@@ -1,0 +1,82 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Copyright (C) 2006, Johns Hopkins University.
+;; All rights reserved.
+;;
+;; Redistribution and use in source and binary forms, with or
+;; without modification, are permitted provided that the following
+;; conditions are met:
+;;
+;;   - Redistributions of source code must contain the above 
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer. 
+;;
+;;   - Redistributions in binary form must reproduce the above
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer in the documentation and/or other materials 
+;;     provided with the distribution.
+;;
+;;   - Neither the names of the copyright holders nor the names of any
+;;     of any contributors may be used to endorse or promote products
+;;     derived from this software without specific prior written
+;;     permission. 
+;;
+;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(bitc-version "0.10")
+(provide main bitc.main)
+
+(define i (the int32 1))
+
+;; The following line illustrates a bug with the "remove unreferenced 
+;; globals" policy. The bug is that when we remove the globals we also
+;; remove their initializers, which may have side effects.
+;;
+;; I have been tempted for some time to impose the restriction that
+;; initializers must be side-effect free. This simplifies their
+;; analysis, ensures that an aggressive compiler can execute them
+;; fully at compile time, and avoids a bunch of aliasing complications
+;; on initializer strictness analysis.
+;;
+;; In any case, there is a bug here either way. Either the compiler
+;; should not admit initializers with side effects or it should not be
+;; dropping this one.
+(define a (begin (set! i 0) 1:int32))
+
+;; However, there is a problem with this policy, which is that it
+;; precludes top-level expressions that have side effects. A very
+;; natural way to think about evaluating the top-level expression:
+;;
+;;   (+ 1 2)
+;;
+;; is to imagine that it is the initializer for some top-level
+;; variable that is never referenced by the application. It seems very
+;; odd (but pragmatically useful) to argue that an initializer must be
+;; side-effect free but a top-level expression is not restricted in
+;; the same way. 
+;;
+;; On the other hand, I can also imagine it being very useful to have
+;; an "interactive" compile mode in which these expressions are
+;; processed and a non-interactive compile mode in which they are
+;; simply ignored.
+;;
+;; It's a puzzlement.
+
+(define (main.main argVec:(vector string)) 
+  i)
+
+;; ANSWER: This issue has been currently resolved by making all
+;; top-level concrete forms roots of polyinstantiation. This test case
+;; is replicated as top-level-mut.bitc in the unit directory

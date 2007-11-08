@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>The BitC Programming Language</title>
+  </head>
+  <body>
+    <h1 class="title">The BitC Programming Language</h1>
+    <p>
+      BitC is a new systems programming language. It seeks to combine
+      the flexibility, safety, and richness of Standard ML or Haskell with the
+      low-level expressiveness of C.
+    </p>
+    <p>
+      <embed type="image/svg+xml" width="36pt" height="36pt"
+	src="svg-logo.svg" alt="SVG image" align="left"
+	style="margin-right: 0.1in;"
+	pluginspage="http://www.adobe.com/svg/viewer/install/"/> This
+	site makes use of SVG images. If your browser supports SVG, or
+	you have an SVG plugin installed, you should see an SVG logo
+	to the left of this paragraph. Recent versions of Microsoft's
+	Internet Explorer, Apple's Safari, and Linux FireFox browsers
+	include support for SVG.  If your Linux distribution ships an
+	older version of Mozilla or Firefox, installing Adobe's <a
+	href="http://www.adobe.com/svg/viewer/install/">plugin</a>
+	will allow you to view these images.
+    </p>
+    <h2>Objectives</h2>
+    <p>
+      The BitC
+      project has several objectives:
+    </p>
+    <ul>
+      <li>
+	<p>Correct some of the shortcomings of the earlier EROS
+	  design.</p>
+      </li>
+      <li>
+	<p>Demonstrate that an atomic kernel design scales
+	  <em>up</em> as well as down. We are planning to bring up
+	  versions of Coyotos on large-scale multiprocessors.</p>
+      </li>
+      <li>
+	<p>Provide an efficient linux compatibility environment for
+	  use as a transitional runtime system, so that we can
+	  explore adapting applications to a more secure API
+	  foundation.</p>
+      </li>
+      <li>
+	<p>Construct the kernel and key utilities in a new systems
+	  programming language (BitC) with a well-defined,
+	  mechanically-specified semantics. This will allow us to
+	  formally verify security and correctness properties of
+	  the system and its key utilities.</p>
+      </li>
+      <li>
+	<p>Develop the proving technology necessary to do useful
+	  verification about a project of this sort.</p>
+      </li>
+    </ul>
+    <h2>Target Platforms</h2>
+    <p>
+      The BitC bootstrap compiler compiles to portable ANSI_C code. By
+      tweaking a single header file it is possible to port BitC
+      bootstrap output to essentially any target platform.
+    </p>
+    <h2>Mailing Lists</h2>
+    <p>
+      At present, the main mailing list for the BitC project is <a
+      href="http://www.bitc-lang.org/mailman/listinfo/bitc-dev">bitc-dev</a>.
+      These lists are intended primarily for developers and
+      architects. When a release exists, we will add a user-oriented
+      list as well.
+    </p>
+  </body>
+</html>

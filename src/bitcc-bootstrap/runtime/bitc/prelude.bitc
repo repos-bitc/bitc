@@ -1,0 +1,340 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Copyright (C) 2006, Johns Hopkins University.
+;; All rights reserved.
+;;
+;; Redistribution and use in source and binary forms, with or
+;; without modification, are permitted provided that the following
+;; conditions are met:
+;;
+;;   - Redistributions of source code must contain the above 
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer. 
+;;
+;;   - Redistributions in binary form must reproduce the above
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer in the documentation and/or other materials 
+;;     provided with the distribution.
+;;
+;;   - Neither the names of the copyright holders nor the names of any
+;;     of any contributors may be used to endorse or promote products
+;;     derived from this software without specific prior written
+;;     permission. 
+;;
+;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(bitc-version "0.10")
+(interface bitc.prelude
+  ;; architecture dependent word type. This comes first because
+  ;; the code generator relies on the definition to emit union
+  ;; tags.
+  ;;  (defstruct word :opaque v:(fixint 32 32 #f))
+
+  ;; These need to appear before procedure declarations
+  ;; so that the arguments can be combined via the pair
+  ;; rule.
+  ;;
+  ;; The following is now a primitive type:
+  ;;
+  ;; (defstruct (pair 'a 'b):val fst:'a snd:'b)
+
+  ;;(defunion bool:val #f #t)
+
+  ;;(defstruct char:val v:(fixint 32 32 #f))
+
+  ;;  (defstruct int8   :opaque v:(fixint 8  8 #t))
+  ;;  (defstruct int16  :opaque v:(fixint 16 16 #t))
+  ;;  (defstruct int32  :opaque v:(fixint 32 32 #t))
+  ;;  (defstruct int64  :opaque v:(fixint 64 64 #t))
+
+  ;;  (defstruct uint8  :opaque v:(fixint 8  8  #f))
+  ;;  (defstruct uint16 :opaque v:(fixint 16 16 #f))
+  ;;  (defstruct uint32 :opaque v:(fixint 32 32 #f))
+  ;;  (defstruct uint64 :opaque v:(fixint 64 64 #f))
+
+  ;;  (defstruct float  :opaque v:(ieeefloat  8 23))
+  ;;  (defstruct double :opaque v:(ieeefloat 11 52))
+  ;;  (defstruct quad   :opaque v:(ieeefloat 15 112))
+
+;;;  (defstruct word   :val v:(fixint 32 32 #f))
+;;;
+;;;  (defstruct int8   :val v:(fixint 8  8 #t))
+;;;  (defstruct int16  :val v:(fixint 16 16 #t))
+;;;  (defstruct int32  :val v:(fixint 32 32 #t))
+;;;  (defstruct int64  :val v:(fixint 64 64 #t))
+;;;
+;;;  (defstruct uint8  :val v:(fixint 8  8  #f))
+;;;  (defstruct uint16 :val v:(fixint 16 16 #f))
+;;;  (defstruct uint32 :val v:(fixint 32 32 #f))
+;;;  (defstruct uint64 :val v:(fixint 64 64 #f))
+;;;
+
+  ;; (defstruct string:val v:(vector char))
+
+  (proclaim OutOfMemory : exception external ExOutOfMemory)
+  (proclaim IndexBoundsError : exception external ExIndexBoundsError)
+  
+  (defexception OutOfMemory)
+  (defexception IndexBoundsError)
+
+  (defunion (optional 'a):val
+    none
+    (some som:'a))
+  
+  (defunion (list 'a):ref
+    nil
+    (cons car:'a cdr:(list 'a)))
+
+  ;;  (defunion int:val
+  ;;    ;; Small representation:
+  ;;    (fix (bitfield int32 31))
+  ;;    ;; Big representation: sign plus digits mod word size
+  ;;    (big (ref (pair bool (vector word)))))
+  
+;;;  The procedure object.
+;;; 	For now, all closures have the same type.
+;;;	I agree that this is not very well typed. 
+;;; 	But, NO existential types for now ...
+;;; I cannot give this PROC object even a little more 
+;;; suitable type like:
+;;;   { ('a 'b) -> 'c, 'a }
+;;; beacuse we don't know airity of the function and we 
+;;; don't have a means of expressing that something be a
+;;; function of some airity.
+
+;  (defstruct (__PROC 'a 'b) fun:'a  env:'b)
+;  (defunion __ZCL __zcl); the empty closure
+  
+  ;; The pair structure
+  (defstruct (pair 'a 'b):val fst:'a snd: 'b)
+
+  ;; Following is a sleazy (but clever -- blame Swaroop) trick for
+  ;; getting comparison operations defined for the built-in types with
+  ;; minimal hassle. We define the comparison operations as
+  ;; polymorphic, and rely on the polyinstantiator to instantiate them
+  ;; only where they are supposed to occur. Most of the instantiations
+  ;; are handled in runtime.h. A notable exception is that the
+  ;; built-in string type is a member of Ord whose implementation is
+  ;; found in libbitc.a
+
+  (proclaim __+:(fn ('a 'a) 'a) external)
+  (proclaim __-:(fn ('a 'a) 'a) external)
+  (proclaim __*:(fn ('a 'a) 'a) external)
+  (proclaim __/:(fn ('a 'a) 'a) external)
+  (proclaim __%:(fn ('a 'a) 'a) external)
+
+  (proclaim __==:(fn ('a 'a) bool) external)
+  (proclaim __!=:(fn ('a 'a) bool) external)
+  (proclaim __<:(fn ('a 'a) bool) external)
+  (proclaim __<=:(fn ('a 'a) bool) external)
+  (proclaim __>:(fn ('a 'a) bool) external)
+  (proclaim __>=:(fn ('a 'a) bool) external)
+
+  
+  ;; Conversion operation. This one is actually quite dangerous,
+  ;; and I'm not convinced that we should have it at all. If we *do*
+  ;; have it, then I am inclined to think that it should perhaps have
+  ;; syntactic support in the form of a first argument that is a 
+  ;; type name.
+
+  (proclaim sign-extend:(fn ('a) 'b) external)
+  (proclaim zero-extend:(fn ('a) 'b) external)
+  (proclaim truncate:(fn ('a) 'b) external)
+
+  (proclaim unsigned:(fn ('a) 'b) external)
+  (proclaim signed  :(fn ('a) 'b) external)
+
+  (proclaim convert: (fn ('a) 'b) external) 
+
+  ;; This is the < operator to be used for the 
+  ;; index computation. By declaring external, we force 
+  ;; the polyinstantiator to keep this definition.
+  ;; By giving the proper external name, we give it the 
+  ;; correct function to use.
+  (proclaim __index_lt: (fn (word word) bool) external bitc_index_lt)
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; TYPE CLASS FOR INTEGER LITERALS
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  (deftypeclass (IntLit 'a))		; built-in => no methods
+
+  (definstance (IntLit word))
+  (definstance (IntLit  int8))
+  (definstance (IntLit uint8))
+  (definstance (IntLit  int16))
+  (definstance (IntLit uint16))
+  (definstance (IntLit  int32))
+  (definstance (IntLit uint32))
+  (definstance (IntLit  int64))
+  (definstance (IntLit uint64))
+
+;  (definstance (IntLit (mutable   word)))
+;  (definstance (IntLit (mutable  int8)))
+;  (definstance (IntLit (mutable uint8)))
+;  (definstance (IntLit (mutable  int16)))
+;  (definstance (IntLit (mutable uint16)))
+;  (definstance (IntLit (mutable  int32)))
+;  (definstance (IntLit (mutable uint32)))
+;  (definstance (IntLit (mutable  int64)))
+;  (definstance (IntLit (mutable uint64)))
+ 
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; TYPE CLASS FOR FLOATING POINT LITERALS
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (deftypeclass (FloatLit 'a))  	; built-in => no methods
+
+  (definstance (FloatLit float))
+  (definstance (FloatLit double))
+  (definstance (FloatLit quad))  
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; TYPES ADMITTING EQUALITY
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (deftypeclass (Eq 'a)
+    == : (fn ('a 'a) bool)
+    != : (fn ('a 'a) bool))
+  
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; TYPES ADMITTING ORDERING
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (deftypeclass (forall ((Eq 'a)) (Ord 'a))
+    <  : (fn ('a 'a) bool)
+    >  : (fn ('a 'a) bool)
+    <= : (fn ('a 'a) bool)
+    >= : (fn ('a 'a) bool))
+  
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; TYPES ADMITTING (FOUR-FUNCTION) ARITHMETIC
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (deftypeclass (forall ((Ord 'a)) (Arith 'a))
+    + : (fn ('a 'a) 'a)
+    - : (fn ('a 'a) 'a)
+    * : (fn ('a 'a) 'a)
+    / : (fn ('a 'a) 'a))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; TYPES ADMITTING INTEGER MODULUS ARITHMETIC
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (deftypeclass (forall ((Arith 'a)) (IntArith 'a))
+    % : (fn ('a 'a) 'a))
+
+  (definstance (Eq ()) __== __!=)
+    
+  (definstance (Eq char) __== __!=)
+
+  (definstance (Eq bool) __== __!=)
+
+  (definstance (Eq int8) __== __!=)
+  (definstance (Eq int16) __== __!=)
+  (definstance (Eq int32) __== __!=)
+  (definstance (Eq int64) __== __!=)
+  (definstance (Eq uint8) __== __!=)
+  (definstance (Eq uint16) __== __!=)
+  (definstance (Eq uint32) __== __!=)
+  (definstance (Eq uint64) __== __!=)
+  (definstance (Eq word) __== __!=)
+
+  (definstance (Eq float) __== __!=)
+  (definstance (Eq double) __== __!=)
+  (definstance (Eq quad) __== __!=)
+
+  (definstance (Eq string) __== __!=)
+
+  (definstance (Ord char)
+    __< __> __<= __>=)
+  
+  (definstance (Ord bool)
+    __< __> __<= __>=)
+
+  (definstance (Ord int8) 
+    __< __> __<= __>=)
+  (definstance (Ord int16) 
+    __< __> __<= __>=)
+  (definstance (Ord int32) 
+    __< __> __<= __>=)
+  (definstance (Ord int64) 
+    __< __> __<= __>=)
+  (definstance (Ord uint8) 
+    __< __> __<= __>=)
+  (definstance (Ord uint16) 
+    __< __> __<= __>=)
+  (definstance (Ord uint32) 
+    __< __> __<= __>=)
+  (definstance (Ord uint64) 
+    __< __> __<= __>=)
+  (definstance (Ord word) 
+    __< __> __<= __>=)
+
+  (definstance (Ord float) 
+    __< __> __<= __>=)
+  (definstance (Ord double) 
+    __< __> __<= __>=)
+  (definstance (Ord quad) 
+    __< __> __<= __>=)
+
+  (definstance (Ord string)
+    __< __> __<= __>=)
+
+  (definstance (Arith int8) 
+    __+ __- __* __/)
+  (definstance (Arith int16) 
+    __+ __- __* __/)
+  (definstance (Arith int32) 
+    __+ __- __* __/)
+  (definstance (Arith int64) 
+    __+ __- __* __/)
+  (definstance (Arith uint8) 
+    __+ __- __* __/)
+  (definstance (Arith uint16) 
+    __+ __- __* __/)
+  (definstance (Arith uint32) 
+    __+ __- __* __/)
+  (definstance (Arith uint64) 
+    __+ __- __* __/)
+  (definstance (Arith word) 
+    __+ __- __* __/)
+
+  (definstance (Arith float) 
+    __+ __- __* __/)
+  (definstance (Arith double) 
+    __+ __- __* __/)
+  (definstance (Arith quad) 
+    __+ __- __* __/)
+
+  (definstance (IntArith int8) __%)
+  (definstance (IntArith int16) __%)
+  (definstance (IntArith int32) __%)
+  (definstance (IntArith int64) __%)
+  (definstance (IntArith uint8) __%)
+  (definstance (IntArith uint16) __%)
+  (definstance (IntArith uint32) __%)
+  (definstance (IntArith uint64) __%)
+  (definstance (IntArith word) __%)
+
+  (deftypeclass (Length 'a)
+    length: (fn ('a) word))		; built-in => no methods
+
+  (definstance (Length (vector 'a))
+    (lambda (x) (vector-length x)))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;    SPECIAL built-in  typeclasses (no instances needed)
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  
+  (deftypeclass (ref-types 'a))
+  (deftypeclass (copy-compat 'a 'b))
+ )
+

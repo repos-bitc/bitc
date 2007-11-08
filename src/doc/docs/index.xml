@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE directory PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd">
+<directory xmlns:xi="http://www.w3.org/2001/XInclude">
+  <title>BitC Documentation</title>
+  <xi:include href="dir.dev.gxml#xpointer(/fakeroot/*)"/>
+  <dirgroup>
+    <title>The BitC Language and System</title>
+    <dir-expand-entries category="dev/bitc"/>
+  </dirgroup>
+  <dirgroup>
+    <title>Published Papers</title>
+    <p>Papers about Coyotos or BitC.</p>
+    <dir-expand-entries category="papers"/>
+  </dirgroup>
+</directory>

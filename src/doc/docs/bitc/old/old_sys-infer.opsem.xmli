@@ -1,0 +1,696 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <floatingtable id="dyn_sem_horz" fullwidth='yes' latex.placement="htb">
+  <font size="small">
+    <btypes:TYPE
+      xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+      <opHorzRules>
+	<opRule name="E-RVAL">
+	  <opPre>
+	    <mapsto>
+	      <stack/>            
+	      <sLoc/>
+	      <aVal/>
+	    </mapsto>
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<sLoc/>
+	      </opState>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aVal/>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-LEFT-TQ">
+	  <opPre/>
+	  <opConc>
+	    <leval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </opState>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr/>
+	      </opState>
+	    </leval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-TQ">
+	  <opPre/>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </opState>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr/>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-LET-TQ">
+	  <opPre/>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<let>
+		  <tqExpr>
+		    <id/>
+		    <type/>
+		  </tqExpr>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</let>
+	      </opState>
+	      <opState>
+		<stack/>
+		<heap/>
+		<let>
+		  <id/>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</let>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-APP-STEP-FN">
+	  <opPre>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>            
+		<aExpr num="1"/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<aExpr num="1" dash="'"/>
+	      </opState>
+	    </eval>
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<apply>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</apply>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<apply>
+		  <aExpr num="1" dash="'"/>
+		  <aExpr num="2"/>
+		</apply>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-APP-STEP-ARG">
+	  <opPre>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>            
+		<aExpr num="2"/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<aExpr num="2" dash="'"/>
+	      </opState>
+	    </eval>
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<apply>
+		  <aVal num="1"/>
+		  <aExpr num="2"/>
+		</apply>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<apply>
+		  <aVal num="1"/>
+		  <aExpr num="2" dash="'"/>
+		</apply>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-APP">
+	  <opPre>
+	    <notin>
+	      <sLoc/>
+	      <dom>
+		<stack/>
+	      </dom>
+	    </notin>
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<apply>
+		  <lambda>
+		    <id/>
+		    <aExpr/>
+		  </lambda>
+		  <aVal/>
+		</apply>
+	      </opState>
+	      <opState>
+		<extend>
+		  <stack/>
+		  <mapping>
+		    <sLoc/>
+		    <aVal/>
+		  </mapping>  
+		</extend>            
+		<heap/>
+		<subst>
+		  <aExpr/>
+		  <id/>
+		  <sLoc/>
+		</subst>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-LET-STEP">
+	  <opPre>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr num="1"/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>          
+		<aExpr num="1" dash="'"/>
+	      </opState>
+	    </eval>
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<let>              
+		  <id/>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</let>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<let>              
+		  <id/>
+		  <aExpr num="1" dash="'"/>
+		  <aExpr num="2"/>
+		</let>
+	      </opState>          
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-LET-M">
+	  <opPre>
+	    <notin>
+	      <sLoc/>
+	      <dom>
+		<stack/>
+	      </dom>
+	    </notin>
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<let>              
+		  <id/>
+		  <aVal num="1"/>
+		  <aExpr num="2"/>
+		</let>
+	      </opState>
+	      <opState>
+		<extend>
+		  <stack/>
+		  <mapping>
+		    <sLoc/>
+		    <aVal num="1"/>
+		  </mapping>  
+		</extend>            
+		<heap/>
+		<subst>
+		  <aExpr num="2"/>
+		  <id/>
+		  <sLoc/>
+		</subst>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-LET-P">
+	  <opPre/>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<let>              
+		  <id/>
+		  <aVal num="1"/>
+		  <aExpr num="2"/>
+		</let>
+	      </opState>
+	      <opState>
+		<stack/>
+		<heap/>
+		<subst>
+		  <aExpr num="2"/>
+		  <id/>
+		  <aVal num="1"/>
+		</subst>                  
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-IF-STEP">
+	  <opPre>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>  
+		<aExpr/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<aExpr dash="'"/>
+	      </opState>
+	    </eval>
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<if>
+		  <aExpr/>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</if>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<if>
+		  <aExpr dash="'"/>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</if>
+	      </opState>
+
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-IF-TRUE">
+	  <opPre/>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<if>
+		  <true/>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</if>
+	      </opState>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr num="1"/>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-IF-FALSE">
+	  <opPre/>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<if>
+		  <false/>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</if>
+	      </opState>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr num="2"/>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-DUP-STEP">
+	  <opPre>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap  dash="'"/>
+		<aExpr dash="'"/>
+	      </opState>
+	    </eval>          
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<dup>
+		  <aExpr/>
+		</dup>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap  dash="'"/>
+		<dup>
+		  <aExpr dash="'"/>
+		</dup>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-DUP">
+	  <opPre>
+	    <notin>
+	      <hLoc/>
+	      <dom>
+		<heap/>
+	      </dom>
+	    </notin>
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<dup>
+		  <aVal/>
+		</dup>
+	      </opState>
+	      <opState>              
+		<stack/>
+		<extend>
+		  <heap/>
+		  <mapping>
+		    <hLoc/>
+		    <aVal/>
+		  </mapping>
+		</extend>
+		<hLoc/>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-LEFT-DEREF-STEP">
+	  <opPre>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap  dash="'"/>
+		<aExpr dash="'"/>
+	      </opState>
+	    </eval>          
+	  </opPre>
+	  <opConc>
+	    <leval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<deref>
+		  <aExpr/>
+		</deref>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap  dash="'"/>
+		<deref>
+		  <aExpr dash="'"/>
+		</deref>
+	      </opState>
+	    </leval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-DEREF-STEP">
+	  <opPre>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap  dash="'"/>
+		<aExpr dash="'"/>
+	      </opState>
+	    </eval>          
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<deref>
+		  <aExpr/>
+		</deref>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap  dash="'"/>
+		<deref>
+		  <aExpr dash="'"/>
+		</deref>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-DEREF">
+	  <opPre>
+	    <mapsto>
+	      <heap/>
+	      <hLoc/>
+	      <aVal/>
+	    </mapsto>
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<deref>
+		  <hLoc/>
+		</deref>
+	      </opState>
+	      <opState>              
+		<stack/>
+		<heap/>
+		<aVal/>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-SET-STEP-LHS">
+	  <opPre>
+	    <leval>
+	      <opState>
+		<stack/>
+		<heap/>            
+		<aExpr num="1"/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<aExpr num="1" dash="'"/>
+	      </opState>
+	    </leval>
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<assign>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</assign>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<assign>
+		  <aExpr num="1" dash="'"/>
+		  <aExpr num="2"/>
+		</assign>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-SET-STEP-RHS">
+	  <opPre>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>            
+		<aExpr num="2"/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<aExpr num="2" dash="'"/>
+	      </opState>
+	    </eval>
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<assign>
+		  <lVal/>
+		  <aExpr num="2"/>
+		</assign>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<assign>
+		  <lVal/>
+		  <aExpr num="2" dash="'"/>
+		</assign>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-SET-STACK">
+	  <opPre/>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<extend>
+		  <stack/>
+		  <mapping>
+		    <sLoc/>
+		    <aVal num="1"/>
+		  </mapping>
+		</extend>
+		<heap/>
+		<assign>
+		  <sLoc/>
+		  <aVal num="2"/>
+		</assign>
+	      </opState>
+	      <opState>
+		<extend>
+		  <stack/>
+		  <mapping>
+		    <sLoc/>
+		    <aVal num="2"/>
+		  </mapping>
+		</extend>
+		<heap/>
+		<Unit/>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-SET-HEAP">
+	  <opPre/>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<extend>
+		  <heap/>
+		  <mapping>
+		    <hLoc/>
+		    <aVal num="1"/>
+		  </mapping>
+		</extend>
+		<assign>
+		  <deref>
+		    <hLoc/>
+		  </deref>
+		  <aVal num="2"/>
+		</assign>
+	      </opState>
+	      <opState>
+		<stack/>
+		<extend>
+		  <heap/>
+		  <mapping>
+		    <hLoc/>
+		    <aVal num="2"/>
+		  </mapping>
+		</extend>
+		<Unit/>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+      </opHorzRules>      
+    </btypes:TYPE> 
+  </font>
+  <caption>Dynamic Semantics</caption>
+</floatingtable>

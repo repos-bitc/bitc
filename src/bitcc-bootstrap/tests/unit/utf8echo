@@ -1,0 +1,14 @@
+#!/usr/bin/perl -w
+# utf8echo: echo statement with 'U+NNNN[N]' meaning utf-8 codepoint NNNN[N]
+# To express U+NNNNN literally, type it as UU+NNNNN.
+# If a space follows the U+NNNNN, eat it.  This is for readability - so you
+# can type utf8echo 'U+0065 U+0301' and get e with combining acute accent.
+
+my $str = join ' ', @ARGV;
+
+while ($str =~ m/(?<!U)U\+([0-9A-Fa-f]{4,5}) ?/g) {
+	$str = $`.chr(hex $1).$';
+}
+$str =~ s/U(U\+[0-9A-Fa-f]{4,5})/$1/g;
+binmode (STDOUT, ":utf8");
+print $str, "\n";

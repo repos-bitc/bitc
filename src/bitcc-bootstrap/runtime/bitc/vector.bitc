@@ -1,0 +1,66 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Copyright (C) 2006, Johns Hopkins University.
+;; All rights reserved.
+;;
+;; Redistribution and use in source and binary forms, with or
+;; without modification, are permitted provided that the following
+;; conditions are met:
+;;
+;;   - Redistributions of source code must contain the above 
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer. 
+;;
+;;   - Redistributions in binary form must reproduce the above
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer in the documentation and/or other materials 
+;;     provided with the distribution.
+;;
+;;   - Neither the names of the copyright holders nor the names of any
+;;     of any contributors may be used to endorse or promote products
+;;     derived from this software without specific prior written
+;;     permission. 
+;;
+;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(interface bitc.vector
+  (import ls bitc.list)
+
+  (define (vector-map vec :(vector 'a) f:(fn ('a) ()))
+    "Apply procedure f to each element of vector."
+    (do ((pos 0 (+ 1 pos)))
+	((== pos (vector-length vec)) ())
+	(f (vector-nth vec pos))))
+
+  (define (vector->list vec:(vector 'a))
+    "Given a vector, return a list of its elements."
+    (define (subvector->list vec pos len)
+      (cond ((> pos len)
+	     (throw IndexBoundsError))
+	    ((== pos len) nil: (list 'a))
+	    (otherwise
+	     (cons (vector-nth vec pos)
+		   (subvector->list vec (+ pos 1) len)))))
+    (subvector->list vec 0 (vector-length vec)))
+
+  (define (make-mutable-vector n:word e:(mutable 'a))
+    (make-vector n (lambda (i) e)))
+
+  (define (list->vector lst:(list 'a))
+    "Given a list, return a vector of its elements."
+    (make-vector (length lst) 
+		  (lambda (n) (ls.list-nth lst n))):(vector 'a))
+)
+

@@ -1,0 +1,1098 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+<!ENTITY entails "&nbsp;&vdash;&nbsp;">
+<!ENTITY tq      "&nbsp;:&nbsp;">
+
+]>
+  <article id="mutinfer" 
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <docinfo>
+    <title>Polymorphism by Polyinstantiation</title>
+    <!-- <pubdate/> -->
+    <pubdate>September 6<sup>th</sup>, 2006</pubdate>
+    <copyright>
+      <year>2006</year>
+      <holder>Swaroop Sridhar</holder>
+    </copyright>
+    <!-- <categories>
+      <category>dev/bitc</category>
+    </categories> -->
+    <synopsis>
+      <p>
+        Discussion about the implementation level details of
+        polyinstantiation in BitC.
+      </p>
+    </synopsis>
+  </docinfo>
+
+  <!-- <abstract latex.incolumn="yes">
+  <p>
+    </p>
+  </abstract> -->
+  <!-- <toc/> -->
+
+  <sect1>
+    <title>Options for Implementing Polymorphism</title> 
+    <p>
+      Traditionally, there are several ways in which first class
+      polymorphism has been implemented:
+    </p>
+
+    <ul> 
+      <li>  
+        <p> Fully boxed: all data-structures are fully boxed (original
+          ML<cite ref="milner1997definition"/>)
+        </p>  
+      </li>  
+ 
+      <li>  
+        <p> Coercions<cite ref="leroyUBobj1992"/>: data-structures can
+          have a custom unboxed representation, but will be coerced
+          (by conversion at run-time) into a boxed representation when
+          they have to be passed as argument to a function requiring
+          polymorphic argument.
+        </p>  
+      </li>  
+
+      <li>
+        <p>
+          Dictionaries<cite ref="harperPoly1995"/>: data-structures
+          can be unboxed, but we must pass extra type-parameters to
+          functions.
+        </p>
+      </li>
+
+      <li>
+        <p>
+          Hybrid<cite ref="ShaoRep1997"/>: Using a mix of coercion and
+          dictionaries at various levels.
+        </p>
+      </li>
+
+      <li>
+        <p>
+          Full Polyinstantiation: Functions are customized per-type.
+          (many compilers have used this too various degrees, ex: C++
+          templates, MLton?)
+        </p>
+      </li>
+    </ul>
+    
+    <p>
+      Depending on which point we pick in the continuum of choices,
+      there are different trade-offs wrt the amount of RTTI support
+      needed, separate compilation, efficiency, code size, dealing
+      with the var-args problem<cite ref="ShaoRep1997"/>, etc.
+      Shao<cite ref="ShaoRep1997"/> discuss these trade-offs in detail
+      (except for full polyinstantiation).
+    </p>
+    
+    <p>
+      In the bootstrap compiler for BitC<cite
+        ref="shapBitcSpec2006"/>, we decided to take implement
+      polymorphism by full polyinstantiation. This will also simplify
+      the implementation of overloading (type-classes), at the
+      cost of requiring whole-program compilation. In the next few
+      mails, I will try to describe our attempts to implement
+      polymorphism by polyinstantiation, and the associated problems.
+    </p>
+  </sect1>
+
+  <sect1>
+    <title>Compiler organization</title>
+    <p>
+      Currently, the compiler performs the following (major) passes:
+    </p>
+    
+    <ol>
+      <li><p>Parse</p></li>
+      <li><p>Symbol resolution</p></li>
+      <li><p>Type inference</p></li>
+      <li><p>Location semantics checking</p></li>
+      <li><p>Polyinstantiation</p></li>
+      <li><p>Closure conversion and lambda hoisting</p></li>
+      <li><p>SSA transformation</p></li>
+      <li><p>Backend (currently C) emission</p></li>
+    </ol>
+
+    <p>
+      The passes 1-4 shall hereinafter be termed as "frontend passes,"
+      and passes 6-8 as "backend-passes." </p>
+
+    <p>
+      All passes up to the SSA pass (including intermediate
+      simplification passes) are Bitc AST -> Bitc AST transformations.
+      Even the output of the SSA pass is a mostly-bitc AST, with some
+      extra annotations. This has the advantage that we can re-run the
+      symbol-resolver and type-inference after each pass that does
+      some AST transformation, and be sure that the compiler did
+      type-correct transformations. This will also reduce the burden
+      on developers to build correct type records whenever an
+      AST-change is introduced. This ability to re-run the resolver
+      and type-checker (hereinafter called the R&amp;T step) is also
+      heavily used in the implementation of polyinstantiation.
+    </p>
+
+    <p>
+      The front end is done one unit of compilation (one interface or
+      source module, abbreviated as UOC) at a time, or, in an
+      interactive environment, one top level form at a time. The front
+      end also pulls in other dependent interfaces and also processes
+      them. After the frontend is done, the polyinstantiator comes
+      into play. It receives a set of FQNs (<em>entry points</em>)
+      that must be instantiated in this pass -- for example,
+      <progident>bitc.main.main</progident>, or the current expression
+      in a top-level interactive loop. It starts out from these as
+      roots and constructs an output-UOC in an on-demand basis. Then,
+      it passes this output-UOC to the backend passes. 
+    </p>
+  </sect1>
+  
+  <sect1>
+    <title>What must be Polyinstantiated?</title>
+    <p>
+      We have three main issues with polyinstantiation:
+    </p>
+    <ul>
+      <li>
+        <p> Polyinstantiation of top-level definitions. For example,
+        if two instantiations of the identity function:
+        </p>
+
+        <literallayout>
+(define (id x) x)
+id: (fn ('a) 'a)</literallayout>
+
+        <p indent="no">
+          have types <progident>(fn (bool) bool)</progident> and
+          <progident>(fn (int32) int32)</progident>, then the
+          definition of <progident>id</progident> is polyinstantiated
+          to two definitions as:
+        </p>
+ 
+        <literallayout>
+(define id#fn_bool_bool:(fn (bool) bool)
+     (lambda (x) x))
+id#fn_bool_bool:(fn (bool) bool)
+
+(define id#fn_bool_bool:(fn (bool) bool)
+     (lambda (x) x))
+id#fn_bool_bool:(fn (bool) bool)</literallayout>
+      </li>
+      
+      <li>
+        <p>
+          Polyinstantiation of local definitions (defined at
+          <progident>let</progident>, <progident>letrec</progident>)
+        </p>
+      </li>
+      
+      <li>
+        <p>
+          Any user defined types / constructors used in the
+          polyinstantiated value definitions must be transitively
+          polyinstantiated.
+        </p>
+      </li>
+
+      <li>
+        <p>
+          All calls to type-class methods must be replaced with the
+          instantiation of functions defined in the appropriate
+          instantiation of that class.  
+        </p>
+      </li>
+    </ul>
+  </sect1>
+
+  <sect1>
+    <title>The Polyinstantiator</title>
+
+    <sect2 id="env">
+      <title>Environment Handling</title>
+      <p>
+        The polyinstantiator needs an environment in which we have the
+        entries from all interfaces and modules so that newly
+        instantiated definitions can be R&amp;Ted (see
+        Section&nbsp;<xref ref = "Specialize"/>). We refer to this
+        environment as Mega-ENV, and it contains symbol, type and
+        typeclass-instance information from all UOCs. Moreover, since
+        the Mega-ENV contains inter-UOC information, it must always be
+        indexed by the fully qualified names (FQNs) of all variables.
+        In order to polyinstantiate a definition completely, we must
+        construct such an environment and pass it to the specializer. 
+      </p>
+
+      <p>
+        How should the Mega-ENV be built? Of course, for the first
+        time, we must build it by iterating over all the environments
+        of all interfaces and source modules and build a new
+        environment based on their FQNs. However, we don't want to do
+        it every time we enter the instantiator. Since here is that
+        the interface-list and the source-module list are append-only
+        -- they are append-only in the case of an interactive
+        interpreter; in the case of static compiler, these lists are
+        frozen -- we can note the previously last processed indices
+        into these lists, and only processes additions each time. In
+        the case of a compiler, interfaces and source module
+        environments are immutable once the entire module is
+        processed.  However, in the case of an interactive
+        interpreter, there is exactly one unit of compilation that is
+        ever expanding, and the instantiator must cope with this. So,
+        we mark this UOC as ``dynamic,'' so that the instantiator will
+        re-process it every-time.
+      </p>
+
+      <p>
+        Once the Mega-UOC is built, we set it up as the
+        <em>parent</em> of the unified-UOC's environment into which
+        new definitions are emitted. Thus, when we try to R&amp;T a
+        newly instantiated definition, not only are all the old
+        definitions and instances available but also all the
+        polyinstantiated definitions. Appropriate name mangling is
+        used to ensure that no polyinstantiated definition will ever
+        collide with an original definitions. Moreover, all typeclass
+        instances are required to be globally distinguishable with
+        respect to the whole program. Thus, we will have no collisions
+        here either.
+      </p>
+
+      <p>
+        Once we have updated the Mega-ENV, we call the
+        Specializer(Section&nbsp;<xref
+        ref = "Specialize"/> on each (input) entry-point. 
+      </p>
+     
+    </sect2>
+
+    <sect2>
+      <title>Name mangling</title>
+      <p>
+        Every identifier <progident>id</progident> with FQN
+        <progident>fqn</progident> and type <progident>typ</progident>
+        is replaced with the mangled name:        
+      </p>
+      <literallayout>
+_ + <em>length(fqn)</em> + fqn + # + <em>mangled_string(type)</em></literallayout>
+      
+      <p indent="no">
+        The `+' operator is meta-syntax for string pasting, and is not
+        a part of the new identifier's name.
+        <progident>length</progident> is the obvious string length
+        function and <progident>mangled_string</progident> function
+        returns a unique string representation of every type.
+      </p>
+
+      <p> For example, the type <progident>list</progident> defined in
+        the interface <progident>bitc.prelude</progident>, if
+        instantiated to the type <progident>(list int32)</progident>
+        will have the name
+        <progident>_17bitc.prelude.list#UR1_4list_5int32</progident>.
+      </p>     
+    </sect2> 
+
+    <sect2 id="Specialize">
+      <title>The Specializer</title>
+      <p>
+        The following is the algorithm for the Specializer: It takes
+        as input the AST of a (possibly polymorphic) definition, and a
+        <em>concrete</em> type to which this definitions must be
+        instantiated. In the case of polyinstantiating a local
+        definition, it takes in a let-binding. It returns the newly
+        instantiated identifier (not the entire defining form).</p>
+
+      <p> The Specializer maintains a <em>worklist</em> of definitions
+        currently being processed, to ensure that recursive
+        definitions do not cause the instantiator to go into an
+        infinite loop. All R&amp;Ts in the following algorithm should
+        be understood to be performed with respect to the environment
+        of the Unified-UOC.</p>  
+      
+      <ol>
+        <li>
+          <p>
+            See if the desired identifier has been instantiated for
+            the desired type by searching the Unified-UOC's
+            environment. If found, just return the identifier for the
+            corresponding definition. 
+          </p>
+        </li>
+        
+        <li>
+          <p>
+            Examine the worklist whether we are in the process of
+            instantiating the current definition. If so, emit a
+            declaration if we are instantiating a global, and return
+            the identifier being declared. If we are in
+            the process of instantiating a local definition, we don't
+            need a declaration; so just make-up the right name for the
+            local instantiation and return it.
+          </p>
+        </li>
+        
+        <li>
+          <p>
+            Copy the incoming AST -- always copy the definition
+            (rather than the declaration) if one exists.
+          </p>
+        </li>
+        
+        <li>
+          <p>
+            If we are instantiating a type definition to a concrete
+            type <progident>typ</progident>, instantiate the structure
+            to the maximally mutable type that is copy-compatible with
+            <progident>typ</progident> (See Appendix&nbsp;<xref
+            ref="mutAdd"/>.) 
+          </p>
+        </li>
+
+        <li>
+          <p>
+            Mangle the name of the identifier being defined
+            depending on the desired type, and also change any
+            recursive usages of the same name within the current
+            definition. For example: </p>
+          
+          <literallayout>
+(define _8myMod.id#Fn_4bool_4bool (lambda (x) x))</literallayout>
+        </li>
+        
+        <li>
+          <p>
+            Clamp the type of this AST to the desired type by
+            introducing a qualifier. For example, to instantiate
+            <progident>id</progident> to <progident>(fn (bool)
+              bool)</progident>, we write: </p>
+          
+          <literallayout>
+(define _8myMod.id#fn_4bool_4bool:(fn (bool) bool) (lambda (x) x))</literallayout>
+            
+          <p> Here, we must <em>overwrite</em> any qualifications
+            already done by the user because we will have strictly
+            more information, and we cannot write the qualification
+            anywhere else (for example, on the RHS) due to
+            copy-compatibility<cite ref="bitcMutinfer"/>.</p>
+          
+          <p> If we are specializing a type definition
+            (<progident>defstruct</progident> /
+            <progident>defunion</progident>), then replace the usage
+            of type-arguments to that type with concrete types, and
+            erase the argument list of that type.</p>
+        </li>
+        
+        <li>
+          <p>
+            R&amp;T the new definition (or let-binding) so that the
+            types in the body of the definition get clamped aiding
+            further instantiation. After successful R&amp;T, throw
+            away any changes to the environment.<footnote>
+              <p>It might seem that this R&amp;T can be done with
+                respect to the original UOC in which the current
+                definition is defined, and there is no need to
+                construct a Mega-ENV, bit this is not true
+                (Appendix&nbsp;<xref ref="MegaENV"/>).</p>
+            </footnote>            
+          </p>
+          <p>In the case of a let-binding, we must R&amp;T the
+            let-binding with respect to the local environment(which
+            the resolver, type-inference engine will have as part of
+            the AST). However, if we receive a let-binding as input, we
+            must be called from recInstantiate 
+            (Section&nbsp;<xref ref="recinst"/>,
+            which means that  the containing definition has already
+            been R&amp;Ted in the Unified-UOC environment. So, the
+            local environment will have the Unified-UOC's environment
+            and thus the Mega-ENV as parents. </p>
+        </li>
+        
+        <li>
+          <p>
+            Add the mangled name plus a unique identifier of the AST
+            being instantiated onto the worklist. The unique ID is
+            required because names of local instantiations might
+            collide. 
+          </p>
+        </li>
+        
+        <li>
+          <p>
+            Recursively instantiate the body of the newly
+            instantiated AST (Section&nbsp;<xref ref="recinst"/>).
+          </p>
+        </li>
+        
+        <li>
+          <p>
+            After the current AST is completely instantiated: </p>
+
+          <ul>
+            <li>
+              <p>
+                In the case of a global instantiation, append it to
+                the module in the Unified-UOC.  R&amp;T it once more
+                but keep changes to the environments so that further
+                instantiations can use it.</p>
+            </li>
+            <li>
+              <p>In the case of a local instantiation, add the
+                instantiated let-binding to the inner-wrapper of the
+                current <progident>let</progident> expression
+                (Section&nbsp;<xref ref="recinst"/>).  </p>
+            </li>
+          </ul>
+        </li>
+        
+        <li>
+          <p>
+            Remove the current definition from the worklist, and
+            return the identifier corresponding to the
+            definition just instantiated.
+          </p>
+        </li>
+      </ol>
+    </sect2>
+    
+    <sect2 id="recinst">
+      <title>The recursive Instantiator</title>
+      <p>The recursive instantiation propagator (recInst, for
+        short), will walk through <em>newly instantiated</em>
+        definitions and look for usages of other definitions and
+        call the specializer on these definitions. There are a
+        couple of special cases that recInst must handle: </p>
+      
+      <ol>
+        <li>
+          <p>
+            <em>Case </em><progident>Lambda</progident><em> / </em>
+            <progident>switch</progident><footnote><p>To be
+                specific, each leg of a switch expression, except
+                the <progident>otherwise</progident> clause.</p>
+            </footnote>: These expressions bind new variables
+            (argument/local name) but not polymorphically.
+            Therefore, just replace the names of all bound
+            identifiers with their mangled-names. Also, replace all
+            use-cases of these identifiers. Later, recInstantiate
+            the body (rest of the AST).
+          </p>
+        </li>
+        
+        <li>
+          <p>
+            <em>Case Type-qualified expression</em>: Replace the
+            type-qualification with an explicitly concrete type
+            from the type-obtained. Otherwise, type-variable
+            scoping will play havoc, especially while dealing with
+            let-polyinstantiation. R&and;T the (AST for)
+            type-qualification, and recInstantiate it.
+          </p>
+        </li>
+        
+        <li>
+          <p>
+            <em>Case Int/Float Literal</em>: Since we no longer have
+            type classes after polyinstantiation, <em>every</em> 
+            int / float literal must be qualified with the precise
+            type. 
+          </p>
+        </li>
+        
+        <li>
+          <p>
+            <em>Case Identifier usage</em>: We should now fetch the
+            definition and (poly)instantiate it. However, this has
+            some sub-cases:
+          </p>
+          <ul>
+            <li>
+              <p>
+                If the identifier is a value constructor,
+                instantiate its container type fully. 
+              </p>
+            </li>
+            
+            <li>
+              <p>
+                If the identifier is a type-class method, fetch the
+                implementation from the <em>appropriate</em>
+                instance. Note that there must exist an instance that
+                will satisfy this usage as the program was declared
+                type-correct. An instance may provide, as
+                implementation for a method of this typeclass, a
+                method from another class. Therefore, this process
+                must be repeated until we find a ``real'' function
+                to instantiate.   
+              </p>
+            </li>
+            
+            <li>
+              <p>
+                Otherwise, this is a ``normal'' identifier usage,
+                just fetch the definition of this identifier. In the
+                case of a local definition, the definition is the
+                corresponding let-binding. 
+              </p>
+            </li>              
+          </ul>
+          
+          <p> After fetching the right definition to instantiate, call
+            specializer with this definition, and the type required by
+            the use of the definition. In case the type of the use
+            case of the definition is non-concrete, fix it to some
+            concrete type (say <progident>unit</progident><footnote>
+              <p>We may want to instantiate it to some well-known
+                dummy type so that we can properly pretty-print it for
+                the user.</p></footnote>) before calling the
+            specializer. Replace the identifier usage with the
+            identifier returned by the specializer.</p> 
+        </li>
+
+        <li>
+          <p>
+            <em>Case </em> <progident>let</progident><em> / </em>
+            <progident>letrec</progident>: </p>
+          <ul>
+            <li>
+              <p>
+                Wrap the body of the current definition with another
+                (respective) <progident>let</progident><em> / </em>
+                <progident>letrec</progident> container with empty
+                bindings<footnote><p>This is an invalid AST, but we
+                    will fix it before R&amp;Ting it.</p></footnote>
+                (See Appendix&nbsp;<xref ref="letwrap"/>).
+                For example: </p>
+
+              <literallayout>
+(let ((id (lambda (x) x))
+  (id ())
+  (id #t))</literallayout>
+
+              <p indent="no"> is changed to </p>
+              <literallayout>
+(let ((id (lambda (x) x))
+  (let ()
+    (id ())
+     (id #t)))</literallayout>              
+            </li>
+
+            <li>
+              <p>
+                Now recInst the body of the let-expression (not the
+                bindings). This will (probably) trigger instantiations
+                of the local bindings, while the specializer will add
+                to the inner <progident>let</progident> expression.
+              </p>
+            </li>
+
+            <li>
+              <p>
+                After the body is completely instantiated, carry
+                forward (by recInstantiating) all non-polymorphic
+                bindings in the outer definition onto the inner
+                definition. This must be done in order to preserve
+                their side-effects. Note that polymorphic expressions
+                cannot have side-effects due to the
+                value-restriction<cite ref="shapBitcSpec2006"/>.
+              </p>
+            </li>
+
+            <li>
+              <p>
+                Finally, discard the outer wrapper, and declare the
+                inner <progident>let</progident> expression as ``the''
+                real AST. In case no bindings are carried forward (all
+                the bindings were polymorphic, and unused in the
+                body), just drop the let and declare the body as the
+                instantiated expression.
+              </p>
+            </li>
+          </ul>                    
+        </li>
+      </ol>
+    </sect2>    
+  </sect1>
+  
+  <sect1>
+    <title>Comments</title>
+    <p>
+      We have explained the mechanism of implementing polymorphism by
+      polyinstantiation used in BitC. It should be noted that since
+      the polyinstantiator instantiates ASTs on demand, it performs the
+      ``tree shaking'' optimization by construction. That is, only
+      those definitions (including library code) that are ultimately
+      required for the correct execution of the program are processed
+      and emitted by the backend of the compiler.
+    </p>
+  </sect1>
+
+  <appendix>
+    <title>The Big-AST approach to polyinstantiation</title>
+    <p>
+      This section describes how polyinstantiation was originally
+      implemented in the compiler, and identifies some associated
+      problems with it. Here, we only deal with instantiation of
+      top-level definitions.      
+    </p>
+
+    <ol>
+      <li>
+        <p>
+          After all the front-end  passes have been run on all
+          interfaces and source modules (successfully), perform a
+          `link' step. Here, build a new source module (called
+          big-AST) by appending all top-level forms from all
+          interfaces and source modules (in that order). While
+          building this big-AST, the names of all identifiers being
+          defined is replaced with their fully-qualified names (FQNs)
+          to ensure non-collision.
+        </p>
+      </li>
+      
+      <li>
+        <p>
+          R&amp;T the big-AST. If there are any link-time errors,
+          abort. Else, we have a properly typed big-AST. We also have
+          an _environment_ where all the definitions in the entire
+          program exist. This can be used in further resolution /
+          typing of new definitions introduced during
+          polyinstantiation. We have now also seen all (typeclass)
+          instance in the entire program. The instances are required
+          to be globally non-interfering wrt the entire program.
+          
+        </p>
+      </li>
+
+
+      <li>
+        <p>
+          We maintain a `todo' list of things that we want to emit
+          into the backend. We start from this list and must emit
+          these definitions as well as those required by them --
+          transitively -- into the backend. Initially, this list is
+          something like bitc.main.main, any external definitions and
+          exceptions, etc. All of the things in initially in the todo
+          list must have concrete type. Call the procedure
+          `Specialize' (see below) on each item in the todo list (on
+          its own type) till it becomes empty.
+        </p>
+        
+        <p>
+          After all specializations is done, remove all _polymorphic_
+          ASTs that are unreachable. (Polymorphic definitions cannot
+          induce state changes].
+        </p>
+      </li>
+
+      <li>
+        <p>
+          Rearrange the big-AST in dependency order so that the use of
+          a type or definition comes after its definition. Optionally,
+          redundant declarations may be removed at this step.
+        </p>
+
+
+      </li>
+      <li>
+        <p>
+          R&amp;T the big-AST once again to ensure validity and we are
+          done. 
+        </p>
+      </li>
+    </ol>
+
+    <p>The algorithm for Specializer: Specializer takes 2 arguments a
+      (possibly polymorphic) definition, and a type to which desired
+      instantiation is desired. [Note that the definition that is
+      being specialized is already in the big-AST]
+    </p>
+    
+    <ol>
+      <li>
+        <p>
+          If the desired definition has been instantiated for the
+          desired type, just return.
+        </p>
+      </li>
+
+      <li>
+        <p>
+          If specialization is requested on a declaration, and if we
+          have a definition, first specialize that, then emit a
+          declaration based on the name of the specialized definition.          
+        </p>
+      </li>
+
+      <li>
+        <p>
+          If the requested specialization is on a union constructor,
+          specialize the entire union.
+        </p>
+      </li>
+
+      <li>
+        <p>
+          If the specialization is on a type-class method, look up the
+          list of available instances. get the instance and specialize
+          that instead. Note that this step handles the case where the
+          instance of one method is satisfied by another method as
+          well.
+        </p>
+      </li>
+
+      <li>
+        <p>
+          Now that we have a definition to specialize, make a copy of
+          the definition's AST. Mangle its name based on the name plus
+          the target type desired (there is a unique mangle for every
+          type).
+        </p>
+      </li>
+
+
+      <li>
+        <p>
+          Clamp the type of this AST to the desired type by
+          introducing a qualifier. In cases of specializing a type, replace all
+          type arguments with concrete types.
+
+        </p>
+      </li>
+
+      <li>
+        <p>
+          R&amp;T this definition in the big-AST environment. This will
+          build new type records for the body of the definition which
+          we can later use for further instantiations.
+
+        </p>
+      </li>
+
+      <li>
+        <p>
+          Recursively walk the body of this definition and add any
+          other definitions needed by this body to the todo list. Note
+          that this must add all definitions used regardless of
+          whether this involves specialization or not, because they
+          may contain other concrete uses of other polymorphic
+          definitions that are not exposed by the outer type.
+        </p>
+      </li>
+
+      <li>
+        <p>
+          Finally after the entire AST is specialized again R&amp;T it
+          to make sure we are fine and add it to the big-AST. After
+          the definition is processed, fix the use to of this
+          definition (because of which we started specialization) to
+          refer to the new definition.
+        </p>
+      </li>
+    </ol>
+
+    <p>However, the above algorithm has the following drawbacks:
+    </p>
+
+    <ul>
+      <li>
+        <p>
+          It forms the bigAST from all the definitions known in the
+          entire program, rather than doing it `on-demand' one-output
+          point at a time. In this sense, it is one-shot-compiler
+          friendly and may not scale to an interactive interpreter.
+        </p>
+      </li>
+
+      <li>
+        <p>
+          It mutates the big-AST in place, and is thus not
+          "functional" in style -- something that is much desired
+          keeping the next version of the compiler in mind.
+        </p>
+      </li>
+      <li>
+        <p>
+          It needs a post-instantiation dependency analysis and
+          re-ordering as the definitions are not emitted on a
+          demand-driven basis.
+        </p>
+      </li>
+    </ul>
+  </appendix>
+
+  <appendix id="MegaENV">
+    <title>Why do we need the Mega-ENV?</title>
+    <p>
+      Suppose that we do not have a Mega-ENV, but instead R&and;T every
+      new definition in the environment of the UOC in which the
+      original definition was present. 
+      Now, Consider the following UOCs:</p>
+
+    <literallayout>
+(interface IF1
+  (proclaim UID:(fn ('a) 'a))
+)
+
+(module SM1
+  (provide if1 IF1)
+  (defunion (un 'a) (Ctr c:'a))
+  (define (UID x) (Ctr x) x)
+)
+
+(module SM2
+  (defstruct St st:bool)
+  (define p (UID (St))
+)</literallayout>
+
+    <p indent="no">
+      If we want to instantiate p:</p>
+
+    <ol>
+      <li>
+        <p>
+          We start with SM2's environment, need to instantiate p. So,
+          we copy the definition of p as:</p>
+        <literallayout>
+(define _5SM2.p#UR_6SM2.St:SM2.St (UID (St)))</literallayout>
+        <p indent="no">
+          and type it in SM2's environment, everything is OK.</p>        
+      </li>
+      
+      <li>
+        <p>
+          Now, we need to recurse over this definition, we encounter UID,
+          get its definition, see that it is a proclaimation, and get its
+          real definition. Then, we make a copy of this definition,
+          and modify it:</p>
+
+        <literallayout>
+(define UID#FN_1_6SM2.St_6SM2.St:(fn (SM2.St) SM2.St) 
+  (lambda (x) (SM1.Ctr x) x))</literallayout>
+
+        <p> Now, we must type it. Which environment should we type it
+          in? Not in SM1 because we don't know `St' there, and not in
+          SM2 because we don't  know `un' there. Not in the big-AST
+          environment as there is nothing relevant there. </p>
+      </li>
+    </ol>
+    <p>
+      There is no single environment which has enough information to
+      type this new definition, unlike the original (take-1) scheme,
+      where we were forming one big AST comprising of all definitions.
+      So, the conclusion is that even though the unified-AST can be
+      formed on demand, R&amp;Ting the new definitions must be done in
+      a totally-rich environment similar to the take-1-big-AST's
+      environment.  
+    </p>
+  </appendix>
+
+  <appendix id="letwrap">
+    <title>More about Local Instantiations</title>
+    <p>
+      Why do we need an extra wrapper (as described in
+      Section&nbsp;<xref ref="recinst"/>) for instantiating
+      <progident>let</progident> or <progident>letrec</progident>
+      bound definitions? For example, in the following expression,
+    </p> 
+
+    <literallayout>
+(define top
+  (let ((id (lambda (x) x))
+    (id ())
+    (id #t))
+  ())</literallayout>
+
+    <p indent="no">
+      <progident>id</progident> must be instantiated locally to two
+      functions with types <progident>(fn (()) ())</progident> and
+      <progident>(fn (bool) bool)</progident>.
+      It might seem, that the instantiator can add extra bindings to
+      the current <progident>let</progident> expression, and
+      instantiate it as:</p>
+    
+    <literallayout>
+(define top
+  (let ((id (lambda (x) x)
+	(id#FN_4unit_4unit: (fn (()) ()) (lambda (x) x))
+	(id#FN_4bool_4bool: (fn (bool) bool) (lambda (x) x))    
+    (id#FN_4unit_4unit ())
+    (id#FN_4bool_4bool #t)
+  ())</literallayout>
+
+    <p indent ="no">
+      And later drop the polymorphic definition of
+      <progident>id</progident>. While this works fine for
+      <progident>id</progident>, it will fail in more complicated
+      cases. For example:</p>
+    <literallayout>
+(define top
+   (letrec ((odd  (lambda (x) (even x)))
+            (even (lambda (x) (odd x) )))
+
+     (even 0:int32):int32))</literallayout>
+
+    <p indent="no">
+      The original type for both <progident>odd</progident> and
+      <progident>even</progident> is 
+      <progident> (fn ('a) 'b) </progident>.
+
+      When we process the body of the <progident>letrec</progident>,
+      we see that <progident>even</progident> must be 
+      specialized for <progident>(fn (int32) int32)</progident>, so
+      we get: </p>
+
+    <literallayout>
+(define top
+   (letrec ((odd  (lambda (x) (even x)))
+            (even (lambda (x) (odd x) ))
+            (even#FN_5int32_5int32:(fn (int32) int32)
+                               (lambda (x) (odd x) )))
+
+     (even#fn_int32_int32 0:int32):int32))</literallayout>
+
+    <p indent="no">
+      Now if we R&amp;T this form, we get:</p>
+
+    <literallayout>
+odd: (fn (int32) int32)
+even: (fn (int32) int32) and
+even#FN_5int32_5int32:(fn (int32) int32)</literallayout>
+
+    <p indent="no">
+      since all let-bindings are typed and generalized together.
+      So, any further usages of
+      <progident>(even 200:int64)</progident> or 
+      <progident>(odd #t)</progident> will fail.
+      
+      Therefore, we should not add new let-bindings to the same
+      <progident>let</progident> expression, but introduce an inner
+      let-binding, that will encapsulate the body. After one step of
+      instantiation, the above expression will now get modified
+      as:</p> 
+    
+    <literallayout>
+(define top
+  (letrec ((odd  (lambda (x) (even x)))
+           (even (lambda (x) (odd x) )))
+
+     (letrec ((even#FN_5int32_5int32:(fn (int32) int32)
+                           (lambda (x) (odd x))))))
+       (even#FN_5int32_5int32 0:int32):int32)))</literallayout>
+
+    <p indent="no">
+      Now the types at the original let-binding are left unchanged,
+      and the symbols in the inner <progident>letrec</progident> are
+      built on a per-use basis. Further specialization must be careful
+      to emit things to the inner <progident>letrec</progident> and
+      not create a new <progident>let</progident> form for every
+      binding -- especially in the case of a
+      <progident>letrec</progident>. Of course, in the end, we will
+      have to carry forward all non-polymorphic definitions in the
+      original let-binding that were not already
+      specialized/referenced, and drop the original letbinding.</p>
+    
+    <literallayout>
+(define top
+     (letrec ((even#FN_5int32_5int32:(fn (int32) int32)
+                           (lambda (x) (odd#FN_5int32_5int32 x)))))
+              ((odd#FN_5int32_5int32:(fn (int32) int32)
+                           (lambda (x) (even#FN_5int32_5int32 x)))))
+       (even#FN_5int32_5int32 0:int32):int32)))</literallayout>
+    
+  </appendix>
+
+  <appendix id="mutAdd">
+    <title>Copy-compatible and Polyinstantiation</title>
+    <p>
+      Consider the following definitions: </p>
+
+    <literallayout>
+(define mb:(mutable bool) #t)
+(define p1:(pair bool (mutable bool)) (pair #t mb))
+(define p2:(pair (mutable bool) bool) p1)
+
+mb: (mutable bool)
+p1: (pair bool (mutable bool))
+p2: (pair (mutable bool) bool)</literallayout>
+    
+    <p>
+      Now, if we want to instantiate <progident>p1</progident> and
+      <progident>p2</progident>, the type <progident>pair</progident>
+      will consequently be poly-instantiated to the following
+      structures: </p>
+
+    <literallayout>
+(defstruct _17bitc.prelude.pair#SV2_20_17bitc.prelude.pairM_4bool_4bool:val
+             _3fst:(mutable bool)
+             _3snd:bool)
+
+(defstruct _17bitc.prelude.pair#SV2_20_17bitc.prelude.pair_4boolM_4bool:val
+             _3fst:bool
+             _3snd:(mutable bool))</literallayout>
+
+    <p>
+      Now, the instantiation of <progident>p1</progident> has the type 
+      <progident>
+        _17bitc.prelude.pair#SV2_20_17bitc.prelude.pairM_4bool_4bool
+      </progident>
+      and the instantiation of <progident>p2</progident> has the type 
+      <progident>
+        _17bitc.prelude.pair#SV2_20_17bitc.prelude.pair_4boolM_4bool
+      </progident>. Therefore, the initialization of p1 from p2 will
+      not type-check, as they now have different types, and not
+      different instantiations of the same type.
+    </p>
+
+  </appendix>
+  <bibliography>
+    <bibentry label="shapBitcSpec2006">
+      J. S. Shapiro, S. Sridhar, M. S. Doerrie, ``BitC Language
+      Specification'' 
+      <link
+        href="http://coyotos.org/docs/bitc/spec.html">
+        <progident>http://coyotos.org/docs/bitc/spec.html</progident>
+      </link>
+    </bibentry>
+    <bibentry label="milner1997definition">
+      Robin Milner, Mads Tofte, Robert Harper, and David
+      MacQueen. <doctitle>The Definition of Standard ML -
+      Revised</doctitle>
+      The MIT Press, May 1997.
+    </bibentry>
+    <bibentry label="leroyUBobj1992">
+      X. Leroy, ``Unboxed objects and polymorphic typing.''
+      <doctitle> ACM SIGPLAN Symposium on Principles of 
+        Programming Languages</doctitle>
+      pages 177--188, January 1992.
+      8(4):343--355, 1995.
+    </bibentry>
+    <bibentry label="harperPoly1995">
+      R. Harper,  G. Morrisett, ``Compiling polymorphism using
+      intentional  type analysis.''
+      <doctitle> ACM SIGPLAN Symposium on Principles of 
+        Programming Languages</doctitle>
+      pages 130-141, January 1995.
+    </bibentry>
+    <bibentry label="ShaoRep1997">
+      Zhong Shao, ``Flexible representation analysis.''
+      <doctitle>ACM SIGPLAN international conference on Functional
+        programming</doctitle> 
+      Pages: 85-98, 1997.
+    </bibentry>
+    <bibentry label="bitcMutinfer"> 
+      ``Issues with Type Inference in BitC'' 
+      <link
+        href="http://www.coyotos.org/docs/bitc/mutinfer.html">
+        <progident>http://www.coyotos.org/docs/bitc/mutinfer.html</progident>
+      </link>
+    </bibentry>   
+  </bibliography>
+</article>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->
+
+ 
+

@@ -1,0 +1,97 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Copyright (C) 2006, Johns Hopkins University.
+;; All rights reserved.
+;;
+;; Redistribution and use in source and binary forms, with or
+;; without modification, are permitted provided that the following
+;; conditions are met:
+;;
+;;   - Redistributions of source code must contain the above 
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer. 
+;;
+;;   - Redistributions in binary form must reproduce the above
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer in the documentation and/or other materials 
+;;     provided with the distribution.
+;;
+;;   - Neither the names of the copyright holders nor the names of any
+;;     of any contributors may be used to endorse or promote products
+;;     derived from this software without specific prior written
+;;     permission. 
+;;
+;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(bitc-version "0.9+")
+ 
+; (define c1 (lambda (y) y))
+; (define (odd2, even2) ((lambda (x) (even2 x)), 
+; 		       (lambda (x) (odd2 x)))) 
+
+; (define c2 (let ((x #t)) (lambda (y) x)))
+; (define c3 (lambda (x) (lambda (y) (and x y))))
+; (define c4
+;  (let ((x #t))
+;    (let ((y #f))
+;      (lambda (z) (and x y z)))))
+; (define c5 #t)
+; (define (c6 x) c5)
+
+; (define c7 (let ((x #t)) (lambda (y) y)))
+; (define c8 (lambda (x) (lambda (y) y)))
+; (define c9 (let ((x #t)) (lambda (y) (lambda (y) y))))
+; (define c10 (let ((x:(mutable bool) #t)) (lambda (y) x)))
+
+; (define c11 (let ((x (lambda (z) z))) (lambda (y) x)))
+
+; (define c12 (let ((x #t)) (lambda ((y, z) sh) x)))
+
+; (define T 
+;   (letrec 
+;       ((P (lambda (x) x))
+;        (Q nil)
+;        (R (lambda (x) (P, Q))))
+;     R))
+
+; (define c13 (c1 ()))
+
+;(define c14 ((lambda (x) x)  ()))
+
+;(define c15 ((the (fn ('a) 'a) c1) ()))
+
+;(define c16 (lambda (a : (vector 'a)) (begin (vector-ref a 0) a))) 
+
+;(defexception c17 (fn (bool) bool))
+
+;(defstruct (clstruct122 'b 'a 'c):ref  f:(PROC (fn ('c 'a) 'b) 'c))
+
+;(define c18 (letrec ((f (lambda (x) (f (the int32 x))))) f))
+;(define c18 (letrec ((f (lambda (x) (f  x)))) f))
+
+;(define (f x) (f x))
+ 
+;(define (odd, even) ((lambda (x) (even x)), 
+;		     (lambda (x) (odd x))))
+
+;(define oe (letrec ((odd1 (lambda (x) (even1 x))) 
+;		    (even1 (lambda (x) (odd1 x)))) (odd1, even1))) 
+
+ 
+(defstruct (proc 'a):val  fun:'a env:() fsz:int32)
+(define id (proc (lambda (y) (begin y)) () 0))
+(define idid (proc (lambda (x) (begin (let ((LAM242:(proc 'a243) id)) (LAM242.fun x)))) () 0))
+(define main6 (proc (lambda () (begin (let ((LAM257:(proc 'a258) idid)) (LAM257.fun #t)) 
+				      (let ((LAM268:(proc 'a269) idid)) (LAM268.fun (the int32 0))))) () 0))

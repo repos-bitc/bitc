@@ -1,0 +1,380 @@
+/* Likewise the box widths for the various content areas! */
+
+@media print {
+  #topnav {
+    display: none;
+  }
+}
+
+#topnav {
+  width: 100%;
+  padding-left: 150px;
+  /* border: 1px solid blue; */
+  border-bottom: 1px solid black;
+  background: lightblue;
+}
+
+#topnav img {
+  border: 0;
+}
+
+#topnav a {
+  border: 0;
+}
+
+#topnav ul {
+  display: inline;
+  padding: 0;
+}
+
+#topnav li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: inline;
+}
+
+@media print {
+  #sidenav {
+    display: none;
+  }
+}
+
+#sidenav {
+  float: left;
+  padding: 4pt;
+  margin: 0;
+  /* position: absolute; */
+  /* padding-top: 40px;
+     top: 0px;   */
+  border: 1px solid black;
+  width: 100px;
+  word-wrap: break-word;
+  /* height: auto; */
+  background: white;
+}
+
+@media screen {
+  #content {
+    padding-left: 150px;
+    word-wrap: break-word;
+    /* border: 1px solid green; */
+    /* The border is a trick to fix a margin background color issue
+       at the top of the content frame. */
+    /* border: 1px solid #ffffe0; */
+    /* background: #ffffe0; */
+  }
+}
+
+/* If you change the background color, be sure to change it
+   throughout. */
+body {
+  font-family: serif;
+  line-height: 110%;
+  padding: 0;
+  margin: 0;
+  background: #ffffe0;
+}
+
+A:link    { text-decoration: none; color: blue }
+A:visited { text-decoration: none; color: blue }
+A:hover   { color: red }
+A:active   { color: red }
+
+A.noborder:link { color: #00BFFF; }
+A.noborder:visited { color: #00BFFF; }
+A.noborder:hover { color: blue; }
+A.noborder:active { color: red; }
+
+H1 {
+  font-weight: normal;
+  text-indent: 0;
+  margin-top: 24pt;
+  font-size: 110%;
+  line-height: 120%;
+  font-weight: bold;
+  font-family: sans-serif;
+}
+
+H1.subpart {
+  text-align: center;
+}
+
+H1.title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+H2 {
+  text-decoration: underline;
+  font-weight: normal;
+  text-indent: 0;
+  margin-top: 12pt;
+  font-size: 110%;
+  line-height: 110%;
+  font-family: sans-serif;
+}
+
+H3 {
+  font-weight: normal;
+  text-indent: 0;
+  margin-top: 12pt;
+  font-size: 100%;
+  line-height: 110%;
+  font-family: sans-serif;
+}
+
+/* P {
+  text-align: justify;
+} */
+
+div.sidebar {
+   float: right;
+   width: 50%;
+   margin-left: 0.2in;
+   background-color: #cb90b5;
+   /* background-color: #85cb7e; */
+   padding: 0.2in;
+   border: solid;
+   border-top-width: 0.2in;
+   border-bottom-width: 0.2in;
+   border-left-width: 0.2in;
+   border-color: white;
+}
+
+p.caption {
+/* Nothing special for now */
+}
+
+div.figure {
+   margin-left: 0.25in;
+}
+
+div.floatingtable {
+   margin-left: 0.25in;
+}
+
+pre.programlisting {
+   margin-left: 0.25in;
+   background-color: lightgrey;
+   padding: 0.1in;
+}
+
+pre.literallayout {
+   margin-left: 0.25in;
+   background-color: lightgrey;
+   padding: 0.1in;
+}
+
+pre.grammarlisting {
+   margin-left: 0.25in;
+   background-color: #80ff80;
+   padding: 0.1in;
+}
+
+div.toc {
+   margin-left: 0.5in;
+   margin-right: 0.5in;
+}
+
+p.toc-subpart {
+   font-weight: bold;
+   font-size: 120%;
+   margin-top: 1.5ex;
+   margin-bottom: 1.5ex;
+}
+
+p.toc-part {
+   text-transform: uppercase;
+   font-weight: bold;
+   font-size: 120%;
+   margin-top: 3ex;
+   margin-bottom: 1.5ex;
+}
+
+p.toc-1 {
+   font-weight: bold;
+   font-size: 120%;
+   margin-top: 1.5ex;
+   margin-bottom: 1.5ex;
+}
+
+p.toc-2 {
+   margin-left: 0.25in;
+   font-size: 100%;
+   margin-top: 0.2ex;
+   margin-bottom: 0.2ex;
+}
+
+p.toc-3 {
+   margin-left: 0.5in;
+   font-style: italic;
+   font-size: 85%;
+   margin-top: 0.2ex;
+   margin-bottom: 0.2ex;
+}
+
+p.toc-4 {
+   margin-left: 0.75in;
+   font-size: 85%;
+   margin-top: 0.2ex;
+   margin-bottom: 0.2ex;
+}
+
+p.sidebar-title {
+   font-size: 140%;
+   text-decoration: underline;
+}
+
+p.callout-title {
+   font-size: 140%;
+   text-decoration: underline;
+}
+
+p.pubdate {
+  text-align: center;
+}
+
+p.captionlabel {
+  font-weight: bold;
+  float: left;
+  clear: left;
+  padding-right: 1ex;
+}
+
+div.caption {
+  display: block;
+}
+
+div.nowrap {
+  word-wrap: normal;
+}
+
+div.wrap {
+  word-wrap: break-word;
+}
+
+div.dirgroup {
+  margin-left: 20px;
+}
+
+div.synopsis {
+  margin-left: 20px;
+}
+
+div.titlepage {
+   text-align: center;
+}
+
+div.legalnotice {
+   margin-left: 1in;
+   margin-right: 1in;
+   text-align: left;
+   background-color: lightblue;
+}
+
+div.abstract {
+   margin-left: 0.5in;
+   margin-right: 0.5in;
+   text-align: left;
+}
+
+div.example {
+   margin-left: 0.25in;
+   text-align: left;
+}
+
+div.author {
+   margin-top: 0.2ex;
+   margin-bottom: 0.2ex;
+}
+
+div.titlepage h1 {
+   margin-top: 0.5in;
+}
+
+p.orgname {
+   font-style: italic;
+   margin-top: 0.2ex;
+   margin-bottom: 0.2ex;
+}
+
+p.author {
+   margin-top: 0.2ex;
+   margin-bottom: 0.2ex;
+}
+
+p.copyright {
+   margin-left: 1in;
+   margin-right: 1in;
+   text-align: left;
+}
+
+div.address {
+   margin-top: 0;
+   margin-bottom: 0;
+   padding: 0;
+   border-width: 0;
+   line-height: 120%;
+}
+
+div.lemma-body {
+   margin-left: 0.5in;
+}
+div.theorem-body {
+   margin-left: 0.5in;
+}
+
+div.note {
+   margin-left: 0.5in;
+   margin-right: 0.5in;
+   background-color: lightblue;
+   padding-bottom: 5px;
+}
+
+div.caution {
+   margin-left: 0.5in;
+   margin-right: 0.5in;
+   background-color: lightblue;
+}
+
+div.warning {
+   margin-left: 0.5in;
+   margin-right: 0.5in;
+   background-color: lightblue;
+}
+
+table {
+   border-collapse: collapse;
+}
+
+/* progident is visually enhanced by a background color: */
+tt.progident {
+  font-family: courier, monospaced;
+  font-size: 105%;
+}
+
+tt.command {
+  font-family: sans-serif;
+  font-weight: normal;
+}
+
+tt.filename {
+  font-family: sans-serif;
+  font-weight: normal;
+}
+
+b.envvar {
+  font-family: sans-serif;
+  font-weight: bold;
+}
+
+b.makevar {
+  font-family: serif;
+  font-weight: bold;
+}
+
+sub {
+  vertical-align: sub;
+  font-size: 70%;  
+}

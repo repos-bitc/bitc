@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+<floatingtable id="hm_unify_solve" fullwidth='yes' latex.placement="htb">
+  <font size="small">
+    <btypes:TYPE
+      xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+      <Hrules>
+	<tyRule name="U-REFL">
+	  <tyPre/>
+	  <tyConc>
+	    <UNIFY>
+	      <type/>
+	      <type/>
+	      <Empty/>
+	    </UNIFY>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="U-COMMUT">
+	  <tyPre>
+	    <UNIFY>
+	      <type/>
+	      <type dash="'"/>
+	      <aSubMap/>
+	    </UNIFY>
+	  </tyPre>
+	  <tyConc>
+	    <UNIFY>
+	      <type dash="'"/>
+	      <type/>
+	      <aSubMap/>
+	    </UNIFY>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="U-TVAR">
+	  <tyPre>
+	    <neq>
+	      <tvar name="alpha"/>
+	      <type/>
+	    </neq>
+	  </tyPre>
+	  <tyConc>
+	    <UNIFY>
+	      <tvar name="alpha"/>
+	      <type/>
+	      <SubMap>
+		<tvar name="alpha"/>
+		<type/>
+	      </SubMap>
+	    </UNIFY>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="U-REF">
+	  <tyPre>                
+	    <UNIFY>
+	      <type num="1"/>
+	      <type num="2"/>
+	      <aSubMap/>
+	    </UNIFY>
+	  </tyPre>
+	  <tyConc>
+	    <UNIFY>
+	      <ref>
+		<type num="1"/>
+	      </ref>
+	      <ref>
+		<type num="2"/>
+	      </ref>
+	      <aSubMap/>
+	    </UNIFY>
+	  </tyConc>
+	</tyRule> 
+	<tyRule name="U-MUT">
+	  <tyPre>                
+	    <UNIFY>
+	      <type num="1"/>
+	      <type num="2"/>
+	      <aSubMap/>
+	    </UNIFY>
+	  </tyPre>
+	  <tyConc>
+	    <UNIFY>
+	      <mutable>
+		<type num="1"/>
+	      </mutable>
+	      <mutable>
+		<type num="2"/>
+	      </mutable>
+	      <aSubMap/>
+	    </UNIFY>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule name="U-FN">
+	  <tyPre>                
+	    <UNIFY>
+	      <minz>
+		<type num="1"/>
+	      </minz>
+	      <minz>
+		<type num="1" dash="'"/>
+	      </minz>
+	      <aSubMap/>
+	    </UNIFY>
+	    <UNIFY>
+	      <maxz>
+		<Subst>
+		  <aSubMap/>
+		  <type num="2"/>
+		</Subst>
+	      </maxz>	      
+	      <maxz>
+		<Subst>
+		  <aSubMap/>
+		  <type num="2" dash="'"/>
+		</Subst>
+	      </maxz>
+	      <aSubMap dash="'"/>
+	    </UNIFY>
+	  </tyPre>
+	  <tyPre>
+	    <models name="acyclic">
+	      <nothing/>
+	      <compose>
+		<aSubMap/>
+		<aSubMap dash="'"/>
+	      </compose>
+	    </models>
+	  </tyPre>
+	  <tyConc> 
+	    <UNIFY>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	      <fn>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </fn>
+	      <compose>
+		<aSubMap/>
+		<aSubMap dash="'"/>
+	      </compose>
+	    </UNIFY>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="U-CT1">
+	  <tyPre>
+	    <neq>
+	      <type num="2"/>
+	      <MBpair>
+		<type num="3"/>
+		<type num="3" dash="'"/>
+	      </MBpair>
+	    </neq>
+	    <neq>
+	      <type num="2"/>
+	      <tvar name="alpha"/>
+	    </neq>
+	    <UNIFY>
+	      <inner>
+		<type num="1" dash="'"/>
+	      </inner>
+	      <minz>
+		<type num="2"/>
+	      </minz>
+	      <aSubMap/>
+	    </UNIFY>
+	  </tyPre>
+	  <tyPre>
+	    <UNIFY>
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<type num="2"/>
+	      </Subst>
+	      <aSubMap dash="'"/>
+	    </UNIFY>
+	    <models name="acyclic">
+	      <assume/>
+	      <compose>
+		<aSubMap/>
+		<aSubMap dash="'"/>
+	      </compose>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <UNIFY>
+	      <MBpair>
+		<type num="1"/>
+		<type num="1" dash="'"/>
+	      </MBpair>
+	      <type num="2"/>
+	      <compose>
+		<aSubMap/>
+		<aSubMap dash="'"/>
+	      </compose>
+	    </UNIFY>
+	  </tyConc>
+	</tyRule>
+      </Hrules> 
+      <Hrules>
+	<tyRule name="U-CT2">
+	  <tyPre>                
+	    <UNIFY>
+	      <inner>
+		<type num="1" dash="'"/>
+	      </inner>
+	      <inner>
+		<type num="2" dash="'"/>
+	      </inner>
+	      <aSubMap/>
+	    </UNIFY>
+	    <UNIFY>
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<type num="2"/>
+	      </Subst>
+	      <aSubMap dash="'"/>
+	    </UNIFY>
+	    <models name="acyclic">
+	      <assume/>  
+	      <compose>
+		<aSubMap/>
+		<aSubMap dash="'"/>
+	      </compose>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <UNIFY>
+	      <MBpair>
+		<type num="1"/>
+		<type num="1" dash="'"/>
+	      </MBpair>
+	      <MBpair>
+		<type num="2"/>
+		<type num="2" dash="'"/>
+	      </MBpair>
+	      <compose>
+		<aSubMap/>
+		<aSubMap dash="'"/>
+	      </compose>
+	    </UNIFY>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="">
+	  <tyPre>
+	    <neq>
+	      <type/>
+	      <MBpair>
+		<type num="1"/>
+		<type num="2"/>
+	      </MBpair>
+	    </neq>
+	  </tyPre>
+	  <tyConc>
+	    <eq>
+	      <inner>
+		<type/>
+	      </inner>
+	      <minz>
+		<type/>
+	      </minz>
+	    </eq>
+	  </tyConc>
+	</tyRule>	
+	<tyRule name="">
+	  <tyPre>     
+	    <eq>
+	      <type/>
+	      <MBpair>
+		<type num="1"/>
+		<type num="2"/>
+	      </MBpair>
+	    </eq>
+	    <eq>
+	      <inner>
+		<type num="2"/>
+	      </inner>
+	      <type num="2" dash="'"/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <eq>
+	      <inner>
+		<type/>
+	      </inner>
+	      <type num="2" dash="'"/>
+	    </eq>
+	  </tyConc>
+	</tyRule>	
+      </Hrules>
+      <Hrules>
+	<tyRule name="U-CEIL">
+	  <tyPre>                
+	    <UNIFY>
+	      <maxz>
+		<type num="1"/>
+	      </maxz>
+	      <maxz>
+		<type num="2"/>
+	      </maxz>
+	      <aSubMap/>
+	    </UNIFY>
+	  </tyPre>
+	  <tyConc>
+	    <UNIFY>
+	      <ceil>
+		<type num="1"/>
+	      </ceil>
+	      <ceil>
+		<type num="2"/>
+	      </ceil>
+	      <aSubMap/>
+	    </UNIFY>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="U-FLOOR">
+	  <tyPre>                
+	    <UNIFY>
+	      <minz>
+		<type num="1"/>
+	      </minz>
+	      <minz>
+		<type num="2"/>
+	      </minz>
+	      <aSubMap/>
+	    </UNIFY>
+	  </tyPre>
+	  <tyConc>
+	    <UNIFY>
+	      <floor>
+		<type num="1"/>
+	      </floor>
+	      <floor>
+		<type num="2"/>
+	      </floor>
+	      <aSubMap/>
+	    </UNIFY>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="SOL-CEIL">
+	  <tyPre>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>                    
+	      </assume>
+	      <corUp>
+		<type/>                      
+		<type dash="'"/>
+	      </corUp>
+	    </Sjudge>                
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <corUp>
+		<ceil>
+		  <type/>
+		</ceil>
+		<ceil>
+		  <type dash="'"/>
+		</ceil>
+	      </corUp>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="SOL-FLOOR">
+	  <tyPre>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>                    
+	      </assume>
+	      <corUp>
+		<type/>                      
+		<type dash="'"/>
+	      </corUp>
+	    </Sjudge>                
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <corUp>
+		<floor>
+		  <type/>
+		</floor>
+		<floor>
+		  <type dash="'"/>
+		</floor>
+	      </corUp>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>	
+      <Hrules>
+	<tyRule name="SOLVE-KNOWN">
+	  <tyPre>
+	    <neq>
+	      <type/>
+	      <MBpair>
+		<type num="1"/>
+		<type num="2"/>
+	      </MBpair>
+	    </neq>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <corUp>
+		<type/>
+		<type dash="'"/>
+	      </corUp>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="solve">
+	      <assume>
+		<aSubMap/>
+		<id/>
+		<aExpr/>
+	      </assume>
+	      <corUp>
+		<type/>
+		<type dash="'"/>
+	      </corUp> 
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="SOLVE-MUT">
+	  <tyPre>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <corUp>
+		<MBpair>
+		  <type num="1"/>
+		  <type num="2"/>
+		</MBpair>
+		<type/>
+	      </corUp>
+	    </Sjudge>
+	    <pred name="mutated">	    
+	      <id/>
+	      <aExpr/>
+	    </pred>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="solve">
+	      <assume>
+		<aSubMap/>
+		<id/>
+		<aExpr/>
+	      </assume>
+	      <corUp>
+		<MBpair>
+		  <type num="1"/>
+		  <type num="2"/>
+		</MBpair>
+		<maxz>
+		  <type/>
+		</maxz>
+	      </corUp>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="SOLVE-IMMUT">
+	  <tyPre>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <corUp>
+		<MBpair>
+		  <type num="1"/>
+		  <type num="2"/>
+		</MBpair>
+		<type/>
+	      </corUp>
+	    </Sjudge>
+	    <NOT>
+	      <pred name="mutated">	    
+		<id/>
+		<aExpr/>
+	      </pred>
+	    </NOT>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="solve">
+	      <assume>
+		<aSubMap/>
+		<id/>
+		<aExpr/>
+	      </assume>
+	      <corUp>
+		<MBpair>
+		  <type num="1"/>
+		  <type num="2"/>
+		</MBpair>
+		<minz>
+		  <type/>
+		</minz>
+	      </corUp>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule name="SOL-UNIT">
+	  <tyPre/>
+	  <tyConc>
+	    <Sjudge name="sol">
+	      <assume>
+		<Empty/>
+	      </assume>
+	      <corUp>
+		<unit/>
+		<unit/>
+	      </corUp>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="SOL-BOOL">
+	  <tyPre/>
+	  <tyConc>
+	    <Sjudge name="sol">
+	      <assume>
+		<Empty/>
+	      </assume>                    
+	      <corUp>
+		<bool/>                      
+		<bool/>
+	      </corUp>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="SOL-MUT">
+	  <tyPre>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>                    
+	      </assume>
+	      <corUp>
+		<type/>                      
+		<type dash="'"/>
+	      </corUp>
+	    </Sjudge>                
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <corUp>
+		<mutable>
+		  <type/>
+		</mutable>
+		<mutable>
+		  <type dash="'"/>
+		</mutable>
+	      </corUp>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="SOL-REF">
+	  <tyPre>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <corUp>
+		<type/>                      
+		<type dash="'"/>
+	      </corUp>
+	    </Sjudge>                
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <corUp>
+		<ref>
+		  <type/>
+		</ref>
+		<ref>
+		  <type dash="'"/>
+		</ref>
+	      </corUp>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule name="SOL-FN">
+	  <tyPre>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <corUp>
+		<type num="1"/>                      
+		<type num="1" dash="'"/>
+	      </corUp>
+	    </Sjudge>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap dash="'"/>
+	      </assume>
+	      <corUp>
+		<Subst>
+		  <aSubMap/>
+		  <type num="2"/>
+		</Subst>
+		<type  num="2" dash="'"/>
+	      </corUp>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="sol">
+	      <assume>
+		<compose>
+		  <aSubMap/>
+		  <aSubMap dash="'"/>
+		</compose>
+	      </assume>
+	      <corUp>
+		<fn>
+		  <type num="1"/>
+		  <type num="2"/>
+		</fn>
+		<fn>
+		  <Subst>
+		    <aSubMap dash="'"/>
+		    <type num="1" dash="'"/>
+		  </Subst>
+		  <type num="2" dash="'"/>
+		</fn>
+	      </corUp>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="SOL-CT-VAR">
+	  <tyPre>
+	    <eq>
+	      <type num="1"/>
+	      <tvar name="alpha"/>
+	    </eq>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <corUp>
+		<type num="2"/>                      
+		<type num="2" dash="'"/>
+	      </corUp>
+	    </Sjudge>
+	    <UNIFY>                
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <type num="2" dash="'"/>
+	      <aSubMap dash="'"/>
+	    </UNIFY>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="sol">
+	      <assume>
+		<compose>
+		  <aSubMap/>
+		  <aSubMap dash="'"/>
+		</compose>
+	      </assume>
+	      <corUp>
+		<MBpair>
+		  <type num="1"/>
+		  <type num="2"/>
+		</MBpair>	
+		<Subst>
+		  <aSubMap dash="'"/>	        
+		  <type num="2" dash="'"/>
+		</Subst>
+	      </corUp>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="SOL-CT-CONST">
+	  <tyPre>
+	    <neq>
+	      <type num="1"/>
+	      <tvar name="alpha"/>
+	    </neq>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <corUp>
+		<type num="1"/>                      
+		<type num="1" dash="'"/>
+	      </corUp>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <corUp>
+		<MBpair>
+		  <type num="1"/>
+		  <type num="2"/>
+		</MBpair>
+		<Subst>
+		  <aSubMap/>
+		  <type num="1"/>
+		</Subst>
+	      </corUp>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+  </font>
+  <caption>Rules for Unification and Constraint Solving.</caption>
+</floatingtable>

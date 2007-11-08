@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+<floatingtable id="gen_rules" fullwidth='yes' latex.placement="tb">
+  <btypes:TYPE
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+    <Hrules vspace="yes">
+      <tyRule name="G-VALUE">
+	<tyPre>
+	  <pred name="Value">
+	    <aExpr/>
+	  </pred>
+	  <pred name="Immut">
+	    <type/>
+	  </pred>
+	  <eq>
+	    <tvars name="alpha"/>
+	    <diff>
+	      <ftvs><type/></ftvs>
+	      <ftvs><gamma/></ftvs>
+	      <ftvs><store/></ftvs>
+	    </diff>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <Sjudge name="gen">
+	    <assume>
+	      <gamma/>
+	      <store/>
+	      <aExpr/>
+	    </assume>                
+	    <GEN>
+	      <type/>
+	      <TS>
+		<tvars name="alpha"/>
+		<type/>
+	      </TS>
+	    </GEN>                                
+	  </Sjudge>
+	</tyConc>
+      </tyRule>
+      <tyRule name="G-EXPANSIVE">
+	<tyPre/>
+	<tyConc>
+	  <Sjudge name="gen">
+	    <assume>
+	      <gamma/>
+	      <store/>
+	      <aExpr/>
+	    </assume>                
+	    <GEN>
+	      <type/>
+	      <type/>
+	    </GEN>                                
+	  </Sjudge>
+	</tyConc>
+      </tyRule>
+`    </Hrules>
+  </btypes:TYPE>  
+  <caption>Generalization Rules</caption>
+</floatingtable>

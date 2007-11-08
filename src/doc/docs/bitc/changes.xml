@@ -1,0 +1,916 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+
+<!ENTITY BitcVersion "0.10">
+]>
+  <article id="capidl-spec" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <docinfo twocolumn="yes">
+    <title>BitC Language Change History</title>
+    <subtitle>Version &BitcVersion;</subtitle>
+    <authorgroup>
+      <author>
+	<firstname>Jonathan</firstname>
+	<surname>Shapiro</surname>
+	<degree>Ph.D.</degree>
+      </author>
+      <author>
+	<firstname>Swaroop</firstname>
+	<surname>Sridhar</surname>
+      </author>
+      <author>
+	<firstname>Scott</firstname>
+	<surname>Doerrie</surname>
+      </author>
+      <affiliation>
+	<orgname>Systems Research Laboratory</orgname>
+	<address>Dept. of Computer Science</address>
+	<address>Johns Hopkins University</address>
+      </affiliation>
+    </authorgroup>
+    <pubdate>June 17, 2006</pubdate>
+    <copyright>
+      <year>2006</year> 
+      <holder>Jonathan S. Shapiro</holder>
+      <holder>Swaroop Sridhar</holder>
+    </copyright>
+    <categories>
+      <category>dev/bitc</category>
+    </categories>
+    <synopsis>
+      <p>History of changes to the BitC language design.</p>
+    </synopsis>
+  </docinfo>
+  <abstract latex.incolumn="yes">
+    <p>
+      This document describes the various changes that have been made
+      to the BitC specification since its inception. Originally, the
+      list was included in the main specification document, but it has
+      grown to the point where separating it into a separate document
+      became motivated.
+    </p>
+  </abstract>
+  <sect1>
+    <title>Changes in version 0.10+</title>    
+    <ul>
+      <li>
+        <p>
+          Moved to a simplified version of Defrepr based on the
+          scheme proposed by Iavor Diatchki,
+          <foreignphrase>et. al.</foreignphrase>.
+        </p>        
+      </li>
+      <li>
+        <p>
+          Dropped the now depricated <progident>(val type)</progident> form.
+        </p>
+      </li>
+    </ul>
+  </sect1>
+  <sect1>
+    <title>Changes in version 0.10</title> 
+    <ul>
+      <li>
+        <p>
+          New default entry point
+          <progident>bitc.main.main</progident>.
+        </p>
+      </li>
+      <li>
+        <p>
+          Added closure conversion.
+        </p>
+      </li>
+      <li>
+        <p>
+          Updated identifier syntax for interfaces. Removed
+          <progident>import!</progident> and
+          <progident>provide!</progident>.
+        </p>
+      </li>
+      <li>
+        <p>
+          Added beginnings of formal specification section. Captured
+          the complete grammar.
+        </p>
+      </li>
+      <li>
+        <p>
+          Introduced an initial attempt to deal with locations in
+          the specification.
+        </p>
+      </li>
+      <li>
+        <p>
+          Introduced <progident>defrepr</progident>. Replaced old
+          <progident>defunion</progident> with a new one that uses
+          field names.
+        </p>
+      </li>
+      <li>
+        <p>
+          Added specification for structure fill fields. Added field
+          names in unions and exceptions. Added
+          <progident>switch</progident> form that lets these fields
+          be used, replacing <progident>case</progident>.
+        </p>
+      </li>
+      <li>
+        <p>
+          Removed obsolete convenience syntax for lists.
+        </p>
+      </li>
+      <li>
+        <p>
+          Improved description of union layout, and clarified elided
+          tag rules.
+        </p>
+      </li>
+      <li>
+        <p>
+          Resolved the problem of circular initialization dependency
+          by introducing a requirement that dependencies be
+          (transitively) observably known.
+        </p>
+      </li>
+      <li>
+        <p>
+          Abandoned <progident>case!</progident> for good.
+        </p>
+      </li>
+      <li>
+        <p>
+          Removed method types now that we have qualified
+          types. Expanded specification of type classes, instances,
+          and qualified types. Defined the resolution rule for
+          ambiguous choices of instance while allowing preferred
+          specializations.
+        </p>
+      </li>
+      <li>
+        <p>
+          Clarified definition of white space and end of line
+          processing. Added proper citation for Unicode standard.
+        </p>
+      </li>
+      <li>
+        <p>
+          Introduction and definition of
+          <progident>definvariant</progident>,
+          <progident>defaxiom</progident>,
+          <progident>deftheory</progident>,
+          <progident>suspend</progident>,
+          <progident>disable</progident>, and
+          <progident>enable</progident>.
+        </p>
+      </li>
+      <li>
+        <p>
+          Revised Unicode character literal syntax, dropping the
+          radix syntax in favor of
+          <progident>\{U+<em>digits</em>}</progident>. Dropped the
+          curly braces around the special forms for non-printing
+          character literals. The old forms will be retired in
+          version 0.11.
+        </p>
+      </li>
+      <li>
+        <p>
+          Revised string backslash embedding rules. Backslash within
+          a string no longer shares a common syntax with character
+          literals. Curly braced forms for non-printing
+          characters in strings will be retired in version 0.11.
+        </p>
+      </li>
+      <li>
+        <p>
+          The following statement from the 0.9 specification has
+          been dropped, and may lead to incompatibilities in
+          transitioning to language version 0.10.
+        </p>
+        <p>
+          In general, if <progident>#\<em>x</em></progident> is a
+          valid character constant, then
+          <progident>"\<em>x</em>"</progident> is a single
+          character string consisting of the same character.  By
+          far the most common uses of this escaped encoding is to
+          embed the double quote character and the backslash
+          character within a string, but the generalization also
+          permits encoding unicode characters by code point.
+        </p>
+      </li>
+    </ul>
+  </sect1>
+  <sect1>
+    <title>Changes in version 0.9</title> 
+    <p>
+      Cleaning up a few <em>more</em> loose ends:
+    </p>
+    <ul>
+      <li>
+        <p>
+          Removed <progident>read-only</progident>.
+        </p>
+      </li>
+      <li>
+        <p>
+          Added keyword <progident>external</progident> to
+          <progident>proclaim</progident>, along with optional
+          external identifier.
+        </p>
+      </li>
+      <li>
+        <p>
+          Renamed <progident>vector-ref</progident>,
+          <progident>array-ref</progident>,
+          <progident>member-ref</progident> to (respectively)
+          <progident>vector-nth</progident>,
+          <progident>array-nth</progident>,
+          <progident>member</progident>.
+        </p>
+      </li>
+      <li>
+        <p>
+          Restored the primitive types
+          <progident>bool</progident>,
+          <progident>char</progident>,
+          <progident>int8</progident>,
+          <progident>int16</progident>,
+          <progident>int32</progident>,
+          <progident>int64</progident>,
+          <progident>uint8</progident>,
+          <progident>uint16</progident>,
+          <progident>uint32</progident>,
+          <progident>uint64</progident>,
+          <progident>word</progident>,
+          <progident>float</progident>,
+          <progident>double</progident>,
+          <progident>quad</progident>.
+        </p>
+      </li>
+      <li>
+        <p>
+          The <progident>fixint</progident> keyword is retired in
+          favor of <progident>bitfield</progident>.
+        </p>
+      </li>
+      <li>
+        <p>
+          Binding patterns in <progident>letrec</progident> forms
+          must now be statically decomposable at compile time to
+          avoid internal violation of the completeness restriction.
+        </p>
+      </li>
+      <li>
+        <p>
+          Order of evaluation in <progident>let</progident> and
+          <progident>letrec</progident> initializers is now
+          specified. This is necessary because of side effects in
+          impure expressions.
+        </p>
+      </li>
+      <li>
+        <p>
+          Replaced LOOP with DO.
+        </p>
+      </li>
+      <li>
+        <p>
+          Added a new type declaration qualifier
+          <progident>:opaque</progident> that renders the type
+          visible in its defining interface and providers but opaque
+          to importers.
+        </p>
+      </li>
+      <li>
+        <p>
+          Removed all references to <progident>tuple</progident>. 
+          This is replaced by a new keyword <progident>pair</progident>.
+        </p>
+      </li>
+      <li>
+        <p>
+          Lambdas now take multiple arguments, and implicit pairing
+          is now gone.
+        </p>
+      </li>
+      <li>
+        <p>
+          The <progident>one-of</progident> type constraint had
+          horrible problems, and has been removed. In consequence,
+          <progident>nth-ref</progident> was split into
+          <progident>array-ref</progident> and
+          <progident>vector-ref</progident> and the indexing
+          convenience syntax has been removed.
+        </p>
+      </li>
+      <li>
+        <p>
+          Renamed <progident>type-qualify</progident> to
+          <progident>the</progident>, following Common Lisp
+          conventions. Removed the
+          <progident><em>e</em>:<em>T</em></progident> convienced
+          syntax for expressions. Types in binding patterns are
+          still specified using the colon-qualified form.
+        </p>
+      </li>
+      <li>
+        <p>
+          The <progident>deftype</progident> form was unmotivated
+          and complicated. It is gone.
+        </p>
+      </li>
+      <li>
+        <p>
+          Removed the reference chasing misfeature of
+          <progident>array-length</progident>,
+          <progident>vector-length</progident>,
+          <progident>nth-ref</progident>, and
+          <progident>struct-ref</progident>. Renamed
+          <progident>struct-ref</progident> to
+          <progident>member-ref</progident>.
+        </p>
+      </li>
+      <li>
+        <p>
+          Renamed keyword <progident>forall</progident> to
+          <progident>method</progident>.
+        </p>
+      </li>
+      <li>
+        <p>
+          Replace <progident>vector-ref</progident> and
+          <progident>array-ref</progident> with
+          <progident>nth-ref</progident>
+        </p>
+      </li>
+      <li>
+        <p>
+          Added <progident>forall</progident> as explicit syntax for
+          writing method types.
+        </p>
+      </li>
+      <li>
+        <p>
+          Added <progident>one-of</progident> as a type constraint,
+          subject to the rule that the member types must not unify.
+        </p>
+      </li>
+      <li>
+        <p>
+          <em>Issue:</em> Should we introduce labeling forms
+          <progident>check</progident>,
+          <progident>assert</progident>,
+          <progident>label</progident>?
+        </p>
+      </li>
+      <li>
+        <p>
+          Described (and required) a variant of the Cardelli
+          optimization for list cell representations.
+        </p>
+      </li>
+      <li>
+        <p>
+          Added type classes.
+        </p>
+      </li>
+      <li>
+        <p>
+          Corrected definitions of <progident>tuple</progident>,
+          <progident>array</progident> types to be value
+          types. Corrected definition of
+          <progident>vector</progident> to be a reference type.
+        </p>
+      </li>
+      <li>
+        <p>
+          Removed <progident>mutable</progident> value
+          constructor. Replaced <progident>immutable</progident>
+          value constructor with <progident>read-only</progident>.
+        </p>
+      </li>
+      <li>
+        <p>
+          Removed discussion of primary type conversion, since this
+          is now part of the standard prelude.
+        </p>
+      </li>
+      <li>
+        <p>
+          Removed discussion of canonical serialization.
+        </p>
+      </li>
+      <li>
+        <p>
+          Discussed declaration of value vs. reference named types.
+        </p>
+      </li>
+      <li>
+        <p>
+          Moved <progident>case!</progident> and
+          <progident>deftype</progident> to the experimental
+          section. We may restore these, but I want to try things
+          without it first.
+        </p>
+      </li>
+      <li>
+        <p>
+          Renamed <progident>alias</progident> to
+          <progident>use</progident>.
+        </p>
+      </li>
+      <li>
+        <p>
+          Removed the ``literal type resolution'' rule, per Mark Jones.
+        </p>
+      </li>
+      <li>
+        <p>
+          Reverted the specification of
+          <progident>mutable</progident>.  Mutability is once again
+          defined at field level. Temporarily <em>removed</em> the
+          <progident>mutable</progident> and
+          <progident>immutable</progident> value constructors..
+        </p>
+      </li>
+      <li>
+        <p>
+          Renamed the <progident>deref</progident> type constructor
+          to <progident>val</progident>.
+        </p>
+      </li>
+    </ul>
+  </sect1>
+  <sect1>
+    <title>Changes in version 0.8</title> 
+    <p>
+      The objective in Version 0.8 is to clean up a few loose ends
+      before I dig in to type classes.
+    </p>
+    <p>
+      One cleanup that did <em>not</em> make it into this document
+      was eliminating the references to "complete" and "incomplete"
+      types. These aren't really issues of type at all. There is no
+      problem from a typing perspective with a recursively defined
+      value type. The issue is really an issue of instantiability,
+      and if we treat it that way and discuss it separately from the
+      discussion of types, we can deal with some of the
+      complications that arise from mutable monomorphism in a more
+      sensible way as well.
+    </p>
+    <ul>
+      <li>
+        <p>
+          Corrected the ``literal type resolution'' rule in section
+          3.2 to apply only to literals, noted Mark Jones's
+          objection, and marked this as provisional.
+        </p>
+      </li>
+      <li>
+        <p>
+          Re-introduced named let under the keyword
+          <progident>loop</progident>. Corrected specification of
+          <progident>let</progident>, which is not a derived form.
+        </p>
+      </li>
+      <li>
+        <p>
+          Non-escaping types have been removed. This includes
+          <progident>restricted</progident> and
+          <progident>sequence</progident>. This required me to
+          expand <progident>sequence-ref</progident> and
+          <progident>sequence-length</progident> into
+          <progident>array-ref</progident>,
+          <progident>array-length</progident>,
+          <progident>vector-ref</progident>, and
+          <progident>vector-length</progident>.
+        </p>
+        <p>
+          This change introduces an open issue, which is whether the
+          array types should be redefined as
+          <progident>(array&nbsp;<em>T</em>&nbsp;<em>len</em>)</progident>,
+          where the type constructor is restricted to require a
+          literal at the argument
+          <progident><em>len</em></progident>. I am deferring the
+          resolution of this issue until type classes have been
+          added.
+        </p>
+      </li>
+      <li>
+        <p>
+          Revised the specification of the
+          <progident>mutable</progident> type constructor to
+          indicate that its use appearances are syntactically
+          restricted.
+        </p>
+      </li>
+      <li>
+        <p>
+          Introduced <progident>dup</progident>, removing the
+          <progident>ref</progident> value constructor.
+        </p>
+      </li>
+    </ul>
+  </sect1>
+  <sect1>
+    <title>Changes in version 0.7</title> 
+    <p>
+      Version 0.7 is primarily a pass to reconcile the provisional
+      compiler with the specification, and perform some
+      cleanups. The primary substantive change in this pass is to
+      replace modules with interfaces.
+    </p>
+    <p>
+      Need to dig into the library some more and define equality
+      types.
+    </p>
+    <ul>
+      <li>
+        <p>
+          Migrated <progident>typecase</progident> into the
+          experimental section. Added a discussion of inference
+          resolution in the primary types section and a set of type
+          coercion operators in the expression section.
+        </p>
+      </li>
+      <li>
+        <p>
+          Removed the Swaroop restrictions, since the implementor is
+          no longer confused.
+        </p>
+      </li>
+      <li>
+        <p>
+          Added <progident>case!</progident> to the specification.
+        </p>
+      </li>
+      <li>
+        <p>
+          As a consequence of the change to interfaces and the
+          deferral of typecase, clarified that
+          <progident>int32</progident> and friends are proper
+          keywords.
+        </p>
+      </li>
+      <li>
+        <p>
+          Added new keywords <progident>alias</progident>,
+          <progident>import!</progident> (was:
+          <progident>stateful-import</progident>),
+          <progident>provide</progident>,
+          <progident>provide!</progident>, and
+          <progident>interface</progident> to provide means for
+          interface specification and name aliasing. Updated the
+          description of compilation units to reflect this
+          addition. Dropped the <progident>module</progident> and
+          <progident>export</progident> keywords in favor of
+          interfaces.
+        </p>
+      </li>
+      <li>
+        <p>
+          Added new keyword <progident>proclaim</progident> for
+          forward and external declarations. This obviated the need
+          for <progident>rectypes</progident>, which is now removed.
+        </p>
+      </li>
+      <li>
+        <p>
+          Added new keyword <progident>immutable</progident>, with
+          the effect that it returns its argument, stripped of
+          mutability. <progident>immutable</progident> is syntax,
+          because it does not copy its argument.
+        </p>
+        <p>
+          Clarified definition of <progident>mutable</progident>
+          value constructor to indicate that it is a non-copying
+          syntactic form.
+        </p>
+        <p>
+          Relocated the Pragmatics section, which should have been
+          part of the language specification rather than the library
+          specification.
+        </p>
+      </li>
+      <li>
+        <p>
+          Removed <progident>defmacro</progident>, which was a
+          really bad idea.
+        </p>
+      </li>
+      <li>
+        <p>
+          Re-merged the core and convenience forms into a single
+          section, but annotate which is which. Having two sections
+          to describe expressions made things unreasonably
+          obfuscated.
+        </p>
+      </li>
+      <!--         <li> -->
+      <!--           <p> -->
+      <!--             Moved the definitions of <progident>ref</progident> and -->
+      <!--             <progident>restricted-ref</progident> from the type -->
+      <!--             section to the expression section. -->
+      <!--           </p> -->
+      <!--         </li> -->
+    </ul>
+  </sect1>
+  <sect1>
+    <title>Changes in version 0.6</title> 
+    <p>
+      Version 0.6 introduce interfaces, modules, and support for
+      capability-safe programming. We are vaguely hopeful that the
+      only major changes after this point will be fleshing out the
+      standard library.
+    </p>
+    <ul>
+      <li>
+        <p>Added a definition of the module system. Changed the
+          definition of compilation units to reflect it.
+        </p>
+      </li>
+      <li>
+        <p>Removed discussion of storage model, layout, and
+          alignment in the types section. Temporarily removed the
+          major section on storage model, which needs serious rework.
+        </p>
+      </li>
+      <li>
+        <p>Moved <progident>letrec</progident> back into the core,
+          since it cannot be lambda-expanded without the Y combinator,
+          which does not type check in a statically typed lambda calculus.
+        </p>
+      </li>
+      <li>
+        <p>Added mention of the value restriction rule.
+        </p>
+      </li>
+      <li>
+        <p>Repaired the erroneous parenthesization of
+          <progident>cond</progident>, <progident>case</progident>,
+          and <progident>typecase</progident>. Changed definition of
+          <progident>cond</progident> and <progident>case</progident>
+          to have an explicit otherwise case.
+        </p>
+      </li>
+      <li>
+        <p>Clarified that the type inference engine must handle
+          <progident>typecase</progident> with care to avoid type
+          unification.
+        </p>
+      </li>
+      <li>
+        <p>Revised <progident>typecase</progident> to note that its
+          result expressions need not have the same type. Also noted
+          that failure to match is a static type error.
+        </p>
+      </li>
+      <li>
+        <p>Removed <progident>int</progident> and
+          <progident>nat</progident>. Specified default types of
+          unqualified integer literals. Added new type
+          <progident>word</progident> which is the least unsigned
+          integer type sufficient to hold a pointer representation.
+        </p>
+      </li>
+      <li>
+        <p>Split existing <progident>vector</progident> type into
+          <progident>array</progident> and
+          <progident>vector</progident>. Array is fixed length, vector
+          is dynamic length. Vectors are unboxable, but internally
+          reference heap-allocated storage. Both are served by the
+          primitive accessor <progident>sequence-ref</progident> in
+          order to continue to support the convenience syntax for
+          array element reference. Added new core form
+          <progident>sequence-length</progident> that returns the
+          length of its argument value of sequence type.
+        </p>
+      </li>
+      <li>
+        <p>Replaced <progident>box</progident>,
+          <progident>unbox</progident> with
+          <progident>ref</progident>,
+          <progident>restricted-ref</progident>. Changed
+          <progident>struct-ref</progident>,
+          <progident>sequence-ref</progident> to implicitly dereference
+          their left hand argument as needed. In consequence it became
+          possible to eliminate the convenience syntax for
+          <progident>deref</progident>, which is now rare.
+        </p>
+      </li>
+      <li>
+        <p>Introduced <progident>defmacro</progident> and specified
+          the expansion of convenience syntax into core language forms.
+        </p>
+      </li>
+      <li>
+        <p>Split the specification into core expression forms and
+          convenience expressions.
+        </p>
+      </li>
+    </ul>
+  </sect1>
+  <sect1>
+    <title>Changes in version 0.5</title>
+    <p>
+      Version 0.5 is a major rework of the language. The reader is
+      advised to reread the entire specification, as there have been
+      many changes with potentially subtle interactions.
+    </p>
+    <ul>
+      <li>
+        <p>Added a ``reserved words'' section, including some
+	  reserved words set aside for use in future module and object
+	  systems.</p>
+      </li>
+      <li>
+        Noted that BitC is polymorphic, and that it imposes the
+        Value restriction similar to ML.
+      </li>
+      <li>
+        <p>Added a syntax for describing procedure types.</p>
+      </li>
+      <li>
+        <p>Removed field names from unions</p>
+      </li>
+      <li>
+        <p>Replaced <progident>typealias</progident> with
+	  <progident>deftype</progident></p>
+      </li>
+      <li>
+        <p>Noticed that binding patterns in
+          <progident>define</progident> already handled mutual
+          recursion and consequently removed
+          <progident>mutual-recursion</progident>. Introduced
+          <progident>rectypes</progident> for recursive type
+          declarations.
+        </p>
+      </li>
+      <li>
+        <p>Removed the <progident>ref</progident>
+	  keyword, replacing it with <progident>mutable</progident>,
+	  with the intended meaning that what we used to write as
+	  <progident>(unbox ref&nbsp;x)</progident> is now
+	  <progident>(mutable&nbsp;x)</progident>.</p>
+      </li>
+      <li>
+        <p>Added an explicit type modifier keyword
+	  <progident>box</progident> to the language (the dual of
+	  <progident>unbox</progident>).</p>
+      </li>
+      <li>
+        <p>State that primitive fixed-size types are unboxed by
+	  default, and the constructed types are boxed by default
+	  (compare Java).</p>
+      </li>
+      <li>
+        <p>
+          <b>Pending</b> Add explicit operators
+          <progident>box</progident> and
+          <progident>unbox</progident> to the language. Each creates
+          a copy of its argument. The compiler is free to optimize
+          out the copy when it can do so correctly.
+        </p>
+      </li>
+      <li>
+        <p>Removed the character <progident><b>^</b></progident>
+	  from the legal identifier
+	  characters. <progident><b>^</b></progident> is now a postfix
+	  operator indicating pointer dereference.</p>
+      </li>
+      <li>
+        <p>Added a new form
+	  <progident>(bitc-version&nbsp;"<em>version</em>")</progident>
+	  where <em>version</em> is a string identifying the BitC
+	  language version in which the program was implemented. This
+	  form is syntax, and is permitted only at top-level. It
+	  <em>must</em> appear exactly once as the first form in every
+	  unit of compilation.  It is a compile-time error if the
+	  compiler implementation does not implement the
+	  language-version specified in the input compilation
+	  unit.</p>
+      </li>
+      <li>
+        <p>Resolved to specify the layout of data
+	  structure created using the <progident>defunion</progident>
+	  declaration, and to provide a means using for specifying the
+	  representation size of the ``hidden'' union tag:</p>
+        <literallayout>
+(defunion u
+  (cons1 arg1)
+  (cons2 args)
+  (declare (tag-type <em>T</em>)))</literallayout>
+        <p indent="no">
+          where <progident><em>T</em></progident> must be compatible
+          with some <progident>fixint</progident> of unsigned type.
+        </p>
+      </li>
+      <li>
+        <p>
+          <b>pending</b> Need to specify assignment and binding
+          compatibility of boxed and unboxed types. Resolution is
+          that the language does <em>not</em> provide implicit
+          boxing or unboxing.
+        </p>
+      </li>
+      <li>
+        <p>
+          <b>pending</b> Need to specify assignment and binding
+          compatibility of mutable vs non-mutable things. Resolution
+          is that assignment has copy semantics, and so both
+          assignments are legal. Further, consider the procedures:
+        </p>
+        <literallayout>
+(define (f x : (mutable <em>T</em>))
+  <em>body</em>)
+(define (g x : <em>T</em>)
+  <em>body</em>)</literallayout>
+        <p indent="no">the mutability of
+	  <progident><em>T</em></progident> in
+	  <progident><em>f</em></progident> is strictly
+	  <em>internal</em> to the procedure. Because BitC has
+	  by-value semantics of procedure arguments the signature of
+	  <progident><em>f</em></progident> for purposes of external
+	  type checking and pattern matching is the same as the
+	  signature of <progident><em>g</em></progident>.</p>
+      </li>
+      <li>
+        <p>Added radix prefixes and negation for integer
+	  literals. Introduced string literal syntax and specified
+	  full syntax for floating point literals. Revised character
+	  literal syntax for code points to be lexically similar. This
+	  may still need further revision, as the current syntax is
+	  exceptionally awkward. I am considering using HTML-style
+	  character entity syntax in place of the current one. Note
+	  that left and right curly brace are no longer supported
+	  using the simple character syntax.</p>
+      </li>
+      <li>
+        <p>Added means to describe bitfields via
+	  <progident>fixint</progident>.</p>
+      </li>
+      <li>
+        <p>Specified string literal syntax.  Type of such literals
+          is <progident>(vector&nbsp;char)</progident>. String type
+          is needed in the primitive language in order to support
+          diagnostic output. More precisely, it is needed in order
+          to provide for string literals.
+        </p>
+      </li>
+      <li>
+        <p>Revised the definition of <progident>tuple</progident> to
+          remove the requirement that
+          <progident>(tuple&nbsp;x)</progident> is treated like
+          <progident>x</progident>. This should never have been true
+          in SML either.</p>
+      </li>
+      <li>
+        <p>Removed the comma-style tuple construction syntax in the
+          expression language, eliminating the syntactic ambiguity
+          of how to interpret <progident>(a)</progident>
+          (application or tuplization?).</p>
+      </li>
+      <li>
+        <p>Swaroop and Jonathan initially had a difference of
+          opinion concerning whether deftype should be resolved by
+          textual substitution. The problem is that most of our
+          types are resolved by name equivalence, so this appears to
+          have rather limited utility in reducing verbiage.
+        </p>
+        <p>
+          Actually, this is rather a big mess, as is illustrated by
+          the definition of <progident>tree-of</progident> in the
+          discussion of structures. There appears to be no
+          <em>correct</em> definition of
+          <progident>tree-of</progident> under our present rules.
+        </p>
+      </li>
+    </ul>
+  </sect1>
+  <sect1>
+    <title>Changes in version 0.4</title>
+    <ul>
+      <li>
+        <p>
+          Description of tuples was augmented to describe syntax of
+          tuple patterns and allow field names in tuple patterns.
+        </p>
+      </li>
+      <li>
+        <p>
+          Added <progident>typealias</progident> declaration.
+        </p>
+      </li>
+      <li>
+        <p>
+          Added pragmatics section requiring limited tail recursion.
+        </p>
+      </li>
+    </ul>
+  </sect1>
+    </article>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->

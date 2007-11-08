@@ -1,0 +1,313 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Copyright (C) 2006, Johns Hopkins University.
+;; All rights reserved.
+;;
+;; Redistribution and use in source and binary forms, with or
+;; without modification, are permitted provided that the following
+;; conditions are met:
+;;
+;;   - Redistributions of source code must contain the above 
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer. 
+;;
+;;   - Redistributions in binary form must reproduce the above
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer in the documentation and/or other materials 
+;;     provided with the distribution.
+;;
+;;   - Neither the names of the copyright holders nor the names of any
+;;     of any contributors may be used to endorse or promote products
+;;     derived from this software without specific prior written
+;;     permission. 
+;;
+;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(bitc-version "0.10")
+
+;; ``Hello World'' in BitC:
+;; This example also shows:
+;;    -  how interfaces are imported/provided in BitC.
+;;    -  how use definitions can be used to avoid writing
+;;                        fully qualified names
+;;    -  how `main' routine is written in BitC.
+  
+(import stdio bitc.stdio)
+(use stdio.stdout)
+
+(provide main bitc.main)
+(define (main.main argVec:(vector string))
+  (stdio.write-string stdout "Hello, world!\n") 0:int32)
+;*** val main.main: (fn ((vector string)) int32)
+
+
+;; Rich set of scalar types:
+;; int8, int32, uint64, bitfields, 
+
+(define XYZ
+   (let ((i:int32 10)
+	 (j:uint64 20)
+	 (f:float 35.5)
+	 (d:double 123.45)) (i, j, f, d)))
+;*** val XYZ: (pair int32 (pair uint64 (pair float double)))
+
+
+;; Type classes to achieve overloading and 
+;; to write generic accessors and mutators.
+
+;; Simple example: Factorial (recursive way)
+(define (fact-rec x) (if (== x 0) 1 (* x (fact-rec (- x 1)))))
+;*** val fact-rec: (forall ((IntLit 'a) (Arith 'a)) (fn ('a) 'a)
+
+;; Simplified Tail-recursion requirement (Section 11.1)
+;; Do loops -- convenience shorthand for tail-recursion.
+;; Factorial using loops
+(define (fact-loop x) (do ((ans 1 (* ans i)) 
+		      (i x (- i 1)))
+		     ((== i 0) ans) ()))
+;*** val fact-loop: (forall ((IntLit 'a) (Arith 'a)) (fn ('a) 'a))
+
+;; Aggregate Types:
+;; Structure and union definitions can specify either a
+;; reference or value type.
+;; That is, values of such a composite type are created 
+;; boxed (pointer to a heap allocated cell) or 
+;; unboxed (composite value on the stack or other containing
+;; structure)  
+
+
+(defunion (List 'a):ref
+  Nil (Cons car:'a cdr:(List 'a)))
+;*** union List: (List 'a)
+
+(defstruct s:val
+  a:(bitfield uint32 2) b:(bitfield uint32 30))
+;*** struct s: s
+
+
+;; Type declarations and opaque types:
+;; BitC provides type-declarations to write abstract type definitions,
+;; and to write mutually recursive types:
+;; Mutual recursion is possible only on reference-types.
+
+(defstruct Odd:ref)
+(defunion  Even:ref)
+(defstruct Odd even:Even)
+(defunion  Even (odd odd:Odd))
+;***  struct Odd: Odd
+;***  union Even: Even
+
+;; Proclaimations:
+;; Similarly Proclaimations are possible to create ``headers'' for
+;; interfaces and for defining top-level mutually recursive
+;; definitions (functions)
+
+(proclaim oddFn: (fn ('a) 'b))
+(proclaim evenFn: (fn ('a) 'b))
+(define (oddFn x) (evenFn x))
+(define (evenFn x) (oddFn x))
+;***  val oddFn: (fn ('b) 'a)
+;***  val evenFn: (fn ('b) 'a)
+
+;; Opaque types can be used to declare unboxed types abstractly across
+;; interfaces -- the definition will only be used to compute the size
+;; of values of this type.
+(defstruct OSt:opaque a:int32 b:bool)
+;*** struct OSt: OSt
+
+;; Arrays and Vectors:
+;; Arrays: Fixed length, unboxed.
+;; Vectors: Variable length, boxed.
+
+(define arr (array 10 20 30))
+(define vec (vector 10 20 30))
+;*** val arr: (forall ((IntLit 'a)) (array 'a 3))
+;*** val vec: (forall ((IntLit 'a)) (vector 'a))
+
+;; Full polymorphism even over unboxed types:
+
+(define (id x) x)
+;*** val id: (fn ('a) 'a)
+(define valPolyTest 
+  (begin 
+    (id #t) (id (pair #t #f)) (id id) (id 0:int32)))
+;*** val valPolyTest: int32
+
+;; PROPOSED: 
+;; An internal typeclass called ``refType'' should be defined, which
+;; contins all reference types by default, so that polymorphism can be
+;; constrained to ref-types only, when the user desires so.
+;; This may be done to ensure that the definition is not
+;; polyinstantiated, or does not incur other overheads (like
+;; dictionaries)  due to support for polymorphism.
+;;
+;; For example:
+
+(deftypeclass (refType 'a)) ;; Compiler Internal. Instances to be
+                            ;; filled in automatically.  
+;*** type-class refType: (refType 'a)
+
+(define ptrId:(forall ((refType 'a)) (fn ('a) 'a))
+  (lambda (x) x))
+;*** val ptrId: (forall ((refType 'a) ) (fn ('a) 'a))
+
+;; Mutability:
+;; Support for mutability is first class. Mutability need not always
+;; be wrapped inside a reference type constructor. Stack values may be
+;; mutated in place. Aggregate value types may be set!ed too.
+
+;; Location Semantics:
+;; The compiler enforces ``lvalue'' like restrictions on things that
+;; can be set!ed, so that the programmers intuision of what is being
+;; set!ed is not violated.
+(define locSem
+  (let ((p 25:int32)
+	(vec:(mutable (vector (mutable bool))) (vector #t #f #t))
+	(third (lambda (x) (vector-nth x 3))))
+     
+    ;; OK, all identifiers are locations
+    (set! p 30)  ;; set! a local    
+    (set! vec (vector #f #f #t))
+    
+    ;; OK array-nth returns a location        
+    (set! (vector-nth vec 0) #t)
+
+    ;ERR; (set! (third vec) #t)
+    ;; ERROR: Non-location in set! context (will set! the copy)
+    ))
+;*** val locSem: ()
+
+;; Type Inference with Mutability
+;; Copy semantics apply as described in 
+;; http://www.coyotos.org/docs/bitc/mutinfer.html
+;;
+;; Many examples along with explaination can be found in the above
+;; document. Here we give only a few cases.
+
+;; Important point to notice is that we do not require any annotations
+;; by default. For example, we don not reqire all polymorphic
+;; definitions to be explicitely annotated (Cyclone), or all mutable
+;; fields annotated (dual of C's const). The compiler tries to guess
+;; the types based on the flow of types, but can always be overridden
+;; by user annotation.
+
+;; Illustration of copy-compatibility at argument passing position.
+(define (plus1 x:(mutable int32)) 
+  (set! x (+ x 1)) x)
+
+(define v1 (plus1 10:int32))
+;; The literal 10, that has type int32 will satisfy the (formal)
+;; argument that expects the type (mutable int32) 
+
+;; Copy-compatibility at binding: (User annotation overrides 
+;; inferred type) 
+(define xyz:(mutable int32) 10)
+;*** val xyz: (mutable int32)
+
+;; Compiler's choice based on flow of types:
+(define p1 (pair xyz #t))
+;*** val p1: (pair (mutable int32) bool)
+
+;; But user can always oiverride it.
+(define p2:(pair int32 (mutable bool)) (pair xyz #t))
+;*** val p2: (pair int32 (mutable bool))
+
+;; Compiler preserves polymorphism by default:
+(define p3 (pair #t (lambda (x) x)))
+;*** val p3: (pair bool (fn ('a) 'a))
+
+;; Unless flow of types (inferred type) suggests mutable components:
+(define p5 (pair xyz (lambda (x) x)))
+;*** val p5: (pair (mutable int32) (fn (#DUMMY#) #DUMMY#))
+
+;; Copy-compatibility must not extend beyond references 
+;; For example, in C, it is legal to write:
+;;  int *x = dup_int(10); // malloc + assign
+;;  const int* y = x;
+;;  *x = 25;
+;; 
+;; However, in BitC (as in ML), types of a location is invariant
+;; across all aliases.
+;;
+;ERR;(define PQR
+;ERR;  (let ((x:(ref (mutable int32)) (dup 10)))
+;ERR;    (let ((y:(ref int32) x)) 
+;ERR;     (set! x^ 25))))
+
+;; PROPOSED:
+;; `defrepr' and  Explicit Representation Control:
+;; Bit-level layout control, Nested union discriminators within one
+;; type. Tag-type, value, placement within the composite structure can
+;; be specified using defrepr.
+;; (defrepr is proposed, not fully supported)
+
+;; Example: IA-32 hardware GDT entry strucutre:
+(defrepr GDT
+  ((case 
+     (segment
+      (loLimit:(bitfield uint32 16)
+       loBase:(bitfield uint32 16)
+       midBase:(bitfield uint32 8)))
+   (system
+    (loOffset:(bitfield uint32 16)
+     selector:(bitfield uint32 16))))
+  type:(bitfield uint32 4) ; segment type
+  (the (bitfield uint32 1) (tag system segment))
+  dpl:(bitfield uint32 2)
+  p:(bitfield uint32 2)  ;present
+  (case 
+    (segment
+     (hiLimit:(bitfield uint32 4)
+      avl:(bitfield uint32 1) ;available
+      l:(bitfield uint32 1)   ;64 bit segment
+      sz:(bitfield uint32 1)  ;16 or 32 bit
+      granularity:(bitfield uint32 1) ;page/byte
+      hiBase:(bitfield uint32 8)))
+    (system 
+     (hiOffset:(bitfield uint32 8)))))
+  )
+
+;; C-structure (for reference):
+;; union {
+;;   // SEGMENT descriptor
+;;   struct ia32_SegDescriptor {
+;;     uint32_t loLimit     : 16;
+;;     uint32_t loBase      : 16;
+;;     uint32_t midBase     : 8;
+;;     uint32_t type        : 4;
+;;     uint32_t system      : 1;
+;;     uint32_t dpl         : 2;
+;;     uint32_t present     : 1;
+;;     uint32_t hiLimit     : 4;
+;;     uint32_t avl         : 1;
+;;     uint32_t zero        : 1;
+;;     uint32_t sz          : 1;
+;;     uint32_t granularity : 1;
+;;     uint32_t hiBase      : 8;
+;;   };
+;;
+;;   // GATE (system) Descriptor
+;;   struct ia32_GateDescriptor {
+;;     uint32_t loOffset : 16;
+;;     uint32_t selector : 16;
+;;     uint32_t zero : 8;
+;;     uint32_t type : 4;
+;;     uint32_t system : 1;
+;;     uint32_t dpl : 2;
+;;     uint32_t present : 1;
+;;     uint32_t hiOffset : 16;
+;;   };
+;; };
+

@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <floatingtable id="decl_all_rules" fullwidth='yes' 
+    latex.placement="htb">
+  <font size="small">
+    <btypes:TYPE
+      xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+      <Hrules>
+	<tyRule name="TS-MUT1">
+	  <tyPre/>
+	  <tyConc>
+	    <Tsub>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <type/>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="TS-MUT2">
+	  <tyPre>
+	    <Tsub>
+	      <type/>
+	      <type dash="'"/>
+	    </Tsub>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <mutable>
+		<type dash="'"/>
+	      </mutable>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="TS-REF">
+	  <tyPre>
+	    <eq>
+	      <type/>
+	      <type dash="'"/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <ref>
+		<type/>
+	      </ref>
+	      <ref>
+		<type dash="'"/>
+	      </ref>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="TS-FN">
+	  <tyPre>
+	    <eq>
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </eq>
+	    <eq>
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	      <fn>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </fn>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="TS-REFL">
+	  <tyPre/>
+	  <tyConc>
+	    <Tsub>
+	      <type/>
+	      <type/>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="TS-TRANS">
+	  <tyPre>
+	    <Tsub>
+	      <type num="2"/>
+	      <type num="1"/>
+	    </Tsub>
+	    <Tsub>
+	      <type num="1"/>
+	      <type/>
+	    </Tsub>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <type num="2"/>
+	      <type/>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>          
+      </Hrules>   
+      <Hrules>
+	<tyRule name=" T-UNIT">
+	  <tyPre/>
+	  <tyConc>
+	    <TDjudge>
+	      <Unit/>
+	      <unit/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="
+	  T-TRUE">
+	  <tyPre/>
+	  <tyConc>
+	    <TDjudge>
+	      <true/>
+	      <bool/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="T-FALSE">
+	  <tyPre/>
+	  <tyConc>
+	    <TDjudge>
+	      <false/>
+	      <bool/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="T-ID">
+	  <tyPre>
+	    <mapsto>
+	      <gamma/>
+	      <id/>
+	      <TS>
+		<tvars name="alpha"/>
+		<type/>
+	      </TS>
+	    </mapsto>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <id/>
+	      <subst>
+		<type/>
+		<tvars
+		  name="alpha"/>
+		<types dash="'"/>
+	      </subst>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="T-HLOC">
+	  <tyPre>
+	    <mapsto>
+	      <store/>
+	      <hLoc/>
+	      <type/>
+	    </mapsto>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <hLoc/>
+	      <ref>
+		<type/>
+	      </ref>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="T-SLOC">
+	  <tyPre>
+	    <mapsto>
+	      <store/>
+	      <sLoc/>
+	      <type/>
+	    </mapsto>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <sLoc/>
+	      <type/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule name="T-LAMBDA">
+	  <tyPre>
+	    <Sjudge>
+	      <assume>
+		<extend>
+		  <gamma/>
+		  <mapping>
+		    <id/>
+		    <type num="1"/>
+		  </mapping>
+		</extend>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aExpr/>
+		<type num="2"/>
+	      </tqExpr>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <lambda>
+		<id/>
+		<aExpr/>
+	      </lambda>
+	      <fn>
+		<minz>
+		  <type num="1"/>
+		</minz>
+		<maxz>
+		  <type num="2"/>
+		</maxz>
+	      </fn>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="T-APP">
+	  <tyPre>
+	    <TDjudge sub="yes">
+	      <aExpr num="1"/>
+	      <fn>
+		<type num="2"/>
+		<type num="0"/>
+	      </fn>
+	    </TDjudge>
+	    <TDjudge sub="yes">
+	      <aExpr num="2"/>
+	      <type num="2"/>
+	    </TDjudge>
+	    <Tsub>
+	      <type
+		num="0"/>
+	      <type num="0" dash="'"/>
+	    </Tsub>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <apply>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+	      </apply>
+	      <type num="0" dash="'"/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="T-SET">
+	  <tyPre>
+	    <TDjudge sub="yes">
+	      <aExpr num="1"/>
+	      <mutable>
+		<type/>
+	      </mutable>
+	    </TDjudge>
+	    <TDjudge sub="yes">
+	      <aExpr num="2"/>
+	      <type/>
+	    </TDjudge>
+	    <Sjudge name="lval">
+	      <assume/>
+	      <aExpr
+		num="1"/>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <assign>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+	      </assign>
+	      <unit/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule name="T-IF">
+	  <tyPre>
+	    <TDjudge
+	      sub="yes">
+	      <aExpr num="1"/>
+	      <bool/>
+	    </TDjudge>
+	    <TDjudge
+	      sub="yes">
+	      <aExpr num="2"/>
+	      <type/>
+	    </TDjudge>
+	    <TDjudge
+	      sub="yes">
+	      <aExpr num="3"/>
+	      <type/>
+	    </TDjudge>
+	    <Tsub>
+	      <type
+		dash="'"/>
+	      <type/>
+	    </Tsub>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <if>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+		<aExpr num="3"/>
+	      </if>
+	      <type dash="'"/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="T-TQEXPR">
+	  <tyPre>
+	    <TDjudge>
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <paren>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </paren>
+	      <type/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="T-DUP">
+	  <tyPre>
+	    <TDjudge sub="yes">
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	    <Tsub>
+	      <type
+		dash="'"/>
+	      <type/>
+	    </Tsub>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <dup>
+		<aExpr/>
+	      </dup>
+	      <ref>
+		<type dash="'"/>
+	      </ref>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="T-DEREF">
+	  <tyPre>
+	    <TDjudge sub="yes">
+	      <aExpr/>
+	      <ref>
+		<type/>
+	      </ref>
+	    </TDjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <deref>
+		<aExpr/>
+	      </deref>
+	      <type/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule name="T-LET / T-LET-TQ">
+	  <tyPre>
+	    <TDjudge sub="yes">
+	      <aExpr
+		num="1"/>
+	      <type num="1"/>
+	    </TDjudge>
+	    <Tsub>
+	      <type/>
+	      <type
+		num="1"/>
+	    </Tsub>
+	    <Sjudge name="gen">
+	      <assume>
+		<gamma/>
+		<store/>
+		<aExpr num="1"/>
+	      </assume>
+	      <GEN>
+		<type/>
+		<aTS/>
+	      </GEN>
+	    </Sjudge>
+	    <Sjudge>
+	      <assume>
+		<extend>
+		  <gamma/>
+		  <mapping>
+		    <id/>
+		    <aTS/>
+		  </mapping>
+		</extend>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aExpr num="2"/>
+		<type num="2"/>
+	      </tqExpr>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <paren>
+		<let>
+		  <tqExpr optional="yes">
+		    <id/>
+		    <type/>
+		  </tqExpr>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</let>
+	      </paren>
+	      <type num="2"/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="G-VALUE">
+	  <tyPre>
+	    <pred name="Value">
+	      <aExpr/>
+	    </pred>
+	    <pred name="Immut">
+	      <type/>
+	    </pred>
+	    <eq>
+	      <tvars name="alpha"/>
+	      <diff>
+		<ftvs><type/></ftvs>
+		<ftvs><gamma/></ftvs>
+		<ftvs><store/></ftvs>
+	      </diff>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="gen">
+	      <assume>
+		<gamma/>
+		<store/>
+		<aExpr/>
+	      </assume>                
+	      <GEN>
+		<type/>
+		<TS>
+		  <tvars name="alpha"/>
+		  <type/>
+		</TS>
+	      </GEN>                                
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules> 
+      <Hrules>
+	<tyRule name="L-ID">
+	  <tyPre/>
+	  <tyConc>
+	    <Sjudge name="lval">
+	      <assume/>                  
+	      <id/>                  
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="L-HLOC">
+	  <tyPre/>
+	  <tyConc>
+	    <Sjudge name="lval">
+	      <assume/>                  
+	      <hLoc/>                  
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="L-SLOC">
+	  <tyPre/>
+	  <tyConc>
+	    <Sjudge name="lval">
+	      <assume/>                  
+	      <sLoc/>                  
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="L-DEREF">
+	  <tyPre/>
+	  <tyConc>
+	    <Sjudge name="lval">
+	      <assume/>                  
+	      <deref>
+		<aExpr/>
+	      </deref>                  
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="L-TQ">
+	  <tyPre>
+	    <Sjudge name="lval">
+	      <assume/>                  
+	      <aExpr/>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="lval">
+	      <assume/>                  
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>                  
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="G-EXPANSIVE">
+	  <tyPre/>
+	  <tyConc>
+	    <Sjudge name="gen">
+	      <assume>
+		<gamma/>
+		<store/>
+		<aExpr/>
+	      </assume>                
+	      <GEN>
+		<type/>
+		<type/>
+	      </GEN>                                
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>     
+    </btypes:TYPE>
+  </font>
+  <caption>Declarative Type Rules and Copy Coercion Rules</caption>
+</floatingtable>

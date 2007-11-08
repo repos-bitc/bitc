@@ -1,0 +1,57 @@
+syntax: regexp
+
+^host/
+
+syntax: glob
+
+# Emacs turds:
+*~
+\#*
+
+# vi[m] turds:
+*.swp
+
+*.aux
+*.bak
+*.idlxml
+*.img
+*.log
+*.ltx
+
+*.dvi
+*.eps
+*.exe
+*.gif
+*.pdf
+*.png
+*.ppm
+*.ps
+*.rpm
+*.spec
+*.toc
+*.xmli
+*.xml.normalized
+*.svg
+
+# All output (in theory) goes into BUILD subdirectories.
+BUILD
+
+# In the BitC tree the majority of HTML files are generated. There
+# are a very few exceptions at the "top" of the doc tree. Those are
+# handled with explicit hg add.
+*.html
+
+# Doxygen output directories:
+doxygen
+
+# OSDoc chunked output directories:
+html-chunk
+
+src/doc/docs/dir.dev.gxml
+#dir.dev.xml
+
+# Some hand-built documents:
+src/doc/docs/bitc/formal.xml
+src/doc/docs/bitc/mut-formal.xml
+src/doc/docs/bitc/mutinfer.xml
+src/doc/docs/bitc/sys-infer.xml

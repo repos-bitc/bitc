@@ -1,0 +1,221 @@
+Here are the items I know about that should be dealt with before we
+can declare that the compiler is "done".
+
+===== SOON ======
+
+1.  Go through all of the FIX comments and either correct them or remove
+    them.
+
+2.  (shap) add support for source file archives into the front end.
+
+3.  Implement (swaroop) initialization restriction.
+
+    Should this defer?
+
+4.  When initializer restrictions are implemented, removed hack that
+    everything at top level with concrete type is considered a root.
+
+5.  (shap) Rearrange the tree for build using autoconf.
+
+6.  (shap) Remove qual_type and friends now that we can do outer
+    forall, but check the impact on the document first.
+
+DEFER UNTIL AFTER RELEASE
+
+1.  [DEFER] (shap) Augment testit infrastructure to support command
+    line args so that we can do things like testing showtypes.
+
+2.  (jointly) Go through and comment everything so that it is all
+    comprehensible. Fix anything that we find in the process.
+
+3.  write it all up.
+
+4.  For those ASTs that are carrying things in weird positions, clean
+    them up.
+
+5.  Typeclasses with overlapping instances.
+
+6.  [DONE, not specified] Figure out how to handle proclaim/define
+    unification and specify it.
+
+    Decided on exact match.
+
+7.  Change external name declaration method to use a DECLARE form.
+
+8.  [DROP] Fix Tail-call analyzer to allow running before hoisting.
+
+===== completed ======
+
+1.  [DONE] Fix mistyping of mutability (see listvec.bitc, use showtypes).
+
+2.  [DONE] Swaroop to send email about new polyinstantiation 
+    strategy for LET.
+
+3.  [DONE] Clean up the CLOSED/CAPTURED bits in flags!!
+          - nothing to do.
+
+4.  [DONE] Document make-vectorL.
+
+5.  [DONE] Fix the implementation of DO
+
+6.  [DONE] Fix type emission for function types
+
+7.  [DONE] Make current test cases work.
+
+8.  [DONE] Get closure conversion working fully (late variant)
+
+9.  [DONE] Infer type of expr in SWITCH correctly
+    
+10. [DONE] Provide alternate FORALL syntax to outermost form -- I
+    couldn't figure out how to get this right with defidents. If we
+    can do it, I would like to make this an optional alternative
+    syntax for now.
+
+11. [DONE] (shap) Remove the pattern checking pass (unless it is still
+    needed).
+
+12. [DONE] (shap) Add syntactic support for documentation strings if
+    that doesn't screw up the parser. Adjust all of the AST positions
+    accordingly.
+
+13. [DONE] Figure out why the types in adecl.bitc are getting fixed
+    when they should not be.
+
+14. [DROP] Get closure conversion working fully (early variant)
+
+    Resolution: closure conversion should run late.
+
+15. [DONE] Figure out why K_6string isn't getting emitted in all
+    cases.
+
+    This was the proclaim/define unification rule issue.
+
+16. [DONE] Figure out what to do about bitfield types. Current
+    *behavior* is okay, but I think that they want to be distinct
+    types so that later reasoning of the form "all int32's behave as
+    follows" will not be violated by truncation.
+
+    Resolution: they need to be their own types for proof reasons, but
+    the current behavior is correct. Internal type handling will
+    change in future when prover is added.
+
+17. [DONE] Fix the SWITCH (and if needed, CASE) ASTs so that they keep
+    a copy of the identifier child in the correct position. This can
+    be ignored by all subsequent passes, but it is needed in the
+    pretty printer. Without it, we cannot print:
+
+      (switch x e
+        (otherwise body))
+
+    because the otherwise leg doesn't have the identifier.
+
+18. [DONE] see if removing the leading quote from type variables
+    creates any issues
+
+    Ans: yes. When a user has identifier "a" and tvar "'a", they end
+    up getting bound in the same environment, so type vars need to be
+    lexically distinguished.
+
+19. [DONE] See if we can remove the parens around comma expressions
+    without making a parse conflict. This would allow (f a,b,c) in
+    place of (f (a,b,c)), and (let ((a,b e)) body).  more importantly
+    it would regularize the sexpr forms.
+
+    Resolution: completely buggers the parse.
+
+20. [DONE] (shap) Decide whether (or not) to drop pattern bindings
+    throughout.
+
+21. [DROP] DO pattern simplification. Need test case for DO with
+    non-trivial binding pattern.
+
+22. [DONE] GET RID OF CLBUILD.H
+
+23. [DONE] Remove the built-in type PAIR from doc and implementation. Rename
+    at_pair so that we can continue to use it in the Type checker for
+    internal convenience.
+
+24. [DONE] Fix polyinstantiator so that everything at top level with
+    concrete type is considered a root of instantiation.
+
+25. [DONE] Specify (shap) initialization restriction.
+
+26. [DONE] Add support to consider constraints attached at end of
+    at_define and at_proclaim ASTs. Need test case for LET.
+
+27. [DONE] Figure out what we are doing about mutability inference --
+    this looks like a train wreck, and we need to make a decision
+    here.
+
+    Shap has added ID_IS_MUTATED on the defining ID. Would be nice if
+    the lval stuff might consult it.
+
+    Resolution:
+
+       1. Remove literal non-valueness.
+       2. Add ID_IS_MUTATED check and mutability propagation.
+       3. Fix generalizer to deal with the fact that mutability of a
+          field causes contagious concreteness on containing data
+          structures out to a REF boundary.
+
+28. [DROP] Fix pair hoisting to hoist constraints correctly. Problem
+    is what to do about inner constraints.
+
+    ?Defer pending possible removal of pattern bindings.
+
+29. [DONE] Restructure compiler to have a mid-pass (gather+poly), so that
+    we can swap in the new polyinstantiator when ready.
+
+30. [DONE] Fix scope of alpha variables. Scope of an alpha variable is
+    the nearest enclosing binding form that contains all appearances of
+    the alpha variable.
+
+31. [DROP] Consider introducing an internal tvar-let form??
+
+32. [DONE] Document the principles of operation for the type inference
+    machine and specifically the handling of mutation.
+
+33.  Finish new, incremental-friendly (?) polyinstantiator.
+
+34.  Introduce ALLOC-REF, COPY-REF, similar to ALLOC-CLOSURE,
+    COPY-CLOSURE.
+
+35.  (shap) Kill comma syntax, re-instate TUPLE
+
+
+36.  Redo closure conversion for LETREC to remove function-only
+    restriction (using ALLOC-REF, COPY-REF).
+
+37.  Finish DEFREPR implementation
+
+38.  [DONE] Check all uses of CVector::remove() and correct them.
+
+===== deferred ======
+
+1.  [DEFER] Closure converter needs to properly capture/copy
+    appropriate FORALL constraints -- is current hoist okay [we can
+    defer this -- clconv runs late.]
+
+2.  [DEFER] Mark top-level constant values  as const.
+ 
+3.  [DEFER] Fix the code generator NOT to emit '*' for ref types. It
+    should be building the proper typedefs and using them.
+
+    Issue: need to define precisely what the external identifier names.
+
+4.  [DEFER] Mark top-level static closures as const. Done for prelude
+    special cases.
+
+    Cannot be done in general until we can distinguish procedures
+    vs. closures and deal with external declarations.
+
+5.  [DEFER] Add declaration for procedures that really are procedures
+    (e.g. C code). Build static const closures for these
+    internally. Issue: figure out the declare syntax.
+
+6.  [DEFER] Do a rewrite pass to expand closure application for static
+    const closures after generalized closure application has been run.
+
+    Deferred because it depends on knowing which closures are static
+    const.
+

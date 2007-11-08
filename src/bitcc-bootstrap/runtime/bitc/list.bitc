@@ -1,0 +1,91 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Copyright (C) 2006, Johns Hopkins University.
+;; All rights reserved.
+;;
+;; Redistribution and use in source and binary forms, with or
+;; without modification, are permitted provided that the following
+;; conditions are met:
+;;
+;;   - Redistributions of source code must contain the above 
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer. 
+;;
+;;   - Redistributions in binary form must reproduce the above
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer in the documentation and/or other materials 
+;;     provided with the distribution.
+;;
+;;   - Neither the names of the copyright holders nor the names of any
+;;     of any contributors may be used to endorse or promote products
+;;     derived from this software without specific prior written
+;;     permission. 
+;;
+;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(interface bitc.list
+  (define (null? l:(list 'a))
+    "Return #t (#f) if list is empty (non-empty)."
+    (if l.nil #t #f))
+
+  (define (map f lst:(list 'a))
+    "Apply procedure f to each element of list."
+    (switch x lst
+      (nil #t)
+      (cons (begin (f x.car) (map f x.cdr)))))
+  
+  ;; These are included for convenience, but it is probably not
+  ;; advisable to use them, because it is difficult to show that no
+  ;; exceptions are thrown.
+  (define (car lst)
+    "Return first element of list (if non-empty)."
+    (switch x lst
+      (nil (throw IndexBoundsError))
+      (cons x.car)))
+
+  (define (cdr lst)
+    "Return rest of list (if non-empty)."
+    (switch x lst
+      (nil (throw IndexBoundsError))
+      (cons x.cdr)))
+
+  (define (list-nth lst n:word)
+    "Return nth element of list."
+    (if (== n 0)
+	(car lst)
+	(list-nth (cdr lst) (- n 1))))
+
+  (define (list-length lst)
+    "Return length of list."
+    (define (length-helper lst count)
+      (if (null? lst)
+	  count
+	  (length-helper (cdr lst) (+ 1 count))))
+    (length-helper lst 0:word))
+
+  (definstance (Length (list 'a)) list-length)
+
+  (define (append l1 l2)
+    "Append two lists."
+    (if (null? l1) l2
+	(cons (car l1) (append (cdr l1) l2))))
+
+  (define (reverse lst)
+    "Reverse the argument list."
+    (define (do-reverse l1 l2)
+      (if (null? l1) l2
+	  (do-reverse (cdr l1) (cons (car l1) l2))))
+    (do-reverse lst nil))
+  )

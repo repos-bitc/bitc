@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+<floatingtable id="sub_rules" fullwidth='yes' latex.placement="tb">
+  <font size="small">
+    <btypes:TYPE
+      xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+      <Hrules vspace="yes">
+	<tyRule name="TS-MUT1">
+	  <tyPre/>
+	  <tyConc>
+	    <Tsub>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <type/>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="TS-MUT2">
+	  <tyPre>
+	    <Tsub>
+	      <type/>
+	      <type dash="'"/>
+	    </Tsub>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <mutable>
+		<type dash="'"/>
+	      </mutable>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="TS-REF">
+	  <tyPre>
+	    <eq>
+	      <type/>
+	      <type dash="'"/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <ref>
+		<type/>
+	      </ref>
+	      <ref>
+		<type dash="'"/>
+	      </ref>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="TS-FN">
+	  <tyPre>
+	    <eq>
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </eq>
+	    <eq>
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	      <fn>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </fn>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="TS-CEIL">
+	  <tyPre/>
+	  <tyConc>
+	    <Tsub>
+	      <ceil>
+		<type/>
+	      </ceil>
+	      <type/>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="TS-FLOOR">
+	  <tyPre/>
+	  <tyConc>
+	    <Tsub>
+	      <type/>
+	      <floor>
+		<type/>
+	      </floor>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+      </Hrules>   
+      <Hrules vspace="yes">
+	<tyRule name="TS-REFL">
+	  <tyPre/>
+	  <tyConc>
+	    <Tsub>
+	      <type/>
+	      <type/>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="TS-TRANS">
+	  <tyPre>
+	    <Tsub>
+	      <type num="2"/>
+	      <type num="1"/>
+	    </Tsub>
+	    <Tsub>
+	      <type num="1"/>
+	      <type/>
+	    </Tsub>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <type num="2"/>
+	      <type/>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>          
+      </Hrules>
+    </btypes:TYPE>
+  </font>
+  <caption>Copy Coercion Rules</caption>        
+</floatingtable>

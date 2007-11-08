@@ -1,0 +1,79 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Copyright (C) 2006, Johns Hopkins University.
+;; All rights reserved.
+;;
+;; Redistribution and use in source and binary forms, with or
+;; without modification, are permitted provided that the following
+;; conditions are met:
+;;
+;;   - Redistributions of source code must contain the above 
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer. 
+;;
+;;   - Redistributions in binary form must reproduce the above
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer in the documentation and/or other materials 
+;;     provided with the distribution.
+;;
+;;   - Neither the names of the copyright holders nor the names of any
+;;     of any contributors may be used to endorse or promote products
+;;     derived from this software without specific prior written
+;;     permission. 
+;;
+;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(bitc-version "0.9+")
+;(define xyz1 (loop x ((y #t)) y))
+;(define xyz2 (letrec ((x (lambda (y) y)))  (x #t)))
+;(define xyz3 (loop x ((y #t)) x))
+;(loop x ((y #t)) (begin y)) 
+;(letrec ((x (lambda (<argVec> y) (begin y)))) (x #t))
+; (letrec ((x {(fn ('a) 'a)} 
+; 	    (lambda ( y {'a}) (begin y {'a}) {'a}) 
+; 	    {(fn ('a) 'a)})) (x {(fn (bool) 'a)} #t {bool})) {'a}
+
+(define zero (the int32 0))
+(define one (the int32 1))
+(define ten (the int32 10))
+
+(define l1 (loop countdown1 ((i ten))
+		 (if (= i zero) 
+		     zero
+		     (countdown1 (- i one)))))
+
+(define l2 (loop countdown2 ((i ten))
+		 (if (= i zero) 
+		     zero
+		     (begin 
+		       (loop countup2 ((j zero))
+			     (if (= j i) 
+				 i
+				 (countup2 (+ j one))))
+		       (countdown2 (- i one))))))
+ 
+
+; (define l3 (loop countdown3 ((i ten))
+; 		 (if (= i zero) 
+; 		     zero
+; 		     (begin 
+; 		       (loop countup3 ((j zero)
+; 				      (csd countup3))			     
+; 			     (if (= j i) 
+; 				 i
+; 				 (countdown3 (+ j one))))
+; 		       (countdown3 (- i one))))))
+  
+(define (main ()) (the int32 0))

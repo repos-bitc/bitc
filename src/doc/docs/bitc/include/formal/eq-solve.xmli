@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+<floatingtable id="eq_solve" fullwidth='yes' latex.placement="tb">
+  <btypes:TYPE
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+    <Hrules vspace="yes">
+      <tyRule name="SOL-EQ">
+	<tyPre>
+	  <in>
+	    <eq>
+	      <tvar name="alpha"/>
+	      <type/>
+	    </eq>
+	    <aCtset/>
+	  </in>
+	  <eq>
+	    <aSubMap/>
+	    <SubMap>
+	      <tvar name="alpha"/>
+	      <type/>
+	    </SubMap>
+	  </eq>
+	  <models name="Sol">
+	    <aSubMap dash="'"/>
+	    <Subst>
+	      <aSubMap/>
+	      <minus>
+		<diff>
+		  <aCtset/>
+		  <set>
+		    <eq>
+		      <tvar name="alpha"/>
+		      <type/>
+		    </eq>
+		  </set>
+		</diff>
+	      </minus>
+	    </Subst>
+	  </models>
+	</tyPre>
+	<tyConc>
+	  <models name="Sol">
+	    <compose>
+	      <aSubMap/>
+	      <aSubMap dash="'"/>
+	    </compose>
+	    <aCtset/>
+	  </models>
+	</tyConc>                
+      </tyRule>   
+    </Hrules>
+    <Hrules vspace="yes">
+      <tyRule name="SOL-SUB">
+	<tyPre>
+	  <notin>
+	    <eq>                    
+	      <tvar name="alpha"/>
+	      <type dash="'"/>                    
+	    </eq>
+	    <aCtset/>
+	  </notin>
+	  <eq>
+	    <aCtset num="a"/>
+	    <set>
+	      <forall>
+		<in>
+		  <Tsub>                    
+		    <tvar name="alpha"/>
+		    <type num="1"/>                    
+		  </Tsub>
+		  <aCtset/>
+		</in>
+	      </forall>
+	      <forall>
+		<in>
+		  <Tsub>                
+		    <type num="2"/>                    
+		    <tvar name="alpha"/>
+		  </Tsub>
+		  <aCtset/>
+		</in>
+	      </forall>
+	    </set>
+	  </eq>
+	  <eq>
+	    <type/>
+	    <text content="some type such that"/>  
+	  </eq>
+	  <eq>
+	    <aSubMap/>
+	    <SubMap>
+	      <tvar name="alpha"/>                    
+	      <type/>                    
+	    </SubMap>
+	  </eq>
+	  <models>
+	    <aSubMap/>
+	    <aCtset num="a"/>
+	  </models>   
+	</tyPre>
+	<tyPre>
+	  <models name="Sol">
+	    <aSubMap dash="'"/>
+	    <Subst>
+	      <aSubMap/>
+	      <minus>
+		<diff>
+		  <aCtset/>
+		  <set>
+		    <Tsub>                    
+		      <tvar name="alpha"/>
+		      <type/>                    
+		    </Tsub>
+		  </set>
+		</diff>
+	      </minus>
+	    </Subst>
+	  </models>
+	</tyPre>
+	<tyConc>
+	  <models name="Sol">
+	    <assume>
+	      <compose>
+		<aSubMap/>
+		<aSubMap dash="'"/>
+	      </compose>
+	    </assume>
+	    <aCtset/>
+	  </models>
+	</tyConc>                
+      </tyRule>
+    </Hrules>
+  </btypes:TYPE>
+  <caption>Solving Equational Constraints</caption>
+</floatingtable>

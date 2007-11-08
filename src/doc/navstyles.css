@@ -1,0 +1,21 @@
+/* Likewise the box widths for the various content areas! */
+
+/* If you change the background color, be sure to change it
+   throughout. */
+body { background: #e8ffe8; }
+A.noborder:link { color: #e8ffe8; }
+A.noborder:visited { color: #e8ffe8; }
+A.noborder:hover { color: blue; }
+A.noborder:active { color: red; }
+
+div.nowrap {
+  word-wrap: normal;
+}
+
+div.wrap {
+  word-wrap: break-word;
+}
+
+A:link    { text-decoration: none; color: blue }
+A:visited { text-decoration: none; color: blue }
+A:hover   { color: red }

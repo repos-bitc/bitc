@@ -1,0 +1,696 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+
+<!ENTITY BitcVersion "0.8+">
+]>
+  <article id="capidl-spec" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <docinfo latex.stylemod="twocolumn">
+    <title>Closure Implementation in BitC</title>
+    <subtitle>Preliminary Implementation Note</subtitle>
+    <authorgroup>
+      <author>
+	<firstname>Jonathan</firstname>
+	<surname>Shapiro</surname>
+	<degree>Ph.D.</degree>
+      </author>
+      <affiliation>
+	<orgname>Systems Research Laboratory</orgname>
+	<address>Dept. of Computer Science</address>
+	<address>Johns Hopkins University</address>
+      </affiliation>
+    </authorgroup>
+    <pubdate>September 3, 2005</pubdate>
+    <copyright>
+      <year>2005</year> 
+      <holder>Jonathan S. Shapiro</holder>
+    </copyright>
+    <categories>
+      <category>dev/bitc</category>
+    </categories>
+    <synopsis>
+      <p>Notes on closure construction for BitC.</p>
+    </synopsis>
+  </docinfo>
+  <!-- latex.incolumn="yes" latex.breakafter="yes" -->
+  <abstract latex.incolumn="yes">
+    <p>
+      BitC is a statically typed higher-order programming language
+      intended (in part) for systems programming. A key decision in
+      such languages is the representation of procedure objects,
+      especially closures, and (in consequence) calling convention and
+      interactions with the garbage collector. In this note I try to
+      capture some ideas about how to do all of this efficiently.
+    </p>
+    <p>
+      I should add that my current thoughts in this regard are
+      somewhat unhappy. Efficient implementation of closures would
+      appear to preclude compilation to C, which is most unfortunate.
+    </p>
+    <p>
+      These notes are preliminary. They should not be viewed as a
+      commitment to a particular implementation, nor as advice
+      concerning feasible implementations.
+    </p>
+  </abstract>
+<!--   <toc/> -->
+  <sect1>
+    <title>Issues</title>
+    <p>
+      In languages having first-class procedure objects, the
+      representation of closures is a foundational design decision in
+      the language implementation. Some of the questions that are
+      raised in this design process include:
+    </p>
+    <ol>
+      <li>
+        <p>
+          <b>Are closures heap allocated or stack allocated?</b>
+        </p>
+        <p>
+          It has been argued that stack-allocated frames are more
+          efficient, but I am unaware of conclusive measurements one
+          way or the other, with the possible exception of Appel and
+          Shao <cite ref="appel1994emprical"/> I suspect that stack
+          allocation is faster, primarily because many modern
+          processors provide special handling of top of stack
+          caching. Heap allocation requires garbage collection (GC),
+          and in practice assumes an incremental collection strategy.
+        </p>
+        <p>
+          Because BitC needs to be compilable in
+          a non-colleted mode (subject to language restrictions), it
+          is strongly desirable to stack-allocate continuations.
+        </p>
+      </li>
+      <li>
+        <p>
+          <b>Is the native calling convention respected?</b>
+        </p>
+        <p>
+          On most modern machines, the native calling convention uses
+          registers to pass the first <em>k</em> arguments. This has
+          been conclusively shown to improve performance, but it
+          presents a variety of hazards in a garbage collected
+          environment. In particular, some collector designs will now
+          be required to collect registers conservatively, which has
+          implications for the storage allocator design.
+        </p>
+        <p>
+          In many respects, procedure call is simplified if the native
+          calling convention is abandoned in favor of a
+          single-argument convention.
+        </p>
+      </li>
+      <li>
+        <p>
+          <b>In environments providing collection, do we wish to
+          support concurrent GC?</b>
+        </p>
+        <p>
+          If the BitC runtime is concurrently multithreaded, it is
+          probably necessary to support concurrent collection. This
+          makes the register-based object reference issue even more of
+          a challenge.
+        </p>
+      </li>
+    </ol>
+  </sect1>
+  <sect1>
+    <title>Ground Work</title>
+    <p>
+      Before describing what I think we should do in BitC, let me
+      start with some groundwork.
+    </p>
+    <sect2>
+      <title>Baseline Approach</title>
+      <p>
+        Jeff Siskind provides a wonderful description of what he calls
+        the <em>baseline approach</em> <cite ref="siskind1999flow"/>:
+      </p>
+      <ol>
+        <li>
+          <p>Each procedure has a closure.</p>
+        </li>
+        <li>
+          <p>
+            The closure for each procedure contains a <em>variable
+              slot</em> for each variable bound by that procedure.
+          </p>
+        </li>
+        <li>
+          <p>
+            The closure for each procedure contains a <em>parent
+              slot</em>, providing a link to the closure of the lexically
+            enclosing procedure. For a top-level procedure, the parent
+            slot contains a null pointer.
+          </p>
+        </li>
+        <li>
+          <p>
+            A procedure object contains a <em>closure pointer slot</em>,
+            which points to the lexically enclosing closure for that
+            procedure. The closure pointer for top-level procedures is
+            null.
+          </p>
+        </li>
+        <li>
+          <p>
+            A procedure object contains a <em>code-pointer slot</em>, a
+            pointer to the code object for that procedure.
+          </p>
+        </li>
+        <li>
+          <p>
+            The code object for a procedure has a <em>variable
+              parameter</em> for each variable bound by that procedure.
+          </p>
+        </li>
+        <li>
+          <p>
+            The code object for a procedure has a <em>parent
+              parameter</em>, a pointer to the closure for the immediate
+            lexically surrounding procedure. For a top-level procedure,
+            the value of this pointer is null.
+          </p>
+        </li>
+        <li>
+          <p>
+            Procedure calls indirect to the code object pointed to by
+            the procedure object.
+          </p>
+        </li>
+        <li>
+          <p>
+            <em>Variable Passing:</em> A procedure call passes each
+            argument to its corresponding variable parameter in the code
+            object.
+          </p>
+        </li>
+        <li>
+          <p>
+            <em>Parent Passing:</em> A procedure call passes the closure
+            pointer of the target procedure object to the parent
+            parameter of the code object.
+          </p>
+        </li>
+        <li>
+          <p>
+            Each code object ocntains a <em>closure pointer</em>, a
+            local variable that holds a poitner to its closure. Each
+            code object begins with a preamble that allocates a closure
+            and storaes a poitner to that closure in the closure
+            pointer.
+          </p>
+        </li>
+        <li>
+          <p>
+            <em>Variable spilling:</em> The preamble spills each
+            variable parameter into the corresponding variable slot of
+            the closure.
+          </p>
+        </li>
+        <li>
+          <p>
+            <em>Parent spilling:</em> The preamble spills the parent
+            parameter into the parent slot of the closure.
+          </p>
+        </li>
+        <li>
+          <p>
+            Variables are referenced indirectly via the closure pointer.
+          </p>
+        </li>
+      </ol>
+    </sect2>
+    <sect2>
+      <title>Conventional Optimizations</title>
+      <p>
+        Several optimizations to this approach are so universal that
+        they are included in nearly every real implementation:
+      </p>
+      <ul>
+        <li>
+          <p>
+            Closure entries for identifiers bound at global scope can be
+            omitted.
+          </p>
+        </li>
+        <li>
+          <p>
+            Procedure calls to statically known target procedures do not
+            need to indirect through a procedure object.
+          </p>
+        </li>
+        <li>
+          <p>
+            Only those variables that are actually closed by inner
+            procedures are included in the closure at a given lexical
+            scope. Non-closed variables are stack allocated.
+          </p>
+        </li>
+        <li>
+          <p>
+            If a given lexical scope has no closed variables, it can be
+            ``dropped out'' of the linked list of closures.
+          </p>
+        </li>
+        <li>
+          <p>
+            In the presence of a more sophisticated analysis phase, some
+            closures may be stack-allocated rather than
+            heap-allocated. Those compilers that have an analysis phase
+            good enough to support this optimization generally do it.
+          </p>
+        </li>
+      </ul>
+      <p>
+        Siskind identifies some optimizations that require greater
+        care than he implies. For example, he notes that a top-level
+        procedure doesn't need a passed closure at all, and this
+        argument can be eliminated. Unfortunately, this is not
+        true. Statically detected invocations of such a procedure will
+        work fine, but if the procedure object reference is stored
+        into a structure, there is no way for the caller to know
+        whether a closure pointer is desired. In practice,
+        implementing the optimization that Siskind proposes requires a
+        small bit of trampoline code (to pop the unnecessary closure
+        argument) that is used as the code pointer in the procedure
+        object.
+      </p>
+      <p>
+        When reading Siskind's proposed optimizations, it is important
+        to recognize that he speaks in the context of the
+        <smallcaps>Stalin</smallcaps> compiler, which performs
+        whole-program analysis.
+      </p>
+    </sect2>
+    <sect2>
+      <title>Calling Convention Issues</title>
+      <p>
+        On machines that use register-based calling conventions, it is
+        worth noting that the limit on the number of registers used is
+        generally no more than three. There are good reasons for this:
+      </p>
+      <ul>
+        <li>
+          <p>
+            Using more registers tends to induce register spills in
+            the caller.
+          </p>
+        </li>
+        <li>
+          <p>
+            Every register reserved in the calling convention
+            potentially requires additional saves in the callee if
+            further recursive calls are made.
+          </p>
+        </li>
+      </ul>
+      <p>
+        The main complication introduced by register-based calling
+        conventions is concurrent collection. The concurrent collector
+        needs to know which (if any) registers may be collection
+        roots. Note that this knowledge is really only needed at those
+        points where the collector might preempt the main thread of
+        control. Note further that the problem is mitigated if a
+        mostly-copying collector implementation is feasible <cite
+        ref="bartlett1989mostly"/>.
+      </p>
+      <p>
+        It is possible to thread a middle path: design the code
+        emission so that any object pointer residing in a register
+        also resides someplace else that the collector can reach. This
+        does not directly support copying collectors, but it does
+        mitigate the need to keep the additional data structures
+        needed for mostly-copying collection to work.
+      </p>
+      <p>
+        There is one other issue that may work significantly in our
+        favor: the call frame size of a procedure in BitC is purely
+        fixed. The language does not support anything analogous to
+        <progident>alloca()</progident>, which actually turns out to
+        be very helpful.
+      </p>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>BitC Issues</title>
+    <p>
+      There are several issues to consider that are specific to
+      BitC.
+    </p>
+    <sect2>
+      <title>Non-Collected Mode</title>
+      <p>
+        For BitC, we very much want to do stack allocation of closures
+        wherever possible. We <em>must</em> do so in non-collected
+        mode, and when compiling in this mode the compiler enforces
+        additional restrictions to <em>guarantee</em> that
+        heap-allocated closures are not necessary. In particular,
+        escaping lambdas are not permitted at all. This significantly
+        reduces the expressive power of the language, because it
+        precludes things like the
+        <progident>make-counter</progident> pattern:
+      </p>
+      <programlisting>
+(define (make-counter)
+  (let ((n 0))
+    (lambda ()
+      (set! n (+ n 1))
+      (- n 1))))
+</programlisting>
+      <p indent="no">
+        However, it still permits some very useful <em>downward</em>
+        uses of nested procedures, such as:
+      </p>
+      <programlisting>
+(map (lambda (x) ...) some-tree)
+</programlisting>
+      <p>
+        It is tempting to try to come up with an amalgam of
+        these styles wherein allocation of this form could be
+        permitted. Unfortunately, it impacts the calling convention
+        and the code emission strategy, and the performance
+        implications of adopting a GC-friendly code generation
+        strategy for non-GC code seem likely to be quite unpleasant.
+      </p>
+    </sect2>
+    <sect2>
+      <title>Mutable Variables of Value Type</title>
+      <p>
+        In languages like SML <cite ref="milner1997definition"/> and
+        Haskell, closure formation is made fairly straightforward by
+        the fact that all mutable cells reside in the heap. Consider
+        a typical SML call frame, where the bold entries are to be
+        copied into a closure:
+      </p>
+      <literallayout>
++-------------+
+|   Param     |
+|   <b>Param</b>     |
+|   Param     |
++-------------+
+|   <b>Parent</b>    |
+| <b>Closure Ptr</b> |
++-------------+
+|  Return PC  |
++-------------+
+|   Local     |
+|   <b>Local</b>     |
+|   Local     |
++-------------+&lt;-- least address
+</literallayout>
+      <p indent="no">
+        There is no need to consider mutability, and there is no
+        real benefit here in copy avoidance, since the number of
+        uncopied locals and parameters is likely to be larger than
+        the number copied. The structure will get copied into a
+        heap-allocated closure with the closure pointer at a
+        well-known offset:
+      </p>
+      <literallayout>
++-------------+
+|   <b>Param</b>     |
+|   <b>Local</b>     |
++-------------+
+|   <b>Parent</b>    |
+| <b>Closure Ptr</b> |
++-------------+&lt;-- least address
+</literallayout>
+      <p>
+        There isn't even a need for the parent procedure to make
+        references via this closure, since all of the elements of
+        the closure itself are (shallowly) constant. It is also
+        permissable (and sometimes desirable) to let different
+        subprocedures receive differently specialized closures that
+        copy different subsets of the lexically enclosing activation.
+      </p>
+      <p>
+        In a language with closed variables of mutable value type,
+        however, things are rather more delicate. Consider a similar
+        frame, wherein bold items are closed by one nested
+        procedure, italic items by a second, and there is an object
+        of mutable value type that is referenced by both:
+      </p>
+      <pagebreak/>
+      <literallayout>
++-------------+
+|  Param C    |
+|  <b>Param B</b>    |
+|  Param A    |
++-------------+
+|   <b><em>Parent</em></b>    |
+| <b><em>Closure Ptr</em></b> |
++-------------+
+|  Return PC  |
++-------------+
+| <b><em>Mut Local E</em></b> |
+|  <em>Local D</em>    |
+|   Local     |
++-------------+&lt;-- least address
+</literallayout>
+      <p>
+        It is permissable to rearrange things in the parent by copy,
+        but <em>only</em> if this is done before any access is made
+        to the mutable cell(s). It is <em>not</em> permissable to
+        make distinct subsets of the closure for nested procedures,
+        because each must be able to see mutations made by the other
+        to the mutable local.  While we could heap-migrate the
+        mutable value in a garbage collected environment, this is
+        not an option for the non-collected mode in BitC, and it
+        largely eliminates the benefits of closure stack allocation
+        if it is done. This means that in practice all nested
+        procedures will end up sharing a single closure record.
+      </p>
+      <p>
+        Fortunately, we <em>can</em> sort the locals so that the
+        ones that are captured are gathered together. If this is
+        done, and if an early copy is performed at procedure entry,
+        then we will end up with the following frame:
+      </p>
+      <literallayout>
++-------------+
+|  Param C    |
+| Param B (X) |
+|  Param A    |
++-------------+
+|  Parent (X) |
+| Closure Ptr |
++-------------+
+|  Return PC  |
++-------------+
+|   Local     |
+|  Local E    |
++=============+&lt;-- capture limit
+| <b>Mut Local D</b> |
++-------------+
+|  <b>Param B</b> *  |
++-------------+
+|   <b>Parent</b> *  |
+| <b>Closure Ptr</b> |
++-------------+&lt;-- least address
+</literallayout>
+      <p>
+        If the frame is stack allocatable, then only the parent
+        pointer requires relocation.
+      </p>
+      <p>
+        If we are prepared to abandon compatibility with the native calling
+        convention, another option is possible: have the
+        <em>caller</em> reserve the space for the callee locals, and
+        also for the closure parent pointer. If this is done, our
+        original frame would look like:
+      </p>
+      <literallayout>
++-------------+
+|   Local(s)  |
++=============+&lt;-- capture bound
+|  <b>Local D</b>    |
+| <b><em>Mut Local E</em></b> |
++-------------+
+|  Param C    |
+|  <b>Param B</b>    |
+|  Param A    |
++-------------+
+|   <b>Parent</b>    |
+| <b>Closure Ptr</b> |
++=============+&lt;-- capture base
+|  Return PC  |
++-------------+&lt;-- least address
+</literallayout>
+      <p>
+        Whether this is desirable depends heavily on the ratio between
+        captured and uncaptured argument bytes. It has the significant
+        <em>disadvantage</em> that it cannot be expressed in C.
+      </p>
+    </sect2>
+<!--     <sect2> -->
+<!--       <title>Other Musings</title> -->
+<!--       <p> -->
+<!--         There is some discussion in the literature of closure -->
+<!--         optimization, including work by Shao and Appel <cite -->
+<!--           ref="shao1994space"/>. I must be missing something -->
+<!--         painfully obvious, because this work seems largely -->
+<!--         unmotivated. It seems to me that we are not greatly -->
+<!--         concerned with reducing the sizes of closures -->
+<!--         <foreignphrase>per se</foreignphrase>, but rather with -->
+<!--         reducing the unintended garbage retention that they -->
+<!--         entail. Since (for captured, nested procedures) we must -->
+<!--         copy the closures anyway, I don't see any reason why we -->
+<!--         should not annotate them with a context-specific mark -->
+<!--         procedure that marks only those pointers referenced from a -->
+<!--         given nested procedure. This <em>does</em> complicate the -->
+<!--         collector, but only very slightly. I must be missing -->
+<!--         something glaringly obvious here. -->
+<!--       </p> -->
+<!--     </sect2> -->
+  </sect1>
+  <sect1>
+    <title>Issues for Generating C</title>
+    <p>
+      The main issue for generating C concerns the relationship
+      between the C code and the garbage collector. The problem is
+      that arguments may reside in registers that the collector cannot
+      find.
+    </p>
+    <p>
+      My current plan to deal with this is decidedly not pretty. The
+      proposal is to overload the use of the closure pointer to point
+      to the entire parent frame, with the end result that we form a
+      heap-like linked call stack using the hardware machine
+      stack. After closure rearrangement, each frame will look like:
+    </p>
+    <pagebreak/>
+    <literallayout>
++-------------+
+|  Uncaptured |
+| (or Copied) |
+|    Params   |
++-------------+
+|  Return PC  |
++-------------+
+|  Uncaptured |
+|   Local(s)  |
++=============+&lt;-- capture bound
+|   Captured  |
+|   Local(s)  |
++-------------+
+|   Captured  |
+|    Params   |
++-------------+
+|   Parent    |
+| Closure Ptr |
++=============+&lt;-- capture base,
+                    least address
+</literallayout>
+    <p>
+      Note that the parent closure pointer now doubles as a parent
+      frame pointer, which is intentional. This pointer is
+      unconditionally passed at procedure call. The purpose of passing
+      this pointer is to ensure that all of these items are aliased,
+      and that register spills will occur on procedure call. This
+      permits the collector to safely walk the frame chain to find all
+      of the garbage collection roots.
+    </p>
+    <p>
+      Regrettably, a C-based implementation must copy the
+      parameters. This is because the calling convention may have
+      registerized some of them, and there may not be any stack space
+      allocated to back those parameters. Regrettably, we cannot rely
+      on the compiler to spill them for us predictably.
+    </p>
+    <p>
+      I cannot help but think that this is all rather a lot of work
+      purely for the sake of avoiding conservative or mostly-copying
+      collection, and that it is probably misguided.
+    </p>
+  </sect1>
+  <bibliography>
+    <bibentry label="ansi1999c">
+      &mdash;: American National Standard for Information Systems,
+	Programming Language C ANSI X3.159-1999, 2000.
+    </bibentry>
+    <bibentry label="ieee1985std754">
+      &mdash;: <doctitle>IEEE Standard for Binary Floating-Point
+      Arithmetic</doctitle>, 1985, ANSI/IEEE Standard 754-1985.
+    </bibentry>
+    <bibentry label="ieee1987std854">
+      &mdash;: <doctitle>IEEE Standard for Radix-Independent
+      Floating-Point Arithmetic</doctitle>, 1987, ANSI/IEEE Standard
+      854-1987.
+    </bibentry>
+    <bibentry label="appel1994emprical">
+      Andrew W. Appel and Zhong Shao. ``An Empirical Study of
+      Stack vs. Heap Cost for Languages with
+      Closures.'' <doctitle>Journal of Functional
+      Programming</doctitle>, <b>1</b>(1), January 1993
+    </bibentry>
+    <bibentry label="bartlett1989mostly">
+      Joel F. Bartlett. <doctitle>Mostly-Copying Garbage Collection
+      Picks Up Generations and C++</doctitle>. WRL Technical Note
+      TN-12. Digital Equipment Corporation, 1989.
+    </bibentry>
+    <bibentry label="garrigue2004value">
+      Jacques Garrigue. ``Relaxing the Value Restriction.''
+      <doctitle>Proc. International Symposium on Functional and Logic
+      Programming</doctitle>. 2004.
+    </bibentry>
+    <bibentry label="jones73thesis">
+      Anita K. Jones. <doctitle>Protection in Programmed
+      Systems</doctitle>, Doctoral Dissertation, Department of
+      Computer Science, Carnegie-Mellon University, June 1973.
+    </bibentry>
+    <bibentry label="jones2000tcfndepend">
+      Mark Jones. ``Type Classes With Functional Dependencies.''
+      <doctitle>Proc. 9th European Symposium on Programming</doctitle>
+      (ESOP 2000). Berlin, Germany. March 2000. Springer-Verlag
+      Lecture Notes in Computer Science 1782.
+    </bibentry>
+    <bibentry label="kaufmann00acl2">
+      M. Kaufmann, J. S. Moore. <doctitle>Computer Aided Reasoning: An
+      Approach</doctitle>, Kluwer Academic Publishers, 2000.
+    </bibentry>
+    <bibentry label="kelsey1998r5rs">
+      Richard Kelsey, William Clinger, and Jonathan Rees (Ed.)
+      <doctitle>Revised<sup>5</sup> Report on the Algorithmic Language
+      Scheme</doctitle>,
+      ACM SIGPLAN Notices, 33(<b>9</b>), pp 26&ndash;76, 1998.
+    </bibentry>
+    <bibentry label="macqueen1984modules">
+      David MacQueen, ``Modules for Standard ML.''
+      <doctitle>Proc. 1984 ACM Conference on LISP and Functional
+      Programming</doctitle>, pp. 198&ndash;207, 1984.
+    </bibentry>
+    <bibentry label="milner1997definition">
+      Robin Milner, Mads Tofte, Robert Harper, and David
+      MacQueen. <doctitle>The Definition of Standard ML -
+      Revised</doctitle>
+      The MIT Press, May 1997.
+    </bibentry>
+    <bibentry label="shap1999fastcapsystem">
+      J. S. Shapiro, J. M. Smith, and D. J. Farber. ``EROS, A Fast
+      Capability System'' <doctitle>Proc. 17th ACM Symposium on Operating
+      Systems Principles</doctitle>. Dec 1999, pp. 170&ndash;185. Kiawah
+      Island Resort, SC, USA.
+    </bibentry>
+    <bibentry label="siskind1999flow">
+      Jeffrey Mark Siskind. <doctitle>``Flow-Directed Lightweight
+      Closure Conversion''</doctitle> Technical Report 99-109R, NEC
+      Research Institute, Inc., Dec. 1999.
+    </bibentry>
+    <bibentry label="shao1994space">
+      Zhong Shao and Andrew W. Appel. ``Space-Efficient Closure
+      Representations.'' <doctitle>Proc. LISP and Fucntional
+      Programming</doctitle>, pp. 150-161, 1994.
+    </bibentry>
+    <bibentry label="wirth1988pascal">
+      N. Wirth and K. Jensen. <doctitle>Pascal: User Manual and
+      Report</doctitle>, 3rd Edition, Springer-Verlag, 1988
+    </bibentry>
+  </bibliography>
+  </article>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->

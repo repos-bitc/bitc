@@ -1,0 +1,36 @@
+(defrepr capability
+  (tag prepared unprepared) : (bitfield uint32 1)
+
+  hazard : (bitfield uint32 1)
+
+  (tag Null Window KeyBits Discrim Range Sleep IRQCtl 
+       SchedCtl Checkpoint ObStore ioperm PinCtl 
+
+       FCRB RcvQ Wrapper Page CapPage GPT oGPT Process
+
+       FcrbSend RcvqSend WrapperSend) : (bitfield uint32 6)
+
+  wk : (bitfield uint32 1)
+  nx : (bitfield uint32 1)
+  ro : (bitfield uint32 1)
+  ro : (bitfield uint32 1)
+
+  (fill (bitfield uint32 1))
+
+  (case ((FcrbSend RcvqSend WrapperSend Process
+		 Page CaPage GPD oGPT FCRB)
+	 ((the (bitfield uint32 20) allocCount)))
+
+	(otherwise ((fill (bitfield uint32 20)))))
+
+  (case ((Page CaPage GPD oGPT FCRB Window)
+	 (l2uv : (bitfield uint32 6)
+	  l2v : (bitfield uint32 6)
+	  guard : (bitfield uint32 20))))
+  
+  (case ((FcrbSend RcvqSend WrapperSend Process
+		   Page CaPage GPD oGPT FCRB)
+	 (case prepared ((the PrepHeader           ph)
+			 (the ObHeader             target)))
+	 (case unprepared ((the oid_t oid)))))
+)

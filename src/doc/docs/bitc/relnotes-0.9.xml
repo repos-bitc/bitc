@@ -1,0 +1,278 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+
+<!ENTITY LangVersion "0.9">
+<!ENTITY BitcVersion "0.9.1">
+]>
+  <article id="capidl-spec" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <docinfo>
+    <title>BitCC Release Notes</title>
+    <subtitle>Version &BitcVersion;</subtitle>
+    <authorgroup>
+      <author>
+	<firstname>Jonathan</firstname>
+	<surname>Shapiro</surname>
+	<degree>Ph.D.</degree>
+      </author>
+      <author>
+	<firstname>Swaroop</firstname>
+	<surname>Sridhar</surname>
+      </author>
+      <affiliation>
+	<orgname>Systems Research Laboratory</orgname>
+	<address>Dept. of Computer Science</address>
+	<address>Johns Hopkins University</address>
+      </affiliation>
+    </authorgroup>
+    <pubdate>February 17, 2006</pubdate>
+    <copyright>
+      <year>2006</year> 
+      <holder>Jonathan S. Shapiro</holder>
+      <holder>Swaroop Sridhar</holder>
+    </copyright>
+    <categories>
+      <category>dev/bitc</category>
+    </categories>
+    <synopsis>
+      <p>Release notes for BitCC version &BitcVersion;.</p>
+    </synopsis>
+  </docinfo>
+  <abstract latex.incolumn="yes">
+    <p>
+      Describes how to obtain BitCC version &BitcVersion; and known
+      issues in the implementation.
+    </p>
+  </abstract>
+  <p>
+    We are very pleased to announce the release of BitCC version
+    &BitcVersion;. This is a compiler conforming (mostly) to the
+    version &LangVersion; specification for the BitC programming
+    language. This document describes how to obtain and build the
+    compiler, known issues or incompletenesses in the implementation.
+  </p>
+  <sect1>
+    <title>Obtaining The Release</title>
+    <p>
+      This release of BitCC is only available as part of the Coyotos
+      operating system release. Instructions for obtaining Coyotos can
+      be found in <link href="../build/build.html"><doctitle>The
+      Coyotos Build System</doctitle></link>. Future versions of BitCC
+      will certainly be available in a more standalone form.
+    </p>
+    <p>
+      This release is an <em>early alpha release</em>! It is
+      undoubtedly broken in very basic ways. The purpose of this
+      release is to discover <em>how</em> the compiler is broken so
+      that we can stabilize it. What we are hoping for in this release
+      is examples of short programs that break the compiler so that we
+      can get the bugs identified and resolved. Discounting helper
+      libraries, the compiler is just under 19,000 lines of C++ code
+      &mdash; debugging it is going to take a little bit of time!
+    </p>
+    <p>
+      The BitCC build does not rely on most of the Coyotos cross
+      tools, but it does rely on having the host portion of the
+      Coyotos cross environment installed. Most notably, you will need
+      to install the package providing the Boehm-Weiser garbage
+      collector and its dependencies. At this stage, we are
+      recommending that you simply install the Coyotos cross
+      environment as recommended, and then use it to build
+      BitCC. You can then <em>skip</em> the top-level build of
+      Coyotos, and execute:
+    </p>
+    <literallayout>
+cd .../coyotos/src/ccs/
+make install
+</literallayout>
+    <p indent="no">
+      Following this command, you will find that the binary program
+      <command>bitcc</command> and the supporting libraries and header
+      files have been installed in:
+    </p>
+    <literallayout>
+$(BITC_ROOT)/host/bin/
+$(BITC_ROOT)/host/lib/
+$(BITC_ROOT)/host/include/
+</literallayout>
+    <p indent="no">
+      Once installed, you can run bitcc from the installed
+      location. The compiler currently uses the environment variable
+      <envvar>BITC_ROOT</envvar> to locate the installed headers
+      and libraries.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Compiler Usage</title>
+    <p>
+      This version of <command>BitCC</command> is a <em>whole
+      program</em> compiler. The expected command line is:
+    </p>
+    <literallayout>
+bitcc [-I if-root] [-L libdir] -o target src1.bitc ... srcN.bitc
+</literallayout>
+    <p indent="no">
+      Source files specified on the command line should include
+      <em>only</em> source units of compilation. Imports will be
+      resolved and loaded automatically by the compiler.
+    </p>
+    <p>
+      The <progident>-I&nbsp;if-root</progident> option can be
+      repeated. Each such option names the <em>top</em> of a directory
+      tree containing interface modules. An attempt to import the
+      module <progident>foo.bar.baz</progident> will be resolved by
+      attempting to import <filename>foo/bar/baz.bitc</filename> in
+      turn from each of the specified <filename>if-root/</filename>
+      directory trees.
+    </p>
+    <sect2>
+      <title>Seeing the C Code</title>
+      <p>
+        If you wish to examine the C code generated by the compiler &mdash;
+        which is interesting primarily as an illustration of just how
+        ugly C code can get &mdash; you can use:
+      </p>
+      <literallayout>
+bitcc [-I if-root] [-L libdir] -l c -o target.c src1.bitc ... srcN.bitc
+</literallayout>
+    </sect2>
+    <sect2>
+      <title>Wrapping An Existing Library</title>
+      <p>
+        If you wish to implement a wrapper for an existing C library,
+        you may wish to examine
+        <filename>ccs/bitcc-bootstrap/libbitc/</filename> and its use of
+        the <progident>-h</progident> option to
+        <command>BitCC</command>. Where the <command>-l&nbsp;c</command>
+        option says "generate C code", the  <command>-l&nbsp;h</command>
+        command says "generate a header file that can be used to
+        implement a supporting wrapper library." This header file will
+        contain declarations for:
+      </p>
+      <ul>
+        <li>
+          <p>
+            Every exception declared in the imported modules.
+          </p>
+        </li>
+        <li>
+          <p>
+            Every <progident>proclaim</progident> that is marked
+            <progident>external</progident>, provided that the
+            proclaimed procedure does not have polymorphic type.
+          </p>
+        </li>
+        <li>
+          <p>
+            Every type that is (recursively) reachable from these.
+          </p>
+        </li>
+      </ul>
+      <p>
+        This mechanism should be considered <em>extremely</em>
+        fragile. It has been used to partially wrap the C stdio
+        library, which has convinced us that the mechanism for
+        external binding declarations needs to be extended. A
+        mechanism for specifying the externally bound identifier will
+        be provided in the next compiler release.
+      </p>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>Known Issues</title>
+    <p>
+      This is very much a ``draft zero'' compiler, and several things
+      are completely or partially unimplemented in this compiler.
+    </p>
+    <p>
+      <leadin>Type Classes</leadin> Type classes are not implemented.
+      Procedures such as arithmetic, comparison, and so forth are
+      declared in this compiler using polymorphic type:
+    </p>
+    <programlisting>
+(proclaim == : (fn ('a 'a) bool))
+</programlisting>
+    <p indent="no">
+      As we implement type classes, these declarations will be changed
+      to use them. We hope that this will be implemented shortly.
+    </p>
+    <p>
+      <leadin>Union Representation</leadin> The union type tag
+      declaration mechanism described in section <link
+      href="spec.html#3.6.2.2">3.6.2.2</link> of the specification is
+      not implemented. The declaration will be accepted, but is
+      silently ignored in this implementation. The storage layout
+      optimization described in the last paragraph of that section
+      (the so-called ``Cardelli Optimization'' is not implemented).
+    </p>
+    <p>
+      <leadin><progident>int</progident> type</leadin> This compiler
+      does not implement an arbitrary precision integer type. It is
+      looking like the implementation of the
+      <progident>int</progident> type can be done equally efficiently
+      in a library, and we are considering dropping it from the core
+      language.
+    </p>
+    <p>
+      <leadin><progident>case</progident> patterns</leadin> This
+      compiler implements only non-nested patterns. This is sufficient
+      for many programs, and it relieved us of the need to implement
+      the full completeness check (which is mildly tricky to do). A
+      non-nested pattern is either a sequence of literals with an
+      optional final variable, or a list of constructor patterns all
+      of whose arguments are variables.
+    </p>
+    <p>
+      <leadin>Restriction on Inner Lambdas</leadin> An inner lambda
+      that closes over a non-global variable and escapes either inward
+      or outward will generate an error. This is straightforward to
+      fix; we have implemented the closure marking pass, but not the
+      closure construction pass. We hope that this will be implemented
+      shortly.
+    </p>
+    <p>
+      <leadin>Mutual Tail Recursion</leadin> Section <link
+      href="spec.html#10.1">10.1</link> of the specification requires
+      proper tail recursion for statically resolvable calls within a
+      single <progident>letrec</progident> form. This is not
+      implemented by the current compiler. We hope that this will be
+      implemented shortly.
+    </p>
+    <p>
+      <leadin>Stateless Interfaces</leadin> Section <link
+      href="spec.html#10.1">10.1</link> of the specification describes
+      stateful and stateless interfaces. This is not implemented by
+      the current compiler.
+    </p>
+    <p>
+      <leadin>Value Polyinstantiation</leadin> Immunitable values of
+      underspecialized polymorphic type will be multiply instantiated
+      by the compiler. No BitC program can detect this, but it is
+      potentially visible to runtime library extensions.
+    </p>
+    <p>
+      <leadin>Import Cross Reference</leadin> There is a <em>major
+      bug</em> in the compiler whose effect is that two interfaces may
+      exploit forward declarations to create mutually recursive
+      top-level declarations. The intended resolution for this is to
+      require a conservatively consistent ordering on imports similar
+      to the one used by Standard ML. The BitC compiler will accept
+      this, but subsequent compilation by the C compiler will fail.
+    </p>
+    <p>
+      <leadin>Interface Forward Reference</leadin> Within a single
+      interface, forward declarations can similarly be exploited to
+      express circular reference in initialization. The BitC compiler
+      will accept this, but subsequent compilation by the C compiler
+      will fail.
+    </p>
+    <p>
+      <leadin>Quad Precision Floats</leadin> Quad precision floating
+      point values are unimplemented.
+    </p>
+  </sect1>
+  </article>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->

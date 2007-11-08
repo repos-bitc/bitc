@@ -1,0 +1,839 @@
+/* -*- mode: c++ -*- */
+%copyright {
+/*
+ * Copyright (C) 2005, The EROS Group, LLC.
+ *
+ * This file is part of the EROS Operating System runtime library.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, 59 Temple Place - Suite 330 Boston, MA 02111-1307, USA.
+ */
+}
+
+%include {
+#include <stdint.h>
+#include "FQName.hxx"
+#include "LitValue.hxx"
+#include "Environment.hxx"
+#include "debug.hxx"
+}
+
+%header { 
+
+using namespace sherpa;
+
+//template <class T> typedef struct environment;
+
+// Index into a pointer of an array or any object that implements the
+// [] operator.
+
+struct Type; 
+struct TypeScheme; 
+struct spStruct;
+struct UocInfo;
+struct Instance;
+ 
+enum IdentType {
+  id_unresolved,
+  id_type,			// type name or type var, possibly ID_IS_CTOR
+  id_value,
+  id_constructor,		// constructor name, implies ID_IS_CTOR
+  id_field,			// field name
+  id_exn,
+  id_typeclass,
+  //  id_module,
+  id_interface,
+  id_usebinding,		// bound by use form
+};
+
+enum primOp {
+  op_equals,
+  op_plus,
+  op_minus,
+  op_mul,
+  op_div,
+  op_mod   
+};
+
+ std::string identTypeToString(IdentType id);
+
+/* Declarations for AST FLAGS */
+#define ID_IS_TVAR       0x00000001u
+#define ID_IS_CTOR       0x00000002u
+#define ID_IS_IMPORTER   0x00000004u
+#define ID_IS_PROVIDER   0x00000008u
+#define AST_IS_VALPAT    0x00000010u  // ONLY for the ROOT of a case leg
+#define ID_IS_GLOBAL     0x00000020u
+#define ID_IS_GENSYM     0x00000040u  // internally generated name
+#define ID_IS_REFIZED    0x00000080u  
+#define LB_IS_ART        0x00000100u  // Let-binding  is 
+                                      // artificially introduced
+                                      // to facilitate temp introduction
+                                      // in SSA transformation phase.
+
+#define STRUCT_IS_CLSTR  0x00000200u  // This is a structure introduced
+                                      // by virtue of closure conversion.
+#define DEF_IN_PRELUDE   0x00000400u
+#define DEF_DECLARED     0x00000800u  // Used by the code-generator
+                                      // to prevent redundant declarations
+#define ID_IS_DO         0x00001000u  // ID is an identifier
+				      // introduced (as a letrec
+				      // bound identifier) by
+				      // re-writing a `do' loop. This
+				      // identifier is never
+				      // captured, except for the
+				      // recursive call.
+
+                                      // Identifier is located in the
+                                      // heap allocated frame for: 
+#define ID_IN_AH_FRAME   0x00002000u  // arguments -- deprecated -- 
+#define ID_IN_LH_FRAME   0x00004000u  // locals  -- deprecated -- 
+#define IDLIST_HAS_LF    0x00008000u  // -- deprecated -- 
+#define ARGVEC_HAS_AH    0x00010000u  // -- deprecated --
+        
+#define LOOP_APP         0x00020000u
+#define SELF_TAIL        0x00040000u
+
+#define LB_IS_DUMMY      0x00080000u  // This let-binding is dummy,
+  	 		  	      // do not emit assignment.
+#define TVAR_IS_DEF      0x00100000u  // This is a type-variable that
+			 	      // appears in a use-position, but
+			 	      // acts like a definition. 
+#define ID_IS_PRIVATE    0x00200000u  // Global ID in source module with
+			 	      // no interface decl, so does not
+			 	      // escape file.
+#define LB_POSTPONED     0x00800000u  // Don't emit this letbinding
+                                      // at the let.
+#define ID_IS_FIELD      0x01000000u
+#define DEF_IS_ENTRYPT   0x02000000u  // ID is an entry point
+
+#define LB_REC_BIND      0x04000000u  // Is this let-binding a rec-binding?
+
+#define DEF_IS_EXTERNAL  0x08000000u 
+#define ENUM_UN          0x10000000u
+#define SINGLE_LEG_UN    0x20000000u
+#define CARDELLI_UN      0x40000000u
+
+#define ID_IS_METHOD     0x80000000u // Typeclass method definitions
+
+///////////////// SECOND ROUND OF FLAGS  /////////////////////
+
+#define ID_FOR_SWITCH    0x00000001u  // Identifier thhat is introduced
+                                      // because of switch -- can only
+                                      // appear in a dotted context
+#define AST_IS_LOCATION  0x00000002u  // Expr is a location
+#define ID_IS_CAPTURED   0x00000004u  // ID is closed over by something
+
+                                      // The following
+                                      // Identifier-markers are
+                                      // applicable only to value
+                                      // identifiers, not to type
+                                      // identifiers. They are used
+                                      // in closure conversion to
+                                      // mark the various identifier
+                                      // nodes. 
+#define ID_IS_DEF        0x00000008u  // ID is a defining occurrence of
+				      // a binding
+#define ID_IS_USE        0x00000010u  // ID is a use occurrence of a
+                                      // binding 
+#define ID_IS_CLOSED     0x00000020u  // Use occurrence of a
+                                      // closed-over ID 
+#define ID_NEEDS_HEAPIFY 0x00000040u  // ID must be moved to heap due
+				      // to capture
+#define ID_IS_RECBOUND   0x00000080u  // ID is bound in recursive
+                                      // context 
+#define ID_IS_MUTATED    0x00000100u  // ID is target of SET!
+#define APP_IS_VALUE     0x00000200u  // -- depricated --
+                                      // This application is internally
+                                      // generated by the backend, and
+                                      // is this safe for value-restriction  
+#define APP_NATIVE_FNXN  0x00000400u  // -- depricated --
+#define ID_MUT_CLOSED    0x00000800u  // ID_IS_MUTATED flag cannot
+                                      // cause mutation of a global
+                                      // after its definition. That
+                                      // is, after processing a lop
+                                      // level identifier, we mark it
+                                      // global. By this time, if it
+                                      // is not determined that the
+                                      // global is mutable, any
+                                      // further attempt to set! it is
+                                      // an error. 
+#define PROCLAIM_IS_INTERNAL 0x00001000u // This proclaim was
+                                      // introduced by the
+                                      // compiler. So, we can skip the
+                                      // def/decl match. This is
+                                      // necessary only until we have
+                                      // a way to input dummy types.
+#define DEF_IS_TRIVIAL_INIT  0x00002000u 
+#define IDENT_MANGLED        0x00004000u // This identifier has
+                                      // already been mangled for
+                                      // instantiation. Don't process
+                                      // it twice.
+#define LOCAL_NOGEN_VAR  0x00008000u  // For variables defined at
+                                      // non-generalizable
+                                      // boundaries. ex: Lambda
+                                      // parameters, identifiers
+                                      // defined at switch / catch,
+                                      // etc.
+#define SEL_FROM_UN_VAL  0x00010000u  // Marked in cases like
+                                      // u.cons, where `u' is a value
+                                      // of list (union) type, where
+                                      // we want to find out if u is
+                                      // currently tagged as
+                                      // cons. This expression has
+                                      // type bool. 
+#define SEL_FROM_UN_TYPE 0x00020000u  // Marked in cases like
+                                      // list.cons, which can be used
+                                      // interchangably with
+                                      // cons. This expression has
+                                      // type ucon/uval.
+#define LB_MUST_GO       0x00020000u  // Unreferenced, unspecialized
+                                      // polymorphic functions must
+                                      // not survive at
+                                      // letbindings. Mark those.
+#define DUPED_BY_CLCONV  0x00040000u  // The dup()s introduced by
+                                      // ClConv impact further typing
+                                      // because, copy-compatibility
+                                      // must be handled beyond this
+                                      // ref at binding instances. 
+#define LBS_PROCESSED    0x00080000u  // used to track the highest
+                                      // level of tvar-usage. If we
+                                      // see a tvar use, and if
+                                      // LBS_PROCESSED is set for
+                                      // tvar->tvarLB, then we have
+                                      // seen the use at a higer LB,
+                                      // and the tvatLB of tvar must
+                                      // point to the current lbs.  
+#define LB_INSTANTIATED  0x00100000u  // The current let-binding has
+                                      // been instantiated (used by
+                                      // the polyinstantiator) 
+#define ID_OBSERV_DEF    0x00200000u  // The Identifier is observably
+                                      // defined 
+#define TVAR_POLY_SPECIAL 0x00400000u // This type variable was
+                                      // temporarily created by the
+                                      // polyinstantiator. Definition
+                                      // is OK.
+#define UNION_IS_REPR    0x00800000u  // Defrepr
+#define FLD_IS_DISCM     0x01000000u  // Discriminator field
+#define LAM_NEEDS_TRANS  0x02000000u  // On at_define, this is a
+                                      // hoisted lambda for a function
+                                      // that has a captured closure,
+                                      // need to emit a transition
+                                      // function. 
+
+/* Add All **AST Flags** that must be masked from definition before
+   setting onto the use cases */
+
+#define MASK_FLAGS_FROM_USE    (TVAR_IS_DEF | ID_IS_CTOR |	\
+				DEF_IS_ENTRYPT | ID_OBSERV_DEF)
+#define MASK_FLAGS2_FROM_USE   (ID_IS_CAPTURED)
+
+struct AST;
+struct envSet : public Countable{
+  GCPtr<Environment<AST> > env;
+  GCPtr<Environment<TypeScheme> > gamma;
+  GCPtr<Environment< sherpa::CVector<GCPtr<Instance> > > > instEnv;
+  
+  envSet()
+  {
+    env = NULL;
+    gamma = NULL;
+    instEnv = NULL;
+  }
+
+  envSet(GCPtr<Environment<AST> > _env, GCPtr<Environment<TypeScheme> >_gamma,
+	 GCPtr<Environment< sherpa::CVector<GCPtr<Instance> > > > _instEnv)
+  {
+    env = _env;
+    gamma = _gamma;
+    instEnv = _instEnv;
+  }
+
+  envSet(envSet &envs)
+  {
+    env = envs.env;
+    gamma = envs.gamma;
+    instEnv = envs.instEnv;
+  }
+
+  void
+  updateKey(const std::string from, const std::string to)
+  {
+    env->updateKey(from, to);
+    gamma->updateKey(from, to);
+  }
+};
+
+}
+
+%members {
+ private:  
+  static unsigned long long astCount;
+  
+ public:
+  unsigned long long ID; // Unique ID of this AST
+
+  LitValue litValue;
+  unsigned long litBase;
+  
+  IdentType identType;
+  unsigned long Flags;
+  unsigned long Flags2;
+
+  unsigned printVariant;	// which syntax to use for pretty printing
+
+  GCPtr<TypeScheme> scheme;		// defining occurrences only
+  GCPtr<Type> symType;		// the (pre-unified) type
+  GCPtr<AST> symbolDef;
+  NoGCPtr <UocInfo> uoc;  
+
+  bool isDecl;                  // is This a declaration or definition?
+
+  bool isGlobal() { return (Flags & ID_IS_GLOBAL); }
+  bool isFnxn(); // Function
+  size_t nBits();
+  bool isTopLevelForm();
+  bool leadsToTopLevelForm();
+  void clearTypes(); // Clear the sumType and scheme fields 
+                     // of this AST and ALL children RECURSIVELY.
+                     // This needs to be done before re-typing an
+                     // expression, for example post-clconv
+                     // otherwise, old types will infulence
+                     // new type records.
+ 
+  // If this is a declaration, and a definition for it has been
+  // seen, then defn points to the definition.
+  GCPtr<AST> defn;  // Pointer to the definition, on a declaration AST 
+  GCPtr<AST> decl;  // Pointer to the definitive declaration (the first
+              // one), on a definition AST.   
+
+  // If this is a global identifier, fqn is its canonical fully
+  // qualified name. The interface component of an fqn is the
+  // IFNAME of the interface in which the symbol was defined.
+  // the ident component is the identifier under which the
+  // symbol was defined at the point of its original definition,
+  // which may or may not be the name that it has in any other
+  // environment (because USE may have aliased it under a different
+  // name).
+  FQName fqn;                 // CANONICAL fully qualified name
+  std::string externalName;	// non-empty if 'external IDENT'
+
+  // The IFNAME of an interface in the case of import and provide
+  std::string ifName;
+
+  // A set of environments associated with this ast. 
+  // The content depend on the context. 
+  // In the case of at_import/atr_provide:
+  //   Environments of imported interface
+  // In the case of at_let, at_letrec, at_letStar, at_define ...
+  //   Environments at that point 
+  envSet envs;
+
+  // For Polyinstantiation:. // CHANGED THIS TO GCPTR
+  GCPtr< sherpa::CVector<spStruct *> > special;
+  // If this is the root of a polymorphic expression, stores a 
+  // pointer to all specializations.
+  bool polyinst; // Polyinstantiation Marker (donelist) to avoid 
+                 // infinite recursion.
+  bool reached; 
+  GCPtr<AST> defForm; // defIdent->defining form pointer .
+  // defForm has context sensitive meaning. 
+  // This is basically a hack in the absence of parent pointers, where
+  // I must reach back into the definition and get the defining form,
+  // or some form of a containing datastructure.
+  // 
+  // In the case of top-level expressions, we use it to get the 
+  // entire defining form from the identifier being defined
+  // 
+  // (def  defIdent ... )
+  // ^        |
+  // |________|
+  //   defForm
+  // 
+  // In the case of let-expressions:
+  // (The quoted phrases are just ast-types not syntax.)
+  //  _______________      __________________
+  // |   defForm     |     |   defForm       |  
+  // v               |     v                 |
+  // (define   ... (let .. ("letbindings" ("letbinding" ident ... ))))
+  //               ^             |        ^               | 
+  //               |_____________|        |_______________|
+  //                  defForm                 defForm
+  //
+  //     ___________
+  //    |           |
+  //    v           | 
+  //  (switch ... ("sw_leg" id ...) ...)
+  //                  ^    |
+  //                  |____|
+  //     _____      __________
+  //    |     |    |          |
+  //    v     |    v          | 
+  //  (do ("dobindings"  ("dobinding" id ...) ...)
+  //                             ^     |
+  //                             |_____|
+  //
+  //
+
+  GCPtr<AST> defbps; // used in the case of loop, tail-recursion
+  
+  GCPtr<Type> tagType;   // Type of the tag in case of unions
+  size_t field_bits; // No. of bits in a bitfield type
+  // Also propagated updards onto: 
+  //   at_field, at_fill, at_reserved, tagtype (declare) at_declares,
+  //   Identifier of at_defunion 
+  
+  size_t unin_discm; // on at_field only when the field is a part
+                     // of a union discriminator (FLD_IS_DISCM)
+  size_t total_fill; // on a at_defstruct or at_constructor only
+                     // contains total number of fill bits
+                     // that is not a reported by the type record.
+
+  GCPtr<TypeScheme> stSigma; // Union constructors only
+                       // TypeSchemes for the corresponding
+                       // Structure definitions.                          
+  GCPtr<AST> stCtr;          // Pointer to the constructor that
+                       // holds such a structure.
+
+  // Tracking scope of type-variables.
+  GCPtr<AST> tvarLB;         // LB at which this tvar is scoped
+  GCPtr<AST> parentLB;       // LB within which this at_letbindings is
+  // contained, everything is contained within the top-level
+  // definition. The resolver marks the above two markers. No need to
+  // worry about them in copy-operations.
+
+  static GCPtr<AST> makeBoolLit(const sherpa::LToken &tok);
+  static GCPtr<AST> makeIntLit(const sherpa::LToken &tok);
+  static GCPtr<AST> makeStringLit(const sherpa::LToken &tok);
+  static GCPtr<AST> makeCharLit(const sherpa::LToken &tok);
+  static GCPtr<AST> makeFloatLit(const sherpa::LToken &tok);
+
+  // Disengage a children[]  AST
+  void disown(size_t s);
+  
+  // Generate an identifier AST with a newly generated internal name.
+  // This will not have any particular type assigned to it, and is
+  // intended to be used in the front end passes before the type
+  // checker is involved.
+  static GCPtr<AST> genIdent(const char *pfx = "tmp", const bool isTV = false);
+
+  // Generate an at_ident AST providing a temporary symbol that is
+  // type-compatible with the type of the passed AST /lhs/.
+  static GCPtr<AST> genSym(GCPtr<AST> lhs, 
+		     const char *pfx="tmp",
+		     const bool isTV = false);
+
+  std::string atKwd() const;
+
+  // *Append* all ident ASTs from a Binding-pattern to the ids vector. 
+  // if getPattern is true, it adds the identPattern ASTs
+  // instead of ident ASTs
+  void getIds(std::ostream &errStream, 
+	      GCPtr<sherpa::CVector<GCPtr<AST> > > ids,
+	      bool getPattern = false);  
+  GCPtr<Type> getType(); 
+  GCPtr<const Type> getType() const;
+  
+  GCPtr<AST> getCtr(); // Union constructors may be written as Ctr or
+  // union.Ctr, this function returns the pure constructor.
+
+  // Given a defining occurrence, return an AST for the use occurrence.
+  GCPtr<AST> Use();
+
+  // The copy constructor -- make an exact (except ID) shallow copy.
+  AST(GCPtr<AST> ast, bool shallowCopyChildren=true);
+
+  // Makes an exact copy, deep, including symbolDef, type, etc.
+  GCPtr<AST> getTrueCopy();
+
+  // Makes an exact copy, deep, but clear symbolDef, type, etc.
+  GCPtr<AST> getDCopy();
+
+  // Set myself to another, mutator (probably a bad idea).
+  void set(GCPtr<AST> ast);
+
+  // Rename identifier `from' to `to' within `this' AST
+  // Rename is based on symbolDef. `from' must be a defining form. If
+  // (and only if) `from' is found within `this' AST, 
+  // it is also renamed.  
+  void rename(GCPtr<AST> from, std::string newName);
+
+  std::string asString() const;
+  std::string mangledString() const;
+
+  GCPtr<AST> getID();
+  bool isUnionLeg();
+  bool isMethod();
+
+  void PrettyPrint(std::ostream& out, bool decorated = false) const;
+
+  // For use in GDB:
+  void PrettyPrint(bool decorated) const;
+} 
+
+%sourcetop {
+#include "Type.hxx"
+#include "Special.hxx"
+#include "UocInfo.hxx"
+
+using namespace sherpa ;
+unsigned long long AST::astCount = 0;
+}
+
+
+// If this section changes, please update the
+// copy-constructor. ASTMaker does not automatically do it. 
+%construct {
+  ID = ++(AST::astCount);
+  identType = id_unresolved;
+  Flags = 0x0u;
+  Flags2 = 0x0;
+  isDecl = false;
+  polyinst = false;
+  reached = false;
+  scheme = 0;
+  symType = 0;
+  symbolDef = 0;
+  // uoc = 0;
+  defn = 0;
+  special = 0;
+  defForm = 0;
+  defbps = 0;
+  decl = 0;
+  printVariant = 0;		// until otherwise stated
+  tagType = 0;
+  field_bits = 0;
+  unin_discm = 0;
+  total_fill = 0;
+  tvarLB = 0;
+  parentLB = 0;
+}
+
+// AST built for version 0.9
+// Section Numbers indicated within []
+
+// NOTE that if you add a new convenience AST, you need to make provision
+// to get rid of it in Simplify.cxx::astSimp()
+
+/* Use LEAF declarations for literals. */
+
+// IDENTIFIERS [2.2]
+LEAF ident;
+LEAF ifident;
+GROUP var = ident | usesel;
+AST usesel = ident ident;
+
+// LITERALS [2.4]
+GROUP literal = charLiteral | boolLiteral 
+              | intLiteral  | floatLiteral 
+              | stringLiteral;
+
+//BOOLEAN LITERALS ???
+LEAF boolLiteral;
+// CHARACTRE LITERALS [2.4.3]
+LEAF charLiteral;
+// INTEGER LITERALS [2.4.1]
+LEAF intLiteral;
+// FLOATING POINT LITERALS [2.4.2]
+LEAF floatLiteral;
+// STRING LITERALS [2.4.4]
+LEAF stringLiteral;
+
+// TYPE VARIABLES [3.3]
+GROUP tvar = ident;
+
+// COMPILATION UNITS [2.5]
+AST start = CompilationUnit version?;
+GROUP CompilationUnit = module | interface;
+
+// VERSION [2.5]
+AST version = stringLiteral;
+
+// MODULES [2.5]
+AST module = definition*;
+// INTERFACES [8.1]
+AST interface = ident definition*;
+
+
+// TOP LEVEL DEFINITIONS [2.5.1]
+GROUP definition = type_definition | value_definition | if_definition
+                   | tc_definition;
+
+GROUP type_definition = defunion | defstruct
+                      | declunion | declstruct 
+                      | declrepr | defrepr
+                   /*  | deftype  */
+                      | defexception;
+GROUP tc_definition = deftypeclass | definstance;
+GROUP value_definition = define;
+GROUP if_definition = proclaim 
+                    | import | provide
+                    | declare | use;
+
+// NEWUNION TYPES [3.6.2]                
+AST defunion = ident tvlist category declares constructors constraints;
+AST declunion = ident tvlist category constraints;
+
+// STRUCTURE TYPES [3.6.1]           
+AST defstruct = ident tvlist category declares fields constraints;
+AST declstruct = ident tvlist category constraints;
+
+// REPR TYPES [3.6.1]           
+//AST defrepr = ident tvlist category declares reprbody constraints;
+//#AST declrepr = ident tvlist category constraints;
+//GROUP reprbodyitem = reprtag | field | fill | reprcase;
+//AST reprbody = reprbodyitem+;
+//AST reprcase = reprcaselegR+;
+//AST reprcaselegR = reprbody ident+;	// note reversal!
+//AST reprtag = ident+;
+AST defrepr = ident category declares reprctrs;
+AST declrepr = ident category;
+AST reprctrs = reprctr+;
+AST reprctr = constructor reprrepr+;
+AST reprrepr = ident intLiteral;
+
+// UNION/STRUCT Categories
+LEAF refCat;
+LEAF valCat;
+LEAF opaqueCat;
+GROUP category = refCat | valCat | opaqueCat;
+
+// EXCEPTION DEFINITION [3.10]
+AST defexception = ident field*;
+
+// // TYPE ALIASES (deftype)  [13]
+// AST deftype = ident tvlist type;
+
+// TYPE CLASS DEFINITION [4.1]
+AST deftypeclass = ident tvlist tcdecls method_decls constraints;
+AST tcdecls = tyfn*;
+AST tyfn = fnargVec tvar;
+AST tcapp = var type+;
+AST method_decls = method_decl*;
+AST method_decl = ident fn;
+AST qualType = constraints type;
+AST constraints = tcapp*;
+
+// TYPE CLASS INSTANTIATIONS [4.2]
+AST definstance = tcapp methods constraints; 
+AST methods = expr*;
+
+// USE [8.2]
+AST use = use_case+;
+AST use_case = ident var;
+
+// PROCLAIM DEFINITION -- VALUES [6.2]
+AST proclaim = ident qtype constraints;
+
+// DEFINE  [5.1]
+AST define = identPattern expr constraints;
+
+// IMPORT DEFINITIONS [8.2]
+AST import = ident ifident;
+AST provide = ident ifident;
+ 
+// DECLARES cannot be empty from the input, but we do insert
+// empty DECLARES nodes in the parser for the sake of positional 
+// regularity.
+AST declares = declare*;
+AST declare = ident type?;
+
+AST tvlist = tvar*;
+
+AST constructors = constructor+;
+AST constructor = ident fielditem*;
+
+GROUP fielditem = field | fill;
+AST fields = fielditem*;
+AST field = ident type;
+AST fill = type;
+AST reserved = type intLiteral;
+
+// Qualified Type
+GROUP qtype = qualType | type;
+
+// argVec is not able to appear in a "type" position.
+GROUP type = var | tvar | bitfield | refType | valType 
+           | fn | primaryType | dummyType
+           | arrayType | vectorType | typeapp 
+           // | closureType;
+           | mutableType | exceptionType; 
+
+// PRIMARY TYPES [3.2]             
+AST bitfield = primaryType intLiteral;
+
+// REF TYPES [3.4.1]               
+AST refType = type;
+// VAL TYPES [3.4.2]
+AST valType = type;
+// FUNCTION TYPES [3.4.3]
+AST fn = fnargVec type;
+// PRIMARY TYPES [???]
+LEAF primaryType;
+// vectors of argument bindings (for LAMBDA)
+AST argVec = identPattern*;
+// vectors of argument type (for FN)
+AST fnargVec = type*;
+// ARRAY TYPE [3.5.1]                 
+AST arrayType = type intLiteral;
+// VECTOR TYPE [3.5.2]               
+AST vectorType = type intLiteral?;
+// MUTABLE TYPE [3.7]              
+AST mutableType = type;
+// TYPE CONSTRUCTORS (typapp)
+AST typeapp = var type+;
+// EXCEPTION TYPE
+LEAF exceptionType;
+
+// Dumy types
+LEAF dummyType;
+ 
+AST identPattern = var qtype?;
+
+
+// TYPE QUALIFIED EXPRESSIONS  [7.3]
+GROUP expr = eform | tqexpr;
+GROUP expr_or_define = expr | define;
+AST tqexpr = eform type;
+
+// EXPRESSIONS [7]
+GROUP eform = literal | var | unit
+            | array | vector | makevectorL 
+            | begin | select
+            | array_nth | vector_nth
+            | array_length | vector_length 
+            | lambda | suspend
+            | apply | struct_apply | ucon_apply
+            | if | and | or | not | cond | switchR
+            | setbang | dup | deref 
+	    | tryR | throw | let | letStar | letrec 
+ 	    | container | do 
+	    | mkClosure | allocREF | copyREF | setClosure
+            // | loop | typecase | casebang 
+            ; 
+
+// Union constructors
+GROUP ucon = var | select;
+
+// UNIT EXPRESSIONS
+LEAF unit;
+
+// SUSPENDED EXPRESSIONS
+AST suspend = var expr;
+
+// MAKE-VECTOR [7.4.2] 
+AST makevectorL = expr expr;
+
+// VECTORS [7.4.3]
+AST vector = expr+;
+
+// ARRAYS [7.4.3]
+AST array = expr+;
+
+// BEGIN [7.5] 
+AST begin = expr_or_define+;
+
+// MEMBER [7.7]
+AST select = expr ident;
+
+// ARRAY-NTH [7.8.2]          
+AST array_nth = expr expr;
+// VECTOR-NTH [7.8.2]          
+AST vector_nth = expr expr;
+// ARRAY-LENGTH [7.8.1]
+AST array_length = expr;
+// VECTOR-LENGTH [7.8.1]
+AST vector_length = expr;
+
+// LAMBDA [7.9]
+AST lambda = argVec expr;
+// APPLICATION [7.10]          
+AST apply = expr expr*;
+AST struct_apply = var expr+;
+AST ucon_apply = ucon expr+;
+
+// IF [7.11.1]
+AST if = expr expr expr;
+// AND [7.11.2]                  
+AST and = expr+;
+// OR [7.11.3]
+AST or = expr+;
+// NOT [7.11.2]                  
+AST not = expr;
+// COND [7.11.4]           
+AST cond = cond_legs otherwise;
+AST cond_legs = cond_leg*;
+AST cond_leg = expr expr;
+AST otherwise = expr;
+
+// SET! [7.12.1]                 
+AST setbang = expr expr;
+
+// READ-ONLY [7.12.2]
+// DEREF [7.13.2]                
+AST deref = expr; 
+// DUP
+AST dup = expr;
+
+// CLOSURE TYPE (compiler-internal)
+//AST closureType = fn+;
+// Alloc, initialize closures (compiler-internal)
+AST allocREF = type; 
+AST copyREF = expr expr;
+AST mkClosure = expr ident;
+AST setClosure = ident expr expr+;
+
+// SWITCH
+AST switchR = expr sw_legs ow ident?;
+AST sw_legs = sw_leg+;
+AST sw_leg = ident expr ucon+;
+GROUP ow = otherwise | Null;
+
+/* // TYPECASE  [11]            
+AST typecase = typecase_leg+;
+AST typecase_leg = identPattern expr;*/
+
+// TRY/CATCH [7.15.1]
+AST tryR = expr sw_legs ow ident?;
+// THROW  [7.15.2]               
+AST throw = expr;
+
+// LET [7.16.1]                  
+AST let = letbindings expr constraints;
+AST letbindings = letbinding+;
+AST letbinding = identPattern expr;
+// LETREC [7.16.2]               
+AST letrec = letbindings expr constraints;
+
+// DO [7.6]
+AST do = dobindings dotest expr;
+AST dobindings = dobinding*;
+AST dobinding = identPattern expr expr;
+AST dotest = expr expr;
+
+// COMPILER INTERNAL:
+// LOCALFRAME -- this is a backend AST
+AST localFrame = frameBindings expr;
+AST frameBindings = identPattern*;
+
+// letStar is not a letStar. It is an internal representation.
+// types are NOT generalize
+AST letStar = letbindings expr;
+AST identList = ident*;
+AST container = identList expr;
+
+AST docString = stringLiteral?;
+
+// This is only used internally within the type checker
+LEAF letGather;

@@ -1,0 +1,48 @@
+(bitc-version "0.9+")
+
+(import stdio bitc.stdio)
+
+(defunion (mylist 'a)
+  (declare (tag-type uint8))
+  mynil
+  (mycons car:'a cdr:(mylist 'a)))
+
+(define i0 (the int32 0))
+(define i1 (the int32 1))
+
+(defunion myUnin
+  (declare (tag-type (bitfield uint32 2)))  
+  mc10
+  mc11
+  (mc12 u:myUnin)
+  )
+
+(defunion myUnin2
+  mc21
+  mc22
+  mc23
+  (mc24 u:myUnin2)
+  )
+
+(defunion myUnin3
+  (mc31 i:int32 b1:bool b2:bool)
+)
+
+(defunion myUnin4
+  mc41
+)
+
+(define (main argVec:(vector string)) 
+  (begin
+    mc10
+    (stdio.write-int32 stdio.stdout
+		       (case (mc24 mc21)
+			 (mc21 (the int32 21))
+			 (mc22 22)
+			 (mc23 23)
+			 ((mc24 x) 24)))
+    (stdio.write-char stdio.stdout #\{linefeed})
+    (mc31 10 #t #f)
+    mc41
+    (mycons i0 (mycons i1 mynil))
+    i0))

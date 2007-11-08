@@ -1,0 +1,740 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <article id="mutinfer" 
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <docinfo twocolumn='yes' ptsz='default' latex.documentclass="acm_proc_article-sp">
+    <title>Programming Language Challenges in Systems Codes</title>
+    <subtitle>Why Systems Programmers Still Use C, and What to Do
+      About It</subtitle>.
+    <authorgroup>
+      <author>
+	<firstname>Jonathan</firstname>
+	<surname>Shapiro</surname>
+	<degree>Ph.D.</degree>
+      </author>
+      <affiliation>
+	<orgname>Systems Research Laboratory</orgname>
+	<address>Department of Computer Science</address>
+	<address>Johns Hopkins University</address>
+      </affiliation>
+    </authorgroup>
+    <pubdate>October 22, 2006</pubdate>
+    <categories>
+      <category>dev/misc</category>
+    </categories>
+    <synopsis>
+      <p>
+        Discussion about Challenges involved in polymorphic type
+        inference in the presence of unboxed mutability.
+      </p>
+    </synopsis>
+  </docinfo>  
+  <abstract latex.incolumn="yes">
+    <p>
+      There have been major advances in programming languages over the
+      last 20 years. Given this, it seems appropriate to ask why
+      systems programmers continue to largely ignore these
+      languages. What are the deficiencies in the eyes of the systems
+      programmers? How have the efforts of the programming language
+      community been misdirected (from their perspective)? What
+      can/should the PL community do address this?
+    </p>
+    <p>
+      As someone whose research straddles these areas, I was asked to
+      give a talk at this year's PLOS workshop. What follows are my
+      thoughts on this subject, which may or not represent those of
+      other systems programmers.
+    </p>
+  </abstract>
+
+  <!-- <toc/> -->
+
+  <sect1>
+    <title>Introduction</title>
+    <p>
+      Modern programming languages such as ML&nbsp;<cite
+      ref="milner97definition"/> or Haskell&nbsp;<cite
+      ref="peytonjones2003haskellrevisedreport"/> provide newer,
+      stronger, and more expressive type systems than 
+      systems programming languages such as C&nbsp;<cites>
+	<cite ref="Kernighan1988C"/>
+	<cite ref="ISO1999ANSI-C"/>
+      </cites>
+      or Ada&nbsp;<cite ref="ISO1995Ada"/>.  Why have they been of so
+      little interest to systems developers, and what can/should we do
+      about it?
+    </p>
+    <p>
+      As the primary author of the EROS system <cite
+        ref="shap1999fastcapsystem"/> and its successor Coyotos <cite
+        ref="shapiro2006coyotos"/>, both of which are high-performance
+        microkernels, it seems fair to characterize myself primarily
+        as a hardcore systems programmer and security
+        architect. However, there are skeletons in my closet. In the
+        mid-1980s, my group at Bell Labs developed one of the first
+        large commercial C++ applications &mdash; perhaps <em>the</em>
+        first.  <!-- Our project generated feedback into the C++
+        design --> <!-- process, and later versions of the language
+        introduced --> <!-- features that are in some measure my
+        fault.  --> My early involvement with C++ includes the first
+        book on reusable C++ programming <cite
+        ref="shapiro1999toolkit"/>, which is either not well known or
+        has been graciously disregarded by my colleagues.
+    </p>
+    <p>
+      In this audience I am tempted to plead for
+      mercy on the grounds of youth and ignorance, but having been an
+      active advocate of C++ for so long this entails a certain degree
+      of <foreignphrase>chutzpah</foreignphrase>.<footnote>
+        <p>
+          <foreignphrase>Chutzpah</foreignphrase> is best defined by
+          example. Chutzpah is when a person murders both of their
+          parents and then asks the court for mercy on the grounds
+          that they are an orphan.
+        </p>
+      </footnote>
+      There is hope.  Microkernel developers seem to have abandoned
+      C++ in favor of C. The book is out of print in most countries,
+      and no longer encourages deviant coding practices among
+      susceptible young programmers.
+    </p>
+    <p>
+      <leadin>A Word About BitC</leadin> Brewer <foreignphrase>et
+      al.</foreignphrase>'s cry that <doctitle>Thirty Years is Long
+      Enough</doctitle> <cite ref="brewer2005thirty"/> resonates.  It
+      really <em>is</em> a bit disturbing that we are still trying to
+      use a high-level assembly language created in the early 1970s
+      for critical production code 35 years later.  But Brewer's
+      lament begs the question: why has no viable replacement for C
+      emerged from the programming languages community? In trying to
+      answer this, my group at Johns Hopkins has started work on a new
+      programming language: BitC. In talking about this work, we have
+      encountered a curious blindness from the PL community.
+    </p>
+    <p>
+      We are often asked ``Why are you building BitC?'' The tacit
+      assumption seems to be that if there is nothing fundamentally
+      new in the language it isn't interesting.  The BitC goal isn't
+      to invent a new language or any new language concepts. It is to
+      integrate existing concepts with advances in prover technology,
+      and reify them in a language that allows us to build stateful
+      low-level systems codes that we can reason about in varying
+      measure using automated tools. The feeling seems to be that
+      everything we are doing is straightforward (read:
+      uninteresting). Would that it were so.
+    </p>
+    <p>
+      Systems programming &mdash; and BitC &mdash; are fundamentally
+      about engineering rather than programming languages.  In the
+      1980s, when compiler writers still struggled with inadequate
+      machine resources, engineering considerations were respected
+      criteria for language and compiler design, and a sense of
+      ``transparency'' was still regarded as important.<footnote>
+        <p>
+          By ``transparent,'' I mean implementations in which the
+          programmer has a relatively direct understanding of
+          machine-level behavior.
+        </p>
+      </footnote> By the time I left the PL community in 1990, respect
+      for engineering and pragmatics was fast fading, and today it is
+      all but gone. The concrete syntax of Standard ML <cite
+      ref="milner97definition"/> and Haskell <cite
+      ref="peytonjones2003haskellrevisedreport"/> are every bit as bad
+      as C++. It is a curious measure of the programming language
+      community that nobody cares. In our pursuit of type theory and
+      semantics, we seem to have forgotten pragmatics and
+      usability. Transparency gave way to abstraction, and then to
+      opacity. The systems programmer <em>requires</em> an intuitive
+      model of what is happening on the machine at the source code
+      level.
+    </p>
+    <p>
+      If indeed it turns out that BitC has nothing new, I think that
+      my group will be very well pleased.  Unfortunately, there
+      <em>are</em> going to be innovations in BitC, and this talk will
+      try to explore some of the factors that are driving us.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Defining Terms</title>
+    <p>
+      Before proceeding further, it seems appropriate to define what I
+      mean by ``systems programming'' &mdash; or more precisely, by
+      ``systems programs.'' These programs seem to have several common
+      properties:
+    </p>
+    <p>
+      <leadin>Systems programs operate in constrained memory.</leadin>
+      This is obvious in embedded systems, but modern general-purpose
+      kernels operate very near the limits of available virtual
+      memory. On a 32-bit IA-32 class machine with a fully populated
+      64 gigabyte physical memory, it is <em>extremely</em> difficult
+      to get the per-page book-keeping data structures to fit within a
+      0.5 gigabyte kernel virtual region. Two-space storage managers
+      are simply unthinkable, and the majority of the reachable kernel
+      working set cannot be mapped into the virtual address space at
+      any given time. The implications for garbage collectors are
+      unpleasant.
+    </p>
+    <p>
+      <leadin>Systems programs are strongly driven by bulk I/O
+        performance.</leadin> In applications that move large amounts
+        of data, the goal is to have <em>zero</em> copies of that
+        data, even as headers and trailers are being added to that
+        data. This is typically done by designing a data structure
+        that reserves space for the headers and trailers in advance,
+        which entails the creation of pointers that do not point to
+        the beginning of an object.  Worse, these objects may be
+        multiply aliased in both the virtual and physical maps
+        (e.g. by DMA). Those aliases that are held by hardware require
+        explicit management. Data may be gathered or scattered in the
+        course of handling. It is often desirable for these
+        sub-objects to reference the storage of the original. The
+        implications for property checking are distressing.
+    </p>
+    <p>
+      <leadin>Performance matters.</leadin> At
+      least in the critical paths of systems programs, the addition of
+      only a few cache references &mdash; or worse, cache misses
+      &mdash; in an inner loop can mean the difference between winning
+      and losing customers. It follows that <b>data representation
+      matters</b>.
+    </p>
+    <p>
+      This is not especially true in client-side code, where languages
+      like Java and C# are establishing success. On the desktop,
+      computons are available in excess and the limiting factor in
+      performance is generally the user, who is a surprisingly slow
+      peripheral.  The corresponding servers, however, must serve
+      thousands of these clients simultaneously, and must do so
+      without excessive memory requirements. They must also be cooled.
+    </p>
+    <p>
+      In systems code, the effect of representation and data placement
+      can be extreme. Bonwick <foreignphrase>et al.</foreignphrase>
+      discuss some of these effects <cite
+      ref="bonwick2001magazines"/>, noting that the performance of
+      system-level benchmarks can change by 50% through careful
+      management of cache residency and collisions.
+    </p>
+    <p>
+      <leadin>Systems Programs Retain State.</leadin> The most common
+      pattern in systems programs is event loops. While there is
+      short-lived data within these processing loops, the pattern
+      overall is that there are (relatively) large amounts of state
+      that live for the duration of the event processing cycle. This
+      tends to penalize the performance of automatic storage
+      reclamation strategies. To make matters more interesting, there
+      are caches. These update frequently enough that ``old space''
+      techniques may not perform well, but are large enough that
+      scanning them can be quite expensive. Our experiences with the
+      Boehm collector in OpenCM were that storage leaked very
+      liberally &mdash; enough so to crash the OpenCM server
+      frequently. It follows that <b>user-managed storage is a
+      requirement</b>, but perhaps not in fully general form.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Four Fallacies</title>
+    <p>
+      <leadin>Factors of 1.5 to 2 don't matter.</leadin> It is sometimes
+      argued that a factor of 1.5 to 2 isn't important. CPUs continue
+      to increase in speed,  and surely this will make up the gap.
+    </p>
+    <p>
+      The facts say otherwise. The annual cost to operate a large
+      banking data center today is $150,000 per square foot. It is by
+      far the most expensive real estate in the world, and more than
+      one third of that cost is the cost of cooling the data
+      center. The general rule of thumb is that power is proportional
+      to V<sup>2</sup>F: the square of the voltage times the
+      frequency. Most of this power is wasted as heat. To a system's
+      programmer, the cost of doubling the clock rate is $50,000 per
+      square foot per machine room. Raising the clock rate decidedly
+      isn't free, and walking into the network distribution closet at
+      your business or school will quickly convince you that
+      <em>current</em> power usage is excessive.
+    </p>
+    <p>
+      <leadin>Boxed representation can be optimized away.</leadin>
+      Biagioni's remarkable success with a TCP/IP implementation in
+      Standard ML <cite ref="biagioni1994structured"/> is sometimes
+      used to support the contention that the compiler can manage
+      representation issues. Derby's technical report <cite
+      ref="derby1999foxnet"/> is more revealing. On interactive
+      traffic, FoxNet achieves 0.00007 times the performance of the
+      then-current UNIX network stack. That is not a typo. On
+      <em>large</em> blocks, which is by far the cheapest case to
+      implement, FoxNet imposes <em>11 times</em> the CPU load of the
+      network stack implemented in C. Large block processing costs are
+      dominated by memory bandwidth, not software overheads. As
+      Blackwell discusses <cite ref="blackwell96speeding"/>,
+      processing overhead on smaller packets is necessarily much
+      higher.
+    </p>
+    <p>
+      Further work will certainly improve on Bagioni's results, but
+      the UNIX stack is much faster now than it was then too.
+      Ultimately, the reason for this is that the UNIX networking
+      stack exploits three unsafe strategies: (1) the ability to
+      directly express data representation that carefully respects
+      that behavioral constraints of the data cache, (2) the ability
+      to alias the insides of data structures, and (3) explicit
+      storage management in the form of recycled buffer and header
+      data structures &mdash; this is not merely a storage
+      optimization. The buffer structures have alignment and virtual
+      memory address binding constraints that enable them to exploit
+      direct DMA.
+    </p>
+    <p>
+      There appears to be a fundamental expressiveness problem here:
+      because DMA is involved, data structure alignment and virtual
+      address binding constraints are not merely matters of
+      convenience or performance. They are requirements of
+      correctness. I am not aware of any managed storage approach that
+      is likely to perform well while supporting this type of
+      constraint.
+    </p>
+    <p>
+      <leadin>The optimizer can fix it.</leadin> Hypothetically,
+      modern commodity processors can sustain a 3 to 4 instruction
+      issue rate per cycle. This may or may not be typical of
+      applications codes in the wild. It certainly is <em>not</em>
+      true of kernel code, where (a) a very large proportion of
+      branches are data dependent, and (b) neither the compiler nor
+      the hardware are able to establish any useful issue distance
+      between the load of that data and the branch nor schedule other
+      instructions between them. For embedded processors, of course,
+      considerations of power still dominate, and out-of-order issue
+      implementations remain quite rare.
+    </p>
+    <p>
+      For microkernels, an issue rate of 1.5 to 1.7 in the critical
+      path is extremely hard to achieve, <em>and can generally be
+      obtained only with carefully hand-optimized code</em>. This
+      optimization frequently entails exploiting non-obvious
+      conditions that the programmer knows, as a matter of
+      application-specific invariants, correspond to the tests that
+      would naturally have been written in a more ``direct''
+      implementation. In the microkernel IPC path, it is generally
+      agreed that C code is not fast enough and carefully hand-tuned
+      assembly code is needed. Writing this kind of code in a language
+      like ML simply isn't an option.
+    </p>
+    <p>
+      I emphasize that the problem here is not merely a matter of
+      applying global optimization. Compilers have a difficult time
+      generating code when instruction selection is tightly
+      constrained, and the optimization strategy available to the
+      compiler does not have access to application-specific invariants
+      that are known to the programmer. In any case, the control paths
+      of systems code are dominated by proximate data
+      dependencies. There is relatively little automatable
+      optimization to be had in these codes. The best way for the
+      programming language designer to help is to ensure that the
+      language can express algorithms that have a direct and
+      transparent transformation into low-level assembly code.
+    </p>
+    <p>
+      <leadin>The legacy problem is insurmountable.</leadin> It is a
+      popular assertion that so much code is written in C and C++ that
+      we are stuck with them forever. People said the same thing about
+      MVS, and later UNIX. From this axiom, we may directly derive the
+      conclusion that Windows, Linux, Java, and C# do not exist. The
+      reality, of course, is that each of these systems started from
+      scratch and succeeded.  While it <em>is</em> comforting to think
+      of them as the products of mass delusion, life is what happens
+      while logicians are making other plans.
+    </p>
+    <p>
+      It is okay to start from
+      scratch.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Challenges</title>
+    <p>
+      <leadin>Application constraint checking</leadin>
+      The wonder of systems codes is that they work at all, and it may
+      be instructive to speculate on why this is so. Operating system
+      kernels and databases, for example, seem to be characterized by
+      a rich invariant structure. Some examples from the EROS kernel
+      (see <cite ref="shap2002groundup"/>):
+    </p>
+    <ul>
+      <li>
+        <p>
+          <leadin>Atomicity</leadin> No path may make a semantically
+          observable change to kernel state until all preconditions
+          are satisfied. When preconditions are satisfied, a ``commit
+          point'' is declared and semantically significant mutation
+          can occur.
+        </p>
+      </li>
+      <li>
+        <p>
+          <leadin>Fail-Fast</leadin> Following a commit point, a
+          system call may result in a valid response or an architected
+          error. Any runtime error must be handled by an immediate
+          system restart <em>without</em> allowing state to be
+          committed to persistent store.
+        </p>
+      </li>
+      <li>
+        <p>
+          <leadin>Caching Constraint</leadin> If a capability to an
+          object is in the ``prepared'' state, the target object must
+          be in memory.
+        </p>
+      </li>
+    </ul>
+    <p>
+      Other systems have very different constraints. The point is that
+      all operating systems <em>have</em> such constraints, and their
+      developers maintain a mental list of these constraints while
+      programming. This serves to impose a human-implemented check on
+      the process of coding. It <em>should</em> be possible in
+      principle to annotate programs in a way that lets these
+      constraints be <em>automatically</em> checked. Hao Chen and I
+      did some initial work in this direction <cite
+      ref="chen2004build"/> with promising success, but concluded that
+      capture of application-specific invariants requires something
+      much richer than a simple model checker. This ultimately
+      motivated our work on BitC.  SLAM <cite
+      ref="ball2002debugging"/> is an interesting step in the right
+      direction, but it is not straightforward for end-developers to
+      extend its properties.  Ultimately, any tool that operates on C
+      code faces an imprecise language, a weak type system, and
+      undecipherable aliasing effects. C wasn't designed as a language
+      to facilitate the expression of global properties.
+    </p>
+    <p>
+      <leadin>Idiomatic Manual Storage</leadin> While systems programs
+      use manual storage management, they do so in highly idiomatic
+      ways. When combined with a rich application-defined constraint
+      environment, much of the storage management behavior of a modern
+      operating system kernel should be checkable. The challenge is to
+      provide mechanisms in the programming language (more precisely:
+      in a constraint metalanguage) that allow programmers to
+      <em>express</em> these constraints.  One difficulty is that
+      global constraints are difficult to express using pre- and
+      post-conditions, because these are constrained by what is
+      lexically in scope.  Finding richer ways to deal with this is
+      one of the things that we will be experimenting with in BitC.
+    </p>
+    <p>
+      <leadin>Representation</leadin> It is hopefully clear by now
+      that direct control over data structure representation is
+      essential in systems programs. The semantics of unboxed
+      datatypes is straightforward, but few modern language designers
+      seem to feel that representation is significant. Related to
+      this, there is a tendency to eliminate multiple fixed-precision
+      integral types, which are the primary types used by systems
+      codes.  Diatchki <foreignphrase>et al.</foreignphrase> <cite
+      ref="Diatchki2005Representation"/> have made an interesting
+      start on the representation problem. BitC is a more
+      comprehensive approach, and by and large we have not found that
+      direct support for representation provides any interesting
+      difficulties in of itself. The difficulty lies in simultaneous
+      support for representation, state, and polymorphism, which is
+      the subject of Sridhar's paper in the current proceedings <cite
+      ref="sridhar2006type"/>. In email exchanges, Diatchki has
+      reported that his enhancement to Haskell has had a significant
+      impact on the implementation of their prototype operating
+      system. Representation matters!
+    </p>
+    <p>
+      <leadin>State</leadin> For systems and kernel codes, state is
+      never going away. These codes are <em>defined</em> by I/O and
+      in-place transformation of data. While it is possible to express
+      all of these operations in monadic form, as the House project
+      <cite ref="hallgren2005principled"/> is doing, there are no
+      examples of large, complex, and deeply stateful codes that have
+      been maintainably constructed in this fashion. My group has
+      spent some time writing code in ACL2 using the STOBJ mechanism
+      <cite ref="kaufmann00acl2"/>, which provides single-threaded
+      state. Our conclusion is that it doesn't scale in the human
+      sense. Kernel programmers already operate at (or slightly
+      beyond) the outer limit of systemic complexity that can be
+      mainained in a programmer's head.
+    </p>
+    <p>
+      This is a large part of why transparency of expression in
+      systems programming languages is critically important to the
+      success of the language. Subjectively, it seems likely that
+      re-expressing algorithms in monadic form will add one layer of
+      complexity too much &mdash; much as the combination of
+      aggressive inlining, constructors, and virtual functions did in
+      C++. As the developer loses their ability to build a clear and
+      direct mental model for what is happening on the machine, the
+      quality of systems code deteriorates rapidly. This is a
+      usability and design problem rather than a science problem, and
+      I remain interested to see what will emerge in the House effort.
+    </p>
+    <p>
+      I should acknowledge that BitC may suffer from an application
+      driven bias in our assessment of state. The Coyotos kernel
+      operates using semi-static memory allocation (a startup-time
+      allocation of available memory is made, but is never changed),
+      constant recursion bounds, and an atomicity
+      discipline. Collectively, these have the effect of simplifying
+      the state model to the point where it may be possible to reason
+      about our system using state induction based reasoning. This may
+      not generalize to user-mode components in Coyotos, many of which
+      operate under less restrictive idioms.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Opportunities</title>
+    <p>
+      The zero-copy idea in operating systems is a critical idea, but
+      so is the concept of protection domains. In hardware-based
+      protection, the basic mechanism for defining domains of
+      protection is the address space. There are two problems with
+      this: (1) hardware context switch times are proportionally slow
+      and getting slower, and (2) the two most widely used embedded
+      processors (Coldfire and ARM) have virtually indexed caches that
+      are not anti-aliased. The first imposes a terrible penalty on
+      secure system structure, and the second is all but
+      fatal.
+    </p>
+    <p>
+      Because of the need to flush the data cache, the time to perform
+      a full context switch on a 200Mhz StrongARM or XScale processor
+      can be measured in <em>milliseconds</em>.  For comparison, the
+      corresponding context switch on a 90Mhz Pentium was between 1.35
+      and 2.4 &mu;s, and even at that speed was very slow in
+      proportion to the surrounding machine. Despite the work on fast
+      context switching that the L4 and EROS communities did in the
+      1990s and following, context switch performance remains the
+      limiting factor in the design of well-structured, recoverable
+      systems. There is a certain irony in this, since a primary
+      reason for introducing memory management hardware in early
+      machines was the desire to provide an efficient domain
+      separation mechanism.
+    </p>
+    <p>
+      Recent results from the Singularity project <cites> <cite
+        ref="fahndrich2006language"/> <cite
+        ref="aiken2006deconstructing"/> </cites> are extremely thought
+        provoking. If linear types prove to be a human-manageable
+        mechanism for handling interprocess communication, it may
+        really be true that the era of hardware-based isolation is
+        over (but for legacy support). Most of the performance
+        unpredictability issues of garbage collection become
+        irrelevant if collection occurs over a small heap. By
+        increasing messaging performance, Singularity permits
+        applications to be split into much smaller, independently
+      collected domains.  Robustness is simultaneously improved.
+    </p>
+    <p>
+      In fact, the Singularity project is probably the most serious
+      challenge to the current Coyotos work in the secure embedded
+      system space. There are some denial of resource issues that are
+      inherent in the Singularity communications layer. These are
+      fixable, and we gave serious thought to replacing the Coyotos
+      system with a structurally similar system built on
+      Singularity-like foundations. In the commercial Coyotos effort,
+      we reluctantly concluded that the schedule risk to our current
+      commitments was too high, but we think that there is an
+      interesting research challenge here: enhance the linear type
+      approach of Singularity messages with complete storage
+      accountability during message exchange. See if a system can be
+      successfully structured using language based mechanisms when the
+      assumption that there is an infinite pool of storage is
+      abandoned.
+    </p>
+  </sect1>
+  <sect1>
+    <title>The Funding Challenge</title>
+    <p>
+      Without wandering too far from a mostly technical discussion, it
+      seems important to say a word about <em>where</em> and
+      <em>how</em> the integration of language and OS research seems
+      likely to happen.
+    </p>
+    <p>
+      Regrettably, DARPA has seen fit to abandon research funding for
+      computer science in the United States. This is hardly news to
+      anyone who reads the New York Times. While the NSF funding model
+      is good at many things, it is not structured to support large
+      scale, single investigator projects that exceed three
+      years. Europe seems to be putting research funding into OS
+      research, and that is promising. Because of this, it seems
+      likely that leadership in both areas will shift to Europe over
+      the next few years.
+    </p>
+    <p>
+      Another path to consider is <em>commercial</em> funding. While
+      research funding has disappeared in the United States, there is
+      active funding through various SBIR initiatives. Investigators
+      may want to consider more active collaborations with small
+      companies as a path to funding and deploying this type of
+      work. One thing is clear: the days of unlimited funding for core
+      computer science in the United States are over, and we must
+      consider new and creative collaboration strategies if core
+      computer science is to remain viable and relevant.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Conclusion</title>
+    <p>
+      Programming language advances have a lot to offer the operating
+      systems community, but only if they can be embodied in a
+      language that preserves state, (idiomatic) manual storage
+      management,  and low-level representation control. BitC is one
+      attempt at this, but we would frankly prefer to work on
+      operating systems and let programming language experts deal with
+      these issues.
+    </p>
+    <p>
+      Systems programmers <em>will</em> adopt a new language if it
+      gives them greater ability to understand and maintain the very
+      complex programs that we write. So far, modern programming
+      languages have come at the cost of a prohibitive level of
+      abstraction. Perhaps the programming language community will
+      revisit these issues.
+    </p>
+  </sect1>
+  <bibliography>
+    <bibentry label="aiken2006deconstructing">
+      M. Aiken, M. F&auml;hndrich, C. Hawblitzel, G. Hunt, and
+      J. R. Lauris. ``Deconstructing Process Isolation.''
+      <doctitle>Microsoft Technical Report
+      MSR-TR-2006-43</doctitle>. Microsoft, Inc. 2006
+    </bibentry>
+    <bibentry label="ball2002debugging">
+      Thomas Ball and Sriram K. Rajamani. ``The SLAM Project:
+      Debugging System Software via Static Analysis.''
+      <doctitle>Proc. 2002 ACM SIGPLAN-SIGACT Conference on Principles
+      of Programming Languages</doctitle>, 2002.
+    </bibentry>
+    <bibentry label="biagioni1994structured">
+      E. Biagioni. ``A Structured TCP in Standard ML.''
+      <doctitle>Proc. SIGCOMM 1994</doctitle>. pp. 36&ndash;45. 1994.
+    </bibentry>
+    <bibentry label="blackwell96speeding">
+      T. Blackwell. ``Speeding up Protocols for Small Messages.''
+      <doctitle>Proc. ACM SIGCOMM
+      '96</doctitle>. pp. 85&ndash;95. Sep. 1996.
+    </bibentry>
+    <bibentry label="bonwick2001magazines">
+      J. Bonwick and J. Adams. ``Magazines and Vmem: Extending the
+      Slab Allocator to Many CPUs and Arbitrary Resources.''
+      <doctitle>Proc. 2001 USENIX Annual Technical
+      Conference</doctitle>, pp. 15&ndash;33. Boston, MA. 2001
+    </bibentry>
+    <bibentry label="brewer2005thirty">
+      E. Brewer, J. Condit, B. McCloskey, and F. Zhou. ``Thirty Years
+      is Long Enough: Getting Beyond C.'' <doctitle>Proc. Tenth
+      Workshop on Hot Topics in Operating System (HotOS X)</doctitle>,
+      USENIX, 2005.
+    </bibentry>
+    <bibentry label="chen2004build">
+      H. Chen and J. Shapiro,
+      ``Using Build-Integrated Static Checking to Preserve Correctness
+      Invariants.'' <doctitle>Proc. 11th ACM Conference on Computer
+      and Communications
+      Security</doctitle>. pp. 288&ndash;297. Washington, DC. 2004
+    </bibentry>
+    <bibentry label="derby1999foxnet">
+      H. Derby. <doctitle>The Performance of FoxNet
+      2.0</doctitle>. CMU Technical Report CMU-CS-99-137. 1999.
+    </bibentry>
+    <bibentry label="Diatchki2005Representation">
+      Iavor S. Diatchki, Mark P. Jones, and Rebekah Leslie.
+      ``High- level Views on Low-level Representations.''
+      <doctitle>Proc. 10th ACM Conference on Functional
+        Programming</doctitle> pp. 168&ndash;179.
+      September 2005.
+    </bibentry>
+    <bibentry label="fahndrich2006language">
+      M. F&auml;hndrich, M. Aiken, C. Hawblitzel, O. Hodson, G. Hunt,
+      J. R. Lauris, and S. Levi. ``Language Support for Fast and
+      Reliable Message-based Communication in Singularity OS.''
+      <doctitle>Proc. EUROSYS 2006</doctitle>, Leuven Belgium. 2006
+    </bibentry>
+    <bibentry label="hallgren2005principled">
+      T. Hallgren, M. P. Jones, R. Leslie, and A. Tolmach. ``A
+      Principled Approach to Operating System Construction in
+      Haskell.'' <doctitle>Proc. International Conference on
+      Functional Programming (ICFP'05)</doctitle>, Sep. 2005. Tallinn,
+      Estonia. pp. 116&ndash;128.
+    </bibentry>
+    <bibentry label="ISO1995Ada">
+      ISO,
+      <doctitle>International Standard ISO/IEC 8652:1995 (Information
+      Technology &mdash; Programming
+      Languages &mdash; Ada)</doctitle>
+      International Standards Organization (ISO). 1995.
+    </bibentry>
+    <bibentry label="ISO1999ANSI-C">
+      ISO,
+      <doctitle>International Standard ISO/IEC 9899:1999 (Programming
+      Languages - C)</doctitle>
+      International Standards Organization (ISO). 1999.
+    </bibentry>
+    <bibentry label="kaufmann00acl2">
+      M. Kaufmann, J. S. Moore. <doctitle>Computer Aided Reasoning: An
+      Approach</doctitle>, Kluwer Academic Publishers, 2000.
+    </bibentry>
+    <bibentry label="Kernighan1988C">
+      Brian W. Kernighan and Dennis M. Ritchie. <doctitle>The C Programming
+	Language</doctitle>. Prentice Hall, 1988
+    </bibentry>
+    <bibentry label="milner97definition">
+      Robin Milner, Mads Tofte, Robert Harper, and David
+      MacQueen. <doctitle>The Definition of Standard ML -
+      Revised</doctitle>
+      The MIT Press, May 1997.
+    </bibentry>
+    <bibentry label="peytonjones2003haskellrevisedreport">
+      Simon Peyton Jones (ed.). <doctitle>Haskell 98 Language and
+	Libraries: The Revised report</doctitle>. Cambridge University
+	Press. 2003.
+    </bibentry>
+    <bibentry label="shap1999fastcapsystem">
+      J. S. Shapiro, J. M. Smith, and D. J. Farber. ``EROS, A Fast
+      Capability System'' <doctitle>Proc. 17th ACM Symposium on Operating
+      Systems Principles</doctitle>. Dec 1999. pp. 170&ndash;185. Kiawah
+      Island Resort, SC, USA.
+    </bibentry>
+    <bibentry label="shap2002groundup">
+      J. S. Shapiro and N. Hardy.
+      ``EROS: A Principle-Driven Operating System from the Ground
+      Up.''
+      <doctitle>IEEE Software</doctitle>, <b>19</b>(1). Jan. 2002.
+    </bibentry>
+    <bibentry label="shapiro2006coyotos">
+      J. S. Shapiro, Eric Northup, M. Scott Doerrie, and Swaroop
+      Sridhar.  <doctitle>Coyotos Microkernel
+      Specification</doctitle>, 2006, available online at <link
+      href="http://www.coyotos.org">www.coyotos.org</link>.
+    </bibentry>
+    <bibentry label="shapiro1999toolkit">
+      J. S. Shapiro.  <doctitle>A C++ Toolkit</doctitle>, Prentice
+      Hall, 1999.
+    </bibentry>
+    <bibentry label="shapBitcSpec2006">
+      J. S. Shapiro, S. Sridhar, and M. S. Doerrie. <doctitle>BitC Language
+      Specification, version 0.3+</doctitle><br/>
+      <link
+        href="http://coyotos.org/docs/bitc/spec.html">
+        <progident>http://coyotos.org/docs/bitc/spec.html</progident>
+      </link>
+    </bibentry>
+    <bibentry label="sridhar2006type">
+      S. Sridhar and J. Shapiro. ``Type Inference for Unboxed Types
+      and First Class Mutability'' <doctitle>Proc. 3rd ECOOP Workshop
+      on Programming Languages and Operating Systems (PLOS
+      2006)</doctitle> San Jose, CA. 2006.
+    </bibentry>
+  </bibliography>
+</article>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->

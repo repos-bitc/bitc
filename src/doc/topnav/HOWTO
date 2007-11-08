@@ -1,0 +1,6 @@
+In order to generate the PNG files, use:
+
+   ../makepng.sh 'SomeString'
+
+If the string gets too big, you may need to tweak parameters in the
+makepng script.

@@ -1,0 +1,216 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Copyright (C) 2006, Johns Hopkins University.
+;; All rights reserved.
+;;
+;; Redistribution and use in source and binary forms, with or
+;; without modification, are permitted provided that the following
+;; conditions are met:
+;;
+;;   - Redistributions of source code must contain the above 
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer. 
+;;
+;;   - Redistributions in binary form must reproduce the above
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer in the documentation and/or other materials 
+;;     provided with the distribution.
+;;
+;;   - Neither the names of the copyright holders nor the names of any
+;;     of any contributors may be used to endorse or promote products
+;;     derived from this software without specific prior written
+;;     permission. 
+;;
+;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(bitc-version "0.9+")
+
+;(interface basic
+;; interface specific
+;(declare stateful)
+; (provide asdf)
+
+;   ;; Literal values
+;   (define a -16r1.2^24)
+;   (define b "asdf")
+;   (define c #\c)
+
+;; proclaim
+;   (proclaim p10:int32)
+;   (define GG (lambda (x) p10))   
+;   (define p10 250:int32)
+   
+
+;; exceptions
+(defexception Xn bool)
+
+; ;   ;; Unions
+; (defunion (mylist 'a):ref Nil (Cons 'a (mylist 'a))) 
+; (defunion (ll 'a 'b 'c 'd 'e 'f 'g 'h 'i 'j 'k 'l 'm 'n 'o 'p 'q 'r 's 't 'u 'v 'w 'x 'y 'z 'aa 'bb 'cde) NONE)
+; (defunion (u3 'a 'b 'c) (u3con 'a 'b 'c))
+; (define u3-instance (u3con #\c (the int32 1) #\d))
+(define l-int32:(list int32) nil)
+(define l-int32-alt (cons (the int32 3) nil))
+(define f5 (if #t nil l-int32-alt))
+
+ ;   ;; Structures
+   (defstruct (llist 'a):ref a:'a next:(ref (llist 'a)))   
+   (defstruct efgh:val a:int32 b:int32)
+   (defstruct abcd:ref a:int32 b:int32)
+   (define sa (abcd 10 20))
+   (define sb (efgh 10 20))
+   (define sc (if #t sa^.a sb.a))
+
+
+
+;; IMPORT EXPORT BUSINESS
+  (import! TEST1 test1)
+  (provide! TEST11 test1)
+  (import! PRELUDE bitc.prelude)
+  (define eqls TEST1.eqls)
+  (define TEST11.eqls (lambda (x) x))   
+  (use (equals TEST11.eqls) TEST11.eqls)
+  (define eq equals)
+  (define eql eqls)
+  (define HHH:int64 (the int64 10))
+
+;  (defstruct plist PL:int32)
+;  (define plist1 (TEST1.plist 10))
+;  (define plist2 (plist 20))
+;  (define plisttest (if #t plist1 plist2)) ; SHOULD NOT WORK
+
+
+;;   TESTS TO SEE if struct-apply and apply are resolved properly
+   (defstruct (ast 'a) f:(fn ('a) 'a))
+   (define fast (ast (lambda (x) x)))
+;; SHOULD NOT WORK
+;   (define fast2 (fast (lambda (x) x)))
+
+;; Recursive Structures with Declare
+;   ;; Various types of definitions
+(define (f x:(list int32) y) (pair x (the int32 y)))
+(define (h x) (the (list int32) x))
+(define (pair f1 g2) (pair (the int32 1100) ((lambda (x) x) (the int64 200))))
+  
+;  (define f2 (lambda (x:(fn 'a 'a)) (begin (x 1) (x 2))))
+
+;  (define (=== a b) #t)
+;  (define (pair fact y) (pair (lambda (x) (if (=== x 0) 0 (fact x))) 200))
+
+;   ;; if
+(define iftest (if #t (the int32 10) (the int32 10)))
+
+;   ;; cond
+(define what (cond (#t (the int32 25)) (#f 35) (otherwise 200)))
+
+;  ;; Mutable and set!
+(define ma:(mutable int32) (the (mutable int32) 25))
+(define mb (set! ma (the int32 20))) 
+(define pqr (lambda (x) x^))
+(define pqrs (pqr (dup (the int32 10))))
+
+
+;   ;; try/catch
+;; Swaroop exception. Thrown whenever compiler runs out
+;; of unique type IDs.
+(defexception SwaroopException string char)
+(defexception X string)
+(define XYZ (X "asdf"))
+(define H (throw XYZ)) 
+(define G (try (throw X) (catch ((X s) s) (otherwise "IMPOSSIBLE"))))
+
+;   ;; case
+  (define p nil)
+  (define R (case p (nil (the int32 10)) ((cons a b) 20) (otherwise 30)))
+
+(define (main) (the int32 0))
+
+;  (define (P f env) (case f ((pair a b) (a 3 b)) (otherwise 100)))
+;  (define p2 (case 10 (10 (lambda (x) x)) (20 (lambda (x) x)) (otherwise (lambda (x) x))))
+    
+;   ;; let, letrec
+;    (define z (let (((pair id g) (pair (lambda (x) x) 200))) (id 0) (id "asdf")))
+
+;   ;; let rec
+;   (define q (letrec ((fact (lambda (x) (fact x)))) 100))  
+;   (define oe (letrec ((oddf (lambda (x) (evenf x))) 
+; 		      (evenf (lambda (x) (oddf x)))) (pair oddf evenf))) 
+    
+;  (define (pair id1 id2) 
+;    (pair (lambda (x) x) (lambda (x) x)))
+
+;  (define LPQ (begin (id1 #t) (id1 (lambda (x) x)) (id1 id2) (id2 #t))) 
+  
+;    (define ff (letrec ((f (lambda (x) (f x)))) f))
+
+;; LOOP
+;  (define xyz (loop x ((y #t)) y))
+
+
+;   ;; arrays, vectors and sequences
+;(define QQ (lambda (a:(array 'a 16r10)) (begin (array-ref a 0) a)))
+;(define QQ1 (array (the int32 10) 20))  
+;(define RR (lambda (a : (vector 'a)) (begin (vector-ref a 0) a))) 
+;(define RRt (lambda (a) (begin (vector-ref a 0) a))) 
+;(define QQR (array-length QQ1))
+;(define QQQ (array-ref QQ1 25))
+
+;   ;; SHOULD NOT WORK
+;   ; (define (pair QR RQ)  (pair (array 10 20 30 4 05 060 70 80 90 100):'a (array 10 20 30 40):'a))
+
+;   ;; list usage example
+  
+;; type classes
+
+;    (deftypeclass (Eq 'a)
+;      == : (fn (pair 'a 'a) bool)
+;      != : (fn (pair 'a 'a) bool))
+
+;    (deftypeclass (Ord 'a)
+;      (super (Eq 'a))
+;      (tyfn ('a) 'a)
+;      <: (fn (pair 'a 'a) 'a))
+
+;    (define eqint32 (lambda (x y) #t))
+;    (define neqint32 (lambda (x y) #t))
+
+;    (definstance (Eq int32) eqint32 neqint32)
+
+;; one-of
+;   (define IB:(one-of int32 int64) 250)
+
+;; Methods
+;   (define equals ==:(method (Eq 'a) (fn (pair 'a 'a) 'a))) 
+
+;   ;; CLCONV examples
+;   (define FFF (lambda (x) ((lambda (y) x) 2)))
+;   (define GGG (lambda (f) (let ((p 3)) (f (lambda (x) p)))))
+;   (define HHH (mutable (lambda (x) 5)))
+;   (define III (lambda (m) (begin (set! HHH m) ())))
+;   (define JJJ (GGG III))
+;   (define KKK ((immutable HHH) ())) ; KKK is now 3
+  
+;   (define PPP (let ((x 3)) (begin (lambda (y) x) 200)))
+
+;;   ESCAPE ANALYSIS EXAMPLES
+;    (define esc1 (lambda (x) (lambda (y) y)))    
+ 
+
+   ;; Other
+;   (deftype (X 'a 'b 'c) 'a)
+;   (define x:X 10)
+;   (define y:X #t)
+
+;)

@@ -1,0 +1,12 @@
+(bitc-version "0.9+")
+
+(defunion (unin 'a) (C a:'a))
+
+(define (f x)
+  (case x
+	((C y) (the int32 y))))
+
+(define (main argv:(vector string))
+  f
+  (the int32 0)
+  )

@@ -1,0 +1,30 @@
+(bitc-version "0.9+")
+
+(define i0 (the int32 0))
+
+(defunion (mylist 'a):ref Nil (Cons car:'a cdr:(mylist 'a))) 
+
+(define mylistValue1 (Cons i0 Nil))
+(define mylistValue2 (Cons #t Nil))
+(define mylistValue3 (Cons #t (Cons #f Nil)))
+
+(define listValue1 (cons i0 nil))
+(define listValue2 (cons #t nil))
+(define listValue3 (cons #t (cons #f nil)))
+
+(define (main argVec:(vector string)) 
+  listValue1 listValue2 listValue3
+  mylistValue1 mylistValue2 mylistValue3
+
+  (case Nil 
+    (Nil i0) 
+    ((Cons x y) x)
+    (otherwise i0))
+
+
+  (case nil 
+    (nil i0) 
+    ((cons x y) x)
+    (otherwise i0))
+
+  i0) 

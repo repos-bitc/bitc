@@ -1,0 +1,4774 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+                  "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd"
+[
+<!ENTITY BitcVersion "0.10+">
+]>
+  <article id="capidl-spec" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <docinfo twocolumn="yes">
+    <title>BitC Language Specification</title>
+    <subtitle>Version &BitcVersion;</subtitle>
+    <authorgroup>
+      <author>
+	<firstname>Jonathan</firstname>
+	<surname>Shapiro</surname>
+	<degree>Ph.D.</degree>
+      </author>
+      <author>
+	<firstname>Swaroop</firstname>
+	<surname>Sridhar</surname>
+      </author>
+      <author>
+	<firstname>Scott</firstname>
+	<surname>Doerrie</surname>
+      </author>
+      <affiliation>
+	<orgname>Systems Research Laboratory</orgname>
+	<address>Dept. of Computer Science</address>
+	<address>Johns Hopkins University</address>
+      </affiliation>
+    </authorgroup>
+    <pubdate>June 17, 2006</pubdate>
+    <copyright>
+      <year>2006</year> 
+      <holder>Jonathan S. Shapiro</holder>
+      <holder>Swaroop Sridhar</holder>
+    </copyright>
+    <legalnotice>
+      <p indent="no">
+	THIS SPECIFICATION IS PROVIDED ``AS IS'' WITHOUT ANY
+	WARRANTIES, INCLUDING ANY WARRANTY OF MERCHANTABILITY,
+	NON-INFRINGEMENT, FITNESS FOR ANY PARTICULAR PURPOSE, OR ANY
+	WARRANTY OTHERWISE ARISING OF ANY PROPOSAL, SPECIFICATION OR
+	SAMPLE.
+      </p>
+    </legalnotice>
+    <categories>
+      <category>dev/bitc</category>
+    </categories>
+    <synopsis>
+      <p>Provisional specification for the BitC programming language.</p>
+    </synopsis>
+  </docinfo>
+  <abstract latex.incolumn="yes" latex.breakafter="yes">
+    <p>
+      BitC is a systems programming language that combines the ``low
+      level'' nature of C with the semantic rigor of Scheme or
+      ML. BitC was designed by careful selection and exclusion of
+      language features in order to support proving properties (up to
+      and including total correctness) of critical systems programs.
+    </p>
+    <p>
+      This document provides an English-language description of the
+      BitC semantics. It will in due course be augmented by a formal
+      specification of the BitC semantics. The immediate purpose of
+      this document is to quickly capture an informal but fairly
+      complete description of the language so that participants in
+      ongoing discussions about verifiable systems programming
+      languages have a common frame of reference on which to base
+      their discussions.
+    </p>
+    <p>
+      While the current language specification uses a Scheme-like
+      concrete syntax, this choice is a matter of convenience only. It
+      is entirely possible to build a C-like concrete syntax for BitC,
+      and at some point it may become compelling to do so.
+    </p>
+  </abstract>
+  <toc/>
+  <sect1>
+    <title>Overview</title>
+    <p>
+      The BitC project is part of the successor work to the EROS
+      system <cite ref="shap1999fastcapsystem"/>.  By 2004, it had
+      become clear that a number of important practical ``systems''
+      lessons had been learned in the EROS effort. These motivated a
+      re-examination of the architecture. With the decision to craft a
+      revised design and a new implementation came the opportunity to
+      consider methods of achieving greater and more objective
+      confidence in the security of the system. In particular, the
+      question of whether a formally verified <em>implementation</em>
+      of the EROS successor might be feasible with modern theorem
+      proving tools.  Following some thought, it appeared that the
+      answer to this question might be ``yes,'' but that there existed
+      no programming language providing an appropriate combination of
+      power, formally founded semantics, and control over low-level
+      representation. BitC was created to fill this gap.
+    </p>
+    <sect2>
+      <title>About the Language</title>
+      <p>
+	BitC is conceptually derived in various measure from Standard
+	ML, Scheme, and C. Like Standard ML <cite
+	ref="milner1997definition"/>, BitC has a formal semantics,
+	static typing, a type inference mechanism, and type
+	variables. Like Scheme <cite ref="kelsey1998r5rs"/>, BitC uses
+	a surface syntax that is readily represented as BitC
+	data. Like C <cite ref="ansi1999c"/>, BitC provides full
+	control over data structure representation, which is necessary
+	for high-performance systems programming.  The BitC language
+	is a direct expression of the typed lambda calculus with side
+	effects, extended to be able to reflect the semantics of
+	explicit representation.
+      </p>
+      <p>
+	In contrast to ML, BitC syntax is designed to discourage
+	currying. Currying encourages the formation of closures that
+	capture non-global state. This requires dynamic storage
+	allocation to instantiate these closures at runtime. Since
+	there are applications of BitC in which dynamic allocation is
+	prohibited, currying is an inappropriate idiom for this
+	language.
+      </p>
+      <p>
+	In contrast to both Scheme and ML, BitC does <em>not</em>
+	provide or require full tail recursion. Procedure calls must
+	be tail recursive exactly if the called procedure and the
+	calling procedure are bound in the same
+	<progident>define</progident>, and if the identity of the
+	called procedure is statically resolvable at compile
+	time. This restriction preserves all of the useful cases of
+	tail recursion that we know about, while still permitting a
+	high-performance translation of BitC code to C code.
+      </p>
+      <p>
+	Building on the features of ACL2 <cite ref="kaufmann00acl2"/>,
+	BitC incorporates explicit support for stating theorems and
+	invariants about the program as part of the program's text.
+      </p>
+      <p>
+	As a consequence of these modifications, BitC is suitable for
+	the expression of verifiable, low-level ``systems'' programs.
+	There exists a well-defined, statically enforceable subset
+	language that is directly translatable to a low-level language
+	such as C. This translation is direct in both the sense that
+	the translation is simple and the result does not violate
+	programmer intuitions about what the program does or the
+	program's data representation. Indeed, this was a key reason
+	for our decision to move our implementation efforts into BitC.
+      </p>
+    </sect2>
+    <sect2>
+      <title>Conventions Used in This Document</title>
+      <p>
+	In the description of the language syntax below, certain
+	conventions are used to render the presentation more compact.
+      </p>
+      <p>
+	Input that is to be typed as shown appears in
+	<progident>fixed</progident> font.
+      </p>
+      <p>
+	Syntactic ``placeholders'' are shown in italics, and should
+	generally be self-explanatory in context. Variable names,
+	expressions, patterns, and types appear respectively as italic
+	<em>v</em>, <em>e</em>, <em>p</em>, or <em>T</em>, with an
+	optional disambiguating subscript. For clarity, the defining
+	occurrence of a name will sometimes appear in the abstract
+	syntax as <em>nm</em>.
+      </p>
+      <p>
+	When a sequence of similar elements is permitted, this is
+	shown using "...".  Such a sequence must have at least one
+	element. For example:
+      </p>
+      <literallayout>
+(begin <em>e</em> ... <em>e</em>)</literallayout>
+      <p indent="no">
+	indicates that the <progident>begin</progident> form takes a
+	(non-empty) sequence of expressions. When it is intended that
+	zero elements should be permitted in a sequence, the example
+	will be written:
+      </p>
+      <literallayout>
+(begin [<em>e</em> ... <em>e</em>])</literallayout>
+      <p indent="no">
+	Note that the square braces <b>[</b> and <b>]</b> have no
+	syntactic significance in the BitC core language after
+	s-expression expansion. When they appear in the specification,
+	they should be read as metasyntax.
+      </p>
+    </sect2>
+    <sect2>
+      <title>Type Inference</title>
+      <p>
+	BitC incorporates a polymorphic type inference mechanism.
+        Like SML, BitC imposes the value restriction for polymorphic
+        type generalization. The algorithm for type inference is not
+        yet specified here, and will be added at a future date &mdash;
+        we want to be sure that it converges.  We currently plan to
+        use a constraint-based type inference system similar to the
+        Hindy-Milner type inference algorithm <cite
+        ref="milner1997definition"/>.
+      </p>
+      <p>
+	The practical consequence of type inference is that explicitly
+	stated types in BitC are rare. Usually, it is necessary to
+	specify types only when the inference engine is unable to
+	resolve them unambiguously, or to specify that two expressions
+	must have the same result type.  In this situation, a type may
+	be written by appending a trailing type qualifier to an
+	expression indicating its result type, as in:
+      </p>
+      <literallayout>
+(+ a b) : int32</literallayout>
+      <p indent="no">
+	by similarly qualifying a formal parameter, as in:
+      </p>
+      <literallayout>
+(define (fact x:int32)
+  (cond ((&lt; x 0) (- (fact (- x))))
+        ((= x 0) 1)
+        (otherwise
+          (* x (fact (- x 1))))))</literallayout>
+      <p indent="no">
+	In general, wherever a type is permitted by the grammar, it is
+	also permissible to write a <term>type variable</term>. A type
+	variable is written as an identifier prefixed by a single
+	quote. The scope of a type variable is the scope of its
+	containing definition form.  The type inference engine will
+	infer the type associated with the type variable. Within a
+	definition, all appearances of a type variable will be resolved
+	to the same type. This is particularly useful in the
+	specification of recursive types.  For historical reasons,
+	<progident>'a</progident>, <progident>'b</progident>, etc. are
+	often pronounced ``alpha,'' ``beta,'' and so forth.
+      </p>
+    </sect2>
+    <sect2>
+      <title>Documentation Strings</title>
+      <p>
+        Certain productions in the grammar (Section&nbsp;<xref
+        ref="grammar"/>) incorporate an optional documentation string
+        labeled
+        <progident><em>docstring</em></progident>. Documentation
+        strings have predefined syntactic positions to facilitate
+        automated extraction by documentation tools. If present, the
+        documentation string must be a syntactically well-formed
+        string, but the string is otherwise ignored for compilation
+        purposes. In certain contexts a documentation string may be
+        followed by an expression syntax, which creates a parse
+        ambiguity. The parser should handle these cases by accepting
+        the expression sequence and then checking to see if it has
+        length greater than 1 and its first element is a string. Note
+        that in such cases the string would be semantically irrelevant
+        in any case. The only point of care here is to note that an
+        expression sequence consisting of a single string is a value,
+        not a documentation string.
+      </p>
+    </sect2>
+  </sect1>
+  <subpart>
+    <title>The Core Language</title>
+    <sect1>
+      <title>Input Processing</title>
+      <p>
+	The BitC surface syntax is an impure s-expression
+	language. Expressions can be augmented with type qualifiers,
+	and the language provides syntactic conveniences for field
+	reference and array indexing. All of these have canonicalizing
+	rewrites into s-expressions.
+      </p>
+      <p>
+        Input units of compilation are defined to use the Unicode
+        character set as defined in version 4.1.0 of the Unicode
+        standard <cite ref="unicode410"/>. Input units must be encoded
+        using the UTF-8 encoding and Normalization Form C.  All
+        keywords and syntactically significant punctuation fall within
+        the US-ASCII subset, and the language provides for US-ASCII
+        encodable ``escapes'' that can be used to express the full
+        Unicode character code space in character and string literals.
+      </p>
+      <p>
+        Tokens are terminated by white space if not otherwise
+        terminated. For purposes of input processing, the characters
+        <em>space</em> (U+0020), <em>tab</em> (U+0009), <em>carriage
+        return</em> (U+000D), and <em>linefeed</em> (U+000A) are
+        considered to be white space.
+      </p>
+      <p>
+        Input lines are terminated by a linefeed character (U+000A), a
+        carriage return (U+000D) or by the two character sequence
+        consisting of a carriage return followed by a line feed.  This
+        is primarily significant for comment processing and diagnostic
+        purposes, as the rest of the language treats linefeeds as
+        white space without further significance.
+      </p>
+      <sect2>
+	<title>Comments</title>
+	<p>
+	  A comment is introduced by a semicolon and extends up to but
+	  not including the trailing newline and/or carriage return of
+	  the current line (the end of line markers are significant for
+	  purposes of line numbering). This implies that the comment
+	  syntax cannot be successfully exploited for identifier
+	  splicing as in early C preprocessors.
+	</p>
+	<p>
+	  Notwithstanding the preceding, a semicolon appearing within a
+	  string or character literal does not begin a comment.
+	</p>
+      </sect2>
+      <sect2 id="identifiers">
+	<title>Identifiers</title>
+	<p>
+	  BitC identifiers are case sensitive. An identifier may start
+	  with any ``identifier character'' (Unicode 4.1.0 <cite
+	  ref="unicode410"/> character class XID_Start), followed by
+	  any number of optional ``identifier continue characters''
+	  (Unicode 4.1.0 character class XID_Continue). The following
+	  ``extended alphabetic characters'' may also appear in
+	  <em>any</em> position of an identifier.
+	</p>
+	<literallayout>
+! $ % &amp; * + - / \ &lt; = &gt; ? @ _ ~</literallayout>
+<!--         <p> -->
+<!--           An identifier may be optionally qualified by an interface -->
+<!--           binding name followed by a period (``.'').  -->
+<!--           Thus, the most general form of an -->
+<!--           identifier is: -->
+<!--         </p> -->
+<!--         <literallayout> -->
+<!-- [<em>Identifier</em>.]<em>Identifier</em></literallayout> -->
+	<p>
+	  Identifiers beginning with two leading underscores are
+	  reserved for use by the runtime system.
+	</p>
+	<p>
+          Reserved words are not identifiers.
+	</p>
+      </sect2>
+      <sect2>
+	<title>Reserved Words</title>
+	<p>
+	  The following identifiers are syntactic keywords, and may not
+	  be rebound:
+	</p>
+	<literallayout indent="no">
+#f            #t            and           
+apply         array         array-length
+array-nth     begin         bitc-version  
+bitfield      bool          case          
+catch         char          cond          
+declare       defaxiom      defexception  
+define        definvariant  defrepr
+defstruct     deftheory     defthm        
+defunion      deref         disable       
+do            double        dup           
+enable        exception     external      
+fill          fixint        float         
+if            import        int8          
+int16         int32         int64         
+interface     fn            lambda        
+let           letrec        member        
+mutable       not           opaque        
+or            otherwise     pair          
+proclaim      provide       quad          
+ref           set!          string        
+suspend       switch        tag           
+the           throw         try           
+tyfn          uint8         uint16        
+uint32        uint64        use           
+val           vector        vector-length 
+vector-nth    word</literallayout>
+	<p>
+	  The following identifiers are reserved for use as future
+	  keywords:
+	</p>
+	<literallayout indent="no">
+assert        check         coindset      
+constrain     defequiv      defobject     
+defrefine     deftype       defvariant    
+do*           import!       indset
+int           label         let*          
+list          literal       location      
+module        namespace     nth           
+read-only     require       sensory       
+sizeof        super         tycon         
+using         value-at</literallayout>
+	<p>
+          In addition to the reserved words identified above, all
+	  definitions provided in the standard prelude are implicitly
+	  imported into the initial top-level environment of every
+	  compilation unit. 
+	</p>
+	<p>
+	  Note that BitC does <em>not</em> permit redefinition of
+	  bound variables in the same scope. This guarantees that
+	  top-level forms receive the default bindings of these
+	  identifiers in their environment.
+	</p>
+	<p>
+	  For the moment, all identifiers beginning with
+	  ``<progident>def</progident>'' are reserved words. This
+	  restriction is a temporary expedient that is not expected to
+	  last in the long term.
+	</p>
+	<p indent="no">
+	  Finally, the identifiers defined as part of the BitC standard
+	  runtime environment (described below) are bound in the
+	  top-level environment.
+	</p>
+      </sect2>
+      <sect2>
+	<title>Literals</title>
+        <p>
+          The handling of literal input and output is implemented by
+          the standard prelude functions <progident>read</progident>
+          and <progident>show</progident>. Source tokenization,
+          requires that foundational literals have a defined canonical
+          form.
+        </p>
+<!-- 	<sect3> -->
+<!-- 	  <title>Boolean Literals</title> -->
+<!-- 	  <p> -->
+<!-- 	    The boolean literals are <progident>#f</progident> and -->
+<!-- 	    <progident>#t</progident>, respectively denoting false and -->
+<!-- 	    true. -->
+<!-- 	  </p> -->
+<!-- 	</sect3> -->
+	<sect3 id="intlit">
+	  <title>Integer Literals</title>
+	  <p>
+	    The general form of an integer literal is:
+	  </p>
+	  <literallayout>
+[<b>-</b>][<em>base</em><b>r</b>]<em>digits</em></literallayout>
+	  <p indent="no">
+	    where <em>base</em> is radix of the subsequent digits
+	    expressed in decimal form. Legal bases are 2, 8, 10, and
+	    16. In the absence of a base prefix, the digits are
+	    interpreted as base ten. The <em>digits</em> are selected
+	    from the characters
+	  </p>
+	  <literallayout>
+0 1 2 3 4 5 6 7 8 9 a b c d e f</literallayout>
+	  <p indent="no">with the customary hexadecimal valuations. The
+	    letters may appear in either lowercase or uppercase. It is
+	    an error for a digit to be present whose value as a digit is
+	    greater than or equal to the specified base.
+	  </p>
+	  <p>
+	    Integer literals of a particular fixed-precision type may be
+	    written by using a type qualifier. The expression:
+	  </p>
+	  <literallayout>
+564 : uint32</literallayout>
+	  <p indent="no">
+	    specifies an unsigned 32 bit quantity whose value is
+	    564. It is a compile-time error to qualify an integer
+	    literal with a type that is incapable of representing the
+	    literal's value.  In the absence of explicit
+	    qualification, the type assigned to an integer literal
+	    will be some subset of:
+	  </p>
+          <literallayout>
+int8  int16  int32  int64
+uint8 uint16 uint32 uint64
+word</literallayout>
+          <p indent="no">
+            Any concrete type that cannot represent the literal value
+            will be omitted from the set of types
+            assigned.<footnote><p>There is an issue here: doesn't the
+            initial set need to be the set of all integer field sizes
+            so that initialization can work? Shap thinks that the
+            answer is probably yes, but that it isn't a problem in
+            practice because the arithmetic operators are only defined
+            over homogeneous argument types. Swaroop points out that
+            expanding the set isn't what creates the problem for type
+            inference.</p></footnote>
+          </p>
+	</sect3>
+	<sect3 id="floatlit">
+	  <title>Floating Point Literals</title>
+	  <p>
+	    The general form of a floating point literal is:
+	  </p>
+	  <literallayout>
+[<b>-</b>][<em>base</em><b>r</b>]<em>digits</em><b>.</b><em>digits</em>[<b>^</b><em>exponent</em>]</literallayout>
+	  <p indent="no">
+	    where <em>base</em> defines the decimal encoded radix of
+	    the digits and <em>exponent</em> is an integer literal,
+	    possibly including an initial minus sign and a radix
+	    specification for the exponent part.  Digits are selected
+	    as for integer literals, above. Note that the decimal
+	    point is not optional, and must have digits on both
+	    sides. Thus, <progident>0.0</progident> is a valid
+	    floating point literal, but <progident>0.</progident> and
+	    <progident>.0</progident> are not.
+	  </p>
+	  <p>
+	    As with integer literals, floating point literals of an
+	    explicitly stated representation type may be written using a
+	    type qualifier. The expression:
+	  </p>
+	  <literallayout>
+0.0 : float</literallayout>
+	  <p indent="no">
+	    specifies a 32-bit (single precision) IEEE floating point
+	    quantity whose value is zero. As with integer literals, it
+	    is a compile-time error to specify a value cannot be
+	    represented within the representable range of the
+	    qualifying type.<footnote><p>It is <em>not</em> an error
+	    if conversion of the literal value causes loss of
+	    precision in the low-order bits of the mantissa.</p>
+	    </footnote> In the absence of explicit
+	    qualification, the type of a floating point literal is
+	    some subset of:
+          </p>
+          <literallayout>
+float double quad</literallayout>
+          <p indent="no">
+            Any concrete type whose representable range cannot express
+            the literal value will be omitted from the assigned set.
+          </p>
+          <p>
+            Conversion of a floating point literal to internal
+	    representation follows the customary IEEE floating point
+	    rounding rules when the specified literal cannot be
+	    exactly represented.<footnote><p>A more precise statement
+	    is needed for floating point literal conversion, but I
+	    don't know enough about floating point conventions to know
+	    what that statement should be.</p>
+            </footnote>
+          </p>
+	</sect3>
+	<sect3 id="charlit">
+	  <title>Character Literals</title>
+	  <p>
+	    BitC uses the Unicode character set as defined in version
+	    4.1.0 of the Unicode standard <cite
+	    ref="unicode410"/>. Characters are 32 bits wide.
+	    Character literals can be expressed in two ways.
+	  </p>
+	  <p>
+	    A character literal may be written as
+	  </p>
+	  <literallayout>
+#\<em>printable-character</em></literallayout>
+	  <p>
+	    Where <progident><em>printable-character</em></progident>
+            is any character specified in the Unicode 4.1.0 standard
+            <em>except</em> those with general categories "Cc"
+            (control codes) "Cf" (format controls), "Cs" (surrogates),
+            "Cn" (unassigned), or "Z" (separators).  That is, any
+            printable character, excluding spaces.  Notwithstanding
+            the listed Unicode categories, the characters ``{''
+            (U+007B, left curly brace) and ``}'' (U+007D, right curly
+            brace) are excluded for use in character literal escaping.
+            Notwithstanding the previously listed Unicode categories,
+            the following characters are considered printable
+            characters as well:
+	  </p>
+	  <literallayout>
+! " # $ % &amp; ' ( ) * + , - . / :
+{ } ; &lt; = &gt; ? @ [ \ ] ^ _ ` | ~</literallayout>
+	  <p>
+            A character may also be specified by its unicode code
+	    point:
+	  </p>
+	  <literallayout>
+#\U+<em>digits</em></literallayout>
+	  <p indent="no">
+	    Where <em>digits</em> are hexidecimal.
+	  </p>
+	  <p>
+	    Certain commonly used non-printing characters have
+	    convenience representations as character literals:
+	  </p>
+	  <literallayout>
+#\space
+#\linefeed
+#\return
+#\tab
+#\backspace
+#\lbrace
+#\rbrace</literallayout>
+	</sect3>
+	<sect3 id="stringlit">
+	  <title>String Literals</title>
+	  <p>
+	    BitC strings are written within double quotes, and may
+	    contain the previously listed ``printable characters''
+	    <em>excluding</em> backslash (``\''), but
+	    <em>including</em> (``{'') and (``}''). They may also
+	    contain spaces (U+0020), left curly brace (U+007B) and
+	    right curly brace (U+007D).
+	  </p>
+	  <p>
+	    Within a string, the backslash character (``\'') is
+	    interpreted as beginning an encoding of a specially
+	    embedded character. The character following the ``\'' is
+	    either a single-character embedding or a curly brace
+	    character ``{'' identifying the start of a Unicode
+	    character embedding. The legal forms and their meanings
+	    are:
+          </p>
+          <table>
+            <tbody>
+              <tr>
+                <td><b>\n</b></td>
+                <td>Linefeed</td>
+              </tr>
+              <tr>
+                <td><b>\r</b></td>
+                <td>Carriage Return</td>
+              </tr>
+            </tbody>
+            <tbody>
+              <tr>
+                <td><b>\t</b></td>
+                <td>Horizontal Tab</td>
+              </tr>
+              <tr>
+                <td><b>\b</b></td>
+                <td>Backspace</td>
+              </tr>
+              <tr>
+                <td><b>\s</b></td>
+                <td>Space</td>
+              </tr>
+              <tr>
+                <td><b>\f</b></td>
+                <td>Formfeed</td>
+              </tr>
+              <tr>
+                <td><b>\"</b></td>
+                <td>Double quote</td>
+              </tr>
+              <tr>
+                <td><b>\\</b></td>
+                <td>Backslash</td>
+              </tr>
+              <tr>
+                <td><b>\{U+<em>digits</em>}</b></td>
+                <td>Unicode code point, hexidecimal <em>digits</em>.</td>
+              </tr>
+            </tbody>
+          </table>
+	</sect3>
+      </sect2>
+      <sect2>
+	<title>Compilation Units</title>
+        <p>
+          There are two types of compilation units in BitC: interfaces
+          and source compilation units. An interface compilation unit
+          defines or declares types (and consequently the code of type
+          constructors), defines type classes, defines constants, and
+          declares values. A source compilation unit can define types,
+          type classes, constants, and values.
+        </p>
+	<p>
+	  Every valid BitC compilation unit may optionally begin
+          (ignoring comments) with a
+          <progident>bitc-version</progident> form.  The syntax of the
+          <progident>bitc-version</progident> form is:
+	</p>
+	<literallayout>
+(bitc-version <em>s</em>)</literallayout>
+	<p indent="no">
+	  where <progident><em>s</em></progident> is the version
+	  string of the BitC version to which this program
+	  conforms. For the version of BitC described in this
+	  document, the proper version string is
+	  <progident>"&BitcVersion;"</progident>. It is a compile-time
+	  error if the language version accepted by the current
+	  compiler is not backwards compatible with the version
+	  specified by the <progident>bitc-version</progident> form.
+	</p>
+        <p>
+          In the case of an interface compilation unit, the optional
+          <progident>bitc-version</progident> form is followed by
+          exactly one <progident>interface</progident> form. In source
+          compilation units, the <progident>bitc-version</progident>
+          form is followed by an arbitrary sequence of imports,
+          definitions, declarations, and use forms that are
+          <em>not</em> <progident>interface</progident> forms.
+        </p>
+        <sect3>
+          <title>Definitions and Declarations</title>
+          <p>
+            The top level forms that introduce programmatic
+            definitions and declarations are:
+          </p>
+          <literallayout>
+define    definstance  defrepr
+defstruct deftypeclass defunion  
+proclaim
+use</literallayout>
+          <p>
+            The <progident>define</progident>,
+            <progident>defunion</progident>,
+            <progident>defrepr</progident>, and
+            <progident>defstruct</progident> forms support simple
+            recursion. That is, the identifier(s) being defined may be
+            used in their definition. However, the identifier(s) being
+            defined are deemed incomplete until the end of the
+            enclosing defining form. Restrictions on the use of
+            incomplete identifiers are described in the sections on
+            types and value binding.
+          </p>
+          <p>
+            The <progident>proclaim</progident> form is used to
+            provide opaque value declarations. The identifier declared
+            by a <progident>proclaim</progident> form is considered
+            incomplete. If a completing definition is later provided
+            within the same compilation unit, the identifier is
+            considered complete in the balance of the defining
+            compilation unit after the the close of its defining form.
+            An incomplete declaration may be used within a procedure,
+            but may not be used as part of a top-level initializer
+            (see <progident>define</progident>, Section&nbsp;<xref ref="define"/>).
+          </p>
+          <p>
+            The <progident>use</progident> form is used to provide
+            an alternative identifier that is equivalent in all
+            respects to some existing top-level identifier.
+          </p>
+          <p>
+            All definition forms are expressions that return a
+            value of type <b>unit</b>.
+          </p>
+        </sect3>
+      </sect2>
+    </sect1>
+    <sect1>
+      <title>Types</title>
+      <p>
+	BitC provides explicit control over data structure
+	representation while preserving a memory-safe and type-safe
+	language design.
+      </p>
+      <sect2>
+        <title>Categories of Types</title>
+        <p>
+          BitC has two categories of types: value types and reference
+          types.
+        </p>
+        <p>
+          A value type is one whose value representation is
+          ``embedded'' in the representation of its containing
+          composite type or stack frame. The lifetime of an instance
+          of value type is determined by the lifetime of its
+          container, and it is the responsibility of the container
+          to allocate storage for its contained value types.
+        </p>
+        <p>
+          A reference type is a type whose value representation
+          resides in the heap. Every instance of a reference type has
+          at least one reference value that denotes it. The
+          <em>reference</em> is a value type; the value
+          <em>denoted</em> by the reference is a reference type.
+        </p>
+        <p>
+          If <progident><em>T</em></progident> is a value type, then
+          <progident>(ref&nbsp;<em>T</em>)</progident> is the type of
+          a reference denoting a heap-allocated instance of
+          <progident><em>T</em></progident>. Similarly, if
+          <progident><em>T</em></progident> is a reference type, then
+          <progident>(val&nbsp;<em>T</em>)</progident> is the
+          corresponding value type. The <progident>val</progident>
+          type constructor can only be applied to reference types
+          whose target is of statically known size. Storage for a
+          value of value type is allocated from its containing type.
+        </p>
+        <p>
+          BitC does not provide automatic assignment conversion
+          between value types and reference types.
+        </p>
+      </sect2>
+      <sect2>
+	<title>Primary Types</title>
+	<p>
+	  The primary types of BitC are:
+	</p>
+	<deflist>
+	  <defli>
+	    <label><term>unit</term></label>
+	    <li>
+	      <p>
+                The unit type, having as its singleton member the unit
+		value, both of which are written as
+		<progident>()</progident>.<footnote><p>Note that
+		<term>unit</term> is not a keyword.</p>
+		</footnote>
+              </p>
+	    </li>
+	  </defli>
+ 	  <defli>
+ 	    <label><term>bool</term></label>
+ 	    <li>
+ 	      <p>
+                 A boolean value, either
+ 		<progident>#f</progident> or
+ 		<progident>#t</progident>. The representation of this
+ 		type is a single byte, aligned at a arbitrary byte
+ 		boundary.
+               </p>
+ 	    </li>
+ 	  </defli>
+ 	  <defli>
+ 	    <label><term>char</term></label>
+ 	    <li>
+ 	      <p>
+                A unicode code point. The representation of this type
+ 		is a 32-bit unsigned integer, aligned at a 32-bit boundary.
+               </p>
+ 	    </li>
+ 	  </defli>
+ 	  <defli>
+ 	    <label><term>word</term></label>
+ 	    <li>
+              <p>
+                The type <progident>word</progident> is the smallest
+                unsigned integral type whose range of values is
+                sufficient to represent the bit representation of a
+                pointer on the underlying machine. This type is
+                architecture dependent, and is <em>not</em> directly
+                assignment compatible with unsigned integral types of
+                the same size. Values of type
+                <progident>word</progident> are aligned at a boundary
+                that is a multiple of their size.
+               </p>
+ 	    </li>
+ 	  </defli>
+<!-- 	  <defli> -->
+<!-- 	    <label><term>fixint</term></label> -->
+<!-- 	    <li> -->
+<!-- 	      <p> -->
+<!-- 		The <progident>fixint</progident> form describes a -->
+<!-- 		fixed-precision integer field: -->
+<!-- 	      </p> -->
+<!-- 	      <literallayout> -->
+<!-- (fixint <em>size</em> <em>align</em> <em>signed</em>) -->
+<!-- </literallayout> -->
+<!-- 	      <p indent="no"> -->
+<!--                 Legal values for <em>align</em> are 8, 16, 32, and -->
+<!--                 64. The value of <em>size</em> must be less than or -->
+<!--                 equal to the value of <em>align</em>. The value of -->
+<!--                 <em>signed</em> must be either #f or #t. The arguments -->
+<!--                 to the <progident>fixint</progident> form must be -->
+<!--                 literals. Type equivalence for -->
+<!--                 <progident>fixint</progident> types is determined -->
+<!--                 structurally: two appearances of a -->
+<!--                 <progident>fixint</progident> form having the same -->
+<!--                 values for <em>size</em>, <em>align</em>, and -->
+<!--                 <em>signed</em> denote the same type. -->
+<!-- 	      </p> -->
+<!-- 	      <p>The form</p> -->
+<!-- 	      <literallayout> -->
+<!-- (fixint 4 32 #t) -->
+<!-- </literallayout> -->
+<!-- 	      <p indent="no"> -->
+<!-- 		describes a two's complement four bit field placed -->
+<!-- 		within a 32-bit alignment frame. The type -->
+<!-- 		<progident>int32</progident> is internally defined as -->
+<!-- 	      </p> -->
+<!-- 	      <literallayout> -->
+<!-- (fixint 32 32 #t) -->
+<!-- </literallayout> -->
+<!-- 	    </li> -->
+<!-- 	  </defli> -->
+	  <defli>
+	    <label><term>bitfield</term></label>
+	    <li>
+	      <p>
+		The <progident>bitfield</progident> form describes a
+		fixed-precision integer field:
+	      </p>
+	      <literallayout>
+(bitfield <em>basetype</em> <em>size</em>)</literallayout>
+	      <p indent="no">
+                Where <progident><em>basetype</em></progident> is one
+                of the primary fixed-precision integral types and
+                <progident><em>size</em></progident> is a literal
+                not exceeding the size in bits of the base type.
+              </p>
+	      <p>
+                The form
+              </p>
+	      <literallayout>
+(bitfield int32 4)</literallayout>
+	      <p indent="no">
+		describes a two's complement four bit field placed
+		within a 32-bit alignment frame.
+	      </p>
+              <p>
+                Bitfields may only be used as types of structure,
+                union, or tag fields. The type of a bitfield is deemed
+                to be assignment and binding compatible with its
+                <em>basetype</em>. A bitfield over a signed base type
+                is sign-extended as needed when copying to its base
+                type. A bitfield over an unsigned base type is zero
+                extended.
+	      </p>
+	    </li>
+	  </defli>
+          <defli>
+            <label><term>float, double, quad</term></label>
+	    <li>
+	      <p>
+		The types <progident>float</progident>,
+		<progident>double</progident>, and
+		<progident>quad</progident> describe, respectively,
+		IEEE floating point values as described in <cite
+		  ref="ieee1985std754"/><cite ref="ieee1987std854"/>.
+                The <progident>quad</progident> type is an extended
+		precision floating point type iwth a 15 bit exponent
+		and a 112 bit mantissa.
+	      </p>
+	    </li>
+	  </defli>
+	</deflist>
+        <p>
+          The type <progident>bool</progident> and its constructors
+          <progident>#t</progident> and <progident>#f</progident> are
+          defined in the standard prelude.
+        </p>
+        <p>
+          At present, the BitC runtime system assumes that actual
+          character values will be limited to the Unicode
+          characters whose encoding falls between 0 and 127. This
+          is a temporary restriction.
+        </p>
+<!--          <p> -->
+<!--            The specification does not require that these types be -->
+<!--            ``built in'' to the compiler. It is permissable to provide -->
+<!--            some or all of them in the Standard Prelude. -->
+<!--          </p> -->
+      </sect2>
+      <sect2>
+	<title>Type Variables</title>
+        <p>
+          A type variable is an identifier preceded by a single quote,
+          as in <progident>'a</progident>. Type variables may appear
+          in any position where a type can appear. Type variables are
+          most commonly used as type constructor arguments for named
+          constructed types (see below). They can also be used to
+          annotate expressions, for example to require that two
+          expressions must have the same type. The expression:
+        </p>
+        <literallayout>
+(myfun x y:'a):'a</literallayout>
+        <p indent="no">
+          says that the type of <progident>x</progident> is
+          unspecified by the program author (and should therefore be
+          inferred), the return type is also unspecified (and should
+          be inferred), but the program author is stating that the
+          return type and the last argument type are the same. This
+          type of annotation is sometimes useful to assist the
+          inference engine.
+        </p>
+        <p>
+          The scope of a type variable is its outermost defining form.
+        </p>
+      </sect2>
+      <sect2>
+	<title>Simple Constructed Types</title>
+	<p>
+          Constructed types compose existing types into new
+          types. Type equivalence for the simple constructed types is
+          determined by structural equivalence.
+	</p>
+	<sect3>
+	  <title>Reference Types</title>
+	  <p>
+            If <progident><em>T</em></progident> is a value type, then
+          </p>
+          <literallayout>
+(ref <em>T</em>)</literallayout>
+          <p indent="no">
+            is the type of a reference denoting a heap-allocated
+            instance of <progident><em>T</em></progident>.
+	  </p>
+	  <p>
+	    <leadin>Storage Layout</leadin> The representation of a
+	    <progident>ref</progident> instance is architecture
+	    dependent. It is customarily determined by the size of the
+	    machine's integer registers, and aligned at any address
+	    that is congruent mod 0 to the integer register size.
+	  </p>
+	</sect3>
+	<sect3>
+	  <title>Function Types</title>
+	  <p>
+	    If <progident><em>t<sub>arg</sub></em></progident> and
+	    <progident><em>t<sub>result</sub></em></progident> are
+	    types (including type variables), then:
+	  </p>
+	  <literallayout>
+(fn <em>t<sub>arg</sub></em> <em>t<sub>result</sub></em>)</literallayout>
+	  <p indent="no">
+	    is the type of a function taking a single argument of type
+	    <em>t<sub>arg</sub></em> and returning a value of type
+	    <progident><em>t<sub>result</sub></em></progident>.
+          </p>
+          <p>
+            Function types are considered reference types that denote
+            an object of statically undefined size. The size and
+            alignment of a value of function type is determined by the
+            underlying processor architecture.
+          </p>
+	</sect3>
+      </sect2>
+      <sect2>
+        <title>Sequence Types</title>
+        <p>
+          BitC provides fixed-length (<progident>array</progident>)
+          and variable-length (<progident>vector</progident>) types.
+        </p>
+        <sect3>
+	  <title>Arrays</title>
+	  <p>
+            An array is a value type whose value is a fixed
+            product type
+            <progident><em>T</em><sup><em>i>0</em></sup></progident>,
+            all of whose elements are of common type. The type:
+	  </p>
+	  <literallayout>
+(array <em>T</em> <em>i</em>)</literallayout>
+          <p indent="no">
+            describes the type of fixed-length arrays of element type
+            <progident><em>T</em></progident> and length
+            <progident><em>i</em></progident>, where
+            <progident><em>i</em></progident> is an integer literal of
+            type <progident>word</progident> that is greater than
+            zero.
+          </p>
+	  <p>
+	    <leadin>Storage Layout</leadin> The value representation
+	    of a <em>k</em>-element array is laid out in memory as the
+	    concatenation of <em>k</em> contiguous element cells whose
+	    size and alignment are determined by their respective
+	    element types. The elements of the array appear at
+	    increasing addresses in order from left to right.
+	  </p>
+	</sect3>
+	<sect3>
+	  <title>Vectors</title>
+	  <p>
+            A vector is a dynamically sized array whose elements are
+            of type <progident><em>T</em></progident>. Vectors are
+            reference types. Because they are dynamically sized, there
+            is no corresponding value type. The type:
+	  </p>
+	  <literallayout>
+(vector <em>T</em>)</literallayout>
+	  <p>
+	    describes vectors of element type
+	    <progident><em>T</em></progident>. 
+	  </p>
+	</sect3>
+      </sect2>
+      <sect2>
+        <title>Named Constructed Types</title>
+        <p>
+          The named constructed types are types whose compatibility
+          rules are determined by name equivalence. Two values of
+          named constructed types are equivalent if (a) they are
+          instances of the same statically appearing type definition,
+          and (b) their corresponding elements are equivalent.
+        </p>
+        <p>
+          Unless otherwise qualified, a named constructed type
+          declaration declares a reference type.
+        </p>
+	<sect3>
+	  <title>Structures</title>
+	  <p>
+	    The structure declaration defines a named type whose
+	    instances are an ordered sequence of named cells. The
+	    syntax of a structure declaration is:
+	  </p>
+	  <literallayout>
+(defstruct <em>nm</em> <em>field</em> ...)
+(defstruct (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>) <em>field</em> ...)</literallayout>
+	  <p indent="no">
+            where each <progident><em>field</em></progident> is one of:
+          </p>
+<literallayout>
+<em>nm</em>:<em>type</em>
+(the <em>type</em> <em>nm</em>)
+(fill <em>bitfield-type</em>)</literallayout>
+          <p indent="no">
+            All names <progident><em>nm</em></progident> are disjoint
+	    identifiers giving the names of the structure fields, and
+	    the respective <progident><em>type</em></progident> forms
+	    are the types of the respective fields.  Given a variable
+	    <progident>v</progident> that is an instance of a
+	    structure type having a field named
+	    <progident>f</progident>, the expression
+	    <progident>v.f</progident> unifies with the field
+	    <progident>f</progident> within that structure.
+          </p>
+          <p>
+            A <progident>fill</progident> element may be used to
+            support precise specification of alignment. The alignment
+            and storage layout of a fill field follows the alignment
+            and storage layout of its base type, however a fill field
+            has no name or defined value, and cannot be
+            programatically referenced.
+          </p>
+          <p>
+	    An identifier that is bound to a structure type may be used
+	    as a procedure to instantiate new values of that structure
+	    type. The arguments to this procedure are the initial values
+	    of the respective structure fields.
+	  </p>
+	  <p>
+	    An identifier that is bound to a non-parameterized
+	    structure type may be used as a type name.  An identifier
+	    that is bound to a parameterized structure type may be
+	    used in a type constructor application within a type
+	    specification. Its arguments are the types over which the
+	    newly instantiated structure type should be instantiated.
+	    For example, the declarations:
+          </p>
+          <literallayout>
+(defstruct ipair a:int32 b:int32)
+
+(defstruct (tree-of 'a):ref
+  left : (optional (tree-of 'a))
+  right : (optional (tree-of 'a))
+  height : int8
+  value : 'a)</literallayout>
+          <p indent="no">
+define (respectively) the type name <progident>ipair</progident> and
+            the single argument type constructor
+            <progident>tree-of</progident>.
+          </p>
+          <sect4>
+            <title>Storage Layout</title>
+            <p>
+              A structure having <em>k</em> fields is laid out in
+              memory at increasing addresses from left to right as
+              <em>k</em> contiguous cells whose size and alignment are
+              determined by their respective element types. These
+              cells are then packed according to the previously
+              described alignment and layout packing rules. <font
+              color="red"><em>Did we describe them?</em></font>
+            </p>
+          </sect4>
+	</sect3>
+	<sect3>
+	  <title>Unions</title>
+          <note>
+            <p>
+              This is a proposed replacement to the current
+              <progident>defunion</progident> form.
+            </p>
+          </note>
+	  <p>
+	    The <progident>defunion</progident> form defines
+	    enumerations, discriminated unions, and mixes of
+	    these. The type being defined is in-scope within the
+	    definition of the type, but is incompletely defined.  The
+	    syntax of a union declaration is one of:
+	  </p>
+	  <literallayout>
+(defunion <em>nm</em> <em>C<sub>1</sub></em> ... <em>C<sub>n</sub></em>)
+(defunion (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)
+  <em>C<sub>1</sub></em> ... <em>C<sub>n</sub></em>)</literallayout>
+	  <p indent="no"> 
+            where each
+            <progident><em>tv<sub>i</sub></em></progident> is a type
+            variable and <progident><em>C<sub>i</sub></em></progident>
+            is a <term>constructor form</term>.  A constructor form
+            consists of either a single identifier or a parenthesized
+            identifier followed by a sequence of field or fill
+            declarations (see <progident>defstruct</progident>). All
+            field names appearing in a
+            <progident>defunion</progident>, including constructor
+            names, must be disjoint.
+	  </p>
+          <p>
+            An identifier bound to a union constructor having no
+            fields denotes the value of the unique corresponding union
+            instance for that union type.
+          </p>
+          <p>
+            An identifier bound to a union constructor having
+            associated fields is a procedure that may be used to
+            instantiate new instances of that union type. The
+            arguments to this procedure are the initial values of the
+            union fields associated with that union variant.
+          </p>
+          <p>
+            An identifier that is bound to a non-parameterized union
+            type is a valid type name.  An identifier that is bound to
+            a paramterized union type may be used in a type
+            constructor application within a type specification. Its
+            arguments are the types over which the newly instantiated
+            structure type should be instantiated.  For example, the
+            declarations:
+	  </p>
+          <literallayout>
+(defunion contrived
+  (asChar c:char) (asInt i:int32))
+
+(defunion (optional 'a) :val
+  none
+  (some value:'a))</literallayout>
+          <p indent="no">
+            define (respectively) a reference type holding either a
+            <progident>char</progident> or an
+            <progident>int32</progident>, and a value type of optional
+            elements.
+          </p>
+          <p>
+            The declaration:
+          </p>
+          <literallayout>
+(defunion (list 'a):ref
+  nil
+  (cons car:'a cdr:(list 'a)))</literallayout>
+          <p indent="no">
+            Defines the reference type of homogeneous lists.
+          </p>
+          <sect4>
+            <title>Storage Layout</title>
+            <p>
+              Each variant of a union declaration effectively defines
+              a <em>k+1</em> element structure, where the first
+              element contains the tag and the remaining <em>k</em>
+              elements are the fields of the constructor leg. In the
+              usual case, the representation of the union leg is
+              arranged as though it had actually been this structure,
+              without regard to the layout of other legs.
+            </p>
+            <p>
+              In the unusual case of a union whose tag representation
+              can be elided (see below), each individual union leg
+              will be arranged as though it had been the corresponding
+              structure declaration.
+            </p>
+            <p>
+              In the case of a union having no tag, the union
+              representation will match the size and alignment of
+              reference cells.  The storage occupied by a union of
+              value type is the maximum of the storage required for
+              each individual case of the discriminated union
+              (including the type tag, if present).
+            </p>
+          </sect4>
+	  <sect4>
+	    <title>Type Tag Size and Alignment</title>
+	    <p>
+	      In the absence of declaration, the union type tag will be
+	      given an implementation-defined size and alignment
+	      selected to maximize performance efficiency. Explicit
+	      control over the size and alignment can be achieved using
+	      a <progident>tag-type</progident> declaration. The
+	      declaration:
+	    </p>
+	    <literallayout>
+(defunion (list 'a):ref
+  (declare (tag-type uint8))
+  nil
+  (cons car:'a cdr:(list 'a)))</literallayout>
+	    <p indent="no">
+	      indicates that the tag should be implemented using an
+	      unsigned byte.  The declared tag type must be an unsigned
+	      integral or bitfield type having a sufficient number
+	      of distinct values to assign a unique value to each
+	      constructor.
+	    </p>
+          </sect4>
+          <sect4>
+            <title>Elided Tag Representation</title>
+            <p>
+              In the absence of an explicit type tag declaration, a
+              union having exactly one leg whose first element is of
+              reference type, all of whose other constructors are
+              enumeration values, shall be represented without using
+              additional storage for the type tag. The value
+              <em>zero</em> shall be used as the low-level
+              representation for the tag associated with the union leg
+              whose first element is of reference type.<footnote>
+                <p>
+                  This representation is often referred to as the
+                  ``Cardelli optimization.'' It permits LISP-style
+                  cons cells to be represented using two words, and
+                  also permits the <progident>optional</progident>
+                  union to be represented in a single word whenever
+                  the element type is of reference type.
+                </p>
+              </footnote>
+            </p>
+            <p>
+              If a union type tag is explicitly declared to be of a
+              field type whose size in bits <progident>b</progident>
+              is such that the machine's natural heap alignment
+              restriction for objects is
+              <progident>align&gt;=2<sup>b</sup></progident>, the
+              total number of distinct legs of the union does not
+              exceed <progident>2<sup>b</sup></progident>, and there
+              is exactly one union leg whose first element is of
+              reference type, then the tag representation shall be
+              chosen in such a way that leg whose first element is of
+              reference type does not reserve additional storage for
+              the tag value.  The value <em>zero</em> shall be used as
+              the low-level representation for the tag associated with
+              the union leg whose first element is of reference type.<footnote>
+                <p>
+                  This is a variant of the ``Cardelli optimization.''
+                  It permits the classic LISP fixnum/bignum
+                  discrimination to be accomplished within a single
+                  word. A further generalization of this rule is
+                  possible to handle multiple legs whose first element
+                  is of reference type, but this generalization
+                  requires an additional mask operation. We have
+                  chosen not to adopt it so that there is no ``hidden
+                  cost'' in this case.
+                </p>
+              </footnote>
+            </p>
+	  </sect4>
+	</sect3>
+        <sect3 id="ty_repr">
+          <title>Reprs</title>
+          <p>
+            There are examples of low-level hardware data structures
+            for which the unions and structures that can be specified
+            using <progident>defstruct</progident> or
+            <progident>defunion</progident> are insufficiently
+            expressive. One example is the Pentium GDT data structure,
+            which has nested union discriminators, but simultaneously
+            has an overall bit-level layout requirement. Another
+            example is data structures where the representation of the
+            tag must appear at a specific location that is not
+            adjacent to the fields guarded by the tag. The
+            <progident>defrepr</progident> form is included to permit
+            the expression of these data structures. 
+          </p>
+          <p>
+            The following scheme for <progident>defrepr</progident> is
+            based on the bit-data representation proposed by Iavor Diatchki,
+            <foreignphrase>et. al.</foreignphrase>&nbsp;<cite
+              ref="diatchki2005representation"/>. 
+          </p>
+          <p>
+            Similar to unions and structures, a
+            <progident>defrepr</progident> delaration takes the
+            following form:
+          </p>
+          <literallayout indent="no">
+(defrepr name
+  (Ctr1 f11:type f21:type ... fn1:type
+    (where (= fp1 v11) (= fq1 v21) ...
+           (= fm1 vm1))
+
+  (Ctr2 f12:type f22:type ... fn2:type
+    (where (= fp2 v12) (= fq2 v22) ... 
+           (= fm2 vm2))
+
+  ... )</literallayout>
+          <p>
+            The following restrictions apply. For all constructors
+            <progident>Ctrx</progident>, <progident>Ctry</progident>, 
+            <progident>Ctrz</progident>, <progident>...</progident>:
+          </p>
+          <ul>
+            <li>
+              <p>
+                All fields <progident>fpx</progident>, fqx...fmx
+                appearing in the <progident>when</progident> clause of
+                a constructor form <progident>Ctrx</progident> must be
+                described within the body of
+                <progident>Ctrx</progident>. That is,
+                {<progident>fpx</progident>,
+                <progident>fqx</progident>, <progident>...</progident>
+                <progident>fmx</progident>} &sube;
+                {<progident>f1x</progident>, <progident>...</progident> 
+                <progident>fnx</progident>}.
+              </p>
+            </li>
+            <li>
+              <p>
+                Identically named fields within two different
+                constructor forms must be located at the same bit
+                level offset from the beginning of both the
+                constructor forms. That is, <progident>fpx</progident>
+                = <progident>fpy</progident> implies
+                bit-offset(<progident>fpx</progident>) =
+                bit-offset(<progident>fpy</progident>).
+              </p>
+            </li>
+            <li>
+              <p>
+                Identically named fields within two different
+                constructor must have the same type. That is,
+                <progident>fpx</progident>  =
+                <progident>fpy</progident> implies 
+                type-of(<progident>fpx</progident>) =
+                type-of(<progident>fpy</progident>).
+              </p>
+            </li>
+            <li>
+              <p>
+                The fields within the <progident>when</progident>
+                clauses of all constructor forms must uniquely
+                distinguish all constructible values of the union. The
+                compiler will not introduce any more tag bits for a
+                <progident>defrepr</progident> value.
+              </p>
+            </li>
+            <li>
+              <p>
+                Currently, the <progident>defrepr</progident> form
+                will not accept type arguments over which
+                it can be instantiated.
+                That is, the following definition is not legal.
+              </p>
+              <literallayout indent="no">
+(defrepr (name 'a 'b ... ) ... )</literallayout>
+            </li>
+            <li>
+              <p>
+                Currently, the discriminating fields
+                <progident>fp1</progident>,
+                <progident>fp2</progident>, etc must have a
+                integer/bitfield type, and the discriminator values  
+                <progident>v11</progident>,
+                <progident>v12</progident>, etc must be an integer
+                literal.  
+              </p>
+            </li>
+          </ul>
+          <p>
+            We can envision a larger language construct
+            <progident>DEFUNION</progident>, which accepts both type
+            arguments and <progident>when</progident> clauses. The
+            <progident>defunion</progident> and
+            <progident>defrepr</progident> are just specializations of
+            this <progident>DEFUNION</progident> construct. However,
+            currently the language only supports
+            <progident>defunion</progident> (which does not accept the
+            <progident>when</progident> clause) and
+            <progident>defrepr</progident> (which does not accept type
+            arguments). 
+          </p>          
+        </sect3>
+        <sect3>
+          <title>Value vs. Reference Types</title>
+          <p>
+            In the absence of other specification, the
+            <progident>defstruct</progident>,
+            <progident>defrepr</progident>, and
+            <progident>defunion</progident> forms declare reference
+            types. The developer may optionally qualify
+            the declaration to make this intention explicit:
+          </p>
+	  <literallayout>
+(defstruct <em>nm</em><b>:ref</b> <em>field</em> ...)
+(defstruct (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)<b>:ref</b>
+  <em>field</em> ...)
+(defunion <em>nm</em><b>:ref</b> <em>C<sub>1</sub></em> ... <em>C<sub>n</sub></em>)
+(defunion (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)<b>:ref</b>
+  <em>C<sub>1</sub></em> ... <em>C<sub>n</sub></em>)
+(defrepr <em>nm</em><b>:ref</b> (<em>body</em>))
+(defrepr (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)<b>:ref</b> (<em>body</em>))</literallayout>
+          <p>
+            The qualifier ``:ref'' indicates that the type declared
+            (and consequently the type returned by value constructors)
+            is a reference type. The qualifier ``:val'' indicates that
+            the type declared is a value type. The qualifier
+            ``:opaque'' indicates that the type declared is a value
+            type whose internal structure is not accessable outside of
+            the defining interface and the providers of that
+            interface. An importer of an opaque type may declare
+            fields and variables of that type and can <em>copy</em>
+            instances of that type, but can neither apply the type
+            constructors nor make reference to the contents of
+            instances.
+          </p>
+          <p>
+            Note that if the type declared is a value type, it cannot
+            be instantiated within the body of the declaration because
+            its size is not statically known. That is, it is legal to
+            have a field that is a <em>reference</em> to a value of
+            the type currently being defined, but not a value of that
+            type.
+          </p>
+        </sect3>
+        <sect3>
+          <title>Forward Declarations</title>
+          <p>
+            The declarations
+          </p>
+          <literallayout>
+(defstruct <em>nm</em> [<em>qual</em>] [<em>external</em>])
+(defunion <em>nm</em> [<em>qual</em>] [<em>external</em>])
+(defrepr <em>nm</em> [<em>qual</em>] [<em>external</em>])
+(defstruct (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>) 
+          [<em>qual</em>] [<em>external</em>])
+(defunion (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)
+          [<em>qual</em>] [<em>external</em>])
+(defrepr (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)
+          [<em>qual</em>] [<em>external</em>])</literallayout>
+          <p indent="no">
+            state (respectively) that <progident>nm</progident> is a
+            structure (respectively union) reference type of the
+            stated arity whose internal structure is not disclosed.
+            If present, the qualifier
+            <progident><em>qual</em></progident> optionally declares
+            the type to be one of ``:ref'', ``:val'', or
+            ``:opaque''. In the absence of qualification, the default
+            is ``:ref''. If present, the <em>external</em> portion
+            consists of the keyword <progident>external</progident>
+            followed by an optional identifier (see discussion of
+            external identifiers in <progident>proclaim</progident>).
+          </p>
+          <p>
+            For example, the following declaration is include in the
+            library <progident>bitc.int</progident> interface to
+            declare the bignum type:
+          </p>
+          <literallayout>
+(defstruct int :val external bitc_int)</literallayout>
+          <p>
+            The structure of these types may optionally be disclosed
+            later in the same compilation unit by a type definition
+            for <progident>nm</progident>. If the declaring form
+            appears within an interface, the corresponding type
+            definition may appear in a providing unit of compilation,
+            in which case the type is opaque to importers of the
+            interface.
+          </p>
+          <p>
+            Note that a forward declaration of a value type is
+            sufficient to declare <em>references</em> to that type,
+            but not <em>instances</em> of that type. A complete
+            definition of the value type is required to be in scope in
+            order to declare fields and variables of value type.
+          </p>
+        </sect3>
+	<sect3>
+	  <title>Named Type Conveniences</title>
+	  <p>
+            The following types are defined in the BitC standard
+ 	    prelude.
+          </p>
+          <literallayout>
+(defstruct (pair 'a 'b) :val
+   fst:'a snd:'b)
+
+(defunion (list 'a) :ref
+   nil
+   (cons 'a (list 'a)))</literallayout>
+          <p indent="no">
+            Note that <progident>pair</progident> is a keyword that is
+            specially recognized in binding patterns.
+          </p>
+          <p>
+            The
+            <progident>pair</progident> type is supported by a
+            right-associative infix convenience syntax:
+          </p>
+          <literallayout>
+(a, b) =&gt; (pair a b)
+(a, b, c) =&gt; (pair a (pair b c))</literallayout>
+          <p indent="no">
+            This convenience syntax may be used in types, binding
+            patterns, and value construction.
+          </p>
+<!--           <p> -->
+<!--             The <progident>list</progident> type is also supported by -->
+<!--             a right-associative convenience syntax: -->
+<!--           </p> -->
+<!--           <literallayout> -->
+<!-- []      =&gt;  nil -->
+<!-- [a]     =&gt; (cons a nil) -->
+<!-- [a,b]   =&gt; (cons a (cons b nil)) -->
+<!-- [a,b,c] =&gt; -->
+<!--   (cons a (cons b (cons c nil)))</literallayout> -->
+<!--           <p indent="no"> -->
+<!--             This convenience syntax may be used in value patterns and -->
+<!--             value construction. -->
+<!--           </p> -->
+<!--           <note> -->
+<!--             <p> -->
+<!--               The <progident>list</progident> form may become a -->
+<!--               syntactic form in future versions of this specification, -->
+<!--               because we are considering adding pattern matching -->
+<!--               support for it. -->
+<!--             </p> -->
+<!--           </note> -->
+	</sect3>
+      </sect2>
+      <sect2>
+        <title>Mutability</title>
+        <p>
+          Unless modified by the <progident>mutable</progident>
+          keyword, the preceding types yield immutable
+          instantiations. If <progident><em>T</em></progident> is a
+          type, the type
+        </p>
+        <literallayout>
+(mutable <em>T</em>)</literallayout>
+        <p indent="no">
+          is the type of mutable instances of
+          <progident><em>T</em></progident>. If the type
+          <progident><em>T</em></progident> is a reference type, then
+          the type <progident>(mutable&nbsp;<em>T</em>)</progident>
+          describes a mutable reference to a memory location in the
+          heap. 
+        </p>
+      </sect2>
+<!--       <sect2> -->
+<!--         <title>Method Types</title> -->
+<!--         <p> -->
+<!--           The type: -->
+<!--         </p> -->
+<!--         <literallayout> -->
+<!-- (method (<em>TC</em> 'a ... 'z)  -->
+<!--         (fn <em>T<sub>arg</sub></em> <em>T<sub>out</sub></em>))</literallayout> -->
+<!--         <p indent="no"> -->
+<!--           describes the type of <em>methods</em> (see type classes, -->
+<!--           below) that are members of some type class -->
+<!--           <progident><em>TC</em></progident>. The types of the -->
+<!--           arguments and return values may refer to the type variable -->
+<!--           paramaters of the type class. Multiple type class -->
+<!--           requirements can be expressed using <progident>and</progident>: -->
+<!--         </p> -->
+<!--         <literallayout> -->
+<!-- (method (and (<em>TC1</em> 'a ... 'z) -->
+<!--              (<em>TC2</em> 'a ... 'z)) -->
+<!--         (fn <em>T<sub>arg</sub></em> <em>T<sub>out</sub></em>))</literallayout> -->
+<!--       </sect2> -->
+      <sect2>
+        <title>Exceptions</title>
+        <p>
+          BitC provides declared exceptions. The type
+          <progident>exception</progident> should be viewed as an
+          ``open'' union reference type whose variant constructors are
+          defined by <progident>defexception</progident>. The syntax
+          of an exception declaration is:
+        </p>
+        <literallayout>
+(defexception <em>nm</em> [<em>field<sub>1</sub></em> ... <em>field<sub>n</sub></em>])</literallayout>
+        <p indent="no"> where each
+	    <progident><em>field<sub>i</sub></em></progident> is a
+          field declaration (see <progident>defstruct</progident>)
+          whose type is a concrete type.
+        </p>
+        <p>
+          An identifier bound to an exception name is a procedure that
+          may be used to instantiate new instances of that exception.
+          The arguments to this procedure are the values of the fields
+          associated with the exception.
+        </p>
+      </sect2>
+      <sect2>
+        <title>Restrictions</title>
+        <p>
+          BitC imposes a value restriction <cite
+          ref="garrigue2004value"/> on polymorphism. A binding is only
+          permitted to be of polymorphic type if its defining
+          expression is a syntactic value.
+        </p>
+        <p>
+          As is usual in let-polymorphic languages, polymorphic
+          function arguments cannot be used polymorphically within the
+          function. For example, the following function is disallowed:
+        </p>
+        <literallayout>
+(define (foo f)
+  (pair
+    (f (cons 1 (cons 2 nil)))
+    (f (cons #t (cons #f nil)))))</literallayout>
+      </sect2>
+    </sect1>
+    <sect1>
+      <title>Type Classes and Qualified Types</title>
+      <p>
+        A <term>type class</term> defines an n-ary relation on types,
+        and provides a means for specifying <foreignphrase>ad
+        hoc</foreignphrase> polymorphism. Every type class is
+        parameterized over <em>n</em>&ge;1 types, and defines a set of
+        methods over those types.  Type classes provide a form of
+        <em>open</em> type-directed operations: a user can add a new
+        member to the relation established by a given type class by
+        providing a new instantiation of the type class.
+      </p>
+      <p>
+        Closely connected with type classes is the notion of
+        <term>qualified types</term>. For example, consider the
+        following definition of <progident>list-max</progident>:
+      </p>
+<literallayout>
+(define (list-max x)
+  (switch tmp x
+    (nil (raise ValueError))
+    (cons
+     (if (null? tmp.cdr)
+         tmp.car
+         (let ((m (list-max tmp.cdr)))
+           (if (>= tmp.car m)
+               tmp.car m))))))</literallayout>
+      <p indent="no">
+        which is typed as:
+      </p>
+<literallayout>
+(forall ((Ord 'a))
+        (fn ((list 'a)) 'a))</literallayout>
+      <p>
+        This type should be read informally as
+        ``<progident>list-max</progident> is a procedure accepting
+        lists of type <progident>'a</progident> and returning a value
+        of type <progident>'a</progident>. It is defined over all
+        types <progident>'a</progident> such that there is an
+        instiation of the <progident>(Ord&nbsp;'a)</progident> type
+        class.''
+      </p>
+      <p>
+        In this example, <progident>(Ord&nbsp;'a)</progident> is the
+        type class that describes types having a total order. That is:
+        types over which the procedure <progident>&gt;=</progident> is
+        defined. Obviously, it not semantically sensible to request
+        the greatest element of a list whose element type does not
+        have at total ordering.
+      </p>
+      <p>
+        Contrast this example with the following alternative:
+      </p>
+<literallayout>
+(define (list-max gte x)
+  (switch tmp x
+    (nil (raise ValueError))
+    (cons
+     (if (null? tmp.cdr)
+         tmp.car
+         (let ((m (list-max tmp.cdr)))
+           (if (gte tmp.car m)
+               tmp.car m))))))</literallayout>
+      <p indent="no">
+        which is typed as:
+      </p>
+<literallayout>
+(fn ((fn ('a 'a) bool)
+     (list 'a)) 'a))</literallayout>
+      <p indent="no">
+        In this second example, the comparison operator is provided as
+        an argument, and there is no requirement for additional type
+        constraints. Note, however, that in practice any comparison
+        function that might actually be passed in this position is
+        likely to depend on the <progident>&lt;=</progident> operator
+        in some fashion, and is therefore likely to end up having a
+        qualified type.
+      </p>
+      <sect2>
+        <title>Definition of Type Classes</title>
+        <p>
+          A type class is defined by the abstract syntax:
+        </p>
+        <literallayout>
+(deftypeclass (<em>nm</em> <em>tv</em> ... <em>tv</em>)
+  [<em>tyfn-declarations</em>]
+  <em>method-definitions</em>)</literallayout>
+        <p indent="no">
+          where a <em>tyfn-declaration</em> is a statement of
+          functional dependency between types <cite
+          ref="jones2000tcfndepend"/>:
+        </p>
+        <literallayout>
+(tyfn (<em>tv</em> ... <em>tv</em>) <em>tv</em>)</literallayout>
+        <p indent="no">
+          and each method definition takes the form:
+        </p>
+        <literallayout>
+nm : <em>function-type</em></literallayout>
+        <p indent="no">
+          Each method is an abstract procedure that may be
+          instantiated for some particular type by a later use of
+          <progident>definstance</progident>. The method may be
+          invoked prior to the point where the instantiation is
+          visible.  Each method defined by a type class is introduced
+          into the scope containing the type class definition.
+        </p>
+        <p>
+          By providing an instantiation of a class over some
+          particular set of types, the programmer simultaneously
+          proves (by example) that the set of types is a member of the
+          class and defines (by example) how the operations of the
+          class are implemented for that type.
+        </p>
+        <p>
+          Type functions, when present, indicate that there is a
+          dependent relationship between two or more types of the type
+          class relation. For example, the (incomplete) declaration:
+        </p>
+        <literallayout>
+(deftypeclass (sample 'a 'b 'c)
+  (tyfn ('a 'b) 'c)
+  ...)</literallayout>
+        <p indent="no">
+          states that <progident>sample</progident> is a type relation
+          over three types, but also says that for any pair of types
+          <progident>'a</progident> and <progident>'b</progident>
+          there there is one valid choice of
+          <progident>'c</progident>.
+        </p>
+        <sect3>
+          <title>Example: <progident>Eql</progident></title>
+          <p>
+            As a first example, consider the equality comparison
+            operations. The type class <progident>Eql</progident>
+            defines a single element type relation on types
+            <progident>'a</progident>: describing whether the type is
+            admissable under equality. Some types &mdash; notably
+            function types &mdash; cannot be compared for equality.
+            The definition of this type class is written:
+          </p>
+          <literallayout>
+(deftypeclass (Eql 'a)
+  == : (fn ('a 'a) bool))
+  != : (fn ('a 'a) bool))</literallayout>
+          <p indent="no">
+            which states that <progident>Eq.</progident> is the
+            single element type relation over all types
+            <progident>'a</progident> that can be passed as arguments to
+            <progident>==</progident> and <progident>!=</progident>.
+          </p>
+        </sect3>
+        <sect3>
+          <title>Qualification: <progident>Ord</progident></title>
+          <p>
+            A type class can also be introduced in qualified form. The
+            syntax for such a type class definition is:
+          </p>
+          <literallayout>
+(deftypeclass 
+  (forall (<em>constraint ... constraint</em>)
+     (<em>nm</em> <em>tv</em> ... <em>tv</em>))
+  [<em>tyfn-declarations</em>]
+  <em>method-definitions</em>)</literallayout>
+          <p indent="no">
+            where each constraint takes the form:
+          </p>
+          <literallayout>
+(<em>tc-name</em> <em>tv</em> ... <em>tv</em>)</literallayout>
+          <p indent="no">
+            where <progident>tc-name</progident> is a typeclass name.
+            An example of this use is the <progident>Ord</progident>
+            type class:
+          </p>
+          <literallayout>
+(deftypeclass 
+  (forall ((Eql 'a)) (Ord 'a))
+  &lt; : (fn ('a 'a) 'a))</literallayout>
+          <p indent="no">
+            This type class states that <progident>Ord</progident> is
+            the single element type relation over all types
+            <progident>'a</progident> that can be passed as arguments to
+            <progident>&lt;</progident>. It also states that the
+            <progident>Ord</progident> relation is only defined for
+            types that are also members of the
+            <progident>Eql</progident> relation (that is: types that
+            admit equality comparison).
+          </p>
+          <p>
+            Note that in the presence of this definition, the
+            procedures <progident>&gt;</progident>, 
+<progident>&lt;=</progident>, and 
+<progident>&gt;=</progident> can be defined as:
+          </p>
+          <literallayout>
+(define (&gt; x y)
+  (not (or (&lt; x y) (== x y)))
+(define (&lt;= x y)
+  (or (&lt; x y) (== x y)))
+(define (&gt;= x y)
+  (or (&gt; x y) (== x y)))</literallayout>
+          <p indent="no">
+            all of which will be inferred to have the type:
+          </p>
+          <literallayout>
+(forall ((Ord 'a)) (fn ('a 'a) bool))</literallayout>
+          <p>
+            This may seem like a very long-winded way of saying that
+            an orderable type is any type that can be passed to the
+            operators <progident>&lt;</progident> and
+            <progident>==</progident>. However, type classes are
+            statements about <em>relations</em> among types. This may
+            become clearer with the following example.
+          </p>
+          <p>
+            Note that because <progident>(Ord&nbsp;'a)</progident> has
+            <progident>(Eql&nbsp;'a)</progident>, the types: 
+          </p>
+          <literallayout>
+(forall ((Ord 'a) (Eql 'a))
+        (fn ('a 'a) bool))
+(forall ((Ord 'a)) (fn ('a 'a) bool))</literallayout>
+          <p indent="no">
+            are equivalent. The second is stylistically preferred for
+            reasons of brevity. It is also more robust: in the (in
+            this example unlikely) event that the definition of
+            <progident>Ord</progident> should be modified to depend on
+            some other type class in place of
+            <progident>Eql</progident> the future, the first
+            definition will mistakenly retain an additional,
+            unncessary type dependency, while the second will continue
+            to type check as intended.
+          </p>
+          <p>
+            <b>Restriction:</b> Qualified type relationships must be
+            acyclic.
+          </p>
+        </sect3>
+<!--         <sect3> -->
+<!--           <title>Example: <progident>Convert</progident></title> -->
+<!--           <p> -->
+<!--             Value promotion and demotion is provided by the -->
+<!--             Conversions type class, which defines the -->
+<!--             <progident>convert</progident> method: over a variety of -->
+<!--             input types, following the conventions of the C -->
+<!--             programming language: -->
+<!--           </p> -->
+<!--           <literallayout> -->
+<!-- convert : (fn (int8)  int16) -->
+<!-- convert : (fn (int8)  int32) -->
+<!-- convert : (fn (int8)  int64) -->
+
+<!-- convert : (fn (int16) int8) -->
+<!-- convert : (fn (int16) int32) -->
+<!-- convert : (fn (int16) int64) -->
+<!-- ...</literallayout> -->
+<!--           <p indent="no"> -->
+<!--             this is accomplished by defining the method -->
+<!--             <progident>convert</progident> as a member of the -->
+<!--             multi parameter type class <progident>Conversions</progident> -->
+<!--             (elided here): -->
+<!--           </p> -->
+<!--           <literallayout> -->
+<!-- (deftypeclass (Conversions 'a 'b) -->
+<!--   convert: (fn ('a) 'c) -->
+<!--   ...)</literallayout> -->
+<!--           <p indent="no"> -->
+<!--             What this says is that the operator -->
+<!--             <progident>convert</progident> can be applied to any two -->
+<!--             types <progident>'a</progident> and -->
+<!--             <progident>'b</progident>. -->
+<!--           </p> -->
+<!--         </sect3> -->
+        <sect3>
+          <title>Example: <progident>tyfn</progident></title>
+          <p>
+            <font color="red">Need an example of type
+            functions.</font>
+          </p>
+        </sect3>
+      </sect2>
+      <sect2>
+        <title>Instantiation of Type Classes</title>
+        <p>
+          Whenever a type class method is invoked, the compiler must
+          identify some concrete member of the type class relation
+          that is sufficient to choose an appropriate implementation
+          of that method. This is done by locating an appropriate
+          instantiation.
+        </p>
+        <p>
+          A type class instantiation is a demonstration by example
+          that some particular set of types satisfies the relation
+          required by the type class. Type class instantiations are
+          defined by the <progident>definstance</progident> form.  The
+          abstract syntax of <progident>definstance</progident> is:
+        </p>
+        <literallayout>
+(definstance <em>tc-instance</em>
+  <em>function ... function</em>)
+(definstance
+  (forall (<em>constraint ... constraint</em>)
+          <em>tc-instance</em>)
+  <em>function ... function</em>)</literallayout>
+        <p indent="no">
+          where <em>tc-instance</em> takes the form:
+        </p>
+        <literallayout>
+(<em>typeclass-name</em> <em>type</em> ... <em>type</em>)</literallayout>
+        <p>
+          For example, the definition:
+        </p>
+        <literallayout>
+(definstance (Ord int32)
+  int32-ops.&lt;)</literallayout>
+        <p indent="no">
+          states that <progident>int32</progident> is member of the
+          type relation <progident>Ord</progident> because there is an
+          instance function <progident>int32.&lt;</progident> that
+          provides an implementation of the ``less than'' operation
+          over arguments of type <progident>int32</progident>.
+        </p>
+        <p>
+          In practice, this definition is insufficient, because we
+          must first demonstrate that <progident>int32</progident> is
+          a member of the <progident>Eq</progident> relation (which is
+          a superclass of <progident>Ord</progident>)
+          In consequence, two separate instantiations are required:
+        </p>
+        <literallayout>
+(definstance (Eq int32)
+  int32-ops.==
+  int32-ops.!=)
+(definstance (Ord int32)
+  int32-ops.&lt;)</literallayout>
+        <p>
+          A type class instantiation is deemed to be in scope for
+          purposes of procedure instantiation if it is defined by the
+          end of the outermost unit of compilation.
+        </p>
+        <p>
+          It is a compile time error to define two type class
+          instances covering the same concrete types unless one
+          instance is ``preferred'' to the other. Preference is
+          determined by comparing the respective type variable
+          instantiations positionally. Given two instances A and B
+          over type variables
+          <progident>tv<sub>1</sub></progident>...<progident>tv<sub>n</sub></progident>,
+          instance A is preferable to instance B if there exists some
+          subset of the respective type variable instantiations such
+          that the instantiation under A is strictly more concrete
+          than the instantiation under B, and the two instantiations
+          are identical (modulo type variable renaming) at all other
+          positions. If this comparison does not (transitively)
+          determine a most preferred instantiation, then no
+          instantiation is preferred and a compile time error is
+          signalled.
+        </p>
+      </sect2>
+      <sect2>
+        <title>Qualified Types</title>
+        <p>
+          It is sometimes necessary to qualify the types of instances,
+          type classes, constructed type definitions, or value
+          declarations explicitly. A qualified type takes the general
+          form:
+        </p>
+        <literallayout>
+(forall (<em>constraint ... constraint</em>)
+        <em>type</em>)</literallayout>
+        <p>
+          Qualified types may appear only as the types of binding
+          patterns; they may not qualify expressions generally.  For
+          example:
+        </p>
+        <literallayout>
+(define add1:(forall ((Num 'a))
+                     (fn 'a 'a))
+  (lambda (x) (+ (the 'a 1) x)))</literallayout>
+        <p indent="no">
+          explicitly states that the <progident>add1</progident>
+          procedure takes arguments whose type admit
+          <progident>+</progident>, and therefore must be members of
+          the <progident>Num</progident> type class.
+        </p>
+        <p>
+          If multiple qualifications appear in the same binding
+          pattern, they must unify. The following is legal, if
+          somewhat obscure:
+        </p>
+        <literallayout>
+(define
+  (v1:(forall ((Eql 'a)) 'a), v2:'b)
+  : (forall ((Num 'c))
+      ((fn ('c) bool), 'b)) ...)</literallayout>
+        <p indent="no">
+          with the effect that <progident>v1</progident> receives the
+          qualified type:
+        </p>
+<literallayout>
+(forall ((Eql (fn ('c) bool))
+         (Num 'c))
+        (fn ('c) bool))</literallayout>
+        <p indent="no">
+          which will ultimately fail to type check, because functions
+          are not admissable under value equality.
+        </p>
+        <p>
+          Qualifications may also be applied to structure and union
+          declarations, with the abstract syntax:
+        </p>
+<literallayout>
+(defstruct
+  (forall (<em>constraints</em>)
+          (<em>struct-name</em> <em>tvars</em>) [<b>:val</b>])
+   <em>nm<sub>1</sub></em>[<b>:</b><em>t<sub>1</sub></em>] ... <em>nm<sub>n</sub></em>[<b>:</b><em>t<sub>n</sub></em>])
+(defunion
+  (forall (<em>constraints</em>)
+          (<em>struct-name</em> <em>tvars</em>) [<b>:val</b>])
+   <em>C<sub>1</sub> ... C<sub>n</sub></em>)
+</literallayout>
+        <p>
+          Qualifications may similarly appear in the binding patterns
+          of structure, union, and value declarations.
+        </p>
+      </sect2>
+    </sect1>
+    <sect1>
+      <title>Binding of Values</title>
+      <sect2>
+	<title>Binding Patterns</title>
+	<p>
+	  Binding patterns are used to bind names to values. They
+	  appear in the definition of formal parameters and in binding
+	  forms such as <progident>define</progident>,
+	  <progident>let</progident>, <progident>letrec</progident>,
+	  and <progident>do</progident>. A binding pattern consists of
+	  an identifier that is optionally qualified by a type:
+	</p>
+	<literallayout>
+id
+(the <em>T</em> <em>id</em>)
+id : T
+</literallayout>
+        <p>
+          In top-level bindings (those introduced by a top-level
+          <progident>define</progident>, the
+          <progident><em>id</em></progident> may be qualified by an
+          interface binding name corresponding to some interface that
+          the current unit of compilation provides (Section&nbsp;<xref
+          ref="provide"/>). Thus, if
+          <progident>my.interface</progident> is an interface name, it
+          is legal for a source unit of compilation to contain:
+        </p>
+	<literallayout>
+;; State that we are a provider
+;; of my.interface:
+(provide if my.interface)
+;;...
+;; Define some variable declared
+;; in the interface:
+(define (if.varname x)
+  (+ x 1))</literallayout>
+      </sect2>
+      <sect2 id="define">
+	<title>define</title>
+	<p>
+	  Variable and procedure bindings are introduced by
+	  <progident>define</progident>:
+	</p>
+	<literallayout>
+(define <em>bp</em> <em>e</em>)
+(define (<em>id</em> [<em>bp<sub>1</sub></em> ... <em>bp<sub>n</sub></em>])
+  <em>e</em> ... <em>e</em>)</literallayout>
+	<p indent="no">
+	  where each <progident><em>bp</em></progident> is a binding
+	  pattern.  The second form is a convenience shorthand for:
+	</p>
+	<literallayout>
+(define id
+  (lambda ([<em>bp<sub>1</sub></em> ... <em>bp<sub>n</sub></em>])
+    <em>e</em> ... <em>e</em>))</literallayout>
+	<p indent="no">
+	  where each <progident><em>bp<sub>i</sub></em></progident> is a
+	  binding pattern.
+	</p>
+        <p>
+	  The right hand form of a <progident>define</progident> is
+	  evaluated to obtain a value, which is then pattern matched
+	  against the pattern being bound. For each identifier
+	  <progident>x</progident> that appears in the binding
+	  pattern, then identifier is bound in the currently active
+	  environment to the positionally corresponding element within
+	  the value resulting from the evaluation of the expression.
+	</p>
+        <p>
+          Identifiers defined within a single
+          <progident>define</progident> are deemed ``incomplete''
+          until the end of the enclosing <progident>define</progident>
+          form.
+        </p>
+	<p>
+	  Mutually recursive procedure definitions at top level can be
+          achieved either by use of <progident>letrec</progident> or
+          by declaring the procedures ahead of their definitions.
+	</p>
+      </sect2>
+      <sect2>
+	<title>Local Binding Forms</title>
+        <sect3>
+          <title>let</title>
+<!--           <p> -->
+<!--             BitC provides an extended form of the -->
+<!--             <progident>let</progident> binding construct that are -->
+<!--             familiar from Scheme.  BitC does not (currently) provide a -->
+<!--             mechanism for local type declarations. -->
+<!--           </p> -->
+          <p>
+            The <progident>let</progident> form provides a mechanism
+            for locally binding identifiers to the result of an
+            expression evaluation.  Each identifier bound in a
+            <progident>let</progident> form must appear exactly once
+            among the collection of binding patterns being bound.
+            Evaluation of the initialization expressions occurs in
+            order from <progident>e<sub>1</sub></progident> to
+            <progident>e<sub>n</sub></progident>.  The environment in
+            which the expression(s) are evaluated does not contain the
+            identifiers being bound in the current
+            <progident>let</progident> form.
+          </p>
+          <p>
+            The syntax of <progident>let</progident> is:
+          </p>
+          <literallayout>
+(let ((<em>bp<sub>1</sub></em> <em>e<sub>1</sub></em>)
+      ...
+      (<em>bp<sub>n</sub></em> <em>e<sub>n</sub></em>))
+  <em>e<sub>body-1</sub></em>
+  ...
+  <em>e<sub>body-n</sub></em>)</literallayout>
+          <p>
+            One common form of these expressions is the one in which
+            the left hand patterns are simple identifier names, as in:
+          </p>
+          <literallayout>
+(let ((x <em>e<sub>1</sub></em>)
+      ...
+      (y <em>e<sub>2</sub></em>))
+  ; <em>x, y are bound in:</em>
+  <em>e<sub>body-1</sub></em>
+  ...
+  <em>e<sub>body-n</sub></em>)</literallayout>
+          <p>
+            The value of a <progident>let</progident> form
+            is the value of the last form executed within the body.
+          </p>
+          <p>
+            In similar languages, <progident>let</progident> is often
+            presented as a form derived from
+            <progident>lamdba</progident>. In BitC, as in other
+            let-polymorphic languages, the value restriction for
+            lambda arguments means that this is not (quite) true.
+          </p>
+        </sect3>
+        <sect3>
+          <title>letrec</title>
+<!--           <p> -->
+<!--             BitC provides an extended form of the -->
+<!--             <progident>letrec</progident> binding construct that are -->
+<!--             familiar from Scheme. -->
+<!--           </p> -->
+          <p>
+            The <progident>letrec</progident> form provides a
+            mechanism for locally binding identifiers to an expression
+            value.  Each identifier bound in a
+            <progident>letrec</progident> form must appear exactly
+            once among the collection of binding patterns being
+            bound. <font color="blue">The type of every identifier
+            bound in a <progident>letrec</progident> must be some
+            function type.</font><footnote>
+              <p>
+                This is a temporary limitation that will be removed
+                shortly.
+              </p>
+            </footnote> Evaluation of the initialization
+            expressions occurs in order from
+            <progident>e<sub>1</sub></progident> to
+            <progident>e<sub>n</sub></progident>.  The environment in
+            which the expression(s) are evaluated contains (via
+            unification) the identifiers being bound in the current
+            <progident>letrec</progident> form. This allows
+            <progident>letrec</progident> to bind recursive procedure
+            definitions:
+          </p>
+          <literallayout>
+(letrec
+  ((odd
+     (lambda (x) ; odd
+       (cond ((= x 0) #f)
+             ((&lt; x 0) (odd (- x)))
+             (otherwise
+               (not
+                 (even (- x 1)))))))
+   (even
+     (lambda (x) ; even
+       (cond ((= x 0) #t)
+             ((&lt; x 0) (even (- x)))
+             (otherwise
+               (not
+                 (odd (- x 1))))))))
+  <em>body</em>)</literallayout>
+<!-- 	<p> -->
+<!-- 	  The ``named <progident>let</progident>'' syntax is a -->
+<!-- 	  shorthand for a <progident>letrec</progident> that wraps a -->
+<!-- 	  <progident>lambda</progident>, enabling a local recursive -->
+<!-- 	  procedure: -->
+<!-- 	</p> -->
+<!-- 	<literallayout> -->
+<!-- (let fn ((<em>bp<sub>1</sub></em> <em>e<sub>1</sub></em>) -->
+<!--          (<em>bp<sub>2</sub></em> <em>e<sub>2</sub></em>)) -->
+<!--   <em>e<sub>body</sub></em>) = -->
+<!-- (letrec  -->
+<!--   ((fn (lambda (<em>p<sub>1</sub></em>, -->
+<!--                 <em>p<sub>2</sub></em>) -->
+<!--          <em>e<sub>body</sub></em>))) -->
+<!--     (fn (<em>e<sub>1</sub></em>, <em>e<sub>2</sub></em>))) -->
+<!-- </literallayout> -->
+          <p>
+            The value of a <progident>let</progident> form is the value
+            of the last form executed within the body.
+          </p>
+          <p>
+            Within the defining expressions of a
+            <progident>letrec</progident> form, use of the identifiers
+            being defined is subject to the same restrictions
+            described for <progident>define</progident>. This ensures
+            that cyclical constant data cannot be
+            introduced.<footnote><p>Cyclical constants impede
+            termination reasoning in the prover.</p>
+            </footnote>
+          </p>
+          <p>
+            Any binding pattern appearing in the
+            <progident><em>bp<sub>i</sub></em></progident> position in
+            a <progident>letrec</progident> must be statically
+            decomposable at compile time. It is not sufficient that
+            the corresponding
+            <progident><em>e<sub>i</sub></em></progident> be of
+            compatible type. This restriction allows the binding
+            patterns to be flattened away by the compiler without
+            internally violating the completeness
+            restriction.<footnote><p>The alternative was to disallow
+            binding patterns in <progident>letrec</progident>
+            forms. The static decomposition constraint preserves
+            greater syntactic consistency with
+            <progident>let</progident>.</p>
+            </footnote>
+          </p>
+        </sect3>
+        <sect3>
+          <title>local define</title>
+          <p>
+            The <progident>define</progident> form may be used in an
+            expression sequence, provided it is not the last form of
+            the expression sequence. In this context,
+            <progident>define</progident> is a derived form.
+            The canonical rewriting of the local
+            <progident>define</progident> form using core language
+            constructs is:
+          </p>
+          <literallayout>
+(begin ...
+  (define id e<sub>def</sub>) e<sub>2</sub> [...]) =&gt;
+(begin ...
+  (letrec ((id e<sub>def</sub>))
+    e<sub>2</sub> [...]))</literallayout>
+          <p indent="no">
+            This rewrite proceeds left to right. Successive defines
+            are gathered into <progident>letrec</progident> forms that
+            are progressively more deeply nested. Adjacent
+            <progident>define</progident> forms are <em>not</em>
+            gathered into a single <progident>letrec</progident> body.
+          </p>
+        </sect3>
+      </sect2>
+      <sect2>
+        <title>Value Non-Recursion</title>
+        <p>
+          In any recursive binding (introduced by
+          <progident>letrec</progident> or
+          <progident>define</progident>) such as:
+        </p>
+        <literallayout>
+(define <em>bp</em> <em>e</em>)</literallayout>
+        <p indent="no">
+          if <progident><em>id</em></progident> is an identifier
+          that appears in the binding pattern (and is therefore
+          incomplete), free occurrences of
+          <progident><em>id</em></progident> in
+          <progident><em>e</em></progident> must occur only within a
+          <progident>lambda</progident> body. This ensures that
+          <progident><em>id</em></progident> will be initialized
+          before it is used.
+        </p>
+        <p>
+          This restriction intentionally prevents infinitely recursive
+          data constant definitions.
+        </p>
+      </sect2>
+      <sect2>
+        <title>Static Initialization Restriction</title>
+        <p>
+          <font color="red">I continue to look for a more rigorous
+            way to express the following requirement.</font>
+        </p>
+        <p>
+          Statically declared (global) variables must be initialized
+          before the main entry point is entered. This presents a
+          challenge of specification. The language definition must
+          impose a sufficient ordering constraint on initializations
+          to ensure that no initializer can depend (transitively) on
+          any uninitialized variable. To ensure this, we introduce
+          the notions of ``compile-time evaluable'' and ``compile
+          time applicable'' expressions, and the restriction that
+          every initializing expression of a statically declared
+          variable must be compile-time evaluable.<footnote>
+            <p>
+              This notion is conceptually related to the Standard ML
+              notion of ``syntactic constants,'' and achieves the
+              same goal. The definition of ``compile-time
+              evaluable'' is slightly richer, and allows for more
+              expressive initializing expressions.
+            </p>
+          </footnote> Informally: it must be possible for the
+          compiler to evaluate the initializing expression at
+          compile time without (conservatively) referencing any
+          uninitialized variable.
+        </p>
+        <p>
+          Literals are compile-time evaluable.
+        </p>
+        <p>
+          A locally bound identifier is compile-time evaluable
+          exactly if its initializing expression is compile-time
+          evaluable. It is compile-time applicable exactly if the
+          return value of its defining expression is compile-time
+          applicable.
+        </p>
+        <p>
+          A globally bound identifier is compile-time evaluable
+          provided its definition is lexically observable and
+          compile-time evaluable. By ``lexically observable,'' we
+          mean that either (a) it appears as a lexically preceding
+          definition in the same unit of compilation, or (b) there
+          exists some chain of interfaces
+          <progident>I<sub>0</sub></progident>...<progident>I<sub><em>n</em></sub></progident>
+          such that the global identifier is is defined in
+          <progident>I<sub><em>n</em></sub></progident>, the unit
+          defining <progident>out</progident> imports
+          <progident>I<sub>0</sub></progident>,
+          <progident>I<sub>0</sub></progident> imports
+          <progident>I<sub>1</sub></progident>,
+          <progident>I<sub>1</sub></progident> imports
+          <progident>I<sub>2</sub></progident> ... and
+          <progident>I<sub><em>n-1</em></sub></progident> imports
+          <progident>I<sub><em>n</em></sub></progident>.
+        </p>
+        <p>
+          A globally bound identifier is compile-time applicable
+          provided it is of function type, it is lexically
+          observable, and all expressions appearing in its defining
+          <progident>lambda</progident> form are compile-time
+          evaluable. For purposes of this analysis, it is assumed
+          that any formal parameter of the function is both
+          compile-time evaluable and (if of function type)
+          compile-time applicable.
+        </p>
+        <p>
+          Any expression <em>other than</em> an application or an
+          assignment is compile-time evaluable provided that all of
+          its free identifiers are
+          compile-time evaluable.
+        </p>
+        <p>
+          An application is compile-time evaluable provided that (a)
+          the expression in the function position is compile-time
+          evaluable, (b) all of its arguments are compile-time
+          evaluable, and (c) any arguments of function type are
+          compile-time evaluable.
+        </p>
+        <p>
+          An assignment (as with <progident>set!</progident>) is
+          compile-time evaluable provided its expression is
+          <em>both</em> compile-time evaluable and (if of function
+          type) compile-time applicable. This prevents later
+          assignments from altering the compile-time evaluability of
+          previously defined identifiers.
+        </p>
+        <p>
+          <b>Dangling:</b>
+        </p>
+        <p>
+          The result of an expression evaluation (including
+          application and constructor application) is observably known
+          if (a) the definitions of all identifiers that are free in
+          the expression are observably known, and (b) any procedure
+          that is applied is observably applicable.  Requirement (b)
+          is satisfied by definition for all type constructors.
+        </p>
+        <p>
+          Note that these definitions are conservative with respect to
+          mutability. Because no initializing expression can reference
+          an observably unknown value, nor perform an application that
+          is not observably applicable, it follows that no assignment
+          performed from within an initializing expression can cause
+          an identifier to transition from observably known to
+          observably unknown.
+        </p>
+      </sect2>
+    </sect1>
+    <sect1>
+      <title>Declarations</title>
+      <p>
+        The <progident>proclaim</progident> form is used to provide
+        opaque value declarations. The declaration:
+      </p>
+      <literallayout>
+(proclaim x:int32)</literallayout>
+        <p indent="no">
+        states that <progident>x</progident> is the name of a value of
+        type <progident>int32</progident> whose definition and
+        initialization is provided by some implementing unit of
+        compilation. This form can legally appear only at top level
+        within a source unit of compilation or within an interface.
+      </p>
+      <p>
+        The identifier declared by a <progident>proclaim</progident>
+        form is considered incomplete. If a completing definition is
+        later provided within the same compilation unit, the
+        identifier is considered complete in the balance of the
+        defining compilation unit after the the close of its defining
+        form.  An incomplete declaration may be used within a
+        procedure, but may not be used as part of a top-level
+        initializer (see <progident>define</progident>,
+        Section&nbsp;<xref ref="define"/>).
+      </p>
+      <p>
+        It is occasionally necessary to make reference to procedures
+        or values that are implemented by an externally provided
+        runtime library. This may be accomplished by an
+        <progident>external</progident> declaration:
+      </p>
+      <literallayout>
+(proclaim proc:(fn (int32) char)
+          external)
+(proclaim proc:(fn (int32) char)
+          external ident)</literallayout>
+      <p indent="no">
+        This has the effect of advising the BitC compiler that no
+        definition of this identifier will be supplied in BitC source
+        code. It is primarily intended to support portions of the BitC
+        runtime library. Use of this mechanism for other purposes is
+        strongly discouraged, and we reserve the right to revise this
+        syntax incompatibly in future revisions of the BitC
+        specification.
+      </p>
+      <p>
+        If a proclaimed external procedure provides an optional
+        trailing <progident>ident</progident>, this identifier will be
+        used verbatim in the generated code in place of the normal
+        identifier name generated by BitC. The trailing identifier is
+        permitted only if the external procedure has non-polymorphic
+        type.
+      </p>
+    </sect1>
+    <sect1>
+      <title>Expressions</title>
+      <sect2>
+	<title>Literals</title>
+	<p>
+	  Every literal is an expression whose type is the type of the
+	  literal (as described above) and whose value is the literal
+	  value itself.
+	</p>
+      </sect2>
+      <sect2>
+	<title>Identifiers</title>
+	<p>
+	  Every lexically valid identifier is an expression whose type
+	  is the type of the identifier and whose value is the value
+	  to which the identifier is bound.
+	</p>
+      </sect2>
+      <sect2>
+	<title>Type-Qualified Expressions</title>
+	<p>
+	  Any expression <progident><em>e</em></progident> may be
+	  qualified with an explicit result type by writing either of
+        </p>
+        <literallayout>
+(the <em>T</em> <em>e</em>)
+<em>e</em> : <em>T</em></literallayout>
+        <p indent="no">
+	  where <progident><em>T</em></progident> is a type. This
+	  indicates that the result type of the
+	  <progident>the</progident> form is constrained to be of type
+	  <progident><em>T</em></progident>. The
+	  <progident>the</progident> form is syntax, its
+	  expression argument is not conveyed by application, and is
+	  therefore not subject to copying as a consequence of type
+	  qualification.
+        </p>
+        <p>
+          The result <em>value</em> of the expression is not changed
+	  by type qualification, except to the extent that a type
+	  restriction may lead the inference engine to resolve the
+	  types of other expressions and the selection of overloaded
+	  primitive arithmetic operators in ways that produce
+	  different results.
+	</p>
+        <p>
+          <leadin>Syntactic Restriction</leadin> The
+          <progident><em>e</em>:<em>T</em></progident> convenience
+          syntax is not permitted in combination with the member
+          selection convenience syntax ``.''. The sequence of grammar
+          expansions:
+        </p>
+        <literallayout>
+<em>expr</em> -> <em>expr</em>.Id
+<em>expr</em> -> <em>expr</em>:<em>type</em>.Id
+<em>expr</em> -> <em>expr</em>:Id.Id.Id
+               ^</literallayout>
+        <p indent="no">
+          leads to a shift/reduce conflict at the indicated position.
+          The grammar resolves this by disallowing the helper
+          type-qualification syntax in this context. If required, a
+          type qualification in this context can be obtained using
+          either of the following alternatives:
+        </p>
+        <literallayout>
+(the <em>T</em> <em>e</em>).Id
+(member <em>e</em>:<em>T</em> Id)</literallayout>
+<!--         <p> -->
+<!--           The expression: -->
+<!--         </p> -->
+<!--           <literallayout> -->
+<!-- <em>e</em><b>:</b><em>T</em> -->
+<!-- </literallayout> -->
+<!--           <p indent="no"> -->
+<!--             is a convenience shorthand for -->
+<!--           </p> -->
+<!--           <literallayout> -->
+<!-- (type-qualify <em>e</em> <em>T</em>) -->
+<!-- </literallayout> -->
+      </sect2>
+      <sect2>
+        <title>Value Constructors</title>
+        <sect3>
+          <title>unit</title>
+          <p>
+            The expression:
+          </p>
+          <literallayout>
+()</literallayout>
+          <p indent="no">
+            denotes the singleton unit value.
+          </p>
+        </sect3>
+        <sect3>
+          <title>make-vector</title>
+          <p>
+            The expression:
+          </p>
+          <literallayout>
+(make-vector <em>e<sub>len</sub></em> <em>e<sub>init</sub></em>)</literallayout>
+          <p indent="no">
+            creates a new vector whose length is determined by the
+            value of the expression
+            <progident><em>e<sub>len</sub></em></progident>, which
+            must evaluate to a value of type
+            <progident>word</progident>.  The argument
+            <progident><em>e<sub>init</sub></em></progident> must be a
+            function from word to some type <em>T</em>, where the
+            vector created will be of type
+            <progident>(vector&nbsp;<em>T</em>)</progident>. The
+            initializer value for each cell will be obtained by
+            invoking the procedure
+            <progident><em>e<sub>init</sub></em></progident> a total
+            of <progident><em>e<sub>len</sub></em></progident> times,
+            passing as an argument the index of the vector position to
+            be initialized. The procedure
+            <progident><em>e<sub>init</sub></em></progident> should
+            return the desired initializer value for the corresponding
+            position.
+          </p>
+          <p>
+            For example, the procedure
+            <progident>list-&gt;vector</progident> may be written as:
+          </p>
+<literallayout>
+(import ls bitc.list)
+(define (list->vector lst)
+  (make-vector
+    (length lst)
+    (lambda (n)
+       (ls.list-nth lst n))))</literallayout>
+          <p>
+            Care should be taken to ensure that the type returned by
+            the initializer function is mutable if the slots of the
+            vector are intended to be mutable.
+          </p>
+        </sect3>
+        <sect3>
+          <title>array, vector</title>
+          <p>
+            The expressions:
+          </p>
+          <literallayout>
+(array <em>e<sub>0</sub></em> ... <em>e<sub>n</sub></em>)
+(vector <em>e<sub>0</sub></em> ... <em>e<sub>n</sub></em>)</literallayout>
+          <p indent="no">
+            create a new array (respectively, vector) whose length is
+            determined by number of arguments. The first argument
+            expression becomes the first cell of the created array
+            (respectively, vector), the second becomes the second, and
+            so forth. All expressions must be of like type.
+          </p>
+        </sect3>
+        <sect3>
+          <title>Convenience Syntax</title>
+          <p>
+            <em>Derived forms</em>
+          </p>
+          <p>
+            The following are right-associative convenience syntax for
+            types defined in the standard prelude:
+          </p>
+          <literallayout>
+(a,b) =&gt; (pair a b)
+(a,b,c) =&gt; (pair a (pair b c))
+
+[]    =&gt; nil
+[a] =&gt; (cons a nil)
+[a,b] =&gt; (cons a (cons b nil))</literallayout>
+        </sect3>
+      </sect2>
+      <sect2>
+        <title>Expression Sequences</title>
+        <p>
+          <em>Derived form</em>
+        </p>
+        <p>
+          The expression:
+        </p>
+        <literallayout>
+(begin <em>e<sub>1</sub></em> ... <em>e<sub>n</sub></em>)</literallayout>
+        <p indent="no">
+          executes the forms
+          <progident><em>e<sub>1</sub></em></progident> through
+          <progident><em>e<sub>n</sub></em></progident> in sequence,
+          where each form is an expression. The value of a
+          <progident>begin</progident> expression is the value
+          produced by the last <em>expression</em> executed in the
+          begin block.
+        </p>
+        <p>
+          <leadin>Derivation</leadin> The canonical rewriting of the
+          <progident>begin</progident> form using core language
+          constructs is:
+        </p>
+        <literallayout>
+(begin <em>e1</em> ... <em>e2</em>) =&gt;
+((lambda () <em>e1</em> ... <em>e2</em>))</literallayout>
+      </sect2>
+      <sect2>
+        <title>Iteration</title>
+        <p>
+          <em>Derived form</em>
+        </p>
+        <p>
+          BitC provides the looping construct
+          <progident>do</progident> as a derived form.
+        </p>
+        <literallayout>
+(do ((<em>bp<sub>1</sub></em> <em>e<sub>init-1</sub></em> <em>e<sub>step-1</sub></em>)
+     ...
+     (<em>bp<sub>n</sub></em> <em>e<sub>init-n</sub></em> <em>e<sub>step-n</sub></em>))
+    (<em>e<sub>test</sub></em> <em>e<sub>result</sub></em>)
+   <em>e<sub>body-1</sub></em>
+   ...
+   <em>e<sub>body-n</sub></em>)</literallayout>
+        <p>
+          Do is an iteration construct taken from Scheme <cite
+          ref="kelsey1998r5rs"/>. It specifies a set of variables to
+          be bound along with an initializer expression and an update
+          expression for each variable. Evaluation of the
+          <progident>do</progident> form proceeds as follows:
+        </p>
+        <p>
+          The <progident><em>e<sub>init-i</sub></em></progident>
+          expressions are evaluated in order in the lexical context
+          containing the <progident>do</progident> form. In this
+          context, the variables bound by the loop have not yet been
+          bound. All other expressions are evaluated within an inner
+          lexical context that includes the
+          <progident>do</progident>-bound variables.  After all of the
+          initialization values are computed in order, the
+          <progident>do</progident>-bound variables are bound to the
+          initial results in parallel, and body processing begins.
+        </p>
+        <p>
+          At the start of each pass over the body, the expression
+          <progident><em>e<sub>test</sub></em></progident> is
+          evaluated. If this expression returns <b>#t</b>, then
+          <progident><em>e<sub>result</sub></em></progident> is
+          evaluated and its result returned. Otherwise, the expresions
+          of the body are evaluated in sequence.
+        </p>
+        <p>
+          At the end of each execution of the loop body, the
+          <progident><em>e<sub>step-i</sub></em></progident> expressions
+          are evaluated in sequence. Once all of the expression values
+          have been evaluated, the 
+          <progident>do</progident>-bound variables are bound to the
+          newly computed results in parallel and a new pass is
+          initiated over the loop body as previously described.
+        </p>
+        <p>
+          <leadin>Derivation</leadin> The canonical rewriting of the
+          <progident>do</progident> form using core language
+          constructs is:
+        </p>
+        <literallayout>
+(do ((<em>bp<sub>1</sub></em> <em>e<sub>init-1</sub></em> <em>e<sub>step-1</sub></em>)
+     ...
+     (<em>bp<sub>n</sub></em> <em>e<sub>init-n</sub></em> <em>e<sub>step-n</sub></em>))
+    (<em>e<sub>test</sub></em> <em>e<sub>result</sub></em>)
+   <em>e<sub>body-1</sub></em>
+   ...
+   <em>e<sub>body-n</sub></em>) =&gt;
+(letrec
+  ((__loop
+    (lambda (<em>bp<sub>1</sub></em> ... <em>bp<sub>n</sub></em>)
+      (if <em>e<sub>test</sub></em> <em>e<sub>result</sub></em>
+          (begin
+            <em>e<sub>body-1</sub></em>
+            ...
+            <em>e<sub>body-n</sub></em>
+            (__loop <em>e<sub>step-1</sub></em>
+                    ...
+                    <em>e<sub>step-n</sub></em>))))))
+  (__loop <em>e<sub>init-1</sub></em> .. <em>e<sub>init-n</sub></em>))</literallayout>
+        <p>
+          Note the because <progident>do</progident> is defined in
+          terms of <progident>lambda</progident> application, value
+          restrictions on argument bindings apply.
+        </p>
+        <p>
+          <leadin>Pragmatics:</leadin> The
+          <progident>do</progident> form is guaranteed to be processed
+          tail recursively, as implied by the canonical rewriting.
+        </p>
+      </sect2>
+      <sect2>
+        <title>Interface Member Reference</title>
+        <p>
+          If <progident><em>if</em></progident> is an identifier
+          naming an interface binding established through
+          <progident>import</progident>, and
+          <progident><em>id</em></progident> is an identifier defined
+          in that interface, then either of:
+        </p>
+        <literallayout>
+(member <em>if</em> <em>id</em>)
+<em>if</em>.<em>id</em></literallayout>
+        <p indent="no">
+          is an expression that returns the value of that identifier.
+          The returned value is a location, and can be used as an
+          argument to <progident>set!</progident>.
+        </p>
+      </sect2>
+      <sect2>
+        <title>Structure, Repr Field Reference</title>
+        <p>
+          If <progident><em>e<sub>loc</sub></em></progident> is a
+          location expression of structure or repr type, and
+          <progident><em>field</em></progident> is an identifier
+          naming some invariant field in that type then either of:
+        </p>
+        <literallayout>
+(member <em>e<sub>loc</sub></em> <em>field</em>)
+<em>e<sub>loc</sub></em><b>.</b><em>field</em></literallayout>
+        <p indent="no">
+          is an expression that returns the field
+          value. <progident>member</progident> is a syntactic
+          form. The returned value is a location, and can be used as
+          an argument to <progident>set!</progident>.
+        </p>
+      </sect2>
+      <sect2>
+        <title>Union, Repr Tag Reference</title>
+        <p>
+          If <progident><em>e<sub>loc</sub></em></progident> is a
+          location expression of union or repr type, and
+          <progident><em>tagid</em></progident> is an identifier
+          naming some union discriminator tag in that union or repr
+          type then either of:
+        </p>
+        <literallayout>
+(member <em>e<sub>loc</sub></em> <em>tagid</em>)
+<em>e<sub>loc</sub></em>.<em>tagid</em>
+</literallayout>
+        <p indent="no">
+          is a boolean expression that returns true exactly if the tag
+          value of the corresponding tag is
+          <progident>tagid</progident>.
+        </p>
+      </sect2>
+      <sect2>
+        <title>Array and Vector Expressions</title>
+        <sect3>
+          <title>array-length, vector-length</title>
+          <p>
+            If <progident><em>e</em></progident> is an expression of
+            array (respectively: vector) type, then
+          </p>
+          <literallayout>
+(array-length <em>e</em>)
+(vector-length <em>e</em>)</literallayout>
+          <p indent="no">
+            returns a <progident>word</progident> whose value is the
+            number of elements in the array.
+          </p>
+        </sect3>
+        <sect3>
+          <title>array-nth, vector-nth</title>
+          <p>
+            If <progident><em>e</em></progident> is an expression of
+            array (respectively: vector) type, and
+            <progident><em>e<sub>i</sub></em></progident> is an
+            expression with result type <progident>word</progident>,
+            then:
+          </p>
+          <literallayout>
+(array-nth <em>e<sub>loc</sub></em> <em>e<sub>i</sub></em>)
+(vector-nth <em>e</em> <em>e<sub>i</sub></em>)</literallayout>
+          <p indent="no">
+            are (respectively) expressions that return the
+            <em>e<sub>i</sub></em>'th element of the array
+            (respectively: vector).  If the value
+            <progident><em>e<sub>i</sub></em></progident> is greater
+            than or equal to the length of the array (respectively:
+            vector), then a <progident>IndexBoundsError</progident>
+            exception is thrown.
+          </p>
+          <p>
+            <progident>array-nth</progident> and
+            <progident>vector-nth</progident> are syntactic forms. The
+            returned value is a location, and can be used as an
+            argument to <progident>set!</progident>.
+            <progident>array-nth</progident> requires a location as
+            its argument.
+          </p>
+          <p>
+            The expression:
+          </p>
+          <literallayout>
+<em>e</em><b>[</b><em>e<sub>i</sub></em><b>]</b>
+</literallayout>
+          <p indent="no">
+            is a convenience shorthand for
+          </p>
+          <literallayout>
+(vector-nth <em>e</em> <em>e<sub>i</sub></em>)
+</literallayout>
+        </sect3>
+      </sect2>
+      <sect2>
+	<title>Procedure Values</title>
+	<p>
+	  Procedure values are introduced by the keyword
+	  <progident>lambda</progident>.  In contrast to Scheme,
+	  Haskell, and Standard ML, BitC procedures take zero or more
+	  arguments.  The syntax of a procedure definition is:
+	</p>
+	<literallayout>
+(lambda ([<em>bp<sub>1</sub></em> ... <em>bp<sub>n</sub></em>]
+  <em>e<sub>1</sub></em> ... <em>e<sub>n</sub></em>)</literallayout>
+	<p indent="no">
+	  where each <progident><em>bp<sub>i</sub></em></progident> is
+	  a binding pattern matching the formal parameters of the
+	  procedure and
+	  <progident><em>e<sub>1</sub></em>...<em>e<sub>n</sub></em></progident>
+	  is the body of the procedure. The return value of the
+	  procedure is the value computed by the last expression
+	  executed in the body.
+	</p>
+	<p>
+	  Each formal argument binding pattern defines a set of
+	  variable bindings that are in scope in the body of the
+	  lambda. Each formal argument binding pattern is unified with
+	  its corresponding actual parameter. Any identifier that is
+	  free in the binding pattern is unified with the structurally
+	  corresponding element of its associated actual parameter.
+        </p>
+        <p>
+          BitC argument and return value passing are ``by value.''
+          Formal argument and return values must be of value type, which
+          means that <em>references</em> can be passed, but the values
+          denoted by these references cannot.  The ``by value'' policy
+          also implies that local variables are <em>copies</em> of their
+          initializing expressions, which may yield surprising results
+          if the initializer is of mutable type. A
+          <progident>let</progident> binding is not an alias for its
+          initializer. A <progident>let</progident> binding of a (top
+          level) mutable value cannot simply be substituted by
+          &beta;-reduction into the body of the
+          <progident>let</progident> form.
+        </p>
+      </sect2>
+      <sect2>
+	<title>Function Application</title>
+	<p>
+	  The expression:
+	</p>
+	<literallayout>
+(<em>e<sub>fn</sub></em> [<em>e<sub>1</sub></em> ... <em>e<sub>n</sub></em>])</literallayout>
+	<p indent="no">
+	  denotes function application. The evaluation of the
+	  expression <progident><em>e<sub>fn</sub></em></progident>
+	  must yield a procedure value. 
+<!--           Applications taking a single -->
+<!-- 	  argument are handled by passing the argument expression -->
+<!-- 	  directly. Applications taking zero, two, or more arguments -->
+<!-- 	  are normalized to applications of a single argument by -->
+<!-- 	  implicit pair construction and unit introduction: -->
+        </p>
+<!--         <literallayout> -->
+<!-- (<em>e<sub>fn</sub></em>) =&gt; (<em>e<sub>fn</sub></em> ()) -->
+<!-- (<em>e<sub>fn</sub></em> <em>e<sub>1</sub></em> <em>e<sub>2</sub></em> [ ... <em>e<sub>n</sub></em>]) =&gt; -->
+<!--   (<em>e<sub>fn</sub></em> (<em>e<sub>1</sub></em>, <em>e<sub>1</sub></em> [, ... <em>e<sub>n</sub></em>])) -->
+<!-- </literallayout> -->
+<!--         <p> -->
+<!--           The type of thedthis procedure's argument -->
+<!-- 	  must be compatible with the type -->
+<!-- 	</p> -->
+<!-- 	<literallayout> -->
+<!-- ([<em>T<sub>1</sub></em>[, ... <em>T<sub>n</sub></em>]]) -->
+<!-- </literallayout> -->
+<!-- 	<p indent="no"> -->
+<!-- 	  where each <progident><em>T<sub>i</sub></em></progident> is -->
+<!-- 	  the return type of the corresponding expression -->
+<!-- 	  <progident><em>e<sub>i</sub></em></progident>. -->
+<!-- 	</p> -->
+        <p>
+          Note that the identifier <progident><em>fn</em></progident>
+          may either evaluate to a procedure or may name a value
+          constructor for a named constructed type.
+        </p>
+      </sect2>
+      <sect2>
+	<title>Conditional Execution</title>
+        <sect3>
+          <title>if</title>
+          <p>
+            <em>Derived form</em>
+          </p>
+          <p>
+            The <progident>if</progident> form is used to represent conditional
+            control flow:
+          </p>
+          <literallayout>
+(if <em>e<sub>test</sub></em> <em>e<sub>then</sub></em> <em>e<sub>else</sub></em>)</literallayout>
+          <p>
+            Where <progident><em>e<sub>test</sub></em></progident>,
+            <progident><em>e<sub>then</sub></em></progident>, and
+            <progident><em>e<sub>else</sub></em></progident>, are BitC
+            expressions.
+          </p>
+          <p>
+            The value of an <progident>if</progident> form is either the value of
+            the <progident><em>e<sub>then</sub></em></progident> form or
+            the value of the
+            <progident><em>e<sub>else</sub></em></progident>
+            expression. Exactly one of the
+            <progident><em>e<sub>then</sub></em></progident> or
+            <progident><em>e<sub>else</sub></em></progident> forms is
+            evaluated.
+          </p>
+          <p>
+            The value returned by the
+            <progident><em>e<sub>test</sub></em></progident> expression
+            must be of boolean type.
+          </p>
+          <p>
+            The values returned by the
+            <progident><em>e<sub>then</sub></em></progident> and
+            <progident><em>e<sub>else</sub></em></progident> forms must be
+            compatible with the type expected by the outer expression
+            within which the <progident>if</progident> expression is
+            nested.<footnote><p>If the value of an
+                <progident>if</progident> form is not captured, then there
+                is no real need to require that its
+                <progident><em>e<sub>then</sub></em></progident> and
+                <progident><em>e<sub>else</sub></em></progident> parts
+                return values of the same type. In this case, the
+                following could be permitted:</p>
+              <literallayout>
+(begin
+  (if <em>e<sub>test</sub></em> 32 false)
+  e1)</literallayout>
+              <p indent="no">
+                because the return value is not captured. Only in
+                situations where the return value of the
+                <progident>if</progident> <em>is</em> captured is it
+                really required for the
+                <progident><em>e<sub>then</sub></em></progident> and
+                <progident><em>e<sub>else</sub></em></progident>
+                expressions must return values that are compatible with
+                the receiver.
+              </p>
+              <p>
+                I'm inclined not to try to take any advantage of this for
+                now. One can always solve the problem of compatibility by
+                writing:
+              </p>
+              <literallayout>
+(begin
+  (if <em>e<sub>test</sub></em> (begin 32 ())
+            (begin false ()))
+  e1)</literallayout>
+            </footnote>
+          </p>
+          <p>
+            <leadin>Derivation</leadin> The canonical rewriting of
+            <progident>if</progident> is:
+          </p>
+          <literallayout>
+(if <em>e<sub>1</sub></em> <em>e<sub>2</sub></em> <em>e<sub>3</sub></em>) =&gt;
+(case <em>e<sub>1</sub></em>
+  (#t <em>e<sub>2</sub></em>)
+  (#f <em>e<sub>3</sub></em>))</literallayout>
+        </sect3>
+	<sect3>
+	  <title>not</title>
+          <p>
+            <em>Derived form</em>
+          </p>
+	  <p>
+	    The <progident>not</progident> form is used to invert a
+	    boolean result. The form:
+	  </p>
+	  <literallayout>
+(not <em>e</em>)</literallayout>
+          <p>
+            returns true if its argument evaluates to false, and false
+            it its argument evaluates to true.
+          </p>
+          <p>
+            <leadin>Derivation</leadin> The canonical rewriting of
+            <progident>not</progident> is:
+          </p>
+          <literallayout>
+(if <em>e</em> #f #t)</literallayout>
+        </sect3>
+	<sect3>
+	  <title>and</title>
+          <p>
+            <em>Derived form</em>
+          </p>
+	  <p>
+	    The <progident>and</progident> form is used to perform lazy
+	    expression evaluation. The form:
+	  </p>
+	  <literallayout>
+(and <em>e<sub>1</sub></em> <em>e<sub>2</sub></em> ... <em>e<sub>n</sub></em>)</literallayout>
+	  <p>
+	    returns true if every one of the expressions
+	    <progident><em>e<sub>1</sub></em>
+	      ... <em>e<sub>n</sub></em></progident> evaluates as
+	    true. Expressions are evaluated left to right. Each
+	    expression must return a result of type
+	    <progident>bool</progident>. If any expression evaluates as
+	    <progident>#f</progident>, no further expressions are
+	    evaluated. For this reason, the <progident>and</progident>
+	    form cannot be implemented as a procedure.
+	  </p>
+          <p>
+            <leadin>Derivation</leadin> The canonical rewriting of
+            <progident>and</progident> proceeds by first rewriting
+            multiargument <progident>and</progident> forms into forms
+            of no more than two arguments:
+          </p>
+          <literallayout>
+(and <em>e<sub>1</sub></em> <em>e<sub>2</sub></em> ... <em>e<sub>n</sub></em>) =&gt;
+(and <em>e<sub>1</sub></em>
+     (and <em>e<sub>2</sub></em> ... <em>e<sub>n</sub></em>))</literallayout>
+          <p indent="no">
+            and then rewriting each two argument
+            <progident>and</progident> form as:
+          </p>
+          <literallayout>
+(and <em>e<sub>1</sub></em> <em>e<sub>2</sub></em>) =&gt;
+(if <em>e<sub>1</sub></em> <em>e<sub>2</sub></em> #f)</literallayout>
+	</sect3>
+	<sect3>
+	  <title>or</title>
+          <p>
+            <em>Derived form</em>
+          </p>
+	  <p>
+	    The <progident>or</progident> form is used to perform lazy
+	    expression evaluation. The form:
+	  </p>
+	  <literallayout>
+(or <em>e<sub>1</sub></em> <em>e<sub>2</sub></em> ... <em>e<sub>n</sub></em>)</literallayout>
+	  <p>
+	    returns true if any of the expressions
+	    <progident><em>e<sub>1</sub></em>
+	    ... <em>e<sub>n</sub></em></progident> evaluates as
+	    true. Expressions are evaluated left to right. Each
+	    expression must return a result of type
+	    <progident>bool</progident>. If any expression evaluates
+	    as <progident>#t</progident>, no further expressions are
+	    evaluated. For this reason, the <progident>or</progident>
+	    form cannot be implemented as a procedure.
+	  </p>
+          <p>
+            <leadin>Derivation</leadin> The canonical rewriting of
+            <progident>or</progident> proceeds by first rewriting
+            multiargument <progident>or</progident> forms into forms
+            of no more than two arguments:
+          </p>
+          <literallayout>
+(or <em>e<sub>1</sub></em> <em>e<sub>2</sub></em> ... <em>e<sub>n</sub></em>) =&gt;
+(or <em>e<sub>1</sub></em>
+     (or <em>e<sub>2</sub></em> ... <em>e<sub>n</sub></em>))</literallayout>
+          <p indent="no">
+            and then rewriting each two argument
+            <progident>or</progident> form as:
+          </p>
+          <literallayout>
+(or <em>e<sub>1</sub></em> <em>e<sub>2</sub></em>) =&gt;
+(if <em>e<sub>1</sub></em> #t <em>e<sub>2</sub></em>)</literallayout>
+	</sect3>
+	<sect3>
+	  <title>cond</title>
+          <p>
+            <em>Derived form</em>
+          </p>
+	  <p>
+	    The <progident>cond</progident> form is used to represent
+	    conditional control flow where there are multiple possible
+	    outcomes:
+	  </p>
+	  <literallayout>
+(cond (<em>e<sub>test1</sub></em> <em>e<sub>1</sub></em>)
+      (<em>e<sub>test2</sub></em> <em>e<sub>2</sub></em>)
+      ; ...
+      (otherwise <em>e<sub>n</sub></em>))</literallayout>
+	  <p>
+	    The <progident><em>e<sub>test-i</sub></em></progident>
+	    expressions are evaluated in sequence until one of them
+	    evaluates as true.  The corresponding
+	    <progident><em>e<sub>i</sub></em></progident> is then evaluated
+	    and its result becomes the value of the
+	    <progident>cond</progident> expression. Subsequent
+	    <progident><em>e<sub>test-i</sub></em></progident>
+	    expressions are not evaluated. Exactly one of the
+	    <progident><em>e<sub>i</sub></em></progident> expressions
+	    will be evaluated. The <progident>otherwise</progident>
+	    clause is <em>not</em> optional.
+	  </p>
+	  <p>
+	    Any <progident>cond</progident> form can be rewritten as a
+	    chain of <progident>if</progident> forms without alteration
+	    to meaning.
+	  </p>
+	  <p>
+	    The values returned by the
+	    <progident><em>e<sub>test</sub></em></progident> expressions
+	    must be of type <progident>bool</progident>. All of the
+	    expressions <progident><em>e<sub>i</sub></em></progident>
+	    must be of compatible result types.<footnote><p>If we choose
+		to relax the type compatibility rules for
+		<progident>if</progident>, we should relax them here too.</p>
+	    </footnote>
+	  </p>
+          <p>
+            <leadin>Derivation</leadin> The canonical rewriting of
+            <progident>cond</progident> proceeds by removing each
+            conditional expression in turn:
+          </p>
+          <literallayout>
+(cond (<em>e<sub>test1</sub></em> <em>e<sub>1</sub></em>)
+      (<em>e<sub>test2</sub></em> <em>e<sub>2</sub></em>)
+      ; ...
+      (otherwise <em>e<sub>n</sub></em>)) =&gt;
+(if <em>e<sub>test1</sub></em>
+    <em>e<sub>1</sub></em>
+    (cond (<em>e<sub>test2</sub></em> <em>e<sub>2</sub></em>)
+         ; ...
+         (otherwise <em>e<sub>n</sub></em>)))</literallayout>
+          <p indent="no">
+            until only two cases remain in the
+            <progident>cond</progident> expression, the last of which
+            has a true predicate. This final cond is
+            rewritten as:
+          </p>
+          <literallayout>
+(cond (<em>e<sub>test1</sub></em> <em>e<sub>1</sub></em>)
+      (otherwise <em>e<sub>n</sub></em>)) =&gt;
+(if <em>e<sub>test1</sub></em>
+    <em>e<sub>1</sub></em>
+    <em>e<sub>n</sub></em>)</literallayout>
+	</sect3>
+      </sect2>
+      <sect2>
+	<title>Mutability</title>
+        <p>
+          The expression:
+        </p>
+        <literallayout>
+(set! <em>e<sub>loc</sub> e<sub>val</sub></em>)</literallayout>
+        <p indent="no">
+          is used to set the value of a mutable entity. The
+          expression <em>e<sub>loc</sub></em> should evaluate to a
+          location of mutable type <progident>(mutable&nbsp;<em>T</em>)</progident>. The expression
+          <em>e<sub>val</sub></em> should evaluate to an
+          assignment-compatible type
+          <progident><em>T</em></progident>.
+          The return value of <progident>set!</progident> is the unit value.
+        </p>
+<!--         <sect3> -->
+<!--           <title>mutable</title> -->
+<!--           <p> -->
+<!--             The <progident>mutable</progident> syntactic form, when -->
+<!--             applied in ``value constructor'' form, is actually a -->
+<!--             convenience shorthand for a type constraint. When applied -->
+<!--             to an expression: -->
+<!--           </p> -->
+<!--           <literallayout> -->
+<!-- (mutable <em>e</em>) -->
+<!-- </literallayout> -->
+<!--           <p indent="no"> -->
+<!--             the <progident>mutable</progident> operator induces a -->
+<!--             requirement on the type checker and the type inference -->
+<!--             engine that the type of its argument must unify with the -->
+<!--             type <progident>(mutable&nbsp;'a)</progident>. That is, -->
+<!--             the effect of <progident>mutable</progident> is a -->
+<!--             constraint on the type of its argument.<footnote><p>Note -->
+<!--             that the <progident>(mutable&nbsp;<em>e</em>)</progident> -->
+<!--             expression form is a redundant convenience syntax. An -->
+<!--             equivalent effect can be obtained by writing the type -->
+<!--             qualifier -->
+<!--             <progident><em>e</em>:(mutable&nbsp;'a)</progident>.</p> -->
+<!--             </footnote> The <progident>mutable</progident> value -->
+<!--             constructor does not copy its argument; the return value -->
+<!--             is identically the same as its argument value. -->
+<!--           </p> -->
+<!--         </sect3> -->
+<!--         <sect3> -->
+<!--           <title>read-only</title> -->
+<!--           <p> -->
+<!--             <font color="red">We need a definition of what it means to -->
+<!--             strip mutability. Until then, -->
+<!--             <progident>read-only</progident> is not -->
+<!--             implemented.</font> -->
+<!--           </p> -->
+<!--           <p> -->
+<!--             The <progident>read-only</progident> ``value constructor'' -->
+<!--             is a syntactic form that strips its argument type of -->
+<!--             mutability. The <progident>read-only</progident> value -->
+<!--             constructor does not copy its argument; the return value -->
+<!--             is identically the same as its argument value.  When -->
+<!--             applied to an expression: -->
+<!--           </p> -->
+<!--           <literallayout> -->
+<!-- (read-only <em>e</em>) -->
+<!-- </literallayout> -->
+<!--           <p indent="no"> -->
+<!--             the <progident>read-only</progident> operator returns its -->
+<!--             argument value, with any top-level mutability stripped -->
+<!--             from its type. That is, if the type of -->
+<!--             <progident><em>e</em></progident> would unify with -->
+<!--             <progident>(mutable&nbsp;'a)</progident>, the type of the -->
+<!--             return value is <progident>'a</progident>, otherwise, the -->
+<!--             type of the return value is the same as the type of the -->
+<!--             input value. -->
+<!--           </p> -->
+<!--         </sect3> -->
+      </sect2>
+      <sect2>
+	<title>References</title>
+        <sect3>
+          <title>dup</title>
+          <p>
+            If <progident><em>e</em></progident> is an expression of
+            non-procedure type, the expression
+	  </p>
+          <literallayout>
+(dup <em>e</em>)</literallayout>
+          <p indent="no">
+            returns a reference to a heap-allocated <em>copy</em> of
+            the value returned by the expression
+            <progident><em>e</em></progident>.
+          </p>
+        </sect3>
+        <sect3>
+          <title>deref</title>
+          <p>If
+          <progident><em>e</em></progident> is an expression of reference
+          type, then:
+          </p>
+          <literallayout>
+(deref <em>e</em>)</literallayout>
+          <p indent="no">
+            returns the value named by the
+            reference. <progident>deref</progident> is a syntactic
+            form. The returned value is a location, and can be used as
+            an argument to <progident>set!</progident>.
+          </p>
+          <p>
+            The expression:
+          </p>
+          <literallayout>
+<em>e</em><b>^</b></literallayout>
+          <p indent="no">
+            is a convenience shorthand for
+          </p>
+          <literallayout>
+(deref <em>e</em>)</literallayout>
+        </sect3>
+      </sect2>
+      <sect2 id="switch">
+	<title>Value Matching</title>
+        <p>
+          The <progident>switch</progident> form provides a
+          mechanism for obtaining access to variant fields of a
+          value of union or repr type. The syntax of
+          <progident>switch</progident> is:
+        </p>
+        <literallayout>
+(switch <em>id</em> <em>e</em>
+  (<em>match<sub>1</sub></em> <em>e<sub>1.1</sub></em> ... <em>e<sub>1.n1</sub></em>)
+  (<em>match<sub>2</sub></em> <em>e<sub>2.1</sub></em> ... <em>e<sub>2.n2</sub></em>)
+  ; ...
+  (<b>otherwise</b> <em>e<sub>other</sub></em>))</literallayout>
+        <p indent="no">
+          where each <em>match</em> form is either a single union
+          tag identifier (constructor) or a parenthesized
+          sequence of union tag identifiers. Multiple union
+          constructors may be matched by a single clause only if all
+          matched constructors dominate identical fields. Since the
+          type and bit-offsets of identically named fields within
+          repr-constructors are required to be the same, any two
+          repr-constructors can be matched in a single clause. In this
+          case, only the common fields of all matched
+          repr-constructors will be visible for selection within
+          <progident><em>e<sub>i.i</sub></em>...<em>e<sub>i.i</sub></em></progident>.
+        </p>
+        <p>
+          A <progident>switch</progident> expression performs a
+          value match on the tag fields of the expression
+          <progident><em>e</em></progident> (or if
+          <progident><em>e</em></progident> is of repr type, on the
+          tags of its outermost body) in sequence. The first
+          <progident><em>match<sub>i</sub></em></progident>
+          expression containining a matching tag value is selected,
+          and the corresponding expression sequence
+          <progident><em>e<sub>i.1</sub></em>...<em>e<sub>i.ni</sub></em></progident>
+          is executed in an environment where
+          <progident>x</progident> is a value of anonymous type.
+          For every field of the original expresion type such that
+          all of its containing union or repr tag qualifications are
+          satisfied, the anonymous type contains a field with the
+          same name denoting the same portion of the The value of
+          <progident>x</progident> is a <em>copy</em> of the value
+          returned by the expression
+          <progident><em>e</em></progident>.
+        </p>
+        <p>
+          An expression of anonymous type may only appear only as
+          the expression argument of the
+          <progident>member</progident> form, or as the expression
+          <progident><em>e</em></progident> of a
+          <progident>switch</progident> form. It may not be passed
+          as an argument, rebound, or returned as a result value.
+        </p>
+        <p>
+          If the matches performed by a given
+          <progident>switch</progident> are exhaustive, the
+          <progident>otherwise</progident> clause can be omitted.
+        </p>
+        <p>
+          For purposes of literal case analysis, the
+          <progident>switch</progident> form will also accept
+          expressions <progident><em>e</em></progident> of primary
+          scalar type and matching values that are literals of the
+          corresponding type.
+        </p>
+      </sect2>
+      <sect2>
+	<title>Exception Handling</title>
+	<sect3>
+	  <title>Try/Catch</title>
+	  <p>
+	    The <progident>try</progident> form is used as the control
+	    flow resumption point of a <progident>throw</progident>
+	    form. When a <progident>throw</progident> occurs, control
+	    resumes at the nearest dynamically containing
+	    <progident>try</progident> form whose matching patterns
+	    match the name of the exception that was thrown.
+	  </p>
+	  <p>
+	    The try block syntax is:
+	  </p>
+	  <literallayout>
+(try <em>expr</em>
+  (catch <em>id</em> (<em>tagid<sub>1</sub></em> <em>e<sub>1</sub></em>)
+            ...
+            (<em>tagid<sub>2</sub></em> <em>e<sub>2</sub></em>)
+            ((<em>tagid<sub>x</sub></em> <em>tagid<sub>y</sub></em>) <em>e<sub>xy</sub></em>)
+            [(otherwise <em>e<sub>n</sub></em>)]))</literallayout>
+          <p indent="no">
+            In the absence of a programmer-specified
+            <progident>otherwise</progident> clause, the
+            <progident>catch</progident> block behaves as though the
+            clause
+          </p>
+          <literallayout>
+(otherwise (throw <em>nm</em>))</literallayout>
+          <p indent="no">
+            had been present.
+          </p>
+	  <p>
+	    If the evaluation of <progident><em>expr</em></progident>
+	    does not cause an exception, the value of the
+	    <progident>try</progident> block is the value of
+	    <progident><em>expr</em></progident>.
+	  </p>
+	  <p>
+	    If the evaluation of <progident><em>expr</em></progident>
+	    causes an exception to be thrown, execution proceeds as if
+	    the catch block were rewritten to the procedure:
+          </p>
+          <literallayout>
+(lambda (e:exception)
+  (switch nm e
+    (<em>tagid<sub>1</sub></em> <em>e<sub>1</sub></em>)
+    (<em>tagid<sub>2</sub></em> <em>e<sub>2</sub></em>)
+    ...
+    (otherwise <em>e<sub>otherwise</sub></em>)))</literallayout>
+          <p indent="no">
+            and this procedure were applied to the received exception
+            value. The return value from this procedure is returned as
+            the value of the <progident>case</progident> expression.
+          </p>
+	</sect3>
+	<sect3>
+	  <title>Throw</title>
+	  <p>
+	    The <progident>throw</progident> form is used to raise an
+	    exception. It performs a non-local control flow transfer
+	    to the most recent (nearest temporally enclosing)
+	    <progident>try</progident> block, with the effect that the
+	    thrown exception value is received by the corresponding
+	    <progident>catch</progident> block as described above.
+	    The <progident>throw</progident> expression has no return
+	    value type. The form:
+	  </p>
+	  <literallayout>
+(throw <em>e</em>)</literallayout>
+	  <p>
+            throws the exception computed by the expression
+            <progident><em>e</em></progident>, which must be an
+            expression of type <progident>exception</progident>.
+	  </p>
+	</sect3>
+      </sect2>
+    </sect1>
+    <sect1>
+      <title>Locations</title>
+      <p>
+        <font color="blue">This section is a work in progress, but it
+        is as accurate as I (shap) can currently make it. Corrections,
+        comments, identification of omissions, and so forth are
+        welcome.</font>
+      </p>
+      <p>
+        BitC is a language supporting mutation. Because of this, a
+        specification of the type system and expression evaluation
+        semantics of BitC does not entirely account for how the
+        behavior of <progident>set!</progident> interacts with the
+        behavior of accessor expressions such as
+        <progident>array-nth</progident>,
+        <progident>vector-nth</progident>,
+        <progident>member</progident>, <progident>deref</progident>,
+        and expressions consisting of a single identifier.  In
+        particular, the characterization of
+        <progident>set!</progident> as
+      </p>
+        <literallayout>
+(set! <em>e<sub>1</sub> e<sub>2</sub></em>)</literallayout>
+      <p indent="no">
+        does not account for how
+        <progident><em>e<sub>1</sub></em></progident> can be mutated
+        in place, because the language specification (to this point)
+        does not distinguish between expressions that generate new
+        values (in the sense of values that occupy new storage) and
+        expressions that return pre-existing values. To address this,
+        we present here an informal characterization of locations in BitC.
+      </p>
+      <sect2>
+        <title>Expressions Involving Locations</title>
+        <p>
+          The following expressions accept locations (addresses of
+          cells) in the indicated positions, and return locations as
+          their result:
+        </p>
+        <literallayout>
+<em>id</em>
+(array-nth <em>loc</em> <em>ndx</em>)
+(vector-nth <em>e</em> <em>ndx</em>)
+(member <em>loc</em> <em>ident</em>)
+(deref <em>e</em>)</literallayout>
+        <p indent="no">
+          in addition, the <progident>set!</progident> form requires a
+          location as its first argument, and returns the unit value.
+        </p>
+        <literallayout>
+(set! <em>loc</em> <em>e</em>)</literallayout>
+      </sect2>
+      <sect2>
+        <title>Implicit Value Extraction</title>
+        <p>
+          When a value of location type appears in any context
+          expecting an expression, the location is implicitly
+          dereferenced to give the expected value as a result.  The
+          ``value extraction rule'' applies both to return values and
+          to applications, with the consequence that ``bare''
+          locations can never escape their binding frame in either the
+          upward or downward directions. Only those forms identified
+          explicitly above as accepting and returning locations are
+          exceptions to the value extraction rule.
+        </p>
+        <p>
+          For example, in the expression:
+        </p>
+        <literallayout>
+(let ((a b)) ...)</literallayout>
+        <p indent="no">
+          the expression <progident>b</progident> evaluates (internally)
+          to a location, but it is then discovered to appear in a
+          binding context requiring an expression, so the value at that
+          location is returned instead. Similarly, the expression
+          <progident>a</progident> evaluates (internally) to a
+          location, allowing it to be initialized in place.
+        </p>
+        <p>
+        </p>
+      </sect2>
+      <sect2>
+        <title>Generalized Accessors</title>
+        <note>
+          <p>
+            This section describes a possible <em>future</em>
+            enhancement to the language. It is considered
+            experimental, and it is possible that it will never be
+            implemented at all.
+          </p>
+        </note>
+        <p>
+          It is customary for programs that introduce ``collection''
+          types to provide both operations for both insertion and
+          lookup. It would be exceedingly convenient if the lookup
+          operation could be used to support efficient access as well,
+          for example:
+        </p>
+        <literallayout>
+(btree-insert bt key some-obj)
+(btree-lookup bt key).field</literallayout>
+        <p indent="no">
+          That is, it is sometimes appropriate for the lookup function
+          could return a location.
+        </p>
+        <p>
+          This cannot be supported for local objects, but it is
+          possible for the type system to successfully infer the
+          distinction between local object locations and global
+          object locations. In this case, we could relax the value
+          extraction rule so that it would <em>not</em> apply to
+          return values, with the effect that we could write an
+          accessor function such as:
+        </p>
+<literallayout>
+(define (4th-elem vec)
+  (vector-nth vec 4))
+5th-elem: (fn ((vector 'a word))
+              (location 'a))</literallayout>
+        <p indent="no">
+          Given such an accessor function, it would even be possible
+          to write:
+        </p>
+        <literallayout>
+(set! (4th-elem vec) 5)</literallayout>
+        <p>
+          If introduced, this feature would need to be handled with
+          care. It would be all too easy for a binary tree's lookup
+          handler to return the internal node structure, with the
+          effect that external code could modify the stored key ``in
+          place,'' violating the integrity of the binary tree. Because
+          of this risk, it is unclear whether the type
+          <progident>(location&nbsp;T)</progident> should ever be
+          inferred automatically.
+        </p>
+      </sect2>
+    </sect1>
+    <sect1>
+      <title>Interfaces</title>
+      <p>
+        An interface describes a public set of definitions and
+        declarations. From the client perspective, it describes the
+        identifiers that are published by some providing body of
+        code. From the provider perspective, it describes a collection
+        of identifiers that are to be exported from the providing
+        implementation.
+      </p>
+      <p>
+        An interface is the <em>only</em> means by which an identifier
+        defined in one source compilation unit can be used in
+        another. Unless declared as part of an interface, identifiers
+        declared or defined in a source unit of compilation are
+        <em>local</em> to that source unit of compilation.
+      </p>
+      <sect2>
+        <title>Defining an Interface</title>
+        <p>
+          An interface unit of compilation consists of a
+          <progident>bitc-version</progident> form followed by a
+          single <progident>interface</progident> form. The
+          <progident>interface</progident> form wraps a
+          sequence of imports, aliases, definitions, and
+          declarations. For example, the interface:
+        </p>
+        <literallayout>
+(interface sample
+  (define x 1) ; constant definition
+  (defunion (list 'a):ref
+    nil
+    (cons 'a (list 'a)))
+  (defstruct (tree-of 'a):ref)
+  (proclaim y : int32))
+  (defstruct S :opaque (int32 i))</literallayout>
+        <p indent="no">
+          Defines a constant <progident>x</progident> with value
+          <progident>1</progident>, defines the now-familiar list
+          type, declares that <progident>tree-of</progident> is an
+          opaque reference type defined in some (unspecified) source
+          unit of compilation, and that <progident>y</progident> is a
+          value of type <progident>int32</progident> declared in some
+          (unspecified) source unit of compilation.
+        </p>
+        <p>
+          Interface names consist of one or more identifiers separated
+          by dots (``.'').  Each identifier must begin with an upper
+          or lower case alphabetic character or underscore, which may
+          be followed by upper and lower alphabetic characters,
+          numbers, underscore, and hyphen. To ensure compatibility
+          with existing file systems, the character set for interface
+          names is restricted to the 7-bit ASCII subset. It is
+          intended that future implementations will relax this
+          restriction.<footnote><p>This restriction exists to ensure
+          that there can be a straightforward mapping from identifier
+          names to file names in current file systems.</p></footnote>
+          Interface names are <em>not</em> restricted by the BitC
+          reserved words, except that interface names beginning with
+          ``<progident>bitc.</progident>'' are reserved for use by the
+          runtime system.
+        </p>
+        <p>
+          Note that the declaration of <progident>tree-of</progident>
+          provided by this interface is incomplete and therefore
+          opaque. Because <progident>tree-of</progident> is a
+          reference type, clients of this interface can declare
+          variables and arguments of type
+          <progident>tree-of</progident>, but cannot instantiate them
+          because no function returning type
+          <progident>tree-of</progident> is exposed by this interface.
+        </p>
+        <p>
+          Note further that <progident>val-type</progident> is both
+          incomplete and undeclarable, because it is a value
+          type. Clients may declare arguments of type
+        </p>
+        <literallayout>
+(ref sample.value-type)</literallayout>
+        <p indent="no">
+          but not of type <progident>value-type</progident>, because
+          the size of <progident>value-type</progident> is not
+          revealed.
+        </p>
+      </sect2>
+      <sect2>
+        <title>Importing an Interface, Aliasing</title>
+        <p>
+          In order to use the identifiers supplied by this interface,
+          the client unit of compilation must import the interface using
+          a top-level <progident>import</progident> form:
+        </p>
+        <literallayout>
+(import <em>local-name</em> <em>interface-name</em>)
+        </literallayout>
+        <p indent="no">
+          where <progident><em>interface-name</em></progident> is an
+          interface name from the namespace of interface names and
+          <progident><em>local-name</em></progident> is an identifier
+          to be bound in the current scope that should be used to
+          designate the elements of this interface. A
+          <progident><em>use</em></progident> form may only appear at
+          tope level. Following this import and
+          <progident>use</progident>, if the imported interface
+          defines a type <progident>my-tree</progident>, this type can
+          be referenced as:
+        </p>
+        <literallayout>
+(define (f local-name:my-tree)
+  ...)</literallayout>
+        <p>
+          The syntax of <progident>use</progident> is:
+        </p>
+        <literallayout>
+(use <em>use-form</em> ... <em>use-form</em>)</literallayout>
+        <p indent="no">
+          where <progident><em>use-form</em></progident> is either a
+          pair consisting of a name to be bound and a qualified name
+          or a singleton qualified name. For example, given the
+          interface:
+        </p>
+        <literallayout>
+(interface sample2
+  (proclaim i : int32))
+  (proclaim j : int32))</literallayout>
+        <p indent="no">
+          and an import statement
+        </p>
+        <literallayout>
+(import ifnm sample2)</literallayout>
+        <p indent="no">
+          an importing compilation can avoid the need to write
+          ``<progident>ifnm.</progident>'' pervasively by writing:
+        </p>
+        <literallayout>
+(import ifnm sample2)
+(use (x ifnm.i) ifnm.j)</literallayout>
+        <p indent="no">
+          The effect of this is that <progident>ifnm.i</progident> is
+          aliased by the local name <progident>x</progident> and
+          <progident>ifnm.j</progident> is aliased by the local name
+          <progident>j</progident>. A
+          <progident><em>use-form</em></progident> of the form
+          <progident><em>prefix</em>.<em>ident</em></progident> is
+          interpreted exactly as if
+          <progident>(<em>ident</em>&nbsp;<em>prefix</em>.<em>ident</em>)</progident>
+          had been written.
+        </p>
+        <p>
+          Like the defining and declaring forms, the
+          <progident>use</progident> form introduces a name that may
+          not subsequently be rebound in the outermost scope. In
+          <em>contrast</em> to the defining and declaring forms, the
+          appearance of an <progident>use</progident> declaration
+          within an interface does <em>not</em> introduce an exported
+          name.
+        </p>
+        <sect3>
+          <title>Compile-Time Import Resolution</title>
+          <p>
+            To locate the source representation of an imported
+            interface, the compiler shall attempt to locate a file
+            <progident><em>name</em>.bitc</progident>, where
+            <progident><em>name</em></progident> is the identifier used
+            to name the corresponding interface. The default search path
+            used for this resolution is not defined by this standard,
+            but shall provide a resolution for every interface specified
+            in the language definition. It is permissable for a compiler
+            to implement some or all of the default search path
+            internally, without reference to any external file name
+            space.
+          </p>
+          <p>
+            Every file-based compilation environment for BitC shall
+            provide a command-line option <progident>-I</progident> that
+            enables the build environment to append directories to the
+            interface search path.
+          </p>
+        </sect3>
+        <sect3>
+          <title>Error Reporting</title>
+          <p>
+            When reporting errors, a conforming BitC compiler should
+            <em>always</em> report the defining name of the type or
+            variable. It may <em>optionally</em> report the alias
+            (use) name by which the type or value was referenced. Only
+            defining names should be exposed for resolution by the
+            linker. For identifiers defined or declared within an
+            interface, the defining name is the fully qualified name
+            of the identifier with respect to its interface. For all
+            other identifiers, the defining name is the one that
+            appears in the defining form.
+          </p>
+          <p>
+            The BitC interface system provides primarily for separate
+            compilation and name hiding. In contrast to the module system
+            of Standard ML <cite ref="macqueen1984modules"/>, BitC interfaces
+            are purely a tool for namespace control.
+          </p>
+        </sect3>
+      </sect2>
+      <sect2 id="provide">
+        <title>Providing an Interface</title>
+        <p>
+          A source unit of compilation can indicate that it provides
+          definitions for one or more declarations of an interface by
+          means of the <progident>provide</progident> declaration. The
+          syntax of provide is:
+        </p>
+        <literallayout>
+(provide <em>local-name</em> <em>interface-name</em>)</literallayout>
+        <p indent="no">
+          For example:
+        </p>
+        <literallayout>
+(bitc-version "&BitcVersion;")
+(provide ln sample)
+
+(defstruct (ln.tree-of 'a):ref
+  left : (optional
+           (ln.tree-of 'a))
+  right : (optional
+            (ln.tree-of 'a))
+  height
+  value : 'a)</literallayout>
+        <p indent="no">
+          Note that the <progident>provide</progident> form imports
+          the corresponding interface. Note further that because the
+          interface introduces the defining name for
+          <progident>tree-of</progident>, the following alternative
+          definition is equivalent in all respects to the one above:
+        </p> 
+        <literallayout>
+(bitc-version "&BitcVersion;")
+(provide ln sample)
+(use (tree-of ln.tree-of))
+
+(defstruct (tree-of 'a):ref
+  left : (optional (tree-of 'a))
+  right : (optional (ree-of 'a))
+  height
+  value : 'a)</literallayout>
+        <p>
+          It is <em>not</em> required that a single source unit of
+          compilation provide the entirety of an interface. For
+          sufficiently large interfaces (e.g. the standard BitC
+          library), this would be impractical. However the flexibility
+          to define an interface with a collection of independently
+          compiled source units of compilation demands some means to
+          prevent circular type and value declarations. Circular value
+          definitions are precluded by the type-level definition
+          observability rule
+        </p>
+      </sect2>
+      <sect2>
+        <title>The Reserved Interface <progident>bitc</progident></title>
+        <p>
+          The interface name ``bitc'' is reserved for use by the BitC
+          implementation.
+        </p>
+      </sect2>
+    </sect1>
+    <sect1>
+      <title>Storage Model</title>
+      <p>
+        <font color="red"><em>This entire section had become hopelessly
+        stale, and needs to be rewritten.</em></font>
+      </p>
+    </sect1>
+    <sect1>
+      <title>Pragmatics</title>
+      <sect2>
+        <title>Tail Recursion</title>
+        <p>
+          BitC provides no syntactic form providing for non-recursive
+          iteration. Instead, the language requires a limited form of tail
+          recursion. We do not require fully proper tail recursion because
+          this is difficult to accomplish efficiently in C, and we wish to
+          preserve the ability to compile BitC programs into C for the
+          sake of portability.
+        </p>
+        <p>
+          <em>Definition:</em> Within a BitC form
+          <progident>f</progident>, a form <progident>g</progident> occurs
+          in <term>tail position</term> with respect to the form
+          <progident>f</progident> if the return value of
+          <progident>g</progident> is the final computation (and therefore
+          the return value) computed by <progident>f</progident>. A
+          function call is said to be <term>tail recursive</term> if it is
+          implemented in such a way as to re-use its containing stack
+          frame.
+        </p>
+        <p>
+          The BitC specification <em>requires</em> that certain procedure
+          calls must be compiled using a tail-recursive implementation:
+        </p>
+        <ul>
+          <li>
+            <p>
+              Within any function <progident>f</progident>, calls to
+              <progident>f</progident> that appear in tail position
+              w.r.t. the body of <progident>f</progident> must be tail
+              recursive.
+            </p>
+          </li>
+          <li>
+            <p>
+              The <progident>do</progident> construct is properly
+              tail recursive.
+            </p>
+          </li>
+          <li>
+            <p>
+              Within a <progident>letrec</progident>, calls to any
+              function bound in the letrec that appear in tail position
+              within some function bound by the
+              <progident>letrec</progident> must be tail recursive.
+            </p>
+          </li>
+        </ul>
+        <p>
+          These requirements apply only to function calls whose
+          destination can be statically resolved by the compiler at
+          compile time. A BitC compiler is permitted, but is not required,
+          to implement other function calls tail recursively.
+        </p>
+      </sect2>
+    </sect1>
+  </subpart>
+  <subpart>
+    <title>Standard Prelude</title>
+    <p>
+      <font color="red">This section needs to be defined.</font>
+    </p>
+    <p>
+      The following types and values are defined in the BitC standard
+      prelude. The compiler is free to implement some or all of these
+      types internally, and is further free to rely on internal
+      knowledge of these types within the implementation.
+    </p>
+    <sect1>
+      <title>Foundational Types</title>
+      <p>
+        The prelude provides definitions for commonly used integral
+        types. Under normal circumstances, the reader and pretty printer
+        conspire to hide the fact that these types are union types.
+      </p>
+      <literallayout>
+;; There is an open issue here: should
+;; strings be primitive? Issue is unicode
+;; character size and long strings.
+; Strings:
+;;(defunion string:val (vector char))
+
+; Pairs:
+(defstruct (pair 'a 'b):val 
+  fst:'a snd:'b)
+
+; Nullable pointers:
+(defunion (optional 'a):val 
+  none (some 'a))
+
+; Homogeneous lists:
+(defunion (list 'a):val 
+  nil (cons 'a (list 'a)))
+
+; Bignums
+(defunion int:val
+  (fix (bitfield int32 31))
+  (big (ref (bool, (vector word)))))</literallayout>
+    </sect1>
+    <sect1>
+      <title>Foundational Type Classes</title>
+      <p>
+        The standard prelude provides a number of standard type
+        classes:
+      </p>
+      <literallayout>
+; Equality comparison by identity:
+(deftypeclass (EqComparison 'a)
+  eq : (fn ('a 'a) bool))
+
+; Equality comparison by identity,
+; with exceptional handling for
+; numerics:
+(deftypeclass (EqlComparison 'a)
+  eql : (fn ('a 'a) bool))
+
+; Generalized equality:
+(deftypeclass (EqualityComparison 'a)
+  == : (fn ('a 'a) bool)
+  != : (fn ('a 'a) bool))
+
+; Magnitude comparison
+(deftypeclass 
+  (forall ((EqualityComparison 'a))
+          (Ord 'a))
+  &lt;  : (fn ('a 'a) bool)
+  &lt;= : (fn ('a 'a) bool))
+
+; Checked arithmetic
+(deftypeclass 
+  (forall ((Ord 'a))
+          (Arith 'a))
+  +: (fn ('a 'a) 'a)
+  -: (fn ('a 'a) 'a)
+  *: (fn ('a 'a) 'a)
+  /: (fn ('a 'a) 'a)
+  &lt;&lt;:(fn ('a word) 'a)
+  &gt;&gt;:(fn ('a word) 'a))
+
+; Ring arithmetic
+(deftypeclass
+  (forall ((Ord 'a))
+          (Ring 'a))
+  R+: (fn ('a 'a) 'a)
+  R-: (fn ('a 'a) 'a)
+  R*: (fn ('a 'a) 'a)
+  R/: (fn ('a 'a) 'a)
+  R&lt;&lt;:(fn ('a word) 'a)
+  R&gt;&gt;:(fn ('a word) 'a))
+
+; Sign transformations
+(deftypeclass
+  (forall ((Ord 'a))
+          (Signed 'a))
+  negate: (fn ('a) 'a)
+  abs:    (fn ('a) 'a))</literallayout>
+    </sect1>
+  </subpart>
+  <subpart>
+    <title>Formal Specification</title>
+    <sect1 id="grammar">
+      <title>Grammar</title>
+      <p>
+        The section below gives the extended EBNF grammar for the BitC
+        language, including derived forms. Non-terminals are shown in
+        italics. Tokens are shown in regular face. The characters
+        ``{'', ''}'', and ``|'', are quoted when appearing as
+        tokens. When appearing as a superscript, the character ``*''
+        indicates ``zero or more'' occurrences, the character ``+''
+        indicates ``one or more'' occurrences, and the character ``?''
+        indicates ``zero or one occurrences.'' These should be read as
+        metasyntactic only when appearing in a superscript. Note that
+        parenthesis are <em>not</em> metasyntactic in extended
+        Backus-Nauer form, and should be read as single-character
+        tokens.
+      </p>
+      <p>
+        Within the EBNF productions below, the left and right
+        parenthesis, period, colon, commma, and single quote
+        characters should always be read as single character
+        tokens. Spaces around these tokens have been omitted for the
+        benefit of typeset readability.
+      </p>
+      <sect2>
+        <title>Categorical Terminals</title>
+        <p>
+          The following categorical terminals are defined by the regular
+          expressions given in the respective sections:
+        </p>
+        <deflist>
+          <defli>
+            <label><b>Id</b></label>
+            <li>
+              <p>
+                Identifiers (Section&nbsp;<xref ref="identifiers"/>)
+              </p>
+            </li>
+          </defli>
+          <defli>
+            <label><b>IntLit</b></label>
+            <li>
+              <p>
+                Integer literals (Section&nbsp;<xref ref="intlit"/>)
+              </p>
+            </li>
+          </defli>
+          <defli>
+            <label><b>FloatLit</b></label>
+            <li>
+              <p>
+                Floating point literals (Section&nbsp;<xref ref="floatlit"/>)
+              </p>
+            </li>
+          </defli>
+          <defli>
+            <label><b>CharLit</b></label>
+            <li>
+              <p>
+                Character literals (Section&nbsp;<xref ref="charlit"/>)
+              </p>
+            </li>
+          </defli>
+          <defli>
+            <label><b>StringLit</b></label>
+            <li>
+              <p>
+                String literals (Section&nbsp;<xref ref="stringlit"/>)
+              </p>
+            </li>
+          </defli>
+        </deflist>
+      </sect2>
+      <sect2>
+        <title>Interfaces, Units of Compilation</title>
+<literallayout indent="no">
+<em>start</em> ::= <em>version</em> <em>module</em>
+  | <em>version</em> <em>interface</em>
+<em>version</em> ::= (bitc-version StringLit)
+<em>ifname</em> ::= {Id.}<sup>*</sup> Id
+<em>interface</em> ::=
+  (interface <em>ifname</em> <em>docstring</em><sup>?</sup> <em>def</em><sup>+</sup>)
+<em>module</em> ::= {<em>provide</em> | <em>def</em>}<sup>+</sup>
+<em>import</em> ::= (import Id <em>ifname</em>)
+<em>provide</em> ::= (provide Id <em>ifname</em>)
+<em>usedecl</em> ::=
+    (use {Id.Id | (Id Id.Id)}<sup>+</sup>)
+<em>def</em> ::= <em>import</em>
+  | <em>usedecl</em>
+  | <em>typedef</em>
+  | <em>typedecl</em>
+  | <em>tcdef</em>
+  | <em>instdef</em>
+  | <em>valdef</em>
+  | <em>proclaim</em>
+  | <em>declare</em></literallayout>
+      </sect2>
+      <sect2>
+        <title>Type Declaration and Definition</title>
+        <p>
+          The <progident>defunion</progident> and
+          <progident>defstruct</progident> forms are semantically
+          derivable from <progident>defrepr</progident> (or vice
+          versa),<footnote>
+            <p>
+              This statement of semantic derivability ignores the
+              Cardelli family of representation optimizations that are
+              not currently expressable for
+              <progident>defrepr</progident>, but it is intended to
+              fully support control of these optimizations in future
+              enhancements to the language.
+            </p>
+          </footnote>
+          but for purposes of specifying typing it is more
+          convenient to retain them and use the conventional typing
+          definitions for product and union types.
+        </p>
+<literallayout indent="no">
+<em>constraint</em> ::= <em>typapp</em> | <em>ident</em>
+<em>typnm</em> ::= <em>ident</em>
+  | (<em>ident</em> <em>tvar</em><sup>+</sup>)
+  | (forall (<em>constraint</em><sup>+</sup>) <em>ident</em>)
+  | (forall (<em>constraint</em><sup>+</sup>)
+                  (<em>ident</em> <em>tvar</em><sup>+</sup>))
+<em>val</em> ::= :val | :ref | :opaque
+<em>typedef</em> ::=
+    (defstruct <em>typnm</em> <em>val</em>
+               <em>docstring</em><sup>?</sup>
+               <em>declare</em><sup>+</sup> {<em>field</em>|<em>fill</em>}<sup>+</sup>)
+  | (defunion <em>typnm</em> <em>val</em>
+              <em>docstring</em><sup>?</sup>
+              <em>declare</em><sup>+</sup> {<em>field</em>|<em>fill</em>}<sup>+</sup>)
+  | (defrepr <em>typnm</em> <em>val</em>
+             <em>docstring</em><sup>?</sup> (<em>reprbody</em>))
+  | (defexception <em>ident</em>
+                  <em>docstring</em><sup>?</sup> <em>field</em><sup>*</sup>)
+<em>field</em> ::= Id : <em>type</em>
+  | (the <em>type</em> Id)
+<em>fill</em> ::=
+    (fill (bitfield <em>fixpttype</em> IntLit))
+<em>reprbody</em> ::= (tag Id<sup>+</sup>)
+  | <em>field</em>
+  | <em>fill</em>
+  | (case {(<em>tags</em> (<em>reprbody</em>))}<sup>+</sup>)
+<em>tags</em> ::= Id | (Id<sup>+</sup>)
+<em>typedecl</em> ::=
+    (defstruct <em>typnm</em> <em>val</em>
+               <em>docstring</em><sup>?</sup>
+               {external Id<sup>?</sup>}<sup>?</sup>)
+  | (defunion <em>typnm</em> <em>val</em>
+               <em>docstring</em><sup>?</sup>
+              {external Id<sup>?</sup>}<sup>?</sup>)
+  | (defrepr <em>typnm</em> <em>val</em>
+             <em>docstring</em><sup>?</sup>
+             {external Id<sup>?</sup>}<sup>?</sup>)
+<em>tcdef</em> ::=
+    (deftypeclass <em>typnm</em> 
+                  <em>docstring</em><sup>?</sup>
+                  {(tyfn (<em>tvar</em><sup>+</sup>) <em>tvar</em>)}<sup>*</sup>
+                  {<em>ident</em>:<em>fntype</em>}<sup>*</sup>)
+<em>instdef</em> ::=
+    (definstance <em>qual_constraint</em>
+                 <em>docstring</em><sup>?</sup> <em>expr</em><sup>+</sup>)
+<em>qual_constraint</em> ::= <em>constraint</em>
+  | (forall (<em>constraint</em><sup>+</sup>) <em>constraint</em>)</literallayout>
+      </sect2>
+      <sect2>
+        <title>Value Declaration and Definition</title>
+        <literallayout indent="no">
+<em>valdef</em> ::=
+    (define <em>defpattern</em> <em>docstring</em><sup>?</sup> <em>expr</em>)
+  | (define (<em>ident</em> <em>bindingpattern</em><sup>?</sup>)
+       <em>docstring</em><sup>?</sup>  <em>expr</em><sup>+</sup>)
+<em>defpattern</em> ::= <em>ident</em>
+  | <em>ident</em>:<em>qualtype</em>
+  | (the <em>qualtype</em> <em>ident</em>)
+  | ()
+  | (pair <em>defpattern</em> <em>defpattern</em>)
+  | ({<em>defpattern</em>,}<sup>+</sup> <em>defpattern</em>)
+<em>bindingpattern</em> ::= <em>ident</em>
+  | <em>ident</em>:<em>type</em>
+  | (the <em>type</em> <em>ident</em>)
+  | ()
+  | (pair <em>defpattern</em> <em>defpattern</em>)
+  | ({<em>defpattern</em>,}<sup>+</sup> <em>defpattern</em>)
+<em>proclaim</em> ::=
+    (proclaim <em>ident</em>:<em>qualtype</em>
+              {external Id<sup>?</sup>}<sup>?</sup>)
+    <em>; Note: external Id may include BitC</em>
+    <em>; reserved words.</em>
+<em>qualtype</em> ::= <em>type</em>
+  | (forall (<em>constraint</em><sup>+</sup>) <em>type</em>)
+  | <em>constraint</em>
+  | (forall (<em>constraint</em><sup>+</sup>) <em>constraint</em>)
+</literallayout>
+      </sect2>
+      <sect2>
+        <title>Types</title>
+        <p>
+          Note that the pair type is semantically a derived form. It
+          appears in the grammar solely because of the need to support
+          pattern bindings and multiple return values.
+        </p>
+        <literallayout indent="no">
+<em>tvar</em> ::= 'Id
+<em>inttype</em> ::= int8 | int16 | int32 | int64
+  | uint8 | uint16 | uint32 | uint64
+<em><u>pairtype</u></em> ::= (pair <em>type</em> <em>type</em>)
+  | ({<em>type</em>,}<sup>+</sup> <em>type</em>)
+<em>type</em> ::= <em>ident</em>
+  | <em>tvar</em>
+  | () | bool | char | string | exception
+  | <em>inttype</em>
+  | float | double | quad
+  | (bitfield <em>inttype</em> IntLit)
+  | (ref <em>type</em>)
+  | (val <em>type</em>)
+  | (mutable <em>type</em>)
+  | (fn (<em>type</em><sup>*</sup>) <em>type</em>)
+  | <em><u>pairtype</u></em>
+  | (array <em>type</em> IntLit)
+  | (vector <em>type</em>)
+  | (<em>ident</em> <em>type</em><sup>+</sup>)</literallayout>
+      </sect2>
+      <sect2>
+        <title>Expressions</title>
+        <p>
+          Productions for derived forms are shown with their
+          non-terminal underlined.
+        </p>
+        <literallayout indent="no">
+<em>ident</em> ::= Id | Id.Id
+<em>expr</em> ::= <em>eform</em>
+  | (the <em>type</em> <em>eform</em>)
+;; <em>eform permits</em> ident <em>via expr.id</em>
+<em>eform</em> ::= Id
+  | ()
+  | <em>eform</em>.Id
+  | (the <em>type</em> <em>eform</em>).Id
+  | (pair <em>expr</em> <em>expr</em>)
+  | (member <em>expr</em> Id)
+  | (array-nth <em>expr</em> <em>expr</em>)
+  | (vector-nth <em>expr</em> <em>expr</em>)
+  | <em>expr</em> [ <em>expr</em> ]
+  | <em>expr</em> ^
+  | (deref <em>expr</em>)
+  | (suspend <em>ident</em> <em>expr</em>)
+  | ({<em>expr</em>,}<sup>+</sup> <em>expr</em>)
+  | (array <em>expr</em><sup>+</sup>)
+  | (vector <em>expr</em><sup>+</sup>)
+  | (array-length <em>expr</em>)
+  | (vector-length <em>expr</em>)
+  | (make-vector <em>expr</em> <em>expr</em>)
+  | (begin <em>expr</em><sup>+</sup>)
+  | (lambda (<em>bindingpattern</em><sup>*</sup>) <em>expr</em><sup>+</sup>)
+  | (<em>expr</em> <em>expr</em><sup>*</sup>)
+  | (if <em>expr</em> <em>expr</em> <em>expr</em>)
+  | (and <em>expr</em><sup>+</sup>)
+  | (or <em>expr</em><sup>+</sup>)
+  | (set! <em>expr</em> <em>expr</em>)
+  | (dup <em>expr</em>)
+  | (cond ( {(<em>expr</em> <em>expr</em>)}<sup>*</sup>)
+            (otherwise <em>expr</em>))
+  <em>;; MAY NEED CASE</em>
+  | (switch Id <em>expr</em>
+            ( {(<em>switchtags</em> <em>expr_seq</em>)}<sup>*</sup>
+              (otherwise <em>expr_seq</em>)))
+  | (try <em>expr</em>
+     (catch <em>Id</em> 
+            {(<em>switchtags</em> <em>expr</em>)}<sup>*</sup> 
+            (otherwise <em>expr</em>)<sup>?</sup>))
+  | (throw <em>expr</em>)
+  | (let ({(<em>bindingpattern</em> <em>expr</em>)}<sup>+</sup>)
+      <em>expr</em>)
+  | (letrec ({(<em>bindingpattern</em> <em>expr</em>)}<sup>+</sup>)
+      <em>expr</em>)
+  | (do ({(<em>bindingpattern</em> <em>expr</em> <em>expr</em>)}<sup>+</sup>)
+      (<em>expr</em> <em>expr</em>)
+      <em>expr</em>)
+  | () | #f | #t | CharLit | StringLit
+  | IntLit | FloatLit
+<em>switchtags</em> ::= <em>ident</em> | (<em>ident</em><sup>+</sup>)
+<!-- <em>expr</em> ::= Id -->
+<!--   | <em>expr</em>.Id -->
+<!--   | (vector-nth <em>expr</em> <em>expr</em>) -->
+</literallayout>
+
+      </sect2>
+      <sect2>
+        <title>Miscellaneous</title>
+        <literallayout indent="no">
+<em>declare</em> ::=
+    (declare {(<em>ident</em> <em>type</em>) | <em>ident</em>}<sup>+</sup>)</literallayout>
+<em>docstring</em> := StringLit
+      </sect2>
+    </sect1>
+  </subpart>
+  <subpart>
+    <title>Standard Library</title>
+    <sect1>
+      <title>BitC Standard Library</title>
+      <p>
+        <font color="red">This section needs badly to be completely
+        revisited.</font>
+      </p>
+      <p>
+	The BitC standard library is described as a set of groups. Each
+	group gives a built-in function, a list of signatures supported
+	by that built-in function, and a description of the operation of
+	the function.
+      </p>
+      <sect2>
+	<title>Built-In Operators</title>
+	<p>
+	  BitC defines the operation <progident>length</progident> to
+	  return the length of a vector.
+	</p>
+	<p>
+	  The length operator is defined over the signature:
+	</p>
+	<table>
+          <tbody>
+            <tr>
+              <td>(vector) &rarr; uint64</td>
+            </tr>
+          </tbody>
+	</table>
+      </sect2>
+      <sect2>
+	<title>Arithmetic</title>
+	<p>
+	  BitC defines the built-in operators <progident>+</progident>,
+	  <progident>-</progident>, <progident>*</progident>,
+	  <progident>/</progident>, and <progident>%</progident>, with
+	  the usual meanings of two's complement addition, subtraction,
+	  multiplication, division and remainder for signed types, and
+	  one's complement addition, subtraction, multiplication,
+	  division, and remainder for unsigned types.
+	</p>
+	<p>
+	  BitC also defines the build-in operators
+	  <progident>bit-or</progident>, <progident>bit-xor</progident>,
+	  and <progident>bit-and</progident>, with the usual meanings of
+	  one's complement bit manipulation.
+	</p>
+	<p>
+	  These operators are defined over the following signatures:
+	</p>
+	<table>
+          <tbody>
+            <tr>
+              <td>int8 &cross; int8 &rarr; int8</td>
+            </tr>
+            <tr>
+              <td>int16 &cross; int16 &rarr; int16</td>
+            </tr>
+            <tr>
+              <td>int32 &cross; int32 &rarr; int32</td>
+            </tr>
+            <tr>
+              <td>int64 &cross; int64 &rarr; int64</td>
+            </tr>
+            <tr>
+              <td>uint8 &cross; uint8 &rarr; uint8</td>
+            </tr>
+            <tr>
+              <td>uint16 &cross; uint16 &rarr; uint16</td>
+            </tr>
+            <tr>
+              <td>uint32 &cross; uint32 &rarr; uint32</td>
+            </tr>
+            <tr>
+              <td>uint64 &cross; uint64 &rarr; uint64</td>
+            </tr>
+          </tbody>
+	</table>
+	<p>
+	  Unary minus is also supported over all integral types with the
+	  usual meaning.
+	</p>
+      </sect2>
+      <sect2>
+	<title>Comparison</title>
+	<p>
+	  BitC defines the built-in comparison operators
+	  <progident>&lt;</progident>, <progident>&lt;=</progident>
+	  <progident>&gt;</progident> <progident>&gt;=</progident>
+	  <progident>=</progident>, and <progident>!=</progident> with
+	  the usual meanings of less than, less than or equal, greater
+	  than, greater than or equal, equal, and not equal.
+	</p>
+	<p>
+	  These operations are defined over the following signatures:
+	</p>
+	<table>
+          <tbody>
+            <tr>
+              <td>char &cross; char &rarr; bool</td>
+            </tr>
+            <tr>
+              <td>int8 &cross; int8 &rarr; bool</td>
+            </tr>
+            <tr>
+              <td>int16 &cross; int16 &rarr; bool</td>
+            </tr>
+            <tr>
+              <td>int32 &cross; int32 &rarr; bool</td>
+            </tr>
+            <tr>
+              <td>int64 &cross; int64 &rarr; bool</td>
+            </tr>
+            <tr>
+              <td>uint8 &cross; uint8 &rarr; bool</td>
+            </tr>
+            <tr>
+              <td>uint16 &cross; uint16 &rarr; bool</td>
+            </tr>
+            <tr>
+              <td>uint32 &cross; uint32 &rarr; bool</td>
+            </tr>
+            <tr>
+              <td>uint64 &cross; uint64 &rarr; bool</td>
+            </tr>
+          </tbody>
+	</table>
+	<p>
+	  The <progident>=</progident> and <progident>!=</progident>
+	  operators are additionally defined over pointers of like
+	  type. They perform structural equality (eq) and inequality.
+	</p>
+      </sect2>
+    </sect1>
+  </subpart>
+  <sect1>
+    <title>Verification Support</title>
+    <p>
+      In addition to its role as a means of expressing computation,
+      BitC directly supports the expression of constraints on
+      execution, and the expression of proof obligations concerning
+      the results of computations. While the bulk of verification
+      effort is performed in the BitC Prover, theorems and invariants
+      also introduce requirements for compile-time static checking.
+    </p>
+    <p>
+      Note that the phrase ``all possible variable instantiations'' is
+      restricted to <em>legal</em> instantions as determined by the
+      type checker. BitC is statically typed, and BitC functions and
+      theorems are therefore defined only over their stated domains.
+    </p>
+    <sect2>
+      <title>Axioms</title>
+      <p>
+	The <progident>defaxiom</progident> form introduces a term
+	rewrite that is accepted as true by the BitC prover. The body
+	of the axiom is a boolean expression that must always return
+	<progident>#t</progident> for all possible variable
+	instantiations:
+      </p>
+      <literallayout>
+(defaxiom <em>name</em> <em>truth-expr</em>)</literallayout>
+    </sect2>
+    <sect2>
+      <title>Proof Obligations: Theorems</title>
+      <p>
+	The <progident>defthm</progident> form introduces a proof
+	obligation that must be discharged by the BitC Prover. The
+	body of a theorem is a boolean expression that is considered
+	to be discharged if its result is <progident>#t</progident>
+	for all possible variable instantiations:
+      </p>
+      <literallayout>
+(defthm <em>name</em> <em>truth-expr</em>)</literallayout>
+    </sect2>
+    <sect2>
+      <title>Proof Obligations: Invariants and Suspensions</title>
+      <p>
+	The <progident>definvariant</progident> form introduces a
+	proof obligation that must be discharged by the BitC Prover at
+	all sequence points where it is not explicitly suspended. The
+	body of an invariant is a boolean expression that is
+	considered to be discharged if its result is
+	<progident>#t</progident> for all possible variable
+	instantiations:
+      </p>
+      <literallayout>
+(definvariant <em>name</em> <em>truth-expr</em>)</literallayout>
+      <p>
+        An invariant may be temporarily suspended by the
+        <progident>suspend</progident> form:
+      </p>
+      <literallayout>
+(suspend <em>name</em> <em>e</em>)</literallayout>
+      <p indent="no">
+        The logical effect of <progident>suspend</progident> is to
+        advise the prover that the invariant given by
+        <progident><em>name</em></progident> is not expected to hold
+        within the scope of the <progident>suspend</progident> form.
+      </p>
+      <p>
+        For program semantics purposes, <progident>suspend</progident>
+        is a derived form:
+      </p>
+      <literallayout>
+(suspend <em>name</em> <em>e</em>) =&gt;
+(begin <em>e</em>)</literallayout>
+    </sect2>
+    <sect2>
+      <title>Theories</title>
+      <p>
+        The <progident>deftheory</progident> form gathers a number of
+        theorems into a single group for purposes of suspension:
+      </p>
+      <literallayout>
+(deftheory <em>name</em> <em>thm<sub>1</sub></em> ... <em>thm<sub>n</sub></em>)</literallayout>
+      <p indent="no">
+        where each <progident><em>thm<sub>i</sub></em></progident> has been
+        previously introduced by <progident>defthm</progident>.
+      </p>
+    </sect2>
+    <sect2>
+      <title>Suspending and Enabling</title>
+      <p>
+        For purposes of proof search management, theorems and theories
+        may be disabled or enabled by the
+        <progident>disable</progident> and
+        <progident>enable</progident> forms:
+      </p>
+      <literallayout>
+(disable <em>name<sub>1</sub></em> ... <em>name<sub>n</sub></em>)
+(enable <em>name<sub>1</sub></em> ... <em>name<sub>n</sub></em>)</literallayout>
+      <p indent="no">
+        where each <progident><em>name<sub>i</sub></em></progident> has been
+        previously introduced by <progident>defthm</progident> or
+        <progident>deftheory</progident>.
+      </p>
+      <p>
+        The effect of disablement is to render a theorem or group of
+        theorems inactive for purposes of proof search.  Disabling or
+        enabling remains in force until altered by a subsequent enable
+        or disable or until the end of the containing lexical scope.
+      </p>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>Acknowledgments</title>
+    <p>
+      We owe a significant debt to the help of Scott Smith of Johns
+      Hopkins University. Scott's input has influenced our thinking
+      about the BitC/L subset language. While BitC/L is not yet
+      visible in the specification, some of the design decisions made
+      here reflect constraints derived from BitC/L.
+    </p>
+    <p>
+      Paritosh Shroff, also at Hopkins, spent a great deal of time
+      helping us explore the implications, strengths, and weaknesses
+      of the <progident>typecase</progident> construct that survived
+      to version 0.8 of the specification and the ``match type''
+      notion that was needed to support it. Beginning in version 0.9,
+      we abandoned match types in favor of type classes. This decision
+      was greatly assisted by the input of Mark Jones of the Oregon
+      Graduate Institute.
+    </p>
+  </sect1>
+  <bibliography>
+    <bibentry label="ansi1999c">
+      &mdash;: American National Standard for Information Systems,
+	Programming Language C ANSI X3.159-1999, 2000.
+    </bibentry>
+    <bibentry label="ieee1985std754">
+      &mdash;: <doctitle>IEEE Standard for Binary Floating-Point
+      Arithmetic</doctitle>, 1985, ANSI/IEEE Standard 754-1985.
+    </bibentry>
+    <bibentry label="ieee1987std854">
+      &mdash;: <doctitle>IEEE Standard for Radix-Independent
+      Floating-Point Arithmetic</doctitle>, 1987, ANSI/IEEE Standard
+      854-1987.
+    </bibentry>
+    <bibentry label="garrigue2004value">
+      Jacques Garrigue. ``Relaxing the Value Restriction.''
+      <doctitle>Proc. International Symposium on Functional and Logic
+      Programming</doctitle>. 2004.
+    </bibentry>
+    <bibentry label="jones73thesis">
+      Anita K. Jones. <doctitle>Protection in Programmed
+      Systems</doctitle>, Doctoral Dissertation, Department of
+      Computer Science, Carnegie-Mellon University, June 1973.
+    </bibentry>
+    <bibentry label="jones2000tcfndepend">
+      Mark Jones. ``Type Classes With Functional Dependencies.''
+      <doctitle>Proc. 9th European Symposium on Programming</doctitle>
+      (ESOP 2000). Berlin, Germany. March 2000. Springer-Verlag
+      Lecture Notes in Computer Science 1782.
+    </bibentry>
+    <bibentry label="kaufmann00acl2">
+      M. Kaufmann, J. S. Moore. <doctitle>Computer Aided Reasoning: An
+      Approach</doctitle>, Kluwer Academic Publishers, 2000.
+    </bibentry>
+    <bibentry label="kelsey1998r5rs">
+      Richard Kelsey, William Clinger, and Jonathan Rees (Ed.)
+      <doctitle>Revised<sup>5</sup> Report on the Algorithmic Language
+      Scheme</doctitle>,
+      ACM SIGPLAN Notices, 33(<b>9</b>), pp 26&ndash;76, 1998.
+    </bibentry>
+    <bibentry label="macqueen1984modules">
+      David MacQueen, ``Modules for Standard ML.''
+      <doctitle>Proc. 1984 ACM Conference on LISP and Functional
+      Programming</doctitle>, pp. 198&ndash;207, 1984.
+    </bibentry>
+    <bibentry label="milner1997definition">
+      Robin Milner, Mads Tofte, Robert Harper, and David
+      MacQueen. <doctitle>The Definition of Standard ML -
+      Revised</doctitle>
+      The MIT Press, May 1997.
+    </bibentry>
+    <bibentry label="diatchki2005representation">
+      Iavor S. Diatchki, Mark P. Jones, and Rebekah Leslie.
+      ``High- level Views on Low-level Representations.''
+      <doctitle>Proc. 10th ACM Conference on Functional
+        Programming</doctitle> pp. 168&ndash;179.
+      September 2005.
+    </bibentry>
+    <bibentry label="shap1999fastcapsystem">
+      J. S. Shapiro, J. M. Smith, and D. J. Farber. ``EROS, A Fast
+      Capability System'' <doctitle>Proc. 17th ACM Symposium on Operating
+      Systems Principles</doctitle>. Dec 1999, pp. 170&ndash;185. Kiawah
+      Island Resort, SC, USA.
+    </bibentry>
+    <bibentry label="unicode410">
+      Unicode Consortium. The Unicode Standard, version 4.1.0, defined
+      by <doctitle>The Unicode Standard Version 4.0</doctitle>,
+      Addison Wesley, 2003, ISBN 0-321-18578-1, as amended by
+      <doctitle>Unicode 4.0.1</doctitle> and by <doctitle>Unicode
+      4.1.0</doctitle>. <tt>http://www.unicode.org</tt>.
+    </bibentry>
+    <bibentry label="wirth1988pascal">
+      N. Wirth and K. Jensen. <doctitle>Pascal: User Manual and
+      Report</doctitle>, 3rd Edition, Springer-Verlag, 1988
+    </bibentry>
+  </bibliography>
+  </article>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->

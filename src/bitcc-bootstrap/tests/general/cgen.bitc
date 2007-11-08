@@ -1,0 +1,155 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Copyright (C) 2006, Johns Hopkins University.
+;; All rights reserved.
+;;
+;; Redistribution and use in source and binary forms, with or
+;; without modification, are permitted provided that the following
+;; conditions are met:
+;;
+;;   - Redistributions of source code must contain the above 
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer. 
+;;
+;;   - Redistributions in binary form must reproduce the above
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer in the documentation and/or other materials 
+;;     provided with the distribution.
+;;
+;;   - Neither the names of the copyright holders nor the names of any
+;;     of any contributors may be used to endorse or promote products
+;;     derived from this software without specific prior written
+;;     permission. 
+;;
+;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; Check that the lambda argument convenience syntax is transformed
+;;; correctly by the parser.
+
+(bitc-version "0.9+")
+	    
+(define intid (lambda (x:int32) x))
+(define + (lambda (x y) x))	
+(define == (lambda (x:'a y:'a) x))
+
+(defstruct str3  a:int32  b:char  c:float)
+
+(defexception fred)
+(defexception barney int32)
+
+;; Explicit BEGIN
+(define (begintest1 x y)
+  (begin x y))
+
+;; Implicit BEGIN
+(define (begintest2 x y)
+  x y)
+
+(define (iftest x y z)
+  (if x y z))
+
+(define (andtest x y)
+  (and x y))
+
+;; Check that the simplifier properly reduces this to
+;; two OR expressions
+(define (andtest2 x y z)
+  (and x y z))
+
+(define (ortest x y)
+  (or x y))
+
+(define (pairtest x y)
+  (pair x y))
+
+;; Simplest vector creation
+(define (veccre1 x)
+  (vector x))
+
+;; Further initialization tests:
+(define (veccre2 x y)
+  (vector x y))
+
+;; Test vector-length:
+(define (veclentest x y)
+  (vector-length (vector x y x)))
+
+;; Initialization tests:
+(define (arycre2 x y)
+  (array x y))
+
+;; Test array-length:
+(define (arylentest x y)
+  (array-length (array x y x)))
+
+;; Array-ref;
+(define (aryref x n)
+  (array-ref (array x x) n))
+
+;; Vec-ref;
+(define (vecref x n)
+  (vector-ref (vector x x) n))
+
+;; ref
+(define (reftest x: (ref 'a)) x)
+
+;; deref
+(define (dereftest x: (ref 'a)) (deref x))
+
+;; makevector
+(define (mkvec x y) (make-vector x y))
+
+;; set!
+(define (setbang x:(mutable 'a) y) (set! x y))
+
+;; select
+;;(define (select x:string) x.v)
+
+;; Literal tests
+(define c #\a)
+
+;; Literal tests
+(define i:int32 1)
+
+;; Literal tests
+(define fixed-i:(bitfield int32 32) 2)
+;; This one should have the field length ignored.
+(define fixed-i-bogus:(bitfield int32 31) 3)
+
+;; Literal tests
+(define f:float 32.45)
+
+;; Literal tests
+(define str "abcdef")
+
+;; Check that the simplifier properly reduces this to
+;; two OR expressions
+(define (ortest2 x y z)
+  (or x y z))
+
+;  (define (factorial x)
+;     (letrec 
+;	 ((* (lambda (tuple x y) 
+;	        (if (= x 1) y (+ y (* (+ x -1) y))))))
+;	(if (= x 0) 1 (factorial (* x (+ -1 x))))))
+
+;  (define (factorial-curry x)
+;     (letrec 
+;	((* (lambda (x) 
+;	      (lambda (y)
+;	        (if (= x 1) y (+ y ((* (+ x -1)) y)))))))
+;	(if (= x 0) 1 (* x (* x (factorial-curry (+ -1 x)))))))
+
+;)

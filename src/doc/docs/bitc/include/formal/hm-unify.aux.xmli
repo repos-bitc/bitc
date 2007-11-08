@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+<floatingtable id="hm_unify_aux" fullwidth='yes' latex.placement="tb">
+  <btypes:TYPE
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+    <Hrules vspace="yes">
+      <tyRule name="">
+	<tyPre>
+	  <neq>
+	    <type/>
+	    <mbpair>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </mbpair>
+	  </neq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <inner>
+	      <type/>
+	    </inner>
+	    <minz>
+	      <type/>
+	    </minz>
+	  </eq>
+	</tyConc>
+      </tyRule>	
+      <tyRule name="">
+	<tyPre>     
+	  <eq>
+	    <type/>
+	    <mbpair>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </mbpair>
+	  </eq>
+	  <eq>
+	    <inner>
+	      <type num="2"/>
+	    </inner>
+	    <type num="2" dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <inner>
+	      <type/>
+	    </inner>
+	    <type num="2" dash="'"/>
+	  </eq>
+	</tyConc>
+      </tyRule>	
+      <tyRule name="">
+	<tyPre/>
+	<tyConc>
+	  <eq>
+	    <Xform name="real" isEntity="yes">
+	      <unit/>
+	    </Xform>
+	    <floor>
+	      <unit/>
+	    </floor>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule name="">
+	<tyPre/>
+	<tyConc>
+	  <eq>
+	    <Xform name="real" isEntity="yes">
+	      <bool/>
+	    </Xform>
+	    <floor>
+	      <bool/>
+	    </floor>
+	  </eq>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+    <Hrules vspace="yes">
+      <tyRule name="">
+	<tyPre/>
+	<tyConc>
+	  <eq>
+	    <Xform name="real" isEntity="yes">
+	      <tvar name="alpha"/>
+	    </Xform>
+	    <tvar name="alpha"/>
+	  </eq>      
+	</tyConc>
+      </tyRule>
+      <tyRule name="">
+	<tyPre>
+	  <eq>
+	    <Xform name="real" isEntity="yes">	      
+	      <type/>
+	    </Xform>
+	    <type dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Xform name="real" isEntity="yes">
+	      <mutable>
+		<type/>
+	      </mutable>
+	    </Xform>
+	    <ceil>
+	      <mutable>
+		<type dash="'"/>
+	      </mutable>
+	    </ceil>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule name="">
+	<tyPre>
+	  <eq>
+	    <Xform name="real" isEntity="yes">	      
+	      <type/>
+	    </Xform>
+	    <type dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Xform name="real" isEntity="yes">
+	      <ref>
+		<type/>
+	      </ref>
+	    </Xform>
+	    <floor>
+	      <ref>
+		<type dash="'"/>
+	      </ref>
+	    </floor>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule name="">
+	<tyPre>
+	  <eq>
+	    <Xform name="real" isEntity="yes">	      
+	      <type num="1"/>
+	    </Xform>
+	    <type num="1" dash="'"/>
+	  </eq>
+	  <eq>
+	    <Xform name="real" isEntity="yes">	      
+	      <type num="2"/>
+	    </Xform>
+	    <type num="2" dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Xform name="real" isEntity="yes">
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	    </Xform>
+	    <floor>
+	      <fn>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </fn>
+	    </floor>
+	  </eq>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+    <Hrules vspace="yes">
+      <tyRule name="">
+	<tyPre>
+	  <eq>
+	    <Xform name="real" isEntity="yes">	      
+	      <type num="1"/>
+	    </Xform>
+	    <type num="1" dash="'"/>
+	  </eq>
+	  <eq>
+	    <Xform name="real" isEntity="yes">	      
+	      <type num="2"/>
+	    </Xform>
+	    <type num="2" dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Xform name="real" isEntity="yes">
+	      <mbpair>
+		<type num="1"/>
+		<type num="2"/>
+	      </mbpair>
+	    </Xform>
+	    <mbpair>
+	      <type num="1" dash="'"/>
+	      <type num="2" dash="'"/>
+	    </mbpair>
+	  </eq>
+	</tyConc>
+      </tyRule>           
+      <tyRule name="">
+	<tyPre>
+	  <eq>
+	    <Xform name="real" isEntity="yes">	      
+	      <minz>
+		<type/>
+	      </minz>
+	    </Xform>
+	    <type dash="'"/>
+	  </eq>
+	  <eq>
+	    <type dash="'"/>
+	    <floor>
+	      <type dash="''"/>
+	    </floor>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Xform name="real" isEntity="yes">
+	      <floor>
+		<type/>
+	      </floor>
+	    </Xform>
+	    <type dash="'"/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule name="">
+	<tyPre>
+	  <eq>
+	    <Xform name="real" isEntity="yes">	      
+	      <minz>
+		<type/>
+	      </minz>
+	    </Xform>
+	    <type dash="'"/>
+	  </eq>
+	  <neq>
+	    <type dash="'"/>
+	    <floor>
+	      <type dash="''"/>
+	    </floor>
+	  </neq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Xform name="real" isEntity="yes">
+	      <floor>
+		<type/>
+	      </floor>
+	    </Xform>
+	    <floor>
+	      <type dash="'"/>	      
+	    </floor>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule name="">
+	<tyPre>
+	  <eq>
+	    <Xform name="real" isEntity="yes">	      
+	      <maxz>
+		<type/>
+	      </maxz>
+	    </Xform>
+	    <type dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Xform name="real" isEntity="yes">
+	      <ceil>
+		<type/>
+	      </ceil>
+	    </Xform>
+	    <type dash="'"/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+  </btypes:TYPE>
+  <caption>Auxiliary Functions for Unification</caption>
+</floatingtable>

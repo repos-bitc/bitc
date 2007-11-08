@@ -1,0 +1,83 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;      DefRepr style definitions              ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;; Original: Imprecise ;;;;;;;;;;;;;;;;
+(defrepr GDT
+  (case (segment
+	  loLimit:(bitfield uint32 16)
+	  loBase:(bitfield uint32 16)
+	  midBase:(bitfield uint32 8))
+	(system
+	  loOffset:(bitfield uint32 16)
+	  selector:(bitfield uint32 16)
+	  params:(bitfield uint32 4))) ; missing params
+  type:(bitfield uint32 4) ; segment type
+  (tag system segment):(bitfield uint32 1)
+  dpl:(bitfield uint32 2)
+  p:(bitfield uint32 1)	;present
+  (case (segment
+	  hiLimit:(bitfield uint32 4)
+	  avl:(bitfield uint32 1)	;available
+	  l:(bitfield uint32 1)	;64 bit segment
+	  sz:(bitfield uint32 1)	;16 or 32 bit
+	  G:(bitfield uint32 1) ;page/byte granularity
+	  hiBase:(bitfield uint32 8))
+	(system 
+	  hiOffset:(bitfield uint32 16))))
+
+
+;;;;;;;;;;; NEW: Precise using defrepr ;;;;;;;;;;;;
+
+(defrepr GDT
+  (case (segment
+	  loLimit:(bitfield uint32 16)
+	  loBase:(bitfield uint32 16)
+	  midBase:(bitfield uint32 8))
+	(system
+	  (case ((callG intG) 
+		  loOffset:(bitfield uint32 16)))
+	  selector:(bitfield uint32 16)
+ 	  (case (callG
+		  params:(bitfield uint32 5)
+ 		  (reserved (bitfield uint32 3) 0))
+		((trapG intG taskG)
+		 (reserved (bitfield uint32 8) 0))))) ;; must be 0 only in
+                                                  ;; some cases
+		 
+  ;; Segment Type Handling
+  (case (segment
+	  a:(bitfield uint32 1)             ;accessed
+	  (case (data  
+		  w:(bitfield uint32 1)     ;writable
+		  e:(bitfield uint32 1))    ;expansion direction
+		(code 
+		  r:(bitfield uint32 1)     ;readable
+		  c:(bitfield uint32 1)))   ;conforming	  
+	  (tag data code):(bitfield uint32 1))
+	(system
+	  (tag callG taskG intG trapG):(bitfield uint32 2)
+	  (case (callG
+	 	  (reserved (bitfield uint32 2) 3))
+		(taskG
+	 	  (reserved (bitfield uint32 2) 1))
+		((intG trapG)
+		  D:(bitfield uint32 1)     ; size of gate
+	 	  (reserved (bitfield uint32 1) 1)))))
+		 
+  (tag system segment):(bitfield uint32 1)
+
+  dpl:(bitfield uint32 2)
+  p:(bitfield uint32 1)	                    ;present
+  (case 
+    (segment
+      hiLimit:(bitfield uint32 4)
+      avl:(bitfield uint32 1)	            ;available
+      l:(bitfield uint32 1)	            ;64 bit segment
+      sz:(bitfield uint32 1)	            ;16 or 32 bit
+      G:(bitfield uint32 1)                 ;page/byte granularity
+      hiBase:(bitfield uint32 8))
+    (system
+      (case ((callG intG trapG)
+	      hiOffset:(bitfield uint32 16))))))
+

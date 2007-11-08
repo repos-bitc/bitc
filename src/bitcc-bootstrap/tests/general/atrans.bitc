@@ -1,0 +1,72 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Copyright (C) 2006, Johns Hopkins University.
+;; All rights reserved.
+;;
+;; Redistribution and use in source and binary forms, with or
+;; without modification, are permitted provided that the following
+;; conditions are met:
+;;
+;;   - Redistributions of source code must contain the above 
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer. 
+;;
+;;   - Redistributions in binary form must reproduce the above
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer in the documentation and/or other materials 
+;;     provided with the distribution.
+;;
+;;   - Neither the names of the copyright holders nor the names of any
+;;     of any contributors may be used to endorse or promote products
+;;     derived from this software without specific prior written
+;;     permission. 
+;;
+;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(bitc-version "0.9+")
+
+(define a1 #t)
+(define (id x) x)
+
+(define (main2) (begin 
+		 (if #t 
+		     (the int32 0)
+		     (id 10))))
+
+(define a2 (some #t))
+  (defstruct asdf a:int8 b:bool)
+(define a3 (asdf (id 10) (id #f)))
+ 
+(define what (cond (#t (the int32 25)) (#f 35) (otherwise 200)))
+(define when (and (or #t #f) #t #t #t))
+(define R (case nil (nil (the int32 10)) ((cons a b) 20) (otherwise 30)))
+
+(define (main3) (begin what when  R main2 (the int32 0)))
+
+(define (pair f1 g2) (pair (id (the int32 1100)) ((lambda (x) x) (the int64 200))))
+
+(define z (let ((x (if #t 
+		       (the int32 (id (id 100)))
+		       200))) x))
+ (define (f a:asdf) (the int32 0))
+
+(define zz (begin (asdf 10 #t) (f (asdf 20 #t)) (id (f (asdf 30 #t)))))
+
+(define zza (begin (let ((p (asdf 10 #t))
+			 (q (f (asdf 20 #t))))
+		     (p, q))))
+
+(define (main) (begin z zz zza f1 g2 (main) (main2) (main3)))
+

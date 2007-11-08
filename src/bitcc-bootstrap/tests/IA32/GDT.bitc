@@ -1,0 +1,94 @@
+(defrepr GDT:val
+  (DataSeg
+    loLimit:(bitfield uint32 16)
+    loBase:(bitfield uint32 16)
+    midBase:(bitfield uint32 8)
+    a:(bitfield uint32 1)
+    w:(bitfield uint32 1)
+    e:(bitfield uint32 1)
+    cd:(bitfield uint32 1)  ;; TAG: code/data segment
+    us:(bitfield uint32 1)  ;; TAG: user/system segment
+    dpl:(bitfield uint32 2)
+    p:(bitfield uint32 1)	
+    hiLimit:(bitfield uint32 4)
+    avl:(bitfield uint32 1)	
+    l:(bitfield uint32 1)	
+    sz:(bitfield uint32 1)	
+    G:(bitfield uint32 1) 
+    hiBase:(bitfield uint32 8)
+    (where (= us 1) (= cd 0)))
+
+  (CodeSeg
+    loLimit:(bitfield uint32 16)
+    loBase:(bitfield uint32 16)
+    midBase:(bitfield uint32 8)
+    a:(bitfield uint32 1)
+    r:(bitfield uint32 1)
+    c:(bitfield uint32 1)
+    cd:(bitfield uint32 1)  ;; TAG: code/data segment
+    us:(bitfield uint32 1)  ;; TAG: user/system segment
+    dpl:(bitfield uint32 2)
+    p:(bitfield uint32 1)	
+    hiLimit:(bitfield uint32 4)
+    avl:(bitfield uint32 1)	
+    l:(bitfield uint32 1)	
+    sz:(bitfield uint32 1)	
+    G:(bitfield uint32 1)
+    hiBase:(bitfield uint32 8)
+    (where (= us 1) (= cd 1)))
+    
+  (CallGate
+    loOffset:(bitfield uint32 16)
+    loSelector:(bitfield uint32 16)
+    params:(bitfield uint32 5)
+    (reserved (bitfield uint32 3) 0)
+    gate:(bitfield uint32 2) ;; TAG: which gate?
+    (reserved (bitfield uint32 2) 3)
+    us:(bitfield uint32 1)   ;; TAG: user/system segment
+    dpl:(bitfield uint32 2)
+    p:(bitfield uint32 1)	
+    hiOffset:(bitfield uint32 16)
+    (where (= us 0) (= gate 0)))
+
+  (taskGate
+    (reserved (bitfield uint32 16) 0)
+    loSelector:(bitfield uint32 16)
+    (reserved (bitfield uint32 8) 0)
+    gate:(bitfield uint32 2) ;; TAG: which gate?
+    (reserved (bitfield uint32 2) 1)
+    us:(bitfield uint32 1)   ;; TAG: user/system segment
+    dpl:(bitfield uint32 2)
+    p:(bitfield uint32 1)    
+    (reserved (bitfield uint32 16) 0)
+    (where (= us 0) (= gate 1))) 
+    
+  (intGate
+    loOffset:(bitfield uint32 16)
+    loSelector:(bitfield uint32 16)
+    (reserved (bitfield uint32 8) 0)
+    gate:(bitfield uint32 2) ;; TAG: which gate?
+    (reserved (bitfield uint32 1) 1)
+    D:(bitfield uint32 1)
+    us:(bitfield uint32 1)   ;; TAG: user/system segment
+    dpl:(bitfield uint32 2)
+    p:(bitfield uint32 1)	
+    hiOffset:(bitfield uint32 16)
+    (where (= us 0) (= gate 2)))
+    
+  (trapGate
+    loOffset:(bitfield uint32 16)
+    loSelector:(bitfield uint32 16)
+    (reserved (bitfield uint32 8) 0)
+    gate:(bitfield uint32 2) ;; TAG: which gate?
+    (reserved (bitfield uint32 1) 1)
+    D:(bitfield uint32 1)
+    us:(bitfield uint32 1)   ;; TAG: user/system segment
+    dpl:(bitfield uint32 2)
+    p:(bitfield uint32 1)	
+    hiOffset:(bitfield uint32 16)
+    (where (= us 0) (= gate 3))))
+
+(provide main bitc.main)
+(define (main.main argv:(vector string))  
+  (DataSeg 16 16 8 1 1 1 2 1 4 1 1 1 1 8)
+  0:int32)
