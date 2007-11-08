@@ -514,12 +514,15 @@ TypeScheme::solvePredicates(std::ostream &errStream,
 	   pred_ambiguousType, 
 	   pred_noInstance } errType = pred_noerror; 	    
     
+    // If this predicate is fully concrete, and we don't have an
+    // instance to solve it, it is definitely an error.
     if(pred->TCCconcrete(ftvs)) {
       errType = pred_noInstance;
     }
     else {      
       for(size_t j=0; j < ftvs->size(); j++) {
 	GCPtr<Type> ftv = ftvs->elem(j);
+	
 	if(!tau->boundInType(ftv) && pred->boundInType(ftv)) {
 	  for(size_t k=0; ((errType != pred_noerror) && 
 			   (k < pred->typeArgs->size())); k++) {
@@ -527,8 +530,9 @@ TypeScheme::solvePredicates(std::ostream &errStream,
 	    if(arg == ftv)
 	      errType = pred_ambiguousType;
 	  }
-
-	  errType = pred_noInstance; 	  
+	  
+	  if(errType == pred_noerror)
+	    errType = pred_noInstance; 	  
 	  break;
 	}
       }

@@ -71,10 +71,11 @@ comp:
 EXPECT_STATUS=0
 EXPECT_OUTPUT=/dev/null
 USE_INPUT=/dev/null
-TESTOPTS=
+ARGS=""
+TESTOPTS=-v
 
 $(BUILDDIR)/%.test: $(BUILDDIR)/%
-	@../testit.sh ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -i $(USE_INPUT) "$<"
+	@../testit.sh ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -i $(USE_INPUT) "$< $(ARGS)"
 
 $(BUILDDIR)/clconv1.test: EXPECT_STATUS=1
 $(BUILDDIR)/closure.test: EXPECT_STATUS=3
@@ -94,11 +95,23 @@ $(BUILDDIR)/hello.test: EXPECT_OUTPUT=hello.stdout
 $(BUILDDIR)/Fact-Rec.test: EXPECT_STATUS=120
 $(BUILDDIR)/Fact-Loop.test: EXPECT_STATUS=120
 $(BUILDDIR)/Fact-Mut.test: EXPECT_STATUS=120
+$(BUILDDIR)/intout.test: EXPECT_OUTPUT=intout.stdout
+$(BUILDDIR)/io-time.test: ARGS=file.input
+$(BUILDDIR)/io-time.test: EXPECT_OUTPUT=io-time.stdout
+$(BUILDDIR)/sha1-file.test: ARGS="file.input 128028"
+$(BUILDDIR)/sha1-file.test: EXPECT_OUTPUT=sha1-file.stdout
+$(BUILDDIR)/sha1-test.test: EXPECT_OUTPUT=sha1-test.stdout 
 
 $(BUILDDIR)/%: $(BUILDDIR)/%.o $(LIBBITC)
 	$(NATIVE_GCC) $(CFLAGS) -o $@ $< $(LIBS)
 
 .PRECIOUS: $(SOURCE:%.bitc=%.c)
+
+sha1-file.c: sha1-file.bitc  $(BITCC)
+	$(BITCC) $(BITCOPT) -I. -I ../../runtime -o $@ $< ../../lib/crypt/sha1.bitc
+
+sha1-test.c: sha1-test.bitc  $(BITCC)
+	$(BITCC) $(BITCOPT) -I. -I ../../runtime -o $@ $< ../../lib/crypt/sha1.bitc
 
 %.c: %.bitc  $(BITCC)
 	$(BITCC) $(BITCOPT) -I. -I ../../runtime -o $@ $<

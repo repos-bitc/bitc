@@ -84,6 +84,25 @@ clearusedef(GCPtr<AST> ast)
     clearusedef(ast->child(c));
 }
 
+// See if The identifier `id' is used in the ast `ast'
+// id must be a defining form.
+static bool
+used(GCPtr<AST> id, GCPtr<AST> ast)
+{  
+  if(ast->astType == at_ident && ast->symbolDef == id) {
+    assert(ast != id);
+    assert(!id->symbolDef);
+    return true;
+  }
+  
+  for(size_t i=0; i < ast->children->size(); i++) 
+    if(used(id, ast->child(i)))
+      return true;
+  
+  return false;
+}
+
+
 /**
  * @brief Mark all defining occurrences that are closed over so that
  * we can later rewrite them.
@@ -375,6 +394,7 @@ findusedef(std::ostream &errStream,
   case at_arrayType:
   case at_vectorType:
   case at_refType:
+  case at_byrefType:
   case at_valType:
   case at_primaryType:
   case at_fnargVec:
@@ -449,7 +469,19 @@ findusedef(std::ostream &errStream,
 				   USE_MODE, boundVars, freeVars));
       break;
     }
-    
+
+  case at_inner_ref:
+    {
+      CHKERR(errFree, findusedef(errStream, topAst, ast->child(0), 
+				 USE_MODE, boundVars, freeVars));
+
+      if(ast->Flags2 & INNER_REF_NDX) 
+	CHKERR(errFree, findusedef(errStream, topAst, ast->child(1), 
+				   USE_MODE, boundVars, freeVars));      
+      
+      break;
+    }
+
   case at_ucon_apply:
   case at_struct_apply:
     {
@@ -664,7 +696,12 @@ cl_convert_ast(GCPtr<AST> ast,
 	GCPtr<AST> id = lb->child(0)->child(0);
 	
 	GCPtr<AST> rhs = lb->child(1);
- 	if(id->Flags2 & ID_IS_CAPTURED) {
+	
+	// If this identifier may be used in *any* let-binding
+	// within the current letrec, we must use the alloc-ref /
+	// copy-ref scheme for closure conversion.
+	if(used(id, lbs)) {
+	  assert(id->Flags2 & ID_IS_CAPTURED);
 	  GCPtr<AST> qual = 
 	    id->symType->getBareType()->asAST(rhs->loc); 
 	  qual = cl_convert_ast(qual, outAsts, hoistChildren);

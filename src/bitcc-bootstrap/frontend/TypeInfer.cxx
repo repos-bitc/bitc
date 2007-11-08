@@ -46,7 +46,6 @@
 #include <libsherpa/CVector.hxx>
 #include <libsherpa/avl.hxx>
 #include <assert.h>
-
 #include "UocInfo.hxx"
 #include "Options.hxx"
 #include "AST.hxx"
@@ -171,7 +170,7 @@ useIFInsts(std::ostream &errStream,
 	    mustAppend = false;
 	    break;
 	  }
-
+	  
 	  if((uflags & ALL_INSTS_OK) == 0)
 	    if(toInst->equals(errStream, fromInst, toEnv)) {
 	      errStream << errLoc << ": "
@@ -2281,7 +2280,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 				    ast->child(0),
 				    ast->child(1), 
 				    false, currTcc, NULL, trail));
-      
+
       gamma->mergeBindingsFrom(defGamma);
       
       if(declTS) 
@@ -2290,8 +2289,8 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
 #ifdef VERBOSE  
       errStream << "At " << ast->asString()
-		<< "[1] = " << ast->child(1)->symType->asString()
       		<< "[0] = " << ast->child(0)->child(0)->scheme->asString()
+		<< "[1] = " << ast->child(1)->symType->asString()
       		<< std::endl;            
 #endif
       ast->symType = ast->child(0)->symType;
@@ -2496,6 +2495,22 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       break;
     }
 
+    // The restriction that byref types can only appear on the
+    // arguemnts of a function is enforced in the parser.
+  case at_byrefType:
+    {
+      // match agt_type
+      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP1);
+    
+      GCPtr<Type> t = ast->child(0)->getType();
+    
+      ast->symType = new Type(ty_byref, ast);
+      ast->symType->components->append(new comp(t));
+    
+      break;
+    }
+
   case at_refType:
     {
       // match agt_type
@@ -2627,7 +2642,14 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       for (size_t c = 0; c < ast->children->size(); c++) {
 	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail, mode, TI_COMP1);
-	GCPtr<comp> nComp = new comp(ast->child(c)->getType());
+	GCPtr<Type> argType = ast->child(c)->symType->getType();
+
+	GCPtr<comp> nComp = new comp(argType);	
+	if(argType->isByrefType()) {
+	  nComp = new comp(argType->CompType(0));
+	  nComp->flags |= COMP_BYREF;
+	}
+	
 	fnarg->components->append(nComp);
       }
       ast->symType = fnarg;
@@ -2819,13 +2841,27 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP1);
       
- 	CHKERR(errFree, unify(errStream, trail, ast->child(0), 
-			      ast->child(0)->symType, 
-			      ast->child(1)->symType, 
-			      uflags));
+	if(ast->child(1)->symType->isByrefType()) {
+	  CHKERR(errFree, unify(errStream, trail, ast->child(0), 
+				ast->child(0)->symType, 
+				ast->child(1)->getType()->CompType(0), 
+				uflags));
+	}
+	else {
+	  CHKERR(errFree, unify(errStream, trail, ast->child(0), 
+				ast->child(0)->symType, 
+				ast->child(1)->symType, 
+				uflags));
+	}
+	
+	// Very Important that we pick the type of 
+	// the qualification, in light of by-ref types.
+	ast->symType = ast->child(1)->symType;
       }
-      ast->symType = ast->child(0)->symType;
-    
+      else {
+	ast->symType = ast->child(0)->symType;
+      }
+      
       break;
     }
 
@@ -3160,9 +3196,17 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	TYPEINFER(argVec->child(c), lamGamma, instEnv, impTypes, 
 		  isVP, tcc, uflags, trail,  REDEF_MODE, TI_COMP2);
 
-	fnarg->components->append(new comp(argVec->child(c)->getType()));
+	GCPtr<Type> argType = argVec->child(c)->getType();
+
+	GCPtr<comp> nComp = new comp(argType);
+	if(argType->isByrefType()) {
+	  nComp = new comp(argType->CompType(0));
+	  nComp->flags |= COMP_BYREF;
+	}
+	
+	fnarg->components->append(nComp);
       }
-      argVec->symType = fnarg;
+      argVec->symType = fnarg;      
 
       TYPEINFER(ast->child(1), lamGamma, instEnv, impTypes, 
 		isVP, tcc, uflags, trail,  USE_MODE, TI_COMP2);
@@ -3177,6 +3221,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Type> fnType = ast->symType->getBareType();
       fnType->components->append(new comp(fnarg));
       fnType->components->append(new comp(retType));      
+
       break;
     }
 
@@ -3318,14 +3363,22 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	    GCPtr<AST> arg = ast->child(i+1);
 	    TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
 		      uflags, trail,  USE_MODE, TI_COMP2);
-	     
-	    GCPtr<Type> rhsType = ArgType(arg->symType);
+	    
+	    GCPtr<Type> rhsType = 0;
+	    if(targ->CompFlags(i) & COMP_BYREF) {
+	      // by-ref arguments need strict compatibality.
+	      rhsType = arg->symType;
+	    }
+	    else {
+	      // by-value arguments can have copy-compatibility.
+	      rhsType = ArgType(arg->symType);
+	    }
 	    
 	    CHKERR(errFree, unify(errStream, trail, ast, 
 				  targ->CompType(i), 
 				  rhsType, uflags));
 	  }
-
+	  
 	  GCPtr<Type> retType = RetType(t->CompType(1));
 	  if(errFree) {
 	    CHKERR(errFree, unify(errStream, trail, ast, 
@@ -3589,7 +3642,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		uflags, trail,  mode, TI_COMP2);      
       
       CHKERR(errFree, unifyPrim(errStream, trail, ast->child(0), 
-				ast->child(0)->symType, 
+				conditionalType(ast->child(0)->symType), 
 				"bool"));
       
       // match agt_expr
@@ -3785,6 +3838,110 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  break;
 	}	
       }
+      
+      break;
+    }
+
+  case at_inner_ref:
+    {
+      // match agt_expr
+      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      
+      GCPtr<Type> realType = ast->child(0)->getType();
+      GCPtr<Type> t = realType->getBareType();
+      bool ndx_usage = false;
+      bool struct_usage = false;
+      bool wrong_usage=false;
+      GCPtr<Type> res = NULL;
+      GCPtr<Type> st = NULL;
+
+      switch(t->kind) {
+      case ty_ref:
+	{		  
+	  GCPtr<Type> drefType = realType->CompType(0);
+	  GCPtr<Type> drType = drefType->getBareType();
+
+	  if(drType->kind == ty_array) {
+	    res = new Type(ty_ref, ast);
+	    res->components->append(new comp(drType->CompType(0)));
+	    ndx_usage = true;
+	  }
+	  else if (drType->kind == ty_structv) {	    
+	    struct_usage = true;
+	    st = drType;
+	  }
+	  else {
+	    wrong_usage = true;
+	  }
+	  
+	  break;
+	}
+	
+      case ty_structr:
+	{
+	  struct_usage = true;
+	  st = realType;
+	  break;
+	}
+
+      case ty_vector:
+	{
+	  res = new Type(ty_ref, ast);
+	  res->components->append(new comp(realType->CompType(0)));
+	  ndx_usage = true;
+	  break;
+	}
+
+      default:
+	{	
+	  wrong_usage = true;
+	  break;
+	}
+      }
+
+      if(struct_usage) {
+	bool found = false;
+	for(size_t i=0; i < st->components->size(); i++)
+	  if(st->CompName(i) == ast->child(1)->s) {
+	    res = new Type(ty_ref, ast);
+	    res->components->append(new comp(st->CompType(i)));
+	    found = true;
+	    break;
+	  }
+	
+	if(!found) {
+	  errStream << ast->loc << ": "
+		    << " Unknown label " << ast->child(1)->s
+		    << " in structure "
+		    << st->defAst->s 
+		    << std::endl;
+	  errFree = false;
+	}
+      }
+      else if (ndx_usage) {
+	ast->Flags2 |= INNER_REF_NDX;
+	// match agt_expr
+	TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_COMP2);
+    
+	// FIX TO WORD
+	GCPtr<Type> ndxType = ast->child(1)->symType->getBareType();
+	CHKERR(errFree, unifyPrim(errStream, trail, ast->child(1), 
+				  ndxType, "word")); 
+      }
+      else {
+	assert(wrong_usage);
+	errStream << ast->loc << ": "
+		  << "Invalid use of inner-ref."  << std::endl;
+	
+	errFree = false;
+      }
+      
+      if(!errFree)      
+	ast->symType = new Type(ty_tvar, ast); 
+      else
+	ast->symType = res;
       
       break;
     }
@@ -4291,8 +4448,8 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       TYPEINFER(ast->child(1), letGamma, instEnv, impTypes, 
 		isVP, tcc, uflags, trail, USE_MODE, TI_COMP2);
       
-      if((ast->astType == at_letrec) && ((uflags & POST_REFIZE) == 0))
-	CHKERR(errFree, CheckLetrecFnxnRestriction(errStream, bAst));
+      //if((ast->astType == at_letrec) && ((uflags & POST_REFIZE) == 0))
+      //CHKERR(errFree, CheckLetrecFnxnRestriction(errStream, bAst));
       
       ast->symType = ast->child(1)->symType;
       break;

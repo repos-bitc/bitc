@@ -1,0 +1,78 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Copyright (C) 2006, Johns Hopkins University.
+;; All rights reserved.
+;;
+;; Redistribution and use in source and binary forms, with or
+;; without modification, are permitted provided that the following
+;; conditions are met:
+;;
+;;   - Redistributions of source code must contain the above 
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer. 
+;;
+;;   - Redistributions in binary form must reproduce the above
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer in the documentation and/or other materials 
+;;     provided with the distribution.
+;;
+;;   - Neither the names of the copyright holders nor the names of any
+;;     of any contributors may be used to endorse or promote products
+;;     derived from this software without specific prior written
+;;     permission. 
+;;
+;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(bitc-version "0.10")
+(import stdio bitc.stdio)
+(import stdlib bitc.stdlib)
+(import sha1 crypt.sha1)
+(provide main bitc.main)
+
+(define (main.main argVec:(vector string))
+  (define sha (sha1.sha1Context
+	       (array 0 0 0 0 0) 0 0 
+	       (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+		      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+		      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+		      0 0 0 0) 0 #f sha1.sha-Success))
+
+  (define digest:(array (mutable uint8) 20)
+    (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
+  
+  (define input (make-vector 5 (lambda (i) (convert (+ 100 i)))))
+  
+  (define (examine res mesg)
+    (switch x res
+      (sha1.sha-Success ())
+      (otherwise (stdio.write-string stdio.stdout "Failed ")
+		 (stdio.write-string stdio.stdout mesg)
+		 (stdio.write-string stdio.stdout ": ")
+		 (stdio.write-string stdio.stdout (sha1.shaResultAsString res))
+		 (stdio.write-char stdio.stdout #\linefeed))))
+  
+   (examine (sha1.sha1Reset sha) "Reset")
+   (examine (sha1.sha1Input sha input) "Input")
+   (examine (sha1.sha1Result sha digest) "Result")
+   
+   (stdio.write-char stdio.stdout #\tab)
+   (do ((i:word 0 (+ i 1)))
+       ((>= i 20) ())
+       (stdio.write-int stdio.stdout (array-nth digest i) 16)
+       (stdio.write-char stdio.stdout #\space))
+   (stdio.write-char stdio.stdout #\linefeed)
+
+  0:int32)
+

@@ -2,11 +2,9 @@
 
 #include <BUILD/bitc-runtime.h>
 
-/* NAME MANGLINGS */
-#define atoi32 _16bitc_DTstdlib_atoi
-
+/* (proclaim atoi: (fn (string) int32) external bitc_stdlib_atoi) */
 bitc_int32_t
-atoi32(bitc_string_t *str)
+bitc_stdlib_atoi(bitc_string_t *str)
 {
   bitc_int32_t val = 0;
   bitc_int32_t ndx = 1;
@@ -29,4 +27,22 @@ atoi32(bitc_string_t *str)
     val = -val;
   
   return val;
+}
+
+/* (proclaim getTimeStamp: (fn () uint64) external bitc_stdlib_rdtsc) */
+bitc_uns64_t
+bitc_stdlib_rdtsc()
+{
+  unsigned long temp1=0;
+  unsigned long temp2=0;  
+  unsigned long long ts=0;
+  asm volatile("rdtsc\t\n"
+	       "movl %%eax, %0\t\n"
+	       "movl %%edx, %1\t\n"
+	       : "=m" (temp1), "=m" (temp2)
+	       : 
+	       : "%eax", "%edx");
+  
+  ts = (((unsigned long long)temp2) << 32) + temp1;
+  return ts;
 }

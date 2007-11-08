@@ -222,7 +222,11 @@ Type::asAST(const sherpa::LexLoc &loc,
     {
       ast = new AST(at_fnargVec, loc);
       for(size_t i=0; i < t->components->size(); i++) {
-	ast->children->append(t->CompType(i)->asAST(loc, tvP));
+	GCPtr<AST> arg = t->CompType(i)->asAST(loc, tvP);
+	if(t->CompFlags(i) & COMP_BYREF)
+	  arg = new AST(at_byrefType, arg->loc, arg);
+	
+	ast->children->append(arg);
       }
       break;
     }
@@ -298,6 +302,13 @@ Type::asAST(const sherpa::LexLoc &loc,
       assert(t->components->size() == 1);
       GCPtr<AST> typ = t->CompType(0)->asAST(loc, tvP);
       ast = new AST(at_refType, loc, typ);
+      break;
+    }
+  case ty_byref:
+    {
+      assert(t->components->size() == 1);
+      GCPtr<AST> typ = t->CompType(0)->asAST(loc, tvP);
+      ast = new AST(at_byrefType, loc, typ);
       break;
     }
   case ty_mutable:

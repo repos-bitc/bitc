@@ -72,6 +72,21 @@ struct Type;
                              // must be valid) The switced value is
                              // only valid within select operations,
                              // and is therefore only checked there.   
+#define COMP_BYREF      0x4u // Valid on ty_argvec only.
+                             // The Flag is not marked on the
+                             // Component types themselves becaluse
+                             // this will cause problems with flag
+                             // propagation during unification
+                             // (especially since the component type
+                             // may be a type variable. We do not have
+                             // a (by-ref 'a) type itself because that
+                             // will result in types such as 
+                             // (mutable (byref 'a)) during inference,
+                             // and we will need normalization.
+                             // Therefore, by-ref is marked on
+                             // ty_argvec components. Two argVecs can
+                             // unify only if all of their components
+                             // and flags match. 
 
 struct comp : public Countable {
   std::string name;
@@ -79,7 +94,7 @@ struct comp : public Countable {
   unsigned long flags;
 
   comp() {flags=0;} 
-  comp(GCPtr<Type> t);
+  comp(GCPtr<Type> t, unsigned long _flags=0);
   comp(const std::string s, GCPtr<Type> t, unsigned long _flags=0);
   //comp(const comp &c);
 };  
@@ -251,6 +266,7 @@ public:
   bool isScalar();
   bool isRefType();
   bool isValType();
+  bool isByrefType();
   bool isFnxn();
 // #if 0
   bool isClosure();

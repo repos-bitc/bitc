@@ -185,7 +185,12 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
       for(size_t i=0; i < t->components->size(); i++) {
 	if (i > 0) 
 	  ss << " ";
-	ss << t->CompType(i)->TypeOfCopy()->minimizeMutability()->asString(tvP, traverse);
+	if(t->CompFlags(i) & COMP_BYREF)
+	  ss << "(byref " 
+	     << t->CompType(i)->asString(tvP, traverse)
+	     << ")";
+	else	   
+	  ss << t->CompType(i)->TypeOfCopy()->minimizeMutability()->asString(tvP, traverse);
       }
       ss << ")";
       break;
@@ -304,6 +309,14 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
     {
       assert(t->components->size() == 1);
       ss << "(ref "
+	 << t->CompType(0)->asString(tvP, traverse) << ")";
+      break;
+    }
+
+  case ty_byref:
+    {
+      assert(t->components->size() == 1);
+      ss << "(by-ref "
 	 << t->CompType(0)->asString(tvP, traverse) << ")";
       break;
     }

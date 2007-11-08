@@ -265,3 +265,4 @@ DEFUN(bitc_stdio_eofp, ty_bitc_stdioStream *ios)
   return (feof(ios->f) ? true : false);
 }
 DEFCLOSURE(bitc_stdio_eofp);
+

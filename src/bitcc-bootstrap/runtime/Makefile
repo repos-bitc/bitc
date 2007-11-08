@@ -38,6 +38,6 @@
 default: package
 BITC_SRC=../..
 
-DIRS=bitc
+DIRS=bitc crypt
 
 include $(BITC_SRC)/build/make/makerules.mk

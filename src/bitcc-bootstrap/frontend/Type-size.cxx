@@ -206,6 +206,7 @@ Type::size()
   case ty_uconr:
   case ty_vector:
   case ty_ref:
+  case ty_byref:
   case ty_exn:
     theSize = TARGET_QUAD_SIZE;
     break;

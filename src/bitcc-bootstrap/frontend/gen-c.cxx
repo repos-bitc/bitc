@@ -318,10 +318,8 @@ toc(std::ostream& errStream, GCPtr<UocInfo> uoc,
     GCPtr<AST> parent, const size_t chno, unsigned long flags);
 
 #define CTYP_EMIT_BF      0x01u	// bitfield
-#define CTYP_EMIT_FN_ARR  0x02u	// array of function pointers
-#define CTYP_EMIT_FN_NAME 0x04u // as opposed to pointer
-#define CTYP_ARG_ONLY     0x08u
-#define CTYP_RET_ONLY     0x10u
+#define CTYP_BYREF        0x02u // Used to declare by-ref 
+                                // arguments in decl() routine.
  
 static string
 toCtype(GCPtr<Type> typ, string IDname="", unsigned long flags=0, 
@@ -479,6 +477,7 @@ toCtype(GCPtr<Type> typ, string IDname="", unsigned long flags=0,
       break;
     }
 
+  case ty_byref:
   case ty_ref:
     {
       out << toCtype( t->CompType(0), IDname, flags, arrsz)
@@ -507,7 +506,13 @@ decl(GCPtr<Type> typ, string idName, unsigned flags=0,
      size_t field_bits=0)
 {
   stringstream ss;
-  ss << toCtype(typ) << " " << idName;
+  ss << toCtype(typ) << " ";
+  
+  if (flags & CTYP_BYREF)
+    ss << "*";
+  
+  ss << idName;
+  
   if ((flags & CTYP_EMIT_BF) && field_bits)
     ss << ":" << field_bits;
   
@@ -521,16 +526,16 @@ decl(GCPtr<AST> id, string idPrefix="", unsigned flags=0,
   assert(id->astType == at_ident);
   stringstream ss;
   
-  if(flags & CTYP_EMIT_BF) {
-    ss << toCtype(id->symType)
-       << " " << CMangle(id, cmFlags);
-    if(id->field_bits > 0)
-      ss << ":" << id->field_bits;
-  }
-  ss << toCtype(id->symType);
- 
-  ss << " "  << idPrefix << CMangle(id, cmFlags);
-
+  ss << toCtype(id->symType) << " ";  
+  
+  if (flags & CTYP_BYREF)
+    ss << "*";
+  
+  ss << idPrefix << CMangle(id, cmFlags);
+  
+  if((flags & CTYP_EMIT_BF) && (id->field_bits > 0))
+    ss << ":" << id->field_bits;
+  
   return ss.str();
 }
 
@@ -614,18 +619,21 @@ emit_fnxn_decl(INOstream &out, GCPtr<AST> ast,
   out << toCtype(retType);
   if(!oneLine)
     out << endl;
-
+  
   out << pfx << CMangle(id) << " ";
   out << "(";
   assert(startParam <= argvec->children->size());
   for(size_t i=startParam; i < argvec->children->size(); i++) {
     if(i > startParam)
       out << ", ";
- 
+    
     GCPtr<AST> pat = argvec->child(i);
     assert(pat->astType == at_identPattern);
     GCPtr<AST> arg = pat->child(0);
-    out << decl(arg);
+    unsigned long flags = ((fnargvec->CompFlags(i) &
+			    COMP_BYREF)?CTYP_BYREF:0);
+    
+    out << decl(arg, "", flags);
   }
   out << ")";
 }
@@ -830,6 +838,7 @@ toc(std::ostream& errStream,
   case at_usesel:
 
   case at_refType:
+  case at_byrefType:
   case at_exceptionType:
   case at_dummyType:
   case at_valType:
@@ -939,7 +948,15 @@ toc(std::ostream& errStream,
 	break;
       }
 
+
+      if(id->Flags2 & ARG_BYREF)
+	out << "(*";      
+      
       out << CMangle(ast);
+
+      if(id->Flags2 & ARG_BYREF)
+	out << ")";      
+
       break;
     }
     
@@ -1533,14 +1550,16 @@ toc(std::ostream& errStream,
 	  if(i > 0)
 	    out << ", ";
 	  
-	  out << toCtype(arg)	
-	      << " arg" << i;
+	  out << toCtype(arg) << " ";
+	  if(args->CompFlags(i) & COMP_BYREF)
+	    out << "*";
+	  out << " arg" << i;
 	}
 	out << ");"
 	    << std::endl;
       }
       else {
-	declare(out, id, "", CTYP_EMIT_FN_NAME);
+	declare(out, id, "");
       }
 
       /* If this declaration has an external name, and is a function,
@@ -1746,10 +1765,9 @@ toc(std::ostream& errStream,
 
   case at_not:
     {
-      out << "! ";
+      out << "(! ";
       TOC(errStream, uoc, ast->child(0), out, IDname, ast, 0, flags);
-      out << ";" << endl;
-      
+      out << ")";
       break;
     }
 
@@ -1758,7 +1776,6 @@ toc(std::ostream& errStream,
       // FIX: Shap has a test case that shows that the thing in apply
       // position can be an arbitrary location expression, so this
       // assert is wrong.
-
       // assert(ast->child(0)->astType == at_ident);
 
       // There is some additional work needed here to deal with
@@ -1789,12 +1806,21 @@ toc(std::ostream& errStream,
       
       GCPtr<Type> clType = ast->child(0)->symType->getBareType();
       assert(clType->kind == ty_fn);
+      GCPtr<Type> argsType = clType->CompType(0)->getType();
+
       TOC(errStream, uoc, ast->child(0), out, IDname, 
 	  ast, 0, flags);
+      
       out << "(";
       for(size_t c=1; c < ast->children->size(); c++) {
 	if(c > 1)
 	  out << ", ";	    
+	
+	if(argsType->CompFlags(c-1) & COMP_BYREF) {	  
+	  assert(ast->child(c)->isLocation());
+	  out << "&";
+	}
+	
 	TOC(errStream, uoc, ast->child(c), out, IDname, 
 	    ast, c, flags);
       }
@@ -2140,6 +2166,25 @@ toc(std::ostream& errStream,
       break;
     }
 
+  case at_inner_ref:
+    {      
+      out << "&";
+      TOC(errStream, uoc, ast->child(0), out, IDname, 
+	  ast, 0, flags);
+      out << "->";
+      
+      if(ast->Flags2 & INNER_REF_NDX) {
+	out << "elem[";
+	TOC(errStream, uoc, ast->child(1), out, IDname, 
+	    ast, 1, flags);      
+	out << "]";
+      }
+      else {
+	out << CMangle(ast->child(1), CMGL_ID_FLD);
+      }
+      break;
+    }
+    
   case at_if:
     {
       GCPtr<AST> testAst = ast->child(0);

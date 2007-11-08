@@ -1,0 +1,152 @@
+This is a test string
+*
+ * Copyright (C) 2005, The EROS Group, LLC.
+ *
+ * This file is part of the EROS Operating System runtime library.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, 59 Temple Place - Suite 330 Boston, MA 02111-1307, USA.
+ */
+ 
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <dirent.h>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
+#include <libsherpa/avl.hxx>
+#include <assert.h>
+#include "die.hxx"
+#include "AST.hxx"
+#include "Environment.hxx"
+#include "Type.hxx"
+#include "TypeScheme.hxx"
+#include "Typeclass.hxx"
+#include "Unify.hxx"
+#include "Symtab.hxx"
+#include "backend.hxx"
+#include "inter-pass.hxx"
+#include "machine-dep.hxx"
+#include "Options.hxx"
+
+using namespace sherpa;
+using namespace std;
+
+
+/*********************************************************************
+                        HANDLING MUTABILITY
+			*******************
+1. In theory, every type could have its mutability status to be one of:
+    -- mutable
+    -- immutable
+    -- undecided / also called maybe (short for maybe-mutable)
+    with obvious meanings.
+
+2. In practice, when a type record is created for a type `t', it
+   stands fot the immutable version of that type. If the type is
+   mutable, it is wrapped by a ty_mutable type record. If undecided,
+   it is wrapped by a ty_maybe type record. These will hereinafter be
+   written as:
+    -- mutable    (mutable t)
+    -- immutable  t
+    -- undecided  (maybe t)
+
+2. Every new binding is initially given a (maybe 'a) type, except for:
+      ty_fnarg, ty_letgather, ty_typeclass, ty_tyfn.
+   Local bindings that are observed to be used in a set! context (that
+      is, are mutated) are given a ty_mutable wrapper.
+
+3. Since:
+    - when the use writes 'a, he means any type whether mutable or
+      immutable, and 
+    - we do not have an immutable type qualifier,
+   type variables can never appear without either a maybe or a mutable
+   wrapper. 
+
+4. All type expressions (except in the case of a type variable) are
+   stand for their immutable versions, so, they are given a type
+   without any wrapper.
+ 
+5. Unification rules:
+   switch (t1->kind, t2->kind) {
+     case (k, k):
+         OK; Unify components/args.
+
+    case (ty_tvar,  ty_maybe):
+    case (ty_maybe, ty_tvar):
+         assert(false);
+
+     case (ty_mutable, ty_maybe):
+     case (k,          ty_maybe):
+         OK; Unify components/args.
+         if(errFree) MKLINK(t2-->t1);
+
+     case (ty_maybe, ty_mutable):
+     case (ty_maybe, k):
+         OK; Unify components/args.
+         if(errFree) MKLINK(t1-->t2);
+ 
+     case (ty_tvar, k):
+         OK; MKLINK(t1-->t2);
+
+     case (k, ty_tvar):
+         OK; MKLINK(t2-->t1);
+    }
+
+6. Copy compatibility: In order to ensure that top-level mutability
+   mismatch is OK across copy boundaries, unification must be done on
+   a shallow copy of the candidate type with undecided mutability
+   status (at top level).
+
+   For example, 
+   (define p #t)
+
+   let lhsType = typeof(p)
+       rhsType = typfOfCopy(#t)
+       unify(lhsType, rhsType)
+   where
+      typeof(x) = obvious type
+      typeOfCopy(x) = (maybe core(typeof(x)))
+      core(x) = x without maybe/mutable wrapper.
+
+  This rule must be applied in the case of
+      - At argument positions of: 
+          -- all applications function/constructor applications
+          -- all expressions except:
+              LHS of set!, deref, dup, array-nth, vector-nth, select.
+
+       (ex:  if, cond, switch, try-catch, and, or, not, array, 
+             vector, make-vector, make-vector, apply, 
+             ucon_apply, struct_apply, etc). 
+
+      - bindings let/letrec/letStar/define     
+
+  This kind of compatibility shall hereby be called copy-compatibility.
+
+7. We could, in principle provide the copy-compatibility at the return
+   position of an application as well. However, as an explicit desgn
+   choice, the return value is treated as exactly compatible. 
+
+   Otherwise, functions like: (define (id x) x) will no longer return
+   precisely what they accept. Of course, this can be forced by means
+   of an explicit annotation *at every use of id*, the definition
+   itself has no control over the top-level mutability of the return
+   type. But, we need the annotation in the "normal" case, and writing
+   an annotation at every use case is combersome. 
+
+   Anot

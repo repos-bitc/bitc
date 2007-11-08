@@ -129,7 +129,10 @@ Type::toString()
     ss << "(";
     for(size_t i=0; i<components->size(); i++) {
       if (i > 0) ss << " ";
-      ss << CompType(i)->toString();
+      if(CompFlags(i) & COMP_BYREF)
+	ss << "(by-ref " << CompType(i)->toString() << ")";
+      else
+	ss << CompType(i)->toString();      
     }
     ss << ")";
     break;
@@ -276,6 +279,12 @@ Type::toString()
   case ty_ref:
     assert(components->size() == 1);
     ss << "(ref " << CompType(0)->toString() << ")";
+    break;
+
+
+  case ty_byref:
+    assert(components->size() == 1);
+    ss << "(by-ref " << CompType(0)->toString() << ")";
     break;
 
   case ty_mutable:

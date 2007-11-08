@@ -132,6 +132,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_arrayType:
   case at_vectorType:
   case at_refType:
+  case at_byrefType:
   case at_exceptionType:
   case at_dummyType:
   case at_valType:
@@ -282,6 +283,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_not:
   case at_dup:
   case at_deref:
+  case at_inner_ref:
   case at_array_length:
   case at_vector_length:
   case at_array_nth:

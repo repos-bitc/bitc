@@ -83,27 +83,36 @@ GCPtr<AST>
 AST::makeIntLit(const sherpa::LToken &tok) 
 {
   GCPtr<AST> ast = new AST(at_intLiteral, tok);
-  ast->litBase = 10;  
-  std::string litString = tok.str;
+  std::string num = "";
+  bool negative = false;
+
+  /* Forgetting the sign, base information in the lexer, and
+     rediscovering it here is a little stupid. */
   
-  /* Forgetting the base information in the lexer, and rediscovering
-     it here is a little stupid. */
-  std::string::size_type pos = litString.find ('r');
+  if (tok.str[0] == '-') {
+    num = tok.str.substr(1, tok.str.size());
+    negative = true;
+  }
+  else {
+    num = tok.str.substr(0, tok.str.size());
+  }
+
+  std::string::size_type pos = num.find ('r');
   if(pos != std::string::npos) {
-    std::string rad;
-    if(litString[0] == '-') {
-      rad = litString.substr(1, pos); 
-      litString = "-" + litString.substr(pos+1, litString.size());
-    }
-    else {
-      rad = litString.substr(0, pos);
-      litString = litString.substr(pos+1, litString.size());
-    }
-      
+    std::string rad = num.substr(0, pos);
+    num = num.substr(pos+1, num.size());
     char *end;
     ast->litBase = strtoul(rad.c_str(), &end, 10); //&OK
   }
-  ast->litValue.i = BigNum(litString, ast->litBase);
+  else {
+    ast->litBase = 10;
+  }
+  
+  ast->litValue.i = BigNum(num, ast->litBase);  
+  
+  // Sign is not being considered by bignum implementation
+  if(negative)
+    ast->litValue.i = -ast->litValue.i;
   
   return ast;
 }
@@ -305,6 +314,9 @@ AST::atKwd() const
   case at_bitfield:
     return "bitfield";
 
+  case at_byrefType:
+    return "byref";
+
   case at_refType:
     return "ref";
 
@@ -440,6 +452,9 @@ AST::atKwd() const
 
   case at_deref:
     return "deref";
+
+  case at_inner_ref:
+    return "inner_ref";
 
   case at_tryR:
     return "try";
@@ -765,5 +780,43 @@ AST::rename(GCPtr<AST> from, std::string newName)
     for(size_t c = 0; c < children->size(); c++)
       child(c)->rename(from, newName);
     break;
+  }
+}
+
+bool
+AST::isLocation()
+{
+  switch (astType) {
+  case at_ident:
+      return true;
+    
+  case at_vector_nth:
+  case at_deref:
+      return true;
+
+  case at_array_nth:
+      return child(0)->isLocation();
+
+  case at_select:
+    return child(0)->isLocation();
+        
+  default:
+      return false;
+  }
+}
+
+bool
+AST::isLiteral()
+{
+  switch (astType) {
+  case at_boolLiteral:
+  case at_charLiteral:
+  case at_intLiteral:
+  case at_floatLiteral:
+  case at_stringLiteral:    
+    return true;    
+    
+  default:
+    return false;
   }
 }

@@ -84,24 +84,39 @@
   ;;
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+  ;; String Output
+  ;;(proclaim write-string:(fn (stream string) word) external bitc_stdio_write_string)
 
   ;; This is quite horrible, but until we have closure conversion 
   ;; implemented it will have to suffice.
   (define (write-string ios s)
     (lst.map (lambda (c) (write-char ios c))
-	     (str.string->list s)))
+  	     (str.string->list s)))
 
+  ;; Integer Output
+  (define (write-int ostream x:'a base:'a)
+    (define digits (array #\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9 
+			  #\a #\b #\c #\d #\e #\f))
+    
+    (if (< x 0)
+	(begin (write-char ostream #\-)
+	       (set! x (* x -1)))
+	())
+    
+    (define log:'a 1)
+    (do ((y x (/ y base)))
+	((== (/ y base) 0) ())  
+	(set! log (* log base)))
+    
+    ;; (/ x log) is the present digit to output
+    (do ((x x (- x (* (/ x log) log)))
+	 (log log (/ log base)))
+	((== log 0) ())	
+	(write-char ostream  
+			  (array-nth digits 
+				     (convert (/ x log))))))
+  
   ;; Read a string from an input stream.
   ;;(proclaim read-string:(fn (stream word) string) external)
-
-  ;; Write a string to an output stream.
-  ;;(proclaim write-string:(fn (stream string) word) external)
-
-
-  ;; Write an integer to output stream
-  ;; (proclaim write-int32:(fn (stream int32) ()) external)
-  ;; (proclaim write-uint32:(fn (stream uint32) ()) external)
-  ;; (proclaim write-float:(fn (stream float) ()) external)
-  ;; (proclaim write-double:(fn (stream double) ()) external)
 
 )

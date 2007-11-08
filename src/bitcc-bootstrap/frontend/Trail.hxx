@@ -55,7 +55,7 @@ struct Trail : public Countable {
   
   size_t snapshot() const { return vec->size(); }
   
-  // Link works on Type Variables only
+  // Substitution works on Type Variables only
   void subst(GCPtr<Type> from, GCPtr<Type> to);
   // Generic Link
   void link(GCPtr<Type> from, GCPtr<Type> to);

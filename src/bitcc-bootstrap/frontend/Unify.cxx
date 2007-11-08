@@ -627,10 +627,17 @@ Unify(std::ostream& errStream,
 	  break;
 	}
 	
-	for(size_t i=0; i< t1->components->size(); i++)
+	for(size_t i=0; i< t1->components->size(); i++) {
+	  if(t1->CompFlags(i) != t2->CompFlags(i)) {
+	    errFree = typeError(errStream, errAst, t1, t2);
+	    break;
+	  }
+	  	    
 	  CHKERR(errFree, Unify(errStream, trail, errAst,
 				t1->CompType(i), 
-				t2->CompType(i), flags, false));	
+				t2->CompType(i), flags, false));
+	  
+	}
 	break;
       }
 
@@ -758,6 +765,7 @@ Unify(std::ostream& errStream,
 
     case ty_mutable:
     case ty_ref:
+    case ty_byref:
       {
 	assert(t1->components->size() == 1);
 	assert(t2->components->size() == 1);

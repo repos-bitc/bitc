@@ -37,51 +37,6 @@
 
 (bitc-version "0.10")
 (interface bitc.prelude
-  ;; architecture dependent word type. This comes first because
-  ;; the code generator relies on the definition to emit union
-  ;; tags.
-  ;;  (defstruct word :opaque v:(fixint 32 32 #f))
-
-  ;; These need to appear before procedure declarations
-  ;; so that the arguments can be combined via the pair
-  ;; rule.
-  ;;
-  ;; The following is now a primitive type:
-  ;;
-  ;; (defstruct (pair 'a 'b):val fst:'a snd:'b)
-
-  ;;(defunion bool:val #f #t)
-
-  ;;(defstruct char:val v:(fixint 32 32 #f))
-
-  ;;  (defstruct int8   :opaque v:(fixint 8  8 #t))
-  ;;  (defstruct int16  :opaque v:(fixint 16 16 #t))
-  ;;  (defstruct int32  :opaque v:(fixint 32 32 #t))
-  ;;  (defstruct int64  :opaque v:(fixint 64 64 #t))
-
-  ;;  (defstruct uint8  :opaque v:(fixint 8  8  #f))
-  ;;  (defstruct uint16 :opaque v:(fixint 16 16 #f))
-  ;;  (defstruct uint32 :opaque v:(fixint 32 32 #f))
-  ;;  (defstruct uint64 :opaque v:(fixint 64 64 #f))
-
-  ;;  (defstruct float  :opaque v:(ieeefloat  8 23))
-  ;;  (defstruct double :opaque v:(ieeefloat 11 52))
-  ;;  (defstruct quad   :opaque v:(ieeefloat 15 112))
-
-;;;  (defstruct word   :val v:(fixint 32 32 #f))
-;;;
-;;;  (defstruct int8   :val v:(fixint 8  8 #t))
-;;;  (defstruct int16  :val v:(fixint 16 16 #t))
-;;;  (defstruct int32  :val v:(fixint 32 32 #t))
-;;;  (defstruct int64  :val v:(fixint 64 64 #t))
-;;;
-;;;  (defstruct uint8  :val v:(fixint 8  8  #f))
-;;;  (defstruct uint16 :val v:(fixint 16 16 #f))
-;;;  (defstruct uint32 :val v:(fixint 32 32 #f))
-;;;  (defstruct uint64 :val v:(fixint 64 64 #f))
-;;;
-
-  ;; (defstruct string:val v:(vector char))
 
   (proclaim OutOfMemory : exception external ExOutOfMemory)
   (proclaim IndexBoundsError : exception external ExIndexBoundsError)
@@ -96,6 +51,9 @@
   (defunion (list 'a):ref
     nil
     (cons car:'a cdr:(list 'a)))
+  
+  ;; The pair structure
+  (defstruct (pair 'a 'b):val fst:'a snd: 'b)
 
   ;;  (defunion int:val
   ;;    ;; Small representation:
@@ -103,23 +61,6 @@
   ;;    ;; Big representation: sign plus digits mod word size
   ;;    (big (ref (pair bool (vector word)))))
   
-;;;  The procedure object.
-;;; 	For now, all closures have the same type.
-;;;	I agree that this is not very well typed. 
-;;; 	But, NO existential types for now ...
-;;; I cannot give this PROC object even a little more 
-;;; suitable type like:
-;;;   { ('a 'b) -> 'c, 'a }
-;;; beacuse we don't know airity of the function and we 
-;;; don't have a means of expressing that something be a
-;;; function of some airity.
-
-;  (defstruct (__PROC 'a 'b) fun:'a  env:'b)
-;  (defunion __ZCL __zcl); the empty closure
-  
-  ;; The pair structure
-  (defstruct (pair 'a 'b):val fst:'a snd: 'b)
-
   ;; Following is a sleazy (but clever -- blame Swaroop) trick for
   ;; getting comparison operations defined for the built-in types with
   ;; minimal hassle. We define the comparison operations as
@@ -141,6 +82,13 @@
   (proclaim __<=:(fn ('a 'a) bool) external)
   (proclaim __>:(fn ('a 'a) bool) external)
   (proclaim __>=:(fn ('a 'a) bool) external)
+
+  (proclaim __b_and:(fn ('a 'a) 'a) external)
+  (proclaim __b_or:(fn ('a 'a) 'a) external)
+  (proclaim __b_not:(fn ('a) 'a) external)
+  (proclaim __b_xor:(fn ('a 'a) 'a) external)
+  (proclaim __<<:(fn ('a word) 'a) external)
+  (proclaim __>>:(fn ('a word) 'a) external)
 
   
   ;; Conversion operation. This one is actually quite dangerous,
@@ -169,7 +117,7 @@
   ;; TYPE CLASS FOR INTEGER LITERALS
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  (deftypeclass (IntLit 'a))		; built-in => no methods
+  (deftypeclass (IntLit 'a))
 
   (definstance (IntLit word))
   (definstance (IntLit  int8))
@@ -181,20 +129,10 @@
   (definstance (IntLit  int64))
   (definstance (IntLit uint64))
 
-;  (definstance (IntLit (mutable   word)))
-;  (definstance (IntLit (mutable  int8)))
-;  (definstance (IntLit (mutable uint8)))
-;  (definstance (IntLit (mutable  int16)))
-;  (definstance (IntLit (mutable uint16)))
-;  (definstance (IntLit (mutable  int32)))
-;  (definstance (IntLit (mutable uint32)))
-;  (definstance (IntLit (mutable  int64)))
-;  (definstance (IntLit (mutable uint64)))
- 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPE CLASS FOR FLOATING POINT LITERALS
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (deftypeclass (FloatLit 'a))  	; built-in => no methods
+  (deftypeclass (FloatLit 'a))  	
 
   (definstance (FloatLit float))
   (definstance (FloatLit double))
@@ -228,8 +166,24 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPES ADMITTING INTEGER MODULUS ARITHMETIC
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (deftypeclass (forall ((Arith 'a)) (IntArith 'a))
+  (deftypeclass (forall ((Arith 'a) (IntLit 'a)) (IntArith 'a)) 
     % : (fn ('a 'a) 'a))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; TYPES ADMITTING BITWISE ARITHMETIC
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (deftypeclass (forall ((IntLit 'a)) (Bitwise 'a)) 
+    bit-and  : (fn ('a 'a) 'a)   ;; Bitwise AND
+    bit-or   : (fn ('a 'a) 'a)   ;; Bitwise OR
+    bit-not  : (fn ('a) 'a)      ;; One's Complement
+    bit-xor  : (fn ('a 'a) 'a)   ;; Bitwise XOR
+    <<  : (fn ('a word) 'a)      ;; Left Shift
+    >>  : (fn ('a word) 'a)      ;; Right Shift
+    )
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; Instance Definitions
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   (definstance (Eq ()) __== __!=)
     
@@ -323,6 +277,17 @@
   (definstance (IntArith uint32) __%)
   (definstance (IntArith uint64) __%)
   (definstance (IntArith word) __%)
+
+  (definstance (Bitwise uint8) 
+    __b_and __b_or __b_not __b_xor __<< __>>)
+  (definstance (Bitwise uint16) 
+    __b_and __b_or __b_not __b_xor __<< __>>)
+  (definstance (Bitwise uint32) 
+    __b_and __b_or __b_not __b_xor __<< __>>)
+  (definstance (Bitwise uint64) 
+    __b_and __b_or __b_not __b_xor __<< __>>)
+  (definstance (Bitwise word) 
+    __b_and __b_or __b_not __b_xor __<< __>>)
 
   (deftypeclass (Length 'a)
     length: (fn ('a) word))		; built-in => no methods

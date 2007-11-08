@@ -39,7 +39,7 @@ default: package
 BITC_SRC=../..
 
 # This needs to change when we fix the install targets
-CFLAGS+=-g
+CFLAGS+=-O4 #-g
 GC_INC=
 
 INC+=-I../runtime -I. -I$(BITC_XENV)/host/include $(GC_INC) 

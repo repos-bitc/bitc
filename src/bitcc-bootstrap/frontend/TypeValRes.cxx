@@ -303,6 +303,7 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
+  case at_inner_ref:
   case at_deref:
     {    
       for(size_t i=0; !itsExpansive && i < ast->children->size(); i++)
@@ -364,6 +365,7 @@ isExpansive(std::ostream& errStream,
   case at_fields:
   case at_field:
   case at_bitfield:
+  case at_byrefType:
   case at_refType:
   case at_exceptionType:
   case at_dummyType:
@@ -479,7 +481,11 @@ isExpansive(std::ostream& errStream,
   case ty_fn:
   case ty_fnarg:
     break;
-    
+
+  case ty_byref:
+    assert(false); // Function case breaks
+    break;
+
   case ty_letGather:
   case ty_array:
   case ty_vector:
@@ -699,6 +705,7 @@ Type::removeRestricted(GCPtr<CVector<GCPtr<Type> > > &ftvs,
 
   case ty_letGather:
   case ty_ref:
+  case ty_byref:
     {
       
       for(size_t i=0; i<t->typeArgs->size(); i++) {

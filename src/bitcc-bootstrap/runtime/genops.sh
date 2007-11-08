@@ -139,41 +139,11 @@ do
   echo "DEFCAST(bitc_word_t, ${SPC} ${BITCMANGLE_W}, ${SPC} bitc_uns${i}_t, ${SPC} ${BITCMANGLE_U});"
   echo "DEFCAST(bitc_word_t, ${SPC} ${BITCMANGLE_W}, ${SPC} bitc_int${i}_t,${SPC} ${BITCMANGLE_S});"
 done
+
+#Helps in writing certain fuctions that range over all integer-types
+echo "DEFCAST(bitc_word_t, ${SPC} ${BITCMANGLE_W}, ${SPC} bitc_word_t, ${SPC} ${BITCMANGLE_W});"
  
 echo "DEFCAST(bitc_float_t,${SPC} ${BITCMANGLE_F},${SPC} bitc_word_t, ${SPC} ${BITCMANGLE_W});"
 echo "DEFCAST(bitc_double_t,${SPC} ${BITCMANGLE_D},${SPC} bitc_word_t, ${SPC} ${BITCMANGLE_W});"
 echo "DEFCAST(bitc_word_t, ${SPC} ${BITCMANGLE_W}, ${SPC} bitc_float_t, ${SPC} ${BITCMANGLE_F});"
 echo "DEFCAST(bitc_word_t, ${SPC} ${BITCMANGLE_W}, ${SPC} bitc_double_t,${SPC} ${BITCMANGLE_D});"
-
-echo "/* Conversion across mutability, -- try to avoid */"
-echo "/* From mutable to immutable */"
-for i in 8 16 32 64
-do
-  bitcmangle_s $i
-  bitcmangle_u $i
-  echo "DEFCAST(bitc_uns${i}_t,${SPC} M${BITCMANGLE_U},${SPC} bitc_word_t, ${SPC} ${BITCMANGLE_W});"
-  echo "DEFCAST(bitc_int${i}_t,${SPC} M${BITCMANGLE_S},${SPC} bitc_word_t, ${SPC} ${BITCMANGLE_W});"
-  echo "DEFCAST(bitc_word_t, ${SPC} M${BITCMANGLE_W}, ${SPC} bitc_uns${i}_t, ${SPC} ${BITCMANGLE_U});"
-  echo "DEFCAST(bitc_word_t, ${SPC} M${BITCMANGLE_W}, ${SPC} bitc_int${i}_t,${SPC} ${BITCMANGLE_S});"
-done
- 
-echo "DEFCAST(bitc_float_t,${SPC} M${BITCMANGLE_F},${SPC} bitc_word_t, ${SPC} ${BITCMANGLE_W});"
-echo "DEFCAST(bitc_double_t,${SPC} M${BITCMANGLE_D},${SPC} bitc_word_t, ${SPC} ${BITCMANGLE_W});"
-echo "DEFCAST(bitc_word_t, ${SPC} M${BITCMANGLE_W}, ${SPC} bitc_float_t, ${SPC} ${BITCMANGLE_F});"
-echo "DEFCAST(bitc_word_t, ${SPC} M${BITCMANGLE_W}, ${SPC} bitc_double_t,${SPC} ${BITCMANGLE_D});"
-
-echo "/* From immutable to mutable -- try to avoid */"
-for i in 8 16 32 64
-do
-  bitcmangle_s $i
-  bitcmangle_u $i
-  echo "DEFCAST(bitc_uns${i}_t,${SPC} ${BITCMANGLE_U},${SPC} bitc_word_t, ${SPC} M${BITCMANGLE_W});"
-  echo "DEFCAST(bitc_int${i}_t,${SPC} ${BITCMANGLE_S},${SPC} bitc_word_t, ${SPC} M${BITCMANGLE_W});"
-  echo "DEFCAST(bitc_word_t, ${SPC} ${BITCMANGLE_W}, ${SPC} bitc_uns${i}_t, ${SPC} M${BITCMANGLE_U});"
-  echo "DEFCAST(bitc_word_t, ${SPC} ${BITCMANGLE_W}, ${SPC} bitc_int${i}_t,${SPC} M${BITCMANGLE_S});"
-done
- 
-echo "DEFCAST(bitc_float_t,${SPC} ${BITCMANGLE_F},${SPC} bitc_word_t, ${SPC} M${BITCMANGLE_W});"
-echo "DEFCAST(bitc_double_t,${SPC} ${BITCMANGLE_D},${SPC} bitc_word_t, ${SPC} M${BITCMANGLE_W});"
-echo "DEFCAST(bitc_word_t, ${SPC} ${BITCMANGLE_W}, ${SPC} bitc_float_t, ${SPC} M${BITCMANGLE_F});"
-echo "DEFCAST(bitc_word_t, ${SPC} ${BITCMANGLE_W}, ${SPC} bitc_double_t,${SPC} M${BITCMANGLE_D});"

@@ -71,6 +71,12 @@ DEFKIND(reprr,     false,  true,   false, false, true,  false,  false)
 DEFKIND(array,     false,  false,  false, false, false, false,  false)
 DEFKIND(vector,    false,  false,  false, false, true,  false,  false)
 DEFKIND(ref,       false,  true,   false, false, true,  false,  false)
+// by-ref is not actually used as a type. It is only present to qualify
+// at_byreftype since all ASTs must have a type. Since by-ref types
+// can only appear within argvecs, the my-ref-ness is marked on the
+// component-flags of ty_fnArgvec, and the ty_byref wrapper is
+// discarded henceforth.
+DEFKIND(byref,    false,  true,   false, false, true,  false,  false)
 DEFKIND(mutable,   false,  false,  false, false, false, false,  false)
 DEFKIND(maybe,     false,  false,  false, false, false, false,  false)
 DEFKIND(exn,       false,  false,  false, false, true,  false,  false)

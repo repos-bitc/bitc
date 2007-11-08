@@ -231,6 +231,10 @@ enum primOp {
                                       // that has a captured closure,
                                       // need to emit a transition
                                       // function. 
+#define INNER_REF_NDX    0x04000000u  // inner_ref is an indexing-ref
+                                      // when clear, indicated
+                                      // inner-ref is a selection-ref
+#define ARG_BYREF        0x08000000u  // Function parameter is By-Reference
 
 /* Add All **AST Flags** that must be masked from definition before
    setting onto the use cases */
@@ -303,6 +307,8 @@ struct envSet : public Countable{
   bool isGlobal() { return (Flags & ID_IS_GLOBAL); }
   bool isFnxn(); // Function
   size_t nBits();
+  bool isLocation();
+  bool isLiteral();
   bool isTopLevelForm();
   bool leadsToTopLevelForm();
   void clearTypes(); // Clear the sumType and scheme fields 
@@ -665,7 +671,7 @@ GROUP qtype = qualType | type;
 
 // argVec is not able to appear in a "type" position.
 GROUP type = var | tvar | bitfield | refType | valType 
-           | fn | primaryType | dummyType
+           | fn | byrefType | primaryType | dummyType
            | arrayType | vectorType | typeapp 
            // | closureType;
            | mutableType | exceptionType; 
@@ -675,14 +681,14 @@ AST bitfield = primaryType intLiteral;
 
 // REF TYPES [3.4.1]               
 AST refType = type;
+AST byrefType = type;
+
 // VAL TYPES [3.4.2]
 AST valType = type;
 // FUNCTION TYPES [3.4.3]
 AST fn = fnargVec type;
 // PRIMARY TYPES [???]
 LEAF primaryType;
-// vectors of argument bindings (for LAMBDA)
-AST argVec = identPattern*;
 // vectors of argument type (for FN)
 AST fnargVec = type*;
 // ARRAY TYPE [3.5.1]                 
@@ -716,7 +722,7 @@ GROUP eform = literal | var | unit
             | lambda | suspend
             | apply | struct_apply | ucon_apply
             | if | and | or | not | cond | switchR
-            | setbang | dup | deref 
+            | setbang | dup | deref | inner_ref
 	    | tryR | throw | let | letStar | letrec 
  	    | container | do 
 	    | mkClosure | allocREF | copyREF | setClosure
@@ -758,6 +764,8 @@ AST vector_length = expr;
 
 // LAMBDA [7.9]
 AST lambda = argVec expr;
+// vectors of argument bindings (for LAMBDA)
+AST argVec = identPattern*;
 // APPLICATION [7.10]          
 AST apply = expr expr*;
 AST struct_apply = var expr+;
@@ -785,6 +793,8 @@ AST setbang = expr expr;
 AST deref = expr; 
 // DUP
 AST dup = expr;
+// INNER-REF
+AST inner_ref = expr expr;
 
 // CLOSURE TYPE (compiler-internal)
 //AST closureType = fn+;

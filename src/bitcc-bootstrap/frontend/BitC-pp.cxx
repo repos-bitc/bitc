@@ -378,6 +378,7 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
   case at_makevectorL:
   case at_array:
   case at_arrayType:
+  case at_byrefType:
   case at_refType:
   case at_valType:
   case at_letStar:
@@ -397,6 +398,7 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
   case at_frameBindings:
   case at_do:
   case at_dup:
+  case at_inner_ref:
   case at_suspend:
   case at_fill:
   case at_reserved:

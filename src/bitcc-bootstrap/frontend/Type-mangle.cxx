@@ -143,9 +143,12 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
   case ty_fnarg:
     ss << components->size();
-    for(size_t i=0; i<components->size(); i++)
+    for(size_t i=0; i<components->size(); i++) {
+      if(CompFlags(i) & COMP_BYREF)
+	ss << "Z";
       ss << CompType(i)->mangledString(igMut, true, 
-					      maxArgMut);
+				       maxArgMut);
+    }
     break;
 
   case ty_letGather:
@@ -232,6 +235,12 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
   case ty_ref:
     assert(components->size() == 1);
     ss << "R" << CompType(0)->mangledString(igMut, false, 
+						   maxArgMut);
+    break;
+
+  case ty_byref:
+    assert(components->size() == 1);
+    ss << "Z" << CompType(0)->mangledString(igMut, false, 
 						   maxArgMut);
     break;
 

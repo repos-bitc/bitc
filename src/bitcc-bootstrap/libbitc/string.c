@@ -145,7 +145,6 @@ DEFUN(bitc_string_nth, bitc_string_t *str, bitc_word_t ndx)
 }
 DEFCLOSURE(bitc_string_nth);
 
-
 /* This is a very bad implementation of vector->string, and it is
    probably even wrong, deppending on how correct the utf8_encode is.
    This should be considered a placeholder for real code */

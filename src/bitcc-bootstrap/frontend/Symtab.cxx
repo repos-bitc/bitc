@@ -141,7 +141,7 @@ bindIdentDef(GCPtr<AST> ast, GCPtr<Environment<AST> > env,
 
   // Type (arguments) Variables are not bound to incompleteness
   // restriction  I believe the following check is sufficient.
-  // If there is a problem, I will have to pass around an additional
+  // If there is problem, I will have to pass around an additional
   // bool addToIncomplete parameter, or at the caller, add them to a
   // dummy list.
   
@@ -477,7 +477,7 @@ resolve(std::ostream& errStream,
 	      // We are OK
 	      ;
 	    }
-	    else if(flags & RES_APP_PAT_MODE &&
+	    else if((flags & RES_APP_PAT_MODE) &&
 		    def->identType == id_constructor) {
 	      // We are OK
 	      ;
@@ -1377,6 +1377,15 @@ resolve(std::ostream& errStream,
       break;
     }
 
+  case at_byrefType:
+    {
+      // match agt_type
+      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
+	      id_type, currLB, 
+	      flags | (INCOMPLETE_OK));
+      break;
+    }
+
   case at_refType:
     {
       // match agt_type
@@ -1753,9 +1762,12 @@ resolve(std::ostream& errStream,
       // clconv calls symResolve().
       
       // match agt_expr+
-      if(ast->child(0)->astType == at_ident) {
-	// This check is OK. If the child is at_select, then we will
-	// not try to resolve the selection (rhs) and we are OK.
+      if(ast->child(0)->astType == at_ident || 
+	 ast->child(0)->astType == at_select) {
+	// During the first time of symbol resolution, 
+	// selection from an interface appears as a at_select
+	// This check is OK. If the child is really an at_select, then
+	// we will not try to resolve the selection (rhs) and we are OK.
 	RESOLVE(ast->child(0), env, lamLevel, USE_MODE, id_value, currLB, 
 		flags | RESOLVE_APPLY_MODE);	
       }
@@ -1870,6 +1882,24 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      id_value, currLB, flags);
 
+      break;
+    }
+
+  case at_inner_ref:
+    {
+      // match agt_expr
+      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
+	      id_value, currLB, flags);
+
+      if(((ast->Flags2 & INNER_REF_NDX) == 0) &&
+	 ast->child(1)->astType == at_ident) {
+	// Could be a field-select
+      }
+      else {
+	// match agt_expr
+	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
+		id_value, currLB, flags);
+      }
       break;
     }
 

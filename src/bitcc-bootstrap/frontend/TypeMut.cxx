@@ -228,6 +228,7 @@ Type::TypeOfCopy()
     }
 
   case ty_fnarg:
+  case ty_byref:
   case ty_typeclass:
   case ty_letGather:
   case ty_hint:
@@ -597,6 +598,7 @@ Type::simplifiedHint()
     }
 
   case ty_fnarg:
+  case ty_byref:
   case ty_typeclass:
   case ty_letGather:
     assert(false);
@@ -633,7 +635,8 @@ Type::simplifiedHint()
       GCPtr<Type> oldFnArgs = t->CompType(0);
       GCPtr<Type> newFnArgs = new Type(ty_fnarg, ast);
       for(size_t i=0; i < oldFnArgs->components->size(); i++)
-	newFnArgs->components->append(new comp(hintTvar(ast)));
+	newFnArgs->components->append(new comp(hintTvar(ast),
+					       oldFnArgs->CompFlags(i)));
       
       rt = new Type(ty_fn, newFnArgs, hintTvar(ast));
       break;

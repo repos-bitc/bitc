@@ -41,7 +41,7 @@
 ;; for DSSSL provided in scheme.el
 
 ;;; Code:
-
+
 (require 'lisp-mode)
 
 (defvar bitc-mode-syntax-table nil)
@@ -99,7 +99,7 @@
       (modify-syntax-entry ?# "_ p14")
       (modify-syntax-entry ?\\ "\\   ")
       ))
-
+
 (defvar bitc-mode-abbrev-table nil)
 (define-abbrev-table 'bitc-mode-abbrev-table ())
 
@@ -189,7 +189,7 @@ All commands in `lisp-mode-shared-map' are inherited by this map.")
     (put 'uncomment-region 'menu-enable 'mark-active)
     (put 'indent-region 'menu-enable 'mark-active)))
 
-
+
 ;;;###autoload
 (defun bitc-mode ()
   "Major mode for editing BitC code.
@@ -289,12 +289,12 @@ See `run-hooks'."
 	       "#f" "#t"
 	       "and" "apply" "array" "array-length"
 	       "array-nth" "assert"
-	       "begin" "bitc-version" "bitfield"
+	       "begin" "bitc-version" "bitfield" "by-ref"
 	       "case" "case!" "catch" "check" "coindset"
 	       "cond" "constrain" 
 	       "deref" "declare" 
 	       "definv" "defobject" "defthm"
-	       "deftypeclass" "definstance" 
+	       "deftypeclass" "definstance" "do"
 	       "exception" "external" 
 	       "fill" "fn" "forall" "hide"
 	       "if" "import" "import!" "indset"
@@ -354,7 +354,6 @@ See `run-hooks'."
 (defvar bitc-font-lock-keywords bitc-font-lock-keywords-1
   "Default expressions to highlight in BitC modes.")
 
-
 (defvar calculate-lisp-indent-last-sexp)
 
 ;; Copied from lisp-indent-function, but with gets of
@@ -395,7 +394,6 @@ See `run-hooks'."
 	      (method
 		(funcall method state indent-point normal-indent)))))))
 
-
 ;;; Let is different in Scheme
 
 (defun would-be-symbol (string)
@@ -435,8 +433,6 @@ See `run-hooks'."
 (put 'let 'bitc-indent-function 'bitc-let-indent)
 (put 'letrec 'bitc-indent-function 'bitc-let-indent)
 (put 'loop 'bitc-indent-function 1)
-
-
 
 (provide 'bitc)
 

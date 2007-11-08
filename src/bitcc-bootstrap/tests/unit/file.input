@@ -1,0 +1,4566 @@
+/*
+ * Copyright (C) 2005, The EROS Group, LLC.
+ *
+ * This file is part of the EROS Operating System runtime library.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, 59 Temple Place - Suite 330 Boston, MA 02111-1307, USA.
+ */
+ 
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <dirent.h>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
+#include <libsherpa/avl.hxx>
+#include <assert.h>
+#include "die.hxx"
+#include "AST.hxx"
+#include "Environment.hxx"
+#include "Type.hxx"
+#include "TypeScheme.hxx"
+#include "Typeclass.hxx"
+#include "Unify.hxx"
+#include "Symtab.hxx"
+#include "backend.hxx"
+#include "inter-pass.hxx"
+#include "machine-dep.hxx"
+#include "Options.hxx"
+
+using namespace sherpa;
+using namespace std;
+
+
+/*********************************************************************
+                        HANDLING MUTABILITY
+			*******************
+1. In theory, every type could have its mutability status to be one of:
+    -- mutable
+    -- immutable
+    -- undecided / also called maybe (short for maybe-mutable)
+    with obvious meanings.
+
+2. In practice, when a type record is created for a type `t', it
+   stands fot the immutable version of that type. If the type is
+   mutable, it is wrapped by a ty_mutable type record. If undecided,
+   it is wrapped by a ty_maybe type record. These will hereinafter be
+   written as:
+    -- mutable    (mutable t)
+    -- immutable  t
+    -- undecided  (maybe t)
+
+2. Every new binding is initially given a (maybe 'a) type, except for:
+      ty_fnarg, ty_letgather, ty_typeclass, ty_tyfn.
+   Local bindings that are observed to be used in a set! context (that
+      is, are mutated) are given a ty_mutable wrapper.
+
+3. Since:
+    - when the use writes 'a, he means any type whether mutable or
+      immutable, and 
+    - we do not have an immutable type qualifier,
+   type variables can never appear without either a maybe or a mutable
+   wrapper. 
+
+4. All type expressions (except in the case of a type variable) are
+   stand for their immutable versions, so, they are given a type
+   without any wrapper.
+ 
+5. Unification rules:
+   switch (t1->kind, t2->kind) {
+     case (k, k):
+         OK; Unify components/args.
+
+    case (ty_tvar,  ty_maybe):
+    case (ty_maybe, ty_tvar):
+         assert(false);
+
+     case (ty_mutable, ty_maybe):
+     case (k,          ty_maybe):
+         OK; Unify components/args.
+         if(errFree) MKLINK(t2-->t1);
+
+     case (ty_maybe, ty_mutable):
+     case (ty_maybe, k):
+         OK; Unify components/args.
+         if(errFree) MKLINK(t1-->t2);
+ 
+     case (ty_tvar, k):
+         OK; MKLINK(t1-->t2);
+
+     case (k, ty_tvar):
+         OK; MKLINK(t2-->t1);
+    }
+
+6. Copy compatibility: In order to ensure that top-level mutability
+   mismatch is OK across copy boundaries, unification must be done on
+   a shallow copy of the candidate type with undecided mutability
+   status (at top level).
+
+   For example, 
+   (define p #t)
+
+   let lhsType = typeof(p)
+       rhsType = typfOfCopy(#t)
+       unify(lhsType, rhsType)
+   where
+      typeof(x) = obvious type
+      typeOfCopy(x) = (maybe core(typeof(x)))
+      core(x) = x without maybe/mutable wrapper.
+
+  This rule must be applied in the case of
+      - At argument positions of: 
+          -- all applications function/constructor applications
+          -- all expressions except:
+              LHS of set!, deref, dup, array-nth, vector-nth, select.
+
+       (ex:  if, cond, switch, try-catch, and, or, not, array, 
+             vector, make-vector, make-vector, apply, 
+             ucon_apply, struct_apply, etc). 
+
+      - bindings let/letrec/letStar/define     
+
+  This kind of compatibility shall hereby be called copy-compatibility.
+
+7. We could, in principle provide the copy-compatibility at the return
+   position of an application as well. However, as an explicit desgn
+   choice, the return value is treated as exactly compatible. 
+
+   Otherwise, functions like: (define (id x) x) will no longer return
+   precisely what they accept. Of course, this can be forced by means
+   of an explicit annotation *at every use of id*, the definition
+   itself has no control over the top-level mutability of the return
+   type. But, we need the annotation in the "normal" case, and writing
+   an annotation at every use case is combersome. 
+
+   Another example is: list-nth: (fn ((list 'a) word) 'a)
+    (define list->vec lst:(list (mutable char))
+           (make-vectorL (length lst) (lambda (n) (list-nth lst n))))
+  
+   The return type will be (vector char) and not 
+                            (vector (mutable char)).
+
+   Of course, we could write out the type of list->vec, but we are
+   trying to avoid explicit typing. 
+
+   Most cases that benifit from the mutability-polymorpism at the
+   return position must be naturally expressible through a
+   let-binding, I think. So, the return position is not
+   copy-compatible, but really compatible with the definition.
+  
+8. Whereas the type of definitions and declarations must ordinarily
+   match exactly, if the definition in question is a function, the
+   definition and declaration shall be deemed compatible if all the
+   arguments return type of the definition and declaration are
+   copy-compatible. 
+      
+9. A (set! lhs rhs) always expects an lhs with ty_mutable type. 
+    Of course, if a ty_maybe is obtained, we fix it to ty_mutable. 
+
+10. Value restriction: ?? NEED A RULE HERE, email sent to Bitc-list ??
+
+11. At top level, all monomorphic type variables are instantiated to
+    dummy types.
+
+12. Generalization: When we get to a let boundary, if we see a type
+    like:
+      p: (maybe(possibly-polymorphic-type))
+
+    we have two choices to obtain a sound type for p:
+      
+      1) p: (maybe/mutable (monomorphic type))
+      2) p: (immutable (polymorphic type))
+   
+   Unfortunately, there is no principal type here that encompasses
+   all cases. Here we choose option (2). All ty_maybe wrappers
+   surrounding polymorphic type variables must be removed (linked
+   with their component type).
+
+15. Fixing maybe types: 
+     - At top level, fix all ty_maybe type records (deeply), except
+       for fully general type varables. 
+  
+     - For inner lets, only fix those ty_maybe type records that
+       wrap a type that (deeply) contains a fully general type
+       variable, but is not itself a type variable.
+
+16. set! only works on locations, and locations cannot be
+    polyinstantiated. So, no identifier that is used within an Lvalue
+    expression of a set! should be polyinstantiated ever. 
+
+    Note: Once we have Rule 13, this rule is understood to be implied
+          by it.
+
+17. Implementation level issue: Since closure conversion introduces
+    new Refs, copy-compatibility at letbindings must be adjusted to
+    work beyond these refs.
+
+**********************************************************************/
+
+
+/**************************************************************/
+/*                     Some Helper Functions                  */
+/**************************************************************/
+
+//#define VERBOSE
+
+/* Different options for creating type records. Thsese helper
+   functions are in place so that all maybe-records are created at one
+   place. Some functions exist so that we cah flip copy behavious in
+   some cases easily */
+
+static inline Type *
+newMaybeType(Type *typ)
+{
+  typ = typ->getType();
+  Type *hint=NULL;
+
+  if(typ->isTvar())
+    hint = typ;
+  else
+    hint = typ->getTheType(true, false);
+  
+  Type *t = new Type(ty_maybe, typ);    
+  t->maybeHint = hint;
+  return t;
+}
+
+/* All type-variables are maybe-types by default */
+static inline Type *
+newTvar(AST *ast)
+{
+  return newMaybeType(new Type(ty_tvar, ast));
+}
+
+/* Type based mutation analysis */
+static inline Type *
+newBindType(AST *ast, unsigned long flags)
+{
+  assert(ast->astType == at_ident);
+ 
+  if(ast->Flags2 & ID_IS_MUTATED) {
+    assert((flags & TI_TYP_EXP) == 0);
+    assert((ast->Flags & ID_IS_TVAR) == 0);
+    return new Type(ty_mutable, new Type(ty_tvar, ast));
+  }
+  else
+    return newTvar(ast);
+}
+
+static inline Type *
+nonCopyType(Kind k, AST *ast)
+{
+  if(k == ty_tvar)   
+    return newTvar(ast);
+  
+  return new Type(k, ast);
+}
+
+static inline Type *
+ConstructedType(Kind k, AST *ast)
+{ 
+  assert(k != ty_tvar);
+  return new Type(k, ast);
+}
+
+// Gives the type of the copy, introduces explicit maybe-mutability.
+static Type *
+TypeOfCopy(Type *t)
+{
+  return newMaybeType(t);
+}
+
+static inline Type *
+ArgType(Type *t)
+{
+  return TypeOfCopy(t);
+}
+
+static inline Type *
+RetType(Type *t)
+{
+  return TypeOfCopy(t);
+}
+
+static inline Type *
+CtrArgType(Type *t)
+{
+  return ArgType(t);
+}
+
+static inline Type *
+CtrRetType(Type *t)
+{
+  return t;
+}
+
+static inline Type *
+conditionalType(Type *t)
+{
+  return TypeOfCopy(t);
+}
+
+static inline Type *
+switchLegType(Type *t)
+{
+  return conditionalType(t);
+}
+
+static Type *
+obtainFullUnionType(Type *t, std::ostream &errStream,
+		    Environment<TypeScheme> *gamma)
+{  
+  //   std::cerr << "Input = " 
+  //   	    << t->toString()
+  //    	    << std::endl;
+  
+
+  t = t->getBareType();
+  
+  assert(t->isUType());
+  AST *unin = t->myContainer;
+  TypeScheme *uScheme = gamma->getBinding(unin->s);
+  Type *uType = uScheme->type_instance_copy();  
+
+  assert(uType->typeArgs.size() == t->typeArgs.size());
+
+  for(size_t c=0; c < uType->typeArgs.size(); c++)
+    t->typeArgs[c]->unifyWith(uType->typeArgs[c]);
+  
+  //   std::cerr << "Output = " 
+  //   	    << uType->toString()
+  //   	    << std::endl;
+  
+  return uType;
+}
+
+/**************************************************************/
+/*                    Environment handling                    */
+/**************************************************************/
+
+/* Use all bindings in the some other environment */
+static void
+useIFGamma(const std::string& idName,
+	   Environment<TypeScheme> *fromEnv, 
+	   Environment<TypeScheme> *toEnv)
+{
+  for (size_t i = 0; i < fromEnv->bindings.size(); i++) {
+    if (fromEnv->bindings[i]->flags & BF_PRIVATE)
+      continue;
+
+    std::string s = fromEnv->bindings[i]->nm;
+    TypeScheme *ts = fromEnv->bindings[i]->val;
+
+    if (idName.size())
+      s = idName + "." + s;
+
+    toEnv->addBinding(s, ts);
+    toEnv->setFlags(s, BF_PRIVATE|BF_COMPLETE);
+  }  
+}
+
+/* Use all instances from some other environment. Unlike Type
+   environmen, this one needs explicit checking to make sure there are
+   no collisions */
+
+static bool
+useIFInsts(std::ostream &errStream,
+	   LexLoc &errLoc,
+	   Environment< CVector<Instance *> > *fromEnv, 
+	   Environment< CVector<Instance *> > *toEnv,
+	   unsigned long uflags)
+{
+  bool errFree = true;
+  for (size_t i = 0; i < fromEnv->bindings.size(); i++) {
+
+    if (fromEnv->bindings[i]->flags & BF_PRIVATE)
+      continue;
+    
+    std::string s = fromEnv->bindings[i]->nm;
+    CVector<Instance *> *fromInsts = fromEnv->bindings[i]->val;
+    CVector<Instance *> *toInsts = toEnv->getBinding(s); 
+
+    if(toInsts == NULL) {
+      toInsts = new CVector<Instance *>;
+      for (size_t j = 0; j < fromInsts->size(); j++)
+	toInsts->append((*fromInsts)[j]);
+      toEnv->addBinding(s, toInsts);
+    }
+    else {
+      for (size_t j = 0; j < fromInsts->size(); j++) {
+	size_t k;
+	bool mustAppend = true;
+	Instance *fromInst = (*fromInsts)[j];
+
+	for (k = 0; k < toInsts->size(); k++) {
+	  Instance *toInst = (*toInsts)[k];
+	  
+	  if(toInst == fromInst) {
+	    // We are seeing the same AST as a matter of import from
+	    // different interfaces. For example: diamond import,
+	    // or, Interface X imports prelude, obviously, and
+	    // exports all interfaces in the prelude. I have also
+	    // already seen the prelude. So, this need not be
+	    // re-considered, but this is not an error.
+	    // It is safe to ignore this because we are thinking of
+	    // the *same* instance defined at the same *AST* and	      
+	    // thus, there is no conflict.
+	    mustAppend = false;
+	    break;
+	  }
+
+	  if((uflags & ALL_INSTS_OK) == 0)
+	    if(toInst->equals(errStream, fromInst, toEnv)) {
+	      errStream << errLoc << ": "
+			<< "Conflict in Instance declarations "
+			<< " of type " 
+			<< (*toInsts)[k]->asString()
+			<< " defined at " 
+			<< (*toInsts)[k]->ast->loc << " and " 
+			<< (*fromInsts)[j]->ast->loc << "."
+			<< std::endl;
+	      errFree = false;
+	      mustAppend = false;	    
+	      break;				  
+	    }
+	}
+	  
+	if(mustAppend) 
+	  toInsts->append((*fromInsts)[j]);
+      }
+    }
+  }
+  
+  return errFree;
+}
+  
+/* Initialize my environment */
+static bool
+initGamma(std::ostream& errStream, 
+	  Environment<TypeScheme> *gamma,
+	  Environment< CVector<Instance *> > *instEnv,
+	  const AST *ast, unsigned long uflags)
+{
+  bool errFree = true;
+  // Make sure I am not processing the prelude itself
+  // cout << "Processing " << ast->children[1]->children[0]->s 
+  //      << std::endl;
+  if(ast->children[0]->astType == at_interface &&
+     ast->children[0]->children[0]->s == "bitc.prelude") {
+    // cout << "Processing Prelude " << std::endl;
+    return true;
+  }
+  
+  // "use" everything in the prelude
+  Environment<TypeScheme> *preenv = 0;
+  Environment< CVector<Instance *> > *preInsts = 0;
+  
+  size_t i;
+
+  for(i=0; i < UocInfo::ifList.size(); i++) {
+    if(UocInfo::ifList[i]->uocName == "bitc.prelude") {
+      preenv = UocInfo::ifList[i]->gamma;
+      preInsts = UocInfo::ifList[i]->instEnv;
+      break;
+    }
+  }
+
+  if(i == UocInfo::ifList.size()) {
+    errStream << ast->loc << ": "
+	      << "Internal Compiler Error. "
+	      << "Prelude has NOT been processed till " 
+	      << "type inference."
+	      << std::endl;
+    return false;
+  }
+  
+  if(preenv == NULL || preInsts == NULL) {
+    errStream << ast->loc << ": "
+	      << "Internal Compiler Error. "
+	      << "Prelude's Gamma is NULL "
+	      << std::endl;
+    return false;
+  }
+  
+  useIFGamma(std::string(), preenv, gamma);
+  LexLoc internalLocation;
+  CHKERR(errFree, useIFInsts(errStream, internalLocation, 
+			     preInsts, instEnv, uflags));
+  return errFree;
+}
+
+
+/**************************************************************/
+/*                Type consistency checking                   */
+/**************************************************************/
+
+bool
+checkImpreciseTypes(std::ostream& errStream, 
+		    const Environment<TypeScheme> *gamma,
+		    CVector<Type *> *impTypes)
+{
+  bool errFree = true;
+  for(size_t i=0; i<impTypes->size(); i++) {
+    Type *t = (*impTypes)[i]->getBareType();
+    switch(t->kind) {
+#if 0
+    case ty_impint:
+      {
+	errStream << t->ast->loc << ": "
+		  << "Type " << &*t << t->asString() 
+		  << " is not precise enough "
+		  << "to be instantiable."
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+
+    case ty_impfloat:
+      {
+	errStream << t->ast->loc << ": "
+		  << "Type " << t->asString() 
+		  << " is not precise enough "
+		  << "to be instantiable."
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+#endif
+    case ty_array:
+      {
+	if(t->arrlen == 0) {
+	  errStream << t->ast->loc << ": "
+		    << "Type " << t->asString() 
+		    << " is not precise enough "
+		    << "to be instantiable."
+		    << std::endl;
+	  errFree = false;
+	}
+	break;
+      }
+      
+    case ty_int8:
+    case ty_int16:
+    case ty_int32:
+    case ty_int64:
+    case ty_uint8:
+    case ty_uint16:
+    case ty_uint32:
+    case ty_uint64:
+    case ty_word:
+    case ty_float:
+    case ty_double:
+    case ty_quad:
+
+#ifdef KEEP_BF
+    case ty_bitfield:
+#endif
+    case ty_structv:
+      //     case ty_unionr:
+      //     case ty_structr:
+      break;
+
+    default:
+      {
+	errStream << t->ast->loc << ": "
+		  << "Internal Compiler Error. "
+		  << "checkImpreciseTypes obtained "
+		  << t->asString() << " type."
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+    }
+  }
+  
+  return errFree;
+}
+
+static bool
+checkConstraints(std::ostream& errStream, 
+		 const TypeScheme *defSigma,
+		 const TypeScheme *declSigma,
+		 const AST *declAst)
+{
+  bool errFree = true;
+  
+  TCConstraints defTcc;
+  TCConstraints declTcc;
+  defSigma->addConstraints(&defTcc);
+  declSigma->addConstraints(&declTcc);
+    
+  if(defTcc.pred.size() == declTcc.pred.size()) {
+    for(size_t i = 0; (errFree && 
+		       (i < defTcc.pred.size())); i++) {
+      Typeclass *defct = defTcc.pred[i];
+      bool unified = false;
+      for(size_t j = 0; errFree && (j < declTcc.pred.size()); j++) {
+	Typeclass *declct = declTcc.pred[j];
+	if(defct->strictlyEquals(declct)) {
+	  defTcc.pred.remove(i);  i--;
+	  declTcc.pred.remove(j); j--;
+	  unified = true;
+	  break;
+	}	  
+      }
+	
+      if(!unified) {
+	errFree = false;
+	break;
+      }	
+    }
+      
+    if(defTcc.pred.size() || declTcc.pred.size())
+      errFree = false;
+  }
+  else {
+    errFree = false;
+  }
+
+  if(!errFree) {
+    errStream << declAst->loc << ": "
+	      << "For the declaration of `" 
+	      << declAst->children[0]->s << "', the constraints "
+	      << "on the declaration here, do not match "
+	      << "with the definition."
+	      << " Declaration: " << declSigma->asString()
+	      << " Definition: " << defSigma->asString()
+	      << std::endl;
+  }
+  
+  return errFree;
+}
+
+/* Checks the types of:
+     - A definition vs Declaration
+     - A declaration vs a previous declaration
+   for EXACT compatibility */
+static bool
+matchDefDecl(std::ostream& errStream, 
+	     sherpa::CVector<Type *>& trail,
+	     const Environment<TypeScheme> *gamma,
+	     Environment< CVector<Instance *> > *instEnv,
+	     TypeScheme *declSigma,
+	     TypeScheme *defSigma,
+	     unsigned long flags,
+	     bool fnCopyCompatibility)
+{
+  bool errorFree = true;   
+  const AST *decl = declSigma->ast;
+  const AST* def = defSigma->ast;
+  
+  if(flags & DEF_DECL_NO_MATCH)
+    return true;  
+  
+  if(declSigma->ftvs.size() != defSigma->ftvs.size()) {
+    errorFree = false;
+  }
+  else {
+    
+    TypeScheme *declTS = declSigma;
+    TypeScheme *defTS = defSigma;
+    Type *declT = declTS->tau->getType();
+    Type *defT  = defTS->tau->getType();
+    
+    // Rigidness preservation.
+    for(size_t i=0; i < defTS->ftvs.size(); i++) {
+      assert(declTS->ftvs[i]->kind == ty_tvar);
+      declTS->ftvs[i]->link = defTS->ftvs[i];
+    }
+    
+    if(fnCopyCompatibility && declT->isFnxn() && defT->isFnxn()) {
+      declTS = declSigma->ts_instance_copy();
+      declT = declTS->tau->getType();      
+      
+      Type *argsDecl = declT->getBareType()->components[0]->typ;
+      Type *argsDef = defT->getBareType()->components[0]->typ;
+      if(argsDecl->components.size() == argsDef->components.size()) {
+	for(size_t c=0; c < argsDecl->components.size(); c++) {	    
+	  Type *argDecl = ArgType(argsDecl->components[c]->typ);
+	  Type *argDef = ArgType(argsDef->components[c]->typ);
+	  CHKERR(errorFree, argDecl->strictlyEquals(argDef));
+	}
+      }
+      else
+	errorFree = false;
+      
+      Type *retDecl = RetType(declT->getBareType()->components[1]->typ);
+      Type *retDef = RetType(defT->getBareType()->components[1]->typ);
+      CHKERR(errorFree, retDecl->strictlyEquals(retDef));
+    }
+    else {
+      CHKERR(errorFree, declT->strictlyEquals(defT));
+    }
+
+    if(errorFree)
+      CHKERR(errorFree, checkConstraints(errStream, defTS, declTS, decl));
+  }
+  
+  if(!errorFree)
+    errStream << def->loc <<": The type of " << def->s 
+	      << " at definition/declaration "  << defSigma->asString()
+	      << " does not match that of "
+	      << std::endl
+	      << decl->loc << ": declaration / definition "
+	      << declSigma->asString() << " EXACTLY."
+	      << std::endl;
+  
+  // unify for real. At this point, it may be reasonable to 
+  // do this in one step using ONLY UNIFY_STRICT flag
+  //CHKERR(errorFree, unify(errStream, trail, gamma, decl,
+  //			      decl->symType, 
+  //			      sigma->tau, UNIFY_STRICT));
+  
+  return errorFree;
+}
+
+
+/**************************************************************/
+/****                   MAIN INFERENCE ROUTINES            ****/
+/**************************************************************/
+
+//WARNING: **REQUIRES** errFree.
+#define TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,	\
+		  uflags, trail, mode, flags)			\
+  do {								\
+    CHKERR((errFree),						\
+	   (typeInfer(errStream, (ast), (gamma), (instEnv),	\
+		      (impTypes), (isVP), (tcc), (uflags),	\
+		      (trail), (mode), (flags))));		\
+  }while(0)
+
+bool
+typeInfer(std::ostream& errStream, AST *ast, 
+	  Environment<TypeScheme> *gamma,
+	  Environment< CVector<Instance *> > *instEnv,
+	  CVector<Type *> *impTypes,
+	  bool isVP, 
+	  TCConstraints *tcc,
+	  unsigned long uflags,
+	  CVector<Type *>& trail,
+	  int mode,
+	  unsigned flags);
+
+bool isExpansive(std::ostream& errStream, 
+		const Environment<TypeScheme> *gamma,
+		const AST *ast);
+
+bool isExpansive(std::ostream& errStream, 
+		 const Environment<TypeScheme> *gamma,
+		 Type *typ);
+
+bool
+generalizePat(std::ostream& errStream,
+	      sherpa::LexLoc &errLoc,
+	      Environment<TypeScheme> *gamma,
+	      const Environment< CVector<Instance *> > *instEnv,
+	      const AST *bp, const AST *expr,
+	      const bool callerIsLet, 
+	      TCConstraints *tcc,
+	      TCConstraints *parentTCC,
+	      CVector<Type *> &trail);
+
+bool
+InferTvList(std::ostream& errStream, AST *tvList, 
+	    Environment<TypeScheme> *gamma,
+	    Environment< CVector<Instance *> > *instEnv,
+	    CVector<Type *> *impTypes,
+	    bool isVP, 
+	    TCConstraints *tcc,
+	    unsigned long uflags,
+	    CVector<Type *>& trail,
+	    int mode, unsigned flags,
+	    Type *container)  
+{  
+  bool errFree = true;
+  for(size_t i = 0; i < tvList->children.size(); i++) {
+    AST *tv = tvList->children[i];
+    TYPEINFER(tv, gamma, instEnv, impTypes, isVP, 
+	      tcc, uflags, trail, DEF_MODE, TI_TYP_EXP);
+    Type *tvType = tv->symType->getBareType();  // ##
+    assert(tvType->kind == ty_tvar);
+    tvType->flags |= TY_RIGID;
+    container->typeArgs.append(tv->symType->getType());
+  }
+
+  return errFree;
+}
+
+static void
+addTvsToSigma(std::ostream& errStream, AST *tvList, 
+	      TypeScheme *sigma)  
+{  
+  for(size_t i = 0; i < tvList->children.size(); i++) {
+    AST *tv = tvList->children[i];
+    Type *tvType = tv->symType->getBareType(); // ## 
+    assert(tvType->kind == ty_tvar);
+    sigma->ftvs.append(tvType);
+  }
+}
+
+
+// Called only for definitions
+bool
+InferStruct(std::ostream& errStream, AST *ast, 
+	    Environment<TypeScheme> *gamma,
+	    Environment< CVector<Instance *> > *instEnv,
+	    CVector<Type *> *impTypes,
+	    bool isVP, 
+	    TCConstraints *tcc,
+	    unsigned long uflags,
+	    CVector<Type *>& trail,
+	    int mode,
+	    bool isReference,
+	    bool mustDefine,
+	    bool mustEvalBody,
+	    unsigned flags)
+{
+  bool errFree = true;
+  size_t c;
+  Kind structKind;
+  
+  AST *sIdent = ast->children[0];
+
+  // match at_ident
+  structKind = (isReference)? ty_structr : ty_structv;
+   
+  Type *st = new Type(structKind, sIdent);
+  st->defAst = sIdent;
+  sIdent->symType = st;
+  TypeScheme *sigma = new TypeScheme(st, sIdent, new TCConstraints);
+
+  // match at_tvlist
+  AST *tvList = ast->children[1];
+  CHKERR(errFree, InferTvList(errStream, tvList, gamma, instEnv, impTypes, 
+			      isVP, sigma->tcc, uflags, trail, DEF_MODE, 
+			      TI_TYP_EXP, st));
+  sIdent->scheme = sigma;
+
+  // Type all constraints
+  TYPEINFER(ast->children[5], gamma, instEnv, impTypes, isVP, 
+	    sigma->tcc, uflags, trail,  mode, TI_CONSTR);
+  
+  TypeScheme *declTS = gamma->getBinding(sIdent->s);
+  unsigned long bindFlags = 0;
+  if(declTS != NULL) {
+    declTS->tau->getBareType()->defAst = sIdent;
+    bindFlags = BF_REBIND;
+  }
+  gamma->addBinding(sIdent->s, sigma);
+  gamma->setFlags(sIdent->s, bindFlags);
+
+  // Ignore the category
+
+  // match at_declares
+  TYPEINFER(ast->children[3], gamma, instEnv, impTypes, isVP, sigma->tcc,
+	    uflags, trail,  mode, TI_NONE);
+    
+  // match at_fields
+  AST *fields = ast->children[4];
+  for(c = 0; c < fields->children.size(); c++) {
+    // match at_ident
+    // match agt_type
+    AST *field_fill = fields->children[c];
+    TYPEINFER(field_fill, gamma, instEnv, impTypes, isVP, 
+	      sigma->tcc, uflags, trail,  USE_MODE, TI_COMP1);
+    
+    if(field_fill->astType == at_field) {
+      AST *field = field_fill;
+      st->components.append(new comp(field->children[0]->s,
+				     field->children[1]->symType));
+    }
+  }
+
+  addTvsToSigma(errStream, tvList, sigma); 
+  
+  // Set the main AST's type.
+  ast->symType = sIdent->symType;
+   
+  // Solve current Predicates.
+  CHKERR(errFree, sigma->solvePredicates(errStream, 
+					 ast->loc, instEnv));
+
+  // Ensure that the definition matches the declarations
+  if(declTS != NULL)
+    CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
+				 declTS, sigma, uflags, false));
+  
+  return errFree;
+}
+
+
+// Called only for definitions
+bool
+InferUnion(std::ostream& errStream, AST *ast, 
+	    Environment<TypeScheme> *gamma,
+	    Environment< CVector<Instance *> > *instEnv,
+	    CVector<Type *> *impTypes,
+	    bool isVP, 
+	    TCConstraints *tcc,
+	    unsigned long uflags,
+	    CVector<Type *>& trail,
+	    int mode,
+	    bool isReference,
+	    bool mustDefine,
+	    bool mustEvalBody,
+	    unsigned flags)
+{
+  bool errFree = true;
+  size_t c;
+  Kind unionKind;
+  
+  AST *uIdent = ast->children[0];
+
+  // match at_ident
+  unionKind = (isReference)? ty_unionr : ty_unionv;
+  
+  Type *ut = new Type(unionKind, uIdent);
+  ut->defAst = uIdent;
+  ut->myContainer = uIdent;
+  uIdent->symType = ut;
+  TypeScheme *sigma = new TypeScheme(ut, uIdent, new TCConstraints);    
+  
+ // match at_tvlist
+  AST *tvList = ast->children[1];
+  CHKERR(errFree, InferTvList(errStream, tvList, gamma, instEnv, impTypes, 
+			      isVP, sigma->tcc, uflags, trail, DEF_MODE, 
+			      TI_TYP_EXP, ut));
+  uIdent->scheme = sigma;
+  
+  // Type all constraints
+  TYPEINFER(ast->children[5], gamma, instEnv, impTypes, isVP, 
+	    sigma->tcc, uflags, trail,  mode, TI_CONSTR);
+  
+  TypeScheme *declTS = gamma->getBinding(uIdent->s);
+  unsigned long bindFlags = 0;
+  
+  if(declTS != NULL) {
+    declTS->tau->getType()->defAst = uIdent;
+    bindFlags = BF_REBIND;
+  }
+  gamma->addBinding(uIdent->s, sigma);
+  gamma->setFlags(uIdent->s, bindFlags);
+  
+  // Ignore the category
+
+  // match at_declares
+  AST *declares = ast->children[3];
+  TYPEINFER(declares, gamma, instEnv, impTypes, isVP, sigma->tcc,
+	    uflags, trail,  mode, TI_NONE);
+    
+ 
+  // match at_constructors
+  AST *ctrs = ast->children[4];
+  for(c = 0; c < ctrs->children.size(); c++) {
+    // match at_ident
+    // match agt_type
+    AST *ctr = ctrs->children[c];
+    ctr->symType = new Type(ty_tvar, ctr);
+
+    AST *ctrId = ctr->children[0];    
+    // Careful: 
+    // Constructors with components are typed ucon 
+    // and those without any are typed uval.
+    Kind ctrKind;
+
+    if(ctr->children.size() > 1)
+      ctrKind = (isReference) ? ty_uconr : ty_uconv;
+    else
+      ctrKind = (isReference) ? ty_uvalr : ty_uvalv;
+
+    ctrId->symType = new Type(ctrKind, ctrId);
+    ctrId->symType->defAst = ctrId;
+    ctrId->symType->myContainer = uIdent;
+    
+
+    for(size_t i = 1; i < ctr->children.size(); i++) {
+      AST *field_fill = ctr->children[i];
+      TYPEINFER(field_fill, gamma, instEnv, impTypes, isVP, 
+		sigma->tcc, uflags, trail,  USE_MODE, TI_TYP_EXP);
+      
+      if(field_fill->astType == at_field) {
+	AST *field = field_fill;
+	comp *nComp = new comp(field->children[0]->s,
+			       field->children[1]->symType);
+	ctrId->symType->components.append(nComp);
+      }
+    }
+    
+    // All constructors share the same type-class constraints
+    // as the union. This rule -- unlike the one in Haskell -- 
+    // requires that the tcc be absolutely enforced.
+    TypeScheme *ctrSigma = new TypeScheme(ctrId->symType, 
+					  ctrId, sigma->tcc);
+    
+    // This may feel wierd -- that All constructors point to the same
+    // type arguments rather than a copy. But since every instance is 
+    // newly obtained, I think this is OK.
+    for(size_t i = 0; i < tvList->children.size(); i++) {
+      ctrId->symType->typeArgs.append(tvList->children[i]->symType);
+    }
+    
+    // Don't add ctrSigma to gamma yet. Constructors are 
+    // bound at the end of the definition
+    ctrId->scheme = ctrSigma;
+
+    ctr->symType->link = ctrId->symType;
+    comp *nComp = new comp(ctrId->s, ctrId->symType);
+    uIdent->symType->components.append(nComp);
+  } 
+
+  addTvsToSigma(errStream, tvList, sigma);
+
+  // Solve current Predicates.
+  CHKERR(errFree, sigma->solvePredicates(errStream, 
+					 ast->loc, instEnv));
+  
+  //Now add all constructor bindings to the environment.
+  for(c = 0; c < ctrs->children.size(); c++) {
+    AST *ctr = ctrs->children[c];
+    AST *ctrId = ctr->children[0];   
+    addTvsToSigma(errStream, tvList, ctrId->scheme);
+    gamma->addBinding(ctrId->s, ctrId->scheme);
+    
+    
+    // Solve current Predicates.
+    // Since we all share the same constraints, automatically solved.
+    //CHKERR(errFree, ctrId->scheme->solvePredicates(errStream, 
+    //						   ctrId->loc, 
+    //						   instEnv));
+  }
+
+  //Build structure types for all constructors.
+  for(c = 0; c < ctrs->children.size(); c++) {
+    AST *ctr = ctrs->children[c]->children[0];
+    Type *ctrType = ctr->symType->getType();
+    TypeScheme *ctrSigma = ctr->scheme;
+    Type *sType = NULL;
+    TypeScheme *stSigma = NULL;
+    
+    for(size_t i=0; i < c; i++) {
+      AST *thatCtr = ctrs->children[i]->children[0];
+      Type *thatCtrType = thatCtr->symType->getType();
+      
+      if(ctrType->components.size() != 
+	 thatCtrType->components.size())
+	continue;
+      
+      // Since there can be no constructors with only fills
+      // and no field names are repeated, it is sufficient
+      // to check types regardless of fills.
+      bool same = true;
+      for(size_t j=0; j < ctrType->components.size(); j++) {	
+	comp *thisComp = ctrType->components[j];
+	comp *thatComp = thatCtrType->components[j];
+	if((thisComp->name != thatComp->name) ||
+	   !thisComp->typ->strictlyEquals(thatComp->typ)) {
+	  same = false;
+	  break;
+	}
+      }
+	 
+      if(same) {
+	assert(thatCtr->stSigma != NULL);
+	stSigma = thatCtr->stSigma;
+	ctr->stSigma = thatCtr->stSigma;
+	ctr->stCtr = thatCtr;
+	break;
+      }
+    }
+    
+    if(stSigma == NULL) {
+      sType = new Type(ty_structv, ctr);
+      sType->defAst = ctr; // structures have names like (cons 'a)
+      for(size_t i=0; i < ctrType->components.size(); i++)
+	sType->components.append(new comp(ctrType->components[i]->name,
+					  ctrType->components[i]->typ));
+      
+      for(size_t i=0; i < ctrType->typeArgs.size(); i++)
+	sType->typeArgs.append(ctrType->typeArgs[i]);
+      
+      stSigma = new TypeScheme(sType, sigma->tcc); 
+      for(size_t i=0; i < ctrSigma->ftvs.size(); i++)
+	stSigma->ftvs.append(ctrSigma->ftvs[i]);
+
+      ctr->stCtr = ctr;
+      ctr->stSigma = stSigma;
+    }
+
+    assert(ctr->stSigma != NULL);
+    /* No need to add anything to the environment, these structures
+       i) Have the same name as the constructor
+       ii) Are accessible through the stSigma field.
+
+       If necessary, add them with some other name */
+  }
+  
+  // Deal with tag-type declaration and Cardelli Optimization
+  if(errFree) {  
+    //Check if we can do Cardelli Optimization:
+
+    unsigned long long maxCtrs = 0;  
+    size_t lastTagValue = (ctrs->children.size() - 1);
+    size_t lastTagValueCardelli = lastTagValue;
+
+    if(declares->tagType != NULL) {
+      maxCtrs = (((unsigned long long)1) << declares->nBits());
+
+      if(lastTagValue > (maxCtrs - 1)) {
+	errStream << ast->loc << ": "
+		  << "Not enough bits in the tag-type to represent "
+		  << "all Constructors. Use a bigger tag-type. "
+		  << "[If no tag-type declaration is found, "
+		  << "the defalut is `word']"
+		  << std::endl;
+	errFree = false;
+      }      
+    }
+    else if(ctrs->children.size() == 1) {
+      declares->tagType = new Type(ty_word, declares);
+      assert(declares->field_bits == 0);
+      uIdent->Flags |= SINGLE_LEG_UN;
+    }
+    else {      
+      declares->tagType = new Type(ty_word, declares);     
+      assert(declares->field_bits == 0);
+
+      maxCtrs = (((unsigned long long)1) << declares->nBits());          
+      
+      bool cardelli = true;
+      bool seenRef = false;
+      bool isEnum = true;
+      
+      for(size_t c = 0; 
+	  cardelli && (c < ctrs->children.size()); 
+	  c++) {
+	AST *ctr = ctrs->children[c];
+	
+	switch(ctr->children.size()) {
+	case 0:
+	  assert(false);
+	  break;
+
+	case 1:
+	  break;
+	  
+	case 2:
+	  isEnum = false;
+
+	  if(seenRef) {
+	    cardelli = false;
+	    break;
+	  }
+	  
+	  if(ctr->children[1]->symType->isRefType())
+	    seenRef = true;
+	  else
+	    cardelli = false;
+	    
+	  break;
+	  
+	default:
+	  isEnum = false;
+	  cardelli = false;
+	  break;	   
+	}	  
+      }
+     
+
+      if(isEnum) {
+	assert(!seenRef);
+	cardelli = false;
+	uIdent->Flags |= ENUM_UN;
+      }
+      else if(cardelli) {	
+	assert(!isEnum);
+	uIdent->Flags |= CARDELLI_UN;
+	lastTagValueCardelli = (2 * lastTagValue) - 1;
+      }
+      
+#ifdef VERBOSE
+      errStream << "Union " << uIdent->s << ": " 
+		<< std::endl
+		<< "  nBits = " << declares->tagType->nBits() 
+		<< std::endl 
+		<< "  maxCtrs = " << maxCtrs 
+		<< std::endl
+		<< "  ltv = " << lastTagValue 
+		<< std::endl
+		<< "  ltvC = " << lastTagValueCardelli 
+		<< std::endl
+		<< "  isEnum = " << isEnum 
+		<< std::endl
+		<< "  cardelli = " << cardelli 
+		<< std::endl;
+#endif
+    }
+    
+    uIdent->tagType = declares->tagType;
+    uIdent->field_bits = declares->field_bits;
+  }
+    
+  // Set the main AST's type.
+  ast->symType = uIdent->symType;
+
+  // Ensure that the definition matches the declarations
+  if(declTS != NULL)
+    CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
+				 declTS, sigma, uflags, false));
+
+  return errFree;
+}
+
+bool
+superDAG(AST *super, AST *curr)
+{
+  if(super ==  curr)
+    return false;
+  
+  assert(super->scheme != NULL);
+  TCConstraints *tcc = super->scheme->tcc;
+  assert(tcc != NULL);
+
+  for(size_t c = 0; c < tcc->pred.size(); c++) {
+    Typeclass *pred = tcc->pred[c];
+    if(pred->flags & TY_CT_SELF)
+      continue;
+
+    if(superDAG(pred->defAst, curr) == false)
+      return false;
+  }
+  return true;
+}
+
+bool
+InferTypeClass(std::ostream& errStream, AST *ast, 
+	       Environment<TypeScheme> *gamma,
+	       Environment< CVector<Instance *> > *instEnv,
+	       CVector<Type *> *impTypes,
+	       bool isVP, 
+	       TCConstraints *tcc,
+	       unsigned long uflags,
+	       CVector<Type *>& trail,
+	       int mode,
+	       unsigned flags)
+{
+  bool errFree = true;
+  AST *ident = ast->children[0];
+  Typeclass *tc = new Typeclass(ty_typeclass, ident);
+  tc->defAst = ident;
+  TypeScheme *sigma = new TypeScheme(tc, ident, new TCConstraints);
+  tc->flags |= TY_CT_SELF;
+  sigma->tcc->addPred(tc);
+
+  AST *tvList = ast->children[1];
+  CHKERR(errFree, InferTvList(errStream, tvList, gamma, instEnv, impTypes, 
+			      isVP, sigma->tcc, uflags, trail, DEF_MODE, 
+			      TI_TYP_EXP, tc));
+  addTvsToSigma(errStream, tvList, sigma);
+  ident->symType = tc;
+  ident->scheme = sigma;
+  
+  // Type all constraints
+  TYPEINFER(ast->children[4], gamma, instEnv, impTypes, isVP, 
+	    sigma->tcc, uflags, trail,  mode, 
+	    TI_CONSTR | TI_TCC_SUB);
+
+  // Typeclass Declarations
+  AST *tcdecls = ast->children[2];
+  for(size_t c = 0; c < tcdecls->children.size(); c++) {
+    AST *tcdecl = tcdecls->children[c];
+    assert(tcdecl->astType == at_tyfn);
+    AST *domain = tcdecl->children[0];	       
+    AST *range =  tcdecl->children[1];
+    Type *tyfn = new Type(ty_tyfn, tcdecl);
+    tyfn->defAst = tcdecl;
+    TYPEINFER(domain, gamma, instEnv, impTypes, isVP, sigma->tcc, 
+	      uflags, trail, USE_MODE, TI_TYP_EXP);
+    TYPEINFER(range, gamma, instEnv, impTypes, isVP, sigma->tcc, 
+	      uflags, trail, USE_MODE, TI_TYP_EXP);
+    tyfn->components.append(new comp(domain->symType));
+    tyfn->components.append(new comp(range->symType));
+    
+    //errStream << "***"
+    //          << domain->asString() << ": "
+    // 	        << domain->symType->asString(NULL) 
+    // 	        << std::endl
+    // 	        << range->asString() << ": "
+    // 	        << range->symType->asString(NULL)
+    // 	        << std::endl
+    // 	        << "tyfn = " << tyfn->asString(NULL)
+    // 	        << std::endl;
+    tc->addFnDep(tyfn);
+  }
+
+  AST *methods = ast->children[3];
+  for(size_t c = 0; c < methods->children.size(); c++) {
+    AST *method = methods->children[c];
+    AST *mID = method->children[0];
+    AST *mtType = method->children[1];
+    
+    TYPEINFER(mtType, gamma, instEnv, impTypes, isVP, sigma->tcc,
+	      uflags, trail,  USE_MODE, TI_TYP_EXP);
+    mID->symType = mtType->symType;
+    
+    Type *mType = mID->symType->getType();
+    mType->defAst = mID;
+    mType->myContainer = ident;
+    
+    TypeScheme *mSigma = new TypeScheme(mType, mID, 
+					new TCConstraints);
+    for(size_t i=0; i < sigma->tcc->pred.size(); i++)
+      mSigma->tcc->addPred(sigma->tcc->pred[i]);
+ 
+    do { // Dummy loop
+      if(mType == NULL) {
+	assert(!errFree); 
+	break;
+      }
+	
+      if(mType->kind != ty_fn) {
+	errStream << ast->loc << ": " 
+		  << "The type of \"method\" " << mID->s
+		  << "was infered as " << mType->asString()
+		  << ", but all methods must have a function type."
+		  << std::endl;
+ 	errFree = false;
+	break;
+      }
+
+      mSigma->collectAllFtvs();
+      
+      /* Make sure that the method type is acceptable */
+      size_t original_size = mSigma->ftvs.size();
+      
+      if(isExpansive(errStream, gamma, mType)) {
+	CVector<Type *> removedFTVs;
+	mType->removeRestricted(mSigma->ftvs, false, removedFTVs);
+      }
+
+      size_t new_size = mSigma->ftvs.size();
+      
+      if(new_size != original_size) {
+	errStream << ast->loc << ": Invalid Method declaration. "
+		  << "The type of " << mID->s 
+		  << " cannot be properly generalized." 
+		  << std::endl;
+	errFree = false;
+      }      
+
+      // Solve current Predicates.
+      CHKERR(errFree, mSigma->solvePredicates(errStream, 
+					      method->loc, instEnv));
+      
+      mType->myContainer = ident;
+      mID->scheme = mSigma;      
+      comp *nComp = new comp(mID->s,mType); 
+      ident->symType->components.append(nComp);      
+    } while(0);				   
+  }
+
+  if(!errFree)
+    return false;
+  
+  gamma->addBinding(ident->s, ident->scheme);
+  for(size_t c = 0; c < methods->children.size(); c++) {
+    AST *method = methods->children[c];
+    AST *mID = method->children[0];
+    gamma->addBinding(mID->s, mID->scheme);
+  }
+  
+  assert(instEnv->getBinding(ident->fqn.asString()) == NULL);
+  instEnv->addBinding(ident->fqn.asString(), 
+		      new CVector<Instance *>);
+  ast->symType = ident->symType;
+  return errFree;
+}
+
+bool
+InferInstance(std::ostream& errStream, AST *ast, 
+	      Environment<TypeScheme> *gamma,
+	      Environment< CVector<Instance *> > *instEnv,
+	      CVector<Type *> *impTypes,
+	      bool isVP, 
+	      TCConstraints *tcc,
+	      unsigned long uflags,
+	      CVector<Type *>& trail,
+	      int mode,
+	      unsigned flags)
+{
+  bool errFree = true;
+  
+  AST *tcapp = ast->children[0];
+  AST *methods = ast->children[1];
+  AST *constraints = ast->children[2];
+  
+  AST *TCident = tcapp;
+  if(tcapp->children.size())
+    TCident = tcapp->children[0];
+  
+  Environment<TypeScheme> *defGamma = gamma->newDefScope();
+
+  ast->symType = new Type(ty_tvar, ast);
+  TCConstraints *myTcc = new TCConstraints;
+  TYPEINFER(tcapp, defGamma, instEnv, impTypes, isVP,
+	    myTcc, uflags, trail, USE_MODE, TI_CONSTR);
+
+  // Mark myself
+  for(size_t m=0; m < myTcc->pred.size(); m++) {
+    Typeclass *pred = myTcc->pred[m];
+    if(pred->defAst == TCident->symbolDef)
+      pred->flags |= TY_CT_SELF;
+  }
+    
+  if(!errFree) 
+    return false;
+  
+  // Type all constraints
+  TYPEINFER(constraints, defGamma, instEnv, impTypes, isVP,
+	    myTcc, uflags, trail, USE_MODE, TI_CONSTR);
+
+  
+  if(!errFree) 
+    return false;
+      
+  Typeclass *tc = tcapp->symType->getType();
+
+  // Get the set of current instances 
+  CVector<Instance *> *currInsts = 
+    instEnv->getBinding(tc->defAst->fqn.asString());
+
+  
+  if((uflags & ALL_INSTS_OK) == 0) {
+    
+    // Make sure that the instance definition is consistent
+    // with the known functional dependencies.
+    
+    //errStream << ast->loc << ": #Preds = " << myTcc->pred.size()
+    //		<< std::endl;
+    for(size_t i = 0; i < myTcc->pred.size(); i++) {
+      Typeclass *pred = myTcc->pred[i]->getType();
+      //errStream << "Processing : " << pred->asString()
+      //	  << std::endl;
+      if(pred->fnDeps)
+	for(size_t d = 0; d < pred->fnDeps->size(); d++) {
+	  Typeclass *fnDep =  FNDEP(pred)[d];
+	  CVector<Type *> domain;
+	  CVector<Type *> range;
+	  fnDep->components[0]->typ->collectAllftvs(domain);
+	  fnDep->components[1]->typ->collectAllftvs(range);
+	  
+	  //errStream << "  Processing : " << fnDep->asString()
+	  //	      << std::endl;
+	  
+	  for(size_t j=0; j < range.size(); j++) {
+	    if(!domain.contains(range[j])) {
+	      errStream << ast->loc << ": "
+			<< "Invalid Instance. Definition contradicts"
+			<< " with the functional dependency "
+			<< fnDep->asString() << " of predicate "
+			<< pred->asString() << ". At least one "
+			<< " type variable in the range was not in"
+			<< " the domain."
+			<< std::endl;
+	      errFree = false;
+	      break;
+	    }
+	  }
+	}
+    }
+
+    if(!errFree) 
+      return false;
+
+    // Make sure that the instance definition does not contradict
+    // with any functional dependencies in the presence of 
+    // previous instance definitions
+    // This is a O(n^5) loop !!! Hopefully there will not be
+    // too many typeclass and fnDep constraints, and 
+    // the compilation will finish in time ... 
+    // The other way to think about this is that this is actually
+    // a O(n^3) algorithm ranging over all instances and the 
+    // functional dependencies. The other two loops occur because
+    // fnDeps are stored inside predicates. 
+    // Is there a better algorithm?
+    for(size_t i = 0; i < currInsts->size(); i++) {
+      Instance *inst = (*currInsts)[i];
+      // Since Equals will not unify any variables in place,
+      // I don't have to do a ts_instance_copy() here.
+      TCConstraints *theirTcc = inst->ast->scheme->tcc;
+
+      for(size_t l = 0; l < myTcc->pred.size(); l++) {
+	Typeclass *myPred = myTcc->pred[l]->getType();
+	for(size_t m = 0; m < theirTcc->pred.size(); m++) {
+	  Typeclass *theirPred = theirTcc->pred[m]->getType();
+
+	  if((myPred->defAst == theirPred->defAst) &&  
+	     (myPred->fnDeps && theirPred->fnDeps))
+	    for(size_t j = 0; j < myPred->fnDeps->size(); j++) {
+	      Type *myFnDep =  FNDEP(myPred)[j]->getType();
+	      Type *myDomain = myFnDep->components[0]->typ;
+		  
+	      for(size_t k = 0; k < theirPred->fnDeps->size(); k++) {		  
+		Type *theirFnDep =  FNDEP(theirPred)[k]->getType();
+		Type *theirDomain = theirFnDep->components[0]->typ;
+		    
+		assert(myFnDep->defAst == theirFnDep->defAst);
+		    
+		if( myDomain->equals(theirDomain) && 
+		    !myFnDep->equals(theirFnDep)) {
+		  errStream << ast->loc << ": "
+			    << "The following is a contradiction: \n"
+			    << inst->ast->loc << ": "
+			    << "Instance definition " 
+			    << inst->asString()
+			    << " with Predicate "
+			    << theirPred->asString() << " and "
+			    << "associated functional dependency "
+			    << theirFnDep->asString() << ", and\n"
+			    << ast->loc << ": "
+			    << "Instance definition " 
+			    << tc->asString()
+			    << " with Predicate "
+			    << myPred->asString() << " and "
+			    << "associated functional dependency "
+			    << myFnDep->asString()
+			    << std::endl;
+		  errFree = false;
+		  break;
+		}
+	      }
+	    }
+	}
+      }	
+    }
+           
+    if(!errFree) 
+      return false;
+
+  }
+ 
+  tcapp->scheme = new TypeScheme(tc, myTcc);
+      
+  size_t nMethods = tc->components.size();
+  if(methods->children.size() == nMethods) {
+    for(size_t i = 0; i < nMethods; i++) {
+      Type *mtType = tc->components[i]->typ;
+      AST *method = methods->children[i];
+      TYPEINFER(method, defGamma, instEnv, impTypes, isVP, myTcc,
+		uflags, trail, USE_MODE, TI_NONE);
+      Type *methodType = method->symType->getType();
+      CHKERR(errFree, unify(errStream, trail, defGamma, 
+			    method, mtType, methodType,
+			    uflags));
+    }
+  }
+  else {
+    errStream << ast->loc << ": "
+	      << "Type class" << tcapp->children[0]->s
+	      << " needs " << nMethods << " methods for "
+	      << "instantiation, but here obtained "
+	      << methods->children.size() << "."
+	      << std::endl;
+  }
+
+  if(!errFree) 
+    return false;
+
+  TypeScheme *sigma = tcapp->scheme;
+
+  Environment<TypeScheme>::mergeBinds(defGamma, gamma);
+  sigma->generalize(errStream, ast->loc, gamma, instEnv, tcapp, 
+		    NULL, trail, true, false, false);      
+       
+  if(!errFree)
+    return false;
+  
+  Instance *myInstance = new Instance(sigma, ast);
+  
+  if((uflags & ALL_INSTS_OK) == 0) {
+    // Make sure there are no absolute conflicts 
+    // with existing instances
+    assert(currInsts != NULL);
+  
+    for(size_t i = 0; i < currInsts->size(); i++) {
+      Instance *inst = (*currInsts)[i];
+      if(inst->equals(errStream, myInstance, instEnv)) {
+	errStream << tcapp->loc << ": "
+		  << "Instance declaration "
+		  << sigma->asString() << " conflicts with "
+		  << " previous definition at "
+		  << inst->ast->loc 
+		  << "(" << inst->ts->asString() << ")."
+		  << std::endl;
+	errFree = false;
+	break;				  
+      }	
+    } 
+
+    if(!errFree)
+      return false; 
+  }
+  
+  // Add current Predicate.
+  currInsts->append(myInstance);
+  
+  //errStream << "Added " << sigma->asString() 
+  //	    << " to " << tc->defAst->s << std::endl;
+      
+  ast->symType = tcapp->symType;
+  ast->scheme =  tcapp->scheme;
+
+  return errFree;
+}
+
+
+static Type *
+LvalAdjustedType(AST *vp, Type *eType)
+{
+  eType = eType->getBareType();
+  Type *rhsType;
+  switch(vp->astType) {
+  case at_ident:
+    {      
+      rhsType = TypeOfCopy(eType);
+      rhsType->components.append(new comp(eType));
+      break;
+    }    
+
+  case at_identPattern:
+    {
+      return LvalAdjustedType(vp->children[0], eType);
+      break;
+    }    
+
+  case at_letGather:
+    {
+      assert(eType->kind == ty_letGather);
+
+      rhsType = new Type(ty_letGather, eType->ast);
+      for (size_t c = 0; c < vp->children.size(); c++) {
+	comp *ncomp = new comp("__dontCare", 
+	  LvalAdjustedType(vp->children[c],
+			   eType->components[c]->typ));
+	rhsType->components.append(ncomp);
+      }
+
+      break;
+    }
+
+  default:
+    {
+      assert(false);
+      break;
+    }
+  }
+  return rhsType;
+}
+
+static bool
+CheckLetrecFnxnRestriction(std::ostream &errStream, AST *ast)
+{
+  bool errFree = true;
+  switch(ast->astType) {
+  case at_ident:
+    {
+      if(!ast->symType->isFnxn() && !ast->symType->isClosure()) {
+	errStream << ast->loc << ": Identifier " << ast->s
+		  << " bound in a letrec, has non-function type "
+		  << ast->symType->asString();
+	errFree = false;	      
+      }
+      break;
+    }
+    
+  case at_identPattern:
+    {
+      CHKERR(errFree, CheckLetrecFnxnRestriction(errStream, 
+						 ast->children[0]));
+      break;
+    }
+  default:
+    {
+      for(size_t c=0; c < ast->children.size(); c++)
+	CHKERR(errFree, CheckLetrecFnxnRestriction(errStream, 
+						   ast->children[c]));
+    }
+  }
+  return errFree;
+}
+
+
+static TypeScheme *
+bindIdentDef(AST *ast, 
+	     Environment<TypeScheme> *gamma,
+	     unsigned long bindFlags,
+	     unsigned long flags)
+{
+  ast->symType = newBindType(ast, flags); 
+  
+  TypeScheme *sigma = new TypeScheme(ast->symType);
+  ast->scheme = sigma;
+  
+  if (ast->Flags & ID_IS_TVAR) {
+    assert(flags & TI_TYP_EXP);
+    bindFlags |= BF_NO_MERGE;
+    gamma->addDefBinding(ast->s, sigma);
+  }
+  else {
+    gamma->addBinding(ast->s, sigma);      
+  }
+  
+  gamma->setFlags(ast->s, bindFlags);    
+  return sigma;
+}
+
+static TypeScheme *
+Instantiate(AST *ast, TypeScheme *sigma)
+{	      
+  if(ast->symbolDef != NULL)
+    ast = ast->symbolDef;
+  
+  if(ast->Flags & ID_IS_CTOR)
+    return sigma->ts_instance_copy();
+  else
+    return sigma->ts_instance();
+}
+	
+
+static Type *
+buildFnFromApp(AST *ast, unsigned long uflags)
+{
+  assert(ast->astType == at_apply);
+  Type *fn = new Type (ty_fn, ast);
+  Type *targ = new Type(ty_fnarg, ast);
+  for (size_t i = 1; i < ast->children.size(); i++) {
+    Type *argi = ArgType(newTvar(ast->children[i]));
+    targ->components.append(new comp(argi));
+  }
+  
+  fn->components.append(new comp(targ));
+  Type *ret = RetType(newTvar(ast));
+  fn->components.append(new comp(ret));
+  
+  if((uflags & APPS_ON_CLOSURES) &&
+     (ast->Flags2 & APP_NATIVE_FNXN) == 0) {
+    Type *closure = new Type(ty_closure, ast);
+    closure->components.append(new comp(fn));
+    fn = closure;
+  }
+  return fn;
+}
+  
+bool
+typeInfer(std::ostream& errStream, AST *ast, 
+	  Environment<TypeScheme> *gamma,
+	  Environment< CVector<Instance *> > *instEnv,
+	  CVector<Type *> *impTypes,
+	  bool isVP, 
+	  TCConstraints *tcc,
+	  unsigned long uflags,
+	  CVector<Type *>& trail,
+	  int mode,
+	  unsigned flags)
+{
+  bool errFree = true;
+
+  //    errStream << "INF: " //<< ast->loc << ": " 
+  //   	    << ast->s << "[" << ast->astTypeName() << "]" 
+  //   	    << "   mode = " << mode
+  // 	     << "   isInTypapp = " << ((isInTypapp)?"true":"false")
+  //   	    << std::endl;
+  
+  switch(ast->astType) {
+  case agt_expr:
+  case agt_expr_or_define:
+  case agt_eform:
+  case at_Null:
+  case at_refCat:
+  case at_valCat:
+  case at_opaqueCat:
+  case at_methods:
+  case agt_category:
+  case at_AnyGroup:
+  case agt_literal:
+  case agt_var:
+  case agt_tvar:
+  case agt_definition:
+  case agt_type_definition:
+  case agt_value_definition:
+  case agt_type:
+  case at_letbindings:
+  case at_letbinding:
+  case at_dobindings:
+  case at_dobinding:
+  case agt_CompilationUnit:
+  case agt_tc_definition:
+  case agt_if_definition:
+  case agt_ow:
+  case agt_qtype:
+  case agt_fielditem:
+  case at_ifident:
+  case at_localFrame:
+  case at_frameBindings:
+  case at_identList:
+  case agt_ucon:
+
+  case at_defrepr:
+  case at_reprbody:
+  case agt_reprbodyitem:
+  case at_reprcase:
+  case at_reprcaselegR:
+  case at_reprtag:
+    {
+      errStream << ast->loc << ": Internal Compiler Error. Invalid AST type" 
+		<< ast->astTypeName() << std::endl;
+    
+      errFree = false;
+      break;
+    }
+
+  case at_boolLiteral:
+    {
+      ast->symType = nonCopyType(Type::LookupKind("bool"), ast);
+      break;
+    }
+
+  case at_charLiteral:
+    {
+      ast->symType = nonCopyType(Type::LookupKind("char"), ast);
+      break;
+    }
+
+  case at_intLiteral:
+    {
+      if(uflags & NO_MORE_TC) {
+	ast->symType = nonCopyType(ty_tvar, ast);
+	break;
+      }
+
+      const std::string& intLit = SpecialNames::spNames.sp_integral;
+      TypeScheme *icSigma = gamma->getBinding(intLit);
+      assert(icSigma != NULL);
+      
+      Typeclass *ic = icSigma->type_instance_copy();
+      assert(ic->typeArgs.size() == 1);
+      ast->symType = ic->typeArgs[0]->getType();
+      tcc->addPred(ic);
+      break;
+    }
+
+  case at_floatLiteral:
+    {
+      if(uflags & NO_MORE_TC) {
+	ast->symType = nonCopyType(ty_tvar, ast);
+	break;
+      }
+
+      std::string& floatLit = SpecialNames::spNames.sp_fp;
+      TypeScheme *fcSigma = gamma->getBinding(floatLit);
+      assert(fcSigma != NULL);
+      
+      Typeclass *fc = fcSigma->type_instance_copy();
+      assert(fc->typeArgs.size() == 1);
+      ast->symType = fc->typeArgs[0]->getType();
+      tcc->addPred(fc);
+      break;
+    }
+    
+  case at_docString:
+    // FIX: Not sure this is right. In truth, we really shouldn't be
+    // bothering to type check these at all.
+    {
+      ast->symType = nonCopyType(Type::LookupKind("string"), ast);
+
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_NONE);
+      break;
+    }
+
+  case at_stringLiteral:
+    {
+      ast->symType = nonCopyType(Type::LookupKind("string"), ast);
+      break;
+    }
+
+  case at_ident:
+    {
+      switch(mode) {
+      case DEF_MODE:
+	{
+	  unsigned long bindFlags = 0;
+	  TypeScheme *sigma = gamma->getBinding(ast->s);
+
+	  if(sigma != NULL) {	    
+	    if(ast->isDecl) {
+	      /* Note: This case is ONLY used for proclaims. 
+		 structure and union declarations and definitions
+		 do not make this recursive call */
+	      
+	      // We need to preserve this un-unified until after the
+	      // real type is inferred. So, this unification will now be
+	      // done in handle-decls.
+	      //
+	      //   CHKERR(errFree, unify(errStream, trail, gamma, 
+	      //                         ast, ast->symType, 
+	      // 	                       sigma->tau, uflags));
+	      //
+	      // Make way for the actual definition of the type.
+	     
+	      ast->symType = newBindType(ast, flags);
+	      TypeScheme *sigma = new TypeScheme(ast->symType, ast, NULL);
+	      ast->symType->getBareType()->defAst = sigma->tau->getBareType()->defAst;
+	      ast->scheme = sigma;
+	    }
+	    else {	      
+	      bindFlags = BF_REBIND;
+	      sigma = bindIdentDef(ast, gamma, bindFlags, flags);
+	      ast->symType->defAst = sigma->tau->getType()->defAst = ast;
+	      break;
+	    }
+	  }
+	  else
+	    sigma = bindIdentDef(ast, gamma, bindFlags, flags);	  
+	  break;
+	}
+      
+      case REDEF_MODE:
+	{
+	  (void) bindIdentDef(ast, gamma, BF_REBIND, flags);
+	  break;
+	}
+
+      case USE_MODE:
+	{
+	  assert(tcc != NULL);
+
+	  TypeScheme *sigma = gamma->getBinding(ast->s);
+	  if(sigma == NULL) {
+
+	    // If this is a type variable that is used as in
+	    //
+	    //   (define a:'a 10)
+	    //
+	    // there will be no prior definition of it ('a).  So, it
+	    // should now be defined.  In-correct usages should be
+	    // taken care of by the symbol resolver.  So, it is safe
+	    // to add this type to Gamma now.
+
+	    if((ast->identType == id_type) && (ast->Flags & ID_IS_TVAR)) {
+	      sigma = bindIdentDef(ast, gamma, 0, flags);	      
+	    }
+	    else {  
+	      errStream << ast->loc << ": "
+			<< ast->s << " Unbound in Gamma" << std::endl;
+	      
+	      errStream << "Available bindings are: "
+			<< gamma->asString()
+			<< std::endl;	      
+	      
+	      ast->symType = newTvar(ast);
+	      return false;
+	    }
+	  }
+	  
+	  TypeScheme *tsIns =  Instantiate(ast, sigma);
+	  Type *ins = tsIns->tau->getType();
+	  ast->symType = ins;
+	  
+#ifdef VERBOSE  
+	  errStream << " For " << ast->s << ":\n";
+	  errStream << "Obtained " << ins->asString()
+		    << " From " << sigma->asString() << std::endl;
+#endif
+	      
+	  ins = ins->getBareType();
+
+	  if((flags & TI_TYP_EXP) && 
+	     ((flags & TI_TYP_APP) == 0) && 
+	     (ins->typeArgs.size() > 0)) {
+	    errStream << ast->loc << ": "
+		      << ast->s << " cannot be instantiated without " 
+		      << ins->typeArgs.size() << " type arguments."
+		      << std::endl;
+	    
+	    ast->symType = newTvar(ast);
+	    return false;
+	  }
+	  
+	  if(tsIns->tcc != NULL) {
+	    for(size_t i = 0; i < tsIns->tcc->pred.size(); i++) {
+	      Typeclass *pred = tsIns->tcc->pred[i]->getType();	      
+	      if(flags & TI_TCC_SUB)
+		pred->flags |= TY_CT_SUBSUMED;
+	      tcc->addPred(pred);
+	    }
+	  }
+	  break;
+	}
+      }
+      break;
+    }
+
+  case at_start:
+    {
+      // match at_module
+    
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_NONE);
+    
+      if (ast->children.size() > 1) {
+	// match at_version
+	TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  mode, TI_NONE);
+      }
+
+      break;
+    }
+
+  case at_version:
+    {
+      // match at_stringLiteral
+      //       TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP,
+      // 		uflags, trail,  USE_MODE, TI_COMP2);
+
+      break;
+    }
+
+  case at_module:
+    {
+      for(size_t c = 0; c < ast->children.size(); c++) {
+	TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  mode, TI_NONE);
+	// errStream << " - - - - - - - - - - - - - - - - - - - - - - - - - "
+	// 	     << std::endl;
+      }
+      break;
+    }
+
+  case at_interface:
+    {
+      // match at_ident
+      //    TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+      //              uflags, trail,  mode, TI_COMP2);
+    
+      // match agt_definition*
+
+      for(size_t c = 1; c < ast->children.size(); c++)
+	TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  mode, TI_NONE);
+      break;
+    }
+
+  case at_usesel:
+    {
+      // Impossible to get here. Symtab rewrote this as ident.
+      assert(false);
+    }
+    break;
+
+  case at_use:
+    {      
+      ast->symType = new Type(ty_tvar, ast);
+
+      for(size_t c = 0; c < ast->children.size(); c++)
+	TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  mode, TI_NONE);
+      break;
+    }
+
+  case at_use_case:
+    {
+      ast->symType = new Type(ty_tvar, ast);
+      
+      TypeScheme *sigma = gamma->getBinding(ast->children[1]->s);
+      
+      if(sigma == NULL) {
+	errStream << ast->loc << ": "
+		  << " attempt to use " << ast->children[1]->s 
+		  << ", which has an unknown, or buggy type"
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+
+      gamma->addBinding(ast->children[0]->s, sigma);
+      gamma->setFlags(ast->children[0]->s, BF_PRIVATE);
+      break;
+    }
+
+  case at_defunion:
+    {
+      Environment<TypeScheme> *defGamma = gamma->newDefScope();
+      
+      AST *category = ast->children[2];
+      bool isRefType = (category->astType == at_refCat);
+
+      CHKERR(errFree, InferUnion(errStream, ast, defGamma, instEnv,
+				 impTypes, isVP, tcc,
+				 uflags, trail,  mode, isRefType, 
+				 true, true, TI_NONE));
+      
+      Environment<TypeScheme>::mergeBinds(defGamma, gamma);      
+      break;
+    }
+
+  case at_defstruct:
+    {
+      Environment<TypeScheme> *defGamma = gamma->newDefScope();
+
+      AST *category = ast->children[2];
+      bool isRefType = (category->astType == at_refCat);
+
+      CHKERR(errFree, InferStruct(errStream, ast, defGamma, instEnv,
+				  impTypes, isVP, tcc,
+				  uflags, trail,  mode, isRefType, 
+				  true, true, TI_NONE));
+
+      Environment<TypeScheme>::mergeBinds(defGamma, gamma);      
+      break;
+    }
+
+  case at_declunion:
+  case at_declstruct:
+  case at_declrepr:
+    {
+      Environment<TypeScheme> *defGamma = gamma->newDefScope();
+
+      // match at_ident
+      // FIX: (shap) Not convinced this is correct for opaque...
+      Kind decl_ty;      
+      switch(ast->astType) {
+      case at_declunion:
+	decl_ty = 
+	  (ast->children[2]->astType == at_refCat) ?  ty_unionr : ty_unionv;
+	break;
+      case at_declstruct:
+	decl_ty = 
+	  (ast->children[2]->astType == at_refCat) ?  ty_structr : ty_structv;
+	break;
+      case at_declrepr:
+	decl_ty = 
+	  (ast->children[2]->astType == at_refCat) ?  ty_reprr : ty_reprv;
+	break;
+      default:
+	die();
+      }
+
+      AST *ident = ast->children[0];
+      ident->symType = new Type(decl_ty, ident);
+      ident->symType->defAst = ident;
+      TypeScheme *sigma = new TypeScheme(ident->symType, ident);
+      sigma->tcc = new TCConstraints;
+
+      // match at_tvlist
+      AST *tvList = ast->children[1];
+      CHKERR(errFree, InferTvList(errStream, tvList, defGamma, instEnv,
+				  impTypes, isVP, sigma->tcc, uflags, 
+				  trail, DEF_MODE, 
+				  TI_TYP_EXP, ident->symType));
+      ident->scheme = sigma;
+
+      // Category keywork at position 2
+
+      // Type all constraints
+      TYPEINFER(ast->children[3], gamma, instEnv, impTypes, isVP, 
+		sigma->tcc, uflags, trail,  mode, TI_CONSTR);
+
+      // Solve current Predicates.
+      CHKERR(errFree, sigma->solvePredicates(errStream, 
+					     ident->loc, instEnv));
+
+    
+      TypeScheme *ts = gamma->getBinding(ident->s);
+      if(ts != NULL) {
+	ident->symType->defAst = ts->tau->getType()->defAst;
+
+	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
+				     ts, sigma, uflags, false));
+      }
+      else {
+	defGamma->addBinding(ident->s, sigma);
+	// 	cout << "Added decl for " << ident->s 
+	// 	     << " with  base = " 
+	//           << &(*ident->symType->defAst)
+	// 	     << std::endl;
+      }
+
+      ast->symType = ident->symType;
+
+      Environment<TypeScheme>::mergeBinds(defGamma, gamma);
+
+      if (sigma->ftvs.size() && ast->getID()->externalName.size()) {
+	errStream << ast->loc << ": Polymorphic declarations may not specify "
+		  << "an external identifier."
+		  << std::endl;
+	errFree = false;
+      }
+
+      break;
+    }
+
+  case at_proclaim:
+    {
+      AST *ident = ast->children[0];
+      AST *typ = ast->children[1];
+      AST *constraints = ast->children[2];
+
+      // Maybe, we have a prior declaration?
+      TypeScheme *declTS = gamma->getBinding(ident->s);
+
+      // FIX Incompeteness Issue here
+      Environment<TypeScheme> *defGamma = gamma->newDefScope();
+      TCConstraints *newTcc = new TCConstraints;
+
+      assert(ident->isDecl);
+      TYPEINFER(ident, defGamma, instEnv, impTypes, isVP, newTcc,
+		uflags, trail, DEF_MODE, TI_NONE);
+      
+      TYPEINFER(typ, defGamma, instEnv, impTypes, isVP, newTcc,
+		uflags, trail, USE_MODE, TI_TYP_EXP);
+      
+      CHKERR(errFree, unify(errStream, trail, defGamma, ident, 
+			    ident->symType, 
+			    typ->symType, uflags)); 
+      
+      TYPEINFER(constraints, defGamma, instEnv, impTypes, isVP, 
+		newTcc, uflags, trail,  mode, TI_CONSTR);
+      
+      if(!errFree)
+	break;
+      
+      TypeScheme *sigma = ident->scheme;
+      sigma->tcc = newTcc;
+      //collectAllftvs(sigma->tau, sigma->ftvs);
+
+      Environment<TypeScheme>::mergeBinds(defGamma, gamma);
+      AST *ip = new AST(at_identPattern, ident->loc, ident, typ);
+      ip->symType = ident->symType;
+
+      CHKERR(errFree, generalizePat(errStream, ast->loc, gamma,
+				    instEnv, ip, ident, false, 
+				    sigma->tcc, NULL, trail));
+
+      if(!errFree) {
+	errStream << ast->loc << ": Invalid Proclaimation"
+		  << " The type specified could not be"
+		  << " properly generalized."
+		  << std::endl;
+      }
+      
+      if (sigma->ftvs.size() && ast->getID()->externalName.size()) {
+	errStream << ast->loc << ": Polymorphic declarations may not specify "
+		  << "an external identifier."
+		  << std::endl;
+	errFree = false;
+      }
+
+      // Make sure this is a compatible declaration is there 
+      // was one already.
+      if(declTS != NULL)
+	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
+				     declTS, sigma, uflags, false));      
+      
+      ast->symType = ident->symType;      
+      break;
+    }
+
+  case at_deftypeclass:
+    {
+      Environment<TypeScheme> *defGamma = gamma->newDefScope();
+      CHKERR(errFree, InferTypeClass(errStream, ast, defGamma, instEnv,
+				     impTypes, isVP, tcc, uflags, 
+				     trail, DEF_MODE, TI_NONE));
+      
+      Environment<TypeScheme>::mergeBinds(defGamma, gamma);
+      break;
+    }
+
+  case at_tcdecls:
+  case at_tyfn:
+  case at_method_decls:
+  case at_method_decl:
+    {
+      assert(false);
+      break;
+    }
+
+  case at_tcapp:
+    {      
+      AST *tcIdent = ast->children[0];
+      TYPEINFER(tcIdent, gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail, USE_MODE, 
+		flags | TI_TYP_EXP | TI_TYP_APP);
+      Typeclass *tc = tcIdent->symType->getType();
+
+      if(tc->kind != ty_typeclass) {
+	// This is the result of some other error
+	errFree = false;
+	break;
+      }
+      
+      if(tc->typeArgs.size() == (ast->children.size() - 1)) {
+	for(size_t i = 1; i < ast->children.size(); i++) {
+	  TYPEINFER(ast->children[i], gamma, instEnv, impTypes, isVP, tcc,
+		    uflags, trail, USE_MODE, TI_COMP1);
+	  CHKERR(errFree, unify(errStream, trail, gamma, 
+				ast->children[i],
+				ast->children[i]->symType,
+				tc->typeArgs[i-1], uflags));
+	}	
+      }
+      else {
+	errStream << ast->loc << ": "
+		  << "Typeclass cannot be Partially "
+		  << "or over instantiated. "
+		  << "Typeclass " << tc->asString()
+		  << " expects " << tc->typeArgs.size() 
+		  << " args, but is here applied to "
+		  << (ast->children.size() - 1) << "."
+		  << std::endl;
+      }
+
+      ast->symType = tc;
+      break;
+    }
+
+  case at_definstance:
+    {
+      CHKERR(errFree, InferInstance(errStream, ast, gamma, instEnv,
+				    impTypes, isVP, tcc, uflags, trail, 
+				    DEF_MODE, TI_NONE));				    
+      break;
+    }
+
+  case at_defexception:
+    {
+      AST *ctr = ast->children[0];
+
+      // Maybe, we have a prior declaration?
+      TypeScheme *declTS = gamma->getBinding(ctr->s);
+
+      Environment<TypeScheme> *defGamma = gamma->newDefScope();
+      TCConstraints *myTcc = new TCConstraints;
+      TYPEINFER(ctr, defGamma, instEnv, impTypes, isVP, myTcc, 
+		uflags, trail, DEF_MODE, TI_TYP_EXP);      
+      
+      Type *exn = new Type(ty_exn, ctr);
+      exn->defAst = ctr;      
+      ctr->symType->getType()->link = exn;
+      TypeScheme *sigma = ctr->scheme;
+      sigma->tcc = myTcc;
+      
+      Type *t = ctr->symType->getType();
+      for (size_t c = 1; c < ast->children.size(); c++) {
+	AST *field = ast->children[c];	
+	if(field->astType == at_fill)
+	  continue;
+
+	TYPEINFER(field, defGamma, instEnv, impTypes, 
+		  isVP, sigma->tcc,
+		  uflags, trail, USE_MODE, TI_TYP_EXP);
+	Type *t1 = field->children[1]->getType();
+	t->components.append(new comp(field->children[0]->s, t1));
+      }
+
+      // Build the structure type for the component structure.
+      Type *sType = new Type(ty_structv, ctr);
+      sType->defAst = ctr;
+      for(size_t i=0; i < t->components.size(); i++)
+	sType->components.append(new comp(t->components[i]->name,
+					  t->components[i]->typ));
+      
+      ctr->stCtr = ctr;
+      ctr->stSigma = new TypeScheme(sType, ctr, sigma->tcc);
+
+      // Solve current Predicates.
+      CHKERR(errFree, sigma->solvePredicates(errStream, 
+					     ast->loc, instEnv));
+
+      ast->symType = ctr->symType;
+
+      Environment<TypeScheme>::mergeBinds(defGamma, gamma);
+
+      if(declTS != NULL)
+	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
+				     declTS, sigma, uflags, false));	
+      break;
+    }
+
+  case at_define:
+    {
+      // Maybe, we have a prior declaration?
+      AST *ident = ast->children[0]->children[0];
+
+      TypeScheme *declTS = gamma->getBinding(ident->s);
+
+      Environment<TypeScheme> *defGamma = gamma->newDefScope();
+      TCConstraints *currTcc = new TCConstraints;
+      
+      // match agt_bindingPattern
+      // match agt_expr
+      TYPEINFER(ast->children[0], defGamma, instEnv, impTypes, isVP, 
+		currTcc, uflags, trail, DEF_MODE, TI_NONE);
+
+      TYPEINFER(ast->children[1], defGamma, instEnv, impTypes, isVP, 
+		currTcc, uflags, trail, USE_MODE, TI_NONE);
+      
+      TYPEINFER(ast->children[2], defGamma, instEnv, impTypes, isVP, 
+		currTcc, uflags, trail,  mode, TI_CONSTR);
+      
+      Type *lhsType = ast->children[0]->symType->getType();
+      Type *rhsType = LvalAdjustedType(ast->children[0], 
+				       ast->children[1]->symType);
+      
+      CHKERR(errFree, unify(errStream, trail, defGamma, ast->children[0], 
+			    lhsType, rhsType, uflags | UNIFY_COPY));
+      
+      //if(errFree) 
+      //  PropagateMutabilityToBindings(lhsType, rhsType);
+
+      Environment<TypeScheme>::mergeBinds(defGamma, gamma);
+
+      CHKERR(errFree, generalizePat(errStream, ast->loc, 
+				    gamma, instEnv, 
+				    ast->children[0],
+				    ast->children[1], 
+				    false, currTcc, NULL, trail));
+      
+      if(declTS != NULL) 
+	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
+				     declTS, ident->scheme, uflags, true));	
+
+#ifdef VERBOSE  
+      errStream << "At " << ast->asString()
+		<< "[1] = " << ast->children[1]->symType->asString()
+      		<< "[0] = " << ast->children[0]->children[0]->scheme->asString()
+      		<< std::endl;            
+#endif
+      ast->symType = ast->children[0]->symType;
+      break;
+    }
+    
+  case at_import:
+  case at_provide:
+    {
+      Environment<TypeScheme> *tmpGamma = gamma->newScope();
+      assert(ast->children[0]->ifgamma != NULL);
+      assert(ast->children[0]->instEnv != NULL);
+      
+      useIFGamma(ast->children[0]->s, ast->children[0]->ifgamma,
+		 tmpGamma);
+      CHKERR(errFree, useIFInsts(errStream, ast->loc, 
+				 ast->children[0]->instEnv, 
+				 instEnv, uflags));
+
+      Environment<TypeScheme>::mergeBinds(tmpGamma, gamma);
+      break;
+    }
+
+  case at_declares:
+    {
+      ast->tagType = NULL;
+      
+      // match at_declare*
+      for(size_t c = 0; c < ast->children.size(); c++) {
+ 	TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  mode, TI_NONE);
+	
+	if(ast->children[c]->tagType != NULL) {
+	  if(ast->tagType == NULL) {
+	    ast->tagType = ast->children[c]->tagType;
+	    ast->field_bits = ast->children[c]->field_bits;
+	  }
+	  else {
+	    errStream << ast->children[c]->loc << ": "
+		      << "Only one tag-type declaration "
+		      << "is allowed per definition"
+		      << std::endl;	  
+	  }
+	}
+      }
+      ast->symType = new Type(ty_tvar, ast);
+      break;
+    }
+
+  case at_declare:
+    {
+      // match at_ident
+      // The first identifier has special meaning, and must be 
+      // dealt with by hand.
+      AST *ident = ast->children[0];      
+      AST *typ = ast->children[1];
+
+      // match agt_type?
+      if (ast->children.size() > 1) {
+	TYPEINFER(typ, gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_NONE);
+
+      if(typ->symType == NULL)
+	typ->symType = new Type(ty_tvar, typ);
+      }
+
+      // These names are never mangled.
+      if(ident->s == "tag-type") {
+	// compatible type
+	
+	Type *realType = ast->children[1]->symType->getType();
+	Type *t = realType->getBareType();	
+	if(t->kind == ty_mutable) {
+	  errStream << ast->children[1]->loc << ": "
+		    << "Tag type cannot be mutable"
+		    << std::endl;
+	  errFree = false;
+	}
+	else if(!t->isInteger()) {
+	  errStream << ast->children[1]->loc << ": "
+		    << "Tag type must be an integral type"
+		    << std::endl;
+	  errFree = false;
+	  break;
+	}
+	else {
+	  ast->tagType = ast->children[1]->symType;
+	  ast->field_bits = ast->children[1]->field_bits;
+	}	  
+      }
+
+      ast->symType = new Type(ty_tvar, ast);
+      break;
+    }
+
+  case at_tvlist:
+    // match agt_tvar*
+  case at_constructors:
+    // match at_constructor+
+  case at_constructor:
+
+  case at_fields:
+    // match at_field*
+    break;
+
+  case at_field: 
+    {
+      // match at_ident
+      AST *fName = ast->children[0];
+      fName->symType = new Type(ty_tvar, fName);
+      
+      // match agt_type
+      AST *fType = ast->children[1];
+      TYPEINFER(fType, gamma, instEnv, impTypes, isVP, 
+		tcc, uflags, trail,  USE_MODE, TI_TYP_EXP);
+      
+      ast->symType = fType->symType;
+      ast->field_bits = fType->field_bits;
+      ast->children[0]->field_bits = fType->field_bits;
+      break;
+    }
+
+  case at_fill:
+    {      
+      // match agt_type 
+      AST *fillType = ast->children[0];
+      TYPEINFER(fillType, gamma, instEnv, impTypes, isVP, 
+		tcc, uflags, trail,  USE_MODE, TI_TYP_EXP);     
+      ast->field_bits = fillType->field_bits;
+      break;
+    }
+
+  case at_bitfield:
+    {
+      // match agt_type
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP1);
+      
+      AST *len = ast->children[1];
+      len->symType = new Type(ty_tvar, len);
+      CHKERR(errFree, unifyPrim(errStream, trail, len, 
+				len->symType, "word", gamma)); 
+      
+      ast->symType = ast->children[0]->symType;
+      ast->field_bits = mpz_get_ui(len->litValue.i);
+
+      if(!errFree)
+	break;
+
+      if(ast->field_bits > ast->symType->nBits()) {
+	errStream << ast->loc << ": Invalid bitfield specification"
+		  << "No. of bits requested = " << ast->field_bits
+		  << ", Max available for type = "
+		  << ast->symType->nBits()
+		  << std::endl;
+	errFree = false;
+      }
+#ifdef KEEP_BF
+      ast->symType = new Type(ty_bitfield, ast);
+      ast->symType->components.append(new comp(ast->children[0]->symType));
+      // match at_intLiteral
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP2);
+      
+      ast->children[1]->symType = ast->children[1]->symType->getTheType();
+
+      // FIX TO WORD
+      CHKERR(errFree, unifyPrim(errStream, trail, ast->children[1], 
+				ast->children[1]->symType, "word", gamma)); 
+      char lenStr[mpz_sizeinbase(ast->children[1]->litValue.i, 10)];
+      mpz_get_str(lenStr, 10, ast->children[1]->litValue.i);
+      ast->symType->Isize = strtoull(lenStr, 0, 10);
+#endif
+    
+      break;
+    }
+
+  case at_refType:
+    {
+      // match agt_type
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP1);
+    
+      Type *t = ast->children[0]->getType();
+    
+      ast->symType = new Type(ty_ref, ast);
+      ast->symType->components.append(new comp(t));
+    
+      break;
+    }
+
+  case at_exceptionType:
+    {
+      ast->symType = new Type(ty_exn, ast);
+      break;
+    }
+
+  case at_valType:
+    {
+      ast->symType = new Type(ty_tvar, ast);
+      
+      // match agt_type
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP1);
+      
+      Type *t1 = ast->children[0]->symType->getType();
+      Type *t = ast->children[0]->symType->getBareType();
+      
+      switch(t->kind) {
+      case ty_tvar:
+	{
+	  Type *tvar = new Type(ty_tvar, t->ast);
+	  t->kind = ty_ref;	  
+	  t->components.append(new comp(tvar));
+	  ast->symType = tvar;
+	  break;
+	}
+
+      case ty_ref:
+	{
+	  ast->symType = t->components[0]->typ;
+	  break;
+	}
+
+      case ty_vector:
+	{
+	  errStream << ast->loc << ": Cannot dereference a "
+		    << "vector type. Obtained: "
+		    << t->asString()
+		    << std::endl;
+	  errFree = false;
+	  break;
+	}
+
+      case ty_structr:
+      case ty_unionr:
+	{
+	  if (t->components.size() == 0) {
+	    errStream << ast->loc << ": "
+		      << "Target of (val 'a) must be a defined type "
+		      << "(not just declared)." 
+		    << "But obtained" << t1->asString() << std::endl;
+	    errFree = false;
+	    break;
+	  }       	
+	  else {
+	    ast->symType = t->getDCopy();
+	    ast->symType->kind = Type::getValKind(t->kind);
+	  }
+	  break;
+	}
+	
+      case ty_uconv: 
+      case ty_uconr:
+      case ty_uvalv: 
+      case ty_uvalr:
+	{	
+	  errStream << ast->loc << ": "
+		    << "Target of a val should be a reference type." 
+		    << " you cannot use a value constructor " 
+		    << "(" << ast->children[0]->s << ") "
+		    << "here, Use "
+		    << "the union name."	  
+		    << std::endl;
+	  errFree = false;
+	  break;
+	}
+	
+      default:
+	{
+	  errStream << ast->loc << ": "
+		    << "Target of a val should be a ref type." 
+		    << "But obtained" << t1->asString() << std::endl;
+	  errFree = false;
+	  break;
+	}
+      }
+      
+      break;
+    }    
+
+  case at_closureType:
+    {
+      Type *closure = new Type(ty_closure, ast);
+      for (size_t c = 0; c < ast->children.size(); c++) {
+	TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail, USE_MODE, TI_COMP1);
+	
+	if(!ast->children[c]->symType->isFnxn()) {
+	  errStream << ast->loc << ": "
+		    << "Argument to a closure is not a function! " 
+		    << "But obtained" 
+		    << ast->children[c]->symType->asString() 
+		    << std::endl;
+	  errFree = false;
+	}
+	  
+	comp *nComp = new comp(ast->children[c]->getType());
+	closure->components.append(nComp);
+      }
+      
+      ast->symType = closure;
+      break;
+    }
+
+  case at_fn:
+    {
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP1);
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP1);
+      
+      ast->symType = new Type(ty_fn, ast);
+      Type *fnarg = ast->children[0]->symType->getType();
+      ast->symType->components.append(new comp(fnarg));
+      comp *nComp = new comp(ast->children[1]->getType());
+      ast->symType->components.append(nComp);    
+      break;
+    }
+
+  case at_fnargVec:
+    {      
+      Type *fnarg = new Type(ty_fnarg, ast);
+      for (size_t c = 0; c < ast->children.size(); c++) {
+	TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail, mode, TI_COMP1);
+	comp *nComp = new comp(ast->children[c]->getType());
+	fnarg->components.append(nComp);
+      }
+      ast->symType = fnarg;
+      break;
+    }
+
+  case at_primaryType:
+    {
+      ast->symType = new Type(Type::LookupKind(ast->s), ast);
+      break;
+    }
+
+  case at_arrayType:
+    {
+      // match agt_type
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP1);
+    
+      Type *arrType = new Type(ty_array, ast);
+      ast->symType = arrType;
+      arrType->components.append(new comp(ast->children[0]->symType));
+
+      // match at_intLiteral
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP1);
+ 
+      // FIX TO WORD
+      CHKERR(errFree, unifyPrim(errStream, trail, ast->children[1], 
+				ast->children[1]->symType, "word", gamma)); 
+
+      arrType->arrlen = mpz_get_ui(ast->children[1]->litValue.i);
+      break;
+    }
+
+  case at_vectorType:
+    {
+      // match agt_type
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP1);
+    
+      ast->symType = new Type(ty_vector, ast);
+      ast->symType->components.append(new comp(ast->children[0]->symType));
+
+      break;
+    }
+     
+  case at_mutableType:
+    {
+      // match agt_type
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP1);
+    
+      Type *t = ast->children[0]->symType->getTheType(true, false);
+      
+      if(t->kind == ty_mutable) {
+	//The Type is already mutable
+	ast->symType = t;
+	break;
+      }
+      else {
+	ast->symType = new Type(ty_mutable, ast);
+	comp *nComp = new comp(ast->children[0]->symType);
+	ast->symType->components.append(nComp);
+      }
+      break;
+    }
+
+  case at_typeapp:
+    {
+      // match agt_var 
+      // match agt_tvar+
+      ast->symType = new Type(ty_tvar, ast);
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, 		
+		(flags | TI_TYP_EXP | TI_TYP_APP));
+    
+      // Constructor cannot return a mutable type by default
+      Type *t = ast->children[0]->getType(); 
+      Type *realType = t;
+      t = t->getBareType(); 
+      
+      if(t->kind != ty_structv && t->kind != ty_structr &&
+	 t->kind != ty_unionv && t->kind != ty_unionr) {
+	
+	if(t->kind == ty_uconv || t->kind == ty_uconr || 
+	   t->kind == ty_uvalv || t->kind == ty_uvalr) {
+	  
+	  errStream << ast->loc << ": "
+		    << "cannot use a value constructor "
+		    << "(" << ast->children[0]->s << ") "	    
+		    << "here, Use the "
+		    << "union name."
+		    << std::endl;
+	  errFree = false;
+	  break;
+	}
+
+	errStream << ast->children[0]->loc << ": "
+		  << ast->children[0]->s << " cannot be resolved" 
+		  << " to a structure or union type."
+		  << " But obtained " 
+		  << ast->children[0]->symType->asString()
+		  << std::endl;
+	
+	errFree = false;
+	break;
+      }
+      
+      ast->symType = realType;
+      
+      Type *sut = t;
+      
+      if((ast->children.size()-1) != sut->typeArgs.size()) {
+	errStream << ast->children[0]->loc << ": "
+		  << ast->children[0]->s << " - Type cannot be" 
+		  << " partially/over instantiated" 
+		  << " For type " << sut->asString()
+		  << ", " << sut->typeArgs.size()
+		  << " arguments are needed. But obtained "
+		  << ast->children.size() -1
+		  << std::endl;
+	errFree = false;
+      }
+      else { 
+	for(size_t i=0; i < sut->typeArgs.size(); i++) {
+	  TYPEINFER(ast->children[i+1], gamma, instEnv, impTypes, isVP, tcc,
+		    uflags, trail,  USE_MODE, TI_COMP1);
+	  
+	  CHKERR(errFree, unify(errStream, trail, gamma, ast->children[i+1], 
+				ast->children[i+1]->symType, 
+				sut->typeArgs[i], uflags));
+	}
+      }
+      
+      break;
+    }
+
+  case at_qualType:
+    {
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_CONSTR);
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP1);
+      ast->symType = ast->children[1]->symType;
+      break;
+    }
+
+  case at_constraints:
+    {
+      for(size_t c=0; c < ast->children.size(); c++)      
+	TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  mode, TI_CONSTR);
+      ast->symType = new Type(ty_tvar, ast);
+      break;
+    }    
+
+  case at_identPattern:
+    {
+      
+      if(ast->Flags & AST_IS_VALPAT) {
+	// AST_IS_VALPAT ONLY for the ROOT of a case leg
+	assert(mode == REDEF_MODE);
+
+	AST *var = ast->children[0];
+	AST *def = var->symbolDef;
+
+	if((def != NULL) && def->isUnionLeg()) {
+	  TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		    uflags, trail, USE_MODE, TI_COMP2);
+	}
+	else {
+	  // match agt_var
+	  TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		    uflags, trail, REDEF_MODE, TI_COMP2);
+	}      
+      }
+      else {
+	// match agt_var
+	TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  mode, TI_COMP2);
+      }
+      
+      // Type Qualifications ONLY in Binding Patterns
+      // match agt_type?
+      if (ast->children.size() > 1) {
+	TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_COMP1);
+      
+ 	CHKERR(errFree, unify(errStream, trail, gamma, ast->children[0], 
+			      ast->children[0]->symType, 
+			      ast->children[1]->symType, 
+			      uflags));
+	//if(errFree)
+	//  PropagateMutabilityToBindings(ast->children[0]->symType,					
+	//				ast->children[1]->symType);	
+      }
+      ast->symType = ast->children[0]->symType;
+    
+      break;
+    }
+
+  case at_tqexpr:
+    {
+      // match agt_eform
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+    
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP1);
+
+      CHKERR(errFree, unify(errStream, trail, gamma, ast->children[1], 
+			    ast->children[0]->symType, 
+			    ast->children[1]->symType,
+			    uflags));
+
+      //if(errFree)
+      //  PropagateMutabilityToBindings(ast->children[0]->symType,					
+      //                                ast->children[1]->symType);	
+      
+      ast->symType = ast->children[0]->symType;
+      break;
+    }
+    
+  case at_suspend:
+    {
+      // match agt_eform
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      
+      ast->symType = ast->children[1]->symType;
+      break;
+    }
+
+  case at_unit:
+    {
+      ast->symType = nonCopyType(ty_unit, ast);
+      break;
+    }
+
+  case at_letGather:
+    {
+      ast->symType = nonCopyType(ty_letGather, ast);
+      Type *gatherType = ast->symType->getBareType();
+
+      for(size_t c=0; c < ast->children.size(); c++)
+	TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  mode, TI_COMP2);
+
+      for(size_t c=0; c < ast->children.size(); c++)
+	gatherType->components.append(new comp(ast->children[c]->symType));
+
+      break;
+    }
+
+  case at_makevector:
+    {
+      // match agt_expr
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      
+      Type *ndxType = ast->children[0]->symType->getType();
+
+      // FIX TO WORD
+      CHKERR(errFree, unifyPrim(errStream, trail, ast->children[0], 
+				ndxType, "word", gamma));
+
+      ast->children[0]->symType = ast->children[0]->symType->getTheType();
+
+      // match agt_expr
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+
+      Type *rhsType = CtrArgType(ast->children[1]->symType);
+      ast->symType = ConstructedType(ty_vector, ast);
+      Type *vecType = ast->symType->getBareType();
+      vecType->components.append(new comp(rhsType));
+
+      break;
+    }
+
+  case at_makevectorL:
+    {
+      // match agt_expr
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      
+      Type *ndxType = ast->children[0]->symType->getType();
+
+      // FIX TO WORD
+      CHKERR(errFree, unifyPrim(errStream, trail, ast->children[0], 
+				ndxType, "word", gamma));
+
+      ast->children[0]->symType = ast->children[0]->symType->getTheType();
+
+      // match agt_expr
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+
+      // Build a type that I expect the second argument to be, and
+      // unify with it.
+
+      Type *wordType = ArgType(new Type(ty_word, ast));
+      Type *fnArg = new Type(ty_fnarg, ast);
+      fnArg->components.append(new comp(wordType));
+      Type *ret = RetType(newTvar(ast)); // non-copy at ret
+      Type *fnType = new Type(ty_fn, ast);
+      fnType->components.append(new comp(fnArg));
+      fnType->components.append(new comp(ret));
+
+      if (uflags & APPS_ON_CLOSURES) {
+	Type *closure = new Type(ty_closure, ast);
+	closure->components.append(new comp(fnType));
+	fnType = closure;
+      }
+
+      // We don't care whether the function is mutable or not.
+      // This lambda is actually not the argument to the constructor,
+      // it is applications of this lambda. So I have used CrtArgType there.
+      Type *rhsType = TypeOfCopy(ast->children[1]->symType);
+
+      CHKERR(errFree, unify(errStream, trail, gamma, ast, fnType, 
+			    rhsType, uflags | UNIFY_COPY));
+
+      /* Get the unified return type so that we can build the 
+	 vector's type */
+      Type *resultFn = rhsType->getBareType();
+      if (uflags & APPS_ON_CLOSURES) {
+	resultFn = resultFn->components[0]->typ->getBareType();
+      }
+      
+      // No copy at ret
+      //Type *resultRetType = resultFn->components[1]->typ; 
+      Type *resultRetType = CtrArgType(resultFn->components[1]->typ); 
+      ast->symType = ConstructedType(ty_vector, ast);
+      Type *vecType = ast->symType->getBareType();
+      vecType->components.append(new comp(resultRetType));      
+      break;
+    }
+
+  case at_array:
+  case at_vector:
+    {
+      size_t c = 0;
+      Kind k = (ast->astType == at_array) ? ty_array : ty_vector;
+      ast->symType = ConstructedType(k, ast);
+      Type *avType = ast->symType->getBareType();
+      
+      Type *compType = newTvar(ast);
+      // match agt_expr+
+      for (c = 0; c < ast->children.size(); c++) {
+	TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_COMP2);
+	
+	Type *rhsType = CtrArgType(ast->children[c]->symType);
+	CHKERR(errFree, unify(errStream, trail, gamma, ast, compType, 
+			      rhsType, uflags | UNIFY_COPY));
+      }
+
+      avType->components.append(new comp(compType->getType()));
+      avType->arrlen = c;
+      break;
+    }
+
+  case at_array_length:
+  case at_vector_length:
+    {
+      Kind neededKind = 
+	(ast->astType == at_array_length) ? ty_array : ty_vector;
+      
+      // match agt_expr
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+
+      Type *t1 = ast->children[0]->getType();
+      Type *t = t1->getBareType();
+
+      if(t->kind == ty_tvar) {
+	t->kind = neededKind;
+	t->components.append(new comp(newTvar(ast)));
+	if(ast->astType == at_array_length)
+	  impTypes->append(t);
+      }
+      
+      if(t->kind != neededKind) {
+	errStream << ast->children[0]->loc << ": "
+		  << "Bad Argument to " << ast->atKwd() << ". " 
+		  << "Need "
+		  << (neededKind == ty_array ? "array" : "vector")
+		  << " type, "
+		  << "but obtained "  << t1->asString() 
+		  << "." << std::endl;
+	errFree = false;
+      }
+    
+      // FIX TO WORD, not mutable
+      ast->symType = new Type(ty_tvar, ast);
+      CHKERR(errFree,
+	     unifyPrim(errStream, trail, ast, ast->symType, "word", gamma)); 
+      break;    
+    }
+
+  case at_array_nth:
+  case at_vector_nth:
+    {
+      ast->symType = newTvar(ast);
+      // match agt_expr
+
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+
+      Type *t1 = ast->children[0]->getType();
+      Type *t = t1->getBareType();
+
+      Kind neededKind = ((ast->astType == at_array_nth) ? 
+			 ty_array : ty_vector);
+      if(t->kind == ty_tvar) {
+	t->kind = neededKind;
+	t->components.append(new comp(newTvar(ast)));
+      }
+
+      if(t->kind != neededKind) {
+	errStream << ast->children[0]->loc << ": "
+		  << ast->atKwd()
+		  << " requires an argument of vector type " 
+		  << "but obtained "  << t1->asString() 
+		  << "." << std::endl;
+	errFree = false;
+	break;
+      }
+
+      // match agt_expr
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+    
+      // FIX TO WORD
+      Type *ndxType = ast->children[1]->symType->getBareType();
+      CHKERR(errFree, unifyPrim(errStream, trail, ast->children[1], 
+				ndxType, "word", gamma)); 
+            
+
+      ast->symType = t->components[0]->typ->getType();
+      break;
+    }
+
+  case at_begin:
+    {
+      // match agt_expr+
+      size_t c = 0;
+      for(c = 0; c < ast->children.size(); c++)
+	TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_COMP2);
+      
+      ast->symType = ast->children[c-1]->symType;
+      break;
+    }
+
+  case at_select:
+    {
+      // match agt_expr 
+      // This can only be mutable or immutable based on the selection.
+      ast->symType = new Type(ty_tvar, ast); 
+
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+
+      Type *t1 = ast->children[0]->symType->getBareType();
+      
+      /* Selectio is only permitted on 
+	 - structures: for selecting field
+	 - union values: determining tag 
+                      (need to mark SEL_FROM_UN_VAL)
+	 - union type: alternate name for tag 
+                      (already marked SEL_FROM_UN_TYPE) */
+      if(t1->kind != ty_structv && t1->kind != ty_structr && 
+	 !t1->isUType()) {
+	errStream << ast->children[0]->loc << ": "
+		  << ast->children[0]->s << " cannot be resolved" 
+		  << " to a structure, union, or exception type." 
+		  << " but obtained " << t1->asString() 
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+
+
+      if(t1->isUType()) {
+	t1 = obtainFullUnionType(t1, errStream, gamma);
+	ast->Flags2 &= ~AST_IS_LOCATION;	
+      }
+
+      if(t1->components.size() == 0) {
+	errStream << ast->children[0]->loc << ": "
+		  << ast->children[0]->s << " cannot dereference fields using "
+		  << "opaque declarations."
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+
+      // match at_ident
+      Type *sut = t1;
+      Type *fct=NULL;
+      for(size_t i=0; i < sut->components.size(); i++)
+	if(sut->components[i]->name == ast->children[1]->s) {
+	  fct = sut->components[i]->typ;	  
+	  break;
+	}
+      
+      if(fct == NULL) {
+	errStream << ast->children[0]->loc << ": "
+		  << " In the expression " << ast->asString() << ", "
+		  << "Structure/Union " << sut->defAst->s 
+		  << " has no Field/Constructor named " 
+		  << ast->children[1]->s << "." << std::endl;
+	errFree = false;
+      }
+      else {
+	if(sut->isUType()) {
+	  /* Deal with Unions */	
+	  ast->children[1]->symbolDef = fct->defAst;	  
+	  ast->children[1]->Flags |= fct->defAst->Flags;
+	  ast->children[1]->Flags2 |= fct->defAst->Flags2;
+	  
+	  if(ast->Flags2 & SEL_FROM_UN_TYPE) {
+	    ast->children[1]->symType = fct;
+	    ast->symType = ast->children[1]->symType;
+	  }
+	  else {	    
+	    ast->Flags2 |= SEL_FROM_UN_VAL; 	
+	    CHKERR(errFree, unifyPrim(errStream, trail, ast, 
+				      ast->symType, "bool", gamma));
+	    ast->children[1]->symType = fct;
+	  }
+	}
+	else {
+	  /* The normal case, selection of a field from a structure */
+	  ast->symType = fct;
+	  CHKERR(errFree, unify(errStream, trail, gamma, ast, 
+				ast->symType, fct, uflags));
+	}
+      }
+      break;
+    }
+
+  case at_lambda:
+    {
+      // match agt_bindingPattern
+      // match agt_expr
+
+      Environment<TypeScheme> *lamGamma = gamma->newScope();
+
+      AST *argVec = ast->children[0];      
+      Type *fnarg = new Type(ty_fnarg, ast->children[0]);
+      // FnArgVec is never mutable
+
+      for (size_t c = 0; c < argVec->children.size(); c++) {
+	TYPEINFER(argVec->children[c], lamGamma, instEnv, impTypes, 
+		  isVP, tcc, uflags, trail,  REDEF_MODE, TI_COMP2);
+
+	fnarg->components.append(new comp(argVec->children[c]->getType()));
+      }
+      argVec->symType = fnarg;
+
+      TYPEINFER(ast->children[1], lamGamma, instEnv, impTypes, 
+		isVP, tcc, uflags, trail,  USE_MODE, TI_COMP2);
+    
+      Type *retType = ast->children[1]->getType();
+
+      /* Copy-compatibility is currently handled at apply-time
+	 This could be handled at lanbda only if desired, but we will
+	 have to deal with constructor applications as well.
+	 So, in the present scheme, lambda preserves exacct typing. */
+      ast->symType = nonCopyType(ty_fn, ast);
+      Type *fnType = ast->symType->getBareType();
+      fnType->components.append(new comp(fnarg));
+      fnType->components.append(new comp(retType));      
+      break;
+    }
+
+  case at_argVec:
+    {
+      assert(false);
+      break;
+    }
+
+  case at_allocClosure:
+    {
+      Type *closure = new Type(ty_closure, ast);
+      for (size_t c = 0; c < ast->children.size(); c++) {
+	TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail, USE_MODE, TI_COMP1);
+	
+	if(!ast->children[c]->symType->isFnxn()) {
+	  errStream << ast->loc << ": "
+		    << "Function argument expected, " 
+		    << "But obtained" 
+		    << ast->children[c]->symType->asString() 
+		    << std::endl;
+	  errFree = false;
+	}	  
+
+	comp *nComp = new comp(ast->children[c]->getType());
+	closure->components.append(nComp);
+      }
+
+      ast->symType = closure;
+      break;      
+    }
+    
+  case at_copyClosure:
+    {
+      AST *lhs = ast->children[0];
+      AST *rhs = ast->children[1];
+
+      TYPEINFER(lhs, gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail, USE_MODE, TI_COMP2);
+      TYPEINFER(rhs, gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail, USE_MODE, TI_COMP2);
+      
+      if(!lhs->symType->isClosure()) {
+	errStream << ast->loc << ": Non-Closure obtained"
+		  << " on the LHS of copyClosure"
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+
+      if(!rhs->symType->isClosure()) {
+	errStream << ast->loc << ": Non-Closure obtained"
+		  << " on the LHS of copyClosure"
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+      CHKERR(errFree, unify(errStream, trail, gamma, lhs, 
+			    lhs->symType, rhs->symType, uflags));
+
+      ast->symType =  new Type(ty_unit, ast);
+      break;      
+    }
+
+  case at_mkClosure:
+    {
+      AST *clEnv = ast->children[0];
+      // Type check the closure structure apply
+      TYPEINFER(clEnv, gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      
+      Type *lamType = new Type(ty_tvar, ast);
+      for(size_t c=1; c < ast->children.size(); c++) {
+	AST *thisLambda = ast->children[c];
+	// Type check the lambda forms
+	TYPEINFER(thisLambda, gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail, USE_MODE, TI_COMP2);
+	
+	// Make sure all lambdas have the same type
+	CHKERR(errFree, unify(errStream, trail, gamma, thisLambda, 
+			      thisLambda->symType, lamType, uflags));	
+      }
+
+      Type *fullClFnType = lamType->getType();
+      Type *clFnType = fullClFnType->getBareType();
+      assert(clFnType->isFnxn());
+      Type *args = clFnType->components[0]->typ->getType();
+      assert(args->components.size() >= 1);
+      Type *clArg = args->components[0]->typ;
+      // Make sure we have the right env on all the functions.
+      CHKERR(errFree, unify(errStream, trail, gamma, clEnv, 
+			    clArg, clEnv->symType, uflags));
+      
+      // Build the closure Type.      
+      Type *fullMkClType= fullClFnType->getDCopy();
+      Type *mkClType= fullMkClType->getBareType();
+      Type *mkClArg = mkClType->components[0]->typ->getType(); 
+      assert(mkClArg->kind == ty_fnarg);
+      mkClArg->components.remove(0);
+      Type *closure = new Type(ty_closure, ast);
+      closure->components.append(new comp(fullMkClType));
+      ast->symType = closure;
+      break;
+    }
+
+  case at_set_closure:
+    {
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, 
+		isVP, tcc, uflags, trail, USE_MODE, TI_COMP2);
+      
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, 
+		isVP, tcc, uflags, trail, USE_MODE, TI_COMP2);
+      
+      for (size_t c = 2; c < ast->children.size(); c++) {
+	TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail, USE_MODE, TI_COMP2);
+	
+	if(!ast->children[c]->symType->isFnxn()) {
+	  errStream << ast->loc << ": "
+		    << "Function argument expected, " 
+		    << "But obtained" 
+		    << ast->children[c]->symType->asString() 
+		    << std::endl;
+	  errFree = false;
+	}
+      }
+
+      ast->symType = new Type(ty_unit, ast);
+      break;      
+    }
+
+  case at_apply:
+    {
+      // match agt_expr agt_expr
+      //NOTE: One operation safe. (+)
+      ast->symType = newTvar(ast); 
+      
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+
+      Type *t1 = ast->children[0]->symType->getType();
+      if(t1->kind == ty_tvar) {
+	Type *fn = buildFnFromApp(ast, uflags);
+	Type *mbfn = TypeOfCopy(fn);
+	t1->link = mbfn;
+      }
+      
+      Type *t = t1->getBareType();
+      if(t->kind == ty_closure)
+	t = t->components[0]->typ->getBareType();
+      
+      switch(t->kind) {
+      case ty_tvar:
+	{
+	  Type *fn = buildFnFromApp(ast, uflags);
+	  t->link = fn;
+	  t = t->getType();
+	  if(t->kind == ty_closure)
+	    t = t->components[0]->typ->getBareType();
+	  // fall through
+	}
+	
+      case ty_fn:
+	{
+	  Type *targ = t->components[0]->typ->getType();
+	  // This is what we fall in to in all of the apply cases.
+	  if ((ast->children.size()-1) != targ->components.size()) {
+	    errStream << ast->children[0]->loc << ": "
+		      << "Function applied to wrong number of"
+		      << " arguments.." 
+		      << " at AST " << ast->asString()
+		      << " fn Type is " 
+		      << t->asString() << ", "
+		      << "Expecting " << targ->components.size()
+		      << " but obtained " 
+		      << (ast->children.size()-1) << ";"
+		      << std::endl;
+	    errFree = false;
+	    break;
+	  }
+	  
+	  for (size_t i = 0; i < ast->children.size()-1; i++) {
+	    AST *arg = ast->children[i+1];
+	    TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
+		      uflags, trail,  USE_MODE, TI_COMP2);
+	     
+	    Type *rhsType = ArgType(arg->symType);
+	    
+	    CHKERR(errFree, unify(errStream, trail, gamma, ast, 
+				  targ->components[i]->typ, 
+				  rhsType, uflags | UNIFY_COPY));
+	  }
+
+	  Type *retType = RetType(t->components[1]->typ);
+	  if(errFree) {
+	    CHKERR(errFree, unify(errStream, trail, gamma, ast, 
+				  retType, ast->symType, uflags));	    
+	  }
+	  break;
+	}
+
+      case ty_structv:
+      case ty_structr:
+	{
+	  if(ast->children[0]->astType == at_ident &&
+	     (ast->children[0]->symbolDef->Flags & ID_IS_CTOR)) {
+	    ast->astType = at_struct_apply;
+	    TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,
+		      uflags, trail,  USE_MODE, TI_COMP2);
+	  }
+	  else {
+	    errStream << ast->children[0]->loc
+		      << ": Expected structure"
+		      << " constructor taking at least one argument."
+		      << std::endl;
+	    errFree = false;
+	  }
+	
+	  break;
+	}
+
+      case ty_uconr:
+      case ty_uconv:
+      case ty_exn:
+	{		  
+	  AST *ctr = ast->children[0];
+	  if((ctr->astType != at_ident) && 
+	     (ctr->astType != at_select)) {
+	    errStream << ast->children[0]->loc
+		      << ": union/exception"
+		      << " constructor expected."
+		      << std::endl;
+	    errFree = false;	    
+	    break;
+	  }	    
+
+	  ctr = ctr->getCtr();
+	  if(ctr->symbolDef->Flags & ID_IS_CTOR) {
+	    ast->astType = at_ucon_apply;
+	    TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,
+		      uflags, trail,  USE_MODE, TI_COMP2);
+	  }
+	  else { 
+	    errStream << ast->children[0]->loc
+		      << ": Expected union/exception"
+		      << " constructor taking at least one argument."
+		      << std::endl;
+	    errFree = false;
+	  }
+	  break;
+	}
+      case ty_unionv:
+      case ty_unionr:
+	{
+	  errStream << ast->loc << ": "
+		    << " Cannot use the union name to construct values."
+		    << " Use one of its value constructors."
+		    << std::endl;
+	  errFree = false;
+	  break;
+	}
+	//case at_usesel:
+	//	assert(false);
+	
+      default: 
+	{
+	  errStream << ast->children[0]->loc
+		    << ": First argument in application must be a function"
+		    << " or a value constructor."
+		    << std::endl;
+	  errFree = false;
+	  break;
+	}
+      }
+
+      break;
+    }
+
+  case at_ucon_apply:
+    {
+      ast->symType = newTvar(ast);
+      AST *ctr = ast->children[0];
+      if(ctr->symType == NULL) {
+	TYPEINFER(ctr, gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_COMP2);
+      }
+      
+      Type *realType = RetType(ctr->getType());
+      Type *t = realType->getBareType();
+    
+      if(t->kind != ty_uconv && t->kind != ty_uconr && 
+	 t->kind != ty_exn) {
+	
+	if(t->kind == ty_unionv || t->kind == ty_unionr) {
+	  
+	  errStream << ast->loc << ": "
+		    << "Cannot use the union name to construct values. "
+		    << "Did you mean to use one of its value constructors?"
+		    << std::endl;
+	  errFree = false;
+	  break;
+	}	
+	
+	errStream << ast->children[0]->loc << ": "
+		  << ast->children[0]->s << " cannot be resolved" 
+		  << " to a Union (or exception) Constructor. Obtained " 
+		  << t->asString()
+		  << std::endl;
+	errFree = false;
+	break;
+     }
+    
+      Type *ut = t;
+      if(ast->children.size() != ut->components.size() + 1) {
+	errStream << ast->children[0]->loc << ": "
+		  << "Constructor " << ast->children[0]->s << " cannot be" 
+		  << " partially instantiated" << std::endl;
+	errFree = false;
+	break;
+      }
+      
+      for(size_t i=0; i < ut->components.size(); i++) {
+	TYPEINFER(ast->children[i+1], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_COMP2);
+	
+	Type *rhsType = TypeOfCopy(ast->children[i+1]->symType);
+	
+	CHKERR(errFree, unify(errStream, trail, gamma, ast->children[i+1], 
+			      ut->components[i]->typ, rhsType, 
+			      uflags | UNIFY_COPY));
+      }
+      
+      if(!errFree)
+	break;
+
+      Type *t1 = ast->symType->getBareType(); //NOT ast->children[0]->symType 
+      if(t->kind == ty_uconr || t->kind == ty_uconv) {
+	// Now Form the union value
+	switch(t->kind) {
+	case ty_uconr:
+	  t1->kind = ty_uvalr;
+	  break;
+	case ty_uconv:
+	  t1->kind = ty_uvalv;
+	  break;
+	default:
+	  die();
+	}
+	t1->defAst = ut->defAst;
+	t1->myContainer = ut->myContainer;
+	// The type-arguments should have unified and stabilized by now.
+	for(size_t i=0; i < ut->typeArgs.size(); i++) {
+	  t1->typeArgs.append((ut->typeArgs)[i]);
+	}	
+      }
+      else {
+	assert(t->kind == ty_exn);
+	// ut is well-formed for my purpose
+	t1->link = ut;
+      }      
+      
+      break;
+    }
+
+  case at_struct_apply:
+    {
+      // match at_ident
+      ast->symType = newTvar(ast);
+
+      if(ast->children[0]->symType == NULL) {
+	TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_COMP2);
+      }
+
+      Type *realType = RetType(ast->children[0]->getType());
+      Type *t = realType->getBareType();
+
+      if(t->kind != ty_structv && t->kind != ty_structr) {
+	errStream << ast->children[0]->loc << ": "
+		  << ast->children[0]->s << " cannot be resolved" 
+		  << " to a structure type." 
+		  << " But obtained "
+		  << t->asString()
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+
+      if(t->components.size() == 0) {
+	errStream << ast->children[0]->loc << ": "
+		  << ast->children[0]->s << " cannot instantiate without "
+		  << "definition in scope."
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+      
+      ast->symType = realType;
+      Type *st = t;
+      
+      if((ast->children.size()-1) != st->components.size()) {
+	errStream << ast->children[0]->loc << ": "
+		  << "Structure " << ast->children[0]->s << " cannot be" 
+		  << " partially/over instantiated."	
+		  << std::endl;
+	
+	errFree = false;
+      }
+      else 
+	for(size_t i=0; i < st->components.size(); i++) {
+	  TYPEINFER(ast->children[i+1], gamma, instEnv, impTypes, isVP, tcc,
+		    uflags, trail,  USE_MODE, TI_COMP2);
+	  
+	  Type *rhsType = CtrArgType(ast->children[i+1]->symType);
+	  CHKERR(errFree, unify(errStream, trail, gamma, ast->children[i+1], 
+				st->components[i]->typ, rhsType, 
+				uflags | UNIFY_COPY));
+	}
+      
+      break;
+    }
+
+  case at_if:
+    {
+      // match agt_expr
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP2);      
+      
+      CHKERR(errFree, unifyPrim(errStream, trail, ast->children[0], 
+				ast->children[0]->symType, 
+				"bool", gamma));
+      
+      // match agt_expr
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP2);
+      Type *ifType = conditionalType(ast->children[1]->symType);
+
+      // match agt_expr
+      TYPEINFER(ast->children[2], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP2);
+      Type *elseType = conditionalType(ast->children[2]->symType);
+    
+
+      ast->symType = newTvar(ast);
+      CHKERR(errFree, unify(errStream, trail, gamma, ast, ast->symType, 
+			    ifType, uflags | UNIFY_COND));
+      CHKERR(errFree, unify(errStream, trail, gamma, ast, ast->symType, 
+			    elseType, uflags | UNIFY_COND));
+    
+      break;
+    }
+
+  case at_and:
+  case at_or:
+  case at_not:
+    {
+      // match agt_expr+
+      
+      ast->symType = new Type(ty_tvar, ast);
+      CHKERR(errFree, 
+	     unifyPrim(errStream, trail, ast, ast->symType, "bool", gamma));
+      
+      for(size_t c = 0; c < ast->children.size(); c++) {
+	TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  mode, TI_COMP2);
+	CHKERR(errFree, unify(errStream, trail, gamma, ast->children[c], 
+			      conditionalType(ast->children[c]->symType), 
+			      ast->symType, uflags | UNIFY_COND));
+      }
+    
+      ast->symType = ast->symType->getBareType();
+      break;
+    }
+
+ case at_cond:
+   {
+     ast->symType = newTvar(ast);
+     
+     // match at_cond_legs
+     TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+	       uflags, trail,  USE_MODE, TI_COMP2);
+     
+     // match at_otherwise
+     TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+	       uflags, trail,  USE_MODE, TI_COMP2);    
+     
+     CHKERR(errFree, unify(errStream, trail, gamma, ast, ast->symType, 
+			   conditionalType(ast->children[0]->symType), 
+			   uflags | UNIFY_COND));
+     CHKERR(errFree, unify(errStream, trail, gamma, ast, ast->symType, 
+			   conditionalType(ast->children[1]->symType), 
+			   uflags | UNIFY_COND));
+     break;
+   }
+   
+ case at_cond_legs:
+   {
+     ast->symType = newTvar(ast);    
+     for(size_t c = 0; c < ast->children.size(); c++) {
+       TYPEINFER(ast->children[c], gamma, instEnv, impTypes, isVP, tcc,
+		 uflags, trail,  USE_MODE, TI_COMP2);
+      
+       CHKERR(errFree, unify(errStream, trail, gamma, ast, ast->symType, 
+			     conditionalType(ast->children[c]->symType), 
+			     uflags | UNIFY_COND));
+     }
+     break;
+   }
+
+ case at_cond_leg:
+   {
+     Type *t = newTvar(ast);
+     CHKERR(errFree, unifyPrim(errStream, trail, ast, t, "bool", gamma));
+      
+     TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+	       uflags, trail,  USE_MODE, TI_COMP2);
+
+     TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+	       uflags, trail,  USE_MODE, TI_COMP2);
+     
+     CHKERR(errFree, unify(errStream, trail, gamma, ast, 
+			   ast->children[0]->symType, 
+			   t, uflags));
+
+     ast->symType = ast->children[1]->symType;
+     break;
+   }
+
+  case at_setbang:
+    {
+      // match agt_expr
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      
+      ast->symType = new Type(ty_tvar, ast);
+      CHKERR(errFree, unifyPrim(errStream, trail, ast, 
+				ast->symType, "unit", gamma)); 
+      
+      
+      Type *realType = ast->children[0]->getType();
+      Type *t = realType->getTheType(true, true);
+      
+      if(t->kind == ty_maybe) // must test this here.
+	t->kind = ty_mutable;
+      else if(t->kind == ty_tvar) {
+	t->kind = ty_mutable;
+	t->components.append(new comp(new Type(ty_tvar, ast->children[0])));
+      }
+      else if (t->kind != ty_mutable) {
+	errStream << ast->children[0]->loc << ": "
+		  << "set! can only be applied to a mutable value" 
+		  << ", but here obtained " 
+		  << t->asString()
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+      
+      // match agt_expr
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      
+      Type *rhsType = TypeOfCopy(ast->children[1]->symType);      
+      CHKERR(errFree, unify(errStream, trail, gamma, ast->children[1], 
+			    t, rhsType, uflags | UNIFY_COPY));
+      
+      break;
+    }
+
+  case at_dup:
+    {
+      // match agt_expr
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+
+      Type *t = ast->children[0]->symType;
+      Kind k = t->getBareType()->kind;
+
+      ast->symType = ConstructedType(ty_ref, ast);
+      Type *t1 = ast->symType->getBareType();
+      if((k == ty_maybe) || (ast->Flags2 & DUPED_BY_CLCONV) == 0)
+	t1->components.append(new comp(t));
+      else
+	t1->components.append(new comp(TypeOfCopy(t)));
+      break;
+    }
+
+  case at_deref:
+    {
+      // match agt_expr
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      
+      Type *realType = ast->children[0]->getType();
+      Type *t = realType->getBareType();
+
+
+      switch(t->kind) {
+
+      case ty_tvar:
+	{
+	  t->kind = ty_ref;
+	  assert(t->components.size() == 0);
+	  Type *innerType = newTvar(t->ast);
+	  t->components.append(new comp(innerType));
+	  ast->symType = innerType;
+	  break;
+	}
+
+      case ty_ref:
+	{	
+	  ast->symType = t->components[0]->typ->getType();
+	  break;
+	}
+
+#if 0
+      case ty_structr:
+      case ty_unionr:	
+      case ty_uvalr:
+	{
+	  /* The following three cases are somewhat wrong, but it does
+	     not matter. That is, we cannot get caught.
+	     
+	     The problem is that in cases like:
+	     
+	     (defstruct s:ref i:int32)
+	   
+	     (define xyz (set! (deref (s 1)) rval))
+	     
+	     Here, since we are making a copy of the type through
+	     getDCopy(), we set the type of the copy to 
+	     ty_mutable while the type of the value created by
+	     (s 1) must be set to mutable as per location semantics.
+	     
+	     However, after the deref, s1 is insccessible, and it does not
+	     matter, and if there is a let binding, a copy is made
+	     anyway.
+	     
+	     Having said that, I think that one day we must change
+	     strategy and give all constructed structure *values* of
+	     reference type (ref (structv ... )) then we don't have to
+	     make the copy in the type. The constructor must still be
+	     typoed as ty_structr */
+	  
+	  if(t->components.size()) {
+	    ast->symType = realType->getDCopy();
+	    ast->symType->getBareType()->kind = Type::getValKind(t->kind);
+	  }
+	  else {	  
+	    ast->symType = newTvar(ast);      	  
+	    errStream << ast->loc << ": "
+		      << "Target of a deref should be a defined ref type." 
+		      << "But obtained" << realType->asString() << std::endl;
+	    errFree = false;
+	  }
+	  break;
+	}	
+#endif	
+      default:
+	{	
+	  ast->symType = newTvar(ast);      	  
+	  errStream << ast->loc << ": "
+		    << "Target of a deref should be a (ref 'a) type." 
+		    << "But obtained" << realType->asString() << std::endl;
+	  
+	  errFree = false;
+	  break;
+	}	
+      }
+      
+      break;
+    }
+    
+  case at_switchR:    
+    {      
+      // match at agt_expr
+      AST *topExpr = ast->children[0];
+      TYPEINFER(topExpr, gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      
+      ast->symType = newTvar(ast);
+    
+      // match at_case_legs
+      AST *cases = ast->children[1];
+      for(size_t c = 0; c < cases->children.size(); c++) {
+	AST *thecase = cases->children[c];
+	for(size_t j=2; j < thecase->children.size(); j++) {
+	  AST *aCtr = thecase->children[j];
+	  
+	  TYPEINFER(aCtr, gamma, instEnv, impTypes, isVP, 
+		    tcc, uflags, trail,  USE_MODE, TI_COMP2);      
+
+	  Type *aCtrType = aCtr->symType->getType();
+	  CHKERR(errFree, unify(errStream, trail, gamma, aCtr, 
+				topExpr->symType, aCtrType, uflags));
+	}
+
+	TYPEINFER(thecase, gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_COMP2);
+	
+	if(!errFree)
+	  continue;
+
+	Type *rhsType = switchLegType(thecase->symType);
+	CHKERR(errFree,
+	       unify(errStream, trail, gamma, ast, ast->symType, 
+		     rhsType, uflags | UNIFY_COND));
+      }
+    
+      // match at_otherwise
+      AST *otherwise = ast->children[2];
+      if(otherwise->astType != at_Null) {
+	TYPEINFER(otherwise, gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_COMP2);
+	
+	Type *rhsType = switchLegType(otherwise->symType);
+	CHKERR(errFree,
+	       unify(errStream, trail, gamma, ast, ast->symType, 
+		     rhsType, uflags | UNIFY_COND)); 
+      }
+
+#if 1
+      if(!topExpr->symType->isUType()) {
+	errStream << topExpr->loc << ": "
+		  << "Only unions are permitted for switching"
+		  << " but obtained "
+		  << topExpr->symType->asString()
+		  << std::endl;
+	ast->symType = newTvar(ast);
+	errFree = false;
+	break;
+      } 
+#endif
+
+      Type *ut = topExpr->symType->getBareType();
+      Type *uType = obtainFullUnionType(ut, errStream, gamma);
+      
+      for(size_t c = 0; c < cases->children.size(); c++) {
+	AST *thecase = cases->children[c];
+	for(size_t i=2; i < thecase->children.size(); i++) {
+	  AST *ctr = thecase->children[i]->getCtr();	  
+	  bool found=false;
+	  for(size_t j=0; j < uType->components.size(); j++) {
+	    Type *cTyp = uType->components[j]->typ->getType();
+	    if(cTyp->defAst == ctr->symbolDef) {
+	      found = true;
+	      uType->components.remove(j);
+	      j--;
+	    }
+	  }
+	  
+	  if(!found) {
+	    errStream << ctr->loc << ": "
+		      << "Duplicate case label"
+		      << ctr->asString()
+		      << "utype is " << uType->toString()
+		      << std::endl;
+	    errFree = false;
+	  }
+	}
+      }
+
+      if(uType->components.size()) {
+	if(otherwise->astType == at_Null) {
+	  errStream << ast->loc << ": The following cases"
+		    << "are not covered: ";
+	  for(size_t j=0; j < uType->components.size(); j++) {
+	    Type *cTyp = uType->components[j]->typ->getType();
+	    if(j > 0)
+	      errStream << ", ";
+	    errStream << cTyp->defAst->s;
+	  }
+	  errStream << std::endl;
+	  errFree = false;
+	}
+      }
+      else {
+	if(otherwise->astType != at_Null) {
+	  errStream << otherwise->loc << ": "
+		    << "Otherwise is present even after all cases"
+		    << "are covered."
+		    << std::endl;
+	  errFree = false;
+	}
+      }
+      break;
+    }
+
+  case at_sw_legs:
+    /* FIX: I forgot if I really mean break here or assert(false); */
+    break;
+
+  case at_otherwise:
+    {
+      // match agt_expr
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+    
+      ast->symType = ast->children[0]->symType;
+      break;
+    }
+
+  case at_sw_leg:
+    {
+      // This is used only in the case of a union leg match.
+      // match agt_valuePattern
+      Environment<TypeScheme> *legGamma = gamma->newScope();
+
+      /* Deal with the constructors first */
+      AST *aCtr = ast->children[2]->getCtr();
+      TypeScheme *stSigma = aCtr->symbolDef->stSigma;
+      
+      for(size_t c=2; c < ast->children.size(); c++) {
+ 	AST *ctr = ast->children[c]->getCtr()->symbolDef;
+	if(ctr->stSigma == NULL) {
+	  errStream << ctr->loc << ": Use of constructor "
+		    << ctr->s << " whose definition had an error"
+		    << std::endl;
+	  errFree = false;
+	  break;
+	}
+	
+	if(ctr->stSigma != stSigma) {
+	  errStream << ctr->loc << ": Use of constructor " 
+		    << ctr->s << " whose components are "
+		    << "incompatible with other constructors used "
+		    << "in this case"
+		    << std::endl;
+	  errFree = false;
+	  break;
+	}
+      }
+
+      if(!errFree) {
+	ast->symType = newTvar(ast);
+	break;
+      }
+
+      /* Deal with the component structure identifier */
+
+      Type *stType = stSigma->type_instance_copy();
+      Type *aCtrType = ast->children[2]->symType->getBareType();
+
+      /* If we decide to alow the unification of the structure
+	 type with the union type, this must be done there */
+      assert(stType->typeArgs.size() == aCtrType->typeArgs.size());      
+      for(size_t m=0; m < stType->typeArgs.size(); m++) {
+	CHKERR(errFree, unify(errStream, trail, gamma, ast, 
+			      stType->typeArgs[m], 
+			      aCtrType->typeArgs[m], uflags));	
+      }
+      AST *stIdent = ast->children[0]; 
+      TYPEINFER(stIdent, legGamma, instEnv, impTypes, isVP, 
+		tcc, uflags, trail,  REDEF_MODE, TI_COMP2);
+      stIdent->symType = stType;
+      stIdent->scheme->tau = stType;
+      assert(stIdent->scheme->ftvs.size() == 0);
+
+      // match agt_expr
+      TYPEINFER(ast->children[1], legGamma, instEnv, impTypes, isVP, 
+		tcc, uflags, trail,  USE_MODE, TI_COMP2);
+
+       ast->symType = ast->children[1]->symType;
+      break;
+    }
+    
+  case at_tryR:
+    {
+      // match agt_expr
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+
+      ast->symType = ast->children[0]->symType;
+
+      if(!errFree) {
+	ast->symType = newTvar(ast);
+	break;
+      }
+
+      AST *cases = ast->children[1];     
+      for (size_t c = 0; c < cases->children.size(); c++) {
+	AST *theCase = cases->children[c];
+	
+	for(size_t j=2; j < theCase->children.size(); j++) {
+	  AST *aCtr = theCase->children[j];
+	  
+	  TYPEINFER(aCtr, gamma, instEnv, impTypes, isVP, 
+		    tcc, uflags, trail,  USE_MODE, TI_COMP2);      
+	  
+	  Type* t = aCtr->symType->getBareType();
+
+	  if(t->kind == ty_tvar) {
+	    assert(t->components.size() == 0);
+	    assert(t->typeArgs.size() == 0);	  
+	    assert(t->defAst == NULL);	  	  
+	    t->kind = ty_exn;
+	  }
+
+	  if(t->kind != ty_exn) {
+	    errStream << aCtr->loc << ": "
+		      << " Only Exceptions can be caught"
+		      << " Obtained type " 
+		      << aCtr->symType->asString()
+		      << std::endl;
+	    errFree = false;
+	  }
+	}
+	
+	Environment<TypeScheme> *legGamma = gamma->newScope();
+	
+	AST *stIdent = theCase->children[0];
+	TYPEINFER(stIdent, legGamma, instEnv, impTypes, isVP, 
+		  tcc, uflags, trail,  REDEF_MODE, TI_COMP2);
+	
+	if(theCase->children.size() == 3) {
+	  AST *onlyCtr = theCase->children[2]->getCtr();
+	  assert(onlyCtr->symbolDef->stSigma);
+	  Type *stType = onlyCtr->symbolDef->stSigma->type_instance_copy();
+	  stIdent->symType = stType;
+	  stIdent->scheme->tau = stType;
+	  assert(stIdent->scheme->ftvs.size() == 0);
+	}
+	
+	AST *expr = theCase->children[1];
+	TYPEINFER(expr, legGamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail, USE_MODE, TI_COMP2);
+
+	theCase->symType = expr->symType;	
+	Type *rhsType = conditionalType(theCase->symType);
+	CHKERR(errFree,
+	       unify(errStream, trail, gamma, ast, ast->symType, 
+		     rhsType, uflags | UNIFY_COND));
+      }
+
+      AST *ow = ast->children[2];
+      if(ow->astType != at_Null) {
+	TYPEINFER(ow->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_COMP2);
+	ow->symType = ow->children[0]->symType;
+	Type *rhsType = conditionalType(ow->symType);	
+	CHKERR(errFree, unify(errStream, trail, gamma, ast, ast->symType, 
+			      rhsType, uflags | UNIFY_COND)); 
+      }
+      
+      break;
+    }
+
+  case at_throw:
+    {
+      // match agt_var
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      Type *t = ast->children[0]->symType->getBareType();
+
+      if(t->kind != ty_exn) {
+	errStream << ast->loc << ": "
+		  << "Could not resolve " << ast->children[0]->s  
+		  << " to exception type." << std::endl;
+	errFree = false;
+      }
+  
+      ast->symType = newTvar(ast);    
+      break;
+    }
+
+  case at_container:
+    {
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      ast->symType = ast->children[1]->symType;
+      break;
+    }    
+
+  case at_do:
+    {
+      // match at_letbindings
+      Environment<TypeScheme> *doGamma = gamma->newScope();
+      TCConstraints *doTcc = new TCConstraints;
+      
+      AST *dbs = ast->children[0];
+      dbs->symType = new Type(ty_tvar, dbs);
+
+      // Initializers
+      for (size_t c = 0; c < dbs->children.size(); c++) {
+	AST *db = dbs->children[c];
+	AST *init = db->children[1];
+	TYPEINFER(init, doGamma, instEnv, impTypes, isVP, doTcc,
+		  uflags, trail, USE_MODE, TI_COMP2);
+      }
+      
+      // Definitions
+      for (size_t c = 0; c < dbs->children.size(); c++) {
+	AST *db = dbs->children[c];
+	AST *localDef = db->children[0];
+	AST *init = db->children[1];
+	TYPEINFER(localDef, doGamma, instEnv, impTypes, isVP, doTcc,
+		  uflags, trail, REDEF_MODE, TI_COMP2);
+	
+	Type *vType = LvalAdjustedType(localDef, init->symType);	
+	CHKERR(errFree, unify(errStream, trail, doGamma, localDef, 
+			      localDef->symType, vType, 
+			      uflags | UNIFY_COPY));
+ 	//if(errFree)
+	//  PropagateMutabilityToBindings(localDef->symType, vType);
+      }
+
+      // Next step initializers
+      for (size_t c = 0; c < dbs->children.size(); c++) {
+	AST *db = dbs->children[c];
+	AST *localDef = db->children[0];
+	AST *step = db->children[2];
+	TYPEINFER(step, doGamma, instEnv, impTypes, isVP, doTcc,
+		  uflags, trail, USE_MODE, TI_COMP2);
+
+	Type *vType = LvalAdjustedType(localDef, step->symType);	
+	CHKERR(errFree, unify(errStream, trail, doGamma, localDef, 
+			      localDef->symType, vType, 
+			      uflags | UNIFY_COPY));
+ 	//if(errFree)
+	//  PropagateMutabilityToBindings(localDef->symType, vType);
+      }
+
+      // Finally evaluate the test and the final expression           
+      TYPEINFER(ast->children[1], doGamma, instEnv, impTypes, 
+		isVP, tcc, uflags, trail, USE_MODE, TI_COMP2);
+      TYPEINFER(ast->children[2], doGamma, instEnv, impTypes, 
+		isVP, tcc, uflags, trail, USE_MODE, TI_COMP2);
+
+      ast->symType = conditionalType(ast->children[1]->symType);      
+      break;
+    }
+
+  case at_dotest:
+    {
+      TYPEINFER(ast->children[0], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+
+      Type *t = ast->children[0]->symType->getBareType();
+      CHKERR(errFree, unifyPrim(errStream, trail, ast->children[0], 
+				t, "bool", gamma));
+      
+      TYPEINFER(ast->children[1], gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      
+      ast->symType = ast->children[1]->symType;
+      break;
+    }
+
+  case at_letrec:
+  case at_let:
+    {
+      // match at_letbindings
+      Environment<TypeScheme> *letGamma = gamma->newScope();
+      TCConstraints *letTcc = new TCConstraints;
+      
+      AST *lbs = ast->children[0];
+      lbs->symType = new Type(ty_tvar, lbs);
+      
+      // Because all types in a letrec share a context, we need a
+      // container form to glue things together temporarily.
+      AST *bAst = new AST(at_letGather, lbs->child(0)->loc);
+      AST *vAst = new AST(at_letGather, lbs->child(0)->loc);
+
+
+      // This loop constructs the container in reversed order,
+      // but that is okay, because the container only exists
+      // to let mutual recursion unify correctly.
+      
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+	AST *lb = lbs->children[c];
+	
+	bAst->addChild(lb->children[0]);
+	vAst->addChild(lb->children[1]);
+      }
+      
+      if(ast->astType == at_let) {
+	TYPEINFER(vAst, letGamma, instEnv, impTypes, isVP, letTcc,
+		  uflags, trail, USE_MODE, TI_COMP2);
+	
+	TYPEINFER(bAst, letGamma, instEnv, impTypes, isVP, letTcc,
+		  uflags, trail, REDEF_MODE, TI_COMP2);
+      }
+      else {
+	TYPEINFER(bAst, letGamma, instEnv, impTypes, isVP, letTcc,
+		  uflags, trail, REDEF_MODE, TI_COMP2);
+	
+	TYPEINFER(vAst, letGamma, instEnv, impTypes, isVP, letTcc,
+		  uflags, trail, USE_MODE, TI_COMP2);	
+      }
+      
+      Type *vType = LvalAdjustedType(bAst, vAst->symType);
+	    
+      CHKERR(errFree, unify(errStream, trail, letGamma, lbs, bAst->symType, 
+			    vType, uflags | UNIFY_COPY));
+      
+      if(!errFree) {
+	ast->symType = newTvar(ast);
+	break;
+      }
+      
+      //PropagateMutabilityToBindings(bAst->symType, vType);
+      
+      // Consider all constraints
+      TYPEINFER(ast->children[2], letGamma, instEnv, impTypes, isVP, 
+		letTcc, uflags, trail,  mode, TI_CONSTR);
+      
+      CHKERR(errFree, generalizePat(errStream, ast->loc, 
+				    letGamma, instEnv, bAst, vAst, 
+				    true, letTcc, tcc, trail));
+
+      // Finally evaluate the final expression
+      TYPEINFER(ast->children[1], letGamma, instEnv, impTypes, 
+		isVP, tcc, uflags, trail, USE_MODE, TI_COMP2);
+      
+      if(ast->astType == at_letrec)
+	CHKERR(errFree, CheckLetrecFnxnRestriction(errStream, bAst));
+      
+      ast->symType = ast->children[1]->symType;
+      break;
+    }
+
+    // letStar is not a letStar. It is an internal representation.
+    // types are NOT generalized
+  case at_letStar:
+    {
+      // match at_letbindings
+      Environment<TypeScheme> *letGamma = gamma->newScope();
+      
+      AST *lbs = ast->children[0];
+      lbs->symType = new Type(ty_tvar, lbs);
+
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+	AST *lb = lbs->children[c];
+
+	TYPEINFER(lb->children[1], letGamma, instEnv, impTypes, 
+		  isVP, tcc, uflags, trail, USE_MODE, TI_COMP2);
+	
+	TYPEINFER(lb->children[0], letGamma, instEnv, impTypes, 
+		  isVP, tcc, uflags, trail, REDEF_MODE, TI_COMP2);
+
+	Type *vType = LvalAdjustedType(lb->children[0], 
+				       lb->children[1]->symType);
+
+	CHKERR(errFree, unify(errStream, trail, letGamma, lb->children[0], 
+			      lb->children[0]->symType, 
+			      vType, uflags | UNIFY_COPY));
+
+	//PropagateMutabilityToBindings(lb->children[0]->symType, vType);
+      }
+
+      
+      TYPEINFER(ast->children[1], letGamma, instEnv, impTypes, 
+		isVP, tcc, uflags, trail, USE_MODE, TI_COMP2);
+      
+      ast->symType = ast->children[1]->symType;
+      break;
+    }
+    
+  } /* switch */
+  
+  return errFree;
+}
+
+
+/**************************************************************/
+/*              Interface to the outside world                */
+/**************************************************************/
+
+bool
+UocInfo::fe_typeCheck(std::ostream& errStream,
+		      bool init, unsigned long flags)
+{
+  // Careful: the input flags are Unifier's flags. 
+
+#ifdef VERBOSE  
+    errStream << "Now Processing " << ifName;
+    errStream << " ast = " << ast->astTypeName();
+    errStream << std::endl;
+#endif
+  
+  CVector<Type *> *impTypes = new CVector<Type *>;
+  CVector<Type *> trail;
+  bool errFree = true;
+  
+  if(init) {
+    gamma = new Environment<TypeScheme>(this->uocName);
+    instEnv = new Environment< CVector<Instance *> >(this->uocName);
+    if((flags & TYP_NO_PRELUDE) == 0)
+      CHKERR(errFree, initGamma(std::cerr, gamma, instEnv, ast, flags));
+    
+    if(!errFree)
+      return false;
+  }
+  
+  CHKERR(errFree, typeInfer(errStream, ast, gamma, instEnv, 
+			    impTypes, false, 
+			    new TCConstraints, flags, trail, 
+			    DEF_MODE, TI_NONE));
+  
+  CHKERR(errFree, checkImpreciseTypes(errStream, gamma, impTypes));
+  
+#ifdef VERBOSE  
+  errStream << "________________________________________" << std::endl;
+#endif
+
+  return errFree;
+}
+

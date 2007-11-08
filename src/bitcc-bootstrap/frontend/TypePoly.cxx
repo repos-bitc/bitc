@@ -61,6 +61,8 @@
 using namespace sherpa;
 using namespace std;
 
+//#define VERBOSE
+
 
 bool
 Type::boundInType(GCPtr<Type> tv)
@@ -379,34 +381,93 @@ TypeScheme::generalize(std::ostream& errStream,
   GCPtr<CVector<GCPtr<Type> > > removedFtvs = 
     new CVector<GCPtr<Type> >;
   
-  if(exprExpansive || typExpansive) {
+  if(exprExpansive || typExpansive) 
     tau->removeRestricted(ftvs, false, removedFtvs);
 
-    if(parentTCC) {      
-      GCPtr<CVector<GCPtr<Typeclass> > > newPred =
-	new CVector<GCPtr<Typeclass> >;
-      for(size_t i=0; i < tcc->pred->size(); i++) {
-	GCPtr<Typeclass> pred = tcc->Pred(i)->getType();
-	GCPtr< CVector<GCPtr<Type> > > allFtvs = new CVector<GCPtr<Type> >;
-	pred->collectAllftvs(allFtvs);
+  /* There are several cases to consider here:
+
+  For each predicate p in type scheme s for type t,
+  Suppose FTV()s are free type variables and 
+          F()s are generalizable type variables,
+
+  1) If FTV(p) = 0 The prediate is concrete, and must be solved at
+     this step
+
+  2) If FTVS(p) C= FTVS(gamma) 
+     
+     This implies that FTVS(p) ^ F(s) = 0. This is a predicate over
+     monomorphic variables (and possibly concrete types). Therefore,
+     it can be  promoted to the containing let's scheme.
+
+     Example:  (define (fnxn x) (let ((y (== x 0))) ... )) 
 	
-	bool allRemoved = true;
-	for(size_t j=0; j < allFtvs->size(); j++) {
-	  GCPtr<Type> ftv = allFtvs->elem(j)->getType();
-	  if(!removedFtvs->contains(ftv)) {
-	    allRemoved = false;
-	    break;
-	  }
-	}
-	
-	if(allRemoved)
-	  parentTCC->pred->append(pred);	
-	else
-	  newPred->append(pred);
+
+  3) If FTVS(p) ^ F(s) = 0 and
+        FTVS(p) ^ FTVS(gamma) = 0
+
+     This predicate consists only of value-restricted variables.
+     Similar to the previous case, this predicate can be promoted to
+     the containing let.
+
+     Example:  (let ((y:(mutable 'a) 0)) ... )) 
+
+  4) FTVS(p) C= F(s)
+     There is nothing to solve, except that we must not generalize all
+     functionally dependent variables and check for ambiguities
+     (that is, ensure  FTVS(p) ^ F(s) C= FTVS(tau) )
+     This step is handled by the solver, and must be handled at this let.
+
+  5) The type variables are a combination of all of the above.
+     That is, predicate contains some generalizable and bound
+     typevariables. This predicate will have to be solved in this
+     case, which might result in concretization of some bound
+     variables due to unification with instances. The solver handles
+     this case */
+
+  if(parentTCC) {      
+    GCPtr<CVector<GCPtr<Typeclass> > > newPred =
+      new CVector<GCPtr<Typeclass> >;
+    
+    for(size_t i=0; i < tcc->pred->size(); i++) {
+      // For each predicate in this constraint set,
+      // Check or cases 2 and3 above.
+      GCPtr<Typeclass> pred = tcc->Pred(i)->getType();
+      GCPtr< CVector< GCPtr<Type> > > allFtvs = new CVector<GCPtr<Type> >;
+      pred->collectAllftvs(allFtvs);
+      
+      // Concrete predicate case
+      if(allFtvs->size() == 0) {
+	newPred->append(pred);	
+	continue;
       }
-      tcc->pred = newPred;
+      
+      // At most one of the following must be ultimately true (after
+      // the following loop. We know that there is at least one type
+      // variable (generalized, restricted, or bound in the
+      // environmint) in this predicate at this stage.
+      bool allRemoved = true;
+      bool allBound = true;
+      
+      for(size_t j=0; j < allFtvs->size(); j++) {
+	GCPtr<Type> ftv = allFtvs->elem(j)->getType();
+	
+	if(!removedFtvs->contains(ftv))
+	  allRemoved = false;
+
+	if(!ftv->boundInGamma(gamma))
+	  allBound = false;	
+      }
+      
+      if(allRemoved || allBound) {
+	assert(!(allRemoved && allBound));
+	parentTCC->pred->append(pred);	
+      }
+      else
+	newPred->append(pred);
     }
+    tcc->pred = newPred;
   }
+  
 
   //for(size_t i=0; i < ftvs->size(); i++) {
   // GCPtr<Type> ftv = Ftv(i)->getType();

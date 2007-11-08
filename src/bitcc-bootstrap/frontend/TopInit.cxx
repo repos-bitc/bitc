@@ -230,6 +230,7 @@ TopInit(std::ostream& errStream,
   case at_bitfield:
   case at_refType:
   case at_valType:
+  case at_byrefType:
   case at_fn:
   case at_fnargVec:
   case at_primaryType:
@@ -354,6 +355,7 @@ TopInit(std::ostream& errStream,
   case at_cond_leg:
   case at_dup:
   case at_deref:
+  case at_inner_ref:
   case at_switchR:
   case at_sw_legs:
   case at_otherwise:

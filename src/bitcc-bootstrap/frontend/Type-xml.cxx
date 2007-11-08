@@ -196,12 +196,19 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 
   case ty_fnarg:
     {
-      for(size_t i=0; i < t->components->size(); i++)
-	t->CompType(i)->TypeOfCopy()->minimizeMutability()->asXML(tvP, out);
-      
+      for(size_t i=0; i < t->components->size(); i++) {
+	if(t->CompFlags(i) & COMP_BYREF) {
+	  out << " <byref> ";
+	  t->CompType(i)->asXML(tvP, out);
+	  out << "<byref> ";
+	}
+	else {
+	  t->CompType(i)->TypeOfCopy()->minimizeMutability()->asXML(tvP, out);
+	}
+      }
       break;
     }
-
+    
   case ty_tyfn:
     {
       assert(t->components->size() == 2);
@@ -297,6 +304,16 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
       t->CompType(0)->asXML(tvP, out);
       out.less();       
       out << "</ref>" << endl; 
+      break;
+    }
+
+  case ty_byref:
+    {
+      out << "<byref>" << endl;
+      out.more();
+      t->CompType(0)->asXML(tvP, out);
+      out.less();       
+      out << "</byref>" << endl; 
       break;
     }
 

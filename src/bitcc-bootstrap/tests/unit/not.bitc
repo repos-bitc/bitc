@@ -39,4 +39,5 @@
 (provide main bitc.main)
 
 (define (main.main argVec:(vector string)) 
-  (if (not #f) 1 0:int32))
+  (if (not #f) 0:int32 1)
+  )

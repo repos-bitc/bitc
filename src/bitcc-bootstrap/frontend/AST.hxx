@@ -218,6 +218,10 @@ enum primOp {
                                       
                                       
                                       
+#define INNER_REF_NDX    0x04000000u  
+                                      
+                                      
+#define ARG_BYREF        0x08000000u  
 
 
 
@@ -317,10 +321,10 @@ enum AstType {
     at_reserved,
     at_bitfield,
     at_refType,
+    at_byrefType,
     at_valType,
     at_fn,
     at_primaryType,
-    at_argVec,
     at_fnargVec,
     at_arrayType,
     at_vectorType,
@@ -342,6 +346,7 @@ enum AstType {
     at_array_length,
     at_vector_length,
     at_lambda,
+    at_argVec,
     at_apply,
     at_struct_apply,
     at_ucon_apply,
@@ -356,6 +361,7 @@ enum AstType {
     at_setbang,
     at_deref,
     at_dup,
+    at_inner_ref,
     at_allocREF,
     at_copyREF,
     at_mkClosure,
@@ -435,6 +441,8 @@ public:
   bool isGlobal() { return (Flags & ID_IS_GLOBAL); }
   bool isFnxn(); 
   size_t nBits();
+  bool isLocation();
+  bool isLiteral();
   bool isTopLevelForm();
   bool leadsToTopLevelForm();
   void clearTypes(); 

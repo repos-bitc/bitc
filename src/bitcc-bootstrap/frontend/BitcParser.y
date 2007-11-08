@@ -161,6 +161,7 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 %token <tok> tk_SET
 %token <tok> tk_DEREF
 %token <tok> tk_REF
+%token <tok> tk_INNER_REF
 %token <tok> tk_VAL
 %token <tok> tk_OPAQUE
 %token <tok> tk_MEMBER
@@ -171,6 +172,7 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 %token <tok> tk_BEGIN
 %token <tok> tk_DO
 %token <tok> tk_APPLY
+%token <tok> tk_BY_REF
 
 %token <tok> tk_EXCEPTION
 %token <tok> tk_TRY
@@ -224,12 +226,13 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 %type <ast> constructors constructor 
 %type <ast> repr_constructors repr_constructor 
 %type <ast> repr_reprs repr_repr 
-%type <ast> bindingpatterns bindingpattern
-%type <ast> expr_seq
+%type <ast> bindingpattern lambdapatterns lambdapattern
+%type <ast> expr_seq 
 %type <ast> qual_type qual_constraint
 %type <ast> expr the_expr eform method_decls method_decl method_seq
 %type <ast> constraints constraint_seq constraint 
-%type <ast> any_type types type bitfieldtype bool_type 
+%type <ast> types type bitfieldtype bool_type 
+%type <ast> type_pl_bf type_pl_byref types_pl_byref
 %type <ast> int_type uint_type any_int_type float_type
 %type <ast> tvlist fields field 
 %type <ast> literal typevar //mod_ident
@@ -570,7 +573,7 @@ type_definition: '(' tk_DEFUNION ptype_name val optdocstring declares constructo
 /*   $$->loc = $2.loc; */
 /* }; */
 
-/* reprbodyitem: '(' tk_THE any_type '(' tk_TAG reprtags ')' ')' { */
+/* reprbodyitem: '(' tk_THE type_pl_bf '(' tk_TAG reprtags ')' ')' { */
 /*   SHOWPARSE("reprbodyitem -> '(' TAG reprtags ')' "); */
 /*   $$ = $6; */
 /*   $$->loc = $5.loc; */
@@ -807,9 +810,9 @@ value_definition: '(' tk_DEFINE '(' defident ')' expr_seq ')'  {
 
 // Define convenience syntax case 3: one or more arguments
 // No docstring here because of expr_seq
-value_definition: '(' tk_DEFINE '(' defident bindingpatterns ')' 
+value_definition: '(' tk_DEFINE '(' defident lambdapatterns ')' 
                   expr_seq ')'  {
-  SHOWPARSE("value_definition -> ( DEFINE  ( defident bindingpatterns ) "
+  SHOWPARSE("value_definition -> ( DEFINE  ( defident lambdapatterns ) "
 	    "[docstring] expr_seq )");
   $7 = stripDocString($7);
   GCPtr<AST> iLambda = new AST(at_lambda, $2.loc, $5, $7);
@@ -918,8 +921,8 @@ decls: decls decl {
   $$->addChild($2);
 };
 
-decl: '(' ident any_type ')' {
-  SHOWPARSE("decl -> ( ident any_type )");
+decl: '(' ident type_pl_bf ')' {
+  SHOWPARSE("decl -> ( ident type_pl_bf )");
   $$ = new AST(at_declare, $2->loc, $2, $3);
 };
 //decl: '(' ident ')' {
@@ -1011,14 +1014,14 @@ fields: fields field {
   $$->addChild($2);
 };
 
-field: ident ':' any_type  {
-  SHOWPARSE("field -> ident : any_type");
+field: ident ':' type_pl_bf  {
+  SHOWPARSE("field -> ident : type_pl_bf");
   $1->Flags |= ID_IS_FIELD;
   $$ = new AST(at_field, $1->loc, $1, $3);
 };
 
-field: '(' tk_THE any_type ident ')'  {
-  SHOWPARSE("field -> '(' THE any_type ident ')'");
+field: '(' tk_THE type_pl_bf ident ')'  {
+  SHOWPARSE("field -> '(' THE type_pl_bf ident ')'");
   $4->Flags |= ID_IS_FIELD;
   $$ = new AST(at_field, $1.loc, $4, $3);
 };
@@ -1188,9 +1191,8 @@ fntype: '(' tk_FN '(' ')' type ')' {
   GCPtr<AST> fnargVec = new AST(at_fnargVec, $3.loc);
   $$ = new AST(at_fn, $2.loc, fnargVec, $5);
 };
-fntype: '(' tk_FN '(' types ')' type ')'  {
-  SHOWPARSE("fntype -> ( FN ( types ) type )");
-  $4->astType = at_fnargVec;
+fntype: '(' tk_FN '(' types_pl_byref ')' type ')'  {
+  SHOWPARSE("fntype -> ( FN ( types_pl_byref ) type )");
   $$ = new AST(at_fn, $2.loc, $4, $6);
 };
 
@@ -1254,15 +1256,40 @@ bitfieldtype: '(' tk_BITFIELD bool_type intLit ')' {
 };
 
 // Any-type, including bitfield type
-any_type: bitfieldtype {
-  SHOWPARSE("any_type -> bitfieldtype");
+type_pl_bf: bitfieldtype {
+  SHOWPARSE("type_pl_bf -> bitfieldtype");
   $$ = $1;
 };
 
-any_type: type {
-  SHOWPARSE("any_type -> type");
+type_pl_bf: type {
+  SHOWPARSE("type_pl_bf -> type");
   $$ = $1;
 };
+
+// by-ref types are not a part of general `type' rule. 
+// They are gramatiocally restricted to apprae only on 
+// formal function arguments and function types. 
+type_pl_byref: type {
+  SHOWPARSE("type_pl_byref -> type");
+  $$ = $1;
+};
+
+type_pl_byref: '(' tk_BY_REF type ')' {
+  SHOWPARSE("type_pl_byref -> ( BY-REF type )");
+  $$ = new AST(at_byrefType, $2.loc, $3);
+};
+
+types_pl_byref: type_pl_byref {
+  SHOWPARSE("types_pl_byref -> type_pl_byref");
+  $$ = new AST(at_fnargVec);
+  $$->addChild($1);
+}; 
+types_pl_byref: types_pl_byref type_pl_byref {
+  SHOWPARSE("types_pl_byref -> types_pl_byref type_pl_byref");
+  $$ = $1;
+  $1->addChild($2);
+};
+
 
 // Qualified types:
 
@@ -1299,25 +1326,6 @@ qual_constraint: '(' tk_FORALL constraints constraint ')' {
 /* }; */
 
 // BINDING PATTERNS [5.1]
-/* Binding Patterns / Structural Patterns */
-bindingpatterns: bindingpattern {
-  SHOWPARSE("bindingpatterns -> bindingpattern");
-  // A sequence of binding patterns is presumptively an
-  // at_ituplePattern. If it turns out later in the parse that
-  // these are really the arguments to something like
-  //
-  //   (TUPLE bp bp bp)
-  //
-  // then we smash the astType at that point.
-  $$ = new AST(at_argVec, $1->loc);
-  $$->addChild($1);
-};
-bindingpatterns: bindingpatterns bindingpattern {
-  SHOWPARSE("bindingpatterns -> bindingpatterns bindingpattern");
-  $$ = $1;
-  $$->addChild($2);
-};
-
 bindingpattern: ident {
   SHOWPARSE("bindingpattern -> ident");
   $$ = new AST(at_identPattern, $1->loc, $1);
@@ -1345,6 +1353,42 @@ defpattern: defident ':' qual_type {
 defpattern: '(' tk_THE qual_type defident ')' {
   SHOWPARSE("defpattern -> (THE qual_type defident)");
   $$ = new AST(at_identPattern, $1.loc, $4, $3);
+};
+
+
+/* Lambda Patterns -- with an additional by-ref annotation */
+lambdapatterns: lambdapattern {
+  SHOWPARSE("lambdapatterns -> lambdapattern");
+  $$ = new AST(at_argVec, $1->loc);
+  $$->addChild($1);
+};
+lambdapatterns: lambdapatterns lambdapattern {
+  SHOWPARSE("lambdapatterns -> lambdapatterns lambdapattern");
+  $$ = $1;
+  $$->addChild($2);
+};
+
+lambdapattern: ident {
+  SHOWPARSE("lambdapattern -> ident");
+  $$ = new AST(at_identPattern, $1->loc, $1);
+};
+
+lambdapattern: ident ':' type_pl_byref {
+  SHOWPARSE("lambdapattern -> ident : type_pl_byref");
+  $$ = new AST(at_identPattern, $1->loc, $1, $3);
+  if($3->astType == at_byrefType)
+    $1->Flags2 |= ARG_BYREF;
+};
+
+lambdapattern: '(' tk_THE type ident ')' {
+  SHOWPARSE("lambdapattern -> ( the type ident ) ");
+  $$ = new AST(at_identPattern, $1.loc, $4, $3);  
+};
+
+lambdapattern: '(' tk_THE '(' tk_BY_REF type ')' ident ')' {
+  SHOWPARSE("lambdapattern -> ( the ( by-ref type ) ident )");
+  $$ = new AST(at_identPattern, $1.loc, $7, $5);
+  $5->Flags2 |= ARG_BYREF;
 };
 
 // EXPRESSIONS [7]
@@ -1519,6 +1563,14 @@ eform: '(' tk_DEREF expr ')' {
   $$ = new AST(at_deref, $2.loc, $3);
   $$->Flags2 |= AST_IS_LOCATION;
 };
+// INNER-REF
+// In the case of structures, the second "expression"
+// must be a label. This cannot be checked until 
+// type-checking phase.
+eform: '(' tk_INNER_REF expr expr ')' {
+  SHOWPARSE("eform -> ( INNER_REF expr expr)");
+  $$ = new AST(at_inner_ref, $2.loc, $3, $4);
+};
 
 // End of locations
 
@@ -1584,22 +1636,22 @@ eform: '(' tk_VECTOR_LENGTH expr ')' {
 
 // LAMBDA [7.9]
 // handles unit argument
-//eform: '(' tk_LAMBDA bindingpattern expr_seq ')'  {
-//  SHOWPARSE("lambda -> ( LAMBDA bindingpattern expr_seq )");
+//eform: '(' tk_LAMBDA lambdapattern expr_seq ')'  {
+//  SHOWPARSE("lambda -> ( LAMBDA lambdapattern expr_seq )");
 //  $4->astType = at_ibegin;
 //  $$ = new AST(at_xlambda, $2.loc, $3, $4);
 //};
 // convenience syntax: multiple arguments
 eform: '(' tk_LAMBDA '(' ')' expr_seq ')'  {
-  SHOWPARSE("lambda -> ( LAMBDA bindingpatterns expr_seq )");
+  SHOWPARSE("lambda -> ( LAMBDA lambdapatterns expr_seq )");
   if ($5->children->size() == 1 && $5->child(0)->astType == at_begin)
     $5 = $5->child(0);
   GCPtr<AST> argVec = new AST(at_argVec, $3.loc);
   $$ = new AST(at_lambda, $2.loc, argVec, $5);
 };
 
-eform: '(' tk_LAMBDA '(' bindingpatterns ')' expr_seq ')'  {
-  SHOWPARSE("lambda -> ( LAMBDA bindingpatterns expr_seq )");
+eform: '(' tk_LAMBDA '(' lambdapatterns ')' expr_seq ')'  {
+  SHOWPARSE("lambda -> ( LAMBDA lambdapatterns expr_seq )");
   if ($6->children->size() == 1 && $6->child(0)->astType == at_begin)
     $6 = $6->child(0);
   $$ = new AST(at_lambda, $2.loc, $4, $6);
@@ -1761,8 +1813,8 @@ ow: { //empty
   $$ = new AST(at_Null);
 };
 
-otherwise: '(' tk_OTHERWISE expr')' {
-  SHOWPARSE("otherwise -> ( OTHERWISE expr )");
+otherwise: '(' tk_OTHERWISE expr_seq')' {
+  SHOWPARSE("otherwise -> ( OTHERWISE expr_seq)");
   $$ = new AST(at_otherwise, $2.loc, $3);
 };
 

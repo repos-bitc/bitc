@@ -272,6 +272,54 @@ DEFCLOSURE_INLINE(bitc_index_lt);
   }								\
   DEFCLOSURE_INLINE(_16bitc_DTprelude_DT___PC_SHFN2##MTY##MTY##MTY)
 
+#define DEFBAND(TY,MTY)						\
+  INLINE TY							\
+  DEFUN(_20bitc_DTprelude_DT__b_and_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
+  {								\
+    return (arg1 & arg2);					\
+  }								\
+  DEFCLOSURE_INLINE(_20bitc_DTprelude_DT__b_and_SHFN2##MTY##MTY##MTY)
+
+#define DEFBOR(TY,MTY)						\
+  INLINE TY							\
+  DEFUN(_19bitc_DTprelude_DT__b_or_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
+  {								\
+    return (arg1 | arg2);					\
+  }								\
+  DEFCLOSURE_INLINE(_19bitc_DTprelude_DT__b_or_SHFN2##MTY##MTY##MTY)
+
+#define DEFBNOT(TY,MTY)						\
+  INLINE TY							\
+  DEFUN(_20bitc_DTprelude_DT__b_not_SHFN1##MTY##MTY, TY arg1)	\
+  {								\
+    return (~arg1);						\
+  }								\
+  DEFCLOSURE_INLINE(_20bitc_DTprelude_DT__b_not_SHFN1##MTY##MTY)
+
+#define DEFBXOR(TY,MTY)						\
+  INLINE TY							\
+  DEFUN(_20bitc_DTprelude_DT__b_xor_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
+  {								\
+    return (arg1 ^ arg2);					\
+  }								\
+  DEFCLOSURE_INLINE(_20bitc_DTprelude_DT__b_xor_SHFN2##MTY##MTY##MTY)
+
+#define DEFBLS(TY,MTY)						\
+  INLINE TY							\
+  DEFUN(_17bitc_DTprelude_DT___LT_LT_SHFN2##MTY##_4word##MTY, TY arg1, bitc_word_t arg2) \
+  {								\
+    return (arg1 << arg2);					\
+  }								\
+  DEFCLOSURE_INLINE(_17bitc_DTprelude_DT___LT_LT_SHFN2##MTY##_4word##MTY)
+
+#define DEFBRS(TY,MTY)						\
+  INLINE TY							\
+  DEFUN(_17bitc_DTprelude_DT___GT_GT_SHFN2##MTY##_4word##MTY, TY arg1, bitc_word_t arg2) \
+  {								\
+    return (arg1 >> arg2);					\
+  }								\
+  DEFCLOSURE_INLINE(_17bitc_DTprelude_DT___GT_GT_SHFN2##MTY##_4word##MTY)
+
 
 #define DEFORD(TY,MTY) \
   DEFEQL(TY,MTY);      \
@@ -296,6 +344,13 @@ DEFCLOSURE_INLINE(bitc_index_lt);
   DEFDIVIDE(TY, MTY);			        \
   DEFORD(TY, MTY)
 
+#define DEFBITARITH(TY, MTY) \
+  DEFBAND(TY, MTY);	     \
+  DEFBOR(TY, MTY);	     \
+  DEFBNOT(TY, MTY);	     \
+  DEFBXOR(TY, MTY);	     \
+  DEFBLS(TY, MTY);	     \
+  DEFBRS(TY, MTY);	     
 
 DEFARITH(bitc_int64_t,_5int64);
 DEFARITH(bitc_int32_t,_5int32);
@@ -308,6 +363,12 @@ DEFARITH(bitc_uns8_t,_5uint8);
 DEFARITH(bitc_word_t,_4word);
 DEFFLOATARITH(bitc_float_t, _5float);
 DEFFLOATARITH(bitc_double_t, _6double);
+
+DEFBITARITH(bitc_uns8_t,_5uint8);
+DEFBITARITH(bitc_uns16_t,_6uint16);
+DEFBITARITH(bitc_uns32_t,_6uint32);
+DEFBITARITH(bitc_uns64_t,_6uint64);
+DEFBITARITH(bitc_word_t,_4word);
 
 DEFORD(bitc_char_t,_4char);
 DEFORD(bitc_bool_t,_4bool);
@@ -349,7 +410,6 @@ DEFUN(_17bitc_DTprelude_DT___GT_EQ_SHFN2_6string_6string_4bool, bitc_string_t *a
   return (__builtin_strcmp((const char *)arg1->s,(const char *)arg2->s) >= 0);
 }						\
 DEFCLOSURE_INLINE(_17bitc_DTprelude_DT___GT_EQ_SHFN2_6string_6string_4bool);
-
 
 /* CAST Operations */
 
@@ -849,54 +909,11 @@ DEFCAST(bitc_uns64_t, _6uint64, bitc_word_t,  _4word);
 DEFCAST(bitc_int64_t, _5int64, bitc_word_t,  _4word);
 DEFCAST(bitc_word_t,  _4word,  bitc_uns64_t,  _6uint64);
 DEFCAST(bitc_word_t,  _4word,  bitc_int64_t, _5int64);
+DEFCAST(bitc_word_t,  _4word,  bitc_word_t,  _4word);
 DEFCAST(bitc_float_t, _5float, bitc_word_t,  _4word);
 DEFCAST(bitc_double_t, _6double, bitc_word_t,  _4word);
 DEFCAST(bitc_word_t,  _4word,  bitc_float_t,  _5float);
 DEFCAST(bitc_word_t,  _4word,  bitc_double_t, _6double);
-
-/* Conversion across mutability, -- try to avoid */
-/* From mutable to immutable */
-DEFCAST(bitc_uns8_t,  M_5uint8,  bitc_word_t,   _4word);
-DEFCAST(bitc_int8_t,  M_4int8,  bitc_word_t,   _4word);
-DEFCAST(bitc_word_t,   M_4word,   bitc_uns8_t,   _5uint8);
-DEFCAST(bitc_word_t,   M_4word,   bitc_int8_t,  _4int8);
-DEFCAST(bitc_uns16_t, M_6uint16, bitc_word_t,  _4word);
-DEFCAST(bitc_int16_t, M_5int16, bitc_word_t,  _4word);
-DEFCAST(bitc_word_t,  M_4word,  bitc_uns16_t,  _6uint16);
-DEFCAST(bitc_word_t,  M_4word,  bitc_int16_t, _5int16);
-DEFCAST(bitc_uns32_t, M_6uint32, bitc_word_t,  _4word);
-DEFCAST(bitc_int32_t, M_5int32, bitc_word_t,  _4word);
-DEFCAST(bitc_word_t,  M_4word,  bitc_uns32_t,  _6uint32);
-DEFCAST(bitc_word_t,  M_4word,  bitc_int32_t, _5int32);
-DEFCAST(bitc_uns64_t, M_6uint64, bitc_word_t,  _4word);
-DEFCAST(bitc_int64_t, M_5int64, bitc_word_t,  _4word);
-DEFCAST(bitc_word_t,  M_4word,  bitc_uns64_t,  _6uint64);
-DEFCAST(bitc_word_t,  M_4word,  bitc_int64_t, _5int64);
-DEFCAST(bitc_float_t, M_5float, bitc_word_t,  _4word);
-DEFCAST(bitc_double_t, M_6double, bitc_word_t,  _4word);
-DEFCAST(bitc_word_t,  M_4word,  bitc_float_t,  _5float);
-DEFCAST(bitc_word_t,  M_4word,  bitc_double_t, _6double);
-/* From immutable to mutable -- try to avoid */
-DEFCAST(bitc_uns8_t,  _5uint8,  bitc_word_t,   M_4word);
-DEFCAST(bitc_int8_t,  _4int8,  bitc_word_t,   M_4word);
-DEFCAST(bitc_word_t,   _4word,   bitc_uns8_t,   M_5uint8);
-DEFCAST(bitc_word_t,   _4word,   bitc_int8_t,  M_4int8);
-DEFCAST(bitc_uns16_t, _6uint16, bitc_word_t,  M_4word);
-DEFCAST(bitc_int16_t, _5int16, bitc_word_t,  M_4word);
-DEFCAST(bitc_word_t,  _4word,  bitc_uns16_t,  M_6uint16);
-DEFCAST(bitc_word_t,  _4word,  bitc_int16_t, M_5int16);
-DEFCAST(bitc_uns32_t, _6uint32, bitc_word_t,  M_4word);
-DEFCAST(bitc_int32_t, _5int32, bitc_word_t,  M_4word);
-DEFCAST(bitc_word_t,  _4word,  bitc_uns32_t,  M_6uint32);
-DEFCAST(bitc_word_t,  _4word,  bitc_int32_t, M_5int32);
-DEFCAST(bitc_uns64_t, _6uint64, bitc_word_t,  M_4word);
-DEFCAST(bitc_int64_t, _5int64, bitc_word_t,  M_4word);
-DEFCAST(bitc_word_t,  _4word,  bitc_uns64_t,  M_6uint64);
-DEFCAST(bitc_word_t,  _4word,  bitc_int64_t, M_5int64);
-DEFCAST(bitc_float_t, _5float, bitc_word_t,  M_4word);
-DEFCAST(bitc_double_t, _6double, bitc_word_t,  M_4word);
-DEFCAST(bitc_word_t,  _4word,  bitc_float_t,  M_5float);
-DEFCAST(bitc_word_t,  _4word,  bitc_double_t, M_6double);
 
 /**************************************************************
  **             End of Script generatede code                **

@@ -272,6 +272,7 @@ ssa(std::ostream& errStream,
   case at_dummyType:
   case at_refType:
   case at_valType:
+  case at_byrefType:
   case at_fn:
   case at_fnargVec:
   case at_primaryType:
@@ -532,6 +533,55 @@ ssa(std::ostream& errStream,
       break;      
     }
 
+  case at_inner_ref:
+    {
+      GCPtr<AST> expr = ast->child(0);
+      
+      SSA(errStream, uoc, expr, grandLet, identList, 
+	  ast, 0, flags);      
+      ast->child(0) = FEXPR(grandLet);
+
+      if(ast->Flags2 & INNER_REF_NDX) {
+	GCPtr<AST> ndx = ast->child(1);
+	SSA(errStream, uoc, ndx, grandLet, identList, 
+	    ast, 1, flags);      
+	ast->child(1) = FEXPR(grandLet);
+	
+	// Need to Check Index bounds here, 
+	// Get the array_nth or vector_nth case to do it
+	// Final replacement of FEXPR(grandLet) will
+	// change the resultant value to 
+	// inner-ref.
+	
+	GCPtr<AST> tempAst = NULL;
+	if(expr->symType->getBareType()->kind == ty_vector) {
+	  // Vector-Index
+	  tempAst = new AST(at_vector_nth, expr->loc, 
+			    expr, ndx);
+	  
+	}
+	else {
+	  // ref(Array)-Index
+	  assert(expr->symType->getBareType()->kind == ty_ref);
+	  tempAst = new AST(at_array_nth, expr->loc, 
+			    new AST(at_deref, expr->loc, expr), ndx);	  
+	}
+	
+	// Careful: tempAst has no real parent. 
+	// Fortunately, arrray_nth and vector_nth does not need this
+	// information, and all other sub-trees will recieve correct
+	// information from that case. Actually, there will be no
+	// further cases as the sub-expression have already been
+	// SSAed in the previous steps. 
+	SSA(errStream, uoc, tempAst, grandLet, identList, 
+	    NULL, 0, flags);      
+	
+      }
+
+      FEXPR(grandLet) = ast;      
+      break;      
+    }
+
   case at_array_nth:
   case at_vector_nth:
     {
@@ -586,11 +636,44 @@ ssa(std::ostream& errStream,
 
   case at_apply:
     {
-      GCPtr<AST> id = ast->child(0);
-      for(c=0; c < ast->children->size(); c++) {
+      GCPtr<AST> id = ast->child(0);      
+
+      GCPtr<Type> fn = id->symType->getBareType();
+      assert(fn->isFnxn());
+      GCPtr<Type> argsType = fn->CompType(0)->getType();
+
+      SSA(errStream, uoc, ast->child(0), grandLet, identList, 
+	  ast, 0, flags);
+      ast->child(0) = FEXPR(grandLet);
+      
+      for(c=1; c < ast->children->size(); c++) {
+	
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 
-	       ast, c, flags);
-	ast->child(c) = FEXPR(grandLet);
+	    ast, c, flags);
+	
+	/* We must make sure that all by-ref applications can be legal
+	   -- some applications may need temporary variable
+	   introductions. For example: 
+	   
+	   (fnxn:(fn ((by-ref bool)) ()) #t)
+	*/
+	
+	if((argsType->CompFlags(c-1) & COMP_BYREF) && 
+	   (!ast->child(c)->isLocation())) {
+	  
+	  assert(ast->child(c)->isLiteral());
+	  
+	  // While application of literals to mutable-by-reference
+	  // parameters is illegal, this should have been a type
+	  // error. 
+	  assert(!argsType->CompType(c-1)->isMutable());
+	  
+	  // Now it is safe to allow the byref application by
+	  // introducing a temporary variable.
+	  FEXPR(grandLet) = addLB(grandLet, identList, ast->child(c));
+	}
+	
+	ast->child(c) = FEXPR(grandLet);	
       }
 
       if(id->Flags & SELF_TAIL) {
@@ -647,7 +730,8 @@ ssa(std::ostream& errStream,
 	       ast, c, flags);
 	ast->child(c) = FEXPR(grandLet);
       }
-      // FEXPR(grandLet), the last one is the right one.
+
+      FEXPR(grandLet) = ast;
       break;
     }    
 
@@ -776,10 +860,16 @@ ssa(std::ostream& errStream,
   case at_switchR:
   case at_tryR:
     {           
+      GCPtr<AST> res = AST::genSym(ast, "t");
+      addIL(identList, res);
+      
+      // The result of the top-expression is a return value	
+      // only in the case of a try block
       if(ast->astType == at_tryR) {
 	GCPtr<AST> gl = newGrandLet(ast);
 	SSA(errStream, uoc, ast->child(0), gl, identList, 
-	    ast, 0, flags);
+	    ast, 0, flags);	
+	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 0, res, false);
 	SETGL(ast->child(0), gl);
       }
       else {
@@ -788,10 +878,7 @@ ssa(std::ostream& errStream,
 	ast->child(0) = FEXPR(grandLet);	
       }
       
-      GCPtr<AST> res = AST::genSym(ast, "t");
-      addIL(identList, res);
-      GCPtr<AST> cases = ast->child(1);
-      
+      GCPtr<AST> cases = ast->child(1);      
       // the cases
       for(c=0; c < cases->children->size(); c++) {
 	GCPtr<AST> theCase = cases->child(c);

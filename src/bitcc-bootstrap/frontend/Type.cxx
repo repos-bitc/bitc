@@ -290,6 +290,13 @@ Type::isValType()
 }
 
 bool 
+Type::isByrefType()
+{
+  GCPtr<Type> t = getBareType();
+  return (t->kind == ty_byref);
+}
+
+bool 
 Type::isFnxn()
 {
   GCPtr<Type> t = getBareType();
@@ -592,6 +599,7 @@ Type::isOfInfiniteType()
   case ty_array:
   case ty_vector:
   case ty_ref:
+  case ty_byref:
   case ty_mutable:
   case ty_maybe:
   case ty_exn:
@@ -678,11 +686,11 @@ Type::SetTvarsToUnit()
   }
 }
   
-comp::comp(GCPtr<Type> t) 
+comp::comp(GCPtr<Type> t, unsigned long _flags) 
 {
   name = "";
   typ = (GCPtr<Type> )t;
-  flags=0;
+  flags=_flags;
 }
   
 comp::comp(const std::string s, GCPtr<Type> t, unsigned long _flags) 

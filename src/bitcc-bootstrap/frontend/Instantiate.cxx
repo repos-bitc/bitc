@@ -57,7 +57,6 @@ using namespace std;
 
 //#define VERBOSE 200
 
-
 #if #INST_DEBUG == #DEBUG_ON
 #define STRICTLYEQUALS(x) strictlyCompatible(x, DEBUG_VERBOSE)
 #else
@@ -1057,6 +1056,19 @@ UocInfo::recInstantiate(ostream &errStream,
       
       if((ast->Flags2 & SEL_FROM_UN_VAL) || 
 	 (ast->Flags2 & SEL_FROM_UN_TYPE))
+	ast->child(1) = recInstantiate(errStream, 
+				       ast->child(1),
+				       errFree, worklist);
+      break;
+    }
+    
+  case at_inner_ref:
+    {
+      ast->child(0) = recInstantiate(errStream, 
+				     ast->child(0),
+				     errFree, worklist);
+      
+      if(ast->Flags2 & INNER_REF_NDX)
 	ast->child(1) = recInstantiate(errStream, 
 				       ast->child(1),
 				       errFree, worklist);
