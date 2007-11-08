@@ -51,7 +51,6 @@
   <p>
     </p>
   </abstract> -->
-
   <!-- <toc/> -->
   <sect1 id="intro">
     <title>Introduction</title>
@@ -166,12 +165,12 @@
             </alternatives>
           </bnfc>
           <bnf desc="Let-kinds">
-            <symbol name="kappa"/>
+            <lKind/>
             <alternatives>
               <text content="-"/>
-              <symbol name="alpha"/>
-              <symbol name="psi"/>
-              <symbol name="forall"/>
+              <lKind k="var"/>
+              <lKind k="mono"/>
+              <lKind k="poly"/>
             </alternatives>
           </bnf>
           <bnf desc="Stack">
@@ -212,7 +211,7 @@
           <bnfc desc="ref / pointer">
             <alternatives>
               <ref><type/></ref>
-            </alternatives>
+            </alternatives> 
           </bnfc>
           <bnfc desc="Mutable type">
             <alternatives>
@@ -288,27 +287,46 @@
               </extend>
             </alternatives>
           </bnf>
+          <bnf desc="Constraints">
+            <constraint/>
+            <alternatives>
+              <eq>
+                <type/>
+                <type/>
+              </eq>
+              <ceq>
+                <type/>
+                <type/> 
+              </ceq>
+              <Tsub>
+                <type/>
+                <type/> 
+              </Tsub>
+            </alternatives>
+          </bnf>
+          <bnfc desc="">
+            <alternatives>
+              <Pcst>
+                <lKind/>
+                <type/>
+                <type/>
+              </Pcst>
+            </alternatives>
+          </bnfc>
           <bnf desc="Constraint Sets">
             <aCtset/>
             <alternatives>
               <Empty/>
               <set>
-                <alternatives>                      
-                  <eq>
-                    <type/>
-                    <type/>
-                  </eq>
-                  <ceq>
-                    <type/>
-                    <type/> 
-                  </ceq>
-                  <Tsub>
-                    <type/>
-                    <type/> 
-                  </Tsub>
-                </alternatives>
+                <plural>
+                  <constraint/>
+                </plural>
               </set>
-            </alternatives>
+              <unin>
+                <aCtset/>
+                <aCtset/>
+              </unin>
+            </alternatives>            
           </bnf>
           <bnf desc="Substitutions">            
             <aSubMap/>            
@@ -317,6 +335,10 @@
               <SubMap>
                 <tvar name="alpha"/>
                 <type/>
+              </SubMap>
+              <SubMap>
+                <lKind k="var"/>
+                <lKind/>
               </SubMap>
               <compose>
                 <aSubMap/>
@@ -379,19 +401,146 @@
 	  <text content="Z"/>          
 	</subst>
       </btypes:TYPE>.
+      The application of a substitution
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE> on X is written as
+      <btypes:TYPE>
+	<Subst>
+	  <aSubMap/>
+	  <text content="X"/>
+	</Subst>
+      </btypes:TYPE>. 
+      We represent mathematical properties as: 
+      <btypes:TYPE>
+	<models name="property">
+	  <text content="assumption"/>
+	  <text content="subject"/>
+	</models>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      As a matter of notational convenience, we write:
+      <btypes:TYPE>
+        <aSubMap num="a.b"/> 
+      </btypes:TYPE> to mean
+      <btypes:TYPE>
+        <compose>
+          <aSubMap num="a"/> 
+          <aSubMap num="b"/> 
+        </compose>
+      </btypes:TYPE>. Note that
+      <btypes:TYPE>
+        <eq>
+          <Subst>
+            <aSubMap num="a.b"/> 
+            <text content="x"/>
+          </Subst>
+          <Subst>
+            <compose>
+              <aSubMap num="a"/> 
+              <aSubMap num="b"/> 
+            </compose>
+            <text content="x"/>
+          </Subst>
+          <Subst>
+            <aSubMap num="a"/> 
+            <Subst>
+              <aSubMap num="b"/>                 
+              <text content="x"/>
+            </Subst>
+          </Subst>
+          <Subst>
+            <aSubMap num="b"/>                 
+            <Subst>
+              <aSubMap num="a"/> 
+              <text content="x"/>
+            </Subst>
+          </Subst>
+        </eq>
+      </btypes:TYPE>.        
     </p>
   </sect1>
   <sect1 id="opsem">
     <title>Semantics</title>
-    <!-- YES I REALLY MEAN include/sys-infer/___  not include/formal/___ --> 
-    <xi:include href="include/sys-infer/opsem.xmli"/>
-    <xi:include href="include/sys-infer/decl.xmli"/>
+    <xi:include href="include/core/opsem.xmli"/>
+    <xi:include href="include/core/decl.xmli"/>
     <p>
       The Operational semantics rules are shown in Figure&nbsp;<xref
-        ref="dyn_sem_horz"/>. 
+        ref="dyn_sem_horz"/>.
+      The system state is represented by the triple 
+      <btypes:TYPE>
+	<opState>
+	  <stack/>
+	  <heap/>
+	  <aExpr/>
+	</opState>
+      </btypes:TYPE>
+      consisting of the stack
+      <btypes:TYPE>
+	<stack/>
+      </btypes:TYPE>, the heap
+      <btypes:TYPE>
+	<heap/>
+      </btypes:TYPE>, and the expression
+      <btypes:TYPE>
+	<aExpr/>
+      </btypes:TYPE> to be
+      evaluated. Evaluation itself is a two place relationship   
+      <btypes:TYPE>
+	<eval>
+	  <opState>
+	    <stack/>
+	    <heap/>
+	    <aExpr/>
+	  </opState>
+	  <opState>
+	    <stack dash="'"/>
+	    <heap dash="'"/>
+	    <aExpr dash="'"/>
+	  </opState>
+	</eval>
+      </btypes:TYPE>
+      that denotes transformation in the system state due to a single
+      step of execution.
+      Figure&nbsp;<xref ref="dyn_sem_horz"/> shows the evaluation
+      rules for our core language. We assume that the program is
+      alpha-converted so that there are no name collisions due to
+      inner bindings. Separate execution
+      semantics are given for left and right execution (evaluation of
+      expressions that appear on the LHS and RHS of an assignment 
+      <btypes:TYPE>
+	<assign>
+	  <aExpr num="l"/>
+	  <aExpr num="r"/>
+	</assign>
+      </btypes:TYPE>) denoted by 
+      <btypes:TYPE><levalOp/></btypes:TYPE> and 
+      <btypes:TYPE><evalOp/></btypes:TYPE> respectively. 
+    </p>
+    <p>
       Figure&nbsp;<xref ref="decl_all_rules"/> shows the declarative
       type rules, copy coercion rules, rules for type generalization
       and the lvalue restriction.
+      The standard type judgment  
+      <btypes:TYPE>
+	<TDjudge>
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE> is understood as: given a binding environment 
+      <btypes:TYPE>
+	<gamma/>
+      </btypes:TYPE> and store typing
+      <btypes:TYPE>
+	<store/>
+      </btypes:TYPE>, the expression
+      <btypes:TYPE>
+	<aExpr/>
+      </btypes:TYPE> has type
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE>.
       We write 
       <btypes:TYPE>
         <TDjudge sub="yes">
@@ -899,6 +1048,17 @@
               <FALSE/>
             </fnxn>
             <br/>
+            <br/>
+            <fnxn name="Expansive">
+              <aExpr/>
+              <NOT>
+                <pred name="Value">
+                  <aExpr/>
+                </pred>
+              </NOT>
+            </fnxn>
+            <br/>
+            <br/>
             <fnxn name="Immut">
               <unit/>
               <TRUE/>
@@ -944,6 +1104,16 @@
             <fnxn name="Immut">
               <type/>
               <FALSE/>
+            </fnxn>
+            <br/>
+            <br/>
+            <fnxn name="Mut">
+              <type/>
+              <NOT>
+                <pred name="Immut">
+                  <type/>
+                </pred>
+              </NOT>
             </fnxn>
           </btypes:TYPE>
         </p>
@@ -1503,7 +1673,7 @@
             <bool/>
           </eq>
         </btypes:TYPE>, it is clear that the final rule in the
-        derivation must be T-TRUE, or T-FALSE, in which case the
+        derivation must be T-True, or T-False, in which case the
         result is immediate. 
 
         The case  
@@ -1668,21 +1838,21 @@
       <ol>
         <li>
           <p>
-            Case T-UNIT, T-TRUE, T-FALSE, T-HLOC, T-LAMBDA:
+            Case T-Unit, T-True, T-False, T-Hloc, T-Lambda:
             (Values) Result is immediate for right execution, and
             cannot happen for right execution
           </p>
         </li>
         <li>
           <p>
-            Case T-ID: cannot happen, there is no execution rule for
+            Case T-Id: cannot happen, there is no execution rule for
             variables. 
           </p>
         </li>
         <li>
           <p>
-            Case T-SLOC: Immediate for left execution. Right
-            execution and can always continue with E-RVAL rule as the
+            Case T-Sloc: Immediate for left execution. Right
+            execution and can always continue with E-Rval rule as the
             stack is well typed 
             (<btypes:TYPE>
               <Sjudge>
@@ -1700,7 +1870,7 @@
         </li>
         <li>
           <p>
-            Case T-APP: Only right execution is possible, no application is well
+            Case T-App: Only right execution is possible, no application is well
             typed as an lvalue. We have:
             <btypes:TYPE>
               <eq>
@@ -1730,8 +1900,8 @@
               <text content=" or "/>
               <aExpr num="2"/>
             </btypes:TYPE>
-            is not a value, we can take E-APP-STEP-FN or
-            E-APP-STEP-ARG. Otherwise, when both 
+            is not a value, we can take E-App1# or
+            E-App2#. Otherwise, when both 
             <btypes:TYPE>
               <aExpr num="1"/>
               <text content=" and "/>
@@ -1748,18 +1918,18 @@
                 <aExpr dash="'"/>
               </lambda>
             </btypes:TYPE>,
-            and we can take the step E-APP. 
+            and we can take the step E-App. 
           </p>
         </li>
         <li>
           <p>
-            Case T-IF: Similar to T-APP, only right execution is
+            Case T-If: Similar to T-App, only right execution is
             permitted.
           </p>
         </li>
         <li>
           <p>
-            Case T-SET: Only right execution is applicable. We have:
+            Case T-Set: Only right execution is applicable. We have:
             <btypes:TYPE>
               <eq>
                 <aExpr/>
@@ -1805,12 +1975,12 @@
                 <aExpr num="1"/>                  
               </Sjudge>
             </btypes:TYPE>
-            we can take E-SET-STEP-LHS by induction hypothesis.
+            we can take E-:=lhs# by induction hypothesis.
             Similarly, if 
             <btypes:TYPE>
               <aExpr num="2"/>
             </btypes:TYPE>
-            is not a value, we can take E-SET-STEP-RHS.
+            is not a value, we can take E-:=rhs#.
             Finally, if
             <btypes:TYPE>
               <eq>
@@ -1823,20 +1993,20 @@
                 <aVal/>
               </eq>
             </btypes:TYPE>,
-            we can take the step E-SET-STACK or E-SET-HEAP as
+            we can take the step E-:=Stack or E-:=Heap as
             applicable. 
           </p>
         </li>
         <li>
           <p>
-            Case T-DUP: Only right execution is
-            permitted, and can take E-DUP-STEP or E-SUP-STEP as
+            Case T-Dup: Only right execution is
+            permitted, and can take E-Dup# or E-Dup as
             applicable. 
           </p>
         </li>
         <li>
           <p>
-            Case T-DEREF: We have:
+            Case T-Deref: We have:
             <btypes:TYPE>
               <eq>
                 <aExpr/>
@@ -1852,7 +2022,7 @@
                 </ref>                  
               </TDjudge>
             </btypes:TYPE>.
-            Execution can take E-LEFT-DEREF-STEP or E-DEREF-STEP as
+            Execution can take EL-^# or E-^# as
             applicable if  
             <btypes:TYPE>
               <aExpr num="1"/>
@@ -1883,7 +2053,7 @@
             </btypes:TYPE>.            
             Now, since this is an lvalue, we are done in the case of
             left execution. In the case of right execution, we can
-            take step E-DEREF since the heap is well typed 
+            take step E-^ since the heap is well typed 
             (<btypes:TYPE>
               <Sjudge>
                 <assume>
@@ -1900,7 +2070,7 @@
         </li>
         <li>
           <p>
-            Case T-LET-M: Only right execution is applicable. We have:
+            Case T-Let-M: Only right execution is applicable. We have:
             <btypes:TYPE>
               <eq>
                 <aExpr/>
@@ -1959,13 +2129,13 @@
             <btypes:TYPE>
               <aExpr num="1"/>
             </btypes:TYPE>
-            is not a value, we can take E-LET-STEP.
-            Otherwise, we can take E-STEP-M.              
+            is not a value, we can take E-Let#.
+            Otherwise, we can take E-Let-M.              
           </p>
         </li>
         <li>
           <p>
-            Case T-LET-P: Only right execution is applicable. We have:
+            Case T-Let-P: Only right execution is applicable. We have:
             <btypes:TYPE>
               <eq>
                 <aExpr/>
@@ -2024,13 +2194,13 @@
             <btypes:TYPE>
               <aExpr num="1"/>
             </btypes:TYPE>
-            is not a value, we can take E-LET-STEP.
-            Otherwise, can take E-LET-P.
+            is not a value, we can take E-Let#.
+            Otherwise, can take E-Let-P.
           </p>
         </li>
         <li>
           <p>
-            Case T-TQEXPR and Case T-LET-M-TQ, T-LET-P-TQ are
+            Case T-TqExpr and Case T-Let-M-Tq, T-Let-P-Tq are
             similar.  
           </p>
         </li>
@@ -2349,7 +2519,7 @@
       <ol>
         <li>
           <p>
-            Case T-ID: We have 
+            Case T-Id: We have 
             <btypes:TYPE>
               <eq>
                 <aExpr/>
@@ -2415,7 +2585,7 @@
               </spEq>
             </btypes:TYPE>, and we can infer any more-specific type
             (and in particular the type being instantiated at the
-            T-ID rule) instead for this substitution of the
+            T-Id rule) instead for this substitution of the
             expression    
             <btypes:TYPE>
               <aVal/>
@@ -2461,7 +2631,7 @@
         </li>
         <li>
           <p>
-            Case T-LAMBDA: We have 
+            Case T-Lambda: We have 
             <btypes:TYPE>
               <eq>
                 <aExpr/>
@@ -2587,7 +2757,7 @@
                 </tqExpr>
               </Sjudge>
             </btypes:TYPE>.
-            Finally, by the T-LAMBDA rule, we have:
+            Finally, by the T-Lambda rule, we have:
             <btypes:TYPE>
               <Sjudge>
                 <assume>
@@ -2638,7 +2808,7 @@
         </li>
         <li>
           <p>
-            T-SET case is similar, except that the substitution
+            T-Set case is similar, except that the substitution
             cannot happen on the LHS of an assignment, since we do
             not perform substitution of mutable values. 
           </p>
@@ -2997,13 +3167,13 @@
       <ol>
         <li>
           <p>
-            Case T-ID, T-TRUE, T-FALSE, T-HLOC, T-LAMBDA  cannot
+            Case T-Id, T-True, T-False, T-Hloc, T-Lambda  cannot
             happen. 
           </p>
         </li>
         <li>
           <p>
-            Case T-SLOC: Only right execution is applicable. 
+            Case T-Sloc: Only right execution is applicable. 
             We have:
             <btypes:TYPE>
               <eq>
@@ -3019,7 +3189,7 @@
                 <type/>
               </tqExpr>
             </btypes:TYPE>.
-            The only applicable step is E-RVAL, and we have
+            The only applicable step is E-Rval, and we have
             <btypes:TYPE>
               <eq>
                 <aExpr dash="'"/>
@@ -3064,7 +3234,7 @@
         </li>
         <li>
           <p>
-            Case T-APP:
+            Case T-App:
             <btypes:TYPE>
               <eq>
                 <aExpr/>
@@ -3134,7 +3304,7 @@
           <ol>
             <li>
               <p>
-                Case E-APP-STEP-FN:
+                Case E-App1#:
                 We have:
                 <btypes:TYPE>
                   <eval>
@@ -3179,7 +3349,7 @@
                     <store/>
                   </supeq>
                 </btypes:TYPE>.
-                One of the assumptions of the T-APP rule states that 
+                One of the assumptions of the T-App rule states that 
                 <btypes:TYPE>                    
                   <TDjudge sub="yes">
                     <aExpr num="2"/>
@@ -3197,7 +3367,7 @@
                       <type num="2"/>
                     </Tsub>
                   </Sjudge>
-                </btypes:TYPE>. Finally, by the T-APP rule, we
+                </btypes:TYPE>. Finally, by the T-App rule, we
                 conclude that
                 <btypes:TYPE>                    
                   <tqExpr>
@@ -3214,13 +3384,13 @@
             </li>
             <li>
               <p>
-                Case E-APP-STEP-ARG: Similar to the previous
+                Case E-App2#: Similar to the previous
                 sub-case. 
               </p>
             </li>
             <li>
               <p>
-                Case E-APP: We have:
+                Case E-App: We have:
                 <btypes:TYPE>
                   <eq>
                     <aExpr num="1"/>
@@ -3353,7 +3523,7 @@
         </li>
         <li>
           <p>
-            Case T-SET:
+            Case T-Set:
             <btypes:TYPE>
               <eq>
                 <aExpr/>
@@ -3381,16 +3551,16 @@
             </btypes:TYPE>
           </p>
           <p>
-            If the step taken is E-SET-STEP-LHS or E-SET-STEP-RHS,
+            If the step taken is E-:=#lhs or E-:=#rhs,
             the result follows from the induction hypothesis and
-            T-SET rule (as in the case of T-APP).               
-            If the step taken is E-SET-STACK or E-SET-HEAP, the
+            T-Set rule (as in the case of T-App).               
+            If the step taken is E-:=Stack or E-:=Heap, the
             result follows from the stack and heap assignment lemma.
           </p>
         </li>
         <li>
           <p>
-            Case T-DEREF: We have: 
+            Case T-Deref: We have: 
             <btypes:TYPE>
               <eq>
                 <aExpr/>
@@ -3406,11 +3576,10 @@
                 </ref>                  
               </TDjudge>
             </btypes:TYPE>.
-            If the step taken is E-LEFT-DEREF-STEP or E-LEFT-DEREF,
-            the result follows from induction hypothesis and T-DEREF
+            If the step taken is EL-^# or E-^#,
+            the result follows from induction hypothesis and T-Deref
             rule. 
-
-            If the step taken is E-DEREF (right execution only) 
+            If the step taken is E-^ (right execution only) 
             <btypes:TYPE>
               <aExpr dash="'"/>                  
             </btypes:TYPE> is a value, and from canonical forms
@@ -3445,7 +3614,7 @@
         </li>
         <li>
           <p>
-            Case T-LET-P: Right execution only. We have:
+            Case T-Let-P: Right execution only. We have:
             <btypes:TYPE>
               <eq>
                 <aExpr/>
@@ -3502,7 +3671,7 @@
           <ol>
             <li>
               <p>
-                If we take step E-LET-STEP,                   
+                If we take step E-Let#,                   
                 <btypes:TYPE>
                   <eval>
                     <opState>
@@ -3547,12 +3716,12 @@
                   </pred>
                 </btypes:TYPE>.                     
                 Now, the result follows
-                from the induction hypothesis and the E-LET-P rule.
+                from the induction hypothesis and the E-Let-P rule.
               </p>
             </li>
             <li>
               <p>
-                If we take the step E-LET-P, 
+                If we take the step E-Let-P, 
                 <btypes:TYPE>
                   <eq>
                     <aExpr/>
@@ -3604,7 +3773,7 @@
         </li>
         <li>
           <p>
-            Case T-LET-M: Similar to T-LET-P, except that we should
+            Case T-Let-M: Similar to T-Let-P, except that we should
             always use the GEN-EXPANSIVE rule during generalization,
             and use the location substitution lemma instead of 
             the value substitution lemma
@@ -3612,7 +3781,7 @@
         </li>
         <li>
           <p>
-            Cases T-IF, T-DUP, T-TQEXPR, and T-LET-M-TQ T-LET-P-TQ are
+            Cases T-If, T-Dup, T-TqExpr, and T-Let-M-Tq T-Let-P-Tq are
             similar.  
           </p>
         </li>
@@ -3741,18 +3910,440 @@
       </p>
     </proof>
   </sect1>
-  <sect1 id="infer">
-    <title>Type Inference</title> 
-    <xi:include href="include/sys-infer/infer.xmli"/>
-    <xi:include href="include/sys-infer/unify.xmli"/>
-    <xi:include href="include/sys-infer/solve.xmli"/>
+  <sect1 id="eq-infer">
+    <title>Equational Type Inference</title> 
+    <xi:include href="include/formal/eq2-infer.xmli"/>
+    <xi:include href="include/formal/eq2-unify.xmli"/>
     <p>
-      The type inference algorithm is shown in
-      Figure&nbsp;<xref ref="hm_infer"/>, the unification rules are
-      shown in Figure&nbsp;<xref ref="hm_unify"/>, and the rules for
-      the constraint solver are shown in Figure&nbsp;<xref
-        ref="hm_solve"/>.      
-    </p>    
+      The equational type inference algorithm is as shown in
+      Figure&nbsp;<xref ref="eq2_infer"/>. 
+      The inference judgment 
+      <btypes:TYPE>
+	<TEjudge>
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+          <constrain>
+            <aCtSet/>
+          </constrain>
+	</TEjudge>
+      </btypes:TYPE>
+      should be understood as: given the binding context
+      <btypes:TYPE><gamma/></btypes:TYPE> and the store typing
+      <btypes:TYPE><store/></btypes:TYPE>, we infer the type 
+      <btypes:TYPE><type/></btypes:TYPE> for the expression 
+      <btypes:TYPE><aExpr/></btypes:TYPE> under the constraints
+      <btypes:TYPE><aCtSet/></btypes:TYPE>. 
+      The Unification algorithm is given in 
+      Figure&nbsp;<xref ref="eq2_unify"/>. 
+      The unification algorithm takes in a set of constraints
+      <btypes:TYPE><aCtSet/></btypes:TYPE> and either fails with an
+      error <btypes:TYPE><error/></btypes:TYPE>, or succeeds to 
+      result in a pair consisting of residual constraints
+      <btypes:TYPE><aCtSet/></btypes:TYPE> and a list of
+      substitutions <btypes:TYPE><aSubMap/></btypes:TYPE> for the
+      constraints solved in this pass.
+    </p>
+    <theorem id="eq-unify-correct">
+      <title>Correctness of Unification</title>
+      <p>
+        If:
+        <btypes:TYPE>
+          <eq>
+            <unf>
+              <aCtset/>
+            </unf>
+            <Pair>
+              <aCtset dash="'"/>
+              <aSubMap/>
+            </Pair>
+          </eq>
+          <text content=", then"/>
+          <Exists>
+            <aSubMap num="s"/>
+          </Exists>          
+          <text content=" such that "/>
+          <models name="sat"> 
+            <assume>
+              <aSubMap num="s"/>
+            </assume>
+            <aCtset dash="'"/>
+          </models>
+        </btypes:TYPE>
+      </p>
+    </theorem>
+    <theorem id="eq-unify-decidable">
+      <title>Decidability of Unification</title>
+      <p>
+        The unification algorithm
+        <btypes:TYPE>
+          <unf>
+            <aCtset/>
+          </unf>
+          <text content=" computes to some "/>
+          <Pair>
+            <aCtset dash="'"/>
+            <aSubMap/>
+          </Pair>
+          <text content=" or fails with "/>
+          <error/>
+          <text content=" decidably in a finite number of steps."/>
+        </btypes:TYPE>
+      </p>
+    </theorem>
+    <theorem id="eq-infer-sound">
+      <title>Soundness of Type Inference</title>
+      <p>
+        If:
+        <btypes:TYPE>
+          <TEjudge>
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <conclude>
+              <tqExpr>
+                <aExpr/>
+                <type/>
+              </tqExpr>
+            </conclude>
+            <constrain>
+              <aCtset/>
+            </constrain>
+          </TEjudge>
+          <text content=" and "/>
+          <eq>
+            <unf>
+              <aCtset/>
+            </unf>
+            <Pair>
+              <aCtset num="u"/>
+              <aSubMap num="u"/>
+            </Pair>
+          </eq>
+          <text content=", then "/>
+          <Forall>
+            <aSubMap num="s"/>
+          </Forall>
+          <text content=" such that "/>
+          <models name="sat"> 
+            <assume>
+              <aSubMap num="s"/>
+            </assume>
+            <aCtset num="u"/>
+          </models>
+          <text content=", "/>  
+          <Sjudge>
+            <assume>
+              <canonical>
+                <Subst>
+                  <scomp>
+                    <aSubMap num="u"/>
+                    <aSubMap num="s"/>
+                  </scomp>
+                  <gamma/>
+                </Subst>
+              </canonical>
+              <canonical>
+                <Subst>
+                  <scomp>
+                    <aSubMap num="u"/>
+                    <aSubMap num="s"/>
+                  </scomp>
+                  <store/>
+                </Subst>
+              </canonical>
+            </assume>
+            <tqExpr>
+              <canonical>
+                <Subst>
+                  <scomp>
+                    <aSubMap num="u"/>
+                    <aSubMap num="s"/>
+                  </scomp>                
+                  <aExpr/>
+                </Subst>
+              </canonical>
+              <canonical>
+                <Subst>
+                  <scomp>
+                    <aSubMap num="u"/>
+                    <aSubMap num="s"/>
+                  </scomp>                                  
+                  <type/>
+                </Subst>
+              </canonical>
+            </tqExpr>
+          </Sjudge>	                
+        </btypes:TYPE>.
+      </p>
+    </theorem>
+    <theorem id="eq-infer-complete">
+      <title>Completeness of Type Inference</title>
+      <p>
+        If:
+        <btypes:TYPE>
+          <Sjudge>
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <tqExpr>
+              <aExpr/>
+              <type/>
+            </tqExpr>
+          </Sjudge>	                          
+          <text content=" then "/>
+          <Exists>
+            <aSubMap/>
+          </Exists>
+          <text content=" such that "/>
+          <TEjudge>
+            <assume>
+              <gamma dash="'"/>
+              <store dash="'"/>
+            </assume>
+            <conclude>
+              <tqExpr>
+                <aExpr/>
+                <type dash="'"/>
+              </tqExpr>
+            </conclude>
+            <constrain>
+              <aCtset/>
+            </constrain>
+          </TEjudge>
+          <text content=", "/>
+          <models name="sat"> 
+            <assume>
+              <aSubMap/>
+            </assume>
+            <aCtset/>
+          </models>
+          <text content=", "/>
+          <eq>
+            <gamma/>
+            <canonical>
+              <Subst>
+                <aSubMap/>
+                <gamma dash="'"/>
+              </Subst>
+            </canonical>
+          </eq>
+          <text content=", "/>
+          <eq>
+            <store/>
+            <canonical>
+              <Subst>
+                <aSubMap/>
+                <store dash="'"/>
+              </Subst>
+            </canonical>
+          </eq>
+          <text content=" and "/>
+          <eq>
+            <type/>
+            <canonical>
+              <Subst>
+                <aSubMap/>
+                <type dash="'"/>
+              </Subst>
+            </canonical>
+          </eq>
+        </btypes:TYPE>.
+      </p>
+    </theorem>
+  </sect1>
+  <sect1 id="infer">
+    <title>Heuristic Type Inference</title> 
+    <xi:include href="include/core/infer.xmli"/>
+    <xi:include href="include/core/unify.xmli"/>
+    <xi:include href="include/core/solve.xmli"/>
+    <p>
+      The type inference algorithm is as shown in
+      Figure&nbsp;<xref ref="hm_infer"/>. 
+      The inference judgment 
+      <btypes:TYPE>
+	<TIjudge>
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <propagate>
+	    <aSubMap/>
+	  </propagate>
+	</TIjudge>
+      </btypes:TYPE>
+      should be understood as: given the binding context
+      <btypes:TYPE><gamma/></btypes:TYPE> and the store typing
+      <btypes:TYPE><store/></btypes:TYPE>, we infer the type 
+      <btypes:TYPE><type/></btypes:TYPE> for the expression 
+      <btypes:TYPE><aExpr/></btypes:TYPE>.
+      <btypes:TYPE><aSubMap/></btypes:TYPE> is list of substitutions 
+      obtained by unifications performed during inference, and must be
+      propagated to further derivations. 
+      We write
+      <btypes:TYPE>
+	<TIjudge>
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	</TIjudge>
+      </btypes:TYPE>
+      as a shorthand for
+      <btypes:TYPE>
+	<TIjudge>
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>            
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <propagate>
+	    <Empty/>
+	  </propagate>
+	</TIjudge>
+      </btypes:TYPE>
+      and write
+      <btypes:TYPE>
+	<TIjudge>
+          <precondition>
+	    <aSubMap num="0"/>
+          </precondition>
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <propagate>
+	    <aSubMap/>
+	  </propagate>
+	</TIjudge>
+      </btypes:TYPE>
+      as a shorthand for
+      <btypes:TYPE>
+	<TIjudge>
+	  <assume>
+            <Subst>
+              <aSubMap num="0"/>
+              <gamma/>
+            </Subst>
+            <Subst>
+              <aSubMap num="0"/>
+              <store/>
+            </Subst>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+              <Subst>
+                <aSubMap num="0"/>
+                <aExpr/>
+              </Subst>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <propagate>
+	    <aSubMap/>
+	  </propagate>
+	</TIjudge>
+      </btypes:TYPE>.
+      The judgment
+      <btypes:TYPE>
+	<models name="new">
+	  <assume/>
+	  <tvars name="alpha"/>
+	</models>
+      </btypes:TYPE> identifies new type variables. 
+    </p>
+    <p>
+      Unification rules are as shown in 
+      Figure&nbsp;<xref ref="hm_unify"/>.
+      The unification judgment
+      <btypes:TYPE>
+	<UNIFY>
+	  <type num="1"/>                  
+	  <type num="2"/>
+	  <aSubMap/>
+	</UNIFY>
+      </btypes:TYPE>
+      is understood as: 
+      <btypes:TYPE>
+	<type num="1"/>                  
+      </btypes:TYPE>
+      unifies with
+      <btypes:TYPE>
+	<type num="2"/>
+      </btypes:TYPE>
+      under the substitution
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE>. 
+    </p>
+    <p>
+      A constraint solver for solving copy compatibility constraints at 
+      let-boundaries is 
+      defined in Figure&nbsp;<xref ref="hm_solve"/>.          
+      The judgment 
+      <btypes:TYPE>
+	<Sjudge name="solve">
+	  <assume>
+	    <aSubMap/>
+	    <id/>
+	    <aExpr/>
+	  </assume>
+	  <corUp>
+	    <type num="1"/>
+	    <type num="2"/>
+	  </corUp>
+	</Sjudge>
+      </btypes:TYPE>
+      should be read as: the (possibly) constrained type 
+      <btypes:TYPE>
+	<type num="1"/>
+      </btypes:TYPE>
+      for the identifier
+      <btypes:TYPE>
+	<id/>
+      </btypes:TYPE>
+      (possibly) used in the expression
+      <btypes:TYPE>
+	<aExpr/>
+      </btypes:TYPE>
+      is transformed to the unconstrained type
+      <btypes:TYPE>
+	<type num="2"/>
+      </btypes:TYPE>
+      by solving all the copy compatibility constraints.
+    </p>
     <definition id="define_infer">
       <title>Type Inference</title> 
       <p>
@@ -4055,6 +4646,49 @@
       </li>
     </ol>
     <definition>
+      <title>Tautological Constraints</title>
+      <p>
+        We write 
+        <btypes:TYPE>
+          <models name="taut">
+            <assume/>
+            <aCtset/>
+          </models>
+        </btypes:TYPE> to denote that the constraint set
+        <btypes:TYPE>
+          <aCtset/>
+        </btypes:TYPE> consists only of tautological constraints. That
+        is, the constraints in 
+        <btypes:TYPE>
+          <aCtset/>
+        </btypes:TYPE> are not only consistent but are trivially
+        solvable.
+      </p>
+    </definition>
+    <definition>
+      <title>Substitution on Expression</title>
+      <p>
+        For any expression 
+        <btypes:TYPE>
+          <aExpr/>
+        </btypes:TYPE>,
+        we write
+        <btypes:TYPE>
+          <Subst>
+            <aSubMap/>
+            <aExpr/>
+          </Subst>
+        </btypes:TYPE> to denote the expression obtained by 
+        applying the substitution
+        <btypes:TYPE>
+          <aSubMap/>
+        </btypes:TYPE> on all types present in 
+        <btypes:TYPE>
+          <aExpr/>
+        </btypes:TYPE> as type annotations.
+      </p>
+    </definition>
+    <definition>
       <title>Normalization of Constraint Sets</title>
       <p>
         A constraint set 
@@ -4278,8 +4912,127 @@
           </eq>
         </btypes:TYPE>, and 
         <btypes:TYPE>
-          <aCtset/>
-        </btypes:TYPE> consists only of tautological constraints. 
+          <models name="taut">
+            <assume/>
+            <aCtset/>
+          </models>
+        </btypes:TYPE>. 
+      </p>
+    </definition>
+    <definition>
+      <title>Normalization of Expressions</title>
+      <p>              
+        A notmalization of expressions
+	<btypes:TYPE>
+	  <eq>
+	    <normalize>
+	      <aExpr/>
+	    </normalize>
+            <constrained>
+              <canonical>
+                <aExpr/>
+              </canonical>
+              <aCtset/>
+            </constrained>
+	  </eq>
+	</btypes:TYPE> wherein:
+      </p>
+      <ol>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <canonical>
+                <aExpr/>
+              </canonical>
+            </btypes:TYPE> is structurally identical to 
+            <btypes:TYPE>	  
+              <aExpr/>	  
+            </btypes:TYPE>, except for the fact that
+            for any type annotation
+            <btypes:TYPE>
+              <type num="i"/>
+            </btypes:TYPE> present in 
+            <btypes:TYPE>
+              <aExpr/>
+            </btypes:TYPE>, 
+            <btypes:TYPE>
+              <canonical>
+                <aExpr/>
+              </canonical>
+            </btypes:TYPE>
+            has a corresponding annotation
+            <btypes:TYPE>
+              <canonical>
+                <type num="i"/>
+              </canonical>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            For each 
+             <btypes:TYPE>
+              <type num="i"/>
+            </btypes:TYPE> above,
+            <btypes:TYPE>
+              <eq>
+                <normalize>
+                  <type num="i"/>
+                </normalize>
+                <constrained>
+                  <canonical>
+                    <type num="i"/>
+                  </canonical>
+                  <aCtset num="i"/>
+                </constrained>
+              </eq>
+            </btypes:TYPE>.            
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <eq>
+                <aCtset/>
+                <Unin>
+                  <aCtset num="i"/>
+                </Unin>
+              </eq>
+            </btypes:TYPE>
+          </p>
+        </li>
+      </ol>
+      <p>
+        We write 
+	<btypes:TYPE>
+	  <eq>
+	    <normalize>
+	      <aExpr/>
+	    </normalize>            
+            <canonical>
+              <aExpr/>
+            </canonical>
+	  </eq>
+	</btypes:TYPE> if
+	<btypes:TYPE>
+	  <eq>
+	    <normalize>
+	      <aExpr/>
+	    </normalize>
+            <constrained>
+              <canonical>
+                <aExpr/>
+              </canonical>
+              <aCtset/>
+            </constrained>
+	  </eq>
+	</btypes:TYPE> and
+	<btypes:TYPE>
+          <models name="taut">
+            <assume/>
+            <aCtset/>
+          </models>
+        </btypes:TYPE>.
       </p>
     </definition>
     <definition>
@@ -4360,10 +5113,11 @@
             </constrained>
           </eq>
           <text content=" and "/>
-          <eq>              
+          <models name="taut">
+            <assume/>
             <aCtset/>
-          </eq>
-        </btypes:TYPE> consists only of tautological constraints.
+          </models>
+        </btypes:TYPE>.
       </p>
       <p>
         Similarly, 
@@ -4488,10 +5242,11 @@
             </constrained>
           </eq>
           <text content=" and "/>
-          <eq>              
+          <models name="taut">
+            <assume/>
             <aCtset/>
-          </eq>
-        </btypes:TYPE> consists only of tautological constraints.
+          </models>
+        </btypes:TYPE>.
       </p>
     </definition>
     <definition id="solvable-entities">
@@ -4501,19 +5256,24 @@
         <btypes:TYPE>
           <solvable/>
         </btypes:TYPE>
-        is structurally defined to be one of
-        <btypes:TYPE>
-          <alternatives>
-            <type/>
-            <gamma/>
-            <store/>
-            <plus>
-              <solvable/>
-              <solvable/>
-            </plus>
-          </alternatives>
-        </btypes:TYPE>.
+        is structurally defined to be:
       </p>
+      <btypes:TYPE>                      
+        <grammar notitle="yes">
+          <bnf desc="Solvables">
+            <solvable/>
+            <alternatives>
+              <type/>
+              <gamma/>
+              <store/>
+              <plus>
+                <solvable/>
+                <solvable/>
+              </plus>
+            </alternatives>
+          </bnf>
+        </grammar>
+      </btypes:TYPE>
     </definition>
     <p>
       Note that:
@@ -4601,10 +5361,12 @@
             </eq>
           </btypes:TYPE>
           where
-          <btypes:TYPE>                
-            <aCtset/>
-          </btypes:TYPE>
-          consists only of tautological constraints.
+          <btypes:TYPE>           
+            <models name="taut">
+              <assume/>
+              <aCtset/>
+            </models>
+          </btypes:TYPE>.
         </p>
       </li>
       <li>
@@ -4837,6 +5599,51 @@
         </ol>
       </li>     
     </ol>
+    <definition id="expr_to_sol">
+      <title>Solvability of Expressions</title>
+      <p>
+        We write 
+        <btypes:TYPE>
+          <aExpr hat="yes"/>
+        </btypes:TYPE> to denote a solvable entity that is obtained by
+        grouping together all type annotations present in the
+        expression 
+        <btypes:TYPE>
+          <aExpr/>
+        </btypes:TYPE>. 
+        For example, <br/>
+        if        
+        <btypes:TYPE>
+          <eq>
+            <aExpr/>
+            <let>
+              <tqExpr>
+                <id/>
+                <type num="0"/>
+              </tqExpr>
+              <tqExpr>                
+                <aExpr num="1"/>
+                <type num="1"/>
+              </tqExpr>
+              <tqExpr>                
+                <aExpr num="2"/>
+                <type num="2"/>
+              </tqExpr>
+            </let>
+          </eq>          
+          <text content=", then "/>
+          <br/>
+          <eq>
+            <aExpr hat="yes"/>
+            <plus>
+              <type num="1"/>
+              <type num="2"/>
+              <type num="3"/>
+            </plus>              
+          </eq>
+        </btypes:TYPE>. 
+      </p>
+    </definition>
     <definition id="ca">
       <title>Consistency and Acyclicity</title> 
       <ol>
@@ -4844,7 +5651,7 @@
           <p>
             We write
             <btypes:TYPE>
-              <models name="consistent">   
+              <models name="cst">   
                 <assume/>
                 <aCtset/>
               </models>                 
@@ -4873,7 +5680,7 @@
               <aSubMap/>
             </btypes:TYPE> is said to be consistent and written 
             <btypes:TYPE>
-              <models name="consistent">   
+              <models name="cst">   
                 <assume/>
                 <aSubMap/>
               </models>  
@@ -4908,7 +5715,7 @@
           <p>
             We write
             <btypes:TYPE>
-              <models name="consistent">   
+              <models name="cst">   
                 <assume/>
                 <type/>
               </models>  
@@ -4925,7 +5732,7 @@
                 </ctype>
               </eq>
               <text content=" and "/>
-              <models name="consistent">   
+              <models name="cst">   
                 <assume/>
                 <canonical>
                   <aCtset/>
@@ -4936,7 +5743,7 @@
           <p>
             In general, we write: 
             <btypes:TYPE>
-              <models name="consistent">
+              <models name="cst">
                 <assume/>
                 <solvable/>
               </models>
@@ -4955,7 +5762,7 @@
                 </constrained>
               </eq>
               <text content=" and "/>
-              <models name="consistent">
+              <models name="cst">
                 <assume/>
                 <canonical>
                   <aCtset/>
@@ -4969,12 +5776,12 @@
             Similarly, the 
             <btypes:TYPE>
               <assume/>
-              <models name="acyclic"/>   
+              <models name="acy"/>   
             </btypes:TYPE>
             judgment states that a set of constraints or substitutions
             are acyclic in the mathematical sense. We write:
             <btypes:TYPE>
-              <models name="acyclic">   
+              <models name="acy">   
                 <assume/>
                 <solvable/>
               </models>  
@@ -4991,7 +5798,7 @@
                 </constrained>
               </eq>
               <text content=" and "/>
-              <models name="acyclic">   
+              <models name="acy">   
                 <assume/>
                 <canonical>
                   <aCtset/>
@@ -5009,12 +5816,12 @@
                 <aCtset/>
               </models>  
               <text content=" iff "/>
-              <models name="consistent">   
+              <models name="cst">   
                 <assume/>
                 <aCtset/>
               </models>  	    
               <text content=" and "/>
-              <models name="acyclic">   
+              <models name="acy">   
                 <assume/>
                 <aCtset/>
               </models>  	    	    
@@ -5819,7 +6626,7 @@
         </canonical>
       </btypes:TYPE>.
     </p>
-    <definition id="cst">
+    <definition id="ct">
       <title>Strong Consistency</title>
       <p>
         &thinsp;<br/>
@@ -5828,7 +6635,7 @@
         <Hrules vspace="yes">
           <tyRule>
             <tyPre>
-              <models name="consistent">
+              <models name="cst">
                 <assume/>
                 <solvable/>
               </models>
@@ -5845,7 +6652,7 @@
               </eq>
             </tyPre>
             <tyConc>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <solvable/>
               </models>
@@ -5857,7 +6664,7 @@
     <p>
       Since we have
       <btypes:TYPE>
-        <models name="consistent">
+        <models name="cst">
           <assume/> 
           <solvable/>
         </models>
@@ -5914,7 +6721,7 @@
       </btypes:TYPE>.
       We call this property strong consistency, denoted by 
       <btypes:TYPE>
-        <models name="cst"/>
+        <models name="ct"/>
       </btypes:TYPE>.
     </p>
     <definition id="compat-subst">
@@ -6219,7 +7026,7 @@
           </btypes:TYPE>,
           then 
           <btypes:TYPE>
-            <models name="consistent">
+            <models name="cst">
               <assume/>
               <Subst>
                 <aSubMap/>
@@ -6295,7 +7102,7 @@
           <p>
             If          
             <btypes:TYPE>
-              <models name="consistent">
+              <models name="cst">
                 <assume/>
                 <solvable/>
               </models>
@@ -6395,12 +7202,12 @@
       <p>
         If
         <btypes:TYPE>
-          <models name="acyclic">
+          <models name="acy">
             <assume/>
             <type num="1"/>
           </models>
           <text content=" and "/>
-          <models name="acyclic">
+          <models name="acy">
             <assume/>
             <type num="2"/>
           </models>
@@ -6413,7 +7220,7 @@
             <aSubMap/>
           </UNIFY>
         </btypes:TYPE>
-        where no two uses of U-COMMUT occur consecutively is
+        where no two uses of U-Commut occur consecutively is
         decidable. 
       </p>
     </theorem>
@@ -6421,7 +7228,7 @@
       <p>
         The unifier and constraint solver builds a solution tree by
         always invoking itself types having <em>smaller</em> shapes of
-        types (after eliminating redundant uses of the U-COMMUT rule).
+        types (after eliminating redundant uses of the U-Commut rule).
         Since types are of bounded size and acyclic, and since
         unification itself does not produce any cycles
         (Theorem&nbsp;<xref ref="TI-unify-correct"/>), these
@@ -6433,7 +7240,7 @@
       <p>
         If
         <btypes:TYPE>
-          <models name="acyclic">
+          <models name="acy">
             <assume/>
             <type/>
           </models>
@@ -6473,7 +7280,7 @@
                 <solvable/>
               </models>              
               <text content=" then "/>
-              <models name="consistent">
+              <models name="cst">
                 <assume/>
                 <Subst>
                   <aSubMap/>
@@ -6487,7 +7294,7 @@
           <p>
             If
             <btypes:TYPE>
-              <models name="consistent">
+              <models name="cst">
                 <assume/>
                 <solvable/>
               </models>              
@@ -6508,28 +7315,28 @@
         <li>
           <p>
             <btypes:TYPE>
-              <iff>
-                <models name="sol">
-                  <assume>
+              <text content="If "/>
+              <models name="sol">
+                <assume>
+                  <aSubMap/>
+                </assume>
+                <solvable/>
+              </models>              
+              <text content=" then "/>
+              <eq>
+                <normalize>
+                  <Subst>
                     <aSubMap/>
-                  </assume>
-                  <solvable/>
-                </models>              
-                <eq>
-                  <normalize>
-                    <Subst>
-                      <aSubMap/>
-                      <solvable/>
-                    </Subst>
-                  </normalize>
-                  <canonical>
-                    <Subst>
-                      <aSubMap/>
-                      <solvable/>
-                    </Subst>
-                  </canonical>
-                </eq>
-              </iff>
+                    <solvable/>
+                  </Subst>
+                </normalize>
+                <canonical>
+                  <Subst>
+                    <aSubMap/>
+                    <solvable/>
+                  </Subst>
+                </canonical>
+              </eq>
             </btypes:TYPE>.
           </p>
         </li>
@@ -6575,7 +7382,7 @@
         <li>
           <p>
             <btypes:TYPE>
-              <models name="consistent">
+              <models name="cst">
                 <assume/>
                 <Subst>
                   <aSubMap num="1"/>
@@ -6583,7 +7390,7 @@
                 </Subst>
               </models>
               <text content=" implies "/>
-              <models name="consistent">
+              <models name="cst">
                 <assume/>
                 <Subst>
                   <aSubMap num="2"/>
@@ -6596,7 +7403,7 @@
         <li>
           <p>
             <btypes:TYPE>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <Subst>
                   <aSubMap num="1"/>
@@ -6604,7 +7411,7 @@
                 </Subst>
               </models>
               <text content=" implies "/>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <Subst>
                   <aSubMap num="2"/>
@@ -6662,12 +7469,12 @@
         Strong consistency implies consistency. That is,
         If
         <btypes:TYPE>
-          <models name="cst">
+          <models name="ct">
             <assume/> 
             <solvable/>
           </models>
           <text content=", then "/>
-          <models name="consistent">
+          <models name="cst">
             <assume/> 
             <solvable/>
           </models>
@@ -6676,7 +7483,7 @@
     </lemma>
     <proof>
       <p>
-        Evident from Definition&nbsp;<xref ref="cst"/>.
+        Evident from Definition&nbsp;<xref ref="ct"/>.
       </p>
     </proof>            
     <lemma id="coequal-solve-OK">
@@ -6890,7 +7697,7 @@
           <p>
             If
             <btypes:TYPE>
-              <models name="consistent">
+              <models name="cst">
                 <assume/>
                 <plus>
                   <solvable num="1"/>
@@ -6898,7 +7705,7 @@
                 </plus>
               </models>
               <text content=" then "/>
-              <models name="consistent">
+              <models name="cst">
                 <assume/>
                 <plus>
                   <solvable num="2"/>
@@ -6912,7 +7719,7 @@
           <p>
             If
             <btypes:TYPE>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus>
                   <solvable num="1"/>
@@ -6920,7 +7727,7 @@
                 </plus>
               </models>
               <text content=" then "/>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus>
                   <solvable num="2"/>
@@ -6939,51 +7746,6 @@
           <p>
             If
             <btypes:TYPE>
-              <models name="consistent">
-                <assume/>
-                <plus>
-                  <solvable num="1"/>
-                  <solvable num="2"/>
-                </plus>
-              </models>
-              <text content=" then "/>
-              <models name="consistent">
-                <assume/>
-                <solvable num="1"/>
-              </models>
-              <text content=" and "/>
-              <models name="consistent">
-                <assume/>
-                <solvable num="2"/>
-              </models>
-            </btypes:TYPE>.
-          </p>
-        </li>
-        <li>
-          <p>
-            If
-            <btypes:TYPE>
-              <models name="consistent">
-                <assume/>
-                <solvable/>
-              </models>
-              <text content=" and "/>
-              <subeq>
-                <solvable dash="'"/>
-                <solvable/>
-              </subeq>  
-              <text content=" then "/>
-              <models name="consistent">
-                <assume/>
-                <solvable dash="'"/>
-              </models>
-            </btypes:TYPE>.
-          </p>
-        </li>
-        <li>
-          <p>
-            If
-            <btypes:TYPE>
               <models name="cst">
                 <assume/>
                 <plus>
@@ -7019,6 +7781,51 @@
               </subeq>  
               <text content=" then "/>
               <models name="cst">
+                <assume/>
+                <solvable dash="'"/>
+              </models>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li>
+          <p>
+            If
+            <btypes:TYPE>
+              <models name="ct">
+                <assume/>
+                <plus>
+                  <solvable num="1"/>
+                  <solvable num="2"/>
+                </plus>
+              </models>
+              <text content=" then "/>
+              <models name="ct">
+                <assume/>
+                <solvable num="1"/>
+              </models>
+              <text content=" and "/>
+              <models name="ct">
+                <assume/>
+                <solvable num="2"/>
+              </models>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li>
+          <p>
+            If
+            <btypes:TYPE>
+              <models name="ct">
+                <assume/>
+                <solvable/>
+              </models>
+              <text content=" and "/>
+              <subeq>
+                <solvable dash="'"/>
+                <solvable/>
+              </subeq>  
+              <text content=" then "/>
+              <models name="ct">
                 <assume/>
                 <solvable dash="'"/>
               </models>
@@ -7146,7 +7953,7 @@
           <p>
             If
             <btypes:TYPE>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus>
                   <solvable num="1"/>
@@ -7184,7 +7991,7 @@
           <p>
             If
             <btypes:TYPE>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus>
                   <solvable/>
@@ -7230,7 +8037,9 @@
               </canonical>
             </assume>
             <tqExpr>
-              <aExpr/>
+              <canonical>
+                <aExpr/>
+              </canonical>
               <canonical>
                 <type/>
               </canonical>
@@ -7275,7 +8084,9 @@
               </canonical>
             </assume>
             <tqExpr>
-              <aExpr/>
+              <canonical>
+                <aExpr/>
+              </canonical>
               <canonical>
                 <type/>
               </canonical>
@@ -7294,7 +8105,7 @@
         <li>
           <p>
             <btypes:TYPE>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus>
                   <solvable num="f"/>
@@ -7308,7 +8119,7 @@
         <li>
           <p>
             <btypes:TYPE>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <Subst>
                   <aSubMap/>
@@ -7349,7 +8160,7 @@
       <p>
         Then, 
         <btypes:TYPE>
-          <models name="cst">
+          <models name="ct">
             <assume/>
             <Subst>
               <aSubMap/>                
@@ -7671,7 +8482,7 @@
                 </btypes:TYPE>
                 Since we have
                 <btypes:TYPE>
-                  <models name="consistent">
+                  <models name="cst">
                     <assume/>
                     <Subst>
                       <compose>
@@ -7757,7 +8568,7 @@
       <p>
         If
         <btypes:TYPE>
-          <models name="cst">   
+          <models name="ct">   
             <nothing/>
             <plus>
               <type num="1"/>
@@ -7771,7 +8582,7 @@
             <aSubMap/>
           </UNIFY>
           <text content=" then "/>
-          <models name="cst">   
+          <models name="ct">   
             <nothing/>
             <plus>
               <Subst>
@@ -7790,7 +8601,7 @@
     <proof>
       <p>        
         Follows from Theorem&nbsp;<xref ref="TI-unify-correct"/>, and
-        by observing the rules U-TVAR, U-CT1 and U-CT2. 
+        by observing the rules U-Tvar, U-Mb-Mb, and U-Mb-Oth. 
       </p>
     </proof>
     <lemma id="unify-strong-consistent-cor">
@@ -7799,7 +8610,7 @@
       <p>
         If
         <btypes:TYPE>
-          <models name="cst">
+          <models name="ct">
             <assume/>
             <plus>
               <solvable/>
@@ -7814,7 +8625,7 @@
             <aSubMap num="v"/>
           </UNIFY>
           <text content=" then "/> 
-          <models name="cst">
+          <models name="ct">
             <assume/>
             <plus>
               <Subst>
@@ -8046,7 +8857,7 @@
         </btypes:TYPE>
         and Lemma&nbsp;<xref ref="sol-math-properties"/>, we have:
         <btypes:TYPE>
-          <models name="consistent">
+          <models name="cst">
             <assume/>
             <plus>
               <Subst>
@@ -8355,7 +9166,7 @@
         </btypes:TYPE>,
         then 
         <btypes:TYPE>
-          <models name="cst">
+          <models name="ct">
             <assume/>
             <plus>
               <Subst>
@@ -8369,6 +9180,7 @@
                   <aExpr/>
                 </relevant>
               </Subst>
+              <aExpr hat="yes"/>
               <type/>
             </plus>
           </models>
@@ -8477,9 +9289,9 @@
       <p>
         Then 
         <btypes:TYPE>
-          <models name="cst">
+          <models name="ct">
             <assume/>
-            <plus>
+            <plus br="yes">
               <Subst>
                 <compose>
                   <aSubMap num="u2"/>                      
@@ -8499,7 +9311,20 @@
                     <aExpr num="2"/>
                   </collection>
                 </relevant>
-              </Subst>                
+              </Subst>     
+              <Subst>
+                <compose>
+                  <aSubMap num="u2"/>                      
+                  <aSubMap num="u1"/>                      
+                </compose>                  
+                <aExpr hat="yes" num="1"/>
+              </Subst>            
+              <Subst>
+                <compose>
+                  <aSubMap num="u2"/>                      
+                </compose>                                  
+                <aExpr hat="yes" num="1"/>                
+              </Subst>                      
               <Subst>
                 <aSubMap num="u2"/>                      
                 <type num="1"/>
@@ -8550,7 +9375,7 @@
               <lem tag="inf-subst-valid"/>
             </btypes:TYPE>, we obtain
             <btypes:TYPE>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus>
                   <Subst>
@@ -8581,7 +9406,7 @@
               <lem tag="inf-subst-valid"/>
             </btypes:TYPE>, we obtain
             <btypes:TYPE>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus>
                   <Subst>
@@ -8681,7 +9506,7 @@
             </btypes:TYPE>
             as
             <btypes:TYPE>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus>
                   <Subst>
@@ -8722,7 +9547,7 @@
             </btypes:TYPE> 
             as
             <btypes:TYPE>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus br="yes">
                   <Subst>
@@ -8870,7 +9695,7 @@
               <lem tag="solvable-weakening"/>
             </btypes:TYPE>, we have
             <btypes:TYPE>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus>
                   <Subst>
@@ -8903,7 +9728,7 @@
               <lem tag="solvable-weakening"/>
             </btypes:TYPE>, we have
             <btypes:TYPE>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus>
                   <Subst>
@@ -8944,7 +9769,7 @@
               <lem tag="cst-subst"/>
             </btypes:TYPE>, we have
             <btypes:TYPE>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus br="yes">
                   <Subst>
@@ -8988,7 +9813,7 @@
               </models>
               <text content=". That is,"/>
               <br/>
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus>
                   <Subst>
@@ -9029,7 +9854,7 @@
               <asm tag="inf-subst-valid-add__a3"/>
             </btypes:TYPE>, we can easily obtain
             <btypes:TYPE>	
-              <models name="cst">
+              <models name="ct">
                 <assume/>
                 <plus>
                   <Subst>
@@ -9059,7 +9884,7 @@
               </models>
             </btypes:TYPE>, in accordance to 
             <btypes:TYPE>	
-              <defn tag="cst"/>
+              <defn tag="ct"/>
             </btypes:TYPE>.
           </p>
         </li>
@@ -9093,7 +9918,10 @@
               </Subst>
             </assume>
             <tqExpr>
-              <aExpr/>
+              <Subst>
+                <aSubMap/>		              
+                <aExpr/>
+              </Subst>
               <Subst>
                 <aSubMap/>		
                 <type/>
@@ -9265,7 +10093,7 @@
             </btypes:TYPE>
             is some substitution such that
             <btypes:TYPE>
-              <models name="consistent">
+              <models name="cst">
                 <assume/>
                 <Subst>
                   <aSubMap/>
@@ -10940,57 +11768,16 @@
         We proceed by case analysis on the last step,
         assuming &alpha;-reduction vacuously.
       </p>
-      <p>
-        As a matter of notational convenience, we write:
-        <btypes:TYPE>
-          <aSubMap num="a.b"/> 
-        </btypes:TYPE> to mean
-        <btypes:TYPE>
-          <compose>
-            <aSubMap num="a"/> 
-            <aSubMap num="b"/> 
-          </compose>
-        </btypes:TYPE>. Note that
-        <btypes:TYPE>
-          <eq>
-            <Subst>
-              <aSubMap num="a.b"/> 
-              <text content="x"/>
-            </Subst>
-            <Subst>
-              <compose>
-                <aSubMap num="a"/> 
-                <aSubMap num="b"/> 
-              </compose>
-              <text content="x"/>
-            </Subst>
-            <Subst>
-              <aSubMap num="a"/> 
-              <Subst>
-                <aSubMap num="b"/>                 
-                <text content="x"/>
-              </Subst>
-            </Subst>
-            <Subst>
-              <aSubMap num="b"/>                 
-              <Subst>
-                <aSubMap num="a"/> 
-                <text content="x"/>
-              </Subst>
-            </Subst>
-          </eq>
-        </btypes:TYPE>.        
-      </p>
       <ol>
         <li>
           <p>
-            Cases TI-UNIT, TI-TRUE. TI-FALSE, TI-ID, TI-HLOC,
-            TI-SLOC are trivial. 
+            Cases I-Unit, I-True. I-False, I-Id, I-Hloc,
+            I-Sloc are trivial. 
           </p>
         </li>
         <li>
           <p>
-            Case TI-LAMBDA:               
+            Case I-Lambda:               
           </p>
           <ol>
             <li>
@@ -11621,7 +12408,7 @@
             </li>
             <li id="infer-sound__lam_decl">
               <p>
-                From the T-LAMBDA rule, we have:
+                From the T-Lambda rule, we have:
                 <btypes:TYPE>
                   <Sjudge>
                     <assume>
@@ -11795,7 +12582,7 @@
         </li>
         <li>
           <p>
-            Case TI-APP:
+            Case I-App:
           </p>
           <ol>
             <li id="infer-sound__app_given">
@@ -12237,7 +13024,7 @@
                     (consistency of inferred substitutions), we
                     have:
                     <btypes:TYPE>
-                      <models name="cst">
+                      <models name="ct">
                         <assume/>
                         <plus>
                           <Subst>
@@ -12315,7 +13102,7 @@
                   <p>
                     From cases (3.e.i and 3.e.ii), we obtain:
                     <btypes:TYPE>
-                      <models name="cst">
+                      <models name="ct">
                         <assume/>
                         <plus>
                           <Subst>
@@ -12353,7 +13140,7 @@
                     we obtain:
                     <br/>
                     <btypes:TYPE>
-                      <models name="consistent">
+                      <models name="cst">
                         <assume/>
                         <plus>
                           <Subst>
@@ -13052,7 +13839,7 @@
                   <p>
                     It is evident that 
                     <btypes:TYPE>
-                      <models name="cst">
+                      <models name="ct">
                         <assume/>
                         <mbpair>
                           <tvar name="beta"/>
@@ -13082,7 +13869,7 @@
                     are fresh type variables, we can write
                     (using case (3.e.iii)):
                     <btypes:TYPE>
-                      <models name="cst">
+                      <models name="ct">
                         <assume/>
                         <plus br="yes">
                           <Subst>
@@ -13130,7 +13917,7 @@
                     (commutativity) 
                     and case (3.k.ii), we  can write:
                     <btypes:TYPE>
-                      <models name="cst">
+                      <models name="ct">
                         <assume/>
                         <plus br="yes">
                           <Subst>
@@ -13177,7 +13964,7 @@
                     Lemma&nbsp;<xref ref="unify-strong-consistent-cor"/>,
                     we have:
                     <btypes:TYPE>
-                      <models name="cst">
+                      <models name="ct">
                         <assume/>
                         <plus br="yes">
                           <Subst>
@@ -13234,7 +14021,7 @@
                     Lemma&nbsp;<xref ref="cst-implies-consistent"/>
                     (weakening of consistency) we have:
                     <btypes:TYPE>
-                      <models name="consistent">
+                      <models name="cst">
                         <assume/>
                         <plus br="yes">
                           <Subst>
@@ -13620,7 +14407,7 @@
                     <li>
                       <p>
                         <btypes:TYPE>
-                          <models name="cst">
+                          <models name="ct">
                             <assume/>
                             <plus>
                               <solvable num="1"/>
@@ -14854,7 +15641,7 @@
             <li>
               <p>
                 Now, from cases (3.s.i), (3.s.ii), (3.r.viii) and
-                T-APP rule, we obtain:
+                T-App rule, we obtain:
                 <btypes:TYPE>
                   <Sjudge>
                     <assume>
@@ -15024,15 +15811,15 @@
         </li>
         <li>
           <p>
-            Cases TI-LET-&alpha;: Similar to case (3) (TI-APP),
+            Cases I-Let-&alpha;: Similar to case (3) (I-App),
             except for the use of
             Lemma&nbsp;<xref ref="solve-sol-compat"/>.
           </p>
         </li>	
         <li>
           <p>
-            Cases TI-IF, TI-DUP, TI-DEREF, TI-SET,  
-            TI-TQEXPR, TI-LET-&alpha;-TQ are similar.
+            Cases I-If, I-Dup, I-Deref, I-Set,  
+            I-Tqexpr, I-Let-&alpha;-Tq are similar.
           </p>
         </li>	
       </ol>
@@ -15230,17 +16017,15 @@
       </p>
     </proof>
   </sect1>
-  <bibliography>
+  <!-- <bibliography>
     <bibentry label="sridhar2006plos">
-      <key>U3</key>
-      Worshop paper
-      &mdash; undisclosed for anonymization.
-      <!--  S. Sridhar and J. Shapiro. ``Type Inference for Unboxed Types -->
-      <!--  and First Class Mutability'' <doctitle>Proc. 3rd ECOOP Workshop -->
-      <!--  on Programming Languages and Operating Systems (PLOS -->
-      <!--  2006)</doctitle> San Jose, CA. 2006. -->
+      <key>Sridhar06</key>
+       S. Sridhar and J. Shapiro. ``Type Inference for Unboxed Types
+       and First Class Mutability'' <doctitle>Proc. 3rd ECOOP Workshop
+       on Programming Languages and Operating Systems (PLOS
+       2006)</doctitle> San Jose, CA. 2006.
     </bibentry>
-  </bibliography>
+  </bibliography> -->
 
 </article>
 

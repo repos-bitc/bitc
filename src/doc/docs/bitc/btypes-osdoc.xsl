@@ -55,7 +55,16 @@
 
   <!-- operator -->
   <xsl:template match="operator" mode="formula">
-    <xsl:value-of select="@name"/>
+    <xsl:choose>
+      <xsl:when test="@name">
+	<xsl:value-of select="@name"/>
+      </xsl:when>
+      <xsl:when test="@symbol">
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:value-of select="@symbol"/>
+	<xsl:text>;</xsl:text>
+      </xsl:when>
+    </xsl:choose>
   </xsl:template>
   
   <!-- error -->
@@ -392,6 +401,13 @@
     <xsl:apply-templates mode="formula"/>
     <xsl:text>)</xsl:text>
   </xsl:template>
+
+  <!-- Double Bracket expression -->
+  <xsl:template match="DBrac" mode="formula">
+    <xsl:text>[[</xsl:text>
+    <xsl:apply-templates mode="formula"/>
+    <xsl:text>]]</xsl:text>
+  </xsl:template>
   
   <!-- mappping -->
   <xsl:template match="mapping" mode="formula">
@@ -418,6 +434,23 @@
       <xsl:text>;</xsl:text>
     </xsl:if>
     <xsl:call-template name="print.params"/>
+  </xsl:template> 
+
+  <!-- Infix operator -->
+  <xsl:template match="op" mode="formula">
+    <xsl:call-template name="print.infix">
+      <xsl:with-param name="print.infix.op">
+	<xsl:value-of select="@symbol"/>
+	<xsl:text>;</xsl:text>
+      </xsl:with-param> 
+    </xsl:call-template>
+  </xsl:template>  
+ 
+  <!-- leadsto -->
+  <xsl:template match="leadsto" mode="formula">
+    <xsl:call-template name="print.infix">
+      <xsl:with-param name="print.infix.op">rarrw;</xsl:with-param> 
+    </xsl:call-template>
   </xsl:template>  
 
   <!-- floorOp -->
@@ -443,6 +476,7 @@
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>rceil;</xsl:text>
   </xsl:template>
+  <!-- ceil -->
   <xsl:template match="ceil" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>lceil;</xsl:text>
@@ -450,7 +484,6 @@
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>rceil;</xsl:text>
   </xsl:template>
-
 
   <!-- incrOp -->
   <xsl:template match="incrOp" mode="formula">
@@ -555,7 +588,7 @@
     </xsl:element>
   </xsl:template>
 
-  <!-- Solved Forms -->
+  <!-- Normalize -->
   <xsl:template match="normalize" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>Ngr;</xsl:text>
@@ -572,6 +605,7 @@
     </xsl:element>
   </xsl:template>  
 
+  
 <!-- ======================================================================
               Substitutions
      ====================================================================== -->
@@ -630,6 +664,7 @@
 		<xsl:value-of select="@dash"/>
 	      </xsl:with-param>
 	    </xsl:call-template>
+	    <xsl:text>*** ERROR: scomp with prime not allowed ***</xsl:text>
 	  </xsl:if>
 	</xsl:for-each>
       </xsl:element>
@@ -798,6 +833,13 @@
     <xsl:text>not;</xsl:text>
     <xsl:apply-templates mode="formula"/>
   </xsl:template>
+
+  <!-- NOT -->
+  <xsl:template match="IMPLIES" mode="formula">
+    <xsl:call-template name="print.infix">
+      <xsl:with-param name="print.infix.op">rArr;</xsl:with-param> 
+    </xsl:call-template>
+  </xsl:template>
   
   <!-- forall -->
   <xsl:template match="forall" mode="formula">
@@ -837,7 +879,11 @@
 
   <!-- pred -->
   <xsl:template match="pred" mode="formula">
-    <xsl:value-of select="@name"/>
+    <xsl:call-template name="print.mathmode">
+      <xsl:with-param name="print.mathmode.text">
+	<xsl:value-of select="@name"/>
+      </xsl:with-param> 
+    </xsl:call-template>
     <xsl:call-template name="print.params"/>
   </xsl:template>
 
@@ -1323,11 +1369,28 @@
     <xsl:call-template name="print.params"/>
   </xsl:template>  
 
+  <!-- constraint -->
+  <xsl:template match="constraint" mode="formula">
+    <xsl:call-template name="print.mathmode">
+      <xsl:with-param name="print.mathmode.text">c</xsl:with-param> 
+    </xsl:call-template>
+    <xsl:call-template name="print.index.dash"/>    
+  </xsl:template>  
+
+  <!-- Polymorphic constraint -->
+  <xsl:template match="Pcst" mode="formula">
+    <xsl:element name="b">          
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>star;</xsl:text>	
+    </xsl:element>
+    <xsl:call-template name="print.params"/>
+  </xsl:template>  
+  
   <!-- ct_set templates -->
   <xsl:template match="aCtset" mode="formula">
-    <!--<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>zeta;</xsl:text>-->
-    <xsl:text>C</xsl:text>
+    <xsl:call-template name="print.mathcal">
+      <xsl:with-param name="print.mathcal.letter">C</xsl:with-param> 
+    </xsl:call-template>
     <xsl:call-template name="print.index.dash"/>    
   </xsl:template>  
   
@@ -1383,9 +1446,22 @@
   </xsl:template>
   <!-- ceq -->
   <xsl:template match="ceq" mode="formula">
-    <xsl:call-template name="print.infix">
-      <xsl:with-param name="print.infix.op">cong;</xsl:with-param> 
-    </xsl:call-template>
+    <xsl:choose>
+      <xsl:when test="@via">
+	<xsl:call-template name="print.infix">
+	  <xsl:with-param name="print.infix.op">cong;</xsl:with-param> 
+	  <xsl:with-param name="print.infix.sub">
+	    <xsl:value-of select="@via"/>
+	    <xsl:text>;</xsl:text>
+	  </xsl:with-param>
+	</xsl:call-template>   
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:call-template name="print.infix">
+	  <xsl:with-param name="print.infix.op">cong;</xsl:with-param> 
+	</xsl:call-template>    
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <!-- nceqOp -->
@@ -1486,14 +1562,31 @@
     <xsl:apply-templates select="*[2]" mode="formula"/>	
   </xsl:template>
 
+  <!-- unf -->
+  <xsl:template match="unf" mode="formula">
+    <xsl:call-template name="print.mathcal">
+      <xsl:with-param name="print.mathcal.letter">U</xsl:with-param> 
+    </xsl:call-template>
+    <xsl:if test="@ac">
+      <xsl:element name="sup">
+	<xsl:element name="sup">
+	  <xsl:text>.</xsl:text>
+	</xsl:element>
+      </xsl:element>
+    </xsl:if>
+    <xsl:call-template name="print.params"/>
+  </xsl:template>  
+
+
 <!-- ======================================================================
               Generalization
      ====================================================================== -->
   <!-- ftvs -->
   <xsl:template match="ftvs" mode="formula">
-    <xsl:call-template name="print.procedure">
-      <xsl:with-param name="print.procedure.name">FTV</xsl:with-param> 
+    <xsl:call-template name="print.mathmode">
+      <xsl:with-param name="print.mathmode.text">ftv</xsl:with-param> 
     </xsl:call-template>
+    <xsl:call-template name="print.params"/>
   </xsl:template>  
   
   <!-- V_ -->
@@ -1640,15 +1733,14 @@
 	<xsl:text>;</xsl:text>
       </xsl:when>
       <xsl:otherwise>
-	<xsl:element name="b">
-	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-	  <xsl:text>star;</xsl:text>	
-	</xsl:element>
+	<xsl:call-template name="print.mathbb">
+	  <xsl:with-param name="print.mathbb.letter">B</xsl:with-param> 
+	</xsl:call-template>
       </xsl:otherwise>
     </xsl:choose>
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>
-  
+
   <!-- grammar -->
   <xsl:template match="grammar" mode="formula">
     <xsl:choose>
@@ -1775,7 +1867,15 @@
   <!-- aExpr -->
   <xsl:template match="aExpr" mode="formula">
     <xsl:element name="em">
-      <xsl:text>e</xsl:text>
+      <xsl:choose>
+	<xsl:when test="@hat='yes'">
+	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	  <xsl:text>euml;</xsl:text>
+	</xsl:when>
+	<xsl:otherwise>
+	  <xsl:text>e</xsl:text>
+	</xsl:otherwise>
+      </xsl:choose>
       <xsl:call-template name="print.index.dash"/>
     </xsl:element>
   </xsl:template>  
@@ -1985,6 +2085,10 @@
 	  <xsl:text>]</xsl:text>    
 	</xsl:element>	
       </xsl:when>
+      <xsl:when test = "@nosp">	      
+	<xsl:call-template name="print.op.qual"/>
+	<xsl:apply-templates select="*[2]" mode="formula"/> 
+      </xsl:when>
       <xsl:otherwise>
 	<xsl:call-template name="print.op.qual"/>
 	<xsl:apply-templates select="*[2]" mode="formula"/> 
@@ -2023,18 +2127,6 @@
       <xsl:element name="sup">
 	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
 	<xsl:text>psi;</xsl:text>
-      </xsl:element>
-    </xsl:if>
-    <xsl:if test="@kind='M'">
-      <xsl:element name="sup">
-	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-	<xsl:text>Psi;</xsl:text>
-      </xsl:element>
-    </xsl:if>
-    <xsl:if test="@kind='a'">
-      <xsl:element name="sup">
-	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-	<xsl:text>alpha;</xsl:text>
       </xsl:element>
     </xsl:if>
     <xsl:if test="@kind='k'">
@@ -2090,6 +2182,28 @@
       <xsl:apply-templates select="." mode="formula"/>	
     </xsl:for-each>
   </xsl:template>  
+
+  <!-- let Kinds -->
+  <xsl:template match="lKind" mode="formula">
+    <xsl:choose>
+      <xsl:when test="@k='poly'">
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>forall;</xsl:text>
+      </xsl:when>
+      <xsl:when test="@k='mono'">
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>psi;</xsl:text>
+      </xsl:when>
+      <xsl:when test="@k='var'">
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>kappa;</xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+ 	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>kappav;</xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
 
   <!-- aProgram -->
   <xsl:template match="aProgram" mode="formula">
@@ -2165,6 +2279,21 @@
     </xsl:call-template>
     <xsl:apply-templates select="*[3]" mode="formula"/>
   </xsl:template>  
+
+  <!-- opt: Optional parts of syntax (of anything actually) -->
+  <xsl:template match="opt" mode="formula">
+    <xsl:element name="b">
+      <xsl:element name="em">
+	<xsl:text>[</xsl:text>	  
+      </xsl:element>
+    </xsl:element>
+    <xsl:apply-templates mode="formula"/>	
+    <xsl:element name="b">
+      <xsl:element name="em">
+	<xsl:text>]</xsl:text>	  
+      </xsl:element>
+    </xsl:element>
+  </xsl:template>    
   
   <!-- ======================================================================
   ======================================================================
@@ -2344,6 +2473,63 @@
     </xsl:element>
   </xsl:template>
   
+  <!-- equiation -->
+  <xsl:template match="equation" mode="formula">
+    <xsl:element name="tr">
+      <xsl:attribute name="valign">top</xsl:attribute>
+      <!-- param -->
+      <xsl:element name="td">
+	<xsl:attribute name="align">right</xsl:attribute>	  
+	<xsl:apply-templates select="*[1]" mode="formula"/>	
+      </xsl:element>	  
+
+      <!-- the = sign -->
+      <xsl:element name="td">
+	<xsl:text>=</xsl:text>
+      </xsl:element>
+      
+      <xsl:element name="td">
+	<xsl:attribute name="align">left</xsl:attribute>	  
+	<!-- result -->
+	<xsl:apply-templates select="*[2]" mode="formula"/>	
+	
+	<!-- dependencies -->
+	<xsl:for-each select="*">
+	  <xsl:if test = "position() &gt; 2">
+	    <xsl:if test = "position() = 3">
+	      <xsl:element name="em">
+		<xsl:text>, where</xsl:text>
+		<xsl:call-template name="print.space"/>	
+	      </xsl:element>
+	    </xsl:if>
+	    <xsl:if test = "position() &gt; 3">
+	      <xsl:text>,</xsl:text>
+	      <xsl:call-template name="print.space"/>	
+	      <xsl:if test = "position() = last()">
+		<xsl:element name="em">
+		  <xsl:text>and</xsl:text>
+		  <xsl:call-template name="print.space"/>	
+		</xsl:element>
+	      </xsl:if>
+	    </xsl:if>	    
+	    <xsl:apply-templates select="." mode="formula"/>	
+	  </xsl:if>
+	</xsl:for-each>
+      </xsl:element>
+    </xsl:element>
+  </xsl:template>
+
+  <!-- VEqns -->
+  <xsl:template match="VEqns" mode="formula">
+    <xsl:element name="table">
+      <xsl:attribute name="valign">top</xsl:attribute>      
+      <xsl:attribute name="latex.center">yes</xsl:attribute>
+      <xsl:element name="tbody">
+	<xsl:apply-templates mode="formula"/>	
+      </xsl:element>
+    </xsl:element>
+  </xsl:template>
+  
 <!-- ======================================================================
                         Modelling / Satisfaction 
      ====================================================================== -->
@@ -2397,6 +2583,17 @@
   <xsl:template match="constrain" mode="formula">
     <xsl:call-template name="print.op.unfct"/>	
     <xsl:apply-templates mode="formula"/>
+  </xsl:template>
+  
+  <!-- precond -->
+  <xsl:template match="precond" mode="formula">
+    <xsl:for-each select="*">
+      <xsl:apply-templates select="." mode="formula"/>	
+      <xsl:if test = "position() &lt; last()">
+	<xsl:call-template name="print.op.semis"/>
+      </xsl:if>
+    </xsl:for-each>
+    <xsl:call-template name="print.op.par"/>
   </xsl:template>
 
   <!-- propagate -->
@@ -2671,6 +2868,62 @@
     <xsl:text> </xsl:text>
   </xsl:template>
 
+  <!-- Mathematical modes for characters -->
+  <!-- mathmode -->
+  <xsl:template name="print.mathmode">
+    <xsl:param name="print.mathmode.text"/>
+    <xsl:element name="b">
+      <xsl:element name="em">
+	<xsl:text>?</xsl:text>	
+      </xsl:element>
+    </xsl:element>
+    <xsl:value-of select="$print.mathmode.text"/>
+    <xsl:element name="b">
+      <xsl:element name="em">
+	<xsl:text>?</xsl:text>	
+      </xsl:element>
+    </xsl:element>    
+  </xsl:template>
+
+  <!-- mathbb -->
+  <xsl:template name="print.mathbb">
+    <xsl:param name="print.mathbb.letter"/>
+    <xsl:element name="b">
+      <xsl:text>*</xsl:text>	
+    </xsl:element>
+    <xsl:value-of select="$print.mathbb.letter"/>
+    <xsl:element name="b">
+      <xsl:text>*</xsl:text>	
+    </xsl:element>    
+  </xsl:template>
+  
+  <!-- mathcal -->
+  <xsl:template name="print.mathcal">
+    <xsl:param name="print.mathcal.letter"/>
+    <xsl:element name="em">
+      <xsl:text>*</xsl:text>	
+    </xsl:element>
+    <xsl:value-of select="$print.mathcal.letter"/>
+    <xsl:element name="em">
+      <xsl:text>*</xsl:text>	
+    </xsl:element>    
+  </xsl:template>
+
+  <!-- mathfrac -->
+  <xsl:template name="print.mathfrac">
+    <xsl:param name="print.mathfrac.letter"/>
+    <xsl:element name="b">
+      <xsl:element name="em">
+	<xsl:text>*</xsl:text>	
+      </xsl:element>
+    </xsl:element>
+    <xsl:value-of select="$print.mathfrac.letter"/>
+    <xsl:element name="b">
+      <xsl:element name="em">
+      <xsl:text>*</xsl:text>	
+      </xsl:element>
+    </xsl:element>    
+  </xsl:template>
 
   <!-- Print any type -->
   <xsl:template name="print.type">
@@ -3174,6 +3427,10 @@
   <!-- Print type op type -->
   <xsl:template name="print.infix">
     <xsl:param name="print.infix.op"/>
+    <xsl:param name="print.infix.sup"/>
+    <xsl:param name="print.infix.sub"/>
+    <xsl:param name="print.infix.sup.noamp"/>
+    <xsl:param name="print.infix.sub.noamp"/>
     <xsl:param name="print.infix.noamp"/>
     <xsl:param name="print.infix.br"/>
     <xsl:param name="print.infix.nosp"/>
@@ -3196,6 +3453,22 @@
 	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
 	</xsl:if>
 	<xsl:value-of select="$print.infix.op"/>
+	<xsl:if test="$print.infix.sup">
+	  <xsl:element name="sup">
+	    <xsl:if test="$print.infix.sup.noamp != 'yes'">
+	      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	    </xsl:if>
+	    <xsl:value-of select="$print.infix.sup"/>
+	  </xsl:element>
+	</xsl:if>
+	<xsl:if test="$print.infix.sub">
+	  <xsl:element name="sub">
+	    <xsl:if test="$print.infix.sub.noamp != 'yes'">
+	      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	    </xsl:if>
+	    <xsl:value-of select="$print.infix.sub"/>
+	  </xsl:element>
+	</xsl:if>
 	<xsl:choose>
 	  <xsl:when test="$print.infix.br='yes'">
 	    <xsl:call-template name="print.bspace"/>
@@ -3210,7 +3483,6 @@
       </xsl:if>
     </xsl:for-each>    
   </xsl:template>  
-
 
   <!-- Print type op type with implied attributes -->
   <xsl:template name="print.infix.implied">

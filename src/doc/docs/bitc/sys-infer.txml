@@ -3478,6 +3478,15 @@ External Type <em>f: (fn ('a) ())</em></literallayout>
       </doctitle>
       2005.
     </bibentry>
+    <bibentry label="Hunt2007Singularity">
+      <key>Hunt07</key>
+      Galen Hunt and James Larus      
+      ``Singularity: Rethinking the Software Stack''
+      <doctitle>
+	ACM SIGOPS Operating Systems Review
+      </doctitle>
+      Vol. 41, Issue 2, pp. 37-49, 2007.
+    </bibentry>
     <bibentry label="ISO1995Ada">
       <key>ISO95</key>
       ISO,

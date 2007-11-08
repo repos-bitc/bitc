@@ -348,16 +348,17 @@
 #f            #t            and           
 apply         array         array-length
 array-nth     begin         bitc-version  
-bitfield      bool          case          
-catch         char          cond          
-declare       defaxiom      defexception  
-define        definvariant  defrepr
-defstruct     deftheory     defthm        
-defunion      deref         disable       
-do            double        dup           
-enable        exception     external      
-fill          fixint        float         
-if            import        int8          
+bitfield      bool          by-ref 
+case          catch         char          
+cond          declare       defaxiom      
+defexception  define        definvariant  
+defrepr       defstruct     deftheory     
+defthm        defunion      deref         
+disable       do            double        
+dup           enable        exception     
+extends       external      fill          
+fixint        float         if            
+import        inner-ref     int8          
 int16         int32         int64         
 interface     fn            lambda        
 let           letrec        member        
@@ -1133,7 +1134,7 @@ use</literallayout>
   height : int8
   value : 'a)</literallayout>
           <p indent="no">
-define (respectively) the type name <progident>ipair</progident> and
+            define (respectively) the type name <progident>ipair</progident> and
             the single argument type constructor
             <progident>tree-of</progident>.
           </p>
@@ -2256,14 +2257,14 @@ id : T
             value.  Each identifier bound in a
             <progident>letrec</progident> form must appear exactly
             once among the collection of binding patterns being
-            bound. <font color="blue">The type of every identifier
+            bound. <!-- <font color="blue">The type of every identifier
             bound in a <progident>letrec</progident> must be some
             function type.</font><footnote>
               <p>
                 This is a temporary limitation that will be removed
                 shortly.
               </p>
-            </footnote> Evaluation of the initialization
+            </footnote> --> Evaluation of the initialization
             expressions occurs in order from
             <progident>e<sub>1</sub></progident> to
             <progident>e<sub>n</sub></progident>.  The environment in
@@ -2998,6 +2999,60 @@ id : T
           &beta;-reduction into the body of the
           <progident>let</progident> form.
         </p>
+        <!-- <sect3>
+          <title>Reference Parameters</title>
+          <p>                    
+            By-reference parameters provide a restricted form of
+            passing address of stack variables. The restrictions
+            placed on by-reference parameters ensure that these stack
+            references do not escape beyond their scope, and are thus
+            safe.
+          </p>
+          <p>
+            The formal parameters of a function can be declared as by
+            by-reference parameters as in:            
+          </p>
+          <literallayout>
+(lambda (x:(by-ref &tau;) ...) ...)         ;; or
+(define (f x:(by-ref &tau;) ...) ...)</literallayout>
+          <p>
+            The following restrictions apply:
+          </p>
+          <ol>
+            <li>
+              <p>
+                The <progident>by-ref</progident> declarations can only
+                appear as a qualifier for the type of a  parameter. This
+                is a syntactic restriction. 
+              </p>
+            </li>
+            <li>
+              <p>
+                By-reference parameters are implicitly
+                dereferenced at all use-occurrences except as the
+                target of an assignment. 
+                This ensures that by-reference parameters cannot
+                be captured within data-structures or by escaping
+                closures. 
+              </p>
+            </li>
+            <li>
+              <p>
+                A function with a formal parameter declared as 
+                <progident>(by-ref &tau;)</progident>
+                can only be apllied to an actual argument of type 
+                <progident> &tau;</progident>. That is, unlike 
+                normal parameters, an actual argument of type 
+                <progident>(mutable &tau;)</progident>
+                where the formal parameter is of type 
+                &tau; 
+                or <foreignphrase>vice versa</foreignphrase> is not
+                permitted
+                [Here, &tau; &ne; (mutable &tau;<sup>&prime;</sup>)].
+              </p>
+            </li>
+          </ol>
+      </sect3> -->       
       </sect2>
       <sect2>
 	<title>Function Application</title>
@@ -3391,7 +3446,7 @@ id : T
           <title>deref</title>
           <p>If
           <progident><em>e</em></progident> is an expression of reference
-          type, then:
+            type <progident>(ref &tau;)</progident>, then:
           </p>
           <literallayout>
 (deref <em>e</em>)</literallayout>
@@ -3411,6 +3466,157 @@ id : T
           </p>
           <literallayout>
 (deref <em>e</em>)</literallayout>
+        </sect3>
+        <sect3>
+          <title>inner-ref</title>
+          <p>If
+            <progident><em>e</em></progident> is an expression of
+            reference type, which evaluates to a value 
+            <progident><em>v</em></progident>,            
+            the <progident>inner-ref</progident>
+            construct can be used to obtain a reference to a
+            subcomponent of <progident><em>v</em></progident>.
+            The permitted cases are:  
+          </p>
+          <ol>
+            <li>
+              <p>
+                If
+              </p>
+              <ol>
+                <li>
+                  <p>                    
+                    <progident><em>e</em></progident>
+                    is an expression with type
+                    <progident>(<em>s</em> &tau;<sub>1</sub>
+                      ... &tau;<sub>n</sub>)</progident>
+                    </p>
+                </li>
+                <li>
+                  <p>                    
+                    <progident><em>s</em></progident>
+                    is a reference
+                    (<progident>:ref</progident>) structure type
+                  </p>
+                </li>
+                <li>
+                  <p>                    
+                    <progident><em>l</em></progident> is a valid
+                    field-label in structure
+                    <progident><em>s</em></progident>
+                  </p>
+                </li>                    
+                <li>
+                  <p>                                        
+                    The type of the value stored at field
+                    <progident><em>l</em></progident> is &tau;
+                  </p>
+                </li>
+              </ol>              
+              <p>
+                then, the expression 
+                <progident>(inner-ref <em>e</em> <em>l</em>)</progident>
+                returns a reference to the inner field with type 
+                <progident>(ref &tau;)</progident>
+              </p>
+            </li>
+            <li>
+              <p>
+                If
+              </p>
+              <ol>
+                <li>
+                  <p>                    
+                    <progident><em>e</em></progident>
+                    is an expression with type
+                    <progident>(ref (<em>s</em> &tau;<sub>1</sub>
+                      ... &tau;<sub>n</sub>))</progident>
+                    </p>
+                </li>
+                <li>
+                  <p>                    
+                    <progident><em>s</em></progident>
+                    is a value
+                    (<progident>:val</progident>) structure type
+                  </p>
+                </li>
+                <li>
+                  <p>                    
+                    <progident><em>l</em></progident> is a valid
+                    field-label in structure
+                    <progident><em>s</em></progident>
+                  </p>
+                </li>                    
+                <li>
+                  <p>                                        
+                    The type of the value stored at field
+                    <progident><em>l</em></progident> is &tau;
+                  </p>
+                </li>
+              </ol>              
+              <p>
+                Then,
+                the expression 
+                <progident>(inner-ref <em>e</em> <em>l</em>)</progident>
+                returns a reference to the inner field with type 
+                <progident>(ref &tau;)</progident>.
+              </p>
+            </li>
+            <li>
+              <p>
+                If
+              </p>
+              <ol>
+                <li>
+                  <p>                    
+                    <progident><em>e</em></progident>
+                    is an expression with type
+                    <progident>(vector &tau;)</progident>
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    <progident><em>e<sub>n</sub></em></progident>
+                    is a valid index expression with type
+                    <progident>word</progident>
+                  </p>
+                </li>
+              </ol>              
+              <p>
+                then, the expression 
+                <progident>(inner-ref <em>e</em> <em>e<sub>n</sub></em>)</progident>
+                returns a reference to the inner element with type 
+                <progident>(ref &tau;)</progident>
+              </p>
+            </li>
+            <li>
+              <p>
+                If
+              </p>
+              <ol>
+                <li>
+                  <p>                    
+                    <progident><em>e</em></progident>
+                    is an expression with type
+                    <progident>(ref (array &tau;))</progident>
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    <progident><em>e<sub>n</sub></em></progident>
+                    is a valid index expression with type
+                    <progident>word</progident>
+                  </p>
+                </li>
+              </ol>              
+              <p>
+                then, the expression 
+                <progident>(inner-ref <em>e</em> <em>e<sub>n</sub></em>)</progident>
+                returns a reference to the inner element with type 
+                <progident>(ref &tau;)</progident>
+              </p>
+            </li>
+          </ol>          
         </sect3>
       </sect2>
       <sect2 id="switch">
@@ -4690,6 +4896,8 @@ id : T
       was greatly assisted by the input of Mark Jones of the Oregon
       Graduate Institute.
     </p>
+    <nocite ref="jones73thesis"/>
+    <nocite ref="wirth1988pascal"/>    
   </sect1>
   <bibliography>
     <bibentry label="ansi1999c">

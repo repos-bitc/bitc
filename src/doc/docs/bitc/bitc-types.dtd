@@ -104,7 +104,8 @@
 <!-- Base operations -->
 <!ELEMENT operator              EMPTY>
 <!ATTLIST operator
-                                name       CDATA   #REQUIRED
+                                name       CDATA   #IMPLIED
+                                symbol     CDATA   #IMPLIED
 >
 
 <!ELEMENT error                 EMPTY>
@@ -190,6 +191,7 @@
 
 <!ELEMENT plural                (%anything.group;)>
 <!ELEMENT Paren                 %anything.group;>
+<!ELEMENT DBrac                 %anything.group;>
 
 <!ELEMENT mapping               (%anything.group;, %anything.group;)>
 <!ELEMENT fnxn                  (%anything.group;, %anything.group;)>
@@ -201,6 +203,11 @@
                                 name       CDATA   #REQUIRED
                                 isEntity   CDATA   #IMPLIED
 >
+<!ELEMENT op                    (%anything.group;+)>
+<!ATTLIST op
+                                symbol       CDATA   #REQUIRED
+>
+<!ELEMENT leadsto               (%anything.group;+)>
 
 <!ELEMENT floorOp                 EMPTY>
 <!ELEMENT floor                   %anything.group;>
@@ -231,7 +238,7 @@
 <!-- Canonical forms -->
 <!ELEMENT canonical            (%anything.group;)>
 <!ELEMENT canonical            (%anything.group;)>
-<!ELEMENT relevant               (%anything.group;,%anything.group;)>
+<!ELEMENT relevant             (%anything.group;,%anything.group;)>
 <!ELEMENT normalize            (%anything.group;)>
  
 <!-- Substitition -->
@@ -322,6 +329,7 @@
 <!ELEMENT AND                  %predicates.group;*>
 <!ELEMENT OR                   %predicates.group;*>
 <!ELEMENT NOT                  %anything.group;>
+<!ELEMENT IMPLIES              %anything.group;*>
  
 <!-- forall/exists a, b, ... [.] n -->
 <!ELEMENT forall               %anything.group;*>
@@ -458,6 +466,7 @@
 <!ENTITY % constraint.group "
                                  %predicates.group;
                                | Tclass 
+                               | Pcst
 ">
 
 <!ENTITY % ct_set.group "
@@ -631,6 +640,14 @@
                                 name       CDATA   #REQUIRED
 >
 
+<!ELEMENT constraint           EMPTY>
+<!ATTLIST constraint
+                               num       CDATA   #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!-- Polymorphic constraint -->
+<!ELEMENT Pcst                 (%anything.group;*)>
+
 <!ELEMENT aCtset               EMPTY>
 <!ATTLIST aCtset
                                num       CDATA   #IMPLIED
@@ -677,6 +694,10 @@
 <!ELEMENT corUpOp              EMPTY>
 <!ELEMENT corDownOp            EMPTY>
 
+<!ATTLIST ceq
+                               via       CDATA   #IMPLIED
+>
+
 <!-- ======================================================================
               Unification     
      ====================================================================== -->
@@ -684,13 +705,18 @@
 <!ELEMENT lnk                   (%anytype.group;, %anytype.group;+)>
 <!ELEMENT aLnset                EMPTY>
 <!ATTLIST aLnset
-                                num       CDATA   #IMPLIED
-                                dash     CDATA    #IMPLIED
+                                num       CDATA    #IMPLIED
+                                dash      CDATA    #IMPLIED
 >
 <!-- unify two types to get link sets -->
 <!ELEMENT unify                (%anytype.group;, %anytype.group;)>
 <!-- unify to get a set of substitutions -->
 <!ELEMENT UNIFY                (%anytype.group;, %anytpe.group;, (%subst.group;|error))>
+<!-- Unify Function -->
+<!ELEMENT unf                  %constraint.group;>
+<!ATTLIST unf
+                               ac        (yes|no)   #IMPLIED
+>
 
 
 <!-- ======================================================================
@@ -805,6 +831,7 @@
                                 | let
                                 | set
                                 | Paren
+                                | DBrac
                                 | Pair
                                 | fst
                                 | snd
@@ -835,6 +862,7 @@
 <!ATTLIST aExpr
                                num      CDATA   #IMPLIED
                                dash     CDATA   #IMPLIED
+                               hat      CDATA   #IMPLIED
 >
 
 <!ELEMENT true                 EMPTY>
@@ -880,6 +908,7 @@
 <!ELEMENT tqExpr               (%anyexpr.group;, %typescheme.group;)>
 <!ATTLIST tqExpr
                                optional yes     #IMPLIED
+                               nosp     yes     #IMPLIED
 >
 <!ELEMENT dup                  %anyexpr.group;>
 <!ELEMENT deref                %anyexpr.group;>
@@ -898,6 +927,15 @@
                                br2     CDATA     #IMPLIED
 >
 
+<!-- let Kinds -->
+<!ELEMENT lKind                  %anyexpr.group;>
+<!ATTLIST lKind
+                               k        CDATA    #IMPLIED
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+
 <!-- Program -->
 <!ELEMENT aProgram             EMPTY>
 <!ATTLIST aProgram
@@ -906,6 +944,9 @@
 >
 <!ELEMENT define               (%anyexpr.group;, %anyexpr.group;, %anyexpr.group;)>
 <!ELEMENT proclaim             (tqExpr, %anyexpr.group;)>
+
+<!-- optional parts of syntax -->
+<!ELEMENT opt                  %anything.group;>
 
 
  <!-- ======================================================================
@@ -1041,6 +1082,7 @@
 <!ELEMENT assume               %context.group;*>
 <!ELEMENT conclude             %anything.group;>
 <!ELEMENT constrain            %constraint.group;>
+<!ELEMENT precond              %anything.group;*>
 <!ELEMENT propagate            %anything.group;*>
 
 <!ELEMENT judgeOp              EMPTY>
@@ -1104,6 +1146,10 @@
                                colsep      CDATA    #IMPLIED
                                rowsep      CDATA    #IMPLIED>
 <!ELEMENT opHorzRules          opRule*>
+
+<!ELEMENT equation             %anything.group;,%anything.group;, %anything.group;* >
+<!ELEMENT VEqns                equation*>
+
 
 <!-- ======================================================================
               Theorems and Proofs 

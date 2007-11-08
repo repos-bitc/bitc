@@ -29,7 +29,6 @@ syntax: glob
 *.rpm
 *.spec
 *.toc
-*.xmli
 *.xml.normalized
 *.svg
 
@@ -51,7 +50,12 @@ src/doc/docs/dir.dev.gxml
 #dir.dev.xml
 
 # Some hand-built documents:
+src/doc/docs/bitc/core.xml
 src/doc/docs/bitc/formal.xml
 src/doc/docs/bitc/mut-formal.xml
 src/doc/docs/bitc/mutinfer.xml
 src/doc/docs/bitc/sys-infer.xml
+
+# ELC files generated for emacs mode
+src/bitcc-bootstrap/emacs/*.elc
+

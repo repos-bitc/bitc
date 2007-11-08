@@ -21,6 +21,8 @@
 default: package
 BITC_SRC=../../..
 
+.SECONDARY:
+
 #OSDOC_XML_SRC=$(patsubst %.xml,%,$(wildcard *.xml)) \
 #              $(patsubst %.txml,%,$(wildcard *.txml)) 
 
@@ -33,32 +35,35 @@ OSDOC_XML_SRC=$(MY_XML) $(MY_TYPE_XML)
 CLEANLIST=bitc-grammar.c mutinfer.xml old_sys-infer.xml sys-infer.xml 
 CLEANLIST+=formal.xml mut-formal.xml
 XSL_BTYPE=btypes-osdoc.xsl
+FIX_LTX='./fixup.pl'
 
 #Do not add these .xmli files into clean list
-FI_DIR=include/formal
-FORMAL_INCLUDE=$(FI_DIR)/locsem.xmli $(FI_DIR)/opsem.xmli 
-FORMAL_INCLUDE+=$(FI_DIR)/decl.xmli $(FI_DIR)/subtype.xmli $(FI_DIR)/gen.xmli
-FORMAL_INCLUDE+=$(FI_DIR)/eq-infer.xmli $(FI_DIR)/eq-unify.xmli
-FORMAL_INCLUDE+=$(FI_DIR)/eq-solve.xmli
-FORMAL_INCLUDE+=$(FI_DIR)/hm-infer.xmli $(FI_DIR)/hm-unify.xmli
-FORMAL_INCLUDE+=$(FI_DIR)/hm-unify.aux.xmli $(FI_DIR)/hm-solve.xmli 
-
 SI_DIR=include/sys-infer
 SYSINFER_INCLUDE=$(SI_DIR)/opsem.xmli $(SI_DIR)/decl.xmli
-SYSINFER_INCLUDE=$(SI_DIR)/infer.xmli $(SI_DIR)/unify.xmli $(SI_DIR)/solve.xmli
+SYSINFER_INCLUDE+=$(SI_DIR)/infer.xmli $(SI_DIR)/unify.xmli $(SI_DIR)/solve.xmli
 
 CI_DIR=include/core
 CORE_INCLUDE=$(CI_DIR)/opsem.xmli $(CI_DIR)/decl.xmli
-CORE_INCLUDE=$(CI_DIR)/infer.xmli $(CI_DIR)/unify.xmli $(CI_DIR)/solve.xmli
+CORE_INCLUDE+=$(CI_DIR)/infer.xmli $(CI_DIR)/unify.xmli $(CI_DIR)/solve.xmli
+
+FI_DIR=include/formal
+FORMAL_INCLUDE=$(CORE_INCLUDE) $(FI_DIR)/eq2-infer.xmli $(FI_DIR)/eq2-unify.xmli
+#FORMAL_INCLUDE=$(FI_DIR)/locsem.xmli $(FI_DIR)/opsem.xmli 
+#FORMAL_INCLUDE+=$(FI_DIR)/decl.xmli $(FI_DIR)/subtype.xmli $(FI_DIR)/gen.xmli
+#FORMAL_INCLUDE+=$(FI_DIR)/eq-infer.xmli $(FI_DIR)/eq-unify.xmli
+#FORMAL_INCLUDE+=$(FI_DIR)/eq-solve.xmli
+#FORMAL_INCLUDE+=$(FI_DIR)/hm-infer.xmli $(FI_DIR)/hm-unify.xmli
+#FORMAL_INCLUDE+=$(FI_DIR)/hm-unify.aux.xmli $(FI_DIR)/hm-solve.xmli 
 
 include $(BITC_SRC)/build/make/makerules.mk
+OSDOC_TARGETS+=%.ps
 
 all:
 
 install: all
 
-%.xmli: %.btype $(XSL_BTYPE)
-	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
+#%.xmli: %.btype $(XSL_BTYPE)
+#	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
 mutinfer.xml: mutinfer.txml $(XSL_BTYPE)
 	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
@@ -72,5 +77,14 @@ mut-formal.xml: mut-formal.txml $(XSL_BTYPE) $(FORMAL_INCLUDE)
 sys-infer.xml: sys-infer.txml $(XSL_BTYPE) $(SYSINFER_INCLUDE)
 	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
-#core.xml: core.txml $(XSL_BTYPE) $(CORE_INCLUDE)
-#	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
+core.xml: core.txml $(XSL_BTYPE) $(CORE_INCLUDE)
+	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
+
+%.ps: %.ltx
+	$(FIX_LTX) $< |\
+	awk '$$1 ~ /\\begin{alltt}/ {if(pre != ""){print pre;} pre = $$0;}\
+	     $$1 !~ /\\begin{alltt}/ {print pre; pre = $$0;}\
+	     END {print $$0;}' - |\
+	sed '/./,/^$$/!d' - > $*.fix.ltx
+	$(OSDOC_RUNLATEX) $*.fix.ltx
+	dvips -t letter -o $@ $*.fix.dvi

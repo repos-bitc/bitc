@@ -21,9 +21,6 @@
 		  <unit/>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<Empty/>
-	      </propagate>
 	    </TIjudge>
 	  </tyConc>                
 	</tyRule>   
@@ -49,9 +46,6 @@
 		  </ref>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<Empty/>
-	      </propagate>
 	    </TIjudge>
 	  </tyConc>
 	</tyRule>
@@ -75,9 +69,6 @@
 		  <type/>                    
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<Empty/>
-	      </propagate>
 	    </TIjudge>
 	  </tyConc>
 	</tyRule>
@@ -112,9 +103,6 @@
 		  </subst>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<Empty/>
-	      </propagate>
 	    </TIjudge>
 	  </tyConc>
 	</tyRule>
@@ -134,9 +122,6 @@
 		  <bool/>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<Empty/>
-	      </propagate>
 	    </TIjudge>
 	  </tyConc>
 	</tyRule>   
@@ -154,9 +139,6 @@
 		  <bool/>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<Empty/>
-	      </propagate>
 	    </TIjudge>
 	  </tyConc>
 	</tyRule>
@@ -213,10 +195,8 @@
 		  </fn>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<compose>
-		  <aSubMap/>
-		</compose>                    
+	      <propagate>		
+		<aSubMap/>		
 	      </propagate>
 	    </TIjudge>
 	  </tyConc>
@@ -237,16 +217,16 @@
 		</tqExpr>
 	      </conclude>
 	      <propagate>
-		<aSubMap dash="'"/>
+		<aSubMap num="i"/>
 	      </propagate>
 	    </TIjudge>
 	    <UNIFY>
 	      <type dash="'"/>              
 	      <Subst>
-		<aSubMap dash="'"/>
+		<aSubMap num="i"/>
 		<type/>
 	      </Subst>
-	      <aSubMap/>
+	      <aSubMap num="u"/>
 	    </UNIFY>
 	  </tyPre>
 	  <tyConc>
@@ -264,16 +244,16 @@
 		    </tqExpr>  
 		  </paren>
 		  <Subst>
-		    <aSubMap/>
+		    <aSubMap num="u"/>
 		    <type dash="'"/>
 		  </Subst>
 		</tqExpr>
 	      </conclude>
 	      <propagate>
-		<compose>
-		  <aSubMap/>
-		  <aSubMap dash="'"/>
-		</compose>
+		<scomp>
+		  <aSubMap num="i"/>
+		  <aSubMap num="u"/>
+		</scomp>
 	      </propagate>                
 	    </TIjudge>
 	  </tyConc>
@@ -349,15 +329,12 @@
 	      </propagate>
 	    </TIjudge>
 	    <TIjudge>
+	      <precond>
+		<aSubMap num="1"/>
+	      </precond>
 	      <assume>
-		<Subst>
-		  <aSubMap num="1"/>
-		  <gamma/>
-		</Subst>
-		<Subst>
-		  <aSubMap num="1"/>
-		  <store/>
-		</Subst>
+		<gamma/>
+		<store/>
 	      </assume>
 	      <conclude>
 		<tqExpr>
@@ -385,7 +362,7 @@
 		  </ceil>
 		</fn>
 	      </mbpair>
-	      <aSubMap num="1" dash="'"/>
+	      <aSubMap num="f"/>
 	    </UNIFY>
 	  </tyPre>
 	  <tyPre>
@@ -395,22 +372,22 @@
 		<tvar name="gamma"/>
 		<floor>
 		  <Subst>
-		    <aSubMap num="1" dash="'"/>
+		    <aSubMap num="f"/>
 		    <tvar name="delta"/>
 		  </Subst>
 		</floor>
 	      </mbpair>
-	      <aSubMap num="2" dash="'"/>
+	      <aSubMap num="a"/>
 	    </UNIFY>
 	    <eq>
 	      <type/>
 	      <mbpair>
 		<tvar name="epsiv"/>
 		<Subst>
-		  <aSubMap num="2" dash="'"/>
+		  <aSubMap num="a"/>
 		  <minz>
 		    <Subst>
-		      <aSubMap num="1" dash="'"/>
+		      <aSubMap num="f"/>
 		      <tvar name="alpha"/>
 		    </Subst>
 		  </minz>
@@ -441,16 +418,16 @@
 		    <aExpr num="1"/>
 		    <aExpr num="2"/>
 		  </apply>                 
-		  <type dash="'"/>
+		  <type/>
 		</tqExpr>
 	      </conclude>
 	      <propagate>
-		<compose>
+		<scomp>
 		  <aSubMap num="1"/>
 		  <aSubMap num="2"/>
-		  <aSubMap num="1" dash="'"/>
-		  <aSubMap num="2" dash="'"/>
-		</compose>
+		  <aSubMap num="f"/>
+		  <aSubMap num="a"/>
+		</scomp>
 	      </propagate>
 	    </TIjudge>
 	  </tyConc>
@@ -475,15 +452,12 @@
 	      </propagate>
 	    </TIjudge>
 	    <TIjudge>
+	      <precond>
+		<aSubMap num="1"/>
+	      </precond>
 	      <assume>
-		<Subst>
-		  <aSubMap num="1"/>
-		  <gamma/>
-		</Subst>
-		<Subst>
-		  <aSubMap num="1"/>
-		  <store/>
-		</Subst>
+		<gamma/>
+		<store/>
 	      </assume>
 	      <conclude>
 		<tqExpr>
@@ -496,21 +470,15 @@
 	      </propagate>
 	    </TIjudge>
 	    <TIjudge>
+	      <precond>
+		<scomp>
+		  <aSubMap num="1"/>		    
+		  <aSubMap num="2"/>
+		</scomp>
+	      </precond>
 	      <assume>
-		<Subst>
-		  <compose>
-		    <aSubMap num="1"/>
-		    <aSubMap num="2"/>
-		  </compose>
-		  <gamma/>
-		</Subst>
-		<Subst>
-		  <compose>
-		    <aSubMap num="1"/>
-		    <aSubMap num="2"/>
-		  </compose>
-		  <store/>
-		</Subst>
+		<gamma/>
+		<store/>
 	      </assume>
 	      <conclude>
 		<tqExpr>
@@ -522,70 +490,6 @@
 		<aSubMap num="3"/>
 	      </propagate>
 	    </TIjudge>
-	  </tyPre>
-	  <tyPre>
-	    <eq>
-	      <aSubMap/>
-	      <compose>
-		<aSubMap num="1"/>
-		<aSubMap num="2"/>
-		<aSubMap num="3"/>
-	      </compose>
-	    </eq>	      
-	    <UNIFY>
-	      <Subst>
-		<aSubMap/>
-		<type num="2"/>
-	      </Subst>
-	      <mbpair>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-	      </mbpair>
-	      <aSubMap num="2" dash="'"/>
-	    </UNIFY>
-	    <UNIFY>
-	      <Subst>
-		<compose>
-		  <aSubMap/>
-		  <aSubMap num="2" dash="'"/>		  
-		</compose>
-		<type num="3"/>
-	      </Subst>
-	      <mbpair>
-		<tvar name="gamma"/>
-		<Subst>
-		  <aSubMap num="2" dash="'"/>		
-		  <tvar name="beta"/>
-		</Subst>
-	      </mbpair>
-	      <aSubMap num="3" dash="'"/>
-	    </UNIFY>
-	  </tyPre>
-	  <tyPre>
-	    <UNIFY>
-	      <Subst>
-		<compose>
-		  <aSubMap/>
-		  <aSubMap num="2" dash="'"/>
-		  <aSubMap num="3" dash="'"/>
-		</compose>
-		<type num="1"/>
-	      </Subst>
-	      <mbpair>
-		<tvar name="delta"/>
-		<bool/>
-	      </mbpair>
-	      <aSubMap num="1" dash="'"/>
-	    </UNIFY>
-	    <eq>
-	      <aSubMap dash="'"/>
-	      <compose>
-		<aSubMap/>
-		<aSubMap num="1" dash="'"/>
-		<aSubMap num="2" dash="'"/>
-		<aSubMap num="3" dash="'"/>
-	      </compose>
-	    </eq>
 	    <models name="new">
 	      <assume/>
 	      <grouping>
@@ -596,6 +500,60 @@
 		<tvar name="epsiv"/>
 	      </grouping>
 	    </models>
+	  </tyPre>
+	  <tyPre>
+	    <UNIFY>
+	      <Subst>
+		<aSubMap num="3"/>
+		<type num="2"/>
+	      </Subst>
+	      <mbpair>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </mbpair>
+	      <aSubMap num="t"/>
+	    </UNIFY>
+	    <UNIFY>
+	      <Subst>
+		<aSubMap num="t"/>
+		<type num="3"/>
+	      </Subst>
+	      <mbpair>
+		<tvar name="gamma"/>
+		<Subst>
+		  <aSubMap num="c"/>		
+		  <tvar name="beta"/>
+		</Subst>
+	      </mbpair>
+	      <aSubMap num="f"/>
+	    </UNIFY>
+	    <UNIFY>
+	      <Subst>
+		<scomp>
+		  <aSubMap num="2"/>
+		  <aSubMap num="3"/>
+		  <aSubMap num="t"/>
+		  <aSubMap num="f"/>
+		</scomp>
+		<type num="1"/>
+	      </Subst>
+	      <mbpair>
+		<tvar name="delta"/>
+		<bool/>
+	      </mbpair>
+	      <aSubMap num="c"/>
+	    </UNIFY>
+	    <eq>
+	      <aSubMap/>
+	      <scomp>
+		<aSubMap num="1"/>
+		<aSubMap num="2"/>
+		<aSubMap num="3"/>
+		<aSubMap num="c"/>
+		<aSubMap num="t"/>
+		<aSubMap num="f"/>
+	      </scomp>
+	    </eq>
 	  </tyPre>
 	  <tyConc>
 	    <TIjudge>
@@ -614,11 +572,11 @@
 		    <tvar name="epsiv"/>
 		    <join>
 		      <Subst>
-			<aSubMap dash="'"/>
+			<aSubMap/>
 			<type num="2"/>
 		      </Subst>
 		      <Subst>
-			<aSubMap dash="'"/>
+			<aSubMap/>
 			<type num="3"/>
 		      </Subst>
 		    </join>
@@ -626,7 +584,7 @@
 		</tqExpr>
 	      </conclude>
 	      <propagate>
-		<aSubMap dash="'"/>
+		<aSubMap/>
 	      </propagate>
 	    </TIjudge>
 	  </tyConc>
@@ -651,15 +609,12 @@
 	      </propagate>
 	    </TIjudge>
 	    <TIjudge>
+	      <precond>
+		<aSubMap num="1"/>
+	      </precond>
 	      <assume>
-		<Subst>
-		  <aSubMap num="1"/>                    
-		  <gamma/>
-		</Subst>
-		<Subst>
-		  <aSubMap num="1"/>                    
-		  <store/>
-		</Subst>
+		<gamma/>
+		<store/>
 	      </assume>
 	      <conclude>
 		<tqExpr>
@@ -685,25 +640,29 @@
 	      <mutable>
 		<tvar name="alpha"/>
 	      </mutable>
-	      <aSubMap num="1" dash="'"/>
+	      <aSubMap num="l"/>
 	    </UNIFY>
 	    <UNIFY>
 	      <Subst>
-		<aSubMap num="1" dash="'"/>
+		<aSubMap num="l"/>
 		<type num="2"/>
 	      </Subst>
 	      <mbpair>
 		<tvar name="beta"/>
 		<Subst>
-		  <compose>
-		    <aSubMap num="1" dash="'"/>
+		  <scomp>
 		    <aSubMap num="2"/>
-		  </compose>
+		    <aSubMap num="l"/>
+		  </scomp>
 		  <type num="1"/>
 		</Subst>
 	      </mbpair>
-	      <aSubMap num="2" dash="'"/>	    
+	      <aSubMap num="r"/>	    
 	    </UNIFY>
+	    <Sjudge name="lval">
+	      <assume/>
+	      <aExpr num="1"/>
+	    </Sjudge>
 	  </tyPre>
 	  <tyConc>
 	    <TIjudge>
@@ -721,12 +680,12 @@
 		</tqExpr>
 	      </conclude>
 	      <propagate>
-		<compose>
+		<scomp>
 		  <aSubMap num="1"/>
 		  <aSubMap num="2"/>
-		  <aSubMap num="1" dash="'"/>
-		  <aSubMap num="2" dash="'"/>
-		</compose>
+		  <aSubMap num="l"/>
+		  <aSubMap num="r"/>
+		</scomp>
 	      </propagate>
 	    </TIjudge>
 	  </tyConc>
@@ -745,7 +704,7 @@
 		</tqExpr>
 	      </conclude>
 	      <propagate>
-		<aSubMap/>
+		<aSubMap num="i"/>
 	      </propagate>
 	    </TIjudge>
 	    <models name="new">
@@ -765,7 +724,7 @@
 		  <tvar name="alpha"/>
 		</ref>
 	      </mbpair>
-	      <aSubMap dash="'"/>
+	      <aSubMap num="u"/>
 	    </UNIFY>
 	  </tyPre>
 	  <tyConc>
@@ -780,19 +739,19 @@
 		    <aExpr/>
 		  </deref>
 		  <Subst>
-		    <compose>
-		      <aSubMap/>
-		      <aSubMap dash="'"/>
-		    </compose>
+		    <scomp>
+		      <aSubMap num="i"/>
+		      <aSubMap num="u"/>
+		    </scomp>
 		    <tvar name="alpha"/>
 		  </Subst>
 		</tqExpr>
 	      </conclude>
 	      <propagate>
-		<compose>
-		  <aSubMap/>
-		  <aSubMap dash="'"/>
-		</compose>
+		<scomp>
+		  <aSubMap num="i"/>
+		  <aSubMap num="u"/>
+		</scomp>
 	      </propagate>                  
 	    </TIjudge>
 	  </tyConc>
@@ -825,20 +784,20 @@
 		<tvar name="alpha"/>
 		<type num="1"/>
 	      </mbpair>
-	      <aSubMap/>
+	      <aSubMap num="u"/>
 	    </UNIFY>
 	    <Sjudge name="sol">
 	      <assume>
-		<aSubMap dash="'"/>
+		<aSubMap num="s"/>
 		<id/>
 		<aExpr num="2"/>
 	      </assume>
 	      <corUp>
 		<Subst>
-		  <compose>
-		    <aSubMap/>
+		  <scomp>
 		    <aSubMap num="1"/>
-		  </compose>
+		    <aSubMap num="u"/>
+		  </scomp>
 		  <type/>
 		</Subst>	    
 		<type dash="'"/>
@@ -857,55 +816,47 @@
 	    </models>
 	  </tyPre>
 	  <tyPre>
+	    <eq>
+	      <aSubMap/>
+	      <scomp>
+		<aSubMap num="1"/>
+		<aSubMap num="u"/>
+		<aSubMap num="s"/>
+	      </scomp>
+	    </eq>
 	    <Sjudge name="gen">
 	      <assume>
 		<Subst>
-		  <compose>
-		    <aSubMap num="1"/>
-		    <aSubMap/>
-		    <aSubMap dash="'"/>
-		  </compose>
+		  <aSubMap/>
 		  <gamma/>
 		</Subst>
 		<Subst> 
-		  <compose>
-		    <aSubMap num="1"/>
-		    <aSubMap/>
-		    <aSubMap dash="'"/>
-		  </compose>
+		  <aSubMap/>
 		  <store/>
 		</Subst>
-		<aExpr num="1"/>
+		<Subst> 
+		  <aSubMap/>
+		  <aExpr num="1"/>
+		</Subst>
 	      </assume>
 	      <GEN>
-		<type dsh="'"/>
+		<type dash="'"/>
 		<aTS/>
 	      </GEN>       
 	    </Sjudge>
 	    <TIjudge>
+	      <precond>
+		<aSubMap/>
+	      </precond>
 	      <assume>
 		<extend>
-		  <Subst>
-		    <compose>
-		      <aSubMap num="1"/>
-		      <aSubMap/>
-		      <aSubMap dash="'"/>
-		    </compose>
-		    <gamma/>
-		  </Subst>
+		  <gamma/>
 		  <mapping>
 		    <id/>
 		    <aTS/>
 		  </mapping>
 		</extend>
-		<Subst>
-		  <compose>
-		    <aSubMap num="1"/>
-		    <aSubMap/>
-		    <aSubMap dash="'"/>
-		  </compose>
-		  <store/>
-		</Subst>
+		<store/>
 	      </assume>
 	      <conclude>
 		<tqExpr>
@@ -938,18 +889,18 @@
 		</tqExpr>
 	      </conclude>
 	      <propagate> 
-		<compose>
-		  <aSubMap/>
-		  <aSubMap dash="'"/>
+		<scomp>
 		  <aSubMap num="1"/>
 		  <aSubMap num="2"/>
-		</compose>
+		  <aSubMap num="u"/>
+		  <aSubMap num="s"/>
+		</scomp>
 	      </propagate>
 	    </TIjudge>
 	  </tyConc>
 	</tyRule>
       </Hrules>
-      <Hrules colsep="2">
+      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="I-Let-P [Tq]">
 	  <tyPre>
 	    <TIjudge>
@@ -976,87 +927,79 @@
 		<tvar name="alpha"/>
 		<type num="1"/>
 	      </mbpair>
-	      <aSubMap/>
+	      <aSubMap num="u"/>
 	    </UNIFY>
 	    <Sjudge name="sol">
 	      <assume>
-		<aSubMap dash="'"/>
+		<aSubMap num="s"/>
 		<id/>
 		<aExpr num="2"/>
 	      </assume>
 	      <corUp>
 		<Subst>
-		  <compose>
-		    <aSubMap/>
+		  <scomp>
 		    <aSubMap num="1"/>
-		  </compose>
+		    <aSubMap num="u"/>
+		  </scomp>
 		  <type/>
 		</Subst>	    
 		<type dash="'"/>
 	      </corUp>
-	    </Sjudge>	
+	    </Sjudge>
 	    <Sjudge name="term">
 	      <assume/>
 	      <tqExpr>
 		<id/>
 		<aTS/>	
 	      </tqExpr>
-	    </Sjudge>
+	    </Sjudge>	
 	    <models name="new">
 	      <assume/>
 	      <tvar name="alpha"/>
 	    </models>
 	  </tyPre>
 	  <tyPre>
+	    <eq>
+	      <aSubMap/>
+	      <scomp>
+		<aSubMap num="1"/>
+		<aSubMap num="u"/>
+		<aSubMap num="s"/>
+	      </scomp>
+	    </eq>
 	    <Sjudge name="gen">
 	      <assume>
 		<Subst>
-		  <compose>
-		    <aSubMap num="1"/>
-		    <aSubMap/>
-		    <aSubMap dash="'"/>
-		  </compose>
+		  <aSubMap/>
 		  <gamma/>
 		</Subst>
 		<Subst> 
-		  <compose>
-		    <aSubMap num="1"/>
-		    <aSubMap/>
-		    <aSubMap dash="'"/>
-		  </compose>
+		  <aSubMap/>
 		  <store/>
 		</Subst>
-		<aExpr num="1"/>
+		<Subst> 
+		  <aSubMap/>
+		  <aExpr num="1"/>
+		</Subst>
 	      </assume>
 	      <GEN>
-		<type dsh="'"/>
+		<type dash="'"/>
 		<aTS/>
 	      </GEN>       
 	    </Sjudge>
 	    <TIjudge>
+	      <precond>
+		<aSubMap/>
+	      </precond>
 	      <assume>
 		<extend>
-		  <Subst>
-		    <compose>
-		      <aSubMap num="1"/>
-		      <aSubMap/>
-		      <aSubMap dash="'"/>
-		    </compose>
-		    <gamma/>
-		  </Subst>
+		  <gamma/>
 		  <mapping>
 		    <id/>
 		    <aTS/>
 		  </mapping>
 		</extend>
-		<Subst>
-		  <compose>
-		    <aSubMap num="1"/>
-		    <aSubMap/>
-		    <aSubMap dash="'"/>
-		  </compose>
-		  <store/>
-		</Subst>
+		<store/>
 	      </assume>
 	      <conclude>
 		<tqExpr>
@@ -1089,12 +1032,12 @@
 		</tqExpr>
 	      </conclude>
 	      <propagate> 
-		<compose>
-		  <aSubMap/>
-		  <aSubMap dash="'"/>
+		<scomp>
 		  <aSubMap num="1"/>
 		  <aSubMap num="2"/>
-		</compose>
+		  <aSubMap num="u"/>
+		  <aSubMap num="s"/>
+		</scomp>
 	      </propagate>
 	    </TIjudge>
 	  </tyConc>

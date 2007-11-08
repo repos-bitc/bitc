@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" >
+<figure id="eq2_unify" fullwidth='yes' latex.placement="tb">
+  <font size="small">
+    <btypes:TYPE
+      xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+      <VEqns>
+	<!-- Acyclic Check -->
+	<equation>
+	  <grouping>
+	    <unf>
+	      <aCtset/>
+	    </unf>
+	    <text content=", "/>
+	    <space/>
+	    <NOT>
+	      <pred name="acyclic">
+		<aCtset/>
+	      </pred>
+	    </NOT>
+	  </grouping>		
+	  <error/>
+	</equation>
+	<!-- Empty -->
+	<equation>
+	  <unf>
+	    <Empty/>
+	  </unf>
+	  <Pair>
+	    <Empty/>
+	    <Empty/>
+	  </Pair>
+	</equation>
+	<!-- t <= t -->
+	<equation>
+	  <unf>
+	    <unin>
+	      <set>
+		<Tsub>
+		  <type/>
+		  <type/>
+		</Tsub>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <unf>
+	    <aCtset/>
+	  </unf>
+	</equation>
+	<!-- a = t -->
+	<equation>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <tvar name="alpha"/>
+		  <type/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <Pair>
+	    <aCtset num="i"/>
+	    <scomp>
+	      <aSubMap num="a"/>
+	      <aSubMap num="i"/>
+	    </scomp>	    
+	  </Pair>	  	    
+	  <eq>
+	    <aSubMap num="a"/>
+	    <SubMap>
+	      <tvar name="alpha"/>
+	      <type/>
+	    </SubMap>
+	  </eq>
+	  <eq>
+	    <unf>
+	      <Subst>
+		<aSubMap num="a"/>
+		<aCtset/>
+	      </Subst>
+	    </unf>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</equation>
+	<!-- k = K -->
+	<equation>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <lKind k="var"/>
+		  <lKind/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <Pair>
+	    <aCtset num="i"/>
+	    <scomp>
+	      <aSubMap num="k"/>
+	      <aSubMap num="i"/>
+	    </scomp>	    
+	  </Pair>	  	    
+	  <eq>
+	    <aSubMap num="k"/>
+	    <SubMap>
+	      <lKind k="var"/>
+	      <lKind/>
+	    </SubMap>
+	  </eq>
+	  <eq>
+	    <unf>
+	      <Subst>
+		<aSubMap num="k"/>
+		<aCtset/>
+	      </Subst>
+	    </unf>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</equation>
+	<!-- t1->t2 <= t1' -> t2' -->
+	<equation>
+	  <unf>
+	    <unin>
+	      <set>
+		<Tsub>
+		  <fn>
+		    <type num="a"/>
+		    <type num="r"/>
+		  </fn>
+		  <fn>
+		    <type num="a" dash="'"/>
+		    <type num="r" dash="'"/>
+		  </fn>
+		</Tsub>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="a"/>
+		  <type num="a" dash="'"/>
+		</eq>
+		<eq>
+		  <type num="r"/>
+		  <type num="r" dash="'"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</equation>	
+	<!-- ^t1 <= ^t2 -->
+	<equation>
+	  <unf>
+	    <unin>
+	      <set>
+		<Tsub>
+		  <ref>
+		    <type num="1"/>
+		  </ref>
+		  <ref>
+		    <type num="2"/>
+		  </ref>
+		</Tsub>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="1"/>
+		  <type num="2"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</equation>	
+	<!-- Mt1 <= Mt2 -->
+	<equation>
+	  <unf>
+	    <unin>
+	      <set>
+		<Tsub>
+		  <mutable>
+		    <type num="1"/>
+		  </mutable>
+		  <mutable>
+		    <type num="2"/>
+		  </mutable>
+		</Tsub>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="1"/>
+		  <type num="2"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</equation>	
+	<!-- t <= Mt -->
+	<equation>
+	  <collection>
+	    <unf>
+	      <unin>
+		<set>
+		  <Tsub>
+		    <type num="1"/>
+		    <type num="2"/>
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <eq>
+	      <type num="2"/>
+	      <maxz>
+		<type num="2"/>
+	      </maxz>
+	    </eq>
+	  </collection>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <maxz>
+		    <type num="1"/>
+		  </maxz>
+		  <maxz>
+		    <type num="2"/>
+		  </maxz>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</equation>	
+	<!-- It <= t -->
+	<equation>
+	  <collection>
+	    <unf>
+	      <unin>
+		<set>
+		  <Tsub>
+		    <type num="1"/>
+		    <type num="2"/>
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <eq>
+	      <type num="1"/>
+	      <minz>
+		<type num="1"/>
+	      </minz>
+	    </eq>
+	    <neq>
+	      <type num="1"/>
+	      <tvar name="alpha"/>
+	    </neq>
+	    <neq>
+	      <type num="2"/>
+	      <tvar name="alpha"/>
+	    </neq>
+	  </collection>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>	
+		<eq>
+		  <minz>
+		    <type num="1"/>
+		  </minz>
+		  <minz>
+		    <type num="2"/>
+		  </minz>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</equation>	
+	<!-- P(m, t1, t2) --> 
+	<equation>
+	  <unf>
+	    <unin>
+	      <set>
+		<Pcst>
+		  <lKind k="mono"/>
+		  <type num="g"/>
+		  <type num="i"/>
+		</Pcst>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="g"/>
+		  <type num="i"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</equation>	
+	<!-- P(p, t1, t2) --> 
+	<equation>
+	  <collection>
+	    <unf>
+	      <unin>
+		<set>
+		  <Pcst>
+		    <lKind k="poly"/>
+		    <type num="g"/>
+		    <type num="i"/>
+		  </Pcst>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <pred name="Immut">
+	      <type num="i"/>
+	    </pred>
+	  </collection>
+	  <unf>
+	    <aCtset/>
+	  </unf>
+	</equation>	
+	<!-- P(k, Mt1?, M?t2) --> 
+	<equation>
+	  <collection>
+	    <unf>
+	      <unin>
+		<aCtset num="*"/>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <eq>
+	      <aCtset num="*"/>
+	      <set>
+		<Pcst>
+		  <lKind k="var"/>
+		  <type num="g"/>
+		  <type num="i"/>
+		</Pcst>
+	      </set>
+	    </eq>
+	    <pred name="Mut">
+	      <type num="i"/>
+	    </pred>
+	  </collection>
+	  <Pair>
+	    <aCtset num="i"/>
+	    <scomp>
+	      <aSubMap num="k"/>
+	      <aSubMap num="i"/>
+	    </scomp>
+	  </Pair>
+	  <eq>
+	    <aSubMap num="k"/>
+	    <SubMap>
+	      <lKind k="var"/>
+	      <lKind k="mono"/>
+	    </SubMap>
+	  </eq>
+	  <eq>
+	    <unf>
+	      <Subst>
+		<aSubMap num="k"/>
+		<aCtset num="*"/>
+	      </Subst>
+	    </unf>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</equation>	
+	<!-- P(k, t, t1), P(k, t, t2) .. . k, t, tn)
+	     t !~ t1 !~ t2 !~ ... !~ tn -->
+	<equation>
+	  <collection>
+	    <unf>
+	      <unin>
+		<aCtset num="*"/>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <eq>
+	      <aCtset num="*"/>
+	      <set>
+		<Pcst>
+		  <lKind k="var"/>
+		  <type/>
+		  <type num="1"/>
+		</Pcst>
+		<text content="..."/>
+		<Pcst>
+		  <lKind k="var"/>
+		  <type/>
+		  <type num="n"/>
+		</Pcst>
+	      </set>
+	    </eq>
+	    <NOT>
+	      <unf>
+		<set>
+		  <eq>		    
+		    <type/>
+		    <type num="1"/>
+		    <text content="..."/>
+		    <type num="n"/>
+		  </eq>
+		</set>
+	      </unf>
+	    </NOT>		    
+	  </collection>
+	  <Pair>
+	    <aCtset num="i"/>
+	    <scomp>
+	      <aSubMap num="k"/>
+	      <aSubMap num="i"/>
+	    </scomp>
+	  </Pair>
+	  <eq>
+	    <aSubMap num="k"/>
+	    <SubMap>
+	      <lKind k="var"/>
+	      <lKind k="poly"/>
+	    </SubMap>
+	  </eq>
+	  <eq>
+	    <unf>
+	      <Subst>
+		<aSubMap num="k"/>
+		<aCtset num="*"/>
+	      </Subst>
+	    </unf>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</equation>	
+	<!-- The subcases of the following two cannot result in any
+	     new substitutions or addition of constraints, 
+	     but might fail -->
+	<!-- a <= t  -->
+	<equation>
+	  <unf>
+	    <unin>
+	      <set>
+		<Pcst>
+		  <lKind k="var"/>
+		  <type num="g"/>
+		  <type num="i"/>
+		</Pcst>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <Pair>
+	    <unin>
+	      <set>
+		<Pcst>
+		  <lKind k="var"/>
+		  <type num="g"/>
+		  <type num="i"/>
+		</Pcst>
+	      </set>
+	      <aCtset num="i"/>
+	    </unin>
+	    <aSubMap num="i"/>
+	  </Pair>	  	    
+	  <eq>
+	    <unf>
+	      <aCtset/>
+	    </unf>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</equation>
+	<equation>
+	  <unf>
+	    <unin>
+	      <set>
+		<Tsub>
+		  <tvar name="alpha"/>
+		  <type/>
+		</Tsub>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <Pair>
+	    <unin>
+	      <set>
+		<Tsub>
+		  <tvar name="alpha"/>
+		  <type/>
+		</Tsub>
+	      </set>
+	      <aCtset num="i"/>
+	    </unin>
+	    <aSubMap num="i"/>
+	  </Pair>	  	    
+	  <eq>
+	    <unf>
+	      <aCtset/>
+	    </unf>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</equation>
+	<!-- a <= t  -->
+	<equation>
+	  <unf>
+	    <unin>
+	      <set>
+		<Tsub>
+		  <type/>
+		  <tvar name="alpha"/>
+		</Tsub>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <Pair>
+	    <unin>
+	      <set>
+		<Tsub>
+		  <type/>
+		  <tvar name="alpha"/>
+		</Tsub>
+	      </set>
+	      <aCtset num="i"/>
+	    </unin>
+	    <aSubMap num="i"/>
+	  </Pair>	  	    
+	  <eq>
+	    <unf>
+	      <aCtset/>
+	    </unf>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</equation>
+	<!-- Error -->
+	<equation>
+	  <unf>
+	    <aCtset/>
+	  </unf>
+	  <error/>
+	</equation>
+      </VEqns>
+    </btypes:TYPE>
+  </font>
+  <caption>Equational Unification Rules</caption>
+</figure>
