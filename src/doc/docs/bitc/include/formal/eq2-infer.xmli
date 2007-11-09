@@ -751,13 +751,18 @@
 		<unin>
 		  <aCtset num="1"/>  
 		  <set>
-		    <ceq via="beta">
-		      <type/>
+		    <ceq via="gamma">
+		      <tvar name="beta"/>
 		      <type num="1"/>
 		    </ceq>
+		    <opt>
+		      <eq>
+			<tvar name="beta"/>
+			<type/>
+		      </eq>
+		    </opt>
 		  </set>
 		</unin>
-		<aCtset num="1"/>
 	      </assume>
 	      <conclude>
 		<GEN>
@@ -802,6 +807,7 @@
 	    <models name="new">
 	      <assume/>
 	      <tvar name="beta"/>
+	      <tvar name="gamma"/>
 	    </models>
 	  </tyPre>
 	  <tyConc>
@@ -813,7 +819,10 @@
 	      <conclude>
 		<tqExpr>
 		  <let kind="k">
-		    <id/>
+		    <tqExpr optional="yes">
+		      <id/>
+		      <type/>
+		    </tqExpr>
 		    <aExpr num="1"/>
 		    <aExpr num="2"/>
 		  </let>
