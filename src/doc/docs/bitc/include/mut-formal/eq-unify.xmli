@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+<floatingtable id="eq_unify" fullwidth='yes' latex.placement="tb">
+  <btypes:TYPE
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+    <Hrules vspace="yes">
+      <tyRule name="E-UNIFY">
+	<tyPre>
+	  <eq>
+	    <fnxn name="Close">
+	      <aCtset/>
+	      <canonical>
+		<aCtset/>
+	      </canonical>
+	    </fnxn>
+	  </eq>
+	  <models name="consistent">
+	    <nothing/>
+	    <canonical>
+	      <aCtset/>
+	    </canonical>
+	  </models>
+	  <models name="acyclic">
+	    <nothing/>
+	    <canonical>
+	      <aCtset/>
+	    </canonical>
+	  </models>
+	</tyPre>
+	<tyConc>
+	  <models name="UNF">
+	    <nothing/>
+	    <canonical>
+	      <aCtset/>                  
+	    </canonical>
+	  </models>
+	</tyConc>                
+      </tyRule>   
+      <tyRule name="E-UNIFY-SOLVE">
+	<tyPre>
+	  <models name="UNF">
+	    <nothing/>
+	    <canonical>
+	      <aCtset/>                  
+	    </canonical>
+	  </models>
+	  <models name="sol">
+	    <assume>
+	      <aSubMap/>
+	    </assume>
+	    <canonical>
+	      <aCtset/>                  
+	    </canonical>
+	  </models>             
+	</tyPre>
+	<tyConc>
+	  <models name="unf">
+	    <aSubMap/>
+	    <aCtset/>                  
+	  </models>
+	</tyConc>                
+      </tyRule>   
+    </Hrules>
+  </btypes:TYPE>
+  <caption>Equational Unification Rules</caption>
+</floatingtable>

@@ -463,8 +463,9 @@
   </sect1>
   <sect1 id="opsem">
     <title>Semantics</title>
-    <xi:include href="include/core/opsem.xmli"/>
-    <xi:include href="include/core/decl.xmli"/>
+    <xi:include href="include/formal/opsem.xmli"/>
+    <xi:include href="include/formal/decl.xmli"/>
+    <xi:include href="include/formal/locsem.xmli"/>
     <p>
       The Operational semantics rules are shown in Figure&nbsp;<xref
         ref="dyn_sem_horz"/>.
@@ -519,9 +520,10 @@
       <btypes:TYPE><evalOp/></btypes:TYPE> respectively. 
     </p>
     <p>
-      Figure&nbsp;<xref ref="decl_all_rules"/> shows the declarative
-      type rules, copy coercion rules, rules for type generalization
-      and the lvalue restriction.
+      Figure&nbsp;<xref ref="decl_rules"/> shows the declarative
+      type rules, copy coercion rules and rules for type
+      generalization. The location semantics (lvalue) rules 
+      are shown in figure&nbsp;<xref ref="lval_rules"/>.
       The standard type judgment  
       <btypes:TYPE>
 	<TDjudge>
@@ -667,7 +669,7 @@
     </definition>
     <p>
       In terms of the copy-coercion rules shown in
-      Figure&nbsp;<xref ref="decl_all_rules"/>, we can define copy
+      Figure&nbsp;<xref ref="decl_rules"/>, we can define copy
       compatibility as: 
     </p>
     <example>
@@ -955,7 +957,7 @@
       <title>Value Restriction</title>
       <p>
         We define some definitions used in the enforcement of value
-        restriction in Figure&nbsp;<xref ref="decl_all_rules"/>.
+        restriction in Figure&nbsp;<xref ref="decl_rules"/>.
       </p>
       <example>
         <p>
@@ -3912,8 +3914,8 @@
   </sect1>
   <sect1 id="eq-infer">
     <title>Equational Type Inference</title> 
-    <xi:include href="include/formal/eq2-infer.xmli"/>
-    <xi:include href="include/formal/eq2-unify.xmli"/>
+    <xi:include href="include/formal/eq-infer.xmli"/>
+    <xi:include href="include/formal/eq-unify.xmli"/>
     <p>
       The equational type inference algorithm is as shown in
       Figure&nbsp;<xref ref="eq2_infer"/>. 
@@ -4163,9 +4165,9 @@
   </sect1>
   <sect1 id="infer">
     <title>Heuristic Type Inference</title> 
-    <xi:include href="include/core/infer.xmli"/>
-    <xi:include href="include/core/unify.xmli"/>
-    <xi:include href="include/core/solve.xmli"/>
+    <xi:include href="include/formal/hm-infer.xmli"/>
+    <xi:include href="include/formal/hm-unify.xmli"/>
+    <xi:include href="include/formal/hm-solve.xmli"/>
     <p>
       The type inference algorithm is as shown in
       Figure&nbsp;<xref ref="hm_infer"/>. 
@@ -4364,7 +4366,7 @@
           <aCtset/> 
         </btypes:TYPE> produces an equivalent set
         of atomic constraints by using the copy coercion rules defined
-        in Figure&nbsp;<xref ref="decl_all_rules"/> (note that this
+        in Figure&nbsp;<xref ref="decl_rules"/> (note that this
         conversion is total); and by explicitely adding all transitive
         relationships.
       </p>
@@ -8970,7 +8972,7 @@
         </btypes:TYPE>.
         The conclusions are now evident from the definition of
         copy coercions in
-        Figure&nbsp;<xref ref="decl_all_rules"/>.
+        Figure&nbsp;<xref ref="decl_rules"/>.
       </p>
     </proof>      
     <lemma id="unify-maybe-cor">
@@ -10282,7 +10284,7 @@
       <p>
         Follows from Lemma&nbsp;<xref ref="solvable-weakening"/> 
         and by observing the declarative type rules in
-        Figure&nbsp;<xref ref="decl_all_rules"/>.
+        Figure&nbsp;<xref ref="decl_rules"/>.
       </p>
     </proof>
     <lemma id="eqi-subst-decl-ok">

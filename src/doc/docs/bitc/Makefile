@@ -47,13 +47,11 @@ CORE_INCLUDE=$(CI_DIR)/opsem.xmli $(CI_DIR)/decl.xmli
 CORE_INCLUDE+=$(CI_DIR)/infer.xmli $(CI_DIR)/unify.xmli $(CI_DIR)/solve.xmli
 
 FI_DIR=include/formal
-FORMAL_INCLUDE=$(CORE_INCLUDE) $(FI_DIR)/eq2-infer.xmli $(FI_DIR)/eq2-unify.xmli
-#FORMAL_INCLUDE=$(FI_DIR)/locsem.xmli $(FI_DIR)/opsem.xmli 
-#FORMAL_INCLUDE+=$(FI_DIR)/decl.xmli $(FI_DIR)/subtype.xmli $(FI_DIR)/gen.xmli
-#FORMAL_INCLUDE+=$(FI_DIR)/eq-infer.xmli $(FI_DIR)/eq-unify.xmli
-#FORMAL_INCLUDE+=$(FI_DIR)/eq-solve.xmli
-#FORMAL_INCLUDE+=$(FI_DIR)/hm-infer.xmli $(FI_DIR)/hm-unify.xmli
-#FORMAL_INCLUDE+=$(FI_DIR)/hm-unify.aux.xmli $(FI_DIR)/hm-solve.xmli 
+FORMAL_INCLUDE=$(FI_DIR)/locsem.xmli $(FI_DIR)/opsem.xmli 
+FORMAL_INCLUDE+=$(FI_DIR)/decl.xmli 
+FORMAL_INCLUDE+=$(FI_DIR)/eq-infer.xmli $(FI_DIR)/eq-unify.xmli
+FORMAL_INCLUDE+=$(FI_DIR)/hm-infer.xmli $(FI_DIR)/hm-unify.xmli
+FORMAL_INCLUDE+=$(FI_DIR)/hm-solve.xmli 
 
 include $(BITC_SRC)/build/make/makerules.mk
 OSDOC_TARGETS+=%.ps

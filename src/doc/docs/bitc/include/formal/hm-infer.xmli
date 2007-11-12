@@ -1,1193 +1,1049 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
-<floatingtable id="hm_infer" fullwidth='yes' latex.placement="!t!b">
-  <btypes:TYPE
-    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-    <Hrules vspace="yes">
-      <tyRule name=" TI-UNIT">
-	<tyPre/>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<Unit/>
-		<unit/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <Empty/>
-	      <tape/>
-	    </propagate>
-	  </TIjudge>
-	</tyConc>                
-      </tyRule>   
-      <tyRule name="TI-HLOC">
-	<tyPre>
-	  <mapsto>
-	    <store/>
-	    <hLoc/>
-	    <type/>
-	  </mapsto>
-	</tyPre>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<hLoc/>
-		<ref>
-		  <type/>
-		</ref>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <Empty/>
-	      <tape/>
-	    </propagate>
-	  </TIjudge>
-	</tyConc>
-      </tyRule>
-      <tyRule name="TI-SLOC">
-	<tyPre>
-	  <mapsto>
-	    <store/>
-	    <sLoc/>
-	    <type/>
-	  </mapsto>
-	</tyPre>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<sLoc/>                    
-		<type/>                    
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <Empty/>
-	      <tape/>
-	    </propagate>
-	  </TIjudge>
-	</tyConc>
-      </tyRule>
-    </Hrules>
-    <Hrules vspace="yes">
-      <tyRule name="TI-ID">
-	<tyPre>
-	  <mapsto>
-	    <gamma/>
-	    <id/>
-	    <TS>
-	      <tvars name="alpha"/>
-	      <type/>
-	    </TS>
-	  </mapsto>
-	</tyPre>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<id/>
-		<subst>
-		  <type/>
-		  <tvars name="alpha"/>
-		  <tvars name="beta"/>
-		</subst>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <Empty/>
-	      <roll>
-		<tape/>
-		<tvars name="beta"/>
-	      </roll>
-	    </propagate>
-	  </TIjudge>
-	</tyConc>
-      </tyRule>
-      <tyRule name=" TI-TRUE">
-	<tyPre/>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<true/>
-		<bool/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <Empty/>
-	      <tape/>
-	    </propagate>
-	  </TIjudge>
-	</tyConc>
-      </tyRule>   
-      <tyRule name="TI-FALSE">
-	<tyPre/>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<false/>
-		<bool/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <Empty/>
-	      <tape/>
-	    </propagate>
-	  </TIjudge>
-	</tyConc>
-      </tyRule>
-    </Hrules>
-    <Hrules vspace="yes">
-      <tyRule name="TI-LAMBDA">
-	<tyPre>
-	  <TIjudge>
-	    <assume>
-	      <extend>
+<figure id="hm_infer" fullwidth='yes' latex.placement="tb">
+  <font size="small">
+    <btypes:TYPE
+      xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name=" I-Unit">
+	  <tyPre/>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
 		<gamma/>
-		<mapping>
-		  <id/>
-		  <tvar name="alpha"/>
-		</mapping>
-	      </extend>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <Unit/>
+		  <unit/>
+		</tqExpr>
+	      </conclude>
+	    </TIjudge>
+	  </tyConc>                
+	</tyRule>   
+	<tyRule name="I-Hloc">
+	  <tyPre>
+	    <mapsto>
 	      <store/>
-	      <roll>
-		<tape/>
-		<tvar name="alpha"/>
-	      </roll>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr/>
-		<type/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap/>
-	      <tape dash="'"/>
-	    </propagate>
-	  </TIjudge>
-	</tyPre>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
+	      <hLoc/>
+	      <type/>
+	    </mapsto>
+	  </tyPre>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <hLoc/>
+		  <ref>
+		    <type/>
+		  </ref>
+		</tqExpr>
+	      </conclude>
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="I-Sloc">
+	  <tyPre>
+	    <mapsto>
+	      <store/>
+	      <sLoc/>
+	      <type/>
+	    </mapsto>
+	  </tyPre>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <sLoc/>                    
+		  <type/>                    
+		</tqExpr>
+	      </conclude>
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="I-Id">
+	  <tyPre>
+	    <mapsto>
 	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<lambda> 
+	      <id/>
+	      <TS>
+		<tvars name="alpha"/>
+		<type/>
+	      </TS>
+	    </mapsto>
+	    <models name="new">
+	      <assume/>
+	      <tvars name="beta"/>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
 		  <id/>
+		  <subst>
+		    <type/>
+		    <tvars name="alpha"/>
+		    <tvars name="beta"/>
+		  </subst>
+		</tqExpr>
+	      </conclude>
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name=" I-True">
+	  <tyPre/>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <true/>
+		  <bool/>
+		</tqExpr>
+	      </conclude>
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>   
+	<tyRule name="I-False">
+	  <tyPre/>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <false/>
+		  <bool/>
+		</tqExpr>
+	      </conclude>
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="I-Lambda">
+	  <tyPre>
+	    <TIjudge>
+	      <assume>
+		<extend>
+		  <gamma/>
+		  <mapping>
+		    <id/>
+		    <tvar name="alpha"/>
+		  </mapping>
+		</extend>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
 		  <aExpr/>
-		</lambda>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap/>
+	      </propagate>
+	    </TIjudge>
+	    <models name="new">
+	      <assume/>
+	      <tvar name="alpha"/>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <lambda> 
+		    <id/>
+		    <aExpr/>
+		  </lambda>
+		  <fn>
+		    <floor>
+		      <Subst>
+			<aSubMap/>
+			<tvar name="alpha"/>
+		      </Subst>
+		    </floor>
+		    <ceil>
+		      <type/>
+		    </ceil>
+		  </fn>
+		</tqExpr>
+	      </conclude>
+	      <propagate>		
+		<aSubMap/>		
+	      </propagate>
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="I-TqExpr">
+	  <tyPre>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type dash="'"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap num="i"/>
+	      </propagate>
+	    </TIjudge>
+	    <UNIFY>
+	      <type dash="'"/>              
+	      <Subst>
+		<aSubMap num="i"/>
+		<type/>
+	      </Subst>
+	      <aSubMap num="u"/>
+	    </UNIFY>
+	  </tyPre>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <paren>
+		    <tqExpr>
+		      <aExpr/>
+		      <type/>
+		    </tqExpr>  
+		  </paren>
+		  <Subst>
+		    <aSubMap num="u"/>
+		    <type dash="'"/>
+		  </Subst>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<scomp>
+		  <aSubMap num="i"/>
+		  <aSubMap num="u"/>
+		</scomp>
+	      </propagate>                
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="I-Dup">
+	  <tyPre>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap/>
+	      </propagate>
+	    </TIjudge>
+	    <eq>
+	      <type dash="'"/>
+	      <mbpair>
+		<tvar name="alpha"/>
+		<type/>
+	      </mbpair>
+	    </eq>
+	    <models name="new">
+	      <assume/>
+	      <tvar name="alpha"/>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <dup>
+		    <aExpr/>
+		  </dup>  
+		  <ref>
+		    <type dash="'"/>
+		  </ref>
+		</tqExpr>
+	      </conclude>                  
+	      <propagate>
+		<aSubMap/>
+	      </propagate>
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="I-App">
+	  <tyPre>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="1"/>
+		  <type num="1"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap num="1"/>
+	      </propagate>
+	    </TIjudge>
+	    <TIjudge>
+	      <precond>
+		<aSubMap num="1"/>
+	      </precond>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="2"/>
+		  <type num="2"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap num="2"/>
+	      </propagate>
+	    </TIjudge>
+	    <UNIFY>
+	      <Subst>
+		<aSubMap num="2"/>
+		<type num="1"/>
+	      </Subst>
+	      <mbpair>
+		<tvar name="beta"/>
 		<fn>
 		  <floor>
-		    <Subst>
-		      <aSubMap/>
-		      <tvar name="alpha"/>
-		    </Subst>
+		    <tvar name="delta"/>
 		  </floor>
 		  <ceil>
-		    <type/>
+		    <tvar name="alpha"/>
 		  </ceil>
 		</fn>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <compose>
-		<aSubMap/>
-	      </compose>                    
-	      <tape dash="'"/>
-	    </propagate>
-	  </TIjudge>
-	</tyConc>
-      </tyRule>
-      <tyRule name="TI-TQEXPR">
-	<tyPre>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr/>
-		<type dash="'"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap dash="'"/>
-	      <tape dash="'"/>
-	    </propagate>
-	  </TIjudge>
-	  <UNIFY>
-	    <type dash="'"/>              
-	    <Subst>
-	      <aSubMap dash="'"/>
+	      </mbpair>
+	      <aSubMap num="f"/>
+	    </UNIFY>
+	  </tyPre>
+	  <tyPre>
+	    <UNIFY>
+	      <type num="2"/>
+	      <mbpair>
+		<tvar name="gamma"/>
+		<floor>
+		  <Subst>
+		    <aSubMap num="f"/>
+		    <tvar name="delta"/>
+		  </Subst>
+		</floor>
+	      </mbpair>
+	      <aSubMap num="a"/>
+	    </UNIFY>
+	    <eq>
 	      <type/>
-	    </Subst>
-	    <aSubMap/>
-	  </UNIFY>
-	</tyPre>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<paren>
-		  <tqExpr>
-		    <aExpr/>
-		    <type/>
-		  </tqExpr>  
-		</paren>
+	      <mbpair>
+		<tvar name="epsiv"/>
 		<Subst>
-		  <aSubMap/>
-		  <type dash="'"/>
+		  <aSubMap num="a"/>
+		  <minz>
+		    <Subst>
+		      <aSubMap num="f"/>
+		      <tvar name="alpha"/>
+		    </Subst>
+		  </minz>
+		  <type/>
 		</Subst>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <compose>
-		<aSubMap/>
-		<aSubMap dash="'"/>
-	      </compose>
-	      <tape dash="'"/>                    
-	    </propagate>                
-	  </TIjudge>
-	</tyConc>
-      </tyRule>
-    </Hrules>
-    <Hrules vspace="yes">
-      <tyRule name="TI-APP">
-	<tyPre>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <roll>
-		<tape/>
+	      </mbpair>
+	    </eq>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
 		<tvar name="alpha"/>
 		<tvar name="beta"/>
 		<tvar name="gamma"/>
 		<tvar name="delta"/>
 		<tvar name="epsiv"/>
-	      </roll>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr num="1"/>
-		<type num="1"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap num="1"/>
-	      <tape dash="'"/>
-	    </propagate>
-	  </TIjudge>
-	  <TIjudge>
-	    <assume>
-	      <Subst>
-		<aSubMap num="1"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
 		<gamma/>
-	      </Subst>
-	      <Subst>
-		<aSubMap num="1"/>
 		<store/>
-	      </Subst>
-	      <tape dash="'"/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr num="2"/>
-		<type num="2"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap num="2"/>
-	      <tape dash="''"/>
-	    </propagate>
-	  </TIjudge>
-	</tyPre>
-	<tyPre>
-	  <UNIFY>
-	    <Subst>
-	      <aSubMap num="2"/>
-	      <type num="1"/>
-	    </Subst>
-	    <mbpair>
-	      <tvar name="beta"/>
-	      <fn>
-		<floor>
-		  <tvar name="delta"/>
-		</floor>
-		<ceil>
-		  <tvar name="alpha"/>
-		</ceil>
-	      </fn>
-	    </mbpair>
-	    <aSubMap num="1" dash="'"/>
-	  </UNIFY>
-	  <eq>
-	    <aSubMap/>
-	    <compose>
-	      <aSubMap num="1"/>
-	      <aSubMap num="2"/>
-	      <aSubMap num="1" dash="'"/>
-	    </compose>
-	  </eq>
-	  <eq>
-	    <tvars name="thetas"/>
-	    <diff>
-	      <ftvs>
-		<Subst>
-		  <aSubMap/>                      
-		  <tvar name="alpha"/>
-		</Subst>
-	      </ftvs>
-	      <ftvs>
-		<Subst>
-		  <aSubMap/>                      
-		  <tvar name="delta"/>
-		</Subst>
-	      </ftvs>
-	    </diff>
-	  </eq>
-	  <eq>
-	    <type/>
-	    <Csubst>
-	      <minz>
-		<Subst>
-		  <aSubMap/>
-		  <tvar name="alpha"/>
-		</Subst>
-	      </minz>
-	      <tvars name="thetas"/>
-	      <plural>
-		<floor>
-		  <tvar name="thetas"/>
-		</floor>
-	      </plural>
-	    </Csubst>
-	  </eq>
-	</tyPre>
-	<tyPre>
-	  <UNIFY>
-	    <type num="2"/>
-	    <mbpair>
-	      <tvar name="gamma"/>
-	      <floor>
-		<Subst>
-		  <aSubMap/>
-		  <tvar name="delta"/>
-		</Subst>
-	      </floor>
-	    </mbpair>
-	    <aSubMap num="2" dash="'"/>
-	  </UNIFY>
-	  <eq>
-	    <type dash="'"/>
-	    <mbpair>
-	      <tvar name="epsiv"/>
-	      <Subst>
-		<aSubMap num="2" dash="'"/>			      
-		<type/>
-	      </Subst>
-	    </mbpair>
-	  </eq>
-	</tyPre>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<apply>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <apply>
+		    <aExpr num="1"/>
+		    <aExpr num="2"/>
+		  </apply>                 
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<scomp>
+		  <aSubMap num="1"/>
+		  <aSubMap num="2"/>
+		  <aSubMap num="f"/>
+		  <aSubMap num="a"/>
+		</scomp>
+	      </propagate>
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="I-If">
+	  <tyPre>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
 		  <aExpr num="1"/>
+		  <type num="1"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap num="1"/>
+	      </propagate>
+	    </TIjudge>
+	    <TIjudge>
+	      <precond>
+		<aSubMap num="1"/>
+	      </precond>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
 		  <aExpr num="2"/>
-		</apply>                 
-		<type dash="'"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <compose>
-		<aSubMap num="1"/>
-		<aSubMap num="2"/>
-		<aSubMap num="1" dash="'"/>
-		<aSubMap num="2" dash="'"/>
-	      </compose>
-	      <tape dash="''"/>
-	    </propagate>
-	  </TIjudge>
-	</tyConc>
-      </tyRule>
-    </Hrules>
-    <Hrules vspace="yes">
-      <tyRule name="TI-IF">
-	<tyPre>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <roll>
-		<tape/>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-		<tvar name="gamma"/>                      
-		<tvar name="delta"/>                      
-		<tvar name="epsiv"/>                      
-	      </roll>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr num="1"/>
-		<type num="1"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap num="1"/>
-	      <tape num="1"/>
-	    </propagate>
-	  </TIjudge>
-	  <TIjudge>
-	    <assume>
-	      <Subst>
-		<aSubMap num="1"/>
-		<gamma/>
-	      </Subst>
-	      <Subst>
-		<aSubMap num="1"/>
-		<store/>
-	      </Subst>
-	      <tape num="1"/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr num="2"/>
-		<type num="2"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap num="2"/>
-	      <tape num="2"/>
-	    </propagate>
-	  </TIjudge>
-	</tyPre>
-	<tyPre>
-	  <TIjudge>
-	    <assume>
-	      <Subst>
-		<compose>
-		  <aSubMap num="1"/>
-		  <aSubMap num="2"/>
-		</compose>
-		<gamma/>
-	      </Subst>
-	      <Subst>
-		<compose>
-		  <aSubMap num="1"/>
-		  <aSubMap num="2"/>
-		</compose>
-		<store/>
-	      </Subst>
-	      <tape num="2"/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr num="3"/>
-		<type num="3"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap num="3"/>
-	      <tape num="3"/>
-	    </propagate>
-	  </TIjudge>
-	  <eq>
-	    <aSubMap/>
-	    <compose>
-	      <aSubMap num="1"/>
-	      <aSubMap num="2"/>
-	      <aSubMap num="3"/>
-	    </compose>
-	  </eq>	      
-	  <UNIFY>
-	    <Subst>
-	      <aSubMap/>
-	      <type num="2"/>
-	    </Subst>
-	    <mbpair>
-	      <tvar name="alpha"/>
-	      <tvar name="beta"/>
-	    </mbpair>
-	    <aSubMap num="2" dash="'"/>
-	  </UNIFY>
-	</tyPre>
-	<tyPre>
-	  <UNIFY>
-	    <Subst>
-	      <compose>
-		<aSubMap/>
-		<aSubMap num="2" dash="'"/>		  
-	      </compose>
-	      <type num="3"/>
-	    </Subst>
-	    <mbpair>
-	      <tvar name="gamma"/>
-	      <Subst>
-		<aSubMap num="2" dash="'"/>		
-		<tvar name="beta"/>
-	      </Subst>
-	    </mbpair>
-	    <aSubMap num="3" dash="'"/>
-	  </UNIFY>
-	  <UNIFY>
-	    <Subst>
-	      <compose>
-		<aSubMap/>
-		<aSubMap num="2" dash="'"/>
-		<aSubMap num="3" dash="'"/>
-	      </compose>
-	      <type num="1"/>
-	    </Subst>
-	    <mbpair>
-	      <tvar name="delta"/>
-	      <bool/>
-	    </mbpair>
-	    <aSubMap num="1" dash="'"/>
-	  </UNIFY>
-	</tyPre>
-	<tyPre>
-	  <eq>
-	    <aSubMap dash="'"/>
-	    <compose>
-	      <aSubMap/>
-	      <aSubMap num="1" dash="'"/>
-	      <aSubMap num="2" dash="'"/>
-	      <aSubMap num="3" dash="'"/>
-	    </compose>
-	  </eq>	      	  
-	  <eq>
-	    <type num="0"/>	   
-	    <mbpair>
-	      <tvar name="epsiv"/>
-	      <join>
-		<Subst>
-		  <aSubMap dash="'"/>
 		  <type num="2"/>
-		</Subst>
-		<Subst>
-		  <aSubMap dash="'"/>
-		  <type num="3"/>
-		</Subst>
-	      </join>
-	    </mbpair> 
-	  </eq>
-	</tyPre>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>                    
-		<if>
-		  <aExpr num="1"/>
-		  <aExpr num="2"/>
-		  <aExpr num="3"/>
-		</if>          
-		<type num="0"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap dash="'"/>
-	      <tape num="3"/>
-	    </propagate>
-	  </TIjudge>
-	</tyConc>
-      </tyRule>
-    </Hrules>
-    <Hrules vspace="yes">
-      <tyRule name="TI-SET">
-	<tyPre>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <roll>
-		<tape/>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-	      </roll>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr num="1"/>
-		<type num="1"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap num="1"/>
-	      <tape dash="'"/>
-	    </propagate>
-	  </TIjudge>
-	  <TIjudge>
-	    <assume>
-	      <Subst>
-		<aSubMap num="1"/>                    
-		<gamma/>
-	      </Subst>
-	      <Subst>
-		<aSubMap num="1"/>                    
-		<store/>
-	      </Subst>
-	      <tape dash="'"/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr num="2"/>
-		<type num="2"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap num="2"/>
-	      <tape dash="''"/>
-	    </propagate>
-	  </TIjudge>
-	</tyPre>
-	<tyPre>
-	  <UNIFY>
-	    <Subst>
-	      <aSubMap num="2"/>
-	      <type num="1"/>
-	    </Subst>
-	    <mutable>
-	      <tvar name="alpha"/>
-	    </mutable>
-	    <aSubMap num="1" dash="'"/>
-	  </UNIFY>
-	  <UNIFY>
-	    <Subst>
-	      <aSubMap num="1" dash="'"/>
-	      <type num="2"/>
-	    </Subst>
-	    <mbpair>
-	      <tvar name="beta"/>
-	      <Subst>
-		<compose>
-		  <aSubMap num="1" dash="'"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap num="2"/>
+	      </propagate>
+	    </TIjudge>
+	    <TIjudge>
+	      <precond>
+		<scomp>
+		  <aSubMap num="1"/>		    
 		  <aSubMap num="2"/>
-		</compose>
-		<type num="1"/>
-	      </Subst>
-	    </mbpair>
-	    <aSubMap num="2" dash="'"/>	    
-	  </UNIFY>
-	</tyPre>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<assign>
-		  <aExpr num="1"/>
-		  <aExpr num="2"/>
-		</assign>  
-		<unit/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <compose>
-		<aSubMap num="1"/>
-		<aSubMap num="2"/>
-		<aSubMap num="1" dash="'"/>
-		<aSubMap num="2" dash="'"/>
-	      </compose>
-	      <tape dash="''"/>
-	    </propagate>
-	  </TIjudge>
-	</tyConc>
-      </tyRule>
-    </Hrules>
-    <Hrules vspace="yes">
-      <tyRule name="TI-DUP">
-	<tyPre>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <roll>
-		<tape/>
-		<tvar name="alpha"/>
-	      </roll>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr/>
-		<type/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap/>
-	      <tape dash="'"/>
-	    </propagate>
-	  </TIjudge>
-	  <eq>
-	    <type dash="'"/>
-	    <mbpair>
-	      <tvar name="alpha"/>
-	      <type/>
-	    </mbpair>
-	  </eq>
-	</tyPre>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<dup>
-		  <aExpr/>
-		</dup>  
-		<ref>
-		  <type dash="'"/>
-		</ref>
-	      </tqExpr>
-	    </conclude>                  
-	    <propagate>
-	      <aSubMap/>
-	      <tape dash="'"/>
-	    </propagate>
-	  </TIjudge>
-	</tyConc>
-      </tyRule>
-      <tyRule name="TI-DEREF">
-	<tyPre>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <roll>
-		<tape/>
+		</scomp>
+	      </precond>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="3"/>
+		  <type num="3"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap num="3"/>
+	      </propagate>
+	    </TIjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
 		<tvar name="alpha"/>
 		<tvar name="beta"/>
-	      </roll>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr/>
-		<type/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
+		<tvar name="gamma"/>
+		<tvar name="delta"/>
+		<tvar name="epsiv"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyPre>
+	    <UNIFY>
+	      <Subst>
+		<aSubMap num="3"/>
+		<type num="2"/>
+	      </Subst>
+	      <mbpair>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </mbpair>
+	      <aSubMap num="t"/>
+	    </UNIFY>
+	    <UNIFY>
+	      <Subst>
+		<aSubMap num="t"/>
+		<type num="3"/>
+	      </Subst>
+	      <mbpair>
+		<tvar name="gamma"/>
+		<Subst>
+		  <aSubMap num="c"/>		
+		  <tvar name="beta"/>
+		</Subst>
+	      </mbpair>
+	      <aSubMap num="f"/>
+	    </UNIFY>
+	    <UNIFY>
+	      <Subst>
+		<scomp>
+		  <aSubMap num="2"/>
+		  <aSubMap num="3"/>
+		  <aSubMap num="t"/>
+		  <aSubMap num="f"/>
+		</scomp>
+		<type num="1"/>
+	      </Subst>
+	      <mbpair>
+		<tvar name="delta"/>
+		<bool/>
+	      </mbpair>
+	      <aSubMap num="c"/>
+	    </UNIFY>
+	    <eq>
 	      <aSubMap/>
-	      <tape dash="'"/>
-	    </propagate>
-	  </TIjudge>
-	  <UNIFY>
-	    <type/>
-	    <mbpair>
-	      <tvar name="beta"/>
-	      <ref>
+	      <scomp>
+		<aSubMap num="1"/>
+		<aSubMap num="2"/>
+		<aSubMap num="3"/>
+		<aSubMap num="c"/>
+		<aSubMap num="t"/>
+		<aSubMap num="f"/>
+	      </scomp>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>                    
+		  <if>
+		    <aExpr num="1"/>
+		    <aExpr num="2"/>
+		    <aExpr num="3"/>
+		  </if>  
+		  <mbpair>
+		    <tvar name="epsiv"/>
+		    <join>
+		      <Subst>
+			<aSubMap/>
+			<type num="2"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<type num="3"/>
+		      </Subst>
+		    </join>
+		  </mbpair> 
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap/>
+	      </propagate>
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="I-Set">
+	  <tyPre>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="1"/>
+		  <type num="1"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap num="1"/>
+	      </propagate>
+	    </TIjudge>
+	    <TIjudge>
+	      <precond>
+		<aSubMap num="1"/>
+	      </precond>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="2"/>
+		  <type num="2"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap num="2"/>
+	      </propagate>
+	    </TIjudge>
+	    <models name="new">
+	      <assume/>
+	      <tvar name="alpha"/>
+	    </models>
+	  </tyPre>
+	  <tyPre>
+	    <UNIFY>
+	      <Subst>
+		<aSubMap num="2"/>
+		<type num="1"/>
+	      </Subst>
+	      <mutable>
 		<tvar name="alpha"/>
-	      </ref>
-	    </mbpair>
-	    <aSubMap dash="'"/>
-	  </UNIFY>
-	</tyPre>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>                      
-		<deref>
+	      </mutable>
+	      <aSubMap num="l"/>
+	    </UNIFY>
+	    <UNIFY>
+	      <Subst>
+		<aSubMap num="l"/>
+		<type num="2"/>
+	      </Subst>
+	      <mbpair>
+		<tvar name="beta"/>
+		<Subst>
+		  <scomp>
+		    <aSubMap num="2"/>
+		    <aSubMap num="l"/>
+		  </scomp>
+		  <type num="1"/>
+		</Subst>
+	      </mbpair>
+	      <aSubMap num="r"/>	    
+	    </UNIFY>
+	    <Sjudge name="lval">
+	      <assume/>
+	      <aExpr num="1"/>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <assign>
+		    <aExpr num="1"/>
+		    <aExpr num="2"/>
+		  </assign>  
+		  <unit/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<scomp>
+		  <aSubMap num="1"/>
+		  <aSubMap num="2"/>
+		  <aSubMap num="l"/>
+		  <aSubMap num="r"/>
+		</scomp>
+	      </propagate>
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="I-Deref">
+	  <tyPre>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
 		  <aExpr/>
-		</deref>
-		<Subst>
-		  <compose>
-		    <aSubMap/>
-		    <aSubMap dash="'"/>
-		  </compose>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap num="i"/>
+	      </propagate>
+	    </TIjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyPre>
+	    <UNIFY>
+	      <type/>
+	      <mbpair>
+		<tvar name="beta"/>
+		<ref>
 		  <tvar name="alpha"/>
-		</Subst>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <compose>
-		<aSubMap/>
-		<aSubMap dash="'"/>
-	      </compose>
-	      <tape dash="'"/>
-	    </propagate>                  
-	  </TIjudge>
-	</tyConc>
-      </tyRule>
-    </Hrules>
-    <Hrules vspace="yes">
-      <tyRule name="TI-LET-M [TQ]">
-	<tyPre>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <roll>
-		<tape/>
-		<tvar name="alpha"/>
-	      </roll>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr num="1"/>
-		<type num="1"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap num="1"/>
-	      <tape num="1"/>
-	    </propagate>
-	  </TIjudge>
-	  <UNIFY>
-	    <Subst>
-	      <aSubMap num="1"/>
-	      <type/>
-	    </Subst>
-	    <mbpair>
-	      <tvar name="alpha"/>
-	      <type num="1"/>
-	    </mbpair>
-	    <aSubMap/>
-	  </UNIFY>
-	  <Sjudge name="solve">
-	    <assume>
-	      <aSubMap dash="'"/>
-	      <id/>
-	      <aExpr num="2"/>
-	    </assume>
-	    <corUp>
-	      <Subst>
-		<compose>
-		  <aSubMap/>
-		  <aSubMap num="1"/>
-		</compose>
-		<type/>
-	      </Subst>	    
-	      <type dash="'"/>
-	    </corUp>
-	  </Sjudge>
-	  <Sjudge name="loc">
-	    <assume/>
-	    <tqExpr>
-	      <id/>
-	      <aTS/>	
-	    </tqExpr>
-	  </Sjudge>	
-	</tyPre>
-	<tyPre>
-	  <Sjudge name="gen">
-	    <assume>
-	      <Subst>
-		<compose>
-		  <aSubMap num="1"/>
-		  <aSubMap/>
-		  <aSubMap dash="'"/>
-		</compose>
+		</ref>
+	      </mbpair>
+	      <aSubMap num="u"/>
+	    </UNIFY>
+	  </tyPre>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
 		<gamma/>
-	      </Subst>
-	      <Subst> 
-		<compose>
-		  <aSubMap num="1"/>
-		  <aSubMap/>
-		  <aSubMap dash="'"/>
-		</compose>
 		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>                      
+		  <deref>
+		    <aExpr/>
+		  </deref>
+		  <Subst>
+		    <scomp>
+		      <aSubMap num="i"/>
+		      <aSubMap num="u"/>
+		    </scomp>
+		    <tvar name="alpha"/>
+		  </Subst>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<scomp>
+		  <aSubMap num="i"/>
+		  <aSubMap num="u"/>
+		</scomp>
+	      </propagate>                  
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="I-Let-M [Tq]">
+	  <tyPre>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="1"/>
+		  <type num="1"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap num="1"/>
+	      </propagate>
+	    </TIjudge>
+	    <UNIFY>
+	      <Subst>
+		<aSubMap num="1"/>
+		<type/>
 	      </Subst>
-	      <aExpr num="1"/>
-	    </assume>
-	    <GEN>
-	      <type dsh="'"/>
-	      <aTS/>
-	    </GEN>       
-	  </Sjudge>
-	  <TIjudge>
-	    <assume>
-	      <extend>
+	      <mbpair>
+		<tvar name="alpha"/>
+		<type num="1"/>
+	      </mbpair>
+	      <aSubMap num="u"/>
+	    </UNIFY>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap num="s"/>
+		<id/>
+		<aExpr num="2"/>
+	      </assume>
+	      <corUp>
 		<Subst>
-		  <compose>
+		  <scomp>
 		    <aSubMap num="1"/>
-		    <aSubMap/>
-		    <aSubMap dash="'"/>
-		  </compose>
+		    <aSubMap num="u"/>
+		  </scomp>
+		  <type/>
+		</Subst>	    
+		<type dash="'"/>
+	      </corUp>
+	    </Sjudge>
+	    <Sjudge name="loc">
+	      <assume/>
+	      <tqExpr>
+		<id/>
+		<aTS/>	
+	      </tqExpr>
+	    </Sjudge>	
+	    <models name="new">
+	      <assume/>
+	      <tvar name="alpha"/>
+	    </models>
+	  </tyPre>
+	  <tyPre>
+	    <eq>
+	      <aSubMap/>
+	      <scomp>
+		<aSubMap num="1"/>
+		<aSubMap num="u"/>
+		<aSubMap num="s"/>
+	      </scomp>
+	    </eq>
+	    <Sjudge name="gen">
+	      <assume>
+		<Subst>
+		  <aSubMap/>
 		  <gamma/>
 		</Subst>
-		<mapping>
-		  <id/>
-		  <aTS/>
-		</mapping>
-	      </extend>
-	      <Subst>
-		<compose>
-		  <aSubMap num="1"/>
+		<Subst> 
 		  <aSubMap/>
-		  <aSubMap dash="'"/>
-		</compose>
-		<store/>
-	      </Subst>
-	      <tape num="1"/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr num="2"/>
-		<type num="2"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap num="2"/>
-	      <tape num="2"/>
-	    </propagate>
-	  </TIjudge>
-	</tyPre>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<let kind="m">
-		  <tqExpr optional="yes">
-		    <id/>
-		    <type/>
-		  </tqExpr>
+		  <store/>
+		</Subst>
+		<Subst> 
+		  <aSubMap/>
 		  <aExpr num="1"/>
-		  <aExpr num="2"/>
-		</let>
-		<type num="2"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate> 
-	      <compose>
+		</Subst>
+	      </assume>
+	      <GEN>
+		<type dash="'"/>
+		<aTS/>
+	      </GEN>       
+	    </Sjudge>
+	    <TIjudge>
+	      <precond>
 		<aSubMap/>
-		<aSubMap dash="'"/>
-		<aSubMap num="1"/>
-		<aSubMap num="2"/>
-	      </compose>
-	      <tape num="2"/>
-	    </propagate>
-	  </TIjudge>
-	</tyConc>
-      </tyRule>
-    </Hrules>
-    <Hrules vspace="yes">
-      <tyRule name="TI-LET-P [TQ]">
-	<tyPre>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <roll>
-		<tape/>
-		<tvar name="alpha"/>
-	      </roll>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr num="1"/>
-		<type num="1"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap num="1"/>
-	      <tape num="1"/>
-	    </propagate>
-	  </TIjudge>
-	  <UNIFY>
-	    <Subst>
-	      <aSubMap num="1"/>
-	      <type/>
-	    </Subst>
-	    <mbpair>
-	      <tvar name="alpha"/>
-	      <type num="1"/>
-	    </mbpair>
-	    <aSubMap/>
-	  </UNIFY>
-	  <Sjudge name="solve">
-	    <assume>
-	      <aSubMap dash="'"/>
-	      <id/>
-	      <aExpr num="2"/>
-	    </assume>
-	    <corUp>
-	      <Subst>
-		<compose>
-		  <aSubMap/>
-		  <aSubMap num="1"/>
-		</compose>
-		<type/>
-	      </Subst>	    
-	      <type dash="'"/>
-	    </corUp>
-	  </Sjudge>	
-	  <Sjudge name="term">
-	    <assume/>
-	    <tqExpr>
-	      <id/>
-	      <aTS/>	
-	    </tqExpr>
-	  </Sjudge>
-	</tyPre>
-	<tyPre>
-	  <Sjudge name="gen">
-	    <assume>
-	      <Subst>
-		<compose>
-		  <aSubMap num="1"/>
-		  <aSubMap/>
-		  <aSubMap dash="'"/>
-		</compose>
-		<gamma/>
-	      </Subst>
-	      <Subst> 
-		<compose>
-		  <aSubMap num="1"/>
-		  <aSubMap/>
-		  <aSubMap dash="'"/>
-		</compose>
+	      </precond>
+	      <assume>
+		<extend>
+		  <gamma/>
+		  <mapping>
+		    <id/>
+		    <aTS/>
+		  </mapping>
+		</extend>
 		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="2"/>
+		  <type num="2"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap num="2"/>
+	      </propagate>
+	    </TIjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <let kind="m">
+		    <tqExpr optional="yes">
+		      <id/>
+		      <type/>
+		    </tqExpr>
+		    <aExpr num="1"/>
+		    <aExpr num="2"/>
+		  </let>
+		  <type num="2"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate> 
+		<scomp>
+		  <aSubMap num="1"/>
+		  <aSubMap num="2"/>
+		  <aSubMap num="u"/>
+		  <aSubMap num="s"/>
+		</scomp>
+	      </propagate>
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="I-Let-P [Tq]">
+	  <tyPre>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="1"/>
+		  <type num="1"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
+		<aSubMap num="1"/>
+	      </propagate>
+	    </TIjudge>
+	    <UNIFY>
+	      <Subst>
+		<aSubMap num="1"/>
+		<type/>
 	      </Subst>
-	      <aExpr num="1"/>
-	    </assume>
-	    <GEN>
-	      <type dsh="'"/>
-	      <aTS/>
-	    </GEN>       
-	  </Sjudge>
-	  <TIjudge>
-	    <assume>
-	      <extend>
+	      <mbpair>
+		<tvar name="alpha"/>
+		<type num="1"/>
+	      </mbpair>
+	      <aSubMap num="u"/>
+	    </UNIFY>
+	    <Sjudge name="sol">
+	      <assume>
+		<aSubMap num="s"/>
+		<id/>
+		<aExpr num="2"/>
+	      </assume>
+	      <corUp>
 		<Subst>
-		  <compose>
+		  <scomp>
 		    <aSubMap num="1"/>
-		    <aSubMap/>
-		    <aSubMap dash="'"/>
-		  </compose>
+		    <aSubMap num="u"/>
+		  </scomp>
+		  <type/>
+		</Subst>	    
+		<type dash="'"/>
+	      </corUp>
+	    </Sjudge>
+	    <Sjudge name="term">
+	      <assume/>
+	      <tqExpr>
+		<id/>
+		<aTS/>	
+	      </tqExpr>
+	    </Sjudge>	
+	    <models name="new">
+	      <assume/>
+	      <tvar name="alpha"/>
+	    </models>
+	  </tyPre>
+	  <tyPre>
+	    <eq>
+	      <aSubMap/>
+	      <scomp>
+		<aSubMap num="1"/>
+		<aSubMap num="u"/>
+		<aSubMap num="s"/>
+	      </scomp>
+	    </eq>
+	    <Sjudge name="gen">
+	      <assume>
+		<Subst>
+		  <aSubMap/>
 		  <gamma/>
 		</Subst>
-		<mapping>
-		  <id/>
-		  <aTS/>
-		</mapping>
-	      </extend>
-	      <Subst>
-		<compose>
-		  <aSubMap num="1"/>
+		<Subst> 
 		  <aSubMap/>
-		  <aSubMap dash="'"/>
-		</compose>
-		<store/>
-	      </Subst>
-	      <tape num="1"/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr num="2"/>
-		<type num="2"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate>
-	      <aSubMap num="2"/>
-	      <tape num="2"/>
-	    </propagate>
-	  </TIjudge>
-	</tyPre>
-	<tyConc>
-	  <TIjudge>
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <tape/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<let kind="p">
-		  <tqExpr optional="yes">
-		    <id/>
-		    <type/>
-		  </tqExpr>
+		  <store/>
+		</Subst>
+		<Subst> 
+		  <aSubMap/>
 		  <aExpr num="1"/>
-		  <aExpr num="2"/>
-		</let>
-		<type num="2"/>
-	      </tqExpr>
-	    </conclude>
-	    <propagate> 
-	      <compose>
+		</Subst>
+	      </assume>
+	      <GEN>
+		<type dash="'"/>
+		<aTS/>
+	      </GEN>       
+	    </Sjudge>
+	    <TIjudge>
+	      <precond>
 		<aSubMap/>
-		<aSubMap dash="'"/>
-		<aSubMap num="1"/>
+	      </precond>
+	      <assume>
+		<extend>
+		  <gamma/>
+		  <mapping>
+		    <id/>
+		    <aTS/>
+		  </mapping>
+		</extend>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="2"/>
+		  <type num="2"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate>
 		<aSubMap num="2"/>
-	      </compose>
-	      <tape num="2"/>
-	    </propagate>
-	  </TIjudge>
-	</tyConc>
-      </tyRule>
-    </Hrules>
-  </btypes:TYPE>
-  <caption>Type Inference Rules</caption>
-</floatingtable>
+	      </propagate>
+	    </TIjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TIjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <let kind="p">
+		    <tqExpr optional="yes">
+		      <id/>
+		      <type/>
+		    </tqExpr>
+		    <aExpr num="1"/>
+		    <aExpr num="2"/>
+		  </let>
+		  <type num="2"/>
+		</tqExpr>
+	      </conclude>
+	      <propagate> 
+		<scomp>
+		  <aSubMap num="1"/>
+		  <aSubMap num="2"/>
+		  <aSubMap num="u"/>
+		  <aSubMap num="s"/>
+		</scomp>
+	      </propagate>
+	    </TIjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+  </font>
+  <caption><font size="small">Type Inference Rules.</font></caption>
+</figure>

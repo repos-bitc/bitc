@@ -1003,7 +1003,7 @@ External Type <em>f: (fn ('a) ())</em></literallayout>
         that denotes transformation in the system state due to a single
         step of execution.
       </p>
-      <xi:include href="include/formal/opsem.xmli"/>
+      <xi:include href="include/mut-formal/opsem.xmli"/>
       <p>
         Table&nbsp;<xref ref="dyn_sem"/> shows the evaluation
         rules for our core language. Following the theoretical
@@ -1471,7 +1471,7 @@ External Type <em>f: (fn ('a) ())</em></literallayout>
     </sect2>
     <sect2 id="copy_coercions">
       <title>Copy Coercions</title>
-      <xi:include href="include/formal/subtype.xmli"/>
+      <xi:include href="include/mut-formal/subtype.xmli"/>
       <p>
         Table&nbsp;<xref ref="sub_rules"/> shows how we can obtain
 	copy compatibility by copy coercions (similar to subtyping).
@@ -1641,11 +1641,11 @@ External Type <em>f: (fn ('a) ())</em></literallayout>
         </cites> appear on the left hand side of an 
         assignment expression.
       </p>
-      <xi:include href="include/formal/locsem.xmli"/>
+      <xi:include href="include/mut-formal/locsem.xmli"/>
     </sect2>
     <sect2>      
       <title>Declarative Type Rules</title>
-      <xi:include href="include/formal/decl.xmli"/>
+      <xi:include href="include/mut-formal/decl.xmli"/>
       <p>
 	Declarative Type rules are given in 
 	Table&nbsp;<xref ref="decl_type_rules"/>.
@@ -1747,7 +1747,7 @@ External Type <em>f: (fn ('a) ())</em></literallayout>
     </tyRule>
     </Hrules>
     </btypes:TYPE> -->
-      <xi:include href="include/formal/gen.xmli"/>
+      <xi:include href="include/mut-formal/gen.xmli"/>
       <p>
         The type generalization rules are shown in Table&nbsp;<xref
           ref="gen_rules"/>. The rule G-VALUE-PF is not actually used
@@ -5069,7 +5069,7 @@ External Type <em>f: (fn ('a) ())</em></literallayout>
           <tvars name="alpha"/>
         </btypes:TYPE> are new type variables.
       </p>
-      <xi:include href="include/formal/eq-infer.xmli"/>
+      <xi:include href="include/mut-formal/eq-infer.xmli"/>
       <p>
         Equational Inference rules are shown in Table&nbsp;<xref
           ref="eq_infer"/>. We will hereinafter write LET-&alpha; to
@@ -5158,7 +5158,7 @@ External Type <em>f: (fn ('a) ())</em></literallayout>
           <aCtset/>                  
         </btypes:TYPE>.
       </p>
-      <xi:include href="include/formal/eq-unify.xmli"/>
+      <xi:include href="include/mut-formal/eq-unify.xmli"/>
       <sect3 id="closure">
         <title>DEFINITION: Constraint Set Closure</title>
         <ol>
@@ -5439,7 +5439,7 @@ External Type <em>f: (fn ('a) ())</em></literallayout>
       </sect3>
       <sect3>
         <title>Solving the Constraints</title>
-        <xi:include href="include/formal/eq-solve.xmli"/>
+        <xi:include href="include/mut-formal/eq-solve.xmli"/>
         <p>
           Judgments to solve equational constraints are shown in
           Table&nbsp;<xref ref="eq_solve"/>.
@@ -6332,7 +6332,7 @@ External Type <em>f: (fn ('a) ())</em></literallayout>
         in some cases while expressing generic mathematical properties
         over constrained types.
       </p>
-      <xi:include href="include/formal/hm-infer.xmli"/>
+      <xi:include href="include/mut-formal/hm-infer.xmli"/>
       <p>
         The inference judgment 
         <btypes:TYPE>
@@ -6514,8 +6514,8 @@ External Type <em>f: (fn ('a) ())</em></literallayout>
         auxiliary functions used by the unifier are given in 
         Table&nbsp;<xref ref="hm_unify_aux"/>.       
       </p>
-      <xi:include href="include/formal/hm-unify.xmli"/>
-      <xi:include href="include/formal/hm-unify.aux.xmli"/>
+      <xi:include href="include/mut-formal/hm-unify.xmli"/>
+      <xi:include href="include/mut-formal/hm-unify.aux.xmli"/>
       <p>
 	The unification judgment
 	<btypes:TYPE>
@@ -6681,7 +6681,7 @@ External Type <em>f: (fn ('a) ())</em></literallayout>
         </btypes:TYPE> is defined in 
         Section&nbsp;<xref ref="consistent-constrained-types"/>.
       </p>
-      <xi:include href="include/formal/hm-solve.xmli"/>
+      <xi:include href="include/mut-formal/hm-solve.xmli"/>
     </sect2>
     <sect2>
       <title>Soundness of Eager Inference</title>
