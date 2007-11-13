@@ -113,6 +113,107 @@
 	    </Pair>
 	  </eq>
 	</equation>
+	<!-- t <= Mt -->
+	<equation>
+	  <collection>
+	    <unf ac="yes">
+	      <unin>
+		<set>
+		  <Tsub>
+		    <tvar name="alpha"/>
+		    <type/>
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <eq>
+	      <type/>
+	      <maxz>
+		<type/>
+	      </maxz>
+	    </eq>
+	  </collection>
+	  <Pair>
+	    <aCtset num="i"/>
+	    <scomp>
+	      <aSubMap num="a"/>
+	      <aSubMap num="i"/>
+	    </scomp>	    
+	  </Pair>	  	    
+	  <eq>
+	    <aSubMap num="a"/>
+	    <SubMap>
+	      <tvar name="alpha"/>
+	      <type/>
+	    </SubMap>
+	  </eq>
+	  <eq>
+	    <unf>
+	      <Subst>
+		<aSubMap num="a"/>
+		<aCtset/>
+	      </Subst>
+	    </unf>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</equation>	
+	<!-- It <= t -->
+	<equation sep="4pt">
+	  <collection>
+	    <unf ac="yes">
+	      <unin>
+		<set>
+		  <Tsub>		    
+		    <type/>
+		    <tvar name="alpha"/>
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <eq>
+	      <type/>
+	      <minz>
+		<type/>
+	      </minz>
+	    </eq>
+	    <neq>
+	      <type/>
+	      <tvar name="alpha"/>
+	      <tvar name="beta"/>
+	    </neq>
+	  </collection>
+	  <Pair>
+	    <aCtset num="i"/>
+	    <scomp>
+	      <aSubMap num="a"/>
+	      <aSubMap num="i"/>
+	    </scomp>	    
+	  </Pair>	  	    
+	  <eq>
+	    <aSubMap num="a"/>
+	    <SubMap>
+	      <tvar name="alpha"/>
+	      <type/>
+	    </SubMap>
+	  </eq>
+	  <eq>
+	    <unf>
+	      <Subst>
+		<aSubMap num="a"/>
+		<aCtset/>
+	      </Subst>
+	    </unf>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</equation>	
 	<!-- t1->t2 <= t1' -> t2' -->
 	<equation>
 	  <unf ac="yes">
@@ -178,7 +279,7 @@
 	  </unf>
 	</equation>	
 	<!-- Mt1 <= Mt2 -->
-	<equation>
+	<equation sep="4pt">
 	  <unf ac="yes">
 	    <unin>
 	      <set>
@@ -206,7 +307,42 @@
 	    </unin>
 	  </unf>
 	</equation>	
-	<!-- t <= Mt -->
+	<!-- Ft1 <= t2 -->
+	<equation>
+	  <collection>
+	    <unf ac="yes">
+	      <unin>
+		<set>
+		  <Tsub>
+		    <floor>
+		      <type num="1"/>
+		    </floor>
+		    <type num="2"/>
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <neq>
+	      <type num="1"/>
+	      <tvar name="alpha"/>
+	    </neq>
+	  </collection>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<Tsub>
+		  <minz>
+		    <type num="1"/>
+		  </minz>
+		  <type num="2"/>
+		</Tsub>
+	      </set>
+	    </unin>
+	  </unf>
+	</equation>
+	<!-- t1 <= Ft2 -->
 	<equation>
 	  <collection>
 	    <unf ac="yes">
@@ -214,59 +350,84 @@
 		<set>
 		  <Tsub>
 		    <type num="1"/>
-		    <type num="2"/>
+		    <floor>
+		      <type num="2"/>
+		    </floor>		    
 		  </Tsub>
 		</set>
 		<aCtset/>
 	      </unin>
 	    </unf>
-	    <eq>
+	    <neq>
 	      <type num="2"/>
-	      <maxz>
-		<type num="2"/>
-	      </maxz>
-	    </eq>
+	      <tvar name="alpha"/>
+	    </neq>
 	  </collection>
 	  <unf>
 	    <unin>
 	      <aCtset/>
 	      <set>
-		<eq>
-		  <maxz>
-		    <type num="1"/>
-		  </maxz>
-		  <maxz>
+		<Tsub>
+		  <type num="1"/>
+		  <minz>
 		    <type num="2"/>
-		  </maxz>
-		</eq>
+		  </minz>
+		</Tsub>
 	      </set>
 	    </unin>
 	  </unf>
-	</equation>	
-	<!-- It <= t -->
+	</equation>
+	<!-- Ct1 <= t2 -->
 	<equation>
 	  <collection>
 	    <unf ac="yes">
 	      <unin>
 		<set>
 		  <Tsub>
-		    <type num="1"/>
+		    <ceil>
+		      <type num="1"/>
+		    </ceil>
 		    <type num="2"/>
 		  </Tsub>
 		</set>
 		<aCtset/>
 	      </unin>
 	    </unf>
-	    <eq>
-	      <type num="1"/>
-	      <minz>
-		<type num="1"/>
-	      </minz>
-	    </eq>
 	    <neq>
 	      <type num="1"/>
 	      <tvar name="alpha"/>
 	    </neq>
+	  </collection>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<Tsub>
+		  <maxz>
+		    <type num="1"/>
+		  </maxz>
+		  <type num="2"/>
+		</Tsub>
+	      </set>
+	    </unin>
+	  </unf>
+	</equation>
+	<!-- t1 <= Ct2 -->
+	<equation sep="4pt">
+	  <collection>
+	    <unf ac="yes">
+	      <unin>
+		<set>
+		  <Tsub>
+		    <type num="1"/>
+		    <ceil>
+		      <type num="2"/>
+		    </ceil>		    
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
 	    <neq>
 	      <type num="2"/>
 	      <tvar name="alpha"/>
@@ -275,15 +436,17 @@
 	  <unf>
 	    <unin>
 	      <aCtset/>
-	      <set>	
-		<eq>
+	      <set>
+		<Tsub>
 		  <type num="1"/>
-		  <type num="2"/>
-		</eq>
+		  <maxz>
+		    <type num="2"/>
+		  </maxz>
+		</Tsub>
 	      </set>
 	    </unin>
 	  </unf>
-	</equation>	
+	</equation>
 	<!-- P(m, t1, t2) --> 
 	<equation>
 	  <unf ac="yes">
@@ -384,7 +547,7 @@
 	  </eq>
 	</equation>	
 	<!-- P(k, t, t1), P(k, t, t2)  t1 !~ t2 -->
-	<equation>
+	<equation sep="4pt">
 	  <collection>
 	    <unf ac="yes">
 	      <unin>
@@ -433,7 +596,7 @@
 	      <lKind k="poly"/>
 	    </SubMap>
 	  </eq>
-	  <eq>
+\	  <eq>
 	    <unf>
 	      <Subst>
 		<aSubMap num="k"/>
@@ -446,116 +609,6 @@
 	    </Pair>
 	  </eq>
 	</equation>	
-	<!-- The subcases of the following two cannot result in any
-	     new substitutions or addition of constraints, 
-	     but might fail -->
-	<!-- a <= t  -->
-	<equation>
-	  <unf ac="yes">
-	    <unin>
-	      <set>
-		<Pcst>
-		  <lKind k="var"/>
-		  <type num="g"/>
-		  <type num="i"/>
-		</Pcst>
-	      </set>
-	      <aCtset/>
-	    </unin>
-	  </unf>
-	  <Pair>
-	    <unin>
-	      <set>
-		<Pcst>
-		  <lKind k="var"/>
-		  <type num="g"/>
-		  <type num="i"/>
-		</Pcst>
-	      </set>
-	      <aCtset num="i"/>
-	    </unin>
-	    <aSubMap num="i"/>
-	  </Pair>	  	    
-	  <eq>
-	    <unf>
-	      <aCtset/>
-	    </unf>
-	    <Pair>
-	      <aCtset num="i"/>
-	      <aSubMap num="i"/>
-	    </Pair>
-	  </eq>
-	</equation>
-	<!-- a <= t  -->
-	<equation>
-	  <unf ac="yes">
-	    <unin>
-	      <set>
-		<Tsub>
-		  <tvar name="alpha"/>
-		  <type/>
-		</Tsub>
-	      </set>
-	      <aCtset/>
-	    </unin>
-	  </unf>
-	  <Pair>
-	    <unin>
-	      <set>
-		<Tsub>
-		  <tvar name="alpha"/>
-		  <type/>
-		</Tsub>
-	      </set>
-	      <aCtset num="i"/>
-	    </unin>
-	    <aSubMap num="i"/>
-	  </Pair>	  	    
-	  <eq>
-	    <unf>
-	      <aCtset/>
-	    </unf>
-	    <Pair>
-	      <aCtset num="i"/>
-	      <aSubMap num="i"/>
-	    </Pair>
-	  </eq>
-	</equation>
-	<!-- t <= a  -->
-	<equation>
-	  <unf ac="yes">
-	    <unin>
-	      <set>
-		<Tsub>
-		  <type/>
-		  <tvar name="alpha"/>
-		</Tsub>
-	      </set>
-	      <aCtset/>
-	    </unin>
-	  </unf>
-	  <Pair>
-	    <unin>
-	      <set>
-		<Tsub>
-		  <type/>
-		  <tvar name="alpha"/>
-		</Tsub>
-	      </set>
-	      <aCtset num="i"/>
-	    </unin>
-	    <aSubMap num="i"/>
-	  </Pair>	  	    
-	  <eq>
-	    <unf>
-	      <aCtset/>
-	    </unf>
-	    <Pair>
-	      <aCtset num="i"/>
-	      <aSubMap num="i"/>
-	    </Pair>
-	  </eq>
-	</equation>
 	<!-- Error -->
 	<equation>
 	  <collection>
@@ -618,6 +671,8 @@
 	  <space/>
 	  <textit content="wherein, if "/>
 	  <space/>
+	  <!-- Immut() is deep immutability, while
+                minz() only guarantees shallow immutability -->
 	  <collection>
 	    <eq>
 	      <type num="m"/>

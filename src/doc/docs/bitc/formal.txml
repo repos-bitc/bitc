@@ -3949,7 +3949,63 @@
       <btypes:TYPE><aCtSet/></btypes:TYPE> and either fails with an
       error <btypes:TYPE><error/></btypes:TYPE>, or succeeds to 
       result in a pair consisting of residual constraints
-      <btypes:TYPE><aCtSet/></btypes:TYPE> and a list of
+      <btypes:TYPE><aCtSet/></btypes:TYPE> <footnote>
+        <p>
+          The residual constraints in 
+          <btypes:TYPE><aCtSet/></btypes:TYPE>
+          must be of the form
+          <btypes:TYPE>
+            <!-- P(k, t1, t2)  -->
+            <Pcst>
+              <lKind k="var"/>
+              <type num="g"/>
+              <type num="i"/>
+            </Pcst>
+            <text content=", "/>
+            <!-- a <= t  -->
+            <Tsub>
+              <tvar name="alpha"/>
+              <type/>
+            </Tsub>
+            <text content=", "/>
+            <!-- t <= a  -->
+            <Tsub>
+              <type/>
+              <tvar name="alpha"/>
+            </Tsub>
+            <!-- however, both of the cases a <= t and t <= a
+            cannot occur since it can be reduced -->
+            <!-- Fa <= t  -->
+            <Tsub>
+              <floor>
+                <tvar name="alpha"/>
+              </floor>
+              <type/>
+            </Tsub>
+            <!-- t <= Fa   -->
+            <Tsub>
+              <type/>
+              <floor>
+                <tvar name="alpha"/>
+              </floor>
+            </Tsub>
+            <!-- Ma <= t  -->
+            <Tsub>
+              <ceil>
+                <tvar name="alpha"/>
+              </ceil>
+              <type/>
+            </Tsub>
+            <!-- t <= Ma   -->
+            <Tsub>
+              <type/>
+              <ceil>
+                <tvar name="alpha"/>
+              </ceil>
+            </Tsub>            
+          </btypes:TYPE>.          
+        </p>
+      </footnote>  and a list of
       substitutions <btypes:TYPE><aSubMap/></btypes:TYPE> for the
       constraints solved in this pass.
     </p>

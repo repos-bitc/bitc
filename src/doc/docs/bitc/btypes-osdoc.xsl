@@ -2516,6 +2516,14 @@
 	  </xsl:if>
 	</xsl:for-each>
       </xsl:element>
+      <xsl:if test="@sep">
+	<xsl:element name="br">
+	  <xsl:attribute name="latex.ptsz">
+	    <xsl:value-of select="@sep"/>
+	  </xsl:attribute>
+	</xsl:element>
+      </xsl:if>    
+      
     </xsl:element>
   </xsl:template>
 

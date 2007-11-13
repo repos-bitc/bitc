@@ -1148,6 +1148,8 @@
 <!ELEMENT opHorzRules          opRule*>
 
 <!ELEMENT equation             %anything.group;,%anything.group;, %anything.group;* >
+<!ATTLIST equation
+                               sep         CDATA      #IMPLIED>
 <!ELEMENT VEqns                equation*>
 
 
