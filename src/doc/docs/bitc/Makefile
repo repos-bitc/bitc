@@ -38,20 +38,10 @@ XSL_BTYPE=btypes-osdoc.xsl
 FIX_LTX='./fixup.pl'
 
 #Do not add these .xmli files into clean list
-SI_DIR=include/sys-infer
-SYSINFER_INCLUDE=$(SI_DIR)/opsem.xmli $(SI_DIR)/decl.xmli
-SYSINFER_INCLUDE+=$(SI_DIR)/infer.xmli $(SI_DIR)/unify.xmli $(SI_DIR)/solve.xmli
-
-CI_DIR=include/core
-CORE_INCLUDE=$(CI_DIR)/opsem.xmli $(CI_DIR)/decl.xmli
-CORE_INCLUDE+=$(CI_DIR)/infer.xmli $(CI_DIR)/unify.xmli $(CI_DIR)/solve.xmli
-
-FI_DIR=include/formal
-FORMAL_INCLUDE=$(FI_DIR)/locsem.xmli $(FI_DIR)/opsem.xmli 
-FORMAL_INCLUDE+=$(FI_DIR)/decl.xmli 
-FORMAL_INCLUDE+=$(FI_DIR)/eq-infer.xmli $(FI_DIR)/eq-unify.xmli
-FORMAL_INCLUDE+=$(FI_DIR)/hm-infer.xmli $(FI_DIR)/hm-unify.xmli
-FORMAL_INCLUDE+=$(FI_DIR)/hm-solve.xmli 
+SYSINFER_INCLUDE=include/sys-infer/$(wildcard *.xmli)
+CORE_INCLUDE=include/core/$(wildcard *.xmli)
+FORMAL_INCLUDE=include/formal/$(wildcard *.xmli)
+MUT_FORMAL_INCLUDE=include/mut-formal/$(wildcard *.xmli)
 
 include $(BITC_SRC)/build/make/makerules.mk
 OSDOC_TARGETS+=%.ps
@@ -69,7 +59,7 @@ mutinfer.xml: mutinfer.txml $(XSL_BTYPE)
 formal.xml: formal.txml $(XSL_BTYPE) $(FORMAL_INCLUDE)
 	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
-mut-formal.xml: mut-formal.txml $(XSL_BTYPE) $(FORMAL_INCLUDE)
+mut-formal.xml: mut-formal.txml $(XSL_BTYPE) $(MUT_FORMAL_INCLUDE)
 	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
 sys-infer.xml: sys-infer.txml $(XSL_BTYPE) $(SYSINFER_INCLUDE)

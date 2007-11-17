@@ -197,6 +197,8 @@
 <!ELEMENT fnxn                  (%anything.group;, %anything.group;)>
 <!ATTLIST fnxn
                                 name      CDATA    #REQUIRED
+                                num       CDATA    #IMPLIED
+                                dash      CDATA    #IMPLIED
 >
 <!ELEMENT Xform                (%anything.group;+)>
 <!ATTLIST Xform
@@ -344,6 +346,8 @@
 <!ELEMENT pred                 %anything.group;*>
 <!ATTLIST pred
                                name       CDATA #REQUIRED
+                               num       CDATA    #IMPLIED
+                               dash      CDATA    #IMPLIED
 >
 
 <!-- Constrained Entities -->
@@ -1142,6 +1146,7 @@
 <!ATTLIST Hrules
                                vspace      yes      #IMPLIED
                                placement   CDATA    #IMPLIED
+                               align       CDATA    #IMPLIED
                                initsep     CDATA    #IMPLIED
                                colsep      CDATA    #IMPLIED
                                rowsep      CDATA    #IMPLIED>

@@ -67,10 +67,10 @@
     </p>
   </sect1>
   <sect1 id="language">
-    <title>Syntax</title>
+    <title>The Language</title>
     <p>
       <btypes:TYPE>        
-        <grammar notitle="yes">
+        <grammar>
           <bnf desc="Identifiers">
             <id/>
             <alternatives etc="yes">
@@ -3916,6 +3916,7 @@
     <title>Equational Type Inference</title> 
     <xi:include href="include/formal/eq-infer.xmli"/>
     <xi:include href="include/formal/eq-unify.xmli"/>
+    <xi:include href="include/formal/eq-helper.xmli"/>
     <p>
       The equational type inference algorithm is as shown in
       Figure&nbsp;<xref ref="eq2_infer"/>. 
@@ -3944,7 +3945,9 @@
       <btypes:TYPE><aExpr/></btypes:TYPE> under the constraints
       <btypes:TYPE><aCtSet/></btypes:TYPE>. 
       The Unification algorithm is given in 
-      Figure&nbsp;<xref ref="eq2_unify"/>. 
+      figure&nbsp;<xref ref="eq2_unify"/> with some auxilary
+      definitions and translations defined in 
+      figure&nbsp;<xref ref="eq2_helper"/>. 
       The unification algorithm takes in a set of constraints
       <btypes:TYPE><aCtSet/></btypes:TYPE> and either fails with an
       error <btypes:TYPE><error/></btypes:TYPE>, or succeeds to 

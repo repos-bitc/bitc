@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" >
+<figure id="eq2_helper" fullwidth='yes' latex.placement="tbp">
+  <font size="small">
+    <btypes:TYPE
+      xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+      <Hrules rowsep="4pt">
+	<textbf content="Translations: "/>
+	<grouping>
+	  <leadsto>
+	    <DBrac>
+	      <op symbol="odot">
+		<type num="1"/>
+		<type num="2"/>
+		<text content=" ... "/>
+		<type num="n"/>	      
+	      </op>
+	    </DBrac>
+	    <DBrac>
+	      <collection>
+		<op symbol="odot">
+		  <type num="1"/>
+		  <type num="2"/>
+		</op>
+		<text content=" ... "/>
+		<op symbol="odot">
+		  <type num="n-1"/>	      
+		  <type num="n"/>
+		</op>
+	      </collection>
+	    </DBrac>
+	  </leadsto>
+	  <space/>
+ 	  <textit content=" for any operator"/>
+	  <space/>
+	  <operator symbol="odot"/>
+	</grouping>
+	<leadsto>
+	  <DBrac>
+	    <unf ac="yes">
+	      <aCtset/>
+	    </unf>
+	  </DBrac>
+	  <DBrac>
+	    <collection>
+	      <unf>
+		<aCtset/>
+	      </unf>
+	      <pred name="acyclic">
+		<aCtset/>
+	      </pred>	      
+	    </collection>
+	  </DBrac>
+	</leadsto>
+      </Hrules>
+      <Hrules>
+	<textbf content="Shallow TVs:"/>
+	<eq>
+	  <fnxn name="stv">
+	    <tvar name="alpha"/>
+	    <set>
+	      <tvar name="alpha"/>
+	    </set>
+	  </fnxn>
+	</eq>
+	<eq>
+	  <fnxn name="stv">
+	    <mutable>
+	      <type/>
+	    </mutable>
+	    <pred name="stv">
+	      <type/>
+	    </pred>
+	  </fnxn>
+	</eq>
+	<eq>
+	  <fnxn name="stv">
+	    <floor>
+	      <type/>
+	    </floor>
+	    <pred name="stv">
+	      <type/>
+	    </pred>
+	  </fnxn>
+	</eq>
+	<eq>
+	  <fnxn name="stv">
+	    <ceil>
+	      <type/>
+	    </ceil>
+	    <pred name="stv">
+	      <type/>
+	    </pred>
+	  </fnxn>
+	</eq>
+	<eq>
+	  <pred name="stv">
+	    <unit/>
+	  </pred>
+	  <pred name="stv">
+	    <bool/>
+	  </pred>
+	  <pred name="stv">
+	    <ref>
+	      <type/>
+	    </ref>
+	  </pred>
+	  <pred name="stv">
+	    <fn>
+	      <type/>
+	      <type dash="'"/>
+	    </fn>
+	  </pred>
+	  <Empty/>
+	</eq>
+      </Hrules>
+      <Hrules  rowsep="4pt">
+	<textbf content="Deep TVs:"/>
+	<eq>
+	  <fnxn name="dtv">
+	    <tvar name="alpha"/>
+	    <set>
+	      <tvar name="alpha"/>
+	    </set>
+	  </fnxn>
+	</eq>
+	<eq>
+	  <fnxn name="dtv">
+	    <mutable>
+	      <type/>
+	    </mutable>
+	    <pred name="dtv">
+	      <type/>
+	    </pred>		
+	  </fnxn>
+	</eq>
+	<eq>
+	  <fnxn name="dtv">
+	    <ref>
+	      <type/>
+	    </ref>
+	    <pred name="dtv">
+	      <type/>
+	    </pred>		
+	  </fnxn>
+	</eq>
+	<eq>
+	  <fnxn name="dtv">
+	    <floor>
+	      <type/>
+	    </floor>
+	    <pred name="dtv">
+	      <type/>
+	    </pred>		
+	  </fnxn>
+	</eq>
+	<eq>
+	  <fnxn name="dtv">
+	    <ceil>
+	      <type/>
+	    </ceil>
+	    <pred name="dtv">
+	      <type/>
+	    </pred>		
+	  </fnxn>
+	</eq>
+	<eq>
+	  <pred name="stv">
+	    <unit/>
+	  </pred>
+	  <pred name="stv">
+	    <bool/>
+	  </pred>
+	  <pred name="stv">
+	    <fn>
+	      <type/>
+	      <type dash="'"/>
+	    </fn>
+	  </pred>
+	  <Empty/>
+	</eq>
+      </Hrules>
+    </btypes:TYPE>
+  </font>
+  <caption>Equational Inference: Auxilary Definitions</caption>
+</figure>

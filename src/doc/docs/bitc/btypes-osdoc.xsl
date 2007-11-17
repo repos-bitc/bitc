@@ -884,6 +884,7 @@
 	<xsl:value-of select="@name"/>
       </xsl:with-param> 
     </xsl:call-template>
+    <xsl:call-template name="print.index.dash"/>
     <xsl:call-template name="print.params"/>
   </xsl:template>
 
@@ -2711,9 +2712,20 @@
 	      </xsl:call-template>
 	    </xsl:element>
 	  </xsl:if>
-	  <xsl:for-each select="*">
+	  <xsl:for-each select="*">	    
 	    <xsl:element name="td">
-	      <xsl:attribute name="align">center</xsl:attribute>
+	      <xsl:choose>
+		<xsl:when test="../@align='left'">
+		  <!-- <xsl:attribute name="align">left</xsl:attribute> -->
+		</xsl:when>
+		<xsl:when test="../@align='right'">
+		  <xsl:attribute name="align">right</xsl:attribute>
+		</xsl:when>
+		<xsl:otherwise>
+		  <!-- default is center -->
+		  <xsl:attribute name="align">center</xsl:attribute>
+		</xsl:otherwise>
+	      </xsl:choose>		  
 	      <xsl:apply-templates select="." mode="formula"/>
 	    </xsl:element>
 	    <xsl:if test="../@colsep">
@@ -3344,7 +3356,12 @@
   
   <!-- Prints a function definition f(x) = y  -->
   <xsl:template name="print.fnxn">
-    <xsl:value-of select="@name"/>      
+    <xsl:call-template name="print.mathmode">
+      <xsl:with-param name="print.mathmode.text">
+	<xsl:value-of select="@name"/>
+      </xsl:with-param> 
+    </xsl:call-template>
+    <xsl:call-template name="print.index.dash"/>
     <xsl:text>(</xsl:text>
     <xsl:apply-templates select="*[1]" mode="formula"/>	
     <xsl:text>)</xsl:text>

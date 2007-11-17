@@ -3,7 +3,7 @@
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
   <figure id="decl_rules" fullwidth='yes' 
-    latex.placement="tb">
+    latex.placement="tbp">
   <font size="small">
     <btypes:TYPE
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">

@@ -1,95 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" >
-<figure id="eq2_infer" fullwidth='yes' latex.placement="tb">
+<figure id="eq2_infer" fullwidth='yes' latex.placement="tbp">
   <font size="small">
     <btypes:TYPE
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-      <Hrules>
-	<grouping>
-	  <textbf content="Shorthand: "/>
-	  <space/>
-	  <leadsto>
-	    <DBrac>
-	      <ceq via="alpha">
-		<type num="1"/>
-		<type num="2"/>
-	      </ceq>
-	    </DBrac>
-	    <DBrac>
-	      <collection>
-		<Tsub>
-		  <type num="1"/>
-		  <tvar name="alpha"/>
-		</Tsub>	      
-		<Tsub>
-		  <type num="2"/>
-		  <tvar name="alpha"/>
-		</Tsub>
-	      </collection>
-	    </DBrac>
-	  </leadsto>
-	  <space/>
-	  <textit content=" and "/>
-	  <space/>
-	  <leadsto>
-	    <DBrac>
-	      <eq>
-		<type num="1"/>
-		<type num="2"/>
-	      </eq>
-	    </DBrac>
-	    <DBrac>
-	      <collection>
-		<Tsub>
-		  <type num="1"/>
-		  <type num="2"/>
-		</Tsub>	      
-		<Tsub>
-		  <type num="2"/>
-		  <type num="1"/>
-		</Tsub>
-	      </collection>
-	    </DBrac>
-	  </leadsto>	  
-	</grouping>
-      </Hrules>
-      <Hrules  rowsep="4pt" colsep="2">
-	<grouping>
-	  <space/><space/><space/><space/><space/>
-	  <space/><space/><space/><space/><space/>
-	  <space/><space/><space/><space/><space/>
-	  <space/><space/><space/>
-	  <leadsto>
-	    <DBrac>
-	      <op symbol="odot">
-		<type num="1"/>
-		<type num="2"/>
-		<text content=" ... "/>
-		<type num="n"/>	      
-	      </op>
-	    </DBrac>
-	    <DBrac>
-	      <collection>
-		<op symbol="odot">
-		  <type num="1"/>
-		  <type num="2"/>
-		</op>
-		<text content=" ... "/>
-		<op symbol="odot">
-		  <type num="n-1"/>	      
-		  <type num="n"/>
-		</op>
-	      </collection>
-	    </DBrac>
-	  </leadsto>
-	  <space/>
- 	  <textit content=" for any operator"/>
-	  <space/>
-	  <operator symbol="odot"/>
- 	  <text content="."/>
-	</grouping>
-      </Hrules>
       <Hrules  rowsep="4pt" colsep="2">
 	<tyRule name="E-Unit">
 	  <tyPre/>
@@ -343,8 +258,6 @@
 		<tvar name="alpha"/>
 		<tvar name="beta"/>
 		<tvar name="gamma"/>
-		<tvar name="delta"/>
-		<tvar name="epsiv"/>
 	      </grouping>
 	    </models>
 	  </tyPre>
@@ -379,14 +292,26 @@
 			</ceil>
 		      </fn>
 		    </Tsub>
- 		    <ceq via="delta">
+		    <Tsub>
 		      <type num="2"/>
-		      <tvar name="beta"/>
-		    </ceq>
-		    <ceq via="epsiv">
-		      <tvar name="gamma"/>
+		      <floor>
+			<tvar name="beta"/>
+		      </floor>
+		    </Tsub>
+		    <Tsub>
+		      <ceil>
+			<tvar name="gamma"/>
+		      </ceil>
 		      <tvar name="alpha"/>
-		    </ceq>
+		    </Tsub>
+<!--  		    <ceq via="delta"> -->
+<!-- 		      <type num="2"/> -->
+<!-- 		      <tvar name="beta"/> -->
+<!-- 		    </ceq> -->
+<!-- 		    <ceq via="epsiv"> -->
+<!-- 		      <tvar name="gamma"/> -->
+<!-- 		      <tvar name="alpha"/> -->
+<!-- 		    </ceq> -->
 		  </set>
 		</unin>
 	      </constrain>
@@ -446,7 +371,6 @@
 	      <assume/>
 	      <grouping>
 		<tvar name="alpha"/>
-		<tvar name="beta"/>
 	      </grouping>
 	    </models>
 	  </tyPre>
@@ -476,11 +400,23 @@
 		      <type num="1"/>
 		      <bool/>
 		    </Tsub>
-		    <ceq via="beta">
+		    <Tsub>
 		      <type num="2"/>
+		      <floor>
+			<tvar name="alpha"/>
+		      </floor>
+		    </Tsub>
+		    <Tsub>
 		      <type num="3"/>
-		      <tvar name="alpha"/>
-		    </ceq>
+		      <floor>
+			<tvar name="alpha"/>
+		      </floor>
+		    </Tsub>
+<!-- 		    <ceq via="beta"> -->
+<!-- 		      <type num="2"/> -->
+<!-- 		      <type num="3"/> -->
+<!-- 		      <tvar name="alpha"/> -->
+<!-- 		    </ceq> -->
 		  </set>
 		</unin>
 	      </constrain>
