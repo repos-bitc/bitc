@@ -323,10 +323,12 @@
 		<aCtset/>
 	      </unin>
 	    </unf>
-	    <neq>
-	      <type num="1"/>
-	      <tvar name="alpha"/>
-	    </neq>
+	    <eq>
+	      <fnxn name="stv">
+		<type num="1"/>
+		<Empty/>
+	      </fnxn>
+	    </eq>
 	  </collection>
 	  <unf>
 	    <unin>
@@ -358,10 +360,12 @@
 		<aCtset/>
 	      </unin>
 	    </unf>
-	    <neq>
-	      <type num="2"/>
-	      <tvar name="alpha"/>
-	    </neq>
+	    <eq>
+	      <fnxn name="stv">
+		<type num="2"/>
+		<Empty/>
+	      </fnxn>
+	    </eq>
 	  </collection>
 	  <unf>
 	    <unin>
@@ -393,10 +397,12 @@
 		<aCtset/>
 	      </unin>
 	    </unf>
-	    <neq>
-	      <type num="1"/>
-	      <tvar name="alpha"/>
-	    </neq>
+	    <eq>
+	      <fnxn name="stv">
+		<type num="1"/>
+		<Empty/>
+	      </fnxn>
+	    </eq>
 	  </collection>
 	  <unf>
 	    <unin>
@@ -428,10 +434,12 @@
 		<aCtset/>
 	      </unin>
 	    </unf>
-	    <neq>
-	      <type num="2"/>
-	      <tvar name="alpha"/>
-	    </neq>
+	    <eq>
+	      <fnxn name="stv">
+		<type num="2"/>
+		<Empty/>
+	      </fnxn>
+	    </eq>
 	  </collection>
 	  <unf>
 	    <unin>
@@ -491,6 +499,12 @@
 	    <pred name="Immut">
 	      <type num="i"/>
 	    </pred>
+	    <eq>
+	      <fnxn name="dtv">
+		<type num="i"/>
+		<Empty/>
+	      </fnxn>
+	    </eq>
 	  </collection>
 	  <unf>
 	    <aCtset/>
@@ -622,137 +636,6 @@
 	  <error/>
 	</equation>
       </VEqns>
-      <Hrules>
-	<grouping>
-	  <eq>
-	    <pred name="P">
-	      <aCtset/>
-	    </pred>
-	    <OR>
-	      <!-- Acyclic Check -->
-	      <pred name="cyclic">
-		<aCtset/>
-	      </pred>
-	      <!-- Individual cases handled -->	    
-	      <Exists>
-		<in>
-		  <constraint/>
-		  <aCtset/>
-		</in>
-	      </Exists>
-	    </OR>
-	  </eq>
-	  <space/>
-	  <textit content="such that"/>
-	  <space/>
-	  <notin>
-	    <constraint/>
-	    <aCtset num="u"/>
-	  </notin>
-	  <space/>
-	  <textit content="wherein, if "/>
-	  <space/>
-	  <!-- Immut() is deep immutability, while
-                minz() only guarantees shallow immutability -->
-	  <collection>
-	    <eq>
-	      <type num="m"/>
-	      <maxz>
-		<type num="m"/>
-	      </maxz>
-	    </eq>
-	    <eq>
-	      <type num="i"/>
-	      <minz>
-		<type num="i"/>
-	      </minz>
-	    </eq>
-	    <neq>
-	      <type num="i"/>
-	      <tvar name="alpha"/>
-	    </neq>
-	    <neq>
-	      <type num="c"/>
-	      <tvar name="alpha"/>
-	    </neq>	      
-	    <pred name="Immut">
-	      <type num="I"/>
-	    </pred>
-	  </collection>
-	</grouping>
-      </Hrules>
-      <Hrules>
-	<eq>
-	  <aCtset num="u"/>
-	  <set>
-	    <Tsub>
-	      <type/>
-	      <type/>
-	    </Tsub>
-	    <Tsub>
-	      <tvar name="alpha"/>
-	      <type/>
-	    </Tsub>
-	    <Tsub>
-	      <type/>
-	      <tvar name="alpha"/>
-	    </Tsub>
-	    <eq>
-	      <lKind k="var"/>
-	      <lKind/>
-	    </eq>
-	    <Tsub>
-	      <fn>
-		<type num="a"/>
-		<type num="r"/>
-	      </fn>
-	      <fn>
-		<type num="a" dash="'"/>
-		<type num="r" dash="'"/>
-	      </fn>
-	    </Tsub>
-	    <Tsub>
-	      <ref>
-		<type/>
-	      </ref>
-	      <ref>
-		<type dash="'"/>
-	      </ref>
-	    </Tsub>
-	    <Tsub>
-	      <mutable>
-		<type/>
-	      </mutable>
-	      <mutable>
-		<type dash="'"/>
-	      </mutable>
-	    </Tsub>
-	    <Tsub>
-	      <type/>
-	      <type num="m"/>
-	    </Tsub>
-	    <Tsub>
-	      <type num="i"/>
-	      <type num="c"/>
-	    </Tsub>
-	    <Pcst>
-	      <lKind k="mono"/>
-	      <type/>
-	      <type dash="'"/>
-	    </Pcst>
-	    <Pcst>
-	      <lKind k="poly"/>
-	      <type/>
-	      <type num="I"/>
-	    </Pcst>
-	    <Pcst>
-	      <lKind k="var"/>
-	      <type/>
-	      <type dash="'"/>
-	    </Pcst>
-	  </set>
-	</eq>
-      </Hrules>
     </btypes:TYPE>
   </font>
   <caption>Equational Unification Rules</caption>

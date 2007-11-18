@@ -432,6 +432,7 @@
                                | struct
                                | union
                                | comp
+                               | aCtype
                                | ctype
                                | CType
                                | MBpair
@@ -585,6 +586,12 @@
 >
 <!-- Constrained type notation -->
 <!ELEMENT ctype                (%anytype.group;, %constraint.group;)>
+<!ELEMENT aCtype                (%anytype.group;, %constraint.group;)>
+<!ATTLIST aCtype
+                               name        CDATA       #IMPLIED
+                               inline      (yes|no)    #IMPLIED
+>
+
 <!-- Typeclass Constraint Notation -->
 <!ELEMENT CType                (typeclass*, %anytype.group;)>
 <!ELEMENT MBpair               (%anytype.group;, %h_set.group;)>

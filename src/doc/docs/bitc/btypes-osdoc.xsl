@@ -1234,6 +1234,13 @@
     </xsl:call-template>
   </xsl:template>  
 
+ <!-- A constrained type -->
+  <xsl:template match="aCtype" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rho;</xsl:text>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>  
+
   <!-- constrained type, Typeclass Notation -->
   <xsl:template match="CType" mode="formula">
     <xsl:for-each select="*">

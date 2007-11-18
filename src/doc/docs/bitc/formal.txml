@@ -58,336 +58,156 @@
       BitC is a systems programming language with first class support
       for unboxed types and mutability. Details about the language can
       be obtained from the <link
-        href="http://coyotos.org/docs/bitc/spec.html">BitC language
-        specification</link> <cite ref="shapBitcSpec2006"/>. The BitC
-      type system and type inference algorithm are described in detail
-      <cite ref="sridharmutinfer2006"/>. This document tries to
-      provide a formalization and proof of soundness for the core
-      calculus the BitC type system.
+        href="http://coyotos.org/docs/bitc/spec.html"> BitC language
+        specification</link> <cite ref="shapBitcSpec2006"/>. This
+      document provides the formalization of the type system and type
+      inference algorithm for a core calculus the BitC, along with the
+      associated proofs.
     </p>
   </sect1>
   <sect1 id="language">
-    <title>The Language</title>
+    <title>The Language <btypes:TYPE><language/></btypes:TYPE> </title>
     <p>
-      <btypes:TYPE>        
-        <grammar>
-          <bnf desc="Identifiers">
-            <id/>
-            <alternatives etc="yes">
-              <id name="y"/>
-              <id name="z"/>
-            </alternatives>
-          </bnf>
-          <bnf desc="Stack Locations">
-            <sLoc/>
-            <alternatives etc="yes">
-              <sLoc num="1"/>
-              <sLoc num="2"/>
-            </alternatives>
-          </bnf>
-          <bnf desc="Heap Locations">
+      We limit our presentation to a core calculus of BitC called 
+      <btypes:TYPE>
+	<language/>
+      </btypes:TYPE> in the interest of brevity. 
+    </p>
+    <btypes:TYPE>        
+      <grammar>
+        <bnf desc="Identifiers">
+          <id/>
+          <alternatives etc="yes">
+            <id name="y"/>
+            <id name="z"/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Stack Locations">
+          <sLoc/>
+          <alternatives etc="yes">
+            <sLoc num="1"/>
+            <sLoc num="2"/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Heap Locations">
+          <hLoc/>
+          <alternatives etc="yes">
+            <hLoc num="1"/>
+            <hLoc num="2"/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Values">
+          <aVal/>
+          <alternatives>
+            <Unit/>
+            <true/>
+            <false/>
             <hLoc/>
-            <alternatives etc="yes">
-              <hLoc num="1"/>
-              <hLoc num="2"/>
-            </alternatives>
-          </bnf>
-          <bnf desc="Values">
-            <aVal/>
-            <alternatives>
-              <Unit/>
-              <true/>
-              <false/>
+            <lambda>
+              <id/>
+              <aExpr/>
+            </lambda>
+          </alternatives>
+        </bnf>
+        <bnf desc="lvalues">
+          <lVal/>
+          <alternatives>
+            <sLoc/>
+            <deref>
               <hLoc/>
-              <lambda>
+            </deref>
+          </alternatives>
+        </bnf>
+        <bnf desc="Expressions">
+          <aExpr/>
+          <alternatives>
+            <aVal/>
+            <sLoc/>
+            <apply>
+              <aExpr/>
+              <aExpr/>
+            </apply>
+            <tqExpr>
+              <aExpr/>
+              <type/>
+            </tqExpr>
+            <assign>
+              <aExpr/>
+              <aExpr/>
+            </assign> 
+          </alternatives>
+        </bnf>
+        <bnfc desc="">
+          <alternatives>
+            <dup>
+              <aExpr/>
+            </dup>
+            <deref>
+              <aExpr/>
+            </deref>
+          </alternatives>
+        </bnfc>
+        <bnfc desc="">
+          <alternatives>
+            <if>
+              <aExpr/>
+              <aExpr/>
+              <aExpr/>
+            </if>
+          </alternatives>
+        </bnfc>
+        <bnfc desc="">
+          <alternatives>
+            <let kind="k">
+              <tqExpr optional="yes">
                 <id/>
-                <aExpr/>
-              </lambda>
-            </alternatives>
-          </bnf>
-          <bnf desc="lvalues">
-            <lVal/>
-            <alternatives>
-              <sLoc/>
-              <deref>
-                <hLoc/>
-              </deref>
-            </alternatives>
-          </bnf>
-          <bnf desc="Expressions">
-            <aExpr/>
-            <alternatives>
-              <aVal/>
-              <sLoc/>
-              <apply>
-                <aExpr/>
-                <aExpr/>
-              </apply>
-              <tqExpr>
-                <aExpr/>
                 <type/>
               </tqExpr>
-              <assign>
-                <aExpr/>
-                <aExpr/>
-              </assign> 
-            </alternatives>
-          </bnf>
-          <bnfc desc="">
-            <alternatives>
-              <dup>
-                <aExpr/>
-              </dup>
-              <deref>
-                <aExpr/>
-              </deref>
-            </alternatives>
-          </bnfc>
-          <bnfc desc="">
-            <alternatives>
-              <if>
-                <aExpr/>
-                <aExpr/>
-                <aExpr/>
-              </if>
-            </alternatives>
-          </bnfc>
-          <bnfc desc="">
-            <alternatives>
-              <let kind="k">
-                <tqExpr optional="yes">
-                  <id/>
-                  <type/>
-                </tqExpr>
-                <aExpr/>
-                <aExpr/>
-              </let>
-            </alternatives>
-          </bnfc>
-          <bnf desc="Let-kinds">
-            <lKind/>
-            <alternatives>
-              <text content="-"/>
-              <lKind k="var"/>
-              <lKind k="mono"/>
-              <lKind k="poly"/>
-            </alternatives>
-          </bnf>
-          <bnf desc="Stack">
-            <stack/>
-            <alternatives>
-              <Empty/>
-              <extend>
-                <stack/>
-                <mapping>
-                  <sLoc/>
-                  <aVal/>
-                </mapping>
-              </extend>
-            </alternatives>
-          </bnf>
-          <bnf desc="Heap">
-            <heap/>
-            <alternatives>
-              <Empty/>
-              <extend>
-                <heap/>
-                <mapping>
-                  <hLoc/>
-                  <aVal/>
-                </mapping>
-              </extend>
-            </alternatives>
-          </bnf>
-	  <bnf desc="Types">
-	    <type/>
-	    <alternatives>
-	      <tvar name="alpha"/>
-	      <unit/>
-              <bool/>
-              <fn><type/><type/></fn>                  
-            </alternatives>                
-          </bnf>
-          <bnfc desc="ref / pointer">
-            <alternatives>
-              <ref><type/></ref>
-            </alternatives> 
-          </bnfc>
-          <bnfc desc="Mutable type">
-            <alternatives>
-              <mutable><type/></mutable>
-            </alternatives>
-          </bnfc>
-          <bnfc desc="Constrained Type">
-            <alternatives>
-              <ctype>
-                <type/>
-                <aCtset/>
-              </ctype>
-            </alternatives>
-          </bnfc>
-          <bnfc desc="Maybe Type">
-            <alternatives>
-              <mbpair>
-                <type/>
-		<type dash="'"/>
-              </mbpair>              
-            </alternatives>
-          </bnfc>
-          <bnfc desc="Meta-Types">
-            <alternatives>
-              <ceil>
-                <type/>
-              </ceil>
-              <floor>
-                <type/>
-              </floor>
-            </alternatives>
-          </bnfc>
-          <bnf desc="Type Scheme">
-            <aTS/>
-            <alternatives>
-              <type/>
-              <forall>                    
-                <tvar name="alpha"/>
-                <aTS/>
-              </forall>
-            </alternatives>
-          </bnf>
-          <bnf desc="Binding Environment">
-            <gamma/>
-            <alternatives>
-              <Empty/>
-              <extend>
-                <gamma/>
-                <mapping>
-                  <id/>
-                  <aTS/>
-                </mapping>
-              </extend>
-            </alternatives>
-          </bnf>
-          <bnf desc="Store Typing">
-            <store/>
-            <alternatives>
-              <Empty/>
-              <extend>
-                <store/>
-                <mapping>
-                  <hLoc/>
-                  <type/>
-                </mapping>
-              </extend>
-              <extend>
-                <store/>
-                <mapping>
-                  <sLoc/>
-                  <type/>
-                </mapping>
-              </extend>
-            </alternatives>
-          </bnf>
-          <bnf desc="Constraints">
-            <constraint/>
-            <alternatives>
-              <eq>
-                <type/>
-                <type/>
-              </eq>
-              <ceq>
-                <type/>
-                <type/> 
-              </ceq>
-              <Tsub>
-                <type/>
-                <type/> 
-              </Tsub>
-            </alternatives>
-          </bnf>
-          <bnfc desc="">
-            <alternatives>
-              <Pcst>
-                <lKind/>
-                <type/>
-                <type/>
-              </Pcst>
-            </alternatives>
-          </bnfc>
-          <bnf desc="Constraint Sets">
-            <aCtset/>
-            <alternatives>
-              <Empty/>
-              <set>
-                <plural>
-                  <constraint/>
-                </plural>
-              </set>
-              <unin>
-                <aCtset/>
-                <aCtset/>
-              </unin>
-            </alternatives>            
-          </bnf>
-          <bnf desc="Substitutions">            
-            <aSubMap/>            
-            <alternatives>
-              <Empty/>
-              <SubMap>
-                <tvar name="alpha"/>
-                <type/>
-              </SubMap>
-              <SubMap>
-                <lKind k="var"/>
-                <lKind/>
-              </SubMap>
-              <compose>
-                <aSubMap/>
-                <aSubMap/>
-              </compose>
-            </alternatives>
-          </bnf>
-          <bnf desc="Solvable Entities">
-            <solvable/>
-            <alternatives>
-              <type/>
-              <gamma/>
-              <store/>
-              <plus>
-                <solvable/>
-                <solvable/>
-              </plus>
-            </alternatives>
-          </bnf>
-          <bnf desc="Logical Relations">
-            <LOGIC/>
-            <alternatives>
-              <TRUE/>
-              <FALSE/>
-              <AND>
-                <LOGIC/>
-                <LOGIC/>
-              </AND>
-              <OR>
-                <LOGIC/>
-                <LOGIC/>
-              </OR>
-            </alternatives>
-          </bnf>
-          <bnfc>
-            <alternatives>              
-              <NOT>
-                <LOGIC/>
-              </NOT>
-              <pred name="Predicate">
-                <plural>
-                  <LOGIC/>
-                </plural>
-              </pred>
-            </alternatives>
-          </bnfc>
-        </grammar>
-      </btypes:TYPE>
-    </p>
+              <aExpr/>
+              <aExpr/>
+            </let>
+          </alternatives>
+        </bnfc>
+        <bnf desc="Let-kinds">
+          <lKind/>
+          <alternatives>
+            <text content="-"/>
+            <lKind k="var"/>
+            <lKind k="mono"/>
+            <lKind k="poly"/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Types">
+          <type/>
+          <alternatives>
+            <tvar name="alpha"/>
+            <unit/>
+            <bool/>
+            <fn><type/><type/></fn>                  
+          </alternatives>                
+        </bnf>
+        <bnfc desc="ref / pointer">
+          <alternatives>
+            <ref><type/></ref>
+          </alternatives> 
+        </bnfc>
+        <bnfc desc="Mutable type">
+          <alternatives>
+            <mutable><type/></mutable>
+          </alternatives>
+        </bnfc>
+        <bnf desc="Type Scheme">
+          <aTS/>
+          <alternatives>
+            <type/>
+            <forall>                    
+              <tvar name="alpha"/>
+              <aTS/>
+            </forall>
+          </alternatives>
+        </bnf>
+      </grammar>
+    </btypes:TYPE>
     <p>
       All the above syntactic forms can be parenthesized without
       change in meaning. The let-kind ``-'' is a placeholder for the
@@ -401,71 +221,43 @@
 	  <text content="Z"/>          
 	</subst>
       </btypes:TYPE>.
-      The application of a substitution
-      <btypes:TYPE>
-	<aSubMap/>
-      </btypes:TYPE> on X is written as
-      <btypes:TYPE>
-	<Subst>
-	  <aSubMap/>
-	  <text content="X"/>
-	</Subst>
-      </btypes:TYPE>. 
-      We represent mathematical properties as: 
-      <btypes:TYPE>
-	<models name="property">
-	  <text content="assumption"/>
-	  <text content="subject"/>
-	</models>
-      </btypes:TYPE>.
-    </p>
-    <p>
-      As a matter of notational convenience, we write:
-      <btypes:TYPE>
-        <aSubMap num="a.b"/> 
-      </btypes:TYPE> to mean
-      <btypes:TYPE>
-        <compose>
-          <aSubMap num="a"/> 
-          <aSubMap num="b"/> 
-        </compose>
-      </btypes:TYPE>. Note that
-      <btypes:TYPE>
-        <eq>
-          <Subst>
-            <aSubMap num="a.b"/> 
-            <text content="x"/>
-          </Subst>
-          <Subst>
-            <compose>
-              <aSubMap num="a"/> 
-              <aSubMap num="b"/> 
-            </compose>
-            <text content="x"/>
-          </Subst>
-          <Subst>
-            <aSubMap num="a"/> 
-            <Subst>
-              <aSubMap num="b"/>                 
-              <text content="x"/>
-            </Subst>
-          </Subst>
-          <Subst>
-            <aSubMap num="b"/>                 
-            <Subst>
-              <aSubMap num="a"/> 
-              <text content="x"/>
-            </Subst>
-          </Subst>
-        </eq>
-      </btypes:TYPE>.        
     </p>
   </sect1>
   <sect1 id="opsem">
-    <title>Semantics</title>
+    <title>Dynamic Semantics of <btypes:TYPE><language/></btypes:TYPE></title>
     <xi:include href="include/formal/opsem.xmli"/>
     <xi:include href="include/formal/decl.xmli"/>
     <xi:include href="include/formal/locsem.xmli"/>
+    <btypes:TYPE>        
+      <grammar>
+        <bnf desc="Stack">
+          <stack/>
+          <alternatives>
+            <Empty/>
+            <extend>
+              <stack/>
+              <mapping>
+                <sLoc/>
+                <aVal/>
+              </mapping>
+            </extend>
+          </alternatives>
+        </bnf>
+        <bnf desc="Heap">
+          <heap/>
+          <alternatives>
+            <Empty/>
+            <extend>
+              <heap/>
+              <mapping>
+                <hLoc/>
+                <aVal/>
+              </mapping>
+            </extend>
+          </alternatives>
+        </bnf>
+      </grammar>
+    </btypes:TYPE>
     <p>
       The Operational semantics rules are shown in Figure&nbsp;<xref
         ref="dyn_sem_horz"/>.
@@ -519,6 +311,82 @@
       <btypes:TYPE><levalOp/></btypes:TYPE> and 
       <btypes:TYPE><evalOp/></btypes:TYPE> respectively. 
     </p>
+  </sect1>
+  <sect1 id="type system">
+    <title>Static Semantics of <btypes:TYPE><language/></btypes:TYPE></title>
+    <btypes:TYPE>        
+      <grammar>
+        <bnf desc="Binding Environment">
+          <gamma/>
+          <alternatives>
+            <Empty/>
+            <extend>
+              <gamma/>
+              <mapping>
+                <id/>
+                <aTS/>
+              </mapping>
+            </extend>
+          </alternatives>
+        </bnf>
+        <bnf desc="Store Typing">
+          <store/>
+          <alternatives>
+            <Empty/>
+            <extend>
+              <store/>
+              <mapping>
+                <hLoc/>
+                <type/>
+              </mapping>
+            </extend>
+            <extend>
+              <store/>
+              <mapping>
+                <sLoc/>
+                <type/>
+              </mapping>
+            </extend>
+          </alternatives>
+        </bnf>
+        <bnf desc="Logical Relations">
+          <LOGIC/>
+          <alternatives>
+            <TRUE/>
+            <FALSE/>
+            <AND>
+              <LOGIC/>
+              <LOGIC/>
+            </AND>
+            <OR>
+              <LOGIC/>
+              <LOGIC/>
+            </OR>
+          </alternatives>
+        </bnf>
+        <bnfc>
+          <alternatives>              
+            <NOT>
+              <LOGIC/>
+            </NOT>
+            <pred name="Predicate">
+              <plural>
+                <LOGIC/>
+              </plural>
+            </pred>
+          </alternatives>
+        </bnfc>
+      </grammar>
+    </btypes:TYPE>
+    <p>
+      We represent mathematical properties as: 
+      <btypes:TYPE>
+	<models name="property">
+	  <text content="assumption"/>
+	  <text content="subject"/>
+	</models>
+      </btypes:TYPE>.
+    </p>
     <p>
       Figure&nbsp;<xref ref="decl_rules"/> shows the declarative
       type rules, copy coercion rules and rules for type
@@ -562,56 +430,24 @@
         </Tsub>
       </btypes:TYPE>.
     </p>
-  </sect1>
-  <sect1 id="static_sound">
-    <title>Soundness of the Type System</title>  
-    <definition id="idemp">      
-      <title>Meta Constructors</title>      
-      <p>
-        <btypes:TYPE>
-          <floor>
-            <type/>
-          </floor>
-        </btypes:TYPE>
-        and 
-        <btypes:TYPE>
-          <ceil>
-            <type/>
-          </ceil>
-        </btypes:TYPE>
-        are "meta-constructors" which (respectively) minimize and
-        maximize the mutability of a type, but are interpreted lazily. 
-      </p>
-    </definition>
     <definition id="aleq">      
       <title>Algebraic equivalences</title>
       <p>
-        In our algebra of types, we define the following equivalences:
+        In our algebra of types, we define the following equivalence:
+        <btypes:TYPE>
+          <equiv>
+            <mutable>
+              <mutable>
+                <type/>
+              </mutable>
+            </mutable>
+            <mutable>
+              <type/>
+            </mutable>
+          </equiv>
+        </btypes:TYPE>.
+        That is, the mutable type constructor is idempotent. 
       </p>
-      <ol>
-        <li>
-          <p>
-            The mutable type constructor is idempotent. That is,
-            <btypes:TYPE>
-              <equiv>
-                <mutable>
-                  <mutable>
-                    <type/>
-                  </mutable>
-                </mutable>
-                <mutable>
-                  <type/>
-                </mutable>
-              </equiv>
-            </btypes:TYPE>.
-          </p>
-        </li>
-        <li>
-          <p>
-            The meta-constructors defined bove are also idempotent.
-          </p>
-        </li>
-      </ol>
     </definition>
     <definition id="copy_sem">      
       <title>Copy Compatibility</title>
@@ -3917,6 +3753,187 @@
     <xi:include href="include/formal/eq-infer.xmli"/>
     <xi:include href="include/formal/eq-unify.xmli"/>
     <xi:include href="include/formal/eq-helper.xmli"/>
+    <btypes:TYPE>        
+      <grammar>
+        <bnf desc="Types">
+          <type/>
+          <alternatives>
+            <tvar name="alpha"/>
+            <unit/>
+            <bool/>
+            <fn><type/><type/></fn>                  
+          </alternatives>                
+        </bnf>
+        <bnfc desc="">
+          <alternatives>
+            <ref><type/></ref>
+            <mutable><type/></mutable>
+          </alternatives>
+        </bnfc>
+        <bnfc desc="Meta-Types">
+          <alternatives>
+            <ceil>
+              <type/>
+            </ceil>
+            <floor>
+              <type/>
+            </floor>
+          </alternatives>
+        </bnfc>
+        <bnf desc="Constr. Type">
+          <aCtype/>
+          <alternatives>
+            <type/>
+            <ctype>
+              <type/>
+              <aCtset/>
+            </ctype>
+          </alternatives>
+        </bnf>
+        <bnf desc="Type Scheme">          
+          <aTS/>
+          <alternatives>
+            <aCtype/>
+            <forall>                    
+              <tvar name="alpha"/>
+              <aTS/>
+            </forall>
+          </alternatives>
+        </bnf>
+        <bnf desc="Constraints">
+          <constraint/>
+          <alternatives>
+            <eq>
+              <type/>
+              <type/>
+            </eq>
+            <ceq>
+              <type/>
+              <type/> 
+            </ceq>
+            <Tsub>
+              <type/>
+              <type/> 
+            </Tsub>
+          </alternatives>
+        </bnf>
+        <bnf desc="Constraint Sets">
+          <aCtset/>
+          <alternatives>
+            <Empty/>
+            <set>
+              <plural>
+                <constraint/>
+              </plural>
+            </set>
+            <unin>
+              <aCtset/>
+              <aCtset/>
+            </unin>
+          </alternatives>            
+        </bnf>
+        <bnf desc="Substitutions">            
+          <aSubMap/>            
+          <alternatives>
+            <Empty/>
+            <SubMap>
+              <tvar name="alpha"/>
+              <type/>
+            </SubMap>
+            <SubMap>
+              <lKind k="var"/>
+              <lKind/>
+            </SubMap>
+            <compose>
+              <aSubMap/>
+              <aSubMap/>
+            </compose>
+          </alternatives>
+        </bnf>
+      </grammar>
+    </btypes:TYPE>
+    <p>
+      The application of a substitution
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE> on X is written as
+      <btypes:TYPE>
+	<Subst>
+	  <aSubMap/>
+	  <text content="X"/>
+	</Subst>
+      </btypes:TYPE>. 
+      As a matter of notational convenience, we write:
+      <btypes:TYPE>
+        <aSubMap num="a.b"/> 
+      </btypes:TYPE> to mean
+      <btypes:TYPE>
+        <compose>
+          <aSubMap num="a"/> 
+          <aSubMap num="b"/> 
+        </compose>
+      </btypes:TYPE>. Note that
+      <btypes:TYPE>
+        <eq>
+          <Subst>
+            <aSubMap num="a.b"/> 
+            <text content="x"/>
+          </Subst>
+          <Subst>
+            <compose>
+              <aSubMap num="a"/> 
+              <aSubMap num="b"/> 
+            </compose>
+            <text content="x"/>
+          </Subst>
+          <Subst>
+            <aSubMap num="a"/> 
+            <Subst>
+              <aSubMap num="b"/>                 
+              <text content="x"/>
+            </Subst>
+          </Subst>
+          <Subst>
+            <aSubMap num="b"/>                 
+            <Subst>
+              <aSubMap num="a"/> 
+              <text content="x"/>
+            </Subst>
+          </Subst>
+        </eq>
+      </btypes:TYPE>.        
+    </p>
+    <definition id="idemp">      
+      <title>Meta Constructors</title>      
+      <p>
+        <btypes:TYPE>
+          <floor>
+            <type/>
+          </floor>
+        </btypes:TYPE>
+        and 
+        <btypes:TYPE>
+          <ceil>
+            <type/>
+          </ceil>
+        </btypes:TYPE>
+        are "meta-constructors" which (respectively) minimize and
+        maximize the mutability of a type, but are interpreted
+        lazily. The meta-constructors defined are idempotent. 
+      </p>
+    </definition>
+    <definition id="define_infer">
+      <title>Type Inference</title> 
+      <p>
+        Type inference is a program
+        transformation that accepts a program in which
+        <progident>let</progident> expressions are not annotated
+        with their kinds, and returns the same programs in which
+        <progident>let</progident> expressions are annotated with
+        their kinds and all expressions are annotated with their
+        types.
+      </p>
+    </definition>
     <p>
       The equational type inference algorithm is as shown in
       Figure&nbsp;<xref ref="eq2_infer"/>. 
@@ -4012,6 +4029,240 @@
       substitutions <btypes:TYPE><aSubMap/></btypes:TYPE> for the
       constraints solved in this pass.
     </p>
+    <definition id="ftvs-eq">
+      <title>Free Type Variables (Ext.)</title>
+      <p>
+        We define an extension to 
+        <btypes:TYPE>
+          <defn tag="ftvs"/>
+        </btypes:TYPE> for our current algebra of types.
+      </p>
+      <p>
+        <btypes:TYPE>
+          <eq>
+            <ftvs>
+              <tvar name="alpha"/>
+            </ftvs>
+            <tvar name="alpha"/>                
+          </eq>
+          <br/>
+          <eq>
+            <ftvs>
+              <unit/>
+            </ftvs>
+            <empty/>                
+          </eq>
+          <br/>
+          <eq>
+            <ftvs>
+              <bool/>
+            </ftvs>
+            <empty/>                
+          </eq>
+          <br/>
+          <eq>
+            <ftvs>
+              <fn>
+                <type num="1"/>
+                <type num="2"/>
+              </fn>
+            </ftvs>                                  
+            <unin>
+              <ftvs>
+                <type num="1"/>
+              </ftvs>                    
+              <ftvs>
+                <type num="2"/>
+              </ftvs>                    
+            </unin>                
+          </eq>          
+          <br/>
+          <eq>
+            <ftvs>
+              <ref>
+                <type/>
+              </ref>
+            </ftvs>
+            <ftvs>                  
+              <type/>                  
+            </ftvs>
+          </eq>              
+          <br/>
+          <eq>
+            <ftvs>
+              <mutable>
+                <type/>
+              </mutable>
+            </ftvs>
+            <ftvs>                  
+              <type/>                  
+            </ftvs>
+          </eq>          
+          <br/>
+          <eq>
+            <ftvs>
+              <floor>
+                <type/>
+              </floor>
+            </ftvs>
+            <ftvs>                  
+              <type/>                  
+            </ftvs>
+          </eq>
+          <br/>
+          <eq>
+            <ftvs>
+              <ceil>
+                <type/>
+              </ceil>
+            </ftvs>
+            <ftvs>                  
+              <type/>                  
+            </ftvs>
+          </eq>   
+        </btypes:TYPE>
+      </p>
+    </definition>
+    <definition id="stvs-eq">
+      <title>Shallow Type Variables</title>
+      <p>
+        The set of type variables embedde in a type up to a 
+        reference/function boundary. 
+      </p>
+      <p>
+        <btypes:TYPE>
+          <fnxn name="stv">
+            <tvar name="alpha"/>
+            <set>
+              <tvar name="alpha"/>
+            </set>
+          </fnxn>
+          <br/>
+          <fnxn name="stv">
+            <unit/>
+            <Empty/>
+          </fnxn>
+          <br/>
+          <fnxn name="stv">
+            <bool/>
+            <Empty/>
+          </fnxn>
+          <br/>
+          <fnxn name="stv">
+            <fn>
+              <type/>
+              <type dash="'"/>
+            </fn>
+            <Empty/>
+          </fnxn>          
+          <br/>
+          <fnxn name="stv">
+            <ref>
+              <type/>
+            </ref>
+            <Empty/>
+          </fnxn>
+          <br/>
+          <fnxn name="stv">
+            <mutable>
+              <type/>
+            </mutable>
+            <pred name="stv">
+              <type/>
+            </pred>
+          </fnxn>
+          <br/>
+          <fnxn name="stv">
+            <floor>
+              <type/>
+            </floor>
+            <pred name="stv">
+              <type/>
+            </pred>
+          </fnxn>
+          <br/>
+          <fnxn name="stv">
+            <ceil>
+              <type/>
+            </ceil>
+            <pred name="stv">
+              <type/>
+            </pred>
+          </fnxn>
+        </btypes:TYPE>
+      </p>
+    </definition>    
+    <definition id="dtvs-eq">
+      <title>Deep Type Variables</title>
+      <p>
+        The set of type variables embedde in a type up to a 
+        function boundary. 
+      </p>
+      <p>        
+        <btypes:TYPE>
+          <fnxn name="dtv">
+            <tvar name="alpha"/>
+            <set>
+              <tvar name="alpha"/>
+            </set>
+          </fnxn>
+          <br/>
+          <fnxn name="dtv">
+            <unit/>
+            <Empty/>
+          </fnxn>
+          <br/>
+          <fnxn name="dtv">
+            <bool/>
+            <Empty/>
+          </fnxn>
+          <br/>
+          <fnxn name="dtv">
+            <fn>
+              <type/>
+              <type dash="'"/>
+            </fn>
+            <Empty/>
+          </fnxn>          
+          <br/>
+          <fnxn name="dtv">
+            <mutable>
+              <type/>
+            </mutable>
+            <pred name="dtv">
+              <type/>
+            </pred>		
+          </fnxn>
+          <br/>
+          <fnxn name="dtv">
+            <ref>
+              <type/>
+            </ref>
+            <pred name="dtv">
+              <type/>
+            </pred>		
+          </fnxn>
+          <br/>
+          <fnxn name="dtv">
+            <floor>
+              <type/>
+            </floor>
+            <pred name="dtv">
+              <type/>
+            </pred>		
+          </fnxn>
+          <br/>
+          <fnxn name="dtv">
+            <ceil>
+              <type/>
+            </ceil>
+            <pred name="dtv">
+              <type/>
+            </pred>		
+          </fnxn>
+        </btypes:TYPE>
+      </p>
+    </definition>    
     <theorem id="eq-unify-correct">
       <title>Correctness of Unification</title>
       <p>
@@ -4227,6 +4478,65 @@
     <xi:include href="include/formal/hm-infer.xmli"/>
     <xi:include href="include/formal/hm-unify.xmli"/>
     <xi:include href="include/formal/hm-solve.xmli"/>
+    <btypes:TYPE>        
+      <grammar>
+        <bnf desc="Types">
+          <type/>
+          <alternatives>
+            <tvar name="alpha"/>
+            <unit/>
+            <bool/>
+            <fn><type/><type/></fn>                  
+          </alternatives>                
+        </bnf>
+        <bnfc desc="">
+          <alternatives>
+            <ref><type/></ref>
+            <mutable><type/></mutable>
+          </alternatives>
+        </bnfc>
+        <bnfc desc="Maybe Type">
+          <alternatives>
+            <mbpair>
+              <type/>
+              <type dash="'"/>
+            </mbpair>              
+          </alternatives>
+        </bnfc>
+        <!--         <bnfc desc="Meta-Types"> -->
+        <!--           <alternatives> -->
+        <!--             <ceil> -->
+        <!--               <type/> -->
+        <!--             </ceil> -->
+        <!--             <floor> -->
+        <!--               <type/> -->
+        <!--             </floor> -->
+        <!--           </alternatives> -->
+        <!--         </bnfc> -->
+        <bnf desc="Type Scheme">
+          <aTS/>
+          <alternatives>
+            <type/>
+            <forall>                    
+              <tvar name="alpha"/>
+              <aTS/>
+            </forall>
+          </alternatives>
+        </bnf>
+        <bnf desc="Solvable Entities">
+          <solvable/>
+          <alternatives>
+            <type/>
+            <gamma/>
+            <store/>
+            <plus>
+              <solvable/>
+              <solvable/>
+            </plus>
+          </alternatives>
+        </bnf>
+      </grammar>
+    </btypes:TYPE>
     <p>
       The type inference algorithm is as shown in
       Figure&nbsp;<xref ref="hm_infer"/>. 
@@ -4405,18 +4715,6 @@
       </btypes:TYPE>
       by solving all the copy compatibility constraints.
     </p>
-    <definition id="define_infer">
-      <title>Type Inference</title> 
-      <p>
-        Type inference is a program
-        transformation that accepts a program in which
-        <progident>let</progident> expressions are not annotated
-        with their kinds, and returns the same programs in which
-        <progident>let</progident> expressions are annotated with
-        their kinds and all expressions are annotated with their
-        types.
-      </p>
-    </definition>
     <definition>
       <title>Constraint Set Closure</title>
       <p>
@@ -16078,7 +16376,17 @@
       </p>
     </proof>
   </sect1>
-  <!-- <bibliography>
+  <nocite ref="sridhar2006plos"/>
+  <bibliography>
+    <bibentry label="shapBitcSpec2006">
+      <key>Shapiro06</key>
+      J. S. Shapiro, S. Sridhar, M. S. Doerrie, ``BitC Language
+      Specification''
+      <link
+      href="http://bitc-lang.org/docs/bitc/spec.html">
+      <progident>http://www.bitc-lang.org/docs/bitc/spec.html</progident>
+      </link>
+    </bibentry>
     <bibentry label="sridhar2006plos">
       <key>Sridhar06</key>
        S. Sridhar and J. Shapiro. ``Type Inference for Unboxed Types
@@ -16086,8 +16394,8 @@
        on Programming Languages and Operating Systems (PLOS
        2006)</doctitle> San Jose, CA. 2006.
     </bibentry>
-  </bibliography> -->
-
+  </bibliography>
+ 
 </article>
 
 <!-- Local Variables: -->
