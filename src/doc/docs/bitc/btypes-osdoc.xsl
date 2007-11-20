@@ -188,15 +188,17 @@
   <xsl:template match="empty" mode="formula">
     <xsl:text>{}</xsl:text>
   </xsl:template>
-  <!-- EMPTY -->
-  <xsl:template match="EMPTY" mode="formula">
-    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>Phi;</xsl:text>
-  </xsl:template>
   <!-- Empty -->
   <xsl:template match="Empty" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>empty;</xsl:text>
+  </xsl:template>
+  <!-- Empty -->
+  <xsl:template match="EmptySubst" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>lang;</xsl:text>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rang;</xsl:text>
   </xsl:template>
   
   <!-- set -->
@@ -1583,6 +1585,14 @@
       </xsl:element>
     </xsl:if>
     <xsl:call-template name="print.params"/>
+    <xsl:if test="@cl">
+      <xsl:element name="sup">
+	<xsl:element name="sup">
+	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	  <xsl:text>plus;</xsl:text>
+	</xsl:element>
+      </xsl:element>
+    </xsl:if>
   </xsl:template>  
 
 
@@ -2481,48 +2491,26 @@
     </xsl:element>
   </xsl:template>
   
-  <!-- equiation -->
+  <!-- equation -->
   <xsl:template match="equation" mode="formula">
     <xsl:element name="tr">
       <xsl:attribute name="valign">top</xsl:attribute>
-      <!-- param -->
+      
+      <!-- LHS -->
       <xsl:element name="td">
 	<xsl:attribute name="align">right</xsl:attribute>	  
 	<xsl:apply-templates select="*[1]" mode="formula"/>	
       </xsl:element>	  
-
+      
       <!-- the = sign -->
       <xsl:element name="td">
 	<xsl:text>=</xsl:text>
       </xsl:element>
       
+      <!-- RHS -->      
       <xsl:element name="td">
 	<xsl:attribute name="align">left</xsl:attribute>	  
-	<!-- result -->
 	<xsl:apply-templates select="*[2]" mode="formula"/>	
-	
-	<!-- dependencies -->
-	<xsl:for-each select="*">
-	  <xsl:if test = "position() &gt; 2">
-	    <xsl:if test = "position() = 3">
-	      <xsl:element name="em">
-		<xsl:text>, where</xsl:text>
-		<xsl:call-template name="print.space"/>	
-	      </xsl:element>
-	    </xsl:if>
-	    <xsl:if test = "position() &gt; 3">
-	      <xsl:text>,</xsl:text>
-	      <xsl:call-template name="print.space"/>	
-	      <xsl:if test = "position() = last()">
-		<xsl:element name="em">
-		  <xsl:text>and</xsl:text>
-		  <xsl:call-template name="print.space"/>	
-		</xsl:element>
-	      </xsl:if>
-	    </xsl:if>	    
-	    <xsl:apply-templates select="." mode="formula"/>	
-	  </xsl:if>
-	</xsl:for-each>
       </xsl:element>
       <xsl:if test="@sep">
 	<xsl:element name="br">
@@ -2530,9 +2518,18 @@
 	    <xsl:value-of select="@sep"/>
 	  </xsl:attribute>
 	</xsl:element>
-      </xsl:if>    
-      
+      </xsl:if>          
     </xsl:element>
+  </xsl:template>
+
+  <!-- lhs -->
+  <xsl:template match="lhs" mode="formula">
+    <xsl:call-template name="print.eqnside"/>    
+  </xsl:template>
+
+  <!-- rhs -->
+  <xsl:template match="rhs" mode="formula">
+    <xsl:call-template name="print.eqnside"/>
   </xsl:template>
 
   <!-- VEqns -->
@@ -3756,6 +3753,33 @@
     </xsl:for-each>
   </xsl:template>
 
+  <!-- Printing LHS ans RHS of equations -->
+  <xsl:template name="print.eqnside">
+    <xsl:apply-templates select="*[1]" mode="formula"/>	      
+    <!-- dependencies -->
+    <xsl:for-each select="*">
+      <xsl:if test = "position() &gt; 1">
+	<xsl:if test = "position() = 2">
+	  <xsl:element name="em">
+	    <xsl:text>, where</xsl:text>
+	    <xsl:call-template name="print.space"/>	
+	  </xsl:element>
+	</xsl:if>
+	<xsl:if test = "position() &gt; 2">
+	  <xsl:text>,</xsl:text>
+	  <xsl:call-template name="print.space"/>	
+	  <xsl:if test = "position() = last()">
+	    <xsl:element name="em">
+	      <xsl:text>and</xsl:text>
+	      <xsl:call-template name="print.space"/>	
+	    </xsl:element>
+	  </xsl:if>
+	</xsl:if>	    
+	<xsl:apply-templates select="." mode="formula"/>	
+      </xsl:if>
+    </xsl:for-each>
+  </xsl:template>
+  
   <!-- Print Premices -->
   <xsl:template name="print.premices">
     <xsl:for-each select="*">

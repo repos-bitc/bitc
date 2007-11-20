@@ -195,8 +195,6 @@
 	      <assume/>
 	      <grouping>
 		<tvar name="alpha"/>
-		<tvar name="beta"/>
-		<tvar name="gamma"/>
 	      </grouping>
 	    </models>
 	  </tyPre>
@@ -212,26 +210,18 @@
 		    <id/>
 		    <aExpr/>
 		  </lambda>
-		  <fn>		    
-		    <tvar name="beta"/>		    		    
-		    <tvar name="gamma"/>		    
+		  <fn>
+		    <floor>
+		      <tvar name="alpha"/>
+		    </floor>
+		    <ceil>
+		      <type/>
+		    </ceil>
 		  </fn>
 		</tqExpr>
 	      </conclude>
 	      <constrain>
-		<unin>
-		  <aCtset/>
-		  <set>
-		    <Tsub>
-		      <tvar name="alpha"/>
-		      <tvar name="beta"/>
-		    </Tsub>
-		    <Tsub>
-		      <type/>
-		      <tvar name="gamma"/>
-		    </Tsub>
-		  </set>
-		</unin>
+		<aCtset/>
 	      </constrain>
 	    </TEjudge>
 	  </tyConc>
@@ -299,19 +289,35 @@
 		  <set>
 		    <Tsub>
 		      <type num="1"/>
-		      <fn>			
-			<tvar name="beta"/>						
-			<tvar name="gamma"/>			
+		      <fn>
+			<floor>
+			  <tvar name="beta"/>
+			</floor>
+			<ceil>
+			  <tvar name="gamma"/>
+			</ceil>
 		      </fn>
 		    </Tsub>
 		    <Tsub>
 		      <type num="2"/>
-		      <tvar name="beta"/>
+		      <floor>
+			<tvar name="beta"/>
+		      </floor>
 		    </Tsub>
 		    <Tsub>
-		      <tvar name="gamma"/>
+		      <ceil>
+			<tvar name="gamma"/>
+		      </ceil>
 		      <tvar name="alpha"/>
 		    </Tsub>
+<!--  		    <ceq via="delta"> -->
+<!-- 		      <type num="2"/> -->
+<!-- 		      <tvar name="beta"/> -->
+<!-- 		    </ceq> -->
+<!-- 		    <ceq via="epsiv"> -->
+<!-- 		      <tvar name="gamma"/> -->
+<!-- 		      <tvar name="alpha"/> -->
+<!-- 		    </ceq> -->
 		  </set>
 		</unin>
 	      </constrain>
@@ -371,7 +377,6 @@
 	      <assume/>
 	      <grouping>
 		<tvar name="alpha"/>
-		<tvar name="beta"/>
 	      </grouping>
 	    </models>
 	  </tyPre>
@@ -401,11 +406,23 @@
 		      <type num="1"/>
 		      <bool/>
 		    </Tsub>
-		    <ceq via="beta">
+		    <Tsub>
 		      <type num="2"/>
+		      <floor>
+			<tvar name="alpha"/>
+		      </floor>
+		    </Tsub>
+		    <Tsub>
 		      <type num="3"/>
-		      <tvar name="alpha"/>
-		    </ceq>
+		      <floor>
+			<tvar name="alpha"/>
+		      </floor>
+		    </Tsub>
+<!-- 		    <ceq via="beta"> -->
+<!-- 		      <type num="2"/> -->
+<!-- 		      <type num="3"/> -->
+<!-- 		      <tvar name="alpha"/> -->
+<!-- 		    </ceq> -->
 		  </set>
 		</unin>
 	      </constrain>
@@ -563,7 +580,6 @@
 	      <assume/>
 	      <grouping>
 		<tvar name="alpha"/>
-		<tvar name="beta"/>
 	      </grouping>
 	    </models>
 	  </tyPre>
@@ -587,10 +603,16 @@
 		<unin>
 		  <aCtset/>
 		  <set>
-		    <ceq via="beta">
+		    <Tsub>
 		      <tvar name="alpha"/>
-		      <type/>
-		    </ceq>
+		      <floor>
+			<type/>
+		      </floor>
+		    </Tsub>
+<!-- 		    <ceq via="beta"> -->
+<!-- 		      <tvar name="alpha"/> -->
+<!-- 		      <type/> -->
+<!-- 		    </ceq> -->
 		  </set>
 		</unin>
 	      </constrain>
@@ -796,21 +818,14 @@
 	</tyRule>        
       </Hrules>
       <Hrules>
-	<tyRule name="Gen-Val">
+	<tyRule>
 	  <tyPre>
 	    <pred name="Value">
 	      <aExpr/>
 	    </pred>
 	    <eq>
 	      <unf cl="yes">
-		<unin>
-		  <aCtset/>
-		  <Pcst>
-		    <lKind k="var"/>
-		    <type/>
-		    <type/>
-		  </Pcst>
-		</unin>		  
+		<aCtset/>
 	      </unf>
 	      <Pair>
 		<aCtset dash="'"/>
@@ -824,6 +839,17 @@
 		<type/>
 	      </Subst>
 	    </eq>
+	    <eq>
+	      <aCtset num="*"/>
+	      <unin>
+		<aCtset dash="'"/>
+		<Pcst>
+		  <lKind k="var"/>
+		  <type dash="'"/>
+		  <type dash="'"/>
+		</Pcst>
+	      </unin>
+	    </eq>
 	  </tyPre>
 	  <tyPre>
 	    <eq>
@@ -832,7 +858,7 @@
 		<paren>
 		  <unin>
 		    <ftvs><type dash="'"/></ftvs>
-		    <ftvs><aCtset dash="'"/></ftvs>
+		    <ftvs><aCtset num="*"/></ftvs>
 		  </unin>
 		</paren>
 		<paren>
@@ -859,7 +885,7 @@
 		<tvars name="alpha"/>
 		<ctype>
 		  <type dash="'"/>
-		  <aCtset dash="'"/>
+		  <aCtset num="*"/>
 		</ctype>
 	      </TS>
 	    </eq>
@@ -885,7 +911,7 @@
 	    </judge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="Gen-Exp">
+	<tyRule>
 	  <tyPre>
 	    <pred name="Expansive">
 	      <aExpr/>
@@ -944,6 +970,118 @@
 	  </tyConc>
 	</tyRule>
       </Hrules>
+      <!-- 
+      <Hrules  rowsep="4pt" colsep="2">
+      <tyRule name="TE-LETREC">
+      <tyPre>
+      <TEjudge>
+      <assume>
+      <extend>
+      <gamma/>
+      <mapping>
+      <id/>
+      <tvar name="beta"/>
+    </mapping>
+    </extend>
+      <store/>
+    </assume>
+      <conclude>
+      <tqExpr>
+      <aExpr num="1"/>
+      <type num="1"/>
+    </tqExpr>
+    </conclude>
+      <constrain>
+      <aCtset num="1"/>                  
+    </constrain>
+    </TEjudge>
+      <models name="unf">
+      <aSubMap/>
+      <aCtset num="1"/>                  
+    </models>
+      <Sjudge name="gen">
+      <assume>
+      <gamma/>
+      <store/>
+      <aExpr num="1"/>
+    </assume>
+      <GEN>
+      <Subst>
+      <aSubMap/>
+      <type num="1"/>
+    </Subst>
+      <aTS/>
+    </GEN>       
+    </Sjudge>  
+      <TEjudge>
+      <assume>
+      <extend>
+      <Subst>
+      <aSubMap/>                      
+      <gamma/>
+    </Subst>
+      <mapping>
+      <id/>
+      <aTS/>
+    </mapping>
+    </extend>
+      <Subst>
+      <aSubMap/>
+      <store/>
+    </Subst>
+    </assume>
+      <conclude>
+      <tqExpr>
+      <aExpr num="2"/>
+      <type num="2"/>
+    </tqExpr>
+    </conclude>
+      <constrain>
+      <aCtset num="2"/>
+    </constrain>
+    </TEjudge>
+    </tyPre>
+      <tyConc>
+      <TEjudge>
+      <assume>
+      <gamma/>
+      <store/>
+    </assume>
+      <conclude>
+      <tqExpr>
+      <let>
+      <id/>
+      <aExpr num="1"/>
+      <aExpr num="2"/>
+    </let>
+      <type num="2"/>
+    </tqExpr>
+    </conclude>
+      <constrain>        
+      <unin>
+      <aCtset num="1"/>
+      <aCtset num="2"/>
+      <set>
+      <forall> 
+      <in>
+      <SubMap>
+      <tvar name="alpha"/>
+      <type/>
+    </SubMap>
+      <aSubMap/>
+    </in>
+    </forall>
+      <eq>
+      <tvar name="alpha"/>
+      <type/>
+    </eq>
+    </set>
+    </unin>
+    </constrain>
+    </TEjudge>
+    </tyConc>
+    </tyRule>        
+    </Hrules> -->
     </btypes:TYPE>
   </font>
   <caption>Equational Inference Rules</caption>

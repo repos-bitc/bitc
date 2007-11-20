@@ -13,7 +13,7 @@
 	      <op symbol="odot">
 		<type num="1"/>
 		<type num="2"/>
-		<textit content=" ... "/>
+		<text content=" ... "/>
 		<type num="n"/>	      
 	      </op>
 	    </DBrac>
@@ -23,7 +23,7 @@
 		  <type num="1"/>
 		  <type num="2"/>
 		</op>
-		<textit content=" ... "/>
+		<text content=" ... "/>
 		<op symbol="odot">
 		  <type num="n-1"/>	      
 		  <type num="n"/>
@@ -58,26 +58,6 @@
 	</leadsto>	
       </Hrules>
       <Hrules rowsep="4pt">
-	<leadsto>
-	  <DBrac>
-	    <ceq via="alpha">
-	      <type num="1"/>
-	      <type num="2"/>
-	    </ceq>
-	  </DBrac>
-	  <DBrac>
-	    <collection>
-	      <Tsub>
-		<type num="1"/>
-		<tvar name="alpha"/>
-	      </Tsub>	      
-	      <Tsub>
-		<type num="2"/>
-		<tvar name="alpha"/>
-	      </Tsub>
-	    </collection>
-	  </DBrac>
-	</leadsto>		
 	<leadsto>
 	  <DBrac>
 	    <unf ac="yes">
@@ -141,88 +121,7 @@
 	    </unin>
 	  </notin>
 	  <space/>
-	  <textit content=", where "/>
-	  <space/>
-	  <eq>
-	    <aCtset num="rem"/>
-	    <set>
-	      <Tsub>
-		<tvar name="alpha"/>
-		<type/>
-	      </Tsub>
-	      <Tsub>
-		<type/>
-		<tvar name="alpha"/>
-	      </Tsub>
-	      <Pcst>
-		<lKind k="var"/>
-		<type/>
-		<type dash="'"/>
-	      </Pcst>
-	    </set>
-	  </eq>
-	  <textit content=", and"/>
-	  <space/>
-	</grouping>
-      </Hrules>
-      <Hrules>
-	<grouping>
-	  <eq>
-	    <aCtset num="hdl"/>
-	    <set>
-	      <Tsub>
-		<type/>
-		<type/>
-	      </Tsub>
-	      <Tsub>
-		<mutable>
-		  <type/>
-		</mutable>
-		<type/>
-	      </Tsub>
-	      <eq>
-		<lKind k="var"/>
-		<lKind/>
-	      </eq>
-	      <Tsub>
-		<fn>
-		  <type num="a"/>
-		  <type num="r"/>
-		</fn>
-		<fn>
-		  <type num="a" dash="'"/>
-		  <type num="r" dash="'"/>
-		</fn>
-	      </Tsub>
-	      <Tsub>
-		<ref>
-		  <type/>
-		</ref>
-		<ref>
-		  <type dash="'"/>
-		</ref>
-	      </Tsub>
-	      <Tsub>
-		<mutable>
-		  <type/>
-		</mutable>
-		<mutable>
-		  <type dash="'"/>
-		</mutable>
-	      </Tsub>
-	      <Pcst>
-		<lKind k="mono"/>
-		<type/>
-		<type dash="'"/>
-	      </Pcst>
-	      <Pcst>
-		<lKind k="poly"/>
-		<type/>
-		<type num="i"/>
-	      </Pcst>
-	    </set>
-	  </eq>
-	  <textit content=","/>
+	  <textit content="wherein, if: "/>
 	  <space/>
 	  <space/>
 	  <!-- Immut() is deep immutability, while
@@ -230,6 +129,136 @@
 	  <pred name="Immut">
 	    <type num="i"/>
 	  </pred>
+	  <text content=","/>
+	  <space/>
+	  <eq>
+	    <type num="f"/>
+	    <minz>
+	      <type num="f"/>
+	    </minz>
+	  </eq>
+	  <textit content=", and"/>
+	  <space/>
+	  <OR>
+	    <eq>
+	      <type num="m"/>
+	      <maxz>
+		<type num="m"/>
+	      </maxz>
+	    </eq>
+	    <eq>
+	      <type num="m"/>
+	      <tvar name="alpha"/>
+	    </eq>
+	  </OR>	  
+	  <textit content=","/>
+	  <space/>
+	  <textit content="then"/>
+	</grouping>
+      </Hrules>
+      <Hrules>
+	<eq>
+	  <aCtset num="hdl"/>
+	  <set>
+	    <Tsub>
+	      <type/>
+	      <type/>
+	    </Tsub>
+	    <Tsub>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <type/>
+	    </Tsub>
+	    <eq>
+	      <lKind k="var"/>
+	      <lKind/>
+	    </eq>
+	    <Tsub>
+	      <fn>
+		<type num="a"/>
+		<type num="r"/>
+	      </fn>
+	      <fn>
+		<type num="a" dash="'"/>
+		<type num="r" dash="'"/>
+	      </fn>
+	    </Tsub>
+	    <Tsub>
+	      <ref>
+		<type/>
+	      </ref>
+	      <ref>
+		<type dash="'"/>
+	      </ref>
+	    </Tsub>
+	    <Tsub>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <mutable>
+		<type dash="'"/>
+	      </mutable>
+	    </Tsub>
+	    <Pcst>
+	      <lKind k="mono"/>
+	      <type/>
+	      <type dash="'"/>
+	    </Pcst>
+	    <Pcst>
+	      <lKind k="poly"/>
+	      <type/>
+	      <type num="i"/>
+	    </Pcst>
+	    <Pcst>
+	      <lKind k="var"/>
+	      <type/>
+	      <type dash="'"/>
+	    </Pcst>
+	  </set>
+	</eq>
+      </Hrules>
+      <Hrules>
+	<eq>
+	  <aCtset num="rem"/>
+	  <set>
+	    <Tsub>
+	      <tvar name="alpha"/>
+	      <type/>
+	    </Tsub>
+	    <Tsub>
+	      <type/>
+	      <tvar name="alpha"/>
+	    </Tsub>
+	    <Tsub>
+	      <type/>
+	      <floor>
+		<type dash="'"/>
+	      </floor>
+	    </Tsub>
+	    <Tsub>
+	      <ceil>
+		<type/>
+	      </ceil>
+	      <type dash="'"/>
+	    </Tsub>
+	    <Tsub>
+	      <floor>
+		<type/>
+	      </floor>
+	      <type num="f"/>
+	    </Tsub>
+	    <Tsub>
+	      <type num="c"/>
+	      <ceil>
+		<type/>
+	      </ceil>
+	    </Tsub>
+	  </set>
+	</eq>
+      </Hrules>	  
+      <Hrules>
+	<grouping>
 	</grouping>
       </Hrules>
     </btypes:TYPE>

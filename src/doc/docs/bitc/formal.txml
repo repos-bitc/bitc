@@ -3750,6 +3750,25 @@
   </sect1>
   <sect1 id="eq-infer">
     <title>Equational Type Inference</title> 
+    <!-- <definition id="idemp">      
+      <title>Meta Constructors</title>      
+      <p>
+        <btypes:TYPE>
+          <floor>
+            <type/>
+          </floor>
+        </btypes:TYPE>
+        and 
+        <btypes:TYPE>
+          <ceil>
+            <type/>
+          </ceil>
+        </btypes:TYPE>
+        are "meta-constructors" which (respectively) minimize and
+        maximize the mutability of a type, but are interpreted
+        lazily. The meta-constructors defined are idempotent. 
+      </p>
+  </definition> -->
     <xi:include href="include/formal/eq-infer.xmli"/>
     <xi:include href="include/formal/eq-unify.xmli"/>
     <xi:include href="include/formal/eq-helper.xmli"/>
@@ -3762,24 +3781,10 @@
             <unit/>
             <bool/>
             <fn><type/><type/></fn>                  
-          </alternatives>                
-        </bnf>
-        <bnfc desc="">
-          <alternatives>
             <ref><type/></ref>
             <mutable><type/></mutable>
           </alternatives>
-        </bnfc>
-        <bnfc desc="Meta-Types">
-          <alternatives>
-            <ceil>
-              <type/>
-            </ceil>
-            <floor>
-              <type/>
-            </floor>
-          </alternatives>
-        </bnfc>
+        </bnf>
         <bnf desc="Constr. Type">
           <aCtype/>
           <alternatives>
@@ -3835,7 +3840,7 @@
         <bnf desc="Substitutions">            
           <aSubMap/>            
           <alternatives>
-            <Empty/>
+            <EmptySubst/>
             <SubMap>
               <tvar name="alpha"/>
               <type/>
@@ -3903,25 +3908,6 @@
         </eq>
       </btypes:TYPE>.        
     </p>
-    <definition id="idemp">      
-      <title>Meta Constructors</title>      
-      <p>
-        <btypes:TYPE>
-          <floor>
-            <type/>
-          </floor>
-        </btypes:TYPE>
-        and 
-        <btypes:TYPE>
-          <ceil>
-            <type/>
-          </ceil>
-        </btypes:TYPE>
-        are "meta-constructors" which (respectively) minimize and
-        maximize the mutability of a type, but are interpreted
-        lazily. The meta-constructors defined are idempotent. 
-      </p>
-    </definition>
     <definition id="define_infer">
       <title>Type Inference</title> 
       <p>
@@ -3936,7 +3922,7 @@
     </definition>
     <p>
       The equational type inference algorithm is as shown in
-      Figure&nbsp;<xref ref="eq2_infer"/>. 
+      Figure&nbsp;<xref ref="eq_infer"/>. 
       The inference judgment 
       <btypes:TYPE>
 	<TEjudge>
@@ -3962,9 +3948,9 @@
       <btypes:TYPE><aExpr/></btypes:TYPE> under the constraints
       <btypes:TYPE><aCtSet/></btypes:TYPE>. 
       The Unification algorithm is given in 
-      figure&nbsp;<xref ref="eq2_unify"/> with some auxilary
+      figure&nbsp;<xref ref="eq_unify"/> with some auxilary
       definitions and translations defined in 
-      figure&nbsp;<xref ref="eq2_helper"/>. 
+      figure&nbsp;<xref ref="eq_helper"/>. 
       The unification algorithm takes in a set of constraints
       <btypes:TYPE><aCtSet/></btypes:TYPE> and either fails with an
       error <btypes:TYPE><error/></btypes:TYPE>, or succeeds to 
@@ -3973,156 +3959,57 @@
         <p>
           The residual constraints in 
           <btypes:TYPE><aCtSet/></btypes:TYPE>
-          must be of the form
+          must be of one of the following forms:
           <btypes:TYPE>
-            <!-- P(k, t1, t2)  -->
-            <Pcst>
-              <lKind k="var"/>
-              <type num="g"/>
-              <type num="i"/>
-            </Pcst>
-            <text content=", "/>
             <!-- a <= t  -->
             <Tsub>
               <tvar name="alpha"/>
               <type/>
             </Tsub>
-            <text content=", "/>
+            <text content=","/>
+            <space/>
             <!-- t <= a  -->
             <Tsub>
               <type/>
               <tvar name="alpha"/>
             </Tsub>
+            <text content=", "/>
+            <space/>
             <!-- however, both of the cases a <= t and t <= a
             cannot occur since it can be reduced -->
-            <!-- Fa <= t  -->
-            <Tsub>
-              <floor>
-                <tvar name="alpha"/>
-              </floor>
+            <!-- P(k, t1, t2)  -->
+            <Pcst>
+              <lKind k="var"/>
               <type/>
-            </Tsub>
-            <!-- t <= Fa   -->
-            <Tsub>
-              <type/>
-              <floor>
-                <tvar name="alpha"/>
-              </floor>
-            </Tsub>
-            <!-- Ma <= t  -->
-            <Tsub>
-              <ceil>
-                <tvar name="alpha"/>
-              </ceil>
-              <type/>
-            </Tsub>
-            <!-- t <= Ma   -->
-            <Tsub>
-              <type/>
-              <ceil>
-                <tvar name="alpha"/>
-              </ceil>
-            </Tsub>            
-          </btypes:TYPE>.          
+              <type dash="'"/>
+            </Pcst>
+            <text content=", and"/>
+            <space/>
+            <Pcst>
+              <lKind k="poly"/>
+              <type num="g"/>
+              <type num="i"/>
+            </Pcst>
+            <text content=", where"/>
+            <space/>
+            <pred name="Immut">
+              <type num="i"/>
+            </pred>
+            <text content=", and"/>
+            <space/>
+            <neq>
+              <pred name="dtv">
+                <type num="i"/>
+              </pred>
+              <Empty/>
+            </neq>
+            <text content="."/>            
+          </btypes:TYPE>
         </p>
-      </footnote>  and a list of
+      </footnote> and a list of
       substitutions <btypes:TYPE><aSubMap/></btypes:TYPE> for the
       constraints solved in this pass.
     </p>
-    <definition id="ftvs-eq">
-      <title>Free Type Variables (Ext.)</title>
-      <p>
-        We define an extension to 
-        <btypes:TYPE>
-          <defn tag="ftvs"/>
-        </btypes:TYPE> for our current algebra of types.
-      </p>
-      <p>
-        <btypes:TYPE>
-          <eq>
-            <ftvs>
-              <tvar name="alpha"/>
-            </ftvs>
-            <tvar name="alpha"/>                
-          </eq>
-          <br/>
-          <eq>
-            <ftvs>
-              <unit/>
-            </ftvs>
-            <empty/>                
-          </eq>
-          <br/>
-          <eq>
-            <ftvs>
-              <bool/>
-            </ftvs>
-            <empty/>                
-          </eq>
-          <br/>
-          <eq>
-            <ftvs>
-              <fn>
-                <type num="1"/>
-                <type num="2"/>
-              </fn>
-            </ftvs>                                  
-            <unin>
-              <ftvs>
-                <type num="1"/>
-              </ftvs>                    
-              <ftvs>
-                <type num="2"/>
-              </ftvs>                    
-            </unin>                
-          </eq>          
-          <br/>
-          <eq>
-            <ftvs>
-              <ref>
-                <type/>
-              </ref>
-            </ftvs>
-            <ftvs>                  
-              <type/>                  
-            </ftvs>
-          </eq>              
-          <br/>
-          <eq>
-            <ftvs>
-              <mutable>
-                <type/>
-              </mutable>
-            </ftvs>
-            <ftvs>                  
-              <type/>                  
-            </ftvs>
-          </eq>          
-          <br/>
-          <eq>
-            <ftvs>
-              <floor>
-                <type/>
-              </floor>
-            </ftvs>
-            <ftvs>                  
-              <type/>                  
-            </ftvs>
-          </eq>
-          <br/>
-          <eq>
-            <ftvs>
-              <ceil>
-                <type/>
-              </ceil>
-            </ftvs>
-            <ftvs>                  
-              <type/>                  
-            </ftvs>
-          </eq>   
-        </btypes:TYPE>
-      </p>
-    </definition>
     <definition id="stvs-eq">
       <title>Shallow Type Variables</title>
       <p>
@@ -4172,23 +4059,6 @@
             </pred>
           </fnxn>
           <br/>
-          <fnxn name="stv">
-            <floor>
-              <type/>
-            </floor>
-            <pred name="stv">
-              <type/>
-            </pred>
-          </fnxn>
-          <br/>
-          <fnxn name="stv">
-            <ceil>
-              <type/>
-            </ceil>
-            <pred name="stv">
-              <type/>
-            </pred>
-          </fnxn>
         </btypes:TYPE>
       </p>
     </definition>    
@@ -4238,24 +4108,6 @@
             <ref>
               <type/>
             </ref>
-            <pred name="dtv">
-              <type/>
-            </pred>		
-          </fnxn>
-          <br/>
-          <fnxn name="dtv">
-            <floor>
-              <type/>
-            </floor>
-            <pred name="dtv">
-              <type/>
-            </pred>		
-          </fnxn>
-          <br/>
-          <fnxn name="dtv">
-            <ceil>
-              <type/>
-            </ceil>
             <pred name="dtv">
               <type/>
             </pred>		

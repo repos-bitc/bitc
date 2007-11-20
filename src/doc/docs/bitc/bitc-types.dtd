@@ -146,6 +146,7 @@
 <!-- Set Opeartions -->
 <!ELEMENT empty                 EMPTY> <-- {} -->
 <!ELEMENT Empty                 EMPTY> <-- \emptyset -->
+<!ELEMENT EmptySubst            EMPTY> <-- <> -->
 <!ELEMENT set                   %anything.group;*> <!-- construct a set -->
 <!ELEMENT inOp                  EMPTY>
 <!ELEMENT in                    (%anything.group;*, %anyset.group;)>
@@ -727,6 +728,7 @@
 <!ELEMENT unf                  %constraint.group;>
 <!ATTLIST unf
                                ac        (yes|no)   #IMPLIED
+                               cl        (yes|no)   #IMPLIED
 >
 
 
@@ -1159,9 +1161,12 @@
                                rowsep      CDATA    #IMPLIED>
 <!ELEMENT opHorzRules          opRule*>
 
-<!ELEMENT equation             %anything.group;,%anything.group;, %anything.group;* >
+<!ELEMENT equation             lhs, rhs>
 <!ATTLIST equation
                                sep         CDATA      #IMPLIED>
+<!--  0-thing, where 1, 2, ..., and n --> 
+<!ELEMENT lhs                  %anything.group;*>
+<!ELEMENT rhs                  %anything.group;*>
 <!ELEMENT VEqns                equation*>
 
 
