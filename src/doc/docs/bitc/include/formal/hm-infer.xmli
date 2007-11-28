@@ -182,16 +182,12 @@
 		    <id/>
 		    <aExpr/>
 		  </lambda>
-		  <fn>
-		    <floor>
-		      <Subst>
-			<aSubMap/>
-			<tvar name="alpha"/>
-		      </Subst>
-		    </floor>
-		    <ceil>
-		      <type/>
-		    </ceil>
+		  <fn M="yes">		    
+		    <Subst>
+		      <aSubMap/>
+		      <tvar name="alpha"/>
+		    </Subst>		    		    
+		    <type/>		    
 		  </fn>
 		</tqExpr>
 	      </conclude>
@@ -353,46 +349,48 @@
 	      </Subst>
 	      <mbpair>
 		<tvar name="beta"/>
-		<fn>
-		  <floor>
-		    <tvar name="delta"/>
-		  </floor>
-		  <ceil>
-		    <tvar name="alpha"/>
-		  </ceil>
+		<fn M="yes">
+		  <tvar name="delta"/>
+		  <tvar name="alpha"/>
 		</fn>
 	      </mbpair>
 	      <aSubMap num="f"/>
 	    </UNIFY>
 	  </tyPre>
 	  <tyPre>
+	    <!-- minz here is sufficient (no need for floor) 
+	    because we are unifying the argument, and we would have
+	    known all we can about the argument type (until a ref
+	    boundary) at this point -->
 	    <UNIFY>
-	      <type num="2"/>
+	      <type num="2"/>	      
 	      <mbpair>
-		<tvar name="gamma"/>
-		<floor>
+		<tvar name="gamma"/>		
+		<minz>
 		  <Subst>
 		    <aSubMap num="f"/>
 		    <tvar name="delta"/>
 		  </Subst>
-		</floor>
+		</minz>
 	      </mbpair>
 	      <aSubMap num="a"/>
 	    </UNIFY>
+	    <!-- A minz() here will loose mutability information
+	    wrt identity function, etc. But this is all we can do 
+	    if we must keep inference deterministic. -->
 	    <eq>
 	      <type/>
 	      <mbpair>
 		<tvar name="epsiv"/>
-		<Subst>
-		  <aSubMap num="a"/>
-		  <minz>
-		    <Subst>
+		<minz>
+		  <Subst>
+		    <scomp>
+		      <aSubMap num="a"/>
 		      <aSubMap num="f"/>
-		      <tvar name="alpha"/>
-		    </Subst>
-		  </minz>
-		  <type/>
-		</Subst>
+		    </scomp>
+		    <tvar name="alpha"/>
+		  </Subst>
+		</minz>
 	      </mbpair>
 	    </eq>
 	    <models name="new">

@@ -320,11 +320,11 @@
 	      <unin>
 		<set>
 		  <Tsub>
-		    <fn>		    
+		    <fn M="yes">		    
 		      <type num="a"/>		    		    
 		      <type num="r"/>		    
 		    </fn>
-		    <fn>		    
+		    <fn M="yes">		    
 		      <type num="a" dash="'"/>		    		    
 		      <type num="r" dash="'"/>
 		    </fn>
@@ -635,122 +635,235 @@
 	  </rhs>
 	</equation>
       </VEqns>      
-      <VEqns>
-	<equation>
-	  <lhs>	    
-	    <aCtset num="rem"/>
-	  </lhs>
-	  <rhs>
-	    <grouping>
-	      <Forall>
-		<collection>
-		  <tvar name="alpha"/>
-		  <lKind k="var"/>
-		  <type/>
-		  <type dash="'"/>
-		</collection>
-	      </Forall>
-	      <textit content="."/>
-	      <space/>
-	      <set>
-		<Tsub>
-		  <tvar name="alpha"/>
-		  <type/>
-		</Tsub>
-		<Tsub>
-		  <type/>
-		  <tvar name="alpha"/>
-		</Tsub>
-		<Pcst>
-		  <lKind k="var"/>
-		  <type/>
-		  <type dash="'"/>
-		</Pcst>
-	      </set>
-	    </grouping>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <aCtset num="hdl"/>
-	  </lhs>
-	  <rhs>
-	    <grouping>
-	      <Forall>
-		<collection>
-		  <tvar name="alpha"/>
-		  <lKind k="var"/>
-		  <lKind/>
-		  <type/>
-		  <type dash="'"/>
-		  <type num="1"/>
-		  <type num="1" dash="'"/>
-		  <type num="i"/>
-		</collection>
-	      </Forall>
-	      <text content="|"/>
-	      <pred name="Immut">
+      <Hrules>
+	<eq>
+	  <aCtset num="rem"/>
+	  <grouping>
+	    <Forall>
+	      <collection>
+		<tvar name="alpha"/>
+		<lKind k="var"/>
+		<type/>
+		<type dash="'"/>
+	      </collection>
+	    </Forall>
+	    <textit content="."/>
+	    <space/>
+	    <set>
+	      <Tsub>
+		<tvar name="alpha"/>
+		<type/>
+	      </Tsub>
+	      <Tsub>
+		<type/>
+		<tvar name="alpha"/>
+	      </Tsub>
+	      <Pcst>
+		<lKind k="var"/>
+		<type/>
+		<type dash="'"/>
+	      </Pcst>
+	    </set>
+	  </grouping>
+	</eq>
+      </Hrules>
+      <Hrules>
+	<eq>
+	  <aCtset num="hdl"/>
+	  <grouping>
+	    <Forall>
+	      <collection>
+		<tvar name="alpha"/>
+		<lKind k="var"/>
+		<lKind/>
+		<type/>
+		<type dash="'"/>
+		<type num="1"/>
+		<type num="1" dash="'"/>
 		<type num="i"/>
-	      </pred>
-	      <space/>
-	      <text content="."/>
-	      <space/>	      
-	      <set>
-		<Tsub>
+	      </collection>
+	    </Forall>
+	    <text content="|"/>
+	    <pred name="Immut">
+	      <type num="i"/>
+	    </pred>
+	    <space/>
+	    <text content="."/>
+	    <space/>	      
+	    <set>
+	      <Tsub>
+		<type/>
+		<type/>
+	      </Tsub>
+	      <Tsub>
+		<mutable>
 		  <type/>
+		</mutable>
+		<type/>
+	      </Tsub>
+	      <eq>
+		<lKind k="var"/>
+		<lKind/>
+	      </eq>
+	      <Tsub>
+		<fn M="yes">
 		  <type/>
-		</Tsub>
-		<Tsub>
-		  <mutable>
-		    <type/>
-		  </mutable>
-		  <type/>
-		</Tsub>
-		<eq>
-		  <lKind k="var"/>
-		  <lKind/>
-		</eq>
-		<Tsub>
-		  <fn>
-		    <type/>
-		    <type num="1"/>
-		  </fn>
-		  <fn>
-		    <type dash="'"/>
-		    <type num="1" dash="'"/>
-		  </fn>
-		</Tsub>
-		<Tsub>
-		  <ref>
-		    <type/>
-		  </ref>
-		  <ref>
-		    <type dash="'"/>
-		  </ref>
-		</Tsub>
-		<Tsub>
-		  <mutable>
-		    <type/>
-		  </mutable>
-		  <mutable>
-		    <type dash="'"/>
-		  </mutable>
-		</Tsub>
-		<Pcst>
-		  <lKind k="mono"/>
-		  <type/>
+		  <type num="1"/>
+		</fn>
+		<fn M="yes">
 		  <type dash="'"/>
-		</Pcst>
-		<Pcst>
-		  <lKind k="poly"/>
+		  <type num="1" dash="'"/>
+		</fn>
+	      </Tsub>
+	      <Tsub>
+		<ref>
 		  <type/>
-		  <type num="i"/>
-		</Pcst>
-	      </set>
-	    </grouping>
-	  </rhs>
-	</equation>	
-       </VEqns>
+		</ref>
+		<ref>
+		  <type dash="'"/>
+		</ref>
+	      </Tsub>
+	      <Tsub>
+		<mutable>
+		  <type/>
+		</mutable>
+		<mutable>
+		  <type dash="'"/>
+		</mutable>
+	      </Tsub>
+	      <Pcst>
+		<lKind k="mono"/>
+		<type/>
+		<type dash="'"/>
+	      </Pcst>
+	      <Pcst>
+		<lKind k="poly"/>
+		<type/>
+		<type num="i"/>
+	      </Pcst>
+	    </set>
+	  </grouping>
+	</eq>
+      </Hrules>
+
+<!--       <VEqns> -->
+<!-- 	<equation> -->
+<!-- 	  <lhs>	     -->
+<!-- 	    <aCtset num="rem"/> -->
+<!-- 	  </lhs> -->
+<!-- 	  <rhs> -->
+<!-- 	    <grouping> -->
+<!-- 	      <Forall> -->
+<!-- 		<collection> -->
+<!-- 		  <tvar name="alpha"/> -->
+<!-- 		  <lKind k="var"/> -->
+<!-- 		  <type/> -->
+<!-- 		  <type dash="'"/> -->
+<!-- 		</collection> -->
+<!-- 	      </Forall> -->
+<!-- 	      <textit content="."/> -->
+<!-- 	      <space/> -->
+<!-- 	      <set> -->
+<!-- 		<Tsub> -->
+<!-- 		  <tvar name="alpha"/> -->
+<!-- 		  <type/> -->
+<!-- 		</Tsub> -->
+<!-- 		<Tsub> -->
+<!-- 		  <type/> -->
+<!-- 		  <tvar name="alpha"/> -->
+<!-- 		</Tsub> -->
+<!-- 		<Pcst> -->
+<!-- 		  <lKind k="var"/> -->
+<!-- 		  <type/> -->
+<!-- 		  <type dash="'"/> -->
+<!-- 		</Pcst> -->
+<!-- 	      </set> -->
+<!-- 	    </grouping> -->
+<!-- 	  </rhs> -->
+<!-- 	</equation> -->
+<!-- 	<equation> -->
+<!-- 	  <lhs> -->
+<!-- 	    <aCtset num="hdl"/> -->
+<!-- 	  </lhs> -->
+<!-- 	  <rhs> -->
+<!-- 	    <grouping> -->
+<!-- 	      <Forall> -->
+<!-- 		<collection> -->
+<!-- 		  <tvar name="alpha"/> -->
+<!-- 		  <lKind k="var"/> -->
+<!-- 		  <lKind/> -->
+<!-- 		  <type/> -->
+<!-- 		  <type dash="'"/> -->
+<!-- 		  <type num="1"/> -->
+<!-- 		  <type num="1" dash="'"/> -->
+<!-- 		  <type num="i"/> -->
+<!-- 		</collection> -->
+<!-- 	      </Forall> -->
+<!-- 	      <text content="|"/> -->
+<!-- 	      <pred name="Immut"> -->
+<!-- 		<type num="i"/> -->
+<!-- 	      </pred> -->
+<!-- 	      <space/> -->
+<!-- 	      <text content="."/> -->
+<!-- 	      <space/>	       -->
+<!-- 	      <set> -->
+<!-- 		<Tsub> -->
+<!-- 		  <type/> -->
+<!-- 		  <type/> -->
+<!-- 		</Tsub> -->
+<!-- 		<Tsub> -->
+<!-- 		  <mutable> -->
+<!-- 		    <type/> -->
+<!-- 		  </mutable> -->
+<!-- 		  <type/> -->
+<!-- 		</Tsub> -->
+<!-- 		<eq> -->
+<!-- 		  <lKind k="var"/> -->
+<!-- 		  <lKind/> -->
+<!-- 		</eq> -->
+<!-- 		<Tsub> -->
+<!-- 		  <fn M="yes"> -->
+<!-- 		    <type/> -->
+<!-- 		    <type num="1"/> -->
+<!-- 		  </fn> -->
+<!-- 		  <fn M="yes"> -->
+<!-- 		    <type dash="'"/> -->
+<!-- 		    <type num="1" dash="'"/> -->
+<!-- 		  </fn> -->
+<!-- 		</Tsub> -->
+<!-- 		<Tsub> -->
+<!-- 		  <ref> -->
+<!-- 		    <type/> -->
+<!-- 		  </ref> -->
+<!-- 		  <ref> -->
+<!-- 		    <type dash="'"/> -->
+<!-- 		  </ref> -->
+<!-- 		</Tsub> -->
+<!-- 		<Tsub> -->
+<!-- 		  <mutable> -->
+<!-- 		    <type/> -->
+<!-- 		  </mutable> -->
+<!-- 		  <mutable> -->
+<!-- 		    <type dash="'"/> -->
+<!-- 		  </mutable> -->
+<!-- 		</Tsub> -->
+<!-- 		<Pcst> -->
+<!-- 		  <lKind k="mono"/> -->
+<!-- 		  <type/> -->
+<!-- 		  <type dash="'"/> -->
+<!-- 		</Pcst> -->
+<!-- 		<Pcst> -->
+<!-- 		  <lKind k="poly"/> -->
+<!-- 		  <type/> -->
+<!-- 		  <type num="i"/> -->
+<!-- 		</Pcst> -->
+<!-- 	      </set> -->
+<!-- 	    </grouping> -->
+<!-- 	  </rhs> -->
+<!-- 	</equation>	 -->
+<!--        </VEqns> -->
+
+
     </btypes:TYPE>
   </font>
   <caption>Equational Unification Rules</caption>

@@ -554,6 +554,9 @@
 
 <!ELEMENT fnOp                 EMPTY>
 <!ELEMENT fn                   (%anytype.group;, %anytype.group;)>
+<!ATTLIST fn
+                               M       yes           #IMPLIED <!-- with meta constructors -->
+>
 <!ELEMENT refOp                EMPTY>
 <!ELEMENT ref                  (%anytype.group;)>
 <!ELEMENT array                (%anytype.group;)>

@@ -176,64 +176,56 @@
 	    </Sjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="Sol-Ceil">
+	<tyRule name="Sol-Fn">
 	  <tyPre>
-	    <Sjudge name="s">
-	      <assume>
-		<aSubMap/>                    
-	      </assume>
-	      <corUp>
-		<type/>                      
-		<type dash="'"/>
-	      </corUp>
-	    </Sjudge>                
-	  </tyPre>
-	  <tyConc>
 	    <Sjudge name="s">
 	      <assume>
 		<aSubMap/>
 	      </assume>
 	      <corUp>
-		<ceil>
-		  <type/>
-		</ceil>
-		<ceil>
-		  <type dash="'"/>
-		</ceil>
+		<type num="1"/>                      
+		<type num="1" dash="'"/>
 	      </corUp>
 	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="Sol-Floor">
-	  <tyPre>
 	    <Sjudge name="s">
 	      <assume>
-		<aSubMap/>                    
+		<aSubMap dash="'"/>
 	      </assume>
 	      <corUp>
-		<type/>                      
-		<type dash="'"/>
+		<Subst>
+		  <aSubMap/>
+		  <type num="2"/>
+		</Subst>
+		<type  num="2" dash="'"/>
 	      </corUp>
-	    </Sjudge>                
+	    </Sjudge>
 	  </tyPre>
 	  <tyConc>
 	    <Sjudge name="s">
 	      <assume>
-		<aSubMap/>
+		<compose>
+		  <aSubMap/>
+		  <aSubMap dash="'"/>
+		</compose>
 	      </assume>
 	      <corUp>
-		<floor>
-		  <type/>
-		</floor>
-		<floor>
-		  <type dash="'"/>
-		</floor>
+		<fn M="yes">
+		  <type num="1"/>
+		  <type num="2"/>
+		</fn>
+		<fn M="yes">
+		  <Subst>
+		    <aSubMap dash="'"/>
+		    <type num="1" dash="'"/>
+		  </Subst>
+		  <type num="2" dash="'"/>
+		</fn>
 	      </corUp>
 	    </Sjudge>
 	  </tyConc>
 	</tyRule>
       </Hrules>
-      <Hrules colsep="2">
+      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="Sol-Ref">
 	  <tyPre>
 	    <Sjudge name="s">
@@ -262,56 +254,6 @@
 	    </Sjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="Sol-Fn">
-	  <tyPre>
-	    <Sjudge name="s">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <corUp>
-		<type num="1"/>                      
-		<type num="1" dash="'"/>
-	      </corUp>
-	    </Sjudge>
-	  </tyPre>
-	  <tyPre>
-	    <Sjudge name="s">
-	      <assume>
-		<aSubMap dash="'"/>
-	      </assume>
-	      <corUp>
-		<Subst>
-		  <aSubMap/>
-		  <type num="2"/>
-		</Subst>
-		<type  num="2" dash="'"/>
-	      </corUp>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="s">
-	      <assume>
-		<compose>
-		  <aSubMap/>
-		  <aSubMap dash="'"/>
-		</compose>
-	      </assume>
-	      <corUp>
-		<fn>
-		  <type num="1"/>
-		  <type num="2"/>
-		</fn>
-		<fn>
-		  <Subst>
-		    <aSubMap dash="'"/>
-		    <type num="1" dash="'"/>
-		  </Subst>
-		  <type num="2" dash="'"/>
-		</fn>
-	      </corUp>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
 	<tyRule name="Sol-Ct-Var">
 	  <tyPre>
 	    <eq>
@@ -327,8 +269,6 @@
 		<type num="2" dash="'"/>
 	      </corUp>
 	    </Sjudge>
-	  </tyPre>
-	  <tyPre>
 	    <eq>
 	      <aSubMap dash="'"/>
 	      <SubMap>
@@ -368,8 +308,6 @@
 		<type num="2"/>
 	      </mbpair>
 	    </models>
-	  </tyPre>
-	  <tyPre>
 	    <Sjudge name="s">
 	      <assume>
 		<aSubMap/>

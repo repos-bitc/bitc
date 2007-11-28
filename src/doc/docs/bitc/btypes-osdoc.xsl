@@ -1094,17 +1094,36 @@
     </xsl:element>
   </xsl:template>
 
-  <!-- Functions &uarr; ... -->
+  <!-- Functions ... &rarr; ... -->
   <xsl:template match="fnOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>rarr;</xsl:text>
   </xsl:template>
   <xsl:template match="fn" mode="formula">
-    <xsl:call-template name="print.infix">
-      <xsl:with-param name="print.infix.op">rarr;</xsl:with-param> 
-    </xsl:call-template>
+    <xsl:if test = "@M">	
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>lfloor;</xsl:text>
+    </xsl:if>
+    <xsl:apply-templates select="*[1]" mode="formula"/>
+    <xsl:if test = "@M">	
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>rfloor;</xsl:text>
+    </xsl:if>
+    <xsl:call-template name="print.space"/>    
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rarr;</xsl:text>
+    <xsl:call-template name="print.space"/>    
+    <xsl:if test = "@M">	
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>lceil;</xsl:text>
+    </xsl:if>
+    <xsl:apply-templates select="*[2]" mode="formula"/>
+    <xsl:if test = "@M">	
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>rceil;</xsl:text>
+    </xsl:if>
   </xsl:template>
-
+  
   <!-- ref &uarr; ... -->
   <xsl:template match="refOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -3482,7 +3501,7 @@
 	  </xsl:when>
 	  <xsl:when test="$print.infix.nosp='yes'">
 	    <!-- nothing -->
-	  </xsl:when>
+	  </xsl:when> 
 	  <xsl:otherwise>
 	    <xsl:call-template name="print.space"/>
 	  </xsl:otherwise>

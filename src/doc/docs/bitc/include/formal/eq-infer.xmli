@@ -212,7 +212,7 @@
 		    <id/>
 		    <aExpr/>
 		  </lambda>
-		  <fn>		    
+		  <fn M="yes">		    
 		    <tvar name="beta"/>		    		    
 		    <tvar name="gamma"/>		    
 		  </fn>
@@ -299,7 +299,7 @@
 		  <set>
 		    <Tsub>
 		      <type num="1"/>
-		      <fn>			
+		      <fn M="yes">			
 			<tvar name="beta"/>						
 			<tvar name="gamma"/>			
 		      </fn>

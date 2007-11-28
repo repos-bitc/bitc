@@ -3750,25 +3750,6 @@
   </sect1>
   <sect1 id="eq-infer">
     <title>Equational Type Inference</title> 
-    <!-- <definition id="idemp">      
-      <title>Meta Constructors</title>      
-      <p>
-        <btypes:TYPE>
-          <floor>
-            <type/>
-          </floor>
-        </btypes:TYPE>
-        and 
-        <btypes:TYPE>
-          <ceil>
-            <type/>
-          </ceil>
-        </btypes:TYPE>
-        are "meta-constructors" which (respectively) minimize and
-        maximize the mutability of a type, but are interpreted
-        lazily. The meta-constructors defined are idempotent. 
-      </p>
-  </definition> -->
     <xi:include href="include/formal/eq-infer.xmli"/>
     <xi:include href="include/formal/eq-unify.xmli"/>
     <xi:include href="include/formal/eq-helper.xmli"/>
@@ -3780,11 +3761,15 @@
             <tvar name="alpha"/>
             <unit/>
             <bool/>
-            <fn><type/><type/></fn>                  
+            <fn M="yes"><type/><type/></fn>                  
+          </alternatives>
+        </bnf>
+        <bnfc desc="">
+          <alternatives>
             <ref><type/></ref>
             <mutable><type/></mutable>
           </alternatives>
-        </bnf>
+        </bnfc>
         <bnf desc="Constr. Type">
           <aCtype/>
           <alternatives>
@@ -3820,6 +3805,11 @@
               <type/>
               <type/> 
             </Tsub>
+            <Pcst>
+              <lKind/>
+              <type/>
+              <type/>
+            </Pcst>
           </alternatives>
         </bnf>
         <bnf desc="Constraint Sets">
@@ -3908,6 +3898,151 @@
         </eq>
       </btypes:TYPE>.        
     </p>
+    <definition id="meta">      
+      <title>Meta Constructors</title>      
+      <p>
+        <btypes:TYPE>
+          <floor>
+            <type/>
+          </floor>
+        </btypes:TYPE>
+        and 
+        <btypes:TYPE>
+          <ceil>
+            <type/>
+          </ceil>
+        </btypes:TYPE>
+        are "meta-constructors" which (respectively) minimize and
+        maximize the mutability of a type, but are interpreted
+        lazily. The meta-constructors are idempotent. 
+      </p>
+    </definition>
+    Note that in our type system, we have restricted meta types to be
+    syntactically present only as part of function types.
+    <definition id="pcst">      
+      <title>Meta Polymorphic Constraints</title>      
+      <p>
+        The constraint 
+        <btypes:TYPE>
+          <Pcst>
+            <lKind/>
+            <type/>
+            <type dash="'"/>
+          </Pcst>
+        </btypes:TYPE> is used to express types that are polymorphic
+        <em>over</em> polymorphism and mutability. 
+        The type 
+        <btypes:TYPE>
+          <type dash="'"/>
+        </btypes:TYPE> can only be a specialization of 
+        <btypes:TYPE>
+          <type/>
+        </btypes:TYPE>, obtained through some substituion.        
+        A Substitution over the polymorphic constraint is defined as:
+        <btypes:TYPE>
+          <eq>
+            <Subst>
+              <aSubMap/>
+              <Pcst>
+                <lKind/>
+                <type/>
+                <type dash="'"/>
+              </Pcst>
+            </Subst>
+            <Pcst>
+              <Subst>
+                <aSubMap/>                
+                <lKind/>
+              </Subst>
+              <type/>              
+              <Subst>
+                <aSubMap/>
+                <type dash="'"/>
+              </Subst>
+            </Pcst>
+          </eq>
+        </btypes:TYPE>.
+        A substitution 
+        <btypes:TYPE>
+          <aSubMap/>
+        </btypes:TYPE> satisfies the set of constraints
+        <btypes:TYPE>
+          <set>
+            <Pcst>
+              <lKind k="var"/>
+              <type/>
+              <type num="1"/>
+            </Pcst>
+            <text content="..."/>
+            <Pcst>
+              <lKind k="var"/>
+              <type/>
+              <type num="n"/>
+            </Pcst>
+          </set>
+        </btypes:TYPE> if and only if:
+      </p>
+      <ol>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <eq>
+                <Subst>
+                  <aSubMap/>
+                  <lKind k="var"/>
+                </Subst>
+                <lKind k="mono"/>
+              </eq>
+            </btypes:TYPE>
+            and
+            <btypes:TYPE>
+              <eq>
+                <Subst>
+                  <aSubMap/>
+                  <type num="1"/>
+                </Subst>
+                <text content="..."/>
+                <Subst>
+                  <aSubMap/>
+                  <type num="n"/>
+                </Subst>
+              </eq>
+            </btypes:TYPE>, or
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <eq>
+                <Subst>
+                  <aSubMap/>
+                  <lKind k="var"/>
+                </Subst>
+                <lKind k="poly"/>
+              </eq>
+            </btypes:TYPE>
+            and
+            <btypes:TYPE>
+              <collection>
+                <pred name="Immut">
+                  <Subst>
+                    <aSubMap/>
+                    <type num="1"/>
+                  </Subst>
+                </pred>
+                <text content="..."/>
+                <pred name="Immut">
+                  <Subst>
+                    <aSubMap/>
+                    <type num="n"/>
+                  </Subst>
+                </pred>
+              </collection>
+            </btypes:TYPE>
+          </p>
+        </li>
+      </ol>
+    </definition>
     <definition id="define_infer">
       <title>Type Inference</title> 
       <p>
@@ -3955,58 +4090,54 @@
       <btypes:TYPE><aCtSet/></btypes:TYPE> and either fails with an
       error <btypes:TYPE><error/></btypes:TYPE>, or succeeds to 
       result in a pair consisting of residual constraints
-      <btypes:TYPE><aCtSet/></btypes:TYPE> <footnote>
-        <p>
-          The residual constraints in 
-          <btypes:TYPE><aCtSet/></btypes:TYPE>
-          must be of one of the following forms:
-          <btypes:TYPE>
-            <!-- a <= t  -->
-            <Tsub>
-              <tvar name="alpha"/>
-              <type/>
-            </Tsub>
-            <text content=","/>
-            <space/>
-            <!-- t <= a  -->
-            <Tsub>
-              <type/>
-              <tvar name="alpha"/>
-            </Tsub>
-            <text content=", "/>
-            <space/>
-            <!-- however, both of the cases a <= t and t <= a
-            cannot occur since it can be reduced -->
-            <!-- P(k, t1, t2)  -->
-            <Pcst>
-              <lKind k="var"/>
-              <type/>
-              <type dash="'"/>
-            </Pcst>
-            <text content=", and"/>
-            <space/>
-            <Pcst>
-              <lKind k="poly"/>
-              <type num="g"/>
-              <type num="i"/>
-            </Pcst>
-            <text content=", where"/>
-            <space/>
-            <pred name="Immut">
-              <type num="i"/>
-            </pred>
-            <text content=", and"/>
-            <space/>
-            <neq>
-              <pred name="dtv">
-                <type num="i"/>
-              </pred>
-              <Empty/>
-            </neq>
-            <text content="."/>            
-          </btypes:TYPE>
-        </p>
-      </footnote> and a list of
+      <btypes:TYPE><aCtSet/></btypes:TYPE> 
+      (which should only contain constraints of the form:
+      <btypes:TYPE>
+        <!-- a <= t  -->
+        <Tsub>
+          <tvar name="alpha"/>
+          <type/>
+        </Tsub>
+        <text content=","/>
+        <space/>
+        <!-- t <= a  -->
+        <Tsub>
+          <type/>
+          <tvar name="alpha"/>
+        </Tsub>
+        <text content=", "/>
+        <space/>
+        <!-- however, both of the cases a <= t and t <= a
+        cannot occur since it can be reduced -->
+        <!-- P(k, t1, t2)  -->
+        <Pcst>
+          <lKind k="var"/>
+          <type/>
+          <type dash="'"/>
+        </Pcst>
+        <text content=", and"/>
+        <space/>
+        <Pcst>
+          <lKind k="poly"/>
+          <type num="g"/>
+          <type num="i"/>
+        </Pcst>
+        <text content=", where"/>
+        <space/>
+        <pred name="Immut">
+          <type num="i"/>
+        </pred>
+        <text content=", and"/>
+        <space/>
+        <neq>
+          <pred name="dtv">
+            <type num="i"/>
+          </pred>
+          <Empty/>
+        </neq>
+        <text content="."/>            
+      </btypes:TYPE>)
+      and a list of
       substitutions <btypes:TYPE><aSubMap/></btypes:TYPE> for the
       constraints solved in this pass.
     </p>
@@ -4338,7 +4469,7 @@
             <tvar name="alpha"/>
             <unit/>
             <bool/>
-            <fn><type/><type/></fn>                  
+            <fn M="yes"><type/><type/></fn>                  
           </alternatives>                
         </bnf>
         <bnfc desc="">
@@ -4355,16 +4486,6 @@
             </mbpair>              
           </alternatives>
         </bnfc>
-        <!--         <bnfc desc="Meta-Types"> -->
-        <!--           <alternatives> -->
-        <!--             <ceil> -->
-        <!--               <type/> -->
-        <!--             </ceil> -->
-        <!--             <floor> -->
-        <!--               <type/> -->
-        <!--             </floor> -->
-        <!--           </alternatives> -->
-        <!--         </bnfc> -->
         <bnf desc="Type Scheme">
           <aTS/>
           <alternatives>
@@ -4454,9 +4575,9 @@
       and write
       <btypes:TYPE>
 	<TIjudge>
-          <precondition>
+          <precond>
 	    <aSubMap num="0"/>
-          </precondition>
+          </precond>
 	  <assume>
 	    <gamma/>
 	    <store/>

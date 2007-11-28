@@ -7,34 +7,10 @@
     <btypes:TYPE
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
       <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="Unify">
-	  <tyPre>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<Xform name="real" isEntity="yes">
-		  <type num="1"/>
-		</Xform>
-		<Xform name="real" isEntity="yes">
-		  <type num="2"/>
-		</Xform>
-	      </eq>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <UNIFY>
-	      <type num="1"/>
-	      <type num="2"/>
-	      <aSubMap/>
-	    </UNIFY>
-	  </tyConc>
-	</tyRule>
-       <tyRule name="U-Refl">
+	<tyRule name="U-Refl">
           <tyPre/>
           <tyConc>
-            <Sjudge name="u">
+            <Sjudge name="unf">
               <assume>
                 <Empty/>
               </assume>
@@ -47,7 +23,7 @@
         </tyRule>
 	<tyRule name="U-Commut">
 	  <tyPre>
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<aSubMap/>
 	      </assume>
@@ -58,7 +34,7 @@
 	    </Sjudge>
 	  </tyPre>
 	  <tyConc>
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<aSubMap/>
 	      </assume>
@@ -77,7 +53,7 @@
 	    </neq>
 	  </tyPre>
 	  <tyConc>
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<SubMap>
 		  <tvar name="alpha"/>
@@ -93,7 +69,7 @@
 	</tyRule>
 	<tyRule name="U-Mut">
 	  <tyPre>                
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<aSubMap/>
 	      </assume>
@@ -104,7 +80,7 @@
 	    </Sjudge>
 	  </tyPre>
 	  <tyConc>
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<aSubMap/>
 	      </assume>
@@ -119,32 +95,68 @@
 	    </Sjudge>
 	  </tyConc>
 	</tyRule>
+	<tyRule name="U-Ref">
+	  <tyPre>                
+	    <Sjudge name="unf">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <eq>
+		<type num="1"/>
+		<type num="2"/>
+	      </eq>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="unf">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <eq>
+		<ref>
+		  <type num="1"/>
+		</ref>
+		<ref>
+		  <type num="2"/>
+		</ref>
+	      </eq>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="U-Fn">
 	  <tyPre>                
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<aSubMap/>
 	      </assume>
-	      <eq>	      
-		<type num="1"/>
-		<type num="1" dash="'"/>
+	      <eq>	
+		<minz>
+		  <type num="1"/>
+		</minz>
+		<minz>
+		  <type num="1" dash="'"/>
+		</minz>
 	      </eq>
 	    </Sjudge>
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<aSubMap dash="'"/>
 	      </assume>
 	      <eq>
-		<Subst>
-		  <aSubMap/>
-		  <type num="2"/>
-		</Subst>
-		<Subst>
-		  <aSubMap/>
-		  <type num="2" dash="'"/>
-		</Subst>
+		<maxz>
+		  <Subst>
+		    <aSubMap/>
+		    <type num="2"/>
+		  </Subst>
+		</maxz>
+		<maxz>
+		  <Subst>
+		    <aSubMap/>
+		    <type num="2" dash="'"/>
+		  </Subst>
+		</maxz>
 	      </eq>
 	    </Sjudge>
 	    <models name="acl">
@@ -156,7 +168,7 @@
 	    </models>
 	  </tyPre>
 	  <tyConc> 
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<compose>
 		  <aSubMap/>
@@ -164,11 +176,11 @@
 		</compose>
 	      </assume>
 	      <eq>
-		<fn>
+		<fn M="yes">
 		  <type num="1"/>
 		  <type num="2"/>
 		</fn>
-		<fn>
+		<fn M="yes">
 		  <type num="1" dash="'"/>
 		  <type num="2" dash="'"/>
 		</fn>
@@ -176,96 +188,9 @@
 	    </Sjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="U-Floor">
-	  <tyPre>                
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<type num="1"/>
-		<type num="2"/>
-	      </eq>
-	      <aSubMap/>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<floor>
-		  <type num="1"/>
-		</floor>
-		<floor>
-		  <type num="2"/>
-		</floor>
-	      </eq>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="U-Ceil">
-	  <tyPre>                
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<type num="1"/>
-		<type num="2"/>
-	      </eq>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<ceil>
-		  <type num="1"/>
-		</ceil>
-		<ceil>
-		  <type num="2"/>
-		</ceil>
-	      </eq>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-      </Hrules> 
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="U-Ref">
-	  <tyPre>                
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<type num="1"/>
-		<type num="2"/>
-	      </eq>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<ref>
-		  <type num="1"/>
-		</ref>
-		<ref>
-		  <type num="2"/>
-		</ref>
-	      </eq>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule> 
 	<tyRule name="U-Mb-Mb">
 	  <tyPre>                
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<aSubMap/>
 	      </assume>
@@ -278,7 +203,7 @@
 		</inner>
 	      </eq>
 	    </Sjudge>
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<aSubMap dash="'"/>
 	      </assume>
@@ -302,7 +227,7 @@
 	    </models>
 	  </tyPre>
 	  <tyConc>
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<compose>
 		  <aSubMap/>
@@ -322,33 +247,6 @@
 	    </Sjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule>
-	  <tyPre>     
-	    <eq>
-	      <type/>
-	      <mbpair>
-		<type num="1"/>
-		<type num="2"/>
-	      </mbpair>
-	    </eq>
-	  </tyPre>
-	  <tyPre>
-	    <eq>
-	      <inner>
-		<type num="2"/>
-	      </inner>
-	      <type num="2" dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <inner>
-		<type/>
-	      </inner>
-	      <type num="2" dash="'"/>
-	    </eq>
-	  </tyConc>
-	</tyRule>	
       </Hrules> 
       <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="U-Mb-Oth">
@@ -364,7 +262,7 @@
 	      <type num="2"/>
 	      <tvar name="alpha"/>
 	    </neq>
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<aSubMap/>
 	      </assume>
@@ -377,7 +275,7 @@
 		</minz>
 	      </eq>
 	    </Sjudge>
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<aSubMap dash="'"/>
 	      </assume>
@@ -401,7 +299,7 @@
 	    </models>
 	  </tyPre>
 	  <tyConc>
-	    <Sjudge name="u">
+	    <Sjudge name="unf">
 	      <assume>
 		<compose>
 		  <aSubMap/>
@@ -418,7 +316,7 @@
 	    </Sjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="">
+	<tyRule>
 	  <tyPre>
 	    <neq>
 	      <type/>
@@ -439,204 +337,32 @@
 	    </eq>
 	  </tyConc>
 	</tyRule>
-      </Hrules> 
-      <Hrules rowsep="4pt" colsep="2">
 	<tyRule>
-	  <tyPre/>
-	  <tyConc>
+	  <tyPre>     
 	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<tvar name="alpha"/>
-	      </Xform>
-	      <tvar name="alpha"/>
-	    </eq>      
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre/>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<bool/>
-	      </Xform>
-	      <floor>
-		<bool/>
-	      </floor>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre/>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<unit/>
-	      </Xform>
-	      <floor>
-		<unit/>
-	      </floor>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<type/>
-	      </Xform>
-	      <type dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<mutable>
-		  <type/>
-		</mutable>
-	      </Xform>
-	      <ceil>
-		<mutable>
-		  <type dash="'"/>
-		</mutable>
-	      </ceil>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<type/>
-	      </Xform>
-	      <type dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<ref>
-		  <type/>
-		</ref>
-	      </Xform>
-	      <floor>
-		<ref>
-		  <type dash="'"/>
-		</ref>
-	      </floor>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules colsep="2">
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<type num="1"/>
-	      </Xform>
-	      <type num="1" dash="'"/>
-	    </eq>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<type num="2"/>
-	      </Xform>
-	      <type num="2" dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<fn>
-		  <type num="1"/>
-		  <type num="2"/>
-		</fn>
-	      </Xform>
-	      <floor>
-		<fn>
-		  <type num="1" dash="'"/>
-		  <type num="2" dash="'"/>
-		</fn>
-	      </floor>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<type num="1"/>
-	      </Xform>
-	      <type num="1" dash="'"/>
-	    </eq>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<type num="2"/>
-	      </Xform>
-	      <type num="2" dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<mbpair>
-		  <type num="1"/>
-		  <type num="2"/>
-		</mbpair>
-	      </Xform>
+	      <type/>
 	      <mbpair>
-		<type num="1" dash="'"/>
-		<type num="2" dash="'"/>
+		<type num="1"/>
+		<type num="2"/>
 	      </mbpair>
 	    </eq>
-	  </tyConc>
-	</tyRule>           
-	<tyRule>
-	  <tyPre>
 	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<minz>
-		  <type/>
-		</minz>
-	      </Xform>
-	      <type dash="'"/>
+	      <inner>
+		<type num="2"/>
+	      </inner>
+	      <type num="2" dash="'"/>
 	    </eq>
 	  </tyPre>
 	  <tyConc>
 	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<floor>
-		  <type/>
-		</floor>
-	      </Xform>
-	      <floor>
-		<type dash="'"/>	      
-	      </floor>
+	      <inner>
+		<type/>
+	      </inner>
+	      <type num="2" dash="'"/>
 	    </eq>
 	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<maxz>
-		  <type/>
-		</maxz>
-	      </Xform>
-	      <type dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<ceil>
-		  <type/>
-		</ceil>
-	      </Xform>
-	      <type dash="'"/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
+	</tyRule>	
+      </Hrules> 
     </btypes:TYPE>
   </font>
   <caption><font size="small">Unification Rules.</font></caption>
