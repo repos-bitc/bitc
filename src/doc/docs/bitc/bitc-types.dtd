@@ -1164,6 +1164,7 @@
 <!ELEMENT equation             lhs, rhs>
 <!ATTLIST equation
                                sep         CDATA      #IMPLIED>
+<!ELEMENT statement            %anything.group;>
 <!--  0-thing, where 1, 2, ..., and n --> 
 <!ELEMENT lhs                  %anything.group;*>
 <!ELEMENT rhs                  %anything.group;*>

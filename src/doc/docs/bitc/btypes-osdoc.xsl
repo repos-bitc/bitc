@@ -2490,7 +2490,16 @@
       </xsl:for-each>
     </xsl:element>
   </xsl:template>
-  
+
+  <!-- statement -->
+  <xsl:template match="statement" mode="formula">
+    <xsl:element name="tr">
+      <xsl:element name="td">
+	<xsl:apply-templates mode="formula"/>      
+      </xsl:element>
+    </xsl:element>
+  </xsl:template>
+
   <!-- equation -->
   <xsl:template match="equation" mode="formula">
     <xsl:element name="tr">
@@ -2498,9 +2507,9 @@
       
       <!-- LHS -->
       <xsl:element name="td">
-	<xsl:attribute name="align">right</xsl:attribute>	  
-	<xsl:apply-templates select="*[1]" mode="formula"/>	
-      </xsl:element>	  
+	<xsl:attribute name="align">right</xsl:attribute>
+	<xsl:apply-templates select="*[1]" mode="formula"/>
+      </xsl:element>
       
       <!-- the = sign -->
       <xsl:element name="td">
@@ -3760,20 +3769,23 @@
     <xsl:for-each select="*">
       <xsl:if test = "position() &gt; 1">
 	<xsl:if test = "position() = 2">
-	  <xsl:element name="em">
-	    <xsl:text>, where</xsl:text>
-	    <xsl:call-template name="print.space"/>	
-	  </xsl:element>
+	  <xsl:call-template name="print.space"/>
+	  <xsl:text>|</xsl:text>
+	  <xsl:call-template name="print.space"/>
+<!-- 	  <xsl:element name="em"> -->
+<!-- 	    <xsl:text>, where</xsl:text> -->
+<!-- 	    <xsl:call-template name="print.space"/>	 -->
+<!-- 	  </xsl:element> -->
 	</xsl:if>
 	<xsl:if test = "position() &gt; 2">
 	  <xsl:text>,</xsl:text>
 	  <xsl:call-template name="print.space"/>	
-	  <xsl:if test = "position() = last()">
-	    <xsl:element name="em">
-	      <xsl:text>and</xsl:text>
-	      <xsl:call-template name="print.space"/>	
-	    </xsl:element>
-	  </xsl:if>
+<!-- 	  <xsl:if test = "position() = last()"> -->
+<!-- 	    <xsl:element name="em"> -->
+<!-- 	      <xsl:text>and</xsl:text> -->
+<!-- 	      <xsl:call-template name="print.space"/>	 -->
+<!-- 	    </xsl:element> -->
+<!-- 	  </xsl:if> -->
 	</xsl:if>	    
 	<xsl:apply-templates select="." mode="formula"/>	
       </xsl:if>

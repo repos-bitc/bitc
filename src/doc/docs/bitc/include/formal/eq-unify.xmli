@@ -20,15 +20,15 @@
 	    </Pair>
 	  </rhs>
 	</equation>
-	<!-- t <= t -->
+	<!-- a <= a -->
 	<equation>
 	  <lhs>
 	    <unf ac="yes">
 	      <unin>
 		<set>
 		  <Tsub>
-		    <type/>
-		    <type/>
+		    <tvar name="alpha"/>
+		    <tvar name="alpha"/>
 		  </Tsub>
 		</set>
 		<aCtset/>
@@ -36,7 +36,49 @@
 	    </unf>
 	  </lhs>
 	  <rhs>
-	    <unf cl="yes">
+	    <unf>
+	      <aCtset/>
+	    </unf>
+	  </rhs>
+	</equation>
+	<!-- unit <= unit -->
+	<equation>
+	  <lhs>
+	    <unf ac="yes">
+	      <unin>
+		<set>
+		  <Tsub>
+		    <unit/>
+		    <unit/>
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <aCtset/>
+	    </unf>
+	  </rhs>
+	</equation>
+	<!-- bool <= bool -->
+	<equation>
+	  <lhs>
+	    <unf ac="yes">
+	      <unin>
+		<set>
+		  <Tsub>
+		    <bool/>
+		    <bool/>
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
 	      <aCtset/>
 	    </unf>
 	  </rhs>
@@ -59,12 +101,12 @@
 	    </unf>
 	  </lhs>
 	  <rhs>
-	    <unf cl="yes">
+	    <unf>
 	      <aCtset/>
 	    </unf>
 	  </rhs>
 	</equation>
-	<!-- a = t, a != t -->
+	<!-- a = t -->
 	<equation>	  
 	  <lhs>
 	    <unf ac="yes">
@@ -78,10 +120,6 @@
 		<aCtset/>
 	      </unin>
 	    </unf>
-	    <neq>
-	      <tvar name="alpha"/>
-	      <type/>
-	    </neq>
 	  </lhs>
 	  <rhs>
 	    <Pair>
@@ -143,7 +181,7 @@
 	      </SubMap>
 	    </eq>
 	    <eq>
-	      <unf cl="yes">
+	      <unf>
 		<Subst>
 		  <aSubMap num="k"/>
 		  <aCtset/>
@@ -156,7 +194,7 @@
 	    </eq>
 	  </rhs>
 	</equation>
-	<!-- t <= Mt -->
+	<!-- a <= Mt -->
 	<equation>
 	  <lhs>
 	    <unf ac="yes">
@@ -176,6 +214,13 @@
 		<type/>
 	      </maxz>
 	    </eq>
+	    <notin>
+	      <Tsub>
+		<type/>
+		<tvar name="alpha"/>
+	      </Tsub>
+	      <aCtset/>
+	    </notin>	    
 	  </lhs>
 	  <rhs>
 	    <Pair>
@@ -206,7 +251,7 @@
 	    </eq>
 	  </rhs>
 	</equation>	
-	<!-- It <= t -->
+	<!-- It <= a -->
 	<equation sep="4pt">
 	  <lhs>
 	    <unf ac="yes">
@@ -231,6 +276,13 @@
 	      <tvar name="alpha"/>
 	      <tvar name="beta"/>
 	    </neq>
+	    <notin>
+	      <Tsub>
+		<tvar name="alpha"/>
+		<type/>
+	      </Tsub>
+	      <aCtset/>
+	    </notin>
 	  </lhs>
 	  <rhs>
 	    <Pair>
@@ -422,7 +474,7 @@
 	    </eq>
 	  </lhs>
 	  <rhs>
-	    <unf cl="yes">
+	    <unf>
 	      <aCtset/>
 	    </unf>
 	  </rhs>
@@ -466,7 +518,7 @@
 	      </SubMap>
 	    </eq>
 	    <eq>
-	      <unf cl="yes">
+	      <unf>
 		<Subst>
 		  <aSubMap num="k"/>
 		  <aCtset num="*"/>
@@ -534,7 +586,7 @@
 	      </SubMap>
 	    </eq>
 	    <eq>
-	      <unf cl="yes">
+	      <unf>
 		<Subst>
 		  <aSubMap num="k"/>
 		  <aCtset num="*"/>
@@ -547,21 +599,158 @@
 	    </eq>
 	  </rhs>
 	</equation>	
-	<!-- Error -->
+	<!-- Error (Cyclic) -->
 	<equation>
 	  <lhs>
 	    <unf>
 	      <aCtset/>
 	    </unf>
-	    <pred name="P">
+	    <pred name="cyclic">
 	      <aCtset/>
-	    </pred>	
+	    </pred>
 	  </lhs>
 	  <rhs>
 	    <error/>
 	  </rhs>
 	</equation>
-      </VEqns>
+	<!-- Error (unhandled, un-unifiable) -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin>
+		<constraint/>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <notin>
+	      <constraint/>
+	      <unin>
+		<aCtset num="rem"/>
+		<aCtset num="hdl"/>
+	      </unin>
+	    </notin>
+	  </lhs>
+	  <rhs>
+	    <error/>
+	  </rhs>
+	</equation>
+      </VEqns>      
+      <VEqns>
+	<equation>
+	  <lhs>	    
+	    <aCtset num="rem"/>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Forall>
+		<collection>
+		  <tvar name="alpha"/>
+		  <lKind k="var"/>
+		  <type/>
+		  <type dash="'"/>
+		</collection>
+	      </Forall>
+	      <textit content="."/>
+	      <space/>
+	      <set>
+		<Tsub>
+		  <tvar name="alpha"/>
+		  <type/>
+		</Tsub>
+		<Tsub>
+		  <type/>
+		  <tvar name="alpha"/>
+		</Tsub>
+		<Pcst>
+		  <lKind k="var"/>
+		  <type/>
+		  <type dash="'"/>
+		</Pcst>
+	      </set>
+	    </grouping>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <aCtset num="hdl"/>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Forall>
+		<collection>
+		  <tvar name="alpha"/>
+		  <lKind k="var"/>
+		  <lKind/>
+		  <type/>
+		  <type dash="'"/>
+		  <type num="1"/>
+		  <type num="1" dash="'"/>
+		  <type num="i"/>
+		</collection>
+	      </Forall>
+	      <text content="|"/>
+	      <pred name="Immut">
+		<type num="i"/>
+	      </pred>
+	      <space/>
+	      <text content="."/>
+	      <space/>	      
+	      <set>
+		<Tsub>
+		  <type/>
+		  <type/>
+		</Tsub>
+		<Tsub>
+		  <mutable>
+		    <type/>
+		  </mutable>
+		  <type/>
+		</Tsub>
+		<eq>
+		  <lKind k="var"/>
+		  <lKind/>
+		</eq>
+		<Tsub>
+		  <fn>
+		    <type/>
+		    <type num="1"/>
+		  </fn>
+		  <fn>
+		    <type dash="'"/>
+		    <type num="1" dash="'"/>
+		  </fn>
+		</Tsub>
+		<Tsub>
+		  <ref>
+		    <type/>
+		  </ref>
+		  <ref>
+		    <type dash="'"/>
+		  </ref>
+		</Tsub>
+		<Tsub>
+		  <mutable>
+		    <type/>
+		  </mutable>
+		  <mutable>
+		    <type dash="'"/>
+		  </mutable>
+		</Tsub>
+		<Pcst>
+		  <lKind k="mono"/>
+		  <type/>
+		  <type dash="'"/>
+		</Pcst>
+		<Pcst>
+		  <lKind k="poly"/>
+		  <type/>
+		  <type num="i"/>
+		</Pcst>
+	      </set>
+	    </grouping>
+	  </rhs>
+	</equation>	
+       </VEqns>
     </btypes:TYPE>
   </font>
   <caption>Equational Unification Rules</caption>
