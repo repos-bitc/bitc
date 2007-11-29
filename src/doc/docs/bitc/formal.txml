@@ -4568,7 +4568,7 @@
 	    </tqExpr>
 	  </conclude>
 	  <propagate>
-	    <Empty/>
+	    <EmptySubst/>
 	  </propagate>
 	</TIjudge>
       </btypes:TYPE>
@@ -4691,7 +4691,13 @@
     <definition>
       <title>Constraint Set Closure</title>
       <p>
-        A closure operation on a constraint set 
+        A closure operation
+        <btypes:TYPE>
+          <pred name="close">
+            <aCtset/> 
+          </pred>
+        </btypes:TYPE>
+        on a constraint set 
         <btypes:TYPE>
           <aCtset/> 
         </btypes:TYPE> produces an equivalent set
@@ -4700,469 +4706,346 @@
         conversion is total); and by explicitely adding all transitive
         relationships.
       </p>
-    </definition>
-    <p>
-      The following algorithm iterates until no further constraints
-      can be added.
-    </p>
-    <ol>
-      <li>
-        <p>
-          <btypes:TYPE>
-            <text content="For each "/>
-            <in>
+      <ol>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <fnxn name="close">
+                <unin>
+                  <set>
+                    <Tsub>
+                      <fn>
+                        <type num="1"/>
+                        <type num="2"/>
+                      </fn>
+                      <fn>
+                        <type num="1" dash="'"/>
+                        <type num="2" dash="'"/>
+                      </fn>
+                    </Tsub>
+                  </set>
+                  <aCtset/>
+                </unin>
+                <pred name="close">
+                  <unin>
+                    <aCtset/>
+                    <set>
+                      <Tsub>
+                        <type num="1"/>
+                        <type num="1" dash="'"/>
+                      </Tsub>
+                      <Tsub>
+                        <type num="2"/>
+                        <type num="2" dash="'"/>
+                      </Tsub>
+                      <Tsub>
+                        <type num="1" dash="'"/>
+                        <type num="1"/>
+                      </Tsub>
+                      <Tsub>
+                        <type num="2" dash="'"/>
+                        <type num="2"/>
+                      </Tsub>
+                    </set>
+                  </unin>
+                </pred>
+              </fnxn>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <fnxn name="close">
+                <unin>
+                  <set>
+                    <Tsub>
+                      <ref>
+                        <type/>
+                      </ref>
+                      <ref>
+                        <type dash="'"/>
+                      </ref>
+                    </Tsub>
+                  </set>
+                  <aCtset/>
+                </unin>
+                <pred name="close">
+                  <unin>
+                    <aCtset/>
+                    <set>
+                      <Tsub>
+                        <type/>
+                        <type dash="'"/>
+                      </Tsub>
+                      <Tsub>
+                        <type dash="'"/>
+                        <type/>
+                      </Tsub>
+                    </set>
+                  </unin>
+                </pred>
+              </fnxn>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <fnxn name="close">
+                <unin>
+                  <set>
+                    <Tsub>
+                      <mutable>
+                        <type/>
+                      </mutable>
+                      <mutable>
+                        <type dash="'"/>
+                      </mutable>
+                    </Tsub>
+                  </set>
+                  <aCtset/>
+                </unin>
+                <pred name="close">
+                  <unin>
+                    <aCtset/>
+                    <set>
+                      <Tsub>
+                        <type/>
+                        <type dash="'"/>
+                      </Tsub>
+                      <Tsub>
+                        <type dash="'"/>
+                        <type/>
+                      </Tsub>
+                    </set>
+                  </unin>
+                </pred>
+              </fnxn>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
               <eq>
-                <fn>
-                  <type num="1"/>
-                  <type num="2"/>
-                </fn>
-                <fn>
-                  <type num="1" dash="'"/>
-                  <type num="2" dash="'"/>
-                </fn>
+                <grouping>
+                  <pred name="close">
+                    <unin>
+                      <set>
+                        <Tsub>
+                          <type num="1"/>
+                          <type num="2"/>
+                        </Tsub>
+                        <Tsub>
+                          <type num="2"/>
+                          <type num="3"/>
+                        </Tsub>
+                      </set>
+                      <aCtset/>
+                    </unin>
+                  </pred>
+                  <space/>
+                  <textit content="where"/>
+                  <space/>
+                  <notin>
+                    <Tsub>
+                      <type num="1"/>
+                      <type num="3"/>
+                    </Tsub>
+                    <aCtset/>
+                  </notin>
+                  <br/>
+                </grouping>
+                <pred name="close">
+                  <unin>
+                    <set>
+                      <Tsub>
+                        <type num="1"/>
+                        <type num="2"/>
+                      </Tsub>
+                      <Tsub>
+                        <type num="2"/>
+                        <type num="3"/>
+                      </Tsub>
+                      <Tsub>
+                        <type num="1"/>
+                        <type num="3"/>
+                      </Tsub>
+                    </set>                      
+                    <aCtset/>
+                  </unin>
+                </pred>
               </eq>
-              <aCtset/>
-            </in>
-            <text content=", add "/>                
-            <eq>                  
-              <type num="1"/>                                    
-              <type num="1" dash="'"/>                  
-            </eq>
-            <text content=" and "/>                
-            <eq>                  
-              <type num="2"/>                                    
-              <type num="2" dash="'"/>                  
-            </eq>
-            <text content="."/>
-          </btypes:TYPE>
-        </p>
-      </li>
-      <li>
-        <p>
-          <btypes:TYPE>
-            <text content="For each "/>
-            <in>
-              <Tsub>
-                <fn>
-                  <type num="1"/>
-                  <type num="2"/>
-                </fn>
-                <fn>
-                  <type num="1" dash="'"/>
-                  <type num="2" dash="'"/>
-                </fn>
-              </Tsub>
-              <aCtset/>
-            </in>
-            <text content=", add "/>                
-            <eq>                  
-              <type num="1"/>                                    
-              <type num="1" dash="'"/>                  
-            </eq>
-            <text content=" and "/>                
-            <eq>                  
-              <type num="2"/>
-              <type num="2" dash="'"/>
-            </eq>
-            <text content="."/>
-          </btypes:TYPE>
-        </p>
-      </li>
-      <li>
-        <p>
-          <btypes:TYPE>
-            <text content="For each "/>
-            <in>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
               <eq>
-                <ref>
-                  <type/>
-                </ref>
-                <ref>
-                  <type dash="'"/>
-                </ref>
+                <grouping>
+                  <pred name="close">
+                    <aCtset/>
+                  </pred>
+                  <space/>
+                  <textit content="where none of the above cases"/>
+                  <textit content="are applicable"/>
+                  <space/>
+                </grouping>
+                <aCtset/>
               </eq>
-              <aCtset/>
-            </in>
-            <text content=", add "/>                
-            <eq>
-              <type/>
-              <type dash="'"/>
-            </eq>
-            <text content="."/>
-          </btypes:TYPE>
-        </p>
-      </li>
-      <li>
-        <p>
-          <btypes:TYPE>
-            <text content="For each "/>
-            <in>
-              <Tsub>
-                <ref>
-                  <type/>
-                </ref>
-                <ref>
-                  <type dash="'"/>
-                </ref>
-              </Tsub>
-              <aCtset/>
-            </in>
-            <text content=", add "/>                
-            <eq>
-              <type/>
-              <type dash="'"/>
-            </eq>
-            <text content="."/>
-          </btypes:TYPE>
-        </p>
-      </li>
-      <li>
-        <p>
-          <btypes:TYPE>
-            <text content="For each "/>
-            <in>
-              <eq>
-                <mutable>
-                  <type/>
-                </mutable>
-                <mutable>
-                  <type dash="'"/>
-                </mutable>
-              </eq>
-              <aCtset/>
-            </in>
-            <text content=", add "/>                
-            <eq>
-              <type/>
-              <type dash="'"/>
-            </eq>
-            <text content="."/>
-          </btypes:TYPE>
-        </p>
-      </li>
-      <li>
-        <p>
-          <btypes:TYPE>
-            <text content="For each "/>
-            <in>
-              <Tsub>
-                <mutable>
-                  <type/>
-                </mutable>
-                <mutable>
-                  <type dash="'"/>
-                </mutable>
-              </Tsub>
-              <aCtset/>
-            </in>
-            <text content=", add "/>                
-            <Tsub>
-              <type/>
-              <type dash="'"/>
-            </Tsub>
-            <text content="."/>
-          </btypes:TYPE>
-        </p>
-      </li>
-      <li>
-        <p>
-          <btypes:TYPE>
-            <text content="For each "/>
-            <in>
-              <eq>
-                <type num="1"/>
-                <type num="2"/>
-              </eq>
-              <aCtset/>
-            </in>
-            <text content=" and "/>                
-            <in>
-              <eq>
-                <type num="2"/>
-                <type num="3"/>
-              </eq>
-              <aCtset/>
-            </in>
-            <text content=", add "/>                
-            <eq>
-              <type num="1"/>
-              <type num="3"/>
-            </eq>
-            <text content="."/>
-          </btypes:TYPE>
-        </p>
-      </li>
-      <li>
-        <p>
-          <btypes:TYPE>
-            <text content="For each "/>
-            <in>
-              <Tsub>
-                <type num="1"/>
-                <type num="2"/>
-              </Tsub>
-              <aCtset/>
-            </in>
-            <text content=" and "/>                
-            <in>
-              <Tsub>
-                <type num="2"/>
-                <type num="3"/>
-              </Tsub>
-              <aCtset/>
-            </in>
-            <text content=", add "/>                
-            <Tsub>
-              <type num="1"/>
-              <type num="3"/>
-            </Tsub>
-            <text content="."/>
-          </btypes:TYPE>
-        </p>
-      </li>
-      <li>
-        <p>
-          <btypes:TYPE>
-            <text content="For each "/>
-            <in>
-              <eq>
-                <type num="1"/>
-                <type num="2"/>
-              </eq>
-              <aCtset/>
-            </in>
-            <text content=" and "/>                
-            <in>
-              <Tsub>
-                <type num="2"/>
-                <type num="3"/>
-              </Tsub>
-              <aCtset/>
-            </in>
-            <text content=", add "/>                
-            <Tsub>
-              <type num="1"/>
-              <type num="3"/>
-            </Tsub>
-            <text content="."/>
-          </btypes:TYPE>
-        </p>
-      </li>
-      <li>
-        <p>
-          <btypes:TYPE>
-            <text content="For each "/>
-            <in>
-              <Tsub>
-                <type num="1"/>
-                <type num="2"/>
-              </Tsub>
-              <aCtset/>
-            </in>
-            <text content=" and "/>                
-            <in>
-              <eq>
-                <type num="2"/>
-                <type num="3"/>
-              </eq>
-              <aCtset/>
-            </in>
-            <text content=", add "/>                
-            <Tsub>
-              <type num="1"/>
-              <type num="3"/>
-            </Tsub>
-            <text content="."/>
-          </btypes:TYPE>
-        </p>
-      </li>
-    </ol>
-    <definition>
-      <title>Tautological Constraints</title>
-      <p>
-        We write 
-        <btypes:TYPE>
-          <models name="taut">
-            <assume/>
-            <aCtset/>
-          </models>
-        </btypes:TYPE> to denote that the constraint set
-        <btypes:TYPE>
-          <aCtset/>
-        </btypes:TYPE> consists only of tautological constraints. That
-        is, the constraints in 
-        <btypes:TYPE>
-          <aCtset/>
-        </btypes:TYPE> are not only consistent but are trivially
-        solvable.
-      </p>
-    </definition>
-    <definition>
-      <title>Substitution on Expression</title>
-      <p>
-        For any expression 
-        <btypes:TYPE>
-          <aExpr/>
-        </btypes:TYPE>,
-        we write
-        <btypes:TYPE>
-          <Subst>
-            <aSubMap/>
-            <aExpr/>
-          </Subst>
-        </btypes:TYPE> to denote the expression obtained by 
-        applying the substitution
-        <btypes:TYPE>
-          <aSubMap/>
-        </btypes:TYPE> on all types present in 
-        <btypes:TYPE>
-          <aExpr/>
-        </btypes:TYPE> as type annotations.
-      </p>
+            </btypes:TYPE>
+          </p>
+        </li>
+      </ol>
     </definition>
     <definition>
       <title>Normalization of Constraint Sets</title>
       <p>
-        A constraint set 
+        The normalization function
         <btypes:TYPE>
-          <canonical>
+          <normalize>
             <aCtset/>
-          </canonical>
-        </btypes:TYPE> is said to be the normalized form of 
+          </normalize>
+        </btypes:TYPE> is used to obtain a normalized form of a
+        constraint set 
         <btypes:TYPE>
           <aCtset/>
-        </btypes:TYPE> 
-        (that is, 
+        </btypes:TYPE> by re-writing it only in terms of closed
+        subtype constraints.
+      </p>
+      <p>
         <btypes:TYPE>
           <eq>              
             <normalize>
               <aCtset/>
             </normalize>
-            <canonical>
-              <aCtset/>
-            </canonical>
+            <pred name="close">
+              <aCtset dash="'"/>
+            </pred>
           </eq>
-        </btypes:TYPE>) if:          
+        </btypes:TYPE>
+        where
+        <btypes:TYPE>
+          <aCtset dash="'"/>
+        </btypes:TYPE>
+        is obtained from
+        <btypes:TYPE>
+          <aCtset/>
+        </btypes:TYPE> using the normalizing translations:
       </p>
       <ul>
         <li>
           <p>
-            Let 
             <btypes:TYPE>
-              <aCtset dash="'"/>
-            </btypes:TYPE> be a set of constraints equivalent to  
-            <btypes:TYPE>
-              <aCtset/>
-            </btypes:TYPE>, but expressed only using subtype and
-            equality constraints.
+              <leadsto>
+                <DBrac>
+                  <eq>
+                    <type num="1"/>
+                    <type num="2"/>
+                  </eq>
+                </DBrac>
+                <DBrac>
+                  <collection>
+                    <Tsub>
+                      <type num="1"/>
+                      <type num="2"/>
+                    </Tsub>
+                    <Tsub>
+                      <type num="2"/>
+                      <type num="1"/>
+                    </Tsub>	      
+                  </collection>
+                </DBrac>
+              </leadsto>	
+            </btypes:TYPE>
           </p>
         </li>
         <li>
           <p>
             <btypes:TYPE>
-              <eq>
-                <canonical>
-                  <aCtset/>
-                </canonical>
-                <pred name="close">
-                  <aCtset dash="'"/>
-                </pred>
-              </eq>
-            </btypes:TYPE>.
+              <leadsto>
+                <DBrac>
+                  <ceq>
+                    <type num="1"/>
+                    <type num="2"/>
+                  </ceq>
+                </DBrac>
+                <DBrac>
+                  <collection>
+                    <Tsub>
+                      <type num="1"/>
+                      <tvar name="alpha"/>
+                    </Tsub>	      
+                    <Tsub>
+                      <type num="2"/>
+                      <tvar name="alpha"/>
+                    </Tsub>
+                  </collection>
+                </DBrac>
+              </leadsto>
+            </btypes:TYPE>,
+            where
+            <btypes:TYPE>
+              <models name="new">
+                <assume/>
+                <tvar name="alpha"/>
+              </models>
+            </btypes:TYPE>.            
           </p>
         </li>
       </ul>
     </definition>
-    <p>
-      The unification algorithm maintains constraints on
-      types. However, these can be written in a normal form as
-      in the case of equational inference so that all constraints
-      only appear on the outermost type. For example:          
-    </p>
-    <example>
+    <definition>
+      <title>Constraint Satisfiability</title>
       <p>
+        A Substitution 
         <btypes:TYPE>
-          <eq>
-            <mbpair>
-              <tvar name="alpha"/>
-              <ref>
-                <mbpair>
-                  <tvar name="beta"/>
-                  <type/>
-                </mbpair>
-              </ref>
-            </mbpair>
-            <ctype>
-              <tvar name="alpha"/>
-              <set>
-                <ceq>
-                  <tvar name="alpha"/>
-                  <ref>
-                    <paren>
-                      <ctype>
-                        <tvar name="beta"/>
-                        <set>
-                          <ceq>
-                            <tvar name="beta"/>
-                            <type/>
-                          </ceq>
-                        </set>
-                      </ctype>                            
-                    </paren>
-                  </ref>
-                </ceq>
-              </set>
-            </ctype>
-          </eq>
-          <br/>
-          <eq>
-            <nothing/>
-            <ctype>
-              <tvar name="alpha"/>
-              <set>
-                <ceq>
-                  <tvar name="alpha"/>
-                  <ref>
-                    <tvar name="beta"/>
-                  </ref>
-                </ceq>
-                <ceq>
-                  <tvar name="beta"/>
-                  <type/>
-                </ceq>
-              </set>
-            </ctype>
-          </eq>
-          <br/>
-          <equiv>
-            <nothing/>
-            <ctype>
-              <tvar name="alpha"/>
-              <set>
-                <Tsub>
-                  <tvar name="alpha"/>
-                  <tvar name="gamma"/>
-                </Tsub>
-                <Tsub>
-                  <ref>
-                    <tvar name="beta"/>
-                  </ref>
-                  <tvar name="gamma"/>
-                </Tsub>
-                <Tsub>
-                  <tvar name="beta"/>
-                  <tvar name="delta"/>
-                </Tsub>
-                <Tsub>
-                  <type/>
-                  <tvar name="delta"/>
-                </Tsub>
-              </set>
-            </ctype>
-          </equiv>
+          <aSubMap/>
         </btypes:TYPE>
-      </p>          
-    </example>        
+        satisfies a constraint set
+        <btypes:TYPE>
+          <aCtset/>
+        </btypes:TYPE>, written
+        <btypes:TYPE>
+          <models name="sat">
+            <aSubMap/>
+            <aCtset/>
+          </models>
+        </btypes:TYPE>
+        <em>iff</em>
+        <btypes:TYPE>
+          <normalize>
+            <aCtset/>
+          </normalize>
+        </btypes:TYPE>
+        consists only of tautologies (trivially).
+      </p>
+    </definition>
+    <definition id="solvable-entities">
+      <title>Solvable Entities</title>
+      <p>
+        A solvable entity 
+        <btypes:TYPE>
+          <solvable/>
+        </btypes:TYPE>
+        is structurally defined to be:
+      </p>
+      <btypes:TYPE>                      
+        <grammar notitle="yes">
+          <bnf desc="Solvables">
+            <solvable/>
+            <alternatives>
+              <type/>
+              <gamma/>
+              <store/>
+              <aExpr/>
+            </alternatives>
+          </bnf>
+        </grammar>
+      </btypes:TYPE>
+    </definition>
     <definition id="normalized-ctr-types">
       <title>Normalization of Constrained Types</title>
       <p>
@@ -5579,401 +5462,6 @@
             <aCtset/>
           </models>
         </btypes:TYPE>.
-      </p>
-    </definition>
-    <definition id="solvable-entities">
-      <title>Solvable Entities</title>
-      <p>
-        A solvable entity 
-        <btypes:TYPE>
-          <solvable/>
-        </btypes:TYPE>
-        is structurally defined to be:
-      </p>
-      <btypes:TYPE>                      
-        <grammar notitle="yes">
-          <bnf desc="Solvables">
-            <solvable/>
-            <alternatives>
-              <type/>
-              <gamma/>
-              <store/>
-              <plus>
-                <solvable/>
-                <solvable/>
-              </plus>
-            </alternatives>
-          </bnf>
-        </grammar>
-      </btypes:TYPE>
-    </definition>
-    <p>
-      Note that:
-    </p>
-    <ol>
-      <li>
-        <p>              
-          Normalization is defined on all atomic solvable
-          entities. We add the rule: If
-          <btypes:TYPE>                
-            <eq>
-              <normalize>
-                <solvable num="1"/>
-              </normalize>
-              <constrained>
-                <canonical>
-                  <solvable num="1"/>
-                </canonical>
-                <aCtset num="1"/>
-              </constrained>
-            </eq>
-            <text content=" and "/>
-            <eq>                  
-              <normalize>
-                <solvable num="2"/>
-              </normalize>
-              <constrained>
-                <canonical>
-                  <solvable num="2"/>
-                </canonical>
-                <aCtset num="2"/>
-              </constrained>
-            </eq>
-            <text content=" then "/>                
-            <eq>
-              <normalize>
-                <plus>
-                  <solvable num="1"/>
-                  <solvable num="2"/>
-                </plus>
-              </normalize>
-              <constrained>
-                <plus>
-                  <canonical>
-                    <solvable num="1"/>
-                  </canonical>                      
-                  <canonical>
-                    <solvable num="2"/>
-                  </canonical>
-                </plus>
-                <unin>
-                  <aCtset num="1"/>
-                  <aCtset num="2"/>
-                </unin>
-              </constrained>                  
-            </eq>
-          </btypes:TYPE>.              
-        </p>
-      </li>
-      <li>
-        <p>
-          As usual, we write
-          <btypes:TYPE>                
-            <eq>
-              <normalize>
-                <solvable/>
-              </normalize>
-              <canonical>
-                <solvable/>
-              </canonical>
-            </eq>
-          </btypes:TYPE>
-          if 
-          <btypes:TYPE>                
-            <eq>
-              <normalize>
-                <solvable/>
-              </normalize>
-              <constrained>
-                <canonical>
-                  <solvable/>
-                </canonical>
-                <aCtset/>
-              </constrained>
-            </eq>
-          </btypes:TYPE>
-          where
-          <btypes:TYPE>           
-            <models name="taut">
-              <assume/>
-              <aCtset/>
-            </models>
-          </btypes:TYPE>.
-        </p>
-      </li>
-      <li>
-        <p>
-          Substitution is defined on all atomic solvable
-          entities. We define:
-          <btypes:TYPE>
-            <eq>
-              <Subst>
-                <aSubMap/>
-                <plus>
-                  <solvable num="1"/>
-                  <solvable num="2"/>
-                </plus>
-              </Subst>
-              <plus>
-                <Subst>
-                  <aSubMap/>
-                  <solvable num="1"/>
-                </Subst>
-                <Subst>
-                  <aSubMap/>
-                  <solvable num="2"/>
-                </Subst>
-              </plus>
-            </eq>
-          </btypes:TYPE>.
-        </p>
-      </li>
-      <li>
-        <p>
-          For the sake of brevity, we write
-          <btypes:TYPE>
-            <eq>
-              <plus>
-                <Empty/>
-                <solvable/>
-              </plus>
-              <plus>
-                <solvable/>
-                <Empty/>
-              </plus>
-              <solvable/>
-            </eq>
-          </btypes:TYPE>.
-        </p>
-      </li>
-      <li>
-        <p>
-          Definition of 
-          <btypes:TYPE>
-            <subeqOp/>
-          </btypes:TYPE>
-          over solvable entities:
-        </p>
-        <ol>
-          <li>
-            <p>
-              <btypes:TYPE>
-                <subeq>
-                  <type/>
-                  <type dash="'"/>
-                </subeq>
-              </btypes:TYPE>
-              if the type  
-              <btypes:TYPE>
-                <type/>
-                <text content=" is structurally a part "/>
-                <text content="of the type "/>
-                <type dash="'"/>
-              </btypes:TYPE>.
-            </p>
-          </li>
-          <li>
-            <p>
-              <btypes:TYPE>
-                <subeq>
-                  <gamma/>
-                  <gamma dash="'"/>
-                </subeq>
-              </btypes:TYPE>
-              if  
-              <btypes:TYPE>
-                <gamma dash="'"/>
-              </btypes:TYPE>
-              contains all the mappings in 
-              <btypes:TYPE>
-                <gamma/>
-              </btypes:TYPE>, and possibly more.
-            </p>
-          </li>
-          <li>
-            <p>
-              <btypes:TYPE>
-                <subeq>
-                  <store/>
-                  <store dash="'"/>
-                </subeq>
-              </btypes:TYPE>
-              if 
-              <btypes:TYPE>
-                <store dash="'"/>
-              </btypes:TYPE>
-              contains all the mappings in 
-              <btypes:TYPE>
-                <store/>
-              </btypes:TYPE>, and possibly more.
-            </p>
-          </li>              
-          <li>
-            <p>
-              <btypes:TYPE>
-                <subeq>
-                  <plus>
-                    <solvable num="1"/>
-                    <solvable num="2"/>
-                  </plus>
-                  <plus>
-                    <solvable num="1" dash="'"/>
-                    <solvable num="2" dash="'"/>
-                  </plus>
-                </subeq>
-              </btypes:TYPE>
-              if 
-              <btypes:TYPE>
-                <subeq>
-                  <solvable num="1"/>
-                  <solvable num="1" dash="'"/>
-                </subeq>
-                <text content=" and "/>
-                <subeq>
-                  <solvable num="2"/>
-                  <solvable num="2" dash="'"/>
-                </subeq>
-              </btypes:TYPE>.                  
-            </p>
-          </li> 
-        </ol>
-      </li>          
-      <li>
-        <p>
-          Definition of 
-          <btypes:TYPE>
-            <supeqOp/>
-          </btypes:TYPE>
-          over solvable entities:
-        </p>
-        <ol>
-          <li>
-            <p>
-              <btypes:TYPE>
-                <supeq>
-                  <type/>
-                  <type dash="'"/>
-                </supeq>
-              </btypes:TYPE>
-              if the type  
-              <btypes:TYPE>
-                <type dash="'"/>
-                <text content=" is structurally a part "/>
-                <text content="of the type "/>
-                <type/>
-              </btypes:TYPE>.
-            </p>
-          </li>
-          <li>
-            <p>
-              <btypes:TYPE>
-                <supeq>
-                  <gamma/>
-                  <gamma dash="'"/>
-                </supeq>
-              </btypes:TYPE>
-              if
-              <btypes:TYPE>
-                <gamma/>
-              </btypes:TYPE>
-              contains all the mappings in 
-              <btypes:TYPE>
-                <gamma dash="'"/>
-              </btypes:TYPE>, and possibly more.
-            </p>
-          </li>
-          <li>
-            <p>
-              <btypes:TYPE>
-                <supeq>
-                  <store/>
-                  <store dash="'"/>
-                </supeq>
-              </btypes:TYPE>
-              if 
-              <btypes:TYPE>
-                <store/>
-              </btypes:TYPE>
-              contains all the mappings in 
-              <btypes:TYPE>
-                <store dash="'"/>
-              </btypes:TYPE>, and possibly more.
-            </p>
-          </li>              
-          <li>
-            <p>
-              <btypes:TYPE>
-                <supeq>
-                  <plus>
-                    <solvable num="1"/>
-                    <solvable num="2"/>
-                  </plus>
-                  <plus>
-                    <solvable num="1" dash="'"/>
-                    <solvable num="2" dash="'"/>
-                  </plus>
-                </supeq>
-              </btypes:TYPE>
-              if 
-              <btypes:TYPE>
-                <supeq>
-                  <solvable num="1"/>
-                  <solvable num="1" dash="'"/>
-                </supeq>
-                <text content=" and "/>
-                <supeq>
-                  <solvable num="2"/>
-                  <solvable num="2" dash="'"/>
-                </supeq>
-              </btypes:TYPE>.                  
-            </p>
-          </li> 
-        </ol>
-      </li>     
-    </ol>
-    <definition id="expr_to_sol">
-      <title>Solvability of Expressions</title>
-      <p>
-        We write 
-        <btypes:TYPE>
-          <aExpr hat="yes"/>
-        </btypes:TYPE> to denote a solvable entity that is obtained by
-        grouping together all type annotations present in the
-        expression 
-        <btypes:TYPE>
-          <aExpr/>
-        </btypes:TYPE>. 
-        For example, <br/>
-        if        
-        <btypes:TYPE>
-          <eq>
-            <aExpr/>
-            <let>
-              <tqExpr>
-                <id/>
-                <type num="0"/>
-              </tqExpr>
-              <tqExpr>                
-                <aExpr num="1"/>
-                <type num="1"/>
-              </tqExpr>
-              <tqExpr>                
-                <aExpr num="2"/>
-                <type num="2"/>
-              </tqExpr>
-            </let>
-          </eq>          
-          <text content=", then "/>
-          <br/>
-          <eq>
-            <aExpr hat="yes"/>
-            <plus>
-              <type num="1"/>
-              <type num="2"/>
-              <type num="3"/>
-            </plus>              
-          </eq>
-        </btypes:TYPE>. 
       </p>
     </definition>
     <definition id="ca">
