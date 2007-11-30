@@ -410,6 +410,13 @@
     <xsl:apply-templates mode="formula"/>
     <xsl:text>]]</xsl:text>
   </xsl:template>
+
+  <!-- Special Set -->
+  <xsl:template match="spset" mode="formula">
+    <xsl:text>{|</xsl:text>
+    <xsl:call-template name="print.children"/>
+    <xsl:text>|}</xsl:text>
+  </xsl:template>
   
   <!-- mappping -->
   <xsl:template match="mapping" mode="formula">
@@ -1970,6 +1977,15 @@
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>  
 
+  <!-- loc -->
+  <xsl:template match="loc" mode="formula">
+    <xsl:call-template name="print.mathcal">
+      <xsl:with-param name="print.mathcal.letter">L</xsl:with-param> 
+    </xsl:call-template>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>  
+
+
   <!-- lambda -->
   <xsl:template match="lambda" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -2654,6 +2670,9 @@
       <xsl:with-param name="print.derives.name">
 	<xsl:value-of select="@name"/>
       </xsl:with-param> 
+      <xsl:with-param name="print.derives.sym">
+	<xsl:value-of select="@sym"/>
+      </xsl:with-param> 
     </xsl:call-template>
   </xsl:template>  
   
@@ -2673,6 +2692,22 @@
     </xsl:call-template>    	
     <xsl:apply-templates select="*[2]" mode="formula"/>
   </xsl:template>  
+
+  <!-- Djudge -->
+  <!-- submap || gamma; store |-diamond expr : type -->
+  <xsl:template match="Djudge" mode="formula">
+    <xsl:apply-templates select="*[1]" mode="formula"/>
+    <xsl:call-template name="print.op.par"/>
+    <xsl:apply-templates select="*[2]" mode="formula"/>
+    <xsl:call-template name="print.op.semis"/>	
+    <xsl:apply-templates select="*[3]" mode="formula"/>
+    <xsl:call-template name="print.derives">
+      <xsl:with-param name="print.derives.sym">diam</xsl:with-param> 
+    </xsl:call-template>
+    <xsl:apply-templates select="*[4]" mode="formula"/>
+    <xsl:call-template name="print.op.qual"/>	
+    <xsl:apply-templates select="*[5]" mode="formula"/>
+  </xsl:template>    
   
   <!-- TDjudge -->
   <!-- gamma; store |-D expr : type , all inlined-->
@@ -3123,15 +3158,25 @@
   <!-- the derives operator -->
   <xsl:template name="print.derives">
     <xsl:param name="print.derives.name"/>
+    <xsl:param name="print.derives.sym"/>
 
     <xsl:call-template name="print.space"/>
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>vdash;</xsl:text> 
-    <xsl:if test="$print.derives.name">
-      <xsl:element name="sub">
-	<xsl:value-of select="$print.derives.name"/>
-      </xsl:element>
-    </xsl:if>
+    <xsl:choose>      
+      <xsl:when test="$print.derives.name">
+	<xsl:element name="sub">
+	  <xsl:value-of select="$print.derives.name"/>
+	</xsl:element>
+      </xsl:when>
+      <xsl:when test="$print.derives.sym">
+	<xsl:element name="sub">
+	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	  <xsl:value-of select="$print.derives.sym"/>
+	  <xsl:text>;</xsl:text>
+	</xsl:element>
+      </xsl:when>
+    </xsl:choose>
     <xsl:call-template name="print.space"/>
   </xsl:template>
 

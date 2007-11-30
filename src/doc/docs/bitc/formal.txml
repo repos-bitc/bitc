@@ -96,6 +96,13 @@
             <hLoc num="2"/>
           </alternatives>
         </bnf>
+        <bnf desc="Locations">
+          <loc/>
+          <alternatives>
+            <sLoc/>
+            <hLoc/>
+          </alternatives>
+        </bnf>
         <bnf desc="Values">
           <aVal/>
           <alternatives>
@@ -336,14 +343,7 @@
             <extend>
               <store/>
               <mapping>
-                <hLoc/>
-                <type/>
-              </mapping>
-            </extend>
-            <extend>
-              <store/>
-              <mapping>
-                <sLoc/>
+                <loc/>
                 <type/>
               </mapping>
             </extend>
@@ -751,10 +751,10 @@
             <text content=" ; "/>
             <Forall/>
             <in>
-              <tqExpr>
+              <mapping>
                 <id/>
                 <aTS num="i"/>
-              </tqExpr>
+              </mapping>
               <gamma/>
             </in>
             <br/>
@@ -771,20 +771,12 @@
             <text content=" ; "/>
             <Forall/>
             <in>
-              <tqExpr>
-                <hLoc/>
+              <mapping>
+                <loc/>
                 <type num="i"/>
-              </tqExpr>
+              </mapping>
               <store/>
             </in>
-            <text content=" or "/>
-            <in>
-              <tqExpr>
-                <sLoc/>
-                <type num="i"/>
-              </tqExpr>
-              <store/>
-            </in>            
           </btypes:TYPE>
         </p>
       </example>
@@ -846,12 +838,17 @@
               </pred>
             </fnxn>
             <br/>
-            <fnxn name="Value">
-              <if>
-                <aExpr num="1"/>
-                <aExpr num="2"/>
-                <aExpr num="3"/>
-              </if>
+            <eq>
+              <grouping>
+                <pred name="Value">
+                  <if>
+                    <aExpr num="1"/>
+                    <aExpr num="2"/>
+                    <aExpr num="3"/>
+                  </if>
+                </pred>
+                <br/>
+              </grouping>
               <AND>
                 <pred name="Value">
                   <aExpr num="1"/>
@@ -863,7 +860,7 @@
                   <aExpr num="3"/>
                 </pred>
               </AND>
-            </fnxn>
+            </eq>
             <br/>
             <fnxn name="Value">
               <let>
@@ -4072,7 +4069,7 @@
 	    </tqExpr>
 	  </conclude>
           <constrain>
-            <aCtSet/>
+            <aCtset/>
           </constrain>
 	</TEjudge>
       </btypes:TYPE>
@@ -4081,16 +4078,16 @@
       <btypes:TYPE><store/></btypes:TYPE>, we infer the type 
       <btypes:TYPE><type/></btypes:TYPE> for the expression 
       <btypes:TYPE><aExpr/></btypes:TYPE> under the constraints
-      <btypes:TYPE><aCtSet/></btypes:TYPE>. 
+      <btypes:TYPE><aCtset/></btypes:TYPE>. 
       The Unification algorithm is given in 
       figure&nbsp;<xref ref="eq_unify"/> with some auxilary
       definitions and translations defined in 
       figure&nbsp;<xref ref="eq_helper"/>. 
       The unification algorithm takes in a set of constraints
-      <btypes:TYPE><aCtSet/></btypes:TYPE> and either fails with an
+      <btypes:TYPE><aCtset/></btypes:TYPE> and either fails with an
       error <btypes:TYPE><error/></btypes:TYPE>, or succeeds to 
       result in a pair consisting of residual constraints
-      <btypes:TYPE><aCtSet/></btypes:TYPE> 
+      <btypes:TYPE><aCtset/></btypes:TYPE> 
       (which should only contain constraints of the form:
       <btypes:TYPE>
         <!-- a <= t  -->
@@ -4539,87 +4536,6 @@
       <btypes:TYPE><aSubMap/></btypes:TYPE> is list of substitutions 
       obtained by unifications performed during inference, and must be
       propagated to further derivations. 
-      We write
-      <btypes:TYPE>
-	<TIjudge>
-	  <assume>
-	    <gamma/>
-	    <store/>
-	  </assume>
-	  <conclude>
-	    <tqExpr>
-	      <aExpr/>
-	      <type/>
-	    </tqExpr>
-	  </conclude>
-	</TIjudge>
-      </btypes:TYPE>
-      as a shorthand for
-      <btypes:TYPE>
-	<TIjudge>
-	  <assume>
-	    <gamma/>
-	    <store/>
-	  </assume>
-	  <conclude>            
-	    <tqExpr>
-	      <aExpr/>
-	      <type/>
-	    </tqExpr>
-	  </conclude>
-	  <propagate>
-	    <EmptySubst/>
-	  </propagate>
-	</TIjudge>
-      </btypes:TYPE>
-      and write
-      <btypes:TYPE>
-	<TIjudge>
-          <precond>
-	    <aSubMap num="0"/>
-          </precond>
-	  <assume>
-	    <gamma/>
-	    <store/>
-	  </assume>
-	  <conclude>
-	    <tqExpr>
-	      <aExpr/>
-	      <type/>
-	    </tqExpr>
-	  </conclude>
-	  <propagate>
-	    <aSubMap/>
-	  </propagate>
-	</TIjudge>
-      </btypes:TYPE>
-      as a shorthand for
-      <btypes:TYPE>
-	<TIjudge>
-	  <assume>
-            <Subst>
-              <aSubMap num="0"/>
-              <gamma/>
-            </Subst>
-            <Subst>
-              <aSubMap num="0"/>
-              <store/>
-            </Subst>
-	  </assume>
-	  <conclude>
-	    <tqExpr>
-              <Subst>
-                <aSubMap num="0"/>
-                <aExpr/>
-              </Subst>
-	      <type/>
-	    </tqExpr>
-	  </conclude>
-	  <propagate>
-	    <aSubMap/>
-	  </propagate>
-	</TIjudge>
-      </btypes:TYPE>.
       The judgment
       <btypes:TYPE>
 	<models name="new">
@@ -4628,6 +4544,144 @@
 	</models>
       </btypes:TYPE> identifies new type variables. 
     </p>
+    <p>
+      We use the following shorthand translations as a notational
+      convenience:
+    </p>
+    <example>
+      <p>
+        <btypes:TYPE>
+	  <leadsto>
+	    <DBrac>
+              <TIjudge>
+                <assume>
+                  <gamma/>
+                  <store/>
+                </assume>
+                <conclude>
+                  <tqExpr>
+                    <aExpr/>
+                    <type/>
+                  </tqExpr>
+                </conclude>
+              </TIjudge>
+            </DBrac>
+	    <DBrac>            
+              <TIjudge>
+                <assume>
+                  <gamma/>
+                  <store/>
+                </assume>
+                <conclude>            
+                  <tqExpr>
+                    <aExpr/>
+                    <type/>
+                  </tqExpr>
+                </conclude>
+                <propagate>
+                  <EmptySubst/>
+                </propagate>
+              </TIjudge>
+            </DBrac>
+          </leadsto>
+        </btypes:TYPE>
+        <br/>
+        <btypes:TYPE>
+	  <leadsto>
+ 	    <DBrac>          
+              <TIjudge>
+                <precond>
+                  <aSubMap num="0"/>
+                </precond>
+                <assume>
+                  <gamma/>
+                  <store/>
+                </assume>
+                <conclude>
+                  <tqExpr>
+                    <aExpr/>
+                    <type/>
+                  </tqExpr>
+                </conclude>
+                <propagate>
+                  <aSubMap/>
+                </propagate>
+              </TIjudge>
+            </DBrac>
+	    <DBrac>          
+              <TIjudge>
+                <assume>
+                  <Subst>
+                    <aSubMap num="0"/>
+                    <gamma/>
+                  </Subst>
+                  <Subst>
+                    <aSubMap num="0"/>
+                    <store/>
+                  </Subst>
+                </assume>
+                <conclude>
+                  <tqExpr>
+                    <Subst>
+                      <aSubMap num="0"/>
+                      <aExpr/>
+                    </Subst>
+                    <type/>
+                  </tqExpr>
+                </conclude>
+                <propagate>
+                  <aSubMap/>
+                </propagate>
+              </TIjudge>
+            </DBrac>
+          </leadsto>   
+          <br/>
+          <leadsto>
+            <DBrac>          
+              <Djudge>
+                <aSubMap/>
+                <gamma/>
+                <store/>
+                <aExpr/>
+                <type/>
+              </Djudge>
+            </DBrac>
+            <DBrac>          
+              <Sjudge>
+                <assume>
+                  <canonical>
+                    <Subst>
+                      <aSubMap/>
+                      <gamma/>
+                    </Subst>
+                  </canonical>
+                  <canonical>
+                    <Subst>
+                      <aSubMap/>
+                      <store/>
+                    </Subst>
+                  </canonical>
+                </assume>
+                <tqExpr>
+                  <canonical>
+                    <Subst>
+                      <aSubMap/>
+                      <aExpr/>
+                    </Subst>
+                  </canonical>
+                  <canonical>
+                    <Subst>
+                      <aSubMap/>
+                      <type/>
+                    </Subst>
+                  </canonical>
+                </tqExpr>
+              </Sjudge>
+            </DBrac>
+          </leadsto>
+        </btypes:TYPE>
+      </p>
+    </example>
     <p>
       Unification rules are as shown in 
       Figure&nbsp;<xref ref="hm_unify"/>.
@@ -4688,6 +4742,61 @@
       </btypes:TYPE>
       by solving all the copy compatibility constraints.
     </p>
+<!--     <definition id="djudge"> -->
+<!--       <title><btypes:TYPE><judgeOp sym="diam"/></btypes:TYPE></title>       -->
+<!--       <p> -->
+<!--         We define the following derivation in the -->
+<!--         interest of notational convenience in proofs. -->
+<!--       </p> -->
+<!--       <btypes:TYPE> -->
+<!--         <Hrules> -->
+<!--           <tyRule> -->
+<!--             <tyPre> -->
+<!--               <Sjudge> -->
+<!--                 <assume> -->
+<!--                   <canonical> -->
+<!--                     <Subst> -->
+<!--                       <aSubMap/> -->
+<!--                       <gamma/> -->
+<!--                     </Subst> -->
+<!--                   </canonical> -->
+<!--                   <canonical> -->
+<!--                     <Subst> -->
+<!--                       <aSubMap/> -->
+<!--                       <store/> -->
+<!--                     </Subst> -->
+<!--                   </canonical> -->
+<!--                 </assume> -->
+<!--                 <tqExpr> -->
+<!--                   <canonical> -->
+<!--                     <Subst> -->
+<!--                       <aSubMap/> -->
+<!--                       <aExpr/> -->
+<!--                     </Subst> -->
+<!--                   </canonical> -->
+<!--                   <canonical> -->
+<!--                     <Subst> -->
+<!--                       <aSubMap/> -->
+<!--                       <type/> -->
+<!--                     </Subst> -->
+<!--                   </canonical> -->
+<!--                 </tqExpr> -->
+<!--               </Sjudge> -->
+
+<!--             </tyPre> -->
+<!--             <tyConc> -->
+<!--               <Djudge> -->
+<!--                 <aSubMap/> -->
+<!--                 <gamma/> -->
+<!--                 <store/> -->
+<!--                 <aExpr/> -->
+<!--                 <type/> -->
+<!--               </Djudge> -->
+<!--             </tyConc> -->
+<!--           </tyRule> -->
+<!--         </Hrules> -->
+<!--       </btypes:TYPE> -->
+<!--     </definition> -->
     <definition>
       <title>Constraint Set Closure</title>
       <p>
@@ -4889,7 +4998,7 @@
                     <aCtset/>
                   </pred>
                   <space/>
-                  <textit content="where none of the above cases"/>
+                  <textit content="where none of the above cases "/>
                   <textit content="are applicable"/>
                   <space/>
                 </grouping>
@@ -5014,7 +5123,7 @@
             <aCtset/>
           </models>
         </btypes:TYPE>
-        <em>iff</em>
+        iff
         <btypes:TYPE>
           <normalize>
             <aCtset/>
@@ -5046,424 +5155,288 @@
         </grammar>
       </btypes:TYPE>
     </definition>
-    <definition id="normalized-ctr-types">
-      <title>Normalization of Constrained Types</title>
-      <p>
-        A normalization of inferred types is defined as: 
-        <btypes:TYPE>
-          <eq>              
-            <normalize>
-              <type/>
-            </normalize>
-            <ctype>
-              <canonical>
-                <type/>
-              </canonical>
-              <aCtset/>
-            </ctype>
-          </eq>
-        </btypes:TYPE>, wherein:
-      </p>
-      <ol>
-        <li>
-          <p>
-            All meta-constructors in 
-            <btypes:TYPE>
-              <canonical>
-                <type/>
-              </canonical>
-            </btypes:TYPE>      
-            are fully interpreted. 
-            That is, the type  
-            <btypes:TYPE>
-              <canonical>
-                <type/>
-              </canonical>
-            </btypes:TYPE> contains no meta-constructors.          
-          </p>
-        </li>
-        <li>
-          <p>
-            <btypes:TYPE>
-              <canonical>
-                <type/>
-              </canonical>
-            </btypes:TYPE>
-            contains no constraints within it.
-          </p>
-        </li>
-        <li>
-          <p>
-            <btypes:TYPE>
-              <aCtset/>
-            </btypes:TYPE> only contains copy coercion or equality
-            constraints.
-          </p>
-        </li>
-      </ol>
-      <p>
-        We write  
-        <btypes:TYPE>
-          <eq>
-            <normalize>
-              <type/>
-            </normalize>
-            <canonical>
-              <type/>
-            </canonical>
-          </eq>
-        </btypes:TYPE> if
-        <btypes:TYPE>
-          <eq>              
-            <normalize>
-              <type/>
-            </normalize>
-            <ctype>
-              <canonical>
-                <type/>
-              </canonical>
-              <aCtset/>
-            </ctype>
-          </eq>
-        </btypes:TYPE>, and 
-        <btypes:TYPE>
-          <models name="taut">
-            <assume/>
-            <aCtset/>
-          </models>
-        </btypes:TYPE>. 
-      </p>
-    </definition>
-    <definition>
-      <title>Normalization of Expressions</title>
-      <p>              
-        A notmalization of expressions
-	<btypes:TYPE>
-	  <eq>
-	    <normalize>
-	      <aExpr/>
-	    </normalize>
-            <constrained>
-              <canonical>
-                <aExpr/>
-              </canonical>
-              <aCtset/>
-            </constrained>
-	  </eq>
-	</btypes:TYPE> wherein:
-      </p>
-      <ol>
-        <li>
-          <p>
-            <btypes:TYPE>
-              <canonical>
-                <aExpr/>
-              </canonical>
-            </btypes:TYPE> is structurally identical to 
-            <btypes:TYPE>	  
-              <aExpr/>	  
-            </btypes:TYPE>, except for the fact that
-            for any type annotation
-            <btypes:TYPE>
-              <type num="i"/>
-            </btypes:TYPE> present in 
-            <btypes:TYPE>
-              <aExpr/>
-            </btypes:TYPE>, 
-            <btypes:TYPE>
-              <canonical>
-                <aExpr/>
-              </canonical>
-            </btypes:TYPE>
-            has a corresponding annotation
-            <btypes:TYPE>
-              <canonical>
-                <type num="i"/>
-              </canonical>
-            </btypes:TYPE>
-          </p>
-        </li>
-        <li>
-          <p>
-            For each 
-             <btypes:TYPE>
-              <type num="i"/>
-            </btypes:TYPE> above,
-            <btypes:TYPE>
+    <definition id="ctr_extract">
+      <title>Constraint Set Extraction</title>
+      <btypes:TYPE>
+        <Hrules vspace="yes">
+          <tyRule>
+            <tyPre/>
+            <tyConc>
               <eq>
-                <normalize>
-                  <type num="i"/>
-                </normalize>
-                <constrained>
-                  <canonical>
-                    <type num="i"/>
-                  </canonical>
-                  <aCtset num="i"/>
-                </constrained>
+                <spset>
+                  <Empty/>
+                </spset>
+                <Empty/>
               </eq>
-            </btypes:TYPE>.            
-          </p>
-        </li>
-        <li>
-          <p>
-            <btypes:TYPE>
+            </tyConc>
+          </tyRule>
+          <tyRule>
+            <tyPre>
+              <grouping>
+                <Forall>
+                  <eq>
+                    <id name="i"/>
+                    <text content="1 ... n"/>
+                  </eq>
+                </Forall>
+                <space/>
+                <eq>
+                  <spset>
+                    <solvable num="i"/>
+                  </spset>
+                  <aCtset num="i"/>
+                </eq>
+              </grouping>
+            </tyPre>
+            <tyConc>
               <eq>
-                <aCtset/>
+                <spset>
+                  <solvable num="1"/>
+                  <text content="..."/>
+                  <solvable num="n"/>
+                </spset>
                 <Unin>
                   <aCtset num="i"/>
                 </Unin>
               </eq>
-            </btypes:TYPE>
-          </p>
-        </li>
-      </ol>
-      <p>
-        We write 
-	<btypes:TYPE>
-	  <eq>
-	    <normalize>
-	      <aExpr/>
-	    </normalize>            
-            <canonical>
-              <aExpr/>
-            </canonical>
-	  </eq>
-	</btypes:TYPE> if
-	<btypes:TYPE>
-	  <eq>
-	    <normalize>
-	      <aExpr/>
-	    </normalize>
-            <constrained>
-              <canonical>
-                <aExpr/>
-              </canonical>
-              <aCtset/>
-            </constrained>
-	  </eq>
-	</btypes:TYPE> and
-	<btypes:TYPE>
-          <models name="taut">
-            <assume/>
-            <aCtset/>
-          </models>
-        </btypes:TYPE>.
-      </p>
-    </definition>
-    <definition>
-      <title>Normalization of Contexts</title>
-      <p>
-        <btypes:TYPE>
-          <eq>              
-            <normalize>
-              <gamma/>
-            </normalize>
-            <constrained>
-              <canonical>
-                <gamma/>
-              </canonical>
-              <aCtset/>
-            </constrained>
-          </eq>
-          <text content=" if "/>
-          <Forall>
-            <in>
-              <tqExpr>
-                <id num="i"/>
-                <type num="i"/>
-              </tqExpr>
-              <gamma/>
-            </in>
-          </Forall>
-          <text content=", "/>
-          <eq>
-            <normalize>
-              <type num="i"/>
-            </normalize>
-            <ctype>
-              <canonical>
+            </tyConc>
+          </tyRule>
+        </Hrules>
+        <Hrules>
+          <tyRule>
+            <tyPre>
+              <eq>
+                <spset>
+                  <solvable num="1"/>
+                </spset>
+                <aCtset num="1"/>
+              </eq>
+              <eq>
+                <spset>
+                  <solvable num="2"/>
+                </spset>
+                <aCtset num="2"/>
+              </eq>
+            </tyPre>
+            <tyConc>
+              <eq>
+                <unin>
+                  <spset>
+                    <solvable num="1"/> 
+                  </spset>
+                  <spset>
+                    <solvable num="2"/>
+                  </spset>
+                </unin>
+                <unin>
+                  <aCtset num="1"/>
+                  <aCtset num="2"/>
+                </unin>
+              </eq>
+            </tyConc>
+          </tyRule>
+          <tyRule>
+            <tyPre>
+              <equiv>
                 <type/>
-              </canonical>
-              <aCtset num="i"/>
-            </ctype>
-          </eq>
-          <text content=", we have, "/>
-          <in>
-            <tqExpr>
-              <id num="i"/>
-              <canonical>
-                <type num="i"/>
-              </canonical>
-            </tqExpr>
-            <canonical>
-              <gamma/>
-            </canonical>
-          </in>
-          <text content=" and "/>
-          <eq>
-            <aCtset/>
-            <Unin>
-              <aCtset num="i"/>
-            </Unin>
-          </eq>
-          <text content=". We write "/>
-          <eq>              
-            <normalize>
-              <gamma/>
-            </normalize>
-            <canonical>
-              <gamma/>
-            </canonical>
-          </eq>
-          <text content=" if "/>
-          <eq>              
-            <normalize>
-              <gamma/>
-            </normalize>
-            <constrained>
-              <canonical>
-                <gamma/>
-              </canonical>
-              <aCtset/>
-            </constrained>
-          </eq>
-          <text content=" and "/>
-          <models name="taut">
-            <assume/>
-            <aCtset/>
-          </models>
-        </btypes:TYPE>.
-      </p>
-      <p>
-        Similarly, 
-        <btypes:TYPE>
-          <eq>              
-            <normalize>
-              <store/>
-            </normalize>
-            <constrained>
-              <canonical>
-                <store/>
-              </canonical>
-            </constrained>
-          </eq>
-          <text content=" if "/>
-          <Forall>
-            <in>
-              <tqExpr>
-                <hLoc/>
-                <type num="i"/>
-              </tqExpr>
-              <store/>
-            </in> 
-          </Forall>
-          <text content=", "/>
-          <eq>
-            <normalize>
-              <type num="i"/>
-            </normalize>
-            <ctype>
-              <canonical>
-                <aCtset num="i"/>
-              </canonical>
-            </ctype>
-          </eq>
-          <text content=" and "/>
-          <Forall>
-            <in>
-              <tqExpr>
-                <sLoc/>
-                <type num="j"/>
-              </tqExpr>
-              <store/>
-            </in>
-          </Forall>
-          <text content=", "/>
-          <eq>
-            <normalize>
-              <type num="j"/>
-            </normalize>
-            <ctype>
-              <canonical>
-                <aCtset num="j"/>
-              </canonical>
-            </ctype>
-          </eq>
-          <text content=", we have, "/>
-          <in>
-            <tqExpr>
-              <hLoc/>
-              <canonical>
-                <type num="i"/>
-              </canonical>
-            </tqExpr>
-            <canonical>
-              <store/>
-            </canonical>
-          </in>
-          <text content=" and "/>
-          <in>
-            <tqExpr>
-              <sLoc/>
-              <canonical>
-                <type num="j"/>
-              </canonical>
-            </tqExpr>
-            <canonical>
-              <store/>
-            </canonical>
-          </in>
-          <text content=", and "/>
-          <eq>
-            <aCtset/>
-            <unin>
-              <aCtset num="I"/>
-              <aCtset num="J"/>
-            </unin>
-          </eq>
-          <text content=" where "/>
-          <eq>
-            <aCtset num="I"/>
-            <Unin>
-              <aCtset num="i"/>
-            </Unin>
-          </eq>
-          <text content=" and "/>
-          <eq>
-            <aCtset num="J"/>
-            <Unin>
-              <aCtset num="j"/>
-            </Unin>
-          </eq>
-          <text content=". Again, we write "/>
-          <eq>              
-            <normalize>
-              <store/>
-            </normalize>
-            <canonical>
-              <store/>
-            </canonical>
-          </eq>
-          <text content=" if "/>
-          <eq>              
-            <normalize>
-              <store/>
-            </normalize>
-            <constrained>
-              <canonical>
-                <store/>
-              </canonical>
-              <aCtset/>
-            </constrained>
-          </eq>
-          <text content=" and "/>
-          <models name="taut">
-            <assume/>
-            <aCtset/>
-          </models>
-        </btypes:TYPE>.
-      </p>
+                <ctype>
+                  <type dash="'"/>
+                  <aCtset/>
+                </ctype>
+              </equiv>
+            </tyPre>
+            <tyConc>
+              <eq>
+                <spset>
+                  <type/>
+                </spset>
+                <aCtset/>                
+              </eq>
+            </tyConc>
+          </tyRule>     
+        </Hrules>
+        <Hrules>
+          <tyRule>
+            <tyPre>
+              <grouping>
+                <Forall/>
+                <type num="i"/>                
+                <space/>
+                <text content="structurally contained in "/>
+                <aExpr/> 
+                <text content=","/>
+                <space/>
+                <eq>
+                  <spset>
+                    <type num="i"/>                
+                  </spset>
+                  <aCtset num="i"/>
+                </eq>                    
+              </grouping>
+            </tyPre>
+            <tyConc>
+              <eq>
+                <spset>
+                  <aExpr/>
+                </spset>
+                <Unin>
+                  <aCtset num="i"/>                
+                </Unin>
+              </eq>
+            </tyConc>
+          </tyRule>
+        </Hrules>
+        <Hrules>
+          <tyRule>
+            <tyPre>
+              <grouping>
+                <Forall>
+                  <in>
+                    <mapping>
+                      <id/>
+                      <type num="i"/>                
+                    </mapping>
+                    <gamma/>
+                  </in>
+                </Forall>
+                <text content=","/>
+                <space/>
+                <eq>
+                  <spset>
+                    <type num="i"/>                
+                  </spset>
+                  <aCtset num="i"/>
+                </eq>                    
+              </grouping>
+            </tyPre>
+            <tyConc>
+              <eq>
+                <spset>
+                  <gamma/>
+                </spset>
+                <Unin>
+                  <aCtset num="i"/>                
+                </Unin>
+              </eq>
+            </tyConc>
+          </tyRule>               
+          <tyRule>
+            <tyPre>
+              <grouping>
+                <Forall>
+                  <in>
+                    <mapping>
+                      <loc/>
+                      <type num="i"/>                
+                    </mapping>
+                    <store/>
+                  </in>
+                </Forall>
+                <text content=","/>
+                <space/>
+                <eq>
+                  <spset>
+                    <type num="i"/>                
+                  </spset>
+                  <aCtset num="i"/>
+                </eq>                    
+              </grouping>
+            </tyPre>
+            <tyConc>
+              <eq>
+                <spset>
+                  <store/>
+                </spset>
+                <Unin>
+                  <aCtset num="i"/>                
+                </Unin>
+              </eq>
+            </tyConc>
+          </tyRule>       
+        </Hrules>
+      </btypes:TYPE>        
     </definition>
+    <definition id="normalized-ctr-types">
+      <title>Canonical forms of Solvable Entities</title>
+      <p>
+        For any 
+        <btypes:TYPE>
+          <solvable/>
+        </btypes:TYPE>
+        such that
+        <btypes:TYPE>
+          <models name="sat">
+            <EmptySubst/>
+            <spset>
+              <solvable/>
+            </spset>
+          </models>
+        </btypes:TYPE>,
+        we write 
+        <btypes:TYPE>
+          <canonical>
+            <solvable/>
+          </canonical>
+        </btypes:TYPE> to represent the equivalent entity
+        in which (1) all meta-constructors in are fully interpreted,
+        and (2) the (tautological) constraints embedded within 
+        <btypes:TYPE>
+          <solvable/>
+        </btypes:TYPE> are removed to obtain an equivalent
+        unconstrained entity.
+      </p>
+    </definition>    
+    <p>
+      For example, if
+      <btypes:TYPE>
+        <eq>
+          <type/>
+          <mbpair>
+            <mutable>
+              <bool/>
+            </mutable>
+            <bool/>
+          </mbpair>
+        </eq>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
+        <eq>
+          <canonical>
+            <type/>
+          </canonical>
+          <mutable>
+            <bool/>
+          </mutable>
+        </eq>
+      </btypes:TYPE>, and if
+      <btypes:TYPE>
+        <eq>
+          <gamma/>
+          <mapping>
+            <id/>
+            <floor>
+              <mutable>
+                <unit/>
+              </mutable>
+            </floor>
+          </mapping>
+        </eq>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
+        <eq>
+          <canonical>
+            <gamma/>
+          </canonical>
+          <mapping>
+            <id/>
+            <unit/>
+          </mapping>
+        </eq>
+      </btypes:TYPE>. 
+      That is, canonicalization obtains entities that are within the
+      language and type system defined in 
+      section&nbsp;<xref ref="language"/>.
+    </p>
     <definition id="ca">
       <title>Consistency and Acyclicity</title> 
       <ol>
@@ -5533,98 +5506,13 @@
         </li>
         <li>
           <p>
-            We write
-            <btypes:TYPE>
-              <models name="cst">   
-                <assume/>
-                <type/>
-              </models>  
-              <text content=" if "/>
-              <eq>
-                <normalize>
-                  <type/>
-                </normalize>
-                <ctype>
-                  <canonical>
-                    <type/>
-                  </canonical>
-                  <aCtset/>
-                </ctype>
-              </eq>
-              <text content=" and "/>
-              <models name="cst">   
-                <assume/>
-                <canonical>
-                  <aCtset/>
-                </canonical>
-              </models>  	    
-            </btypes:TYPE>.
-          </p>
-          <p>
-            In general, we write: 
-            <btypes:TYPE>
-              <models name="cst">
-                <assume/>
-                <solvable/>
-              </models>
-            </btypes:TYPE>
-            iff
-            <btypes:TYPE>
-              <eq>
-                <normalize>
-                  <solvable/>
-                </normalize>
-                <constrained>
-                  <canonical>
-                    <solvable/>
-                  </canonical>
-                  <aCtset/>
-                </constrained>
-              </eq>
-              <text content=" and "/>
-              <models name="cst">
-                <assume/>
-                <canonical>
-                  <aCtset/>
-                </canonical>
-              </models>
-            </btypes:TYPE>.
-          </p>
-        </li>
-        <li>
-          <p>
             Similarly, the 
             <btypes:TYPE>
               <assume/>
               <models name="acy"/>   
             </btypes:TYPE>
             judgment states that a set of constraints or substitutions
-            are acyclic in the mathematical sense. We write:
-            <btypes:TYPE>
-              <models name="acy">   
-                <assume/>
-                <solvable/>
-              </models>  
-              <text content=" if "/>
-              <eq>
-                <normalize>
-                  <solvable/>
-                </normalize>
-                <constrained>
-                  <canonical>
-                    <solvable/>
-                  </canonical>
-                  <aCtset/>
-                </constrained>
-              </eq>
-              <text content=" and "/>
-              <models name="acy">   
-                <assume/>
-                <canonical>
-                  <aCtset/>
-                </canonical>
-              </models>  	    
-            </btypes:TYPE>.
+            are acyclic in the mathematical sense. 
           </p>
         </li>
         <li>
@@ -5651,17 +5539,7 @@
               <models name="ca">   
                 <assume/>
                 <aSubMap/>
-              </models> 
-              <text content=", "/>
-              <models name="ca">   
-                <assume/>
-                <type/>
-              </models>           
-              <text content=" and "/>
-              <models name="ca">   
-                <assume/>
-                <solvable/>
-              </models>           
+              </models>
             </btypes:TYPE>. 
           </p>
         </li>
@@ -5695,23 +5573,6 @@
                 </ftvs>
               </unin>
             </eq>
-            <br/>
-            <eq>
-              <ftvs>
-                <plus>
-                  <solvable num="1"/>
-                  <solvable num="2"/>
-                </plus>
-              </ftvs>                
-              <unin>                  
-                <ftvs>
-                  <solvable num="1"/>
-                </ftvs>
-                <ftvs>
-                  <solvable num="2"/>
-                </ftvs>
-              </unin>
-            </eq>              
           </btypes:TYPE>.
         </p>
       </example>
@@ -5824,78 +5685,47 @@
             </fnxn>
             <br/>
             <fnxn name="MTV">
-              <Empty/>
-              <empty/>
-            </fnxn>
-            <text content=" (empty context)."/>
-            <br/>
-            <fnxn name="MTV">
-              <extend>
-                <gamma/>
-                <tqExpr>
-                  <id/>
-                  <type/>
-                </tqExpr>
-              </extend>
-              <unin>
-                <pred name="MTV">
-                  <gamma/>
-                </pred>
-                <pred name="MTV">
-                  <type/>
-                </pred>
-              </unin>
+              <gamma/>
+              <grouping>
+                <Unin>
+                  <pred name="MTV">
+                    <type num="i"/>
+                  </pred>
+                </Unin>
+                <text content=","/>
+                <space/>
+                <Forall>
+                  <in>
+                    <mapping>
+                      <id num="i"/>
+                      <type num="i"/>
+                    </mapping>
+                    <gamma/>
+                  </in>
+                </Forall>
+              </grouping>
             </fnxn>
             <br/>
             <fnxn name="MTV">
-              <extend>
-                <store/>
-                <tqExpr>
-                  <hLoc/>
-                  <type/>
-                </tqExpr>
-              </extend>
-              <unin>
-                <pred name="MTV">
-                  <store/>
-                </pred>
-                <pred name="MTV">
-                  <type/>
-                </pred>
-              </unin>
-            </fnxn>
-            <br/>
-            <fnxn name="MTV">
-              <extend>
-                <store/>
-                <tqExpr>
-                  <sLoc/>
-                  <type/>
-                </tqExpr>
-              </extend>
-              <unin>
-                <pred name="MTV">
-                  <store/>
-                </pred>
-                <pred name="MTV">
-                  <type/>
-                </pred>
-              </unin>
-            </fnxn>
-            <br/>
-            <fnxn name="MTV">
-              <plus>
-                <solvable num="1"/>
-                <solvable num="2"/>
-              </plus>
-              <unin>                  
-                <pred name="MTV">
-                  <solvable num="1"/>
-                </pred>
-                <pred name="MTV">
-                  <solvable num="2"/>
-                </pred>
-              </unin>
+              <store/>
+              <grouping>
+                <Unin>
+                  <pred name="MTV">
+                    <type num="i"/>
+                  </pred>
+                </Unin>
+                <text content=","/>
+                <space/>
+                <Forall>
+                  <in>
+                    <mapping>
+                      <loc num="i"/>
+                      <type num="i"/>
+                    </mapping>
+                    <store/>
+                  </in>
+                </Forall>
+              </grouping>
             </fnxn>
           </btypes:TYPE>
         </p>
@@ -5945,7 +5775,7 @@
                 <type/>
               </pred>
             </fnxn>
-            <text content=" where "/>
+-            <text content=" where "/>
             <neq>
               <type/>
               <tvar name="alpha"/>
@@ -5985,78 +5815,47 @@
             </fnxn>
             <br/>
             <fnxn name="NTV">
-              <Empty/>
-              <empty/>
-            </fnxn>
-            <text content=" (empty context)."/>
-            <br/>
-            <fnxn name="NTV">
-              <extend>
-                <gamma/>
-                <tqExpr>
-                  <id/>
-                  <type/>
-                </tqExpr>
-              </extend>
-              <unin>
-                <pred name="NTV">
-                  <gamma/>
-                </pred>
-                <pred name="NTV">
-                  <type/>
-                </pred>
-              </unin>
+              <gamma/>
+              <grouping>
+                <Unin>
+                  <pred name="NTV">
+                    <type num="i"/>
+                  </pred>
+                </Unin>
+                <text content=","/>
+                <space/>
+                <Forall>
+                  <in>
+                    <mapping>
+                      <id num="i"/>
+                      <type num="i"/>
+                    </mapping>
+                    <gamma/>
+                  </in>
+                </Forall>
+              </grouping>
             </fnxn>
             <br/>
             <fnxn name="NTV">
-              <extend>
-                <store/>
-                <tqExpr>
-                  <hLoc/>
-                  <type/>
-                </tqExpr>
-              </extend>
-              <unin>
-                <pred name="NTV">
-                  <store/>
-                </pred>
-                <pred name="NTV">
-                  <type/>
-                </pred>
-              </unin>
-            </fnxn>
-            <br/>
-            <fnxn name="NTV">
-              <extend>
-                <store/>
-                <tqExpr>
-                  <sLoc/>
-                  <type/>
-                </tqExpr>
-              </extend>
-              <unin>
-                <pred name="NTV">
-                  <store/>
-                </pred>
-                <pred name="NTV">
-                  <type/>
-                </pred>
-              </unin>
-            </fnxn>
-            <br/>
-            <fnxn name="NTV">
-              <plus>
-                <solvable num="1"/>
-                <solvable num="2"/>
-              </plus>
-              <unin>                  
-                <pred name="NTV">
-                  <solvable num="1"/>
-                </pred>
-                <pred name="NTV">
-                  <solvable num="2"/>
-                </pred>
-              </unin>
+              <store/>
+              <grouping>
+                <Unin>
+                  <pred name="NTV">
+                    <type num="i"/>
+                  </pred>
+                </Unin>
+                <text content=","/>
+                <space/>
+                <Forall>
+                  <in>
+                    <mapping>
+                      <loc num="i"/>
+                      <type num="i"/>
+                    </mapping>
+                    <store/>
+                  </in>
+                </Forall>
+              </grouping>
             </fnxn>
           </btypes:TYPE>
         </p>
@@ -6066,9 +5865,7 @@
       <title>TVs</title>
       <p>
         The set of all type variables in a solvable entity is given
-        by TV() function, defined as follows: Note that this
-        function is different from FTV()
-        (see Definition&nbsp;<xref ref="ext-ftvs"/>). 
+        by TV() function, defined as follows:
       </p>
       <example>
         <p>
@@ -6088,269 +5885,13 @@
         </p>
       </example>
     </definition>
-    <definition id="reachable-store">
-      <title>Reachable Store</title>
-      <p>
-        We define
-        <btypes:TYPE>
-          <relevant>
-            <store/>
-            <collection etc="yes">
-              <aExpr num="1"/>
-              <aExpr num="2"/>                
-            </collection>
-          </relevant>
-        </btypes:TYPE>
-        as a store such that 
-        <btypes:TYPE>
-          <subeq>
-            <Subst>
-              <relevant>
-                <store/>
-                <collection etc="yes">
-                  <aExpr num="1"/>
-                  <aExpr num="2"/>                
-                </collection>
-              </relevant>
-              <store/>
-            </Subst>
-          </subeq>
-        </btypes:TYPE>
-        and 
-        <btypes:TYPE>
-          <relevant>
-            <store/>
-            <collection etc="yes">
-              <aExpr num="1"/>
-              <aExpr num="2"/>                
-            </collection>
-          </relevant>
-        </btypes:TYPE>
-        contains mappings for <em>only</em>
-        those locations that are reachable from
-        <btypes:TYPE>
-          <collection etc="yes">
-            <aExpr num="1"/>
-            <aExpr num="2"/>                
-          </collection>
-        </btypes:TYPE>
-        (that is, the location is syntactically a part of 
-        <btypes:TYPE>
-          <collection etc="yes">
-            <aExpr num="1"/>
-            <aExpr num="2"/>                
-          </collection>
-        </btypes:TYPE>).
-      </p>
-    </definition>
-    <definition id="sol-entities">
-      <title>
-        <btypes:TYPE><Sjudge name="sol"/></btypes:TYPE></title>        
-      <p>
-        We write 
-        <btypes:TYPE>
-          <Sjudge name="sol">
-            <assume>
-              <aSubMap/>
-            </assume>
-            <type/>
-          </Sjudge>
-        </btypes:TYPE>
-        to mean that the substitution is 
-        <btypes:TYPE>
-          <aSubMap/>
-        </btypes:TYPE>
-        is obtained by solving the copy compatibility constraints in  
-        <btypes:TYPE>
-          <type/>
-        </btypes:TYPE>. We define solving all solvable entities as
-        follows: 
-      </p>
-      <btypes:TYPE>
-        <Hrules vspace="yes">
-          <tyRule name="S-EMPTY-CTX">
-            <tyPre/>
-            <tyConc>
-              <Sjudge name="sol">
-                <assume>
-                  <Empty/>
-                </assume>
-                <Empty/>
-              </Sjudge>
-            </tyConc>
-          </tyRule>
-          <tyRule name="S-EMPTY-TYPE">
-            <tyPre>
-              <Sjudge name="s">
-                <assume>
-                  <aSubMap/>
-                </assume>
-                <corUp>
-                  <type/>
-                  <type dash="''"/>
-                </corUp>
-              </Sjudge>              
-            </tyPre>
-            <tyConc>
-              <Sjudge name="sol">
-                <assume>
-                  <aSubMap/>
-                </assume>
-                <type/>
-              </Sjudge>              
-            </tyConc>             
-          </tyRule>
-        </Hrules>
-        <Hrules vspace="yes">
-          <tyRule name="S-STORE-HL">
-            <tyPre>
-              <Sjudge name="sol">
-                <assume>
-                  <aSubMap num="1"/>
-                </assume>
-                <type/>
-              </Sjudge>              
-              <Sjudge name="sol">
-                <assume>
-                  <aSubMap num="2"/>
-                </assume>
-                <Subst>
-                  <aSubMap num="1"/>
-                  <store/>
-                </Subst>
-              </Sjudge>              
-            </tyPre>
-            <tyConc>
-              <Sjudge name="sol">
-                <assume>
-                  <compose>
-                    <aSubMap num="1"/>
-                    <aSubMap num="2"/>
-                  </compose>
-                </assume>
-                <extend>
-                  <store/>
-                  <tqExpr>
-                    <hLoc/>
-                    <type/>
-                  </tqExpr>
-                </extend>
-              </Sjudge>
-            </tyConc>
-          </tyRule>
-          <tyRule name="S-STORE-SL">
-            <tyPre>
-              <Sjudge name="sol">
-                <assume>
-                  <aSubMap num="1"/>
-                </assume>
-                <type/>
-              </Sjudge>              
-              <Sjudge name="sol">
-                <assume>
-                  <aSubMap num="2"/>
-                </assume>
-                <Subst>
-                  <aSubMap num="1"/>
-                  <store/>
-                </Subst>
-              </Sjudge>              
-            </tyPre>
-            <tyConc>
-              <Sjudge name="sol">
-                <assume>
-                  <compose>
-                    <aSubMap num="1"/>
-                    <aSubMap num="2"/>
-                  </compose>
-                </assume>
-                <extend>
-                  <store/>
-                  <tqExpr>
-                    <sLoc/>
-                    <type/>
-                  </tqExpr>
-                </extend>
-              </Sjudge>
-            </tyConc>
-          </tyRule>
-        </Hrules>
-        <Hrules vspace="yes">
-          <tyRule name="S-GAMMA">
-            <tyPre>
-              <Sjudge name="sol">
-                <assume>
-                  <aSubMap num="1"/>
-                </assume>
-                <type/>
-              </Sjudge>              
-              <Sjudge name="sol">
-                <assume>
-                  <aSubMap num="2"/>
-                </assume>
-                <Subst>
-                  <aSubMap num="1"/>
-                  <gamma/>
-                </Subst>
-              </Sjudge>              
-            </tyPre>
-            <tyConc>
-              <Sjudge name="sol">
-                <assume>
-                  <compose>
-                    <aSubMap num="1"/>
-                    <aSubMap num="2"/>
-                  </compose>
-                </assume>
-                <extend>
-                  <gamma/>
-                  <tqExpr>
-                    <id/>
-                    <type/>
-                  </tqExpr>
-                </extend>
-              </Sjudge>
-            </tyConc>
-          </tyRule>
-          <tyRule name="S-MULTIPLE">
-            <tyPre>
-              <Sjudge name="sol">
-                <assume>
-                  <aSubMap num="1"/>
-                </assume>
-                <solvable num="1"/>
-              </Sjudge>              
-              <Sjudge name="sol">
-                <assume>
-                  <aSubMap num="2"/>
-                </assume>
-                <Subst>
-                  <aSubMap num="1"/>
-                  <solvable num="2"/>
-                </Subst>
-              </Sjudge>              
-            </tyPre>
-            <tyConc>
-              <Sjudge name="sol">
-                <assume>
-                  <compose>
-                    <aSubMap num="1"/>
-                    <aSubMap num="2"/>
-                  </compose>
-                </assume>                  
-                <plus>
-                  <solvable num="1"/>
-                  <solvable num="2"/>
-                </plus>                  
-              </Sjudge>
-            </tyConc>
-          </tyRule>
-        </Hrules>
-      </btypes:TYPE>
-    </definition>
+    <p>
+      Note that this
+      function is different from FTV(), defined in 
+      Definition&nbsp;<xref ref="ext-ftvs"/>. 
+    </p>
     <definition id="sol-math">
-      <title>
-        <btypes:TYPE><models name="sol"/></btypes:TYPE></title>
+      <title><btypes:TYPE><models name="sol"/></btypes:TYPE></title>
       <p>
         &thinsp;<br/>
       </p>
@@ -6358,53 +5899,24 @@
         <Hrules vspace="yes">
           <tyRule>
             <tyPre>
-              <eq>
-                <normalize>
-                  <Subst>
-                    <aSubMap/>
-                    <solvable/>
-                  </Subst>
-                </normalize>
-                <canonical>
-                  <Subst>
-                    <aSubMap/>
-                    <solvable/>
-                  </Subst>
-                </canonical>
-              </eq>
-              <eq>
+              <models name="sat">
                 <aSubMap/>
-                <compose>
-                  <aSubMap num="s"/>
-                  <aSubMap num="o"/>
-                </compose>
-              </eq>
+                <spset>
+                  <solvable/>
+                </spset>
+              </models>
               <eq>
-                <dom>
-                  <aSubMap num="s"/>
-                </dom>
+                <inter>
+                  <dom>
+                    <aSubMap/>
+                  </dom>
+                  <pred name="TV">
+                    <solvable/>
+                  </pred>
+                </inter>
                 <pred name="MTV">
                   <solvable/>
                 </pred>
-              </eq>
-            </tyPre>
-            <tyPre>
-              <eq>
-                <Subst>
-                  <aSubMap num="o"/>
-                  <canonical>
-                    <Subst>
-                      <aSubMap/>
-                      <solvable/>
-                    </Subst>
-                  </canonical>
-                </Subst>
-                <canonical>
-                  <Subst>
-                    <aSubMap/>
-                    <solvable/>
-                  </Subst>
-                </canonical>
               </eq>
             </tyPre>
             <tyConc>
@@ -6427,23 +5939,14 @@
       constraints in  
       <btypes:TYPE>
         <solvable/>
-      </btypes:TYPE>, but does not otherwise affect the resultant
+      </btypes:TYPE>, but does not contain substitutions to 
+      other type variables in 
       <btypes:TYPE>
-        <canonical>
-          <Subst>
-            <aSubMap/>
-            <solvable/>
-          </Subst>
-        </canonical>
+        <solvable/>
       </btypes:TYPE>. It is, however, free to contain other
       substitutions that do not matter wrt
       <btypes:TYPE>
-        <canonical>
-          <Subst>
-            <aSubMap/>
-            <solvable/>
-          </Subst>
-        </canonical>
+        <solvable/>
       </btypes:TYPE>.
     </p>
     <definition id="ct">
@@ -6543,6 +6046,62 @@
       <btypes:TYPE>
         <models name="ct"/>
       </btypes:TYPE>.
+    </p>
+    <definition id="reachable-store">
+      <title>Reachable Store</title>
+      <p>
+        We define
+        <btypes:TYPE>
+          <relevant>
+            <store/>
+            <collection etc="yes">
+              <aExpr num="1"/>
+              <aExpr num="2"/>                
+            </collection>
+          </relevant>
+        </btypes:TYPE>
+        as a store such that 
+        <btypes:TYPE>
+          <subeq>
+            <relevant>
+              <store/>
+              <collection etc="yes">
+                <aExpr num="1"/>
+                <aExpr num="2"/>                
+              </collection>
+            </relevant>
+            <store/>
+          </subeq>
+        </btypes:TYPE>
+        and 
+        <btypes:TYPE>
+          <relevant>
+            <store/>
+            <collection etc="yes">
+              <aExpr num="1"/>
+              <aExpr num="2"/>                
+            </collection>
+          </relevant>
+        </btypes:TYPE>
+        contains mappings for <em>only</em>
+        those locations that are reachable from
+        <btypes:TYPE>
+          <collection etc="yes">
+            <aExpr num="1"/>
+            <aExpr num="2"/>                
+          </collection>
+        </btypes:TYPE>
+        (that is, the location is syntactically a part of 
+        <btypes:TYPE>
+          <collection etc="yes">
+            <aExpr num="1"/>
+            <aExpr num="2"/>                
+          </collection>
+        </btypes:TYPE>).
+      </p>
+    </definition>
+    <p>
+      _____________________________________________
     </p>
     <definition id="compat-subst">
       <title>Compatible Solutions (Substitutions)</title>
@@ -11501,67 +11060,37 @@
         <li id="infer-sound__a_solve">
           <p>
             <btypes:TYPE>
-              <Sjudge name="sol">
+              <models name="sat">
                 <assume>
                   <aSubMap num="s"/>
-                </assume>
-                <plus>
-                  <type/>
-                  <Subst>
-                    <aSubMap num="u"/>                  
+                </assume>                
+                <Subst>
+                  <aSubMap num="u"/>                                    
+                  <spset>
+                    <type/>
                     <gamma/>
-                  </Subst>
-                  <Subst>
-                    <aSubMap num="u"/>                  
                     <store/>
-                  </Subst>
-                </plus>
-              </Sjudge>
+                    <aExpr/>
+                  </spset>
+                </Subst>
+              </models>
             </btypes:TYPE>.              
-          </p>
-        </li>
-        <li id="infer-sound__comp">
-          <p>
-            <btypes:TYPE>
-              <eq>
-                <aSubMap num="su"/>
-                <compose>
-                  <aSubMap num="s"/>
-                  <aSubMap num="u"/>                  
-                </compose>
-              </eq>
-            </btypes:TYPE>
           </p>
         </li>
       </ol>
       <p>
         Then,
         <btypes:TYPE>
-          <Sjudge>
-            <assume>
-              <canonical>
-                <Subst>
-                  <aSubMap num="su"/>
-                  <gamma/>
-                </Subst>
-              </canonical>
-              <canonical>
-                <Subst>
-                  +                    <aSubMap num="su"/>
-                  <store/>
-                </Subst>
-              </canonical>
-            </assume>
-            <tqExpr>
-              <aExpr/>
-              <canonical>
-                <Subst>
-                  <aSubMap num="s"/>
-                  <type/>
-                </Subst>
-              </canonical>
-            </tqExpr>
-          </Sjudge>	    
+          <Djudge>            
+            <scomp>
+              <aSubMap num="s"/>
+              <aSubMap num="u"/>                  
+            </scomp>
+            <gamma/>
+            <store/>
+            <aExpr/>
+            <type/>
+          </Djudge>
         </btypes:TYPE>.
       </p>
     </theorem>
@@ -11677,33 +11206,70 @@
                 <li id="infer-sound__lam_sol">
                   <p>
                     <btypes:TYPE>
-                      <Sjudge name="sol">
+                      <models name="sat">
                         <assume>
                           <aSubMap num="s"/>
                         </assume>
-                        <plus>
-                          <fn>
-                            <floor>
-                              <Subst>
-                                <aSubMap num="u"/>
-                                <tvar name="alpha"/>
-                              </Subst>
-                            </floor>
-                            <ceil>
-                              <type num="r"/>
-                            </ceil>
-                          </fn>
-                          <Subst>
-                            <aSubMap num="u"/>
+                        <Subst>
+                          <aSubMap num="u"/>
+                          <spset>
+                            <fn>
+                              <floor>
+                                <Subst>
+                                  <aSubMap num="u"/>
+                                  <tvar name="alpha"/>
+                                </Subst>
+                              </floor>
+                              <ceil>
+                                <type num="r"/>
+                              </ceil>
+                            </fn>
                             <gamma/>
-                          </Subst>
-                          <Subst>
-                            <aSubMap num="u"/>
                             <store/>
-                          </Subst>
-                        </plus>
-                      </Sjudge>                
-                    </btypes:TYPE>
+                            <lambda>
+                              <id/>
+                              <aExpr/>
+                            </lambda>
+                          </spset>
+                        </Subst>
+                      </models>
+                    </btypes:TYPE>. 
+<!--                     That is, -->
+<!--                     <btypes:TYPE> -->
+<!--                       <models name="sat"> -->
+<!--                         <assume> -->
+<!--                           <aSubMap num="s"/> -->
+<!--                         </assume> -->
+<!--                         <spset> -->
+<!--                           <fn> -->
+<!--                             <floor> -->
+<!--                               <Subst> -->
+<!--                                 <aSubMap num="u"/> -->
+<!--                                 <tvar name="alpha"/> -->
+<!--                               </Subst> -->
+<!--                             </floor> -->
+<!--                             <ceil> -->
+<!--                               <type num="r"/> -->
+<!--                             </ceil> -->
+<!--                           </fn> -->
+<!--                           <Subst> -->
+<!--                             <aSubMap num="u"/> -->
+<!--                             <gamma/> -->
+<!--                           </Subst> -->
+<!--                           <Subst> -->
+<!--                             <aSubMap num="u"/> -->
+<!--                             <store/> -->
+<!--                           </Subst> -->
+<!--                           <lambda> -->
+<!--                             <id/> -->
+<!--                             <Subst> -->
+<!--                               <aSubMap num="u"/> -->
+<!--                               <aExpr/> -->
+<!--                             </Subst> -->
+<!--                           </lambda> -->
+<!--                         </spset> -->
+<!--                       </models> -->
+<!--                     </btypes:TYPE> -->
                   </p>
                 </li>
               </ol>
@@ -11716,112 +11282,51 @@
                 <li id="infer-sound__lam_ih1">
                   <p>
                     <btypes:TYPE>
-                      <Sjudge name="sol">
+                      <models name="sat">
                         <assume>
                           <aSubMap num="si"/>
                         </assume>
-                        <plus>
-                          <type num="r"/>
-                          <Subst>
-                            <aSubMap num="u"/>
-                            <extend>
-                              <gamma/>
-                              <tqExpr>
-                                <id/>
-                                <tvar name="alpha"/>
-                              </tqExpr>
-                            </extend>
-                          </Subst>
-                          <Subst>
-                            <aSubMap num="u"/>
+                        <Subst>
+                          <aSubMap num="u"/>
+                          <spset>
+                            <type num="r"/>
+                            <paren>
+                              <extend>
+                                <gamma/>
+                                <mapping>
+                                  <id/>
+                                  <tvar name="alpha"/>
+                                </mapping>
+                              </extend>
+                            </paren>
                             <store/>
-                          </Subst>
-                        </plus>
-                      </Sjudge>
+                            <aExpr/>
+                          </spset>
+                        </Subst>
+                      </models>
                     </btypes:TYPE>
                   </p>
                 </li>
                 <li id="infer-sound__lam_ih2">
                   <p>
                     <btypes:TYPE>
-                      <Sjudge>
-                        <assume>
-                          <canonical>
-                            <Subst>
-                              <scomp>
-                                <aSubMap num="si"/>
-                                <aSubMap num="u"/>
-                              </scomp>
-                              <extend>
-                                <gamma/>
-                                <tqExpr>
-                                  <id/>
-                                  <tvar name="alpha"/>
-                                </tqExpr>
-                              </extend>
-                            </Subst>
-                          </canonical>
-                          <canonical>
-                            <Subst>
-                              <scomp>
-                                <aSubMap num="si"/>
-                                <aSubMap num="u"/>
-                              </scomp>
-                              <store/>
-                            </Subst>
-                          </canonical>
-                        </assume>
-                        <tqExpr>
-                          <aExpr num="i"/>
-                          <canonical>
-                            <Subst>
-                              <aSubMap num="si"/>
-                              <type num="r"/>
-                            </Subst>
-                          </canonical>
-                        </tqExpr>
-                      </Sjudge>	    
+                      <Djudge>
+                        <scomp>
+                          <aSubMap num="si"/>
+                          <aSubMap num="u"/>
+                        </scomp>
+                        <extend>
+                          <gamma/>
+                          <mapping>
+                            <id/>
+                            <tvar name="alpha"/>
+                          </mapping>
+                        </extend>
+                        <store/>
+                        <aExpr num="i"/>
+                        <type num="r"/>
+                      </Djudge>	    
                     </btypes:TYPE>.
-                    That is,
-                    <btypes:TYPE>
-                      <Sjudge>
-                        <assume>
-                          <canonical>
-                            <Subst>
-                              <aSubMap num="si"/>
-                              <Subst>
-                                <aSubMap num="u"/>
-                                <extend>
-                                  <gamma/>
-                                  <tqExpr>
-                                    <id/>
-                                    <tvar name="alpha"/>
-                                  </tqExpr>
-                                </extend>
-                              </Subst>
-                            </Subst>
-                          </canonical>
-                          <canonical>
-                            <Subst>
-                              <aSubMap num="si"/>
-                              <Subst>
-                                <aSubMap num="u"/>
-                                <store/>
-                              </Subst>
-                            </Subst>
-                          </canonical>
-                        </assume>
-                        <tqExpr>
-                          <aExpr num="i"/>
-                          <canonical>
-                            <Subst>
-                              <aSubMap num="si"/>
-                              <type num="r"/>
-                            </Subst>
-                          </canonical>
-                        </tqExpr>
-                      </Sjudge>	    
-                    </btypes:TYPE>
                   </p>
                 </li>
               </ol>
@@ -11829,7 +11334,7 @@
             <li id="infer-sound__lam_expand">                
               <p>
                 From case (2.b.i) above, and 
-                Definition&nbsp;<xref ref="sol-entities"/> 
+                Definition&nbsp;??
                 rule S-GAMMA, we have:
                 <btypes:TYPE>
                   <Sjudge name="sol">
@@ -11893,7 +11398,7 @@
             </li>
             <li id="infer-sound__lam_sep">
               <p>
-                From Definition&nbsp;<xref ref="sol-entities"/> 
+                From Definition&nbsp;??
                 rule S-MULTIPLE, we can write:
                 <btypes:TYPE>
                   <eq>

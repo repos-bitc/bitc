@@ -28,7 +28,7 @@ BITC_SRC=../../..
 
 MY_XML=changes closures PLOS2006-shap PLOS2006 polyinst 
 MY_XML+=relnotes-0.10 relnotes-0.9 spec
-MY_TYPE_XML=mutinfer formal sys-infer mut-formal #core
+MY_TYPE_XML=formal core mutinfer mut-formal sys-infer 
 
 OSDOC_XML_SRC=$(MY_XML) $(MY_TYPE_XML)
 

@@ -193,6 +193,7 @@
 <!ELEMENT plural                (%anything.group;)>
 <!ELEMENT Paren                 %anything.group;>
 <!ELEMENT DBrac                 %anything.group;>
+<!ELEMENT spset                 %anything.group;*>
 
 <!ELEMENT mapping               (%anything.group;, %anything.group;)>
 <!ELEMENT fnxn                  (%anything.group;, %anything.group;)>
@@ -902,6 +903,13 @@
                                num      CDATA    #IMPLIED
                                dash     CDATA    #IMPLIED
 >
+<!ELEMENT loc                  EMPTY>
+<!ATTLIST loc
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+
 <!ELEMENT lambda               (id, %anyexpr.group;)>
 <!ELEMENT Pair                 (%anyexpr.group;, %anyexpr.group;)>
 <!ELEMENT fst                  %anyexpr.group;>
@@ -1104,6 +1112,7 @@
 <!ELEMENT judgeOp              EMPTY>
 <!ATTLIST judgeOp
                                name      CDATA   #IMPLIED
+                               sym       CDATA   #IMPLIED
 >
 
 <!ELEMENT judge                (assume, conclude, constrain?, propagate?)>
@@ -1117,8 +1126,14 @@
                                name      CDATA   #IMPLIED
                                br        CDATA   #IMPLIED
 >
+<!-- Convenience form substituted canonicalized declarative derivation -->
+<!ELEMENT Djudge              %anything.group;%anything.group;%anything.group;%anything.group;%anything.group;)>
+<!ATTLIST Djudge
+                               br        CDATA   #IMPLIED
+>
+
 <!ELEMENT TDjudge             (%anyexpr.group;, %anytype.group;)>
-<!ATTLIST TDdge
+<!ATTLIST TDjudge
                                sub      yes      #IMPLIED
 >
 
