@@ -11213,16 +11213,12 @@
                         <Subst>
                           <aSubMap num="u"/>
                           <spset>
-                            <fn>
-                              <floor>
-                                <Subst>
-                                  <aSubMap num="u"/>
-                                  <tvar name="alpha"/>
-                                </Subst>
-                              </floor>
-                              <ceil>
-                                <type num="r"/>
-                              </ceil>
+                            <fn M="yes">
+                              <Subst>
+                                <aSubMap num="u"/>
+                                <tvar name="alpha"/>
+                              </Subst>
+                              <type num="r"/>
                             </fn>
                             <gamma/>
                             <store/>
@@ -11234,45 +11230,33 @@
                         </Subst>
                       </models>
                     </btypes:TYPE>. 
-<!--                     That is, -->
-<!--                     <btypes:TYPE> -->
-<!--                       <models name="sat"> -->
-<!--                         <assume> -->
-<!--                           <aSubMap num="s"/> -->
-<!--                         </assume> -->
-<!--                         <spset> -->
-<!--                           <fn> -->
-<!--                             <floor> -->
-<!--                               <Subst> -->
-<!--                                 <aSubMap num="u"/> -->
-<!--                                 <tvar name="alpha"/> -->
-<!--                               </Subst> -->
-<!--                             </floor> -->
-<!--                             <ceil> -->
-<!--                               <type num="r"/> -->
-<!--                             </ceil> -->
-<!--                           </fn> -->
-<!--                           <Subst> -->
-<!--                             <aSubMap num="u"/> -->
-<!--                             <gamma/> -->
-<!--                           </Subst> -->
-<!--                           <Subst> -->
-<!--                             <aSubMap num="u"/> -->
-<!--                             <store/> -->
-<!--                           </Subst> -->
-<!--                           <lambda> -->
-<!--                             <id/> -->
-<!--                             <Subst> -->
-<!--                               <aSubMap num="u"/> -->
-<!--                               <aExpr/> -->
-<!--                             </Subst> -->
-<!--                           </lambda> -->
-<!--                         </spset> -->
-<!--                       </models> -->
-<!--                     </btypes:TYPE> -->
                   </p>
                 </li>
               </ol>
+              <p>
+                and we need:
+                <btypes:TYPE>
+                  <Djudge>            
+                    <scomp>
+                      <aSubMap num="s"/>
+                      <aSubMap num="u"/>                  
+                    </scomp>
+                    <gamma/>
+                    <store/>
+                    <lambda>
+                      <id/>
+                      <aExpr num="i"/>
+                    </lambda>
+                    <fn M="yes">
+                      <Subst>
+                        <aSubMap num="u"/>
+                        <tvar name="alpha"/>
+                      </Subst>
+                      <type num="r"/>
+                    </fn>
+                  </Djudge>
+                </btypes:TYPE>.
+              </p>
             </li>
             <li id="infer-sound__lam_ih">
               <p>
@@ -11300,7 +11284,7 @@
                               </extend>
                             </paren>
                             <store/>
-                            <aExpr/>
+                            <aExpr num="i"/>
                           </spset>
                         </Subst>
                       </models>
@@ -11333,294 +11317,162 @@
             </li>
             <li id="infer-sound__lam_expand">                
               <p>
-                From case (2.b.i) above, and 
-                Definition&nbsp;??
-                rule S-GAMMA, we have:
+                Using 
                 <btypes:TYPE>
-                  <Sjudge name="sol">
-                    <assume>
-                      <aSubMap num="si"/>
-                    </assume>
-                    <plus>
-                      <type num="r"/>
-                      <Subst>
-                        <aSubMap num="u"/>
-                        <gamma/>
-                      </Subst>
-                      <Subst>
-                        <aSubMap num="u"/>
-                        <tvar name="alpha"/>
-                      </Subst>
-                      <Subst>
-                        <aSubMap num="u"/>
-                        <store/>
-                      </Subst>
-                    </plus>
-                  </Sjudge>
+                  <defn tag="ctr_extract"/>
+                </btypes:TYPE>, we can
+                re-write 
+                <btypes:TYPE>
+                  <case tag="infer-sound__lam_ih1"/> 
                 </btypes:TYPE>
-              </p>
-            </li>
-            <li id="infer-sound__lam_commut">
-              <p>
-                From case (2.c) above and 
-                Lemma&nbsp;<xref ref="sol-plus-commut"/>
-                (commutativity), we conclude that   
+                as 
                 <btypes:TYPE>
-                  <Exists>
-                    <ceq>
-                      <aSubMap num="si" subnum="1"/>
+                  <models name="sat">
+                    <assume>
                       <aSubMap num="si"/>
-                    </ceq>
-                  </Exists>
-                  <text content=" such that "/>
-                  <Sjudge name="sol">
-                    <assume>
-                      <aSubMap num="si" subnum="1"/>
-                    </assume>
-                    <plus>
-                      <type num="r"/>
-                      <Subst>
-                        <aSubMap num="u"/>
-                        <tvar name="alpha"/>
-                      </Subst>
-                      <Subst>
-                        <aSubMap num="u"/>
-                        <gamma/>
-                      </Subst>
-                      <Subst>
-                        <aSubMap num="u"/>
-                        <store/>
-                      </Subst>
-                    </plus>
-                  </Sjudge>
-                </btypes:TYPE>.
-              </p>
-            </li>
-            <li id="infer-sound__lam_sep">
-              <p>
-                From Definition&nbsp;??
-                rule S-MULTIPLE, we can write:
-                <btypes:TYPE>
-                  <eq>
-                    <aSubMap num="si" subnum="1"/>
-                    <compose>
-                      <aSubMap num="f"/>
-                      <aSubMap num="o"/>
-                    </compose>
-                  </eq>
-                  <text content=" where "/>
-                  <Sjudge name="sol">
-                    <assume>
-                      <aSubMap num="f"/>
-                    </assume>
-                    <plus>
-                      <type num="r"/>
-                      <Subst>
-                        <aSubMap num="u"/>
-                        <tvar name="alpha"/>
-                      </Subst>
-                    </plus>
-                  </Sjudge>
-                  <text content=" and "/>
-                  <Sjudge name="sol">
-                    <assume>
-                      <aSubMap num="o"/>
                     </assume>
                     <Subst>
-                      <aSubMap num="f"/>
-                      <plus>
-                        <Subst>
-                          <aSubMap num="u"/>
-                          <gamma/>
-                        </Subst>
-                        <Subst>
-                          <aSubMap num="u"/>
-                          <store/>
-                        </Subst>
-                      </plus>
-                    </Subst>
-                  </Sjudge>                    
-                </btypes:TYPE>.
-              </p>
-            </li>
-            <li id="infer-sound__lam_fnize">
-              <p>
-                Given
-                <btypes:TYPE>
-                  <Sjudge name="sol">
-                    <assume>
-                      <aSubMap num="f"/>
-                    </assume>
-                    <plus>
-                      <type num="r"/>
-                      <Subst>
-                        <aSubMap num="u"/>
-                        <tvar name="alpha"/>
-                      </Subst>
-                    </plus>
-                  </Sjudge>
-                </btypes:TYPE>,
-                using the SOL-FN rule in Figure&nbsp;<xref
-                  ref="hm_solve"/>, we can conclude that 
-                <btypes:TYPE>
-                  <Sjudge name="sol">
-                    <assume>
-                      <aSubMap num="f"/>
-                    </assume>
-                    <fn>
-                      <floor>                          
-                        <Subst>
-                          <aSubMap num="u"/>
-                          <tvar name="alpha"/>
-                        </Subst>
-                      </floor>
-                      <ceil>
+                      <aSubMap num="u"/>
+                      <spset>
                         <type num="r"/>
-                      </ceil>
-                    </fn>
-                  </Sjudge>
-                </btypes:TYPE>.                  
-              </p>
-            </li>
-            <li id="infer-sound__lam_rejoin">
-              <p>
-                Therefore, 
-                <btypes:TYPE>
-                  <Sjudge name="sol">
-                    <assume>
-                      <aSubMap num="si" subnum="1"/>
-                    </assume>
-                    <plus>                        
-                      <fn>
-                        <floor>                          
-                          <Subst>
-                            <aSubMap num="u"/>
-                            <tvar name="alpha"/>
-                          </Subst>
-                        </floor>
-                        <ceil>
-                          <type num="r"/>
-                        </ceil>
-                      </fn>
-                      <Subst>
-                        <aSubMap num="u"/>
                         <gamma/>
-                      </Subst>
-                      <Subst>
-                        <aSubMap num="u"/>
+                        <tvar name="alpha"/>
                         <store/>
-                      </Subst>
-                    </plus>
-                  </Sjudge>
-                  <text content=". That is, "/>
-                  <eq>
-                    <aSubMap num="si" subnum="1"/>
-                    <aSubMap num="s"/>
-                  </eq>                      
-                </btypes:TYPE>
-              </p>
-            </li>
-            <li id="infer-sound__lam_cong1">
-              <p>
-                From cases (d and g), we conclude that
-                <btypes:TYPE>
-                  <ceq>
-                    <aSubMap num="si"/>
-                    <aSubMap num="s"/>
-                  </ceq>                                          
-                </btypes:TYPE>.
-              </p>
-            </li>
-            <li id="infer-sound__lam_sm">
-              <p> 
-                From case (2.b.i) and
-                Theorem&nbsp;<xref ref="TI-solve-correct"/>
-                (constraint solver correctness),
-                we have:
-                <btypes:TYPE>
-                  <models name="sol">
-                    <assume>
-                      <aSubMap num="si"/>
-                    </assume>
-                    <plus>
-                      <type num="r"/>
-                      <Subst>
-                        <aSubMap num="u"/>
-                        <extend>
-                          <gamma/>
-                          <tqExpr>
-                            <id/>
-                            <tvar name="alpha"/>
-                          </tqExpr>
-                        </extend>
-                      </Subst>
-                      <Subst>
-                        <aSubMap num="u"/>
-                        <store/>
-                      </Subst>
-                    </plus>
+                        <aExpr num="i"/>
+                      </spset>
+                    </Subst>
                   </models>
                 </btypes:TYPE>.
               </p>
             </li>
-            <li id="infer-sound__lam_decl_lem">
+            <li id="infer-sound__lam_functionalize">
               <p>
-                From cases (2.i, 2.b.ii and 2.h), and 
-                Lemma&nbsp;<xref ref="compat-subst-decl-ok"/>, we
-                have:
+                It is evident that
                 <btypes:TYPE>
-                  <Sjudge>
-                    <assume>
-                      <canonical>
-                        <Subst>
-                          <aSubMap num="s"/>
-                          <Subst>
-                            <aSubMap num="u"/>
-                            <extend>
-                              <gamma/>
-                              <tqExpr>
-                                <id/>
-                                <tvar name="alpha"/>
-                              </tqExpr>
-                            </extend>
-                          </Subst>
-                        </Subst>
-                      </canonical>
-                      <canonical>
-                        <Subst>
-                          <aSubMap num="s"/>
-                          <Subst>
-                            <aSubMap num="u"/>
-                            <store/>
-                          </Subst>
-                        </Subst>
-                      </canonical>
-                    </assume>
-                    <tqExpr>
+                  <eq>
+                    <spset>
+                      <tvar name="alpha"/>
+                      <type num="r"/>
+                    </spset>
+                    <spset>
+                      <fn M="yes">
+                        <tvar name="alpha"/>
+                        <type num="r"/>
+                      </fn>
+                    </spset>
+                  </eq>                  
+                </btypes:TYPE> and
+                <btypes:TYPE>
+                  <eq>
+                    <spset>
+                      <lambda>
+                        <id/>
+                        <aExpr num="i"/>
+                      </lambda>
+                    </spset>
+                    <spset>
                       <aExpr num="i"/>
-                      <canonical>
-                        <Subst>
-                          <aSubMap num="s"/>
-                          <type num="r"/>
-                        </Subst>
-                      </canonical>
-                    </tqExpr>
-                  </Sjudge>	    
+                    </spset>
+                  </eq>                  
+                </btypes:TYPE>. Therefore, we can rewrite 
+                <btypes:TYPE>
+                  <case tag="infer-sound__lam_expand"/>
                 </btypes:TYPE>
+                as 
+                <btypes:TYPE>
+                  <models name="sat">
+                    <assume>
+                      <aSubMap num="si"/>
+                    </assume>
+                    <Subst>
+                      <aSubMap num="u"/>
+                      <spset>
+                        <fn M="yes">
+                          <tvar name="alpha"/>
+                          <type num="r"/>
+                        </fn>
+                        <gamma/>
+                        <store/>
+                        <lambda>
+                          <id/>
+                          <aExpr num="i"/>
+                        </lambda>
+                      </spset>
+                    </Subst>
+                  </models>
+                </btypes:TYPE>. Further, this is 
+                equivalent to 
+                <btypes:TYPE>
+                  <models name="sat">
+                    <assume>
+                      <aSubMap num="si"/>
+                    </assume>
+                    <Subst>
+                      <aSubMap num="u"/>
+                      <spset>
+                        <fn M="yes">
+                          <Subst>
+                            <aSubMap num="u"/>                            
+                            <tvar name="alpha"/>
+                          </Subst>
+                          <type num="r"/>
+                        </fn>
+                        <gamma/>
+                        <store/>
+                        <lambda>
+                          <id/>
+                          <aExpr num="i"/>
+                        </lambda>
+                      </spset>
+                    </Subst>
+                  </models>
+                </btypes:TYPE> (redundant substitution specification).
               </p>
             </li>
-            <li id="infer-sound__lam_c1">
+            <li>
               <p>
-                Since
+                Using cases (d and a.ii), we conclude that 
+                <btypes:TYPE>
+                  <eq>
+                    <aSubMap num="si"/>
+                    <aSubMap num="s"/>
+                  </eq>                      
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li>
+              <p>
+                Let
                 <btypes:TYPE>
                   <eq>
                     <aSubMap num="su"/>
-                    <compose>
+                    <scomp>
                       <aSubMap num="s"/>
-                      <aSubMap num="u"/>                  
-                    </compose>
+                      <aSubMap num="u"/>
+                    </scomp>
                   </eq>
-                </btypes:TYPE>, we can write
+                </btypes:TYPE>.
+                Using cases (e and b.ii), we obtain
+                <btypes:TYPE>
+                  <Djudge>
+                    <aSubMap num="su"/>
+                    <extend>
+                      <gamma/>
+                      <mapping>
+                        <id/>
+                        <tvar name="alpha"/>
+                      </mapping>
+                    </extend>
+                    <store/>
+                    <aExpr num="i"/>
+                    <type num="r"/>
+                  </Djudge>	    
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="infer-sound__lam_decl_rewrite">
+              <p>
+                That is, 
                 <btypes:TYPE>
                   <Sjudge>
                     <assume>
@@ -11644,53 +11496,21 @@
                       </canonical>
                     </assume>
                     <tqExpr>
-                      <aExpr num="i"/>
                       <canonical>
                         <Subst>
-                          <aSubMap num="s"/>
-                          <type num="r"/>
+                          <aSubMap num="su"/>
+                          <aExpr num="i"/>
                         </Subst>
-                      </canonical>
-                    </tqExpr>
-                  </Sjudge>	    
-                </btypes:TYPE>.
-                That is,
-                <btypes:TYPE>
-                  <Sjudge>
-                    <assume>
-                      <canonical>
-                        <extend>
-                          <Subst>
-                            <aSubMap num="su"/>
-                            <gamma/>
-                          </Subst>
-                          <tqExpr>
-                            <id/>
-                            <Subst>
-                              <aSubMap num="su"/>
-                              <tvar name="alpha"/>
-                            </Subst>
-                          </tqExpr>
-                        </extend>
                       </canonical>
                       <canonical>
                         <Subst>
                           <aSubMap num="su"/>
-                          <store/>
-                        </Subst>
-                      </canonical>
-                    </assume>
-                    <tqExpr>
-                      <aExpr num="i"/>
-                      <canonical>
-                        <Subst>
-                          <aSubMap num="s"/>
                           <type num="r"/>
                         </Subst>
                       </canonical>
                     </tqExpr>
                   </Sjudge>	    
-                </btypes:TYPE>. Or,
+                </btypes:TYPE>, which can be re-written as
                 <btypes:TYPE>
                   <Sjudge>
                     <assume>
@@ -11719,10 +11539,15 @@
                       </canonical>
                     </assume>
                     <tqExpr>
-                      <aExpr num="i"/>
                       <canonical>
                         <Subst>
-                          <aSubMap num="s"/>
+                          <aSubMap num="su"/>
+                          <aExpr num="i"/>
+                        </Subst>
+                      </canonical>
+                      <canonical>
+                        <Subst>
+                          <aSubMap num="su"/>
                           <type num="r"/>
                         </Subst>
                       </canonical>
@@ -11733,7 +11558,10 @@
             </li>
             <li id="infer-sound__lam_decl">
               <p>
-                From the T-Lambda rule, we have:
+                From 
+                <btypes:TYPE>
+                  <case tag="infer-sound__lam_decl_rewrite"/>
+                </btypes:TYPE>, and the T-Lambda rule, we obtain
                 <btypes:TYPE>
                   <Sjudge>
                     <assume>
@@ -11753,7 +11581,12 @@
                     <tqExpr>
                       <lambda>
                         <id/>
-                        <aExpr num="i"/>
+                        <canonical>
+                          <Subst>
+                            <aSubMap num="su"/>
+                            <aExpr num="i"/>
+                          </Subst>
+                        </canonical>
                       </lambda>
                       <fn>
                         <minz>
@@ -11767,7 +11600,7 @@
                         <maxz>
                           <canonical>
                             <Subst>
-                              <aSubMap num="s"/>
+                              <aSubMap num="su"/>
                               <type num="r"/>
                             </Subst>
                           </canonical>
@@ -11775,15 +11608,59 @@
                       </fn>
                     </tqExpr>
                   </Sjudge>	    
-                </btypes:TYPE>
+                </btypes:TYPE>.
               </p>
             </li>
             <li id="infer-sound__lam_norm">
               <p>
-                By definition (see 
+                From 
                 <btypes:TYPE>
                   <defn tag="normalized-ctr-types"/>
-                </btypes:TYPE>), 
+                </btypes:TYPE> and
+                <btypes:TYPE>
+                  <defn tag="meta"/>
+                </btypes:TYPE>, we know that
+                <btypes:TYPE>
+                  <eq>
+                    <canonical>
+                      <floor>
+                        <Subst>
+                          <aSubMap num="su"/>
+                          <tvar name="alpha"/>
+                        </Subst>
+                      </floor>
+                    </canonical>                    
+                    <minz>
+                      <canonical>
+                        <Subst>
+                          <aSubMap num="su"/>
+                          <tvar name="alpha"/>
+                        </Subst>
+                      </canonical>
+                    </minz>
+                  </eq>
+                </btypes:TYPE>, and
+                <btypes:TYPE>
+                  <eq>
+                    <canonical>
+                      <ceil>
+                        <Subst>
+                          <aSubMap num="s"/>
+                          <type num="r"/>
+                        </Subst>
+                      </ceil>
+                    </canonical>
+                    <maxz>
+                      <canonical>
+                        <Subst>
+                          <aSubMap num="su"/>
+                          <type num="r"/>
+                        </Subst>
+                      </canonical>
+                    </maxz>
+                  </eq>
+                </btypes:TYPE>.
+                Therefore, we can write
                 <btypes:TYPE>
                   <eq br="yes">
                     <fn>
@@ -11816,43 +11693,62 @@
                       <canonical>
                         <ceil>
                           <Subst>
-                            <aSubMap num="s"/>
+                            <aSubMap num="su"/>
                             <type num="r"/>
                           </Subst>
                         </ceil>
                       </canonical>
                     </fn>
                     <canonical>
-                      <fn>
-                        <floor>
-                          <Subst>
-                            <aSubMap num="su"/>
-                            <tvar name="alpha"/>
-                          </Subst>
-                        </floor>
-                        <ceil>
-                          <Subst>
-                            <aSubMap num="s"/>
-                            <type num="r"/>
-                          </Subst>
-                        </ceil>
+                      <fn M="yes">
+                        <Subst>
+                          <aSubMap num="su"/>
+                          <tvar name="alpha"/>
+                        </Subst>
+                        <Subst>
+                          <aSubMap num="su"/>
+                          <type num="r"/>
+                        </Subst>
                       </fn>
                     </canonical>
                     <canonical>
                       <Subst>
-                        <aSubMap num="s"/>
-                        <fn>
-                          <floor>
-                            <Subst>
-                              <aSubMap num="u"/>
-                              <tvar name="alpha"/>
-                            </Subst>
-                          </floor>
-                          <ceil>
-                            <type num="r"/>
-                          </ceil>
+                        <aSubMap num="su"/>
+                        <fn M="yes">
+                          <Subst>
+                            <aSubMap num="u"/>
+                            <tvar name="alpha"/>
+                          </Subst>
+                          <type num="r"/>
                         </fn>
                       </Subst>                        
+                    </canonical>
+                  </eq>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="infer-sound__lam_lambda_canonical">
+              <p>
+                It is evident that 
+                <btypes:TYPE>
+                  <eq>
+                    <lambda>
+                      <id/>
+                      <canonical>
+                        <Subst>
+                          <aSubMap num="su"/>
+                          <aExpr num="i"/>
+                        </Subst>
+                      </canonical>
+                    </lambda>
+                    <canonical>
+                      <Subst>
+                        <aSubMap num="su"/>
+                        <lambda>
+                          <id/>
+                          <aExpr num="i"/>
+                        </lambda>
+                      </Subst>
                     </canonical>
                   </eq>
                 </btypes:TYPE>
@@ -11860,7 +11756,17 @@
             </li>
             <li id="infer-sound__lam_done">
               <p>
-                From cases (2.j and 2.k) , we finally have:
+                Substituting the results of                 
+                <btypes:TYPE>
+                  <cases>
+                    <case tag="infer-sound__lam_norm"/>
+                    <case tag="infer-sound__lam_done"/>
+                  </cases>
+                </btypes:TYPE>
+                in 
+                <btypes:TYPE>
+                  <case tag="infer-sound__lam_decl"/>
+                </btypes:TYPE>, we obtain
                 <btypes:TYPE>
                   <Sjudge>
                     <assume>
@@ -11878,29 +11784,52 @@
                       </canonical>
                     </assume>
                     <tqExpr>
-                      <lambda>
-                        <id/>
-                        <aExpr num="i"/>
-                      </lambda>
                       <canonical>
                         <Subst>
-                          <aSubMap num="s"/>
-                          <fn>
-                            <floor>
-                              <Subst>
-                                <aSubMap num="u"/>
-                                <tvar name="alpha"/>
-                              </Subst>
-                            </floor>
-                            <ceil>
-                              <type num="r"/>
-                            </ceil>
+                          <aSubMap num="su"/>
+                          <lambda>
+                            <id/>
+                            <aExpr num="i"/>
+                          </lambda>
+                        </Subst>
+                      </canonical>
+                      <canonical>
+                        <Subst>
+                          <aSubMap num="su"/>
+                          <fn M="yes">
+                            <Subst>
+                              <aSubMap num="u"/>
+                              <tvar name="alpha"/>
+                            </Subst>
+                            <type num="r"/>
                           </fn>
                         </Subst>                        
                       </canonical>
                     </tqExpr>
-                  </Sjudge>	    
-                </btypes:TYPE>
+                  </Sjudge>
+                </btypes:TYPE>.
+                That is,
+                <btypes:TYPE>
+                  <Djudge>            
+                    <scomp>
+                      <aSubMap num="s"/>
+                      <aSubMap num="u"/>                  
+                    </scomp>
+                    <gamma/>
+                    <store/>
+                    <lambda>
+                      <id/>
+                      <aExpr num="i"/>
+                    </lambda>
+                    <fn M="yes">
+                      <Subst>
+                        <aSubMap num="u"/>
+                        <tvar name="alpha"/>
+                      </Subst>
+                      <type num="r"/>
+                    </fn>
+                  </Djudge>
+                </btypes:TYPE>.
               </p>
             </li>
           </ol>
