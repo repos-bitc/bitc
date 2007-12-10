@@ -4459,6 +4459,7 @@
     <xi:include href="include/formal/hm-infer.xmli"/>
     <xi:include href="include/formal/hm-unify.xmli"/>
     <xi:include href="include/formal/hm-solve.xmli"/>
+    <xi:include href="include/formal/hm-inter.xmli"/>
     <btypes:TYPE>        
       <grammar>
         <bnf desc="Types">
@@ -5926,6 +5927,55 @@
         </li>
         <li>
           <p>
+            <btypes:TYPE>              
+              <leadsto>
+                <DBrac>  
+                  <judge name="j">
+                    <precond>
+                      <aSubMap/>
+                    </precond>
+                    <assume>
+                      <gamma/>
+                      <store/>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <aExpr/>
+                        <type/>
+                      </tqExpr>
+                    </conclude>
+                  </judge>
+                </DBrac>
+                <DBrac>          
+                  <Sjudge name="j">
+                    <assume>
+                      <Subst>
+                        <aSubMap/>
+                        <gamma/>
+                      </Subst>
+                      <Subst>
+                        <aSubMap/>
+                        <store/>
+                      </Subst>
+                    </assume>
+                    <tqExpr>
+                      <Subst>
+                        <aSubMap/>
+                        <aExpr/>
+                      </Subst>
+                      <Subst>
+                        <aSubMap/>
+                        <type/>
+                      </Subst>
+                    </tqExpr>
+                  </Sjudge>
+                </DBrac>
+              </leadsto>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
             <btypes:TYPE>
               <leadsto>
                 <DBrac> 
@@ -6049,12 +6099,200 @@
       </btypes:TYPE>
       by solving all the copy compatibility constraints.
     </p>
-    <xi:include href="include/formal/hm-inter.xmli"/>
     <p>
       We prove the soundness of the inference system, through an
       intermediate declarative system defined in 
       Figure&nbsp;<xref ref="hm_inter_rules"/>
     </p>
+    <lemma id="Tsub-implies-Msub">
+      <title><btypes:TYPE><TsubOp/></btypes:TYPE> 
+        implies <btypes:TYPE><MsubOp/></btypes:TYPE></title>
+      <p>
+        If
+        <btypes:TYPE>
+          <Tsub>
+            <type/>
+            <type dash="'"/>
+          </Tsub>
+        </btypes:TYPE>, then
+        <btypes:TYPE>
+          <Msub>
+            <type/>
+            <type dash="'"/>
+          </Msub>
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        Evident from the definition of 
+        <btypes:TYPE><MsubOp/></btypes:TYPE> in 
+        Figure&nbsp;<xref ref="hm_inter_rules"/>.
+        Both
+        <btypes:TYPE><TsubOp/></btypes:TYPE> and
+        <btypes:TYPE><MsubOp/></btypes:TYPE> are partial functions on
+        types, but 
+        <btypes:TYPE><MsubOp/></btypes:TYPE> clearly covers all
+        cases that 
+        <btypes:TYPE><TsubOp/></btypes:TYPE> relates.
+      </p>
+    </proof>
+    <lemma id="Msub-begets-Tsub">
+      <title><btypes:TYPE><MsubOp/></btypes:TYPE> 
+        begets <btypes:TYPE><TsubOp/></btypes:TYPE></title> 
+      <p>
+        If
+        <btypes:TYPE>
+          <Msub>
+            <type/>
+            <type dash="'"/>
+          </Msub>
+        </btypes:TYPE>, then
+        <btypes:TYPE>
+          <Exists>
+            <aSubMap/>
+          </Exists>
+        </btypes:TYPE>
+        such that
+        <btypes:TYPE>
+          <Tsub>
+            <canonical>
+              <Subst>
+                <aSubMap/>
+                <type/>
+              </Subst>
+            </canonical>
+            <canonical>
+              <Subst>
+                <aSubMap/>
+                <type dash="'"/>
+              </Subst>
+            </canonical>
+          </Tsub>
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        By construction of 
+        <btypes:TYPE>
+          <aSubMap/>
+        </btypes:TYPE>. One possible solution is        
+        <btypes:TYPE>
+          <eq>
+            <aSubMap/>
+            <grouping>
+              <Forall>
+                <mbpair>
+                  <tvar name="alpha"/>
+                  <type num="h"/>
+                </mbpair>
+              </Forall>
+              <space/>
+              <textit content="structurally contained in"/>
+              <space/>
+              <type/> 
+              <textit content=","/>
+              <space/>
+              <SubMap>
+                <tvar name="alpha"/>
+                <inner>
+                  <type num="h"/>
+                </inner>
+              </SubMap>
+            </grouping>
+          </eq>
+        </btypes:TYPE>.
+      </p>
+    </proof>
+    <theorem id="intermediate-sound">
+      <title>Soundness of Intermediate System</title>
+      <p>
+        If:
+      </p>
+      <ol>
+        <li id="inter-sound__a_derive">
+          <p>
+            <btypes:TYPE>
+              <TDjudge name="j">
+                <aExpr/>
+                <type/>
+              </TDjudge>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li id="inter-sound__a_solve">
+          <p>
+            <btypes:TYPE>
+              <models name="sat">
+                <assume>
+                  <aSubMap/>
+                </assume>                
+                <spset>
+                  <gamma/>
+                  <store/>
+                  <aExpr/>
+                  <type/>
+                </spset>
+              </models>
+            </btypes:TYPE>.              
+          </p>
+        </li>
+      </ol>
+      <p>
+        Then,
+        <btypes:TYPE>
+          <Djudge>            
+            <aSubMap/>
+            <gamma/>
+            <store/>
+            <aExpr/>
+            <type/>
+          </Djudge>
+        </btypes:TYPE>.        
+      </p>
+    </theorem>
+    <theorem id="heuristic-inference-sound">
+      <title>Soundness of Heuristic Type Inference</title>
+      <p>
+        If:
+        <btypes:TYPE>
+          <TIjudge>
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <conclude>
+              <tqExpr>
+                <aExpr/>
+                <type/>
+              </tqExpr>
+            </conclude>
+            <propagate>
+              <aSubMap/>
+            </propagate>
+          </TIjudge>
+        </btypes:TYPE>
+        then,
+        <btypes:TYPE>
+          <judge name="j">
+            <precond>
+              <aSubMap/>
+            </precond>
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <conclude>
+              <tqExpr>
+                <aExpr/>
+                <type/>
+              </tqExpr>
+            </conclude>
+          </judge>
+        </btypes:TYPE>.
+      </p>
+    </theorem>
     <p>
       _____________________________________________
     </p>
