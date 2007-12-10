@@ -314,8 +314,9 @@
                                | neq
                                | ceq
                                | nceq
-                               | Tsub
-                               | tsub
+                               | Tsub <!-- Copy coersion -->
+                               | tsub <!-- SubType -->
+                               | Msub <!-- Intermediate-coersion -->
                                | forall
                                | exists
                                | iff
@@ -435,6 +436,7 @@
                                | union
                                | comp
                                | aCtype
+                               | sType
                                | ctype
                                | CType
                                | MBpair
@@ -593,8 +595,12 @@
 <!ELEMENT ctype                (%anytype.group;, %constraint.group;)>
 <!ELEMENT aCtype                (%anytype.group;, %constraint.group;)>
 <!ATTLIST aCtype
-                               name        CDATA       #IMPLIED
-                               inline      (yes|no)    #IMPLIED
+                               num        CDATA       #IMPLIED
+                               dash       CDATA       #IMPLIED
+>
+<!ATTLIST sType
+                               num        CDATA       #IMPLIED
+                               dash       DATA        #IMPLIED
 >
 
 <!-- Typeclass Constraint Notation -->
@@ -702,6 +708,7 @@
 <!ELEMENT nceqOp               EMPTY>
 <!ELEMENT TsubOp               EMPTY>
 <!ELEMENT tsubOp               EMPTY>
+<!ELEMENT MsubOp               EMPTY>
 <!ELEMENT ceq                  (%anytype.group;, %anytype.group;+)>
 <!ELEMENT nceq                 (%anytype.group;, %anytype.group;+)>
 <!ELEMENT Tsub                 ((%anytype.group;|%anyexpr.group;), %anytype.group;+)>
@@ -1134,7 +1141,9 @@
 
 <!ELEMENT TDjudge             (%anyexpr.group;, %anytype.group;)>
 <!ATTLIST TDjudge
+                               name     CDATA    #IMPLIED
                                sub      yes      #IMPLIED
+                                Msub     yes      #IMPLIED
 >
 
 <!ELEMENT TIjudge             (assume?, conclude, propagate?)>

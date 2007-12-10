@@ -711,21 +711,25 @@
   </xsl:template>    
   
   <xsl:template match="Subst" mode="formula">
-    <xsl:for-each select="*">
-      <xsl:if test = "position() = 1">
-	<xsl:apply-templates select="." mode="formula"/>	
-      </xsl:if>
-      <xsl:if test = "position() = 2">
+    <xsl:apply-templates select="*[1]" mode="formula"/>	
+    <xsl:choose>
+      <xsl:when test="*[2] = spset">
+      </xsl:when>
+      <xsl:otherwise>
 	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
 	<xsl:text>lang;</xsl:text>
-	<xsl:apply-templates select="." mode="formula"/>	
+      </xsl:otherwise>
+    </xsl:choose>
+    <xsl:apply-templates select="*[2]" mode="formula"/>	
+    <xsl:choose>
+      <xsl:when test="*[2] = spset">
+      </xsl:when>
+      <xsl:otherwise>
 	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
 	<xsl:text>rang;</xsl:text>
-      </xsl:if>
-    </xsl:for-each>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>  
-  
-  
 
 <!-- ======================================================================
               Tape
@@ -990,8 +994,9 @@
 
   <!-- unspecified -->
   <xsl:template match="unspecified" mode="formula">
-    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>mldr;</xsl:text>
+    <!--     <xsl:text disable-output-escaping="yes">&amp;</xsl:text> -->
+    <!--     <xsl:text>mldr;</xsl:text> -->
+    <xsl:text>...</xsl:text>
   </xsl:template>
   
   <!-- symbol -->
@@ -1269,6 +1274,13 @@
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>  
 
+ <!-- A special type: generic usage! -->
+  <xsl:template match="sType" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>phiv;</xsl:text>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>  
+  
   <!-- constrained type, Typeclass Notation -->
   <xsl:template match="CType" mode="formula">
     <xsl:for-each select="*">
@@ -1531,6 +1543,17 @@
   <xsl:template match="tsub" mode="formula">
     <xsl:call-template name="print.infix">
       <xsl:with-param name="print.infix.op">le;:</xsl:with-param> 
+    </xsl:call-template>
+  </xsl:template>
+
+  <!-- MsubOp -->
+  <xsl:template match="MsubOp" mode="formula">
+    <xsl:call-template name="print.op.Mqual"/>
+  </xsl:template>
+  <!-- Msub -->
+  <xsl:template match="Msub" mode="formula">
+    <xsl:call-template name="print.infix">
+      <xsl:with-param name="print.infix.op">ltrie;:</xsl:with-param> 
     </xsl:call-template>
   </xsl:template>
 
@@ -2717,12 +2740,19 @@
     <xsl:call-template name="print.op.semis"/>	
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>Sigma;</xsl:text>
-    <xsl:call-template name="print.derives"/>	
+    <xsl:call-template name="print.derives">
+      <xsl:with-param name="print.derives.name">
+	<xsl:value-of select="@name"/>
+      </xsl:with-param>
+    </xsl:call-template>	
     <xsl:for-each select="*">
       <xsl:if test = "position() = 2">	
 	<xsl:choose>
-	  <xsl:when test = "../@sub">
+ 	  <xsl:when test = "../@sub">
 	    <xsl:call-template name="print.op.subqual"/>	
+	  </xsl:when>
+ 	  <xsl:when test = "../@Msub">
+	    <xsl:call-template name="print.op.Mqual"/>	
 	  </xsl:when>
 	  <xsl:otherwise>
 	    <xsl:call-template name="print.op.qual"/>	
@@ -3317,6 +3347,15 @@
     <xsl:call-template name="print.space"/>
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>cupre;</xsl:text>
+    <xsl:text>:</xsl:text>
+    <xsl:call-template name="print.space"/>
+  </xsl:template>
+
+  <!-- the <|: (Mqual) operator -->
+  <xsl:template name="print.op.Mqual">	
+    <xsl:call-template name="print.space"/>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>ltrie;</xsl:text>
     <xsl:text>:</xsl:text>
     <xsl:call-template name="print.space"/>
   </xsl:template>

@@ -55,11 +55,6 @@ while(!eof(F)) {
 	$l =~ s/\{\\\{\}\{\\textbar\}/$EM\{\\\{\\!\|\}/g;
 	$l =~ s/\{\\textbar\}\{\\\}\}/$EM\{\|\\!\\\}\}/g;
 
-	# $rightarrow$ to \ensuremath{rightarrow}
-	# Patching up until official osdoc is fixed.
-	# Could have used a wildcard here, but ...
-	$l =~ s/\$\\rightarrow\$/$EM\{\\rightarrow\}/g;
-
 	# \textbf{*}letter\textbf{*} to \mathbb{letter}
 	$l =~ s/\\textbf\{\*\}([A-Za-z])\\textbf\{\*\}/$EM\{\\mathbb{$1}\}/g;
 

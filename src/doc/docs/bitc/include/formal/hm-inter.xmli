@@ -2,42 +2,84 @@
 <!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
-  <figure id="decl_rules" fullwidth='yes' 
+  <figure id="hm_inter_rules" fullwidth='yes' 
     latex.placement="tbp">
   <font size="small">
     <btypes:TYPE
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
       <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="S-Mut1">
+	<tyRule name="M-Mut1">
 	  <tyPre/>
 	  <tyConc>
-	    <Tsub>
+	    <Msub>
 	      <mutable>
 		<type/>
 	      </mutable>
 	      <type/>
-	    </Tsub>
+	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="S-Mut2">
+	<tyRule name="M-Mut2">
 	  <tyPre>
-	    <Tsub>
+	    <Msub>
 	      <type/>
 	      <type dash="'"/>
-	    </Tsub>
+	    </Msub>
 	  </tyPre>
 	  <tyConc>
-	    <Tsub>
+	    <Msub>
 	      <mutable>
 		<type/>
 	      </mutable>
 	      <mutable>
 		<type dash="'"/>
 	      </mutable>
-	    </Tsub>
+	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="S-Ref">
+	<tyRule name="M-May1">
+	  <tyPre>
+	    <Msub>
+	      <inner>
+		<type/>
+	      </inner>
+	      <minz>
+		<type dash="'"/>
+	      </minz>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbpair>
+		<tvar name="alpha"/>
+		<type/>
+	      </mbpair>
+	      <type dash="'"/>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="M-May2">
+	  <tyPre>
+	    <neq>
+	      <type/>
+	      <tvar name="alpha"/>
+	    </neq>
+	    <Msub>	      
+	      <type/>
+	      <type dash="''"/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbpair>
+		<type/>
+		<type dash="'"/>
+	      </mbpair>
+	      <type dash="''"/>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="M-Ref">
 	  <tyPre>
 	    <eq>
 	      <type/>
@@ -45,70 +87,80 @@
 	    </eq>
 	  </tyPre>
 	  <tyConc>
-	    <Tsub>
+	    <Msub>
 	      <ref>
 		<type/>
 	      </ref>
 	      <ref>
 		<type dash="'"/>
 	      </ref>
-	    </Tsub>
+	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="S-Fn">
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="M-Fn">
 	  <tyPre>
-	    <eq>
+	    <Msub>
 	      <type num="1"/>
+	      <type num="1" dash="''"/>
+	    </Msub>
+	    <Msub>
 	      <type num="1" dash="'"/>
-	    </eq>
-	    <eq>
+	      <type num="1" dash="''"/>
+	    </Msub>
+	    <Msub>
 	      <type num="2"/>
+	      <type num="2" dash="''"/>
+	    </Msub>
+	    <Msub>
 	      <type num="2" dash="'"/>
-	    </eq>
+	      <type num="2" dash="''"/>
+	    </Msub>
 	  </tyPre>
 	  <tyConc>
-	    <Tsub>
-	      <fn>
+	    <Msub>
+	      <fn M="yes">
 		<type num="1"/>
 		<type num="2"/>
 	      </fn>
-	      <fn>
+	      <fn M="yes">
 		<type num="1" dash="'"/>
 		<type num="2" dash="'"/>
 	      </fn>
-	    </Tsub>
+	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="S-Refl">
+	<tyRule name="M-Refl">
 	  <tyPre/>
 	  <tyConc>
-	    <Tsub>
+	    <Msub>
 	      <type/>
 	      <type/>
-	    </Tsub>
+	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="S-Trans">
+	<tyRule name="M-Trans">
 	  <tyPre>
-	    <Tsub>
+	    <Msub>
 	      <type num="0"/>
 	      <type num="1"/>
-	    </Tsub>
-	    <Tsub>
+	    </Msub>
+	    <Msub>
 	      <type num="1"/>
 	      <type num="2"/>
-	    </Tsub>
+	    </Msub>
 	  </tyPre>
 	  <tyConc>
-	    <Tsub>
+	    <Msub>
 	      <type num="0"/>
 	      <type num="2"/>
-	    </Tsub>
+	    </Msub>
 	  </tyConc>
 	</tyRule>  
       </Hrules>
       <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="T-Id">
+	<tyRule name="J-Id">
 	  <tyPre>
 	    <mapsto>
 	      <gamma/>
@@ -118,9 +170,15 @@
 		<type/>
 	      </TS>
 	    </mapsto>
+	    <models name="cst">
+	      <assume/>
+	      <spset>		
+		<type/>
+	      </spset>
+	    </models>
 	  </tyPre>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <id/>
 	      <subst>
 		<type/>
@@ -131,34 +189,34 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>        
-	<tyRule name=" T-Unit">
+	<tyRule name=" J-Unit">
 	  <tyPre/>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <Unit/>
 	      <unit/>
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="T-True">
+	<tyRule name="J-True">
 	  <tyPre/>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <true/>
 	      <bool/>
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="T-False">
+	<tyRule name="J-False">
 	  <tyPre/>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <false/>
 	      <bool/>
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="T-Hloc">
+	<tyRule name="J-Hloc">
 	  <tyPre>
 	    <mapsto>
 	      <store/>
@@ -167,7 +225,7 @@
 	    </mapsto>
 	  </tyPre>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <hLoc/>
 	      <ref>
 		<type/>
@@ -177,7 +235,7 @@
 	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="T-Sloc">
+	<tyRule name="J-Sloc">
 	  <tyPre>
 	    <mapsto>
 	      <store/>
@@ -186,13 +244,13 @@
 	    </mapsto>
 	  </tyPre>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <sLoc/>
 	      <type/>
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="T-Lambda">
+	<tyRule name="J-Lambda">
 	  <tyPre>
 	    <Sjudge>
 	      <assume>
@@ -212,43 +270,38 @@
 	    </Sjudge>
 	  </tyPre>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <lambda>
 		<id/>
 		<aExpr/>
 	      </lambda>
-	      <fn>
-		<minz>
-		  <type num="1"/>
-		</minz>
-		<maxz>
-		  <type num="2"/>
-		</maxz>
+	      <fn M="yes">		
+		<type num="1"/>
+		<type num="2"/>
 	      </fn>
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="T-App">
+	<tyRule name="J-App">
 	  <tyPre>
-	    <TDjudge sub="yes">
+	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
-	      <fn>
+	      <fn M="yes">
 		<type num="2"/>
 		<type num="0"/>
 	      </fn>
 	    </TDjudge>
-	    <TDjudge sub="yes">
+	    <TDjudge Msub="yes">
 	      <aExpr num="2"/>
 	      <type num="2"/>
 	    </TDjudge>
-	    <Tsub>
-	      <type
-		num="0"/>
+	    <Msub>
+	      <type num="0"/>
 	      <type num="0" dash="'"/>
-	    </Tsub>
+	    </Msub>
 	  </tyPre>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <apply>
 		<aExpr num="1"/>
 		<aExpr num="2"/>
@@ -259,7 +312,7 @@
 	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="T-Set">
+	<tyRule name="J-Set">
 	  <tyPre>
 	    <TDjudge sub="yes">
 	      <aExpr num="1"/>
@@ -267,17 +320,18 @@
 		<type/>
 	      </mutable>
 	    </TDjudge>
-	    <TDjudge sub="yes">
+	    <TDjudge Msub="yes">
 	      <aExpr num="2"/>
 	      <type/>
 	    </TDjudge>
 	    <Sjudge name="lval">
 	      <assume/>
-	      <aExpr num="1"/>
+	      <aExpr
+		num="1"/>
 	    </Sjudge>
 	  </tyPre>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <assign>
 		<aExpr num="1"/>
 		<aExpr num="2"/>
@@ -286,15 +340,15 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="T-TqExpr">
+	<tyRule name="J-TqExpr">
 	  <tyPre>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <aExpr/>
 	      <type/>
 	    </TDjudge>
 	  </tyPre>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <paren>
 		<tqExpr>
 		  <aExpr/>
@@ -305,20 +359,20 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="T-Dup">
+	<tyRule name="J-Dup">
 	  <tyPre>
-	    <TDjudge sub="yes">
+	    <TDjudge Msub="yes">
 	      <aExpr/>
 	      <type/>
 	    </TDjudge>
-	    <Tsub>
+	    <Msub>
 	      <type
 		dash="'"/>
 	      <type/>
-	    </Tsub>
+	    </Msub>
 	  </tyPre>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <dup>
 		<aExpr/>
 	      </dup>
@@ -328,9 +382,9 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="T-Deref">
+	<tyRule name="J-Deref">
 	  <tyPre>
-	    <TDjudge sub="yes">
+	    <TDjudge Msub="yes">
 	      <aExpr/>
 	      <ref>
 		<type/>
@@ -338,7 +392,7 @@
 	    </TDjudge>
 	  </tyPre>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <deref>
 		<aExpr/>
 	      </deref>
@@ -348,30 +402,30 @@
 	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="T-If">
+	<tyRule name="J-If">
 	  <tyPre>
-	    <TDjudge sub="yes">
+	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
 	      <bool/>
 	    </TDjudge>
-	    <TDjudge sub="yes">
+	    <TDjudge Msub="yes">
 	      <aExpr num="2"/>
 	      <type/>
 	    </TDjudge>
 	  </tyPre>
 	  <tyPre>
-	    <TDjudge sub="yes">
+	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
 	      <type/>
 	    </TDjudge>
-	    <Tsub>
+	    <Msub>
 	      <type
 		dash="'"/>
 	      <type/>
-	    </Tsub>
+	    </Msub>
 	  </tyPre>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <if>
 		<aExpr num="1"/>
 		<aExpr num="2"/>
@@ -381,18 +435,16 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="T-Let-M [Tq]">
+	<tyRule name="J-Let-M [Tq]">
 	  <tyPre>
-	    <TDjudge sub="yes">
-	      <aExpr
-		num="1"/>
+	    <TDjudge Msub="yes">
+	      <aExpr num="1"/>
 	      <type num="1"/>
 	    </TDjudge>
-	    <Tsub>
-	      <type/>
-	      <type
-		num="1"/>
-	    </Tsub>
+	    <Msub>
+	      <sType/>
+	      <type num="1"/>
+	    </Msub>
 	  </tyPre>
 	  <tyPre>
 	    <Sjudge>
@@ -401,7 +453,7 @@
 		  <gamma/>
 		  <mapping>
 		    <id/>
-		    <type/>
+		    <sType/>
 		  </mapping>
 		</extend>
 		<store/>
@@ -413,7 +465,7 @@
 	    </Sjudge>
 	  </tyPre>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <paren>
 		<let kind="m">
 		  <tqExpr optional="yes">
@@ -428,16 +480,16 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="T-Let-P [Tq]">
+	<tyRule name="J-Let-P [Tq]">
 	  <tyPre>
-	    <TDjudge sub="yes">
+	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
 	      <type num="1"/>
 	    </TDjudge>
-	    <Tsub>
-	      <type/>
+	    <Msub>
+	      <sType/>
 	      <type num="1"/>
-	    </Tsub>
+	    </Msub>
 	    <Sjudge name="gen">
 	      <assume>
 		<gamma/>
@@ -445,7 +497,7 @@
 		<aExpr num="1"/>
 	      </assume>
 	      <GEN>
-		<type/>
+		<sType/>
 		<aTS/>
 	      </GEN>
 	    </Sjudge>
@@ -476,7 +528,7 @@
 	    </Sjudge>
 	  </tyPre>
 	  <tyConc>
-	    <TDjudge>
+	    <TDjudge name="j">
 	      <paren>
 		<let kind="p">
 		  <tqExpr optional="yes">
@@ -492,103 +544,7 @@
 	  </tyConc>
 	</tyRule>
       </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="G-Value">
-	  <tyPre>
-	    <pred name="Value">
-	      <aExpr/>
-	    </pred>
-	    <pred name="Immut">
-	      <type/>
-	    </pred>
-	  </tyPre>
-	  <tyPre>
-	    <eq>
-	      <tvars name="alpha"/>
-	      <diff>
-		<ftvs><type/></ftvs>
-		<ftvs><gamma/></ftvs>
-		<ftvs><store/></ftvs>
-	      </diff>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="gen">
-	      <assume>
-		<gamma/>
-		<store/>
-		<aExpr/>
-	      </assume>                
-	      <GEN>
-		<type/>
-		<TS>
-		  <tvars name="alpha"/>
-		  <type/>
-		</TS>
-	      </GEN>                                
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="G-Expansive">
-	  <tyPre/>
-	  <tyConc>
-	    <Sjudge name="gen">
-	      <assume>
-		<gamma/>
-		<store/>
-		<aExpr/>
-	      </assume>                
-	      <GEN>
-		<type/>
-		<type/>
-	      </GEN>                                
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="Q-Loc">
-	  <tyPre>
-	    <eq>
-	      <aTS/>
-	      <type/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="loc">
-	      <assume/>
-	      <tqExpr>
-		<id/>
-		<aTS/>	
-	      </tqExpr>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="Q-Term">
-	  <tyPre>
-	    <eq>
-	      <aTS/>
-	      <forall>
-		<tvars name="alpha"/>
-		<type/>
-	      </forall>
-	    </eq>
-	    <neq>
-	      <aTS/>
-	      <type/>
-	    </neq>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="term">
-	      <assume/>
-	      <tqExpr>
-		<id/>
-		<aTS/>	
-	      </tqExpr>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>	  	  	
-      </Hrules>
     </btypes:TYPE>
   </font>
-  <caption><font size="small">Declarative Type Rules and
-      Copy Coercion  Rules</font></caption>
+  <caption><font size="small">Intermediate Declarative System</font></caption>
 </figure>

@@ -28,9 +28,7 @@ BITC_SRC=../../..
 
 MY_XML=changes closures PLOS2006-shap PLOS2006 polyinst 
 MY_XML+=relnotes-0.10 relnotes-0.9 spec
-MY_TYPE_XML=formal mutinfer mut-formal sys-infer #core 
-# core not build for now because OsDoc LNCS mode 
-# does not include math-mode.
+MY_TYPE_XML=formal mutinfer mut-formal sys-infer core 
 
 OSDOC_XML_SRC=$(MY_XML) $(MY_TYPE_XML)
 

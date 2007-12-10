@@ -82,7 +82,7 @@
             <id name="z"/>
           </alternatives>
         </bnf>
-        <bnf desc="Stack Locations">
+        <bnf desc="Stack Locations"> 
           <sLoc/>
           <alternatives etc="yes">
             <sLoc num="1"/>
@@ -107,7 +107,8 @@
           <aVal/>
           <alternatives>
             <Unit/>
-            <true/>
+            <true/> 
+
             <false/>
             <hLoc/>
             <lambda>
@@ -319,7 +320,7 @@
       <btypes:TYPE><evalOp/></btypes:TYPE> respectively. 
     </p>
   </sect1>
-  <sect1 id="type system">
+  <sect1 id="type_system">
     <title>Static Semantics of <btypes:TYPE><language/></btypes:TYPE></title>
     <btypes:TYPE>        
       <grammar>
@@ -4483,10 +4484,25 @@
             </mbpair>              
           </alternatives>
         </bnfc>
+        <bnf desc="Unct. Types">
+          <sType/>
+          <alternatives>
+            <tvar name="alpha"/>
+            <unit/>
+            <bool/>
+            <fn M="yes"><sType/><sType/></fn>                  
+          </alternatives>                
+        </bnf>
+        <bnfc desc="">
+          <alternatives>
+            <ref><sType/></ref>
+            <mutable><sType/></mutable>
+          </alternatives>
+        </bnfc>
         <bnf desc="Type Scheme">
           <aTS/>
           <alternatives>
-            <type/>
+            <sType/>
             <forall>                    
               <tvar name="alpha"/>
               <aTS/>
@@ -4507,241 +4523,6 @@
         </bnf>
       </grammar>
     </btypes:TYPE>
-    <p>
-      The type inference algorithm is as shown in
-      Figure&nbsp;<xref ref="hm_infer"/>. 
-      The inference judgment 
-      <btypes:TYPE>
-	<TIjudge>
-	  <assume>
-	    <gamma/>
-	    <store/>
-	  </assume>
-	  <conclude>
-	    <tqExpr>
-	      <aExpr/>
-	      <type/>
-	    </tqExpr>
-	  </conclude>
-	  <propagate>
-	    <aSubMap/>
-	  </propagate>
-	</TIjudge>
-      </btypes:TYPE>
-      should be understood as: given the binding context
-      <btypes:TYPE><gamma/></btypes:TYPE> and the store typing
-      <btypes:TYPE><store/></btypes:TYPE>, we infer the type 
-      <btypes:TYPE><type/></btypes:TYPE> for the expression 
-      <btypes:TYPE><aExpr/></btypes:TYPE>.
-      <btypes:TYPE><aSubMap/></btypes:TYPE> is list of substitutions 
-      obtained by unifications performed during inference, and must be
-      propagated to further derivations. 
-      The judgment
-      <btypes:TYPE>
-	<models name="new">
-	  <assume/>
-	  <tvars name="alpha"/>
-	</models>
-      </btypes:TYPE> identifies new type variables. 
-    </p>
-    <p>
-      We use the following shorthand translations as a notational
-      convenience:
-    </p>
-    <example>
-      <p>
-        <btypes:TYPE>
-	  <leadsto>
-	    <DBrac>
-              <TIjudge>
-                <assume>
-                  <gamma/>
-                  <store/>
-                </assume>
-                <conclude>
-                  <tqExpr>
-                    <aExpr/>
-                    <type/>
-                  </tqExpr>
-                </conclude>
-              </TIjudge>
-            </DBrac>
-	    <DBrac>            
-              <TIjudge>
-                <assume>
-                  <gamma/>
-                  <store/>
-                </assume>
-                <conclude>            
-                  <tqExpr>
-                    <aExpr/>
-                    <type/>
-                  </tqExpr>
-                </conclude>
-                <propagate>
-                  <EmptySubst/>
-                </propagate>
-              </TIjudge>
-            </DBrac>
-          </leadsto>
-        </btypes:TYPE>
-        <br/>
-        <btypes:TYPE>
-	  <leadsto>
- 	    <DBrac>          
-              <TIjudge>
-                <precond>
-                  <aSubMap num="0"/>
-                </precond>
-                <assume>
-                  <gamma/>
-                  <store/>
-                </assume>
-                <conclude>
-                  <tqExpr>
-                    <aExpr/>
-                    <type/>
-                  </tqExpr>
-                </conclude>
-                <propagate>
-                  <aSubMap/>
-                </propagate>
-              </TIjudge>
-            </DBrac>
-	    <DBrac>          
-              <TIjudge>
-                <assume>
-                  <Subst>
-                    <aSubMap num="0"/>
-                    <gamma/>
-                  </Subst>
-                  <Subst>
-                    <aSubMap num="0"/>
-                    <store/>
-                  </Subst>
-                </assume>
-                <conclude>
-                  <tqExpr>
-                    <Subst>
-                      <aSubMap num="0"/>
-                      <aExpr/>
-                    </Subst>
-                    <type/>
-                  </tqExpr>
-                </conclude>
-                <propagate>
-                  <aSubMap/>
-                </propagate>
-              </TIjudge>
-            </DBrac>
-          </leadsto>   
-          <br/>
-          <leadsto>
-            <DBrac>          
-              <Djudge>
-                <aSubMap/>
-                <gamma/>
-                <store/>
-                <aExpr/>
-                <type/>
-              </Djudge>
-            </DBrac>
-            <DBrac>          
-              <Sjudge>
-                <assume>
-                  <canonical>
-                    <Subst>
-                      <aSubMap/>
-                      <gamma/>
-                    </Subst>
-                  </canonical>
-                  <canonical>
-                    <Subst>
-                      <aSubMap/>
-                      <store/>
-                    </Subst>
-                  </canonical>
-                </assume>
-                <tqExpr>
-                  <canonical>
-                    <Subst>
-                      <aSubMap/>
-                      <aExpr/>
-                    </Subst>
-                  </canonical>
-                  <canonical>
-                    <Subst>
-                      <aSubMap/>
-                      <type/>
-                    </Subst>
-                  </canonical>
-                </tqExpr>
-              </Sjudge>
-            </DBrac>
-          </leadsto>
-        </btypes:TYPE>
-      </p>
-    </example>
-    <p>
-      Unification rules are as shown in 
-      Figure&nbsp;<xref ref="hm_unify"/>.
-      The unification judgment
-      <btypes:TYPE>
-	<UNIFY>
-	  <type num="1"/>                  
-	  <type num="2"/>
-	  <aSubMap/>
-	</UNIFY>
-      </btypes:TYPE>
-      is understood as: 
-      <btypes:TYPE>
-	<type num="1"/>                  
-      </btypes:TYPE>
-      unifies with
-      <btypes:TYPE>
-	<type num="2"/>
-      </btypes:TYPE>
-      under the substitution
-      <btypes:TYPE>
-	<aSubMap/>
-      </btypes:TYPE>. 
-    </p>
-    <p>
-      A constraint solver for solving copy compatibility constraints at 
-      let-boundaries is 
-      defined in Figure&nbsp;<xref ref="hm_solve"/>.          
-      The judgment 
-      <btypes:TYPE>
-	<Sjudge name="solve">
-	  <assume>
-	    <aSubMap/>
-	    <id/>
-	    <aExpr/>
-	  </assume>
-	  <corUp>
-	    <type num="1"/>
-	    <type num="2"/>
-	  </corUp>
-	</Sjudge>
-      </btypes:TYPE>
-      should be read as: the (possibly) constrained type 
-      <btypes:TYPE>
-	<type num="1"/>
-      </btypes:TYPE>
-      for the identifier
-      <btypes:TYPE>
-	<id/>
-      </btypes:TYPE>
-      (possibly) used in the expression
-      <btypes:TYPE>
-	<aExpr/>
-      </btypes:TYPE>
-      is transformed to the unconstrained type
-      <btypes:TYPE>
-	<type num="2"/>
-      </btypes:TYPE>
-      by solving all the copy compatibility constraints.
-    </p>
 <!--     <definition id="djudge"> -->
 <!--       <title><btypes:TYPE><judgeOp sym="diam"/></btypes:TYPE></title>       -->
 <!--       <p> -->
@@ -5130,6 +4911,31 @@
           </normalize>
         </btypes:TYPE>
         consists only of tautologies (trivially).
+      </p>
+    </definition>
+    <definition>
+      <title>Constraint Consistency</title>
+      <p>
+        We write
+        <btypes:TYPE>
+          <models name="cst">
+            <assume/>
+            <aCtset/>
+          </models>
+        </btypes:TYPE> 
+        iff
+        <btypes:TYPE>
+          <Exists>
+            <aSubMap/>
+          </Exists>
+        </btypes:TYPE>
+        such that 
+        <btypes:TYPE>
+          <models name="sat">
+            <aSubMap/>
+            <aCtset/>
+          </models>
+        </btypes:TYPE>
       </p>
     </definition>
     <definition id="solvable-entities">
@@ -5890,6 +5696,368 @@
       function is different from FTV(), defined in 
       Definition&nbsp;<xref ref="ext-ftvs"/>. 
     </p>
+    <definition id="shorthand">
+      <title>Notational Shorthands</title>
+      <p>
+        We use the following shorthand translations as a notational
+        convenience. Shorthand&nbsp;(<xref ref="decl_shorthand"/>) was already defined
+        and used in section&nbsp;<xref ref="type_system"/>
+      </p>
+      <ol>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <leadsto>
+                <DBrac>
+                  <TIjudge>
+                    <assume>
+                      <gamma/>
+                      <store/>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <aExpr/>
+                        <type/>
+                      </tqExpr>
+                    </conclude>
+                  </TIjudge>
+                </DBrac>
+                <DBrac>            
+                  <TIjudge>
+                    <assume>
+                      <gamma/>
+                      <store/>
+                    </assume>
+                    <conclude>            
+                      <tqExpr>
+                        <aExpr/>
+                        <type/>
+                      </tqExpr>
+                    </conclude>
+                    <propagate>
+                      <EmptySubst/>
+                    </propagate>
+                  </TIjudge>
+                </DBrac>
+              </leadsto>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <leadsto>
+                <DBrac>          
+                  <TIjudge>
+                    <precond>
+                      <aSubMap num="0"/>
+                    </precond>
+                    <assume>
+                      <gamma/>
+                      <store/>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <aExpr/>
+                        <type/>
+                      </tqExpr>
+                    </conclude>
+                    <propagate>
+                      <aSubMap/>
+                    </propagate>
+                  </TIjudge>
+                </DBrac>
+                <DBrac>          
+                  <TIjudge>
+                    <assume>
+                      <Subst>
+                        <aSubMap num="0"/>
+                        <gamma/>
+                      </Subst>
+                      <Subst>
+                        <aSubMap num="0"/>
+                        <store/>
+                      </Subst>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <Subst>
+                          <aSubMap num="0"/>
+                          <aExpr/>
+                        </Subst>
+                        <type/>
+                      </tqExpr>
+                    </conclude>
+                    <propagate>
+                      <aSubMap/>
+                    </propagate>
+                  </TIjudge>
+                </DBrac>
+              </leadsto>   
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li id="decl_shorthand">
+          <p>
+            <btypes:TYPE>
+              <leadsto>
+                <DBrac>
+                  <TDjudge sub="yes">
+                    <aExpr/>
+                    <type/>
+                  </TDjudge>
+                </DBrac>
+                <DBrac>
+                  <collection>
+                    <TDjudge>
+                      <aExpr/>
+                      <type dash="'"/>
+                    </TDjudge>
+                    <Tsub>
+                      <type/>
+                      <type dash="'"/>
+                    </Tsub>
+                  </collection>
+                </DBrac>
+              </leadsto>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <leadsto>
+                <DBrac>
+                  <TDjudge name="j" sub="yes">
+                    <aExpr/>
+                    <type/>
+                  </TDjudge>
+                </DBrac>
+                <DBrac>
+                  <collection>
+                    <TDjudge name="j">
+                      <aExpr/>
+                      <type dash="'"/>
+                    </TDjudge>
+                    <Tsub>
+                      <type/>
+                      <type dash="'"/>
+                    </Tsub>
+                  </collection>
+                </DBrac>
+              </leadsto>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <leadsto>
+                <DBrac>
+                  <TDjudge name="j" Msub="yes">
+                    <aExpr/>
+                    <type/>
+                  </TDjudge>
+                </DBrac>
+                <DBrac>
+                  <collection>
+                    <TDjudge name="j">
+                      <aExpr/>
+                      <type dash="'"/>
+                    </TDjudge>
+                    <Msub>
+                      <type/>
+                      <type dash="'"/>
+                    </Msub>
+                  </collection>
+                </DBrac>
+              </leadsto>            
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <leadsto>
+                <DBrac>          
+                  <Djudge>
+                    <aSubMap/>
+                    <gamma/>
+                    <store/>
+                    <aExpr/>
+                    <type/>
+                  </Djudge>
+                </DBrac>
+                <DBrac>          
+                  <Sjudge>
+                    <assume>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <gamma/>
+                        </Subst>
+                      </canonical>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <store/>
+                        </Subst>
+                      </canonical>
+                    </assume>
+                    <tqExpr>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <aExpr/>
+                        </Subst>
+                      </canonical>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <type/>
+                        </Subst>
+                      </canonical>
+                    </tqExpr>
+                  </Sjudge>
+                </DBrac>
+              </leadsto>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <leadsto>
+                <DBrac> 
+                  <Subst>
+                    <aSubMap/>
+                    <spset>
+                      <text content="..."/>
+                    </spset>
+                  </Subst>
+                </DBrac>
+                <DBrac>          
+                  <Subst>                
+                    <aSubMap/>
+                    <grouping>
+                      <spset>
+                        <text content="..."/>
+                      </spset>
+                    </grouping>
+                  </Subst>
+                </DBrac>
+              </leadsto>
+            </btypes:TYPE>
+          </p>
+        </li>
+      </ol>
+    </definition>
+    <p>
+      The type inference algorithm is as shown in
+      Figure&nbsp;<xref ref="hm_infer"/>. 
+      The inference judgment 
+      <btypes:TYPE>
+	<TIjudge>
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <propagate>
+	    <aSubMap/>
+	  </propagate>
+	</TIjudge>
+      </btypes:TYPE>
+      should be understood as: given the binding context
+      <btypes:TYPE><gamma/></btypes:TYPE> and the store typing
+      <btypes:TYPE><store/></btypes:TYPE>, we infer the type 
+      <btypes:TYPE><type/></btypes:TYPE> for the expression 
+      <btypes:TYPE><aExpr/></btypes:TYPE>.
+      <btypes:TYPE><aSubMap/></btypes:TYPE> is list of substitutions 
+      obtained by unifications performed during inference, and must be
+      propagated to further derivations. 
+      The judgment
+      <btypes:TYPE>
+	<models name="new">
+	  <assume/>
+	  <tvars name="alpha"/>
+	</models>
+      </btypes:TYPE> identifies new type variables. 
+    </p>
+    <p>
+      Unification rules are as shown in 
+      Figure&nbsp;<xref ref="hm_unify"/>.
+      The unification judgment
+      <btypes:TYPE>
+	<UNIFY>
+	  <type num="1"/>                  
+	  <type num="2"/>
+	  <aSubMap/>
+	</UNIFY>
+      </btypes:TYPE>
+      is understood as: 
+      <btypes:TYPE>
+	<type num="1"/>                  
+      </btypes:TYPE>
+      unifies with
+      <btypes:TYPE>
+	<type num="2"/>
+      </btypes:TYPE>
+      under the substitution
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE>. 
+    </p>
+    <p>
+      A constraint solver for solving copy compatibility constraints at 
+      let-boundaries is 
+      defined in Figure&nbsp;<xref ref="hm_solve"/>.          
+      The judgment 
+      <btypes:TYPE>
+	<Sjudge name="solve">
+	  <assume>
+	    <aSubMap/>
+	    <id/>
+	    <aExpr/>
+	  </assume>
+	  <corUp>
+	    <type num="1"/>
+	    <type num="2"/>
+	  </corUp>
+	</Sjudge>
+      </btypes:TYPE>
+      should be read as: the (possibly) constrained type 
+      <btypes:TYPE>
+	<type num="1"/>
+      </btypes:TYPE>
+      for the identifier
+      <btypes:TYPE>
+	<id/>
+      </btypes:TYPE>
+      (possibly) used in the expression
+      <btypes:TYPE>
+	<aExpr/>
+      </btypes:TYPE>
+      is transformed to the unconstrained type
+      <btypes:TYPE>
+	<type num="2"/>
+      </btypes:TYPE>
+      by solving all the copy compatibility constraints.
+    </p>
+    <xi:include href="include/formal/hm-inter.xmli"/>
+    <p>
+      We prove the soundness of the inference system, through an
+      intermediate declarative system defined in 
+      Figure&nbsp;<xref ref="hm_inter_rules"/>
+    </p>
+    <p>
+      _____________________________________________
+    </p>
     <definition id="sol-math">
       <title><btypes:TYPE><models name="sol"/></btypes:TYPE></title>
       <p>
@@ -6100,9 +6268,6 @@
         </btypes:TYPE>).
       </p>
     </definition>
-    <p>
-      _____________________________________________
-    </p>
     <definition id="compat-subst">
       <title>Compatible Solutions (Substitutions)</title>
       <p>
@@ -11017,6 +11182,703 @@
         </li>          
       </ol>
     </proof>
+    <lemma id="inf-subst-compose">
+      <title>Composability of Inferred Substitutions</title>
+      <p>
+        If
+      </p>
+      <ol>
+        <li id="inf-subst-compose__a1">
+          <p>
+            <btypes:TYPE>
+              <TIjudge>
+                <assume>
+                  <gamma/>
+                  <store/>
+                </assume>
+                <conclude>
+                  <tqExpr>
+                    <aExpr num="1"/>
+                    <type num="1"/>
+                  </tqExpr>
+                </conclude>
+                <propagate>
+                  <aSubMap num="u"/>
+                </propagate>
+              </TIjudge>                
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li id="inf-subst-compose__a2">
+          <p>
+            <btypes:TYPE>
+              <TIjudge>
+                <precond>                  
+                  <aSubMap num="u"/>                      
+                </precond>
+                <assume>
+                  <gamma/>
+                  <store/>
+                </assume>
+                <conclude>
+                  <tqExpr>
+                    <aExpr num="2"/>
+                    <type num="2"/>
+                  </tqExpr>
+                </conclude>
+                <propagate>
+                  <aSubMap num="v"/>
+                </propagate>
+              </TIjudge>                
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li id="inf-subst-compose__a3">
+          <p>
+            Fresh variables used in
+            <btypes:TYPE>
+              <cases>
+                <case tag="inf-subst-compose__a1"/>
+                <case tag="inf-subst-compose__a2"/>
+              </cases>
+            </btypes:TYPE> do not collide. 
+          </p>
+        </li>
+        <li id="inf-subst-compose__a4">
+          <p>
+            <btypes:TYPE>
+              <models name="sat">
+                <assume>
+                  <aSubMap num="i"/>
+                </assume>
+                <Subst>
+                  <aSubMap num="u"/>
+                  <spset>
+                    <type num="1"/>
+                    <gamma/>
+                    <store/>
+                    <aExpr num="1"/>
+                  </spset>
+                </Subst>
+              </models>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li id="inf-subst-compose__a5">
+          <p>
+            <btypes:TYPE>
+              <models name="sat">
+                <assume>
+                  <aSubMap num="j"/>
+                </assume>
+                <Subst>
+                  <scomp>
+                    <aSubMap num="u"/>
+                    <aSubMap num="v"/>
+                  </scomp>
+                  <spset>
+                    <type num="2"/>
+                    <gamma/>
+                    <store/>
+                    <aExpr num="2"/>
+                  </spset>
+                </Subst>
+              </models>
+            </btypes:TYPE>
+          </p>
+        </li>
+      </ol>
+      <p>
+        Then 
+        <btypes:TYPE>
+          <Exists>
+            <aSubMap num="s"/>
+          </Exists>
+        </btypes:TYPE> such that
+        <btypes:TYPE>
+          <models name="sat">
+            <assume>
+              <aSubMap num="s"/>
+            </assume>
+            <Subst>
+              <scomp>
+                <aSubMap num="u"/>
+                <aSubMap num="v"/>
+              </scomp>
+              <spset>
+                <type num="1"/>
+                <type num="2"/>
+                <gamma/>
+                <store/>
+                <aExpr num="1"/>
+                <aExpr num="2"/>
+              </spset>
+            </Subst>
+          </models>
+        </btypes:TYPE>
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        By construction of 
+        <btypes:TYPE>          
+          <aSubMap num="s"/>
+        </btypes:TYPE>. 
+      </p>
+      <ol>
+        <li>
+          <p>
+            The inference derivation for 
+            <btypes:TYPE>
+              <aExpr num="2"/>                  
+            </btypes:TYPE>
+            (which produces the substitution
+            <btypes:TYPE>
+              <aSubMap num="v"/>                  
+            </btypes:TYPE>)
+            is done in an environment that already
+            has applied the substitutions in
+            <btypes:TYPE>
+              <aSubMap num="u"/>                  
+            </btypes:TYPE>.
+            From this fact, and 
+            <btypes:TYPE>
+              <asm tag="inf-subst-compose__a3"/>
+            </btypes:TYPE>
+            we can conclude that 
+            <btypes:TYPE>
+              <aSubMap num="u"/>                  
+              <text content=" and "/>
+              <aSubMap num="v"/>                  
+            </btypes:TYPE> contain mutually exclusive substitutions.
+          </p>
+        </li>
+        <li id="inf-subst-compose__d1">
+          <p>
+            From 
+            <btypes:TYPE>
+              <asm tag="inf-subst-compose__a1"/>
+            </btypes:TYPE>
+            and
+            <btypes:TYPE>
+              <lem tag="inf-subst-valid"/>
+            </btypes:TYPE>, we obtain
+            <btypes:TYPE>
+              <models name="ct">
+                <assume/>
+                <plus>
+                  <Subst>
+                    <aSubMap num="u1"/>
+                    <gamma/>
+                  </Subst>
+                  <Subst>
+                    <aSubMap num="u1"/>
+                    <relevant>
+                      <store/>
+                      <aExpr num="1"/>
+                    </relevant>
+                  </Subst>
+                  <type num="1"/>
+                </plus>
+              </models>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li id="inf-subst-compose__d2">
+          <p>
+            From 
+            <btypes:TYPE>
+              <asm tag="inf-subst-compose__a2"/>
+            </btypes:TYPE>
+            and
+            <btypes:TYPE>
+              <lem tag="inf-subst-valid"/>
+            </btypes:TYPE>, we obtain
+            <btypes:TYPE>
+              <models name="ct">
+                <assume/>
+                <plus>
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <gamma/>
+                  </Subst>
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <relevant>
+                      <store/>
+                      <aExpr num="2"/>
+                    </relevant>
+                  </Subst>
+                  <type num="2"/>
+                </plus>
+              </models>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li>
+          <p> 
+            Let
+            <btypes:TYPE>
+              <eq>        
+                <relevant>
+                  <store/>
+                  <inter nosp="yes">
+                    <aExpr num="1"/>
+                    <aExpr num="2"/>
+                  </inter>
+                </relevant>      
+                <inter nosp="yes">
+                  <relevant>
+                    <store/>
+                    <aExpr num="1"/>
+                  </relevant>
+                  <relevant>
+                    <store/>
+                    <aExpr num="1"/>
+                  </relevant>
+                </inter>
+              </eq>
+              <text content=" and "/>
+              <eq>        
+                <relevant>
+                  <store/>
+                  <minus nosp="yes">
+                    <aExpr num="1"/>
+                    <aExpr num="2"/>
+                  </minus>
+                </relevant>      
+                <minus nosp="yes">
+                  <relevant>
+                    <store/>
+                    <aExpr num="1"/>
+                  </relevant>
+                  <relevant>
+                    <store/>
+                    <aExpr num="2"/>
+                  </relevant>
+                </minus>
+              </eq>
+              <text content=" and "/>
+              <eq>        
+                <relevant>
+                  <store/>
+                  <minus nosp="yes">
+                    <aExpr num="2"/>
+                    <aExpr num="1"/>
+                  </minus>
+                </relevant>      
+                <minus nosp="yes">
+                  <relevant>
+                    <store/>
+                    <aExpr num="2"/>
+                  </relevant>
+                  <relevant>
+                    <store/>
+                    <aExpr num="1"/>
+                  </relevant>
+                </minus>
+              </eq>              
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li id="inf-subst-compose__d11">
+          <p>
+            We can rewrite:
+            <btypes:TYPE>
+              <case tag="inf-subst-compose__d1"/>
+            </btypes:TYPE>
+            as
+            <btypes:TYPE>
+              <models name="ct">
+                <assume/>
+                <plus>
+                  <Subst>
+                    <aSubMap num="u1"/>
+                    <gamma/>
+                  </Subst>
+                  <Subst>
+                    <aSubMap num="u1"/>
+                    <relevant>
+                      <store/>
+                      <inter nosp="yes">
+                        <aExpr num="1"/>
+                        <aExpr num="2"/>
+                      </inter>
+                    </relevant>
+                  </Subst>
+                  <Subst>
+                    <aSubMap num="u1"/>
+                    <relevant>
+                      <store/>
+                      <minus nosp="yes">
+                        <aExpr num="1"/>
+                        <aExpr num="2"/>
+                      </minus>
+                    </relevant>
+                  </Subst>
+                  <type num="1"/>
+                </plus>
+              </models>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li id="inf-subst-compose__d22">
+          <p>
+            We can rewrite
+            <btypes:TYPE>
+              <case tag="inf-subst-compose__d2"/>
+            </btypes:TYPE> 
+            as
+            <btypes:TYPE>
+              <models name="ct">
+                <assume/>
+                <plus br="yes">
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <gamma/>
+                  </Subst>
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <relevant>
+                      <store/>
+                      <inter nosp="yes">
+                        <aExpr num="1"/>
+                        <aExpr num="2"/>
+                      </inter>
+                    </relevant>
+                  </Subst>
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <relevant>
+                      <store/>
+                      <minus nosp="yes">
+                        <aExpr num="2"/>
+                        <aExpr num="1"/>
+                      </minus>
+                    </relevant>
+                  </Subst>
+                  <type num="2"/>
+                </plus>
+              </models>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li id="inf-subst-compose__excl">
+          <p>
+            The only effect 
+            <btypes:TYPE>
+              <aSubMap num="u2"/>                  
+            </btypes:TYPE>
+            can have on 
+            <btypes:TYPE>
+              <type num="1"/>
+            </btypes:TYPE> 
+            (or 
+            <btypes:TYPE>
+              <relevant>
+                <store/>
+                <aExpr num="1"/>
+              </relevant>
+            </btypes:TYPE>) 
+            is by providing a substitution for some
+            type variable 
+            <btypes:TYPE>
+              <tvar name="alpha"/>
+            </btypes:TYPE>
+            which is a non-universally quantified free type variable
+            within  
+            <btypes:TYPE>
+              <Subst>
+                <aSubMap num="u1"/>
+                <gamma/>
+              </Subst>
+            </btypes:TYPE> or is contained in 
+            <btypes:TYPE>
+              <relevant>
+                <store/>
+                <inter nosp="yes">
+                  <aExpr num="1"/>
+                  <aExpr num="2"/>
+                </inter>
+              </relevant>
+            </btypes:TYPE> 
+            and is also present in 
+            <btypes:TYPE>
+              <type num="1"/>
+              <text content="( or "/>
+              <relevant>
+                <store/>
+                <aExpr num="1"/>
+              </relevant>
+              <text content=")"/>
+            </btypes:TYPE>.
+            Therefore, we know that 
+            <btypes:TYPE>
+              <eq br="yes">
+                <inter>
+                  <dom>
+                    <aSubMap num="u2"/>
+                  </dom>
+                  <pred name="TV">
+                    <plus>
+                      <Subst>
+                        <aSubMap num="u1"/>
+                        <gamma/>
+                      </Subst>
+                      <Subst>
+                        <aSubMap num="u1"/>
+                        <relevant>
+                          <store/>
+                          <aExpr num="1"/>
+                        </relevant>
+                      </Subst>
+                      <type num="1"/>
+                    </plus>
+                  </pred>
+                </inter>
+                <pred name="TV">
+                  <plus>
+                    <Subst>
+                      <aSubMap num="u1"/>
+                      <gamma/>
+                    </Subst>
+                    <Subst>
+                      <aSubMap num="u1"/>
+                      <relevant>
+                        <store/>
+                        <inter nosp="yes">
+                          <aExpr num="1"/>
+                          <aExpr num="2"/>
+                        </inter>
+                      </relevant>
+                    </Subst>
+                  </plus>
+                </pred>
+              </eq>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li id="inf-subst-compose__req1">
+          <p>
+            From 
+            <btypes:TYPE>	
+              <asm tag="inf-subst-compose__d1"/>
+            </btypes:TYPE>
+            and 
+            <btypes:TYPE>	
+              <lem tag="solvable-weakening"/>
+            </btypes:TYPE>, we have
+            <btypes:TYPE>
+              <models name="ct">
+                <assume/>
+                <plus>
+                  <Subst>
+                    <aSubMap num="u1"/>
+                    <gamma/>
+                  </Subst>
+                  <Subst>
+                    <aSubMap num="u1"/>
+                    <relevant>                      
+                      <store/>
+                      <inter nosp="yes">
+                        <aExpr num="1"/>
+                        <aExpr num="2"/>
+                      </inter>
+                    </relevant>
+                  </Subst>
+                </plus>
+              </models>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li id="inf-subst-compose__req2">
+          <p>
+            From 
+            <btypes:TYPE>	
+              <asm tag="inf-subst-compose__d2"/>
+            </btypes:TYPE>
+            and 
+            <btypes:TYPE>	
+              <lem tag="solvable-weakening"/>
+            </btypes:TYPE>, we have
+            <btypes:TYPE>
+              <models name="ct">
+                <assume/>
+                <plus>
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <gamma/>
+                  </Subst>
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <relevant>                      
+                      <store/>
+                      <inter nosp="yes">
+                        <aExpr num="1"/>
+                        <aExpr num="2"/>
+                      </inter>
+                    </relevant>
+                  </Subst>
+                </plus>
+              </models>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li id="inf-subst-compose__cst1">
+          <p>
+            From             
+            <btypes:TYPE>	
+              <cases>
+                <case tag="inf-subst-compose__req1"/>
+                <case tag="inf-subst-compose__req2"/>
+                <case tag="inf-subst-compose__excl"/>
+              </cases>
+              <text content=" and "/>
+              <lem tag="cst-subst"/>
+            </btypes:TYPE>, we have
+            <btypes:TYPE>
+              <models name="ct">
+                <assume/>
+                <plus br="yes">
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <gamma/>
+                  </Subst>
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <relevant>
+                      <store/>
+                      <inter nosp="yes">
+                        <aExpr num="1"/>
+                        <aExpr num="2"/>
+                      </inter>
+                    </relevant>
+                  </Subst>
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <relevant>
+                      <store/>
+                      <minus nosp="yes">
+                        <aExpr num="1"/>
+                        <aExpr num="2"/>
+                      </minus>
+                    </relevant>
+                  </Subst>
+                  <Subst>
+                    <aSubMap num="u2"/>
+                    <type num="1"/>
+                  </Subst>
+                </plus>
+              </models>
+              <text content=". That is,"/>
+              <br/>
+              <models name="ct">
+                <assume/>
+                <plus>
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <gamma/>
+                  </Subst>
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <relevant>
+                      <store/>
+                      <aExpr num="1"/>
+                    </relevant>
+                  </Subst>
+                  <Subst>
+                    <aSubMap num="u2"/>
+                    <type num="1"/>
+                  </Subst>
+                </plus>
+              </models>
+            </btypes:TYPE>.            
+          </p>
+        </li>
+        <li>
+          <p>
+            From 
+            <btypes:TYPE>	
+              <cases>
+                <case tag="inf-subst-compose__d2"/>
+                <case tag="inf-subst-compose__req2"/>
+              </cases>
+              <text content=" and "/>
+              <asm tag="inf-subst-compose__a3"/>
+            </btypes:TYPE>, we can easily obtain
+            <btypes:TYPE>	
+              <models name="ct">
+                <assume/>
+                <plus>
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <gamma/>
+                  </Subst>
+                  <Subst>
+                    <compose>
+                      <aSubMap num="u2"/>
+                      <aSubMap num="u1"/>
+                    </compose>
+                    <relevant>
+                      <store/>
+                      <aExpr num="1"/>
+                      <aExpr num="2"/>            
+                    </relevant>
+                  </Subst>
+                  <Subst>
+                    <aSubMap num="u2"/>
+                    <type num="1"/>
+                  </Subst>
+                  <type num="2"/>
+                </plus>
+              </models>
+            </btypes:TYPE>, in accordance to 
+            <btypes:TYPE>	
+              <defn tag="ct"/>
+            </btypes:TYPE>.
+          </p>
+        </li>
+      </ol>
+    </proof>
     <lemma id="vars-new">
       <title>Non-colliding type variables</title>
       <p>
@@ -11864,7 +12726,7 @@
                                   </tqExpr>
                                 </conclude>
                                 <propagate>
-                                  <aSubMap num="uf"/>
+                                  <aSubMap num="f"/>
                                 </propagate>
                               </TIjudge>
                             </grouping>
@@ -11873,15 +12735,12 @@
                             <grouping>                              
                               <text content="[II]  "/>
                               <TIjudge>
+                                <precond>
+                                  <aSubMap num="f"/>
+                                </precond>
                                 <assume>
-                                  <Subst>
-                                    <aSubMap num="uf"/>
-                                    <gamma/>
-                                  </Subst>
-                                  <Subst>
-                                    <aSubMap num="uf"/>
-                                    <store/>
-                                  </Subst>
+                                  <gamma/>
+                                  <store/>
                                 </assume>
                                 <conclude>
                                   <tqExpr>
@@ -11890,7 +12749,7 @@
                                   </tqExpr>
                                 </conclude>
                                 <propagate>
-                                  <aSubMap num="ua"/>
+                                  <aSubMap num="a"/>
                                 </propagate>
                               </TIjudge>
                             </grouping>
@@ -11900,21 +12759,17 @@
                               <text content="[III]  "/>
                               <UNIFY>
                                 <Subst>
-                                  <aSubMap num="ua"/>
+                                  <aSubMap num="a"/>
                                   <type num="f"/>
                                 </Subst>
                                 <mbpair>
                                   <tvar name="beta"/>
-                                  <fn>
-                                    <floor>
-                                      <tvar name="delta"/>
-                                    </floor>
-                                    <ceil>
-                                      <tvar name="alpha"/>
-                                    </ceil>
+                                  <fn M="yes">
+                                    <tvar name="delta"/>
+                                    <tvar name="alpha"/>
                                   </fn>
                                 </mbpair>
-                                <aSubMap num="vf"/>
+                                <aSubMap num="v"/>
                               </UNIFY>
                             </grouping>
                           </tyPre>
@@ -11922,17 +12777,17 @@
                             <grouping>
                               <text content="[IV]  "/>
                               <UNIFY>
-                                <type num="a"/>
+                                <type num="a"/>	      
                                 <mbpair>
-                                  <tvar name="gamma"/>
-                                  <floor>
+                                  <tvar name="gamma"/>		
+                                  <minz>
                                     <Subst>
-                                      <aSubMap num="vf"/>
+                                      <aSubMap num="v"/>
                                       <tvar name="delta"/>
                                     </Subst>
-                                  </floor>
+                                  </minz>
                                 </mbpair>
-                                <aSubMap num="va"/>
+                                <aSubMap num="w"/>
                               </UNIFY>
                             </grouping>
                           </tyPre>
@@ -11940,18 +12795,18 @@
                             <grouping>
                               <text content="[V]  "/>
                               <eq>
-                                <type num="res"/>
+                                <type/>
                                 <mbpair>
                                   <tvar name="epsiv"/>
-                                  <Subst>
-                                    <aSubMap num="va"/>
-                                    <minz>
-                                      <Subst>
-                                        <aSubMap num="vf"/>
-                                        <tvar name="alpha"/>
-                                      </Subst>
-                                    </minz>
-                                  </Subst>
+                                  <minz>
+                                    <Subst>
+                                      <scomp>
+                                        <aSubMap num="w"/>
+                                        <aSubMap num="v"/>
+                                      </scomp>
+                                      <tvar name="alpha"/>
+                                    </Subst>
+                                  </minz>
                                 </mbpair>
                               </eq>
                             </grouping>
@@ -11983,16 +12838,16 @@
                                     <aExpr num="f"/>
                                     <aExpr num="a"/>
                                   </apply>                 
-                                  <type num="res"/>
+                                  <type/>
                                 </tqExpr>
                               </conclude>
                               <propagate>
-                                <compose>
-                                  <aSubMap num="va"/>
-                                  <aSubMap num="vf"/>
-                                  <aSubMap num="ua"/>
-                                  <aSubMap num="uf"/>
-                                </compose>
+                                <scomp>
+                                  <aSubMap num="w"/>
+                                  <aSubMap num="v"/>
+                                  <aSubMap num="a"/>
+                                  <aSubMap num="f"/>
+                                </scomp>
                               </propagate>
                             </TIjudge>
                           </tyConc>
@@ -12007,45 +12862,10 @@
                       <eq>
                         <aSubMap num="u"/>
                         <compose>
-                          <aSubMap num="va"/>
-                          <aSubMap num="vf"/>
-                          <aSubMap num="ua"/>
-                          <aSubMap num="uf"/>
-                        </compose>
-                      </eq>
-                    </btypes:TYPE>
-                  </p>
-                </li>
-                <li id="infer-sound__app_given_sol">
-                  <p>
-                    <btypes:TYPE>
-                      <Sjudge name="sol">
-                        <assume>
-                          <aSubMap num="s"/>
-                        </assume>
-                        <plus>
-                          <type num="res"/>
-                          <Subst>
-                            <aSubMap num="u"/>			                                    
-                            <gamma/>
-                          </Subst>
-                          <Subst>
-                            <aSubMap num="u"/>			                                    
-                            <store/>
-                          </Subst>
-                        </plus>
-                      </Sjudge>                
-                    </btypes:TYPE>
-                  </p>
-                </li>
-                <li id="infer-sound__app_given_comp2">                    
-                  <p>
-                    <btypes:TYPE>
-                      <eq>
-                        <aSubMap num="su"/>
-                        <compose>
-                          <aSubMap num="s"/>
-                          <aSubMap num="u"/>
+                          <aSubMap num="w"/>
+                          <aSubMap num="v"/>
+                          <aSubMap num="a"/>
+                          <aSubMap num="f"/>
                         </compose>
                       </eq>
                     </btypes:TYPE>
@@ -12064,8 +12884,49 @@
                     </btypes:TYPE>
                   </p>
                 </li>
+                <li id="infer-sound__app_given_sol">
+                  <p>
+                    <btypes:TYPE>
+                      <models name="sat">
+                        <assume>
+                          <aSubMap num="s"/>
+                        </assume>
+                        <Subst>
+                          <aSubMap num="u"/>			                                    
+                          <spset>
+                            <type/>
+                            <gamma/>
+                            <store/>
+                            <aExpr/>
+                          </spset>
+                        </Subst>
+                      </models>
+                    </btypes:TYPE>
+                  </p>
+                </li>
               </ol>
-            </li>
+              <p>
+                Let
+                <btypes:TYPE>
+                  <eq>
+                    <aSubMap num="su"/>
+                    <compose>
+                      <aSubMap num="s"/>
+                      <aSubMap num="u"/>
+                    </compose>
+                  </eq>
+                </btypes:TYPE>. We need
+                <btypes:TYPE>
+                  <Djudge>            
+                    <aSubMap num="su"/>
+                    <gamma/>
+                    <store/>
+                    <aExpr/>
+                    <type/>
+                  </Djudge>
+                </btypes:TYPE>.                  
+              </p>
+            </li>            
             <li id="infer-sound__app_ih1">
               <p>
                 From induction hypothesis (wrt [I]), we have:
@@ -12074,59 +12935,36 @@
                 <li id="infer-sound__app_ih11">
                   <p>                      
                     <btypes:TYPE>
-                      <Sjudge name="sol">
+                      <models name="sat">
                         <assume>
-                          <aSubMap num="sf"/>
+                          <aSubMap num="i"/>
                         </assume>
-                        <plus>
-                          <type num="f"/>
-                          <Subst>
-                            <aSubMap num="uf"/>
+                        <Subst>
+                          <aSubMap num="f"/>                          
+                          <spset>
+                            <type num="f"/>
                             <gamma/>
-                          </Subst>
-                          <Subst>
-                            <aSubMap num="uf"/>
                             <store/>
-                          </Subst>
-                        </plus>
-                      </Sjudge>
+                            <aExpr num="f"/>
+                          </spset>
+                        </Subst>
+                      </models>
                     </btypes:TYPE>
                   </p>
                 </li>
                 <li id="infer-sound__app_ih12">
                   <p>
                     <btypes:TYPE>
-                      <Sjudge>
-                        <assume>
-                          <canonical>
-                            <Subst>
-                              <scomp>
-                                <aSubMap num="sf"/>
-                                <aSubMap num="uf"/>
-                              </scomp>
-                              <gamma/>
-                            </Subst>
-                          </canonical>
-                          <canonical>
-                            <Subst>
-                              <scomp>
-                                <aSubMap num="sf"/>
-                                <aSubMap num="uf"/>
-                              </scomp>
-                              <store/>
-                            </Subst>
-                          </canonical>
-                        </assume>
-                        <tqExpr>
-                          <aExpr num="f"/>
-                          <canonical>
-                            <Subst>
-                              <aSubMap num="sf"/>
-                              <type num="f"/>
-                            </Subst>
-                          </canonical>
-                        </tqExpr>
-                      </Sjudge>	    
+                      <Djudge>            
+                        <scomp>
+                          <aSubMap num="i"/>
+                          <aSubMap num="f"/>
+                        </scomp>
+                        <gamma/>
+                        <store/>
+                        <aExpr num="f"/>
+                        <type num="f"/>
+                      </Djudge>
                     </btypes:TYPE>
                   </p>
                 </li>                  
@@ -12141,129 +12979,43 @@
                 <li id="infer-sound__app_ih21">
                   <p>                      
                     <btypes:TYPE>
-                      <Sjudge name="sol">
+                      <models name="sat">
                         <assume>
-                          <aSubMap num="sa"/>
+                          <aSubMap num="j"/>
                         </assume>
-                        <plus>
-                          <type num="a"/>
-                          <Subst>
-                            <scomp>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
-                            </scomp>
+                        <Subst>
+                          <scomp>
+                            <aSubMap num="a"/>                          
+                            <aSubMap num="f"/>
+                          </scomp>
+                          <spset>
+                            <type num="a"/>
                             <gamma/>
-                          </Subst>
-                          <Subst>
-                            <scomp>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
-                            </scomp>
                             <store/>
-                          </Subst>
-                        </plus>
-                      </Sjudge>
+                            <aExpr num="a"/>
+                          </spset>
+                        </Subst>
+                      </models>
                     </btypes:TYPE>
                   </p>
                 </li>
                 <li id="infer-sound__app_ih22">
                   <p>
                     <btypes:TYPE>
-                      <Sjudge>
-                        <assume>
-                          <canonical>
-                            <Subst>
-                              <scomp>
-                                <aSubMap num="sa"/>
-                                <aSubMap num="ua"/>
-                                <aSubMap num="uf"/>
-                              </scomp>
-                              <gamma/>
-                            </Subst>
-                          </canonical>
-                          <canonical>
-                            <Subst>
-                              <scomp>
-                                <aSubMap num="sa"/>
-                                <aSubMap num="ua"/>
-                                <aSubMap num="uf"/>
-                              </scomp>
-                              <store/>
-                            </Subst>
-                          </canonical>
-                        </assume>
-                        <tqExpr>
-                          <aExpr num="a"/>
-                          <canonical>
-                            <Subst>
-                              <aSubMap num="sa"/>
-                              <type num="a"/>
-                            </Subst>
-                          </canonical>
-                        </tqExpr>
-                      </Sjudge>	    
+                      <Djudge>            
+                        <scomp>
+                          <aSubMap num="j"/>
+                          <aSubMap num="a"/>
+                          <aSubMap num="f"/>
+                        </scomp>
+                        <gamma/>
+                        <store/>
+                        <aExpr num="a"/>
+                        <type num="a"/>
+                      </Djudge>
                     </btypes:TYPE>
                   </p>
                 </li>                  
-              </ol>
-            </li>
-            <li>
-              <p>
-                From cases (3.b.i and 3.c.i) and
-                Theorem&nbsp;<xref ref="TI-solve-correct"/>
-                (constraint solver correctness), we have:
-              </p> 
-              <ol>
-                <li>
-                  <p>                      
-                    <btypes:TYPE>
-                      <models name="sol">
-                        <assume>
-                          <aSubMap num="sf"/>
-                        </assume>
-                        <plus>
-                          <type num="f"/>
-                          <Subst>
-                            <aSubMap num="uf"/>
-                            <gamma/>
-                          </Subst>
-                          <Subst>
-                            <aSubMap num="uf"/>
-                            <store/>
-                          </Subst>
-                        </plus>
-                      </models>
-                    </btypes:TYPE>
-                  </p>
-                </li>
-                <li>
-                  <p>                      
-                    <btypes:TYPE>
-                      <models name="sol">
-                        <assume>
-                          <aSubMap num="sa"/>
-                        </assume>
-                        <plus>
-                          <type num="a"/>
-                          <Subst>
-                            <scomp>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
-                            </scomp>
-                            <gamma/>
-                          </Subst>
-                          <Subst>
-                            <scomp>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
-                            </scomp>
-                            <store/>
-                          </Subst>
-                        </plus>
-                      </models>
-                    </btypes:TYPE>
-                  </p>
-                </li>
               </ol>
             </li>
             <li>
@@ -12274,7 +13026,7 @@
                     Lemma&nbsp;<xref ref="vars-new"/> (non-colliding
                     fresh type variables),
                     and
-                    Lemma&nbsp;<xref ref="inf-subst-valid-add"/>
+                    Lemma&nbsp;<xref ref="inf-subst-compose"/>
                     (consistency of inferred substitutions), we
                     have:
                     <btypes:TYPE>
@@ -12283,15 +13035,15 @@
                         <plus>
                           <Subst>
                             <scomp>
-                              <aSubMap num="ua"/>                      
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="a"/>                      
+                              <aSubMap num="f"/>                      
                             </scomp>
                             <gamma/>
                           </Subst>
                           <Subst>
                             <scomp>
-                              <aSubMap num="ua"/>                      
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="a"/>                      
+                              <aSubMap num="f"/>                      
                             </scomp>
                             <relevant>
                               <store/>
@@ -12302,7 +13054,7 @@
                             </relevant>
                           </Subst>
                           <Subst>
-                            <aSubMap num="ua"/>                      
+                            <aSubMap num="a"/>                      
                             <type num="f"/>
                           </Subst>
                           <type num="a"/>
@@ -12361,15 +13113,15 @@
                         <plus>
                           <Subst>
                             <scomp>
-                              <aSubMap num="ua"/>                      
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="a"/>                      
+                              <aSubMap num="f"/>                      
                             </scomp>
                             <gamma/>
                           </Subst>
                           <Subst>
                             <scomp>
-                              <aSubMap num="ua"/>                      
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="a"/>                      
+                              <aSubMap num="f"/>                      
                             </scomp>
                             <relevant>
                               <store/>
@@ -12377,7 +13129,7 @@
                             </relevant>
                           </Subst>
                           <Subst>
-                            <aSubMap num="ua"/>                      
+                            <aSubMap num="a"/>                      
                             <type num="f"/>
                           </Subst>
                           <type num="a"/>
@@ -12399,15 +13151,15 @@
                         <plus>
                           <Subst>
                             <scomp>
-                              <aSubMap num="ua"/>                      
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="a"/>                      
+                              <aSubMap num="f"/>                      
                             </scomp>
                             <gamma/>
                           </Subst>
                           <Subst>
                             <scomp>
-                              <aSubMap num="ua"/>                      
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="a"/>                      
+                              <aSubMap num="f"/>                      
                             </scomp>
                             <relevant>
                               <store/>
@@ -12415,7 +13167,7 @@
                             </relevant>
                           </Subst>
                           <Subst>
-                            <aSubMap num="ua"/>                      
+                            <aSubMap num="a"/>                      
                             <type num="f"/>
                           </Subst>
                           <type num="a"/>
@@ -12444,15 +13196,15 @@
                     <plus>
                       <Subst>
                         <scomp>
-                          <aSubMap num="ua"/>                      
-                          <aSubMap num="uf"/>                      
+                          <aSubMap num="a"/>                      
+                          <aSubMap num="f"/>                      
                         </scomp>
                         <gamma/>
                       </Subst>
                       <Subst>
                         <scomp>
-                          <aSubMap num="ua"/>                      
-                          <aSubMap num="uf"/>                      
+                          <aSubMap num="a"/>                      
+                          <aSubMap num="f"/>                      
                         </scomp>
                         <relevant>
                           <store/>
@@ -12460,7 +13212,7 @@
                         </relevant>
                       </Subst>
                       <Subst>
-                        <aSubMap num="ua"/>                      
+                        <aSubMap num="a"/>                      
                         <type num="f"/>
                       </Subst>
                       <type num="a"/>
@@ -12499,15 +13251,15 @@
                         <plus>
                           <Subst>
                             <scomp>
-                              <aSubMap num="ua"/>                      
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="a"/>                      
+                              <aSubMap num="f"/>                      
                             </scomp>
                             <gamma/>
                           </Subst>
                           <Subst>
                             <scomp>
-                              <aSubMap num="ua"/>                      
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="a"/>                      
+                              <aSubMap num="f"/>                      
                             </scomp>
                             <relevant>
                               <store/>
@@ -12515,7 +13267,7 @@
                             </relevant>
                           </Subst>
                           <Subst>
-                            <aSubMap num="ua"/>                      
+                            <aSubMap num="a"/>                      
                             <type num="f"/>
                           </Subst>
                         </plus>
@@ -12528,21 +13280,21 @@
                           <aSubMap num="e"/>
                         </assume>
                         <Subst>                              
-                          <aSubMap num="ua"/>                      
+                          <aSubMap num="a"/>                      
                           <plus>
                             <Subst>                                                              
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="f"/>                      
                               <gamma/>
                             </Subst>
                             <Subst>                                                              
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="f"/>                      
                               <relevant>
                                 <store/>
                                 <aExpr num="f"/>
                               </relevant>
                             </Subst>
                             <Subst>                                                              
-                              <aSubMap num="uf"/>                                                      
+                              <aSubMap num="f"/>                                                      
                               <type num="f"/>
                             </Subst>
                           </plus>
@@ -12553,7 +13305,7 @@
                     <btypes:TYPE>
                       <eq>
                         <Subst>
-                          <aSubMap num="uf"/>
+                          <aSubMap num="f"/>
                           <type num="f"/>
                         </Subst>
                         <type num="f"/>
@@ -12570,8 +13322,8 @@
                     <btypes:TYPE>
                       <Exists>
                         <subEq>
-                          <aSubMap num="sf" subnum="1"/> 
-                          <aSubMap num="sf"/>
+                          <aSubMap num="i" subnum="1"/> 
+                          <aSubMap num="i"/>
                         </subEq>
                       </Exists>
                     </btypes:TYPE>
@@ -12583,22 +13335,22 @@
                         <btypes:TYPE>
                           <models name="sol">
                             <assume>
-                              <aSubMap num="sf" subnum="1"/>
+                              <aSubMap num="i" subnum="1"/>
                             </assume>
                             <plus>
                               <Subst>                                  
-                                <aSubMap num="uf"/>
+                                <aSubMap num="f"/>
                                 <gamma/>
                               </Subst>
                               <Subst>                                  
-                                <aSubMap num="uf"/>
+                                <aSubMap num="f"/>
                                 <relevant>
                                   <store/>
                                   <aExpr num="f"/>
                                 </relevant>
                               </Subst>
                               <Subst>
-                                <aSubMap num="uf"/>
+                                <aSubMap num="f"/>
                                 <type num="f"/>
                               </Subst>
                             </plus>
@@ -12613,18 +13365,18 @@
                             <assume>
                               <canonical>
                                 <Subst>
-                                  <aSubMap num="sf" subnum="1"/>
+                                  <aSubMap num="i" subnum="1"/>
                                   <Subst>                                  
-                                    <aSubMap num="uf"/>
+                                    <aSubMap num="f"/>
                                     <gamma/>
                                   </Subst>
                                 </Subst>
                               </canonical>
                               <canonical>
                                 <Subst>
-                                  <aSubMap num="sf" subnum="1"/>
+                                  <aSubMap num="i" subnum="1"/>
                                   <Subst>                                  
-                                    <aSubMap num="uf"/>
+                                    <aSubMap num="f"/>
                                     <relevant>
                                       <store/>
                                       <aExpr num="f"/>
@@ -12637,9 +13389,9 @@
                               <aExpr num="f"/>
                               <canonical>
                                 <Subst>
-                                  <aSubMap num="sf" subnum="1"/>
+                                  <aSubMap num="i" subnum="1"/>
                                   <Subst>
-                                    <aSubMap num="uf"/>
+                                    <aSubMap num="f"/>
                                     <type num="f"/>
                                   </Subst>
                                 </Subst>
@@ -12659,18 +13411,18 @@
                     <!--                         <solvable dash="'"/> -->
                     <!--                         <plus> -->
                     <!--                           <Subst>                                   -->
-                    <!--                             <aSubMap num="uf"/> -->
+                    <!--                             <aSubMap num="f"/> -->
                     <!--                             <gamma/> -->
                     <!--                           </Subst> -->
                     <!--                           <Subst>                                   -->
-                    <!--                             <aSubMap num="uf"/> -->
+                    <!--                             <aSubMap num="f"/> -->
                     <!--                             <relevant> -->
                     <!--                               <store/> -->
                     <!--                               <aExpr num="f"/> -->
                     <!--                             </relevant> -->
                     <!--                           </Subst> -->
                     <!--                           <Subst> -->
-                    <!--                             <aSubMap num="uf"/> -->
+                    <!--                             <aSubMap num="f"/> -->
                     <!--                             <type num="f"/> -->
                     <!--                           </Subst> -->
                     <!--                         </plus> -->
@@ -12678,29 +13430,29 @@
                     <!--                     </btypes:TYPE>. -->
                     In step (3.g.ii), we can pick 
                     <btypes:TYPE>
-                      <aSubMap num="sf" subnum="1"/>
+                      <aSubMap num="i" subnum="1"/>
                     </btypes:TYPE>
                     such that
                     <btypes:TYPE>
                       <eq>
                         <dom>
-                          <aSubMap num="sf" subnum="1"/>
+                          <aSubMap num="i" subnum="1"/>
                         </dom>
                         <pred name="MTV">                            
                           <plus>
                             <Subst>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="f"/>
                               <gamma/>
                             </Subst>
                             <Subst>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="f"/>
                               <relevant>
                                 <store/>
                                 <aExpr num="f"/>
                               </relevant>
                             </Subst>
                             <Subst>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="f"/>
                               <type num="f"/>
                             </Subst>
                           </plus>                          
@@ -12714,24 +13466,24 @@
                         <dom>
                           <scomp>
                             <aSubMap num="e"/>
-                            <aSubMap num="ua"/>
+                            <aSubMap num="a"/>
                           </scomp>
                         </dom>
                         <pred name="MTV">
                           <plus>
                             <Subst>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="f"/>
                               <gamma/>
                             </Subst>
                             <Subst>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="f"/>
                               <relevant>
                                 <store/>
                                 <aExpr num="f"/>
                               </relevant>
                             </Subst>
                             <Subst>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="f"/>
                               <type num="f"/>
                             </Subst>
                           </plus>                          
@@ -12743,30 +13495,30 @@
                       <eq br="yes">
                         <inter>
                           <dom>
-                            <aSubMap num="sf" subnum="1"/>
+                            <aSubMap num="i" subnum="1"/>
                           </dom>                          
                           <dom>
                             <scomp>
                               <aSubMap num="e"/>
-                              <aSubMap num="ua"/>
+                              <aSubMap num="a"/>
                             </scomp>
                           </dom>
                         </inter>
                         <pred name="MTV">
                           <plus br="yes">
                             <Subst>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="f"/>
                               <gamma/>
                             </Subst>
                             <Subst>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="f"/>
                               <relevant>
                                 <store/>
                                 <aExpr num="f"/>
                               </relevant>
                             </Subst>
                             <Subst>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="f"/>
                               <type num="f"/>
                             </Subst>
                           </plus>                          
@@ -12776,7 +13528,7 @@
                     (This property can be shown for any other correct
                     value of
                     <btypes:TYPE>
-                      <aSubMap num="sf" subnum="1"/>
+                      <aSubMap num="i" subnum="1"/>
                     </btypes:TYPE> using 
                     Lemma&nbsp;<xref ref="vars-new"/>).
                   </p>
@@ -12795,10 +13547,10 @@
                         <Subst>
                           <scomp>
                             <aSubMap num="e"/>
-                            <aSubMap num="ua"/>
+                            <aSubMap num="a"/>
                           </scomp>
                           <Subst>                                  
-                            <aSubMap num="uf"/>
+                            <aSubMap num="f"/>
                             <gamma/>
                           </Subst>
                         </Subst>
@@ -12807,10 +13559,10 @@
                         <Subst>
                           <scomp>
                             <aSubMap num="e"/>
-                            <aSubMap num="ua"/>
+                            <aSubMap num="a"/>
                           </scomp>
                           <Subst>                                  
-                            <aSubMap num="uf"/>
+                            <aSubMap num="f"/>
                             <relevant>
                               <store/>
                               <aExpr num="f"/>
@@ -12825,10 +13577,10 @@
                         <Subst>
                           <scomp>
                             <aSubMap num="e"/>
-                            <aSubMap num="ua"/>
+                            <aSubMap num="a"/>
                           </scomp>
                           <Subst>
-                            <aSubMap num="uf"/>
+                            <aSubMap num="f"/>
                             <type num="f"/>
                           </Subst>
                         </Subst>
@@ -12846,8 +13598,8 @@
                         <Subst>
                           <scomp>
                             <aSubMap num="e"/>
-                            <aSubMap num="ua"/>
-                            <aSubMap num="uf"/>
+                            <aSubMap num="a"/>
+                            <aSubMap num="f"/>
                           </scomp>
                           <gamma/>
                         </Subst>
@@ -12856,8 +13608,8 @@
                         <Subst>
                           <scomp>
                             <aSubMap num="e"/>
-                            <aSubMap num="ua"/>
-                            <aSubMap num="uf"/>
+                            <aSubMap num="a"/>
+                            <aSubMap num="f"/>
                           </scomp>
                           <relevant>
                             <store/>
@@ -12872,8 +13624,8 @@
                         <Subst>
                           <scomp>
                             <aSubMap num="e"/>
-                            <aSubMap num="ua"/>
-                            <aSubMap num="uf"/>
+                            <aSubMap num="a"/>
+                            <aSubMap num="f"/>
                           </scomp>
                           <type num="f"/>
                         </Subst>
@@ -12897,8 +13649,8 @@
                           <Subst>
                             <scomp>
                               <aSubMap num="e"/>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="a"/>
+                              <aSubMap num="f"/>
                             </scomp>
                             <gamma/>
                           </Subst>
@@ -12907,8 +13659,8 @@
                           <Subst>
                             <scomp>
                               <aSubMap num="e"/>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="a"/>
+                              <aSubMap num="f"/>
                             </scomp>
                             <gamma/>
                           </Subst>
@@ -12920,8 +13672,8 @@
                           <Subst>
                             <scomp>
                               <aSubMap num="e"/>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="a"/>
+                              <aSubMap num="f"/>
                             </scomp>
                             <relevant>
                               <store/>
@@ -12933,8 +13685,8 @@
                           <Subst>
                             <scomp>
                               <aSubMap num="e"/>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="a"/>
+                              <aSubMap num="f"/>
                             </scomp>
                             <relevant>
                               <store/>
@@ -12967,8 +13719,8 @@
                         <Subst>
                           <compose>
                             <aSubMap num="e"/>
-                            <aSubMap num="ua"/>
-                            <aSubMap num="uf"/>
+                            <aSubMap num="a"/>
+                            <aSubMap num="f"/>
                           </compose>
                           <relevant>
                             <store/>
@@ -12978,8 +13730,8 @@
                         <Subst>
                           <compose>
                             <aSubMap num="e"/>
-                            <aSubMap num="ua"/>
-                            <aSubMap num="uf"/>
+                            <aSubMap num="a"/>
+                            <aSubMap num="f"/>
                           </compose>
                           <relevant>
                             <store/>
@@ -13001,8 +13753,8 @@
                             <Subst>
                               <scomp>
                                 <aSubMap num="e"/>
-                                <aSubMap num="ua"/>
-                                <aSubMap num="uf"/>
+                                <aSubMap num="a"/>
+                                <aSubMap num="f"/>
                               </scomp>
                               <gamma/>
                             </Subst>
@@ -13011,8 +13763,8 @@
                             <Subst>
                               <scomp>
                                 <aSubMap num="e"/>
-                                <aSubMap num="ua"/>
-                                <aSubMap num="uf"/>
+                                <aSubMap num="a"/>
+                                <aSubMap num="f"/>
                               </scomp>
                               <relevant>
                                 <store/>
@@ -13027,8 +13779,8 @@
                             <Subst>
                               <scomp>
                                 <aSubMap num="e"/>
-                                <aSubMap num="ua"/>
-                                <aSubMap num="uf"/>
+                                <aSubMap num="a"/>
+                                <aSubMap num="f"/>
                               </scomp>
                               <type num="f"/>
                             </Subst>
@@ -13050,8 +13802,8 @@
                         <Subst>
                           <scomp>
                             <aSubMap num="e"/>
-                            <aSubMap num="ua"/>
-                            <aSubMap num="uf"/>
+                            <aSubMap num="a"/>
+                            <aSubMap num="f"/>
                           </scomp>
                           <gamma/>
                         </Subst>
@@ -13060,8 +13812,8 @@
                         <Subst>
                           <scomp>
                             <aSubMap num="e"/>
-                            <aSubMap num="ua"/>
-                            <aSubMap num="uf"/>
+                            <aSubMap num="a"/>
+                            <aSubMap num="f"/>
                           </scomp>
                           <relevant>
                             <store/>
@@ -13076,8 +13828,8 @@
                         <Subst>
                           <scomp>
                             <aSubMap num="e"/>
-                            <aSubMap num="ua"/>
-                            <aSubMap num="uf"/>
+                            <aSubMap num="a"/>
+                            <aSubMap num="f"/>
                           </scomp>
                           <type num="a"/>
                         </Subst>
@@ -13128,15 +13880,15 @@
                         <plus br="yes">
                           <Subst>
                             <scomp>
-                              <aSubMap num="ua"/>                      
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="a"/>                      
+                              <aSubMap num="f"/>                      
                             </scomp>
                             <gamma/>
                           </Subst>
                           <Subst>
                             <scomp>
-                              <aSubMap num="ua"/>                      
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="a"/>                      
+                              <aSubMap num="f"/>                      
                             </scomp>
                             <relevant>
                               <store/>
@@ -13144,7 +13896,7 @@
                             </relevant>
                           </Subst>
                           <Subst>
-                            <aSubMap num="ua"/>                      
+                            <aSubMap num="a"/>                      
                             <type num="f"/>
                           </Subst>
                           <type num="a"/>
@@ -13176,15 +13928,15 @@
                         <plus br="yes">
                           <Subst>
                             <scomp>
-                              <aSubMap num="ua"/>                      
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="a"/>                      
+                              <aSubMap num="f"/>                      
                             </scomp>
                             <gamma/>
                           </Subst>
                           <Subst>
                             <scomp>
-                              <aSubMap num="ua"/>                      
-                              <aSubMap num="uf"/>                      
+                              <aSubMap num="a"/>                      
+                              <aSubMap num="f"/>                      
                             </scomp>
                             <relevant>
                               <store/>
@@ -13193,7 +13945,7 @@
                           </Subst>
                           <type num="a"/>
                           <Subst>
-                            <aSubMap num="ua"/>                      
+                            <aSubMap num="a"/>                      
                             <type num="f"/>
                           </Subst>
                           <mbpair>
@@ -13223,17 +13975,17 @@
                         <plus br="yes">
                           <Subst>
                             <scomp>
-                              <aSubMap num="vf"/>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="v"/>
+                              <aSubMap num="a"/>
+                              <aSubMap num="f"/>
                             </scomp>
                             <gamma/>
                           </Subst>
                           <Subst>
                             <scomp>
-                              <aSubMap num="vf"/>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="v"/>
+                              <aSubMap num="a"/>
+                              <aSubMap num="f"/>
                             </scomp>
                             <relevant>
                               <store/>
@@ -13242,12 +13994,12 @@
                           </Subst>
                           <type num="a"/>
                           <Subst>
-                            <aSubMap num="vf"/>
-                            <aSubMap num="ua"/>
+                            <aSubMap num="v"/>
+                            <aSubMap num="a"/>
                             <type num="f"/>
                           </Subst>
                           <Subst>
-                            <aSubMap num="vf"/>
+                            <aSubMap num="v"/>
                             <mbpair>
                               <tvar name="beta"/>
                               <fn>
@@ -13280,17 +14032,17 @@
                         <plus br="yes">
                           <Subst>
                             <scomp>
-                              <aSubMap num="vf"/>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="v"/>
+                              <aSubMap num="a"/>
+                              <aSubMap num="f"/>
                             </scomp>
                             <gamma/>
                           </Subst>
                           <Subst>
                             <scomp>
-                              <aSubMap num="vf"/>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="v"/>
+                              <aSubMap num="a"/>
+                              <aSubMap num="f"/>
                             </scomp>
                             <relevant>
                               <store/>
@@ -13299,12 +14051,12 @@
                           </Subst>
                           <type num="a"/>
                           <Subst>
-                            <aSubMap num="vf"/>
-                            <aSubMap num="ua"/>
+                            <aSubMap num="v"/>
+                            <aSubMap num="a"/>
                             <type num="f"/>
                           </Subst>
                           <Subst>
-                            <aSubMap num="vf"/>
+                            <aSubMap num="v"/>
                             <mbpair>
                               <tvar name="beta"/>
                               <fn>
@@ -13339,17 +14091,17 @@
                         <plus br="yes">
                           <Subst>
                             <scomp>
-                              <aSubMap num="vf"/>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="v"/>
+                              <aSubMap num="a"/>
+                              <aSubMap num="f"/>
                             </scomp>
                             <gamma/>
                           </Subst>
                           <Subst>
                             <scomp>
-                              <aSubMap num="vf"/>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="v"/>
+                              <aSubMap num="a"/>
+                              <aSubMap num="f"/>
                             </scomp>
                             <relevant>
                               <store/>
@@ -13359,13 +14111,13 @@
                           <type num="a"/>
                           <Subst>
                             <scomp>
-                              <aSubMap num="vf"/>
-                              <aSubMap num="ua"/>
+                              <aSubMap num="v"/>
+                              <aSubMap num="a"/>
                             </scomp>
                             <type num="f"/>
                           </Subst>
                           <Subst>
-                            <aSubMap num="vf"/>
+                            <aSubMap num="v"/>
                             <mbpair>
                               <tvar name="beta"/>
                               <fn>
@@ -13398,9 +14150,9 @@
                                 <Subst>
                                   <scomp>
                                     <aSubMap num="e" subnum="1"/>
-                                    <aSubMap num="vf"/>
-                                    <aSubMap num="ua"/>
-                                    <aSubMap num="uf"/>
+                                    <aSubMap num="v"/>
+                                    <aSubMap num="a"/>
+                                    <aSubMap num="f"/>
                                   </scomp>
                                   <gamma/>
                                 </Subst>
@@ -13409,9 +14161,9 @@
                                 <Subst>
                                   <scomp>
                                     <aSubMap num="e" subnum="1"/>
-                                    <aSubMap num="vf"/>
-                                    <aSubMap num="ua"/>
-                                    <aSubMap num="uf"/>
+                                    <aSubMap num="v"/>
+                                    <aSubMap num="a"/>
+                                    <aSubMap num="f"/>
                                   </scomp>
                                   <relevant>
                                     <store/>
@@ -13426,9 +14178,9 @@
                                 <Subst>
                                   <scomp>
                                     <aSubMap num="e" subnum="1"/>
-                                    <aSubMap num="vf"/>
-                                    <aSubMap num="ua"/>
-                                    <aSubMap num="uf"/>
+                                    <aSubMap num="v"/>
+                                    <aSubMap num="a"/>
+                                    <aSubMap num="f"/>
                                   </scomp>
                                   <type num="f"/>
                                 </Subst>
@@ -13447,9 +14199,9 @@
                                 <Subst>
                                   <scomp>
                                     <aSubMap num="e" subnum="1"/>
-                                    <aSubMap num="vf"/>
-                                    <aSubMap num="ua"/>
-                                    <aSubMap num="uf"/>
+                                    <aSubMap num="v"/>
+                                    <aSubMap num="a"/>
+                                    <aSubMap num="f"/>
                                   </scomp>
                                   <gamma/>
                                 </Subst>
@@ -13458,9 +14210,9 @@
                                 <Subst>
                                   <scomp>
                                     <aSubMap num="e" subnum="1"/>
-                                    <aSubMap num="vf"/>
-                                    <aSubMap num="ua"/>
-                                    <aSubMap num="uf"/>
+                                    <aSubMap num="v"/>
+                                    <aSubMap num="a"/>
+                                    <aSubMap num="f"/>
                                   </scomp>
                                   <relevant>
                                     <store/>
@@ -13475,9 +14227,9 @@
                                 <Subst>
                                   <scomp>
                                     <aSubMap num="e" subnum="1"/>
-                                    <aSubMap num="vf"/>
-                                    <aSubMap num="ua"/>
-                                    <aSubMap num="uf"/>
+                                    <aSubMap num="v"/>
+                                    <aSubMap num="a"/>
+                                    <aSubMap num="f"/>
                                   </scomp>
                                   <type num="a"/>
                                 </Subst>
@@ -13500,9 +14252,9 @@
                       <eq>
                         <Subst>
                           <scomp>
-                            <aSubMap num="vf"/>
-                            <aSubMap num="ua"/>
-                            <aSubMap num="uf"/>
+                            <aSubMap num="v"/>
+                            <aSubMap num="a"/>
+                            <aSubMap num="f"/>
                           </scomp>
                           <type num="a"/>
                         </Subst>
@@ -13514,10 +14266,10 @@
                       <eq>
                         <aSubMap num="u"/>
                         <scomp>
-                          <aSubMap num="va"/>
-                          <aSubMap num="vf"/>
-                          <aSubMap num="ua"/>
-                          <aSubMap num="uf"/>
+                          <aSubMap num="w"/>
+                          <aSubMap num="v"/>
+                          <aSubMap num="a"/>
+                          <aSubMap num="f"/>
                         </scomp>
                       </eq>
                     </btypes:TYPE>
@@ -13535,10 +14287,10 @@
                             <solvable num="1"/>
                             <Subst>
                               <scomp>
-                                <aSubMap num="va"/>
-                                <aSubMap num="vf"/>
-                                <aSubMap num="ua"/>
-                                <aSubMap num="uf"/>
+                                <aSubMap num="w"/>
+                                <aSubMap num="v"/>
+                                <aSubMap num="a"/>
+                                <aSubMap num="f"/>
                               </scomp>
                               <gamma/>
                             </Subst>
@@ -13553,10 +14305,10 @@
                             <solvable num="2"/>
                             <Subst>
                               <scomp>
-                                <aSubMap num="va"/>
-                                <aSubMap num="vf"/>
-                                <aSubMap num="ua"/>
-                                <aSubMap num="uf"/>
+                                <aSubMap num="w"/>
+                                <aSubMap num="v"/>
+                                <aSubMap num="a"/>
+                                <aSubMap num="f"/>
                               </scomp>
                               <relevant>
                                 <store/>
@@ -13574,9 +14326,9 @@
                             <solvable num="3"/>
                             <Subst>
                               <scomp>
-                                <aSubMap num="va"/>
-                                <aSubMap num="vf"/>
-                                <aSubMap num="ua"/>
+                                <aSubMap num="w"/>
+                                <aSubMap num="v"/>
+                                <aSubMap num="a"/>
                               </scomp>
                               <type num="f"/>
                             </Subst>
@@ -13590,7 +14342,7 @@
                           <eq>
                             <solvable num="4"/>
                             <Subst>
-                              <aSubMap num="va"/>                              
+                              <aSubMap num="w"/>                              
                               <type num="a"/>
                             </Subst>
                           </eq>
@@ -13604,8 +14356,8 @@
                             <solvable num="5"/>
                             <Subst>
                               <scomp>
-                                <aSubMap num="va"/>
-                                <aSubMap num="vf"/>
+                                <aSubMap num="w"/>
+                                <aSubMap num="v"/>
                               </scomp>
                               <mbpair>
                                 <tvar name="beta"/>
@@ -13629,12 +14381,12 @@
                           <eq>
                             <solvable num="6"/>
                             <Subst>
-                              <aSubMap num="va"/>
+                              <aSubMap num="w"/>
                               <mbpair>
                                 <tvar name="gamma"/>
                                 <floor>
                                   <Subst>
-                                    <aSubMap num="vf"/>
+                                    <aSubMap num="v"/>
                                     <tvar name="delta"/>
                                   </Subst>
                                 </floor>
@@ -13792,7 +14544,7 @@
                     <btypes:TYPE>
                       <UNIFY>
                         <Subst>
-                          <aSubMap num="ua"/>
+                          <aSubMap num="a"/>
                           <type num="f"/>
                         </Subst>
                         <mbpair>
@@ -13806,7 +14558,7 @@
                             </ceil>
                           </fn>
                         </mbpair>
-                        <aSubMap num="vf"/>
+                        <aSubMap num="v"/>
                       </UNIFY>
                     </btypes:TYPE>                      
                   </p>
@@ -13839,16 +14591,16 @@
                           <plus>
                             <Subst>
                               <scomp>
-                                <aSubMap num="va"/>
-                                <aSubMap num="vf"/>
-                                <aSubMap num="ua"/>
+                                <aSubMap num="w"/>
+                                <aSubMap num="v"/>
+                                <aSubMap num="a"/>
                               </scomp>
                               <type num="f"/>
                             </Subst>
                             <Subst>
                               <scomp>
-                                <aSubMap num="va"/>
-                                <aSubMap num="vf"/>
+                                <aSubMap num="w"/>
+                                <aSubMap num="v"/>
                               </scomp>
                               <mbpair>
                                 <tvar name="beta"/>
@@ -13879,18 +14631,18 @@
                         <plus>
                           <Subst>
                             <scomp>
-                              <aSubMap num="va"/>
-                              <aSubMap num="vf"/>
+                              <aSubMap num="w"/>
+                              <aSubMap num="v"/>
                             </scomp>
                             <Subst>
-                              <aSubMap num="ua"/>
+                              <aSubMap num="a"/>
                               <type num="f"/>
                             </Subst>
                           </Subst>
                           <Subst>
                             <scomp>
-                              <aSubMap num="va"/>
-                              <aSubMap num="vf"/>
+                              <aSubMap num="w"/>
+                              <aSubMap num="v"/>
                             </scomp>
                             <mbpair>
                               <tvar name="beta"/>
@@ -13921,11 +14673,11 @@
                           <Subst>
                             <scomp>
                               <aSubMap num="e" subnum="2"/>
-                              <aSubMap num="va"/>
-                              <aSubMap num="vf"/>
+                              <aSubMap num="w"/>
+                              <aSubMap num="v"/>
                             </scomp>
                             <Subst>
-                              <aSubMap num="ua"/>
+                              <aSubMap num="a"/>
                               <type num="f"/>
                             </Subst>
                           </Subst>
@@ -13935,8 +14687,8 @@
                             <Subst>
                               <scomp>
                                 <aSubMap num="e" subnum="2"/>
-                                <aSubMap num="va"/>
-                                <aSubMap num="vf"/>
+                                <aSubMap num="w"/>
+                                <aSubMap num="v"/>
                               </scomp>
                               <fn>
                                 <floor>
@@ -13960,9 +14712,9 @@
                           <Subst>
                             <scomp>
                               <aSubMap num="e" subnum="2"/>
-                              <aSubMap num="va"/>
-                              <aSubMap num="vf"/>
-                              <aSubMap num="ua"/>
+                              <aSubMap num="w"/>
+                              <aSubMap num="v"/>
+                              <aSubMap num="a"/>
                             </scomp>                              
                             <type num="f"/>
                           </Subst>
@@ -13971,8 +14723,8 @@
                           <Subst>
                             <scomp>
                               <aSubMap num="e" subnum="2"/>
-                              <aSubMap num="va"/>
-                              <aSubMap num="vf"/>
+                              <aSubMap num="w"/>
+                              <aSubMap num="v"/>
                             </scomp>
                             <fn>
                               <floor>
@@ -13998,10 +14750,10 @@
                           <Subst>
                             <scomp>
                               <aSubMap num="e" subnum="2"/>
-                              <aSubMap num="va"/>
-                              <aSubMap num="vf"/>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="w"/>
+                              <aSubMap num="v"/>
+                              <aSubMap num="a"/>
+                              <aSubMap num="f"/>
                             </scomp>                              
                             <type num="f"/>
                           </Subst>
@@ -14010,10 +14762,10 @@
                           <Subst>
                             <scomp>
                               <aSubMap num="e" subnum="2"/>
-                              <aSubMap num="va"/>
-                              <aSubMap num="vf"/>
-                              <aSubMap num="ua"/>
-                              <aSubMap num="uf"/>
+                              <aSubMap num="w"/>
+                              <aSubMap num="v"/>
+                              <aSubMap num="a"/>
+                              <aSubMap num="f"/>
                             </scomp>
                             <fn>
                               <floor>
@@ -14274,12 +15026,12 @@
                           <solvable num="1"/>
                           <solvable num="2"/>
                           <Subst>
-                            <aSubMap num="va"/>                            
+                            <aSubMap num="w"/>                            
                             <mbpair>
                               <tvar name="gamma"/>
                               <floor>
                                 <Subst>
-                                  <aSubMap num="vf"/>
+                                  <aSubMap num="v"/>
                                   <tvar name="alpha"/>
                                 </Subst>     
                               </floor>                       
@@ -14306,10 +15058,10 @@
                           <solvable num="1"/>
                           <solvable num="2"/>
                           <Subst>
-                            <aSubMap num="va"/>                            
+                            <aSubMap num="w"/>                            
                             <floor>
                               <Subst>
-                                <aSubMap num="vf"/>
+                                <aSubMap num="v"/>
                                 <tvar name="alpha"/>
                               </Subst>     
                             </floor>                       
@@ -14327,10 +15079,10 @@
                           <solvable num="1"/>
                           <solvable num="2"/>
                           <Subst>
-                            <aSubMap num="va"/>                            
+                            <aSubMap num="w"/>                            
                             <minz>
                               <Subst>
-                                <aSubMap num="vf"/>
+                                <aSubMap num="v"/>
                                 <tvar name="alpha"/>
                               </Subst>     
                             </minz>                       
@@ -14347,10 +15099,10 @@
                       <eq>
                         <type num="rh"/>
                         <Subst>
-                          <aSubMap num="va"/>                            
+                          <aSubMap num="w"/>                            
                           <minz>
                               <Subst>
-                              <aSubMap num="vf"/>
+                              <aSubMap num="v"/>
                               <tvar name="alpha"/>
                             </Subst>     
                           </minz>                       
@@ -14462,9 +15214,9 @@
                           <aSubMap num="e" subnum="2"/>
                         </assume>
                         <Subst>
-                          <aSubMap num="va"/>
+                          <aSubMap num="w"/>
                           <Subst>
-                            <aSubMap num="vf"/>
+                            <aSubMap num="v"/>
                             <tvar name="alpha"/>
                           </Subst>
                         </Subst>
@@ -14480,8 +15232,8 @@
                         <assume>
                           <Subst>
                             <scomp>
-                              <aSubMap num="va"/>           
-                              <aSubMap num="vf"/>
+                              <aSubMap num="w"/>           
+                              <aSubMap num="v"/>
                             </scomp>
                             <tvar name="alpha"/>
                           </Subst>
@@ -14499,9 +15251,9 @@
                           <aSubMap num="E"/>
                         </assume>
                         <Subst>
-                          <aSubMap num="va"/>
+                          <aSubMap num="w"/>
                           <Subst>
-                            <aSubMap num="vf"/>
+                            <aSubMap num="v"/>
                             <tvar name="alpha"/>
                           </Subst>
                         </Subst>
@@ -14523,8 +15275,8 @@
                         <ceil>
                           <Subst>
                             <scomp>
-                              <aSubMap num="va"/>
-                              <aSubMap num="vf"/>
+                              <aSubMap num="w"/>
+                              <aSubMap num="v"/>
                             </scomp>
                             <tvar name="alpha"/>
                           </Subst>
@@ -14537,10 +15289,10 @@
                           <aSubMap num="E"/>
                         </assume>
                         <Subst>
-                          <aSubMap num="va"/>
+                          <aSubMap num="w"/>
                           <minz>
                             <Subst>
-                              <aSubMap num="vf"/>
+                              <aSubMap num="v"/>
                               <tvar name="alpha"/>
                             </Subst>
                           </minz>
@@ -14561,8 +15313,8 @@
                             <Subst>
                               <scomp>
                                 <aSubMap num="E"/>
-                                <aSubMap num="va"/>
-                                <aSubMap num="vf"/>
+                                <aSubMap num="w"/>
+                                <aSubMap num="v"/>
                               </scomp>
                               <tvar name="alpha"/>
                             </Subst>
@@ -14573,8 +15325,8 @@
                             <Subst>
                               <scomp>
                                 <aSubMap num="E"/>
-                                <aSubMap num="va"/>
-                                <aSubMap num="vf"/>
+                                <aSubMap num="w"/>
+                                <aSubMap num="v"/>
                               </scomp>
                               <tvar name="alpha"/>
                             </Subst>
@@ -14588,11 +15340,11 @@
                           <Subst>
                             <scomp>
                               <aSubMap num="E"/>                        
-                              <aSubMap num="va"/>
+                              <aSubMap num="w"/>
                             </scomp>
                             <minz>
                               <Subst>
-                                <aSubMap num="vf"/>
+                                <aSubMap num="v"/>
                                 <tvar name="alpha"/>
                               </Subst>
                             </minz>
@@ -14602,11 +15354,11 @@
                           <Subst>
                             <scomp>
                               <aSubMap num="E"/>                        
-                              <aSubMap num="va"/>
+                              <aSubMap num="w"/>
                             </scomp>
                             <minz>
                               <Subst>
-                                <aSubMap num="vf"/>
+                                <aSubMap num="v"/>
                                 <tvar name="alpha"/>
                               </Subst>
                             </minz>
@@ -14626,8 +15378,8 @@
                             <Subst>
                               <scomp>
                                 <aSubMap num="E"/>
-                                <aSubMap num="va"/>           
-                                <aSubMap num="vf"/>
+                                <aSubMap num="w"/>           
+                                <aSubMap num="v"/>
                               </scomp>
                               <tvar name="alpha"/>
                             </Subst>
@@ -14637,11 +15389,11 @@
                           <Subst>
                             <scomp>
                               <aSubMap num="E"/>
-                              <aSubMap num="va"/>           
+                              <aSubMap num="w"/>           
                             </scomp>
                             <minz>
                               <Subst>
-                                <aSubMap num="vf"/>
+                                <aSubMap num="v"/>
                                 <tvar name="alpha"/>
                               </Subst>
                             </minz>
@@ -14657,8 +15409,8 @@
                             <Subst>
                               <scomp>
                                 <aSubMap num="E"/>
-                                <aSubMap num="va"/>           
-                                <aSubMap num="vf"/>
+                                <aSubMap num="w"/>           
+                                <aSubMap num="v"/>
                               </scomp>
                               <tvar name="alpha"/>
                             </Subst>
@@ -14708,8 +15460,8 @@
                             <Subst>
                               <scomp>
                                 <aSubMap num="E"/>
-                                <aSubMap num="va"/>           
-                                <aSubMap num="vf"/>
+                                <aSubMap num="w"/>           
+                                <aSubMap num="v"/>
                               </scomp>
                               <tvar name="alpha"/>
                             </Subst>
