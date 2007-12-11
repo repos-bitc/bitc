@@ -827,9 +827,9 @@
 		</Subst>
 	      </assume>
 	      <GEN>
-		<canonical>
-		  <type dash="'"/>
-		</canonical>
+		<!-- This must not be canonical(t'): we must
+		     preserve meta-constructors -->
+		<type dash="'"/>
 		<aTS/>
 	      </GEN>       
 	    </Sjudge>

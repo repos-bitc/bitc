@@ -6205,6 +6205,65 @@
         </btypes:TYPE>.
       </p>
     </proof>
+    <lemma id="Msub-consistent">
+      <title>Consistency of <btypes:TYPE><MsubOp/></btypes:TYPE></title> 
+      <p>
+        If
+        <btypes:TYPE>
+          <Msub>
+            <type/>
+            <type dash="'"/>
+          </Msub>
+        </btypes:TYPE>, then
+        <btypes:TYPE>
+          <Forall>
+            <aSubMap/>
+          </Forall>
+        </btypes:TYPE>
+        such that
+        <btypes:TYPE>
+          <models name="sat">
+            <assume>
+              <aSubMap/>
+            </assume>
+            <spset>
+              <type/>
+            </spset>
+          </models>              
+        </btypes:TYPE>, we have        
+        <btypes:TYPE>
+          <Tsub>
+            <canonical>
+              <Subst>
+                <aSubMap/>
+                <type/>
+              </Subst>
+            </canonical>
+            <canonical>
+              <Subst>
+                <aSubMap/>
+                <type dash="'"/>
+              </Subst>
+            </canonical>
+          </Tsub>
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        By straightforward induction over the derivation of 
+        <btypes:TYPE>
+          <Msub>
+            <type/>
+            <type dash="'"/>
+          </Msub>
+        </btypes:TYPE>, with case analysis over the 
+        definition of <btypes:TYPE><MsubOp/></btypes:TYPE> in
+        Figure&nbsp;<xref ref="hm_inter_rules"/>.
+        A normalizing derivation with no redundant applications of
+        reflexive and transitive rules must be considered.
+      </p>
+    </proof>
     <theorem id="intermediate-sound">
       <title>Soundness of Intermediate System</title>
       <p>
@@ -6252,6 +6311,617 @@
         </btypes:TYPE>.        
       </p>
     </theorem>
+    <proof>
+      <p>
+        By induction on the derivation of 
+        <btypes:TYPE>
+          <TDjudge name="j">
+            <aExpr/>
+            <type/>
+          </TDjudge>
+        </btypes:TYPE>
+        We proceed by case analysis on the last step,
+        assuming &alpha;-reduction vacuously.        
+      </p>
+      <ol>
+        <li id="ints_bases">
+          <p>
+            Cases J-Unit, J-True. J-False, J-Id, J-Hloc,
+            J-Sloc are trivial. 
+          </p>
+        </li>
+        <li id="ints_lam">
+          <p>
+            Case J-Lambda:               
+          </p>
+          <ol>
+            <li id="ints_l1">
+              <p>
+                In this case, we have:
+              </p>
+              <ol>
+                <li id="ints_l1_1">
+                  <btypes:TYPE>
+                    <Hrules vspace="yes">                      
+                      <tyRule>
+                        <tyPre>
+                          <Sjudge>
+                            <assume>
+                              <extend>
+                                <gamma/>
+                                <mapping>
+                                  <id/>
+                                  <type num="1"/>
+                                </mapping>
+                              </extend>
+                              <store/>
+                            </assume>
+                            <tqExpr>
+                              <aExpr num="i"/>
+                              <type num="2"/>
+                            </tqExpr>
+                          </Sjudge>
+                        </tyPre>
+                        <tyConc>
+                          <TDjudge name="j">
+                            <lambda>
+                              <id/>
+                              <aExpr num="i"/>
+                            </lambda>
+                            <fn M="yes">
+                              <type num="1"/>
+                              <type num="2"/>
+                            </fn>
+                          </TDjudge>
+                        </tyConc>
+                      </tyRule>
+                    </Hrules> 
+                  </btypes:TYPE>
+                </li>
+                <li id="ints_l1_2">
+                  <p>
+                    <btypes:TYPE>
+                      <models name="sat">
+                        <assume>
+                          <aSubMap/>
+                        </assume>
+                        <spset>
+                          <gamma/>
+                          <store/>
+                          <lambda>
+                            <id/>
+                            <aExpr num="i"/>
+                          </lambda>
+                          <fn M="yes">
+                            <type num="1"/>
+                            <type num="2"/>
+                          </fn>
+                        </spset>
+                      </models>
+                    </btypes:TYPE>
+                  </p>
+                </li>
+              </ol>
+              <p>
+                and we need to show that
+                <btypes:TYPE>
+                  <Djudge>
+                    <aSubMap/>
+                    <gamma/>
+                    <store/>
+                    <lambda>
+                      <id/>
+                      <aExpr num="i"/>
+                    </lambda>
+                    <fn M="yes">
+                      <type num="1"/>
+                      <type num="2"/>
+                    </fn>                    
+                  </Djudge>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="inst_l2">
+              <p>
+                It is evident (from the syntactic structure) that                 
+                <btypes:TYPE>
+                  <eq>
+                    <spset>
+                      <lambda>
+                        <id/>
+                        <aExpr num="i"/>
+                      </lambda>
+                    </spset>
+                    <spset>
+                      <aExpr num="i"/>
+                    </spset>
+                  </eq>
+                </btypes:TYPE>
+                and
+                <btypes:TYPE>
+                  <eq>
+                    <spset>
+                      <fn M="yes">
+                        <type num="1"/>
+                        <type num="2"/>
+                      </fn>
+                    </spset>
+                    <spset>
+                      <type num="1"/>
+                      <type num="2"/>
+                    </spset>
+                  </eq>
+                </btypes:TYPE>. Therefore, we can re-write
+                case (2.a.ii) as
+                <btypes:TYPE>
+                  <models name="sat">
+                    <assume>
+                      <aSubMap/>
+                    </assume>
+                    <spset>
+                      <gamma/>
+                      <store/>
+                      <aExpr num="i"/>
+                      <type num="1"/>
+                      <type num="2"/>
+                    </spset>
+                  </models>
+                </btypes:TYPE>.
+                Similarly, since
+                <btypes:TYPE>
+                  <eq>
+                    <spset>
+                      <gamma/>
+                      <type num="1"/>
+                    </spset>
+                    <spset>
+                      <paren>
+                        <extend>
+                          <gamma/>
+                          <mapping>
+                            <id/>
+                            <type num="1"/>
+                          </mapping>
+                        </extend>
+                      </paren>
+                    </spset>
+                  </eq>
+                </btypes:TYPE>, we can write
+                <btypes:TYPE>
+                  <models name="sat">
+                    <assume>
+                      <aSubMap/>
+                    </assume>
+                    <spset>
+                      <extend>
+                        <gamma/>
+                        <mapping>
+                          <id/>
+                          <type num="1"/>
+                        </mapping>
+                      </extend>
+                      <store/>
+                      <aExpr num="i"/>
+                      <type num="2"/>
+                    </spset>
+                  </models>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="ints_l3">
+              <p>
+                Since we have
+                <btypes:TYPE>
+                  <Sjudge>
+                    <assume>
+                      <extend>
+                        <gamma/>
+                        <mapping>
+                          <id/>
+                          <type num="1"/>
+                        </mapping>
+                      </extend>
+                      <store/>
+                    </assume>
+                    <tqExpr>
+                      <aExpr num="i"/>
+                      <type num="2"/>
+                    </tqExpr>
+                  </Sjudge>
+                </btypes:TYPE>, and 
+                <btypes:TYPE>
+                  <models name="sat">
+                    <assume>
+                      <aSubMap/>
+                    </assume>
+                    <spset>
+                      <extend>
+                        <gamma/>
+                        <mapping>
+                          <id/>
+                          <type num="1"/>
+                        </mapping>
+                      </extend>
+                      <store/>
+                      <aExpr num="i"/>
+                      <type num="2"/>
+                    </spset>
+                  </models>
+                </btypes:TYPE>,                
+                from induction hypothesis, we obtain 
+                <btypes:TYPE>
+                  <Djudge>
+                    <aSubMap/>
+                    <extend>
+                      <gamma/>
+                      <mapping>
+                        <id/>
+                        <type num="1"/>
+                      </mapping>
+                    </extend>                    
+                    <store/>
+                    <aExpr num="i"/>
+                    <type num="2"/>
+                  </Djudge>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="ints_l4">
+              <p>
+                <btypes:TYPE>
+                  <Djudge>
+                    <aSubMap/>
+                    <extend>
+                      <gamma/>
+                      <mapping>
+                        <id/>
+                        <type num="1"/>
+                      </mapping>
+                    </extend>                    
+                    <store/>
+                    <aExpr num="i"/>
+                    <type num="2"/>
+                  </Djudge>
+                </btypes:TYPE> is a shorthand for 
+                <btypes:TYPE>
+                  <Sjudge>
+                    <assume>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <extend>
+                            <gamma/>
+                            <mapping>
+                              <id/>
+                              <type num="1"/>
+                            </mapping>
+                          </extend>                    
+                        </Subst>
+                      </canonical>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <store/>
+                        </Subst>
+                      </canonical>
+                    </assume>
+                    <tqExpr>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <aExpr num="i"/>
+                        </Subst>
+                      </canonical>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <type num="2"/>
+                        </Subst>
+                      </canonical>
+                    </tqExpr>
+                  </Sjudge>
+                </btypes:TYPE>, which can be re-written as
+                <btypes:TYPE>
+                  <Sjudge>
+                    <assume>
+                      <extend>
+                        <canonical>
+                          <Subst>
+                            <aSubMap/>
+                            <gamma/>
+                          </Subst>
+                        </canonical>
+                        <mapping>
+                          <id/>
+                          <canonical>
+                            <Subst>
+                              <aSubMap/>
+                              <type num="1"/>
+                            </Subst>
+                          </canonical>
+                        </mapping>
+                      </extend>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <store/>
+                        </Subst>
+                      </canonical>
+                    </assume>
+                    <tqExpr>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <aExpr num="i"/>
+                        </Subst>
+                      </canonical>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <type num="2"/>
+                        </Subst>
+                      </canonical>
+                    </tqExpr>
+                  </Sjudge>
+                </btypes:TYPE>
+              </p>
+            </li>
+            <li id="ints_l5">
+              <p>
+                From case (2.d) and T-Lambda rule, we obtain
+                <btypes:TYPE>
+                  <Sjudge>
+                    <assume>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <gamma/>
+                        </Subst>
+                      </canonical>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <store/>
+                        </Subst>
+                      </canonical>
+                    </assume>
+                    <tqExpr>
+                      <lambda>
+                        <id/>
+                        <canonical>                          
+                          <Subst>
+                            <aSubMap/>
+                            <aExpr num="i"/>
+                          </Subst>
+                        </canonical>
+                      </lambda>
+                      <fn>
+                        <minz>
+                          <canonical>
+                            <Subst>
+                              <aSubMap/>
+                              <type num="1"/>
+                            </Subst>
+                          </canonical>
+                        </minz>
+                        <maxz>
+                          <canonical>
+                            <Subst>
+                              <aSubMap/>
+                              <type num="2"/>
+                            </Subst>
+                          </canonical>
+                        </maxz>
+                      </fn>
+                    </tqExpr>
+                  </Sjudge>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="insts_l6">
+              <p>
+                From 
+                <btypes:TYPE>
+                  <defn tag="normalized-ctr-types"/>
+                </btypes:TYPE> and
+                <btypes:TYPE>
+                  <defn tag="meta"/>
+                </btypes:TYPE>, it is clear that
+                <btypes:TYPE>
+                  <eq>
+                    <canonical>
+                      <floor>
+                        <Subst>
+                          <aSubMap/>
+                          <type num="1"/>
+                        </Subst>
+                      </floor>
+                    </canonical>                    
+                    <minz>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <type num="1"/>
+                        </Subst>
+                      </canonical>
+                    </minz>
+                  </eq>
+                </btypes:TYPE>, and
+                <btypes:TYPE>
+                  <eq>
+                    <canonical>
+                      <ceil>
+                        <Subst>
+                          <aSubMap/>
+                          <type num="2"/>
+                        </Subst>
+                      </ceil>
+                    </canonical>
+                    <maxz>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <type num="2"/>
+                        </Subst>
+                      </canonical>
+                    </maxz>
+                  </eq>
+                </btypes:TYPE>.
+                Therefore, we can write
+                <btypes:TYPE>
+                  <eq br="yes">
+                    <fn>
+                      <minz>
+                        <canonical>
+                          <Subst>
+                            <aSubMap/>
+                            <type num="1"/>
+                          </Subst>
+                        </canonical>
+                      </minz>
+                      <maxz>
+                        <canonical>
+                          <Subst>
+                            <aSubMap/>
+                            <type num="2"/>
+                          </Subst>
+                        </canonical>
+                      </maxz>
+                    </fn>
+                    <fn>
+                      <canonical>
+                        <floor>
+                          <Subst>
+                            <aSubMap/>
+                            <type num="1"/>
+                          </Subst>
+                        </floor>
+                      </canonical>
+                      <canonical>
+                        <ceil>
+                          <Subst>
+                            <aSubMap/>
+                            <type num="2"/>
+                          </Subst>
+                        </ceil>
+                      </canonical>
+                    </fn>
+                    <canonical>
+                      <fn M="yes">
+                        <Subst>
+                          <aSubMap/>
+                          <type num="1"/>
+                        </Subst>
+                        <Subst>
+                          <aSubMap/>
+                          <type num="2"/>
+                        </Subst>
+                      </fn>
+                    </canonical>
+                    <canonical>
+                      <Subst>
+                        <aSubMap/>
+                        <fn M="yes">
+                          <type num="1"/>
+                          <type num="2"/>
+                        </fn>
+                      </Subst>                        
+                    </canonical>
+                  </eq>
+                </btypes:TYPE>.
+                It is further evident that
+                <btypes:TYPE>
+                  <eq>
+                    <lambda>
+                      <id/>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <aExpr num="i"/>
+                        </Subst>
+                      </canonical>
+                    </lambda>
+                    <canonical>
+                      <Subst>
+                        <aSubMap/>
+                        <lambda>
+                          <id/>
+                          <aExpr num="i"/>
+                        </lambda>
+                      </Subst>
+                    </canonical>
+                  </eq>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="ints_l7">
+              <p>
+                Substituting the equivalencies in case (2.f) into case
+                (2.e), we obtain:
+                <btypes:TYPE>
+                  <Sjudge>
+                    <assume>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <gamma/>
+                        </Subst>
+                      </canonical>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <store/>
+                        </Subst>
+                      </canonical>
+                    </assume>
+                    <tqExpr>
+                      <canonical>                          
+                        <Subst>
+                          <aSubMap/>                          
+                          <lambda>
+                            <id/>
+                            <aExpr num="i"/>
+                          </lambda>
+                        </Subst>
+                      </canonical>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <fn>
+                            <floor>
+                              <type num="1"/>
+                            </floor>
+                            <ceil>
+                              <type num="2"/>
+                            </ceil>
+                          </fn>
+                        </Subst>
+                      </canonical>
+                    </tqExpr>
+                  </Sjudge>
+                </btypes:TYPE>.
+                That is,
+                <btypes:TYPE>
+                  <Djudge>
+                    <aSubMap/>
+                    <gamma/>
+                    <store/>
+                    <lambda>
+                      <id/>
+                      <aExpr num="i"/>
+                    </lambda>
+                    <fn M="yes">
+                      <type num="1"/>
+                      <type num="2"/>
+                    </fn>                    
+                  </Djudge>
+                </btypes:TYPE>.
+              </p>
+            </li>
+          </ol>
+        </li>
+      </ol>
+    </proof>
     <theorem id="heuristic-inference-sound">
       <title>Soundness of Heuristic Type Inference</title>
       <p>
