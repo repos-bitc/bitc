@@ -124,9 +124,8 @@
 	      <id/>
 	      <subst>
 		<type/>
-		<tvars
-		  name="alpha"/>
-		<types dash="'"/>
+		<tvars name="alpha"/>
+		<types num="n"/>
 	      </subst>
 	    </TDjudge>
 	  </tyConc>

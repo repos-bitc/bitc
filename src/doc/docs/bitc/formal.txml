@@ -5705,6 +5705,84 @@
         and used in section&nbsp;<xref ref="type_system"/>
       </p>
       <ol>
+        <li id="decl_shorthand">
+          <p>
+            <btypes:TYPE>
+              <leadsto>
+                <DBrac>
+                  <TDjudge sub="yes">
+                    <aExpr/>
+                    <type/>
+                  </TDjudge>
+                </DBrac>
+                <DBrac>
+                  <collection>
+                    <TDjudge>
+                      <aExpr/>
+                      <type dash="'"/>
+                    </TDjudge>
+                    <Tsub>
+                      <type/>
+                      <type dash="'"/>
+                    </Tsub>
+                  </collection>
+                </DBrac>
+              </leadsto>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <leadsto>
+                <DBrac>
+                  <TDjudge name="j" sub="yes">
+                    <aExpr/>
+                    <type/>
+                  </TDjudge>
+                </DBrac>
+                <DBrac>
+                  <collection>
+                    <TDjudge name="j">
+                      <aExpr/>
+                      <type dash="'"/>
+                    </TDjudge>
+                    <Tsub>
+                      <type/>
+                      <type dash="'"/>
+                    </Tsub>
+                  </collection>
+                </DBrac>
+              </leadsto>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <leadsto>
+                <DBrac>
+                  <TDjudge name="j" Msub="yes">
+                    <aExpr/>
+                    <type/>
+                  </TDjudge>
+                </DBrac>
+                <DBrac>
+                  <collection>
+                    <TDjudge name="j">
+                      <aExpr/>
+                      <type dash="'"/>
+                    </TDjudge>
+                    <Msub>
+                      <type/>
+                      <type dash="'"/>
+                    </Msub>
+                  </collection>
+                </DBrac>
+              </leadsto>            
+            </btypes:TYPE>
+          </p>
+        </li>
         <li>
           <p>
             <btypes:TYPE>
@@ -5798,126 +5876,48 @@
             </btypes:TYPE>
           </p>
         </li>
-        <li id="decl_shorthand">
-          <p>
-            <btypes:TYPE>
-              <leadsto>
-                <DBrac>
-                  <TDjudge sub="yes">
-                    <aExpr/>
-                    <type/>
-                  </TDjudge>
-                </DBrac>
-                <DBrac>
-                  <collection>
-                    <TDjudge>
-                      <aExpr/>
-                      <type dash="'"/>
-                    </TDjudge>
-                    <Tsub>
-                      <type/>
-                      <type dash="'"/>
-                    </Tsub>
-                  </collection>
-                </DBrac>
-              </leadsto>
-            </btypes:TYPE>
-          </p>
-        </li>
         <li>
           <p>
-            <btypes:TYPE>
+            <btypes:TYPE>              
               <leadsto>
-                <DBrac>
-                  <TDjudge name="j" sub="yes">
-                    <aExpr/>
-                    <type/>
-                  </TDjudge>
-                </DBrac>
-                <DBrac>
-                  <collection>
-                    <TDjudge name="j">
-                      <aExpr/>
-                      <type dash="'"/>
-                    </TDjudge>
-                    <Tsub>
-                      <type/>
-                      <type dash="'"/>
-                    </Tsub>
-                  </collection>
-                </DBrac>
-              </leadsto>
-            </btypes:TYPE>
-          </p>
-        </li>
-        <li>
-          <p>
-            <btypes:TYPE>
-              <leadsto>
-                <DBrac>
-                  <TDjudge name="j" Msub="yes">
-                    <aExpr/>
-                    <type/>
-                  </TDjudge>
-                </DBrac>
-                <DBrac>
-                  <collection>
-                    <TDjudge name="j">
-                      <aExpr/>
-                      <type dash="'"/>
-                    </TDjudge>
-                    <Msub>
-                      <type/>
-                      <type dash="'"/>
-                    </Msub>
-                  </collection>
-                </DBrac>
-              </leadsto>            
-            </btypes:TYPE>
-          </p>
-        </li>
-        <li>
-          <p>
-            <btypes:TYPE>
-              <leadsto>
-                <DBrac>          
-                  <Djudge>
-                    <aSubMap/>
-                    <gamma/>
-                    <store/>
-                    <aExpr/>
-                    <type/>
-                  </Djudge>
+                <DBrac>  
+                  <judge>
+                    <precond>
+                      <aSubMap/>
+                    </precond>
+                    <assume>
+                      <gamma/>
+                      <store/>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <aExpr/>
+                        <type/>
+                      </tqExpr>
+                    </conclude>
+                  </judge>
                 </DBrac>
                 <DBrac>          
                   <Sjudge>
                     <assume>
-                      <canonical>
-                        <Subst>
-                          <aSubMap/>
-                          <gamma/>
-                        </Subst>
-                      </canonical>
-                      <canonical>
-                        <Subst>
-                          <aSubMap/>
-                          <store/>
-                        </Subst>
-                      </canonical>
+                      <Subst>
+                        <aSubMap/>
+                        <gamma/>
+                      </Subst>
+                      <Subst>
+                        <aSubMap/>
+                        <store/>
+                      </Subst>
                     </assume>
                     <tqExpr>
-                      <canonical>
-                        <Subst>
-                          <aSubMap/>
-                          <aExpr/>
-                        </Subst>
-                      </canonical>
-                      <canonical>
-                        <Subst>
-                          <aSubMap/>
-                          <type/>
-                        </Subst>
-                      </canonical>
+                      <Subst>
+                        <aSubMap/>
+                        <aExpr/>
+                      </Subst>
+                      <Subst>
+                        <aSubMap/>
+                        <type/>
+                      </Subst>
                     </tqExpr>
                   </Sjudge>
                 </DBrac>
@@ -5967,6 +5967,55 @@
                         <aSubMap/>
                         <type/>
                       </Subst>
+                    </tqExpr>
+                  </Sjudge>
+                </DBrac>
+              </leadsto>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <leadsto>
+                <DBrac>          
+                  <Djudge>
+                    <aSubMap/>
+                    <gamma/>
+                    <store/>
+                    <aExpr/>
+                    <type/>
+                  </Djudge>
+                </DBrac>
+                <DBrac>          
+                  <Sjudge>
+                    <assume>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <gamma/>
+                        </Subst>
+                      </canonical>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <store/>
+                        </Subst>
+                      </canonical>
+                    </assume>
+                    <tqExpr>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <aExpr/>
+                        </Subst>
+                      </canonical>
+                      <canonical>
+                        <Subst>
+                          <aSubMap/>
+                          <type/>
+                        </Subst>
+                      </canonical>
                     </tqExpr>
                   </Sjudge>
                 </DBrac>
@@ -6262,6 +6311,123 @@
         Figure&nbsp;<xref ref="hm_inter_rules"/>.
         A normalizing derivation with no redundant applications of
         reflexive and transitive rules must be considered.
+      </p>
+    </proof>
+    <lemma id="decl-sub">
+      <title>Substitution on Declarative Derivation</title>
+      <p>
+        <btypes:TYPE>	    
+          <text content="If "/>
+          <Sjudge>
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <tqExpr>
+              <aExpr/>
+              <type/>
+            </tqExpr>
+          </Sjudge>
+          <text content=" then "/>
+          <judge>
+            <precond>
+              <aSubMap/>
+            </precond>
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <conclude>
+              <tqExpr>
+                <aExpr/>
+                <type/>
+              </tqExpr>
+            </conclude>
+          </judge>
+        </btypes:TYPE>.
+      </p>	
+    </lemma>
+    <proof>
+      <p>
+        Straightforward induction on the
+        derivation of 
+        <btypes:TYPE>	    
+          <Sjudge>
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <tqExpr>
+              <aExpr/>
+              <type/>
+            </tqExpr>
+          </Sjudge>
+        </btypes:TYPE>, except for the fact that we should use
+        appropriate &alpha;-renaming on generalized variables 
+        <btypes:TYPE>	    
+          <forall>
+            <in>
+              <aTS/>
+              <gamma/>
+            </in>
+          </forall>
+        </btypes:TYPE>, so that generalized variables do not get
+        substituted. 	  
+      </p>
+    </proof>
+    <lemma id="ctr-subst-decl">
+      <title>Corollary to Lemma&nbsp;<xref ref="decl-sub"/>.</title>
+      <p>
+        If
+        <btypes:TYPE>
+          <Djudge>
+            <aSubMap num="1"/>
+            <gamma/>
+            <store/>
+            <aExpr/>
+            <type/>
+          </Djudge>
+        </btypes:TYPE>, and
+        <btypes:TYPE>
+          <aSubMap num="2"/>
+        </btypes:TYPE>
+        is some substitution such that
+        <btypes:TYPE>
+          <models name="cst">
+            <assume/>
+            <Subst>
+              <scomp>
+                <aSubMap num="1"/>
+                <aSubMap num="2"/>
+              </scomp>
+              <spset>
+                <gamma/>
+                <store/>
+                <aExpr/>
+                <type/>
+              </spset>
+            </Subst>
+          </models>
+        </btypes:TYPE>
+        then,
+        <btypes:TYPE>
+          <Djudge>
+            <scomp>
+              <aSubMap num="1"/>
+              <aSubMap num="2"/>
+            </scomp>
+            <gamma/>
+            <store/>
+            <aExpr/>
+            <type/>
+          </Djudge>
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        Straightforward extension to Lemma&nbsp;<xref
+          ref="decl-sub"/>. 
       </p>
     </proof>
     <theorem id="intermediate-sound">
@@ -6920,7 +7086,191 @@
             </li>
           </ol>
         </li>
+        <li id="ints_app">
+          <p>
+            Case J-App:
+          </p>
+          <ol>
+            <li id="ints_a1">
+              <p>
+                In this case, we have:
+              </p>
+              <ol>
+                <li id="ints_a1_1">
+                  <p>
+                    <btypes:TYPE>
+                      <tyRule>
+                        <tyPre>
+                          <TDjudge name="j">
+                            <aExpr num="1"/>
+                            <type num="1"/>
+                          </TDjudge>
+                          <Msub>
+                            <type num="1"/>
+                            <fn M="yes">
+                              <type num="a"/>
+                              <type num="r"/>
+                            </fn>
+                          </Msub>
+                        </tyPre>
+                        <tyPre>
+                          <TDjudge name="j">
+                            <aExpr num="2"/>
+                            <type num="2"/>
+                          </TDjudge>
+                          <Msub>
+                            <type num="2"/>
+                            <type num="a"/>
+                          </Msub>                          
+                          <Msub>
+                            <type num="r"/>
+                            <inner>
+                              <type/>
+                            </inner>
+                          </Msub>
+                        </tyPre>
+                        <tyConc>
+                          <TDjudge name="j">
+                            <apply>
+                              <aExpr num="1"/>
+                              <aExpr num="2"/>
+                            </apply>
+                            <type/>
+                          </TDjudge>
+                        </tyConc>
+                      </tyRule>
+                    </btypes:TYPE>
+                  </p>
+                </li>
+                <li id="ints_a1_2">
+                  <p>
+                    <btypes:TYPE>
+                      <models name="sat">
+                        <assume>
+                          <aSubMap/>
+                        </assume>                
+                        <spset>
+                          <gamma/>
+                          <store/>
+                          <apply>
+                            <aExpr num="1"/>
+                            <aExpr num="2"/>
+                          </apply>
+                          <type/>
+                        </spset>
+                      </models>
+                    </btypes:TYPE>.
+                  </p>
+                </li>
+              </ol>
+              <p>
+                We need to show that 
+                <btypes:TYPE>
+                  <Djudge>
+                    <aSubMap/>
+                    <gamma/>
+                    <store/>
+                    <apply>
+                      <aExpr num="1"/>
+                      <aExpr num="2"/>
+                    </apply>
+                    <type/>
+                  </Djudge>
+                </btypes:TYPE>.
+              </p>                
+            </li>
+            <li id="ints_a2">
+              <p>
+                From case (3.a.ii), we obtain 
+                <btypes:TYPE>
+                  <models name="sat">
+                    <assume>
+                      <aSubMap/>
+                    </assume>                
+                    <spset>
+                      <gamma/>
+                      <store/>
+                      <aExpr num="1"/>
+                      <aExpr num="2"/>
+                      <type/>
+                    </spset>
+                  </models>
+                </btypes:TYPE>.
+              </p>
+            </li>
+          </ol>
+        </li>
       </ol>
+    </proof>
+    <lemma id="int-sub">
+      <title>Substitution on Intermediate Derivation</title>
+      <p>
+        <btypes:TYPE>	    
+          <text content="If "/>
+          <Sjudge name="j">
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <tqExpr>
+              <aExpr/>
+              <type/>
+            </tqExpr>
+          </Sjudge>
+          <text content=" and "/>          
+          <aSubMap/>
+          <text content=" is a substitution such that "/>
+          <models name="cst">
+            <assume/>
+            <Subst>
+              <aSubMap/>              
+              <spset>
+                <gamma/>
+                <store/>
+                <aExpr/>
+                <type/>
+              </spset>
+            </Subst>
+          </models>
+          <text content=", then "/>
+          <judge name="j">
+            <precond>
+              <aSubMap/>
+            </precond>
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <conclude>
+              <tqExpr>
+                <aExpr/>
+                <type/>
+              </tqExpr>
+            </conclude>
+          </judge>
+        </btypes:TYPE>.
+      </p>	
+    </lemma>
+    <proof>
+      <p>
+        Straightforward induction on the
+        derivation of 
+        <btypes:TYPE>	    
+          <Sjudge name="j">
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <tqExpr>
+              <aExpr/>
+              <type/>
+            </tqExpr>
+          </Sjudge>
+        </btypes:TYPE>, similar to 
+        <btypes:TYPE>	    
+          <lem tag="decl-sub"/>
+        </btypes:TYPE>.
+      </p>
     </proof>
     <theorem id="heuristic-inference-sound">
       <title>Soundness of Heuristic Type Inference</title>
@@ -10341,173 +10691,6 @@
           </p>
         </li>
       </ol>
-    </proof>
-    <lemma id="decl-sub">
-      <title>Substitution on Declarative Derivation</title>
-      <p>
-        <btypes:TYPE>	    
-          <text content="If "/>
-          <Sjudge>
-            <assume>
-              <gamma/>
-              <store/>
-            </assume>
-            <tqExpr>
-              <aExpr/>
-              <type/>
-            </tqExpr>
-          </Sjudge>
-          <text content=" then "/>
-          <Sjudge>
-            <assume>
-              <Subst>
-                <aSubMap/>
-                <gamma/>
-              </Subst>
-              <Subst>
-                <aSubMap/>
-                <store/>
-              </Subst>
-            </assume>
-            <tqExpr>
-              <Subst>
-                <aSubMap/>		              
-                <aExpr/>
-              </Subst>
-              <Subst>
-                <aSubMap/>		
-                <type/>
-              </Subst>
-            </tqExpr>
-          </Sjudge>
-        </btypes:TYPE>.
-      </p>	
-    </lemma>
-    <proof>
-      <p>
-        Straightforward induction on the
-        derivation of 
-        <btypes:TYPE>	    
-          <Sjudge>
-            <assume>
-              <gamma/>
-              <store/>
-            </assume>
-            <tqExpr>
-              <aExpr/>
-              <type/>
-            </tqExpr>
-          </Sjudge>
-        </btypes:TYPE>, except for the fact that we should use
-        appropriate &alpha;-renaming on generalized variables 
-        <btypes:TYPE>	    
-          <forall>
-            <in>
-              <aTS/>
-              <gamma/>
-            </in>
-          </forall>
-        </btypes:TYPE>, so that generalized variables do not get
-        substituted. 	  
-      </p>
-    </proof>
-    <lemma id="ctr-subst-decl">
-      <title>Corollary to Lemma&nbsp;<xref ref="decl-sub"/>.</title>
-      <p>
-        If
-      </p>
-      <ol>
-        <li>
-          <p>
-            <btypes:TYPE>
-              <Sjudge>
-                <assume>
-                  <canonical>
-                    <gamma/>
-                  </canonical>
-                  <canonical>
-                    <store/>
-                  </canonical>
-                </assume>
-                <tqExpr>
-                  <aExpr/>
-                  <canonical>
-                    <type/>
-                  </canonical>
-                </tqExpr>
-              </Sjudge>	    
-            </btypes:TYPE>
-          </p>
-        </li>
-        <li>
-          <p>
-            <btypes:TYPE>
-              <aSubMap/>
-            </btypes:TYPE>
-            is some substitution such that
-            <btypes:TYPE>
-              <eq>
-                <normalize>
-                  <Subst>
-                    <aSubMap/>
-                    <plus>
-                      <type/>
-                      <gamma/>
-                      <store/>
-                    </plus>
-                  </Subst>
-                </normalize>
-                <canonical>
-                  <Subst>
-                    <aSubMap/>
-                    <plus>
-                      <type/>
-                      <gamma/>
-                      <store/>
-                    </plus>
-                  </Subst>
-                </canonical>
-              </eq>
-            </btypes:TYPE>
-          </p>
-        </li>
-      </ol>
-      <p>
-        Then,
-        <btypes:TYPE>
-          <Sjudge>
-            <assume>
-              <canonical>
-                <Subst>
-                  <aSubMap/>
-                  <gamma/>
-                </Subst>
-              </canonical>
-              <canonical>
-                <Subst>
-                  <aSubMap/>
-                  <store/>
-                </Subst>
-              </canonical>
-            </assume>
-            <tqExpr>
-              <aExpr/>
-              <canonical>
-                <Subst>
-                  <aSubMap/>
-                  <type/>
-                </Subst>
-              </canonical>
-            </tqExpr>
-          </Sjudge>	    
-        </btypes:TYPE> 
-      </p>
-    </lemma>
-    <proof>
-      <p>
-        Straightforward extension to Lemma&nbsp;<xref
-          ref="decl-sub"/>. 
-      </p>
     </proof>
     <lemma id="ctr-subst-decl-cor">
       <title>Corollary to 
