@@ -64,9 +64,15 @@
 	      <type/>
 	      <tvar name="alpha"/>
 	    </neq>
+	    <ceq>
+	      <type/>
+	      <inner>
+		<type dash="''"/>
+	      </inner>
+	    </ceq>
 	    <Msub>	      
 	      <type/>
-	      <type dash="''"/>
+	      <type dash="'"/>
 	    </Msub>
 	  </tyPre>
 	  <tyConc>
@@ -79,6 +85,36 @@
 	    </Msub>
  	  </tyConc>
 	</tyRule>
+	<tyRule name="M-May3">
+	  <tyPre>
+	    <neq>
+	      <type dash="'"/>
+	      <tvar name="alpha"/>
+	    </neq>
+	    <ceq>
+	      <type dash="'"/>
+	      <inner>
+		<type dash="''"/>
+	      </inner>
+	    </ceq>
+	    <Msub>
+	      <type/>
+	      <type dash="'"/>
+	    </Msub>
+	  </tyPre>
+
+	  <tyConc>
+	    <Msub>
+	      <type/>
+	      <mbpair>
+		<type dash="'"/>
+		<type dash="''"/>
+	      </mbpair>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="M-Ref">
 	  <tyPre>
 	    <eq>
@@ -97,8 +133,6 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="M-Fn">
 	  <tyPre>
 	    <Msub>
@@ -269,6 +303,10 @@
 		<type num="2"/>
 	      </tqExpr>
 	    </Sjudge>
+	    <models name="cst">
+	      <assume/>	      
+	      <type num="1"/>	      
+	    </models>
 	  </tyPre>
 	  <tyConc>
 	    <TDjudge name="j">

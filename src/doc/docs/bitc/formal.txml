@@ -493,7 +493,7 @@
               </ceq>	    
             </tyPre>
             <tyConc>
-              <ceq>                
+              <ceq>
                 <mutable>
                   <type/>
                 </mutable>
@@ -4913,32 +4913,222 @@
         </btypes:TYPE>
         consists only of tautologies (trivially).
       </p>
-    </definition>
-    <definition>
-      <title>Constraint Consistency</title>
+    </definition>    
+    <definition id="structural_containment">
+      <title>Structural Containment</title>
       <p>
-        We write
+        We write 
         <btypes:TYPE>
-          <models name="cst">
-            <assume/>
-            <aCtset/>
-          </models>
-        </btypes:TYPE> 
-        iff
+          <in>
+            <type/>
+            <type dash="'"/>
+          </in>
+        </btypes:TYPE> if
         <btypes:TYPE>
-          <Exists>
-            <aSubMap/>
-          </Exists>
-        </btypes:TYPE>
-        such that 
+          <type/>
+        </btypes:TYPE> is structurally present as a part of 
         <btypes:TYPE>
-          <models name="sat">
-            <aSubMap/>
-            <aCtset/>
-          </models>
-        </btypes:TYPE>
+          <type dash="'"/>
+        </btypes:TYPE>.
+        We write 
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <aExpr/>
+          </in>
+        </btypes:TYPE> if
+        <btypes:TYPE>
+          <type/>
+        </btypes:TYPE> is structurally present as a part of  
+        <btypes:TYPE>
+          <aExpr/>
+        </btypes:TYPE>,as a type annotation.        
       </p>
     </definition>
+    <definition id="ca">
+      <title>Consistency and Acyclicity</title> 
+      <btypes:TYPE>
+        <Hrules>
+          <tyRule>
+            <tyPre>
+              <grouping>
+                <Exists>
+                  <aSubMap/>
+                </Exists>
+                <text content=" such that "/>
+                <models name="sat">
+                  <aSubMap/>
+                  <aCtset/>
+                </models>
+              </grouping>
+            </tyPre>
+            <tyConc>
+              <models name="cst">
+                <assume/>
+                <aCtset/>
+              </models>
+            </tyConc>
+          </tyRule>
+        </Hrules>
+        <Hrules>
+          <tyRule>
+            <tyPre>
+              <grouping>
+                <Forall/>
+                <SubMap>
+                  <tvar name="alpha"/>
+                  <type/>
+                </SubMap>
+                <text content=" and "/>
+                <SubMap>
+                  <tvar name="beta"/>
+                  <type dash="'"/>
+                </SubMap>
+                <text content=" in "/>
+                <aSubMap/>
+                <text content=", "/>
+                <eq>
+                  <tvar name="alpha"/>
+                  <tvar name="beta"/>
+                </eq>
+                <text content=" implies "/>
+                <eq>
+                  <type/>
+                  <type dash="'"/>
+                </eq>          
+              </grouping>
+            </tyPre>
+            <tyConc>
+              <models name="cst">
+                <assume/>
+                <aSubMap/>
+              </models>
+            </tyConc>
+          </tyRule>
+        </Hrules>
+        <Hrules>
+          <tyRule>
+            <tyPre>
+              <grouping>
+                <Forall/>
+                <in>
+                  <grouping>
+                    <Tsub>
+                      <tvar name="alpha"/>
+                      <type/>
+                    </Tsub>
+                    <text content=" or "/>
+                    <Tsub>
+                      <tvar name="alpha"/>
+                      <type/>
+                    </Tsub>
+                  </grouping>
+                  <normalize>
+                    <aCtset/>
+                  </normalize>
+                </in>                
+                <text content=", "/>
+                <OR>
+                  <paren>
+                    <eq>
+                      <type/>
+                      <tvar name="alpha"/>
+                    </eq>
+                  </paren>
+                  <paren>
+                    <eq>
+                      <type/>
+                      <mutable>
+                        <tvar name="alpha"/>
+                      </mutable>
+                    </eq>
+                  </paren>
+                  <paren>
+                    <notin>
+                      <tvar name="alpha"/>
+                      <type/>
+                    </notin>
+                  </paren>
+                </OR>
+              </grouping>
+            </tyPre>
+            <tyConc>
+              <models name="acy">
+                <assume/>
+                <aCtset/>
+              </models>
+            </tyConc>
+          </tyRule>
+        </Hrules>
+        <Hrules>
+          <tyRule>
+            <tyPre>
+              <grouping>
+                <Forall/>
+                <in>
+                  <SubMap>
+                    <tvar name="alpha"/>
+                    <type/>
+                  </SubMap>
+                  <pred name="TransClose">
+                    <aSubMap/>
+                  </pred>
+                </in>
+                <text content=", "/>
+                <notin>
+                  <tvar name="alpha"/>
+                  <type/>
+                </notin>
+              </grouping>
+            </tyPre>
+            <tyConc>
+              <models name="acy">
+                <assume/>
+                <aSubMap/>
+              </models>
+            </tyConc>
+          </tyRule>
+        </Hrules>
+        <Hrules>
+          <tyRule>
+            <tyPre>
+              <models name="cst">   
+                <assume/>
+                <aCtset/>
+              </models>  	    
+              <models name="acy">   
+                <assume/>
+                <aCtset/>
+              </models>  	    	    
+            </tyPre>
+            <tyConc> 
+              <models name="ca">   
+                <assume/>
+                <aCtset/>
+              </models>  
+            </tyConc>
+          </tyRule>
+          <tyRule>
+            <tyPre>
+              <models name="cst">   
+                <assume/>
+                <aSubMap/>
+              </models>  	    
+              <models name="acy">   
+                <assume/>
+                <aSubMap/>
+              </models>  	    	    
+            </tyPre>
+            <tyConc> 
+              <models name="ca">   
+                <assume/>
+                <aSubMap/>
+              </models>  
+            </tyConc>
+          </tyRule>
+        </Hrules>
+      </btypes:TYPE>
+    </definition>      
     <definition id="solvable-entities">
       <title>Solvable Entities</title>
       <p>
@@ -5042,35 +5232,53 @@
               </eq>
             </tyConc>
           </tyRule>
-          <tyRule>
-            <tyPre>
-              <equiv>
-                <type/>
-                <ctype>
-                  <type dash="'"/>
-                  <aCtset/>
-                </ctype>
-              </equiv>
-            </tyPre>
-            <tyConc>
-              <eq>
-                <spset>
-                  <type/>
-                </spset>
-                <aCtset/>                
-              </eq>
-            </tyConc>
-          </tyRule>     
         </Hrules>
         <Hrules>
           <tyRule>
             <tyPre>
               <grouping>
                 <Forall/>
-                <type num="i"/>                
+                <in>
+                  <mbpair>
+                    <type num="i"/>                
+                    <type num="i" dash="'"/>
+                  </mbpair>
+                  <type/>
+                </in>
+                <text content=","/>
                 <space/>
-                <text content="structurally contained in "/>
-                <aExpr/> 
+                <eq>
+                  <aCtset num="i"/>
+                  <set>
+                    <ceq>
+                      <type num="i"/>
+                      <inner>
+                        <type num="i" dash="'"/>
+                      </inner>
+                    </ceq>
+                  </set>
+                </eq>                    
+              </grouping>
+            </tyPre>
+            <tyConc>
+              <eq>
+                <spset>
+                  <type/>
+                </spset>
+                <Unin>
+                  <aCtset num="i"/>                
+                </Unin>
+              </eq>
+            </tyConc>
+          </tyRule>
+          <tyRule>
+            <tyPre>
+              <grouping>
+                <Forall/>
+                <in>
+                  <type num="i"/>                
+                  <aExpr/> 
+                </in>
                 <text content=","/>
                 <space/>
                 <eq>
@@ -5244,114 +5452,6 @@
       language and type system defined in 
       section&nbsp;<xref ref="language"/>.
     </p>
-    <definition id="ca">
-      <title>Consistency and Acyclicity</title> 
-      <ol>
-        <li>
-          <p>
-            We write
-            <btypes:TYPE>
-              <models name="cst">   
-                <assume/>
-                <aCtset/>
-              </models>                 
-            </btypes:TYPE> 
-            if the constraints in the constraint set 
-            <btypes:TYPE>
-              <aCtset/>
-            </btypes:TYPE> are consistent in the mathematical
-            sense. That is,
-            <btypes:TYPE>
-              <aCtset/>
-            </btypes:TYPE> does not (transitively) include any
-            contradictions like 
-            <btypes:TYPE>
-              <Tsub>
-                <bool/>
-                <unit/>
-              </Tsub>
-            </btypes:TYPE>. 
-          </p>
-        </li>
-        <li>
-          <p>
-            A substitution 
-            <btypes:TYPE>
-              <aSubMap/>
-            </btypes:TYPE> is said to be consistent and written 
-            <btypes:TYPE>
-              <models name="cst">   
-                <assume/>
-                <aSubMap/>
-              </models>  
-            </btypes:TYPE> if for any two substitutions 
-            <btypes:TYPE>
-              <SubMap>
-                <tvar name="alpha"/>
-                <type/>
-              </SubMap>
-              <text content=" and "/>
-              <SubMap>
-                <tvar name="beta"/>
-                <type dash="'"/>
-              </SubMap>
-              <text content=" in "/>
-              <aSubMap/>
-              <text content=", "/>
-              <eq>
-                <tvar name="alpha"/>
-                <tvar name="beta"/>
-              </eq>
-              <text content=" implies "/>
-              <eq>
-                <type/>
-                <type dash="'"/>
-              </eq>          
-              <text content="."/>
-            </btypes:TYPE>
-          </p>
-        </li>
-        <li>
-          <p>
-            Similarly, the 
-            <btypes:TYPE>
-              <assume/>
-              <models name="acy"/>   
-            </btypes:TYPE>
-            judgment states that a set of constraints or substitutions
-            are acyclic in the mathematical sense. 
-          </p>
-        </li>
-        <li>
-          <p>        
-            We write 
-            <btypes:TYPE>
-              <models name="ca">   
-                <assume/>
-                <aCtset/>
-              </models>  
-              <text content=" iff "/>
-              <models name="cst">   
-                <assume/>
-                <aCtset/>
-              </models>  	    
-              <text content=" and "/>
-              <models name="acy">   
-                <assume/>
-                <aCtset/>
-              </models>  	    	    
-            </btypes:TYPE>.
-            Similarly for 
-            <btypes:TYPE>
-              <models name="ca">   
-                <assume/>
-                <aSubMap/>
-              </models>
-            </btypes:TYPE>. 
-          </p>
-        </li>
-      </ol>
-    </definition>      
     <definition id="ext-ftvs">
       <title>FTVs (Extension)</title>
       <p>
@@ -6428,6 +6528,146 @@
       <p>
         Straightforward extension to Lemma&nbsp;<xref
           ref="decl-sub"/>. 
+      </p>
+    </proof>
+    <lemma id="int-consistent">
+      <title>Consistency of Intermediate Derivation</title>
+      <p>
+        If 
+        <btypes:TYPE>
+          <TDjudge name="j">
+            <aExpr/>
+            <type/>
+          </TDjudge>
+        </btypes:TYPE>
+        and
+        <btypes:TYPE>
+          <models name="cst">
+            <assume/>
+            <spset>
+              <gamma/>
+              <store/>
+            </spset>
+          </models>
+        </btypes:TYPE>, then
+        <btypes:TYPE>
+          <models name="cst">
+            <assume/>
+            <spset>
+              <gamma/>
+              <store/>
+              <aExpr/>
+              <type/>
+            </spset>
+          </models>
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        By induction on the derivation of 
+        <btypes:TYPE>
+          <TDjudge name="j">
+            <aExpr/>
+            <type/>
+          </TDjudge>
+        </btypes:TYPE>.
+      </p>
+      <ol>
+        <li>
+          <p>
+            The cases that introduce new types are J-ID and J-Lambda,
+            and there is an explicit consistency constraint imposed in
+            these steps.
+          </p>
+        </li>
+        <li>
+          <p>
+            Case J-TqExpr has a (user) annotated type, but this must
+            exactly match a derived type, which must be consistent by
+            induction hypothesis.
+            (This case is actually more restrictive than necessary,
+            since it precludes typing of expressions like
+            <btypes:TYPE>
+              <tqExpr>
+                <paren>
+                  <tqExpr>
+                    <aExpr/>
+                    <type/>
+                  </tqExpr>
+                </paren>
+                <mbpair>
+                  <tvar name="alpha"/>
+                  <type/>
+                </mbpair>
+              </tqExpr>
+            </btypes:TYPE>.            
+            but is sufficient to facilitate the proof of the main
+            soundness theorem).
+          </p>
+        </li>
+        <li>
+          <p>
+            The types obtained from all other cases are: 
+          </p>
+          <ol>
+            <li>
+              <p>
+                Obtained from
+                <btypes:TYPE>
+                  <gamma/>
+                </btypes:TYPE> or
+                <btypes:TYPE>
+                  <store/>
+                </btypes:TYPE>, which are given to be consistent.
+              </p>
+            </li>
+            <li>
+              <p>
+                Types that were derived from the previous steps,
+                which are consistent by induction hypothesis.
+              </p>
+            </li>
+            <li>
+              <p>                
+                New types that are related to the (consistent) types
+                derived from previous steps via the 
+                <btypes:TYPE>
+                  <MsubOp/>
+                </btypes:TYPE> relation. The cases M-May2 and M-May3 
+                in the definition of 
+                <btypes:TYPE>
+                  <MsubOp/>
+                </btypes:TYPE> (figure&nbsp;<xref ref="hm_inter_rules"/>)
+                include explicit constraints that preserve
+                consistency.
+              </p>
+            </li>
+          </ol>
+        </li>
+      </ol>
+      <p>
+        This consistency is a stronger property than what is required
+        for  soundness of the intermediate system. That is,
+        considering types like
+        <btypes:TYPE>
+          <mbpair>
+            <unit/>
+            <bool/>
+          </mbpair>
+        </btypes:TYPE>
+        to be equivalent to 
+        <btypes:TYPE>
+          <unit/>
+        </btypes:TYPE>, and only satisfying the constrained types of
+        the form 
+        <btypes:TYPE>
+          <mbpair>
+            <tvar name="alpha"/>
+            <type/>
+          </mbpair>
+        </btypes:TYPE> is sufficient to prove soundness.
+        However, proving the stronger property is more straightforward.
       </p>
     </proof>
     <theorem id="intermediate-sound">

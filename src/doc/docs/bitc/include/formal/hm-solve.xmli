@@ -303,10 +303,12 @@
 	    </neq>
 	    <models name="cst">
 	      <assume/>
-	      <mbpair>
-		<type num="1"/>
-		<type num="2"/>
-	      </mbpair>
+	      <spset>
+		<mbpair>
+		  <type num="1"/>
+		  <type num="2"/>
+		</mbpair>
+	      </spset>
 	    </models>
 	    <Sjudge name="s">
 	      <assume>
