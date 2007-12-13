@@ -3971,7 +3971,7 @@
               <type/>
               <type num="1"/>
             </Pcst>
-            <text content="..."/>
+            <unspecified/>
             <Pcst>
               <lKind k="var"/>
               <type/>
@@ -3999,7 +3999,7 @@
                   <aSubMap/>
                   <type num="1"/>
                 </Subst>
-                <text content="..."/>
+                <unspecified/>
                 <Subst>
                   <aSubMap/>
                   <type num="n"/>
@@ -4028,7 +4028,7 @@
                     <type num="1"/>
                   </Subst>
                 </pred>
-                <text content="..."/>
+                <unspecified/>
                 <pred name="Immut">
                   <Subst>
                     <aSubMap/>
@@ -5237,7 +5237,7 @@
               <eq>
                 <spset>
                   <solvable num="1"/>
-                  <text content="..."/>
+                  <unspecified/>
                   <solvable num="n"/>
                 </spset>
                 <Unin>
@@ -5583,7 +5583,7 @@
       <example>
         <p>
           <btypes:TYPE>
-            <text content="..."/>
+            <unspecified/>
             <br/>
             <eq>
               <ftvs>
@@ -6254,7 +6254,7 @@
                   <Subst>
                     <aSubMap/>
                     <spset>
-                      <text content="..."/>
+                      <unspecified/>
                     </spset>
                   </Subst>
                 </DBrac>
@@ -6263,7 +6263,7 @@
                     <aSubMap/>
                     <grouping>
                       <spset>
-                        <text content="..."/>
+                        <unspecified/>
                       </spset>
                     </grouping>
                   </Subst>
@@ -6537,59 +6537,126 @@
     </proof>
     <lemma id="weakening-sat-cst">
       <title>Weakening of Satisfiability and Consistency</title>
-      <p>
-        If 
-        <btypes:TYPE>	    
-          <subeq>
-            <aCtset dash="'"/>
-            <aCtset/>
-          </subeq>
-        </btypes:TYPE>, then
-        <btypes:TYPE>	    
-          <models name="sat">
-            <assume>
-              <aSubMap/>
-            </assume>
-            <aCtset/>
-          </models>
-        </btypes:TYPE> implies
-        <btypes:TYPE>	    
-          <models name="sat">
-            <assume>
-              <aSubMap/>
-            </assume>
-            <aCtset dash="'"/>
-          </models>
-        </btypes:TYPE>, and
-        <btypes:TYPE>	    
-          <models name="cst">
-            <assume/>
-            <aCtset/>
-          </models>
-        </btypes:TYPE> implies
-        <btypes:TYPE>	    
-          <models name="cst">
-            <assume/>
-            <aCtset dash="'"/>
-          </models>
-        </btypes:TYPE>.
-      </p>
+      <ol>
+        <li>
+          <p>
+            If 
+            <btypes:TYPE>	    
+              <models name="sat">
+                <assume>
+                  <aSubMap/>
+                </assume>
+                <aCtset/>
+              </models>
+            </btypes:TYPE> and
+            <btypes:TYPE>	    
+              <subeq>
+                <aCtset dash="'"/>
+                <aCtset/>
+              </subeq>
+            </btypes:TYPE>, then
+            <btypes:TYPE>	    
+              <models name="sat">
+                <assume>
+                  <aSubMap/>
+                </assume>
+                <aCtset dash="'"/>
+              </models>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li>
+          <p> 
+            If 
+            <btypes:TYPE>	    
+              <models name="cst">
+                <assume/>
+                <aCtset/>
+              </models>
+            </btypes:TYPE> and
+            <btypes:TYPE>	    
+              <subeq>
+                <aCtset dash="'"/>
+                <aCtset/>
+              </subeq>
+            </btypes:TYPE>, then
+            <btypes:TYPE>	    
+              <models name="cst">
+                <assume/>
+                <aCtset dash="'"/>
+              </models>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li>
+          <p>
+            If 
+            <btypes:TYPE>	    
+              <CST>
+                <solvable num="1"/>
+                <unspecified/>
+                <solvable num="n"/>
+              </CST>
+            </btypes:TYPE>, and            
+            <btypes:TYPE>	
+              <subeq>
+                <set>
+                  <solvable num="1"/>
+                  <unspecified/>
+                  <solvable num="m"/>
+                </set>
+                <set>
+                  <solvable num="1"/>
+                  <unspecified/>
+                  <solvable num="n"/>
+                </set>
+              </subeq>
+            </btypes:TYPE>, then
+            <btypes:TYPE>	    
+              <CST>
+                <solvable num="1"/>
+                <unspecified/>
+                <solvable num="m"/>
+              </CST>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li>
+          <p>
+            If 
+            <btypes:TYPE>	    
+              <CST>
+                <solvable num="1"/>
+                <unspecified/>
+                <solvable num="n"/>
+              </CST>
+            </btypes:TYPE>, then
+            <btypes:TYPE>	    
+              <models name="cst">
+                <assume/>
+                <spset>
+                  <solvable num="1"/>
+                  <unspecified/>
+                  <solvable num="n"/>
+                </spset>
+              </models>
+            </btypes:TYPE>.
+          </p>
+        </li>
+      </ol>
     </lemma>
     <proof>
       <p>
-        Evident from the definition of 
+        Evident from 
         <btypes:TYPE>
-          <modelsOp tag="sol"/>
-        </btypes:TYPE> 
-        (<btypes:TYPE>
           <defn tag="sat"/>
-        </btypes:TYPE>) and        
+        </btypes:TYPE>,
         <btypes:TYPE>
-          <modelsOp tag="cst"/>
-        </btypes:TYPE> 
-        (<btypes:TYPE>
           <defn tag="ca"/>
-        </btypes:TYPE>).
+        </btypes:TYPE>, and
+        <btypes:TYPE>
+          <defn tag="maybe-consistent"/>
+        </btypes:TYPE>.
       </p>
     </proof>
     <lemma id="cst-implies-sat">
@@ -6749,148 +6816,26 @@
             <aExpr/>
             <type/>
           </TDjudge>
-        </btypes:TYPE>
-        and
+        </btypes:TYPE>,
+        then
         <btypes:TYPE>
-          <models name="cst">
-            <assume/>
-            <spset>
-              <gamma/>
-              <store/>
-            </spset>
-          </models>
-        </btypes:TYPE>, then
-        <btypes:TYPE>
-          <models name="cst">
-            <assume/>
-            <spset>
-              <gamma/>
-              <store/>
-              <aExpr/>
-              <type/>
-            </spset>
-          </models>
+          <CST>
+            <gamma/>
+            <store/>
+            <aExpr/>
+            <type/>
+          </CST>
         </btypes:TYPE>.
       </p>
     </lemma>
     <proof>
       <p>
-        By induction on the derivation of 
-        <btypes:TYPE>
-          <TDjudge name="j">
-            <aExpr/>
-            <type/>
-          </TDjudge>
-        </btypes:TYPE>.
-      </p>
-      <ol>
-        <li>
-          <p>
-            The cases that introduce new types are J-ID and J-Lambda,
-            and there is an explicit consistency constraint imposed in
-            these steps.
-          </p>
-        </li>
-        <li>
-          <p>
-            Case J-TqExpr has a (user) annotated type, but this must
-            exactly match a derived type, which must be consistent by
-            induction hypothesis.
-            (This case is actually more restrictive than necessary,
-            since it precludes typing of expressions like
-            <btypes:TYPE>
-              <tqExpr>
-                <paren>
-                  <tqExpr>
-                    <aExpr/>
-                    <type/>
-                  </tqExpr>
-                </paren>
-                <mbpair>
-                  <tvar name="alpha"/>
-                  <type/>
-                </mbpair>
-              </tqExpr>
-            </btypes:TYPE>.            
-            but is sufficient to facilitate the proof of the main
-            soundness theorem).
-          </p>
-        </li>
-        <li>
-          <p>
-            The types obtained from all other cases are: 
-          </p>
-          <ol>
-            <li>
-              <p>
-                Obtained from
-                <btypes:TYPE>
-                  <gamma/>
-                </btypes:TYPE> or
-                <btypes:TYPE>
-                  <store/>
-                </btypes:TYPE>, which are given to be consistent.
-              </p>
-            </li>
-            <li>
-              <p>
-                Types that were derived from the previous steps,
-                which are consistent by induction hypothesis.
-              </p>
-            </li>
-            <li>
-              <p>                
-                Types of the form 
-                <btypes:TYPE>
-                  <type/>
-                </btypes:TYPE> where
-                <btypes:TYPE>
-                  <Msub>
-                    <type/>
-                    <type dash="'"/>
-                  </Msub>
-                </btypes:TYPE>, and
-                <btypes:TYPE>
-                  <type dash="'"/>
-                </btypes:TYPE> is a consistent type derived from a
-                previous steps. The consistency is now proved by
-                induction on the derivation of
-                <btypes:TYPE>
-                  <Msub>
-                    <type/>
-                    <type dash="'"/>
-                  </Msub>
-                </btypes:TYPE>. The interesting cases are M-May2 and
-                M-May3 (figure&nbsp;<xref ref="hm_inter_rules"/>),
-                which explicitly include assertions that preserve
-                consistency.
-              </p>
-            </li>
-          </ol>
-        </li>
-      </ol>
-      <p>
-        This consistency is a stronger property than what is required
-        for  soundness of the intermediate system. That is,
-        considering types like
-        <btypes:TYPE>
-          <mbpair>
-            <unit/>
-            <bool/>
-          </mbpair>
-        </btypes:TYPE>
-        to be equivalent to 
-        <btypes:TYPE>
-          <unit/>
-        </btypes:TYPE>, and only satisfying the constrained types of
-        the form 
-        <btypes:TYPE>
-          <mbpair>
-            <tvar name="alpha"/>
-            <type/>
-          </mbpair>
-        </btypes:TYPE> is sufficient to prove soundness.
-        However, proving the stronger property is more straightforward.
+        Evident from the definition of the intermediate type system in 
+        figure&nbsp;<xref ref="hm_inter_rules"/> (each rule
+        explicitrly includes a consistency constraint), and
+        <btypes:TYPE>	    
+          <lem tag="weakening-sat-cst"/>
+        </btypes:TYPE> (weakening).
       </p>
     </proof>
     <theorem id="intermediate-sound">
@@ -7825,6 +7770,159 @@
       _____________________________________________
     </p>
     <!-- 
+    <lemma id="int-consistent">
+      <title>Consistency of Intermediate Derivation</title>
+      <p>
+        If 
+        <btypes:TYPE>
+          <TDjudge name="j">
+            <aExpr/>
+            <type/>
+          </TDjudge>
+        </btypes:TYPE>
+        and
+        <btypes:TYPE>
+          <models name="cst">
+            <assume/>
+            <spset>
+              <gamma/>
+              <store/>
+            </spset>
+          </models>
+        </btypes:TYPE>, then
+        <btypes:TYPE>
+          <models name="cst">
+            <assume/>
+            <spset>
+              <gamma/>
+              <store/>
+              <aExpr/>
+              <type/>
+            </spset>
+          </models>
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        By induction on the derivation of 
+        <btypes:TYPE>
+          <TDjudge name="j">
+            <aExpr/>
+            <type/>
+          </TDjudge>
+        </btypes:TYPE>.
+      </p>
+      <ol>
+        <li>
+          <p>
+            The cases that introduce new types are J-ID and J-Lambda,
+            and there is an explicit consistency constraint imposed in
+            these steps.
+          </p>
+        </li>
+        <li>
+          <p>
+            Case J-TqExpr has a (user) annotated type, but this must
+            exactly match a derived type, which must be consistent by
+            induction hypothesis.
+            (This case is actually more restrictive than necessary,
+            since it precludes typing of expressions like
+            <btypes:TYPE>
+              <tqExpr>
+                <paren>
+                  <tqExpr>
+                    <aExpr/>
+                    <type/>
+                  </tqExpr>
+                </paren>
+                <mbpair>
+                  <tvar name="alpha"/>
+                  <type/>
+                </mbpair>
+              </tqExpr>
+            </btypes:TYPE>.            
+            but is sufficient to facilitate the proof of the main
+            soundness theorem).
+          </p>
+        </li>
+        <li>
+          <p>
+            The types obtained from all other cases are: 
+          </p>
+          <ol>
+            <li>
+              <p>
+                Obtained from
+                <btypes:TYPE>
+                  <gamma/>
+                </btypes:TYPE> or
+                <btypes:TYPE>
+                  <store/>
+                </btypes:TYPE>, which are given to be consistent.
+              </p>
+            </li>
+            <li>
+              <p>
+                Types that were derived from the previous steps,
+                which are consistent by induction hypothesis.
+              </p>
+            </li>
+            <li>
+              <p>                
+                Types of the form 
+                <btypes:TYPE>
+                  <type/>
+                </btypes:TYPE> where
+                <btypes:TYPE>
+                  <Msub>
+                    <type/>
+                    <type dash="'"/>
+                  </Msub>
+                </btypes:TYPE>, and
+                <btypes:TYPE>
+                  <type dash="'"/>
+                </btypes:TYPE> is a consistent type derived from a
+                previous steps. The consistency is now proved by
+                induction on the derivation of
+                <btypes:TYPE>
+                  <Msub>
+                    <type/>
+                    <type dash="'"/>
+                  </Msub>
+                </btypes:TYPE>. The interesting cases are M-May2 and
+                M-May3 (figure&nbsp;<xref ref="hm_inter_rules"/>),
+                which explicitly include assertions that preserve
+                consistency.
+              </p>
+            </li>
+          </ol>
+        </li>
+      </ol>
+      <p>
+        This consistency is a stronger property than what is required
+        for  soundness of the intermediate system. That is,
+        considering types like
+        <btypes:TYPE>
+          <mbpair>
+            <unit/>
+            <bool/>
+          </mbpair>
+        </btypes:TYPE>
+        to be equivalent to 
+        <btypes:TYPE>
+          <unit/>
+        </btypes:TYPE>, and only satisfying the constrained types of
+        the form 
+        <btypes:TYPE>
+          <mbpair>
+            <tvar name="alpha"/>
+            <type/>
+          </mbpair>
+        </btypes:TYPE> is sufficient to prove soundness.
+        However, proving the stronger property is more straightforward.
+      </p>
+    </proof>
     <lemma id="cst-multiple">
       <title>Partial Solutions</title>
       <p>
