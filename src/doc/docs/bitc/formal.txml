@@ -4503,7 +4503,7 @@
         <bnf desc="Type Scheme">
           <aTS/>
           <alternatives>
-            <sType/>
+            <type/>
             <forall>                    
               <tvar name="alpha"/>
               <aTS/>
@@ -4888,7 +4888,7 @@
         </li>
       </ul>
     </definition>
-    <definition>
+    <definition id="sat">
       <title>Constraint Satisfiability</title>
       <p>
         A Substitution 
@@ -5682,7 +5682,7 @@
                 <type/>
               </pred>
             </fnxn>
--            <text content=" where "/>
+            <text content=" where "/>
             <neq>
               <type/>
               <tvar name="alpha"/>
@@ -6332,15 +6332,14 @@
             <aSubMap/>
             <grouping>
               <Forall>
-                <mbpair>
-                  <tvar name="alpha"/>
-                  <type num="h"/>
-                </mbpair>
+                <in>
+                  <mbpair>
+                    <tvar name="alpha"/>
+                    <type num="h"/>
+                  </mbpair>
+                  <type/> 
+                </in>
               </Forall>
-              <space/>
-              <textit content="structurally contained in"/>
-              <space/>
-              <type/> 
               <textit content=","/>
               <space/>
               <SubMap>
@@ -6411,6 +6410,94 @@
         Figure&nbsp;<xref ref="hm_inter_rules"/>.
         A normalizing derivation with no redundant applications of
         reflexive and transitive rules must be considered.
+      </p>
+    </proof>
+    <lemma id="weakening-sat-cst">
+      <title>Weakening of Satisfiability and Consistency</title>
+      <p>
+        If 
+        <btypes:TYPE>	    
+          <subeq>
+            <aCtset dash="'"/>
+            <aCtset/>
+          </subeq>
+        </btypes:TYPE>, then
+        <btypes:TYPE>	    
+          <models name="sat">
+            <assume>
+              <aSubMap/>
+            </assume>
+            <aCtset/>
+          </models>
+        </btypes:TYPE> implies
+        <btypes:TYPE>	    
+          <models name="sat">
+            <assume>
+              <aSubMap/>
+            </assume>
+            <aCtset dash="'"/>
+          </models>
+        </btypes:TYPE>, and
+        <btypes:TYPE>	    
+          <models name="cst">
+            <assume/>
+            <aCtset/>
+          </models>
+        </btypes:TYPE> implies
+        <btypes:TYPE>	    
+          <models name="cst">
+            <assume/>
+            <aCtset dash="'"/>
+          </models>
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        Evident from the definition of 
+        <btypes:TYPE>
+          <modelsOp tag="sol"/>
+        </btypes:TYPE> 
+        (<btypes:TYPE>
+          <defn tag="sat"/>
+        </btypes:TYPE>) and        
+        <btypes:TYPE>
+          <modelsOp tag="cst"/>
+        </btypes:TYPE> 
+        (<btypes:TYPE>
+          <defn tag="ca"/>
+        </btypes:TYPE>).
+      </p>
+    </proof>
+    <lemma id="cst-implies-sat">
+      <title>Consistency Implies Satisfiability</title>
+      <p>
+        If 
+        <btypes:TYPE>
+          <models name="cst">
+            <assume/>
+            <aCtset/>
+          </models>
+        </btypes:TYPE>, then
+        <btypes:TYPE>
+          <Exists>
+            <aSubMap/>
+          </Exists>
+        </btypes:TYPE> such that
+        <btypes:TYPE>
+          <models name="sat">
+            <aSubMap/>
+            <aCtset/>
+          </models>
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        By inversion of the constraint consistency relationship in 
+        <btypes:TYPE>
+          <defn tag="ca"/>
+        </btypes:TYPE>.
       </p>
     </proof>
     <lemma id="decl-sub">
@@ -6630,16 +6717,29 @@
             </li>
             <li>
               <p>                
-                New types that are related to the (consistent) types
-                derived from previous steps via the 
+                Types of the form 
                 <btypes:TYPE>
-                  <MsubOp/>
-                </btypes:TYPE> relation. The cases M-May2 and M-May3 
-                in the definition of 
+                  <type/>
+                </btypes:TYPE> where
                 <btypes:TYPE>
-                  <MsubOp/>
-                </btypes:TYPE> (figure&nbsp;<xref ref="hm_inter_rules"/>)
-                include explicit constraints that preserve
+                  <Msub>
+                    <type/>
+                    <type dash="'"/>
+                  </Msub>
+                </btypes:TYPE>, and
+                <btypes:TYPE>
+                  <type dash="'"/>
+                </btypes:TYPE> is a consistent type derived from a
+                previous steps. The consistency is now proved by
+                induction on the derivation of
+                <btypes:TYPE>
+                  <Msub>
+                    <type/>
+                    <type dash="'"/>
+                  </Msub>
+                </btypes:TYPE>. The interesting cases are M-May2 and
+                M-May3 (figure&nbsp;<xref ref="hm_inter_rules"/>),
+                which explicitly include assertions that preserve
                 consistency.
               </p>
             </li>
@@ -6767,6 +6867,12 @@
                               <type num="2"/>
                             </tqExpr>
                           </Sjudge>
+                          <models name="cst">
+                            <assume/>
+                            <spset>
+                              <type num="1"/>
+                            </spset>
+                          </models>
                         </tyPre>
                         <tyConc>
                           <TDjudge name="j">
@@ -7438,6 +7544,45 @@
                 </btypes:TYPE>.
               </p>
             </li>
+            <li id="ints_a3">
+              <p>
+                Since 
+                <btypes:TYPE>
+                  <subeq>
+                    <spset>
+                      <gamma/>
+                      <store/>
+                    </spset>
+                    <spset>
+                      <gamma/>
+                      <store/>
+                      <aExpr num="1"/>
+                      <aExpr num="2"/>
+                      <type/>
+                    </spset>
+                  </subeq>
+                </btypes:TYPE>, from 
+                case (3.b) and 
+                <btypes:TYPE>
+                  <lem tag="weakening-sat-cst"/>
+                </btypes:TYPE>, we obtain
+                <btypes:TYPE>
+                  <models name="sat">
+                    <assume>
+                      <aSubMap/>
+                    </assume>                    
+                    <spset>
+                      <gamma/>
+                      <store/>
+                    </spset>
+                  </models>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="ints_a4">
+              <p>
+              </p>
+            </li>
           </ol>
         </li>
       </ol>
@@ -7556,6 +7701,226 @@
     <p>
       _____________________________________________
     </p>
+    <!-- 
+    <lemma id="cst-multiple">
+      <title>Partial Solutions</title>
+      <p>
+        If 
+        <btypes:TYPE>
+          <models name="cst">
+            <assume/>
+            <aCtset/>
+          </models>
+        </btypes:TYPE>, 
+        <btypes:TYPE>
+          <subeq>
+            <aCtset dsah="'"/>
+            <aCtset/>
+          </subeq>
+        </btypes:TYPE>, and 
+        <btypes:TYPE>
+          <models name="sat">
+            <assume>
+              <aSubMap/>
+            </assume>
+            <aCtset dash="'"/>
+          </models>
+        </btypes:TYPE>, then
+        <btypes:TYPE>
+          <models name="cst">
+            <assume/>
+            <Subst>              
+              <aSubMap/>
+              <aCtset/>
+            </Subst>
+          </models>
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <lemma id="sat-solvable">
+      <title>Satisfying extracted constraints</title>
+      <p>
+        If 
+      </p>
+      <ol>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <models name="cst">
+                <assume/>
+                <spset>
+                  <solvable num="1"/>
+                  <text content="..."/>
+                  <solvable num="n"/>
+                </spset>
+              </models>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <aSubMap/>
+            </btypes:TYPE> is a substitution
+            such that
+            <btypes:TYPE>
+              <Forall>
+                <tvar name="alpha"/>
+                <type/>
+                <type dash="'"/>
+                <grouping>
+                  <text content=" and "/>
+                  <in>
+                    <solvable num="i"/>
+                    <set>
+                      <solvable num="1"/>
+                      <text content="..."/>
+                      <solvable num="n"/>
+                    </set>
+                  </in>
+                </grouping>
+              </Forall>
+              <text content=", "/>
+              <in>
+                <mbpair>
+                  <tvar name="alpha"/>
+                  <type/>
+                </mbpair>
+                <solvable num="i"/>
+              </in>
+              <text content=" implies "/>          
+              <in>
+                <SubMap>
+                  <tvar name="alpha"/>
+                  <type dash="'"/>
+                </SubMap>
+                <aSubMap/>
+              </in> 
+              <text content=", where "/>
+              <ceq>
+                <type dash="'"/>
+                <inner>
+                  <type/>
+                </inner>
+              </ceq>
+            </btypes:TYPE>
+          </p>
+        </li>
+      </ol>
+      <p>
+        then, we have,
+        <btypes:TYPE>
+          <models name="sat">
+            <assume>
+              <aSolvable/>
+            </assume>
+            <spset>
+              <solvable num="1"/>
+              <text content="..."/>
+              <solvable num="n"/>
+            </spset>
+          </models>          
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        Since we have 
+        <btypes:TYPE>
+          <models name="cst">
+            <assume/>
+            <spset>
+              <solvable num="1"/>
+              <text content="..."/>
+              <solvable num="n"/>
+            </spset>
+          </models>          
+        </btypes:TYPE>, then 
+        <btypes:TYPE>
+          <Forall>
+            <tvar name="alpha"/>
+            <type dash="'"/>
+            <type dash="''"/>
+            <in>
+              <grouping>
+                <solvable num="i"/>
+                <text content=" and "/>
+                <solvable num="j"/>
+              </grouping>
+              <set>
+                <solvable num="1"/>
+                <text content="..."/>
+                <solvable num="n"/>
+              </set>
+            </in>
+          </Forall>
+          <text content=", if "/>
+          <in>
+            <mbpair>
+              <tvar name="alpha"/>
+              <type dsah="'"/>
+            </mbpair>
+            <solvable num="i"/>
+          </in>
+          <text content=", and "/>
+          <in>
+            <mbpair>
+              <tvar name="alpha"/>
+              <type dash="''"/>
+            </mbpair>
+            <solvable num="j"/>
+          </in>
+          <text content=", then "/>
+          <ceq>
+            <inner>
+              <type dash="'"/>
+            </inner>
+            <inner>
+              <type dash="''"/>
+            </inner>
+          </ceq>
+        </btypes:TYPE>.
+        Now, it is evident that any substitution
+        <btypes:TYPE>
+          <SubMap>
+            <tvar name="alpha"/>
+            <type num="c"/>
+          </SubMap>
+        </btypes:TYPE> such that
+        <btypes:TYPE>
+          <ceq>
+            <type num="c"/>
+            <type dash="'"/>
+            <type dash="''"/>
+          </ceq>
+        </btypes:TYPE>
+        can satisfy the all the of constraints generated by the 
+        constrained types of the form
+        <btypes:TYPE>
+          <mbpair>
+            <tvar name="alpha"/>
+            <type/>
+          </mbpair>
+        </btypes:TYPE>. Since 
+        <btypes:TYPE>
+          <aSubMap/>
+        </btypes:TYPE> is the composistion of all such substitutions,
+        we obtain
+        <btypes:TYPE>
+          <models name="sat">
+            <assume>
+              <aSolvable/>
+            </assume>
+            <spset>
+              <solvable num="1"/>
+              <text content="..."/>
+              <solvable num="n"/>
+            </spset>
+          </models>          
+        </btypes:TYPE>.
+      </p>
+    </proof>
+    -->
     <definition id="sol-math">
       <title><btypes:TYPE><models name="sol"/></btypes:TYPE></title>
       <p>
@@ -17415,3 +17780,5 @@
  -->
 <!--  LocalWords:  fnize cong sm ecomp subEq
  -->
+
+
