@@ -4942,7 +4942,55 @@
         </btypes:TYPE> is structurally present as a part of  
         <btypes:TYPE>
           <aExpr/>
-        </btypes:TYPE>,as a type annotation.        
+        </btypes:TYPE>, as a type annotation.
+        Similarly, we write 
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <gamma/>
+          </in>
+        </btypes:TYPE> if
+        <btypes:TYPE>
+          <Exists>
+            <in>
+              <mapping>
+                <id/>
+                <type dash="'"/>
+              </mapping>
+              <gamma/>
+            </in>
+          </Exists>          
+        </btypes:TYPE> such that 
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <type dash="'"/>
+          </in>
+        </btypes:TYPE>.
+        We write
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <store/>
+          </in>
+        </btypes:TYPE> if
+        <btypes:TYPE>
+          <Exists>
+            <in>
+              <mapping>
+                <loc/>
+                <type dash="'"/>
+              </mapping>
+              <gamma/>
+            </in>
+          </Exists>          
+        </btypes:TYPE> such that 
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <type dash="'"/>
+          </in>
+        </btypes:TYPE>.
       </p>
     </definition>
     <definition id="ca">
@@ -5370,6 +5418,81 @@
           </tyRule>       
         </Hrules>
       </btypes:TYPE>        
+    </definition>
+    <definition id="maybe-consistent">
+      <title>Consistency of Maybe types</title>
+      <p>
+        We identify the following consistency property on maybe types.
+      </p>
+      <btypes:TYPE>
+        <Hrules>
+          <tyRule>
+            <tyPre>
+              <grouping>
+                <Forall/>
+                <in>
+                  <mbpair>
+                    <type/>
+                    <type dash="'"/>
+                  </mbpair>
+                  <collection>
+                    <solvable num="1"/> 
+                    <unspecified/>
+                    <solvable num="n"/> 
+                  </collection>
+                </in>
+                <text content=", "/>
+                <eq>
+                  <type/>
+                  <tvar name="alpha"/>
+                </eq>
+                <text content=", or "/>
+                <ceq>
+                  <type/>
+                  <inner>
+                    <type dash="'"/>
+                  </inner>
+                </ceq>
+              </grouping>
+            </tyPre>
+            <tyPre>
+              <grouping>
+                <Forall/>
+                <in>
+                  <grouping>
+                    <mbpair>
+                      <tvar name="alpha"/>
+                      <type/>
+                    </mbpair>
+                    <text content=" and "/>
+                    <mbpair>
+                      <tvar name="alpha"/>
+                      <type dash="'"/>
+                    </mbpair>
+                  </grouping>
+                  <collection>
+                    <solvable num="1"/> 
+                    <unspecified/>
+                    <solvable num="n"/> 
+                  </collection>
+                </in>
+                <text content=", "/>
+                <eq>
+                  <type/>
+                  <type dash="'"/>
+                </eq>
+              </grouping>              
+            </tyPre>
+            <tyConc>
+              <CST>
+                <solvable num="1"/> 
+                <unspecified/>
+                <solvable num="n"/> 
+              </CST>
+            </tyConc>
+          </tyRule>
+        </Hrules>
+      </btypes:TYPE>
     </definition>
     <definition id="normalized-ctr-types">
       <title>Canonical forms of Solvable Entities</title>

@@ -360,7 +360,7 @@
 	  </tyPre>
 	  <tyPre>
 	    <TDjudge sub="yes">
-	      <aExpr num="1"/>
+	      <aExpr num="3"/>
 	      <type/>
 	    </TDjudge>
 	    <Tsub>
@@ -374,7 +374,7 @@
 	      <if>
 		<aExpr num="1"/>
 		<aExpr num="2"/>
-		<aExpr num="1"/>
+		<aExpr num="3"/>
 	      </if>
 	      <type dash="'"/>
 	    </TDjudge>

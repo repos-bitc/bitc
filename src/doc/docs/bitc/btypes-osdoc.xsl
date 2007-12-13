@@ -350,7 +350,7 @@
   <!-- range --> 
   <xsl:template match="dom" mode="formula">
     <xsl:element name="em">
-      <xsl:text>dom</xsl:text>      
+      <xsl:text>range</xsl:text>      
     </xsl:element>    
     <xsl:call-template name="print.params"/>
   </xsl:template>
@@ -2625,6 +2625,27 @@
     <xsl:apply-templates select="*[2]" mode="formula"/>
   </xsl:template>
 
+  <!-- Cst -->
+  <xsl:template match="Cst" mode="formula">
+    <xsl:apply-templates select="*[1]" mode="formula"/>
+    <xsl:call-template name="print.cst">
+      <xsl:with-param name="print.cst.name">
+	<xsl:value-of select="@name"/>
+      </xsl:with-param> 
+    </xsl:call-template>    	
+    <xsl:apply-templates select="*[2]" mode="formula"/>
+  </xsl:template>
+
+  <!-- CST -->
+  <xsl:template match="CST" mode="formula">
+    <xsl:call-template name="print.cst">
+      <xsl:with-param name="print.cst.name">
+	<xsl:value-of select="@name"/>
+      </xsl:with-param> 
+    </xsl:call-template>    	
+    <xsl:call-template name="print.set"/>
+  </xsl:template>
+  
 <!-- ======================================================================
                        Type Judgements 
      ====================================================================== -->
@@ -3222,6 +3243,23 @@
 	<xsl:value-of select="$print.models.name"/>
       </xsl:element>
     </xsl:if>
+    <xsl:call-template name="print.space"/>
+  </xsl:template>
+
+  <!-- the consistency ||- operator -->
+  <xsl:template name="print.cst">
+    <xsl:param name="print.cst.name"/>
+    
+    <xsl:call-template name="print.space"/>
+    <xsl:element name="b">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>models;</xsl:text> 
+      <xsl:if test="$print.cst.name">
+	<xsl:element name="sub">
+	  <xsl:value-of select="$print.cst.name"/>
+	</xsl:element>
+      </xsl:if>
+    </xsl:element>
     <xsl:call-template name="print.space"/>
   </xsl:template>
 

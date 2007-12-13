@@ -9,6 +9,8 @@ $sups="\\\\raise.5ex\\\\hbox\{\\\\small($br)\}";
 $subs="\\\\lower.5ex\\\\hbox\{\\\\small($br)\}";
 $em="\\\\ensuremath";
 $EM="\\ensuremath";
+$b="\\\\textbf";
+$B="\\textbf";
 $MIT="\\mathit";
 $emem="$em($br)$em($br)";
 $dummyem="$em\\{\\_\\{\\}\\}";
@@ -55,8 +57,12 @@ while(!eof(F)) {
 	$l =~ s/\{\\\{\}\{\\textbar\}/$EM\{\\\{\\!\|\}/g;
 	$l =~ s/\{\\textbar\}\{\\\}\}/$EM\{\|\\!\\\}\}/g;
 
+	# Temporary: Until osdoc supports ||-
+	# \textbf{\ensuremath{models}} to \ensuremath{models}
+	$l =~ s/$b\{$em\{\\models\}\}/$EM\{\\Vdash\}/g;
+
 	# \textbf{*}letter\textbf{*} to \mathbb{letter}
-	$l =~ s/\\textbf\{\*\}([A-Za-z])\\textbf\{\*\}/$EM\{\\mathbb{$1}\}/g;
+	$l =~ s/$b\{\*\}([A-Za-z])\\textbf\{\*\}/$EM\{\\mathbb{$1}\}/g;
 
 	# \emph{*}letter\emph{*} to \mathcal{letter}
 	$l =~ s/\\emph\{\*\}([A-Za-z])\\emph\{\*\}/$EM\{\\mathcal{$1}\}/g;

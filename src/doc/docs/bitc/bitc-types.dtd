@@ -1105,6 +1105,16 @@
                                name      CDATA   #IMPLIED
                                br        CDATA   #IMPLIED
 >
+<!ELEMENT Cst                 %anything.group;%anything.group;)>
+<!ATTLIST Cst
+                               name      CDATA   #IMPLIED
+                               br        CDATA   #IMPLIED
+>
+<!ELEMENT CST                 %anything.group;*)>
+<!ATTLIST CST
+                               name      CDATA   #IMPLIED
+                               br        CDATA   #IMPLIED
+>
 
 <!-- ======================================================================
                         Type Judgements 
