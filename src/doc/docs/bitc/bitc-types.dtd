@@ -360,8 +360,13 @@
 <!ELEMENT TypEvalPred          EMPTY>
 <!ELEMENT solvable             EMPTY>
 <!ATTLIST solvable
-                                num       CDATA    #IMPLIED
-                                dash      CDATA    #IMPLIED
+                               num       CDATA    #IMPLIED
+                               dash      CDATA    #IMPLIED
+>
+<!ELEMENT solvables            EMPTY>
+<!ATTLIST solvables
+                               num       CDATA    #IMPLIED
+                               dash      CDATA    #IMPLIED
 >
 
 <!-- ======================================================================

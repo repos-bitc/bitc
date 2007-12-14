@@ -673,7 +673,6 @@
 	  <grouping>
 	    <Forall>
 	      <collection>
-		<tvar name="alpha"/>
 		<lKind k="var"/>
 		<lKind/>
 		<type/>

@@ -348,7 +348,7 @@
   </xsl:template>
 
   <!-- range --> 
-  <xsl:template match="dom" mode="formula">
+  <xsl:template match="range" mode="formula">
     <xsl:element name="em">
       <xsl:text>range</xsl:text>      
     </xsl:element>    
@@ -724,6 +724,8 @@
     </xsl:choose>
     <xsl:apply-templates select="*[2]" mode="formula"/>	
     <xsl:choose>
+      <xsl:when test="*[2] = set">
+      </xsl:when>
       <xsl:when test="*[2] = spset">
       </xsl:when>
       <xsl:otherwise>
@@ -930,6 +932,14 @@
     <xsl:text>omega;</xsl:text>
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>
+
+  <!-- solvables -->
+  <xsl:template match="solvables" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>omega;</xsl:text>
+    <xsl:call-template name="print.index.dash"/>
+    <xsl:call-template name="print.plural"/>
+  </xsl:template>
   
 <!-- ======================================================================
                         Text  
@@ -982,7 +992,6 @@
       </xsl:with-param> 
     </xsl:call-template>
   </xsl:template>
-
 
   <!-- nothing -->
   <xsl:template match="nothing" mode="formula">
@@ -1715,7 +1724,7 @@
     <!-- <xsl:text>)</xsl:text> -->    
     <xsl:call-template name="print.plural"/>
   </xsl:template>
-
+  
   <!-- Spair -->
   <xsl:template match="Spair" mode="formula">
     <xsl:call-template name="print.comp.actual">

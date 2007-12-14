@@ -377,6 +377,15 @@
             </pred>
           </alternatives>
         </bnfc>
+        <bnf desc="Solvable Entities">
+          <solvable/>
+          <alternatives>
+            <type/>
+            <gamma/>
+            <store/>
+            <aExpr/>
+          </alternatives>
+        </bnf>
       </grammar>
     </btypes:TYPE>
     <p>
@@ -639,7 +648,13 @@
     <definition id="structural_containment">
       <title>Structural Containment</title>
       <p>
-        We write 
+        We define a structural containment relation 
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <solvable/>
+          </in>
+        </btypes:TYPE> as follows.
         <btypes:TYPE>
           <in>
             <type/>
@@ -652,7 +667,6 @@
         <btypes:TYPE>
           <type dash="'"/>
         </btypes:TYPE>.
-        We write 
         <btypes:TYPE>
           <in>
             <type/>
@@ -665,7 +679,6 @@
         <btypes:TYPE>
           <aExpr/>
         </btypes:TYPE>, as a type annotation.
-        Similarly, we write 
         <btypes:TYPE>
           <in>
             <type/>
@@ -689,7 +702,6 @@
             <type dash="'"/>
           </in>
         </btypes:TYPE>.
-        We write
         <btypes:TYPE>
           <in>
             <type/>
@@ -711,6 +723,27 @@
           <in>
             <type/>
             <type dash="'"/>
+          </in>
+        </btypes:TYPE>.
+        We write
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <solvables/>
+          </in>
+        </btypes:TYPE> if
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <solvable/>
+          </in>
+        </btypes:TYPE>, for any
+        <btypes:TYPE>
+          <in>       
+            <solvable/>
+            <set>
+              <solvables/>
+            </set>
           </in>
         </btypes:TYPE>.
       </p>
@@ -4606,15 +4639,6 @@
             </forall>
           </alternatives>
         </bnf>
-        <bnf desc="Solvable Entities">
-          <solvable/>
-          <alternatives>
-            <type/>
-            <gamma/>
-            <store/>
-            <aExpr/>
-          </alternatives>
-        </bnf>
       </grammar>
     </btypes:TYPE>
 <!--     <definition id="djudge"> -->
@@ -5035,6 +5059,17 @@
                 </ftvs>
               </unin>
             </eq>
+            <br/>
+            <eq>
+              <ftvs>
+                <solvables/>
+              </ftvs>
+              <Unin>
+                <ftvs>
+                  <solvable/>
+                </ftvs>
+              </Unin>
+            </eq>
           </btypes:TYPE>.
         </p>
       </example>
@@ -5208,6 +5243,15 @@
                 </Forall>
               </grouping>
             </fnxn>
+            <br/>
+            <fnxn name="mtv">
+              <solvables/>
+              <Unin>
+                <pred name="mtv">
+                  <solvable/>
+                </pred>
+              </Unin>
+            </fnxn>
           </btypes:TYPE>
         </p>
       </example>              
@@ -5343,7 +5387,7 @@
               <aExpr/>
               <grouping>
                 <Unin>
-                  <pred name="mtv">
+                  <pred name="ntv">
                     <type num="i"/>
                   </pred>
                 </Unin>
@@ -5356,6 +5400,15 @@
                   </in>
                 </Forall>
               </grouping>
+            </fnxn>
+            <br/>
+            <fnxn name="ntv">
+              <solvables/>
+              <Unin>
+                <pred name="ntv">
+                  <solvable/>
+                </pred>
+              </Unin>
             </fnxn>
           </btypes:TYPE>
         </p>
@@ -5370,7 +5423,7 @@
       <example>
         <p>
           <btypes:TYPE>
-            <fnxn name="TV">
+            <fnxn name="tv">
               <solvable/>
               <unin>
                 <pred name="mtv">
@@ -5803,24 +5856,25 @@
           <tyRule>
             <tyPre>
               <grouping>
-                <Forall/>
+                <Forall>
+                  <tvar name="alpha"/>
+                  <type/>
+                  <type dash="'"/>
+                </Forall>
+                <text content=" such that "/>
                 <in>
                   <mbpair>
                     <type/>
                     <type dash="'"/>
                   </mbpair>
-                  <collection>
-                    <solvable num="1"/> 
-                    <unspecified/>
-                    <solvable num="n"/> 
-                  </collection>
+                  <solvables/>
                 </in>
                 <text content=", "/>
                 <eq>
                   <type/>
                   <tvar name="alpha"/>
                 </eq>
-                <text content=", or "/>
+                <text content=" or "/>
                 <ceq>
                   <type/>
                   <inner>
@@ -5844,11 +5898,7 @@
                       <type dash="'"/>
                     </mbpair>
                   </grouping>
-                  <collection>
-                    <solvable num="1"/> 
-                    <unspecified/>
-                    <solvable num="n"/> 
-                  </collection>
+                  <solvables/>
                 </in>
                 <text content=", "/>
                 <eq>
@@ -5856,41 +5906,21 @@
                   <type dash="'"/>
                 </eq>
               </grouping>              
-            </tyPre>
-            <tyPre>
               <eq>
                 <inter>
-                  <paren>
-                    <unin>
-                      <pred name="mtv">
-                        <solvable num="1"/> 
-                      </pred>
-                      <unspecified/>
-                      <pred name="mtv">
-                        <solvable num="n"/> 
-                      </pred>
-                    </unin>
-                  </paren>
-                  <paren>
-                    <unin>
-                      <pred name="ntv">
-                        <solvable num="1"/> 
-                      </pred>
-                      <unspecified/>
-                      <pred name="ntv">
-                        <solvable num="n"/> 
-                      </pred>
-                    </unin>
-                  </paren>
+                  <pred name="mtv">
+                    <solvables/>
+                  </pred>
+                  <pred name="ntv">
+                    <solvables/>
+                  </pred>
                 </inter>
                 <Empty/>
               </eq>
             </tyPre>
             <tyConc>
               <CST>
-                <solvable num="1"/> 
-                <unspecified/>
-                <solvable num="n"/> 
+                <solvables/>
               </CST>
             </tyConc>
           </tyRule>
@@ -6620,6 +6650,9 @@
     </proof>
     <lemma id="weakening-sat-cst">
       <title>Weakening of Satisfiability and Consistency</title>
+      <p>
+        Weakening of properties over solvable entities:
+      </p>
       <ol>
         <li>
           <p>
@@ -6676,30 +6709,22 @@
             If 
             <btypes:TYPE>	    
               <CST>
-                <solvable num="1"/>
-                <unspecified/>
-                <solvable num="n"/>
+                <solvables num="n"/>
               </CST>
             </btypes:TYPE>, and            
             <btypes:TYPE>	
               <subeq>
                 <set>
-                  <solvable num="1"/>
-                  <unspecified/>
-                  <solvable num="m"/>
+                  <solvables num="m"/>
                 </set>
                 <set>
-                  <solvable num="1"/>
-                  <unspecified/>
-                  <solvable num="n"/>
+                  <solvables num="n"/>
                 </set>
               </subeq>
             </btypes:TYPE>, then
             <btypes:TYPE>	    
               <CST>
-                <solvable num="1"/>
-                <unspecified/>
-                <solvable num="m"/>
+                <solvables num="m"/>
               </CST>
             </btypes:TYPE>.
           </p>
@@ -6707,20 +6732,16 @@
         <li>
           <p>
             If 
-            <btypes:TYPE>	    
+            <btypes:TYPE>
               <CST>
-                <solvable num="1"/>
-                <unspecified/>
-                <solvable num="n"/>
+                <solvables/>
               </CST>
             </btypes:TYPE>, then
             <btypes:TYPE>	    
               <models name="cst">
                 <assume/>
                 <spset>
-                  <solvable num="1"/>
-                  <unspecified/>
-                  <solvable num="n"/>
+                  <solvables/>
                 </spset>
               </models>
             </btypes:TYPE>.
@@ -6773,6 +6794,103 @@
         </btypes:TYPE>.
       </p>
     </proof>
+    <lemma id="sat-implies-ct">
+      <title>Satisfied constraints are consistent</title>
+      <p>
+        If 
+        <btypes:TYPE>
+          <models name="sat">
+            <assume>
+              <aSubMap/>
+            </assume>
+            <spset>
+              <solvables/>
+            </spset>
+          </models>
+        </btypes:TYPE>, then
+        <btypes:TYPE>
+          <Cst>
+            <assume/>
+            <Subst>
+              <aSubMap/>
+              <set>
+                <solvables/>
+              </set>
+            </Subst>
+          </Cst>
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        Due to assumption&nbsp;(3), since 
+        <btypes:TYPE>
+          <aSubMap/>
+        </btypes:TYPE> satisfies all constraints in 
+        <btypes:TYPE>
+          <solvables/>
+        </btypes:TYPE>,  we must have
+        <btypes:TYPE>
+          <eq>
+            <pred name="mtv">
+              <Subst>
+                <aSubMap/>
+                <solvables/>
+              </Subst>
+            </pred>
+            <Empty/>
+          </eq>
+        </btypes:TYPE>. That is, there exists no 
+        <btypes:TYPE>
+          <in>
+            <mbpair>
+              <tvar name="alpha"/>
+              <type/>
+            </mbpair>
+            <Subst>
+              <aSubMap/>
+              <solvables/>
+            </Subst>
+          </in>
+        </btypes:TYPE>.
+        Further, we must also have
+        <btypes:TYPE>
+          <Forall/>
+          <in>
+            <mbpair>
+              <type/>
+              <type dash="'"/>
+            </mbpair>
+            <Subst>
+              <aSubMap/>
+              <solvables/>
+            </Subst>
+          </in>
+          <text content=", "/>
+          <ceq>
+            <type/>
+            <inner>
+              <type dash="'"/>
+            </inner>
+          </ceq>
+        </btypes:TYPE>.
+        Now, from  
+        <btypes:TYPE>
+          <defn tag="maybe-consistent"/>
+        </btypes:TYPE>, we obtain
+        <btypes:TYPE>
+          <Cst>
+            <assume/>
+            <Subst>
+              <aSubMap/>
+              <set>
+                <solvables/>
+              </set>
+            </Subst>
+          </Cst>
+        </btypes:TYPE>.
+      </p>
+    </proof>
     <lemma id="decl-sub">
       <title>Substitution on Declarative Derivation</title>
       <p>
@@ -6805,7 +6923,7 @@
             </conclude>
           </judge>
         </btypes:TYPE>.
-      </p>	
+      </p>
     </lemma>
     <proof>
       <p>
@@ -6915,26 +7033,24 @@
       <p>
         Evident from the definition of the intermediate type system in 
         figure&nbsp;<xref ref="hm_inter_rules"/> (each rule
-        explicitrly includes a consistency constraint), and
+        explicitly includes a consistency constraint), and
         <btypes:TYPE>	    
           <lem tag="weakening-sat-cst"/>
         </btypes:TYPE> (weakening).
       </p>
     </proof>
-    <lemma id="partial_solutions">
-      <title>Partial solutions</title>
+    <lemma id="subst_cst">
+      <title>Substitution Consistency of Maybe types</title>
       <p>
-        If 
+        If
       </p>
       <ol>
         <li>
           <p>
             <btypes:TYPE>
               <CST>
-                <solvable num="1"/>
-                <unspecified/>
-                <solvable num="n"/>
-              </CST>
+                  <solvables num="n"/>
+                </CST>
             </btypes:TYPE>
           </p>
         </li>
@@ -6943,14 +7059,436 @@
             <btypes:TYPE>	
               <subeq>
                 <set>
-                  <solvable num="1"/>
-                  <unspecified/>
-                  <solvable num="m"/>
+                  <solvables num="m"/>
                 </set>
+                <set>                  
+                  <solvables num="n"/>
+                </set>
+              </subeq>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <aSubMap/>
+            </btypes:TYPE> is a substitution such that
+            <btypes:TYPE>
+              <Cst>
+                <assume/>
                 <set>
-                  <solvable num="1"/>
-                  <unspecified/>
-                  <solvable num="n"/>
+                  <Subst>
+                    <aSubMap/>
+                    <solvables num="m"/>
+                  </Subst>
+                </set>
+              </Cst>
+            </btypes:TYPE>
+          </p>
+        </li>
+      </ol>
+      <p>
+        Then,
+        <btypes:TYPE>
+          <Cst>
+            <assume/>
+            <Subst>
+              <aSubMap/>
+              <set>
+                <solvables num="n"/>
+              </set>
+            </Subst>
+          </Cst>
+        </btypes:TYPE> (under
+        <btypes:TYPE>
+          <tvar name="alpha"/>
+        </btypes:TYPE>-renaming),
+      </p>
+    </lemma>
+    <proof>
+      <ol>
+        <li>
+          <p>
+            Due to assumption&nbsp;(1), and
+            <btypes:TYPE>
+              <defn tag="maybe-consistent"/>
+            </btypes:TYPE>, we have
+          </p>
+          <ol>
+            <li>
+              <p>
+                <btypes:TYPE>
+                  <Forall>
+                    <tvar name="alpha"/>
+                    <type/>
+                    <type dash="'"/>
+                  </Forall>
+                  <text content=" such that "/>
+                  <in>
+                    <mbpair>
+                      <type/>
+                      <type dash="'"/>
+                    </mbpair>
+                    <solvables num="n"/>
+                  </in>
+                  <text content=", "/>
+                  <eq>
+                    <type/>
+                    <tvar name="alpha"/>
+                  </eq>
+                  <text content=" or "/>
+                  <ceq>
+                    <type/>
+                    <inner>
+                      <type dash="'"/>
+                    </inner>
+                  </ceq>
+                </btypes:TYPE>
+              </p>
+            </li>
+            <li>
+              <p>
+                <btypes:TYPE>
+                  <Forall/>
+                  <in>
+                    <grouping>
+                      <mbpair>
+                        <tvar name="alpha"/>
+                        <type/>
+                      </mbpair>
+                      <text content=" and "/>
+                      <mbpair>
+                        <tvar name="alpha"/>
+                        <type dash="'"/>
+                      </mbpair>
+                    </grouping>
+                    <solvables num="n"/>
+                  </in>
+                  <text content=", "/>
+                  <eq>
+                    <type/>
+                    <type dash="'"/>
+                  </eq>
+                </btypes:TYPE>
+              </p>
+            </li>
+            <li>
+              <p>
+                <btypes:TYPE>
+                  <eq>
+                    <inter>
+                      <pred name="mtv">
+                        <solvables num="n"/>
+                      </pred>
+                      <pred name="ntv">
+                        <solvables num="n"/>
+                      </pred>
+                    </inter>
+                    <Empty/>
+                  </eq>
+                </btypes:TYPE>
+              </p>
+            </li>
+          </ol>
+        </li>
+        <li>
+          <p>
+            Due to assumption&nbsp;(3), 
+            <btypes:TYPE>
+              <defn tag="maybe-consistent"/>
+            </btypes:TYPE>, we have
+          </p>          
+          <ol>
+            <li>
+              <p>
+                <btypes:TYPE>
+                  <Forall>
+                    <tvar name="alpha"/>
+                    <type/>
+                    <type dash="'"/>
+                  </Forall>
+                  <text content=" such that "/>
+                  <in>
+                    <mbpair>
+                      <type/>
+                      <type dash="'"/>
+                    </mbpair>
+                    <Subst>
+                      <aSubMap/>
+                      <solvables num="m"/>
+                    </Subst>
+                  </in>
+                  <text content=", "/>
+                  <eq>
+                    <type/>
+                    <tvar name="alpha"/>
+                  </eq>
+                  <text content=" or "/>
+                  <ceq>
+                    <type/>
+                    <inner>
+                      <type dash="'"/>
+                    </inner>
+                  </ceq>
+                </btypes:TYPE>
+              </p>
+            </li>
+            <li>
+              <p>
+                <btypes:TYPE>
+                  <Forall/>
+                  <in>
+                    <grouping>
+                      <mbpair>
+                        <tvar name="alpha"/>
+                        <type/>
+                      </mbpair>
+                      <text content=" and "/>
+                      <mbpair>
+                        <tvar name="alpha"/>
+                        <type dash="'"/>
+                      </mbpair>
+                    </grouping>
+                    <Subst>
+                      <aSubMap/>
+                      <solvables num="m"/>
+                    </Subst>
+                  </in>
+                  <text content=", "/>
+                  <eq>
+                    <type/>
+                    <type dash="'"/>
+                  </eq>
+                </btypes:TYPE>
+              </p>
+            </li>
+            <li>
+              <p>
+                <btypes:TYPE>
+                  <eq>
+                    <inter>
+                      <pred name="mtv">
+                        <Subst>
+                          <aSubMap/>
+                          <solvables num="m"/>
+                        </Subst>
+                      </pred>
+                      <pred name="ntv">
+                        <Subst>
+                          <aSubMap/>
+                          <solvables num="m"/>
+                        </Subst>
+                      </pred>
+                    </inter>
+                    <Empty/>
+                  </eq>
+                </btypes:TYPE>
+              </p>
+            </li>
+          </ol>
+        </li>
+        <li>
+          <p>
+            We can assume that 
+            <btypes:TYPE>
+              <eq>
+                <inter>
+                  <dom>
+                    <aSubMap/>
+                  </dom>
+                  <pred name="tv">
+                    <solvable num="n"/>
+                  </pred>
+                </inter>
+                <pred name="tv">
+                  <solvable num="m"/>
+                </pred>
+              </eq>
+            </btypes:TYPE>, since it is possible to use a consistent
+            <btypes:TYPE>
+              <tvar name="alpha"/>
+            </btypes:TYPE>-renaming to achieve this property.
+            That is, we can write
+            <btypes:TYPE>
+              <eq>
+                <aSubMap/>
+                <compose>
+                  <aSubMap num="1"/>                  
+                  <aSubMap num="2"/>
+                  <aSubMap num="3"/>
+                </compose>
+              </eq>
+            </btypes:TYPE> such that 
+            <btypes:TYPE>
+              <eq>
+                <dom>
+                  <aSubMap num="1"/>
+                </dom>
+                <pred name="mtv">
+                  <solvable num="m"/>
+                </pred>
+              </eq>
+            </btypes:TYPE>, 
+            <btypes:TYPE>
+              <eq>
+                <dom>
+                  <aSubMap num="2"/>
+                </dom>
+                <pred name="ntv">
+                  <solvable num="m"/>
+                </pred>
+              </eq>
+            </btypes:TYPE>, and 
+            <btypes:TYPE>
+              <eq>
+                <inter>
+                  <dom>
+                    <aSubMap num="3"/>
+                  </dom>
+                  <pred name="tv">
+                    <solvable num="n"/>
+                  </pred>
+                </inter>
+                <Empty/>
+              </eq>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li>
+          <p>
+            From cases (2.a, 2.b, 2.c, 1.a, and 3), we can conclude
+            that
+            <btypes:TYPE>
+              <Forall>
+                <tvar name="alpha"/>
+                <type/>
+                <type dash="'"/>
+              </Forall>
+              <text content=" such that "/>
+              <in>
+                <mbpair>
+                  <type/>
+                  <type dash="'"/>
+                </mbpair>
+                <Subst>
+                  <aSubMap/>
+                  <solvables num="n"/>
+                </Subst>
+              </in>
+              <text content=", "/>
+              <eq>
+                <type/>
+                <tvar name="alpha"/>
+              </eq>
+              <text content=" or "/>
+              <ceq>
+                <type/>
+                <inner>
+                  <type dash="'"/>
+                </inner>
+              </ceq>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            From cases (2.b, 1.b, and 3), we conclude that
+            <btypes:TYPE>
+              <Forall/>
+              <in>
+                <grouping>
+                  <mbpair>
+                    <tvar name="alpha"/>
+                    <type/>
+                  </mbpair>
+                  <text content=" and "/>
+                  <mbpair>
+                    <tvar name="alpha"/>
+                    <type dash="'"/>
+                  </mbpair>
+                </grouping>
+                <Subst>
+                  <aSubMap/>
+                  <solvables num="n"/>
+                </Subst>
+              </in>
+              <text content=", "/>
+              <eq>
+                <type/>
+                <type dash="'"/>
+              </eq>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li>
+          <p>
+            From cases (2.c, 1.c, and 3), we conclude that
+            <btypes:TYPE>
+              <eq>
+                <inter>
+                  <pred name="mtv">
+                    <Subst>
+                      <aSubMap/>
+                      <solvables num="n"/>
+                    </Subst>
+                  </pred>
+                  <pred name="ntv">
+                    <Subst>
+                      <aSubMap/>
+                      <solvables num="n"/>
+                    </Subst>
+                  </pred>
+                </inter>
+                <Empty/>
+              </eq>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            From cases (4, 5, 6) and 
+            <btypes:TYPE>
+              <defn tag="maybe-consistent"/>
+            </btypes:TYPE>, we obtain
+            <btypes:TYPE>
+              <Cst>
+                <assume/>
+                <Subst>
+                  <aSubMap/>
+                  <set>
+                    <solvables num="n"/>
+                  </set>
+                </Subst>
+              </Cst>
+            </btypes:TYPE>.
+          </p>
+        </li>
+      </ol>
+    </proof>
+    <lemma id="partial_solutions">
+      <title>Partial solutions</title>
+      <p>
+        If
+      </p>
+      <ol>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <CST>
+                  <solvables num="n"/>
+                </CST>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>	
+              <subeq>
+                <set>
+                  <solvables num="m"/>
+                </set>
+                <set>                  
+                  <solvables num="n"/>
                 </set>
               </subeq>
             </btypes:TYPE>
@@ -6964,9 +7502,7 @@
                   <aSubMap num="m"/>
                 </assume>
                 <spset>
-                  <solvable num="1"/>
-                  <unspecified/>
-                  <solvable num="m"/>                
+                  <solvables num="m"/>
                 </spset>
               </models>
             </btypes:TYPE>
@@ -6974,7 +7510,10 @@
         </li>
       </ol>
       <p>
-        Then, 
+        Then, (subject to 
+        <btypes:TYPE>
+          <tvar name="alpha"/>
+        </btypes:TYPE>-renaming),
       </p>
       <ol>
         <li>
@@ -6985,9 +7524,7 @@
                 <Subst>
                   <aSubMap num="m"/>
                   <set>
-                    <solvable num="1"/>
-                    <unspecified/>
-                    <solvable num="n"/>
+                    <solvables num="n"/>
                   </set>
                 </Subst>
               </Cst>
@@ -7010,52 +7547,229 @@
                 <Subst>
                   <aSubMap num="m"/>
                   <spset>
-                    <solvable num="1"/>
-                    <unspecified/>
-                    <solvable num="n"/>
+                    <solvables num="n"/>
                   </spset>
                 </Subst>
               </models>
             </btypes:TYPE>, and
             <btypes:TYPE>
-              <collection>
-                <eq>
-                  <Subst>
-                    <scomp>
-                      <aSubMap num="n"/>
-                      <aSubMap num="m"/>
-                    </scomp>
-                    <solvable num="1"/>
-                  </Subst>
-                  <Subst>
+              <eq>
+                <Subst>
+                  <scomp>
+                    <aSubMap num="n"/>
                     <aSubMap num="m"/>
-                    <solvable num="1"/>
-                  </Subst>
-                </eq>
-                <unspecified/>
-                <eq>
-                  <Subst>
-                    <scomp>
-                      <aSubMap num="n"/>
-                      <aSubMap num="m"/>
-                    </scomp>
-                    <solvable num="m"/>
-                  </Subst>
-                  <Subst>
-                    <aSubMap num="m"/>
-                    <solvable num="m"/>
-                  </Subst>
-                </eq>
-              </collection>
+                  </scomp>
+                  <set>
+                    <solvables num="m"/>
+                  </set>
+                </Subst>
+                <Subst>
+                  <aSubMap num="m"/>
+                  <set>
+                    <solvables num="m"/>
+                  </set>
+                </Subst>
+              </eq>
             </btypes:TYPE>.
           </p>
         </li>
       </ol>
     </lemma>
     <proof>
-      <p>
-        S solves all mtvs() in its set and does not disturb others.
-      </p>
+      <ol>
+        <li>          
+          <p>
+            From assumption&nbsp;(3) and 
+            <btypes:TYPE>
+              <lem tag="sat-implies-ct"/>
+            </btypes:TYPE>, we conclude that
+            <btypes:TYPE>
+              <Cst>
+                <assume/>
+                <Subst>
+                  <aSubMap num="m"/>
+                  <set>
+                    <solvables num="m"/>
+                  </set>
+                </Subst>
+              </Cst>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li>
+          <p>
+            From assumptions&nbsp;(1 and 2),
+            case&nbsp;(1), and
+            <btypes:TYPE>
+              <lem tag="subst_cst"/>
+            </btypes:TYPE>, we obtain
+            <btypes:TYPE>
+              <Cst>
+                <assume/>
+                <Subst>
+                  <aSubMap num="m"/>
+                  <set>
+                    <solvables num="n"/>
+                  </set>
+                </Subst>
+              </Cst>
+            </btypes:TYPE>, the required conclusion&nbsp;(1).
+          </p>
+        </li>
+        <li>
+          <p>
+            Conclusion&nbsp;(2) can be proved by construcion of
+            <btypes:TYPE>
+              <aSubMap num="n"/>
+            </btypes:TYPE>. One possibility is
+            <btypes:TYPE>
+              <eq>
+                <aSubMap num="n"/>
+                <SubMap>
+                  <tvar name="alpha"/>
+                  <inner>
+                    <type/>
+                  </inner>
+                </SubMap>
+              </eq>
+              <text content=", "/>
+              <Forall>
+                <in>
+                  <mbpair>
+                    <tvar name="alpha"/>
+                    <type/>
+                  </mbpair>
+                  <Subst>
+                    <aSubMap num="m"/>
+                    <solvables num="n"/>
+                  </Subst>
+                </in>
+              </Forall>
+            </btypes:TYPE>.
+          </p>
+          <ol>
+            <li>
+              <p>
+                Clearly, 
+                <btypes:TYPE>
+                  <models name="sat">
+                    <assume>
+                      <aSubMap num="n"/>
+                    </assume>
+                    <Subst>
+                      <aSubMap num="m"/>
+                      <spset>
+                        <solvables num="n"/>
+                      </spset>
+                    </Subst>
+                  </models>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li>
+              <p>
+                We know that 
+                <btypes:TYPE>
+                  <eq>
+                    <dom>
+                      <aSubMap/>
+                    </dom>
+                    <pred name="mtv">
+                      <Subst>
+                        <aSubMap num="m"/>
+                        <spset>
+                          <solvables num="n"/>
+                        </spset>
+                      </Subst>
+                    </pred>
+                  </eq>
+                </btypes:TYPE>. 
+              </p>
+            </li>
+            <li>
+              <p>
+                Due to assumption&nbsp;(3), we must have 
+                <btypes:TYPE>
+                  <eq>
+                    <pred name="mtv">
+                      <Subst>
+                        <aSubMap num="m"/>
+                        <solvables num="m"/>
+                      </Subst>
+                    </pred>
+                    <Empty/>
+                  </eq>
+                </btypes:TYPE>. 
+              </p>
+            </li>
+            <li>
+              <p>
+                By construction, 
+                <btypes:TYPE>
+                  <eq>
+                    <inter>
+                      <dom>
+                        <aSubMap/>
+                      </dom>
+                      <pred name="ntv">
+                        <Subst>
+                          <aSubMap num="m"/>
+                          <spset>
+                            <solvables num="n"/>
+                          </spset>
+                        </Subst>
+                      </pred>
+                    </inter>
+                    <Empty/>
+                  </eq>
+                </btypes:TYPE>, and consequently, 
+                <btypes:TYPE>
+                  <eq>
+                    <inter>
+                      <dom>
+                        <aSubMap/>
+                      </dom>
+                      <pred name="ntv">
+                        <Subst>
+                          <aSubMap num="m"/>
+                          <spset>
+                            <solvables num="m"/>
+                          </spset>
+                        </Subst>
+                      </pred>
+                    </inter>
+                    <Empty/>
+                  </eq>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li>
+              <p>
+                From cases (3.c and 3.d), we conclude that 
+                <btypes:TYPE>
+                  <eq>
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="n"/>
+                        <aSubMap num="m"/>
+                      </scomp>
+                      <set>
+                        <solvables num="m"/>
+                      </set>
+                    </Subst>
+                    <Subst>
+                      <aSubMap num="m"/>
+                      <set>
+                        <solvables num="m"/>
+                      </set>
+                    </Subst>
+                  </eq>
+                </btypes:TYPE>
+              </p>
+            </li>
+          </ol>
+        </li>
+      </ol>
     </proof>
     <theorem id="intermediate-sound">
       <title>Soundness of Intermediate System</title>
