@@ -636,6 +636,85 @@
         <text content="."/>
       </btypes:TYPE>
     </p>
+    <definition id="structural_containment">
+      <title>Structural Containment</title>
+      <p>
+        We write 
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <type dash="'"/>
+          </in>
+        </btypes:TYPE> if
+        <btypes:TYPE>
+          <type/>
+        </btypes:TYPE> is structurally present as a part of 
+        <btypes:TYPE>
+          <type dash="'"/>
+        </btypes:TYPE>.
+        We write 
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <aExpr/>
+          </in>
+        </btypes:TYPE> if
+        <btypes:TYPE>
+          <type/>
+        </btypes:TYPE> is structurally present as a part of  
+        <btypes:TYPE>
+          <aExpr/>
+        </btypes:TYPE>, as a type annotation.
+        Similarly, we write 
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <gamma/>
+          </in>
+        </btypes:TYPE> if
+        <btypes:TYPE>
+          <Exists>
+            <in>
+              <mapping>
+                <id/>
+                <type dash="'"/>
+              </mapping>
+              <gamma/>
+            </in>
+          </Exists>          
+        </btypes:TYPE> such that 
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <type dash="'"/>
+          </in>
+        </btypes:TYPE>.
+        We write
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <store/>
+          </in>
+        </btypes:TYPE> if
+        <btypes:TYPE>
+          <Exists>
+            <in>
+              <mapping>
+                <loc/>
+                <type dash="'"/>
+              </mapping>
+              <gamma/>
+            </in>
+          </Exists>          
+        </btypes:TYPE> such that 
+        <btypes:TYPE>
+          <in>
+            <type/>
+            <type dash="'"/>
+          </in>
+        </btypes:TYPE>.
+      </p>
+    </definition>
     <definition id="ftvs">
       <title>Free Type Variables</title>
       <p>
@@ -777,6 +856,23 @@
                 <type num="i"/>
               </mapping>
               <store/>
+            </in>
+            <br/>
+            <eq>
+              <ftvs>
+                <aExpr/>
+              </ftvs>
+              <Unin>
+                <ftvs>
+                  <type num="i"/>
+                </ftvs>
+              </Unin>                  
+            </eq> 
+            <text content=" ; "/>
+            <Forall/>
+            <in>
+              <type num="i"/>
+              <aExpr/>
             </in>
           </btypes:TYPE>
         </p>
@@ -4516,10 +4612,7 @@
             <type/>
             <gamma/>
             <store/>
-            <plus>
-              <solvable/>
-              <solvable/>
-            </plus>
+            <aExpr/>
           </alternatives>
         </bnf>
       </grammar>
@@ -4914,85 +5007,389 @@
         consists only of tautologies (trivially).
       </p>
     </definition>    
-    <definition id="structural_containment">
-      <title>Structural Containment</title>
+    <definition id="ext-ftvs">
+      <title>FTVs (Extension)</title>
       <p>
-        We write 
+        We need to enhance the definition of FTV as:
+      </p>
+      <example>
+        <p>
+          <btypes:TYPE>
+            <unspecified/>
+            <br/>
+            <eq>
+              <ftvs>
+                <mbpair>
+                  <type num="1"/>
+                  <type num="2"/>
+                </mbpair>
+              </ftvs>
+              <unin>
+                <ftvs>
+                  <type num="1"/>
+                </ftvs>
+                <ftvs>
+                  <inner>
+                    <type num="2"/>
+                  </inner>
+                </ftvs>
+              </unin>
+            </eq>
+          </btypes:TYPE>.
+        </p>
+      </example>
+    </definition>
+    <definition id="MTVs">
+      <title>MTVs</title>
+      <p>
+        The function 
         <btypes:TYPE>
-          <in>
-            <type/>
-            <type dash="'"/>
-          </in>
-        </btypes:TYPE> if
+          <fnxn name="mtv">
+            <solvable/>
+            <tvars name="alpha"/>
+          </fnxn>
+        </btypes:TYPE> is defined to be the set of all type variables
+        within the solvable entity 
         <btypes:TYPE>
-          <type/>
-        </btypes:TYPE> is structurally present as a part of 
+          <solvable/>
+        </btypes:TYPE>. That is, it returns the set of all
+        type-variables 
         <btypes:TYPE>
-          <type dash="'"/>
-        </btypes:TYPE>.
-        We write 
+          <tvars name="alpha"/>
+        </btypes:TYPE> where  
         <btypes:TYPE>
-          <in>
-            <type/>
-            <aExpr/>
-          </in>
-        </btypes:TYPE> if
+          <tvar name="alpha"/>
+        </btypes:TYPE> occurs within a maybe type as 
         <btypes:TYPE>
-          <type/>
-        </btypes:TYPE> is structurally present as a part of  
-        <btypes:TYPE>
-          <aExpr/>
-        </btypes:TYPE>, as a type annotation.
-        Similarly, we write 
-        <btypes:TYPE>
-          <in>
-            <type/>
-            <gamma/>
-          </in>
-        </btypes:TYPE> if
-        <btypes:TYPE>
-          <Exists>
-            <in>
-              <mapping>
-                <id/>
-                <type dash="'"/>
-              </mapping>
-              <gamma/>
-            </in>
-          </Exists>          
-        </btypes:TYPE> such that 
-        <btypes:TYPE>
-          <in>
-            <type/>
-            <type dash="'"/>
-          </in>
-        </btypes:TYPE>.
-        We write
-        <btypes:TYPE>
-          <in>
-            <type/>
-            <store/>
-          </in>
-        </btypes:TYPE> if
-        <btypes:TYPE>
-          <Exists>
-            <in>
-              <mapping>
-                <loc/>
-                <type dash="'"/>
-              </mapping>
-              <gamma/>
-            </in>
-          </Exists>          
-        </btypes:TYPE> such that 
-        <btypes:TYPE>
-          <in>
-            <type/>
-            <type dash="'"/>
-          </in>
+          <mbpair>
+            <tvar name="alpha"/>
+            <type num="h"/>
+          </mbpair>            
         </btypes:TYPE>.
       </p>
+      <example>
+        <p>
+          <btypes:TYPE>
+            <fnxn name="mtv">
+              <tvar name="alpha"/>
+              <empty/>
+            </fnxn>
+            <br/>
+            <fnxn name="mtv">
+              <unit/>
+              <empty/>
+            </fnxn>
+            <br/>
+            <fnxn name="mtv">
+              <bool/>
+              <empty/>
+            </fnxn>
+            <br/>
+            <fnxn name="mtv">
+              <mbpair>
+                <tvar name="alpha"/>
+                <type num="h"/>
+              </mbpair>                            
+              <unin>
+                <tvar name="alpha"/>
+                <pred name="mtv">
+                  <type num="h"/>
+                </pred>
+              </unin>
+            </fnxn>
+            <br/>
+            <fnxn name="mtv">
+              <mbpair>
+                <type/>
+                <type num="h"/>
+              </mbpair>                            
+              <pred name="mtv">
+                <type/>
+              </pred>
+            </fnxn>
+            <text content=" where "/>
+            <neq>
+              <type/>
+              <tvar name="alpha"/>
+            </neq>
+            <br/>
+            <fnxn name="mtv">
+              <ref>
+                <type/>
+              </ref>                            
+              <pred name="mtv">
+                <type/>
+              </pred>
+            </fnxn>              
+            <br/>
+            <fnxn name="mtv">
+              <mutable>
+                <type/>
+              </mutable>                            
+              <pred name="mtv">
+                <type/>
+              </pred>
+            </fnxn>
+            <br/>
+            <fnxn name="mtv">
+              <fn>
+                <type num="1"/>
+                <type num="2"/>
+              </fn>                            
+              <unin>
+                <pred name="mtv">
+                  <type num="1"/>
+                </pred>
+                <pred name="mtv">
+                  <type num="2"/>
+                </pred>
+              </unin>
+            </fnxn>
+            <br/>
+            <fnxn name="mtv">
+              <gamma/>
+              <grouping>
+                <Unin>
+                  <pred name="mtv">
+                    <type num="i"/>
+                  </pred>
+                </Unin>
+                <text content=","/>
+                <space/>
+                <Forall>
+                  <in>
+                    <mapping>
+                      <id num="i"/>
+                      <type num="i"/>
+                    </mapping>
+                    <gamma/>
+                  </in>
+                </Forall>
+              </grouping>
+            </fnxn>
+            <br/>
+            <fnxn name="mtv">
+              <store/>
+              <grouping>
+                <Unin>
+                  <pred name="mtv">
+                    <type num="i"/>
+                  </pred>
+                </Unin>
+                <text content=","/>
+                <space/>
+                <Forall>
+                  <in>
+                    <mapping>
+                      <loc num="i"/>
+                      <type num="i"/>
+                    </mapping>
+                    <store/>
+                  </in>
+                </Forall>
+              </grouping>
+            </fnxn>
+            <br/>
+            <fnxn name="mtv">
+              <aExpr/>
+              <grouping>
+                <Unin>
+                  <pred name="mtv">
+                    <type num="i"/>
+                  </pred>
+                </Unin>
+                <text content=","/>
+                <space/>
+                <Forall>
+                  <in>
+                    <type num="i"/>
+                    <aExpr/>
+                  </in>
+                </Forall>
+              </grouping>
+            </fnxn>
+          </btypes:TYPE>
+        </p>
+      </example>              
     </definition>
+    <definition id="NTVs">
+      <title>NTVs</title>
+      <p>
+        The set of unconstrained variables is defined as:
+      </p>
+      <example>
+        <p>
+          <btypes:TYPE>
+            <fnxn name="ntv">
+              <tvar name="alpha"/>
+              <set>
+                <tvar name="alpha"/>
+              </set>
+            </fnxn>
+            <br/>
+            <fnxn name="ntv">
+              <unit/>
+              <empty/>
+            </fnxn>
+            <br/>
+            <fnxn name="ntv">
+              <bool/>
+              <empty/>
+            </fnxn>
+            <br/>
+            <fnxn name="ntv">
+              <mbpair>
+                <tvar name="alpha"/>
+                <type num="h"/>
+              </mbpair>                            
+              <pred name="ntv">
+                <type num="h"/>
+              </pred>
+            </fnxn>
+            <br/>
+            <fnxn name="ntv">
+              <mbpair>
+                <type/>
+                <type num="h"/>
+              </mbpair>                            
+              <pred name="ntv">
+                <type/>
+              </pred>
+            </fnxn>
+            <text content=" where "/>
+            <neq>
+              <type/>
+              <tvar name="alpha"/>
+            </neq>
+            <br/>
+            <fnxn name="ntv">
+              <ref>
+                <type/>
+              </ref>                            
+              <pred name="ntv">
+                <type/>
+              </pred>
+            </fnxn>              
+            <br/>
+            <fnxn name="ntv">
+              <mutable>
+                <type/>
+              </mutable>                            
+              <pred name="ntv">
+                <type/>
+              </pred>
+            </fnxn>
+            <br/>
+            <fnxn name="ntv">
+              <fn>
+                <type num="1"/>
+                <type num="2"/>
+              </fn>                            
+              <unin>
+                <pred name="ntv">
+                  <type num="1"/>
+                </pred>
+                <pred name="ntv">
+                  <type num="2"/>
+                </pred>
+              </unin>
+            </fnxn>
+            <br/>
+            <fnxn name="ntv">
+              <gamma/>
+              <grouping>
+                <Unin>
+                  <pred name="ntv">
+                    <type num="i"/>
+                  </pred>
+                </Unin>
+                <text content=","/>
+                <space/>
+                <Forall>
+                  <in>
+                    <mapping>
+                      <id num="i"/>
+                      <type num="i"/>
+                    </mapping>
+                    <gamma/>
+                  </in>
+                </Forall>
+              </grouping>
+            </fnxn>
+            <br/>
+            <fnxn name="ntv">
+              <store/>
+              <grouping>
+                <Unin>
+                  <pred name="ntv">
+                    <type num="i"/>
+                  </pred>
+                </Unin>
+                <text content=","/>
+                <space/>
+                <Forall>
+                  <in>
+                    <mapping>
+                      <loc num="i"/>
+                      <type num="i"/>
+                    </mapping>
+                    <store/>
+                  </in>
+                </Forall>
+              </grouping>
+            </fnxn>
+            <br/>
+            <fnxn name="ntv">
+              <aExpr/>
+              <grouping>
+                <Unin>
+                  <pred name="mtv">
+                    <type num="i"/>
+                  </pred>
+                </Unin>
+                <text content=","/>
+                <space/>
+                <Forall>
+                  <in>
+                    <type num="i"/>
+                    <aExpr/>
+                  </in>
+                </Forall>
+              </grouping>
+            </fnxn>
+          </btypes:TYPE>
+        </p>
+      </example>              
+    </definition>
+    <definition id="TVs">
+      <title>TVs</title>
+      <p>
+        The set of all type variables in a solvable entity is given
+        by TV() function, defined as follows:
+      </p>
+      <example>
+        <p>
+          <btypes:TYPE>
+            <fnxn name="TV">
+              <solvable/>
+              <unin>
+                <pred name="mtv">
+                  <solvable/>
+                </pred>
+                <pred name="ntv">
+                  <solvable/>
+                </pred>
+              </unin>
+            </fnxn>
+          </btypes:TYPE>
+        </p>
+      </example>
+    </definition>
+    <p>
+      Note that this
+      function is different from FTV(), defined in 
+      Definition&nbsp;<xref ref="ext-ftvs"/>. 
+    </p>
     <definition id="ca">
       <title>Consistency and Acyclicity</title> 
       <btypes:TYPE>
@@ -5177,29 +5574,6 @@
         </Hrules>
       </btypes:TYPE>
     </definition>      
-    <definition id="solvable-entities">
-      <title>Solvable Entities</title>
-      <p>
-        A solvable entity 
-        <btypes:TYPE>
-          <solvable/>
-        </btypes:TYPE>
-        is structurally defined to be:
-      </p>
-      <btypes:TYPE>                      
-        <grammar notitle="yes">
-          <bnf desc="Solvables">
-            <solvable/>
-            <alternatives>
-              <type/>
-              <gamma/>
-              <store/>
-              <aExpr/>
-            </alternatives>
-          </bnf>
-        </grammar>
-      </btypes:TYPE>
-    </definition>
     <definition id="ctr_extract">
       <title>Constraint Set Extraction</title>
       <btypes:TYPE>
@@ -5483,6 +5857,35 @@
                 </eq>
               </grouping>              
             </tyPre>
+            <tyPre>
+              <eq>
+                <inter>
+                  <paren>
+                    <unin>
+                      <pred name="mtv">
+                        <solvable num="1"/> 
+                      </pred>
+                      <unspecified/>
+                      <pred name="mtv">
+                        <solvable num="n"/> 
+                      </pred>
+                    </unin>
+                  </paren>
+                  <paren>
+                    <unin>
+                      <pred name="ntv">
+                        <solvable num="1"/> 
+                      </pred>
+                      <unspecified/>
+                      <pred name="ntv">
+                        <solvable num="n"/> 
+                      </pred>
+                    </unin>
+                  </paren>
+                </inter>
+                <Empty/>
+              </eq>
+            </tyPre>
             <tyConc>
               <CST>
                 <solvable num="1"/> 
@@ -5574,351 +5977,6 @@
       That is, canonicalization obtains entities that are within the
       language and type system defined in 
       section&nbsp;<xref ref="language"/>.
-    </p>
-    <definition id="ext-ftvs">
-      <title>FTVs (Extension)</title>
-      <p>
-        We need to enhance the definition of FTV as:
-      </p>
-      <example>
-        <p>
-          <btypes:TYPE>
-            <unspecified/>
-            <br/>
-            <eq>
-              <ftvs>
-                <mbpair>
-                  <type num="1"/>
-                  <type num="2"/>
-                </mbpair>
-              </ftvs>
-              <unin>
-                <ftvs>
-                  <type num="1"/>
-                </ftvs>
-                <ftvs>
-                  <inner>
-                    <type num="2"/>
-                  </inner>
-                </ftvs>
-              </unin>
-            </eq>
-          </btypes:TYPE>.
-        </p>
-      </example>
-    </definition>
-    <definition id="MTVs">
-      <title>MTVs</title>
-      <p>
-        The function 
-        <btypes:TYPE>
-          <fnxn name="MTV">
-            <solvable/>
-            <tvars name="alpha"/>
-          </fnxn>
-        </btypes:TYPE> is defined to be the set of all type variables
-        within the solvable entity 
-        <btypes:TYPE>
-          <solvable/>
-        </btypes:TYPE>. That is, it returns the set of all
-        type-variables 
-        <btypes:TYPE>
-          <tvars name="alpha"/>
-        </btypes:TYPE> where  
-        <btypes:TYPE>
-          <tvar name="alpha"/>
-        </btypes:TYPE> occurs within a maybe type as 
-        <btypes:TYPE>
-          <mbpair>
-            <tvar name="alpha"/>
-            <type num="h"/>
-          </mbpair>            
-        </btypes:TYPE>.
-      </p>
-      <example>
-        <p>
-          <btypes:TYPE>
-            <fnxn name="MTV">
-              <tvar name="alpha"/>
-              <empty/>
-            </fnxn>
-            <br/>
-            <fnxn name="MTV">
-              <unit/>
-              <empty/>
-            </fnxn>
-            <br/>
-            <fnxn name="MTV">
-              <bool/>
-              <empty/>
-            </fnxn>
-            <br/>
-            <fnxn name="MTV">
-              <mbpair>
-                <tvar name="alpha"/>
-                <type num="h"/>
-              </mbpair>                            
-              <unin>
-                <tvar name="alpha"/>
-                <pred name="MTV">
-                  <type num="h"/>
-                </pred>
-              </unin>
-            </fnxn>
-            <br/>
-            <fnxn name="MTV">
-              <mbpair>
-                <type/>
-                <type num="h"/>
-              </mbpair>                            
-              <pred name="MTV">
-                <type/>
-              </pred>
-            </fnxn>
-            <text content=" where "/>
-            <neq>
-              <type/>
-              <tvar name="alpha"/>
-            </neq>
-            <br/>
-            <fnxn name="MTV">
-              <ref>
-                <type/>
-              </ref>                            
-              <pred name="MTV">
-                <type/>
-              </pred>
-            </fnxn>              
-            <br/>
-            <fnxn name="MTV">
-              <mutable>
-                <type/>
-              </mutable>                            
-              <pred name="MTV">
-                <type/>
-              </pred>
-            </fnxn>
-            <br/>
-            <fnxn name="MTV">
-              <fn>
-                <type num="1"/>
-                <type num="2"/>
-              </fn>                            
-              <unin>
-                <pred name="MTV">
-                  <type num="1"/>
-                </pred>
-                <pred name="MTV">
-                  <type num="2"/>
-                </pred>
-              </unin>
-            </fnxn>
-            <br/>
-            <fnxn name="MTV">
-              <gamma/>
-              <grouping>
-                <Unin>
-                  <pred name="MTV">
-                    <type num="i"/>
-                  </pred>
-                </Unin>
-                <text content=","/>
-                <space/>
-                <Forall>
-                  <in>
-                    <mapping>
-                      <id num="i"/>
-                      <type num="i"/>
-                    </mapping>
-                    <gamma/>
-                  </in>
-                </Forall>
-              </grouping>
-            </fnxn>
-            <br/>
-            <fnxn name="MTV">
-              <store/>
-              <grouping>
-                <Unin>
-                  <pred name="MTV">
-                    <type num="i"/>
-                  </pred>
-                </Unin>
-                <text content=","/>
-                <space/>
-                <Forall>
-                  <in>
-                    <mapping>
-                      <loc num="i"/>
-                      <type num="i"/>
-                    </mapping>
-                    <store/>
-                  </in>
-                </Forall>
-              </grouping>
-            </fnxn>
-          </btypes:TYPE>
-        </p>
-      </example>              
-    </definition>
-    <definition id="NTVs">
-      <title>NTVs</title>
-      <p>
-        The set of unconstrained variables is defined as:
-      </p>
-      <example>
-        <p>
-          <btypes:TYPE>
-            <fnxn name="NTV">
-              <tvar name="alpha"/>
-              <set>
-                <tvar name="alpha"/>
-              </set>
-            </fnxn>
-            <br/>
-            <fnxn name="NTV">
-              <unit/>
-              <empty/>
-            </fnxn>
-            <br/>
-            <fnxn name="NTV">
-              <bool/>
-              <empty/>
-            </fnxn>
-            <br/>
-            <fnxn name="NTV">
-              <mbpair>
-                <tvar name="alpha"/>
-                <type num="h"/>
-              </mbpair>                            
-              <pred name="NTV">
-                <type num="h"/>
-              </pred>
-            </fnxn>
-            <br/>
-            <fnxn name="NTV">
-              <mbpair>
-                <type/>
-                <type num="h"/>
-              </mbpair>                            
-              <pred name="NTV">
-                <type/>
-              </pred>
-            </fnxn>
-            <text content=" where "/>
-            <neq>
-              <type/>
-              <tvar name="alpha"/>
-            </neq>
-            <br/>
-            <fnxn name="NTV">
-              <ref>
-                <type/>
-              </ref>                            
-              <pred name="NTV">
-                <type/>
-              </pred>
-            </fnxn>              
-            <br/>
-            <fnxn name="NTV">
-              <mutable>
-                <type/>
-              </mutable>                            
-              <pred name="NTV">
-                <type/>
-              </pred>
-            </fnxn>
-            <br/>
-            <fnxn name="NTV">
-              <fn>
-                <type num="1"/>
-                <type num="2"/>
-              </fn>                            
-              <unin>
-                <pred name="NTV">
-                  <type num="1"/>
-                </pred>
-                <pred name="NTV">
-                  <type num="2"/>
-                </pred>
-              </unin>
-            </fnxn>
-            <br/>
-            <fnxn name="NTV">
-              <gamma/>
-              <grouping>
-                <Unin>
-                  <pred name="NTV">
-                    <type num="i"/>
-                  </pred>
-                </Unin>
-                <text content=","/>
-                <space/>
-                <Forall>
-                  <in>
-                    <mapping>
-                      <id num="i"/>
-                      <type num="i"/>
-                    </mapping>
-                    <gamma/>
-                  </in>
-                </Forall>
-              </grouping>
-            </fnxn>
-            <br/>
-            <fnxn name="NTV">
-              <store/>
-              <grouping>
-                <Unin>
-                  <pred name="NTV">
-                    <type num="i"/>
-                  </pred>
-                </Unin>
-                <text content=","/>
-                <space/>
-                <Forall>
-                  <in>
-                    <mapping>
-                      <loc num="i"/>
-                      <type num="i"/>
-                    </mapping>
-                    <store/>
-                  </in>
-                </Forall>
-              </grouping>
-            </fnxn>
-          </btypes:TYPE>
-        </p>
-      </example>              
-    </definition>
-    <definition id="TVs">
-      <title>TVs</title>
-      <p>
-        The set of all type variables in a solvable entity is given
-        by TV() function, defined as follows:
-      </p>
-      <example>
-        <p>
-          <btypes:TYPE>
-            <fnxn name="TV">
-              <solvable/>
-              <unin>
-                <pred name="MTV">
-                  <solvable/>
-                </pred>
-                <pred name="NTV">
-                  <solvable/>
-                </pred>
-              </unin>
-            </fnxn>
-          </btypes:TYPE>
-        </p>
-      </example>
-    </definition>
-    <p>
-      Note that this
-      function is different from FTV(), defined in 
-      Definition&nbsp;<xref ref="ext-ftvs"/>. 
     </p>
     <definition id="shorthand">
       <title>Notational Shorthands</title>
@@ -6251,6 +6309,32 @@
             <btypes:TYPE>
               <leadsto>
                 <DBrac> 
+                  <set>
+                    <aSubMap/>
+                    <spset>
+                      <unspecified/>
+                    </spset>
+                  </set>
+                </DBrac>
+                <DBrac>          
+                  <Subst>                
+                    <aSubMap/>
+                    <grouping>
+                      <set>
+                        <unspecified/>
+                      </set>
+                    </grouping>
+                  </Subst>
+                </DBrac>
+              </leadsto>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <leadsto>
+                <DBrac> 
                   <Subst>
                     <aSubMap/>
                     <spset>
@@ -6286,8 +6370,7 @@
 	  </assume>
 	  <conclude>
 	    <tqExpr>
-	      <aExpr/>
-	      <type/>
+	      <aExpr/> <type/>
 	    </tqExpr>
 	  </conclude>
 	  <propagate>
@@ -6836,6 +6919,142 @@
         <btypes:TYPE>	    
           <lem tag="weakening-sat-cst"/>
         </btypes:TYPE> (weakening).
+      </p>
+    </proof>
+    <lemma id="partial_solutions">
+      <title>Partial solutions</title>
+      <p>
+        If 
+      </p>
+      <ol>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <CST>
+                <solvable num="1"/>
+                <unspecified/>
+                <solvable num="n"/>
+              </CST>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>	
+              <subeq>
+                <set>
+                  <solvable num="1"/>
+                  <unspecified/>
+                  <solvable num="m"/>
+                </set>
+                <set>
+                  <solvable num="1"/>
+                  <unspecified/>
+                  <solvable num="n"/>
+                </set>
+              </subeq>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <models name="sat">
+                <assume>
+                  <aSubMap num="m"/>
+                </assume>
+                <spset>
+                  <solvable num="1"/>
+                  <unspecified/>
+                  <solvable num="m"/>                
+                </spset>
+              </models>
+            </btypes:TYPE>
+          </p>
+        </li>
+      </ol>
+      <p>
+        Then, 
+      </p>
+      <ol>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <Cst>
+                <assume/>
+                <Subst>
+                  <aSubMap num="m"/>
+                  <set>
+                    <solvable num="1"/>
+                    <unspecified/>
+                    <solvable num="n"/>
+                  </set>
+                </Subst>
+              </Cst>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <Exists>
+                <aSubMap num="n"/>
+              </Exists>
+            </btypes:TYPE>
+            such that
+            <btypes:TYPE>
+              <models name="sat">
+                <assume>
+                  <aSubMap num="n"/>
+                </assume>
+                <Subst>
+                  <aSubMap num="m"/>
+                  <spset>
+                    <solvable num="1"/>
+                    <unspecified/>
+                    <solvable num="n"/>
+                  </spset>
+                </Subst>
+              </models>
+            </btypes:TYPE>, and
+            <btypes:TYPE>
+              <collection>
+                <eq>
+                  <Subst>
+                    <scomp>
+                      <aSubMap num="n"/>
+                      <aSubMap num="m"/>
+                    </scomp>
+                    <solvable num="1"/>
+                  </Subst>
+                  <Subst>
+                    <aSubMap num="m"/>
+                    <solvable num="1"/>
+                  </Subst>
+                </eq>
+                <unspecified/>
+                <eq>
+                  <Subst>
+                    <scomp>
+                      <aSubMap num="n"/>
+                      <aSubMap num="m"/>
+                    </scomp>
+                    <solvable num="m"/>
+                  </Subst>
+                  <Subst>
+                    <aSubMap num="m"/>
+                    <solvable num="m"/>
+                  </Subst>
+                </eq>
+              </collection>
+            </btypes:TYPE>.
+          </p>
+        </li>
+      </ol>
+    </lemma>
+    <proof>
+      <p>
+        S solves all mtvs() in its set and does not disturb others.
       </p>
     </proof>
     <theorem id="intermediate-sound">
@@ -8166,7 +8385,7 @@
                     <solvable/>
                   </pred>
                 </inter>
-                <pred name="MTV">
+                <pred name="mtv">
                   <solvable/>
                 </pred>
               </eq>
@@ -8216,10 +8435,10 @@
               </models>
               <eq>
                 <inter>
-                  <pred name="MTV">
+                  <pred name="mtv">
                     <solvable/>
                   </pred>
-                  <pred name="NTV">
+                  <pred name="ntv">
                     <solvable/>
                   </pred>
                 </inter>
@@ -8279,10 +8498,10 @@
       <btypes:TYPE>
         <eq>
           <inter>
-            <pred name="MTV">
+            <pred name="mtv">
               <solvable/>
             </pred>
-            <pred name="NTV">
+            <pred name="ntv">
               <solvable/>
             </pred>
           </inter>
@@ -8790,7 +9009,7 @@
                 <dom>
                   <aSubMap/>
                 </dom>
-                <pred name="MTV">
+                <pred name="mtv">
                   <solvable/>
                 </pred>
               </eq>
@@ -9174,7 +9393,7 @@
                 <dom>
                   <aSubMap num="21"/>
                 </dom>
-                <pred name="MTV">
+                <pred name="mtv">
                   <solvable/>
                 </pred>
               </eq>
@@ -9901,7 +10120,7 @@
                     </compose>
                   </dom>
                 </inter>
-                <pred name="MTV">
+                <pred name="mtv">
                   <solvable/>
                 </pred>
               </eq>
@@ -9977,7 +10196,7 @@
               <text content=", where "/>
               <notin>
                 <tvar name="alpha"/>
-                <pred name="MTV">
+                <pred name="mtv">
                   <solvable/>
                 </pred>
               </notin>
@@ -10003,7 +10222,7 @@
               <text content=", where "/>
               <notin>
                 <tvar name="alpha"/>
-                <pred name="MTV">
+                <pred name="mtv">
                   <solvable/>
                 </pred>
               </notin>
@@ -10018,7 +10237,7 @@
               <Forall>
                 <in>
                   <tvar name="alpha"/>
-                  <pred name="MTV">
+                  <pred name="mtv">
                     <solvable/>
                   </pred>
                 </in>
@@ -12012,7 +12231,7 @@
         </btypes:TYPE>
         contains substitutions to
         <btypes:TYPE>
-          <pred name="MTV">
+          <pred name="mtv">
             <plus>
               <type/>
               <gamma/>
@@ -12743,7 +12962,7 @@
                     </compose>
                   </dom>
                 </inter>
-                <pred name="MTV">
+                <pred name="mtv">
                   <plus>
                     <type/>
                     <gamma/>
@@ -15355,7 +15574,7 @@
                         <dom>
                           <aSubMap num="i" subnum="1"/>
                         </dom>
-                        <pred name="MTV">                            
+                        <pred name="mtv">                            
                           <plus>
                             <Subst>
                               <aSubMap num="f"/>
@@ -15386,7 +15605,7 @@
                             <aSubMap num="a"/>
                           </scomp>
                         </dom>
-                        <pred name="MTV">
+                        <pred name="mtv">
                           <plus>
                             <Subst>
                               <aSubMap num="f"/>
@@ -15421,7 +15640,7 @@
                             </scomp>
                           </dom>
                         </inter>
-                        <pred name="MTV">
+                        <pred name="mtv">
                           <plus br="yes">
                             <Subst>
                               <aSubMap num="f"/>

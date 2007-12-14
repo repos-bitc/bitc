@@ -713,6 +713,8 @@
   <xsl:template match="Subst" mode="formula">
     <xsl:apply-templates select="*[1]" mode="formula"/>	
     <xsl:choose>
+      <xsl:when test="*[2] = set">
+      </xsl:when>
       <xsl:when test="*[2] = spset">
       </xsl:when>
       <xsl:otherwise>
