@@ -977,6 +977,15 @@
     </xsl:element>
   </xsl:template>
 
+  <!-- textmath -->
+  <xsl:template match="textmath" mode="formula">
+    <xsl:call-template name="print.mathmode">
+      <xsl:with-param name="print.mathmode.text">
+	<xsl:value-of select="@content"/>
+      </xsl:with-param> 
+    </xsl:call-template>
+  </xsl:template>
+
   <!-- space -->
   <xsl:template match="space" mode="formula">
     <xsl:call-template name="print.spaces">

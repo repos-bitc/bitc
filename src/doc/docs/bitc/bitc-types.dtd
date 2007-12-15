@@ -397,6 +397,10 @@
 <!ATTLIST textu
                                content      CDATA  #REQUIRED
 >
+<!ELEMENT textmath             EMPTY>
+<!ATTLIST textmath
+                               content      CDATA  #REQUIRED
+>
 <!ELEMENT nothing               EMPTY>
 <!ELEMENT unknown               EMPTY>
 <!ELEMENT unspecified           EMPTY>
