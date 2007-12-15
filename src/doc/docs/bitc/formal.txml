@@ -9173,14 +9173,14 @@
               <models name="ca">   
                 <assume/>
                 <spset>
-                  <aCtset num="1"/>
+                  <type num="1"/>
                 </spset>
               </models>
               <text content=", and"/>
               <models name="ca">
                 <assume/>
                 <spset>
-                  <aCtset num="2"/>
+                  <type num="2"/>
                 </spset>
               </models>
               <text content=" implies "/>
@@ -9188,10 +9188,10 @@
                 <assume/>
                 <Subst>
                   <aSubMap/>
-                  <unin>
-                    <aCtset num="1"/>
-                    <aCtset num="2"/>
-                  </unin>
+                  <spset>
+                    <type num="1"/>
+                    <type num="2"/>
+                  </spset>
                 </Subst>
               </models>
               <text content="."/>
@@ -9203,12 +9203,12 @@
             <btypes:TYPE>
               <CST>
                 <solvables/>
-                <aCtset num="1"/>
+                <type num="1"/>
               </CST>
               <text content=", and"/>
               <CST>
                 <solvables/>
-                <aCtset num="2"/>
+                <type num="2"/>
               </CST>
               <text content=" implies "/>
               <Cst>
@@ -9217,8 +9217,8 @@
                   <aSubMap/>
                   <set>
                     <solvables/>
-                    <aCtset num="1"/>
-                    <aCtset num="2"/>
+                    <type num="1"/>
+                    <type num="2"/>
                   </set>
                 </Subst>
               </Cst>
@@ -9504,6 +9504,76 @@
         Similar to Theorem&nbsp;<xref ref="TI-unify-decidable"/>. 
       </p>
     </proof>
+    <lemma id="heuristic-inference-consistent">
+      <title>Consistency of Heuristic Type Inference</title>
+      <p>
+        If:
+        <btypes:TYPE>
+          <TIjudge>
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <conclude>
+              <tqExpr>
+                <aExpr/>
+                <type/>
+              </tqExpr>
+            </conclude>
+            <propagate>
+              <aSubMap/>
+            </propagate>
+          </TIjudge>
+        </btypes:TYPE> and
+        <btypes:TYPE>
+          <CST>
+            <gamma/>
+            <store/>
+          </CST>
+        </btypes:TYPE>
+        then,
+        <btypes:TYPE>
+          <CST>
+            <gamma/>
+            <store/>
+            <aExpr/>
+            <type/>
+          </CST>
+        </btypes:TYPE>
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        By induction on the derivation of 
+        <btypes:TYPE>
+          <TIjudge>
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <conclude>
+              <tqExpr>
+                <aExpr/>
+                <type/>
+              </tqExpr>
+            </conclude>
+            <propagate>
+              <aSubMap/>
+            </propagate>
+          </TIjudge>
+        </btypes:TYPE>, noting that (1) all maybe types are introduced
+        through new type variables, (2) the two parts of a maybe type
+        are never separated once constructed (3) all substitutions
+        produced during inference are obtained from the unifier or the
+        solver, which preserve consistency according to 
+        <btypes:TYPE>
+          <thm tag="TI-unify-correct"/>
+        </btypes:TYPE> (property&nbsp;3), and
+        <btypes:TYPE>
+          <thm tag="TI-solve-correct"/>
+        </btypes:TYPE>.
+      </p>
+    </proof>
     <theorem id="heuristic-inference-sound">
       <title>Soundness of Heuristic Type Inference</title>
       <p>
@@ -9551,9 +9621,158 @@
         </btypes:TYPE>.
       </p>
     </theorem>
+    <proof>
+      <p>
+        By induction on the derivation of 
+        <btypes:TYPE>
+          <TIjudge>
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <conclude>
+              <tqExpr>
+                <aExpr/>
+                <type/>
+              </tqExpr>
+            </conclude>
+            <propagate>
+              <aSubMap/>
+            </propagate>
+          </TIjudge>
+        </btypes:TYPE>.
+        We proceed by case analysis on the last step,
+        assuming &alpha;-reduction vacuously.
+      </p>
+      <ol>
+        <li>
+          <p>
+            Cases I-Unit, I-True. I-False, I-Id, I-Hloc,
+            I-Sloc are trivial. 
+          </p>
+        </li>
+        <li>
+          <p>
+            Case I-Lambda:               
+          </p>
+          <ol>
+            <li>
+              <p>
+                In this case, we have:
+              </p>
+              <ol>
+                <li>
+                  <p>
+                    <btypes:TYPE>
+                      <Hrules>
+                        <tyRule>
+                          <tyPre>
+                            <TIjudge>
+                              <assume>
+                                <extend>
+                                  <gamma/>
+                                  <mapping>
+                                    <id/>
+                                    <tvar name="alpha"/>
+                                  </mapping>
+                                </extend>
+                                <store/>
+                              </assume>
+                              <conclude>
+                                <tqExpr>
+                                  <aExpr/>
+                                  <type/>
+                                </tqExpr>
+                              </conclude>
+                              <propagate>
+                                <aSubMap/>
+                              </propagate>
+                            </TIjudge>
+                            <models name="new">
+                              <assume/>
+                              <tvar name="alpha"/>
+                            </models>
+                          </tyPre>
+                          <tyConc>
+                            <TIjudge>
+                              <assume>
+                                <gamma/>
+                                <store/>
+                              </assume>
+                              <conclude>
+                                <tqExpr>
+                                  <lambda> 
+                                    <id/>
+                                    <aExpr num="i"/>
+                                  </lambda>
+                                  <fn M="yes">		    
+                                    <Subst>
+                                      <aSubMap/>
+                                      <tvar name="alpha"/>
+                                    </Subst>		    		    
+                                    <type/>		    
+                                  </fn>
+                                </tqExpr>
+                              </conclude>
+                              <propagate>		
+                                <aSubMap/>		
+                              </propagate>
+                            </TIjudge>
+                          </tyConc>
+                        </tyRule>
+                      </Hrules>
+                    </btypes:TYPE>
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    <btypes:TYPE>
+                      <CST>
+                        <gamma/>
+                        <store/>
+                      </CST>
+                    </btypes:TYPE>
+                  </p>
+                </li>
+              </ol>
+              <p>
+                We need to show that
+                <btypes:TYPE>
+                  <judge name="j">
+                    <precond>
+                      <aSubMap/>
+                    </precond>
+                    <assume>
+                      <gamma/>
+                      <store/>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <lambda>
+                          <id/>
+                          <aExpr/>
+                        </lambda>
+                        <fn M="yes">		    
+                          <Subst>
+                            <aSubMap/>
+                            <tvar name="alpha"/>
+                          </Subst>		    		    
+                          <type/>		    
+                        </fn>
+                      </tqExpr>
+                    </conclude>
+                  </judge>
+                </btypes:TYPE>.
+              </p>
+            </li>
+          </ol>
+        </li>
+      </ol>
+    </proof>
     <p>
       _____________________________________________
     </p>
+
     <!--
     <lemma id="ctr-subst-decl">
       <title>Corollary to Lemma&nbsp;<xref ref="decl-sub"/>.</title>
