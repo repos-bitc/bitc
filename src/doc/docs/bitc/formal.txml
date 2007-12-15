@@ -9533,12 +9533,18 @@
         </btypes:TYPE>
         then,
         <btypes:TYPE>
-          <CST>
-            <gamma/>
-            <store/>
-            <aExpr/>
-            <type/>
-          </CST>
+          <Cst>
+            <assume/>
+            <Subst>
+              <aSubMap/>
+              <set>
+                <gamma/>
+                <store/>
+                <aExpr/>
+                <type/>
+              </set>
+            </Subst>
+          </Cst>
         </btypes:TYPE>
       </p>
     </lemma>
@@ -9645,53 +9651,67 @@
         assuming &alpha;-reduction vacuously.
       </p>
       <ol>
-        <li>
+        <li id="hms_base">
           <p>
             Cases I-Unit, I-True. I-False, I-Id, I-Hloc,
             I-Sloc are trivial. 
           </p>
         </li>
-        <li>
+        <li id="hms_lambda">
           <p>
             Case I-Lambda:               
           </p>
           <ol>
-            <li>
+            <li id="hms_l1">
               <p>
                 In this case, we have:
               </p>
               <ol>
-                <li>
+                <li id="hms_l1_1">
                   <p>
                     <btypes:TYPE>
                       <Hrules>
                         <tyRule>
                           <tyPre>
-                            <TIjudge>
-                              <assume>
-                                <extend>
-                                  <gamma/>
-                                  <mapping>
-                                    <id/>
-                                    <tvar name="alpha"/>
-                                  </mapping>
-                                </extend>
-                                <store/>
-                              </assume>
-                              <conclude>
-                                <tqExpr>
-                                  <aExpr/>
-                                  <type/>
-                                </tqExpr>
-                              </conclude>
-                              <propagate>
-                                <aSubMap/>
-                              </propagate>
-                            </TIjudge>
-                            <models name="new">
-                              <assume/>
-                              <tvar name="alpha"/>
-                            </models>
+                            <grouping>
+                              <text content="(A)"/>
+                              <space/>
+                              <space/>
+                              <space/>
+                              <TIjudge>
+                                <assume>
+                                  <extend>
+                                    <gamma/>
+                                    <mapping>
+                                      <id/>
+                                      <tvar name="alpha"/>
+                                    </mapping>
+                                  </extend>
+                                  <store/>
+                                </assume>
+                                <conclude>
+                                  <tqExpr>
+                                    <aExpr num="i"/>
+                                    <type/>
+                                  </tqExpr>
+                                </conclude>
+                                <propagate>
+                                  <aSubMap/>
+                                </propagate>
+                              </TIjudge>
+                            </grouping>
+                          </tyPre>
+                          <tyPre>
+                            <grouping>
+                              <text content="(B)"/>
+                              <space/>
+                              <space/>
+                              <space/>
+                              <models name="new">
+                                <assume/>
+                                <tvar name="alpha"/>
+                              </models>
+                            </grouping>
                           </tyPre>
                           <tyConc>
                             <TIjudge>
@@ -9724,7 +9744,7 @@
                     </btypes:TYPE>
                   </p>
                 </li>
-                <li>
+                <li id="hms_l1_2">
                   <p>
                     <btypes:TYPE>
                       <CST>
@@ -9750,7 +9770,7 @@
                       <tqExpr>
                         <lambda>
                           <id/>
-                          <aExpr/>
+                          <aExpr num="i"/>
                         </lambda>
                         <fn M="yes">		    
                           <Subst>
@@ -9765,8 +9785,162 @@
                 </btypes:TYPE>.
               </p>
             </li>
-          </ol>
+            <li id="hms_l2">
+              <p>
+                From case&nbsp;(2.a.ii), conclusion of
+                case&nbsp;(2.a.i) and 
+                <btypes:TYPE>
+                  <lem tag="heuristic-inference-consistent"/>
+                </btypes:TYPE>, we obtain
+                <btypes:TYPE>
+                  <Cst>
+                    <assume/>
+                    <Subst>
+                      <aSubMap/>
+                      <set>
+                        <gamma/>
+                        <store/>
+                        <lambda>
+                          <id/>
+                          <aExpr num="i"/>
+                        </lambda>
+                        <fn M="yes">		    
+                          <Subst>
+                            <aSubMap/>
+                            <tvar name="alpha"/>
+                          </Subst>		    		    
+                          <type/>		    
+                        </fn>
+                      </set>
+                    </Subst>
+                  </Cst>
+                </btypes:TYPE>. This can be re-written as
+                <btypes:TYPE>
+                  <Cst>
+                    <assume/>
+                    <Subst>
+                      <aSubMap/>
+                      <set>
+                        <gamma/>
+                        <store/>
+                        <aExpr num="i"/>
+                        <tvar name="alpha"/>
+                        <type/>		    
+                      </set>
+                    </Subst>
+                  </Cst>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_l3">
+              <p>
+                From cases&nbsp;(2.a.ii and 2.a.i.B), we can write
+                <btypes:TYPE>
+                  <CST>
+                    <extend>
+                      <gamma/>
+                      <mapping>
+                        <id/>
+                        <tvar name="alpha"/>
+                      </mapping>
+                    </extend>
+                    <store/>
+                  </CST>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_l4">
+              <p>
+                From cases&nbsp;(2.a.i.A and 2.c), from induction
+                hypothesis, we conclude that
+                <btypes:TYPE>
+                  <judge name="j">
+                    <precond>
+                      <aSubMap/>
+                    </precond>
+                    <assume>
+                      <extend>
+                        <gamma/>
+                        <mapping>
+                          <id/>
+                          <tvar name="alpha"/>
+                        </mapping>
+                      </extend>
+                      <store/>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <aExpr num="i"/>
+                        <type/>		    
+                      </tqExpr>
+                    </conclude>
+                  </judge>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_l5">
+              <p>
+                From cases&nbsp;(2.d and 2.b), and the J-Lambda rule
+                in figure&nbsp;<xref ref="hm_inter_rules"/>, we obtain
+                <btypes:TYPE>
+                  <judge name="j">
+                    <precond>
+                      <aSubMap/>
+                    </precond>
+                    <assume>
+                      <gamma/>
+                      <store/>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <lambda>
+                          <id/>
+                          <aExpr num="i"/>
+                        </lambda>
+                        <fn M="yes">		    
+                          <tvar name="alpha"/>
+                          <type/>		    
+                        </fn>
+                      </tqExpr>
+                    </conclude>
+                  </judge>
+                </btypes:TYPE>.
+                This can be equivalently stated as:
+                <btypes:TYPE>
+                  <judge name="j">
+                    <precond>
+                      <aSubMap/>
+                    </precond>
+                    <assume>
+                      <gamma/>
+                      <store/>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <lambda>
+                          <id/>
+                          <aExpr num="i"/>
+                        </lambda>
+                        <fn M="yes">		    
+                          <Subst>
+                            <aSubMap/>
+                            <tvar name="alpha"/>
+                          </Subst>		    		    
+                          <type/>		    
+                        </fn>
+                      </tqExpr>
+                    </conclude>
+                  </judge>
+                </btypes:TYPE>.
+              </p>
+            </li>
+          </ol> <!-- Lambda case ends here -->
         </li>
+        <li id="hms_app">
+          <p>
+            Case I-App:
+          </p>
+        </li> <!-- App case ends here -->
       </ol>
     </proof>
     <p>
