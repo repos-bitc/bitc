@@ -29,8 +29,8 @@
       </author>
       <affiliation>
       	<orgname>Department of Computer Science</orgname>
-      	<address>The Johns Hopkins Uinversity</address>
-      	<address>3400 N.Charles Street. 224 NEB. Balimore, MD 21218.</address>
+      	<address>The Johns Hopkins University</address>
+      	<address>3400 N.Charles Street. 224 NEB. Baltimore, MD 21218.</address>
       </affiliation>
     </authorgroup>
     <pubdate></pubdate>
@@ -462,7 +462,7 @@
     <definition id="copy_sem">      
       <title>Copy Compatibility</title>
       <p> 
-        We deifne the copy compatibility relationship 
+        We define the copy compatibility relationship 
         (<btypes:TYPE>
           <ceqOp/>
         </btypes:TYPE>) as follows:
@@ -4064,7 +4064,7 @@
         </btypes:TYPE> can only be a specialization of 
         <btypes:TYPE>
           <type/>
-        </btypes:TYPE>, obtained through some substituion.        
+        </btypes:TYPE>, obtained through some substitution.        
         A Substitution over the polymorphic constraint is defined as:
         <btypes:TYPE>
           <eq>
@@ -4210,7 +4210,7 @@
       <btypes:TYPE><aExpr/></btypes:TYPE> under the constraints
       <btypes:TYPE><aCtset/></btypes:TYPE>. 
       The Unification algorithm is given in 
-      figure&nbsp;<xref ref="eq_unify"/> with some auxilary
+      figure&nbsp;<xref ref="eq_unify"/> with some auxiliary
       definitions and translations defined in 
       figure&nbsp;<xref ref="eq_helper"/>. 
       The unification algorithm takes in a set of constraints
@@ -4271,7 +4271,7 @@
     <definition id="stvs-eq">
       <title>Shallow Type Variables</title>
       <p>
-        The set of type variables embedde in a type up to a 
+        The set of type variables embedded in a type up to a 
         reference/function boundary. 
       </p>
       <p>
@@ -4323,7 +4323,7 @@
     <definition id="dtvs-eq">
       <title>Deep Type Variables</title>
       <p>
-        The set of type variables embedde in a type up to a 
+        The set of type variables embedded in a type up to a 
         function boundary. 
       </p>
       <p>        
@@ -7569,7 +7569,7 @@
         </li>
         <li>
           <p>
-            Conclusion&nbsp;(2) can be proved by construcion of
+            Conclusion&nbsp;(2) can be proved by construction of
             <btypes:TYPE>
               <aSubMap num="n"/>
             </btypes:TYPE>. One possibility is
@@ -9126,6 +9126,384 @@
         </btypes:TYPE>.
       </p>
     </proof>
+    <theorem id="TI-unify-correct">
+      <title>Correctness of Unification</title>
+      <p>
+        <btypes:TYPE>
+          <text content="If "/>
+          <UNIFY>
+            <type num="1"/>
+            <type num="2"/>              
+            <aSubMap/>
+          </UNIFY>
+          <text content=", then:"/>
+        </btypes:TYPE>
+      </p>
+      <ol>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <Msub>
+                <Subst>
+                  <aSubMap/>
+                  <type num="1"/>
+                </Subst>
+                <Subst>
+                  <aSubMap/>
+                  <type num="2"/>              
+                </Subst>
+              </Msub>
+              <text content=" and "/>
+              <Msub>
+                <Subst>
+                  <aSubMap/>
+                  <type num="2"/>              
+                </Subst>
+                <Subst>
+                  <aSubMap/>
+                  <type num="1"/>
+                </Subst>
+              </Msub>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <models name="ca">   
+                <assume/>
+                <spset>
+                  <aCtset num="1"/>
+                </spset>
+              </models>
+              <text content=", and"/>
+              <models name="ca">
+                <assume/>
+                <spset>
+                  <aCtset num="2"/>
+                </spset>
+              </models>
+              <text content=" implies "/>
+              <models name="ca">   
+                <assume/>
+                <Subst>
+                  <aSubMap/>
+                  <unin>
+                    <aCtset num="1"/>
+                    <aCtset num="2"/>
+                  </unin>
+                </Subst>
+              </models>
+              <text content="."/>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <CST>
+                <solvables/>
+                <aCtset num="1"/>
+              </CST>
+              <text content=", and"/>
+              <CST>
+                <solvables/>
+                <aCtset num="2"/>
+              </CST>
+              <text content=" implies "/>
+              <Cst>
+                <assume/>
+                <Subst>
+                  <aSubMap/>
+                  <set>
+                    <solvables/>
+                    <aCtset num="1"/>
+                    <aCtset num="2"/>
+                  </set>
+                </Subst>
+              </Cst>
+              <text content="."/>
+            </btypes:TYPE>
+          </p>
+        </li>
+      </ol>
+    </theorem>
+    <proof>
+      <p>
+        By straightforward induction on the derivation of 
+        <btypes:TYPE>
+          <UNIFY>
+            <type num="1"/>
+            <type num="2"/>              
+            <aSubMap/>
+          </UNIFY>
+        </btypes:TYPE>.
+      </p>
+    </proof>
+    <theorem id="TI-solve-correct">
+      <title>Correctness of the Constraint Solver</title>
+      <p>
+        If
+        <btypes:TYPE>
+          <Sjudge name="s">
+            <assume>
+              <aSubMap/>
+            </assume>
+            <corUp>
+              <type/>
+              <type dash="'"/>
+            </corUp>
+          </Sjudge>
+        </btypes:TYPE>,
+        then 
+        <btypes:TYPE>
+          <models name="sat">
+            <assume>
+              <aSubMap/>
+            </assume>
+            <spset>
+              <type/>
+            </spset>
+          </models>              
+        </btypes:TYPE> and
+        <btypes:TYPE>
+          <eq>
+            <canonical>
+              <Subst>
+                <aSubMap/>
+                <type/>
+              </Subst>
+            </canonical>
+            <canonical>
+              <type dash="'"/>
+            </canonical>
+          </eq>
+        </btypes:TYPE>
+      </p>
+    </theorem>
+    <proof>
+      <p>
+        By straightforward induction on the derivation of 
+        <btypes:TYPE>
+          <Sjudge>
+            <assume>
+              <aSubMap/>
+            </assume>
+            <corUp>
+              <type/>
+              <type dash="'"/>
+            </corUp>
+          </Sjudge>
+        </btypes:TYPE>, noting that the solver infers
+        compatible types at steps Sol-Ct-Var and that the Sol-Ct-Const
+        explicitely checks for compatibility.
+      </p>
+    </proof>
+    <lemma id="TI-SOLVE-correct">
+      <title>Corrolarry to Correctness of the Constraint Solver</title>
+      <p>
+        If
+        <btypes:TYPE>
+          <Sjudge name="solve">
+            <assume>
+              <aSubMap/>
+            </assume>
+            <corUp>
+              <type/>
+              <type dash="'"/>
+            </corUp>
+          </Sjudge>
+        </btypes:TYPE>,
+        then 
+        <btypes:TYPE>
+          <models name="sat">
+            <assume>
+              <aSubMap/>
+            </assume>
+            <spset>
+              <type/>
+            </spset>
+          </models>              
+        </btypes:TYPE> and
+        <btypes:TYPE>
+          <eq>
+            <canonical>
+              <Subst>
+                <aSubMap/>
+                <type/>
+              </Subst>
+            </canonical>
+            <canonical>
+              <type dash="'"/>
+            </canonical>
+          </eq>
+        </btypes:TYPE>
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        Follows from 
+        <btypes:TYPE>
+          <thm tag="TI-solve-correct"/>
+        </btypes:TYPE> and the definition of
+        <btypes:TYPE>
+          <Sjudge name="solve"/>
+        </btypes:TYPE>
+        figure&nbsp;<xref ref="hm_solve"/>.
+      </p>
+    </proof>
+    <theorem id="TI-solve-total">
+      <title>Totality of the Constraint Solver</title>
+      <p>
+        If          
+        <btypes:TYPE>
+          <models name="cst">
+            <assume/>
+            <spset>
+              <type/>
+            </spset>
+          </models>
+          <text content=" then "/>
+          <Exists/>
+          <aSubMap/>
+          <text content=" and "/>
+          <type dash="'"/>
+          <text content=" such that "/>
+          <Sjudge name="s">
+            <assume>
+              <aSubMap/>
+            </assume>
+            <corUp>
+              <type/>
+              <type dash="'"/>
+            </corUp>
+          </Sjudge>
+        </btypes:TYPE>.
+      </p>
+    </theorem>
+    <proof>
+      <p>
+        Evident from the definition of the solver in 
+        figure&nbsp;<xref ref="hm_solve"/>.
+      </p>
+    </proof>
+    <theorem id="unique-solve-solutions">
+      <title>Uniqueness of Solutions Produced by the Solver</title> 
+      <p>
+        If
+        <btypes:TYPE>
+          <Sjudge name="s">
+            <assume>
+              <aSubMap dash="'"/>
+            </assume>
+            <corUp>
+              <type/>
+              <type dash="'"/>
+            </corUp>
+          </Sjudge>
+          <text content=" and "/>
+          <Sjudge name="s">
+            <assume>
+              <aSubMap dash="''"/>
+            </assume>
+            <corUp>
+              <type/>
+              <type dash="''"/>
+            </corUp>
+          </Sjudge>
+          <text content=", then "/>
+          <eq>
+            <aSubMap dash="'"/>
+            <aSubMap dash="''"/>
+          </eq>
+          <text content=" and "/>
+          <eq>
+            <type dash="'"/>
+            <type dash="''"/>
+          </eq>
+        </btypes:TYPE>.
+      </p>
+    </theorem>
+    <proof>
+      <p>
+        Evident from the definition of the solver in 
+        figure&nbsp;<xref ref="hm_solve"/>.
+      </p>
+    </proof>
+    <theorem id="TI-unify-decidable">
+      <title>Decidability of Unification</title>
+      <p>
+        If
+        <btypes:TYPE>
+          <models name="acy">
+            <assume/>
+            <spset>
+              <type num="1"/>
+            </spset>
+          </models>
+          <text content=" and "/>
+          <models name="acy">
+            <assume/>
+            <spset>
+              <type num="2"/>
+            </spset>
+          </models>
+        </btypes:TYPE>, then,        
+        a normalizing derivation of 
+        <btypes:TYPE>
+          <UNIFY>
+            <type num="1"/>
+            <type num="2"/>
+            <aSubMap/>
+          </UNIFY>
+        </btypes:TYPE>
+        where no two uses of U-Commut occur consecutively is
+        decidable. 
+      </p>
+    </theorem>
+    <proof>
+      <p>
+        The unifier and constraint solver builds a solution tree by
+        always invoking itself types having <em>smaller</em> shapes of
+        types (after eliminating redundant uses of the U-Commut rule).
+        Since types are of bounded size and acyclic, and since
+        unification itself does not produce any cycles
+        (Theorem&nbsp;<xref ref="TI-unify-correct"/>), these
+        derivations must be bounded. 
+      </p>
+    </proof>
+    <theorem id="TI-solve-decidable">
+      <title>Decidability of the Constraint Solver</title>
+      <p>
+        If
+        <btypes:TYPE>
+          <models name="acy">
+            <assume/>
+            <spset>
+              <type/>
+            </spset>
+          </models>
+        </btypes:TYPE>, then,
+        the derivation of
+        <btypes:TYPE>
+          <Sjudge name="s">
+            <assume>
+              <aSubMap/>
+            </assume>
+            <corUp>
+              <type/>
+              <type dash="'"/>
+            </corUp>
+          </Sjudge>
+          <text content=" is decidable."/>
+        </btypes:TYPE>
+      </p>
+    </theorem>
+    <proof>
+      <p>
+        Similar to Theorem&nbsp;<xref ref="TI-unify-decidable"/>. 
+      </p>
+    </proof>
     <theorem id="heuristic-inference-sound">
       <title>Soundness of Heuristic Type Inference</title>
       <p>
@@ -9146,6 +9524,12 @@
               <aSubMap/>
             </propagate>
           </TIjudge>
+        </btypes:TYPE> and
+        <btypes:TYPE>
+          <CST>
+            <gamma/>
+            <store/>
+          </CST>
         </btypes:TYPE>
         then,
         <btypes:TYPE>
@@ -9693,7 +10077,7 @@
         </btypes:TYPE>. Since 
         <btypes:TYPE>
           <aSubMap/>
-        </btypes:TYPE> is the composistion of all such substitutions,
+        </btypes:TYPE> is the composition of all such substitutions,
         we obtain
         <btypes:TYPE>
           <models name="sat">
@@ -10081,386 +10465,6 @@
         </li>
       </ol>
     </definition>
-    <theorem id="TI-unify-correct">
-      <title>Correctness of Unification</title>
-      <p>
-        <btypes:TYPE>
-          <text content="If "/>
-          <eq>
-            <normalize>
-              <type num="1"/>
-            </normalize>
-            <ctype>
-              <canonical>
-                <type num="1"/>
-              </canonical>
-              <aCtset num="1"/>
-            </ctype>
-          </eq>            
-          <text content=", "/>
-          <eq>
-            <normalize>
-              <type num="2"/>
-            </normalize>
-            <ctype>
-              <canonical>
-                <type num="2"/>
-              </canonical>		
-              <aCtset num="2"/>
-            </ctype>
-          </eq>
-          <text content=", "/>
-          <models name="ca">   
-            <assume/>
-            <aCtset num="1"/>
-          </models>                 
-          <text content=", "/>
-          <models name="ca">   
-            <assume/>
-            <aCtset num="2"/>
-          </models>                 
-          <text content=", "/>
-          <UNIFY>
-            <type num="1"/>
-            <type num="2"/>              
-            <aSubMap/>
-          </UNIFY>
-          <text content=", then:"/>
-        </btypes:TYPE>
-      </p>
-      <ol>
-        <li>
-          <p>
-            <btypes:TYPE>
-              <models name="ca">   
-                <assume/>
-                <canonical>
-                  <unin>
-                    <set>
-                      <eq>
-                        <canonical>
-                          <type num="1"/>
-                        </canonical>
-                        <canonical>
-                          <type num="2"/>
-                        </canonical>
-                      </eq>
-                    </set> 
-                    <aCtset num="1"/>
-                    <aCtset num="2"/>
-                  </unin>
-                </canonical>
-              </models>
-              <text content="."/>
-            </btypes:TYPE>
-          </p>
-        </li>
-        <li>
-          <p>
-            <btypes:TYPE>
-              <models name="ca">   
-                <nothing/>
-                <plus>
-                  <Subst>
-                    <aSubMap/>
-                    <type num="1"/>
-                  </Subst>
-                  <Subst>
-                    <aSubMap/>
-                    <type num="2"/>
-                  </Subst>
-                </plus>
-              </models> 
-              <text content=" and "/>
-              <models name="ca">   
-                <nothing/>
-                <aSubMap/>
-              </models> 
-            </btypes:TYPE>
-          </p>
-        </li>
-      </ol>
-    </theorem>
-    <theorem id="TI-solve-correct">
-      <title>Correctness of the Constraint Solver</title>
-      <p>
-        If
-        <btypes:TYPE>
-          <Sjudge name="sol">
-            <assume>
-              <aSubMap/>
-            </assume>
-            <solvable/>
-          </Sjudge>              
-        </btypes:TYPE>,
-        then 
-        <btypes:TYPE>
-          <models name="sol">
-            <assume>
-              <aSubMap/>
-            </assume>
-            <solvable/>
-          </models>              
-        </btypes:TYPE>.
-      </p>
-    </theorem>
-    <p>
-      We will also use the following equivalent forms (or special
-      cases of the above statement): 
-    </p>
-    <ol>
-      <li>
-        <p>
-          If
-          <btypes:TYPE>
-            <Sjudge name="sol">
-              <assume>
-                <aSubMap/>
-              </assume>
-              <solvable/>
-            </Sjudge>              
-          </btypes:TYPE>,
-          then 
-          <btypes:TYPE>
-            <models name="cst">
-              <assume/>
-              <Subst>
-                <aSubMap/>
-                <solvable/>
-              </Subst>
-            </models>              
-          </btypes:TYPE>.
-        </p>
-      </li>
-      <li>
-        <p>
-          If
-          <btypes:TYPE>
-            <Sjudge name="sol">
-              <assume>
-                <aSubMap/>
-              </assume>
-              <solvable/>
-            </Sjudge>              
-          </btypes:TYPE>,
-          then 
-          <btypes:TYPE>
-            <eq>
-              <normalize>
-                <Subst>
-                  <aSubMap/>
-                  <solvable/>
-                </Subst>
-              </normalize>
-              <canonical>
-                <Subst>
-                  <aSubMap/>
-                  <solvable/>
-                </Subst>
-              </canonical>
-            </eq>
-          </btypes:TYPE>.
-        </p>
-      </li>
-      <li>
-        <p>
-          If          
-          <btypes:TYPE>
-            <Sjudge name="s">
-              <assume>
-                <aSubMap/>
-              </assume>
-              <corUp>
-                <type/>
-                <type dash="'"/>
-              </corUp>
-            </Sjudge>
-            <text content=" then "/>
-            <eq>
-              <normalize>
-                <Subst>
-                  <aSubMap/>
-                  <type/>
-                </Subst>
-              </normalize>
-              <canonical>
-                <type dash="'"/>
-              </canonical>
-            </eq>
-          </btypes:TYPE>.
-        </p>
-      </li>
-    </ol>
-    <theorem id="TI-solve-total">
-      <title>Totality of the Constraint Solver</title>
-      <ol>
-        <li>
-          <p>
-            If          
-            <btypes:TYPE>
-              <models name="cst">
-                <assume/>
-                <solvable/>
-              </models>
-              <text content=" then "/>
-              <Exists>
-                <aSubMap/>
-              </Exists>
-              <text content=" such that "/>            
-              <Sjudge name="sol">
-                <assume>
-                  <aSubMap/>
-                </assume>
-                <solvable/>
-              </Sjudge>
-            </btypes:TYPE>.
-          </p>
-        </li>
-        <li>
-          <p>
-            If          
-            <btypes:TYPE>
-              <models name="sol">
-                <assume>
-                  <aSubMap/>
-                </assume>
-                <solvable/>
-              </models>
-              <text content=" then "/>
-              <Exists>
-                <spEq>
-                  <aSubMap dash="'"/>
-                  <aSubMap/>
-                </spEq>
-              </Exists>
-              <text content=" such that "/>            
-              <Sjudge name="sol">
-                <assume>
-                  <aSubMap/>
-                </assume>
-                <solvable/>
-              </Sjudge>
-            </btypes:TYPE>.
-          </p>
-        </li>
-        <li>
-          <p>
-            If 
-            <btypes:TYPE>
-              <Sjudge name="sol">
-                <assume>
-                  <aSubMap/>
-                </assume>
-                <solvable/>
-              </Sjudge>   
-              <text content=", then "/>
-              <eq>
-                <dom>
-                  <aSubMap/>
-                </dom>
-                <pred name="mtv">
-                  <solvable/>
-                </pred>
-              </eq>
-            </btypes:TYPE>.
-          </p>
-        </li>
-      </ol>
-    </theorem>
-    <theorem id="unique-solve-solutions">
-      <title>Uniqueness of Solutions Produced by the Solver</title> 
-      <p>
-        If
-        <btypes:TYPE>
-          <Sjudge name="sol">
-            <assume>
-              <aSubMap num="1"/>
-            </assume>
-            <solvable/>
-          </Sjudge>
-          <text content=" and "/>
-          <Sjudge name="sol">
-            <assume>
-              <aSubMap num="2"/>
-            </assume>
-            <solvable/>
-          </Sjudge>
-          <text content=", then "/>
-          <eq>
-            <aSubMap num="1"/>
-            <aSubMap num="2"/>
-          </eq>
-        </btypes:TYPE>.
-      </p>
-    </theorem>
-    <theorem id="TI-unify-decidable">
-      <title>Decidability of Unification</title>
-      <p>
-        If
-        <btypes:TYPE>
-          <models name="acy">
-            <assume/>
-            <type num="1"/>
-          </models>
-          <text content=" and "/>
-          <models name="acy">
-            <assume/>
-            <type num="2"/>
-          </models>
-        </btypes:TYPE>, then,        
-        a normalizing derivation of 
-        <btypes:TYPE>
-          <UNIFY>
-            <type num="1"/>
-            <type num="2"/>
-            <aSubMap/>
-          </UNIFY>
-        </btypes:TYPE>
-        where no two uses of U-Commut occur consecutively is
-        decidable. 
-      </p>
-    </theorem>
-    <proof>
-      <p>
-        The unifier and constraint solver builds a solution tree by
-        always invoking itself types having <em>smaller</em> shapes of
-        types (after eliminating redundant uses of the U-Commut rule).
-        Since types are of bounded size and acyclic, and since
-        unification itself does not produce any cycles
-        (Theorem&nbsp;<xref ref="TI-unify-correct"/>), these
-        derivations must be bounded. 
-      </p>
-    </proof>
-    <theorem id="TI-solve-decidable">
-      <title>Decidability of the Constraint Solver</title>
-      <p>
-        If
-        <btypes:TYPE>
-          <models name="acy">
-            <assume/>
-            <type/>
-          </models>
-        </btypes:TYPE>, then,
-        the derivation of
-        <btypes:TYPE>
-          <Sjudge name="s">
-            <assume>
-              <aSubMap/>
-            </assume>
-            <corUp>
-              <type/>
-              <type dash="'"/>
-            </corUp>
-          </Sjudge>
-          <text content=" is decidable."/>
-        </btypes:TYPE>
-      </p>
-    </theorem>
-    <proof>
-      <p>
-        Similar to Theorem&nbsp;<xref ref="TI-unify-decidable"/>. 
-      </p>
-    </proof>
     <lemma id="sol-math-properties"> 
       <title>Properties of 
         <btypes:TYPE><models name="sol"/></btypes:TYPE></title>
@@ -19458,7 +19462,13 @@
  -->
 <!--  LocalWords:  explicitely tvs asm mtvs lem nosp req defn scomp subnum sep
  -->
-<!--  LocalWords:  fnize cong sm ecomp subEq
+<!--  LocalWords:  fnize cong sm ecomp subEq BitC Swaroop Sridhar dev bitc LHS
  -->
 
 
+<!--  LocalWords:  unboxed RHS lvalue Hloc Sloc Rval lhs rhs Deref Tq iff wrt
+ -->
+<!--  LocalWords:  canonicalization unifications Tqexpr Tvar Oth Composability
+ -->
+<!--  LocalWords:  Doerrie Proc ECOOP PLOS
+ -->
