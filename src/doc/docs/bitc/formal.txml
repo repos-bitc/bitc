@@ -7000,8 +7000,8 @@
           <p>
             <btypes:TYPE>
               <CST>
-                  <solvables num="n"/>
-                </CST>
+                <solvables num="n"/>
+              </CST>
             </btypes:TYPE>
           </p>
         </li>
@@ -7037,6 +7037,25 @@
             </btypes:TYPE>
           </p>
         </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <eq>
+                <inter>
+                  <dom>
+                    <aSubMap/>
+                  </dom>
+                  <pred name="tv">
+                    <solvables num="n"/>
+                  </pred>
+                </inter>
+                <pred name="tv">
+                  <solvables num="m"/>
+                </pred>
+              </eq>
+            </btypes:TYPE>
+          </p>
+        </li>
       </ol>
       <p>
         Then,
@@ -7050,10 +7069,7 @@
               </set>
             </Subst>
           </Cst>
-        </btypes:TYPE> (under
-        <btypes:TYPE>
-          <tvar name="alpha"/>
-        </btypes:TYPE>-renaming),
+        </btypes:TYPE>.
       </p>
     </lemma>
     <proof>
@@ -7240,26 +7256,7 @@
         </li>
         <li>
           <p>
-            We can assume that 
-            <btypes:TYPE>
-              <eq>
-                <inter>
-                  <dom>
-                    <aSubMap/>
-                  </dom>
-                  <pred name="tv">
-                    <solvable num="n"/>
-                  </pred>
-                </inter>
-                <pred name="tv">
-                  <solvable num="m"/>
-                </pred>
-              </eq>
-            </btypes:TYPE>, since it is possible to use a consistent
-            <btypes:TYPE>
-              <tvar name="alpha"/>
-            </btypes:TYPE>-renaming to achieve this property.
-            That is, we can write
+            Due to assumption&nbsp;(4), we can write
             <btypes:TYPE>
               <eq>
                 <aSubMap/>
@@ -7276,7 +7273,7 @@
                   <aSubMap num="1"/>
                 </dom>
                 <pred name="mtv">
-                  <solvable num="m"/>
+                  <solvables num="m"/>
                 </pred>
               </eq>
             </btypes:TYPE>, 
@@ -7286,7 +7283,7 @@
                   <aSubMap num="2"/>
                 </dom>
                 <pred name="ntv">
-                  <solvable num="m"/>
+                  <solvables num="m"/>
                 </pred>
               </eq>
             </btypes:TYPE>, and 
@@ -7297,7 +7294,7 @@
                     <aSubMap num="3"/>
                   </dom>
                   <pred name="tv">
-                    <solvable num="n"/>
+                    <solvables num="n"/>
                   </pred>
                 </inter>
                 <Empty/>
@@ -7307,8 +7304,8 @@
         </li>
         <li>
           <p>
-            From cases (2.a, 2.b, 2.c, 1.a, and 3), we can conclude
-            that
+            From cases&nbsp;(2.a, 2.b, 2.c, 1.a, and 3), we can
+            conclude that 
             <btypes:TYPE>
               <Forall>
                 <tvar name="alpha"/>
@@ -7343,7 +7340,7 @@
         </li>
         <li>
           <p>
-            From cases (2.b, 1.b, and 3), we conclude that
+            From cases&nbsp;(2.b, 1.b, and 3), we conclude that
             <btypes:TYPE>
               <Forall/>
               <in>
@@ -7373,7 +7370,7 @@
         </li>
         <li>
           <p>
-            From cases (2.c, 1.c, and 3), we conclude that
+            From cases&nbsp;(2.c, 1.c, and 3), we conclude that
             <btypes:TYPE>
               <eq>
                 <inter>
@@ -7397,7 +7394,7 @@
         </li>
         <li>
           <p>
-            From cases (4, 5, 6) and 
+            From cases&nbsp;(4, 5, 6) and 
             <btypes:TYPE>
               <defn tag="maybe-consistent"/>
             </btypes:TYPE>, we obtain
@@ -7459,12 +7456,28 @@
             </btypes:TYPE>
           </p>
         </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <eq>
+                <inter>
+                  <dom>
+                    <aSubMap num="m"/>
+                  </dom>
+                  <pred name="tv">
+                    <solvables num="n"/>
+                  </pred>
+                </inter>
+                <pred name="tv">
+                  <solvables num="m"/>
+                </pred>
+              </eq>
+            </btypes:TYPE>
+          </p>
+        </li>
       </ol>
       <p>
-        Then, (subject to 
-        <btypes:TYPE>
-          <tvar name="alpha"/>
-        </btypes:TYPE>-renaming),
+        Then,
       </p>
       <ol>
         <li>
@@ -7550,7 +7563,7 @@
         <li>
           <p>
             From assumptions&nbsp;(1 and 2),
-            case&nbsp;(1), and
+            case&nbsp;(1), assumptions&nbsp;(4) and
             <btypes:TYPE>
               <lem tag="subst_cst"/>
             </btypes:TYPE>, we obtain
@@ -7721,6 +7734,68 @@
           </ol>
         </li>
       </ol>
+    </proof>
+    <lemma id="ct_additive">
+      <title>Additivity of Consistent Entities</title>
+      <p>
+        If
+      </p>
+      <ol>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <CST>
+                <solvables/>
+                <solvables num="m"/>
+              </CST>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <CST>
+                <solvables/>
+                <solvables num="n"/>
+              </CST>
+            </btypes:TYPE>
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <eq>
+                <inter>
+                  <pred name="tv">
+                    <solvables num="m"/>
+                  </pred>
+                  <pred name="tv">
+                    <solvables num="n"/>
+                  </pred>
+                </inter>
+                <pred name="tv">
+                  <solvables/>
+                </pred>
+              </eq>
+            </btypes:TYPE>
+          </p>
+        </li>
+      </ol>
+      <p>
+        Then,
+        <btypes:TYPE>
+          <CST>
+            <solvables/>
+            <solvables num="m"/>
+            <solvables num="n"/>
+          </CST>
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <proof>
+      <p> 
+        ...
+      </p>
     </proof>
     <theorem id="intermediate-sound">
       <title>Soundness of Intermediate System</title>
@@ -8561,116 +8636,41 @@
               </p>
             </li>
             <li id="ints_a3">
-              <p>
-                From case&nbsp;(3.a.i.F), we
-                have 
-                <btypes:TYPE>
-                  <CST>
-                    <gamma/>
-                    <store/>
-                    <aExpr num="1"/>
-                    <aExpr num="2"/>
-                    <type/>
-                    <type num="1"/>
-                    <type num="2"/>
-                    <fn M="yes">
-                      <type num="a"/>
-                      <type num="r"/>
-                    </fn>
-                  </CST>
-                </btypes:TYPE>.
-                Clearly, 
-                <btypes:TYPE>
-                  <subeq>
-                    <set>
-                      <gamma/>
-                      <store/>
-                      <aExpr num="1"/>
-                      <aExpr num="2"/>
-                      <type/>
-                    </set>
-                    <set>
-                      <gamma/>
-                      <store/>
-                      <aExpr num="1"/>
-                      <aExpr num="2"/>
-                      <type/>
-                      <type num="1"/>
-                      <type num="2"/>
-                      <fn M="yes">
-                        <type num="a"/>
-                        <type num="r"/>
-                      </fn>
-                    </set>
-                  </subeq>
-                </btypes:TYPE>.
-                From case&nbsp;(3.b), we have
-                <btypes:TYPE>
-                  <models name="sat">
-                    <assume>
-                      <aSubMap/>
-                    </assume>                
-                    <spset>
-                      <gamma/>
-                      <store/>
-                      <aExpr num="1"/>
-                      <aExpr num="2"/>
-                      <type/>
-                    </spset>
-                  </models>
-                </btypes:TYPE>.
-                Now, from 
-                <btypes:TYPE>
-                  <lem tag="partial_solutions"/>
-                </btypes:TYPE>, we conclude that 
-                <btypes:TYPE>
-                  <Exists>
-                    <aSubMap dash="''"/>
-                  </Exists>
-                </btypes:TYPE>
-                such that if
-                <btypes:TYPE>
-                  <eq>
-                    <aSubMap dash="'"/>
-                    <compose>
-                      <aSubMap dash="''"/>
-                      <aSubMap/>
-                    </compose>
-                  </eq>
-                </btypes:TYPE>, we have
-              </p>
               <ol>
-                <li>
+                <li id="ints_a3_1">
                   <p>
+                    From case&nbsp;(3.a.i.F), we
+                    have 
                     <btypes:TYPE>
-                      <models name="sat">
-                        <assume>
-                          <aSubMap dash="''"/>
-                        </assume>
-                        <Subst>
-                          <aSubMap/>
-                          <spset>
-                            <gamma/>
-                            <store/>
-                            <aExpr num="1"/>
-                            <aExpr num="2"/>
-                            <type/>
-                            <type num="1"/>
-                            <type num="2"/>
-                            <fn M="yes">
-                              <type num="a"/>
-                              <type num="r"/>
-                            </fn>
-                          </spset>
-                        </Subst>
-                      </models>
-                    </btypes:TYPE>, and therefore,
+                      <CST>
+                        <gamma/>
+                        <store/>
+                        <aExpr num="1"/>
+                        <aExpr num="2"/>
+                        <type/>
+                        <type num="1"/>
+                        <type num="2"/>
+                        <fn M="yes">
+                          <type num="a"/>
+                          <type num="r"/>
+                        </fn>
+                      </CST>
+                    </btypes:TYPE>.
+                  </p>
+                </li>
+                <li id="ints_a3_2">
+                  <p>
+                    Clearly, 
                     <btypes:TYPE>
-                      <models name="sat">
-                        <assume>
-                          <aSubMap dash="'"/>
-                        </assume>
-                        <spset>
+                      <subeq>
+                        <set>
+                          <gamma/>
+                          <store/>
+                          <aExpr num="1"/>
+                          <aExpr num="2"/>
+                          <type/>
+                        </set>
+                        <set>
                           <gamma/>
                           <store/>
                           <aExpr num="1"/>
@@ -8682,17 +8682,56 @@
                             <type num="a"/>
                             <type num="r"/>
                           </fn>
+                        </set>
+                      </subeq>
+                    </btypes:TYPE>.
+                  </p>
+                </li>
+                <li id="ints_a3_3">
+                  <p>
+                    From case&nbsp;(3.b), we have
+                    <btypes:TYPE>
+                      <models name="sat">
+                        <assume>
+                          <aSubMap/>
+                        </assume>                
+                        <spset>
+                          <gamma/>
+                          <store/>
+                          <aExpr num="1"/>
+                          <aExpr num="2"/>
+                          <type/>
                         </spset>
                       </models>
                     </btypes:TYPE>.
                   </p>
                 </li>
-                <li>
+                <li id="ints_a3_4">
                   <p>
+                    We can assume that 
                     <btypes:TYPE>
                       <eq>
-                        <Subst>
-                          <aSubMap dash="'"/>
+                        <inter>
+                          <dom>
+                            <aSubMap/>
+                          </dom>
+                          <pred name="tvs">
+                            <set>
+                              <gamma/>
+                              <store/>
+                              <aExpr num="1"/>
+                              <aExpr num="2"/>
+                              <type/>
+                              <type num="1"/>
+                              <type num="2"/>
+                              <fn M="yes">
+                                <type num="a"/>
+                                <type num="r"/>
+                              </fn>
+                            </set>
+                          </pred>
+                        </inter>
+                        <pred name="tvs">
                           <set>
                             <gamma/>
                             <store/>
@@ -8700,26 +8739,126 @@
                             <aExpr num="2"/>
                             <type/>
                           </set>
-                        </Subst>
-                        <Subst>
-                          <aSubMap/>
-                          <set>
-                            <gamma/>
-                            <store/>
-                            <aExpr num="1"/>
-                            <aExpr num="2"/>
-                            <type/>
-                          </set>
-                        </Subst>
+                        </pred>
                       </eq>
+                    </btypes:TYPE>, because this property can be
+                    obtained by suitable &alpha;-renaming using fresh
+                    type variables. The only common type variables
+                    that need to be common to both the derivations are
+                    those present in 
+                    <btypes:TYPE>
+                      <gamma/>
+                      <text content=" or "/>
+                      <store/>
                     </btypes:TYPE>.
                   </p>
+                </li>
+                <li id="ints_a3_5">
+                  <p>
+                    Now, from cases&nbsp;(3.c.i, 3.c.ii, 3.c.iii and
+                    3.c.iv) and 
+                    <btypes:TYPE>
+                      <lem tag="partial_solutions"/>
+                    </btypes:TYPE>, we conclude that 
+                    <btypes:TYPE>
+                      <Exists>
+                        <aSubMap dash="''"/>
+                      </Exists>
+                    </btypes:TYPE>
+                    such that if
+                    <btypes:TYPE>
+                      <eq>
+                        <aSubMap dash="'"/>
+                        <compose>
+                          <aSubMap dash="''"/>
+                          <aSubMap/>
+                        </compose>
+                      </eq>
+                    </btypes:TYPE>, we have
+                  </p>
+                  <ol>
+                    <li>
+                      <p>
+                        <btypes:TYPE>
+                          <models name="sat">
+                            <assume>
+                              <aSubMap dash="''"/>
+                            </assume>
+                            <Subst>
+                              <aSubMap/>
+                              <spset>
+                                <gamma/>
+                                <store/>
+                                <aExpr num="1"/>
+                                <aExpr num="2"/>
+                                <type/>
+                                <type num="1"/>
+                                <type num="2"/>
+                                <fn M="yes">
+                                  <type num="a"/>
+                                  <type num="r"/>
+                                </fn>
+                              </spset>
+                            </Subst>
+                          </models>
+                        </btypes:TYPE>, and therefore,<br/>
+                        <btypes:TYPE>
+                          <models name="sat">
+                            <assume>
+                              <aSubMap dash="'"/>
+                            </assume>
+                            <spset>
+                              <gamma/>
+                              <store/>
+                              <aExpr num="1"/>
+                              <aExpr num="2"/>
+                              <type/>
+                              <type num="1"/>
+                              <type num="2"/>
+                              <fn M="yes">
+                                <type num="a"/>
+                                <type num="r"/>
+                              </fn>
+                            </spset>
+                          </models>
+                        </btypes:TYPE>.
+                      </p>
+                    </li>
+                    <li>
+                      <p>
+                        <btypes:TYPE>
+                          <eq>
+                            <Subst>
+                              <aSubMap dash="'"/>
+                              <set>
+                                <gamma/>
+                                <store/>
+                                <aExpr num="1"/>
+                                <aExpr num="2"/>
+                                <type/>
+                              </set>
+                            </Subst>
+                            <Subst>
+                              <aSubMap/>
+                              <set>
+                                <gamma/>
+                                <store/>
+                                <aExpr num="1"/>
+                                <aExpr num="2"/>
+                                <type/>
+                              </set>
+                            </Subst>
+                          </eq>
+                        </btypes:TYPE>.
+                      </p>
+                    </li>
+                  </ol>
                 </li>
               </ol>
             </li>
             <li id="ints_a4">
               <p>
-                From case&nbsp;(3.c.i) and 
+                From case&nbsp;(3.c.v.A) and 
                 <btypes:TYPE>	    
                   <lem tag="weakening-sat-cst"/>
                 </btypes:TYPE> (weakening), we obtain
@@ -8795,7 +8934,7 @@
             </li>
             <li id="ints_a7">
               <p>
-                From cases&nbsp;(3.a.i.F and 3.c.i), and  
+                From cases&nbsp;(3.a.i.F and 3.c.v.A), and  
                 <btypes:TYPE>	    
                   <lem tag="weakening-sat-cst"/>
                 </btypes:TYPE> (weakening), we obtain
@@ -8896,7 +9035,7 @@
                     </canonical>
                   </Tsub>
                 </btypes:TYPE>.
-                Given case&nbsp;(3.c.i), 
+                Given case&nbsp;(3.c.v.A), 
                 <btypes:TYPE>	    
                   <ceq>
                     <canonical>
@@ -9031,7 +9170,7 @@
             </li>
             <li id="ints_a11">
               <p>
-                From cases&nbsp;(3.j, and 3.c.ii), we finally conclude that
+                From cases&nbsp;(3.j, and 3.c.v.B), we finally conclude that
                 <btypes:TYPE>
                   <Djudge>
                     <aSubMap/>
@@ -9056,7 +9195,7 @@
         </li>
       </ol>
     </proof>
-    <lemma id="int-sub">
+    <lemma id="int-subst">
       <title>Substitution on Intermediate Derivation</title>
       <p>
          <btypes:TYPE>	    
@@ -9074,18 +9213,18 @@
           <text content=" and "/>          
           <aSubMap/>
           <text content=" is a substitution such that "/>
-          <models name="cst">
+          <Cst>
             <assume/>
             <Subst>
               <aSubMap/>              
-              <spset>
+              <set>
                 <gamma/>
                 <store/>
                 <aExpr/>
                 <type/>
-              </spset>
+              </set>
             </Subst>
-          </models>
+          </Cst>
           <text content=", then "/>
           <judge name="j">
             <precond>
@@ -9668,81 +9807,79 @@
               </p>
               <ol>
                 <li id="hms_l1_1">
-                  <p>
-                    <btypes:TYPE>
-                      <Hrules>
-                        <tyRule>
-                          <tyPre>
-                            <grouping>
-                              <text content="(A)"/>
-                              <space/>
-                              <space/>
-                              <space/>
-                              <TIjudge>
-                                <assume>
-                                  <extend>
-                                    <gamma/>
-                                    <mapping>
-                                      <id/>
-                                      <tvar name="alpha"/>
-                                    </mapping>
-                                  </extend>
-                                  <store/>
-                                </assume>
-                                <conclude>
-                                  <tqExpr>
-                                    <aExpr num="i"/>
-                                    <type/>
-                                  </tqExpr>
-                                </conclude>
-                                <propagate>
-                                  <aSubMap/>
-                                </propagate>
-                              </TIjudge>
-                            </grouping>
-                          </tyPre>
-                          <tyPre>
-                            <grouping>
-                              <text content="(B)"/>
-                              <space/>
-                              <space/>
-                              <space/>
-                              <models name="new">
-                                <assume/>
-                                <tvar name="alpha"/>
-                              </models>
-                            </grouping>
-                          </tyPre>
-                          <tyConc>
+                  <btypes:TYPE>
+                    <Hrules>
+                      <tyRule>
+                        <tyPre>
+                          <grouping>
+                            <text content="(A)"/>
+                            <space/>
+                            <space/>
+                            <space/>
                             <TIjudge>
                               <assume>
-                                <gamma/>
+                                <extend>
+                                  <gamma/>
+                                  <mapping>
+                                    <id/>
+                                    <tvar name="alpha"/>
+                                  </mapping>
+                                </extend>
                                 <store/>
                               </assume>
                               <conclude>
                                 <tqExpr>
-                                  <lambda> 
-                                    <id/>
-                                    <aExpr num="i"/>
-                                  </lambda>
-                                  <fn M="yes">		    
-                                    <Subst>
-                                      <aSubMap/>
-                                      <tvar name="alpha"/>
-                                    </Subst>		    		    
-                                    <type/>		    
-                                  </fn>
+                                  <aExpr num="i"/>
+                                  <type/>
                                 </tqExpr>
                               </conclude>
-                              <propagate>		
-                                <aSubMap/>		
+                              <propagate>
+                                <aSubMap/>
                               </propagate>
                             </TIjudge>
-                          </tyConc>
-                        </tyRule>
-                      </Hrules>
-                    </btypes:TYPE>
-                  </p>
+                          </grouping>
+                        </tyPre>
+                        <tyPre>
+                          <grouping>
+                            <text content="(B)"/>
+                            <space/>
+                            <space/>
+                            <space/>
+                            <models name="new">
+                              <assume/>
+                              <tvar name="alpha"/>
+                            </models>
+                          </grouping>
+                        </tyPre>
+                        <tyConc>
+                          <TIjudge>
+                            <assume>
+                              <gamma/>
+                              <store/>
+                            </assume>
+                            <conclude>
+                              <tqExpr>
+                                <lambda> 
+                                  <id/>
+                                  <aExpr num="i"/>
+                                </lambda>
+                                <fn M="yes">		    
+                                  <Subst>
+                                    <aSubMap/>
+                                    <tvar name="alpha"/>
+                                  </Subst>		    		    
+                                  <type/>		    
+                                </fn>
+                              </tqExpr>
+                            </conclude>
+                            <propagate>		
+                              <aSubMap/>		
+                            </propagate>
+                          </TIjudge>
+                        </tyConc>
+                      </tyRule>
+                    </Hrules>
+                  </btypes:TYPE>
                 </li>
                 <li id="hms_l1_2">
                   <p>
@@ -9940,6 +10077,368 @@
           <p>
             Case I-App:
           </p>
+          <ol>
+            <li id="hms_a1">
+              <p>
+                In this case, we have:
+              </p>
+              <ol>
+                <li id="hms_a1_1">
+                  <btypes:TYPE>
+                    <Hrules>
+                      <tyRule>
+                        <tyPre>
+                          <grouping>
+                            <text content="(A)"/>
+                            <space/>
+                            <space/>
+                            <space/>
+                            <TIjudge>
+                              <assume>
+                                <gamma/>
+                                <store/>
+                              </assume>
+                              <conclude>
+                                <tqExpr>
+                                  <aExpr num="1"/>
+                                  <type num="1"/>
+                                </tqExpr>
+                              </conclude>
+                              <propagate>
+                                <aSubMap num="1"/>
+                              </propagate>
+                            </TIjudge>
+                          </grouping>
+                        </tyPre>
+                        <tyPre>
+                          <grouping>
+                            <text content="(B)"/>
+                            <space/>
+                            <space/>
+                            <space/>
+                            <TIjudge>
+                              <precond>
+                                <aSubMap num="1"/>
+                              </precond>
+                              <assume>
+                                <gamma/>
+                                <store/>
+                              </assume>
+                              <conclude>
+                                <tqExpr>
+                                  <aExpr num="2"/>
+                                  <type num="2"/>
+                                </tqExpr>
+                              </conclude>
+                              <propagate>
+                                <aSubMap num="2"/>
+                              </propagate>
+                            </TIjudge>
+                          </grouping>
+                        </tyPre>
+                        <tyPre>
+                          <grouping>
+                            <text content="(C)"/>
+                            <space/>
+                            <space/>
+                            <space/>
+                            <UNIFY>
+                              <Subst>
+                                <aSubMap num="2"/>
+                                <type num="1"/>
+                              </Subst>
+                              <mbpair>
+                                <tvar name="beta"/>
+                                <fn M="yes">
+                                  <tvar name="delta"/>
+                                  <tvar name="alpha"/>
+                                </fn>
+                              </mbpair>
+                              <aSubMap num="f"/>
+                            </UNIFY>
+                          </grouping>
+                        </tyPre>
+                        <tyPre>
+                          <grouping>
+                            <text content="(D)"/>
+                            <space/>
+                            <space/>
+                            <space/>
+                            <UNIFY>
+                              <type num="2"/>	      
+                              <mbpair>
+                                <tvar name="gamma"/>		
+                                <minz>
+                                  <Subst>
+                                    <aSubMap num="f"/>
+                                    <tvar name="delta"/>
+                                  </Subst>
+                                </minz>
+                              </mbpair>
+                              <aSubMap num="a"/>
+                            </UNIFY>
+                          </grouping>
+                        </tyPre>
+                        <tyPre>
+                          <grouping>
+                            <text content="(E)"/>
+                            <space/>
+                            <space/>
+                            <space/>
+                            <eq>
+                              <type/>
+                              <mbpair>
+                                <tvar name="epsiv"/>
+                                <minz>
+                                  <Subst>
+                                    <scomp>
+                                      <aSubMap num="a"/>
+                                      <aSubMap num="f"/>
+                                    </scomp>
+                                    <tvar name="alpha"/>
+                                  </Subst>
+                                </minz>
+                              </mbpair>
+                            </eq>
+                          </grouping>
+                        </tyPre>
+                        <tyPre>
+                          <grouping>
+                            <text content="(F)"/>
+                            <space/>
+                            <space/>
+                            <space/>
+                            <models name="new">
+                              <assume/>
+                              <grouping>
+                                <tvar name="alpha"/>
+                                <tvar name="beta"/>
+                                <tvar name="gamma"/>
+                                <tvar name="delta"/>
+                                <tvar name="epsiv"/>
+                              </grouping>
+                            </models>
+                          </grouping>
+                        </tyPre>
+                        <tyConc>
+                          <TIjudge>
+                            <assume>
+                              <gamma/>
+                              <store/>
+                            </assume>
+                            <conclude>
+                              <tqExpr>
+                                <apply>
+                                  <aExpr num="1"/>
+                                  <aExpr num="2"/>
+                                </apply>                 
+                                <type/>
+                              </tqExpr>
+                            </conclude>
+                            <propagate>
+                              <scomp>
+                                <aSubMap num="1"/>
+                                <aSubMap num="2"/>
+                                <aSubMap num="f"/>
+                                <aSubMap num="a"/>
+                              </scomp>
+                            </propagate>
+                          </TIjudge>
+                        </tyConc>
+                      </tyRule>
+                    </Hrules>
+                  </btypes:TYPE>
+                </li>
+                <li id="hms_a1_2">
+                  <p>
+                    <btypes:TYPE>
+                      <CST>
+                        <gamma/>
+                        <store/>
+                      </CST>
+                    </btypes:TYPE>
+                  </p>
+                </li>
+                <li id="hms_a1_3">
+                  <p>
+                    <btypes:TYPE>
+                      <eq>
+                        <aSubMap/>
+                        <scomp>
+                          <aSubMap num="1"/>
+                          <aSubMap num="2"/>
+                          <aSubMap num="f"/>
+                          <aSubMap num="a"/>
+                        </scomp>
+                      </eq>                        
+                    </btypes:TYPE>
+                  </p>
+                </li>
+              </ol>
+              <p>
+                We need to show that
+                <btypes:TYPE>
+                  <judge name="j">
+                    <precond>
+                      <aSubMap/>
+                    </precond>
+                    <assume>
+                      <gamma/>
+                      <store/>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <apply>
+                          <aExpr num="1"/>
+                          <aExpr num="2"/>
+                        </apply>                 
+                        <type/>
+                      </tqExpr>
+                    </conclude>
+                  </judge>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_a2">
+              <p>
+                From cases&nbsp;(3.a.i.A and 3.a.ii) and induction
+                hypothesis, we can write, 
+                <btypes:TYPE>
+                  <judge name="j">
+                    <precond>
+                      <aSubMap num="1"/>
+                    </precond>
+                    <assume>
+                      <gamma/>
+                      <store/>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <aExpr num="1"/>
+                        <type num="1"/>
+                      </tqExpr>
+                    </conclude>
+                  </judge>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_a3">
+              <p>
+                From cases&nbsp;(3.a.ii and 3.b) and
+                <btypes:TYPE>
+                  <lem tag="heuristic-inference-consistent"/>
+                </btypes:TYPE>, we obtain
+                <btypes:TYPE>
+                  <Cst>
+                    <assume/>
+                    <Subst>
+                      <aSubMap num="1"/>
+                      <set>
+                        <gamma/>
+                        <store/>
+                        <aExpr num="1"/>
+                        <type num="1"/>
+                      </set>
+                    </Subst>
+                  </Cst>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_a4">
+              <p>
+                From case&nbsp;(3.c) and
+                <btypes:TYPE>
+                  <lem tag="weakening-sat-cst"/>
+                </btypes:TYPE> (weakening), we obtain
+                <btypes:TYPE>
+                  <Cst>
+                    <assume/>
+                    <Subst>
+                      <aSubMap num="1"/>
+                      <set>
+                        <gamma/>
+                        <store/>
+                      </set>
+                    </Subst>
+                  </Cst>
+                </btypes:TYPE>. Using this result along with
+                case&nbsp;(3.a.i.B) and induction hypothesis, we obtain
+                <btypes:TYPE>
+                  <judge name="j">
+                    <precond>
+                      <scomp>
+                        <aSubMap num="1"/>
+                        <aSubMap num="2"/>
+                      </scomp>
+                    </precond>
+                    <assume>
+                      <gamma/>
+                      <store/>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <aExpr num="2"/>
+                        <type num="2"/>
+                      </tqExpr>
+                    </conclude>
+                  </judge>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_a5">
+              <p>
+                From case&nbsp;(3.d) and 
+                <btypes:TYPE>
+                  <lem tag="int-consistent"/>
+                </btypes:TYPE>, we obtain
+                <btypes:TYPE>
+                  <Cst>
+                    <assume/>
+                    <Subst>
+                      <aSubMap num="2"/>
+                      <Subst>
+                        <aSubMap num="1"/>
+                        <set>
+                          <gamma/>
+                          <store/>
+                          <aExpr num="2"/>
+                          <type num="2"/>
+                        </set>
+                      </Subst>
+                    </Subst>
+                  </Cst>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_a6">
+              <p>
+                From cases&nbsp;(3.b and 3.e), and
+                <btypes:TYPE>
+                  <lem tag="int-subst"/>
+                </btypes:TYPE>, we obtain
+                 <btypes:TYPE>
+                  <judge name="j">
+                    <precond>
+                      <scomp>
+                        <aSubMap num="1"/>
+                        <aSubMap num="2"/>
+                      </scomp>
+                    </precond>
+                    <assume>
+                      <gamma/>
+                      <store/>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <aExpr num="1"/>
+                        <type num="1"/>
+                      </tqExpr>
+                    </conclude>
+                  </judge>
+                </btypes:TYPE>.
+              </p>
+            </li>
+          </ol>
         </li> <!-- App case ends here -->
       </ol>
     </proof>
