@@ -5434,6 +5434,15 @@
                 </pred>
               </unin>
             </fnxn>
+            <br/>
+            <fnxn name="tv">
+              <solvables/>
+              <Unin>
+                <pred name="tv">
+                  <solvable/>
+                </pred>
+              </Unin>
+            </fnxn>
           </btypes:TYPE>
         </p>
       </example>
@@ -7793,9 +7802,159 @@
       </p>
     </lemma>
     <proof>
-      <p> 
-        ...
-      </p>
+      <ol>
+        <li>
+          <p> 
+            <btypes:TYPE>
+              <Forall>
+                <in>
+                  <mbpair>
+                    <type/>
+                    <type dash="'"/>
+                  </mbpair>
+                  <grouping>
+                    <solvables/>
+                    <text content=", "/>
+                    <solvables num="m"/>
+                    <text content=", or "/>
+                    <solvables num="n"/>
+                  </grouping>
+                </in>
+              </Forall>
+            </btypes:TYPE>,
+            if
+            <btypes:TYPE>
+              <neq>
+                <type/>
+                <tvar name="alpha"/>
+              </neq>
+            </btypes:TYPE>
+            for some
+            <btypes:TYPE>
+              <tvar name="alpha"/>
+            </btypes:TYPE>, then
+            from assumptions&nbsp;(1 and 2),
+            we must have
+            <btypes:TYPE>
+              <ceq>
+                <type/>
+                <inner>
+                  <type dash="'"/>
+                </inner>
+              </ceq>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <Forall>
+                <in>
+                  <mbpair>
+                    <tvar name="alpha"/>
+                    <type num="i"/>
+                  </mbpair>
+                  <grouping>
+                    <solvables num="m"/>
+                    <text content=", and "/>
+                    <solvables num="n"/>
+                  </grouping>
+                </in>
+              </Forall>
+            </btypes:TYPE>,
+            from assumptions&nbsp;(1, 2, and 3), and
+            <btypes:TYPE>
+              <defn tag="maybe-consistent"/>
+            </btypes:TYPE>, we have
+            <btypes:TYPE>
+              <Exists>
+                <in>
+                  <mbpair>
+                    <tvar name="alpha"/>
+                    <type num="0"/>
+                  </mbpair>
+                  <solvables/>
+                </in>
+              </Exists>
+            </btypes:TYPE>, such that
+            <btypes:TYPE>
+              <eq>
+                <types num="i"/>
+                <type num="0"/>
+              </eq>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li>
+          <p>
+            Due to assumption&nbsp;(1), we must have
+            <btypes:TYPE>
+              <eq>
+                <inter>
+                  <pred name="mtv">
+                    <solvables/>
+                    <solvables num="m"/>
+                  </pred>
+                  <pred name="ntv">
+                    <solvables/>
+                    <solvables num="m"/>
+                  </pred>
+                </inter>
+                <Empty/>
+              </eq>
+            </btypes:TYPE>.
+            Due to assumption&nbsp;(2), we must have
+            <btypes:TYPE>
+              <eq>
+                <inter>
+                  <pred name="mtv">
+                    <solvables/>
+                    <solvables num="n"/>
+                  </pred>
+                  <pred name="ntv">
+                    <solvables/>
+                    <solvables num="n"/>
+                  </pred>
+                </inter>
+                <Empty/>
+              </eq>
+            </btypes:TYPE>.
+            This, along with assumption&nbsp;(3) gives us
+            <btypes:TYPE>
+              <eq>
+                <inter>
+                  <pred name="mtv">
+                    <solvables/>
+                    <solvables num="m"/>
+                    <solvables num="n"/>
+                  </pred>
+                  <pred name="ntv">
+                    <solvables/>
+                    <solvables num="m"/>
+                    <solvables num="n"/>
+                  </pred>
+                </inter>
+                <Empty/>
+              </eq>
+            </btypes:TYPE>.
+          </p>
+        </li>
+        <li>
+          <p>
+            From cases&nbsp;(1, 2, and 3), and 
+            <btypes:TYPE>
+              <defn tag="maybe-consistent"/>
+            </btypes:TYPE>, we obtain
+            <btypes:TYPE>
+              <CST>
+                <solvables/>
+                <solvables num="m"/>
+                <solvables num="n"/>
+              </CST>
+            </btypes:TYPE>.
+          </p>
+        </li>
+      </ol>
     </proof>
     <theorem id="intermediate-sound">
       <title>Soundness of Intermediate System</title>
@@ -9719,6 +9878,302 @@
         </btypes:TYPE>.
       </p>
     </proof>
+    <lemma id="hm-tvar-effects">
+      <title>Type Variable Propagation</title>
+      <p>
+        If:
+        <btypes:TYPE>
+          <TIjudge>
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <conclude>
+              <tqExpr>
+                <aExpr num="1"/>
+                <type num="1"/>
+              </tqExpr>
+            </conclude>
+            <propagate>
+              <aSubMap num="1"/>
+            </propagate>
+          </TIjudge>
+        </btypes:TYPE> and
+        <btypes:TYPE>
+          <TIjudge>
+            <precond>
+              <aSubMap num="1"/>
+            </precond>              
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <conclude>
+              <tqExpr>
+                <aExpr num="2"/>
+                <type num="2"/>
+              </tqExpr>
+            </conclude>
+            <propagate>
+              <aSubMap num="2"/>
+            </propagate>
+          </TIjudge>
+        </btypes:TYPE>, then
+        <btypes:TYPE>
+          <eq>
+            <inter>
+              <pred name="tv">
+                <Subst>
+                  <scomp>
+                    <aSubMap num="1"/>
+                    <aSubMap num="2"/>
+                  </scomp>
+                  <collection>
+                    <aExpr num="1"/>
+                    <type num="1"/>
+                  </collection>
+                </Subst>
+              </pred>
+              <pred name="tv">
+                <Subst>
+                  <scomp>
+                    <aSubMap num="1"/>
+                    <aSubMap num="2"/>
+                  </scomp>
+                  <collection>
+                    <aExpr num="2"/>
+                    <type num="2"/>
+                  </collection>
+                </Subst>
+              </pred>
+            </inter>
+            <pred name="tv">
+              <Subst>
+                <scomp>
+                  <aSubMap num="1"/>
+                  <aSubMap num="2"/>
+                </scomp>
+                <collection>
+                  <gamma/>
+                  <store/>
+                </collection>
+              </Subst>
+            </pred>
+          </eq>
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        By straightforward induction on the derivation of 
+        <btypes:TYPE>
+          <TIjudge>
+            <precond>
+              <aSubMap num="1"/>
+            </precond>              
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <conclude>
+              <tqExpr>
+                <aExpr num="2"/>
+                <type num="2"/>
+              </tqExpr>
+            </conclude>
+            <propagate>
+              <aSubMap num="2"/>
+            </propagate>
+          </TIjudge>
+        </btypes:TYPE>. 
+        This derivation happens in an environment that already
+        contains the substitutions obtained from the first
+        derivation:
+        <btypes:TYPE>
+          <aSubMap num="1"/>
+        </btypes:TYPE>. 
+        All of the cases in the second derivation either
+        use (1) primitive types that do not alter the type variables
+        involved, (2) types (and thus type variables) from 
+        <btypes:TYPE>
+          <Subst>
+            <aSubMap num="1"/>
+            <gamma/>
+          </Subst>
+          <text content=" or "/>
+          <Subst>
+            <aSubMap num="1"/>
+            <store/>
+          </Subst>
+        </btypes:TYPE>, or (3) new type variables.
+        Therefore, it is evident that, if
+        <btypes:TYPE>
+          <eq>
+            <set>
+              <tvars name="alpha"/>
+            </set>
+            <Unin>
+              <pred name="tv">
+                <type/>
+              </pred>
+            </Unin>
+          </eq>
+          <text content=", "/>
+          <Forall>
+            <in>
+              <type/>
+              <range>
+                <aSubMap num="2"/>
+              </range>
+            </in>
+          </Forall>            
+        </btypes:TYPE>, we have
+        <btypes:TYPE>
+          <eq>
+            <inter>
+              <paren>
+                <unin>
+                  <dom>
+                    <aSubMap num="2"/>
+                  </dom>
+                  <set>
+                    <tvars name="alpha"/>
+                  </set>
+                  <pred name="tv">
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="1"/>
+                        <aSubMap num="2"/>
+                      </scomp>
+                      <collection>
+                        <aExpr num="2"/>
+                        <type num="2"/>
+                      </collection>
+                    </Subst>
+                  </pred>
+                </unin>
+              </paren>
+              <pred name="tv">
+                <Subst>
+                  <aSubMap num="1"/>
+                  <collection>
+                    <aExpr num="1"/>
+                    <type num="1"/>
+                  </collection>
+                </Subst>
+              </pred>
+            </inter>
+            <pred name="tv">
+              <Subst>
+                <aSubMap num="1"/>
+                <collection>
+                  <gamma/>
+                  <store/>
+                </collection>
+              </Subst>
+            </pred>
+          </eq>
+        </btypes:TYPE>.
+        From this, we can conclude that
+        <btypes:TYPE>
+          <eq>
+            <inter>
+              <pred name="tv">
+                <Subst>
+                  <scomp>
+                    <aSubMap num="1"/>
+                    <aSubMap num="2"/>
+                  </scomp>
+                  <collection>
+                    <aExpr num="1"/>
+                    <type num="1"/>
+                  </collection>
+                </Subst>
+              </pred>
+              <pred name="tv">
+                <Subst>
+                  <scomp>
+                    <aSubMap num="1"/>
+                    <aSubMap num="2"/>
+                  </scomp>
+                  <collection>
+                    <aExpr num="2"/>
+                    <type num="2"/>
+                  </collection>
+                </Subst>
+              </pred>
+            </inter>
+            <pred name="tv">
+              <Subst>
+                <scomp>
+                  <aSubMap num="1"/>
+                  <aSubMap num="2"/>
+                </scomp>
+                <collection>
+                  <gamma/>
+                  <store/>
+                </collection>
+              </Subst>
+            </pred>
+          </eq>
+        </btypes:TYPE>.
+      </p>
+      <p>
+        <em>Note:</em> 
+        For the sake of simplicity, type variables present as type
+        qualifications that are unbound in the environment are treated
+        as fresh type variables. For example, the epxression
+        <btypes:TYPE>
+          <if>
+            <true/>
+            <tqExpr>
+              <aExpr num="a"/> 
+              <tvar name="alpha"/>
+            </tqExpr>
+            <tqExpr>
+              <aExpr num="2"/>
+              <tvar name="alpha"/>
+            </tqExpr>
+          </if>
+        </btypes:TYPE>, where
+        <btypes:TYPE>
+          <notin>
+            <tvar name="alpha"/>
+            <pred name="tv">
+              <gamma/>
+              <store/>
+            </pred>
+          </notin>
+        </btypes:TYPE> is equivalent to 
+        <btypes:TYPE>
+          <if>
+            <true/>
+            <tqExpr>
+              <aExpr num="a"/> 
+              <tvar name="beta"/>
+            </tqExpr>
+            <tqExpr>
+              <aExpr num="2"/>
+              <tvar name="gamma"/>
+            </tqExpr>
+          </if>
+        </btypes:TYPE>, where
+        <btypes:TYPE>
+          <models name="new">
+            <assume/>
+            <grouping>
+              <tvar name="beta"/>
+              <tvar name="gamma"/>
+            </grouping>
+          </models>
+        </btypes:TYPE>.
+        This formulation obviates the need for tracking type variable
+        scopes in the environment. If necessary, any alternate
+        behaviour can be obtained by introducing dummy bindings (ex:
+        through an lambda expression that encompasses all expressions
+        that must be in scope of a type variable). 
+      </p>
+    </proof>
     <theorem id="heuristic-inference-sound">
       <title>Soundness of Heuristic Type Inference</title>
       <p>
@@ -10435,6 +10890,152 @@
                       </tqExpr>
                     </conclude>
                   </judge>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_a7">
+              <p>
+                From case&nbsp;(3.f) and
+                <btypes:TYPE>
+                  <lem tag="int-consistent"/>
+                </btypes:TYPE>, we obtain
+                <btypes:TYPE>
+                  <Cst>
+                    <assume/>
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="1"/>
+                        <aSubMap num="2"/>
+                      </scomp>
+                      <set>
+                        <gamma/>
+                        <store/>
+                        <aExpr num="1"/>
+                        <type num="1"/>
+                      </set>
+                    </Subst>
+                  </Cst>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_a8">
+              <p>
+                From cases&nbsp;(3.a.i.A and 3.a.i.B), and
+                <btypes:TYPE>
+                  <lem tag="hm-tvar-effects"/>
+                </btypes:TYPE>, we obtain:
+                <btypes:TYPE>
+                  <eq>
+                    <inter>
+                      <pred name="tv">
+                        <Subst>
+                          <scomp>
+                            <aSubMap num="1"/>
+                            <aSubMap num="2"/>
+                          </scomp>
+                          <collection>
+                            <aExpr num="1"/>
+                            <type num="1"/>
+                          </collection>
+                        </Subst>
+                      </pred>
+                      <pred name="tv">
+                        <Subst>
+                          <scomp>
+                            <aSubMap num="1"/>
+                            <aSubMap num="2"/>
+                          </scomp>
+                          <collection>
+                            <aExpr num="2"/>
+                            <type num="2"/>
+                          </collection>
+                        </Subst>
+                      </pred>
+                    </inter>
+                    <pred name="tv">
+                      <Subst>
+                        <scomp>
+                          <aSubMap num="1"/>
+                          <aSubMap num="2"/>
+                        </scomp>
+                        <collection>
+                          <gamma/>
+                          <store/>
+                        </collection>
+                      </Subst>
+                    </pred>
+                  </eq>
+                </btypes:TYPE>.
+                This can be written as:
+                <btypes:TYPE>
+                  <eq>
+                    <inter>
+                      <pred name="tv">
+                        <Subst>
+                          <scomp>
+                            <aSubMap num="1"/>
+                            <aSubMap num="2"/>
+                          </scomp>
+                          <collection>
+                            <gamma/>
+                            <store/>
+                            <aExpr num="1"/>
+                            <type num="1"/>
+                          </collection>
+                        </Subst>
+                      </pred>
+                      <pred name="tv">
+                        <Subst>
+                          <scomp>
+                            <aSubMap num="1"/>
+                            <aSubMap num="2"/>
+                          </scomp>
+                          <collection>
+                            <gamma/>
+                            <store/>
+                            <aExpr num="2"/>
+                            <type num="2"/>
+                          </collection>
+                        </Subst>
+                      </pred>
+                    </inter>
+                    <pred name="tv">
+                      <Subst>
+                        <scomp>
+                          <aSubMap num="1"/>
+                          <aSubMap num="2"/>
+                        </scomp>
+                        <collection>
+                          <gamma/>
+                          <store/>
+                        </collection>
+                      </Subst>
+                    </pred>
+                  </eq>
+                </btypes:TYPE>.                
+              </p>
+            </li>
+            <li id="hms_a9">
+              <p>
+                From cases&nbsp;(3.g, 3.e, and 3.h), we obtain
+                <btypes:TYPE>
+                  <Cst>
+                    <assume/>
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="1"/>
+                        <aSubMap num="2"/>
+                      </scomp>
+                      <set>
+                        <gamma/>
+                        <store/>
+                        <aExpr num="1"/>
+                        <type num="1"/>
+                        <aExpr num="2"/>
+                        <type num="2"/>
+                      </set>
+                    </Subst>
+                  </Cst>
                 </btypes:TYPE>.
               </p>
             </li>
