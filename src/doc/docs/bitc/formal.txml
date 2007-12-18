@@ -9496,6 +9496,58 @@
             </btypes:TYPE>
           </p>
         </li>
+      </ol>
+    </theorem>
+    <proof>
+      <p>
+        By straightforward induction on the derivation of 
+        <btypes:TYPE>
+          <UNIFY>
+            <type num="1"/>
+            <type num="2"/>              
+            <aSubMap/>
+          </UNIFY>
+        </btypes:TYPE>.
+      </p>
+    </proof>
+    <lemma id="unify-consistent">
+      <title>Consistency of Unified Types</title>
+      <p>
+        <btypes:TYPE>
+          <text content="If "/>
+          <UNIFY>
+            <type num="1"/>
+            <type num="2"/>              
+            <aSubMap/>
+          </UNIFY>
+          <text content=", then:"/>
+        </btypes:TYPE>
+      </p>
+      <ol>
+        <li>
+          <p>
+            <btypes:TYPE>
+              <CST>
+                <solvables/>
+                <type num="1"/>
+                <type num="2"/>
+              </CST>
+              <text content=" implies "/>
+              <Cst>
+                <assume/>
+                <Subst>
+                  <aSubMap/>
+                  <set>
+                    <solvables/>
+                    <type num="1"/>
+                    <type num="2"/>
+                  </set>
+                </Subst>
+              </Cst>
+              <text content="."/>
+            </btypes:TYPE>
+          </p>
+        </li>
         <li>
           <p>
             <btypes:TYPE>
@@ -9525,7 +9577,7 @@
           </p>
         </li>
       </ol>
-    </theorem>
+    </lemma>
     <proof>
       <p>
         By straightforward induction on the derivation of 
@@ -9800,6 +9852,81 @@
     <proof>
       <p>
         Similar to Theorem&nbsp;<xref ref="TI-unify-decidable"/>. 
+      </p>
+    </proof>
+    <lemma id="structural_isomorphism">
+      <title>Structural Isomorphism</title>
+      <p>
+        If 
+        <btypes:TYPE>
+          <Msub>
+            <type num="1"/>
+            <type num="2"/>              
+          </Msub>
+          <text content=" and "/>
+          <Msub>
+            <type num="2"/>              
+            <type num="1"/>
+          </Msub>
+        </btypes:TYPE>, then for any substitution
+        <btypes:TYPE>
+          <aSubMap/>
+        </btypes:TYPE>, we have
+        <btypes:TYPE>
+          <Msub>
+            <Subst>
+              <aSubMap/>
+              <type num="1"/>
+            </Subst>
+            <Subst>
+              <aSubMap/>
+              <type num="2"/>              
+            </Subst>
+          </Msub>
+          <text content=" and "/>
+          <Msub>
+            <Subst>
+              <aSubMap/>
+              <type num="2"/>              
+            </Subst>
+            <Subst>
+              <aSubMap/>
+              <type num="1"/>
+            </Subst>
+          </Msub>
+        </btypes:TYPE>.
+      </p>
+    </lemma>
+    <proof>
+      <p>
+        Since we have both
+        <btypes:TYPE>
+          <Msub>
+            <type num="1"/>
+            <type num="2"/>
+          </Msub>
+          <text content=" and "/>
+          <Msub>
+            <type num="2"/>
+            <type num="1"/>
+          </Msub>
+        </btypes:TYPE>,
+        the two types 
+        <btypes:TYPE>
+          <type num="1"/>
+          <text content=" and "/>
+          <type num="2"/>
+        </btypes:TYPE> must be structurally equivalent expect for the
+        fact that one of the types can be of the form
+        <btypes:TYPE>
+          <mbpair>
+            <type/>
+            <type dash="'"/>
+          </mbpair>
+        </btypes:TYPE>, and the other of the form
+        <btypes:TYPE>
+          <type/>
+        </btypes:TYPE>. The conclusion is thus evident.
       </p>
     </proof>
     <lemma id="heuristic-inference-consistent">
@@ -11039,14 +11166,708 @@
                 </btypes:TYPE>.
               </p>
             </li>
+            <li id="hms_a10">
+              <p>
+                It is evident that 
+                <btypes:TYPE>
+                  <Cst>
+                    <assume/>
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="1"/>
+                        <aSubMap num="2"/>
+                      </scomp>
+                      <set>
+                        <gamma/>
+                        <store/>
+                        <aExpr num="1"/>
+                        <type num="1"/>
+                        <aExpr num="2"/>
+                        <type num="2"/>
+                        <mbpair>
+                          <tvar name="beta"/>
+                          <fn M="yes">
+                            <tvar name="delta"/>
+                            <tvar name="alpha"/>
+                          </fn>
+                        </mbpair>
+                      </set>
+                    </Subst>
+                  </Cst>
+                </btypes:TYPE>, since 
+                <btypes:TYPE>
+                  <tvar name="beta"/>
+                  <text content=", "/>
+                  <tvar name="gamma"/>
+                  <text content=", and "/>
+                  <tvar name="delta"/>
+                </btypes:TYPE> are new type variables 
+                (from case&nbsp;(3.a.i.F)).
+              </p>
+            </li>
+            <li id="hms_a11">
+              <p>
+                From cases&nbsp;(3.a.i.C, and 3.j) and 
+                <btypes:TYPE>
+                  <lem tag="unify-consistent"/>
+                </btypes:TYPE>-conclusion&nbsp;(1), we obtain
+                <btypes:TYPE>
+                  <Cst>
+                    <assume/>
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="1"/>
+                        <aSubMap num="2"/>
+                        <aSubMap num="f"/>
+                      </scomp>
+                      <set>
+                        <gamma/>
+                        <store/>
+                        <aExpr num="1"/>
+                        <type num="1"/>
+                        <aExpr num="2"/>
+                        <type num="2"/>
+                        <mbpair>
+                          <tvar name="beta"/>
+                          <fn M="yes">
+                            <tvar name="delta"/>
+                            <tvar name="alpha"/>
+                          </fn>
+                        </mbpair>
+                      </set>
+                    </Subst>
+                  </Cst>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_a12">
+              <p>
+                From case&nbsp;(3.a.i.C), and 
+                <btypes:TYPE>
+                  <thm tag="TI-unify-correct"/>
+                </btypes:TYPE>-conclusion(1), we have 
+                <btypes:TYPE>
+                  <Msub>
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="2"/>
+                        <aSubMap num="f"/>
+                      </scomp>
+                      <type num="1"/>
+                    </Subst>
+                    <Subst>
+                      <aSubMap num="f"/>
+                      <mbpair>
+                        <tvar name="beta"/>
+                        <fn M="yes">
+                          <tvar name="delta"/>
+                          <tvar name="alpha"/>
+                        </fn>
+                      </mbpair>
+                    </Subst>
+                  </Msub>
+                  <text content=" and "/>
+                  <Msub>
+                    <Subst>
+                      <aSubMap num="f"/>
+                      <mbpair>
+                        <tvar name="beta"/>
+                        <fn M="yes">
+                          <tvar name="delta"/>
+                          <tvar name="alpha"/>
+                        </fn>
+                      </mbpair>
+                    </Subst>
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="2"/>
+                        <aSubMap num="f"/>
+                      </scomp>
+                      <type num="1"/>
+                    </Subst>
+                  </Msub>
+                </btypes:TYPE>. This can be equivalently written as
+                <btypes:TYPE>
+                  <Msub>
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="1"/>
+                        <aSubMap num="2"/>
+                        <aSubMap num="f"/>
+                      </scomp>
+                      <type num="1"/>
+                    </Subst>
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="1"/>
+                        <aSubMap num="2"/>
+                        <aSubMap num="f"/>
+                      </scomp>
+                      <mbpair>
+                        <tvar name="beta"/>
+                        <fn M="yes">
+                          <tvar name="delta"/>
+                          <tvar name="alpha"/>
+                        </fn>
+                      </mbpair>
+                    </Subst>
+                  </Msub>
+                  <text content=" and "/>
+                  <Msub>
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="1"/>
+                        <aSubMap num="2"/>
+                        <aSubMap num="f"/>
+                      </scomp>
+                      <mbpair>
+                        <tvar name="beta"/>
+                        <fn M="yes">
+                          <tvar name="delta"/>
+                          <tvar name="alpha"/>
+                        </fn>
+                      </mbpair>
+                    </Subst>
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="1"/>
+                        <aSubMap num="2"/>
+                        <aSubMap num="f"/>
+                      </scomp>
+                      <type num="1"/>
+                    </Subst>
+                  </Msub>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_a13">
+              <p>
+                From case (3.a.iii), we know that
+                <btypes:TYPE>
+                  <eq>
+                    <aSubMap/>
+                    <scomp>
+                      <aSubMap num="1"/>
+                      <aSubMap num="2"/>
+                      <aSubMap num="f"/>
+                      <aSubMap num="a"/>
+                    </scomp>
+                  </eq>
+                </btypes:TYPE>.
+                Similar to cases&nbsp;(3.j, 3.k, and 3.l), from
+                case&nbsp;(3.a.i.D) we obtain:
+              </p>
+              <ol>
+                <li>
+                  <p>
+                    <btypes:TYPE>
+                      <Cst>
+                        <assume/>
+                        <Subst>
+                          <aSubMap/>
+                          <set>
+                            <gamma/>
+                            <store/>
+                            <aExpr num="1"/>
+                            <type num="1"/>
+                            <aExpr num="2"/>
+                            <type num="2"/>
+                            <mbpair>
+                              <tvar name="beta"/>
+                              <fn M="yes">
+                                <tvar name="delta"/>
+                                <tvar name="alpha"/>
+                              </fn>
+                            </mbpair>
+                            <mbpair>
+                              <tvar name="gamma"/>		
+                              <minz>
+                                <Subst>
+                                  <aSubMap num="f"/>
+                                  <tvar name="delta"/>
+                                </Subst>
+                              </minz>
+                            </mbpair>
+                          </set>
+                        </Subst>
+                      </Cst>
+                    </btypes:TYPE>
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    <btypes:TYPE>
+                      <Msub>
+                        <Subst>
+                          <aSubMap/>
+                          <type num="2"/>	      
+                        </Subst>
+                        <Subst>
+                          <aSubMap/>
+                          <mbpair>
+                            <tvar name="gamma"/>		
+                            <minz>
+                              <Subst>
+                                <aSubMap num="f"/>
+                                <tvar name="delta"/>
+                              </Subst>
+                            </minz>
+                          </mbpair>
+                        </Subst>
+                      </Msub>
+                      <text content=" and "/>
+                      <Msub>
+                        <Subst>
+                          <aSubMap/>
+                          <mbpair>
+                            <tvar name="gamma"/>		
+                            <minz>
+                              <Subst>
+                                <aSubMap num="f"/>
+                                <tvar name="delta"/>
+                              </Subst>
+                            </minz>
+                          </mbpair>
+                        </Subst>
+                        <Subst>
+                          <aSubMap/>
+                          <type num="2"/>	      
+                        </Subst>
+                      </Msub>
+                    </btypes:TYPE>.
+                  </p>
+                </li>
+              </ol>
+            </li>
+            <li id="hms_a14"> 
+              <ol>
+                <li>
+                  <p>
+                    From case&nbsp;(3.m.i), and
+                    <btypes:TYPE>
+                      <lem tag="weakening-sat-cst"/>
+                    </btypes:TYPE> (weakening-conclusion&nbsp;(3)),
+                    we obtain
+                    <btypes:TYPE>
+                      <Cst>
+                        <assume/>
+                        <Subst>
+                          <aSubMap/>
+                          <set>
+                            <gamma/>
+                            <store/>
+                            <aExpr num="1"/>
+                            <type num="1"/>
+                          </set>
+                        </Subst>
+                      </Cst>
+                    </btypes:TYPE>
+                    From this, case&nbsp;(3.b), and
+                    <btypes:TYPE>
+                      <lem tag="int-subst"/>
+                    </btypes:TYPE>, we obtain
+                    <btypes:TYPE>
+                      <judge name="j">
+                        <precond>
+                          <aSubMap/>
+                        </precond>
+                        <assume>
+                          <gamma/>
+                          <store/>
+                        </assume>
+                        <conclude>
+                          <tqExpr>
+                            <aExpr num="1"/>
+                            <type num="1"/>
+                          </tqExpr>
+                        </conclude>
+                      </judge>
+                    </btypes:TYPE>.
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    Similarly, from case&nbsp;(3.d), and
+                    <btypes:TYPE>
+                      <lem tag="int-subst"/>
+                    </btypes:TYPE>, we obtain
+                    <btypes:TYPE>
+                      <judge name="j">
+                        <precond>
+                          <aSubMap/>
+                        </precond>
+                        <assume>
+                          <gamma/>
+                          <store/>
+                        </assume>
+                        <conclude>
+                          <tqExpr>
+                            <aExpr num="2"/>
+                            <type num="2"/>
+                          </tqExpr>
+                        </conclude>
+                      </judge>
+                    </btypes:TYPE>.
+                  </p>
+                </li>
+              </ol>
+            </li>
+            <li id="hms_a15">
+              <p>
+                From case&nbsp;(3.m.i), and
+                <btypes:TYPE>
+                  <lem tag="weakening-sat-cst"/>
+                </btypes:TYPE> (weakening-conclusion&nbsp;(3)),
+                we obtain
+                <btypes:TYPE>
+                  <Cst>
+                    <assume/>
+                    <Subst>
+                      <aSubMap/>
+                      <set>
+                        <gamma/>
+                        <store/>
+                        <aExpr num="1"/>
+                        <type num="1"/>
+                        <aExpr num="2"/>
+                        <type num="2"/>
+                        <mbpair>
+                          <tvar name="beta"/>
+                          <fn M="yes">
+                            <tvar name="delta"/>
+                            <tvar name="alpha"/>
+                          </fn>
+                        </mbpair>
+                      </set>
+                    </Subst>
+                  </Cst>
+                </btypes:TYPE>. From this, it is evident that
+                <btypes:TYPE>
+                  <Cst>
+                    <assume/>
+                    <Subst>
+                      <aSubMap/>
+                      <set>
+                        <gamma/>
+                        <store/>
+                        <aExpr num="1"/>
+                        <type num="1"/>
+                        <aExpr num="2"/>
+                        <type num="2"/>
+                        <fn M="yes">
+                          <tvar name="delta"/>
+                          <tvar name="alpha"/>
+                        </fn>
+                      </set>
+                    </Subst>
+                  </Cst>
+                </btypes:TYPE>.
+                Now, from cases&nbsp;(3.m.1 and 3.a.i.E), since 
+                <btypes:TYPE>
+                  <tvar name="epsiv"/>
+                </btypes:TYPE> is a new type variable, and
+                <btypes:TYPE>
+                  <eq>
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="a"/>
+                        <aSubMap num="f"/>
+                      </scomp>
+                      <tvar name="alpha"/>
+                    </Subst>
+                    <Subst>
+                      <aSubMap/>
+                      <tvar name="alpha"/>
+                    </Subst>
+                  </eq>
+                </btypes:TYPE>, and 
+                <btypes:TYPE>
+                  <in>
+                    <Subst>
+                      <aSubMap/>
+                      <tvar name="alpha"/>
+                    </Subst>
+                    <Subst>
+                      <aSubMap/>
+                      <fn M="yes">
+                        <tvar name="delta"/>
+                        <tvar name="alpha"/>
+                      </fn>
+                    </Subst>                    
+                  </in>
+                </btypes:TYPE>, we conclude that
+                <btypes:TYPE>
+                  <Cst>
+                    <assume/>
+                    <Subst>
+                      <aSubMap/>
+                      <set>
+                        <gamma/>
+                        <store/>
+                        <aExpr num="1"/>
+                        <type num="1"/>
+                        <aExpr num="2"/>
+                        <type num="2"/>
+                        <fn M="yes">
+                          <tvar name="delta"/>
+                          <tvar name="alpha"/>
+                        </fn>
+                        <type/>
+                      </set>
+                    </Subst>
+                  </Cst>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_a16">
+              <p>
+                From case&nbsp;(3.l) and 
+                 <btypes:TYPE>
+                  <lem tag="structural_isomorphism"/>
+                </btypes:TYPE>, we obtain (as one of the conclusions):
+                <btypes:TYPE>
+                  <Msub>
+                    <Subst>
+                      <aSubMap/>
+                      <type num="1"/>
+                    </Subst>
+                    <Subst>
+                      <aSubMap/>
+                      <mbpair>
+                        <tvar name="beta"/>
+                        <fn M="yes">
+                          <tvar name="delta"/>
+                          <tvar name="alpha"/>
+                        </fn>
+                      </mbpair>
+                    </Subst>
+                  </Msub>
+                </btypes:TYPE>, from which we can conclude that
+                <btypes:TYPE>
+                  <Msub>
+                    <Subst>
+                      <aSubMap/>
+                      <type num="1"/>
+                    </Subst>
+                    <Subst>
+                      <aSubMap/>
+                      <fn M="yes">
+                        <tvar name="delta"/>
+                        <tvar name="alpha"/>
+                      </fn>
+                    </Subst>
+                  </Msub>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_a17">
+              <p>
+                From case&nbsp;(3.m.ii), we have 
+                <btypes:TYPE>
+                  <Msub>
+                    <Subst>
+                      <aSubMap/>
+                      <type num="2"/>	      
+                    </Subst>
+                    <Subst>
+                      <aSubMap/>
+                      <mbpair>
+                        <tvar name="gamma"/>		
+                        <minz>
+                          <Subst>
+                            <aSubMap num="f"/>
+                            <tvar name="delta"/>
+                          </Subst>
+                        </minz>
+                      </mbpair>
+                    </Subst>
+                  </Msub>
+                </btypes:TYPE>, from which, we can conclude that
+                <btypes:TYPE>
+                  <Msub>
+                    <Subst>
+                      <aSubMap/>
+                      <type num="2"/>	      
+                    </Subst>
+                    <Subst>
+                      <aSubMap/>
+                      <minz>
+                        <Subst>
+                          <aSubMap num="f"/>
+                          <tvar name="delta"/>
+                        </Subst>
+                      </minz>
+                    </Subst>
+                  </Msub>
+                </btypes:TYPE>, and therefore
+                <btypes:TYPE>
+                  <Msub>
+                    <Subst>
+                      <aSubMap/>
+                      <type num="2"/>	      
+                    </Subst>
+                    <minz>
+                      <Subst>
+                        <aSubMap/>
+                        <tvar name="delta"/>
+                      </Subst>
+                    </minz>
+                  </Msub>
+                </btypes:TYPE>, and thus
+                <btypes:TYPE>
+                  <Msub>
+                    <Subst>
+                      <aSubMap/>
+                      <type num="2"/>	      
+                    </Subst>
+                    <inner>
+                      <Subst>
+                        <aSubMap/>
+                        <tvar name="delta"/>
+                      </Subst>
+                    </inner>
+                  </Msub>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_a18">
+              <p>
+                For any type 
+                <btypes:TYPE>
+                  <type dash="'"/>
+                </btypes:TYPE>, it is evident from the definition of 
+                <btypes:TYPE>
+                  <inner>
+                    <type dash="'"/>
+                  </inner>
+                </btypes:TYPE> in
+                figure&nbsp;<xref ref="hm_infer"/> that
+                <btypes:TYPE>
+                  <Msub>
+                    <minz>
+                      <type dash="'"/>
+                    </minz>
+                    <inner>
+                      <type dash="'"/>
+                    </inner>
+                  </Msub>
+                </btypes:TYPE>. Therefore,
+                <btypes:TYPE>
+                  <Msub>
+                    <minz>
+                      <Subst>
+                        <aSubMap/>
+                        <tvar name="alpha"/>
+                      </Subst>
+                    </minz>
+                    <inner>
+                      <Subst>
+                        <aSubMap/>
+                        <tvar name="alpha"/>
+                      </Subst>
+                    </inner>
+                  </Msub>
+                </btypes:TYPE>. From this, it is evident that
+                <btypes:TYPE>
+                  <Msub>
+                    <mbpair>
+                      <tvar name="gamma"/>
+                      <minz>
+                        <Subst>
+                          <aSubMap/>
+                          <tvar name="alpha"/>
+                        </Subst>
+                      </minz>
+                    </mbpair>
+                    <inner>
+                      <Subst>
+                        <aSubMap/>
+                        <tvar name="alpha"/>
+                      </Subst>
+                    </inner>
+                  </Msub>
+                </btypes:TYPE>.
+                Now, from case&nbsp;(3.a.i.E), (since
+                <btypes:TYPE>
+                  <eq>
+                    <Subst>
+                      <scomp>
+                        <aSubMap num="a"/>
+                        <aSubMap num="f"/>
+                      </scomp>
+                      <tvar name="alpha"/>
+                    </Subst>
+                    <Subst>
+                      <aSubMap/>
+                      <tvar name="alpha"/>
+                    </Subst>
+                  </eq>
+                </btypes:TYPE>, and
+                <btypes:TYPE>
+                  <eq>
+                    <Subst>
+                      <aSubMap/>
+                      <type/>
+                    </Subst>
+                    <type/>
+                  </eq>
+                </btypes:TYPE>), we can write
+                <btypes:TYPE>
+                  <Msub>
+                    <Subst>
+                      <aSubMap/>
+                      <tvar name="alpha"/>
+                    </Subst>
+                    <inner>
+                      <Subst>
+                        <aSubMap/>
+                        <type/>	      
+                      </Subst>
+                    </inner>
+                  </Msub>
+                </btypes:TYPE>.
+              </p>
+            </li>
+            <li id="hms_a19">
+              <p>
+                Now, from cases&nbsp;(3.n.i, 3.p, 3.n.ii, 3.q, 3.r,
+                and 3.o) and the J-App rule in 
+                figure&nbsp;<xref ref="hm_inter_rules"/>, we obtain
+                <btypes:TYPE>
+                  <judge name="j">
+                    <precond>
+                      <aSubMap/>
+                    </precond>
+                    <assume>
+                      <gamma/>
+                      <store/>
+                    </assume>
+                    <conclude>
+                      <tqExpr>
+                        <apply>
+                          <aExpr num="1"/>
+                          <aExpr num="2"/>
+                        </apply>                 
+                        <type/>
+                      </tqExpr>
+                    </conclude>
+                  </judge>
+                </btypes:TYPE>.
+              </p>
+            </li>
           </ol>
         </li> <!-- App case ends here -->
+        <li id="hms_rest">
+          <p>
+            Cases I-If, I-Dup, I-Deref, I-Set,  
+            I-Tqexpr, I-Let[Tq] are similar.
+          </p>
+        </li>
       </ol>
     </proof>
     <p>
       _____________________________________________
     </p>
-
     <!--
     <lemma id="ctr-subst-decl">
       <title>Corollary to Lemma&nbsp;<xref ref="decl-sub"/>.</title>
