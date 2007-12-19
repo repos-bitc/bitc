@@ -105,25 +105,36 @@
     <btypes:TYPE>
       <type/>
     </btypes:TYPE>.
-    We write 
-    <btypes:TYPE>
-      <TDjudge sub="yes">
-	<aExpr/>                  
-	<type/>                  
-      </TDjudge>
-    </btypes:TYPE> as a shorthand for:
-    <btypes:TYPE>
-      <TDjudge>
-	<aExpr/>                  
-	<type dash="'"/>                  
-      </TDjudge>
-      <text content=", "/>
-      <Tsub>
-	<type dash="'"/>
-	<type/>
-      </Tsub>
-    </btypes:TYPE>.
   </p>
+  <p>
+    We use the following shorthand notation:
+  </p>
+  <example>
+    <p>
+      <btypes:TYPE>
+	<leadsto>
+	  <DBrac>
+	    <TDjudge sub="yes">
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	  </DBrac>
+	  <DBrac>
+	    <collection>
+	      <TDjudge>
+		<aExpr/>
+		<type dash="'"/>
+	      </TDjudge>
+	      <Tsub>
+		<type/>
+		<type dash="'"/>
+	      </Tsub>
+	    </collection>
+	  </DBrac>
+	</leadsto>
+      </btypes:TYPE>
+    </p>
+  </example>
   <definition id="aleq">      
     <title>Algebraic equivalences</title>
     <p>
@@ -591,7 +602,18 @@
 	    <type num="i"/>
 	    <aExpr/>
 	  </in>
-	</btypes:TYPE>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <solvables/>
+	    </ftvs>
+	    <Unin>
+	      <ftvs>
+		<solvable/>
+	      </ftvs>
+	    </Unin>
+	  </eq>
+	</btypes:TYPE>.
       </p>
     </example>
   </definition>

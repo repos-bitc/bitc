@@ -33,11 +33,9 @@
       	<address>3400 N.Charles Street. 224 NEB. Baltimore, MD 21218.</address>
       </affiliation>
     </authorgroup>
-    <pubdate></pubdate>
+    <pubdate/>
     <!--     <copyright> -->
-    <!--       <year>2006</year> -->
-    <!--       <holder>Swaroop Sridhar</holder> -->
-    <!--       <holder>Jonathan S. Shapiro</holder> -->
+    <!--       <year/><holder/> -->
     <!--     </copyright> -->
     <!--   <categories> -->
     <!--     <category>dev/bitc</category> -->
@@ -48,7 +46,7 @@
     </synopsis>
   </docinfo>  
   <!--<abstract latex.incolumn="yes">
-  <p>
+    <p>
     </p>
   </abstract> -->
   <!-- <toc/> -->

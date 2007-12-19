@@ -60,9 +60,10 @@
   </btypes:TYPE>
   <p>
     In this system, we will use a slightly modified version of 
+    the constraint set normalization function defined in 
     <btypes:TYPE>
       <defn tag="normalized_ctset"/>
-    </btypes:TYPE>, wherein the translation 
+    </btypes:TYPE>. Here, the translation 
   </p>
   <example>
     <p>
@@ -158,10 +159,18 @@
       </eq>
     </btypes:TYPE>.
   </p>
-  <definition id="ext-ftvs">
-    <title>FTVs (Extension)</title>
+  <definition id="ext2-ftvs">
+    <title>FTVs (Extension II)</title>
     <p>
-      We need to enhance the definition of FTV as:
+      We enhance the definition of 
+      <btypes:TYPE>
+	<ftvs>
+	  <unspecified/>
+	</ftvs>
+      </btypes:TYPE> in 
+      <btypes:TYPE>
+	<defn tag="ext-ftvs"/>
+      </btypes:TYPE> as follows:
     </p>
     <example>
       <p>
@@ -185,17 +194,6 @@
 		</inner>
 	      </ftvs>
 	    </unin>
-	  </eq>
-	  <br/>
-	  <eq>
-	    <ftvs>
-	      <solvables/>
-	    </ftvs>
-	    <Unin>
-	      <ftvs>
-		<solvable/>
-	      </ftvs>
-	    </Unin>
 	  </eq>
 	</btypes:TYPE>.
       </p>
@@ -879,387 +877,8 @@
       </Hrules>
     </btypes:TYPE>
   </definition>
-  <definition id="shorthand">
-    <title>Notational Shorthands</title>
-    <p>
-      We use the following shorthand translations as a notational
-      convenience. Shorthand&nbsp;(<xref ref="decl_shorthand"/>) was already defined
-      and used in section&nbsp;<xref ref="type_system"/>
-    </p>
-    <ol>
-      <li id="decl_shorthand">
-	<p>
-	  <btypes:TYPE>
-	    <leadsto>
-	      <DBrac>
-		<TDjudge sub="yes">
-		  <aExpr/>
-		  <type/>
-		</TDjudge>
-	      </DBrac>
-	      <DBrac>
-		<collection>
-		  <TDjudge>
-		    <aExpr/>
-		    <type dash="'"/>
-		  </TDjudge>
-		  <Tsub>
-		    <type/>
-		    <type dash="'"/>
-		  </Tsub>
-		</collection>
-	      </DBrac>
-	    </leadsto>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <leadsto>
-	      <DBrac>
-		<TDjudge name="j" sub="yes">
-		  <aExpr/>
-		  <type/>
-		</TDjudge>
-	      </DBrac>
-	      <DBrac>
-		<collection>
-		  <TDjudge name="j">
-		    <aExpr/>
-		    <type dash="'"/>
-		  </TDjudge>
-		  <Tsub>
-		    <type/>
-		    <type dash="'"/>
-		  </Tsub>
-		</collection>
-	      </DBrac>
-	    </leadsto>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <leadsto>
-	      <DBrac>
-		<TDjudge name="j" Msub="yes">
-		  <aExpr/>
-		  <type/>
-		</TDjudge>
-	      </DBrac>
-	      <DBrac>
-		<collection>
-		  <TDjudge name="j">
-		    <aExpr/>
-		    <type dash="'"/>
-		  </TDjudge>
-		  <Msub>
-		    <type/>
-		    <type dash="'"/>
-		  </Msub>
-		</collection>
-	      </DBrac>
-	    </leadsto>            
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <leadsto>
-	      <DBrac>
-		<TIjudge>
-		  <assume>
-		    <gamma/>
-		    <store/>
-		  </assume>
-		  <conclude>
-		    <tqExpr>
-		      <aExpr/>
-		      <type/>
-		    </tqExpr>
-		  </conclude>
-		</TIjudge>
-	      </DBrac>
-	      <DBrac>            
-		<TIjudge>
-		  <assume>
-		    <gamma/>
-		    <store/>
-		  </assume>
-		  <conclude>            
-		    <tqExpr>
-		      <aExpr/>
-		      <type/>
-		    </tqExpr>
-		  </conclude>
-		  <propagate>
-		    <EmptySubst/>
-		  </propagate>
-		</TIjudge>
-	      </DBrac>
-	    </leadsto>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <leadsto>
-	      <DBrac>          
-		<TIjudge>
-		  <precond>
-		    <aSubMap num="0"/>
-		  </precond>
-		  <assume>
-		    <gamma/>
-		    <store/>
-		  </assume>
-		  <conclude>
-		    <tqExpr>
-		      <aExpr/>
-		      <type/>
-		    </tqExpr>
-		  </conclude>
-		  <propagate>
-		    <aSubMap/>
-		  </propagate>
-		</TIjudge>
-	      </DBrac>
-	      <DBrac>          
-		<TIjudge>
-		  <assume>
-		    <Subst>
-		      <aSubMap num="0"/>
-		      <gamma/>
-		    </Subst>
-		    <Subst>
-		      <aSubMap num="0"/>
-		      <store/>
-		    </Subst>
-		  </assume>
-		  <conclude>
-		    <tqExpr>
-		      <Subst>
-			<aSubMap num="0"/>
-			<aExpr/>
-		      </Subst>
-		      <type/>
-		    </tqExpr>
-		  </conclude>
-		  <propagate>
-		    <aSubMap/>
-		  </propagate>
-		</TIjudge>
-	      </DBrac>
-	    </leadsto>   
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>              
-	    <leadsto>
-	      <DBrac>  
-		<judge>
-		  <precond>
-		    <aSubMap/>
-		  </precond>
-		  <assume>
-		    <gamma/>
-		    <store/>
-		  </assume>
-		  <conclude>
-		    <tqExpr>
-		      <aExpr/>
-		      <type/>
-		    </tqExpr>
-		  </conclude>
-		</judge>
-	      </DBrac>
-	      <DBrac>          
-		<Sjudge>
-		  <assume>
-		    <Subst>
-		      <aSubMap/>
-		      <gamma/>
-		    </Subst>
-		    <Subst>
-		      <aSubMap/>
-		      <store/>
-		    </Subst>
-		  </assume>
-		  <tqExpr>
-		    <Subst>
-		      <aSubMap/>
-		      <aExpr/>
-		    </Subst>
-		    <Subst>
-		      <aSubMap/>
-		      <type/>
-		    </Subst>
-		  </tqExpr>
-		</Sjudge>
-	      </DBrac>
-	    </leadsto>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>              
-	    <leadsto>
-	      <DBrac>  
-		<judge name="j">
-		  <precond>
-		    <aSubMap/>
-		  </precond>
-		  <assume>
-		    <gamma/>
-		    <store/>
-		  </assume>
-		  <conclude>
-		    <tqExpr>
-		      <aExpr/>
-		      <type/>
-		    </tqExpr>
-		  </conclude>
-		</judge>
-	      </DBrac>
-	      <DBrac>          
-		<Sjudge name="j">
-		  <assume>
-		    <Subst>
-		      <aSubMap/>
-		      <gamma/>
-		    </Subst>
-		    <Subst>
-		      <aSubMap/>
-		      <store/>
-		    </Subst>
-		  </assume>
-		  <tqExpr>
-		    <Subst>
-		      <aSubMap/>
-		      <aExpr/>
-		    </Subst>
-		    <Subst>
-		      <aSubMap/>
-		      <type/>
-		    </Subst>
-		  </tqExpr>
-		</Sjudge>
-	      </DBrac>
-	    </leadsto>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <leadsto>
-	      <DBrac>          
-		<Djudge>
-		  <aSubMap/>
-		  <gamma/>
-		  <store/>
-		  <aExpr/>
-		  <type/>
-		</Djudge>
-	      </DBrac>
-	      <DBrac>          
-		<Sjudge>
-		  <assume>
-		    <canonical>
-		      <Subst>
-			<aSubMap/>
-			<gamma/>
-		      </Subst>
-		    </canonical>
-		    <canonical>
-		      <Subst>
-			<aSubMap/>
-			<store/>
-		      </Subst>
-		    </canonical>
-		  </assume>
-		  <tqExpr>
-		    <canonical>
-		      <Subst>
-			<aSubMap/>
-			<aExpr/>
-		      </Subst>
-		    </canonical>
-		    <canonical>
-		      <Subst>
-			<aSubMap/>
-			<type/>
-		      </Subst>
-		    </canonical>
-		  </tqExpr>
-		</Sjudge>
-	      </DBrac>
-	    </leadsto>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <leadsto>
-	      <DBrac> 
-		<set>
-		  <aSubMap/>
-		  <spset>
-		    <unspecified/>
-		  </spset>
-		</set>
-	      </DBrac>
-	      <DBrac>          
-		<Subst>                
-		  <aSubMap/>
-		  <grouping>
-		    <set>
-		      <unspecified/>
-		    </set>
-		  </grouping>
-		</Subst>
-	      </DBrac>
-	    </leadsto>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <leadsto>
-	      <DBrac> 
-		<Subst>
-		  <aSubMap/>
-		  <spset>
-		    <unspecified/>
-		  </spset>
-		</Subst>
-	      </DBrac>
-	      <DBrac>          
-		<Subst>                
-		  <aSubMap/>
-		  <grouping>
-		    <spset>
-		      <unspecified/>
-		    </spset>
-		  </grouping>
-		</Subst>
-	      </DBrac>
-	    </leadsto>
-	  </btypes:TYPE>
-	</p>
-      </li>
-    </ol>
-  </definition>
   <p>
+    <leadin>Type Inference:</leadin>
     The type inference algorithm is as shown in
     Figure&nbsp;<xref ref="hm_infer"/>. 
     The inference judgment 
@@ -1295,6 +914,332 @@
       </models>
     </btypes:TYPE> identifies new type variables. 
   </p>
+  <p>
+    We use the following shorthand translations as a notational
+    convenience. The translations defined in 
+    section&nbsp;<xref ref="type_system"/> and
+    section&nbsp;<xref ref="eq-infer"/> are repeated here.
+  </p>
+  <ol>
+    <li id="decl_shorthand">
+      <p>
+	<btypes:TYPE>
+	  <leadsto>
+	    <DBrac>
+	      <TDjudge sub="yes">
+		<aExpr/>
+		<type/>
+	      </TDjudge>
+	    </DBrac>
+	    <DBrac>
+	      <collection>
+		<TDjudge>
+		  <aExpr/>
+		  <type dash="'"/>
+		</TDjudge>
+		<Tsub>
+		  <type/>
+		  <type dash="'"/>
+		</Tsub>
+	      </collection>
+	    </DBrac>
+	  </leadsto>
+	</btypes:TYPE>
+      </p>
+    </li>
+    <li>
+      <p>
+	<btypes:TYPE>
+	  <leadsto>
+	    <DBrac>
+	      <TIjudge>
+		<assume>
+		  <gamma/>
+		  <store/>
+		</assume>
+		<conclude>
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
+		</conclude>
+	      </TIjudge>
+	    </DBrac>
+	    <DBrac>            
+	      <TIjudge>
+		<assume>
+		  <gamma/>
+		  <store/>
+		</assume>
+		<conclude>            
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
+		</conclude>
+		<propagate>
+		  <EmptySubst/>
+		</propagate>
+	      </TIjudge>
+	    </DBrac>
+	  </leadsto>
+	</btypes:TYPE>
+      </p>
+    </li>
+    <li>
+      <p>
+	<btypes:TYPE>
+	  <leadsto>
+	    <DBrac>          
+	      <TIjudge>
+		<precond>
+		  <aSubMap num="0"/>
+		</precond>
+		<assume>
+		  <gamma/>
+		  <store/>
+		</assume>
+		<conclude>
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
+		</conclude>
+		<propagate>
+		  <aSubMap/>
+		</propagate>
+	      </TIjudge>
+	    </DBrac>
+	    <DBrac>          
+	      <TIjudge>
+		<assume>
+		  <Subst>
+		    <aSubMap num="0"/>
+		    <gamma/>
+		  </Subst>
+		  <Subst>
+		    <aSubMap num="0"/>
+		    <store/>
+		  </Subst>
+		</assume>
+		<conclude>
+		  <tqExpr>
+		    <Subst>
+		      <aSubMap num="0"/>
+		      <aExpr/>
+		    </Subst>
+		    <type/>
+		  </tqExpr>
+		</conclude>
+		<propagate>
+		  <aSubMap/>
+		</propagate>
+	      </TIjudge>
+	    </DBrac>
+	  </leadsto>   
+	</btypes:TYPE>
+      </p>
+    </li>
+    <li>
+      <p>
+	<btypes:TYPE>              
+	  <leadsto>
+	    <DBrac>  
+	      <judge>
+		<precond>
+		  <aSubMap/>
+		</precond>
+		<assume>
+		  <gamma/>
+		  <store/>
+		</assume>
+		<conclude>
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
+		</conclude>
+	      </judge>
+	    </DBrac>
+	    <DBrac>          
+	      <Sjudge>
+		<assume>
+		  <Subst>
+		    <aSubMap/>
+		    <gamma/>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <store/>
+		  </Subst>
+		</assume>
+		<tqExpr>
+		  <Subst>
+		    <aSubMap/>
+		    <aExpr/>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <type/>
+		  </Subst>
+		</tqExpr>
+	      </Sjudge>
+	    </DBrac>
+	  </leadsto>
+	</btypes:TYPE>
+      </p>
+    </li>
+    <li>
+      <p>
+	<btypes:TYPE>              
+	  <leadsto>
+	    <DBrac>  
+	      <judge name="j">
+		<precond>
+		  <aSubMap/>
+		</precond>
+		<assume>
+		  <gamma/>
+		  <store/>
+		</assume>
+		<conclude>
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
+		</conclude>
+	      </judge>
+	    </DBrac>
+	    <DBrac>          
+	      <Sjudge name="j">
+		<assume>
+		  <Subst>
+		    <aSubMap/>
+		    <gamma/>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <store/>
+		  </Subst>
+		</assume>
+		<tqExpr>
+		  <Subst>
+		    <aSubMap/>
+		    <aExpr/>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <type/>
+		  </Subst>
+		</tqExpr>
+	      </Sjudge>
+	    </DBrac>
+	  </leadsto>
+	</btypes:TYPE>
+      </p>
+    </li>
+    <li>
+      <p>
+	<btypes:TYPE>
+	  <leadsto>
+	    <DBrac>          
+	      <Djudge>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+		<aExpr/>
+		<type/>
+	      </Djudge>
+	    </DBrac>
+	    <DBrac>          
+	      <Sjudge>
+		<assume>
+		  <canonical>
+		    <Subst>
+		      <aSubMap/>
+		      <gamma/>
+		    </Subst>
+		  </canonical>
+		  <canonical>
+		    <Subst>
+		      <aSubMap/>
+		      <store/>
+		    </Subst>
+		  </canonical>
+		</assume>
+		<tqExpr>
+		  <canonical>
+		    <Subst>
+		      <aSubMap/>
+		      <aExpr/>
+		    </Subst>
+		  </canonical>
+		  <canonical>
+		    <Subst>
+		      <aSubMap/>
+		      <type/>
+		    </Subst>
+		  </canonical>
+		</tqExpr>
+	      </Sjudge>
+	    </DBrac>
+	  </leadsto>
+	</btypes:TYPE>
+      </p>
+    </li>
+    <li>
+      <p>
+	<btypes:TYPE>
+	  <leadsto>
+	    <DBrac> 
+	      <Subst>
+		<aSubMap/>
+		<set>
+		  <unspecified/>
+		</set>
+	      </Subst>
+	    </DBrac>
+	    <DBrac>          
+	      <Subst>                
+		<aSubMap/>
+		<grouping>
+		  <set>
+		    <unspecified/>
+		  </set>
+		</grouping>
+	      </Subst>
+	    </DBrac>
+	  </leadsto>
+	</btypes:TYPE>
+      </p>
+    </li>
+    <li>
+      <p>
+	<btypes:TYPE>
+	  <leadsto>
+	    <DBrac> 
+	      <Subst>
+		<aSubMap/>
+		<spset>
+		  <unspecified/>
+		</spset>
+	      </Subst>
+	    </DBrac>
+	    <DBrac>          
+	      <Subst>                
+		<aSubMap/>
+		<grouping>
+		  <spset>
+		    <unspecified/>
+		  </spset>
+		</grouping>
+	      </Subst>
+	    </DBrac>
+	  </leadsto>
+	</btypes:TYPE>
+      </p>
+    </li>
+  </ol>
   <p>
     Unification rules are as shown in 
     Figure&nbsp;<xref ref="hm_unify"/>.
@@ -1637,37 +1582,6 @@
       </btypes:TYPE>, and
       <btypes:TYPE>
 	<defn tag="maybe-consistent"/>
-      </btypes:TYPE>.
-    </p>
-  </proof>
-  <lemma id="cst-implies-sat">
-    <title>Consistency Implies Satisfiability</title>
-    <p>
-      If 
-      <btypes:TYPE>
-	<models name="cst">
-	  <assume/>
-	  <aCtset/>
-	</models>
-      </btypes:TYPE>, then
-      <btypes:TYPE>
-	<Exists>
-	  <aSubMap/>
-	</Exists>
-      </btypes:TYPE> such that
-      <btypes:TYPE>
-	<models name="sat">
-	  <aSubMap/>
-	  <aCtset/>
-	</models>
-      </btypes:TYPE>.
-    </p>
-  </lemma>
-  <proof>
-    <p>
-      By inversion of the constraint consistency relationship in 
-      <btypes:TYPE>
-	<defn tag="ca"/>
       </btypes:TYPE>.
     </p>
   </proof>

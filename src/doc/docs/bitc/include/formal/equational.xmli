@@ -170,8 +170,101 @@
       lazily. The meta-constructors are idempotent. 
     </p>
   </definition>
-  Note that in our type system, we have restricted meta types to be
-  syntactically present only as part of function types.
+  <p>
+    Note that in our type system, we have restricted meta types to be
+    syntactically present only as part of function types.
+  </p>
+  <definition id="special">      
+    <title>Specialization</title>
+    <p>
+      We write
+      <btypes:TYPE>
+	<spEq>
+	  <type num="1"/>
+	  <type num="2"/>
+	</spEq>
+      </btypes:TYPE>, that is, 
+      <btypes:TYPE>
+	<type num="1"/>
+      </btypes:TYPE> is a specialization of (or less general than)
+      <btypes:TYPE>
+	<type num="2"/>
+      </btypes:TYPE>
+      iff  
+      <btypes:TYPE>
+	<Exists>
+	  <aSubMap/>
+	</Exists>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<eq>
+	  <type num="1"/>
+	  <Subst>
+	    <aSubMap/>
+	    <type num="2"/>
+	  </Subst>
+	</eq>
+      </btypes:TYPE>.
+      We write 
+      <btypes:TYPE>
+	<genEq>
+	  <type num="1"/>
+	  <type num="2"/>
+	</genEq> 
+      </btypes:TYPE>, that is, 
+      <btypes:TYPE>
+	<type num="1"/>
+      </btypes:TYPE> is more general than
+      <btypes:TYPE>
+	<type num="2"/>
+      </btypes:TYPE>
+      iff
+      <btypes:TYPE>
+	<spEq>
+	  <type num="2"/>
+	  <type num="1"/>
+	</spEq> 
+      </btypes:TYPE>.
+    </p>
+    <p>
+      We write
+      <btypes:TYPE>
+	<spEq>
+	  <aSubMap num="1"/>
+	  <aSubMap num="2"/>
+	</spEq>
+      </btypes:TYPE>
+      iff  
+      <btypes:TYPE>
+	<Exists>
+	  <aSubMap/>
+	</Exists>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<eq>
+	  <aSubMap num="1"/>
+	  <compose>
+	    <aSubMap/>
+	    <aSubMap num="2"/>
+	  </compose>
+	</eq>
+      </btypes:TYPE>.
+      We write 
+      <btypes:TYPE>
+	<genEq>
+	  <aSubMap num="1"/>
+	  <aSubMap num="2"/>
+	</genEq> 
+      </btypes:TYPE>
+      iff
+      <btypes:TYPE>
+	<spEq>
+	  <aSubMap num="2"/>
+	  <aSubMap num="1"/>
+	</spEq> 
+      </btypes:TYPE>.
+    </p>
+  </definition>
   <definition id="pcst">      
     <title>Meta Polymorphic Constraints</title>      
     <p>
@@ -182,16 +275,20 @@
 	  <type/>
 	  <type dash="'"/>
 	</Pcst>
-      </btypes:TYPE> is used to express types that are polymorphic
+      </btypes:TYPE>, where
+      <btypes:TYPE>
+	<spEq>
+	  <type dash="'"/>
+	  <type/>
+	</spEq>
+      </btypes:TYPE>, is used to express types that are polymorphic
       <em>over</em> polymorphism and mutability. 
-      The type 
-      <btypes:TYPE>
-	<type dash="'"/>
-      </btypes:TYPE> can only be a specialization of 
-      <btypes:TYPE>
-	<type/>
-      </btypes:TYPE>, obtained through some substitution.        
-      A Substitution over the polymorphic constraint is defined as:
+    </p>
+  </definition>
+  <definition id="pcst-subst">      
+    <title>Substitution Over Polymorphic Constraints</title>      
+    <p>
+      Substitution over a polymorphic constraint is defined as:
       <btypes:TYPE>
 	<eq>
 	  <Subst>
@@ -215,6 +312,11 @@
 	  </Pcst>
 	</eq>
       </btypes:TYPE>.
+    </p>
+  </definition>
+  <definition id="pcst-sat">      
+    <title>Polymorphic Constraint Satisfaction</title>      
+    <p>
       A substitution 
       <btypes:TYPE>
 	<aSubMap/>
@@ -222,13 +324,13 @@
       <btypes:TYPE>
 	<set>
 	  <Pcst>
-	    <lKind k="var"/>
+	    <lKind/>
 	    <type/>
 	    <type num="1"/>
 	  </Pcst>
 	  <unspecified/>
 	  <Pcst>
-	    <lKind k="var"/>
+	    <lKind/>
 	    <type/>
 	    <type num="n"/>
 	  </Pcst>
@@ -242,7 +344,7 @@
 	    <eq>
 	      <Subst>
 		<aSubMap/>
-		<lKind k="var"/>
+		<lKind/>
 	      </Subst>
 	      <lKind k="mono"/>
 	    </eq>
@@ -269,7 +371,7 @@
 	    <eq>
 	      <Subst>
 		<aSubMap/>
-		<lKind k="var"/>
+		<lKind/>
 	      </Subst>
 	      <lKind k="poly"/>
 	    </eq>
@@ -296,104 +398,174 @@
       </li>
     </ol>
   </definition>
-  <definition id="define_infer">
-    <title>Type Inference</title> 
+  <definition id="ext-ftvs">
+    <title>FTVs (Extension)</title>
     <p>
-      Type inference is a program
-      transformation that accepts a program in which
-      <progident>let</progident> expressions are not annotated
-      with their kinds, and returns the same programs in which
-      <progident>let</progident> expressions are annotated with
-      their kinds and all expressions are annotated with their
-      types.
+      We enhance the definition of 
+      <btypes:TYPE>
+	<ftvs>
+	  <unspecified/>
+	</ftvs>
+      </btypes:TYPE> in 
+      <btypes:TYPE>
+	<defn tag="ftvs"/>
+      </btypes:TYPE> as follows:
     </p>
+    <example>
+      <p>
+ 	<btypes:TYPE>
+	  <unspecified/>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <fn M="yes">
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <eq>
+		<type num="1"/>
+		<type num="2"/>
+	      </eq>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <ceq>
+		<type num="1"/>
+		<type num="2"/>
+	      </ceq>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <Tsub>
+		<type num="1"/>
+		<type num="2"/>
+	      </Tsub>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <Pcst>
+		<lKind/>
+		<type num="1"/>
+		<type num="2"/>
+	      </Pcst>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <aCtset/>
+	    </ftvs>
+	    <Unin>
+	      <ftvs>
+		<constraint num="i"/>
+	      </ftvs>
+	    </Unin>
+	  </eq> 
+	  <text content=" ; "/>
+	  <Forall/>
+	  <in>
+	    <constraint num="i"/>
+	    <aCtset/>
+	  </in>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <aCtype/>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type/>
+	      </ftvs>
+	      <ftvs>
+		<aCtset/>
+	      </ftvs>                  
+	    </unin>
+	  </eq>
+	  <text content=" where "/>
+	  <eq>
+	    <aCtype/>
+	    <ctype>
+	      <type/>
+	      <aCtset/>
+	    </ctype>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <aTS/>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<tvars name="alpha"/>
+	      </ftvs>
+	      <ftvs>
+		<aCtype/>
+	      </ftvs>                  
+	    </unin>
+	  </eq>
+	  <text content=" where "/>
+	  <eq>
+	    <aTS/>
+	    <forall>
+	      <tvars name="alpha"/>
+	      <aCtype/>
+	    </forall>
+	  </eq>
+	</btypes:TYPE>
+      </p>
+    </example>
   </definition>
-  <p>
-    The equational type inference algorithm is as shown in
-    Figure&nbsp;<xref ref="eq_infer"/>. 
-    The inference judgment 
-    <btypes:TYPE>
-      <TEjudge>
-	<assume>
-	  <gamma/>
-	  <store/>
-	</assume>
-	<conclude>
-	  <tqExpr>
-	    <aExpr/>
-	    <type/>
-	  </tqExpr>
-	</conclude>
-	<constrain>
-	  <aCtset/>
-	</constrain>
-      </TEjudge>
-    </btypes:TYPE>
-    should be understood as: given the binding context
-    <btypes:TYPE><gamma/></btypes:TYPE> and the store typing
-    <btypes:TYPE><store/></btypes:TYPE>, we infer the type 
-    <btypes:TYPE><type/></btypes:TYPE> for the expression 
-    <btypes:TYPE><aExpr/></btypes:TYPE> under the constraints
-    <btypes:TYPE><aCtset/></btypes:TYPE>. 
-    The Unification algorithm is given in 
-    figure&nbsp;<xref ref="eq_unify"/> with some auxiliary
-    definitions and translations defined in 
-    figure&nbsp;<xref ref="eq_helper"/>. 
-    The unification algorithm takes in a set of constraints
-    <btypes:TYPE><aCtset/></btypes:TYPE> and either fails with an
-    error <btypes:TYPE><error/></btypes:TYPE>, or succeeds to 
-    result in a pair consisting of residual constraints
-    <btypes:TYPE><aCtset/></btypes:TYPE> 
-    (which should only contain constraints of the form:
-    <btypes:TYPE>
-      <!-- a <= t  -->
-      <Tsub>
-	<tvar name="alpha"/>
-	<type/>
-      </Tsub>
-      <text content=","/>
-      <space/>
-      <!-- t <= a  -->
-      <Tsub>
-	<type/>
-	<tvar name="alpha"/>
-      </Tsub>
-      <text content=", "/>
-      <space/>
-      <!-- however, both of the cases a <= t and t <= a
-      cannot occur since it can be reduced -->
-      <!-- P(k, t1, t2)  -->
-      <Pcst>
-	<lKind k="var"/>
-	<type/>
-	<type dash="'"/>
-      </Pcst>
-      <text content=", and"/>
-      <space/>
-      <Pcst>
-	<lKind k="poly"/>
-	<type num="g"/>
-	<type num="i"/>
-      </Pcst>
-      <text content=", where"/>
-      <space/>
-      <pred name="Immut">
-	<type num="i"/>
-      </pred>
-      <text content=", and"/>
-      <space/>
-      <neq>
-	<pred name="dtv">
-	  <type num="i"/>
-	</pred>
-	<Empty/>
-      </neq>
-      <text content="."/>            
-    </btypes:TYPE>)
-    and a list of
-    substitutions <btypes:TYPE><aSubMap/></btypes:TYPE> for the
-    constraints solved in this pass.
-  </p>
   <definition id="stvs-eq">
     <title>Shallow Type Variables</title>
     <p>
@@ -579,7 +751,7 @@
 		  <aCtset/>
 		</pred>
 		<space/>
-		<textit content="(otherwise)"/>
+		<textit content=" otherwise "/>
 		<space/>
 	      </grouping>
 	      <aCtset/>
@@ -910,9 +1082,12 @@
       </btypes:TYPE>
       iff
       <btypes:TYPE>
-	<normalize>
-	  <aCtset/>
-	</normalize>
+	<Subst>
+	  <aSubMap/>
+	  <normalize>
+	    <aCtset/>
+	  </normalize>
+	</Subst>
       </btypes:TYPE>
       consists only of tautologies (trivially).
     </p>
@@ -1137,14 +1312,10 @@
       <eq>
 	<type/>
 	<fn M="yes">
-	  <floor>
-	    <mutable>
-	      <unit/>
-	    </mutable>
-	  </floor>
-	  <ceil>
+	  <mutable>
 	    <unit/>
-	  </ceil>
+	  </mutable>
+	  <bool/>
 	</fn>
       </eq>
     </btypes:TYPE>, then
@@ -1154,10 +1325,10 @@
 	  <type/>
 	</canonical>
 	<fn>
-	  <mutable>
-	    <unit/>
-	  </mutable>
 	  <unit/>
+	  <mutable>
+	    <bool/>
+	  </mutable>
 	</fn>
       </eq>
     </btypes:TYPE>. If
@@ -1195,6 +1366,292 @@
     language and type system defined in 
     section&nbsp;<xref ref="language"/>.
   </p>
+  <definition id="define_infer">
+    <title>Type Inference</title> 
+    <p>
+      Type inference is a program
+      transformation that accepts a program in which
+      <progident>let</progident> expressions are not annotated
+      with their kinds, and returns the same programs in which
+      <progident>let</progident> expressions are annotated with
+      their kinds and all expressions are annotated with their
+      types.
+    </p>
+  </definition>
+  <p>
+    The equational type inference algorithm is as shown in
+    Figure&nbsp;<xref ref="eq_infer"/>. 
+    The inference judgment 
+    <btypes:TYPE>
+      <TEjudge>
+	<assume>
+	  <gamma/>
+	  <store/>
+	</assume>
+	<conclude>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	</conclude>
+	<constrain>
+	  <aCtset/>
+	</constrain>
+      </TEjudge>
+    </btypes:TYPE>
+    should be understood as: given the binding context
+    <btypes:TYPE><gamma/></btypes:TYPE> and the store typing
+    <btypes:TYPE><store/></btypes:TYPE>, we infer the type 
+    <btypes:TYPE><type/></btypes:TYPE> for the expression 
+    <btypes:TYPE><aExpr/></btypes:TYPE> under the constraints
+    <btypes:TYPE><aCtset/></btypes:TYPE>. 
+    The Unification algorithm is given in 
+    figure&nbsp;<xref ref="eq_unify"/> with some auxiliary
+    definitions and translations defined in 
+    figure&nbsp;<xref ref="eq_helper"/>. 
+    The unification algorithm takes in a set of constraints
+    <btypes:TYPE><aCtset/></btypes:TYPE> and either fails with an
+    error <btypes:TYPE><error/></btypes:TYPE>, or succeeds to 
+    result in a pair consisting of residual constraints
+    <btypes:TYPE><aCtset/></btypes:TYPE> 
+    (which should only contain constraints of the form:
+    <btypes:TYPE>
+      <!-- a <= t  -->
+      <Tsub>
+	<tvar name="alpha"/>
+	<type/>
+      </Tsub>
+      <text content=","/>
+      <space/>
+      <!-- t <= a  -->
+      <Tsub>
+	<type/>
+	<tvar name="alpha"/>
+      </Tsub>
+      <text content=", "/>
+      <space/>
+      <!-- however, both of the cases a <= t and t <= a
+      cannot occur since it can be reduced -->
+      <!-- P(k, t1, t2)  -->
+      <Pcst>
+	<lKind k="var"/>
+	<type/>
+	<type dash="'"/>
+      </Pcst>
+      <text content=", and"/>
+      <space/>
+      <Pcst>
+	<lKind k="poly"/>
+	<type num="g"/>
+	<type num="i"/>
+      </Pcst>
+      <text content=", where"/>
+      <space/>
+      <pred name="Immut">
+	<type num="i"/>
+      </pred>
+      <text content=", and"/>
+      <space/>
+      <neq>
+	<pred name="dtv">
+	  <type num="i"/>
+	</pred>
+	<Empty/>
+      </neq>
+      <text content="."/>            
+    </btypes:TYPE>)
+    and a list of
+    substitutions <btypes:TYPE><aSubMap/></btypes:TYPE> for the
+    constraints solved in this pass.
+  </p>
+  <p>
+    We use the following shorthand translations as a notational
+    convenience (the translation defined in section&nbsp;<xref
+      ref="type_system"/> is repeated here).
+  </p>
+  <ol>
+    <li>
+      <p>
+	<btypes:TYPE>
+	  <leadsto>
+	    <DBrac>
+	      <TDjudge sub="yes">
+		<aExpr/>
+		<type/>
+	      </TDjudge>
+	    </DBrac>
+	    <DBrac>
+	      <collection>
+		<TDjudge>
+		  <aExpr/>
+		  <type dash="'"/>
+		</TDjudge>
+		<Tsub>
+		  <type/>
+		  <type dash="'"/>
+		</Tsub>
+	      </collection>
+	    </DBrac>
+	  </leadsto>
+	</btypes:TYPE>
+      </p>
+    </li>
+    <li>
+      <p>
+	<btypes:TYPE>              
+	  <leadsto>
+	    <DBrac>  
+	      <judge>
+		<precond>
+		  <aSubMap/>
+		</precond>
+		<assume>
+		  <gamma/>
+		  <store/>
+		</assume>
+		<conclude>
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
+		</conclude>
+	      </judge>
+	    </DBrac>
+	    <DBrac>          
+	      <Sjudge>
+		<assume>
+		  <Subst>
+		    <aSubMap/>
+		    <gamma/>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <store/>
+		  </Subst>
+		</assume>
+		<tqExpr>
+		  <Subst>
+		    <aSubMap/>
+		    <aExpr/>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <type/>
+		  </Subst>
+		</tqExpr>
+	      </Sjudge>
+	    </DBrac>
+	  </leadsto>
+	</btypes:TYPE>
+      </p>
+    </li>
+    <li>
+      <p>
+	<btypes:TYPE>
+	  <leadsto>
+	    <DBrac>          
+	      <Djudge>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+		<aExpr/>
+		<type/>
+	      </Djudge>
+	    </DBrac>
+	    <DBrac>          
+	      <Sjudge>
+		<assume>
+		  <canonical>
+		    <Subst>
+		      <aSubMap/>
+		      <gamma/>
+		    </Subst>
+		  </canonical>
+		  <canonical>
+		    <Subst>
+		      <aSubMap/>
+		      <store/>
+		    </Subst>
+		  </canonical>
+		</assume>
+		<tqExpr>
+		  <canonical>
+		    <Subst>
+		      <aSubMap/>
+		      <aExpr/>
+		    </Subst>
+		  </canonical>
+		  <canonical>
+		    <Subst>
+		      <aSubMap/>
+		      <type/>
+		    </Subst>
+		  </canonical>
+		</tqExpr>
+	      </Sjudge>
+	    </DBrac>
+	  </leadsto>
+	</btypes:TYPE>
+      </p>
+    </li>
+    <li>
+      <p>
+	<btypes:TYPE>
+	  <leadsto>
+	    <DBrac> 
+	      <Subst>
+		<aSubMap/>
+		<set>
+		  <unspecified/>
+		</set>
+	      </Subst>
+	    </DBrac>
+	    <DBrac>          
+	      <Subst>                
+		<aSubMap/>
+		<grouping>
+		  <set>
+		    <unspecified/>
+		  </set>
+		</grouping>
+	      </Subst>
+	    </DBrac>
+	  </leadsto>
+	</btypes:TYPE>
+      </p>
+    </li>
+  </ol>
+  <lemma id="cst-implies-sat">
+    <title>Consistency Implies Satisfiability</title>
+    <p>
+      If 
+      <btypes:TYPE>
+	<models name="cst">
+	  <assume/>
+	  <aCtset/>
+	</models>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
+	<Exists>
+	  <aSubMap/>
+	</Exists>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<models name="sat">
+	  <aSubMap/>
+	  <aCtset/>
+	</models>
+      </btypes:TYPE>.
+    </p>
+  </lemma>
+  <proof>
+    <p>
+      By inversion of the constraint consistency relationship in 
+      <btypes:TYPE>
+	<defn tag="ca"/>
+      </btypes:TYPE>.
+    </p>
+  </proof>
   <theorem id="eq-unify-correct">
     <title>Correctness of Unification</title>
     <p>
@@ -1206,23 +1663,57 @@
 	  </unf>
 	  <Pair>
 	    <aCtset dash="'"/>
-	    <aSubMap/>
+	    <aSubMap num="u"/>
 	  </Pair>
 	</eq>
 	<text content=", then"/>
-	<Exists>
-	  <aSubMap num="s"/>
-	</Exists>          
-	<text content=" such that "/>
-	<models name="sat"> 
-	  <assume>
-	    <aSubMap num="s"/>
-	  </assume>
-	  <aCtset dash="'"/>
-	</models>
       </btypes:TYPE>
     </p>
-  </theorem>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Forall>
+	      <aSubMap num="s"/>
+	    </Forall>
+	    <text content=" such that "/>
+	    <models name="sat"> 
+	      <assume>
+		<aSubMap num="s"/>
+	      </assume>
+	      <aCtset dash="'"/>
+	    </models>
+	    <text content=", "/>
+	    <models name="sat"> 
+	      <assume>
+		<scomp>
+		  <aSubMap num="s"/>
+		  <aSubMap num="u"/>
+		</scomp>
+	      </assume>
+	      <aCtset/>
+	    </models>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Exists>
+	      <aSubMap num="s"/>
+	    </Exists>
+	    <text content=" such that "/>
+	    <models name="sat"> 
+	      <assume>
+		<aSubMap num="s"/>
+	      </assume>
+	      <aCtset dash="'"/>
+	    </models>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </theorem>  
   <theorem id="eq-unify-decidable">
     <title>Decidability of Unification</title>
     <p>
@@ -1262,70 +1753,28 @@
 	    <aCtset/>
 	  </constrain>
 	</TEjudge>
-	<text content=" and "/>
-	<eq>
-	  <unf>
-	    <aCtset/>
-	  </unf>
-	  <Pair>
-	    <aCtset num="u"/>
-	    <aSubMap num="u"/>
-	  </Pair>
-	</eq>
-	<text content=", then "/>
-	<Forall>
-	  <aSubMap num="s"/>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
+	<Forall>	
+	  <aSubMap/>
 	</Forall>
-	<text content=" such that "/>
+      </btypes:TYPE> such that 
+      <btypes:TYPE>
 	<models name="sat"> 
 	  <assume>
-	    <aSubMap num="s"/>
+	    <aSubMap/>
 	  </assume>
-	  <aCtset num="u"/>
+	  <aCtset/>
 	</models>
-	<text content=", "/>  
-	<Sjudge>
-	  <assume>
-	    <canonical>
-	      <Subst>
-		<scomp>
-		  <aSubMap num="u"/>
-		  <aSubMap num="s"/>
-		</scomp>
-		<gamma/>
-	      </Subst>
-	    </canonical>
-	    <canonical>
-	      <Subst>
-		<scomp>
-		  <aSubMap num="u"/>
-		  <aSubMap num="s"/>
-		</scomp>
-		<store/>
-	      </Subst>
-	    </canonical>
-	  </assume>
-	  <tqExpr>
-	    <canonical>
-	      <Subst>
-		<scomp>
-		  <aSubMap num="u"/>
-		  <aSubMap num="s"/>
-		</scomp>                
-		<aExpr/>
-	      </Subst>
-	    </canonical>
-	    <canonical>
-	      <Subst>
-		<scomp>
-		  <aSubMap num="u"/>
-		  <aSubMap num="s"/>
-		</scomp>                                  
-		<type/>
-	      </Subst>
-	    </canonical>
-	  </tqExpr>
-	</Sjudge>	                
+      </btypes:TYPE>, we have
+      <btypes:TYPE>
+	<Djudge>
+	  <aSubMap/>
+	  <gamma/>
+	  <store/>
+	  <aExpr/>
+	  <type/>
+	</Djudge>
       </btypes:TYPE>.
     </p>
   </theorem>
@@ -1334,17 +1783,11 @@
     <p>
       If:
       <btypes:TYPE>
-	<Sjudge>
-	  <assume>
-	    <gamma/>
-	    <store/>
-	  </assume>
-	  <tqExpr>
-	    <aExpr/>
-	    <type/>
-	  </tqExpr>
-	</Sjudge>	                          
-	<text content=" then "/>
+	<TDjudge>
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+	<text content=", then "/>
 	<Exists>
 	  <aSubMap/>
 	</Exists>
@@ -1365,7 +1808,7 @@
 	  </constrain>
 	</TEjudge>
 	<text content=", "/>
-	<models name="sat"> 
+	<models name="sat">
 	  <assume>
 	    <aSubMap/>
 	  </assume>

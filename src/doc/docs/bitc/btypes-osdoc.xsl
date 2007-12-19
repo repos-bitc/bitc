@@ -583,7 +583,7 @@
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>sqsupe;</xsl:text>
   </xsl:template>
-  <!-- spEq -->
+  <!-- genEq -->
   <xsl:template match="genEq" mode="formula">
     <xsl:call-template name="print.infix">
       <xsl:with-param name="print.infix.op">sqsupe;</xsl:with-param> 
