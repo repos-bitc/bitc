@@ -103,9 +103,11 @@
 	  </DBrac>
 	  <DBrac>
 	    <unf>
-	      <pred name="TransClose">
-		<aCtset/>
-	      </pred>
+	      <TransClose>
+		<paren>
+		  <aCtset/>
+		</paren>
+	      </TransClose>
 	    </unf>
 	  </DBrac>
 	</leadsto>

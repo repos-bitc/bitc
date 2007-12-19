@@ -47,6 +47,12 @@ while(!eof(F)) {
 	#\textbf{\star} to \bigstar
 	$l =~ s/$bigstar/$EM\{\\bigstar\}/g;
 
+	#Bold-Not -> strikeoff
+	$l =~ s/\\textbf\{$em\{\\neg\}\}$em($br)/$EM\{\\not $1\}/g;
+	
+	#\ensuremath{\not {\exists}} to \ensuremath{\nexist}
+	$l =~ s/$em\{\\not \{\\exists\}\}/$EM\{\\nexists\}/g;
+	
         #[[ ... ]] to [\![ .. ]\!]
 	$l =~ s/\{\[\}\{\[\}/\[\[/g;
 	$l =~ s/\{\]\}\{\]\}/\]\]/g;
@@ -60,10 +66,10 @@ while(!eof(F)) {
 	# Temporary: Until osdoc supports ||-
 	# \textbf{\ensuremath{models}} to \ensuremath{models}
 	$l =~ s/$b\{$em\{\\models\}\}/$EM\{\\Vdash\}/g;
-
+	
 	# \textbf{*}letter\textbf{*} to \mathbb{letter}
 	$l =~ s/$b\{\*\}([A-Za-z])\\textbf\{\*\}/$EM\{\\mathbb{$1}\}/g;
-
+	
 	# \emph{*}letter\emph{*} to \mathcal{letter}
 	$l =~ s/\\emph\{\*\}([A-Za-z])\\emph\{\*\}/$EM\{\\mathcal{$1}\}/g;
 

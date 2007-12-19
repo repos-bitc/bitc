@@ -462,6 +462,17 @@
     </xsl:call-template>
   </xsl:template>  
 
+  <!-- TransClose -->
+  <xsl:template match="TransClose" mode="formula">
+    <xsl:apply-templates mode="formula"/>
+    <xsl:element name="sup">
+      <xsl:element name="sup">
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>plus;</xsl:text>
+      </xsl:element>
+    </xsl:element>
+  </xsl:template>  
+  
   <!-- floorOp -->
   <xsl:template match="floorOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -851,13 +862,22 @@
     <xsl:apply-templates mode="formula"/>
   </xsl:template>
 
-  <!-- NOT -->
+  <!-- IMPLIES -->
   <xsl:template match="IMPLIES" mode="formula">
     <xsl:call-template name="print.infix">
       <xsl:with-param name="print.infix.op">rArr;</xsl:with-param> 
     </xsl:call-template>
   </xsl:template>
   
+  <!-- Not -->
+  <xsl:template match="Not" mode="formula">
+    <xsl:element name="b">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>not;</xsl:text>
+    </xsl:element>
+    <xsl:apply-templates mode="formula"/>
+  </xsl:template>
+
   <!-- forall -->
   <xsl:template match="forall" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -1451,7 +1471,9 @@
       <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
       <xsl:text>star;</xsl:text>	
     </xsl:element>
-    <xsl:call-template name="print.params"/>
+    <xsl:if test="count(*)">
+      <xsl:call-template name="print.params"/>
+    </xsl:if>
   </xsl:template>  
   
   <!-- ct_set templates -->

@@ -212,6 +212,7 @@
                                 symbol       CDATA   #REQUIRED
 >
 <!ELEMENT leadsto               (%anything.group;+)>
+<!ELEMENT TransClose            (%anything.group;)>
 
 <!ELEMENT floorOp                 EMPTY>
 <!ELEMENT floor                   %anything.group;>
@@ -335,6 +336,9 @@
 <!ELEMENT OR                   %predicates.group;*>
 <!ELEMENT NOT                  %anything.group;>
 <!ELEMENT IMPLIES              %anything.group;*>
+
+<!-- Strike-off a symbol -->
+<!ELEMENT Not                  %anything.group;>
  
 <!-- forall/exists a, b, ... [.] n -->
 <!ELEMENT forall               %anything.group;*>

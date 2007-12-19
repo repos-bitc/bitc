@@ -266,7 +266,7 @@
     </p>
   </definition>
   <definition id="pcst">      
-    <title>Meta Polymorphic Constraints</title>      
+    <title>Meta Polymorphic Constraints (MPC)</title>      
     <p>
       The constraint 
       <btypes:TYPE>
@@ -286,9 +286,9 @@
     </p>
   </definition>
   <definition id="pcst-subst">      
-    <title>Substitution Over Polymorphic Constraints</title>      
+    <title>Substitution over MPCs</title>      
     <p>
-      Substitution over a polymorphic constraint is defined as:
+      Substitution over an MPC is defined as:
       <btypes:TYPE>
 	<eq>
 	  <Subst>
@@ -315,7 +315,7 @@
     </p>
   </definition>
   <definition id="pcst-sat">      
-    <title>Polymorphic Constraint Satisfaction</title>      
+    <title>MPC Satisfaction</title>      
     <p>
       A substitution 
       <btypes:TYPE>
@@ -676,9 +676,9 @@
     <p>
       A closure operation
       <btypes:TYPE>
-	<pred name="TransClose">
+	<TransClose>
 	  <aCtset/> 
-	</pred>
+	</TransClose>
       </btypes:TYPE>
       on a constraint set 
       <btypes:TYPE>
@@ -689,71 +689,71 @@
     <ol>
       <li>
 	<p>
+	  If
+	  <btypes:TYPE>
+	    <Exists>
+	      <type num="1"/>
+	      <type num="2"/>
+	      <type num="3"/>
+	    </Exists>
+	  </btypes:TYPE> such that
+	  <btypes:TYPE>
+	    <in>
+	      <Tsub>
+		<type num="1"/>
+		<type num="2"/>
+	      </Tsub>
+	      <aCtSet/>
+	    </in>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <in>
+	      <Tsub>
+		<type num="2"/>
+		<type num="3"/>
+	      </Tsub>
+	      <aCtset/>
+	    </in>
+	  </btypes:TYPE>, and
+	  <btypes:TYPE>
+	    <notin>
+	      <Tsub>
+		<type num="1"/>
+		<type num="3"/>
+	      </Tsub>
+	      <aCtset/>
+	    </notin>
+	  </btypes:TYPE>, then
 	  <btypes:TYPE>
 	    <eq>
-	      <grouping>
-		<pred name="TransClose">
+	      <TransClose>
+		<aCtset/> 
+	      </TransClose>
+	      <TransClose>
+		<paren>
 		  <unin>
 		    <set>
 		      <Tsub>
 			<type num="1"/>
-			<type num="2"/>
-		      </Tsub>
-		      <Tsub>
-			<type num="2"/>
 			<type num="3"/>
 		      </Tsub>
-		    </set>
+		    </set>                      
 		    <aCtset/>
 		  </unin>
-		</pred>
-		<space/>
-		<textit content="where"/>
-		<space/>
-		<notin>
-		  <Tsub>
-		    <type num="1"/>
-		    <type num="3"/>
-		  </Tsub>
-		  <aCtset/>
-		</notin>
-		<br/>
-	      </grouping>
-	      <pred name="TransClose">
-		<unin>
-		  <set>
-		    <Tsub>
-		      <type num="1"/>
-		      <type num="2"/>
-		    </Tsub>
-		    <Tsub>
-		      <type num="2"/>
-		      <type num="3"/>
-		    </Tsub>
-		    <Tsub>
-		      <type num="1"/>
-		      <type num="3"/>
-		    </Tsub>
-		  </set>                      
-		  <aCtset/>
-		</unin>
-	      </pred>
+		</paren>
+	      </TransClose>
 	    </eq>
 	  </btypes:TYPE>
 	</p>
       </li>
       <li>
 	<p>
+	  Otherwise,
 	  <btypes:TYPE>
 	    <eq>
-	      <grouping>
-		<pred name="TransClose">
-		  <aCtset/>
-		</pred>
-		<space/>
-		<textit content=" otherwise "/>
-		<space/>
-	      </grouping>
+	      <TransClose>
+		<aCtset/>
+	      </TransClose>
 	      <aCtset/>
 	    </eq>
 	  </btypes:TYPE>
@@ -777,7 +777,10 @@
       of atomic constraints by using the copy coercion rules defined
       in Figure&nbsp;<xref ref="decl_rules"/> (note that this
       conversion is total); and by explicitely adding all transitive
-      relationships.
+      relationships. This conversion does not affect the MPCs in 
+      <btypes:TYPE>
+	<aCtset/> 
+      </btypes:TYPE>.
     </p>
     <ol>
       <li>
@@ -986,7 +989,7 @@
       <btypes:TYPE>
 	<aCtset/>
       </btypes:TYPE> by re-writing it only in terms of closed
-      subtype constraints.
+      subtype constraints and MPCs.
     </p>
     <p>
       <btypes:TYPE>
@@ -1714,6 +1717,95 @@
       </li>
     </ol>
   </theorem>  
+  <theorem id="eq-unify-complete">
+    <title>Principality of Unification</title>
+    <p>
+      We have the following two properties to show that 
+      the unification algorithm produces most general
+      substitutions and residual constraints.
+    </p>
+    <ol>
+      <li>
+	<p>
+	  If:
+	  <btypes:TYPE>
+	    <eq>
+	      <unf>
+		<aCtset/>
+	      </unf>
+	      <Pair>
+		<aCtset dash="'"/>
+		<aSubMap num="u"/>
+	      </Pair>
+	    </eq>
+	  </btypes:TYPE> then,
+	  <btypes:TYPE>
+	    <Forall>
+	      <aSubMap num="s"/>
+	    </Forall>
+	  </btypes:TYPE> such that 
+	  <btypes:TYPE>
+	    <models name="sat"> 
+	      <assume>
+		<aSubMap num="s"/>
+	      </assume>
+	      <aCtset/>
+	    </models>
+	  </btypes:TYPE>, 
+	  <btypes:TYPE>
+	    <Forall>
+	      <aSubMap num="s" dash="'"/>
+	    </Forall>
+	  </btypes:TYPE> such that 
+	  <btypes:TYPE>
+	    <eq>
+	      <aSubMap num="s"/>
+	      <compose>
+		<aSubMap num="u"/>
+		<aSubMap num="s" dash="'"/>
+	      </compose>
+	    </eq>
+	  </btypes:TYPE>, and
+	  <btypes:TYPE>
+	    <models name="sat"> 
+	      <assume>
+		<aSubMap num="s" dash="'"/>
+	      </assume>
+	      <aCtset dash="'"/>
+	    </models>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  If:
+	  <btypes:TYPE>
+	    <eq>
+	      <unf>
+		<aCtset/>
+	      </unf>
+	      <error/>
+	    </eq>
+	  </btypes:TYPE> then, 
+	  <btypes:TYPE>
+	    <Not>
+	      <Exists/>
+	    </Not>
+	    <aSubMap/>
+	  </btypes:TYPE>
+	  such that 
+	  <btypes:TYPE>
+	    <models name="sat"> 
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <aCtset/>
+	    </models>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
+  </theorem>
   <theorem id="eq-unify-decidable">
     <title>Decidability of Unification</title>
     <p>
