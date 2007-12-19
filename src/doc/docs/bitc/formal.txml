@@ -11810,6 +11810,81 @@
         </li>
       </ol>
     </proof>
+    <theorem id="heuristic-inference-sound-direct">
+      <title>(Direct Statemet of) Soundness of Heuristic Type Inference</title>
+      <p>
+        If
+        <btypes:TYPE>
+          <TIjudge>
+            <assume>
+              <gamma/>
+              <store/>
+            </assume>
+            <conclude>
+              <tqExpr>
+                <aExpr/>
+                <type/>
+              </tqExpr>
+            </conclude>
+            <propagate>
+              <aSubMap num="u"/>
+            </propagate>
+          </TIjudge>
+        </btypes:TYPE> and
+        <btypes:TYPE>
+          <CST>
+            <gamma/>
+            <store/>
+          </CST>
+        </btypes:TYPE>,
+        then,
+        <btypes:TYPE>
+          <Forall>
+            <aSubMap num="s"/>
+          </Forall>
+        </btypes:TYPE>
+        such that 
+        <btypes:TYPE>
+          <models name="sat">
+            <assume>
+              <aSubMap num="s"/>
+            </assume>
+            <Subst>
+              <aSubMap num="u"/>
+              <spset>
+                <gamma/>
+                <store/>
+                <aExpr/>
+                <type/>
+              </spset>
+            </Subst>
+          </models>
+        </btypes:TYPE>, we have
+        <btypes:TYPE>
+          <Djudge>
+            <scomp>
+              <aSubMap num="s"/>
+              <aSubMap num="u"/>
+            </scomp>
+            <gamma/>
+            <store/>
+            <aExpr/>
+            <type/>
+          </Djudge>
+        </btypes:TYPE>.        
+      </p>
+    </theorem>
+    <proof>
+      <p>
+        Follows from 
+        <btypes:TYPE>
+          <thm tag="intermediate-sound"/>
+        </btypes:TYPE> and
+        <btypes:TYPE>
+          <thm tag="heuristic-inference-sound"/>
+        </btypes:TYPE>.
+      </p>
+    </proof>
   </sect1>
   <nocite ref="sridhar2006plos"/>
   <bibliography>
@@ -11830,7 +11905,6 @@
        2006)</doctitle> San Jose, CA. 2006.
     </bibentry>
   </bibliography>
- 
 </article>
 
 <!-- Local Variables: -->
