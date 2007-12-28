@@ -512,7 +512,7 @@
 	      </ftvs>
 	    </Unin>
 	  </eq> 
-	  <text content=" ; "/>
+	  <text content=", "/>
 	  <Forall/>
 	  <in>
 	    <constraint num="i"/>
@@ -532,7 +532,7 @@
 	      </ftvs>                  
 	    </unin>
 	  </eq>
-	  <text content=" where "/>
+	  <text content=", where "/>
 	  <eq>
 	    <aCtype/>
 	    <ctype>
@@ -554,7 +554,7 @@
 	      </ftvs>                  
 	    </unin>
 	  </eq>
-	  <text content=" where "/>
+	  <text content=", where "/>
 	  <eq>
 	    <aTS/>
 	    <forall>
@@ -703,7 +703,7 @@
 		<type num="1"/>
 		<type num="2"/>
 	      </Tsub>
-	      <aCtSet/>
+	      <aCtset/>
 	    </in>
 	  </btypes:TYPE>,
 	  <btypes:TYPE>
@@ -1085,12 +1085,12 @@
       </btypes:TYPE>
       iff
       <btypes:TYPE>
-	<Subst>
-	  <aSubMap/>
-	  <normalize>
+	<normalize>
+	  <Subst>
+	    <aSubMap/>
 	    <aCtset/>
-	  </normalize>
-	</Subst>
+	  </Subst>
+	</normalize>
       </btypes:TYPE>
       consists only of tautologies (trivially).
     </p>
@@ -1137,15 +1137,10 @@
 	      <text content=" in "/>
 	      <aSubMap/>
 	      <text content=", "/>
-	      <eq>
+	      <neq>
 		<tvar name="alpha"/>
 		<tvar name="beta"/>
-	      </eq>
-	      <text content=" implies "/>
-	      <eq>
-		<type/>
-		<type dash="'"/>
-	      </eq>          
+	      </neq>
 	    </grouping>
 	  </tyPre>
 	  <tyConc>
@@ -1212,24 +1207,40 @@
       </Hrules>
       <Hrules>
 	<tyRule>
+	  <tyPre/>
+	  <tyConc>
+	    <models name="acy">
+	      <assume/>
+	      <EmptySubst/>
+	    </models>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
 	  <tyPre>
-	    <grouping>
-	      <Forall/>
-	      <in>
+	    <eq>
+	      <aSubMap/>
+	      <compose>
 		<SubMap>
 		  <tvar name="alpha"/>
 		  <type/>
 		</SubMap>
-		<pred name="TransClose">
-		  <aSubMap/>
-		</pred>
-	      </in>
-	      <text content=", "/>
-	      <notin>
-		<tvar name="alpha"/>
-		<type/>
-	      </notin>
-	    </grouping>
+		<aSubMap dash="'"/>
+	      </compose>
+	    </eq>
+	    <notin>
+	      <tvar name="alpha"/>
+	      <type/>
+	    </notin>
+	    <models name="acy">
+	      <assume/>
+	      <Subst>
+		<SubMap>
+		  <tvar name="alpha"/>
+		  <type/>
+		</SubMap>
+		<aSubMap dash="'"/>
+	      </Subst>
+	    </models>
 	  </tyPre>
 	  <tyConc>
 	    <models name="acy">
@@ -1284,15 +1295,62 @@
     <p>
       For any 
       <btypes:TYPE>
-	<solvable/>
-      </btypes:TYPE>
-      such that
+	<eq>
+	  <solvable/>
+	  <collection>
+	    <type/>
+	    <aExpr/>
+	    <grouping>
+	      <text content=" or "/>
+	      <store/>
+	    </grouping>
+	  </collection>
+	</eq>
+      </btypes:TYPE>,
+      we write 
+      <btypes:TYPE>
+	<canonical>
+	  <solvable/>
+	</canonical>
+      </btypes:TYPE> to represent the entity in which all
+      meta-constructors in (posibly embedded types) are fully
+      interpreted.
+    </p>
+    <p>
+      For any 
+      <btypes:TYPE>
+	<gamma/>
+      </btypes:TYPE> such that if
+      <btypes:TYPE>
+	<eq>
+	  <aCtset/>
+	  <Unin>
+	    <aCtset num="i"/>
+	  </Unin>
+	</eq>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<Forall/>
+	<in>
+	  <mapping>
+	    <id/>
+	    <forall>
+	      <tvars name="alpha"/>
+	      <ctype>
+		<type num="i"/>
+		<aCtset num="i"/>
+	      </ctype>
+	    </forall>
+	  </mapping>
+	  <gamma/>
+	</in>
+      </btypes:TYPE>, and
       <btypes:TYPE>
 	<models name="sat">
-	  <EmptySubst/>
-	  <spset>
-	    <solvable/>
-	  </spset>
+	  <assume>
+	    <EmptySubst/>
+	  </assume>
+	  <aCtset/>
 	</models>
       </btypes:TYPE>,
       we write 
@@ -1300,11 +1358,12 @@
 	<canonical>
 	  <solvable/>
 	</canonical>
-      </btypes:TYPE> to represent the equivalent entity
-      in which (1) all meta-constructors in are fully interpreted,
-      and (2) the (tautological) constraints embedded within 
+      </btypes:TYPE> to represent the entity in which (1) all
+      meta-constructors in the embedded types are fully
+      interpreted, and (2) the (tautological) constraints embedded
+      within  
       <btypes:TYPE>
-	<solvable/>
+	<gamma/>
       </btypes:TYPE> are removed to obtain an equivalent
       unconstrained entity.
     </p>
@@ -1720,9 +1779,9 @@
   <theorem id="eq-unify-complete">
     <title>Principality of Unification</title>
     <p>
-      We have the following two properties to show that 
-      the unification algorithm produces most general
-      substitutions and residual constraints.
+      The unification algorithm produces most general
+      substitutions, and fails only when the 
+      constaint set is inconsistent. 
     </p>
     <ol>
       <li>
@@ -1753,9 +1812,9 @@
 	    </models>
 	  </btypes:TYPE>, 
 	  <btypes:TYPE>
-	    <Forall>
+	    <Exists>
 	      <aSubMap num="s" dash="'"/>
-	    </Forall>
+	    </Exists>
 	  </btypes:TYPE> such that 
 	  <btypes:TYPE>
 	    <eq>
@@ -1858,18 +1917,87 @@
 	  </assume>
 	  <aCtset/>
 	</models>
-      </btypes:TYPE>, we have
+      </btypes:TYPE>, 
       <btypes:TYPE>
-	<Djudge>
-	  <aSubMap/>
-	  <gamma/>
-	  <store/>
-	  <aExpr/>
-	  <type/>
-	</Djudge>
+	<Exists>	
+	  <aCtset dash="'"/>
+	</Exists>
+      </btypes:TYPE> such that 
+      <btypes:TYPE>
+	<Cjudge>
+	  <aCtset dash="'"/>
+	  <canonical>
+	    <Subst>
+	      <aSubMap/>
+	      <gamma/>
+	    </Subst>
+	  </canonical>
+	  <canonical>
+	    <Subst>
+	      <aSubMap/>
+	      <store/>
+	    </Subst>
+	  </canonical>
+ 	  <canonical>
+	    <Subst>
+	      <aSubMap/>
+	      <aExpr/>
+	    </Subst>
+	  </canonical>
+ 	  <canonical>
+	    <Subst>
+	      <aSubMap/>
+	      <type/>
+	    </Subst>
+	  </canonical>
+	</Cjudge>
       </btypes:TYPE>.
+
+<!--       <btypes:TYPE> -->
+<!-- 	<Djudge> -->
+<!-- 	  <aSubMap/> -->
+<!-- 	  <gamma/> -->
+<!-- 	  <store/> -->
+<!-- 	  <aExpr/> -->
+<!-- 	  <type/> -->
+<!-- 	</Djudge> -->
+<!--       </btypes:TYPE>. -->
     </p>
   </theorem>
+  <proof>
+    <p>
+      By induction on the derivation of 
+      <btypes:TYPE>
+	<TEjudge>
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <aCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE>. We proceed by case analysis on the last step.
+    </p>
+    <ol>
+      <li id="eqs_base">
+	<p>
+	  Cases E-Unit, E-True. E-False, E-Hloc, and E-Sloc are trivial. 
+	</p>
+      </li>
+      <li id="eqs_id">
+	<p>
+	  Case E-Id:
+	</p>
+      </li>
+    </ol>
+  </proof>
   <theorem id="eq-infer-complete">
     <title>Completeness of Type Inference</title>
     <p>

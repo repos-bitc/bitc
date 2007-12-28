@@ -1128,6 +1128,11 @@
                                name      CDATA   #IMPLIED
                                br        CDATA   #IMPLIED
 >
+<!ELEMENT Sat                 %anything.group;%anything.group;)>
+<!ATTLIST Sat
+                               name      CDATA   #IMPLIED
+                               br        CDATA   #IMPLIED
+>
 
 <!-- ======================================================================
                         Type Judgements 
@@ -1156,6 +1161,10 @@
                                name      CDATA   #IMPLIED
                                br        CDATA   #IMPLIED
 >
+
+<!-- Convenience form constrained declarative derivation -->
+<!ELEMENT Cjudge              %anything.group;%anything.group;%anything.group;%anything.group;%anything.group;)>
+
 <!-- Convenience form substituted canonicalized declarative derivation -->
 <!ELEMENT Djudge              %anything.group;%anything.group;%anything.group;%anything.group;%anything.group;)>
 <!ATTLIST Djudge

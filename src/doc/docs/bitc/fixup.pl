@@ -64,8 +64,12 @@ while(!eof(F)) {
 	$l =~ s/\{\\textbar\}\{\\\}\}/$EM\{\|\\!\\\}\}/g;
 
 	# Temporary: Until osdoc supports ||-
-	# \textbf{\ensuremath{models}} to \ensuremath{models}
+	# \textbf{\ensuremath{models}} to \ensuremath{Vdash}
 	$l =~ s/$b\{$em\{\\models\}\}/$EM\{\\Vdash\}/g;
+
+	# Temporary: Until osdoc supports |||-
+	# \textbf{\emph{\ensuremath{models}}} to \ensuremath{VDash}
+	$l =~ s/\\textbf\{\\emph\{$em\{\\models\}\}\}/$EM\{\\Vvdash\}/g;
 	
 	# \textbf{*}letter\textbf{*} to \mathbb{letter}
 	$l =~ s/$b\{\*\}([A-Za-z])\\textbf\{\*\}/$EM\{\\mathbb{$1}\}/g;

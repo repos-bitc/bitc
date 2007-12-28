@@ -63,101 +63,7 @@
     the constraint set normalization function defined in 
     <btypes:TYPE>
       <defn tag="normalized_ctset"/>
-    </btypes:TYPE>. Here, the translation 
-  </p>
-  <example>
-    <p>
-      <btypes:TYPE>
-	<leadsto>
-	  <DBrac>
-	    <ceq>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </ceq>
-	  </DBrac>
-	  <DBrac>
-	    <collection>
-	      <Tsub>
-		<type num="1"/>
-		<tvar name="alpha"/>
-	      </Tsub>	      
-	      <Tsub>
-		<type num="2"/>
-		<tvar name="alpha"/>
-	      </Tsub>
-	    </collection>
-	  </DBrac>
-	</leadsto>
-      </btypes:TYPE>,
-      where
-      <btypes:TYPE>
-	<models name="new">
-	  <assume/>
-	  <tvar name="alpha"/>
-	</models>
-      </btypes:TYPE>.            
-    </p>
-  </example>
-  <p indent="no">
-    should be used instead of
-  </p>
-  <example>
-    <p>
-      <btypes:TYPE>
-	<leadsto>
-	  <DBrac>
-	    <ceq via="alpha">
-	      <type num="1"/>
-	      <type num="2"/>
-	    </ceq>
-	  </DBrac>
-	  <DBrac>
-	    <collection>
-	      <Tsub>
-		<type num="1"/>
-		<tvar name="alpha"/>
-	      </Tsub>	      
-	      <Tsub>
-		<type num="2"/>
-		<tvar name="alpha"/>
-	      </Tsub>
-	    </collection>
-	  </DBrac>
-	</leadsto>
-      </btypes:TYPE>            
-    </p>
-  </example>
-  <p>
-    In this system, we will continue to use the 
-    canonicalization defined in 
-    <btypes:TYPE>
-      <defn tag="canonical-ctr-types"/>
     </btypes:TYPE>
-    in order to obtain entities that are within the
-    language and type system defined in 
-    section&nbsp;<xref ref="language"/>.
-    For example, if
-    <btypes:TYPE>
-      <eq>
-	<type/>
-	<mbpair>
-	  <mutable>
-	    <bool/>
-	  </mutable>
-	  <bool/>
-	</mbpair>
-      </eq>
-    </btypes:TYPE>, then
-    <btypes:TYPE>
-      <eq>
-	<canonical>
-	  <type/>
-	</canonical>
-	<mutable>
-	  <bool/>
-	</mutable>
-      </eq>
-    </btypes:TYPE>.
   </p>
   <definition id="ext2-ftvs">
     <title>FTVs (Extension II)</title>
@@ -169,7 +75,7 @@
 	</ftvs>
       </btypes:TYPE> in 
       <btypes:TYPE>
-	<defn tag="ext-ftvs"/>
+	<defn tag="ext2-ftvs"/>
       </btypes:TYPE> as follows:
     </p>
     <example>
@@ -267,7 +173,7 @@
 	      <type/>
 	    </pred>
 	  </fnxn>
-	  <text content=" where "/>
+	  <text content=", where "/>
 	  <neq>
 	    <type/>
 	    <tvar name="alpha"/>
@@ -425,7 +331,7 @@
 	      <type/>
 	    </pred>
 	  </fnxn>
-	  <text content=" where "/>
+	  <text content=", where "/>
 	  <neq>
 	    <type/>
 	    <tvar name="alpha"/>
@@ -877,6 +783,167 @@
       </Hrules>
     </btypes:TYPE>
   </definition>
+  <definition id="normalized_ctset_2">
+    <title>Normalization of Constraint Sets (2)</title>
+    <p>
+      The normalization function
+      <btypes:TYPE>
+	<normalize>
+	  <aCtset/>
+	</normalize>
+      </btypes:TYPE> is used to obtain a normalized form of a
+      constraint set 
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE> by re-writing it only in terms of closed
+      subtype constraints.
+    </p>
+    <p>
+      <btypes:TYPE>
+	<eq>              
+	  <normalize>
+	    <aCtset/>
+	  </normalize>
+	  <pred name="close">
+	    <aCtset dash="'"/>
+	  </pred>
+	</eq>
+      </btypes:TYPE>
+      where
+      <btypes:TYPE>
+	<aCtset dash="'"/>
+      </btypes:TYPE>
+      is obtained from
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE> using the normalizing translations:
+    </p>
+    <ul>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <leadsto>
+	      <DBrac>
+		<eq>
+		  <type num="1"/>
+		  <type num="2"/>
+		</eq>
+	      </DBrac>
+	      <DBrac>
+		<collection>
+		  <Tsub>
+		    <type num="1"/>
+		    <type num="2"/>
+		  </Tsub>
+		  <Tsub>
+		    <type num="2"/>
+		    <type num="1"/>
+		  </Tsub>	      
+		</collection>
+	      </DBrac>
+	    </leadsto>	
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <leadsto>
+	      <DBrac>
+		<ceq>
+		  <type num="1"/>
+		  <type num="2"/>
+		</ceq>
+	      </DBrac>
+	      <DBrac>
+		<collection>
+		  <Tsub>
+		    <type num="1"/>
+		    <tvar name="alpha"/>
+		  </Tsub>	      
+		  <Tsub>
+		    <type num="2"/>
+		    <tvar name="alpha"/>
+		  </Tsub>
+		</collection>
+	      </DBrac>
+	    </leadsto>
+	  </btypes:TYPE>,
+	  where
+	  <btypes:TYPE>
+	    <models name="new">
+	      <assume/>
+	      <tvar name="alpha"/>
+	    </models>
+	  </btypes:TYPE>.            
+	</p>
+      </li>
+    </ul>
+  </definition>
+  <p>
+    We will also use a modified version of the 
+    canonicalization transformation defined in 
+    <btypes:TYPE>
+      <defn tag="canonical-ctr-types"/>
+    </btypes:TYPE>
+    in order to obtain entities that are within the
+    language and type system defined in 
+    section&nbsp;<xref ref="language"/>.
+  </p>
+  <definition id="canonical-ctr-types2">
+    <title>Canonical forms of Solvable Entities</title>
+    <p>
+      For any 
+      <btypes:TYPE>
+	<solvable/>
+      </btypes:TYPE>
+      such that
+      <btypes:TYPE>
+	<models name="sat">
+	  <EmptySubst/>
+	  <spset>
+	    <solvable/>
+	  </spset>
+	</models>
+      </btypes:TYPE>,
+      we write 
+      <btypes:TYPE>
+	<canonical>
+	  <solvable/>
+	</canonical>
+      </btypes:TYPE> to represent the equivalent entity
+      in which (1) all meta-constructors in are fully interpreted,
+      and (2) the (tautological) constraints embedded within 
+      <btypes:TYPE>
+	<solvable/>
+      </btypes:TYPE> are removed to obtain an equivalent
+      unconstrained entity.
+    </p>
+  </definition>    
+  <p>
+    For example, if
+    <btypes:TYPE>
+      <eq>
+	<type/>
+	<mbpair>
+	  <mutable>
+	    <bool/>
+	  </mutable>
+	  <bool/>
+	</mbpair>
+      </eq>
+    </btypes:TYPE>, then
+    <btypes:TYPE>
+      <eq>
+	<canonical>
+	  <type/>
+	</canonical>
+	<mutable>
+	  <bool/>
+	</mutable>
+      </eq>
+    </btypes:TYPE>.
+  </p>
   <p>
     <leadin>Type Inference:</leadin>
     The type inference algorithm is as shown in
@@ -3200,7 +3267,7 @@
 	    <p>
 	      From 
 	      <btypes:TYPE>
-		<defn tag="canonical-ctr-types"/>
+		<defn tag="canonical-ctr-types2"/>
 	      </btypes:TYPE> and
 	      <btypes:TYPE>
 		<defn tag="meta"/>

@@ -8,6 +8,65 @@
   <title>Static Semantics of <btypes:TYPE><language/></btypes:TYPE></title>
   <btypes:TYPE>        
     <grammar>
+      <bnf desc="Types">
+	<type/>
+	<alternatives>
+	  <tvar name="alpha"/>
+	  <unit/>
+	  <bool/>
+	  <fn><type/><type/></fn>                  
+	</alternatives>
+      </bnf>
+      <bnfc desc="">
+	<alternatives>
+	  <ref><type/></ref>
+	  <mutable><type/></mutable>
+	</alternatives>
+      </bnfc>
+      <bnf desc="Constr. Type">
+	<aCtype/>
+	<alternatives>
+	  <type/>
+	  <ctype>
+	    <type/>
+	    <aCtset/>
+	  </ctype>
+	</alternatives>
+      </bnf>
+      <bnf desc="Type Scheme">          
+	<aTS/>
+	<alternatives>
+	  <aCtype/>
+	  <forall>                    
+	    <tvar name="alpha"/>
+	    <aTS/>
+	  </forall>
+	</alternatives>
+      </bnf>
+      <bnf desc="Constraints">
+	<constraint/>
+	<alternatives>
+	  <Tsub>
+	    <tvar name="alpha"/>
+	    <type/>
+	  </Tsub>
+	</alternatives>
+      </bnf>
+      <bnf desc="Constraint Sets">
+	<aCtset/>
+	<alternatives>
+	  <Empty/>
+	  <set>
+	    <plural>
+	      <constraint/>
+	    </plural>
+	  </set>
+	  <unin>
+	    <aCtset/>
+	    <aCtset/>
+	  </unin>
+	</alternatives>            
+      </bnf>
       <bnf desc="Binding Environment">
 	<gamma/>
 	<alternatives>
@@ -82,10 +141,11 @@
     </btypes:TYPE>.
   </p>
   <p>
-    Figure&nbsp;<xref ref="decl_rules"/> shows the declarative
-    type rules, copy coercion rules and rules for type
-    generalization. The location semantics (lvalue) rules 
+    Figure&nbsp;<xref ref="subtype_rules"/> shows the copy coercion
+    rules. The location semantics (lvalue) rules 
     are shown in figure&nbsp;<xref ref="lval_rules"/>.
+    Figure&nbsp;<xref ref="decl_rules"/> shows the declarative
+    type rules, rules for type generalization. 
     The standard type judgment  
     <btypes:TYPE>
       <TDjudge>
@@ -135,6 +195,29 @@
       </btypes:TYPE>
     </p>
   </example>
+  <p>
+    Figure&nbsp;<xref ref="decl_rules"/> shows a generalized
+    declarative type system and associated rules for type
+    generalization. The type judgment  
+    <btypes:TYPE>
+      <TDjudge>
+	<aExpr/>
+	<type/>
+      </TDjudge>
+    </btypes:TYPE> is understood as: given a binding environment 
+    <btypes:TYPE>
+      <gamma/>
+    </btypes:TYPE> and store typing
+    <btypes:TYPE>
+      <store/>
+    </btypes:TYPE>, the expression
+    <btypes:TYPE>
+      <aExpr/>
+    </btypes:TYPE> has type
+    <btypes:TYPE>
+      <type/>
+    </btypes:TYPE>.
+  </p>
   <definition id="aleq">      
     <title>Algebraic equivalences</title>
     <p>
@@ -537,7 +620,7 @@
 	      </ftvs>                  
 	    </unin>
 	  </eq>
-	  <text content=" where "/>
+	  <text content=", where "/>
 	  <eq>
 	    <aTS/>
 	    <forall>
@@ -556,7 +639,7 @@
 	      </ftvs>
 	    </Unin>                  
 	  </eq>
-	  <text content=" ; "/>
+	  <text content=", "/>
 	  <Forall/>
 	  <in>
 	    <mapping>
@@ -576,7 +659,7 @@
 	      </ftvs>
 	    </Unin>                  
 	  </eq> 
-	  <text content=" ; "/>
+	  <text content=", "/>
 	  <Forall/>
 	  <in>
 	    <mapping>
@@ -596,7 +679,7 @@
 	      </ftvs>
 	    </Unin>                  
 	  </eq> 
-	  <text content=" ; "/>
+	  <text content=", "/>
 	  <Forall/>
 	  <in>
 	    <type num="i"/>
@@ -715,7 +798,10 @@
 	  </fnxn>
 	  <br/>
 	  <fnxn name="Value">
-	    <aExpr/>
+	    <grouping>
+	      <aExpr/>
+	      <text content=" (otherwise) "/>
+	    </grouping>
 	    <FALSE/>
 	  </fnxn>
 	  <br/>
@@ -727,6 +813,42 @@
 		<aExpr/>
 	      </pred>
 	    </NOT>
+	  </fnxn>
+	  <br/>
+	  <br/>
+	  <fnxn name="Immutable">
+	    <unit/>
+	    <TRUE/>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Immutable">
+	    <bool/>
+	    <TRUE/>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Immutable">
+	    <fn>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </fn>
+	    <TRUE/>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Immutable">
+	    <ref>
+	      <type/>
+	    </ref>                
+	    <pred name="Immutable">
+	      <type/>
+	    </pred>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Immutable">
+	    <grouping>
+	      <type/>
+	      <text content=" (otherwise) "/>
+	    </grouping>
+	    <FALSE/>
 	  </fnxn>
 	  <br/>
 	  <br/>
@@ -773,7 +895,11 @@
 	  </fnxn>
 	  <br/>
 	  <fnxn name="Immut">
-	    <type/>
+	    <grouping>
+	      <type/>
+	      <text content=" (otherwise) "/>
+	    </grouping>
+
 	    <FALSE/>
 	  </fnxn>
 	  <br/>
@@ -2196,7 +2322,7 @@
 	      <aExpr/>
 	      <id name="y"/>
 	    </eq>
-	    <text content=" where "/>
+	    <text content=", where "/>
 	    <in>
 	      <id name="y"/>
 	      <extend>
@@ -3580,4 +3706,332 @@
       and heap. Proof now follows from induction hypothesis.  
     </p>
   </proof>
+  <lemma id="C-progress">
+    <title>Progress</title>
+    <p>
+      <btypes:TYPE>
+	<text content="If "/>
+	<aExpr/>
+	<text content=" is a closed, well typed term, "/> 
+	<text content="that is, "/> 
+	<Cjudge>
+	  <aCtset/>
+	  <Empty/>
+	  <store/>
+	  <aExpr/>
+	  <type/>
+	</Cjudge>
+	<text content=" for some "/> 
+	<type/> 
+	<text content=", "/> 
+	<aCtset/>
+	<text content=", "/> 
+	<store/>
+	<text content=", and if "/> 
+	<models name="cst">
+	  <assume/>
+	  <aCtset/>
+	</models>
+	<text content=", then, given any heap "/> 
+	<heap/>
+	<text content=" and stack "/> 
+	<stack/>
+	<text content=" such that "/> 
+	<Sjudge num="*">
+	  <assume>
+	    <aCtset/>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <plus>
+	    <heap/>
+	    <stack/>
+	  </plus>
+	</Sjudge> 
+	<text content=", "/>            
+      </btypes:TYPE>
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <text content=" If "/>                
+	    <Sjudge name="lval">
+	      <assume/>
+	      <aExpr/>
+	    </Sjudge>
+	    <text content=", then "/>              
+	    <aExpr/>
+	    <text content=" is either a valid lvalue "/> 
+	    <lVal/>
+	    <text content=" (that is, "/>
+	    <eq>
+	      <lVal/>
+	      <sLoc/>
+	    </eq>
+	    <text content=", "/>
+	    <in>
+	      <sLoc/>
+	      <dom>
+		<stack/>
+	      </dom>
+	    </in>
+	    <text content=" or "/> 
+	    <eq>
+	      <lVal/>
+	      <deref>
+		<hLoc/>
+	      </deref>
+	    </eq>
+	    <text content=", "/>
+	    <in>
+	      <hLoc/>
+	      <dom>
+		<heap/>
+	      </dom>
+	    </in>
+	    <text content=") or else "/>
+	    <Exists>
+	      <aExpr dash="'"/>
+	      <stack dash="'"/>
+	      <heap dash="'"/>
+	    </Exists>
+	    <text content=" such that:"/>               
+	    <leval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<aExpr dash="'"/>
+	      </opState>
+	    </leval>
+	    <text content="."/>   
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>              
+	  <btypes:TYPE>
+	    <aExpr/>
+	    <text content=" is a value "/> 
+	    <aVal/>
+	    <text content=" or else "/> 
+	    <Exists>
+	      <aExpr dash="'"/>
+	      <stack dash="'"/>
+	      <heap dash="'"/>
+	    </Exists>
+	    <text content=" such that "/>               
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<aExpr dash="'"/>
+	      </opState>
+	    </eval>
+	    <text content="."/>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </lemma>
+  <lemma id="C-preservation">
+    <title>Preservation</title>
+    <p>
+      <btypes:TYPE>          
+	<text content="If "/>
+	<Cjudge>
+	  <aCtset/>
+	  <gamma/>
+	  <store/>
+	  <aExpr/>
+	  <type/>
+	</Cjudge>
+	<text content=", "/>
+	<models name="cst">
+	  <assume/>
+	  <aCtset/>
+	</models>
+	<text content=", and "/>
+	<Sjudge num="*">
+	  <assume>
+	    <aCtset/>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <plus>
+	    <heap/>
+	    <stack/>
+	  </plus>
+	</Sjudge> 
+	<text content=", then, "/>    
+      </btypes:TYPE>
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <text content="If "/>
+	    <leval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<aExpr dash="'"/>
+	      </opState>
+	    </leval>
+	    <text content=", then, there exists a "/>
+	    <supeq>
+	      <store dash="'"/>
+	      <store/>
+	    </supeq>
+	    <text content=" such that "/>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store dash="'"/>
+	      <aExpr dash="'"/>
+	      <type/>
+	    </Cjudge>
+	    <text content=" and "/>
+	    <Sjudge num="*">
+	      <assume>
+		<aCtset/>
+		<gamma/>
+		<store dash="'"/>
+	      </assume>
+	      <plus>
+		<heap dash="'"/>
+		<stack dash="'"/>
+	      </plus>
+	    </Sjudge>
+	    <text content="."/>
+	  </btypes:TYPE>              
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>          
+	    <text content="If "/>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<aExpr dash="'"/>
+	      </opState>
+	    </eval>
+	    <text content=", there exists a "/>
+	    <supeq>
+	      <store dash="'"/>
+	      <store/>
+	    </supeq>                
+	    <text content=" such that "/>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store dash="'"/>
+	      <aExpr dash="'"/>
+	      <type dash="'"/>
+	    </Cjudge>
+	    <text content=",  "/>
+	    <Sjudge num="*">
+	      <assume>
+		<aCtset/>
+		<gamma/>
+		<store dash="'"/>
+	      </assume>
+	      <plus>
+		<heap dash="'"/>
+		<stack dash="'"/>
+	      </plus>
+	    </Sjudge>
+	    <text content=" and "/>
+	    <eq>
+	      <minz>
+		<type/>
+	      </minz>
+	      <minz>
+		<type dash="'"/>
+	      </minz>
+	    </eq>
+	    <text content="."/>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </lemma>
+  <theorem id="C-soundness">
+    <title>Type Soundness</title>
+    <p>
+      If 
+      <btypes:TYPE>
+	<Cjudge>
+	  <aCtset/>
+	  <Empty/>
+	  <store/>
+	  <aExpr/>
+	  <type/>
+	</Cjudge>
+	<text content=" and "/>
+	<Sjudge num="*">
+	  <assume>
+	    <aCtset/>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <plus>
+	    <heap/>
+	    <stack/>
+	  </plus>
+	</Sjudge> 
+	<text content=" and "/>
+	<eval many="yes">
+	  <opState>
+	    <stack/>
+	    <heap/>
+	    <aExpr/>
+	  </opState>
+	  <opState>
+	    <stack dash="'"/>
+	    <heap dash="'"/>
+	    <aExpr dash="'"/>
+	  </opState>
+	</eval>
+	<text content=" then "/>
+	<opState>
+	  <stack dash="'"/>
+	  <heap dash="'"/>
+	  <aExpr dash="'"/>
+	</opState>
+	<text content=" is not stuck."/>            
+      </btypes:TYPE>
+      That is, execution of a well typed expression cannot lead to
+      a stuck state. Here, 
+      <btypes:TYPE>
+	<evalOp many="yes"/>
+      </btypes:TYPE > represents the 
+      reflexive-transitive-closure of 
+      <btypes:TYPE>
+	<evalOp/>
+      </btypes:TYPE>.
+    </p>
+  </theorem>
   </sect1>

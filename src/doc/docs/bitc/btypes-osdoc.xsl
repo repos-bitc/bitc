@@ -2687,6 +2687,18 @@
     </xsl:call-template>    	
     <xsl:call-template name="print.set"/>
   </xsl:template>
+
+  <!-- Sat -->
+  <xsl:template match="Sat" mode="formula">
+    <xsl:apply-templates select="*[1]" mode="formula"/>
+    <xsl:call-template name="print.sat">
+      <xsl:with-param name="print.sat.name">
+	<xsl:value-of select="@name"/>
+      </xsl:with-param> 
+    </xsl:call-template>    	
+    <xsl:apply-templates select="*[2]" mode="formula"/>
+  </xsl:template>
+
   
 <!-- ======================================================================
                        Type Judgements 
@@ -2789,6 +2801,23 @@
     <xsl:apply-templates select="*[3]" mode="formula"/>
     <xsl:call-template name="print.derives">
       <xsl:with-param name="print.derives.sym">diam</xsl:with-param> 
+    </xsl:call-template>
+    <xsl:apply-templates select="*[4]" mode="formula"/>
+    <xsl:call-template name="print.op.qual"/>	
+    <xsl:apply-templates select="*[5]" mode="formula"/>
+  </xsl:template>    
+
+  <!-- Cjudge -->
+  <!-- submap || gamma; store |-diamond expr : type -->
+  <xsl:template match="Cjudge" mode="formula">
+    <xsl:apply-templates select="*[1]" mode="formula"/>
+    <xsl:call-template name="print.op.semis"/>
+    <xsl:apply-templates select="*[2]" mode="formula"/>
+    <xsl:call-template name="print.op.semis"/>	
+    <xsl:apply-templates select="*[3]" mode="formula"/>
+    <xsl:call-template name="print.derives">
+      <!--       <xsl:with-param name="print.derives.sym">compfn</xsl:with-param>  -->
+      <xsl:with-param name="print.derives.name">*</xsl:with-param> 
     </xsl:call-template>
     <xsl:apply-templates select="*[4]" mode="formula"/>
     <xsl:call-template name="print.op.qual"/>	
@@ -3288,22 +3317,42 @@
     <xsl:call-template name="print.space"/>
   </xsl:template>
 
-  <!-- the consistency ||- operator -->
+  <!-- the consistency |||- operator -->
   <xsl:template name="print.cst">
     <xsl:param name="print.cst.name"/>
     
     <xsl:call-template name="print.space"/>
     <xsl:element name="b">
+      <xsl:element name="em">
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>models;</xsl:text> 
+	<xsl:if test="$print.cst.name">
+	  <xsl:element name="sub">
+	    <xsl:value-of select="$print.cst.name"/>
+	  </xsl:element>
+	</xsl:if>
+      </xsl:element>
+    </xsl:element>
+    <xsl:call-template name="print.space"/>
+  </xsl:template>
+
+  <!-- the Satisfiability ||- operator -->
+  <xsl:template name="print.sat">
+    <xsl:param name="print.sat.name"/>
+    
+    <xsl:call-template name="print.space"/>
+    <xsl:element name="b">
       <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
       <xsl:text>models;</xsl:text> 
-      <xsl:if test="$print.cst.name">
+      <xsl:if test="$print.sat.name">
 	<xsl:element name="sub">
-	  <xsl:value-of select="$print.cst.name"/>
+	  <xsl:value-of select="$print.sat.name"/>
 	</xsl:element>
       </xsl:if>
     </xsl:element>
     <xsl:call-template name="print.space"/>
   </xsl:template>
+
 
   <!-- |-inf infer operator -->
   <xsl:template name="print.infer">

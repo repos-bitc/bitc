@@ -65,8 +65,10 @@
   </sect1>
   <xi:include href="include/formal/lang.xmli"/>
   <xi:include href="include/formal/opsem.xmli"/>
-  <xi:include href="include/formal/decl.xmli"/>
+  <xi:include href="include/formal/subtype.xmli"/>
   <xi:include href="include/formal/locsem.xmli"/>
+  <xi:include href="include/formal/decl.xmli"/>
+  <xi:include href="include/formal/cdecl.xmli"/>
   <xi:include href="include/formal/semantics.xmli"/>
   <xi:include href="include/formal/type_system.xmli"/>
   <xi:include href="include/formal/eq-infer.xmli"/>

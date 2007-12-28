@@ -1,0 +1,745 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <figure id="cdecl_rules" fullwidth='yes' 
+    latex.placement="tbp">
+  <font size="small">
+    <btypes:TYPE
+      xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule>
+	  <tyPre>
+	    <Tsub>
+	      <type/>
+	      <type dash="'"/>
+	    </Tsub>
+	  </tyPre>
+	  <tyConc>
+	    <Sat>
+	      <aCtset/>
+	      <Tsub>
+		<type/>
+		<type dash="'"/>
+	      </Tsub>
+	    </Sat>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <in>
+	      <Tsub>
+		<type/>
+		<type dash="'"/>
+	      </Tsub>
+	      <aCtset/>
+	    </in>
+	  </tyPre>
+	  <tyConc>
+	    <Sat>
+	      <aCtset/>
+	      <Tsub>
+		<type/>
+		<type dash="'"/>
+	      </Tsub>
+	    </Sat>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <grouping>
+	      <Forall>
+		<in>
+		  <constraint/>
+		  <aCtset dash="'"/>
+		</in>
+	      </Forall>
+	      <text content=", "/>
+	      <Sat>
+		<aCtset/>
+		<constraint/>
+	      </Sat>
+	    </grouping>
+	  </tyPre>
+	  <tyConc>
+	    <Sat>
+	      <aCtset/>
+	      <aCtset dash="'"/>
+	    </Sat>
+	  </tyConc>
+	</tyRule>	
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="C-Id">
+	  <tyPre>
+	    <mapsto>
+	      <gamma/>
+	      <id/>
+	      <TS>
+		<tvars name="alpha"/>
+		<ctype>
+		  <type/>
+		  <aCtset dash="'"/>
+		</ctype>
+	      </TS>
+	    </mapsto>
+	    <Sat>
+	      <aCtset/>
+	      <subst>
+		<aCtset dash="'"/>
+		<tvars name="alpha"/>
+		<types num="n"/>
+	      </subst>
+	    </Sat>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <id/>
+	      <subst>
+		<type/>
+		<tvars name="alpha"/>
+		<types num="n"/>
+	      </subst>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>        
+	<tyRule name="C-Unit">
+	  <tyPre/>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <Unit/>
+	      <unit/>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="C-True">
+	  <tyPre/>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <true/>
+	      <bool/>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="C-False">
+	  <tyPre/>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <false/>
+	      <bool/>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="C-Hloc">
+	  <tyPre>
+	    <mapsto>
+	      <store/>
+	      <hLoc/>
+	      <type/>
+	    </mapsto>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <hLoc/>
+	      <ref>
+		<type/>
+	      </ref>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="C-Sloc">
+	  <tyPre>
+	    <mapsto>
+	      <store/>
+	      <sLoc/>
+	      <type/>
+	    </mapsto>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <sLoc/>
+	      <type/>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="C-Lambda">
+	  <tyPre>
+	    <Cjudge>
+	      <aCtset/>
+	      <extend>
+		<gamma/>
+		<mapping>
+		  <id/>
+		  <type num="1"/>
+		</mapping>
+	      </extend>
+	      <store/>
+	      <aExpr/>
+	      <type num="2"/>
+	    </Cjudge>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <lambda>
+		<id/>
+		<aExpr/>
+	      </lambda>
+	      <fn>
+		<minz>
+		  <type num="1"/>
+		</minz>
+		<maxz>
+		  <type num="2"/>
+		</maxz>
+	      </fn>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="C-TqExpr">
+	  <tyPre>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr/>
+	      <type/>
+	    </Cjudge>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <paren>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </paren>
+	      <type/>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="C-App">
+	  <tyPre>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr num="1"/>
+	      <type num="1"/>
+	    </Cjudge>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr num="2"/>
+	      <type num="2"/>
+	    </Cjudge>
+	  </tyPre>
+	  <tyPre>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<Tsub>
+		  <type num="1"/>
+		  <fn>
+		    <type num="a"/>
+		    <type num="r"/>
+		  </fn>
+		</Tsub>
+		<Tsub>
+		  <type num="2"/>
+		  <type num="a"/>
+		</Tsub>
+		<Tsub>
+		  <type num="r"/>
+		  <type/>
+		</Tsub>
+	      </set>
+	    </Sat>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <apply>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+	      </apply>
+	      <type/>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="C-If">
+	  <tyPre>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr num="1"/>
+	      <type num="1"/>
+	    </Cjudge>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr num="2"/>
+	      <type num="2"/>
+	    </Cjudge>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr num="3"/>
+	      <type num="2"/>
+	    </Cjudge>
+	  </tyPre>
+	  <tyPre>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<Tsub>
+		  <type num="1"/>		
+		  <bool/>
+		</Tsub>
+		<Tsub>
+		  <type num="2"/>		
+		  <type/>
+		</Tsub>
+		<Tsub>
+		  <type num="3"/>		
+		  <type/>
+		</Tsub>
+		<Tsub>
+		  <type num="0"/>		
+		  <type/>
+		</Tsub>
+	      </set>
+	    </Sat>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <if>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+		<aExpr num="3"/>
+	      </if>
+	      <type num="0"/>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="C-Set">
+	  <tyPre>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr num="1"/>
+	      <mutable>
+		<type/>
+	      </mutable>
+	    </Cjudge>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr num="2"/>
+	      <type dash="'"/>
+	    </Cjudge>
+	  </tyPre>
+	  <tyPre>
+	    <Sat>
+	      <aCtset/>
+	      <Tsub>
+		<type dash="'"/>
+		<type/>
+	      </Tsub>
+	    </Sat>
+	    <Sjudge name="lval">
+	      <assume/>
+	      <aExpr num="1"/>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <assign>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+	      </assign>
+	      <unit/>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="C-Dup">
+	  <tyPre>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr/>
+	      <type dash="'"/>
+	    </Cjudge>
+	  </tyPre>
+	  <tyPre>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<Tsub>
+		  <type dash="'"/>		
+		  <type/>
+		</Tsub>
+		<Tsub>
+		  <type dash="''"/>
+		  <type/>
+		</Tsub>
+	      </set>
+	    </Sat>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <dup>
+		<aExpr/>
+	      </dup>
+	      <ref>
+		<type dash="''"/>
+	      </ref>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="C-Deref">
+	  <tyPre>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr/>
+	      <type dash="'"/>
+	    </Cjudge>
+	  </tyPre>
+	  <tyPre>
+	    <Sat>
+	      <aCtset/>
+	      <Tsub>
+		<type dash="'"/>		
+		<ref>
+		  <type/>
+		</ref>
+	      </Tsub>
+	    </Sat>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <deref>
+		<aExpr/>
+	      </deref>
+	      <type/>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="C-Let-M [Tq]">
+	  <tyPre>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr num="1"/>
+	      <type num="1"/>
+	    </Cjudge>
+	    <Cjudge>
+	      <aCtset/>
+	      <extend>
+		<gamma/>
+		<mapping>
+		  <id/>
+		  <type/>
+		</mapping>
+	      </extend>
+	      <store/>
+	      <aExpr num="2"/>
+	      <type num="2"/>
+	    </Cjudge>
+	  </tyPre>
+	  <tyPre>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<Tsub>
+		  <type num="1"/>
+		  <type dash="'"/>		
+		</Tsub>
+		<Tsub>
+		  <type/>
+		  <type dash="'"/>		
+		</Tsub>
+	      </set>
+	    </Sat>
+	    <opt>
+	      <eq>
+		<type/>
+		<type num="q"/>
+	      </eq>
+	    </opt>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <paren>
+		<let kind="m">
+		  <tqExpr optional="yes">
+		    <id/>
+		    <type num="q"/>
+		  </tqExpr>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</let>
+	      </paren>
+	      <type num="2"/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="C-Let-P [Tq]">
+	  <tyPre>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr num="1"/>
+	      <type num="1"/>
+	    </Cjudge>
+	    <Sjudge name="gen">
+	      <assume>
+		<aCtset dash="'"/>
+		<gamma/>
+		<store/>
+		<aExpr num="1"/>
+	      </assume>
+	      <GEN>
+		<type/>
+		<aTS/>
+	      </GEN>
+	    </Sjudge>
+	    <Cjudge>
+	      <aCtset/>
+	      <extend>
+		<gamma/>
+		<mapping>
+		  <id/>
+		  <aTS/>
+		</mapping>
+	      </extend>
+	      <store/>
+	      <aExpr num="2"/>
+	      <type num="2"/>
+	    </Cjudge>
+	  </tyPre>
+	  <tyPre>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<Tsub>
+		  <type num="1"/>
+		  <type dash="'"/>		
+		</Tsub>
+		<Tsub>
+		  <type/>
+		  <type dash="'"/>		
+		</Tsub>
+	      </set>
+	    </Sat>
+	    <Sat>
+	      <aCtset/>
+	      <aCtset dash="'"/>
+	    </Sat>
+	    <opt>
+	      <eq>
+		<type/>
+		<type num="q"/>
+	      </eq>
+	    </opt>
+	    <Sjudge name="term">
+	      <assume/>
+	      <tqExpr>
+		<id/>
+		<aTS/>	
+	      </tqExpr>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <paren>
+		<let kind="p">
+		  <tqExpr optional="yes">
+		    <id/>
+		    <type num="q"/>
+		  </tqExpr>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</let>
+	      </paren>
+	      <type num="2"/>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="G-Value">
+	  <tyPre>
+	    <pred name="Value">
+	      <aExpr/>
+	    </pred>
+	    <pred name="Immutable">
+	      <type/>
+	    </pred>
+	  </tyPre>
+	  <tyPre>
+	    <eq>
+	      <tvars name="alpha"/>
+	      <diff>
+		<paren>
+		  <unin>
+		    <ftvs><type/></ftvs>
+		    <ftvs><aCtset/></ftvs>
+		  </unin>
+		</paren>
+		<paren>
+		  <unin>
+		    <ftvs><gamma/></ftvs>
+		    <ftvs><store/></ftvs>
+		  </unin>
+		</paren>
+	      </diff>
+	    </eq>
+	    <models name="new">
+	      <assume/>
+	      <tvars name="beta"/>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="gen">
+	      <assume>
+		<aCtset/>
+		<gamma/>
+		<store/>
+		<aExpr/>
+	      </assume>                
+	      <GEN>
+		<type/>
+		<TS>
+		  <tvars name="beta"/>
+		  <subst>
+		    <type/>
+		    <tvars name="alpha"/>
+		    <tvars name="beta"/>
+		  </subst>
+		</TS>
+	      </GEN>                                
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="G-Expansive">
+	  <tyPre/>
+	  <tyConc>
+	    <Sjudge name="gen">
+	      <assume>
+		<gamma/>
+		<store/>
+		<aExpr/>
+	      </assume>                
+	      <GEN>
+		<type/>
+		<type/>
+	      </GEN>                                
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="Q-Loc">
+	  <tyPre>
+	    <eq>
+	      <aTS/>
+	      <type/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="loc">
+	      <assume/>
+	      <tqExpr>
+		<id/>
+		<aTS/>	
+	      </tqExpr>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="Q-Term">
+	  <tyPre>
+	    <eq>
+	      <aTS/>
+	      <forall>
+		<tvars name="alpha"/>
+		<aCtype/>
+	      </forall>
+	    </eq>
+	    <neq>
+	      <aTS/>
+	      <aCtype/>
+	    </neq>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="term">
+	      <assume/>
+	      <tqExpr>
+		<id/>
+		<aTS/>	
+	      </tqExpr>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>	  	  	
+      </Hrules>
+    </btypes:TYPE>
+  </font>
+  <caption><font size="small">Declarative Type Rules with Constrained Types</font></caption>
+</figure>
