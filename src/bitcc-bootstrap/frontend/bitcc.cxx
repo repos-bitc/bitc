@@ -82,6 +82,7 @@ bool Options::FQtypes = false;
 bool Options::showAllTccs = false;
 bool Options::showPasses = false;
 bool Options::topMutOnly = false; 
+infChoice Options::inferenceAlgorithm = inf_hm; 
 bool Options::dumpAfterMidEnd = false;
 bool Options::dumpTypesAfterMidEnd = false;
 GCPtr<CVector<std::string> > Options::showTypesUocs;
@@ -113,8 +114,9 @@ bool Options::nogc = false;
 #define LOPT_SHOW_MAYBES  272   /* Show all maybe wrapper types, hints */
 #define LOPT_SHOW_TYPES   273   /* Dump types a particular uoc only */
 #define LOPT_TOP_MUT      274   /* Top-level mutability compatibility only */
-#define LOPT_XML_TYPES    275   /* Dump XML types */
-#define LOPT_NOGC         276   /* NO GC mode */
+#define LOPT_EQ_INFER     275   /* Equational (Complete) Type Inference */
+#define LOPT_XML_TYPES    276   /* Dump XML types */
+#define LOPT_NOGC         277   /* NO GC mode */
 
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
@@ -125,6 +127,7 @@ struct option longopts[] = {
   { "full-qual-types",      0,  0, LOPT_FQ_TYPES },
   { "help",                 0,  0, 'h' },
   { "topmutonly",           0,  0, LOPT_TOP_MUT },
+  { "eqinfer",              0,  0, LOPT_EQ_INFER },
   { "nostdinc",             0,  0, LOPT_NOSTDINC },
   { "nostdlib",             0,  0, LOPT_NOSTDLIB },
   { "ppfqns",               0,  0, LOPT_PPFQNS },
@@ -271,6 +274,12 @@ main(int argc, char *argv[])
 
     case LOPT_NOGC:
       Options::nogc = true;
+      break;
+
+    case LOPT_EQ_INFER:
+      Options::inferenceAlgorithm = inf_eq;
+      // FIX: TEMPORARY
+      UocInfo::passInfo[pn_typeCheck].stopAfter = true;
       break;
 
     case LOPT_TOP_MUT:
@@ -502,8 +511,12 @@ main(int argc, char *argv[])
   /*                        The frontend                      */
   /************************************************************/
   // Process the Prelude:
-  sherpa::LexLoc loc = LexLoc();
-  UocInfo::importInterface(std::cerr, loc, "bitc.prelude");
+
+  // FIX: TEMPORARY
+  if(Options::inferenceAlgorithm != inf_eq) {
+    sherpa::LexLoc loc = LexLoc();
+    UocInfo::importInterface(std::cerr, loc, "bitc.prelude");
+  }
   
   // Compile everything
   for(int i = 0; i < argc; i++)

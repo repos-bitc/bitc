@@ -164,6 +164,12 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
       break;
     }
 
+  case ty_kvar:
+    {      
+      out << "<lKind k='var' num='"<< t->uniqueID << "'/>" << endl; 
+      break;
+    }
+    
   case ty_dummy:
     {
       out << "<dummy/>" << endl;
@@ -346,6 +352,39 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
       out.less();       
       out << "</mutable>" << endl; 
       break;  
+    }
+
+  case ty_subtype:
+    {
+      out << "<Tsub>" << endl;
+      out.more();
+      t->CompType(0)->asXML(tvP, out);
+      t->CompType(1)->asXML(tvP, out);
+      out << "</Tsub>" << endl; 
+      break;
+    }
+    
+  case ty_pcst:
+    {
+      out << "<pcst>" << endl;
+      out.more();
+      t->CompType(0)->asXML(tvP, out);
+      t->CompType(1)->asXML(tvP, out);
+      out << "</pcst>" << endl; 
+      for(size_t i=0; i<t->components->size(); i++)
+	t->CompType(i)->asXML(tvP, out);
+      break;
+    }
+
+  case ty_kfix:
+    {
+      if(t == Type::Kmono)
+	out << "<lKind k='mono'/>" << endl; 
+      else if(t == Type::Kpoly)
+	out << "<lKind k='poly'/>" << endl; 
+      else
+	assert(false);
+      break;
     }
 
   case ty_exn:

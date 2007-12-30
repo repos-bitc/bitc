@@ -322,8 +322,13 @@ Type::asAST(const sherpa::LexLoc &loc,
     {
       ast = new AST(at_exceptionType, loc);
       break;
-    }   
+    }
+   
   case ty_letGather:
+  case ty_subtype:
+  case ty_pcst:
+  case ty_kvar:
+  case ty_kfix:
     assert(false);
     break;
   }

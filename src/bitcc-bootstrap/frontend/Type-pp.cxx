@@ -149,6 +149,12 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
       break;
     }
 
+  case ty_kvar:
+    {
+      ss << "'k" << t->uniqueID;
+      break;
+    }
+
   case ty_dummy:
     {
       ss << "#DUMMY#";
@@ -351,6 +357,33 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
       ss << "(mutable " 
 	 << t->CompType(0)->asString(tvP, traverse) << ")";
       break;  
+    }
+
+  case ty_subtype:
+    {
+      ss << t->CompType(0)->asString(tvP, traverse) 
+	 << " < "
+	 << t->CompType(1)->asString(tvP, traverse);
+      break;
+    }
+    
+  case ty_pcst:
+    {
+      ss << "(*";
+      for(size_t i=0; i<t->components->size(); i++)
+	ss << t->CompType(i)->asString(tvP, traverse);
+      break;
+    }
+
+  case ty_kfix:
+    {
+      if(t == Type::Kmono)
+	ss << "m";
+      else if(t == Type::Kpoly)
+	ss << "P";
+      else
+	assert(false);
+      break;
     }
 
   case ty_exn:

@@ -79,7 +79,11 @@ Type::toString()
   case ty_tvar:
     ss << "'a" << uniqueID;
     break;
-    
+  
+  case ty_kvar:
+      ss << "'k" << uniqueID;
+      break;
+  
   case ty_dummy:
     ss << "#DUMMY#";
     //ss << "#X" << uniqueID;
@@ -318,6 +322,34 @@ Type::toString()
       ss << CompType(i)->getType()->toString();
     ss << ")";
     break;
+
+  case ty_subtype:
+    {
+      ss << CompType(0)->toString() 
+	 << " < "
+	 << CompType(1)->toString();
+      break;
+    }
+    
+  case ty_pcst:
+    {
+      ss << "(*";
+      for(size_t i=0; i<components->size(); i++)
+	ss << CompType(i)->toString();
+      break;
+    }
+
+  case ty_kfix:
+    {
+      GCPtr<Type> t = this; // To satisfy libsherpa
+      if(t == Type::Kmono)
+	ss << "m";
+      else if(t == Type::Kpoly)
+	ss << "P";
+      else
+	assert(false);
+      break;
+    }
   }
 
   pMark--;

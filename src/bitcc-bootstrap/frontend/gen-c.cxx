@@ -495,6 +495,10 @@ toCtype(GCPtr<Type> typ, string IDname="", unsigned long flags=0,
     }
 
   case ty_typeclass:
+  case ty_subtype:
+  case ty_pcst:
+  case ty_kvar:
+  case ty_kfix:
     assert(false);
     break;
   }

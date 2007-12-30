@@ -25,7 +25,7 @@
 static bitc_char_t
 utf8_decode(const char *s, const char **snext)
 {
-  uint32_t ucs4;
+  uint32_t ucs4=0;
   const uint8_t *sb = (uint8_t *)s;
 
   if (*sb <= 127) {

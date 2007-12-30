@@ -82,10 +82,21 @@ DEFKIND(maybe,     false,  false,  false, false, false, false,  false)
 DEFKIND(exn,       false,  false,  false, false, true,  false,  false)
 DEFKIND(dummy,     false,  false,  false, false, false, false,  false)
 
-//DEFKIND(closure,   false,  false,  false, false, true,  false,  false)
+// The following are constraints, stricttly speaking, but are types at
+// the next level.
 DEFKIND(typeclass, false,  false,  false, false, false, false,  false)
+// Copy coersion constraint
+DEFKIND(subtype, false,  false,  false, false, false, false,  false)
+// Meta polymorphic constraint (MPC)
+DEFKIND(pcst, false,  false,  false, false, false, false,  false)
+// Kind variable for the MPC
+DEFKIND(kvar, false,  false,  false, false, false, false,  false)
+// Fixed kinds for the MPC. The type-header has static types
+// to identify the two kinds (mono/poly) that can exist.
+DEFKIND(kfix, false,  false,  false, false, false, false,  false)
 
 /* For internal use ONLY */
+//DEFKIND(closure,   false,  false,  false, false, true,  false,  false)
 DEFKIND(letGather, false,  false,  false, false, false, false,  false)
 DEFKIND(hint,      false,  false,  false, false, false, false,  false)
 

@@ -219,6 +219,10 @@ Type::size()
   case ty_hint:
   case ty_reprv:
   case ty_reprr:
+  case ty_subtype:
+  case ty_pcst:
+  case ty_kvar:
+  case ty_kfix:
     assert(false);
     break;
     

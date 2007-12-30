@@ -2273,7 +2273,7 @@ initEnv(std::ostream& errStream,
       break;
     }
   }
-
+  
   assert(preenv);
   
   if(i == UocInfo::ifList->size()) {
@@ -2303,6 +2303,10 @@ UocInfo::fe_symresolve(std::ostream& errStream,
 {
   bool errFree = true;
 
+  // FIX: TEMPORARY
+  if(Options::inferenceAlgorithm == inf_eq)
+    flags |= SYM_NO_PRELUDE;
+  
   if(init) {    
     if(flags & SYM_REINIT) {
       assert(env);      

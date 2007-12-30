@@ -803,6 +803,11 @@ Unify(std::ostream& errStream,
 	break;
       }
 
+      
+    case ty_subtype:
+    case ty_pcst:
+    case ty_kvar:
+    case ty_kfix:
     case ty_hint:
       {
 	assert(false);

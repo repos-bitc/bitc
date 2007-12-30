@@ -44,6 +44,8 @@
 #include "backend.hxx"
 #include "Special.hxx"
 
+enum infChoice {inf_hm, inf_eq};
+
 /* Flags set from command line option */
 struct Options {
   static bool showParse;
@@ -64,6 +66,8 @@ struct Options {
   // Use top-level mutability compatibility only, as opposed to full
   // copy-compatibility. 
   static bool topMutOnly; 
+  static infChoice inferenceAlgorithm; 
+  static bool eqInference;
   static bool dumpAfterMidEnd;
   static bool dumpTypesAfterMidEnd;
   static GCPtr<CVector<std::string> > showTypesUocs;

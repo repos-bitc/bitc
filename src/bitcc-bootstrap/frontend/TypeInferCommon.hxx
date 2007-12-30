@@ -1,6 +1,5 @@
-#ifndef TYPECLASS_HXX
-#define TYPECLASS_HXX
-
+#ifndef TYPEINFERCOMMON_HXX
+#define TYPEINFERCOMMON_HXX
 /**************************************************************************
  *
  * Copyright (C) 2006, Johns Hopkins University.
@@ -38,74 +37,60 @@
  *
  **************************************************************************/
 
-#include <stdlib.h>
-#include <dirent.h>
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/avl.hxx>
+
+#include "UocInfo.hxx"
+#include "Options.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
-#include "INOstream.hxx"
+#include "TypeScheme.hxx"
+#include "TypeMut.hxx"
+#include "Typeclass.hxx"
+#include "inter-pass.hxx"
 
-typedef Type Typeclass;
-struct TypeScheme;
+GCPtr<Type> 
+obtainFullUnionType(GCPtr<Type> t);
 
-struct Instance : public Countable {
-  GCPtr<TypeScheme> ts;
-  GCPtr<AST> ast;
-  
-  Instance(GCPtr<TypeScheme> _ts, GCPtr<AST>_ins)
-  {
-    ts = _ts;
-    ast = _ins;
-  }
-  
-  bool equals(std::ostream &errStream, GCPtr<Instance> ins, 
-	      GCPtr<const Environment< CVector<GCPtr<Instance> > > >
-	      instEnv) const;
-  bool satisfies(std::ostream &errStream, GCPtr<Typeclass> pred, 
-		 GCPtr<const Environment< CVector<GCPtr<Instance> > > >
-		 instEnv) const;
-  std::string asString() const;
-  std::string asXML() const;
-  void asXML(INOstream &out) const;
-};
+bool
+initGamma(std::ostream& errStream, 
+	  GCPtr<Environment<TypeScheme> > gamma,
+	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	  const GCPtr<AST> ast, unsigned long uflags);
+bool
+checkImpreciseTypes(std::ostream& errStream, 
+		    const GCPtr<Environment<TypeScheme> > gamma,
+		    GCPtr<CVector<GCPtr<Type> > > impTypes);
 
 
-/* Type class constraints */
- 
-struct TCConstraints : public Countable {
-  // Type class predicates
-  GCPtr<CVector<GCPtr<Typeclass> > > pred;
-  
-  TCConstraints()
-  {
-    pred = new CVector<GCPtr<Typeclass> >;
-  }
 
-  void addPred(GCPtr<Typeclass> tc);
-  void clearPred(size_t n);
+GCPtr<TypeScheme> 
+bindIdentDef(GCPtr<AST> ast, 
+	     GCPtr<Environment<TypeScheme> > gamma,
+	     unsigned long bindFlags,
+	     unsigned long flags);
 
-  bool contains(GCPtr<Typeclass> tc);
-  void collectAllFnDeps(GCPtr<CVector<GCPtr<Type> > > fnDeps);
+GCPtr<TypeScheme> 
+Instantiate(GCPtr<AST> ast, GCPtr<TypeScheme> sigma);
 
-  // Compute the closure of all functional dependencies 
-  // supplied in the vector
-  static void close(GCPtr<CVector<GCPtr<Type> > > closure,
-		    GCPtr<const CVector<GCPtr<Type> > > fnDeps);
-  void clearHintsOnPreds(GCPtr<Trail> trail);  
+GCPtr<Type> 
+buildFnFromApp(GCPtr<AST> ast, unsigned long uflags);
 
-  /* PUBLIC Accessors (Conveniecnce Forms) */
-  GCPtr<Type> & Pred(size_t i)
-  {
-    return (*pred)[i];
-  }  
-};
+void
+useIFGamma(const std::string& idName,
+	   GCPtr<Environment<TypeScheme> > fromEnv, 
+	   GCPtr<Environment<TypeScheme> > toEnv);
 
-typedef Typeclass Constraint; 
-typedef TCConstraints Constraints; 
+bool
+useIFInsts(std::ostream &errStream,
+	   LexLoc &errLoc,
+	   GCPtr<Environment< CVector<GCPtr<Instance> > > >fromEnv, 
+	   GCPtr<Environment< CVector<GCPtr<Instance> > > >toEnv,
+	   unsigned long uflags);
 
-#endif /* TYPECLASS_HXX */
+bool
+initGamma(std::ostream& errStream, 
+	  GCPtr<Environment<TypeScheme> > gamma,
+	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	  const GCPtr<AST> ast, unsigned long uflags);
 
+
+#endif /* TYPEINFERCOMMON_HXX */

@@ -269,6 +269,10 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
   case ty_tyfn:
   case ty_hint:
+  case ty_subtype:
+  case ty_pcst:
+  case ty_kvar:
+  case ty_kfix:
     {
       assert(false);
       break;

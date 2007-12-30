@@ -232,6 +232,10 @@ Type::TypeOfCopy()
   case ty_typeclass:
   case ty_letGather:
   case ty_hint:
+  case ty_subtype:
+  case ty_pcst:
+  case ty_kvar:
+  case ty_kfix:
     assert(false);
     
   case ty_tvar:
@@ -600,6 +604,10 @@ Type::simplifiedHint()
   case ty_fnarg:
   case ty_byref:
   case ty_typeclass:
+  case ty_subtype:
+  case ty_pcst:
+  case ty_kvar:
+  case ty_kfix:
   case ty_letGather:
     assert(false);
     

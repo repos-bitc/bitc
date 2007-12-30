@@ -195,7 +195,7 @@ public:
   size_t    Isize;		// size in fixint
   GCPtr<CVector<GCPtr<Type> > > fnDeps; // Functional Dependencies (for 
                                    //   Type classes only).
-    
+  
   GCPtr<CVector<GCPtr<comp> > > components;
   GCPtr<CVector<GCPtr<Type> > > typeArgs;  
     
@@ -360,6 +360,11 @@ public:
   // that are unbound in gamma
   void collectftvsWrtGamma(GCPtr<CVector<GCPtr<Type> > > tvs,
 			   GCPtr<const Environment<TypeScheme> > gamma);
+
+  // Meta-polymorphism
+  static GCPtr<Type> Kmono;
+  static GCPtr<Type> Kpoly;
+  
 
 private:
   GCPtr<Type> 

@@ -82,7 +82,10 @@ OBJECTS=\
 	$(BUILDDIR)/Trail.o \
 	$(BUILDDIR)/Type.o \
 	$(BUILDDIR)/TopInit.o \
+	$(BUILDDIR)/TypeChoice.o \
 	$(BUILDDIR)/TypeInfer.o \
+	$(BUILDDIR)/TypeEqInfer.o \
+	$(BUILDDIR)/TypeInferCommon.o \
 	$(BUILDDIR)/TypePoly.o \
 	$(BUILDDIR)/TypeScheme.o \
 	$(BUILDDIR)/Typeclass.o \

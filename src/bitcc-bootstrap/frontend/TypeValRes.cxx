@@ -473,7 +473,9 @@ isExpansive(std::ostream& errStream,
 
   case ty_tvar:
   case ty_dummy:
-
+  case ty_kvar:
+  case ty_kfix:
+    
 #ifdef KEEP_BF
   case ty_bitfield:
 #endif
@@ -506,6 +508,8 @@ isExpansive(std::ostream& errStream,
   case ty_reprv:
   case ty_reprr:
   case ty_maybe:
+  case ty_subtype:
+  case ty_pcst:
     {    
       for(size_t i=0; i<t->typeArgs->size(); i++) 
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
@@ -529,7 +533,7 @@ isExpansive(std::ostream& errStream,
 					   t->FnDep(i)));
       break;
     }
-
+    
   case ty_mutable:
   case ty_exn:
     {
@@ -587,7 +591,9 @@ Type::removeRestricted(GCPtr<CVector<GCPtr<Type> > > &ftvs,
   case ty_float:
   case ty_double:
   case ty_quad:
-
+  case ty_kvar:
+  case ty_kfix:
+    
 #ifdef KEEP_BF    
   case ty_bitfield:  
 #endif
@@ -651,6 +657,8 @@ Type::removeRestricted(GCPtr<CVector<GCPtr<Type> > > &ftvs,
 
 
   case ty_typeclass:
+  case ty_subtype:
+  case ty_pcst:
   case ty_array:
   case ty_structv:
   case ty_uconv:

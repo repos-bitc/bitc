@@ -64,6 +64,8 @@ using namespace sherpa;
 using namespace std;
 
 unsigned long long Type::typeCount=0;
+GCPtr<Type> Type::Kmono = new Type(ty_kfix, (GCPtr<AST>)0);
+GCPtr<Type> Type::Kpoly = new Type(ty_kfix, (GCPtr<AST>)0);
 
 static struct {
   const char *nm;
@@ -556,6 +558,8 @@ Type::isOfInfiniteType()
 
   switch(kind) {
   case ty_tvar:
+  case ty_kvar:
+  case ty_kfix:
   case ty_dummy:
   case ty_unit:
   case ty_bool:
@@ -603,6 +607,8 @@ Type::isOfInfiniteType()
   case ty_mutable:
   case ty_maybe:
   case ty_exn:
+  case ty_subtype:
+  case ty_pcst:
     {      
       for(size_t i=0; !infType && (i < typeArgs->size()); i++)
       	if(TypeArg(i)->isOfInfiniteType())

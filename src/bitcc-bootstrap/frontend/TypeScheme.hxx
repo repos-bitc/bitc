@@ -115,7 +115,7 @@ struct TypeScheme : public Countable {
 		       GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv);  
 
   /* Note this is different from adjMaybe method in Type struct.
-     This dunction calls that function on `tau' and calls 
+     This function calls that function on `tau' and calls 
      clearHints on all predicates 
      (by calling clearHintsOnPreds method of `tcc') */
   void adjMaybes(GCPtr<Trail> trail);
