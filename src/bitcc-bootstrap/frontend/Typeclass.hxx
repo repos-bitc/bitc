@@ -85,6 +85,8 @@ struct TCConstraints : public Countable {
     pred = new CVector<GCPtr<Typeclass> >;
   }
 
+  size_t size() { return pred->size(); }
+
   void addPred(GCPtr<Typeclass> tc);
   void clearPred(size_t n);
 

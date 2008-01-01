@@ -738,6 +738,22 @@ Type::Type(const Kind k, GCPtr<AST> a, GCPtr<AST> _defAst)
   TYPE_CTR_INIT(k, a, _defAst);
 }
 
+Type::Type(const Kind k, GCPtr<AST> ast, GCPtr<Type> child)
+  : uniqueID(genTypeID())
+{
+  TYPE_CTR_INIT(k, ast, GCPtr<AST>(0));
+  components->append(new comp(child));
+}
+
+Type::Type(const Kind k, GCPtr<AST> ast, 
+	   GCPtr<Type> child1, GCPtr<Type> child2)
+  : uniqueID(genTypeID())
+{
+  TYPE_CTR_INIT(k, ast, GCPtr<AST>(0));
+  components->append(new comp(child1));
+  components->append(new comp(child2));
+}
+
 Type::Type(const Kind k, GCPtr<Type> child)
   : uniqueID(genTypeID())
 {

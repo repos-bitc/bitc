@@ -43,9 +43,7 @@
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeScheme.hxx"
-#include "TypeMut.hxx"
 #include "Typeclass.hxx"
-#include "inter-pass.hxx"
 
 GCPtr<Type> 
 obtainFullUnionType(GCPtr<Type> t);
@@ -59,21 +57,6 @@ bool
 checkImpreciseTypes(std::ostream& errStream, 
 		    const GCPtr<Environment<TypeScheme> > gamma,
 		    GCPtr<CVector<GCPtr<Type> > > impTypes);
-
-
-
-GCPtr<TypeScheme> 
-bindIdentDef(GCPtr<AST> ast, 
-	     GCPtr<Environment<TypeScheme> > gamma,
-	     unsigned long bindFlags,
-	     unsigned long flags);
-
-GCPtr<TypeScheme> 
-Instantiate(GCPtr<AST> ast, GCPtr<TypeScheme> sigma);
-
-GCPtr<Type> 
-buildFnFromApp(GCPtr<AST> ast, unsigned long uflags);
-
 void
 useIFGamma(const std::string& idName,
 	   GCPtr<Environment<TypeScheme> > fromEnv, 

@@ -64,6 +64,68 @@ using namespace std;
 
 
 /**************************************************************/
+/*                     Some Helper Functions                  */
+/**************************************************************/
+
+/* Some of the following fure repeated (and marked static) in both 
+   inference routines due to the use/non-use of maybe types */
+
+static GCPtr<Type> 
+buildFnFromApp(GCPtr<AST> ast, unsigned long uflags)
+{
+  assert(ast->astType == at_apply);
+  GCPtr<Type> fn = new Type (ty_fn, ast);
+  GCPtr<Type> targ = new Type(ty_fnarg, ast);
+  for (size_t i = 1; i < ast->children->size(); i++) {
+    GCPtr<Type> argi = ArgType(newTvar(ast->child(i)));
+    targ->components->append(new comp(argi));
+  }
+  
+  fn->components->append(new comp(targ));
+  GCPtr<Type> ret = RetType(newTvar(ast));
+  fn->components->append(new comp(ret));
+  
+  return fn;
+}
+
+
+static GCPtr<TypeScheme> 
+bindIdentDef(GCPtr<AST> ast, 
+	     GCPtr<Environment<TypeScheme> > gamma,
+	     unsigned long bindFlags,
+	     unsigned long flags)
+{
+  ast->symType = newBindType(ast, flags); 
+  
+  GCPtr<TypeScheme> sigma = new TypeScheme(ast->symType);
+  ast->scheme = sigma;
+  
+  if (ast->Flags & ID_IS_TVAR) {
+    assert(flags & TI_TYP_EXP);
+    bindFlags |= BF_NO_MERGE;
+    ast->tvarLB->envs.gamma->addBinding(ast->s, sigma);
+  }
+  else {
+    gamma->addBinding(ast->s, sigma);      
+  }
+  
+  gamma->setFlags(ast->s, bindFlags);    
+  return sigma;
+}
+
+static GCPtr<TypeScheme> 
+Instantiate(GCPtr<AST> ast, GCPtr<TypeScheme> sigma)
+{	      
+  if(ast->symbolDef)
+    ast = ast->symbolDef;
+  
+  if(ast->Flags & ID_IS_CTOR)
+    return sigma->ts_instance_copy();
+  else
+    return sigma->ts_instance();
+}
+	
+/**************************************************************/
 /*                Type consistency checking                   */
 /**************************************************************/
 

@@ -219,14 +219,17 @@ public:
                     // this type, if any.
   unsigned flags;               
 
+  // Main (Base) Constructor
   Type(const Kind k, GCPtr<AST> a, GCPtr<AST> defAST = 0);
-
-  Type(GCPtr<Type> t); // copy constructor.
-  Type(const Kind k, GCPtr<Type> child); // wrapper type, obtains AST 
-                                   // from child (added to components)
-  Type(const Kind k, GCPtr<Type> child1, GCPtr<Type> child2); // same as above,
-                                   // for two children. 
-                                   // Obtains ast from Child1.
+  // Copy Constructor.
+  Type(GCPtr<Type> t); 
+  // Wrapper Constructor, obtains component nodes as arguments.
+  Type(const Kind k, GCPtr<AST> ast, GCPtr<Type> child);
+  Type(const Kind k, GCPtr<AST> ast, 
+       GCPtr<Type> child1, GCPtr<Type> child2);
+  // Wrapper Constructors, similar to above, but obtain AST from child1
+  Type(const Kind k, GCPtr<Type> child);
+  Type(const Kind k, GCPtr<Type> child1, GCPtr<Type> child2);
 
   // Makes a deep copy , but ** LINKS TVARS TO ORIGINAL ONES ** 
   // This function calls TypeSpecialize on a typeScheme with
