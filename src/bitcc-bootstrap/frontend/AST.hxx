@@ -616,7 +616,8 @@ public:
   bool isUnionLeg();
   bool isMethod();
 
-  void PrettyPrint(std::ostream& out, bool decorated = false) const;
+  void PrettyPrint(std::ostream& out, bool decorated = false, 
+		   bool endline=true) const;
 
   
   void PrettyPrint(bool decorated) const;

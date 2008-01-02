@@ -802,12 +802,29 @@ Unify(std::ostream& errStream,
 	
 	break;
       }
-
       
+      // The following cases are filled in so that strictlyEquals()
+      // function works correctly.
     case ty_subtype:
     case ty_pcst:
+      {
+	assert(t1->components->size() == t2->components->size());
+	for(size_t i=0; i < t1->components->size(); i++) 
+	  CHKERR(errFree,
+		 Unify(errStream, trail, errAst, t1->CompType(i), 
+		       t2->CompType(i), flags, false));
+	break;
+      }
+      
     case ty_kvar:
     case ty_kfix:
+      {
+	// This check will never unify, since the following check has
+	// already failed at the start of the unification algorithm.
+	if (t1->uniqueID != t2->uniqueID)
+	  errFree = typeError(errStream, errAst, t1, t2);
+	break;
+      }
     case ty_hint:
       {
 	assert(false);

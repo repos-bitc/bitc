@@ -50,7 +50,6 @@
 #include "TypeScheme.hxx"
 #include "Typeclass.hxx"
 #include "inter-pass.hxx"
-#include "Unify.hxx"
 #include <libsherpa/BigNum.hxx>
 #include "TypeInfer.hxx"
 #include "TypeInferCommon.hxx"
@@ -67,17 +66,20 @@
   }while(0)
 
 
+// For debugging only.
+GCPtr<TvPrinter> debugTvp = new TvPrinter;
 #define PRINT(out, ast, ct)				\
   do {							\
-    out << ast->asString() << " : "			\
-	<< ast->symType->asString() << " \\ ";		\
+    out << __LINE__ << ": [" << ast->atKwd() << "]"	\
+	<< ast->asString() << " : "			\
+	<< ast->symType->asString(debugTvp) << " \\ ";	\
     out << "{";						\
     for(size_t i=0; i < ct->size(); i++) {		\
       if(i > 0)						\
 	out << ", ";					\
-      out << ct->Pred(i)->asString();			\
+      out << ct->Pred(i)->asString(debugTvp);		\
     }							\
-    out << "}";						\
+    out << "}" << std::endl;				\
   } while(0)
 
 
@@ -474,7 +476,7 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
       // 				     declTS, ident->scheme, uflags, true));	
       
       ast->symType = ast->child(0)->symType;
-      PRINT(errStream, ast->child(0), currTcc);
+      PRINT(errStream, ast, currTcc);
       break;
     }
     

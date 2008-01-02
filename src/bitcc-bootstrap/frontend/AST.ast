@@ -482,7 +482,8 @@ struct envSet : public Countable{
   bool isUnionLeg();
   bool isMethod();
 
-  void PrettyPrint(std::ostream& out, bool decorated = false) const;
+  void PrettyPrint(std::ostream& out, bool decorated = false, 
+		   bool endline=true) const;
 
   // For use in GDB:
   void PrettyPrint(bool decorated) const;

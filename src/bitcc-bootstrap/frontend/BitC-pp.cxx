@@ -1062,11 +1062,13 @@ doShowTypes(std::ostream& out, GCPtr<AST> ast,
 }
 
 void
-AST::PrettyPrint(std::ostream& strm, bool decorated) const
+AST::PrettyPrint(std::ostream& strm, bool decorated, 
+		 bool endline) const
 {
   INOstream out(strm);
   BitcP(out, this, decorated);
-  out << endl;
+  if(endline)
+    out << std::endl;
 }
 
 void

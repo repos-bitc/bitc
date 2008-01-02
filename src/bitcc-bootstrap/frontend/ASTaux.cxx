@@ -100,9 +100,8 @@ std::string
 AST::asString() const
 {
   std::stringstream ss;
-  PrettyPrint(ss, false);
+  PrettyPrint(ss, false, false);
   return ss.str();
-  
 }
 
 std::string
