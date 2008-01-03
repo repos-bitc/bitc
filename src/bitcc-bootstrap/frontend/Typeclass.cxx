@@ -61,65 +61,6 @@
 using namespace sherpa;
 using namespace std;
 
-void
-TCConstraints::collectAllFnDeps(GCPtr<CVector<GCPtr<Type> > > fnDeps)
-{
-  for(size_t i=0; i < pred->size(); i++) {
-    GCPtr<Typeclass> pr = Pred(i)->getType();    
-    if(pr->fnDeps)
-      for(size_t j=0; j < pr->fnDeps->size(); j++) {
-	GCPtr<Type> fnDep = pr->FnDep(j)->getType();
-	assert(fnDep->kind == ty_tyfn);
-	fnDeps->append(fnDep);
-      }
-  }  
-}
-
-// Very important: if using pointer comparison, always add
-// getType()s to closure and compare with getType()s only.
-// I am relying on the fact that no unification happens
-// at this stage. Otherwise, a equals() ir strictlyEquals()
-// must be used.
-
-void 
-TCConstraints::close(GCPtr<CVector<GCPtr<Type> > > closure,
-		     GCPtr<const CVector<GCPtr<Type> > > fnDeps)
-{
-  size_t newSize = 0; 
-  size_t oldSize = 0;
-  
-  do {
-    oldSize = newSize;    
-    for(size_t i=0; i < fnDeps->size(); i++) {
-      GCPtr<Type> fnDep = fnDeps->elem(i)->getType();
-      GCPtr<Type> fnDepArgs = fnDep->CompType(0)->getType();
-      GCPtr<Type> fnDepRet = fnDep->CompType(1)->getType();      
-      GCPtr< CVector <GCPtr<Type> > > argTvs = new CVector <GCPtr<Type> >;
-      GCPtr< CVector <GCPtr<Type> > > retTvs = new CVector <GCPtr<Type> >;
-      fnDepArgs->collectAllftvs(argTvs);      
-      bool foundAll = true;
-      for(size_t j=0; j < argTvs->size(); j++) {
-	GCPtr<Type> argTv = argTvs->elem(j);
-	if(!closure->contains(argTv)) {
-	  foundAll = false;
-	  break;
-	}
-      }
-
-      if(foundAll) {	
-	fnDepRet->collectAllftvs(retTvs);	
-	for(size_t j=0; j < retTvs->size(); j++) {
-	  GCPtr<Type> retTv = retTvs->elem(j);
-	  if(!closure->contains(retTv))
-	    closure->append(retTv);
-	}
-      }	
-    }
-    newSize = closure->size();
-  } while(newSize > oldSize);
-}
-
-
 bool 
 Instance::equals(std::ostream &errStream, GCPtr<Instance> ins, 
 		 GCPtr<const Environment< sherpa::CVector<GCPtr<Instance> > > >
@@ -188,38 +129,6 @@ Instance::satisfies(std::ostream &errStream,
   else
     return false;
 }
-
-bool 
-TCConstraints::contains(GCPtr<Typeclass> tc) 
-{
-  for(size_t c = 0; c < pred->size(); c++) 
-    if(Pred(c)->strictlyEquals(tc, false, true))
-      return true;
-
-  return false;
-}
- 
-void 
-TCConstraints::addPred(GCPtr<Typeclass> tc) 
-{
-  size_t c;
-  for(c = 0; c < pred->size(); c++) 
-    if(Pred(c)->strictlyEquals(tc, false, true)) {
-      if(tc->flags & TY_CT_SUBSUMED)
-	Pred(c)->flags |= TY_CT_SUBSUMED;
-      break;
-    }  
-
-  if(c == pred->size()) {
-    pred->append(tc);
-  }
-}
-
-void 
-TCConstraints::clearPred(size_t n) 
-{
-  pred = eliminate<GCPtr<Typeclass> >(pred, n);
-} 
 
 bool 
 Typeclass::addFnDep(GCPtr<Type> dep) 

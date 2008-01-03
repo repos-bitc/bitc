@@ -78,6 +78,7 @@ OBJECTS=\
 	$(BUILDDIR)/BitC-pp.o \
 	$(BUILDDIR)/Symtab.o \
 	$(BUILDDIR)/Unify.o\
+	$(BUILDDIR)/EqUnify.o \
 	$(BUILDDIR)/UocInfo.o \
 	$(BUILDDIR)/Trail.o \
 	$(BUILDDIR)/Type.o \
@@ -97,6 +98,7 @@ OBJECTS=\
 	$(BUILDDIR)/Type-xml.o \
 	$(BUILDDIR)/Type-size.o \
 	$(BUILDDIR)/TypeMut.o \
+	$(BUILDDIR)/Constraints.o \
 	$(BUILDDIR)/LocChk.o \
 	$(BUILDDIR)/NoGcCheck.o \
 	$(BUILDDIR)/Special.o\

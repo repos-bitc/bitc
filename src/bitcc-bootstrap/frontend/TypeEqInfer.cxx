@@ -52,6 +52,7 @@
 #include "inter-pass.hxx"
 #include <libsherpa/BigNum.hxx>
 #include "TypeInfer.hxx"
+#include "TypeEqInfer.hxx"
 #include "TypeInferCommon.hxx"
 
 
@@ -68,18 +69,30 @@
 
 // For debugging only.
 GCPtr<TvPrinter> debugTvp = new TvPrinter;
+static std::string
+ctypeAsString(GCPtr<Type> t, GCPtr<Constraints> cset)
+{
+  stringstream ss;
+  ss << t->asString(debugTvp);
+  if(cset->size()) {
+    ss << " / {";
+    for(size_t i=0; i < cset->size(); i++) {
+      if(i > 0)
+	ss << ", ";
+      ss << cset->Pred(i)->asString(debugTvp);
+    }
+    ss << "}";
+  }
+  return ss.str();
+}
+
+
 #define PRINT(out, ast, ct)				\
   do {							\
-    out << __LINE__ << ": [" << ast->atKwd() << "]"	\
+    out << "[" << ast->atKwd() << "]"			\
 	<< ast->asString() << " : "			\
-	<< ast->symType->asString(debugTvp) << " \\ ";	\
-    out << "{";						\
-    for(size_t i=0; i < ct->size(); i++) {		\
-      if(i > 0)						\
-	out << ", ";					\
-      out << ct->Pred(i)->asString(debugTvp);		\
-    }							\
-    out << "}" << std::endl;				\
+	<< ctypeAsString(ast->symType, ct)		\
+	<< std::endl;					\
   } while(0)
 
 
@@ -156,10 +169,7 @@ Instantiate(GCPtr<AST> ast, GCPtr<TypeScheme> sigma)
 /**************************************************************/
 
 void
-addSubCst(std::ostream& errStream,
-	  GCPtr<AST> errAst,
-	  GCPtr<Type> t1,
-	  GCPtr<Type> t2,
+addSubCst(GCPtr<AST> errAst, GCPtr<Type> t1, GCPtr<Type> t2,
 	  GCPtr<Constraints> tcc)
 {
   GCPtr<Constraint> sub = new Constraint(ty_subtype, errAst, 
@@ -168,33 +178,24 @@ addSubCst(std::ostream& errStream,
 }
 
 void
-addEqCst(std::ostream& errStream,
-	 GCPtr<AST> errAst,
-	 GCPtr<Type> t1,
-	 GCPtr<Type> t2,
+addEqCst(GCPtr<AST> errAst, GCPtr<Type> t1, GCPtr<Type> t2,
 	 GCPtr<Constraints> tcc)
 {
-  addSubCst(errStream, errAst, t1, t2, tcc);
-  addSubCst(errStream, errAst, t2, t1, tcc);
+  addSubCst(errAst, t1, t2, tcc);
+  addSubCst(errAst, t2, t1, tcc);
 }
 	
 void
-addCcCst(std::ostream& errStream,
-	  GCPtr<AST> errAst,
-	  GCPtr<Type> t1,
-	  GCPtr<Type> t2,
-	  GCPtr<Constraints> tcc)
+addCcCst(GCPtr<AST> errAst, GCPtr<Type> t1, GCPtr<Type> t2,
+	 GCPtr<Constraints> tcc)
 {
   GCPtr<Type> via = new Type(ty_tvar, errAst);
-  addSubCst(errStream, errAst, t1, via, tcc);
-  addSubCst(errStream, errAst, t2, via, tcc);
+  addSubCst(errAst, t1, via, tcc);
+  addSubCst(errAst, t2, via, tcc);
 }
 
 void
-addPcst(std::ostream& errStream,
-	GCPtr<AST> errAst,
-	GCPtr<Type> t,
-	GCPtr<Constraints> tcc)
+addPcst(GCPtr<AST> errAst, GCPtr<Type> t, GCPtr<Constraints> tcc)
 {
   GCPtr<Type> k = new Type(ty_kvar, errAst);
   t = t->getType();
@@ -416,6 +417,9 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
     
   case at_module:
     {
+      // FIX: This must be eventually removed when 
+      // new constraint sets are created at every define
+      GCPtr<TCConstraints> tcc = new TCConstraints;
       for(size_t c = 0; c < ast->children->size(); c++) {
 	TYPEEQINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
 		    uflags, trail,  mode, TI_NONE);
@@ -426,7 +430,10 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
   case at_interface:
     {
       // match agt_definition*
-
+      
+      // FIX: This must be eventually removed when 
+      // new constraint sets are created at every define
+      GCPtr<TCConstraints> tcc = new TCConstraints;
       for(size_t c = 1; c < ast->children->size(); c++)
 	TYPEEQINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
 		    uflags, trail,  mode, TI_NONE);
@@ -443,7 +450,10 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Environment<TypeScheme> > defGamma = gamma->newDefScope();
       ast->envs.gamma = defGamma;
 
-      GCPtr<TCConstraints> currTcc = new TCConstraints;
+      // This is the right place to start constraints, but for now, 
+      // define is like  let .... 
+      //GCPtr<TCConstraints> currTcc = new TCConstraints;
+      GCPtr<TCConstraints> currTcc = tcc;
       
       // match agt_bindingPattern
       // match agt_expr
@@ -459,7 +469,7 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Type> lhsType = ast->child(0)->symType->getType();
       GCPtr<Type> rhsType = ast->child(1)->symType;
       
-      addCcCst(errStream, ast, lhsType, rhsType, currTcc);
+      addCcCst(ast, lhsType, rhsType, currTcc);
       //       CHKERR(errFree, unify(errStream, trail, ast->child(0), 
       // 			    lhsType, rhsType, uflags));
       
@@ -469,14 +479,27 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
       // 				    ast->child(1), 
       // 				    false, currTcc, NULL, trail));
       
-      //       gamma->mergeBindingsFrom(defGamma);
-      
+      gamma->mergeBindingsFrom(defGamma);
       //       if(declTS) 
       // 	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
       // 				     declTS, ident->scheme, uflags, true));	
       
       ast->symType = ast->child(0)->symType;
-      PRINT(errStream, ast, currTcc);
+
+      GCPtr<AST> id = ast->getID();
+      errStream << "[define]"		
+		<< id->asString() << " : "	
+		<< ctypeAsString(id->symType, currTcc)
+		<< ast->symType->asString(debugTvp)
+		<< std::endl;
+      
+      EqUnify(errStream, currTcc);
+      errStream << "  UNF:"
+		<< id->asString() << " : "
+		<< ctypeAsString(id->symType, currTcc)
+		<< std::endl;
+      
+      //PRINT(errStream, ast, currTcc);
       break;
     }
     
@@ -618,8 +641,7 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
 				ast->child(1)->getType()->CompType(0):
 				ast->child(1)->symType);
 	
-	addEqCst(errStream, ast, 
-		 ast->child(0)->symType, qualType, tcc);
+	addEqCst(ast, ast->child(0)->symType, qualType, tcc);
 	
 	// Very Important that we pick the type of 
 	// the qualification, in light of by-ref types.
@@ -642,8 +664,8 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
       TYPEEQINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP1);
  
-      addEqCst(errStream, ast, 
-	       ast->child(0)->symType, ast->child(1)->symType, tcc);
+      addEqCst(ast, ast->child(0)->symType, 
+	       ast->child(1)->symType, tcc);
       
       ast->symType = ast->child(0)->symType;
       PRINT(errStream, ast, tcc);
@@ -681,7 +703,7 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
 	}
 	else {	
 	  GCPtr<Type> argFnType = new Type(ty_tvar, arg);
-	  addSubCst(errStream, arg, argInfType, argFnType, tcc);
+	  addSubCst(arg, argInfType, argFnType, tcc);
 	  GCPtr<comp> nComp = new comp(argFnType);
 	  fnarg->components->append(nComp);
 	}
@@ -694,7 +716,7 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       GCPtr<Type> retInfType = ast->child(1)->getType();
       GCPtr<Type> retFnType = new Type(ty_tvar, ret);
-      addSubCst(errStream, ret, retFnType, retInfType, tcc);
+      addSubCst(ret, retFnType, retInfType, tcc);
       
       ast->symType = new Type(ty_fn, ast, fnarg, retFnType);
       PRINT(errStream, ast, tcc);
@@ -721,7 +743,7 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
       case ty_tvar:
 	{
 	  GCPtr<Type> fn = buildFnFromApp(ast, uflags);
-	  addSubCst(errStream, ast->child(0), t, fn, tcc);
+	  addSubCst(ast->child(0), t, fn, tcc);
 	  t = fn;
 	  // fall through
 	}
@@ -755,16 +777,16 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
 	    
 	    if(targ->CompFlags(i) & COMP_BYREF) {
 	      // by-ref arguments need strict compatibality.
-	      addEqCst(errStream, arg, argType, fnArgType, tcc);
+	      addEqCst(arg, argType, fnArgType, tcc);
 	    }
 	    else {
 	      // by-value arguments can have copy-compatibility.
-	      addSubCst(errStream, arg, argType, fnArgType, tcc); 
+	      addSubCst(arg, argType, fnArgType, tcc); 
 	    }
 	  }
 	  
 	  GCPtr<Type> retType = t->CompType(1);
-	  addSubCst(errStream, ast, retType, ast->symType, tcc);
+	  addSubCst(ast, retType, ast->symType, tcc);
 	  break;
 	}
 	
@@ -852,7 +874,7 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
       TYPEEQINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  mode, TI_COMP2);      
       
-      addSubCst(errStream, ast->child(0), ast->child(0)->symType,
+      addSubCst(ast->child(0), ast->child(0)->symType,
 		new Type(ty_bool, ast->child(0)), tcc); 
       
       // match agt_expr
@@ -869,11 +891,11 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
       // I am not using addCcCst() because it uses new type variables 
       // on every invocation.
       GCPtr<Type> latticeTop = new Type(ty_tvar, ast);
-      addSubCst(errStream, ast->child(1), ast->child(1)->symType,
+      addSubCst(ast->child(1), ast->child(1)->symType,
 		latticeTop, tcc);
-      addSubCst(errStream, ast->child(2), ast->child(2)->symType,
+      addSubCst(ast->child(2), ast->child(2)->symType,
 		latticeTop, tcc);
-      addSubCst(errStream, ast, ast->symType,
+      addSubCst(ast, ast->symType,
 		latticeTop, tcc);
       
       PRINT(errStream, ast, tcc);
@@ -889,7 +911,7 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
 		  uflags, trail,  USE_MODE, TI_COMP2);
       
       GCPtr<Type> t = ast->child(0)->symType->getType();
-      addSubCst(errStream, ast->child(0), ast->child(0)->symType, 
+      addSubCst(ast->child(0), ast->child(0)->symType, 
 		new Type(ty_mutable, 
 			 new Type(ty_tvar, ast->child(0))), tcc);
       
@@ -897,7 +919,7 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
       TYPEEQINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
       
-      addSubCst(errStream, ast->child(1), ast->child(0)->symType, 
+      addSubCst(ast->child(1), ast->child(0)->symType, 
 		ast->child(0)->symType, tcc);
       
       PRINT(errStream, ast, tcc);
@@ -913,8 +935,7 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Type> copyType = new Type(ty_tvar, ast->child(0));
       ast->symType = new Type(ty_ref, copyType);
       
-      addCcCst(errStream, ast->child(0), copyType,
-	       ast->child(0)->symType, tcc);
+      addCcCst(ast->child(0), copyType, ast->child(0)->symType, tcc);
       
       PRINT(errStream, ast, tcc);
       break;      
@@ -929,7 +950,7 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
       ast->symType = new Type(ty_tvar, ast);
       GCPtr<Type> expectType = new Type(ty_ref, ast->symType);
       
-      addSubCst(errStream, ast->child(0), ast->child(0)->symType,
+      addSubCst(ast->child(0), ast->child(0)->symType,
 		expectType, tcc);
       
       PRINT(errStream, ast, tcc);

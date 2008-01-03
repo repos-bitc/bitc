@@ -1,5 +1,3 @@
-#ifndef TYPEINFERCOMMON_HXX
-#define TYPEINFERCOMMON_HXX
 /**************************************************************************
  *
  * Copyright (C) 2006, Johns Hopkins University.
@@ -37,41 +35,75 @@
  *
  **************************************************************************/
 
+#include <stdint.h>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
+#include <assert.h>
 #include "UocInfo.hxx"
 #include "Options.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeScheme.hxx"
 #include "Typeclass.hxx"
+#include "inter-pass.hxx"
+#include "TypeEqInfer.hxx"
+#include "TypeInferCommon.hxx"
 
-GCPtr<Type>
-obtainFullUnionType(GCPtr<Type> t);
+/* This file implements an equational unification algorithm that
+   (partially) solves the constraints generated through the inference
+   algorithm coded in TypeEqInfer.cxx */
 
-bool
-initGamma(std::ostream& errStream, 
-	  GCPtr<Environment<TypeScheme> > gamma,
-	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	  const GCPtr<AST> ast, unsigned long uflags);
-bool
-checkImpreciseTypes(std::ostream& errStream, 
-		    const GCPtr<Environment<TypeScheme> > gamma,
-		    GCPtr<CVector<GCPtr<Type> > > impTypes);
+/**********************************************************************/
+/*                 Constraint Set (Transitive) Closure                */
+/**********************************************************************/
+
+
+// Note: This function uses pointer comparison for transitive closure.
+// The only important case for closure is the constraints of the form
+// 'a <: t and t <: 'a, for which this algorithm suffices.
+// This algorithm will not close constraints of the form:
+// tx <: t1 -> t2 , t1 -> t2 <: ty
+
 void
-useIFGamma(const std::string& idName,
-	   GCPtr<Environment<TypeScheme> > fromEnv, 
-	   GCPtr<Environment<TypeScheme> > toEnv);
+TransClose(GCPtr<Constraints> cset)
+{
+  size_t start_size=0;
+  do {
+    start_size = cset->pred->size();
+    
+    for(size_t i=0; i < cset->size(); i++) {
+      GCPtr<Constraint> cti = cset->Pred(i)->getType();
+      if(cti->kind != ty_subtype)
+	continue;
+      
+      for(size_t j=i+1; j < cset->size(); j++) {
+	GCPtr<Constraint> ctj = cset->Pred(j)->getType();
+	if(ctj->kind != ty_subtype)
+	  continue;
+	
+	// If we have cti = a <: b and ctj = b <: c, then add a <: c
+	if(cti->CompType(1) == ctj->CompType(0))
+	  addSubCst(cti->ast, cti->CompType(0), 
+		    ctj->CompType(1), cset);
+
+	// If we have cti = a <: b and ctj = c <: a, then add c <: a
+	if(cti->CompType(0) == ctj->CompType(1))
+	  addSubCst(ctj->ast, ctj->CompType(0), 
+		    cti->CompType(1), cset);
+      }
+    }
+  } while(cset->pred->size() > start_size);
+  
+  cset->normalize();
+}
 
 bool
-useIFInsts(std::ostream &errStream,
-	   LexLoc &errLoc,
-	   GCPtr<Environment< CVector<GCPtr<Instance> > > >fromEnv, 
-	   GCPtr<Environment< CVector<GCPtr<Instance> > > >toEnv,
-	   unsigned long uflags);
-
-bool
-initGamma(std::ostream& errStream, 
-	  GCPtr<Environment<TypeScheme> > gamma,
-	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	  const GCPtr<AST> ast, unsigned long uflags);
-
-#endif /* TYPEINFERCOMMON_HXX */
+EqUnify(std::ostream& errStream, GCPtr<Constraints> cset)
+{
+  TransClose(cset);
+  return true;
+}

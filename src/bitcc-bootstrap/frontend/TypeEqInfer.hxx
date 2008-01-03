@@ -1,5 +1,5 @@
-#ifndef TYPEINFERCOMMON_HXX
-#define TYPEINFERCOMMON_HXX
+#ifndef TYPEEQINFER_HXX
+#define TYPEEQINFER_HXX
 /**************************************************************************
  *
  * Copyright (C) 2006, Johns Hopkins University.
@@ -37,41 +37,29 @@
  *
  **************************************************************************/
 
-#include "UocInfo.hxx"
-#include "Options.hxx"
+#include <iostream>
+#include <sstream>
+#include <libsherpa/CVector.hxx>
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeScheme.hxx"
 #include "Typeclass.hxx"
 
-GCPtr<Type>
-obtainFullUnionType(GCPtr<Type> t);
-
-bool
-initGamma(std::ostream& errStream, 
-	  GCPtr<Environment<TypeScheme> > gamma,
-	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	  const GCPtr<AST> ast, unsigned long uflags);
-bool
-checkImpreciseTypes(std::ostream& errStream, 
-		    const GCPtr<Environment<TypeScheme> > gamma,
-		    GCPtr<CVector<GCPtr<Type> > > impTypes);
 void
-useIFGamma(const std::string& idName,
-	   GCPtr<Environment<TypeScheme> > fromEnv, 
-	   GCPtr<Environment<TypeScheme> > toEnv);
+addSubCst(GCPtr<AST> errAst, GCPtr<Type> t1, GCPtr<Type> t2,
+	  GCPtr<Constraints> tcc);
+
+void
+addEqCst(GCPtr<AST> errAst, GCPtr<Type> t1, GCPtr<Type> t2,
+	 GCPtr<Constraints> tcc);
+	
+void
+addCcCst(GCPtr<AST> errAst, GCPtr<Type> t1, GCPtr<Type> t2,
+	 GCPtr<Constraints> tcc);
+void
+addPcst(GCPtr<AST> errAst, GCPtr<Type> t, GCPtr<Constraints> tcc);
 
 bool
-useIFInsts(std::ostream &errStream,
-	   LexLoc &errLoc,
-	   GCPtr<Environment< CVector<GCPtr<Instance> > > >fromEnv, 
-	   GCPtr<Environment< CVector<GCPtr<Instance> > > >toEnv,
-	   unsigned long uflags);
+EqUnify(std::ostream& errStream, GCPtr<Constraints> cset);
 
-bool
-initGamma(std::ostream& errStream, 
-	  GCPtr<Environment<TypeScheme> > gamma,
-	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	  const GCPtr<AST> ast, unsigned long uflags);
-
-#endif /* TYPEINFERCOMMON_HXX */
+#endif /* TYPEEQINFER_HXX */

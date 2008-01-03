@@ -89,10 +89,11 @@ struct TCConstraints : public Countable {
 
   void addPred(GCPtr<Typeclass> tc);
   void clearPred(size_t n);
-
+  void normalize();
+  
   bool contains(GCPtr<Typeclass> tc);
   void collectAllFnDeps(GCPtr<CVector<GCPtr<Type> > > fnDeps);
-
+  
   // Compute the closure of all functional dependencies 
   // supplied in the vector
   static void close(GCPtr<CVector<GCPtr<Type> > > closure,
