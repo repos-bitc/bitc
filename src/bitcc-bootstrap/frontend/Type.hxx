@@ -129,9 +129,15 @@ struct TypeScheme;
                               // composite type is free to be 
                               // copy-compatible at this position.
 
+#define CT_REMOVE        0x20u // A constraint marked for removal
+                               // since it is satisfied. 
+                               // Inter-procedural flag used in the
+                               // implementation of unification only.
+                               
+
 // Specialization mask -- those flags which should NOT survive
 // specialization. ((TY_RESTRICTED was here too.))
-#define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC) 
+#define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | CT_REMOVE) 
 
 struct Type : public Countable {
 
@@ -421,6 +427,10 @@ public:
   GCPtr<Type> maximizeMutability(GCPtr<Trail> trail=new Trail);
   // Get the minimally-mutable, but copy-compatible type.
   GCPtr<Type> minimizeMutability(GCPtr<Trail> trail=new Trail);
+
+  // Check if maximally / minimally mutable
+  bool isMaxMutable();
+  bool isMinMutable();
   
   /* Determine Candidacy for Copy-Compatibility for type variables
      only, argument is a composite-type that is searched 

@@ -97,8 +97,6 @@ TCConstraints::normalize()
     addPred((*allPreds)[c]);
 }
 
-
-
 void
 TCConstraints::collectAllFnDeps(GCPtr<CVector<GCPtr<Type> > > fnDeps)
 {

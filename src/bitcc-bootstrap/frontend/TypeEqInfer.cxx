@@ -493,7 +493,7 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
 		<< ast->symType->asString(debugTvp)
 		<< std::endl;
       
-      EqUnify(errStream, currTcc);
+      EqUnify(errStream, currTcc, trail);
       errStream << "  UNF:"
 		<< id->asString() << " : "
 		<< ctypeAsString(id->symType, currTcc)

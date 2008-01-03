@@ -1,2 +1,5 @@
 (define f (lambda (x) x))
 (define k (set! f f))
+
+;; Cyclic type
+;;(define f (lambda (x) f))

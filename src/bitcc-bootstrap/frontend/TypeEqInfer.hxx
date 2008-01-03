@@ -60,6 +60,7 @@ void
 addPcst(GCPtr<AST> errAst, GCPtr<Type> t, GCPtr<Constraints> tcc);
 
 bool
-EqUnify(std::ostream& errStream, GCPtr<Constraints> cset);
+EqUnify(std::ostream& errStream, GCPtr<Constraints> cset, 
+	GCPtr<Trail> trail);
 
 #endif /* TYPEEQINFER_HXX */

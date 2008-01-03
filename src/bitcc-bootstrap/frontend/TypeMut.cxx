@@ -449,6 +449,19 @@ Type::minimizeMutability(GCPtr<Trail> trail)
   return rt;
 }
 
+
+bool 
+Type::isMaxMutable()
+{
+  return strictlyEquals(maximizeMutability());
+}
+
+bool
+Type::isMinMutable()
+{
+  return strictlyEquals(minimizeMutability());
+}
+
 void 
 Type::addHint(GCPtr<Type> theHint)
 {

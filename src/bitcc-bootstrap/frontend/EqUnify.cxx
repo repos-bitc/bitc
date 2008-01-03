@@ -68,12 +68,14 @@
 // This algorithm will not close constraints of the form:
 // tx <: t1 -> t2 , t1 -> t2 <: ty
 
-void
+// Returns true if the constraint set has changed, otherwise false.
+bool
 TransClose(GCPtr<Constraints> cset)
 {
-  size_t start_size=0;
+  size_t start = cset->pred->size();
+  size_t pass_start=0;
   do {
-    start_size = cset->pred->size();
+    pass_start = cset->pred->size();
     
     for(size_t i=0; i < cset->size(); i++) {
       GCPtr<Constraint> cti = cset->Pred(i)->getType();
@@ -96,14 +98,102 @@ TransClose(GCPtr<Constraints> cset)
 		    cti->CompType(1), cset);
       }
     }
-  } while(cset->pred->size() > start_size);
+  } while(cset->pred->size() > pass_start);
   
+  size_t norm = cset->pred->size();
   cset->normalize();
+  
+  size_t final = cset->pred->size();
+  return ((start != norm) || (norm != final));
 }
 
+#define CMPSET(var, val) \
+  do {			 \
+    if(var != true)	 \
+      var = val;	 \
+  } while(0);		 
+
+
 bool
-EqUnify(std::ostream& errStream, GCPtr<Constraints> cset)
+EqUnify(std::ostream& errStream, GCPtr<Constraints> cset, 
+	GCPtr<Trail> trail)
 {
-  TransClose(cset);
-  return true;
+  bool cset_changed = false;
+  bool errFree = true;
+  do {
+    
+    CMPSET(cset_changed, TransClose(cset));
+    for(size_t i=0; i < cset->size(); i++) {
+      /* U({}) */
+      // Implementation is implicit
+      
+      GCPtr<Constraint> ct = cset->Pred(i)->getType();
+      if(ct->flags & CT_REMOVE)
+	continue;
+
+      switch(ct->kind) {
+      case ty_subtype:
+	{
+	  GCPtr<Type> lhs = ct->CompType(0)->getType();
+	  GCPtr<Type> rhs = ct->CompType(1)->getType();
+	  
+	  /* U('a <: 'a) 
+	     U(unit <: unit) 
+	     U(bool <: bool) 	 
+	     U(int <: int),  ... etc */
+	  if(lhs == rhs) {
+	    ct->flags |= CT_REMOVE;
+	    break;
+	  }
+
+	  /* U(Mt <: t) */
+	  if((lhs->kind == ty_mutable) &&
+	     (lhs->CompType(0)->getType() == rhs)) {
+	    ct->flags |= CT_REMOVE;
+	  }
+
+	  /* U('a <: t, t <: 'a) */
+	  if(lhs->kind == ty_tvar) {
+	    GCPtr<Type> reverse = new Constraint(ty_subtype, ct->ast,
+						 rhs, lhs);
+	    if(cset->contains(reverse)) {
+	      ct->flags |= CT_REMOVE;
+	      trail->subst(lhs, rhs);
+	    }
+	  }
+	  
+	  /* U(k = x) */
+	  // This case is implicit. We don't generate k=x constraints, 
+	  // but perform the substitution immediately.
+
+	  /* U('a < t), t = maxz(t) */
+	  if((lhs->kind == ty_tvar) && rhs->isMaxMutable()) {
+	    ct->flags |= CT_REMOVE;
+	    trail->subst(lhs, rhs);
+	  }
+	  
+	  /* U(t < 'a), t = minz(t), forall 'b, t != 'b */
+	  if((lhs->kind == ty_tvar) && (rhs->kind != ty_tvar) &&
+	     rhs->isMinMutable()) {
+	    ct->flags |= CT_REMOVE;
+	    trail->subst(lhs, rhs);
+	  }
+	  break;
+	}
+	
+      case ty_pcst:
+	{
+	  break;
+	}
+
+      default:
+	{
+	  assert(false);
+	  break;
+	}
+      }
+    }
+  } while(cset_changed);
+  
+  return errFree;
 }
