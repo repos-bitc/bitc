@@ -3184,10 +3184,10 @@
   <xsl:template name="print.op.times">
     <xsl:call-template name="print.space"/>
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>times;</xsl:text>
+    <xsl:text>cross;</xsl:text>
     <xsl:call-template name="print.space"/>
   </xsl:template>
-
+  
   <!-- the || operator -->
   <xsl:template name="print.op.par">
     <xsl:call-template name="print.space"/>

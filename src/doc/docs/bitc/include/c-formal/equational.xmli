@@ -761,1310 +761,1297 @@
       </li>
     </ol>
   </definition>
-  <definition id="close">
-    <title>Constraint Set Closure</title>
-    <p>
-      A closure operation
-      <btypes:TYPE>
-	<pred name="close">
-	  <aCtset/> 
-	</pred>
-      </btypes:TYPE>
-      on a constraint set 
-      <btypes:TYPE>
-	<aCtset/> 
-      </btypes:TYPE> produces an equivalent set
-      of atomic constraints by using the copy coercion rules defined
-      in Figure&nbsp;<xref ref="decl_rules"/> (note that this
-      conversion is total); and by explicitely adding all transitive
-      relationships. This conversion does not affect the MPCs in 
-      <btypes:TYPE>
-	<aCtset/> 
-      </btypes:TYPE>.
-    </p>
-    <ol>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <fnxn name="close">
-	      <unin>
-		<set>
-		  <Tsub>
-		    <fn>
-		      <type num="1"/>
-		      <type num="2"/>
-		    </fn>
-		    <fn>
-		      <type num="1" dash="'"/>
-		      <type num="2" dash="'"/>
-		    </fn>
-		  </Tsub>
-		</set>
-		<aCtset/>
-	      </unin>
-	      <pred name="close">
-		<unin>
-		  <aCtset/>
-		  <set>
-		    <Tsub>
-		      <type num="1"/>
-		      <type num="1" dash="'"/>
-		    </Tsub>
-		    <Tsub>
-		      <type num="2"/>
-		      <type num="2" dash="'"/>
-		    </Tsub>
-		    <Tsub>
-		      <type num="1" dash="'"/>
-		      <type num="1"/>
-		    </Tsub>
-		    <Tsub>
-		      <type num="2" dash="'"/>
-		      <type num="2"/>
-		    </Tsub>
-		  </set>
-		</unin>
-	      </pred>
-	    </fnxn>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <fnxn name="close">
-	      <unin>
-		<set>
-		  <Tsub>
-		    <ref>
-		      <type/>
-		    </ref>
-		    <ref>
-		      <type dash="'"/>
-		    </ref>
-		  </Tsub>
-		</set>
-		<aCtset/>
-	      </unin>
-	      <pred name="close">
-		<unin>
-		  <aCtset/>
-		  <set>
-		    <Tsub>
-		      <type/>
-		      <type dash="'"/>
-		    </Tsub>
-		    <Tsub>
-		      <type dash="'"/>
-		      <type/>
-		    </Tsub>
-		  </set>
-		</unin>
-	      </pred>
-	    </fnxn>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <fnxn name="close">
-	      <unin>
-		<set>
-		  <Tsub>
-		    <mutable>
-		      <type/>
-		    </mutable>
-		    <mutable>
-		      <type dash="'"/>
-		    </mutable>
-		  </Tsub>
-		</set>
-		<aCtset/>
-	      </unin>
-	      <pred name="close">
-		<unin>
-		  <aCtset/>
-		  <set>
-		    <Tsub>
-		      <type/>
-		      <type dash="'"/>
-		    </Tsub>
-		    <Tsub>
-		      <type dash="'"/>
-		      <type/>
-		    </Tsub>
-		  </set>
-		</unin>
-	      </pred>
-	    </fnxn>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <eq>
-	      <grouping>
-		<pred name="close">
-		  <unin>
-		    <set>
-		      <Tsub>
-			<type num="1"/>
-			<type num="2"/>
-		      </Tsub>
-		      <Tsub>
-			<type num="2"/>
-			<type num="3"/>
-		      </Tsub>
-		    </set>
-		    <aCtset/>
-		  </unin>
-		</pred>
-		<space/>
-		<textit content="where"/>
-		<space/>
-		<notin>
-		  <Tsub>
-		    <type num="1"/>
-		    <type num="3"/>
-		  </Tsub>
-		  <aCtset/>
-		</notin>
-		<br/>
-	      </grouping>
-	      <pred name="close">
-		<unin>
-		  <set>
-		    <Tsub>
-		      <type num="1"/>
-		      <type num="2"/>
-		    </Tsub>
-		    <Tsub>
-		      <type num="2"/>
-		      <type num="3"/>
-		    </Tsub>
-		    <Tsub>
-		      <type num="1"/>
-		      <type num="3"/>
-		    </Tsub>
-		  </set>                      
-		  <aCtset/>
-		</unin>
-	      </pred>
-	    </eq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <eq>
-	      <grouping>
-		<pred name="close">
-		  <aCtset/>
-		</pred>
-		<space/>
-		<textit content="where none of the above cases "/>
-		<textit content="are applicable"/>
-		<space/>
-	      </grouping>
-	      <aCtset/>
-	    </eq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-    </ol>
-  </definition>
-  <definition id="normalized_ctset">
-    <title>Normalization of Constraint Sets</title>
-    <p>
-      The normalization function
-      <btypes:TYPE>
-	<normalize>
-	  <aCtset/>
-	</normalize>
-      </btypes:TYPE> is used to obtain a normalized form of a
-      constraint set 
-      <btypes:TYPE>
-	<aCtset/>
-      </btypes:TYPE> by re-writing it only in terms of closed
-      subtype constraints and MPCs.
-    </p>
-    <p>
-      <btypes:TYPE>
-	<eq>              
-	  <normalize>
-	    <aCtset/>
-	  </normalize>
-	  <pred name="close">
-	    <aCtset dash="'"/>
-	  </pred>
-	</eq>
-      </btypes:TYPE>
-      where
-      <btypes:TYPE>
-	<aCtset dash="'"/>
-      </btypes:TYPE>
-      is obtained from
-      <btypes:TYPE>
-	<aCtset/>
-      </btypes:TYPE> using the normalizing translations:
-    </p>
-    <ul>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <leadsto>
-	      <DBrac>
-		<eq>
-		  <type num="1"/>
-		  <type num="2"/>
-		</eq>
-	      </DBrac>
-	      <DBrac>
-		<collection>
-		  <Tsub>
-		    <type num="1"/>
-		    <type num="2"/>
-		  </Tsub>
-		  <Tsub>
-		    <type num="2"/>
-		    <type num="1"/>
-		  </Tsub>	      
-		</collection>
-	      </DBrac>
-	    </leadsto>	
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <leadsto>
-	      <DBrac>
-		<ceq via="alpha">
-		  <type num="1"/>
-		  <type num="2"/>
-		</ceq>
-	      </DBrac>
-	      <DBrac>
-		<collection>
-		  <Tsub>
-		    <type num="1"/>
-		    <tvar name="alpha"/>
-		  </Tsub>	      
-		  <Tsub>
-		    <type num="2"/>
-		    <tvar name="alpha"/>
-		  </Tsub>
-		</collection>
-	      </DBrac>
-	    </leadsto>
-	  </btypes:TYPE>            
-	</p>
-      </li>
-    </ul>
-  </definition>
-  <definition id="sat">
-    <title>Constraint Satisfiability</title>
-    <p>
-      A Substitution 
-      <btypes:TYPE>
-	<aSubMap/>
-      </btypes:TYPE>
-      satisfies a constraint set
-      <btypes:TYPE>
-	<aCtset/>
-      </btypes:TYPE>, written
-      <btypes:TYPE>
-	<models name="sat">
-	  <aSubMap/>
-	  <aCtset/>
-	</models>
-      </btypes:TYPE>
-      iff
-      <btypes:TYPE>
-	<normalize>
-	  <Subst>
-	    <aSubMap/>
-	    <aCtset/>
-	  </Subst>
-	</normalize>
-      </btypes:TYPE>
-      consists only of tautologies (trivially).
-    </p>
-  </definition>
-  <definition id="ca">
-    <title>Consistency and Acyclicity</title> 
-    <btypes:TYPE>
-      <Hrules>
-	<tyRule>
-	  <tyPre>
-	    <grouping>
-	      <Exists>
-		<aSubMap/>
-	      </Exists>
-	      <text content=" such that "/>
-	      <models name="sat">
-		<aSubMap/>
-		<aCtset/>
-	      </models>
-	    </grouping>
-	  </tyPre>
-	  <tyConc>
-	    <models name="cst">
-	      <assume/>
-	      <aCtset/>
-	    </models>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules>
-	<tyRule>
-	  <tyPre>
-	    <grouping>
-	      <Forall/>
-	      <SubMap>
-		<tvar name="alpha"/>
-		<type/>
-	      </SubMap>
-	      <text content=" and "/>
-	      <SubMap>
-		<tvar name="beta"/>
-		<type dash="'"/>
-	      </SubMap>
-	      <text content=" in "/>
-	      <aSubMap/>
-	      <text content=", "/>
-	      <neq>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-	      </neq>
-	    </grouping>
-	  </tyPre>
-	  <tyConc>
-	    <models name="cst">
-	      <assume/>
-	      <aSubMap/>
-	    </models>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules>
-	<tyRule>
-	  <tyPre>
-	    <grouping>
-	      <Forall/>
-	      <in>
-		<grouping>
-		  <Tsub>
-		    <tvar name="alpha"/>
-		    <type/>
-		  </Tsub>
-		  <text content=" or "/>
-		  <Tsub>
-		    <tvar name="alpha"/>
-		    <type/>
-		  </Tsub>
-		</grouping>
-		<normalize>
-		  <aCtset/>
-		</normalize>
-	      </in>                
-	      <text content=", "/>
-	      <OR>
-		<paren>
-		  <eq>
-		    <type/>
-		    <tvar name="alpha"/>
-		  </eq>
-		</paren>
-		<paren>
-		  <eq>
-		    <type/>
-		    <mutable>
-		      <tvar name="alpha"/>
-		    </mutable>
-		  </eq>
-		</paren>
-		<paren>
-		  <notin>
-		    <tvar name="alpha"/>
-		    <type/>
-		  </notin>
-		</paren>
-	      </OR>
-	    </grouping>
-	  </tyPre>
-	  <tyConc>
-	    <models name="acy">
-	      <assume/>
-	      <aCtset/>
-	    </models>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules>
-	<tyRule>
-	  <tyPre/>
-	  <tyConc>
-	    <models name="acy">
-	      <assume/>
-	      <EmptySubst/>
-	    </models>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <aSubMap/>
-	      <compose>
-		<SubMap>
-		  <tvar name="alpha"/>
-		  <type/>
-		</SubMap>
-		<aSubMap dash="'"/>
-	      </compose>
-	    </eq>
-	    <notin>
-	      <tvar name="alpha"/>
-	      <type/>
-	    </notin>
-	    <models name="acy">
-	      <assume/>
-	      <Subst>
-		<SubMap>
-		  <tvar name="alpha"/>
-		  <type/>
-		</SubMap>
-		<aSubMap dash="'"/>
-	      </Subst>
-	    </models>
-	  </tyPre>
-	  <tyConc>
-	    <models name="acy">
-	      <assume/>
-	      <aSubMap/>
-	    </models>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules>
-	<tyRule>
-	  <tyPre>
-	    <models name="cst">   
-	      <assume/>
-	      <aCtset/>
-	    </models>  	    
-	    <models name="acy">   
-	      <assume/>
-	      <aCtset/>
-	    </models>  	    	    
-	  </tyPre>
-	  <tyConc> 
-	    <models name="ca">   
-	      <assume/>
-	      <aCtset/>
-	    </models>  
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <models name="cst">   
-	      <assume/>
-	      <aSubMap/>
-	    </models>  	    
-	    <models name="acy">   
-	      <assume/>
-	      <aSubMap/>
-	    </models>  	    	    
-	  </tyPre>
-	  <tyConc> 
-	    <models name="ca">   
-	      <assume/>
-	      <aSubMap/>
-	    </models>  
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-    </btypes:TYPE>
-  </definition>
-  <definition id="canonical-ctr-types">
-    <title>Canonical forms of Solvable Entities</title>
-    <p>
-      For any 
-      <btypes:TYPE>
-	<eq>
-	  <solvable/>
-	  <collection>
-	    <type/>
-	    <aExpr/>
-	    <grouping>
-	      <text content=" or "/>
-	      <store/>
-	    </grouping>
-	  </collection>
-	</eq>
-      </btypes:TYPE>,
-      we write 
-      <btypes:TYPE>
-	<canonical>
-	  <solvable/>
-	</canonical>
-      </btypes:TYPE> to represent the entity in which all
-      meta-constructors in (posibly embedded types) are fully
-      interpreted.
-    </p>
-    <p>
-      For any 
-      <btypes:TYPE>
-	<gamma/>
-      </btypes:TYPE> such that if
-      <btypes:TYPE>
-	<eq>
-	  <aCtset/>
-	  <Unin>
-	    <aCtset num="i"/>
-	  </Unin>
-	</eq>
-      </btypes:TYPE>, 
-      <btypes:TYPE>
-	<Forall/>
-	<in>
-	  <mapping>
-	    <id/>
-	    <forall>
-	      <tvars name="alpha"/>
-	      <ctype>
-		<type num="i"/>
-		<aCtset num="i"/>
-	      </ctype>
-	    </forall>
-	  </mapping>
-	  <gamma/>
-	</in>
-      </btypes:TYPE>, and
-      <btypes:TYPE>
-	<models name="sat">
-	  <assume>
-	    <EmptySubst/>
-	  </assume>
-	  <aCtset/>
-	</models>
-      </btypes:TYPE>,
-      we write 
-      <btypes:TYPE>
-	<canonical>
-	  <solvable/>
-	</canonical>
-      </btypes:TYPE> to represent the entity in which (1) all
-      meta-constructors in the embedded types are fully
-      interpreted, and (2) the (tautological) constraints embedded
-      within  
-      <btypes:TYPE>
-	<gamma/>
-      </btypes:TYPE> are removed to obtain an equivalent
-      unconstrained entity.
-    </p>
-  </definition>    
-  <p>
-    For example, if 
-    <btypes:TYPE>
-      <eq>
-	<type/>
-	<fn M="yes">
-	  <mutable>
-	    <unit/>
-	  </mutable>
-	  <bool/>
-	</fn>
-      </eq>
-    </btypes:TYPE>, then
-    <btypes:TYPE>
-      <eq>
-	<canonical>
-	  <type/>
-	</canonical>
-	<fn>
-	  <unit/>
-	  <mutable>
-	    <bool/>
-	  </mutable>
-	</fn>
-      </eq>
-    </btypes:TYPE>. If
-    <btypes:TYPE>
-      <eq>
-	<gamma/>
-	<mapping>
-	  <id/>
-	  <ctype>
-	    <unit/>
-	    <set>
-	      <Tsub>
-		<mutable>
-		  <unit/>
-		</mutable>
-		<unit/>
-	      </Tsub>
-	    </set>
-	  </ctype>
-	</mapping>
-      </eq>
-    </btypes:TYPE>, then
-    <btypes:TYPE>
-      <eq>
-	<canonical>
-	  <gamma/>
-	</canonical>
-	<mapping>
-	  <id/>
-	  <unit/>
-	</mapping>
-      </eq>
-    </btypes:TYPE>. 
-    That is, canonicalization obtains entities that are within the
-    language and type system defined in 
-    section&nbsp;<xref ref="language"/>.
-  </p>
-  <definition id="define_infer">
-    <title>Type Inference</title> 
-    <p>
-      Type inference is a program
-      transformation that accepts a program in which
-      <progident>let</progident> expressions are not annotated
-      with their kinds, and returns the same programs in which
-      <progident>let</progident> expressions are annotated with
-      their kinds and all expressions are annotated with their
-      types.
-    </p>
-  </definition>
-  <p>
-    The equational type inference algorithm is as shown in
-    Figure&nbsp;<xref ref="eq_infer"/>. 
-    The inference judgment 
-    <btypes:TYPE>
-      <TEjudge>
-	<assume>
-	  <gamma/>
-	  <store/>
-	</assume>
-	<conclude>
-	  <tqExpr>
-	    <aExpr/>
-	    <type/>
-	  </tqExpr>
-	</conclude>
-	<constrain>
-	  <aCtset/>
-	</constrain>
-      </TEjudge>
-    </btypes:TYPE>
-    should be understood as: given the binding context
-    <btypes:TYPE><gamma/></btypes:TYPE> and the store typing
-    <btypes:TYPE><store/></btypes:TYPE>, we infer the type 
-    <btypes:TYPE><type/></btypes:TYPE> for the expression 
-    <btypes:TYPE><aExpr/></btypes:TYPE> under the constraints
-    <btypes:TYPE><aCtset/></btypes:TYPE>. 
-    The Unification algorithm is given in 
-    figure&nbsp;<xref ref="eq_unify"/> with some auxiliary
-    definitions and translations defined in 
-    figure&nbsp;<xref ref="eq_helper"/>. 
-    The unification algorithm takes in a set of constraints
-    <btypes:TYPE><aCtset/></btypes:TYPE> and either fails with an
-    error <btypes:TYPE><error/></btypes:TYPE>, or succeeds to 
-    result in a pair consisting of residual constraints
-    <btypes:TYPE><aCtset/></btypes:TYPE> 
-    (which should only contain constraints of the form:
-    <btypes:TYPE>
-      <!-- a <= t  -->
-      <Tsub>
-	<tvar name="alpha"/>
-	<type/>
-      </Tsub>
-      <text content=","/>
-      <space/>
-      <!-- t <= a  -->
-      <Tsub>
-	<type/>
-	<tvar name="alpha"/>
-      </Tsub>
-      <text content=", "/>
-      <space/>
-      <!-- however, both of the cases a <= t and t <= a
-      cannot occur since it can be reduced -->
-      <!-- P(k, t1, t2)  -->
-      <Pcst>
-	<lKind k="var"/>
-	<type/>
-	<type dash="'"/>
-      </Pcst>
-      <text content=", and"/>
-      <space/>
-      <Pcst>
-	<lKind k="poly"/>
-	<type num="g"/>
-	<type num="i"/>
-      </Pcst>
-      <text content=", where"/>
-      <space/>
-      <pred name="Immut">
-	<type num="i"/>
-      </pred>
-      <text content=", and"/>
-      <space/>
-      <neq>
-	<pred name="dtv">
-	  <type num="i"/>
-	</pred>
-	<Empty/>
-      </neq>
-      <text content="."/>            
-    </btypes:TYPE>)
-    and a list of
-    substitutions <btypes:TYPE><aSubMap/></btypes:TYPE> for the
-    constraints solved in this pass.
-  </p>
-  <p>
-    We use the following shorthand translations as a notational
-    convenience (the translation defined in section&nbsp;<xref
-      ref="type_system"/> is repeated here).
-  </p>
-  <ol>
-    <li>
-      <p>
-	<btypes:TYPE>
-	  <leadsto>
-	    <DBrac>
-	      <TDjudge sub="yes">
-		<aExpr/>
-		<type/>
-	      </TDjudge>
-	    </DBrac>
-	    <DBrac>
-	      <collection>
-		<TDjudge>
-		  <aExpr/>
-		  <type dash="'"/>
-		</TDjudge>
-		<Tsub>
-		  <type/>
-		  <type dash="'"/>
-		</Tsub>
-	      </collection>
-	    </DBrac>
-	  </leadsto>
-	</btypes:TYPE>
-      </p>
-    </li>
-    <li>
-      <p>
-	<btypes:TYPE>              
-	  <leadsto>
-	    <DBrac>  
-	      <judge>
-		<precond>
-		  <aSubMap/>
-		</precond>
-		<assume>
-		  <gamma/>
-		  <store/>
-		</assume>
-		<conclude>
-		  <tqExpr>
-		    <aExpr/>
-		    <type/>
-		  </tqExpr>
-		</conclude>
-	      </judge>
-	    </DBrac>
-	    <DBrac>          
-	      <Sjudge>
-		<assume>
-		  <Subst>
-		    <aSubMap/>
-		    <gamma/>
-		  </Subst>
-		  <Subst>
-		    <aSubMap/>
-		    <store/>
-		  </Subst>
-		</assume>
-		<tqExpr>
-		  <Subst>
-		    <aSubMap/>
-		    <aExpr/>
-		  </Subst>
-		  <Subst>
-		    <aSubMap/>
-		    <type/>
-		  </Subst>
-		</tqExpr>
-	      </Sjudge>
-	    </DBrac>
-	  </leadsto>
-	</btypes:TYPE>
-      </p>
-    </li>
-    <li>
-      <p>
-	<btypes:TYPE>
-	  <leadsto>
-	    <DBrac>          
-	      <Djudge>
-		<aSubMap/>
-		<gamma/>
-		<store/>
-		<aExpr/>
-		<type/>
-	      </Djudge>
-	    </DBrac>
-	    <DBrac>          
-	      <Sjudge>
-		<assume>
-		  <canonical>
-		    <Subst>
-		      <aSubMap/>
-		      <gamma/>
-		    </Subst>
-		  </canonical>
-		  <canonical>
-		    <Subst>
-		      <aSubMap/>
-		      <store/>
-		    </Subst>
-		  </canonical>
-		</assume>
-		<tqExpr>
-		  <canonical>
-		    <Subst>
-		      <aSubMap/>
-		      <aExpr/>
-		    </Subst>
-		  </canonical>
-		  <canonical>
-		    <Subst>
-		      <aSubMap/>
-		      <type/>
-		    </Subst>
-		  </canonical>
-		</tqExpr>
-	      </Sjudge>
-	    </DBrac>
-	  </leadsto>
-	</btypes:TYPE>
-      </p>
-    </li>
-    <li>
-      <p>
-	<btypes:TYPE>
-	  <leadsto>
-	    <DBrac> 
-	      <Subst>
-		<aSubMap/>
-		<set>
-		  <unspecified/>
-		</set>
-	      </Subst>
-	    </DBrac>
-	    <DBrac>          
-	      <Subst>                
-		<aSubMap/>
-		<grouping>
-		  <set>
-		    <unspecified/>
-		  </set>
-		</grouping>
-	      </Subst>
-	    </DBrac>
-	  </leadsto>
-	</btypes:TYPE>
-      </p>
-    </li>
-  </ol>
-  <lemma id="cst-implies-sat">
-    <title>Consistency Implies Satisfiability</title>
-    <p>
-      If 
-      <btypes:TYPE>
-	<models name="cst">
-	  <assume/>
-	  <aCtset/>
-	</models>
-      </btypes:TYPE>, then
-      <btypes:TYPE>
-	<Exists>
-	  <aSubMap/>
-	</Exists>
-      </btypes:TYPE> such that
-      <btypes:TYPE>
-	<models name="sat">
-	  <aSubMap/>
-	  <aCtset/>
-	</models>
-      </btypes:TYPE>.
-    </p>
-  </lemma>
-  <proof>
-    <p>
-      By inversion of the constraint consistency relationship in 
-      <btypes:TYPE>
-	<defn tag="ca"/>
-      </btypes:TYPE>.
-    </p>
-  </proof>
-  <theorem id="eq-unify-correct">
-    <title>Correctness of Unification</title>
-    <p>
-      If:
-      <btypes:TYPE>
-	<eq>
-	  <unf>
-	    <aCtset/>
-	  </unf>
-	  <Pair>
-	    <aCtset dash="'"/>
-	    <aSubMap num="u"/>
-	  </Pair>
-	</eq>
-	<text content=", then"/>
-      </btypes:TYPE>
-    </p>
-    <ol>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <Forall>
-	      <aSubMap num="s"/>
-	    </Forall>
-	    <text content=" such that "/>
-	    <models name="sat"> 
-	      <assume>
-		<aSubMap num="s"/>
-	      </assume>
-	      <aCtset dash="'"/>
-	    </models>
-	    <text content=", "/>
-	    <models name="sat"> 
-	      <assume>
-		<scomp>
-		  <aSubMap num="s"/>
-		  <aSubMap num="u"/>
-		</scomp>
-	      </assume>
-	      <aCtset/>
-	    </models>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <Exists>
-	      <aSubMap num="s"/>
-	    </Exists>
-	    <text content=" such that "/>
-	    <models name="sat"> 
-	      <assume>
-		<aSubMap num="s"/>
-	      </assume>
-	      <aCtset dash="'"/>
-	    </models>
-	  </btypes:TYPE>
-	</p>
-      </li>
-    </ol>
-  </theorem>  
-  <theorem id="eq-unify-complete">
-    <title>Principality of Unification</title>
-    <p>
-      The unification algorithm produces most general
-      substitutions, and fails only when the 
-      constaint set is inconsistent. 
-    </p>
-    <ol>
-      <li>
-	<p>
-	  If:
-	  <btypes:TYPE>
-	    <eq>
-	      <unf>
-		<aCtset/>
-	      </unf>
-	      <Pair>
-		<aCtset dash="'"/>
-		<aSubMap num="u"/>
-	      </Pair>
-	    </eq>
-	  </btypes:TYPE> then,
-	  <btypes:TYPE>
-	    <Forall>
-	      <aSubMap num="s"/>
-	    </Forall>
-	  </btypes:TYPE> such that 
-	  <btypes:TYPE>
-	    <models name="sat"> 
-	      <assume>
-		<aSubMap num="s"/>
-	      </assume>
-	      <aCtset/>
-	    </models>
-	  </btypes:TYPE>, 
-	  <btypes:TYPE>
-	    <Exists>
-	      <aSubMap num="s" dash="'"/>
-	    </Exists>
-	  </btypes:TYPE> such that 
-	  <btypes:TYPE>
-	    <eq>
-	      <aSubMap num="s"/>
-	      <compose>
-		<aSubMap num="u"/>
-		<aSubMap num="s" dash="'"/>
-	      </compose>
-	    </eq>
-	  </btypes:TYPE>, and
-	  <btypes:TYPE>
-	    <models name="sat"> 
-	      <assume>
-		<aSubMap num="s" dash="'"/>
-	      </assume>
-	      <aCtset dash="'"/>
-	    </models>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  If:
-	  <btypes:TYPE>
-	    <eq>
-	      <unf>
-		<aCtset/>
-	      </unf>
-	      <error/>
-	    </eq>
-	  </btypes:TYPE> then, 
-	  <btypes:TYPE>
-	    <Not>
-	      <Exists/>
-	    </Not>
-	    <aSubMap/>
-	  </btypes:TYPE>
-	  such that 
-	  <btypes:TYPE>
-	    <models name="sat"> 
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <aCtset/>
-	    </models>
-	  </btypes:TYPE>.
-	</p>
-      </li>
-    </ol>
-  </theorem>
-  <theorem id="eq-unify-decidable">
-    <title>Decidability of Unification</title>
-    <p>
-      The unification algorithm
-      <btypes:TYPE>
-	<unf>
-	  <aCtset/>
-	</unf>
-	<text content=" computes to some "/>
-	<Pair>
-	  <aCtset dash="'"/>
-	  <aSubMap/>
-	</Pair>
-	<text content=" or fails with "/>
-	<error/>
-	<text content=" decidably in a finite number of steps."/>
-      </btypes:TYPE>
-    </p>
-  </theorem>
-  <theorem id="eq-infer-sound">
-    <title>Soundness of Type Inference</title>
-    <p>
-      If:
-      <btypes:TYPE>
-	<TEjudge>
-	  <assume>
-	    <gamma/>
-	    <store/>
-	  </assume>
-	  <conclude>
-	    <tqExpr>
-	      <aExpr/>
-	      <type/>
-	    </tqExpr>
-	  </conclude>
-	  <constrain>
-	    <aCtset/>
-	  </constrain>
-	</TEjudge>
-      </btypes:TYPE>, then
-      <btypes:TYPE>
-	<Forall>	
-	  <aSubMap/>
-	</Forall>
-      </btypes:TYPE> such that 
-      <btypes:TYPE>
-	<models name="sat"> 
-	  <assume>
-	    <aSubMap/>
-	  </assume>
-	  <aCtset/>
-	</models>
-      </btypes:TYPE>, 
-      <btypes:TYPE>
-	<Exists>	
-	  <aCtset dash="'"/>
-	</Exists>
-      </btypes:TYPE> such that 
-      <btypes:TYPE>
-	<Cjudge>
-	  <aCtset dash="'"/>
-	  <canonical>
-	    <Subst>
-	      <aSubMap/>
-	      <gamma/>
-	    </Subst>
-	  </canonical>
-	  <canonical>
-	    <Subst>
-	      <aSubMap/>
-	      <store/>
-	    </Subst>
-	  </canonical>
- 	  <canonical>
-	    <Subst>
-	      <aSubMap/>
-	      <aExpr/>
-	    </Subst>
-	  </canonical>
- 	  <canonical>
-	    <Subst>
-	      <aSubMap/>
-	      <type/>
-	    </Subst>
-	  </canonical>
-	</Cjudge>
-      </btypes:TYPE>.
-
+<!--   <definition id="close"> -->
+<!--     <title>Constraint Set Closure</title> -->
+<!--     <p> -->
+<!--       A closure operation -->
 <!--       <btypes:TYPE> -->
-<!-- 	<Djudge> -->
+<!-- 	<pred name="close"> -->
+<!-- 	  <aCtset/>  -->
+<!-- 	</pred> -->
+<!--       </btypes:TYPE> -->
+<!--       on a constraint set  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<aCtset/>  -->
+<!--       </btypes:TYPE> produces an equivalent set -->
+<!--       of atomic constraints by using the copy coercion rules defined -->
+<!--       in Figure&nbsp;<xref ref="decl_rules"/> (note that this -->
+<!--       conversion is total); and by explicitely adding all transitive -->
+<!--       relationships. This conversion does not affect the MPCs in  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<aCtset/>  -->
+<!--       </btypes:TYPE>. -->
+<!--     </p> -->
+<!--     <ol> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <fnxn name="close"> -->
+<!-- 	      <unin> -->
+<!-- 		<set> -->
+<!-- 		  <Tsub> -->
+<!-- 		    <fn> -->
+<!-- 		      <type num="1"/> -->
+<!-- 		      <type num="2"/> -->
+<!-- 		    </fn> -->
+<!-- 		    <fn> -->
+<!-- 		      <type num="1" dash="'"/> -->
+<!-- 		      <type num="2" dash="'"/> -->
+<!-- 		    </fn> -->
+<!-- 		  </Tsub> -->
+<!-- 		</set> -->
+<!-- 		<aCtset/> -->
+<!-- 	      </unin> -->
+<!-- 	      <pred name="close"> -->
+<!-- 		<unin> -->
+<!-- 		  <aCtset/> -->
+<!-- 		  <set> -->
+<!-- 		    <Tsub> -->
+<!-- 		      <type num="1"/> -->
+<!-- 		      <type num="1" dash="'"/> -->
+<!-- 		    </Tsub> -->
+<!-- 		    <Tsub> -->
+<!-- 		      <type num="2"/> -->
+<!-- 		      <type num="2" dash="'"/> -->
+<!-- 		    </Tsub> -->
+<!-- 		    <Tsub> -->
+<!-- 		      <type num="1" dash="'"/> -->
+<!-- 		      <type num="1"/> -->
+<!-- 		    </Tsub> -->
+<!-- 		    <Tsub> -->
+<!-- 		      <type num="2" dash="'"/> -->
+<!-- 		      <type num="2"/> -->
+<!-- 		    </Tsub> -->
+<!-- 		  </set> -->
+<!-- 		</unin> -->
+<!-- 	      </pred> -->
+<!-- 	    </fnxn> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <fnxn name="close"> -->
+<!-- 	      <unin> -->
+<!-- 		<set> -->
+<!-- 		  <Tsub> -->
+<!-- 		    <ref> -->
+<!-- 		      <type/> -->
+<!-- 		    </ref> -->
+<!-- 		    <ref> -->
+<!-- 		      <type dash="'"/> -->
+<!-- 		    </ref> -->
+<!-- 		  </Tsub> -->
+<!-- 		</set> -->
+<!-- 		<aCtset/> -->
+<!-- 	      </unin> -->
+<!-- 	      <pred name="close"> -->
+<!-- 		<unin> -->
+<!-- 		  <aCtset/> -->
+<!-- 		  <set> -->
+<!-- 		    <Tsub> -->
+<!-- 		      <type/> -->
+<!-- 		      <type dash="'"/> -->
+<!-- 		    </Tsub> -->
+<!-- 		    <Tsub> -->
+<!-- 		      <type dash="'"/> -->
+<!-- 		      <type/> -->
+<!-- 		    </Tsub> -->
+<!-- 		  </set> -->
+<!-- 		</unin> -->
+<!-- 	      </pred> -->
+<!-- 	    </fnxn> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <fnxn name="close"> -->
+<!-- 	      <unin> -->
+<!-- 		<set> -->
+<!-- 		  <Tsub> -->
+<!-- 		    <mutable> -->
+<!-- 		      <type/> -->
+<!-- 		    </mutable> -->
+<!-- 		    <mutable> -->
+<!-- 		      <type dash="'"/> -->
+<!-- 		    </mutable> -->
+<!-- 		  </Tsub> -->
+<!-- 		</set> -->
+<!-- 		<aCtset/> -->
+<!-- 	      </unin> -->
+<!-- 	      <pred name="close"> -->
+<!-- 		<unin> -->
+<!-- 		  <aCtset/> -->
+<!-- 		  <set> -->
+<!-- 		    <Tsub> -->
+<!-- 		      <type/> -->
+<!-- 		      <type dash="'"/> -->
+<!-- 		    </Tsub> -->
+<!-- 		    <Tsub> -->
+<!-- 		      <type dash="'"/> -->
+<!-- 		      <type/> -->
+<!-- 		    </Tsub> -->
+<!-- 		  </set> -->
+<!-- 		</unin> -->
+<!-- 	      </pred> -->
+<!-- 	    </fnxn> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <eq> -->
+<!-- 	      <grouping> -->
+<!-- 		<pred name="close"> -->
+<!-- 		  <unin> -->
+<!-- 		    <set> -->
+<!-- 		      <Tsub> -->
+<!-- 			<type num="1"/> -->
+<!-- 			<type num="2"/> -->
+<!-- 		      </Tsub> -->
+<!-- 		      <Tsub> -->
+<!-- 			<type num="2"/> -->
+<!-- 			<type num="3"/> -->
+<!-- 		      </Tsub> -->
+<!-- 		    </set> -->
+<!-- 		    <aCtset/> -->
+<!-- 		  </unin> -->
+<!-- 		</pred> -->
+<!-- 		<space/> -->
+<!-- 		<textit content="where"/> -->
+<!-- 		<space/> -->
+<!-- 		<notin> -->
+<!-- 		  <Tsub> -->
+<!-- 		    <type num="1"/> -->
+<!-- 		    <type num="3"/> -->
+<!-- 		  </Tsub> -->
+<!-- 		  <aCtset/> -->
+<!-- 		</notin> -->
+<!-- 		<br/> -->
+<!-- 	      </grouping> -->
+<!-- 	      <pred name="close"> -->
+<!-- 		<unin> -->
+<!-- 		  <set> -->
+<!-- 		    <Tsub> -->
+<!-- 		      <type num="1"/> -->
+<!-- 		      <type num="2"/> -->
+<!-- 		    </Tsub> -->
+<!-- 		    <Tsub> -->
+<!-- 		      <type num="2"/> -->
+<!-- 		      <type num="3"/> -->
+<!-- 		    </Tsub> -->
+<!-- 		    <Tsub> -->
+<!-- 		      <type num="1"/> -->
+<!-- 		      <type num="3"/> -->
+<!-- 		    </Tsub> -->
+<!-- 		  </set>                       -->
+<!-- 		  <aCtset/> -->
+<!-- 		</unin> -->
+<!-- 	      </pred> -->
+<!-- 	    </eq> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <eq> -->
+<!-- 	      <grouping> -->
+<!-- 		<pred name="close"> -->
+<!-- 		  <aCtset/> -->
+<!-- 		</pred> -->
+<!-- 		<space/> -->
+<!-- 		<textit content="where none of the above cases "/> -->
+<!-- 		<textit content="are applicable"/> -->
+<!-- 		<space/> -->
+<!-- 	      </grouping> -->
+<!-- 	      <aCtset/> -->
+<!-- 	    </eq> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--     </ol> -->
+<!--   </definition> -->
+<!--   <definition id="normalized_ctset"> -->
+<!--     <title>Normalization of Constraint Sets</title> -->
+<!--     <p> -->
+<!--       The normalization function -->
+<!--       <btypes:TYPE> -->
+<!-- 	<normalize> -->
+<!-- 	  <aCtset/> -->
+<!-- 	</normalize> -->
+<!--       </btypes:TYPE> is used to obtain a normalized form of a -->
+<!--       constraint set  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<aCtset/> -->
+<!--       </btypes:TYPE> by re-writing it only in terms of closed -->
+<!--       subtype constraints and MPCs. -->
+<!--     </p> -->
+<!--     <p> -->
+<!--       <btypes:TYPE> -->
+<!-- 	<eq>               -->
+<!-- 	  <normalize> -->
+<!-- 	    <aCtset/> -->
+<!-- 	  </normalize> -->
+<!-- 	  <pred name="close"> -->
+<!-- 	    <aCtset dash="'"/> -->
+<!-- 	  </pred> -->
+<!-- 	</eq> -->
+<!--       </btypes:TYPE> -->
+<!--       where -->
+<!--       <btypes:TYPE> -->
+<!-- 	<aCtset dash="'"/> -->
+<!--       </btypes:TYPE> -->
+<!--       is obtained from -->
+<!--       <btypes:TYPE> -->
+<!-- 	<aCtset/> -->
+<!--       </btypes:TYPE> using the normalizing translations: -->
+<!--     </p> -->
+<!--     <ul> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <leadsto> -->
+<!-- 	      <DBrac> -->
+<!-- 		<eq> -->
+<!-- 		  <type num="1"/> -->
+<!-- 		  <type num="2"/> -->
+<!-- 		</eq> -->
+<!-- 	      </DBrac> -->
+<!-- 	      <DBrac> -->
+<!-- 		<collection> -->
+<!-- 		  <Tsub> -->
+<!-- 		    <type num="1"/> -->
+<!-- 		    <type num="2"/> -->
+<!-- 		  </Tsub> -->
+<!-- 		  <Tsub> -->
+<!-- 		    <type num="2"/> -->
+<!-- 		    <type num="1"/> -->
+<!-- 		  </Tsub>	       -->
+<!-- 		</collection> -->
+<!-- 	      </DBrac> -->
+<!-- 	    </leadsto>	 -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <leadsto> -->
+<!-- 	      <DBrac> -->
+<!-- 		<ceq via="alpha"> -->
+<!-- 		  <type num="1"/> -->
+<!-- 		  <type num="2"/> -->
+<!-- 		</ceq> -->
+<!-- 	      </DBrac> -->
+<!-- 	      <DBrac> -->
+<!-- 		<collection> -->
+<!-- 		  <Tsub> -->
+<!-- 		    <type num="1"/> -->
+<!-- 		    <tvar name="alpha"/> -->
+<!-- 		  </Tsub>	       -->
+<!-- 		  <Tsub> -->
+<!-- 		    <type num="2"/> -->
+<!-- 		    <tvar name="alpha"/> -->
+<!-- 		  </Tsub> -->
+<!-- 		</collection> -->
+<!-- 	      </DBrac> -->
+<!-- 	    </leadsto> -->
+<!-- 	  </btypes:TYPE>             -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--     </ul> -->
+<!--   </definition> -->
+<!--   <definition id="sat"> -->
+<!--     <title>Constraint Satisfiability</title> -->
+<!--     <p> -->
+<!--       A Substitution  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<aSubMap/> -->
+<!--       </btypes:TYPE> -->
+<!--       satisfies a constraint set -->
+<!--       <btypes:TYPE> -->
+<!-- 	<aCtset/> -->
+<!--       </btypes:TYPE>, written -->
+<!--       <btypes:TYPE> -->
+<!-- 	<models name="sat"> -->
 <!-- 	  <aSubMap/> -->
+<!-- 	  <aCtset/> -->
+<!-- 	</models> -->
+<!--       </btypes:TYPE> -->
+<!--       iff -->
+<!--       <btypes:TYPE> -->
+<!-- 	<normalize> -->
+<!-- 	  <Subst> -->
+<!-- 	    <aSubMap/> -->
+<!-- 	    <aCtset/> -->
+<!-- 	  </Subst> -->
+<!-- 	</normalize> -->
+<!--       </btypes:TYPE> -->
+<!--       consists only of tautologies (trivially). -->
+<!--     </p> -->
+<!--   </definition> -->
+<!--   <definition id="ca"> -->
+<!--     <title>Consistency and Acyclicity</title>  -->
+<!--     <btypes:TYPE> -->
+<!--       <Hrules> -->
+<!-- 	<tyRule> -->
+<!-- 	  <tyPre> -->
+<!-- 	    <grouping> -->
+<!-- 	      <Exists> -->
+<!-- 		<aSubMap/> -->
+<!-- 	      </Exists> -->
+<!-- 	      <text content=" such that "/> -->
+<!-- 	      <models name="sat"> -->
+<!-- 		<aSubMap/> -->
+<!-- 		<aCtset/> -->
+<!-- 	      </models> -->
+<!-- 	    </grouping> -->
+<!-- 	  </tyPre> -->
+<!-- 	  <tyConc> -->
+<!-- 	    <models name="cst"> -->
+<!-- 	      <assume/> -->
+<!-- 	      <aCtset/> -->
+<!-- 	    </models> -->
+<!-- 	  </tyConc> -->
+<!-- 	</tyRule> -->
+<!--       </Hrules> -->
+<!--       <Hrules> -->
+<!-- 	<tyRule> -->
+<!-- 	  <tyPre> -->
+<!-- 	    <grouping> -->
+<!-- 	      <Forall/> -->
+<!-- 	      <SubMap> -->
+<!-- 		<tvar name="alpha"/> -->
+<!-- 		<type/> -->
+<!-- 	      </SubMap> -->
+<!-- 	      <text content=" and "/> -->
+<!-- 	      <SubMap> -->
+<!-- 		<tvar name="beta"/> -->
+<!-- 		<type dash="'"/> -->
+<!-- 	      </SubMap> -->
+<!-- 	      <text content=" in "/> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	      <text content=", "/> -->
+<!-- 	      <neq> -->
+<!-- 		<tvar name="alpha"/> -->
+<!-- 		<tvar name="beta"/> -->
+<!-- 	      </neq> -->
+<!-- 	    </grouping> -->
+<!-- 	  </tyPre> -->
+<!-- 	  <tyConc> -->
+<!-- 	    <models name="cst"> -->
+<!-- 	      <assume/> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	    </models> -->
+<!-- 	  </tyConc> -->
+<!-- 	</tyRule> -->
+<!--       </Hrules> -->
+<!--       <Hrules> -->
+<!-- 	<tyRule> -->
+<!-- 	  <tyPre> -->
+<!-- 	    <grouping> -->
+<!-- 	      <Forall/> -->
+<!-- 	      <in> -->
+<!-- 		<grouping> -->
+<!-- 		  <Tsub> -->
+<!-- 		    <tvar name="alpha"/> -->
+<!-- 		    <type/> -->
+<!-- 		  </Tsub> -->
+<!-- 		  <text content=" or "/> -->
+<!-- 		  <Tsub> -->
+<!-- 		    <tvar name="alpha"/> -->
+<!-- 		    <type/> -->
+<!-- 		  </Tsub> -->
+<!-- 		</grouping> -->
+<!-- 		<normalize> -->
+<!-- 		  <aCtset/> -->
+<!-- 		</normalize> -->
+<!-- 	      </in>                 -->
+<!-- 	      <text content=", "/> -->
+<!-- 	      <OR> -->
+<!-- 		<paren> -->
+<!-- 		  <eq> -->
+<!-- 		    <type/> -->
+<!-- 		    <tvar name="alpha"/> -->
+<!-- 		  </eq> -->
+<!-- 		</paren> -->
+<!-- 		<paren> -->
+<!-- 		  <eq> -->
+<!-- 		    <type/> -->
+<!-- 		    <mutable> -->
+<!-- 		      <tvar name="alpha"/> -->
+<!-- 		    </mutable> -->
+<!-- 		  </eq> -->
+<!-- 		</paren> -->
+<!-- 		<paren> -->
+<!-- 		  <notin> -->
+<!-- 		    <tvar name="alpha"/> -->
+<!-- 		    <type/> -->
+<!-- 		  </notin> -->
+<!-- 		</paren> -->
+<!-- 	      </OR> -->
+<!-- 	    </grouping> -->
+<!-- 	  </tyPre> -->
+<!-- 	  <tyConc> -->
+<!-- 	    <models name="acy"> -->
+<!-- 	      <assume/> -->
+<!-- 	      <aCtset/> -->
+<!-- 	    </models> -->
+<!-- 	  </tyConc> -->
+<!-- 	</tyRule> -->
+<!--       </Hrules> -->
+<!--       <Hrules> -->
+<!-- 	<tyRule> -->
+<!-- 	  <tyPre/> -->
+<!-- 	  <tyConc> -->
+<!-- 	    <models name="acy"> -->
+<!-- 	      <assume/> -->
+<!-- 	      <EmptySubst/> -->
+<!-- 	    </models> -->
+<!-- 	  </tyConc> -->
+<!-- 	</tyRule> -->
+<!-- 	<tyRule> -->
+<!-- 	  <tyPre> -->
+<!-- 	    <eq> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	      <compose> -->
+<!-- 		<SubMap> -->
+<!-- 		  <tvar name="alpha"/> -->
+<!-- 		  <type/> -->
+<!-- 		</SubMap> -->
+<!-- 		<aSubMap dash="'"/> -->
+<!-- 	      </compose> -->
+<!-- 	    </eq> -->
+<!-- 	    <notin> -->
+<!-- 	      <tvar name="alpha"/> -->
+<!-- 	      <type/> -->
+<!-- 	    </notin> -->
+<!-- 	    <models name="acy"> -->
+<!-- 	      <assume/> -->
+<!-- 	      <Subst> -->
+<!-- 		<SubMap> -->
+<!-- 		  <tvar name="alpha"/> -->
+<!-- 		  <type/> -->
+<!-- 		</SubMap> -->
+<!-- 		<aSubMap dash="'"/> -->
+<!-- 	      </Subst> -->
+<!-- 	    </models> -->
+<!-- 	  </tyPre> -->
+<!-- 	  <tyConc> -->
+<!-- 	    <models name="acy"> -->
+<!-- 	      <assume/> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	    </models> -->
+<!-- 	  </tyConc> -->
+<!-- 	</tyRule> -->
+<!--       </Hrules> -->
+<!--       <Hrules> -->
+<!-- 	<tyRule> -->
+<!-- 	  <tyPre> -->
+<!-- 	    <models name="cst">    -->
+<!-- 	      <assume/> -->
+<!-- 	      <aCtset/> -->
+<!-- 	    </models>  	     -->
+<!-- 	    <models name="acy">    -->
+<!-- 	      <assume/> -->
+<!-- 	      <aCtset/> -->
+<!-- 	    </models>  	    	     -->
+<!-- 	  </tyPre> -->
+<!-- 	  <tyConc>  -->
+<!-- 	    <models name="ca">    -->
+<!-- 	      <assume/> -->
+<!-- 	      <aCtset/> -->
+<!-- 	    </models>   -->
+<!-- 	  </tyConc> -->
+<!-- 	</tyRule> -->
+<!-- 	<tyRule> -->
+<!-- 	  <tyPre> -->
+<!-- 	    <models name="cst">    -->
+<!-- 	      <assume/> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	    </models>  	     -->
+<!-- 	    <models name="acy">    -->
+<!-- 	      <assume/> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	    </models>  	    	     -->
+<!-- 	  </tyPre> -->
+<!-- 	  <tyConc>  -->
+<!-- 	    <models name="ca">    -->
+<!-- 	      <assume/> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	    </models>   -->
+<!-- 	  </tyConc> -->
+<!-- 	</tyRule> -->
+<!--       </Hrules> -->
+<!--     </btypes:TYPE> -->
+<!--   </definition> -->
+<!--   <definition id="canonical-ctr-types"> -->
+<!--     <title>Canonical forms of Solvable Entities</title> -->
+<!--     <p> -->
+<!--       For any  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<eq> -->
+<!-- 	  <solvable/> -->
+<!-- 	  <collection> -->
+<!-- 	    <type/> -->
+<!-- 	    <aExpr/> -->
+<!-- 	    <grouping> -->
+<!-- 	      <text content=" or "/> -->
+<!-- 	      <store/> -->
+<!-- 	    </grouping> -->
+<!-- 	  </collection> -->
+<!-- 	</eq> -->
+<!--       </btypes:TYPE>, -->
+<!--       we write  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<canonical> -->
+<!-- 	  <solvable/> -->
+<!-- 	</canonical> -->
+<!--       </btypes:TYPE> to represent the entity in which all -->
+<!--       meta-constructors in (posibly embedded types) are fully -->
+<!--       interpreted. -->
+<!--     </p> -->
+<!--     <p> -->
+<!--       For any  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<gamma/> -->
+<!--       </btypes:TYPE> such that if -->
+<!--       <btypes:TYPE> -->
+<!-- 	<eq> -->
+<!-- 	  <aCtset/> -->
+<!-- 	  <Unin> -->
+<!-- 	    <aCtset num="i"/> -->
+<!-- 	  </Unin> -->
+<!-- 	</eq> -->
+<!--       </btypes:TYPE>,  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<Forall/> -->
+<!-- 	<in> -->
+<!-- 	  <mapping> -->
+<!-- 	    <id/> -->
+<!-- 	    <forall> -->
+<!-- 	      <tvars name="alpha"/> -->
+<!-- 	      <ctype> -->
+<!-- 		<type num="i"/> -->
+<!-- 		<aCtset num="i"/> -->
+<!-- 	      </ctype> -->
+<!-- 	    </forall> -->
+<!-- 	  </mapping> -->
+<!-- 	  <gamma/> -->
+<!-- 	</in> -->
+<!--       </btypes:TYPE>, and -->
+<!--       <btypes:TYPE> -->
+<!-- 	<models name="sat"> -->
+<!-- 	  <assume> -->
+<!-- 	    <EmptySubst/> -->
+<!-- 	  </assume> -->
+<!-- 	  <aCtset/> -->
+<!-- 	</models> -->
+<!--       </btypes:TYPE>, -->
+<!--       we write  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<canonical> -->
+<!-- 	  <solvable/> -->
+<!-- 	</canonical> -->
+<!--       </btypes:TYPE> to represent the entity in which (1) all -->
+<!--       meta-constructors in the embedded types are fully -->
+<!--       interpreted, and (2) the (tautological) constraints embedded -->
+<!--       within   -->
+<!--       <btypes:TYPE> -->
+<!-- 	<gamma/> -->
+<!--       </btypes:TYPE> are removed to obtain an equivalent -->
+<!--       unconstrained entity. -->
+<!--     </p> -->
+<!--   </definition>     -->
+<!--   <p> -->
+<!--     For example, if  -->
+<!--     <btypes:TYPE> -->
+<!--       <eq> -->
+<!-- 	<type/> -->
+<!-- 	<fn M="yes"> -->
+<!-- 	  <mutable> -->
+<!-- 	    <unit/> -->
+<!-- 	  </mutable> -->
+<!-- 	  <bool/> -->
+<!-- 	</fn> -->
+<!--       </eq> -->
+<!--     </btypes:TYPE>, then -->
+<!--     <btypes:TYPE> -->
+<!--       <eq> -->
+<!-- 	<canonical> -->
+<!-- 	  <type/> -->
+<!-- 	</canonical> -->
+<!-- 	<fn> -->
+<!-- 	  <unit/> -->
+<!-- 	  <mutable> -->
+<!-- 	    <bool/> -->
+<!-- 	  </mutable> -->
+<!-- 	</fn> -->
+<!--       </eq> -->
+<!--     </btypes:TYPE>. If -->
+<!--     <btypes:TYPE> -->
+<!--       <eq> -->
+<!-- 	<gamma/> -->
+<!-- 	<mapping> -->
+<!-- 	  <id/> -->
+<!-- 	  <ctype> -->
+<!-- 	    <unit/> -->
+<!-- 	    <set> -->
+<!-- 	      <Tsub> -->
+<!-- 		<mutable> -->
+<!-- 		  <unit/> -->
+<!-- 		</mutable> -->
+<!-- 		<unit/> -->
+<!-- 	      </Tsub> -->
+<!-- 	    </set> -->
+<!-- 	  </ctype> -->
+<!-- 	</mapping> -->
+<!--       </eq> -->
+<!--     </btypes:TYPE>, then -->
+<!--     <btypes:TYPE> -->
+<!--       <eq> -->
+<!-- 	<canonical> -->
+<!-- 	  <gamma/> -->
+<!-- 	</canonical> -->
+<!-- 	<mapping> -->
+<!-- 	  <id/> -->
+<!-- 	  <unit/> -->
+<!-- 	</mapping> -->
+<!--       </eq> -->
+<!--     </btypes:TYPE>.  -->
+<!--     That is, canonicalization obtains entities that are within the -->
+<!--     language and type system defined in  -->
+<!--     section&nbsp;<xref ref="language"/>. -->
+<!--   </p> -->
+<!--   <definition id="define_infer"> -->
+<!--     <title>Type Inference</title>  -->
+<!--     <p> -->
+<!--       Type inference is a program -->
+<!--       transformation that accepts a program in which -->
+<!--       <progident>let</progident> expressions are not annotated -->
+<!--       with their kinds, and returns the same programs in which -->
+<!--       <progident>let</progident> expressions are annotated with -->
+<!--       their kinds and all expressions are annotated with their -->
+<!--       types. -->
+<!--     </p> -->
+<!--   </definition> -->
+<!--   <p> -->
+<!--     The equational type inference algorithm is as shown in -->
+<!--     Figure&nbsp;<xref ref="eq_infer"/>.  -->
+<!--     The inference judgment  -->
+<!--     <btypes:TYPE> -->
+<!--       <TEjudge> -->
+<!-- 	<assume> -->
 <!-- 	  <gamma/> -->
 <!-- 	  <store/> -->
+<!-- 	</assume> -->
+<!-- 	<conclude> -->
+<!-- 	  <tqExpr> -->
+<!-- 	    <aExpr/> -->
+<!-- 	    <type/> -->
+<!-- 	  </tqExpr> -->
+<!-- 	</conclude> -->
+<!-- 	<constrain> -->
+<!-- 	  <aCtset/> -->
+<!-- 	</constrain> -->
+<!--       </TEjudge> -->
+<!--     </btypes:TYPE> -->
+<!--     should be understood as: given the binding context -->
+<!--     <btypes:TYPE><gamma/></btypes:TYPE> and the store typing -->
+<!--     <btypes:TYPE><store/></btypes:TYPE>, we infer the type  -->
+<!--     <btypes:TYPE><type/></btypes:TYPE> for the expression  -->
+<!--     <btypes:TYPE><aExpr/></btypes:TYPE> under the constraints -->
+<!--     <btypes:TYPE><aCtset/></btypes:TYPE>.  -->
+<!--     The Unification algorithm is given in  -->
+<!--     figure&nbsp;<xref ref="eq_unify"/> with some auxiliary -->
+<!--     definitions and translations defined in  -->
+<!--     figure&nbsp;<xref ref="eq_helper"/>.  -->
+<!--     The unification algorithm takes in a set of constraints -->
+<!--     <btypes:TYPE><aCtset/></btypes:TYPE> and either fails with an -->
+<!--     error <btypes:TYPE><error/></btypes:TYPE>, or succeeds to  -->
+<!--     result in a pair consisting of residual constraints -->
+<!--     <btypes:TYPE><aCtset/></btypes:TYPE>  -->
+<!--     (which should only contain constraints of the form: -->
+<!--     <btypes:TYPE> -->
+<!--       <Tsub> -->
+<!-- 	<tvar name="alpha"/> -->
+<!-- 	<type/> -->
+<!--       </Tsub> -->
+<!--       <text content=","/> -->
+<!--       <space/> -->
+<!--       <Tsub> -->
+<!-- 	<type/> -->
+<!-- 	<tvar name="alpha"/> -->
+<!--       </Tsub> -->
+<!--       <text content=", "/> -->
+<!--       <space/> -->
+<!--       (however, both of the cases a <= t and t <= a -->
+<!--       cannot occur since it can be reduced) -->
+<!--       <Pcst> -->
+<!-- 	<lKind k="var"/> -->
+<!-- 	<type/> -->
+<!-- 	<type dash="'"/> -->
+<!--       </Pcst> -->
+<!--       <text content=", and"/> -->
+<!--       <space/> -->
+<!--       <Pcst> -->
+<!-- 	<lKind k="poly"/> -->
+<!-- 	<type num="g"/> -->
+<!-- 	<type num="i"/> -->
+<!--       </Pcst> -->
+<!--       <text content=", where"/> -->
+<!--       <space/> -->
+<!--       <pred name="Immut"> -->
+<!-- 	<type num="i"/> -->
+<!--       </pred> -->
+<!--       <text content=", and"/> -->
+<!--       <space/> -->
+<!--       <neq> -->
+<!-- 	<pred name="dtv"> -->
+<!-- 	  <type num="i"/> -->
+<!-- 	</pred> -->
+<!-- 	<Empty/> -->
+<!--       </neq> -->
+<!--       <text content="."/>             -->
+<!--     </btypes:TYPE>) -->
+<!--     and a list of -->
+<!--     substitutions <btypes:TYPE><aSubMap/></btypes:TYPE> for the -->
+<!--     constraints solved in this pass. -->
+<!--   </p> -->
+<!--   <p> -->
+<!--     We use the following shorthand translations as a notational -->
+<!--     convenience (the translation defined in section&nbsp;<xref -->
+<!--       ref="type_system"/> is repeated here). -->
+<!--   </p> -->
+<!--   <ol> -->
+<!--     <li> -->
+<!--       <p> -->
+<!-- 	<btypes:TYPE> -->
+<!-- 	  <leadsto> -->
+<!-- 	    <DBrac> -->
+<!-- 	      <TDjudge sub="yes"> -->
+<!-- 		<aExpr/> -->
+<!-- 		<type/> -->
+<!-- 	      </TDjudge> -->
+<!-- 	    </DBrac> -->
+<!-- 	    <DBrac> -->
+<!-- 	      <collection> -->
+<!-- 		<TDjudge> -->
+<!-- 		  <aExpr/> -->
+<!-- 		  <type dash="'"/> -->
+<!-- 		</TDjudge> -->
+<!-- 		<Tsub> -->
+<!-- 		  <type/> -->
+<!-- 		  <type dash="'"/> -->
+<!-- 		</Tsub> -->
+<!-- 	      </collection> -->
+<!-- 	    </DBrac> -->
+<!-- 	  </leadsto> -->
+<!-- 	</btypes:TYPE> -->
+<!--       </p> -->
+<!--     </li> -->
+<!--     <li> -->
+<!--       <p> -->
+<!-- 	<btypes:TYPE>               -->
+<!-- 	  <leadsto> -->
+<!-- 	    <DBrac>   -->
+<!-- 	      <judge> -->
+<!-- 		<precond> -->
+<!-- 		  <aSubMap/> -->
+<!-- 		</precond> -->
+<!-- 		<assume> -->
+<!-- 		  <gamma/> -->
+<!-- 		  <store/> -->
+<!-- 		</assume> -->
+<!-- 		<conclude> -->
+<!-- 		  <tqExpr> -->
+<!-- 		    <aExpr/> -->
+<!-- 		    <type/> -->
+<!-- 		  </tqExpr> -->
+<!-- 		</conclude> -->
+<!-- 	      </judge> -->
+<!-- 	    </DBrac> -->
+<!-- 	    <DBrac>           -->
+<!-- 	      <Sjudge> -->
+<!-- 		<assume> -->
+<!-- 		  <Subst> -->
+<!-- 		    <aSubMap/> -->
+<!-- 		    <gamma/> -->
+<!-- 		  </Subst> -->
+<!-- 		  <Subst> -->
+<!-- 		    <aSubMap/> -->
+<!-- 		    <store/> -->
+<!-- 		  </Subst> -->
+<!-- 		</assume> -->
+<!-- 		<tqExpr> -->
+<!-- 		  <Subst> -->
+<!-- 		    <aSubMap/> -->
+<!-- 		    <aExpr/> -->
+<!-- 		  </Subst> -->
+<!-- 		  <Subst> -->
+<!-- 		    <aSubMap/> -->
+<!-- 		    <type/> -->
+<!-- 		  </Subst> -->
+<!-- 		</tqExpr> -->
+<!-- 	      </Sjudge> -->
+<!-- 	    </DBrac> -->
+<!-- 	  </leadsto> -->
+<!-- 	</btypes:TYPE> -->
+<!--       </p> -->
+<!--     </li> -->
+<!--     <li> -->
+<!--       <p> -->
+<!-- 	<btypes:TYPE> -->
+<!-- 	  <leadsto> -->
+<!-- 	    <DBrac>           -->
+<!-- 	      <Djudge> -->
+<!-- 		<aSubMap/> -->
+<!-- 		<gamma/> -->
+<!-- 		<store/> -->
+<!-- 		<aExpr/> -->
+<!-- 		<type/> -->
+<!-- 	      </Djudge> -->
+<!-- 	    </DBrac> -->
+<!-- 	    <DBrac>           -->
+<!-- 	      <Sjudge> -->
+<!-- 		<assume> -->
+<!-- 		  <canonical> -->
+<!-- 		    <Subst> -->
+<!-- 		      <aSubMap/> -->
+<!-- 		      <gamma/> -->
+<!-- 		    </Subst> -->
+<!-- 		  </canonical> -->
+<!-- 		  <canonical> -->
+<!-- 		    <Subst> -->
+<!-- 		      <aSubMap/> -->
+<!-- 		      <store/> -->
+<!-- 		    </Subst> -->
+<!-- 		  </canonical> -->
+<!-- 		</assume> -->
+<!-- 		<tqExpr> -->
+<!-- 		  <canonical> -->
+<!-- 		    <Subst> -->
+<!-- 		      <aSubMap/> -->
+<!-- 		      <aExpr/> -->
+<!-- 		    </Subst> -->
+<!-- 		  </canonical> -->
+<!-- 		  <canonical> -->
+<!-- 		    <Subst> -->
+<!-- 		      <aSubMap/> -->
+<!-- 		      <type/> -->
+<!-- 		    </Subst> -->
+<!-- 		  </canonical> -->
+<!-- 		</tqExpr> -->
+<!-- 	      </Sjudge> -->
+<!-- 	    </DBrac> -->
+<!-- 	  </leadsto> -->
+<!-- 	</btypes:TYPE> -->
+<!--       </p> -->
+<!--     </li> -->
+<!--     <li> -->
+<!--       <p> -->
+<!-- 	<btypes:TYPE> -->
+<!-- 	  <leadsto> -->
+<!-- 	    <DBrac>  -->
+<!-- 	      <Subst> -->
+<!-- 		<aSubMap/> -->
+<!-- 		<set> -->
+<!-- 		  <unspecified/> -->
+<!-- 		</set> -->
+<!-- 	      </Subst> -->
+<!-- 	    </DBrac> -->
+<!-- 	    <DBrac>           -->
+<!-- 	      <Subst>                 -->
+<!-- 		<aSubMap/> -->
+<!-- 		<grouping> -->
+<!-- 		  <set> -->
+<!-- 		    <unspecified/> -->
+<!-- 		  </set> -->
+<!-- 		</grouping> -->
+<!-- 	      </Subst> -->
+<!-- 	    </DBrac> -->
+<!-- 	  </leadsto> -->
+<!-- 	</btypes:TYPE> -->
+<!--       </p> -->
+<!--     </li> -->
+<!--   </ol> -->
+<!--   <lemma id="cst-implies-sat"> -->
+<!--     <title>Consistency Implies Satisfiability</title> -->
+<!--     <p> -->
+<!--       If  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<models name="cst"> -->
+<!-- 	  <assume/> -->
+<!-- 	  <aCtset/> -->
+<!-- 	</models> -->
+<!--       </btypes:TYPE>, then -->
+<!--       <btypes:TYPE> -->
+<!-- 	<Exists> -->
+<!-- 	  <aSubMap/> -->
+<!-- 	</Exists> -->
+<!--       </btypes:TYPE> such that -->
+<!--       <btypes:TYPE> -->
+<!-- 	<models name="sat"> -->
+<!-- 	  <aSubMap/> -->
+<!-- 	  <aCtset/> -->
+<!-- 	</models> -->
+<!--       </btypes:TYPE>. -->
+<!--     </p> -->
+<!--   </lemma> -->
+<!--   <proof> -->
+<!--     <p> -->
+<!--       By inversion of the constraint consistency relationship in  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<defn tag="ca"/> -->
+<!--       </btypes:TYPE>. -->
+<!--     </p> -->
+<!--   </proof> -->
+<!--   <theorem id="eq-unify-correct"> -->
+<!--     <title>Correctness of Unification</title> -->
+<!--     <p> -->
+<!--       If: -->
+<!--       <btypes:TYPE> -->
+<!-- 	<eq> -->
+<!-- 	  <unf> -->
+<!-- 	    <aCtset/> -->
+<!-- 	  </unf> -->
+<!-- 	  <Pair> -->
+<!-- 	    <aCtset dash="'"/> -->
+<!-- 	    <aSubMap num="u"/> -->
+<!-- 	  </Pair> -->
+<!-- 	</eq> -->
+<!-- 	<text content=", then"/> -->
+<!--       </btypes:TYPE> -->
+<!--     </p> -->
+<!--     <ol> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Forall> -->
+<!-- 	      <aSubMap num="s"/> -->
+<!-- 	    </Forall> -->
+<!-- 	    <text content=" such that "/> -->
+<!-- 	    <models name="sat">  -->
+<!-- 	      <assume> -->
+<!-- 		<aSubMap num="s"/> -->
+<!-- 	      </assume> -->
+<!-- 	      <aCtset dash="'"/> -->
+<!-- 	    </models> -->
+<!-- 	    <text content=", "/> -->
+<!-- 	    <models name="sat">  -->
+<!-- 	      <assume> -->
+<!-- 		<scomp> -->
+<!-- 		  <aSubMap num="s"/> -->
+<!-- 		  <aSubMap num="u"/> -->
+<!-- 		</scomp> -->
+<!-- 	      </assume> -->
+<!-- 	      <aCtset/> -->
+<!-- 	    </models> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Exists> -->
+<!-- 	      <aSubMap num="s"/> -->
+<!-- 	    </Exists> -->
+<!-- 	    <text content=" such that "/> -->
+<!-- 	    <models name="sat">  -->
+<!-- 	      <assume> -->
+<!-- 		<aSubMap num="s"/> -->
+<!-- 	      </assume> -->
+<!-- 	      <aCtset dash="'"/> -->
+<!-- 	    </models> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--     </ol> -->
+<!--   </theorem>   -->
+<!--   <theorem id="eq-unify-complete"> -->
+<!--     <title>Principality of Unification</title> -->
+<!--     <p> -->
+<!--       The unification algorithm produces most general -->
+<!--       substitutions, and fails only when the  -->
+<!--       constaint set is inconsistent.  -->
+<!--     </p> -->
+<!--     <ol> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  If: -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <eq> -->
+<!-- 	      <unf> -->
+<!-- 		<aCtset/> -->
+<!-- 	      </unf> -->
+<!-- 	      <Pair> -->
+<!-- 		<aCtset dash="'"/> -->
+<!-- 		<aSubMap num="u"/> -->
+<!-- 	      </Pair> -->
+<!-- 	    </eq> -->
+<!-- 	  </btypes:TYPE> then, -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Forall> -->
+<!-- 	      <aSubMap num="s"/> -->
+<!-- 	    </Forall> -->
+<!-- 	  </btypes:TYPE> such that  -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <models name="sat">  -->
+<!-- 	      <assume> -->
+<!-- 		<aSubMap num="s"/> -->
+<!-- 	      </assume> -->
+<!-- 	      <aCtset/> -->
+<!-- 	    </models> -->
+<!-- 	  </btypes:TYPE>,  -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Exists> -->
+<!-- 	      <aSubMap num="s" dash="'"/> -->
+<!-- 	    </Exists> -->
+<!-- 	  </btypes:TYPE> such that  -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <eq> -->
+<!-- 	      <aSubMap num="s"/> -->
+<!-- 	      <compose> -->
+<!-- 		<aSubMap num="u"/> -->
+<!-- 		<aSubMap num="s" dash="'"/> -->
+<!-- 	      </compose> -->
+<!-- 	    </eq> -->
+<!-- 	  </btypes:TYPE>, and -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <models name="sat">  -->
+<!-- 	      <assume> -->
+<!-- 		<aSubMap num="s" dash="'"/> -->
+<!-- 	      </assume> -->
+<!-- 	      <aCtset dash="'"/> -->
+<!-- 	    </models> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  If: -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <eq> -->
+<!-- 	      <unf> -->
+<!-- 		<aCtset/> -->
+<!-- 	      </unf> -->
+<!-- 	      <error/> -->
+<!-- 	    </eq> -->
+<!-- 	  </btypes:TYPE> then,  -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Not> -->
+<!-- 	      <Exists/> -->
+<!-- 	    </Not> -->
+<!-- 	    <aSubMap/> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	  such that  -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <models name="sat">  -->
+<!-- 	      <assume> -->
+<!-- 		<aSubMap/> -->
+<!-- 	      </assume> -->
+<!-- 	      <aCtset/> -->
+<!-- 	    </models> -->
+<!-- 	  </btypes:TYPE>. -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--     </ol> -->
+<!--   </theorem> -->
+<!--   <theorem id="eq-unify-decidable"> -->
+<!--     <title>Decidability of Unification</title> -->
+<!--     <p> -->
+<!--       The unification algorithm -->
+<!--       <btypes:TYPE> -->
+<!-- 	<unf> -->
+<!-- 	  <aCtset/> -->
+<!-- 	</unf> -->
+<!-- 	<text content=" computes to some "/> -->
+<!-- 	<Pair> -->
+<!-- 	  <aCtset dash="'"/> -->
+<!-- 	  <aSubMap/> -->
+<!-- 	</Pair> -->
+<!-- 	<text content=" or fails with "/> -->
+<!-- 	<error/> -->
+<!-- 	<text content=" decidably in a finite number of steps."/> -->
+<!--       </btypes:TYPE> -->
+<!--     </p> -->
+<!--   </theorem> -->
+<!--   <theorem id="eq-infer-sound"> -->
+<!--     <title>Soundness of Type Inference</title> -->
+<!--     <p> -->
+<!--       If: -->
+<!--       <btypes:TYPE> -->
+<!-- 	<TEjudge> -->
+<!-- 	  <assume> -->
+<!-- 	    <gamma/> -->
+<!-- 	    <store/> -->
+<!-- 	  </assume> -->
+<!-- 	  <conclude> -->
+<!-- 	    <tqExpr> -->
+<!-- 	      <aExpr/> -->
+<!-- 	      <type/> -->
+<!-- 	    </tqExpr> -->
+<!-- 	  </conclude> -->
+<!-- 	  <constrain> -->
+<!-- 	    <aCtset/> -->
+<!-- 	  </constrain> -->
+<!-- 	</TEjudge> -->
+<!--       </btypes:TYPE>, then -->
+<!--       <btypes:TYPE> -->
+<!-- 	<Forall>	 -->
+<!-- 	  <aSubMap/> -->
+<!-- 	</Forall> -->
+<!--       </btypes:TYPE> such that  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<models name="sat">  -->
+<!-- 	  <assume> -->
+<!-- 	    <aSubMap/> -->
+<!-- 	  </assume> -->
+<!-- 	  <aCtset/> -->
+<!-- 	</models> -->
+<!--       </btypes:TYPE>,  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<Exists>	 -->
+<!-- 	  <aCtset dash="'"/> -->
+<!-- 	</Exists> -->
+<!--       </btypes:TYPE> such that  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<Cjudge> -->
+<!-- 	  <aCtset dash="'"/> -->
+<!-- 	  <canonical> -->
+<!-- 	    <Subst> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	      <gamma/> -->
+<!-- 	    </Subst> -->
+<!-- 	  </canonical> -->
+<!-- 	  <canonical> -->
+<!-- 	    <Subst> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	      <store/> -->
+<!-- 	    </Subst> -->
+<!-- 	  </canonical> -->
+<!--  	  <canonical> -->
+<!-- 	    <Subst> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	      <aExpr/> -->
+<!-- 	    </Subst> -->
+<!-- 	  </canonical> -->
+<!--  	  <canonical> -->
+<!-- 	    <Subst> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	      <type/> -->
+<!-- 	    </Subst> -->
+<!-- 	  </canonical> -->
+<!-- 	</Cjudge> -->
+<!--       </btypes:TYPE>. -->
+<!--     </p> -->
+<!--   </theorem> -->
+<!--   <proof> -->
+<!--     <p> -->
+<!--       By induction on the derivation of  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<TEjudge> -->
+<!-- 	  <assume> -->
+<!-- 	    <gamma/> -->
+<!-- 	    <store/> -->
+<!-- 	  </assume> -->
+<!-- 	  <conclude> -->
+<!-- 	    <tqExpr> -->
+<!-- 	      <aExpr/> -->
+<!-- 	      <type/> -->
+<!-- 	    </tqExpr> -->
+<!-- 	  </conclude> -->
+<!-- 	  <constrain> -->
+<!-- 	    <aCtset/> -->
+<!-- 	  </constrain> -->
+<!-- 	</TEjudge> -->
+<!--       </btypes:TYPE>. We proceed by case analysis on the last step. -->
+<!--     </p> -->
+<!--     <ol> -->
+<!--       <li id="eqs_base"> -->
+<!-- 	<p> -->
+<!-- 	  Cases E-Unit, E-True. E-False, E-Hloc, and E-Sloc are trivial.  -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li id="eqs_id"> -->
+<!-- 	<p> -->
+<!-- 	  Case E-Id: -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--     </ol> -->
+<!--   </proof> -->
+<!--   <theorem id="eq-infer-complete"> -->
+<!--     <title>Completeness of Type Inference</title> -->
+<!--     <p> -->
+<!--       If: -->
+<!--       <btypes:TYPE> -->
+<!-- 	<TDjudge> -->
 <!-- 	  <aExpr/> -->
 <!-- 	  <type/> -->
-<!-- 	</Djudge> -->
+<!-- 	</TDjudge> -->
+<!-- 	<text content=", then "/> -->
+<!-- 	<Exists> -->
+<!-- 	  <aSubMap/> -->
+<!-- 	</Exists> -->
+<!-- 	<text content=" such that "/> -->
+<!-- 	<TEjudge> -->
+<!-- 	  <assume> -->
+<!-- 	    <gamma dash="'"/> -->
+<!-- 	    <store dash="'"/> -->
+<!-- 	  </assume> -->
+<!-- 	  <conclude> -->
+<!-- 	    <tqExpr> -->
+<!-- 	      <aExpr/> -->
+<!-- 	      <type dash="'"/> -->
+<!-- 	    </tqExpr> -->
+<!-- 	  </conclude> -->
+<!-- 	  <constrain> -->
+<!-- 	    <aCtset/> -->
+<!-- 	  </constrain> -->
+<!-- 	</TEjudge> -->
+<!-- 	<text content=", "/> -->
+<!-- 	<models name="sat"> -->
+<!-- 	  <assume> -->
+<!-- 	    <aSubMap/> -->
+<!-- 	  </assume> -->
+<!-- 	  <aCtset/> -->
+<!-- 	</models> -->
+<!-- 	<text content=", "/> -->
+<!-- 	<eq> -->
+<!-- 	  <gamma/> -->
+<!-- 	  <canonical> -->
+<!-- 	    <Subst> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	      <gamma dash="'"/> -->
+<!-- 	    </Subst> -->
+<!-- 	  </canonical> -->
+<!-- 	</eq> -->
+<!-- 	<text content=", "/> -->
+<!-- 	<eq> -->
+<!-- 	  <store/> -->
+<!-- 	  <canonical> -->
+<!-- 	    <Subst> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	      <store dash="'"/> -->
+<!-- 	    </Subst> -->
+<!-- 	  </canonical> -->
+<!-- 	</eq> -->
+<!-- 	<text content=" and "/> -->
+<!-- 	<eq> -->
+<!-- 	  <type/> -->
+<!-- 	  <canonical> -->
+<!-- 	    <Subst> -->
+<!-- 	      <aSubMap/> -->
+<!-- 	      <type dash="'"/> -->
+<!-- 	    </Subst> -->
+<!-- 	  </canonical> -->
+<!-- 	</eq> -->
 <!--       </btypes:TYPE>. -->
-    </p>
-  </theorem>
-  <proof>
-    <p>
-      By induction on the derivation of 
-      <btypes:TYPE>
-	<TEjudge>
-	  <assume>
-	    <gamma/>
-	    <store/>
-	  </assume>
-	  <conclude>
-	    <tqExpr>
-	      <aExpr/>
-	      <type/>
-	    </tqExpr>
-	  </conclude>
-	  <constrain>
-	    <aCtset/>
-	  </constrain>
-	</TEjudge>
-      </btypes:TYPE>. We proceed by case analysis on the last step.
-    </p>
-    <ol>
-      <li id="eqs_base">
-	<p>
-	  Cases E-Unit, E-True. E-False, E-Hloc, and E-Sloc are trivial. 
-	</p>
-      </li>
-      <li id="eqs_id">
-	<p>
-	  Case E-Id:
-	</p>
-      </li>
-    </ol>
-  </proof>
-  <theorem id="eq-infer-complete">
-    <title>Completeness of Type Inference</title>
-    <p>
-      If:
-      <btypes:TYPE>
-	<TDjudge>
-	  <aExpr/>
-	  <type/>
-	</TDjudge>
-	<text content=", then "/>
-	<Exists>
-	  <aSubMap/>
-	</Exists>
-	<text content=" such that "/>
-	<TEjudge>
-	  <assume>
-	    <gamma dash="'"/>
-	    <store dash="'"/>
-	  </assume>
-	  <conclude>
-	    <tqExpr>
-	      <aExpr/>
-	      <type dash="'"/>
-	    </tqExpr>
-	  </conclude>
-	  <constrain>
-	    <aCtset/>
-	  </constrain>
-	</TEjudge>
-	<text content=", "/>
-	<models name="sat">
-	  <assume>
-	    <aSubMap/>
-	  </assume>
-	  <aCtset/>
-	</models>
-	<text content=", "/>
-	<eq>
-	  <gamma/>
-	  <canonical>
-	    <Subst>
-	      <aSubMap/>
-	      <gamma dash="'"/>
-	    </Subst>
-	  </canonical>
-	</eq>
-	<text content=", "/>
-	<eq>
-	  <store/>
-	  <canonical>
-	    <Subst>
-	      <aSubMap/>
-	      <store dash="'"/>
-	    </Subst>
-	  </canonical>
-	</eq>
-	<text content=" and "/>
-	<eq>
-	  <type/>
-	  <canonical>
-	    <Subst>
-	      <aSubMap/>
-	      <type dash="'"/>
-	    </Subst>
-	  </canonical>
-	</eq>
-      </btypes:TYPE>.
-    </p>
-  </theorem>
+<!--     </p> -->
+<!--   </theorem> -->
   </sect1>

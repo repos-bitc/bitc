@@ -39,45 +39,7 @@
   <p>
     The Operational semantics rules are shown in Figure&nbsp;<xref
       ref="dyn_sem_horz"/>.
-    The system state is represented by the triple 
-    <btypes:TYPE>
-      <opState>
-	<stack/>
-	<heap/>
-	<aExpr/>
-      </opState>
-    </btypes:TYPE>
-    consisting of the stack
-    <btypes:TYPE>
-      <stack/>
-    </btypes:TYPE>, the heap
-    <btypes:TYPE>
-      <heap/>
-    </btypes:TYPE>, and the expression
-    <btypes:TYPE>
-      <aExpr/>
-    </btypes:TYPE> to be
-    evaluated. Evaluation itself is a two place relationship   
-    <btypes:TYPE>
-      <eval>
-	<opState>
-	  <stack/>
-	  <heap/>
-	  <aExpr/>
-	</opState>
-	<opState>
-	  <stack dash="'"/>
-	  <heap dash="'"/>
-	  <aExpr dash="'"/>
-	</opState>
-      </eval>
-    </btypes:TYPE>
-    that denotes transformation in the system state due to a single
-    step of execution.
-    Figure&nbsp;<xref ref="dyn_sem_horz"/> shows the evaluation
-    rules for our core language. We assume that the program is
-    alpha-converted so that there are no name collisions due to
-    inner bindings. Separate execution
+    Separate execution
     semantics are given for left and right execution (evaluation of
     expressions that appear on the LHS and RHS of an assignment 
     <btypes:TYPE>
@@ -88,5 +50,7 @@
     </btypes:TYPE>) denoted by 
     <btypes:TYPE><levalOp/></btypes:TYPE> and 
     <btypes:TYPE><evalOp/></btypes:TYPE> respectively. 
+    <br/>
+    <br/>
   </p>
   </sect1>
