@@ -83,7 +83,7 @@ using namespace std;
     - when the use writes 'a, he means any type whether mutable or
       immutable, and 
     - we do not have an immutable type qualifier (yet),
-   type variables are alyaws given a maybe-wrapper at binding
+   type variables are always given a maybe-wrapper at binding
    time. These are discarded at the let-boundary.
 
    There are 2 positions we can take on Type Variables:

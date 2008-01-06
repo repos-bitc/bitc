@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <article id="formal" 
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <docinfo ptsz='default' latex.otheroptions="nocopyrightspace" latex.documentclass="sigplanconf">
+    <title>A Theory of Well-founded First Class Mutability</title>
+    <subtitle>A Proof of Soundness for BitC Type System and
+      Type Inference Algorithm</subtitle>
+    <authorgroup>
+      <author>
+      	<firstname>Swaroop</firstname>
+      	<surname>Sridhar</surname>
+      	<email>swarop@cs.jhu.edu</email>
+      </author>
+      <author>
+      	<firstname>Jonathan</firstname>
+        <othername>S.</othername>
+      	<surname>Shapiro</surname>
+      	<email>shap@eros-os.org</email>
+      </author>
+      <author>
+      	<firstname>Scott</firstname>
+        <othername>F.</othername>
+      	<surname>Smith</surname>
+      	<email>scott@cs.jhu.edu</email>
+      </author>
+      <affiliation>
+      	<orgname>Department of Computer Science</orgname>
+      	<address>The Johns Hopkins University</address>
+      	<address>3400 N.Charles Street. 224 NEB. Baltimore, MD 21218.</address>
+      </affiliation>
+    </authorgroup>
+    <pubdate/>
+    <!--     <copyright> -->
+    <!--       <year/><holder/> -->
+    <!--     </copyright> -->
+    <!--   <categories> -->
+    <!--     <category>dev/bitc</category> -->
+    <!--   </categories> -->
+    <synopsis>
+      <p>
+      </p>
+    </synopsis>
+  </docinfo>  
+  <!--<abstract latex.incolumn="yes">
+    <p>
+    </p>
+  </abstract> -->
+  <!-- <toc/> -->
+  <sect1 id="intro">
+    <title>Introduction</title>
+    <p>
+      BitC is a systems programming language with first class support
+      for unboxed types and mutability. Details about the language can
+      be obtained from the <link
+        href="http://coyotos.org/docs/bitc/spec.html"> BitC language
+        specification</link> <cite ref="shapBitcSpec2006"/>. This
+      document provides the formalization of the type system and type
+      inference algorithm for a core calculus the BitC, along with the
+      associated proofs.
+    </p>
+  </sect1>
+  <xi:include href="include/c-formal/lang.xmli"/>
+  <xi:include href="include/c-formal/opsem.xmli"/>
+  <xi:include href="include/c-formal/subtype.xmli"/>
+  <xi:include href="include/c-formal/locsem.xmli"/>
+  <xi:include href="include/c-formal/decl.xmli"/>
+  <xi:include href="include/c-formal/cdecl.xmli"/>
+  <xi:include href="include/c-formal/semantics.xmli"/>
+  <xi:include href="include/c-formal/type_system.xmli"/>
+  <xi:include href="include/c-formal/eq-infer.xmli"/>
+  <xi:include href="include/c-formal/eq-unify.xmli"/>
+  <xi:include href="include/c-formal/eq-helper.xmli"/>
+  <xi:include href="include/c-formal/equational.xmli"/>
+  <nocite ref="sridhar2006plos"/>
+  <bibliography>
+    <bibentry label="shapBitcSpec2006">
+      <key>Shapiro06</key>
+      J. S. Shapiro, S. Sridhar, M. S. Doerrie, ``BitC Language
+      Specification''
+      <link
+      href="http://bitc-lang.org/docs/bitc/spec.html">
+      <progident>http://www.bitc-lang.org/docs/bitc/spec.html</progident>
+      </link>
+    </bibentry>
+    <bibentry label="sridhar2006plos">
+      <key>Sridhar06</key>
+       S. Sridhar and J. Shapiro. ``Type Inference for Unboxed Types
+       and First Class Mutability'' <doctitle>Proc. 3rd ECOOP Workshop
+       on Programming Languages and Operating Systems (PLOS
+       2006)</doctitle> San Jose, CA. 2006.
+    </bibentry>
+  </bibliography>
+</article>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->
+
+
+<!--  LocalWords:  ptsz authorgroup firstname orgname sridharmutinfer bnf desc
+ -->
+<!--  LocalWords:  sLoc hLoc aVal aExpr lvalues lVal tqExpr bnfc dup opsem eval
+ -->
+<!--  LocalWords:  opState dyn sem Grossman qtypes levalOp evalOp RVAL aTS pred
+ -->
+<!--  LocalWords:  subst Csubst ceqOp maxzOp minzOp eq maxz neq minz metaCT ol
+ -->
+<!--  LocalWords:  covariant arg ret ceil Tsub TDjudge Hrules tyRule TW tyPre
+ -->
+<!--  LocalWords:  tyConc lval decl judgeOp Garriage's spEqOp notin spEq unin
+ -->
+<!--  LocalWords:  uninOp Sjudge dom mapsto rexec leadin leval supeq aSubMap Ph
+ -->
+<!--  LocalWords:  VSubstitution LSubstitution SubMap TEjudge UNF unf subeq ACM
+ -->
+<!--  LocalWords:  mbpair TIjudge vaughanHM Hindley Milner mdash epsiv corUp HL
+ -->
+<!--  LocalWords:  TypesBook corUpOp carrys epsi ASET SRL unkinded pagebreak SL
+ -->
+<!--  LocalWords:  Garriague's vspace CTX MTVs FTVs NTVs cst commut sust ok su
+ -->
+<!--  LocalWords:  canonicalized ndash si uf ua vf rh va sa subeqOp supeqOp eqi
+ -->
+ 
+<!--  LocalWords:  nceq documentclass sigplanconf FirstName LastName notitle ih
+ -->
+
+<!--  LocalWords:  horz idemp Acyclicity otheroptions nocopyrightspace FTV NTV
+ -->
+<!--  LocalWords:  explicitely tvs asm mtvs lem nosp req defn scomp subnum sep
+ -->
+<!--  LocalWords:  fnize cong sm ecomp subEq BitC Swaroop Sridhar dev bitc LHS
+ -->
+
+
+<!--  LocalWords:  unboxed RHS lvalue Hloc Sloc Rval lhs rhs Deref Tq iff wrt
+ -->
+<!--  LocalWords:  canonicalization unifications Tqexpr Tvar Oth Composability
+ -->
+<!--  LocalWords:  Doerrie Proc ECOOP PLOS
+ -->

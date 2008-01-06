@@ -56,17 +56,134 @@
 	  </forall>
 	</alternatives>
       </bnf>
+      <bnf desc="Constraints">
+	<constraint/>
+	<alternatives>
+	  <eq>
+	    <type/>
+	    <type/>
+	  </eq>
+	  <ceq>
+	    <type/>
+	    <type/> 
+	  </ceq>
+	  <Tsub>
+	    <type/>
+	    <type/> 
+	  </Tsub>
+	</alternatives>
+      </bnf>
+      <bnf desc="Constraint Sets">
+	<aCtset/>
+	<alternatives>
+	  <Empty/>
+	  <set>
+	    <plural>
+	      <constraint/>
+	    </plural>
+	  </set>
+	  <unin>
+	    <aCtset/>
+	    <aCtset/>
+	  </unin>
+	</alternatives>            
+      </bnf>
+      <bnf desc="Substitutions">            
+	<aSubMap/>            
+	<alternatives>
+	  <EmptySubst/>
+	  <SubMap>
+	    <tvar name="alpha"/>
+	    <type/>
+	  </SubMap>
+	  <SubMap>
+	    <lKind k="var"/>
+	    <lKind/>
+	  </SubMap>
+	  <compose>
+	    <aSubMap/>
+	    <aSubMap/>
+	  </compose>
+	</alternatives>
+      </bnf>
     </grammar>
   </btypes:TYPE>
   <p>
-    In this system, we will use a slightly modified version of 
-    the constraint set normalization function defined in 
+    The application of a substitution
     <btypes:TYPE>
-      <defn tag="normalized_ctset"/>
-    </btypes:TYPE>
+      <aSubMap/>
+    </btypes:TYPE> on X is written as
+    <btypes:TYPE>
+      <Subst>
+	<aSubMap/>
+	<text content="X"/>
+      </Subst>
+    </btypes:TYPE>. 
+    As a matter of notational convenience, we write:
+    <btypes:TYPE>
+      <aSubMap num="a.b"/> 
+    </btypes:TYPE> to mean
+    <btypes:TYPE>
+      <compose>
+	<aSubMap num="a"/> 
+	<aSubMap num="b"/> 
+      </compose>
+    </btypes:TYPE>. Note that
+    <btypes:TYPE>
+      <eq>
+	<Subst>
+	  <aSubMap num="a.b"/> 
+	  <text content="x"/>
+	</Subst>
+	<Subst>
+	  <compose>
+	    <aSubMap num="a"/> 
+	    <aSubMap num="b"/> 
+	  </compose>
+	  <text content="x"/>
+	</Subst>
+	<Subst>
+	  <aSubMap num="a"/> 
+	  <Subst>
+	    <aSubMap num="b"/>                 
+	    <text content="x"/>
+	  </Subst>
+	</Subst>
+	<Subst>
+	  <aSubMap num="b"/>                 
+	  <Subst>
+	    <aSubMap num="a"/> 
+	    <text content="x"/>
+	  </Subst>
+	</Subst>
+      </eq>
+    </btypes:TYPE>.        
+  </p>
+  <definition id="meta">      
+    <title>Meta Constructors</title>      
+    <p>
+      <btypes:TYPE>
+	<floor>
+	  <type/>
+	</floor>
+      </btypes:TYPE>
+      and 
+      <btypes:TYPE>
+	<ceil>
+	  <type/>
+	</ceil>
+      </btypes:TYPE>
+      are "meta-constructors" which (respectively) minimize and
+      maximize the mutability of a type, but are interpreted
+      lazily. The meta-constructors are idempotent. 
+    </p>
+  </definition>
+  <p>
+    Note that in our type system, we have restricted meta types to be
+    syntactically present only as part of function types.
   </p>
   <definition id="ext2-ftvs">
-    <title>FTVs (Extension II)</title>
+    <title>FTVs (Extension)</title>
     <p>
       We enhance the definition of 
       <btypes:TYPE>
@@ -75,13 +192,142 @@
 	</ftvs>
       </btypes:TYPE> in 
       <btypes:TYPE>
-	<defn tag="ext2-ftvs"/>
+	<defn tag="ftvs"/>
       </btypes:TYPE> as follows:
     </p>
     <example>
       <p>
 	<btypes:TYPE>
 	  <unspecified/>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <fn M="yes">
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <eq>
+		<type num="1"/>
+		<type num="2"/>
+	      </eq>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <ceq>
+		<type num="1"/>
+		<type num="2"/>
+	      </ceq>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <Tsub>
+		<type num="1"/>
+		<type num="2"/>
+	      </Tsub>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <aCtset/>
+	    </ftvs>
+	    <Unin>
+	      <ftvs>
+		<constraint num="i"/>
+	      </ftvs>
+	    </Unin>
+	  </eq> 
+	  <text content=", "/>
+	  <Forall/>
+	  <in>
+	    <constraint num="i"/>
+	    <aCtset/>
+	  </in>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <aCtype/>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type/>
+	      </ftvs>
+	      <ftvs>
+		<aCtset/>
+	      </ftvs>                  
+	    </unin>
+	  </eq>
+	  <text content=", where "/>
+	  <eq>
+	    <aCtype/>
+	    <ctype>
+	      <type/>
+	      <aCtset/>
+	    </ctype>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <aTS/>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<tvars name="alpha"/>
+	      </ftvs>
+	      <ftvs>
+		<aCtype/>
+	      </ftvs>                  
+	    </unin>
+	  </eq>
+	  <text content=", where "/>
+	  <eq>
+	    <aTS/>
+	    <forall>
+	      <tvars name="alpha"/>
+	      <aCtype/>
+	    </forall>
+	  </eq>
 	  <br/>
 	  <eq>
 	    <ftvs>
@@ -481,7 +727,7 @@
   <p>
     Note that this
     function is different from FTV(), defined in 
-    Definition&nbsp;<xref ref="ext-ftvs"/>. 
+    Definition&nbsp;<xref ref="ext2-ftvs"/>. 
   </p>
   <definition id="ctr_extract">
     <title>Constraint Set Extraction</title>
@@ -783,8 +1029,223 @@
       </Hrules>
     </btypes:TYPE>
   </definition>
+  <definition id="close">
+    <title>Constraint Set Closure</title>
+    <p>
+      A closure operation
+      <btypes:TYPE>
+	<pred name="close">
+	  <aCtset/> 
+	</pred>
+      </btypes:TYPE>
+      on a constraint set 
+      <btypes:TYPE>
+	<aCtset/> 
+      </btypes:TYPE> produces an equivalent set
+      of atomic constraints by using the copy coercion rules defined
+      in Figure&nbsp;<xref ref="decl_rules"/> (note that this
+      conversion is total); and by explicitely adding all transitive
+      relationships. This conversion does not affect the MPCs in 
+      <btypes:TYPE>
+	<aCtset/> 
+      </btypes:TYPE>.
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <fnxn name="close">
+	      <unin>
+		<set>
+		  <Tsub>
+		    <fn>
+		      <type num="1"/>
+		      <type num="2"/>
+		    </fn>
+		    <fn>
+		      <type num="1" dash="'"/>
+		      <type num="2" dash="'"/>
+		    </fn>
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	      <pred name="close">
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <Tsub>
+		      <type num="1"/>
+		      <type num="1" dash="'"/>
+		    </Tsub>
+		    <Tsub>
+		      <type num="2"/>
+		      <type num="2" dash="'"/>
+		    </Tsub>
+		    <Tsub>
+		      <type num="1" dash="'"/>
+		      <type num="1"/>
+		    </Tsub>
+		    <Tsub>
+		      <type num="2" dash="'"/>
+		      <type num="2"/>
+		    </Tsub>
+		  </set>
+		</unin>
+	      </pred>
+	    </fnxn>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <fnxn name="close">
+	      <unin>
+		<set>
+		  <Tsub>
+		    <ref>
+		      <type/>
+		    </ref>
+		    <ref>
+		      <type dash="'"/>
+		    </ref>
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	      <pred name="close">
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <Tsub>
+		      <type/>
+		      <type dash="'"/>
+		    </Tsub>
+		    <Tsub>
+		      <type dash="'"/>
+		      <type/>
+		    </Tsub>
+		  </set>
+		</unin>
+	      </pred>
+	    </fnxn>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <fnxn name="close">
+	      <unin>
+		<set>
+		  <Tsub>
+		    <mutable>
+		      <type/>
+		    </mutable>
+		    <mutable>
+		      <type dash="'"/>
+		    </mutable>
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	      <pred name="close">
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <Tsub>
+		      <type/>
+		      <type dash="'"/>
+		    </Tsub>
+		    <Tsub>
+		      <type dash="'"/>
+		      <type/>
+		    </Tsub>
+		  </set>
+		</unin>
+	      </pred>
+	    </fnxn>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <grouping>
+		<pred name="close">
+		  <unin>
+		    <set>
+		      <Tsub>
+			<type num="1"/>
+			<type num="2"/>
+		      </Tsub>
+		      <Tsub>
+			<type num="2"/>
+			<type num="3"/>
+		      </Tsub>
+		    </set>
+		    <aCtset/>
+		  </unin>
+		</pred>
+		<space/>
+		<textit content="where"/>
+		<space/>
+		<notin>
+		  <Tsub>
+		    <type num="1"/>
+		    <type num="3"/>
+		  </Tsub>
+		  <aCtset/>
+		</notin>
+		<br/>
+	      </grouping>
+	      <pred name="close">
+		<unin>
+		  <set>
+		    <Tsub>
+		      <type num="1"/>
+		      <type num="2"/>
+		    </Tsub>
+		    <Tsub>
+		      <type num="2"/>
+		      <type num="3"/>
+		    </Tsub>
+		    <Tsub>
+		      <type num="1"/>
+		      <type num="3"/>
+		    </Tsub>
+		  </set>                      
+		  <aCtset/>
+		</unin>
+	      </pred>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <grouping>
+		<pred name="close">
+		  <aCtset/>
+		</pred>
+		<space/>
+		<textit content="where none of the above cases "/>
+		<textit content="are applicable"/>
+		<space/>
+	      </grouping>
+	      <aCtset/>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </definition>
   <definition id="normalized_ctset_2">
-    <title>Normalization of Constraint Sets (2)</title>
+    <title>Normalization of Constraint Sets</title>
     <p>
       The normalization function
       <btypes:TYPE>
@@ -880,16 +1341,6 @@
       </li>
     </ul>
   </definition>
-  <p>
-    We will also use a modified version of the 
-    canonicalization transformation defined in 
-    <btypes:TYPE>
-      <defn tag="canonical-ctr-types"/>
-    </btypes:TYPE>
-    in order to obtain entities that are within the
-    language and type system defined in 
-    section&nbsp;<xref ref="language"/>.
-  </p>
   <definition id="canonical-ctr-types2">
     <title>Canonical forms of Solvable Entities</title>
     <p>
@@ -944,8 +1395,243 @@
       </eq>
     </btypes:TYPE>.
   </p>
+  <definition id="sat">
+    <title>Constraint Satisfiability</title>
+    <p>
+      A Substitution 
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE>
+      satisfies a constraint set
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE>, written
+      <btypes:TYPE>
+	<models name="sat">
+	  <aSubMap/>
+	  <aCtset/>
+	</models>
+      </btypes:TYPE>
+      iff
+      <btypes:TYPE>
+	<normalize>
+	  <Subst>
+	    <aSubMap/>
+	    <aCtset/>
+	  </Subst>
+	</normalize>
+      </btypes:TYPE>
+      consists only of tautologies (trivially).
+    </p>
+  </definition>
+  <definition id="ca">
+    <title>Consistency and Acyclicity</title> 
+    <btypes:TYPE>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <grouping>
+	      <Exists>
+		<aSubMap/>
+	      </Exists>
+	      <text content=" such that "/>
+	      <models name="sat">
+		<aSubMap/>
+		<aCtset/>
+	      </models>
+	    </grouping>
+	  </tyPre>
+	  <tyConc>
+	    <models name="cst">
+	      <assume/>
+	      <aCtset/>
+	    </models>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <SubMap>
+		<tvar name="alpha"/>
+		<type/>
+	      </SubMap>
+	      <text content=" and "/>
+	      <SubMap>
+		<tvar name="beta"/>
+		<type dash="'"/>
+	      </SubMap>
+	      <text content=" in "/>
+	      <aSubMap/>
+	      <text content=", "/>
+	      <neq>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </neq>
+	    </grouping>
+	  </tyPre>
+	  <tyConc>
+	    <models name="cst">
+	      <assume/>
+	      <aSubMap/>
+	    </models>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<grouping>
+		  <Tsub>
+		    <tvar name="alpha"/>
+		    <type/>
+		  </Tsub>
+		  <text content=" or "/>
+		  <Tsub>
+		    <tvar name="alpha"/>
+		    <type/>
+		  </Tsub>
+		</grouping>
+		<normalize>
+		  <aCtset/>
+		</normalize>
+	      </in>                
+	      <text content=", "/>
+	      <OR>
+		<paren>
+		  <eq>
+		    <type/>
+		    <tvar name="alpha"/>
+		  </eq>
+		</paren>
+		<paren>
+		  <eq>
+		    <type/>
+		    <mutable>
+		      <tvar name="alpha"/>
+		    </mutable>
+		  </eq>
+		</paren>
+		<paren>
+		  <notin>
+		    <tvar name="alpha"/>
+		    <type/>
+		  </notin>
+		</paren>
+	      </OR>
+	    </grouping>
+	  </tyPre>
+	  <tyConc>
+	    <models name="acy">
+	      <assume/>
+	      <aCtset/>
+	    </models>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre/>
+	  <tyConc>
+	    <models name="acy">
+	      <assume/>
+	      <EmptySubst/>
+	    </models>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <eq>
+	      <aSubMap/>
+	      <compose>
+		<SubMap>
+		  <tvar name="alpha"/>
+		  <type/>
+		</SubMap>
+		<aSubMap dash="'"/>
+	      </compose>
+	    </eq>
+	    <notin>
+	      <tvar name="alpha"/>
+	      <type/>
+	    </notin>
+	    <models name="acy">
+	      <assume/>
+	      <Subst>
+		<SubMap>
+		  <tvar name="alpha"/>
+		  <type/>
+		</SubMap>
+		<aSubMap dash="'"/>
+	      </Subst>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <models name="acy">
+	      <assume/>
+	      <aSubMap/>
+	    </models>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <models name="cst">   
+	      <assume/>
+	      <aCtset/>
+	    </models>  	    
+	    <models name="acy">   
+	      <assume/>
+	      <aCtset/>
+	    </models>  	    	    
+	  </tyPre>
+	  <tyConc> 
+	    <models name="ca">   
+	      <assume/>
+	      <aCtset/>
+	    </models>  
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <models name="cst">   
+	      <assume/>
+	      <aSubMap/>
+	    </models>  	    
+	    <models name="acy">   
+	      <assume/>
+	      <aSubMap/>
+	    </models>  	    	    
+	  </tyPre>
+	  <tyConc> 
+	    <models name="ca">   
+	      <assume/>
+	      <aSubMap/>
+	    </models>  
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+  </definition>
+  <definition id="define_infer">
+    <title>Type Inference</title> 
+    <p>
+      Type inference is a program
+      transformation that accepts a program in which
+      <progident>let</progident> expressions are not annotated
+      with their kinds, and returns the same programs in which
+      <progident>let</progident> expressions are annotated with
+      their kinds and all expressions are annotated with their
+      types.
+    </p>
+  </definition>
   <p>
-    <leadin>Type Inference:</leadin>
     The type inference algorithm is as shown in
     Figure&nbsp;<xref ref="hm_infer"/>. 
     The inference judgment 
@@ -984,8 +1670,7 @@
   <p>
     We use the following shorthand translations as a notational
     convenience. The translations defined in 
-    section&nbsp;<xref ref="type_system"/> and
-    section&nbsp;<xref ref="eq-infer"/> are repeated here.
+    section&nbsp;<xref ref="type_system"/> are repeated here.
   </p>
   <ol>
     <li id="decl_shorthand">

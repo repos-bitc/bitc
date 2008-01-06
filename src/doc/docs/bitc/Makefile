@@ -28,19 +28,21 @@ BITC_SRC=../../..
 
 MY_XML=changes closures PLOS2006-shap PLOS2006 polyinst 
 MY_XML+=relnotes-0.10 relnotes-0.9 spec
-MY_TYPE_XML=formal mutinfer mut-formal sys-infer core 
+MY_TYPE_XML=c-formal h-formal mut-formal 
+MY_TYPE_XML+=mutinfer sys-infer core
 
 OSDOC_XML_SRC=$(MY_XML) $(MY_TYPE_XML)
 
 CLEANLIST=bitc-grammar.c mutinfer.xml old_sys-infer.xml sys-infer.xml 
-CLEANLIST+=formal.xml mut-formal.xml
+CLEANLIST+=c-formal.xml h-formal.xml mut-formal.xml
 XSL_BTYPE=btypes-osdoc.xsl
 FIX_LTX='./fixup.pl'
 
 #Do not add these .xmli files into clean list
 SYSINFER_INCLUDE=include/sys-infer/$(wildcard *.xmli)
 CORE_INCLUDE=include/core/$(wildcard *.xmli)
-FORMAL_INCLUDE=include/formal/$(wildcard *.xmli)
+H_FORMAL_INCLUDE=include/h-formal/$(wildcard *.xmli)
+C_FORMAL_INCLUDE=include/c-formal/$(wildcard *.xmli)
 MUT_FORMAL_INCLUDE=include/mut-formal/$(wildcard *.xmli)
 
 include $(BITC_SRC)/build/make/makerules.mk
@@ -56,7 +58,10 @@ install: all
 mutinfer.xml: mutinfer.txml $(XSL_BTYPE)
 	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
-formal.xml: formal.txml $(XSL_BTYPE) $(FORMAL_INCLUDE)
+h-formal.xml: h-formal.txml $(XSL_BTYPE) $(H_FORMAL_INCLUDE)
+	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
+
+c-formal.xml: c-formal.txml $(XSL_BTYPE) $(C_FORMAL_INCLUDE)
 	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
 mut-formal.xml: mut-formal.txml $(XSL_BTYPE) $(MUT_FORMAL_INCLUDE)
