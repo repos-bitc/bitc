@@ -21,34 +21,12 @@
 	  <id name="z"/>
 	</alternatives>
       </bnf>
-      <bnf desc="Stack Locations"> 
-	<sLoc/>
-	<alternatives etc="yes">
-	  <sLoc num="1"/>
-	  <sLoc num="2"/>
-	</alternatives>
-      </bnf>
-      <bnf desc="Heap Locations">
-	<hLoc/>
-	<alternatives etc="yes">
-	  <hLoc num="1"/>
-	  <hLoc num="2"/>
-	</alternatives>
-      </bnf>
-      <bnf desc="Locations">
-	<loc/>
-	<alternatives>
-	  <sLoc/>
-	  <hLoc/>
-	</alternatives>
-      </bnf>
       <bnf desc="Values">
 	<aVal/>
 	<alternatives>
 	  <Unit/>
 	  <true/> 
 	  <false/>
-	  <hLoc/>
 	  <lambda>
 	    <id/>
 	    <aExpr/>
@@ -59,35 +37,12 @@
 	  </Pair>
 	</alternatives>
       </bnf>
-      <bnf desc="lvalues">
-	<lVal/>
-	<alternatives>
-	  <sLoc/>
-	  <deref>
-	    <hLoc/>
-	  </deref>
-	  <fst>
-	    <Pair>
-	      <aVal/>
-	      <aVal/>
-	    </Pair>
-	  </fst>
-	  <snd>
-	    <Pair>
-	      <aVal/>
-	      <aVal/>
-	    </Pair>
-	  </snd>
-	</alternatives>
-      </bnf>
       <bnf desc="Expressions">
 	<aExpr/>
 	<alternatives>
 	  <Unit/>
 	  <true/> 
 	  <false/>
-	  <sLoc/>
-	  <hLoc/>
 	  <lambda>
 	    <id/>
 	    <aExpr/>

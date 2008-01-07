@@ -8,6 +8,27 @@
   <title>Dynamic Semantics of <btypes:TYPE><language/></btypes:TYPE></title>
   <btypes:TYPE>        
     <grammar>
+      <bnf desc="Locations">
+	<loc/>
+	<alternatives>
+	  <sLoc/>
+	  <hLoc/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Stack Locations"> 
+	<sLoc/>
+	<alternatives etc="yes">
+	  <sLoc num="1"/>
+	  <sLoc num="2"/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Heap Locations">
+	<hLoc/>
+	<alternatives etc="yes">
+	  <hLoc num="1"/>
+	  <hLoc num="2"/>
+	</alternatives>
+      </bnf>
       <bnf desc="Stack">
 	<stack/>
 	<alternatives>
@@ -32,6 +53,54 @@
 	      <aVal/>
 	    </mapping>
 	  </extend>
+	</alternatives>
+      </bnf>
+      <bnf desc="lvalues">
+	<lVal/>
+	<alternatives>
+	  <lVal stack="yes"/>
+	  <lVal heap="yes"/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Stack lvalues">
+	<lVal stack="yes"/>
+	<alternatives>
+	  <sLoc/>
+	  <fst>
+	    <lVal stack="yes"/>
+	  </fst>
+	  <snd>
+	    <lVal stack="yes"/>
+	  </snd>
+	</alternatives>
+      </bnf>
+      <bnf desc="Heap lvalues">
+	<lVal heap="yes"/>
+	<alternatives>
+	  <deref>
+	    <hLoc/>
+	  </deref>
+	  <fst>
+	    <lVal heap="yes"/>
+	  </fst>
+	  <snd>
+	    <lVal heap="yes"/>
+	  </snd>
+	</alternatives>
+      </bnf>
+      <bnf desc="Values">
+	<aVal/>
+	<alternatives>
+	  <text content="..."/>
+	  <hLoc/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Expressions">
+	<aExpr/>
+	<alternatives>
+	  <text content="..."/>
+	  <sLoc/>
+	  <hLoc/>
 	</alternatives>
       </bnf>
     </grammar>

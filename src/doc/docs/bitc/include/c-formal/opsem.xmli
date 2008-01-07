@@ -772,7 +772,35 @@
 	  </opConc>
 	</opRule>
 	<opRule name="E-:=S.1">
-	  <opPre/>
+	  <opPre>
+	    <eval>
+	      <opState>
+		<extend>
+		  <stack/>
+		  <mapping>
+		    <sLoc/>
+		    <aVal num="1"/>
+		  </mapping>
+		</extend>
+		<heap/>
+		<assign>
+		  <lVal stack="yes"/>
+		  <aVal num="1" dash="'"/>
+		</assign>
+	      </opState>
+	      <opState>
+		<extend>
+		  <stack/>
+		  <mapping>
+		    <sLoc/>
+		    <aVal num="1" dash="'"/>
+		  </mapping>
+		</extend>
+		<heap/>
+		<Unit/>
+	      </opState>
+	    </eval>
+	  </opPre>
 	  <opConc>
 	    <eval>
 	      <opState>
@@ -789,10 +817,7 @@
 		<heap/>
 		<assign>
 		  <fst>
-		    <Pair>
-		      <aVal num="1"/>
-		      <aVal num="2"/>	
-		    </Pair>
+		    <lVal stack="yes"/>
 		  </fst>
 		  <aVal num="1" dash="'"/>
 		</assign>
@@ -815,7 +840,35 @@
 	  </opConc>
 	</opRule>
 	<opRule name="E-:=H.1">
-	  <opPre/>
+	  <opPre>
+	    <eval>
+	      <opState>
+		<stack/>
+		<extend>
+		  <heap/>
+		  <mapping>
+		    <sLoc/>
+		    <aVal num="1"/>
+		  </mapping>
+		</extend>
+		<assign>
+		  <lVal heap="yes"/>
+		  <aVal num="1" dash="'"/>
+		</assign>
+	      </opState>
+	      <opState>
+		<stack/>
+		<extend>
+		  <heap/>
+		  <mapping>
+		    <sLoc/>
+		    <aVal num="1" dash="'"/>
+		  </mapping>
+		</extend>
+		<Unit/>
+	      </opState>
+	    </eval>
+	  </opPre>
 	  <opConc>
 	    <eval>
 	      <opState>
@@ -823,7 +876,7 @@
 		<extend>
 		  <heap/>
 		  <mapping>
-		    <hLoc/>
+		    <sLoc/>
 		    <Pair>
 		      <aVal num="1"/>
 		      <aVal num="2"/>	
@@ -832,10 +885,7 @@
 		</extend>
 		<assign>
 		  <fst>
-		    <Pair>
-		      <aVal num="1"/>
-		      <aVal num="2"/>	
-		    </Pair>
+		    <lVal heap="yes"/>
 		  </fst>
 		  <aVal num="1" dash="'"/>
 		</assign>
@@ -845,7 +895,7 @@
 		<extend>
 		  <heap/>
 		  <mapping>
-		    <hLoc/>
+		    <sLoc/>
 		    <Pair>
 		      <aVal num="1" dash="'"/>
 		      <aVal num="2"/>
@@ -858,7 +908,35 @@
 	  </opConc>
 	</opRule>
 	<opRule name="E-:=S.2">
-	  <opPre/>
+	  <opPre>
+	    <eval>
+	      <opState>
+		<extend>
+		  <stack/>
+		  <mapping>
+		    <sLoc/>
+		    <aVal num="2"/>
+		  </mapping>
+		</extend>
+		<heap/>
+		<assign>
+		  <lVal stack="yes"/>
+		  <aVal num="2" dash="'"/>
+		</assign>
+	      </opState>
+	      <opState>
+		<extend>
+		  <stack/>
+		  <mapping>
+		    <sLoc/>
+		    <aVal num="2" dash="'"/>
+		  </mapping>
+		</extend>
+		<heap/>
+		<Unit/>
+	      </opState>
+	    </eval>
+	  </opPre>
 	  <opConc>
 	    <eval>
 	      <opState>
@@ -875,10 +953,7 @@
 		<heap/>
 		<assign>
 		  <snd>
-		    <Pair>
-		      <aVal num="1"/>
-		      <aVal num="2"/>	
-		    </Pair>
+		    <lVal stack="yes"/>
 		  </snd>
 		  <aVal num="2" dash="'"/>
 		</assign>
@@ -889,7 +964,7 @@
 		  <mapping>
 		    <sLoc/>
 		    <Pair>
-		      <aVal num="2"/>
+		      <aVal num="1"/>
 		      <aVal num="2" dash="'"/>
 		    </Pair>
 		  </mapping>
@@ -901,7 +976,35 @@
 	  </opConc>
 	</opRule>
 	<opRule name="E-:=H.2">
-	  <opPre/>
+	  <opPre>
+	    <eval>
+	      <opState>
+		<stack/>
+		<extend>
+		  <heap/>
+		  <mapping>
+		    <sLoc/>
+		    <aVal num="2"/>
+		  </mapping>
+		</extend>
+		<assign>
+		  <lVal heap="yes"/>
+		  <aVal num="2" dash="'"/>
+		</assign>
+	      </opState>
+	      <opState>
+		<stack/>
+		<extend>
+		  <heap/>
+		  <mapping>
+		    <sLoc/>
+		    <aVal num="2" dash="'"/>
+		  </mapping>
+		</extend>
+		<Unit/>
+	      </opState>
+	    </eval>
+	  </opPre>
 	  <opConc>
 	    <eval>
 	      <opState>
@@ -909,7 +1012,7 @@
 		<extend>
 		  <heap/>
 		  <mapping>
-		    <hLoc/>
+		    <sLoc/>
 		    <Pair>
 		      <aVal num="1"/>
 		      <aVal num="2"/>	
@@ -918,10 +1021,7 @@
 		</extend>
 		<assign>
 		  <snd>
-		    <Pair>
-		      <aVal num="1"/>
-		      <aVal num="2"/>	
-		    </Pair>
+		    <lVal heap="yes"/>
 		  </snd>
 		  <aVal num="2" dash="'"/>
 		</assign>
@@ -931,7 +1031,7 @@
 		<extend>
 		  <heap/>
 		  <mapping>
-		    <hLoc/>
+		    <sLoc/>
 		    <Pair>
 		      <aVal num="1"/>
 		      <aVal num="2" dash="'"/>

@@ -1969,10 +1969,23 @@
     <xsl:element name="em">
       <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
       <xsl:text>pound;</xsl:text>    
+      <xsl:choose>
+	<xsl:when test="@stack">
+	  <xsl:element name="sup">
+	    <xsl:text>l</xsl:text>    
+	  </xsl:element>
+	</xsl:when>
+	<xsl:when test="@heap">
+	  <xsl:element name="sup">
+	    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	    <xsl:text>ell;</xsl:text>
+	  </xsl:element>
+	</xsl:when>
+      </xsl:choose>
       <xsl:call-template name="print.index.dash"/>
     </xsl:element>
   </xsl:template>  
-
+  
   <!-- aExpr -->
   <xsl:template match="aExpr" mode="formula">
     <xsl:element name="em">
@@ -1987,7 +2000,7 @@
       </xsl:choose>
       <xsl:call-template name="print.index.dash"/>
     </xsl:element>
-  </xsl:template>  
+  </xsl:template>
 
   <!-- Unit -->
   <xsl:template match="Unit" mode="formula">

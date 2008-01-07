@@ -892,6 +892,8 @@
 >
 <!ELEMENT lVal                 EMPTY>
 <!ATTLIST lVal
+                               stack    yes      #IMPLIED
+                               heap     yes      #IMPLIED
                                num      CDATA    #IMPLIED
                                dash     CDATA    #IMPLIED
 >
