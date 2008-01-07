@@ -233,6 +233,223 @@
       That is, the mutable type constructor is idempotent. 
     </p>
   </definition>
+  <definition id="max_min">      
+    <title>Max and Min Mutability</title>      
+    <p> 
+      The operators
+      <btypes:TYPE><maxzOp/></btypes:TYPE> and
+      <btypes:TYPE><minzOp/></btypes:TYPE> increase or
+      decrease the mutability of a type, and are defined as:
+    </p>
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
+	    <maxz>
+	      <tvar name="alpha"/>
+	    </maxz>
+	  </lhs>
+	  <rhs>
+	    <mutable>
+	      <tvar name="alpha"/>
+	    </mutable>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <maxz>
+	      <unit/>
+	    </maxz>
+	  </lhs>
+	  <rhs>
+	    <mutable>
+	      <unit/>
+	    </mutable>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <maxz>
+	      <bool/>
+	    </maxz>
+	  </lhs>
+	  <rhs>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <maxz>
+	      <fn>
+		<type/>
+		<type dash="'"/>
+	      </fn>
+	    </maxz>
+	  </lhs>
+	  <rhs>
+	    <mutable>
+	      <fn>
+		<type/>
+		<type dash="'"/>
+	      </fn>
+	    </mutable>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <maxz>
+	      <ref>
+		<type/>
+	      </ref>
+	    </maxz>
+	  </lhs>
+	  <rhs>
+	    <mutable>
+	      <ref>
+		<type/>
+	      </ref>
+	    </mutable>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <maxz>
+	      <mutable>
+		<type/>
+	      </mutable>
+	    </maxz>
+	  </lhs>
+	  <rhs>
+	    <maxz>
+	      <type/>
+	    </maxz>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <maxz>
+	      <pair>
+		<type/>
+		<type dash="'"/>
+	      </pair>
+	    </maxz>
+	  </lhs>
+	  <rhs>
+	    <mutable>
+	      <pair>
+		<maxz>
+		  <type/>	
+		</maxz>
+		<maxz>
+		  <type dash="'"/>
+		</maxz>
+	      </pair>
+	    </mutable>
+	  </rhs>
+	</equation>
+      </VEqns>
+    </btypes:TYPE> 
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
+	    <minz>
+	      <tvar name="alpha"/>
+	    </minz>
+	  </lhs>
+	  <rhs>
+	    <tvar name="alpha"/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <minz>
+	      <unit/>
+	    </minz>
+	  </lhs>
+	  <rhs>
+	    <unit/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <minz>
+	      <bool/>
+	    </minz>
+	  </lhs>
+	  <rhs>
+	    <bool/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <minz>
+	      <fn>
+		<type/>
+		<type dash="'"/>
+	      </fn>
+	    </minz>
+	  </lhs>
+	  <rhs>
+	    <fn>
+	      <type/>
+	      <type dash="'"/>
+	    </fn>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <minz>
+	      <ref>
+		<type/>
+	      </ref>
+	    </minz>
+	  </lhs>
+	  <rhs>
+	    <ref>
+	      <type/>
+	    </ref>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <minz>
+	      <mutable>
+		<type/>
+	      </mutable>
+	    </minz>
+	  </lhs>
+	  <rhs>
+	    <minz>
+	      <type/>
+	    </minz>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <minz>
+	      <pair>
+		<type/>
+		<type dash="'"/>
+	      </pair>
+	    </minz>
+	  </lhs>
+	  <rhs>
+	    <pair>
+	      <minz>
+		<type/>	
+	      </minz>
+	      <minz>
+		<type dash="'"/>
+	      </minz>
+	    </pair>
+	  </rhs>
+	</equation>
+      </VEqns>
+    </btypes:TYPE>
+  </definition>
   <definition id="copy_sem">      
     <title>Copy Compatibility</title>
     <p> 
@@ -283,7 +500,31 @@
 	      <type dash="'"/>
 	    </ceq>
 	  </tyConc>                
-	</tyRule>   
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <ceq>                
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </ceq>
+	    <ceq>
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </ceq>
+	  </tyPre>
+	  <tyConc>
+	    <ceq>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	      <pair>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </pair>
+	    </ceq>
+	  </tyConc>                
+	</tyRule>
       </Hrules>
     </btypes:TYPE>
   </definition>
@@ -291,91 +532,21 @@
     In terms of the copy-coercion rules shown in
     Figure&nbsp;<xref ref="decl_rules"/>, we can define copy
     compatibility as: 
-  </p>
-  <example>
-    <p>
-      <btypes:TYPE>
-	<equiv>
-	  <ceq>
-	    <type num="1"/>
+    <btypes:TYPE>
+      <equiv>
+	<ceq>
+	  <type num="1"/>
+	  <type num="2"/>
+	</ceq>
+	<Tsub>
+	  <type num="1"/>
+	  <minz>
 	    <type num="2"/>
-	  </ceq>
-	  <Tsub>
-	    <type num="1"/>
-	    <minz>
-	      <type num="2"/>
-	    </minz>
-	  </Tsub>
-	</equiv>              
-      </btypes:TYPE>
-    </p>
-  </example>
-  <definition id="max_min">      
-    <title>Max and Min Mutability</title>      
-    <p> 
-      The operators
-      <btypes:TYPE><maxzOp/></btypes:TYPE> and
-      <btypes:TYPE><minzOp/></btypes:TYPE> increase or
-      decrease the mutability of a type, and are defined as:
-    </p>
-    <example>
-      <p>
-	<btypes:TYPE>
-	  <eq>                
-	    <maxz>
-	      <mutable>
-		<type/>
-	      </mutable>
-	    </maxz>
-	    <mutable>
-	      <type/>
-	    </mutable>
-	  </eq>
-	  <text content="  and  "/>
-	  <eq> 
-	    <maxz>
-	      <type/>
-	    </maxz>
-	    <mutable>
-	      <type/>
-	    </mutable>
-	  </eq>
-	  `<text content=", where "/>
-	  <neq>                
-	    <type/>
-	    <mutable>
-	      <type dash="'"/>
-	    </mutable>
-	  </neq>
-	  <br/>
-	  <eq>                
-	    <minz>
-	      <mutable>
-		<type/>
-	      </mutable>
-	    </minz>
-	    <type/>
-	  </eq>
-	  <text content="  and  "/>
-	  <eq> 
-	    <minz>
-	      <type/>
-	    </minz>
-	    <type/>
-	  </eq>
-	  <text content=", where "/>
-	  <neq>                
-	    <type/>
-	    <mutable>
-	      <type dash="'"/>
-	    </mutable>
-	  </neq>
-	</btypes:TYPE> 
-      </p>
-    </example>
-  </definition>
-  <p>
-    It is obvious that 
+	  </minz>
+	</Tsub>
+      </equiv>
+    </btypes:TYPE>.
+    It is evident that 
     <btypes:TYPE>
       <forall>
 	<type/>
@@ -594,6 +765,23 @@
 	  <br/>
 	  <eq>
 	    <ftvs>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	    </ftvs>                                  
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>                    
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>                    
+	    </unin>                
+	  </eq>          
+	  <br/>
+	  <eq>
+	    <ftvs>
 	      <types num="i"/>
 	    </ftvs>
 	    <Unin>
@@ -696,11 +884,161 @@
       </p>
     </example>
   </definition>
+  <definition id="immut-types">
+    <title>Immutability Predicates</title>
+    <p>
+      We define two notions of immutability of types. 
+      <btypes:TYPE>
+	<pred name="Immut">
+	  <type/>
+	</pred>
+      </btypes:TYPE> gurantees that the type
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> is (structurally) not a mutable type upto the
+      function boundary. This predicated holds for type variables.
+      The predicate 
+      <btypes:TYPE>
+	<pred name="Immutable">
+	  <type/>
+	</pred>
+      </btypes:TYPE> gurantees that the type
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> is not-mutable and invariable upto the
+      function boundary.
+    </p>
+    <example>
+      <p>
+	<btypes:TYPE>
+	  <fnxn name="Immutable">
+	    <unit/>
+	    <TRUE/>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Immutable">
+	    <bool/>
+	    <TRUE/>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Immutable">
+	    <fn>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </fn>
+	    <TRUE/>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Immutable">
+	    <ref>
+	      <type/>
+	    </ref>                
+	    <pred name="Immutable">
+	      <type/>
+	    </pred>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Immutable">
+	    <pair>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </pair>
+	    <AND>
+	      <pred name="Immutable">
+		<type num="1"/>
+	      </pred>
+	      <pred name="Immutable">
+		<type num="2"/>
+	      </pred>
+	    </AND>
+	  </fnxn>
+	  <br/>
+	  <eq>
+	    <grouping>
+	      <pred name="Immutable">
+		<type/>
+	      </pred>
+	      <text content=" (otherwise) "/>
+	    </grouping>
+	    <FALSE/>
+	  </eq>
+	  <br/>
+	  <br/>
+	  <fnxn name="Immut">
+	    <tvar name="alpha"/>
+	    <TRUE/>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Immut">
+	    <unit/>
+	    <TRUE/>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Immut">
+	    <bool/>
+	    <TRUE/>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Immut">
+	    <fn>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </fn>
+	    <TRUE/>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Immut">
+	    <ref>
+	      <type/>
+	    </ref>                
+	    <pred name="Immut">
+	      <type/>
+	    </pred>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Immut">
+	    <pair>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </pair>
+	    <AND>
+	      <pred name="Immut">
+		<type num="1"/>
+	      </pred>
+	      <pred name="Immut">
+		<type num="2"/>
+	      </pred>
+	    </AND>
+	  </fnxn>
+	  <br/>
+	  <eq>
+	    <grouping>
+	      <pred name="Immut">
+		<type/>
+	      </pred>
+	      <text content=" (otherwise) "/>
+	    </grouping>
+	    <FALSE/>
+	  </eq>
+	  <br/>
+	  <br/>
+	  <fnxn name="Mut">
+	    <type/>
+	    <NOT>
+	      <pred name="Immut">
+		<type/>
+	      </pred>
+	    </NOT>
+	  </fnxn>
+	</btypes:TYPE>
+      </p>
+    </example>
+  </definition>
   <definition id="val_res">
     <title>Value Restriction</title>
     <p>
       We define some definitions used in the enforcement of value
-      restriction in Figure&nbsp;<xref ref="decl_rules"/>.
+      restriction.
     </p>
     <example>
       <p>
@@ -778,6 +1116,39 @@
 	  </eq>
 	  <br/>
 	  <fnxn name="Value">
+	    <Pair>
+	      <aExpr num="1"/>
+	      <aExpr num="2"/>
+	    </Pair>
+	    <AND>
+	      <pred name="Value">
+		<aExpr num="1"/>
+	      </pred>
+	      <pred name="Value">
+		<aExpr num="2"/>
+	      </pred>
+	    </AND>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Value">
+	    <fst>
+	      <aExpr/>
+	    </fst>
+	    <pred name="Value">
+	      <aExpr/>
+	    </pred>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Value">
+	    <snd>
+	      <aExpr/>
+	    </snd>
+	    <pred name="Value">
+	      <aExpr/>
+	    </pred>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Value">
 	    <let>
 	      <id/>
 	      <aExpr num="1"/>
@@ -793,13 +1164,15 @@
 	    </AND>
 	  </fnxn>
 	  <br/>
-	  <fnxn name="Value">
+	  <eq>
 	    <grouping>
-	      <aExpr/>
+	      <pred name="Value">
+		<aExpr/>
+	      </pred>
 	      <text content=" (otherwise) "/>
 	    </grouping>
 	    <FALSE/>
-	  </fnxn>
+	  </eq>
 	  <br/>
 	  <br/>
 	  <fnxn name="Expansive">
@@ -807,104 +1180,6 @@
 	    <NOT>
 	      <pred name="Value">
 		<aExpr/>
-	      </pred>
-	    </NOT>
-	  </fnxn>
-	  <br/>
-	  <br/>
-	  <fnxn name="Immutable">
-	    <unit/>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immutable">
-	    <bool/>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immutable">
-	    <fn>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </fn>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immutable">
-	    <ref>
-	      <type/>
-	    </ref>                
-	    <pred name="Immutable">
-	      <type/>
-	    </pred>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immutable">
-	    <grouping>
-	      <type/>
-	      <text content=" (otherwise) "/>
-	    </grouping>
-	    <FALSE/>
-	  </fnxn>
-	  <br/>
-	  <br/>
-	  <fnxn name="Immut">
-	    <unit/>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immut">
-	    <bool/>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immut">
-	    <tvar name="alpha"/>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immut">
-	    <fn>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </fn>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immut">
-	    <ref>
-	      <type/>
-	    </ref>                
-	    <pred name="Immut">
-	      <type/>
-	    </pred>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immut">
-	    <forall>
-	      <tvars name="alpha"/>
-	      <type/>
-	    </forall>
-	    <pred name="Immut">                
-	      <type/>
-	    </pred>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immut">
-	    <grouping>
-	      <type/>
-	      <text content=" (otherwise) "/>
-	    </grouping>
-
-	    <FALSE/>
-	  </fnxn>
-	  <br/>
-	  <br/>
-	  <fnxn name="Mut">
-	    <type/>
-	    <NOT>
-	      <pred name="Immut">
-		<type/>
 	      </pred>
 	    </NOT>
 	  </fnxn>

@@ -124,29 +124,24 @@
 	  <fn><type/><type/></fn>                  
 	</alternatives>                
       </bnf>
-      <bnfc desc="ref / pointer">
+      <bnfc>
 	<alternatives>
 	  <ref><type/></ref>
+	  <mutable><type/></mutable>
+	  <pair><type/><type/></pair>
 	</alternatives> 
       </bnfc>
-      <bnfc desc="Mutable type">
-	<alternatives>
-	  <mutable><type/></mutable>
-	</alternatives>
-      </bnfc>
-<!--       <bnf desc="Type Scheme"> -->
-<!-- 	<aTS/> -->
-<!-- 	<alternatives> -->
-<!-- 	  <type/> -->
-<!-- 	  <forall>                     -->
-<!-- 	    <tvar name="alpha"/> -->
-<!-- 	    <aTS/> -->
-<!-- 	  </forall> -->
-<!-- 	</alternatives> -->
-<!--       </bnf> -->
     </grammar>
   </btypes:TYPE>
   <p>
+    The type 
+    <btypes:TYPE>        
+      <ref><type/></ref>
+    </btypes:TYPE> represents a reference / pointer type. It does not
+    entail mutability. The type 
+    <btypes:TYPE>        
+      <mutable><type/></mutable>
+    </btypes:TYPE> represents a mutable type.
     All the above syntactic forms can be parenthesized without
     change in meaning. The let-kind ``-'' is a placeholder for the
     unkinded (input) <progident>let</progident> form.

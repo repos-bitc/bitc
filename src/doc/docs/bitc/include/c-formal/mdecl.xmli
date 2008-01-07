@@ -741,6 +741,101 @@
 	  </tyConc>
 	</tyRule>
       </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="G-Value">
+	  <tyPre>
+	    <pred name="Value">
+	      <aExpr/>
+	    </pred>
+	    <pred name="Immut">
+	      <type/>
+	    </pred>
+	  </tyPre>
+	  <tyPre>
+	    <eq>
+	      <tvars name="alpha"/>
+	      <diff>
+		<ftvs><type/></ftvs>
+		<ftvs><gamma/></ftvs>
+		<ftvs><store/></ftvs>
+	      </diff>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="gen">
+	      <assume>
+		<gamma/>
+		<store/>
+		<aExpr/>
+	      </assume>                
+	      <GEN>
+		<type/>
+		<TS>
+		  <tvars name="alpha"/>
+		  <type/>
+		</TS>
+	      </GEN>                                
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="G-Expansive">
+	  <tyPre/>
+	  <tyConc>
+	    <Sjudge name="gen">
+	      <assume>
+		<gamma/>
+		<store/>
+		<aExpr/>
+	      </assume>                
+	      <GEN>
+		<type/>
+		<type/>
+	      </GEN>                                
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="Q-Loc">
+	  <tyPre>
+	    <eq>
+	      <aTS/>
+	      <type/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="loc">
+	      <assume/>
+	      <tqExpr>
+		<id/>
+		<aTS/>	
+	      </tqExpr>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="Q-Term">
+	  <tyPre>
+	    <eq>
+	      <aTS/>
+	      <forall>
+		<tvars name="alpha"/>
+		<type/>
+	      </forall>
+	    </eq>
+	    <neq>
+	      <aTS/>
+	      <type/>
+	    </neq>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="term">
+	      <assume/>
+	      <tqExpr>
+		<id/>
+		<aTS/>	
+	      </tqExpr>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>	  	  	
+      </Hrules>
     </btypes:TYPE>
   </font>
   <caption><font size="small">Declarative Type Rules with Maybe-Types</font></caption>

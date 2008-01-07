@@ -2,12 +2,11 @@
 <!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
-  <figure id="subtype_rules" fullwidth='yes' 
-    latex.placement="tbp">
+  <figure id="subtype_rules" fullwidth='yes' latex.placement="tbp">
   <font size="small">
     <btypes:TYPE
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-      <Hrules rowsep="4pt" colsep="2">
+      <Hrules>
 	<tyRule name="S-Mut1">
 	  <tyPre/>
 	  <tyConc>
@@ -76,6 +75,30 @@
 		<type num="1" dash="'"/>
 		<type num="2" dash="'"/>
 	      </fn>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="S-Pair">
+	  <tyPre>
+	    <Tsub>
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </Tsub>
+	    <Tsub>
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </Tsub>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	      <pair>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </pair>
 	    </Tsub>
 	  </tyConc>
 	</tyRule>

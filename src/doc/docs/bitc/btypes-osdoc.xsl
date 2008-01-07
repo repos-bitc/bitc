@@ -1235,11 +1235,11 @@
   <xsl:template match="mutable" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>Psi;</xsl:text>
-    <xsl:if test = "node() = fn">
+    <xsl:if test = "(node() = fn) or (node() = pair)">
       <xsl:text>(</xsl:text>
     </xsl:if>
     <xsl:apply-templates mode="formula"/>
-    <xsl:if test = "node() = fn">
+    <xsl:if test = "(node() = fn) or (node() = pair)">
       <xsl:text>)</xsl:text>
     </xsl:if>
   </xsl:template>

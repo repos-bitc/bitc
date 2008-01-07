@@ -65,7 +65,6 @@
   <xi:include href="include/c-formal/opsem.xmli"/>
   <xi:include href="include/c-formal/subtype.xmli"/>
   <xi:include href="include/c-formal/locsem.xmli"/>
-  <xi:include href="include/c-formal/decl.xmli"/>
   <xi:include href="include/c-formal/cdecl.xmli"/>
   <xi:include href="include/c-formal/mdecl.xmli"/>
   <xi:include href="include/c-formal/semantics.xmli"/>
