@@ -386,7 +386,7 @@
 	  </rhs>
 	</equation>	
 	<!-- Mt1 <= Mt2 -->
-	<equation sep="4pt">
+	<equation>
 	  <lhs>
 	    <unf ac="yes">
 	      <unin>
@@ -413,6 +413,45 @@
 		    <type num="1"/>
 		    <type num="2"/>
 		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>	
+	<!-- t1xt2 <= t1'xt2' -->
+	<equation sep="4pt">
+	  <lhs>
+	    <unf ac="yes">
+	      <unin>
+		<set>
+		  <Tsub>
+		    <pair>
+		      <type num="1"/>
+		      <type num="2"/>
+		    </pair>
+		    <pair>
+		      <type num="1" dash="'"/>
+		      <type num="2" dash="'"/>
+		    </pair>
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf cl="yes">
+	      <unin>
+		<aCtset/>
+		<set>
+		  <Tsub>
+		    <type num="1"/>
+		    <type num="1" dash="'"/>
+		  </Tsub>
+		  <Tsub>
+		    <type num="2"/>
+		    <type num="2" dash="'"/>
+		  </Tsub>
 		</set>
 	      </unin>
 	    </unf>

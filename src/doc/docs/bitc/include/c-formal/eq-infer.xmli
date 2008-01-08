@@ -651,6 +651,197 @@
 	</tyRule>
       </Hrules>
       <Hrules  rowsep="4pt" colsep="2">
+	<tyRule name="E-Pair">
+	  <tyPre>
+	    <TEjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="1"/>
+		  <type num="1"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset num="1"/>
+	      </constrain>
+	    </TEjudge>
+	    <TEjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="2"/>
+		  <type num="2"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset num="2"/>
+	      </constrain>
+	    </TEjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+		<tvar name="gamma"/>
+		<tvar name="delta"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <Pair>
+		    <aExpr num="1"/>
+		    <aExpr num="2"/>
+		  </Pair>  
+		  <pair>
+		    <tvar name="alpha"/>
+		    <tvar name="beta"/>
+		  </pair>
+		</tqExpr>
+	      </conclude>                  
+	      <constrain>
+		<unin>
+		  <aCtset num="1"/>
+		  <aCtset num="2"/>
+		  <set>
+		    <ceq via="gamma">
+		      <tvar name="alpha"/>
+		      <type num="1"/>
+		    </ceq>
+		    <ceq via="delta">
+		      <tvar name="beta"/>
+		      <type num="2"/>
+		    </ceq>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules  rowsep="4pt" colsep="2">
+	<tyRule name="E-Fst">
+	  <tyPre>
+	    <TEjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	    <models name="new">
+	      <assume/>
+	      <tvar name="alpha"/>
+	      <tvar name="beta"/>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>                      
+		  <fst>
+		    <aExpr/>
+		  </fst>
+		  <tvar name="alpha"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>                    
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <Tsub>
+		      <type/>
+		      <pair>
+			<tvar name="alpha"/>
+			<tvar name="beta"/>
+		      </pair>
+		    </Tsub>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="E-Snd">
+	  <tyPre>
+	    <TEjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	    <models name="new">
+	      <assume/>
+	      <tvar name="alpha"/>
+	      <tvar name="beta"/>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>                      
+		  <snd>
+		    <aExpr/>
+		  </snd>
+		  <tvar name="beta"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>                    
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <Tsub>
+		      <type/>
+		      <pair>
+			<tvar name="alpha"/>
+			<tvar name="beta"/>
+		      </pair>
+		    </Tsub>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule name="E-Let"> 
 	  <tyPre>
 	    <TEjudge>
