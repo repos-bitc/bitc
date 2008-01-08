@@ -70,9 +70,9 @@
   <xi:include href="include/c-formal/cdecl.xmli"/>
   <xi:include href="include/c-formal/mdecl.xmli"/>
   <xi:include href="include/c-formal/type_system.xmli"/>
+  <xi:include href="include/c-formal/eq-helper.xmli"/>
   <xi:include href="include/c-formal/eq-infer.xmli"/>
   <xi:include href="include/c-formal/eq-unify.xmli"/>
-  <xi:include href="include/c-formal/eq-helper.xmli"/>
   <xi:include href="include/c-formal/equational.xmli"/>
   <nocite ref="sridhar2006plos"/>
   <bibliography>
