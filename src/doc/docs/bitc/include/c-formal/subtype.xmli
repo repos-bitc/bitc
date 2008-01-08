@@ -57,69 +57,9 @@
 	      <mutable>
 		<type/>
 	      </mutable>
-	      <type dash="'"/>
-	    </Tsub>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="S-Mut3">
-	  <tyPre>
-	    <Tsub>
-	      <type/>
-	      <type dash="'"/>
-	    </Tsub>
-	  </tyPre>
-	  <tyConc>
-	    <Tsub>
-	      <mutable>
-		<type/>
-	      </mutable>
 	      <mutable>
 		<type dash="'"/>
 	      </mutable>
-	    </Tsub>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="S-Ref">
-	  <tyPre>
-	    <eq>
-	      <type/>
-	      <type dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <Tsub>
-	      <ref>
-		<type/>
-	      </ref>
-	      <ref>
-		<type dash="'"/>
-	      </ref>
-	    </Tsub>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="S-Fn">
-	  <tyPre>
-	    <eq>
-	      <type num="1"/>
-	      <type num="1" dash="'"/>
-	    </eq>
-	    <eq>
-	      <type num="2"/>
-	      <type num="2" dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <Tsub>
-	      <fn>
-		<type num="1"/>
-		<type num="2"/>
-	      </fn>
-	      <fn>
-		<type num="1" dash="'"/>
-		<type num="2" dash="'"/>
-	      </fn>
 	    </Tsub>
 	  </tyConc>
 	</tyRule>

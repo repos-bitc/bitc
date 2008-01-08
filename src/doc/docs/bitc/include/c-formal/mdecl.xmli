@@ -116,9 +116,13 @@
 		<id/>
 		<aExpr/>
 	      </lambda>
-	      <fn M="yes">		
-		<type num="1"/>
- 		<type num="2"/>
+	      <fn>
+		<minz>
+		  <type num="1"/>
+		</minz>
+		<maxz>
+		  <type num="2"/>
+		</maxz>
 	      </fn>
 	    </TDjudge>
 	  </tyConc>

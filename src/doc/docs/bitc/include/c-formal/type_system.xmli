@@ -8,46 +8,6 @@
   <title>Static Semantics of <btypes:TYPE><language/></btypes:TYPE></title>
   <btypes:TYPE>        
     <grammar>
-      <bnf desc="Unct. Types">
-	<sType/>
-	<alternatives>
-	  <tvar name="alpha"/>
-	  <unit/>
-	  <bool/>
-	  <fn><type/><type/></fn>                  
-	</alternatives>
-      </bnf>
-      <bnfc desc="">
-	<alternatives>
-	  <ref><type/></ref>
-	  <mutable><type/></mutable>
-	  <pair><type/><type/></pair>
-	</alternatives>
-      </bnfc>
-      <bnf desc="Types">
-	<type/>
-	<alternatives>
-	  <sType/>
-	  <mbpair>
-	    <sType/>
-	    <sType/>
-	  </mbpair>
-	</alternatives>
-      </bnf>
-      <bnf desc="Type Scheme">          
-	<aTS/>
-	<alternatives>
-	  <type/>
-	  <forall>                    
-	    <tvar name="alpha"/>
-	    <aTS/>
-	  </forall>
-	</alternatives>
-      </bnf>
-    </grammar>
-  </btypes:TYPE>
-  <btypes:TYPE>        
-    <grammar>
       <bnf desc="Types">
 	<type/>
 	<alternatives>
@@ -185,35 +145,6 @@
       </models>
     </btypes:TYPE>.
   </p>
-  <p>
-    We use the following shorthand notation:
-  </p>
-  <example>
-    <p>
-      <btypes:TYPE>
-	<leadsto>
-	  <DBrac>
-	    <TDjudge sub="yes">
-	      <aExpr/>
-	      <type/>
-	    </TDjudge>
-	  </DBrac>
-	  <DBrac>
-	    <collection>
-	      <TDjudge>
-		<aExpr/>
-		<type dash="'"/>
-	      </TDjudge>
-	      <Tsub>
-		<type/>
-		<type dash="'"/>
-	      </Tsub>
-	    </collection>
-	  </DBrac>
-	</leadsto>
-      </btypes:TYPE>
-    </p>
-  </example>
   <definition id="aleq">      
     <title>Algebraic equivalences</title>
     <p>
@@ -303,7 +234,7 @@
 	      <loc/>
 	      <type dash="'"/>
 	    </mapping>
-	    <gamma/>
+	    <store/>
 	  </in>
 	</Exists>          
       </btypes:TYPE> such that 
@@ -333,6 +264,226 @@
 	    <solvables/>
 	  </set>
 	</in>
+      </btypes:TYPE>.
+    </p>
+  </definition>
+  <p>
+    <leadin>Alternate Presentation</leadin>
+  </p>
+  <btypes:TYPE>        
+    <grammar>
+      <bnf desc="Unct. Types">
+	<sType/>
+	<alternatives>
+	  <tvar name="alpha"/>
+	  <unit/>
+	  <bool/>
+	  <fn><type/><type/></fn>                  
+	</alternatives>
+      </bnf>
+      <bnfc desc="">
+	<alternatives>
+	  <ref><type/></ref>
+	  <mutable><type/></mutable>
+	  <pair><type/><type/></pair>
+	</alternatives>
+      </bnfc>
+      <bnf desc="Types">
+	<type/>
+	<alternatives>
+	  <sType/>
+	  <mbpair>
+	    <sType/>
+	    <sType/>
+	  </mbpair>
+	</alternatives>
+      </bnf>
+      <bnf desc="Type Scheme">          
+	<aTS/>
+	<alternatives>
+	  <type/>
+	  <forall>                    
+	    <tvar name="alpha"/>
+	    <aTS/>
+	  </forall>
+	</alternatives>
+      </bnf>
+    </grammar>
+  </btypes:TYPE>
+  <definition id="copy_sem">      
+    <title>Copy Compatibility</title>
+    <p> 
+      We define the copy compatibility relationship 
+      (<btypes:TYPE>
+	<ceqOp/>
+      </btypes:TYPE>) as follows:
+    </p>
+    <btypes:TYPE>
+      <Hrules>
+	<tyRule>
+	  <tyPre/>
+	  <tyConc>
+	    <ceq>                
+	      <type/>
+	      <type/>
+	    </ceq>
+	  </tyConc>                
+	</tyRule>   
+	<tyRule>
+	  <tyPre>
+	    <ceq>                
+	      <type/>
+	      <type dash="'"/>
+	    </ceq>	    
+	  </tyPre>
+	  <tyConc>
+	    <ceq>                
+	      <type/>
+	      <mutable>
+		<type dash="'"/>
+	      </mutable>
+	    </ceq>
+	  </tyConc>                
+	</tyRule>   
+	<tyRule>
+	  <tyPre>
+	    <ceq>                
+	      <type/>
+	      <type dash="'"/>
+	    </ceq>	    
+	  </tyPre>
+	  <tyConc>
+	    <ceq>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <type dash="'"/>
+	    </ceq>
+	  </tyConc>                
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <ceq>                
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </ceq>
+	    <ceq>
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </ceq>
+	  </tyPre>
+	  <tyConc>
+	    <ceq>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	      <pair>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </pair>
+	    </ceq>
+	  </tyConc>                
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+  </definition>
+  <definition id="top_ceq">      
+    <title>Top-level Copy Compatibility</title>
+    <p> 
+      We define a restricted version of copy compatibility
+      (<btypes:TYPE>
+	<approxOp/>
+      </btypes:TYPE>) as follows:
+    </p>
+    <btypes:TYPE>
+      <Hrules>
+	<tyRule>
+	  <tyPre/>
+	  <tyConc>
+	    <approx>                
+	      <type/>
+	      <type/>
+	    </approx>
+	  </tyConc>                
+	</tyRule>
+	<tyRule>
+	  <tyPre/>
+	  <tyConc>
+	    <approx>                
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <type/>
+	    </approx>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre/>
+	  <tyConc>
+	    <approx>
+	      <type/>
+	      <mutable>
+		<type/>
+	      </mutable>
+	    </approx>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+  </definition>
+  <definition id="maybe-types">      
+    <title>``Maybe'' types </title>
+    <p> 
+      A maybe type 
+      <btypes:TYPE>
+	<mbpair>
+	  <type/>
+	  <type dash="'"/>
+	</mbpair>
+      </btypes:TYPE> represents the constrained type
+      <btypes:TYPE>
+	<ctype>
+	  <type/>
+	  <approx>
+	    <type/>
+	    <type dash="'"/>
+	  </approx>
+	</ctype>
+      </btypes:TYPE>. Therefore, for any 
+      <btypes:TYPE>
+	<tvar name="alpha"/>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE>, the only legal forms of a maybe type are, 
+      <btypes:TYPE>
+	<mbpair>
+	  <tvar name="alpha"/>
+	  <type/>
+	</mbpair>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<mbpair>
+	  <type/>
+	  <type/>
+	</mbpair>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<mbpair>
+	  <mutable>
+	    <type/>
+	  </mutable>
+	  <type/>
+	</mbpair>
+      </btypes:TYPE>, and
+      <btypes:TYPE>
+	<mbpair>
+	  <type/>
+	  <mutable>
+	    <type/>
+	  </mutable>
+	</mbpair>
       </btypes:TYPE>.
     </p>
   </definition>
@@ -467,7 +618,7 @@
 	    </maxz>
 	  </rhs>
 	</equation>
-	<equation>
+	<equation sep="yes">
 	  <lhs>
 	    <maxz>
 	      <mbpair>
@@ -476,10 +627,6 @@
 	      </mbpair>
 	    </maxz>
 	    <grouping>
-	      <Forall>
-		<tvar name="alpha"/>
-	      </Forall>
-	      <text content=", "/>
 	      <neq>
 		<sType/>
 		<tvar name="alpha"/>
@@ -492,10 +639,6 @@
 	    </maxz>
 	  </rhs>
 	</equation>
-      </VEqns>
-    </btypes:TYPE> 
-    <btypes:TYPE>
-      <VEqns>
 	<equation>
 	  <lhs>
 	    <minz>
@@ -614,10 +757,6 @@
 	      </mbpair>
 	    </minz>
 	    <grouping>
-	      <Forall>
-		<tvar name="alpha"/>
-	      </Forall>
-	      <text content=", "/>
 	      <neq>
 		<sType/>
 		<tvar name="alpha"/>
@@ -633,146 +772,6 @@
       </VEqns>
     </btypes:TYPE>
   </definition>
-  <definition id="copy_sem">      
-    <title>Copy Compatibility</title>
-    <p> 
-      We define the copy compatibility relationship 
-      (<btypes:TYPE>
-	<ceqOp/>
-      </btypes:TYPE>) as follows:
-    </p>
-    <btypes:TYPE>
-      <Hrules>
-	<tyRule>
-	  <tyPre/>
-	  <tyConc>
-	    <ceq>                
-	      <type/>
-	      <type/>
-	    </ceq>
-	  </tyConc>                
-	</tyRule>   
-	<tyRule>
-	  <tyPre>
-	    <ceq>                
-	      <type/>
-	      <type dash="'"/>
-	    </ceq>	    
-	  </tyPre>
-	  <tyConc>
-	    <ceq>                
-	      <type/>
-	      <mutable>
-		<type dash="'"/>
-	      </mutable>
-	    </ceq>
-	  </tyConc>                
-	</tyRule>   
-	<tyRule>
-	  <tyPre>
-	    <ceq>                
-	      <type/>
-	      <type dash="'"/>
-	    </ceq>	    
-	  </tyPre>
-	  <tyConc>
-	    <ceq>
-	      <mutable>
-		<type/>
-	      </mutable>
-	      <type dash="'"/>
-	    </ceq>
-	  </tyConc>                
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <ceq>                
-	      <type num="1"/>
-	      <type num="1" dash="'"/>
-	    </ceq>
-	    <ceq>
-	      <type num="2"/>
-	      <type num="2" dash="'"/>
-	    </ceq>
-	  </tyPre>
-	  <tyConc>
-	    <ceq>
-	      <pair>
-		<type num="1"/>
-		<type num="2"/>
-	      </pair>
-	      <pair>
-		<type num="1" dash="'"/>
-		<type num="2" dash="'"/>
-	      </pair>
-	    </ceq>
-	  </tyConc>                
-	</tyRule>
-      </Hrules>
-    </btypes:TYPE>
-  </definition>
-  <p>
-    In terms of the copy-coercion rules shown in
-    figure&nbsp;<xref ref="subtype_rules"/>, we can define copy
-    compatibility as: 
-    <btypes:TYPE>
-      <equiv>
-	<ceq>
-	  <type num="1"/>
-	  <type num="2"/>
-	</ceq>
-	<Tsub>
-	  <type num="1"/>
-	  <minz>
-	    <type num="2"/>
-	  </minz>
-	</Tsub>
-      </equiv>
-    </btypes:TYPE>.
-    It is evident that 
-    <btypes:TYPE>
-      <forall>
-	<type/>
-	<ceq> 
-	  <minz>
-	    <type/>
-	  </minz>
-	  <type/>
-	  <maxz>
-	    <type/>
-	  </maxz>
-	</ceq>
-      </forall>
-      <text content=", and "/>
-      <forall>
-	<type/>
-	<type dash="'"/>
-	<iff>
-	  <ceq> 
-	    <type/>
-	    <type dash="'"/>
-	  </ceq>
-	  <eq>
-	    <minz>
-	      <type/>
-	    </minz>
-	    <minz>
-	      <type dash="'"/>
-	    </minz>
-	  </eq>
-	  <eq>
-	    <maxz>
-	      <type/>
-	    </maxz>
-	    <maxz>
-	      <type dash="'"/>
-	    </maxz>
-	  </eq>                
-	</iff>
-      </forall>          
-      <text content="."/>
-    </btypes:TYPE>
-  </p>
   <definition id="ftvs">
     <title>Free Type Variables</title>
     <p>
@@ -780,59 +779,76 @@
       <btypes:TYPE><type/></btypes:TYPE> as
       <btypes:TYPE><ftvs><type/></ftvs></btypes:TYPE>. 
     </p>
-    <example>
-      <p>
-	<btypes:TYPE>
-	  <eq>
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <tvar name="alpha"/>
 	    </ftvs>
-	    <tvar name="alpha"/>                
-	  </eq>
-	  <br/>
-	  <eq>
+	  </lhs>
+	  <rhs>
+	    <tvar name="alpha"/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <unit/>
 	    </ftvs>
-	    <empty/>                
-	  </eq>
-	  <br/>
-	  <eq>
+	  </lhs>
+	  <rhs>
+	    <empty/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <bool/>
 	    </ftvs>
+	  </lhs>
+	  <rhs>
 	    <empty/>                
-	  </eq>
-	  <br/>
-	  <eq>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <ref>
 		<type/>
 	      </ref>
 	    </ftvs>
+	  </lhs>
+	  <rhs>
 	    <ftvs>                  
 	      <type/>                  
 	    </ftvs>
-	  </eq>              
-	  <br/>
-	  <eq>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <mutable>
 		<type/>
 	      </mutable>
 	    </ftvs>
+	  </lhs>
+	  <rhs>
 	    <ftvs>                  
 	      <type/>                  
 	    </ftvs>
-	  </eq>          
-	  <br/>
-	  <eq>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <fn>
 		<type num="1"/>
 		<type num="2"/>
 	      </fn>
-	    </ftvs>                                  
+	    </ftvs>
+	  </lhs>
+	  <rhs>
 	    <unin>
 	      <ftvs>
 		<type num="1"/>
@@ -840,33 +856,39 @@
 	      <ftvs>
 		<type num="2"/>
 	      </ftvs>                    
-	    </unin>                
-	  </eq>          
-	  <br/>
-	  <eq>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <pair>
 		<type num="1"/>
 		<type num="2"/>
 	      </pair>
 	    </ftvs>                                  
+	  </lhs>
+	  <rhs>
 	    <unin>
 	      <ftvs>
 		<type num="1"/>
 	      </ftvs>                    
 	      <ftvs>
 		<type num="2"/>
-	      </ftvs>                    
-	    </unin>                
-	  </eq>          
-	  <br/>
-	  <eq>
+	      </ftvs>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <mbpair>
 		<sType num="1"/>
 		<sType num="2"/>
 	      </mbpair>
 	    </ftvs>                                  
+	  </lhs>
+	  <rhs>
 	    <unin>
 	      <ftvs>
 		<sType num="1"/>
@@ -874,24 +896,33 @@
 	      <ftvs>
 		<sType num="2"/>
 	      </ftvs>                    
-	    </unin>                
-	  </eq>          
-	  <br/>
-	  <eq>
+	    </unin>
+	  </rhs>
+	</equation>                
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <types num="i"/>
 	    </ftvs>
+	  </lhs>
+	  <rhs>
 	    <Unin>
 	      <ftvs>
 		<type num="i"/>
 	      </ftvs>
 	    </Unin>
-	  </eq>
-	  <br/>
-	  <eq>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
-	      <aTS/>
+	      <forall>
+		<tvars name="alpha"/>
+		<type/>
+	      </forall>
 	    </ftvs>
+	  </lhs>
+	  <rhs>
 	    <unin>
 	      <ftvs>
 		<tvars name="alpha"/>
@@ -900,86 +931,630 @@
 		<type/>
 	      </ftvs>                  
 	    </unin>
-	  </eq>
-	  <text content=", where "/>
-	  <eq>
-	    <aTS/>
-	    <forall>
-	      <tvars name="alpha"/>
-	      <type/>
-	    </forall>
-	  </eq>              
-	  <br/>
-	  <eq>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <gamma/>
 	    </ftvs>
-	    <Unin>
-	      <ftvs>
-		<aTS num="i"/>
-	      </ftvs>
-	    </Unin>                  
-	  </eq>
-	  <text content=", "/>
-	  <Forall/>
-	  <in>
-	    <mapping>
-	      <id/>
-	      <aTS num="i"/>
-	    </mapping>
-	    <gamma/>
-	  </in>
-	  <br/>
-	  <eq>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<ftvs>
+		  <aTS num="i"/>
+		</ftvs>
+	      </Unin>
+	      <text content=", "/>
+	      <Forall/>
+	      <in>
+		<mapping>
+		  <id/>
+		  <aTS num="i"/>
+		</mapping>
+		<gamma/>
+	      </in>
+	    </grouping>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <store/>
 	    </ftvs>
-	    <Unin>
-	      <ftvs>
-		<type num="i"/>
-	      </ftvs>
-	    </Unin>                  
-	  </eq> 
-	  <text content=", "/>
-	  <Forall/>
-	  <in>
-	    <mapping>
-	      <loc/>
-	      <type num="i"/>
-	    </mapping>
-	    <store/>
-	  </in>
-	  <br/>
-	  <eq>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<ftvs>
+		  <type num="i"/>
+		</ftvs>
+	      </Unin>
+	      <text content=", "/>
+	      <Forall/>
+	      <in>
+		<mapping>
+		  <loc/>
+		  <type num="i"/>
+		</mapping>
+		<store/>
+	      </in>
+	    </grouping>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <aExpr/>
 	    </ftvs>
-	    <Unin>
-	      <ftvs>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<ftvs>
+		  <type num="i"/>
+		</ftvs>
+	      </Unin>                  
+	      <text content=", "/>
+	      <Forall/>
+	      <in>
 		<type num="i"/>
-	      </ftvs>
-	    </Unin>                  
-	  </eq> 
-	  <text content=", "/>
-	  <Forall/>
-	  <in>
-	    <type num="i"/>
-	    <aExpr/>
-	  </in>
-	  <br/>
-	  <eq>
+		<aExpr/>
+	      </in>
+	    </grouping>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <solvables/>
 	    </ftvs>
+	  </lhs>
+	  <rhs>
 	    <Unin>
 	      <ftvs>
 		<solvable/>
 	      </ftvs>
 	    </Unin>
-	  </eq>
-	</btypes:TYPE>.
-      </p>
-    </example>
+	  </rhs>
+	</equation>
+      </VEqns>
+    </btypes:TYPE>.
+  </definition>
+  <definition id="MTVs">
+    <title>MTVs</title>
+    <p>
+      The function 
+      <btypes:TYPE>
+	<fnxn name="mtv">
+	  <solvable/>
+	  <tvars name="alpha"/>
+	</fnxn>
+      </btypes:TYPE> is defined to be the set of all type variables
+      within the solvable entity 
+      <btypes:TYPE>
+	<solvable/>
+      </btypes:TYPE>. That is, it returns the set of all
+      type-variables 
+      <btypes:TYPE>
+	<tvars name="alpha"/>
+      </btypes:TYPE> where  
+      <btypes:TYPE>
+	<tvar name="alpha"/>
+      </btypes:TYPE> occurs within a maybe type as 
+      <btypes:TYPE>
+	<mbpair>
+	  <tvar name="alpha"/>
+	  <type num="h"/>
+	</mbpair>            
+      </btypes:TYPE>.
+    </p>
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
+	    <pred name="mtv">
+	      <tvar name="alpha"/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <empty/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="mtv">
+	      <unit/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <empty/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="mtv">
+	      <bool/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <empty/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="mtv">
+	      <mbpair>
+		<tvar name="alpha"/>
+		<sType/>
+	      </mbpair>                            
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <set>
+	      <tvar name="alpha"/>
+	    </set>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="mtv">
+	      <mbpair>
+		<sType/>
+		<sType dash="'"/>
+	      </mbpair>
+	    </pred>
+	    <neq>
+	      <sType/>
+	      <tvar name="alpha"/>
+	    </neq>
+	  </lhs>
+	  <rhs>
+	    <pred name="mtv">
+	      <sType/>
+	    </pred>
+	  </rhs>
+	</equation>	
+	<equation>
+	  <lhs>
+	    <pred name="mtv">
+	      <ref>
+		<type/>
+	      </ref>                            
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <pred name="mtv">
+	      <type/>
+	    </pred>
+	  </rhs>
+	</equation>	
+	<equation>
+	  <lhs>
+	    <pred name="mtv">
+	      <mutable>
+		<type/>
+	      </mutable>                            
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <pred name="mtv">
+	      <type/>
+	    </pred>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="mtv">
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>                            
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <pred name="mtv">
+		<type num="1"/>
+	      </pred>
+	      <pred name="mtv">
+		<type num="2"/>
+	      </pred>
+	    </unin>
+	  </rhs>
+	</equation>	
+	<equation>
+	  <lhs>
+	    <pred name="mtv">
+	      <gamma/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<pred name="mtv">
+		  <type num="i"/>
+		</pred>
+	      </Unin>
+	      <text content=","/>
+	      <space/>
+	      <Forall>
+		<in>
+		  <mapping>
+		    <id num="i"/>
+		    <type num="i"/>
+		  </mapping>
+		  <gamma/>
+		</in>
+	      </Forall>
+	    </grouping>
+	  </rhs>
+	</equation>	
+	<equation>
+	  <lhs>
+	    <pred name="mtv">
+	      <store/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<pred name="mtv">
+		  <type num="i"/>
+		</pred>
+	      </Unin>
+	      <text content=","/>
+	      <space/>
+	      <Forall>
+		<in>
+		  <mapping>
+		    <loc num="i"/>
+		    <type num="i"/>
+		  </mapping>
+		  <store/>
+		</in>
+	      </Forall>
+	    </grouping>
+	  </rhs>
+	</equation>	
+	<equation>
+	  <lhs>
+	    <pred name="mtv">
+	      <aExpr/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<pred name="mtv">
+		  <type num="i"/>
+		</pred>
+	      </Unin>
+	      <text content=","/>
+	      <space/>
+	      <Forall>
+		<in>
+		  <type num="i"/>
+		  <aExpr/>
+		</in>
+	      </Forall>
+	    </grouping>
+	  </rhs>
+	</equation>	
+	<equation>
+	  <lhs>
+	    <pred name="mtv">
+	      <solvables/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <Unin>
+	      <pred name="mtv">
+		<solvable/>
+	      </pred>
+	    </Unin>
+	  </rhs>
+	</equation>	
+      </VEqns>
+    </btypes:TYPE>
+  </definition>
+  <definition id="NTVs">
+    <title>NTVs</title>
+    <p>
+      The set of unconstrained variables is defined as:
+    </p>
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
+	  <pred name="ntv">
+	    <tvar name="alpha"/>
+	  </pred>
+	  </lhs>
+	  <rhs>
+	    <set>
+	      <tvar name="alpha"/>
+	    </set>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	  <pred name="ntv">
+	    <unit/>
+	  </pred>
+	  </lhs>
+	  <rhs>
+	    <empty/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	  <pred name="ntv">
+	    <bool/>
+	  </pred>
+	  </lhs>
+	  <rhs>
+	    <empty/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	  <pred name="ntv">
+	    <mbpair>
+	      <tvar name="alpha"/>
+	      <sType/>
+	    </mbpair>
+	  </pred>
+	  </lhs>
+	  <rhs>
+	    <pred name="ntv">
+	      <sType/>
+	    </pred>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	  <pred name="ntv">
+	    <mbpair>
+	      <sType/>
+	      <sType/>
+	    </mbpair>                            
+	  </pred>
+	  <neq>
+	    <sType/>
+	    <tvar name="alpha"/>
+	  </neq>
+	  </lhs>
+	  <rhs>
+	    <pred name="ntv">
+	      <sType/>
+	    </pred>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	  <pred name="ntv">
+	    <ref>
+	      <type/>
+	    </ref>                            
+	  </pred>              
+	  </lhs>
+	  <rhs>
+	    <pred name="ntv">
+	      <type/>
+	    </pred>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	  <pred name="ntv">
+	    <mutable>
+	      <type/>
+	    </mutable>                            
+	  </pred>
+	  </lhs>
+	  <rhs>
+	    <pred name="ntv">
+	      <type/>
+	    </pred>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	  <pred name="ntv">
+	    <fn>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </fn>                            
+	  </pred>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <pred name="ntv">
+		<type num="1"/>
+	      </pred>
+	      <pred name="ntv">
+		<type num="2"/>
+	      </pred>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	  <pred name="ntv">
+	    <gamma/>
+	  </pred>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<pred name="ntv">
+		  <type num="i"/>
+		</pred>
+	      </Unin>
+	      <text content=","/>
+	      <space/>
+	      <Forall>
+		<in>
+		  <mapping>
+		    <id num="i"/>
+		    <type num="i"/>
+		  </mapping>
+		  <gamma/>
+		</in>
+	      </Forall>
+	    </grouping>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	  <pred name="ntv">
+	    <store/>
+	  </pred>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<pred name="ntv">
+		  <type num="i"/>
+		</pred>
+	      </Unin>
+	      <text content=","/>
+	      <space/>
+	      <Forall>
+		<in>
+		  <mapping>
+		    <loc num="i"/>
+		    <type num="i"/>
+		  </mapping>
+		  <store/>
+		</in>
+	      </Forall>
+	    </grouping>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	  <pred name="ntv">
+	    <aExpr/>
+	  </pred>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<pred name="ntv">
+		  <type num="i"/>
+		</pred>
+	      </Unin>
+	      <text content=","/>
+	      <space/>
+	      <Forall>
+		<in>
+		  <type num="i"/>
+		  <aExpr/>
+		</in>
+	      </Forall>
+	    </grouping>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	  <pred name="ntv">
+	    <solvables/>
+	  </pred>
+	  </lhs>
+	  <rhs>
+	    <Unin>
+	      <pred name="ntv">
+		<solvable/>
+	      </pred>
+	    </Unin>
+	  </rhs>
+	</equation>
+      </VEqns>
+    </btypes:TYPE>
+  </definition>
+  <definition id="maybe-consistent">
+    <title>Consistency of Maybe types</title>
+    <p>
+      We identify the following consistency property on maybe types.
+    </p>
+    <btypes:TYPE>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <grouping>
+	      <Forall>
+		<tvar name="alpha"/>
+		<sType/>
+		<sType dash="'"/>
+	      </Forall>
+	      <text content=" such that "/>
+	      <in>
+		<mbpair>
+		  <sType/>
+		  <sType dash="'"/>
+		</mbpair>
+		<solvables/>
+	      </in>
+	      <text content=", "/>
+	      <eq>
+		<sType/>
+		<tvar name="alpha"/>
+	      </eq>
+	      <text content=" or "/>
+	      <approx>
+		<sType/>
+		<sType dash="'"/>
+	      </approx>
+	    </grouping>
+	  </tyPre>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<grouping>
+		  <mbpair>
+		    <tvar name="alpha"/>
+		    <sType/>
+		  </mbpair>
+		  <text content=" and "/>
+		  <mbpair>
+		    <tvar name="alpha"/>
+		    <sType dash="'"/>
+		  </mbpair>
+		</grouping>
+		<solvables/>
+	      </in>
+	      <text content=", "/>
+	      <eq>
+		<sType/>
+		<sType dash="'"/>
+	      </eq>
+	    </grouping>         
+	  </tyPre>
+	  <tyPre>
+	    <eq>
+	      <inter>
+		<pred name="mtv">
+		  <solvables/>
+		</pred>
+		<pred name="ntv">
+		  <solvables/>
+		</pred>
+	      </inter>
+	      <Empty/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <CST>
+	      <solvables/>
+	    </CST>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
   </definition>
   <definition id="immut-types">
     <title>Immutability Predicates</title>

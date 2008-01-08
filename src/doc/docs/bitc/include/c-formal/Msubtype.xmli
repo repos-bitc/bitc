@@ -34,6 +34,50 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>  
+	<tyRule name="M-Ref">
+	  <tyPre>
+	    <eq>
+	      <type/>
+	      <type dash="'"/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <ref>
+		<type/>
+	      </ref>
+	      <ref>
+		<type dash="'"/>
+	      </ref>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="M-Fn">
+	  <tyPre>
+	    <eq>
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </eq>
+	    <eq>
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	      <fn>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </fn>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="M-Mut1">
 	  <tyPre/>
 	  <tyConc>
@@ -57,30 +101,12 @@
 	      <mutable>
 		<type/>
 	      </mutable>
-	      <type dash="'"/>
-	    </Msub>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="M-Mut3">
-	  <tyPre>
-	    <Msub>
-	      <type/>
-	      <type dash="'"/>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <mutable>
-		<type/>
-	      </mutable>
 	      <mutable>
 		<type dash="'"/>
 	      </mutable>
 	    </Msub>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="M-May1">
 	  <tyPre>
 	    <!-- This rule MUST NOT be written with a minz(t) 
@@ -106,10 +132,10 @@
 	<tyRule name="M-May2">
 	  <tyPre>
 	    <grouping>
-	      <forall>
-		<tvar name="alpha"/>
-	      </forall>
-	      <text content=", "/>
+<!-- 	      <forall> -->
+<!-- 		<tvar name="alpha"/> -->
+<!-- 	      </forall> -->
+<!-- 	      <text content=", "/> -->
 	      <neq>
 		<sType/>
 		<tvar name="alpha"/>
@@ -133,10 +159,10 @@
 	<tyRule name="M-May3">
 	  <tyPre>
 	    <grouping>
-	      <forall>
-		<tvar name="alpha"/>
-	      </forall>
-	      <text content=", "/>
+<!-- 	      <forall> -->
+<!-- 		<tvar name="alpha"/> -->
+<!-- 	      </forall> -->
+<!-- 	      <text content=", "/> -->
 	      <neq>
 		<sType/>
 		<tvar name="alpha"/>
@@ -159,24 +185,6 @@
 	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="M-Ref">
-	  <tyPre>
-	    <eq>
-	      <type/>
-	      <type dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <ref>
-		<type/>
-	      </ref>
-	      <ref>
-		<type dash="'"/>
-	      </ref>
-	    </Msub>
-	  </tyConc>
-	</tyRule>
 	<tyRule name="M-Fn">
 	  <tyPre>
 	    <eq>

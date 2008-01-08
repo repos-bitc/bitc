@@ -5,7 +5,10 @@
   <sect1 id="eq-infer"
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-  <title>Equational Type Inference</title> 
+  <title>Type Inference</title> 
+  <p>
+    <leadin>Equational Presentation</leadin>
+  </p>
   <btypes:TYPE>        
     <grammar>
       <bnf desc="Types">
@@ -761,6 +764,102 @@
       </li>
     </ol>
   </definition>
+  <p>
+    <leadin>Eager-Unification Based Presentation</leadin>
+  </p>
+  <btypes:TYPE>        
+    <grammar>
+      <bnf desc="Unct. Types">
+	<sType/>
+	<alternatives>
+	  <tvar name="alpha"/>
+	  <unit/>
+	  <bool/>
+	  <fn M="yes"><type/><type/></fn>                  
+	</alternatives>
+      </bnf>
+      <bnfc desc="">
+	<alternatives>
+	  <ref><type/></ref>
+	  <mutable><type/></mutable>
+	  <pair><type/><type/></pair>
+	</alternatives>
+      </bnfc>
+      <bnf desc="Types">
+	<type/>
+	<alternatives>
+	  <sType/>
+	  <mbpair>
+	    <sType/>
+	    <sType/>
+	  </mbpair>
+	</alternatives>
+      </bnf>
+      <bnf desc="Constr. Type">
+	<aCtype/>
+	<alternatives>
+	  <type/>
+	  <ctype>
+	    <type/>
+	    <aCtset/>
+	  </ctype>
+	</alternatives>
+      </bnf>
+      <bnf desc="Type Scheme">          
+	<aTS/>
+	<alternatives>
+	  <aCtype/>
+	  <forall>                    
+	    <tvar name="alpha"/>
+	    <aTS/>
+	  </forall>
+	</alternatives>
+      </bnf>
+      <bnf desc="Constraints">
+	<constraint/>
+	<alternatives>
+	  <Pcst>
+	    <lKind/>
+	    <type/>
+	    <type/>
+	  </Pcst>
+	</alternatives>
+      </bnf>
+      <bnf desc="Constraint Sets">
+	<aCtset/>
+	<alternatives>
+	  <Empty/>
+	  <set>
+	    <plural>
+	      <constraint/>
+	    </plural>
+	  </set>
+	  <unin>
+	    <aCtset/>
+	    <aCtset/>
+	  </unin>
+	</alternatives>            
+      </bnf>
+      <bnf desc="Substitutions">            
+	<aSubMap/>            
+	<alternatives>
+	  <EmptySubst/>
+	  <SubMap>
+	    <tvar name="alpha"/>
+	    <type/>
+	  </SubMap>
+	  <SubMap>
+	    <lKind k="var"/>
+	    <lKind/>
+	  </SubMap>
+	  <compose>
+	    <aSubMap/>
+	    <aSubMap/>
+	  </compose>
+	</alternatives>
+      </bnf>
+    </grammar>
+  </btypes:TYPE>
 <!--   <definition id="close"> -->
 <!--     <title>Constraint Set Closure</title> -->
 <!--     <p> -->

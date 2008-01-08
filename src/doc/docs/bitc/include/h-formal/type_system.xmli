@@ -493,7 +493,7 @@
 	      <loc/>
 	      <type dash="'"/>
 	    </mapping>
-	    <gamma/>
+	    <store/>
 	  </in>
 	</Exists>          
       </btypes:TYPE> such that 

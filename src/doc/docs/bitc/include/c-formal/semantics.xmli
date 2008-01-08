@@ -107,19 +107,9 @@
   </btypes:TYPE>
   <p>
     The Operational semantics rules are shown in Figure&nbsp;<xref
-      ref="dyn_sem_horz"/>.
-    Separate execution
-    semantics are given for left and right execution (evaluation of
-    expressions that appear on the LHS and RHS of an assignment 
-    <btypes:TYPE>
-      <assign>
-	<aExpr num="l"/>
-	<aExpr num="r"/>
-      </assign>
-    </btypes:TYPE>) denoted by 
-    <btypes:TYPE><levalOp/></btypes:TYPE> and 
-    <btypes:TYPE><evalOp/></btypes:TYPE> respectively. 
-    <br/>
-    <br/>
+      ref="dyn_sem_horz"/>. The standard evaluation relation for
+    expressions is denoted by <btypes:TYPE><evalOp/></btypes:TYPE>,
+    and evaluation in a Lvalue context is given by the
+    <btypes:TYPE><levalOp/></btypes:TYPE> relation.
   </p>
   </sect1>
