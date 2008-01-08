@@ -6,7 +6,34 @@
   <font size="small">
     <btypes:TYPE
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-      <Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="S-Refl">
+	  <tyPre/>
+	  <tyConc>
+	    <Tsub>
+	      <type/>
+	      <type/>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="S-Trans">
+	  <tyPre>
+	    <Tsub>
+	      <type num="0"/>
+	      <type num="1"/>
+	    </Tsub>
+	    <Tsub>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </Tsub>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <type num="0"/>
+	      <type num="2"/>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>  
 	<tyRule name="S-Mut1">
 	  <tyPre/>
 	  <tyConc>
@@ -30,12 +57,30 @@
 	      <mutable>
 		<type/>
 	      </mutable>
+	      <type dash="'"/>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="S-Mut3">
+	  <tyPre>
+	    <Tsub>
+	      <type/>
+	      <type dash="'"/>
+	    </Tsub>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <mutable>
+		<type/>
+	      </mutable>
 	      <mutable>
 		<type dash="'"/>
 	      </mutable>
 	    </Tsub>
 	  </tyConc>
 	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="S-Ref">
 	  <tyPre>
 	    <eq>
@@ -102,33 +147,6 @@
 	    </Tsub>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="S-Refl">
-	  <tyPre/>
-	  <tyConc>
-	    <Tsub>
-	      <type/>
-	      <type/>
-	    </Tsub>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="S-Trans">
-	  <tyPre>
-	    <Tsub>
-	      <type num="0"/>
-	      <type num="1"/>
-	    </Tsub>
-	    <Tsub>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </Tsub>
-	  </tyPre>
-	  <tyConc>
-	    <Tsub>
-	      <type num="0"/>
-	      <type num="2"/>
-	    </Tsub>
-	  </tyConc>
-	</tyRule>  
       </Hrules>
     </btypes:TYPE>
   </font>

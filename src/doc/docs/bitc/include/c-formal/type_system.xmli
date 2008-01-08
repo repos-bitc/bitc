@@ -20,7 +20,7 @@
       <bnfc desc="">
 	<alternatives>
 	  <ref><type/></ref>
-	  <mutable><sType/></mutable>
+	  <mutable><type/></mutable>
 	  <pair><type/><type/></pair>
 	</alternatives>
       </bnfc>
@@ -233,6 +233,109 @@
       That is, the mutable type constructor is idempotent. 
     </p>
   </definition>
+  <definition id="structural_containment">
+    <title>Structural Containment</title>
+    <p>
+      We define a structural containment relation 
+      <btypes:TYPE>
+	<in>
+	  <type/>
+	  <solvable/>
+	</in>
+      </btypes:TYPE> as follows.
+      <btypes:TYPE>
+	<in>
+	  <type/>
+	  <type dash="'"/>
+	</in>
+      </btypes:TYPE> if
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> is structurally present as a part of 
+      <btypes:TYPE>
+	<type dash="'"/>
+      </btypes:TYPE>.
+      <btypes:TYPE>
+	<in>
+	  <type/>
+	  <aExpr/>
+	</in>
+      </btypes:TYPE> if
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> is structurally present as a part of  
+      <btypes:TYPE>
+	<aExpr/>
+      </btypes:TYPE>, as a type annotation.
+      <btypes:TYPE>
+	<in>
+	  <type/>
+	  <gamma/>
+	</in>
+      </btypes:TYPE> if
+      <btypes:TYPE>
+	<Exists>
+	  <in>
+	    <mapping>
+	      <id/>
+	      <type dash="'"/>
+	    </mapping>
+	    <gamma/>
+	  </in>
+	</Exists>          
+      </btypes:TYPE> such that 
+      <btypes:TYPE>
+	<in>
+	  <type/>
+	  <type dash="'"/>
+	</in>
+      </btypes:TYPE>.
+      <btypes:TYPE>
+	<in>
+	  <type/>
+	  <store/>
+	</in>
+      </btypes:TYPE> if
+      <btypes:TYPE>
+	<Exists>
+	  <in>
+	    <mapping>
+	      <loc/>
+	      <type dash="'"/>
+	    </mapping>
+	    <gamma/>
+	  </in>
+	</Exists>          
+      </btypes:TYPE> such that 
+      <btypes:TYPE>
+	<in>
+	  <type/>
+	  <type dash="'"/>
+	</in>
+      </btypes:TYPE>.
+      We write
+      <btypes:TYPE>
+	<in>
+	  <type/>
+	  <solvables/>
+	</in>
+      </btypes:TYPE> if
+      <btypes:TYPE>
+	<in>
+	  <type/>
+	  <solvable/>
+	</in>
+      </btypes:TYPE>, for any
+      <btypes:TYPE>
+	<in>       
+	  <solvable/>
+	  <set>
+	    <solvables/>
+	  </set>
+	</in>
+      </btypes:TYPE>.
+    </p>
+  </definition>
   <definition id="max_min">      
     <title>Max and Min Mutability</title>      
     <p> 
@@ -349,6 +452,46 @@
 	    </mutable>
 	  </rhs>
 	</equation>
+	<equation>
+	  <lhs>
+	    <maxz>
+	      <mbpair>
+		<tvar name="alpha"/>
+		<sType/>
+	      </mbpair>
+	    </maxz>
+	  </lhs>
+	  <rhs>
+	    <maxz>
+	      <sType/>
+	    </maxz>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <maxz>
+	      <mbpair>
+		<sType/>
+		<sType dash="'"/>
+	      </mbpair>
+	    </maxz>
+	    <grouping>
+	      <Forall>
+		<tvar name="alpha"/>
+	      </Forall>
+	      <text content=", "/>
+	      <neq>
+		<sType/>
+		<tvar name="alpha"/>
+	      </neq>
+	    </grouping>
+	  </lhs>
+	  <rhs>
+	    <maxz>
+	      <sType dash="'"/>
+	    </maxz>
+	  </rhs>
+	</equation>
       </VEqns>
     </btypes:TYPE> 
     <btypes:TYPE>
@@ -447,6 +590,46 @@
 	    </pair>
 	  </rhs>
 	</equation>
+	<equation>
+	  <lhs>
+	    <minz>
+	      <mbpair>
+		<tvar name="alpha"/>
+		<sType/>
+	      </mbpair>
+	    </minz>
+	  </lhs>
+	  <rhs>
+	    <minz>
+	      <sType/>
+	    </minz>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <minz>
+	      <mbpair>
+		<sType/>
+		<sType dash="'"/>
+	      </mbpair>
+	    </minz>
+	    <grouping>
+	      <Forall>
+		<tvar name="alpha"/>
+	      </Forall>
+	      <text content=", "/>
+	      <neq>
+		<sType/>
+		<tvar name="alpha"/>
+	      </neq>
+	    </grouping>
+	  </lhs>
+	  <rhs>
+	    <minz>
+	      <sType dash="'"/>
+	    </minz>
+	  </rhs>
+	</equation>
       </VEqns>
     </btypes:TYPE>
   </definition>
@@ -530,7 +713,7 @@
   </definition>
   <p>
     In terms of the copy-coercion rules shown in
-    Figure&nbsp;<xref ref="decl_rules"/>, we can define copy
+    figure&nbsp;<xref ref="subtype_rules"/>, we can define copy
     compatibility as: 
     <btypes:TYPE>
       <equiv>
@@ -590,109 +773,6 @@
       <text content="."/>
     </btypes:TYPE>
   </p>
-  <definition id="structural_containment">
-    <title>Structural Containment</title>
-    <p>
-      We define a structural containment relation 
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <solvable/>
-	</in>
-      </btypes:TYPE> as follows.
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <type dash="'"/>
-	</in>
-      </btypes:TYPE> if
-      <btypes:TYPE>
-	<type/>
-      </btypes:TYPE> is structurally present as a part of 
-      <btypes:TYPE>
-	<type dash="'"/>
-      </btypes:TYPE>.
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <aExpr/>
-	</in>
-      </btypes:TYPE> if
-      <btypes:TYPE>
-	<type/>
-      </btypes:TYPE> is structurally present as a part of  
-      <btypes:TYPE>
-	<aExpr/>
-      </btypes:TYPE>, as a type annotation.
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <gamma/>
-	</in>
-      </btypes:TYPE> if
-      <btypes:TYPE>
-	<Exists>
-	  <in>
-	    <mapping>
-	      <id/>
-	      <type dash="'"/>
-	    </mapping>
-	    <gamma/>
-	  </in>
-	</Exists>          
-      </btypes:TYPE> such that 
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <type dash="'"/>
-	</in>
-      </btypes:TYPE>.
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <store/>
-	</in>
-      </btypes:TYPE> if
-      <btypes:TYPE>
-	<Exists>
-	  <in>
-	    <mapping>
-	      <loc/>
-	      <type dash="'"/>
-	    </mapping>
-	    <gamma/>
-	  </in>
-	</Exists>          
-      </btypes:TYPE> such that 
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <type dash="'"/>
-	</in>
-      </btypes:TYPE>.
-      We write
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <solvables/>
-	</in>
-      </btypes:TYPE> if
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <solvable/>
-	</in>
-      </btypes:TYPE>, for any
-      <btypes:TYPE>
-	<in>       
-	  <solvable/>
-	  <set>
-	    <solvables/>
-	  </set>
-	</in>
-      </btypes:TYPE>.
-    </p>
-  </definition>
   <definition id="ftvs">
     <title>Free Type Variables</title>
     <p>
@@ -776,6 +856,23 @@
 	      </ftvs>                    
 	      <ftvs>
 		<type num="2"/>
+	      </ftvs>                    
+	    </unin>                
+	  </eq>          
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <mbpair>
+		<sType num="1"/>
+		<sType num="2"/>
+	      </mbpair>
+	    </ftvs>                                  
+	    <unin>
+	      <ftvs>
+		<sType num="1"/>
+	      </ftvs>                    
+	      <ftvs>
+		<sType num="2"/>
 	      </ftvs>                    
 	    </unin>                
 	  </eq>          

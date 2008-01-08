@@ -775,7 +775,7 @@
 <!-- 	<aCtset/>  -->
 <!--       </btypes:TYPE> produces an equivalent set -->
 <!--       of atomic constraints by using the copy coercion rules defined -->
-<!--       in Figure&nbsp;<xref ref="decl_rules"/> (note that this -->
+<!--       in figure&nbsp;<xref ref="decl_rules"/> (note that this -->
 <!--       conversion is total); and by explicitely adding all transitive -->
 <!--       relationships. This conversion does not affect the MPCs in  -->
 <!--       <btypes:TYPE> -->
@@ -1442,7 +1442,7 @@
 <!--   </definition> -->
 <!--   <p> -->
 <!--     The equational type inference algorithm is as shown in -->
-<!--     Figure&nbsp;<xref ref="eq_infer"/>.  -->
+<!--     figure&nbsp;<xref ref="eq_infer"/>.  -->
 <!--     The inference judgment  -->
 <!--     <btypes:TYPE> -->
 <!--       <TEjudge> -->

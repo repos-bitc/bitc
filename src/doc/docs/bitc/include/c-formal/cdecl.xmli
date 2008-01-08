@@ -382,10 +382,18 @@
 	  <tyPre>
 	    <Sat>
 	      <aCtset/>
-	      <Tsub>
-		<type dash="'"/>
-		<type/>
-	      </Tsub>
+	      <set>
+		<Tsub>
+		  <mutable>
+		    <type/>
+		  </mutable>
+		  <type dash="''"/>
+		</Tsub>
+		<Tsub>
+		  <type dash="'"/>
+		  <type dash="''"/>
+		</Tsub>
+	      </set>
 	    </Sat>
 	    <Sjudge name="lval">
 	      <assume/>
@@ -421,11 +429,11 @@
 	      <set>
 		<Tsub>
 		  <type dash="'"/>		
-		  <type/>
+		  <type dash="''"/>
 		</Tsub>
 		<Tsub>
-		  <type dash="''"/>
 		  <type/>
+		  <type dash="''"/>
 		</Tsub>
 	      </set>
 	    </Sat>
@@ -439,7 +447,7 @@
 		<aExpr/>
 	      </dup>
 	      <ref>
-		<type dash="''"/>
+		<type/>
 	      </ref>
 	    </Cjudge>
 	  </tyConc>
@@ -474,6 +482,132 @@
 		<aExpr/>
 	      </deref>
 	      <type/>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="C-Pair">
+	  <tyPre>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr num="1"/>
+	      <type num="1" dash="'"/>
+	    </Cjudge>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr num="2"/>
+	      <type num="2" dash="'"/>
+	    </Cjudge>
+	  </tyPre>
+	  <tyPre>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<Tsub>
+		  <type num="1" dash="'"/>
+		  <type num="1" dash="''"/>
+		</Tsub>
+		<Tsub>
+		  <type num="1"/>
+		  <type num="1" dash="''"/>
+		</Tsub>
+		<Tsub>
+		  <type num="2" dash="'"/>
+		  <type num="2" dash="''"/>
+		</Tsub>
+		<Tsub>
+		  <type num="2"/>
+		  <type num="2" dash="''"/>
+		</Tsub>
+	      </set>
+	    </Sat>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <Pair>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+	      </Pair>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="C-Fst">
+	  <tyPre>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr/>
+	      <type/>
+	    </Cjudge>
+	  </tyPre>
+	  <tyPre>
+	    <Sat>
+	      <aCtset/>
+	      <Tsub>
+		<type/>
+		<pair>
+		  <type num="1"/>
+		  <type num="2"/>
+		</pair>
+	      </Tsub>
+	    </Sat>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <fst>
+		<aExpr/>
+	      </fst>
+	      <type num="1"/>
+	    </Cjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="C-Snd">
+	  <tyPre>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <aExpr/>
+	      <type/>
+	    </Cjudge>
+	  </tyPre>
+	  <tyPre>
+	    <Sat>
+	      <aCtset/>
+	      <Tsub>
+		<type/>
+		<pair>
+		  <type num="1"/>
+		  <type num="2"/>
+		</pair>
+	      </Tsub>
+	    </Sat>
+	  </tyPre>
+	  <tyConc>
+	    <Cjudge>
+	      <aCtset/>
+	      <gamma/>
+	      <store/>
+	      <snd>
+		<aExpr/>
+	      </snd>
+	      <type num="2"/>
 	    </Cjudge>
 	  </tyConc>
 	</tyRule>

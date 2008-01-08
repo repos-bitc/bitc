@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <figure id="Msubtype_rules" fullwidth='yes' latex.placement="tbp">
+  <font size="small">
+    <btypes:TYPE
+      xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="M-Refl">
+	  <tyPre/>
+	  <tyConc>
+	    <Msub>
+	      <type/>
+	      <type/>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="M-Trans">
+	  <tyPre>
+	    <Msub>
+	      <type num="0"/>
+	      <type num="1"/>
+	    </Msub>
+	    <Msub>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <type num="0"/>
+	      <type num="2"/>
+	    </Msub>
+	  </tyConc>
+	</tyRule>  
+	<tyRule name="M-Mut1">
+	  <tyPre/>
+	  <tyConc>
+	    <Msub>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <type/>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="M-Mut2">
+	  <tyPre>
+	    <Msub>
+	      <type/>
+	      <type dash="'"/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <type dash="'"/>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="M-Mut3">
+	  <tyPre>
+	    <Msub>
+	      <type/>
+	      <type dash="'"/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <mutable>
+		<type dash="'"/>
+	      </mutable>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="M-May1">
+	  <tyPre>
+	    <!-- This rule MUST NOT be written with a minz(t) 
+	         on the RHS type, minz() on a maybe type a\t 
+	         returns minz(t) -->
+	    <Msub>
+	      <maxz>
+		<sType/>
+	      </maxz>
+	      <type/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbpair>
+		<tvar name="alpha"/>
+		<sType/>
+	      </mbpair>
+	      <type/>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="M-May2">
+	  <tyPre>
+	    <grouping>
+	      <forall>
+		<tvar name="alpha"/>
+	      </forall>
+	      <text content=", "/>
+	      <neq>
+		<sType/>
+		<tvar name="alpha"/>
+	      </neq>
+	    </grouping>
+	    <Msub>
+	      <sType/>
+	      <type/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbpair>
+		<sType/>
+		<sType dash="'"/>
+	      </mbpair>
+	      <type/>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="M-May3">
+	  <tyPre>
+	    <grouping>
+	      <forall>
+		<tvar name="alpha"/>
+	      </forall>
+	      <text content=", "/>
+	      <neq>
+		<sType/>
+		<tvar name="alpha"/>
+	      </neq>
+	    </grouping>
+	    <Msub>
+	      <type/>
+	      <sType/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <type/>
+	      <mbpair>
+		<sType/>
+		<sType dash="'"/>
+	      </mbpair>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="M-Ref">
+	  <tyPre>
+	    <eq>
+	      <type/>
+	      <type dash="'"/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <ref>
+		<type/>
+	      </ref>
+	      <ref>
+		<type dash="'"/>
+	      </ref>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="M-Fn">
+	  <tyPre>
+	    <eq>
+	      <minz>
+		<type num="1"/>
+	      </minz>
+	      <minz>
+		<type num="1" dash="'"/>
+	      </minz>
+	    </eq>
+	    <eq>
+	      <maxz>
+		<type num="2"/>
+	      </maxz>
+	      <maxz>
+		<type num="2" dash="'"/>
+	      </maxz>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <fn M="yes">
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	      <fn M="yes">
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </fn>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="M-Pair">
+	  <tyPre>
+	    <Msub>
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </Msub>
+	    <Msub>
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	      <pair>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </pair>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+  </font>
+  <caption><font size="small">Coercion Rules with Maybe Types</font></caption>
+  </figure>

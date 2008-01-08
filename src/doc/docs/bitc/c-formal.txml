@@ -62,12 +62,13 @@
     </p>
   </sect1>
   <xi:include href="include/c-formal/lang.xmli"/>
+  <xi:include href="include/c-formal/semantics.xmli"/>
   <xi:include href="include/c-formal/opsem.xmli"/>
-  <xi:include href="include/c-formal/subtype.xmli"/>
   <xi:include href="include/c-formal/locsem.xmli"/>
+  <xi:include href="include/c-formal/subtype.xmli"/>
+  <xi:include href="include/c-formal/Msubtype.xmli"/>
   <xi:include href="include/c-formal/cdecl.xmli"/>
   <xi:include href="include/c-formal/mdecl.xmli"/>
-  <xi:include href="include/c-formal/semantics.xmli"/>
   <xi:include href="include/c-formal/type_system.xmli"/>
   <xi:include href="include/c-formal/eq-infer.xmli"/>
   <xi:include href="include/c-formal/eq-unify.xmli"/>
