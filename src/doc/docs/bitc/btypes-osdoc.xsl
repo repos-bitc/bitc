@@ -783,13 +783,29 @@
       <xsl:choose>
 	<xsl:when test="position() = 1"/>
 	<xsl:when test="position() = last()">	
-	  <xsl:text>, </xsl:text>
-	  <xsl:if test="@and">
+	  <xsl:choose>
+	    <xsl:when test="../@sep">
+	      <xsl:value-of select="../@sep"/> 
+	      <xsl:text> </xsl:text>
+	    </xsl:when>
+	    <xsl:otherwise>
+	      <xsl:text>, </xsl:text>
+	    </xsl:otherwise>
+	  </xsl:choose>
+	  <xsl:if test="../@and">
 	    <xsl:text> and </xsl:text>
 	  </xsl:if>
 	</xsl:when>
 	<xsl:otherwise>
-	  <xsl:text>, </xsl:text>
+	  <xsl:choose>
+	    <xsl:when test="../@sep">
+	      <xsl:value-of select="../@sep"/> 
+	      <xsl:text> </xsl:text>
+	    </xsl:when>
+	    <xsl:otherwise>
+	      <xsl:text>, </xsl:text>
+	    </xsl:otherwise>
+	  </xsl:choose>
 	</xsl:otherwise>
       </xsl:choose>
       <xsl:apply-templates select="." mode="formula"/>	

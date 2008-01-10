@@ -6,7 +6,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
   <docinfo ptsz='default' latex.otheroptions="nocopyrightspace" latex.documentclass="sigplanconf">
-    <title>A Theory of Meta-Polymorphism in Stateful &lambda;&mdash;Calculus</title>
+    <title>A Theory of Well-founded First Class Mutability</title>
+<!--     <title>A Theory of Meta-Polymorphism in Stateful &lambda;&mdash;Calculus</title> -->
     <authorgroup>
       <author>
       	<firstname>Swaroop</firstname>
@@ -70,9 +71,11 @@
   <xi:include href="include/c-formal/cdecl.xmli"/>
   <xi:include href="include/c-formal/mdecl.xmli"/>
   <xi:include href="include/c-formal/type_system.xmli"/>
-  <xi:include href="include/c-formal/eq-helper.xmli"/>
   <xi:include href="include/c-formal/eq-infer.xmli"/>
   <xi:include href="include/c-formal/eq-unify.xmli"/>
+  <xi:include href="include/c-formal/hy-infer.xmli"/>
+  <xi:include href="include/c-formal/hy-unify.xmli"/>
+  <xi:include href="include/c-formal/hy-solve.xmli"/>
   <xi:include href="include/c-formal/equational.xmli"/>
   <nocite ref="sridhar2006plos"/>
   <bibliography>

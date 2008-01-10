@@ -154,6 +154,116 @@
       </eq>
     </btypes:TYPE>.        
   </p>
+  <p>
+    <leadin>Translations:</leadin>
+    <br/>
+    <btypes:TYPE>
+      <Forall>
+	<operator symbol="odot"/>
+      </Forall>
+      <text content=", "/>
+      <leadsto>
+	<DBrac>
+	  <op symbol="odot">
+	    <type num="1"/>
+	    <type num="2"/>
+	    <textit content=" ... "/>
+	    <type num="n"/>	      
+	  </op>
+	</DBrac>
+	<DBrac>
+	  <collection>
+	    <op symbol="odot">
+	      <type num="1"/>
+	      <type num="2"/>
+	    </op>
+	    <textit content=" ... "/>
+	    <op symbol="odot">
+	      <type num="n-1"/>	      
+	      <type num="n"/>
+	    </op>
+	  </collection>
+	</DBrac>
+      </leadsto>
+      <br/>
+      <leadsto>
+	<DBrac>
+	  <eq>
+	    <type num="1"/>
+	    <type num="2"/>
+	  </eq>
+	</DBrac>
+	<DBrac>
+	  <collection>
+	    <Tsub>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </Tsub>
+	    <Tsub>
+	      <type num="2"/>
+	      <type num="1"/>
+	    </Tsub>	      
+	  </collection>
+	</DBrac>
+      </leadsto>	
+      <br/>
+      <leadsto>
+	<DBrac>
+	  <ceq via="alpha">
+	    <type num="1"/>
+	    <type num="2"/>
+	  </ceq>
+	</DBrac>
+	<DBrac>
+	  <collection>
+	    <Tsub>
+	      <type num="1"/>
+	      <tvar name="alpha"/>
+	    </Tsub>	      
+	    <Tsub>
+	      <type num="2"/>
+	      <tvar name="alpha"/>
+	    </Tsub>
+	  </collection>
+	</DBrac>
+      </leadsto>		
+      <br/>
+      <leadsto>
+	<DBrac>
+	  <unf ac="yes">
+	    <aCtset/>
+	  </unf>
+	</DBrac>
+	<DBrac>
+	  <collection>
+	    <unf>
+	      <aCtset/>
+	    </unf>
+	    <pred name="acyclic">
+	      <aCtset/>
+	    </pred>	      
+	  </collection>
+	</DBrac>
+      </leadsto>
+      <br/>
+      <leadsto>
+	<DBrac>
+	  <unf cl="yes">
+	    <aCtset/>
+	  </unf>
+	</DBrac>
+	<DBrac>
+	  <unf>
+	    <TransClose>
+	      <paren>
+		<aCtset/>
+	      </paren>
+	    </TransClose>
+	  </unf>
+	</DBrac>
+      </leadsto>
+    </btypes:TYPE>
+  </p>
   <definition id="meta">      
     <title>Meta Constructors</title>      
     <p>

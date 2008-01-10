@@ -294,9 +294,10 @@
 
 <!ELEMENT collection            (%anything.group;*)>
 <!ATTLIST collection
-                                etc       yes #IMPLIED
-                                paren     yes #IMPLIED
-                                and       yes #IMPLIED
+                                etc       yes   #IMPLIED
+                                paren     yes   #IMPLIED
+                                and       yes   #IMPLIED
+                                sep       CDATA #IMPLIED
 >
 
 <!ELEMENT alternatives          (%anything.group;*)>

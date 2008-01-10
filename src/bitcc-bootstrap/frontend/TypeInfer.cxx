@@ -4347,6 +4347,12 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
     
   } /* switch */
   
+  if(ast->symType)
+    errStream << ast->loc << " [" << ast->atKwd() << "] " 
+	      << ast->asString() << ": "
+	      << ast->symType->asString() 
+	      << endl << endl; 
+  
   return errFree;
 }
 
