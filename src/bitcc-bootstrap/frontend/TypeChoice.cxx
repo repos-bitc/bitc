@@ -73,6 +73,10 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
 	    int mode,
 	    unsigned flags);
 
+std::string
+ctypeAsString(GCPtr<Type> t, GCPtr<Constraints> cset,
+	      bool showAllCts=false);
+  
 /**************************************************************/
 /*              Interface to the outside world                */
 /**************************************************************/
@@ -122,17 +126,35 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
 
   switch(Options::inferenceAlgorithm) {
   case inf_hm:
-    CHKERR(errFree, typeInfer(errStream, ast, gamma, instEnv, 
-			      impTypes, false, 
-			      new TCConstraints, flags, trail, 
-			      USE_MODE, TI_NONE));
-    break;
-  case inf_eq:
-    CHKERR(errFree, typeEqInfer(errStream, ast, gamma, instEnv, 
+    {
+      CHKERR(errFree, typeInfer(errStream, ast, gamma, instEnv, 
 				impTypes, false, 
 				new TCConstraints, flags, trail, 
 				USE_MODE, TI_NONE));
-    break;
+      break;
+    }
+  case inf_eq: 
+    {
+      CHKERR(errFree, typeEqInfer(errStream, ast, gamma, instEnv, 
+				  impTypes, false, 
+				  new TCConstraints, flags, trail, 
+				  USE_MODE, TI_NONE));
+      
+      
+      errStream << "- - - - - - - - - - - - - - - - - - - - - - - " << endl;
+      GCPtr<AST> mod = ast->child(0);
+      for(size_t i=0; i < mod->children->size(); i++) {
+	GCPtr<AST> ast = mod->child(i);
+	errStream << ast->atKwd() << std::endl;
+	if(ast->astType == at_define) {
+	  GCPtr<AST> id = ast->child(0)->child(0);
+	  errStream << id->asString() << ": "	
+		    << ctypeAsString(id->scheme->tau, id->scheme->tcc)
+		    << std::endl;
+	}
+      }
+      break;
+    }
   }
   
   CHKERR(errFree, checkImpreciseTypes(errStream, gamma, impTypes));

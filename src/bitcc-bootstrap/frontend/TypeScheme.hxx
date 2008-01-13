@@ -100,6 +100,8 @@ struct TypeScheme : public Countable {
   // Appends constraints that corrrespond to at least one
   // free variable in this scheme's ftvs to _tcc
   void addConstraints(GCPtr<TCConstraints> _tcc) const;
+  // or ones that correspond to any of the added predicates
+  void TransAddConstraints(GCPtr<TCConstraints> _tcc) const;
 
   //GCPtr<Type> type_copy();
   std::string asString(GCPtr<TvPrinter> tvP = new TvPrinter) const;

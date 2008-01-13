@@ -221,17 +221,17 @@ TypeScheme::addConstraints(GCPtr<TCConstraints> _tcc) const
 {
   if(tcc == NULL)
     return;
- 
+  
   GCPtr<CVector<GCPtr<Type> > > allftvs = new CVector<GCPtr<Type> >;
   tau->collectAllftvs(allftvs);
-
+  
   for(size_t i = 0; i < tcc->pred->size(); i++)    
     for(size_t j=0; j < allftvs->size(); j++)      
       if(tcc->Pred(i)->boundInType((*allftvs)[j])) {
 	_tcc->addPred(tcc->Pred(i));
 	break;
       }
-
+  
   //if(tcc->pred.size()) {
   // std::cout << tau->ast->loc << "AddConstraints("
   //	      << tau->asString() << ", ";    
@@ -244,3 +244,4 @@ TypeScheme::addConstraints(GCPtr<TCConstraints> _tcc) const
   //	      << std::endl;
   //}
 }
+

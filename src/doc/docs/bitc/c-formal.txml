@@ -75,7 +75,6 @@
   <xi:include href="include/c-formal/eq-unify.xmli"/>
   <xi:include href="include/c-formal/hy-infer.xmli"/>
   <xi:include href="include/c-formal/hy-unify.xmli"/>
-  <xi:include href="include/c-formal/hy-solve.xmli"/>
   <xi:include href="include/c-formal/equational.xmli"/>
   <nocite ref="sridhar2006plos"/>
   <bibliography>

@@ -283,7 +283,6 @@ public:
   bool isImmutableRefType();
   bool isMutable();
   bool isMaybe();
-  bool isMAYBE();
   bool isConcrete();
   bool isPrimaryType();
   bool isPrimInt();
@@ -301,8 +300,19 @@ public:
   /* Produce Type ty_union[rv] from ty_ucon[rv] or ty_uval[rv]
      ONLY typeArgs are polylated */
   GCPtr<Type> getUnionType();
-
+    
   size_t size();
+
+  /* Methods used in Equational Unification */
+  // Is this type Mutable upto function boundary?
+  bool isDeepMut();
+  // Is there no mutability upto function boundary?
+  // Type variables OK
+  bool isDeepImmut();
+  
+  // Is the type known to be Immutable upto function boundary?
+  // Type variables not OK
+  bool isDeepImmutable();
 
   /* Methods that can be used for various kinds of 
      comparisons between two types */
@@ -555,6 +565,8 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
 #define MARK19  0x040000u
 #define MARK20  0x080000u
 #define MARK21  0x100000u
+#define MARK22  0x200000u
+#define MARK23  0x400000u
 
 /* Flags used by Type-inference engine. 
    These flags are different from the Unifier's flags */

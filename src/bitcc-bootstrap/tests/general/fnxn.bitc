@@ -1,5 +1,11 @@
 (define f (lambda (x) x))
-(define k (set! f f))
+(define g (set! f f))
 
 ;; Cyclic type
 ;;(define f (lambda (x) f))
+
+
+f: (mutable 'g) / {(mutable 'g) < (fn ('c) 'd) , 'd < 'c, 'b < 'c, 'd < 'b}
+g: 'f / {'f < (), *('k171, 'f, 'f)}
+
+

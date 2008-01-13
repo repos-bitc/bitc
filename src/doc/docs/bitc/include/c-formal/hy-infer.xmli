@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
-               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
-]>
-<figure id="hm_infer" fullwidth='yes' latex.placement="tbp">
+<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" >
+<figure id="hy_infer" fullwidth='yes' latex.placement="tbp">
   <font size="small">
     <btypes:TYPE
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule name=" I-Unit">
+      <Hrules  rowsep="4pt" colsep="2">
+	<tyRule name="I-Unit">
 	  <tyPre/>
 	  <tyConc>
-	    <TIjudge>
+	    <TEjudge name="i">
 	      <assume>
-		<aSubMap/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -23,93 +21,64 @@
 		</tqExpr>
 	      </conclude>
 	      <constrain>
-		<collection sep=";">
-		  <Empty/>
-		  <aSubMap/>
-		</collection>
+		<Empty/>
 	      </constrain>
-	    </TIjudge>
+	    </TEjudge>
 	  </tyConc>                
 	</tyRule>   
-	<tyRule name="I-Hloc">
-	  <tyPre>
-	    <mapsto>
-	      <Subst>
-		<aSubMap/>
-		<store/>
-	      </Subst>
-	      <hLoc/>
-	      <type/>
-	    </mapsto>
-	  </tyPre>
+	<tyRule name="I-True">
+	  <tyPre/>
 	  <tyConc>
-	    <TIjudge>
+	    <TEjudge name="i">
 	      <assume>
-		<aSubMap/>
 		<gamma/>
 		<store/>
 	      </assume>
 	      <conclude>
 		<tqExpr>
-		  <hLoc/>
-		  <ref>
-		    <type/>
-		  </ref>
+		  <true/>
+		  <bool/>
 		</tqExpr>
 	      </conclude>
-	      <constrain>
-		<collection sep=";">
-		  <Empty/>
-		  <aSubMap/>
-		</collection>
+	      <constrain>                      
+		<Empty/>
 	      </constrain>
-	    </TIjudge>
+	    </TEjudge>
 	  </tyConc>
-	</tyRule>
-	<tyRule name="I-Sloc">
-	  <tyPre>
-	    <mapsto>
-	      <Subst>
-		<aSubMap/>
-		<store/>
-	      </Subst>
-	      <sLoc/>
-	      <type/>
-	    </mapsto>
-	  </tyPre>
+	</tyRule>   
+	<tyRule name="I-False">
+	  <tyPre/>
 	  <tyConc>
-	    <TIjudge>
+	    <TEjudge name="i">
 	      <assume>
-		<aSubMap/>
 		<gamma/>
 		<store/>
 	      </assume>
 	      <conclude>
 		<tqExpr>
-		  <sLoc/>                    
-		  <type/>                    
+		  <false/>
+		  <bool/>
 		</tqExpr>
 	      </conclude>
 	      <constrain>
-		<collection sep=";">
-		  <Empty/>
-		  <aSubMap/>
-		</collection>
+		<Empty/>
 	      </constrain>
-	    </TIjudge>
+	    </TEjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>
+      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule name="I-Id">
 	  <tyPre>
 	    <mapsto>
-	      <Subst>
-		<aSubMap/>
-		<gamma/>
-	      </Subst>
+	      <gamma/>
 	      <id/>
 	      <TS>
 		<tvars name="alpha"/>
-		<type/>
+		<ctype>
+		  <type/>
+		  <aCtset/>
+		</ctype>
 	      </TS>
 	    </mapsto>
 	    <models name="new">
@@ -118,7 +87,7 @@
 	    </models>
 	  </tyPre>
 	  <tyConc>
-	    <TIjudge>
+	    <TEjudge name="i">
 	      <assume>
 		<gamma/>
 		<store/>
@@ -133,54 +102,84 @@
 		  </subst>
 		</tqExpr>
 	      </conclude>
-	    </TIjudge>
+	      <constrain>
+		<subst>
+		  <aCtset/>
+		  <tvars name="alpha"/>
+		  <tvars name="beta"/>
+		</subst>
+	      </constrain>
+	    </TEjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule name=" I-True">
-	  <tyPre/>
+	<tyRule name="I-Hloc">
+	  <tyPre>
+	    <mapsto>
+	      <store/>
+	      <hLoc/>
+	      <type/>
+	    </mapsto>
+	  </tyPre>
 	  <tyConc>
-	    <TIjudge>
+	    <TEjudge name="i">
 	      <assume>
 		<gamma/>
 		<store/>
 	      </assume>
 	      <conclude>
 		<tqExpr>
-		  <true/>
-		  <bool/>
+		  <hLoc/>
+		  <ref>
+		    <type/>
+		  </ref>
 		</tqExpr>
 	      </conclude>
-	    </TIjudge>
+	      <constrain>
+		<Empty/>
+	      </constrain>
+	    </TEjudge>
 	  </tyConc>
-	</tyRule>   
-	<tyRule name="I-False">
-	  <tyPre/>
+	</tyRule>
+	<tyRule name="I-Sloc">
+	  <tyPre>
+	    <mapsto>
+	      <store/>
+	      <sLoc/>
+	      <type/>
+	    </mapsto>
+	  </tyPre>
 	  <tyConc>
-	    <TIjudge>
+	    <TEjudge name="i">
 	      <assume>
 		<gamma/>
 		<store/>
 	      </assume>
 	      <conclude>
 		<tqExpr>
-		  <false/>
-		  <bool/>
+		  <sLoc/>                    
+		  <type/>                    
 		</tqExpr>
 	      </conclude>
-	    </TIjudge>
+	      <constrain>
+		<Empty/>
+	      </constrain>
+	    </TEjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>        
+      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule name="I-Lambda">
 	  <tyPre>
-	    <TIjudge>
+	    <TEjudge name="i">
 	      <assume>
 		<extend>
 		  <gamma/>
 		  <mapping>
 		    <id/>
-		    <tvar name="alpha"/>
+		    <mbpair>
+		      <tvar name="alpha"/>
+		      <tvar name="beta"/>
+		    </mbpair>
 		  </mapping>
 		</extend>
 		<store/>
@@ -191,17 +190,22 @@
 		  <type/>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<aSubMap/>
-	      </propagate>
-	    </TIjudge>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
 	    <models name="new">
 	      <assume/>
-	      <tvar name="alpha"/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+		<tvar name="gamma"/>
+		<tvar name="delta"/>
+	      </grouping>
 	    </models>
 	  </tyPre>
 	  <tyConc>
-	    <TIjudge>
+	    <TEjudge name="i">
 	      <assume>
 		<gamma/>
 		<store/>
@@ -212,26 +216,205 @@
 		    <id/>
 		    <aExpr/>
 		  </lambda>
-		  <fn M="yes">		    
-		    <Subst>
-		      <aSubMap/>
+		  <fn M="yes">		
+		    <mbpair>
+		      <tvar name="gamma"/>
 		      <tvar name="alpha"/>
-		    </Subst>		    		    
-		    <type/>		    
+		    </mbpair>
+		    <mbpair>
+		      <tvar name="delta"/>
+		      <type/>
+		    </mbpair>
 		  </fn>
 		</tqExpr>
 	      </conclude>
-	      <propagate>		
-		<aSubMap/>		
-	      </propagate>
-	    </TIjudge>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="I-App">
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="1"/>
+		  <type num="1"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset num="1"/>                  
+	      </constrain>
+	    </TEjudge>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="2"/>
+		  <type num="2"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset num="2"/>                  
+	      </constrain>
+	    </TEjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+		<tvar name="gamma"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <apply>
+		    <aExpr num="1"/>
+		    <aExpr num="2"/>
+		  </apply>                 
+		  <tvar name="alpha"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<unin>
+		  <aCtset num="1"/>
+		  <aCtset num="2"/>
+		  <set>
+		    <Tsub>
+		      <type num="1"/>
+		      <fn M="yes">			
+			<tvar name="beta"/>						
+			<tvar name="gamma"/>			
+		      </fn>
+		    </Tsub>
+		    <Tsub>
+		      <type num="2"/>
+		      <tvar name="beta"/>
+		    </Tsub>
+		    <Tsub>
+		      <tvar name="gamma"/>
+		      <tvar name="alpha"/>
+		    </Tsub>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
 	  </tyConc>
 	</tyRule>
       </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="I-TqExpr">
+      <Hrules  rowsep="4pt" colsep="2">
+	<tyRule name="I-If">
 	  <tyPre>
-	    <TIjudge>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="1"/>
+		  <type num="1"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset num="1"/>                  
+	      </constrain>
+	    </TEjudge>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="2"/>
+		  <type num="2"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset num="2"/>                  
+	      </constrain>
+	    </TEjudge>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="3"/>
+		  <type num="3"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset num="3"/>                  
+	      </constrain>
+	    </TEjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>                    
+		  <if>
+		    <aExpr num="1"/>
+		    <aExpr num="2"/>
+		    <aExpr num="3"/>
+		  </if>          
+		  <tvar name="alpha"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<unin>
+		  <aCtset num="1"/>
+		  <aCtset num="2"/>
+		  <aCtset num="3"/>
+		  <set>
+		    <Tsub>
+		      <type num="1"/>
+		      <bool/>
+		    </Tsub>
+		    <ceq via="beta">
+		      <type num="2"/>
+		      <type num="3"/>
+		      <tvar name="alpha"/>
+		    </ceq>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules  rowsep="4pt" colsep="2">
+	<tyRule name="I-Tqexpr">
+	  <tyPre>
+	    <TEjudge name="i">
 	      <assume>
 		<gamma/>
 		<store/>
@@ -242,21 +425,13 @@
 		  <type dash="'"/>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<aSubMap num="i"/>
-	      </propagate>
-	    </TIjudge>
-	    <UNIFY>
-	      <type dash="'"/>              
-	      <Subst>
-		<aSubMap num="i"/>
-		<type/>
-	      </Subst>
-	      <aSubMap num="u"/>
-	    </UNIFY>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
 	  </tyPre>
 	  <tyConc>
-	    <TIjudge>
+	    <TEjudge name="i">
 	      <assume>
 		<gamma/>
 		<store/>
@@ -268,360 +443,27 @@
 		      <aExpr/>
 		      <type/>
 		    </tqExpr>  
-		  </paren>
-		  <Subst>
-		    <aSubMap num="u"/>
-		    <type dash="'"/>
-		  </Subst>
-		</tqExpr>
-	      </conclude>
-	      <propagate>
-		<scomp>
-		  <aSubMap num="i"/>
-		  <aSubMap num="u"/>
-		</scomp>
-	      </propagate>                
-	    </TIjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="I-Dup">
-	  <tyPre>
-	    <TIjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr/>
+		  </paren>        
 		  <type/>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<aSubMap/>
-	      </propagate>
-	    </TIjudge>
-	    <eq>
-	      <type dash="'"/>
-	      <mbpair>
-		<tvar name="alpha"/>
-		<type/>
-	      </mbpair>
-	    </eq>
-	    <models name="new">
-	      <assume/>
-	      <tvar name="alpha"/>
-	    </models>
-	  </tyPre>
-	  <tyConc>
-	    <TIjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <dup>
-		    <aExpr/>
-		  </dup>  
-		  <ref>
-		    <type dash="'"/>
-		  </ref>
-		</tqExpr>
-	      </conclude>                  
-	      <propagate>
-		<aSubMap/>
-	      </propagate>
-	    </TIjudge>
+	      <constrain>
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <eq>
+		      <type dash="'"/>
+		      <type/>
+		    </eq>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="I-App">
-	  <tyPre>
-	    <TIjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr num="1"/>
-		  <type num="1"/>
-		</tqExpr>
-	      </conclude>
-	      <propagate>
-		<aSubMap num="1"/>
-	      </propagate>
-	    </TIjudge>
-	    <TIjudge>
-	      <precond>
-		<aSubMap num="1"/>
-	      </precond>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr num="2"/>
-		  <type num="2"/>
-		</tqExpr>
-	      </conclude>
-	      <propagate>
-		<aSubMap num="2"/>
-	      </propagate>
-	    </TIjudge>
-	    <UNIFY>
-	      <Subst>
-		<aSubMap num="2"/>
-		<type num="1"/>
-	      </Subst>
-	      <mbpair>
-		<tvar name="beta"/>
-		<fn M="yes">
-		  <tvar name="delta"/>
-		  <tvar name="alpha"/>
-		</fn>
-	      </mbpair>
-	      <aSubMap num="f"/>
-	    </UNIFY>
-	  </tyPre>
-	  <tyPre>
-	    <!-- minz here is sufficient (no need for floor) 
-	    because we are unifying the argument, and we would have
-	    known all we can about the argument type (until a ref
-	    boundary) at this point -->
-	    <UNIFY>
-	      <type num="2"/>	      
-	      <mbpair>
-		<tvar name="gamma"/>		
-		<minz>
-		  <Subst>
-		    <aSubMap num="f"/>
-		    <tvar name="delta"/>
-		  </Subst>
-		</minz>
-	      </mbpair>
-	      <aSubMap num="a"/>
-	    </UNIFY>
-	    <!-- A minz() here will loose mutability information
-	    wrt identity function, etc. But this is all we can do 
-	    if we must keep inference deterministic. -->
-	    <eq>
-	      <type/>
-	      <mbpair>
-		<tvar name="epsiv"/>
-		<minz>
-		  <Subst>
-		    <scomp>
-		      <aSubMap num="a"/>
-		      <aSubMap num="f"/>
-		    </scomp>
-		    <tvar name="alpha"/>
-		  </Subst>
-		</minz>
-	      </mbpair>
-	    </eq>
-	    <models name="new">
-	      <assume/>
-	      <grouping>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-		<tvar name="gamma"/>
-		<tvar name="delta"/>
-		<tvar name="epsiv"/>
-	      </grouping>
-	    </models>
-	  </tyPre>
-	  <tyConc>
-	    <TIjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <apply>
-		    <aExpr num="1"/>
-		    <aExpr num="2"/>
-		  </apply>                 
-		  <type/>
-		</tqExpr>
-	      </conclude>
-	      <propagate>
-		<scomp>
-		  <aSubMap num="1"/>
-		  <aSubMap num="2"/>
-		  <aSubMap num="f"/>
-		  <aSubMap num="a"/>
-		</scomp>
-	      </propagate>
-	    </TIjudge>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="I-If">
-	  <tyPre>
-	    <TIjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr num="1"/>
-		  <type num="1"/>
-		</tqExpr>
-	      </conclude>
-	      <propagate>
-		<aSubMap num="1"/>
-	      </propagate>
-	    </TIjudge>
-	    <TIjudge>
-	      <precond>
-		<aSubMap num="1"/>
-	      </precond>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr num="2"/>
-		  <type num="2"/>
-		</tqExpr>
-	      </conclude>
-	      <propagate>
-		<aSubMap num="2"/>
-	      </propagate>
-	    </TIjudge>
-	    <TIjudge>
-	      <precond>
-		<scomp>
-		  <aSubMap num="1"/>		    
-		  <aSubMap num="2"/>
-		</scomp>
-	      </precond>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr num="3"/>
-		  <type num="3"/>
-		</tqExpr>
-	      </conclude>
-	      <propagate>
-		<aSubMap num="3"/>
-	      </propagate>
-	    </TIjudge>
-	    <models name="new">
-	      <assume/>
-	      <grouping>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-		<tvar name="gamma"/>
-		<tvar name="delta"/>
-		<tvar name="epsiv"/>
-	      </grouping>
-	    </models>
-	  </tyPre>
-	  <tyPre>
-	    <UNIFY>
-	      <Subst>
-		<aSubMap num="3"/>
-		<type num="2"/>
-	      </Subst>
-	      <mbpair>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-	      </mbpair>
-	      <aSubMap num="t"/>
-	    </UNIFY>
-	    <UNIFY>
-	      <Subst>
-		<aSubMap num="t"/>
-		<type num="3"/>
-	      </Subst>
-	      <mbpair>
-		<tvar name="gamma"/>
-		<Subst>
-		  <aSubMap num="c"/>		
-		  <tvar name="beta"/>
-		</Subst>
-	      </mbpair>
-	      <aSubMap num="f"/>
-	    </UNIFY>
-	    <UNIFY>
-	      <Subst>
-		<scomp>
-		  <aSubMap num="2"/>
-		  <aSubMap num="3"/>
-		  <aSubMap num="t"/>
-		  <aSubMap num="f"/>
-		</scomp>
-		<type num="1"/>
-	      </Subst>
-	      <mbpair>
-		<tvar name="delta"/>
-		<bool/>
-	      </mbpair>
-	      <aSubMap num="c"/>
-	    </UNIFY>
-	    <eq>
-	      <aSubMap/>
-	      <scomp>
-		<aSubMap num="1"/>
-		<aSubMap num="2"/>
-		<aSubMap num="3"/>
-		<aSubMap num="c"/>
-		<aSubMap num="t"/>
-		<aSubMap num="f"/>
-	      </scomp>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <TIjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>                    
-		  <if>
-		    <aExpr num="1"/>
-		    <aExpr num="2"/>
-		    <aExpr num="3"/>
-		  </if>  
-		  <mbpair>
-		    <tvar name="epsiv"/>
-		    <join>
-		      <Subst>
-			<aSubMap/>
-			<type num="2"/>
-		      </Subst>
-		      <Subst>
-			<aSubMap/>
-			<type num="3"/>
-		      </Subst>
-		    </join>
-		  </mbpair> 
-		</tqExpr>
-	      </conclude>
-	      <propagate>
-		<aSubMap/>
-	      </propagate>
-	    </TIjudge>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="I-Set">
 	  <tyPre>
-	    <TIjudge>
+	    <TEjudge name="i">
 	      <assume>
 		<gamma/>
 		<store/>
@@ -632,14 +474,11 @@
 		  <type num="1"/>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<aSubMap num="1"/>
-	      </propagate>
-	    </TIjudge>
-	    <TIjudge>
-	      <precond>
-		<aSubMap num="1"/>
-	      </precond>
+	      <constrain>
+		<aCtset num="1"/>
+	      </constrain>
+	    </TEjudge>
+	    <TEjudge name="i">
 	      <assume>
 		<gamma/>
 		<store/>
@@ -650,50 +489,24 @@
 		  <type num="2"/>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<aSubMap num="2"/>
-	      </propagate>
-	    </TIjudge>
-	    <models name="new">
-	      <assume/>
-	      <tvar name="alpha"/>
-	    </models>
-	  </tyPre>
-	  <tyPre>
-	    <UNIFY>
-	      <Subst>
-		<aSubMap num="2"/>
-		<type num="1"/>
-	      </Subst>
-	      <mutable>
-		<tvar name="alpha"/>
-	      </mutable>
-	      <aSubMap num="l"/>
-	    </UNIFY>
-	    <UNIFY>
-	      <Subst>
-		<aSubMap num="l"/>
-		<type num="2"/>
-	      </Subst>
-	      <mbpair>
-		<tvar name="beta"/>
-		<Subst>
-		  <scomp>
-		    <aSubMap num="2"/>
-		    <aSubMap num="l"/>
-		  </scomp>
-		  <type num="1"/>
-		</Subst>
-	      </mbpair>
-	      <aSubMap num="r"/>	    
-	    </UNIFY>
+	      <constrain>
+		<aCtset num="2"/>
+	      </constrain>
+	    </TEjudge>
 	    <Sjudge name="lval">
 	      <assume/>
 	      <aExpr num="1"/>
 	    </Sjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </grouping>
+	    </models>
 	  </tyPre>
 	  <tyConc>
-	    <TIjudge>
+	    <TEjudge name="i">
 	      <assume>
 		<gamma/>
 		<store/>
@@ -707,88 +520,32 @@
 		  <unit/>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<scomp>
-		  <aSubMap num="1"/>
-		  <aSubMap num="2"/>
-		  <aSubMap num="l"/>
-		  <aSubMap num="r"/>
-		</scomp>
-	      </propagate>
-	    </TIjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="I-Deref">
-	  <tyPre>
-	    <TIjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr/>
-		  <type/>
-		</tqExpr>
-	      </conclude>
-	      <propagate>
-		<aSubMap num="i"/>
-	      </propagate>
-	    </TIjudge>
-	    <models name="new">
-	      <assume/>
-	      <grouping>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-	      </grouping>
-	    </models>
-	  </tyPre>
-	  <tyPre>
-	    <UNIFY>
-	      <type/>
-	      <mbpair>
-		<tvar name="beta"/>
-		<ref>
-		  <tvar name="alpha"/>
-		</ref>
-	      </mbpair>
-	      <aSubMap num="u"/>
-	    </UNIFY>
-	  </tyPre>
-	  <tyConc>
-	    <TIjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>                      
-		  <deref>
-		    <aExpr/>
-		  </deref>
-		  <Subst>
-		    <scomp>
-		      <aSubMap num="i"/>
-		      <aSubMap num="u"/>
-		    </scomp>
-		    <tvar name="alpha"/>
-		  </Subst>
-		</tqExpr>
-	      </conclude>
-	      <propagate>
-		<scomp>
-		  <aSubMap num="i"/>
-		  <aSubMap num="u"/>
-		</scomp>
-	      </propagate>                  
-	    </TIjudge>
+	      <constrain>
+		<unin>
+		  <aCtset num="1"/>
+		  <aCtset num="2"/>
+		  <set>
+		    <eq>
+		      <type num="1"/>
+		      <mutable>
+			<tvar name="alpha"/>
+		      </mutable>
+		    </eq>
+		    <ceq via="beta">
+		      <type num="1"/>
+		      <type num="2"/>
+		    </ceq>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
 	  </tyConc>
 	</tyRule>
       </Hrules>
-      <Hrules colsep="2">
-	<tyRule name="I-Let [Tq]">
+      <Hrules  rowsep="4pt" colsep="2">
+	<tyRule name="I-Pair">
 	  <tyPre>
-	    <TIjudge>
+	    <TEjudge name="i">
 	      <assume>
 		<gamma/>
 		<store/>
@@ -799,94 +556,13 @@
 		  <type num="1"/>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<aSubMap num="1"/>
-	      </propagate>
-	    </TIjudge>
-	    <UNIFY>
-	      <Subst>
-		<aSubMap num="1"/>
-		<type/>
-	      </Subst>
-	      <mbpair>
-		<tvar name="alpha"/>
-		<type num="1"/>
-	      </mbpair>
-	      <aSubMap num="u"/>
-	    </UNIFY>
-	    <Sjudge name="sol">
+	      <constrain>
+		<aCtset num="1"/>
+	      </constrain>
+	    </TEjudge>
+	    <TEjudge name="i">
 	      <assume>
-		<aSubMap num="s"/>
-		<id/>
-		<aExpr num="2"/>
-	      </assume>
-	      <corUp>
-		<Subst>
-		  <scomp>
-		    <aSubMap num="1"/>
-		    <aSubMap num="u"/>
-		  </scomp>
-		  <type/>
-		</Subst>	    
-		<type dash="'"/>
-	      </corUp>
-	    </Sjudge>
-	    <eq>
-	      <aSubMap/>
-	      <scomp>
-		<aSubMap num="1"/>
-		<aSubMap num="u"/>
-		<aSubMap num="s"/>
-	      </scomp>
-	    </eq>
-	  </tyPre>
-	  <tyPre>
-	    <Sjudge name="gen">
-	      <assume>
-		<Subst>
-		  <aSubMap/>
-		  <gamma/>
-		</Subst>
-		<Subst> 
-		  <aSubMap/>
-		  <store/>
-		</Subst>
-		<Subst> 
-		  <aSubMap/>
-		  <aExpr num="1"/>
-		</Subst>
-	      </assume>
-	      <GEN>
-		<!-- This must not be canonical(t'): we must
-		     preserve meta-constructors -->
-		<type dash="'"/>
-		<aTS/>
-	      </GEN>       
-	    </Sjudge>
-	    <Sjudge name="ch">
-	      <assume>
-		<tqExpr>
-		  <id/>
-		  <aTS/>
-		</tqExpr>
-	      </assume>
-	      <eq>
-		<lKind k="var"/>
-		<lKind/>
-	      </eq>
-	    </Sjudge>	  
-	    <TIjudge>
-	      <precond>
-		<aSubMap/>
-	      </precond>
-	      <assume>
-		<extend>
-		  <gamma/>
-		  <mapping>
-		    <id/>
-		    <aTS/>
-		  </mapping>
-		</extend>
+		<gamma/>
 		<store/>
 	      </assume>
 	      <conclude>
@@ -895,24 +571,375 @@
 		  <type num="2"/>
 		</tqExpr>
 	      </conclude>
-	      <propagate>
-		<aSubMap num="2"/>
-	      </propagate>
-	    </TIjudge>
+	      <constrain>
+		<aCtset num="2"/>
+	      </constrain>
+	    </TEjudge>
 	    <models name="new">
 	      <assume/>
-	      <tvar name="alpha"/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+		<tvar name="gamma"/>
+		<tvar name="delta"/>
+	      </grouping>
 	    </models>
 	  </tyPre>
 	  <tyConc>
-	    <TIjudge>
+	    <TEjudge name="i">
 	      <assume>
 		<gamma/>
 		<store/>
 	      </assume>
 	      <conclude>
 		<tqExpr>
-		  <let kind="m">
+		  <Pair>
+		    <aExpr num="1"/>
+		    <aExpr num="2"/>
+		  </Pair>  
+		  <pair>
+		    <tvar name="alpha"/>
+		    <tvar name="beta"/>
+		  </pair>
+		</tqExpr>
+	      </conclude>                  
+	      <constrain>
+		<unin>
+		  <aCtset num="1"/>
+		  <aCtset num="2"/>
+		  <set>
+		    <ceq via="gamma">
+		      <tvar name="alpha"/>
+		      <type num="1"/>
+		    </ceq>
+		    <ceq via="delta">
+		      <tvar name="beta"/>
+		      <type num="2"/>
+		    </ceq>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="I-Fst">
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>                      
+		  <fst>
+		    <aExpr/>
+		  </fst>
+		  <tvar name="alpha"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>                    
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <Tsub>
+		      <type/>
+		      <pair>
+			<tvar name="alpha"/>
+			<tvar name="beta"/>
+		      </pair>
+		    </Tsub>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules  rowsep="4pt" colsep="2">
+	<tyRule name="I-Snd">
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>                      
+		  <snd>
+		    <aExpr/>
+		  </snd>
+		  <tvar name="beta"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>                    
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <Tsub>
+		      <type/>
+		      <pair>
+			<tvar name="alpha"/>
+			<tvar name="beta"/>
+		      </pair>
+		    </Tsub>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="I-Dup">
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <dup>
+		    <aExpr/>
+		  </dup>  
+		  <ref>
+		    <tvar name="alpha"/>
+		  </ref>
+		</tqExpr>
+	      </conclude>                  
+	      <constrain>
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <ceq via="beta">
+		      <tvar name="alpha"/>
+		      <type/>
+		    </ceq>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="I-Deref">
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	    <models name="new">
+	      <assume/>
+	      <tvar name="alpha"/>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>                      
+		  <deref>
+		    <aExpr/>
+		  </deref>
+		  <tvar name="alpha"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>                    
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <Tsub>
+		      <type/>
+		      <ref>
+			<tvar name="alpha"/>
+		      </ref>
+		    </Tsub>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules  rowsep="4pt" colsep="2">
+	<tyRule name="I-Let"> 
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="1"/>
+		  <type num="1"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset num="1"/>                  
+	      </constrain>
+	    </TEjudge>
+	    <judge name="Gen">
+	      <assume>
+		<store/>
+		<aExpr num="1"/>
+		<symbol name="kappa"/>
+		<unin>
+		  <aCtset num="1"/>  
+		  <set>
+		    <ceq via="gamma">
+		      <tvar name="beta"/>
+		      <type num="1"/>
+		    </ceq>
+		    <opt>
+		      <eq>
+			<tvar name="beta"/>
+			<type/>
+		      </eq>
+		    </opt>
+		  </set>
+		</unin>
+	      </assume>
+	      <conclude>
+		<GEN>
+		  <type/>
+		  <aTS/>
+		</GEN>
+	      </conclude>
+	      <propagate>
+		<aSubMap/>		  
+	      </propagate>
+	    </judge>
+	    <TEjudge name="i">
+	      <assume>
+		<extend>
+		  <Subst>
+		    <aSubMap/>
+		    <gamma/>
+		  </Subst>
+		  <mapping>
+		    <id/>
+		    <aTS/>
+		  </mapping>
+		</extend>
+		<Subst>
+		  <aSubMap/>
+		  <store/>
+		</Subst>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <Subst>
+		    <aSubMap/>
+		    <aExpr num="2"/>
+		  </Subst>
+		  <type num="2"/>
+		</tqExpr>
+-	      </conclude>
+	      <constrain>
+		<aCtset num="2"/>
+	      </constrain>
+	    </TEjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="beta"/>
+		<tvar name="gamma"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <let kind="k">
 		    <tqExpr optional="yes">
 		      <id/>
 		      <type/>
@@ -923,71 +950,195 @@
 		  <type num="2"/>
 		</tqExpr>
 	      </conclude>
-	      <propagate> 
+	      <constrain>        
+		<unin>
+		  <aCtset num="2"/>
+		  <set>
+		    <forall> 
+		      <in>
+			<SubMap>
+			  <tvar name="alpha"/>
+			  <type/>
+			</SubMap>
+			<aSubMap/>
+		      </in>
+		    </forall>
+		    <eq>
+		      <tvar name="alpha"/>
+		      <type/>
+		    </eq>
+		  </set>
+		  <set>
+		    <forall> 
+		      <in>
+			<SubMap>
+			  <lKind k="var"/>
+			  <lKind/>
+			</SubMap>
+			<aSubMap/>
+		      </in>
+		    </forall>
+		    <eq>
+		      <lKind k="var"/>
+		      <lKind/>
+		    </eq>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>        
+      </Hrules>
+      <Hrules>
+	<tyRule name="Gen-Val">
+	  <tyPre>
+	    <pred name="Value">
+	      <aExpr/>
+	    </pred>
+	    <eq>
+	      <unf cl="yes">
+		<unin>
+		  <aCtset/>
+		  <Pcst>
+		    <lKind k="var"/>
+		    <type/>
+		    <type/>
+		  </Pcst>
+		</unin>		  
+	      </unf>
+	      <Pair>
+		<aCtset dash="'"/>
+		<aSubMap/>
+	      </Pair>
+	    </eq>
+	    <eq>
+	      <type dash="'"/>
+	      <Subst>
+		<aSubMap/>
+		<type/>
+	      </Subst>
+	    </eq>
+	  </tyPre>
+	  <tyPre>
+	    <eq>
+	      <tvars name="alpha"/>	      
+	      <diff>
+		<paren>
+		  <unin>
+		    <ftvs><type dash="'"/></ftvs>
+		    <ftvs><aCtset dash="'"/></ftvs>
+		  </unin>
+		</paren>
+		<paren>
+		  <unin>
+		    <ftvs>
+		      <Subst>
+			<aSubMap/>
+			<gamma/>
+		      </Subst>
+		    </ftvs>
+		    <ftvs>
+		      <Subst>
+			<aSubMap/>
+			<store/>
+		      </Subst>
+		    </ftvs>
+		  </unin>
+		</paren>
+	      </diff>
+	    </eq>
+	    <eq>
+	      <aTS/>
+	      <TS>
+		<tvars name="alpha"/>
+		<ctype>
+		  <type dash="'"/>
+		  <aCtset dash="'"/>
+		</ctype>
+	      </TS>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <judge name="Gen">
+	      <assume>
+		<gamma/>
+		<store/>
+		<aExpr num="1"/>
+		<lKind k="var"/>
+		<aCtset/>
+	      </assume>
+	      <conclude>
+		<GEN>
+		  <type/>
+		  <aTS/>
+		</GEN>    
+	      </conclude>   
+	      <propagate>
+		<aSubMap/>		  
+	      </propagate>	      
+	    </judge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="Gen-Exp">
+	  <tyPre>
+	    <pred name="Expansive">
+	      <aExpr/>
+	    </pred>
+	  </tyPre>
+	  <tyPre>
+	    <eq>
+	      <unf cl="yes">
+		<aCtset/>
+	      </unf>
+	      <Pair>
+		<aCtset dash="'"/>
+		<aSubMap/>
+	      </Pair>
+	    </eq>
+	    <eq>
+	      <type dash="'"/>
+	      <Subst>
+		<aSubMap/>
+		<type/>
+	      </Subst>
+	    </eq>
+	    <eq>
+	      <type num="g"/>
+	      <ctype>
+		<type dash="'"/>
+		<aCtset dash="'"/>
+	      </ctype>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <judge name="Gen">
+	      <assume>
+		<gamma/>
+		<store/>
+		<aExpr num="1"/>
+		<lKind k="var"/>
+		<aCtset/>
+	      </assume>
+	      <conclude>
+		<GEN>
+		  <type/>
+		  <type num="g"/>
+		</GEN>    
+	      </conclude>   
+	      <propagate>
 		<compose>
 		  <aSubMap/>
 		  <SubMap>
 		    <lKind k="var"/>
-		    <lKind/>
+		    <lKind k="mono"/>
 		  </SubMap>
-		  <aSubMap num="2"/>
-		</compose>		    
-	      </propagate>
-	    </TIjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <Sjudge name="loc">
-	      <assume/>
-	      <tqExpr>
-		<id/>
-		<aTS/>	
-	      </tqExpr>
-	    </Sjudge>	
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="ch">
-	      <assume>
-		<tqExpr>
-		  <id/>
-		  <aTS/>
-		</tqExpr>
-	      </assume>
-	      <eq>
-		<lKind k="var"/>
-		<lKind k="mono"/>
-	      </eq>
-	    </Sjudge>	  
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <Sjudge name="term">
-	      <assume/>
-	      <tqExpr>
-		<id/>
-		<aTS/>	
-	      </tqExpr>
-	    </Sjudge>	
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="ch">
-	      <assume>
-		<tqExpr>
-		  <id/>
-		  <aTS/>
-		</tqExpr>
-	      </assume>
-	      <eq>
-		<lKind k="var"/>
-		<lKind k="poly"/>
-	      </eq>
-	    </Sjudge>	  
+		</compose>
+	      </propagate>	      
+	    </judge>
 	  </tyConc>
 	</tyRule>
       </Hrules>
     </btypes:TYPE>
   </font>
-  <caption><font size="small">Type Inference Rules.</font></caption>
+  <caption>Equational Inference Rules</caption>
 </figure>

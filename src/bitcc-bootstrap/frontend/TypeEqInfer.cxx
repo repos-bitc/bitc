@@ -66,34 +66,17 @@
 			(trail), (mode), (flags))));		\
   }while(0)
 
-
-// For debugging only.
-GCPtr<TvPrinter> debugTvp = new TvPrinter;
-static std::string
-ctypeAsString(GCPtr<Type> t, GCPtr<Constraints> cset)
-{
-  stringstream ss;
-  ss << t->asString(debugTvp);
-  if(cset->size()) {
-    ss << " / {";
-    for(size_t i=0; i < cset->size(); i++) {
-      if(i > 0)
-	ss << ", ";
-      ss << cset->Pred(i)->asString(debugTvp);
-    }
-    ss << "}";
-  }
-  return ss.str();
-}
-
-
 #define PRINT(out, ast, ct)				\
   do {							\
     out << "[" << ast->atKwd() << "]"			\
 	<< ast->asString() << " : "			\
-	<< ctypeAsString(ast->symType, ct)		\
+	<< ctypeAsString(ast->symType, ct, true)	\
 	<< std::endl;					\
   } while(0)
+
+std::string
+ctypeAsString(GCPtr<Type> t, GCPtr<Constraints> cset,
+	      bool showAllCts=false);
 
 
 /**************************************************************/
@@ -485,20 +468,24 @@ typeEqInfer(std::ostream& errStream, GCPtr<AST> ast,
       // 				     declTS, ident->scheme, uflags, true));	
       
       ast->symType = ast->child(0)->symType;
-
+      
       GCPtr<AST> id = ast->getID();
+
+      addPcst(ast, id->symType, currTcc);
+      
       errStream << "[define]"		
-		<< id->asString() << " : "	
-		<< ctypeAsString(id->symType, currTcc)
-		<< ast->symType->asString(debugTvp)
+		<< id->asString() << ": "	
+		<< ctypeAsString(id->symType, currTcc, true)
 		<< std::endl;
       
       EqUnify(errStream, currTcc, trail);
       errStream << "  UNF:"
-		<< id->asString() << " : "
-		<< ctypeAsString(id->symType, currTcc)
+		<< id->asString() << ": "
+		<< ctypeAsString(id->symType, currTcc, true)
 		<< std::endl;
       
+      id->scheme = new TypeScheme(id->symType, currTcc);
+
       //PRINT(errStream, ast, currTcc);
       break;
     }

@@ -369,9 +369,13 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
     
   case ty_pcst:
     {
-      ss << "(*";
-      for(size_t i=0; i<t->components->size(); i++)
+      ss << "*(";
+      for(size_t i=0; i<t->components->size(); i++) {
+	if(i > 0)
+	  ss << ", ";
 	ss << t->CompType(i)->asString(tvP, traverse);
+      }
+      ss << ")";
       break;
     }
 
@@ -464,3 +468,69 @@ Instance::asString() const
 {
   return ts->tau->asString();
 }
+
+static void
+appendAllFtvs(GCPtr<CVector<GCPtr<Type> > > allftvs,
+	      GCPtr<Type> t)
+{
+  GCPtr<CVector<GCPtr<Type> > > tftvs = new CVector<GCPtr<Type> >;
+  t->collectAllftvs(tftvs);
+  
+  for(size_t i=0; i < tftvs->size(); i++) {
+    GCPtr<Type> ftv = (*tftvs)[i]->getType();
+    if(!allftvs->contains(ftv))
+      allftvs->append(ftv);
+  }
+}
+
+static void
+collectRelevantCts(GCPtr<Type> tau, GCPtr<TCConstraints> from, 
+		   GCPtr<TCConstraints> to)
+{
+  GCPtr<CVector<GCPtr<Type> > > allftvs = new CVector<GCPtr<Type> >;
+  tau->collectAllftvs(allftvs);
+  
+  bool added=false;
+  do {
+    added=false;
+    for(size_t i = 0; i < from->pred->size(); i++) {
+      GCPtr<Constraint> ct = from->Pred(i);
+      for(size_t j=0; j < allftvs->size(); j++)      
+	if(ct->boundInType((*allftvs)[j]) && !to->contains(ct)) {
+	  to->addPred(ct);
+	  appendAllFtvs(allftvs, ct);
+	  added=true;
+	  break;
+	}
+    }
+  }while(added);
+}
+
+// For debugging only.
+GCPtr<TvPrinter> debugTvp = new TvPrinter;
+
+std::string
+ctypeAsString(GCPtr<Type> t, GCPtr<Constraints> cset, 
+	      bool showAllCts=false)
+{
+  stringstream ss;
+  ss << t->asString(debugTvp);
+  
+  if(!showAllCts) {
+    GCPtr<Constraints> cset1 = new Constraints;
+    collectRelevantCts(t, cset, cset1);
+    cset = cset1;
+  }
+  
+  if(cset->size()) {
+    ss << " / {";
+    for(size_t i=0; i < cset->size(); i++) {
+      if(i > 0)
+	ss << ", ";
+      ss << cset->Pred(i)->asString(debugTvp);
+    }
+    ss << "}";
+  }
+  return ss.str();
+}
+

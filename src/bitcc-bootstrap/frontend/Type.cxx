@@ -496,6 +496,78 @@ Type::isUType()
 }
 
 
+bool 
+Type::isDeepMut()
+{
+  return !isDeepImmut();
+}
+
+bool
+Type::isDeepImmut()
+{
+  GCPtr<Type> t = getType();
+  
+  if(t->mark & MARK22)
+    return true;
+  
+  t->mark |= MARK22;
+  
+  if(t->kind == ty_mutable)
+    return false;
+  
+  if(t->kind == ty_fn)
+    return true;
+  
+  for(size_t i=0; i < t->components->size(); i++)
+    if(!t->CompType(i)->isDeepImmut())
+      return false;
+  
+  for(size_t i=0; i < t->typeArgs->size(); i++)
+    if(!t->TypeArg(i)->isDeepImmut())
+      return false;
+  
+  if(t->fnDeps)
+    for(size_t i=0; i < t->fnDeps->size(); i++)
+      if(!t->FnDep(i)->isDeepImmut())
+	return false;
+  
+  t->mark &= ~MARK22;
+  return true;
+}
+  
+bool 
+Type::isDeepImmutable()
+{
+  GCPtr<Type> t = getType();
+  
+  if(t->mark & MARK23)
+    return true;
+  
+  t->mark |= MARK23;
+  
+  if(t->kind == ty_mutable || t->kind == ty_tvar)
+    return false;
+  
+  if(t->kind == ty_fn)
+    return true;
+  
+  for(size_t i=0; i < t->components->size(); i++)
+    if(!t->CompType(i)->isDeepImmut())
+      return false;
+  
+  for(size_t i=0; i < t->typeArgs->size(); i++)
+    if(!t->TypeArg(i)->isDeepImmut())
+      return false;
+  
+  if(t->fnDeps)
+    for(size_t i=0; i < t->fnDeps->size(); i++)
+      if(!t->FnDep(i)->isDeepImmut())
+	return false;
+  
+  t->mark &= ~MARK23;
+  return true;  
+}
+
 /* Produce Type ty_union[rv] from ty_ucon[rv] or ty_uval[rv]
    ONLY typeArgs are populated */
 GCPtr<Type> 

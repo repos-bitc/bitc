@@ -2746,6 +2746,13 @@
   <!-- conclude -->
   <xsl:template match="conclude" mode="formula">
     <xsl:choose>
+      <xsl:when test= "../@name">
+	<xsl:call-template name="print.derives">
+	  <xsl:with-param name="print.derives.name">
+	    <xsl:value-of select="../@name"/>
+	  </xsl:with-param> 
+	</xsl:call-template>
+      </xsl:when>
       <xsl:when test= "parent::TIjudge">
 	<xsl:call-template name="print.infer"/>
       </xsl:when>
@@ -2753,11 +2760,7 @@
 	<xsl:call-template name="print.eqinfer"/>
       </xsl:when>
       <xsl:otherwise>
-	<xsl:call-template name="print.derives">
-	  <xsl:with-param name="print.derives.name">
-	    <xsl:value-of select="../@name"/>
-	  </xsl:with-param> 
-	</xsl:call-template>    	
+	<xsl:call-template name="print.derives"/>
       </xsl:otherwise>
     </xsl:choose>
     <xsl:apply-templates mode="formula"/>
