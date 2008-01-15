@@ -170,12 +170,14 @@ EqUnify(std::ostream& errStream, GCPtr<Constraints> cset,
 	{
 	  GCPtr<Type> lhs = ct->CompType(0)->getType();
 	  GCPtr<Type> rhs = ct->CompType(1)->getType();
-	  
-	  /* U('a <: 'a) 
-	     U(unit <: unit) 
-	     U(bool <: bool) 	 
-	     U(int <: int),  ... etc */
+
+	  /* U(t <: t) */
 	  if(lhs == rhs) {
+	    ct->flags |= CT_REMOVE;
+	    break;
+	  }
+	  
+	  if((lhs->kind == rhs->kind) && lhs->isBaseConstType()) {
 	    ct->flags |= CT_REMOVE;
 	    break;
 	  }
@@ -210,10 +212,10 @@ EqUnify(std::ostream& errStream, GCPtr<Constraints> cset,
 	  }
 	  
 	  /* U(t <: 'a), t = minz(t), forall 'b, t != 'b */
-	  if((lhs->kind == ty_tvar) && (rhs->kind != ty_tvar) &&
-	     rhs->isMinMutable()) {
+	  if((rhs->kind == ty_tvar) && (lhs->kind != ty_tvar) &&
+	     lhs->isMinMutable()) {
 	    ct->flags |= CT_REMOVE;
-	    trail->subst(lhs, rhs);
+	    trail->subst(rhs, lhs);
 	    break;
 	  }
 	  
@@ -254,6 +256,15 @@ EqUnify(std::ostream& errStream, GCPtr<Constraints> cset,
 	    break;
 	  }
 	  
+	  /* U(Mt1 <: Mt2 */ 
+	  if((lhs->kind == ty_mutable) && (rhs->kind != ty_tvar)) {
+	    assert(rhs->kind != ty_mutable);
+	    ct->flags |= CT_REMOVE;
+	    
+	    addSubCst(ct->ast, lhs->CompType(0), rhs, cset);
+	    break;
+	  }
+
 	  /* U(t11xt12 <: t21xt22 */ 
 	  /* Pairs tbd */
 	  

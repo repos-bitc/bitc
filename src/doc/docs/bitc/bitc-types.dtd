@@ -228,6 +228,8 @@
 <!ELEMENT maxz                    %anything.group;>
 <!ELEMENT minzOp                  EMPTY>
 <!ELEMENT minz                    %anything.group;>
+<!ELEMENT mmbOp                   EMPTY>
+<!ELEMENT mmb                    %anything.group;>
 
 <!-- More or less generality -->
 <!ELEMENT spOp                    EMPTY>
@@ -627,8 +629,12 @@
 <!ATTLIST MBpair
                               break       CDATA   #IMPLIED
 >
-<!ELEMENT mbpair               (%anytype.group;, %h_set.group;)>
+<!ELEMENT mbpair             (%anytype.group;, %h_set.group;)>
 <!ATTLIST mbpair
+                              break       CDATA   #IMPLIED
+>
+<!ELEMENT MBPAIR              (%anytype.group;, %h_set.group;)>
+<!ATTLIST MBPAIR
                               break       CDATA   #IMPLIED
 >
 

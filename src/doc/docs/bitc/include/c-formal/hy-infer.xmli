@@ -176,10 +176,10 @@
 		  <gamma/>
 		  <mapping>
 		    <id/>
-		    <mbpair>
+		    <MBPAIR>
 		      <tvar name="alpha"/>
 		      <tvar name="beta"/>
-		    </mbpair>
+		    </MBPAIR>
 		  </mapping>
 		</extend>
 		<store/>
@@ -212,19 +212,19 @@
 	      </assume>
 	      <conclude>
 		<tqExpr>
-		  <lambda> 
+		  <lambda>
 		    <id/>
 		    <aExpr/>
 		  </lambda>
 		  <fn M="yes">		
-		    <mbpair>
+		    <MBPAIR>
 		      <tvar name="gamma"/>
 		      <tvar name="alpha"/>
-		    </mbpair>
-		    <mbpair>
+		    </MBPAIR>
+		    <MBPAIR>
 		      <tvar name="delta"/>
 		      <type/>
-		    </mbpair>
+		    </MBPAIR>
 		  </fn>
 		</tqExpr>
 	      </conclude>
@@ -272,6 +272,8 @@
 		<tvar name="alpha"/>
 		<tvar name="beta"/>
 		<tvar name="gamma"/>
+		<tvar name="delta"/>
+		<tvar name="epsiv"/>
 	      </grouping>
 	    </models>
 	  </tyPre>
@@ -287,7 +289,10 @@
 		    <aExpr num="1"/>
 		    <aExpr num="2"/>
 		  </apply>                 
-		  <tvar name="alpha"/>
+		  <MBPAIR>
+		    <tvar name="epsiv"/>
+		    <tvar name="gamma"/>			
+		  </MBPAIR>
 		</tqExpr>
 	      </conclude>
 	      <constrain>
@@ -295,21 +300,23 @@
 		  <aCtset num="1"/>
 		  <aCtset num="2"/>
 		  <set>
-		    <Tsub>
+		    <eq>
 		      <type num="1"/>
-		      <fn M="yes">			
-			<tvar name="beta"/>						
-			<tvar name="gamma"/>			
-		      </fn>
-		    </Tsub>
-		    <Tsub>
+		      <MBPAIR>
+			<tvar name="alpha"/>
+			<fn M="yes">			
+			  <tvar name="beta"/>						
+			  <tvar name="gamma"/>			
+			</fn>
+		      </MBPAIR>
+		    </eq>
+		    <eq>
 		      <type num="2"/>
-		      <tvar name="beta"/>
-		    </Tsub>
-		    <Tsub>
-		      <tvar name="gamma"/>
-		      <tvar name="alpha"/>
-		    </Tsub>
+		      <MBPAIR>
+			<tvar name="delta"/>
+			<tvar name="beta"/>
+		      </MBPAIR>
+		    </eq>
 		  </set>
 		</unin>
 	      </constrain>

@@ -553,6 +553,19 @@
     <xsl:call-template name="print.params"/>
   </xsl:template>
 
+  <!-- mmbOp -->
+  <xsl:template match="mmbOp" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>xdtri;</xsl:text>
+  </xsl:template>
+  <!-- mmb -->
+  <xsl:template match="mmb" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rtrif;</xsl:text>
+    <xsl:call-template name="print.params"/>
+  </xsl:template>
+
+
   <!-- spOp -->
   <xsl:template match="spOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -1352,41 +1365,16 @@
 
   <!-- mbpair -->
   <xsl:template match="mbpair" mode="formula">
-    <xsl:variable name="mbpair1.paren" 
-      select="(*[1] = mbpair) or (*[1] = fn) or (*[1] = ref)"/>
-    <xsl:variable name="mbpair2.paren" 
-      select="(*[2] = mbpair) or (*[2] = fn) or (*[2] = ref)"/>
-    <xsl:variable name="mbpair.paren" 
-      select="(.. = fn) or (.. = mbpair) or (.. = ref)"/>
-
-    <xsl:if test="$mbpair.paren">
-      <xsl:text>(</xsl:text>
-    </xsl:if>
-    
-    <xsl:if test="$mbpair1.paren">
-      <xsl:text>(</xsl:text>
-    </xsl:if>
-    <xsl:apply-templates select="*[1]" mode="formula"/>	
-    <xsl:if test="$mbpair1.paren">
-      <xsl:text>)</xsl:text>
-    </xsl:if>
-
-    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>drarr;</xsl:text>
-
-    <xsl:if test="$mbpair2.paren">
-      <xsl:text>(</xsl:text>
-    </xsl:if>
-    <xsl:apply-templates select="*[2]" mode="formula"/>	
-    <xsl:if test="$mbpair2.paren">
-      <xsl:text>)</xsl:text>
-    </xsl:if>
-
-    <xsl:if test="$mbpair.paren">
-      <xsl:text>)</xsl:text>
-    </xsl:if>
+    <xsl:call-template name="print.maybe"/>
   </xsl:template>    
 
+  <!-- MBPAIR -->
+  <xsl:template match="MBPAIR" mode="formula">
+    <xsl:call-template name="print.maybe">
+      <xsl:with-param name="print.maybe.double">yes</xsl:with-param>
+    </xsl:call-template>
+  </xsl:template>
+  
   <!-- MBpair -->
   <xsl:template match="MBpair" mode="formula">
     <xsl:text>[[</xsl:text>
@@ -3896,6 +3884,60 @@
     <xsl:call-template name="print.children"/>
     <xsl:text>)</xsl:text>
   </xsl:template>  
+
+  <!-- Print  maybe types -->
+  <xsl:template name="print.maybe">
+    <xsl:param name="print.maybe.double"/>
+    <xsl:variable name="mbpair1.paren" 
+      select="(*[1] = mbpair) or (*[1] = fn) or (*[1] = ref)"/>
+    <xsl:variable name="mbpair2.paren" 
+      select="(*[2] = mbpair) or (*[2] = fn) or (*[2] = ref)"/>
+    <xsl:variable name="mbpair.paren" 
+      select="(.. = fn) or (.. = mbpair) or (.. = ref)"/>
+
+    <xsl:if test="$mbpair.paren">
+      <xsl:text>(</xsl:text>
+    </xsl:if>
+    
+    <xsl:if test="$mbpair1.paren">
+      <xsl:text>(</xsl:text>
+    </xsl:if>
+    <xsl:apply-templates select="*[1]" mode="formula"/>	
+    <xsl:if test="$mbpair1.paren">
+      <xsl:text>)</xsl:text>
+    </xsl:if>
+    
+    <xsl:choose>
+      <xsl:when test="$print.maybe.double">
+	<xsl:call-template name="print.space"/>	  
+	<xsl:text>!`</xsl:text>
+	<xsl:call-template name="print.space"/>	  
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:call-template name="print.space"/>	  
+	<xsl:text>!</xsl:text>
+	<xsl:call-template name="print.space"/>	  
+      </xsl:otherwise>
+    </xsl:choose>
+    
+<!-- 	<xsl:text disable-output-escaping="yes">&amp;</xsl:text> -->
+<!-- 	<xsl:text>dlarr;</xsl:text> -->
+<!-- 	<xsl:text disable-output-escaping="yes">&amp;</xsl:text> -->
+<!-- 	<xsl:text>drarr;</xsl:text> -->
+
+    
+    <xsl:if test="$mbpair2.paren">
+      <xsl:text>(</xsl:text>
+    </xsl:if>
+    <xsl:apply-templates select="*[2]" mode="formula"/>	
+    <xsl:if test="$mbpair2.paren">
+      <xsl:text>)</xsl:text>
+    </xsl:if>
+
+    <xsl:if test="$mbpair.paren">
+      <xsl:text>)</xsl:text>
+    </xsl:if>
+  </xsl:template>
 
   <!-- Print n spaces -->  
   <xsl:template name="print.spaces">

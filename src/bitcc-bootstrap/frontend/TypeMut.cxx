@@ -456,11 +456,28 @@ Type::isMaxMutable()
   return strictlyEquals(maximizeMutability());
 }
 
+extern GCPtr<TvPrinter> debugTvp;
 bool
 Type::isMinMutable()
 {
   return strictlyEquals(minimizeMutability());
+  //   GCPtr<Type> min = minimizeMutability();
+  //   std::cout << "**  t = " << asString(debugTvp) 
+  // 	    << std::endl;
+  //   std::cout << "  min = " << min->asString(debugTvp) 
+  // 	    << std::endl;
+  //   bool isMin = strictlyEquals(min);
+  //   if(isMin)
+  //     std::cout << "   [MINIMAL]" << min->asString(debugTvp) 
+  // 	      << std::endl;
+  //   else
+  //     std::cout << "   [NOT MINIMAL]" << min->asString(debugTvp)
+  // 	      << std::endl;
+  //   return isMin;
 }
+
+  
+
 
 void 
 Type::addHint(GCPtr<Type> theHint)

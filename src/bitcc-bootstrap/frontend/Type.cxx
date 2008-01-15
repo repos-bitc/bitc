@@ -305,6 +305,34 @@ Type::isFnxn()
   return (t->kind == ty_fn);
 }
 
+bool 
+Type::isBaseConstType()
+{
+  switch(getType()->kind) {
+  case ty_unit:
+  case ty_bool:
+  case ty_char:
+  case ty_string:
+  case ty_int8:
+  case ty_int16:
+  case ty_int32:
+  case ty_int64:
+  case ty_uint8:
+  case ty_uint16:
+  case ty_uint32:
+  case ty_uint64:
+  case ty_word:
+  case ty_float:
+  case ty_double:
+  case ty_quad:
+  case ty_dummy:
+    return true;
+  default:
+    return false;
+  }
+}
+
+
 //#if 0
 bool 
 Type::isClosure()

@@ -277,6 +277,7 @@ public:
   bool isValType();
   bool isByrefType();
   bool isFnxn();
+  bool isBaseConstType(); // Integers, floats, string, bool, unit, dummy.
 // #if 0
   bool isClosure();
 // #endif

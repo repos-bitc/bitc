@@ -20,57 +20,15 @@
 	    </Pair>
 	  </rhs>
 	</equation>
-	<!-- a <= a -->
+	<!-- t <= t -->
 	<equation>
 	  <lhs>
 	    <unf ac="yes">
 	      <unin>
 		<set>
 		  <Tsub>
-		    <tvar name="alpha"/>
-		    <tvar name="alpha"/>
-		  </Tsub>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <aCtset/>
-	    </unf>
-	  </rhs>
-	</equation>
-	<!-- unit <= unit -->
-	<equation>
-	  <lhs>
-	    <unf ac="yes">
-	      <unin>
-		<set>
-		  <Tsub>
-		    <unit/>
-		    <unit/>
-		  </Tsub>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <aCtset/>
-	    </unf>
-	  </rhs>
-	</equation>
-	<!-- bool <= bool -->
-	<equation>
-	  <lhs>
-	    <unf ac="yes">
-	      <unin>
-		<set>
-		  <Tsub>
-		    <bool/>
-		    <bool/>
+		    <type/>
+		    <type/>
 		  </Tsub>
 		</set>
 		<aCtset/>
@@ -104,50 +62,6 @@
 	    <unf>
 	      <aCtset/>
 	    </unf>
-	  </rhs>
-	</equation>
-	<!-- a = t -->
-	<equation>	  
-	  <lhs>
-	    <unf ac="yes">
-	      <unin>
-		<set>
-		  <eq>
-		    <tvar name="alpha"/>
-		    <type/>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <Pair>
-	      <aCtset num="i"/>
-	      <scomp>
-		<aSubMap num="a"/>
-		<aSubMap num="i"/>
-	      </scomp>	    
-	    </Pair>	 
-	    <eq>
-	      <aSubMap num="a"/>
-	      <SubMap>
-		<tvar name="alpha"/>
-		<type/>
-	      </SubMap>
-	    </eq>
-	    <eq>
-	      <unf cl="yes">
-		<Subst>
-		  <aSubMap num="a"/>
-		  <aCtset/>
-		</Subst>
-	      </unf>
-	      <Pair>
-		<aCtset num="i"/>
-		<aSubMap num="i"/>
-	      </Pair>
-	    </eq>
 	  </rhs>
 	</equation>
 	<!-- k = K -->
@@ -194,7 +108,51 @@
 	    </eq>
 	  </rhs>
 	</equation>
-	<!-- a <= Mt -->
+	<!-- a = t -->
+	<equation>	  
+	  <lhs>
+	    <unf ac="yes">
+	      <unin>
+		<set>
+		  <eq>
+		    <tvar name="alpha"/>
+		    <type/>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <scomp>
+		<aSubMap num="a"/>
+		<aSubMap num="i"/>
+	      </scomp>	    
+	    </Pair>	 
+	    <eq>
+	      <aSubMap num="a"/>
+	      <SubMap>
+		<tvar name="alpha"/>
+		<type/>
+	      </SubMap>
+	    </eq>
+	    <eq>
+	      <unf cl="yes">
+		<Subst>
+		  <aSubMap num="a"/>
+		  <aCtset/>
+		</Subst>
+	      </unf>
+	      <Pair>
+		<aCtset num="i"/>
+		<aSubMap num="i"/>
+	      </Pair>
+	    </eq>
+	  </rhs>
+	</equation>
+	<!-- a <= t | t = /\(t), stv(t) = {} -->
 	<equation>
 	  <lhs>
 	    <unf ac="yes">
@@ -214,13 +172,12 @@
 		<type/>
 	      </maxz>
 	    </eq>
-	    <notin>
-	      <Tsub>
+	    <eq>
+	      <pred name="stv">
 		<type/>
-		<tvar name="alpha"/>
-	      </Tsub>
-	      <aCtset/>
-	    </notin>	    
+	      </pred>
+	      <Empty/>
+	    </eq>
 	  </lhs>
 	  <rhs>
 	    <Pair>
@@ -251,7 +208,7 @@
 	    </eq>
 	  </rhs>
 	</equation>	
-	<!-- It <= a -->
+	<!-- t <= a | t = \/(t), stv(t) = {} -->
 	<equation sep="4pt">
 	  <lhs>
 	    <unf ac="yes">
@@ -271,18 +228,12 @@
 		<type/>
 	      </minz>
 	    </eq>
-	    <neq>
-	      <type/>
-	      <tvar name="alpha"/>
-	      <tvar name="beta"/>
-	    </neq>
-	    <notin>
-	      <Tsub>
-		<tvar name="alpha"/>
+	    <eq>
+	      <pred name="stv">
 		<type/>
-	      </Tsub>
-	      <aCtset/>
-	    </notin>
+	      </pred>
+	      <Empty/>
+	    </eq>
 	  </lhs>
 	  <rhs>
 	    <Pair>
@@ -385,41 +336,8 @@
 	    </unf>
 	  </rhs>
 	</equation>	
-	<!-- Mt1 <= Mt2 -->
-	<equation>
-	  <lhs>
-	    <unf ac="yes">
-	      <unin>
-		<set>
-		  <Tsub>
-		    <mutable>
-		      <type num="1"/>
-		    </mutable>
-		    <mutable>
-		      <type num="2"/>
-		    </mutable>
-		  </Tsub>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf cl="yes">
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <type num="1"/>
-		    <type num="2"/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>	
 	<!-- t1xt2 <= t1'xt2' -->
-	<equation sep="4pt">
+	<equation>
 	  <lhs>
 	    <unf ac="yes">
 	      <unin>
@@ -456,7 +374,81 @@
 	      </unin>
 	    </unf>
 	  </rhs>
-	</equation>	
+	</equation>
+	<!-- Mt1 <= Mt2 -->
+	<equation>
+	  <lhs>
+	    <unf ac="yes">
+	      <unin>
+		<set>
+		  <Tsub>
+		    <mutable>
+		      <type num="1"/>
+		    </mutable>
+		    <mutable>
+		      <type num="2"/>
+		    </mutable>
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf cl="yes">
+	      <unin>
+		<aCtset/>
+		<set>
+		  <Tsub>
+		    <type num="1"/>
+		    <type num="2"/>
+		  </Tsub>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>
+	<!-- Mt1 <= t2 | t2 != Mt2', t2 != 'a -->
+	<equation sep="4pt">
+	  <lhs>
+	    <unf ac="yes">
+	      <unin>
+		<set>
+		  <Tsub>
+		    <mutable>
+		      <type num="1"/>
+		    </mutable>
+		    <type num="2"/>
+		  </Tsub>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <neq>
+	      <type num="2"/>
+	      <mutable>
+		<type num="2" dash="'"/>
+	      </mutable>
+	    </neq>
+	    <neq>
+	      <type num="2"/>
+	      <tvar name="alpha"/>
+	    </neq>
+	  </lhs>
+	  <rhs>
+	    <unf cl="yes">
+	      <unin>
+		<aCtset/>
+		<set>
+		  <Tsub>
+		    <type num="1"/>
+		    <type num="2"/>
+		  </Tsub>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>
 	<!-- P(m, t1, t2) --> 
 	<equation>
 	  <lhs>
@@ -486,7 +478,7 @@
 	      </unin>
 	    </unf>
 	  </rhs>
-	</equation>	
+	</equation>
 	<!-- P(p, t1, t2) --> 
 	<equation>
 	  <lhs>
@@ -502,15 +494,9 @@
 		<aCtset/>
 	      </unin>
 	    </unf>
-	    <pred name="Immut">
+	    <pred name="Immutable">
 	      <type num="i"/>
 	    </pred>
-	    <eq>
-	      <fnxn name="dtv">
-		<type num="i"/>
-		<Empty/>
-	      </fnxn>
-	    </eq>
 	  </lhs>
 	  <rhs>
 	    <unf>
@@ -596,15 +582,15 @@
 	    </eq>
 	    <eq>
 	      <unf cl="yes">
-		<set>
-		  <unin>
+		<unin>
+		  <set>
 		    <eq>		    
 		      <type num="1"/>
 		      <type num="2"/>
 		    </eq>
-		    <aCtset/>
-		  </unin>
-		</set>
+		  </set>
+		  <aCtset/>
+		</unin>
 	      </unf>
 	      <error/>
 	    </eq>
@@ -697,6 +683,18 @@
 		<type/>
 		<tvar name="alpha"/>
 	      </Tsub>
+	      <Tsub>
+		<mutable>
+		  <tvar name="alpha"/>
+		</mutable>
+		<tvar name="beta"/>
+	      </Tsub>
+	      <Tsub>
+		<tvar name="alpha"/>
+		<mutable>
+		  <tvar name="beta"/>
+		</mutable>
+	      </Tsub>
 	      <Pcst>
 		<lKind k="var"/>
 		<type/>
@@ -737,7 +735,7 @@
 		<mutable>
 		  <type/>
 		</mutable>
-		<type/>
+		<type dash="'"/>
 	      </Tsub>
 	      <eq>
 		<lKind k="var"/>
@@ -783,7 +781,68 @@
 	  </grouping>
 	</eq>
       </Hrules>
-
+<!--       <VEqns> -->
+<!-- 	<equation> -->
+<!-- 	  <lhs> -->
+<!-- 	    <unf ac="yes"> -->
+<!-- 	      <unin> -->
+<!-- 		<set> -->
+<!-- 		  <Tsub> -->
+<!-- 		    <tvar name="alpha"/> -->
+<!-- 		    <tvar name="alpha"/> -->
+<!-- 		  </Tsub> -->
+<!-- 		</set> -->
+<!-- 		<aCtset/> -->
+<!-- 	      </unin> -->
+<!-- 	    </unf> -->
+<!-- 	  </lhs> -->
+<!-- 	  <rhs> -->
+<!-- 	    <unf> -->
+<!-- 	      <aCtset/> -->
+<!-- 	    </unf> -->
+<!-- 	  </rhs> -->
+<!-- 	</equation> -->
+<!-- 	<equation> -->
+<!-- 	  <lhs> -->
+<!-- 	    <unf ac="yes"> -->
+<!-- 	      <unin> -->
+<!-- 		<set> -->
+<!-- 		  <Tsub> -->
+<!-- 		    <unit/> -->
+<!-- 		    <unit/> -->
+<!-- 		  </Tsub> -->
+<!-- 		</set> -->
+<!-- 		<aCtset/> -->
+<!-- 	      </unin> -->
+<!-- 	    </unf> -->
+<!-- 	  </lhs> -->
+<!-- 	  <rhs> -->
+<!-- 	    <unf> -->
+<!-- 	      <aCtset/> -->
+<!-- 	    </unf> -->
+<!-- 	  </rhs> -->
+<!-- 	</equation> -->
+<!-- 	<equation> -->
+<!-- 	  <lhs> -->
+<!-- 	    <unf ac="yes"> -->
+<!-- 	      <unin> -->
+<!-- 		<set> -->
+<!-- 		  <Tsub> -->
+<!-- 		    <bool/> -->
+<!-- 		    <bool/> -->
+<!-- 		  </Tsub> -->
+<!-- 		</set> -->
+<!-- 		<aCtset/> -->
+<!-- 	      </unin> -->
+<!-- 	    </unf> -->
+<!-- 	  </lhs> -->
+<!-- 	  <rhs> -->
+<!-- 	    <unf> -->
+<!-- 	      <aCtset/> -->
+<!-- 	    </unf> -->
+<!-- 	  </rhs> -->
+<!-- 	</equation> -->
+<!--        </VEqns> -->
 <!--       <VEqns> -->
 <!-- 	<equation> -->
 <!-- 	  <lhs>	     -->
@@ -900,8 +959,6 @@
 <!-- 	  </rhs> -->
 <!-- 	</equation>	 -->
 <!--        </VEqns> -->
-
-
     </btypes:TYPE>
   </font>
   <caption>Equational Unification Rules</caption>

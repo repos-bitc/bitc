@@ -63,9 +63,10 @@ while(!eof(F)) {
 	$l =~ s/\{\\\{\}\{\\textbar\}/$EM\{\\\{\\!\|\}/g;
 	$l =~ s/\{\\textbar\}\{\\\}\}/$EM\{\|\\!\\\}\}/g;
 
-	# Temporary: Until osdoc supports ||-
+	# Temporary: Until osdoc some symbols
 	# \textbf{\ensuremath{models}} to \ensuremath{Vdash}
 	$l =~ s/$b\{$em\{\\models\}\}/$EM\{\\Vdash\}/g;
+	$l =~ s/\\blacktriangleright/\\blacktriangle/g;
 
 	# Temporary: Until osdoc supports |||-
 	# \textbf{\emph{\ensuremath{models}}} to \ensuremath{VDash}
@@ -85,7 +86,10 @@ while(!eof(F)) {
 
 	# \textbf{\emph{\?}}text\textbf{\emph{\?}} to \ensuremath{text}
 	$l =~ s/\\textbf\{\\emph\{\?\}\}([A-Za-z0-9]+)\\textbf\{\\emph\{\?\}\}/$EM\{$1\}/g;
-	
+
+	# \swarr ==> {\searrow\hskip -2.6ex\diagdown}
+	$l =~ s/\\swarrow/\\searrow\\hskip -2.6ex\\diagdown/g;
+
 	#OK??
 	#Derivation and Modelling
 	$l =~ s/$deriveSp/\\mbox\{$1\\hskip -0.9ex\\raise0.25ex\\hbox\{$EM\{\_\{\_$MIT\{$2\}\}\}\}\}/g;
