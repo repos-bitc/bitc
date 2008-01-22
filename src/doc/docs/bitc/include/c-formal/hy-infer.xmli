@@ -177,8 +177,8 @@
 		  <mapping>
 		    <id/>
 		    <MBPAIR>
-		      <tvar name="alpha"/>
 		      <tvar name="beta"/>
+		      <tvar name="alpha"/>
 		    </MBPAIR>
 		  </mapping>
 		</extend>
@@ -199,7 +199,9 @@
 	      <grouping>
 		<tvar name="alpha"/>
 		<tvar name="beta"/>
+		<tvar name="beta" dash="'"/>
 		<tvar name="gamma"/>
+		<tvar name="gamma" dash="'"/>
 		<tvar name="delta"/>
 	      </grouping>
 	    </models>
@@ -218,18 +220,29 @@
 		  </lambda>
 		  <fn M="yes">		
 		    <MBPAIR>
-		      <tvar name="gamma"/>
+		      <tvar name="beta" dash="'"/>
 		      <tvar name="alpha"/>
 		    </MBPAIR>
 		    <MBPAIR>
+		      <tvar name="gamma" dash="'"/>
 		      <tvar name="delta"/>
-		      <type/>
 		    </MBPAIR>
 		  </fn>
 		</tqExpr>
 	      </conclude>
 	      <constrain>
-		<aCtset/>
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <eq>
+		      <type/>
+		      <MBPAIR>
+			<tvar name="gamma"/>
+			<tvar name="delta"/>
+		      </MBPAIR>
+		    </eq>
+		  </set>
+		</unin>
 	      </constrain>
 	    </TEjudge>
 	  </tyConc>
@@ -271,7 +284,9 @@
 	      <grouping>
 		<tvar name="alpha"/>
 		<tvar name="beta"/>
+		<tvar name="beta" dash="'"/>
 		<tvar name="gamma"/>
+		<tvar name="gamma" dash="'"/>
 		<tvar name="delta"/>
 		<tvar name="epsiv"/>
 	      </grouping>
@@ -304,9 +319,15 @@
 		      <type num="1"/>
 		      <MBPAIR>
 			<tvar name="alpha"/>
-			<fn M="yes">			
-			  <tvar name="beta"/>						
-			  <tvar name="gamma"/>			
+			<fn M="yes">
+			  <MBPAIR>
+			    <tvar name="beta" dash="'"/>
+			    <tvar name="beta"/>
+			  </MBPAIR>
+			  <MBPAIR>
+			    <tvar name="gamma" dash="'"/>
+			    <tvar name="gamma"/>
+			  </MBPAIR>
 			</fn>
 		      </MBPAIR>
 		    </eq>
@@ -377,6 +398,9 @@
 	      <grouping>
 		<tvar name="alpha"/>
 		<tvar name="beta"/>
+		<tvar name="gamma"/>
+		<tvar name="delta"/>
+		<tvar name="epsiv"/>
 	      </grouping>
 	    </models>
 	  </tyPre>
@@ -392,8 +416,11 @@
 		    <aExpr num="1"/>
 		    <aExpr num="2"/>
 		    <aExpr num="3"/>
-		  </if>          
-		  <tvar name="alpha"/>
+		  </if>       
+		  <MBPAIR>
+		    <tvar name="epsiv"/>
+		    <tvar name="gamma"/>
+		  </MBPAIR>
 		</tqExpr>
 	      </conclude>
 	      <constrain>
@@ -402,15 +429,27 @@
 		  <aCtset num="2"/>
 		  <aCtset num="3"/>
 		  <set>
-		    <Tsub>
+		    <eq>
 		      <type num="1"/>
-		      <bool/>
-		    </Tsub>
-		    <ceq via="beta">
+		      <MBPAIR>
+			<tvar name="alpha"/>
+			<bool/>
+		      </MBPAIR>
+		    </eq>
+		    <eq>
 		      <type num="2"/>
+		      <MBPAIR>
+			<tvar name="beta"/>
+			<tvar name="gamma"/>
+		      </MBPAIR>
+		    </eq>
+		    <eq>
 		      <type num="3"/>
-		      <tvar name="alpha"/>
-		    </ceq>
+		      <MBPAIR>
+			<tvar name="delta"/>
+			<tvar name="gamma"/>
+		      </MBPAIR>
+		    </eq>
 		  </set>
 		</unin>
 	      </constrain>
@@ -509,6 +548,8 @@
 	      <grouping>
 		<tvar name="alpha"/>
 		<tvar name="beta"/>
+		<tvar name="gamma"/>
+		<tvar name="delta"/>
 	      </grouping>
 	    </models>
 	  </tyPre>
@@ -523,7 +564,7 @@
 		  <assign>
 		    <aExpr num="1"/>
 		    <aExpr num="2"/>
-		  </assign>  
+		  </assign>
 		  <unit/>
 		</tqExpr>
 	      </conclude>
@@ -538,10 +579,20 @@
 			<tvar name="alpha"/>
 		      </mutable>
 		    </eq>
-		    <ceq via="beta">
+		    <eq>
 		      <type num="1"/>
+		      <MBPAIR>
+			<tvar name="beta"/>
+			<tvar name="gamma"/>
+		      </MBPAIR>
+		    </eq>
+		    <eq>
 		      <type num="2"/>
-		    </ceq>
+		      <MBPAIR>
+			<tvar name="delta"/>
+			<tvar name="gamma"/>
+		      </MBPAIR>
+		    </eq>
 		  </set>
 		</unin>
 	      </constrain>
@@ -586,7 +637,9 @@
 	      <assume/>
 	      <grouping>
 		<tvar name="alpha"/>
+		<tvar name="alpha" dash="'"/>
 		<tvar name="beta"/>
+		<tvar name="beta" dash="'"/>
 		<tvar name="gamma"/>
 		<tvar name="delta"/>
 	      </grouping>
@@ -605,8 +658,14 @@
 		    <aExpr num="2"/>
 		  </Pair>  
 		  <pair>
-		    <tvar name="alpha"/>
-		    <tvar name="beta"/>
+		    <MBPAIR>
+		      <tvar name="alpha"/>
+		      <tvar name="gamma"/>
+		    </MBPAIR>
+		    <MBPAIR>
+		      <tvar name="beta"/>
+		      <tvar name="delta"/>
+		    </MBPAIR>
 		  </pair>
 		</tqExpr>
 	      </conclude>                  
@@ -615,14 +674,20 @@
 		  <aCtset num="1"/>
 		  <aCtset num="2"/>
 		  <set>
-		    <ceq via="gamma">
-		      <tvar name="alpha"/>
+		    <eq>
 		      <type num="1"/>
-		    </ceq>
-		    <ceq via="delta">
-		      <tvar name="beta"/>
+		      <MBPAIR>
+			<tvar name="alpha" dash="'"/>
+			<tvar name="gamma"/>
+		      </MBPAIR>
+		    </eq>
+		    <eq>
 		      <type num="2"/>
-		    </ceq>
+		      <MBPAIR>
+			<tvar name="beta" dash="'"/>
+			<tvar name="delta"/>
+		      </MBPAIR>
+		    </eq>
 		  </set>
 		</unin>
 	      </constrain>
@@ -665,20 +730,32 @@
 		  <fst>
 		    <aExpr/>
 		  </fst>
-		  <tvar name="alpha"/>
+		  <MBPAIR>
+		    <tvar name="alpha"/>
+		    <tvar name="beta"/>
+		  </MBPAIR>
 		</tqExpr>
 	      </conclude>
 	      <constrain>                    
 		<unin>
 		  <aCtset/>
 		  <set>
-		    <Tsub>
+		    <eq>
 		      <type/>
-		      <pair>
-			<tvar name="alpha"/>
-			<tvar name="beta"/>
-		      </pair>
-		    </Tsub>
+		      <mbpair>
+			<tvar name="epsiv"/>
+			<pair>
+			  <MBPAIR>
+			    <tvar name="alpha"/>
+			    <tvar name="beta"/>
+			  </MBPAIR>
+			  <MBPAIR>
+			    <tvar name="gamma"/>
+			    <tvar name="delta"/>
+			  </MBPAIR>
+			</pair>
+		      </mbpair>
+		    </eq>
 		  </set>
 		</unin>
 	      </constrain>
@@ -720,23 +797,35 @@
 	      </assume>
 	      <conclude>
 		<tqExpr>                      
-		  <snd>
+		  <Snd>
 		    <aExpr/>
-		  </snd>
-		  <tvar name="beta"/>
+		  </Snd>
+		  <MBPAIR>
+		    <tvar name="gamma"/>
+		    <tvar name="delta"/>
+		  </MBPAIR>
 		</tqExpr>
 	      </conclude>
 	      <constrain>                    
 		<unin>
 		  <aCtset/>
 		  <set>
-		    <Tsub>
+		    <eq>
 		      <type/>
-		      <pair>
-			<tvar name="alpha"/>
-			<tvar name="beta"/>
-		      </pair>
-		    </Tsub>
+		      <mbpair>
+			<tvar name="epsiv"/>
+			<pair>
+			  <MBPAIR>
+			    <tvar name="alpha"/>
+			    <tvar name="beta"/>
+			  </MBPAIR>
+			  <MBPAIR>
+			    <tvar name="gamma"/>
+			    <tvar name="delta"/>
+			  </MBPAIR>
+			</pair>
+		      </mbpair>
+		    </eq>
 		  </set>
 		</unin>
 	      </constrain>
@@ -765,6 +854,7 @@
 	      <grouping>
 		<tvar name="alpha"/>
 		<tvar name="beta"/>
+		<tvar name="gamma"/>
 	      </grouping>
 	    </models>
 	  </tyPre>
@@ -780,7 +870,12 @@
 		    <aExpr/>
 		  </dup>  
 		  <ref>
-		    <tvar name="alpha"/>
+		    <paren>
+		      <MBPAIR>
+			<tvar name="alpha"/>
+			<tvar name="beta"/>
+		      </MBPAIR>
+		    </paren>
 		  </ref>
 		</tqExpr>
 	      </conclude>                  
@@ -788,10 +883,13 @@
 		<unin>
 		  <aCtset/>
 		  <set>
-		    <ceq via="beta">
-		      <tvar name="alpha"/>
+		    <eq>
 		      <type/>
-		    </ceq>
+		      <MBPAIR>
+			<tvar name="gamma"/>
+			<tvar name="beta"/>
+		      </MBPAIR>
+		    </eq>
 		  </set>
 		</unin>
 	      </constrain>
@@ -818,6 +916,7 @@
 	    <models name="new">
 	      <assume/>
 	      <tvar name="alpha"/>
+	      <tvar name="beta"/>
 	    </models>
 	  </tyPre>
 	  <tyConc>
@@ -838,12 +937,15 @@
 		<unin>
 		  <aCtset/>
 		  <set>
-		    <Tsub>
+		    <eq>
 		      <type/>
-		      <ref>
-			<tvar name="alpha"/>
-		      </ref>
-		    </Tsub>
+		      <MBPAIR>
+			<tvar name="beta"/>
+			<ref>
+			  <tvar name="alpha"/>
+			</ref>
+		      </MBPAIR>
+		    </eq>
 		  </set>
 		</unin>
 	      </constrain>
@@ -877,14 +979,20 @@
 		<unin>
 		  <aCtset num="1"/>  
 		  <set>
-		    <ceq via="gamma">
-		      <tvar name="beta"/>
+		    <eq>
 		      <type num="1"/>
-		    </ceq>
+		      <MBPAIR>
+			<tvar name="gamma"/>
+			<tvar name="beta"/>
+		      </MBPAIR>
+		    </eq>
 		    <opt>
 		      <eq>
-			<tvar name="beta"/>
 			<type/>
+			<MBPAIR>
+			  <tvar name="alpha"/>
+			  <tvar name="beta"/>
+			</MBPAIR>
 		      </eq>
 		    </opt>
 		  </set>
@@ -892,7 +1000,10 @@
 	      </assume>
 	      <conclude>
 		<GEN>
-		  <type/>
+		  <MBPAIR>
+		    <tvar name="alpha"/>
+		    <tvar name="beta"/>
+		  </MBPAIR>
 		  <aTS/>
 		</GEN>
 	      </conclude>
@@ -933,6 +1044,7 @@
 	    <models name="new">
 	      <assume/>
 	      <grouping>
+		<tvar name="alpha"/>
 		<tvar name="beta"/>
 		<tvar name="gamma"/>
 	      </grouping>
@@ -964,14 +1076,14 @@
 		    <forall> 
 		      <in>
 			<SubMap>
-			  <tvar name="alpha"/>
+			  <tvar name="delta"/>
 			  <type/>
 			</SubMap>
 			<aSubMap/>
 		      </in>
 		    </forall>
 		    <eq>
-		      <tvar name="alpha"/>
+		      <tvar name="delta"/>
 		      <type/>
 		    </eq>
 		  </set>
@@ -1003,7 +1115,7 @@
 	      <aExpr/>
 	    </pred>
 	    <eq>
-	      <unf cl="yes">
+	      <unf>
 		<unin>
 		  <aCtset/>
 		  <Pcst>
@@ -1094,7 +1206,7 @@
 	  </tyPre>
 	  <tyPre>
 	    <eq>
-	      <unf cl="yes">
+	      <unf>
 		<aCtset/>
 	      </unf>
 	      <Pair>

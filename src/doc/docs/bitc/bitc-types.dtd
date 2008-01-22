@@ -220,6 +220,8 @@
 <!ELEMENT ceil                    %anything.group;>
 
 <!-- Increase, Decrease, Maximize and minimize -->
+<!ELEMENT incMB                   EMPTY>
+<!ELEMENT incMB                   %anything.group;>
 <!ELEMENT incrOp                  EMPTY>
 <!ELEMENT incr                    %anything.group;>
 <!ELEMENT decrOp                  EMPTY>
@@ -228,8 +230,10 @@
 <!ELEMENT maxz                    %anything.group;>
 <!ELEMENT minzOp                  EMPTY>
 <!ELEMENT minz                    %anything.group;>
-<!ELEMENT mmbOp                   EMPTY>
-<!ELEMENT mmb                    %anything.group;>
+<!ELEMENT minDOp                  EMPTY>
+<!ELEMENT minD                    %anything.group;>
+<!ELEMENT mindOp                  EMPTY>
+<!ELEMENT mind                    %anything.group;>
 
 <!-- More or less generality -->
 <!ELEMENT spOp                    EMPTY>
@@ -453,6 +457,7 @@
                                | comp
                                | aCtype
                                | sType
+                               | pType
                                | ctype
                                | CType
                                | MBpair

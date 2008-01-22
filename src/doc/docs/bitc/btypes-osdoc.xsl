@@ -505,6 +505,24 @@
     <xsl:text>rceil;</xsl:text>
   </xsl:template>
 
+
+  <!-- incMBOp -->
+  <xsl:template match="incMBOp" mode="formula">
+    <xsl:element name="em">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>and;</xsl:text>
+    </xsl:element>
+  </xsl:template>
+  <!-- incrMB -->
+  <xsl:template match="incMB" mode="formula">
+    <xsl:element name="em">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>and;</xsl:text>
+    </xsl:element>
+    <xsl:call-template name="print.params"/>
+  </xsl:template>  
+
+
   <!-- incrOp -->
   <xsl:template match="incrOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -553,13 +571,26 @@
     <xsl:call-template name="print.params"/>
   </xsl:template>
 
-  <!-- mmbOp -->
-  <xsl:template match="mmbOp" mode="formula">
+
+  <!-- maxzTOp -->
+  <xsl:template match="maxzTOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>xdtri;</xsl:text>
+    <xsl:text>ltrif;</xsl:text>
   </xsl:template>
-  <!-- mmb -->
-  <xsl:template match="mmb" mode="formula">
+  <!-- maxzT -->
+  <xsl:template match="maxzT" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>ltrif;</xsl:text>
+    <xsl:call-template name="print.params"/>
+  </xsl:template>  
+
+  <!-- minzTOp -->
+  <xsl:template match="minzTOp" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rtrif;</xsl:text>
+  </xsl:template>
+  <!-- minz -->
+  <xsl:template match="minzT" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>rtrif;</xsl:text>
     <xsl:call-template name="print.params"/>
@@ -1205,14 +1236,14 @@
     </xsl:if>
   </xsl:template>
   
-  <!-- ref &uarr; ... -->
+  <!-- ref -->
   <xsl:template match="refOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>uarr;</xsl:text>
+    <xsl:text>uArr;</xsl:text>
   </xsl:template>
   <xsl:template match="ref" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>uarr;</xsl:text>
+    <xsl:text>uArr;</xsl:text>
     <xsl:apply-templates mode="formula"/>
   </xsl:template>
   
@@ -1347,6 +1378,13 @@
   <xsl:template match="sType" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>phiv;</xsl:text>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>  
+
+  <!-- ptype, same as aCtype -->
+  <xsl:template match="pType" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rho;</xsl:text>
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>  
   
@@ -3889,9 +3927,9 @@
   <xsl:template name="print.maybe">
     <xsl:param name="print.maybe.double"/>
     <xsl:variable name="mbpair1.paren" 
-      select="(*[1] = mbpair) or (*[1] = fn) or (*[1] = ref)"/>
+      select="(*[1] = mbpair) or (*[1] = fn) or (*[1] = pair)"/>
     <xsl:variable name="mbpair2.paren" 
-      select="(*[2] = mbpair) or (*[2] = fn) or (*[2] = ref)"/>
+      select="(*[2] = mbpair) or (*[2] = fn) or (*[2] = pair)"/>
     <xsl:variable name="mbpair.paren" 
       select="(.. = fn) or (.. = mbpair) or (.. = ref)"/>
 
@@ -3909,22 +3947,14 @@
     
     <xsl:choose>
       <xsl:when test="$print.maybe.double">
-	<xsl:call-template name="print.space"/>	  
-	<xsl:text>!`</xsl:text>
-	<xsl:call-template name="print.space"/>	  
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>darr;</xsl:text>
       </xsl:when>
       <xsl:otherwise>
-	<xsl:call-template name="print.space"/>	  
-	<xsl:text>!</xsl:text>
-	<xsl:call-template name="print.space"/>	  
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>drarr;</xsl:text>
       </xsl:otherwise>
     </xsl:choose>
-    
-<!-- 	<xsl:text disable-output-escaping="yes">&amp;</xsl:text> -->
-<!-- 	<xsl:text>dlarr;</xsl:text> -->
-<!-- 	<xsl:text disable-output-escaping="yes">&amp;</xsl:text> -->
-<!-- 	<xsl:text>drarr;</xsl:text> -->
-
     
     <xsl:if test="$mbpair2.paren">
       <xsl:text>(</xsl:text>

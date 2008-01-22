@@ -21,6 +21,7 @@ $modelSp="($models)$em\\{\\_($br)\\}";
 $bigcup="\\\\textbf\\{$em\\{\\\\cup\\}\\}";
 $bigcap="\\\\textbf\\{$em\\{\\\\cap\\}\\}";
 $bigstar="\\\\textbf\\{$em\\{\\\\star\\}\\}";
+$curwed="\\\\emph\\{$em\\{\\\\wedge\\}\\}";
 #$transR="\\{\\\$\\\\Rightarrow\\\$\\}\\*";
 $emset="$em($br)";
 $plural1="$emset$em\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}";
@@ -43,13 +44,24 @@ while(!eof(F)) {
 	#Bold-Ops -> Big-Ops
 	$l =~ s/$bigcup/$EM\{\\bigcup\}/g;
 	$l =~ s/$bigcap/$EM\{\\bigcap\}/g;
+	
 
+	#OSDOC-FIX LIST
+	#\emph{\ensuremath{\wedge}} -> \ensuremath{\curlywedge}
+	$l =~ s/$curwed/$EM\{\\curlywedge\}/g;
+	#\searrow ->  \downharpoonleft
+	$l =~ s/\\searrow/\\downharpoonleft/g;
+	#\blacktriangleleft ->  \blacktriangle
+	$l =~ s/\\blacktriangleleft/\\blacktriangle/g;
+	#\blacktriangleright ->  \blacktriangledown
+	$l =~ s/\\blacktriangleright/\\blacktriangledown/g;
+	
 	#\textbf{\star} to \bigstar
 	$l =~ s/$bigstar/$EM\{\\bigstar\}/g;
 
 	#Bold-Not -> strikeoff
 	$l =~ s/\\textbf\{$em\{\\neg\}\}$em($br)/$EM\{\\not $1\}/g;
-	
+
 	#\ensuremath{\not {\exists}} to \ensuremath{\nexist}
 	$l =~ s/$em\{\\not \{\\exists\}\}/$EM\{\\nexists\}/g;
 	
