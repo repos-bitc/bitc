@@ -358,7 +358,7 @@
 		    </MBPAIR>
 		    <MBPAIR>
 		      <tvar name="beta"/>
-		      <aType num="1"/>
+		      <sType num="2"/>
 		    </MBPAIR>
 		  </eq>
 		</set>
@@ -420,10 +420,10 @@
 		  </eq>
 		  <eq>
 		    <minzT>
-		      <type num="1"/>
+		      <sType num="1"/>
 		    </minzT>
 		    <minzT>
-		      <type num="2"/>
+		      <sType num="2"/>
 		    </minzT>
 		  </eq>
 		</set>
