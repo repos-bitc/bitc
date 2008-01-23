@@ -9,7 +9,7 @@
 	<!-- Empty -->
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <Empty/>
 	    </unf>
 	  </lhs>
@@ -23,7 +23,7 @@
 	<!-- t = t -->
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <eq>
@@ -41,10 +41,10 @@
 	    </unf>
 	  </rhs>
 	</equation>
-	<!-- a = t -->
+	<!-- a = t | a notin t -->
 	<equation>	  
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <eq>
@@ -55,6 +55,10 @@
 		<aCtset/>
 	      </unin>
 	    </unf>
+	    <notin>
+	      <tvar name="alpha"/>
+	      <type/>
+	    </notin>
 	  </lhs>
 	  <rhs>
 	    <Pair>
@@ -88,7 +92,7 @@
 	<!-- k = K -->
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <eq>
@@ -132,7 +136,7 @@
 	<!-- t1->t2 = t1' -> t2' -->
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <eq>
@@ -171,7 +175,7 @@
 	<!-- ^t1 = ^t2 -->
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <eq>
@@ -204,7 +208,7 @@
 	<!-- Mt1 = Mt2 -->
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <eq>
@@ -237,7 +241,7 @@
 	<!-- t1xt2 <= t1'xt2' -->
 	<equation sep="4pt">
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <eq>
@@ -276,7 +280,7 @@
 	<!-- MB(p, s) = t | p != 'a -->
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <eq>
@@ -312,7 +316,7 @@
 	<!-- mb(s1, s2) = t | s1 != 'a -->
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <eq>
@@ -348,7 +352,7 @@
 	<!-- MB('a, s1) = MB('b, s2) -->
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <eq>
@@ -391,7 +395,7 @@
 	<!-- mb('a, s1) = mb('b, s2) -->
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <eq>
@@ -434,7 +438,7 @@
 	<!-- MB('a, s) = p -->
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <eq>
@@ -478,7 +482,7 @@
 	<!-- mb('a, s') = s -->
 	<equation sep="4pt">
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <eq>
@@ -522,7 +526,7 @@
 	<!-- P(m, t1, t2) --> 
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <Pcst>
@@ -552,7 +556,7 @@
 	<!-- P(p, t1, t2) --> 
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<set>
 		  <Pcst>
@@ -577,7 +581,7 @@
 	<!-- P(k, Mt1?, M?t2) --> 
 	<equation>
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<aCtset num="*"/>
 		<aCtset/>
@@ -629,7 +633,7 @@
 	<!-- P(k, t, t1), P(k, t, t2)  t1 !~ t2 -->
 	<equation sep="4pt">
 	  <lhs>
-	    <unf ac="yes">
+	    <unf>
 	      <unin>
 		<aCtset num="*"/>
 		<aCtset/>
@@ -694,20 +698,6 @@
 	    </eq>
 	  </rhs>
 	</equation>	
-	<!-- Error (Cyclic) -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <aCtset/>
-	    </unf>
-	    <pred name="cyclic">
-	      <aCtset/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <error/>
-	  </rhs>
-	</equation>
 	<!-- Error (unhandled, un-unifiable) -->
 	<equation>
 	  <lhs>
@@ -737,12 +727,21 @@
 	    <Forall>
 	      <collection>
 		<tvar name="alpha"/>
+		<sType/>
+		<pType/>
 		<type/>
 		<type dash="'"/>
+		<type dash="''"/>
 		<type num="1"/>
 		<type num="1" dash="'"/>
 	      </collection>
 	    </Forall>
+	    <text content="|"/>
+	    <notin>
+	      <tvar name="alpha"/>
+	      <type dash="''"/>
+	    </notin>
+	    <space/>
 	    <text content="."/>
 	    <space/>	      
 	    <set>
@@ -752,7 +751,7 @@
 	      </eq>
 	      <eq>
 		<tvar name="alpha"/>
-		<type/>
+		<type dsah="''"/>
 	      </eq>
 	      <eq>
 		<lKind k="var"/>
