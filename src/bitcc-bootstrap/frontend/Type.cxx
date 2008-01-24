@@ -353,7 +353,7 @@ bool
 Type::isMaybe()
 {
   GCPtr<Type> t = getType();
-  return t->kind == ty_maybe;
+  return (t->kind == ty_mbTop || t->kind == ty_mbFull);
 }
 
 bool 
@@ -705,7 +705,8 @@ Type::isOfInfiniteType()
   case ty_ref:
   case ty_byref:
   case ty_mutable:
-  case ty_maybe:
+  case ty_mbFull:
+  case ty_mbTop:
   case ty_exn:
   case ty_subtype:
   case ty_pcst:
@@ -716,10 +717,6 @@ Type::isOfInfiniteType()
 
       break;
     }
-
-  case ty_hint:
-    assert(false);
-    break;    
   }
   
  mark &= ~MARK6;

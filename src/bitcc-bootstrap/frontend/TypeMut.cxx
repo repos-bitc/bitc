@@ -337,6 +337,59 @@ Type::copy_compatible_eql(GCPtr<Type> t, bool verbose, std::ostream &errStream)
   return copy->equals(t->TypeOfCopy(), verbose, errStream); 
 }
 
+
+GCPtr<Type> 
+Type::maximizeTopMutability(GCPtr<Trail> trail)
+{
+  GCPtr<Type> t = getType();
+  GCPtr<Type> rt = NULL;
+  
+  switch(t->kind) {
+    
+  case ty_mbFull:    
+  case ty_mbTop:    
+  case ty_mutable:
+    {
+      rt = t->CompType(0)->maximizeMutability(trail);
+      break;
+    }
+
+  default:
+    {
+      rt = t->getDCopy()->addShallowMutable();
+      break;
+    }
+  }
+
+  return rt;
+}
+
+GCPtr<Type> 
+Type::minimizeMutability(GCPtr<Trail> trail)
+{
+  GCPtr<Type> t = getType();
+  GCPtr<Type> rt = NULL;
+  
+  switch(t->kind) {
+    
+  case ty_maybe:    
+  case ty_mutable:
+    {
+      rt = t->CompType(0)->minimizeMutability(trail);
+      break;
+    }
+    
+  default:
+    {
+      rt = t;
+      break;
+    }
+  }
+  
+  return rt;
+}
+
+
 GCPtr<Type> 
 Type::maximizeMutability(GCPtr<Trail> trail)
 {
@@ -350,7 +403,8 @@ Type::maximizeMutability(GCPtr<Trail> trail)
   
   switch(t->kind) {
     
-  case ty_maybe:    
+  case ty_mbFull:    
+  case ty_mbTop:    
   case ty_mutable:
     {
       rt = t->CompType(0)->maximizeMutability(trail);

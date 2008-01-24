@@ -2303,8 +2303,7 @@ UocInfo::fe_symresolve(std::ostream& errStream,
 {
   bool errFree = true;
 
-  // FIX: TEMPORARY
-  if(Options::inferenceAlgorithm == inf_eq)
+  if(Options::noPrelude)
     flags |= SYM_NO_PRELUDE;
   
   if(init) {    

@@ -57,7 +57,7 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 #include <libsherpa/BigNum.hxx>
-#include "TypeInferCommon.hxx"
+#include "TypeInferUtil.hxx"
 
 using namespace sherpa;
 using namespace std;
@@ -1757,7 +1757,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       GCPtr<AST> category = ast->child(2);
       bool isRefType = (category->astType == at_refCat);
-
+      
       CHKERR(errFree, InferUnion(errStream, ast, defGamma, instEnv,
 				 impTypes, isVP, tcc,
 				 uflags, trail,  mode, isRefType, 
@@ -4347,11 +4347,85 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
     
   } /* switch */
   
-  if(ast->symType)
-    errStream << ast->loc << " [" << ast->atKwd() << "] " 
-	      << ast->asString() << ": "
-	      << ast->symType->asString() 
-	      << endl << endl; 
+//   if(ast->symType)
+//     errStream << ast->loc << " [" << ast->atKwd() << "] " 
+// 	      << ast->asString() << ": "
+// 	      << ast->symType->asString() 
+// 	      << endl << endl; 
+  
+  return errFree;
+}
+
+/**************************************************************/
+/*              Interface to the outside world                */
+/**************************************************************/
+
+bool
+UocInfo::fe_typeCheck(std::ostream& errStream,
+		      bool init, unsigned long flags)
+{
+  // Careful: the input flags are interface flags `uflags,'
+  // and not the internal flags `flags.' 
+
+#ifdef VERBOSE  
+    errStream << "Now Processing " << ifName;
+    errStream << " ast = " << ast->astTypeName();
+    errStream << std::endl;
+#endif
+  
+  GCPtr<CVector<GCPtr<Type> > > impTypes = new CVector<GCPtr<Type> >;
+  GCPtr<Trail> trail = new Trail;
+  bool errFree = true;
+
+  if(Options::noPrelude)
+    flags |= TYP_NO_PRELUDE;
+  
+  if(init) {
+    
+    if(flags & INF_REINIT) {
+      assert(gamma);      
+      assert(gamma->parent);
+      gamma = gamma->parent->newDefScope();
+
+      assert(instEnv);      
+      assert(instEnv->parent);
+      instEnv = instEnv->parent->newDefScope();      
+    }
+    else {
+      gamma = new Environment<TypeScheme>(this->uocName);
+      instEnv = new Environment< CVector<GCPtr<Instance> > >(this->uocName);
+    }
+    if((flags & TYP_NO_PRELUDE) == 0)
+      CHKERR(errFree, initGamma(std::cerr, gamma, instEnv, ast, flags));
+    
+    if(!errFree)
+      return false;
+  }
+
+  CHKERR(errFree, typeInfer(errStream, ast, gamma, instEnv, 
+			    impTypes, false, 
+			    new TCConstraints, flags, trail, 
+			    USE_MODE, TI_NONE));
+  CHKERR(errFree, checkImpreciseTypes(errStream, gamma, impTypes));
+
+#if 0
+  errStream << "- - - - - - - - - - - - - - - - - - - - - - - " << endl;
+  GCPtr<AST> mod = ast->child(0);
+  for(size_t i=0; i < mod->children->size(); i++) {
+    GCPtr<AST> ast = mod->child(i);
+    errStream << ast->atKwd() << std::endl;
+    if(ast->astType == at_define) {
+      GCPtr<AST> id = ast->child(0)->child(0);
+      errStream << id->asString() << ": "	
+		<< ctypeAsString(id->scheme->tau, id->scheme->tcc)
+		<< std::endl;
+    }
+  }
+#endif  
+
+#ifdef VERBOSE  
+  errStream << "________________________________________" << std::endl;
+#endif
   
   return errFree;
 }

@@ -1,6 +1,5 @@
-#ifndef OPTIONS_HXX
-#define OPTIONS_HXX
-
+#ifndef TYPEINFERCOMMON_HXX
+#define TYPEINFERCOMMON_HXX
 /**************************************************************************
  *
  * Copyright (C) 2006, Johns Hopkins University.
@@ -38,46 +37,41 @@
  *
  **************************************************************************/
 
-#include <dirent.h>
-#include <libsherpa/Path.hxx>
-#include <libsherpa/CVector.hxx>
-#include "backend.hxx"
-#include "Special.hxx"
+#include "UocInfo.hxx"
+#include "Options.hxx"
+#include "AST.hxx"
+#include "Type.hxx"
+#include "TypeScheme.hxx"
+#include "Typeclass.hxx"
 
-//enum infChoice {inf_hm, inf_eq};
+GCPtr<Type>
+obtainFullUnionType(GCPtr<Type> t);
 
-/* Flags set from command line option */
-struct Options {
-  static bool showParse;
-  static bool showLex;
-  static bool showTypes;
-  static bool xmlTypes;
-  static bool showPP;
-  static bool useStdInc;
-  static bool useStdLib;
-  static bool advisory;
-  static bool rawTvars;
-  static bool showMaybes;
-  static bool FQtypes;
-  static bool showAllTccs;
-  static bool showPasses;
-  static bool ppFQNS;
-  static bool ppDecorate;
-  // Use top-level mutability compatibility only, as opposed to full
-  // copy-compatibility. 
-  static bool topMutOnly; 
-  //static infChoice inferenceAlgorithm; 
-  static bool noPrelude;
-  static bool dumpAfterMidEnd;
-  static bool dumpTypesAfterMidEnd;
-  static GCPtr<CVector<std::string> > showTypesUocs;
-  static GCPtr<CVector<std::string> > xmlTypesUocs;
-  static GCPtr<CVector<std::string> > entryPts;
-  static BackEnd *backEnd;
-  static std::string outputFileName;
-  static GCPtr<CVector<GCPtr<Path> > > libPath;
-  static bool Wall; // All Warnings are errors.
-  static bool nogc; // no garbage collection mode
-};
+bool
+initGamma(std::ostream& errStream, 
+	  GCPtr<Environment<TypeScheme> > gamma,
+	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	  const GCPtr<AST> ast, unsigned long uflags);
+bool
+checkImpreciseTypes(std::ostream& errStream, 
+		    const GCPtr<Environment<TypeScheme> > gamma,
+		    GCPtr<CVector<GCPtr<Type> > > impTypes);
+void
+useIFGamma(const std::string& idName,
+	   GCPtr<Environment<TypeScheme> > fromEnv, 
+	   GCPtr<Environment<TypeScheme> > toEnv);
 
-#endif /* OPTIONS_HXX */
+bool
+useIFInsts(std::ostream &errStream,
+	   LexLoc &errLoc,
+	   GCPtr<Environment< CVector<GCPtr<Instance> > > >fromEnv, 
+	   GCPtr<Environment< CVector<GCPtr<Instance> > > >toEnv,
+	   unsigned long uflags);
+
+bool
+initGamma(std::ostream& errStream, 
+	  GCPtr<Environment<TypeScheme> > gamma,
+	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	  const GCPtr<AST> ast, unsigned long uflags);
+
+#endif /* TYPEINFERCOMMON_HXX */

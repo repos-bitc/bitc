@@ -76,9 +76,10 @@ DEFKIND(ref,       false,  true,   false, false, true,  false,  false)
 // can only appear within argvecs, the my-ref-ness is marked on the
 // component-flags of ty_fnArgvec, and the ty_byref wrapper is
 // discarded henceforth.
-DEFKIND(byref,    false,  true,   false, false, true,  false,  false)
+DEFKIND(byref,     false,  true,   false, false, true,  false,  false)
 DEFKIND(mutable,   false,  false,  false, false, false, false,  false)
-DEFKIND(maybe,     false,  false,  false, false, false, false,  false)
+DEFKIND(mbTop,     false,  false,  false, false, false, false,  false)
+DEFKIND(mbFull,    false,  false,  false, false, false, false,  false)
 DEFKIND(exn,       false,  false,  false, false, true,  false,  false)
 DEFKIND(dummy,     false,  false,  false, false, false, false,  false)
 
@@ -98,7 +99,6 @@ DEFKIND(kfix, false,  false,  false, false, false, false,  false)
 /* For internal use ONLY */
 //DEFKIND(closure,   false,  false,  false, false, true,  false,  false)
 DEFKIND(letGather, false,  false,  false, false, false, false,  false)
-DEFKIND(hint,      false,  false,  false, false, false, false,  false)
 
 #undef DEFKIND
 

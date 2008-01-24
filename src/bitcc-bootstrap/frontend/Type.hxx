@@ -438,6 +438,8 @@ public:
   GCPtr<Type> maximizeMutability(GCPtr<Trail> trail=new Trail);
   // Get the minimally-mutable, but copy-compatible type.
   GCPtr<Type> minimizeMutability(GCPtr<Trail> trail=new Trail);
+  GCPtr<Type> maximizeTopMutability(GCPtr<Trail> trail=new Trail);
+  GCPtr<Type> minimizeTopMutability(GCPtr<Trail> trail=new Trail);
 
   // Check if maximally / minimally mutable
   bool isMaxMutable();
@@ -523,7 +525,7 @@ public:
   //The Inner type of Maybe-types
   GCPtr<Type> & Inner() const
   {
-    TYPE_ACC_DEBUG assert(kind == ty_maybe);
+    TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
     return (*components)[0]->typ;
   }
   // The first component of an array/vector/mutable/ref type

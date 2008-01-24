@@ -78,15 +78,12 @@ OBJECTS=\
 	$(BUILDDIR)/BitC-pp.o \
 	$(BUILDDIR)/Symtab.o \
 	$(BUILDDIR)/Unify.o\
-	$(BUILDDIR)/EqUnify.o \
 	$(BUILDDIR)/UocInfo.o \
 	$(BUILDDIR)/Trail.o \
 	$(BUILDDIR)/Type.o \
 	$(BUILDDIR)/TopInit.o \
-	$(BUILDDIR)/TypeChoice.o \
 	$(BUILDDIR)/TypeInfer.o \
-	$(BUILDDIR)/TypeEqInfer.o \
-	$(BUILDDIR)/TypeInferCommon.o \
+	$(BUILDDIR)/TypeInferUtil.o \
 	$(BUILDDIR)/TypePoly.o \
 	$(BUILDDIR)/TypeScheme.o \
 	$(BUILDDIR)/Typeclass.o \

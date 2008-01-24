@@ -66,7 +66,7 @@ newBareTvar(GCPtr<AST> ast)
 static inline GCPtr<Type> 
 newTvar(GCPtr<AST> ast)
 {
-  return new Type(ty_maybe, newBareTvar(ast));
+  return new Type(ty_tvar, ast);
 }
 
 /* Type based mutation analysis */

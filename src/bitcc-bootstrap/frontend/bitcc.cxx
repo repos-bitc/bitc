@@ -82,7 +82,8 @@ bool Options::FQtypes = false;
 bool Options::showAllTccs = false;
 bool Options::showPasses = false;
 bool Options::topMutOnly = false; 
-infChoice Options::inferenceAlgorithm = inf_hm; 
+//infChoice Options::inferenceAlgorithm = inf_hm; 
+bool Options::noPrelude = false; 
 bool Options::dumpAfterMidEnd = false;
 bool Options::dumpTypesAfterMidEnd = false;
 GCPtr<CVector<std::string> > Options::showTypesUocs;
@@ -117,6 +118,7 @@ bool Options::nogc = false;
 #define LOPT_EQ_INFER     275   /* Equational (Complete) Type Inference */
 #define LOPT_XML_TYPES    276   /* Dump XML types */
 #define LOPT_NOGC         277   /* NO GC mode */
+#define LOPT_NOPRELUDE    278   /* Don't process prelude */
 
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
@@ -142,10 +144,12 @@ struct option longopts[] = {
   { "xmltypes",             1,  0, LOPT_XML_TYPES },
   { "stopafter",            1,  0, LOPT_STOPAFTER },
   { "no-gc",                0,  0, LOPT_NOGC },
+  { "no-prelude",           0,  0, LOPT_NOPRELUDE },
   { "version",              0,  0, 'V' },
 #if 0
   /* Options that have short-form equivalents: */
   { "debug",                0,  0, 'd' },
+
   { "dispatchers",          0,  0, 's' },
   { "entry",                1,  0, 'e' },
   { "execdir",              1,  0, 'X' },
@@ -276,10 +280,14 @@ main(int argc, char *argv[])
       Options::nogc = true;
       break;
 
+    case LOPT_NOPRELUDE:
+      Options::noPrelude = true;
+      break;
+
     case LOPT_EQ_INFER:
-      Options::inferenceAlgorithm = inf_eq;
+      //Options::inferenceAlgorithm = inf_eq;
       // FIX: TEMPORARY
-      UocInfo::passInfo[pn_typeCheck].stopAfter = true;
+      //UocInfo::passInfo[pn_typeCheck].stopAfter = true;
       break;
 
     case LOPT_TOP_MUT:
@@ -513,7 +521,7 @@ main(int argc, char *argv[])
   // Process the Prelude:
 
   // FIX: TEMPORARY
-  if(Options::inferenceAlgorithm != inf_eq) {
+  if(!Options::noPrelude) {
     sherpa::LexLoc loc = LexLoc();
     UocInfo::importInterface(std::cerr, loc, "bitc.prelude");
   }
