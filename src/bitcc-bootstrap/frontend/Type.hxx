@@ -221,8 +221,6 @@ public:
   unsigned mark;                // General traversal
   unsigned pMark;               // Type printer
   GCPtr<Type> sp;			// Type specializer.
-  GCPtr<Type> hints;      // A set of hints to resolve the maybe-ness of
-                    // this type, if any.
   unsigned flags;               
 
   // Main (Base) Constructor
@@ -428,10 +426,7 @@ public:
   void addHint(GCPtr<Type> theHint);
 
   /* Return a copy-compatible, but maximally permissible type */
-private:
-  GCPtr<Type> addShallowMaybe();
-  GCPtr<Type> addShallowMutable();
-public:
+  // returns ty_mbFull wrapped cc-immutable form of `this' type
   GCPtr<Type> TypeOfCopy();
 
   // Get the maximally-mutable, but copy-compatible type.

@@ -316,13 +316,6 @@ Type::toString()
     ss  << ")";
     break;    
 
-  case ty_hint:
-    ss << "(hints ";
-    for(size_t i=0; i<components->size(); i++)
-      ss << CompType(i)->getType()->toString();
-    ss << ")";
-    break;
-
   case ty_subtype:
     {
       ss << CompType(0)->toString() 

@@ -180,32 +180,30 @@ p: (CL (maybe-1 'a)) => (fn ('a) ())
 
 
 // Gives the type of the copy, introduces explicit maybe-mutability.
-GCPtr<Type> 
-Type::addShallowMaybe()
+static inline GCPtr<Type> 
+addMbTop(GCPtr<Type> t)
 {
-  GCPtr<Type> t = getType();
-  GCPtr<Type> bt = t->getBareType();
-  GCPtr<Type> mt = new Type(ty_maybe, bt);
-  
-  mt->hints = new Type(ty_hint, t);
-  return mt;
+  return new Type(ty_mbTop, t->getBareType());
+}
+
+static inline GCPtr<Type> 
+addMbFull(GCPtr<Type> t)
+{
+  return new Type(ty_mbFull, t->getBareType());
+}
+
+static inline GCPtr<Type> 
+addMutable(GCPtr<Type> t)
+{
+  return new Type(ty_mutable, t->getBareType());
 }
 
 GCPtr<Type> 
-Type::addShallowMutable()
-{
-  GCPtr<Type> bt = getBareType();
-  GCPtr<Type> mt = new Type(ty_mutable, bt);
-
-  return mt;
-}
-
-GCPtr<Type> 
-Type::TypeOfCopy()
+addShallowMbTop()
 {
   if(Options::topMutOnly)
-    return addShallowMaybe();
-
+    return addMbTop(t);
+  
   GCPtr<Type> t = getType();
   GCPtr<Type> rt = NULL;
 
@@ -219,7 +217,7 @@ Type::TypeOfCopy()
   case ty_maybe:
   case ty_mutable:
     {
-      rt = t->CompType(0)->TypeOfCopy()->getType();
+      rt = t->CompType(0)->addShallowMbTop()->getType();
       assert(rt->kind == ty_maybe);
       assert(rt->hints);
       assert(rt->hints->components->size() == 1);
@@ -231,7 +229,6 @@ Type::TypeOfCopy()
   case ty_byref:
   case ty_typeclass:
   case ty_letGather:
-  case ty_hint:
   case ty_subtype:
   case ty_pcst:
   case ty_kvar:
@@ -261,7 +258,7 @@ Type::TypeOfCopy()
   case  ty_bitfield:
 #endif
     {
-      rt = t->addShallowMaybe();
+      rt = addMbTop(t);
       break;
     }
     
@@ -275,15 +272,15 @@ Type::TypeOfCopy()
   case ty_reprr:
   case ty_exn:
     {
-      rt = t->addShallowMaybe();
+      rt = addMbTop(t);
       break;
     }
 
   case ty_array:
     {
       rt = new Type(t);
-      rt->CompType(0) = t->CompType(0)->TypeOfCopy();
-      rt = rt->addShallowMaybe();
+      rt->CompType(0) = t->CompType(0)->addShallowMbTop();
+      rt = addMbTop(rt);
       break;
     }
 
@@ -303,7 +300,7 @@ Type::TypeOfCopy()
 	              // with bare tvars, except in the type-schemes. 
 	
 	if(rt->argCCOK(i))
-	  rt->TypeArg(i)->link = tArg->TypeOfCopy();
+	  rt->TypeArg(i)->link = tArg->addShallowMbTop();
 	else
 	  rt->TypeArg(i)->link = tArg;	
       }
@@ -314,7 +311,7 @@ Type::TypeOfCopy()
       // ...
       //}
 
-      rt = rt->addShallowMaybe();
+      rt = addMbTop(rt);
       break;
     }
   }
@@ -356,7 +353,7 @@ Type::maximizeTopMutability(GCPtr<Trail> trail)
 
   default:
     {
-      rt = t->getDCopy()->addShallowMutable();
+      rt = t->getDCopy()->addMutable();
       break;
     }
   }
@@ -416,7 +413,7 @@ Type::maximizeMutability(GCPtr<Trail> trail)
       rt = new Type(t);
       rt->CompType(0) = 
 	t->CompType(0)->maximizeMutability(trail);
-      rt = t->addShallowMutable();      
+      rt = t->addMutable();      
       break;
     }
 
@@ -433,13 +430,13 @@ Type::maximizeMutability(GCPtr<Trail> trail)
 	if(rt->argCCOK(i))	  
 	  trail->link(arg, arg->maximizeMutability(trail));       
       }
-      rt = rt->addShallowMutable();
+      rt = rt->addMutable();
       break;
     } 
     
   default:
     {
-      rt = t->getDCopy()->addShallowMutable();
+      rt = t->getDCopy()->addMutable();
       break;
     }
   }
@@ -515,31 +512,13 @@ bool
 Type::isMinMutable()
 {
   return strictlyEquals(minimizeMutability());
-  //   GCPtr<Type> min = minimizeMutability();
-  //   std::cout << "**  t = " << asString(debugTvp) 
-  // 	    << std::endl;
-  //   std::cout << "  min = " << min->asString(debugTvp) 
-  // 	    << std::endl;
-  //   bool isMin = strictlyEquals(min);
-  //   if(isMin)
-  //     std::cout << "   [MINIMAL]" << min->asString(debugTvp) 
-  // 	      << std::endl;
-  //   else
-  //     std::cout << "   [NOT MINIMAL]" << min->asString(debugTvp)
-  // 	      << std::endl;
-  //   return isMin;
 }
-
-  
-
 
 void 
 Type::addHint(GCPtr<Type> theHint)
 {
   GCPtr<Type> t = getType();
   theHint = theHint->getType();
-  assert(t->kind == ty_hint);
-  assert(theHint->kind != ty_hint);
   
   bool found = false;
   for(size_t i=0; i < t->components->size(); i++) {
@@ -566,8 +545,6 @@ Type::clearHints(GCPtr<Trail> trail)
   
   switch(t->kind) {
   case ty_maybe:
-    if((t->hints) && t->hints->components->size())
-      trail->link(t->hints, new Type(ty_hint, t->hints->ast));
     // fall through
     
   default:
@@ -867,7 +844,6 @@ Type::determineCCC(GCPtr<Type> t, bool inRefType)
 
   case ty_typeclass:
   case ty_tyfn:
-  case ty_hint:
     {
       assert(false);
       break;

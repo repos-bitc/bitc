@@ -232,7 +232,6 @@ Type::asAST(const sherpa::LexLoc &loc,
     }
     
   case ty_tyfn:
-  case ty_hint:
     {
       assert(false);
       break;

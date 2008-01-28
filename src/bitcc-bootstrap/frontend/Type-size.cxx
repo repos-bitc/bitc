@@ -216,7 +216,6 @@ Type::size()
   case ty_tyfn:
   case ty_letGather:
   case ty_typeclass:    
-  case ty_hint:
   case ty_reprv:
   case ty_reprr:
   case ty_subtype:

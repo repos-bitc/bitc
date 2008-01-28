@@ -429,7 +429,6 @@ toCtype(GCPtr<Type> typ, string IDname="", unsigned long flags=0,
     }
 
   case ty_tyfn:
-  case ty_hint:
     {
       assert(false);
       break;

@@ -881,7 +881,6 @@ Type::Type(GCPtr<Type>  t)
   Isize = t->Isize;
   minSignedRep = t->minSignedRep;
   minUnsignedRep = t->minUnsignedRep;
-  hints = hints;
 
   components = new CVector<GCPtr<comp> >;
   typeArgs = new CVector<GCPtr<Type> >;

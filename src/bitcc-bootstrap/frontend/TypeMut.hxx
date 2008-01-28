@@ -58,84 +58,15 @@
    legs of a datastructure or expression.*/
 
 static inline GCPtr<Type> 
-newBareTvar(GCPtr<AST> ast)
+newMbTvar(GCPtr<AST> ast)
 {
-  return new Type(ty_tvar, ast);
+  return new Type(ty_mbFull, new Type(ty_tvar, ast));
 }
 
 static inline GCPtr<Type> 
 newTvar(GCPtr<AST> ast)
 {
   return new Type(ty_tvar, ast);
-}
-
-/* Type based mutation analysis */
-static inline GCPtr<Type> 
-newBindType(GCPtr<AST> ast, unsigned long flags)
-{
-  assert(ast->astType == at_ident);
- 
-  if(ast->Flags2 & ID_IS_MUTATED) {
-    assert((flags & TI_TYP_EXP) == 0);
-    assert((ast->Flags & ID_IS_TVAR) == 0);
-    return new Type(ty_mutable, new Type(ty_tvar, ast));
-  }
-  else
-    return newTvar(ast);
-}
-
-static inline GCPtr<Type> 
-nonCopyType(Kind k, GCPtr<AST> ast)
-{
-  if(k == ty_tvar)   
-    return newTvar(ast);
-  
-  return new Type(k, ast);
-}
-
-
-static inline GCPtr<Type> 
-ConstructedType(Kind k, GCPtr<AST> ast)
-{ 
-  assert(k != ty_tvar);
-  return new Type(k, ast);
-}
-
-
-static inline GCPtr<Type> 
-ArgType(GCPtr<Type> t)
-{
-  return t->TypeOfCopy();
-}
-
-static inline GCPtr<Type> 
-RetType(GCPtr<Type> t)
-{
-  return t->TypeOfCopy();
-}
-
-static inline GCPtr<Type> 
-CtrArgType(GCPtr<Type> t)
-{
-  return ArgType(t);
-}
-
-static inline GCPtr<Type> 
-CtrRetType(GCPtr<Type> t)
-{
-  return t;
-}
-
-static inline GCPtr<Type> 
-conditionalType(GCPtr<Type> t)
-{
-  return t->TypeOfCopy();
-}
-
-static inline GCPtr<Type> 
-switchLegType(GCPtr<Type> t)
-{
-  return conditionalType(t);
 }
 
 #endif /* TYPEMUT_HXX */

@@ -343,15 +343,6 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
       break;
     }
 
-  case ty_hint:
-    {
-      ss << "(hints ";
-      for(size_t i=0; i<t->components->size(); i++)
-	ss << t->CompType(i)->getType()->asString(tvP, traverse);
-      ss << ")";
-      break;
-    }
-    
   case ty_mutable:
     {
       ss << "(mutable " 

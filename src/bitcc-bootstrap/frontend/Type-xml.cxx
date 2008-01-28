@@ -337,13 +337,6 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
       break;
     }
 
-  case ty_hint:
-    {
-      for(size_t i=0; i<t->components->size(); i++)
-	t->CompType(i)->getType()->asXML(tvP, out);
-      break;
-    }
-    
   case ty_mutable:
     {
       out << "<mutable>" << endl;

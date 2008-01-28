@@ -77,12 +77,12 @@ buildFnFromApp(GCPtr<AST> ast, unsigned long uflags)
   GCPtr<Type> fn = new Type (ty_fn, ast);
   GCPtr<Type> targ = new Type(ty_fnarg, ast);
   for (size_t i = 1; i < ast->children->size(); i++) {
-    GCPtr<Type> argi = ArgType(newTvar(ast->child(i)));
+    GCPtr<Type> argi = newMbTvar(ast->child(i));
     targ->components->append(new comp(argi));
   }
   
   fn->components->append(new comp(targ));
-  GCPtr<Type> ret = RetType(newTvar(ast));
+  GCPtr<Type> ret = newMbTvar(ast);
   fn->components->append(new comp(ret));
   
   return fn;
@@ -95,7 +95,7 @@ bindIdentDef(GCPtr<AST> ast,
 	     unsigned long bindFlags,
 	     unsigned long flags)
 {
-  ast->symType = newBindType(ast, flags); 
+  ast->symType = newMbTvar(ast); 
   
   GCPtr<TypeScheme> sigma = new TypeScheme(ast->symType);
   ast->scheme = sigma;
@@ -303,16 +303,16 @@ matchDefDecl(std::ostream& errStream,
       GCPtr<Type> argsDef = defT->getBareType()->CompType(0);
       if(argsDecl->components->size() == argsDef->components->size()) {
 	for(size_t c=0; c < argsDecl->components->size(); c++) {	    
-	  GCPtr<Type> argDecl = ArgType(argsDecl->CompType(c));
-	  GCPtr<Type> argDef = ArgType(argsDef->CompType(c));
+	  GCPtr<Type> argDecl = argsDecl->CompType(c);
+	  GCPtr<Type> argDef = argsDef->CompType(c);
 	  CHKERR(errorFree, argDecl->strictlyEquals(argDef));
 	}
       }
       else
 	errorFree = false;
       
-      GCPtr<Type> retDecl = RetType(declT->getBareType()->CompType(1));
-      GCPtr<Type> retDef = RetType(defT->getBareType()->CompType(1));
+      GCPtr<Type> retDecl = declT->getBareType()->CompType(1);
+      GCPtr<Type> retDef = defT->getBareType()->CompType(1);
       CHKERR(errorFree, retDecl->strictlyEquals(retDef));
     }
     else {
@@ -547,13 +547,13 @@ InferStruct(std::ostream& errStream, GCPtr<AST> ast,
       }
     }
   }
-
+  
   addTvsToSigma(errStream, tvList, sigma, trail); 
-
+  
   // In case of value type definitions, mark all those  
   // type arguments that are candidiates for copy-compatibility.
   markCCC(st);
-    
+  
   // Set the main AST's type.
   ast->symType = sIdent->symType;
    
@@ -1483,20 +1483,20 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
   case at_boolLiteral:
     {
-      ast->symType = nonCopyType(Type::LookupKind("bool"), ast);
+      ast->symType = new Type(Type::LookupKind("bool"), ast);
       break;
     }
 
   case at_charLiteral:
     {
-      ast->symType = nonCopyType(Type::LookupKind("char"), ast);
+      ast->symType = new Type(Type::LookupKind("char"), ast);
       break;
     }
 
   case at_intLiteral:
     {
       if(uflags & NO_MORE_TC) {
-	ast->symType = nonCopyType(ty_tvar, ast);
+	ast->symType = new Type(ty_tvar, ast);
 	break;
       }
 
@@ -1514,7 +1514,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
   case at_floatLiteral:
     {
       if(uflags & NO_MORE_TC) {
-	ast->symType = nonCopyType(ty_tvar, ast);
+	ast->symType = new Type(ty_tvar, ast);
 	break;
       }
 
@@ -1533,7 +1533,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
     // FIX: Not sure this is right. In truth, we really shouldn't be
     // bothering to type check these at all.
     {
-      ast->symType = nonCopyType(Type::LookupKind("string"), ast);
+      ast->symType = new Type(Type::LookupKind("string"), ast);
 
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  mode, TI_NONE);
@@ -1542,7 +1542,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
   case at_stringLiteral:
     {
-      ast->symType = nonCopyType(Type::LookupKind("string"), ast);
+      ast->symType = new Type(Type::LookupKind("string"), ast);
       break;
     }
 
@@ -1555,41 +1555,27 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  GCPtr<TypeScheme> sigma = gamma->getBinding(ast->s);
 
 	  if(sigma) {	    
-	    if(ast->isDecl) {
-	      /* Note: This case is ONLY used for proclaims. 
-		 structure and union declarations and definitions
-		 do not make this recursive call */
-	      
-	      // We need to preserve this un-unified until after the
-	      // real type is inferred. So, this unification will now be
-	      // done in handle-decls.
-	      //
-	      //   CHKERR(errFree, unify(errStream, trail, gamma, 
-	      //                         ast, ast->symType, 
-	      // 	                       sigma->tau, uflags));
-	      //
-	      // Make way for the actual definition of the type.
-	     
-	      ast->symType = newBindType(ast, flags);
-	      GCPtr<TypeScheme> sigma = new TypeScheme(ast->symType, ast, NULL);
-	      ast->symType->getBareType()->defAst = sigma->tau->getBareType()->defAst;
-	      ast->scheme = sigma;
-	    }
-	    else {	      
-	      bindFlags = BF_REBIND;
-	      sigma = bindIdentDef(ast, gamma, bindFlags, flags);
-	      ast->symType->defAst = sigma->tau->getType()->defAst = ast;
-	      break;
-	    }
+	    // NOTE: none of the declaration forms make this 
+	    // recursive call. 
+	    assert(!ast->isDecl);
+
+	    // All rebinding forms (lambda, let, etc) make calls
+	    // through REDEF_MODE. Threfore, this case MUST be
+	    // a definition for which we have already seen a 
+	    // declaration.
+	    bindFlags = BF_REBIND;
+	    sigma = bindIdentDef(ast, gamma, bindFlags, flags);
+	    ast->symType->defAst = sigma->tau->getType()->defAst = ast;
 	  }
-	  else
+	  else {
 	    sigma = bindIdentDef(ast, gamma, bindFlags, flags);	  
+	  }
 	  break;
 	}
-      
+	
       case REDEF_MODE:
 	{
-	  (void) bindIdentDef(ast, gamma, BF_REBIND, flags);
+	  bindIdentDef(ast, gamma, BF_REBIND, flags);
 	  break;
 	}
 
@@ -1836,6 +1822,12 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       CHKERR(errFree, sigma->solvePredicates(errStream, 
 					     ident->loc, instEnv));
 
+      if (sigma->ftvs->size() && ast->getID()->externalName.size()) {
+	errStream << ast->loc << ": Polymorphic declarations may not specify "
+		  << "an external identifier."
+		  << std::endl;
+	errFree = false;
+      }
     
       GCPtr<TypeScheme> ts = gamma->getBinding(ident->s);
       if(ts) {
@@ -1856,35 +1848,25 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
       gamma->mergeBindingsFrom(defGamma);
 
-      if (sigma->ftvs->size() && ast->getID()->externalName.size()) {
-	errStream << ast->loc << ": Polymorphic declarations may not specify "
-		  << "an external identifier."
-		  << std::endl;
-	errFree = false;
-      }
-
       break;
     }
 
   case at_proclaim:
     {
-      GCPtr<AST> ident = ast->child(0);
-      GCPtr<AST> typ = ast->child(1);
-      GCPtr<AST> constraints = ast->child(2);
-
-      // Maybe, we have a prior declaration?
-      GCPtr<TypeScheme> declTS = gamma->getBinding(ident->s);
-
       // FIX Incompeteness Issue here
       GCPtr<Environment<TypeScheme> > defGamma = gamma->newDefScope();
       ast->envs.gamma = defGamma;
 
       GCPtr<TCConstraints> newTcc = new TCConstraints;
-
-
+      GCPtr<AST> ident = ast->child(0);
+      GCPtr<AST> typ = ast->child(1);
+      GCPtr<AST> constraints = ast->child(2);
       assert(ident->isDecl);
-      TYPEINFER(ident, defGamma, instEnv, impTypes, isVP, newTcc,
-		uflags, trail, DEF_MODE, TI_NONE);
+
+      // WAS: newBindType() which had a maybe() around.
+      ast->symType = newTvar(ast);
+      GCPtr<TypeScheme> sigma = new TypeScheme(ast->symType, ast, NULL);
+      ast->scheme = sigma;
       
       TYPEINFER(typ, defGamma, instEnv, impTypes, isVP, newTcc,
 		uflags, trail, USE_MODE, TI_TYP_EXP);
@@ -1899,18 +1881,15 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       if(!errFree)
 	break;
       
-      GCPtr<TypeScheme> sigma = ident->scheme;
       sigma->tcc = newTcc;
       //collectAllftvs(sigma->tau, sigma->ftvs);
-
       GCPtr<AST> ip = new AST(at_identPattern, ident->loc, ident, typ);
       ip->symType = ident->symType;
 
       CHKERR(errFree, generalizePat(errStream, ast->loc, gamma,
 				    instEnv, ip, ident, false, 
 				    sigma->tcc, NULL, trail));
-      gamma->mergeBindingsFrom(defGamma);
-
+      
       if(!errFree) {
 	errStream << ast->loc << ": Invalid Proclaimation"
 		  << " The type specified could not be"
@@ -1925,12 +1904,17 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	errFree = false;
       }
 
-      // Make sure this is a compatible declaration is there 
-      // was one already.
-      if(declTS)
+      GCPtr<TypeScheme> ts = gamma->getBinding(ident->s);
+      if(ts) {
+	ident->symType->defAst = ts->tau->getType()->defAst;
 	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
-				     declTS, sigma, uflags, false));      
+				     ts, sigma, uflags, false));      
+      }
+      else {
+	defGamma->addBinding(ident->s, sigma);
+      }
       
+      gamma->mergeBindingsFrom(defGamma);
       ast->symType = ident->symType;      
       break;
     }
@@ -2086,8 +2070,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		currTcc, uflags, trail,  mode, TI_CONSTR);
       
       GCPtr<Type> lhsType = ast->child(0)->symType->getType();
-      GCPtr<Type> rhsType = LvalAdjustedType(ast->child(0), 
-				       ast->child(1)->symType);
+      GCPtr<Type> rhsType = ast->child(1)->symType->TypeOfCopy();
       
       CHKERR(errFree, unify(errStream, trail, ast->child(0), 
 			    lhsType, rhsType, uflags));
@@ -2525,10 +2508,8 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	//The Type is already mutable
 	ast->symType = t;
       }
-      if(t->kind == ty_maybe) {
-	//maybe-types appear around type variables
-	t->kind = ty_mutable;
-	ast->symType = t;
+      if(t->isMaybe()) {
+	assert(false);
       }
       else {
 	ast->symType = new Type(ty_mutable, ast);
@@ -3391,7 +3372,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       break;
     }
-
+    
   case at_struct_apply:
     {
       // match at_ident
@@ -3570,7 +3551,8 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       GCPtr<Type> t = ast->child(0)->symType->getType();
       
-      if(t->kind == ty_maybe) {
+      if(t->isMaybe()) {
+	assert(false); // FIX with unification
 	t->kind = ty_mutable;
       }
       else if(t->kind == ty_tvar) {

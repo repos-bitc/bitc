@@ -540,12 +540,6 @@ isExpansive(std::ostream& errStream,
       itsExpansive = true;
       break;
     }
-
-  case ty_hint:
-    {
-      assert(false);
-      break;       
-    }
   }
 
   t->mark &= ~MARK4;
@@ -732,12 +726,6 @@ Type::removeRestricted(GCPtr<CVector<GCPtr<Type> > > &ftvs,
 	  tt->removeRestricted(ftvs, remove, removed);
 	}
       break;
-    }
-    
-  case ty_hint:
-    {
-      assert(false);
-      break;       
     }
   }
   

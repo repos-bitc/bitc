@@ -260,59 +260,6 @@ TypeScheme::collectftvs(GCPtr<const Environment<TypeScheme> > gamma)
   }
 }
 
-bool
-Type::fixMaybes(GCPtr<CVector<GCPtr<Type> > > ftvs, GCPtr<Trail> trail, bool clearAll)
-{
-  bool noFtvs = (clearAll) ? false : true;
-  GCPtr<Type> t = getType();
-  
-  if(t->mark & MARK9)
-    return true;
-
-  t->mark |= MARK9;
-
-  switch(t->kind) {
-  case ty_tvar:
-    if(ftvs->contains(t))
-      noFtvs = false;
-    break;
-
-  case ty_maybe:
-    CHKERR(noFtvs, t->CompType(0)->fixMaybes(ftvs, trail, clearAll));    
-    if(!noFtvs) {
-      trail->link(t, t->CompType(0)->getType());
-      t->hints = NULL;
-    }
-    break;
-    
-  default:
-    for(size_t i=0; i < t->typeArgs->size(); i++) 
-      CHKERR(noFtvs, t->TypeArg(i)->fixMaybes(ftvs, trail, clearAll));
-
-    for(size_t i=0; i<t->components->size(); i++)
-      CHKERR(noFtvs, t->CompType(i)->fixMaybes(ftvs, trail,
-					       clearAll)); 
-    if(t->fnDeps)
-      for(size_t i=0; i < t->fnDeps->size(); i++)
-	CHKERR(noFtvs, t->FnDep(i)->fixMaybes(ftvs, trail, 
-					      clearAll));
-    break;
-  }
-
-  t->mark &= ~MARK9;
-  return noFtvs;
-}
-
-void
-Type::clearAllMaybes()
-{
-  CVector<GCPtr<Type> > dummyFtvs;
-  Trail dummyTrail;
-  
-  fixMaybes(&dummyFtvs, &dummyTrail, true);
-}
-
-
 bool isExpansive(std::ostream& errStream, 
 		GCPtr<const Environment<TypeScheme> > gamma,
 		GCPtr<const AST> ast);
@@ -340,8 +287,6 @@ TypeScheme::generalize(std::ostream& errStream,
 		       const bool mustSolve)
 {
   bool errFree = true;
-
-  //tau->fixMaybes(ftvs, trail, true);
 
 //   std::cerr << "At " << errLoc
 // 	    << "RHS = " << expr->asString() 
