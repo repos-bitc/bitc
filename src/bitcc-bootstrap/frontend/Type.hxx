@@ -399,7 +399,7 @@ public:
 		   bool remove,
 		   GCPtr<CVector<GCPtr<Type> > > removed);
 
-  /* Methids to deal with mutability issues */
+  /* Methods to deal with mutability issues */
   // Fix all Maybe types surrounding type records containing a
   // polymorphic type variables, except in the case of those maybes
   // directly surrounding type variables, unless clearall is
@@ -413,21 +413,8 @@ public:
   
 private:
   void groundMaybe(GCPtr<Trail> trail);
-  GCPtr<Type> simplifiedHint();
 public:
   void adjMaybe(GCPtr<Trail> trail);
-  void clearHints(GCPtr<Trail> trail);
-
-  // For hint types only. Add another hint to the set (components)
-  // only if that hint is not already present. This function checks
-  // getType()s but should not be taken as authentic because of
-  // possible inter-linkages due to further linkages. If the real
-  // meaning of _set_ is needed, re-normalize at the time of use.
-  void addHint(GCPtr<Type> theHint);
-
-  /* Return a copy-compatible, but maximally permissible type */
-  // returns ty_mbFull wrapped cc-immutable form of `this' type
-  GCPtr<Type> TypeOfCopy();
 
   // Get the maximally-mutable, but copy-compatible type.
   GCPtr<Type> maximizeMutability(GCPtr<Trail> trail=new Trail);

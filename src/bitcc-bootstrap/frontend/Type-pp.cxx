@@ -180,7 +180,8 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
       ss << "(fn " 
 	 << t->CompType(0)->asString(tvP, traverse) 
 	 << " " 
-	 << t->CompType(1)->TypeOfCopy()->minimizeMutability()->asString(tvP, traverse) 
+	//<< t->CompType(1)->minimizeMutability()->asString(tvP, traverse) 
+	 << t->CompType(1)->asString(tvP, traverse) 
 	 << ")";
       break;
     }
@@ -196,7 +197,9 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 	     << t->CompType(i)->asString(tvP, traverse)
 	     << ")";
 	else	   
-	  ss << t->CompType(i)->TypeOfCopy()->minimizeMutability()->asString(tvP, traverse);
+	  ss << t->CompType(i)->asString(tvP, traverse);
+	// ss << t->CompType(i)->minimizeMutability()->asString(tvP, traverse);
+
       }
       ss << ")";
       break;

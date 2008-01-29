@@ -194,7 +194,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
       t->CompType(0)->asXML(tvP, out);
       out.less();
       out << "</tuple>" << endl;
-      t->CompType(1)->TypeOfCopy()->minimizeMutability()->asXML(tvP, out);
+      t->CompType(1)->minimizeMutability()->asXML(tvP, out);
       out.less();
       out << "</fn>" << endl;
       break;
@@ -209,7 +209,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 	  out << "<byref> ";
 	}
 	else {
-	  t->CompType(i)->TypeOfCopy()->minimizeMutability()->asXML(tvP, out);
+	  t->CompType(i)->minimizeMutability()->asXML(tvP, out);
 	}
       }
       break;
@@ -225,7 +225,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
       t->CompType(0)->asXML(tvP, out);
       out.less();
       out << "</tuple>" << endl;
-      t->CompType(1)->TypeOfCopy()->minimizeMutability()->asXML(tvP, out);
+      t->CompType(1)->minimizeMutability()->asXML(tvP, out);
       out.less();
       out << "</tyfn>" << endl;
       break;

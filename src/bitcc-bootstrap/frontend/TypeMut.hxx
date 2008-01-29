@@ -69,4 +69,16 @@ newTvar(GCPtr<AST> ast)
   return new Type(ty_tvar, ast);
 }
 
+static inline GCPtr<Type> 
+MBF(GCPtr<Type> t)
+{
+  return new Type(ty_mbFull, t->minimizeMutaiblity());
+}
+
+static inline GCPtr<Type> 
+MBT(GCPtr<Type> t)
+{
+  return new Type(ty_mbTop, t->getBareType());
+}
+
 #endif /* TYPEMUT_HXX */

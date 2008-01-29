@@ -20,6 +20,10 @@ can declare that the compiler is "done".
 6.  (shap) Remove qual_type and friends now that we can do outer
     forall, but check the impact on the document first.
 
+7.  Modify typing of array/vector indices so that any integral type
+    (not just word type) is admissible. In case of ambiguity, 
+    the index must default to word? or be polymorphic if possible?
+
 DEFER UNTIL AFTER RELEASE
 
 1.  [DEFER] (shap) Augment testit infrastructure to support command

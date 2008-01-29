@@ -178,31 +178,11 @@ p: (CL (maybe-1 'a)) => (fn ('a) ())
 /********************************************************************/ 
  
 
-
-// Gives the type of the copy, introduces explicit maybe-mutability.
-static inline GCPtr<Type> 
-addMbTop(GCPtr<Type> t)
-{
-  return new Type(ty_mbTop, t->getBareType());
-}
-
-static inline GCPtr<Type> 
-addMbFull(GCPtr<Type> t)
-{
-  return new Type(ty_mbFull, t->getBareType());
-}
-
-static inline GCPtr<Type> 
-addMutable(GCPtr<Type> t)
-{
-  return new Type(ty_mutable, t->getBareType());
-}
-
 GCPtr<Type> 
 addShallowMbTop()
 {
   if(Options::topMutOnly)
-    return addMbTop(t);
+    return MBT(t);
   
   GCPtr<Type> t = getType();
   GCPtr<Type> rt = NULL;
@@ -258,7 +238,7 @@ addShallowMbTop()
   case  ty_bitfield:
 #endif
     {
-      rt = addMbTop(t);
+      rt = MBT(t);
       break;
     }
     
@@ -272,7 +252,7 @@ addShallowMbTop()
   case ty_reprr:
   case ty_exn:
     {
-      rt = addMbTop(t);
+      rt = MBT(t);
       break;
     }
 
@@ -280,7 +260,7 @@ addShallowMbTop()
     {
       rt = new Type(t);
       rt->CompType(0) = t->CompType(0)->addShallowMbTop();
-      rt = addMbTop(rt);
+      rt = MBT(rt);
       break;
     }
 
@@ -311,7 +291,7 @@ addShallowMbTop()
       // ...
       //}
 
-      rt = addMbTop(rt);
+      rt = MBT(rt);
       break;
     }
   }
@@ -386,6 +366,11 @@ Type::minimizeMutability(GCPtr<Trail> trail)
   return rt;
 }
 
+static inline GCPtr<Type> 
+addMutable(GCPtr<Type> t)
+{
+  return new Type(ty_mutable, t->getBareType());
+}
 
 GCPtr<Type> 
 Type::maximizeMutability(GCPtr<Trail> trail)
