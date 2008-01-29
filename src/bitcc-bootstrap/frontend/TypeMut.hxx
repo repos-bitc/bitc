@@ -72,7 +72,7 @@ newTvar(GCPtr<AST> ast)
 static inline GCPtr<Type> 
 MBF(GCPtr<Type> t)
 {
-  return new Type(ty_mbFull, t->minimizeMutaiblity());
+  return new Type(ty_mbFull, t->minimizeMutability());
 }
 
 static inline GCPtr<Type> 

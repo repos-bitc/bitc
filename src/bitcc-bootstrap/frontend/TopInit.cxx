@@ -325,13 +325,14 @@ TopInit(std::ostream& errStream,
       break;
     }
 
+  case at_fqCtr:
+    break;
+
   case at_identPattern:
   case at_tqexpr:
   case at_select:
+  case at_sel_ctr:
     {
-      if(ast->Flags2 & SEL_FROM_UN_TYPE)
-	break;
-
       TOPINIT(ast->child(0), flags);
       break;
     }

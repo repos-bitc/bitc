@@ -1648,10 +1648,25 @@ resolve(std::ostream& errStream,
       break;
     }
     
+
+  case at_fqCtr:
+    {
+      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
+	      id_type, currLB, flags);
+      break;
+    }
+    
+  case at_sel_ctr:
+    {
+      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
+	      id_value, currLB, flags );
+      break;
+    }
+
   case at_select:
     {
       // match agt_expr
-
+      
       // CAREFUL: this might be a usesel
       if(ast->child(0)->astType == at_ident || 
 	 ast->child(0)->astType == at_usesel) {
@@ -1660,7 +1675,7 @@ resolve(std::ostream& errStream,
 	
 	// If ast->child(0) was a at_usesel, now it would have
 	// turned into at_ident.
-
+	
 	switch(ast->child(0)->identType) {
 	case id_interface:
 	  ast->astType = at_usesel;
@@ -1676,7 +1691,8 @@ resolve(std::ostream& errStream,
 	case id_type:
 	  // This must be a case where we are qualifying a constructor
 	  // with its union name.
-	  ast->Flags2 |= SEL_FROM_UN_TYPE;
+	  ast->astType = at_fqCtr;
+	  RESOLVE(ast, env, lamLevel, USE_MODE, id_type, currLB, flags);
 	  break;
 
 	default:

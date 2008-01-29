@@ -128,6 +128,56 @@ Instantiate(GCPtr<AST> ast, GCPtr<TypeScheme> sigma)
   else
     return sigma->ts_instance();
 }
+
+static bool
+findComponent(std::ostream& errStream, 
+	      GCPtr<Type> sut, GCPtr<AST> ast, GCPtr<Type> &fct)
+{
+  assert(ast->astType == at_select || 
+	 ast->astType == at_sel_ctr || 
+	 ast->astType == at_fqCtr);
+  fct = NULL;
+
+  if(sut->isUType())
+    sut = obtainFullUnionType(sut);
+  
+  if(sut->components->size() == 0) {
+    errStream << ast->loc << ": "
+	      << "cannot dereference fields as only "
+	      << "an opaque declaration is available."
+	      << std::endl;
+    return false;
+  }
+
+  bool valid=false;
+  for(size_t i=0; i < sut->components->size(); i++)
+    if(sut->CompName(i) == ast->child(1)->s) {
+      fct = sut->CompType(i);	  
+      valid = ((sut->CompFlags(i) & COMP_INVALID) == 0);
+      break;
+    }
+      
+  if(!fct) {
+    errStream << ast->loc << ": "
+	      << " In the expression " << ast->asString() << ", "
+	      << " structure/constructor " << sut->defAst->s 
+	      << " has no Field/Constructor named " 
+	      << ast->child(1)->s << "." << std::endl;
+    return false;
+  } 
+
+  if(!valid) {
+    errStream << ast->child(0)->loc << ": "
+	      << " The expression " << ast->asString()
+	      << " has no field " 
+	      << ast->child(1)->s << "." << std::endl;
+
+    fct = NULL;
+    return false;
+  }
+
+  return fct;
+}
 	
 /**************************************************************/
 /*                Type consistency checking                   */
@@ -1857,14 +1907,13 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
   case at_proclaim:
     {
       /*--------------------------------------------
-
 	   A(x) = t1   U(t1 = t)
 	_________________________
-    	    (proclaim x:t): t 
+	     A |- (proclaim x:t): t 
 	
 	  x:t' notin A,  EXTEND A with x:t
 	_______________________________
-    	   (proclaim x:t): t 
+       	   A |- (proclaim x:t): t 
 	------------------------------------------------*/
       
       // FIX Incompeteness Issue here
@@ -2063,15 +2112,11 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
   case at_define:
     {
       /*------------------------------------------------
-	
 	        t' = 'a|'b       [U(t = t')]
-
    	     A, x:t' |- e:t1    U(t1 = 'c|'b)	
-	     
           s = generalize(A, t', e)   EXTEND A with x:s
 	_______________________________________________
-    	          (define x:[t] = e): t'
-     
+    	        A |- (define x:[t] = e): t'
      ---------------------------------------------------*/
       // Maybe, we have a prior declaration?
       GCPtr<AST> ident = ast->child(0)->child(0);
@@ -2098,7 +2143,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Type> rhsType = MBF(ast->child(1)->symType);
       
       CHKERR(errFree, unify(errStream, trail, ast->child(1), 
-			    ast->child(1)->symType
+			    ast->child(1)->symType,
 			    MBF(ast->child(0)->symType), uflags));
       
       CHKERR(errFree, generalizePat(errStream, ast->loc, 
@@ -2742,17 +2787,22 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
   case at_makevectorL:
     {
+      /*------------------------------------------------
+	         A |- en:tn  U(tn =  'w|word)
+                 A |- el:tl  U(tl = 'f|('a|word -> 'b|'c))
+                       tv = vector('d|'c)              
+	  ___________________________________________
+                A |- (make-vector en el): tv
+	------------------------------------------------*/
+
       // match agt_expr
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
-      
-      GCPtr<Type> ndxType = ast->child(0)->symType->getType();
-
       // FIX TO WORD
-      CHKERR(errFree, unifyPrim(errStream, trail, ast->child(0), 
-				ndxType, "word"));
-
-      ast->child(0)->symType = ast->child(0)->symType->getTheType();
+      CHKERR(errFree, unify(errStream, trail, ast->child(0), 
+			    ast->child(0)->symType, 
+			    MBF(new Type(ty_word, ast->child(0))), 
+			    uflags));
 
       // match agt_expr
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
@@ -2781,6 +2831,19 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
   case at_array:
   case at_vector:
     {
+    /*------------------------------------------------
+                A |- e1: t1 ... A |- en: tn
+             U(t1 = 'a1|'b) ... U(tn = 'an|'b)
+          _________________________________________
+             A |- (array e1 ... en): array('a|'b, n)
+
+
+                A |- e1: t1 ... A |- en: tn
+             U(t1 = 'a1|'b) ... U(tn = 'an|'b)
+          _________________________________________
+             A |- (vector e1 ... en): vector('a|'b)
+       ------------------------------------------------*/
+
       Kind k = (ast->astType == at_array) ? ty_array : ty_vector;
       GCPtr<Type> compType = MBF(newTvar(ast));
       ast->symType = new Type(k, ast, compType);
@@ -2792,7 +2855,8 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		  uflags, trail,  USE_MODE, TI_COMP2);
 	
 	CHKERR(errFree, unify(errStream, trail, ast->child(c), 
-			      compType, MB(Fast->child(c)->symType), uflags));
+			      ast->child(c)->symType,
+			      MBF(compType), uflags));
       }
       
       break;
@@ -2801,6 +2865,16 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
   case at_array_length:
   case at_vector_length:
     {
+    /*------------------------------------------------
+             A |- e: t   U(t = 'a|array('b, ?len))
+          _________________________________________
+             A |- (array-length e): word
+
+
+             A |- e: t   U(t = 'a|vector('b))
+          _________________________________________
+             A |- (vector-length e): word
+       ------------------------------------------------*/
       Kind k = (ast->astType == at_array_length) ? ty_array : ty_vector;
       
       // match agt_expr
@@ -2809,31 +2883,12 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       GCPtr<Type> av = MBF(new Type(k, ast->child(0), 
 				    newTvar(ast->child(0))));
+      if(ast->astType == at_array_length)
+	impTypes->append(av);
+      
       CHKERR(errFree, unify(errStream, trail, ast->child(0), 
-			    ast->child(0)->symType,
-			    MBF(new Type(k, ast, ), uflags));
-
-      GCPtr<Type> t1 = ast->child(0)->getType();
-      GCPtr<Type> t = t1->getBareType();
+			    ast->child(0)->symType, av, uflags));
       
-      if(t->kind == ty_tvar) {
-	t->kind = neededKind;
-	t->components->append(new comp(newTvar(ast)));
-	if(ast->astType == at_array_length)
-	  impTypes->append(t);
-      }
-      
-      if(t->kind != neededKind) {
-	errStream << ast->child(0)->loc << ": "
-		  << "Bad Argument to " << ast->atKwd() << ". " 
-		  << "Need "
-		  << (neededKind == ty_array ? "array" : "vector")
-		  << " type, "
-		  << "but obtained "  << t1->asString() 
-		  << "." << std::endl;
-	errFree = false;
-      }
-    
       // FIX TO WORD, not mutable
       ast->symType = new Type(ty_word, ast);
       break;    
@@ -2842,77 +2897,94 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
   case at_array_nth:
   case at_vector_nth:
     {
-      ast->symType = newTvar(ast);
-      // match agt_expr
+    /*------------------------------------------------
+             A |- e: t   U(t = 'a!array('b|'c, ?len))
+             A |- en: tn  U(tn = 'd|word)
+          _________________________________________
+             A |- (array-nth e): 'b|'c
 
+
+             A |- e: t   U(t = 'a|vector('b))
+             A |- en: tn  U(tn = 'd|word)
+          _________________________________________
+             A |- (vector-nth e en): 'b
+       ------------------------------------------------*/
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
 
-      GCPtr<Type> t1 = ast->child(0)->getType();
-      GCPtr<Type> t = t1->getBareType();
-
-      Kind neededKind = ((ast->astType == at_array_nth) ? 
-			 ty_array : ty_vector);
-      if(t->kind == ty_tvar) {
-	t->kind = neededKind;
-	t->components->append(new comp(newTvar(ast)));
+      GCPtr<Type> av=0;
+      GCPtr<Type> cmp=0;
+      if(ast->ast->astType == at_array_nth) {
+	cmp = MBF(newTvar(ast->child(0)));
+	av = MBT(new Type(ty_array, ast->child(0), cmp));
+	impTypes->append(av);
       }
-
-      if(t->kind != neededKind) {
-	errStream << ast->child(0)->loc << ": "
-		  << ast->atKwd()
-		  << " requires an argument of vector type " 
-		  << "but obtained "  << t1->asString() 
-		  << "." << std::endl;
-	errFree = false;
-	break;
+      else {
+	cmp = newTvar(ast->child(0));
+	av = MBF(new Type(ty_vector, ast->child(0), cmp));
       }
-
-      // match agt_expr
+      
+      CHKERR(errFree, unify(errStream, trail, ast->child(0), 
+			    ast->child(0)->symType, arr, uflags));
+      
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
-    
       // FIX TO WORD
-      GCPtr<Type> ndxType = ast->child(1)->symType->getBareType();
-      CHKERR(errFree, unifyPrim(errStream, trail, ast->child(1), 
-				ndxType, "word")); 
-            
+      CHKERR(errFree, unify(errStream, trail, ast->child(1), 
+			    ast->child(1)->symType, 
+			    MBF(new Type(ty_word, ast->child(1))), 
+			    uflags));
 
-      ast->symType = t->CompType(0)->getType();
+      ast->symType = cmp;
       break;
     }
 
   case at_begin:
     {
+    /*------------------------------------------------
+             A |- e1: t1 ... A |- en: tn
+          _________________________________________
+             A |- (begin e1 ... en): tn
+
+       ------------------------------------------------*/
       // match agt_expr+
-      size_t c = 0;
-      for(c = 0; c < ast->children->size(); c++)
+      for(size_t c = 0; c < ast->children->size(); c++)
 	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
       
-      ast->symType = ast->child(c-1)->symType;
+      ast->symType = ast->child(ast->children->size()-1)->symType;
       break;
     }
 
   case at_select:
     {
+    /*------------------------------------------------
+                tr = R{... fld:t ... }  
+	   tr' = tr or mutable(tr) or 'a!tr
+                  A |- e: tr'
+          _________________________________________
+                  A |- e.fld: t
+       ------------------------------------------------*/
+
       // match agt_expr 
-      // This can only be mutable or immutable based on the selection.
-      ast->symType = new Type(ty_tvar, ast); 
-
-      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
-		uflags, trail,  USE_MODE, TI_COMP2);
-
-      GCPtr<Type> t1 = ast->child(0)->symType->getBareType();
-      
       /* Selection is only permitted on 
 	 - structures: for selecting field
-	 - union values: determining tag 
-                      (need to mark SEL_FROM_UN_VAL)
-	 - union type: alternate name for tag 
-                      (already marked SEL_FROM_UN_TYPE) */
-      if(t1->kind != ty_structv && t1->kind != ty_structr && 
-	 !t1->isUType()) {
+	 - union values: determining tag (need to convert it to at_sel_ctr)
+	 Note that selection for fqn-naming a union constructor
+	 is already handled by the symbol table  */
+      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      
+      GCPtr<Type> t1 = ast->child(0)->symType->getBareType();
+      if(t1->isUType()) {
+	ast->astType = at_sel_ctr;
+	ast->Flags2 &= ~AST_IS_LOCATION;	
+	TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail, USE_MODE, TI_COMP2);
+	break;
+      }
+
+      if(t1->kind != ty_structv && t1->kind != ty_structr) {
 	errStream << ast->child(0)->loc << ": "
 		  << ast->child(0)->s << " cannot be resolved" 
 		  << " to a structure, union, or exception type." 
@@ -2922,74 +2994,92 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	break;
       }
 
+      GCPtr<Type> fld;
+      CHKERR(errFree, findComponent(errStream, t1, ast, fld));
 
-      if(t1->isUType()) {
-	t1 = obtainFullUnionType(t1);
-	ast->Flags2 &= ~AST_IS_LOCATION;	
-      }
+      if(errFree)
+	ast->symType = fct;
+      else
+	ast->symType = new Type(ty_tvar, ast); 
+      
+      break;
+    }
 
-      if(t1->components->size() == 0) {
+  case at_fqCtr:
+    {
+      /*------------------------------------------------
+                 A(un) = V(... ctr:t ...) 
+          _________________________________________
+                  A |- un.ctr:t
+       ------------------------------------------------*/
+
+
+      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      
+      GCPtr<Type> t1 = ast->child(0)->symType->getBareType();
+      if(!t1->isUType()) {
 	errStream << ast->child(0)->loc << ": "
-		  << ast->child(0)->s << " cannot dereference fields using "
-		  << "opaque declarations."
+		  << ast->child(0)->s << " cannot be resolved" 
+		  << " to a union, or exception type." 
+		  << " but obtained " << t1->asString() 
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+      
+      GCPtr<Type> fct;
+      CHKERR(errFree, findComponent(errStream, t1, ast, fct));
+      
+      if(!errFree) {
+	ast->symType = new Type(ty_tvar, ast); 
+	break;
+      }
+      
+      ast->child(1)->symbolDef = fct->defAst;	  
+      ast->child(1)->Flags |= fct->defAst->Flags;
+      ast->child(1)->Flags2 |= fct->defAst->Flags2;
+      ast->child(1)->symType = fct;
+      ast->symType = ast->child(1)->symType;
+      break;
+    }
+    
+  case at_sel_ctr:
+    {
+      /*------------------------------------------------
+                 A |- e:un   A(un) = V(... ctr ...)
+          _________________________________________
+                  A |- e.ctr:bool
+       ------------------------------------------------*/
+
+      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+
+      GCPtr<Type> t1 = ast->child(0)->symType->getBareType();
+      if(!t1->isUType()) {
+	errStream << ast->child(0)->loc << ": "
+		  << ast->child(0)->s << " cannot be resolved" 
+		  << " to a union, or exception type." 
+		  << " but obtained " << t1->asString() 
 		  << std::endl;
 	errFree = false;
 	break;
       }
 
-      // match at_ident
-      GCPtr<Type> sut = t1;
-      GCPtr<Type> fct=NULL;
-      bool valid=false;
-      for(size_t i=0; i < sut->components->size(); i++)
-	if(sut->CompName(i) == ast->child(1)->s) {
-	  fct = sut->CompType(i);	  
-	  valid = ((sut->CompFlags(i) & COMP_INVALID) == 0);
-	  break;
-	}
+      ast->symType = new Type(ty_bool, ast);
       
-      if(!fct) {
-	errStream << ast->child(0)->loc << ": "
-		  << " In the expression " << ast->asString() << ", "
-		  << " structure/constructor " << sut->defAst->s 
-		  << " has no Field/Constructor named " 
-		  << ast->child(1)->s << "." << std::endl;
-	errFree = false;
-      } 
-      else if(!valid) {
-	errStream << ast->child(0)->loc << ": "
-		  << " The expression " << ast->asString()
-		  << " has no field " 
-		  << ast->child(1)->s << "." << std::endl;
-	errFree = false;
-      }else {
-	if(sut->isUType()) {
-	  /* Deal with Unions */	
-	  ast->child(1)->symbolDef = fct->defAst;	  
-	  ast->child(1)->Flags |= fct->defAst->Flags;
-	  ast->child(1)->Flags2 |= fct->defAst->Flags2;
-	  
-	  if(ast->Flags2 & SEL_FROM_UN_TYPE) {
-	    ast->child(1)->symType = fct;
-	    ast->symType = ast->child(1)->symType;
-	  }
-	  else {	    
-	    ast->Flags2 |= SEL_FROM_UN_VAL; 	
-	    CHKERR(errFree, unifyPrim(errStream, trail, ast, 
-				      ast->symType, "bool"));
-	    ast->child(1)->symType = fct;
-	  }
-	}
-	else {
-	  /* The normal case, selection of a field from a structure */
-	  ast->symType = fct;
-	  CHKERR(errFree, unify(errStream, trail, ast, 
-				ast->symType, fct, uflags));
-	}
-      }
+      GCPtr<Type> fld;
+      CHKERR(errFree, findComponent(errStream, t1, ast, fld));
+      if(!errFree)
+	break;
+      
+      ast->child(1)->symbolDef = fct->defAst;	  
+      ast->child(1)->Flags |= fct->defAst->Flags;
+      ast->child(1)->Flags2 |= fct->defAst->Flags2;
+      ast->child(1)->symType = fct;
       break;
     }
-
+    
   case at_lambda:
     {
       // match agt_bindingPattern
@@ -4424,3 +4514,6 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
   return errFree;
 }
 
+
+    /*------------------------------------------------
+      ------------------------------------------------*/

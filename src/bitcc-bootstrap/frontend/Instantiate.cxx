@@ -490,12 +490,14 @@ name2fqn(GCPtr<AST> ast)
       break;
     }
 
+  case at_fqCtr:
+  case at_sel_ctr:
   case at_select:
     {
       name2fqn(ast->child(0));      
 
       // There is *NO* name2fqn of the field in the case of  
-      // SEL_FROM_UN_VAL or SEL_FROM_UN_TYPE.
+      // at_sel_crt or at_fqCtr
       // This is because, because the original AST contains 
       // unqualified names within type-records.
       // We only added fqns to the mega environment, with pointers to
@@ -1053,15 +1055,21 @@ UocInfo::recInstantiate(ostream &errStream,
       ast->child(0) = recInstantiate(errStream, 
 				     ast->child(0),
 				     errFree, worklist);
-      
-      if((ast->Flags2 & SEL_FROM_UN_VAL) || 
-	 (ast->Flags2 & SEL_FROM_UN_TYPE))
-	ast->child(1) = recInstantiate(errStream, 
-				       ast->child(1),
-				       errFree, worklist);
       break;
     }
     
+  case at_fqCtr:
+  case at_sel_ctr:
+    {
+      ast->child(0) = recInstantiate(errStream, 
+				     ast->child(0),
+				     errFree, worklist);
+      ast->child(1) = recInstantiate(errStream, 
+				     ast->child(1),
+				     errFree, worklist);
+      break;
+    }
+
   case at_inner_ref:
     {
       ast->child(0) = recInstantiate(errStream, 

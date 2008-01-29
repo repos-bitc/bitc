@@ -101,11 +101,13 @@ LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
       return true;
     }
 
+  case at_fqCtr:
+    {
+      return true;
+    }
+
   case at_select:
     {
-      if(ast->Flags2 & SEL_FROM_UN_TYPE)
-	return true;
-      
       bool isLoc = LocChk(errStream, errFree, ast->child(0), inSET);
       
       if(inSET && !isLoc && !ast->child(0)->symType->isRefType()) {
@@ -118,6 +120,12 @@ LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
       return true;
     }
 
+  case at_sel_ctr:
+    {
+      bool isLoc = LocChk(errStream, errFree, ast->child(0), inSET);
+      return false;
+    }
+    
   default:
     {
       for (size_t c = 0; c < ast->children->size(); c++)

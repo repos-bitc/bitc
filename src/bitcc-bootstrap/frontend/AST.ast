@@ -186,28 +186,16 @@ enum primOp {
                                       // parameters, identifiers
                                       // defined at switch / catch,
                                       // etc.
-#define SEL_FROM_UN_VAL  0x00010000u  // Marked in cases like
-                                      // u.cons, where `u' is a value
-                                      // of list (union) type, where
-                                      // we want to find out if u is
-                                      // currently tagged as
-                                      // cons. This expression has
-                                      // type bool. 
-#define SEL_FROM_UN_TYPE 0x00020000u  // Marked in cases like
-                                      // list.cons, which can be used
-                                      // interchangably with
-                                      // cons. This expression has
-                                      // type ucon/uval.
-#define LB_MUST_GO       0x00020000u  // Unreferenced, unspecialized
+#define LB_MUST_GO       0x00010000u  // Unreferenced, unspecialized
                                       // polymorphic functions must
                                       // not survive at
                                       // letbindings. Mark those.
-#define DUPED_BY_CLCONV  0x00040000u  // The dup()s introduced by
+#define DUPED_BY_CLCONV  0x00020000u  // The dup()s introduced by
                                       // ClConv impact further typing
                                       // because, copy-compatibility
                                       // must be handled beyond this
                                       // ref at binding instances. 
-#define LBS_PROCESSED    0x00080000u  // used to track the highest
+#define LBS_PROCESSED    0x00040000u  // used to track the highest
                                       // level of tvar-usage. If we
                                       // see a tvar use, and if
                                       // LBS_PROCESSED is set for
@@ -215,26 +203,26 @@ enum primOp {
                                       // seen the use at a higer LB,
                                       // and the tvatLB of tvar must
                                       // point to the current lbs.  
-#define LB_INSTANTIATED  0x00100000u  // The current let-binding has
+#define LB_INSTANTIATED  0x00080000u  // The current let-binding has
                                       // been instantiated (used by
                                       // the polyinstantiator) 
-#define ID_OBSERV_DEF    0x00200000u  // The Identifier is observably
+#define ID_OBSERV_DEF    0x00100000u  // The Identifier is observably
                                       // defined 
-#define TVAR_POLY_SPECIAL 0x00400000u // This type variable was
+#define TVAR_POLY_SPECIAL 0x00200000u // This type variable was
                                       // temporarily created by the
                                       // polyinstantiator. Definition
                                       // is OK.
-#define UNION_IS_REPR    0x00800000u  // Defrepr
-#define FLD_IS_DISCM     0x01000000u  // Discriminator field
-#define LAM_NEEDS_TRANS  0x02000000u  // On at_define, this is a
+#define UNION_IS_REPR    0x00400000u  // Defrepr
+#define FLD_IS_DISCM     0x00800000u  // Discriminator field
+#define LAM_NEEDS_TRANS  0x01000000u  // On at_define, this is a
                                       // hoisted lambda for a function
                                       // that has a captured closure,
                                       // need to emit a transition
                                       // function. 
-#define INNER_REF_NDX    0x04000000u  // inner_ref is an indexing-ref
+#define INNER_REF_NDX    0x02000000u  // inner_ref is an indexing-ref
                                       // when clear, indicated
                                       // inner-ref is a selection-ref
-#define ARG_BYREF        0x08000000u  // Function parameter is By-Reference
+#define ARG_BYREF        0x04000000u  // Function parameter is By-Reference
 
 /* Add All **AST Flags** that must be masked from definition before
    setting onto the use cases */
@@ -675,7 +663,7 @@ GROUP type = var | tvar | bitfield | refType | valType
            | fn | byrefType | primaryType | dummyType
            | arrayType | vectorType | typeapp 
            // | closureType;
-           | mutableType | exceptionType; 
+           | mutableType | exceptionType;
 
 // PRIMARY TYPES [3.2]             
 AST bitfield = primaryType intLiteral;
@@ -718,6 +706,7 @@ AST tqexpr = eform type;
 GROUP eform = literal | var | unit
             | array | vector | makevectorL 
             | begin | select
+            | fqCtr | sel_ctr
             | array_nth | vector_nth
             | array_length | vector_length 
             | lambda | suspend
@@ -729,6 +718,15 @@ GROUP eform = literal | var | unit
 	    | mkClosure | allocREF | copyREF | setClosure
             // | loop | typecase | casebang 
             ; 
+// *select* is record selection.
+// *fqCtr* is a union name qualified constructor. Marked in cases like
+// list.cons, which can be used interchangably with cons. This
+// expression has type ucon/uval.
+// *sel_ctr* is the selection of a constructor value
+// for true/false test. Marked in cases like
+// u.cons, where `u' is a value of list (union) type, where
+// we want to find out if u is currently tagged as cons.
+// This expression has type bool. 
 
 // Union constructors
 GROUP ucon = var | select;
@@ -753,6 +751,8 @@ AST begin = expr_or_define+;
 
 // MEMBER [7.7]
 AST select = expr ident;
+AST fqCtr = ident ident;
+AST sel_ctr = expr ident;
 
 // ARRAY-NTH [7.8.2]          
 AST array_nth = expr expr;

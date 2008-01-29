@@ -513,23 +513,29 @@ ssa(std::ostream& errStream,
       break;
     }
     
+  case at_fqCtr:
+    {
+      FEXPR(grandLet) = ast;
+      break;      
+    }
+
+  case at_sel_ctr:
+    {
+      SSA(errStream, uoc, ast->child(0), grandLet, identList, 
+	  ast, 0, flags);      
+      ast->child(0) = FEXPR(grandLet);
+      
+      FEXPR(grandLet) = addLB(grandLet, identList, ast);	
+      break;      
+    }
+
   case at_deref:
   case at_select:
     {
-      GCPtr<AST> expr = ast->child(0);
-      
-      if((ast->Flags2 & SEL_FROM_UN_TYPE) == 0) {
-	SSA(errStream, uoc, expr, grandLet, identList, 
-	    ast, 0, flags);      
-	ast->child(0) = FEXPR(grandLet);
-	//warnTmp(errStream, expr);
-	expr = ast->child(0);
-      }
-      
-      if(ast->Flags2 & SEL_FROM_UN_VAL)
-	FEXPR(grandLet) = addLB(grandLet, identList, ast);	
-      else
-	FEXPR(grandLet) = ast;
+      SSA(errStream, uoc, ast->child(0), grandLet, identList, 
+	  ast, 0, flags);      
+      ast->child(0) = FEXPR(grandLet);
+      FEXPR(grandLet) = ast;
       break;      
     }
 

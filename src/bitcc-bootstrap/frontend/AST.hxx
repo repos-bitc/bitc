@@ -173,28 +173,16 @@ enum primOp {
                                       
                                       
                                       
-#define SEL_FROM_UN_VAL  0x00010000u  
+#define LB_MUST_GO       0x00010000u  
+                                      
+                                      
+                                      
+#define DUPED_BY_CLCONV  0x00020000u  
                                       
                                       
                                       
                                       
-                                      
-                                      
-#define SEL_FROM_UN_TYPE 0x00020000u  
-                                      
-                                      
-                                      
-                                      
-#define LB_MUST_GO       0x00020000u  
-                                      
-                                      
-                                      
-#define DUPED_BY_CLCONV  0x00040000u  
-                                      
-                                      
-                                      
-                                      
-#define LBS_PROCESSED    0x00080000u  
+#define LBS_PROCESSED    0x00040000u  
                                       
                                       
                                       
@@ -202,26 +190,26 @@ enum primOp {
                                       
                                       
                                       
-#define LB_INSTANTIATED  0x00100000u  
+#define LB_INSTANTIATED  0x00080000u  
                                       
                                       
-#define ID_OBSERV_DEF    0x00200000u  
+#define ID_OBSERV_DEF    0x00100000u  
                                       
-#define TVAR_POLY_SPECIAL 0x00400000u 
-                                      
-                                      
-                                      
-#define UNION_IS_REPR    0x00800000u  
-#define FLD_IS_DISCM     0x01000000u  
-#define LAM_NEEDS_TRANS  0x02000000u  
+#define TVAR_POLY_SPECIAL 0x00200000u 
                                       
                                       
                                       
+#define UNION_IS_REPR    0x00400000u  
+#define FLD_IS_DISCM     0x00800000u  
+#define LAM_NEEDS_TRANS  0x01000000u  
                                       
-#define INNER_REF_NDX    0x04000000u  
                                       
                                       
-#define ARG_BYREF        0x08000000u  
+                                      
+#define INNER_REF_NDX    0x02000000u  
+                                      
+                                      
+#define ARG_BYREF        0x04000000u  
 
 
 
@@ -341,6 +329,8 @@ enum AstType {
     at_array,
     at_begin,
     at_select,
+    at_fqCtr,
+    at_sel_ctr,
     at_array_nth,
     at_vector_nth,
     at_array_length,

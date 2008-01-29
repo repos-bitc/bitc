@@ -405,6 +405,12 @@ AST::atKwd() const
   case at_select:
     return "<select>";
 
+  case at_fqCtr:
+    return "<fqCtr>";
+
+  case at_sel_ctr:
+    return "<sel_ctr>";
+
   case at_usesel:
     return "<usesel>";
 
@@ -758,7 +764,7 @@ AST::getCtr()
   if(astType == at_ident)
     return this;
   
-  if ((astType == at_select) && (Flags2 & SEL_FROM_UN_TYPE))
+  if (astType == at_fqCtr)
     return child(1);
 
   assert(false);

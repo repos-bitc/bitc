@@ -338,14 +338,18 @@ findusedef(std::ostream &errStream,
       break;
     }
     
-  case at_select:
+  case at_fqCtr:
     {
-      if(ast->Flags2 & SEL_FROM_UN_TYPE)
-	CHKERR(errFree, findusedef(errStream, topAst, ast->child(0), 
-				   TYPE_MODE, boundVars, freeVars));
-      else
-	CHKERR(errFree, findusedef(errStream, topAst, ast->child(0), 
-				   USE_MODE, boundVars, freeVars));
+      CHKERR(errFree, findusedef(errStream, topAst, ast->child(0), 
+				 TYPE_MODE, boundVars, freeVars));
+      break;
+    }
+
+  case at_select:
+  case at_sel_ctr:
+    {
+      CHKERR(errFree, findusedef(errStream, topAst, ast->child(0), 
+				 USE_MODE, boundVars, freeVars));
       break;
     }
 

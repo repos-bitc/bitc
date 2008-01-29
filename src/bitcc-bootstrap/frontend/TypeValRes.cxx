@@ -285,11 +285,17 @@ isExpansive(std::ostream& errStream,
       break;
     }
     
-  case at_select:
+  case at_fqCtr:
     {
-      if((ast->Flags2 & SEL_FROM_UN_TYPE) == 0)
-	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
-					 ast->child(0)));      
+      itsExpansive = false;
+      break;
+    }
+
+  case at_select:
+  case at_sel_ctr:
+    {
+      CHKEXP(itsExpansive, isExpansive(errStream, gamma,
+				       ast->child(0)));      
       break;
     }
 

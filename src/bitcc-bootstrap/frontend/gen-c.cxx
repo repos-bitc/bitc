@@ -1178,35 +1178,37 @@ toc(std::ostream& errStream,
       break;
     }
 
+  case at_fqCtr:
+    {
+      TOC(errStream, uoc, ast->child(1), out, IDname, 
+	  ast, 1, flags);
+      break;
+    }
+
+  case at_sel_ctr:
+    {
+      GCPtr<Type> t = ast->child(0)->symType->getBareType();
+      out << "(" <<  "TAG_" << CMangle(t->myContainer) << "(";	
+
+      if (!ast->child(0)->symType->isRefType())
+	out << "&";
+
+      TOC(errStream, uoc, ast->child(0), out, IDname, 
+	  ast, 0, flags);
+	
+      out << ") == ";	
+      out << ENUM_PFX << CMangle(ast->child(1), CMGL_ID_FLD)
+	  << ")";
+      break;
+    }
+
   case at_select:
     {
-      if(ast->Flags2 & SEL_FROM_UN_TYPE) {
-	TOC(errStream, uoc, ast->child(1), out, IDname, 
-	    ast, 1, flags);
-	break;
-      }
-
-      if(ast->Flags2 & SEL_FROM_UN_VAL) {
-	GCPtr<Type> t = ast->child(0)->symType->getBareType();
-	out << "(" <<  "TAG_" << CMangle(t->myContainer) << "(";	
-
-	if (!ast->child(0)->symType->isRefType())
-	  out << "&";
-
-	TOC(errStream, uoc, ast->child(0), out, IDname, 
-	    ast, 0, flags);
-	
-	out << ") == ";	
-	out << ENUM_PFX << CMangle(ast->child(1), CMGL_ID_FLD)
-	    << ")";
-      }
-      else {	
- 	TOC(errStream, uoc, ast->child(0), out, IDname, 
-	    ast, 0, flags);
-	
-	out << ((ast->child(0)->symType->isRefType()) ? "->" : "." );
-	out << CMangle(ast->child(1), CMGL_ID_FLD);
-      }
+      TOC(errStream, uoc, ast->child(0), out, IDname, 
+	  ast, 0, flags);
+      
+      out << ((ast->child(0)->symType->isRefType()) ? "->" : "." );
+      out << CMangle(ast->child(1), CMGL_ID_FLD);
       break;
     }
 

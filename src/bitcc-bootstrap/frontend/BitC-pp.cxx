@@ -215,6 +215,8 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
     BitcP(out, ast->child(1), showTypes);
     break;
 
+  case at_fqCtr:
+  case at_sel_ctr:
   case at_select:
     {
       BitcP(out, ast->child(0), showTypes);
