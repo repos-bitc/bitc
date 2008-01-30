@@ -87,6 +87,12 @@ struct Type;
                              // ty_argvec components. Two argVecs can
                              // unify only if all of their components
                              // and flags match. 
+#define COMP_BYREF_P    0x8u // Valid on ty_argvec only.
+                             // This flag indicates that this 
+                             // component is open to be either ByREF
+                             // or ByVALUE. We need this to unify the
+                             // (extected) functions that we build
+                             // with the actual functions.
 
 struct comp : public Countable {
   std::string name;

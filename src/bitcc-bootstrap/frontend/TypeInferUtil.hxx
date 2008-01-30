@@ -74,4 +74,7 @@ initGamma(std::ostream& errStream,
 	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
 	  const GCPtr<AST> ast, unsigned long uflags);
 
+size_t
+nCtArgs(GCPtr<Type> t);
+
 #endif /* TYPEINFERCOMMON_HXX */

@@ -632,7 +632,18 @@ Unify(std::ostream& errStream,
       }
 	
       for(size_t i=0; i< t1->components->size(); i++) {
-	if(t1->CompFlags(i) != t2->CompFlags(i)) {
+
+	if ((t1->CompFlags(i) & COMP_BYREF_P) &&
+	    ((t2->CompFlags(i) & COMP_BYREF_P) == 0)) {
+	  t1->CompFlags(i) &= ~COMP_BYREF_P;
+	  t1->CompFlags(i) |= t1->CompFlags(i) & COMP_BYREF;
+	}
+	else if ((t2->CompFlags(i) & COMP_BYREF_P) &&
+		 ((t1->CompFlags(i) & COMP_BYREF_P) == 0)) {
+	  t2->CompFlags(i) &= ~COMP_BYREF_P;
+	  t2->CompFlags(i) |= t2->CompFlags(i) & COMP_BYREF;
+	}
+	else if(t1->CompFlags(i) != t2->CompFlags(i)) {
 	  errFree = typeError(errStream, errAst, t1, t2);
 	  break;
 	}
@@ -640,7 +651,6 @@ Unify(std::ostream& errStream,
 	CHKERR(errFree, Unify(errStream, trail, errAst,
 			      t1->CompType(i), 
 			      t2->CompType(i), flags));
-	  
       }
       break;
     }

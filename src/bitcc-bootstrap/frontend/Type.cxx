@@ -622,9 +622,12 @@ bool
 Type::isStruct()
 {
   GCPtr<Type> t = getBareType();
-  return (((t->kind == ty_structv) || 
-	   (t->kind == ty_structr)) &&
-	  (t->components->size() != 0));
+
+  // WAS  return (((t->kind == ty_structv) || 
+  //               (t->kind == ty_structr)) &&
+  //           	  (t->components->size() != 0));
+  return ((t->kind == ty_structv) || 
+	  (t->kind == ty_structr));
 }
 
 bool 

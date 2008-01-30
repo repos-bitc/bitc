@@ -87,6 +87,20 @@ obtainFullUnionType(GCPtr<Type> t)
   return uType;
 }
 
+size_t
+nCtArgs(GCPtr<Type> t)
+{
+  assert(t->isUType);
+  t = t->getBareType();
+  
+  size_t cnt=0;
+  for(size_t i=0; i < t->components->size(); i++)
+    if((t->CompFlags(i) & COMP_UNIN_DISCM) ==0)
+      cnt++;
+
+  return cnt;
+}
+
 
 
 /**************************************************************/
