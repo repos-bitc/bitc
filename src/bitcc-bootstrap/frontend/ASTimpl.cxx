@@ -721,6 +721,7 @@ AST::getID()
   switch(astType) {
   case at_define:
   case at_letbinding:
+  case at_dobinding:
     return child(0)->child(0);
     
   case at_defstruct:

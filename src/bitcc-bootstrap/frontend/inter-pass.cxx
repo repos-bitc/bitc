@@ -81,6 +81,10 @@ UocInfo::TypeCheck(std::ostream& errStream, bool init,
   bool errFree = true;
   std::stringstream ss;
 
+  // If one considers removing this clear clause,
+  // be careful about old types. Pay attention to
+  // bindIdentDef() function which preserves types
+  // if a type already exists.
   ast->clearTypes();  
   errFree = fe_typeCheck(ss, init, tflags);    
   if(!errFree) {
@@ -109,11 +113,11 @@ UocInfo::RandT(std::ostream& errStream,
   
   if(errFree)
     CHKERR(errFree, TypeCheck(errStream, init, tflags, pre));
-
+  
   if(!errFree)
     errStream << "WHILE R&Ting:" << std::endl
 	      << ast->asString() << std::endl;
-
+  
   return errFree;
 }
 

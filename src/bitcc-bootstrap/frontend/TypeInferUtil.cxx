@@ -90,7 +90,7 @@ obtainFullUnionType(GCPtr<Type> t)
 size_t
 nCtArgs(GCPtr<Type> t)
 {
-  assert(t->isUType);
+  assert(t->isUType());
   t = t->getBareType();
   
   size_t cnt=0;
