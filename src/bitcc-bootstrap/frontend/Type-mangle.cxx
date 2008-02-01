@@ -125,8 +125,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
 #ifdef KEEP_BF
   case  ty_bitfield:
-    ss << "BF" << Isize << CompType(0)->mangledString(igMut, 
-							     false);
+    ss << "BF" << Isize << CompType(0)->mangledString(igMut, false);
     break;
 #endif
 
@@ -134,10 +133,8 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     assert(components->size() == 2);
     
     ss << "FN" 
-       << CompType(0)->mangledString(igMut, true,
-					    maxArgMut)
-       << CompType(1)->mangledString(igMut, true, 
-					    maxArgMut);
+       << Args()->mangledString(igMut, true,maxArgMut)
+       << Ret()->mangledString(igMut, true, maxArgMut);
 
     break;
 
@@ -218,8 +215,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
   case ty_array:
     {
       assert(components->size() == 1);
-      ss << "J" << CompType(0)->mangledString(igMut, false, 
-						     maxArgMut)
+      ss << "J" << Base()->mangledString(igMut, false, maxArgMut)
 	 << "__" << arrlen;
       break;
     }
@@ -227,31 +223,27 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
   case ty_vector:
     {
       assert(components->size() == 1);
-      ss << "K" << CompType(0)->mangledString(igMut, false, 
-						     maxArgMut);
+      ss << "K" << Base()->mangledString(igMut, false, maxArgMut);
       break;
     }
 
   case ty_ref:
     assert(components->size() == 1);
-    ss << "R" << CompType(0)->mangledString(igMut, false, 
-						   maxArgMut);
+    ss << "R" << Base()->mangledString(igMut, false, maxArgMut);
     break;
 
   case ty_byref:
     assert(components->size() == 1);
-    ss << "Z" << CompType(0)->mangledString(igMut, false, 
-						   maxArgMut);
+    ss << "Z" << Base()->mangledString(igMut, false, maxArgMut);
     break;
 
   case ty_mutable:
     assert(components->size() == 1);
     if(!igMut && !igTlMut)
       ss << "M";
-    ss << CompType(0)->mangledString(igMut, false, 
-					    maxArgMut);
+    ss << Base()->mangledString(igMut, false, maxArgMut);
     break;
-
+    
   case ty_exn:
     {
       string s = "exception";
@@ -259,7 +251,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
       //ss << "X" << defAst->s.size() << defAst->s;
       break;
     }
-
+    
     /* MAYBE handling right? */
   case ty_mbFull:
   case ty_mbTop:

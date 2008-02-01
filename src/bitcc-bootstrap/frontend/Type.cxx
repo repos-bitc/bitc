@@ -184,26 +184,26 @@ Type::getType()
   // getting parametrized over a mutable type while having a mutable
   // wrapper at the field level.  
   if(t->kind == ty_mutable) {    
-    GCPtr<Type> in = t->CompType(0)->getTypePrim();
+    GCPtr<Type> in = t->Base()->getTypePrim();
     while(in->kind == ty_mutable) {
       t = in;
-      in = t->CompType(0)->getTypePrim();
+      in = t->Base()->getTypePrim();
     }
   }
   
   // Maybe types may not be recursively nested, But a MbFull
   // might contain an MbTop.
   if(t->kind == ty_mbFull || t->kind == ty_mbTop) {
-    GCPtr<Type> in = t->CompType(0)->getTypePrim();
+    GCPtr<Type> in = t->Var()->getTypePrim();
 
     assert(in->kind != ty_mbFull);
-
+    
     if(in->kind == ty_mbTop) {
       t = in;
-      in = in->CompType(0)->getTypePrim();
+      in = in->Var()->getTypePrim();
     }
-
-    assert(in->kind != ty_mbTop);
+    
+    assert(in->kind != ty_mbFull && in->kind != ty_mbTop);
     
     if(in->kind != ty_tvar)
       t = in;
@@ -239,9 +239,12 @@ Type::getBareType()
   t->mark |= MARK10;
 
   GCPtr<Type> retType = t;
+
+  if(t->isMaybe())
+    retType = t->Core()->getBareType();  
   
-  if(t->isMaybe() || t->isMutable())
-    retType = t->CompType(0)->getBareType();  
+  if(t->isMutable())
+    retType = t->Base()->getBareType();  
 
   t->mark &= ~MARK10;
   return retType;
@@ -260,9 +263,9 @@ Type::getTheType(bool mutableOK, bool maybeOK)
   GCPtr<Type> retType = t;
   
   if((t->kind == ty_mutable) && !mutableOK)
-    retType = t->CompType(0)->getTheType(mutableOK, maybeOK);
+    retType = t->Base()->getTheType(mutableOK, maybeOK);
   else if(t->isMaybe() && !maybeOK)
-    retType = t->CompType(0)->getTheType(mutableOK, maybeOK);
+    retType = t->Core()->getTheType(mutableOK, maybeOK);
   
   t->mark &= ~MARK11;
   return retType;

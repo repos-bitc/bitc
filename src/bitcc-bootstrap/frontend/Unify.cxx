@@ -605,8 +605,8 @@ Unify(std::ostream& errStream,
       // ty_fnarg because, in the presence of a type-error,
       // it is better to report the entire function type
       // rather than the argument types.
-      GCPtr<Type> t1Args = t1->CompType(0);
-      GCPtr<Type> t2Args = t2->CompType(0);
+      GCPtr<Type> t1Args = t1->Args();
+      GCPtr<Type> t2Args = t2->Args();
 
       if (t1Args->components->size() != t2Args->components->size()) {
 	errFree = typeError(errStream, errAst, t1, t2);
@@ -619,8 +619,8 @@ Unify(std::ostream& errStream,
 			      t2Args->CompType(i), flags));
 
       CHKERR(errFree, 
-	     Unify(errStream, trail, errAst, t1->CompType(1), 
-		   t2->CompType(1), flags));
+	     Unify(errStream, trail, errAst, t1->Ret(), 
+		   t2->Ret(), flags));
       break;
     }
 
@@ -710,8 +710,8 @@ Unify(std::ostream& errStream,
   case ty_array:
     {
       CHKERR(errFree, 
-	     Unify(errStream, trail, errAst, t1->CompType(0), 
-		   t2->CompType(0), flags));
+	     Unify(errStream, trail, errAst, t1->Base(), 
+		   t2->Base(), flags));
 
       if(t1->arrlen == t2->arrlen)
 	break;
@@ -741,8 +741,8 @@ Unify(std::ostream& errStream,
   case ty_vector:
     {
       CHKERR(errFree, 
-	     Unify(errStream, trail, errAst, t1->CompType(0), 
-		   t2->CompType(0), flags));
+	     Unify(errStream, trail, errAst, t1->Base(), 
+		   t2->Base(), flags));
       break;
     }
     
@@ -777,8 +777,8 @@ Unify(std::ostream& errStream,
       assert(t1->components->size() == 1);
       assert(t2->components->size() == 1);
       CHKERR(errFree,
-	     Unify(errStream, trail, errAst, t1->CompType(0), 
-		   t2->CompType(0), flags));
+	     Unify(errStream, trail, errAst, t1->Base(), 
+		   t2->Base(), flags));
       break;
     }
 

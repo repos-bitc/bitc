@@ -622,7 +622,7 @@ Type::removeRestricted(GCPtr<CVector<GCPtr<Type> > > &ftvs,
    
   case ty_mutable:
     {
-      GCPtr<Type> in = t->CompType(0);
+      GCPtr<Type> in = t->Base();
       in->removeRestricted(ftvs, true, removed);
       break;
     }
@@ -637,8 +637,8 @@ Type::removeRestricted(GCPtr<CVector<GCPtr<Type> > > &ftvs,
 
   case ty_fn:
     {
-      t->CompType(0)->removeRestricted(ftvs, true, removed);
-      t->CompType(1)->removeRestricted(ftvs, remove, removed);
+      t->Args()->removeRestricted(ftvs, true, removed);
+      t->Ret()->removeRestricted(ftvs, remove, removed);
       break;
     }
     
@@ -652,8 +652,8 @@ Type::removeRestricted(GCPtr<CVector<GCPtr<Type> > > &ftvs,
 
   case ty_tyfn:
     {
-      t->CompType(0)->removeRestricted(ftvs, remove, removed);
-      t->CompType(1)->removeRestricted(ftvs, remove, removed);
+      t->Args()->removeRestricted(ftvs, remove, removed);
+      t->Ret()->removeRestricted(ftvs, remove, removed);
       break;
     }
 

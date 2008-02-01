@@ -125,8 +125,8 @@ Type::toString()
     
   case ty_fn:
     assert(components->size() == 2);
-    ss << "(fn " << CompType(0)->toString() 
-       <<  " " << CompType(1)->toString() << ")";
+    ss << "(fn " << Args()->toString() 
+       <<  " " << Ret()->toString() << ")";
     break;
 
   case ty_fnarg:
@@ -265,48 +265,35 @@ Type::toString()
     break;
 
   case ty_array:
-    ss <<  "(array "
-       << CompType(0)->toString()
-       << " " << arrlen
-       << ")";
+    ss <<  "(array " << Base()->toString() 
+       << " " << arrlen << ")";
     break;
     
   case ty_vector:
-    ss << "(vector ";
-    for(size_t i=0; i<components->size(); i++) {
-      if (i > 0) ss << " ";
-      ss << CompType(i)->toString();
-    }
-    ss << ")";
+    ss << "(vector " << Base()->toString() << ")";
     break;
 
   case ty_ref:
-    assert(components->size() == 1);
-    ss << "(ref " << CompType(0)->toString() << ")";
+    ss << "(ref " << Base()->toString() << ")";
     break;
 
 
   case ty_byref:
-    assert(components->size() == 1);
-    ss << "(by-ref " << CompType(0)->toString() << ")";
+    ss << "(by-ref " << Base()->toString() << ")";
     break;
 
   case ty_mutable:
-    assert(components->size() == 1);
-    ss << "(mutable " << CompType(0)->toString() << ")";
+    ss << "(mutable " << Base()->toString() << ")";
     break;
 
   case ty_exn:
-    if(defAst)
-      ss << "(exn " << defAst->s << ")"; 
-    else
-      ss << "exception";     
+    ss << "exception";     
     break;
 
   case ty_tyfn:
     assert(components->size() == 2);
-    ss << "(tyfn (" << CompType(0)->toString() 
-       <<  ") " << CompType(1)->toString() << ")";
+    ss << "(tyfn (" << Args()->toString() 
+       <<  ") " << Ret()->toString() << ")";
     break;
 
 
@@ -321,6 +308,7 @@ Type::toString()
 
   case ty_subtype:
     {
+      assert(false);
       ss << CompType(0)->toString() 
 	 << " < "
 	 << CompType(1)->toString();

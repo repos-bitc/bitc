@@ -55,7 +55,7 @@ include $(BITC_SRC)/build/make/makerules.mk
 
 # The new inference algorithm is in promitive stage, trying some test cases.
 new:
-	$(BITCC) --eqinfer fnxn.bitc || true
+	$(BITCC) --no-prelude --full-qual-types --showtypes fnxn fnxn.bitc || true
 
 all:
 	$(BITCC) $(BITCINC) $(BITCLIB) -l $(OLANG) $(BITCOPT) $(SOURCE)

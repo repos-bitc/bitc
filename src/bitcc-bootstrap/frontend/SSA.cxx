@@ -646,7 +646,7 @@ ssa(std::ostream& errStream,
 
       GCPtr<Type> fn = id->symType->getBareType();
       assert(fn->isFnxn());
-      GCPtr<Type> argsType = fn->CompType(0)->getType();
+      GCPtr<Type> argsType = fn->Args()->getType();
 
       SSA(errStream, uoc, ast->child(0), grandLet, identList, 
 	  ast, 0, flags);

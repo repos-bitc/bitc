@@ -128,8 +128,8 @@ TCConstraints::close(GCPtr<CVector<GCPtr<Type> > > closure,
     oldSize = newSize;    
     for(size_t i=0; i < fnDeps->size(); i++) {
       GCPtr<Type> fnDep = fnDeps->elem(i)->getType();
-      GCPtr<Type> fnDepArgs = fnDep->CompType(0)->getType();
-      GCPtr<Type> fnDepRet = fnDep->CompType(1)->getType();      
+      GCPtr<Type> fnDepArgs = fnDep->Args()->getType();
+      GCPtr<Type> fnDepRet = fnDep->Ret()->getType();      
       GCPtr< CVector <GCPtr<Type> > > argTvs = new CVector <GCPtr<Type> >;
       GCPtr< CVector <GCPtr<Type> > > retTvs = new CVector <GCPtr<Type> >;
       fnDepArgs->collectAllftvs(argTvs);      

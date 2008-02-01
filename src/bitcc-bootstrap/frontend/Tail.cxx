@@ -62,7 +62,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   //std::cout << ast->astTypeName() << ": " << isTail << std::endl;
 
   switch(ast->astType) {
-
+    
   case at_Null:
     break;
 
@@ -245,6 +245,8 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
       break;
     }
     
+  case at_fqCtr:
+  case at_sel_ctr:    
   case at_select:
     {
       //markTail(ast->child(0), fn, bps, false); 

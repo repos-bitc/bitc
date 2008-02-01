@@ -315,7 +315,7 @@ TypeScheme::markRigid(std::ostream &errStream, LexLoc &errLoc)
     
     if(pred->fnDeps)
       for(size_t fd = 0; fd < pred->fnDeps->size(); fd++) {
-	GCPtr<Type> fndom = pred->FnDep(fd)->CompType(0);
+	GCPtr<Type> fndom = pred->FnDep(fd)->Args();
 	fndom->collectAllftvs(det);
       }
   } 

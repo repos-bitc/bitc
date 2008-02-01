@@ -191,10 +191,10 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
       out.more();
       out << "<tuple>" << endl;
       out.more();
-      t->CompType(0)->asXML(tvP, out);
+      t->Args()->asXML(tvP, out);
       out.less();
       out << "</tuple>" << endl;
-      t->CompType(1)->minimizeMutability()->asXML(tvP, out);
+      t->Ret()->minimizeMutability()->asXML(tvP, out);
       out.less();
       out << "</fn>" << endl;
       break;
@@ -222,10 +222,10 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
       out.more();
       out << "<tuple>" << endl;
       out.more();
-      t->CompType(0)->asXML(tvP, out);
+      t->Args()->asXML(tvP, out);
       out.less();
       out << "</tuple>" << endl;
-      t->CompType(1)->minimizeMutability()->asXML(tvP, out);
+      t->Ret()->minimizeMutability()->asXML(tvP, out);
       out.less();
       out << "</tyfn>" << endl;
       break;
@@ -287,7 +287,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
     {
       out << "<array sz='" << t->arrlen  <<"'>" << endl;
       out.more();
-      t->CompType(0)->asXML(tvP, out);
+      t->Base()->asXML(tvP, out);
       out.less();
       out << "</array>" << endl; 
       break;
@@ -297,7 +297,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
     {
       out << "<vector>" << endl;
       out.more();
-      t->CompType(0)->asXML(tvP, out);
+      t->Base()->asXML(tvP, out);
       out.less();       
       out << "</vector>" << endl; 
       break;
@@ -307,7 +307,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
     {
       out << "<ref>" << endl;
       out.more();
-      t->CompType(0)->asXML(tvP, out);
+      t->Base()->asXML(tvP, out);
       out.less();       
       out << "</ref>" << endl; 
       break;
@@ -317,7 +317,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
     {
       out << "<byref>" << endl;
       out.more();
-      t->CompType(0)->asXML(tvP, out);
+      t->Base()->asXML(tvP, out);
       out.less();       
       out << "</byref>" << endl; 
       break;
@@ -340,7 +340,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
     {
       out << "<mutable>" << endl;
       out.more();
-      t->CompType(0)->asXML(tvP, out);
+      t->Base()->asXML(tvP, out);
       out.less();       
       out << "</mutable>" << endl; 
       break;  

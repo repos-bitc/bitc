@@ -203,7 +203,7 @@ addShallowMbTop(GCPtr<Type> t)
 
   case ty_mutable:
     {
-      rt = addShallowMbTop(t->CompType(0));
+      rt = addShallowMbTop(t->Base());
       break;
     }
 
@@ -261,7 +261,7 @@ addShallowMbTop(GCPtr<Type> t)
   case ty_array:
     {
       rt = new Type(t);
-      rt->CompType(0) = addShallowMbTop(t->CompType(0));
+      rt->Base() = addShallowMbTop(t->Base());
       rt = MBT(rt);
       break;
     }
@@ -337,7 +337,7 @@ Type::maximizeTopMutability(GCPtr<Trail> trail)
 
   case ty_mutable:
     {
-      rt = t->CompType(0)->maximizeTopMutability(trail);
+      rt = t->Base()->maximizeTopMutability(trail);
     }
 
   default:
@@ -367,7 +367,7 @@ Type::minimizeTopMutability(GCPtr<Trail> trail)
     
   case ty_mutable:
     {
-      rt = t->CompType(0)->minimizeTopMutability(trail);
+      rt = t->Base()->minimizeTopMutability(trail);
       break;
     }
     
@@ -403,15 +403,14 @@ Type::maximizeMutability(GCPtr<Trail> trail)
 
   case ty_mutable:
     {
-      rt = t->CompType(0)->maximizeMutability(trail);
+      rt = t->Base()->maximizeMutability(trail);
       break;
     }
     
   case ty_array:
     {
       rt = new Type(t);
-      rt->CompType(0) = 
-	t->CompType(0)->maximizeMutability(trail);
+      rt->Base() = t->Base()->maximizeMutability(trail);
       rt = addMutable(t);      
       break;
     }
@@ -466,15 +465,14 @@ Type::minimizeMutability(GCPtr<Trail> trail)
 
   case ty_mutable:
     {
-      rt = t->CompType(0)->minimizeMutability(trail);
+      rt = t->Base()->minimizeMutability(trail);
       break;
     }
 
   case ty_array:
     {
       rt = new Type(t);
-      rt->CompType(0) = 
-	t->CompType(0)->minimizeMutability(trail);
+      rt->Base() = t->Base()->minimizeMutability(trail);
       break;
     }
 

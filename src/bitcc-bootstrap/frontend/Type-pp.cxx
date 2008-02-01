@@ -178,10 +178,9 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
     {
       assert(t->components->size() == 2);
       ss << "(fn " 
-	 << t->CompType(0)->asString(tvP, traverse) 
+	 << t->Args()->asString(tvP, traverse) 
 	 << " " 
-	//<< t->CompType(1)->minimizeMutability()->asString(tvP, traverse) 
-	 << t->CompType(1)->asString(tvP, traverse) 
+	 << t->Ret()->asString(tvP, traverse) 
 	 << ")";
       break;
     }
@@ -198,7 +197,6 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 	     << ")";
 	else	   
 	  ss << t->CompType(i)->asString(tvP, traverse);
-	// ss << t->CompType(i)->minimizeMutability()->asString(tvP, traverse);
 
       }
       ss << ")";
@@ -209,9 +207,9 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
     {
       assert(t->components->size() == 2);
       ss << "(tyfn " 
-	 <<  t->CompType(0)->asString(tvP, traverse) 
+	 <<  t->Args()->asString(tvP, traverse) 
 	 << " " 
-	 << t->CompType(1)->asString(tvP, traverse) 
+	 << t->Ret()->asString(tvP, traverse) 
 	 << ")";
       break;          
     }
@@ -295,7 +293,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   case ty_array:
     {
       ss << "(array "
-	 << t->CompType(0)->asString(tvP, traverse)
+	 << t->Base()->asString(tvP, traverse)
 	 << " "
 	 << t->arrlen
 	 << ")";
@@ -304,21 +302,18 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
   case ty_vector:
     {
-      ss << "(vector ";
-
-      for(size_t i=0; i<t->components->size(); i++) {
-	if (i > 0) ss << " ";
-	ss << t->CompType(i)->asString(tvP, traverse);
-      }
-      ss << ")";
+      ss << "(vector " 
+	 << t->Base()->asString(tvP, traverse) 
+	 <<  ")";
       break;
     }
-
+    
   case ty_ref:
     {
       assert(t->components->size() == 1);
       ss << "(ref "
-	 << t->CompType(0)->asString(tvP, traverse) << ")";
+	 << t->Base()->asString(tvP, traverse) 
+	 << ")";
       break;
     }
 
@@ -326,7 +321,8 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
     {
       assert(t->components->size() == 1);
       ss << "(by-ref "
-	 << t->CompType(0)->asString(tvP, traverse) << ")";
+	 << t->Base()->asString(tvP, traverse) 
+	 << ")";
       break;
     }
 
@@ -344,7 +340,8 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   case ty_mutable:
     {
       ss << "(mutable " 
-	 << t->CompType(0)->asString(tvP, traverse) << ")";
+	 << t->Base()->asString(tvP, traverse) 
+	 << ")";
       break;  
     }
 

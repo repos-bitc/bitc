@@ -252,7 +252,7 @@ Type::size()
     
   case ty_array:
     {
-      theSize = CompType(0)->size() * arrlen;
+      theSize = Base()->size() * arrlen;
       break;
     }
     
@@ -264,7 +264,7 @@ Type::size()
     
   case ty_mutable:
     {
-      theSize = CompType(0)->size();      
+      theSize = Base()->size();      
       break;
     }
   }

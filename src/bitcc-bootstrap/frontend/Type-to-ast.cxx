@@ -213,8 +213,8 @@ Type::asAST(const sherpa::LexLoc &loc,
   case ty_fn:
     {
       assert(t->components->size() == 2);
-      GCPtr<AST> arg = t->CompType(0)->asAST(loc, tvP);
-      GCPtr<AST> ret = t->CompType(1)->asAST(loc, tvP);
+      GCPtr<AST> arg = t->Args()->asAST(loc, tvP);
+      GCPtr<AST> ret = t->Ret()->asAST(loc, tvP);
       ast = new AST(at_fn, loc, arg, ret);
       break;
     }
@@ -283,7 +283,7 @@ Type::asAST(const sherpa::LexLoc &loc,
 
   case ty_array:
     {
-      GCPtr<AST> typ = t->CompType(0)->asAST(loc, tvP);
+      GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
       GCPtr<AST> intLit = new AST(at_intLiteral, loc);
       intLit->litValue.i = t->arrlen;
       intLit->litBase = 10;
@@ -293,28 +293,28 @@ Type::asAST(const sherpa::LexLoc &loc,
     }
   case ty_vector:
     {
-      GCPtr<AST> typ = t->CompType(0)->asAST(loc, tvP);
+      GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = new AST(at_vectorType, loc, typ);
       break;
     }
   case ty_ref:
     {
       assert(t->components->size() == 1);
-      GCPtr<AST> typ = t->CompType(0)->asAST(loc, tvP);
+      GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = new AST(at_refType, loc, typ);
       break;
     }
   case ty_byref:
     {
       assert(t->components->size() == 1);
-      GCPtr<AST> typ = t->CompType(0)->asAST(loc, tvP);
+      GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = new AST(at_byrefType, loc, typ);
       break;
     }
   case ty_mutable:
     {
       assert(t->components->size() == 1);
-      GCPtr<AST> typ = t->CompType(0)->asAST(loc, tvP);
+      GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = new AST(at_mutableType, loc, typ);
       break;
     }

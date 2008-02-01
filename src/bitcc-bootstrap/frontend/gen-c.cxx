@@ -349,7 +349,7 @@ toCtype(GCPtr<Type> typ, string IDname="", unsigned long flags=0,
     break;
 
   case ty_mutable:
-    out << toCtype(t->CompType(0), IDname, flags, arrsz);
+    out << toCtype(t->Base(), IDname, flags, arrsz);
     break;
     
   case ty_dummy:
@@ -483,7 +483,7 @@ toCtype(GCPtr<Type> typ, string IDname="", unsigned long flags=0,
   case ty_byref:
   case ty_ref:
     {
-      out << toCtype( t->CompType(0), IDname, flags, arrsz)
+      out << toCtype(t->Base(), IDname, flags, arrsz)
 	  << "*";
       break;
     }
@@ -617,10 +617,10 @@ emit_fnxn_decl(INOstream &out, GCPtr<AST> ast,
 {
   GCPtr<AST> id = ast->child(0)->child(0);
   GCPtr<Type> fnType = id->symType->getBareType();
-  GCPtr<Type> retType = fnType->CompType(1);
+  GCPtr<Type> retType = fnType->Ret()->getType();
   GCPtr<AST> lam = ast->child(1);
   GCPtr<AST> argvec = lam->child(0);
-  GCPtr<Type> fnargvec = fnType->CompType(0)->getBareType();
+  GCPtr<Type> fnargvec = fnType->Args()->getBareType();
   assert(argvec->children->size() == fnargvec->components->size());
 
   out << toCtype(retType);
@@ -757,7 +757,7 @@ typeIsUnmangled(GCPtr<Type> typ)
       return true;
     
   case ty_ref:
-    return typeIsUnmangled(typ->CompType(0));
+    return typeIsUnmangled(typ->Base());
 
   default:
     return false;
@@ -1548,8 +1548,8 @@ toc(std::ostream& errStream,
       // out << "const ";
             
       if(id->symType->isFnxn() && !id->symType->isMutable()) {
-	GCPtr<Type> ret = id->symType->getBareType()->CompType(1);
-	GCPtr<Type> args = id->symType->getBareType()->CompType(0);
+	GCPtr<Type> ret = id->symType->getBareType()->Ret();
+	GCPtr<Type> args = id->symType->getBareType()->Args();
 	
 	out << toCtype(ret) << " "	
 	    << CMangle(id) << " (";
@@ -1576,8 +1576,8 @@ toc(std::ostream& errStream,
 	 they can easily be accessed */
       if(id->symType->isFnxn() && id->externalName.size()) {       
 	GCPtr<Type> fnType = id->symType->getBareType();
-	GCPtr<Type> ret = fnType->CompType(1);
-	GCPtr<Type> args = fnType->CompType(0);
+	GCPtr<Type> ret = fnType->Ret();
+	GCPtr<Type> args = fnType->Args();
 	
 	if(!typeIsUnmangled(ret)) {
 	  out << "typedef "
@@ -1815,7 +1815,7 @@ toc(std::ostream& errStream,
       
       GCPtr<Type> clType = ast->child(0)->symType->getBareType();
       assert(clType->kind == ty_fn);
-      GCPtr<Type> argsType = clType->CompType(0)->getType();
+      GCPtr<Type> argsType = clType->Args()->getType();
 
       TOC(errStream, uoc, ast->child(0), out, IDname, 
 	  ast, 0, flags);
@@ -1861,13 +1861,13 @@ toc(std::ostream& errStream,
 	  << "GC_ALLOC(sizeof("
 	  << CMangle(t->mangledString(true)) << ") + " 
 	  << "(" << ast->children->size() << " * sizeof("
-	  << toCtype(t->CompType(0)) << ")));"
+	  << toCtype(t->Base()) << ")));"
 	  << endl;
  
       out << IDname << "->len = " << ast->children->size() 
 	  << ";" << endl;
       out << IDname << "->elem = (("
-	  << toCtype(t->CompType(0))
+	  << toCtype(t->Base())
 	  << " *) (((char *) " << IDname << ") + "
 	  << "sizeof(" << CMangle(t->mangledString(true)) << ")));"
 	  << endl;
@@ -1892,7 +1892,7 @@ toc(std::ostream& errStream,
       TOC(errStream, uoc, ast->child(0), out, IDname, 
 	  ast, 0, flags);      
       out << " * sizeof("
-	  << toCtype(t->CompType(0)) << ")));"
+	  << toCtype(t->Base()) << ")));"
 	  << endl;
 
       out << IDname << "->len = ";
@@ -1901,7 +1901,7 @@ toc(std::ostream& errStream,
       out << ";" << endl;
 
       out << IDname << "->elem = (("
-	  << toCtype(t->CompType(0))
+	  << toCtype(t->Base())
 	  << " *) (((char *) " << IDname << ") + "
 	  << "sizeof(" << CMangle(t->mangledString(true)) << ")));"
 	  << endl;
@@ -2335,7 +2335,7 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
       //	  << " for " << t->asString()
       // 	  << std::endl;
       
-      GCPtr<Type> et = t->CompType(0)->getBareType(); 
+      GCPtr<Type> et = t->Base()->getBareType(); 
       out << "/* Typedef in anticipation of the array type:"
 	  << endl
 	  << t->asString()
@@ -2358,7 +2358,7 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
 
       vecVec->append(CMangle(t->mangledString(true)));
       
-      GCPtr<Type> et = t->CompType(0)->getBareType(); 
+      GCPtr<Type> et = t->Base()->getBareType(); 
       out << "/* Typedef in anticipation of the vector type:"
 	  << endl
 	  << t->asString()
@@ -2382,8 +2382,8 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
 
       fnVec->append(CMangle(t->mangledString(true)));
       
-      GCPtr<Type> args = t->CompType(0)->getBareType(); 
-      GCPtr<Type> ret = t->CompType(1)->getBareType(); 
+      GCPtr<Type> args = t->Args()->getBareType(); 
+      GCPtr<Type> ret = t->Ret()->getBareType(); 
       
       out << "/* Typedef in anticipation of the function (pointer) type:"
 	  << endl
@@ -2674,8 +2674,8 @@ EmitGlobalInitializers(std::ostream& errStream,
 	
 	if (wrapperNeeded) {
 	  GCPtr<Type> fnType = id->symType->getBareType();
-	  GCPtr<Type> ret = fnType->CompType(1);
-	  GCPtr<Type> args = fnType->CompType(0)->getBareType();
+	  GCPtr<Type> ret = fnType->Ret();
+	  GCPtr<Type> args = fnType->Args()->getBareType();
 	  
 	  out << toCtype(ret) << endl	  
 	      << CMangle(label);

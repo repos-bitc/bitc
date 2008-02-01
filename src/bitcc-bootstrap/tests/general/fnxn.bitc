@@ -1,9 +1,15 @@
 ;(define f (lambda (x) x))
 ;(define g (set! f f))
 
+(defstruct (pr 'a 'b) fst:'a snd:'b)
+
+(define p1 (pr #t #\t))
+(define pf p1.fst) 
+(define p2 p1)
+
 ;; Cyclic type
 ;;(define f (lambda (x) f))
 
-(define f1 #t)
-(define g1 (if #t 1 0))
-(define err (if #t f1 0))
+;(define f1 #t)
+;(define g1 (if #t 1 0))
+;(define err (if #t f1 0))

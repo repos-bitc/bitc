@@ -143,9 +143,9 @@ bindIdentDef(GCPtr<AST> ast,
 {
   if(!ast->symType) {
     if(ast->Flags & ID_IS_TVAR)
-      ast->symType = MBF(newTvar(ast)); 
-    else
       ast->symType = newTvar(ast);
+    else
+      ast->symType = MBF(newTvar(ast)); 
   }
 
   GCPtr<TypeScheme> sigma = new TypeScheme(ast->symType);
@@ -507,8 +507,8 @@ matchDefDecl(std::ostream& errStream,
       declTS = declSigma->ts_instance_copy();
       declT = declTS->tau->getType();      
       
-      GCPtr<Type> argsDecl = declT->getBareType()->CompType(0);
-      GCPtr<Type> argsDef = defT->getBareType()->CompType(0);
+      GCPtr<Type> argsDecl = declT->getBareType()->Args();
+      GCPtr<Type> argsDef = defT->getBareType()->Args();
       if(argsDecl->components->size() == argsDef->components->size()) {
 	for(size_t c=0; c < argsDecl->components->size(); c++) {	    
 	  GCPtr<Type> argDecl = argsDecl->CompType(c);
@@ -519,8 +519,8 @@ matchDefDecl(std::ostream& errStream,
       else
 	errorFree = false;
       
-      GCPtr<Type> retDecl = declT->getBareType()->CompType(1);
-      GCPtr<Type> retDef = defT->getBareType()->CompType(1);
+      GCPtr<Type> retDecl = declT->getBareType()->Ret();
+      GCPtr<Type> retDef = defT->getBareType()->Ret();
       CHKERR(errorFree, retDecl->strictlyEquals(retDef));
     }
     else {
@@ -572,12 +572,6 @@ InferTvList(std::ostream& errStream, GCPtr<AST> tvList,
     TYPEINFER(tv, gamma, instEnv, impTypes, isVP, 
 	      tcc, uflags, trail, DEF_MODE, TI_TYP_EXP);
     GCPtr<Type> tvType = tv->symType->getType();
-    /* Within a type-expression, there is no copy-compatibility. So,
-       we don't need maybe-ness aroung type-variables. 
-       So, clear them */    
-    assert(tvType != tvType->getBareType());
-    trail->subst(tvType, tvType->getBareType());
-    tvType = tvType->getType();
     assert(tvType->kind == ty_tvar);
     tvType->flags |= TY_RIGID;
     container->typeArgs->append(tvType);
@@ -1329,8 +1323,8 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
 	  GCPtr<Typeclass> fnDep =  pred->FnDep(d);
 	  GCPtr< CVector<GCPtr<Type> > > domain = new CVector<GCPtr<Type> >;
 	  GCPtr< CVector<GCPtr<Type> > > range = new CVector<GCPtr<Type> >;
-	  fnDep->CompType(0)->collectAllftvs(domain);
-	  fnDep->CompType(1)->collectAllftvs(range);
+	  fnDep->Args()->collectAllftvs(domain);
+	  fnDep->Ret()->collectAllftvs(range);
 	  
 	  //errStream << "  Processing : " << fnDep->asString()
 	  //	      << std::endl;
@@ -1381,11 +1375,11 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
 	     (myPred->fnDeps && theirPred->fnDeps))
 	    for(size_t j = 0; j < myPred->fnDeps->size(); j++) {
 	      GCPtr<Type> myFnDep =  myPred->FnDep(j)->getType();
-	      GCPtr<Type> myDomain = myFnDep->CompType(0);
+	      GCPtr<Type> myDomain = myFnDep->Args();
 		  
 	      for(size_t k = 0; k < theirPred->fnDeps->size(); k++) {		  
 		GCPtr<Type> theirFnDep =  theirPred->FnDep(k)->getType();
-		GCPtr<Type> theirDomain = theirFnDep->CompType(0);
+		GCPtr<Type> theirDomain = theirFnDep->Args();
 		    
 		assert(myFnDep->defAst == theirFnDep->defAst);
 		    
@@ -1630,6 +1624,12 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  ___________________________________________
                  A |- INT_LITEREAL: 'a \ IntLit('a)
 	------------------------------------------------*/
+      
+      if(Options::noPrelude) {
+	ast->symType = new Type(ty_word, ast);
+	break;
+      }
+
       if(uflags & NO_MORE_TC) {
 	ast->symType = new Type(ty_tvar, ast);
 	break;
@@ -1652,6 +1652,12 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  ___________________________________________
                  A |- FLOAT_LITERAL: 'a \ FloarLit('a)
 	------------------------------------------------*/
+
+      if(Options::noPrelude) {
+	ast->symType = new Type(ty_float, ast);
+	break;
+      }
+
       if(uflags & NO_MORE_TC) {
 	ast->symType = new Type(ty_tvar, ast);
 	break;
@@ -2220,8 +2226,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
     	        A |- (define x:[t] = e): t'
      ---------------------------------------------------*/
       // Maybe, we have a prior declaration?
-      GCPtr<AST> ident = ast->child(0)->child(0);
-
+      GCPtr<AST> ident = ast->getID();
       GCPtr<TypeScheme> declTS = gamma->getBinding(ident->s);
 
       GCPtr<Environment<TypeScheme> > defGamma = gamma->newDefScope();
@@ -2239,23 +2244,40 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       TYPEINFER(ast->child(2), defGamma, instEnv, impTypes, isVP, 
 		currTcc, uflags, trail,  mode, TI_CONSTR);
+
+      GCPtr<Type> idType = ident->symType;
+      GCPtr<Type> rhsType = ast->child(1)->symType;
+
+      errStream << "At define " << ident->asString() << ":"
+      		<< " LHS = " << idType->asString()
+		<< " RHS = " << rhsType->asString()
+      		<< std::endl;
       
       CHKERR(errFree, unify(errStream, trail, ast->child(1), 
 			    ast->child(1)->symType,
 			    MBF(ast->child(0)->symType), uflags));
       
+
+      errStream << "After Unification: " 
+		<< ast->getID()->symType->asString()
+      		<< std::endl;            
+
       CHKERR(errFree, generalizePat(errStream, ast->loc, 
 				    gamma, instEnv, 
 				    ast->child(0),
 				    ast->child(1), 
 				    false, currTcc, NULL, trail));
 
+      errStream << "After Generalization: " 
+		<< ast->getID()->scheme->asString()
+      		<< std::endl;
+      
       gamma->mergeBindingsFrom(defGamma);
       
       if(declTS) 
 	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
 				     declTS, ident->scheme, uflags, true));	
-
+      
 #ifdef VERBOSE  
       errStream << "At " << ast->asString()
       		<< "[0] = " << ast->child(0)->child(0)->scheme->asString()
@@ -2527,7 +2549,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
       case ty_ref:
 	{
-	  ast->symType = t->CompType(0);
+	  ast->symType = t->Base();
 	  break;
 	}
 
@@ -2613,7 +2635,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
 	GCPtr<comp> nComp = new comp(argType);	
 	if(argType->isByrefType()) {
-	  nComp = new comp(argType->CompType(0));
+	  nComp = new comp(argType->Args());
 	  nComp->flags |= COMP_BYREF;
 	}
 	
@@ -2809,7 +2831,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	if(ast->child(1)->symType->isByrefType()) {
 	  CHKERR(errFree, unify(errStream, trail, ast->child(0), 
 				ast->child(0)->symType, 
-				ast->child(1)->getType()->CompType(0), 
+				ast->child(1)->getType()->Base(), 
 				uflags));
 	}
 	else {
@@ -2935,7 +2957,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       /* Get the unified return type so that we can build the 
 	 vector's type */
-      GCPtr<Type> vecElemType = fnType->getBareType()->CompType(1);
+      GCPtr<Type> vecElemType = fnType->getBareType()->Base();
       ast->symType = new Type(ty_vector, ast, MBF(vecElemType));
       break;
     }
@@ -3223,7 +3245,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	GCPtr<Type> argType = argVec->child(c)->getType();
 	GCPtr<comp> nComp = 0;
 	if(argType->isByrefType()) {
-	  nComp = new comp(argType->CompType(0));
+	  nComp = new comp(argType->Base());
 	  nComp->flags |= COMP_BYREF;
 	}
 	else {
@@ -3304,7 +3326,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Type> fullClFnType = thisLambda->symType->getType();
       GCPtr<Type> clFnType = fullClFnType->getBareType();
       assert(clFnType->isFnxn());
-      GCPtr<Type> args = clFnType->CompType(0)->getType();
+      GCPtr<Type> args = clFnType->Args()->getType();
       assert(args->components->size() >= 1);
       GCPtr<Type> clArg = args->CompType(0);
       // Make sure we have the right env on all the functions.
@@ -3314,7 +3336,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       // Build the closure Type.      
       GCPtr<Type> fullMkClType = fullClFnType->getDCopy();
       GCPtr<Type> mkClType= fullMkClType->getBareType();
-      GCPtr<Type> mkClArg = mkClType->CompType(0)->getType(); 
+      GCPtr<Type> mkClArg = mkClType->Args()->getType(); 
       assert(mkClArg->kind == ty_fnarg);
       
       // To Achieve: mkClArg->components->remove (0);
@@ -3405,7 +3427,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 				ast->child(i)->symType, uflags));
       }
       
-      ast->symType = MBF(Fn->CompType(1));
+      ast->symType = MBF(Fn->Ret());
       break;
     }
     
@@ -3827,9 +3849,9 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       switch(t->kind) {
       case ty_ref:
 	{		  
-	  GCPtr<Type> drType = t->CompType(0)->getBareType();
+	  GCPtr<Type> drType = t->Base()->getBareType();
 	  if(drType->kind == ty_array) {
-	    ast->symType = new Type(ty_ref, ast, drType->CompType(0));
+	    ast->symType = new Type(ty_ref, ast, drType->Base());
 	    process_ndx = true;
 	  }
 	  else if (drType->kind == ty_structv) {
@@ -3857,7 +3879,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       case ty_vector:
 	{
 	  process_ndx = true;
-	  ast->symType = new Type(ty_ref, ast, t->CompType(0));
+	  ast->symType = new Type(ty_ref, ast, t->Base());
 	  break;
 	}
 

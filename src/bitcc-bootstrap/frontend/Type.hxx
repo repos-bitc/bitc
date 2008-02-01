@@ -505,12 +505,12 @@ public:
   //Argument and return types of function-types
   GCPtr<Type> & Args() const
   {
-    TYPE_ACC_DEBUG assert(kind == ty_fn);
+    TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn);
     return CompType(0);
   }  
   GCPtr<Type> & Ret() const
   {
-    TYPE_ACC_DEBUG assert(kind == ty_fn);
+    TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn);
     return CompType(1);
   }  
   //The Inner type of Maybe-types
@@ -528,7 +528,8 @@ public:
   GCPtr<Type> & Base() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_mutable || 
-			  kind == ty_ref || 
+ 			  kind == ty_byref || 
+ 			  kind == ty_ref || 
 			  kind == ty_array || 
 			  kind == ty_vector);
     return (*components)[0]->typ;
