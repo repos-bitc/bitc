@@ -323,17 +323,16 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
       break;
     }
 
-  case ty_maybe:
+  case ty_mbTop:
+  case ty_mbFull:
     {
-      out << "<MBpair>" << endl;
+      out << ((t->kind == ty_mbFull) ? "<MBPAIR>" : "<mbpair>") 
+	  << endl;
       out.more();
-      t->CompType(0)->asXML(tvP, out);
-      if(t->hints)
-	t->hints->asXML(tvP, out);
-      else
-	out << "<aHset/>" << endl; // fix
-      out.less();
-      out << "</MBpair>" << endl;
+      t->Var()->asXML(tvP, out);
+      t->Core()->asXML(tvP, out);
+      out << ((t->kind == ty_mbFull) ? "</MBPAIR>" : "</mbpair>") 
+	  << endl;
       break;
     }
 

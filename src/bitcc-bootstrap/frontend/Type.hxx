@@ -265,6 +265,8 @@ public:
   // Get the type without some combinations of the above
   GCPtr<Type> getTheType(bool mutableOK=false, bool maybeOK=false);   
 
+  // The only reason the following unctions are not marked const is
+  // that they call getType(), which uses the mark flag. 
   bool isUnion(); // 1. Union type.
   bool isUcon();  // 2. Union Constructor.
   bool isUval();  // 3. Constructed union value (includes zero arity ctrs).
@@ -288,6 +290,7 @@ public:
   bool isImmutableRefType();
   bool isMutable();
   bool isMaybe();
+  bool isMbVar();
   bool isConcrete();
   bool isPrimaryType();
   bool isPrimInt();
@@ -503,18 +506,23 @@ public:
   GCPtr<Type> & Args() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_fn);
-    return (*components)[0]->typ;
+    return CompType(0);
   }  
   GCPtr<Type> & Ret() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_fn);
-    return (*components)[1]->typ;
+    return CompType(1);
   }  
   //The Inner type of Maybe-types
-  GCPtr<Type> & Inner() const
+  GCPtr<Type> &Var() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
-    return (*components)[0]->typ;
+    return CompType(0);
+  }  
+  GCPtr<Type> & Core() const
+  {
+    TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
+    return CompType(1);
   }
   // The first component of an array/vector/mutable/ref type
   GCPtr<Type> & Base() const

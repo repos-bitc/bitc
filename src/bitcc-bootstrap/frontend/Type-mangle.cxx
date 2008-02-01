@@ -260,10 +260,11 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
       break;
     }
 
-  case ty_maybe:
+    /* MAYBE handling right? */
+  case ty_mbFull:
+  case ty_mbTop:
     {
-      ss << CompType(0)->mangledString(igMut, false, 
-					      maxArgMut);
+      ss << Core()->mangledString(igMut, false, maxArgMut);
       break;
     }
 

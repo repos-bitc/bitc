@@ -256,7 +256,12 @@ Type::size()
       break;
     }
     
-  case ty_maybe:
+  case ty_mbTop:
+  case ty_mbFull:
+    {
+      theSize = Core()->size();
+    }
+    
   case ty_mutable:
     {
       theSize = CompType(0)->size();      

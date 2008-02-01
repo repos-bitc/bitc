@@ -179,14 +179,14 @@ p: (CL (maybe-1 'a)) => (fn ('a) ())
  
 
 GCPtr<Type> 
-addShallowMbTop()
+addShallowMbTop(GCPtr<Type> t)
 {
+  t = t->getType();
+  GCPtr<Type> rt = NULL;
+
   if(Options::topMutOnly)
     return MBT(t);
   
-  GCPtr<Type> t = getType();
-  GCPtr<Type> rt = NULL;
-
   if(t->mark & MARK17)
     return t;
   
@@ -194,14 +194,16 @@ addShallowMbTop()
   
   switch(t->kind) {
 
-  case ty_maybe:
+  case ty_mbTop:
+  case ty_mbFull:
+    {
+      rt = addShallowMbTop(t->Core());
+      break;
+    }
+
   case ty_mutable:
     {
-      rt = t->CompType(0)->addShallowMbTop()->getType();
-      assert(rt->kind == ty_maybe);
-      assert(rt->hints);
-      assert(rt->hints->components->size() == 1);
-      rt->hints->CompType(0) = t;
+      rt = addShallowMbTop(t->CompType(0));
       break;
     }
 
@@ -259,7 +261,7 @@ addShallowMbTop()
   case ty_array:
     {
       rt = new Type(t);
-      rt->CompType(0) = t->CompType(0)->addShallowMbTop();
+      rt->CompType(0) = addShallowMbTop(t->CompType(0));
       rt = MBT(rt);
       break;
     }
@@ -280,7 +282,7 @@ addShallowMbTop()
 	              // with bare tvars, except in the type-schemes. 
 	
 	if(rt->argCCOK(i))
-	  rt->TypeArg(i)->link = tArg->addShallowMbTop();
+	  rt->TypeArg(i)->link = addShallowMbTop(tArg);
 	else
 	  rt->TypeArg(i)->link = tArg;	
       }
@@ -303,17 +305,20 @@ addShallowMbTop()
 bool 
 Type::copy_compatible_compat(GCPtr<Type> t, bool verbose, std::ostream &errStream)
 {
-  GCPtr<Type> copy = TypeOfCopy();
-  return copy->compatible(t->TypeOfCopy(), verbose, errStream); 
+  return MBF(this)->compatible(MBF(t), verbose, errStream);
 }
 
 bool 
 Type::copy_compatible_eql(GCPtr<Type> t, bool verbose, std::ostream &errStream)
 {
-  GCPtr<Type> copy = TypeOfCopy();
-  return copy->equals(t->TypeOfCopy(), verbose, errStream); 
+  return MBF(this)->equals(MBF(t), verbose, errStream);
 }
 
+static inline GCPtr<Type> 
+addMutable(GCPtr<Type> t)
+{
+  return new Type(ty_mutable, t->getBareType());
+}
 
 GCPtr<Type> 
 Type::maximizeTopMutability(GCPtr<Trail> trail)
@@ -325,15 +330,19 @@ Type::maximizeTopMutability(GCPtr<Trail> trail)
     
   case ty_mbFull:    
   case ty_mbTop:    
+    {
+      rt = t->Core()->maximizeTopMutability(trail);
+      break;
+    }
+
   case ty_mutable:
     {
-      rt = t->CompType(0)->maximizeMutability(trail);
-      break;
+      rt = t->CompType(0)->maximizeTopMutability(trail);
     }
 
   default:
     {
-      rt = t->getDCopy()->addMutable();
+      rt = addMutable(t->getDCopy());
       break;
     }
   }
@@ -342,17 +351,23 @@ Type::maximizeTopMutability(GCPtr<Trail> trail)
 }
 
 GCPtr<Type> 
-Type::minimizeMutability(GCPtr<Trail> trail)
+Type::minimizeTopMutability(GCPtr<Trail> trail)
 {
   GCPtr<Type> t = getType();
   GCPtr<Type> rt = NULL;
   
   switch(t->kind) {
     
-  case ty_maybe:    
+  case ty_mbFull:    
+  case ty_mbTop:    
+    {
+      rt = t->Core()->minimizeTopMutability(trail);
+      break;
+    }
+    
   case ty_mutable:
     {
-      rt = t->CompType(0)->minimizeMutability(trail);
+      rt = t->CompType(0)->minimizeTopMutability(trail);
       break;
     }
     
@@ -364,12 +379,6 @@ Type::minimizeMutability(GCPtr<Trail> trail)
   }
   
   return rt;
-}
-
-static inline GCPtr<Type> 
-addMutable(GCPtr<Type> t)
-{
-  return new Type(ty_mutable, t->getBareType());
 }
 
 GCPtr<Type> 
@@ -387,18 +396,23 @@ Type::maximizeMutability(GCPtr<Trail> trail)
     
   case ty_mbFull:    
   case ty_mbTop:    
+    {
+      rt = t->Core()->maximizeMutability(trail);
+      break;
+    }
+
   case ty_mutable:
     {
       rt = t->CompType(0)->maximizeMutability(trail);
       break;
     }
-
+    
   case ty_array:
     {
       rt = new Type(t);
       rt->CompType(0) = 
 	t->CompType(0)->maximizeMutability(trail);
-      rt = t->addMutable();      
+      rt = addMutable(t);      
       break;
     }
 
@@ -415,13 +429,13 @@ Type::maximizeMutability(GCPtr<Trail> trail)
 	if(rt->argCCOK(i))	  
 	  trail->link(arg, arg->maximizeMutability(trail));       
       }
-      rt = rt->addMutable();
+      rt = addMutable(rt);
       break;
     } 
     
   default:
     {
-      rt = t->getDCopy()->addMutable();
+      rt = addMutable(t->getDCopy());
       break;
     }
   }
@@ -443,7 +457,13 @@ Type::minimizeMutability(GCPtr<Trail> trail)
   
   switch(t->kind) {
     
-  case ty_maybe:    
+  case ty_mbFull:    
+  case ty_mbTop:    
+    {
+      rt = t->Core()->minimizeMutability(trail);
+      break;
+    }
+
   case ty_mutable:
     {
       rt = t->CompType(0)->minimizeMutability(trail);
@@ -499,241 +519,6 @@ Type::isMinMutable()
   return strictlyEquals(minimizeMutability());
 }
 
-void 
-Type::addHint(GCPtr<Type> theHint)
-{
-  GCPtr<Type> t = getType();
-  theHint = theHint->getType();
-  
-  bool found = false;
-  for(size_t i=0; i < t->components->size(); i++) {
-    GCPtr<Type> thisHint = t->CompType(i)->getType();
-    if(thisHint == theHint) {
-      found = true;
-      break;
-    }
-  }
-
-  if(!found)
-    t->components->append(new comp(theHint));
-}
-
-void
-Type::clearHints(GCPtr<Trail> trail)
-{
-  GCPtr<Type> t = getType();
-  
-  if(t->mark & MARK14)
-    return;
-  
-  t->mark |= MARK14;
-  
-  switch(t->kind) {
-  case ty_maybe:
-    // fall through
-    
-  default:
-    for(size_t i=0; i < t->typeArgs->size(); i++) 
-      t->TypeArg(i)->clearHints(trail);
-    
-    for(size_t i=0; i<t->components->size(); i++)
-      t->CompType(i)->clearHints(trail);
-    
-    if(t->fnDeps)
-      for(size_t i=0; i < t->fnDeps->size(); i++)
-	t->FnDep(i)->clearHints(trail);
-    
-    break;
-  }
-
-  t->mark &= ~MARK14;
-}
-
-void 
-TCConstraints::clearHintsOnPreds(GCPtr<Trail> trail)
-{
-  for(size_t i=0; i < pred->size(); i++)
-    Pred(i)->clearHints(trail);
-}
-
-void 
-TypeScheme::adjMaybes(GCPtr<Trail> trail)
-{
-  tau->adjMaybe(trail);
-  if(tcc)
-    tcc->clearHintsOnPreds(trail);
-}
-
-void
-Type::groundMaybe(GCPtr<Trail> trail)
-{
-  GCPtr<Type> t = getType();
-  switch(t->kind) {
-  case ty_maybe:
-    trail->link(t, t->CompType(0)->getType()); 
-    break;    
-
-  default:
-    break;
-  }
-}
-
-static inline GCPtr<Type> 
-hintTvar(GCPtr<AST> ast)
-{
-  return newBareTvar(ast);
-}
-
-GCPtr<Type> 
-Type::simplifiedHint()
-{
-  GCPtr<Type> t = getType();
-
-  GCPtr<Type> rt = NULL;
-  //   LexLoc _loc;
-  //   GCPtr<AST> dummy = new AST(at_Null, _loc);  
-
-  if(t->mark & MARK16)
-    return newBareTvar(ast);
-
-  t->mark |= MARK16;
-
-  switch(t->kind) {
-
-  case ty_maybe:
-    {
-      if(t->hints)
-	rt =  t->hints->simplifiedHint();
-      else
-	rt = new Type(ty_maybe, 
-		      t->CompType(0)->simplifiedHint());
-      break;
-    }
-
-  case ty_hint:
-    {
-      GCPtr<Type> immut = NULL;
-      GCPtr<Type> mut = NULL;
-      GCPtr<Type> maybe = NULL;
-      for(size_t i=0; i < t->components->size(); i++) {
-	GCPtr<Type> hint = t->CompType(i);
-	hint = hint->simplifiedHint();
-
- 	if(hint->isMaybe())
-	  maybe = hint;
-	else if(hint->isMutable())
-	  mut = hint;
-	else
-	  immut = hint;
-      }
-
-      // Pincking maybe over mutable may seem like we are losing
-      // information. but consider: 
-      // (define (f x:'a y:(mutable 'b)) (if #t x y)) 
-      if(immut)
-	rt = immut;
-      else if (maybe)
-	rt = maybe;
-      else if (mut)
-	rt = mut;
-      else
-	rt = hintTvar(ast);
-      break;
-    }
-
-  case ty_mutable:
-    {
-      rt = new Type(ty_mutable, newBareTvar(ast));
-      break;
-    }
-
-  case ty_fnarg:
-  case ty_byref:
-  case ty_typeclass:
-  case ty_subtype:
-  case ty_pcst:
-  case ty_kvar:
-  case ty_kfix:
-  case ty_letGather:
-    assert(false);
-    
-  case ty_tvar:
-  case ty_unit:
-  case ty_bool:
-  case ty_char:
-  case ty_string:
-  case ty_int8:
-  case ty_int16:
-  case ty_int32:
-  case ty_int64:
-  case ty_uint8:
-  case ty_uint16:
-  case ty_uint32:
-  case ty_uint64:
-  case ty_word:
-  case ty_float:
-  case ty_double:
-  case ty_quad:
-  case ty_dummy:
-  case ty_tyfn:
-#ifdef KEEP_BF
-  case  ty_bitfield:
-#endif
-    {
-      rt = t;
-      break;
-    }
-    
-  case ty_fn:
-    {
-      GCPtr<Type> oldFnArgs = t->CompType(0);
-      GCPtr<Type> newFnArgs = new Type(ty_fnarg, ast);
-      for(size_t i=0; i < oldFnArgs->components->size(); i++)
-	newFnArgs->components->append(new comp(hintTvar(ast),
-					       oldFnArgs->CompFlags(i)));
-      
-      rt = new Type(ty_fn, newFnArgs, hintTvar(ast));
-      break;
-    }
-    
-  case ty_array:
-  case ty_vector:
-  case ty_ref:
-    {
-      rt = new Type(t);
-      for(size_t i=0; i < t->components->size(); i++)
-	rt->CompType(i) = hintTvar(ast);      
-      break;
-    }
-   
-  case ty_structv:
-  case ty_structr:
-  case ty_unionv: 
-  case ty_unionr:
-  case ty_uvalv: 
-  case ty_uvalr:
-  case ty_uconv: 
-  case ty_uconr:
-  case ty_reprr:
-  case ty_reprv:
-  case ty_exn:
-    {
-      // For Structur and union base types, myContainer = defAst.
-      rt = t->myContainer->scheme->type_instance_copy();
-      rt->kind = t->kind; // Sometime, we need ucon/uval fixup
-
-      GCPtr<Trail> trail = new Trail;
-      for(size_t i=0; i < rt->typeArgs->size(); i++)
-	rt->TypeArg(i)->groundMaybe(trail);
-      break;
-    }
-  }
-  
-  assert(rt);
-
-  t->mark &= ~MARK16;
-  return rt;
-}
 
 void
 Type::adjMaybe(GCPtr<Trail> trail)
@@ -746,20 +531,11 @@ Type::adjMaybe(GCPtr<Trail> trail)
   t->mark |= MARK15;
     
   switch(t->kind) {
-  case ty_maybe:
+  case ty_mbFull:
+  case ty_mbTop:
     {
-      t->CompType(0)->adjMaybe(trail);
-      if(t->hints) {
-	GCPtr<Type> sh = t->hints->simplifiedHint();
-// 	std::cerr << "Trying to Unify: " 
-// 		  << t->asString(0) << sh->asString(0)
-// 		  << std::endl;
-	t->unifyWith(sh, false, trail);
-// 	std::cerr << "Result = " 
-// 		  << t->asString(0)
-// 		  << std::endl;	
-      }
-      t->groundMaybe(trail);
+      t->Core()->adjMaybe(trail);
+      trail->subst(t->Var(), t->Core());
       break;
     }
 

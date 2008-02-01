@@ -122,7 +122,7 @@ LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
 
   case at_sel_ctr:
     {
-      bool isLoc = LocChk(errStream, errFree, ast->child(0), inSET);
+      LocChk(errStream, errFree, ast->child(0), inSET);
       return false;
     }
     

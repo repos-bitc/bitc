@@ -490,7 +490,7 @@ Unify(std::ostream& errStream,
 	    typ->minimizeMutability(), flags);
       
       if(errFree)
-	trail->link(mb, typ);
+	trail->link(mb->Var(), typ);
       return errFree;
     }
     else if(t1->kind == ty_mbTop || t2->kind == ty_mbTop) {      
@@ -503,7 +503,7 @@ Unify(std::ostream& errStream,
 	    typ->minimizeMutability(), flags);
       
       if(errFree)
-	trail->link(mb, typ);
+	trail->link(mb->Var(), typ);
       return errFree;
     }
     else if(t1->isUType() && t2->isUType() && 
@@ -745,28 +745,28 @@ Unify(std::ostream& errStream,
 		   t2->CompType(0), flags));
       break;
     }
-
+    
   case ty_mbTop:
     {
       CHKERR(errFree,
 	     Unify(errStream, trail, errAst, 
-		   t1->CompType(0)->minimizeTopMutability(), 
-		   t2->CompType(0)->minimizeTopMutability(), 
+		   t1->Core()->minimizeTopMutability(), 
+		   t2->Core()->minimizeTopMutability(), 
 		   flags));
-	
-      trail->link(t1, t2);
+      
+      trail->link(t1->Var(), t2->Var());
       break;
     }
-      
+    
   case ty_mbFull:
     {
       CHKERR(errFree,
 	     Unify(errStream, trail, errAst, 
-		   t1->CompType(0)->minimizeMutability(), 
-		   t2->CompType(0)->minimizeMutability(), 
+		   t1->Core()->minimizeMutability(), 
+		   t2->Core()->minimizeMutability(), 
 		   flags));
 	
-      trail->link(t1, t2);
+      trail->link(t1->Var(), t2->Var());
       break;
     }
 

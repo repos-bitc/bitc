@@ -185,9 +185,10 @@ Type::asAST(const sherpa::LexLoc &loc,
       break;
     }
 
-  case ty_maybe:
+  case ty_mbTop:
+  case ty_mbFull:
     {
-      ast = t->CompType(0)->asAST(loc, tvP);
+      ast = t->Core()->asAST(loc, tvP);
       break;
     }
 

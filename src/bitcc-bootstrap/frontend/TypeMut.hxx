@@ -58,12 +58,6 @@
    legs of a datastructure or expression.*/
 
 static inline GCPtr<Type> 
-newMbTvar(GCPtr<AST> ast)
-{
-  return new Type(ty_mbFull, new Type(ty_tvar, ast));
-}
-
-static inline GCPtr<Type> 
 newTvar(GCPtr<AST> ast)
 {
   return new Type(ty_tvar, ast);
@@ -72,13 +66,17 @@ newTvar(GCPtr<AST> ast)
 static inline GCPtr<Type> 
 MBF(GCPtr<Type> t)
 {
-  return new Type(ty_mbFull, t->minimizeMutability());
+  return new Type(ty_mbFull, 
+		  newTvar(t->ast),
+ 		  t->minimizeMutability());
 }
 
 static inline GCPtr<Type> 
 MBT(GCPtr<Type> t)
 {
-  return new Type(ty_mbTop, t->getBareType());
+  return new Type(ty_mbTop, 
+		  newTvar(t->ast),
+		  t->getBareType());
 }
 
 #endif /* TYPEMUT_HXX */

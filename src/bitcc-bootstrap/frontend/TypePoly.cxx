@@ -293,10 +293,8 @@ TypeScheme::generalize(std::ostream& errStream,
 // 	    << ": " << std::endl;
 //   std::cerr << "\tBefore Adjustment : " 
 // 	    << asString(NULL) << std::endl;
-  adjMaybes(trail);
 //   std::cerr << "After Adjustment : " 
 // 	    << asString(NULL) << std::endl;
-
 
   collectftvs(gamma);
   

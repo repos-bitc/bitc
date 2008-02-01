@@ -309,12 +309,15 @@ Type::toString()
        <<  ") " << CompType(1)->toString() << ")";
     break;
 
-  case ty_maybe:
-    ss << "(maybe " << CompType(0)->toString();      
-    if(hints)
-      ss << " " << hints->toString();
-    ss  << ")";
-    break;    
+
+  case ty_mbFull:
+  case ty_mbTop:
+    ss << Var()->toString()
+       << ((kind == ty_mbFull) ? "|" : "!")
+       << ((Core()->kind == ty_fn)?"(":"")
+       << Core()->toString()
+       << ((Core()->kind == ty_fn)?"(":"");
+    break;
 
   case ty_subtype:
     {

@@ -487,9 +487,9 @@ isExpansive(std::ostream& errStream,
 #endif
   case ty_ref:
   case ty_fn:
-  case ty_fnarg:
     break;
 
+  case ty_fnarg:
   case ty_byref:
     assert(false); // Function case breaks
     break;
@@ -513,7 +513,8 @@ isExpansive(std::ostream& errStream,
   case ty_uvalr:
   case ty_reprv:
   case ty_reprr:
-  case ty_maybe:
+  case ty_mbFull:
+  case ty_mbTop:
   case ty_subtype:
   case ty_pcst:
     {    
@@ -626,10 +627,11 @@ Type::removeRestricted(GCPtr<CVector<GCPtr<Type> > > &ftvs,
       break;
     }
 
-  case ty_maybe:
+  case ty_mbFull:
+  case ty_mbTop:
     {
-      GCPtr<Type> in = t->CompType(0);
-      in->removeRestricted(ftvs, remove, removed);
+      t->Var()->removeRestricted(ftvs, remove, removed);
+      t->Core()->removeRestricted(ftvs, remove, removed);
       break;
     }
 

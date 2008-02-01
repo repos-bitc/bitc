@@ -190,6 +190,24 @@ Type::getType()
       in = t->CompType(0)->getTypePrim();
     }
   }
+  
+  // Maybe types may not be recursively nested, But a MbFull
+  // might contain an MbTop.
+  if(t->kind == ty_mbFull || t->kind == ty_mbTop) {
+    GCPtr<Type> in = t->CompType(0)->getTypePrim();
+
+    assert(in->kind != ty_mbFull);
+
+    if(in->kind == ty_mbTop) {
+      t = in;
+      in = in->CompType(0)->getTypePrim();
+    }
+
+    assert(in->kind != ty_mbTop);
+    
+    if(in->kind != ty_tvar)
+      t = in;
+  }
 
   return t;
 }
@@ -354,6 +372,21 @@ Type::isMaybe()
 {
   GCPtr<Type> t = getType();
   return (t->kind == ty_mbTop || t->kind == ty_mbFull);
+}
+ 
+bool 
+Type::isMbVar()
+{
+  GCPtr<Type> t = getType();
+  TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
+  GCPtr<Type> v = t->Var();
+  TYPE_ACC_DEBUG 
+    if(t->kind == ty_mbFull)
+      assert(v->kind != ty_mbFull);
+    else
+      assert(v->kind != ty_mbFull && v->kind != ty_mbTop);
+  
+  return (v->kind == ty_tvar);
 }
 
 bool 
@@ -688,6 +721,13 @@ Type::isOfInfiniteType()
       break;
     }
 
+  case ty_mbFull:
+  case ty_mbTop:
+    {
+      return Core()->isOfInfiniteType();
+      break;
+    }
+
   case ty_letGather:
   case ty_fn:
   case ty_tyfn:
@@ -708,8 +748,6 @@ Type::isOfInfiniteType()
   case ty_ref:
   case ty_byref:
   case ty_mutable:
-  case ty_mbFull:
-  case ty_mbTop:
   case ty_exn:
   case ty_subtype:
   case ty_pcst:

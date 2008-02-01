@@ -343,8 +343,12 @@ toCtype(GCPtr<Type> typ, string IDname="", unsigned long flags=0,
     assert(false);
     break;
     
+  case ty_mbTop:
+  case ty_mbFull:
+    out << toCtype(t->Core(), IDname, flags, arrsz);
+    break;
+
   case ty_mutable:
-  case ty_maybe:
     out << toCtype(t->CompType(0), IDname, flags, arrsz);
     break;
     

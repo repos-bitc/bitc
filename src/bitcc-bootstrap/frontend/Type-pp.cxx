@@ -330,19 +330,14 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
       break;
     }
 
-  case ty_maybe:
+  case ty_mbFull:
+  case ty_mbTop:
     {
-      if(Options::showMaybes) {
-	ss << "(maybe-" << t->uniqueID << " "
-	   << t->CompType(0)->asString(tvP, traverse);
-
-	if(t->hints)
-	  ss << t->hints->asString(tvP, traverse);
-	ss << ")";	
-      }
-      else {
-	ss << t->CompType(0)->asString(tvP, traverse);
-      }
+      ss << t->Var()->asString(tvP, traverse)
+	 << ((t->kind == ty_mbFull) ? "|" : "!")
+	 << ((t->Core()->kind == ty_fn)?"(":"")
+	 << t->Core()->asString(tvP, traverse)
+	 << ((t->Core()->kind == ty_fn)?"(":"");
       break;
     }
 
