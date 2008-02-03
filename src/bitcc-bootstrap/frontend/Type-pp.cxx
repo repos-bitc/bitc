@@ -295,7 +295,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
       ss << "(array "
 	 << t->Base()->asString(tvP, traverse)
 	 << " "
-	 << t->arrlen
+	 << t->arrlen->len
 	 << ")";
       break;
     }

@@ -105,6 +105,15 @@ struct comp : public Countable {
   //comp(const comp &c);
 };  
 
+// The only reason for this class is that we need
+// Countable to use GCPtr for an indirection 
+// over array length
+struct ArrLen : public Countable {
+  uint64_t  len;
+  ArrLen(uint64_t _len) {len = _len;}
+};
+
+
 struct tvPrinter;
 struct TypeScheme;
 
@@ -203,7 +212,21 @@ public:
 
   uint8_t   minSignedRep;	// minimum signed representation size
   uint8_t   minUnsignedRep;	// minimum signed representation size
-  uint64_t  arrlen;		// Length in the case of an array type
+
+  // Array length is actually a type variable, which ultimnately
+  // resolves to  singleton types. Strictly speaking, we must use type
+  // variables here. Since we do not have singleton types or dependent
+  // types over arrays, we have arrlen in the type record
+  // itself. However, we still need a level of indirection because the
+  // lengths must also be unified during unification [think of
+  // unification calls such as 
+  //     U(t1->minimizeMutability() == t2->mininmizeMutability()) ]
+  // Implicitely, an indirection entry with `0' in it is a length
+  // variable. Copy constructor and TypeSpecialize DO NOT copy this
+  // variable deeply.  This "variable" is not subject to
+  // generalization.  
+  GCPtr<ArrLen> arrlen;	// Length in the case of an array type
+
   size_t    Isize;		// size in fixint
   GCPtr<CVector<GCPtr<Type> > > fnDeps; // Functional Dependencies (for 
                                    //   Type classes only).
@@ -248,9 +271,6 @@ public:
   // the typeScheme class in that this function makes a copy
   // of non-tvars, while type_instance() returns the original type.
   GCPtr<Type> getDCopy();
-
-  // Makes a deep copy, including type variables.
-  GCPtr<Type> getTrueCopy();
 
 private:
   GCPtr<const Type> getTypePrim() const;

@@ -285,7 +285,7 @@ Type::asAST(const sherpa::LexLoc &loc,
     {
       GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
       GCPtr<AST> intLit = new AST(at_intLiteral, loc);
-      intLit->litValue.i = t->arrlen;
+      intLit->litValue.i = t->arrlen->len;
       intLit->litBase = 10;
       intLit->s = intLit->litValue.i.asString(10);
       ast = new AST(at_arrayType, loc, typ, intLit);

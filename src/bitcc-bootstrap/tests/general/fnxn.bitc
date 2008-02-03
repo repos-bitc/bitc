@@ -1,11 +1,20 @@
 ;(define f (lambda (x) x))
 ;(define g (set! f f))
 
-(defstruct (pr 'a 'b) fst:'a snd:'b)
+;(defstruct (pr 'a 'b) fst:'a snd:'b)
 
-(define p1 (pr #t #\t))
-(define pf p1.fst) 
-(define p2 p1)
+;(define p1 (pr #t #\t))
+;(define pf p1.fst) 
+;(define p2 p1)
+
+;(define mb:(mutable bool) #t)
+;(define T1 (if #t #t mb))
+;(define T2 (if #t (dup #t) (dup mb)))
+;(define T3 (if #t (dup #t):(ref bool) (dup mb):(ref (mutable bool))))
+
+(define A (array #t #f #t #f))
+(define B (array-nth A 0))
+(define C (array-length A))
 
 ;; Cyclic type
 ;;(define f (lambda (x) f))

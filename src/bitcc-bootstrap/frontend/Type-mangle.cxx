@@ -216,7 +216,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     {
       assert(components->size() == 1);
       ss << "J" << Base()->mangledString(igMut, false, maxArgMut)
-	 << "__" << arrlen;
+	 << "__" << arrlen->len;
       break;
     }
     

@@ -393,8 +393,8 @@ UnifyUTVC(std::ostream& errStream,
   
 #ifdef VERBOSE_UNIFY
   std::cout << "UnifyUTVC" 
-	    << ut->asString(NULL) << " and "
-	    << uv->asString(NULL)
+	    << ut1->asString(NULL) << " and "
+	    << ut2->asString(NULL)
 	    << std::endl;
 #endif
   
@@ -713,24 +713,24 @@ Unify(std::ostream& errStream,
 	     Unify(errStream, trail, errAst, t1->Base(), 
 		   t2->Base(), flags));
 
-      if(t1->arrlen == t2->arrlen)
+      if(t1->arrlen->len == t2->arrlen->len)
 	break;
       
       // Array lengths did not Unify
-      if(t1->arrlen == 0) {
-	t1->arrlen = t2->arrlen;
+      if(t1->arrlen->len == 0) {
+	t1->arrlen->len = t2->arrlen->len;
 	break;
       }
-      else if(t2->arrlen == 0) {
-	t2->arrlen = t1->arrlen;
+      else if(t2->arrlen->len == 0) {
+	t2->arrlen->len = t1->arrlen->len;
 	break;
       }
       else {
 	errStream << errAst->loc 
 		  << ": Array Lengths do not match. "
-		  << t1->arrlen
+		  << t1->arrlen->len
 		  << " vs " 
-		  << t2->arrlen
+		  << t2->arrlen->len
 		  << std::endl;
 	errFree = false;
       }
@@ -833,13 +833,15 @@ Unify(std::ostream& errStream,
       break;
     }
   }
-
-  //     errStream << "\t Result: " 
-  // 	    << ft->asString(NULL)
-  // 	    << " vs " 
-  // 	    << st->asString(NULL)
-  // 	    << std::endl;  
-    
+  
+#ifdef VERBOSE_UNIFY
+  errStream << "\t Result: " 
+	    << ft->asString(NULL)
+	    << " == " 
+	    << st->asString(NULL)
+	    << std::endl;  
+#endif
+  
   if(errFree)
     RET_UNIFY;
   else

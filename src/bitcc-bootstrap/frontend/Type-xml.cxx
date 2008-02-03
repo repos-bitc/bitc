@@ -285,7 +285,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 
   case ty_array:
     {
-      out << "<array sz='" << t->arrlen  <<"'>" << endl;
+      out << "<array sz='" << t->arrlen->len  <<"'>" << endl;
       out.more();
       t->Base()->asXML(tvP, out);
       out.less();

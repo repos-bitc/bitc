@@ -1933,7 +1933,7 @@ toc(std::ostream& errStream,
 
   case at_array_length:
     {
-      out << ast->child(0)->symType->getBareType()->arrlen;
+      out << ast->child(0)->symType->getBareType()->arrlen->len;
       break;
     } 
 
@@ -2325,7 +2325,7 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
       if(alreadyEmitted(t, arrVec))
 	break;
 
-      if(t->arrlen == 0) {
+      if(t->arrlen->len == 0) {
 	assert(false);
       }
 
@@ -2344,7 +2344,7 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
       out << "typedef struct {" << endl;
       out.more();
 
-      out << toCtype(et) << " elem[" << t->arrlen << "];" << endl;
+      out << toCtype(et) << " elem[" << t->arrlen->len << "];" << endl;
       out.less();
       out << "} " << CMangle(t->mangledString(true)) 
 	  << ";" << endl << endl;

@@ -348,7 +348,7 @@ checkImpreciseTypes(std::ostream& errStream,
     switch(t->kind) {
     case ty_array:
       {
-	if(t->arrlen == 0) {
+	if(t->arrlen->len == 0) {
 	  errStream << t->ast->loc << ": "
 		    << "Type " << t->asString() 
 		    << " is not precise enough "
@@ -2270,7 +2270,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
       errStream << "After Generalization: " 
 		<< ast->getID()->scheme->asString()
-      		<< std::endl;
+      		<< std::endl << std::endl;
       
       gamma->mergeBindingsFrom(defGamma);
       
@@ -2669,7 +2669,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       CHKERR(errFree, unifyPrim(errStream, trail, ast->child(1), 
 				ast->child(1)->symType, "word")); 
 
-      arrType->arrlen = ast->child(1)->litValue.i.as_uint32();
+      arrType->arrlen->len = ast->child(1)->litValue.i.as_uint32();
       break;
     }
 
@@ -2981,7 +2981,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       Kind k = (ast->astType == at_array) ? ty_array : ty_vector;
       GCPtr<Type> compType = MBF(newTvar(ast));
       ast->symType = new Type(k, ast, compType);
-      ast->symType->arrlen = ast->children->size();
+      ast->symType->arrlen->len = ast->children->size();
       
       // match agt_expr+
       for (size_t c = 0; c < ast->children->size(); c++) {
@@ -3019,10 +3019,10 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 				    newTvar(ast->child(0))));
       if(ast->astType == at_array_length)
 	impTypes->append(av);
-      
+
       CHKERR(errFree, unify(errStream, trail, ast->child(0), 
 			    ast->child(0)->symType, av, uflags));
-      
+ 
       // FIX TO WORD, not mutable
       ast->symType = new Type(ty_word, ast);
       break;    
@@ -3437,16 +3437,12 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
         A(v) = ['a1.. 'am] ... | Ctr{f1:t1 ... fn:tn} | ...
        A |- ef:v(s1 ... sm)    A |- e1:t1' ... A |- en: tn'
                      
-        (*1)   U(t1  = 'c1|'b1) ... U(tn  = 'cn|'bn)
-        (*2)   U(t1' = 'd1|'b1) ... U(tn' = 'dn|'bn)
+               U(t1  = 'c1|'b1) ... U(tn  = 'cn|'bn)
+               U(t1' = 'd1|'b1) ... U(tn' = 'dn|'bn)
       ______________________________________________________
               A |- (Ctr e1 ... en): v(s1 ... sm)
 
-       NOTE: s and t both denote standard types
-       NOTE: (*1) set of unifications are implicit.
-             The id rule instantiates tvars to maybe types.
-             For non-type variables, we srtictly do not
-             need this set of unifications
+      NOTE: s and t both denote standard types
        ------------------------------------------------*/
 
       ast->symType = newTvar(ast->child(0));
@@ -3496,13 +3492,16 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	if(ctrComp->flags & COMP_UNIN_DISCM)
 	  continue;
 	
-	TYPEINFER(ast->child(j), gamma, instEnv, impTypes, isVP, tcc,
+	GCPtr<AST> arg = ast->child(j);
+	
+	TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail, USE_MODE, TI_COMP2);
 	
-	CHKERR(errFree, unify(errStream, trail, ast->child(j), 
-			      MBF(t->CompType(i)),
-			      ast->child(j)->symType,
-			      uflags));
+	GCPtr<Type> tv = newTvar(arg);
+	CHKERR(errFree, unify(errStream, trail, arg, t->CompType(i),
+			      MBF(tv), uflags)); 
+	CHKERR(errFree, unify(errStream, trail, arg, arg->symType, 
+			      MBF(tv), uflags));
 	j++;
       }
       
@@ -3551,8 +3550,8 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
            A(r) = ['a1.. 'am] {f1:t1 ... fn:tn}
       A |- ef:r(s1 ... sm)   A |- e1:t1' ... A |- en: tn'
                      
-        (*1)   U(t1  = 'c1|'b1) ... U(tn  = 'cn|'bn)
-        (*2)   U(t1' = 'd1|'b1) ... U(tn' = 'dn|'bn)
+               U(t1  = 'c1|'b1) ... U(tn  = 'cn|'bn)
+               U(t1' = 'd1|'b1) ... U(tn' = 'dn|'bn)
       ______________________________________________________
               A |- (r e1 ... en): r(s1 ... sm)
        ------------------------------------------------*/
@@ -3599,8 +3598,12 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
 	
+	GCPtr<Type> tv = newTvar(arg);
+	CHKERR(errFree, unify(errStream, trail, arg, t->CompType(i),
+			      MBF(tv), uflags));
+	
 	CHKERR(errFree, unify(errStream, trail, arg, arg->symType,
-			      MBF(t->CompType(i)), uflags));
+			      MBF(tv), uflags));
       }
 
       ast->symType = t;
@@ -3788,7 +3791,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       CHKERR(errFree, unify(errStream, trail, ast->child(0),
 			    ast->child(0)->symType,
 			    MBF(tv), uflags));
-      ast->symType = MBF(tv);
+      ast->symType = new Type(ty_ref, ast, MBF(tv));
       break;      
     }
 

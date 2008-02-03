@@ -858,7 +858,7 @@ comp::comp(const std::string s, GCPtr<Type> t, unsigned long _flags)
     kind = k;					\
     ast = a;					\
     defAst = _defAst;				\
-    arrlen = 0;					\
+    arrlen = new ArrLen(0);			\
     Isize = 0;					\
     minSignedRep = 0;				\
     minUnsignedRep = 0;				\
@@ -921,7 +921,7 @@ Type::Type(GCPtr<Type>  t)
   defAst = t->defAst;
   myContainer = t->myContainer;
   link = t->link;    
-  arrlen = t->arrlen;
+  arrlen = t->arrlen; // Copies the indirection
   Isize = t->Isize;
   minSignedRep = t->minSignedRep;
   minUnsignedRep = t->minUnsignedRep;
@@ -956,18 +956,6 @@ Type::getDCopy()
   GCPtr<TypeScheme> sigma = new TypeScheme(t);
   // sigma's ftvs are empty, therefore, TypeSpecialize will link
   // all type-variables to the original ones
-  GCPtr<Type> newTyp = sigma->type_instance_copy();
-  newTyp->flags = flags;
-  return newTyp;
-}
-
-// Makes a deep copy , but ** LINKS TVARS TO ORIGINAL ONES ** 
-GCPtr<Type> 
-Type::getTrueCopy()
-{
-  GCPtr<Type> t = getType();
-  GCPtr<TypeScheme> sigma = new TypeScheme(t);
-  t->collectAllftvs(sigma->ftvs);
   GCPtr<Type> newTyp = sigma->type_instance_copy();
   newTyp->flags = flags;
   return newTyp;
