@@ -62,4 +62,5 @@ src/bitcc-bootstrap/emacs/*.elc
 
 # Generated .c files in the test directory
 src/bitcc-bootstrap/tests/unit/*.c
+src/bitcc-bootstrap/tests/general/*.c
 

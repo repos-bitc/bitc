@@ -12,9 +12,36 @@
 ;(define T2 (if #t (dup #t) (dup mb)))
 ;(define T3 (if #t (dup #t):(ref bool) (dup mb):(ref (mutable bool))))
 
-(define A (array #t #f #t #f))
-(define B (array-nth A 0))
-(define C (array-length A))
+;(define A (array #t #f #t #f))
+;(define B (array-nth A 0))
+;(define C (array-length A))
+
+(defunion (list 'a) nil (cons car:'a cdr:(list 'a)))
+
+;(define (vector->list vec)
+;  (define (subvector->list vec pos len) ())
+;  (subvector->list vec 0 (vector-length vec)))
+
+(define (> a b) #t)
+(define (== a b) #t)
+(define (+ a b) a)
+
+(define (vector->list vec)
+ (define (subvector->list vec pos len)
+   (cond ((> pos len)	nil)
+	  ((== pos len) nil)
+	  (otherwise
+	   (cons (vector-nth vec pos)
+		 (subvector->list vec (+ pos 1) len)))))
+ (subvector->list vec 0 (vector-length vec)))
+
+
+
+
+
+;(provide main bitc.main)
+;(define main.main:(fn ((vector string)) int32) 
+;  (lambda (argvec) 0:int32)) 
 
 ;; Cyclic type
 ;;(define f (lambda (x) f))

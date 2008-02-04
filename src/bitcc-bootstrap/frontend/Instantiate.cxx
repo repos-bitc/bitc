@@ -55,8 +55,6 @@
 using namespace sherpa;
 using namespace std;
 
-//#define VERBOSE 200
-
 #if #INST_DEBUG == #DEBUG_ON
 #define STRICTLYEQUALS(x) strictlyCompatible(x, DEBUG_VERBOSE)
 #else
@@ -71,7 +69,7 @@ using namespace std;
 /* 
    Even though the unified-AST can be formed on demand, R&Ting the new
    definitions must be done in a fuly built environment -- 
-   he mega-environment.
+   the mega-environment.
 
    We need the mega-environment because there is -- in general --
    no single environment where we can perform this R&T. For example,
@@ -239,13 +237,16 @@ importTSBindings(GCPtr<Environment<TypeScheme> > fromEnv,
   for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
     GCPtr<Binding<TypeScheme> > bdng = fromEnv->bindings->elem(i);
 
-    if ((bdng->flags & BF_PRIVATE) == 0)
+    if ((bdng->flags & BF_PRIVATE) == 0) {
       toEnv->addBinding(bdng->val->ast->fqn.asString(),
 			bdng->val, BF_REBIND | BF_COMPLETE);
-    INST_ENV_DEBUG
-      std::cerr << "Added to Gamma:" 
-		<< bdng->val->ast->fqn.asString()
-		<< std::endl;    
+      INST_ENV_DEBUG
+	std::cerr << "Added to Gamma:" 
+		  << bdng->val->ast->fqn.asString()
+		  << ": " 
+		  << bdng->val->asString()
+		  << std::endl;
+    }
   }
 }
 

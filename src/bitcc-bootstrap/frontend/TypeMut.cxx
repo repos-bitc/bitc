@@ -519,35 +519,73 @@ Type::isMinMutable()
 
 
 void
-Type::adjMaybe(GCPtr<Trail> trail)
+Type::adjMaybe(GCPtr<Trail> trail, bool minimize)
 {
   GCPtr<Type> t = getType();
-
+  
   if(t->mark & MARK15)
     return;
-
+  
   t->mark |= MARK15;
     
   switch(t->kind) {
   case ty_mbFull:
+    {
+      t->Core()->adjMaybe(trail, minimize);
+      GCPtr<Type> core = t->Core();
+      if(minimize)
+	core = core->minimizeTopMutability();
+      trail->subst(t->Var(), core);
+      break;
+    }
   case ty_mbTop:
     {
-      t->Core()->adjMaybe(trail);
-      trail->subst(t->Var(), t->Core());
+      t->Core()->adjMaybe(trail, minimize);
+      GCPtr<Type> core = t->Core();
+      if(minimize)
+	core = core->minimizeMutability();
+      trail->subst(t->Var(), core);
       break;
     }
 
-  default:
+  case ty_fn:
+    {
+      t->Args()->adjMaybe(trail, true);
+      t->Ret()->adjMaybe(trail, true);
+    }
+
+  case ty_mutable:
+  case ty_array:
+  case ty_structv:
+  case ty_unionv: 
+  case ty_uvalv: 
+  case ty_uconv: 
+  case ty_reprv:
     {
       for(size_t i=0; i < t->typeArgs->size(); i++) 
-	t->TypeArg(i)->adjMaybe(trail);
+	t->TypeArg(i)->adjMaybe(trail, minimize);
       
       for(size_t i=0; i<t->components->size(); i++)
-	t->CompType(i)->adjMaybe(trail);
+	t->CompType(i)->adjMaybe(trail, minimize);
       
       if(t->fnDeps)
 	for(size_t i=0; i < t->fnDeps->size(); i++)
-	  t->FnDep(i)->adjMaybe(trail);
+	  t->FnDep(i)->adjMaybe(trail, minimize);
+
+      break;
+    }
+    
+  default:
+    {
+      for(size_t i=0; i < t->typeArgs->size(); i++) 
+	t->TypeArg(i)->adjMaybe(trail, false);
+      
+      for(size_t i=0; i<t->components->size(); i++)
+	t->CompType(i)->adjMaybe(trail, false);
+      
+      if(t->fnDeps)
+	for(size_t i=0; i < t->fnDeps->size(); i++)
+	  t->FnDep(i)->adjMaybe(trail, false);
       
       break;
     }

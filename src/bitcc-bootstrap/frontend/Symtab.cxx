@@ -273,7 +273,7 @@ resolve(std::ostream& errStream,
       if(!ast->fqn.isInitialized()) {
 	if (ast->isGlobal()) {
 	  ast->fqn = FQName(env->uocName, ast->s);
-	  ast->Flags |= ID_IS_PRIVATE;	  
+	  ast->Flags |= ID_IS_PRIVATE;
 	}
 	else
 	  ast->fqn = FQName(FQ_NOIF, ast->s);
@@ -1110,15 +1110,19 @@ resolve(std::ostream& errStream,
 	errStream << ast->loc << ": "
 		  << "Cannot import an undefined interface. "
 		  << std::endl;
-
+	
 	errorFree = false;
 	break;
       }
-
+      
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE,
 	      id_interface, NULL, flags);
       ast->child(0)->ifName = ast->child(1)->s;
-    
+      // The interface name must not be exported
+      env->setFlags(ast->child(0)->s,
+		    ((env->getFlags(ast->child(0)->s)) |
+		     BF_PRIVATE)); 
+   
       if(ast->astType == at_import)
 	ast->child(0)->Flags |= ID_IS_IMPORTER;
       else

@@ -440,10 +440,8 @@ public:
   // Wrapper for the above function with the clearAll flag set.
   void clearAllMaybes();
   
-private:
-  void groundMaybe(GCPtr<Trail> trail);
 public:
-  void adjMaybe(GCPtr<Trail> trail);
+  void adjMaybe(GCPtr<Trail> trail, bool minimize=false);
 
   // Get the maximally-mutable, but copy-compatible type.
   GCPtr<Type> maximizeMutability(GCPtr<Trail> trail=new Trail);

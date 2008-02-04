@@ -43,6 +43,7 @@
 #include <libsherpa/CVector.hxx>
 #include "backend.hxx"
 #include "Special.hxx"
+#include "TvPrinter.hxx"
 
 //enum infChoice {inf_hm, inf_eq};
 
@@ -78,6 +79,7 @@ struct Options {
   static GCPtr<CVector<GCPtr<Path> > > libPath;
   static bool Wall; // All Warnings are errors.
   static bool nogc; // no garbage collection mode
+  static GCPtr<TvPrinter> debugTvP;
 };
 
 #endif /* OPTIONS_HXX */

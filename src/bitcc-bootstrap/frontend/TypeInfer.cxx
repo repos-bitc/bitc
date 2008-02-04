@@ -119,7 +119,6 @@ static GCPtr<Type>
 buildFnFromApp(GCPtr<AST> ast, unsigned long uflags)
 {
   assert(ast->astType == at_apply);
-  GCPtr<Type> fn = new Type (ty_fn, ast);
   GCPtr<Type> targ = new Type(ty_fnarg, ast);
   for (size_t i = 1; i < ast->children->size(); i++) {
     GCPtr<Type> argi = MBF(newTvar(ast->child(i)));
@@ -128,10 +127,8 @@ buildFnFromApp(GCPtr<AST> ast, unsigned long uflags)
     targ->components->append(ncomp);
   }
   
-  fn->components->append(new comp(targ));
   GCPtr<Type> ret = MBF(newTvar(ast));
-  fn->components->append(new comp(ret));
-  
+  GCPtr<Type> fn = new Type (ty_fn, ast, targ, ret);
   return fn;
 }
 
@@ -511,16 +508,16 @@ matchDefDecl(std::ostream& errStream,
       GCPtr<Type> argsDef = defT->getBareType()->Args();
       if(argsDecl->components->size() == argsDef->components->size()) {
 	for(size_t c=0; c < argsDecl->components->size(); c++) {	    
-	  GCPtr<Type> argDecl = argsDecl->CompType(c);
-	  GCPtr<Type> argDef = argsDef->CompType(c);
+	  GCPtr<Type> argDecl = argsDecl->CompType(c)->minimizeMutability();
+	  GCPtr<Type> argDef = argsDef->CompType(c)->minimizeMutability();
 	  CHKERR(errorFree, argDecl->strictlyEquals(argDef));
 	}
       }
       else
 	errorFree = false;
       
-      GCPtr<Type> retDecl = declT->getBareType()->Ret();
-      GCPtr<Type> retDef = defT->getBareType()->Ret();
+      GCPtr<Type> retDecl = declT->getBareType()->Ret()->minimizeMutability();
+      GCPtr<Type> retDef = defT->getBareType()->Ret()->minimizeMutability();
       CHKERR(errorFree, retDecl->strictlyEquals(retDef));
     }
     else {
@@ -797,8 +794,6 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
     // match at_ident
     // match agt_type
     GCPtr<AST> ctr = ctrs->child(c);
-    ctr->symType = new Type(ty_tvar, ctr);
-
     GCPtr<AST> ctrId = ctr->child(0);    
     // Careful: 
     // Constructors with components are typed ucon 
@@ -813,8 +808,8 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
     ctrId->symType = new Type(ctrKind, ctrId);
     ctrId->symType->defAst = ctrId;
     ctrId->symType->myContainer = uIdent;
+    ctr->symType = ctrId->symType;
     
-
     for(size_t i = 1; i < ctr->children->size(); i++) {
       GCPtr<AST> field = ctr->child(i);
       TYPEINFER(field, gamma, instEnv, impTypes, isVP, 
@@ -862,8 +857,7 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
     // Don't add ctrSigma to gamma yet. Constructors are 
     // bound at the end of the definition
     ctrId->scheme = ctrSigma;
-
-    ctr->symType->link = ctrId->symType;
+    
     GCPtr<comp> nComp = new comp(ctrId->s, ctrId->symType);
     uIdent->symType->components->append(nComp);
   } 
@@ -2034,9 +2028,9 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       assert(ident->isDecl);
 
       // WAS: newBindType() which had a maybe() around.
-      ast->symType = newTvar(ast);
-      GCPtr<TypeScheme> sigma = new TypeScheme(ast->symType, ast, NULL);
-      ast->scheme = sigma;
+      ident->symType = newTvar(ast);
+      GCPtr<TypeScheme> sigma = new TypeScheme(ident->symType, ident, NULL);
+      ident->scheme = sigma;
       
       TYPEINFER(typ, defGamma, instEnv, impTypes, isVP, newTcc,
 		uflags, trail, USE_MODE, TI_TYP_EXP);
@@ -2248,19 +2242,19 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Type> idType = ident->symType;
       GCPtr<Type> rhsType = ast->child(1)->symType;
 
-      errStream << "At define " << ident->asString() << ":"
-      		<< " LHS = " << idType->asString()
-		<< " RHS = " << rhsType->asString()
-      		<< std::endl;
+      //errStream << "At define " << ident->asString() << ":"
+      //		<< " LHS = " << idType->asString()
+      //		<< " RHS = " << rhsType->asString()
+      //		<< std::endl;
       
       CHKERR(errFree, unify(errStream, trail, ast->child(1), 
 			    ast->child(1)->symType,
 			    MBF(ast->child(0)->symType), uflags));
       
 
-      errStream << "After Unification: " 
-		<< ast->getID()->symType->asString()
-      		<< std::endl;            
+      //errStream << "After Unification: " 
+      //		<< ast->getID()->symType->asString()
+      //		<< std::endl;            
 
       CHKERR(errFree, generalizePat(errStream, ast->loc, 
 				    gamma, instEnv, 
@@ -2268,9 +2262,9 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 				    ast->child(1), 
 				    false, currTcc, NULL, trail));
 
-      errStream << "After Generalization: " 
-		<< ast->getID()->scheme->asString()
-      		<< std::endl << std::endl;
+      // errStream << "After Generalization: " 
+      //		<< ast->getID()->scheme->asString()
+      //		<< std::endl << std::endl;
       
       gamma->mergeBindingsFrom(defGamma);
       
@@ -2293,7 +2287,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
     {
       GCPtr<Environment<TypeScheme> > tmpGamma = gamma->newScope();
       ast->envs.gamma = gamma;
-
+      
       assert(ast->child(0)->envs.gamma);
       assert(ast->child(0)->envs.instEnv);
       
@@ -2302,7 +2296,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       CHKERR(errFree, useIFInsts(errStream, ast->loc, 
 				 ast->child(0)->envs.instEnv, 
 				 instEnv, uflags));
-
+      
       gamma->mergeBindingsFrom(tmpGamma);
       break;
     }
@@ -2955,10 +2949,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       CHKERR(errFree, unify(errStream, trail, ast->child(1), 
 			    ast->child(1)->symType, fnType, uflags));
       
-      /* Get the unified return type so that we can build the 
-	 vector's type */
-      GCPtr<Type> vecElemType = fnType->getBareType()->Base();
-      ast->symType = new Type(ty_vector, ast, MBF(vecElemType));
+      ast->symType = new Type(ty_vector, ast, MBF(ret));
       break;
     }
 
@@ -3402,6 +3393,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
       GCPtr<Type> Fn = buildFnFromApp(ast, uflags);
       GCPtr<Type> expectFn = MBF(Fn);
+
       CHKERR(errFree, unify(errStream, trail, ast->child(0), 
 			    fType, expectFn, uflags));
       
@@ -3410,21 +3402,21 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	break;
       }
       
+      GCPtr<Type> fnArgs = Fn->Args();
       for (size_t i = 0; i < ast->children->size()-1; i++) {
 	GCPtr<AST> arg = ast->child(i+1);
+	GCPtr<Type> fnArg = fnArgs->CompType(i);
 	TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
 	
 	// by-ref arguments need strict compatibality.
 	// by-value arguments can have copy-compatibility.
-	if(Fn->CompFlags(i) & COMP_BYREF)
+	if(fnArgs->CompFlags(i) & COMP_BYREF)
 	  CHKERR(errFree, unify(errStream, trail, ast->child(i+1), 
-				Fn->CompType(i), 
-				ast->child(i)->symType, uflags));
+				fnArg, arg->symType, uflags));
 	else
 	  CHKERR(errFree, unify(errStream, trail, ast->child(i+1), 
-				MBF(Fn->CompType(i)),
-				ast->child(i)->symType, uflags));
+				MBF(fnArg), arg->symType, uflags));
       }
       
       ast->symType = MBF(Fn->Ret());
@@ -3456,7 +3448,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		  << std::endl;
 	errFree = false;	    
 	break;
-      }	 
+      }
       
       if(!ctr->symType) {
 	TYPEINFER(ctr, gamma, instEnv, impTypes, isVP, tcc,
@@ -3487,16 +3479,16 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  break;
       }
 
-      for(size_t i=0, j=0; i < t->components->size(); i++) {
+      for(size_t i=0, j=1; i < t->components->size(); i++) {
 	GCPtr<comp> ctrComp = t->components->elem(i);
 	if(ctrComp->flags & COMP_UNIN_DISCM)
 	  continue;
 	
-	GCPtr<AST> arg = ast->child(j);
+	GCPtr<AST> arg = ast->child(j);	
 	
 	TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail, USE_MODE, TI_COMP2);
-	
+
 	GCPtr<Type> tv = newTvar(arg);
 	CHKERR(errFree, unify(errStream, trail, arg, t->CompType(i),
 			      MBF(tv), uflags)); 
@@ -3515,7 +3507,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       else {
 	ast->symType = t;
       }
-      
+
       //       GCPtr<Type> t1 = new Type(ty_tvar, ast);
       //       if(t->kind == ty_uconr || t->kind == ty_uconv) {
       // 	// Now Form the union value
@@ -4445,7 +4437,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       }
       else {
 	CHKERR(errFree, 
-	       ProcessLetExprs(errStream, lbs, letGamma, instEnv,
+	       ProcessLetBinds(errStream, lbs, letGamma, instEnv,
 			       impTypes, isVP, letTcc, uflags, trail,
 			       REDEF_MODE, TI_COMP2)); 
 	CHKERR(errFree, 

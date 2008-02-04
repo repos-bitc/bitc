@@ -114,8 +114,8 @@ UnifyDecl(std::ostream& errStream,
 
 #ifdef VERBOSE_UNIFY
   std::cout << "UnifyDecl " 
-  	    << t1->asString(NULL) << " and "
-  	    << t2->asString(NULL)
+  	    << t1->asString(Options::debugTvP) << " and "
+  	    << t2->asString(Options::debugTvP)
   	    << std::endl;
 #endif
 
@@ -234,8 +234,8 @@ UnifyUnion(std::ostream& errStream,
 
 #ifdef VERBOSE_UNIFY
   std::cout << "UnifyUnion" 
-  	    << t1->asString(NULL)
-  	    << t2->asString(NULL)
+  	    << t1->asString(Options::debugTvP)
+  	    << t2->asString(Options::debugTvP)
   	    << std::endl;
 #endif
   
@@ -316,8 +316,8 @@ UnifyUcon(std::ostream& errStream,
   
 #ifdef VERBOSE_UNIFY
   std::cout << "UnifyUcon" 
-	    << t1->asString(NULL)
-	    << t2->asString(NULL)
+	    << t1->asString(Options::debugTvP)
+	    << t2->asString(Options::debugTvP)
 	    << std::endl;
 #endif
 
@@ -338,8 +338,8 @@ UnifyUcon(std::ostream& errStream,
   
 //   errStream << "utype = " << utyp->asString() << std::endl;  
 //   errStream << "Result [" << ((errFree)?"true":"false") << "] = " 
-//        << t1->asString(NULL)
-//        << t2->asString(NULL)
+//        << t1->asString(Options::debugTvP)
+//        << t2->asString(Options::debugTvP)
 //        << std::endl;
   
   return errFree;
@@ -356,8 +356,8 @@ UnifyUval(std::ostream& errStream,
   
 #ifdef VERBOSE_UNIFY
   std::cout << "UnifyUval" 
-	    << t1->asString(NULL)
-	    << t2->asString(NULL)
+	    << t1->asString(Options::debugTvP)
+	    << t2->asString(Options::debugTvP)
 	    << std::endl;
 #endif
 
@@ -393,8 +393,8 @@ UnifyUTVC(std::ostream& errStream,
   
 #ifdef VERBOSE_UNIFY
   std::cout << "UnifyUTVC" 
-	    << ut1->asString(NULL) << " and "
-	    << ut2->asString(NULL)
+	    << ut1->asString(Options::debugTvP) << " and "
+	    << ut2->asString(Options::debugTvP)
 	    << std::endl;
 #endif
   
@@ -419,8 +419,8 @@ UnifyUTVC(std::ostream& errStream,
     trail->release(n, ut1);
 
   //   errStream << "Result [" << ((errFree)?"true":"false") << "] = " 
-  // 	    << ut->asString(NULL) << " and "
-  // 	    << uv->asString(NULL)
+  // 	    << ut->asString(Options::debugTvP) << " and "
+  // 	    << uv->asString(Options::debugTvP)
   // 	    << std::endl;
 
   return errFree;
@@ -450,9 +450,9 @@ Unify(std::ostream& errStream,
   
 #ifdef VERBOSE_UNIFY
   std::cout << "Unifier: " 
-  	    << ft->asString()
+  	    << ft->asString(Options::debugTvP)
   	    << " vs " 
-  	    << st->asString()
+  	    << st->asString(Options::debugTvP)
   	    << std::endl;  
 #endif
     
@@ -481,11 +481,14 @@ Unify(std::ostream& errStream,
 	  trail->subst(tv, typ);
 	  RET_UNIFY;
 	}
+      
+      RET_FAIL;
     }
-    else if (t1->kind == ty_mbFull || t2->kind == ty_mbFull) {
+    
+    if (t1->kind == ty_mbFull || t2->kind == ty_mbFull) {
       GCPtr<Type> mb = (t1->kind == ty_mbFull) ? t1 : t2;
       GCPtr<Type> typ = (t1->kind == ty_mbFull) ? t2 : t1;
-
+      
       Unify(errStream, trail, errAst, mb->minimizeMutability(), 
 	    typ->minimizeMutability(), flags);
       
@@ -493,7 +496,8 @@ Unify(std::ostream& errStream,
 	trail->link(mb->Var(), typ);
       return errFree;
     }
-    else if(t1->kind == ty_mbTop || t2->kind == ty_mbTop) {      
+
+    if(t1->kind == ty_mbTop || t2->kind == ty_mbTop) {      
       // ONLY one of the types is a maybe type.
       GCPtr<Type> mb = (t1->kind == ty_mbTop) ? t1 : t2;
       GCPtr<Type> typ = (t1->kind == ty_mbTop) ? t2 : t1;
@@ -506,17 +510,14 @@ Unify(std::ostream& errStream,
 	trail->link(mb->Var(), typ);
       return errFree;
     }
-    else if(t1->isUType() && t2->isUType() && 
+    
+    if(t1->isUType() && t2->isUType() && 
 	    (t1->isRefType() == t2->isRefType())) {
       return UnifyUTVC(errStream, trail, errAst, t1, t2, flags);
     }
-    else {
-      errFree = typeError(errStream, errAst, t1, t2);
-      RET_FAIL;
-    }
     
-    // Must not reach here
-    assert(false);
+    errFree = typeError(errStream, errAst, t1, t2);
+    RET_FAIL;
   }
   
   // Here, t1->kins == t2->kind.
@@ -836,9 +837,9 @@ Unify(std::ostream& errStream,
   
 #ifdef VERBOSE_UNIFY
   errStream << "\t Result: " 
-	    << ft->asString(NULL)
+	    << ft->asString(Options::debugTvP)
 	    << " == " 
-	    << st->asString(NULL)
+	    << st->asString(Options::debugTvP)
 	    << std::endl;  
 #endif
   
@@ -860,7 +861,7 @@ acyclic(std::ostream& errStream,
   GCPtr<Type> t = typ->getType();
   bool errFree = true;
 
-  //std::cout << "Acyclic: Processing: " << t->asString(NULL)
+  //std::cout << "Acyclic: Processing: " << t->asString(Options::debugTvP)
   //	    << std::endl;
   
   if (donelist->contains(t))

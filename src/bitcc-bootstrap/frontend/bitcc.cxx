@@ -61,7 +61,7 @@
 #include "backend.hxx"
 #include "INOstream.hxx"
 #include "Instantiate.hxx"
-
+#include "TvPrinter.hxx"
 using namespace sherpa;
 using namespace std;
 
@@ -96,6 +96,7 @@ std::string Options::outputFileName;
 GCPtr<CVector<GCPtr<Path> > > Options::libPath;
 bool Options::Wall = false;
 bool Options::nogc = false;
+GCPtr<TvPrinter> Options::debugTvP = new TvPrinter;
 
 #define LOPT_SHOWLEX      257   /* Show tokens */
 #define LOPT_SHOWPARSE    258   /* Show parse */
@@ -119,6 +120,7 @@ bool Options::nogc = false;
 #define LOPT_XML_TYPES    276   /* Dump XML types */
 #define LOPT_NOGC         277   /* NO GC mode */
 #define LOPT_NOPRELUDE    278   /* Don't process prelude */
+#define LOPT_DBG_TVARS    279   /* Show globally unqiue tvar naming */
 
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
@@ -134,6 +136,7 @@ struct option longopts[] = {
   { "nostdlib",             0,  0, LOPT_NOSTDLIB },
   { "ppfqns",               0,  0, LOPT_PPFQNS },
   { "raw-tvars",            0,  0, LOPT_RAW_TVARS },
+  { "debug-tvars",          0,  0, LOPT_DBG_TVARS },
   { "show-maybes",          0,  0, LOPT_SHOW_MAYBES },
   { "show-all-tccs",        0,  0, LOPT_SA_TCC },
   { "showlex",              0,  0, LOPT_SHOWLEX },

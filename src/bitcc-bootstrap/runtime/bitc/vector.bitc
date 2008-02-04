@@ -61,6 +61,6 @@
   (define (list->vector lst:(list 'a))
     "Given a list, return a vector of its elements."
     (make-vector (length lst) 
-		  (lambda (n) (ls.list-nth lst n))):(vector 'a))
+		 (lambda (n) (ls.list-nth lst n))):(vector 'a))
 )
 
