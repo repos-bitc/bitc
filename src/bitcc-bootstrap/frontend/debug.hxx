@@ -46,8 +46,8 @@
 
 #define BEG_SIMP_DEBUG    DEBUG_OFF
 #define ILH_DEBUG         DEBUG_OFF // Inst-Lambda-Hoist
-#define INST_DEBUG        DEBUG_ON
-#define INST_ENV_DEBUG    DEBUG_ON
+#define INST_DEBUG        DEBUG_OFF
+#define INST_ENV_DEBUG    DEBUG_OFF
 #define REPR_SIMP_DEBUG   DEBUG_OFF
 #define CLCONV_DEBUG      DEBUG_OFF
 

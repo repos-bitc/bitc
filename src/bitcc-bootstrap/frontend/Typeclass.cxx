@@ -336,21 +336,45 @@ TypeScheme::markRigid(std::ostream &errStream, LexLoc &errLoc)
 }
 
 
-/* Checking satisfiability of Typeclass constraints
-   Here is the algorithm that is presently being used:
-   1) Infer the type
-   2) Generalize the type
-   3) Reduce type-class constraints based on instance declarations 
-   6) If there are unsatisfied fully concrete type-classes 
-      constraints, report an error.
-   4) Check for ambiguity
-   5) If there is an ambiguous condition:
-      For each such ambiguous predicate:
-        If the ambiguious type-var appears by itself in the 
-	constraint report ambiguity error.
-	Otherwise, report "No instance found error" 
-*/
+/**********************************************************
+                   THE Constraint solver 
+
+    The input is a set of constraints, which the solver tries to solve
+    based on pre-defined rules or known instances. It returns the set
+    of residual constraints that:
+      -- are known to be solvable
+      -- do not constain only concrete types
  
+    The predicate solver is a unification based algorthm
+    here are the steps to follow:
+    1) Handle special prediactes like copy-compat, ref-types
+       as though apropriate instances are present.
+    2) Handle the polymorphic constraint as a special case: 
+       If we find a constraint
+          2.a) c = *(m, t, t1) then Unify(t = t1), c is satisfied
+          2.b) c = *(p, t, t1) | Immutable(t1), then c is satisfied
+          2.c) c = *(k, t, t1) | mutable(t1), then k = m
+          2.d) c1 = *(k, t, t1) and c2 = *(k, t, t2) | ~Unify(t1 = t2)
+                   then k = p.
+          2.e) c = *(k, t, t1) | Immut(t1), keep the constraint
+          2.f) c = *(p, t, t1) | ~Immutable(t1) then error
+    3) If there exists a constraint such that c = T(t1,...,tm, ... tn),
+       where types tm+1 ... tn are determined by functional
+       dependencies, 
+       3.a) If t1 != ... != tm != 'a for any 'a, 
+              If there exists a unifying instance I, then Unify(c=I)
+              else fail.
+       3.b) Otherwise, 
+               If there is a unifying instance I, keep the constraint
+                  as is (do not unify)
+               Else fail.
+    4) If there exists two constraints such that 
+             c1 = T(t1,...,tm, ... tn), and
+             c2 = T(t1',...,tm', ... tn'), 
+       where types tm+1 ... tn, tm+1' ... tn' are determined by
+       functional dependencies, Unify(c1 = c2).
+
+ *********************************************************/
 
 bool
 TypeScheme::solvePredicates(std::ostream &errStream,

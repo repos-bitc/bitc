@@ -268,11 +268,48 @@ bool isExpansive(std::ostream& errStream,
 		 GCPtr<Type> typ);
 
 
-/* THE Type Generalizer */
 
-// The generalizer.
-// Returns true if all free-type-variables could be completely
-// generalized, false otherwise.
+/**********************************************************
+                   THE Type Generalizer 
+
+   The generalizer returns true if all free-type-variables could be
+   completely generalized, false otherwise.
+
+   Here is the Type generalization algorithm:
+   Input is a type t and a set of constraints C, wrt to 
+   the current let expression let(k) x = e in ...
+
+   1) Add the polymorphic instantiation constraint *(k, t, t) to C
+
+   2) Solve predicates: let (t', C') = SolvePredicates(C)
+      The constraint set C' contains residual constraints. It cannot
+      contain any constraints over concrete types.
+
+   3) Determine the set of generalizable type variables:
+      'a* = (FTVS(t') U FTVS(C')) \ FTVS(gamma)
+
+   4) Check for value restriction: 
+      exp = isExpansive(e) || isExpansive(t')
+
+   5) If expansive, remove the set of non-generalizable type
+      variables from 'a*.
+      let 'b* = 'a* \ remove-restricted('a*)
+      Here, we follow Ocaml-like relaxed-value restriction
+      rule. Otherwise, {'b*} = {}
+
+   6) Migrate appropriate constraints to parent's TCC, if one exists
+      let C'' = migrate(parent-sigma, C')
+      --> Constraints purely over monomorphic type variables can be
+          migrated to the containing scope.
+
+   7) Check for ambiguous types. If there exists a 'a such that 
+      'a in {'b*} and 'a in FTVS(C'') and 'a not in FTVS(t'), then the
+      type is ambiguous. 
+    
+   4) The generalized type is forall 'b*, t' \ C''
+
+ *********************************************************/
+
 bool
 TypeScheme::generalize(std::ostream& errStream, 
 		       LexLoc &errLoc,
@@ -295,6 +332,8 @@ TypeScheme::generalize(std::ostream& errStream,
 // 	    << asString(NULL) << std::endl;
 //   std::cerr << "After Adjustment : " 
 // 	    << asString(NULL) << std::endl;
+  
+  
 
   collectftvs(gamma);
   

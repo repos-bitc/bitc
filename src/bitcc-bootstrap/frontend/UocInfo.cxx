@@ -306,10 +306,10 @@ UocInfo::Compile()
     if (Options::showPasses)
       std::cerr << uocName << " PASS " << passInfo[i].name << std::endl;
     
-    std::cout << "Now performing "
-    	      << passInfo[i].descrip
-    	      << " on " << path->asString()
-    	      << std::endl;
+    //std::cout << "Now performing "
+    //	      << passInfo[i].descrip
+    //	      << " on " << path->asString()
+    //	      << std::endl;
     
     bool showTypes = false;
     

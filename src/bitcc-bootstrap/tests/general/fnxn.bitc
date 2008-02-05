@@ -1,51 +1,7 @@
-;(define f (lambda (x) x))
-;(define g (set! f f))
-
-;(defstruct (pr 'a 'b) fst:'a snd:'b)
-
-;(define p1 (pr #t #\t))
-;(define pf p1.fst) 
-;(define p2 p1)
-
-;(define mb:(mutable bool) #t)
-;(define T1 (if #t #t mb))
-;(define T2 (if #t (dup #t) (dup mb)))
-;(define T3 (if #t (dup #t):(ref bool) (dup mb):(ref (mutable bool))))
-
-;(define A (array #t #f #t #f))
-;(define B (array-nth A 0))
-;(define C (array-length A))
-
-(defunion (list 'a) nil (cons car:'a cdr:(list 'a)))
-
-;(define (vector->list vec)
-;  (define (subvector->list vec pos len) ())
-;  (subvector->list vec 0 (vector-length vec)))
-
-(define (> a b) #t)
-(define (== a b) #t)
-(define (+ a b) a)
-
-(define (vector->list vec)
- (define (subvector->list vec pos len)
-   (cond ((> pos len)	nil)
-	  ((== pos len) nil)
-	  (otherwise
-	   (cons (vector-nth vec pos)
-		 (subvector->list vec (+ pos 1) len)))))
- (subvector->list vec 0 (vector-length vec)))
-
-
-
-
-
-;(provide main bitc.main)
-;(define main.main:(fn ((vector string)) int32) 
-;  (lambda (argvec) 0:int32)) 
+(provide main bitc.main)
+(define main.main:(fn ((vector string)) int32) 
+  (lambda (argvec) 0:int32)) 
 
 ;; Cyclic type
 ;;(define f (lambda (x) f))
 
-;(define f1 #t)
-;(define g1 (if #t 1 0))
-;(define err (if #t f1 0))
