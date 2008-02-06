@@ -67,10 +67,10 @@ struct TypeScheme : public Countable {
   //trivial_TypeScheme
   TypeScheme(GCPtr<Type> ty,
       GCPtr<TCConstraints> _tcc = NULL);
-
+  
   TypeScheme(GCPtr<Type> ty, GCPtr<AST> ast,
 	     GCPtr<TCConstraints> _tcc = NULL);
-
+  
   // The generalizer
   bool generalize(std::ostream& errStream,
 		  LexLoc &errLoc,
@@ -82,52 +82,43 @@ struct TypeScheme : public Countable {
 		  const bool topLevel,
 		  const bool VRIsError,
 		  const bool mustSolve);
-
+  
   // The function that actually makes a copy of the 
   // contained type. This function calls TypeSpecialize.
   // This function is called by type_instance()
   // and getDCopy() function in Type class.
   GCPtr<Type> type_instance_copy() const;
-
+  
   // Type Instance, if there are no ftvs, returns the original tau  
   GCPtr<Type> type_instance() const;
   
   // Type scheme's instance (including TC constraints)
   GCPtr<TypeScheme> ts_instance() const;
   GCPtr<TypeScheme> ts_instance_copy() const;
-
+  
   // Read carefully:
   // Appends constraints that corrrespond to at least one
   // free variable in this scheme's ftvs to _tcc
   void addConstraints(GCPtr<TCConstraints> _tcc) const;
   // or ones that correspond to any of the added predicates
   void TransAddConstraints(GCPtr<TCConstraints> _tcc) const;
-
+  
   //GCPtr<Type> type_copy();
   std::string asString(GCPtr<TvPrinter> tvP = new TvPrinter) const;
   void asXML(GCPtr<TvPrinter> tvP, INOstream &out) const;
   std::string asXML(GCPtr<TvPrinter> tvP = new TvPrinter) const;
-
-  // Collect all tvs wrt tau, and tcc->pored, but NOT tcc->fnDeps
+  
+  // Collect all tvs wrt tau, and tcc->pred, but NOT tcc->fnDeps
   void collectAllFtvs();
   void collectftvs(GCPtr<const Environment<TypeScheme> > gamma);
-
+  
   bool solvePredicates(std::ostream &errStream,
 		       LexLoc &errLoc,
 		       GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv);  
+  bool checkAmbiguity(std::ostream &errStream, LexLoc &errLoc);
+  bool migratePredicates(GCPtr<TCConstraints> parentTCC);    
 
-  /* Note this is different from adjMaybe method in Type struct.
-     This function calls that function on `tau' and calls 
-     clearHints on all predicates 
-     (by calling clearHintsOnPreds method of `tcc') */
-  void adjMaybes(GCPtr<Trail> trail);
-
-private:
-  void markRigid(std::ostream &errStream, LexLoc &errLoc);
-
-public:
   /* FIX: THIS MUST NEVER BE USED IN lhs OF ASSIGNMENT! */
-
   /* PUBLIC Accessors (Convenience Forms) */
   GCPtr<Type> & Ftv(size_t i)
   {

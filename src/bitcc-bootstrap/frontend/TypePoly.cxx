@@ -306,7 +306,7 @@ bool isExpansive(std::ostream& errStream,
       'a in {'b*} and 'a in FTVS(C'') and 'a not in FTVS(t'), then the
       type is ambiguous. 
     
-   4) The generalized type is forall 'b*, t' \ C''
+   8) The generalized type is forall 'b*, t' \ C''
 
  *********************************************************/
 
@@ -325,143 +325,73 @@ TypeScheme::generalize(std::ostream& errStream,
 {
   bool errFree = true;
 
-//   std::cerr << "At " << errLoc
-// 	    << "RHS = " << expr->asString() 
-// 	    << ": " << std::endl;
-//   std::cerr << "\tBefore Adjustment : " 
-// 	    << asString(NULL) << std::endl;
-//   std::cerr << "After Adjustment : " 
-// 	    << asString(NULL) << std::endl;
-  
+#ifdef VERBOSE  
+  errStream << "[0] To Generalize " 
+	    << asString(Options::debugTvP)
+	    << " for expression "
+	    << expr->asString() 
+	    << std::endl;
+#endif
+
+  // Step 1
+  GCPtr<Type> pcst = new Constraint(ty_pcst, tau->ast, 
+				    new Type(ty_kvar, tau->ast),
+				    tau, tau);
   
 
+#ifdef VERBOSE  
+  errStream << "[1] With Pcst: " 
+	    << asString(Options::debugTvP)
+	    << std::endl;
+#endif
+
+
+  // Step 2
+  if(mustSolve && (tcc))
+    CHKERR(errFree, solvePredicates(errStream, 
+				    errLoc, instEnv));  
+
+#ifdef VERBOSE  
+  errStream << "[2] Solve: " 
+	    << asString(Options::debugTvP)
+	    << std::endl;
+#endif
+  
+  // Step 3
   collectftvs(gamma);
   
 #ifdef VERBOSE  
-  errStream << "RHS = " << expr->asString() 
-	    << ": " << std::endl;
-  errStream << "\tBefore restriction : " 
-	    << asString() << std::endl;
+  errStream << "[3] CollectFtvs: " 
+	    << asString(Options::debugTvP)
+	    << std::endl;
 #endif
-    
-  assert(expr);
   
+  // Step 4
   bool exprExpansive = isExpansive(errStream, gamma, expr);
   bool typExpansive = isExpansive(errStream, gamma, tau);
   bool fullyGeneral = true;
 #ifdef VERBOSE  
-  
   if(exprExpansive)
-    errStream << expr->asString() << " is expansive"
+    errStream << "[5] " << expr->asString() 
+	      << " is expansive"
 	      << std::endl;
 
   if(typExpansive)
-    errStream << tau->asString() << "is expansive"
+    errStream << "[5] " << tau->asString(Options::debugTvP) 
+	      << "is expansive"
 	      << std::endl;
 #endif
 
+  // Step 5
   GCPtr<CVector<GCPtr<Type> > > removedFtvs = 
     new CVector<GCPtr<Type> >;
-  
   if(exprExpansive || typExpansive) 
     tau->removeRestricted(ftvs, false, removedFtvs);
-
-  /* There are several cases to consider here:
-
-  For each predicate p in type scheme s for type t,
-  Suppose FTV()s are free type variables and 
-          F()s are generalizable type variables,
-
-  1) If FTV(p) = 0 The prediate is concrete, and must be solved at
-     this step
-
-  2) If FTVS(p) C= FTVS(gamma) 
-     
-     This implies that FTVS(p) ^ F(s) = 0. This is a predicate over
-     monomorphic variables (and possibly concrete types). Therefore,
-     it can be  promoted to the containing let's scheme.
-
-     Example:  (define (fnxn x) (let ((y (== x 0))) ... )) 
-	
-
-  3) If FTVS(p) ^ F(s) = 0 and
-        FTVS(p) ^ FTVS(gamma) = 0
-
-     This predicate consists only of value-restricted variables.
-     Similar to the previous case, this predicate can be promoted to
-     the containing let.
-
-     Example:  (let ((y:(mutable 'a) 0)) ... )) 
-
-  4) FTVS(p) C= F(s)
-     There is nothing to solve, except that we must not generalize all
-     functionally dependent variables and check for ambiguities
-     (that is, ensure  FTVS(p) ^ F(s) C= FTVS(tau) )
-     This step is handled by the solver, and must be handled at this let.
-
-  5) The type variables are a combination of all of the above.
-     That is, predicate contains some generalizable and bound
-     typevariables. This predicate will have to be solved in this
-     case, which might result in concretization of some bound
-     variables due to unification with instances. The solver handles
-     this case */
-
-  if(parentTCC) {      
-    GCPtr<CVector<GCPtr<Typeclass> > > newPred =
-      new CVector<GCPtr<Typeclass> >;
-    
-    for(size_t i=0; i < tcc->pred->size(); i++) {
-      // For each predicate in this constraint set,
-      // Check or cases 2 and3 above.
-      GCPtr<Typeclass> pred = tcc->Pred(i)->getType();
-      GCPtr< CVector< GCPtr<Type> > > allFtvs = new CVector<GCPtr<Type> >;
-      pred->collectAllftvs(allFtvs);
-      
-      // Concrete predicate case
-      if(allFtvs->size() == 0) {
-	newPred->append(pred);	
-	continue;
-      }
-      
-      // At most one of the following must be ultimately true (after
-      // the following loop. We know that there is at least one type
-      // variable (generalized, restricted, or bound in the
-      // environmint) in this predicate at this stage.
-      bool allRemoved = true;
-      bool allBound = true;
-      
-      for(size_t j=0; j < allFtvs->size(); j++) {
-	GCPtr<Type> ftv = allFtvs->elem(j)->getType();
-	
-	if(!removedFtvs->contains(ftv))
-	  allRemoved = false;
-
-	if(!ftv->boundInGamma(gamma))
-	  allBound = false;	
-      }
-      
-      if(allRemoved || allBound) {
-	assert(!(allRemoved && allBound));
-	parentTCC->pred->append(pred);	
-      }
-      else
-	newPred->append(pred);
-    }
-    tcc->pred = newPred;
-  }
-  
-
-  //for(size_t i=0; i < ftvs->size(); i++) {
-  // GCPtr<Type> ftv = Ftv(i)->getType();
-  // ftv->flags &= ~TY_RESTRICTED;
-  //}
   
   if(removedFtvs->size()) 
     fullyGeneral = false;
-
-
+  
   if (topLevel && !fullyGeneral) {
-
     for(size_t i=0; i < removedFtvs->size(); i++) {
       GCPtr<Type> ftv = (*removedFtvs)[i]->getType();
       if(ftv->kind == ty_tvar)
@@ -481,21 +411,31 @@ TypeScheme::generalize(std::ostream& errStream,
       errFree = false;
   }
 
-  if(mustSolve && (tcc))
-    CHKERR(errFree, solvePredicates(errStream, 
-				    errLoc, instEnv));  
-  
-  //if(topLevel)
-  //  for(size_t i=0; i < removedFtvs->size(); i++) {
-  //    GCPtr<Type> ftv = removedFtvs[i]->getType();
-  //    if(ftv->kind == ty_tvar)
-  //	  ftv->link = new Type(ty_dummy, ftv->ast);
-  //  } 
+#ifdef VERBOSE  
+  errStream << "[5] Value Restriction: " 
+	    << asString(Options::debugTvP)
+	    << std::endl;
+#endif
+
+  // Step 6
+  migratePredicates(parentTCC);
   
 #ifdef VERBOSE  
-  errStream << "\tAfter restriction, solve : " 
-	    << asString() << std::endl;
+  errStream << "[6] Migrated Constraints: " 
+	    << asString(Options::debugTvP)
+	    << std::endl;
 #endif
+  
+  // Step 7
+  CHKERR(errFree, checkAmbiguity(errStream, errLoc));
+
+  // Step 8
+#ifdef VERBOSE  
+  errStream << "FINAL: " 
+	    << asString(Options::debugTvP)
+	    << std::endl;
+#endif
+
   
   return errFree;
 } 

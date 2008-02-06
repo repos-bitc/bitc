@@ -322,6 +322,7 @@ public:
   bool isbool();
   bool isFloat();
   bool isTypeClass();
+  bool isPcst();
   bool isOfInfiniteType();
   size_t nBits();
   bool needsCaptureConversion();
@@ -490,8 +491,6 @@ public:
 
   /* Typeclass special */
   bool addFnDep(GCPtr<Type> tc);
-  bool TCCspecialized();
-  bool TCCconcrete(GCPtr<CVector<GCPtr<Type> > > ftvs);
 
   /* PUBLIC Accessors (Conveniecnce Forms) */
   //Accessing Type Arguments and Components

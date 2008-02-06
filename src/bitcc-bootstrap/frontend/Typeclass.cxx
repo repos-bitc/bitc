@@ -158,41 +158,198 @@ Typeclass::addFnDep(GCPtr<Type> dep)
   return true;
 }
 
-
-bool
-Typeclass::TCCconcrete(GCPtr<CVector<GCPtr<Type> > > ftvs)
+/* Check if a type scheme s = forall 'a*. t\C is ambiguous.
+   If there exists a 'a such that 
+      'a in {'a*}, 
+      'a in FTVS(C) and 
+      'a not in FTVS(t')
+    then s is ambiguous. */
+bool 
+TypeScheme::checkAmbiguity(std::ostream &errStream, LexLoc &errLoc)
 {
-  GCPtr<Type> t = getType();
-  GCPtr<CVector<GCPtr<Type> > > tvs = new CVector<GCPtr<Type> >;
-  t->collectAllftvs(tvs);
-
-  // The real loop to be written here is :
-  //for(size_t i=0; i < tvs->size(); i++)
-  //  if(ftvs.contains(tvs->elem(i)))
-  //    return false;
-  //
-  // However, we cannot gurantee that ftvs contains getType()s
-  // Therefore we write it (equivalently) as:
-
-  for(size_t i=0; i < ftvs->size(); i++) {
-    GCPtr<Type> ftv = ftvs->elem(i)->getType();
-    if(tvs->contains(ftv))
-      return false;
+  bool errFree =true;
+  for(size_t j=0; j < ftvs->size(); j++) {
+    GCPtr<Type> ftv = ftvs->elem(j);
+    
+    if(!tau->boundInType(ftv) && pred->boundInType(ftv)) {
+      // ftv must be bound in some predicate.
+      errFree = false;
+      break;
+    }
   }
   
-  //   std::cout << "Predicate: "
-  //   	    << t->asString(NULL) 
-  //   	    << "is Concrete."
-  //   	    << std::endl;
+  if(!errFree)
+    errStream << errLoc << ": "
+	      << "Ambiguous type definition:"
+	      << asString()
+	      << std::endl;
+  return errFree;
+}
+
+/* Migrate appropriate constraints to parent's TCC, if one exists
+   let C'' = migrate(parent-sigma, C')
+      --> Constraints purely over monomorphic type variables can be
+          migrated to the containing scope.
+   
+  This function returns true if at least one predicate was migrated to
+  the containing scope, false otherwise. 
+
+  Suppose the current tye scheme s = forall 'a*.t\C
+
+  For each predicate p in C,
+
+  1) FTV(p) = 0 CANNOT HAPPEN. The prediate is concrete, and must be
+     have been solved at this step.
+
+  2) If FTVS(p) intersection 'a* = {}, then this predicate can be
+     migrated. 
+*/
+
+
+bool
+TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
+{
+  if(!parentTCC)
+    return false;
   
-  //   std::cout << "\t ftvs are: ";
-  //   for(size_t i=0; i < ftvs->size(); i++)
-  //     std::cout << ftvs->elem(i)->asString(NULL) << " ";
-  //   std::cout << std::endl;  
-  return true;
+  bool migrated = false;
+  GCPtr<CVector<GCPtr<Typeclass> > > newPred =
+    new CVector<GCPtr<Typeclass> >;
+  
+  for(size_t i=0; i < tcc->pred->size(); i++) {
+    GCPtr<Typeclass> pred = tcc->Pred(i)->getType();
+    GCPtr< CVector< GCPtr<Type> > > allFtvs = new CVector<GCPtr<Type> >;
+    pred->collectAllftvs(allFtvs);
+    
+    assert(allFtvs->size() != 0);
+    
+    bool hasFtv = false;
+    for(size_t j=0; j < allFtvs->size(); j++) {
+      GCPtr<Type> ftv = allFtvs->elem(j)->getType();
+      
+      if(ftvs->contains(ftv)) {
+	hasFtv = true;
+	break;
+      }
+    }
+    
+    if(hasFtv) {
+      newpred->append(pred);
+    }
+    else {
+      parentTcc->addPred(pred);
+      migrated = true;
+    }
+  }
+    
+  tcc->pred = newPred;
+  return migrated;
 }
 
 //#define VERBOSE_SOLVE
+
+static bool
+mustSolve(GCPtr<Typeclass> t)
+{
+  t = getType();
+  GCPtr< CVector< GCPtr<Type> > > args = new CVector< GCPtr<Type> >;
+  
+  for(size_t i=0; i < t->typeArgs->size(); i++)
+    args->append(t->TypeArg(i));
+  
+  if(pred->fnDeps)
+    for(size_t fd = 0; fd < t->fnDeps->size(); fd++) {
+      GCPtr<Type> fdep = t->FnDep(fd);
+      GCPtr<Type> ret = fdep->Ret();
+      
+      GCPtr< CVector< GCPtr<Type> > > newArgs = 
+	new CVector< GCPtr<Type> >;
+      
+      for(size_t i=0; i < args->size(); i++)
+	if((*args)[i]->getType() != ret->getType())
+	  newArgs->append((*args)[i]);
+      
+      args = newArgs;
+    }
+  
+  for(size_t i=0; i < args->size(); i++) {
+    GCPtr<Type> arg = (*args)[i]->getType();
+    if(arg->kind == ty_tvar || 
+       arg->kind == ty_mbTop || arg->kind == ty_mbFull)
+      return false;
+  }
+
+  return true;
+}
+
+bool
+handlePcst(bool &errFree, std::ostream &errStream,
+	   GCPtr<Constraint> ct, 
+	   GCPtr<Constraints> caset, 
+	   bool &handled)
+{
+  GCPtr<Type> k = ct->CompType(0)->getType();
+  GCPtr<Type> gen = ct->CompType(1)->getType();
+  GCPtr<Type> ins = ct->CompType(2)->getType();
+
+
+  // *(m, tg, ti)
+  if(k == Type::Kmono) {
+    cset->clearPred(ct);
+    handled = true;
+    return ins->unifyWith(gen) ;
+  }
+
+  if (k == Type::Kpoly) {
+    
+    // *(p, tg, ti), Immutable(ti)
+    if(ins->isDeepImmutable()) {
+      cset->clearPred(ct);
+      handled = true;
+      return true;
+    }
+
+    // *(p, tg, ti), ~Immut(ti) (type variables OK here)
+    if (!ins->isDeepImmut()) {
+      cset->clearPred(ct);
+      handled = true;
+      return false;
+    }
+    
+    // *(p, tg, ti), Immut(ti), ~Immutable(ti)
+    handled = false;
+    return true;
+  }
+  
+  assert(k->kind == ty_kvar);
+  
+  // *(k, tg, ti), Mut(ti)
+  if(ins->isDeepMut()) {
+    trail->subst(k, Type::Kmono);
+    handled = true;
+    return true;
+  }
+
+  /* U(*(k, tg, ti), *(k, tg, ti')), ti !=~= ti' */
+  for(size_t c=0; c < cset->size(); c++) {
+    GCPtr<Constraint> newCt = cset->Pred(c)->getType();
+    if(newCt == ct)
+      continue;
+    
+    if(newCt->isPcst() && newCt->CompType(0) == k) {
+      GCPtr<Type> newIns = newCt->CompType(1);
+      if(!ins->unifyWith(newIns)) {
+	trail->subst(k, Type::Kpoly);
+	handled = true;
+	return true;
+      }
+    }
+  }
+  
+  handled = false;
+  return true;
+}
+
 static GCPtr<TypeScheme> 
 handleSpecialPred(bool &errFree, std::ostream &errStream,
 		  GCPtr<Typeclass> pred, bool &handled)
@@ -212,40 +369,10 @@ handleSpecialPred(bool &errFree, std::ostream &errStream,
       return NULL;
   }
   
-  const std::string& copy_compat =
-    SpecialNames::spNames.sp_copy_compat;   
-  if(pred->defAst->s == copy_compat) {
-    handled = true;
-    assert(pred->typeArgs->size() == 2);
-    GCPtr<Type> t1 = pred->TypeArg(0)->getType();    
-    GCPtr<Type> t2 = pred->TypeArg(1)->getType();    
-
-    if(t1 == t2)
-      return sTS;
-
-    if(t1->copy_compatible_compat(t2)) {
-      if(t1->isConcrete() && t2->isConcrete())
-	return sTS;
-      
-      if(t1->allTvarsRigid() && t2->allTvarsRigid())
-	if(t1->copy_compatible_eql(t2))
-	  return sTS;
-      
-      return NULL;
-    }
-    else {
-      errStream << pred->ast->loc << ": "
-		<< "Unsolvable copy-compatibility constraint: "
-		<< pred->asString()
-		<< std::endl;
-      errFree = false;
-      return NULL;
-    }
-  }
-  
   handled = false;
   return NULL;
 }
+
 
 static GCPtr<TypeScheme> 
 findInstance(bool &errFree, std::ostream &errStream,
@@ -295,47 +422,6 @@ unifyWithInstance(std::ostream &errStream,
     }
 }
 
-void 
-TypeScheme::markRigid(std::ostream &errStream, LexLoc &errLoc)
-{
-  //  tvs that are determined by fnDeps
-  GCPtr< CVector<GCPtr<Type> > > det = new CVector<GCPtr<Type> >; 
-
-  // Mark all free Type variables as rigid
-#ifdef VERBOSE_SOLVE
-  Options::showAllTccs = true;
-  errStream << errLoc << ": In " << asString(NULL) 
-	    << " {" << tau->asString(NULL) << "} "
-	    << " marking: ";
-  Options::showAllTccs = false;
-#endif
-
-  for(size_t i=0; i < tcc->pred->size(); i++) {
-    GCPtr<Typeclass> pred = tcc->Pred(i);
-    
-    if(pred->fnDeps)
-      for(size_t fd = 0; fd < pred->fnDeps->size(); fd++) {
-	GCPtr<Type> fndom = pred->FnDep(fd)->Args();
-	fndom->collectAllftvs(det);
-      }
-  } 
-  
-  for(size_t i=0; i < ftvs->size(); i++) {
-    GCPtr<Type> ftv = ftvs->elem(i)->getType();
-    
-    if(!det->contains(ftv)) {
-      ftv->flags |= TY_RIGID;
-#ifdef VERBOSE_SOLVE
-    errStream << ftv->asString(NULL) << " ";
-#endif
-    }
-  }
-#ifdef VERBOSE_SOLVE
-  errStream << std::endl;
-#endif  
-}
-
-
 /**********************************************************
                    THE Constraint solver 
 
@@ -347,8 +433,9 @@ TypeScheme::markRigid(std::ostream &errStream, LexLoc &errLoc)
  
     The predicate solver is a unification based algorthm
     here are the steps to follow:
-    1) Handle special prediactes like copy-compat, ref-types
-       as though apropriate instances are present.
+    1) Handle special prediactes like ref-types as though apropriate
+       instances are present. 
+
     2) Handle the polymorphic constraint as a special case: 
        If we find a constraint
           2.a) c = *(m, t, t1) then Unify(t = t1), c is satisfied
@@ -358,16 +445,31 @@ TypeScheme::markRigid(std::ostream &errStream, LexLoc &errLoc)
                    then k = p.
           2.e) c = *(k, t, t1) | Immut(t1), keep the constraint
           2.f) c = *(p, t, t1) | ~Immutable(t1) then error
+
     3) If there exists a constraint such that c = T(t1,...,tm, ... tn),
        where types tm+1 ... tn are determined by functional
        dependencies, 
+
        3.a) If t1 != ... != tm != 'a for any 'a, 
-              If there exists a unifying instance I, then Unify(c=I)
-              else fail.
-       3.b) Otherwise, 
-               If there is a unifying instance I, keep the constraint
-                  as is (do not unify)
-               Else fail.
+              If there exists a unifying instance I, then Unify(c=I).
+                 The constraint c is declared satisfied.
+              Else fail.
+
+       3.b) Otherwise, let {tm*} <= {t1, ..., tm} be type variables. 
+
+            3.b.i) If there exists a unifying instance I, such that 
+                      the unification Unify(c=I) succeeds when {tm*} 
+                      are held rigid, then Unify(c=I).
+                      the constraint c is declared satisfied.
+
+           3.b.ii) Otherwise, 
+                   If there is a unifying instance I, keep
+                      the constraint as is (do not unify)
+                   Else fail.
+
+       In this case, maybe types aer considered constrained type
+       variables. That is, T('a|t) === T('a) | copy-compat('a, t).
+
     4) If there exists two constraints such that 
              c1 = T(t1,...,tm, ... tn), and
              c2 = T(t1',...,tm', ... tn'), 
@@ -385,12 +487,12 @@ TypeScheme::solvePredicates(std::ostream &errStream,
   bool errFree = true;
   bool unifiedWithInstInThisPass = false;
   GCPtr<TCConstraints> removedTcc = new TCConstraints;
-
+  
   markRigid(errStream, errLoc);
-    
+  
 #ifdef VERBOSE_SOLVE
   errStream << std::endl;
-
+  
   errStream << "Starting: " << this->asString(NULL)
 	    << std::endl;
 #endif
@@ -441,44 +543,8 @@ TypeScheme::solvePredicates(std::ostream &errStream,
     }
   } while(unifiedWithInstInThisPass);
 
-  for(size_t i=0; i < tcc->pred->size(); i++) {
-    GCPtr<Typeclass> pred = tcc->Pred(i);
-    enum { pred_noerror, 
-	   pred_ambiguousType, 
-	   pred_noInstance } errType = pred_noerror; 	    
-    
-    // If this predicate is fully concrete, and we don't have an
-    // instance to solve it, it is definitely an error.
-    if(pred->TCCconcrete(ftvs)) {
-      errType = pred_noInstance;
-    }
-    else {      
-      for(size_t j=0; j < ftvs->size(); j++) {
-	GCPtr<Type> ftv = ftvs->elem(j);
-	
-	if(!tau->boundInType(ftv) && pred->boundInType(ftv)) {
-	  for(size_t k=0; ((errType != pred_noerror) && 
-			   (k < pred->typeArgs->size())); k++) {
-	    GCPtr<Type> arg = pred->TypeArg(k)->getType();
-	    if(arg == ftv)
-	      errType = pred_ambiguousType;
-	  }
-	  
-	  if(errType == pred_noerror)
-	    errType = pred_noInstance; 	  
-	  break;
-	}
-      }
-      /* At the end of this loop, if no such variable is found,
-	 there is no error */
-    }
 
-    switch(errType) {
-    case pred_noerror:
-      /* good */
-      break;
-
-    case pred_noInstance:
+  ///// Continue
       errStream << errLoc << ": "
 		<< "No Instance found for "
 		<< pred->asString() 
@@ -486,17 +552,6 @@ TypeScheme::solvePredicates(std::ostream &errStream,
 		<< std::endl; 
 
       errFree = false;
-      break;
-      
-    case pred_ambiguousType:
-      errStream << errLoc << ": "
-		<< "Ambiguous type definition:"
-		<< asString()
-		<< std::endl;
-      errFree = false;
-      break;
-    }
-  }
 
 #ifdef VERBOSE_SOLVE
   errStream << "  - - - - - - - - - - - - - - - " 
@@ -505,4 +560,48 @@ TypeScheme::solvePredicates(std::ostream &errStream,
 #endif
   return errFree;
 }
+
+
+#if 0
+void 
+TypeScheme::markRigid(std::ostream &errStream, LexLoc &errLoc)
+{
+  //  tvs that are determined by fnDeps
+  GCPtr< CVector<GCPtr<Type> > > det = new CVector<GCPtr<Type> >; 
+
+  // Mark all free Type variables as rigid
+#ifdef VERBOSE_SOLVE
+  Options::showAllTccs = true;
+  errStream << errLoc << ": In " << asString(NULL) 
+	    << " {" << tau->asString(NULL) << "} "
+	    << " marking: ";
+  Options::showAllTccs = false;
+#endif
+
+  for(size_t i=0; i < tcc->pred->size(); i++) {
+    GCPtr<Typeclass> pred = tcc->Pred(i);
+
+    
+    if(pred->fnDeps)
+      for(size_t fd = 0; fd < pred->fnDeps->size(); fd++) {
+	GCPtr<Type> fndom = pred->FnDep(fd)->Args();
+	fndom->collectAllftvs(det);
+      }
+  } 
+  
+  for(size_t i=0; i < ftvs->size(); i++) {
+    GCPtr<Type> ftv = ftvs->elem(i)->getType();
+    
+    if(!det->contains(ftv)) {
+      ftv->flags |= TY_RIGID;
+#ifdef VERBOSE_SOLVE
+    errStream << ftv->asString(NULL) << " ";
+#endif
+    }
+  }
+#ifdef VERBOSE_SOLVE
+  errStream << std::endl;
+#endif  
+}
+#endif
 

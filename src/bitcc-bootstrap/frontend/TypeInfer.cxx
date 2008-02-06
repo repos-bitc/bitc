@@ -2111,14 +2111,14 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       TYPEINFER(tcIdent, gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail, USE_MODE, 
 		flags | TI_TYP_EXP | TI_TYP_APP);
-      GCPtr<Typeclass> tc = tcIdent->symType->getType();
+      GCPtr<Typeclass> tc = tcIdent->symType->getType();      
 
       if(tc->kind != ty_typeclass) {
 	// This is the result of some other error
 	errFree = false;
 	break;
       }
-      
+
       if(tc->typeArgs->size() == (ast->children->size() - 1)) {
 	for(size_t i = 1; i < ast->children->size(); i++) {
 	  TYPEINFER(ast->child(i), gamma, instEnv, impTypes, isVP, tcc,
@@ -2138,6 +2138,26 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		  << " args, but is here applied to "
 		  << (ast->children->size() - 1) << "."
 		  << std::endl;
+      }
+
+
+      /* Special Handling for the copy-compatibility constraint 
+         The copy-compat type-class constraint is transformed into a
+         unification constraint using maybe-types, and the constraint
+         is immediately eliminated as solved. */ 
+      const std::string& copy_compat =
+	SpecialNames::spNames.sp_copy_compat;
+      if(tc->defAst->s == copy_compat) {
+	GCPtr<Type> tv = newTvar(ast);
+	CHKERR(errFree, unify(errStream, trail,
+			      ast->child(0),
+			      ast->child(0)->symType,
+			      MBF(tv), uflags));
+	CHKERR(errFree, unify(errStream, trail,
+			      ast->child(1),
+			      ast->child(1)->symType,
+			      MBF(tv), uflags));
+	tcc->clearPred(tc);
       }
 
       ast->symType = tc;

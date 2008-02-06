@@ -523,6 +523,13 @@ Type::isTypeClass()
   return (t->kind == ty_typeclass);    
 }
 
+bool
+Type::isPcst()
+{
+  GCPtr<Type> t = getBareType();
+  return (t->kind == ty_pcst);    
+}
+
 // Returns true if this is a union or a structure definition 
 // respectively
 bool 
