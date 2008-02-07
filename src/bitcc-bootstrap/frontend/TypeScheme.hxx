@@ -114,7 +114,9 @@ struct TypeScheme : public Countable {
   
   bool solvePredicates(std::ostream &errStream,
 		       LexLoc &errLoc,
-		       GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv);  
+		       GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
+		       GCPtr<Trail> trail);
+  
   bool checkAmbiguity(std::ostream &errStream, LexLoc &errLoc);
   bool migratePredicates(GCPtr<TCConstraints> parentTCC);    
 

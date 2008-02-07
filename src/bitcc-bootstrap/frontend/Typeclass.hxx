@@ -89,6 +89,8 @@ struct TCConstraints : public Countable {
 
   void addPred(GCPtr<Typeclass> tc);
   void clearPred(size_t n);
+  void clearPred(GCPtr<Constraint> ct);
+
   void normalize();
   
   bool contains(GCPtr<Typeclass> tc);

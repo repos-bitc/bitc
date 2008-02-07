@@ -326,6 +326,15 @@ public:
   bool isOfInfiniteType();
   size_t nBits();
   bool needsCaptureConversion();
+  // Test if the type is a variable that can be substituted with
+  // another type. Tests if the type is a variable (mbFull or mbTop)
+  // wherein the variable (possible within Var() component) is 
+  // not marked RIGID, unless, fllags indicate that rigidity 
+  // must be ignored.  
+  bool isUnifiableTvar(size_t flags=0);
+  bool isUnifiableMbFull(size_t flags=0);
+  bool isUnifiableMbTop(size_t flags=0);
+
   /* Produce Type ty_union[rv] from ty_ucon[rv] or ty_uval[rv]
      ONLY typeArgs are polylated */
   GCPtr<Type> getUnionType();
@@ -377,18 +386,19 @@ public:
   // All Tvars are rigid?
   bool allTvarsRigid();
 
-  // The following functions are the same as equals and strictlyEquals
-  // except for the fact that they ignore rigidity.
-  bool compatible(GCPtr<Type> t, bool verbose=false,
-	      std::ostream &errStream=std::cerr);
-  bool strictlyCompatible(GCPtr<Type> t, bool verbose=false,
-			  std::ostream &errStream=std::cerr);
-
+  // Equality under alpha renaming of all (including rigid)
+  // variables. The following functions are the same as equals and
+  // strictlyEquals except for the fact that they ignore rigidity.
+  bool equalsA(GCPtr<Type> t, bool verbose=false,
+	       std::ostream &errStream=std::cerr);
+  bool strictlyEqualsA(GCPtr<Type> t, bool verbose=false,
+		       std::ostream &errStream=std::cerr);
+  
   /* Test for copy compatibility 
-     two versions based on inner function equal or compatible? */
-  bool copy_compatible_eql(GCPtr<Type> t, bool verbose=false,
+     two versions based on inner function equal or equalsA? */
+  bool copy_compatible(GCPtr<Type> t, bool verbose=false,
 			   std::ostream &errStream=std::cerr);
-  bool copy_compatible_compat(GCPtr<Type> t, bool verbose=false,
+  bool copy_compatibleA(GCPtr<Type> t, bool verbose=false,
 			      std::ostream &errStream=std::cerr);
  
   /* Methods to support polymorphism */

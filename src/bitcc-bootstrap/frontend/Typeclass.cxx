@@ -248,58 +248,97 @@ TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
 
 //#define VERBOSE_SOLVE
 
-static bool
-mustSolve(GCPtr<Typeclass> t)
+static GCPtr< CVector< GCPtr<Type> > > 
+getDomain(GCPtr<Typeclass> t)
 {
-  t = getType();
-  GCPtr< CVector< GCPtr<Type> > > args = new CVector< GCPtr<Type> >;
+  GCPtr< CVector< GCPtr<Type> > > dom = new CVector< GCPtr<Type> >;
   
   for(size_t i=0; i < t->typeArgs->size(); i++)
-    args->append(t->TypeArg(i));
+    dom->append(t->TypeArg(i));
   
   if(pred->fnDeps)
     for(size_t fd = 0; fd < t->fnDeps->size(); fd++) {
       GCPtr<Type> fdep = t->FnDep(fd);
       GCPtr<Type> ret = fdep->Ret();
       
-      GCPtr< CVector< GCPtr<Type> > > newArgs = 
+      GCPtr< CVector< GCPtr<Type> > > newDom = 
 	new CVector< GCPtr<Type> >;
       
-      for(size_t i=0; i < args->size(); i++)
-	if((*args)[i]->getType() != ret->getType())
-	  newArgs->append((*args)[i]);
+      for(size_t i=0; i < dom->size(); i++)
+	if(dom->elem(i)->getType() != ret->getType())
+	  newDom->append(dom->elem(i));
       
-      args = newArgs;
+      dom = newDom;
     }
   
-  for(size_t i=0; i < args->size(); i++) {
-    GCPtr<Type> arg = (*args)[i]->getType();
+  return dom;
+}
+
+static GCPtr< CVector< GCPtr<Type> > >
+getDomVars(GCPtr< CVector< GCPtr<Type> > > dom)
+{
+  GCPtr< CVector< GCPtr<Type> > > vars = new CVector< GCPtr<Type> >;
+  
+  for(size_t i=0; i < dom->size(); i++) {
+    GCPtr<Type> arg = dom->elem(i)->getType();
+    arg->collectAllftvs(vars);
+  }
+  
+  return vars;
+}
+
+static bool
+mustSolve(GCPtr< CVector< GCPtr<Type> > > dom)
+{
+  for(size_t i=0; i < dom->size(); i++) {
+    GCPtr<Type> arg = dom->elem(i)->getType();
+    arg->collectAllftvs(vars);
     if(arg->kind == ty_tvar || 
        arg->kind == ty_mbTop || arg->kind == ty_mbFull)
       return false;
   }
-
+  
   return true;
 }
 
+static void
+rigidify(GCPtr< CVector< GCPtr<Type> > > vars)
+{  
+  for(size_t i=0; i < vars->size(); i++) {
+    GCPtr<Type> arg = vars->elem(i)->getType();
+    assert(arg->kind == ty_tvar);
+    arg->flags |= TY_RIGID;
+  }
+}
+
+static void
+unrigidify(GCPtr< CVector< GCPtr<Type> > > vars)
+{  
+  for(size_t i=0; i < vars->size(); i++) {
+    GCPtr<Type> arg = vars->elem(i)->getType();
+    assert(arg->kind == ty_tvar);
+    arg->flags &= ~TY_RIGID;
+  }
+}
+
+
 bool
-handlePcst(bool &errFree, std::ostream &errStream,
-	   GCPtr<Constraint> ct, 
-	   GCPtr<Constraints> caset, 
+handlePcst(std::ostream &errStream, GCPtr<Trail> trail
+	   GCPtr<Constraint> ct, GCPtr<Constraints> cset, 
 	   bool &handled)
 {
   GCPtr<Type> k = ct->CompType(0)->getType();
   GCPtr<Type> gen = ct->CompType(1)->getType();
   GCPtr<Type> ins = ct->CompType(2)->getType();
-
-
+  
+  
   // *(m, tg, ti)
   if(k == Type::Kmono) {
     cset->clearPred(ct);
     handled = true;
-    return ins->unifyWith(gen) ;
+    return ins->unifyWith(gen, false, trail, errStream) ;
   }
-
+  
   if (k == Type::Kpoly) {
     
     // *(p, tg, ti), Immutable(ti)
@@ -308,7 +347,7 @@ handlePcst(bool &errFree, std::ostream &errStream,
       handled = true;
       return true;
     }
-
+    
     // *(p, tg, ti), ~Immut(ti) (type variables OK here)
     if (!ins->isDeepImmut()) {
       cset->clearPred(ct);
@@ -350,43 +389,44 @@ handlePcst(bool &errFree, std::ostream &errStream,
   return true;
 }
 
-static GCPtr<TypeScheme> 
-handleSpecialPred(bool &errFree, std::ostream &errStream,
-		  GCPtr<Typeclass> pred, bool &handled)
+bool
+handleSpecialPred(std::ostream &errStream, GCPtr<Trail> trail
+		  GCPtr<Constraint> pred, GCPtr<Constraints> cset, 
+		  bool &handled)
 {
-  GCPtr<TypeScheme> sTS = new TypeScheme(pred);
-  
   // Special handling for ref-types
   // Safe to do name comparison, everyone includes the prelude.
   const std::string &ref_types = SpecialNames::spNames.sp_ref_types; 
   if(pred->defAst->s == ref_types) {
-    handled = true;
     assert(pred->typeArgs->size() == 1);
-    GCPtr<Type> it = pred->TypeArg(0)->getType();    
-    if(it->isRefType())
-      return sTS;
-    else 
-      return NULL;
-  }
-  
-  handled = false;
-  return NULL;
-}
+    GCPtr<Type> it = pred->TypeArg(0)->getType();
 
+    if(it->isRefType()) {
+      cset->clearPred(pred);
+      handled = true;
+      return true;
+    }
+    
+    if(it->isTvar()) {
+      handled = false;
+      return true;
+    }
+    
+    /* Value Type */
+    cset->clearPred(pred);
+    handled = true;
+    return false;
+  }
+
+  handled = false;
+  return true;
+}
 
 static GCPtr<TypeScheme> 
 findInstance(bool &errFree, std::ostream &errStream,
 	     GCPtr<Typeclass> pred, 
 	     GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv)
 {
-  // See if this is a special (built-in) typeclass constraint
-  bool speciallyHandled = false;
-  GCPtr<TypeScheme> sTS = handleSpecialPred(errFree, errStream,  
-				      pred, speciallyHandled);
-  
-  if(speciallyHandled)
-    return sTS;
-  
   GCPtr<CVector<GCPtr<Instance> > > insts = 
     instEnv->getBinding(pred->defAst->fqn.asString());
   if(!insts)
@@ -398,7 +438,7 @@ findInstance(bool &errFree, std::ostream &errStream,
       return ts;
 #ifdef VERBOSE_SOLVE    
     errStream << "Not applicable: " << ts->asString()
-               << std::endl;
+	      << std::endl;
 #endif
   }  
   return NULL;  
@@ -421,6 +461,96 @@ unifyWithInstance(std::ostream &errStream,
 	tcc->addPred(instPred);
     }
 }
+
+
+bool
+handleTCPred(std::ostream &errStream, GCPtr<Trail> trail
+	     GCPtr<Typeclass> pred, GCPtr<TCConstraints> tcc, 
+	     GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
+	     bool must_solve, bool trial_mode, bool &handled)
+{
+  GCPtr<CVector<GCPtr<Instance> > > insts = 
+    instEnv->getBinding(pred->defAst->fqn.asString());
+  
+  if(!insts) {
+    if(mustSolve) {
+      tcc->clearPred(pred);
+      handled = true;
+      return false;
+    }
+    else {
+      handled = false;
+      return true;
+    }
+  }
+
+  GCPtr<TypeScheme> instScheme = NULL;  
+  for(size_t j=0; j < insts->size(); j++) {
+    GCPtr<TypeScheme> ts = (insts->elem(j))->ts->ts_instance_copy();
+    if(pred->equals(ts->tau)) {
+      instScheme = ts;
+      break;
+    }
+  }
+
+  if(instScheme == NULL) {
+    if(mustSolve) {
+      tcc->clearPred(pred);
+      handled = true;
+      return false;
+    }
+    else {
+      handled = false;
+      return true;
+    }
+  }
+  
+  if(trial_mode) {
+    handled = false;
+    return true;
+  }
+  
+  bool errFree = pred->unifyWith(instScheme->tau);
+  assert(errFree);  
+  tcc->clearPred(pred);
+  
+  if(instScheme->tcc)
+    for(size_t c=0; c < instScheme->tcc->pred->size(); c++) {
+      GCPtr<Typeclass> instPred = instScheme->tcc->Pred(c);
+      tcc->addPred(instPred);
+    }
+
+  handled = true;
+  return true;
+}
+
+bool
+handleEquPreds(std::ostream &errStream, GCPtr<Trail> trail
+	       GCPtr<Typeclass> pred, GCPtr<TCConstraints> tcc, 
+	       GCPtr< CVector< GCPtr<Type> > > vars,
+	       bool &handled)
+{
+  // Equality of domain types in two type class predicated is achieved
+  // by testing for unification wherein the type variables in the
+  // domain are held rigid.
+  rigidify(vars);
+  for(size_t c=0; c < tcc->size(); c++) {
+    GCPtr<Constraint> newCt = cset->Pred(c)->getType();
+    if(newCt == pred)
+      continue;
+    
+    if(pred->equals(newCt)) {
+      pred->unifyWith(newCt);
+      tcc->clearPred(pred);
+      handled=true;
+      return true;
+    }
+  }
+
+  handled=false;
+  return false;
+}
+
 
 /**********************************************************
                    THE Constraint solver 
@@ -478,17 +608,21 @@ unifyWithInstance(std::ostream &errStream,
 
  *********************************************************/
 
+
 bool
-TypeScheme::solvePredicates(std::ostream &errStream,
- 			    LexLoc &errLoc,
-			    GCPtr< const Environment< CVector<GCPtr<Instance> > > >
-			    instEnv)
+TypeScheme::solvePredicates(std::ostream &errStream, LexLoc &errLoc,
+			    GCPtr< const Environment< CVector<GCPtr<Instance> > > > instEnv,
+			    GCPtr<Trail> trail)
 {
+/* handled: Signifies any changes to the tcc individual handler
+   functions might have performed.
+   
+   errFree/errFreeNow: Decides correctness of current constraints
+
+   In the case of and error, the rpedicate is removed, and handles
+   must be true */
   bool errFree = true;
-  bool unifiedWithInstInThisPass = false;
-  GCPtr<TCConstraints> removedTcc = new TCConstraints;
-  
-  markRigid(errStream, errLoc);
+  bool handled = false;
   
 #ifdef VERBOSE_SOLVE
   errStream << std::endl;
@@ -498,66 +632,77 @@ TypeScheme::solvePredicates(std::ostream &errStream,
 #endif
 
   do {
-    unifiedWithInstInThisPass = false;
-
+    handled = false;
+    GCPtr<Typeclass> errPred = NULL;
+    bool errFreeNow = true;
+    
     for(size_t i=0; i < tcc->pred->size(); i++) {
       GCPtr<Typeclass> pred = tcc->Pred(i);
-      GCPtr<TypeScheme> inst = findInstance(errFree, errStream, 
-				      pred, instEnv);
-      
-#ifdef VERBOSE_SOLVE
-      errStream << "For Predicate : " << pred->asString(NULL);
-#endif		
-      
-      if(inst) {	
-	// This predicate is a tautology	
-	// Improve the type using the type of the instance 
-	unifyWithInstance(errStream, pred, inst, 
-			  removedTcc, tcc, errLoc);      
-	unifiedWithInstInThisPass = true;
+      errPred = pred;
 
-	removedTcc->addPred(pred);
-
-	// Remove the constraint since we know that it is true.
-	// This remove () _must_ be done immediately. The tcc must be
-	// current, since further unifications with instances might
-	// add other predicates and addPred() must know correct
-	// information about current predicates.
-	// clearPred OK since we break immediately.
-	// We are NOT clearing in a loop.
-	tcc->clearPred(i);	
-    	
-#ifdef VERBOSE_SOLVE
-	errStream << " Instance Found. "
-		  << " Scheme after Unification = "
-		  << asString(NULL)
-		  << std::endl;
-#endif
+      // Step 1
+      CHKERR(errFreeNow, handleSpecialPred(errStream, trail, 
+					   pred, tcc, handled));
+      if(handled)
 	break;
+
+      // Step 2
+      CHKERR(errFreeNow, handlePcst(errStream, trail, 
+				    pred, tcc, handled));
+      if(handled)
+	break;
+      
+      GCPtr< CVector< GCPtr<Type> > > dom = getDomain(pred);
+      GCPtr< CVector< GCPtr<Type> > > vars = getDomVars(dom);
+      bool ms = mustSolve(dom);
+      if(ms) {
+ 	// Step 3.a
+	CHKERR(errFreeNow, handleTcPred(errStream, trail, pred, tcc,
+					instEnv, false, handled));
+	if(handled)
+	  break;
       }
-      else {
-#ifdef VERBOSE_SOLVE
-	errStream << "NoInstance Found" << std::endl;
-#endif
-      }
+      
+      // Step 3.b.i
+      rigidify(vars);
+      handleTcPred(errStream, trail, pred, tcc,
+		   instEnv, false, handled);
+      unrigidify(vars);
+      
+      if(handled)
+	break;
+      
+      // Step 3.b.ii
+      CHKERR(errFreeNow, handleTcPred(errStream, trail, pred, tcc,
+				      instEnv, false, handled));
+      
+      if(handled)
+	break;
+      
+      // Step 4
+      CHKERR(errFreeNow, handleEquPreds(errStream, trail, 
+					pred, tcc, vars, handled));
+      
+      if(handled)
+	break;
+      
+      if(!errFreeNow)
+	assert(false);
     }
-  } while(unifiedWithInstInThisPass);
-
-
-  ///// Continue
+    
+    if(!errFreeNow) {
+      assert(handled);
+      assert(errPred);
       errStream << errLoc << ": "
-		<< "No Instance found for "
-		<< pred->asString() 
-		<< " in " << asString()
+		<< "Unsatisfiable Constraint: "
+		<< errPred->asString() 
 		<< std::endl; 
-
-      errFree = false;
-
-#ifdef VERBOSE_SOLVE
-  errStream << "  - - - - - - - - - - - - - - - " 
-	    << std::endl
-	    << std::endl;
-#endif
+    }
+    
+    CHKERR(errFree, errFreeNow);
+    
+  } while(handled);
+  
   return errFree;
 }
 

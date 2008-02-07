@@ -56,9 +56,9 @@ using namespace sherpa;
 using namespace std;
 
 #if #INST_DEBUG == #DEBUG_ON
-#define STRICTLYEQUALS(x) strictlyCompatible(x, DEBUG_VERBOSE)
+#define STRICTLYEQUALS(x) strictlyEqualsA(x, DEBUG_VERBOSE)
 #else
-#define STRICTLYEQUALS(x) strictlyCompatible(x)
+#define STRICTLYEQUALS(x) strictlyEqualsA(x)
 #endif
 
 

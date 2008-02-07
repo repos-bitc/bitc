@@ -1,5 +1,5 @@
 /**************************************************************************
- *
+" *
  * Copyright (C) 2006, Johns Hopkins University.
  * All rights reserved.
  *
@@ -276,6 +276,42 @@ Type::isTvar()
 {
   GCPtr<Type> t = getBareType();  
   return (t->kind == ty_tvar);
+}
+
+bool
+Type::isUnifiableTvar(size_t flags)
+{
+  GCPtr<Type> t = getType();
+  if(t->kind != ty_tvar)
+    return false;
+  
+  if(flags & UNIFY_IGN_RIGIDITY)
+    return true;
+  
+  if((tv->flags & TY_RIGID) == 0)
+    return true;
+
+  return false;
+}
+
+bool
+Type::isUnifiableMbTop(size_t flags)
+{
+  GCPtr<Type> t = getType();
+  if(t->kind != ty_mbTop)
+    return false;
+  
+  return t->Var()->isUnifiableTvar(flags);
+}
+
+bool
+Type::isUnifiableMbFull(size_t flags)
+{
+  GCPtr<Type> t = getType();
+  if(t->kind != ty_mbFull)
+    return false;
+  
+  return t->Var()->isUnifiableTvar(flags);
 }
 
 bool 
@@ -1037,14 +1073,14 @@ Type::forcedUnify(GCPtr<Type> t, bool verbose, std::ostream &errStream)
 }
 
 bool
-Type::compatible(GCPtr<Type> t, bool verbose, std::ostream &errStream)
+Type::equalsA(GCPtr<Type> t, bool verbose, std::ostream &errStream)
 {
   return eql(t, verbose, errStream, 
 	     UNIFY_TRY | UN_IGN_RIGIDITY, false);
 }
 
 bool 
-Type::strictlyCompatible(GCPtr<Type> t, bool verbose,
+Type::strictlyEqualsA(GCPtr<Type> t, bool verbose,
 			 std::ostream &errStream)
 {
   return eql(t, verbose, errStream, 

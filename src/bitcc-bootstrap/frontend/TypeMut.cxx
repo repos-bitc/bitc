@@ -303,15 +303,15 @@ addShallowMbTop(GCPtr<Type> t)
 }
 
 bool 
-Type::copy_compatible_compat(GCPtr<Type> t, bool verbose, std::ostream &errStream)
+Type::copy_compatible(GCPtr<Type> t, bool verbose, std::ostream &errStream)
 {
-  return MBF(this)->compatible(MBF(t), verbose, errStream);
+  return MBF(this)->equals(MBF(t), verbose, errStream);
 }
 
 bool 
-Type::copy_compatible_eql(GCPtr<Type> t, bool verbose, std::ostream &errStream)
+Type::copy_compatibleA(GCPtr<Type> t, bool verbose, std::ostream &errStream)
 {
-  return MBF(this)->equals(MBF(t), verbose, errStream);
+  return MBF(this)->equalsA(MBF(t), verbose, errStream);
 }
 
 static inline GCPtr<Type> 

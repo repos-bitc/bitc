@@ -102,6 +102,8 @@ unifyPrim(std::ostream& errStream,
 }
 
 
+
+
 // Handle unification of struct/union decl+decl or decl+def
 static bool 
 UnifyDecl(std::ostream& errStream,
@@ -460,67 +462,66 @@ Unify(std::ostream& errStream,
     RET_UNIFY;
 
   if(t1->kind != t2->kind) {
-    
-    if(t1->kind == ty_tvar || t2->kind == ty_tvar) {
-      /* Handle the case of Type Variables unifying with another type */
-      GCPtr<Type> tv = (t1->kind == ty_tvar) ? t1 : t2;
-      GCPtr<Type> typ = (t1->kind == ty_tvar) ? t2 : t1;
-      
-      if(typ->boundInType(tv)) {
-	// This case is not really wrong: 'a = 'b|'a
-        // but I want to find out if we get here.
-	assert(false);
-      }
-      
-      // This condition is not hoisted up because, we want the
-      // execution to enter the type variable case and fail, 
-      // rather then go to other cases.
-      // Why should maybe-case exempt from UNIFY_STRICT? 
-      if((flags & UNIFY_STRICT) == 0)
-	if(((flags & UN_IGN_RIGIDITY) || ((tv->flags & TY_RIGID) == 0))) {
-	  trail->subst(tv, typ);
-	  RET_UNIFY;
-	}
-      
-      RET_FAIL;
-    }
-    
-    if (t1->kind == ty_mbFull || t2->kind == ty_mbFull) {
-      GCPtr<Type> mb = (t1->kind == ty_mbFull) ? t1 : t2;
-      GCPtr<Type> typ = (t1->kind == ty_mbFull) ? t2 : t1;
-      
-      Unify(errStream, trail, errAst, mb->minimizeMutability(), 
-	    typ->minimizeMutability(), flags);
-      
-      if(errFree)
-	trail->link(mb->Var(), typ);
-      return errFree;
-    }
 
-    if(t1->kind == ty_mbTop || t2->kind == ty_mbTop) {      
-      // ONLY one of the types is a maybe type.
-      GCPtr<Type> mb = (t1->kind == ty_mbTop) ? t1 : t2;
-      GCPtr<Type> typ = (t1->kind == ty_mbTop) ? t2 : t1;
-      assert(typ->kind != ty_mbFull);
-      
-      Unify(errStream, trail, errAst, mb->minimizeMutability(), 
-	    typ->minimizeMutability(), flags);
-      
-      if(errFree)
-	trail->link(mb->Var(), typ);
-      return errFree;
-    }
-    
     if(t1->isUType() && t2->isUType() && 
 	    (t1->isRefType() == t2->isRefType())) {
       return UnifyUTVC(errStream, trail, errAst, t1, t2, flags);
     }
-    
+
+    if((flags & UNIFY_STRICT) == 0) {
+      
+      /* Handle the case of Type Variables unifying with another type */
+      if(t1->isUnifiableTvar(flags) && !t1->boundInType(t2)) {
+	trail->subst(t1, t2);
+	RET_UNIFY;
+      }
+      if(t2->isUnifiableTvar(flags) && !t2->boundInType(t1)) {
+	trail->subst(t2, t1);
+	RET_UNIFY;
+      }
+      
+      /* Handle the Maybe Types unifying with another type */
+      if (t1->isUnifiableMbFull(flags)) {
+	Unify(errStream, trail, errAst, t1->minimizeMutability(), 
+	      t2->minimizeMutability(), flags);
+	
+	if(errFree)
+	  trail->subst(t1->Var(), t2);
+	
+	return errFree;
+      }
+      if (t2->isUnifiableMbFull(flags)) {
+	Unify(errStream, trail, errAst, t1->minimizeMutability(), 
+	      t2->minimizeMutability(), flags);
+	
+	if(errFree)
+	  trail->subst(t2->Var(), t1);
+	
+	return errFree;
+      }
+      if (t1->isUnifiableMbTop(flags)) {
+	Unify(errStream, trail, errAst, t1->minimizeMutability(), 
+	      t2->minimizeMutability(), flags);
+	
+	if(errFree)
+	  trail->subst(t1->Var(), t2);
+	
+	return errFree;
+      }
+      if (t2->isUnifiableMbTop(flags)) {
+	Unify(errStream, trail, errAst, t1->minimizeMutability(), 
+	      t2->minimizeMutability(), flags);
+	
+	if(errFree)
+	  trail->subst(t2->Var(), t1);
+	
+	return errFree;
+      }
     errFree = typeError(errStream, errAst, t1, t2);
     RET_FAIL;
   }
   
-  // Here, t1->kins == t2->kind.
+  // Here, t1->kind == t2->kind.
   switch(t1->kind) {
   case ty_unit:
   case ty_bool:

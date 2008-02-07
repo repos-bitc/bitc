@@ -348,9 +348,9 @@ TypeScheme::generalize(std::ostream& errStream,
 
   // Step 2
   if(mustSolve && (tcc))
-    CHKERR(errFree, solvePredicates(errStream, 
-				    errLoc, instEnv));  
-
+    CHKERR(errFree, solvePredicates(errStream, errLoc, 
+				    instEnv, trail)); 
+  
 #ifdef VERBOSE  
   errStream << "[2] Solve: " 
 	    << asString(Options::debugTvP)
