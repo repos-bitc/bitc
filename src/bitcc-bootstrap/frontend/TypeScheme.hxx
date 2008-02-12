@@ -50,14 +50,15 @@
 #include "Typeclass.hxx"
 #include "INOstream.hxx"
 
-struct TypeScheme : public Countable {
+enum GeneralizeMode {gen_instance, gen_top, gen_local};
 
+struct TypeScheme : public Countable {
+  
   GCPtr<Type> tau;
   GCPtr<AST> ast; // Need to maintained the official version here,
-            // Type pointers get linked, typeschemes don't
+                  // Type pointers get linked, typeschemes don't
   GCPtr<CVector<GCPtr<Type> > > ftvs;
-   
-
+  
   // Type class constraints 
   // Note: Leave this as a pointer, not an embedded vector.
   // This helps tcc sharing for definitions that are 
@@ -66,7 +67,7 @@ struct TypeScheme : public Countable {
   
   //trivial_TypeScheme
   TypeScheme(GCPtr<Type> ty,
-      GCPtr<TCConstraints> _tcc = NULL);
+	     GCPtr<TCConstraints> _tcc = NULL);
   
   TypeScheme(GCPtr<Type> ty, GCPtr<AST> ast,
 	     GCPtr<TCConstraints> _tcc = NULL);
@@ -79,9 +80,7 @@ struct TypeScheme : public Countable {
 		  GCPtr<const AST> expr, 
 		  GCPtr<TCConstraints >parentTCC,
 		  GCPtr<Trail> trail,
-		  const bool topLevel,
-		  const bool VRIsError,
-		  const bool mustSolve);
+		  const GeneralizeMode gen);
   
   // The function that actually makes a copy of the 
   // contained type. This function calls TypeSpecialize.
@@ -93,7 +92,7 @@ struct TypeScheme : public Countable {
   GCPtr<Type> type_instance() const;
   
   // Type scheme's instance (including TC constraints)
-  GCPtr<TypeScheme> ts_instance() const;
+  GCPtr<TypeScheme> ts_instance(bool copy=false) const;
   GCPtr<TypeScheme> ts_instance_copy() const;
   
   // Read carefully:

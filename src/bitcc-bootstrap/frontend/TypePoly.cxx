@@ -61,48 +61,34 @@
 using namespace sherpa;
 using namespace std;
 
-//#define VERBOSE
-
-
 bool
 Type::boundInType(GCPtr<Type> tv)
 {
   GCPtr<Type> t = getType();
   
-  if((t->kind == ty_tvar) && (t->uniqueID == tv->uniqueID))
+  if(t == tv->getType())
     return true;
    
-  t->mark |= MARK1;
+  if(t->mark & MARK1)
+    return false;
   
-  for(size_t i=0; i < t->components->size(); i++) 
-    if(!(t->CompType(i)->getType()->mark & MARK1)) {
-      if(t->CompType(i)->boundInType(tv)) {
-	t->mark &= ~MARK1;
-	return true;
-      }
-    }
+  t->mark |= MARK1;
+  bool bound = false;
+  
+  for(size_t i=0; (!bound) && (i < t->components->size()); i++) 
+    bound = t->CompType(i)->boundInType(tv);
 
   // To consider cases like (define aNil nil)
-  for(size_t i=0; i < t->typeArgs->size(); i++) 
-    if(!(t->TypeArg(i)->getType()->mark & MARK1)) {
-      if(t->TypeArg(i)->boundInType(tv)) {
-	t->mark &= ~MARK1;
-	return true;
-      }
-    }
+  for(size_t i=0; (!bound) && (i < t->typeArgs->size()); i++) 
+    bound = t->TypeArg(i)->boundInType(tv);
 
   // Deal with fnDeps if present
   if(t->fnDeps)
-    for(size_t i=0; i < t->fnDeps->size(); i++) 
-      if(!(t->FnDep(i)->getType()->mark & MARK1)) {
-	if(t->FnDep(i)->boundInType(tv)) {
-	  t->mark &= ~MARK1;
-	  return true;
-	}
-      }
+    for(size_t i=0; (!bound) && (i < t->fnDeps->size()); i++) 
+      bound = t->FnDep(i)->boundInType(tv);
   
   t->mark &= ~MARK1;
-  return false;
+  return bound;
 }
 
 bool
@@ -248,10 +234,30 @@ void
 TypeScheme::collectftvs(GCPtr<const Environment<TypeScheme> > gamma)
 {
   tau->collectftvsWrtGamma(ftvs, gamma);  
+  std::cerr << "tau = "
+	    << tau->asString(Options::debugTvP)
+	    << std::endl
+	    << "tau's ftvs = ";
+
+  for(size_t i=0; i < ftvs->size(); i++)
+    std::cerr << Ftv(i)->asString(Options::debugTvP);
+  
+  std::cerr << std::endl;
+  
   if(tcc) {    
     for(size_t i=0; i < tcc->pred->size(); i++) {
       GCPtr<Typeclass> pred = tcc->Pred(i);
       pred->collectftvsWrtGamma(ftvs, gamma);  
+      
+      std::cerr << "pred = "
+		<< pred->asString(Options::debugTvP)
+		<< std::endl
+		<< "SUM ftvs = ";
+      
+      for(size_t i=0; i < ftvs->size(); i++)
+	std::cerr << Ftv(i)->asString(Options::debugTvP);
+      
+      std::cerr << std::endl;
     }
  
     GCPtr<CVector<GCPtr<Type> > > allFnDeps = new CVector<GCPtr<Type> >;
@@ -280,33 +286,39 @@ bool isExpansive(std::ostream& errStream,
    the current let expression let(k) x = e in ...
 
    1) Add the polymorphic instantiation constraint *(k, t, t) to C
+      This step is not performed for instance generalizations.      
 
    2) Solve predicates: let (t', C') = SolvePredicates(C)
       The constraint set C' contains residual constraints. It cannot
       contain any constraints over concrete types.
+      This step is not performed for instance generalizations.      
 
-   3) Determine the set of generalizable type variables:
+   3) In case of top-level definitions, make a choice for all
+      *-constraints: The type is made immutable upto the function
+      boundary, and all 'ks are resolved to polymorphic.
+
+   4) Determine the set of generalizable type variables:
       'a* = (FTVS(t') U FTVS(C')) \ FTVS(gamma)
 
-   4) Check for value restriction: 
+   5) Check for value restriction: 
       exp = isExpansive(e) || isExpansive(t')
 
-   5) If expansive, remove the set of non-generalizable type
+   6) If expansive, remove the set of non-generalizable type
       variables from 'a*.
       let 'b* = 'a* \ remove-restricted('a*)
       Here, we follow Ocaml-like relaxed-value restriction
       rule. Otherwise, {'b*} = {}
 
-   6) Migrate appropriate constraints to parent's TCC, if one exists
+   7) Migrate appropriate constraints to parent's TCC, if one exists
       let C'' = migrate(parent-sigma, C')
       --> Constraints purely over monomorphic type variables can be
           migrated to the containing scope.
 
-   7) Check for ambiguous types. If there exists a 'a such that 
+   8) Check for ambiguous types. If there exists a 'a such that 
       'a in {'b*} and 'a in FTVS(C'') and 'a not in FTVS(t'), then the
       type is ambiguous. 
     
-   8) The generalized type is forall 'b*, t' \ C''
+   9) The generalized type is forall 'b*, t' \ C''
 
  *********************************************************/
 
@@ -319,70 +331,95 @@ TypeScheme::generalize(std::ostream& errStream,
 		       GCPtr<const AST> expr, 
 		       GCPtr<TCConstraints> parentTCC,
 		       GCPtr<Trail> trail,
-		       const bool topLevel,
-		       const bool VRIsError,
-		       const bool mustSolve)
+		       const GeneralizeMode gen_mode)
 {
   bool errFree = true;
 
-#ifdef VERBOSE  
-  errStream << "[0] To Generalize " 
-	    << asString(Options::debugTvP)
-	    << " for expression "
-	    << expr->asString() 
-	    << std::endl;
-#endif
-
-  // Step 1
-  GCPtr<Type> pcst = new Constraint(ty_pcst, tau->ast, 
-				    new Type(ty_kvar, tau->ast),
-				    tau, tau);
   
+  GEN_DEBUG errStream << "[0] To Generalize " 
+		      << asString(Options::debugTvP)
+		      << " for expression "
+		      << expr->asString() 
+		      << std::endl;
 
-#ifdef VERBOSE  
-  errStream << "[1] With Pcst: " 
-	    << asString(Options::debugTvP)
-	    << std::endl;
-#endif
+  if(gen_mode != gen_instance) {
+    // Step 1
+    GCPtr<Type> pcst = new Constraint(ty_pcst, tau->ast); 
+    pcst->components->append(new comp(new Type(ty_kvar, tau->ast)));
+    pcst->components->append(new comp(tau)); // General Type
+    pcst->components->append(new comp(tau)); // Instantiation Type
+    tcc->addPred(pcst);
+    
+    GEN_DEBUG errStream << "[1] With Pcst: " 
+			<< asString(Options::debugTvP)
+			<< std::endl;
 
+    // Step 2
+    if(tcc)
+      CHKERR(errFree, solvePredicates(errStream, errLoc, 
+				      instEnv, trail)); 
+    
+    GEN_DEBUG errStream << "[2] Solve: " 
+			<< asString(Options::debugTvP)
+			<< std::endl;
+  }
 
-  // Step 2
-  if(mustSolve && (tcc))
+  if(gen_mode == gen_top) {
+    // Step 3
+    tau->adjMaybe(trail, true);
+    
+    for(size_t i=0; i < tcc->size(); i++) {
+      GCPtr<Type> pred = tcc->Pred(i);
+      if(!pred->isPcst())
+	continue;
+
+      GCPtr<Type> k = pred->CompType(0)->getType();
+      GCPtr<Type> ins = pred->CompType(2)->getType();
+      if(k->kind == ty_kvar) {
+	ins->adjMaybe(trail, true);
+	trail->subst(k, Type::Kpoly);
+      }
+    }
+    
     CHKERR(errFree, solvePredicates(errStream, errLoc, 
 				    instEnv, trail)); 
-  
-#ifdef VERBOSE  
-  errStream << "[2] Solve: " 
-	    << asString(Options::debugTvP)
-	    << std::endl;
-#endif
-  
-  // Step 3
-  collectftvs(gamma);
-  
-#ifdef VERBOSE  
-  errStream << "[3] CollectFtvs: " 
-	    << asString(Options::debugTvP)
-	    << std::endl;
-#endif
+
+    for(size_t i=0; i < tcc->size(); i++) {
+      GCPtr<Type> pred = tcc->Pred(i);
+      if(pred->isPcst()) {
+	errStream << "REMAINING PCST!!!"
+		  << std::endl;
+      }
+    }
+   
+    GEN_DEBUG errStream << "[3] Top-Fix: " 
+			<< asString(Options::debugTvP)
+			<< std::endl;
+  }
   
   // Step 4
+  collectftvs(gamma);
+  
+  GEN_DEBUG errStream << "[4] CollectFtvs: " 
+		      << asString(Options::debugTvP)
+		      << std::endl;    
+  
+  // Step 5
   bool exprExpansive = isExpansive(errStream, gamma, expr);
   bool typExpansive = isExpansive(errStream, gamma, tau);
   bool fullyGeneral = true;
-#ifdef VERBOSE  
-  if(exprExpansive)
+
+  GEN_DEBUG if(exprExpansive)
     errStream << "[5] " << expr->asString() 
 	      << " is expansive"
 	      << std::endl;
-
-  if(typExpansive)
+  
+  GEN_DEBUG if(typExpansive)
     errStream << "[5] " << tau->asString(Options::debugTvP) 
 	      << "is expansive"
 	      << std::endl;
-#endif
 
-  // Step 5
+  // Step 6
   GCPtr<CVector<GCPtr<Type> > > removedFtvs = 
     new CVector<GCPtr<Type> >;
   if(exprExpansive || typExpansive) 
@@ -391,13 +428,13 @@ TypeScheme::generalize(std::ostream& errStream,
   if(removedFtvs->size()) 
     fullyGeneral = false;
   
-  if (topLevel && !fullyGeneral) {
+  if ((gen_mode == gen_top) && !fullyGeneral) {
     for(size_t i=0; i < removedFtvs->size(); i++) {
       GCPtr<Type> ftv = (*removedFtvs)[i]->getType();
       if(ftv->kind == ty_tvar)
 	ftv->link = new Type(ty_dummy, ftv->ast);
     }      
-
+    
     errStream << errLoc << ": WARNING: The type of"
 	      << " this toplevel definition "
 	      << expr->asString() << " "
@@ -406,39 +443,29 @@ TypeScheme::generalize(std::ostream& errStream,
 	      << " The type obtained is: "
 	      << tau->asString() << "."
 	      << std::endl;    
-    
-    if(VRIsError)
-      errFree = false;
   }
 
-#ifdef VERBOSE  
-  errStream << "[5] Value Restriction: " 
-	    << asString(Options::debugTvP)
-	    << std::endl;
-#endif
+  GEN_DEBUG errStream << "[6] Value Restriction: " 
+		      << asString(Options::debugTvP)
+		      << std::endl;
 
-  // Step 6
+  // Step 7
   migratePredicates(parentTCC);
   
-#ifdef VERBOSE  
-  errStream << "[6] Migrated Constraints: " 
-	    << asString(Options::debugTvP)
-	    << std::endl;
-#endif
+  GEN_DEBUG errStream << "[7] Migrated Constraints: " 
+		      << asString(Options::debugTvP)
+		      << std::endl;
   
-  // Step 7
-  CHKERR(errFree, checkAmbiguity(errStream, errLoc));
-
   // Step 8
-#ifdef VERBOSE  
-  errStream << "FINAL: " 
-	    << asString(Options::debugTvP)
-	    << std::endl;
-#endif
-
+  CHKERR(errFree, checkAmbiguity(errStream, errLoc));
   
+  // Step 9
+  GEN_DEBUG errStream << "FINAL: " 
+		      << asString(Options::debugTvP)
+		      << std::endl 
+		      << std::endl;
   return errFree;
-} 
+}
 
 
 /* THE Type Specializer */     
@@ -458,16 +485,32 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
   // Note `hints' is linked to the ORIGINAL VALUE here.
   GCPtr<Type> retType = theType;
   
-#ifdef VERBOSE  
-  std::cout << "To Specialize " << '`' << ast->s << '\''
-  	    << this->asString()  << std::endl;  
-#endif  
+  INS_DEBUG std::cout << "To Specialize " 
+		      << '`' << ast->s << '\''
+		      << this->asString()  
+		      << std::endl;  
+
   if(t->sp)
     retType = t->sp;
   else {    
     t->sp = retType;
   
     switch(t->kind) {    
+    case ty_kvar:
+      {
+	retType = t;
+	break;
+      }
+    case ty_pcst:
+      {
+	// the let-kind and generic type are added as is.
+	theType->components->append(new comp(t->CompType(0)));
+	theType->components->append(new comp(t->CompType(1)));
+	// The instance of the constraint is specialized.
+	GCPtr<Type> ins = t->CompType(2)->TypeSpecializeReal(ftvs, nftvs);
+	theType->components->append(new comp(ins));
+	break;
+      }
     case ty_tvar:
       {
 	size_t i=0;
@@ -522,32 +565,35 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
     //t->sp =  NULL;
   }
   
-#ifdef VERBOSE  
-  std::cout << "\t Specialized " << '`' << ast->s << '\''
-    	    << getType()->asString(NULL) << " to " 
-  	    << retType->getType()->asString(NULL) << std::endl;
-#endif  
+  INS_DEBUG std::cout << "\t Specialized " 
+		      << '`' << ast->s << '\''
+		      << getType()->asString(NULL) 
+		      << " to " 
+		      << retType->getType()->asString(NULL) 
+		      << std::endl;
+  
   return retType;
 }
 
-static void
-clear_spField(GCPtr<Type> t)
+// Clear the sp (specialization) field of type records recursively.
+void
+Type::clear_sp()
 {
-  t = t->getType();
+  GCPtr<Type> t = getType();
   if(!t->sp)
     return;
 
   t->sp = NULL;
 
   for(size_t i=0; i<t->typeArgs->size(); i++)
-    clear_spField(t->TypeArg(i));
+    t->TypeArg(i)->clear_sp();
 
   for(size_t i=0; i<t->components->size(); i++)
-    clear_spField(t->CompType(i));
+    t->CompType(i)->clear_sp();
 
   if(t->fnDeps)
     for(size_t i=0; i<t->fnDeps->size(); i++)
-      clear_spField(t->FnDep(i));
+      t->FnDep(i)->clear_sp();
 }
 
 
@@ -556,7 +602,7 @@ Type::TypeSpecialize(GCPtr<CVector<GCPtr<Type> > > ftvs,
 		     GCPtr<CVector<GCPtr<Type> > > nftvs)
 {
   GCPtr<Type> specializedType = TypeSpecializeReal(ftvs, nftvs);
-  clear_spField(this);
+  clear_sp();
   return specializedType;
 }
 
@@ -603,7 +649,6 @@ generalizePat(std::ostream& errStream,
 	      GCPtr<Environment<TypeScheme> > gamma,
 	      GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
 	      GCPtr<AST> bp, GCPtr<AST> expr,
-	      const bool callerIsLet, 
 	      GCPtr<TCConstraints> tcc,
 	      GCPtr<TCConstraints> parentTCC,
 	      GCPtr<Trail> trail)
@@ -614,17 +659,11 @@ generalizePat(std::ostream& errStream,
   // Individual identifiers' TypeScheme will be updated after the 
   // pattern is generalized as a whole.
   GCPtr<TypeScheme> sigma = new TypeScheme(bp->symType, tcc);
-#ifdef VERBOSE  
-  errStream << "Calling Gen on " << bp->asString() << std::endl;
-#endif
+  
   CHKERR(errFree, 
 	 sigma->generalize(errStream, errLoc, 
 			   gamma, instEnv, expr, parentTCC,
-			   trail, !callerIsLet, false, true));
-  
-#ifdef VERBOSE  
-  errStream << "Obtained " << sigma->asString() << std::endl;
-#endif
+			   trail, gen_local));
   
   updateSigmas(bp, sigma->ftvs, tcc);
 

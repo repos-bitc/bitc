@@ -62,8 +62,6 @@
 
 using namespace sherpa;
 
-//#define VERBOSE_UNIFY
-
 static bool
 typeError(std::ostream& errStream,
 	  GCPtr<const AST> errAst, GCPtr<Type> t1, GCPtr<Type> t2)
@@ -72,11 +70,7 @@ typeError(std::ostream& errStream,
 	    << "Expected " << t1->asString(NULL) 
 	    << ", Obtained " << t2->asString(NULL)
 	    << std::endl;
-
-  if(t1->isUType()) {
-    errStream << "##" << std::endl;
-  }
-
+  
   // MUST always return false.
   return false;
 }
@@ -114,12 +108,11 @@ UnifyDecl(std::ostream& errStream,
 {
   bool errFree = true;
 
-#ifdef VERBOSE_UNIFY
-  std::cout << "UnifyDecl " 
-  	    << t1->asString(Options::debugTvP) << " and "
-  	    << t2->asString(Options::debugTvP)
-  	    << std::endl;
-#endif
+  UNIFY_DEBUG std::cout << "UnifyDecl " 
+			<< t1->asString(Options::debugTvP) 
+			<< " ==? " 
+			<< t2->asString(Options::debugTvP)
+			<< std::endl;
 
   assert(t1->defAst == t2->defAst);
   assert(t1->kind != ty_uconv || t1->kind != ty_uconr);
@@ -145,12 +138,11 @@ UnifyStruct(std::ostream& errStream,
 {
   bool errFree = true;
 
-#ifdef VERBOSE_UNIFY
-  std::cout << "UnifyStruct " 
-  	    << t1->asString() << " and "
-  	    << t2->asString()
-  	    << std::endl;    
-#endif
+  UNIFY_DEBUG std::cout << "UnifyStruct " 
+			<< t1->asString(Options::debugTvP) 
+			<< " ==? "
+			<< t2->asString(Options::debugTvP)
+			<< std::endl;
 
   if(t1->defAst != t2->defAst)
     return typeError(errStream, errAst, t1, t2);
@@ -234,12 +226,11 @@ UnifyUnion(std::ostream& errStream,
 {
   bool errFree = true;
 
-#ifdef VERBOSE_UNIFY
-  std::cout << "UnifyUnion" 
-  	    << t1->asString(Options::debugTvP)
-  	    << t2->asString(Options::debugTvP)
-  	    << std::endl;
-#endif
+  UNIFY_DEBUG std::cout << "UnifyUnion " 
+			<< t1->asString(Options::debugTvP)
+			<< " ==? "
+			<< t2->asString(Options::debugTvP)
+			<< std::endl;
   
   // Note: Following check also serves to prevent unification of reprs with 
   // unions.
@@ -316,13 +307,12 @@ UnifyUcon(std::ostream& errStream,
 {
   bool errFree = true;
   
-#ifdef VERBOSE_UNIFY
-  std::cout << "UnifyUcon" 
-	    << t1->asString(Options::debugTvP)
-	    << t2->asString(Options::debugTvP)
-	    << std::endl;
-#endif
-
+  UNIFY_DEBUG std::cout << "UnifyUcon " 
+			<< t1->asString(Options::debugTvP)
+			<< " ==? "
+			<< t2->asString(Options::debugTvP)
+			<< std::endl;
+  
   if(t1->myContainer != t2->myContainer) {
     typeError(errStream, errAst, t1, t2);
     return false;
@@ -356,12 +346,11 @@ UnifyUval(std::ostream& errStream,
 {
   bool errFree = true;
   
-#ifdef VERBOSE_UNIFY
-  std::cout << "UnifyUval" 
-	    << t1->asString(Options::debugTvP)
-	    << t2->asString(Options::debugTvP)
-	    << std::endl;
-#endif
+  UNIFY_DEBUG std::cout << "UnifyUval " 
+			<< t1->asString(Options::debugTvP)
+			<< " ==? "
+			<< t2->asString(Options::debugTvP)
+			<< std::endl;
 
   if(t1->myContainer != t2->myContainer)
     return typeError(errStream, errAst, t1, t2);
@@ -393,12 +382,11 @@ UnifyUTVC(std::ostream& errStream,
 {
   bool errFree = true;
   
-#ifdef VERBOSE_UNIFY
-  std::cout << "UnifyUTVC" 
-	    << ut1->asString(Options::debugTvP) << " and "
-	    << ut2->asString(Options::debugTvP)
-	    << std::endl;
-#endif
+  UNIFY_DEBUG std::cout << "UnifyUTVC " 
+			<< ut1->asString(Options::debugTvP) 
+			<< " ==? "
+			<< ut2->asString(Options::debugTvP)
+			<< std::endl;
   
   if(ut1->myContainer != ut2->myContainer)
     return typeError(errStream, errAst, ut1, ut2);
@@ -450,14 +438,12 @@ Unify(std::ostream& errStream,
   bool errFree = true;
 
   
-#ifdef VERBOSE_UNIFY
-  std::cout << "Unifier: " 
-  	    << ft->asString(Options::debugTvP)
-  	    << " vs " 
-  	    << st->asString(Options::debugTvP)
-  	    << std::endl;  
-#endif
-    
+  UNIFY_DEBUG std::cout << "Unifier: " 
+			<< ft->asString(Options::debugTvP)
+			<< " ==? " 
+			<< st->asString(Options::debugTvP)
+			<< std::endl;  
+  
   if (t1->uniqueID == t2->uniqueID)
     RET_UNIFY;
 
@@ -517,6 +503,8 @@ Unify(std::ostream& errStream,
 	
 	return errFree;
       }
+    }
+    
     errFree = typeError(errStream, errAst, t1, t2);
     RET_FAIL;
   }

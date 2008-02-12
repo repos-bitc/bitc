@@ -535,23 +535,25 @@ Type::adjMaybe(GCPtr<Trail> trail, bool minimize)
       GCPtr<Type> core = t->Core();
       if(minimize)
 	core = core->minimizeTopMutability();
+
       trail->subst(t->Var(), core);
       break;
     }
+    
   case ty_mbTop:
     {
       t->Core()->adjMaybe(trail, minimize);
       GCPtr<Type> core = t->Core();
       if(minimize)
 	core = core->minimizeMutability();
+      
       trail->subst(t->Var(), core);
       break;
     }
 
   case ty_fn:
     {
-      t->Args()->adjMaybe(trail, true);
-      t->Ret()->adjMaybe(trail, true);
+      break;
     }
 
   case ty_mutable:

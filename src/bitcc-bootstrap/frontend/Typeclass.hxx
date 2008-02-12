@@ -49,8 +49,12 @@
 #include "Type.hxx"
 #include "INOstream.hxx"
 
-typedef Type Typeclass;
 struct TypeScheme;
+struct TCConstraints;
+
+typedef Type Typeclass;
+typedef Typeclass Constraint; 
+typedef TCConstraints Constraints; 
 
 struct Instance : public Countable {
   GCPtr<TypeScheme> ts;
@@ -109,8 +113,6 @@ struct TCConstraints : public Countable {
   }  
 };
 
-typedef Typeclass Constraint; 
-typedef TCConstraints Constraints; 
 
 #endif /* TYPECLASS_HXX */
 

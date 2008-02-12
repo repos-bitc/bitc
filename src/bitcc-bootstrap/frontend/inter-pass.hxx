@@ -78,7 +78,6 @@ void BitcP(std::ostream& out,
 	   bool showTypes);
 
 void addDecl(GCPtr<AST> decl);
-
 extern void fatal();
 
 #endif /* INTER_PASS_HXX */

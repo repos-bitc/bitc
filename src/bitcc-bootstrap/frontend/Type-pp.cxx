@@ -333,7 +333,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 	 << ((t->kind == ty_mbFull) ? "|" : "!")
 	 << ((t->Core()->kind == ty_fn)?"(":"")
 	 << t->Core()->asString(tvP, traverse)
-	 << ((t->Core()->kind == ty_fn)?"(":"");
+	 << ((t->Core()->kind == ty_fn)?")":"");
       break;
     }
 
@@ -392,20 +392,25 @@ std::string
 TypeScheme::asString(GCPtr<TvPrinter> tvP) const
 {
   std::stringstream ss; 
-  bool mustEndForall = false;
+  bool forall = false;
   if(Options::FQtypes)
     if(ftvs->size()) {
       ss << "(forall";
+      forall = true;
       for(size_t i=0; i < ftvs->size(); i++)      
 	ss << " " << Ftv(i)->asString(tvP);      
-      ss << ") ";
+      ss << " ";
     }
 
   if(tcc != NULL) {
     if(Options::showAllTccs) {
       if(tcc->pred->size()) {
-	ss << "(forall (";
-	mustEndForall = true;
+	if(!forall) {
+	  ss << "(forall";
+	  forall = true;
+	}
+
+	ss << " (";
 	for(size_t i=0; i < tcc->pred->size(); i++) {
 	  GCPtr<Typeclass> pred = tcc->Pred(i)->getType();
 	  ss << pred->asString(tvP) << " ";
@@ -415,35 +420,34 @@ TypeScheme::asString(GCPtr<TvPrinter> tvP) const
 	      ss << pred->FnDep(j)->asString(tvP) << " ";
 	    }
 	}
-	
 	ss << ") ";
-	//ss << "=> ";      
       }
     }
     else { 
-      GCPtr<TCConstraints> _tcc = new TCConstraints;
-      addConstraints(_tcc);
+      //GCPtr<TCConstraints> _tcc = new TCConstraints;
+      //addConstraints(_tcc);
+      GCPtr<TCConstraints> _tcc = tcc;
 
       if(_tcc->pred->size()) {
  	for(size_t i=0; i < _tcc->pred->size(); i++) {
 	  if(((_tcc->Pred(i)->flags & TY_CT_SUBSUMED) == 0) && 
 	     ((_tcc->Pred(i)->flags & TY_CT_SELF) == 0)) {
-	    if(!mustEndForall) {
+	    if(!forall) {
 	      ss << "(forall (";
-	      mustEndForall = true;
+	      forall = true;
 	    }
 	    ss << _tcc->Pred(i)->asString(tvP) << " ";	  
 	  }
 	}
 
-	if(mustEndForall)
+	if(forall)
 	  ss << ") ";
       }
     }
   }
   
   ss << tau->asString(tvP);
-  if(mustEndForall)
+  if(forall)
     ss << ")";
   
   return ss.str();
@@ -455,6 +459,7 @@ Instance::asString() const
   return ts->tau->asString();
 }
 
+#if 0
 static void
 appendAllFtvs(GCPtr<CVector<GCPtr<Type> > > allftvs,
 	      GCPtr<Type> t)
@@ -468,6 +473,7 @@ appendAllFtvs(GCPtr<CVector<GCPtr<Type> > > allftvs,
       allftvs->append(ftv);
   }
 }
+
 
 static void
 collectRelevantCts(GCPtr<Type> tau, GCPtr<TCConstraints> from, 
@@ -520,3 +526,4 @@ ctypeAsString(GCPtr<Type> t, GCPtr<Constraints> cset,
   return ss.str();
 }
 
+#endif

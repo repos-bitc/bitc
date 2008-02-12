@@ -120,61 +120,7 @@ TypeScheme::type_instance() const
 
 
 GCPtr<TypeScheme> 
-TypeScheme::ts_instance() const
-{
-  //std::cout << "TS Instantiating " << this->asString();
-
-  GCPtr<TypeScheme> ts = new TypeScheme(tau);
-  ts->tau = NULL;
-
-  for(size_t i=0; i<ftvs->size(); i++) {
-    GCPtr<Type> thisFtv = Ftv(i)->getType();
-    GCPtr<AST> thisAst = thisFtv->ast;
-    GCPtr<Type> newFtv = newTvar(thisAst);
-    ts->ftvs->append(newFtv); // FIXed
-  }
-
-  GCPtr<CVector<GCPtr<Type> > > cnftvs = new CVector<GCPtr<Type> >;
-  GCPtr<CVector<GCPtr<Type> > > cftvs = new CVector<GCPtr<Type> >;
-  
-  for(size_t i=0; i<ftvs->size(); i++) {
-    cftvs->append(Ftv(i));
-    cnftvs->append(ts->Ftv(i));
-  }
-  
-  if(ftvs->size() == 0)
-    ts->tau = tau;
-  else
-    ts->tau = tau->TypeSpecialize(cftvs, cnftvs);  
-  //std::cout << " to " << ts->tau->asString() << std::endl;
- 
-  if(tcc != NULL) {
-    GCPtr<TCConstraints> _tcc = new TCConstraints;
-    addConstraints(_tcc);
-    
-    ts->tcc = new TCConstraints;
-
-    for(size_t i = 0; i < _tcc->pred->size(); i++) {
-      GCPtr<Typeclass> pred;
-      if(ftvs->size() == 0)
-	pred = _tcc->Pred(i);
-      else
-	pred = _tcc->Pred(i)->TypeSpecialize(cftvs, cnftvs);
-      
-      ts->tcc->addPred(pred);
-
-      if(_tcc->Pred(i)->fnDeps) {
-	assert(pred->fnDeps);
-	assert(pred->fnDeps->size() == _tcc->Pred(i)->fnDeps->size());
-      }
-    }
-  }
-  
-  return ts;
-}
-
-GCPtr<TypeScheme> 
-TypeScheme::ts_instance_copy() const
+TypeScheme::ts_instance(bool fullCopy) const
 {
   //std::cout << "TS Instantiating " << this->asString();
 
@@ -182,9 +128,8 @@ TypeScheme::ts_instance_copy() const
   ts->tau = NULL;
 
   for(size_t i=0; i<ftvs->size(); i++) 
-    ts->ftvs->append(newTvar(Ftv(i)->ast)); // FIXed
+    ts->ftvs->append(newTvar(Ftv(i)->ast));
   
-
   GCPtr<CVector<GCPtr<Type> > > cnftvs = new CVector<GCPtr<Type> >;
   GCPtr<CVector<GCPtr<Type> > > cftvs = new CVector<GCPtr<Type> >;
   
@@ -193,27 +138,41 @@ TypeScheme::ts_instance_copy() const
     cnftvs->append(ts->Ftv(i));
   }
   
-  ts->tau = tau->TypeSpecialize(cftvs, cnftvs);  
-  //std::cout << " to " << ts->tau->asString() << std::endl;
-
-  if(tcc != NULL) {
+  if(fullCopy || ftvs->size() > 0)
+    ts->tau = tau->TypeSpecializeReal(cftvs, cnftvs);  
+  else 
+    ts->tau = tau;
+ 
+  if(tcc) {
     GCPtr<TCConstraints> _tcc = new TCConstraints;
     addConstraints(_tcc);
     
     ts->tcc = new TCConstraints;
-
     for(size_t i = 0; i < _tcc->pred->size(); i++) {
-      GCPtr<Typeclass> pred = _tcc->Pred(i)->TypeSpecialize(cftvs, cnftvs);
+      GCPtr<Typeclass> pred;
+      
+      if(fullCopy || ftvs->size() > 0)
+	pred = _tcc->Pred(i)->TypeSpecializeReal(cftvs, cnftvs);
+      else
+	pred = _tcc->Pred(i);
+      
       ts->tcc->addPred(pred);
-
-      if(_tcc->Pred(i)->fnDeps) {
-	assert(pred->fnDeps);
-	assert(pred->fnDeps->size() == _tcc->Pred(i)->fnDeps->size());
-      }
     }
   }
+
+  tau->clear_sp();
+
+  if(tcc)
+    for(size_t i = 0; i < tcc->size(); i++)
+      tcc->Pred(i)->clear_sp();
   
   return ts;
+}
+
+GCPtr<TypeScheme> 
+TypeScheme::ts_instance_copy() const
+{
+  return ts_instance(true);
 }
 
 void

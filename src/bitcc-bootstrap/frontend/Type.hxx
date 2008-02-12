@@ -155,6 +155,8 @@ struct TypeScheme;
 #define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | CT_REMOVE) 
 
 struct Type : public Countable {
+  
+  friend struct TypeScheme;
 
  private:  
   static unsigned long long typeCount; // To generate New Type Variables
@@ -361,15 +363,10 @@ private:
 	   GCPtr<Trail> trail=new Trail);
 public:
   // Returns true of the type `t' is structurally equal to `this'
-  // under alpha renaming -- module:
-  // i)   mutabality 
-  // ii)  declarations unify with definitions
+  // under alpha renaming (and declarations unify with definitions)
   // 
-  // However, it should be noted that this is rarely an issue 
-  // if the function used once the inference process is OVER.
-  //
-  // If one is still not satisfied, he can use the next function
-  // strictlyEquals which removes the above two restrictions.
+  // The next function strictlyEquals removes the above two
+  // restrictions. 
   bool equals(GCPtr<Type> t, bool verbose=false,
 	      std::ostream &errStream=std::cerr);
   bool strictlyEquals(GCPtr<Type> t, bool verbose=false,
@@ -423,11 +420,13 @@ public:
   static GCPtr<Type> Kmono;
   static GCPtr<Type> Kpoly;
   
-
 private:
   GCPtr<Type> 
   TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
 		     GCPtr<CVector<GCPtr<Type> > > nftvs);
+  
+  // Clear the sp (specialization) field of type records recursively.
+  void clear_sp();
   
 public:
   GCPtr<Type> 

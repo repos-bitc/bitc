@@ -102,7 +102,6 @@ generalizePat(std::ostream& errStream,
 	      GCPtr<Environment<TypeScheme> > gamma,
 	      GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
 	      GCPtr<AST> bp, GCPtr<AST> expr,
-	      const bool callerIsLet, 
 	      GCPtr<TCConstraints> tcc,
 	      GCPtr<TCConstraints> parentTCC,
 	      GCPtr<Trail> trail);
@@ -716,8 +715,8 @@ InferStruct(std::ostream& errStream, GCPtr<AST> ast,
   ast->symType = sIdent->symType;
    
   // Solve current Predicates.
-  CHKERR(errFree, sigma->solvePredicates(errStream, 
-					 ast->loc, instEnv));
+  CHKERR(errFree, sigma->solvePredicates(errStream, ast->loc,
+					 instEnv, trail)); 
 
   // Ensure that the definition matches the declarations
   if(declTS)
@@ -868,8 +867,8 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
   markCCC(ut);
   
   // Solve current Predicates.
-  CHKERR(errFree, sigma->solvePredicates(errStream, 
-					 ast->loc, instEnv));
+  CHKERR(errFree, sigma->solvePredicates(errStream, ast->loc,
+					 instEnv, trail)); 
   
   //Now add all constructor bindings to the environment.
   for(c = 0; c < ctrs->children->size(); c++) {
@@ -1218,8 +1217,8 @@ InferTypeClass(std::ostream& errStream, GCPtr<AST> ast,
       }      
 
       // Solve current Predicates.
-      CHKERR(errFree, mSigma->solvePredicates(errStream, 
-					      method->loc, instEnv));
+      CHKERR(errFree, mSigma->solvePredicates(errStream, method->loc,
+					      instEnv, trail)); 
       
       mType->myContainer = ident;
       mID->scheme = mSigma;      
@@ -1282,7 +1281,7 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
     if(pred->defAst == TCident->symbolDef)
       pred->flags |= TY_CT_SELF;
   }
-    
+  
   if(!errFree) 
     return false;
   
@@ -1420,8 +1419,10 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
       TYPEINFER(method, defGamma, instEnv, impTypes, isVP, myTcc,
 		uflags, trail, USE_MODE, TI_NONE);
       GCPtr<Type> methodType = method->symType->getType();
-      CHKERR(errFree, unify(errStream, trail,
-			    method, mtType, methodType,
+
+      // Methods are functions, remove top mutability.
+      CHKERR(errFree, unify(errStream, trail, method, 
+			    mtType, methodType->minimizeMutability(),
 			    uflags));
     }
   }
@@ -1441,7 +1442,7 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
 
   gamma->mergeBindingsFrom(defGamma);
   sigma->generalize(errStream, ast->loc, gamma, instEnv, tcapp, 
-		    NULL, trail, true, false, false);      
+		    NULL, trail, gen_instance);      
        
   if(!errFree)
     return false;
@@ -1973,8 +1974,8 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		sigma->tcc, uflags, trail,  mode, TI_CONSTR);
 
       // Solve current Predicates.
-      CHKERR(errFree, sigma->solvePredicates(errStream, 
-					     ident->loc, instEnv));
+      CHKERR(errFree, sigma->solvePredicates(errStream, ident->loc,
+					     instEnv, trail)); 
 
       if (sigma->ftvs->size() && ast->getID()->externalName.size()) {
 	errStream << ast->loc << ": Polymorphic declarations may not specify "
@@ -2046,13 +2047,9 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	break;
       
       sigma->tcc = newTcc;
-      //collectAllftvs(sigma->tau, sigma->ftvs);
-      GCPtr<AST> ip = new AST(at_identPattern, ident->loc, ident, typ);
-      ip->symType = ident->symType;
-
-      CHKERR(errFree, generalizePat(errStream, ast->loc, gamma,
-				    instEnv, ip, ident, false, 
-				    sigma->tcc, NULL, trail));
+      CHKERR(errFree, sigma->generalize(errStream, ast->loc, gamma,
+					instEnv, ident, NULL, trail,
+					gen_top)); 
       
       if(!errFree) {
 	errStream << ast->loc << ": Invalid Proclaimation"
@@ -2127,7 +2124,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 				ast->child(i),
 				ast->child(i)->symType,
 				tc->TypeArg(i-1), uflags));
-	}	
+	}
       }
       else {
 	errStream << ast->loc << ": "
@@ -2217,8 +2214,8 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       ctr->stSigma = new TypeScheme(sType, ctr, sigma->tcc);
 
       // Solve current Predicates.
-      CHKERR(errFree, sigma->solvePredicates(errStream, 
-					     ast->loc, instEnv));
+      CHKERR(errFree, sigma->solvePredicates(errStream, ast->loc,
+					     instEnv, trail)); 
 
       ast->symType = ctr->symType;
 
@@ -2261,6 +2258,8 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
       GCPtr<Type> idType = ident->symType;
       GCPtr<Type> rhsType = ast->child(1)->symType;
+      GCPtr<TypeScheme> sigma = ident->scheme;
+      sigma->tcc = currTcc;
 
       //errStream << "At define " << ident->asString() << ":"
       //		<< " LHS = " << idType->asString()
@@ -2271,16 +2270,13 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 			    ast->child(1)->symType,
 			    MBF(ast->child(0)->symType), uflags));
       
-
       //errStream << "After Unification: " 
       //		<< ast->getID()->symType->asString()
       //		<< std::endl;            
 
-      CHKERR(errFree, generalizePat(errStream, ast->loc, 
-				    gamma, instEnv, 
-				    ast->child(0),
-				    ast->child(1), 
-				    false, currTcc, NULL, trail));
+      CHKERR(errFree, sigma->generalize(errStream, ast->loc, gamma,
+					instEnv,  ast->child(1), NULL, 
+					trail, gen_top));
 
       // errStream << "After Generalization: " 
       //		<< ast->getID()->scheme->asString()
@@ -3768,23 +3764,47 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       // match agt_expr
       ast->symType = new Type(ty_unit, ast);
 
+      errStream << "set! case ";
+
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
+
+      errStream << "e1: "
+		<< ast->child(0)->symType->asString(Options::debugTvP)
+		<< std::endl;
       
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
 
+      errStream << "e2: "
+		<< ast->child(0)->symType->asString(Options::debugTvP)
+		<< std::endl;
+
       GCPtr<Type> mTv = new Type(ty_mutable, newTvar(ast->child(0)));
       CHKERR(errFree, unify(errStream, trail, ast->child(0),
 			    ast->child(0)->symType, mTv, uflags));
+
+      errStream << "[U1] e1: "
+		<< ast->child(0)->symType->asString(Options::debugTvP)
+		<< std::endl;
       
       GCPtr<Type> tv = newTvar(ast);
       CHKERR(errFree, unify(errStream, trail, ast->child(0),
 			    ast->child(0)->symType,
 			    MBF(tv), uflags));
+
+      errStream << "[U2] e1: "
+		<< ast->child(0)->symType->asString(Options::debugTvP)
+		<< std::endl;
+
       CHKERR(errFree, unify(errStream, trail, ast->child(1),
 			    ast->child(1)->symType,
 			    MBF(tv), uflags));
+
+      errStream << "[U3] e1: "
+		<< ast->child(0)->symType->asString(Options::debugTvP)
+		<< std::endl;
+
       break;
     }
 
@@ -4481,7 +4501,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       CHKERR(errFree, generalizePat(errStream, ast->loc, 
 				    gamma, instEnv, bAst, vAst, 
-				    true, letTcc, tcc, trail));
+				    letTcc, tcc, trail));
       
       lbs->symType = bAst->symType;
       lbs->scheme = bAst->scheme;

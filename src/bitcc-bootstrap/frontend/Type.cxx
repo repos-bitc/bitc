@@ -285,10 +285,10 @@ Type::isUnifiableTvar(size_t flags)
   if(t->kind != ty_tvar)
     return false;
   
-  if(flags & UNIFY_IGN_RIGIDITY)
+  if(flags & UN_IGN_RIGIDITY)
     return true;
   
-  if((tv->flags & TY_RIGID) == 0)
+  if((t->flags & TY_RIGID) == 0)
     return true;
 
   return false;

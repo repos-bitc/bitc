@@ -90,7 +90,8 @@ Instance::equals(std::ostream &errStream, GCPtr<Instance> ins,
   }
   
   std::stringstream ss;
-  CHKERR(unifies, mySigma->solvePredicates(ss, ast->loc, instEnv)); 
+  CHKERR(unifies, mySigma->solvePredicates(ss, ast->loc, 
+					   instEnv, new Trail)); 
   
   if(!unifies)
     return false;
@@ -119,7 +120,8 @@ Instance::satisfies(std::ostream &errStream,
     return true;
 
   std::stringstream ss;
-  CHKERR(unifies, sigma->solvePredicates(ss, pred->ast->loc, instEnv));   
+  CHKERR(unifies, sigma->solvePredicates(ss, pred->ast->loc, 
+					 instEnv, new Trail));
   
   if(!unifies)
     return false;
@@ -163,7 +165,51 @@ Typeclass::addFnDep(GCPtr<Type> dep)
       'a in {'a*}, 
       'a in FTVS(C) and 
       'a not in FTVS(t')
-    then s is ambiguous. */
+    then s is ambiguous.
+
+   For example: 
+     read:  forall 'a. () -> 'a \ {Readable('a)}
+     write: forall 'a. 'a -> () \ {Writable('a)}
+
+   What about write(read ()) ?
+  
+     write(read ()): forall 'a. () \ Readable('a), Writable('a).
+
+   This case is traditionally declared and error because there is no
+   way to instantiate the 'a at the use location.
+
+   It is not clear that "ambiguous" typing is an error. In fact, it
+   does not break subject reduction, and execution can continue by
+   picking any instantiation of the variable. In particular, it is (in
+   a way) necessary in the case of polymorphic consrtaints.
+
+   For example, consider:
+   
+    let(k1) id = \x.x 
+    Ignoring the internal maybe types at function argument and return
+    positions, we can write:
+    
+    id: forall 'a,'b. 'b|'a->'a  \ {*(k1, 'b|'a->'a, 'b|'a->'a)}
+    
+    This type is not ambiguous. Now, if we write:
+
+    let(k2) id2 = \y.(id y),
+
+    the type if id2 will be:
+
+    id2: forall 'c,'d,'e. 'd|'c->'c  \ {*(k1, 'b|'a->'a, 'e|'c->'c),
+                                        *(k2, 'd|'c->'c, 'd|'c->'c)}
+
+    Here, the type of id2 will be declared ambiguous, which we cannot
+    accept. 
+
+   It seems that the correct solution is to drop the ambiguity check,
+   but here I have taken a middle ground wher ambiguity check is
+   performed only for type-class constraints.
+
+ */
+
+
 bool 
 TypeScheme::checkAmbiguity(std::ostream &errStream, LexLoc &errLoc)
 {
@@ -171,13 +217,32 @@ TypeScheme::checkAmbiguity(std::ostream &errStream, LexLoc &errLoc)
   for(size_t j=0; j < ftvs->size(); j++) {
     GCPtr<Type> ftv = ftvs->elem(j);
     
-    if(!tau->boundInType(ftv) && pred->boundInType(ftv)) {
+    if(!tau->boundInType(ftv)) {
       // ftv must be bound in some predicate.
-      errFree = false;
-      break;
+
+      for(size_t c=0; c < tcc->size(); c++) {
+	GCPtr<Typeclass> pred = tcc->Pred(c);
+	if(pred->isPcst())
+	  continue;
+	
+	// The ftv is bound in a type-class predicate.
+	if(pred->boundInType(ftv)) {
+	  errStream << errLoc << ": "
+		    << "Type variable "
+		    << ftv->asString(Options::debugTvP)
+		    << " unbound in "
+		    << tau->asString(Options::debugTvP)
+		    << " wrt "
+		    << asString(Options::debugTvP)
+		    << std::endl;
+	  
+	  errFree = false;
+	  break;
+	}
+      }
     }
   }
-  
+
   if(!errFree)
     errStream << errLoc << ": "
 	      << "Ambiguous type definition:"
@@ -234,10 +299,10 @@ TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
     }
     
     if(hasFtv) {
-      newpred->append(pred);
+      newPred->append(pred);
     }
     else {
-      parentTcc->addPred(pred);
+      parentTCC->addPred(pred);
       migrated = true;
     }
   }
@@ -246,7 +311,6 @@ TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
   return migrated;
 }
 
-//#define VERBOSE_SOLVE
 
 static GCPtr< CVector< GCPtr<Type> > > 
 getDomain(GCPtr<Typeclass> t)
@@ -256,7 +320,7 @@ getDomain(GCPtr<Typeclass> t)
   for(size_t i=0; i < t->typeArgs->size(); i++)
     dom->append(t->TypeArg(i));
   
-  if(pred->fnDeps)
+  if(t->fnDeps)
     for(size_t fd = 0; fd < t->fnDeps->size(); fd++) {
       GCPtr<Type> fdep = t->FnDep(fd);
       GCPtr<Type> ret = fdep->Ret();
@@ -292,7 +356,6 @@ mustSolve(GCPtr< CVector< GCPtr<Type> > > dom)
 {
   for(size_t i=0; i < dom->size(); i++) {
     GCPtr<Type> arg = dom->elem(i)->getType();
-    arg->collectAllftvs(vars);
     if(arg->kind == ty_tvar || 
        arg->kind == ty_mbTop || arg->kind == ty_mbFull)
       return false;
@@ -323,17 +386,31 @@ unrigidify(GCPtr< CVector< GCPtr<Type> > > vars)
 
 
 bool
-handlePcst(std::ostream &errStream, GCPtr<Trail> trail
+handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
 	   GCPtr<Constraint> ct, GCPtr<Constraints> cset, 
-	   bool &handled)
+	   bool &handled, bool &handlable)
 {
+  if(ct->isPcst()) {
+    handlable = true;
+  }
+  else {
+    handlable = false;
+    handled = false;
+    return true;
+  }
+
+  PCST_DEBUG errStream << "\t\tTrying PCST: " 
+		       << ct->asString(Options::debugTvP)
+		       << std::endl;
+  
   GCPtr<Type> k = ct->CompType(0)->getType();
   GCPtr<Type> gen = ct->CompType(1)->getType();
   GCPtr<Type> ins = ct->CompType(2)->getType();
   
-  
   // *(m, tg, ti)
   if(k == Type::Kmono) {
+    PCST_DEBUG errStream << "\t\tCase *(m, tg, ti), CLEAR." 
+			 << std::endl;
     cset->clearPred(ct);
     handled = true;
     return ins->unifyWith(gen, false, trail, errStream) ;
@@ -343,6 +420,9 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail
     
     // *(p, tg, ti), Immutable(ti)
     if(ins->isDeepImmutable()) {
+      PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), "
+			   << "Immutable(ti) CLEAR." 
+			   << std::endl;
       cset->clearPred(ct);
       handled = true;
       return true;
@@ -350,10 +430,17 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail
     
     // *(p, tg, ti), ~Immut(ti) (type variables OK here)
     if (!ins->isDeepImmut()) {
+      PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), " 
+			   << "~Immut(ti) ERROR." 
+			   << std::endl;
       cset->clearPred(ct);
       handled = true;
       return false;
     }
+    
+    PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), " 
+			 << "Immut(ti) KEEP." 
+			 << std::endl;
     
     // *(p, tg, ti), Immut(ti), ~Immutable(ti)
     handled = false;
@@ -364,6 +451,9 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail
   
   // *(k, tg, ti), Mut(ti)
   if(ins->isDeepMut()) {
+    PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), " 
+			 << "Mut(ti) [k |-> m]." 
+			 << std::endl;
     trail->subst(k, Type::Kmono);
     handled = true;
     return true;
@@ -377,7 +467,11 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail
     
     if(newCt->isPcst() && newCt->CompType(0) == k) {
       GCPtr<Type> newIns = newCt->CompType(1);
-      if(!ins->unifyWith(newIns)) {
+      if(!ins->equals(newIns)) {
+	PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), *(k, tg, tj)" 
+			     << " ti !~~ tj, [k |-> p]." 
+			     << std::endl;
+	
 	trail->subst(k, Type::Kpoly);
 	handled = true;
 	return true;
@@ -385,95 +479,87 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail
     }
   }
   
+  PCST_DEBUG errStream << "\t\tCase *(k, tg, ti) KEEP." 
+		       << std::endl;
+  
   handled = false;
   return true;
 }
 
 bool
-handleSpecialPred(std::ostream &errStream, GCPtr<Trail> trail
+handleSpecialPred(std::ostream &errStream, GCPtr<Trail> trail,
 		  GCPtr<Constraint> pred, GCPtr<Constraints> cset, 
-		  bool &handled)
+		  bool &handled, bool &handlable)
 {
+  pred = pred->getType();
+  if(pred->kind != ty_typeclass) {
+    // This must be a pcst constraint;
+    handlable = false;
+    handled = false;
+    return true;
+  }
+  
   // Special handling for ref-types
   // Safe to do name comparison, everyone includes the prelude.
   const std::string &ref_types = SpecialNames::spNames.sp_ref_types; 
   if(pred->defAst->s == ref_types) {
+    handlable = true;
     assert(pred->typeArgs->size() == 1);
     GCPtr<Type> it = pred->TypeArg(0)->getType();
 
+    SPSOL_DEBUG errStream << "\t\tCase RefTypes for "
+			  << pred->asString(Options::debugTvP)
+			  << std::endl;
+    
     if(it->isRefType()) {
+      SPSOL_DEBUG errStream << "\t\t ... Sarisfied, CLEAR"
+			    << pred->asString(Options::debugTvP)
+			    << std::endl;
       cset->clearPred(pred);
       handled = true;
       return true;
     }
     
-    if(it->isTvar()) {
+    if(it->isTvar()) { // checks beyond mutability, maybe-ness
+      SPSOL_DEBUG errStream << "\t\t ... Variable, KEEP"
+			    << pred->asString(Options::debugTvP)
+			    << std::endl;
       handled = false;
       return true;
     }
     
     /* Value Type */
+    SPSOL_DEBUG errStream << "\t\t ... Unboxed-type, ERROR"
+			  << pred->asString(Options::debugTvP)
+			  << std::endl;
     cset->clearPred(pred);
     handled = true;
     return false;
   }
-
+  
+  handlable = false;
   handled = false;
   return true;
 }
 
-static GCPtr<TypeScheme> 
-findInstance(bool &errFree, std::ostream &errStream,
-	     GCPtr<Typeclass> pred, 
-	     GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv)
-{
-  GCPtr<CVector<GCPtr<Instance> > > insts = 
-    instEnv->getBinding(pred->defAst->fqn.asString());
-  if(!insts)
-    return NULL;
-  
-  for(size_t j=0; j < insts->size(); j++) {
-    GCPtr<TypeScheme> ts = (insts->elem(j))->ts->ts_instance_copy();
-    if(pred->equals(ts->tau))
-      return ts;
-#ifdef VERBOSE_SOLVE    
-    errStream << "Not applicable: " << ts->asString()
-	      << std::endl;
-#endif
-  }  
-  return NULL;  
-}
-
-static void
-unifyWithInstance(std::ostream &errStream,
-		  GCPtr<Typeclass> pred, GCPtr<TypeScheme> instScheme,
-		  GCPtr<TCConstraints> removedTcc,		  
-		  GCPtr<TCConstraints> tcc,
-		  LexLoc &errLoc)
-{  
-  bool errFree = pred->unifyWith(instScheme->tau);
-  assert(errFree);  
-  
-  if(instScheme->tcc)
-    for(size_t c=0; c < instScheme->tcc->pred->size(); c++) {
-      GCPtr<Typeclass> instPred = instScheme->tcc->Pred(c);
-      if(!removedTcc->contains(instPred))
-	tcc->addPred(instPred);
-    }
-}
-
-
 bool
-handleTCPred(std::ostream &errStream, GCPtr<Trail> trail
+handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
 	     GCPtr<Typeclass> pred, GCPtr<TCConstraints> tcc, 
 	     GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
 	     bool must_solve, bool trial_mode, bool &handled)
 {
+  TCSOL_DEBUG errStream << "\t\tInstance Solver for: "
+			<< pred->asString(Options::debugTvP)
+			<< (trial_mode ? " [TRIAL]" : "")
+			<< std::endl;
+
   GCPtr<CVector<GCPtr<Instance> > > insts = 
     instEnv->getBinding(pred->defAst->fqn.asString());
   
   if(!insts) {
-    if(mustSolve) {
+    TCSOL_DEBUG errStream << "\t\t ... No Instances in Environment"
+			  << std::endl;
+    if(must_solve) {
       tcc->clearPred(pred);
       handled = true;
       return false;
@@ -487,14 +573,21 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail
   GCPtr<TypeScheme> instScheme = NULL;  
   for(size_t j=0; j < insts->size(); j++) {
     GCPtr<TypeScheme> ts = (insts->elem(j))->ts->ts_instance_copy();
-    if(pred->equals(ts->tau)) {
+    GCPtr<Type> inst = ts->tau;
+    
+    for(size_t c=0; c < inst->typeArgs->size(); c++)
+      inst->TypeArg(c) = MBF(inst->TypeArg(c));
+    
+    if(pred->equals(inst)) {
       instScheme = ts;
       break;
     }
   }
 
-  if(instScheme == NULL) {
-    if(mustSolve) {
+  if(!instScheme) {
+    TCSOL_DEBUG errStream << "\t\t ... No Suitable Instance found"
+			  << std::endl;
+    if(must_solve) {
       tcc->clearPred(pred);
       handled = true;
       return false;
@@ -511,6 +604,12 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail
   }
   
   bool errFree = pred->unifyWith(instScheme->tau);
+
+  TCSOL_DEBUG errStream << "\t\t .. Post Unification with Instance: "
+			<< pred->asString(Options::debugTvP)
+			<< " CLEAR."
+			<< std::endl;
+  
   assert(errFree);  
   tcc->clearPred(pred);
   
@@ -518,6 +617,10 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail
     for(size_t c=0; c < instScheme->tcc->pred->size(); c++) {
       GCPtr<Typeclass> instPred = instScheme->tcc->Pred(c);
       tcc->addPred(instPred);
+      TCSOL_DEBUG errStream << "\t\t .. Add pre-condition: "
+			    << instPred->asString(Options::debugTvP)
+			    << " CLEAR."
+			    << std::endl;
     }
 
   handled = true;
@@ -525,7 +628,7 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail
 }
 
 bool
-handleEquPreds(std::ostream &errStream, GCPtr<Trail> trail
+handleEquPreds(std::ostream &errStream, GCPtr<Trail> trail,
 	       GCPtr<Typeclass> pred, GCPtr<TCConstraints> tcc, 
 	       GCPtr< CVector< GCPtr<Type> > > vars,
 	       bool &handled)
@@ -533,22 +636,30 @@ handleEquPreds(std::ostream &errStream, GCPtr<Trail> trail
   // Equality of domain types in two type class predicated is achieved
   // by testing for unification wherein the type variables in the
   // domain are held rigid.
+  handled = false;
   rigidify(vars);
   for(size_t c=0; c < tcc->size(); c++) {
-    GCPtr<Constraint> newCt = cset->Pred(c)->getType();
+    GCPtr<Constraint> newCt = tcc->Pred(c)->getType();
     if(newCt == pred)
       continue;
     
     if(pred->equals(newCt)) {
+      TCSOL_DEBUG errStream << "\t\t EquPreds: "
+			    << pred->asString(Options::debugTvP)
+			    << " === "
+			    << newCt->asString(Options::debugTvP)
+			    << " UNIFY, CLEAR1."
+			    << std::endl;
+      
       pred->unifyWith(newCt);
       tcc->clearPred(pred);
       handled=true;
-      return true;
+      break;
     }
   }
-
-  handled=false;
-  return false;
+  unrigidify(vars);
+  
+  return true;
 }
 
 
@@ -624,13 +735,10 @@ TypeScheme::solvePredicates(std::ostream &errStream, LexLoc &errLoc,
   bool errFree = true;
   bool handled = false;
   
-#ifdef VERBOSE_SOLVE
-  errStream << std::endl;
+  SOL_DEBUG errStream << "\tTo Solve: " 
+		      << asString(Options::debugTvP)
+		      << std::endl;
   
-  errStream << "Starting: " << this->asString(NULL)
-	    << std::endl;
-#endif
-
   do {
     handled = false;
     GCPtr<Typeclass> errPred = NULL;
@@ -639,50 +747,89 @@ TypeScheme::solvePredicates(std::ostream &errStream, LexLoc &errLoc,
     for(size_t i=0; i < tcc->pred->size(); i++) {
       GCPtr<Typeclass> pred = tcc->Pred(i);
       errPred = pred;
-
+      bool handlable = false;
+      
       // Step 1
       CHKERR(errFreeNow, handleSpecialPred(errStream, trail, 
-					   pred, tcc, handled));
+					   pred, tcc, 
+					   handled, handlable));
+      SOL_DEBUG errStream << "\t[Sol 1] (special): " 
+			  << asString(Options::debugTvP)
+			  << (handled ? " [HANDLED]" : "")
+			  << (handlable ? " [HANDLABLE]" : "")
+			  << (!errFreeNow ? " [ERROR]" : "")
+			  << std::endl;
       if(handled)
 	break;
+      if(handlable)
+	continue;
 
       // Step 2
       CHKERR(errFreeNow, handlePcst(errStream, trail, 
-				    pred, tcc, handled));
+				    pred, tcc, handled, handlable));
+      SOL_DEBUG errStream << "\t[Sol 2] (pcst): " 
+			  << asString(Options::debugTvP)
+			  << (handled ? " [HANDLED]" : "")
+			  << (handlable ? " [HANDLABLE]" : "")
+			  << (!errFreeNow ? " [ERROR]" : "")
+			  << std::endl;
       if(handled)
 	break;
+      if(handlable)
+	continue;
       
       GCPtr< CVector< GCPtr<Type> > > dom = getDomain(pred);
       GCPtr< CVector< GCPtr<Type> > > vars = getDomVars(dom);
       bool ms = mustSolve(dom);
       if(ms) {
  	// Step 3.a
-	CHKERR(errFreeNow, handleTcPred(errStream, trail, pred, tcc,
-					instEnv, false, handled));
+	CHKERR(errFreeNow, handleTCPred(errStream, trail, pred, tcc,
+					instEnv, ms, false, handled));
+	SOL_DEBUG errStream << "\t[Sol 3.a] (must-solve): " 
+			    << asString(Options::debugTvP)
+			    << (handled ? " [HANDLED]" : "")
+			    << (handlable ? " [HANDLABLE]" : "")
+			    << (!errFreeNow ? " [ERROR]" : "")
+			    << std::endl;
 	if(handled)
 	  break;
       }
       
       // Step 3.b.i
       rigidify(vars);
-      handleTcPred(errStream, trail, pred, tcc,
-		   instEnv, false, handled);
+      handleTCPred(errStream, trail, pred, tcc,
+		   instEnv, ms, false, handled);
       unrigidify(vars);
-      
+      SOL_DEBUG errStream << "\t[Sol 3.b.i] (exact): " 
+			  << asString(Options::debugTvP)
+			  << (handled ? " [HANDLED]" : "")
+			  << (handlable ? " [HANDLABLE]" : "")
+			  << (!errFreeNow ? " [ERROR]" : "")
+			  << std::endl;
       if(handled)
 	break;
       
       // Step 3.b.ii
-      CHKERR(errFreeNow, handleTcPred(errStream, trail, pred, tcc,
-				      instEnv, false, handled));
-      
+      CHKERR(errFreeNow, handleTCPred(errStream, trail, pred, tcc,
+				      instEnv, false, true, handled));
+      SOL_DEBUG errStream << "[Sol 3.b.ii] (solvability): " 
+			  << asString(Options::debugTvP)
+			  << (handled ? " [HANDLED]" : "")
+			  << (handlable ? " [HANDLABLE]" : "")
+			  << (!errFreeNow ? " [ERROR]" : "")
+			  << std::endl;
       if(handled)
 	break;
       
       // Step 4
       CHKERR(errFreeNow, handleEquPreds(errStream, trail, 
 					pred, tcc, vars, handled));
-      
+      SOL_DEBUG errStream << "[Sol 4] (equ-pred): " 
+			  << asString(Options::debugTvP)
+			  << (handled ? " [HANDLED]" : "")
+			  << (handlable ? " [HANDLABLE]" : "")
+			  << (!errFreeNow ? " [ERROR]" : "")
+			  << std::endl;      
       if(handled)
 	break;
       

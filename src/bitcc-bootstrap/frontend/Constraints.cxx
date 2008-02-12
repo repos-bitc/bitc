@@ -91,7 +91,7 @@ void
 TCConstraints::clearPred(GCPtr<Constraint> ct) 
 {
   ct =  ct->getType();
-  for(c = 0; c < pred->size(); c++) {
+  for(size_t c = 0; c < pred->size(); c++) {
     GCPtr<Constraint> pr = Pred(c)->getType();
     if(pr == ct)
       return clearPred(c);
