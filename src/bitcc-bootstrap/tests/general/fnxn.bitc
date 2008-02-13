@@ -11,16 +11,16 @@
 ;; Cyclic type
 ;;(define f (lambda (x) f))
 
-(deftypeclass (Eq 'a)
-  == : (fn ('a) bool)  )
+(defunion (list 'a) nil (cons car:'a cdr:(list 'a)))
 
-(deftypeclass (forall ((Eq 'a)) (Ord 'a))
-  <= : (fn ('a) bool)  )
-  
+(proclaim list-nth:(fn ((list 'a) word) 'a))
+(proclaim llength:(fn ((list 'a)) word))
 
-(define h (lambda (x) #t))
+(deftypeclass (Length 'a)
+  length: (fn ('a) word))
 
-(definstance (Eq bool) h)
-(definstance (Ord bool) h)
+(definstance (Length (list 'a)) llength)
 
-(define g (<= #t)  )
+(define (list->vector lst)
+  (make-vector (length lst) 
+	       (lambda (n) (list-nth lst n))))

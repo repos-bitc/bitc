@@ -234,30 +234,30 @@ void
 TypeScheme::collectftvs(GCPtr<const Environment<TypeScheme> > gamma)
 {
   tau->collectftvsWrtGamma(ftvs, gamma);  
-  std::cerr << "tau = "
-	    << tau->asString(Options::debugTvP)
-	    << std::endl
-	    << "tau's ftvs = ";
+  //std::cerr << "tau = "
+  //	    << tau->asString(Options::debugTvP)
+  //	    << std::endl
+  //	    << "tau's ftvs = ";
 
-  for(size_t i=0; i < ftvs->size(); i++)
-    std::cerr << Ftv(i)->asString(Options::debugTvP);
+  //for(size_t i=0; i < ftvs->size(); i++)
+  //  std::cerr << Ftv(i)->asString(Options::debugTvP);
   
-  std::cerr << std::endl;
+  //std::cerr << std::endl;
   
   if(tcc) {    
     for(size_t i=0; i < tcc->pred->size(); i++) {
       GCPtr<Typeclass> pred = tcc->Pred(i);
       pred->collectftvsWrtGamma(ftvs, gamma);  
       
-      std::cerr << "pred = "
-		<< pred->asString(Options::debugTvP)
-		<< std::endl
-		<< "SUM ftvs = ";
+      //  std::cerr << "pred = "
+      //	<< pred->asString(Options::debugTvP)
+      //	<< std::endl
+      //	<< "SUM ftvs = ";
       
-      for(size_t i=0; i < ftvs->size(); i++)
-	std::cerr << Ftv(i)->asString(Options::debugTvP);
+      //  for(size_t i=0; i < ftvs->size(); i++)
+      //    std::cerr << Ftv(i)->asString(Options::debugTvP);
       
-      std::cerr << std::endl;
+      //      std::cerr << std::endl;
     }
  
     GCPtr<CVector<GCPtr<Type> > > allFnDeps = new CVector<GCPtr<Type> >;

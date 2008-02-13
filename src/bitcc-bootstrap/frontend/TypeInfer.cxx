@@ -3764,47 +3764,24 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       // match agt_expr
       ast->symType = new Type(ty_unit, ast);
 
-      errStream << "set! case ";
-
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
 
-      errStream << "e1: "
-		<< ast->child(0)->symType->asString(Options::debugTvP)
-		<< std::endl;
-      
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
-
-      errStream << "e2: "
-		<< ast->child(0)->symType->asString(Options::debugTvP)
-		<< std::endl;
 
       GCPtr<Type> mTv = new Type(ty_mutable, newTvar(ast->child(0)));
       CHKERR(errFree, unify(errStream, trail, ast->child(0),
 			    ast->child(0)->symType, mTv, uflags));
 
-      errStream << "[U1] e1: "
-		<< ast->child(0)->symType->asString(Options::debugTvP)
-		<< std::endl;
-      
       GCPtr<Type> tv = newTvar(ast);
       CHKERR(errFree, unify(errStream, trail, ast->child(0),
 			    ast->child(0)->symType,
 			    MBF(tv), uflags));
 
-      errStream << "[U2] e1: "
-		<< ast->child(0)->symType->asString(Options::debugTvP)
-		<< std::endl;
-
       CHKERR(errFree, unify(errStream, trail, ast->child(1),
 			    ast->child(1)->symType,
 			    MBF(tv), uflags));
-
-      errStream << "[U3] e1: "
-		<< ast->child(0)->symType->asString(Options::debugTvP)
-		<< std::endl;
-
       break;
     }
 

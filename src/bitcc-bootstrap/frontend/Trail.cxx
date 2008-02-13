@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include "Type.hxx"
 #include "Trail.hxx"
+#include "Options.hxx"
 #include <assert.h>
 #include <libsherpa/CVector.hxx>
 #include "Eliminate.hxx"
@@ -47,8 +48,24 @@ using namespace sherpa;
 void
 Trail::link(GCPtr<Type> from, GCPtr<Type> to)
 {  
-  from->link = to; 
+  
+  if(to->boundInType(from)) {
+    std::cerr << "CYCLIC SUBSTITUTION "
+	      << from->asString(Options::debugTvP)
+	      << " |-> "
+	      << to->asString(Options::debugTvP)
+	      << std::endl;
+    assert(false);
+  }
+
+//   std::cerr << "LINKING: "
+// 	    << from->asString(Options::debugTvP)
+// 	    << " |-> "
+// 	    << to->asString(Options::debugTvP)
+// 	    << std::endl;
+  
   vec->append(from);   
+  from->link = to; 
 } 
 
 void
@@ -59,7 +76,23 @@ Trail::subst(GCPtr<Type> from, GCPtr<Type> to)
   // therefore this does not hold.
   // assert(from->kind == ty_tvar);
   // NOT from->isTvar()
+
+  if(to->boundInType(from)) {
+    std::cerr << "CYCLIC SUBSTITUTION "
+	      << from->asString(Options::debugTvP)
+	      << " |-> "
+	      << to->asString(Options::debugTvP)
+	      << std::endl;
+    assert(false);
+  }
+
+//   std::cerr << "SUBSTITUTING: "
+// 	    << from->asString(Options::debugTvP)
+// 	    << " |-> "
+// 	    << to->asString(Options::debugTvP)
+// 	    << std::endl;
   
+  vec->append(from);   
   link(from, to);
 } 
 

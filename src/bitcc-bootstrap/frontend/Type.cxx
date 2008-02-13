@@ -569,39 +569,38 @@ Type::isPcst()
 // Returns true if this is a union or a structure definition 
 // respectively
 bool 
-Type::isUnion() 
+Type::isUnion(bool ignMut) 
 {
-  GCPtr<Type> t = getBareType();
+  GCPtr<Type> t = ((ignMut) ? getBareType() : getType());
   return (((t->kind == ty_unionv) || (t->kind == ty_unionr)) &&
 	  (t->components->size() != 0));
 }
 
 bool 
-Type::isUcon() 
+Type::isUcon(bool ignMut) 
 {
-  GCPtr<Type> t = getBareType();
+  GCPtr<Type> t = ((ignMut) ? getBareType() : getType());
   return ((t->kind == ty_uconv) || (t->kind == ty_uconr));
 }
 
 bool 
-Type::isUval() 
+Type::isUval(bool ignMut) 
 {
-  GCPtr<Type> t = getBareType();
+  GCPtr<Type> t =  ((ignMut) ? getBareType() : getType());
   return ((t->kind == ty_uvalv) || (t->kind == ty_uvalr));
 }
 
 bool 
-Type::isULeg() 
+Type::isULeg(bool ignMut) 
 {
-  return(isUcon() || isUval());
+  return(isUcon(ignMut) || isUval(ignMut));
 }
 
 bool 
-Type::isUType() 
+Type::isUType(bool ignMut) 
 {
-  return(isUnion() || isUcon() || isUval());
+  return(isUnion(ignMut) || isUcon(ignMut) || isUval(ignMut));
 }
-
 
 bool 
 Type::isDeepMut()

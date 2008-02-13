@@ -289,11 +289,11 @@ public:
 
   // The only reason the following unctions are not marked const is
   // that they call getType(), which uses the mark flag. 
-  bool isUnion(); // 1. Union type.
-  bool isUcon();  // 2. Union Constructor.
-  bool isUval();  // 3. Constructed union value (includes zero arity ctrs).
-  bool isULeg();  // 2 or 3.
-  bool isUType(); // 1, 2, or 3.
+  bool isUnion(bool ignMut=true); // 1. Union type.
+  bool isUcon(bool ignMut=true);  // 2. Union Constructor.
+  bool isUval(bool ignMut=true);  // 3. Constructed union value (includes zero arity ctrs).
+  bool isULeg(bool ignMut=true);  // 2 or 3.
+  bool isUType(bool ignMut=true); // 1, 2, or 3.
   bool isDecl();
   bool isException();
   bool isStruct();

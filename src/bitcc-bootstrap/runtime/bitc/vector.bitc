@@ -58,9 +58,9 @@
   (define (make-mutable-vector n:word e:(mutable 'a))
     (make-vector n (lambda (i) e)))
 
-  (define (list->vector lst:(list 'a))
+  (define (list->vector lst)
     "Given a list, return a vector of its elements."
     (make-vector (length lst) 
-		 (lambda (n) (ls.list-nth lst n))):(vector 'a))
-)
+		 (lambda (n) (ls.list-nth lst n))))
+  )
 

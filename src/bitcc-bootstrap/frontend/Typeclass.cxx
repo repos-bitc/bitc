@@ -202,17 +202,30 @@ Typeclass::addFnDep(GCPtr<Type> dep)
 
     Here, the type of id2 will be declared ambiguous, which we cannot
     accept. 
+    
+   It seems that we can take a middle ground wher ambiguity check is
+   performed only for type-class constraints. However, in the presence
+   of copy-compatibility, even this is insufficient. Consider the
+   following case:
 
-   It seems that the correct solution is to drop the ambiguity check,
-   but here I have taken a middle ground wher ambiguity check is
-   performed only for type-class constraints.
+   (deftypeclass (Tc 'a)
+      mt: (fn ('a) bool))
 
+   (define (f x) (mt x))
+   f: forall 'a,'b,'c,'d. (fn ('a|'b) 'c|bool) \ Tc('d|'b)
+
+   Actually, the top-level mutability on the type-class does not
+   matter (as long as the argument) is not used in a reference
+   context, and can be ignored in the ambiguity check. However,
+   it seems that the correct solution is to turn off the ambiguity
+   check. There is now only a stub-code for the ambiguty check.
  */
 
 
 bool 
 TypeScheme::checkAmbiguity(std::ostream &errStream, LexLoc &errLoc)
 {
+#if 0
   bool errFree =true;
   for(size_t j=0; j < ftvs->size(); j++) {
     GCPtr<Type> ftv = ftvs->elem(j);
@@ -249,6 +262,9 @@ TypeScheme::checkAmbiguity(std::ostream &errStream, LexLoc &errLoc)
 	      << asString()
 	      << std::endl;
   return errFree;
+#else
+  return true;
+#endif
 }
 
 /* Migrate appropriate constraints to parent's TCC, if one exists
@@ -512,7 +528,7 @@ handleSpecialPred(std::ostream &errStream, GCPtr<Trail> trail,
 			  << std::endl;
     
     if(it->isRefType()) {
-      SPSOL_DEBUG errStream << "\t\t ... Sarisfied, CLEAR"
+      SPSOL_DEBUG errStream << "\t\t ... Satisfied, CLEAR"
 			    << pred->asString(Options::debugTvP)
 			    << std::endl;
       cset->clearPred(pred);
@@ -574,7 +590,13 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
   for(size_t j=0; j < insts->size(); j++) {
     GCPtr<TypeScheme> ts = (insts->elem(j))->ts->ts_instance_copy();
     GCPtr<Type> inst = ts->tau;
+
     
+    // FIX: This step must be performed ONLY for those
+    // arguments that are used only at copy-compatible
+    // positions. That is, if an argument is used in a 
+    // method within a reference, this step must be 
+    // skipped on that argument. 
     for(size_t c=0; c < inst->typeArgs->size(); c++)
       inst->TypeArg(c) = MBF(inst->TypeArg(c));
     
@@ -616,13 +638,18 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
   if(instScheme->tcc)
     for(size_t c=0; c < instScheme->tcc->pred->size(); c++) {
       GCPtr<Typeclass> instPred = instScheme->tcc->Pred(c);
-      tcc->addPred(instPred);
-      TCSOL_DEBUG errStream << "\t\t .. Add pre-condition: "
-			    << instPred->asString(Options::debugTvP)
-			    << " CLEAR."
-			    << std::endl;
-    }
 
+      // Add all preconditions, except for the self-condition
+      // added to all instances. Remember that the 
+      // type specializer clears the TY_SELF flag.
+      if(!pred->equals(instPred)) {
+	tcc->addPred(instPred);
+	TCSOL_DEBUG errStream << "\t\t .. Adding pre-condition: "
+			      << instPred->asString(Options::debugTvP)
+			      << std::endl;
+      }
+    }
+  
   handled = true;
   return true;
 }

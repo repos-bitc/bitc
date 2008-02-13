@@ -61,12 +61,12 @@
       (nil (throw IndexBoundsError))
       (cons x.cdr)))
 
-  (define (list-nth lst n:word)
+  (define (list-nth lst n)
     "Return nth element of list."
     (if (== n 0)
 	(car lst)
 	(list-nth (cdr lst) (- n 1))))
-
+  
   (define (list-length lst)
     "Return length of list."
     (define (length-helper lst count)
@@ -74,9 +74,9 @@
 	  count
 	  (length-helper (cdr lst) (+ 1 count))))
     (length-helper lst 0:word))
-
+  
   (definstance (Length (list 'a)) list-length)
-
+  
   (define (append l1 l2)
     "Append two lists."
     (if (null? l1) l2

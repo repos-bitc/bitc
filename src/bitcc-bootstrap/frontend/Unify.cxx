@@ -71,6 +71,8 @@ typeError(std::ostream& errStream,
 	    << ", Obtained " << t2->asString(NULL)
 	    << std::endl;
   
+  if(errStream == std::cerr)
+    errStream << "Real Error!" << std::endl;
   // MUST always return false.
   return false;
 }
@@ -392,22 +394,22 @@ UnifyUTVC(std::ostream& errStream,
     return typeError(errStream, errAst, ut1, ut2);
   
   assert(ut1->typeArgs->size() == ut2->typeArgs->size());
-
+  
   size_t n = trail->snapshot();
   trail->link(ut1, ut2);  
-
+  
   for(size_t i=0; i<ut1->typeArgs->size(); i++) {
     CHKERR(errFree, Unify(errStream, trail, errAst, ut1->TypeArg(i), 
 			  ut2->TypeArg(i), flags)); 
   }
-
+  
   // If error, rollback. 
   // Otherwise, single remove to break the unnecessary link. 
   if(!errFree)
     trail->rollBack(n);
-  else
-    trail->release(n, ut1);
-
+  //else
+  //  trail->release(n, ut1);
+  
   //   errStream << "Result [" << ((errFree)?"true":"false") << "] = " 
   // 	    << ut->asString(Options::debugTvP) << " and "
   // 	    << uv->asString(Options::debugTvP)
@@ -437,7 +439,6 @@ Unify(std::ostream& errStream,
   GCPtr<Type> t2 = st->getType();
   bool errFree = true;
 
-  
   UNIFY_DEBUG std::cout << "Unifier: " 
 			<< ft->asString(Options::debugTvP)
 			<< " ==? " 
@@ -449,19 +450,18 @@ Unify(std::ostream& errStream,
 
   if(t1->kind != t2->kind) {
 
-    if(t1->isUType() && t2->isUType() && 
-	    (t1->isRefType() == t2->isRefType())) {
+    if(t1->isUType(false) && t2->isUType(false) && 
+       (t1->isRefType() == t2->isRefType()))
       return UnifyUTVC(errStream, trail, errAst, t1, t2, flags);
-    }
-
+    
     if((flags & UNIFY_STRICT) == 0) {
       
       /* Handle the case of Type Variables unifying with another type */
-      if(t1->isUnifiableTvar(flags) && !t1->boundInType(t2)) {
+      if(t1->isUnifiableTvar(flags) && !t2->boundInType(t1)) {
 	trail->subst(t1, t2);
 	RET_UNIFY;
       }
-      if(t2->isUnifiableTvar(flags) && !t2->boundInType(t1)) {
+      if(t2->isUnifiableTvar(flags) && !t1->boundInType(t2)) {
 	trail->subst(t2, t1);
 	RET_UNIFY;
       }
@@ -471,6 +471,14 @@ Unify(std::ostream& errStream,
 	Unify(errStream, trail, errAst, t1->minimizeMutability(), 
 	      t2->minimizeMutability(), flags);
 	
+	if(t2->boundInType(t1->Var())) {
+	  std::cerr << t1->asString(Options::debugTvP)
+		    << "'s VAR() bound in "
+		    << t2->asString(Options::debugTvP)
+		    << std::endl;
+	  assert(false);
+	}
+
 	if(errFree)
 	  trail->subst(t1->Var(), t2);
 	
@@ -479,6 +487,14 @@ Unify(std::ostream& errStream,
       if (t2->isUnifiableMbFull(flags)) {
 	Unify(errStream, trail, errAst, t1->minimizeMutability(), 
 	      t2->minimizeMutability(), flags);
+
+	if(t1->boundInType(t2->Var())) {
+	  std::cerr << t2->asString(Options::debugTvP)
+		    << "'s VAR() bound in "
+		    << t1->asString(Options::debugTvP)
+		    << std::endl;
+	  assert(false);
+	}
 	
 	if(errFree)
 	  trail->subst(t2->Var(), t1);
@@ -488,6 +504,14 @@ Unify(std::ostream& errStream,
       if (t1->isUnifiableMbTop(flags)) {
 	Unify(errStream, trail, errAst, t1->minimizeMutability(), 
 	      t2->minimizeMutability(), flags);
+
+	if(t2->boundInType(t1->Var())) {
+	  std::cerr << t1->asString(Options::debugTvP)
+		    << "'s VAR() bound in "
+		    << t2->asString(Options::debugTvP)
+		    << std::endl;
+	  assert(false);
+	}
 	
 	if(errFree)
 	  trail->subst(t1->Var(), t2);
@@ -497,7 +521,15 @@ Unify(std::ostream& errStream,
       if (t2->isUnifiableMbTop(flags)) {
 	Unify(errStream, trail, errAst, t1->minimizeMutability(), 
 	      t2->minimizeMutability(), flags);
-	
+
+	if(t1->boundInType(t2->Var())) {
+	  std::cerr << t2->asString(Options::debugTvP)
+		    << "'s VAR() bound in "
+		    << t1->asString(Options::debugTvP)
+		    << std::endl;
+	  assert(false);
+	}
+
 	if(errFree)
 	  trail->subst(t2->Var(), t1);
 	
@@ -744,7 +776,10 @@ Unify(std::ostream& errStream,
 		   t2->Core()->minimizeTopMutability(), 
 		   flags));
       
-      trail->link(t1->Var(), t2->Var());
+      CHKERR(errFree, Unify(errStream, trail, errAst, 
+			    t1->Var(), t2->Var(), flags));
+
+      //trail->subst(t1->Var(), t2->Var());
       break;
     }
     
@@ -755,8 +790,11 @@ Unify(std::ostream& errStream,
 		   t1->Core()->minimizeMutability(), 
 		   t2->Core()->minimizeMutability(), 
 		   flags));
-	
-      trail->link(t1->Var(), t2->Var());
+      
+      CHKERR(errFree, Unify(errStream, trail, errAst, 
+			    t1->Var(), t2->Var(), flags));
+      
+      //trail->subst(t1->Var(), t2->Var());
       break;
     }
 
