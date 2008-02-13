@@ -1,8 +1,10 @@
-;(define (id x) x)
+(define df
+  (let ((f (lambda (x) x)))
+    (let ((g (lambda (x) x)))
+      (set! g f)
+      (f #t)
+      (f #\c) )))
 
-;(define (id2 x) (id x) ())
-
-;define x (set! id id))
 
 ;(provide main bitc.main)
 ;(define main.main:(fn ((vector string)) int32) 
@@ -11,16 +13,3 @@
 ;; Cyclic type
 ;;(define f (lambda (x) f))
 
-(defunion (list 'a) nil (cons car:'a cdr:(list 'a)))
-
-(proclaim list-nth:(fn ((list 'a) word) 'a))
-(proclaim llength:(fn ((list 'a)) word))
-
-(deftypeclass (Length 'a)
-  length: (fn ('a) word))
-
-(definstance (Length (list 'a)) llength)
-
-(define (list->vector lst)
-  (make-vector (length lst) 
-	       (lambda (n) (list-nth lst n))))

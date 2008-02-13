@@ -43,7 +43,7 @@
    communication/processing within Type-methods annd inference
    routines. */
 
-#define UNIFY_STRICT        0x00001u // Overrides ecerything else.
+#define UNIFY_STRICT        0x00001u // Overrides everything else.
 #define UNIFY_STRICT_TVAR   0x00002u // No-alpha-renaming.
 #define UNIFY_TRY           0x00004u // Trial mode.
 #define DEF_DECL_NO_MATCH   0x00008u
@@ -53,11 +53,11 @@
 #define UN_IGN_RIGIDITY     0x00040u
 #define ALL_INSTS_OK        0x00080u // All instances are OK.
 
-#define POST_REFIZE         0x00200u // We have passedrefization pass  
+#define POST_REFIZE         0x00100u // We have passedrefization pass  
         // of Closure conversion. The (temporary?) restriction that
         // letrecs must define only define lambdas must be prepared to
         // take closures or refs to functions / closures.
 
-#define INF_REINIT          0x00400u 
+#define INF_REINIT          0x00200u 
 
 #endif /* TYPEINFER_HXX */

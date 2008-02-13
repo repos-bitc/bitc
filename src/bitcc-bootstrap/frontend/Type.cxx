@@ -1039,7 +1039,6 @@ Type::eql(GCPtr<Type> t, bool verbose, std::ostream &errStream,
   return errFree;
 }
 
-
 bool
 Type::equals(GCPtr<Type> t, bool verbose, std::ostream &errStream)
 {

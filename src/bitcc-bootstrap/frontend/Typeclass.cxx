@@ -203,7 +203,7 @@ Typeclass::addFnDep(GCPtr<Type> dep)
     Here, the type of id2 will be declared ambiguous, which we cannot
     accept. 
     
-   It seems that we can take a middle ground wher ambiguity check is
+   It seems that we can take a middle ground where ambiguity check is
    performed only for type-class constraints. However, in the presence
    of copy-compatibility, even this is insufficient. Consider the
    following case:
@@ -429,7 +429,8 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
 			 << std::endl;
     cset->clearPred(ct);
     handled = true;
-    return ins->unifyWith(gen, false, trail, errStream) ;
+    bool unifies = ins->unifyWith(gen, false, trail, errStream);
+    return unifies;
   }
   
   if (k == Type::Kpoly) {
@@ -480,18 +481,22 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
     GCPtr<Constraint> newCt = cset->Pred(c)->getType();
     if(newCt == ct)
       continue;
+
+    if(!newCt->isPcst())
+      continue;
     
-    if(newCt->isPcst() && newCt->CompType(0) == k) {
-      GCPtr<Type> newIns = newCt->CompType(1);
-      if(!ins->equals(newIns)) {
-	PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), *(k, tg, tj)" 
-			     << " ti !~~ tj, [k |-> p]." 
-			     << std::endl;
-	
-	trail->subst(k, Type::Kpoly);
-	handled = true;
-	return true;
-      }
+    GCPtr<Type> newK = newCt->CompType(0)->getType();
+    GCPtr<Type> newGen = newCt->CompType(1)->getType();
+    GCPtr<Type> newIns = newCt->CompType(2)->getType();
+    
+    if(newK == k && !ins->equals(newIns)) {
+      PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), *(k, tg, tj)" 
+			   << " ti !~~ tj, [k |-> p]." 
+			   << std::endl;
+      
+      trail->subst(k, Type::Kpoly);
+      handled = true;
+      return true;
     }
   }
   

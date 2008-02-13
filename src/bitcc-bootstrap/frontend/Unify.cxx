@@ -71,8 +71,8 @@ typeError(std::ostream& errStream,
 	    << ", Obtained " << t2->asString(NULL)
 	    << std::endl;
   
-  if(errStream == std::cerr)
-    errStream << "Real Error!" << std::endl;
+  //if(errStream == std::cerr)
+  //  errStream << "Real Error!" << std::endl;
   // MUST always return false.
   return false;
 }
@@ -424,8 +424,8 @@ UnifyUTVC(std::ostream& errStream,
   }while(0)
 
 
-#define RET_FAIL do{    \
-    return false;       \
+#define RET_FAIL do{	\
+    return false;	\
   }while(0) 
 
 
@@ -468,8 +468,9 @@ Unify(std::ostream& errStream,
       
       /* Handle the Maybe Types unifying with another type */
       if (t1->isUnifiableMbFull(flags)) {
-	Unify(errStream, trail, errAst, t1->minimizeMutability(), 
-	      t2->minimizeMutability(), flags);
+	CHKERR(errFree, Unify(errStream, trail, errAst, 
+			      t1->minimizeMutability(), 
+			      t2->minimizeMutability(), flags));
 	
 	if(t2->boundInType(t1->Var())) {
 	  std::cerr << t1->asString(Options::debugTvP)
@@ -484,9 +485,11 @@ Unify(std::ostream& errStream,
 	
 	return errFree;
       }
+      
       if (t2->isUnifiableMbFull(flags)) {
-	Unify(errStream, trail, errAst, t1->minimizeMutability(), 
-	      t2->minimizeMutability(), flags);
+	CHKERR(errFree, Unify(errStream, trail, errAst, 
+			      t1->minimizeMutability(), 
+			      t2->minimizeMutability(), flags));
 
 	if(t1->boundInType(t2->Var())) {
 	  std::cerr << t2->asString(Options::debugTvP)
@@ -501,9 +504,11 @@ Unify(std::ostream& errStream,
 	
 	return errFree;
       }
+
       if (t1->isUnifiableMbTop(flags)) {
-	Unify(errStream, trail, errAst, t1->minimizeMutability(), 
-	      t2->minimizeMutability(), flags);
+	CHKERR(errFree, Unify(errStream, trail, errAst, 
+			      t1->minimizeMutability(), 
+			      t2->minimizeMutability(), flags));
 
 	if(t2->boundInType(t1->Var())) {
 	  std::cerr << t1->asString(Options::debugTvP)
@@ -519,8 +524,9 @@ Unify(std::ostream& errStream,
 	return errFree;
       }
       if (t2->isUnifiableMbTop(flags)) {
-	Unify(errStream, trail, errAst, t1->minimizeMutability(), 
-	      t2->minimizeMutability(), flags);
+	CHKERR(errFree, Unify(errStream, trail, errAst, 
+			      t1->minimizeMutability(), 
+			      t2->minimizeMutability(), flags));
 
 	if(t1->boundInType(t2->Var())) {
 	  std::cerr << t2->asString(Options::debugTvP)
@@ -776,10 +782,11 @@ Unify(std::ostream& errStream,
 		   t2->Core()->minimizeTopMutability(), 
 		   flags));
       
+      if(!errFree)
+	break;
+      
       CHKERR(errFree, Unify(errStream, trail, errAst, 
 			    t1->Var(), t2->Var(), flags));
-
-      //trail->subst(t1->Var(), t2->Var());
       break;
     }
     
@@ -791,10 +798,11 @@ Unify(std::ostream& errStream,
 		   t2->Core()->minimizeMutability(), 
 		   flags));
       
+      if(!errFree)
+	break;
+      
       CHKERR(errFree, Unify(errStream, trail, errAst, 
 			    t1->Var(), t2->Var(), flags));
-      
-      //trail->subst(t1->Var(), t2->Var());
       break;
     }
 
