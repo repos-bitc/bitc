@@ -1198,24 +1198,6 @@ InferTypeClass(std::ostream& errStream, GCPtr<AST> ast,
 
       mSigma->collectAllFtvs();
       
-      /* Make sure that the method type is acceptable */
-      size_t original_size = mSigma->ftvs->size();
-      
-      if(isExpansive(errStream, gamma, mType)) {
-	GCPtr< CVector<GCPtr<Type> > > removedFTVs = new CVector<GCPtr<Type> >;
-	mType->removeRestricted(mSigma->ftvs, false, removedFTVs);
-      }
-
-      size_t new_size = mSigma->ftvs->size();
-      
-      if(new_size != original_size) {
-	errStream << ast->loc << ": Invalid Method declaration. "
-		  << "The type of " << mID->s 
-		  << " cannot be properly generalized." 
-		  << std::endl;
-	errFree = false;
-      }      
-
       // Solve current Predicates.
       CHKERR(errFree, mSigma->solvePredicates(errStream, method->loc,
 					      instEnv, trail)); 

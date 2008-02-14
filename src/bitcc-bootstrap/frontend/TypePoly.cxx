@@ -285,40 +285,41 @@ bool isExpansive(std::ostream& errStream,
    Input is a type t and a set of constraints C, wrt to 
    the current let expression let(k) x = e in ...
 
-   1) Add the polymorphic instantiation constraint *(k, t, t) to C
-      This step is not performed for instance generalizations.      
-
-   2) Solve predicates: let (t', C') = SolvePredicates(C)
+   1) Solve predicates: let (t', C') = SolvePredicates(C)
       The constraint set C' contains residual constraints. It cannot
       contain any constraints over concrete types.
-      This step is not performed for instance generalizations.      
+      This step is not performed for instance generalizations.
 
-   3) In case of top-level definitions, make a choice for all
+   2) In case of top-level definitions, make a choice for all
       *-constraints: The type is made immutable upto the function
       boundary, and all 'ks are resolved to polymorphic.
+      At this stage, re-solve all consrtainst.
 
-   4) Determine the set of generalizable type variables:
-      'a* = (FTVS(t') U FTVS(C')) \ FTVS(gamma)
+   3) Add the polymorphic instantiation constraint *(k, t, t) to C
+      if necessary.
+      -- This step is not performed for instance generalizations.      
+      -- The constraint is only added if !Mut(t) and !Immut(t)
 
-   5) Check for value restriction: 
+        --- Migrate constraints at this stage ???? ---
+
+   4) Check for value restriction: 
       exp = isExpansive(e) || isExpansive(t')
 
-   6) If expansive, remove the set of non-generalizable type
-      variables from 'a*.
-      let 'b* = 'a* \ remove-restricted('a*)
-      Here, we follow Ocaml-like relaxed-value restriction
-      rule. Otherwise, {'b*} = {}
+   5) If !exp, Determine the set of generalizable type variables:
+      'a* = (FTVS(t') U FTVS(C')) \ FTVS(gamma)
+      Otherwise, 'a* = {}
 
-   7) Migrate appropriate constraints to parent's TCC, if one exists
+      If exp, and if generalizing at top-level, instantiate
+      free variables to dummy types and issue warnings
+
+   6) Migrate appropriate constraints to parent's TCC, if one exists
       let C'' = migrate(parent-sigma, C')
       --> Constraints purely over monomorphic type variables can be
           migrated to the containing scope.
 
-   8) Check for ambiguous types. If there exists a 'a such that 
-      'a in {'b*} and 'a in FTVS(C'') and 'a not in FTVS(t'), then the
-      type is ambiguous. 
-    
-   9) The generalized type is forall 'b*, t' \ C''
+   7) Check for ambiguity: This is a no-op.
+
+   7) The generalized type is forall 'b*, t' \ C''
 
  *********************************************************/
 
@@ -344,28 +345,18 @@ TypeScheme::generalize(std::ostream& errStream,
 
   if(gen_mode != gen_instance) {
     // Step 1
-    GCPtr<Type> pcst = new Constraint(ty_pcst, tau->ast); 
-    pcst->components->append(new comp(new Type(ty_kvar, tau->ast)));
-    pcst->components->append(new comp(tau)); // General Type
-    pcst->components->append(new comp(tau)); // Instantiation Type
-    tcc->addPred(pcst);
-    
-    GEN_DEBUG errStream << "[1] With Pcst: " 
-			<< asString(Options::debugTvP)
-			<< std::endl;
-
-    // Step 2
     if(tcc)
       CHKERR(errFree, solvePredicates(errStream, errLoc, 
 				      instEnv, trail)); 
     
-    GEN_DEBUG errStream << "[2] Solve: " 
+    GEN_DEBUG errStream << "[1] Solve: " 
 			<< asString(Options::debugTvP)
 			<< std::endl;
   }
 
+  if(0)
   if(gen_mode == gen_top) {
-    // Step 3
+    // Step 2
     tau->adjMaybe(trail, true);
     
     for(size_t i=0; i < tcc->size(); i++) {
@@ -392,22 +383,30 @@ TypeScheme::generalize(std::ostream& errStream,
       }
     }
    
-    GEN_DEBUG errStream << "[3] Top-Fix: " 
+    GEN_DEBUG errStream << "[2] Top-Fix: " 
 			<< asString(Options::debugTvP)
 			<< std::endl;
   }
   
+  
+  // Step 3
+  if(!tau->isDeepMut() && !tau->isDeepImmutable()) {
+    GCPtr<Type> pcst = new Constraint(ty_pcst, tau->ast); 
+    pcst->components->append(new comp(new Type(ty_kvar, tau->ast)));
+    pcst->components->append(new comp(tau)); // General Type
+    pcst->components->append(new comp(tau)); // Instantiation Type
+    tcc->addPred(pcst);
+    
+    GEN_DEBUG errStream << "[1] With Pcst: " 
+			<< asString(Options::debugTvP)
+			<< std::endl;
+
+  }
+
   // Step 4
-  collectftvs(gamma);
-  
-  GEN_DEBUG errStream << "[4] CollectFtvs: " 
-		      << asString(Options::debugTvP)
-		      << std::endl;    
-  
-  // Step 5
   bool exprExpansive = isExpansive(errStream, gamma, expr);
   bool typExpansive = isExpansive(errStream, gamma, tau);
-  bool fullyGeneral = true;
+  bool expansive = exprExpansive || typExpansive;
 
   GEN_DEBUG if(exprExpansive)
     errStream << "[5] " << expr->asString() 
@@ -419,37 +418,38 @@ TypeScheme::generalize(std::ostream& errStream,
 	      << "is expansive"
 	      << std::endl;
 
-  // Step 6
-  GCPtr<CVector<GCPtr<Type> > > removedFtvs = 
-    new CVector<GCPtr<Type> >;
-  if(exprExpansive || typExpansive) 
-    tau->removeRestricted(ftvs, false, removedFtvs);
+  // Step 5
+  if(!expansive)
+    collectftvs(gamma);
   
-  if(removedFtvs->size()) 
-    fullyGeneral = false;
-  
-  if ((gen_mode == gen_top) && !fullyGeneral) {
-    for(size_t i=0; i < removedFtvs->size(); i++) {
-      GCPtr<Type> ftv = (*removedFtvs)[i]->getType();
-      if(ftv->kind == ty_tvar)
+  if ((gen_mode == gen_top) && expansive) {
+    collectftvs(gamma);
+
+    if(ftvs->size()) {
+      GCPtr< CVector< GCPtr<Type> > > dummys = ftvs;
+      ftvs = new CVector< GCPtr<Type> >;
+      
+      for(size_t i=0; i < dummys->size(); i++) {
+	GCPtr<Type> ftv = dummys->elem(i)->getType();
 	ftv->link = new Type(ty_dummy, ftv->ast);
-    }      
-    
-    errStream << errLoc << ": WARNING: The type of"
-	      << " this toplevel definition "
-	      << expr->asString() << " "
-	      << " cannot be fully generalized"
-	      << " due to the value restriction."
-	      << " The type obtained is: "
-	      << tau->asString() << "."
-	      << std::endl;    
+      }
+      
+      errStream << errLoc << ": WARNING: The type of"
+		<< " this toplevel definition "
+		<< expr->asString() << " "
+		<< " cannot be fully generalized"
+		<< " due to the value restriction."
+		<< " The type obtained is: "
+		<< tau->asString() << "."
+		<< std::endl;    
+    }
   }
-
-  GEN_DEBUG errStream << "[6] Value Restriction: " 
+  
+  GEN_DEBUG errStream << "[5] Generalize: " 
 		      << asString(Options::debugTvP)
-		      << std::endl;
-
-  // Step 7
+		      << std::endl;    
+  
+  // Step 6
   migratePredicates(parentTCC);
   
   GEN_DEBUG errStream << "[7] Migrated Constraints: " 

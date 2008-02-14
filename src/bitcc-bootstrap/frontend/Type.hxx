@@ -433,11 +433,6 @@ public:
   TypeSpecialize(GCPtr<CVector<GCPtr<Type> > > ftvs,
 		 GCPtr<CVector<GCPtr<Type> > > nftvs);
 
-  // Remove Value restricted type variables from ftvs.  
-  void removeRestricted(GCPtr<CVector<GCPtr<Type> > > &ftvs,
-		   bool remove,
-		   GCPtr<CVector<GCPtr<Type> > > removed);
-
   /* Methods to deal with mutability issues */
   // Fix all Maybe types surrounding type records containing a
   // polymorphic type variables, except in the case of those maybes
@@ -576,7 +571,7 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
 #define MARK4   0x000008u
 #define MARK5   0x000010u
 #define MARK6   0x000020u
-#define MARK7   0x000040u
+#define MARK7   0x000040u // Free for use
 #define MARK8   0x000080u
 #define MARK9   0x000100u
 #define MARK10  0x000200u

@@ -434,15 +434,16 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
   }
   
   if (k == Type::Kpoly) {
-    
-    // *(p, tg, ti), Immutable(ti)
-    if(ins->isDeepImmutable()) {
+    // *(p, tg, ti), Immutable(\/(ti))
+    GCPtr<Type> tii = ins->minimizeMutability();
+    if(tii->isDeepImmutable()) {
       PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), "
-			   << "Immutable(ti) CLEAR." 
+			   << "Immutable(\\/(ti)) ti = \\/(ti)." 
 			   << std::endl;
       cset->clearPred(ct);
       handled = true;
-      return true;
+      bool unifies = ins->unifyWith(tii, false, trail, errStream);
+      return unifies;
     }
     
     // *(p, tg, ti), ~Immut(ti) (type variables OK here)
