@@ -319,7 +319,7 @@ bool isExpansive(std::ostream& errStream,
 
    7) Check for ambiguity: This is a no-op.
 
-   7) The generalized type is forall 'b*, t' \ C''
+   7) The generalized type is forall 'a*, t' \ C''
 
  *********************************************************/
 

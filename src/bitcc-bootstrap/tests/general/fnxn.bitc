@@ -1,58 +1,7 @@
-;(define df
-;  (let ((f (lambda (x) x)))
-;    (let ((g (lambda (x) x)))
-;      (set! g f)
-;      (f #t)
-;      (f #\c) )))
-
-;(define f (lambda (x) x))
-;(define g (lambda (x) x))
-
-;(define df
-;  (begin 
-;    (let ((h1 (f #t))) ())
-;    (let ((h2 (f #\c))) ())))
-   
-;(define rec (lambda (x) (set! rec rec) x))
-
-;(define df
-;  (begin
-;    (set! g f)
-;    (f #t)
-;    (f #\c)))
-
-
 (define (id x) x)
 
 (defunion (L 'a) Nil)
 
 (define (F1 x) id:(fn ('a) bool) x)
 (define (F2 x) id:(fn ('a) char) x)
-
-(deftypeclass (ABC 'a)
-  abc: (fn ('a) bool))
-
-(define (F3 x) (abc Nil) x)
-
-
-(forall 'a 'b 'c 'd 'e 'f 
-(ABC 'e|(L 'f)) 
-*('k160, 'a|(fn ('b|'c) 'd|'c), 'a|(fn ('b|'c) 'd|'c)) ) 
-'a|(fn ('b|'c) 'd|'c))
-
-;F3: (forall 'a 'b 'c 'd 'e 
-;(ABC 'e|bool) 
-;*('k151, 'a|(fn ('b|'c) 'd|'c), 'a|(fn ('b|'c) 'd|'c)) ) 'a|(fn ('b|'c) 'd|'c))
-
-;(forall 'a 'b 'c 'd 'e 
-;*('k22, 'i|(fn ('h|'f) 'g|'f), (fn ('e|bool) bool)) 
-;*('k62, 'a|(fn ('b|'c) 'd|'c), 'a|(fn ('b|'c) 'd|'c)) ) 
-;'a|(fn ('b|'c) 'd|'c))
-
-;(provide main bitc.main)
-;(define main.main:(fn ((vector string)) int32) 
-;  (lambda (argvec) 0:int32)) 
-
-;; Cyclic type
-;;(define f (lambda (x) f))
 

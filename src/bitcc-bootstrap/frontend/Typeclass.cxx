@@ -372,8 +372,7 @@ mustSolve(GCPtr< CVector< GCPtr<Type> > > dom)
 {
   for(size_t i=0; i < dom->size(); i++) {
     GCPtr<Type> arg = dom->elem(i)->getType();
-    if(arg->kind == ty_tvar || 
-       arg->kind == ty_mbTop || arg->kind == ty_mbFull)
+    if(arg->isTvar())
       return false;
   }
   
