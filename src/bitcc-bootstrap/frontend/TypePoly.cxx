@@ -390,7 +390,7 @@ TypeScheme::generalize(std::ostream& errStream,
   
   
   // Step 3
-  if(!tau->isDeepMut() && !tau->isDeepImmutable()) {
+  if(!tau->isDeepMut() && !tau->isDeepImmut()) {
     GCPtr<Type> pcst = new Constraint(ty_pcst, tau->ast); 
     pcst->components->append(new comp(new Type(ty_kvar, tau->ast)));
     pcst->components->append(new comp(tau)); // General Type

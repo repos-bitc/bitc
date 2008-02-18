@@ -346,13 +346,11 @@ public:
   /* Methods used in Equational Unification */
   // Is this type Mutable upto function boundary?
   bool isDeepMut();
-  // Is there no mutability upto function boundary?
-  // Type variables OK
-  bool isDeepImmut();
-  
   // Is the type known to be Immutable upto function boundary?
-  // Type variables not OK
-  bool isDeepImmutable();
+  bool isDeepImmut();
+  // Does this type contain variables only within functions or on the
+  // lhs of a matybe type?
+  bool isConcretizable();
 
   /* Methods that can be used for various kinds of 
      comparisons between two types */
@@ -454,6 +452,7 @@ public:
   GCPtr<Type> minimizeMutability(GCPtr<Trail> trail=new Trail);
   GCPtr<Type> maximizeTopMutability(GCPtr<Trail> trail=new Trail);
   GCPtr<Type> minimizeTopMutability(GCPtr<Trail> trail=new Trail);
+  GCPtr<Type> minimizeDeepMutability(GCPtr<Trail> trail=new Trail);
 
   // Check if maximally / minimally mutable
   bool isMaxMutable();
@@ -571,7 +570,7 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
 #define MARK4   0x000008u
 #define MARK5   0x000010u
 #define MARK6   0x000020u
-#define MARK7   0x000040u // Free for use
+#define MARK7   0x000040u
 #define MARK8   0x000080u
 #define MARK9   0x000100u
 #define MARK10  0x000200u
@@ -588,6 +587,7 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
 #define MARK21  0x100000u
 #define MARK22  0x200000u
 #define MARK23  0x400000u
+#define MARK24  0x800000u
 
 /* Flags used by Type-inference engine. 
    These flags are different from the Unifier's flags */

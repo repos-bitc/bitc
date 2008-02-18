@@ -602,14 +602,8 @@ Type::isUType(bool ignMut)
   return(isUnion(ignMut) || isUcon(ignMut) || isUval(ignMut));
 }
 
-bool 
-Type::isDeepMut()
-{
-  return !isDeepImmut();
-}
-
 bool
-Type::isDeepImmut()
+Type::isDeepMut()
 {
   GCPtr<Type> t = getType();
   
@@ -619,30 +613,29 @@ Type::isDeepImmut()
   t->mark |= MARK22;
   
   if(t->kind == ty_mutable)
-    return false;
-  
-  if(t->kind == ty_fn)
     return true;
   
+  if(t->kind == ty_fn)
+    return false;
+  
   for(size_t i=0; i < t->components->size(); i++)
-    if(!t->CompType(i)->isDeepImmut())
-      return false;
+    if(t->CompType(i)->isDeepMut())
+      return true;
   
   for(size_t i=0; i < t->typeArgs->size(); i++)
-    if(!t->TypeArg(i)->isDeepImmut())
-      return false;
+    if(t->TypeArg(i)->isDeepMut())
+      return true;
   
-  if(t->fnDeps)
-    for(size_t i=0; i < t->fnDeps->size(); i++)
-      if(!t->FnDep(i)->isDeepImmut())
-	return false;
+  // No need to check functional dependencies
+  // May lead to error if checked because functional dependencies
+  // might be on types that are used within a function constructor
   
   t->mark &= ~MARK22;
-  return true;
+  return false;
 }
   
 bool 
-Type::isDeepImmutable()
+Type::isDeepImmut()
 {
   GCPtr<Type> t = getType();
   
@@ -664,13 +657,47 @@ Type::isDeepImmutable()
   for(size_t i=0; i < t->typeArgs->size(); i++)
     if(!t->TypeArg(i)->isDeepImmut())
       return false;
-  
-  if(t->fnDeps)
-    for(size_t i=0; i < t->fnDeps->size(); i++)
-      if(!t->FnDep(i)->isDeepImmut())
-	return false;
+
+  // No need to check functional dependencies
+  // May lead to error if checked because functional dependencies
+  // might be on types that are used within a function constructor
   
   t->mark &= ~MARK23;
+  return true;  
+}
+
+bool 
+Type::isConcretizable()
+{
+  GCPtr<Type> t = getType();
+  
+  if(t->mark & MARK7)
+    return true;
+  
+  t->mark |= MARK7;
+  
+  if(t->kind == ty_tvar)
+    return false;
+  
+  if(t->kind == ty_fn)
+    return true;
+  
+  if(t->kind == ty_mbTop || t->kind == ty_mbFull)
+    return t->Core()->isDeepImmut();
+      
+  for(size_t i=0; i < t->components->size(); i++)
+    if(!t->CompType(i)->isConcretizable())
+      return false;
+  
+  for(size_t i=0; i < t->typeArgs->size(); i++)
+    if(!t->TypeArg(i)->isConcretizable())
+      return false;
+  
+  // No need to check functional dependencies
+  // May lead to error if checked because functional dependencies
+  // might be on types that are used within a function constructor
+  
+  t->mark &= ~MARK7;
   return true;  
 }
 

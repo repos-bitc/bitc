@@ -434,34 +434,33 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
   if (k == Type::Kpoly) {
     //                _
     // *(p, tg, ti), |_|(tg)
-    
-
-    //                _
-    // *(p, tg, ti), |_|(ti)
-    
-    
-    // *(p, tg, ti),  Mut(ti)
-    
-
-    // *(p, tg, ti), Immutable(\/(ti))
-    GCPtr<Type> tii = ins->minimizeMutability();
-    if(tii->isDeepImmutable()) {
-      PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), "
-			   << "Immutable(\\/(ti)) ti = \\/(ti)." 
+    if(gen->isConcretizable()) {
+      PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), [](tg), CLEAR."
 			   << std::endl;
       cset->clearPred(ct);
       handled = true;
+      GCPtr<Type> tgg = gen->minimizeDeepMutability();
+      GCPtr<Type> tii = ins->minimizeDeepMutability();
+      bool errFree = true;
+      CHKERR(errFree, gen->unifyWith(tgg, false, trail, errStream));
+      CHKERR(errFree, ins->unifyWith(tii, false, trail, errStream));
+      return errFree;
+    }
+    
+    // EXTRA RULE!    _
+    // *(p, tg, ti), |_|(ti)
+    if(ins->isConcretizable()) {
+      PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), [](ti), KEEP."
+			   << std::endl;
+      handled = true;
+      GCPtr<Type> tii = ins->minimizeDeepMutability();
       bool unifies = ins->unifyWith(tii, false, trail, errStream);
       return unifies;
     }
     
-
-    
-
-    // *(p, tg, ti), ~Immut(ti) (type variables OK here)
-    if (!ins->isDeepImmut()) {
-      PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), " 
-			   << "~Immut(ti) ERROR." 
+    // *(p, tg, ti),  Mut(ti)
+    if (ins->isDeepMut()) {
+      PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), Mut(ti) ERROR." 
 			   << std::endl;
       cset->clearPred(ct);
       handled = true;
@@ -477,8 +476,6 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
     return true;
   }
   
-  
-
   assert(k->kind == ty_kvar);
   
   // *(k, tg, ti), Mut(ti)

@@ -503,6 +503,75 @@ Type::minimizeMutability(GCPtr<Trail> trail)
   return rt;
 }
 
+GCPtr<Type> 
+Type::minimizeDeepMutability(GCPtr<Trail> trail)
+{
+  GCPtr<Type> t = getType();
+  GCPtr<Type> rt = NULL;
+  
+  if(t->mark & MARK24)
+    return t;
+  
+  t->mark |= MARK24;  
+  
+  switch(t->kind) {
+    
+  case ty_mbFull:    
+  case ty_mbTop:    
+    {
+      rt = t->Core()->minimizeDeepMutability(trail);
+      break;
+    }
+
+  case ty_mutable:
+    {
+      rt = t->Base()->minimizeDeepMutability(trail);
+      break;
+    }
+
+  case ty_ref:
+  case ty_vector:
+  case ty_array:
+    {
+      rt = new Type(t);
+      rt->Base() = t->Base()->minimizeDeepMutability(trail);
+      break;
+    }
+
+  case ty_structv:
+  case ty_unionv: 
+  case ty_uvalv: 
+  case ty_uconv: 
+  case ty_reprv:
+  case ty_structr:
+  case ty_unionr: 
+  case ty_uvalr: 
+  case ty_uconr: 
+  case ty_reprr:
+    {
+      rt = t->getDCopy();
+      for(size_t i=0; i < rt->typeArgs->size(); i++) {
+	GCPtr<Type> arg = rt->TypeArg(i)->getType();
+	assert(arg->kind != ty_tvar);
+	if(rt->argCCOK(i))	  
+	  trail->link(arg, arg->minimizeDeepMutability(trail));       
+      }
+      break;
+    } 
+    
+  default:
+    {
+      // Concrete types and function types enter this case
+      rt = t;
+      break;
+    }
+  }
+  
+  t->mark &= ~MARK24;
+  return rt;
+}
+
+
 
 bool 
 Type::isMaxMutable()

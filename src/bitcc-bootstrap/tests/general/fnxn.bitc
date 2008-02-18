@@ -1,7 +1,2 @@
 (define (id x) x)
-
-(defunion (L 'a) Nil)
-
-(define (F1 x) id:(fn ('a) bool) x)
-(define (F2 x) id:(fn ('a) char) x)
-
+(define F (begin (id #t) (id #\t)))
