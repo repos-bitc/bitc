@@ -221,7 +221,6 @@ Typeclass::addFnDep(GCPtr<Type> dep)
    check. There is now only a stub-code for the ambiguty check.
  */
 
-
 bool 
 TypeScheme::checkAmbiguity(std::ostream &errStream, LexLoc &errLoc)
 {
@@ -433,6 +432,17 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
   }
   
   if (k == Type::Kpoly) {
+    //                _
+    // *(p, tg, ti), |_|(tg)
+    
+
+    //                _
+    // *(p, tg, ti), |_|(ti)
+    
+    
+    // *(p, tg, ti),  Mut(ti)
+    
+
     // *(p, tg, ti), Immutable(\/(ti))
     GCPtr<Type> tii = ins->minimizeMutability();
     if(tii->isDeepImmutable()) {
@@ -445,6 +455,9 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
       return unifies;
     }
     
+
+    
+
     // *(p, tg, ti), ~Immut(ti) (type variables OK here)
     if (!ins->isDeepImmut()) {
       PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), " 
@@ -464,6 +477,8 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
     return true;
   }
   
+  
+
   assert(k->kind == ty_kvar);
   
   // *(k, tg, ti), Mut(ti)

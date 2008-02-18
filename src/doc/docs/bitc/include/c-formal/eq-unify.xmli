@@ -494,7 +494,7 @@
 		<aCtset/>
 	      </unin>
 	    </unf>
-	    <pred name="Immutable">
+	    <pred name="Immut">
 	      <type num="i"/>
 	    </pred>
 	  </lhs>
@@ -720,9 +720,11 @@
 	      </collection>
 	    </Forall>
 	    <text content="|"/>
-	    <pred name="Immut">
-	      <type num="i"/>
-	    </pred>
+	    <NOT>
+	      <pred name="Mut">
+		<type num="i"/>
+	      </pred>
+	    </NOT>
 	    <space/>
 	    <text content="."/>
 	    <space/>	      

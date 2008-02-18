@@ -1557,9 +1557,8 @@
     </btypes:TYPE>
   </definition>
   <definition id="immut-types">
-    <title>Immutability Predicates</title>
+    <title>(Im)Mutability Predicates</title>
     <p>
-      We define two notions of immutability of types. 
       <btypes:TYPE>
 	<pred name="Immut">
 	  <type/>
@@ -1567,80 +1566,23 @@
       </btypes:TYPE> gurantees that the type
       <btypes:TYPE>
 	<type/>
-      </btypes:TYPE> is (structurally) not a mutable type upto the
-      function boundary. This predicated holds for type variables.
-      The predicate 
+      </btypes:TYPE> is not-mutable and invariable upto the
+      function boundary. This predicate does not hold to tpe variables
+      that are not contained within a function type. Similarly, 
+      the predicate
       <btypes:TYPE>
-	<pred name="Immutable">
+	<pred name="Mut">
 	  <type/>
 	</pred>
-      </btypes:TYPE> gurantees that the type
+      </btypes:TYPE> holds for any type
       <btypes:TYPE>
 	<type/>
-      </btypes:TYPE> is not-mutable and invariable upto the
-      function boundary.
+      </btypes:TYPE> that is mutable, not considering mutability
+      within function types.
     </p>
     <example>
       <p>
 	<btypes:TYPE>
-	  <fnxn name="Immutable">
-	    <unit/>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immutable">
-	    <bool/>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immutable">
-	    <fn>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </fn>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immutable">
-	    <ref>
-	      <type/>
-	    </ref>                
-	    <pred name="Immutable">
-	      <type/>
-	    </pred>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immutable">
-	    <pair>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </pair>
-	    <AND>
-	      <pred name="Immutable">
-		<type num="1"/>
-	      </pred>
-	      <pred name="Immutable">
-		<type num="2"/>
-	      </pred>
-	    </AND>
-	  </fnxn>
-	  <br/>
-	  <eq>
-	    <grouping>
-	      <pred name="Immutable">
-		<type/>
-	      </pred>
-	      <text content=" (otherwise) "/>
-	    </grouping>
-	    <FALSE/>
-	  </eq>
-	  <br/>
-	  <br/>
-	  <fnxn name="Immut">
-	    <tvar name="alpha"/>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
 	  <fnxn name="Immut">
 	    <unit/>
 	    <TRUE/>
@@ -1695,13 +1637,45 @@
 	  <br/>
 	  <br/>
 	  <fnxn name="Mut">
-	    <type/>
-	    <NOT>
-	      <pred name="Immut">
+	    <mutable>
+	      <type/>
+	    </mutable>
+	    <TRUE/>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Mut">
+	    <ref>
+	      <type/>
+	    </ref>                
+	    <pred name="Mut">
+	      <type/>
+	    </pred>
+	  </fnxn>
+	  <br/>
+	  <fnxn name="Mut">
+	    <pair>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </pair>
+	    <OR>
+	      <pred name="Mut">
+		<type num="1"/>
+	      </pred>
+	      <pred name="Mut">
+		<type num="2"/>
+	      </pred>
+	    </OR>
+	  </fnxn>
+	  <br/>
+	  <eq>
+	    <grouping>
+	      <pred name="Mut">
 		<type/>
 	      </pred>
-	    </NOT>
-	  </fnxn>
+	      <text content=" (otherwise) "/>
+	    </grouping>
+	    <FALSE/>
+	  </eq>
 	</btypes:TYPE>
       </p>
     </example>

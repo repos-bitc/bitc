@@ -230,10 +230,15 @@
 <!ELEMENT maxz                    %anything.group;>
 <!ELEMENT minzOp                  EMPTY>
 <!ELEMENT minz                    %anything.group;>
+<!ELEMENT minTOp                  EMPTY>
+<!ELEMENT minT                    %anything.group;>
+<!ELEMENT minTOp                  EMPTY>
+<!ELEMENT minT                    %anything.group;>
 <!ELEMENT minDOp                  EMPTY>
 <!ELEMENT minD                    %anything.group;>
-<!ELEMENT mindOp                  EMPTY>
-<!ELEMENT mind                    %anything.group;>
+<!ELEMENT minDOp                  EMPTY>
+<!ELEMENT minD                    %anything.group;>
+<!ELEMENT concrete             %anything.group;>
 
 <!-- More or less generality -->
 <!ELEMENT spOp                    EMPTY>

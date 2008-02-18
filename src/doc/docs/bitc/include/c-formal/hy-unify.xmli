@@ -553,7 +553,7 @@
 	    </unf>
 	  </rhs>
 	</equation>	
-	<!-- P(p, t1, t2) --> 
+	<!-- P(p, t1, t2) | [](t1) --> 
 	<equation>
 	  <lhs>
 	    <unf>
@@ -568,13 +568,29 @@
 		<aCtset/>
 	      </unin>
 	    </unf>
-	    <pred name="Immutable">
-	      <type num="i"/>
-	    </pred>
+	    <concrete>
+	      <type num="g"/>
+	    </concrete>
 	  </lhs>
 	  <rhs>
 	    <unf>
-	      <aCtset/>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <type num="g"/>
+		    <minzD>
+		      <type num="g"/>
+		    </minzD>
+		  </eq>
+		  <eq>
+		    <type num="i"/>
+		    <minzD>
+		      <type num="i"/>
+		    </minzD>
+		  </eq>
+		</set>
+	      </unin>
 	    </unf>
 	  </rhs>
 	</equation>	
@@ -815,9 +831,11 @@
 	      </collection>
 	    </Forall>
 	    <text content="|"/>
-	    <pred name="Immut">
-	      <type num="i"/>
-	    </pred>
+	    <NOT>
+	      <pred name="Mut">
+		<type num="i"/>
+	      </pred>
+	    </NOT>
 	    <space/>
 	    <textit content="."/>
 	    <space/>

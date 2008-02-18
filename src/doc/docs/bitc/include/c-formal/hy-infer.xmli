@@ -1008,7 +1008,10 @@
 		</GEN>
 	      </conclude>
 	      <propagate>
-		<aSubMap/>		  
+		<collection sep=";">
+		  <aSubMap/>
+		  <aCtset/>
+		</collection>
 	      </propagate>
 	    </judge>
 	    <TEjudge name="i">
@@ -1071,6 +1074,7 @@
 	      </conclude>
 	      <constrain>        
 		<unin>
+		  <aCtset/>
 		  <aCtset num="2"/>
 		  <set>
 		    <forall> 
@@ -1111,22 +1115,12 @@
       <Hrules>
 	<tyRule name="Gen-Val">
 	  <tyPre>
-	    <pred name="Value">
-	      <aExpr/>
-	    </pred>
 	    <eq>
 	      <unf>
-		<unin>
-		  <aCtset/>
-		  <Pcst>
-		    <lKind k="var"/>
-		    <type/>
-		    <type/>
-		  </Pcst>
-		</unin>		  
+		<aCtset/>
 	      </unf>
 	      <Pair>
-		<aCtset dash="'"/>
+		<aCtset num="u"/>
 		<aSubMap/>
 	      </Pair>
 	    </eq>
@@ -1136,6 +1130,25 @@
 		<aSubMap/>
 		<type/>
 	      </Subst>
+	    </eq>
+	    <pred name="Value">
+	      <aExpr/>
+	    </pred>
+	    <NOT>
+	      <pred name="Mut">
+		<type dash="'"/>
+	      </pred>
+	    </NOT>
+	    <eq>
+	      <aCtset dash="'"/>
+	      <unin>
+		<aCtset num="u"/>
+		<Pcst>
+		  <lKind k="var"/>
+		  <type/>
+		  <type/>
+		</Pcst>
+	      </unin>
 	    </eq>
 	  </tyPre>
 	  <tyPre>
@@ -1176,6 +1189,10 @@
 		</ctype>
 	      </TS>
 	    </eq>
+	    <models name="new">
+	      <assume/>
+	      <tvars name="beta"/>
+	    </models>
 	  </tyPre>
 	  <tyConc>
 	    <judge name="Gen">
@@ -1193,17 +1210,19 @@
 		</GEN>    
 	      </conclude>   
 	      <propagate>
-		<aSubMap/>		  
+		<collection sep=";">
+		  <aSubMap/>
+		  <subst>
+		    <aCtset dash="'"/>
+		    <tvars name="alpha"/>
+		    <tvars name="beta"/>
+		  </subst>
+		</collection>
 	      </propagate>	      
 	    </judge>
 	  </tyConc>
 	</tyRule>
 	<tyRule name="Gen-Exp">
-	  <tyPre>
-	    <pred name="Expansive">
-	      <aExpr/>
-	    </pred>
-	  </tyPre>
 	  <tyPre>
 	    <eq>
 	      <unf>
@@ -1221,13 +1240,16 @@
 		<type/>
 	      </Subst>
 	    </eq>
-	    <eq>
-	      <type num="g"/>
-	      <ctype>
+	  </tyPre>
+	  <tyPre>
+	    <OR>
+	      <pred name="Expansive">
+		<aExpr/>
+	      </pred>
+	      <pred name="Mut">
 		<type dash="'"/>
-		<aCtset dash="'"/>
-	      </ctype>
-	    </eq>
+	      </pred>
+	    </OR>
 	  </tyPre>
 	  <tyConc>
 	    <judge name="Gen">
@@ -1241,18 +1263,21 @@
 	      <conclude>
 		<GEN>
 		  <type/>
-		  <type num="g"/>
+		  <type dash="'"/>
 		</GEN>    
 	      </conclude>   
 	      <propagate>
-		<compose>
-		  <aSubMap/>
-		  <SubMap>
-		    <lKind k="var"/>
-		    <lKind k="mono"/>
-		  </SubMap>
-		</compose>
-	      </propagate>	      
+		<collection sep=";">
+		  <compose>
+		    <aSubMap/>
+		    <SubMap>
+		      <lKind k="var"/>
+		      <lKind k="mono"/>
+		    </SubMap>
+		  </compose>
+		  <aCtset dash="'"/>
+		</collection>
+	      </propagate>
 	    </judge>
 	  </tyConc>
 	</tyRule>

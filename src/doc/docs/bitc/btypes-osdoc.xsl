@@ -571,7 +571,6 @@
     <xsl:call-template name="print.params"/>
   </xsl:template>
 
-
   <!-- maxzTOp -->
   <xsl:template match="maxzTOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -589,14 +588,34 @@
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>rtrif;</xsl:text>
   </xsl:template>
-  <!-- minz -->
+  <!-- minzT -->
   <xsl:template match="minzT" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>rtrif;</xsl:text>
     <xsl:call-template name="print.params"/>
   </xsl:template>
 
+  <!-- minzDOp -->
+  <xsl:template match="minzDOp" mode="formula">
+    <xsl:call-template name="print.mathfrac">
+      <xsl:with-param name="print.mathfrac.letter">I</xsl:with-param> 
+    </xsl:call-template>
+  </xsl:template>
+  <!-- minzD -->
+  <xsl:template match="minzD" mode="formula">
+    <xsl:call-template name="print.mathfrac">
+      <xsl:with-param name="print.mathfrac.letter">I</xsl:with-param> 
+    </xsl:call-template>
+    <xsl:call-template name="print.params"/>
+  </xsl:template>
 
+  <!-- concrete -->
+  <xsl:template match="concrete" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>square;</xsl:text>
+    <xsl:call-template name="print.params"/>
+  </xsl:template>
+  
   <!-- spOp -->
   <xsl:template match="spOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -1020,7 +1039,7 @@
     <xsl:call-template name="print.index.dash"/>
     <xsl:call-template name="print.plural"/>
   </xsl:template>
-  
+
 <!-- ======================================================================
                         Text  
      ====================================================================== -->
