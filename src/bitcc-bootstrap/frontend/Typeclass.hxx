@@ -72,9 +72,9 @@ struct Instance : public Countable {
   bool satisfies(std::ostream &errStream, GCPtr<Typeclass> pred, 
 		 GCPtr<const Environment< CVector<GCPtr<Instance> > > >
 		 instEnv) const;
-  std::string asString() const;
-  std::string asXML() const;
-  void asXML(INOstream &out) const;
+  std::string asString();
+  std::string asXML();
+  void asXML(INOstream &out);
 };
 
 

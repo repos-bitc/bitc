@@ -389,10 +389,12 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
 
 std::string
-TypeScheme::asString(GCPtr<TvPrinter> tvP) const
+TypeScheme::asString(GCPtr<TvPrinter> tvP)
 {
   std::stringstream ss; 
   bool forall = false;
+  normalize();
+  
   if(Options::FQtypes)
     if(ftvs->size()) {
       ss << "(forall";
@@ -402,7 +404,7 @@ TypeScheme::asString(GCPtr<TvPrinter> tvP) const
       ss << " ";
     }
 
-  if(tcc != NULL) {
+  if(tcc) {
     if(Options::showAllTccs) {
       if(tcc->pred->size()) {
 	if(!forall) {
@@ -454,76 +456,8 @@ TypeScheme::asString(GCPtr<TvPrinter> tvP) const
 }
 
 std::string 
-Instance::asString() const
+Instance::asString()
 {
   return ts->tau->asString();
 }
 
-#if 0
-static void
-appendAllFtvs(GCPtr<CVector<GCPtr<Type> > > allftvs,
-	      GCPtr<Type> t)
-{
-  GCPtr<CVector<GCPtr<Type> > > tftvs = new CVector<GCPtr<Type> >;
-  t->collectAllftvs(tftvs);
-  
-  for(size_t i=0; i < tftvs->size(); i++) {
-    GCPtr<Type> ftv = (*tftvs)[i]->getType();
-    if(!allftvs->contains(ftv))
-      allftvs->append(ftv);
-  }
-}
-
-
-static void
-collectRelevantCts(GCPtr<Type> tau, GCPtr<TCConstraints> from, 
-		   GCPtr<TCConstraints> to)
-{
-  GCPtr<CVector<GCPtr<Type> > > allftvs = new CVector<GCPtr<Type> >;
-  tau->collectAllftvs(allftvs);
-  
-  bool added=false;
-  do {
-    added=false;
-    for(size_t i = 0; i < from->pred->size(); i++) {
-      GCPtr<Constraint> ct = from->Pred(i);
-      for(size_t j=0; j < allftvs->size(); j++)      
-	if(ct->boundInType((*allftvs)[j]) && !to->contains(ct)) {
-	  to->addPred(ct);
-	  appendAllFtvs(allftvs, ct);
-	  added=true;
-	  break;
-	}
-    }
-  }while(added);
-}
-
-// For debugging only.
-GCPtr<TvPrinter> debugTvp = new TvPrinter;
-
-std::string
-ctypeAsString(GCPtr<Type> t, GCPtr<Constraints> cset, 
-	      bool showAllCts=false)
-{
-  stringstream ss;
-  ss << t->asString(debugTvp);
-  
-  if(!showAllCts) {
-    GCPtr<Constraints> cset1 = new Constraints;
-    collectRelevantCts(t, cset, cset1);
-    cset = cset1;
-  }
-  
-  if(cset->size()) {
-    ss << " / {";
-    for(size_t i=0; i < cset->size(); i++) {
-      if(i > 0)
-	ss << ", ";
-      ss << cset->Pred(i)->asString(debugTvp);
-    }
-    ss << "}";
-  }
-  return ss.str();
-}
-
-#endif

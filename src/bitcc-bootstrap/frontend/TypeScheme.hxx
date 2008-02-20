@@ -86,14 +86,14 @@ struct TypeScheme : public Countable {
   // contained type. This function calls TypeSpecialize.
   // This function is called by type_instance()
   // and getDCopy() function in Type class.
-  GCPtr<Type> type_instance_copy() const;
+  GCPtr<Type> type_instance_copy();
   
   // Type Instance, if there are no ftvs, returns the original tau  
-  GCPtr<Type> type_instance() const;
+  GCPtr<Type> type_instance();
   
   // Type scheme's instance (including TC constraints)
-  GCPtr<TypeScheme> ts_instance(bool copy=false) const;
-  GCPtr<TypeScheme> ts_instance_copy() const;
+  GCPtr<TypeScheme> ts_instance(bool copy=false);
+  GCPtr<TypeScheme> ts_instance_copy();
   
   // Read carefully:
   // Appends constraints that corrrespond to at least one
@@ -103,9 +103,9 @@ struct TypeScheme : public Countable {
   void TransAddConstraints(GCPtr<TCConstraints> _tcc) const;
   
   //GCPtr<Type> type_copy();
-  std::string asString(GCPtr<TvPrinter> tvP = new TvPrinter) const;
-  void asXML(GCPtr<TvPrinter> tvP, INOstream &out) const;
-  std::string asXML(GCPtr<TvPrinter> tvP = new TvPrinter) const;
+  std::string asString(GCPtr<TvPrinter> tvP = new TvPrinter);
+  void asXML(GCPtr<TvPrinter> tvP, INOstream &out);
+  std::string asXML(GCPtr<TvPrinter> tvP = new TvPrinter);
   
   // Collect all tvs wrt tau, and tcc->pred, but NOT tcc->fnDeps
   void collectAllFtvs();
@@ -119,6 +119,15 @@ struct TypeScheme : public Countable {
   
   bool checkAmbiguity(std::ostream &errStream, LexLoc &errLoc);
   bool migratePredicates(GCPtr<TCConstraints> parentTCC);    
+  
+  // In the presence of PCSTs, the substitution within type schemes is
+  // not capture avoiding. Therefore, there might be some
+  // substitutions into the free type-variables. If so, they can be
+  // removed from the list of type variables.
+  // Returns true if any changes to the type scheme are made.
+  // This also removes redundant constraints, or PCSTs that are
+  // satisfied and no longer need to be present.
+  bool normalize();
 
   /* FIX: THIS MUST NEVER BE USED IN lhs OF ASSIGNMENT! */
   /* PUBLIC Accessors (Convenience Forms) */

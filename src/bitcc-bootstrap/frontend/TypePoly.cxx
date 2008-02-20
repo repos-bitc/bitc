@@ -133,7 +133,7 @@ Type::boundInGamma(GCPtr<const Environment<TypeScheme> > gamma)
 
 // Collect ALL ftvs regardless of gamma
 // This APPENDS TO the vector `tvs'. IT IS NOT NECESSARY THAT
-// `tvs' BE EMPTY TO START WITH. Don't rely on this.
+// `tvs' BE EMPTY TO START WITH. 
 void
 Type::collectAllftvs(GCPtr<CVector<GCPtr<Type> > > tvs)
 {
@@ -336,15 +336,15 @@ TypeScheme::removeUnInstFtvs()
       contain any constraints over concrete types.
       This step is not performed for instance generalizations.
 
-   2) In case of top-level definitions, make a choice for all
-      *-constraints: The type is made immutable upto the function
-      boundary, and all 'ks are resolved to polymorphic.
-      At this stage, re-solve all consrtainst.
-
-   3) Add the polymorphic instantiation constraint *(k, t, t) to C
+   2) Add the polymorphic instantiation constraint *(k, t, t) to C
       if necessary.
       -- This step is not performed for instance generalizations.      
       -- The constraint is only added if !Mut(t) and !Immut(t)
+
+   3) In case of top-level definitions, make a choice for all
+      *-constraints: The type is made immutable upto the function
+      boundary, and all 'ks are resolved to polymorphic.
+      At this stage, re-solve all consrtainst.
 
    4) Check for value restriction: 
       exp = isExpansive(e) || isExpansive(t')
@@ -357,7 +357,7 @@ TypeScheme::removeUnInstFtvs()
       free variables to dummy types and issue warnings
 
    6) Remove FTVs that are present purely only in constraints (no need
-      for generalization
+      for generalization)
          -- remove FTVs that only appear in a constraint that does not 
             contain an FTV that is transitively reachable from the 
             type t' (possibly through other constraints)
@@ -406,8 +406,22 @@ TypeScheme::generalize(std::ostream& errStream,
 			<< std::endl;
   }
 
+  // Step 2
+  if(!tau->isDeepMut() && !tau->isDeepImmut()) {
+    GCPtr<Type> pcst = new Constraint(ty_pcst, tau->ast); 
+    pcst->components->append(new comp(new Type(ty_kvar, tau->ast)));
+    pcst->components->append(new comp(tau)); // General Type
+    pcst->components->append(new comp(tau)); // Instantiation Type
+    tcc->addPred(pcst);
+    
+    GEN_DEBUG errStream << "[2] With Pcst: " 
+			<< asString(Options::debugTvP)
+			<< std::endl;
+    
+  }
+
   if(gen_mode == gen_top) {
-    // Step 2
+    // Step 3
     tau->adjMaybe(trail, true);
     
     for(size_t i=0; i < tcc->size(); i++) {
@@ -434,26 +448,12 @@ TypeScheme::generalize(std::ostream& errStream,
       }
     }
    
-    GEN_DEBUG errStream << "[2] Top-Fix: " 
+    GEN_DEBUG errStream << "[3] Top-Fix: " 
 			<< asString(Options::debugTvP)
 			<< std::endl;
   }
   
-  
-  // Step 3
-  if(!tau->isDeepMut() && !tau->isDeepImmut()) {
-    GCPtr<Type> pcst = new Constraint(ty_pcst, tau->ast); 
-    pcst->components->append(new comp(new Type(ty_kvar, tau->ast)));
-    pcst->components->append(new comp(tau)); // General Type
-    pcst->components->append(new comp(tau)); // Instantiation Type
-    tcc->addPred(pcst);
-    
-    GEN_DEBUG errStream << "[1] With Pcst: " 
-			<< asString(Options::debugTvP)
-			<< std::endl;
-    
-  }
-  
+   
   // Step 4
   bool exprExpansive = isExpansive(errStream, gamma, expr);
   bool typExpansive = isExpansive(errStream, gamma, tau);

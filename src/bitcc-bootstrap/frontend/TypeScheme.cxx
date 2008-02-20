@@ -78,8 +78,10 @@ TypeScheme::TypeScheme(GCPtr<Type> ty, GCPtr<AST> _ast, GCPtr<TCConstraints> _tc
 }
 
 GCPtr<Type> 
-TypeScheme::type_instance_copy() const
+TypeScheme::type_instance_copy()
 {
+  normalize();
+
   CVector<GCPtr<Type> > nftvs;
   
   //std::cout << "Instantiating by copy " << this->asString();
@@ -103,8 +105,9 @@ TypeScheme::type_instance_copy() const
 
 
 GCPtr<Type> 
-TypeScheme::type_instance() const
+TypeScheme::type_instance()
 {
+  normalize();
   //std::cout << "Instantiating " << this->asString();
 
   GCPtr<Type> t;
@@ -120,9 +123,10 @@ TypeScheme::type_instance() const
 
 
 GCPtr<TypeScheme> 
-TypeScheme::ts_instance(bool fullCopy) const
+TypeScheme::ts_instance(bool fullCopy)
 {
   //std::cout << "TS Instantiating " << this->asString();
+  normalize();
 
   GCPtr<TypeScheme> ts = new TypeScheme(tau);
   ts->tau = NULL;
@@ -170,7 +174,7 @@ TypeScheme::ts_instance(bool fullCopy) const
 }
 
 GCPtr<TypeScheme> 
-TypeScheme::ts_instance_copy() const
+TypeScheme::ts_instance_copy() 
 {
   return ts_instance(true);
 }
@@ -204,3 +208,56 @@ TypeScheme::addConstraints(GCPtr<TCConstraints> _tcc) const
   //}
 }
 
+bool
+TypeScheme::normalize() 
+{
+  bool changed = false;
+  
+  GCPtr< CVector< GCPtr<Type> > > newTvs = new CVector< GCPtr<Type> >;
+  for(size_t c=0; c < ftvs->size(); c++) {
+    GCPtr<Type> ftv = Ftv(c)->getType();
+    
+    if(ftv->kind == ty_tvar)
+      newTvs->append(ftv);
+    else
+      changed = true;
+  }
+  ftvs = newTvs;
+  
+  if(tcc) {
+    GCPtr< CVector< GCPtr<Constraint> > > allPreds = tcc->pred;
+    tcc->pred = new CVector< GCPtr<Constraint> >;
+    
+    for(size_t c=0; c < allPreds->size(); c++) {
+      GCPtr<Constraint> ct = allPreds->elem(c)->getType();
+      if(!ct->isPcst()) {
+	tcc->addPred(ct);
+	continue;
+      }
+      
+      GCPtr<Type> k = ct->CompType(0)->getType();
+      GCPtr<Type> tg = ct->CompType(1)->getType();
+
+      /* If k = M, the solver must have handled this case
+	 and unified tg = ti
+	               _
+	 If k = P and |_|(tg), then the solver must have handled this
+	 case and unified tg = I(tg) and ti = I(ti).
+	 Actually, we can check Immut(tg) here;
+
+
+	 In either case, drop this predicate. 
+	 Otherwise, add it to newPred.                  */
+      
+      if((k == Type::Kmono) ||
+	 ((k == Type::Kpoly) && tg->isConcretizable())) {
+	changed = true;
+      }
+      else {
+	tcc->addPred(ct);
+      }
+    }
+  }
+  
+  return changed;
+}

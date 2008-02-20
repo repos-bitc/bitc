@@ -410,8 +410,9 @@ mustShowPred(GCPtr<Typeclass> pred)
 }
 
 void
-TypeScheme::asXML(GCPtr<TvPrinter> tvP, INOstream &out) const
+TypeScheme::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 {
+  normalize();
   GCPtr<TCConstraints> _tcc = new TCConstraints;
   out << "<TS>" << endl;
   out.more();
@@ -419,7 +420,7 @@ TypeScheme::asXML(GCPtr<TvPrinter> tvP, INOstream &out) const
   for(size_t i=0; i < ftvs->size(); i++)      
     out << Ftv(i)->asXML(tvP);      
   
-  if(tcc != NULL) {    
+  if(tcc) {    
     if(Options::showAllTccs)
       _tcc = tcc;
     else
@@ -443,8 +444,9 @@ TypeScheme::asXML(GCPtr<TvPrinter> tvP, INOstream &out) const
 }
 
 std::string
-TypeScheme::asXML(GCPtr<TvPrinter> tvP) const
+TypeScheme::asXML(GCPtr<TvPrinter> tvP)
 {
+  normalize();
   std::stringstream ss; 
   INOstream out(ss);
   asXML(tvP, out);  
@@ -452,13 +454,13 @@ TypeScheme::asXML(GCPtr<TvPrinter> tvP) const
 }
 
 void 
-Instance::asXML(INOstream &out) const
+Instance::asXML(INOstream &out)
 {
   ts->asXML(NULL, out);
 }
 
 std::string 
-Instance::asXML() const
+Instance::asXML()
 {
   return ts->asXML();
 }
