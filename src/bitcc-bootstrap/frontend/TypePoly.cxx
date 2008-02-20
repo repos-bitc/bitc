@@ -61,6 +61,23 @@
 using namespace sherpa;
 using namespace std;
 
+bool isExpansive(std::ostream& errStream, 
+		GCPtr<const Environment<TypeScheme> > gamma,
+		GCPtr<const AST> ast);
+bool isExpansive(std::ostream& errStream, 
+		 GCPtr<const Environment<TypeScheme> > gamma,
+		 GCPtr<Type> typ);
+
+/**********************************************************
+ **********************************************************
+
+    FTV Handling: Support routines for Type generalization
+                  and Specialization
+
+ **********************************************************
+ **********************************************************/
+
+
 bool
 Type::boundInType(GCPtr<Type> tv)
 {
@@ -228,36 +245,19 @@ remftvsWrtFnDeps(GCPtr<CVector<GCPtr<Type> > > &ftvs,
   ftvs = newFtvs;
 }
 
+/**********************************************************
+                     FTV Collection
+ **********************************************************/
 // Collect the Free Type Variables in a type
 // that are unbound in gamma
 void
 TypeScheme::collectftvs(GCPtr<const Environment<TypeScheme> > gamma)
 {
   tau->collectftvsWrtGamma(ftvs, gamma);  
-  //std::cerr << "tau = "
-  //	    << tau->asString(Options::debugTvP)
-  //	    << std::endl
-  //	    << "tau's ftvs = ";
-
-  //for(size_t i=0; i < ftvs->size(); i++)
-  //  std::cerr << Ftv(i)->asString(Options::debugTvP);
-  
-  //std::cerr << std::endl;
-  
   if(tcc) {    
     for(size_t i=0; i < tcc->pred->size(); i++) {
       GCPtr<Typeclass> pred = tcc->Pred(i);
       pred->collectftvsWrtGamma(ftvs, gamma);  
-      
-      //  std::cerr << "pred = "
-      //	<< pred->asString(Options::debugTvP)
-      //	<< std::endl
-      //	<< "SUM ftvs = ";
-      
-      //  for(size_t i=0; i < ftvs->size(); i++)
-      //    std::cerr << Ftv(i)->asString(Options::debugTvP);
-      
-      //      std::cerr << std::endl;
     }
  
     GCPtr<CVector<GCPtr<Type> > > allFnDeps = new CVector<GCPtr<Type> >;
@@ -266,13 +266,59 @@ TypeScheme::collectftvs(GCPtr<const Environment<TypeScheme> > gamma)
   }
 }
 
-bool isExpansive(std::ostream& errStream, 
-		GCPtr<const Environment<TypeScheme> > gamma,
-		GCPtr<const AST> ast);
-bool isExpansive(std::ostream& errStream, 
-		 GCPtr<const Environment<TypeScheme> > gamma,
-		 GCPtr<Type> typ);
+/**********************************************************
+                  Type Scheme Imprevoment
+ **********************************************************/
 
+// Remove Ftvs that will never be instantiable.
+void
+TypeScheme::removeUnInstFtvs()
+{
+  for(size_t c=0; c < ftvs->size(); c++) {
+    GCPtr<Type> ftv = Ftv(c)->getType();
+    if(tau->boundInType(ftv))
+      ftv->flags |= TY_CLOS;
+  }
+
+  for(size_t i=0; i < tcc->size(); i++) {
+    GCPtr<Constraint> ct = tcc->Pred(i)->getType();
+
+    bool mustAdd=false;
+    for(size_t c=0; c < ftvs->size(); c++) {
+      GCPtr<Type> ftv = Ftv(c)->getType();
+      if(ct->boundInType(ftv) && (ftv->flags & TY_CLOS)) {
+	mustAdd = true;
+	break;
+      }
+    }
+
+    if(mustAdd)
+      for(size_t c=0; c < ftvs->size(); c++) {
+	GCPtr<Type> ftv = Ftv(c)->getType();
+	
+	if(ct->boundInType(ftv))
+	  ftv->flags |= TY_CLOS;
+      }
+  }
+
+  GCPtr< CVector< GCPtr<Type> > > newTvs = new CVector < GCPtr<Type> >;
+  for(size_t c=0; c < ftvs->size(); c++) {
+    GCPtr<Type> ftv = Ftv(c)->getType();
+    if(ftv->flags & TY_CLOS) {
+      newTvs->append(ftv);
+      ftv->flags &= ~TY_CLOS;
+    }
+  }
+  
+  ftvs = newTvs;
+}
+
+/**********************************************************
+ **********************************************************
+                Type Generalization
+
+ **********************************************************
+ **********************************************************/
 
 
 /**********************************************************
@@ -300,8 +346,6 @@ bool isExpansive(std::ostream& errStream,
       -- This step is not performed for instance generalizations.      
       -- The constraint is only added if !Mut(t) and !Immut(t)
 
-        --- Migrate constraints at this stage ???? ---
-
    4) Check for value restriction: 
       exp = isExpansive(e) || isExpansive(t')
 
@@ -312,14 +356,20 @@ bool isExpansive(std::ostream& errStream,
       If exp, and if generalizing at top-level, instantiate
       free variables to dummy types and issue warnings
 
-   6) Migrate appropriate constraints to parent's TCC, if one exists
+   6) Remove FTVs that are present purely only in constraints (no need
+      for generalization
+         -- remove FTVs that only appear in a constraint that does not 
+            contain an FTV that is transitively reachable from the 
+            type t' (possibly through other constraints)
+
+   7) Migrate appropriate constraints to parent's TCC, if one exists
       let C'' = migrate(parent-sigma, C')
       --> Constraints purely over monomorphic type variables can be
           migrated to the containing scope.
 
-   7) Check for ambiguity: This is a no-op.
+   8) Check for ambiguity: This is a no-op.
 
-   7) The generalized type is forall 'a*, t' \ C''
+   9) The generalized type is forall 'a*, t' \ C''
 
  *********************************************************/
 
@@ -332,10 +382,12 @@ TypeScheme::generalize(std::ostream& errStream,
 		       GCPtr<const AST> expr, 
 		       GCPtr<TCConstraints> parentTCC,
 		       GCPtr<Trail> trail,
-		       const GeneralizeMode gen_mode)
+		       GeneralizeMode gen_mode)
 {
   bool errFree = true;
 
+  GEN_DEBUG_TL if(gen_mode == gen_top)
+    gen_mode = gen_local;
   
   GEN_DEBUG errStream << "[0] To Generalize " 
 		      << asString(Options::debugTvP)
@@ -354,7 +406,6 @@ TypeScheme::generalize(std::ostream& errStream,
 			<< std::endl;
   }
 
-  if(0)
   if(gen_mode == gen_top) {
     // Step 2
     tau->adjMaybe(trail, true);
@@ -400,28 +451,20 @@ TypeScheme::generalize(std::ostream& errStream,
     GEN_DEBUG errStream << "[1] With Pcst: " 
 			<< asString(Options::debugTvP)
 			<< std::endl;
-
+    
   }
-
+  
   // Step 4
   bool exprExpansive = isExpansive(errStream, gamma, expr);
   bool typExpansive = isExpansive(errStream, gamma, tau);
   bool expansive = exprExpansive || typExpansive;
 
-  GEN_DEBUG if(exprExpansive)
-    errStream << "[5] " << expr->asString() 
-	      << " is expansive"
-	      << std::endl;
-  
-  GEN_DEBUG if(typExpansive)
-    errStream << "[5] " << tau->asString(Options::debugTvP) 
-	      << "is expansive"
-	      << std::endl;
-
   // Step 5
-  if(!expansive)
+  if(!expansive) {
     collectftvs(gamma);
-  
+    removeUnInstFtvs();
+  }
+
   if ((gen_mode == gen_top) && expansive) {
     collectftvs(gamma);
 
@@ -446,6 +489,7 @@ TypeScheme::generalize(std::ostream& errStream,
   }
   
   GEN_DEBUG errStream << "[5] Generalize: " 
+		      << ((expansive) ? " {Expansive} " : " {Value} ")
 		      << asString(Options::debugTvP)
 		      << std::endl;    
   
@@ -468,10 +512,259 @@ TypeScheme::generalize(std::ostream& errStream,
 }
 
 
-/* THE Type Specializer */     
+/**********************************************************
+                     Pattern Generalization
+ **********************************************************/
 
-// The following function has the distinction of being the most
-// debugged (and most vulnerale) function.
+/* Helper routines to generalize a pattern */
+void
+updateSigmas(GCPtr<const AST> bp, GCPtr<CVector<GCPtr<Type> > > ftvs,
+	     GCPtr<TCConstraints> tcc)
+{
+  switch(bp->astType) {
+  case at_identPattern:
+    {
+      GCPtr<AST> ident = bp->child(0);
+      assert(ident->scheme);
+      for(size_t i=0; i<ftvs->size(); i++) {
+	if(ident->symType->boundInType(ftvs->elem(i)))
+	  ident->scheme->ftvs->append(ftvs->elem(i));
+      }
+      ident->scheme->tcc = tcc;
+      break;
+    }
+    
+  case at_letGather:
+    {
+      for (size_t c = 0; c < bp->children->size(); c++)
+	updateSigmas(bp->child(c), ftvs, tcc);
+      break;
+    }
+
+  default:
+    {
+      assert(false);
+      break;
+    }
+  }
+}
+
+bool
+generalizePat(std::ostream& errStream,
+	      LexLoc &errLoc,
+	      GCPtr<Environment<TypeScheme> > gamma,
+	      GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
+	      GCPtr<AST> bp, GCPtr<AST> expr,
+	      GCPtr<TCConstraints> tcc,
+	      GCPtr<TCConstraints> parentTCC,
+	      GCPtr<Trail> trail)
+{
+  bool errFree = true;
+
+  // Make a temporary typeScheme for the pattern.
+  // Individual identifiers' TypeScheme will be updated after the 
+  // pattern is generalized as a whole.
+  GCPtr<TypeScheme> sigma = new TypeScheme(bp->symType, tcc);
+  
+  CHKERR(errFree, 
+	 sigma->generalize(errStream, errLoc, 
+			   gamma, instEnv, expr, parentTCC,
+			   trail, gen_local));
+  
+  updateSigmas(bp, sigma->ftvs, tcc);
+
+  // Puts the letgather type here.
+  expr->symType = bp->symType = sigma->tau;
+  expr->scheme = bp->scheme = sigma;
+
+  return errFree;
+}
+
+/******************************************************************
+                       Predicate Migration 
+
+  Migrate appropriate constraints to parent's TCC, if one exists
+   let C'' = migrate(parent-sigma, C')
+      --> Constraints purely over monomorphic type variables can be
+          migrated to the containing scope.
+   
+  This function returns true if at least one predicate was migrated to
+  the containing scope, false otherwise. 
+
+  Suppose the current tye scheme s = forall 'a*.t\C
+
+  For each predicate p in C,
+
+  1) FTV(p) = 0 CANNOT HAPPEN. The prediate is concrete, and must be
+     have been solved at this step.
+
+  2) If FTVS(p) intersection 'a* = {}, then this predicate can be
+     migrated. 
+*********************************************************************/
+
+
+bool
+TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
+{
+  if(!parentTCC)
+    return false;
+  
+  bool migrated = false;
+  GCPtr<CVector<GCPtr<Typeclass> > > newPred =
+    new CVector<GCPtr<Typeclass> >;
+  
+  for(size_t i=0; i < tcc->pred->size(); i++) {
+    GCPtr<Typeclass> pred = tcc->Pred(i)->getType();
+    GCPtr< CVector< GCPtr<Type> > > allFtvs = new CVector<GCPtr<Type> >;
+    pred->collectAllftvs(allFtvs);
+    
+    assert(allFtvs->size() != 0);
+    
+    bool hasFtv = false;
+    for(size_t j=0; j < allFtvs->size(); j++) {
+      GCPtr<Type> ftv = allFtvs->elem(j)->getType();
+      
+      if(ftvs->contains(ftv)) {
+	hasFtv = true;
+	break;
+      }
+    }
+    
+    if(hasFtv) {
+      newPred->append(pred);
+    }
+    else {
+      parentTCC->addPred(pred);
+      migrated = true;
+    }
+  }
+    
+  tcc->pred = newPred;
+  return migrated;
+}
+
+/**************************************************************
+                         Ambiguity Check
+
+   Check if a type scheme s = forall 'a*. t\C is ambiguous.
+   If there exists a 'a such that 
+      'a in {'a*}, 
+      'a in FTVS(C) and 
+      'a not in FTVS(t')
+    then s is ambiguous.
+
+   For example: 
+     read:  forall 'a. () -> 'a \ {Readable('a)}
+     write: forall 'a. 'a -> () \ {Writable('a)}
+
+   What about write(read ()) ?
+  
+     write(read ()): forall 'a. () \ Readable('a), Writable('a).
+
+   This case is traditionally declared and error because there is no
+   way to instantiate the 'a at the use location.
+
+   It is not clear that "ambiguous" typing is an error. In fact, it
+   does not break subject reduction, and execution can continue by
+   picking any instantiation of the variable. In particular, it is (in
+   a way) necessary in the case of polymorphic consrtaints.
+
+   For example, consider:
+   
+    let(k1) id = \x.x 
+    Ignoring the internal maybe types at function argument and return
+    positions, we can write:
+    
+    id: forall 'a,'b. 'b|'a->'a  \ {*(k1, 'b|'a->'a, 'b|'a->'a)}
+    
+    This type is not ambiguous. Now, if we write:
+
+    let(k2) id2 = \y.(id y),
+
+    the type if id2 will be:
+
+    id2: forall 'c,'d,'e. 'd|'c->'c  \ {*(k1, 'b|'a->'a, 'e|'c->'c),
+                                        *(k2, 'd|'c->'c, 'd|'c->'c)}
+
+    Here, the type of id2 will be declared ambiguous, which we cannot
+    accept. 
+    
+   It seems that we can take a middle ground where ambiguity check is
+   performed only for type-class constraints. However, in the presence
+   of copy-compatibility, even this is insufficient. Consider the
+   following case:
+
+   (deftypeclass (Tc 'a)
+      mt: (fn ('a) bool))
+
+   (define (f x) (mt x))
+   f: forall 'a,'b,'c,'d. (fn ('a|'b) 'c|bool) \ Tc('d|'b)
+
+   Actually, the top-level mutability on the type-class does not
+   matter (as long as the argument) is not used in a reference
+   context, and can be ignored in the ambiguity check. However,
+   it seems that the correct solution is to turn off the ambiguity
+   check. There is now only a stub-code for the ambiguty check.
+*********************************************************************/
+
+bool 
+TypeScheme::checkAmbiguity(std::ostream &errStream, LexLoc &errLoc)
+{
+#if 0
+  bool errFree =true;
+  for(size_t j=0; j < ftvs->size(); j++) {
+    GCPtr<Type> ftv = ftvs->elem(j);
+    
+    if(!tau->boundInType(ftv)) {
+      // ftv must be bound in some predicate.
+
+      for(size_t c=0; c < tcc->size(); c++) {
+	GCPtr<Typeclass> pred = tcc->Pred(c);
+	if(pred->isPcst())
+	  continue;
+	
+	// The ftv is bound in a type-class predicate.
+	if(pred->boundInType(ftv)) {
+	  errStream << errLoc << ": "
+		    << "Type variable "
+		    << ftv->asString(Options::debugTvP)
+		    << " unbound in "
+		    << tau->asString(Options::debugTvP)
+		    << " wrt "
+		    << asString(Options::debugTvP)
+		    << std::endl;
+	  
+	  errFree = false;
+	  break;
+	}
+      }
+    }
+  }
+
+  if(!errFree)
+    errStream << errLoc << ": "
+	      << "Ambiguous type definition:"
+	      << asString()
+	      << std::endl;
+  return errFree;
+#else
+  return true;
+#endif
+}
+
+
+/**********************************************************
+ **********************************************************
+               Type Specialization
+
+ **********************************************************
+ **********************************************************/
+
+
+/**********************************************************
+                  THE Type Specializer 
+***********************************************************/
+
 GCPtr<Type> 
 Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
 			 GCPtr<CVector<GCPtr<Type> > > nftvs)
@@ -482,7 +775,6 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
   theType->typeArgs->erase();
   theType->components->erase();
   theType->fnDeps = NULL;
-  // Note `hints' is linked to the ORIGINAL VALUE here.
   GCPtr<Type> retType = theType;
   
   INS_DEBUG std::cout << "To Specialize " 
@@ -562,7 +854,6 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
 	break;
       }      
     }
-    //t->sp =  NULL;
   }
   
   INS_DEBUG std::cout << "\t Specialized " 
@@ -596,6 +887,9 @@ Type::clear_sp()
       t->FnDep(i)->clear_sp();
 }
 
+/**********************************************************
+                  The Specizlizer interface 
+***********************************************************/
 
 GCPtr<Type> 
 Type::TypeSpecialize(GCPtr<CVector<GCPtr<Type> > > ftvs,
@@ -607,69 +901,3 @@ Type::TypeSpecialize(GCPtr<CVector<GCPtr<Type> > > ftvs,
 }
 
 
-/* Helper routines to generalize a pattern */
-void
-updateSigmas(GCPtr<const AST> bp, GCPtr<CVector<GCPtr<Type> > > ftvs,
-	     GCPtr<TCConstraints> tcc)
-{
-  switch(bp->astType) {
-  case at_identPattern:
-    {
-      GCPtr<AST> ident = bp->child(0);
-      assert(ident->scheme);
-      for(size_t i=0; i<ftvs->size(); i++) {
-	if(ident->symType->boundInType(ftvs->elem(i)))
-	  ident->scheme->ftvs->append(ftvs->elem(i));
-      }
-      ident->scheme->tcc = tcc;
-      break;
-    }
-    
-  case at_letGather:
-    {
-      for (size_t c = 0; c < bp->children->size(); c++)
-	updateSigmas(bp->child(c), ftvs, tcc);
-      break;
-    }
-
-  default:
-    {
-      assert(false);
-      break;
-    }
-  }
-}
-
-
-/* This is the routine that any definition involving a pattern
-   biunding, including identPattern must call. */
-bool
-generalizePat(std::ostream& errStream,
-	      LexLoc &errLoc,
-	      GCPtr<Environment<TypeScheme> > gamma,
-	      GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
-	      GCPtr<AST> bp, GCPtr<AST> expr,
-	      GCPtr<TCConstraints> tcc,
-	      GCPtr<TCConstraints> parentTCC,
-	      GCPtr<Trail> trail)
-{
-  bool errFree = true;
-
-  // Make a temporary typeScheme for the pattern.
-  // Individual identifiers' TypeScheme will be updated after the 
-  // pattern is generalized as a whole.
-  GCPtr<TypeScheme> sigma = new TypeScheme(bp->symType, tcc);
-  
-  CHKERR(errFree, 
-	 sigma->generalize(errStream, errLoc, 
-			   gamma, instEnv, expr, parentTCC,
-			   trail, gen_local));
-  
-  updateSigmas(bp, sigma->ftvs, tcc);
-
-  // Puts the letgather type here.
-  expr->symType = bp->symType = sigma->tau;
-  expr->scheme = bp->scheme = sigma;
-
-  return errFree;
-}

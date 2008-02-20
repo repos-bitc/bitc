@@ -1,2 +1,18 @@
 (define (id x) x)
-(define F (begin (id #t) (id #\t)))
+;(define F (begin (id #t) (id #\t)))
+
+(define (id2 x) (id #t))
+
+; id: (forall 'a 'b 'c 'd 
+;          *('k22, 'a|(fn ('b|'c) 'd|'c), 'a|(fn ('b|'c) 'd|'c)) ) 
+;         'a|(fn ('b|'c) 'd|'c))
+
+; id2: (forall 'a 'b 'c 'd  
+;        *('k22, 'h|(fn ('g|'e) 'f|'e), 'k|((fn ('j|bool) 'i|bool))) 
+;        *('k73, 'a|(fn ('b|'c) 'd|bool), 'a|(fn ('b|'c) 'd|bool)) ) 
+;      'a|(fn ('b|'c) 'd|bool))
+
+; id2: (forall 'a 'b 'c 'd 
+;        *('k22, 'h|(fn ('g|'e) 'f|'e), 'k|((fn ('j|bool) 'i|bool))) 
+;        *('k73, 'a|(fn ('b|'c) 'd|bool), 'a|(fn ('b|'c) 'd|bool)) ) 
+;      'a|(fn ('b|'c) 'd|bool))

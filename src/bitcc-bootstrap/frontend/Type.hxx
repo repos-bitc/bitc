@@ -144,15 +144,13 @@ struct TypeScheme;
                               // composite type is free to be 
                               // copy-compatible at this position.
 
-#define CT_REMOVE        0x20u // A constraint marked for removal
-                               // since it is satisfied. 
-                               // Inter-procedural flag used in the
-                               // implementation of unification only.
+#define TY_CLOS          0x20u // A temporary flag used in closure
+                               // computation of FTVs in a TypeScheme.
                                
 
 // Specialization mask -- those flags which should NOT survive
 // specialization. ((TY_RESTRICTED was here too.))
-#define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | CT_REMOVE) 
+#define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | TY_CLOS) 
 
 struct Type : public Countable {
   

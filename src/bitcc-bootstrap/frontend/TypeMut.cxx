@@ -553,7 +553,7 @@ Type::minimizeDeepMutability(GCPtr<Trail> trail)
       for(size_t i=0; i < rt->typeArgs->size(); i++) {
 	GCPtr<Type> arg = rt->TypeArg(i)->getType();
 	assert(arg->kind != ty_tvar);
-	if(rt->argCCOK(i))	  
+	if(rt->argCCOK(i))
 	  trail->link(arg, arg->minimizeDeepMutability(trail));       
       }
       break;

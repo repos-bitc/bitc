@@ -50,7 +50,8 @@
 #define INST_ENV_DEBUG    DEBUG_OFF
 #define REPR_SIMP_DEBUG   DEBUG_OFF
 #define CLCONV_DEBUG      DEBUG_OFF
-#define GEN_DEBUG         DEBUG_ON // Debug Type Generalization
+#define GEN_DEBUG_TL      DEBUG_ON   // Treat all generalization as local
+#define GEN_DEBUG         DEBUG_ON   // Debug Type Generalization
 #define INS_DEBUG         DEBUG_OFF  // Debug Type Instantiation
 #define SOL_DEBUG         DEBUG_OFF  // Debug Constraint Solver
 #define SPSOL_DEBUG       DEBUG_OFF  // Debug Solving Special constaints

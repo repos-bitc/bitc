@@ -756,9 +756,9 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
   ut->defAst = uIdent;
   ut->myContainer = uIdent;
   uIdent->symType = ut;
-  GCPtr<TypeScheme> sigma = new TypeScheme(ut, uIdent, new TCConstraints);    
+  GCPtr<TypeScheme> sigma = new TypeScheme(ut, uIdent, new TCConstraints);
   
- // match at_tvlist
+  // match at_tvlist
   GCPtr<AST> tvList = ast->child(1);
   CHKERR(errFree, InferTvList(errStream, tvList, gamma, instEnv, impTypes, 
 			      isVP, sigma->tcc, uflags, trail, DEF_MODE, 
@@ -780,13 +780,13 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
   gamma->setFlags(uIdent->s, bindFlags);
   
   // Ignore the category
-
+  
   // match at_declares
   GCPtr<AST> declares = ast->child(3);
   TYPEINFER(declares, gamma, instEnv, impTypes, isVP, sigma->tcc,
 	    uflags, trail,  mode, TI_NONE);
-    
- 
+  
+  
   // match at_constructors
   GCPtr<AST> ctrs = ast->child(4);
   for(c = 0; c < ctrs->children->size(); c++) {
@@ -803,7 +803,7 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
       ctrKind = (isReference) ? ty_uconr : ty_uconv;
     else
       ctrKind = (isReference) ? ty_uvalr : ty_uvalv;
-
+    
     ctrId->symType = new Type(ctrKind, ctrId);
     ctrId->symType->defAst = ctrId;
     ctrId->symType->myContainer = uIdent;

@@ -96,6 +96,7 @@ OBJECTS=\
 	$(BUILDDIR)/Type-size.o \
 	$(BUILDDIR)/TypeMut.o \
 	$(BUILDDIR)/Constraints.o \
+	$(BUILDDIR)/Solver.o \
 	$(BUILDDIR)/LocChk.o \
 	$(BUILDDIR)/NoGcCheck.o \
 	$(BUILDDIR)/Special.o\

@@ -80,7 +80,7 @@ struct TypeScheme : public Countable {
 		  GCPtr<const AST> expr, 
 		  GCPtr<TCConstraints >parentTCC,
 		  GCPtr<Trail> trail,
-		  const GeneralizeMode gen);
+		  GeneralizeMode gen);
   
   // The function that actually makes a copy of the 
   // contained type. This function calls TypeSpecialize.
@@ -110,7 +110,8 @@ struct TypeScheme : public Countable {
   // Collect all tvs wrt tau, and tcc->pred, but NOT tcc->fnDeps
   void collectAllFtvs();
   void collectftvs(GCPtr<const Environment<TypeScheme> > gamma);
-  
+  void removeUnInstFtvs();
+
   bool solvePredicates(std::ostream &errStream,
 		       LexLoc &errLoc,
 		       GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
