@@ -44,6 +44,6 @@
 
 
 (provide main bitc.main)
-(define (main.main argVec:(vector string)) 
-  (somefun nil)
-  0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (somefun nil) 0))

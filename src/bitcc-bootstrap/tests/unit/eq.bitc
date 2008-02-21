@@ -38,11 +38,6 @@
 (bitc-version "0.10")
 (provide main bitc.main)
 
-
-(define i0 (the int32 0))
-(define i1 (the int32 1))
-(define i2 (the int32 2))
- 
 (deftypeclass (EQL 'a)
   ===: (fn ('a 'a) bool)
   )
@@ -77,10 +72,10 @@
 (definstance (EQL (list 'a)) ==)
 (define (f x:(list 'a)) (=== x x))
 
-(define (main.main argVec:(vector string))
-  (=== (the int32 10) 20)
-  (=== #t #f)
-  (=== nil nil)
-  (P #t #f)
-  i0)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (=== (the int32 10) 20)
+    (=== #t #f)
+    (=== nil nil)
+    (P #t #f) 0))
 

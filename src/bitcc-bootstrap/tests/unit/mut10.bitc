@@ -43,6 +43,6 @@
 	      (pair #f #t):(pair bool (mutable bool))))
 
 (provide main bitc.main)
-(define (main.main argv:(vector string))  
-  0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argv) 0))
 

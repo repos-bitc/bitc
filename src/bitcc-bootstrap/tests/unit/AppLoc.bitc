@@ -44,6 +44,7 @@
 
 (define mysf1 (sf int32id))
 
-(define (main.main argVec:(vector string)) 
-  (let ((mysf2 (sf int32id)))
-    (mysf1.f 3)))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (let ((mysf2 (sf int32id)))
+      (mysf1.f 3))))

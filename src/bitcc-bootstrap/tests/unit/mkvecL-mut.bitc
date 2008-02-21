@@ -43,8 +43,8 @@
 (define (id x) x)
 
 (provide main bitc.main)
-(define (main.main argv:(vector string))
-  (let ((vec:(vector (mutable int32)) 
-	     (make-vector 30 (lambda (x) (convert x)))))
-    vec)
-  (the int32 0))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argv)
+    (let ((vec:(vector (mutable int32)) 
+	       (make-vector 30 (lambda (x) (convert x)))))
+      vec) 0))

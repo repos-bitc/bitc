@@ -38,8 +38,6 @@
 (bitc-version "0.10")  
 (provide main bitc.main)
 
-(define i0 (the int32 0))
-
 (define (addone x) (+ x 1))
 
 (define (addtwo x) (+ x 2.0))
@@ -61,9 +59,9 @@
 ;    (let ((p 25))
 ;      p)))
   
-(define (main.main argVec:(vector string))
-  XYZ ABC
- i0)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    XYZ ABC 0))
 
 
 

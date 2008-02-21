@@ -48,79 +48,81 @@
 
 (define (zero x) 0)
 
-(define (main.main argVec:(vector string))
-  (define len:word 5000)
-  (define first (stdlib.getTimeStamp))
-  (define start (stdlib.getTimeStamp)) 
-  (define stop (stdlib.getTimeStamp)) 
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (define len:word 5000)
+    (define first (stdlib.getTimeStamp))
+    (define start (stdlib.getTimeStamp)) 
+    (define stop (stdlib.getTimeStamp)) 
   ;(TS "Time Stamping: " (- stop start))
-  
-  (define vec:(vector (mutable uint8))
-    (make-vector len zero))
-  
-  (set! start (stdlib.getTimeStamp))
-  (stdio.write-string stdio.stdout "This is a test string\n")
-  (set! stop (stdlib.getTimeStamp)) 
+    
+    (define vec:(vector (mutable uint8))
+      (make-vector len zero))
+    
+    (set! start (stdlib.getTimeStamp))
+    (stdio.write-string stdio.stdout "This is a test string\n")
+    (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Print to stdout: " (- stop start))
-  
-  (set! start (stdlib.getTimeStamp))
-  (define iStream (stdio.open (vector-nth argVec 1) "r"))
-  (set! stop (stdlib.getTimeStamp)) 
+    
+    (set! start (stdlib.getTimeStamp))
+    (define iStream (stdio.open (vector-nth argVec 1) "r"))
+    (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Open Read Stream: " (- stop start))
-  
-  (set! start (stdlib.getTimeStamp))
-  (define oStream (stdio.open "BUILD/_WRITE_" "w"))
-  (set! stop (stdlib.getTimeStamp)) 
+    
+    (set! start (stdlib.getTimeStamp))
+    (define oStream (stdio.open "BUILD/_WRITE_" "w"))
+    (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Open Write Stream: " (- stop start))
-
-  (set! start (stdlib.getTimeStamp))
-  (define temp (stdio.read-byte iStream))
-  (set! stop (stdlib.getTimeStamp)) 
+    
+    (set! start (stdlib.getTimeStamp))
+    (define temp (stdio.read-byte iStream))
+    (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Read 1 Byte from file: " (- stop start))
- 
-  (set! start (stdlib.getTimeStamp))
-  (do ((i 0 (+ i 1)))
-      ((>= i len) ())
-      (set! (vector-nth vec i) (stdio.read-byte iStream)))  
-  (set! stop (stdlib.getTimeStamp)) 
+    
+    (set! start (stdlib.getTimeStamp))
+    (do ((i 0 (+ i 1)))
+	((>= i len) ())
+	(set! (vector-nth vec i) (stdio.read-byte iStream)))  
+    (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Input from File: " (- stop start))
-  
-  (set! start (stdlib.getTimeStamp))
-  (do ((i 0 (+ i 1)))
-      ((>= i len) ())
-      (stdio.write-byte stdio.stdout (vector-nth vec i)))  
-  (set! stop (stdlib.getTimeStamp)) 
+    
+    (set! start (stdlib.getTimeStamp))
+    (do ((i 0 (+ i 1)))
+	((>= i len) ())
+	(stdio.write-byte stdio.stdout (vector-nth vec i)))  
+    (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Write to stdout: " (- stop start))
-  
-  (set! start (stdlib.getTimeStamp))
-  (do ((i 0 (+ i 1)))
-      ((>= i len) ())
-      (set!  (vector-nth vec i)
-	     (if (not (stdio.eof? iStream))
-		 (stdio.read-byte iStream) 0)))  
-  (set! stop (stdlib.getTimeStamp)) 
+    
+    (set! start (stdlib.getTimeStamp))
+    (do ((i 0 (+ i 1)))
+	((>= i len) ())
+	(set!  (vector-nth vec i)
+	       (if (not (stdio.eof? iStream))
+		   (stdio.read-byte iStream) 0)))  
+    (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Checked Input From file: " (- stop start))
-  
-  (set! start (stdlib.getTimeStamp))
-  (do ((i 0 (+ i 1)))
-      ((>= i len) ())
-      (stdio.write-byte oStream (vector-nth vec i)))  
-  (set! stop (stdlib.getTimeStamp)) 
+    
+    (set! start (stdlib.getTimeStamp))
+    (do ((i 0 (+ i 1)))
+	((>= i len) ())
+	(stdio.write-byte oStream (vector-nth vec i)))  
+    (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Write to file: " (- stop start))
-
-  
-  (set! start (stdlib.getTimeStamp))
-  (stdio.close iStream)
-  (set! stop (stdlib.getTimeStamp)) 
+    
+    
+    (set! start (stdlib.getTimeStamp))
+    (stdio.close iStream)
+    (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Close iStream: " (- stop start))
-
-  (set! start (stdlib.getTimeStamp))
-  (stdio.close oStream)
-  (set! stop (stdlib.getTimeStamp)) 
+    
+    (set! start (stdlib.getTimeStamp))
+    (stdio.close oStream)
+    (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Close oStream: " (- stop start))
-  
-  (set! stop (stdlib.getTimeStamp)) 
+    
+    (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Total: " (- stop first))
+    
+    0))
   
-  0:int32)
-
+  

@@ -40,6 +40,6 @@
  
 (define (f x) (f x))
 
-(define (main.main argVec:(vector string)) 
-  f  
-  (the int32 0)) 
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    f 0)) 

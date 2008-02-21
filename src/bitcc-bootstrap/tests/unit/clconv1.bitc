@@ -43,7 +43,6 @@
 (define f (let ((x 1))
 	    (lambda (y:int32) (+ x y))))
 
-(define (main.main argVec:(vector string)) 
- (f 0)) ;; No qualification of in32 needed here. 
-        ;; Already qualiied in `f'
-
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (f 0)))

@@ -38,8 +38,9 @@
 (bitc-version "0.10")
 (provide main bitc.main)
 
-(define (main.main argVec:(vector string)) 
-  ;; The following *should* cause an exception:
-  (let ((v (make-vector 10 (lambda (n) #\c))))
-    (vector-nth v 12))
-  0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    ;; The following *should* cause an exception:
+    (let ((v (make-vector 10 (lambda (n) #\c))))
+      (vector-nth v 12))
+    0))

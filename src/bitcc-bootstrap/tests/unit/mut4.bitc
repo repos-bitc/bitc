@@ -39,10 +39,11 @@
 (provide main bitc.main)
 
 (defstruct St:val f1:(mutable int32) f2:bool)
-(define (main.main argVec:(vector string))
-  (let ((p (St 10 #t)))
-    (set! p.f1 25)
-    ;; MUST not work
-    ;; (set! p.f2 #f)
-    (set! p (St p.f1 p.f2)))
-  0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (let ((p (St 10 #t)))
+      (set! p.f1 25)
+      ;; MUST not work
+      ;; (set! p.f2 #f)
+      (set! p (St p.f1 p.f2)))
+    0))

@@ -40,5 +40,5 @@
 ;; The simplest test
 
 (provide main bitc.main)
-(define (main.main argVec:(vector string))   
-  0:int32) 
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 0)) 

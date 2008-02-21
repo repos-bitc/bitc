@@ -40,12 +40,10 @@
 
 (define i0 (the int32 0))
 (define i1 (the int32 1))
-(define i2 (the int32 2))
 
 (defexception exFred)
 
 (define (f) (try (throw exFred) 
 		 (catch xyz (exFred i1))))
-(define (main.main argVec:(vector string)) 
-  (f)
-  i0)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) (f)  i0))

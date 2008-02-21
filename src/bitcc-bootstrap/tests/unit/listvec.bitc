@@ -46,7 +46,8 @@
   (list->vector lst))
 
 (provide main bitc.main)
-(define (main.main argv:(vector string))
-  (lv-m (cons #\a nil:(list (mutable char))))
-  (lv-nm (cons #\a nil))
-  0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argv)
+    (lv-m (cons #\a nil:(list (mutable char))))
+    (lv-nm (cons #\a nil))
+    0))

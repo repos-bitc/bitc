@@ -40,5 +40,6 @@
 (defstruct bst f1:(bitfield bool 1) (fill (bitfield uint32 31)))
 
 (define bstv (bst #t))
-(define (main.main argVec:(vector string))
-  (if bstv.f1 0:int32 1:int32))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (if bstv.f1 0 1)))

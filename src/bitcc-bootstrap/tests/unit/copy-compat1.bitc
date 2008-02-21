@@ -44,8 +44,9 @@
   (lambda (x:'a y:'b) ()))
 
 (provide main bitc.main)
-(define (main.main argv:(vector string))  
-  (abc (10, 20):(pair int32 (mutable int32))
-       (10, 20):(pair int32 int32) )
-  0:int32)
+(define main.main:(fn ((vector string)) int32) 
+  (lambda (argv)  
+    (abc (10, 20):(pair int32 (mutable int32))
+	 (10, 20):(pair int32 int32) )
+    0))
 

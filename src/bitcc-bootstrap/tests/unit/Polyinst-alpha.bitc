@@ -42,6 +42,5 @@
 (define i1 (the int32 1))
 
 (define (f) (letrec ((lam (lambda (x) x))) i0))
-(define (main.main argVec:(vector string)) 
-  (f)
-  i0)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) (f) i0))

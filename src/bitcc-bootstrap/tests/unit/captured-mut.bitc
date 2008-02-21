@@ -41,7 +41,6 @@
 ;; Test for refization of captured mutables.
 
 (define (f x:(mutable int32)) ((lambda () x)):(mutable int32))
-(define (main.main argVec:(vector string))   
-  f
-  0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) f 0))
 

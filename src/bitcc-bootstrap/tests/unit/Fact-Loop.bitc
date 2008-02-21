@@ -43,6 +43,7 @@
 		      (i x (- i 1)))
 		     ((== i 0) ans) ()))
 
-(define (main.main argVec:(vector string)) 
-  (fact 5:int32))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (fact 5)))
 

@@ -43,7 +43,8 @@
 (define i2 (the int32 2))
 
 (define a1 (array i0 i1 i2))
-(define (main.main argVec:(vector string)) 
-  (begin (try (array-nth a1 25) 
-	      (catch xyz (IndexBoundsError -1))))
-  i0)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (begin (try (array-nth a1 25) 
+		(catch xyz (IndexBoundsError -1))))
+    i0))

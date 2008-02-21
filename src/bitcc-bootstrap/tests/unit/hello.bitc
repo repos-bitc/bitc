@@ -39,7 +39,8 @@
 (provide main bitc.main)
 (import stdio bitc.stdio)
 
-(define (main.main argVec:(vector string))
-  (stdio.write-string stdio.stdout "Hello, world!\n")
-  (the int32 0))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (stdio.write-string stdio.stdout "Hello, world!\n")
+    0))
 

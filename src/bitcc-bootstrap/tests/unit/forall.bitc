@@ -63,10 +63,11 @@
 
 (define Q @)
  
-(define (main.main argVec:(vector string))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
   (S2 i0 i0)
   (u2 #t #f)
-  i0)
+  i0))
 
 
 

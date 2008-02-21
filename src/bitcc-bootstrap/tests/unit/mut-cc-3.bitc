@@ -45,7 +45,6 @@
 (define p2:(pair (mutable bool) bool) p1)
 
 (provide main bitc.main)
-(define (main.main argv:(vector string))
- p1 p2
- 0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) p1 p2 0))
 

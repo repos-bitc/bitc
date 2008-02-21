@@ -40,8 +40,9 @@
 
 ;; Test for the library-routine (make-mutable-vector ... )
 (import vec bitc.vector)
-(define (main.main argVec:(vector string))   
-  (let ((mvec (vec.make-mutable-vector 10 #t)))
-    (set! (vector-nth mvec 5) #f))
-  0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)   
+    (let ((mvec (vec.make-mutable-vector 10 #t)))
+      (set! (vector-nth mvec 5) #f))
+    0))
 

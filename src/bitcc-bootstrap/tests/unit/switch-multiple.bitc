@@ -44,6 +44,8 @@
   (Ct1 i:int32 j:bool)
   (Ct2 i:int32 j:bool))
  
-(define (main.main argVec:(vector string)) 
-  (switch x (Ct1 0 #t)
-    ((Ct1 Ct2) x.i)))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (switch x (Ct1 0 #t)
+      ((Ct1 Ct2) x.i))))
+  

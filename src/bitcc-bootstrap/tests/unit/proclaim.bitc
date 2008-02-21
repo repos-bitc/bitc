@@ -38,8 +38,6 @@
 (bitc-version "0.10")
 (provide main bitc.main)
  
-(define i0 (the int32 0))
-
 (proclaim id: (fn ('a) 'a))
 (proclaim id: (fn ('b) 'b))
 
@@ -49,6 +47,7 @@
 ;(proclaim id: (fn ('c) 'c))
 ;(proclaim id: (fn ('d) 'd))
 
-(define (main.main argVec:(vector string)) 
-  (id i0)) 
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (id 0))) 
 

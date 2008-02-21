@@ -57,7 +57,8 @@
 (define mp:(ref (pair (mutable bool) (mutable bool))) 
   (dup (#t, #f)))
 
-(define (main.main argVec:(vector string)) 
-  (if (== mp mp) 0:int32 1:int32)
-  (if (== p p) 0:int32 1:int32)
-  )
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (if (== mp mp) 0:int32 1)
+    (if (== p p) 0 1)
+    ))

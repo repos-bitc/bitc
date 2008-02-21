@@ -42,5 +42,5 @@
   (let ((y 0:int32))
     (lambda (x) y)))
  
-(define (main.main argVec:(vector string)) 
-  ((f) #t)) 
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) ((f) #t))) 

@@ -38,9 +38,10 @@
 (bitc-version "0.10")
 (provide main bitc.main)
 
-(define (main.main argVec:(vector string)) 
-  (letrec ((f (lambda (x) x)))
-    (f 0):int32))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (letrec ((f (lambda (x) x)))
+      (f 0))))
 
 ;; The following should ultimately be legal once the 
 ;; letrec-function-only-restriction is removed.

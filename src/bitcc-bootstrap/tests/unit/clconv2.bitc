@@ -47,12 +47,12 @@
 
 (define (id x) x)
 
-(define (main.main argVec:(vector string))
-  (define i:int32 0)
-  (define l:(list bool) nil)
-  (define out stdio.stdout)
-  (define (f) (id (i, l, out)))
-  
-  0:int32
-  )
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (define i:int32 0)
+    (define l:(list bool) nil)
+    (define out stdio.stdout)
+    (define (f) (id (i, l, out)))
+    
+    0))
 

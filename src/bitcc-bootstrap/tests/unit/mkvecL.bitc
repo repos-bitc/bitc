@@ -38,7 +38,7 @@
 (bitc-version "0.10")
 
 (provide main bitc.main)
-(define (main.main argv:(vector string))
-  (let ((vec (make-vector 10 (lambda (x) x))))
-    vec) 
-  0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argv)
+    (let ((vec (make-vector 10 (lambda (x) x))))
+      vec) 0))

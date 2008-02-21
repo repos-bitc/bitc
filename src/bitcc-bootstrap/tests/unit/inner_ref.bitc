@@ -41,23 +41,23 @@
 (defstruct myPairV:val fst:(mutable int32) snd:(mutable int32))
 (defstruct myPairR:ref fst:(mutable int32) snd:(mutable int32))
  
-(define (main.main argVec:(vector string)) 
-  (let ((vec:(vector (mutable int32)) (vector 1 2 3 4 5))
-	(arr:(ref (array (mutable int32) 5)) (dup (array 1 2 3 4 5)))
-	(stv (dup (myPairV 23 34)))
-	(str (myPairR 45 65)))
-    
-    (let ((Ivec (inner-ref vec 1))
-	  (Iarr (inner-ref arr 2))
-	  (Istv (inner-ref stv fst))	
-	  (Istr (inner-ref str snd)))
-
-      (set! Ivec^ 0)
-      (set! Iarr^ 0)
-      (set! Istv^ 0)
-      (set! Istr^ 0)
-
-      (+ (vector-nth vec 1) 
-	 (+ (array-nth  arr^ 2)
-	    (+ stv^.fst str.snd)))))) 
-
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (let ((vec:(vector (mutable int32)) (vector 1 2 3 4 5))
+	  (arr:(ref (array (mutable int32) 5)) (dup (array 1 2 3 4 5)))
+	  (stv (dup (myPairV 23 34)))
+	  (str (myPairR 45 65)))
+      
+      (let ((Ivec (inner-ref vec 1))
+	    (Iarr (inner-ref arr 2))
+	    (Istv (inner-ref stv fst))	
+	    (Istr (inner-ref str snd)))
+	
+	(set! Ivec^ 0)
+	(set! Iarr^ 0)
+	(set! Istv^ 0)
+	(set! Istr^ 0)
+	
+	(+ (vector-nth vec 1) 
+	   (+ (array-nth  arr^ 2)
+	      (+ stv^.fst str.snd))))))) 

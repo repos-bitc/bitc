@@ -49,67 +49,69 @@
 
 (define (id x) (convert x))
 
-(define (main.main argVec:(vector string))
-  (define start:(mutable uint64) 0)
-  (define stop:(mutable uint64) 0)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (define start:(mutable uint64) 0)
+    (define stop:(mutable uint64) 0)
 ; (define start (stdlib.getTimeStamp))
- (define sha (sha1.sha1Context
-	      (array 0 0 0 0 0) 0 0 
-	      (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-		      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-		      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-		      0 0 0 0) 0 #f sha1.sha-Success))
-
- (define digest:(array (mutable uint8) 20)
-   (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
- (define len:word (convert (stdlib.atoi (vector-nth argVec 2))))
+    (define sha (sha1.sha1Context
+		 (array 0 0 0 0 0) 0 0 
+		 (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+			0 0 0 0) 0 #f sha1.sha-Success))
+    
+    (define digest:(array (mutable uint8) 20)
+      (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
+    (define len:word (convert (stdlib.atoi (vector-nth argVec 2))))
  ;(define stop (stdlib.getTimeStamp)) 
  ;(TS "Initialization: " (- stop start))
-
+    
  ;(set! start (stdlib.getTimeStamp))
- (define iStream (stdio.open (vector-nth argVec 1) "r"))
- (define input:(vector (mutable uint8)) 
-   (make-vector (convert len)
-		(lambda (i) 
-		  (if (not (stdio.eof? iStream))
-		      (stdio.read-byte iStream) 0))))
+    (define iStream (stdio.open (vector-nth argVec 1) "r"))
+    (define input:(vector (mutable uint8)) 
+      (make-vector (convert len)
+		   (lambda (i) 
+		     (if (not (stdio.eof? iStream))
+			 (stdio.read-byte iStream) 0))))
   ;(do ((i 0 (+ i 1)))
   ;    ((>= i len) ())
   ;    (set! (vector-nth input i) 
   ;	    (if (not (stdio.eof? iStream))
   ;		(stdio.read-byte iStream) 0)))  
- (stdio.close iStream)
-
+    (stdio.close iStream)
+    
  ;(set! stop (stdlib.getTimeStamp)) 
  ;(TS "Input: " (- stop start))
-
- (define (examine res mesg)
-   (switch x res
-     (sha1.sha-Success ())
-     (otherwise (stdio.write-string stdio.stdout "Failed ")
-		(stdio.write-string stdio.stdout mesg)
-		(stdio.write-string stdio.stdout ": ")
-		(stdio.write-string stdio.stdout (sha1.shaResultAsString res))
-		(stdio.write-char stdio.stdout #\linefeed))))
- 
- (set! start (stdlib.getTimeStamp)) 
- (do ((i:word 0 (+ i 1)))
-     ((>= i 500) ())
-     (examine (sha1.sha1Reset sha) "Reset")
-     (examine (sha1.sha1Input sha input) "Input")
-     (examine (sha1.sha1Result sha digest) "Result"))
- (set! stop (stdlib.getTimeStamp)) 
+    
+    (define (examine res mesg)
+      (switch x res
+	(sha1.sha-Success ())
+	(otherwise (stdio.write-string stdio.stdout "Failed ")
+		   (stdio.write-string stdio.stdout mesg)
+		   (stdio.write-string stdio.stdout ": ")
+		   (stdio.write-string stdio.stdout (sha1.shaResultAsString res))
+		   (stdio.write-char stdio.stdout #\linefeed))))
+    
+    (set! start (stdlib.getTimeStamp)) 
+    (do ((i:word 0 (+ i 1)))
+	((>= i 500) ())
+	(examine (sha1.sha1Reset sha) "Reset")
+	(examine (sha1.sha1Input sha input) "Input")
+	(examine (sha1.sha1Result sha digest) "Result"))
+    (set! stop (stdlib.getTimeStamp)) 
 ; (TS "SHA1: " (- stop start))
- 
+    
  ;(set! start (stdlib.getTimeStamp))
- (stdio.write-char stdio.stdout #\tab)
- (do ((i 0 (+ i 1)))
-     ((>= i 20) ())
-     (stdio.write-int stdio.stdout (array-nth digest i) 16)
-     (stdio.write-char stdio.stdout #\space))
- (stdio.write-char stdio.stdout #\linefeed)
- 
+    (stdio.write-char stdio.stdout #\tab)
+    (do ((i 0 (+ i 1)))
+	((>= i 20) ())
+	(stdio.write-int stdio.stdout (array-nth digest i) 16)
+	(stdio.write-char stdio.stdout #\space))
+    (stdio.write-char stdio.stdout #\linefeed)
+    
  ;(set! stop (stdlib.getTimeStamp)) 
  ;(TS "Output: " (- stop start))
- 0:int32)
-
+    0))
+  
+  

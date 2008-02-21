@@ -42,7 +42,8 @@
   (lambda (x) (dup x)))
 
 (provide main bitc.main)
-(define (main.main argv:(vector string))  
-  ((dupize1 #t), (dupize2 #f))
-  0:int32)
+(define main.main:(fn ((vector string)) int32) 
+  (lambda (argv)  
+    ((dupize1 #t), (dupize2 #f))
+    0))
 

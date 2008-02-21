@@ -58,6 +58,7 @@
 ;;(definstance  (ABC int32)
 ;; FUN)
   
-(define (main.main argVec:(vector string))  
-  (FN i0 i0) i0)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)  
+    (FN i0 i0) i0))
 

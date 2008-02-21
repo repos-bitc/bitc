@@ -38,19 +38,15 @@
 (bitc-version "0.10")
 (provide main bitc.main)
 
-(define i0 (the int32 0))
-(define i1 (the int32 1))
-(define i2 (the int32 2))
-
 (defexception Xn1)
 (defexception Xn2 a:int32 b:char)
 (defexception Xn3)
 
 (define (f) (try (if #t (throw (Xn2 (throw Xn3) #\c)) (throw Xn1)) 
 		 (catch xyz 
-			(Xn1 i1)
+			(Xn1 1:int32)
 			(Xn2 xyz.a)
 			(otherwise 250))))
-(define (main.main argVec:(vector string)) 
-  (f)
-  i0)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (f) 0))

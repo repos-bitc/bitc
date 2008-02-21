@@ -38,9 +38,10 @@
 (bitc-version "0.10")
 (provide main bitc.main)
 
-(define (main.main argVec:(vector string)) 
- (do ((a 0:int32 (+ a 1))
-      (b 1:int32 (+ b 2)))
-     (#t 0:int32)
-     #f))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (do ((a 0:int32 (+ a 1))
+	 (b 1:int32 (+ b 2)))
+	(#t 0)
+	#f)))
  

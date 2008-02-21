@@ -44,7 +44,8 @@
   (lambda (x) x))
 
 (provide main bitc.main)
-(define (main.main argVec:(vector string)) 
-  (refID nil)
-  (refID (dup ()))
-  0:int32) 
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (refID nil)
+    (refID (dup ()))
+    0)) 

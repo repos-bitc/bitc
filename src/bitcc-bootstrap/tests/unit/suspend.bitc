@@ -38,11 +38,9 @@
 (bitc-version "0.10")
 (provide main bitc.main)
 
-(define i0 (the int32 0))
-(define i1 (the int32 1))
-
 ; suspend cannot be tested until (if at all) we have definvariant
 ; definvariuant property
-(define (main.main argVec:(vector string))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
  ; (suspend property i0)
-  i0)
+    0))

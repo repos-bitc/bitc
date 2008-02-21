@@ -108,9 +108,9 @@
 ;(define (lmn x y:bool) (ijk x y))
 
 
-(define (main.main argVec:(vector string))
- (++ (cons 0:int32 nil) (cons 0:int32 nil))
- (++ 0:int32 1:int32)
- 0:int32)
-
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (++ (cons 0:int32 nil) (cons 0:int32 nil))
+    (++ 0:int32 1:int32) 
+    0))
 

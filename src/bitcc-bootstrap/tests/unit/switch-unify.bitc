@@ -39,6 +39,7 @@
 (import lst bitc.list)
 (provide main bitc.main)
 
-(define (main.main argVec:(vector string)) 
-  (lst.list-length nil:(list char))
-  0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (lst.list-length nil:(list char))
+    0))

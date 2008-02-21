@@ -47,5 +47,6 @@
 		      ((== x 0) #t)
 		      (otherwise (odd (- x 1)))))
 
-(define (main.main argVec:(vector string)) 
-  (odd 10:int32) 0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (odd 10:int32) 0))

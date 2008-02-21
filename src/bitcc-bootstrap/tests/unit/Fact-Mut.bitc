@@ -44,5 +44,6 @@
 		     (set! ans (* ans i))))
 
 (provide main bitc.main)
-(define (main.main argVec:(vector string)) 
-  (fact 5:int32))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (fact 5)))

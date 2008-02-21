@@ -39,7 +39,8 @@
 (provide main bitc.main)
 
 (define (fact x) (if (== x 0) 1 (* x (fact (- x 1)))))
-(define (main.main argVec:(vector string)) 
-  (fact 5:int32))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (fact 5)))
 
 

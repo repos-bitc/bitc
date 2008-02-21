@@ -40,11 +40,11 @@
 
 (define i:uint8 0)
 
-(define (main.main argVec:(vector string)) 
-  (bit-and i i)
-  (bit-or i i)
-  (bit-not i)
-  (<< i 2)
-  (>> i 2)
-  0:int32
-  )
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (bit-and i i)
+    (bit-or i i)
+    (bit-not i)
+    (<< i 2)
+    (>> i 2)
+    0))

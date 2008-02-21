@@ -46,7 +46,8 @@
 (defunion (Unin 'a)
   U1 (U2 a:'a (fill (bitfield uint32 16))) (U3 u:(Unin 'a)))
  
-(define (main.main argVec:(vector string))
-  (Struct i0 i0 i0)
-  (U2 #t)
-  i0) 
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (Struct i0 i0 i0)
+    (U2 #t)
+    i0)) 

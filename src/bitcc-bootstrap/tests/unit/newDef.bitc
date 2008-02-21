@@ -40,7 +40,8 @@
 ;; Tests new local define syntax.
 
 (provide main bitc.main)
-(define (main.main argVec:(vector string)) 
-  (define (m) 0:int32)
-  (define (close) (m))
-  (close))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (define (m) 0:int32)
+    (define (close) (m))
+    (close)))

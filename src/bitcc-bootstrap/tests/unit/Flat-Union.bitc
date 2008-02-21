@@ -44,10 +44,11 @@
   (lambda (x y) #t)
   (lambda (x y) #f))
 
-(define (main.main argVec:(vector string)) 
-  (let ((n:(mutable int32) 10))
-    C1 (C2 10 #t)
-    (== C1 (C2 n #t))
-    (== C3 C1)
-    0:int32))
- 
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (let ((n:(mutable int32) 10))
+      C1 (C2 10 #t)
+      (== C1 (C2 n #t))
+      (== C3 C1)
+      0)))
+

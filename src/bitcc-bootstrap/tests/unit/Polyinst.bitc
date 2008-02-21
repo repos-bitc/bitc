@@ -41,10 +41,10 @@
 (defstruct st1 a:int32 b:(list bool))
 
 (defstruct (st2 'a 'b) a:'a b:'b)
-(define (main.main argVec:(vector string)) 
-  (cons 
-   (st2 (st2 #t (cons 0:int32 nil)) 
-	(st1 0:int32 (cons #t nil)))
-   nil) 
-  0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (cons 
+     (st2 (st2 #t (cons 0:int32 nil)) 
+	  (st1 0:int32 (cons #t nil)))
+     nil) 0))
 

@@ -44,6 +44,7 @@
 
 (define duped (dup i2))
 (define dpair (dup (i0, #f)))
-(define (main.main argVec:(vector string)) 
-  duped^ dpair^.fst
-  i0)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    duped^ dpair^.fst
+    i0))

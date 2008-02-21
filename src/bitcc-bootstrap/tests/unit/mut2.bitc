@@ -43,9 +43,10 @@
 	  (nil 0)
 	  (cons (+ 1 (len y.cdr)))))
 
-(define (main.main argVec:(vector string))
-  (let ((p (the int32 (len (cons 0:int32 nil)))))
-    (set! p 0)
-    p))
-
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (let ((p (the int32 (len (cons 0:int32 nil)))))
+      (set! p 0)
+      p)))
+  
 

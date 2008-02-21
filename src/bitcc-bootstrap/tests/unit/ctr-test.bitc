@@ -38,14 +38,12 @@
 (bitc-version "0.10")
 (provide main bitc.main)
 
-(define i0 (the int32 0))
- 
 (defunion (unin 'a 'b) (C1 c1:'a c11:'b) (C2 c2:'a))
  
-(define value (C2 i0)) 
+(define value (C2 0:int32)) 
   
 (define bVal value.C2)
-(define (main.main argVec:(vector string))
-  (if bVal value.C1 value.C2)
-  i0)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (if bVal value.C1 value.C2) 0))
 

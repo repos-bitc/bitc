@@ -38,5 +38,6 @@
 (bitc-version "0.10")
 (provide main bitc.main)
 
-(define (main.main argVec:(vector string)) 
-  (if (== (the int32 1) 1) 0 1:int32))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (if (== (the int32 1) 1) 0 1)))

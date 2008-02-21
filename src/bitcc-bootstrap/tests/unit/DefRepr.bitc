@@ -42,6 +42,6 @@
   (Ct1 i:int32 j:bool  (where (= i 0)))
   (Ct2 i:int32 k:int32 (where (= i 1))))
  
-(define (main.main argVec:(vector string)) 
-  (Ct1 #f)
-  0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (Ct1 #f) 0))

@@ -38,14 +38,12 @@
 (bitc-version "0.10")
 (provide main bitc.main)
 
-(define i0 (the int32 0))
-
 (define (id x) x)
 
 (define a #\a)
 (define s #\space)
 (define d #\U+1ab)
 
-(define (main.main argVec:(vector string)) 
-  (id a) (id s) (id d)
-  i0) 
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (id a) (id s) (id d) 0)) 

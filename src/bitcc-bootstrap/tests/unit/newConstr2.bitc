@@ -40,9 +40,10 @@
 ;; New dotted syntax (type.constructor) for union constructors.
 
 (provide main bitc.main)
-(define (main.main argVec:(vector string))   
-  (switch x nil
-    (list.nil 0:int32)
-    (list.cons x.car)))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)   
+    (switch x nil
+      (list.nil 0:int32)
+      (list.cons x.car))))
 
 

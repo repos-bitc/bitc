@@ -43,7 +43,7 @@
   (lambda (x y) #t)
   (lambda (x y) #f))
 
-(define (main.main argVec:(vector string)) 
-  (== C C)
-  0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (== C C) 0))
 

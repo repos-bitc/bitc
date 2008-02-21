@@ -40,10 +40,11 @@
 
 (import stdio bitc.stdio)
 
-(define (main.main argVec:(vector string))
-  (do ((i:word 0 (+ i 1)))
-      ((== i (vector-length argVec)) ())
-      (begin
-	(stdio.write-string stdio.stdout (vector-nth argVec i))
-	(stdio.write-char stdio.stdout #\linefeed)))
-  0:int32)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (do ((i:word 0 (+ i 1)))
+	((== i (vector-length argVec)) ())
+	(begin
+	  (stdio.write-string stdio.stdout (vector-nth argVec i))
+	  (stdio.write-char stdio.stdout #\linefeed)))
+    0))

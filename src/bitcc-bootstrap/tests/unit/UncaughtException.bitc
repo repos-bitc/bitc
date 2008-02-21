@@ -45,7 +45,8 @@
 
 (define somelist (cons i0 (cons i1 nil)))
 
-(define (main.main argVec:(vector string)) 
-  (begin (throw exFred)
-	somelist
-	 i0))
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec) 
+    (begin (throw exFred)
+	   somelist i0)))
+  

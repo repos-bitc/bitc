@@ -52,8 +52,9 @@
 		    (C1 xyz.c1)
 		    (otherwise i0)))
   
-(define (main.main argVec:(vector string))
-  out
-  in)
-
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    out
+    in))
+  
 

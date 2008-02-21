@@ -43,8 +43,6 @@
 (define vec1:(vector int32) (vector 1 2 3))
 (define vec2:(mutable (vector int32)) (vector 1 2 3)) 
 
-(define (main.main argVec:(vector string))
-  (f vec1)
-  (f vec2)
-  (the int32 0)
-)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    (f vec1) (f vec2) 0))
