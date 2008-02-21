@@ -442,8 +442,9 @@ public:
   void clearAllMaybes();
   
 public:
-  void adjMaybe(GCPtr<Trail> trail, bool minimize=false);
-
+  void adjMaybe(GCPtr<Trail> trail, 
+		bool minimize=false, bool adjFn=false);
+  
   // Get the maximally-mutable, but copy-compatible type.
   GCPtr<Type> maximizeMutability(GCPtr<Trail> trail=new Trail);
   // Get the minimally-mutable, but copy-compatible type.

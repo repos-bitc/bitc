@@ -1,5 +1,9 @@
 (define (id x) x)
 
-(define idid (begin (id #t) (id #\t)))
+;(define (P x) (+ x 1))
 
-(define ididid (set! idid idid))
+(provide main bitc.main)
+;(define main.main:(fn ((vector string)) int32)
+;  (lambda (argVec) (+ 1 0)))
+
+(define (main.main:(fn ((vector string)) int32) argvec)  0)

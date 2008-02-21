@@ -44,6 +44,7 @@
 #include <sstream>
 #include <errno.h>
 
+#include "Options.hxx"
 #include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
@@ -166,7 +167,7 @@ using namespace std;
 void 
 initUnifiedUoc(GCPtr<UocInfo> uoc)
 {
-  uoc->initUoc(std::cerr);
+  uoc->initUoc(cerr);
   uoc->env = uoc->env->newDefScope();
   uoc->gamma = uoc->gamma->newDefScope();
   uoc->instEnv = uoc->instEnv->newDefScope();  
@@ -223,9 +224,9 @@ importSymBindings(GCPtr<Environment<AST> > fromEnv,
       toEnv->addBinding(bdng->val->fqn.asString(), bdng->val,
 			BF_REBIND | BF_COMPLETE);
       INST_ENV_DEBUG
-	std::cerr << "Added to env:" 
-		  << bdng->val->fqn.asString()
-		  << std::endl;
+	cerr << "Added to env:" 
+	     << bdng->val->fqn.asString()
+	     << endl;
     }
   }
 }
@@ -241,11 +242,11 @@ importTSBindings(GCPtr<Environment<TypeScheme> > fromEnv,
       toEnv->addBinding(bdng->val->ast->fqn.asString(),
 			bdng->val, BF_REBIND | BF_COMPLETE);
       INST_ENV_DEBUG
-	std::cerr << "Added to Gamma:" 
-		  << bdng->val->ast->fqn.asString()
-		  << ": " 
-		  << bdng->val->asString()
-		  << std::endl;
+	cerr << "Added to Gamma:" 
+	     << bdng->val->ast->fqn.asString()
+	     << ": " 
+	     << bdng->val->asString()
+	     << endl;
     }
   }
 }
@@ -270,7 +271,7 @@ importInstBindings(GCPtr<Environment< CVector<GCPtr<Instance> > > > fromEnv,
     // defined and then its FQN.
     GCPtr<AST> instAST = fromInsts->elem(0)->ast;
     GCPtr<AST> tcAST = instAST->child(0)->child(0)->symbolDef;
-    std::string tcFQN = tcAST->fqn.asString();
+    string tcFQN = tcAST->fqn.asString();
     GCPtr<CVector<GCPtr<Instance> > > toInsts = toEnv->getBinding(tcFQN); 
     
     if(!toInsts) {
@@ -296,8 +297,8 @@ importInstBindings(GCPtr<Environment< CVector<GCPtr<Instance> > > > fromEnv,
 	  if(mustAppend) {
 	    toInsts->append(fromInsts->elem(j));	
 	    INST_ENV_DEBUG
-	      std::cerr << "Added Inatance " 
-			<< fromInsts->elem(j)->asString();
+	      cerr << "Added Inatance " 
+		   << fromInsts->elem(j)->asString();
 	  }
 	}
       }
@@ -976,7 +977,11 @@ UocInfo::recInstantiate(ostream &errStream,
   INST_DEBUG
     cerr << "RecInstantiate: " 
 	 << "[" << ast->atKwd() << "]"
-	 << ast->asString() << endl;
+	 << ast->asString() << ": "
+	 << ((ast->symType) ?
+	     ast->symType->asString(Options::debugTvP) :
+	     "??")
+	 << endl;
 
   switch(ast->astType) {
   case at_ident:
@@ -1013,6 +1018,10 @@ UocInfo::recInstantiate(ostream &errStream,
       // marked by Instantiate, and this use must be a use outside the
       // definition if IDENT_MANGLED is not set. So, there is no loss
       // of generality in fixing the use case.
+      // In case of maybe Types, we can
+      //    a) Just consider the core() part
+      //    b) Pick any variant of the core(), in particular the
+      //       minimally mutable one.
       //
       // FIX: Need to check that the type is not constrained, so that I
       //      can use unit as the placeholder value.
@@ -1020,8 +1029,17 @@ UocInfo::recInstantiate(ostream &errStream,
       //      thing so that the user can be shown a tvar, rather than the
       //      unit
       
-      if(!ast->symType->isConcrete())
+      if(!ast->symType->isConcrete()) {
+	INST_DEBUG
+	  errStream << "COERCING " 
+		    << ast->symType->asString(Options::debugTvP) 
+		    << " to ";
+	ast->symType->adjMaybe(new Trail, false, true);
 	ast->symType->SetTvarsToUnit();
+	INST_DEBUG
+	  errStream << ast->symType->asString(Options::debugTvP) 
+		    << endl;
+      }
       
       // Now that the identifier is a concrete instantiation, 
       // (poly)instantiate it, and replace the use case with the
@@ -1163,7 +1181,19 @@ UocInfo::recInstantiate(ostream &errStream,
       // Integer literals must have their types explicitely clamped
       // with a qualifier, we no longer deal with type classes after
       // this pass
+      if(!ast->symType->isConcrete()) {
+	INST_DEBUG
+	  errStream << "Lit-COERCING " 
+		    << ast->symType->asString(Options::debugTvP) 
+		    << " to ";
+	ast->symType->adjMaybe(new Trail, false, true);
+	INST_DEBUG
+	  errStream << ast->symType->asString(Options::debugTvP) 
+		    << endl;
+      }
+
       assert(ast->symType->isConcrete());
+
       ast = new AST(at_tqexpr, ast->loc, ast,
 		    typeAsAst(ast->symType, ast->loc));
       RANDT_DROP(ast, "IntFloat R&T: ", UNIFIED_ENVS);
@@ -1210,9 +1240,9 @@ UocInfo::recInstantiate(ostream &errStream,
 
       INST_DEBUG
 	errStream << "recInstantiate: WrappedLet =  "
-		  << std::endl
+		  << endl
 		  << ast->asString()
-		  << std::endl;
+		  << endl;
       
       newLet->child(1) = recInstantiate(errStream, newExpr, 
 					errFree, worklist);      
@@ -1542,10 +1572,10 @@ UocInfo::doInstantiate(ostream &errStream,
 		<< newName;
       if(!globalInst) 
 	errStream << " in Local Env of "
-		  << std::endl
+		  << endl
 		  << getInnerLet(defIdent)->asString();
       
-      errStream << std::endl;
+      errStream << endl;
     }
   
   // If an instantiation is already found, return a use ast of the
@@ -1573,7 +1603,7 @@ UocInfo::doInstantiate(ostream &errStream,
 	errStream << "LOCAL definition "
 		  << wkName << " is present in the workist, "
 		  << " returning " << newName 
-		  << std::endl;
+		  << endl;
       return res;
     }
 
@@ -1924,7 +1954,7 @@ UocInfo::doInstantiate(ostream &errStream,
    (defunion (unin 'a) nil)
       
    and if we see the definition 
-   (define (main argv:(vector string))
+   (define (main argv:(vector string)))
    nil:(unin (st int32)) 0:int32)
 
    nil and this unin must be specialized for (st int32).
@@ -2019,7 +2049,7 @@ UocInfo::instantiate(ostream &errStream,
  
 bool
 UocInfo::instantiateBatch(ostream &errStream, 
-			  GCPtr<const CVector<std::string> > epNames)
+			  GCPtr<const CVector<string> > epNames)
 {
   bool errFree = true;
   UpdateMegaEnvs(this);

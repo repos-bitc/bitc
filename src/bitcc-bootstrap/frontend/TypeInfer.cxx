@@ -330,7 +330,7 @@ makeLetGather(GCPtr<AST> lbs, GCPtr<AST> &bAst, GCPtr<AST> &vAst)
 
 	
 /**************************************************************/
-/*                Type consistency checking                   */
+/*                Type consistency checkng                   */
 /**************************************************************/
 
 bool
@@ -510,6 +510,15 @@ matchDefDecl(std::ostream& errStream,
 	  GCPtr<Type> argDecl = argsDecl->CompType(c)->minimizeMutability();
 	  GCPtr<Type> argDef = argsDef->CompType(c)->minimizeMutability();
 	  CHKERR(errorFree, argDecl->strictlyEquals(argDef));
+	  
+	  if(!errorFree) {
+	    errStream << "ARG@Def " 
+		      << argDef->asString(Options::debugTvP)
+		      << " != "
+		      << "ARG@Decl " 
+		      << argDecl->asString(Options::debugTvP)
+		      << std::endl;
+	  }
 	}
       }
       else

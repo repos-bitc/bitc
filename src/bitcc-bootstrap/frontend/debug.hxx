@@ -50,14 +50,14 @@
 #define INST_ENV_DEBUG    DEBUG_OFF
 #define REPR_SIMP_DEBUG   DEBUG_OFF
 #define CLCONV_DEBUG      DEBUG_OFF
-#define GEN_DEBUG_TL      DEBUG_ON   // Treat all generalization as local
-#define GEN_DEBUG         DEBUG_ON   // Debug Type Generalization
-#define INS_DEBUG         DEBUG_OFF  // Debug Type Instantiation
-#define SOL_DEBUG         DEBUG_OFF  // Debug Constraint Solver
-#define SPSOL_DEBUG       DEBUG_OFF  // Debug Solving Special constaints
-#define PCST_DEBUG        DEBUG_OFF  // Debug Solving Polymorhic * constaints
-#define TCSOL_DEBUG       DEBUG_OFF  // Debug Solving Type-class constaints
-#define UNIFY_DEBUG       DEBUG_OFF  // Debug Unification
+#define GEN_DEBUG_TL      DEBUG_OFF   // Treat all generalization as local
+#define GEN_DEBUG         DEBUG_OFF   // Debug Type Generalization
+#define INS_DEBUG         DEBUG_OFF   // Debug Type Instantiation
+#define SOL_DEBUG         DEBUG_OFF   // Debug Constraint Solver
+#define SPSOL_DEBUG       DEBUG_OFF   // Debug Solving Special constaints
+#define PCST_DEBUG        DEBUG_OFF   // Debug Solving Polymorhic * constaints
+#define TCSOL_DEBUG       DEBUG_OFF   // Debug Solving Type-class constaints
+#define UNIFY_DEBUG       DEBUG_OFF   // Debug Unification
 
 
 #define TYPE_ACC_DEBUG    DEBUG_ON
