@@ -257,6 +257,8 @@ Type::asAST(const sherpa::LexLoc &loc,
       break;
     }
 
+  case ty_uconv: 
+  case ty_uconr:
   case ty_uvalv: 
   case ty_uvalr:
     {
@@ -270,14 +272,7 @@ Type::asAST(const sherpa::LexLoc &loc,
       }
       break;
     }
-
-  case ty_uconv: 
-  case ty_uconr:
-    {
-      assert(false);
-      break;
-    }
-
+    
   case ty_typeclass:
     assert(false);
 

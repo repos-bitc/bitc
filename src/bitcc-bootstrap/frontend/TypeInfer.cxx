@@ -1434,7 +1434,7 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
   gamma->mergeBindingsFrom(defGamma);
   sigma->generalize(errStream, ast->loc, gamma, instEnv, tcapp, 
 		    NULL, trail, gen_instance);      
-       
+  
   if(!errFree)
     return false;
   
@@ -2138,12 +2138,12 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       if(tc->defAst->s == copy_compat) {
 	GCPtr<Type> tv = newTvar(ast);
 	CHKERR(errFree, unify(errStream, trail,
-			      ast->child(0),
-			      ast->child(0)->symType,
-			      MBF(tv), uflags));
-	CHKERR(errFree, unify(errStream, trail,
 			      ast->child(1),
 			      ast->child(1)->symType,
+			      MBF(tv), uflags));
+	CHKERR(errFree, unify(errStream, trail,
+			      ast->child(2),
+			      ast->child(2)->symType,
 			      MBF(tv), uflags));
 	tcc->clearPred(tc);
       }
@@ -2636,7 +2636,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
 	GCPtr<comp> nComp = new comp(argType);	
 	if(argType->isByrefType()) {
-	  nComp = new comp(argType->Args());
+	  nComp = new comp(argType->Base());
 	  nComp->flags |= COMP_BYREF;
 	}
 	
@@ -3447,7 +3447,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       ast->symType = newTvar(ast->child(0));
       GCPtr<AST> ctr = ast->child(0);
       if(((ctr->astType != at_ident) && 
-	  (ctr->astType != at_select)) ||
+	  (ctr->astType != at_fqCtr)) ||
 	 ((ctr->symbolDef->Flags & ID_IS_CTOR) == 0)) {
 	errStream << ast->child(0)->loc
 		  << ": union/exception"
@@ -4219,14 +4219,18 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		      << std::endl;
 	    errFree = false;
 	  }
-	}
+	}	
 	
 	GCPtr<Environment<TypeScheme> > legGamma = gamma;
 	if(theCase->children->size() == 3) {
 	  legGamma = gamma->newScope();
 	  theCase->envs.gamma = legGamma;
-	  
+
 	  GCPtr<AST> stIdent = theCase->child(0);
+	  // Add sIdent to the legGamma environment.
+	  TYPEINFER(stIdent, legGamma, instEnv, impTypes, isVP, 
+		    tcc, uflags, trail,  REDEF_MODE, TI_COMP2);
+
 	  // Make sIdent's type the correct type.
 	  GCPtr<AST> onlyCtr = theCase->child(2)->getCtr();
 	  assert(onlyCtr->symbolDef->stSigma);
@@ -4234,10 +4238,6 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  stIdent->symType = stType;
 	  stIdent->scheme->tau = stType;
 	  assert(stIdent->scheme->ftvs->size() == 0);
-
-	  // Add sIdent to the legGamma environment.
-	  TYPEINFER(stIdent, legGamma, instEnv, impTypes, isVP, 
-		    tcc, uflags, trail,  REDEF_MODE, TI_COMP2);
 	}
 	
 	GCPtr<AST> expr = theCase->child(1);

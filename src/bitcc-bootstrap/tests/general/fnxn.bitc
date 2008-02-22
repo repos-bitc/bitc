@@ -1,9 +1,7 @@
-(define (id x) x)
-
-;(define (P x) (+ x 1))
+(define dupize2:(forall ((copy-compat 'a 'b))
+			(fn ('a) (ref 'b)))
+  (lambda (x) (dup x)))
 
 (provide main bitc.main)
-;(define main.main:(fn ((vector string)) int32)
-;  (lambda (argVec) (+ 1 0)))
-
-(define (main.main:(fn ((vector string)) int32) argvec)  0)
+(define main.main:(fn ((vector string)) int32)
+  (lambda (argVec) 0))

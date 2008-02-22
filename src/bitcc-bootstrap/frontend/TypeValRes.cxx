@@ -487,8 +487,10 @@ isExpansive(std::ostream& errStream,
 #endif
   case ty_ref:
   case ty_fn:
+  case ty_typeclass:
     break;
 
+  case ty_tyfn:
   case ty_fnarg:
   case ty_byref:
     assert(false); // Function case breaks
@@ -502,7 +504,6 @@ isExpansive(std::ostream& errStream,
 				       t->CompType(i)));
     break;
 
-  case ty_tyfn:
   case ty_structv:
   case ty_structr:
   case ty_unionv: 
@@ -528,16 +529,7 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
-  case ty_typeclass:
     {
-      for(size_t i=0; i<t->typeArgs->size(); i++) 
-	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
-					 t->TypeArg(i)));
-    
-      if(t->fnDeps)
-	for(size_t i=0; i<t->fnDeps->size(); i++)
-	  CHKEXP(itsExpansive, isExpansive(errStream, gamma,
-					   t->FnDep(i)));
       break;
     }
     

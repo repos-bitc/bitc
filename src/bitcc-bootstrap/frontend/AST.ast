@@ -729,7 +729,7 @@ GROUP eform = literal | var | unit
 // This expression has type bool. 
 
 // Union constructors
-GROUP ucon = var | select;
+GROUP ucon = var | select | fqCtr;
 
 // UNIT EXPRESSIONS
 LEAF unit;

@@ -175,132 +175,7 @@ p: (CL (maybe-1 'a)) => (fn ('a) ())
    imperative that TypeSpecialize be the **only** routine that
    duplicates type records deeply.
                                                                     */
-/********************************************************************/ 
- 
-
-GCPtr<Type> 
-addShallowMbTop(GCPtr<Type> t)
-{
-  t = t->getType();
-  GCPtr<Type> rt = NULL;
-
-  if(Options::topMutOnly)
-    return MBT(t);
-  
-  if(t->mark & MARK17)
-    return t;
-  
-  t->mark |= MARK17;  
-  
-  switch(t->kind) {
-
-  case ty_mbTop:
-  case ty_mbFull:
-    {
-      rt = addShallowMbTop(t->Core());
-      break;
-    }
-
-  case ty_mutable:
-    {
-      rt = addShallowMbTop(t->Base());
-      break;
-    }
-
-  case ty_fnarg:
-  case ty_byref:
-  case ty_typeclass:
-  case ty_letGather:
-  case ty_subtype:
-  case ty_pcst:
-  case ty_kvar:
-  case ty_kfix:
-    assert(false);
-    
-  case ty_tvar:
-  case ty_unit:
-  case ty_bool:
-  case ty_char:
-  case ty_string:
-  case ty_int8:
-  case ty_int16:
-  case ty_int32:
-  case ty_int64:
-  case ty_uint8:
-  case ty_uint16:
-  case ty_uint32:
-  case ty_uint64:
-  case ty_word:
-  case ty_float:
-  case ty_double:
-  case ty_quad:
-  case ty_dummy:
-  case ty_tyfn:
-#ifdef KEEP_BF
-  case  ty_bitfield:
-#endif
-    {
-      rt = MBT(t);
-      break;
-    }
-    
-  case ty_fn:
-  case ty_vector:
-  case ty_ref:
-  case ty_structr:
-  case ty_unionr:
-  case ty_uvalr:
-  case ty_uconr:
-  case ty_reprr:
-  case ty_exn:
-    {
-      rt = MBT(t);
-      break;
-    }
-
-  case ty_array:
-    {
-      rt = new Type(t);
-      rt->Base() = addShallowMbTop(t->Base());
-      rt = MBT(rt);
-      break;
-    }
-
-  case ty_structv:
-  case ty_unionv: 
-  case ty_uvalv: 
-  case ty_uconv: 
-  case ty_reprv:
-    {
-      rt = t->defAst->scheme->type_instance_copy();
-      rt->kind = t->kind; // Sometime, we need ucon/uval fixup
-
-      for(size_t i=0; i < rt->typeArgs->size(); i++) {
-	GCPtr<Type> tArg = t->TypeArg(i)->getType();
-
-	assert(tArg->kind != ty_tvar); // We should never be dealing
-	              // with bare tvars, except in the type-schemes. 
-	
-	if(rt->argCCOK(i))
-	  rt->TypeArg(i)->link = addShallowMbTop(tArg);
-	else
-	  rt->TypeArg(i)->link = tArg;	
-      }
-
-      // One should NEVER make a DCopy() here.
-      //rt = t->getDCopy();
-      //for(size_t i=0; i < rt->typeArgs->size(); i++) {
-      // ...
-      //}
-
-      rt = MBT(rt);
-      break;
-    }
-  }
-  
-  t->mark &= ~MARK17;
-  return rt;
-}
+/********************************************************************/  
 
 bool 
 Type::copy_compatible(GCPtr<Type> t, bool verbose, std::ostream &errStream)
@@ -424,10 +299,15 @@ Type::maximizeMutability(GCPtr<Trail> trail)
       rt = t->getDCopy();
       for(size_t i=0; i < rt->typeArgs->size(); i++) {
 	GCPtr<Type> arg = rt->TypeArg(i)->getType();
-	assert(arg->kind != ty_tvar);
-	if(rt->argCCOK(i))	  
-	  trail->link(arg, arg->maximizeMutability(trail));       
+
+	if(rt->argCCOK(i)) {
+	  GCPtr<Type> argMax =
+	    arg->maximizeMutability(trail)->getType(); 
+	  if(arg != argMax)
+	    trail->link(arg, argMax);
+	}
       }
+      
       rt = addMutable(rt);
       break;
     } 
@@ -485,12 +365,15 @@ Type::minimizeMutability(GCPtr<Trail> trail)
       rt = t->getDCopy();
       for(size_t i=0; i < rt->typeArgs->size(); i++) {
 	GCPtr<Type> arg = rt->TypeArg(i)->getType();
-	assert(arg->kind != ty_tvar);
-	if(rt->argCCOK(i))	  
-	  trail->link(arg, arg->minimizeMutability(trail));       
+	if(rt->argCCOK(i)) {
+	  GCPtr<Type> argMin =
+	    arg->minimizeMutability(trail)->getType(); 
+	  if(arg != argMin)
+	    trail->link(arg, argMin);
+	}
       }
       break;
-    } 
+    }
     
   default:
     {
@@ -552,9 +435,11 @@ Type::minimizeDeepMutability(GCPtr<Trail> trail)
       rt = t->getDCopy();
       for(size_t i=0; i < rt->typeArgs->size(); i++) {
 	GCPtr<Type> arg = rt->TypeArg(i)->getType();
-	assert(arg->kind != ty_tvar);
-	if(rt->argCCOK(i))
-	  trail->link(arg, arg->minimizeDeepMutability(trail));       
+	GCPtr<Type> argMin =
+	  arg->minimizeDeepMutability(trail)->getType(); 
+	
+	if(arg != argMin)
+	  trail->link(arg, argMin);
       }
       break;
     } 
@@ -600,7 +485,7 @@ Type::adjMaybe(GCPtr<Trail> trail, bool minimize, bool adjFn)
   switch(t->kind) {
   case ty_mbFull:
     {
-      t->Core()->adjMaybe(trail, minimize);
+      t->Core()->adjMaybe(trail, minimize, adjFn);
       GCPtr<Type> core = t->Core();
       if(minimize)
 	core = core->minimizeTopMutability();
@@ -611,7 +496,7 @@ Type::adjMaybe(GCPtr<Trail> trail, bool minimize, bool adjFn)
     
   case ty_mbTop:
     {
-      t->Core()->adjMaybe(trail, minimize);
+      t->Core()->adjMaybe(trail, minimize, adjFn);
       GCPtr<Type> core = t->Core();
       if(minimize)
 	core = core->minimizeMutability();

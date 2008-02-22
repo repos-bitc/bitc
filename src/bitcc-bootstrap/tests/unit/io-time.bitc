@@ -65,7 +65,7 @@
   ;(TS "Print to stdout: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
-    (define iStream (stdio.open (vector-nth argVec 1) "r"))
+    (define iStream (stdio.open (vector-nth argvec 1) "r"))
     (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Open Read Stream: " (- stop start))
     
