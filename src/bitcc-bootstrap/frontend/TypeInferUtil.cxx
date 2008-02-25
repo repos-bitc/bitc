@@ -65,24 +65,17 @@ using namespace std;
 GCPtr<Type> 
 obtainFullUnionType(GCPtr<Type> t)
 {  
-  //   std::cerr << "Input = " 
-  //   	    << t->toString()
-  //    	    << std::endl;
-  
   t = t->getBareType();  
   assert(t->isUType());
   GCPtr<AST> unin = t->myContainer;  
   GCPtr<TypeScheme> uScheme = unin->scheme;
-  GCPtr<Type> uType = uScheme->type_instance_copy();  
+  GCPtr<Type> uType = uScheme->type_instance_copy()->getType();
 
+  assert(uType->kind == ty_unionv || uType->kind == ty_unionr);
   assert(uType->typeArgs->size() == t->typeArgs->size());
 
   for(size_t c=0; c < uType->typeArgs->size(); c++)
     t->TypeArg(c)->unifyWith(uType->TypeArg(c));
-  
-  //   std::cerr << "Output = " 
-  //   	    << uType->toString()
-  //   	    << std::endl;
   
   return uType;
 }
@@ -90,7 +83,7 @@ obtainFullUnionType(GCPtr<Type> t)
 size_t
 nCtArgs(GCPtr<Type> t)
 {
-  assert(t->isUType());
+  assert(t->isUType() || t->isException());
   t = t->getBareType();
   
   size_t cnt=0;

@@ -81,14 +81,17 @@ enum primOp {
 				      
 				      
 				      
+ 
+#define ID_ENV_COPY       0x00002000u 
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
 
-                                      
-                                      
-#define ID_IN_AH_FRAME   0x00002000u  
-#define ID_IN_LH_FRAME   0x00004000u  
-#define IDLIST_HAS_LF    0x00008000u  
-#define ARGVEC_HAS_AH    0x00010000u  
-        
+ 
 #define LOOP_APP         0x00020000u
 #define SELF_TAIL        0x00040000u
 
@@ -213,7 +216,7 @@ enum primOp {
 
 
 
-#define MASK_FLAGS_FROM_USE    (TVAR_IS_DEF | ID_IS_CTOR |	\
+#define MASK_FLAGS_FROM_USE    (TVAR_IS_DEF | ID_IS_CTOR | ID_ENV_COPY |\
 				DEF_IS_ENTRYPT | ID_OBSERV_DEF)
 #define MASK_FLAGS2_FROM_USE   (ID_IS_CAPTURED)
 

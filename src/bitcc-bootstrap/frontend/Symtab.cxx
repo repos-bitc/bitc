@@ -708,7 +708,7 @@ resolve(std::ostream& errStream,
 	      (flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)) | BIND_PUBLIC);
       if (category->astType == at_refCat)
 	tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
-      
+
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
 	      id_type, ast,

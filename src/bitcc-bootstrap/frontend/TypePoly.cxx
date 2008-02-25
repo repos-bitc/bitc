@@ -313,6 +313,30 @@ TypeScheme::removeUnInstFtvs()
   ftvs = newTvs;
 }
 
+// Remove *generalizable* Ftvs that appear only at copy-positions of
+// function types.
+void
+TypeScheme::removeFnCpMbVars()
+{
+  for(size_t c=0; c < ftvs->size(); c++) {
+    GCPtr<Type> ftv = Ftv(c)->getType();
+    if(tau->boundInType(ftv) && tau->mbVarAtCpPos(ftv))
+      ftv->flags |= TY_REM;
+  }
+
+  GCPtr< CVector< GCPtr<Type> > > newTvs = new CVector < GCPtr<Type> >;
+  for(size_t c=0; c < ftvs->size(); c++) {
+    GCPtr<Type> ftv = Ftv(c)->getType();
+    if(ftv->flags & TY_REM)
+      ftv->flags &= ~TY_REM;
+    else
+      newTvs->append(ftv);
+  }
+  
+  ftvs = newTvs;
+}
+
+
 /**********************************************************
  **********************************************************
                 Type Generalization
@@ -353,23 +377,28 @@ TypeScheme::removeUnInstFtvs()
       'a* = (FTVS(t') U FTVS(C')) \ FTVS(gamma)
       Otherwise, 'a* = {}
 
-      If exp, and if generalizing at top-level, instantiate
-      free variables to dummy types and issue warnings
-
    6) Remove FTVs that are present purely only in constraints (no need
       for generalization)
          -- remove FTVs that only appear in a constraint that does not 
             contain an FTV that is transitively reachable from the 
             type t' (possibly through other constraints)
 
-   7) Migrate appropriate constraints to parent's TCC, if one exists
+   7) Function type simplification: Remove *generalizable* FTVs that
+      appear as maybe-type variables at copy-positions of function
+      types, since these will be not result in any loss of
+      generality. Coerce the type to its non-maybe form.
+
+   8) If exp, and if generalizing at top-level, instantiate
+      free variables to dummy types and issue warnings
+
+   9) Migrate appropriate constraints to parent's TCC, if one exists
       let C'' = migrate(parent-sigma, C')
       --> Constraints purely over monomorphic type variables can be
           migrated to the containing scope.
 
-   8) Check for ambiguity: This is a no-op.
+   10) Check for ambiguity: This is a no-op.
 
-   9) The generalized type is forall 'a*, t' \ C''
+    Finally,  The generalized type is forall 'a*, t' \ C''
 
  *********************************************************/
 
@@ -404,20 +433,20 @@ TypeScheme::generalize(std::ostream& errStream,
     GEN_DEBUG errStream << "[1] Solve: " 
 			<< asString(Options::debugTvP)
 			<< std::endl;
-  }
-
-  // Step 2
-  if(!tau->isDeepMut() && !tau->isDeepImmut()) {
-    GCPtr<Type> pcst = new Constraint(ty_pcst, tau->ast); 
-    pcst->components->append(new comp(new Type(ty_kvar, tau->ast)));
-    pcst->components->append(new comp(tau)); // General Type
-    pcst->components->append(new comp(tau)); // Instantiation Type
-    tcc->addPred(pcst);
     
-    GEN_DEBUG errStream << "[2] With Pcst: " 
-			<< asString(Options::debugTvP)
-			<< std::endl;
-    
+    // Step 2
+    if(!tau->isDeepMut() && !tau->isDeepImmut()) {
+      GCPtr<Type> pcst = new Constraint(ty_pcst, tau->ast); 
+      pcst->components->append(new comp(new Type(ty_kvar, tau->ast)));
+      pcst->components->append(new comp(tau)); // General Type
+      pcst->components->append(new comp(tau)); // Instantiation Type
+      tcc->addPred(pcst);
+      
+      GEN_DEBUG errStream << "[2] With Pcst: " 
+			  << asString(Options::debugTvP)
+			  << std::endl;
+      
+    }
   }
 
   if(gen_mode == gen_top) {
@@ -460,11 +489,31 @@ TypeScheme::generalize(std::ostream& errStream,
   bool expansive = exprExpansive || typExpansive;
 
   // Step 5
-  if(!expansive) {
+  if(!expansive)
     collectftvs(gamma);
+  
+  GEN_DEBUG errStream << "[5] Generalize: " 
+		      << ((expansive) ? " {Expansive} " : " {Value} ")
+		      << asString(Options::debugTvP)
+		      << std::endl;    
+  
+  // Step 6
+  if(!expansive) {
     removeUnInstFtvs();
+    
+    GEN_DEBUG errStream << "[6] Remove Uninst-Ftvs: " 
+			<< asString(Options::debugTvP)
+			<< std::endl;
+
+    
+    removeFnCpMbVars();
+    
+    GEN_DEBUG errStream << "[7] Function Simplification: " 
+			<< asString(Options::debugTvP)
+			<< std::endl;
   }
 
+  // Step 8
   if ((gen_mode == gen_top) && expansive) {
     collectftvs(gamma);
 
@@ -487,23 +536,16 @@ TypeScheme::generalize(std::ostream& errStream,
 		<< std::endl;    
     }
   }
-  
-  GEN_DEBUG errStream << "[5] Generalize: " 
-		      << ((expansive) ? " {Expansive} " : " {Value} ")
-		      << asString(Options::debugTvP)
-		      << std::endl;    
-  
-  // Step 6
+
+  // Step 9
   migratePredicates(parentTCC);
-  
-  GEN_DEBUG errStream << "[7] Migrated Constraints: " 
+  GEN_DEBUG errStream << "[9] Migrated Constraints: " 
 		      << asString(Options::debugTvP)
 		      << std::endl;
-  
-  // Step 8
+
+  // Step 10
   CHKERR(errFree, checkAmbiguity(errStream, errLoc));
   
-  // Step 9
   GEN_DEBUG errStream << "FINAL: " 
 		      << asString(Options::debugTvP)
 		      << std::endl 
@@ -591,7 +633,7 @@ generalizePat(std::ostream& errStream,
   This function returns true if at least one predicate was migrated to
   the containing scope, false otherwise. 
 
-  Suppose the current tye scheme s = forall 'a*.t\C
+  Suppose the current type scheme s = forall 'a*.t\C
 
   For each predicate p in C,
 

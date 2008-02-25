@@ -135,7 +135,7 @@ Instance::satisfies(std::ostream &errStream,
 bool 
 Typeclass::addFnDep(GCPtr<Type> dep) 
 {
-  if(link)
+  if(getType() != this)
     return getType()->addFnDep(dep); // getType() OK
   
   size_t c;

@@ -59,6 +59,6 @@
 ;; FUN)
   
 (define main.main:(fn ((vector string)) int32)
-  (lambda (argvec)  
+  (lambda (argvec) 
     (FN i0 i0) i0))
 

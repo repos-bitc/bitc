@@ -486,22 +486,34 @@ Type::adjMaybe(GCPtr<Trail> trail, bool minimize, bool adjFn)
   case ty_mbFull:
     {
       t->Core()->adjMaybe(trail, minimize, adjFn);
-      GCPtr<Type> core = t->Core();
-      if(minimize)
-	core = core->minimizeTopMutability();
 
-      trail->subst(t->Var(), core);
+      GCPtr<Type> core = t->Core()->getType();
+      if(minimize)
+	core = core->minimizeTopMutability()->getType();
+      
+      GCPtr<Type> var = t->Var()->getType();
+      if(var != core)
+	trail->subst(var, core);
+      else
+      	trail->link(t, core);
+      
       break;
     }
     
   case ty_mbTop:
     {
       t->Core()->adjMaybe(trail, minimize, adjFn);
+
       GCPtr<Type> core = t->Core();
       if(minimize)
 	core = core->minimizeMutability();
+
+      GCPtr<Type> var = t->Var()->getType();
+      if(var != core)
+	trail->subst(var, core);
+      else
+	trail->link(t, core);
       
-      trail->subst(t->Var(), core);
       break;
     }
 
@@ -602,3 +614,107 @@ Type::determineCCC(GCPtr<Type> t, bool inRefType)
   return cccOK;
 }
 
+bool 
+Type::mbVarAtCpPos(GCPtr<Type> tv, bool cppos)
+{
+  GCPtr<Type> t = getType();
+  bool rem = true;
+
+
+  if(t->mark & MARK25)
+    return true;
+  
+  t->mark |= MARK25;  
+  
+  switch(t->kind) {
+    
+  case ty_tvar:
+    {
+      if(t == tv->getType())
+	rem = false;
+      break;
+    }
+    
+  case ty_mbFull:    
+  case ty_mbTop:    
+    {
+      if(t->Var()->getType() == tv->getType()) {
+	if(!cppos)
+	  rem = false;
+      }
+      
+      CHKERR(rem, t->Core()->mbVarAtCpPos(tv, cppos));
+      break;
+    }
+
+  case ty_mutable:
+    {
+      CHKERR(rem, t->Base()->mbVarAtCpPos(tv, cppos));
+      break;
+    }
+
+  case ty_array:
+    {
+      CHKERR(rem, t->Base()->mbVarAtCpPos(tv, cppos));
+      break;
+    }
+    
+  case ty_vector:
+  case ty_ref:
+  case ty_byref:
+    {
+      CHKERR(rem, t->Base()->mbVarAtCpPos(tv, false));
+      break;
+    }
+
+  case ty_fn:
+    {
+      CHKERR(rem, t->Args()->mbVarAtCpPos(tv, true));
+      CHKERR(rem, t->Ret()->mbVarAtCpPos(tv, true));
+      break;
+    }    
+
+  case ty_fnarg:
+    {
+      for(size_t i=0; i < t->components->size(); i++)
+	CHKERR(rem, t->CompType(i)->mbVarAtCpPos(tv, true));
+      break;
+    }
+    
+  case ty_structv:
+  case ty_unionv: 
+  case ty_uvalv: 
+  case ty_uconv: 
+  case ty_reprv:
+    {
+      for(size_t i=0; i < t->typeArgs->size(); i++) {
+	GCPtr<Type> arg = t->TypeArg(i)->getType();
+	if(t->argCCOK(i))
+	  CHKERR(rem, arg->mbVarAtCpPos(tv, cppos));
+	else
+	  CHKERR(rem, arg->mbVarAtCpPos(tv, false));
+      }
+      break;
+    }
+  case ty_structr:
+  case ty_unionr: 
+  case ty_uvalr: 
+  case ty_uconr: 
+  case ty_reprr:
+    {
+      for(size_t i=0; i < t->typeArgs->size(); i++) {
+	GCPtr<Type> arg = t->TypeArg(i)->getType();
+	CHKERR(rem, arg->mbVarAtCpPos(tv, false));
+      }
+      break;
+    }
+    
+  default:
+    {
+      break;
+    }
+  }
+  
+  t->mark &= ~MARK25;
+  return rem;
+}

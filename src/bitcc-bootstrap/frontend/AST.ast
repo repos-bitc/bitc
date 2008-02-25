@@ -94,14 +94,17 @@ enum primOp {
 				      // identifier is never
 				      // captured, except for the
 				      // recursive call.
+ 
+#define ID_ENV_COPY       0x00002000u // Marked for type constructors
+                                      // and value constructors
+                                      // defined through
+                                      // (defstruct, defunion, and
+                                      // defexception). The
+                                      // type-scheme for these
+                                      // definitions must be copied
+                                      // even if there are no FTVs.
 
-                                      // Identifier is located in the
-                                      // heap allocated frame for: 
-#define ID_IN_AH_FRAME   0x00002000u  // arguments -- deprecated -- 
-#define ID_IN_LH_FRAME   0x00004000u  // locals  -- deprecated -- 
-#define IDLIST_HAS_LF    0x00008000u  // -- deprecated -- 
-#define ARGVEC_HAS_AH    0x00010000u  // -- deprecated --
-        
+ // -- available 0x4000u - 0x10000u  -- //    
 #define LOOP_APP         0x00020000u
 #define SELF_TAIL        0x00040000u
 
@@ -227,7 +230,7 @@ enum primOp {
 /* Add All **AST Flags** that must be masked from definition before
    setting onto the use cases */
 
-#define MASK_FLAGS_FROM_USE    (TVAR_IS_DEF | ID_IS_CTOR |	\
+#define MASK_FLAGS_FROM_USE    (TVAR_IS_DEF | ID_IS_CTOR | ID_ENV_COPY |\
 				DEF_IS_ENTRYPT | ID_OBSERV_DEF)
 #define MASK_FLAGS2_FROM_USE   (ID_IS_CAPTURED)
 

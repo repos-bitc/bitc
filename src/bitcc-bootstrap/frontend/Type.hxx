@@ -146,11 +146,14 @@ struct TypeScheme;
 
 #define TY_CLOS          0x20u // A temporary flag used in closure
                                // computation of FTVs in a TypeScheme.
+#define TY_REM           0x40u // A temporary flag used in
+			       // FTV-adjustment during 
+                               // TypeScheme improvement. 
                                
 
 // Specialization mask -- those flags which should NOT survive
 // specialization. ((TY_RESTRICTED was here too.))
-#define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | TY_CLOS) 
+#define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | TY_CLOS | TY_REM) 
 
 struct Type : public Countable {
   
@@ -334,6 +337,11 @@ public:
   bool isUnifiableTvar(size_t flags=0);
   bool isUnifiableMbFull(size_t flags=0);
   bool isUnifiableMbTop(size_t flags=0);
+
+  // Is Tv bound in the current type *only* as a maybe-type variable
+  // (to the LHS of a mbTop or mbFull) at a copy position of a
+  // function argument or return type?
+  bool mbVarAtCpPos(GCPtr<Type> tv, bool cppos=false);
 
   /* Produce Type ty_union[rv] from ty_ucon[rv] or ty_uval[rv]
      ONLY typeArgs are polylated */
@@ -563,30 +571,31 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
 }
 
 // Markers used for type traversal
-#define MARK1   0x000001u
-#define MARK2   0x000002u
-#define MARK3   0x000004u
-#define MARK4   0x000008u
-#define MARK5   0x000010u
-#define MARK6   0x000020u
-#define MARK7   0x000040u
-#define MARK8   0x000080u
-#define MARK9   0x000100u
-#define MARK10  0x000200u
-#define MARK11  0x000400u
-#define MARK12  0x000800u
-#define MARK13  0x001000u
-#define MARK14  0x002000u
-#define MARK15  0x004000u
-#define MARK16  0x008000u
-#define MARK17  0x010000u
-#define MARK18  0x020000u
-#define MARK19  0x040000u
-#define MARK20  0x080000u
-#define MARK21  0x100000u
-#define MARK22  0x200000u
-#define MARK23  0x400000u
-#define MARK24  0x800000u
+#define MARK1   0x0000001u
+#define MARK2   0x0000002u
+#define MARK3   0x0000004u
+#define MARK4   0x0000008u
+#define MARK5   0x0000010u
+#define MARK6   0x0000020u
+#define MARK7   0x0000040u
+#define MARK8   0x0000080u
+#define MARK9   0x0000100u
+#define MARK10  0x0000200u
+#define MARK11  0x0000400u
+#define MARK12  0x0000800u
+#define MARK13  0x0001000u
+#define MARK14  0x0002000u
+#define MARK15  0x0004000u
+#define MARK16  0x0008000u
+#define MARK17  0x0010000u
+#define MARK18  0x0020000u
+#define MARK19  0x0040000u
+#define MARK20  0x0080000u
+#define MARK21  0x0100000u
+#define MARK22  0x0200000u
+#define MARK23  0x0400000u
+#define MARK24  0x0800000u
+#define MARK25  0x1000000u
 
 /* Flags used by Type-inference engine. 
    These flags are different from the Unifier's flags */

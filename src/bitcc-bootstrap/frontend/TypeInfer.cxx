@@ -166,7 +166,12 @@ Instantiate(GCPtr<AST> ast, GCPtr<TypeScheme> sigma)
   if(ast->symbolDef)
     ast = ast->symbolDef;
   
-  if(ast->Flags & ID_IS_CTOR)
+  // Need to copy structure/union definitions at all times even though
+  // there might not be any type variables. 
+  // The ID_IS_CTOR test alone does not capture union type
+  // definitions. It is only set for the structre constructor, each
+  // constructor of a union definition and excception constructors.
+  if(ast->Flags & ID_ENV_COPY) 
     return sigma->ts_instance_copy();
   else
     return sigma->ts_instance();
@@ -713,9 +718,15 @@ InferStruct(std::ostream& errStream, GCPtr<AST> ast,
       }
     }
   }
-  
+
+  // Add Ftvs so that they get generalized in future uses
   addTvsToSigma(errStream, tvList, sigma, trail); 
   
+  // Mark that the structure must always be copied.
+  // It is important that this step be done late so that the recursive
+  // uses do not prompt copy.
+  sIdent->Flags |= ID_ENV_COPY;
+
   // In case of value type definitions, mark all those  
   // type arguments that are candidiates for copy-compatibility.
   markCCC(st);
@@ -752,6 +763,7 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
 	   bool mustEvalBody,
 	   unsigned flags)
 {
+
   bool errFree = true;
   size_t c;
   Kind unionKind;
@@ -853,7 +865,7 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
     // as the union. This rule -- unlike the one in Haskell -- 
     // requires that the tcc be absolutely enforced.
     GCPtr<TypeScheme> ctrSigma = new TypeScheme(ctrId->symType, 
-					  ctrId, sigma->tcc);
+						ctrId, sigma->tcc);
     
     // This may feel wierd -- that All constructors point to the same
     // type arguments rather than a copy. But since every instance is 
@@ -870,7 +882,13 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
     uIdent->symType->components->append(nComp);
   } 
 
+  // Add Ftvs so that they get generalized in future uses
+  // Mark that the structure must always be copied.
+  // It is important that this step be done late so that the recursive
+  // uses do not prompt copy.
   addTvsToSigma(errStream, tvList, sigma, trail);
+  uIdent->Flags |= ID_ENV_COPY;
+  
   // In case of value type definitions, mark all those  
   // type arguments that are candidiates for copy-compatibility.
   markCCC(ut);
@@ -885,7 +903,7 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
     GCPtr<AST> ctrId = ctr->child(0);   
     addTvsToSigma(errStream, tvList, ctrId->scheme, trail);
     gamma->addBinding(ctrId->s, ctrId->scheme);
-    
+    ctrId->Flags |= ID_ENV_COPY;   
     
     // Solve current Predicates.
     // Since we all share the same constraints, automatically solved.
@@ -1084,7 +1102,7 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
   if(declTS)
     CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
 				 declTS, sigma, uflags, false));
-
+  
   return errFree;
 }
 
@@ -2163,6 +2181,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
   case at_defexception:
     {
       GCPtr<AST> ctr = ast->child(0);
+      ctr->Flags |= ID_ENV_COPY;   
 
       // Maybe, we have a prior declaration?
       GCPtr<TypeScheme> declTS = gamma->getBinding(ctr->s);
@@ -3514,32 +3533,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       else {
 	ast->symType = t;
       }
-
-      //       GCPtr<Type> t1 = new Type(ty_tvar, ast);
-      //       if(t->kind == ty_uconr || t->kind == ty_uconv) {
-      // 	// Now Form the union value
-      // 	switch(t->kind) {
-      // 	case ty_uconr:
-      // 	  t1->kind = ty_uvalr;
-      // 	  break;
-      // 	case ty_uconv:
-      // 	  t1->kind = ty_uvalv;
-      // 	  break;
-      // 	default:
-      // 	  die();
-      // 	}
-      // 	t1->defAst = t->defAst;
-      // 	t1->myContainer = t->myContainer;
-      // 	// The type-arguments should have unified and stabilized by now.
-      // 	for(size_t i=0; i < t->typeArgs->size(); i++) {
-      // 	  t1->typeArgs->append(t->TypeArg(i));
-      // 	}	
-      //       }
-      //       else {
-      // 	assert(t->kind == ty_exn);
-      //       }      
-      //       GCPtr<Type> realType = RetType(t1);
-      //       ast->symType = realType;
+      
       break;
     }
     

@@ -1,7 +1,21 @@
-(define dupize2:(forall ((copy-compat 'a 'b))
-			(fn ('a) (ref 'b)))
-  (lambda (x) (dup x)))
+;(defunion List Nil (Cons car:char cdr:List))
+
+;(define (map lst:List)
+;  (switch x lst
+;    (Nil #t)
+;    (Cons #f))
+;  )
+
+(define (map lst:(list 'a))
+  (switch x lst
+    (nil #t)
+    (cons #f))
+  )
+
 
 (provide main bitc.main)
 (define main.main:(fn ((vector string)) int32)
-  (lambda (argVec) 0))
+  (lambda (argVec) 
+    (map (cons #f (cons #t nil)))
+    0))
+

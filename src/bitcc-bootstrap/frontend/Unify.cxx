@@ -242,8 +242,14 @@ UnifyUnion(std::ostream& errStream,
   if (t1->components->size() == 0 || t2->components->size() == 0) 
     return UnifyDecl(errStream, trail, errAst, t1, t2, flags);  
   
+#if 0  
+  // This unification of components is unnecessary, and if done,
+  // might need adjustment in the specializerf 
+  // -- while specializing a constructor, first specialize the union
+  // definition and then pick the constructor out of it.
+
   GCPtr<Type> bt = t1->defAst->scheme->type_instance_copy();
-  
+
   if(bt->components->size() != t1->components->size()) {
     errStream << errAst->loc
 	      << ": Incorrect Number of legs for the Union type "
@@ -257,6 +263,7 @@ UnifyUnion(std::ostream& errStream,
   }
   
   if(bt->components->size() != t2->components->size()) {
+
     errStream << errAst->loc
 	      << ": Incorrect Number of legs for the Union type "
 	      << bt->asString()
@@ -267,18 +274,7 @@ UnifyUnion(std::ostream& errStream,
     errFree = false;
     return false;
   }
-  
-  //   for(size_t i=0; i<bt->components->size(); i++) 
-  //     CHKERR(errFree, Unify(errStream, trail, errAst, bt->CompType(i), 
-  //   			  t1->CompType(i), flags));
-  
-  //   for(size_t i=0; i<bt->components->size(); i++) 
-  //     CHKERR(errFree, Unify(errStream, trail, errAst, bt->CompType(i), 
-  //   			  t2->CompType(i), flags));
-  
-  //if(!errFree)
-  //  return false;
-  
+#endif  
   assert(t1->typeArgs->size() == t2->typeArgs->size());
 
   size_t n = trail->snapshot();
@@ -319,22 +315,12 @@ UnifyUcon(std::ostream& errStream,
     typeError(errStream, errAst, t1, t2);
     return false;
   }  
-  
-  //  GCPtr<Type> utyp = t1->myContainer->symType->getType();
-  //  errStream << "utype = " << utyp->asString() << std::endl;
-  
   assert(t1->typeArgs->size() == t2->typeArgs->size());
   
   for(size_t i=0; i<t1->typeArgs->size(); i++) {
     CHKERR(errFree, Unify(errStream, trail, errAst, t1->TypeArg(i), 
 			  t2->TypeArg(i), flags)); 
   }
-  
-//   errStream << "utype = " << utyp->asString() << std::endl;  
-//   errStream << "Result [" << ((errFree)?"true":"false") << "] = " 
-//        << t1->asString(Options::debugTvP)
-//        << t2->asString(Options::debugTvP)
-//        << std::endl;
   
   return errFree;
 }
@@ -407,14 +393,7 @@ UnifyUTVC(std::ostream& errStream,
   // Otherwise, single remove to break the unnecessary link. 
   if(!errFree)
     trail->rollBack(n);
-  //else
-  //  trail->release(n, ut1);
   
-  //   errStream << "Result [" << ((errFree)?"true":"false") << "] = " 
-  // 	    << ut->asString(Options::debugTvP) << " and "
-  // 	    << uv->asString(Options::debugTvP)
-  // 	    << std::endl;
-
   return errFree;
 }
 
@@ -725,8 +704,11 @@ Unify(std::ostream& errStream,
 
   case ty_letGather:
     {      
-      assert(t1->components->size() == t2->components->size());
-	
+      if(t1->components->size() != t2->components->size()) {
+	errFree = typeError(errStream, errAst, t1, t2);
+	break;
+      }
+
       for(size_t i=0; i<t1->components->size(); i++) 
 	CHKERR(errFree, 
 	       Unify(errStream, trail, errAst, t1->CompType(i), 

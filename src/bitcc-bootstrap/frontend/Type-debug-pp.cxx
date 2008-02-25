@@ -66,7 +66,7 @@ Type::toString()
 {
   stringstream ss;
 
-  if(link)
+  if(getType() != this)
     return getType()->toString();
 
   if(pMark >= 2)

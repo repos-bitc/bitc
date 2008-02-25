@@ -111,6 +111,7 @@ struct TypeScheme : public Countable {
   void collectAllFtvs();
   void collectftvs(GCPtr<const Environment<TypeScheme> > gamma);
   void removeUnInstFtvs();
+  void removeFnCpMbVars();
 
   bool solvePredicates(std::ostream &errStream,
 		       LexLoc &errLoc,

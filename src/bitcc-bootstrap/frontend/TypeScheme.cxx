@@ -125,7 +125,6 @@ TypeScheme::type_instance()
 GCPtr<TypeScheme> 
 TypeScheme::ts_instance(bool fullCopy)
 {
-  //std::cout << "TS Instantiating " << this->asString();
   normalize();
 
   GCPtr<TypeScheme> ts = new TypeScheme(tau);
@@ -142,7 +141,7 @@ TypeScheme::ts_instance(bool fullCopy)
     cnftvs->append(ts->Ftv(i));
   }
   
-  if(fullCopy || ftvs->size() > 0)
+  if(fullCopy || (ftvs->size() > 0))
     ts->tau = tau->TypeSpecializeReal(cftvs, cnftvs);  
   else 
     ts->tau = tau;

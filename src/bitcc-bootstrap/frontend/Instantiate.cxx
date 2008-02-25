@@ -425,6 +425,20 @@ getInstName(GCPtr<const AST> def, GCPtr<Type> typ)
   
   if(typ->isUcon() || typ->isUval())
     uAdjTyp = typ->getUnionType();
+
+  if(def->s == "ceq") {
+    std::cerr << "Came Here for "
+	      << def->asString()
+	      << " wrt "
+	      << uAdjTyp->asString(Options::debugTvP)
+	      << std::endl;
+    
+    std::cerr << "### ";
+    std::cerr << uAdjTyp->asString(Options::debugTvP);
+    std::cerr << " ---> ";
+    std::cerr << uAdjTyp->mangledString();
+    std::cerr << std::endl;
+  }
   
   string fqnString = def->fqn.asString();
   ss << "_" << fqnString.size() << fqnString;

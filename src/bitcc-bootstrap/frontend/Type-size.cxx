@@ -147,7 +147,7 @@ calc_unin_size(const GCPtr<Type> t)
 size_t
 Type::size() 
 { 
-  if(link)
+  if(getType() != this)
     return link->getType()->size();
 
   if(mark & MARK21)

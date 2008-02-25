@@ -71,8 +71,8 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
   // "__" "VS"
 
   stringstream ss;
-
-  if(link)
+  
+  if(getType() != this)
     return getType()->mangledString(igMut, igTlMut, maxArgMut);
 
   if(mark & MARK5) {

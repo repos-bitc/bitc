@@ -756,7 +756,7 @@ Type::isOfInfiniteType()
 {
   bool infType = false;
 
-  if(link)
+  if(getType() != this)
     return getType()->isOfInfiniteType();
 
   if(mark & MARK6) 
