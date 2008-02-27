@@ -45,7 +45,7 @@
 #define DEBUG_VERBOSE true
 
 #define BEG_SIMP_DEBUG    DEBUG_OFF
-#define ILH_DEBUG         DEBUG_OFF  // Inst-Lambda-Hoist
+#define ILH_DEBUG         DEBUG_OFF   // Inst-Lambda-Hoist
 #define INST_DEBUG        DEBUG_OFF
 #define INST_ENV_DEBUG    DEBUG_OFF
 #define REPR_SIMP_DEBUG   DEBUG_OFF

@@ -1,8 +1,13 @@
-(defstruct (St 'a):val f1:(vector 'a))
-
-(define q3:(St (mutable bool)) (St (vector #t)))
-
 (provide main bitc.main)
+
 (define main.main:(fn ((vector string)) int32)
-  (lambda (argVec) 0))
+  (lambda (argVec) 
+    
+    (define W:(array (mutable uint32) 2)
+      (array 0 0))
+
+    (define E (array-nth W 1))
+    (set! E 5)
+
+    0))
 

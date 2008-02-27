@@ -48,6 +48,8 @@ using namespace sherpa;
 void
 Trail::link(GCPtr<Type> from, GCPtr<Type> to)
 {  
+  from = from->getType();
+  to = to->getType();
   
   if(to->boundInType(from)) {
     std::cerr << "CYCLIC SUBSTITUTION "
@@ -72,12 +74,12 @@ Trail::link(GCPtr<Type> from, GCPtr<Type> to)
 void
 Trail::subst(GCPtr<Type> from, GCPtr<Type> to)
 { 
-  // This assert() is only theoritically true. 
-  // In practice we wrap type variables in maybes and
-  // therefore this does not hold.
-  // assert(from->kind == ty_tvar);
   // NOT from->isTvar()
+  from = from->getType();
+  to = to->getType();
 
+  assert(from->kind == ty_tvar || from->kind == ty_kvar);
+  
   if(to->boundInType(from)) {
     std::cerr << "CYCLIC SUBSTITUTION "
 	      << from->asString(Options::debugTvP)
@@ -93,6 +95,7 @@ Trail::subst(GCPtr<Type> from, GCPtr<Type> to)
 	      << " |-> "
 	      << to->asString(Options::debugTvP)
 	      << std::endl;
+
   
   vec->append(from);   
   from->link = to; 
@@ -107,8 +110,13 @@ Trail::rollBack(size_t upto)
   for(size_t i = 0; i < upto; i++)
     newVec->append(vec->elem(i));
 
-  for(size_t i = upto; i < vec->size(); i++)
+  for(size_t i = upto; i < vec->size(); i++) {
     vec->elem(i)->link = NULL;
+    TRAIL_DEBUG 
+      std::cerr << "[RB] Releasing: "
+		<< vec->elem(i)->asString(Options::debugTvP)
+		<< std::endl;
+  }
 
   vec = newVec;
 }
@@ -119,5 +127,11 @@ Trail::release(const size_t n, GCPtr<Type> rel)
   assert(vec->elem(n) == rel); // not getType()
   
   rel->link = NULL;
+  
+  TRAIL_DEBUG 
+    std::cerr << "[RB] Releasing: "
+	      << rel->asString(Options::debugTvP)
+	      << std::endl;
+
   vec = eliminate(vec, n);
 }

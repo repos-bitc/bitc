@@ -2272,21 +2272,21 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<TypeScheme> sigma = ident->scheme;
       sigma->tcc = currTcc;
 
-      //errStream << "At define " << ident->asString() << ":"
-      //		<< " LHS = " << idType->asString()
-      //		<< " RHS = " << rhsType->asString()
-      //		<< std::endl;
+      //       errStream << "At define " << ident->asString() << ":"
+      //       		<< " LHS = " << idType->asString()
+      //       		<< " RHS = " << rhsType->asString()
+      //       		<< std::endl;
       
       CHKERR(errFree, unify(errStream, trail, ast->child(1), 
 			    ast->child(1)->symType,
 			    MBF(ast->child(0)->symType), uflags));
       
-      //errStream << "After Unification: " 
-      //		<< ast->getID()->symType->asString()
-      //		<< " LHS = " << idType->asString()
-      //		<< " RHS = " << rhsType->asString()
-      //		<< std::endl;            
-
+      //       errStream << "After Unification: " 
+      //       		<< ast->getID()->symType->asString()
+      //       		<< " LHS = " << idType->asString()
+      //       		<< " RHS = " << rhsType->asString()
+      //       		<< std::endl;            
+      
       CHKERR(errFree, sigma->generalize(errStream, ast->loc, gamma,
 					instEnv,  ast->child(1), NULL, 
 					trail, gen_top));

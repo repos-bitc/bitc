@@ -1106,7 +1106,7 @@ Type::equalsA(GCPtr<Type> t, bool verbose, std::ostream &errStream)
 
 bool 
 Type::strictlyEqualsA(GCPtr<Type> t, bool verbose,
-			 std::ostream &errStream)
+		      std::ostream &errStream)
 {
   return eql(t, verbose, errStream, 
 	     UNIFY_TRY | UNIFY_STRICT | UN_IGN_RIGIDITY, false);

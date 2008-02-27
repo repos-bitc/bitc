@@ -713,12 +713,18 @@ Type::mbVarAtCpPos(GCPtr<Type> tv, bool cppos)
       CHKERR(rem, t->Ret()->mbVarAtCpPos(tv, true));
       break;
     }    
-
-  case ty_letGather:
+    
   case ty_fnarg:
     {
       for(size_t i=0; i < t->components->size(); i++)
 	CHKERR(rem, t->CompType(i)->mbVarAtCpPos(tv, true));
+      break;
+    }
+    
+  case ty_letGather:
+    {
+      for(size_t i=0; i < t->components->size(); i++)
+	CHKERR(rem, t->CompType(i)->mbVarAtCpPos(tv, cppos));
       break;
     }
     

@@ -179,6 +179,30 @@ UnifyStructUnion(std::ostream& errStream,
     return false;	\
   }while(0) 
 
+static bool 
+UnifyMbCt(std::ostream& errStream, GCPtr<Trail> trail,
+	  GCPtr<Type> mb, GCPtr<Type> ct)
+{
+  mb = mb->getType();
+  ct = ct->getType();
+  GCPtr<Type> var = mb->Var()->getType();
+  GCPtr<Type> core = mb->Core()->getType();
+  
+  if(ct->boundInType(var)) {
+    std::cerr << mb->asString(Options::debugTvP)
+	      << "'s VAR() bound in "
+	      << ct->asString(Options::debugTvP)
+	      << std::endl;
+    assert(false);
+  }
+
+  if(core == ct) 
+    trail->link(mb, core);
+  
+  trail->subst(var, ct);
+  
+  return true;
+}
 
 static bool
 Unify(std::ostream& errStream,
@@ -190,7 +214,7 @@ Unify(std::ostream& errStream,
   GCPtr<Type> t2 = st->getType();
   bool errFree = true;
 
-  UNIFY_DEBUG std::cout << "Unifier: " 
+  UNIFY_DEBUG std::cerr << "Unifier: " 
 			<< ft->asString(Options::debugTvP)
 			<< " ==? " 
 			<< st->asString(Options::debugTvP)
@@ -222,17 +246,9 @@ Unify(std::ostream& errStream,
 	CHKERR(errFree, Unify(errStream, trail, errAst, 
 			      t1->minimizeMutability(), 
 			      t2->minimizeMutability(), flags));
-	
-	if(t2->boundInType(t1->Var())) {
-	  std::cerr << t1->asString(Options::debugTvP)
-		    << "'s VAR() bound in "
-		    << t2->asString(Options::debugTvP)
-		    << std::endl;
-	  assert(false);
-	}
 
 	if(errFree)
-	  trail->subst(t1->Var(), t2);
+	  CHKERR(errFree, UnifyMbCt(errStream, trail, t1, t2));
 	
 	return errFree;
       }
@@ -241,17 +257,8 @@ Unify(std::ostream& errStream,
 	CHKERR(errFree, Unify(errStream, trail, errAst, 
 			      t1->minimizeMutability(), 
 			      t2->minimizeMutability(), flags));
-
-	if(t1->boundInType(t2->Var())) {
-	  std::cerr << t2->asString(Options::debugTvP)
-		    << "'s VAR() bound in "
-		    << t1->asString(Options::debugTvP)
-		    << std::endl;
-	  assert(false);
-	}
-	
 	if(errFree)
-	  trail->subst(t2->Var(), t1);
+	  CHKERR(errFree, UnifyMbCt(errStream, trail, t2, t1));
 	
 	return errFree;
       }
@@ -260,17 +267,9 @@ Unify(std::ostream& errStream,
 	CHKERR(errFree, Unify(errStream, trail, errAst, 
 			      t1->minimizeMutability(), 
 			      t2->minimizeMutability(), flags));
-
-	if(t2->boundInType(t1->Var())) {
-	  std::cerr << t1->asString(Options::debugTvP)
-		    << "'s VAR() bound in "
-		    << t2->asString(Options::debugTvP)
-		    << std::endl;
-	  assert(false);
-	}
 	
 	if(errFree)
-	  trail->subst(t1->Var(), t2);
+	  CHKERR(errFree, UnifyMbCt(errStream, trail, t1, t2));
 	
 	return errFree;
       }
@@ -278,17 +277,9 @@ Unify(std::ostream& errStream,
 	CHKERR(errFree, Unify(errStream, trail, errAst, 
 			      t1->minimizeMutability(), 
 			      t2->minimizeMutability(), flags));
-
-	if(t1->boundInType(t2->Var())) {
-	  std::cerr << t2->asString(Options::debugTvP)
-		    << "'s VAR() bound in "
-		    << t1->asString(Options::debugTvP)
-		    << std::endl;
-	  assert(false);
-	}
-
+	
 	if(errFree)
-	  trail->subst(t2->Var(), t1);
+	  CHKERR(errFree, UnifyMbCt(errStream, trail, t2, t1));
 	
 	return errFree;
       }
