@@ -146,14 +146,17 @@ struct TypeScheme;
 
 #define TY_CLOS          0x20u // A temporary flag used in closure
                                // computation of FTVs in a TypeScheme.
-#define TY_REM           0x40u // A temporary flag used in
-			       // FTV-adjustment during 
-                               // TypeScheme improvement. 
+#define TY_COERCE        0x40u // A flag used by adjMaybe to coerce
+			       // only certain maybe-types. This flag
+			       // must be marked on maybe-Var()s.
+			       // This flag is NOT cleared by the 
+			       // adjMaybe function. 
+
                                
 
 // Specialization mask -- those flags which should NOT survive
 // specialization. ((TY_RESTRICTED was here too.))
-#define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | TY_CLOS | TY_REM) 
+#define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | TY_CLOS | TY_COERCE) 
 
 struct Type : public Countable {
   
@@ -450,7 +453,7 @@ public:
   void clearAllMaybes();
   
 public:
-  void adjMaybe(GCPtr<Trail> trail, 
+  void adjMaybe(GCPtr<Trail> trail, bool markedOnly=false,
 		bool minimize=false, bool adjFn=false);
   
   // Get the maximally-mutable, but copy-compatible type.

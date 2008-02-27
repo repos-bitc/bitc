@@ -205,7 +205,7 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
 			 << "Immut(ti) KEEP." 
 			 << std::endl;
     
-    // *(p, tg, ti), Immut(ti), ~Immutable(ti)
+    // *(p, tg, ti), ~Immut(ti), ~Mut(ti)
     handled = false;
     return true;
   }
@@ -218,6 +218,16 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
 			 << "Mut(ti) [k |-> m]." 
 			 << std::endl;
     trail->subst(k, Type::Kmono);
+    handled = true;
+    return true;
+  }
+
+  // *(k, tg, ti), Immut(ti)
+  if(gen->isDeepImmut()) {
+    PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), Immut(tg)" 
+			 << "Immut(tg) [k |-> m]." 
+			 << std::endl;
+    trail->subst(k, Type::Kpoly);
     handled = true;
     return true;
   }

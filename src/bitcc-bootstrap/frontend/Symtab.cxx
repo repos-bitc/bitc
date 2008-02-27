@@ -471,16 +471,18 @@ resolve(std::ostream& errStream,
 	
 	  if((!(flags & NO_CHK_USE_TYPE)) 
 	     && (def->identType != identType)) {
-	  
+	    
 	    if((flags & RESOLVE_APPLY_MODE) && 
 	       (def->Flags & ID_IS_CTOR)) {
 	      // We are OK
-	      ;
 	    }
-	    else if((flags & RES_APP_PAT_MODE) &&
+ 	    else if((flags & RES_APP_PAT_MODE) &&
 		    def->identType == id_constructor) {
 	      // We are OK
-	      ;
+	    }
+ 	    else if((flags & RESOLVE_FQCT_MODE) &&
+		    def->identType == id_value) {
+	      // We are OK
 	    }
 	    else {
 	      errStream << ast->loc << ": " << identTypeToString(identType) 
@@ -1657,6 +1659,10 @@ resolve(std::ostream& errStream,
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      id_type, currLB, flags);
+      
+      RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
+	      id_constructor, currLB, flags | RESOLVE_FQCT_MODE);
+      
       break;
     }
     
@@ -1698,7 +1704,7 @@ resolve(std::ostream& errStream,
 	  ast->astType = at_fqCtr;
 	  RESOLVE(ast, env, lamLevel, USE_MODE, id_type, currLB, flags);
 	  break;
-
+	  
 	default:
 	  errStream << ast->child(0)->loc 
 		    << ": At selection, Identifier "

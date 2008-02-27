@@ -58,6 +58,7 @@
 #define PCST_DEBUG        DEBUG_OFF   // Debug Solving Polymorhic * constaints
 #define TCSOL_DEBUG       DEBUG_OFF   // Debug Solving Type-class constaints
 #define UNIFY_DEBUG       DEBUG_OFF   // Debug Unification
+#define TRAIL_DEBUG       DEBUG_OFF   // Debug Type Linking
 
 
 #define TYPE_ACC_DEBUG    DEBUG_ON

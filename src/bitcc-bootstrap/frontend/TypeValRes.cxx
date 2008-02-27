@@ -529,10 +529,6 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
-    {
-      break;
-    }
-    
   case ty_mutable:
   case ty_exn:
     {
@@ -540,7 +536,7 @@ isExpansive(std::ostream& errStream,
       break;
     }
   }
-
+  
   t->mark &= ~MARK4;
   return itsExpansive;
 }

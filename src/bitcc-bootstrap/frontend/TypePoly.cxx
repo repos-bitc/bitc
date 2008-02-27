@@ -316,24 +316,30 @@ TypeScheme::removeUnInstFtvs()
 // Remove *generalizable* Ftvs that appear only at copy-positions of
 // function types.
 void
-TypeScheme::removeFnCpMbVars()
+TypeScheme::normalizeFnTypes(GCPtr<Trail> trail)
 {
   for(size_t c=0; c < ftvs->size(); c++) {
     GCPtr<Type> ftv = Ftv(c)->getType();
-    if(tau->boundInType(ftv) && tau->mbVarAtCpPos(ftv))
-      ftv->flags |= TY_REM;
+    if(tau->boundInType(ftv) && tau->mbVarAtCpPos(ftv)) {
+      ftv->flags |= TY_COERCE;
+      //std::cerr << "FTV: " << ftv->asString(Options::debugTvP)
+      //		<< "  bound only in Copy-position in "
+      //		<< tau->asString(Options::debugTvP) << "."
+      //		<< std::endl;
+    }
   }
-
+    
   GCPtr< CVector< GCPtr<Type> > > newTvs = new CVector < GCPtr<Type> >;
   for(size_t c=0; c < ftvs->size(); c++) {
     GCPtr<Type> ftv = Ftv(c)->getType();
-    if(ftv->flags & TY_REM)
-      ftv->flags &= ~TY_REM;
-    else
+    if((ftv->flags & TY_COERCE) == 0)
       newTvs->append(ftv);
   }
-  
   ftvs = newTvs;
+  
+  // TY_COERCE flag is not cleared, but it does not matter, because
+  // all of these types are substituted within the next adjMaybe call.
+  tau->adjMaybe(trail, true, false, true);
 }
 
 
@@ -451,7 +457,7 @@ TypeScheme::generalize(std::ostream& errStream,
 
   if(gen_mode == gen_top) {
     // Step 3
-    tau->adjMaybe(trail, true);
+    tau->adjMaybe(trail, false, true);
     
     for(size_t i=0; i < tcc->size(); i++) {
       GCPtr<Type> pred = tcc->Pred(i);
@@ -461,7 +467,7 @@ TypeScheme::generalize(std::ostream& errStream,
       GCPtr<Type> k = pred->CompType(0)->getType();
       GCPtr<Type> ins = pred->CompType(2)->getType();
       if(k->kind == ty_kvar) {
-	ins->adjMaybe(trail, true);
+	ins->adjMaybe(trail, false, true);
 	trail->subst(k, Type::Kpoly);
       }
     }
@@ -498,7 +504,7 @@ TypeScheme::generalize(std::ostream& errStream,
 		      << std::endl;    
   
   // Step 6
-  if(!expansive) {
+  if(!expansive && gen_mode != gen_instance) {
     removeUnInstFtvs();
     
     GEN_DEBUG errStream << "[6] Remove Uninst-Ftvs: " 
@@ -506,11 +512,19 @@ TypeScheme::generalize(std::ostream& errStream,
 			<< std::endl;
 
     
-    removeFnCpMbVars();
+    normalizeFnTypes(trail);
     
     GEN_DEBUG errStream << "[7] Function Simplification: " 
 			<< asString(Options::debugTvP)
-			<< std::endl;
+    			<< std::endl;
+
+    
+    CHKERR(errFree, solvePredicates(errStream, errLoc, 
+				    instEnv, trail)); 
+
+    GEN_DEBUG errStream << "[7#] Re-Solve: " 
+			<< asString(Options::debugTvP)
+    			<< std::endl;
   }
 
   // Step 8

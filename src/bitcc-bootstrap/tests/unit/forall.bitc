@@ -58,16 +58,10 @@
 
 (proclaim abc: (forall ((TC2 'a 'b)) (fn ('a 'b) bool)))
 (define abc:(forall ((TC2 'a 'b)) (fn ('a 'b) bool)) 
-  (lambda (x y) #t)) 
-
-The type of abc at definition/declaration 
-(forall 'a 'b 'c 'd (TC2 'a|'b 'c|'d) ) (fn ('a|'b 'c|'d) bool)) 
-(forall 'a 'b (TC2 'a 'b) ) (fn ('a 'b) bool)) EXACTLY.
-
-
+  (lambda (x y) #t))
 
 (define Q @)
- 
+
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec)
   (S2 i0 i0)

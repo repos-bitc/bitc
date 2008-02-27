@@ -98,8 +98,6 @@ unifyPrim(std::ostream& errStream,
 }
 
 
-
-
 // Handle unification of struct/union decl+decl or decl+def
 static bool 
 UnifyDecl(std::ostream& errStream,
@@ -132,271 +130,45 @@ UnifyDecl(std::ostream& errStream,
     
 
 static bool 
-UnifyStruct(std::ostream& errStream,
-	    GCPtr<Trail> trail,
-	    GCPtr<const AST> errAst,
-	    GCPtr<Type> t1, GCPtr<Type> t2,
-	    unsigned long flags) 
+UnifyStructUnion(std::ostream& errStream,
+		 GCPtr<Trail> trail,
+		 GCPtr<const AST> errAst,
+		 GCPtr<Type> t1, GCPtr<Type> t2,
+		 unsigned long flags) 
 {
   bool errFree = true;
 
-  UNIFY_DEBUG std::cout << "UnifyStruct " 
+  UNIFY_DEBUG std::cout << "UnifyStructUnion " 
 			<< t1->asString(Options::debugTvP) 
 			<< " ==? "
 			<< t2->asString(Options::debugTvP)
 			<< std::endl;
 
-  if(t1->defAst != t2->defAst)
-    return typeError(errStream, errAst, t1, t2);
+  if(t1->isULeg() || t2->isULeg()) {
+    if(t1->myContainer != t2->myContainer)
+      return typeError(errStream, errAst, t1, t2);
+  }
+  else {
+    if(t1->defAst != t2->defAst)
+      return typeError(errStream, errAst, t1, t2);
+
+    if (t1->components->size() == 0 || t2->components->size() == 0) 
+      return UnifyDecl(errStream, trail, errAst, t1, t2, flags);
+  }
   
-  if (t1->components->size() == 0 || t2->components->size() == 0) 
-    return UnifyDecl(errStream, trail, errAst, t1, t2, flags);
-
-  GCPtr<Type> bt = t1->defAst->scheme->type_instance_copy();
-
-  if(bt->components->size() != t1->components->size()) {
-    errStream << errAst->loc
-	      << ": Incorrect Number of Fields for structure "
-	      << bt->asString()
-	      << " Expected " << bt->components->size()
-	      << " Obtained " << t1->components->size() << "."
-	      << std::endl;
-    errFree = false;
-    return false;
-  }
-   
-  if(bt->components->size() != t2->components->size()) {
-    errStream << errAst->loc
-	      << ": Incorrect Number of Fields for structure "
-	      << bt->asString()
-	      << " Expected " << bt->components->size()
-	      << " Obtained " << t2->components->size() << "."
-	      << std::endl;
-
-    errFree = false;
-    return false;
-  }
-
   size_t n = trail->snapshot();
-  trail->link(t1, t2);
-
-  for(size_t i=0; i<bt->components->size(); i++) 
-    CHKERR(errFree, Unify(errStream, trail, errAst, 
-			  t1->CompType(i), 
-			  t2->CompType(i), flags));
+  trail->link(t1, t2);  
   
-
-  if(!errFree) {
-    trail->rollBack(n);
-    return false;
-  }
-
-  trail->link(bt, t1);  
-  // Just to be really sure:
-  for(size_t i=0; i<bt->components->size(); i++) 
-    CHKERR(errFree, Unify(errStream, trail, errAst, 
-			  bt->CompType(i), 
-			  t1->CompType(i), 
-			  (flags & ~UNIFY_STRICT)));
-  
-  if(!errFree) {
-    trail->rollBack(n);
-    return false;
-  }
-  
-  assert(t1->typeArgs->size() == t2->typeArgs->size());
-  
-  // This is redundant; someday I should delete it.
-  // Careful, it is NOT redundant in unions, don't 
-  // delete it there out of symetry.
+  assert(t1->typeArgs->size() == t2->typeArgs->size());  
   for(size_t i=0; i<t1->typeArgs->size(); i++) 
     CHKERR(errFree, Unify(errStream, trail, errAst, t1->TypeArg(i), 
 			  t2->TypeArg(i), flags));
-
-  if(!errFree)
-    trail->rollBack(n);
-
-  return errFree;
-}
-
-static bool 
-UnifyUnion(std::ostream& errStream,
-	    GCPtr<Trail> trail,
-	    GCPtr<const AST> errAst,
-	    GCPtr<Type> t1, GCPtr<Type> t2,
-	    unsigned long flags)
-{
-  bool errFree = true;
-
-  UNIFY_DEBUG std::cout << "UnifyUnion " 
-			<< t1->asString(Options::debugTvP)
-			<< " ==? "
-			<< t2->asString(Options::debugTvP)
-			<< std::endl;
-  
-  // Note: Following check also serves to prevent unification of reprs with 
-  // unions.
-  if(t1->defAst != t2->defAst)
-    return typeError(errStream, errAst, t1, t2);
-  
-  if (t1->components->size() == 0 || t2->components->size() == 0) 
-    return UnifyDecl(errStream, trail, errAst, t1, t2, flags);  
-  
-#if 0  
-  // This unification of components is unnecessary, and if done,
-  // might need adjustment in the specializerf 
-  // -- while specializing a constructor, first specialize the union
-  // definition and then pick the constructor out of it.
-
-  GCPtr<Type> bt = t1->defAst->scheme->type_instance_copy();
-
-  if(bt->components->size() != t1->components->size()) {
-    errStream << errAst->loc
-	      << ": Incorrect Number of legs for the Union type "
-	      << bt->asString()
-	      << " Expected " << bt->components->size()
-	      << " Obtained " << t1->components->size() << "."
-	      << std::endl;
-    
-    errFree = false;
-    return false;
-  }
-  
-  if(bt->components->size() != t2->components->size()) {
-
-    errStream << errAst->loc
-	      << ": Incorrect Number of legs for the Union type "
-	      << bt->asString()
-	      << " Expected " << bt->components->size()
-	      << " Obtained " << t2->components->size() << "."
-	      << std::endl;
-    
-    errFree = false;
-    return false;
-  }
-#endif  
-  assert(t1->typeArgs->size() == t2->typeArgs->size());
-
-  size_t n = trail->snapshot();
-  trail->link(t1, t2);
-  
-  for(size_t i=0; i<t1->typeArgs->size(); i++) {
-    CHKERR(errFree, Unify(errStream, trail, errAst, t1->TypeArg(i), 
-			  t2->TypeArg(i), flags)); 
-  }
   
   if(!errFree)
     trail->rollBack(n);
   
   return errFree;
 }
-
-/* Strict unification of typeArgs of t1 and t2
-   should happen first.
-   component unifications wiith bt, if at all done, 
-   should be done without the UNIFY_STRICT flag.
-*/
-static bool 
-UnifyUcon(std::ostream& errStream,
-	   GCPtr<Trail> trail,
-	   GCPtr<const AST> errAst,
-	   GCPtr<Type> t1, GCPtr<Type> t2,
-	   unsigned long flags)
-{
-  bool errFree = true;
-  
-  UNIFY_DEBUG std::cout << "UnifyUcon " 
-			<< t1->asString(Options::debugTvP)
-			<< " ==? "
-			<< t2->asString(Options::debugTvP)
-			<< std::endl;
-  
-  if(t1->myContainer != t2->myContainer) {
-    typeError(errStream, errAst, t1, t2);
-    return false;
-  }  
-  assert(t1->typeArgs->size() == t2->typeArgs->size());
-  
-  for(size_t i=0; i<t1->typeArgs->size(); i++) {
-    CHKERR(errFree, Unify(errStream, trail, errAst, t1->TypeArg(i), 
-			  t2->TypeArg(i), flags)); 
-  }
-  
-  return errFree;
-}
-
-static bool 
-UnifyUval(std::ostream& errStream,
-	   GCPtr<Trail> trail,
-	   GCPtr<const AST> errAst,
-	   GCPtr<Type> t1, GCPtr<Type> t2,
-	   unsigned long flags)
-{
-  bool errFree = true;
-  
-  UNIFY_DEBUG std::cout << "UnifyUval " 
-			<< t1->asString(Options::debugTvP)
-			<< " ==? "
-			<< t2->asString(Options::debugTvP)
-			<< std::endl;
-
-  if(t1->myContainer != t2->myContainer)
-    return typeError(errStream, errAst, t1, t2);
-  
-  assert(t1->typeArgs->size() == t2->typeArgs->size());
-
-  size_t n = trail->snapshot();
-  trail->link(t1, t2);
-  
-  for(size_t i=0; i<t1->typeArgs->size(); i++) {
-    CHKERR(errFree, Unify(errStream, trail, errAst, t1->TypeArg(i), 
-			  t2->TypeArg(i), flags)); 
-  }
-  
-  if(!errFree)
-    trail->rollBack(n);
-
-  
-  return errFree;
-}
-
-
-static bool 
-UnifyUTVC(std::ostream& errStream,
-	  GCPtr<Trail> trail,
-	  GCPtr<const AST> errAst,
-	  GCPtr<Type> ut1, GCPtr<Type> ut2,
-	  unsigned long flags) 
-{
-  bool errFree = true;
-  
-  UNIFY_DEBUG std::cout << "UnifyUTVC " 
-			<< ut1->asString(Options::debugTvP) 
-			<< " ==? "
-			<< ut2->asString(Options::debugTvP)
-			<< std::endl;
-  
-  if(ut1->myContainer != ut2->myContainer)
-    return typeError(errStream, errAst, ut1, ut2);
-  
-  assert(ut1->typeArgs->size() == ut2->typeArgs->size());
-  
-  size_t n = trail->snapshot();
-  trail->link(ut1, ut2);  
-  
-  for(size_t i=0; i<ut1->typeArgs->size(); i++) {
-    CHKERR(errFree, Unify(errStream, trail, errAst, ut1->TypeArg(i), 
-			  ut2->TypeArg(i), flags)); 
-  }
-  
-  // If error, rollback. 
-  // Otherwise, single remove to break the unnecessary link. 
-  if(!errFree)
-    trail->rollBack(n);
-  
-  return errFree;
-}
-
 
 #define RET_UNIFY do{   \
     return true;        \
@@ -431,7 +203,7 @@ Unify(std::ostream& errStream,
 
     if(t1->isUType(false) && t2->isUType(false) && 
        (t1->isRefType() == t2->isRefType()))
-      return UnifyUTVC(errStream, trail, errAst, t1, t2, flags);
+      return UnifyStructUnion(errStream, trail, errAst, t1, t2, flags);
     
     if((flags & UNIFY_STRICT) == 0) {
       
@@ -664,41 +436,17 @@ Unify(std::ostream& errStream,
 
   case ty_structv:
   case ty_structr:
-    {
-      CHKERR(errFree,
-	     UnifyStruct(errStream, trail, errAst, t1, t2, flags));
-      break;
-    }
-
   case ty_reprv:
   case ty_reprr:
-    {
-      CHKERR(errFree,
-	     UnifyUnion(errStream, trail, errAst, t1, t2, flags));
-      break;
-    }
-
   case ty_unionv:
   case ty_unionr:
-    {
-      CHKERR(errFree,
-	     UnifyUnion(errStream, trail, errAst, t1, t2, flags));
-      break;
-    }
-
   case ty_uconr:
   case ty_uconv:
-    {
-      CHKERR(errFree,
-	     UnifyUcon(errStream, trail, errAst, t1, t2, flags));
-      break;
-    }
-
   case ty_uvalr:
   case ty_uvalv:
     {
       CHKERR(errFree,
-	     UnifyUval(errStream, trail, errAst, t1, t2, flags));
+	     UnifyStructUnion(errStream, trail, errAst, t1, t2, flags));
       break;
     }
 

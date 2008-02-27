@@ -217,7 +217,7 @@ findComponent(std::ostream& errStream,
 	      << std::endl;
     return false;
   }
-
+  
   bool valid=false;
   for(size_t i=0; i < sut->components->size(); i++)
     if(sut->CompName(i) == ast->child(1)->s) {
@@ -454,13 +454,14 @@ checkConstraints(std::ostream& errStream,
       errFree = false;  
 
   if(!errFree) {
-    errStream << declAst->loc << ": "
-	      << "For the declaration of `" 
-	      << declAst->child(0)->s << "', the constraints "
+    errStream << declAst->loc << ": For the declaration of `" 
+	      << declAst->s << "', the constraints "
 	      << "on the declaration here, do not match "
 	      << "with the definition."
-	      << " Declaration: " << declSigma->asString()
-	      << " Definition: " << defSigma->asString()
+	      << " Declaration: "
+	      << declSigma->asString()
+	      << " Definition: "
+	      << defSigma->asString()
 	      << std::endl;
   }
   
@@ -2282,13 +2283,15 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       //errStream << "After Unification: " 
       //		<< ast->getID()->symType->asString()
+      //		<< " LHS = " << idType->asString()
+      //		<< " RHS = " << rhsType->asString()
       //		<< std::endl;            
 
       CHKERR(errFree, sigma->generalize(errStream, ast->loc, gamma,
 					instEnv,  ast->child(1), NULL, 
 					trail, gen_top));
 
-      // errStream << "After Generalization: " 
+      //errStream << "After Generalization: " 
       //		<< ast->getID()->scheme->asString()
       //		<< std::endl << std::endl;
       
@@ -3465,11 +3468,18 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
       ast->symType = newTvar(ast->child(0));
       GCPtr<AST> ctr = ast->child(0);
-      if(((ctr->astType != at_ident) && 
-	  (ctr->astType != at_fqCtr)) ||
-	 ((ctr->symbolDef->Flags & ID_IS_CTOR) == 0)) {
-	errStream << ast->child(0)->loc
-		  << ": union/exception"
+
+      if((ctr->astType == at_ident) &&
+	 (ctr->symbolDef->Flags & ID_IS_CTOR)) {
+	// Constructor direct usage
+      }
+      else if ((ctr->astType == at_fqCtr) &&
+	       (ctr->child(1)->symbolDef->Flags & ID_IS_CTOR)) {
+	// Constructor qualified usage 
+      }
+      else {
+	errStream << ctr->loc << ": "
+		  << "union/exception"
 		  << " constructor expected."
 		  << std::endl;
 	errFree = false;	    

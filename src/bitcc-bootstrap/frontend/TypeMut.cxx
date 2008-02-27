@@ -215,6 +215,12 @@ Type::maximizeTopMutability(GCPtr<Trail> trail)
       rt = t->Base()->maximizeTopMutability(trail);
     }
 
+  case ty_letGather:
+    {
+      assert(false);
+      break;
+    }
+    
   default:
     {
       rt = addMutable(t->getDCopy());
@@ -245,7 +251,13 @@ Type::minimizeTopMutability(GCPtr<Trail> trail)
       rt = t->Base()->minimizeTopMutability(trail);
       break;
     }
-    
+
+  case ty_letGather:
+    {
+      assert(false);
+      break;
+    }
+        
   default:
     {
       rt = t;
@@ -312,6 +324,14 @@ Type::maximizeMutability(GCPtr<Trail> trail)
       break;
     } 
     
+  case ty_letGather:
+    {
+      rt = t->getDCopy();
+      for(size_t i=0; i < t->components->size(); i++)
+	rt->CompType(i) = t->CompType(i)->maximizeMutability(trail); 
+      break;
+    }
+    
   default:
     {
       rt = addMutable(t->getDCopy());
@@ -372,6 +392,14 @@ Type::minimizeMutability(GCPtr<Trail> trail)
 	    trail->link(arg, argMin);
 	}
       }
+      break;
+    }
+
+  case ty_letGather:
+    {
+      rt = t->getDCopy();
+      for(size_t i=0; i < t->components->size(); i++) 
+	rt->CompType(i) = t->CompType(i)->minimizeMutability(trail);
       break;
     }
     
@@ -444,6 +472,16 @@ Type::minimizeDeepMutability(GCPtr<Trail> trail)
       break;
     } 
     
+  case ty_letGather:
+    {
+      rt = t->getDCopy();
+      for(size_t i=0; i < t->components->size(); i++) {
+	rt->CompType(i) =
+	  t->CompType(i)->minimizeDeepMutability(trail);
+      }
+      break;
+    }
+
   default:
     {
       // Concrete types and function types enter this case
@@ -472,8 +510,29 @@ Type::isMinMutable()
 }
 
 
+static void 
+coerceMaybe(GCPtr<Type> t, GCPtr<Trail> trail, bool minimize)
+{
+  //std::cerr << "Coercing: " << t->asString(Options::debugTvP)
+  //	    << " to ";
+  
+  GCPtr<Type> core = t->Core()->getType();
+  if(minimize)
+    core = core->minimizeTopMutability()->getType();
+  
+  GCPtr<Type> var = t->Var()->getType();
+  if(core->kind != ty_tvar)
+    trail->subst(var, core);
+  else
+    trail->link(t, core);
+
+  //  std::cerr << t->asString(Options::debugTvP)
+  //    << std::endl;
+}
+
 void
-Type::adjMaybe(GCPtr<Trail> trail, bool minimize, bool adjFn) 
+Type::adjMaybe(GCPtr<Trail> trail, bool markedOnly, 
+	       bool minimize, bool adjFn) 
 {
   GCPtr<Type> t = getType();
   
@@ -485,35 +544,17 @@ Type::adjMaybe(GCPtr<Trail> trail, bool minimize, bool adjFn)
   switch(t->kind) {
   case ty_mbFull:
     {
-      t->Core()->adjMaybe(trail, minimize, adjFn);
-
-      GCPtr<Type> core = t->Core()->getType();
-      if(minimize)
-	core = core->minimizeTopMutability()->getType();
-      
-      GCPtr<Type> var = t->Var()->getType();
-      if(var != core)
-	trail->subst(var, core);
-      else
-      	trail->link(t, core);
-      
+      t->Core()->adjMaybe(trail, markedOnly, minimize, adjFn);
+      if(!markedOnly || (t->Var()->getType()->flags & TY_COERCE))
+	coerceMaybe(t, trail, minimize);
       break;
     }
     
   case ty_mbTop:
     {
-      t->Core()->adjMaybe(trail, minimize, adjFn);
-
-      GCPtr<Type> core = t->Core();
-      if(minimize)
-	core = core->minimizeMutability();
-
-      GCPtr<Type> var = t->Var()->getType();
-      if(var != core)
-	trail->subst(var, core);
-      else
-	trail->link(t, core);
-      
+      t->Core()->adjMaybe(trail, markedOnly, minimize, adjFn);
+      if(!markedOnly || (t->Var()->getType()->flags & TY_COERCE))
+	coerceMaybe(t, trail, minimize);
       break;
     }
 
@@ -527,14 +568,14 @@ Type::adjMaybe(GCPtr<Trail> trail, bool minimize, bool adjFn)
   default:
     {
       for(size_t i=0; i < t->typeArgs->size(); i++) 
-	t->TypeArg(i)->adjMaybe(trail, minimize, adjFn);
+	t->TypeArg(i)->adjMaybe(trail, markedOnly, minimize, adjFn);
       
       for(size_t i=0; i<t->components->size(); i++)
-	t->CompType(i)->adjMaybe(trail, minimize, adjFn);
+	t->CompType(i)->adjMaybe(trail, markedOnly, minimize, adjFn);
       
       if(t->fnDeps)
 	for(size_t i=0; i < t->fnDeps->size(); i++)
-	  t->FnDep(i)->adjMaybe(trail, minimize, adjFn);
+	  t->FnDep(i)->adjMaybe(trail, markedOnly, minimize, adjFn);
       
       break;
     }
@@ -619,8 +660,7 @@ Type::mbVarAtCpPos(GCPtr<Type> tv, bool cppos)
 {
   GCPtr<Type> t = getType();
   bool rem = true;
-
-
+  
   if(t->mark & MARK25)
     return true;
   
@@ -674,6 +714,7 @@ Type::mbVarAtCpPos(GCPtr<Type> tv, bool cppos)
       break;
     }    
 
+  case ty_letGather:
   case ty_fnarg:
     {
       for(size_t i=0; i < t->components->size(); i++)

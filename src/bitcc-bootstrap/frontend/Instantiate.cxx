@@ -1048,7 +1048,7 @@ UocInfo::recInstantiate(ostream &errStream,
 	  errStream << "COERCING " 
 		    << ast->symType->asString(Options::debugTvP) 
 		    << " to ";
-	ast->symType->adjMaybe(new Trail, false, true);
+	ast->symType->adjMaybe(new Trail, false, false, true);
 	ast->symType->SetTvarsToUnit();
 	INST_DEBUG
 	  errStream << ast->symType->asString(Options::debugTvP) 
@@ -1200,7 +1200,7 @@ UocInfo::recInstantiate(ostream &errStream,
 	  errStream << "Lit-COERCING " 
 		    << ast->symType->asString(Options::debugTvP) 
 		    << " to ";
-	ast->symType->adjMaybe(new Trail, false, true);
+	ast->symType->adjMaybe(new Trail, false, false, true);
 	INST_DEBUG
 	  errStream << ast->symType->asString(Options::debugTvP) 
 		    << endl;

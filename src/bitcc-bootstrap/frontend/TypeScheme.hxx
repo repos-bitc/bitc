@@ -111,7 +111,7 @@ struct TypeScheme : public Countable {
   void collectAllFtvs();
   void collectftvs(GCPtr<const Environment<TypeScheme> > gamma);
   void removeUnInstFtvs();
-  void removeFnCpMbVars();
+  void normalizeFnTypes(GCPtr<Trail> trail);
 
   bool solvePredicates(std::ostream &errStream,
 		       LexLoc &errLoc,

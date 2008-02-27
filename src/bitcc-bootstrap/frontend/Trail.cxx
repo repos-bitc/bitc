@@ -58,11 +58,12 @@ Trail::link(GCPtr<Type> from, GCPtr<Type> to)
     assert(false);
   }
 
-//   std::cerr << "LINKING: "
-// 	    << from->asString(Options::debugTvP)
-// 	    << " |-> "
-// 	    << to->asString(Options::debugTvP)
-// 	    << std::endl;
+  TRAIL_DEBUG 
+    std::cerr << "LINKING: "
+	      << from->asString(Options::debugTvP)
+	      << " |-> "
+	      << to->asString(Options::debugTvP)
+	      << std::endl;
   
   vec->append(from);   
   from->link = to; 
@@ -86,15 +87,16 @@ Trail::subst(GCPtr<Type> from, GCPtr<Type> to)
     assert(false);
   }
 
-//   std::cerr << "SUBSTITUTING: "
-// 	    << from->asString(Options::debugTvP)
-// 	    << " |-> "
-// 	    << to->asString(Options::debugTvP)
-// 	    << std::endl;
+  TRAIL_DEBUG 
+    std::cerr << "SUBSTITUTING: "
+	      << from->asString(Options::debugTvP)
+	      << " |-> "
+	      << to->asString(Options::debugTvP)
+	      << std::endl;
   
   vec->append(from);   
-  link(from, to);
-} 
+  from->link = to; 
+}
 
 void
 Trail::rollBack(size_t upto)
