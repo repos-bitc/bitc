@@ -103,7 +103,8 @@ struct TypeScheme : public Countable {
   void TransAddConstraints(GCPtr<TCConstraints> _tcc) const;
   
   //GCPtr<Type> type_copy();
-  std::string asString(GCPtr<TvPrinter> tvP = new TvPrinter);
+  std::string asString(GCPtr<TvPrinter> tvP=new TvPrinter, 
+		       bool norm=false);
   void asXML(GCPtr<TvPrinter> tvP, INOstream &out);
   std::string asXML(GCPtr<TvPrinter> tvP = new TvPrinter);
   

@@ -211,6 +211,12 @@ bool
 TypeScheme::normalize() 
 {
   bool changed = false;
+
+  TS_NORM_DEBUG
+    std::cerr << "Considering: "
+	      << asString(Options::debugTvP, false)
+	      << std::endl;
+  
   
   GCPtr< CVector< GCPtr<Type> > > newTvs = new CVector< GCPtr<Type> >;
   for(size_t c=0; c < ftvs->size(); c++) {
@@ -257,6 +263,12 @@ TypeScheme::normalize()
       }
     }
   }
+  
+  TS_NORM_DEBUG
+    if(changed)
+      std::cerr << "\t\tNormalized to "
+		<< asString(Options::debugTvP, false)
+		<< std::endl;
   
   return changed;
 }

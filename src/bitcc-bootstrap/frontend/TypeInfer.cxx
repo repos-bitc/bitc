@@ -1749,6 +1749,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  assert(tcc);
 
 	  GCPtr<TypeScheme> sigma = gamma->getBinding(ast->s);
+
 	  if(!sigma) {
 
 	    // If this is a type variable that is used as in
@@ -1782,8 +1783,8 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  
 #ifdef VERBOSE  
 	  errStream << " For " << ast->s << ":\n";
-	  errStream << "Obtained " << ins->asString()
-		    << " From " << sigma->asString() << std::endl;
+	  errStream << "Obtained " << ins->asString(Options::debugTvP)
+		    << " From " << sigma->asString(Options::debugTvP) << std::endl;
 #endif
 	      
 	  ins = ins->getBareType();

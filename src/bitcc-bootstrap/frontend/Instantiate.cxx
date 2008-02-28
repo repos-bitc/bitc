@@ -1153,7 +1153,7 @@ UocInfo::recInstantiate(ostream &errStream,
       if(ast->children->size() > 1) {
 	ast->child(1) = typeAsAst(ast->child(0)->symType,
 				  ast->child(1)->loc);
-	RANDT_DROP(ast->child(1), "IP R&T: ", UNIFIED_ENVS);	
+	RANDT_DROP(ast->child(1), "[[IP R&T]]", UNIFIED_ENVS);	
 	
 	ast->child(1) = recInstantiate(errStream, 
 				       ast->child(1),
@@ -1181,7 +1181,7 @@ UocInfo::recInstantiate(ostream &errStream,
       ast->child(1) = typeAsAst(ast->child(0)->symType,
 				ast->child(1)->loc);
 
-      RANDT_DROP(ast->child(1), "TQ R&T: ", UNIFIED_ENVS);
+      RANDT_DROP(ast->child(1), "[[TQ R&T]]", UNIFIED_ENVS);
 
       ast->child(1) = recInstantiate(errStream, 
 				     ast->child(1),
@@ -1210,7 +1210,7 @@ UocInfo::recInstantiate(ostream &errStream,
 
       ast = new AST(at_tqexpr, ast->loc, ast,
 		    typeAsAst(ast->symType, ast->loc));
-      RANDT_DROP(ast, "IntFloat R&T: ", UNIFIED_ENVS);
+      RANDT_DROP(ast, "[[IntFloat R&T]]", UNIFIED_ENVS);
       break;	
     }
 
@@ -1636,7 +1636,7 @@ UocInfo::doInstantiate(ostream &errStream,
     // This new Declaration can never contain the name being
     // defined. So, no immediate fixup necessary. 
     // Safe to R&T in MEGA environment.
-    RANDT_DROP(newDecl, "InstDecl: R&T-1", UNIFIED_ENVS);
+    RANDT_DROP(newDecl, "[[InstDecl: R&T-1]]", UNIFIED_ENVS);
 
     // In the case of a proclaimation, I need to recurse over
     // the type-part and instantiate any types if necessary. 
@@ -1649,7 +1649,7 @@ UocInfo::doInstantiate(ostream &errStream,
 
     // Now that the declaration is fixed up -- if necessary -- 
     // R&T it (in my enviromment) and commit the AST.    
-    RANDT_COMMIT(newDecl, "InstDecl: R&T-2", UNIFIED_ENVS);
+    RANDT_COMMIT(newDecl, "[[InstDecl: R&T-2]]", UNIFIED_ENVS);
     
     // Actually add the declaration AST
     addTopLevelForm(newDecl);
@@ -1854,7 +1854,7 @@ UocInfo::doInstantiate(ostream &errStream,
   
   GCPtr<envSet> envset = (globalInst ? UNIFIED_ENVS 
 			  : (new envSet(getOuterLet(copy)->envs)));
-  RANDT_DROP(copy, "Inst: R&T-1: ", envset);
+  RANDT_DROP(copy, "[[Inst: R&T-1: ]]", envset);
   
   // Now that the expression is typed, recurse over the body and
   // process dependencies
@@ -1933,7 +1933,7 @@ UocInfo::doInstantiate(ostream &errStream,
     // this one.
     INST_DEBUG
       cerr << "Copy after all fixup: " << copy->asString() << endl;
-    RANDT_COMMIT(copy, "Inst: R&T-COMMIT: ", UNIFIED_ENVS);
+    RANDT_COMMIT(copy, "[[Inst: R&T-COMMIT]]", UNIFIED_ENVS);
   }
   // No ned for RandT in the case of local definitions
   // (let-bindings). 
@@ -2052,7 +2052,7 @@ UocInfo::instantiate(ostream &errStream,
     cerr << "Unified UOC after instantiation is "
 	 << ast->asString() << endl;
   CHKERR(errFree, RandT(errStream, true, POLY_SYM_FLAGS,
-			POLY_TYP_FLAGS, "Post Instantiation: "));
+			POLY_TYP_FLAGS, "[[Post Instantiation]]"));
   
   return errFree;
 }

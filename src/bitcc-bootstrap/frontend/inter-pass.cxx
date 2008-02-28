@@ -57,46 +57,32 @@ using namespace sherpa;
 
 bool 
 UocInfo::Resolve(std::ostream& errStream, bool init, 
-		 unsigned long rflags, std::string pre)
+		 unsigned long rflags, std::string mesg)
 {
   bool errFree = true;
-  std::stringstream ss;
-  errFree = fe_symresolve(ss, init, rflags);
-  if(!errFree) {
-    errStream << pre
-	      << ss.str()
+  errFree = fe_symresolve(errStream, init, rflags);
+  if(!errFree)
+    errStream << mesg
 	      << std::endl;
-    return false;
-  }
-  else {
-    errStream << ss.str();
-  }
   return errFree;
 }
 
 bool 
 UocInfo::TypeCheck(std::ostream& errStream, bool init, 
-		   unsigned long tflags, std::string pre)
+		   unsigned long tflags, std::string mesg)
 {
   bool errFree = true;
-  std::stringstream ss;
 
   // If one considers removing this clear clause,
   // be careful about old types. Pay attention to
   // bindIdentDef() function which preserves types
   // if a type already exists.
   ast->clearTypes();  
-  errFree = fe_typeCheck(ss, init, tflags);    
-  if(!errFree) {
-    errStream << pre
-	      << ss.str()
+
+  errFree = fe_typeCheck(errStream, init, tflags);    
+  if(!errFree) 
+    errStream << mesg
 	      << std::endl;
-    return false;
-  }
-  else {
-    errStream << ss.str();
-  }
-   
   return errFree;
 }
 
@@ -105,14 +91,14 @@ UocInfo::RandT(std::ostream& errStream,
 	       bool init, 
 	       unsigned long rflags,
 	       unsigned long tflags,
-	       std::string pre)
+	       std::string mesg)
 {
   bool errFree = true;
 
-  CHKERR(errFree, Resolve(errStream, init, rflags, pre));
+  CHKERR(errFree, Resolve(errStream, init, rflags, mesg));
   
   if(errFree)
-    CHKERR(errFree, TypeCheck(errStream, init, tflags, pre));
+    CHKERR(errFree, TypeCheck(errStream, init, tflags, mesg));
   
   if(!errFree)
     errStream << "WHILE R&Ting:" << std::endl
@@ -167,7 +153,7 @@ UocInfo::RandTexpr(std::ostream& errStream,
 		   GCPtr<AST> expr,
 		   unsigned long rflags,
 		   unsigned long tflags,
-		   std::string pre,
+		   std::string mesg,
 		   bool keepResults,
 		   GCPtr<envSet> altEnvSet)
 {
@@ -184,13 +170,13 @@ UocInfo::RandTexpr(std::ostream& errStream,
   if(!keepResults) 
     myUoc->wrapEnvs();
   
-  CHKERR(errFree, myUoc->Resolve(errStream, false, rflags, pre));
+  CHKERR(errFree, myUoc->Resolve(errStream, false, rflags, mesg));
   if(errFree)
-    CHKERR(errFree, myUoc->TypeCheck(errStream, false, tflags, pre));
+    CHKERR(errFree, myUoc->TypeCheck(errStream, false, tflags, mesg));
   
   if(!keepResults)
     myUoc->unwrapEnvs();
-
+  
   if(!errFree)
     errStream << "WHILE R&Ting:" << std::endl
 	      << expr->asString() << std::endl;

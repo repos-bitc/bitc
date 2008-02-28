@@ -530,12 +530,14 @@ TypeScheme::solvePredicates(std::ostream &errStream, LexLoc &errLoc,
       CHKERR(errFreeNow, handleSpecialPred(errStream, trail, 
 					   pred, tcc, 
 					   handled, handlable));
+
       SOL_DEBUG errStream << "\t[Sol 1] (special): " 
 			  << asString(Options::debugTvP)
 			  << (handled ? " [HANDLED]" : "")
 			  << (handlable ? " [HANDLABLE]" : "")
 			  << (!errFreeNow ? " [ERROR]" : "")
 			  << std::endl;
+      
       if(handled)
 	break;
       if(handlable)
@@ -544,12 +546,14 @@ TypeScheme::solvePredicates(std::ostream &errStream, LexLoc &errLoc,
       // Step 2
       CHKERR(errFreeNow, handlePcst(errStream, trail, 
 				    pred, tcc, handled, handlable));
+      
       SOL_DEBUG errStream << "\t[Sol 2] (pcst): " 
 			  << asString(Options::debugTvP)
 			  << (handled ? " [HANDLED]" : "")
 			  << (handlable ? " [HANDLABLE]" : "")
 			  << (!errFreeNow ? " [ERROR]" : "")
 			  << std::endl;
+
       if(handled)
 	break;
       if(handlable)
@@ -568,6 +572,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, LexLoc &errLoc,
 			    << (handlable ? " [HANDLABLE]" : "")
 			    << (!errFreeNow ? " [ERROR]" : "")
 			    << std::endl;
+
 	if(handled)
 	  break;
       }

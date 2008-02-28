@@ -389,11 +389,13 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
 
 std::string
-TypeScheme::asString(GCPtr<TvPrinter> tvP)
+TypeScheme::asString(GCPtr<TvPrinter> tvP, bool norm)
 {
   std::stringstream ss; 
   bool forall = false;
-  normalize();
+
+  if(norm)
+    normalize();
   
   if(Options::FQtypes)
     if(ftvs->size()) {

@@ -595,12 +595,27 @@ updateSigmas(GCPtr<const AST> bp, GCPtr<CVector<GCPtr<Type> > > ftvs,
   case at_identPattern:
     {
       GCPtr<AST> ident = bp->child(0);
+      GCPtr<TypeScheme> sigma = ident->scheme;
       assert(ident->scheme);
+      GCPtr<Type> tau = sigma->tau;;
+      
       for(size_t i=0; i<ftvs->size(); i++) {
-	if(ident->symType->boundInType(ftvs->elem(i)))
-	  ident->scheme->ftvs->append(ftvs->elem(i));
+	if(tau->boundInType(ftvs->elem(i))) {
+	  sigma->ftvs->append(ftvs->elem(i));
+	  continue;
+	}
+	
+	if(tcc)
+	  for(size_t c=0; c < tcc->size(); c++) {
+	    GCPtr<Constraint> pred = tcc->Pred(c);
+	    if(pred->boundInType(ftvs->elem(i))) {
+	      sigma->ftvs->append(ftvs->elem(i));
+	      break;
+	    }
+	  }
       }
-      ident->scheme->tcc = tcc;
+      
+      sigma->tcc = tcc;
       break;
     }
     

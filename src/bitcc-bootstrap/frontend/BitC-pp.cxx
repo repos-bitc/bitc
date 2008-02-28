@@ -917,22 +917,17 @@ doShowTypes(std::ostream& out, GCPtr<AST> ast,
     if (!raw)
       tvP = new TvPrinter;
     
-    //     out << ast->s  << ": "
-    //       	<< ((ast->symType == NULL)
-    // 	    ? "??" 
-    // 	    : ast->symType->asString(tvP));
-    
     out << ast->s  << ": "
       	<< ((!ast->scheme)
 	    ? "??" 
-	    : ast->scheme->asString(tvP));
+	    : ast->scheme->asString(tvP, true));
 
     if(showMangName)
       if(ast->symType->isOfInfiniteType())
 	out << "[Infinite Type]";
       else
 	out << " [" << ast->symType->mangledString() << "]";
-
+    
     break;
     
   case at_usesel:
