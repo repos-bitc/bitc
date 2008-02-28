@@ -181,17 +181,6 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
       return errFree;
     }
     
-    // EXTRA RULE!    _
-    // *(p, tg, ti), |_|(ti)
-    if(ins->isConcretizable()) {
-      PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), [](ti), KEEP."
-			   << std::endl;
-      handled = true;
-      GCPtr<Type> tii = ins->minimizeDeepMutability();
-      bool unifies = ins->unifyWith(tii, false, trail, errStream);
-      return unifies;
-    }
-    
     // *(p, tg, ti),  Mut(ti)
     if (ins->isDeepMut()) {
       PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), Mut(ti) ERROR." 
@@ -225,7 +214,7 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
   // *(k, tg, ti), Immut(ti)
   if(gen->isDeepImmut()) {
     PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), Immut(tg)" 
-			 << "Immut(tg) [k |-> m]." 
+			 << "Immut(tg) [k |-> p]." 
 			 << std::endl;
     trail->subst(k, Type::Kpoly);
     handled = true;

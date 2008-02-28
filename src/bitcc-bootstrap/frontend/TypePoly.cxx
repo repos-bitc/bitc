@@ -458,31 +458,45 @@ TypeScheme::generalize(std::ostream& errStream,
   if(gen_mode == gen_top) {
     // Step 3
     tau->adjMaybe(trail, false, true);
-    
+
+    bool cleared = false;
     for(size_t i=0; i < tcc->size(); i++) {
       GCPtr<Type> pred = tcc->Pred(i);
       if(!pred->isPcst())
 	continue;
 
+      cleared = true;
       GCPtr<Type> k = pred->CompType(0)->getType();
+      GCPtr<Type> gen = pred->CompType(1)->getType();
       GCPtr<Type> ins = pred->CompType(2)->getType();
+      
+      assert(k != Type::Kmono);
       if(k->kind == ty_kvar) {
-	ins->adjMaybe(trail, false, true);
 	trail->subst(k, Type::Kpoly);
+	k = k->getType();
       }
+      assert(k == Type::Kpoly);
+      
+      GCPtr<Type> tgg = gen->minimizeDeepMutability();
+      GCPtr<Type> tii = ins->minimizeDeepMutability();
+      assert(gen->unifyWith(tgg, false, trail, errStream));
+      assert(ins->unifyWith(tii, false, trail, errStream));
     }
-    
-    CHKERR(errFree, solvePredicates(errStream, errLoc, 
-				    instEnv, trail)); 
 
-    for(size_t i=0; i < tcc->size(); i++) {
-      GCPtr<Type> pred = tcc->Pred(i);
-      if(pred->isPcst()) {
-	errStream << "REMAINING PCST!!!"
-		  << std::endl;
+    if(cleared) {
+      GCPtr< CVector< GCPtr<Typeclass> > > oldPreds = tcc->pred;
+      tcc->pred = new CVector< GCPtr<Typeclass> >;
+      
+      for(size_t i=0; i < oldPreds->size(); i++) {
+	GCPtr<Type> pred = oldPreds->elem(i);
+	if(!pred->isPcst())
+	  tcc->addPred(pred);
       }
+      
+      CHKERR(errFree, solvePredicates(errStream, errLoc, 
+				      instEnv, trail)); 
     }
-   
+
     GEN_DEBUG errStream << "[3] Top-Fix: " 
 			<< asString(Options::debugTvP)
 			<< std::endl;

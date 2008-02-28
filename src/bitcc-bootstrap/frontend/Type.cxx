@@ -612,26 +612,31 @@ Type::isDeepMut()
   
   t->mark |= MARK22;
   
-  if(t->kind == ty_mutable)
-    return true;
+  bool mut = false;
   
-  if(t->kind == ty_fn)
-    return false;
-  
-  for(size_t i=0; i < t->components->size(); i++)
-    if(t->CompType(i)->isDeepMut())
-      return true;
-  
-  for(size_t i=0; i < t->typeArgs->size(); i++)
-    if(t->TypeArg(i)->isDeepMut())
-      return true;
-  
-  // No need to check functional dependencies
-  // May lead to error if checked because functional dependencies
-  // might be on types that are used within a function constructor
+  switch(t->kind) {
+  case ty_mutable:
+    mut = true;
+    break;
+    
+  case ty_fn:
+    break;
+
+  default:
+    for(size_t i=0;!mut &&  i < t->components->size(); i++)
+      mut = t->CompType(i)->isDeepMut();
+   
+    for(size_t i=0; !mut && i < t->typeArgs->size(); i++)
+      mut = t->TypeArg(i)->isDeepMut();
+
+    // No need to check functional dependencies
+    // May lead to error if checked because functional dependencies
+    // might be on types that are used within a function constructor
+    break;
+  }
   
   t->mark &= ~MARK22;
-  return false;
+  return mut;
 }
   
 bool 
@@ -644,26 +649,33 @@ Type::isDeepImmut()
   
   t->mark |= MARK23;
   
-  if(t->kind == ty_mutable || t->kind == ty_tvar)
-    return false;
+  bool immut = true;
   
-  if(t->kind == ty_fn)
-    return true;
-  
-  for(size_t i=0; i < t->components->size(); i++)
-    if(!t->CompType(i)->isDeepImmut())
-      return false;
-  
-  for(size_t i=0; i < t->typeArgs->size(); i++)
-    if(!t->TypeArg(i)->isDeepImmut())
-      return false;
+  switch(t->kind) {
+  case ty_mutable:
+  case ty_tvar:
+    immut = false;
+    break;
+ 
+  case ty_fn:
+    break;
+    
+  default:
+    for(size_t i=0; immut && i < t->components->size(); i++)
+      immut = t->CompType(i)->isDeepImmut();
+    
+    for(size_t i=0; immut && i < t->typeArgs->size(); i++)
+      immut = t->TypeArg(i)->isDeepImmut();
 
-  // No need to check functional dependencies
-  // May lead to error if checked because functional dependencies
-  // might be on types that are used within a function constructor
-  
+    // No need to check functional dependencies
+    // May lead to error if checked because functional dependencies
+    // might be on types that are used within a function constructor
+    
+    break;
+  }
+
   t->mark &= ~MARK23;
-  return true;  
+  return immut;  
 }
 
 bool 
@@ -676,29 +688,35 @@ Type::isConcretizable()
   
   t->mark |= MARK7;
   
-  if(t->kind == ty_tvar)
-    return false;
+  bool concretizable = true;
   
-  if(t->kind == ty_fn)
-    return true;
-  
-  if(t->kind == ty_mbTop || t->kind == ty_mbFull)
-    return t->Core()->isDeepImmut();
-      
-  for(size_t i=0; i < t->components->size(); i++)
-    if(!t->CompType(i)->isConcretizable())
-      return false;
-  
-  for(size_t i=0; i < t->typeArgs->size(); i++)
-    if(!t->TypeArg(i)->isConcretizable())
-      return false;
-  
-  // No need to check functional dependencies
-  // May lead to error if checked because functional dependencies
-  // might be on types that are used within a function constructor
+  switch(t->kind) {
+  case ty_tvar:
+    concretizable = false;
+    break;
+
+  case ty_mbTop:
+  case ty_mbFull:
+    concretizable = t->Core()->isConcretizable();
+    
+  case ty_fn:
+    break;
+    
+  default:
+    for(size_t i=0; concretizable && i < t->components->size(); i++)
+      concretizable = t->CompType(i)->isConcretizable();
+    
+    for(size_t i=0; concretizable && i < t->typeArgs->size(); i++)
+      concretizable = t->TypeArg(i)->isConcretizable();
+    
+    // No need to check functional dependencies
+    // May lead to error if checked because functional dependencies
+    // might be on types that are used within a function constructor
+    break;
+  }
   
   t->mark &= ~MARK7;
-  return true;  
+  return concretizable;  
 }
 
 /* Produce Type ty_union[rv] from ty_ucon[rv] or ty_uval[rv]

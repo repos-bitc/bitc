@@ -1,13 +1,6 @@
 (provide main bitc.main)
 
+(define anil nil)
+
 (define main.main:(fn ((vector string)) int32)
-  (lambda (argVec) 
-    
-    (define W:(array (mutable uint32) 2)
-      (array 0 0))
-
-    (define E (array-nth W 1))
-    (set! E 5)
-
-    0))
-
+  (lambda (argvec) 0))
