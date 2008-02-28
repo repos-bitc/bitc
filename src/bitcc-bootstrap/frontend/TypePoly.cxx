@@ -271,9 +271,11 @@ TypeScheme::collectftvs(GCPtr<const Environment<TypeScheme> > gamma)
  **********************************************************/
 
 // Remove Ftvs that will never be instantiable.
-void
+bool
 TypeScheme::removeUnInstFtvs()
 {
+  bool removed = false;
+
   for(size_t c=0; c < ftvs->size(); c++) {
     GCPtr<Type> ftv = Ftv(c)->getType();
     if(tau->boundInType(ftv))
@@ -308,24 +310,24 @@ TypeScheme::removeUnInstFtvs()
       newTvs->append(ftv);
       ftv->flags &= ~TY_CLOS;
     }
+    else
+      removed = true;
   }
   
   ftvs = newTvs;
+  return removed;
 }
 
 // Remove *generalizable* Ftvs that appear only at copy-positions of
 // function types.
-void
+bool
 TypeScheme::normalizeFnTypes(GCPtr<Trail> trail)
 {
+  bool removed = false;
   for(size_t c=0; c < ftvs->size(); c++) {
     GCPtr<Type> ftv = Ftv(c)->getType();
     if(tau->boundInType(ftv) && tau->mbVarAtCpPos(ftv)) {
       ftv->flags |= TY_COERCE;
-      //std::cerr << "FTV: " << ftv->asString(Options::debugTvP)
-      //		<< "  bound only in Copy-position in "
-      //		<< tau->asString(Options::debugTvP) << "."
-      //		<< std::endl;
     }
   }
     
@@ -334,12 +336,16 @@ TypeScheme::normalizeFnTypes(GCPtr<Trail> trail)
     GCPtr<Type> ftv = Ftv(c)->getType();
     if((ftv->flags & TY_COERCE) == 0)
       newTvs->append(ftv);
+    else
+      removed = true;
   }
   ftvs = newTvs;
   
   // TY_COERCE flag is not cleared, but it does not matter, because
   // all of these types are substituted within the next adjMaybe call.
   tau->adjMaybe(trail, true, false, true);
+  
+  return removed;
 }
 
 
@@ -394,6 +400,10 @@ TypeScheme::normalizeFnTypes(GCPtr<Trail> trail)
       types, since these will be not result in any loss of
       generality. Coerce the type to its non-maybe form.
 
+      If any variables were removed due to (6) or (7), 
+      then re-solve all consrtainsts .
+
+
    8) If exp, and if generalizing at top-level, instantiate
       free variables to dummy types and issue warnings
 
@@ -432,9 +442,8 @@ TypeScheme::generalize(std::ostream& errStream,
 
   if(gen_mode != gen_instance) {
     // Step 1
-    if(tcc)
-      CHKERR(errFree, solvePredicates(errStream, errLoc, 
-				      instEnv, trail)); 
+    CHKERR(errFree, solvePredicates(errStream, errLoc, 
+				    instEnv, trail)); 
     
     GEN_DEBUG errStream << "[1] Solve: " 
 			<< asString(Options::debugTvP)
@@ -519,28 +528,28 @@ TypeScheme::generalize(std::ostream& errStream,
   
   // Step 6
   if(!expansive && gen_mode != gen_instance) {
-    removeUnInstFtvs();
+    bool rem1 = removeUnInstFtvs();
     
     GEN_DEBUG errStream << "[6] Remove Uninst-Ftvs: " 
 			<< asString(Options::debugTvP)
 			<< std::endl;
-
     
-    normalizeFnTypes(trail);
+    
+    bool rem2 = normalizeFnTypes(trail);
     
     GEN_DEBUG errStream << "[7] Function Simplification: " 
 			<< asString(Options::debugTvP)
     			<< std::endl;
-
     
-    CHKERR(errFree, solvePredicates(errStream, errLoc, 
-				    instEnv, trail)); 
-
+    if(rem1 || rem2)
+      CHKERR(errFree, solvePredicates(errStream, errLoc, 
+				      instEnv, trail)); 
+    
     GEN_DEBUG errStream << "[7#] Re-Solve: " 
 			<< asString(Options::debugTvP)
     			<< std::endl;
   }
-
+  
   // Step 8
   if ((gen_mode == gen_top) && expansive) {
     collectftvs(gamma);

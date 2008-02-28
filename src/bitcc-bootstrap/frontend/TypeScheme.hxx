@@ -111,8 +111,8 @@ struct TypeScheme : public Countable {
   // Collect all tvs wrt tau, and tcc->pred, but NOT tcc->fnDeps
   void collectAllFtvs();
   void collectftvs(GCPtr<const Environment<TypeScheme> > gamma);
-  void removeUnInstFtvs();
-  void normalizeFnTypes(GCPtr<Trail> trail);
+  bool removeUnInstFtvs();
+  bool normalizeFnTypes(GCPtr<Trail> trail);
 
   bool solvePredicates(std::ostream &errStream,
 		       LexLoc &errLoc,

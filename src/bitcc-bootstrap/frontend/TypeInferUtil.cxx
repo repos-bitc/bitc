@@ -60,8 +60,6 @@ using namespace std;
 /*                     Some Helper Functions                  */
 /**************************************************************/
 
-//#define VERBOSE
-
 GCPtr<Type> 
 obtainFullUnionType(GCPtr<Type> t)
 {  

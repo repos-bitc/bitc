@@ -591,13 +591,11 @@ Unify(std::ostream& errStream,
     }
   }
   
-#ifdef VERBOSE_UNIFY
-  errStream << "\t Result: " 
-	    << ft->asString(Options::debugTvP)
-	    << " == " 
-	    << st->asString(Options::debugTvP)
-	    << std::endl;  
-#endif
+  UNF_RES_DEBUG errStream << "\t Result: " 
+			  << ft->asString(Options::debugTvP)
+			  << " == " 
+			  << st->asString(Options::debugTvP)
+			  << std::endl;  
   
   if(errFree)
     RET_UNIFY;
@@ -684,10 +682,6 @@ unify(std::ostream& errStream,
   GCPtr< DoneList<GCPtr<Type> > > donelist = new DoneList<GCPtr<Type> >;
   CHKERR(errFree, Unify(errStream, trail, errAst, ft, st, flags));
   CHKERR(errFree, acyclic(errStream, ft, worklist, donelist));
-#ifdef VERBOSE_UNIFY
-  std::cout << "____________________________"
-	    << std::endl << std::endl;
-#endif
 
   return errFree;
 }

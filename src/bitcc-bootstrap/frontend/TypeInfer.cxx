@@ -1074,22 +1074,21 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
 	lastTagValueCardelli = (2 * lastTagValue) - 1;
       }
       
-#ifdef VERBOSE
-      errStream << "Union " << uIdent->s << ": " 
-		<< std::endl
-		<< "  nBits = " << declares->tagType->nBits() 
-		<< std::endl 
-		<< "  maxCtrs = " << maxCtrs 
-		<< std::endl
-		<< "  ltv = " << lastTagValue 
-		<< std::endl
-		<< "  ltvC = " << lastTagValueCardelli 
-		<< std::endl
-		<< "  isEnum = " << isEnum 
-		<< std::endl
-		<< "  cardelli = " << cardelli 
-		<< std::endl;
-#endif
+      UNION_INF_DEBUG
+	errStream << "Union " << uIdent->s << ": " 
+		  << std::endl
+		  << "  nBits = " << declares->tagType->nBits() 
+		  << std::endl 
+		  << "  maxCtrs = " << maxCtrs 
+		  << std::endl
+		  << "  ltv = " << lastTagValue 
+		  << std::endl
+		  << "  ltvC = " << lastTagValueCardelli 
+		  << std::endl
+		  << "  isEnum = " << isEnum 
+		  << std::endl
+		  << "  cardelli = " << cardelli 
+		  << std::endl;
     }
     
     uIdent->tagType = declares->tagType;
@@ -1781,11 +1780,12 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  GCPtr<Type> ins = tsIns->tau->getType();
 	  ast->symType = ins;
 	  
-#ifdef VERBOSE  
-	  errStream << " For " << ast->s << ":\n";
-	  errStream << "Obtained " << ins->asString(Options::debugTvP)
-		    << " From " << sigma->asString(Options::debugTvP) << std::endl;
-#endif
+	  ID_INS_DEBUG
+	    errStream << " For " << ast->s << ", "
+		      << "Obtained " << ins->asString(Options::debugTvP)
+		      << " From " 
+		      << sigma->asString(Options::debugTvP) 
+		      << std::endl;
 	      
 	  ins = ins->getBareType();
 
@@ -2273,28 +2273,30 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<TypeScheme> sigma = ident->scheme;
       sigma->tcc = currTcc;
 
-      //       errStream << "At define " << ident->asString() << ":"
-      //       		<< " LHS = " << idType->asString()
-      //       		<< " RHS = " << rhsType->asString()
-      //       		<< std::endl;
+      DEF_INF_DEBUG
+	errStream << "At define " << ident->asString() << ":"
+		  << " LHS = " << idType->asString()
+		  << " RHS = " << rhsType->asString()
+		  << std::endl;
       
       CHKERR(errFree, unify(errStream, trail, ast->child(1), 
 			    ast->child(1)->symType,
 			    MBF(ast->child(0)->symType), uflags));
       
-      //       errStream << "After Unification: " 
-      //       		<< ast->getID()->symType->asString()
-      //       		<< " LHS = " << idType->asString()
-      //       		<< " RHS = " << rhsType->asString()
-      //       		<< std::endl;            
+      DEF_INF_DEBUG
+	errStream << "After Unification: " 
+		  << ast->getID()->symType->asString()
+		  << " LHS = " << idType->asString()
+		  << " RHS = " << rhsType->asString()
+		  << std::endl;            
       
       CHKERR(errFree, sigma->generalize(errStream, ast->loc, gamma,
 					instEnv,  ast->child(1), NULL, 
 					trail, gen_top));
-
-      //errStream << "After Generalization: " 
-      //		<< ast->getID()->scheme->asString()
-      //		<< std::endl << std::endl;
+      DEF_INF_DEBUG
+	errStream << "After Generalization: " 
+		  << ast->getID()->scheme->asString()
+		  << std::endl << std::endl;
       
       gamma->mergeBindingsFrom(defGamma);
       
@@ -2302,12 +2304,6 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
 				     declTS, ident->scheme, uflags, true));	
       
-#ifdef VERBOSE  
-      errStream << "At " << ast->asString()
-      		<< "[0] = " << ast->child(0)->child(0)->scheme->asString()
-		<< "[1] = " << ast->child(1)->symType->asString()
-      		<< std::endl;            
-#endif
       ast->symType = ast->child(0)->symType;
       break;
     }
@@ -4596,12 +4592,11 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
 {
   // Careful: the input flags are interface flags `uflags,'
   // and not the internal flags `flags.' 
-
-#ifdef VERBOSE  
-    errStream << "Now Processing " << ifName;
-    errStream << " ast = " << ast->astTypeName();
-    errStream << std::endl;
-#endif
+  
+  TI_TOP_DEBUG
+    errStream << "Now Processing " << uocName
+	      << " ast = " << ast->astTypeName()
+	      << std::endl;
   
   GCPtr<CVector<GCPtr<Type> > > impTypes = new CVector<GCPtr<Type> >;
   GCPtr<Trail> trail = new Trail;
@@ -4638,28 +4633,26 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
 			    USE_MODE, TI_NONE));
   CHKERR(errFree, checkImpreciseTypes(errStream, gamma, impTypes));
 
-#if 0
-  errStream << "- - - - - - - - - - - - - - - - - - - - - - - " << endl;
-  GCPtr<AST> mod = ast->child(0);
-  for(size_t i=0; i < mod->children->size(); i++) {
-    GCPtr<AST> ast = mod->child(i);
-    errStream << ast->atKwd() << std::endl;
-    if(ast->astType == at_define) {
-      GCPtr<AST> id = ast->child(0)->child(0);
-      errStream << id->asString() << ": "	
-		<< ctypeAsString(id->scheme->tau, id->scheme->tcc)
-		<< std::endl;
+  TI_TOP_DEBUG {
+    errStream << "- - - - - - - - - - - - - - - - - - - - - - - " 
+	      << endl;
+    
+    GCPtr<AST> mod = ast->child(0);
+    for(size_t i=0; i < mod->children->size(); i++) {
+      GCPtr<AST> ast = mod->child(i);
+      errStream << ast->atKwd() << std::endl;
+      if(ast->astType == at_define) {
+	GCPtr<AST> id = ast->child(0)->child(0);
+	errStream << id->asString() << ": "	
+		  << id->scheme->asString(Options::debugTvP, true)
+		  << std::endl;
+      }
     }
+    
+    errStream << "________________________________________" 
+	      << std::endl;
   }
-#endif  
 
-#ifdef VERBOSE  
-  errStream << "________________________________________" << std::endl;
-#endif
   
   return errFree;
 }
-
-
-    /*------------------------------------------------
-      ------------------------------------------------*/
