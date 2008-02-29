@@ -151,7 +151,6 @@ struct TypeScheme;
 			       // must be marked on maybe-Var()s.
 			       // This flag is NOT cleared by the 
 			       // adjMaybe function. 
-
                                
 
 // Specialization mask -- those flags which should NOT survive
@@ -341,10 +340,17 @@ public:
   bool isUnifiableMbFull(size_t flags=0);
   bool isUnifiableMbTop(size_t flags=0);
 
-  // Is Tv bound in the current type *only* as a maybe-type variable
-  // (to the LHS of a mbTop or mbFull) at a copy position of a
-  // function argument or return type?
-  bool mbVarAtCpPos(GCPtr<Type> tv, bool cppos=false);
+  // Mark significant MB-tvars.
+  // Mb-Tvars that need not be preserved semantically are:
+  //  (1) at a copy position of a function argument or return type.
+  //  (2) at a copy-argument-position of typeclass argument.
+  // (1) is detected automatically, for (2) pass cppos-true at start.
+  // Actually what this does is an "unmark" on the TY_COERCE flag, not
+  // a new mark. The idea is that only generalizable FTVs should be
+  // marked this way. So, mark all generalizable TVs with TY_COERCE,
+  // and this routine will unmark all those coercions that will alter
+  // semantic meaning.
+  void markSignMbs(bool cppos=false);
 
   /* Produce Type ty_union[rv] from ty_ucon[rv] or ty_uval[rv]
      ONLY typeArgs are polylated */

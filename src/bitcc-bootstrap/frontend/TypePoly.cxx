@@ -319,18 +319,24 @@ TypeScheme::removeUnInstFtvs()
 }
 
 // Remove *generalizable* Ftvs that appear only at copy-positions of
-// function types.
+// function types or Typeclass Predicates.
 bool
-TypeScheme::normalizeFnTypes(GCPtr<Trail> trail)
+TypeScheme::normalizeConstruction(GCPtr<Trail> trail)
 {
   bool removed = false;
+
   for(size_t c=0; c < ftvs->size(); c++) {
     GCPtr<Type> ftv = Ftv(c)->getType();
-    if(tau->boundInType(ftv) && tau->mbVarAtCpPos(ftv)) {
-      ftv->flags |= TY_COERCE;
-    }
+    ftv->flags |= TY_COERCE;
   }
-    
+  
+  tau->markSignMbs(false);
+  
+  for(size_t i=0; i < tcc->size(); i++) {
+    GCPtr<Constraint> ct = tcc->Pred(i)->getType();
+    ct->markSignMbs(true);
+  }
+
   GCPtr< CVector< GCPtr<Type> > > newTvs = new CVector < GCPtr<Type> >;
   for(size_t c=0; c < ftvs->size(); c++) {
     GCPtr<Type> ftv = Ftv(c)->getType();
@@ -344,6 +350,10 @@ TypeScheme::normalizeFnTypes(GCPtr<Trail> trail)
   // TY_COERCE flag is not cleared, but it does not matter, because
   // all of these types are substituted within the next adjMaybe call.
   tau->adjMaybe(trail, true, false, true);
+  for(size_t i=0; i < tcc->size(); i++) {
+    GCPtr<Constraint> ct = tcc->Pred(i)->getType();
+    ct->adjMaybe(trail, true, false, true);
+  }
   
   return removed;
 }
@@ -535,9 +545,9 @@ TypeScheme::generalize(std::ostream& errStream,
 			<< std::endl;
     
     
-    bool rem2 = normalizeFnTypes(trail);
+    bool rem2 = normalizeConstruction(trail);
     
-    GEN_DEBUG errStream << "[7] Function Simplification: " 
+    GEN_DEBUG errStream << "[7] Construction Normalization: " 
 			<< asString(Options::debugTvP)
     			<< std::endl;
     

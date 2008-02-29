@@ -655,14 +655,24 @@ Type::determineCCC(GCPtr<Type> t, bool inRefType)
   return cccOK;
 }
 
-bool 
-Type::mbVarAtCpPos(GCPtr<Type> tv, bool cppos)
+
+// Mark significant MB-tvars.
+// Mb-Tvars that need not be preserved semantically are:
+//  (1) at a copy position of a function argument or return type.
+//  (2) at a copy-argument-position of typeclass argument.
+// (1) is detected automatically, for (2) pass cppos-true at start.
+// Actually what this does is an "unmark" on the TY_COERCE flag, not
+// a new mark. The idea is that only generalizable FTVs should be
+// marked this way. So, mark all generalizable TVs with TY_COERCE,
+// and this routine will unmark all those coercions that will alter
+// semantic meaning.
+void 
+Type::markSignMbs(bool cppos)
 {
   GCPtr<Type> t = getType();
-  bool rem = true;
   
   if(t->mark & MARK25)
-    return true;
+    return;
   
   t->mark |= MARK25;  
   
@@ -670,32 +680,24 @@ Type::mbVarAtCpPos(GCPtr<Type> tv, bool cppos)
     
   case ty_tvar:
     {
-      if(t == tv->getType())
-	rem = false;
+      t->flags &= ~TY_COERCE;
       break;
     }
     
   case ty_mbFull:    
   case ty_mbTop:    
     {
-      if(t->Var()->getType() == tv->getType()) {
-	if(!cppos)
-	  rem = false;
-      }
+      if(!cppos)
+	t->Var()->markSignMbs(cppos);
       
-      CHKERR(rem, t->Core()->mbVarAtCpPos(tv, cppos));
+      t->Core()->markSignMbs(cppos);
       break;
     }
 
   case ty_mutable:
-    {
-      CHKERR(rem, t->Base()->mbVarAtCpPos(tv, cppos));
-      break;
-    }
-
   case ty_array:
     {
-      CHKERR(rem, t->Base()->mbVarAtCpPos(tv, cppos));
+      t->Base()->markSignMbs(cppos);
       break;
     }
     
@@ -703,28 +705,28 @@ Type::mbVarAtCpPos(GCPtr<Type> tv, bool cppos)
   case ty_ref:
   case ty_byref:
     {
-      CHKERR(rem, t->Base()->mbVarAtCpPos(tv, false));
+      t->Base()->markSignMbs(false);
       break;
     }
 
   case ty_fn:
     {
-      CHKERR(rem, t->Args()->mbVarAtCpPos(tv, true));
-      CHKERR(rem, t->Ret()->mbVarAtCpPos(tv, true));
+      t->Args()->markSignMbs(true);
+      t->Ret()->markSignMbs(true);
       break;
     }    
     
   case ty_fnarg:
     {
       for(size_t i=0; i < t->components->size(); i++)
-	CHKERR(rem, t->CompType(i)->mbVarAtCpPos(tv, true));
+	t->CompType(i)->markSignMbs(true);
       break;
     }
     
   case ty_letGather:
     {
       for(size_t i=0; i < t->components->size(); i++)
-	CHKERR(rem, t->CompType(i)->mbVarAtCpPos(tv, cppos));
+	t->CompType(i)->markSignMbs(cppos);
       break;
     }
     
@@ -737,9 +739,9 @@ Type::mbVarAtCpPos(GCPtr<Type> tv, bool cppos)
       for(size_t i=0; i < t->typeArgs->size(); i++) {
 	GCPtr<Type> arg = t->TypeArg(i)->getType();
 	if(t->argCCOK(i))
-	  CHKERR(rem, arg->mbVarAtCpPos(tv, cppos));
+	  t->CompType(i)->markSignMbs(cppos);
 	else
-	  CHKERR(rem, arg->mbVarAtCpPos(tv, false));
+	  t->CompType(i)->markSignMbs(false);
       }
       break;
     }
@@ -751,7 +753,7 @@ Type::mbVarAtCpPos(GCPtr<Type> tv, bool cppos)
     {
       for(size_t i=0; i < t->typeArgs->size(); i++) {
 	GCPtr<Type> arg = t->TypeArg(i)->getType();
-	CHKERR(rem, arg->mbVarAtCpPos(tv, false));
+	t->TypeArg(i)->markSignMbs(false);
       }
       break;
     }
@@ -763,5 +765,5 @@ Type::mbVarAtCpPos(GCPtr<Type> tv, bool cppos)
   }
   
   t->mark &= ~MARK25;
-  return rem;
+  return;
 }
