@@ -74,7 +74,6 @@ Trail::link(GCPtr<Type> from, GCPtr<Type> to)
 void
 Trail::subst(GCPtr<Type> from, GCPtr<Type> to)
 { 
-  // NOT from->isTvar()
   from = from->getType();
   to = to->getType();
 

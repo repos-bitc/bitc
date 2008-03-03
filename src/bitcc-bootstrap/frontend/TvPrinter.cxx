@@ -63,16 +63,15 @@ string
 TvPrinter::newTvName()
 {
   stringstream ss;
-  
-  if(count <= (unsigned long long) ('z' - 'a')) {
-    // Wierd: ss << ('a' + count) did do the right thing !?
-    char c = 'a' + count;
-    ss << pfx << c;
-  }
-  else {
-    ss << pfx << "a" << count;
-  }
+  unsigned long long nchars = 'z' - 'a' + 1;
 
+  char c = 'a' + (count % nchars);
+  ss << pfx << c;
+
+  unsigned long long ndx = count / nchars;
+  if(ndx > 0)
+    ss << ndx;
+  
   count++;
   return ss.str();
 }

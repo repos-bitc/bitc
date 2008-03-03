@@ -202,13 +202,14 @@ static bool
 findComponent(std::ostream& errStream, 
 	      GCPtr<Type> sut, GCPtr<AST> ast, GCPtr<Type> &fct)
 {
+  sut = sut->getType();
   assert(ast->astType == at_select || 
 	 ast->astType == at_sel_ctr || 
 	 ast->astType == at_fqCtr);
   fct = NULL;
 
   if(sut->isUType())
-    sut = obtainFullUnionType(sut);
+    sut = obtainFullUnionType(sut)->getType();
   
   if(sut->components->size() == 0) {
     errStream << ast->loc << ": "
@@ -221,7 +222,7 @@ findComponent(std::ostream& errStream,
   bool valid=false;
   for(size_t i=0; i < sut->components->size(); i++)
     if(sut->CompName(i) == ast->child(1)->s) {
-      fct = sut->CompType(i);	  
+      fct = sut->CompType(i)->getType();	  
       valid = ((sut->CompFlags(i) & COMP_INVALID) == 0);
       break;
     }
@@ -245,7 +246,7 @@ findComponent(std::ostream& errStream,
     return false;
   }
 
-  return fct;
+  return true;
 }
 
 static bool
@@ -3110,11 +3111,11 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
   case at_select:
     {
     /*------------------------------------------------
-                 A(r) = ['a1.. 'am] {... fld:t ... }  
-          tr = r(...) or mutable(r(...)) or 'a!r(...)
-                      A |- e: tr
+              A(r) = ['a1.. 'am] {... fld:t ... }  
+        A |- e: tr     tr' = 'd!r('c1|'b1, ... 'c1|'bm)
+               U(tr = tr')   tf = tr'.fld
           _________________________________________
-                  A |- e.fld: t
+                  A |- e.fld: tf
        ------------------------------------------------*/
 
       // match agt_expr 
@@ -3122,11 +3123,21 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	 - structures: for selecting field
 	 - union values: determining tag (need to convert it to at_sel_ctr)
 	 Note that selection for fqn-naming a union constructor
-	 is already handled by the symbol table  */
+	 is already handled by the symbol resolver pass  */
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
-      
-      GCPtr<Type> t1 = ast->child(0)->symType->getBareType();
+            
+      GCPtr<Type> t = ast->child(0)->symType->getType();
+      GCPtr<Type> t1 = t->getBareType();
+
+//       errStream << "t = " 
+// 		<< t->asString(Options::debugTvP)
+// 		<< std::endl;
+
+//       errStream << "t1 = " 
+// 		<< t1->asString(Options::debugTvP)
+// 		<< std::endl;
+
       if(t1->isUType()) {
 	ast->astType = at_sel_ctr;
 	ast->Flags2 &= ~AST_IS_LOCATION;	
@@ -3144,14 +3155,67 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	errFree = false;
 	break;
       }
+      
+      GCPtr<TypeScheme> stScheme;
+      if(t1->defAst->symType->isULeg() ||
+	 t1->defAst->symType->isException()) 
+	stScheme = t1->defAst->stSigma;
+      else
+	stScheme = t1->defAst->scheme;
+      
+      GCPtr<Type> tr = stScheme->type_instance_copy();
+
+//       errStream << "tr = " 
+// 		<< tr->asString(Options::debugTvP)
+// 		<< std::endl;
+
+      if(tr->isValType())
+	for(size_t i=0; i < tr->typeArgs->size(); i++) {
+	  GCPtr<Type> arg = tr->TypeArg(i)->getType();
+	  if(tr->argCCOK(i))
+	    trail->subst(arg, MBF(newTvar(arg->ast)));
+	}
+      
+//       errStream << "tr' = " 
+// 		<< tr->asString(Options::debugTvP)
+// 		<< std::endl;
+
+      GCPtr<Type> trt = MBT(tr);
+
+//       errStream << "trt = " 
+// 		<< trt->asString(Options::debugTvP)
+// 		<< std::endl;
+     
+      CHKERR(errFree, unify(errStream, trail, ast->child(0), 
+			    t, trt, uflags));
+      
+//       errStream << "Post Unification: "
+// 		<< std::endl
+// 		<< "\tt = "
+// 		<< t->asString(Options::debugTvP)
+// 		<< std::endl
+// 		<< "\ttr = "
+// 		<< trt->asString(Options::debugTvP)
+// 		<< std::endl
+// 		<< "\ttrt = "
+// 		<< trt->asString(Options::debugTvP)
+// 		<< std::endl;
 
       GCPtr<Type> fld;
-      CHKERR(errFree, findComponent(errStream, t1, ast, fld));
+      CHKERR(errFree, findComponent(errStream, tr, ast, fld));
 
+//       errStream << "fld = "
+// 		<< fld->asString(Options::debugTvP)
+// 		<< std::endl;
+      
       if(errFree)
 	ast->symType = fld;
       else
 	ast->symType = new Type(ty_tvar, ast); 
+      
+//       errStream << "type = "
+// 		<< ast->symType->asString(Options::debugTvP)
+// 		<< std::endl;
       
       break;
     }
@@ -3747,7 +3811,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
     {
      /*------------------------------------------------
        A |- e1: t1    A |- e2: t2    U(t1 = (mutable 'a))
-          U(t1 = 'a|'b)    U(t2 = 'c|'b) |-lval e1
+          U(t1 = 'b|'c)    U(t2 = 'd|'c) |-lval e1
        __________________________________________________
                     A |- (set! e1 e2): ()
 
@@ -3755,25 +3819,54 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
        ------------------------------------------------*/
       // match agt_expr
       ast->symType = new Type(ty_unit, ast);
-
+      
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
-
+      
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
+      
 
+//       errStream << "[Start] LHS: " 
+// 		<< ast->child(0)->symType->asString(Options::debugTvP)
+// 		<< std::endl
+// 		<< "RHS: " 
+// 		<< ast->child(1)->symType->asString(Options::debugTvP)
+// 		<< std::endl;
+      
       GCPtr<Type> mTv = new Type(ty_mutable, newTvar(ast->child(0)));
       CHKERR(errFree, unify(errStream, trail, ast->child(0),
 			    ast->child(0)->symType, mTv, uflags));
-
+      
+//       errStream << "[U1] LHS: " 
+// 		<< ast->child(0)->symType->asString(Options::debugTvP)
+// 		<< std::endl
+// 		<< "RHS: " 
+// 		<< ast->child(1)->symType->asString(Options::debugTvP)
+// 		<< std::endl;
+      
       GCPtr<Type> tv = newTvar(ast);
       CHKERR(errFree, unify(errStream, trail, ast->child(0),
 			    ast->child(0)->symType,
 			    MBF(tv), uflags));
+      
+//       errStream << "[U2] LHS: " 
+// 		<< ast->child(0)->symType->asString(Options::debugTvP)
+// 		<< std::endl
+// 		<< "RHS: " 
+// 		<< ast->child(1)->symType->asString(Options::debugTvP)
+// 		<< std::endl;
 
       CHKERR(errFree, unify(errStream, trail, ast->child(1),
 			    ast->child(1)->symType,
 			    MBF(tv), uflags));
+
+//       errStream << "[U3] LHS: " 
+// 		<< ast->child(0)->symType->asString(Options::debugTvP)
+// 		<< std::endl
+// 		<< "RHS: " 
+// 		<< ast->child(1)->symType->asString(Options::debugTvP)
+// 		<< std::endl;
       break;
     }
 

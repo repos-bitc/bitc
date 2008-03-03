@@ -85,7 +85,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
     t = getType();
   else
     t = this;
-
+  
   if(t->pMark >= 2)
     return " ... ";
   else 
@@ -151,7 +151,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
   case ty_kvar:
     {
-      ss << "'k" << t->uniqueID;
+      ss << "'K" << t->uniqueID;
       break;
     }
 
@@ -246,6 +246,8 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   case ty_unionr:
   case ty_uvalv: 
   case ty_uvalr:
+  case ty_uconv: 
+  case ty_uconr:
     {
       if(t->typeArgs->size() == 0)
 	ss << printName(t->myContainer);
@@ -256,26 +258,6 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 	ss << ")";
       }
       
-      break;
-    }
-
-  case ty_uconv: 
-  case ty_uconr:
-    {
-      ss << "(ucon ";
-
-      if(t->typeArgs->size() == 0)
-	ss << printName(t->myContainer);
-      else {
-	ss << "(" << printName(t->myContainer);
-	for(size_t i=0; i < t->typeArgs->size(); i++) 
-	  ss << " " << t->TypeArg(i)->asString(tvP, traverse);
-	
-	ss << ")";
-      }
-      
-      ss << ")";
-     
       break;
     }
 

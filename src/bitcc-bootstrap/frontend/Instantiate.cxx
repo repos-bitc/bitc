@@ -510,7 +510,7 @@ name2fqn(GCPtr<AST> ast)
   case at_sel_ctr:
   case at_select:
     {
-      name2fqn(ast->child(0));      
+      name2fqn(ast->child(0));
 
       // There is *NO* name2fqn of the field in the case of  
       // at_sel_crt or at_fqCtr
@@ -1443,7 +1443,7 @@ UocInfo::doInstantiate(ostream &errStream,
 		       GCPtr<Type> typ,
 		       bool &errFree,
 		       GCPtr<WorkList<string> > worklist)
-{
+{  
   // INPUT: /ast/ is the *defining* occurence of an identifier whise
   //        definition must be instantiated to the type /typ/
   //
@@ -1459,7 +1459,7 @@ UocInfo::doInstantiate(ostream &errStream,
   // constructors, entire union must be instantiated. Special
   // handling is necessary for methods, etc.
   GCPtr<AST> def = getDefToInstantiate(errStream, this, ast, typ);
- 
+  
   assert((def->astType != at_deftypeclass) || 
 	 (def->astType == at_definstance));
   

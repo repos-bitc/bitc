@@ -81,7 +81,7 @@ Type::toString()
     break;
   
   case ty_kvar:
-      ss << "'k" << uniqueID;
+      ss << "'K" << uniqueID;
       break;
   
   case ty_dummy:

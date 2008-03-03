@@ -24,7 +24,7 @@ can declare that the compiler is "done".
     (not just word type) is admissible. In case of ambiguity, 
     the index must default to word? or be polymorphic if possible?
 
-DEFER UNTIL AFTER RELEASE
+======= LATER =======
 
 1.  [DEFER] (shap) Augment testit infrastructure to support command
     line args so that we can do things like testing showtypes.
@@ -48,7 +48,7 @@ DEFER UNTIL AFTER RELEASE
 
 8.  [DROP] Fix Tail-call analyzer to allow running before hoisting.
 
-===== completed ======
+===== COMPLETED ======
 
 1.  [DONE] Fix mistyping of mutability (see listvec.bitc, use showtypes).
 
@@ -194,7 +194,7 @@ DEFER UNTIL AFTER RELEASE
 
 38.  [DONE] Check all uses of CVector::remove() and correct them.
 
-===== deferred ======
+===== DEFERRED ======
 
 1.  [DEFER] Closure converter needs to properly capture/copy
     appropriate FORALL constraints -- is current hoist okay [we can

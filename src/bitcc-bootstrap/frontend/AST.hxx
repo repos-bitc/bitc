@@ -151,14 +151,6 @@ enum primOp {
 #define APP_NATIVE_FNXN  0x00000400u  
 #define ID_MUT_CLOSED    0x00000800u  
                                       
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
 #define PROCLAIM_IS_INTERNAL 0x00001000u 
                                       
                                       
@@ -536,7 +528,7 @@ public:
   GCPtr<TypeScheme> stSigma; 
                        
                        
-  GCPtr<AST> stCtr;          
+  GCPtr<AST> stCtr;    
                        
 
   

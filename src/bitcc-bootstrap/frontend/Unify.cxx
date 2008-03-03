@@ -195,9 +195,6 @@ UnifyMbCt(std::ostream& errStream, GCPtr<Trail> trail,
 	      << std::endl;
     assert(false);
   }
-
-  if(core == ct) 
-    trail->link(mb, core);
   
   trail->subst(var, ct);
   
@@ -265,8 +262,8 @@ Unify(std::ostream& errStream,
 
       if (t1->isUnifiableMbTop(flags)) {
 	CHKERR(errFree, Unify(errStream, trail, errAst, 
-			      t1->minimizeMutability(), 
-			      t2->minimizeMutability(), flags));
+			      t1->minimizeTopMutability(), 
+			      t2->minimizeTopMutability(), flags));
 	
 	if(errFree)
 	  CHKERR(errFree, UnifyMbCt(errStream, trail, t1, t2));
@@ -275,8 +272,8 @@ Unify(std::ostream& errStream,
       }
       if (t2->isUnifiableMbTop(flags)) {
 	CHKERR(errFree, Unify(errStream, trail, errAst, 
-			      t1->minimizeMutability(), 
-			      t2->minimizeMutability(), flags));
+			      t1->minimizeTopMutability(), 
+			      t2->minimizeTopMutability(), flags));
 	
 	if(errFree)
 	  CHKERR(errFree, UnifyMbCt(errStream, trail, t2, t1));
