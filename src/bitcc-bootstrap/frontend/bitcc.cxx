@@ -81,8 +81,6 @@ bool Options::showMaybes = false;
 bool Options::FQtypes = true;
 bool Options::showAllTccs = false;
 bool Options::showPasses = false;
-bool Options::topMutOnly = false; 
-//infChoice Options::inferenceAlgorithm = inf_hm; 
 bool Options::noPrelude = false; 
 bool Options::dumpAfterMidEnd = false;
 bool Options::dumpTypesAfterMidEnd = false;
@@ -97,6 +95,7 @@ GCPtr<CVector<GCPtr<Path> > > Options::libPath;
 bool Options::Wall = false;
 bool Options::nogc = false;
 GCPtr<TvPrinter> Options::debugTvP = new TvPrinter;
+bool Options::heuristicInference = false;
 
 #define LOPT_SHOWLEX      257   /* Show tokens */
 #define LOPT_SHOWPARSE    258   /* Show parse */
@@ -115,12 +114,12 @@ GCPtr<TvPrinter> Options::debugTvP = new TvPrinter;
 #define LOPT_PPDECORATE   271   /* Decorate pretty printing with types */
 #define LOPT_SHOW_MAYBES  272   /* Show all maybe wrapper types, hints */
 #define LOPT_SHOW_TYPES   273   /* Dump types a particular uoc only */
-#define LOPT_TOP_MUT      274   /* Top-level mutability compatibility only */
-#define LOPT_EQ_INFER     275   /* Equational (Complete) Type Inference */
-#define LOPT_XML_TYPES    276   /* Dump XML types */
-#define LOPT_NOGC         277   /* NO GC mode */
-#define LOPT_NOPRELUDE    278   /* Don't process prelude */
-#define LOPT_DBG_TVARS    279   /* Show globally unqiue tvar naming */
+#define LOPT_EQ_INFER     274   /* Equational (Complete) Type Inference */
+#define LOPT_XML_TYPES    275   /* Dump XML types */
+#define LOPT_NOGC         276   /* NO GC mode */
+#define LOPT_NOPRELUDE    277   /* Don't process prelude */
+#define LOPT_DBG_TVARS    278   /* Show globally unqiue tvar naming */
+#define LOPT_HEURISTIC    279   /* Use Heuristic Inference */
 
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
@@ -130,7 +129,6 @@ struct option longopts[] = {
   { "free-advice",          0,  0, LOPT_ADVISORY },
   { "full-qual-types",      0,  0, LOPT_FQ_TYPES },
   { "help",                 0,  0, 'h' },
-  { "topmutonly",           0,  0, LOPT_TOP_MUT },
   { "eqinfer",              0,  0, LOPT_EQ_INFER },
   { "nostdinc",             0,  0, LOPT_NOSTDINC },
   { "nostdlib",             0,  0, LOPT_NOSTDLIB },
@@ -148,6 +146,7 @@ struct option longopts[] = {
   { "stopafter",            1,  0, LOPT_STOPAFTER },
   { "no-gc",                0,  0, LOPT_NOGC },
   { "no-prelude",           0,  0, LOPT_NOPRELUDE },
+  { "heuristic-inf",        0,  0, LOPT_HEURISTIC },
   { "version",              0,  0, 'V' },
 #if 0
   /* Options that have short-form equivalents: */
@@ -287,14 +286,14 @@ main(int argc, char *argv[])
       Options::noPrelude = true;
       break;
 
+    case LOPT_HEURISTIC:
+      Options::heuristicInference=true;
+      break;
+
     case LOPT_EQ_INFER:
       //Options::inferenceAlgorithm = inf_eq;
       // FIX: TEMPORARY
       //UocInfo::passInfo[pn_typeCheck].stopAfter = true;
-      break;
-
-    case LOPT_TOP_MUT:
-      Options::topMutOnly = true;
       break;
 
     case LOPT_SHOWPASSNMS:

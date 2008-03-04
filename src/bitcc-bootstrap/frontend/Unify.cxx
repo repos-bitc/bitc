@@ -71,8 +71,9 @@ typeError(std::ostream& errStream,
 	    << ", Obtained " << t2->asString(NULL)
 	    << std::endl;
   
-  if(errStream == std::cerr)
-    errStream << "Real Error!" << std::endl;
+  //   if(errStream == std::cerr)
+  //     errStream << "Real Error!" << std::endl;
+
   // MUST always return false.
   return false;
 }

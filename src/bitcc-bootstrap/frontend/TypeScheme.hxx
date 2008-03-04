@@ -50,7 +50,8 @@
 #include "Typeclass.hxx"
 #include "INOstream.hxx"
 
-enum GeneralizeMode {gen_instance, gen_top, gen_local};
+enum GeneralizeMode {gen_instance=0, gen_top=1, gen_local=2, 
+		     gen_Hinstance=3, gen_Htop=4, gen_Hlocal=5};
 
 struct TypeScheme : public Countable {
   

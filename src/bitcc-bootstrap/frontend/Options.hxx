@@ -45,8 +45,6 @@
 #include "Special.hxx"
 #include "TvPrinter.hxx"
 
-//enum infChoice {inf_hm, inf_eq};
-
 /* Flags set from command line option */
 struct Options {
   static bool showParse;
@@ -64,10 +62,6 @@ struct Options {
   static bool showPasses;
   static bool ppFQNS;
   static bool ppDecorate;
-  // Use top-level mutability compatibility only, as opposed to full
-  // copy-compatibility. 
-  static bool topMutOnly; 
-  //static infChoice inferenceAlgorithm; 
   static bool noPrelude;
   static bool dumpAfterMidEnd;
   static bool dumpTypesAfterMidEnd;
@@ -80,6 +74,7 @@ struct Options {
   static bool Wall; // All Warnings are errors.
   static bool nogc; // no garbage collection mode
   static GCPtr<TvPrinter> debugTvP;
+  static bool heuristicInference;
 };
 
 #endif /* OPTIONS_HXX */

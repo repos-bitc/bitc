@@ -19,7 +19,7 @@
 ;;   - Neither the names of the copyright holders nor the names of any
 ;;     of any contributors may be used to endorse or promote products
 ;;     derived from this software without specific prior written
-;;     permission. 
+;;\     permission. 
 ;;
 ;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 ;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -42,5 +42,5 @@
 (define anIntNil (cons 10:int32 anil))
 (define aBoolNil (cons #t anil))
 (define main.main:(fn ((vector string)) int32)
-  (lambda (argvec) 
+  (lambda (argvec)
     anIntNil aBoolNil 0))

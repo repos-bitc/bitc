@@ -427,6 +427,49 @@ TypeScheme::normalizeConstruction(GCPtr<Trail> trail)
 
  *********************************************************/
 
+enum GenSteps {
+  gs_fixAll=0,
+  gs_solve=1,
+  gs_pcst=2,
+  gs_fixTop=3,
+  gs_valRes=4,
+  gs_genFtvs=5,
+  gs_ctrNorm=6,
+  gs_fnNorm=7,
+  gs_dummy=8,
+  gs_migrate=9,
+  gs_ambgCheck=10};
+
+// 0     1      2      3       4    5     6       7       8      9    10
+//fAll,  Solve, PCST,  fTop,  VRes, Gen, CtNorm, FnNorm, Dummy, Mig, Ambg
+
+static bool genSteps[6][11] = {
+  /////////////////////////   COMPLETE INFERENCE  ////////////////////
+// Case gen_instance[0]
+//fAll,  Solve, PCST,  fTop,  VRes, Gen, CtNorm, FnNorm, Dummy, Mig, Ambg
+  {false, false, false, false, true, true, false, false,  false, true, true},
+// Case gen_top [1]
+//fAll,  Solve, PCST,  fTop,  VRes, Gen, CtNorm, FnNorm, Dummy, Mig, Ambg
+  {false, true, true,  true, true, true, true,   true,   true, true, true},
+// Case gen_local [2]
+//fAll,  Solve, PCST,  fTop,  VRes, Gen, CtNorm, FnNorm, Dummy, Mig, Ambg
+  {false, true, true,  false, true, true, true,  false,  false, true, true},
+
+  /////////////////////////   HEURISTIC INFERENCE  ////////////////////
+// Case gen_instance[3]
+//fAll,  Solve, PCST,  fTop,  VRes, Gen, CtNorm, FnNorm, Dummy, Mig, Ambg
+  {true, false, false, false, true, true, false, false,  false, true, true},
+// Case gen_top [4]
+//fAll,  Solve, PCST,  fTop,  VRes, Gen, CtNorm, FnNorm, Dummy, Mig, Ambg
+  {true, true,  false, false, true, true, true,  true,   true,  true, true},
+// Case gen_local [5]
+//fAll,  Solve, PCST,  fTop,  VRes, Gen, CtNorm, FnNorm, Dummy, Mig, Ambg
+  {true, true,  false, false, true, true, true,  false,  false, true, true},
+};
+
+#define GEN_STEP(m,s) if(genSteps[m][s])
+#define GEN_STEP2(m,s1,s2) if(genSteps[m][s1] || genSteps[m][s2])
+
 bool
 TypeScheme::generalize(std::ostream& errStream, 
 		       LexLoc &errLoc,
@@ -436,29 +479,62 @@ TypeScheme::generalize(std::ostream& errStream,
 		       GCPtr<const AST> expr, 
 		       GCPtr<TCConstraints> parentTCC,
 		       GCPtr<Trail> trail,
-		       GeneralizeMode gen_mode)
+		       GeneralizeMode mode)
 {
-  bool errFree = true;
+  bool errFree = true;  
+  bool exprExpansive=false;
+  bool typExpansive=false;
+  bool expansive=false;
+  bool rem1=false;
+  bool rem2=false;
 
-  GEN_DEBUG_TL if(gen_mode == gen_top)
-    gen_mode = gen_local;
-  
-  GEN_DEBUG errStream << "[0] To Generalize " 
+  GEN_DEBUG errStream << "To Generalize " 
 		      << asString(Options::debugTvP)
 		      << " for expression "
 		      << expr->asString() 
 		      << std::endl;
+  
+  GEN_DEBUG_TL if(mode == gen_top)
+    mode = gen_local;
+  
+  if(Options::heuristicInference) {
+    switch(mode) {
+    case gen_instance:
+      mode = gen_Hinstance;
+      break;
+    case gen_top:
+      mode = gen_Htop;
+      break;
+    case gen_local:
+      mode = gen_Hlocal;
+      break;
+    default:
+      assert(false);
+      break;
+    }
+  }
+  
+  // Step 0: Heiristic Inference
+  GEN_STEP(mode, gs_fixAll) {
+    tau->adjMaybe(trail, false, true);
 
-  if(gen_mode != gen_instance) {
-    // Step 1
+    GEN_DEBUG errStream << "[0] Heuristic Adjustment " 
+			<< asString(Options::debugTvP)
+			<< std::endl;
+  }
+
+  // Step 1
+  GEN_STEP(mode, gs_solve) {
     CHKERR(errFree, solvePredicates(errStream, errLoc, 
 				    instEnv, trail)); 
     
     GEN_DEBUG errStream << "[1] Solve: " 
 			<< asString(Options::debugTvP)
 			<< std::endl;
-    
-    // Step 2
+  }
+
+  // Step 2
+  GEN_STEP(mode, gs_pcst) {
     if(!tau->isDeepMut() && !tau->isDeepImmut()) {
       GCPtr<Type> pcst = new Constraint(ty_pcst, tau->ast); 
       pcst->components->append(new comp(new Type(ty_kvar, tau->ast)));
@@ -473,8 +549,8 @@ TypeScheme::generalize(std::ostream& errStream,
     }
   }
 
-  if(gen_mode == gen_top) {
-    // Step 3
+  // Step 3
+  GEN_STEP(mode, gs_fixTop) {
     tau->adjMaybe(trail, false, true);
 
     bool cleared = false;
@@ -520,82 +596,100 @@ TypeScheme::generalize(std::ostream& errStream,
 			<< std::endl;
   }
   
-   
   // Step 4
-  bool exprExpansive = isExpansive(errStream, gamma, expr);
-  bool typExpansive = isExpansive(errStream, gamma, tau);
-  bool expansive = exprExpansive || typExpansive;
+  GEN_STEP(mode, gs_valRes) {
+    exprExpansive = isExpansive(errStream, gamma, expr);
+    typExpansive = isExpansive(errStream, gamma, tau);
+    expansive = exprExpansive || typExpansive;
+  }
 
   // Step 5
-  if(!expansive)
-    collectftvs(gamma);
-  
-  GEN_DEBUG errStream << "[5] Generalize: " 
-		      << ((expansive) ? " {Expansive} " : " {Value} ")
-		      << asString(Options::debugTvP)
-		      << std::endl;    
+  GEN_STEP(mode, gs_genFtvs) {
+    if(!expansive)
+      collectftvs(gamma);
+    
+    GEN_DEBUG errStream << "[5] Generalize: " 
+			<< ((expansive) ? " {Expansive} " : " {Value} ")
+			<< asString(Options::debugTvP)
+			<< std::endl;    
+  }
   
   // Step 6
-  if(!expansive && gen_mode != gen_instance) {
-    bool rem1 = removeUnInstFtvs();
+  GEN_STEP(mode, gs_ctrNorm) {
+    if(!expansive) {
+      rem1 = removeUnInstFtvs();
     
-    GEN_DEBUG errStream << "[6] Remove Uninst-Ftvs: " 
-			<< asString(Options::debugTvP)
-			<< std::endl;
-    
-    
-    bool rem2 = normalizeConstruction(trail);
-    
-    GEN_DEBUG errStream << "[7] Construction Normalization: " 
-			<< asString(Options::debugTvP)
-    			<< std::endl;
-    
+      GEN_DEBUG errStream << "[6] Remove Uninst-Ftvs: " 
+			  << asString(Options::debugTvP)
+			  << std::endl;
+    }
+  }
+  
+  // Step 7
+  GEN_STEP(mode, gs_fnNorm) {
+    if(!expansive) {
+      rem2 = normalizeConstruction(trail);
+      
+      GEN_DEBUG errStream << "[7] Construction Normalization: " 
+			  << asString(Options::debugTvP)
+			  << std::endl;
+    }
+  }
+  
+  GEN_STEP2(mode, gs_ctrNorm, gs_fnNorm) {
     if(rem1 || rem2)
       CHKERR(errFree, solvePredicates(errStream, errLoc, 
 				      instEnv, trail)); 
     
     GEN_DEBUG errStream << "[7#] Re-Solve: " 
 			<< asString(Options::debugTvP)
-    			<< std::endl;
+			<< std::endl;
   }
   
   // Step 8
-  if ((gen_mode == gen_top) && expansive) {
-    collectftvs(gamma);
+  GEN_STEP(mode, gs_dummy) {
+    if (expansive) {
+      collectftvs(gamma);
 
-    if(ftvs->size()) {
-      GCPtr< CVector< GCPtr<Type> > > dummys = ftvs;
-      ftvs = new CVector< GCPtr<Type> >;
-      
-      for(size_t i=0; i < dummys->size(); i++) {
-	GCPtr<Type> ftv = dummys->elem(i)->getType();
-	ftv->link = new Type(ty_dummy, ftv->ast);
+      if(ftvs->size()) {
+	GCPtr< CVector< GCPtr<Type> > > dummys = ftvs;
+	ftvs = new CVector< GCPtr<Type> >;
+	
+	for(size_t i=0; i < dummys->size(); i++) {
+	  GCPtr<Type> ftv = dummys->elem(i)->getType();
+	  ftv->link = new Type(ty_dummy, ftv->ast);
+	}
+	
+	errStream << errLoc << ": WARNING: The type of"
+		  << " this toplevel definition "
+		  << expr->asString() << " "
+		  << " cannot be fully generalized"
+		  << " due to the value restriction."
+		  << " The type obtained is: "
+		  << tau->asString() << "."
+		  << std::endl;    
       }
-      
-      errStream << errLoc << ": WARNING: The type of"
-		<< " this toplevel definition "
-		<< expr->asString() << " "
-		<< " cannot be fully generalized"
-		<< " due to the value restriction."
-		<< " The type obtained is: "
-		<< tau->asString() << "."
-		<< std::endl;    
     }
   }
 
   // Step 9
-  migratePredicates(parentTCC);
-  GEN_DEBUG errStream << "[9] Migrated Constraints: " 
-		      << asString(Options::debugTvP)
-		      << std::endl;
+  GEN_STEP(mode, gs_migrate) {
+    migratePredicates(parentTCC);
+    GEN_DEBUG errStream << "[9] Migrated Constraints: " 
+			<< asString(Options::debugTvP)
+			<< std::endl;
+  }
 
   // Step 10
-  CHKERR(errFree, checkAmbiguity(errStream, errLoc));
+  GEN_STEP(mode, gs_ambgCheck) {
+    CHKERR(errFree, checkAmbiguity(errStream, errLoc));
+    
+    GEN_DEBUG errStream << "FINAL: " 
+			<< asString(Options::debugTvP)
+			<< std::endl 
+			<< std::endl;
+  }
   
-  GEN_DEBUG errStream << "FINAL: " 
-		      << asString(Options::debugTvP)
-		      << std::endl 
-		      << std::endl;
   return errFree;
 }
 
