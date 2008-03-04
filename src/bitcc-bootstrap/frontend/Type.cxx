@@ -209,6 +209,14 @@ Type::getType()
       t = in;
   }
 
+  if(t->kind == ty_mbFull || t->kind == ty_mbTop) {
+    GCPtr<Type> var = t->Var()->getTypePrim();
+    GCPtr<Type> core = t->Core()->getTypePrim();
+    
+    if (var == core)
+      t = core;
+  }
+
   return t;
 }
 

@@ -229,6 +229,7 @@
     __< __> __<= __>=)
   (definstance (Ord uint64) 
     __< __> __<= __>=)
+
   (definstance (Ord word) 
     __< __> __<= __>=)
 

@@ -413,7 +413,6 @@ TypeScheme::normalizeConstruction(GCPtr<Trail> trail)
       If any variables were removed due to (6) or (7), 
       then re-solve all consrtainsts .
 
-
    8) If exp, and if generalizing at top-level, instantiate
       free variables to dummy types and issue warnings
 

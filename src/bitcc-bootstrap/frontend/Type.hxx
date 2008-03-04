@@ -231,7 +231,7 @@ public:
   // variable deeply.  This "variable" is not subject to
   // generalization.  
   GCPtr<ArrLen> arrlen;	// Length in the case of an array type
-
+  
   size_t    Isize;		// size in fixint
   GCPtr<CVector<GCPtr<Type> > > fnDeps; // Functional Dependencies (for 
                                    //   Type classes only).
@@ -351,6 +351,14 @@ public:
   // and this routine will unmark all those coercions that will alter
   // semantic meaning.
   void markSignMbs(bool cppos=false);
+  
+  // Due to the above normalization, instantiated function types will
+  // not be of the proper template (always with maybe types in
+  // argment/return position. This will be require fixup at
+  // instantiation. Note that the types of non-generalizable functions
+  // are not affected by this fixup as they will not be removed due to
+  // normalization in the first place,
+  void fixupFnTypes();
 
   /* Produce Type ty_union[rv] from ty_ucon[rv] or ty_uval[rv]
      ONLY typeArgs are polylated */
@@ -605,6 +613,7 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
 #define MARK23  0x0400000u
 #define MARK24  0x0800000u
 #define MARK25  0x1000000u
+#define MARK26  0x2000000u
 
 /* Flags used by Type-inference engine. 
    These flags are different from the Unifier's flags */

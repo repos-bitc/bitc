@@ -1,6 +1,10 @@
 (provide main bitc.main)
 
-(define anil nil)
+(import ls bitc.list)
+(define (lnth lst)
+  (if #t
+      (ls.car lst)
+      (lnth (ls.cdr lst))))
 
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec) 0))

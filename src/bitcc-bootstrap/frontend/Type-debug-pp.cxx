@@ -65,7 +65,7 @@ string
 Type::toString()
 {
   stringstream ss;
-
+  
   if(getType() != this)
     return getType()->toString();
 

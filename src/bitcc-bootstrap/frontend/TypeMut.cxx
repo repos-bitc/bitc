@@ -767,3 +767,101 @@ Type::markSignMbs(bool cppos)
   t->mark &= ~MARK25;
   return;
 }
+
+
+// Mark significant MB-tvars.
+// Mb-Tvars that need not be preserved semantically are:
+//  (1) at a copy position of a function argument or return type.
+//  (2) at a copy-argument-position of typeclass argument.
+// (1) is detected automatically, for (2) pass cppos-true at start.
+// Actually what this does is an "unmark" on the TY_COERCE flag, not
+// a new mark. The idea is that only generalizable FTVs should be
+// marked this way. So, mark all generalizable TVs with TY_COERCE,
+// and this routine will unmark all those coercions that will alter
+// semantic meaning.
+
+void
+Type::fixupFnTypes()
+{
+  GCPtr<Type> t = getType();
+  
+  if(t->mark & MARK26)
+    return;
+  
+  t->mark |= MARK26;
+  
+  switch(t->kind) {
+    
+  case ty_mbFull:    
+  case ty_mbTop:    
+    {
+      t->Core()->fixupFnTypes();
+      break;
+    }
+    
+  case ty_mutable:
+  case ty_array:
+  case ty_vector:    
+  case ty_ref:
+  case ty_byref:
+    {
+      t->Base()->fixupFnTypes();
+      break;
+    }
+  
+  case ty_fn:
+    {
+      t->Args()->fixupFnTypes();
+      t->Ret()->fixupFnTypes();
+      GCPtr<Type> ret = t->Ret()->getType();
+      if(ret->kind != ty_mbFull)
+	t->Ret() = MBF(ret);
+      break;
+    }
+
+  case ty_fnarg:
+    {
+      for(size_t i=0; i < t->components->size(); i++) {
+	t->CompType(i)->fixupFnTypes();
+	GCPtr<Type> arg = t->CompType(i)->getType();
+	if((t->CompFlags(i) & COMP_BYREF) == 0) {
+	  if(arg->kind != ty_mbFull)
+	    t->CompType(i) = MBF(arg);
+	}
+      }
+      
+      break;
+    }
+  
+  case ty_structv:
+  case ty_unionv: 
+  case ty_uvalv: 
+  case ty_uconv: 
+  case ty_reprv:
+  case ty_structr:
+  case ty_unionr: 
+  case ty_uvalr: 
+  case ty_uconr: 
+  case ty_reprr:
+    {
+      for(size_t i=0; i < t->typeArgs->size(); i++)
+	t->TypeArg(i)->fixupFnTypes();
+      
+      break;
+    }
+
+  case ty_letGather:
+    {
+      for(size_t i=0; i < t->components->size(); i++) 
+	t->CompType(i)->fixupFnTypes();
+      break;
+    }
+    
+  default:
+    {
+      break;
+    }
+  }
+  
+  t->mark &= ~MARK26;
+}

@@ -171,10 +171,14 @@ Instantiate(GCPtr<AST> ast, GCPtr<TypeScheme> sigma)
   // The ID_IS_CTOR test alone does not capture union type
   // definitions. It is only set for the structre constructor, each
   // constructor of a union definition and excception constructors.
+  GCPtr<TypeScheme> ins = NULL;
   if(ast->Flags & ID_ENV_COPY) 
-    return sigma->ts_instance_copy();
+    ins = sigma->ts_instance_copy();
   else
-    return sigma->ts_instance();
+    ins = sigma->ts_instance();
+  
+  ins->tau->fixupFnTypes();
+  return ins;
 }
 
 static bool
@@ -3130,14 +3134,6 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Type> t = ast->child(0)->symType->getType();
       GCPtr<Type> t1 = t->getBareType();
 
-//       errStream << "t = " 
-// 		<< t->asString(Options::debugTvP)
-// 		<< std::endl;
-
-//       errStream << "t1 = " 
-// 		<< t1->asString(Options::debugTvP)
-// 		<< std::endl;
-
       if(t1->isUType()) {
 	ast->astType = at_sel_ctr;
 	ast->Flags2 &= ~AST_IS_LOCATION;	
@@ -3165,10 +3161,6 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       GCPtr<Type> tr = stScheme->type_instance_copy();
 
-//       errStream << "tr = " 
-// 		<< tr->asString(Options::debugTvP)
-// 		<< std::endl;
-
       if(tr->isValType())
 	for(size_t i=0; i < tr->typeArgs->size(); i++) {
 	  GCPtr<Type> arg = tr->TypeArg(i)->getType();
@@ -3176,46 +3168,18 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	    trail->subst(arg, MBF(newTvar(arg->ast)));
 	}
       
-//       errStream << "tr' = " 
-// 		<< tr->asString(Options::debugTvP)
-// 		<< std::endl;
-
       GCPtr<Type> trt = MBT(tr);
 
-//       errStream << "trt = " 
-// 		<< trt->asString(Options::debugTvP)
-// 		<< std::endl;
-     
       CHKERR(errFree, unify(errStream, trail, ast->child(0), 
 			    t, trt, uflags));
       
-//       errStream << "Post Unification: "
-// 		<< std::endl
-// 		<< "\tt = "
-// 		<< t->asString(Options::debugTvP)
-// 		<< std::endl
-// 		<< "\ttr = "
-// 		<< trt->asString(Options::debugTvP)
-// 		<< std::endl
-// 		<< "\ttrt = "
-// 		<< trt->asString(Options::debugTvP)
-// 		<< std::endl;
-
       GCPtr<Type> fld;
       CHKERR(errFree, findComponent(errStream, tr, ast, fld));
 
-//       errStream << "fld = "
-// 		<< fld->asString(Options::debugTvP)
-// 		<< std::endl;
-      
       if(errFree)
 	ast->symType = fld;
       else
 	ast->symType = new Type(ty_tvar, ast); 
-      
-//       errStream << "type = "
-// 		<< ast->symType->asString(Options::debugTvP)
-// 		<< std::endl;
       
       break;
     }
@@ -3826,47 +3790,17 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
       
-
-//       errStream << "[Start] LHS: " 
-// 		<< ast->child(0)->symType->asString(Options::debugTvP)
-// 		<< std::endl
-// 		<< "RHS: " 
-// 		<< ast->child(1)->symType->asString(Options::debugTvP)
-// 		<< std::endl;
-      
       GCPtr<Type> mTv = new Type(ty_mutable, newTvar(ast->child(0)));
       CHKERR(errFree, unify(errStream, trail, ast->child(0),
 			    ast->child(0)->symType, mTv, uflags));
-      
-//       errStream << "[U1] LHS: " 
-// 		<< ast->child(0)->symType->asString(Options::debugTvP)
-// 		<< std::endl
-// 		<< "RHS: " 
-// 		<< ast->child(1)->symType->asString(Options::debugTvP)
-// 		<< std::endl;
-      
       GCPtr<Type> tv = newTvar(ast);
       CHKERR(errFree, unify(errStream, trail, ast->child(0),
 			    ast->child(0)->symType,
 			    MBF(tv), uflags));
-      
-//       errStream << "[U2] LHS: " 
-// 		<< ast->child(0)->symType->asString(Options::debugTvP)
-// 		<< std::endl
-// 		<< "RHS: " 
-// 		<< ast->child(1)->symType->asString(Options::debugTvP)
-// 		<< std::endl;
 
       CHKERR(errFree, unify(errStream, trail, ast->child(1),
 			    ast->child(1)->symType,
 			    MBF(tv), uflags));
-
-//       errStream << "[U3] LHS: " 
-// 		<< ast->child(0)->symType->asString(Options::debugTvP)
-// 		<< std::endl
-// 		<< "RHS: " 
-// 		<< ast->child(1)->symType->asString(Options::debugTvP)
-// 		<< std::endl;
       break;
     }
 
