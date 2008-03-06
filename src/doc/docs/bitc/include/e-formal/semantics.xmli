@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <sect1 id="opsem"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <title>Dynamic Semantics of <btypes:TYPE><language/></btypes:TYPE></title>
+  <btypes:TYPE>        
+    <grammar>
+      <bnf desc="Locations">
+	<loc/>
+	<alternatives>
+	  <sLoc/>
+	  <hLoc/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Stack Locations"> 
+	<sLoc/>
+	<alternatives etc="yes">
+	  <sLoc num="1"/>
+	  <sLoc num="2"/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Heap Locations">
+	<hLoc/>
+	<alternatives etc="yes">
+	  <hLoc num="1"/>
+	  <hLoc num="2"/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Stack">
+	<stack/>
+	<alternatives>
+	  <Empty/>
+	  <extend>
+	    <stack/>
+	    <mapping>
+	      <sLoc/>
+	      <aVal/>
+	    </mapping>
+	  </extend>
+	</alternatives>
+      </bnf>
+      <bnf desc="Heap">
+	<heap/>
+	<alternatives>
+	  <Empty/>
+	  <extend>
+	    <heap/>
+	    <mapping>
+	      <hLoc/>
+	      <aVal/>
+	    </mapping>
+	  </extend>
+	</alternatives>
+      </bnf>
+      <bnf desc="lvalues">
+	<lVal/>
+	<alternatives>
+	  <lVal stack="yes"/>
+	  <lVal heap="yes"/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Stack lvalues">
+	<lVal stack="yes"/>
+	<alternatives>
+	  <sLoc/>
+	  <fst>
+	    <lVal stack="yes"/>
+	  </fst>
+	  <snd>
+	    <lVal stack="yes"/>
+	  </snd>
+	</alternatives>
+      </bnf>
+      <bnf desc="Heap lvalues">
+	<lVal heap="yes"/>
+	<alternatives>
+	  <deref>
+	    <hLoc/>
+	  </deref>
+	  <fst>
+	    <lVal heap="yes"/>
+	  </fst>
+	  <snd>
+	    <lVal heap="yes"/>
+	  </snd>
+	</alternatives>
+      </bnf>
+      <bnf desc="Values">
+	<aVal/>
+	<alternatives>
+	  <text content="..."/>
+	  <hLoc/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Expressions">
+	<aExpr/>
+	<alternatives>
+	  <text content="..."/>
+	  <sLoc/>
+	  <hLoc/>
+	</alternatives>
+      </bnf>
+    </grammar>
+  </btypes:TYPE>
+  <p>
+    The Operational semantics rules are shown in Figure&nbsp;<xref
+      ref="dyn_sem_horz"/>. The standard evaluation relation for
+    expressions is denoted by <btypes:TYPE><evalOp/></btypes:TYPE>,
+    and evaluation in a Lvalue context is given by the
+    <btypes:TYPE><levalOp/></btypes:TYPE> relation.
+  </p>
+  </sect1>

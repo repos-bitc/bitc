@@ -62,16 +62,16 @@
       associated proofs.
     </p>
   </sect1>
-  <xi:include href="include/c-formal/lang.xmli"/>
-  <xi:include href="include/c-formal/semantics.xmli"/>
-  <xi:include href="include/c-formal/opsem.xmli"/>
-  <xi:include href="include/c-formal/locsem.xmli"/>
-  <xi:include href="include/c-formal/Msubtype.xmli"/>
-  <xi:include href="include/c-formal/mdecl.xmli"/>
-  <xi:include href="include/c-formal/type_system.xmli"/>
-  <xi:include href="include/c-formal/hy-infer.xmli"/>
-  <xi:include href="include/c-formal/hy-unify.xmli"/>
-  <xi:include href="include/c-formal/equational.xmli"/>
+  <xi:include href="include/e-formal/lang.xmli"/>
+  <xi:include href="include/e-formal/semantics.xmli"/>
+  <xi:include href="include/e-formal/opsem.xmli"/>
+  <xi:include href="include/e-formal/locsem.xmli"/>
+  <xi:include href="include/e-formal/subtype.xmli"/>
+  <xi:include href="include/e-formal/cdecl.xmli"/>
+  <xi:include href="include/e-formal/type_system.xmli"/>
+  <xi:include href="include/e-formal/eq-infer.xmli"/>
+  <xi:include href="include/e-formal/eq-unify.xmli"/>
+  <xi:include href="include/e-formal/equational.xmli"/>
   <nocite ref="sridhar2006plos"/>
   <bibliography>
     <bibentry label="shapBitcSpec2006">

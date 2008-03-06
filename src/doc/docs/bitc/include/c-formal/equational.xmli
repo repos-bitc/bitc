@@ -11,8 +11,8 @@
   </p>
   <btypes:TYPE>        
     <grammar>
-      <bnf desc="Types">
-	<type/>
+      <bnf desc="Base Types">
+	<sType/>
 	<alternatives>
 	  <tvar name="alpha"/>
 	  <unit/>
@@ -24,43 +24,48 @@
 	<alternatives>
 	  <ref><type/></ref>
 	  <mutable><type/></mutable>
+	  <pair><type/><type/></pair>
 	</alternatives>
       </bnfc>
-      <bnf desc="Constr. Type">
-	<aCtype/>
+      <bnf desc="Top-Maybe">
+	<pType/>
 	<alternatives>
-	  <type/>
-	  <ctype>
-	    <type/>
-	    <aCtset/>
-	  </ctype>
+	  <sType/>
+	  <mbpair>
+	    <sType/>
+	    <sType/>
+	  </mbpair>
+	</alternatives>
+      </bnf>
+      <bnf desc="Types">
+	<type/>
+	<alternatives>
+	  <pType/>
+	  <MBPAIR>
+	    <pType/>
+	    <sType/>
+	  </MBPAIR>
 	</alternatives>
       </bnf>
       <bnf desc="Type Scheme">          
 	<aTS/>
 	<alternatives>
-	  <aCtype/>
+	  <ctype>
+	    <type/>
+	    <aCtset/>
+	  </ctype>
 	  <forall>                    
-	    <tvar name="alpha"/>
-	    <aTS/>
+ 	    <tvars name="alpha"/>
+	    <ctype>
+	      <type/>
+	      <aCtset/>
+	    </ctype>
 	  </forall>
 	</alternatives>
       </bnf>
       <bnf desc="Constraints">
 	<constraint/>
 	<alternatives>
-	  <eq>
-	    <type/>
-	    <type/>
-	  </eq>
-	  <ceq>
-	    <type/>
-	    <type/> 
-	  </ceq>
-	  <Tsub>
-	    <type/>
-	    <type/> 
-	  </Tsub>
 	  <Pcst>
 	    <lKind/>
 	    <type/>
@@ -185,48 +190,6 @@
 	  </collection>
 	</DBrac>
       </leadsto>
-      <br/>
-      <leadsto>
-	<DBrac>
-	  <eq>
-	    <type num="1"/>
-	    <type num="2"/>
-	  </eq>
-	</DBrac>
-	<DBrac>
-	  <collection>
-	    <Tsub>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </Tsub>
-	    <Tsub>
-	      <type num="2"/>
-	      <type num="1"/>
-	    </Tsub>	      
-	  </collection>
-	</DBrac>
-      </leadsto>	
-      <br/>
-      <leadsto>
-	<DBrac>
-	  <ceq via="alpha">
-	    <type num="1"/>
-	    <type num="2"/>
-	  </ceq>
-	</DBrac>
-	<DBrac>
-	  <collection>
-	    <Tsub>
-	      <type num="1"/>
-	      <tvar name="alpha"/>
-	    </Tsub>	      
-	    <Tsub>
-	      <type num="2"/>
-	      <tvar name="alpha"/>
-	    </Tsub>
-	  </collection>
-	</DBrac>
-      </leadsto>		
       <br/>
       <leadsto>
 	<DBrac>
@@ -582,23 +545,6 @@
 	  <br/>
 	  <eq>
 	    <ftvs>
-	      <Tsub>
-		<type num="1"/>
-		<type num="2"/>
-	      </Tsub>
-	    </ftvs>
-	    <unin>
-	      <ftvs>
-		<type num="1"/>
-	      </ftvs>
-	      <ftvs>
-		<type num="2"/>
-	      </ftvs>
-	    </unin>
-	  </eq>
-	  <br/>
-	  <eq>
-	    <ftvs>
 	      <Pcst>
 		<lKind/>
 		<type num="1"/>
@@ -679,303 +625,6 @@
       </p>
     </example>
   </definition>
-  <definition id="stvs-eq">
-    <title>Shallow Type Variables</title>
-    <p>
-      The set of type variables embedded in a type up to a 
-      reference/function boundary. 
-    </p>
-    <p>
-      <btypes:TYPE>
-	<fnxn name="stv">
-	  <tvar name="alpha"/>
-	  <set>
-	    <tvar name="alpha"/>
-	  </set>
-	</fnxn>
-	<br/>
-	<fnxn name="stv">
-	  <unit/>
-	  <Empty/>
-	</fnxn>
-	<br/>
-	<fnxn name="stv">
-	  <bool/>
-	  <Empty/>
-	</fnxn>
-	<br/>
-	<fnxn name="stv">
-	  <fn>
-	    <type/>
-	    <type dash="'"/>
-	  </fn>
-	  <Empty/>
-	</fnxn>          
-	<br/>
-	<fnxn name="stv">
-	  <ref>
-	    <type/>
-	  </ref>
-	  <Empty/>
-	</fnxn>
-	<br/>
-	<fnxn name="stv">
-	  <mutable>
-	    <type/>
-	  </mutable>
-	  <pred name="stv">
-	    <type/>
-	  </pred>
-	</fnxn>
-	<br/>
-      </btypes:TYPE>
-    </p>
-  </definition>    
-  <definition id="dtvs-eq">
-    <title>Deep Type Variables</title>
-    <p>
-      The set of type variables embedded in a type up to a 
-      function boundary. 
-    </p>
-    <p>        
-      <btypes:TYPE>
-	<fnxn name="dtv">
-	  <tvar name="alpha"/>
-	  <set>
-	    <tvar name="alpha"/>
-	  </set>
-	</fnxn>
-	<br/>
-	<fnxn name="dtv">
-	  <unit/>
-	  <Empty/>
-	</fnxn>
-	<br/>
-	<fnxn name="dtv">
-	  <bool/>
-	  <Empty/>
-	</fnxn>
-	<br/>
-	<fnxn name="dtv">
-	  <fn>
-	    <type/>
-	    <type dash="'"/>
-	  </fn>
-	  <Empty/>
-	</fnxn>          
-	<br/>
-	<fnxn name="dtv">
-	  <mutable>
-	    <type/>
-	  </mutable>
-	  <pred name="dtv">
-	    <type/>
-	  </pred>		
-	</fnxn>
-	<br/>
-	<fnxn name="dtv">
-	  <ref>
-	    <type/>
-	  </ref>
-	  <pred name="dtv">
-	    <type/>
-	  </pred>		
-	</fnxn>
-      </btypes:TYPE>
-    </p>
-  </definition>
-  <definition id="TransClose">
-    <title>Transitive Closure of Constraint Sets</title>
-    <p>
-      A closure operation
-      <btypes:TYPE>
-	<TransClose>
-	  <aCtset/> 
-	</TransClose>
-      </btypes:TYPE>
-      on a constraint set 
-      <btypes:TYPE>
-	<aCtset/> 
-      </btypes:TYPE> produces an equivalent set of constraints in
-      which all transitive relationships are explicitely added.
-    </p>
-    <ol>
-      <li>
-	<p>
-	  If
-	  <btypes:TYPE>
-	    <Exists>
-	      <type num="1"/>
-	      <type num="2"/>
-	      <type num="3"/>
-	    </Exists>
-	  </btypes:TYPE> such that
-	  <btypes:TYPE>
-	    <in>
-	      <Tsub>
-		<type num="1"/>
-		<type num="2"/>
-	      </Tsub>
-	      <aCtset/>
-	    </in>
-	  </btypes:TYPE>,
-	  <btypes:TYPE>
-	    <in>
-	      <Tsub>
-		<type num="2"/>
-		<type num="3"/>
-	      </Tsub>
-	      <aCtset/>
-	    </in>
-	  </btypes:TYPE>, and
-	  <btypes:TYPE>
-	    <notin>
-	      <Tsub>
-		<type num="1"/>
-		<type num="3"/>
-	      </Tsub>
-	      <aCtset/>
-	    </notin>
-	  </btypes:TYPE>, then
-	  <btypes:TYPE>
-	    <eq>
-	      <TransClose>
-		<aCtset/> 
-	      </TransClose>
-	      <TransClose>
-		<paren>
-		  <unin>
-		    <set>
-		      <Tsub>
-			<type num="1"/>
-			<type num="3"/>
-		      </Tsub>
-		    </set>                      
-		    <aCtset/>
-		  </unin>
-		</paren>
-	      </TransClose>
-	    </eq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  Otherwise,
-	  <btypes:TYPE>
-	    <eq>
-	      <TransClose>
-		<aCtset/>
-	      </TransClose>
-	      <aCtset/>
-	    </eq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-    </ol>
-  </definition>
-  <p>
-    <leadin>Eager-Unification Based Presentation</leadin>
-  </p>
-  <btypes:TYPE>        
-    <grammar>
-      <bnf desc="Base Types">
-	<sType/>
-	<alternatives>
-	  <tvar name="alpha"/>
-	  <unit/>
-	  <bool/>
-	  <fn M="yes"><type/><type/></fn>                  
-	</alternatives>
-      </bnf>
-      <bnfc desc="">
-	<alternatives>
-	  <ref><type/></ref>
-	  <mutable><type/></mutable>
-	  <pair><type/><type/></pair>
-	</alternatives>
-      </bnfc>
-      <bnf desc="Top-Maybe">
-	<pType/>
-	<alternatives>
-	  <sType/>
-	  <mbpair>
-	    <sType/>
-	    <sType/>
-	  </mbpair>
-	</alternatives>
-      </bnf>
-      <bnf desc="Types">
-	<type/>
-	<alternatives>
-	  <pType/>
-	  <MBPAIR>
-	    <pType/>
-	    <sType/>
-	  </MBPAIR>
-	</alternatives>
-      </bnf>
-      <bnf desc="Type Scheme">          
-	<aTS/>
-	<alternatives>
-	  <ctype>
-	    <type/>
-	    <aCtset/>
-	  </ctype>
-	  <forall>                    
- 	    <tvars name="alpha"/>
-	    <ctype>
-	      <type/>
-	      <aCtset/>
-	    </ctype>
-	  </forall>
-	</alternatives>
-      </bnf>
-      <bnf desc="Constraints">
-	<constraint/>
-	<alternatives>
-	  <Pcst>
-	    <lKind/>
-	    <type/>
-	    <type/>
-	  </Pcst>
-	</alternatives>
-      </bnf>
-      <bnf desc="Constraint Sets">
-	<aCtset/>
-	<alternatives>
-	  <Empty/>
-	  <set>
-	    <plural>
-	      <constraint/>
-	    </plural>
-	  </set>
-	  <unin>
-	    <aCtset/>
-	    <aCtset/>
-	  </unin>
-	</alternatives>            
-      </bnf>
-      <bnf desc="Substitutions">            
-	<aSubMap/>            
-	<alternatives>
-	  <EmptySubst/>
-	  <SubMap>
-	    <tvar name="alpha"/>
-	    <type/>
-	  </SubMap>
-	  <SubMap>
-	    <lKind k="var"/>
-	    <lKind/>
-	  </SubMap>
-	  <compose>
-	    <aSubMap/>
-	    <aSubMap/>
-	  </compose>
-	</alternatives>
-      </bnf>
-    </grammar>
-  </btypes:TYPE>
   <definition id="(Im) Mutability Predicates">      
     <title>(Im)Mutability Predicates -- redefinition</title>      
     <example>

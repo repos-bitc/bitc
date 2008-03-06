@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <sect1 id="language"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <title>The Language <btypes:TYPE><language/></btypes:TYPE> </title>
+  <p>
+    We limit our presentation to a core calculus of BitC called 
+    <btypes:TYPE>
+      <language/>
+    </btypes:TYPE> in the interest of brevity. 
+  </p>
+  <btypes:TYPE>        
+    <grammar>
+      <bnf desc="Identifiers">
+	<id/>
+	<alternatives etc="yes">
+	  <id name="y"/>
+	  <id name="z"/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Values">
+	<aVal/>
+	<alternatives>
+	  <Unit/>
+	  <true/> 
+	  <false/>
+	  <lambda>
+	    <id/>
+	    <aExpr/>
+	  </lambda>
+	  <Pair>
+	    <aVal/>
+	    <aVal/>
+	  </Pair>
+	</alternatives>
+      </bnf>
+      <bnf desc="Expressions">
+	<aExpr/>
+	<alternatives>
+	  <Unit/>
+	  <true/> 
+	  <false/>
+	  <lambda>
+	    <id/>
+	    <aExpr/>
+	  </lambda>
+	  <apply>
+	    <aExpr/>
+	    <aExpr/>
+	  </apply>
+	</alternatives>
+      </bnf>
+      <bnfc desc="">
+	<alternatives>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	  <assign>
+	    <aExpr/>
+	    <aExpr/>
+	  </assign> 
+	  <dup>
+	    <aExpr/>
+	  </dup>
+	  <deref>
+	    <aExpr/>
+	  </deref>
+	</alternatives>
+      </bnfc>
+      <bnfc desc="">
+	<alternatives>
+	  <if>
+	    <aExpr/>
+	    <aExpr/>
+	    <aExpr/>
+	  </if>
+	</alternatives>
+      </bnfc>
+      <bnfc desc="">
+	<alternatives>
+	  <Pair>
+	    <aExpr/>
+	    <aExpr/>
+	  </Pair>
+	  <fst>
+	    <aExpr/>
+	  </fst>
+	  <snd>
+	    <aExpr/>
+	  </snd>
+	</alternatives>
+      </bnfc>
+      <bnfc desc="">
+	<alternatives>
+	  <let kind="k">
+	    <tqExpr optional="yes">
+	      <id/>
+	      <type/>
+	    </tqExpr>
+	    <aExpr/>
+	    <aExpr/>
+	  </let>
+	</alternatives>
+      </bnfc>
+      <bnf desc="Let-kinds">
+	<lKind/>
+	<alternatives>
+	  <text content="-"/>
+	  <lKind k="var"/>
+	  <lKind k="mono"/>
+	  <lKind k="poly"/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Types">
+	<type/>
+	<alternatives>
+	  <tvar name="alpha"/>
+	  <unit/>
+	  <bool/>
+	  <fn><type/><type/></fn>                  
+	</alternatives>                
+      </bnf>
+      <bnfc>
+	<alternatives>
+	  <ref><type/></ref>
+	  <mutable><type/></mutable>
+	  <pair><type/><type/></pair>
+	</alternatives> 
+      </bnfc>
+    </grammar>
+  </btypes:TYPE>
+  <p>
+    The type 
+    <btypes:TYPE>        
+      <ref><type/></ref>
+    </btypes:TYPE> represents a reference / pointer type. It does not
+    entail mutability. The type 
+    <btypes:TYPE>        
+      <mutable><type/></mutable>
+    </btypes:TYPE> represents a mutable type.
+    All the above syntactic forms can be parenthesized without
+    change in meaning. The let-kind ``-'' is a placeholder for the
+    unkinded (input) <progident>let</progident> form.
+    A substitution is of Z for Y in X is written using the standard
+    notation:
+    <btypes:TYPE>
+      <subst>
+	<text content="X"/>
+	<text content="Y"/>
+	<text content="Z"/>          
+      </subst>
+    </btypes:TYPE>.
+  </p>
+  </sect1>

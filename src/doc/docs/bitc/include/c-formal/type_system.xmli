@@ -6,10 +6,10 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
   <title>Static Semantics of <btypes:TYPE><language/></btypes:TYPE></title>
-  <btypes:TYPE>        
+  <btypes:TYPE>       
     <grammar>
-      <bnf desc="Types">
-	<type/>
+      <bnf desc="Unct. Types">
+	<sType/>
 	<alternatives>
 	  <tvar name="alpha"/>
 	  <unit/>
@@ -24,54 +24,26 @@
 	  <pair><type/><type/></pair>
 	</alternatives>
       </bnfc>
-      <bnf desc="Constr. Type">
-	<aCtype/>
+      <bnf desc="Types">
+	<type/>
 	<alternatives>
-	  <type/>
-	  <ctype>
-	    <type/>
-	    <aCtset/>
-	  </ctype>
+	  <sType/>
+	  <mbpair>
+	    <sType/>
+	    <sType/>
+	  </mbpair>
 	</alternatives>
       </bnf>
       <bnf desc="Type Scheme">          
 	<aTS/>
 	<alternatives>
-	  <aCtype/>
+	  <type/>
 	  <forall>                    
 	    <tvar name="alpha"/>
 	    <aTS/>
 	  </forall>
 	</alternatives>
       </bnf>
-      <bnf desc="Constraints">
-	<constraint/>
-	<alternatives>
-	  <Tsub>
-	    <tvar name="alpha"/>
-	    <type/>
-	  </Tsub>
-	</alternatives>
-      </bnf>
-      <bnf desc="Constraint Sets">
-	<aCtset/>
-	<alternatives>
-	  <Empty/>
-	  <set>
-	    <plural>
-	      <constraint/>
-	    </plural>
-	  </set>
-	  <unin>
-	    <aCtset/>
-	    <aCtset/>
-	  </unin>
-	</alternatives>            
-      </bnf>
-    </grammar>
-  </btypes:TYPE>
-  <btypes:TYPE>        
-    <grammar>
       <bnf desc="Binding Environment">
 	<gamma/>
 	<alternatives>
@@ -267,56 +239,9 @@
       </btypes:TYPE>.
     </p>
   </definition>
-  <p>
-    <leadin>Alternate Presentation</leadin>
-  </p>
-  <btypes:TYPE>        
-    <grammar>
-      <bnf desc="Unct. Types">
-	<sType/>
-	<alternatives>
-	  <tvar name="alpha"/>
-	  <unit/>
-	  <bool/>
-	  <fn><type/><type/></fn>                  
-	</alternatives>
-      </bnf>
-      <bnfc desc="">
-	<alternatives>
-	  <ref><type/></ref>
-	  <mutable><type/></mutable>
-	  <pair><type/><type/></pair>
-	</alternatives>
-      </bnfc>
-      <bnf desc="Types">
-	<type/>
-	<alternatives>
-	  <sType/>
-	  <mbpair>
-	    <sType/>
-	    <sType/>
-	  </mbpair>
-	</alternatives>
-      </bnf>
-      <bnf desc="Type Scheme">          
-	<aTS/>
-	<alternatives>
-	  <type/>
-	  <forall>                    
-	    <tvar name="alpha"/>
-	    <aTS/>
-	  </forall>
-	</alternatives>
-      </bnf>
-    </grammar>
-  </btypes:TYPE>
-  <definition id="copy_sem">      
-    <title>Copy Compatibility</title>
-    <p> 
-      We define the copy compatibility relationship 
-      (<btypes:TYPE>
-	<ceqOp/>
-      </btypes:TYPE>) as follows:
+  <definition id="copy_sem"> <title>Copy Compatibility</title> <p> We
+    define the copy compatibility relationship (<btypes:TYPE> <ceqOp/>
+    </btypes:TYPE>) as follows:
     </p>
     <btypes:TYPE>
       <Hrules>

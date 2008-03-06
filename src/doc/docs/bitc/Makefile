@@ -28,7 +28,7 @@ BITC_SRC=../../..
 
 MY_XML=changes closures PLOS2006-shap PLOS2006 polyinst 
 MY_XML+=relnotes-0.10 relnotes-0.9 spec
-MY_TYPE_XML=c-formal h-formal mut-formal 
+MY_TYPE_XML=c-formal e-formal h-formal mut-formal 
 MY_TYPE_XML+=mutinfer sys-infer core
 
 OSDOC_XML_SRC=$(MY_XML) $(MY_TYPE_XML)
@@ -43,6 +43,7 @@ SYSINFER_INCLUDE=include/sys-infer/$(wildcard *.xmli)
 CORE_INCLUDE=include/core/$(wildcard *.xmli)
 H_FORMAL_INCLUDE=include/h-formal/$(wildcard *.xmli)
 C_FORMAL_INCLUDE=include/c-formal/$(wildcard *.xmli)
+E_FORMAL_INCLUDE=include/e-formal/$(wildcard *.xmli)
 MUT_FORMAL_INCLUDE=include/mut-formal/$(wildcard *.xmli)
 
 include $(BITC_SRC)/build/make/makerules.mk
@@ -62,6 +63,9 @@ h-formal.xml: h-formal.txml $(XSL_BTYPE) $(H_FORMAL_INCLUDE)
 	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
 c-formal.xml: c-formal.txml $(XSL_BTYPE) $(C_FORMAL_INCLUDE)
+	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
+
+e-formal.xml: e-formal.txml $(XSL_BTYPE) $(E_FORMAL_INCLUDE)
 	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
 mut-formal.xml: mut-formal.txml $(XSL_BTYPE) $(MUT_FORMAL_INCLUDE)

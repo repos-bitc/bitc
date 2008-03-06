@@ -1,0 +1,877 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <sect1 id="eq-infer"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <title>Type Inference</title> 
+  <p>
+    <leadin>Equational Presentation</leadin>
+  </p>
+  <btypes:TYPE>        
+    <grammar>
+      <bnf desc="Types">
+	<type/>
+	<alternatives>
+	  <tvar name="alpha"/>
+	  <unit/>
+	  <bool/>
+	  <fn M="yes"><type/><type/></fn>                  
+	</alternatives>
+      </bnf>
+      <bnfc desc="">
+	<alternatives>
+	  <ref><type/></ref>
+	  <mutable><type/></mutable>
+	</alternatives>
+      </bnfc>
+      <bnf desc="Constr. Type">
+	<aCtype/>
+	<alternatives>
+	  <type/>
+	  <ctype>
+	    <type/>
+	    <aCtset/>
+	  </ctype>
+	</alternatives>
+      </bnf>
+      <bnf desc="Type Scheme">          
+	<aTS/>
+	<alternatives>
+	  <aCtype/>
+	  <forall>                    
+	    <tvar name="alpha"/>
+	    <aTS/>
+	  </forall>
+	</alternatives>
+      </bnf>
+      <bnf desc="Constraints">
+	<constraint/>
+	<alternatives>
+	  <eq>
+	    <type/>
+	    <type/>
+	  </eq>
+	  <ceq>
+	    <type/>
+	    <type/> 
+	  </ceq>
+	  <Tsub>
+	    <type/>
+	    <type/> 
+	  </Tsub>
+	  <Pcst>
+	    <lKind/>
+	    <type/>
+	    <type/>
+	  </Pcst>
+	</alternatives>
+      </bnf>
+      <bnf desc="Constraint Sets">
+	<aCtset/>
+	<alternatives>
+	  <Empty/>
+	  <set>
+	    <plural>
+	      <constraint/>
+	    </plural>
+	  </set>
+	  <unin>
+	    <aCtset/>
+	    <aCtset/>
+	  </unin>
+	</alternatives>            
+      </bnf>
+      <bnf desc="Substitutions">            
+	<aSubMap/>            
+	<alternatives>
+	  <EmptySubst/>
+	  <SubMap>
+	    <tvar name="alpha"/>
+	    <type/>
+	  </SubMap>
+	  <SubMap>
+	    <lKind k="var"/>
+	    <lKind/>
+	  </SubMap>
+	  <compose>
+	    <aSubMap/>
+	    <aSubMap/>
+	  </compose>
+	</alternatives>
+      </bnf>
+    </grammar>
+  </btypes:TYPE>
+  <p>
+    The application of a substitution
+    <btypes:TYPE>
+      <aSubMap/>
+    </btypes:TYPE> on X is written as
+    <btypes:TYPE>
+      <Subst>
+	<aSubMap/>
+	<text content="X"/>
+      </Subst>
+    </btypes:TYPE>. 
+    As a matter of notational convenience, we write:
+    <btypes:TYPE>
+      <aSubMap num="a.b"/> 
+    </btypes:TYPE> to mean
+    <btypes:TYPE>
+      <compose>
+	<aSubMap num="a"/> 
+	<aSubMap num="b"/> 
+      </compose>
+    </btypes:TYPE>. Note that
+    <btypes:TYPE>
+      <eq>
+	<Subst>
+	  <aSubMap num="a.b"/> 
+	  <text content="x"/>
+	</Subst>
+	<Subst>
+	  <compose>
+	    <aSubMap num="a"/> 
+	    <aSubMap num="b"/> 
+	  </compose>
+	  <text content="x"/>
+	</Subst>
+	<Subst>
+	  <aSubMap num="a"/> 
+	  <Subst>
+	    <aSubMap num="b"/>                 
+	    <text content="x"/>
+	  </Subst>
+	</Subst>
+	<Subst>
+	  <aSubMap num="b"/>                 
+	  <Subst>
+	    <aSubMap num="a"/> 
+	    <text content="x"/>
+	  </Subst>
+	</Subst>
+      </eq>
+    </btypes:TYPE>.        
+  </p>
+  <p>
+    <leadin>Translations:</leadin>
+    <br/>
+    <btypes:TYPE>
+      <Forall>
+	<operator symbol="odot"/>
+      </Forall>
+      <text content=", "/>
+      <leadsto>
+	<DBrac>
+	  <op symbol="odot">
+	    <type num="1"/>
+	    <type num="2"/>
+	    <textit content=" ... "/>
+	    <type num="n"/>	      
+	  </op>
+	</DBrac>
+	<DBrac>
+	  <collection>
+	    <op symbol="odot">
+	      <type num="1"/>
+	      <type num="2"/>
+	    </op>
+	    <textit content=" ... "/>
+	    <op symbol="odot">
+	      <type num="n-1"/>	      
+	      <type num="n"/>
+	    </op>
+	  </collection>
+	</DBrac>
+      </leadsto>
+      <br/>
+      <leadsto>
+	<DBrac>
+	  <eq>
+	    <type num="1"/>
+	    <type num="2"/>
+	  </eq>
+	</DBrac>
+	<DBrac>
+	  <collection>
+	    <Tsub>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </Tsub>
+	    <Tsub>
+	      <type num="2"/>
+	      <type num="1"/>
+	    </Tsub>	      
+	  </collection>
+	</DBrac>
+      </leadsto>	
+      <br/>
+      <leadsto>
+	<DBrac>
+	  <ceq via="alpha">
+	    <type num="1"/>
+	    <type num="2"/>
+	  </ceq>
+	</DBrac>
+	<DBrac>
+	  <collection>
+	    <Tsub>
+	      <type num="1"/>
+	      <tvar name="alpha"/>
+	    </Tsub>	      
+	    <Tsub>
+	      <type num="2"/>
+	      <tvar name="alpha"/>
+	    </Tsub>
+	  </collection>
+	</DBrac>
+      </leadsto>		
+      <br/>
+      <leadsto>
+	<DBrac>
+	  <unf ac="yes">
+	    <aCtset/>
+	  </unf>
+	</DBrac>
+	<DBrac>
+	  <collection>
+	    <unf>
+	      <aCtset/>
+	    </unf>
+	    <pred name="acyclic">
+	      <aCtset/>
+	    </pred>	      
+	  </collection>
+	</DBrac>
+      </leadsto>
+      <br/>
+      <leadsto>
+	<DBrac>
+	  <unf cl="yes">
+	    <aCtset/>
+	  </unf>
+	</DBrac>
+	<DBrac>
+	  <unf>
+	    <TransClose>
+	      <paren>
+		<aCtset/>
+	      </paren>
+	    </TransClose>
+	  </unf>
+	</DBrac>
+      </leadsto>
+    </btypes:TYPE>
+  </p>
+  <definition id="meta">      
+    <title>Meta Constructors</title>      
+    <p>
+      <btypes:TYPE>
+	<floor>
+	  <type/>
+	</floor>
+      </btypes:TYPE>
+      and 
+      <btypes:TYPE>
+	<ceil>
+	  <type/>
+	</ceil>
+      </btypes:TYPE>
+      are "meta-constructors" which (respectively) minimize and
+      maximize the mutability of a type, but are interpreted
+      lazily. The meta-constructors are idempotent. 
+    </p>
+  </definition>
+  <p>
+    Note that in our type system, we have restricted meta types to be
+    syntactically present only as part of function types.
+  </p>
+  <definition id="special">      
+    <title>Specialization</title>
+    <p>
+      We write
+      <btypes:TYPE>
+	<spEq>
+	  <type num="1"/>
+	  <type num="2"/>
+	</spEq>
+      </btypes:TYPE>, that is, 
+      <btypes:TYPE>
+	<type num="1"/>
+      </btypes:TYPE> is a specialization of (or less general than)
+      <btypes:TYPE>
+	<type num="2"/>
+      </btypes:TYPE>
+      iff  
+      <btypes:TYPE>
+	<Exists>
+	  <aSubMap/>
+	</Exists>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<eq>
+	  <type num="1"/>
+	  <Subst>
+	    <aSubMap/>
+	    <type num="2"/>
+	  </Subst>
+	</eq>
+      </btypes:TYPE>.
+      We write 
+      <btypes:TYPE>
+	<genEq>
+	  <type num="1"/>
+	  <type num="2"/>
+	</genEq> 
+      </btypes:TYPE>, that is, 
+      <btypes:TYPE>
+	<type num="1"/>
+      </btypes:TYPE> is more general than
+      <btypes:TYPE>
+	<type num="2"/>
+      </btypes:TYPE>
+      iff
+      <btypes:TYPE>
+	<spEq>
+	  <type num="2"/>
+	  <type num="1"/>
+	</spEq> 
+      </btypes:TYPE>.
+    </p>
+    <p>
+      We write
+      <btypes:TYPE>
+	<spEq>
+	  <aSubMap num="1"/>
+	  <aSubMap num="2"/>
+	</spEq>
+      </btypes:TYPE>
+      iff  
+      <btypes:TYPE>
+	<Exists>
+	  <aSubMap/>
+	</Exists>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<eq>
+	  <aSubMap num="1"/>
+	  <compose>
+	    <aSubMap/>
+	    <aSubMap num="2"/>
+	  </compose>
+	</eq>
+      </btypes:TYPE>.
+      We write 
+      <btypes:TYPE>
+	<genEq>
+	  <aSubMap num="1"/>
+	  <aSubMap num="2"/>
+	</genEq> 
+      </btypes:TYPE>
+      iff
+      <btypes:TYPE>
+	<spEq>
+	  <aSubMap num="2"/>
+	  <aSubMap num="1"/>
+	</spEq> 
+      </btypes:TYPE>.
+    </p>
+  </definition>
+  <definition id="pcst">      
+    <title>Meta Polymorphic Constraints (MPC)</title>      
+    <p>
+      The constraint 
+      <btypes:TYPE>
+	<Pcst>
+	  <lKind/>
+	  <type/>
+	  <type dash="'"/>
+	</Pcst>
+      </btypes:TYPE>, where
+      <btypes:TYPE>
+	<spEq>
+	  <type dash="'"/>
+	  <type/>
+	</spEq>
+      </btypes:TYPE>, is used to express types that are polymorphic
+      <em>over</em> polymorphism and mutability. 
+    </p>
+  </definition>
+  <definition id="pcst-subst">      
+    <title>Substitution over MPCs</title>      
+    <p>
+      Substitution over an MPC is defined as:
+      <btypes:TYPE>
+	<eq>
+	  <Subst>
+	    <aSubMap/>
+	    <Pcst>
+	      <lKind/>
+	      <type/>
+	      <type dash="'"/>
+	    </Pcst>
+	  </Subst>
+	  <Pcst>
+	    <Subst>
+	      <aSubMap/>                
+	      <lKind/>
+	    </Subst>
+	    <type/>              
+	    <Subst>
+	      <aSubMap/>
+	      <type dash="'"/>
+	    </Subst>
+	  </Pcst>
+	</eq>
+      </btypes:TYPE>.
+    </p>
+  </definition>
+  <definition id="pcst-sat">      
+    <title>MPC Satisfaction</title>      
+    <p>
+      A substitution 
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE> satisfies the set of constraints
+      <btypes:TYPE>
+	<set>
+	  <Pcst>
+	    <lKind/>
+	    <type/>
+	    <type num="1"/>
+	  </Pcst>
+	  <unspecified/>
+	  <Pcst>
+	    <lKind/>
+	    <type/>
+	    <type num="n"/>
+	  </Pcst>
+	</set>
+      </btypes:TYPE> if and only if:
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<lKind/>
+	      </Subst>
+	      <lKind k="mono"/>
+	    </eq>
+	  </btypes:TYPE>
+	  and
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <unspecified/>
+	      <Subst>
+		<aSubMap/>
+		<type num="n"/>
+	      </Subst>
+	    </eq>
+	  </btypes:TYPE>, or
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<lKind/>
+	      </Subst>
+	      <lKind k="poly"/>
+	    </eq>
+	  </btypes:TYPE>
+	  and
+	  <btypes:TYPE>
+	    <collection>
+	      <pred name="Immut">
+		<Subst>
+		  <aSubMap/>
+		  <type num="1"/>
+		</Subst>
+	      </pred>
+	      <unspecified/>
+	      <pred name="Immut">
+		<Subst>
+		  <aSubMap/>
+		  <type num="n"/>
+		</Subst>
+	      </pred>
+	    </collection>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </definition>
+  <definition id="ext-ftvs">
+    <title>FTVs (Extension)</title>
+    <p>
+      We enhance the definition of 
+      <btypes:TYPE>
+	<ftvs>
+	  <unspecified/>
+	</ftvs>
+      </btypes:TYPE> in 
+      <btypes:TYPE>
+	<defn tag="ftvs"/>
+      </btypes:TYPE> as follows:
+    </p>
+    <example>
+      <p>
+ 	<btypes:TYPE>
+	  <unspecified/>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <fn M="yes">
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <eq>
+		<type num="1"/>
+		<type num="2"/>
+	      </eq>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <ceq>
+		<type num="1"/>
+		<type num="2"/>
+	      </ceq>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <Tsub>
+		<type num="1"/>
+		<type num="2"/>
+	      </Tsub>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <Pcst>
+		<lKind/>
+		<type num="1"/>
+		<type num="2"/>
+	      </Pcst>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <aCtset/>
+	    </ftvs>
+	    <Unin>
+	      <ftvs>
+		<constraint num="i"/>
+	      </ftvs>
+	    </Unin>
+	  </eq> 
+	  <text content=", "/>
+	  <Forall/>
+	  <in>
+	    <constraint num="i"/>
+	    <aCtset/>
+	  </in>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <aCtype/>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<type/>
+	      </ftvs>
+	      <ftvs>
+		<aCtset/>
+	      </ftvs>                  
+	    </unin>
+	  </eq>
+	  <text content=", where "/>
+	  <eq>
+	    <aCtype/>
+	    <ctype>
+	      <type/>
+	      <aCtset/>
+	    </ctype>
+	  </eq>
+	  <br/>
+	  <eq>
+	    <ftvs>
+	      <aTS/>
+	    </ftvs>
+	    <unin>
+	      <ftvs>
+		<tvars name="alpha"/>
+	      </ftvs>
+	      <ftvs>
+		<aCtype/>
+	      </ftvs>                  
+	    </unin>
+	  </eq>
+	  <text content=", where "/>
+	  <eq>
+	    <aTS/>
+	    <forall>
+	      <tvars name="alpha"/>
+	      <aCtype/>
+	    </forall>
+	  </eq>
+	</btypes:TYPE>
+      </p>
+    </example>
+  </definition>
+  <definition id="stvs-eq">
+    <title>Shallow Type Variables</title>
+    <p>
+      The set of type variables embedded in a type up to a 
+      reference/function boundary. 
+    </p>
+    <p>
+      <btypes:TYPE>
+	<fnxn name="stv">
+	  <tvar name="alpha"/>
+	  <set>
+	    <tvar name="alpha"/>
+	  </set>
+	</fnxn>
+	<br/>
+	<fnxn name="stv">
+	  <unit/>
+	  <Empty/>
+	</fnxn>
+	<br/>
+	<fnxn name="stv">
+	  <bool/>
+	  <Empty/>
+	</fnxn>
+	<br/>
+	<fnxn name="stv">
+	  <fn>
+	    <type/>
+	    <type dash="'"/>
+	  </fn>
+	  <Empty/>
+	</fnxn>          
+	<br/>
+	<fnxn name="stv">
+	  <ref>
+	    <type/>
+	  </ref>
+	  <Empty/>
+	</fnxn>
+	<br/>
+	<fnxn name="stv">
+	  <mutable>
+	    <type/>
+	  </mutable>
+	  <pred name="stv">
+	    <type/>
+	  </pred>
+	</fnxn>
+	<br/>
+      </btypes:TYPE>
+    </p>
+  </definition>    
+  <definition id="dtvs-eq">
+    <title>Deep Type Variables</title>
+    <p>
+      The set of type variables embedded in a type up to a 
+      function boundary. 
+    </p>
+    <p>        
+      <btypes:TYPE>
+	<fnxn name="dtv">
+	  <tvar name="alpha"/>
+	  <set>
+	    <tvar name="alpha"/>
+	  </set>
+	</fnxn>
+	<br/>
+	<fnxn name="dtv">
+	  <unit/>
+	  <Empty/>
+	</fnxn>
+	<br/>
+	<fnxn name="dtv">
+	  <bool/>
+	  <Empty/>
+	</fnxn>
+	<br/>
+	<fnxn name="dtv">
+	  <fn>
+	    <type/>
+	    <type dash="'"/>
+	  </fn>
+	  <Empty/>
+	</fnxn>          
+	<br/>
+	<fnxn name="dtv">
+	  <mutable>
+	    <type/>
+	  </mutable>
+	  <pred name="dtv">
+	    <type/>
+	  </pred>		
+	</fnxn>
+	<br/>
+	<fnxn name="dtv">
+	  <ref>
+	    <type/>
+	  </ref>
+	  <pred name="dtv">
+	    <type/>
+	  </pred>		
+	</fnxn>
+      </btypes:TYPE>
+    </p>
+  </definition>
+  <definition id="TransClose">
+    <title>Transitive Closure of Constraint Sets</title>
+    <p>
+      A closure operation
+      <btypes:TYPE>
+	<TransClose>
+	  <aCtset/> 
+	</TransClose>
+      </btypes:TYPE>
+      on a constraint set 
+      <btypes:TYPE>
+	<aCtset/> 
+      </btypes:TYPE> produces an equivalent set of constraints in
+      which all transitive relationships are explicitely added.
+    </p>
+    <ol>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Exists>
+	      <type num="1"/>
+	      <type num="2"/>
+	      <type num="3"/>
+	    </Exists>
+	  </btypes:TYPE> such that
+	  <btypes:TYPE>
+	    <in>
+	      <Tsub>
+		<type num="1"/>
+		<type num="2"/>
+	      </Tsub>
+	      <aCtset/>
+	    </in>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <in>
+	      <Tsub>
+		<type num="2"/>
+		<type num="3"/>
+	      </Tsub>
+	      <aCtset/>
+	    </in>
+	  </btypes:TYPE>, and
+	  <btypes:TYPE>
+	    <notin>
+	      <Tsub>
+		<type num="1"/>
+		<type num="3"/>
+	      </Tsub>
+	      <aCtset/>
+	    </notin>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <eq>
+	      <TransClose>
+		<aCtset/> 
+	      </TransClose>
+	      <TransClose>
+		<paren>
+		  <unin>
+		    <set>
+		      <Tsub>
+			<type num="1"/>
+			<type num="3"/>
+		      </Tsub>
+		    </set>                      
+		    <aCtset/>
+		  </unin>
+		</paren>
+	      </TransClose>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  Otherwise,
+	  <btypes:TYPE>
+	    <eq>
+	      <TransClose>
+		<aCtset/>
+	      </TransClose>
+	      <aCtset/>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </definition>
+  </sect1>
