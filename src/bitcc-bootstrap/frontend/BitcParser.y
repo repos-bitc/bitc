@@ -1563,14 +1563,15 @@ eform: '(' tk_DEREF expr ')' {
   $$ = new AST(at_deref, $2.loc, $3);
   $$->Flags2 |= AST_IS_LOCATION;
 };
+
 // INNER-REF
 // In the case of structures, the second "expression"
 // must be a label. This cannot be checked until 
 // type-checking phase.
-eform: '(' tk_INNER_REF expr expr ')' {
-  SHOWPARSE("eform -> ( INNER_REF expr expr)");
-  $$ = new AST(at_inner_ref, $2.loc, $3, $4);
-};
+/* eform: '(' tk_INNER_REF expr expr ')' { */
+/*   SHOWPARSE("eform -> ( INNER_REF expr expr)"); */
+/*   $$ = new AST(at_inner_ref, $2.loc, $3, $4); */
+/* }; */
 
 // End of locations
 

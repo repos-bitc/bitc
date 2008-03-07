@@ -358,20 +358,20 @@ disable       do            double
 dup           enable        exception     
 extends       external      fill          
 fixint        float         if            
-import        inner-ref     int8          
-int16         int32         int64         
-interface     fn            lambda        
-let           letrec        member        
-mutable       not           opaque        
-or            otherwise     pair          
-proclaim      provide       quad          
-ref           set!          string        
-suspend       switch        tag           
-the           throw         try           
-tyfn          uint8         uint16        
-uint32        uint64        use           
-val           vector        vector-length 
-vector-nth    word</literallayout>
+import        int8          int16         
+int32         int64         interface
+fn            lambda        let
+letrec        member        mutable
+not           opaque        or
+otherwise     pair          proclaim
+provide       quad          ref
+set!          string        suspend
+switch        tag           the
+throw         try           tyfn
+uint8         uint16        uint32
+uint64        use           val
+vector        vector-length vector-nth
+word</literallayout>
 	<p>
 	  The following identifiers are reserved for use as future
 	  keywords:
@@ -381,12 +381,12 @@ assert        check         coindset
 constrain     defequiv      defobject     
 defrefine     deftype       defvariant    
 do*           import!       indset
-int           label         let*          
-list          literal       location      
-module        namespace     nth           
-read-only     require       sensory       
-sizeof        super         tycon         
-using         value-at</literallayout>
+inner-ref     int           label         
+let*          list          literal       
+location      module        namespace     
+nth           read-only     require
+sensory       sizeof        super
+tycon         using         value-at</literallayout>
 	<p>
           In addition to the reserved words identified above, all
 	  definitions provided in the standard prelude are implicitly
@@ -3467,157 +3467,157 @@ id : T
           <literallayout>
 (deref <em>e</em>)</literallayout>
         </sect3>
-        <sect3>
-          <title>inner-ref</title>
-          <p>If
-            <progident><em>e</em></progident> is an expression of
-            reference type, which evaluates to a value 
-            <progident><em>v</em></progident>,            
-            the <progident>inner-ref</progident>
-            construct can be used to obtain a reference to a
-            subcomponent of <progident><em>v</em></progident>.
-            The permitted cases are:  
-          </p>
-          <ol>
-            <li>
-              <p>
-                If
-              </p>
-              <ol>
-                <li>
-                  <p>                    
-                    <progident><em>e</em></progident>
-                    is an expression with type
-                    <progident>(<em>s</em> &tau;<sub>1</sub>
-                      ... &tau;<sub>n</sub>)</progident>
-                    </p>
-                </li>
-                <li>
-                  <p>                    
-                    <progident><em>s</em></progident>
-                    is a reference
-                    (<progident>:ref</progident>) structure type
-                  </p>
-                </li>
-                <li>
-                  <p>                    
-                    <progident><em>l</em></progident> is a valid
-                    field-label in structure
-                    <progident><em>s</em></progident>
-                  </p>
-                </li>                    
-                <li>
-                  <p>                                        
-                    The type of the value stored at field
-                    <progident><em>l</em></progident> is &tau;
-                  </p>
-                </li>
-              </ol>              
-              <p>
-                then, the expression 
-                <progident>(inner-ref <em>e</em> <em>l</em>)</progident>
-                returns a reference to the inner field with type 
-                <progident>(ref &tau;)</progident>
-              </p>
-            </li>
-            <li>
-              <p>
-                If
-              </p>
-              <ol>
-                <li>
-                  <p>                    
-                    <progident><em>e</em></progident>
-                    is an expression with type
-                    <progident>(ref (<em>s</em> &tau;<sub>1</sub>
-                      ... &tau;<sub>n</sub>))</progident>
-                    </p>
-                </li>
-                <li>
-                  <p>                    
-                    <progident><em>s</em></progident>
-                    is a value
-                    (<progident>:val</progident>) structure type
-                  </p>
-                </li>
-                <li>
-                  <p>                    
-                    <progident><em>l</em></progident> is a valid
-                    field-label in structure
-                    <progident><em>s</em></progident>
-                  </p>
-                </li>                    
-                <li>
-                  <p>                                        
-                    The type of the value stored at field
-                    <progident><em>l</em></progident> is &tau;
-                  </p>
-                </li>
-              </ol>              
-              <p>
-                Then,
-                the expression 
-                <progident>(inner-ref <em>e</em> <em>l</em>)</progident>
-                returns a reference to the inner field with type 
-                <progident>(ref &tau;)</progident>.
-              </p>
-            </li>
-            <li>
-              <p>
-                If
-              </p>
-              <ol>
-                <li>
-                  <p>                    
-                    <progident><em>e</em></progident>
-                    is an expression with type
-                    <progident>(vector &tau;)</progident>
-                  </p>
-                </li>
-                <li>
-                  <p>
-                    <progident><em>e<sub>n</sub></em></progident>
-                    is a valid index expression with type
-                    <progident>word</progident>
-                  </p>
-                </li>
-              </ol>              
-              <p>
-                then, the expression 
-                <progident>(inner-ref <em>e</em> <em>e<sub>n</sub></em>)</progident>
-                returns a reference to the inner element with type 
-                <progident>(ref &tau;)</progident>
-              </p>
-            </li>
-            <li>
-              <p>
-                If
-              </p>
-              <ol>
-                <li>
-                  <p>                    
-                    <progident><em>e</em></progident>
-                    is an expression with type
-                    <progident>(ref (array &tau;))</progident>
-                  </p>
-                </li>
-                <li>
-                  <p>
-                    <progident><em>e<sub>n</sub></em></progident>
-                    is a valid index expression with type
-                    <progident>word</progident>
-                  </p>
-                </li>
-              </ol>              
-              <p>
-                then, the expression 
-                <progident>(inner-ref <em>e</em> <em>e<sub>n</sub></em>)</progident>
-                returns a reference to the inner element with type 
-                <progident>(ref &tau;)</progident>
-              </p>
-            </li>
-          </ol>          
-        </sect3>
+<!--         <sect3> -->
+<!--           <title>inner-ref</title> -->
+<!--           <p>If -->
+<!--             <progident><em>e</em></progident> is an expression of -->
+<!--             reference type, which evaluates to a value  -->
+<!--             <progident><em>v</em></progident>,             -->
+<!--             the <progident>inner-ref</progident> -->
+<!--             construct can be used to obtain a reference to a -->
+<!--             subcomponent of <progident><em>v</em></progident>. -->
+<!--             The permitted cases are:   -->
+<!--           </p> -->
+<!--           <ol> -->
+<!--             <li> -->
+<!--               <p> -->
+<!--                 If -->
+<!--               </p> -->
+<!--               <ol> -->
+<!--                 <li> -->
+<!--                   <p>                     -->
+<!--                     <progident><em>e</em></progident> -->
+<!--                     is an expression with type -->
+<!--                     <progident>(<em>s</em> &tau;<sub>1</sub> -->
+<!--                       ... &tau;<sub>n</sub>)</progident> -->
+<!--                     </p> -->
+<!--                 </li> -->
+<!--                 <li> -->
+<!--                   <p>                     -->
+<!--                     <progident><em>s</em></progident> -->
+<!--                     is a reference -->
+<!--                     (<progident>:ref</progident>) structure type -->
+<!--                   </p> -->
+<!--                 </li> -->
+<!--                 <li> -->
+<!--                   <p>                     -->
+<!--                     <progident><em>l</em></progident> is a valid -->
+<!--                     field-label in structure -->
+<!--                     <progident><em>s</em></progident> -->
+<!--                   </p> -->
+<!--                 </li>                     -->
+<!--                 <li> -->
+<!--                   <p>                                         -->
+<!--                     The type of the value stored at field -->
+<!--                     <progident><em>l</em></progident> is &tau; -->
+<!--                   </p> -->
+<!--                 </li> -->
+<!--               </ol>               -->
+<!--               <p> -->
+<!--                 then, the expression  -->
+<!--                 <progident>(inner-ref <em>e</em> <em>l</em>)</progident> -->
+<!--                 returns a reference to the inner field with type  -->
+<!--                 <progident>(ref &tau;)</progident> -->
+<!--               </p> -->
+<!--             </li> -->
+<!--             <li> -->
+<!--               <p> -->
+<!--                 If -->
+<!--               </p> -->
+<!--               <ol> -->
+<!--                 <li> -->
+<!--                   <p>                     -->
+<!--                     <progident><em>e</em></progident> -->
+<!--                     is an expression with type -->
+<!--                     <progident>(ref (<em>s</em> &tau;<sub>1</sub> -->
+<!--                       ... &tau;<sub>n</sub>))</progident> -->
+<!--                     </p> -->
+<!--                 </li> -->
+<!--                 <li> -->
+<!--                   <p>                     -->
+<!--                     <progident><em>s</em></progident> -->
+<!--                     is a value -->
+<!--                     (<progident>:val</progident>) structure type -->
+<!--                   </p> -->
+<!--                 </li> -->
+<!--                 <li> -->
+<!--                   <p>                     -->
+<!--                     <progident><em>l</em></progident> is a valid -->
+<!--                     field-label in structure -->
+<!--                     <progident><em>s</em></progident> -->
+<!--                   </p> -->
+<!--                 </li>                     -->
+<!--                 <li> -->
+<!--                   <p>                                         -->
+<!--                     The type of the value stored at field -->
+<!--                     <progident><em>l</em></progident> is &tau; -->
+<!--                   </p> -->
+<!--                 </li> -->
+<!--               </ol>               -->
+<!--               <p> -->
+<!--                 Then, -->
+<!--                 the expression  -->
+<!--                 <progident>(inner-ref <em>e</em> <em>l</em>)</progident> -->
+<!--                 returns a reference to the inner field with type  -->
+<!--                 <progident>(ref &tau;)</progident>. -->
+<!--               </p> -->
+<!--             </li> -->
+<!--             <li> -->
+<!--               <p> -->
+<!--                 If -->
+<!--               </p> -->
+<!--               <ol> -->
+<!--                 <li> -->
+<!--                   <p>                     -->
+<!--                     <progident><em>e</em></progident> -->
+<!--                     is an expression with type -->
+<!--                     <progident>(vector &tau;)</progident> -->
+<!--                   </p> -->
+<!--                 </li> -->
+<!--                 <li> -->
+<!--                   <p> -->
+<!--                     <progident><em>e<sub>n</sub></em></progident> -->
+<!--                     is a valid index expression with type -->
+<!--                     <progident>word</progident> -->
+<!--                   </p> -->
+<!--                 </li> -->
+<!--               </ol>               -->
+<!--               <p> -->
+<!--                 then, the expression  -->
+<!--                 <progident>(inner-ref <em>e</em> <em>e<sub>n</sub></em>)</progident> -->
+<!--                 returns a reference to the inner element with type  -->
+<!--                 <progident>(ref &tau;)</progident> -->
+<!--               </p> -->
+<!--             </li> -->
+<!--             <li> -->
+<!--               <p> -->
+<!--                 If -->
+<!--               </p> -->
+<!--               <ol> -->
+<!--                 <li> -->
+<!--                   <p>                     -->
+<!--                     <progident><em>e</em></progident> -->
+<!--                     is an expression with type -->
+<!--                     <progident>(ref (array &tau;))</progident> -->
+<!--                   </p> -->
+<!--                 </li> -->
+<!--                 <li> -->
+<!--                   <p> -->
+<!--                     <progident><em>e<sub>n</sub></em></progident> -->
+<!--                     is a valid index expression with type -->
+<!--                     <progident>word</progident> -->
+<!--                   </p> -->
+<!--                 </li> -->
+<!--               </ol>               -->
+<!--               <p> -->
+<!--                 then, the expression  -->
+<!--                 <progident>(inner-ref <em>e</em> <em>e<sub>n</sub></em>)</progident> -->
+<!--                 returns a reference to the inner element with type  -->
+<!--                 <progident>(ref &tau;)</progident> -->
+<!--               </p> -->
+<!--             </li> -->
+<!--           </ol>           -->
+<!--         </sect3> -->
       </sect2>
       <sect2 id="switch">
 	<title>Value Matching</title>
