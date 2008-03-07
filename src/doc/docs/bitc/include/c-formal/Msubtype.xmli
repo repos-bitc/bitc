@@ -33,158 +33,7 @@
 	      <type num="2"/>
 	    </Msub>
 	  </tyConc>
-	</tyRule>  
-	<tyRule name="M-Ref">
-	  <tyPre>
-	    <eq>
-	      <type/>
-	      <type dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <ref>
-		<type/>
-	      </ref>
-	      <ref>
-		<type dash="'"/>
-	      </ref>
-	    </Msub>
-	  </tyConc>
 	</tyRule>
-	<tyRule name="M-Fn">
-	  <tyPre>
-	    <eq>
-	      <type num="1"/>
-	      <type num="1" dash="'"/>
-	    </eq>
-	    <eq>
-	      <type num="2"/>
-	      <type num="2" dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <fn>
-		<type num="1"/>
-		<type num="2"/>
-	      </fn>
-	      <fn>
-		<type num="1" dash="'"/>
-		<type num="2" dash="'"/>
-	      </fn>
-	    </Msub>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="M-Mut1">
-	  <tyPre/>
-	  <tyConc>
-	    <Msub>
-	      <mutable>
-		<type/>
-	      </mutable>
-	      <type/>
-	    </Msub>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="M-Mut2">
-	  <tyPre>
-	    <Msub>
-	      <type/>
-	      <type dash="'"/>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <mutable>
-		<type/>
-	      </mutable>
-	      <mutable>
-		<type dash="'"/>
-	      </mutable>
-	    </Msub>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="M-May1">
-	  <tyPre>
-	    <!-- This rule MUST NOT be written with a minz(t) 
-	         on the RHS type, minz() on a maybe type a\t 
-	         returns minz(t) -->
-	    <Msub>
-	      <maxz>
-		<sType/>
-	      </maxz>
-	      <type/>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <mbpair>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbpair>
-	      <type/>
-	    </Msub>
- 	  </tyConc>
-	</tyRule>
-	<tyRule name="M-May2">
-	  <tyPre>
-	    <grouping>
-<!-- 	      <forall> -->
-<!-- 		<tvar name="alpha"/> -->
-<!-- 	      </forall> -->
-<!-- 	      <text content=", "/> -->
-	      <neq>
-		<sType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
-	    <Msub>
-	      <sType/>
-	      <type/>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <mbpair>
-		<sType/>
-		<sType dash="'"/>
-	      </mbpair>
-	      <type/>
-	    </Msub>
- 	  </tyConc>
-	</tyRule>
-	<tyRule name="M-May3">
-	  <tyPre>
-	    <grouping>
-<!-- 	      <forall> -->
-<!-- 		<tvar name="alpha"/> -->
-<!-- 	      </forall> -->
-<!-- 	      <text content=", "/> -->
-	      <neq>
-		<sType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
-	    <Msub>
-	      <type/>
-	      <sType/>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <type/>
-	      <mbpair>
-		<sType/>
-		<sType dash="'"/>
-	      </mbpair>
-	    </Msub>
- 	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="M-Fn">
 	  <tyPre>
 	    <eq>
@@ -240,6 +89,106 @@
 	      </pair>
 	    </Msub>
 	  </tyConc>
+	</tyRule>  
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="M-Mut1">
+	  <tyPre/>
+	  <tyConc>
+	    <Msub>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <type/>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="M-Mut2">
+	  <tyPre>
+	    <Msub>
+	      <type/>
+	      <type dash="'"/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <mutable>
+		<type dash="'"/>
+	      </mutable>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="M-May1">
+	  <tyPre>
+	    <!-- This rule MUST NOT be written with a minz(t) 
+  	         on the RHS type, minz() on a maybe type a\t 
+  	         returns minz(t). The RHS cannot be a maybe type 
+	         where the mb-var has not concretized.  -->
+	    <Msub>
+	      <maxz>
+		<sType/>
+	      </maxz>
+	      <type/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbpair>
+		<tvar name="alpha"/>
+		<sType/>
+	      </mbpair>
+	      <type/>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="M-May2">
+	  <tyPre>
+	    <grouping>
+	      <neq>
+		<sType/>
+		<tvar name="alpha"/>
+	      </neq>
+	    </grouping>
+	    <Msub>
+	      <sType/>
+	      <type/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbpair>
+		<sType/>
+		<sType dash="'"/>
+	      </mbpair>
+	      <type/>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="M-May3">
+	  <tyPre>
+	    <grouping>
+	      <neq>
+		<sType/>
+		<tvar name="alpha"/>
+	      </neq>
+	    </grouping>
+	    <Msub>
+	      <type/>
+	      <sType/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <type/>
+	      <mbpair>
+		<sType/>
+		<sType dash="'"/>
+	      </mbpair>
+	    </Msub>
+ 	  </tyConc>
 	</tyRule>
       </Hrules>
     </btypes:TYPE>

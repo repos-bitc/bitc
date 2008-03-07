@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
-               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
   <sect1 id="type_system"    
     xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -375,41 +375,7 @@
 	    <type dash="'"/>
 	  </approx>
 	</ctype>
-      </btypes:TYPE>. Therefore, for any 
-      <btypes:TYPE>
-	<tvar name="alpha"/>
-      </btypes:TYPE> and
-      <btypes:TYPE>
-	<type/>
-      </btypes:TYPE>, the only legal forms of a maybe type are, 
-      <btypes:TYPE>
-	<mbpair>
-	  <tvar name="alpha"/>
-	  <type/>
-	</mbpair>
-      </btypes:TYPE>,
-      <btypes:TYPE>
-	<mbpair>
-	  <type/>
-	  <type/>
-	</mbpair>
-      </btypes:TYPE>,
-      <btypes:TYPE>
-	<mbpair>
-	  <mutable>
-	    <type/>
-	  </mutable>
-	  <type/>
-	</mbpair>
-      </btypes:TYPE>, and
-      <btypes:TYPE>
-	<mbpair>
-	  <type/>
-	  <mutable>
-	    <type/>
-	  </mutable>
-	</mbpair>
-      </btypes:TYPE>.
+      </btypes:TYPE>. 
     </p>
   </definition>
   <definition id="max_min">      

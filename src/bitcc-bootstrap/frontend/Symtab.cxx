@@ -1079,7 +1079,34 @@ resolve(std::ostream& errStream,
     {
       /** FIX ME : The incompleteness restriction is NOT enforced here
 	  This needs to be fixed after a resolution algorithm is
-	  specified ***/
+	  specified. The resolution algorithm must identify what
+	  identifiers are declared complete across a interface/module
+	  definition.  
+
+	  The problem here is that there can be a cyclic construction,
+	  which leads to infinite loop in the construction logic.
+	  For example:
+
+	  Interface A:
+	  (interface ifa
+   	    (proclaim a:uint32))
+
+	  Interface B:
+	  (interface ifb
+	    (proclaim b:uint32))
+
+
+	  Source A:
+	  (import ifb ifb)
+          (provide ifa ifa)
+          (define ifa.a ifb.b)
+
+          Source B:
+	  (import ifa ifa)
+	  (provide ifb ifb)
+	  (define ifb.b ifa.a)
+
+	  This test case can be found in tests/defloop. ***/
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE,
 	      id_usebinding, currLB, 
 	      ((flags & (~NEW_TV_OK))) | NO_CHK_USE_TYPE);
