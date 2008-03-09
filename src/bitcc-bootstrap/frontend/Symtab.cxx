@@ -517,10 +517,6 @@ resolve(std::ostream& errStream,
 		    def->identType == id_constructor) {
 	      // We are OK
 	    }
- 	    else if((flags & RESOLVE_FQCT_MODE) &&
-		    def->identType == id_value) {
-	      // We are OK
-	    }
 	    else {
 	      errStream << ast->loc << ": " << identTypeToString(identType) 
 			<< " `" << ast->s << "' Undefined"
@@ -1760,10 +1756,8 @@ resolve(std::ostream& errStream,
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      id_type, currLB, flags);
-      
-      RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_constructor, currLB, flags | RESOLVE_FQCT_MODE);
-      
+     
+      // Second Component handled by the type checker
       break;
     }
     
@@ -1771,6 +1765,8 @@ resolve(std::ostream& errStream,
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      id_value, currLB, flags );
+
+      // Second Component handled by the type checker
       break;
     }
 

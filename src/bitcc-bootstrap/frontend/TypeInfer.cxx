@@ -2324,9 +2324,8 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       useIFGamma(ast->child(0)->s, ast->child(0)->envs.gamma,
 		 tmpGamma);
-      CHKERR(errFree, useIFInsts(errStream, ast->loc, 
-				 ast->child(0)->envs.instEnv, 
-				 instEnv, uflags));
+      useIFInsts(ast->child(0)->s, ast->child(0)->envs.instEnv, 
+		 instEnv);
       
       gamma->mergeBindingsFrom(tmpGamma);
       break;

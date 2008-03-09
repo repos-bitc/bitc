@@ -121,81 +121,27 @@ useIFGamma(const std::string& idName,
   }  
 }
 
-/* Use all instances from some other environment. Unlike Type
-   environment, this one needs explicit checking to make sure there
-   are no collisions */
 
-bool
-useIFInsts(std::ostream &errStream,
-	   LexLoc &errLoc,
+void
+useIFInsts(const std::string& idName,
 	   GCPtr<Environment< CVector<GCPtr<Instance> > > >fromEnv, 
-	   GCPtr<Environment< CVector<GCPtr<Instance> > > >toEnv,
-	   unsigned long uflags)
+	   GCPtr<Environment< CVector<GCPtr<Instance> > > >toEnv)
 {
-  bool errFree = true;
   for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
-    GCPtr<Binding< CVector<GCPtr<Instance> > > >bdng =
-      fromEnv->bindings->elem(i);
+    GCPtr<Binding< CVector<GCPtr<Instance> > > > bdng = fromEnv->bindings->elem(i);
     
     if (bdng->flags & BF_PRIVATE)
       continue;
     
     std::string s = bdng->nm;
-    GCPtr<CVector<GCPtr<Instance> > > fromInsts = bdng->val;
-    GCPtr<CVector<GCPtr<Instance> > > toInsts = toEnv->getBinding(s); 
-
-    if(!toInsts) {
-      toInsts = new CVector<GCPtr<Instance> >;
-      for (size_t j = 0; j < fromInsts->size(); j++)
-	toInsts->append(fromInsts->elem(j));
-      toEnv->addBinding(s, toInsts);
-    }
-    else {
-      for (size_t j = 0; j < fromInsts->size(); j++) {
-	size_t k;
-	bool mustAppend = true;
-	GCPtr<Instance> fromInst = fromInsts->elem(j);
-
-	for (k = 0; k < toInsts->size(); k++) {
-	  GCPtr<Instance> toInst = toInsts->elem(k);
-	  
-	  if(toInst == fromInst) {
-	    // We are seeing the same AST as a matter of import from
-	    // different interfaces. For example: diamond import,
-	    // or, Interface X imports prelude, obviously, and
-	    // exports all interfaces in the prelude. I have also
-	    // already seen the prelude. So, this need not be
-	    // re-considered, but this is not an error.
-	    // It is safe to ignore this because we are thinking of
-	    // the *same* instance defined at the same *AST* and	      
-	    // thus, there is no conflict.
-	    mustAppend = false;
-	    break;
-	  }
-	  
-	  if((uflags & ALL_INSTS_OK) == 0)
-	    if(toInst->equals(errStream, fromInst, toEnv)) {
-	      errStream << errLoc << ": "
-			<< "Conflict in Instance declarations "
-			<< " of type " 
-			<< toInsts->elem(k)->asString()
-			<< " defined at " 
-			<< toInsts->elem(k)->ast->loc << " and " 
-			<< fromInsts->elem(j)->ast->loc << "."
-			<< std::endl;
-	      errFree = false;
-	      mustAppend = false;	    
-	      break;				  
-	    }
-	}
-	  
-	if(mustAppend) 
-	  toInsts->append(fromInsts->elem(j));
-      }
-    }
+    GCPtr<CVector<GCPtr<Instance> > > insts = bdng->val;
+    
+    if (idName.size())
+      s = idName + "." + s;
+    
+    toEnv->addBinding(s, insts);
+    toEnv->setFlags(s, BF_PRIVATE|BF_COMPLETE);
   }
-  
-  return errFree;
 }
   
 /* Initialize my environment */
@@ -248,9 +194,9 @@ initGamma(std::ostream& errStream,
   
   useIFGamma(std::string(), preenv, gamma);
   LexLoc internalLocation;
-  CHKERR(errFree, useIFInsts(errStream, internalLocation, 
-			     preInsts, instEnv, uflags));
+  useIFInsts(std::string(), preInsts, instEnv);
+  //   CHKERR(errFree, useIFInsts(errStream, internalLocation, 
+  // 			     preInsts, instEnv, uflags));
   return errFree;
 }
-
 

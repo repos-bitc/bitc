@@ -69,6 +69,5 @@
                                      // (and post) polyinstantiation
                                      // ignore tvar-scoping.
 #define RESOLVE_INREF_MODE  0x100000u
-#define RESOLVE_FQCT_MODE   0x200000u
 
 #endif /* SYMTAB_HXX */

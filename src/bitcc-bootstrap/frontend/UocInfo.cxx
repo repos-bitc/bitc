@@ -114,7 +114,9 @@ UocInfo::initUoc(std::ostream& errStream)
   ast->child(1)->child(0)->s = BITC_VERSION;
   ast->child(1)->child(0)->litValue.s = BITC_VERSION;
 
-  RandT(errStream, true);
+  env = new Environment<AST>(uocName);
+  gamma = new Environment<TypeScheme>(uocName);
+  instEnv = new Environment< CVector<GCPtr<Instance> > >(uocName);
 }
 
 GCPtr<Path> 

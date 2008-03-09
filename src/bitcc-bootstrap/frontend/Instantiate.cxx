@@ -258,10 +258,10 @@ importInstBindings(GCPtr<Environment< CVector<GCPtr<Instance> > > > fromEnv,
   for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
     GCPtr<Binding< CVector<GCPtr<Instance> > > > bdng = 
       fromEnv->bindings->elem(i);
-    
+
     if (bdng->flags & BF_PRIVATE)
       continue;    
-    
+
     GCPtr<CVector<GCPtr<Instance> > > fromInsts = bdng->val;      
     if(fromInsts->size() == 0)
       continue;
@@ -272,37 +272,20 @@ importInstBindings(GCPtr<Environment< CVector<GCPtr<Instance> > > > fromEnv,
     GCPtr<AST> instAST = fromInsts->elem(0)->ast;
     GCPtr<AST> tcAST = instAST->child(0)->child(0)->symbolDef;
     string tcFQN = tcAST->fqn.asString();
+
     GCPtr<CVector<GCPtr<Instance> > > toInsts = toEnv->getBinding(tcFQN); 
-    
-    if(!toInsts) {
-      toInsts = new CVector<GCPtr<Instance> >;
+    if(toInsts) {
+      cerr << "Available non-private instance for "
+	   << tcFQN << ": ";
       for (size_t j = 0; j < fromInsts->size(); j++)
-	toInsts->append(fromInsts->elem(j));
-      toEnv->addBinding(tcFQN, toInsts);
+	cerr << toInsts->elem(j)->asString() << "     ";
+      cerr << endl;
+      assert(false);
     }
-    else {
-      for (size_t j = 0; j < fromInsts->size(); j++) {
-	size_t k;
-	bool mustAppend = true;
-	GCPtr<Instance> fromInst = fromInsts->elem(j);
-	
-	for (k = 0; k < toInsts->size(); k++) {
-	  GCPtr<Instance> toInst = toInsts->elem(k);
-	  
-	  if(toInst == fromInst) {
-	    mustAppend = false;
-	    break;
-	  }
-	  	  
-	  if(mustAppend) {
-	    toInsts->append(fromInsts->elem(j));	
-	    INST_ENV_DEBUG
-	      cerr << "Added Inatance " 
-		   << fromInsts->elem(j)->asString();
-	  }
-	}
-      }
-    }
+    
+    INST_ENV_DEBUG
+      cerr << "Adding Instance for " << tcFQN << endl;
+    toEnv->addBinding(tcFQN, fromInsts);
   }
 }
 
@@ -317,10 +300,23 @@ UpdateMegaEnvs(GCPtr<UocInfo> uoc)
   GCPtr<Environment< CVector<GCPtr<Instance> > > > megaInstEnv =
     uoc->instEnv->parent;
   
+  INST_ENV_DEBUG
+    cerr << "#envs = " << megaEnv->bindings->size() 
+	 << endl
+	 << "#tss = " << megaGamma->bindings->size() 
+	 << endl
+	 << "#Instances = " << megaInstEnv->bindings->size() 
+	 << endl;
+
   for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
     GCPtr<UocInfo> puoci = UocInfo::ifList->elem(i);
     if((puoci->flags & UOC_IS_MUTABLE) ||
        ((puoci->flags & UOC_SEEN_BY_INST) == 0)) {
+      INST_ENV_DEBUG
+	cerr << "Importing Symbols from Interface: "
+	     << puoci->uocName << "."
+	     << endl;
+
       importSymBindings(puoci->env, megaEnv);
       importTSBindings(puoci->gamma, megaGamma);
       importInstBindings(puoci->instEnv, megaInstEnv); 
@@ -332,6 +328,11 @@ UpdateMegaEnvs(GCPtr<UocInfo> uoc)
     GCPtr<UocInfo> puoci = UocInfo::srcList->elem(i);
     if((puoci->flags & UOC_IS_MUTABLE) ||
        ((puoci->flags &UOC_SEEN_BY_INST) == 0)) {
+      INST_ENV_DEBUG
+	cerr << "Importing Symbols from Module: "
+	     << puoci->uocName << "."
+	     << endl;
+      
       importSymBindings(puoci->env, megaEnv);
       importTSBindings(puoci->gamma, megaGamma);
       importInstBindings(puoci->instEnv, megaInstEnv); 
