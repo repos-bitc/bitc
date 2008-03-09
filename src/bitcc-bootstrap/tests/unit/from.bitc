@@ -36,11 +36,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(provide main bitc.main)
 
-(define anil nil)
-(define anIntNil (cons 10:int32 anil))
-(define aBoolNil (cons #t anil))
-(define main.main:(fn ((vector string)) int32)
+(from bitc.main import main)
+(from bitc.list import (= MAP map))
+(define main:(fn ((vector string)) int32)
   (lambda (argvec)
-    anIntNil aBoolNil 0))
+    (MAP (lambda (x) x) (cons #t nil))
+    0))
+

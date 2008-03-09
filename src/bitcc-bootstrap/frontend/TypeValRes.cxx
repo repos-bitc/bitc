@@ -409,6 +409,8 @@ isExpansive(std::ostream& errStream,
   case at_interface:
   case at_import:
   case at_provide:
+  case at_from:
+  case at_ifsel:
   case agt_CompilationUnit:
   case at_defexception:
   case at_deftypeclass:

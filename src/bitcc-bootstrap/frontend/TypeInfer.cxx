@@ -2332,6 +2332,46 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       break;
     }
 
+  case at_from:
+    {
+      GCPtr<Environment<TypeScheme> > tmpGamma = gamma->newScope();
+      ast->envs.gamma = gamma;
+
+      GCPtr<AST> ifName = ast->child(0);
+      
+      assert(ifName->envs.gamma);
+      assert(ifName->envs.instEnv);
+      
+      for (size_t c = 1; c < ast->children->size(); c++) {
+	GCPtr<AST> alias = ast->child(c);
+	GCPtr<AST> thisName = alias->child(0);
+	GCPtr<AST> thatName = alias->child(1);
+	
+	GCPtr<TypeScheme> sigma = ifName->envs.gamma->getBinding(thatName->s);
+	
+	if(!sigma) {
+	  errStream << ast->loc << ": "
+		    << " attempt to use " << thatName->s 
+		    << ", which has an unknown, or buggy type"
+		    << std::endl;
+	  errFree = false;
+	  break;
+	}
+	
+	tmpGamma->addBinding(thisName->s, sigma);
+	tmpGamma->setFlags(ast->child(0)->s, BF_PRIVATE);
+      }	
+      
+      gamma->mergeBindingsFrom(tmpGamma);
+      break;
+    }
+
+  case at_ifsel:
+    {
+      assert(false);
+      break;
+    }
+
   case at_declares:
     {
       ast->tagType = NULL;

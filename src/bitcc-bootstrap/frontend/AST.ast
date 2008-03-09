@@ -567,7 +567,7 @@ GROUP type_definition = defunion | defstruct
                       | defexception;
 GROUP tc_definition = deftypeclass | definstance;
 GROUP value_definition = define;
-GROUP if_definition = proclaim 
+GROUP if_definition = proclaim | from
                     | import | provide
                     | declare | use;
 
@@ -633,6 +633,9 @@ AST define = identPattern expr constraints;
 AST import = ident ifident;
 AST provide = ident ifident;
  
+AST from = ifident ifsel+;
+AST ifsel = ident ident;
+
 // DECLARES cannot be empty from the input, but we do insert
 // empty DECLARES nodes in the parser for the sake of positional 
 // regularity.

@@ -866,6 +866,8 @@ toc(std::ostream& errStream,
   case at_use:
   case at_import:
   case at_provide:
+  case at_from:
+  case at_ifsel:
   case at_tvlist:
 
   case at_lambda:

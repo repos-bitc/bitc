@@ -353,6 +353,8 @@ ssa(std::ostream& errStream,
   case at_use:
   case at_import:
   case at_provide:
+  case at_from:
+  case at_ifsel:
   case at_defrepr:
     //case at_reprbody:
     //case at_reprcase:

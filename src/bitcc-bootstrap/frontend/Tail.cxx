@@ -125,6 +125,8 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_use:
   case at_import:
   case at_provide:
+  case at_from:
+  case at_ifsel:
   case at_declares:
   case at_declare:
   case at_tvlist:

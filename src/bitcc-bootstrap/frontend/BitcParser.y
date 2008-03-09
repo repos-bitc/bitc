@@ -100,11 +100,12 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 %token <tok> '(' ')' ','	/* unit */
 %token <tok> '[' ']'	/* unit */
 %token <tok> tk_BOOL
-%token <tok>   tk_TRUE   /* #t */
-%token <tok>   tk_FALSE  /* #f */
+%token <tok> tk_TRUE   /* #t */
+%token <tok> tk_FALSE  /* #f */
 %token <tok> tk_CHAR
 %token <tok> tk_STRING
 %token <tok> tk_FLOAT
+%token <tok> tk_FROM
 %token <tok> tk_DOUBLE
 %token <tok> tk_DUP
 %token <tok> tk_QUAD
@@ -196,7 +197,7 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 //%token <tok> tk_SUPER
 %token <tok> tk_SUSPEND
 %token <tok> tk_HIDE
-%type <tok> ifident
+%type <tok>  ifident
 
 //%token <tok> tk_MODULE
 //%token <tok> tk_EXPORT
@@ -217,7 +218,7 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 %type <ast> proclaim_definition
 %type <ast> ptype_name val
 %type <ast> type_definition typapp use_cases use_case
-%type <ast> type_decl externals
+%type <ast> type_decl externals impList alias
 %type <ast> type_cpair eform_cpair
 %type <ast> value_definition tc_definition ti_definition
 %type <ast> import_definition provide_definition
@@ -838,7 +839,7 @@ proclaim_definition: '(' tk_PROCLAIM defident ':' qual_type optdocstring externa
 // IMPORT DEFINITIONS [8.2]
 
 import_definition: '(' tk_IMPORT ident ifident ')' {
-  SHOWPARSE("import_definition -> (IMPORT ident ifident)");
+  SHOWPARSE("import_definition -> ( IMPORT ident ifident )");
   $3->uoc = UocInfo::importInterface(lexer->errStream, $4.loc, $4.str);
   GCPtr<AST> ifIdent = new AST(at_ifident, $4);
   $$ = new AST(at_import, $2.loc, $3, ifIdent); 
@@ -852,9 +853,17 @@ import_definition:  '(' tk_USE use_cases ')' {
   $$->astType = at_use;
 };
 
+import_definition: '(' tk_FROM ifident tk_IMPORT impList ')' {
+  SHOWPARSE("import_definition -> (FROM ifident IMPORT impList)");
+  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
+  GCPtr<AST> ifIdent = new AST(at_ifident, $3);
+  $$ = new AST(at_from, $2.loc, ifIdent);
+  $$->addChildrenFrom($5);
+};
+
 // PROVIDE DEFINITION [8.3]
 provide_definition: '(' tk_PROVIDE ident ifident ')' {
-  SHOWPARSE("import_definition -> (PROVIDE ident ifident)");
+  SHOWPARSE("provide_definition -> (PROVIDE ident ifident)");
   $3->uoc = UocInfo::importInterface(lexer->errStream, $4.loc, $4.str);
   GCPtr<AST> ifIdent = new AST(at_ifident, $4);
   $$ = new AST(at_provide, $2.loc, $3, ifIdent); 
@@ -884,6 +893,32 @@ use_case: '(' ident ident '.' ident ')' {
   GCPtr<AST> usesel = new AST(at_usesel, $3->loc, $3, $5);
   $$ = new AST(at_use_case, $2->loc, $2, usesel);
 };
+
+impList: alias {
+  SHOWPARSE("impList -> alias");
+  $$ = new AST(at_Null, $1->loc, $1);
+};
+impList: impList alias {
+  SHOWPARSE("impList -> impList alias");
+  $$ = $1;
+  $$->addChild($2);
+};
+
+alias: ident {
+  SHOWPARSE("alias -> ident");
+  $$ = new AST(at_ifsel, $1->loc, $1, $1->getDCopy());
+};
+alias: '(' ident ident ident ')' {
+  SHOWPARSE("alias -> ( = ident ident )");
+  
+  if($2->s != "=") {
+    cerr << $2->loc << ": Syntax error, expecting `='.\n";
+    lexer->num_errors++;
+  }
+
+  $$ = new AST(at_ifsel, $2->loc, $3, $4);
+};
+
 
 // definition: '(' tk_DEFTHM ident expr ')'  {
 //    SHOWPARSE("definition -> ( DEFTHM ident expr )");

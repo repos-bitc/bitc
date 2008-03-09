@@ -526,6 +526,22 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
     out << ")";
     break;
 
+  case at_from:
+    out << "(" << ast->atKwd();
+    BitcP(out, ast->child(0), showTypes);
+    out << " import ";
+    doChildren(out, ast, 1, true, showTypes);
+    break;
+
+  case at_ifsel:
+    if(ast->child(0)->s == ast->child(1)->s)
+      out << ast->child(0)->s;
+    else
+      out << "(= " << ast->child(0)->s
+	  << " " << ast->child(1)->s
+	  << ")";
+    break;
+    
   case at_proclaim:
     {
       GCPtr<AST> ident = ast->child(0);

@@ -122,8 +122,8 @@ useIFGamma(const std::string& idName,
 }
 
 /* Use all instances from some other environment. Unlike Type
-   environmen, this one needs explicit checking to make sure there are
-   no collisions */
+   environment, this one needs explicit checking to make sure there
+   are no collisions */
 
 bool
 useIFInsts(std::ostream &errStream,

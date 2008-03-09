@@ -217,6 +217,7 @@ struct KeyWord {
   { "float",            tk_FLOAT },
   { "fn",               tk_FN },
   { "forall",           tk_FORALL },
+  { "from",             tk_FROM },
   { "hide",             tk_HIDE },
   { "if",               tk_IF },
   { "import",           tk_IMPORT },

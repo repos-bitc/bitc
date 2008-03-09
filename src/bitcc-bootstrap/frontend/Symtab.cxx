@@ -111,8 +111,6 @@ useIF(const std::string& idName,
       continue;
     }
       
-    // FIX: This is probably buggered // Swaroop: Why?
-
     std::string s = bdng->nm;
     GCPtr<AST> ast = bdng->val;
 
@@ -152,6 +150,45 @@ bindIdentDef(GCPtr<AST> ast, GCPtr<Environment<AST> > env,
 //        << std::endl;
 
 }
+
+static GCPtr<UocInfo>
+findInterface(std::ostream& errStream, GCPtr<AST> ifAst)
+{
+  GCPtr<UocInfo> iface=NULL;
+  for(size_t i=0; i < UocInfo::ifList->size(); i++) {
+    GCPtr<UocInfo> thisIface = UocInfo::ifList->elem(i);
+    if(thisIface->uocName == ifAst->s) {
+      iface = thisIface;
+      break;
+    }
+  }
+      
+  if(!iface) {
+    errStream << ifAst->loc << ": "
+	      << "Internal Compiler Error. "
+	      << "Interface " << ifAst->s
+	      << " has NOT been processed"
+	      << std::endl;
+    return NULL;
+  }
+  
+  if(!iface->env || !iface->gamma || !iface->instEnv) { 
+    errStream << ifAst->loc << ": "
+	      << "Internal Compiler Error. "
+	      << "Interface " << ifAst->s
+	      << " has at least one NULL environment"
+	      << std::endl;
+    return NULL;
+  }
+  
+  ifAst->envs.env = iface->env;
+  ifAst->envs.gamma = iface->gamma;
+  ifAst->envs.instEnv = iface->instEnv;
+
+  return iface;
+}
+	      
+
 
 static void
 markComplete(GCPtr<Environment<AST> > env)
@@ -1132,8 +1169,6 @@ resolve(std::ostream& errStream,
       // import ident ifname
       GCPtr<Environment<AST> > tmpEnv = env->newScope();
       ast->envs.env = tmpEnv;
-
-      size_t i=0;
       
       if (ast->child(1)->s == env->uocName) {
 	errStream << ast->loc << ": "
@@ -1157,41 +1192,80 @@ resolve(std::ostream& errStream,
       else
 	ast->child(0)->Flags |= ID_IS_PROVIDER;
 
-      for(i=0; i < UocInfo::ifList->size(); i++) {
-	if(UocInfo::ifList->elem(i)->uocName == ast->child(1)->s) {
-	  ast->child(0)->envs.env = UocInfo::ifList->elem(i)->env;
-	  ast->child(0)->envs.gamma = UocInfo::ifList->elem(i)->gamma;
-	  ast->child(0)->envs.instEnv = UocInfo::ifList->elem(i)->instEnv;
-	  break;
-	}
-      }
-      
-      if(i == UocInfo::ifList->size()) {
-	errStream << ast->loc << ": "
-		  << "Internal Compiler Error. "
-		  << "Interface " << ast->child(1)->s
-		  << " has NOT been processed"
-		  << std::endl;
+      GCPtr<UocInfo> iface = findInterface(errStream, ast->child(1)); 
+      if(!iface) {
+	// Error message printed in findInterface() function
 	errorFree = false;
 	break;
       }
 
-      if(!ast->child(0)->envs.env || 
-	 !ast->child(0)->envs.gamma ||
-	 !ast->child(0)->envs.instEnv) { 
+      ast->child(0)->envs.env = iface->env;
+      ast->child(0)->envs.gamma = iface->gamma;
+      ast->child(0)->envs.instEnv = iface->instEnv;
+
+      useIF(ast->child(0)->s, ast->child(0)->envs.env, tmpEnv);
+      env->mergeBindingsFrom(tmpEnv);
+      break;
+    }
+
+  case at_from:
+    {
+      // from ifName alias+
+      GCPtr<Environment<AST> > tmpEnv = env->newScope();
+      ast->envs.env = tmpEnv;
+     
+      GCPtr<AST> ifName = ast->child(0);
+
+      if (ifName->s == env->uocName) {
 	errStream << ast->loc << ": "
-		  << "Internal Compiler Error. "
-		  << "Interface " << ast->child(1)->s
-		  << " has at least one NULL environment"
+		  << "Cannot import an undefined interface. "
 		  << std::endl;
+	
 	errorFree = false;
 	break;
       }
-    
-      assert(ast->child(0)->envs.env);
-      useIF(ast->child(0)->s, ast->child(0)->envs.env, tmpEnv);
-    
+
+      GCPtr<UocInfo> iface = findInterface(errStream, ifName);
+      if(!iface) {
+	// Error message printed in findInterface() function
+	errorFree = false;
+	break;
+      }
+      
+      for (size_t c = 1; c < ast->children->size(); c++) {
+	GCPtr<AST> alias = ast->child(c);
+	GCPtr<AST> thisName = alias->child(0);
+	GCPtr<AST> thatName = alias->child(1);
+	
+	RESOLVE(thatName, iface->env, lamLevel, USE_MODE,
+		id_usebinding, currLB, 
+		((flags & (~NEW_TV_OK))) | NO_CHK_USE_TYPE);
+	
+	if(!errorFree)
+	  break;
+	
+	GCPtr<AST> oldDef = env->getBinding(thisName->s);
+	if(oldDef) {
+	  errStream << alias->loc << ": Conflict for alias definition"
+		    << thisName->s
+		    << ". Previously defined at "
+		    << oldDef->loc
+		    << std::endl;
+	  errorFree = false;
+	  break;
+	}
+	
+	tmpEnv->addBinding(thisName->s, thatName->symbolDef);
+	tmpEnv->setFlags(thisName->s, BF_PRIVATE);
+      }
+      
       env->mergeBindingsFrom(tmpEnv);
+      break;
+    }
+    
+  case at_ifsel:
+    {
+      assert(false);
       break;
     }
 

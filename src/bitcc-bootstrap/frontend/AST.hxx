@@ -293,6 +293,8 @@ enum AstType {
     at_define,
     at_import,
     at_provide,
+    at_from,
+    at_ifsel,
     at_declares,
     at_declare,
     at_tvlist,

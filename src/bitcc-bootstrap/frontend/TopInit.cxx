@@ -224,6 +224,8 @@ TopInit(std::ostream& errStream,
   case at_ifident:
   case at_import:
   case at_provide:
+  case at_from:
+  case at_ifsel:
   case at_declares:
   case at_declare:
   case at_suspend:

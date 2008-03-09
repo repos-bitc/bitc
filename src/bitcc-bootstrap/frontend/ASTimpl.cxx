@@ -516,6 +516,12 @@ AST::atKwd() const
   case at_provide:
     return "provide";
 
+  case at_from:
+    return "from";
+
+  case at_ifsel:
+    return "<ifsel>";
+
   case at_proclaim:
     return "proclaim";
 
