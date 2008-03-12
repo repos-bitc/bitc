@@ -52,6 +52,12 @@ OSDOC_XHTML_OPTS+=\
 	--stringparam sidenavdir $(WEBROOT) \
 	--stringparam topnav $(WEBROOT)/topnav/$(HTML_TOPNAV) \
 	--stringparam topnavdir $(WEBROOT)/topnav
+OSDOC_OHTML_OPTS+=\
+	--param navbars 1 \
+	--stringparam sidenav $(WEBROOT)/sidenav.html \
+	--stringparam sidenavdir $(WEBROOT) \
+	--stringparam topnav $(WEBROOT)/topnav/$(HTML_TOPNAV) \
+	--stringparam topnavdir $(WEBROOT)/topnav
 endif
 OSDOC_HTML_CHUNK_OPTS+= --param enable.chunking 1
 
