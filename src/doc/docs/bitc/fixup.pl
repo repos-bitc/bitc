@@ -20,9 +20,6 @@ $deriveSp="($derive)$em\\{\\_($br)\\}";
 $modelSp="($models)$em\\{\\_($br)\\}";
 $bigcup="\\\\textbf\\{$em\\{\\\\cup\\}\\}";
 $bigcap="\\\\textbf\\{$em\\{\\\\cap\\}\\}";
-$bigstar="\\\\textbf\\{$em\\{\\\\star\\}\\}";
-$curwed="\\\\emph\\{$em\\{\\\\wedge\\}\\}";
-#$transR="\\{\\\$\\\\Rightarrow\\\$\\}\\*";
 $emset="$em($br)";
 $plural1="$emset$em\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}";
 $plural2="$em\\{($br)\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}\\}";
@@ -41,49 +38,15 @@ while(!eof(F)) {
 	$l =~ s/$subs/$EM\{_$1\}/g;
 	$l =~ s/$dummyem//g;
 	
-	#Bold-Ops -> Big-Ops
+	#Bold-Ops - Big-Ops
 	$l =~ s/$bigcup/$EM\{\\bigcup\}/g;
 	$l =~ s/$bigcap/$EM\{\\bigcap\}/g;
 	
-
-	#OSDOC-FIX LIST
-	#\emph{\ensuremath{\wedge}} -> \ensuremath{\curlywedge}
-	$l =~ s/$curwed/$EM\{\\curlywedge\}/g;
-	#\searrow ->  \downharpoonleft
-	$l =~ s/\\searrow/\\downharpoonleft/g;
-	#\blacktriangleleft ->  \blacktriangle
-	$l =~ s/\\blacktriangleleft/\\blacktriangle/g;
-	#\blacktriangleright ->  \blacktriangledown
-	$l =~ s/\\blacktriangleright/\\blacktriangledown/g;
-	
-	#\textbf{\star} to \bigstar
-	$l =~ s/$bigstar/$EM\{\\bigstar\}/g;
-
-	#Bold-Not -> strikeoff
-	$l =~ s/\\textbf\{$em\{\\neg\}\}$em($br)/$EM\{\\not $1\}/g;
-
-	#\ensuremath{\not {\exists}} to \ensuremath{\nexist}
-	$l =~ s/$em\{\\not \{\\exists\}\}/$EM\{\\nexists\}/g;
-	
-        #[[ ... ]] to [\![ .. ]\!]
-	$l =~ s/\{\[\}\{\[\}/\[\[/g;
-	$l =~ s/\{\]\}\{\]\}/\]\]/g;
-	$l =~ s/$BR/$EM\{[\\![\}$1$EM\{]\\!]\}/g;
-
         #{| to {\!| and |} to |\!}
 	# Note that this is *not* paranthesizing replacement
 	$l =~ s/\{\\\{\}\{\\textbar\}/$EM\{\\\{\\!\|\}/g;
 	$l =~ s/\{\\textbar\}\{\\\}\}/$EM\{\|\\!\\\}\}/g;
 
-	# Temporary: Until osdoc some symbols
-	# \textbf{\ensuremath{models}} to \ensuremath{Vdash}
-	$l =~ s/$b\{$em\{\\models\}\}/$EM\{\\Vdash\}/g;
-	$l =~ s/\\blacktriangleright/\\blacktriangle/g;
-
-	# Temporary: Until osdoc supports |||-
-	# \textbf{\emph{\ensuremath{models}}} to \ensuremath{VDash}
-	$l =~ s/\\textbf\{\\emph\{$em\{\\models\}\}\}/$EM\{\\Vvdash\}/g;
-	
 	# \textbf{*}letter\textbf{*} to \mathbb{letter}
 	$l =~ s/$b\{\*\}([A-Za-z])\\textbf\{\*\}/$EM\{\\mathbb{$1}\}/g;
 	
@@ -98,9 +61,6 @@ while(!eof(F)) {
 
 	# \textbf{\emph{\?}}text\textbf{\emph{\?}} to \ensuremath{text}
 	$l =~ s/\\textbf\{\\emph\{\?\}\}([A-Za-z0-9]+)\\textbf\{\\emph\{\?\}\}/$EM\{$1\}/g;
-
-	# \swarr ==> {\searrow\hskip -2.6ex\diagdown}
-	$l =~ s/\\swarrow/\\searrow\\hskip -2.6ex\\diagdown/g;
 
 	#OK??
 	#Derivation and Modelling

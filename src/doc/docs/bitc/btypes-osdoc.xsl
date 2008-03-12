@@ -133,7 +133,7 @@
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>ap;</xsl:text>
   </xsl:template>
-  <!-- approx -->
+  <!-- approx --> 
   <xsl:template match="approx" mode="formula">
     <xsl:call-template name="print.infix">
       <xsl:with-param name="print.infix.op">ap;</xsl:with-param> 
@@ -406,9 +406,11 @@
 
   <!-- Double Bracket expression -->
   <xsl:template match="DBrac" mode="formula">
-    <xsl:text>[[</xsl:text>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>#x301A;</xsl:text>
     <xsl:apply-templates mode="formula"/>
-    <xsl:text>]]</xsl:text>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>#x301B;</xsl:text>
   </xsl:template>
 
   <!-- Special Set -->
@@ -505,23 +507,17 @@
     <xsl:text>rceil;</xsl:text>
   </xsl:template>
 
-
   <!-- incMBOp -->
   <xsl:template match="incMBOp" mode="formula">
-    <xsl:element name="em">
-      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-      <xsl:text>and;</xsl:text>
-    </xsl:element>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>curwed;</xsl:text>
   </xsl:template>
   <!-- incrMB -->
   <xsl:template match="incMB" mode="formula">
-    <xsl:element name="em">
-      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-      <xsl:text>and;</xsl:text>
-    </xsl:element>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>curwed;</xsl:text>
     <xsl:call-template name="print.params"/>
   </xsl:template>  
-
 
   <!-- incrOp -->
   <xsl:template match="incrOp" mode="formula">
@@ -574,24 +570,24 @@
   <!-- maxzTOp -->
   <xsl:template match="maxzTOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>ltrif;</xsl:text>
+    <xsl:text>utrif;</xsl:text>
   </xsl:template>
   <!-- maxzT -->
   <xsl:template match="maxzT" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>ltrif;</xsl:text>
+    <xsl:text>utrif;</xsl:text>
     <xsl:call-template name="print.params"/>
   </xsl:template>  
 
   <!-- minzTOp -->
   <xsl:template match="minzTOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>rtrif;</xsl:text>
+    <xsl:text>dtrif;</xsl:text>
   </xsl:template>
   <!-- minzT -->
   <xsl:template match="minzT" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>rtrif;</xsl:text>
+    <xsl:text>dtrif;</xsl:text>
     <xsl:call-template name="print.params"/>
   </xsl:template>
 
@@ -948,15 +944,6 @@
     </xsl:call-template>
   </xsl:template>
   
-  <!-- Not -->
-  <xsl:template match="Not" mode="formula">
-    <xsl:element name="b">
-      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-      <xsl:text>not;</xsl:text>
-    </xsl:element>
-    <xsl:apply-templates mode="formula"/>
-  </xsl:template>
-
   <!-- forall -->
   <xsl:template match="forall" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -1528,10 +1515,8 @@
 
   <!-- Polymorphic constraint -->
   <xsl:template match="Pcst" mode="formula">
-    <xsl:element name="b">          
-      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-      <xsl:text>star;</xsl:text>	
-    </xsl:element>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>starf;</xsl:text>	
     <xsl:if test="count(*)">
       <xsl:call-template name="print.params"/>
     </xsl:if>
@@ -3397,19 +3382,14 @@
   <!-- the consistency |||- operator -->
   <xsl:template name="print.cst">
     <xsl:param name="print.cst.name"/>
-    
     <xsl:call-template name="print.space"/>
-    <xsl:element name="b">
-      <xsl:element name="em">
-	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-	<xsl:text>models;</xsl:text> 
-	<xsl:if test="$print.cst.name">
-	  <xsl:element name="sub">
-	    <xsl:value-of select="$print.cst.name"/>
-	  </xsl:element>
-	</xsl:if>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>Vvdash;</xsl:text> 
+    <xsl:if test="$print.cst.name">
+      <xsl:element name="sub">
+	<xsl:value-of select="$print.cst.name"/>
       </xsl:element>
-    </xsl:element>
+    </xsl:if>
     <xsl:call-template name="print.space"/>
   </xsl:template>
 
@@ -3418,18 +3398,15 @@
     <xsl:param name="print.sat.name"/>
     
     <xsl:call-template name="print.space"/>
-    <xsl:element name="b">
-      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-      <xsl:text>models;</xsl:text> 
-      <xsl:if test="$print.sat.name">
-	<xsl:element name="sub">
-	  <xsl:value-of select="$print.sat.name"/>
-	</xsl:element>
-      </xsl:if>
-    </xsl:element>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>Vdash;</xsl:text> 
+    <xsl:if test="$print.sat.name">
+      <xsl:element name="sub">
+	<xsl:value-of select="$print.sat.name"/>
+      </xsl:element>
+    </xsl:if>
     <xsl:call-template name="print.space"/>
   </xsl:template>
-
 
   <!-- |-inf infer operator -->
   <xsl:template name="print.infer">
@@ -3971,7 +3948,7 @@
       </xsl:when>
       <xsl:otherwise>
 	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-	<xsl:text>drarr;</xsl:text>
+	<xsl:text>dharl;</xsl:text>
       </xsl:otherwise>
     </xsl:choose>
     

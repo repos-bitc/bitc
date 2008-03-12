@@ -349,9 +349,6 @@
 <!ELEMENT NOT                  %anything.group;>
 <!ELEMENT IMPLIES              %anything.group;*>
 
-<!-- Strike-off a symbol -->
-<!ELEMENT Not                  %anything.group;>
- 
 <!-- forall/exists a, b, ... [.] n -->
 <!ELEMENT forall               %anything.group;*>
 <!ELEMENT exists               %anything.group;*>
