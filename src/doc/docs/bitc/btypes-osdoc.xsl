@@ -1407,17 +1407,24 @@
     </xsl:for-each>
   </xsl:template>  
 
-  <!-- mbpair -->
-  <xsl:template match="mbpair" mode="formula">
+  <!-- mbTop -->
+  <xsl:template match="mbTop" mode="formula">
     <xsl:call-template name="print.maybe"/>
   </xsl:template>    
 
-  <!-- MBPAIR -->
-  <xsl:template match="MBPAIR" mode="formula">
+  <!-- mbFull -->
+  <xsl:template match="mbFull" mode="formula">
     <xsl:call-template name="print.maybe">
       <xsl:with-param name="print.maybe.double">yes</xsl:with-param>
     </xsl:call-template>
   </xsl:template>
+
+  <!-- mbpair -->
+  <xsl:template match="mbpair" mode="formula">
+    <xsl:call-template name="print.maybe">
+      <xsl:with-param name="print.maybe.double">yes</xsl:with-param>
+    </xsl:call-template>
+  </xsl:template>    
   
   <!-- MBpair -->
   <xsl:template match="MBpair" mode="formula">
@@ -1514,12 +1521,27 @@
   </xsl:template>  
 
   <!-- Polymorphic constraint -->
-  <xsl:template match="Pcst" mode="formula">
+  <!-- PcstOp -->
+  <xsl:template match="PcstOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>starf;</xsl:text>	
-    <xsl:if test="count(*)">
-      <xsl:call-template name="print.params"/>
-    </xsl:if>
+    <xsl:text>rarrhk;</xsl:text>	
+    <xsl:element name="sup">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>kappa;</xsl:text>
+    </xsl:element>
+    <xsl:apply-templates select="*[3]" mode="formula"/>
+  </xsl:template>  
+  <!-- Pcst -->
+  <xsl:template match="Pcst" mode="formula">
+    <xsl:apply-templates select="*[2]" mode="formula"/>
+    <xsl:call-template name="print.space"/>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rarrhk;</xsl:text>	
+    <xsl:element name="sup">
+      <xsl:apply-templates select="*[1]" mode="formula"/>
+    </xsl:element>
+    <xsl:call-template name="print.space"/>
+    <xsl:apply-templates select="*[3]" mode="formula"/>
   </xsl:template>  
   
   <!-- ct_set templates -->
@@ -1609,6 +1631,30 @@
   <xsl:template match="nceq" mode="formula">
     <xsl:call-template name="print.infix">
       <xsl:with-param name="print.infix.op">ncong;</xsl:with-param> 
+    </xsl:call-template>
+  </xsl:template>
+
+  <!-- TceqOp -->
+  <xsl:template match="TceqOp" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>sime;</xsl:text>
+  </xsl:template>
+  <!-- Tceq -->
+  <xsl:template match="Tceq" mode="formula">
+    <xsl:call-template name="print.infix">
+      <xsl:with-param name="print.infix.op">sime;</xsl:with-param> 
+    </xsl:call-template>   
+  </xsl:template>
+
+  <!-- TnceqOp -->
+  <xsl:template match="nceqOp" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>nsime;</xsl:text>
+  </xsl:template>
+  <!-- Tnceq -->
+  <xsl:template match="nceq" mode="formula">
+    <xsl:call-template name="print.infix">
+      <xsl:with-param name="print.infix.op">nsime;</xsl:with-param> 
     </xsl:call-template>
   </xsl:template>
 

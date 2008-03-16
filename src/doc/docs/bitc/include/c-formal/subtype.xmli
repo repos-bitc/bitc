@@ -7,7 +7,7 @@
     <btypes:TYPE
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
       <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="M-Refl">
+	<tyRule name="S-Refl">
 	  <tyPre/>
 	  <tyConc>
 	    <Msub>
@@ -16,7 +16,7 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="M-Trans">
+	<tyRule name="S-Trans">
 	  <tyPre>
 	    <Msub>
 	      <type num="0"/>
@@ -34,7 +34,7 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="M-Fn">
+	<tyRule name="S-Fn">
 	  <tyPre>
 	    <eq>
 	      <minz>
@@ -55,18 +55,18 @@
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
-	      <fn M="yes">
+	      <fn>
 		<type num="1"/>
 		<type num="2"/>
 	      </fn>
-	      <fn M="yes">
+	      <fn>
 		<type num="1" dash="'"/>
 		<type num="2" dash="'"/>
 	      </fn>
 	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="M-Pair">
+	<tyRule name="S-Pair">
 	  <tyPre>
 	    <Msub>
 	      <type num="1"/>
@@ -92,7 +92,7 @@
 	</tyRule>  
       </Hrules>
       <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="M-Mut1">
+	<tyRule name="S-Mut1">
 	  <tyPre/>
 	  <tyConc>
 	    <Msub>
@@ -103,7 +103,7 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="M-Mut2">
+	<tyRule name="S-Mut2">
 	  <tyPre>
 	    <Msub>
 	      <type/>
@@ -121,7 +121,7 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="M-May1">
+	<tyRule name="S-May1">
 	  <tyPre>
 	    <!-- This rule MUST NOT be written with a minz(t) 
   	         on the RHS type, minz() on a maybe type a\t 
@@ -136,15 +136,15 @@
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
-	      <mbpair>
+	      <mbTop>
 		<tvar name="alpha"/>
 		<sType/>
-	      </mbpair>
+	      </mbTop>
 	      <type/>
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="M-May2">
+	<tyRule name="S-May2">
 	  <tyPre>
 	    <grouping>
 	      <neq>
@@ -159,15 +159,15 @@
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
-	      <mbpair>
+	      <mbTop>
 		<sType/>
 		<sType dash="'"/>
-	      </mbpair>
+	      </mbTop>
 	      <type/>
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="M-May3">
+	<tyRule name="S-May3">
 	  <tyPre>
 	    <grouping>
 	      <neq>
@@ -183,10 +183,10 @@
 	  <tyConc>
 	    <Msub>
 	      <type/>
-	      <mbpair>
+	      <mbTop>
 		<sType/>
 		<sType dash="'"/>
-	      </mbpair>
+	      </mbTop>
 	    </Msub>
  	  </tyConc>
 	</tyRule>

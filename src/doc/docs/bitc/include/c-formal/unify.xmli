@@ -284,10 +284,10 @@
 	      <unin>
 		<set>
 		  <eq>
-		    <MBPAIR>
+		    <mbFull>
 		      <pType/>
 		      <sType/>
-		    </MBPAIR>
+		    </mbFull>
 		    <type/>
 		  </eq>
 		</set>
@@ -320,10 +320,10 @@
 	      <unin>
 		<set>
 		  <eq>
-		    <mbpair>
+		    <mbTop>
 		      <sType num="1"/>
 		      <sType num="2"/>
-		    </mbpair>
+		    </mbTop>
 		    <type/>
 		  </eq>
 		</set>
@@ -356,14 +356,14 @@
 	      <unin>
 		<set>
 		  <eq>
-		    <MBPAIR>
+		    <mbFull>
 		      <tvar name="alpha"/>
 		      <sType num="1"/>
-		    </MBPAIR>
-		    <MBPAIR>
+		    </mbFull>
+		    <mbFull>
 		      <tvar name="beta"/>
 		      <sType num="2"/>
-		    </MBPAIR>
+		    </mbFull>
 		  </eq>
 		</set>
 		<aCtset/>
@@ -399,14 +399,14 @@
 	      <unin>
 		<set>
 		  <eq>
-		    <mbpair>
+		    <mbTop>
 		      <tvar name="alpha"/>
 		      <sType num="1"/>
-		    </mbpair>
-		    <mbpair>
+		    </mbTop>
+		    <mbTop>
 		      <tvar name="beta"/>
 		      <sType num="2"/>
-		    </mbpair>
+		    </mbTop>
 		  </eq>
 		</set>
 		<aCtset/>
@@ -442,10 +442,10 @@
 	      <unin>
 		<set>
 		  <eq>
-		    <MBPAIR>
+		    <mbFull>
 		      <tvar name="alpha"/>
 		      <sType/>
-		    </MBPAIR>
+		    </mbFull>
 		    <pType/>
 		  </eq>
 		</set>
@@ -486,10 +486,10 @@
 	      <unin>
 		<set>
 		  <eq>
-		    <mbpair>
+		    <mbTop>
 		      <tvar name="alpha"/>
 		      <sType dash="'"/>
-		    </mbpair>
+		    </mbTop>
 		    <sType/>
 		  </eq>
 		</set>
@@ -800,17 +800,17 @@
 		</mutable>
 	      </eq>
 	      <eq>
-		<MBPAIR>
+		<mbFull>
 		  <pType/>
 		  <sType/>
-		</MBPAIR>
+		</mbFull>
 		<type/>
 	      </eq>
 	      <eq>
-		<mbpair>
+		<mbTop>
 		  <sType/>
 		  <sType dsah="'"/>
-		</mbpair>
+		</mbTop>
 		<type/>
 	      </eq>
 	    </set>

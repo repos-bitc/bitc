@@ -327,6 +327,8 @@
                                | neq
                                | ceq
                                | nceq
+                               | Tceq
+                               | Tnceq
                                | Tsub <!-- Copy coersion -->
                                | tsub <!-- SubType -->
                                | Msub <!-- Intermediate-coersion -->
@@ -463,6 +465,9 @@
                                | ctype
                                | CType
                                | MBpair
+                               | mbpair
+                               | mbTop
+                               | mbFull
                                | aggregate
                                | paren              
                                | meta              
@@ -640,8 +645,12 @@
 <!ATTLIST mbpair
                               break       CDATA   #IMPLIED
 >
-<!ELEMENT MBPAIR              (%anytype.group;, %h_set.group;)>
-<!ATTLIST MBPAIR
+<!ELEMENT mbTop              (%anytype.group;%anytype.group;)>
+<!ATTLIST mbTop
+                              break       CDATA   #IMPLIED
+>
+<!ELEMENT mbFull             (%anytype.group;, %anytype.group;)>
+<!ATTLIST mbFull
                               break       CDATA   #IMPLIED
 >
 
@@ -695,6 +704,7 @@
                                dash     CDATA    #IMPLIED
 >
 <!-- Polymorphic constraint -->
+<!ELEMENT PcstOp               >
 <!ELEMENT Pcst                 (%anything.group;*)>
 
 <!ELEMENT aCtset               EMPTY>
@@ -733,11 +743,15 @@
      ====================================================================== -->
 <!ELEMENT ceqOp                EMPTY>
 <!ELEMENT nceqOp               EMPTY>
+<!ELEMENT TceqOp                EMPTY>
+<!ELEMENT TnceqOp               EMPTY>
 <!ELEMENT TsubOp               EMPTY>
 <!ELEMENT tsubOp               EMPTY>
 <!ELEMENT MsubOp               EMPTY>
 <!ELEMENT ceq                  (%anytype.group;, %anytype.group;+)>
 <!ELEMENT nceq                 (%anytype.group;, %anytype.group;+)>
+<!ELEMENT Tceq                  (%anytype.group;, %anytype.group;+)>
+<!ELEMENT Tnceq                 (%anytype.group;, %anytype.group;+)>
 <!ELEMENT Tsub                 ((%anytype.group;|%anyexpr.group;), %anytype.group;+)>
 <!ELEMENT tsub                 ((%anytype.group;|%anyexpr.group;), %anytype.group;+)>
 <!ELEMENT MadjOp               EMPTY>

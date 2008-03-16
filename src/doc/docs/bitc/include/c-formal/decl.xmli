@@ -8,7 +8,7 @@
     <btypes:TYPE
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
       <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="J-Id">
+	<tyRule name="T-Id">
 	  <tyPre>
 	    <mapsto>
 	      <gamma/>
@@ -30,7 +30,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>        
-	<tyRule name=" J-Unit">
+	<tyRule name=" T-Unit">
 	  <tyPre/>
 	  <tyConc>
 	    <TDjudge>
@@ -39,7 +39,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-True">
+	<tyRule name="T-True">
 	  <tyPre/>
 	  <tyConc>
 	    <TDjudge>
@@ -48,7 +48,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-False">
+	<tyRule name="T-False">
 	  <tyPre/>
 	  <tyConc>
 	    <TDjudge>
@@ -57,7 +57,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Hloc">
+	<tyRule name="T-Hloc">
 	  <tyPre>
 	    <mapsto>
 	      <store/>
@@ -76,7 +76,7 @@
 	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="J-Sloc">
+	<tyRule name="T-Sloc">
 	  <tyPre>
 	    <mapsto>
 	      <store/>
@@ -91,7 +91,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Lambda">
+	<tyRule name="T-Lambda">
 	  <tyPre>
 	    <Sjudge>
 	      <assume>
@@ -127,7 +127,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-App">
+	<tyRule name="T-App">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
@@ -161,7 +161,7 @@
 	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="J-If">
+	<tyRule name="T-If">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
@@ -191,7 +191,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-TqExpr">
+	<tyRule name="T-TqExpr">
 	  <tyPre>
 	    <TDjudge>
 	      <aExpr/>
@@ -212,7 +212,7 @@
 	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="J-Set">
+	<tyRule name="T-Set">
 	  <tyPre>
 	    <TDjudge num="j" Msub="yes">
 	      <aExpr num="1"/>
@@ -240,7 +240,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Dup">
+	<tyRule name="T-Dup">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr/>
@@ -262,7 +262,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Deref">
+	<tyRule name="T-Deref">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr/>
@@ -282,7 +282,7 @@
 	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="J-Pair">
+	<tyRule name="T-Pair">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
@@ -314,7 +314,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Fst">
+	<tyRule name="T-Fst">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr/>
@@ -333,7 +333,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Snd">
+	<tyRule name="T-Snd">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr/>
@@ -354,7 +354,7 @@
 	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="J-Let-M [Tq]">
+	<tyRule name="T-Let-M [Tq]">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
@@ -397,7 +397,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Let-P [Tq]">
+	<tyRule name="T-Let-P [Tq]">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>

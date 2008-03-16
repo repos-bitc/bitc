@@ -66,11 +66,11 @@
   <xi:include href="include/c-formal/semantics.xmli"/>
   <xi:include href="include/c-formal/opsem.xmli"/>
   <xi:include href="include/c-formal/locsem.xmli"/>
-  <xi:include href="include/c-formal/Msubtype.xmli"/>
-  <xi:include href="include/c-formal/mdecl.xmli"/>
+  <xi:include href="include/c-formal/subtype.xmli"/>
+  <xi:include href="include/c-formal/decl.xmli"/>
   <xi:include href="include/c-formal/type_system.xmli"/>
-  <xi:include href="include/c-formal/hy-infer.xmli"/>
-  <xi:include href="include/c-formal/hy-unify.xmli"/>
+  <xi:include href="include/c-formal/infer.xmli"/>
+  <xi:include href="include/c-formal/unify.xmli"/>
   <xi:include href="include/c-formal/equational.xmli"/>
   <nocite ref="sridhar2006plos"/>
   <bibliography>

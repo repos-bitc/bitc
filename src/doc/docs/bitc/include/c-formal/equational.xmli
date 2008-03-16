@@ -6,47 +6,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
   <title>Type Inference</title> 
-  <p>
-    <leadin>Equational Presentation</leadin>
-  </p>
   <btypes:TYPE>        
     <grammar>
-      <bnf desc="Base Types">
-	<sType/>
-	<alternatives>
-	  <tvar name="alpha"/>
-	  <unit/>
-	  <bool/>
-	  <fn M="yes"><type/><type/></fn>                  
-	</alternatives>
-      </bnf>
-      <bnfc desc="">
-	<alternatives>
-	  <ref><type/></ref>
-	  <mutable><type/></mutable>
-	  <pair><type/><type/></pair>
-	</alternatives>
-      </bnfc>
-      <bnf desc="Top-Maybe">
-	<pType/>
-	<alternatives>
-	  <sType/>
-	  <mbpair>
-	    <sType/>
-	    <sType/>
-	  </mbpair>
-	</alternatives>
-      </bnf>
-      <bnf desc="Types">
-	<type/>
-	<alternatives>
-	  <pType/>
-	  <MBPAIR>
-	    <pType/>
-	    <sType/>
-	  </MBPAIR>
-	</alternatives>
-      </bnf>
       <bnf desc="Type Scheme">          
 	<aTS/>
 	<alternatives>
@@ -128,127 +89,7 @@
 	<aSubMap num="a"/> 
 	<aSubMap num="b"/> 
       </compose>
-    </btypes:TYPE>. Note that
-    <btypes:TYPE>
-      <eq>
-	<Subst>
-	  <aSubMap num="a.b"/> 
-	  <text content="x"/>
-	</Subst>
-	<Subst>
-	  <compose>
-	    <aSubMap num="a"/> 
-	    <aSubMap num="b"/> 
-	  </compose>
-	  <text content="x"/>
-	</Subst>
-	<Subst>
-	  <aSubMap num="a"/> 
-	  <Subst>
-	    <aSubMap num="b"/>                 
-	    <text content="x"/>
-	  </Subst>
-	</Subst>
-	<Subst>
-	  <aSubMap num="b"/>                 
-	  <Subst>
-	    <aSubMap num="a"/> 
-	    <text content="x"/>
-	  </Subst>
-	</Subst>
-      </eq>
-    </btypes:TYPE>.        
-  </p>
-  <p>
-    <leadin>Translations:</leadin>
-    <br/>
-    <btypes:TYPE>
-      <Forall>
-	<operator symbol="odot"/>
-      </Forall>
-      <text content=", "/>
-      <leadsto>
-	<DBrac>
-	  <op symbol="odot">
-	    <type num="1"/>
-	    <type num="2"/>
-	    <textit content=" ... "/>
-	    <type num="n"/>	      
-	  </op>
-	</DBrac>
-	<DBrac>
-	  <collection>
-	    <op symbol="odot">
-	      <type num="1"/>
-	      <type num="2"/>
-	    </op>
-	    <textit content=" ... "/>
-	    <op symbol="odot">
-	      <type num="n-1"/>	      
-	      <type num="n"/>
-	    </op>
-	  </collection>
-	</DBrac>
-      </leadsto>
-      <br/>
-      <leadsto>
-	<DBrac>
-	  <unf ac="yes">
-	    <aCtset/>
-	  </unf>
-	</DBrac>
-	<DBrac>
-	  <collection>
-	    <unf>
-	      <aCtset/>
-	    </unf>
-	    <pred name="acyclic">
-	      <aCtset/>
-	    </pred>	      
-	  </collection>
-	</DBrac>
-      </leadsto>
-      <br/>
-      <leadsto>
-	<DBrac>
-	  <unf cl="yes">
-	    <aCtset/>
-	  </unf>
-	</DBrac>
-	<DBrac>
-	  <unf>
-	    <TransClose>
-	      <paren>
-		<aCtset/>
-	      </paren>
-	    </TransClose>
-	  </unf>
-	</DBrac>
-      </leadsto>
-    </btypes:TYPE>
-  </p>
-  <definition id="meta">      
-    <title>Meta Constructors</title>      
-    <p>
-      <btypes:TYPE>
-	<floor>
-	  <type/>
-	</floor>
-      </btypes:TYPE>
-      and 
-      <btypes:TYPE>
-	<ceil>
-	  <type/>
-	</ceil>
-      </btypes:TYPE>
-      are "meta-constructors" which (respectively) minimize and
-      maximize the mutability of a type, but are interpreted
-      lazily. The meta-constructors are idempotent. 
-    </p>
-  </definition>
-  <p>
-    Note that in our type system, we have restricted meta types to be
-    syntactically present only as part of function types.
+    </btypes:TYPE>. 
   </p>
   <definition id="special">      
     <title>Specialization</title>
@@ -487,63 +328,20 @@
 	<defn tag="ftvs"/>
       </btypes:TYPE> as follows:
     </p>
-    <example>
-      <p>
- 	<btypes:TYPE>
-	  <unspecified/>
-	  <br/>
-	  <eq>
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
 	    <ftvs>
-	      <fn M="yes">
-		<type num="1"/>
-		<type num="2"/>
-	      </fn>
+	      <unspecified/>
 	    </ftvs>
-	    <unin>
-	      <ftvs>
-		<type num="1"/>
-	      </ftvs>
-	      <ftvs>
-		<type num="2"/>
-	      </ftvs>
-	    </unin>
-	  </eq>
-	  <br/>
-	  <eq>
-	    <ftvs>
-	      <eq>
-		<type num="1"/>
-		<type num="2"/>
-	      </eq>
-	    </ftvs>
-	    <unin>
-	      <ftvs>
-		<type num="1"/>
-	      </ftvs>
-	      <ftvs>
-		<type num="2"/>
-	      </ftvs>
-	    </unin>
-	  </eq>
-	  <br/>
-	  <eq>
-	    <ftvs>
-	      <ceq>
-		<type num="1"/>
-		<type num="2"/>
-	      </ceq>
-	    </ftvs>
-	    <unin>
-	      <ftvs>
-		<type num="1"/>
-	      </ftvs>
-	      <ftvs>
-		<type num="2"/>
-	      </ftvs>
-	    </unin>
-	  </eq>
-	  <br/>
-	  <eq>
+	  </lhs>
+	  <rhs>
+	    <unspecified/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <Pcst>
 		<lKind/>
@@ -551,6 +349,8 @@
 		<type num="2"/>
 	      </Pcst>
 	    </ftvs>
+	  </lhs>
+	  <rhs>
 	    <unin>
 	      <ftvs>
 		<type num="1"/>
@@ -559,581 +359,28 @@
 		<type num="2"/>
 	      </ftvs>
 	    </unin>
-	  </eq>
-	  <br/>
-	  <eq>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
 	    <ftvs>
 	      <aCtset/>
 	    </ftvs>
-	    <Unin>
-	      <ftvs>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<ftvs>
+		  <constraint num="i"/>
+		</ftvs>
+	      </Unin>
+	      <text content=", "/>
+	      <Forall/>
+	      <in>
 		<constraint num="i"/>
-	      </ftvs>
-	    </Unin>
-	  </eq> 
-	  <text content=", "/>
-	  <Forall/>
-	  <in>
-	    <constraint num="i"/>
-	    <aCtset/>
-	  </in>
-	  <br/>
-	  <eq>
-	    <ftvs>
-	      <aCtype/>
-	    </ftvs>
-	    <unin>
-	      <ftvs>
-		<type/>
-	      </ftvs>
-	      <ftvs>
 		<aCtset/>
-	      </ftvs>                  
-	    </unin>
-	  </eq>
-	  <text content=", where "/>
-	  <eq>
-	    <aCtype/>
-	    <ctype>
-	      <type/>
-	      <aCtset/>
-	    </ctype>
-	  </eq>
-	  <br/>
-	  <eq>
-	    <ftvs>
-	      <aTS/>
-	    </ftvs>
-	    <unin>
-	      <ftvs>
-		<tvars name="alpha"/>
-	      </ftvs>
-	      <ftvs>
-		<aCtype/>
-	      </ftvs>                  
-	    </unin>
-	  </eq>
-	  <text content=", where "/>
-	  <eq>
-	    <aTS/>
-	    <forall>
-	      <tvars name="alpha"/>
-	      <aCtype/>
-	    </forall>
-	  </eq>
-	</btypes:TYPE>
-      </p>
-    </example>
-  </definition>
-  <definition id="(Im) Mutability Predicates">      
-    <title>(Im)Mutability Predicates -- redefinition</title>      
-    <example>
-      <p>
-	<btypes:TYPE>
-	  <fnxn name="Immut">
-	    <unit/>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immut">
-	    <bool/>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immut">
-	    <fn>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </fn>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immut">
-	    <ref>
-	      <type/>
-	    </ref>                
-	    <pred name="Immut">
-	      <type/>
-	    </pred>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Immut">
-	    <pair>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </pair>
-	    <AND>
-	      <pred name="Immut">
-		<type num="1"/>
-	      </pred>
-	      <pred name="Immut">
-		<type num="2"/>
-	      </pred>
-	    </AND>
-	  </fnxn>
-	  <br/>
-	  <eq>
-	    <grouping>
-	      <pred name="Immut">
-		<MBPAIR>
-		  <pType/>
-		  <sType/>
-		</MBPAIR>
-	      </pred>
-	      <text content=" | "/>
-	      <neq>
-		<pType/>
-		<tvar name="alpha"/>
-	      </neq>
+	      </in>
 	    </grouping>
-	    <pred name="Immut">
-	      <sType/>
-	    </pred>
-	  </eq>
-	  <br/>
-	  <eq>
-	    <grouping>
-	      <pred name="Immut">
-		<mbpair>
-		  <sType num="1"/>
-		  <sType num="2"/>
-		</mbpair>
-	      </pred>
-	      <text content=" | "/>
-	      <neq>
-		<sType num="1"/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
-	    <pred name="Immut">
-	      <sType num="1"/>
-	    </pred>
-	  </eq>
-	  <br/>
-	  <eq>
-	    <grouping>
-	      <pred name="Immut">
-		<type/>
-	      </pred>
-	      <text content=" (otherwise) "/>
-	    </grouping>
-	    <FALSE/>
-	  </eq>
-	  <br/>
-	  <br/>
-	  <fnxn name="Mut">
-	    <mutable>
-	      <type/>
-	    </mutable>
-	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Mut">
-	    <ref>
-	      <type/>
-	    </ref>                
-	    <pred name="Mut">
-	      <type/>
-	    </pred>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Mut">
-	    <pair>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </pair>
-	    <OR>
-	      <pred name="Mut">
-		<type num="1"/>
-	      </pred>
-	      <pred name="Mut">
-		<type num="2"/>
-	      </pred>
-	    </OR>
-	  </fnxn>
-	  <br/>
-	  <eq>
-	    <grouping>
-	      <pred name="Mut">
-		<MBPAIR>
-		  <pType/>
-		  <sType/>
-		</MBPAIR>
-	      </pred>
-	      <text content=" | "/>
-	      <neq>
-		<pType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
-	    <pred name="Mut">
-	      <sType/>
-	    </pred>
-	  </eq>
-	  <br/>
-	  <eq>
-	    <grouping>
-	      <pred name="Mut">
-		<mbpair>
-		  <sType num="1"/>
-		  <sType num="2"/>
-		</mbpair>
-	      </pred>
-	      <text content=" | "/>
-	      <neq>
-		<sType num="1"/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
-	    <pred name="Mut">
-	      <sType num="1"/>
-	    </pred>
-	  </eq>
-	  <br/>
-	  <eq>
-	    <grouping>
-	      <pred name="Mut">
-		<type/>
-	      </pred>
-	      <text content=" (otherwise) "/>
-	    </grouping>
-	    <FALSE/>
-	  </eq>
-	</btypes:TYPE>
-      </p>
-    </example>
-  </definition>
-  <definition id="min2">      
-    <title>Mutability Max(Min)imization -- redefinition</title>      
-    <btypes:TYPE>
-      <VEqns>
-	<equation>
-	  <lhs>
-	    <minz>
-	      <tvar name="alpha"/>
-	    </minz>
-	  </lhs>
-	  <rhs>
-	    <tvar name="alpha"/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minz>
-	      <unit/>
-	    </minz>
-	  </lhs>
-	  <rhs>
-	    <unit/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minz>
-	      <bool/>
-	    </minz>
-	  </lhs>
-	  <rhs>
-	    <bool/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minz>
-	      <fn>
-		<type/>
-		<type dash="'"/>
-	      </fn>
-	    </minz>
-	  </lhs>
-	  <rhs>
-	    <fn>
-	      <type/>
-	      <type dash="'"/>
-	    </fn>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minz>
-	      <ref>
-		<type/>
-	      </ref>
-	    </minz>
-	  </lhs>
-	  <rhs>
-	    <ref>
-	      <type/>
-	    </ref>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minz>
-	      <mutable>
-		<type/>
-	      </mutable>
-	    </minz>
-	  </lhs>
-	  <rhs>
-	    <minz>
-	      <type/>
-	    </minz>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minz>
-	      <pair>
-		<type/>
-		<type dash="'"/>
-	      </pair>
-	    </minz>
-	  </lhs>
-	  <rhs>
-	    <pair>
-	      <minz>
-		<type/>	
-	      </minz>
-	      <minz>
-		<type dash="'"/>
-	      </minz>
-	    </pair>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minz>
-	      <mbpair>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbpair>
-	    </minz>
-	  </lhs>
-	  <rhs>
-	    <minz>
-	      <sType/>
-	    </minz>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minz>
-	      <mbpair>
-		<sType/>
-		<sType dash="'"/>
-	      </mbpair>
-	    </minz>
-	    <grouping>
-	      <neq>
-		<sType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
-	  </lhs>
-	  <rhs>
-	    <minz>
-	      <sType/>
-	    </minz>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minz>
-	      <MBPAIR>
-		<tvar name="alpha"/>
-		<sType/>
-	      </MBPAIR>
-	    </minz>
-	  </lhs>
-	  <rhs>
-	    <minz>
-	      <sType/>
-	    </minz>
-	  </rhs>
-	</equation>
-	<equation sep="4pt">
-	  <lhs>
-	    <minz>
-	      <MBPAIR>
-		<pType/>
-		<sType/>
-	      </MBPAIR>
-	    </minz>
-	    <grouping>
-	      <neq>
-		<pType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
-	  </lhs>
-	  <rhs>
-	    <minz>
-	      <pType/>
-	    </minz>
-	  </rhs>
-	</equation>
-	<!-- Second set starts here -->
-	<equation>
-	  <lhs>
-	    <minzT>
-	      <tvar name="alpha"/>
-	    </minzT>
-	  </lhs>
-	  <rhs>
-	    <tvar name="alpha"/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzT>
-	      <unit/>
-	    </minzT>
-	  </lhs>
-	  <rhs>
-	    <unit/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzT>
-	      <bool/>
-	    </minzT>
-	  </lhs>
-	  <rhs>
-	    <bool/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzT>
-	      <fn>
-		<type/>
-		<type dash="'"/>
-	      </fn>
-	    </minzT>
-	  </lhs>
-	  <rhs>
-	    <fn>
-	      <type/>
-	      <type dash="'"/>
-	    </fn>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzT>
-	      <ref>
-		<type/>
-	      </ref>
-	    </minzT>
-	  </lhs>
-	  <rhs>
-	    <ref>
-	      <type/>
-	    </ref>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzT>
-	      <mutable>
-		<type/>
-	      </mutable>
-	    </minzT>
-	  </lhs>
-	  <rhs>
-	    <minzT>
-	      <type/>
-	    </minzT>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzT>
-	      <pair>
-		<type/>
-		<type dash="'"/>
-	      </pair>
-	    </minzT>
-	  </lhs>
-	  <rhs>
-	    <pair>
-	      <type/>	
-	      <type dash="'"/>
-	    </pair>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzT>
-	      <mbpair>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbpair>
-	    </minzT>
-	  </lhs>
-	  <rhs>
-	    <minzT>
-	      <sType/>
-	    </minzT>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzT>
-	      <mbpair>
-		<sType/>
-		<sType dash="'"/>
-	      </mbpair>
-	    </minzT>
-	    <grouping>
-	      <neq>
-		<sType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
-	  </lhs>
-	  <rhs>
-	    <minzT>
-	      <sType/>
-	    </minzT>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzT>
-	      <MBPAIR>
-		<tvar name="alpha"/>
-		<sType/>
-	      </MBPAIR>
-	    </minzT>
-	  </lhs>
-	  <rhs>
-	    <minzT>
-	      <sType/>
-	    </minzT>
-	  </rhs>
-	</equation>
-	<equation sep="4pt">
-	  <lhs>
-	    <minzT>
-	      <MBPAIR>
-		<pType/>
-		<sType/>
-	      </MBPAIR>
-	    </minzT>
-	    <grouping>
-	      <neq>
-		<pType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
-	  </lhs>
-	  <rhs>
-	    <minzT>
-	      <pType/>
-	    </minzT>
 	  </rhs>
 	</equation>
       </VEqns>
@@ -1227,10 +474,10 @@
 	<equation>
 	  <lhs>
 	    <concrete>
-	      <mbpair>
+	      <mbTop>
 		<tvar name="alpha"/>
 		<sType/>
-	      </mbpair>
+	      </mbTop>
 	    </concrete>
 	  </lhs>
 	  <rhs>
@@ -1242,10 +489,10 @@
 	<equation>
 	  <lhs>
 	    <concrete>
-	      <mbpair>
+	      <mbTop>
 		<sType/>
 		<sType dash="'"/>
-	      </mbpair>
+	      </mbTop>
 	    </concrete>
 	    <neq>
 	      <sType/>
@@ -1261,10 +508,10 @@
 	<equation>
 	  <lhs>
 	    <concrete>
-	      <MBPAIR>
+	      <mbFull>
 		<tvar name="alpha"/>
 		<sType/>
-	      </MBPAIR>
+	      </mbFull>
 	    </concrete>
 	  </lhs>
 	  <rhs>
@@ -1276,10 +523,10 @@
 	<equation>
 	  <lhs>
 	    <concrete>
-	      <MBPAIR>
+	      <mbFull>
 		<pType/>
 		<sType/>
-	      </MBPAIR>
+	      </mbFull>
 	    </concrete>
 	    <neq>
 	      <pType/>
@@ -1295,190 +542,15 @@
 	<equation>
 	  <lhs>
 	    <concrete>
-	      <MBPAIR>
+	      <mbFull>
 		<pType/>
 		<sType/>
-	      </MBPAIR>
+	      </mbFull>
 	    </concrete>
 	    <textit content="(otherwise)"/>
 	  </lhs>
 	  <rhs>
 	    <FALSE/>
-	  </rhs>
-	</equation>
-      </VEqns>
-    </btypes:TYPE>
-  </definition>
-  <definition id="deepmut">      
-    <title>Deep Mutability Minimization</title>      
-    <btypes:TYPE>
-      <VEqns>
-	<equation>
-	  <lhs>
-	    <minzD>
-	      <tvar name="alpha"/>
-	    </minzD>
-	  </lhs>
-	  <rhs>
-	    <tvar name="alpha"/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzD>
-	      <unit/>
-	    </minzD>
-	  </lhs>
-	  <rhs>
-	    <unit/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzD>
-	      <bool/>
-	    </minzD>
-	  </lhs>
-	  <rhs>
-	    <bool/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzD>
-	      <fn>
-		<type/>
-		<type dash="'"/>
-	      </fn>
-	    </minzD>
-	  </lhs>
-	  <rhs>
-	    <fn>
-	      <type/>
-	      <type dash="'"/>
-	    </fn>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzD>
-	      <ref>
-		<type/>
-	      </ref>
-	    </minzD>
-	  </lhs>
-	  <rhs>
-	    <ref>
-	      <minzD>
-		<type/>
-	      </minzD>
-	    </ref>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzD>
-	      <mutable>
-		<type/>
-	      </mutable>
-	    </minzD>
-	  </lhs>
-	  <rhs>
-	    <minzD>
-	      <type/>
-	    </minzD>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzD>
-	      <pair>
-		<type/>
-		<type dash="'"/>
-	      </pair>
-	    </minzD>
-	  </lhs>
-	  <rhs>
-	    <pair>
-	      <minzD>
-		<type/>	
-	      </minzD>
-	      <minzD>
-		<type dash="'"/>
-	      </minzD>
-	    </pair>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzD>
-	      <mbpair>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbpair>
-	    </minzD>
-	  </lhs>
-	  <rhs>
-	    <minzD>
-	      <sType/>
-	    </minzD>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzD>
-	      <mbpair>
-		<sType/>
-		<sType dash="'"/>
-	      </mbpair>
-	    </minzD>
-	    <grouping>
-	      <neq>
-		<sType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
-	  </lhs>
-	  <rhs>
-	    <minzD>
-	      <sType/>
-	    </minzD>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzD>
-	      <MBPAIR>
-		<tvar name="alpha"/>
-		<sType/>
-	      </MBPAIR>
-	    </minzD>
-	  </lhs>
-	  <rhs>
-	    <minzD>
-	      <sType/>
-	    </minzD>
-	  </rhs>
-	</equation>
-	<equation sep="4pt">
-	  <lhs>
-	    <minzD>
-	      <MBPAIR>
-		<pType/>
-		<sType/>
-	      </MBPAIR>
-	    </minzD>
-	    <grouping>
-	      <neq>
-		<pType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
-	  </lhs>
-	  <rhs>
-	    <minzD>
-	      <pType/>
-	    </minzD>
 	  </rhs>
 	</equation>
       </VEqns>

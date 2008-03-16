@@ -176,10 +176,10 @@
 		  <gamma/>
 		  <mapping>
 		    <id/>
-		    <MBPAIR>
+		    <mbFull>
 		      <tvar name="beta"/>
 		      <tvar name="alpha"/>
-		    </MBPAIR>
+		    </mbFull>
 		  </mapping>
 		</extend>
 		<store/>
@@ -219,14 +219,14 @@
 		    <aExpr/>
 		  </lambda>
 		  <fn M="yes">		
-		    <MBPAIR>
+		    <mbFull>
 		      <tvar name="beta" dash="'"/>
 		      <tvar name="alpha"/>
-		    </MBPAIR>
-		    <MBPAIR>
+		    </mbFull>
+		    <mbFull>
 		      <tvar name="gamma" dash="'"/>
 		      <tvar name="delta"/>
-		    </MBPAIR>
+		    </mbFull>
 		  </fn>
 		</tqExpr>
 	      </conclude>
@@ -236,10 +236,10 @@
 		  <set>
 		    <eq>
 		      <type/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="gamma"/>
 			<tvar name="delta"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -304,10 +304,10 @@
 		    <aExpr num="1"/>
 		    <aExpr num="2"/>
 		  </apply>                 
-		  <MBPAIR>
+		  <mbFull>
 		    <tvar name="epsiv"/>
 		    <tvar name="gamma"/>			
-		  </MBPAIR>
+		  </mbFull>
 		</tqExpr>
 	      </conclude>
 	      <constrain>
@@ -317,26 +317,26 @@
 		  <set>
 		    <eq>
 		      <type num="1"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="alpha"/>
 			<fn M="yes">
-			  <MBPAIR>
+			  <mbFull>
 			    <tvar name="beta" dash="'"/>
 			    <tvar name="beta"/>
-			  </MBPAIR>
-			  <MBPAIR>
+			  </mbFull>
+			  <mbFull>
 			    <tvar name="gamma" dash="'"/>
 			    <tvar name="gamma"/>
-			  </MBPAIR>
+			  </mbFull>
 			</fn>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		    <eq>
 		      <type num="2"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="delta"/>
 			<tvar name="beta"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -417,10 +417,10 @@
 		    <aExpr num="2"/>
 		    <aExpr num="3"/>
 		  </if>       
-		  <MBPAIR>
+		  <mbFull>
 		    <tvar name="epsiv"/>
 		    <tvar name="gamma"/>
-		  </MBPAIR>
+		  </mbFull>
 		</tqExpr>
 	      </conclude>
 	      <constrain>
@@ -431,24 +431,24 @@
 		  <set>
 		    <eq>
 		      <type num="1"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="alpha"/>
 			<bool/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		    <eq>
 		      <type num="2"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="beta"/>
 			<tvar name="gamma"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		    <eq>
 		      <type num="3"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="delta"/>
 			<tvar name="gamma"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -581,17 +581,17 @@
 		    </eq>
 		    <eq>
 		      <type num="1"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="beta"/>
 			<tvar name="gamma"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		    <eq>
 		      <type num="2"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="delta"/>
 			<tvar name="gamma"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -658,14 +658,14 @@
 		    <aExpr num="2"/>
 		  </Pair>  
 		  <pair>
-		    <MBPAIR>
+		    <mbFull>
 		      <tvar name="alpha"/>
 		      <tvar name="gamma"/>
-		    </MBPAIR>
-		    <MBPAIR>
+		    </mbFull>
+		    <mbFull>
 		      <tvar name="beta"/>
 		      <tvar name="delta"/>
-		    </MBPAIR>
+		    </mbFull>
 		  </pair>
 		</tqExpr>
 	      </conclude>                  
@@ -676,17 +676,17 @@
 		  <set>
 		    <eq>
 		      <type num="1"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="alpha" dash="'"/>
 			<tvar name="gamma"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		    <eq>
 		      <type num="2"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="beta" dash="'"/>
 			<tvar name="delta"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -730,10 +730,10 @@
 		  <fst>
 		    <aExpr/>
 		  </fst>
-		  <MBPAIR>
+		  <mbFull>
 		    <tvar name="alpha"/>
 		    <tvar name="beta"/>
-		  </MBPAIR>
+		  </mbFull>
 		</tqExpr>
 	      </conclude>
 	      <constrain>                    
@@ -742,19 +742,19 @@
 		  <set>
 		    <eq>
 		      <type/>
-		      <mbpair>
+		      <mbTop>
 			<tvar name="epsiv"/>
 			<pair>
-			  <MBPAIR>
+			  <mbFull>
 			    <tvar name="alpha"/>
 			    <tvar name="beta"/>
-			  </MBPAIR>
-			  <MBPAIR>
+			  </mbFull>
+			  <mbFull>
 			    <tvar name="gamma"/>
 			    <tvar name="delta"/>
-			  </MBPAIR>
+			  </mbFull>
 			</pair>
-		      </mbpair>
+		      </mbTop>
 		    </eq>
 		  </set>
 		</unin>
@@ -800,10 +800,10 @@
 		  <Snd>
 		    <aExpr/>
 		  </Snd>
-		  <MBPAIR>
+		  <mbFull>
 		    <tvar name="gamma"/>
 		    <tvar name="delta"/>
-		  </MBPAIR>
+		  </mbFull>
 		</tqExpr>
 	      </conclude>
 	      <constrain>                    
@@ -812,19 +812,19 @@
 		  <set>
 		    <eq>
 		      <type/>
-		      <mbpair>
+		      <mbTop>
 			<tvar name="epsiv"/>
 			<pair>
-			  <MBPAIR>
+			  <mbFull>
 			    <tvar name="alpha"/>
 			    <tvar name="beta"/>
-			  </MBPAIR>
-			  <MBPAIR>
+			  </mbFull>
+			  <mbFull>
 			    <tvar name="gamma"/>
 			    <tvar name="delta"/>
-			  </MBPAIR>
+			  </mbFull>
 			</pair>
-		      </mbpair>
+		      </mbTop>
 		    </eq>
 		  </set>
 		</unin>
@@ -871,10 +871,10 @@
 		  </dup>  
 		  <ref>
 		    <paren>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="alpha"/>
 			<tvar name="beta"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </paren>
 		  </ref>
 		</tqExpr>
@@ -885,10 +885,10 @@
 		  <set>
 		    <eq>
 		      <type/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="gamma"/>
 			<tvar name="beta"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -939,12 +939,12 @@
 		  <set>
 		    <eq>
 		      <type/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="beta"/>
 			<ref>
 			  <tvar name="alpha"/>
 			</ref>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -981,18 +981,18 @@
 		  <set>
 		    <eq>
 		      <type num="1"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="gamma"/>
 			<tvar name="beta"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		    <opt>
 		      <eq>
 			<type/>
-			<MBPAIR>
+			<mbFull>
 			  <tvar name="alpha"/>
 			  <tvar name="beta"/>
-			</MBPAIR>
+			</mbFull>
 		      </eq>
 		    </opt>
 		  </set>
@@ -1000,10 +1000,10 @@
 	      </assume>
 	      <conclude>
 		<GEN>
-		  <MBPAIR>
+		  <mbFull>
 		    <tvar name="alpha"/>
 		    <tvar name="beta"/>
-		  </MBPAIR>
+		  </mbFull>
 		  <aTS/>
 		</GEN>
 	      </conclude>
