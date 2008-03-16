@@ -3000,8 +3000,9 @@ EmitObj(std::ostream &optStream, std::ostream &errStream,
   opt << " bitc.out.c";
   opt << " -lbitc";
   opt << " -lgc";
+  opt << " --std=c99";
 
-  std::cerr  << opt.str();
+  std::cerr  << opt.str() << std::endl;
 
   system(opt.str().c_str());
   //system("rm -f bitc.out.c");
