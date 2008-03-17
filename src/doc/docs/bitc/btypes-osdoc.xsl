@@ -1447,6 +1447,13 @@
     <xsl:call-template name="print.params"/>
   </xsl:template>  
 
+  <!-- mb_ps: Maybe power-set -->
+  <xsl:template match="mb_ps" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>weierp;</xsl:text>
+    <xsl:call-template name="print.params"/>
+  </xsl:template>  
+
   <!-- join and meet -->
   <xsl:template match="join" mode="formula">
     <xsl:call-template name="print.procedure">

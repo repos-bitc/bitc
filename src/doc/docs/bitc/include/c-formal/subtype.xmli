@@ -121,7 +121,7 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="S-May1">
+	<tyRule name="S-MT1">
 	  <tyPre>
 	    <!-- This rule MUST NOT be written with a minz(t) 
   	         on the RHS type, minz() on a maybe type a\t 
@@ -144,7 +144,32 @@
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="S-May2">
+	<tyRule name="S-MF1">
+	  <tyPre>
+	    <!-- This rule MUST NOT be written with a minz(t) 
+  	         on the RHS type, minz() on a maybe type a\t 
+  	         returns minz(t). The RHS cannot be a maybe type 
+	         where the mb-var has not concretized.  -->
+	    <Msub>
+	      <maxz>
+		<sType/>
+	      </maxz>
+	      <type/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbFull>
+		<tvar name="alpha"/>
+		<sType/>
+	      </mbFull>
+	      <type/>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="S-MF2">
 	  <tyPre>
 	    <grouping>
 	      <neq>
@@ -167,7 +192,30 @@
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="S-May3">
+	<tyRule name="S-MF2">
+	  <tyPre>
+	    <grouping>
+	      <neq>
+		<sType/>
+		<tvar name="alpha"/>
+	      </neq>
+	    </grouping>
+	    <Msub>
+	      <sType/>
+	      <type/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbFull>
+		<sType/>
+		<sType dash="'"/>
+	      </mbFull>
+	      <type/>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="S-MT3">
 	  <tyPre>
 	    <grouping>
 	      <neq>
@@ -187,6 +235,29 @@
 		<sType/>
 		<sType dash="'"/>
 	      </mbTop>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="S-MF3">
+	  <tyPre>
+	    <grouping>
+	      <neq>
+		<sType/>
+		<tvar name="alpha"/>
+	      </neq>
+	    </grouping>
+	    <Msub>
+	      <type/>
+	      <sType/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <type/>
+	      <mbFull>
+		<sType/>
+		<sType dash="'"/>
+	      </mbFull>
 	    </Msub>
  	  </tyConc>
 	</tyRule>

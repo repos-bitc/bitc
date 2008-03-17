@@ -2548,6 +2548,114 @@
       </Hrules>
     </btypes:TYPE>
   </definition>
+  <definition id="maybe-powerset">
+    <title>Set of top-level maybe variations</title>
+    <p>
+      For any type
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<neq>
+	  <type/>
+	  <mutable>
+	    <type dash="'"/>
+	  </mutable>
+	</neq>
+	<text content=", and for some "/>
+	<collection and="yes">
+	  <tvar name="alpha"/>
+	  <sType/>
+	  <sType dash="'"/>
+	</collection>
+	<text content=", we define "/>
+	<eq>
+	  <mb_ps>
+	    <type/>
+	  </mb_ps>
+	  <set>
+	    <type/>
+	    <mutable>
+	      <type/>
+	    </mutable>
+	    <mbTop>
+	      <tvar name="alpha"/>
+	      <type/>
+	    </mbTop>
+	    <mbTop>
+	      <tvar name="alpha"/>
+	      <mutable>
+		<type/>
+	      </mutable>
+	    </mbTop>
+	    <mbTop>
+	      <type/>
+	      <sType/>
+	    </mbTop>
+	    <mbTop>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <sType/>
+	    </mbTop>
+	    <mbFull>
+	      <tvar name="alpha"/>
+	      <type/>
+	    </mbFull>
+	    <mbFull>
+	      <tvar name="alpha"/>
+	      <mutable>
+		<type/>
+	      </mutable>
+	    </mbFull>
+	    <mbFull>
+	      <type/> 
+	      <sType dash="'"/>
+	    </mbFull>
+	    <mbFull>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <sType dash="'"/>
+	    </mbFull>
+	    <mbFull>
+	      <mbTop>
+		<tvar name="alpha"/>
+		<type/>
+	      </mbTop>
+	      <sType dash="'"/>
+	    </mbFull>
+	    <mbFull>
+	      <mbTop>
+		<tvar name="alpha"/>
+		<mutable>
+		  <type/>
+		</mutable>
+	      </mbTop>
+	      <sType dash="'"/>
+	    </mbFull>
+	    <mbFull>
+	      <mbTop>
+		<type/>
+		<sType/>
+	      </mbTop>
+	      <sType dash="'"/>
+	    </mbFull>
+	    <mbFull>
+	      <mbTop>
+		<mutable>
+		  <type/>
+		</mutable>
+		<sType/>
+	      </mbTop>
+	      <sType dash="'"/>
+	    </mbFull>
+	  </set>
+	</eq>
+      </btypes:TYPE>
+      
+    </p>
+  </definition>
   <definition id="val_res">
     <title>Value Restriction</title>
     <p>
@@ -2705,8 +2813,8 @@
     <title>Stack and Heap Typing</title>
     <p>
       A heap <btypes:TYPE><heap/></btypes:TYPE> and a stack
-      <btypes:TYPE><stack/></btypes:TYPE> are said to be
-      <em>well typed</em> with respect to a binding context
+      <btypes:TYPE><stack/></btypes:TYPE> are said to be <em>well
+	typed</em> with respect to a binding context
       <btypes:TYPE><gamma/></btypes:TYPE> and store typing
       <btypes:TYPE><store/></btypes:TYPE>, and written
       <btypes:TYPE>
@@ -2947,17 +3055,12 @@
 	      <bool/>
 	    </Msub>
 	    <text content=" then "/>
-	    <eq>
+	    <in>
 	      <type/>
-	      <bool/>
-	    </eq>
-	    <text content=" or "/>
-	    <eq>
-	      <type/>
-	      <mutable>
+	      <mb_ps>
 		<bool/>
-	      </mutable>
-	    </eq>
+	      </mb_ps>
+	    </in>
 	    <text content="."/>
 	  </btypes:TYPE>
 	</p>
@@ -2971,17 +3074,12 @@
 	      <unit/>
 	    </Msub>
 	    <text content=" then "/>
-	    <eq>
+	    <in>
 	      <type/>
-	      <unit/>
-	    </eq>
-	    <text content=" or "/>
-	    <eq>
-	      <type/>
-	      <mutable>
+	      <mb_ps>
 		<unit/>
-	      </mutable>
-	    </eq>
+	      </mb_ps>
+	    </in>
 	    <text content="."/>
 	  </btypes:TYPE>
 	</p>
@@ -2997,21 +3095,14 @@
 	      </ref>
 	    </Msub>
 	    <text content=" then "/>
-	    <eq>
+	    <in>
 	      <type/>
-	      <ref>
-		<type dash="'"/>
-	      </ref>
-	    </eq>
-	    <text content=" or "/>
-	    <eq>
-	      <type/>
-	      <mutable>
+	      <mb_ps>
 		<ref>
 		  <type dash="'"/>
 		</ref>
-	      </mutable>
-	    </eq>
+	      </mb_ps>
+	    </in>
 	    <text content="."/>
 	  </btypes:TYPE>
 	</p>
@@ -3028,23 +3119,15 @@
 	      </fn>
 	    </Msub>
 	    <text content=" then "/>
-	    <eq>
+	    <in>
 	      <type/>
-	      <fn>
-		<type num="1" dash="'"/>
-		<type num="2" dash="'"/>
-	      </fn>
-	    </eq>
-	    <text content=" or "/>
-	    <eq>
-	      <type/>
-	      <mutable>
+	      <mb_ps>
 		<fn>
 		  <type num="1" dash="'"/>
 		  <type num="2" dash="'"/>
 		</fn>
-	      </mutable>
-	    </eq>
+	      </mb_ps>
+	    </in>
 	    <text content=", where "/>
 	    <eq>
 	      <minz>
@@ -3079,23 +3162,15 @@
 	      </pair>
 	    </Msub>
 	    <text content=" then "/>
-	    <eq>
+	    <in>
 	      <type/>
-	      <pair>
-		<type num="1" dash="'"/>
-		<type num="2" dash="'"/>
-	      </pair>
-	    </eq>
-	    <text content=" or "/>
-	    <eq>
-	      <type/>
-	      <mutable>
+	      <mb_ps>
 		<pair>
 		  <type num="1" dash="'"/>
 		  <type num="2" dash="'"/>
 		</pair>
-	      </mutable>
-	    </eq>
+	      </mb_ps>
+	    </in>
 	    <text content=", such that "/>
 	    <Msub>
 	      <type num="1"/>
@@ -3289,19 +3364,103 @@
       From 
       <btypes:TYPE>
 	<lem tag="T-sub-inversion"/>
-      </btypes:TYPE> (inversion of copy-coercion), we have,
+      </btypes:TYPE> (inversion of copy-coercion), we know that 
       <btypes:TYPE>
-	<eq>
+	<in>
 	  <type/>
+	  <mb_ps>
+	    <bool/>
+	  </mb_ps>
+	</in>
+      </btypes:TYPE>. 
+      <btypes:TYPE>
+	<text content=" That is, for some "/>
+	<tvar name="alpha"/>
+	<text content=", "/>
+	<sType/>
+	<text content=" , and "/>
+	<sType dash="'"/>
+	<text content=", "/>
+	<type/>
+	<text content=" equals one of: "/>
+	<collection>
 	  <bool/>
-	</eq>
-	<text content=" or "/>
-	<eq>
-	  <type/>
 	  <mutable>
 	    <bool/>
 	  </mutable>
-	</eq>
+	  <mbTop>
+	    <tvar name="alpha"/>
+	    <bool/>
+	  </mbTop>
+	  <mbTop>
+	    <tvar name="alpha"/>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	  </mbTop>
+	  <mbTop>
+	    <bool/>
+	    <sType/>
+	  </mbTop>
+	  <mbTop>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	    <sType/>
+	  </mbTop>
+	  <mbFull>
+	    <tvar name="alpha"/>
+	    <bool/>
+	  </mbFull>
+	  <mbFull>
+	    <tvar name="alpha"/>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	  </mbFull>
+	  <mbFull>
+	    <bool/> 
+	    <sType dash="'"/>
+	  </mbFull>
+	  <mbFull>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	    <sType dash="'"/>
+	  </mbFull>
+	  <mbFull>
+	    <mbTop>
+	      <tvar name="alpha"/>
+	      <bool/>
+	    </mbTop>
+	    <sType dash="'"/>
+	  </mbFull>
+	  <mbFull>
+	    <mbTop>
+	      <tvar name="alpha"/>
+	      <mutable>
+		<bool/>
+	      </mutable>
+	    </mbTop>
+	    <sType dash="'"/>
+	  </mbFull>
+	  <mbFull>
+	    <mbTop>
+	      <bool/>
+	      <sType/>
+	    </mbTop>
+	    <sType dash="'"/>
+	  </mbFull>
+	  <mbFull>
+	    <mbTop>
+	      <mutable>
+		<bool/>
+	      </mutable>
+	      <sType/>
+	    </mbTop>
+	    <sType dash="'"/>
+	  </mbFull>
+	</collection>
       </btypes:TYPE>.
       If
       <btypes:TYPE>
@@ -3323,16 +3482,17 @@
 	  <false/>
 	</eq>
       </btypes:TYPE>.
-      The case
+      Further, the cases like 
       <btypes:TYPE>
-	<eq>
+ 	<eq>
 	  <type/>
 	  <mutable>
 	    <bool/>
 	  </mutable>
 	</eq>
-      </btypes:TYPE> cannot happen because there is no rule that
-      derives a mutable type for a value.
+      </btypes:TYPE>
+      cannot happen because there is no rule that
+      derives a mutable/maybe type for a value.
     </p>
     <p>
       Other cases of the lemma are similar.
