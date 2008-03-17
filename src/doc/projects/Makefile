@@ -21,6 +21,7 @@
 default: package
 BITC_SRC=../..
 OSDOC_XHTML_SRC=$(patsubst %.xhtml,%,$(wildcard *.xhtml))
+OSDOC_OHTML_SRC=$(patsubst %.ohtml,%,$(wildcard *.ohtml))
 HTML_TOPNAV=projects.html
 
 DOCSTYLES= #docstyles.css

@@ -2999,14 +2999,29 @@ id : T
           &beta;-reduction into the body of the
           <progident>let</progident> form.
         </p>
-        <!-- <sect3>
+        <sect3>
           <title>Reference Parameters</title>
-          <p>                    
-            By-reference parameters provide a restricted form of
-            passing address of stack variables. The restrictions
-            placed on by-reference parameters ensure that these stack
-            references do not escape beyond their scope, and are thus
-            safe.
+          <p>
+            By-reference
+            parameters provide an optimized argument passing mechanism
+            for parameters. A by-reference formal parameter is an
+            <em>alias</em> of the passed argument; the internal
+            implementation passes a pointer to the argument
+            rather than a copy of the argument. A by-reference
+            parameter may be a reference to an component of an
+            aggregate type, such as a field or a vector member.
+          </p>
+          <p>
+            The BitC specification permits the representation of a
+            by-reference parameter to be either one word or two. This
+            is intended to simplify the handling of inner pointers by
+            the garbage collector.
+          </p>
+          <p>
+            By-reference parameters can escape only as part of a
+            first-class procedure, but the lifetime of a by-reference
+            parameter cannot exceed the lifetime of its containing
+            scope.
           </p>
           <p>
             The formal parameters of a function can be declared as by
@@ -3016,43 +3031,36 @@ id : T
 (lambda (x:(by-ref &tau;) ...) ...)         ;; or
 (define (f x:(by-ref &tau;) ...) ...)</literallayout>
           <p>
-            The following restrictions apply:
+            A <progident>by-ref</progident> declaration can only
+            appear as a qualifier for the type of a  parameter. This
+            is a syntactic restriction.
           </p>
-          <ol>
-            <li>
-              <p>
-                The <progident>by-ref</progident> declarations can only
-                appear as a qualifier for the type of a  parameter. This
-                is a syntactic restriction. 
-              </p>
-            </li>
-            <li>
-              <p>
-                By-reference parameters are implicitly
-                dereferenced at all use-occurrences except as the
-                target of an assignment. 
-                This ensures that by-reference parameters cannot
-                be captured within data-structures or by escaping
-                closures. 
-              </p>
-            </li>
-            <li>
-              <p>
-                A function with a formal parameter declared as 
-                <progident>(by-ref &tau;)</progident>
-                can only be apllied to an actual argument of type 
-                <progident> &tau;</progident>. That is, unlike 
-                normal parameters, an actual argument of type 
-                <progident>(mutable &tau;)</progident>
-                where the formal parameter is of type 
-                &tau; 
-                or <foreignphrase>vice versa</foreignphrase> is not
-                permitted
-                [Here, &tau; &ne; (mutable &tau;<sup>&prime;</sup>)].
-              </p>
-            </li>
-          </ol>
-      </sect3> -->       
+<!-- The bit about dereferencing should not be stated in the -->
+<!-- specification of the language. The bit about non-escaping is -->
+<!-- mistaken; a first-class procedure value having a by-reference -->
+<!-- parameter can escape, taking the by-reference parameter with it. -->
+<!--           <p> -->
+<!--             By-reference parameters are implicitly -->
+<!--             dereferenced at all use-occurrences except as the -->
+<!--             target of an assignment.  -->
+<!--             This ensures that by-reference parameters cannot -->
+<!--             be captured within data-structures or by escaping -->
+<!--             closures.  -->
+<!--           </p> -->
+          <p>
+            A function with a formal parameter declared as 
+            <progident>(by-ref &tau;)</progident>
+            can only be apllied to an actual argument of type 
+            <progident>&tau;</progident>. That is, unlike 
+            normal parameters, an actual argument of type 
+            <progident>(mutable &tau;)</progident>
+            where the formal parameter is of type 
+            &tau; 
+            or <foreignphrase>vice versa</foreignphrase> is not
+            permitted
+            [Here, &tau; &ne; (mutable &tau;<sup>&prime;</sup>)].
+          </p>
+        </sect3>
       </sect2>
       <sect2>
 	<title>Function Application</title>
