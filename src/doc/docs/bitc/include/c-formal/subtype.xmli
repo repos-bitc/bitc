@@ -193,5 +193,5 @@
       </Hrules>
     </btypes:TYPE>
   </font>
-  <caption><font size="small">Coercion Rules with Maybe Types</font></caption>
+  <caption><font size="small">Copy Coercion Rules</font></caption>
   </figure>

@@ -1329,7 +1329,7 @@
 <!-- 	<btypes:TYPE> -->
 <!-- 	  <leadsto> -->
 <!-- 	    <DBrac> -->
-<!-- 	      <TDjudge sub="yes"> -->
+<!-- 	      <TDjudge Msub="yes"> -->
 <!-- 		<aExpr/> -->
 <!-- 		<type/> -->
 <!-- 	      </TDjudge> -->

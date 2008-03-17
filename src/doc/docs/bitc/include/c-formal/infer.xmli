@@ -1284,5 +1284,5 @@
       </Hrules>
     </btypes:TYPE>
   </font>
-  <caption>Equational Inference Rules</caption>
+  <caption>Type Inference Algorithm</caption>
 </figure>
