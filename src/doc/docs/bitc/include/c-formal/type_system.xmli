@@ -54,6 +54,20 @@
 	  </forall>
 	</alternatives>
       </bnf>
+      <bnf desc="Substitutions">            
+	<aSubMap/>            
+	<alternatives>
+	  <EmptySubst/>
+	  <SubMap>
+	    <tvar name="alpha"/>
+	    <type/>
+	  </SubMap>
+	  <compose>
+	    <aSubMap/>
+	    <aSubMap/>
+	  </compose>
+	</alternatives>
+      </bnf>
       <bnf desc="Binding Environment">
 	<gamma/>
 	<alternatives>
@@ -1296,7 +1310,7 @@
       <btypes:TYPE>
 	<type/>
       </btypes:TYPE> is not-mutable and invariable upto the
-      function boundary. This predicate does not hold to tpe variables
+      function boundary. This predicate does not hold to type variables
       that are not contained within a function type. Similarly, 
       the predicate
       <btypes:TYPE>
@@ -1659,6 +1673,26 @@
 	      <solvable/>
 	    </pred>
 	  </Unin>
+	</eq>
+      </btypes:TYPE>.
+      For Substitutions, we write:
+      <btypes:TYPE>
+	<eq>
+	  <pred name="F">
+	    <aSubMap/>
+	  </pred>
+	  <unin>
+	    <pred name="F">
+	      <dom>
+		<aSubMap/>
+	      </dom>
+	    </pred>
+	    <pred name="F">
+	      <range>
+		<aSubMap/>
+	      </range>
+	    </pred>
+	  </unin>
 	</eq>
       </btypes:TYPE>.
     </p>
@@ -2390,6 +2424,63 @@
       </VEqns>
     </btypes:TYPE>
   </definition>
+  <definition id="GTVs">
+    <title>Generalized Type variables</title>
+    <p>
+      <btypes:TYPE>
+	<pred name="gtv">
+	  <sigma/>
+	</pred>
+      </btypes:TYPE> defines the set of all generalized type variables 
+      in a type-scheme. We extend this definition to a binding
+      environment in a straightforward way.
+    </p>
+    <btypes:TYPE>
+      <!-- mtvs -->
+      <VEqns>
+	<equation>
+	  <lhs>
+	    <pred name="gtv">
+	      <TS>
+		<tvars name="alpha"/>
+		<type/>
+	      </TS>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <set>
+	      <tvars name="alpha"/>
+	    </set>	      
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="gtv">
+	      <gamma/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<pred name="gtv">
+		  <aTS num="i"/>
+		</pred>
+	      </Unin>
+	      <text content=", "/>
+	      <Forall/>
+	      <in>
+		<mapping>
+		  <id/>
+		  <aTS num="i"/>
+		</mapping>
+		<gamma/>
+	      </in>
+	    </grouping>
+	  </rhs>
+	</equation>
+      </VEqns>
+    </btypes:TYPE>
+  </definition>
   <definition id="maybe-consistent">
     <title>Consistency of Maybe types</title>
     <p>
@@ -2405,7 +2496,7 @@
 		<sType/>
 		<sType dash="'"/>
 	      </Forall>
-	      <text content=" such that "/>
+	      <text content="if "/>
 	      <in>
 		<mbTop>
 		  <sType/>
@@ -2413,7 +2504,7 @@
 		</mbTop>
 		<solvables/>
 	      </in>
-	      <text content=", "/>
+	      <text content=" then "/>
 	      <eq>
 		<sType/>
 		<tvar name="alpha"/>
@@ -2431,8 +2522,12 @@
 		<tvar name="alpha"/>
 		<pType/>
 		<sType/>
+		<ceq>
+		  <sType dash="'"/>
+		  <sType/>
+		</ceq>
 	      </Forall>
-	      <text content=" such that "/>
+	      <text content="if "/>
 	      <in>
 		<mbFull>
 		  <pType/>
@@ -2440,10 +2535,18 @@
 		</mbFull>
 		<solvables/>
 	      </in>
-	      <text content=", "/>
+	      <text content=" then "/>
 	      <eq>
 		<pType/>
 		<tvar name="alpha"/>
+	      </eq>
+	      <text content=" or "/>
+	      <eq>
+		<pType/>
+		<mbTop>
+		  <tvar name="alpha"/>
+		  <sType dash="'"/>
+		</mbTop>
 	      </eq>
 	      <text content=" or "/>
 	      <ceq>
@@ -2470,10 +2573,10 @@
 		<solvables/>
 	      </in>
 	      <text content=", "/>
-	      <eq>
+	      <Tceq>
 		<sType/>
 		<sType dash="'"/>
-	      </eq>
+	      </Tceq>
 	    </grouping>
 	  </tyPre>
 	  <tyPre>
@@ -2494,10 +2597,10 @@
 		<solvables/>
 	      </in>
 	      <text content=", "/>
-	      <eq>
+	      <ceq>
 		<sType/>
 		<sType dash="'"/>
-	      </eq>
+	      </ceq>
 	    </grouping>
 	  </tyPre>
 	  <tyPre>
@@ -4305,696 +4408,752 @@
       </li>
     </ol>
   </proof>
-<!--   <lemma id="T-Weakening"> -->
-<!--     <title>Weakening</title> -->
-<!--     <p> -->
-<!--       We will write -->
-<!--       <btypes:TYPE> -->
-<!-- 	<Sjudge> -->
-<!-- 	  <assume> -->
-<!-- 	    <gamma/> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <tqExpr> -->
-<!-- 	    <aExpr/> -->
-<!-- 	    <GEN> -->
-<!-- 	      <type/> -->
-<!-- 	      <aTS/> -->
-<!-- 	    </GEN> -->
-<!-- 	  </tqExpr> -->
-<!-- 	</Sjudge> -->
-<!-- 	<text content=" as a shorthand for "/> -->
-<!-- 	<Sjudge> -->
-<!-- 	  <assume> -->
-<!-- 	    <gamma/> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <tqExpr> -->
-<!-- 	    <aExpr/> -->
-<!-- 	    <type/> -->
-<!-- 	  </tqExpr> -->
-<!-- 	</Sjudge> -->
-<!-- 	<text content=", and "/>             -->
-<!-- 	<Sjudge name="gen"> -->
-<!-- 	  <assume> -->
-<!-- 	    <gamma/> -->
-<!-- 	    <store/> -->
-<!-- 	    <aExpr/> -->
-<!-- 	  </assume> -->
-<!-- 	  <GEN> -->
-<!-- 	    <type/> -->
-<!-- 	    <aTS/> -->
-<!-- 	  </GEN> -->
-<!-- 	</Sjudge> -->
-<!-- 	<text content="."/> -->
-<!--       </btypes:TYPE>            -->
-<!--     </p> -->
-<!--     <ol> -->
-<!--       <li>           -->
-<!-- 	<p> -->
-<!-- 	  If  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Sjudge> -->
-<!-- 	      <assume> -->
-<!-- 		<gamma/> -->
-<!-- 		<store/> -->
-<!-- 	      </assume> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<aExpr/> -->
-<!-- 		<type/> -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </Sjudge>                 -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  then, -->
-<!-- 	</p> -->
-<!-- 	<ol> -->
-<!-- 	  <li> -->
-<!-- 	    <p> -->
-<!-- 	      If -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<supeq> -->
-<!-- 		  <gamma dash="'"/> -->
-<!-- 		  <gamma/> -->
-<!-- 		</supeq> -->
-<!-- 		<text content=" then "/> -->
-<!-- 		<Sjudge> -->
-<!-- 		  <assume> -->
-<!-- 		    <gamma dash="'"/> -->
-<!-- 		    <store/> -->
-<!-- 		  </assume> -->
-<!-- 		  <tqExpr> -->
-<!-- 		    <aExpr/> -->
-<!-- 		    <type/> -->
-<!-- 		  </tqExpr> -->
-<!-- 		</Sjudge> -->
-<!-- 	      </btypes:TYPE>. -->
-<!-- 	    </p> -->
-<!-- 	  </li> -->
-<!-- 	  <li> -->
-<!-- 	    <p> -->
-<!-- 	      If -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<supeq> -->
-<!-- 		  <store dash="'"/> -->
-<!-- 		  <store/> -->
-<!-- 		</supeq> -->
-<!-- 		<text content=" then "/> -->
-<!-- 		<Sjudge> -->
-<!-- 		  <assume> -->
-<!-- 		    <gamma/> -->
-<!-- 		    <store dash="'"/> -->
-<!-- 		  </assume> -->
-<!-- 		  <tqExpr> -->
-<!-- 		    <aExpr/> -->
-<!-- 		    <type/> -->
-<!-- 		  </tqExpr> -->
-<!-- 		</Sjudge> -->
-<!-- 	      </btypes:TYPE>. -->
-<!-- 	    </p> -->
-<!-- 	  </li> -->
-<!-- 	</ol> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  If  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Sjudge> -->
-<!-- 	      <assume> -->
-<!-- 		<gamma/> -->
-<!-- 		<store/> -->
-<!-- 	      </assume> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<aExpr/> -->
-<!-- 		<GEN> -->
-<!-- 		  <type/> -->
-<!-- 		  <aTS/> -->
-<!-- 		</GEN> -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </Sjudge> -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <eq> -->
-<!-- 	      <aTS/> -->
-<!-- 	      <forall> -->
-<!-- 		<tvars name="alpha"/> -->
-<!-- 		<type/> -->
-<!-- 	      </forall> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	</p> -->
-<!-- 	<ol> -->
-<!-- 	  <li> -->
-<!-- 	    <p> -->
-<!-- 	      If -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<supeq> -->
-<!-- 		  <gamma dash="'"/> -->
-<!-- 		  <gamma/> -->
-<!-- 		</supeq>                 -->
-<!-- 		<text content=" and "/> -->
-<!-- 		<eq> -->
-<!-- 		  <inter> -->
-<!-- 		    <ftvs> -->
-<!-- 		      <gamma dash="'"/> -->
-<!-- 		    </ftvs> -->
-<!-- 		    <ftvs> -->
-<!-- 		      <tvars name="alpha"/> -->
-<!-- 		    </ftvs> -->
-<!-- 		  </inter> -->
-<!-- 		  <Empty/> -->
-<!-- 		</eq> -->
-<!-- 		<text content=" then "/> -->
-<!-- 		<Sjudge> -->
-<!-- 		  <assume> -->
-<!-- 		    <gamma dash="'"/> -->
-<!-- 		    <store/> -->
-<!-- 		  </assume> -->
-<!-- 		  <tqExpr> -->
-<!-- 		    <aExpr/> -->
-<!-- 		    <GEN> -->
-<!-- 		      <type/> -->
-<!-- 		      <aTS/> -->
-<!-- 		    </GEN> -->
-<!-- 		  </tqExpr> -->
-<!-- 		</Sjudge> -->
-<!-- 	      </btypes:TYPE>. -->
-<!-- 	    </p> -->
-<!-- 	  </li> -->
-<!-- 	  <li> -->
-<!-- 	    <p> -->
-<!-- 	      If -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<supeq> -->
-<!-- 		  <store dash="'"/> -->
-<!-- 		  <store/> -->
-<!-- 		</supeq> -->
-<!-- 		<text content=" and "/> -->
-<!-- 		<eq> -->
-<!-- 		  <inter> -->
-<!-- 		    <ftvs> -->
-<!-- 		      <store dash="'"/> -->
-<!-- 		    </ftvs> -->
-<!-- 		    <ftvs> -->
-<!-- 		      <tvars name="alpha"/> -->
-<!-- 		    </ftvs> -->
-<!-- 		  </inter> -->
-<!-- 		  <Empty/> -->
-<!-- 		</eq>                -->
-<!-- 		<text content=" then "/> -->
-<!-- 		<Sjudge> -->
-<!-- 		  <assume> -->
-<!-- 		    <gamma/> -->
-<!-- 		    <store dash="'"/> -->
-<!-- 		  </assume> -->
-<!-- 		  <tqExpr> -->
-<!-- 		    <aExpr/> -->
-<!-- 		    <GEN> -->
-<!-- 		      <type/> -->
-<!-- 		      <aTS/> -->
-<!-- 		    </GEN> -->
-<!-- 		  </tqExpr> -->
-<!-- 		</Sjudge> -->
-<!-- 	      </btypes:TYPE>. -->
-<!-- 	    </p> -->
-<!-- 	  </li> -->
-<!-- 	</ol> -->
-<!--       </li> -->
-<!--     </ol> -->
-<!--   </lemma> -->
-<!--   <proof> -->
-<!--     <p> -->
-<!--       Straightforward induction on the typing derivation. -->
-<!--     </p> -->
-<!--   </proof> -->
-<!--   <lemma id="T-VSubstitution"> -->
-<!--     <title>Value Substitution</title> -->
-<!--     <p> -->
-<!--       If -->
-<!--       <btypes:TYPE> -->
-<!-- 	<Sjudge> -->
-<!-- 	  <assume> -->
-<!-- 	    <extend> -->
-<!-- 	      <gamma/> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<id/> -->
-<!-- 		<aTS/> -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </extend> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <tqExpr> -->
-<!-- 	    <aExpr/> -->
-<!-- 	    <type/> -->
-<!-- 	  </tqExpr> -->
-<!-- 	</Sjudge> -->
-<!-- 	<text content=", "/>             -->
-<!-- 	<pred name="Immut"> -->
-<!-- 	  <aTS/> -->
-<!-- 	</pred> -->
-<!-- 	<text content=" and "/> -->
-<!-- 	<Sjudge> -->
-<!-- 	  <assume> -->
-<!-- 	    <gamma/> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <tqExpr> -->
-<!-- 	    <aVal/> -->
-<!-- 	    <type num="v"/> -->
-<!-- 	  </tqExpr> -->
-<!-- 	</Sjudge> -->
-<!-- 	<text content=", and "/> -->
-<!-- 	<Sjudge name="gen"> -->
-<!-- 	  <assume> -->
-<!-- 	    <gamma/> -->
-<!-- 	    <store/> -->
-<!-- 	    <aExpr/> -->
-<!-- 	  </assume> -->
-<!-- 	  <GEN> -->
-<!-- 	    <type num="v"/> -->
-<!-- 	    <aTS/> -->
-<!-- 	  </GEN> -->
-<!-- 	</Sjudge> -->
-<!-- 	<text content=" then "/> -->
-<!-- 	<Sjudge> -->
-<!-- 	  <assume> -->
-<!-- 	    <gamma/> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <tqExpr> -->
-<!-- 	    <subst> -->
-<!-- 	      <aExpr/> -->
-<!-- 	      <id/> -->
-<!-- 	      <aVal/> -->
-<!-- 	    </subst> -->
-<!-- 	    <type/> -->
-<!-- 	  </tqExpr> -->
-<!-- 	</Sjudge>             -->
-<!--       </btypes:TYPE>           -->
-<!--     </p> -->
-<!--   </lemma> -->
-<!--   <proof> -->
-<!--     <p> -->
-<!--       By induction on the typing derivation of -->
-<!--       <btypes:TYPE> -->
-<!-- 	<Sjudge> -->
-<!-- 	  <assume> -->
-<!-- 	    <extend> -->
-<!-- 	      <gamma/> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<id/> -->
-<!-- 		<aTS/> -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </extend> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <tqExpr> -->
-<!-- 	    <aExpr/> -->
-<!-- 	    <type/> -->
-<!-- 	  </tqExpr> -->
-<!-- 	</Sjudge> -->
-<!--       </btypes:TYPE>. -->
-<!--       We proceed by case analysis on the final step of the -->
-<!--       derivation.  -->
-<!--     </p> -->
-<!--     <ol> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case T-Id: We have  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <aExpr/> -->
-<!-- 	      <id name="y"/> -->
-<!-- 	    </eq> -->
-<!-- 	    <text content=", where "/> -->
-<!-- 	    <in> -->
-<!-- 	      <id name="y"/> -->
-<!-- 	      <extend> -->
-<!-- 		<gamma/> -->
-<!-- 		<id/> -->
-<!-- 		<aTS/> -->
-<!-- 	      </extend> -->
-<!-- 	    </in> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	</p> -->
-<!-- 	<p> -->
-<!-- 	  There are two sub cases to consider. If  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <id name="x"/> -->
-<!-- 	      <id name="y"/> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE>, -->
-<!-- 	  then,  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <subst> -->
-<!-- 		<id name="y"/> -->
-<!-- 		<id name="x"/> -->
-<!-- 		<aVal/> -->
-<!-- 	      </subst> -->
-<!-- 	      <aVal/>                 -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE>, -->
-<!-- 	  and the result type  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <type/> -->
-<!-- 	  </btypes:TYPE> is an instantiation of the type scheme  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <aTS/> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  One of the assumptions of the lemma states that -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Sjudge> -->
-<!-- 	      <assume> -->
-<!-- 		<gamma/> -->
-<!-- 		<store/> -->
-<!-- 	      </assume> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<aVal/> -->
-<!-- 		<GEN> -->
-<!-- 		  <type num="v"/> -->
-<!-- 		  <aTS/> -->
-<!-- 		</GEN> -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </Sjudge> -->
-<!-- 	  </btypes:TYPE>. That is,  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <spEq> -->
-<!-- 	      <type/> -->
-<!-- 	      <aTS/> -->
-<!-- 	    </spEq> -->
-<!-- 	  </btypes:TYPE>, and we can infer any more-specific type -->
-<!-- 	  (and in particular the type being instantiated at the -->
-<!-- 	  T-Id rule) instead for this substitution of the -->
-<!-- 	  expression     -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <aVal/> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  Therefore, we have -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Sjudge> -->
-<!-- 	      <assume> -->
-<!-- 		<gamma/> -->
-<!-- 		<store/> -->
-<!-- 	      </assume> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<subst> -->
-<!-- 		  <aExpr/> -->
-<!-- 		  <id/> -->
-<!-- 		  <aVal/> -->
-<!-- 		</subst> -->
-<!-- 		<type/> -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </Sjudge> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	</p> -->
-<!-- 	<p> -->
-<!-- 	  If  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <neq> -->
-<!-- 	      <id name="x"/> -->
-<!-- 	      <id name="y"/> -->
-<!-- 	    </neq> -->
-<!-- 	  </btypes:TYPE>, then  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <subst> -->
-<!-- 		<id name="y"/> -->
-<!-- 		<id name="x"/> -->
-<!-- 		<aVal/> -->
-<!-- 	      </subst> -->
-<!-- 	      <id name="y"/> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE>, -->
-<!-- 	  and the result is immediate. -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case T-Lambda: We have  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <aExpr/> -->
-<!-- 	      <lambda> -->
-<!-- 		<id name="y"/> -->
-<!-- 		<aExpr dash="'"/> -->
-<!-- 	      </lambda> -->
-<!-- 	    </eq> -->
-<!-- 	    <text content=", and "/> -->
-<!-- 	    <eq> -->
-<!-- 	      <type/> -->
-<!-- 	      <fn> -->
-<!-- 		<type num="1"/> -->
-<!-- 		<type num="2"/> -->
-<!-- 	      </fn> -->
-<!-- 	    </eq> -->
+  <lemma id="T-Weakening">
+    <title>Weakening</title>
+    <p>
+      We will write
+      <btypes:TYPE>
+	<Sjudge>
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <GEN>
+	      <type/>
+	      <aTS/>
+	    </GEN>
+	  </tqExpr>
+	</Sjudge>
+	<text content=" as a shorthand for "/>
+	<Sjudge>
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+	<text content=", and "/>
+	<Sjudge name="gen">
+	  <assume>
+	    <gamma/>
+	    <store/>
+	    <aExpr/>
+	  </assume>
+	  <GEN>
+	    <type/>
+	    <aTS/>
+	  </GEN>
+	</Sjudge>
+	<text content="."/>
+      </btypes:TYPE>
+    </p>
+    <ol>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>
+	    </Sjudge>
+	  </btypes:TYPE>
+	  then,
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      If
+	      <btypes:TYPE>
+		<supeq>
+		  <gamma dash="'"/>
+		  <gamma/>
+		</supeq>
+		<text content=" then "/>
+		<Sjudge>
+		  <assume>
+		    <gamma dash="'"/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      If
+	      <btypes:TYPE>
+		<supeq>
+		  <store dash="'"/>
+		  <store/>
+		</supeq>
+		<text content=" then "/>
+		<Sjudge>
+		  <assume>
+		    <gamma/>
+		    <store dash="'"/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	</ol>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aExpr/>
+		<GEN>
+		  <type/>
+		  <aTS/>
+		</GEN>
+	      </tqExpr>
+	    </Sjudge>
+	    <text content=", "/>
+	    <eq>
+	      <aTS/>
+	      <forall>
+		<tvars name="alpha"/>
+		<type/>
+	      </forall>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      If
+	      <btypes:TYPE>
+		<supeq>
+		  <gamma dash="'"/>
+		  <gamma/>
+		</supeq>
+		<text content=" and "/>
+		<eq>
+		  <inter>
+		    <ftvs>
+		      <gamma dash="'"/>
+		    </ftvs>
+		    <ftvs>
+		      <tvars name="alpha"/>
+		    </ftvs>
+		  </inter>
+		  <Empty/>
+		</eq>
+		<text content=" then "/>
+		<Sjudge>
+		  <assume>
+		    <gamma dash="'"/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr/>
+		    <GEN>
+		      <type/>
+		      <aTS/>
+		    </GEN>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      If
+	      <btypes:TYPE>
+		<supeq>
+		  <store dash="'"/>
+		  <store/>
+		</supeq>
+		<text content=" and "/>
+		<eq>
+		  <inter>
+		    <ftvs>
+		      <store dash="'"/>
+		    </ftvs>
+		    <ftvs>
+		      <tvars name="alpha"/>
+		    </ftvs>
+		  </inter>
+		  <Empty/>
+		</eq>
+		<text content=" then "/>
+		<Sjudge>
+		  <assume>
+		    <gamma/>
+		    <store dash="'"/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr/>
+		    <GEN>
+		      <type/>
+		      <aTS/>
+		    </GEN>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	</ol>
+      </li>
+    </ol>
+  </lemma>
+  <proof>
+    <p>
+      Straightforward induction on the typing derivation.
+    </p>
+  </proof>
+  <lemma id="T-TSubstitution">
+    <title>Type Substitution</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<TDjudge>
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+	<text content=" and "/>
+	<CST>
+	  <gamma/>
+	  <store/>
+	  <aExpr/>
+	  <type/>
+	</CST>
+	<text content=", then for any substitution "/>
+	<aSubMap/>
+	<text content=" such that "/>
+	<eq>
+	  <inter>
+	    <ftv>
+	      <aSubMap/>
+	    </ftv>
+	    <pred name="gtv">
+	      <gamma/>
+	    </pred>
+	  </inter>
+	  <Empty/>
+	</eq>
+	<text content=" and "/>
+	<Cst>
+	  <assume/>
+	  <Subst>
+	    <aSubMap/>
+	    <set>
+	      <gamma/>
+	      <store/>
+	      <aExpr/>
+	      <type/>
+	    </set>
+	  </Subst>
+	</Cst>
+	<text content=", we have "/>
+	<Sjudge>
+	  <assume>
+	    <Subst>
+	      <aSubMap/>
+	      <gamma/>
+	    </Subst>
+	    <Subst>
+	      <aSubMap/>
+	      <store/>
+	    </Subst>
+	  </assume>
+	  <tqExpr>
+	    <Subst>
+	      <aSubMap/>
+	      <aExpr/>
+	    </Subst>
+	    <Subst>
+	      <aSubMap/>
+	      <type/>
+	    </Subst>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>.
+    </p>
+  </lemma>
+  <lemma id="T-VSubstitution">
+    <title>Value Substitution</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<Sjudge>
+	  <assume>
+	    <extend>
+	      <gamma/>
+	      <tqExpr>
+		<id/>
+		<aTS/>
+	      </tqExpr>
+	    </extend>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+	<text content=" and "/>
+	<Sjudge>
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <GEN>
+	    <tqExpr>
+	      <aVal/>
+	      <type num="v"/>
+	    </tqExpr>
+	    <aTS/>
+	  </GEN>
+	</Sjudge>
+	<text content=" then "/>
+	<Sjudge>
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <subst>
+	      <aExpr/>
+	      <id/>
+	      <aVal/>
+	    </subst>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>
+    </p>
+  </lemma>
+  <proof>
+    <p>
+      By induction on the typing derivation of
+      <btypes:TYPE>
+	<Sjudge>
+	  <assume>
+	    <extend>
+	      <gamma/>
+	      <tqExpr>
+		<id/>
+		<aTS/>
+	      </tqExpr>
+	    </extend>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>.
+      We proceed by case analysis on the final step of the
+      derivation.
+    </p>
+    <ol>
+      <li>
+	<p>
+	  Case T-Id: We have
+	  <btypes:TYPE>
+	    <eq>
+	      <aExpr/>
+	      <id name="y"/>
+	    </eq>
+	    <text content=", where "/>
+	    <in>
+	      <id name="y"/>
+	      <extend>
+		<gamma/>
+		<id/>
+		<aTS/>
+	      </extend>
+	    </in>
+	  </btypes:TYPE>.
+	</p>
+	<p>
+	  There are two sub cases to consider. If
+	  <btypes:TYPE>
+	    <eq>
+	      <id name="x"/>
+	      <id name="y"/>
+	    </eq>
+	  </btypes:TYPE>,
+	  then,
+	  <btypes:TYPE>
+	    <eq>
+	      <subst>
+		<id name="y"/>
+		<id name="x"/>
+		<aVal/>
+	      </subst>
+	      <aVal/>
+	    </eq>
+	  </btypes:TYPE>,
+	  and the result type
+	  <btypes:TYPE>
+	    <type/>
+	  </btypes:TYPE> is an instantiation of the type scheme
+	  <btypes:TYPE>
+	    <aTS/>
+	  </btypes:TYPE>.
+	  One of the assumptions of the lemma states that
+	  <btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aVal/>
+		<GEN>
+		  <type num="v"/>
+		  <aTS/>
+		</GEN>
+	      </tqExpr>
+	    </Sjudge>
+	  </btypes:TYPE>. That is,
+	  <btypes:TYPE>
+	    <spEq>
+	      <type/>
+	      <aTS/>
+	    </spEq>
+	  </btypes:TYPE>, and we can infer any more-specific type
+	  (and in particular the type being instantiated at the
+	  T-Id rule) instead for this substitution of the
+	  expression
+	  <btypes:TYPE>
+	    <aVal/>
+	  </btypes:TYPE>.
+	  Therefore, we have
+	  <btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<subst>
+		  <aExpr/>
+		  <id/>
+		  <aVal/>
+		</subst>
+		<type/>
+	      </tqExpr>
+	    </Sjudge>
+	  </btypes:TYPE>.
+	</p>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <neq>
+	      <id name="x"/>
+	      <id name="y"/>
+	    </neq>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <eq>
+	      <subst>
+		<id name="y"/>
+		<id name="x"/>
+		<aVal/>
+	      </subst>
+	      <id name="y"/>
+	    </eq>
+	  </btypes:TYPE>,
+	  and the result is immediate.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case T-Lambda: We have
+	  <btypes:TYPE>
+	    <eq>
+	      <aExpr/>
+	      <lambda>
+		<id name="y"/>
+		<aExpr dash="'"/>
+	      </lambda>
+	    </eq>
+	    <text content=", and "/>
+	    <eq>
+	      <type/>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	    </eq>
 	    
-<!-- 	    <text content=", and "/> -->
-<!-- 	    <Sjudge> -->
-<!-- 	      <assume> -->
-<!-- 		<extend> -->
-<!-- 		  <gamma/> -->
-<!-- 		  <tqExpr> -->
-<!-- 		    <id/> -->
-<!-- 		    <aTS/> -->
-<!-- 		  </tqExpr> -->
-<!-- 		  <tqExpr> -->
-<!-- 		    <id name="y"/> -->
-<!-- 		    <type num="1"/> -->
-<!-- 		  </tqExpr> -->
-<!-- 		</extend> -->
-<!-- 		<store/> -->
-<!-- 	      </assume> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<aExpr dash="'"/> -->
-<!-- 		<type num="2"/> -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </Sjudge> -->
-<!-- 	  </btypes:TYPE>.               -->
-<!-- 	</p> -->
-<!-- 	<p> -->
-<!-- 	  We can assume that -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <neq> -->
-<!-- 	      <id/> -->
-<!-- 	      <id name="y"/> -->
-<!-- 	    </neq> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  Since it is clear that the type -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <type num="1"/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  of  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <id name="y"/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  can either use variables already in                -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <gamma/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  or fresh type variables, we know that  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <inter> -->
-<!-- 		<ftvs> -->
-<!-- 		  <extend> -->
-<!-- 		    <gamma/> -->
-<!-- 		    <tqExpr> -->
-<!-- 		      <id name="y"/> -->
-<!-- 		      <type num="1"/> -->
-<!-- 		    </tqExpr> -->
-<!-- 		  </extend> -->
-<!-- 		</ftvs> -->
-<!-- 		<ftvs> -->
-<!-- 		  <aTS/> -->
-<!-- 		</ftvs> -->
-<!-- 	      </inter> -->
-<!-- 	      <Empty/> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  Thus, by weakening lemma, we have: -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Sjudge> -->
-<!-- 	      <assume> -->
-<!-- 		<extend> -->
-<!-- 		  <gamma/> -->
-<!-- 		  <tqExpr> -->
-<!-- 		    <id name="y"/> -->
-<!-- 		    <type num="1"/> -->
-<!-- 		  </tqExpr> -->
-<!-- 		</extend> -->
-<!-- 		<store/> -->
-<!-- 	      </assume> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<aVal/> -->
-<!-- 		<GEN> -->
-<!-- 		  <type num="v"/> -->
-<!-- 		  <aTS/> -->
-<!-- 		</GEN> -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </Sjudge> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  , and, by induction hypothesis,  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Sjudge> -->
-<!-- 	      <assume> -->
-<!-- 		<extend> -->
-<!-- 		  <gamma/> -->
-<!-- 		  <tqExpr> -->
-<!-- 		    <id name="y"/> -->
-<!-- 		    <type num="1"/> -->
-<!-- 		  </tqExpr> -->
-<!-- 		</extend> -->
-<!-- 		<store/> -->
-<!-- 	      </assume> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<subst> -->
-<!-- 		  <aExpr dash="'"/> -->
-<!-- 		  <id/> -->
-<!-- 		  <aVal/> -->
-<!-- 		</subst> -->
-<!-- 		<type num="2"/> -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </Sjudge> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  Finally, by the T-Lambda rule, we have: -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Sjudge> -->
-<!-- 	      <assume> -->
-<!-- 		<gamma/> -->
-<!-- 		<store/> -->
-<!-- 	      </assume> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<lambda> -->
-<!-- 		  <id num="y"/> -->
-<!-- 		  <paren> -->
-<!-- 		    <subst> -->
-<!-- 		      <aExpr dash="'"/> -->
-<!-- 		      <id/>                       -->
-<!-- 		      <aVal/> -->
-<!-- 		    </subst> -->
-<!-- 		  </paren> -->
-<!-- 		</lambda> -->
-<!-- 		<fn> -->
-<!-- 		  <type num="1"/> -->
-<!-- 		  <type num="2"/> -->
-<!-- 		</fn> -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </Sjudge> -->
-<!-- 	  </btypes:TYPE>, and thus -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Sjudge> -->
-<!-- 	      <assume> -->
-<!-- 		<gamma/> -->
-<!-- 		<store/> -->
-<!-- 	      </assume> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<subst> -->
-<!-- 		  <lambda> -->
-<!-- 		    <id num="y"/> -->
-<!-- 		    <aExpr dash="'"/> -->
-<!-- 		  </lambda>                     -->
-<!-- 		  <id/>                       -->
-<!-- 		  <aVal/>                   -->
-<!-- 		</subst> -->
-<!-- 		<fn> -->
-<!-- 		  <type num="1"/> -->
-<!-- 		  <type num="2"/> -->
-<!-- 		</fn> -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </Sjudge> -->
-<!-- 	  </btypes:TYPE>, which is the desired result. -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  T-Set case is similar, except that the substitution -->
-<!-- 	  cannot happen on the LHS of an assignment, since we do -->
-<!-- 	  not perform substitution of mutable values.  -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Other cases are similar. -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--     </ol> -->
-<!--   </proof> -->
-<!--   <lemma id="T-LSubstitution"> -->
-<!--     <title>Location Substitution</title> -->
-<!--     <p> -->
-<!--       If -->
-<!--       <btypes:TYPE> -->
-<!-- 	<Sjudge> -->
-<!-- 	  <assume> -->
-<!-- 	    <extend> -->
-<!-- 	      <gamma/> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<id/> -->
-<!-- 		<type num="0"/> -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </extend> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <tqExpr> -->
-<!-- 	    <aExpr/> -->
-<!-- 	    <type/> -->
-<!-- 	  </tqExpr> -->
-<!-- 	</Sjudge> -->
-<!-- 	<text content=", and for some "/> -->
-<!-- 	<supeq> -->
-<!-- 	  <store dash="'"/> -->
-<!-- 	  <store/> -->
-<!-- 	</supeq> -->
-<!-- 	<text content=", "/> -->
-<!-- 	<tqExpr> -->
-<!-- 	  <mapsto> -->
-<!-- 	    <store/> -->
-<!-- 	    <sLoc/> -->
-<!-- 	    <type num="0"/> -->
-<!-- 	  </mapsto> -->
-<!-- 	</tqExpr> -->
-<!-- 	<text content=", then "/> -->
-<!-- 	<Sjudge> -->
-<!-- 	  <assume> -->
-<!-- 	    <gamma/> -->
-<!-- 	    <store dash="'"/> -->
-<!-- 	  </assume> -->
-<!-- 	  <tqExpr> -->
-<!-- 	    <subst> -->
-<!-- 	      <aExpr/> -->
-<!-- 	      <id/> -->
-<!-- 	      <sLoc/> -->
-<!-- 	    </subst> -->
-<!-- 	    <type/> -->
-<!-- 	  </tqExpr> -->
-<!-- 	</Sjudge>             -->
-<!--       </btypes:TYPE>.           -->
-<!--     </p> -->
-<!--   </lemma> -->
-<!--   <proof> -->
-<!--     <p> -->
-<!--       By induction on the typing derivation of -->
-<!--       <btypes:TYPE> -->
-<!-- 	<Sjudge> -->
-<!-- 	  <assume> -->
-<!-- 	    <extend> -->
-<!-- 	      <gamma/> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<id/> -->
-<!-- 		<type/> -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </extend> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <tqExpr> -->
-<!-- 	    <aExpr/> -->
-<!-- 	    <type/> -->
-<!-- 	  </tqExpr> -->
-<!-- 	</Sjudge> -->
-<!--       </btypes:TYPE>, similar to lemma <xref -->
-<!-- 	ref="T-VSubstitution"/>. -->
-<!--     </p> -->
-<!--   </proof> -->
+	    <text content=", and "/>
+	    <Sjudge>
+	      <assume>
+		<extend>
+		  <gamma/>
+		  <tqExpr>
+		    <id/>
+		    <aTS/>
+		  </tqExpr>
+		  <tqExpr>
+		    <id name="y"/>
+		    <type num="1"/>
+		  </tqExpr>
+		</extend>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aExpr dash="'"/>
+		<type num="2"/>
+	      </tqExpr>
+	    </Sjudge>
+	  </btypes:TYPE>.
+	</p>
+	<p>
+	  We can assume that
+	  <btypes:TYPE>
+	    <neq>
+	      <id/>
+	      <id name="y"/>
+	    </neq>
+	  </btypes:TYPE>.
+	  Since it is clear that the type
+	  <btypes:TYPE>
+	    <type num="1"/>
+	  </btypes:TYPE>
+	  of
+	  <btypes:TYPE>
+	    <id name="y"/>
+	  </btypes:TYPE>
+	  can either use variables already in
+	  <btypes:TYPE>
+	    <gamma/>
+	  </btypes:TYPE>
+	  or fresh type variables, we know that
+	  <btypes:TYPE>
+	    <eq>
+	      <inter>
+		<ftvs>
+		  <extend>
+		    <gamma/>
+		    <tqExpr>
+		      <id name="y"/>
+		      <type num="1"/>
+		    </tqExpr>
+		  </extend>
+		</ftvs>
+		<ftvs>
+		  <aTS/>
+		</ftvs>
+	      </inter>
+	      <Empty/>
+	    </eq>
+	  </btypes:TYPE>.
+	  Thus, by weakening lemma, we have:
+	  <btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<extend>
+		  <gamma/>
+		  <tqExpr>
+		    <id name="y"/>
+		    <type num="1"/>
+		  </tqExpr>
+		</extend>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aVal/>
+		<GEN>
+		  <type num="v"/>
+		  <aTS/>
+		</GEN>
+	      </tqExpr>
+	    </Sjudge>
+	  </btypes:TYPE>
+	  , and, by induction hypothesis,
+	  <btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<extend>
+		  <gamma/>
+		  <tqExpr>
+		    <id name="y"/>
+		    <type num="1"/>
+		  </tqExpr>
+		</extend>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<subst>
+		  <aExpr dash="'"/>
+		  <id/>
+		  <aVal/>
+		</subst>
+		<type num="2"/>
+	      </tqExpr>
+	    </Sjudge>
+	  </btypes:TYPE>.
+	  Finally, by the T-Lambda rule, we have:
+	  <btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<lambda>
+		  <id num="y"/>
+		  <paren>
+		    <subst>
+		      <aExpr dash="'"/>
+		      <id/>
+		      <aVal/>
+		    </subst>
+		  </paren>
+		</lambda>
+		<fn>
+		  <type num="1"/>
+		  <type num="2"/>
+		</fn>
+	      </tqExpr>
+	    </Sjudge>
+	  </btypes:TYPE>, and thus
+	  <btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<subst>
+		  <lambda>
+		    <id num="y"/>
+		    <aExpr dash="'"/>
+		  </lambda>
+		  <id/>
+		  <aVal/>
+		</subst>
+		<fn>
+		  <type num="1"/>
+		  <type num="2"/>
+		</fn>
+	      </tqExpr>
+	    </Sjudge>
+	  </btypes:TYPE>, which is the desired result.
+	</p>
+      </li>
+      <li>
+	<p>
+	  T-Set case is similar, except that the substitution
+	  cannot happen on the LHS of an assignment, since we do
+	  not perform substitution of mutable values.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Other cases are similar.
+	</p>
+      </li>
+    </ol>
+  </proof>
+    <lemma id="T-LSubstitution">
+    <title>Location Substitution</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<Sjudge>
+	  <assume>
+	    <extend>
+	      <gamma/>
+	      <tqExpr>
+		<id/>
+		<type num="0"/>
+	      </tqExpr>
+	    </extend>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+	<text content=", and for some "/>
+	<supeq>
+	  <store dash="'"/>
+	  <store/>
+	</supeq>
+	<text content=", "/>
+	<tqExpr>
+	  <mapsto>
+	    <store/>
+	    <sLoc/>
+	    <type num="0"/>
+	  </mapsto>
+	</tqExpr>
+	<text content=", then "/>
+	<Sjudge>
+	  <assume>
+	    <gamma/>
+	    <store dash="'"/>
+	  </assume>
+	  <tqExpr>
+	    <subst>
+	      <aExpr/>
+	      <id/>
+	      <sLoc/>
+	    </subst>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>.
+    </p>
+  </lemma>
+  <proof>
+    <p>
+      By induction on the typing derivation of
+      <btypes:TYPE>
+	<Sjudge>
+	  <assume>
+	    <extend>
+	      <gamma/>
+	      <tqExpr>
+		<id/>
+		<type/>
+	      </tqExpr>
+	    </extend>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>, similar to lemma <xref
+	ref="T-VSubstitution"/>.
+    </p>
+  </proof>
 <!--   <lemma id="T-sh-safety"> -->
 <!--     <title>Stack and Heap Assignment</title> -->
 <!--     <ol> -->
@@ -6337,3 +6496,49 @@
 <!--     </p> -->
 <!--   </theorem> -->
   </sect1>
+
+<!--   <lemma id="T-SSubstitution"> -->
+<!--     <title>Sub-Type Substitution</title> -->
+<!--     <p> -->
+<!--       If -->
+<!--       <btypes:TYPE> -->
+<!-- 	<CST> -->
+<!-- 	  <type/> -->
+<!-- 	  <type dash="'"/> -->
+<!-- 	</CST> -->
+<!-- 	<text content=" and "/> -->
+<!-- 	<Msub> -->
+<!-- 	  <type/> -->
+<!-- 	  <type dash="'"/> -->
+<!-- 	</Msub>	   -->
+<!-- 	<text content=", then for any substitution "/> -->
+<!-- 	<aSubMap/> -->
+<!-- 	<text content=" such that "/> -->
+<!-- 	<Cst> -->
+<!-- 	  <assume/> -->
+<!-- 	  <Subst> -->
+<!-- 	    <aSubMap/> -->
+<!-- 	    <set> -->
+<!-- 	      <type/> -->
+<!-- 	      <type dash="'"/> -->
+<!-- 	    </set> -->
+<!-- 	  </Subst> -->
+<!-- 	</Cst> -->
+<!-- 	<text content=", we have "/> -->
+<!-- 	<Msub> -->
+<!-- 	  <Subst> -->
+<!-- 	    <aSubMap/> -->
+<!-- 	    <type/> -->
+<!-- 	  </Subst> -->
+<!-- 	  <Subst> -->
+<!-- 	    <aSubMap/> -->
+<!-- 	    <type dash="'"/> -->
+<!-- 	  </Subst> -->
+<!-- 	</Msub>	   -->
+<!--       </btypes:TYPE>. -->
+<!--     </p> -->
+<!--   </lemma> -->
+<!--   <proof> -->
+<!--     <p> -->
+<!--     </p> -->
+<!--   </proof> -->

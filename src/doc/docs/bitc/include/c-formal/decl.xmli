@@ -214,7 +214,7 @@
       <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-Set">
 	  <tyPre>
-	    <TDjudge num="j" Msub="yes">
+	    <TDjudge>
 	      <aExpr num="1"/>
 	      <mutable>
 		<type/>

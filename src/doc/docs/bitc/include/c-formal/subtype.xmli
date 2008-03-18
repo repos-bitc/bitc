@@ -128,9 +128,9 @@
   	         returns minz(t). The RHS cannot be a maybe type 
 	         where the mb-var has not concretized.  -->
 	    <Msub>
-	      <maxz>
+	      <maxzT>
 		<sType/>
-	      </maxz>
+	      </maxzT>
 	      <type/>
 	    </Msub>
 	  </tyPre>
@@ -169,7 +169,7 @@
 	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="S-MF2">
+	<tyRule name="S-MT2">
 	  <tyPre>
 	    <grouping>
 	      <neq>
@@ -196,20 +196,20 @@
 	  <tyPre>
 	    <grouping>
 	      <neq>
-		<sType/>
+		<pType/>
 		<tvar name="alpha"/>
 	      </neq>
 	    </grouping>
 	    <Msub>
-	      <sType/>
+	      <pType/>
 	      <type/>
 	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
 	      <mbFull>
+		<pType/>
 		<sType/>
-		<sType dash="'"/>
 	      </mbFull>
 	      <type/>
 	    </Msub>
@@ -242,21 +242,21 @@
 	  <tyPre>
 	    <grouping>
 	      <neq>
-		<sType/>
+		<pType/>
 		<tvar name="alpha"/>
 	      </neq>
 	    </grouping>
 	    <Msub>
 	      <type/>
-	      <sType/>
+	      <pType/>
 	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
 	      <type/>
 	      <mbFull>
+		<pType/>
 		<sType/>
-		<sType dash="'"/>
 	      </mbFull>
 	    </Msub>
  	  </tyConc>
