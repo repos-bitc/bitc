@@ -145,6 +145,8 @@
     All the above syntactic forms can be parenthesized without
     change in meaning. The let-kind ``-'' is a placeholder for the
     unkinded (input) <progident>let</progident> form.
+    Optional parts of syntax are written within the 
+    <em>[]</em> brackets.
     A substitution is of Z for Y in X is written using the standard
     notation:
     <btypes:TYPE>

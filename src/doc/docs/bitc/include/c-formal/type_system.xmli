@@ -3498,514 +3498,813 @@
       Other cases of the lemma are similar.
     </p>
   </proof>
-<!--   <lemma id="T-progress"> -->
-<!--     <title>Progress</title> -->
-<!--     <p> -->
-<!--       <btypes:TYPE> -->
-<!-- 	<text content="If "/> -->
-<!-- 	<aExpr/> -->
-<!-- 	<text content=" is a closed, well typed term, "/>  -->
-<!-- 	<text content="that is, "/>  -->
-<!-- 	<Sjudge> -->
-<!-- 	  <assume> -->
-<!-- 	    <Empty/> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <tqExpr> -->
-<!-- 	    <aExpr/> -->
-<!-- 	    <type/> -->
-<!-- 	  </tqExpr> -->
-<!-- 	</Sjudge> -->
-<!-- 	<text content=" for some "/>  -->
-<!-- 	<type/> -->
-<!-- 	<text content=" and "/>  -->
-<!-- 	<store/> -->
-<!-- 	<text content=", given any heap "/>  -->
-<!-- 	<heap/> -->
-<!-- 	<text content=" and stack "/>  -->
-<!-- 	<stack/> -->
-<!-- 	<text content=" such that "/>  -->
-<!-- 	<Sjudge> -->
-<!-- 	  <assume> -->
-<!-- 	    <gamma/> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <plus> -->
-<!-- 	    <heap/> -->
-<!-- 	    <stack/> -->
-<!-- 	  </plus> -->
-<!-- 	</Sjudge>  -->
-<!-- 	<text content=", "/>             -->
-<!--       </btypes:TYPE> -->
-<!--     </p> -->
-<!--     <ol> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <text content=" If "/>                 -->
-<!-- 	    <Sjudge name="lval"> -->
-<!-- 	      <assume/> -->
-<!-- 	      <aExpr/> -->
-<!-- 	    </Sjudge> -->
-<!-- 	    <text content=", then "/>               -->
-<!-- 	    <aExpr/> -->
-<!-- 	    <text content=" is either a valid lvalue "/>  -->
-<!-- 	    <lVal/> -->
-<!-- 	    <text content=" (that is, "/> -->
-<!-- 	    <eq> -->
-<!-- 	      <lVal/> -->
-<!-- 	      <sLoc/> -->
-<!-- 	    </eq> -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <in> -->
-<!-- 	      <sLoc/> -->
-<!-- 	      <dom> -->
-<!-- 		<stack/> -->
-<!-- 	      </dom> -->
-<!-- 	    </in> -->
-<!-- 	    <text content=" or "/>  -->
-<!-- 	    <eq> -->
-<!-- 	      <lVal/> -->
-<!-- 	      <deref> -->
-<!-- 		<hLoc/> -->
-<!-- 	      </deref> -->
-<!-- 	    </eq> -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <in> -->
-<!-- 	      <hLoc/> -->
-<!-- 	      <dom> -->
-<!-- 		<heap/> -->
-<!-- 	      </dom> -->
-<!-- 	    </in> -->
-<!-- 	    <text content=") or else "/> -->
-<!-- 	    <Exists> -->
-<!-- 	      <aExpr dash="'"/> -->
-<!-- 	      <stack dash="'"/> -->
-<!-- 	      <heap dash="'"/> -->
-<!-- 	    </Exists> -->
-<!-- 	    <text content=" such that:"/>                -->
-<!-- 	    <leval> -->
-<!-- 	      <opState> -->
-<!-- 		<stack/> -->
-<!-- 		<heap/> -->
-<!-- 		<aExpr/> -->
-<!-- 	      </opState> -->
-<!-- 	      <opState> -->
-<!-- 		<stack dash="'"/> -->
-<!-- 		<heap dash="'"/> -->
-<!-- 		<aExpr dash="'"/> -->
-<!-- 	      </opState> -->
-<!-- 	    </leval> -->
-<!-- 	    <text content="."/>    -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p>               -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <aExpr/> -->
-<!-- 	    <text content=" is a value "/>  -->
-<!-- 	    <aVal/> -->
-<!-- 	    <text content=" or else "/>  -->
-<!-- 	    <Exists> -->
-<!-- 	      <aExpr dash="'"/> -->
-<!-- 	      <stack dash="'"/> -->
-<!-- 	      <heap dash="'"/> -->
-<!-- 	    </Exists> -->
-<!-- 	    <text content=" such that "/>                -->
-<!-- 	    <eval> -->
-<!-- 	      <opState> -->
-<!-- 		<stack/> -->
-<!-- 		<heap/> -->
-<!-- 		<aExpr/> -->
-<!-- 	      </opState> -->
-<!-- 	      <opState> -->
-<!-- 		<stack dash="'"/> -->
-<!-- 		<heap dash="'"/> -->
-<!-- 		<aExpr dash="'"/> -->
-<!-- 	      </opState> -->
-<!-- 	    </eval> -->
-<!-- 	    <text content="."/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--     </ol> -->
-<!--   </lemma> -->
-<!--   <proof> -->
-<!--     <p> -->
-<!--       By induction on the typing derivation.  -->
-<!--     </p> -->
-<!--     <ol> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case T-Unit, T-True, T-False, T-Hloc, T-Lambda: -->
-<!-- 	  (Values) Result is immediate for right execution, and -->
-<!-- 	  cannot happen for right execution -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case T-Id: cannot happen, there is no execution rule for -->
-<!-- 	  variables.  -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case T-Sloc: Immediate for left execution. Right -->
-<!-- 	  execution and can always continue with E-Rval rule as the -->
-<!-- 	  stack is well typed  -->
-<!-- 	  (<btypes:TYPE> -->
-<!-- 	    <Sjudge> -->
-<!-- 	      <assume> -->
-<!-- 		<gamma/> -->
-<!-- 		<store/> -->
-<!-- 	      </assume> -->
-<!-- 	      <plus> -->
-<!-- 		<heap/> -->
-<!-- 		<stack/> -->
-<!-- 	      </plus> -->
-<!-- 	    </Sjudge>  -->
-<!-- 	  </btypes:TYPE>). -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case T-App: Only right execution is possible, no application is well -->
-<!-- 	  typed as an lvalue. We have: -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <aExpr/> -->
-<!-- 	      <apply> -->
-<!-- 		<aExpr num="1"/> -->
-<!-- 		<aExpr num="2"/> -->
-<!-- 	      </apply>                   -->
-<!-- 	    </eq> -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <Msub> -->
-<!-- 	      <aExpr num="1"/> -->
-<!-- 	      <fn> -->
-<!-- 		<type num="1"/> -->
-<!-- 		<type num="2"/> -->
-<!-- 	      </fn> -->
-<!-- 	    </Msub>                   -->
-<!-- 	    <text content=", and "/> -->
-<!-- 	    <Msub> -->
-<!-- 	      <aExpr num="2"/> -->
-<!-- 	      <type num="1"/> -->
-<!-- 	    </Msub>                 -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  If  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <aExpr num="1"/> -->
-<!-- 	    <text content=" or "/> -->
-<!-- 	    <aExpr num="2"/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  is not a value, we can take E-App1# or -->
-<!-- 	  E-App2#. Otherwise, when both  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <aExpr num="1"/> -->
-<!-- 	    <text content=" and "/> -->
-<!-- 	    <aExpr num="2"/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  are values, by canonical forms lemma,  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <aExpr num="1"/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  is of the form -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <lambda> -->
-<!-- 	      <id/> -->
-<!-- 	      <aExpr dash="'"/> -->
-<!-- 	    </lambda> -->
-<!-- 	  </btypes:TYPE>, -->
-<!-- 	  and we can take the step E-App.  -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case T-If: Similar to T-App, only right execution is -->
-<!-- 	  permitted. -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case T-Set: Only right execution is applicable. We have: -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <aExpr/> -->
-<!-- 	      <assign> -->
-<!-- 		<aExpr num="1"/> -->
-<!-- 		<aExpr num="2"/> -->
-<!-- 	      </assign>   -->
-<!-- 	    </eq> -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <Msub> -->
-<!-- 	      <aExpr num="1"/> -->
-<!-- 	      <fn> -->
-<!-- 		<type num="1"/> -->
-<!-- 		<type num="2"/> -->
-<!-- 	      </fn> -->
-<!-- 	    </Msub>                   -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <TDjudge Msub="yes"> -->
-<!-- 	      <aExpr num="1"/> -->
-<!-- 	      <mutable> -->
-<!-- 		<type/> -->
-<!-- 	      </mutable> -->
-<!-- 	    </TDjudge> -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <TDjudge Msub="yes"> -->
-<!-- 	      <aExpr num="2"/> -->
-<!-- 	      <type/> -->
-<!-- 	    </TDjudge> -->
-<!-- 	    <text content=", and "/> -->
-<!-- 	    <Sjudge name="lval"> -->
-<!-- 	      <assume/>                   -->
-<!-- 	      <aExpr num="1"/>                   -->
-<!-- 	    </Sjudge> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  If  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <aExpr num="1"/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  not an lvalue, since we have   -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Sjudge name="lval"> -->
-<!-- 	      <assume/>                   -->
-<!-- 	      <aExpr num="1"/>                   -->
-<!-- 	    </Sjudge> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  we can take E-:=lhs# by induction hypothesis. -->
-<!-- 	  Similarly, if  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <aExpr num="2"/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  is not a value, we can take E-:=rhs#. -->
-<!-- 	  Finally, if -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <aExpr num="1"/> -->
-<!-- 	      <lVal/> -->
-<!-- 	    </eq> -->
-<!-- 	    <text content=" and "/> -->
-<!-- 	    <eq> -->
-<!-- 	      <aExpr num="1"/> -->
-<!-- 	      <aVal/> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE>, -->
-<!-- 	  we can take the step E-:=Stack or E-:=Heap as -->
-<!-- 	  applicable.  -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case T-Dup: Only right execution is -->
-<!-- 	  permitted, and can take E-Dup# or E-Dup as -->
-<!-- 	  applicable.  -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case T-Deref: We have: -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <aExpr/> -->
-<!-- 	      <deref> -->
-<!-- 		<aExpr num="1"/> -->
-<!-- 	      </deref> -->
-<!-- 	    </eq> -->
-<!-- 	    <text content=", and "/> -->
-<!-- 	    <TDjudge Msub="yes"> -->
-<!-- 	      <aExpr num="1"/>                   -->
-<!-- 	      <ref> -->
-<!-- 		<type/> -->
-<!-- 	      </ref>                   -->
-<!-- 	    </TDjudge> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  Execution can take EL-^# or E-^# as -->
-<!-- 	  applicable if   -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <aExpr num="1"/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  is not a value. -->
-<!-- 	  If  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Msub> -->
-<!-- 	      <aExpr num="1"/> -->
-<!-- 	      <ref> -->
-<!-- 		<type/> -->
-<!-- 	      </ref> -->
-<!-- 	    </Msub> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  is a value, then, from the canonical forms lemma,  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <aExpr num="1"/> -->
-<!-- 	      <hLoc/> -->
-<!-- 	    </eq> -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <in> -->
-<!-- 	      <hLoc/> -->
-<!-- 	      <dom> -->
-<!-- 		<store/> -->
-<!-- 	      </dom> -->
-<!-- 	    </in> -->
-<!-- 	  </btypes:TYPE>.             -->
-<!-- 	  Now, since this is an lvalue, we are done in the case of -->
-<!-- 	  left execution. In the case of right execution, we can -->
-<!-- 	  take step E-^ since the heap is well typed  -->
-<!-- 	  (<btypes:TYPE> -->
-<!-- 	    <Sjudge> -->
-<!-- 	      <assume> -->
-<!-- 		<gamma/> -->
-<!-- 		<store/> -->
-<!-- 	      </assume> -->
-<!-- 	      <plus> -->
-<!-- 		<heap/> -->
-<!-- 		<stack/> -->
-<!-- 	      </plus> -->
-<!-- 	    </Sjudge>  -->
-<!-- 	  </btypes:TYPE>). -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case T-Let-M: Only right execution is applicable. We have: -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <aExpr/> -->
-<!-- 	      <paren> -->
-<!-- 		<let kind="m"> -->
-<!-- 		  <id/> -->
-<!-- 		  <aExpr num="1"/> -->
-<!-- 		  <aExpr num="2"/> -->
-<!-- 		</let> -->
-<!-- 	      </paren> -->
-<!-- 	    </eq> -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <Msub> -->
-<!-- 	      <type/> -->
-<!-- 	      <type num="1"/> -->
-<!-- 	    </Msub> -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <Sjudge name="gen"> -->
-<!-- 	      <assume> -->
-<!-- 		<gamma/> -->
-<!-- 		<store/> -->
-<!-- 		<aExpr num="1"/> -->
-<!-- 	      </assume>                 -->
-<!-- 	      <GEN> -->
-<!-- 		<type/> -->
-<!-- 		<aTS/> -->
-<!-- 	      </GEN> -->
-<!-- 	    </Sjudge>       -->
-<!-- 	    <text content=", and"/> -->
-<!-- 	    <Sjudge name="loc"> -->
-<!-- 	      <assume/> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<id/> -->
-<!-- 		<aTS/>	 -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </Sjudge> -->
-<!-- 	    <text content=", and"/> -->
-<!-- 	    <Sjudge> -->
-<!-- 	      <assume> -->
-<!-- 		<extend> -->
-<!-- 		  <gamma/> -->
-<!-- 		  <mapping> -->
-<!-- 		    <id/>                       -->
-<!-- 		    <aTS/> -->
-<!-- 		  </mapping> -->
-<!-- 		</extend> -->
-<!-- 		<store/> -->
-<!-- 	      </assume>                 -->
-<!-- 	      <tqExpr> -->
-<!-- 		<aExpr num="2"/> -->
-<!-- 		<type num="2"/> -->
-<!-- 	      </tqExpr>                 -->
-<!-- 	    </Sjudge> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  If  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <aExpr num="1"/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  is not a value, we can take E-Let#. -->
-<!-- 	  Otherwise, we can take E-Let-M.               -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case T-Let-P: Only right execution is applicable. We have: -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <aExpr/> -->
-<!-- 	      <paren> -->
-<!-- 		<let kind="m"> -->
-<!-- 		  <id/> -->
-<!-- 		  <aExpr num="1"/> -->
-<!-- 		  <aExpr num="2"/> -->
-<!-- 		</let> -->
-<!-- 	      </paren> -->
-<!-- 	    </eq> -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <Msub> -->
-<!-- 	      <type/> -->
-<!-- 	      <type num="1"/> -->
-<!-- 	    </Msub> -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <Sjudge name="gen"> -->
-<!-- 	      <assume> -->
-<!-- 		<gamma/> -->
-<!-- 		<store/> -->
-<!-- 		<aExpr num="1"/> -->
-<!-- 	      </assume>                 -->
-<!-- 	      <GEN> -->
-<!-- 		<type/> -->
-<!-- 		<aTS/> -->
-<!-- 	      </GEN> -->
-<!-- 	    </Sjudge>       -->
-<!-- 	    <text content=", and"/> -->
-<!-- 	    <Sjudge name="term"> -->
-<!-- 	      <assume/> -->
-<!-- 	      <tqExpr> -->
-<!-- 		<id/> -->
-<!-- 		<aTS/>	 -->
-<!-- 	      </tqExpr> -->
-<!-- 	    </Sjudge> -->
-<!-- 	    <text content=", and"/> -->
-<!-- 	    <Sjudge> -->
-<!-- 	      <assume> -->
-<!-- 		<extend> -->
-<!-- 		  <gamma/> -->
-<!-- 		  <mapping> -->
-<!-- 		    <id/>                       -->
-<!-- 		    <aTS/> -->
-<!-- 		  </mapping> -->
-<!-- 		</extend> -->
-<!-- 		<store/> -->
-<!-- 	      </assume>                 -->
-<!-- 	      <tqExpr> -->
-<!-- 		<aExpr num="2"/> -->
-<!-- 		<type num="2"/> -->
-<!-- 	      </tqExpr>                 -->
-<!-- 	    </Sjudge> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  If  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <aExpr num="1"/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  is not a value, we can take E-Let#. -->
-<!-- 	  Otherwise, can take E-Let-P. -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case T-TqExpr and Case T-Let-M-Tq, T-Let-P-Tq are -->
-<!-- 	  similar.   -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--     </ol> -->
-<!--   </proof> -->
+  <lemma id="T-progress">
+    <title>Progress</title>
+    <p>
+      <btypes:TYPE>
+	<text content="If "/>
+	<aExpr/>
+	<text content=" is a closed, well typed term, "/>
+	<text content="that is, "/>
+	<Sjudge>
+	  <assume>
+	    <Empty/>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+	<text content=" for some "/>
+	<type/>
+	<text content=" and "/>
+	<store/>
+	<text content=", given any heap "/>
+	<heap/>
+	<text content=" and stack "/>
+	<stack/>
+	<text content=" such that "/>
+	<Sjudge>
+	  <assume>
+	    <Empty/>
+	    <store/>
+	  </assume>
+	  <plus>
+	    <heap/>
+	    <stack/>
+	  </plus>
+	</Sjudge>
+	<text content=", "/>
+      </btypes:TYPE>
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <text content=" If "/>
+	    <Sjudge name="lval">
+	      <assume/>
+	      <aExpr/>
+	    </Sjudge>
+	    <text content=", then "/>
+	    <aExpr/>
+	    <text content=" is either a valid lvalue "/>
+	    <lVal/>
+	    <text content=" (that is, "/>
+	    <eq>
+	      <lVal/>
+	      <select opt="yes">
+		<sLoc/>
+		<path/>
+	      </select>
+	    </eq>
+	    <text content=", "/>
+	    <in>
+	      <sLoc/>
+	      <dom>
+		<stack/>
+	      </dom>
+	    </in>
+	    <text content=" or "/>
+	    <eq>
+	      <lVal/>
+	      <select opt="yes">
+		<deref>
+		  <hLoc/>
+		</deref>
+		<path/>
+	      </select>
+	    </eq>
+	    <text content=", "/>
+	    <in>
+	      <hLoc/>
+	      <dom>
+		<heap/>
+	      </dom>
+	    </in>
+	    <text content=") or else "/>
+	    <Exists>
+	      <aExpr dash="'"/>
+	      <stack dash="'"/>
+	      <heap dash="'"/>
+	    </Exists>
+	    <text content=" such that "/>
+	    <leval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<aExpr dash="'"/>
+	      </opState>
+	    </leval>
+	    <text content="."/>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <aExpr/>
+	    <text content=" is a value "/>
+	    <aVal/>
+	    <text content=" or else "/>
+	    <Exists>
+	      <aExpr dash="'"/>
+	      <stack dash="'"/>
+	      <heap dash="'"/>
+	    </Exists>
+	    <text content=" such that "/>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<aExpr dash="'"/>
+	      </opState>
+	    </eval>
+	    <text content="."/>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </lemma>
+  <proof>
+    <p>
+      By induction on the typing derivation.
+    </p>
+    <ol>
+      <li>
+	<p>
+	  Case T-Unit, T-True, T-False, T-Hloc, T-Lambda:
+	  (Values) Result is immediate for right execution, and
+	  cannot happen for left execution.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case T-Id: cannot happen. 
+	  <btypes:TYPE>
+	    <eq>
+	      <aExpr/>
+	      <id/>
+	    </eq>
+	  </btypes:TYPE> is not a closed term.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case T-Sloc: Immediate for left execution. Right
+	  execution and can always continue with E-Rval rule as the
+	  stack is well typed
+	  (<btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<Empty/>
+		<store/>
+	      </assume>
+	      <plus>
+		<heap/>
+		<stack/>
+	      </plus>
+	    </Sjudge>
+	  </btypes:TYPE>).
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case T-App: Only right execution is possible, no application is well
+	  typed as an lvalue. We have:
+	  <btypes:TYPE>
+	    <eq>
+	      <aExpr/>
+	      <apply>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+	      </apply>
+	    </eq>
+	    <text content=", "/>
+	    <Sjudge>
+	      <assume>
+		<Empty/>
+		<store/>
+	      </assume>
+	      <Msub>
+		<aExpr num="1"/>
+		<fn>
+		  <type num="1"/>
+		  <type num="2"/>
+		</fn>
+	      </Msub>
+	    </Sjudge>
+	    <text content=", and "/>
+	    <Sjudge>
+	      <assume>
+		<Empty/>
+		<store/>
+	      </assume>
+	      <Msub>
+		<aExpr num="2"/>
+		<type num="1"/>
+	      </Msub>
+	    </Sjudge>
+	  </btypes:TYPE>.
+	  If
+	  <btypes:TYPE>
+	    <aExpr num="1"/>
+	  </btypes:TYPE> is not a value, execution can continue via
+	  the E-App1# due to induction hypothesis. Similarly, if 
+	  <btypes:TYPE>
+	    <aExpr num="2"/>
+	  </btypes:TYPE>
+	  is not a value, we can take E-App2#. 
+	  Now, consider the case when both
+	  <btypes:TYPE>
+	    <aExpr num="1"/>
+	    <text content=" and "/>
+	    <aExpr num="2"/>
+	  </btypes:TYPE>
+	  are values. Since we know that
+	  <btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<Empty/>
+		<store/>
+	      </assume>
+	      <Msub>
+		<aExpr num="1"/>
+		<fn>
+		  <type num="1"/>
+		  <type num="2"/>
+		</fn>
+	      </Msub>
+	    </Sjudge>
+	  </btypes:TYPE>, from 
+	  <btypes:TYPE>
+	    <lem tag="T-canonical"/>
+	  </btypes:TYPE> (canonical forms) we conclude that 
+	  <btypes:TYPE>
+	    <aExpr num="1"/>
+	  </btypes:TYPE>
+	  is of the form
+	  <btypes:TYPE>
+	    <lambda>
+	      <id/>
+	      <aExpr dash="'"/>
+	    </lambda>
+	  </btypes:TYPE>. Now, we can take the step E-App.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case T-If: Similar to T-App, only right execution is
+	  permitted.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case T-Set: Only right execution is applicable. We have:
+	  <btypes:TYPE>
+	    <eq>
+	      <aExpr/>
+	      <assign>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+	      </assign>
+	    </eq>
+	    <text content=", "/>
+	    <Sjudge>
+	      <assume>
+		<Empty/>
+		<store/>
+	      </assume>
+	      <Msub>
+		<aExpr num="1"/>
+		<mutable>
+		  <type/>
+		</mutable>
+	      </Msub>
+	    </Sjudge>
+	    <text content=", "/>
+	    <Sjudge>
+	      <assume>
+		<Empty/>
+		<store/>
+	      </assume>
+	      <Msub>
+		<aExpr num="2"/>
+		<type/>
+	      </Msub>
+	    </Sjudge>
+	    <text content=", and "/>
+	    <Sjudge name="lval">
+	      <assume/>
+	      <aExpr num="1"/>
+	    </Sjudge>
+	  </btypes:TYPE>.
+	  If
+	  <btypes:TYPE>
+	    <aExpr num="1"/>
+	  </btypes:TYPE>
+	  not an lvalue, since we have
+	  <btypes:TYPE>
+	    <Sjudge name="lval">
+	      <assume/>
+	      <aExpr num="1"/>
+	    </Sjudge>
+	  </btypes:TYPE>
+	  we can take E-:=lhs# by induction hypothesis.
+	  Similarly, if
+	  <btypes:TYPE>
+	    <aExpr num="2"/>
+	  </btypes:TYPE>
+	  is not a value, we can take E-:=rhs#.
+	</p>
+	<p>
+	  Finally, we consider the case where
+	  <btypes:TYPE>
+	    <eq>
+	      <aExpr num="1"/>
+	      <lVal/>
+	    </eq>
+	    <text content=" and "/>
+	    <eq>
+	      <aExpr num="2"/>
+	      <aVal/>
+	    </eq>
+	  </btypes:TYPE>.
+	  We should have 
+	  <btypes:TYPE>
+	    <eq>
+	      <lVal/>
+	      <select opt="yes">
+		<sLoc/>
+		<path/>
+	      </select>
+	    </eq>
+	  </btypes:TYPE>
+	  or 
+	  <btypes:TYPE>
+	    <eq>
+	      <lVal/>
+	      <select opt="yes">
+		<deref>
+		  <hLoc/>
+		</deref>
+		<path/>
+	      </select>
+	    </eq>
+	  </btypes:TYPE>.
+	  Now, we proceed by induction on the length of
+	  <btypes:TYPE>
+	    <lVal/>
+	  </btypes:TYPE>.
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      If 
+	      <btypes:TYPE>
+		<eq>
+		  <aExpr num="1"/>
+		  <lVal/>
+		  <sLoc/>
+		</eq>
+	      </btypes:TYPE>, since we know that 
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <Empty/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <sLoc/>
+		    <mutable>
+		      <type/>
+		    </mutable>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE> and
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <Empty/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <stack/>
+		    <heap/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>, we must have
+	      <btypes:TYPE>
+		<in>
+		  <sLoc/>
+		  <dom>
+		    <stack/>
+		  </dom>
+		</in>
+	      </btypes:TYPE>. Therefore, execution can continnue
+	      with step E-:Stack.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Similarly, if 
+	      <btypes:TYPE>
+		<eq>
+		  <aExpr num="1"/>
+		  <lVal/>
+		  <deref>
+		    <hLoc/>
+		  </deref>
+		</eq>
+	      </btypes:TYPE>, the execution can continue with step	    
+	      E:-Heap.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Assume (by hypothesis) that the execution can continue for 
+	      some 
+	      <btypes:TYPE>
+		<eq>
+		  <aExpr num="1" dash="'"/>
+		  <select>
+		    <sLoc/>
+		    <path/>
+		  </select>
+		</eq>
+	      </btypes:TYPE>. 
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Now, let
+	      <btypes:TYPE>
+		<eq>
+		  <aExpr num="1"/>
+		  <select>
+		    <fst>
+		      <sLoc/>
+		    </fst>
+		    <path/>
+		  </select>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      We know that 
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <Empty/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr num="1"/>
+		    <mutable>
+		      <type/>
+		    </mutable>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>. That is,
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <Empty/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <select>
+		      <fst>
+			<sLoc/>
+		      </fst>
+		      <path/>
+		    </select>
+		    <mutable>
+		      <type/>
+		    </mutable>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>. 
+	      The first two steps of this derivation must be 
+	      T-Sloc and T-Fst.
+	      From the assumption of T-Fst rule, we must have
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <Empty/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <sLoc/>
+		    <pair>
+		      <mutable>
+			<type/>
+		      </mutable>
+		      <type dash="'"/>
+		    </pair>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	      And, from the assumption of T-Sloc rule, we must have
+	      <btypes:TYPE>
+		<mapsto>
+		  <store/>
+		  <sLoc/>
+		  <pair>
+		    <mutable>
+		      <type/>
+		    </mutable>
+		    <type dash="'"/>
+		  </pair>
+		</mapsto>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Now, if 
+	      <btypes:TYPE>
+		<mapsto>
+		  <stack/>
+		  <sLoc/>
+		  <aVal/>
+		</mapsto>
+	      </btypes:TYPE>, 
+	      since we have
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <Empty/>
+		    <store/>
+		  </assume>
+		  <tqExpr >
+		    <stack/>
+		    <heap/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>, 
+	      we conclude that 
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <Empty/>
+		    <store/>
+		  </assume>
+		  <Msub>
+		    <aVal/>
+		    <pair>
+		      <mutable>
+			<type/>
+		      </mutable>
+		      <type dash="'"/>
+		    </pair>
+		  </Msub>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From case&nbsp;(f) and
+	      <btypes:TYPE>
+		<lem tag="T-sub-inversion"/>
+	      </btypes:TYPE> (inversion of copy-coercion), we conclude
+	      that 
+	      <btypes:TYPE>
+		<eq>
+		  <aVal/>
+		  <Pair>
+		    <aVal num="1"/>
+		    <aVal num="2"/>
+		  </Pair>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From cases&nbsp;(c and g), we conclude that the
+	      execution can continue using the E:-S.1 rule.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Similarly, if
+	      <btypes:TYPE>
+		<eq>
+		  <aExpr num="1"/>
+		  <select>
+		    <snd>
+		      <sLoc/>
+		    </snd>
+		    <path/>
+		  </select>
+		</eq>
+	      </btypes:TYPE>, 
+	      the execution can continue using E:-S.2 rule.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Similar to the above induction, we can show that if
+	      <btypes:TYPE>
+		<eq>
+		  <aExpr num="1"/>
+		  <select>
+		    <fst>
+		      <deref>
+			<hLoc/>
+		      </deref>
+		    </fst>
+		    <path/>
+		  </select>
+		</eq>
+	      </btypes:TYPE>, 
+	      execution can continue using the E:-H1 rule, and if
+	      <btypes:TYPE>
+		<eq>
+		  <aExpr num="1"/>
+		  <select>
+		    <snd>
+		      <deref>
+			<hLoc/>
+		      </deref>
+		    </snd>
+		    <path/>
+		  </select>
+		</eq>
+	      </btypes:TYPE>, 
+	      execution can continue using the E:-H2 rule.
+	    </p>
+	  </li>
+	</ol>
+      </li>
+      <li>
+	<p>
+	  Case T-Dup: Only right execution is
+	  permitted, and can take E-Dup# or E-Dup as
+	  applicable.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case T-Deref: We have:
+	  <btypes:TYPE>
+	    <eq>
+	      <aExpr/>
+	      <deref>
+		<aExpr num="1"/>
+	      </deref>
+	    </eq>
+	    <text content=", and "/>
+	    <Sjudge>
+	      <assume>
+		<Empty/>
+		<store/>
+	      </assume>
+	      <Msub>
+		<aExpr num="1"/>
+		<ref>
+		  <type/>
+		</ref>
+	      </Msub>
+	    </Sjudge>
+	  </btypes:TYPE>.
+	  Execution can take EL-^# or E-^# as
+	  applicable if
+	  <btypes:TYPE>
+	    <aExpr num="1"/>
+	  </btypes:TYPE>
+	  is not a value.
+	  If 
+	  <btypes:TYPE>
+	    <aExpr num="1"/>
+	  </btypes:TYPE>
+	  is a value, then, from
+	  <btypes:TYPE>
+	    <lem tag="T-canonical"/>
+	  </btypes:TYPE> (canonical forms), we conclude that 
+	  <btypes:TYPE>
+	    <eq>
+	      <aExpr num="1"/>
+	      <hLoc/>
+	    </eq>
+	    <text content=", "/>
+	    <in>
+	      <hLoc/>
+	      <dom>
+		<store/>
+	      </dom>
+	    </in>
+	  </btypes:TYPE>.
+	  Now, since this is an lvalue, we are done in the case of
+	  left execution. In the case of right execution, we can
+	  take step E-^.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case T-Pair: Similar to case T-Dup
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case T-Fst, Case T-Snd: Similar to case T-Deref.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case T-Let-M: Only right execution is applicable. We have:
+	  <btypes:TYPE>
+	    <eq>
+	      <aExpr/>
+	      <let kind="m">
+		<id/>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+	      </let>
+	    </eq>
+	    <text content=", "/>
+	    <Sjudge>
+	      <assume>
+		<Empty/>
+		<store/>
+	      </assume>
+	      <Msub>
+		<aExpr/>
+		<type/>
+	      </Msub>
+	    </Sjudge>
+	  </btypes:TYPE>.
+	  If
+	  <btypes:TYPE>
+	    <aExpr num="1"/>
+	  </btypes:TYPE>
+	  is not a value, we can take E-Let#.
+	  Otherwise, we can take E-Let-M.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case T-Let-P: Only right execution is applicable. We have:
+	  <btypes:TYPE>
+	    <eq>
+	      <aExpr/>
+	      <paren>
+		<let kind="p">
+		  <id/>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</let>
+	      </paren>
+	    </eq>
+	    <text content=", "/>
+	    <Sjudge>
+	      <assume>
+		<Empty/>
+		<store/>
+	      </assume>
+	      <Msub>
+		<aExpr/>
+		<type/>
+	      </Msub>
+	    </Sjudge>
+	  </btypes:TYPE>.
+	  If
+	  <btypes:TYPE>
+	    <aExpr num="1"/>
+	  </btypes:TYPE>
+	  is not a value, we can take E-Let#.
+	  Otherwise, the execution can take E-Let-P.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case T-TqExpr: Execution can always continue using the EL-Tq
+	  or E-Tq rules as applicable.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case T-Let-M-Tq, T-Let-P-Tq: Execution can always continue
+	  using the E-Let-Tq rule.	
+	</p>
+      </li>
+    </ol>
+  </proof>
 <!--   <lemma id="T-Weakening"> -->
 <!--     <title>Weakening</title> -->
 <!--     <p> -->

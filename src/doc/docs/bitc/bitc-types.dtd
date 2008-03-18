@@ -901,6 +901,7 @@
                                 | Pair
                                 | fst
                                 | snd
+                                | ith
                                 | match
                                 | unspecified
 ">
@@ -965,6 +966,21 @@
 <!ELEMENT Pair                 (%anyexpr.group;, %anyexpr.group;)>
 <!ELEMENT fst                  %anyexpr.group;>
 <!ELEMENT snd                  %anyexpr.group;>
+<!ELEMENT select               %anyexpr.group;%anything.group;>
+<!ATTLIST select
+                               opt      CDATA    #IMPLIED
+>
+<!ELEMENT ith                  %anyexpr.group;>
+<!ATTLIST ith
+                               etc      CDATA    #IMPLIED
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT path                 >
+<!ATTLIST ith
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
 <!ELEMENT List                 (%anyexpr.group;*)>
 <!ELEMENT Cons                 (%anyexpr.group;*)>
 <!ELEMENT match                (%anyexpr.group;, %anyexpr.group;, %anyexpr.group;?)>

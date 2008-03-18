@@ -2219,6 +2219,48 @@
     </xsl:element>
   </xsl:template>
 
+  <!-- select -->
+  <xsl:template match="select" mode="formula">
+    <xsl:apply-templates select="*[1]" mode="formula"/>
+    <xsl:if test = "@opt">	      
+      <xsl:element name="em">
+	<xsl:text>[</xsl:text>	  
+      </xsl:element>       
+    </xsl:if>    
+    <xsl:element name="progident">
+      <xsl:text>.</xsl:text>
+    </xsl:element>
+    <xsl:apply-templates select="*[2]" mode="formula"/>
+    <xsl:if test = "@opt">	      
+      <xsl:element name="em">
+	<xsl:text>]</xsl:text>	  
+      </xsl:element>       
+    </xsl:if>    
+  </xsl:template>
+
+  <!-- ith -->
+  <xsl:template match="ith" mode="formula">
+    <xsl:apply-templates mode="formula"/>
+    <xsl:if test="@etc = 'yes'">
+      <xsl:text>...</xsl:text>
+    </xsl:if>
+    <xsl:element name="progident">
+      <xsl:text>.</xsl:text>
+    </xsl:element>
+    <xsl:element name="em">
+      <xsl:text>i</xsl:text>
+    </xsl:element>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>
+
+  <!-- path -->
+  <xsl:template match="path" mode="formula">
+    <xsl:call-template name="print.mathmode">
+      <xsl:with-param name="print.mathmode.text">p</xsl:with-param> 
+    </xsl:call-template>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>
+  
   <!-- match -->
   <xsl:template match="match" mode="formula">
     <xsl:element name="progident">

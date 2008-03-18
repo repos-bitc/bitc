@@ -714,13 +714,13 @@
 		  <stack/>
 		  <mapping>
 		    <sLoc/>
-		    <aVal num="1"/>
+		    <aVal/>
 		  </mapping>
 		</extend>
 		<heap/>
 		<assign>
 		  <sLoc/>
-		  <aVal num="2"/>
+		  <aVal dash="'"/>
 		</assign>
 	      </opState>
 	      <opState>
@@ -728,7 +728,7 @@
 		  <stack/>
 		  <mapping>
 		    <sLoc/>
-		    <aVal num="2"/>
+		    <aVal dash="'"/>
 		  </mapping>
 		</extend>
 		<heap/>
@@ -747,14 +747,14 @@
 		  <heap/>
 		  <mapping>
 		    <hLoc/>
-		    <aVal num="1"/>
+		    <aVal/>
 		  </mapping>
 		</extend>
 		<assign>
 		  <deref>
 		    <hLoc/>
 		  </deref>
-		  <aVal num="2"/>
+		  <aVal dash="'"/>
 		</assign>
 	      </opState>
 	      <opState>
@@ -763,7 +763,7 @@
 		  <heap/>
 		  <mapping>
 		    <hLoc/>
-		    <aVal num="2"/>
+		    <aVal dash="'"/>
 		  </mapping>
 		</extend>
 		<Unit/>
@@ -784,7 +784,10 @@
 		</extend>
 		<heap/>
 		<assign>
-		  <lVal stack="yes"/>
+		  <select>
+		    <sLoc/>
+		    <path/>
+		  </select>
 		  <aVal num="1" dash="'"/>
 		</assign>
 	      </opState>
@@ -816,9 +819,12 @@
 		</extend>
 		<heap/>
 		<assign>
-		  <fst>
-		    <lVal stack="yes"/>
-		  </fst>
+		  <select>
+		    <fst>
+		      <sLoc/>
+		    </fst>
+		    <path/>
+		  </select>
 		  <aVal num="1" dash="'"/>
 		</assign>
 	      </opState>
@@ -847,12 +853,17 @@
 		<extend>
 		  <heap/>
 		  <mapping>
-		    <sLoc/>
+		    <hLoc/>
 		    <aVal num="1"/>
 		  </mapping>
 		</extend>
 		<assign>
-		  <lVal heap="yes"/>
+		  <select>
+		    <deref>
+		      <hLoc/>
+		    </deref>
+		    <path/>
+		  </select>
 		  <aVal num="1" dash="'"/>
 		</assign>
 	      </opState>
@@ -861,7 +872,7 @@
 		<extend>
 		  <heap/>
 		  <mapping>
-		    <sLoc/>
+		    <hLoc/>
 		    <aVal num="1" dash="'"/>
 		  </mapping>
 		</extend>
@@ -876,7 +887,7 @@
 		<extend>
 		  <heap/>
 		  <mapping>
-		    <sLoc/>
+		    <hLoc/>
 		    <Pair>
 		      <aVal num="1"/>
 		      <aVal num="2"/>	
@@ -884,9 +895,14 @@
 		  </mapping>
 		</extend>
 		<assign>
-		  <fst>
-		    <lVal heap="yes"/>
-		  </fst>
+		  <select>
+		    <fst>
+		      <deref>
+			<hLoc/>
+		      </deref>
+		    </fst>
+		    <path/>
+		  </select>
 		  <aVal num="1" dash="'"/>
 		</assign>
 	      </opState>
@@ -895,7 +911,7 @@
 		<extend>
 		  <heap/>
 		  <mapping>
-		    <sLoc/>
+		    <hLoc/>
 		    <Pair>
 		      <aVal num="1" dash="'"/>
 		      <aVal num="2"/>
@@ -920,7 +936,10 @@
 		</extend>
 		<heap/>
 		<assign>
-		  <lVal stack="yes"/>
+		  <select>
+		    <sLoc/>
+		    <path/>
+		  </select>
 		  <aVal num="2" dash="'"/>
 		</assign>
 	      </opState>
@@ -952,9 +971,12 @@
 		</extend>
 		<heap/>
 		<assign>
-		  <snd>
-		    <lVal stack="yes"/>
-		  </snd>
+		  <select>
+		    <snd>
+		      <sLoc/>
+		    </snd>
+		    <path/>
+		  </select>
 		  <aVal num="2" dash="'"/>
 		</assign>
 	      </opState>
@@ -983,12 +1005,17 @@
 		<extend>
 		  <heap/>
 		  <mapping>
-		    <sLoc/>
+		    <hLoc/>
 		    <aVal num="2"/>
 		  </mapping>
 		</extend>
 		<assign>
-		  <lVal heap="yes"/>
+		  <select>
+		    <deref>
+		      <hLoc/>
+		    </deref>
+		    <path/>
+		  </select>
 		  <aVal num="2" dash="'"/>
 		</assign>
 	      </opState>
@@ -997,7 +1024,7 @@
 		<extend>
 		  <heap/>
 		  <mapping>
-		    <sLoc/>
+		    <hLoc/>
 		    <aVal num="2" dash="'"/>
 		  </mapping>
 		</extend>
@@ -1012,7 +1039,7 @@
 		<extend>
 		  <heap/>
 		  <mapping>
-		    <sLoc/>
+		    <hLoc/>
 		    <Pair>
 		      <aVal num="1"/>
 		      <aVal num="2"/>	
@@ -1020,9 +1047,14 @@
 		  </mapping>
 		</extend>
 		<assign>
-		  <snd>
-		    <lVal heap="yes"/>
-		  </snd>
+		  <select>
+		    <snd>
+		      <deref>
+			<hLoc/>
+		      </deref>
+		    </snd>
+		    <path/>
+		  </select>
 		  <aVal num="2" dash="'"/>
 		</assign>
 	      </opState>
