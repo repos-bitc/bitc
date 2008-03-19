@@ -1562,12 +1562,20 @@
   <!--  ====================================================================
                      TypeScheme
         ==================================================================== -->
+  <!-- aTS: Type scheme -->
   <xsl:template match="aTS" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>sigma;</xsl:text>
     <xsl:call-template name="print.index.dash"/>    
   </xsl:template>
   
+  <!-- sTS: Special Type Scheme -->
+  <xsl:template match="sTS" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rhov;</xsl:text>
+    <xsl:call-template name="print.index.dash"/>    
+  </xsl:template>
+
   <xsl:template match="TS" mode="formula">
     <xsl:if test="count(*) &gt; 1">
       <xsl:text disable-output-escaping="yes">&amp;</xsl:text>

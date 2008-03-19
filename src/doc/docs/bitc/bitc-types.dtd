@@ -728,6 +728,11 @@
                                num      CDATA       #IMPLIED
                                dash     CDATA       #IMPLIED
 >
+<!ELEMENT sTS                  EMPTY>
+<!ATTLIST sTS
+                               num      CDATA       #IMPLIED
+                               dash     CDATA       #IMPLIED
+>
 <!ELEMENT TS                  ((tvar|tvars)*, %anytype.group;)>
 
 <!-- ======================================================================
