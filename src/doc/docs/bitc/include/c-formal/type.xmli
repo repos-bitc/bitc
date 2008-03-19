@@ -316,13 +316,17 @@
 	</tyRule>
 	<tyRule name="T-Fst">
 	  <tyPre>
-	    <TDjudge Msub="yes">
+	    <TDjudge>
 	      <aExpr/>
+	      <pType/>
+	    </TDjudge>
+	    <Msub>
+	      <pType/>
 	      <pair>
 		<type num="1"/>
 		<type num="2"/>
 	      </pair>
-	    </TDjudge>
+	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <TDjudge>
@@ -335,13 +339,17 @@
 	</tyRule>
 	<tyRule name="T-Snd">
 	  <tyPre>
-	    <TDjudge Msub="yes">
+	    <TDjudge>
 	      <aExpr/>
+	      <pType/>
+	    </TDjudge>
+	    <Msub>
+	      <pType/>
 	      <pair>
 		<type num="1"/>
 		<type num="2"/>
 	      </pair>
-	    </TDjudge>
+	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <TDjudge>
