@@ -218,7 +218,7 @@
 		    <id/>
 		    <aExpr/>
 		  </lambda>
-		  <fn M="yes">		
+		  <fn>		
 		    <mbFull>
 		      <tvar name="beta" dash="'"/>
 		      <tvar name="alpha"/>
@@ -319,7 +319,7 @@
 		      <type num="1"/>
 		      <mbFull>
 			<tvar name="alpha"/>
-			<fn M="yes">
+			<fn>
 			  <mbFull>
 			    <tvar name="beta" dash="'"/>
 			    <tvar name="beta"/>

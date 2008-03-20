@@ -44,16 +44,6 @@
 	  </mbFull>
 	</alternatives>
       </bnf>
-      <bnf desc="Res. Type Scheme">          
-	<sTS/>
-	<alternatives>
-	  <pType/>
-	  <forall>                    
-	    <tvars name="alpha"/>
-	    <pType/>
-	  </forall>
-	</alternatives>
-      </bnf>
       <bnf desc="Type Scheme">          
 	<aTS/>
 	<alternatives>
@@ -197,6 +187,30 @@
       That is, the mutable type constructor is idempotent. 
     </p>
   </definition>
+  <definition id="wf-subst">      
+    <title>Well-formed Substitutions</title>
+    <p>
+      A substitution
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE> is said to be well-formed with respect to 
+      a sentence
+      <btypes:TYPE>
+	<text content="X"/>
+      </btypes:TYPE> in the above grammar if
+      <btypes:TYPE>
+	<Subst>
+	  <aSubMap/>
+	  <text content="X"/>
+	</Subst>
+      </btypes:TYPE> is still a valid sentence in the same language.
+    </p>
+  </definition>
+  <p>
+    That is, the substitution does not violate the syntax of the 
+    language. In the rest of the document, we say substitutions to
+    mean well-formed substitutions unless otherwise specified.
+  </p>
   <definition id="structural_containment">
     <title>Structural Containment</title>
     <p>
@@ -2991,10 +3005,14 @@
 		<tvar name="alpha"/>
 	      </eq>
 	      <text content=" or "/>
-	      <Tceq>
-		<sType/>
-		<sType dash="'"/>
-	      </Tceq>
+	      <eq>
+		<minzT>
+		  <sType/>
+		</minzT>
+		<minzT>
+		  <sType dash="'"/>
+		</minzT>
+	      </eq>
 	    </grouping>
 	  </tyPre>
 	  <tyPre>
@@ -3003,10 +3021,6 @@
 		<tvar name="alpha"/>
 		<pType/>
 		<sType/>
-		<ceq>
-		  <sType dash="'"/>
-		  <sType/>
-		</ceq>
 	      </Forall>
 	      <text content="if "/>
 	      <in>
@@ -3023,17 +3037,13 @@
 	      </eq>
 	      <text content=" or "/>
 	      <eq>
-		<pType/>
-		<mbTop>
-		  <tvar name="alpha"/>
-		  <sType dash="'"/>
-		</mbTop>
+		<minz>
+		  <pType/>
+		</minz>
+		<minz>
+		  <sType/>
+		</minz>
 	      </eq>
-	      <text content=" or "/>
-	      <ceq>
-		<pType/>
-		<sType/>
-	      </ceq>
 	    </grouping>
 	  </tyPre>
 	  <tyPre>
@@ -3054,10 +3064,14 @@
 		<solvables/>
 	      </in>
 	      <text content=", "/>
-	      <Tceq>
-		<sType/>
-		<sType dash="'"/>
-	      </Tceq>
+	      <eq>
+		<minzT>
+		  <sType/>
+		</minzT>
+		<minzT>
+		  <sType dash="'"/>
+		</minzT>
+	      </eq>
 	    </grouping>
 	  </tyPre>
 	  <tyPre>
@@ -3078,10 +3092,14 @@
 		<solvables/>
 	      </in>
 	      <text content=", "/>
-	      <ceq>
-		<sType/>
-		<sType dash="'"/>
-	      </ceq>
+	      <eq>
+		<minz>
+		  <sType/>
+		</minz>
+		<minz>
+		  <sType dash="'"/>
+		</minz>
+	      </eq>
 	    </grouping>
 	  </tyPre>
 	  <tyPre>
@@ -3131,6 +3149,23 @@
 	</tyRule>
       </Hrules>
     </btypes:TYPE>
+    <p>
+      As a notational convenience, we write
+      <btypes:TYPE>
+	<Cst>
+	  <assume/>
+	  <solvable/>
+	</Cst>
+      </btypes:TYPE> as a shorthand for
+      <btypes:TYPE>
+	<Cst>
+	  <assume/>
+	  <set>
+	    <solvable/>
+	  </set>
+	</Cst>
+      </btypes:TYPE>
+    </p>
   </definition>
   <definition id="maybe-powerset">
     <title>Set of top-level maybe variations</title>

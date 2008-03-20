@@ -140,11 +140,11 @@
 	      <unin>
 		<set>
 		  <eq>
-		    <fn M="yes">		    
+		    <fn>		    
 		      <type num="a"/>		    		    
 		      <type num="r"/>		    
 		    </fn>
-		    <fn M="yes">		    
+		    <fn>		    
 		      <type num="a" dash="'"/>		    		    
 		      <type num="r" dash="'"/>
 		    </fn>
@@ -774,11 +774,11 @@
 		<lKind/>
 	      </eq>
 	      <eq>
-		<fn M="yes">
+		<fn>
 		  <type/>
 		  <type num="1"/>
 		</fn>
-		<fn M="yes">
+		<fn>
 		  <type dash="'"/>
 		  <type num="1" dash="'"/>
 		</fn>

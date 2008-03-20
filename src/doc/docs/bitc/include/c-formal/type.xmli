@@ -117,12 +117,8 @@
 		<aExpr/>
 	      </lambda>
 	      <fn>
-		<minz>
-		  <type num="1"/>
-		</minz>
-		<maxz>
-		  <type num="2"/>
-		</maxz>
+		<type num="1"/>
+		<type num="2"/>
 	      </fn>
 	    </TDjudge>
 	  </tyConc>
@@ -131,7 +127,7 @@
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
-	      <fn M="yes">
+	      <fn>
 		<type num="a"/>
 		<type num="r"/>
 	      </fn>

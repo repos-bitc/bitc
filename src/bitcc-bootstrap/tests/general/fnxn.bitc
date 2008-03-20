@@ -1,10 +1,10 @@
 (provide main bitc.main)
 
-(import ls bitc.list)
-(define (lnth lst)
-  (if #t
-      (ls.car lst)
-      (lnth (ls.cdr lst))))
+(define p:(bool, bool) (#t, #f))
+
+(define (f x)
+  (set! x^ p)
+  )
 
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec) 0))
