@@ -90,7 +90,7 @@
 	  </rhs>
 	</equation>
 	<!-- k = K -->
-	<equation>
+	<equation sep="4pt">
 	  <lhs>
 	    <unf>
 	      <unin>
@@ -205,7 +205,7 @@
 	    </unf>
 	  </rhs>
 	</equation>	
-	<!-- Mt1 = Mt2 -->
+	<!-- Ms1 = Ms2 -->
 	<equation>
 	  <lhs>
 	    <unf>
@@ -213,10 +213,10 @@
 		<set>
 		  <eq>
 		    <mutable>
-		      <type num="1"/>
+		      <sType num="1"/>
 		    </mutable>
 		    <mutable>
-		      <type num="2"/>
+		      <sType num="2"/>
 		    </mutable>
 		  </eq>
 		</set>
@@ -230,8 +230,8 @@
 		<aCtset/>
 		<set>
 		  <eq>
-		    <type num="1"/>
-		    <type num="2"/>
+		    <sType num="1"/>
+		    <sType num="2"/>
 		  </eq>
 		</set>
 	      </unin>
@@ -277,43 +277,7 @@
 	    </unf>
 	  </rhs>
 	</equation>	
-	<!-- MB(p, s) = t | p != 'a -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <mbFull>
-		      <pType/>
-		      <sType/>
-		    </mbFull>
-		    <type/>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	    <neq>
-	      <pType/>
-	      <tvar name="alpha"/>
-	    </neq>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <pType/>
-		    <type/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>
-	<!-- mb(s1, s2) = t | s1 != 'a -->
+	<!-- mb(s1, s2) = s -->
 	<equation>
 	  <lhs>
 	    <unf>
@@ -324,16 +288,95 @@
 		      <sType num="1"/>
 		      <sType num="2"/>
 		    </mbTop>
-		    <type/>
+		    <sType/>
 		  </eq>
 		</set>
 		<aCtset/>
 	      </unin>
 	    </unf>
-	    <neq>
-	      <sType num="1"/>
-	      <tvar name="alpha"/>
-	    </neq>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <minzT>
+		      <sType num="2"/>
+ 		    </minzT>
+		    <minzT>
+		      <sType/>
+		    </minzT>
+		  </eq>
+		  <eq>
+		    <sType num="1"/>
+		    <sType/>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>
+	<!-- MB(p, s) = p' -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin>
+		<set>
+		  <eq>
+		    <mbFull>
+		      <pType/>
+		      <sType/>
+		    </mbFull>
+		    <pType dash="'"/>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <minz>
+		      <sType/>
+		    </minz>
+		    <minz>
+		      <pType dash="'"/>
+		    </minz>
+		  </eq>
+		  <eq>
+		    <pType/>
+		    <pType dash="'"/>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>
+	<!-- mb(s1, s1') = mb(s2, s2') -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin>
+		<set>
+		  <eq>
+		    <mbTop>
+		      <sType num="1"/>
+		      <sType num="1" dash="'"/>
+		    </mbTop>
+		    <mbTop>
+		      <sType num="2"/>
+		      <sType num="2" dash="'"/>
+		    </mbTop>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
 	  </lhs>
 	  <rhs>
 	    <unf>
@@ -342,92 +385,14 @@
 		<set>
 		  <eq>
 		    <sType num="1"/>
-		    <type/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>
-	<!-- MB('a, s1) = MB('b, s2) -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <mbFull>
-		      <tvar name="alpha"/>
-		      <sType num="1"/>
-		    </mbFull>
-		    <mbFull>
-		      <tvar name="beta"/>
-		      <sType num="2"/>
-		    </mbFull>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <tvar name="alpha"/>
-		    <tvar name="beta"/>
-		  </eq>
-		  <eq>
-		    <minz>
-		      <sType num="1"/>
-		    </minz>
-		    <minz>
-		      <sType num="2"/>
-		    </minz>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>
-	<!-- mb('a, s1) = mb('b, s2) -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <mbTop>
-		      <tvar name="alpha"/>
-		      <sType num="1"/>
-		    </mbTop>
-		    <mbTop>
-		      <tvar name="beta"/>
-		      <sType num="2"/>
-		    </mbTop>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <tvar name="alpha"/>
-		    <tvar name="beta"/>
+		    <sType num="2"/>
 		  </eq>
 		  <eq>
 		    <minzT>
-		      <sType num="1"/>
+		      <sType num="1" dash="'"/>
 		    </minzT>
 		    <minzT>
-		      <sType num="2"/>
+		      <sType num="2" dash="'"/>
 		    </minzT>
 		  </eq>
 		</set>
@@ -435,71 +400,26 @@
 	    </unf>
 	  </rhs>
 	</equation>	  
-	<!-- MB('a, s) = p -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <mbFull>
-		      <tvar name="alpha"/>
-		      <sType/>
-		    </mbFull>
-		    <pType/>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	    <neq>
-	      <pType/>
-	      <tvar name="alpha"/>
-	    </neq>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <minz>
-		      <sType/>
-		    </minz>
-		    <minz>
-		      <pType/>
-		    </minz>
-		  </eq>
-		  <eq>
-		    <tvar name="alpha"/>
-		    <pType/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>
-	<!-- mb('a, s') = s -->
+	<!-- MB(s1, s1') = MB(s2, s2') -->
 	<equation sep="4pt">
 	  <lhs>
 	    <unf>
 	      <unin>
 		<set>
 		  <eq>
-		    <mbTop>
-		      <tvar name="alpha"/>
-		      <sType dash="'"/>
-		    </mbTop>
-		    <sType/>
+		    <mbFull>
+		      <pType num="1"/>
+		      <sTtype num="1"/>
+		    </mbFull>
+		    <mbFull>
+		      <pType num="2"/>
+		      <sType num="2"/>
+		    </mbFull>
 		  </eq>
 		</set>
 		<aCtset/>
 	      </unin>
 	    </unf>
-	    <neq>
-	      <sType/>
-	      <tvar name="alpha"/>
-	    </neq>
 	  </lhs>
 	  <rhs>
 	    <unf>
@@ -507,16 +427,16 @@
 		<aCtset/>
 		<set>
 		  <eq>
-		    <minzT>
-		      <sType/>
-		    </minzT>
-		    <minzT>
-		      <sType dash="'"/>
-		    </minzT>
+		    <pTtype num="1"/>
+		    <pType num="2"/>
 		  </eq>
 		  <eq>
-		    <tvar name="alpha"/>
-		    <sType/>
+		    <minz>
+		      <sType num="1"/>
+		    </minz>
+		    <minz>
+		      <sType num="2"/>
+		    </minz>
 		  </eq>
 		</set>
 	      </unin>
@@ -793,10 +713,10 @@
 	      </eq>
 	      <eq>
 		<mutable>
-		  <type/>
+		  <sType/>
 		</mutable>
 		<mutable>
-		  <type dash="'"/>
+		  <sType dash="'"/>
 		</mutable>
 	      </eq>
 	      <eq>

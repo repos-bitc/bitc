@@ -210,20 +210,26 @@
       <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-Set">
 	  <tyPre>
-	    <TDjudge>
+	    <!-- Msub is okay in this place because the top-level
+                 mutability is fixed to mutable, and the type inside
+                 the mutable constructor is a sType. That is,
+                 vatiation in shallow mutability can only happen
+                 within te pair constructor, which is okay.
+                 The Msub relation ensures that the inner types can be 
+                 promoted to immutable variants as necessary --> 
+	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
 	    </TDjudge>
 	    <TDjudge Msub="yes">
 	      <aExpr num="2"/>
-	      <type/>
+	      <sType/>
 	    </TDjudge>
 	    <Sjudge name="lval">
 	      <assume/>
-	      <aExpr
-		num="1"/>
+	      <aExpr num="1"/>
 	    </Sjudge>
 	  </tyPre>
 	  <tyConc>
@@ -391,7 +397,7 @@
 		<let kind="m">
 		  <tqExpr optional="yes">
 		    <id/>
-		    <sType/>
+		    <type/>
 		  </tqExpr>
 		  <aExpr num="1"/>
 		  <aExpr num="2"/>
@@ -452,7 +458,7 @@
 		<let kind="p">
 		  <tqExpr optional="yes">
 		    <id/>
-		    <sType/>
+		    <type/>
 		  </tqExpr>
 		  <aExpr num="1"/>
 		  <aExpr num="2"/>

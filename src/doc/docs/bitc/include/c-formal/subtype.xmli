@@ -97,26 +97,26 @@
 	  <tyConc>
 	    <Msub>
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
-	      <type/>
+	      <sType/>
 	    </Msub>
 	  </tyConc>
 	</tyRule>
 	<tyRule name="S-Mut2">
 	  <tyPre>
 	    <Msub>
-	      <type/>
-	      <type dash="'"/>
+	      <sType/>
+	      <sType dash="'"/>
 	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
 	      <mutable>
-		<type dash="'"/>
+		<sType dash="'"/>
 	      </mutable>
 	    </Msub>
 	  </tyConc>
@@ -137,7 +137,7 @@
 	  <tyConc>
 	    <Msub>
 	      <mbTop>
-		<tvar name="alpha"/>
+		<sType dash="'"/>
 		<sType/>
 	      </mbTop>
 	      <type/>
@@ -160,92 +160,32 @@
 	  <tyConc>
 	    <Msub>
 	      <mbFull>
-		<tvar name="alpha"/>
+		<pType/>
 		<sType/>
 	      </mbFull>
 	      <type/>
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="S-MT2">
 	  <tyPre>
-	    <grouping>
-	      <neq>
-		<sType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
 	    <Msub>
-	      <sType/>
 	      <type/>
+	      <sType/>
 	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
+	      <type/>
 	      <mbTop>
 		<sType/>
 		<sType dash="'"/>
 	      </mbTop>
-	      <type/>
 	    </Msub>
  	  </tyConc>
 	</tyRule>
 	<tyRule name="S-MF2">
 	  <tyPre>
-	    <grouping>
-	      <neq>
-		<pType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
-	    <Msub>
-	      <pType/>
-	      <type/>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <mbFull>
-		<pType/>
-		<sType/>
-	      </mbFull>
-	      <type/>
-	    </Msub>
- 	  </tyConc>
-	</tyRule>
-	<tyRule name="S-MT3">
-	  <tyPre>
-	    <grouping>
-	      <neq>
-		<sType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
-	    <Msub>
-	      <type/>
-	      <sType/>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <type/>
-	      <mbTop>
-		<sType/>
-		<sType dash="'"/>
-	      </mbTop>
-	    </Msub>
- 	  </tyConc>
-	</tyRule>
-	<tyRule name="S-MF3">
-	  <tyPre>
-	    <grouping>
-	      <neq>
-		<pType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
 	    <Msub>
 	      <type/>
 	      <pType/>

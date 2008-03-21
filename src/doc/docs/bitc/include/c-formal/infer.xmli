@@ -549,7 +549,6 @@
 		<tvar name="alpha"/>
 		<tvar name="beta"/>
 		<tvar name="gamma"/>
-		<tvar name="delta"/>
 	      </grouping>
 	    </models>
 	  </tyPre>
@@ -575,22 +574,18 @@
 		  <set>
 		    <eq>
 		      <type num="1"/>
-		      <mutable>
-			<tvar name="alpha"/>
-		      </mutable>
-		    </eq>
-		    <eq>
-		      <type num="1"/>
 		      <mbFull>
+			<mutable>
+			  <tvar name="alpha"/>
+			</mutable>
 			<tvar name="beta"/>
-			<tvar name="gamma"/>
 		      </mbFull>
 		    </eq>
 		    <eq>
 		      <type num="2"/>
 		      <mbFull>
-			<tvar name="delta"/>
 			<tvar name="gamma"/>
+			<tvar name="beta"/>
 		      </mbFull>
 		    </eq>
 		  </set>

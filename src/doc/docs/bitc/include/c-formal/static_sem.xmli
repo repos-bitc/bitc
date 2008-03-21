@@ -20,7 +20,7 @@
       <bnfc desc="">
 	<alternatives>
 	  <ref><type/></ref>
-	  <mutable><type/></mutable>
+	  <mutable><sType/></mutable>
 	  <pair><type/><type/></pair>
 	</alternatives>
       </bnfc>
@@ -429,9 +429,9 @@
 	  <tyConc>
 	    <Tceq>                
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
-	      <type/>
+	      <sType/>
 	    </Tceq>
 	  </tyConc>
 	</tyRule>
@@ -439,9 +439,9 @@
 	  <tyPre/>
 	  <tyConc>
 	    <Tceq>
-	      <type/>
+	      <sType/>
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
 	    </Tceq>
 	  </tyConc>
@@ -473,9 +473,9 @@
 	  </tyPre>
 	  <tyConc>
 	    <ceq>                
-	      <type/>
+	      <sType/>
 	      <mutable>
-		<type dash="'"/>
+		<sType dash="'"/>
 	      </mutable>
 	    </ceq>
 	  </tyConc>                
@@ -483,16 +483,16 @@
 	<tyRule>
 	  <tyPre>
 	    <ceq>                
-	      <type/>
-	      <type dash="'"/>
+	      <sType/>
+	      <sType dash="'"/>
 	    </ceq>	    
 	  </tyPre>
 	  <tyConc>
 	    <ceq>
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
-	      <type dash="'"/>
+	      <sType dash="'"/>
 	    </ceq>
 	  </tyConc>                
 	</tyRule>
@@ -781,13 +781,13 @@
 	  <lhs>
 	    <maxz>
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
 	    </maxz>
 	  </lhs>
 	  <rhs>
 	    <maxz>
-	      <type/>
+	      <sType/>
 	    </maxz>
 	  </rhs>
 	</equation>
@@ -817,50 +817,14 @@
 	  <lhs>
 	    <maxz>
 	      <mbTop>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbTop>
-	    </maxz>
-	  </lhs>
-	  <rhs>
-	    <maxz>
-	      <sType/>
-	    </maxz>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <maxz>
-	      <mbTop>
 		<sType/>
 		<sType dash="'"/>
 	      </mbTop>
 	    </maxz>
-	    <grouping>
-	      <neq>
-		<sType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
 	  </lhs>
 	  <rhs>
 	    <maxz>
-	      <sType/>
-	    </maxz>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <maxz>
-	      <mbFull>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbFull>
-	    </maxz>
-	  </lhs>
-	  <rhs>
-	    <maxz>
-	      <sType/>
+	      <sType dash="'"/>
 	    </maxz>
 	  </rhs>
 	</equation>
@@ -872,16 +836,10 @@
 		<sType/>
 	      </mbFull>
 	    </maxz>
-	    <grouping>
-	      <neq>
-		<pType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
 	  </lhs>
 	  <rhs>
 	    <maxz>
-	      <pType/>
+	      <sType/>
 	    </maxz>
 	  </rhs>
 	</equation>
@@ -952,13 +910,13 @@
 	  <lhs>
 	    <minz>
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
 	    </minz>
 	  </lhs>
 	  <rhs>
 	    <minz>
-	      <type/>
+	      <sType/>
 	    </minz>
 	  </rhs>
 	</equation>
@@ -986,50 +944,14 @@
 	  <lhs>
 	    <minz>
 	      <mbTop>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbTop>
-	    </minz>
-	  </lhs>
-	  <rhs>
-	    <minz>
-	      <sType/>
-	    </minz>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minz>
-	      <mbTop>
 		<sType/>
 		<sType dash="'"/>
 	      </mbTop>
 	    </minz>
-	    <grouping>
-	      <neq>
-		<sType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
 	  </lhs>
 	  <rhs>
 	    <minz>
-	      <sType/>
-	    </minz>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minz>
-	      <mbFull>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbFull>
-	    </minz>
-	  </lhs>
-	  <rhs>
-	    <minz>
-	      <sType/>
+	      <sType dash="'"/>
 	    </minz>
 	  </rhs>
 	</equation>
@@ -1041,16 +963,10 @@
 		<sType/>
 	      </mbFull>
 	    </minz>
-	    <grouping>
-	      <neq>
-		<pType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
 	  </lhs>
 	  <rhs>
 	    <minz>
-	      <pType/>
+	      <sType/>
 	    </minz>
 	  </rhs>
 	</equation>
@@ -1131,13 +1047,13 @@
 	  <lhs>
 	    <maxzT>
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
 	    </maxzT>
 	  </lhs>
 	  <rhs>
 	    <maxzT>
-	      <type/>
+	      <sType/>
 	    </maxzT>
 	  </rhs>
 	</equation>
@@ -1163,50 +1079,14 @@
 	  <lhs>
 	    <maxzT>
 	      <mbTop>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbTop>
-	    </maxzT>
-	  </lhs>
-	  <rhs>
-	    <maxzT>
-	      <sType/>
-	    </maxzT>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <maxzT>
-	      <mbTop>
 		<sType/>
 		<sType dash="'"/>
 	      </mbTop>
 	    </maxzT>
-	    <grouping>
-	      <neq>
-		<sType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
 	  </lhs>
 	  <rhs>
 	    <maxzT>
-	      <sType/>
-	    </maxzT>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <maxzT>
-	      <mbFull>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbFull>
-	    </maxzT>
-	  </lhs>
-	  <rhs>
-	    <maxzT>
-	      <sType/>
+	      <sType dash="'"/>
 	    </maxzT>
 	  </rhs>
 	</equation>
@@ -1218,17 +1098,14 @@
 		<sType/>
 	      </mbFull>
 	    </maxzT>
-	    <grouping>
-	      <neq>
-		<pType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
 	  </lhs>
 	  <rhs>
-	    <maxzT>
-	      <pType/>
-	    </maxzT>
+	    <mbFull>
+	      <maxzT>
+		<pType/>
+	      </maxzT>
+	      <sType/>
+	    </mbFull>
 	  </rhs>
 	</equation>
       </VEqns>
@@ -1298,13 +1175,13 @@
 	  <lhs>
 	    <minzT>
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
 	    </minzT>
 	  </lhs>
 	  <rhs>
 	    <minzT>
-	      <type/>
+	      <sType/>
 	    </minzT>
 	  </rhs>
 	</equation>
@@ -1328,50 +1205,14 @@
 	  <lhs>
 	    <minzT>
 	      <mbTop>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbTop>
-	    </minzT>
-	  </lhs>
-	  <rhs>
-	    <minzT>
-	      <sType/>
-	    </minzT>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzT>
-	      <mbTop>
 		<sType/>
 		<sType dash="'"/>
 	      </mbTop>
 	    </minzT>
-	    <grouping>
-	      <neq>
-		<sType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
 	  </lhs>
 	  <rhs>
 	    <minzT>
-	      <sType/>
-	    </minzT>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzT>
-	      <mbFull>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbFull>
-	    </minzT>
-	  </lhs>
-	  <rhs>
-	    <minzT>
-	      <sType/>
+	      <sType dash="'"/>
 	    </minzT>
 	  </rhs>
 	</equation>
@@ -1383,17 +1224,14 @@
 		<sType/>
 	      </mbFull>
 	    </minzT>
-	    <grouping>
-	      <neq>
-		<pType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
 	  </lhs>
 	  <rhs>
-	    <minzT>
-	      <pType/>
-	    </minzT>
+	    <mbFull>
+	      <minzT>
+		<pType/>
+	      </minzT>
+	      <sType/>
+	    </mbFull>
 	  </rhs>
 	</equation>
       </VEqns>
@@ -1469,13 +1307,13 @@
 	  <lhs>
 	    <minzD>
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
 	    </minzD>
 	  </lhs>
 	  <rhs>
 	    <minzD>
-	      <type/>
+	      <sType/>
 	    </minzD>
 	  </rhs>
 	</equation>
@@ -1503,50 +1341,14 @@
 	  <lhs>
 	    <minzD>
 	      <mbTop>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbTop>
-	    </minzD>
-	  </lhs>
-	  <rhs>
-	    <minzD>
-	      <sType/>
-	    </minzD>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzD>
-	      <mbTop>
 		<sType/>
 		<sType dash="'"/>
 	      </mbTop>
 	    </minzD>
-	    <grouping>
-	      <neq>
-		<sType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
 	  </lhs>
 	  <rhs>
 	    <minzD>
-	      <sType/>
-	    </minzD>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <minzD>
-	      <mbFull>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbFull>
-	    </minzD>
-	  </lhs>
-	  <rhs>
-	    <minzD>
-	      <sType/>
+	      <sType dash="'"/>
 	    </minzD>
 	  </rhs>
 	</equation>
@@ -1558,16 +1360,10 @@
 		<sType/>
 	      </mbFull>
 	    </minzD>
-	    <grouping>
-	      <neq>
-		<pType/>
-		<tvar name="alpha"/>
-	      </neq>
-	    </grouping>
 	  </lhs>
 	  <rhs>
 	    <minzD>
-	      <pType/>
+	      <sType/>
 	    </minzD>
 	  </rhs>
 	</equation>
@@ -1629,13 +1425,13 @@
 	  <lhs>
 	    <concrete>
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
 	    </concrete>
 	  </lhs>
 	  <rhs>
 	    <concrete>
-	      <type/>
+	      <sType/>
 	    </concrete>
 	  </rhs>
 	</equation>
@@ -1663,48 +1459,14 @@
 	  <lhs>
 	    <concrete>
 	      <mbTop>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbTop>
-	    </concrete>
-	  </lhs>
-	  <rhs>
-	    <concrete>
-	      <sType/>
-	    </concrete>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <concrete>
-	      <mbTop>
 		<sType/>
 		<sType dash="'"/>
 	      </mbTop>
 	    </concrete>
-	    <neq>
-	      <sType/>
-	      <tvar name="alpha"/>
-	    </neq>
 	  </lhs>
 	  <rhs>
 	    <concrete>
-	      <sType/>
-	    </concrete>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <concrete>
-	      <mbFull>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbFull>
-	    </concrete>
-	  </lhs>
-	  <rhs>
-	    <concrete>
-	      <sType/>
+	      <sType dash="'"/>
 	    </concrete>
 	  </rhs>
 	</equation>
@@ -1716,26 +1478,21 @@
 		<sType/>
 	      </mbFull>
 	    </concrete>
-	    <neq>
-	      <pType/>
-	      <tvar name="alpha"/>
-	    </neq>
 	  </lhs>
 	  <rhs>
 	    <concrete>
-	      <pType/>
+	      <sType/>
 	    </concrete>
 	  </rhs>
 	</equation>
 	<equation>
 	  <lhs>
-	    <concrete>
-	      <mbFull>
-		<pType/>
-		<sType/>
-	      </mbFull>
-	    </concrete>
-	    <textit content="(otherwise)"/>
+	    <grouping>
+	      <concrete>
+		<type/>
+	      </concrete>
+	      <textit content="(otherwise)"/>
+	    </grouping>
 	  </lhs>
 	  <rhs>
 	    <FALSE/>
@@ -1855,7 +1612,7 @@
 	  </lhs>
 	  <rhs>
 	    <pred name="Immut">
-	      <sType/>
+	      <pType/>
 	    </pred>
 	  </rhs>
 	</equation>
@@ -1898,7 +1655,7 @@
 	  <lhs>
 	    <pred name="Mut">
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
 	    </pred>
 	  </lhs>
@@ -2249,7 +2006,7 @@
 	  <lhs>
 	    <ftvs>
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
 	    </ftvs>
 	  </lhs>
@@ -2448,7 +2205,7 @@
 	  <lhs>
 	    <pred name="mtv">
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>                            
 	    </pred>
 	  </lhs>
@@ -2622,7 +2379,7 @@
 	  <lhs>
 	    <pred name="Mtv">
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>                            
 	    </pred>
 	  </lhs>
@@ -2798,7 +2555,7 @@
 	  <lhs>
 	    <pred name="ntv">
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>                            
 	    </pred>
 	  </lhs>
@@ -3034,6 +2791,13 @@
 	      <eq>
 		<pType/>
 		<tvar name="alpha"/>
+	      </eq>
+	      <text content=" or "/>
+	      <eq>
+		<pType/>
+		<mutable>
+		  <tvar name="alpha"/>
+		</mutable>
 	      </eq>
 	      <text content=" or "/>
 	      <eq>

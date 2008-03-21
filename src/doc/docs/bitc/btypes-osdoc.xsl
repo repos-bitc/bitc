@@ -4026,7 +4026,7 @@
   <xsl:template name="print.maybe">
     <xsl:param name="print.maybe.double"/>
     <xsl:variable name="mbpair1.paren" 
-      select="(*[1] = mbpair) or (*[1] = fn) or (*[1] = pair)"/>
+      select="(*[1] = mbpair) or (*[1] = fn) or (*[1] = pair) or (*[1] = mutable)"/>
     <xsl:variable name="mbpair2.paren" 
       select="(*[2] = mbpair) or (*[2] = fn) or (*[2] = pair)"/>
     <xsl:variable name="mbpair.paren" 
