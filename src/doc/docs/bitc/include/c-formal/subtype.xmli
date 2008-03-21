@@ -90,20 +90,7 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>  
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="S-Mut1">
-	  <tyPre/>
-	  <tyConc>
-	    <Msub>
-	      <mutable>
-		<sType/>
-	      </mutable>
-	      <sType/>
-	    </Msub>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="S-Mut2">
+	<tyRule name="S-Mut">
 	  <tyPre>
 	    <Msub>
 	      <sType/>
@@ -121,6 +108,8 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="S-MT1">
 	  <tyPre>
 	    <!-- This rule MUST NOT be written with a minz(t) 
@@ -137,14 +126,14 @@
 	  <tyConc>
 	    <Msub>
 	      <mbTop>
-		<sType dash="'"/>
+		<tvar name="alpha"/>
 		<sType/>
 	      </mbTop>
 	      <type/>
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="S-MF1">
+	<tyRule name="S-MF11">
 	  <tyPre>
 	    <!-- This rule MUST NOT be written with a minz(t) 
   	         on the RHS type, minz() on a maybe type a\t 
@@ -160,6 +149,64 @@
 	  <tyConc>
 	    <Msub>
 	      <mbFull>
+		<tvar name="alpha"/>
+		<sType/>
+	      </mbFull>
+	      <type/>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="S-MF12">
+	  <tyPre>
+	    <Msub>
+	      <mbFull>
+		<tvar name="alpha"/>
+		<sType/>
+	      </mbFull>
+	      <sType/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbFull>
+		<mutable>
+		  <tvar name="alpha"/>
+		</mutable>
+		<sType/>
+	      </mbFull>
+	      <mutable>
+		<sType/>
+	      </mutable>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="S-MT2">
+	  <tyPre>
+	    <Msub>
+	      <sType/>
+	      <type/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbTop>
+		<sType/>
+		<sType dash="'"/>
+	      </mbTop>
+	      <type/>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="S-MF2">
+	  <tyPre>
+	    <Msub>
+	      <pType/>
+ 	      <type/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbFull>
 		<pType/>
 		<sType/>
 	      </mbFull>
@@ -167,7 +214,7 @@
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="S-MT2">
+	<tyRule name="S-MT3">
 	  <tyPre>
 	    <Msub>
 	      <type/>
@@ -184,7 +231,7 @@
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="S-MF2">
+	<tyRule name="S-MF3">
 	  <tyPre>
 	    <Msub>
 	      <type/>
