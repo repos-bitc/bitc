@@ -187,27 +187,6 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="T-TqExpr">
-	  <tyPre>
-	    <TDjudge>
-	      <aExpr/>
-	      <type/>
-	    </TDjudge>
-	  </tyPre>
-	  <tyConc>
-	    <TDjudge>
-	      <paren>
-		<tqExpr>
-		  <aExpr/>
-		  <type/>
-		</tqExpr>
-	      </paren>
-	      <type/>
-	    </TDjudge>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-Set">
 	  <tyPre>
 	    <!-- Msub is okay in this place because the top-level
@@ -242,6 +221,8 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-Dup">
 	  <tyPre>
 	    <TDjudge Msub="yes">
@@ -282,8 +263,6 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-Pair">
 	  <tyPre>
 	    <TDjudge Msub="yes">
@@ -316,6 +295,8 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-Fst">
 	  <tyPre>
 	    <TDjudge>
@@ -362,9 +343,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="T-Let-M [Tq]">
+	<tyRule name="T-Let-M">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
@@ -395,10 +374,7 @@
 	    <TDjudge>
 	      <paren>
 		<let kind="m">
-		  <tqExpr optional="yes">
-		    <id/>
-		    <type/>
-		  </tqExpr>
+		  <id/>
 		  <aExpr num="1"/>
 		  <aExpr num="2"/>
 		</let>
@@ -407,9 +383,11 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="T-Let-P [Tq]">
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="T-Let-P">
 	  <tyPre>
-	    <TDjudge Msub="yes">
+	    <TDjudge>
 	      <aExpr num="1"/>
 	      <type num="1"/>
 	    </TDjudge>
@@ -424,16 +402,9 @@
 		<aExpr num="1"/>
 	      </assume>
 	      <GEN>
-		<sType/>
+		<type/>
 		<aTS/>
 	      </GEN>
-	    </Sjudge>
-	    <Sjudge name="term">
-	      <assume/>
-	      <tqExpr>
-		<id/>
-		<aTS/>	
-	      </tqExpr>
 	    </Sjudge>
 	    <Sjudge>
 	      <assume>
@@ -456,10 +427,7 @@
 	    <TDjudge>
 	      <paren>
 		<let kind="p">
-		  <tqExpr optional="yes">
-		    <id/>
-		    <type/>
-		  </tqExpr>
+		  <id/>
 		  <aExpr num="1"/>
 		  <aExpr num="2"/>
 		</let>
@@ -468,9 +436,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="G-Value">
+	<tyRule name="T-Generalize">
 	  <tyPre>
 	    <pred name="Value">
 	      <aExpr/>
@@ -504,63 +470,6 @@
 	    </Sjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="G-Expansive">
-	  <tyPre/>
-	  <tyConc>
-	    <Sjudge name="gen">
-	      <assume>
-		<gamma/>
-		<store/>
-		<aExpr/>
-	      </assume>                
-	      <GEN>
-		<type/>
-		<type/>
-	      </GEN>                                
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="Q-Loc">
-	  <tyPre>
-	    <eq>
-	      <aTS/>
-	      <type/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="loc">
-	      <assume/>
-	      <tqExpr>
-		<id/>
-		<aTS/>	
-	      </tqExpr>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="Q-Term">
-	  <tyPre>
-	    <eq>
-	      <aTS/>
-	      <forall>
-		<tvars name="alpha"/>
-		<type/>
-	      </forall>
-	    </eq>
-	    <neq>
-	      <aTS/>
-	      <type/>
-	    </neq>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="term">
-	      <assume/>
-	      <tqExpr>
-		<id/>
-		<aTS/>	
-	      </tqExpr>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>	  	  	
       </Hrules>
     </btypes:TYPE>
   </font>

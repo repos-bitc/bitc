@@ -55,10 +55,6 @@
       </bnf>
       <bnfc desc="">
 	<alternatives>
-	  <tqExpr>
-	    <aExpr/>
-	    <type/>
-	  </tqExpr>
 	  <assign>
 	    <aExpr/>
 	    <aExpr/>
@@ -97,10 +93,7 @@
       <bnfc desc="">
 	<alternatives>
 	  <let kind="k">
-	    <tqExpr optional="yes">
-	      <id/>
-	      <type/>
-	    </tqExpr>
+	    <id/>
 	    <aExpr/>
 	    <aExpr/>
 	  </let>

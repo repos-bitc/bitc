@@ -66,8 +66,6 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule name="I-Id">
 	  <tyPre>
 	    <mapsto>
@@ -112,6 +110,8 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>
+      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule name="I-Hloc">
 	  <tyPre>
 	    <mapsto>
@@ -166,8 +166,6 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>        
-      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule name="I-Lambda">
 	  <tyPre>
 	    <TEjudge name="i">
@@ -247,6 +245,8 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>        
+      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule name="I-App">
 	  <tyPre>
 	    <TEjudge name="i">
@@ -335,6 +335,93 @@
 		      <type num="2"/>
 		      <mbFull>
 			<tvar name="delta"/>
+			<tvar name="beta"/>
+		      </mbFull>
+		    </eq>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="I-Set">
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="1"/>
+		  <type num="1"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset num="1"/>
+	      </constrain>
+	    </TEjudge>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="2"/>
+		  <type num="2"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset num="2"/>
+	      </constrain>
+	    </TEjudge>
+	    <Sjudge name="lval">
+	      <assume/>
+	      <aExpr num="1"/>
+	    </Sjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+		<tvar name="gamma"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <assign>
+		    <aExpr num="1"/>
+		    <aExpr num="2"/>
+		  </assign>
+		  <unit/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<unin>
+		  <aCtset num="1"/>
+		  <aCtset num="2"/>
+		  <set>
+		    <eq>
+		      <type num="1"/>
+		      <mbFull>
+			<mutable>
+			  <tvar name="alpha"/>
+			</mutable>
+			<tvar name="beta"/>
+		      </mbFull>
+		    </eq>
+		    <eq>
+		      <type num="2"/>
+		      <mbFull>
+			<tvar name="gamma"/>
 			<tvar name="beta"/>
 		      </mbFull>
 		    </eq>
@@ -448,144 +535,6 @@
 		      <mbFull>
 			<tvar name="delta"/>
 			<tvar name="gamma"/>
-		      </mbFull>
-		    </eq>
-		  </set>
-		</unin>
-	      </constrain>
-	    </TEjudge>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules  rowsep="4pt" colsep="2">
-	<tyRule name="I-Tqexpr">
-	  <tyPre>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr/>
-		  <type dash="'"/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<aCtset/>
-	      </constrain>
-	    </TEjudge>
-	  </tyPre>
-	  <tyConc>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <paren>
-		    <tqExpr>
-		      <aExpr/>
-		      <type/>
-		    </tqExpr>  
-		  </paren>        
-		  <type/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<unin>
-		  <aCtset/>
-		  <set>
-		    <eq>
-		      <type dash="'"/>
-		      <type/>
-		    </eq>
-		  </set>
-		</unin>
-	      </constrain>
-	    </TEjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="I-Set">
-	  <tyPre>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr num="1"/>
-		  <type num="1"/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<aCtset num="1"/>
-	      </constrain>
-	    </TEjudge>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr num="2"/>
-		  <type num="2"/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<aCtset num="2"/>
-	      </constrain>
-	    </TEjudge>
-	    <Sjudge name="lval">
-	      <assume/>
-	      <aExpr num="1"/>
-	    </Sjudge>
-	    <models name="new">
-	      <assume/>
-	      <grouping>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-		<tvar name="gamma"/>
-	      </grouping>
-	    </models>
-	  </tyPre>
-	  <tyConc>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <assign>
-		    <aExpr num="1"/>
-		    <aExpr num="2"/>
-		  </assign>
-		  <unit/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<unin>
-		  <aCtset num="1"/>
-		  <aCtset num="2"/>
-		  <set>
-		    <eq>
-		      <type num="1"/>
-		      <mbFull>
-			<mutable>
-			  <tvar name="alpha"/>
-			</mutable>
-			<tvar name="beta"/>
-		      </mbFull>
-		    </eq>
-		    <eq>
-		      <type num="2"/>
-		      <mbFull>
-			<tvar name="gamma"/>
-			<tvar name="beta"/>
 		      </mbFull>
 		    </eq>
 		  </set>
@@ -981,15 +930,6 @@
 			<tvar name="beta"/>
 		      </mbFull>
 		    </eq>
-		    <opt>
-		      <eq>
-			<type/>
-			<mbFull>
-			  <tvar name="alpha"/>
-			  <tvar name="beta"/>
-			</mbFull>
-		      </eq>
-		    </opt>
 		  </set>
 		</unin>
 	      </assume>
@@ -1057,10 +997,7 @@
 	      <conclude>
 		<tqExpr>
 		  <let kind="k">
-		    <tqExpr optional="yes">
-		      <id/>
-		      <type/>
-		    </tqExpr>
+		    <id/>
 		    <aExpr num="1"/>
 		    <aExpr num="2"/>
 		  </let>

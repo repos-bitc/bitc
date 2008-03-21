@@ -36,16 +36,6 @@
 	  </fnxn>
 	  <br/>
 	  <fnxn name="Value">
-	    <tqExpr>
-	      <aExpr/>
-	      <type/>
-	    </tqExpr>
-	    <pred name="Value">
-	      <aExpr/>
-	    </pred>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Value">
 	    <dup>
 	      <aExpr/>
 	    </dup>
@@ -1641,18 +1631,6 @@
 	  Otherwise, the execution can take E-Let-P.
 	</p>
       </li>
-      <li>
-	<p>
-	  Case T-TqExpr: Execution can always continue using the EL-Tq
-	  or E-Tq rules as applicable.
-	</p>
-      </li>
-      <li>
-	<p>
-	  Case T-Let-M-Tq, T-Let-P-Tq: Execution can always continue
-	  using the E-Let-Tq rule.	
-	</p>
-      </li>
     </ol>
   </proof>
   <lemma id="T-Weakening">
@@ -2344,7 +2322,6 @@
 	    <set>
 	      <gamma/>
 	      <store/>
-	      <aExpr/>
 	      <type/>
 	    </set>
 	  </Subst>
@@ -2362,10 +2339,7 @@
 	    </Subst>
 	  </assume>
 	  <tqExpr>
-	    <Subst>
-	      <aSubMap/>
-	      <aExpr/>
-	    </Subst>
+	    <aExpr/>
 	    <Subst>
 	      <aSubMap/>
 	      <type/>
@@ -3728,8 +3702,7 @@
 <!--       </li> -->
 <!--       <li> -->
 <!-- 	<p> -->
-<!-- 	  Cases T-If, T-Dup, T-TqExpr, and T-Let-M-Tq T-Let-P-Tq are -->
-<!-- 	  similar.   -->
+<!-- 	  Cases T-If, T-Dup are similar.   -->
 <!-- 	</p> -->
 <!--       </li> -->
 <!--     </ol> -->

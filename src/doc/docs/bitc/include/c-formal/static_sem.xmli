@@ -132,7 +132,6 @@
 	  <type/>
 	  <gamma/>
 	  <store/>
-	  <aExpr/>
 	</alternatives>
       </bnf>
     </grammar>
@@ -233,18 +232,6 @@
       <btypes:TYPE>
 	<type dash="'"/>
       </btypes:TYPE>.
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <aExpr/>
-	</in>
-      </btypes:TYPE> if
-      <btypes:TYPE>
-	<type/>
-      </btypes:TYPE> is structurally present as a part of  
-      <btypes:TYPE>
-	<aExpr/>
-      </btypes:TYPE>, as a type annotation.
       <btypes:TYPE>
 	<in>
 	  <type/>
@@ -1835,28 +1822,6 @@
 		  <type num="i"/>
 		</mapping>
 		<store/>
-	      </in>
-	    </grouping>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="F">
-	      <aExpr/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <grouping>
-	      <Unin>
-		<pred name="F">
-		  <type num="i"/>
-		</pred>
-	      </Unin>                  
-	      <text content=", "/>
-	      <Forall/>
-	      <in>
-		<type num="i"/>
-		<aExpr/>
 	      </in>
 	    </grouping>
 	  </rhs>
