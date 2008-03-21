@@ -854,6 +854,9 @@
 	  <xsl:if test="../@and">
 	    <xsl:text> and </xsl:text>
 	  </xsl:if>
+	  <xsl:if test="../@or">
+	    <xsl:text> or </xsl:text>
+	  </xsl:if>
 	</xsl:when>
 	<xsl:otherwise>
 	  <xsl:choose>
@@ -1444,13 +1447,6 @@
   <xsl:template match="inner" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>image;</xsl:text>
-    <xsl:call-template name="print.params"/>
-  </xsl:template>  
-
-  <!-- mb_ps: Maybe power-set -->
-  <xsl:template match="mb_ps" mode="formula">
-    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>weierp;</xsl:text>
     <xsl:call-template name="print.params"/>
   </xsl:template>  
 

@@ -385,6 +385,59 @@
   </proof>
   <lemma id="T-sub-inversion">
     <title>Inversion of Copy Coercion</title>
+    <p>
+      For any type
+      <btypes:TYPE>
+	<sType/>
+      </btypes:TYPE>
+      such that 
+      <btypes:TYPE>
+	<neq>
+	  <sType/>
+	  <mutable>
+	    <sType dash="''"/>
+	  </mutable>
+	</neq>
+      </btypes:TYPE>
+      and for any 
+      <btypes:TYPE>
+	<sType dash="'"/>
+	<pType dash="'"/>
+      </btypes:TYPE>, let
+      <btypes:TYPE>
+	<eq>
+	  <pred name="Q">
+	    <sType/>
+	  </pred>
+	  <set>
+	    <sType/>
+	    <mutable>
+	      <sType/>
+	    </mutable>
+	    <mbTop>
+	      <sType dash="'"/>
+	      <sType/>
+	    </mbTop>
+	    <mbTop>
+	      <sType dash="'"/>
+	      <mutable>
+		<sType/>
+	      </mutable>
+	    </mbTop>
+	    <mbFull>
+	      <pType/>
+	      <sType/>
+	    </mbFull>
+	    <mbFull>
+	      <pType/>
+	      <mutable>
+		<sType/>
+	      </mutable>
+	    </mbFull>
+	  </set>
+	</eq>
+      </btypes:TYPE>.
+    </p>
     <ol>
       <li>
 	<p>
@@ -397,11 +450,10 @@
 	    <text content=" then "/>
 	    <in>
 	      <type/>
-	      <mb_ps>
+	      <pred name="Q">
 		<bool/>
-	      </mb_ps>
+	      </pred>
 	    </in>
-	    <text content="."/>
 	  </btypes:TYPE>
 	</p>
       </li>
@@ -416,9 +468,9 @@
 	    <text content=" then "/>
 	    <in>
 	      <type/>
-	      <mb_ps>
+	      <pred name="Q">
 		<unit/>
-	      </mb_ps>
+	      </pred>
 	    </in>
 	    <text content="."/>
 	  </btypes:TYPE>
@@ -437,11 +489,11 @@
 	    <text content=" then "/>
 	    <in>
 	      <type/>
-	      <mb_ps>
+	      <pred name="Q">
 		<ref>
 		  <type dash="'"/>
 		</ref>
-	      </mb_ps>
+	      </pred>
 	    </in>
 	    <text content="."/>
 	  </btypes:TYPE>
@@ -461,12 +513,12 @@
 	    <text content=" then "/>
 	    <in>
 	      <type/>
-	      <mb_ps>
+	      <pred name="Q">
 		<fn>
 		  <type num="1" dash="'"/>
 		  <type num="2" dash="'"/>
 		</fn>
-	      </mb_ps>
+	      </pred>
 	    </in>
 	    <text content=", where "/>
 	    <eq>
@@ -504,12 +556,12 @@
 	    <text content=" then "/>
 	    <in>
 	      <type/>
-	      <mb_ps>
+	      <pred name="Q">
 		<pair>
 		  <type num="1" dash="'"/>
 		  <type num="2" dash="'"/>
 		</pair>
-	      </mb_ps>
+	      </pred>
 	    </in>
 	    <text content=", such that "/>
 	    <Msub>
@@ -708,97 +760,43 @@
       <btypes:TYPE>
 	<in>
 	  <type/>
-	  <mb_ps>
+	  <pred name="Q">
 	    <bool/>
-	  </mb_ps>
+	  </pred>
 	</in>
       </btypes:TYPE>. 
       <btypes:TYPE>
 	<text content=" That is, for some "/>
-	<tvar name="alpha"/>
-	<text content=", "/>
 	<sType/>
-	<text content=" , and "/>
-	<sType dash="'"/>
-	<text content=", "/>
+	<text content=" and "/>
+	<pType/>
+	<text content=", the type "/>
 	<type/>
 	<text content=" equals one of: "/>
-	<collection>
+	<collection or="yes">
 	  <bool/>
 	  <mutable>
 	    <bool/>
 	  </mutable>
 	  <mbTop>
-	    <tvar name="alpha"/>
-	    <bool/>
-	  </mbTop>
-	  <mbTop>
-	    <tvar name="alpha"/>
-	    <mutable>
-	      <bool/>
-	    </mutable>
-	  </mbTop>
-	  <mbTop>
-	    <bool/>
 	    <sType/>
+	    <bool/>
 	  </mbTop>
 	  <mbTop>
+	    <sType/>
 	    <mutable>
 	      <bool/>
 	    </mutable>
-	    <sType/>
 	  </mbTop>
 	  <mbFull>
-	    <tvar name="alpha"/>
+	    <pType/>
 	    <bool/>
 	  </mbFull>
 	  <mbFull>
-	    <tvar name="alpha"/>
+	    <pType/>
 	    <mutable>
 	      <bool/>
 	    </mutable>
-	  </mbFull>
-	  <mbFull>
-	    <bool/> 
-	    <sType dash="'"/>
-	  </mbFull>
-	  <mbFull>
-	    <mutable>
-	      <bool/>
-	    </mutable>
-	    <sType dash="'"/>
-	  </mbFull>
-	  <mbFull>
-	    <mbTop>
-	      <tvar name="alpha"/>
-	      <bool/>
-	    </mbTop>
-	    <sType dash="'"/>
-	  </mbFull>
-	  <mbFull>
-	    <mbTop>
-	      <tvar name="alpha"/>
-	      <mutable>
-		<bool/>
-	      </mutable>
-	    </mbTop>
-	    <sType dash="'"/>
-	  </mbFull>
-	  <mbFull>
-	    <mbTop>
-	      <bool/>
-	      <sType/>
-	    </mbTop>
-	    <sType dash="'"/>
-	  </mbFull>
-	  <mbFull>
-	    <mbTop>
-	      <mutable>
-		<bool/>
-	      </mutable>
-	      <sType/>
-	    </mbTop>
-	    <sType dash="'"/>
 	  </mbFull>
 	</collection>
       </btypes:TYPE>.
@@ -1129,7 +1127,7 @@
 	      <Msub>
 		<aExpr num="1"/>
 		<mutable>
-		  <type/>
+		  <sType/>
 		</mutable>
 	      </Msub>
 	    </Sjudge>
@@ -1141,7 +1139,7 @@
 	      </assume>
 	      <Msub>
 		<aExpr num="2"/>
-		<type/>
+		<sType/>
 	      </Msub>
 	    </Sjudge>
 	    <text content=", and "/>
@@ -1225,12 +1223,12 @@
 		    <Empty/>
 		    <store/>
 		  </assume>
-		  <tqExpr>
+		  <Msub>
 		    <sLoc/>
 		    <mutable>
-		      <type/>
+		      <sType/>
 		    </mutable>
-		  </tqExpr>
+		  </Msub>
 		</Sjudge>
 	      </btypes:TYPE> and
 	      <btypes:TYPE>
@@ -1311,14 +1309,34 @@
 		    <Empty/>
 		    <store/>
 		  </assume>
-		  <tqExpr>
+		  <Msub>
 		    <aExpr num="1"/>
 		    <mutable>
-		      <type/>
+		      <sType/>
 		    </mutable>
+		  </Msub>
+		</Sjudge>
+	      </btypes:TYPE>, which is equivalent to
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <Empty/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr num="1"/>
+		    <type num="1"/>
 		  </tqExpr>
 		</Sjudge>
-	      </btypes:TYPE>. That is,
+		<text content=" and "/>
+		<Msub>
+		  <type num="1"/>
+		  <mutable>
+		    <sType/>
+		  </mutable>
+		</Msub>
+	      </btypes:TYPE>.
+	      That is,
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
@@ -1332,9 +1350,7 @@
 		      </fst>
 		      <path/>
 		    </select>
-		    <mutable>
-		      <type/>
-		    </mutable>
+		    <type num="1"/>
 		  </tqExpr>
 		</Sjudge>
 	      </btypes:TYPE>. 
@@ -1347,29 +1363,30 @@
 		    <Empty/>
 		    <store/>
 		  </assume>
-		  <tqExpr>
+		  <Msub>
 		    <sLoc/>
 		    <pair>
-		      <mutable>
-			<type/>
-		      </mutable>
-		      <type dash="'"/>
+		      <type num="1"/>
+		      <type num="2"/>
 		    </pair>
-		  </tqExpr>
+		  </Msub>
 		</Sjudge>
-	      </btypes:TYPE>.
-	      And, from the assumption of T-Sloc rule, we must have
+	      </btypes:TYPE> for some type
 	      <btypes:TYPE>
-		<mapsto>
-		  <store/>
-		  <sLoc/>
+		<type num="2"/>
+	      </btypes:TYPE>.
+	      Now, from the assumption of T-Sloc rule, we must have
+	      <btypes:TYPE>
+		<Msub>
+		  <mapsto>
+		    <store/>
+		    <sLoc/>
+		  </mapsto>
 		  <pair>
-		    <mutable>
-		      <type/>
-		    </mutable>
-		    <type dash="'"/>
+		    <type num="1"/>
+		    <type num="2"/>
 		  </pair>
-		</mapsto>
+		</Msub>
 	      </btypes:TYPE>.
 	    </p>
 	  </li>
@@ -1406,10 +1423,8 @@
 		  <Msub>
 		    <aVal/>
 		    <pair>
-		      <mutable>
-			<type/>
-		      </mutable>
-		      <type dash="'"/>
+		      <type num="1"/>
+		      <type num="2"/>
 		    </pair>
 		  </Msub>
 		</Sjudge>

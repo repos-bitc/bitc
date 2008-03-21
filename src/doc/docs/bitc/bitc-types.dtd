@@ -308,6 +308,7 @@
                                 etc       yes   #IMPLIED
                                 paren     yes   #IMPLIED
                                 and       yes   #IMPLIED
+                                or        yes   #IMPLIED
                                 sep       CDATA #IMPLIED
 >
 
@@ -659,7 +660,6 @@
 
 <!-- inner of the maybe types -->
 <!ELEMENT inner               (%anytype.group;)>
-<!ELEMENT mb_ps               (%anytype.group;)>
 
 <!ELEMENT join                (%anytype.group;*)>
 <!ELEMENT meet                (%anytype.group;*)>
