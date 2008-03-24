@@ -189,13 +189,14 @@
 	</tyRule>
 	<tyRule name="T-Set">
 	  <tyPre>
-	    <!-- Msub is okay in this place because the top-level
-                 mutability is fixed to mutable, and the type inside
-                 the mutable constructor is a sType. That is,
-                 vatiation in shallow mutability can only happen
-                 within te pair constructor, which is okay.
-                 The Msub relation ensures that the inner types can be 
-                 promoted to immutable variants as necessary --> 
+	    <!-- Msub is okay in this place because, given the
+	    definition of subtyping, the type t which is t <|: Mw can
+	    only be of the form: 
+                Mw', where w' <|: w (ex: immutable variations within
+ 	             pair constructor, function constructor are okay).
+                Mw'|w'' where w' <|: w
+                Mw!w''
+                M'a|w' where w' <|: w  --> 
 	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
 	      <mutable>

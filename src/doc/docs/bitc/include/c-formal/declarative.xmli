@@ -389,20 +389,9 @@
       For any type
       <btypes:TYPE>
 	<sType/>
-      </btypes:TYPE>
-      such that 
-      <btypes:TYPE>
-	<neq>
-	  <sType/>
-	  <mutable>
-	    <sType dash="''"/>
-	  </mutable>
-	</neq>
-      </btypes:TYPE>
-      and for any 
+      </btypes:TYPE>, and for any
       <btypes:TYPE>
 	<sType dash="'"/>
-	<pType dash="'"/>
       </btypes:TYPE>, let
       <btypes:TYPE>
 	<eq>
@@ -410,33 +399,64 @@
 	    <sType/>
 	  </pred>
 	  <set>
-	    <sType/>
-	    <mutable>
-	      <sType/>
-	    </mutable>
+	    <sType num="f"/>
 	    <mbTop>
-	      <sType dash="'"/>
+	      <tvar name="alpha"/>
 	      <sType/>
 	    </mbTop>
 	    <mbTop>
-	      <sType dash="'"/>
+	      <tvar name="alpha"/>
 	      <mutable>
 		<sType/>
 	      </mutable>
 	    </mbTop>
 	    <mbFull>
-	      <pType/>
+	      <tvar name="alpha"/>
 	      <sType/>
 	    </mbFull>
 	    <mbFull>
-	      <pType/>
+	      <tvar name="alpha"/>
 	      <mutable>
 		<sType/>
 	      </mutable>
+	    </mbFull>
+	    <mbFull>
+	      <mutable>
+		<tvar name="alpha"/>
+	      </mutable>
+	      <sType/>
+	    </mbFull>
+	    <mbFull>
+	      <mutable>
+		<tvar name="alpha"/>
+	      </mutable>
+	      <mutable>
+		<sType/>
+	      </mutable>
+	    </mbFull>
+	    <mbTop>
+	      <sType/>
+	      <sType dash="'"/>
+	    </mbTop>
+	    <mbTop>
+	      <mutable>
+		<sType/>
+	      </mutable>
+	      <sType dash="'"/>
+	    </mbTop>
+	    <mbFull>
+	      <sType/>
+	      <sType dash="'"/>
+	    </mbFull>
+	    <mbFull>
+	      <mutable>
+		<sType/>
+	      </mutable>
+	      <sType dash="'"/>
 	    </mbFull>
 	  </set>
 	</eq>
-      </btypes:TYPE>.
+      </btypes:TYPE>. Then,
     </p>
     <ol>
       <li>
@@ -768,8 +788,6 @@
       <btypes:TYPE>
 	<text content=" That is, for some "/>
 	<sType/>
-	<text content=" and "/>
-	<pType/>
 	<text content=", the type "/>
 	<type/>
 	<text content=" equals one of: "/>
@@ -779,24 +797,58 @@
 	    <bool/>
 	  </mutable>
 	  <mbTop>
-	    <sType/>
+	    <tvar name="alpha"/>
 	    <bool/>
 	  </mbTop>
 	  <mbTop>
-	    <sType/>
+	    <tvar name="alpha"/>
 	    <mutable>
 	      <bool/>
 	    </mutable>
 	  </mbTop>
 	  <mbFull>
-	    <pType/>
+	    <tvar name="alpha"/>
 	    <bool/>
 	  </mbFull>
 	  <mbFull>
-	    <pType/>
+	    <tvar name="alpha"/>
 	    <mutable>
 	      <bool/>
 	    </mutable>
+	  </mbFull>
+	  <mbFull>
+	    <mutable>
+	      <tvar name="alpha"/>
+	    </mutable>
+	    <bool/>
+	  </mbFull>
+	  <mbFull>
+	    <mutable>
+	      <tvar name="alpha"/>
+	    </mutable>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	  </mbFull>
+	  <mbTop>
+	    <bool/>
+	    <sType/>
+	  </mbTop>
+	  <mbTop>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	    <sType/>
+	  </mbTop>
+	  <mbFull>
+	    <bool/>
+	    <sType/>
+	  </mbFull>
+	  <mbFull>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	    <sType/>
 	  </mbFull>
 	</collection>
       </btypes:TYPE>.
@@ -1250,7 +1302,7 @@
 		    <stack/>
 		  </dom>
 		</in>
-	      </btypes:TYPE>. Therefore, execution can continnue
+	      </btypes:TYPE>. Therefore, execution can continue
 	      with step E-:Stack.
 	    </p>
 	  </li>
@@ -1868,109 +1920,39 @@
       Straightforward induction on the typing derivation.
     </p>
   </proof>
-  <lemma id="T-Subtype-properties">
-    <title>Properties of Copy Coercion</title>
-    <p>
-      If
-      <btypes:TYPE>
-	<Msub>
-	  <type/>
-	  <type dash="'"/>
-	</Msub>
-      </btypes:TYPE>, then
-    </p>
-    <ol>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <Msub>
-	      <type/>
-	      <minz>
-		<type dash="'"/>
-	      </minz>
-	    </Msub>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <Msub>
-	      <maxz>
-		<type/>
-	      </maxz>
-	      <type dash="'"/>
-	    </Msub>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <eq>
-	      <maxz>
-		<type/>
-	      </maxz>
-	      <maxz>
-		<type dash="'"/>
-	      </maxz>
-	    </eq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <eq>
-	      <minz>
-		<type/>
-	      </minz>
-	      <minz>
-		<type dash="'"/>
-	      </minz>
-	    </eq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-    </ol>
-  </lemma>
-  <proof>
-    <p>
-      Evident from the definition of copy coercion relationship.
-    </p>
-  </proof>
-<!--   <lemma id="subtype_and_maxmin"> -->
-<!--     <title>Substitution and Mutability</title> -->
+<!--   <lemma id="T-Subtype-properties"> -->
+<!--     <title>Properties of Copy Coercion</title> -->
 <!--     <p> -->
-<!--       If  -->
+<!--       If -->
 <!--       <btypes:TYPE> -->
-<!-- 	<Cst> -->
-<!-- 	  <assume/> -->
-<!-- 	  <Subst> -->
-<!-- 	    <aSubMap/> -->
-<!-- 	    <type/> -->
-<!-- 	  </Subst> -->
-<!-- 	</Cst> -->
+<!-- 	<Msub> -->
+<!-- 	  <type/> -->
+<!-- 	  <type dash="'"/> -->
+<!-- 	</Msub> -->
 <!--       </btypes:TYPE>, then -->
 <!--     </p> -->
 <!--     <ol> -->
 <!--       <li> -->
 <!-- 	<p> -->
 <!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
+<!-- 	    <Msub> -->
+<!-- 	      <type/> -->
+<!-- 	      <minz> -->
+<!-- 		<type dash="'"/> -->
+<!-- 	      </minz> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
 <!-- 	      <maxz> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <type/> -->
-<!-- 		</Subst> -->
+<!-- 		<type/> -->
 <!-- 	      </maxz> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<maxz> -->
-<!-- 		  <type/> -->
-<!-- 		</maxz> -->
-<!-- 	      </Subst> -->
-<!-- 	    </eq> -->
+<!-- 	      <type dash="'"/> -->
+<!-- 	    </Msub> -->
 <!-- 	  </btypes:TYPE> -->
 <!-- 	</p> -->
 <!--       </li> -->
@@ -1978,18 +1960,12 @@
 <!-- 	<p> -->
 <!-- 	  <btypes:TYPE> -->
 <!-- 	    <eq> -->
-<!-- 	      <maxzT> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <type/> -->
-<!-- 		</Subst> -->
-<!-- 	      </maxzT> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<maxzT> -->
-<!-- 		  <type/> -->
-<!-- 		</maxzT> -->
-<!-- 	      </Subst> -->
+<!-- 	      <maxz> -->
+<!-- 		<type/> -->
+<!-- 	      </maxz> -->
+<!-- 	      <maxz> -->
+<!-- 		<type dash="'"/> -->
+<!-- 	      </maxz> -->
 <!-- 	    </eq> -->
 <!-- 	  </btypes:TYPE> -->
 <!-- 	</p> -->
@@ -1999,37 +1975,11 @@
 <!-- 	  <btypes:TYPE> -->
 <!-- 	    <eq> -->
 <!-- 	      <minz> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <type/> -->
-<!-- 		</Subst> -->
+<!-- 		<type/> -->
 <!-- 	      </minz> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<minz> -->
-<!-- 		  <type/> -->
-<!-- 		</minz> -->
-<!-- 	      </Subst> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <minzT> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <type/> -->
-<!-- 		</Subst> -->
-<!-- 	      </minzT> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<minzT> -->
-<!-- 		  <type/> -->
-<!-- 		</minzT> -->
-<!-- 	      </Subst> -->
+<!-- 	      <minz> -->
+<!-- 		<type dash="'"/> -->
+<!-- 	      </minz> -->
 <!-- 	    </eq> -->
 <!-- 	  </btypes:TYPE> -->
 <!-- 	</p> -->
@@ -2038,11 +1988,7 @@
 <!--   </lemma> -->
 <!--   <proof> -->
 <!--     <p> -->
-<!--       By induction on the structure of  -->
-<!--       <btypes:TYPE> -->
-<!-- 	<type/> -->
-<!--       </btypes:TYPE>. We give the proof only for the first -->
-<!--       property. Other properties are similar. -->
+<!--       Evident from the definition of copy coercion relationship. -->
 <!--     </p> -->
 <!--   </proof> -->
   <lemma id="T-SSubstitution">
@@ -2073,21 +2019,6 @@
 	    <aSubMap/>
 	    <type/>
 	  </Subst>
-	  <minz>
-	    <Subst>
-	      <aSubMap/>
-	      <type dash="'"/>
-	    </Subst>
-	  </minz>
-	</Msub>
-	<text content=" and "/>
-	<Msub>
-	  <maxz>
-	    <Subst>
-	      <aSubMap/>
-	      <type/>
-	    </Subst>
-	  </maxz>
 	  <Subst>
 	    <aSubMap/>
 	    <type dash="'"/>
@@ -2104,29 +2035,11 @@
 	  <type/>
 	  <type dash="'"/>
 	</Msub>
-      </btypes:TYPE>. We give the proof for the first part
-      <btypes:TYPE>
-	<Msub>
-	  <Subst>
-	    <aSubMap/>
-	    <type/>
-	  </Subst>
-	  <minz>
-	    <Subst>
-	      <aSubMap/>
-	      <type dash="'"/>
-	    </Subst>
-	  </minz>
-	</Msub>
-      </btypes:TYPE>. The proof for the second part is exactly
-      similar. 
+      </btypes:TYPE>.
     </p>
     <p>
-      Case S-Refl is trivial. Case S-Trans, S-Fn, S-Pair, S-Mut1, and
-      S-Mut2 follow from induction hypothesis and by using 
-      <btypes:TYPE>
-	<lem tag="T-Subtype-properties"/>
-      </btypes:TYPE> properties 1 and 4.
+      Case S-Refl is trivial. Cases S-Trans, S-Fn, S-Pair and S-Mut
+      follow from induction hypothesis.
     </p>
     <p>
       Case S-MT1: There are two sub-cases to consider. Suppose
@@ -2138,7 +2051,34 @@
 	  </Subst>
 	  <tvar name="alpha"/>
 	</eq>
+      </btypes:TYPE>. In this case, we know that 
+      <btypes:TYPE>
+	<eq>
+	  <minz>
+	    <sType/>
+	  </minz>
+	  <type/>
+	</eq>
       </btypes:TYPE>.
+      Since a substitution on strcturally equal types must preserve
+      equality, we have
+      <btypes:TYPE>
+	<eq>
+	  <Subst>
+	    <aSubMap/>
+	    <minz>
+	      <sType/>
+	    </minz>
+	  </Subst>
+	  <Subst>
+	    <aSubMap/>
+	    <type/>
+	  </Subst>
+	</eq>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      Otherwise, 
       It must be true that
       <btypes:TYPE>
 	<eq>
@@ -2248,7 +2188,6 @@
 	  </minz>
 	</Msub>
       </btypes:TYPE>. The result is obtainable from S-MT1 rule.
-      
       Let
       <btypes:TYPE>
 	<eq>
@@ -2756,7 +2695,7 @@
       </li>
     </ol>
   </proof>
-    <lemma id="T-LSubstitution">
+  <lemma id="T-LSubstitution">
     <title>Location Substitution</title>
     <p>
       If

@@ -112,16 +112,12 @@
       <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="S-MT1">
 	  <tyPre>
-	    <!-- This rule MUST NOT be written with a minz(t) 
-  	         on the RHS type, minz() on a maybe type a\t 
-  	         returns minz(t). The RHS cannot be a maybe type 
-	         where the mb-var has not concretized.  -->
-	    <Msub>
-	      <maxzT>
+	    <eq>
+	      <minzT>
 		<sType/>
-	      </maxzT>
+	      </minzT>
 	      <type/>
-	    </Msub>
+	    </eq>
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
@@ -133,18 +129,69 @@
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="S-MF11">
+	<tyRule name="S-MT2">
 	  <tyPre>
-	    <!-- This rule MUST NOT be written with a minz(t) 
-  	         on the RHS type, minz() on a maybe type a\t 
-  	         returns minz(t). The RHS cannot be a maybe type 
-	         where the mb-var has not concretized.  -->
-	    <Msub>
-	      <maxz>
+	    <eq>
+	      <maxzT>
 		<sType/>
-	      </maxz>
+	      </maxzT>
+	      <type/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <type/>
+	      <mbTop>
+		<tvar name="alpha"/>
+		<sType/>
+	      </mbTop>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="S-MT3">
+	  <tyPre>
+	    <Msub>
+	      <sType/>
 	      <type/>
 	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbTop>
+		<sType/>
+		<sType dash="'"/>
+	      </mbTop>
+	      <type/>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="S-MT4">
+	  <tyPre>
+	    <Msub>
+	      <type/>
+	      <sType/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <type/>
+	      <mbTop>
+		<sType/>
+		<sType dash="'"/>
+	      </mbTop>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="S-MF1">
+	  <tyPre>
+	    <eq>
+	      <minz>
+		<sType/>
+	      </minz>
+	      <type/>
+	    </eq>
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
@@ -156,7 +203,26 @@
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="S-MF12">
+	<tyRule name="S-M2">
+	  <tyPre>
+	    <Msub>
+	      <maxz>
+		<sType/>
+	      </maxz>
+	      <type/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <type/>
+	      <mbFull>
+		<tvar name="alpha"/>
+		<sType/>
+	      </mbFull>
+	    </Msub>
+ 	  </tyConc>
+	</tyRule>
+	<tyRule name="S-MF3">
 	  <tyPre>
 	    <Msub>
 	      <mbFull>
@@ -180,24 +246,31 @@
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="S-MT2">
+	<tyRule name="S-MF4">
 	  <tyPre>
 	    <Msub>
 	      <sType/>
-	      <type/>
+	      <mbFull>
+		<tvar name="alpha"/>
+		<sType/>
+	      </mbFull>
 	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
-	      <mbTop>
+	      <mutable>
 		<sType/>
-		<sType dash="'"/>
-	      </mbTop>
-	      <type/>
+	      </mutable>
+	      <mbFull>
+		<mutable>
+		  <tvar name="alpha"/>
+		</mutable>
+		<sType/>
+	      </mbFull>
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="S-MF2">
+	<tyRule name="S-MF5">
 	  <tyPre>
 	    <Msub>
 	      <pType/>
@@ -214,24 +287,7 @@
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="S-MT3">
-	  <tyPre>
-	    <Msub>
-	      <type/>
-	      <sType/>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <type/>
-	      <mbTop>
-		<sType/>
-		<sType dash="'"/>
-	      </mbTop>
-	    </Msub>
- 	  </tyConc>
-	</tyRule>
-	<tyRule name="S-MF3">
+	<tyRule name="S-MF6">
 	  <tyPre>
 	    <Msub>
 	      <type/>
