@@ -8,6 +8,9 @@ syntax: glob
 *~
 \#*
 
+# Doxygen output directories:
+doxygen
+
 # vi[m] turds:
 *.swp
 
