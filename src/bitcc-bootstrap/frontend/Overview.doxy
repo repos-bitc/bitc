@@ -1,0 +1,28 @@
+/* -*- mode: c -*-  */
+
+/** @page Overview Overview of the Front End
+ *
+ * The BitC front end is conceptually divided into three major phases:
+ * surface syntax processing, validation, and code generation.
+ *
+ * @li The <b>surface phase</b> covers everything that is needed to
+ * generate an AST. This is basically the parser and the lexer. The
+ * main reason that this stage is distinguished is that we are
+ * planning a re-work of the language surface syntax.
+ *
+ * @li The <b>validation phase</b> covers everything required to know
+ * that you have a valid unit of compilation, or in interactive mode,
+ * a valid top-level form. This includes a few AST simplification
+ * passes, the symbol resolver, and various semantic checking
+ * passes. It also includes a hoisting pass that converts lambda
+ * instance forms into top level functions. This hoisting pass should
+ * probably be moved into to the next phase. If compilation makes it
+ * to the end of the UOC phase, the rest of the compilation should (in
+ * theory) proceed without error unless compiler memory is exhausted.
+ *
+ * @li The <b>code generation phase</b> implements closure conversion,
+ * tail recursion marking, and transformation of the code into an
+ * SSA-like form. In essence, this covers all of the ``flattening''
+ * activities that are necessary to emit an IR representation of BitC
+ * code for use by the back end.
+ */
