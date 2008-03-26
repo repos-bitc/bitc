@@ -18,6 +18,8 @@ $derive="$em\\{\\\\vdash\\}";
 $models="$em\\{\\\\models\\}";
 $deriveSp="($derive)$em\\{\\_($br)\\}";
 $modelSp="($models)$em\\{\\_($br)\\}";
+$pcst="$em\\{\\\\hookrightarrow\\}";
+$pcstSp="($pcst)$em\\{\\^($br)\\}";
 $bigcup="\\\\textbf\\{$em\\{\\\\cup\\}\\}";
 $bigcap="\\\\textbf\\{$em\\{\\\\cap\\}\\}";
 $emset="$em($br)";
@@ -69,6 +71,9 @@ while(!eof(F)) {
 	#Transitive Right execution
 	#$l =~ s/$transR/$EM\{\\Rightarrow\}\\hskip -2.1ex\{\*\}/g;
 
+	#Polymorphic constraint
+	$l =~ s/$pcstSp/\\mbox\{$1\\hskip -2ex$EM\{\^\{$MIT\{$2\}\}\}\}/g;
+	
 	#Plural handling
 	#FIX: Deal with parentheses
 	$l =~ s/$plural1/$EM\{\\overline\{$1$2$3\}\}/g;

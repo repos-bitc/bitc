@@ -76,23 +76,6 @@
 	    </Sjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="L-Tq">
-	  <tyPre>
-	    <Sjudge name="lval">
-	      <assume/>                  
-	      <aExpr/>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="lval">
-	      <assume/>                  
-	      <tqExpr>
-		<aExpr/>
-		<type/>
-	      </tqExpr>                  
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
       </Hrules>
     </btypes:TYPE>
   </font>

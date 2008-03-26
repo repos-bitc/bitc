@@ -855,6 +855,9 @@
 	  <xsl:if test="../@and">
 	    <xsl:text> and </xsl:text>
 	  </xsl:if>
+	  <xsl:if test="../@or">
+	    <xsl:text> or </xsl:text>
+	  </xsl:if>
 	</xsl:when>
 	<xsl:otherwise>
 	  <xsl:choose>
@@ -1408,17 +1411,24 @@
     </xsl:for-each>
   </xsl:template>  
 
-  <!-- mbpair -->
-  <xsl:template match="mbpair" mode="formula">
+  <!-- mbTop -->
+  <xsl:template match="mbTop" mode="formula">
     <xsl:call-template name="print.maybe"/>
   </xsl:template>    
 
-  <!-- MBPAIR -->
-  <xsl:template match="MBPAIR" mode="formula">
+  <!-- mbFull -->
+  <xsl:template match="mbFull" mode="formula">
     <xsl:call-template name="print.maybe">
       <xsl:with-param name="print.maybe.double">yes</xsl:with-param>
     </xsl:call-template>
   </xsl:template>
+
+  <!-- mbpair -->
+  <xsl:template match="mbpair" mode="formula">
+    <xsl:call-template name="print.maybe">
+      <xsl:with-param name="print.maybe.double">yes</xsl:with-param>
+    </xsl:call-template>
+  </xsl:template>    
   
   <!-- MBpair -->
   <xsl:template match="MBpair" mode="formula">
@@ -1515,12 +1525,27 @@
   </xsl:template>  
 
   <!-- Polymorphic constraint -->
-  <xsl:template match="Pcst" mode="formula">
+  <!-- PcstOp -->
+  <xsl:template match="PcstOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>starf;</xsl:text>	
-    <xsl:if test="count(*)">
-      <xsl:call-template name="print.params"/>
-    </xsl:if>
+    <xsl:text>rarrhk;</xsl:text>	
+    <xsl:element name="sup">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>kappa;</xsl:text>
+    </xsl:element>
+    <xsl:apply-templates select="*[3]" mode="formula"/>
+  </xsl:template>  
+  <!-- Pcst -->
+  <xsl:template match="Pcst" mode="formula">
+    <xsl:apply-templates select="*[2]" mode="formula"/>
+    <xsl:call-template name="print.space"/>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rarrhk;</xsl:text>	
+    <xsl:element name="sup">
+      <xsl:apply-templates select="*[1]" mode="formula"/>
+    </xsl:element>
+    <xsl:call-template name="print.space"/>
+    <xsl:apply-templates select="*[3]" mode="formula"/>
   </xsl:template>  
   
   <!-- ct_set templates -->
@@ -1534,12 +1559,20 @@
   <!--  ====================================================================
                      TypeScheme
         ==================================================================== -->
+  <!-- aTS: Type scheme -->
   <xsl:template match="aTS" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>sigma;</xsl:text>
     <xsl:call-template name="print.index.dash"/>    
   </xsl:template>
   
+  <!-- sTS: Special Type Scheme -->
+  <xsl:template match="sTS" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rhov;</xsl:text>
+    <xsl:call-template name="print.index.dash"/>    
+  </xsl:template>
+
   <xsl:template match="TS" mode="formula">
     <xsl:if test="count(*) &gt; 1">
       <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -1610,6 +1643,30 @@
   <xsl:template match="nceq" mode="formula">
     <xsl:call-template name="print.infix">
       <xsl:with-param name="print.infix.op">ncong;</xsl:with-param> 
+    </xsl:call-template>
+  </xsl:template>
+
+  <!-- TceqOp -->
+  <xsl:template match="TceqOp" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>sime;</xsl:text>
+  </xsl:template>
+  <!-- Tceq -->
+  <xsl:template match="Tceq" mode="formula">
+    <xsl:call-template name="print.infix">
+      <xsl:with-param name="print.infix.op">sime;</xsl:with-param> 
+    </xsl:call-template>   
+  </xsl:template>
+
+  <!-- TnceqOp -->
+  <xsl:template match="nceqOp" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>nsime;</xsl:text>
+  </xsl:template>
+  <!-- Tnceq -->
+  <xsl:template match="nceq" mode="formula">
+    <xsl:call-template name="print.infix">
+      <xsl:with-param name="print.infix.op">nsime;</xsl:with-param> 
     </xsl:call-template>
   </xsl:template>
 
@@ -2167,6 +2224,48 @@
     </xsl:element>
   </xsl:template>
 
+  <!-- select -->
+  <xsl:template match="select" mode="formula">
+    <xsl:apply-templates select="*[1]" mode="formula"/>
+    <xsl:if test = "@opt">	      
+      <xsl:element name="em">
+	<xsl:text>[</xsl:text>	  
+      </xsl:element>       
+    </xsl:if>    
+    <xsl:element name="progident">
+      <xsl:text>.</xsl:text>
+    </xsl:element>
+    <xsl:apply-templates select="*[2]" mode="formula"/>
+    <xsl:if test = "@opt">	      
+      <xsl:element name="em">
+	<xsl:text>]</xsl:text>	  
+      </xsl:element>       
+    </xsl:if>    
+  </xsl:template>
+
+  <!-- ith -->
+  <xsl:template match="ith" mode="formula">
+    <xsl:apply-templates mode="formula"/>
+    <xsl:if test="@etc = 'yes'">
+      <xsl:text>...</xsl:text>
+    </xsl:if>
+    <xsl:element name="progident">
+      <xsl:text>.</xsl:text>
+    </xsl:element>
+    <xsl:element name="em">
+      <xsl:text>i</xsl:text>
+    </xsl:element>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>
+
+  <!-- path -->
+  <xsl:template match="path" mode="formula">
+    <xsl:call-template name="print.mathmode">
+      <xsl:with-param name="print.mathmode.text">p</xsl:with-param> 
+    </xsl:call-template>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>
+  
   <!-- match -->
   <xsl:template match="match" mode="formula">
     <xsl:element name="progident">
@@ -3924,7 +4023,7 @@
   <xsl:template name="print.maybe">
     <xsl:param name="print.maybe.double"/>
     <xsl:variable name="mbpair1.paren" 
-      select="(*[1] = mbpair) or (*[1] = fn) or (*[1] = pair)"/>
+      select="(*[1] = mbpair) or (*[1] = fn) or (*[1] = pair) or (*[1] = mutable)"/>
     <xsl:variable name="mbpair2.paren" 
       select="(*[2] = mbpair) or (*[2] = fn) or (*[2] = pair)"/>
     <xsl:variable name="mbpair.paren" 

@@ -8,7 +8,7 @@
     <btypes:TYPE
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
       <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="J-Id">
+	<tyRule name="T-Id">
 	  <tyPre>
 	    <mapsto>
 	      <gamma/>
@@ -30,7 +30,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>        
-	<tyRule name=" J-Unit">
+	<tyRule name=" T-Unit">
 	  <tyPre/>
 	  <tyConc>
 	    <TDjudge>
@@ -39,7 +39,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-True">
+	<tyRule name="T-True">
 	  <tyPre/>
 	  <tyConc>
 	    <TDjudge>
@@ -48,7 +48,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-False">
+	<tyRule name="T-False">
 	  <tyPre/>
 	  <tyConc>
 	    <TDjudge>
@@ -57,7 +57,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Hloc">
+	<tyRule name="T-Hloc">
 	  <tyPre>
 	    <mapsto>
 	      <store/>
@@ -76,7 +76,7 @@
 	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="J-Sloc">
+	<tyRule name="T-Sloc">
 	  <tyPre>
 	    <mapsto>
 	      <store/>
@@ -91,7 +91,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Lambda">
+	<tyRule name="T-Lambda">
 	  <tyPre>
 	    <Sjudge>
 	      <assume>
@@ -117,21 +117,17 @@
 		<aExpr/>
 	      </lambda>
 	      <fn>
-		<minz>
-		  <type num="1"/>
-		</minz>
-		<maxz>
-		  <type num="2"/>
-		</maxz>
+		<type num="1"/>
+		<type num="2"/>
 	      </fn>
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-App">
+	<tyRule name="T-App">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
-	      <fn M="yes">
+	      <fn>
 		<type num="a"/>
 		<type num="r"/>
 	      </fn>
@@ -161,7 +157,7 @@
 	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="J-If">
+	<tyRule name="T-If">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
@@ -191,43 +187,29 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-TqExpr">
+	<tyRule name="T-Set">
 	  <tyPre>
-	    <TDjudge>
-	      <aExpr/>
-	      <type/>
-	    </TDjudge>
-	  </tyPre>
-	  <tyConc>
-	    <TDjudge>
-	      <paren>
-		<tqExpr>
-		  <aExpr/>
-		  <type/>
-		</tqExpr>
-	      </paren>
-	      <type/>
-	    </TDjudge>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="J-Set">
-	  <tyPre>
-	    <TDjudge num="j" Msub="yes">
+	    <!-- Msub is okay in this place because, given the
+	    definition of subtyping, the type t which is t <|: Mw can
+	    only be of the form: 
+                Mw', where w' <|: w (ex: immutable variations within
+ 	             pair constructor, function constructor are okay).
+                Mw'|w'' where w' <|: w
+                Mw!w''
+                M'a|w' where w' <|: w  --> 
+	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
 	      <mutable>
-		<type/>
+		<sType/>
 	      </mutable>
 	    </TDjudge>
 	    <TDjudge Msub="yes">
 	      <aExpr num="2"/>
-	      <type/>
+	      <sType/>
 	    </TDjudge>
 	    <Sjudge name="lval">
 	      <assume/>
-	      <aExpr
-		num="1"/>
+	      <aExpr num="1"/>
 	    </Sjudge>
 	  </tyPre>
 	  <tyConc>
@@ -240,7 +222,9 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Dup">
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="T-Dup">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr/>
@@ -262,7 +246,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Deref">
+	<tyRule name="T-Deref">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr/>
@@ -280,9 +264,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="J-Pair">
+	<tyRule name="T-Pair">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
@@ -314,15 +296,21 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Fst">
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="T-Fst">
 	  <tyPre>
-	    <TDjudge Msub="yes">
+	    <TDjudge>
 	      <aExpr/>
+	      <pType/>
+	    </TDjudge>
+	    <Msub>
+	      <pType/>
 	      <pair>
 		<type num="1"/>
 		<type num="2"/>
 	      </pair>
-	    </TDjudge>
+	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <TDjudge>
@@ -333,15 +321,19 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Snd">
+	<tyRule name="T-Snd">
 	  <tyPre>
-	    <TDjudge Msub="yes">
+	    <TDjudge>
 	      <aExpr/>
+	      <pType/>
+	    </TDjudge>
+	    <Msub>
+	      <pType/>
 	      <pair>
 		<type num="1"/>
 		<type num="2"/>
 	      </pair>
-	    </TDjudge>
+	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <TDjudge>
@@ -352,9 +344,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="J-Let-M [Tq]">
+	<tyRule name="T-Let-M">
 	  <tyPre>
 	    <TDjudge Msub="yes">
 	      <aExpr num="1"/>
@@ -385,10 +375,7 @@
 	    <TDjudge>
 	      <paren>
 		<let kind="m">
-		  <tqExpr optional="yes">
-		    <id/>
-		    <sType/>
-		  </tqExpr>
+		  <id/>
 		  <aExpr num="1"/>
 		  <aExpr num="2"/>
 		</let>
@@ -397,9 +384,11 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="J-Let-P [Tq]">
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="T-Let-P">
 	  <tyPre>
-	    <TDjudge Msub="yes">
+	    <TDjudge>
 	      <aExpr num="1"/>
 	      <type num="1"/>
 	    </TDjudge>
@@ -414,16 +403,9 @@
 		<aExpr num="1"/>
 	      </assume>
 	      <GEN>
-		<sType/>
+		<type/>
 		<aTS/>
 	      </GEN>
-	    </Sjudge>
-	    <Sjudge name="term">
-	      <assume/>
-	      <tqExpr>
-		<id/>
-		<aTS/>	
-	      </tqExpr>
 	    </Sjudge>
 	    <Sjudge>
 	      <assume>
@@ -446,10 +428,7 @@
 	    <TDjudge>
 	      <paren>
 		<let kind="p">
-		  <tqExpr optional="yes">
-		    <id/>
-		    <sType/>
-		  </tqExpr>
+		  <id/>
 		  <aExpr num="1"/>
 		  <aExpr num="2"/>
 		</let>
@@ -458,9 +437,7 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
-	<tyRule name="G-Value">
+	<tyRule name="T-Generalize">
 	  <tyPre>
 	    <pred name="Value">
 	      <aExpr/>
@@ -494,65 +471,8 @@
 	    </Sjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="G-Expansive">
-	  <tyPre/>
-	  <tyConc>
-	    <Sjudge name="gen">
-	      <assume>
-		<gamma/>
-		<store/>
-		<aExpr/>
-	      </assume>                
-	      <GEN>
-		<type/>
-		<type/>
-	      </GEN>                                
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="Q-Loc">
-	  <tyPre>
-	    <eq>
-	      <aTS/>
-	      <type/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="loc">
-	      <assume/>
-	      <tqExpr>
-		<id/>
-		<aTS/>	
-	      </tqExpr>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="Q-Term">
-	  <tyPre>
-	    <eq>
-	      <aTS/>
-	      <forall>
-		<tvars name="alpha"/>
-		<type/>
-	      </forall>
-	    </eq>
-	    <neq>
-	      <aTS/>
-	      <type/>
-	    </neq>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="term">
-	      <assume/>
-	      <tqExpr>
-		<id/>
-		<aTS/>	
-	      </tqExpr>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>	  	  	
       </Hrules>
     </btypes:TYPE>
   </font>
-  <caption><font size="small">Declarative Type Rules with Maybe-Types</font></caption>
+  <caption><font size="small">Declarative Type Rules</font></caption>
 </figure>

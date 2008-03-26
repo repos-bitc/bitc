@@ -308,6 +308,7 @@
                                 etc       yes   #IMPLIED
                                 paren     yes   #IMPLIED
                                 and       yes   #IMPLIED
+                                or        yes   #IMPLIED
                                 sep       CDATA #IMPLIED
 >
 
@@ -327,6 +328,8 @@
                                | neq
                                | ceq
                                | nceq
+                               | Tceq
+                               | Tnceq
                                | Tsub <!-- Copy coersion -->
                                | tsub <!-- SubType -->
                                | Msub <!-- Intermediate-coersion -->
@@ -463,6 +466,9 @@
                                | ctype
                                | CType
                                | MBpair
+                               | mbpair
+                               | mbTop
+                               | mbFull
                                | aggregate
                                | paren              
                                | meta              
@@ -640,8 +646,12 @@
 <!ATTLIST mbpair
                               break       CDATA   #IMPLIED
 >
-<!ELEMENT MBPAIR              (%anytype.group;, %h_set.group;)>
-<!ATTLIST MBPAIR
+<!ELEMENT mbTop              (%anytype.group;%anytype.group;)>
+<!ATTLIST mbTop
+                              break       CDATA   #IMPLIED
+>
+<!ELEMENT mbFull             (%anytype.group;, %anytype.group;)>
+<!ATTLIST mbFull
                               break       CDATA   #IMPLIED
 >
 
@@ -695,6 +705,7 @@
                                dash     CDATA    #IMPLIED
 >
 <!-- Polymorphic constraint -->
+<!ELEMENT PcstOp               >
 <!ELEMENT Pcst                 (%anything.group;*)>
 
 <!ELEMENT aCtset               EMPTY>
@@ -717,6 +728,11 @@
                                num      CDATA       #IMPLIED
                                dash     CDATA       #IMPLIED
 >
+<!ELEMENT sTS                  EMPTY>
+<!ATTLIST sTS
+                               num      CDATA       #IMPLIED
+                               dash     CDATA       #IMPLIED
+>
 <!ELEMENT TS                  ((tvar|tvars)*, %anytype.group;)>
 
 <!-- ======================================================================
@@ -733,11 +749,15 @@
      ====================================================================== -->
 <!ELEMENT ceqOp                EMPTY>
 <!ELEMENT nceqOp               EMPTY>
+<!ELEMENT TceqOp                EMPTY>
+<!ELEMENT TnceqOp               EMPTY>
 <!ELEMENT TsubOp               EMPTY>
 <!ELEMENT tsubOp               EMPTY>
 <!ELEMENT MsubOp               EMPTY>
 <!ELEMENT ceq                  (%anytype.group;, %anytype.group;+)>
 <!ELEMENT nceq                 (%anytype.group;, %anytype.group;+)>
+<!ELEMENT Tceq                  (%anytype.group;, %anytype.group;+)>
+<!ELEMENT Tnceq                 (%anytype.group;, %anytype.group;+)>
 <!ELEMENT Tsub                 ((%anytype.group;|%anyexpr.group;), %anytype.group;+)>
 <!ELEMENT tsub                 ((%anytype.group;|%anyexpr.group;), %anytype.group;+)>
 <!ELEMENT MadjOp               EMPTY>
@@ -886,6 +906,7 @@
                                 | Pair
                                 | fst
                                 | snd
+                                | ith
                                 | match
                                 | unspecified
 ">
@@ -950,6 +971,21 @@
 <!ELEMENT Pair                 (%anyexpr.group;, %anyexpr.group;)>
 <!ELEMENT fst                  %anyexpr.group;>
 <!ELEMENT snd                  %anyexpr.group;>
+<!ELEMENT select               %anyexpr.group;%anything.group;>
+<!ATTLIST select
+                               opt      CDATA    #IMPLIED
+>
+<!ELEMENT ith                  %anyexpr.group;>
+<!ATTLIST ith
+                               etc      CDATA    #IMPLIED
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT path                 >
+<!ATTLIST ith
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
 <!ELEMENT List                 (%anyexpr.group;*)>
 <!ELEMENT Cons                 (%anyexpr.group;*)>
 <!ELEMENT match                (%anyexpr.group;, %anyexpr.group;, %anyexpr.group;?)>

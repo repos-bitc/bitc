@@ -55,10 +55,6 @@
       </bnf>
       <bnfc desc="">
 	<alternatives>
-	  <tqExpr>
-	    <aExpr/>
-	    <type/>
-	  </tqExpr>
 	  <assign>
 	    <aExpr/>
 	    <aExpr/>
@@ -97,10 +93,7 @@
       <bnfc desc="">
 	<alternatives>
 	  <let kind="k">
-	    <tqExpr optional="yes">
-	      <id/>
-	      <type/>
-	    </tqExpr>
+	    <id/>
 	    <aExpr/>
 	    <aExpr/>
 	  </let>
@@ -145,6 +138,8 @@
     All the above syntactic forms can be parenthesized without
     change in meaning. The let-kind ``-'' is a placeholder for the
     unkinded (input) <progident>let</progident> form.
+    Optional parts of syntax are written within the 
+    <em>[]</em> brackets.
     A substitution is of Z for Y in X is written using the standard
     notation:
     <btypes:TYPE>

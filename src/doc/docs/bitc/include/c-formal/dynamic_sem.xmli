@@ -2,7 +2,7 @@
 <!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
-  <sect1 id="opsem"
+  <sect1 id="dynamic_semantics"
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
   <title>Dynamic Semantics of <btypes:TYPE><language/></btypes:TYPE></title>
@@ -55,37 +55,34 @@
 	  </extend>
 	</alternatives>
       </bnf>
+      <bnf desc="sel-path">
+	<path/>
+	<alternatives>
+	  <texttt content="1"/>
+	  <texttt content="2"/>
+	  <select>
+	    <path/>
+	    <path/>
+	  </select>
+	</alternatives>
+      </bnf>
       <bnf desc="lvalues">
 	<lVal/>
 	<alternatives>
-	  <lVal stack="yes"/>
-	  <lVal heap="yes"/>
-	</alternatives>
-      </bnf>
-      <bnf desc="Stack lvalues">
-	<lVal stack="yes"/>
-	<alternatives>
 	  <sLoc/>
-	  <fst>
-	    <lVal stack="yes"/>
-	  </fst>
-	  <snd>
-	    <lVal stack="yes"/>
-	  </snd>
-	</alternatives>
-      </bnf>
-      <bnf desc="Heap lvalues">
-	<lVal heap="yes"/>
-	<alternatives>
 	  <deref>
 	    <hLoc/>
 	  </deref>
-	  <fst>
-	    <lVal heap="yes"/>
-	  </fst>
-	  <snd>
-	    <lVal heap="yes"/>
-	  </snd>
+	  <select>
+	    <sLoc/>
+	    <path/>
+	  </select>
+	  <select>
+	    <deref>
+	      <hLoc/>
+	    </deref>
+	    <path/>
+	  </select>
 	</alternatives>
       </bnf>
       <bnf desc="Values">

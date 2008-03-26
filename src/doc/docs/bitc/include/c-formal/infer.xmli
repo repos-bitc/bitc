@@ -66,8 +66,6 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule name="I-Id">
 	  <tyPre>
 	    <mapsto>
@@ -112,6 +110,8 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>
+      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule name="I-Hloc">
 	  <tyPre>
 	    <mapsto>
@@ -166,8 +166,6 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>        
-      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule name="I-Lambda">
 	  <tyPre>
 	    <TEjudge name="i">
@@ -176,10 +174,10 @@
 		  <gamma/>
 		  <mapping>
 		    <id/>
-		    <MBPAIR>
+		    <mbFull>
 		      <tvar name="beta"/>
 		      <tvar name="alpha"/>
-		    </MBPAIR>
+		    </mbFull>
 		  </mapping>
 		</extend>
 		<store/>
@@ -218,15 +216,15 @@
 		    <id/>
 		    <aExpr/>
 		  </lambda>
-		  <fn M="yes">		
-		    <MBPAIR>
+		  <fn>		
+		    <mbFull>
 		      <tvar name="beta" dash="'"/>
 		      <tvar name="alpha"/>
-		    </MBPAIR>
-		    <MBPAIR>
+		    </mbFull>
+		    <mbFull>
 		      <tvar name="gamma" dash="'"/>
 		      <tvar name="delta"/>
-		    </MBPAIR>
+		    </mbFull>
 		  </fn>
 		</tqExpr>
 	      </conclude>
@@ -236,10 +234,10 @@
 		  <set>
 		    <eq>
 		      <type/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="gamma"/>
 			<tvar name="delta"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -247,6 +245,8 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>        
+      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule name="I-App">
 	  <tyPre>
 	    <TEjudge name="i">
@@ -304,10 +304,10 @@
 		    <aExpr num="1"/>
 		    <aExpr num="2"/>
 		  </apply>                 
-		  <MBPAIR>
+		  <mbFull>
 		    <tvar name="epsiv"/>
 		    <tvar name="gamma"/>			
-		  </MBPAIR>
+		  </mbFull>
 		</tqExpr>
 	      </conclude>
 	      <constrain>
@@ -317,26 +317,113 @@
 		  <set>
 		    <eq>
 		      <type num="1"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="alpha"/>
-			<fn M="yes">
-			  <MBPAIR>
+			<fn>
+			  <mbFull>
 			    <tvar name="beta" dash="'"/>
 			    <tvar name="beta"/>
-			  </MBPAIR>
-			  <MBPAIR>
+			  </mbFull>
+			  <mbFull>
 			    <tvar name="gamma" dash="'"/>
 			    <tvar name="gamma"/>
-			  </MBPAIR>
+			  </mbFull>
 			</fn>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		    <eq>
 		      <type num="2"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="delta"/>
 			<tvar name="beta"/>
-		      </MBPAIR>
+		      </mbFull>
+		    </eq>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="I-Set">
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="1"/>
+		  <type num="1"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset num="1"/>
+	      </constrain>
+	    </TEjudge>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="2"/>
+		  <type num="2"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset num="2"/>
+	      </constrain>
+	    </TEjudge>
+	    <Sjudge name="lval">
+	      <assume/>
+	      <aExpr num="1"/>
+	    </Sjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+		<tvar name="gamma"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <assign>
+		    <aExpr num="1"/>
+		    <aExpr num="2"/>
+		  </assign>
+		  <unit/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<unin>
+		  <aCtset num="1"/>
+		  <aCtset num="2"/>
+		  <set>
+		    <eq>
+		      <type num="1"/>
+		      <mbFull>
+			<mutable>
+			  <tvar name="alpha"/>
+			</mutable>
+			<tvar name="beta"/>
+		      </mbFull>
+		    </eq>
+		    <eq>
+		      <type num="2"/>
+		      <mbFull>
+			<tvar name="gamma"/>
+			<tvar name="beta"/>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -417,10 +504,10 @@
 		    <aExpr num="2"/>
 		    <aExpr num="3"/>
 		  </if>       
-		  <MBPAIR>
+		  <mbFull>
 		    <tvar name="epsiv"/>
 		    <tvar name="gamma"/>
-		  </MBPAIR>
+		  </mbFull>
 		</tqExpr>
 	      </conclude>
 	      <constrain>
@@ -431,167 +518,24 @@
 		  <set>
 		    <eq>
 		      <type num="1"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="alpha"/>
 			<bool/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		    <eq>
 		      <type num="2"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="beta"/>
 			<tvar name="gamma"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		    <eq>
 		      <type num="3"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="delta"/>
 			<tvar name="gamma"/>
-		      </MBPAIR>
-		    </eq>
-		  </set>
-		</unin>
-	      </constrain>
-	    </TEjudge>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules  rowsep="4pt" colsep="2">
-	<tyRule name="I-Tqexpr">
-	  <tyPre>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr/>
-		  <type dash="'"/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<aCtset/>
-	      </constrain>
-	    </TEjudge>
-	  </tyPre>
-	  <tyConc>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <paren>
-		    <tqExpr>
-		      <aExpr/>
-		      <type/>
-		    </tqExpr>  
-		  </paren>        
-		  <type/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<unin>
-		  <aCtset/>
-		  <set>
-		    <eq>
-		      <type dash="'"/>
-		      <type/>
-		    </eq>
-		  </set>
-		</unin>
-	      </constrain>
-	    </TEjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="I-Set">
-	  <tyPre>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr num="1"/>
-		  <type num="1"/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<aCtset num="1"/>
-	      </constrain>
-	    </TEjudge>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr num="2"/>
-		  <type num="2"/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<aCtset num="2"/>
-	      </constrain>
-	    </TEjudge>
-	    <Sjudge name="lval">
-	      <assume/>
-	      <aExpr num="1"/>
-	    </Sjudge>
-	    <models name="new">
-	      <assume/>
-	      <grouping>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-		<tvar name="gamma"/>
-		<tvar name="delta"/>
-	      </grouping>
-	    </models>
-	  </tyPre>
-	  <tyConc>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <assign>
-		    <aExpr num="1"/>
-		    <aExpr num="2"/>
-		  </assign>
-		  <unit/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<unin>
-		  <aCtset num="1"/>
-		  <aCtset num="2"/>
-		  <set>
-		    <eq>
-		      <type num="1"/>
-		      <mutable>
-			<tvar name="alpha"/>
-		      </mutable>
-		    </eq>
-		    <eq>
-		      <type num="1"/>
-		      <MBPAIR>
-			<tvar name="beta"/>
-			<tvar name="gamma"/>
-		      </MBPAIR>
-		    </eq>
-		    <eq>
-		      <type num="2"/>
-		      <MBPAIR>
-			<tvar name="delta"/>
-			<tvar name="gamma"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -658,14 +602,14 @@
 		    <aExpr num="2"/>
 		  </Pair>  
 		  <pair>
-		    <MBPAIR>
+		    <mbFull>
 		      <tvar name="alpha"/>
 		      <tvar name="gamma"/>
-		    </MBPAIR>
-		    <MBPAIR>
+		    </mbFull>
+		    <mbFull>
 		      <tvar name="beta"/>
 		      <tvar name="delta"/>
-		    </MBPAIR>
+		    </mbFull>
 		  </pair>
 		</tqExpr>
 	      </conclude>                  
@@ -676,17 +620,17 @@
 		  <set>
 		    <eq>
 		      <type num="1"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="alpha" dash="'"/>
 			<tvar name="gamma"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		    <eq>
 		      <type num="2"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="beta" dash="'"/>
 			<tvar name="delta"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -730,10 +674,10 @@
 		  <fst>
 		    <aExpr/>
 		  </fst>
-		  <MBPAIR>
+		  <mbFull>
 		    <tvar name="alpha"/>
 		    <tvar name="beta"/>
-		  </MBPAIR>
+		  </mbFull>
 		</tqExpr>
 	      </conclude>
 	      <constrain>                    
@@ -742,19 +686,19 @@
 		  <set>
 		    <eq>
 		      <type/>
-		      <mbpair>
+		      <mbTop>
 			<tvar name="epsiv"/>
 			<pair>
-			  <MBPAIR>
+			  <mbFull>
 			    <tvar name="alpha"/>
 			    <tvar name="beta"/>
-			  </MBPAIR>
-			  <MBPAIR>
+			  </mbFull>
+			  <mbFull>
 			    <tvar name="gamma"/>
 			    <tvar name="delta"/>
-			  </MBPAIR>
+			  </mbFull>
 			</pair>
-		      </mbpair>
+		      </mbTop>
 		    </eq>
 		  </set>
 		</unin>
@@ -800,10 +744,10 @@
 		  <Snd>
 		    <aExpr/>
 		  </Snd>
-		  <MBPAIR>
+		  <mbFull>
 		    <tvar name="gamma"/>
 		    <tvar name="delta"/>
-		  </MBPAIR>
+		  </mbFull>
 		</tqExpr>
 	      </conclude>
 	      <constrain>                    
@@ -812,19 +756,19 @@
 		  <set>
 		    <eq>
 		      <type/>
-		      <mbpair>
+		      <mbTop>
 			<tvar name="epsiv"/>
 			<pair>
-			  <MBPAIR>
+			  <mbFull>
 			    <tvar name="alpha"/>
 			    <tvar name="beta"/>
-			  </MBPAIR>
-			  <MBPAIR>
+			  </mbFull>
+			  <mbFull>
 			    <tvar name="gamma"/>
 			    <tvar name="delta"/>
-			  </MBPAIR>
+			  </mbFull>
 			</pair>
-		      </mbpair>
+		      </mbTop>
 		    </eq>
 		  </set>
 		</unin>
@@ -871,10 +815,10 @@
 		  </dup>  
 		  <ref>
 		    <paren>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="alpha"/>
 			<tvar name="beta"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </paren>
 		  </ref>
 		</tqExpr>
@@ -885,10 +829,10 @@
 		  <set>
 		    <eq>
 		      <type/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="gamma"/>
 			<tvar name="beta"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -939,12 +883,12 @@
 		  <set>
 		    <eq>
 		      <type/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="beta"/>
 			<ref>
 			  <tvar name="alpha"/>
 			</ref>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -981,29 +925,20 @@
 		  <set>
 		    <eq>
 		      <type num="1"/>
-		      <MBPAIR>
+		      <mbFull>
 			<tvar name="gamma"/>
 			<tvar name="beta"/>
-		      </MBPAIR>
+		      </mbFull>
 		    </eq>
-		    <opt>
-		      <eq>
-			<type/>
-			<MBPAIR>
-			  <tvar name="alpha"/>
-			  <tvar name="beta"/>
-			</MBPAIR>
-		      </eq>
-		    </opt>
 		  </set>
 		</unin>
 	      </assume>
 	      <conclude>
 		<GEN>
-		  <MBPAIR>
+		  <mbFull>
 		    <tvar name="alpha"/>
 		    <tvar name="beta"/>
-		  </MBPAIR>
+		  </mbFull>
 		  <aTS/>
 		</GEN>
 	      </conclude>
@@ -1062,10 +997,7 @@
 	      <conclude>
 		<tqExpr>
 		  <let kind="k">
-		    <tqExpr optional="yes">
-		      <id/>
-		      <type/>
-		    </tqExpr>
+		    <id/>
 		    <aExpr num="1"/>
 		    <aExpr num="2"/>
 		  </let>
@@ -1284,5 +1216,5 @@
       </Hrules>
     </btypes:TYPE>
   </font>
-  <caption>Equational Inference Rules</caption>
+  <caption>Type Inference Algorithm</caption>
 </figure>
