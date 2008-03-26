@@ -193,8 +193,12 @@ UocInfo::RandTexpr(std::ostream& errStream,
 //	<< def->asString() << std::endl;
 
 
+/** @brief For every defining occurrence of an identifier, set up a
+ * back pointer to the containing defining form. 
+ *
+ * See the explanation in AST.ast*/
 void
-UocInfo::markDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
+UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
 {
   ast->uoc = this;
   bool processChildren = true; 
@@ -305,20 +309,22 @@ UocInfo::markDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
   
   if(processChildren)
     for(size_t c=0; c < ast->children->size(); c++)
-      markDefForms(ast->child(c), local, top);	  
+      findDefForms(ast->child(c), local, top);	  
 }
 
+/** @brief Make a pass over every AST, setting up back pointers to the
+ * containing forms of all defining occurrences. */
 void
-UocInfo::markAllDefForms()
+UocInfo::findAllDefForms()
 {
   for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
     GCPtr<UocInfo> puoci = UocInfo::srcList->elem(i);
-    puoci->markDefForms(puoci->ast);
+    puoci->findDefForms(puoci->ast);
   }
 
   for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
     GCPtr<UocInfo> puoci = UocInfo::ifList->elem(i);
-    puoci->markDefForms(puoci->ast);
+    puoci->findDefForms(puoci->ast);
   }
 }
 

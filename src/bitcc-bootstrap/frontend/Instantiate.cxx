@@ -1251,7 +1251,7 @@ UocInfo::recInstantiate(ostream &errStream,
       ast->child(1) = newLet;
       
       // We re-built the let-expression, So, remark all defForms.
-      markDefForms(ast, NULL, ast->defForm);      
+      findDefForms(ast, NULL, ast->defForm);      
 
       INST_DEBUG
 	errStream << "recInstantiate: WrappedLet =  "
@@ -1632,7 +1632,7 @@ UocInfo::doInstantiate(ostream &errStream,
     GCPtr<AST> newDecl = buildNewDeclaration(def, typ);
     
     // Marking done wrt my UOC.
-    markDefForms(newDecl);
+    findDefForms(newDecl);
 
     // This new Declaration can never contain the name being
     // defined. So, no immediate fixup necessary. 
@@ -1681,7 +1681,7 @@ UocInfo::doInstantiate(ostream &errStream,
   
   // and adjust the defForms and constraints in the new AST.  
   if(globalInst) {
-    markDefForms(copy); // Marking done wrt my UOC.
+    findDefForms(copy); // Marking done wrt my UOC.
     clearConstraints(copy);
   }
   else {    
@@ -1691,7 +1691,7 @@ UocInfo::doInstantiate(ostream &errStream,
 			copy->defForm->defForm->defForm);
     //lb    lbs      let      define        
 
-    markDefForms(copy, copy->defForm, copyTopExpr);
+    findDefForms(copy, copy->defForm, copyTopExpr);
     // constraints are dealt with in recInstantiate itself.
   }
 
@@ -1998,7 +1998,7 @@ UocInfo::doInstantiate(ostream &errStream,
 *******************************************************************/
  
 bool
-UocInfo::instantiateWorker(ostream &errStream, 
+UocInfo::instantiateFQN(ostream &errStream, 
 			   const string& epName)
 {
   bool errFree = true;
@@ -2047,7 +2047,7 @@ UocInfo::instantiate(ostream &errStream,
   bool errFree = true;
   UpdateMegaEnvs(this);
 
-  CHKERR(errFree, instantiateWorker(errStream, epName));  
+  CHKERR(errFree, instantiateFQN(errStream, epName));  
     
   INST_DEBUG
     cerr << "Unified UOC after instantiation is "
@@ -2070,7 +2070,7 @@ UocInfo::instantiateBatch(ostream &errStream,
   UpdateMegaEnvs(this);
   
   for (size_t ep = 0; ep < epNames->size(); ep++)
-    CHKERR(errFree, instantiateWorker(errStream, epNames->elem(ep)));  
+    CHKERR(errFree, instantiateFQN(errStream, epNames->elem(ep)));  
   
   INST_DEBUG
     cerr << "Unified UOC after instantiation is "

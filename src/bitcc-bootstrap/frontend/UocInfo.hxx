@@ -188,8 +188,8 @@ public:
   // FOLLOWING ARE IN inter-pass.cxx
   //
   //////////////////////////////////////////////////////
-  void markDefForms(GCPtr<AST> start, GCPtr<AST> local=NULL, GCPtr<AST> top=NULL);
-  static void markAllDefForms();
+  void findDefForms(GCPtr<AST> start, GCPtr<AST> local=NULL, GCPtr<AST> top=NULL);
+  static void findAllDefForms();
   
   // Add all candidate Entry-points to the entry-point vectror
   static void addAllCandidateEPs();
@@ -253,7 +253,7 @@ public:
 private:
   void addTopLevelForm(GCPtr<AST> ast); // Add a new Top-level form
 
-  bool instantiateWorker(std::ostream &errStream, 
+  bool instantiateFQN(std::ostream &errStream, 
 			 const std::string& fqn);
 
   // The main AST specializer/ instantiator

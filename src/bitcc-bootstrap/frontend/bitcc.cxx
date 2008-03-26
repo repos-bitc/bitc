@@ -518,7 +518,7 @@ main(int argc, char *argv[])
     Options::outputFileName = "bitc.out";
   
   /************************************************************/
-  /*                        The frontend                      */
+  /*                UOC Parse and Validate                    */
   /************************************************************/
   // Process the Prelude:
 
@@ -565,34 +565,44 @@ main(int argc, char *argv[])
   /************************************************************/
   /*   The mid zone, build the polyinstantiate + big-ast      */
   /************************************************************/
-  GCPtr<UocInfo> unifiedUOC = new UocInfo("*emit*", true);
-  bool midPassOK = true;
-  
 #if (BITC_CURRENT_MODE == BITC_COMPILER_MODE)
   /* Build the list of things to be instantiated */
 
-  /* First add things that are absolutely necessary, but may be
-     unreached at the stage of polyinstantiation. ex: SSA pass inserts
-     them */
+  /** The following symbols are introduced by code that is added in the
+   * SSA pass. This code is added @em after polyinstantiation, and
+   * consequently cannot be discovered by the demand-driven incremental
+   * instantiation process. Add them to the emission list by hand here
+   * to ensure that they get emitted.
+   */
   Options::entryPts->append("bitc.prelude.__index_lt");
   Options::entryPts->append("bitc.prelude.IndexBoundsError");  
 
-  /* Then add what the user wants to start with (default is
-     bitc.main.main unless we are compiling in header mode) */
+  /** If we are not compiling in header mode, we also need to emit
+   * code for the primary entry point, which is generally
+   * bitc.main.main. All else will follow from that as
+   * polyinstantiation proceeds.
+   *
+   * Header mode is a bit different. In that mode we are converting
+   * interfaces into header files, and there is no particular entry
+   * point to emit.
+   */
   if(!userAddedEntryPts &&
      ((Options::backEnd->flags & BK_HDR_MODE) == 0))
     Options::entryPts->append("bitc.main.main");
 
-  /* TEMPORARY: Then add all other top level forms that might cause
-     side-effects. */ 
+  /** Add all other top level forms that might cause
+   * side-effects. These are the top-level initializers. This is a
+   * temporary expedient. We need to re-examine the rules for legal
+   * top-level initialization.
+   */
   UocInfo::addAllCandidateEPs(); 
 #endif
 
-  // Initialize
+  GCPtr<UocInfo> unifiedUOC = new UocInfo("*emit*", true);
   initUnifiedUoc(unifiedUOC);
-    
+
   // Update all of the defForm pointers so that we can find things:
-  UocInfo::markAllDefForms();
+  UocInfo::findAllDefForms();
     
   // Build the master back-end AST. This is done in a way that can be
   // extended incrementally.
@@ -603,7 +613,7 @@ main(int argc, char *argv[])
   // use batch mode. In an interpreter, if we are instantiating only
   // one entry point, one might as well use instantiate instead of
   // instantiateBatch call.
-  midPassOK = unifiedUOC->instantiateBatch(std::cerr, Options::entryPts);
+  bool midPassOK = unifiedUOC->instantiateBatch(std::cerr, Options::entryPts);
     
   if (Options::dumpAfterMidEnd) {
     std::cerr << "==== DUMPING *unified UOC*"

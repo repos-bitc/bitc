@@ -62,6 +62,12 @@ struct Options {
   static bool showPasses;
   static bool ppFQNS;
   static bool ppDecorate;
+  /** @brief Suppress load of the prelude.
+   *
+   * This is an internal testing option to suppress loading the
+   * prelude while working on incomplete parts of the compiler.  This
+   * option should not be exposed to users.
+   */
   static bool noPrelude;
   static bool dumpAfterMidEnd;
   static bool dumpTypesAfterMidEnd;
