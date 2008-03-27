@@ -43,13 +43,13 @@ include $(BITC_SRC)/build/make/makerules.mk
 INC+=-I$(BITC_XENV)/host/include
 SOURCE= $(wildcard src*.bitc)
 OBJECTS=$(SOURCE:%.bitc=BUILD/%.o)
-BITCC=../../frontend/BUILD/bitcc
+BITCC=$(BITC_SRC)/compiler/frontend/BUILD/bitcc
 RUN=a.out
 GCCWARN+=-Wno-unused
 ILANG=c
 GCLIB=$(BITC_XENV)/host/lib/libgc.a
 
-CFLAGS+=-g -I$(PWD)/../../runtime
+CFLAGS+=-g -I$(PWD)/$(BITC_SRC)/runtime
 c-source: $(SOURCE:%.bitc=%.$(ILANG))
 all: $(OBJECTS)
 
