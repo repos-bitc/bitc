@@ -51,6 +51,9 @@ BITC_SOURCES=\
 	$(wildcard $(BITC_SRC)/runtime/bitc/*.bitc) \
 	$(wildcard $(BITC_SRC)/runtime/bitc/*/*.bitc)
 
+# mkclosure.c is sourced from the appropriate target architecture directory
+# by virtue of the VPATH setting below. Contrary to appearences, it is not
+# matched by the wildcard.
 C_SOURCES=\
 	$(wildcard *.c) \
 	mkclosure.c
