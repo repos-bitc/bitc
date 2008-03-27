@@ -13,56 +13,59 @@
       the flexibility, safety, and richness of Standard ML or Haskell with the
       low-level expressiveness of C.
     </p>
-    <p>
-      <embed type="image/svg+xml" width="36pt" height="36pt"
-	src="svg-logo.svg" alt="SVG image" align="left"
-	style="margin-right: 0.1in;"
-	pluginspage="http://www.adobe.com/svg/viewer/install/"/> This
-	site makes use of SVG images. If your browser supports SVG, or
-	you have an SVG plugin installed, you should see an SVG logo
-	to the left of this paragraph. Recent versions of Microsoft's
-	Internet Explorer, Apple's Safari, and Linux FireFox browsers
-	include support for SVG.  If your Linux distribution ships an
-	older version of Mozilla or Firefox, installing Adobe's <a
-	href="http://www.adobe.com/svg/viewer/install/">plugin</a>
-	will allow you to view these images.
-    </p>
     <h2>Objectives</h2>
     <p>
-      The BitC
-      project has several objectives:
+      BitC is a programming language that tries to meet the following
+      objectives:
     </p>
     <ul>
       <li>
-	<p>Correct some of the shortcomings of the earlier EROS
-	  design.</p>
+	<p>Provide full support for fine-grain data structure
+	  specifications, including hardware-defined data
+	  structures. Representation requirements are sometimes
+	  prescriptive! Check out <a
+	  href="docs/bitc/spec.html#ty_repr">defrepr</a>.</p>
       </li>
       <li>
-	<p>Demonstrate that an atomic kernel design scales
-	  <em>up</em> as well as down. We are planning to bring up
-	  versions of Coyotos on large-scale multiprocessors.</p>
+	<p>Preserve mutability as a first-class notion in the
+	language. Monads, effect types, and the like are wonderful
+	things, but languages that rely on them have yet to
+	demonstrate acceptable performance on systems problems.</p>
       </li>
       <li>
-	<p>Provide an efficient linux compatibility environment for
-	  use as a transitional runtime system, so that we can
-	  explore adapting applications to a more secure API
-	  foundation.</p>
+	<p>Provide a modern type system in the style of Haskell or ML,
+	  including type inference and type classes, without giving up
+	  data structure representation and mutability.
+	</p>
       </li>
       <li>
-	<p>Construct the kernel and key utilities in a new systems
-	  programming language (BitC) with a well-defined,
-	  mechanically-specified semantics. This will allow us to
-	  formally verify security and correctness properties of
-	  the system and its key utilities.</p>
+	<p>Provide first class functions and type-safe abstraction
+	  mechanisms to programmers who can't give up performance to
+	  get them:</p>
+<pre>
+(define (add-one x) (+ 1 x))
+add-one: (forall (Arith 'a) (fn 'a 'a))
+</pre>
+      </li>
+      <li>
+	<p>Provide a complete formal semantics in automated form, so
+	  that it is possible to reason formally about specialized
+	  BitC programs.</p>
       </li>
       <li>
 	<p>Develop the proving technology necessary to do useful
-	  verification about a project of this sort.</p>
+	  verification about programs written in such a language.</p>
       </li>
     </ul>
+    <p>
+      As a litmus test, it is possible to write a SHA-1 decoder in
+      BitC that is fully safe, but performs competatively with the C
+      implementation. If you can figure out how to do that in SML,
+      O'Caml, or Haskell
+    </p>
     <h2>Target Platforms</h2>
     <p>
-      The BitC bootstrap compiler compiles to portable ANSI_C code. By
+      The BitC bootstrap compiler compiles to portable ANSI&nbsp;C code. By
       tweaking a single header file it is possible to port BitC
       bootstrap output to essentially any target platform.
     </p>
