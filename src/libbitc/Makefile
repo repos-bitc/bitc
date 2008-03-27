@@ -36,18 +36,43 @@
 ##########################################################################
 
 default: package
-BITC_SRC=../../..
+BITC_SRC=..
+
+# This needs to change when we fix the install targets
+CFLAGS+=-O4 #-g
+GC_INC=
+
+INC+=-I$(BITC_SRC)/runtime -I. -I$(BITC_XENV)/host/include $(GC_INC) 
+#INC+=-I../include
 
 include $(BITC_SRC)/build/make/makerules.mk
 
-HEADERS=$(wildcard *.h)
-BITC=$(wildcard *.bitc)
+BITC_SOURCES=\
+	$(wildcard $(BITC_SRC)/runtime/bitc/*.bitc) \
+	$(wildcard $(BITC_SRC)/runtime/bitc/*/*.bitc)
 
-all:
+C_SOURCES=\
+	$(wildcard *.c) \
+	mkclosure.c
 
-install:
+VPATH=.:$(BITC_TARGET)
+
+OBJECTS=$(C_SOURCES:%.c=$(BUILDDIR)/%.o)
+
+$(OBJECTS): $(BUILDDIR)/bitc-runtime.h
+
+$(BUILDDIR)/bitc-runtime.h: $(BUILDDIR) $(BITC_SOURCES)
+	$(BITC_SRC)/compiler/frontend/BUILD/bitcc $(INC) -l h -o $@ bitc-runtime.bitc
+
+all: BUILD/libbitc.a
+
+install: all
 	$(INSTALL) -d $(BITC_ROOT)/host
-	$(INSTALL) -d $(BITC_ROOT)/host/include
-	$(INSTALL) -d $(BITC_ROOT)/host/include/crypt
-#$(INSTALL) -m 0644 $(HEADERS) $(BITC_ROOT)/host/include/crypt
-	$(INSTALL) -m 0644 $(BITC) $(BITC_ROOT)/host/include/crypt
+	$(INSTALL) -d $(BITC_ROOT)/host/lib
+	$(INSTALL) -m 0644 BUILD/libbitc.a $(BITC_ROOT)/host/lib
+
+BUILD/libbitc.a: $(OBJECTS)
+	ar -crv $@ $(OBJECTS)
+
+-include $(BUILDDIR)/.*.m
+

@@ -41,7 +41,7 @@ BITC_SRC=.
 # DIRS are ordered:
 # build must be made before others. base and doc can be in either order.
 # Nothing depends on legal.
-REQUIRED_DIRS=bitcc-bootstrap
+REQUIRED_DIRS=compiler runtime libbitc
 OPTIONAL_DIRS=doc
 DIRS=$(REQUIRED_DIRS) $(OPTIONAL_DIRS)
 CLEANDIRS=build $(DIRS)

@@ -65,6 +65,6 @@ src/doc/docs/bitc/sys-infer.xml
 src/emacs/*.elc
 
 # Generated .c files in the test directory
-src/bitcc-bootstrap/tests/unit/*.c
-src/bitcc-bootstrap/tests/general/*.c
+src/compiler/tests/unit/*.c
+src/compiler/tests/general/*.c
 

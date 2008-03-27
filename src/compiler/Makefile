@@ -36,43 +36,14 @@
 ##########################################################################
 
 default: package
-BITC_SRC=../..
+BITC_SRC=..
 
-# This needs to change when we fix the install targets
-CFLAGS+=-O4 #-g
-GC_INC=
 
-INC+=-I../runtime -I. -I$(BITC_XENV)/host/include $(GC_INC) 
-INC+=-I../include
+# Important that astmaker come first, since later tools use it.
+DIRS=frontend
+CLEANDIRS=$(DIRS) tests/unit tests/issues
+#DIRS+=runtime
+#DIRS+=c-gen
+#DIRS+=emacs
 
-include $(BITC_SRC)/build/make/makerules.mk
-
-BITC_SOURCES=\
-	$(wildcard ../runtime/bitc/*.bitc) \
-	$(wildcard ../runtime/bitc/*/*.bitc)
-
-C_SOURCES=\
-	$(wildcard *.c) \
-	mkclosure.c
-
-VPATH=.:$(BITC_TARGET)
-
-OBJECTS=$(C_SOURCES:%.c=$(BUILDDIR)/%.o)
-
-$(OBJECTS): $(BUILDDIR)/bitc-runtime.h
-
-$(BUILDDIR)/bitc-runtime.h: $(BUILDDIR) $(BITC_SOURCES)
-	../frontend/BUILD/bitcc $(INC) -l h -o $@ bitc-runtime.bitc
-
-all: BUILD/libbitc.a
-
-install: all
-	$(INSTALL) -d $(BITC_ROOT)/host
-	$(INSTALL) -d $(BITC_ROOT)/host/lib
-	$(INSTALL) -m 0644 BUILD/libbitc.a $(BITC_ROOT)/host/lib
-
-BUILD/libbitc.a: $(OBJECTS)
-	ar -crv $@ $(OBJECTS)
-
--include $(BUILDDIR)/.*.m
-
+include $(BITC_SRC)/build/make/pkgrules.mk

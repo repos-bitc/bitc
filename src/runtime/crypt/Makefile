@@ -38,6 +38,16 @@
 default: package
 BITC_SRC=../..
 
-DIRS=bitc crypt
-
 include $(BITC_SRC)/build/make/makerules.mk
+
+HEADERS=$(wildcard *.h)
+BITC=$(wildcard *.bitc)
+
+all:
+
+install:
+	$(INSTALL) -d $(BITC_ROOT)/host
+	$(INSTALL) -d $(BITC_ROOT)/host/include
+	$(INSTALL) -d $(BITC_ROOT)/host/include/crypt
+#$(INSTALL) -m 0644 $(HEADERS) $(BITC_ROOT)/host/include/crypt
+	$(INSTALL) -m 0644 $(BITC) $(BITC_ROOT)/host/include/crypt

@@ -38,12 +38,6 @@
 default: package
 BITC_SRC=..
 
+DIRS=bitc crypt
 
-# Important that astmaker come first, since later tools use it.
-DIRS=frontend runtime libbitc
-CLEANDIRS=$(DIRS) tests/unit tests/issues
-#DIRS+=runtime
-#DIRS+=c-gen
-#DIRS+=emacs
-
-include $(BITC_SRC)/build/make/pkgrules.mk
+include $(BITC_SRC)/build/make/makerules.mk
