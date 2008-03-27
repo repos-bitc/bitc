@@ -195,10 +195,12 @@ DOMLIB += $(DOMCRTN)
 # characters into spaces (yields: "src PKG xxx xxx xxx"), and  
 # then selecting the appropriate word. Notice that the first substring is 
 # empty, so the appropriate word is the second one.
-PACKAGE=$(word 1, $(strip $(subst /, ,$(subst $(BITC_ROOT)/src/,,$(PWD)))))
+BITC_SRC_DIR=$(shell (cd $(BITC_SRC);pwd))
+BITC_CURRENT_DIR=$(subst $(BITC_SRC_DIR)/,,$(PWD))
+PACKAGE=$(word 1, $(strip $(subst /, ,$(BITC_CURRENT_DIR))))
 
-PKG_ROOT=$(BITC_ROOT)/pkg/${PACKAGE}
-PKG_SRC=$(BITC_ROOT)/$(BITC_SRCDIR)/${PACKAGE}
+#PKG_ROOT=$(BITC_ROOT)/pkg/${PACKAGE}
+#PKG_SRC=$(BITC_ROOT)/$(BITC_SRCDIR)/${PACKAGE}
 
 # Until proven otherwise...
 IMGMAP=imgmap
@@ -211,27 +213,24 @@ BOOTSTRAP=boot
 ifeq "$(BUILDDIR)" ""
 ifeq "$(PACKAGE)" "doc"
 BUILDDIR=.
-RBUILDDIR=.
 endif
 ifeq "$(PACKAGE)" "legal"
 BUILDDIR=.
-RBUILDDIR=.
 endif
 ifeq "$(PACKAGE)" "build"
 BUILDDIR=.
-RBUILDDIR=.
 endif
 ifeq "$(BUILDDIR)" ""
 BUILDDIR=BUILD
-RBUILDDIR=..
 endif
 endif
 
 showme:
+	@echo "PWD: " $(PWD)
 	@echo "BITC_ROOT: " $(BITC_ROOT)
-	@echo "BITC_SRCDIR: " $(BITC_SRCDIR)
-	@echo "PKG_ROOT:" $(PKG_ROOT)
-	@echo "PKG_SRC:" $(PKG_SRC)
+	@echo "BITC_SRC: " $(BITC_SRC)
+	@echo "BITC_SRC_DIR: " $(BITC_SRC_DIR)
+	@echo "PACKAGE: " $(PACKAGE)
 	@echo "BUILDDIR:" $(BUILDDIR)
 
 MAKEVARS_LOADED=1

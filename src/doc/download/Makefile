@@ -35,6 +35,7 @@
 
 default: package
 BITC_SRC=../..
+OSDOC_NAVCONTEXT="GetIt"
 OSDOC_XHTML_SRC=$(patsubst %.xhtml,%,$(wildcard *.xhtml))
 OSDOC_OHTML_SRC=$(patsubst %.ohtml,%,$(wildcard *.ohtml))
 HTML_TOPNAV=download.html

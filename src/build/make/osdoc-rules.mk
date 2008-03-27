@@ -53,26 +53,45 @@ ifeq "$(HTML_TOPNAV)" ""
 HTML_TOPNAV=docs.html
 endif
 
+ifeq "$(OSDOC_NAVCONTEXT)" ""
+OSDOC_NAVCONTEXT="none"
+endif
+
+OSDOC_NAVCONTEXT_PARAM=--stringparam navcontext $(OSDOC_NAVCONTEXT)
+OSDOC_TOPNAV_PARAM=--stringparam topnav $(WEBROOT)/topnav.html \
+                   --stringparam topnavdir $(WEBROOT)
+
+ifneq "$(OSDOC_SIDENAV)" ""
+OSDOC_SIDENAV_PARAM=--stringparam sidenav $(OSDOC_SIDENAV) \
+                    --stringparam sidenavdir .
+endif
+
+OSDOC_SITEHDFT_PARAM=--stringparam siteheader $(WEBROOT)/siteheader.html \
+                     --stringparam sitefooter $(WEBROOT)/sitefooter.html
+
 LATEX_XSLTPROC_OPTS+=
 ifeq "$(PACKAGE)" "doc"
 OSDOC_HTML_OPTS+=\
 	--param navbars 1 \
-	--stringparam sidenav $(WEBROOT)/sidenav.html \
-	--stringparam sidenavdir $(WEBROOT) \
-	--stringparam topnav $(WEBROOT)/topnav/$(HTML_TOPNAV) \
-	--stringparam topnavdir $(WEBROOT)/topnav
+        $(OSDOC_SITEHDFT_PARAM) \
+        $(OSDOC_NAVCONTEXT_PARAM) \
+        $(OSDOC_TOPNAV_PARAM) \
+        $(OSDOC_SIDENAV_PARAM) \
+        --stringparam webroot $(WEBROOT)
 OSDOC_XHTML_OPTS+=\
 	--param navbars 1 \
-	--stringparam sidenav $(WEBROOT)/sidenav.html \
-	--stringparam sidenavdir $(WEBROOT) \
-	--stringparam topnav $(WEBROOT)/topnav/$(HTML_TOPNAV) \
-	--stringparam topnavdir $(WEBROOT)/topnav
+        $(OSDOC_SITEHDFT_PARAM) \
+        $(OSDOC_NAVCONTEXT_PARAM) \
+        $(OSDOC_TOPNAV_PARAM) \
+        $(OSDOC_SIDENAV_PARAM) \
+        --stringparam webroot $(WEBROOT)
 OSDOC_OHTML_OPTS+=\
 	--param navbars 1 \
-	--stringparam sidenav $(WEBROOT)/sidenav.html \
-	--stringparam sidenavdir $(WEBROOT) \
-	--stringparam topnav $(WEBROOT)/topnav/$(HTML_TOPNAV) \
-	--stringparam topnavdir $(WEBROOT)/topnav
+        $(OSDOC_SITEHDFT_PARAM) \
+        $(OSDOC_NAVCONTEXT_PARAM) \
+        $(OSDOC_TOPNAV_PARAM) \
+        $(OSDOC_SIDENAV_PARAM) \
+        --stringparam webroot $(WEBROOT)
 endif
 OSDOC_HTML_CHUNK_OPTS+= --param enable.chunking 1
 
@@ -89,7 +108,6 @@ STYLESHEET=$(WEBROOT)/styles.css
 endif
 
 webroot:
-	@echo "bitcsrc: $(BITC_SRC)"
 	@echo "webroot: $(WEBROOT)"
 	@echo "pwd:     $(PWD)"
 	@echo "web:     $(BITC_SRC)/doc"

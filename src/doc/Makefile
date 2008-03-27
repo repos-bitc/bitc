@@ -35,6 +35,8 @@
 default: package
 BITC_SRC=..
 CLEANLIST=index.html
+OSDOC_NAVCONTEXT="Home"
+OSDOC_SIDENAV="sidenav.html"
 OSDOC_XHTML_SRC=$(patsubst %.xhtml,%,$(wildcard *.xhtml))
 OSDOC_OHTML_SRC=$(patsubst %.ohtml,%,$(wildcard *.ohtml))
 HTML_TOPNAV=home.html

@@ -40,6 +40,7 @@ CLEANLIST=dir.dev.gxml
 DIRS=bitc osverify-2004
 OSDOC_XML_SRC=index
 # Only build the HTML targets in this directory...
+OSDOC_NAVCONTEXT="Docs"
 OSDOC_TARGETS=%.html
 
 include $(BITC_SRC)/build/make/makerules.mk

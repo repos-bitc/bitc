@@ -6,32 +6,121 @@
   }
 }
 
+#siteheader {
+  background:#C4D1F3;
+  /*  background-image: url("img/banner_background.png"); 
+  background-repeat: repeat-x;
+  background-position: bottom;
+  background-size: 50px 1ppx; */
+}
+
+/* Following is a kludge. The intended header should be in a SPAN tag
+ * that floats right, accompanied by a logo image that sits at left.
+ * Unfortunately, if you leave out the logo image the site header
+ * background color does not render in firefox.
+ * 
+ * Putting the blurb into a paragraph with a zero margin seems to
+ * work around the problem, but it would be better to have a proper
+ * logo.
+ */
+#siteheader P {
+  margin: 0;
+  text-align: right;
+  padding-right: 10px;
+}
+
+#siteheader span {
+  float: right;
+  text-align: right;
+  padding-right: 10px;
+}
+
+#siteheader img {
+  height: 50px;
+}
+
+#sitefooter {
+  /* height: 50px; */
+  /* border-top:1px solid #765; */
+  font-size: 93%;
+  line-height: 93%;
+  /* background:#DAE0D2 url("img/doors/bg.gif") repeat-x bottom; */
+}
+
+#sitefooter span {
+  border-top:1px solid #765;
+  float: right;
+  text-align: right;
+  font-style: italic;
+  margin-right: 10px;
+}
+
+#topnav-barrier {
+  clear: left;
+}
+
 #topnav {
+  float: left;
   width: 100%;
-  padding-left: 150px;
   /* border: 1px solid blue; */
-  border-bottom: 1px solid black;
-  background: lightblue;
-}
-
-#topnav img {
-  border: 0;
-}
-
-#topnav a {
-  border: 0;
+  font-size: 93%
+  line-height: normal;
+  background: #DAE0D2 url("img/doors/bg.gif") repeat-x bottom;
+  /* padding: 0; */
 }
 
 #topnav ul {
-  display: inline;
-  padding: 0;
+  margin: 0;
+  list-style: none;
+  /* If sidenav is on the left, this should be
+       padding: 10px 124px 0;
+     If sidenav is on the right, it should be
+       padding: 10px 10px 0;
+   */
+  padding: 10px 124px 0;
 }
 
 #topnav li {
-  list-style: none;
-  padding: 0;
+  background:url("img/doors/left_both.gif") no-repeat left top;
+  float: left;
   margin: 0;
-  display: inline;
+  padding: 0 0 0 9px;
+}
+
+#topnav LI.current {
+  background-position: 0% -150px;
+}
+
+#topnav LI.not-current {
+  border-bottom:1px solid #765;
+}
+
+#topnav LI:hover.not-current {
+  background-position: 0% -150px;
+}
+
+#topnav LI:hover.not-current A {
+  background-position: 100% -150px;
+}
+
+#topnav a {
+  background:url("img/doors/right_both.gif") no-repeat right top;
+  display: block;
+  border: none;
+  /* width: 6em; */
+  padding: 2px 10px 1px 1px;
+  color: #765;
+  /* background: white;   */
+  /* border: 1px solid blue; */
+}
+
+#topnav LI.current A {
+  padding-bottom: 2px;
+  background-position: 100% -150px;
+}
+
+#topnav LI.not-current A {
+  no-repeat right top;
 }
 
 @media print {
@@ -51,7 +140,7 @@
   width: 100px;
   word-wrap: break-word;
   /* height: auto; */
-  background: white;
+  background: #ffffe0;
 }
 
 @media screen {
@@ -73,7 +162,6 @@ body {
   line-height: 110%;
   padding: 0;
   margin: 0;
-  background: #ffffe0;
 }
 
 A:link    { text-decoration: none; color: blue }

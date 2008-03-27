@@ -135,8 +135,7 @@ $(BUILDDIR)/BitcParser.o: $(BUILDDIR)/BitcParser.cxx
 
 $(BUILDDIR)/BitcParser.cxx: $(MAKE_BUILDDIR)
 $(BUILDDIR)/BitcParser.cxx $(BUILDDIR)/BitcParser.hxx: BitcParser.y $(MAKE_BUILDDIR) 
-	(cd $(BUILDDIR); bison -t -p bitc -v -d -o BitcParser.cxx -y $(RBUILDDIR)/BitcParser.y)
-
+	bison -t -p bitc -v -d -o $(BUILDDIR)/BitcParser.cxx -y BitcParser.y
 
 AST.cxx: AST.ast AST.hxx
 	$(ASTMAKER) -s AST.ast
