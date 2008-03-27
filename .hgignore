@@ -62,7 +62,7 @@ src/doc/docs/bitc/mutinfer.xml
 src/doc/docs/bitc/sys-infer.xml
 
 # ELC files generated for emacs mode
-src/bitcc-bootstrap/emacs/*.elc
+src/emacs/*.elc
 
 # Generated .c files in the test directory
 src/bitcc-bootstrap/tests/unit/*.c
