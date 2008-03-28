@@ -1920,85 +1920,557 @@
       Straightforward induction on the typing derivation.
     </p>
   </proof>
-<!--   <lemma id="T-Subtype-properties"> -->
-<!--     <title>Properties of Copy Coercion</title> -->
-<!--     <p> -->
-<!--       If -->
-<!--       <btypes:TYPE> -->
-<!-- 	<Msub> -->
-<!-- 	  <type/> -->
-<!-- 	  <type dash="'"/> -->
-<!-- 	</Msub> -->
-<!--       </btypes:TYPE>, then -->
-<!--     </p> -->
-<!--     <ol> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Msub> -->
-<!-- 	      <type/> -->
-<!-- 	      <minz> -->
-<!-- 		<type dash="'"/> -->
-<!-- 	      </minz> -->
-<!-- 	    </Msub> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Msub> -->
-<!-- 	      <maxz> -->
-<!-- 		<type/> -->
-<!-- 	      </maxz> -->
-<!-- 	      <type dash="'"/> -->
-<!-- 	    </Msub> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <maxz> -->
-<!-- 		<type/> -->
-<!-- 	      </maxz> -->
-<!-- 	      <maxz> -->
-<!-- 		<type dash="'"/> -->
-<!-- 	      </maxz> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <minz> -->
-<!-- 		<type/> -->
-<!-- 	      </minz> -->
-<!-- 	      <minz> -->
-<!-- 		<type dash="'"/> -->
-<!-- 	      </minz> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--     </ol> -->
-<!--   </lemma> -->
-<!--   <proof> -->
-<!--     <p> -->
-<!--       Evident from the definition of copy coercion relationship. -->
-<!--     </p> -->
-<!--   </proof> -->
+  <lemma id="Cst-Weakening">
+    <title>Weakening of Consistency</title>
+    <p>
+      If 
+      <btypes:TYPE>
+	<CST>
+	  <solvables num="1"/>
+	</CST>
+      </btypes:TYPE>
+      and
+      <btypes:TYPE>
+	<subeq>
+	  <set>
+	    <solvables num="2"/>
+	  </set>
+	  <set>
+	    <solvables num="1"/>
+	  </set>
+	</subeq>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
+	<CST>
+	  <solvables num="2"/>
+	</CST>
+      </btypes:TYPE>
+    </p>
+  </lemma>
+  <proof>
+    <p>
+      Evident from defintion 
+      <btypes:TYPE>
+	<defn tag="maybe-consistent"/>
+      </btypes:TYPE>.
+    </p>
+  </proof>
+  <lemma id="T-Subtype-properties">
+    <title>Properties of Copy Coercion</title>
+    <ol>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <CST>
+	      <type/>
+	      <type dash="'"/>
+	    </CST>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <Msub>
+	      <type/>
+	      <type dash="'"/>
+	    </Msub>
+	  </btypes:TYPE>, then,
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<Msub>
+		  <type/>
+		  <minz>
+		    <type dash="'"/>
+		  </minz>
+		</Msub>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<Msub>
+		  <maxz>
+		    <type/>
+		  </maxz>
+		  <type dash="'"/>
+		</Msub>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<eq>
+		  <maxz>
+		    <type/>
+		  </maxz>
+		  <maxz>
+		    <type dash="'"/>
+		  </maxz>
+		</eq>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<eq>
+		  <minz>
+		    <type/>
+		  </minz>
+		  <minz>
+		    <type dash="'"/>
+		  </minz>
+		</eq>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	</ol>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <CST>
+	      <type/>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </CST>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <Msub>
+	      <type/>
+	      <type num="1"/>
+	    </Msub>
+	  </btypes:TYPE>, and
+	  <btypes:TYPE>
+	    <Msub>
+	      <type/>
+ 	      <type num="2"/>
+	    </Msub>
+	  </btypes:TYPE>, then,
+	  <btypes:TYPE>
+	    <Exists>
+	      <type num="3"/>
+	    </Exists>
+	  </btypes:TYPE> such that 
+	  <btypes:TYPE>
+	    <Msub>
+	      <type num="1"/>
+	      <type num="3"/>
+	    </Msub>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <Msub>
+	      <type num="2"/>
+	      <type num="3"/>
+	    </Msub>
+	  </btypes:TYPE>, and
+	  <btypes:TYPE>
+	    <CST>
+	      <type/>
+	      <type num="1"/>
+	      <type num="2"/>
+	      <type num="3"/>
+	    </CST>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <CST>
+	      <type/>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </CST>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <Msub>
+	      <type num="1"/>
+	      <type/>
+	    </Msub>
+	  </btypes:TYPE>, and
+	  <btypes:TYPE>
+	    <Msub>
+ 	      <type num="2"/>
+	      <type/>
+	    </Msub>
+	  </btypes:TYPE>, then,
+	  <btypes:TYPE>
+	    <Exists>
+	      <type num="3"/>
+	    </Exists>
+	  </btypes:TYPE> such that 
+	  <btypes:TYPE>
+	    <Msub>
+	      <type num="3"/>
+	      <type num="1"/>
+	    </Msub>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <Msub>
+	      <type num="3"/>
+	      <type num="2"/>
+	    </Msub>
+	  </btypes:TYPE>, and
+	  <btypes:TYPE>
+	    <CST>
+	      <type/>
+	      <type num="1"/>
+	      <type num="2"/>
+	      <type num="3"/>
+	    </CST>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
+  </lemma>
+  <proof>
+    <p>
+      Property 1: By straightforward induction on the copy-coercion
+      derivation, and using
+      <btypes:TYPE>
+	<defn tag="maybe-consistent"/>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      Property 2: By construction of 
+      <btypes:TYPE>
+	<type num="3"/>
+      </btypes:TYPE>.
+    </p>
+    <ol>
+      <li>
+	<p>
+	  From 	  
+	  <btypes:TYPE>
+	    <CST>
+	      <type/>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </CST>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <lem tag="Cst-Weakening"/>
+	  </btypes:TYPE> (weakening), we have 
+	  <btypes:TYPE>
+	    <CST>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </CST>
+	  </btypes:TYPE>. 
+	</p>
+      </li>
+      <li>
+	<p>
+	  From the above case, and property 1.d above, we have
+	  <btypes:TYPE>
+	    <eq>
+	      <minz>
+		<type/>
+	      </minz>
+	      <minz>
+		<type num="1"/>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Similarly, we have
+	  <btypes:TYPE>
+	    <eq>
+	      <minz>
+		<type/>
+	      </minz>
+	      <minz>
+		<type num="2"/>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  From cases&nbsp;(2 and 3), we obtain
+	  <btypes:TYPE>
+	    <eq>
+	      <minz>
+		<type/>
+	      </minz>
+	      <minz>
+		<type num="1"/>
+	      </minz>
+	      <minz>
+		<type num="2"/>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Let us pick
+	  <btypes:TYPE>
+	    <type num="3"/>
+	  </btypes:TYPE> such that
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="3"/>
+	      <minz>
+		<type/>
+	      </minz>
+	      <minz>
+		<type num="1"/>
+	      </minz>
+	      <minz>
+		<type num="2"/>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE>.
+	  It is evident that 
+	  <btypes:TYPE>
+	    <CST>
+	      <type/>
+	      <type num="1"/>
+	      <type num="2"/>
+	      <type num="3"/>
+	    </CST>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  From S-Refl rule in 
+	  figure&nbsp;<xref ref="Msubtype_rules"/>, we know that
+	  <btypes:TYPE>
+	    <Msub>
+	      <type num="1"/>
+	      <type num="1"/>
+	    </Msub>
+	  </btypes:TYPE>. From this, and the fact that
+	  <btypes:TYPE>
+	    <CST>
+	      <type num="1"/>
+	    </CST>
+	  </btypes:TYPE>, using property 1.a, we obtain
+	  <btypes:TYPE>
+	    <Msub>
+	      <type num="1"/>
+	      <minz>
+		<type num="1"/>
+	      </minz>
+	    </Msub>
+	  </btypes:TYPE>.
+	  From case&nbsp;(5), we can write this as
+	  <btypes:TYPE>
+	    <Msub>
+	      <type num="1"/>
+	      <type num="3"/>
+	    </Msub>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Similarly, we obtain
+	  <btypes:TYPE>
+	    <Msub>
+	      <type num="2"/>
+	      <type num="3"/>
+	    </Msub>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
+    <p>
+      Property 3: Similar to Property 2.
+    </p>
+  </proof>
+  <lemma id="T-msm_eq_ms">
+    <title>Type Substitution Canonicalization</title>
+    <p>
+      For any type 
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> and substitution
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE>, we have:
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <minz>
+		    <type/>
+		  </minz>
+		</Subst>
+	      </minz>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <maxz>
+		    <type/>
+		  </maxz>
+		</Subst>
+	      </minz>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <maxz>
+		<Subst>
+		  <aSubMap/>
+		  <maxz>
+		    <type/>
+		  </maxz>
+		</Subst>
+	      </maxz>
+	      <maxz>
+		<Subst>
+		  <aSubMap/>
+		  <minz>
+		    <type/>
+		  </minz>
+		</Subst>
+	      </maxz>
+	      <maxz>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </maxz>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <minzT>
+		    <type/>
+		  </minzT>
+		</Subst>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <maxzT>
+		    <type/>
+		  </maxzT>
+		</Subst>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <maxzT>
+		<Subst>
+		  <aSubMap/>
+		  <maxzT>
+		    <type/>
+		  </maxzT>
+		</Subst>
+	      </maxzT>
+	      <maxzT>
+		<Subst>
+		  <aSubMap/>
+		  <minzT>
+		    <type/>
+		  </minzT>
+		</Subst>
+	      </maxzT>
+	      <maxzT>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </maxzT>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </lemma>
+  <proof>
+    <p>
+      By induction on the structure of 
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE>. The only interesting cases are
+      <btypes:TYPE>
+	<mbTop>
+	  <sType dash="'"/>
+	  <sType/>
+	</mbTop>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<mbFull>
+	  <pType/>
+	  <sType/>
+	</mbFull>
+      </btypes:TYPE>. In these cases, the substitution into
+      <btypes:TYPE>
+	<sType dash="'"/>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<pType/>
+      </btypes:TYPE> do not matter as they are disregarded by 
+      <btypes:TYPE>
+	<maxzOp/>
+	<text content=" and "/>
+	<minzOp/>
+      </btypes:TYPE> functions. Similar is the case for the properties
+      with respect to 
+      <btypes:TYPE>
+	<maxzTOp/>
+	<text content=" and "/>
+	<minzTOp/>
+      </btypes:TYPE> opeartors.
+    </p>
+  </proof>
   <lemma id="T-SSubstitution">
     <title>Sub-Type Substitution</title>
     <p>
       If
       <btypes:TYPE>
 	<Msub>
-	  <type/>
-	  <type dash="'"/>
+	  <type num="1"/>
+	  <type num="2"/>
 	</Msub>
 	<text content=", then for any substitution "/>
 	<aSubMap/>
@@ -2008,235 +2480,666 @@
 	  <Subst>
 	    <aSubMap/>
 	    <set>
-	      <type/>
-	      <type dash="'"/>
+	      <type num="1"/>
+	      <type num="2"/>
 	    </set>
 	  </Subst>
 	</Cst>
-	<text content=", we have "/>
-	<Msub>
-	  <Subst>
-	    <aSubMap/>
-	    <type/>
-	  </Subst>
-	  <Subst>
-	    <aSubMap/>
-	    <type dash="'"/>
-	  </Subst>
-	</Msub>
-      </btypes:TYPE>.
+      </btypes:TYPE>,
     </p>
+    <ol>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<type num="2"/>
+	      </Subst>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <type num="2"/>
+		</Subst>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <Msub>
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<type num="2"/>
+	      </Subst>
+	    </Msub>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <maxz>
+		<Subst>
+		  <aSubMap/>
+		  <type num="1"/>
+		</Subst>
+	      </maxz>
+	    </eq>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <Msub>
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<type num="2"/>
+	      </Subst>
+	    </Msub>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
   </lemma>
   <proof>
     <p>
       By induction on the derivation of 
       <btypes:TYPE>
 	<Msub>
-	  <type/>
-	  <type dash="'"/>
+	  <type num="1"/>
+	  <type num="2"/>
 	</Msub>
-      </btypes:TYPE>.
+      </btypes:TYPE>. We give the proof for the first property only,
+      the second property is similarly proved.
     </p>
-    <p>
-      Case S-Refl is trivial. Cases S-Trans, S-Fn, S-Pair and S-Mut
-      follow from induction hypothesis.
-    </p>
-    <p>
-      Case S-MT1: There are two sub-cases to consider. Suppose
-      <btypes:TYPE>
-	<eq>
-	  <Subst>
-	    <aSubMap/>
-	    <tvar name="alpha"/>
-	  </Subst>
-	  <tvar name="alpha"/>
-	</eq>
-      </btypes:TYPE>. In this case, we know that 
-      <btypes:TYPE>
-	<eq>
-	  <minz>
-	    <sType/>
-	  </minz>
-	  <type/>
-	</eq>
-      </btypes:TYPE>.
-      Since a substitution on strcturally equal types must preserve
-      equality, we have
-      <btypes:TYPE>
-	<eq>
-	  <Subst>
-	    <aSubMap/>
-	    <minz>
-	      <sType/>
-	    </minz>
-	  </Subst>
-	  <Subst>
-	    <aSubMap/>
-	    <type/>
-	  </Subst>
-	</eq>
-      </btypes:TYPE>.
-    </p>
-    <p>
-      Otherwise, 
-      It must be true that
-      <btypes:TYPE>
-	<eq>
-	  <Subst>
-	    <aSubMap/>
-	    <sType/>
-	  </Subst>
-	  <sType dash="'"/>
-	</eq>
-      </btypes:TYPE> for some base type 
-      <btypes:TYPE>
-	<sType dash="'"/>
-      </btypes:TYPE>,
-      because otherwise, the substitution will
-      violate the grammar within the type
-      <btypes:TYPE>
-	<mbTop>
-	  <tvar name="alpha"/>
-	  <Subst>
-	    <aSubMap/>
-	    <sType/>
-	  </Subst>
-	</mbTop>
-      </btypes:TYPE>.
-      Given this, we can conclude that 
-      <btypes:TYPE>
-	<eq>
-	  <Subst>
-	    <aSubMap/>
+    <ol>
+      <li>
+	<p>
+	  Case S-Refl is trivial. Cases S-Trans follows from induction
+	  hypothesis.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case S-Fn: Here, 
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="1"/>
+	      <fn>
+		<type num="a"/>
+		<type num="r"/>
+	      </fn>
+	    </eq>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <fn>
+		<type num="a" dash="'"/>
+		<type num="r" dash="'"/>
+	      </fn>
+	    </eq>
+	  </btypes:TYPE>, and we have
+	  <btypes:TYPE>
+	    <Msub>
+	      <fn>
+		<type num="a"/>
+		<type num="r"/>
+	      </fn>
+	      <fn>
+		<type num="a" dash="'"/>
+		<type num="r" dash="'"/>
+	      </fn>
+	    </Msub>
+	  </btypes:TYPE>.
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      From the assumptions of this derivation of
+	      <btypes:TYPE>
+		<Msub>
+		  <fn>
+		    <type num="a"/>
+		    <type num="r"/>
+		  </fn>
+		  <fn>
+		    <type num="a" dash="'"/>
+		    <type num="r" dash="'"/>
+		  </fn>
+		</Msub>
+	      </btypes:TYPE>, we have
+	      <btypes:TYPE>
+		<eq>
+		  <minz>
+		    <type num="a"/>
+		  </minz>
+		  <minz>
+		    <type num="a" dash="'"/>
+		  </minz>
+		</eq>
+	      </btypes:TYPE>, and
+	      <btypes:TYPE>
+		<eq>
+		  <maxz>
+		    <type num="r"/>
+		  </maxz>
+		  <maxz>
+		    <type num="r" dash="'"/>
+		  </maxz>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Therefore, we must have
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <minz>
+		      <type num="a"/>
+		    </minz>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <minz>
+		      <type num="a" dash="'"/>
+		    </minz>
+		  </Subst>
+		</eq>
+	      </btypes:TYPE>, and
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <maxz>
+		      <type num="r"/>
+		    </maxz>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <maxz>
+		      <type num="r" dash="'"/>
+		    </maxz>
+		  </Subst>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Further, we can write:
+	      <btypes:TYPE>
+		<eq>
+		  <minz>
+		    <Subst>
+		      <aSubMap/>
+		      <minz>
+			<type num="a"/>
+		      </minz>
+		    </Subst>
+		  </minz>
+		  <minz>
+		    <Subst>
+		      <aSubMap/>
+		      <minz>
+			<type num="a" dash="'"/>
+		      </minz>
+		    </Subst>
+		  </minz>
+		</eq>
+	      </btypes:TYPE>, and
+	      <btypes:TYPE>
+		<eq>
+		  <maxz>
+		    <Subst>
+		      <aSubMap/>
+		      <maxz>
+			<type num="r"/>
+		      </maxz>
+		    </Subst>
+		  </maxz>
+		  <maxz>
+		    <Subst>
+		      <aSubMap/>
+		      <maxz>
+			<type num="r" dash="'"/>
+		      </maxz>
+		    </Subst>
+		  </maxz>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From case&nbsp;(2.c) and 
+	      <btypes:TYPE>
+		<lem tag="T-msm_eq_ms"/>
+	      </btypes:TYPE>, we can write:
+	      <btypes:TYPE>
+		<eq>
+		  <minz>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="a"/>
+		    </Subst>
+		  </minz>
+		  <minz>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="a" dash="'"/>
+		    </Subst>
+		  </minz>
+		</eq>
+	      </btypes:TYPE>, and
+	      <btypes:TYPE>
+		<eq>
+		  <maxz>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="r"/>
+		    </Subst>
+		  </maxz>
+		  <maxz>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="r" dash="'"/>
+		    </Subst>
+		  </maxz>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From case&nbsp;(2.d) and S-Fn rule, we conclude that
+	      <btypes:TYPE>
+		<Msub>
+		  <Subst>
+		    <aSubMap/>
+		    <fn>
+		      <type num="a"/>
+		      <type num="r"/>
+		    </fn>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <fn>
+		      <type num="a" dash="'"/>
+		      <type num="r" dash="'"/>
+		    </fn>
+		  </Subst>
+		</Msub>
+	      </btypes:TYPE>	      
+	    </p>
+	  </li>
+	</ol>
+      </li>
+      <li>
+	<p>
+	  Case S-Pair: Follows from induction hypothesis, and the fact
+	  that
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <type num="1"/>
+		</Subst>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<type num="2"/>
+	      </Subst>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <type num="2"/>
+		</Subst>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE> implies
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<pair>
+		  <type num="1"/>
+		  <type num="2"/>
+		</pair>
+	      </Subst>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <pair>
+		    <type num="1"/>
+		    <type num="2"/>
+		  </pair>
+		</Subst>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case S-Mut: Cannot happen for first property (follows from
+	  induction hypothesis for the second property).
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case S-MT1: There are two sub-cases to consider:
+	  <btypes:TYPE>
+	    <in>
+	      <tvar name="alpha"/>
+	      <dom>
+		<aSubMap/>
+	      </dom>
+	    </in>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <notin>
+	      <tvar name="alpha"/>
+	      <dom>
+		<aSubMap/>
+	      </dom>
+	    </notin>
+	  </btypes:TYPE>.
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      Suppose
+	      <btypes:TYPE>
+		<notin>
+		  <tvar name="alpha"/>
+		  <dom>
+		    <aSubMap/>
+		  </dom>
+		</notin>
+	      </btypes:TYPE>.
+	      That is,
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <tvar name="alpha"/>
+		  </Subst>
+		  <tvar name="alpha"/>
+		</eq>
+	      </btypes:TYPE>. 
+	      We know that 
+	      <btypes:TYPE>
+		<eq>
+		  <minzT>
+		    <sType/>
+		  </minzT>
+		  <type/>
+		</eq>
+	      </btypes:TYPE>.
+	      Therefore, we have
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <minzT>
+		      <sType/>
+		    </minzT>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <type/>
+		  </Subst>
+		</eq>
+	      </btypes:TYPE>, and further
+	      <btypes:TYPE>
+		<eq>
+		  <minzT>
+		    <Subst>
+		      <aSubMap/>
+		      <minzT>
+			<sType/>
+		      </minzT>
+		    </Subst>
+		  </minzT>
+		  <minzT>
+		    <Subst>
+		      <aSubMap/>
+		      <type/>
+		    </Subst>
+		  </minzT>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From case&nbsp;(5.a) and
+	      <btypes:TYPE>
+		<lem tag="T-msm_eq_ms"/>
+	      </btypes:TYPE>, we can write:
+	      <btypes:TYPE>
+		<eq>
+		  <minzT>
+		    <Subst>
+		      <aSubMap/>
+		      <sType/>
+		    </Subst>
+		  </minzT>
+		  <minzT>
+		    <Subst>
+		      <aSubMap/>
+		      <type/>
+		    </Subst>
+		  </minzT>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	</ol>
+	<p>
+	  Since a substitution on strcturally equal types must preserve
+	  equality, we have
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<minz>
+		  <sType/>
+		</minz>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<type/>
+	      </Subst>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+	<p>
+	  Otherwise, 
+	  It must be true that
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<sType/>
+	      </Subst>
+	      <sType dash="'"/>
+	    </eq>
+	  </btypes:TYPE> for some base type 
+	  <btypes:TYPE>
+	    <sType dash="'"/>
+	  </btypes:TYPE>,
+	  because otherwise, the substitution will
+	  violate the grammar within the type
+	  <btypes:TYPE>
+	    <mbTop>
+	      <tvar name="alpha"/>
+	      <Subst>
+		<aSubMap/>
+		<sType/>
+	      </Subst>
+	    </mbTop>
+	  </btypes:TYPE>.
+	  Given this, we can conclude that 
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<maxzT>
+		  <sType/>
+		</maxzT>
+	      </Subst>
+	      <sType dash="''"/>
+	    </eq>
+	  </btypes:TYPE> for some type
+	  <btypes:TYPE>
+	    <sType dash="''"/>
+	  </btypes:TYPE>.
+	</p>
+	<p>
+	  By induction hypothesis, we know that
+	  <btypes:TYPE>
+	    <Msub>
+	      <Subst>
+		<aSubMap/>
+		<maxzT>
+		  <sType/>
+		</maxzT>
+	      </Subst>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </minz>
+	    </Msub>
+	  </btypes:TYPE>.
+	  Now,
+	  <btypes:TYPE>
 	    <maxzT>
 	      <sType/>
 	    </maxzT>
-	  </Subst>
-	  <sType dash="''"/>
-	</eq>
-      </btypes:TYPE> for some type
-      <btypes:TYPE>
-	<sType dash="''"/>
-      </btypes:TYPE>.
-    </p>
-    <p>
-      By induction hypothesis, we know that
-      <btypes:TYPE>
-	<Msub>
-	  <Subst>
-	    <aSubMap/>
-	    <maxzT>
+	  </btypes:TYPE>
+	  is equal to 
+	  <btypes:TYPE>
+	    <sType/>
+	  </btypes:TYPE> or
+	  <btypes:TYPE>
+	    <mutable>
 	      <sType/>
-	    </maxzT>
-	  </Subst>
-	  <minz>
-	    <Subst>
-	      <aSubMap/>
-	      <type/>
-	    </Subst>
-	  </minz>
-	</Msub>
-      </btypes:TYPE>.
-      Now,
-      <btypes:TYPE>
-	<maxzT>
-	  <sType/>
-	</maxzT>
-      </btypes:TYPE>
-      is equal to 
-      <btypes:TYPE>
-	<sType/>
-      </btypes:TYPE> or
-      <btypes:TYPE>
-	<mutable>
-	  <sType/>
-	</mutable>
-      </btypes:TYPE>.
-      Since 
-      <btypes:TYPE>
-	<sType/>
-      </btypes:TYPE> is not a maybe type, 
-      <btypes:TYPE>
-	<eq>
-	  <maxzT>
-	    <Subst>
-	      <aSubMap/>
-	      <sType/>
-	    </Subst>
-	  </maxzT>
-	  <Subst>
-	    <aSubMap/>
-	    <maxzT>
-	      <sType/>
-	    </maxzT>
-	  </Subst>
-	</eq>
-      </btypes:TYPE>. Therefore, we have,
-      <btypes:TYPE>
-	<Msub>
-	  <maxzT>
-	    <Subst>
-	      <aSubMap/>
-	      <sType/>
-	    </Subst>
-	  </maxzT>
-	  <minz>
-	    <Subst>
-	      <aSubMap/>
-	      <type/>
-	    </Subst>
-	  </minz>
-	</Msub>
-      </btypes:TYPE>. The result is obtainable from S-MT1 rule.
-      Let
-      <btypes:TYPE>
-	<eq>
-	  <sType num="1"/>
-	  <Subst>
-	    <aSubMap/>
+	    </mutable>
+	  </btypes:TYPE>.
+	  Since 
+	  <btypes:TYPE>
+	    <sType/>
+	  </btypes:TYPE> is not a maybe type, 
+	  <btypes:TYPE>
+	    <eq>
+	      <maxzT>
+		<Subst>
+		  <aSubMap/>
+		  <sType/>
+		</Subst>
+	      </maxzT>
+	      <Subst>
+		<aSubMap/>
+		<maxzT>
+		  <sType/>
+		</maxzT>
+	      </Subst>
+	    </eq>
+	  </btypes:TYPE>. Therefore, we have,
+	  <btypes:TYPE>
 	    <Msub>
 	      <maxzT>
-		<sType/>
+		<Subst>
+		  <aSubMap/>
+		  <sType/>
+		</Subst>
 	      </maxzT>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </minz>
 	    </Msub>
-	  </Subst>
-	</eq>
-      </btypes:TYPE> and
-      <btypes:TYPE>
-	<eq>
-	  <sType num="2"/>
-	  <minz>
-	    <Subst>
-	      <aSubMap/>
-	      <type/>
-	    </Subst>
-	  </minz>
-	</eq>
-      </btypes:TYPE>.
-      Since we have 
-      
-      By inspecting the copy coercion rules, we determine that in
-      order for the relationship 
-      <btypes:TYPE>
-	<Msub>
-	  <sType num="1"/>
-	  <minz>
-	    <Subst>
-	      <aSubMap/>
-	      <type/>
-	    </Subst>
-	  </minz>
-	</Msub>
-      </btypes:TYPE> to hold, 
-      <btypes:TYPE>
-	<minz>
-	  <Subst>
-	    <aSubMap/>
-	    <type/>
-	  </Subst>
-	</minz>
-      </btypes:TYPE>
-    </p>
+	  </btypes:TYPE>. The result is obtainable from S-MT1 rule.
+	  Let
+	  <btypes:TYPE>
+	    <eq>
+	      <sType num="1"/>
+	      <Subst>
+		<aSubMap/>
+		<Msub>
+		  <maxzT>
+		    <sType/>
+		  </maxzT>
+		</Msub>
+	      </Subst>
+	    </eq>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <eq>
+	      <sType num="2"/>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE>.
+	  Since we have 
+	  
+	  By inspecting the copy coercion rules, we determine that in
+	  order for the relationship 
+	  <btypes:TYPE>
+	    <Msub>
+	      <sType num="1"/>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </minz>
+	    </Msub>
+	  </btypes:TYPE> to hold, 
+	  <btypes:TYPE>
+	    <minz>
+	      <Subst>
+		<aSubMap/>
+		<type/>
+	      </Subst>
+	    </minz>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
   </proof>
   <lemma id="T-TSubstitution">
     <title>Type Substitution</title>

@@ -302,15 +302,20 @@
 	  <tyPre>
 	    <TDjudge>
 	      <aExpr/>
-	      <pType/>
+	      <type/>
 	    </TDjudge>
-	    <Msub>
-	      <pType/>
+	    <!-- This relationship does not permit types like
+                 t1xt2 | t. The inference engine never produces
+                 this type, did not bother -->    
+	    <eq>
+	      <minzT>
+		<type/>
+	      </minzT>
 	      <pair>
 		<type num="1"/>
 		<type num="2"/>
 	      </pair>
-	    </Msub>
+	    </eq>
 	  </tyPre>
 	  <tyConc>
 	    <TDjudge>
@@ -325,15 +330,17 @@
 	  <tyPre>
 	    <TDjudge>
 	      <aExpr/>
-	      <pType/>
+	      <type/>
 	    </TDjudge>
-	    <Msub>
-	      <pType/>
+	    <eq>
+	      <minzT>
+		<pType/>
+	      </minzT>
 	      <pair>
 		<type num="1"/>
 		<type num="2"/>
 	      </pair>
-	    </Msub>
+	    </eq>
 	  </tyPre>
 	  <tyConc>
 	    <TDjudge>

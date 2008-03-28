@@ -3180,7 +3180,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		  uflags, trail, USE_MODE, TI_COMP2);
 	break;
       }
-
+      
       if(t1->kind != ty_structv && t1->kind != ty_structr) {
 	errStream << ast->child(0)->loc << ": "
 		  << ast->child(0)->s << " cannot be resolved" 
@@ -3616,7 +3616,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
        /*------------------------------------------------
            A(r) = ['a1.. 'am] {f1:t1 ... fn:tn}
       A |- ef:r(s1 ... sm)   A |- e1:t1' ... A |- en: tn'
-                     
+      
                U(t1  = 'c1|'b1) ... U(tn  = 'cn|'bn)
                U(t1' = 'd1|'b1) ... U(tn' = 'dn|'bn)
       ______________________________________________________

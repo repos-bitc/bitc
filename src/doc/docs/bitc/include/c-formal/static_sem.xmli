@@ -172,7 +172,7 @@
     <p>
       In our algebra of types, we define the following equivalence:
       <btypes:TYPE>
-	<equiv>
+	<eq>
 	  <mutable>
 	    <mutable>
 	      <type/>
@@ -181,7 +181,7 @@
 	  <mutable>
 	    <type/>
 	  </mutable>
-	</equiv>
+	</eq>
       </btypes:TYPE>.
       That is, the mutable type constructor is idempotent. 
     </p>
