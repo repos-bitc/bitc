@@ -145,6 +145,24 @@
 
 @media screen {
   #content {
+    margin: 0;
+   /* If sidenav is on the left, this should be
+        padding-left: 124px;
+      If sidenav is on the right, it should be
+        padding-left: 10px;
+    */
+    padding-left: 124px;
+    padding-right: 50px;
+    word-wrap: break-word;
+    border: 1px solid white;	
+    /* The border is a trick to fix a margin background color issue
+       at the top of the content frame. */
+    /* border: 1px solid #ffffe0; */
+    /* border: 1px solid blue; */
+  }
+}
+@media screen {
+  #content {
     padding-left: 150px;
     word-wrap: break-word;
     /* border: 1px solid green; */
