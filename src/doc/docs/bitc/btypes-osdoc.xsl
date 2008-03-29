@@ -15,7 +15,8 @@
   version ="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:doc="http://www.eros-os.org/DTD/osdoc/0.1/osdoc.dtd"
-  xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd"
+  xmlns:m="http://www.w3.org/1998/Math/MathML">
 
   <xsl:output method="xml"
     encoding="utf-8"
