@@ -108,6 +108,8 @@
     expressions is denoted by <btypes:TYPE><evalOp/></btypes:TYPE>,
     and evaluation in a Lvalue context is given by the
     <btypes:TYPE><levalOp/></btypes:TYPE> relation.
+    <br/>
+    <br/>
   </p>
   </sect1>
   

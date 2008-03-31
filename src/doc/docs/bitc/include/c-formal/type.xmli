@@ -304,9 +304,6 @@
 	      <aExpr/>
 	      <type/>
 	    </TDjudge>
-	    <!-- This relationship does not permit types like
-                 t1xt2 | t. The inference engine never produces
-                 this type, did not bother -->    
 	    <eq>
 	      <minzT>
 		<type/>

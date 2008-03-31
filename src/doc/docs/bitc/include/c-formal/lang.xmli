@@ -108,22 +108,6 @@
 	  <lKind k="poly"/>
 	</alternatives>
       </bnf>
-      <bnf desc="Types">
-	<type/>
-	<alternatives>
-	  <tvar name="alpha"/>
-	  <unit/>
-	  <bool/>
-	  <fn><type/><type/></fn>                  
-	</alternatives>                
-      </bnf>
-      <bnfc>
-	<alternatives>
-	  <ref><type/></ref>
-	  <mutable><type/></mutable>
-	  <pair><type/><type/></pair>
-	</alternatives> 
-      </bnfc>
     </grammar>
   </btypes:TYPE>
   <p>
@@ -138,16 +122,14 @@
     All the above syntactic forms can be parenthesized without
     change in meaning. The let-kind ``-'' is a placeholder for the
     unkinded (input) <progident>let</progident> form.
-    Optional parts of syntax are written within the 
-    <em>[]</em> brackets.
-    A substitution is of Z for Y in X is written using the standard
-    notation:
-    <btypes:TYPE>
-      <subst>
-	<text content="X"/>
-	<text content="Y"/>
-	<text content="Z"/>          
-      </subst>
-    </btypes:TYPE>.
+<!--     A substitution is of Z for Y in X is written using the standard -->
+<!--     notation: -->
+<!--     <btypes:TYPE> -->
+<!--       <subst> -->
+<!-- 	<text content="X"/> -->
+<!-- 	<text content="Y"/> -->
+<!-- 	<text content="Z"/>           -->
+<!--       </subst> -->
+<!--     </btypes:TYPE>. -->
   </p>
   </sect1>
