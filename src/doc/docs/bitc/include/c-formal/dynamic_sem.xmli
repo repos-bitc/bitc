@@ -103,11 +103,13 @@
     </grammar>
   </btypes:TYPE>
   <p>
-    The Operational semantics rules are shown in Figure&nbsp;<xref
+    The Operational semantics rules are shown in figure&nbsp;<xref
       ref="dyn_sem_horz"/>. The standard evaluation relation for
     expressions is denoted by <btypes:TYPE><evalOp/></btypes:TYPE>,
     and evaluation in a Lvalue context is given by the
     <btypes:TYPE><levalOp/></btypes:TYPE> relation.
+    <br/>
+    <br/>
   </p>
   </sect1>
   

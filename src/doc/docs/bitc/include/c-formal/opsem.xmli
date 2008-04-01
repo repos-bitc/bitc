@@ -1111,5 +1111,5 @@
       </opHorzRules>      
     </btypes:TYPE> 
   </font>
-  <caption><font size="small">Dynamic Semantics</font></caption>
+  <caption><font size="small">Small Step Operational Semantics</font></caption>
 </figure>

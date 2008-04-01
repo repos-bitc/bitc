@@ -1135,11 +1135,18 @@
   <!-- Type Variables -->
   <xsl:template match="tvar" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:choose>
+      <xsl:when test = "@name">
+	<xsl:value-of select="@name"/>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:text>alpha</xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:text>;</xsl:text>
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>
-
+  
   <!-- Type Variable set -->
   <xsl:template match="aTVset" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -1851,12 +1858,17 @@
 
   <!-- tvars -->
   <xsl:template match="tvars" mode="formula">
-    <!-- <xsl:text>(</xsl:text> -->    
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:choose>
+      <xsl:when test = "@name">
+	<xsl:value-of select="@name"/>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:text>alpha</xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:text>;</xsl:text>
     <xsl:call-template name="print.index.dash"/>
-    <!-- <xsl:text>)</xsl:text> -->    
     <xsl:call-template name="print.plural"/>
   </xsl:template>
   
@@ -2480,6 +2492,7 @@
 	<xsl:text>kappav;</xsl:text>
       </xsl:otherwise>
     </xsl:choose>
+    <xsl:call-template name="print.index.dash"/>
   </xsl:template>
 
   <!-- aProgram -->
@@ -4023,7 +4036,7 @@
   <xsl:template name="print.maybe">
     <xsl:param name="print.maybe.double"/>
     <xsl:variable name="mbpair1.paren" 
-      select="(*[1] = mbpair) or (*[1] = fn) or (*[1] = pair) or (*[1] = mutable)"/>
+      select="(*[1] = mbpair) or (*[1] = fn) or (*[1] = pair)"/>
     <xsl:variable name="mbpair2.paren" 
       select="(*[2] = mbpair) or (*[2] = fn) or (*[2] = pair)"/>
     <xsl:variable name="mbpair.paren" 

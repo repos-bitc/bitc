@@ -6,12 +6,34 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
   <title>Static Semantics of <btypes:TYPE><language/></btypes:TYPE></title>
+  <!-- Can we have just one kind of type instead of restricting
+  mutable and maybe types to only contain unconstrained types? 
+
+  This means that we will permit types such as:
+  'a!'b|'d|'e!bool and M'a|'b.
+
+  Further, with this setup, can we elide the M'a|t type, and
+  instead use the typing M('a|t) ?
+
+  While there is nothing wrong with these types themselves, they
+  complicate the unification algorithm. For example, suppose
+  p: bool x bool, and consider the expression
+  
+  \x. x:= p.
+
+  The unification algorithm will initially assign x: 'a|'b, and at
+  the set rule, generate constraints
+  { 'a|'b = M('c|'d), bool x bool = 'e|'d }
+
+  This will reduce to { 'a|'b = M('c|boolxbool) }
+  Now, we will need a rule that unifies mutable vs maybe types
+  correctly ... -->
   <btypes:TYPE>       
     <grammar>
       <bnf desc="Unct. Types">
-	<sType/>
+	<pType/>
 	<alternatives>
-	  <tvar name="alpha"/>
+	  <tvar/>
 	  <unit/>
 	  <bool/>
 	  <fn><type/><type/></fn>                  
@@ -20,27 +42,30 @@
       <bnfc desc="">
 	<alternatives>
 	  <ref><type/></ref>
-	  <mutable><sType/></mutable>
+	  <mutable><pType/></mutable>
 	  <pair><type/><type/></pair>
 	</alternatives>
       </bnfc>
-      <bnf desc="Ct. Type">
-	<pType/>
+      <bnf desc="M-Vars">
+	<sType/>
 	<alternatives>
-	  <sType/>
-	  <mbTop>
-	    <sType/>
-	    <sType/>
-	  </mbTop>
+	  <tvar/>
+	  <mutable>
+	    <tvar/>
+	  </mutable>
 	</alternatives>
       </bnf>
       <bnf desc="Types">
 	<type/>
 	<alternatives>
 	  <pType/>
-	  <mbFull>
+	  <mbTop>
+	    <tvar/>
 	    <pType/>
+	  </mbTop>
+	  <mbFull>
 	    <sType/>
+	    <pType/>
 	  </mbFull>
 	</alternatives>
       </bnf>
@@ -49,7 +74,7 @@
 	<alternatives>
 	  <type/>
 	  <forall>                    
- 	    <tvars name="alpha"/>
+ 	    <tvars/>
 	    <ctype>
 	      <type/>
 	      <aCtset/>
@@ -87,7 +112,7 @@
 	<alternatives>
 	  <EmptySubst/>
 	  <SubMap>
-	    <tvar name="alpha"/>
+	    <tvar/>
 	    <type/>
 	  </SubMap>
 	  <SubMap>
@@ -144,19 +169,8 @@
 	<text content="subject"/>
       </models>
     </btypes:TYPE>.
-  </p>
-  <p>
-    The application of a substitution
-    <btypes:TYPE>
-      <aSubMap/>
-    </btypes:TYPE> on X is written as
-    <btypes:TYPE>
-      <Subst>
-	<aSubMap/>
-	<text content="X"/>
-      </Subst>
-    </btypes:TYPE>. 
-    As a matter of notational convenience, we write:
+    As a matter of notational convenience in the case of
+    substitutions, we write: 
     <btypes:TYPE>
       <aSubMap num="a.b"/> 
     </btypes:TYPE> to mean
@@ -175,41 +189,17 @@
 	<eq>
 	  <mutable>
 	    <mutable>
-	      <type/>
+	      <pType/>
 	    </mutable>
 	  </mutable>
 	  <mutable>
-	    <type/>
+	    <pType/>
 	  </mutable>
 	</eq>
       </btypes:TYPE>.
       That is, the mutable type constructor is idempotent. 
     </p>
   </definition>
-  <definition id="wf-subst">      
-    <title>Well-formed Substitutions</title>
-    <p>
-      A substitution
-      <btypes:TYPE>
-	<aSubMap/>
-      </btypes:TYPE> is said to be well-formed with respect to 
-      a sentence
-      <btypes:TYPE>
-	<text content="X"/>
-      </btypes:TYPE> in the above grammar if
-      <btypes:TYPE>
-	<Subst>
-	  <aSubMap/>
-	  <text content="X"/>
-	</Subst>
-      </btypes:TYPE> is still a valid sentence in the same language.
-    </p>
-  </definition>
-  <p>
-    That is, the substitution does not violate the syntax of the 
-    language. In the rest of the document, we say substitutions to
-    mean well-formed substitutions unless otherwise specified.
-  </p>
   <definition id="structural_containment">
     <title>Structural Containment</title>
     <p>
@@ -301,97 +291,6 @@
       </btypes:TYPE>.
     </p>
   </definition>
-  <definition id="special">      
-    <title>Specialization</title>
-    <p>
-      We write
-      <btypes:TYPE>
-	<spEq>
-	  <type num="1"/>
-	  <type num="2"/>
-	</spEq>
-      </btypes:TYPE>, that is, 
-      <btypes:TYPE>
-	<type num="1"/>
-      </btypes:TYPE> is a specialization of (or less general than)
-      <btypes:TYPE>
-	<type num="2"/>
-      </btypes:TYPE>
-      iff  
-      <btypes:TYPE>
-	<Exists>
-	  <aSubMap/>
-	</Exists>
-      </btypes:TYPE> such that
-      <btypes:TYPE>
-	<eq>
-	  <type num="1"/>
-	  <Subst>
-	    <aSubMap/>
-	    <type num="2"/>
-	  </Subst>
-	</eq>
-      </btypes:TYPE>.
-      We write 
-      <btypes:TYPE>
-	<genEq>
-	  <type num="1"/>
-	  <type num="2"/>
-	</genEq> 
-      </btypes:TYPE>, that is, 
-      <btypes:TYPE>
-	<type num="1"/>
-      </btypes:TYPE> is more general than
-      <btypes:TYPE>
-	<type num="2"/>
-      </btypes:TYPE>
-      iff
-      <btypes:TYPE>
-	<spEq>
-	  <type num="2"/>
-	  <type num="1"/>
-	</spEq> 
-      </btypes:TYPE>.
-    </p>
-    <p>
-      We write
-      <btypes:TYPE>
-	<spEq>
-	  <aSubMap num="1"/>
-	  <aSubMap num="2"/>
-	</spEq>
-      </btypes:TYPE>
-      iff  
-      <btypes:TYPE>
-	<Exists>
-	  <aSubMap/>
-	</Exists>
-      </btypes:TYPE> such that
-      <btypes:TYPE>
-	<eq>
-	  <aSubMap num="1"/>
-	  <compose>
-	    <aSubMap/>
-	    <aSubMap num="2"/>
-	  </compose>
-	</eq>
-      </btypes:TYPE>.
-      We write 
-      <btypes:TYPE>
-	<genEq>
-	  <aSubMap num="1"/>
-	  <aSubMap num="2"/>
-	</genEq> 
-      </btypes:TYPE>
-      iff
-      <btypes:TYPE>
-	<spEq>
-	  <aSubMap num="2"/>
-	  <aSubMap num="1"/>
-	</spEq> 
-      </btypes:TYPE>.
-    </p>
-  </definition>
   <definition id="top_ceq">      
     <title>Top-level Copy Compatibility</title>
     <p> 
@@ -412,24 +311,27 @@
 	  </tyConc>                
 	</tyRule>
 	<tyRule>
-	  <tyPre/>
+	  <tyPre>
+	    <Tceq>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </Tceq>
+	  </tyPre>
 	  <tyConc>
-	    <Tceq>                
-	      <mutable>
-		<sType/>
-	      </mutable>
-	      <sType/>
+	    <Tceq>
+	      <type num="2"/>
+	      <type num="1"/>
 	    </Tceq>
 	  </tyConc>
 	</tyRule>
 	<tyRule>
 	  <tyPre/>
 	  <tyConc>
-	    <Tceq>
-	      <sType/>
+	    <Tceq>                
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>
+	      <pType/>
 	    </Tceq>
 	  </tyConc>
 	</tyRule>
@@ -454,35 +356,53 @@
 	<tyRule>
 	  <tyPre>
 	    <ceq>                
-	      <type/>
-	      <type dash="'"/>
-	    </ceq>	    
-	  </tyPre>
-	  <tyConc>
-	    <ceq>                
-	      <sType/>
-	      <mutable>
-		<sType dash="'"/>
-	      </mutable>
-	    </ceq>
-	  </tyConc>                
-	</tyRule>   
-	<tyRule>
-	  <tyPre>
-	    <ceq>                
-	      <sType/>
-	      <sType dash="'"/>
+	      <type num="1"/>
+	      <type num="2"/>
 	    </ceq>	    
 	  </tyPre>
 	  <tyConc>
 	    <ceq>
-	      <mutable>
-		<sType/>
-	      </mutable>
-	      <sType dash="'"/>
+	      <type num="2"/>
+	      <type num="1"/>
 	    </ceq>
 	  </tyConc>                
 	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <ceq>                
+	      <type num="1"/>
+	      <type num="2"/>
+	    </ceq>
+	    <ceq>                
+	      <type num="2"/>
+	      <type num="3"/>
+	    </ceq>	    
+	  </tyPre>
+	  <tyConc>
+	    <ceq>
+	      <type num="1"/>
+	      <type num="3"/>
+	    </ceq>
+	  </tyConc>                
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <ceq>                
+	      <type/>
+	      <pType/>
+	    </ceq>	    
+	  </tyPre>
+	  <tyConc>
+	    <ceq>                
+	      <type/>
+	      <mutable>
+		<pType/>
+	      </mutable>
+	    </ceq>
+	  </tyConc>                
+	</tyRule>   
 	<tyRule>
 	  <tyPre>
 	    <ceq>                
@@ -516,34 +436,207 @@
       A (top-level) maybe type 
       <btypes:TYPE>
 	<mbTop>
-	  <type/>
-	  <type dash="'"/>
+	  <tvar/>
+	  <pType/>
 	</mbTop>
       </btypes:TYPE> represents the constrained type
       <btypes:TYPE>
 	<ctype>
-	  <type/>
-	  <Tceq>
-	    <type/>
-	    <type dash="'"/>
-	  </Tceq>
+	  <tvar/>
+	  <set>
+	    <Tceq>
+	      <tvar/>
+	      <pType/>
+	    </Tceq>
+	  </set>
 	</ctype>
-      </btypes:TYPE>, and the (full) maybe type 
+      </btypes:TYPE>.
+    </p>
+    <p>
+      The (full) maybe type 
       <btypes:TYPE>
 	<mbFull>
-	  <type/>
-	  <type dash="'"/>
+	  <sType/>
+	  <pType/>
 	</mbFull>
       </btypes:TYPE> represents the constrained type
       <btypes:TYPE>
 	<ctype>
-	  <type/>
-	  <ceq>
-	    <type/>
-	    <type dash="'"/>
-	  </ceq>
+	  <sType/>
+	  <set>
+	    <ceq>
+	      <sType/>
+	      <pType/>
+	    </ceq>
+	  </set>
 	</ctype>
+      </btypes:TYPE>, and 
+      <btypes:TYPE>
+	<mbFull>
+	  <mutable>
+	    <tvar/>
+	  </mutable>
+	  <pType/>
+	</mbFull>
+      </btypes:TYPE> represents the constrained type
+      <btypes:TYPE>
+	<ctype>
+	  <mutable>
+	    <tvar/>
+	  </mutable>
+	  <set>
+	    <ceq>
+	      <tvar/>
+	      <pType/>
+	    </ceq>
+	  </set>
+	</ctype>
+      </btypes:TYPE>.
+    </p>
+  </definition>
+  <definition id="subst">      
+    <title>Substitution</title>      
+    <p>
+      Substitution on an entity 
+      <btypes:TYPE>
+	<textmath content="X"/> 
+      </btypes:TYPE> in our algebra of types and expressions is
+      written 
+      <btypes:TYPE>
+	<Subst>
+	  <aSubMap/>
+	  <textmath content="X"/> 
+	</Subst>
+      </btypes:TYPE> and is defined in figure&nbsp;<xref ref="subst_rules"/>.
+    </p>
+  </definition>
+  <definition id="wf-subst">
+    <title>Well-formed Substitutions</title>
+    <p>
+      A substitution
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE> is said to be well-formed with respect to
+      a sentence
+      <btypes:TYPE>
+	<textmath content="X"/> 
+      </btypes:TYPE> in the above grammar if
+      <btypes:TYPE>
+	<Subst>
+	  <aSubMap/>
+	  <textmath content="X"/> 
+	</Subst>
+      </btypes:TYPE> is still a valid sentence in the same language.
+    </p>
+  </definition>
+  <p>
+    That is, the substitution does not violate the syntax of the
+    language. For example, the substitution
+    <btypes:TYPE>
+      <SubMap>
+	<tvar/>
+	<mbTop>
+	  <tvar name="beta"/>
+	  <type/>
+	</mbTop>
+      </SubMap>
+    </btypes:TYPE> is not a well formed substitution on 
+    <btypes:TYPE>
+      <mutable>
+	<tvar/>
+      </mutable>
+    </btypes:TYPE>. In the rest of the document, we say substitutions
+    to mean well-formed substitutions unless otherwise specified.
+  </p>
+  <definition id="special">
+    <title>Specialization</title>
+    <p>
+      We write
+      <btypes:TYPE>
+	<spEq>
+	  <type num="1"/>
+	  <type num="2"/>
+	</spEq>
+      </btypes:TYPE>, that is,
+      <btypes:TYPE>
+	<type num="1"/>
+      </btypes:TYPE> is a specialization of (or less general than)
+      <btypes:TYPE>
+	<type num="2"/>
       </btypes:TYPE>
+      iff
+      <btypes:TYPE>
+	<Exists>
+	  <aSubMap/>
+	</Exists>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<eq>
+	  <type num="1"/>
+	  <Subst>
+	    <aSubMap/>
+	    <type num="2"/>
+	  </Subst>
+	</eq>
+      </btypes:TYPE>.
+      We write
+      <btypes:TYPE>
+	<genEq>
+	  <type num="1"/>
+	  <type num="2"/>
+	</genEq>
+      </btypes:TYPE>, that is,
+      <btypes:TYPE>
+	<type num="1"/>
+      </btypes:TYPE> is more general than
+      <btypes:TYPE>
+	<type num="2"/>
+      </btypes:TYPE>
+      iff
+      <btypes:TYPE>
+	<spEq>
+	  <type num="2"/>
+	  <type num="1"/>
+	</spEq>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      We write
+      <btypes:TYPE>
+	<spEq>
+	  <aSubMap num="1"/>
+	  <aSubMap num="2"/>
+	</spEq>
+      </btypes:TYPE>
+      iff
+      <btypes:TYPE>
+	<Exists>
+	  <aSubMap/>
+	</Exists>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<eq>
+	  <aSubMap num="1"/>
+	  <compose>
+	    <aSubMap/>
+	    <aSubMap num="2"/>
+	  </compose>
+	</eq>
+      </btypes:TYPE>.
+      We write
+      <btypes:TYPE>
+	<genEq>
+	  <aSubMap num="1"/>
+	  <aSubMap num="2"/>
+	</genEq>
+      </btypes:TYPE>
+      iff
+      <btypes:TYPE>
+	<spEq>
+	  <aSubMap num="2"/>
+	  <aSubMap num="1"/>
+	</spEq>
+      </btypes:TYPE>.
     </p>
   </definition>
   <definition id="pcst">      
@@ -564,35 +657,6 @@
 	</spEq>
       </btypes:TYPE>, is used to express types that are polymorphic
       <em>over</em> polymorphism and mutability. 
-    </p>
-  </definition>
-  <definition id="pcst-subst">      
-    <title>Substitution over MPCs</title>      
-    <p>
-      Substitution over an MPC is defined as:
-      <btypes:TYPE>
-	<eq>
-	  <Subst>
-	    <aSubMap/>
-	    <Pcst>
-	      <lKind/>
-	      <type/>
-	      <type dash="'"/>
-	    </Pcst>
-	  </Subst>
-	  <Pcst>
-	    <Subst>
-	      <aSubMap/>                
-	      <lKind/>
-	    </Subst>
-	    <type/>              
-	    <Subst>
-	      <aSubMap/>
-	      <type dash="'"/>
-	    </Subst>
-	  </Pcst>
-	</eq>
-      </btypes:TYPE>.
     </p>
   </definition>
   <definition id="pcst-sat">      
@@ -697,12 +761,12 @@
 	<equation>
 	  <lhs>
 	    <maxz>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </maxz>
 	  </lhs>
 	  <rhs>
 	    <mutable>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </mutable>
 	  </rhs>
 	</equation>
@@ -836,11 +900,11 @@
 	<equation>
 	  <lhs>
 	    <minz>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </minz>
 	  </lhs>
 	  <rhs>
-	    <tvar name="alpha"/>
+	    <tvar/>
 	  </rhs>
 	</equation>
 	<equation>
@@ -963,12 +1027,12 @@
 	<equation>
 	  <lhs>
 	    <maxzT>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </maxzT>
 	  </lhs>
 	  <rhs>
 	    <mutable>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </mutable>
 	  </rhs>
 	</equation>
@@ -1101,11 +1165,11 @@
 	<equation>
 	  <lhs>
 	    <minzT>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </minzT>
 	  </lhs>
 	  <rhs>
-	    <tvar name="alpha"/>
+	    <tvar/>
 	  </rhs>
 	</equation>
 	<equation>
@@ -1231,11 +1295,11 @@
 	<equation>
 	  <lhs>
 	    <minzD>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </minzD>
 	  </lhs>
 	  <rhs>
-	    <tvar name="alpha"/>
+	    <tvar/>
 	  </rhs>
 	</equation>
 	<equation>
@@ -1593,7 +1657,7 @@
 	      <text content=" | "/>
 	      <neq>
 		<pType/>
-		<tvar name="alpha"/>
+		<tvar/>
 	      </neq>
 	    </grouping>
 	  </lhs>
@@ -1615,7 +1679,7 @@
 	      <text content=" | "/>
 	      <neq>
 		<sType num="1"/>
-		<tvar name="alpha"/>
+		<tvar/>
 	      </neq>
 	    </grouping>
 	  </lhs>
@@ -1696,7 +1760,7 @@
 	      <text content=" | "/>
 	      <neq>
 		<pType/>
-		<tvar name="alpha"/>
+		<tvar/>
 	      </neq>
 	    </grouping>
 	  </lhs>
@@ -1718,7 +1782,7 @@
 	      <text content=" | "/>
 	      <neq>
 		<sType num="1"/>
-		<tvar name="alpha"/>
+		<tvar/>
 	      </neq>
 	    </grouping>
 	  </lhs>
@@ -1760,7 +1824,7 @@
 	  <lhs>
 	    <pred name="F">
 	      <forall>
-		<tvars name="alpha"/>
+		<tvars/>
 		<type/>
 	      </forall>
 	    </pred>
@@ -1768,7 +1832,7 @@
 	  <rhs>
 	    <unin>
 	      <pred name="F">
-		<tvars name="alpha"/>
+		<tvars/>
 	      </pred>
 	      <pred name="F">
 		<type/>
@@ -1926,11 +1990,11 @@
 	<equation>
 	  <lhs>
 	    <ftvs>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </ftvs>
 	  </lhs>
 	  <rhs>
-	    <tvar name="alpha"/>
+	    <tvar/>
 	  </rhs>
 	</equation>
 	<equation>
@@ -2073,11 +2137,11 @@
 	</pred>
       </btypes:TYPE> defines the set of all type variables
       <btypes:TYPE>
-	<tvars name="alpha"/>
+	<tvars/>
       </btypes:TYPE> 
       such that
       <btypes:TYPE>
-	<tvar name="alpha"/>
+	<tvar/>
       </btypes:TYPE> occurs in 
       <btypes:TYPE>
 	<solvable/>
@@ -2085,7 +2149,7 @@
       within a maybe type in the form 
       <btypes:TYPE>
 	<mbTop>
-	  <tvar name="alpha"/>
+	  <tvar/>
 	  <type num="h"/>
 	</mbTop>            
       </btypes:TYPE>.
@@ -2096,11 +2160,11 @@
 	</pred>
       </btypes:TYPE> defines the set of all type variables
       <btypes:TYPE>
-	<tvars name="alpha"/>
+	<tvars/>
       </btypes:TYPE>
       such that
       <btypes:TYPE>
-	<tvar name="alpha"/>
+	<tvar/>
       </btypes:TYPE> occurs in     
       <btypes:TYPE>
 	<solvable/>
@@ -2108,7 +2172,7 @@
       within a maybe type in the form
       <btypes:TYPE>
 	<mbFull>
-	  <tvar name="alpha"/>
+	  <tvar/>
 	  <type num="h"/>
 	</mbFull>            
       </btypes:TYPE>.
@@ -2125,7 +2189,7 @@
 	<equation>
 	  <lhs>
 	    <pred name="mtv">
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </pred>
 	  </lhs>
 	  <rhs>
@@ -2224,7 +2288,7 @@
 	  <lhs>
 	    <pred name="mtv">
 	      <mbTop>
-		<tvar name="alpha"/>
+		<tvar/>
 		<sType/>
 	      </mbTop>                            
 	    </pred>
@@ -2232,7 +2296,7 @@
 	  <rhs>
 	    <unin>
 	      <set>
-		<tvar name="alpha"/>
+		<tvar/>
 	      </set>
 	      <pred name="mtv">
 		<sType/>
@@ -2250,7 +2314,7 @@
 	    </pred>
 	    <neq>
 	      <sType/>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </neq>
 	  </lhs>
 	  <rhs>
@@ -2263,7 +2327,7 @@
 	  <lhs>
 	    <pred name="mtv">
 	      <mbFull>
-		<tvar name="alpha"/>
+		<tvar/>
 		<sType/>
 	      </mbFull>                            
 	    </pred>
@@ -2284,7 +2348,7 @@
 	    </pred>
 	    <neq>
 	      <pType/>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </neq>
 	  </lhs>
 	  <rhs>
@@ -2299,7 +2363,7 @@
 	<equation>
 	  <lhs>
 	    <pred name="Mtv">
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </pred>
 	  </lhs>
 	  <rhs>
@@ -2398,7 +2462,7 @@
 	  <lhs>
 	    <pred name="Mtv">
 	      <mbTop>
-		<tvar name="alpha"/>
+		<tvar/>
 		<sType/>
 	      </mbTop>                       
 	    </pred>
@@ -2419,7 +2483,7 @@
 	    </pred>
 	    <neq>
 	      <sType/>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </neq>
 	  </lhs>
 	  <rhs>
@@ -2432,7 +2496,7 @@
 	  <lhs>
 	    <pred name="Mtv">
 	      <mbFull>
-		<tvar name="alpha"/>
+		<tvar/>
 		<sType/>
 	      </mbFull>                            
 	    </pred>
@@ -2440,7 +2504,7 @@
 	  <rhs>
 	    <unin>
 	      <set>
-		<tvar name="alpha"/>
+		<tvar/>
 	      </set>
 	      <pred name="Mtv">
 		<sType/>
@@ -2458,7 +2522,7 @@
 	    </pred>
 	    <neq>
 	      <pType/>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </neq>
 	  </lhs>
 	  <rhs>
@@ -2473,12 +2537,12 @@
 	<equation>
 	  <lhs>
 	    <pred name="ntv">
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </pred>
 	  </lhs>
 	  <rhs>
 	    <set>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </set>
 	  </rhs>
 	</equation>
@@ -2574,7 +2638,7 @@
 	  <lhs>
 	    <pred name="ntv">
 	      <mbTop>
-		<tvar name="alpha"/>
+		<tvar/>
 		<sType/>
 	      </mbTop>
 	    </pred>
@@ -2595,7 +2659,7 @@
 	    </pred>
 	    <neq>
 	      <sType/>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </neq>
 	  </lhs>
 	  <rhs>
@@ -2608,7 +2672,7 @@
 	  <lhs>
 	    <pred name="ntv">
 	      <mbFull>
-		<tvar name="alpha"/>
+		<tvar/>
 		<sType/>
 	      </mbFull>
 	    </pred>
@@ -2629,7 +2693,7 @@
 	    </pred>
 	    <neq>
 	      <pType/>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </neq>
 	  </lhs>
 	  <rhs>
@@ -2659,14 +2723,14 @@
 	  <lhs>
 	    <pred name="gtv">
 	      <TS>
-		<tvars name="alpha"/>
+		<tvars/>
 		<type/>
 	      </TS>
 	    </pred>
 	  </lhs>
 	  <rhs>
 	    <set>
-	      <tvars name="alpha"/>
+	      <tvars/>
 	    </set>	      
 	  </rhs>
 	</equation>
@@ -2709,7 +2773,7 @@
 	  <tyPre>
 	    <grouping>
 	      <Forall>
-		<tvar name="alpha"/>
+		<tvar/>
 		<sType/>
 		<sType dash="'"/>
 	      </Forall>
@@ -2724,7 +2788,7 @@
 	      <text content=" then "/>
 	      <eq>
 		<sType/>
-		<tvar name="alpha"/>
+		<tvar/>
 	      </eq>
 	      <text content=" or "/>
 	      <eq>
@@ -2740,7 +2804,7 @@
 	  <tyPre>
 	    <grouping>
 	      <Forall>
-		<tvar name="alpha"/>
+		<tvar/>
 		<pType/>
 		<sType/>
 	      </Forall>
@@ -2755,13 +2819,13 @@
 	      <text content=" then "/>
 	      <eq>
 		<pType/>
-		<tvar name="alpha"/>
+		<tvar/>
 	      </eq>
 	      <text content=" or "/>
 	      <eq>
 		<pType/>
 		<mutable>
-		  <tvar name="alpha"/>
+		  <tvar/>
 		</mutable>
 	      </eq>
 	      <text content=" or "/>
@@ -2781,12 +2845,12 @@
 	      <in>
 		<grouping>
 		  <mbTop>
-		    <tvar name="alpha"/>
+		    <tvar/>
 		    <sType/>
 		  </mbTop>
 		  <text content=" and "/>
 		  <mbTop>
-		    <tvar name="alpha"/>
+		    <tvar/>
 		    <sType dash="'"/>
 		  </mbTop>
 		</grouping>
@@ -2809,12 +2873,12 @@
 	      <in>
 		<grouping>
 		  <mbFull>
-		    <tvar name="alpha"/>
+		    <tvar/>
 		    <sType/>
 		  </mbFull>
 		  <text content=" and "/>
 		  <mbFull>
-		    <tvar name="alpha"/>
+		    <tvar/>
 		    <sType dash="'"/>
 		  </mbFull>
 		</grouping>
