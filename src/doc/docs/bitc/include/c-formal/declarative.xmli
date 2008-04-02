@@ -233,6 +233,95 @@
       </li>
     </ol>
   </definition>
+  <definition id="valid-lval">
+    <title>Valid Lvalues</title>
+    <p>
+      We say that an lvalue
+      <btypes:TYPE>
+	<lVal/>
+      </btypes:TYPE> is valid with respect to a stack
+      <btypes:TYPE>
+	<stack/>
+      </btypes:TYPE> and heap
+      <btypes:TYPE>
+	<heap/>
+      </btypes:TYPE>, written
+      <btypes:TYPE>
+	<Sjudge name="v">
+	  <assume>
+	    <plus>
+	      <heap/>
+	      <stack/>
+	    </plus>
+	  </assume>
+	  <lVal/>
+	</Sjudge>
+      </btypes:TYPE> if one of the following conditions hold for some
+      <btypes:TYPE>
+	<path/>
+      </btypes:TYPE>:
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <lVal/>
+	      <sLoc/>
+	    </eq>
+	  </btypes:TYPE> or
+	  <btypes:TYPE>
+	    <eq>
+	      <lVal/>
+	      <select>
+		<sLoc/>
+		<path/>
+	      </select>
+	    </eq>
+	  </btypes:TYPE>, where
+	  <btypes:TYPE>
+	    <in>
+	      <sLoc/>
+	      <dom>
+		<stack/>
+	      </dom>
+	    </in>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <lVal/>
+	      <deref>
+		<hLoc/>
+	      </deref>
+	    </eq>
+	  </btypes:TYPE> or
+	  <btypes:TYPE>
+	    <eq>
+	      <lVal/>
+	      <select>
+		<deref>
+		  <hLoc/>
+		</deref>
+		<path/>
+	      </select>
+	    </eq>
+	  </btypes:TYPE>, where
+	  <btypes:TYPE>
+	    <in>
+	      <hLoc/>
+	      <dom>
+		<heap/>
+	      </dom>
+	    </in>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
+  </definition>
   <lemma id="T-inversion">
     <title>Inversion of Typing Relation</title>
     <ol>
@@ -364,7 +453,9 @@
 	      </assume>
 	      <Msub>
 		<aExpr/>
-		<type dash="'"/>
+		<ref>
+		  <type/>
+		</ref>
 	      </Msub>
 	    </Sjudge>
 	    <text content="."/>
@@ -388,71 +479,53 @@
     <p>
       For any type
       <btypes:TYPE>
-	<sType/>
-      </btypes:TYPE>, and for any
-      <btypes:TYPE>
-	<sType dash="'"/>
+	<pType/>
+	<text content=" and "/>
+	<tvar/>
       </btypes:TYPE>, let
       <btypes:TYPE>
 	<eq>
 	  <pred name="Q">
-	    <sType/>
+	    <pType/>
 	  </pred>
 	  <set>
-	    <sType num="f"/>
+	    <pType/>
+	    <mutable>
+	      <pType/>
+	    </mutable>
 	    <mbTop>
-	      <tvar name="alpha"/>
-	      <sType/>
+	      <tvar/>
+	      <pType/>
 	    </mbTop>
 	    <mbTop>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>
 	    </mbTop>
 	    <mbFull>
-	      <tvar name="alpha"/>
-	      <sType/>
+	      <tvar/>
+	      <pType/>
 	    </mbFull>
 	    <mbFull>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>
-	    </mbFull>
-	    <mbFull>
-	      <mutable>
-		<tvar name="alpha"/>
-	      </mutable>
-	      <sType/>
 	    </mbFull>
 	    <mbFull>
 	      <mutable>
-		<tvar name="alpha"/>
+		<tvar/>
 	      </mutable>
-	      <mutable>
-		<sType/>
-	      </mutable>
-	    </mbFull>
-	    <mbTop>
-	      <sType/>
-	      <sType dash="'"/>
-	    </mbTop>
-	    <mbTop>
-	      <mutable>
-		<sType/>
-	      </mutable>
-	      <sType dash="'"/>
-	    </mbTop>
-	    <mbFull>
-	      <sType/>
-	      <sType dash="'"/>
+	      <pType/>
 	    </mbFull>
 	    <mbFull>
 	      <mutable>
-		<sType/>
+		<tvar/>
 	      </mutable>
-	      <sType dash="'"/>
+	      <mutable>
+		<pType/>
+	      </mutable>
 	    </mbFull>
 	  </set>
 	</eq>
@@ -787,7 +860,7 @@
       </btypes:TYPE>. 
       <btypes:TYPE>
 	<text content=" That is, for some "/>
-	<sType/>
+	<tvar/>
 	<text content=", the type "/>
 	<type/>
 	<text content=" equals one of: "/>
@@ -797,58 +870,38 @@
 	    <bool/>
 	  </mutable>
 	  <mbTop>
-	    <tvar name="alpha"/>
+	    <tvar/>
 	    <bool/>
 	  </mbTop>
 	  <mbTop>
-	    <tvar name="alpha"/>
+	    <tvar/>
 	    <mutable>
 	      <bool/>
 	    </mutable>
 	  </mbTop>
 	  <mbFull>
-	    <tvar name="alpha"/>
+	    <tvar/>
 	    <bool/>
 	  </mbFull>
 	  <mbFull>
-	    <tvar name="alpha"/>
+	    <tvar/>
 	    <mutable>
 	      <bool/>
 	    </mutable>
 	  </mbFull>
 	  <mbFull>
 	    <mutable>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </mutable>
 	    <bool/>
 	  </mbFull>
 	  <mbFull>
 	    <mutable>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	    </mutable>
 	    <mutable>
 	      <bool/>
 	    </mutable>
-	  </mbFull>
-	  <mbTop>
-	    <bool/>
-	    <sType/>
-	  </mbTop>
-	  <mbTop>
-	    <mutable>
-	      <bool/>
-	    </mutable>
-	    <sType/>
-	  </mbTop>
-	  <mbFull>
-	    <bool/>
-	    <sType/>
-	  </mbFull>
-	  <mbFull>
-	    <mutable>
-	      <bool/>
-	    </mutable>
-	    <sType/>
 	  </mbFull>
 	</collection>
       </btypes:TYPE>.
@@ -940,39 +993,21 @@
 	    <text content=", then "/>
 	    <aExpr/>
 	    <text content=" is either a valid lvalue "/>
-	    <lVal/>
-	    <text content=" (that is, "/>
+	    <text content="(that is, "/>
 	    <eq>
+	      <aExpr/>
 	      <lVal/>
-	      <select opt="yes">
-		<sLoc/>
-		<path/>
-	      </select>
 	    </eq>
-	    <text content=", "/>
-	    <in>
-	      <sLoc/>
-	      <dom>
-		<stack/>
-	      </dom>
-	    </in>
-	    <text content=" or "/>
-	    <eq>
+	    <text content=" and "/>
+	    <Sjudge name="v">
+	      <assume>
+		<plus>
+		  <heap/>
+		  <stack/>
+		</plus>
+	      </assume>
 	      <lVal/>
-	      <select opt="yes">
-		<deref>
-		  <hLoc/>
-		</deref>
-		<path/>
-	      </select>
-	    </eq>
-	    <text content=", "/>
-	    <in>
-	      <hLoc/>
-	      <dom>
-		<heap/>
-	      </dom>
-	    </in>
+	    </Sjudge>
 	    <text content=") or else "/>
 	    <Exists>
 	      <aExpr dash="'"/>
@@ -1179,7 +1214,7 @@
 	      <Msub>
 		<aExpr num="1"/>
 		<mutable>
-		  <sType/>
+		  <pType/>
 		</mutable>
 	      </Msub>
 	    </Sjudge>
@@ -1191,7 +1226,7 @@
 	      </assume>
 	      <Msub>
 		<aExpr num="2"/>
-		<sType/>
+		<pType/>
 	      </Msub>
 	    </Sjudge>
 	    <text content=", and "/>
@@ -1231,27 +1266,27 @@
 	      <aVal/>
 	    </eq>
 	  </btypes:TYPE>.
-	  We should have 
 	  <btypes:TYPE>
-	    <eq>
-	      <lVal/>
-	      <select opt="yes">
+	    <lVal/>
+	  </btypes:TYPE>	    
+	  should be one of
+	  <btypes:TYPE>
+	    <collection or = "yes">
+	      <sLoc/>
+	      <select>
 		<sLoc/>
 		<path/>
 	      </select>
-	    </eq>
-	  </btypes:TYPE>
-	  or 
-	  <btypes:TYPE>
-	    <eq>
-	      <lVal/>
-	      <select opt="yes">
+	      <deref>
+		<hLoc/>
+	      </deref>
+	      <select>
 		<deref>
 		  <hLoc/>
 		</deref>
 		<path/>
 	      </select>
-	    </eq>
+	    </collection>
 	  </btypes:TYPE>.
 	  Now, we proceed by induction on the length of
 	  <btypes:TYPE>
@@ -1261,40 +1296,27 @@
 	<ol>
 	  <li>
 	    <p>
-	      If 
+	      Suppose
 	      <btypes:TYPE>
 		<eq>
 		  <aExpr num="1"/>
 		  <lVal/>
 		  <sLoc/>
 		</eq>
-	      </btypes:TYPE>, since we know that 
+	      </btypes:TYPE>. We know from induction hypothesis
+	      that that 
 	      <btypes:TYPE>
-		<Sjudge>
+		<Sjudge name="v">
 		  <assume>
-		    <Empty/>
-		    <store/>
-		  </assume>
-		  <Msub>
-		    <sLoc/>
-		    <mutable>
-		      <sType/>
-		    </mutable>
-		  </Msub>
-		</Sjudge>
-	      </btypes:TYPE> and
-	      <btypes:TYPE>
-		<Sjudge>
-		  <assume>
-		    <Empty/>
-		    <store/>
-		  </assume>
-		  <tqExpr>
-		    <stack/>
 		    <heap/>
-		  </tqExpr>
+		    <stack/>
+		  </assume>
+		  <sLoc/>
 		</Sjudge>
-	      </btypes:TYPE>, we must have
+	      </btypes:TYPE> and from 
+	      <btypes:TYPE>
+		<defn tag="valid-lval"/>
+	      </btypes:TYPE>, we conclude that
 	      <btypes:TYPE>
 		<in>
 		  <sLoc/>
@@ -1302,8 +1324,8 @@
 		    <stack/>
 		  </dom>
 		</in>
-	      </btypes:TYPE>. Therefore, execution can continue
-	      with step E-:Stack.
+	      </btypes:TYPE>. Now, execution can continue
+	      with E-:Stack.
 	    </p>
 	  </li>
 	  <li>
@@ -1364,7 +1386,7 @@
 		  <Msub>
 		    <aExpr num="1"/>
 		    <mutable>
-		      <sType/>
+		      <pType/>
 		    </mutable>
 		  </Msub>
 		</Sjudge>
@@ -1384,7 +1406,7 @@
 		<Msub>
 		  <type num="1"/>
 		  <mutable>
-		    <sType/>
+		    <pType/>
 		  </mutable>
 		</Msub>
 	      </btypes:TYPE>.

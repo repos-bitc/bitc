@@ -2240,18 +2240,14 @@
   <xsl:template match="select" mode="formula">
     <xsl:apply-templates select="*[1]" mode="formula"/>
     <xsl:if test = "@opt">	      
-      <xsl:element name="em">
-	<xsl:text>[</xsl:text>	  
-      </xsl:element>       
+      <xsl:text>[</xsl:text>	  
     </xsl:if>    
     <xsl:element name="progident">
       <xsl:text>.</xsl:text>
     </xsl:element>
     <xsl:apply-templates select="*[2]" mode="formula"/>
     <xsl:if test = "@opt">	      
-      <xsl:element name="em">
-	<xsl:text>]</xsl:text>	  
-      </xsl:element>       
+      <xsl:text>]</xsl:text>	  
     </xsl:if>    
   </xsl:template>
 
@@ -2308,9 +2304,7 @@
     <xsl:call-template name="print.space"/>        
     <xsl:if test = "*[4]">	      
       <xsl:if test = "@optionalElse">	      
-	<xsl:element name="em">
-	  <xsl:text>[</xsl:text>	  
-	</xsl:element>       
+	<xsl:text>[</xsl:text>	  
       </xsl:if>    
       <xsl:element name="progident">
 	<xsl:text>else</xsl:text>
@@ -2326,9 +2320,7 @@
       </xsl:if>    
       <xsl:apply-templates select="*[4]" mode="formula"/>
       <xsl:if test = "@optionalElse">	      
-	<xsl:element name="em">
-	  <xsl:text>]</xsl:text>	  
-	</xsl:element>       
+	<xsl:text>]</xsl:text>	  
       </xsl:if>    
     </xsl:if>
   </xsl:template>
@@ -2365,14 +2357,10 @@
     <xsl:apply-templates select="*[1]" mode="formula"/>
     <xsl:choose>
       <xsl:when test = "@optional">	      
-	<xsl:element name="em">
-	  <xsl:text>[</xsl:text>	  
-	</xsl:element>     
+	<xsl:text>[</xsl:text>	  
 	<xsl:call-template name="print.op.qual.bare"/>
 	<xsl:apply-templates select="*[2]" mode="formula"/>
-	<xsl:element name="em">
-	  <xsl:text>]</xsl:text>    
-	</xsl:element>	
+	<xsl:text>]</xsl:text>    
       </xsl:when>
       <xsl:when test = "@nosp">	      
 	<xsl:call-template name="print.op.qual"/>
@@ -2572,17 +2560,9 @@
 
   <!-- opt: Optional parts of syntax (of anything actually) -->
   <xsl:template match="opt" mode="formula">
-    <xsl:element name="b">
-      <xsl:element name="em">
-	<xsl:text>[</xsl:text>	  
-      </xsl:element>
-    </xsl:element>
+    <xsl:text>[</xsl:text>	  
     <xsl:apply-templates mode="formula"/>	
-    <xsl:element name="b">
-      <xsl:element name="em">
-	<xsl:text>]</xsl:text>	  
-      </xsl:element>
-    </xsl:element>
+    <xsl:text>]</xsl:text>	  
   </xsl:template>    
   
   <!-- ======================================================================
