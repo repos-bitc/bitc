@@ -90,31 +90,31 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>  
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="S-Mut">
 	  <tyPre>
 	    <Msub>
-	      <sType/>
-	      <sType dash="'"/>
+	      <pType/>
+	      <pType dash="'"/>
 	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>
 	      <mutable>
-		<sType dash="'"/>
+		<pType dash="'"/>
 	      </mutable>
 	    </Msub>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="S-MT1">
 	  <tyPre>
 	    <eq>
 	      <minzT>
-		<sType/>
+		<pType/>
 	      </minzT>
 	      <type/>
 	    </eq>
@@ -122,8 +122,8 @@
 	  <tyConc>
 	    <Msub>
 	      <mbTop>
-		<tvar name="alpha"/>
-		<sType/>
+		<tvar/>
+		<pType/>
 	      </mbTop>
 	      <type/>
 	    </Msub>
@@ -133,7 +133,7 @@
 	  <tyPre>
 	    <eq>
 	      <maxzT>
-		<sType/>
+		<pType/>
 	      </maxzT>
 	      <type/>
 	    </eq>
@@ -142,53 +142,17 @@
 	    <Msub>
 	      <type/>
 	      <mbTop>
-		<tvar name="alpha"/>
-		<sType/>
+		<tvar/>
+		<pType/>
 	      </mbTop>
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="S-MT3">
-	  <tyPre>
-	    <Msub>
-	      <sType/>
-	      <type/>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <mbTop>
-		<sType/>
-		<sType dash="'"/>
-	      </mbTop>
-	      <type/>
-	    </Msub>
- 	  </tyConc>
-	</tyRule>
-	<tyRule name="S-MT4">
-	  <tyPre>
-	    <Msub>
-	      <type/>
-	      <sType/>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <type/>
-	      <mbTop>
-		<sType/>
-		<sType dash="'"/>
-	      </mbTop>
-	    </Msub>
- 	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
 	<tyRule name="S-MF1">
 	  <tyPre>
 	    <eq>
 	      <minz>
-		<sType/>
+		<pType/>
 	      </minz>
 	      <type/>
 	    </eq>
@@ -196,110 +160,52 @@
 	  <tyConc>
 	    <Msub>
 	      <mbFull>
-		<tvar name="alpha"/>
-		<sType/>
+		<tvar/>
+		<pType/>
 	      </mbFull>
 	      <type/>
 	    </Msub>
  	  </tyConc>
 	</tyRule>
-	<tyRule name="S-M2">
+	<tyRule name="S-MF2">
 	  <tyPre>
 	    <Msub>
-	      <maxz>
-		<sType/>
-	      </maxz>
-	      <type/>
+	      <mbFull>
+		<tvar/>
+		<pType/>
+	      </mbFull>
+	      <pType dash="'"/>
 	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
-	      <type/>
 	      <mbFull>
-		<tvar name="alpha"/>
-		<sType/>
+		<mutable>
+		  <tvar/>
+		</mutable>
+		<pType/>
 	      </mbFull>
+	      <mutable>
+		<pType dash="'"/>
+	      </mutable>
 	    </Msub>
  	  </tyConc>
 	</tyRule>
 	<tyRule name="S-MF3">
 	  <tyPre>
-	    <Msub>
-	      <mbFull>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbFull>
-	      <sType/>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <mbFull>
-		<mutable>
-		  <tvar name="alpha"/>
-		</mutable>
-		<sType/>
-	      </mbFull>
-	      <mutable>
-		<sType/>
-	      </mutable>
-	    </Msub>
- 	  </tyConc>
-	</tyRule>
-	<tyRule name="S-MF4">
-	  <tyPre>
-	    <Msub>
-	      <sType/>
-	      <mbFull>
-		<tvar name="alpha"/>
-		<sType/>
-	      </mbFull>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <mutable>
-		<sType/>
-	      </mutable>
-	      <mbFull>
-		<mutable>
-		  <tvar name="alpha"/>
-		</mutable>
-		<sType/>
-	      </mbFull>
-	    </Msub>
- 	  </tyConc>
-	</tyRule>
-	<tyRule name="S-MF5">
-	  <tyPre>
-	    <Msub>
-	      <pType/>
- 	      <type/>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <mbFull>
+	    <eq>
+	      <maxz>
 		<pType/>
-		<sType/>
-	      </mbFull>
+	      </maxz>
 	      <type/>
-	    </Msub>
- 	  </tyConc>
-	</tyRule>
-	<tyRule name="S-MF6">
-	  <tyPre>
-	    <Msub>
-	      <type/>
-	      <pType/>
-	    </Msub>
+	    </eq>
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
 	      <type/>
 	      <mbFull>
-		<pType/>
 		<sType/>
+		<pType/>
 	      </mbFull>
 	    </Msub>
  	  </tyConc>

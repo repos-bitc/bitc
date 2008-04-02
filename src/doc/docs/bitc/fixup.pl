@@ -2,7 +2,7 @@
 use re 'eval';
 
 open(F, $ARGV[0]);
-$BR = qr{ \[\[ ( (?: (?> [^\[\]]+ )| (??{ $BR }) )* ) \]\] }x;
+$BR = qr{ \[ ( (?: (?> [^\[\]]+ )| (??{ $BR }) )* ) \] }x;
 $br = qr{ \{  (?: (?> [^{}]+ )	| (??{ $br }) )* \} }x;
 
 $sups="\\\\raise.5ex\\\\hbox\{\\\\small($br)\}";
@@ -25,6 +25,7 @@ $bigcap="\\\\textbf\\{$em\\{\\\\cap\\}\\}";
 $emset="$em($br)";
 $plural1="$emset$em\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}";
 $plural2="$em\\{($br)\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}\\}";
+$plural3="\\{($BR)\\}$em\\{\\^\\{\\*\\}\\}";
 $pluralbad="$em\\{\\^\\{\\*\\}\\}";
 
 while(!eof(F)) {    
@@ -77,7 +78,8 @@ while(!eof(F)) {
 	#Plural handling
 	#FIX: Deal with parentheses
 	$l =~ s/$plural1/$EM\{\\overline\{$1$2$3\}\}/g;
-	$l =~ s/$plural2/$EM\{\\overline\{$1$2$3\}\}/g;		
+	$l =~ s/$plural2/$EM\{\\overline\{$1$2$3\}\}/g;
+	$l =~ s/$plural3/$EM\{\\overline\{\{$1\}\}\}/g;
 
 	# \ensuremath{} redundancy elimination
 	$l =~ s/$emem/\\ensuremath{$1$2}/g;

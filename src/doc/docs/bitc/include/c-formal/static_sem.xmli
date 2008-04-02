@@ -659,90 +659,6 @@
       <em>over</em> polymorphism and mutability. 
     </p>
   </definition>
-  <definition id="pcst-sat">      
-    <title>MPC Satisfaction</title>      
-    <p>
-      A substitution 
-      <btypes:TYPE>
-	<aSubMap/>
-      </btypes:TYPE> satisfies the set of constraints
-      <btypes:TYPE>
-	<set>
-	  <Pcst>
-	    <lKind/>
-	    <type/>
-	    <type num="1"/>
-	  </Pcst>
-	  <unspecified/>
-	  <Pcst>
-	    <lKind/>
-	    <type/>
-	    <type num="n"/>
-	  </Pcst>
-	</set>
-      </btypes:TYPE> if and only if:
-    </p>
-    <ol>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<lKind/>
-	      </Subst>
-	      <lKind k="mono"/>
-	    </eq>
-	  </btypes:TYPE>
-	  and
-	  <btypes:TYPE>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<type num="1"/>
-	      </Subst>
-	      <unspecified/>
-	      <Subst>
-		<aSubMap/>
-		<type num="n"/>
-	      </Subst>
-	    </eq>
-	  </btypes:TYPE>, or
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<lKind/>
-	      </Subst>
-	      <lKind k="poly"/>
-	    </eq>
-	  </btypes:TYPE>
-	  and
-	  <btypes:TYPE>
-	    <collection>
-	      <pred name="Immut">
-		<Subst>
-		  <aSubMap/>
-		  <type num="1"/>
-		</Subst>
-	      </pred>
-	      <unspecified/>
-	      <pred name="Immut">
-		<Subst>
-		  <aSubMap/>
-		  <type num="n"/>
-		</Subst>
-	      </pred>
-	    </collection>
-	  </btypes:TYPE>
-	</p>
-      </li>
-    </ol>
-  </definition>
   <definition id="max_min">      
     <title>Max and Min Mutability</title>      
     <p> 
@@ -832,13 +748,13 @@
 	  <lhs>
 	    <maxz>
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>
 	    </maxz>
 	  </lhs>
 	  <rhs>
 	    <maxz>
-	      <sType/>
+	      <pType/>
 	    </maxz>
 	  </rhs>
 	</equation>
@@ -868,14 +784,14 @@
 	  <lhs>
 	    <maxz>
 	      <mbTop>
-		<sType/>
-		<sType dash="'"/>
+		<tvar/>
+		<pType/>
 	      </mbTop>
 	    </maxz>
 	  </lhs>
 	  <rhs>
 	    <maxz>
-	      <sType dash="'"/>
+	      <pType/>
 	    </maxz>
 	  </rhs>
 	</equation>
@@ -883,14 +799,14 @@
 	  <lhs>
 	    <maxz>
 	      <mbFull>
-		<pType/>
 		<sType/>
+		<pType/>
 	      </mbFull>
 	    </maxz>
 	  </lhs>
 	  <rhs>
 	    <maxz>
-	      <sType/>
+	      <pType/>
 	    </maxz>
 	  </rhs>
 	</equation>
@@ -961,13 +877,13 @@
 	  <lhs>
 	    <minz>
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>
 	    </minz>
 	  </lhs>
 	  <rhs>
 	    <minz>
-	      <sType/>
+	      <pType/>
 	    </minz>
 	  </rhs>
 	</equation>
@@ -995,14 +911,14 @@
 	  <lhs>
 	    <minz>
 	      <mbTop>
-		<sType/>
-		<sType dash="'"/>
+		<tvar/>
+		<pType/>
 	      </mbTop>
 	    </minz>
 	  </lhs>
 	  <rhs>
 	    <minz>
-	      <sType dash="'"/>
+	      <pType/>
 	    </minz>
 	  </rhs>
 	</equation>
@@ -1010,14 +926,14 @@
 	  <lhs>
 	    <minz>
 	      <mbFull>
-		<pType/>
 		<sType/>
+		<pType/>
 	      </mbFull>
 	    </minz>
 	  </lhs>
 	  <rhs>
 	    <minz>
-	      <sType/>
+	      <pType/>
 	    </minz>
 	  </rhs>
 	</equation>
@@ -1098,13 +1014,13 @@
 	  <lhs>
 	    <maxzT>
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>
 	    </maxzT>
 	  </lhs>
 	  <rhs>
 	    <maxzT>
-	      <sType/>
+	      <pType/>
 	    </maxzT>
 	  </rhs>
 	</equation>
@@ -1130,14 +1046,14 @@
 	  <lhs>
 	    <maxzT>
 	      <mbTop>
-		<sType/>
-		<sType dash="'"/>
+		<tvar/>
+		<pType/>
 	      </mbTop>
 	    </maxzT>
 	  </lhs>
 	  <rhs>
 	    <maxzT>
-	      <sType dash="'"/>
+	      <pType/>
 	    </maxzT>
 	  </rhs>
 	</equation>
@@ -1145,17 +1061,17 @@
 	  <lhs>
 	    <maxzT>
 	      <mbFull>
-		<pType/>
 		<sType/>
+		<pType/>
 	      </mbFull>
 	    </maxzT>
 	  </lhs>
 	  <rhs>
 	    <mbFull>
 	      <maxzT>
-		<pType/>
+		<sType/>
 	      </maxzT>
-	      <sType/>
+	      <pType/>
 	    </mbFull>
 	  </rhs>
 	</equation>
@@ -1226,13 +1142,13 @@
 	  <lhs>
 	    <minzT>
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>
 	    </minzT>
 	  </lhs>
 	  <rhs>
 	    <minzT>
-	      <sType/>
+	      <pType/>
 	    </minzT>
 	  </rhs>
 	</equation>
@@ -1256,14 +1172,14 @@
 	  <lhs>
 	    <minzT>
 	      <mbTop>
-		<sType/>
-		<sType dash="'"/>
+		<tvar/>
+		<pType/>
 	      </mbTop>
 	    </minzT>
 	  </lhs>
 	  <rhs>
 	    <minzT>
-	      <sType dash="'"/>
+	      <pType/>
 	    </minzT>
 	  </rhs>
 	</equation>
@@ -1271,17 +1187,17 @@
 	  <lhs>
 	    <minzT>
 	      <mbFull>
-		<pType/>
 		<sType/>
+		<pType/>
 	      </mbFull>
 	    </minzT>
 	  </lhs>
 	  <rhs>
 	    <mbFull>
 	      <minzT>
-		<pType/>
+		<sType/>
 	      </minzT>
-	      <sType/>
+	      <pType/>
 	    </mbFull>
 	  </rhs>
 	</equation>
@@ -1358,13 +1274,13 @@
 	  <lhs>
 	    <minzD>
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>
 	    </minzD>
 	  </lhs>
 	  <rhs>
 	    <minzD>
-	      <sType/>
+	      <pType/>
 	    </minzD>
 	  </rhs>
 	</equation>
@@ -1392,14 +1308,14 @@
 	  <lhs>
 	    <minzD>
 	      <mbTop>
-		<sType/>
-		<sType dash="'"/>
+		<tvar/>
+		<pType/>
 	      </mbTop>
 	    </minzD>
 	  </lhs>
 	  <rhs>
 	    <minzD>
-	      <sType dash="'"/>
+	      <pType/>
 	    </minzD>
 	  </rhs>
 	</equation>
@@ -1407,14 +1323,14 @@
 	  <lhs>
 	    <minzD>
 	      <mbFull>
-		<pType/>
 		<sType/>
+		<pType/>
 	      </mbFull>
 	    </minzD>
 	  </lhs>
 	  <rhs>
 	    <minzD>
-	      <sType/>
+	      <pType/>
 	    </minzD>
 	  </rhs>
 	</equation>
@@ -1476,13 +1392,13 @@
 	  <lhs>
 	    <concrete>
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>
 	    </concrete>
 	  </lhs>
 	  <rhs>
 	    <concrete>
-	      <sType/>
+	      <pType/>
 	    </concrete>
 	  </rhs>
 	</equation>
@@ -1510,14 +1426,14 @@
 	  <lhs>
 	    <concrete>
 	      <mbTop>
-		<sType/>
-		<sType dash="'"/>
+		<tvar/>
+		<pType/>
 	      </mbTop>
 	    </concrete>
 	  </lhs>
 	  <rhs>
 	    <concrete>
-	      <sType dash="'"/>
+	      <pType/>
 	    </concrete>
 	  </rhs>
 	</equation>
@@ -1525,14 +1441,14 @@
 	  <lhs>
 	    <concrete>
 	      <mbFull>
-		<pType/>
 		<sType/>
+		<pType/>
 	      </mbFull>
 	    </concrete>
 	  </lhs>
 	  <rhs>
 	    <concrete>
-	      <sType/>
+	      <pType/>
 	    </concrete>
 	  </rhs>
 	</equation>
@@ -1645,50 +1561,6 @@
 	    </AND>
 	  </rhs>
 	</equation>
-	<equation>
-	  <lhs>
-	    <grouping>
-	      <pred name="Immut">
-		<mbFull>
-		  <pType/>
-		  <sType/>
-		</mbFull>
-	      </pred>
-	      <text content=" | "/>
-	      <neq>
-		<pType/>
-		<tvar/>
-	      </neq>
-	    </grouping>
-	  </lhs>
-	  <rhs>
-	    <pred name="Immut">
-	      <pType/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <grouping>
-	      <pred name="Immut">
-		<mbTop>
-		  <sType num="1"/>
-		  <sType num="2"/>
-		</mbTop>
-	      </pred>
-	      <text content=" | "/>
-	      <neq>
-		<sType num="1"/>
-		<tvar/>
-	      </neq>
-	    </grouping>
-	  </lhs>
-	  <rhs>
-	    <pred name="Immut">
-	      <sType num="1"/>
-	    </pred>
-	  </rhs>
-	</equation>
 	<equation sep="yes">
 	  <lhs>
 	    <grouping>
@@ -1706,7 +1578,7 @@
 	  <lhs>
 	    <pred name="Mut">
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>
 	    </pred>
 	  </lhs>
@@ -1752,43 +1624,50 @@
 	  <lhs>
 	    <grouping>
 	      <pred name="Mut">
-		<mbFull>
+		<mbTop>
+		  <tvar/>
 		  <pType/>
-		  <sType/>
-		</mbFull>
+		</mbTop>
 	      </pred>
-	      <text content=" | "/>
-	      <neq>
-		<pType/>
-		<tvar/>
-	      </neq>
 	    </grouping>
 	  </lhs>
 	  <rhs>
 	    <pred name="Mut">
-	      <sType/>
+	      <minzT>
+		<pType/>
+	      </minzT>
 	    </pred>
 	  </rhs>
 	</equation>
 	<equation>
 	  <lhs>
-	    <grouping>
-	      <pred name="Mut">
-		<mbTop>
-		  <sType num="1"/>
-		  <sType num="2"/>
-		</mbTop>
-	      </pred>
-	      <text content=" | "/>
-	      <neq>
-		<sType num="1"/>
+	    <pred name="Mut">
+	      <mbFull>
+		<mutable>
+		  <tvar/>
+		</mutable>
+		<pType/>
+	      </mbFull>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <TRUE/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="Mut">
+	      <mbFull>
 		<tvar/>
-	      </neq>
-	    </grouping>
+		<pType/>
+	      </mbFull>
+	    </pred>
 	  </lhs>
 	  <rhs>
 	    <pred name="Mut">
-	      <sType num="1"/>
+	      <minz>
+		<pType/>
+	      </minz>
 	    </pred>
 	  </rhs>
 	</equation>
@@ -1807,6 +1686,90 @@
 	</equation>
       </VEqns>
     </btypes:TYPE>
+  </definition>
+  <definition id="pcst-sat">      
+    <title>MPC Satisfaction</title>      
+    <p>
+      A substitution 
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE> satisfies the set of constraints
+      <btypes:TYPE>
+	<set>
+	  <Pcst>
+	    <lKind/>
+	    <type/>
+	    <type num="1"/>
+	  </Pcst>
+	  <unspecified/>
+	  <Pcst>
+	    <lKind/>
+	    <type/>
+	    <type num="n"/>
+	  </Pcst>
+	</set>
+      </btypes:TYPE> if and only if:
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<lKind/>
+	      </Subst>
+	      <lKind k="mono"/>
+	    </eq>
+	  </btypes:TYPE>
+	  and
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <unspecified/>
+	      <Subst>
+		<aSubMap/>
+		<type num="n"/>
+	      </Subst>
+	    </eq>
+	  </btypes:TYPE>, or
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<lKind/>
+	      </Subst>
+	      <lKind k="poly"/>
+	    </eq>
+	  </btypes:TYPE>
+	  and
+	  <btypes:TYPE>
+	    <collection>
+	      <pred name="Immut">
+		<Subst>
+		  <aSubMap/>
+		  <type num="1"/>
+		</Subst>
+	      </pred>
+	      <unspecified/>
+	      <pred name="Immut">
+		<Subst>
+		  <aSubMap/>
+		  <type num="n"/>
+		</Subst>
+	      </pred>
+	    </collection>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
   </definition>
   <definition id="ExtToSol">
     <title>Application to Solvable Entities</title>
@@ -1994,7 +1957,9 @@
 	    </ftvs>
 	  </lhs>
 	  <rhs>
-	    <tvar/>
+	    <set>
+	      <tvar/>
+	    </set>
 	  </rhs>
 	</equation>
 	<equation>
@@ -2035,7 +2000,7 @@
 	  <lhs>
 	    <ftvs>
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>
 	    </ftvs>
 	  </lhs>
@@ -2089,18 +2054,18 @@
 	  <lhs>
 	    <ftvs>
 	      <mbTop>
-		<sType num="1"/>
-		<sType num="2"/>
+		<tvar/>
+		<pType/>
 	      </mbTop>
 	    </ftvs>                                  
 	  </lhs>
 	  <rhs>
 	    <unin>
 	      <ftvs>
-		<sType num="1"/>
+		<tvar/>
 	      </ftvs>                    
 	      <ftvs>
-		<sType num="2"/>
+		<pType/>
 	      </ftvs>                    
 	    </unin>
 	  </rhs>
@@ -2109,19 +2074,19 @@
 	  <lhs>
 	    <ftvs>
 	      <mbFull>
-		<pType/>
 		<sType/>
+		<pType/>
 	      </mbFull>
 	    </ftvs>                                  
 	  </lhs>
 	  <rhs>
 	    <unin>
 	      <ftvs>
-		<pType/>
-	      </ftvs>                    
-	      <ftvs>
 		<sType/>
-	      </ftvs>                    
+	      </ftvs>
+	      <ftvs>
+		<pType/>
+	      </ftvs>
 	    </unin>
 	  </rhs>
 	</equation>
@@ -2150,7 +2115,7 @@
       <btypes:TYPE>
 	<mbTop>
 	  <tvar/>
-	  <type num="h"/>
+	  <pType/>
 	</mbTop>            
       </btypes:TYPE>.
       Similarly,
@@ -2173,7 +2138,15 @@
       <btypes:TYPE>
 	<mbFull>
 	  <tvar/>
-	  <type num="h"/>
+	  <pType/>
+	</mbFull>            
+      </btypes:TYPE> or 
+      <btypes:TYPE>
+	<mbFull>
+	  <mutable>
+	    <tvar/>
+	  </mutable>
+	  <pType/>
 	</mbFull>            
       </btypes:TYPE>.
       <btypes:TYPE>
@@ -2234,13 +2207,13 @@
 	  <lhs>
 	    <pred name="mtv">
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>                            
 	    </pred>
 	  </lhs>
 	  <rhs>
 	    <pred name="mtv">
-	      <type/>
+	      <pType/>
 	    </pred>
 	  </rhs>
 	</equation>
@@ -2289,17 +2262,17 @@
 	    <pred name="mtv">
 	      <mbTop>
 		<tvar/>
-		<sType/>
+		<pType/>
 	      </mbTop>                            
 	    </pred>
 	  </lhs>
 	  <rhs>
-	    <unin>
+ 	    <unin>
 	      <set>
 		<tvar/>
 	      </set>
 	      <pred name="mtv">
-		<sType/>
+		<pType/>
 	      </pred>
 	    </unin>
 	  </rhs>
@@ -2307,49 +2280,11 @@
 	<equation>
 	  <lhs>
 	    <pred name="mtv">
-	      <mbTop>
-		<sType/>
-		<sType dash="'"/>
-	      </mbTop>
-	    </pred>
-	    <neq>
-	      <sType/>
-	      <tvar/>
-	    </neq>
-	  </lhs>
-	  <rhs>
-	    <pred name="mtv">
-	      <sType/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="mtv">
 	      <mbFull>
-		<tvar/>
 		<sType/>
+		<pType/>
 	      </mbFull>                            
 	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="mtv">
-	      <sType/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="mtv">
-	      <mbFull>
-		<pType/>
-		<sType/>
-	      </mbFull>
-	    </pred>
-	    <neq>
-	      <pType/>
-	      <tvar/>
-	    </neq>
 	  </lhs>
 	  <rhs>
 	    <pred name="mtv">
@@ -2408,13 +2343,13 @@
 	  <lhs>
 	    <pred name="Mtv">
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>                            
 	    </pred>
 	  </lhs>
 	  <rhs>
 	    <pred name="Mtv">
-	      <type/>
+	      <pType/>
 	    </pred>
 	  </rhs>
 	</equation>
@@ -2463,32 +2398,13 @@
 	    <pred name="Mtv">
 	      <mbTop>
 		<tvar/>
-		<sType/>
+		<pType/>
 	      </mbTop>                       
 	    </pred>
 	  </lhs>
 	  <rhs>
 	    <pred name="Mtv">
-	      <sType/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Mtv">
-	      <mbTop>
-		<sType/>
-		<sType dash="'"/>
-	      </mbTop>
-	    </pred>
-	    <neq>
-	      <sType/>
-	      <tvar/>
-	    </neq>
-	  </lhs>
-	  <rhs>
-	    <pred name="Mtv">
-	      <sType/>
+	      <pType/>
 	    </pred>
 	  </rhs>
 	</equation>
@@ -2497,7 +2413,7 @@
 	    <pred name="Mtv">
 	      <mbFull>
 		<tvar/>
-		<sType/>
+		<pType/>
 	      </mbFull>                            
 	    </pred>
 	  </lhs>
@@ -2507,7 +2423,7 @@
 		<tvar/>
 	      </set>
 	      <pred name="Mtv">
-		<sType/>
+		<pType/>
 	      </pred>
 	    </unin>
 	  </rhs>
@@ -2516,21 +2432,24 @@
 	  <lhs>
 	    <pred name="Mtv">
 	      <mbFull>
+		<mutable>
+		  <tvar/>
+		</mutable>
 		<pType/>
-		<sType/>
-	      </mbFull>
+	      </mbFull>                            
 	    </pred>
-	    <neq>
-	      <pType/>
-	      <tvar/>
-	    </neq>
 	  </lhs>
 	  <rhs>
-	    <pred name="Mtv">
-	      <pType/>
-	    </pred>
+	    <unin>
+	      <set>
+		<tvar/>
+	      </set>
+	      <pred name="Mtv">
+		<pType/>
+	      </pred>
+	    </unin>
 	  </rhs>
-	</equation>	
+	</equation>
       </VEqns>
       <!-- ntvs -->
       <VEqns>
@@ -2584,13 +2503,13 @@
 	  <lhs>
 	    <pred name="ntv">
 	      <mutable>
-		<sType/>
+		<pType/>
 	      </mutable>                            
 	    </pred>
 	  </lhs>
 	  <rhs>
 	    <pred name="ntv">
-	      <type/>
+	      <pType/>
 	    </pred>
 	  </rhs>
 	</equation>
@@ -2639,32 +2558,13 @@
 	    <pred name="ntv">
 	      <mbTop>
 		<tvar/>
-		<sType/>
+		<pType/>
 	      </mbTop>
 	    </pred>
 	  </lhs>
 	  <rhs>
 	    <pred name="ntv">
-	      <sType/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="ntv">
-	      <mbTop>
-		<sType/>
-		<sType dash="'"/>
-	      </mbTop>                            
-	    </pred>
-	    <neq>
-	      <sType/>
-	      <tvar/>
-	    </neq>
-	  </lhs>
-	  <rhs>
-	    <pred name="ntv">
-	      <sType/>
+	      <pType/>
 	    </pred>
 	  </rhs>
 	</equation>
@@ -2672,29 +2572,10 @@
 	  <lhs>
 	    <pred name="ntv">
 	      <mbFull>
-		<tvar/>
 		<sType/>
+		<pType/>
 	      </mbFull>
 	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="ntv">
-	      <sType/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="ntv">
-	      <mbFull>
-		<pType/>
-		<sType/>
-	      </mbFull>                            
-	    </pred>
-	    <neq>
-	      <pType/>
-	      <tvar/>
-	    </neq>
 	  </lhs>
 	  <rhs>
 	    <pred name="ntv">
@@ -2717,7 +2598,6 @@
       environment in a straightforward way.
     </p>
     <btypes:TYPE>
-      <!-- mtvs -->
       <VEqns>
 	<equation>
 	  <lhs>
@@ -2772,125 +2652,67 @@
 	<tyRule>
 	  <tyPre>
 	    <grouping>
-	      <Forall>
-		<tvar/>
-		<sType/>
-		<sType dash="'"/>
-	      </Forall>
-	      <text content="if "/>
+	      <text content="If "/>
 	      <in>
 		<mbTop>
-		  <sType/>
-		  <sType dash="'"/>
+		  <tvar/>
+		  <pType/>
 		</mbTop>
 		<solvables/>
 	      </in>
-	      <text content=" then "/>
-	      <eq>
-		<sType/>
-		<tvar/>
-	      </eq>
-	      <text content=" or "/>
+	      <text content=" and "/>
+	      <in>
+		<mbTop>
+		  <tvar/>
+		  <pType dash="'"/>
+		</mbTop>
+		<solvables/>
+	      </in>
+	      <text content=", then "/>
 	      <eq>
 		<minzT>
-		  <sType/>
+		  <pType/>
 		</minzT>
 		<minzT>
-		  <sType dash="'"/>
+		  <pType dash="'"/>
 		</minzT>
 	      </eq>
 	    </grouping>
 	  </tyPre>
 	  <tyPre>
 	    <grouping>
-	      <Forall>
-		<tvar/>
-		<pType/>
-		<sType/>
-	      </Forall>
-	      <text content="if "/>
+	      <text content="If "/>
 	      <in>
 		<mbFull>
-		  <pType/>
 		  <sType/>
+		  <pType/>
 		</mbFull>
 		<solvables/>
 	      </in>
-	      <text content=" then "/>
+	      <text content=", "/>
+	      <in>
+		<mbFull>
+		  <sType dash="'"/>
+		  <pType dash="'"/>
+		</mbFull>
+		<solvables/>
+	      </in>
+	      <text content=", and "/>
 	      <eq>
-		<pType/>
-		<tvar/>
+		<minzT>
+		  <sType/>
+		</minzT>
+		<minzT>
+		  <sType dash="'"/>
+		</minzT>
 	      </eq>
-	      <text content=" or "/>
-	      <eq>
-		<pType/>
-		<mutable>
-		  <tvar/>
-		</mutable>
-	      </eq>
-	      <text content=" or "/>
+	      <text content=", then "/>
 	      <eq>
 		<minz>
 		  <pType/>
 		</minz>
 		<minz>
-		  <sType/>
-		</minz>
-	      </eq>
-	    </grouping>
-	  </tyPre>
-	  <tyPre>
-	    <grouping>
-	      <Forall/>
-	      <in>
-		<grouping>
-		  <mbTop>
-		    <tvar/>
-		    <sType/>
-		  </mbTop>
-		  <text content=" and "/>
-		  <mbTop>
-		    <tvar/>
-		    <sType dash="'"/>
-		  </mbTop>
-		</grouping>
-		<solvables/>
-	      </in>
-	      <text content=", "/>
-	      <eq>
-		<minzT>
-		  <sType/>
-		</minzT>
-		<minzT>
-		  <sType dash="'"/>
-		</minzT>
-	      </eq>
-	    </grouping>
-	  </tyPre>
-	  <tyPre>
-	    <grouping>
-	      <Forall/>
-	      <in>
-		<grouping>
-		  <mbFull>
-		    <tvar/>
-		    <sType/>
-		  </mbFull>
-		  <text content=" and "/>
-		  <mbFull>
-		    <tvar/>
-		    <sType dash="'"/>
-		  </mbFull>
-		</grouping>
-		<solvables/>
-	      </in>
-	      <text content=", "/>
-	      <eq>
-		<minz>
-		  <sType/>
-		</minz>
-		<minz>
-		  <sType dash="'"/>
+		  <pType dash="'"/>
 		</minz>
 	      </eq>
 	    </grouping>
@@ -2959,5 +2781,106 @@
 	</Cst>
       </btypes:TYPE>
     </p>
+  </definition>
+  <definition id="subst-consistent">
+    <title>Consistency of substitutions</title>
+    <p>
+      A consistent substitution is a well formed substitution that
+      does not violate the constraints embedded as maybe types.
+    </p>
+    <btypes:TYPE>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<mbTop>
+		  <tvar/>
+		  <pType/>
+		</mbTop>
+		<solvable/>
+	      </in>
+	      <text content=", "/>
+	      <eq>
+		<Subst>
+		  <aSubMap/>
+		  <tvar/>
+		</Subst>
+		<tvar name="beta"/>
+	      </eq>
+	      <text content=" or "/>
+	      <eq>
+		<Subst>
+		  <aSubMap/>
+		  <tvar/>
+		</Subst>
+		<pType dash="'"/>
+	      </eq>
+	      <text content=" such that "/>
+	      <eq>
+		<minzT>
+		  <pType dash="'"/>
+		</minzT>
+		<minzT>
+		  <Subst>
+		    <aSubMap/>
+		    <pType/>
+		  </Subst>
+		</minzT>
+	      </eq>
+	    </grouping>
+	  </tyPre>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<mbFull>
+		  <sType/>
+		  <pType/>
+		</mbFull>
+		<solvable/>
+	      </in>
+	      <text content=", "/>
+	      <eq>
+		<Subst>
+		  <aSubMap/>
+		  <sType/>
+		</Subst>
+		<sType dash="'"/>
+	      </eq>
+	      <text content=" or "/>
+	      <eq>
+		<Subst>
+		  <aSubMap/>
+		  <sType/>
+		</Subst>
+		<pType dash="'"/>
+	      </eq>
+	      <text content=" such that "/>
+	      <eq>
+ 		<minz>
+		  <pType dash="'"/>
+		</minz>
+		<minz>
+		  <Subst>
+		    <aSubMap/>
+		    <pType/>
+		  </Subst>
+		</minz>
+	      </eq>
+	    </grouping>
+	  </tyPre>
+	  <tyConc>
+	    <models name="cst">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <solvable/>
+	    </models>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
   </definition>
   </sect1>
