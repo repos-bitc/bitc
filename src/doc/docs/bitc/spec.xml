@@ -915,7 +915,7 @@ use</literallayout>
 		IEEE floating point values as described in <cite
 		  ref="ieee1985std754"/><cite ref="ieee1987std854"/>.
                 The <progident>quad</progident> type is an extended
-		precision floating point type iwth a 15 bit exponent
+		precision floating point type with a 15 bit exponent
 		and a 112 bit mantissa.
 	      </p>
 	    </li>
@@ -3867,7 +3867,7 @@ id : T
         </note>
         <p>
           It is customary for programs that introduce ``collection''
-          types to provide both operations for both insertion and
+          types to provide operations for both insertion and
           lookup. It would be exceedingly convenient if the lookup
           operation could be used to support efficient access as well,
           for example:
