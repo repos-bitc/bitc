@@ -27,22 +27,6 @@
 		</SubMap>
 	      </plural>
 	    </eq>
-<!-- 	    <eq> -->
-<!-- 	      <aSubMap/> -->
-<!-- 	      <grouping> -->
-<!-- 		<Forall> -->
-<!-- 		  <in> -->
-<!-- 		    <tvar/> -->
-<!-- 		    <tvars/> -->
-<!-- 		  </in> -->
-<!-- 		</Forall> -->
-<!-- 		<text content=", "/> -->
-<!-- 		<SubMap> -->
-<!-- 		  <tvar/> -->
-<!-- 		  <type num="n"/> -->
-<!-- 		</SubMap> -->
-<!-- 	      </grouping> -->
-<!-- 	    </eq> -->
 	    <models name="cst">
 	      <assume>
 		<aSubMap/>

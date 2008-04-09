@@ -470,27 +470,6 @@
 	    </ceq>
 	  </set>
 	</ctype>
-      </btypes:TYPE>, and 
-      <btypes:TYPE>
-	<mbFull>
-	  <mutable>
-	    <tvar/>
-	  </mutable>
-	  <pType/>
-	</mbFull>
-      </btypes:TYPE> represents the constrained type
-      <btypes:TYPE>
-	<ctype>
-	  <mutable>
-	    <tvar/>
-	  </mutable>
-	  <set>
-	    <ceq>
-	      <tvar/>
-	      <pType/>
-	    </ceq>
-	  </set>
-	</ctype>
       </btypes:TYPE>.
     </p>
   </definition>
@@ -520,17 +499,99 @@
       a sentence
       <btypes:TYPE>
 	<textmath content="X"/> 
-      </btypes:TYPE> in the above grammar if
-      <btypes:TYPE>
+      </btypes:TYPE> in the above grammar if:
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <aSubMap/>
+	  </btypes:TYPE> is idempotent.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Subst>
+	      <aSubMap/>
+	      <textmath content="X"/> 
+	    </Subst>
+	  </btypes:TYPE> is still a valid sentence in the same language.
+	</p>
+      </li>
+    </ol>
+  </definition>
+  <p>
+    The first condition requires that for any 
+    <btypes:TYPE>
+      <textmath content="X"/> 
+    </btypes:TYPE>,
+    <btypes:TYPE>
+      <eq>
 	<Subst>
 	  <aSubMap/>
 	  <textmath content="X"/> 
 	</Subst>
-      </btypes:TYPE> is still a valid sentence in the same language.
-    </p>
-  </definition>
+	<Subst>
+	  <aSubMap/>
+	  <Subst>
+	    <aSubMap/>
+	    <textmath content="X"/> 
+	  </Subst>
+	</Subst>
+      </eq>
+    </btypes:TYPE>. The actual condition we require here is that the
+    substitution 
+    <btypes:TYPE>
+      <aSubMap/>
+    </btypes:TYPE> satisfies the occurs check. Since any substitution
+    that satisfies the occurs check can be written equivalently as an
+    idempotent substitution, we require this stronger property without
+    loss of generality. This means that substitutions such as
+    <btypes:TYPE>
+      <compose>
+	<SubMap>
+	  <tvar name="alpha"/> 
+	  <tvar name="beta"/> 
+	</SubMap>
+	<SubMap>
+	  <tvar name="beta"/> 
+	  <unit/> 
+	</SubMap>
+      </compose>
+    </btypes:TYPE> are not well formed, and must instead be written
+    (equivalently) as: 
+    <btypes:TYPE>
+      <compose>
+	<SubMap>
+	  <tvar name="alpha"/> 
+	  <unit/> 
+	</SubMap>
+	<SubMap>
+	  <tvar name="beta"/> 
+	  <unit/> 
+	</SubMap>
+      </compose>
+    </btypes:TYPE>. An implication of idempotence is that
+    <btypes:TYPE>
+      <eq>
+	<inter>
+	  <dom>
+	    <aSubMap/>
+	  </dom>
+	  <range>
+	    <aSubMap/>
+	  </range>
+	</inter>
+	<Empty/>
+      </eq>
+    </btypes:TYPE>.
+  </p>
   <p>
-    That is, the substitution does not violate the syntax of the
+    The second condidtion requires that the substitution 
+    <btypes:TYPE>
+      <aSubMap/>
+    </btypes:TYPE> does not violate the syntax of the 
     language. For example, the substitution
     <btypes:TYPE>
       <SubMap>
@@ -2877,6 +2938,38 @@
 		<aSubMap/>
 	      </assume>
 	      <solvable/>
+	    </models>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<solvable/>
+		<set>
+		  <solvables/>
+		</set>
+	      </in>
+	      <text content=", "/>
+	      <models name="cst">
+		<assume>
+		  <aSubMap/>
+		</assume>
+		<solvable/>
+	      </models>
+	    </grouping>
+	  </tyPre>
+	  <tyConc>
+	    <models name="cst">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <set>
+		<solvables/>
+	      </set>
 	    </models>
 	  </tyConc>
 	</tyRule>

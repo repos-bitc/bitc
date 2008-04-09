@@ -2850,7 +2850,7 @@
     </xsl:call-template>    	
     <xsl:apply-templates select="*[2]" mode="formula"/>
   </xsl:template>
-
+  
   
 <!-- ======================================================================
                        Type Judgements 
