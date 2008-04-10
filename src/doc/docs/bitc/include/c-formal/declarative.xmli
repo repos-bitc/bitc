@@ -326,6 +326,8 @@
     <title>Inversion of Typing Relation</title>
     <ol>
       <li>
+
+
 	<p>
 	  <btypes:TYPE>
 	    <text content="If "/>
@@ -2395,7 +2397,7 @@
     </p>
   </proof>
   <lemma id="T-msm_eq_ms">
-    <title>Type Substitution Canonicalization</title>
+    <title>Substitution Canonicalization</title>
     <p>
       For any type 
       <btypes:TYPE>
@@ -4486,7 +4488,7 @@
 		      </Subst>
 		      <pType num="si"/>
 		    </eq>
-		  </btypes:TYPE>, and similar to case (5.b), 
+		  </btypes:TYPE>, and similar to case&nbsp;(5.b), 
 		  we obtain 
 		  <btypes:TYPE>
 		    <eq>
@@ -4575,57 +4577,481 @@
 		  </btypes:TYPE>.
 		</p>
 	      </li>
-	      <li>
-		<p>
-		  From cases&nbsp;(5.c.i and 5.c.iii), we conclude
-		  that 
-		  <btypes:TYPE>
-		    <eq>
-		      <minzT>
-			<Subst>
- 			  <Subst>
-			    <aSubMap/>
-			    <aSubMap num="i"/>
-			  </Subst>
-			  <tvar name="beta"/>
-			</Subst>
-		      </minzT>
-		      <minzT>
-			<Subst>
-			  <Subst>
-			    <aSubMap/>
-			    <aSubMap num="i"/>
-			  </Subst>
-			  <pType num="s"/>
-			</Subst>
-		      </minzT>
-		    </eq>
-		  </btypes:TYPE>.
-		</p>
-	      </li>
 	    </ol>
 	  </li>
 	</ol>
       </li>
-      <!-- 	  <li> -->
-      <!-- 	    <p> -->
-      <!-- 	      Now, we need to show that  -->
-      <!-- 	      <btypes:TYPE> -->
-      <!-- 		<models name="cst"> -->
-      <!-- 		  <assume> -->
-      <!-- 		    <Subst> -->
-      <!-- 		      <aSubMap/> -->
-      <!-- 		      <aSubMap num="i"/> -->
-      <!-- 		    </Subst> -->
-      <!-- 		  </assume> -->
-      <!-- 		  <Subst> -->
-      <!-- 		    <aSubMap/> -->
-      <!-- 		    <type/> -->
-      <!-- 		  </Subst> -->
-      <!-- 		</models> -->
-      <!-- 	      </btypes:TYPE>. -->
-      <!-- 	    </p> -->
-      <!-- 	  </li> -->
+      <li>
+	<p>
+	  Suppose
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap num="i"/>
+		<tvar name="beta"/>
+	      </Subst>
+	      <pType num="i"/>
+	    </eq>
+	  </btypes:TYPE> such that
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<pType num="i"/>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <aSubMap num="i"/>
+		  <pType/>
+		</Subst>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      Then,
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <Subst>
+		      <aSubMap num="i"/>
+		      <tvar name="beta"/>
+		    </Subst>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <pType num="i"/>
+		  </Subst>
+		</eq>
+	      </btypes:TYPE>.
+	      Similar to case&nbsp;(5.b), this can be written as
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <aSubMap num="i"/>
+		    </Subst>
+		    <tvar name="beta"/>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <pType num="i"/>
+		  </Subst>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      We can assume that 
+	      <btypes:TYPE>
+		<Forall>
+		  <tvar name="gamma"/>
+		</Forall>
+		<text content=", "/>
+		<neq>
+		  <pType num="i"/>
+		  <tvar name="gamma"/>
+		</neq>
+	      </btypes:TYPE>, since the possibility that
+	      <btypes:TYPE>
+		<eq>
+		  <pType num="i"/>
+		  <tvar name="gamma"/>
+		</eq>
+	      </btypes:TYPE> is already handled by case&nbsp;(5).
+	      It is evident from the grammar of types in
+	      section&nbsp;<xref ref="static_semantics"/> that
+	      any substitution into a non-type variable 
+	      <btypes:TYPE>
+		<pType/>
+	      </btypes:TYPE>-type cannot result in a maybe-type.
+	      Therefore, for some 
+	      <btypes:TYPE>
+		<pType num="si" dash="'"/>
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <pType num="i"/>
+		  </Subst>
+		  <pType num="si" dash="'"/>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From cases&nbsp;(6.a and 6.b), we can write
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <aSubMap num="i"/>
+		    </Subst>
+		    <tvar name="beta"/>
+		  </Subst>
+		  <pType num="si" dash="'"/>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Since
+	      <btypes:TYPE>
+		<eq>
+		  <minzT>
+		    <pType num="i"/>
+		  </minzT>
+		  <minzT>
+		    <Subst>
+		      <aSubMap num="i"/>
+		      <pType/>
+		    </Subst>
+		  </minzT>
+		</eq>
+	      </btypes:TYPE>, we have
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <minzT>
+		      <pType num="i"/>
+		    </minzT>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <minzT>
+		      <Subst>
+			<aSubMap num="i"/>
+			<pType/>
+		      </Subst>
+		    </minzT>
+		  </Subst>
+		</eq>
+	      </btypes:TYPE>, and further,
+	      <btypes:TYPE>
+		<eq>
+		  <minzT>
+		    <Subst>
+		      <aSubMap/>
+		      <minzT>
+			<pType num="i"/>
+		      </minzT>
+		    </Subst>
+		  </minzT>
+		  <minzT>
+		    <Subst>
+		      <aSubMap/>
+		      <minzT>
+			<Subst>
+			  <aSubMap num="i"/>
+			  <pType/>
+			</Subst>
+		      </minzT>
+		    </Subst>
+		  </minzT>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Using
+	      <btypes:TYPE>
+		<lem tag="T-msm_eq_ms"/>
+	      </btypes:TYPE>, we can re-write case&nbsp;(6.d) as
+	      <btypes:TYPE>
+		<eq>
+		  <minzT>
+		    <Subst>
+		      <aSubMap/>
+		      <pType num="i"/>
+		    </Subst>
+		  </minzT>
+		  <minzT>
+		    <Subst>
+		      <aSubMap/>
+		      <Subst>
+			<aSubMap num="i"/>
+			<pType/>
+		      </Subst>
+		    </Subst>
+		  </minzT>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Since 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <pType num="i"/>
+		  </Subst>
+		  <pType num="si" dash="'"/>
+		</eq>
+	      </btypes:TYPE> (case&nbsp;(6.b)), we can write
+	      case&nbsp;(6.e) as
+	      <btypes:TYPE>
+		<eq>
+		  <minzT>
+		    <pType num="si" dash="'"/>
+		  </minzT>
+		  <minzT>
+		    <Subst>
+		      <aSubMap/>
+		      <Subst>
+			<aSubMap num="i"/>
+			<pType/>
+		      </Subst>
+		    </Subst>
+		  </minzT>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Using assumption&nbsp;(1) and 
+	      <btypes:TYPE>
+		<lem tag="norm-subst-compose"/>
+	      </btypes:TYPE>, we conclude that
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <Subst>
+		      <aSubMap num="i"/>
+		      <pType/>
+		    </Subst>
+		  </Subst>
+		  <Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <aSubMap num="i"/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <pType/>
+		    </Subst>
+		  </Subst>
+		</eq>
+	      </btypes:TYPE>. Therefore, can re-write case&nbsp;(6.e) as
+	      <btypes:TYPE>
+		<eq>
+		  <minzT>
+		    <Subst>
+		      <aSubMap/>
+		      <pType num="i"/>
+		    </Subst>
+		  </minzT>
+		  <minzT>
+		    <Subst>
+		      <Subst>
+			<aSubMap/>
+			<aSubMap num="i"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<pType/>
+		      </Subst>
+		    </Subst>
+		  </minzT>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Since
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <pType/>
+		  </Subst>
+		  <pType num="s"/>
+		</eq>
+	      </btypes:TYPE>, case&nbsp;(6.f) can be written as
+	      <btypes:TYPE>
+		<eq>
+		  <minzT>
+		    <Subst>
+		      <aSubMap/>
+		      <pType num="i"/>
+		    </Subst>
+		  </minzT>
+		  <minzT>
+		    <Subst>
+		      <Subst>
+			<aSubMap/>
+			<aSubMap num="i"/>
+		      </Subst>
+		      <pType num="s"/>
+		    </Subst>
+		  </minzT>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	</ol>
+      </li>
+      <li>
+	<p>
+	  From cases&nbsp;(2, 5.b.iv, (5.c.i, 5.c.iii) and (6.c, 6.h)),
+	  we conclude that 
+	  <btypes:TYPE>
+	    <Forall/>
+	    <in>
+	      <mbTop>
+		<tvar name="beta"/>
+		<pType num="s"/>
+	      </mbTop>
+	      <Subst>
+		<aSubMap/>
+		<type/>
+	      </Subst>
+	    </in>
+	  </btypes:TYPE>, and for some
+	  <btypes:TYPE>
+	    <tvar name="beta" dash="'"/>
+	    <text content=" and "/>
+	    <pType dash="'"/>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<Subst>
+		  <aSubMap/>
+		  <aSubMap num="i"/>
+		</Subst>
+		<tvar name="beta"/>
+	      </Subst>
+	      <tvar name="beta" dash="'"/>
+	    </eq>
+	  </btypes:TYPE>, or
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<Subst>
+		  <aSubMap/>
+		  <aSubMap num="i"/>
+		</Subst>
+		<tvar name="beta"/>
+	      </Subst>
+	      <pType dash="'"/>
+	    </eq>
+	  </btypes:TYPE> such that
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<pType dash="'"/>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <aSubMap num="i"/>
+		  </Subst>
+		  <pType num="s"/>
+		</Subst>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Similar to cases&nbsp;(2 through 7), we obtain
+	  <btypes:TYPE>
+	    <Forall/>
+	    <in>
+	      <mbFull>
+		<tvar name="beta"/>
+		<pType num="s"/>
+	      </mbFull>
+	      <Subst>
+		<aSubMap/>
+		<type/>
+	      </Subst>
+	    </in>
+	  </btypes:TYPE>, and for some
+	  <btypes:TYPE>
+	    <tvar name="beta" dash="'"/>
+	    <text content=" and "/>
+	    <pType dash="'"/>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<Subst>
+		  <aSubMap/>
+		  <aSubMap num="i"/>
+		</Subst>
+		<tvar name="beta"/>
+	      </Subst>
+	      <tvar name="beta" dash="'"/>
+	    </eq>
+	  </btypes:TYPE>, or
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<Subst>
+		  <aSubMap/>
+		  <aSubMap num="i"/>
+		</Subst>
+		<tvar name="beta"/>
+	      </Subst>
+	      <pType dash="'"/>
+	    </eq>
+	  </btypes:TYPE> such that
+	  <btypes:TYPE>
+	    <eq>
+	      <minz>
+		<pType dash="'"/>
+	      </minz>
+	      <minz>
+		<Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <aSubMap num="i"/>
+		  </Subst>
+		  <pType num="s"/>
+		</Subst>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  From cases&nbsp;(7 and 8), and 
+	  <btypes:TYPE>
+	    <defn tag="subst-consistent"/>
+	  </btypes:TYPE>, we finally conclude that
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <Subst>
+		<aSubMap/>
+		<aSubMap num="i"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<type/>
+	      </Subst>
+	    </models>
+	  </btypes:TYPE>.
+	</p>
+      </li>
     </ol>
   </proof>
   <lemma id="T-TSubstitution">
