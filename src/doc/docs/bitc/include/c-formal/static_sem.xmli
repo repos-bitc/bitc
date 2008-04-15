@@ -2976,4 +2976,127 @@
       </Hrules>
     </btypes:TYPE>
   </definition>
+  <definition id="approx-types">
+    <title>Approximate Types</title>
+    <p>
+      We define a notion of equivalence in types which are
+      structurally identical except for type variables corresponding
+      to top-level maybe-types.
+    </p>
+    <btypes:TYPE>
+      <Hrules>
+	<tyRule>
+	  <tyPre/>
+	  <tyConc>
+	    <approx>
+	      <type/>
+	      <type/>
+	    </approx>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <approx>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </approx>
+	    <approx>
+	      <type num="2"/>
+	      <type num="3"/>
+	    </approx>
+	  </tyPre>
+	  <tyConc>
+	    <approx>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </approx>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <approx>
+	      <pType num="1"/>
+	      <pType num="2"/>
+	    </approx>
+	  </tyPre>
+	  <tyConc>
+	    <approx>
+	      <mutable>
+		<pType num="1"/>
+	      </mutable>
+	      <mutable>
+		<pType num="2"/>
+	      </mutable>
+	    </approx>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <approx>
+	      <pType num="1"/>
+	      <pType num="1" dash="'"/>
+	    </approx>
+	    <approx>
+	      <pType num="2"/>
+	      <pType num="2" dash="'"/>
+	    </approx>
+	  </tyPre>
+	  <tyConc>
+	    <approx>
+	      <pair>
+		<pType num="1"/>
+		<pType num="2"/>
+	      </pair>
+	      <pair>
+		<pType num="1" dash="'"/>
+		<pType num="2" dash="'"/>
+	      </pair>
+	    </approx>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <approx>
+	      <pType num="1"/>
+	      <pType num="2"/>
+	    </approx>
+	  </tyPre>
+	  <tyConc>
+	    <approx>
+	      <mbTop>
+		<tvar name="alpha"/>
+		<pType num="1"/>
+	      </mbTop>
+	      <mbTop>
+		<tvar name="beta"/>
+		<pType num="2"/>
+	      </mbTop>
+	    </approx>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <approx>
+	      <pType num="1"/>
+	      <pType num="2"/>
+	    </approx>
+	  </tyPre>
+	  <tyConc>
+	    <approx>
+	      <mbFull>
+		<tvar name="alpha"/>
+		<pType num="1"/>
+	      </mbFull>
+	      <mbFull>
+		<tvar name="beta"/>
+		<pType num="2"/>
+	      </mbFull>
+	    </approx>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+  </definition>
   </sect1>

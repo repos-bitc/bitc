@@ -34,35 +34,21 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule name="S-Fn">
+	<tyRule name="S-Mut">
 	  <tyPre>
-	    <eq>
-	      <minz>
-		<type num="1"/>
-	      </minz>
-	      <minz>
-		<type num="1" dash="'"/>
-	      </minz>
-	    </eq>
-	    <eq>
-	      <maxz>
-		<type num="2"/>
-	      </maxz>
-	      <maxz>
-		<type num="2" dash="'"/>
-	      </maxz>
-	    </eq>
+	    <Msub>
+	      <pType/>
+	      <pType dash="'"/>
+	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
-	      <fn>
-		<type num="1"/>
-		<type num="2"/>
-	      </fn>
-	      <fn>
-		<type num="1" dash="'"/>
-		<type num="2" dash="'"/>
-	      </fn>
+	      <mutable>
+		<pType/>
+	      </mutable>
+	      <mutable>
+		<pType dash="'"/>
+	      </mutable>
 	    </Msub>
 	  </tyConc>
 	</tyRule>
@@ -92,24 +78,6 @@
 	</tyRule>  
       </Hrules>
       <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="S-Mut">
-	  <tyPre>
-	    <Msub>
-	      <pType/>
-	      <pType dash="'"/>
-	    </Msub>
-	  </tyPre>
-	  <tyConc>
-	    <Msub>
-	      <mutable>
-		<pType/>
-	      </mutable>
-	      <mutable>
-		<pType dash="'"/>
-	      </mutable>
-	    </Msub>
-	  </tyConc>
-	</tyRule>
 	<tyRule name="S-MT1">
 	  <tyPre>
 	    <eq>

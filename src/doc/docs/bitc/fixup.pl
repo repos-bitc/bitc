@@ -62,8 +62,8 @@ while(!eof(F)) {
 	# \textbf{\emph{*}}letter\textbf{\emph{*}} to \mathfrak{letter}
 	$l =~ s/\\textbf\{\\emph\{\*\}\}([A-Za-z])\\textbf\{\\emph\{\*\}\}/$EM\{\\mathfrak{$1}\}/g;
 
-	# \textbf{\emph{\?}}text\textbf{\emph{\?}} to \ensuremath{text}
-	$l =~ s/\\textbf\{\\emph\{\?\}\}([A-Za-z0-9]+)\\textbf\{\\emph\{\?\}\}/$EM\{$1\}/g;
+	# \textbf{\emph{\?}}text\textbf{\emph{\?}} to \ensuremath{\mathrm{text}}
+	$l =~ s/\\textbf\{\\emph\{\?\}\}([A-Za-z0-9]+)\\textbf\{\\emph\{\?\}\}/$EM\{\\mathrm\{$1\}\}/g;
 
 	#OK??
 	#Derivation and Modelling

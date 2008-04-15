@@ -672,6 +672,32 @@
 	  </btypes:TYPE>
 	</p>
       </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <text content="If "/>
+	    <Msub>
+	      <type/>
+	      <mutable>
+		<pType/>
+	      </mutable>
+	    </Msub>
+	    <text content=" then "/>
+	    <eq>
+	      <type/>
+	      <mutable>
+		<pType dash="'"/>
+	      </mutable>
+	    </eq>	      
+	    <text content=", such that "/>
+	    <Msub>
+ 	      <pType dash="'"/>
+	      <pType/>
+	    </Msub>
+	    <text content="."/>
+	  </btypes:TYPE>
+	</p>
+      </li>
     </ol>
   </lemma>
   <proof>
@@ -2066,12 +2092,6 @@
 	<p>
 	  If
 	  <btypes:TYPE>
-	    <CST>
-	      <type/>
-	      <type dash="'"/>
-	    </CST>
-	  </btypes:TYPE> and
-	  <btypes:TYPE>
 	    <Msub>
 	      <type/>
 	      <type dash="'"/>
@@ -2137,13 +2157,6 @@
 	<p>
 	  If
 	  <btypes:TYPE>
-	    <CST>
-	      <type/>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </CST>
-	  </btypes:TYPE>,
-	  <btypes:TYPE>
 	    <Msub>
 	      <type/>
 	      <type num="1"/>
@@ -2165,20 +2178,12 @@
 	      <type num="1"/>
 	      <type num="3"/>
 	    </Msub>
-	  </btypes:TYPE>,
+	  </btypes:TYPE>, and
 	  <btypes:TYPE>
 	    <Msub>
 	      <type num="2"/>
 	      <type num="3"/>
 	    </Msub>
-	  </btypes:TYPE>, and
-	  <btypes:TYPE>
-	    <CST>
-	      <type/>
-	      <type num="1"/>
-	      <type num="2"/>
-	      <type num="3"/>
-	    </CST>
 	  </btypes:TYPE>.
 	</p>
       </li>
@@ -2186,13 +2191,6 @@
 	<p>
 	  If
 	  <btypes:TYPE>
-	    <CST>
-	      <type/>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </CST>
-	  </btypes:TYPE>,
-	  <btypes:TYPE>
 	    <Msub>
 	      <type num="1"/>
 	      <type/>
@@ -2214,20 +2212,93 @@
 	      <type num="3"/>
 	      <type num="1"/>
 	    </Msub>
-	  </btypes:TYPE>,
+	  </btypes:TYPE>, and
 	  <btypes:TYPE>
 	    <Msub>
 	      <type num="3"/>
 	      <type num="2"/>
 	    </Msub>
-	  </btypes:TYPE>, and
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
 	  <btypes:TYPE>
-	    <CST>
-	      <type/>
+	    <Msub>
 	      <type num="1"/>
 	      <type num="2"/>
-	      <type num="3"/>
-	    </CST>
+	    </Msub>
+	  </btypes:TYPE>, then
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<Forall/>
+		<approx>
+		  <type num="1" dash="'"/>
+		  <type num="1"/>
+		</approx>
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<Msub>
+		  <type num="1" dash="'"/>
+		  <minz>
+		    <type num="2"/>
+		  </minz>
+		</Msub>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<Forall/>
+		<approx>
+		  <type num="2" dash="'"/>
+		  <type num="2"/>
+		</approx>
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<Msub>
+		  <maxz>
+		    <type num="1"/>
+		  </maxz>
+		  <type num="2" dash="'"/>
+		</Msub>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	</ol>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Msub>
+	      <type/>
+	      <mutable>
+		<pType/>
+	      </mutable>
+	    </Msub>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <Forall/>
+	    <approx>
+	      <type dash="'"/>
+	      <type/>
+	    </approx>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <Msub>
+	      <type dash="'"/>
+	      <mutable>
+		<minz>
+		  <pType/>
+		</minz>
+	      </mutable>
+	    </Msub>
 	  </btypes:TYPE>.
 	</p>
       </li>
@@ -2235,10 +2306,12 @@
   </lemma>
   <proof>
     <p>
-      Property 1: By straightforward induction on the copy-coercion
-      derivation, and using
+      Property 1: By straightforward induction on the derivation of
       <btypes:TYPE>
-	<defn tag="maybe-consistent"/>
+	<Msub>
+	  <type num="1"/>
+	  <type num="2"/>
+	</Msub>
       </btypes:TYPE>.
     </p>
     <p>
@@ -2250,28 +2323,7 @@
     <ol>
       <li>
 	<p>
-	  From 	  
-	  <btypes:TYPE>
-	    <CST>
-	      <type/>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </CST>
-	  </btypes:TYPE> and
-	  <btypes:TYPE>
-	    <lem tag="Cst-Weakening"/>
-	  </btypes:TYPE> (weakening), we have 
-	  <btypes:TYPE>
-	    <CST>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </CST>
-	  </btypes:TYPE>. 
-	</p>
-      </li>
-      <li>
-	<p>
-	  From the above case, and property 1.d above, we have
+	  From property 1.d above, we have
 	  <btypes:TYPE>
 	    <eq>
 	      <minz>
@@ -2282,10 +2334,6 @@
 	      </minz>
 	    </eq>
 	  </btypes:TYPE>.
-	</p>
-      </li>
-      <li>
-	<p>
 	  Similarly, we have
 	  <btypes:TYPE>
 	    <eq>
@@ -2297,11 +2345,7 @@
 	      </minz>
 	    </eq>
 	  </btypes:TYPE>.
-	</p>
-      </li>
-      <li>
-	<p>
-	  From cases&nbsp;(2 and 3), we obtain
+	  Therefore,
 	  <btypes:TYPE>
 	    <eq>
 	      <minz>
@@ -2337,15 +2381,6 @@
 	      </minz>
 	    </eq>
 	  </btypes:TYPE>.
-	  It is evident that 
-	  <btypes:TYPE>
-	    <CST>
-	      <type/>
-	      <type num="1"/>
-	      <type num="2"/>
-	      <type num="3"/>
-	    </CST>
-	  </btypes:TYPE>.
 	</p>
       </li>
       <li>
@@ -2357,12 +2392,7 @@
 	      <type num="1"/>
 	      <type num="1"/>
 	    </Msub>
-	  </btypes:TYPE>. From this, and the fact that
-	  <btypes:TYPE>
-	    <CST>
-	      <type num="1"/>
-	    </CST>
-	  </btypes:TYPE>, using property 1.a, we obtain
+	  </btypes:TYPE>. From this using property 1.a, we obtain
 	  <btypes:TYPE>
 	    <Msub>
 	      <type num="1"/>
@@ -2371,17 +2401,13 @@
 	      </minz>
 	    </Msub>
 	  </btypes:TYPE>.
-	  From case&nbsp;(5), we can write this as
+	  From case&nbsp;(2), we can write this as
 	  <btypes:TYPE>
 	    <Msub>
 	      <type num="1"/>
 	      <type num="3"/>
 	    </Msub>
 	  </btypes:TYPE>.
-	</p>
-      </li>
-      <li>
-	<p>
 	  Similarly, we obtain
 	  <btypes:TYPE>
 	    <Msub>
@@ -2394,6 +2420,47 @@
     </ol>
     <p>
       Property 3: Similar to Property 2.
+    </p>
+    <p>
+      Property 4: By straightforward induction on the derivation of
+      <btypes:TYPE>
+	<Msub>
+	  <type num="1"/>
+	  <type num="2"/>
+	</Msub>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      Property 5: We know that 
+      <btypes:TYPE>
+	<Msub>
+	  <type/>
+	  <mutable>
+	    <pType/>
+	  </mutable>
+	</Msub>
+      </btypes:TYPE>. 
+      From 
+      <btypes:TYPE>
+	<lem tag="T-sub-inversion"/>
+      </btypes:TYPE>, we conclude that  
+      <btypes:TYPE>
+	<eq>
+	  <type/>
+	  <mutable>
+	    <pType dash="'"/>
+	  </mutable>
+	</eq>
+      </btypes:TYPE>
+      such that
+      <btypes:TYPE>
+	<Msub>
+	  <pType dash="'"/>
+	  <pType/>
+	</Msub>
+      </btypes:TYPE>.
+      Now, the conclusion follows from property&nbsp;4 and the 
+      S-Mut rule. 
     </p>
   </proof>
   <lemma id="T-msm_eq_ms">
@@ -3349,45 +3416,45 @@
       </ol>
     </proof>
   </lemma>
-<!--   <lemma id="cann-derivation"> -->
-<!--     <title>Canonical Derivation under Substitution</title> -->
-<!--     <p> -->
-<!--       If -->
-<!--       <btypes:TYPE> -->
-<!-- 	<TDjudge> -->
-<!-- 	  <aExpr/> -->
-<!-- 	  <type/> -->
-<!-- 	</TDjudge> -->
-<!-- 	<text content=" and "/> -->
-<!-- 	<models name="cst"> -->
-<!-- 	  <assume> -->
-<!-- 	    <aSubMap/> -->
-<!-- 	  </assume> -->
-<!-- 	  <set> -->
-<!-- 	    <gamma/> -->
-<!-- 	    <store/> -->
-<!-- 	    <type/> -->
-<!-- 	  </set> -->
-<!-- 	</models> -->
-<!-- 	<text content=", then "/> -->
-<!-- 	<models name="cst"> -->
-<!-- 	  <assume> -->
-<!-- 	    <aSubMap/> -->
-<!-- 	  </assume> -->
-<!-- 	  <DBrac> -->
-<!-- 	    <TDjudge> -->
-<!-- 	      <aExpr/> -->
-<!-- 	      <type/> -->
-<!-- 	    </TDjudge> -->
-<!-- 	  </DBrac> -->
-<!--  	</models> -->
-<!--       </btypes:TYPE>. -->
-<!--     </p> -->
-<!--   </lemma> -->
-<!--   <proof> -->
-<!--     <p> -->
-<!--     </p> -->
-<!--   </proof> -->
+  <lemma id="cann-derivation">
+    <title>Canonical Derivation under Substitution</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<TDjudge>
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+	<text content=" and "/>
+	<models name="cst">
+	  <assume>
+	    <aSubMap/>
+	  </assume>
+	  <set>
+	    <gamma/>
+	    <store/>
+	    <type/>
+	  </set>
+	</models>
+	<text content=", then "/>
+	<models name="cst">
+	  <assume>
+	    <aSubMap/>
+	  </assume>
+	  <DBrac>
+	    <TDjudge>
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	  </DBrac>
+ 	</models>
+      </btypes:TYPE>.
+    </p>
+  </lemma>
+  <proof>
+    <p>
+    </p>
+  </proof>
 <!--   <lemma id="T-SSubstitution"> -->
 <!--     <title>Sub-Type Substitution</title> -->
 <!--     <p> -->
@@ -7391,4 +7458,342 @@
 <!--     </p> -->
 <!--   </theorem> -->
   </sect1>
+
+<!--   <lemma id="T-Subtype-properties"> -->
+<!--     <title>Properties of Copy Coercion</title> -->
+<!--     <ol> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  If -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <CST> -->
+<!-- 	      <type/> -->
+<!-- 	      <type dash="'"/> -->
+<!-- 	    </CST> -->
+<!-- 	  </btypes:TYPE> and -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
+<!-- 	      <type/> -->
+<!-- 	      <type dash="'"/> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE>, then, -->
+<!-- 	</p> -->
+<!-- 	<ol> -->
+<!-- 	  <li> -->
+<!-- 	    <p> -->
+<!-- 	      <btypes:TYPE> -->
+<!-- 		<Msub> -->
+<!-- 		  <type/> -->
+<!-- 		  <minz> -->
+<!-- 		    <type dash="'"/> -->
+<!-- 		  </minz> -->
+<!-- 		</Msub> -->
+<!-- 	      </btypes:TYPE> -->
+<!-- 	    </p> -->
+<!-- 	  </li> -->
+<!-- 	  <li> -->
+<!-- 	    <p> -->
+<!-- 	      <btypes:TYPE> -->
+<!-- 		<Msub> -->
+<!-- 		  <maxz> -->
+<!-- 		    <type/> -->
+<!-- 		  </maxz> -->
+<!-- 		  <type dash="'"/> -->
+<!-- 		</Msub> -->
+<!-- 	      </btypes:TYPE> -->
+<!-- 	    </p> -->
+<!-- 	  </li> -->
+<!-- 	  <li> -->
+<!-- 	    <p> -->
+<!-- 	      <btypes:TYPE> -->
+<!-- 		<eq> -->
+<!-- 		  <maxz> -->
+<!-- 		    <type/> -->
+<!-- 		  </maxz> -->
+<!-- 		  <maxz> -->
+<!-- 		    <type dash="'"/> -->
+<!-- 		  </maxz> -->
+<!-- 		</eq> -->
+<!-- 	      </btypes:TYPE> -->
+<!-- 	    </p> -->
+<!-- 	  </li> -->
+<!-- 	  <li> -->
+<!-- 	    <p> -->
+<!-- 	      <btypes:TYPE> -->
+<!-- 		<eq> -->
+<!-- 		  <minz> -->
+<!-- 		    <type/> -->
+<!-- 		  </minz> -->
+<!-- 		  <minz> -->
+<!-- 		    <type dash="'"/> -->
+<!-- 		  </minz> -->
+<!-- 		</eq> -->
+<!-- 	      </btypes:TYPE> -->
+<!-- 	    </p> -->
+<!-- 	  </li> -->
+<!-- 	</ol> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  If -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <CST> -->
+<!-- 	      <type/> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	      <type num="2"/> -->
+<!-- 	    </CST> -->
+<!-- 	  </btypes:TYPE>, -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
+<!-- 	      <type/> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE>, and -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
+<!-- 	      <type/> -->
+<!--  	      <type num="2"/> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE>, then, -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Exists> -->
+<!-- 	      <type num="3"/> -->
+<!-- 	    </Exists> -->
+<!-- 	  </btypes:TYPE> such that  -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	      <type num="3"/> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE>, -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
+<!-- 	      <type num="2"/> -->
+<!-- 	      <type num="3"/> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE>, and -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <CST> -->
+<!-- 	      <type/> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	      <type num="2"/> -->
+<!-- 	      <type num="3"/> -->
+<!-- 	    </CST> -->
+<!-- 	  </btypes:TYPE>. -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  If -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <CST> -->
+<!-- 	      <type/> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	      <type num="2"/> -->
+<!-- 	    </CST> -->
+<!-- 	  </btypes:TYPE>, -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	      <type/> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE>, and -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
+<!--  	      <type num="2"/> -->
+<!-- 	      <type/> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE>, then, -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Exists> -->
+<!-- 	      <type num="3"/> -->
+<!-- 	    </Exists> -->
+<!-- 	  </btypes:TYPE> such that  -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
+<!-- 	      <type num="3"/> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE>, -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
+<!-- 	      <type num="3"/> -->
+<!-- 	      <type num="2"/> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE>, and -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <CST> -->
+<!-- 	      <type/> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	      <type num="2"/> -->
+<!-- 	      <type num="3"/> -->
+<!-- 	    </CST> -->
+<!-- 	  </btypes:TYPE>. -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--     </ol> -->
+<!--   </lemma> -->
+<!--   <proof> -->
+<!--     <p> -->
+<!--       Property 1: By straightforward induction on the copy-coercion -->
+<!--       derivation, and using -->
+<!--       <btypes:TYPE> -->
+<!-- 	<defn tag="maybe-consistent"/> -->
+<!--       </btypes:TYPE>. -->
+<!--     </p> -->
+<!--     <p> -->
+<!--       Property 2: By construction of  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<type num="3"/> -->
+<!--       </btypes:TYPE>. -->
+<!--     </p> -->
+<!--     <ol> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  From 	   -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <CST> -->
+<!-- 	      <type/> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	      <type num="2"/> -->
+<!-- 	    </CST> -->
+<!-- 	  </btypes:TYPE> and -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <lem tag="Cst-Weakening"/> -->
+<!-- 	  </btypes:TYPE> (weakening), we have  -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <CST> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	      <type num="2"/> -->
+<!-- 	    </CST> -->
+<!-- 	  </btypes:TYPE>.  -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  From the above case, and property 1.d above, we have -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <eq> -->
+<!-- 	      <minz> -->
+<!-- 		<type/> -->
+<!-- 	      </minz> -->
+<!-- 	      <minz> -->
+<!-- 		<type num="1"/> -->
+<!-- 	      </minz> -->
+<!-- 	    </eq> -->
+<!-- 	  </btypes:TYPE>. -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  Similarly, we have -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <eq> -->
+<!-- 	      <minz> -->
+<!-- 		<type/> -->
+<!-- 	      </minz> -->
+<!-- 	      <minz> -->
+<!-- 		<type num="2"/> -->
+<!-- 	      </minz> -->
+<!-- 	    </eq> -->
+<!-- 	  </btypes:TYPE>. -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  From cases&nbsp;(2 and 3), we obtain -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <eq> -->
+<!-- 	      <minz> -->
+<!-- 		<type/> -->
+<!-- 	      </minz> -->
+<!-- 	      <minz> -->
+<!-- 		<type num="1"/> -->
+<!-- 	      </minz> -->
+<!-- 	      <minz> -->
+<!-- 		<type num="2"/> -->
+<!-- 	      </minz> -->
+<!-- 	    </eq> -->
+<!-- 	  </btypes:TYPE>. -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  Let us pick -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <type num="3"/> -->
+<!-- 	  </btypes:TYPE> such that -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <eq> -->
+<!-- 	      <type num="3"/> -->
+<!-- 	      <minz> -->
+<!-- 		<type/> -->
+<!-- 	      </minz> -->
+<!-- 	      <minz> -->
+<!-- 		<type num="1"/> -->
+<!-- 	      </minz> -->
+<!-- 	      <minz> -->
+<!-- 		<type num="2"/> -->
+<!-- 	      </minz> -->
+<!-- 	    </eq> -->
+<!-- 	  </btypes:TYPE>. -->
+<!-- 	  It is evident that  -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <CST> -->
+<!-- 	      <type/> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	      <type num="2"/> -->
+<!-- 	      <type num="3"/> -->
+<!-- 	    </CST> -->
+<!-- 	  </btypes:TYPE>. -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  From S-Refl rule in  -->
+<!-- 	  figure&nbsp;<xref ref="Msubtype_rules"/>, we know that -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE>. From this, and the fact that -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <CST> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	    </CST> -->
+<!-- 	  </btypes:TYPE>, using property 1.a, we obtain -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	      <minz> -->
+<!-- 		<type num="1"/> -->
+<!-- 	      </minz> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE>. -->
+<!-- 	  From case&nbsp;(5), we can write this as -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
+<!-- 	      <type num="1"/> -->
+<!-- 	      <type num="3"/> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE>. -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  Similarly, we obtain -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Msub> -->
+<!-- 	      <type num="2"/> -->
+<!-- 	      <type num="3"/> -->
+<!-- 	    </Msub> -->
+<!-- 	  </btypes:TYPE>. -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--     </ol> -->
+<!--     <p> -->
+<!--       Property 3: Similar to Property 2. -->
+<!--     </p> -->
+<!--   </proof> -->
 
