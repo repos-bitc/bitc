@@ -322,12 +322,56 @@
       </li>
     </ol>
   </definition>
+  <definition id="consistent-typing">
+    <title>Consistent Type Derivation</title>
+    <p>
+      We say that 
+      <btypes:TYPE>
+	<TDjudge name="*">
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE>, is a consistent type derivation if
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <TDjudge>
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <CST>
+	      <gamma/>
+	      <store/>
+	      <type/>
+	    </CST>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  Every sub-derivation involved in the derivation of 
+	  <btypes:TYPE>
+	    <TDjudge>
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	  </btypes:TYPE> is a consistent derivation.
+	</p>
+      </li>
+    </ol>
+  </definition>
   <lemma id="T-inversion">
     <title>Inversion of Typing Relation</title>
     <ol>
       <li>
-
-
 	<p>
 	  <btypes:TYPE>
 	    <text content="If "/>
@@ -423,14 +467,14 @@
 		  <gamma/>
 		  <mapping>
 		    <id/>
-		    <type num="1"/>
+		    <type num="1" dash="'"/>
 		  </mapping>
 		</extend>
 		<store/>
 	      </assume>
 	      <tqExpr>
 		<aExpr/>
-		<type num="2"/>
+		<type num="2" dash="'"/>
 	      </tqExpr>
 	    </Sjudge>
 	    <text content="."/>
@@ -2448,19 +2492,67 @@
 	<eq>
 	  <type/>
 	  <mutable>
-	    <pType dash="'"/>
+	    <pType num="1"/>
 	  </mutable>
 	</eq>
       </btypes:TYPE>
       such that
       <btypes:TYPE>
 	<Msub>
-	  <pType dash="'"/>
+	  <pType num="1"/>
 	  <pType/>
 	</Msub>
       </btypes:TYPE>.
-      Now, the conclusion follows from property&nbsp;4 and the 
-      S-Mut rule. 
+      Using property&nbsp;2 with respect to 
+      <btypes:TYPE>
+	<Msub>
+	  <pType num="1"/>
+	  <pType/>
+	</Msub>
+      </btypes:TYPE>, we have
+      <btypes:TYPE>
+	<Forall/>
+	<approx>
+	  <pType num="1" dash="'"/>
+	  <pType num="1"/>
+	</approx>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<Msub>
+	  <pType num="1" dash="'"/>
+	  <minz>
+	    <pType/>
+	  </minz>
+	</Msub>
+      </btypes:TYPE>.
+      Now, from S-Mut rule, we obtain
+      <btypes:TYPE>
+	<Msub>
+	  <mutable>
+	    <pType num="1" dash="'"/>
+	  </mutable>
+	  <mutable>
+	    <minz>
+	      <pType/>
+	    </minz>
+	  </mutable>
+	</Msub>
+      </btypes:TYPE>. This is equivalent to saying
+      <btypes:TYPE>
+	<Forall/>
+	<approx>
+	  <type dash="'"/>
+	  <type/>
+	</approx>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<Msub>
+	  <type dash="'"/>
+	  <minz>
+	    <pType/>
+	  </minz>
+	</Msub>
+      </btypes:TYPE>.
     </p>
   </proof>
   <lemma id="T-msm_eq_ms">
@@ -3416,134 +3508,55 @@
       </ol>
     </proof>
   </lemma>
-  <lemma id="cann-derivation">
-    <title>Canonical Derivation under Substitution</title>
+  <lemma id="T-SSubstitution">
+    <title>Sub-Type Substitution</title>
     <p>
       If
       <btypes:TYPE>
-	<TDjudge>
-	  <aExpr/>
-	  <type/>
-	</TDjudge>
-	<text content=" and "/>
+	<Msub>
+	  <type num="1"/>
+	  <type num="2"/>
+	</Msub>
+      </btypes:TYPE> and
+      <btypes:TYPE>
 	<models name="cst">
-	  <assume>
-	    <aSubMap/>
-	  </assume>
+	  <aSubMap/>
 	  <set>
-	    <gamma/>
-	    <store/>
-	    <type/>
+	    <type num="1"/>
+	    <type num="2"/>
 	  </set>
 	</models>
-	<text content=", then "/>
-	<models name="cst">
-	  <assume>
+      </btypes:TYPE>, then,
+      <btypes:TYPE>
+	<Msub>
+	  <Subst>
 	    <aSubMap/>
-	  </assume>
-	  <DBrac>
-	    <TDjudge>
-	      <aExpr/>
-	      <type/>
-	    </TDjudge>
-	  </DBrac>
- 	</models>
-      </btypes:TYPE>.
+	    <type num="1"/>
+	  </Subst>
+	  <minz>
+	    <Subst>
+	      <aSubMap/>
+	      <type num="2"/>
+	    </Subst>
+	  </minz>
+	</Msub>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<Msub>
+	  <maxz>
+	    <Subst>
+	      <aSubMap/>
+	      <type num="1"/>
+	    </Subst>
+	  </maxz>
+	  <Subst>
+	    <aSubMap/>
+	    <type num="2"/>
+	  </Subst>
+	</Msub>
+      </btypes:TYPE>
     </p>
   </lemma>
-  <proof>
-    <p>
-    </p>
-  </proof>
-<!--   <lemma id="T-SSubstitution"> -->
-<!--     <title>Sub-Type Substitution</title> -->
-<!--     <p> -->
-<!--       If -->
-<!--       <btypes:TYPE> -->
-<!-- 	<Msub> -->
-<!-- 	  <type num="1"/> -->
-<!-- 	  <type num="2"/> -->
-<!-- 	</Msub> -->
-<!-- 	<text content=", then for any substitution "/> -->
-<!-- 	<aSubMap/> -->
-<!-- 	<text content=" such that "/> -->
-<!-- 	<Cst> -->
-<!-- 	  <assume/> -->
-<!-- 	  <Subst> -->
-<!-- 	    <aSubMap/> -->
-<!-- 	    <set> -->
-<!-- 	      <type num="1"/> -->
-<!-- 	      <type num="2"/> -->
-<!-- 	    </set> -->
-<!-- 	  </Subst> -->
-<!-- 	</Cst> -->
-<!--       </btypes:TYPE>, -->
-<!--     </p> -->
-<!--     <ol> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  If -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<type num="2"/> -->
-<!-- 	      </Subst> -->
-<!-- 	      <minz> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <type num="2"/> -->
-<!-- 		</Subst> -->
-<!-- 	      </minz> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE>, then -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Msub> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<type num="1"/> -->
-<!-- 	      </Subst> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<type num="2"/> -->
-<!-- 	      </Subst> -->
-<!-- 	    </Msub> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  If -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<type num="1"/> -->
-<!-- 	      </Subst> -->
-<!-- 	      <maxz> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <type num="1"/> -->
-<!-- 		</Subst> -->
-<!-- 	      </maxz> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE>, then -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Msub> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<type num="1"/> -->
-<!-- 	      </Subst> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<type num="2"/> -->
-<!-- 	      </Subst> -->
-<!-- 	    </Msub> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--     </ol> -->
-<!--   </lemma> -->
 <!--   <proof> -->
 <!--     <p> -->
 <!--       By induction on the derivation of  -->
@@ -5164,7 +5177,7 @@
     <p>
       If
       <btypes:TYPE>
-	<TDjudge>
+	<TDjudge name="*">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
@@ -5194,7 +5207,7 @@
 	  <Empty/>
 	</eq>
 	<text content=", we have "/>
-	<Sjudge>
+	<Sjudge name="*">
 	  <assume>
 	    <Subst>
 	      <aSubMap/>
@@ -5987,7 +6000,7 @@
 	      </assume>
 	      <tqExpr>
 		<lambda>
-		  <id num="y"/>
+		  <id name="y"/>
 		  <paren>
 		    <subst>
 		      <aExpr dash="'"/>
@@ -6002,7 +6015,7 @@
 		</fn>
 	      </tqExpr>
 	    </Sjudge>
-	  </btypes:TYPE>, and thus
+	  </btypes:TYPE>, and thus,
 	  <btypes:TYPE>
 	    <Sjudge>
 	      <assume>
@@ -6012,7 +6025,7 @@
 	      <tqExpr>
 		<subst>
 		  <lambda>
-		    <id num="y"/>
+		    <id name="y"/>
 		    <aExpr dash="'"/>
 		  </lambda>
 		  <id/>
@@ -7797,3 +7810,84 @@
 <!--     </p> -->
 <!--   </proof> -->
 
+<!--   <lemma id="cann-derivation"> -->
+<!--     <title>Canonical Type Derivation</title> -->
+<!--     <p> -->
+<!--       If  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<TDjudge> -->
+<!-- 	  <aExpr/> -->
+<!-- 	  <type/> -->
+<!-- 	</TDjudge> -->
+<!--       </btypes:TYPE> -->
+<!--       and -->
+<!--       <btypes:TYPE> -->
+<!-- 	<CST> -->
+<!-- 	  <gamma/> -->
+<!-- 	  <store/> -->
+<!-- 	  <type/> -->
+<!-- 	</CST> -->
+<!--       </btypes:TYPE>, then -->
+<!--       <btypes:TYPE> -->
+<!-- 	<Exists> -->
+<!-- 	  <approx> -->
+<!-- 	    <type dash="'"/> -->
+<!-- 	    <type/> -->
+<!-- 	  </approx> -->
+<!-- 	</Exists> -->
+<!--       </btypes:TYPE> such that   -->
+<!--       <btypes:TYPE> -->
+<!-- 	<TDjudge> -->
+<!-- 	  <aExpr/> -->
+<!-- 	  <type/> -->
+<!-- 	</TDjudge> -->
+<!--       </btypes:TYPE> -->
+
+<!--       <btypes:TYPE> -->
+<!-- 	<CST> -->
+<!-- 	  <gamma/> -->
+<!-- 	  <store/> -->
+<!-- 	  <type/> -->
+<!-- 	</CST> -->
+<!--       </btypes:TYPE> -->
+<!--     </p> -->
+<!--   </lemma> -->
+<!--   <lemma id="cann-derivation-subst"> -->
+<!--     <title>Canonical Derivation under Substitution</title> -->
+<!--     <p> -->
+<!--       If -->
+<!--       <btypes:TYPE> -->
+<!-- 	<TDjudge> -->
+<!-- 	  <aExpr/> -->
+<!-- 	  <type/> -->
+<!-- 	</TDjudge> -->
+<!-- 	<text content=" and "/> -->
+<!-- 	<models name="cst"> -->
+<!-- 	  <assume> -->
+<!-- 	    <aSubMap/> -->
+<!-- 	  </assume> -->
+<!-- 	  <set> -->
+<!-- 	    <gamma/> -->
+<!-- 	    <store/> -->
+<!-- 	    <type/> -->
+<!-- 	  </set> -->
+<!-- 	</models> -->
+<!-- 	<text content=", then "/> -->
+<!-- 	<models name="cst"> -->
+<!-- 	  <assume> -->
+<!-- 	    <aSubMap/> -->
+<!-- 	  </assume> -->
+<!-- 	  <DBrac> -->
+<!-- 	    <TDjudge> -->
+<!-- 	      <aExpr/> -->
+<!-- 	      <type/> -->
+<!-- 	    </TDjudge> -->
+<!-- 	  </DBrac> -->
+<!--  	</models> -->
+<!--       </btypes:TYPE>. -->
+<!--     </p> -->
+<!--   </lemma> -->
+<!--   <proof> -->
+<!--     <p> -->
+<!--     </p> -->
+<!--   </proof> -->

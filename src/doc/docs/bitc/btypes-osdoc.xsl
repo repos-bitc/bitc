@@ -3009,7 +3009,7 @@
       <xsl:apply-templates select="." mode="formula"/>	
     </xsl:for-each>
   </xsl:template>  
-
+  
   <!-- TIjudge -->
   <xsl:template match="TIjudge" mode="formula">
     <xsl:apply-templates mode="formula"/>
