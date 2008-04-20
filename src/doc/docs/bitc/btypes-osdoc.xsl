@@ -280,7 +280,7 @@
       <xsl:with-param name="print.infix.op">sub;</xsl:with-param> 
     </xsl:call-template>
   </xsl:template>
-
+  
   <!-- subeqOp -->
   <xsl:template match="subeqOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -416,9 +416,7 @@
 
   <!-- Special Set -->
   <xsl:template match="spset" mode="formula">
-    <xsl:text>{|</xsl:text>
-    <xsl:call-template name="print.children"/>
-    <xsl:text>|}</xsl:text>
+    <xsl:call-template name="print.spset"/>
   </xsl:template>
   
   <!-- mappping -->
@@ -2836,8 +2834,15 @@
       <xsl:with-param name="print.cst.name">
 	<xsl:value-of select="@name"/>
       </xsl:with-param> 
-    </xsl:call-template>    	
-    <xsl:call-template name="print.set"/>
+    </xsl:call-template>
+    <xsl:choose>
+      <xsl:when test="@sp">
+	<xsl:call-template name="print.spset"/>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:call-template name="print.set"/>
+      </xsl:otherwise>
+    </xsl:choose>	
   </xsl:template>
 
   <!-- Sat -->
@@ -3954,6 +3959,14 @@
     <xsl:call-template name="print.children"/>
     <xsl:text>}</xsl:text>
   </xsl:template>  
+
+  <!-- Print special set {| .., .., ... |} -->
+  <xsl:template name="print.spset">
+    <xsl:text>{|</xsl:text>
+    <xsl:call-template name="print.children"/>
+    <xsl:text>|}</xsl:text>
+  </xsl:template>  
+
 
   <!-- Print a &union; b  -->
   <xsl:template name="print.unin">

@@ -1179,6 +1179,7 @@
 <!ATTLIST CST
                                name      CDATA   #IMPLIED
                                br        CDATA   #IMPLIED
+                               sp        CDATA   #IMPLIED
 >
 <!ELEMENT Sat                 %anything.group;%anything.group;)>
 <!ATTLIST Sat
