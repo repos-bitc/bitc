@@ -2190,6 +2190,45 @@
       </btypes:TYPE>.
     </p>
   </proof>
+  <lemma id="Cst-additive">
+    <title>Aggregation of Substitution Consistency</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<models name="cst">
+	  <aSubMap/>
+	  <set>
+	    <solvables num="1"/>
+	  </set>
+	</models>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<models name="cst">
+	  <aSubMap/>
+	  <set>
+	    <solvables num="2"/>
+	  </set>
+	</models>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
+	<models name="cst">
+	  <aSubMap/>
+	  <set>
+	    <solvables num="1"/>
+	    <solvables num="2"/>
+	  </set>
+	</models>
+      </btypes:TYPE>
+    </p>
+  </lemma>
+  <proof>
+    <p>
+      Evident from the definition of consistent substitutions
+      (<btypes:TYPE>
+	<defn tag="subst-consistent"/>
+      </btypes:TYPE>).
+    </p>
+  </proof>
   <lemma id="T-Subtype-properties">
     <title>Properties of Copy Coercion</title>
     <ol>
@@ -2756,35 +2795,235 @@
       </li>
     </ol>
   </lemma>
-  <proof>
+  <lemma id="T-sub-min">
+    <title>Substitution over mutability Minimization</title>
     <p>
-      By induction on the structure of 
-      <btypes:TYPE>
-	<type/>
-      </btypes:TYPE>. The only interesting cases are
-      <btypes:TYPE>
-	<mbTop>
-	  <tvar/>
-	  <pType/>
-	</mbTop>
-      </btypes:TYPE> and
-      <btypes:TYPE>
-	<mbFull>
-	  <sType/>
-	  <pType/>
-	</mbFull>
-      </btypes:TYPE>. In these cases, the result follows from
-      the assumption
+      If
       <btypes:TYPE>
 	<models name="cst">
 	  <aSubMap/>
-	  <type/>
+	  <set>
+	    <type num="1"/>
+	    <type num="2"/>
+	  </set>
 	</models>
-      </btypes:TYPE>, and 
-      <btypes:TYPE>
-	<defn tag="subst-consistent"/>
-      </btypes:TYPE>.
+      </btypes:TYPE>, then
     </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq under="minzT">
+	      <type num="1"/>
+	      <type num="2"/>
+	    </eq>
+	  </btypes:TYPE> implies
+	  <btypes:TYPE>
+	    <eq under="minzT">
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>	
+		<type num="2"/>
+	      </Subst>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq under="minz">
+	      <type num="1"/>
+	      <type num="2"/>
+	    </eq>
+	  </btypes:TYPE> implies
+	  <btypes:TYPE>
+	    <eq under="minz">
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>	
+		<type num="2"/>
+	      </Subst>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </lemma>
+  <proof>
+    <ol>
+      <li>
+	<p>
+	  Property 1: We have
+	  <btypes:TYPE>
+	    <eq under="minzT">
+	      <type num="1"/>
+	      <type num="2"/>
+	    </eq>
+	  </btypes:TYPE>. That is,
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<type num="1"/>
+	      </minzT>
+	      <minzT>
+		<type num="2"/>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>.
+	  Therefore, we must have
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<minzT>
+		  <type num="1"/>
+		</minzT>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<minzT>
+		  <type num="2"/>
+		</minzT>
+	      </Subst>
+	    </eq>
+	  </btypes:TYPE>, and further,
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <minzT>
+		    <type num="1"/>
+		  </minzT>
+		</Subst>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <minzT>
+		    <type num="2"/>
+		  </minzT>
+		</Subst>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  From
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<type num="1"/>
+		<type num="2"/>
+	      </set>
+	    </models>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <lem tag="Cst-Weakening"/>
+	  </btypes:TYPE> (weakening), we have       
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <type num="1"/>
+	    </models>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Now using case&nbsp;(2) and
+	  <btypes:TYPE>
+	    <lem tag="T-msm_eq_ms"/>
+	  </btypes:TYPE>, we obtain
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <minzT>
+		    <type num="1"/>
+		  </minzT>
+		</Subst>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <type num="1"/>
+		</Subst>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>. Similarly, we obtain
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <minzT>
+		    <type num="2"/>
+		  </minzT>
+		</Subst>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <type num="2"/>
+		</Subst>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Substituting the results of case&nbsp;(3)
+	  in case&nbsp;(1), we obtain
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <type num="1"/>
+		</Subst>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <type num="2"/>
+		</Subst>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>.
+	  That is,
+	  <btypes:TYPE>
+	    <eq under="minzT">
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<type num="2"/>
+	      </Subst>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Property 2: Similar to Property 1.
+	</p>
+      </li>
+    </ol>
   </proof>
   <lemma id="norm-subst-compose">
     <title>Multiple Substitution Canonicalization</title>
@@ -3540,12 +3779,12 @@
 	      </in>
 	    </btypes:TYPE>, then,
 	    <btypes:TYPE>
-	      <in>
+	      <notin>
 		<tvar/>
 		<dom>
 		  <aSubMap num="1"/>
 		</dom>
-	      </in>
+	      </notin>
 	    </btypes:TYPE>. The proof for this case is similar to
 	    case&nbsp;(3). However, in this case, it is possible
 	    that
@@ -4207,418 +4446,614 @@
 <!--       </li> -->
 <!--     </ol> -->
 <!--   </proof> -->
-  <lemma id="subst-helper">
-    <title>Type Substitution Helper</title>
-    <!-- S needs to be idempotent in this case -->
+  <lemma id="T-Renaming">
+    <title>Type Renaming</title>
     <p>
       If
+      <btypes:TYPE>
+	<TDjudge>
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<eq>
+	  <aSubMap/>
+	  <plural>
+	    <SubMap>
+	      <tvar name="alpha"/>
+	      <tvar name="beta"/>
+	    </SubMap>
+	  </plural>
+	</eq>
+      </btypes:TYPE>, where,
+      <btypes:TYPE>
+	<eq>
+	  <inter>
+	    <set>
+	      <tvars name="beta"/>
+	    </set>
+	    <ftvs>
+	      <gamma/>
+	      <store/>
+	      <type/>
+	    </ftvs>
+	  </inter>
+	  <Empty/>
+	</eq>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
+	<Sjudge>
+	  <assume>
+	    <Subst>
+	      <aSubMap/>
+	      <gamma/>
+	    </Subst>
+	    <Subst>
+	      <aSubMap/>
+	      <store/>
+	    </Subst>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <Subst>
+	      <aSubMap/>
+	      <type/>
+	    </Subst>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>.
+    </p>
+  </lemma>
+  <proof>
+    <p>
+      By straightforward induction on the derivation of 
+      <btypes:TYPE>
+	<TDjudge>
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE>.
+    </p>
+  </proof>
+  <lemma id="cst-streangthening">
+    <title><font color="blue">Strengthening of Consistency</font></title>
+    <p>
+      If:
     </p>
     <ol>
       <li>
 	<p>
 	  <btypes:TYPE>
-	    <eq>
+	    <CST>
+	      <solvables num="b"/>
+	    </CST>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <subeq>
+	      <set>
+		<solvables num="a"/>
+	      </set>
+	      <set>
+		<solvables num="b"/>
+	      </set>
+	    </subeq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Cst>
+	      <assume/>
+	      <Subst>
+		<aSubMap/>
+ 		<set>
+		  <solvables num="a"/>
+		</set>
+	      </Subst>
+	    </Cst>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <subeq>
 	      <inter>
 		<dom>
-		  <aSubMap num="i"/>
+		  <aSubMap/>
 		</dom>
 		<ftvs>
-		  <aSubMap/>
+		  <solvables num="b"/>
 		</ftvs>
 	      </inter>
-	      <Empty/>
-	    </eq>
+	      <ftvs>
+		<solvables num="a"/>
+	      </ftvs>
+	    </subeq>
 	  </btypes:TYPE>
 	</p>
       </li>
       <li>
 	<p>
 	  <btypes:TYPE>
-	    <models name="cst">
-	      <aSubMap num="i"/>
-	      <type/>
-	    </models>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <models name="cst">
-	      <aSubMap/>
-	      <Subst>
-		<aSubMap num="i"/>
-		<type/>
-	      </Subst>
-	    </models>
+	    <subeq>
+	      <inter>
+		<ftvs>
+		  <range>
+		    <aSubMap/>
+		  </range>
+		</ftvs>
+		<ftvs>
+		  <solvables num="b"/>
+		</ftvs>
+	      </inter>
+	      <ftvs>
+		<solvables num="a"/>
+	      </ftvs>
+	    </subeq>
 	  </btypes:TYPE>
 	</p>
       </li>
     </ol>
     <p>
-      then, 
+      Then,
+      <btypes:TYPE>
+	<Cst>
+	  <assume/>
+	  <Subst>
+	    <aSubMap/>
+	    <set>
+	      <solvables num="b"/>
+	    </set>
+	  </Subst>
+	</Cst>
+      </btypes:TYPE>
+    </p>
+  </lemma>
+  <proof>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Forall/>
+	    <in>
+	      <mbTop>
+		<tvar/>
+		<pType num="sb"/>
+	      </mbTop>
+	      <Subst>
+		<aSubMap/>
+		<solvables num="b"/>
+	      </Subst>
+	    </in>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <Forall/>
+	    <in>
+	      <mbTop>
+		<tvar/>
+		<pType num="sb" dash="'"/>
+	      </mbTop>
+	      <Subst>
+		<aSubMap/>
+		<solvables num="b"/>
+	      </Subst>
+	    </in>
+	  </btypes:TYPE>, we could have any of the following possibilities:
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      Case
+	      <btypes:TYPE>
+		<notin>
+		  <tvar/>
+		  <ftvs>
+		    <range>
+		      <aSubMap/>
+		    </range>
+		  </ftvs>
+		</notin>
+	      </btypes:TYPE>:
+	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  In this case, 
+		  <btypes:TYPE>
+		    <Exists/>
+		    <in>
+		      <mbTop>
+			<tvar/>
+			<pType num="s"/>
+		      </mbTop>
+		      <solvables num="b"/>
+		    </in>
+		    <text content=" and "/>
+		    <in>
+		      <mbTop>
+			<tvar/>
+			<pType num="s" dash="'"/>
+		      </mbTop>
+		      <solvables num="b"/>
+		    </in>
+		    <text content=" | "/>
+		    <eq>
+		      <pType num="sb"/>
+		      <Subst>
+			<aSubMap/>
+			<pType num="b"/>
+		      </Subst>
+		    </eq>
+		    <text content=" and "/>
+		    <eq>
+		      <pType num="sb" dash="'"/>
+		      <Subst>
+			<aSubMap/>
+			<pType num="b" dash="'"/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>.
+		  We have:
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <type num="1"/>
+		      <type num="2"/>
+		    </eq>
+		  </btypes:TYPE> and
+		  <btypes:TYPE>
+		    <eq under="minz">
+		      <type num="1"/>
+		      <type num="2"/>
+		    </eq>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	</ol>
+      </li>
+    </ol>
+  </proof>
+  <lemma id="Consistency-Propagation-1">
+    <title>Consistency of Substitution over Type Derivation</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<CST sp="yes">
+	  <TDjudge>
+	    <aExpr/>
+	    <type/>
+	  </TDjudge>
+	</CST>
+      </btypes:TYPE>, and 
       <btypes:TYPE>
 	<models name="cst">
-	  <Subst>
-	    <aSubMap/>
-	    <aSubMap num="i"/>
-	  </Subst>
-	  <Subst>
-	    <aSubMap/>
+	  <aSubMap/>
+	  <set>
+	    <gamma/>
+	    <store/>
 	    <type/>
-	  </Subst>
+	  </set>
+	</models>
+      </btypes:TYPE>, then,
+      <btypes:TYPE>
+	<models name="cst">
+	  <aSubMap/>
+	  <spset>
+	    <TDjudge>
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	  </spset>
 	</models>
       </btypes:TYPE>.
     </p>
   </lemma>
   <proof>
     <p>
-      By case analysis on the possible outcomes of the substitutions.
+      By induction on the derivation of 
+      <btypes:TYPE>
+	<TDjudge>
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE>. 
     </p>
     <ol>
       <li>
 	<p>
-	  Let
+	  At any step of the derivation, let
 	  <btypes:TYPE>
-	    <eq>
-	      <set>
-		<tvars/>
-	      </set>
-	      <dom>
-		<aSubMap num="i"/>
-	      </dom>
-	    </eq>
-	  </btypes:TYPE>.
-	</p>
-      </li>
-      <li>
-	<p>
+	    <type num="s"/>
+	  </btypes:TYPE> be a type used in the derivation such that 
 	  <btypes:TYPE>
-	    <Forall/>
 	    <in>
-	      <mbTop>
-		<tvar name="beta"/>
-		<pType num="s"/>
-	      </mbTop>
-	      <Subst>
-		<aSubMap/>
-		<type/>
-	      </Subst>
-	    </in>
-	    <text content=" | "/>
-	    <notin>
-	      <tvar name="beta"/>
-	      <set>
-		<tvars/>
-	      </set>
-	    </notin>
-	  </btypes:TYPE>, we have
-	  <btypes:TYPE>
-	    <eq>
-	      <Subst>
-		<aSubMap num="i"/>
-		<tvar name="beta"/>
-	      </Subst>
-	      <tvar name="beta"/>
-	    </eq>
-	  </btypes:TYPE>, and further,
-	  <btypes:TYPE>
-	    <eq>
-	      <Subst>
-		<Subst>
-		  <aSubMap/>
-		  <aSubMap num="i"/>
-		</Subst>
-		<tvar name="beta"/>
-	      </Subst>
-	      <tvar name="beta"/>
-	    </eq>
-	  </btypes:TYPE>.
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <Forall/>
-	    <in>
-	      <mbTop>
-		<tvar name="beta"/>
-		<pType num="s"/>
-	      </mbTop>
-	      <Subst>
-		<aSubMap/>
-		<type/>
-	      </Subst>
-	    </in>
-	    <text content=" | "/>
-	    <in>
-	      <tvar name="beta"/>
-	      <set>
-		<tvars/>
-	      </set>
+	      <type num="s"/>
+	      <gamma/>
 	    </in>
 	  </btypes:TYPE>,
 	  <btypes:TYPE>
-	    <notin>
-	      <tvar name="beta"/>
-	      <ftvs>
-		<range>
-		  <aSubMap/>
-		</range>
-	      </ftvs>
-	    </notin>
-	  </btypes:TYPE> (as a consequence of
-	  from assumption&nbsp;(1)).
-	  Therefore, 
-	  <btypes:TYPE>
-	    <Exists/>
-	    <pType/>
-	    <text content=" | "/>
-	    <eq>
-	      <pType num="s"/>
-	      <Subst>
-		<aSubMap/>
-		<pType/>
-	      </Subst>
-	    </eq>
-	    <text content=" and "/>
 	    <in>
-	      <mbTop>
-		<tvar name="beta"/>
-		<pType/>
-	      </mbTop>
+	      <type num="s"/>
+	      <store/>
+	    </in>
+	  </btypes:TYPE>, and 
+	  <btypes:TYPE>
+	    <in>
+	      <type num="s"/>
 	      <type/>
 	    </in>
+	  </btypes:TYPE> do not (necessarily) hold. For example, 
+	  <btypes:TYPE>
+	    <type dash="'"/>
+	  </btypes:TYPE> in T-ID, 
+	  <btypes:TYPE>
+	    <fn>
+	      <type num="a"/>
+	      <type num="r"/>
+	    </fn>
+	  </btypes:TYPE> in T-APP, or the type obtained by any
+	  sub-derivation (for some sub-expression).
+	</p>
+      </li>
+      <li>
+	<p>
+	  Through a suitable renaming of variables, and using
+	  <btypes:TYPE>
+	    <lem tag="T-Renaming"/>
+	  </btypes:TYPE>, we can ensure
+	  <btypes:TYPE>
+	    <subeq>
+	      <inter>
+		<dom>
+		  <aSubMap/>
+		</dom>
+		<ftvs>
+		  <type num="s"/>
+		</ftvs>
+	      </inter>
+	      <ftvs>
+		<gamma/>
+		<store/>
+		<type/>
+	      </ftvs>
+	    </subeq>
 	  </btypes:TYPE>.
 	</p>
       </li>
       <li>
 	<p>
-	  From assumption&nbsp;(2) and
+	  We want to show
 	  <btypes:TYPE>
-	    <defn tag="subst-consistent"/>
-	  </btypes:TYPE>, we conclude that for some
+	    <models name="cst">
+	      <aSubMap/>
+	      <type num="s"/>
+	    </models>
+	  </btypes:TYPE>.
+	  Therefore, we proceed by induction on the structure of 
 	  <btypes:TYPE>
-	    <notin>
-	      <tvar name="gamma"/>
-	      <set>
-		<tvars/>
-	      </set>
-	    </notin>
+	    <type num="s"/>
+	  </btypes:TYPE>. The only interesting cases are
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="s"/>
+	      <mbTop>
+		<tvar/>
+		<pType/>
+	      </mbTop>
+	    </eq>
 	  </btypes:TYPE> and
 	  <btypes:TYPE>
-	    <pType num="i"/>
-	  </btypes:TYPE>, 
-	  <btypes:TYPE>
 	    <eq>
-	      <Subst>
-		<aSubMap num="i"/>
-		<tvar name="beta"/>
-	      </Subst>
-	      <tvar name="gamma"/>
-	    </eq>
-	  </btypes:TYPE>, or
-	  <btypes:TYPE>
-	    <eq>
-	      <Subst>
-		<aSubMap num="i"/>
-		<tvar name="beta"/>
-	      </Subst>
-	      <pType num="i"/>
-	    </eq>
-	  </btypes:TYPE> such that
-	  <btypes:TYPE>
-	    <eq>
-	      <minzT>
-		<pType num="i"/>
-	      </minzT>
-	      <minzT>
-		<Subst>
-		  <aSubMap num="i"/>
-		  <pType/>
-		</Subst>
-	      </minzT>
+	      <type num="s"/>
+	      <mbFull>
+		<sType/>
+		<pType/>
+	      </mbFull>
 	    </eq>
 	  </btypes:TYPE>.
 	</p>
       </li>
       <li>
 	<p>
-	  Suppose that
+	  Case 
 	  <btypes:TYPE>
 	    <eq>
-	      <Subst>
-		<aSubMap num="i"/>
-		<tvar name="beta"/>
-	      </Subst>
-	      <tvar name="gamma"/>
-	    </eq>
-	  </btypes:TYPE>. That is,
-	  <btypes:TYPE>
-	    <in>
+	      <type num="s"/>
 	      <mbTop>
-		<tvar name="gamma"/>
-		<Subst>
-		  <aSubMap num="i"/>
-		  <pType/>
-		</Subst>
+		<tvar/>
+		<pType/>
 	      </mbTop>
-	      <Subst>
-		<aSubMap num="i"/>
-		<type/>
-	      </Subst>
-	    </in>
-	  </btypes:TYPE>.
+	    </eq>
+	  </btypes:TYPE>:
 	</p>
 	<ol>
 	  <li>
 	    <p>
-	      From assumption&nbsp;(3) and
+	      By induction hypothesis, we have
 	      <btypes:TYPE>
-		<defn tag="subst-consistent"/>
-	      </btypes:TYPE>, we conclude that for some
-	      <btypes:TYPE>
-		<notin>
-		  <tvar name="delta"/>
-		  <set>
-		    <tvars/>
-		  </set>
-		</notin>
-	      </btypes:TYPE> and
-	      <btypes:TYPE>
-		<pType num="si"/>
-	      </btypes:TYPE>, 
-	      <btypes:TYPE>
-		<eq>
-		  <Subst>
-		    <aSubMap/>
-		    <tvar name="gamma"/>
-		  </Subst>
-		  <tvar name="delta"/>
-		</eq>
-	      </btypes:TYPE>, or
-	      <btypes:TYPE>
-		<eq>
-		  <Subst>
-		    <aSubMap/>
-		    <tvar name="gamma"/>
-		  </Subst>
-		  <pType num="si"/>
-		</eq>
-	      </btypes:TYPE> such that
-	      <btypes:TYPE>
-		<eq>
-		  <minzT>
-		    <pType num="si"/>
-		  </minzT>
-		  <minzT>
-		    <Subst>
-		      <aSubMap/>
-		      <Subst>
-			<aSubMap num="i"/>
-			<pType/>
-		      </Subst>
-		    </Subst>
-		  </minzT>
-		</eq>
+		<models name="cst">
+		  <aSubMap/>
+		  <pType/>
+		</models>
 	      </btypes:TYPE>.
 	    </p>
 	  </li>
 	  <li>
 	    <p>
-	      Suppose
+	      If
 	      <btypes:TYPE>
-		<eq>
-		  <Subst>
-		    <aSubMap/>
-		    <tvar name="gamma"/>
-		  </Subst>
-		  <tvar name="delta"/>
-		</eq>
-	      </btypes:TYPE>.
+		<in>
+		  <tvar/>
+		  <ftvs>
+		    <gamma/>
+		    <store/>
+		    <type/>
+		  </ftvs>
+		</in>
+	      </btypes:TYPE>:
 	    </p>
 	    <ol>
 	      <li>
 		<p>
-		  This case can be re-written as
+		  Due to the assumption 
 		  <btypes:TYPE>
-		    <eq>
-		      <Subst>
-			<aSubMap/>
-			<Subst>
-			  <aSubMap num="i"/>
-			  <tvar name="beta"/>
-			</Subst>
-		      </Subst>
-		      <tvar name="delta"/>
-		    </eq>
-		  </btypes:TYPE>. 
-		</p>
-	      </li>
-	      <li>
-		<p>
-		  From assumption&nbsp;(1), case&nbsp;(5.b.1) and
-		  <btypes:TYPE>
-		    <lem tag="norm-subst-compose"/>
-		  </btypes:TYPE>, we obtain
-		  <btypes:TYPE>
-		    <eq>
-		      <Subst>
-			<Subst>
-			  <aSubMap/>
-			  <aSubMap num="i"/>
-			</Subst>
-			<Subst>
-			  <aSubMap/>
-			  <tvar name="beta"/>
-			</Subst>
-		      </Subst>
-		      <tvar name="delta"/>
-		    </eq>
-		  </btypes:TYPE>. 
-		</p>
-	      </li>
-	      <li>
-		<p>
-		  Due to the idempotence of 
-		  <btypes:TYPE>
-		    <aSubMap/>
-		  </btypes:TYPE> and the fact that
-		  <btypes:TYPE>
-		    <in>
-		      <tvar name="beta"/>
-		      <Subst>
-			<aSubMap/>
+		    <CST sp="yes">
+		      <TDjudge>
+			<aExpr/>
 			<type/>
-		      </Subst>
-		    </in>
-		  </btypes:TYPE>, we conclude that
+		      </TDjudge>
+		    </CST>
+		  </btypes:TYPE>, and 
 		  <btypes:TYPE>
-		    <eq>
-		      <Subst>
-			<aSubMap/>
-			<tvar name="beta"/>
-		      </Subst>
-		      <tvar name="beta"/>
+		    <defn tag="maybe-consistent"/>
+		  </btypes:TYPE>,
+		  <btypes:TYPE>
+		    <Exists/>
+		    <in>
+		      <mbTop>
+			<tvar/>
+			<pType dash="'"/>
+		      </mbTop>
+		      <collection or="yes">
+			<gamma/>
+			<store/>
+			<type/>
+		      </collection>
+		    </in>
+		  </btypes:TYPE> such that
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <pType/>
+		      <pType dash="'"/>
 		    </eq>
 		  </btypes:TYPE>.
 		</p>
 	      </li>
 	      <li>
 		<p>
-		  From cases&nbsp;(5.b.ii and 5.b.iii), we obtain
+		  From the assumption
+		  <btypes:TYPE>
+		    <models name="cst">
+		      <aSubMap/>
+		      <set>
+			<gamma/>
+			<store/>
+			<type/>
+		      </set>
+		    </models>
+		  </btypes:TYPE>, and 
+		  <btypes:TYPE>
+		    <lem tag="Cst-Weakening"/>
+		  </btypes:TYPE> (weakening), we obtain
+		  <btypes:TYPE>
+		    <models name="cst">
+		      <aSubMap/>
+		      <pType dash="'"/>
+		    </models>
+		  </btypes:TYPE>.
+		  From this, case&nbsp;(4.a) and
+		  <btypes:TYPE>
+		    <lem tag="Cst-additive"/>
+		  </btypes:TYPE> (aggregation), we obtain
+		  <btypes:TYPE>
+		    <models name="cst">
+		      <aSubMap/>
+		      <set>
+			<pType/>
+			<pType dash="'"/>
+		      </set>
+		    </models>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From cases&nbsp;(4.b.i and 4.b.ii), and
+		  <btypes:TYPE>
+		    <lem tag="T-sub-min"/>
+		  </btypes:TYPE>, we obtain
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <Subst>
+			<aSubMap/>
+			<pType/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<pType dash="'"/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>.      
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From the assumption
+		  <btypes:TYPE>
+		    <models name="cst">
+		      <aSubMap/>
+		      <set>
+			<gamma/>
+			<store/>
+			<type/>
+		      </set>
+		    </models>
+		  </btypes:TYPE>, case&nbsp;(4.b.i), and	  
+		  <btypes:TYPE>
+		    <defn tag="subst-consistent"/>
+		  </btypes:TYPE>, we know that 
 		  <btypes:TYPE>
 		    <eq>
 		      <Subst>
-			<Subst>
-			  <aSubMap/>
-			  <aSubMap num="i"/>
-			</Subst>
-			<tvar name="beta"/>
+			<aSubMap/>
+			<tvar/>
 		      </Subst>
-		      <tvar name="delta"/>
+		      <tvar name="beta"/>
 		    </eq>
-		  </btypes:TYPE>. 
+		  </btypes:TYPE>, for some 
+		  <btypes:TYPE>
+		    <tvar name="beta"/>
+		  </btypes:TYPE>, or
+		  <btypes:TYPE>
+		    <eq>
+		      <Subst>
+			<aSubMap/>
+			<tvar/>
+		      </Subst>
+		      <pType dash="''"/>
+		    </eq>
+		  </btypes:TYPE>, such that 
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <pType dash="''"/>
+		      <Subst>
+			<aSubMap/>
+			<pType dash="'"/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>. Using case&nbsp;(4.b.iii), we can
+		  write this as
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <Subst>
+			<aSubMap/>
+			<pType dash="'"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<pType/>
+		      </Subst>
+		      <pType/>
+		    </eq>
+		  </btypes:TYPE>.      
 		</p>
 	      </li>
 	    </ol>
@@ -4627,618 +5062,305 @@
 	    <p>
 	      If
 	      <btypes:TYPE>
+		<notin>
+		  <tvar/>
+		  <ftvs>
+		    <gamma/>
+		    <store/>
+		    <type/>
+		  </ftvs>
+		</notin>
+	      </btypes:TYPE>, then, we know that
+	      <btypes:TYPE>
+		<notin>
+		  <tvar/>
+		  <dom>
+		    <aSubMap/>
+		  </dom>
+		</notin>
+	      </btypes:TYPE>, and therefore,
+	      <btypes:TYPE>
 		<eq>
 		  <Subst>
 		    <aSubMap/>
-		    <tvar name="gamma"/>
+		    <tvar/>
 		  </Subst>
-		  <pType num="si"/>
-		</eq>
-	      </btypes:TYPE> such that
-	      <btypes:TYPE>
-		<eq>
-		  <minzT>
-		    <pType num="si"/>
-		  </minzT>
-		  <minzT>
-		    <Subst>
-		      <aSubMap/>
-		      <Subst>
-			<aSubMap num="i"/>
-			<pType/>
-		      </Subst>
-		    </Subst>
-		  </minzT>
+		  <tvar/>
 		</eq>
 	      </btypes:TYPE>.
 	    </p>
-	    <ol>
-	      <li>
-		<p>
-		  This case can be written as
-		  <btypes:TYPE>
-		    <eq>
-		      <Subst>
-			<aSubMap/>
-			<Subst>
-			  <aSubMap num="i"/>
-			  <tvar name="beta"/>
-			</Subst>
-		      </Subst>
-		      <pType num="si"/>
-		    </eq>
-		  </btypes:TYPE>, and similar to case&nbsp;(5.b), 
-		  we obtain 
-		  <btypes:TYPE>
-		    <eq>
-		      <Subst>
-			<Subst>
-			  <aSubMap/>
-			  <aSubMap num="i"/>
-			</Subst>
-			<tvar name="beta"/>
-		      </Subst>
-		      <pType num="si"/>
-		    </eq>
-		  </btypes:TYPE>.
-		</p>
-	      </li>
-	      <li>
-		<p>
-		  Using assumption&nbsp;(1) and 
-		  <btypes:TYPE>
-		    <lem tag="norm-subst-compose"/>
-		  </btypes:TYPE>, we can re-write
-		  <btypes:TYPE>
-		    <eq>
-		      <minzT>
-			<pType num="si"/>
-		      </minzT>
-		      <minzT>
-			<Subst>
-			  <aSubMap/>
-			  <Subst>
-			    <aSubMap num="i"/>
-			    <pType/>
-			  </Subst>
-			</Subst>
-		      </minzT>
-		    </eq>
-		  </btypes:TYPE> as
-		  <btypes:TYPE>
-		    <eq>
-		      <minzT>
-			<pType num="si"/>
-		      </minzT>
-		      <minzT>
-			<Subst>
-			  <Subst>
-			    <aSubMap/>
-			    <aSubMap num="i"/>
-			  </Subst>
-			  <Subst>
-			    <aSubMap/>
-			    <pType/>
-			  </Subst>
-			</Subst>
-		      </minzT>
-		    </eq>
-		  </btypes:TYPE>.
-		</p>
-	      </li>
-	      <li>
-		<p>
-		  Since
-		  <btypes:TYPE>
-		    <eq>
-		      <Subst>
-			<aSubMap/>
-			<pType/>
-		      </Subst>
-		      <pType num="s"/>
-		    </eq>
-		  </btypes:TYPE>, case&nbsp;(5.c.ii) can be written as
-		  <btypes:TYPE>
-		    <eq>
-		      <minzT>
-			<pType num="si"/>
-		      </minzT>
-		      <minzT>
-			<Subst>
-			  <Subst>
-			    <aSubMap/>
-			    <aSubMap num="i"/>
-			  </Subst>
-			  <pType num="s"/>
-			</Subst>
-		      </minzT>
-		    </eq>
-		  </btypes:TYPE>.
-		</p>
-	      </li>
-	    </ol>
 	  </li>
 	</ol>
-      </li>
-      <li>
 	<p>
-	  Suppose
+	  Therefore, in all cases, for some
+	  <btypes:TYPE>
+	    <tvar name="beta"/> 
+	  </btypes:TYPE> and 
+	  <btypes:TYPE>
+	    <pType dash="''"/>
+	  </btypes:TYPE>, we have
 	  <btypes:TYPE>
 	    <eq>
 	      <Subst>
-		<aSubMap num="i"/>
-		<tvar name="beta"/>
+		<aSubMap/>
+		<tvar/>
 	      </Subst>
-	      <pType num="i"/>
+	      <tvar name="beta"/> 
+	    </eq>
+	  </btypes:TYPE>, or
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<tvar/>
+	      </Subst>
+	      <pType dash="''"/>
 	    </eq>
 	  </btypes:TYPE> such that
 	  <btypes:TYPE>
-	    <eq>
-	      <minzT>
-		<pType num="i"/>
-	      </minzT>
-	      <minzT>
-		<Subst>
-		  <aSubMap num="i"/>
-		  <pType/>
-		</Subst>
-	      </minzT>
-	    </eq>
-	  </btypes:TYPE>.
-	</p>
-	<ol>
-	  <li>
-	    <p>
-	      Then,
-	      <btypes:TYPE>
-		<eq>
-		  <Subst>
-		    <aSubMap/>
-		    <Subst>
-		      <aSubMap num="i"/>
-		      <tvar name="beta"/>
-		    </Subst>
-		  </Subst>
-		  <Subst>
-		    <aSubMap/>
-		    <pType num="i"/>
-		  </Subst>
-		</eq>
-	      </btypes:TYPE>.
-	      Similar to case&nbsp;(5.b), this can be written as
-	      <btypes:TYPE>
-		<eq>
-		  <Subst>
-		    <Subst>
-		      <aSubMap/>
-		      <aSubMap num="i"/>
-		    </Subst>
-		    <tvar name="beta"/>
-		  </Subst>
-		  <Subst>
-		    <aSubMap/>
-		    <pType num="i"/>
-		  </Subst>
-		</eq>
-	      </btypes:TYPE>.
-	    </p>
-	  </li>
-	  <li>
-	    <p>
-	      We can assume that 
-	      <btypes:TYPE>
-		<Forall>
-		  <tvar name="gamma"/>
-		</Forall>
-		<text content=", "/>
-		<neq>
-		  <pType num="i"/>
-		  <tvar name="gamma"/>
-		</neq>
-	      </btypes:TYPE>, since the possibility that
-	      <btypes:TYPE>
-		<eq>
-		  <pType num="i"/>
-		  <tvar name="gamma"/>
-		</eq>
-	      </btypes:TYPE> is already handled by case&nbsp;(5).
-	      It is evident from the grammar of types in
-	      section&nbsp;<xref ref="static_semantics"/> that
-	      any substitution into a non-type variable 
-	      <btypes:TYPE>
+	    <eq under="minzT">
+	      <pType dash="''"/>
+	      <Subst>
+		<aSubMap/>
 		<pType/>
-	      </btypes:TYPE>-type cannot result in a maybe-type.
-	      Therefore, for some 
-	      <btypes:TYPE>
-		<pType num="si" dash="'"/>
-	      </btypes:TYPE>,
-	      <btypes:TYPE>
-		<eq>
-		  <Subst>
-		    <aSubMap/>
-		    <pType num="i"/>
-		  </Subst>
-		  <pType num="si" dash="'"/>
-		</eq>
-	      </btypes:TYPE>.
-	    </p>
-	  </li>
-	  <li>
-	    <p>
-	      From cases&nbsp;(6.a and 6.b), we can write
-	      <btypes:TYPE>
-		<eq>
-		  <Subst>
-		    <Subst>
-		      <aSubMap/>
-		      <aSubMap num="i"/>
-		    </Subst>
-		    <tvar name="beta"/>
-		  </Subst>
-		  <pType num="si" dash="'"/>
-		</eq>
-	      </btypes:TYPE>.
-	    </p>
-	  </li>
-	  <li>
-	    <p>
-	      Since
-	      <btypes:TYPE>
-		<eq>
-		  <minzT>
-		    <pType num="i"/>
-		  </minzT>
-		  <minzT>
-		    <Subst>
-		      <aSubMap num="i"/>
-		      <pType/>
-		    </Subst>
-		  </minzT>
-		</eq>
-	      </btypes:TYPE>, we have
-	      <btypes:TYPE>
-		<eq>
-		  <Subst>
-		    <aSubMap/>
-		    <minzT>
-		      <pType num="i"/>
-		    </minzT>
-		  </Subst>
-		  <Subst>
-		    <aSubMap/>
-		    <minzT>
-		      <Subst>
-			<aSubMap num="i"/>
-			<pType/>
-		      </Subst>
-		    </minzT>
-		  </Subst>
-		</eq>
-	      </btypes:TYPE>, and further,
-	      <btypes:TYPE>
-		<eq>
-		  <minzT>
-		    <Subst>
-		      <aSubMap/>
-		      <minzT>
-			<pType num="i"/>
-		      </minzT>
-		    </Subst>
-		  </minzT>
-		  <minzT>
-		    <Subst>
-		      <aSubMap/>
-		      <minzT>
-			<Subst>
-			  <aSubMap num="i"/>
-			  <pType/>
-			</Subst>
-		      </minzT>
-		    </Subst>
-		  </minzT>
-		</eq>
-	      </btypes:TYPE>.
-	    </p>
-	  </li>
-	  <li>
-	    <p>
-	      Using
-	      <btypes:TYPE>
-		<lem tag="T-msm_eq_ms"/>
-	      </btypes:TYPE>, we can re-write case&nbsp;(6.d) as
-	      <btypes:TYPE>
-		<eq>
-		  <minzT>
-		    <Subst>
-		      <aSubMap/>
-		      <pType num="i"/>
-		    </Subst>
-		  </minzT>
-		  <minzT>
-		    <Subst>
-		      <aSubMap/>
-		      <Subst>
-			<aSubMap num="i"/>
-			<pType/>
-		      </Subst>
-		    </Subst>
-		  </minzT>
-		</eq>
-	      </btypes:TYPE>.
-	    </p>
-	  </li>
-	  <li>
-	    <p>
-	      Since 
-	      <btypes:TYPE>
-		<eq>
-		  <Subst>
-		    <aSubMap/>
-		    <pType num="i"/>
-		  </Subst>
-		  <pType num="si" dash="'"/>
-		</eq>
-	      </btypes:TYPE> (case&nbsp;(6.b)), we can write
-	      case&nbsp;(6.e) as
-	      <btypes:TYPE>
-		<eq>
-		  <minzT>
-		    <pType num="si" dash="'"/>
-		  </minzT>
-		  <minzT>
-		    <Subst>
-		      <aSubMap/>
-		      <Subst>
-			<aSubMap num="i"/>
-			<pType/>
-		      </Subst>
-		    </Subst>
-		  </minzT>
-		</eq>
-	      </btypes:TYPE>.
-	    </p>
-	  </li>
-	  <li>
-	    <p>
-	      Using assumption&nbsp;(1) and 
-	      <btypes:TYPE>
-		<lem tag="norm-subst-compose"/>
-	      </btypes:TYPE>, we conclude that
-	      <btypes:TYPE>
-		<eq>
-		  <Subst>
-		    <aSubMap/>
-		    <Subst>
-		      <aSubMap num="i"/>
-		      <pType/>
-		    </Subst>
-		  </Subst>
-		  <Subst>
-		    <Subst>
-		      <aSubMap/>
-		      <aSubMap num="i"/>
-		    </Subst>
-		    <Subst>
-		      <aSubMap/>
-		      <pType/>
-		    </Subst>
-		  </Subst>
-		</eq>
-	      </btypes:TYPE>. Therefore, can re-write case&nbsp;(6.e) as
-	      <btypes:TYPE>
-		<eq>
-		  <minzT>
-		    <Subst>
-		      <aSubMap/>
-		      <pType num="i"/>
-		    </Subst>
-		  </minzT>
-		  <minzT>
-		    <Subst>
-		      <Subst>
-			<aSubMap/>
-			<aSubMap num="i"/>
-		      </Subst>
-		      <Subst>
-			<aSubMap/>
-			<pType/>
-		      </Subst>
-		    </Subst>
-		  </minzT>
-		</eq>
-	      </btypes:TYPE>.
-	    </p>
-	  </li>
-	  <li>
-	    <p>
-	      Since
-	      <btypes:TYPE>
-		<eq>
-		  <Subst>
-		    <aSubMap/>
-		    <pType/>
-		  </Subst>
-		  <pType num="s"/>
-		</eq>
-	      </btypes:TYPE>, case&nbsp;(6.f) can be written as
-	      <btypes:TYPE>
-		<eq>
-		  <minzT>
-		    <Subst>
-		      <aSubMap/>
-		      <pType num="i"/>
-		    </Subst>
-		  </minzT>
-		  <minzT>
-		    <Subst>
-		      <Subst>
-			<aSubMap/>
-			<aSubMap num="i"/>
-		      </Subst>
-		      <pType num="s"/>
-		    </Subst>
-		  </minzT>
-		</eq>
-	      </btypes:TYPE>.
-	    </p>
-	  </li>
-	</ol>
-      </li>
-      <li>
-	<p>
-	  From cases&nbsp;(2, 5.b.iv, (5.c.i, 5.c.iii) and (6.c, 6.h)),
-	  we conclude that 
-	  <btypes:TYPE>
-	    <Forall/>
-	    <in>
-	      <mbTop>
-		<tvar name="beta"/>
-		<pType num="s"/>
-	      </mbTop>
-	      <Subst>
-		<aSubMap/>
-		<type/>
 	      </Subst>
-	    </in>
-	  </btypes:TYPE>, and for some
-	  <btypes:TYPE>
-	    <tvar name="beta" dash="'"/>
-	    <text content=" and "/>
-	    <pType dash="'"/>
-	  </btypes:TYPE>,
-	  <btypes:TYPE>
-	    <eq>
-	      <Subst>
-		<Subst>
-		  <aSubMap/>
-		  <aSubMap num="i"/>
-		</Subst>
-		<tvar name="beta"/>
-	      </Subst>
-	      <tvar name="beta" dash="'"/>
-	    </eq>
-	  </btypes:TYPE>, or
-	  <btypes:TYPE>
-	    <eq>
-	      <Subst>
-		<Subst>
-		  <aSubMap/>
-		  <aSubMap num="i"/>
-		</Subst>
-		<tvar name="beta"/>
-	      </Subst>
-	      <pType dash="'"/>
-	    </eq>
-	  </btypes:TYPE> such that
-	  <btypes:TYPE>
-	    <eq>
-	      <minzT>
-		<pType dash="'"/>
-	      </minzT>
-	      <minzT>
-		<Subst>
-		  <Subst>
-		    <aSubMap/>
-		    <aSubMap num="i"/>
-		  </Subst>
-		  <pType num="s"/>
-		</Subst>
-	      </minzT>
 	    </eq>
 	  </btypes:TYPE>.
 	</p>
       </li>
       <li>
 	<p>
-	  Similar to cases&nbsp;(2 through 7), we obtain
+	  Case
 	  <btypes:TYPE>
-	    <Forall/>
-	    <in>
+	    <eq>
+	      <type num="s"/>
 	      <mbFull>
-		<tvar name="beta"/>
-		<pType num="s"/>
+		<sType/>
+		<pType/>
 	      </mbFull>
-	      <Subst>
-		<aSubMap/>
-		<type/>
-	      </Subst>
-	    </in>
-	  </btypes:TYPE>, and for some
+	    </eq>
+	  </btypes:TYPE>:
+	  Similar to the previous case, we conclude that
+	  for some
 	  <btypes:TYPE>
-	    <tvar name="beta" dash="'"/>
-	    <text content=" and "/>
-	    <pType dash="'"/>
-	  </btypes:TYPE>,
+	    <sType dash="'"/> 
+	  </btypes:TYPE> and 
+	  <btypes:TYPE>
+	    <pType dash="''"/>
+	  </btypes:TYPE>, we have
 	  <btypes:TYPE>
 	    <eq>
 	      <Subst>
-		<Subst>
-		  <aSubMap/>
-		  <aSubMap num="i"/>
-		</Subst>
-		<tvar name="beta"/>
+		<aSubMap/>
+		<sType/>
 	      </Subst>
-	      <tvar name="beta" dash="'"/>
+	      <sType dash="'"/> 
 	    </eq>
 	  </btypes:TYPE>, or
 	  <btypes:TYPE>
 	    <eq>
 	      <Subst>
-		<Subst>
-		  <aSubMap/>
-		  <aSubMap num="i"/>
-		</Subst>
-		<tvar name="beta"/>
+		<aSubMap/>
+		<sType/>
 	      </Subst>
-	      <pType dash="'"/>
+	      <pType dash="''"/>
 	    </eq>
 	  </btypes:TYPE> such that
 	  <btypes:TYPE>
-	    <eq>
-	      <minz>
-		<pType dash="'"/>
-	      </minz>
-	      <minz>
-		<Subst>
-		  <Subst>
-		    <aSubMap/>
-		    <aSubMap num="i"/>
-		  </Subst>
-		  <pType num="s"/>
-		</Subst>
-	      </minz>
+	    <eq under="minz">
+	      <pType dash="''"/>
+	      <Subst>
+		<aSubMap/>
+		<pType/>
+	      </Subst>
 	    </eq>
 	  </btypes:TYPE>.
 	</p>
       </li>
       <li>
 	<p>
-	  From cases&nbsp;(7 and 8), and 
+	  From cases&nbsp;(4 and 5), and 
 	  <btypes:TYPE>
 	    <defn tag="subst-consistent"/>
-	  </btypes:TYPE>, we finally conclude that
+	  </btypes:TYPE>, we conclude that
 	  <btypes:TYPE>
 	    <models name="cst">
-	      <Subst>
-		<aSubMap/>
-		<aSubMap num="i"/>
-	      </Subst>
-	      <Subst>
-		<aSubMap/>
-		<type/>
-	      </Subst>
+	      <aSubMap/>
+	      <type num="s"/>
+	    </models>
+	  </btypes:TYPE>. 
+	</p>
+      </li>
+      <li>
+	<p>
+	  By repeating the same argument over all types
+	  <btypes:TYPE>
+	    <type num="s"/>
+	  </btypes:TYPE> used in the derivation of
+	  <btypes:TYPE>
+	    <TDjudge>
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	  </btypes:TYPE>, we finally obtain
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <spset>
+		<TDjudge>
+		  <aExpr/>
+		  <type/>
+		</TDjudge>
+	      </spset>
 	    </models>
 	  </btypes:TYPE>.
 	</p>
       </li>
     </ol>
   </proof>
+  <lemma id="Composistion-Rearrange">
+    <title>Composition Consistency</title>
+    <p>
+      If:
+    </p>
+    <p>
+      <btypes:TYPE>
+	<models name="cst">
+	  <assume>
+	    <aSubMap num="1"/>
+	  </assume>
+	  <type/>
+	</models>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<models name="cst">
+	  <assume>
+	    <aSubMap num="2"/>
+	  </assume>
+	  <type/>
+	</models>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<models name="cst">
+	  <assume>
+	    <aSubMap num="1"/>
+	  </assume>
+	  <Subst>
+	    <aSubMap num="2"/>
+	    <type/>
+	  </Subst>
+	</models>
+      </btypes:TYPE>, and
+      <btypes:TYPE>
+	<eq>
+	  <inter>
+	    <dom>
+	      <aSubMap num="2"/>
+	    </dom>
+	    <ftvs>
+	      <aSubMap num="1"/>
+	    </ftvs>
+	  </inter>
+	  <Empty/>
+	</eq>
+      </btypes:TYPE>,
+    </p>
+    <p>
+      Then, 
+      <btypes:TYPE>
+	<Exists/>
+	<eq>
+	  <aSubMap num="2" dash="'"/>
+	</eq>
+      </btypes:TYPE> such that:
+    </p>
+    <p>
+      <btypes:TYPE>
+	<eq>
+	  <dom>
+	    <aSubMap num="2"/>
+	  </dom>
+	  <dom>
+	    <aSubMap num="2" dash="'"/>
+	  </dom>
+	</eq>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<eq>
+	  <Subst>
+	    <aSubMap num="2" dash="'"/>
+	    <Subst>
+	      <aSubMap num="1"/>
+	      <type/>
+	    </Subst>
+	  </Subst>
+	  <Subst>
+	    <aSubMap num="1"/>
+	    <Subst>
+	      <aSubMap num="2"/>
+	      <type/>
+	    </Subst>
+	  </Subst>
+	</eq>
+      </btypes:TYPE>, and 
+      <btypes:TYPE>
+	<models name="cst">
+	  <assume>
+	    <aSubMap num="2" dash="'"/>
+	  </assume>
+	  <Subst>
+	    <aSubMap num="1"/>
+	    <type/>
+	  </Subst>
+	</models>
+      </btypes:TYPE>
+    </p>
+  </lemma>
+  <proof>
+    <p>
+      By construction of
+      <btypes:TYPE>
+	<aSubMap num="2" dash="'"/>
+      </btypes:TYPE>.
+      Let
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE> be an idempotent substitution equivalent to 
+      <btypes:TYPE>
+	<compose>
+	  <aSubMap num="1"/>
+	  <aSubMap num="2"/>
+	</compose>
+      </btypes:TYPE>.
+      <btypes:TYPE>
+	<aSubMap num="2" dash="'"/>
+      </btypes:TYPE> can be choosen as a part of 
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE> that contains substitutions only for
+      <btypes:TYPE>
+	<dom>
+	  <aSubMap num="2"/>
+	</dom>
+      </btypes:TYPE>.
+      Here, we will have
+      <btypes:TYPE>
+	<eq>
+	  <Subst>
+	    <aSubMap num="1"/>
+	    <aSubMap num="2" dash="'"/>
+	  </Subst>
+	  <aSubMap num="2" dash="'"/>
+	</eq>
+      </btypes:TYPE>, 
+    </p>
+  </proof>
   <lemma id="T-TSubstitution">
     <title>Type Substitution</title>
     <p>
       If
       <btypes:TYPE>
-	<TDjudge>
+	<TDjudge name="*">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
@@ -5269,7 +5391,7 @@
 	  <Empty/>
 	</eq>
 	<text content=", we have "/>
-	<Sjudge>
+	<Sjudge name="*">
 	  <assume>
 	    <Subst>
 	      <aSubMap/>
@@ -5363,19 +5485,48 @@
 	      <li>
 		<p>
 		  <btypes:TYPE>
-		    <models name="cst">
-		      <assume>
-			<aSubMap/>
-		      </assume>
-		      <set>
-			<gamma/>
-			<store/>
+		    <CST sp="yes">
+		      <TDjudge>
+			<id/>
 			<Subst>
 			  <aSubMap num="n"/>
 			  <type num="i"/>
 			</Subst>
-		      </set>
+		      </TDjudge>
+		    </CST>
+		  </btypes:TYPE>		      
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <models name="cst">
+		      <assume>
+			<aSubMap/>
+		      </assume>
+		      <spset>
+			<TDjudge>
+			  <id/>
+			  <Subst>
+			    <aSubMap num="n"/>
+			    <type num="i"/>
+			  </Subst>
+			</TDjudge>
+		      </spset>
 		    </models>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <eq>
+		      <type/>
+		      <Subst>
+			<aSubMap num="n"/>
+			<type num="i"/>
+		      </Subst>
+		    </eq>
 		  </btypes:TYPE>.
 		</p>
 	      </li>
@@ -5410,7 +5561,7 @@
 		  <Empty/>
 		</eq>
 	      </btypes:TYPE>.
-	      Since 
+	      Since
 	      <btypes:TYPE>
 		<eq>
 		  <dom>
@@ -5459,83 +5610,147 @@
 	  </li>
 	  <li>
 	    <p>
-	      From cases&nbsp;(2.a.i and 2.b), we have
-	      <btypes:TYPE>
-		<eq>
-		  <Subst>
-		    <aSubMap/>
-		    <aSubMap num="n"/>
-		  </Subst>
-		  <plural>
-		    <SubMap>
-		      <tvar/>
-		      <Subst>
-			<aSubMap/>
-			<type dash="'"/>
-		      </Subst>
-		    </SubMap>
-		  </plural>
-		</eq>
-	      </btypes:TYPE>.
-	    </p>
-	  </li>
-	  <li>
-	    <p>
-	      From case&nbsp;(2.a.ii) and 
+	      From case&nbsp;(2.a.iii) and 
 	      <btypes:TYPE>
 		<lem tag="Cst-Weakening"/>
-	      </btypes:TYPE> (weakening), we have 
-	      <btypes:TYPE>
-		<models name="cst">
-		  <assume>
-		    <aSubMap/>
-		  </assume>
-		  <Subst>
-		    <aSubMap num="n"/>
-		    <type num="i"/>
-		  </Subst>
-		</models>
-	      </btypes:TYPE>.
+	      </btypes:TYPE> (weakening), and case&nbsp;(2.a.i), 
+	      we have:
 	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <models name="cst">
+		      <assume>
+			<aSubMap/>
+		      </assume>
+		      <type num="i"/>
+		    </models>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <models name="cst">
+		      <assume>
+			<aSubMap num="n"/>
+		      </assume>
+		      <type num="i"/>
+		    </models>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <models name="cst">
+		      <assume>
+			<aSubMap/>
+		      </assume>
+		      <Subst>
+			<aSubMap num="n"/>
+			<type num="i"/>
+		      </Subst>
+		    </models>
+		  </btypes:TYPE>.	      
+		</p>
+	      </li>
+	    </ol>
 	  </li>
 	  <li>
 	    <p>
-	      From cases&nbsp;(2.a.i), we know that 
+	      From cases&nbsp;(2.d.i, 2.d.ii, 2.d.iii, and 2.b), 
+	      and
 	      <btypes:TYPE>
-		<models name="cst">
-		  <assume>
-		    <aSubMap num="n"/>
-		  </assume>
-		  <type num="i"/>
-		</models>
-	      </btypes:TYPE>.
+		<lem tag="Composistion-Rearrange"/>
+	      </btypes:TYPE>, we conclude that 
+	      <btypes:TYPE>
+		<Exists/>
+		<aSubMap num="m"/>
+	      </btypes:TYPE> such that:
 	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <eq>
+		      <dom>
+			<aSubMap num="m"/>
+		      </dom>
+		      <dom>
+			<aSubMap num="n"/>
+		      </dom>
+		    </eq>
+		  </btypes:TYPE>. That is,
+		  <btypes:TYPE>
+		    <eq>
+		      <aSubMap num="m"/>
+		      <plural>
+			<SubMap>
+			  <tvar/>
+			  <type dash="''"/>
+			</SubMap>
+		      </plural>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <eq>
+		      <Subst>
+			<aSubMap num="m"/>
+			<Subst>
+			  <aSubMap/>
+			  <type num="i"/>
+			</Subst>
+		      </Subst>
+		      <Subst>
+			<sSubMap/>
+			<Subst>
+			  <aSubMap num="n"/>
+			  <type num="i"/>
+			</Subst>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>. That is,
+		  <btypes:TYPE>
+		    <eq>
+		      <Subst>
+			<aSubMap num="m"/>
+			<Subst>
+			  <aSubMap/>
+			  <type num="i"/>
+			</Subst>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<type/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>		
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <models name="cst">
+		      <aSubMap num="m"/>
+		      <Subst>
+			<aSubMap/>
+			<type num="i"/>
+		      </Subst>
+		    </models>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	    </ol>
 	  </li>
 	  <li>
 	    <p>
-	      From cases&nbsp;(2.b, 2.f, and 2.e), and 
-	      <btypes:TYPE>
-		<lem tag="subst-helper"/>
-	      </btypes:TYPE>, we conclude that
-	      <btypes:TYPE>
-		<models name="cst">
-		  <assume>
-		    <Subst>
-		      <aSubMap/>
-		      <aSubMap num="n"/>
-		    </Subst>
-		  </assume>
-		  <Subst>
-		    <aSubMap/>
-		    <type num="i"/>
-		  </Subst>
-		</models>
-	      </btypes:TYPE>.
-	    </p>
-	  </li>
-	  <li>
-	    <p>
-	      From cases&nbsp;(2.c, 2.d and 2.g), and the T-ID rule
+	      From cases&nbsp;(2.c, 2.e.i and 2.e,iii), and the T-ID rule
 	      we obtain
 	      <btypes:TYPE>
 		<Sjudge>
@@ -5552,10 +5767,7 @@
 		  <tqExpr>
 		    <aExpr/>
 		    <Subst>
-		      <Subst>
-			<aSubMap/>
-			<aSubMap num="n"/>
-		      </Subst>
+		      <aSubMap num="m"/>
 		      <Subst>
 			<aSubMap/>
 			<type num="i"/>
@@ -5568,57 +5780,7 @@
 	  </li>
 	  <li>
 	    <p>
-	      From case&nbsp;(2.b) and 
-	      <btypes:TYPE>
-		<lem tag="norm-subst-compose"/>
-	      </btypes:TYPE>, we conclude that
-	      <btypes:TYPE>
-		<eq>
-		  <Subst>
-		    <Subst>
-		      <aSubMap/>
-		      <aSubMap num="n"/>
-		    </Subst>
-		    <Subst>
-		      <aSubMap/>
-		      <type num="i"/>
-		    </Subst>
-		  </Subst>
-		  <Subst>
-		    <aSubMap/>
-		    <Subst>
-		      <aSubMap num="n"/>
-		      <type num="i"/>
-		    </Subst>
-		  </Subst>
-		</eq>
-	      </btypes:TYPE>. Using this along with case&nbsp;(2.h),
-	      we obtain
-	      <btypes:TYPE>
-		<Sjudge>
-		  <assume>
-		    <Subst>
-		      <aSubMap/>
-		      <gamma/>
-		    </Subst>
-		    <Subst>
-		      <aSubMap/>
-		      <store/>
-		    </Subst>
-		  </assume>
-		  <tqExpr>
-		    <aExpr/>
-		    <Subst>
-		      <aSubMap/>
-		      <Subst>
-			<aSubMap num="n"/>
-			<type num="i"/>
-		      </Subst>
-		    </Subst>
-		  </tqExpr>
-		</Sjudge>
-	      </btypes:TYPE>.
-	      That is,
+	      From cases&nbsp;(2.g and 2.e.ii), we obtain
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
@@ -5735,146 +5897,8 @@
       </li>
     </ol>
   </proof>
-  <lemma id="T-Renaming">
-    <title>Type Renaming</title>
-    <p>
-      If
-      <btypes:TYPE>
-	<TDjudge>
-	  <aExpr/>
-	  <type/>
-	</TDjudge>
-      </btypes:TYPE>,
-      <btypes:TYPE>
-	<eq>
-	  <aSubMap/>
-	  <plural>
-	    <SubMap>
-	      <tvar name="alpha"/>
-	      <tvar name="beta"/>
-	    </SubMap>
-	  </plural>
-	</eq>
-      </btypes:TYPE>,
-      <btypes:TYPE>
-	<subeq>
-	  <set>
-	    <tvars/>
-	  </set>
-	  <pred name="gtv">
-	    <gamma/>
-	  </pred>
-	</subeq>
-      </btypes:TYPE>,
-      <btypes:TYPE>
-	<eq>
-	  <inter>
-	    <set>
-	      <tvars name="beta"/>
-	    </set>
-	    <paren>
-	      <unin>
-		<ftvs>
-		  <gamma/>
-		</ftvs>
-		<ftvs>
-		  <store/>
-		</ftvs>
-		<ftvs>
-		  <type/>
-		</ftvs>
-	      </unin>
-	    </paren>
-	  </inter>
-	  <Empty/>
-	</eq>
-      </btypes:TYPE>, then
-      <btypes:TYPE>
-	<Sjudge>
-	  <assume>
-	    <Subst>
-	      <aSubMap/>
-	      <gamma/>
-	    </Subst>
-	    <Subst>
-	      <aSubMap/>
-	      <store/>
-	    </Subst>
-	  </assume>
-	  <tqExpr>
-	    <aExpr/>
-	    <Subst>
-	      <aSubMap/>
-	      <type/>
-	    </Subst>
-	  </tqExpr>
-	</Sjudge>
-      </btypes:TYPE>.
-    </p>
-  </lemma>
-  <proof>
-    <p>
-      By straightforward induction on the derivation of 
-      <btypes:TYPE>
-	<TDjudge>
-	  <aExpr/>
-	  <type/>
-	</TDjudge>
-      </btypes:TYPE>.
-    </p>
-  </proof>
-  <lemma id="Consistency-Propagation-1">
-    <title>Consistency of Substitution over Type Derivation 1</title>
-    <p>
-      If
-      <btypes:TYPE>
-	<CST sp="yes">
-	  <TDjudge>
-	    <aExpr/>
-	    <type/>
-	  </TDjudge>
-	</CST>
-      </btypes:TYPE>, and 
-      <btypes:TYPE>
-	<models name="cst">
-	  <aSubMap/>
-	  <set>
-	    <gamma/>
-	    <store/>
-	    <type/>
-	  </set>
-	</models>
-      </btypes:TYPE>, then,
-      <btypes:TYPE>
-	<models name="cst">
-	  <aSubMap/>
-	  <spset>
-	    <TDjudge>
-	      <aExpr/>
-	      <type/>
-	    </TDjudge>
-	  </spset>
-	</models>
-      </btypes:TYPE>.
-    </p>
-  </lemma>
-  <proof>
-    <p>
-      By induction on the derivation of 
-      <btypes:TYPE>
-	<TDjudge>
-	  <aExpr/>
-	  <type/>
-	</TDjudge>
-      </btypes:TYPE>. 
-    </p>
-    <p>
-      Cases T-Unit, T-True, T-False, T-Hloc, and T-Sloc are
-      trivial. Case T-Lambda follows from induction  hypothesis.
-    </p>
-  </proof>
   <lemma id="Consistency-Propagation-2">
-    <title>Consistency of Substitution over Type Derivation 2</title>
+    <title><font color="red">Consistency of Substitution over Type Derivation 2</font></title>
     <p>
       If
       <btypes:TYPE>
@@ -5884,7 +5908,7 @@
 	    <type/>
 	  </TDjudge>
 	</CST>
-      </btypes:TYPE>, 
+      </btypes:TYPE>,
       <btypes:TYPE>
 	<Sjudge>
 	  <assume>
@@ -5986,8 +6010,10 @@
 	</TDjudge>
 	<text content=" and "/>
 	<!-- This predicate is necessary since the pair rule can
-	derive mutable values for pair of values (v,v) and the
-	substitution can be performed on the lhs of an assignment. -->
+	derive mutable types for pair of values (v,v) and the
+	substitution can go wrong if performed on the lhs of
+	an assignment. This predicate effectively rules out
+	substitution on the lhs of an assignment.--> 
 	<pred name="Immut">
 	  <type num="v"/>
 	</pred>

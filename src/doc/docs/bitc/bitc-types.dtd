@@ -116,6 +116,7 @@
 <!ATTLIST eq
                                 br      CDATA    #IMPLIED
                                 nosp    CDATA    #IMPLIED
+                                under   CDATA    #IMPLIED
 >
 <!ELEMENT neqOp                 EMPTY>
 <!ELEMENT neq                   (%anything.group;, %anything.group;+)>

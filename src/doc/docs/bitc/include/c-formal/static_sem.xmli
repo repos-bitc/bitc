@@ -157,6 +157,7 @@
 	  <type/>
 	  <gamma/>
 	  <store/>
+	  <solvables/>
 	</alternatives>
       </bnf>
     </grammar>
@@ -1748,6 +1749,37 @@
       </VEqns>
     </btypes:TYPE>
   </definition>
+  <definition id="eq-minz">      
+    <title><btypes:TYPE><eqOp under="minzT"/></btypes:TYPE> and
+      <btypes:TYPE><eqOp under="minz"/></btypes:TYPE></title>      
+    <p>
+      We write
+      <btypes:TYPE>
+	<eq under="minzT">
+	  <type num="1"/>
+	  <type num="2"/>
+	</eq>
+      </btypes:TYPE> if
+      <btypes:TYPE>
+	<minzT>
+	  <type num="1"/>
+	  <type num="2"/>
+	</minzT>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<eq under="minz">
+	  <type num="1"/>
+	  <type num="2"/>
+	</eq>
+      </btypes:TYPE> if
+      <btypes:TYPE>
+	<minz>
+	  <type num="1"/>
+	  <type num="2"/>
+	</minz>
+      </btypes:TYPE>.
+    </p>
+  </definition>
   <definition id="pcst-sat">      
     <title>MPC Satisfaction</title>      
     <p>
@@ -2730,13 +2762,9 @@
 		<solvables/>
 	      </in>
 	      <text content=", then "/>
-	      <eq>
-		<minzT>
-		  <pType/>
-		</minzT>
-		<minzT>
-		  <pType dash="'"/>
-		</minzT>
+	      <eq under="minzT">
+		<pType/>
+		<pType dash="'"/>
 	      </eq>
 	    </grouping>
 	  </tyPre>
@@ -2759,22 +2787,14 @@
 		<solvables/>
 	      </in>
 	      <text content=", and "/>
-	      <eq>
-		<minzT>
-		  <sType/>
-		</minzT>
-		<minzT>
-		  <sType dash="'"/>
-		</minzT>
+	      <eq under="minzT">
+		<sType/>
+		<sType dash="'"/>
 	      </eq>
 	      <text content=", then "/>
-	      <eq>
-		<minz>
-		  <pType/>
-		</minz>
-		<minz>
-		  <pType dash="'"/>
-		</minz>
+	      <eq under="minz">
+		<pType/>
+		<pType dash="'"/>
 	      </eq>
 	    </grouping>
 	  </tyPre>

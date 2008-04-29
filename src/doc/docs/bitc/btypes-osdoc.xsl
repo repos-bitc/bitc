@@ -83,6 +83,20 @@
   <xsl:template match="eqOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>equals;</xsl:text>
+    <xsl:choose>
+      <xsl:when test="@under='minzT'">
+	<xsl:element name="sub">
+	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	  <xsl:text>dtrif;</xsl:text>
+	</xsl:element>
+      </xsl:when>
+      <xsl:when test="@under='minz'">
+	<xsl:element name="sub">
+	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	  <xsl:text>xdtri;</xsl:text>
+	</xsl:element>
+      </xsl:when>
+    </xsl:choose>
   </xsl:template>
   <!-- eq -->
   <xsl:template match="eq" mode="formula">
@@ -3875,7 +3889,7 @@
 	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
 	</xsl:if>
 	<xsl:value-of select="$print.infix.op"/>
-	<xsl:if test="$print.infix.sup">
+	<xsl:if test="$print.infix.sup != ''">
 	  <xsl:element name="sup">
 	    <xsl:if test="$print.infix.sup.noamp != 'yes'">
 	      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -3883,7 +3897,7 @@
 	    <xsl:value-of select="$print.infix.sup"/>
 	  </xsl:element>
 	</xsl:if>
-	<xsl:if test="$print.infix.sub">
+	<xsl:if test="$print.infix.sub != ''">
 	  <xsl:element name="sub">
 	    <xsl:if test="$print.infix.sub.noamp != 'yes'">
 	      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -3909,17 +3923,27 @@
   <!-- Print type op type with implied attributes -->
   <xsl:template name="print.infix.implied">
     <xsl:param name="print.infix.implied.op"/>
-    <xsl:call-template name="print.infix">
-      <xsl:with-param name="print.infix.op">
-	<xsl:value-of select="$print.infix.implied.op"/>
-      </xsl:with-param> 
-      <xsl:with-param name="print.infix.br">
-	<xsl:value-of select="@br"/>	
-      </xsl:with-param>
-      <xsl:with-param name="print.infix.nosp">
-	<xsl:value-of select="@nosp"/>
-      </xsl:with-param>
-    </xsl:call-template>    
+	<xsl:call-template name="print.infix">
+	  <xsl:with-param name="print.infix.op">
+	    <xsl:value-of select="$print.infix.implied.op"/>
+	  </xsl:with-param> 
+	  <xsl:with-param name="print.infix.br">
+	    <xsl:value-of select="@br"/>	
+	  </xsl:with-param>
+	  <xsl:with-param name="print.infix.nosp">
+	    <xsl:value-of select="@nosp"/>
+	  </xsl:with-param>
+	  <xsl:with-param name="print.infix.sub">
+	    <xsl:choose>
+	      <xsl:when test="@under='minzT'">
+		<xsl:text>dtrif;</xsl:text>
+	      </xsl:when>
+	      <xsl:when test="@under='minz'">
+		<xsl:text>xdtri;</xsl:text>
+	      </xsl:when>
+	    </xsl:choose>
+	  </xsl:with-param>
+	</xsl:call-template>    
   </xsl:template>
 
   <!-- Print type op type -->

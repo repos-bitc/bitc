@@ -18,6 +18,9 @@ $derive="$em\\{\\\\vdash\\}";
 $models="$em\\{\\\\models\\}";
 $deriveSp="($derive)$em\\{\\_($br)\\}";
 $modelSp="($models)$em\\{\\_($br)\\}";
+#Unfortunately, the following two cases need different spacings
+$EqSp1="(=)$em\\{\\_(\\{$em\\{\\\\blacktriangledown\\}\\})\\}";
+$EqSp2="(=)$em\\{\\_(\\{$em\\{\\\\bigtriangledown\\}\\})\\}";
 $pcst="$em\\{\\\\hookrightarrow\\}";
 $pcstSp="($pcst)$em\\{\\^($br)\\}";
 $bigcup="\\\\textbf\\{$em\\{\\\\cup\\}\\}";
@@ -71,6 +74,11 @@ while(!eof(F)) {
 	$l =~ s/$modelSp/\\mbox\{$1\\hskip -1.2ex$EM\{\_\{_$MIT\{$2\}\}\}\}/g;
 	#Transitive Right execution
 	#$l =~ s/$transR/$EM\{\\Rightarrow\}\\hskip -2.1ex\{\*\}/g;
+
+	#Equality onder another operator
+	#$l =~ s/=$EM\{\^\{$EM\{\\blacktriangledown\}\}\}/\\mbox\{$1\\hskip -0.9ex\\raise0.25ex\\hbox\{$EM\{\_\{\_$MIT\{$2\}\}\}\}\}/g;
+	$l =~ s/$EqSp1/\\mbox\{$1\\hskip -1.2ex\\lower 0.1ex\\hbox\{$EM\{\_\{\_\{$2\}\}\}\}\}/g;
+	$l =~ s/$EqSp2/\\mbox\{$1\\hskip -1.3ex\\raise 0.1ex\\hbox\{$EM\{\_\{\_\{$2\}\}\}\}\}/g;
 
 	#Polymorphic constraint
 	$l =~ s/$pcstSp/\\mbox\{$1\\hskip -2ex$EM\{\^\{$MIT\{$2\}\}\}\}/g;
