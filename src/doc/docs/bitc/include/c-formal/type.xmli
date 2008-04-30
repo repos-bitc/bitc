@@ -18,21 +18,20 @@
 		<type/>
 	      </TS>
 	    </mapsto>
-	    <eq>
-	      <aSubMap/>
-	      <plural>
-		<SubMap>
-		  <tvar/>
-		  <type dash="'"/>
-		</SubMap>
-	      </plural>
-	    </eq>
 	    <models name="cst">
 	      <assume>
 		<aSubMap/>
 	      </assume>
 	      <type/>
 	    </models>
+	    <eq>
+	      <dom>
+		<aSubMap/>
+	      </dom>
+	      <set>
+		<tvars/>
+	      </set>
+	    </eq>
 	  </tyPre>
 	  <tyConc>
 	    <TDjudge>

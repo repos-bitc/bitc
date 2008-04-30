@@ -325,6 +325,19 @@
   <definition id="constraint-colection">
     <title>Constraint Collection</title>
     <p>
+      We write 
+      <btypes:TYPE>
+	<spset>
+	  <solvable/>
+	</spset>
+      </btypes:TYPE>
+      to denote the set of all maybe types 
+      structurally present in 
+      <btypes:TYPE>
+	<solvable/>
+      </btypes:TYPE>.
+    </p>
+    <p>
       We write
       <btypes:TYPE>
 	<spset>
@@ -343,64 +356,394 @@
 	  </TDjudge>
 	</spset>
       </btypes:TYPE>.
-      That is,
-      <btypes:TYPE>
-	<eq>
-	  <spset>
-	    <TDjudge>
-	      <aExpr/>
+    </p>
+    <btypes:TYPE>
+      <!-- Full maximization -->
+      <VEqns>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <tvar/>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <Empty/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <unit/>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <Empty/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <bool/>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <Empty/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <spset>
+		<type num="1"/>
+	      </spset>
+	      <spset>
+		<type num="2"/>
+	      </spset>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <ref>
+		<type/>
+	      </ref>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <spset>
 	      <type/>
-	    </TDjudge>
-	  </spset>
-	  <set>
-	    <types/>
-	  </set>
-	</eq>
-      </btypes:TYPE> 
-      such that 
+	    </spset>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <mutable>
+		<pType/>
+	      </mutable>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <spset>
+	      <pType/>
+	    </spset>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <spset>
+		<type num="1"/>
+	      </spset>
+	      <spset>
+		<type num="2"/>
+	      </spset>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <spset>
+		<type num="1"/>
+	      </spset>
+	      <spset>
+		<type num="2"/>
+	      </spset>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <mbTop>
+		<tvar/>
+		<pType/>
+	      </mbTop>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <set>
+		<mbTop>
+		  <tvar/>
+		  <pType/>
+		</mbTop>
+	      </set>
+	      <spset>
+		<pType/>
+	      </spset>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <mbFull>
+		<tvar/>
+		<pType/>
+	      </mbFull>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <set>
+		<mbFull>
+		  <tvar/>
+		  <pType/>
+		</mbFull>
+	      </set>
+	      <spset>
+		<pType/>
+	      </spset>
+	    </unin>
+	  </rhs>
+	</equation>
+      </VEqns>
+    </btypes:TYPE>
+    <p>
+      The 
       <btypes:TYPE>
-	<Forall/>
-      </btypes:TYPE>
+	<spset/>
+      </btypes:TYPE> relation is extended to 
       <btypes:TYPE>
-	<mbTop>
-	  <tvar/>
-	  <pType/>
-	</mbTop>
-      </btypes:TYPE> and
+	<collection and="true">
+	  <aTS/>
+	  <gamma/>
+	  <store/>
+	  <solvables/>
+	</collection>
+      </btypes:TYPE> using the
       <btypes:TYPE>
-	<mbFull>
-	  <sType/>
-	  <pType dash="'"/>
-	</mbFull>
-      </btypes:TYPE> used anywhere in the derivation of 
+	<pred name="F"/>
+      </btypes:TYPE> function defined in 
       <btypes:TYPE>
-	<TDjudge>
-	  <aExpr/>
-	  <type/>
-	</TDjudge>
-      </btypes:TYPE>,
-      <btypes:TYPE>
-	<in>
-	  <mbTop>
-	    <tvar/>
-	    <pType/>
-	  </mbTop>
-	  <set>
-	    <types/>
-	  </set>
-	</in>
-      </btypes:TYPE> and
-      <btypes:TYPE>
-	<in>
-	  <mbFull>
-	    <sType/>
-	    <pType dash="'"/>
-	  </mbFull>
-	  <set>
-	    <types/>
-	  </set>
-	</in>
+	<defn tag="ExtToSol"/>
       </btypes:TYPE>.
+    </p>
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <TDjudge>
+		<id/>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </TDjudge>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <spset>
+	      <rhs>
+		<gamma/>
+		<store/>
+		<type/>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </rhs>
+	    </spset>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <TDjudge>
+		<Unit/>
+		<unit/>
+	      </TDjudge>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <spset>
+	      <gamma/>
+	      <store/>
+	    </spset>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <TDjudge>
+		<true/>
+		<bool/>
+	      </TDjudge>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <spset>
+	      <gamma/>
+	      <store/>
+	    </spset>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <TDjudge>
+		<false/>
+		<bool/>
+	      </TDjudge>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <spset>
+	      <gamma/>
+	      <store/>
+	    </spset>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <TDjudge>
+		<hLoc/>
+		<ref>
+		  <type/>
+		</ref>
+	      </TDjudge>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <spset>
+	      <gamma/>
+	      <store/>
+	      <type/>
+	    </spset>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <TDjudge>
+		<sLoc/>
+		<type/>
+	      </TDjudge>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <spset>
+	      <gamma/>
+	      <store/>
+	      <type/>
+	    </spset>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <TDjudge>
+		<lambda>
+		  <id/>
+		  <aExpr/>
+		</lambda>
+		<fn>
+		  <type num="1"/>
+		  <type num="2"/>
+		</fn>
+	      </TDjudge>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <spset>
+	      <Sjudge>
+		<assume>
+		  <extend>
+		    <gamma/>
+		    <mapping>
+		      <id/>
+		      <type num="1"/>
+		    </mapping>
+		  </extend>
+		  <store/>
+		</assume>
+		<tqExpr>
+		  <aExpr/>
+		  <type num="2"/>
+		</tqExpr>
+	      </Sjudge>
+	    </spset>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <TDjudge>
+		<apply>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</apply>
+		<type/>
+	      </TDjudge>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <spset>
+	      <TDjudge>
+		<aExpr num="1"/>
+		<type num="1"/>
+	      </TDjudge>
+	    </spset>
+	  </rhs>
+	</equation>
+	<eqn-cnt>
+	  <rhs>
+	    <unin>
+	      <nothing/>
+	      <spset>
+		<TDjudge Msub="yes">
+		  <aExpr num="2"/>
+		  <type num="2"/>
+		</TDjudge>
+	      </spset>
+	    </unin>
+	  </rhs>
+	</eqn-cnt>
+	<eqn-cnt>
+	  <rhs>
+	    <unin>
+	      <nothing/>
+	      <spset>
+		<type num="a"/>
+		<type num="r"/>
+		<type/>
+	      </spset>
+	    </unin>
+	  </rhs>
+	</eqn-cnt>
+      </VEqns>
+    </btypes:TYPE>
+    <p>
+      Other cases are similar.
     </p>
   </definition>
   <definition id="consistent-typing">

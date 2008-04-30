@@ -220,6 +220,12 @@
   <xsl:template match="set" mode="formula">
     <xsl:call-template name="print.set"/>
   </xsl:template>  
+  <!-- aSet -->
+  <xsl:template match="aSet" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>chi;</xsl:text>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>  
 
   <!-- inOp -->
   <xsl:template match="inOp" mode="formula">
@@ -701,14 +707,13 @@
 <!-- ======================================================================
               Substitutions
      ====================================================================== -->
-  
   <xsl:template match="aSubMap" mode="formula">
-    <!-- <xsl:element name="em"> -->
+    <!--     <xsl:text disable-output-escaping="yes">&amp;</xsl:text> -->
+    <!--     <xsl:text>thetas;</xsl:text> -->
     <xsl:text>S</xsl:text>
     <xsl:call-template name="print.index.dash"/>
-    <!-- </xsl:element> -->
   </xsl:template>
- 
+
   <xsl:template match="SubMap" mode="formula">
     <xsl:text>[</xsl:text>
     <xsl:apply-templates select="*[1]" mode="formula"/>
@@ -2794,6 +2799,33 @@
       </xsl:if>          
     </xsl:element>
   </xsl:template>
+  
+  <xsl:template match="eqn-cnt" mode="formula">
+    <xsl:element name="tr">
+      <xsl:attribute name="valign">top</xsl:attribute>
+      
+      <!-- STUB for LHS -->
+      <xsl:element name="td">
+      </xsl:element>
+      
+      <!-- STUB for the = sign -->
+      <xsl:element name="td">
+      </xsl:element>
+      
+      <!-- RHS -->      
+      <xsl:element name="td">
+	<xsl:attribute name="align">left</xsl:attribute>	  
+	<xsl:apply-templates select="*[1]" mode="formula"/>	
+      </xsl:element>
+      <xsl:if test="@sep">
+	<xsl:element name="br">
+	  <xsl:attribute name="latex.ptsz">
+	    <xsl:value-of select="@sep"/>
+	  </xsl:attribute>
+	</xsl:element>
+      </xsl:if>          
+    </xsl:element>
+  </xsl:template>
 
   <!-- lhs -->
   <xsl:template match="lhs" mode="formula">
@@ -4234,20 +4266,10 @@
 	  <xsl:call-template name="print.space"/>
 	  <xsl:text>|</xsl:text>
 	  <xsl:call-template name="print.space"/>
-<!-- 	  <xsl:element name="em"> -->
-<!-- 	    <xsl:text>, where</xsl:text> -->
-<!-- 	    <xsl:call-template name="print.space"/>	 -->
-<!-- 	  </xsl:element> -->
 	</xsl:if>
 	<xsl:if test = "position() &gt; 2">
 	  <xsl:text>,</xsl:text>
 	  <xsl:call-template name="print.space"/>	
-<!-- 	  <xsl:if test = "position() = last()"> -->
-<!-- 	    <xsl:element name="em"> -->
-<!-- 	      <xsl:text>and</xsl:text> -->
-<!-- 	      <xsl:call-template name="print.space"/>	 -->
-<!-- 	    </xsl:element> -->
-<!-- 	  </xsl:if> -->
 	</xsl:if>	    
 	<xsl:apply-templates select="." mode="formula"/>	
       </xsl:if>

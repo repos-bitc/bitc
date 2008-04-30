@@ -149,6 +149,7 @@
 <!ELEMENT Empty                 EMPTY> <-- \emptyset -->
 <!ELEMENT EmptySubst            EMPTY> <-- <> -->
 <!ELEMENT set                   %anything.group;*> <!-- construct a set -->
+<!ELEMENT aSet                  EMPTY> <!-- construct a set -->
 <!ELEMENT inOp                  EMPTY>
 <!ELEMENT in                    (%anything.group;*, %anyset.group;)>
 <!ELEMENT notinOp               EMPTY>
@@ -176,6 +177,11 @@
 <!ELEMENT range                 (%anyset.group;*)>
 <!ELEMENT mapsto                (%anything.group;, %anything.group;, %anything.group;?)>
 <!-- 1st(2nd) = 3rd -->
+
+<!ATTLIST aSet
+                               num        CDATA       #IMPLIED
+                               dash       CDATA       #IMPLIED
+>
 
 <!ATTLIST unin
                                 br      CDATA    #IMPLIED
@@ -902,6 +908,7 @@
                                 | deref
                                 | let
                                 | set
+                                | aSet
                                 | Paren
                                 | DBrac
                                 | Pair
@@ -1277,7 +1284,9 @@
 <!ELEMENT equation             lhs, rhs>
 <!ATTLIST equation
                                sep         CDATA      #IMPLIED>
+<!ELEMENT eqn-cnt              rhs>
 <!ELEMENT statement            %anything.group;>
+
 <!--  0-thing, where 1, 2, ..., and n --> 
 <!ELEMENT lhs                  %anything.group;*>
 <!ELEMENT rhs                  %anything.group;*>

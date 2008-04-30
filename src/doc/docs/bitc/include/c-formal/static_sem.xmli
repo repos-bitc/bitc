@@ -93,20 +93,33 @@
 	</alternatives>
       </bnf>
       <bnf desc="Constraint Sets">
-	<aCtset/>
+	<aSet/>
 	<alternatives>
 	  <Empty/>
 	  <set>
-	    <plural>
-	      <constraint/>
-	    </plural>
+	    <unspecified/>
 	  </set>
 	  <unin>
-	    <aCtset/>
-	    <aCtset/>
+	    <aSet/>
+	    <aSet/>
 	  </unin>
 	</alternatives>            
       </bnf>
+      <!--       <bnf desc="Sets"> -->
+      <!-- 	<aCtset/> -->
+      <!-- 	<alternatives> -->
+      <!-- 	  <Empty/> -->
+      <!-- 	  <set> -->
+      <!-- 	    <plural> -->
+      <!-- 	      <constraint/> -->
+      <!-- 	    </plural> -->
+      <!-- 	  </set> -->
+      <!-- 	  <unin> -->
+      <!-- 	    <aCtset/> -->
+      <!-- 	    <aCtset/> -->
+      <!-- 	  </unin> -->
+      <!-- 	</alternatives>             -->
+      <!--       </bnf> -->
       <bnf desc="Substitutions">            
 	<aSubMap/>            
 	<alternatives>
@@ -155,6 +168,7 @@
 	<solvable/>
 	<alternatives>
 	  <type/>
+	  <aTS/>
 	  <gamma/>
 	  <store/>
 	  <solvables/>
@@ -210,87 +224,131 @@
 	  <type/>
 	  <solvable/>
 	</in>
-      </btypes:TYPE> as follows.
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <type dash="'"/>
-	</in>
-      </btypes:TYPE> if
-      <btypes:TYPE>
-	<type/>
-      </btypes:TYPE> is structurally present as a part of 
-      <btypes:TYPE>
-	<type dash="'"/>
-      </btypes:TYPE>.
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <gamma/>
-	</in>
-      </btypes:TYPE> if
-      <btypes:TYPE>
-	<Exists>
-	  <in>
-	    <mapping>
-	      <id/>
-	      <type dash="'"/>
-	    </mapping>
-	    <gamma/>
-	  </in>
-	</Exists>          
-      </btypes:TYPE> such that 
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <type dash="'"/>
-	</in>
-      </btypes:TYPE>.
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <store/>
-	</in>
-      </btypes:TYPE> if
-      <btypes:TYPE>
-	<Exists>
-	  <in>
-	    <mapping>
-	      <loc/>
-	      <type dash="'"/>
-	    </mapping>
-	    <store/>
-	  </in>
-	</Exists>          
-      </btypes:TYPE> such that 
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <type dash="'"/>
-	</in>
-      </btypes:TYPE>.
-      We write
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <solvables/>
-	</in>
-      </btypes:TYPE> if
-      <btypes:TYPE>
-	<in>
-	  <type/>
-	  <solvable/>
-	</in>
-      </btypes:TYPE>, for any
-      <btypes:TYPE>
-	<in>       
-	  <solvable/>
-	  <set>
-	    <solvables/>
-	  </set>
-	</in>
-      </btypes:TYPE>.
+      </btypes:TYPE> as follows:
     </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <type dash="'"/>
+	    </in>
+	  </btypes:TYPE> if
+	  <btypes:TYPE>
+	    <type/>
+	  </btypes:TYPE> is structurally present as a part of 
+	  <btypes:TYPE>
+	    <type dash="'"/>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <forall>
+		<tvars/>
+		<type dash="'"/>
+	      </forall>
+	    </in>
+	  </btypes:TYPE> if
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <set>
+		<tvars/>
+	      </set>
+	    </in>
+	  </btypes:TYPE> or
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <type dash="'"/>
+	    </in>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <gamma/>
+	    </in>
+	  </btypes:TYPE> if
+	  <btypes:TYPE>
+	    <Exists>
+	      <in>
+		<mapping>
+		  <id/>
+		  <aTS/>
+		</mapping>
+		<gamma/>
+	      </in>
+	    </Exists>          
+	  </btypes:TYPE> such that 
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <aTS/>
+	    </in>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <store/>
+	    </in>
+	  </btypes:TYPE> if
+	  <btypes:TYPE>
+	    <Exists>
+	      <in>
+		<mapping>
+		  <loc/>
+		  <type dash="'"/>
+		</mapping>
+		<store/>
+	      </in>
+	    </Exists>          
+	  </btypes:TYPE> such that 
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <type dash="'"/>
+	    </in>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <solvables/>
+	    </in>
+	  </btypes:TYPE> if
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <solvable/>
+	    </in>
+	  </btypes:TYPE>, for any
+	  <btypes:TYPE>
+	    <in>       
+	      <solvable/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </in>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
   </definition>
   <definition id="top_ceq">      
     <title>Top-level Copy Compatibility</title>
