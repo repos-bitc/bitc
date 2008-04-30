@@ -3221,6 +3221,14 @@
       </li>
     </ol>
   </lemma>
+  <proof>
+    <p>
+      By straightforward induction on the structure of
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE>.
+    </p>
+  </proof>
   <lemma id="T-sub-min">
     <title>Substitution over mutability Minimization</title>
     <p>
@@ -5790,9 +5798,13 @@
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
-	<text content=", then for any substitution "/>
+      </btypes:TYPE>, 
+      then for any substitution
+      <btypes:TYPE>
 	<aSubMap/>
-	<text content=" such that "/>
+      </btypes:TYPE>
+      such that
+      <btypes:TYPE>
 	<models name="cst">
 	  <assume>
 	    <aSubMap/>
@@ -5804,7 +5816,24 @@
 	    </TDjudge>
 	  </spset>
 	</models>
-	<text content=" and "/>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<CST>
+	  <Subst>
+	    <aSubMap/>
+	    <gamma/>
+	  </Subst>
+	  <Subst>
+	    <aSubMap/>
+	    <store/>
+	  </Subst>
+	  <Subst>
+	    <aSubMap/>
+	    <type/>
+	  </Subst>
+	</CST>
+      </btypes:TYPE>, and
+      <btypes:TYPE>
 	<eq>
 	  <inter>
 	    <ftvs>
@@ -5816,7 +5845,8 @@
 	  </inter>
 	  <Empty/>
 	</eq>
-	<text content=", we have "/>
+      </btypes:TYPE>, we have
+      <btypes:TYPE>
 	<Sjudge name="*">
 	  <assume>
 	    <Subst>
@@ -6323,88 +6353,6 @@
       </li>
     </ol>
   </proof>
-  <lemma id="Consistency-Propagation-2">
-    <title><font color="red">Consistency of Substitution over Type Derivation 2</font></title>
-    <p>
-      If
-      <btypes:TYPE>
-	<CST sp="yes">
-	  <TDjudge>
-	    <aExpr/>
-	    <type/>
-	  </TDjudge>
-	</CST>
-      </btypes:TYPE>,
-      <btypes:TYPE>
-	<Sjudge>
-	  <assume>
-	    <Subst>
-	      <aSubMap/>
-	      <gamma/>
-	    </Subst>
-	    <Subst>
-	      <aSubMap/>
-	      <store/>
-	    </Subst>
-	  </assume>
-	  <tqExpr>
-	    <aExpr/>
-	    <Subst>
-	      <aSubMap/>
-	      <type/>
-	    </Subst>
-	  </tqExpr>
-	</Sjudge>
-      </btypes:TYPE>, and 
-      <btypes:TYPE>
-	<Cst>
-	  <assume/>
-	  <Subst>
-	    <aSubMap/>
-	    <set>
-	      <gamma/>
-	      <store/>
-	      <type/>
-	    </set>
-	  </Subst>
-	</Cst>
-      </btypes:TYPE>, then,
-      <btypes:TYPE>
-	<CST sp="yes">
-	  <Sjudge>
-	    <assume>
-	      <Subst>
-		<aSubMap/>
-		<gamma/>
-	      </Subst>
-	      <Subst>
-		<aSubMap/>
-		<store/>
-	      </Subst>
-	    </assume>
-	    <tqExpr>
-	      <aExpr/>
-	      <Subst>
-		<aSubMap/>
-		<type/>
-	      </Subst>
-	    </tqExpr>
-	  </Sjudge>
-	</CST>
-      </btypes:TYPE>.
-    </p>
-  </lemma>
-  <proof>
-    <p>
-      By induction on the derivation of 
-      <btypes:TYPE>
-	<TDjudge>
-	  <aExpr/>
-	  <type/>
-	</TDjudge>
-      </btypes:TYPE>. 
-    </p>
-  </proof>
   <lemma id="T-VSubstitution">
     <title>Value Substitution</title>
     <p>
@@ -6876,27 +6824,7 @@
 			  <type num="v"/>
 			</TDjudge>
 		      </btypes:TYPE>.
-		    </p>
-		  </li>
-		  <li>
-		    <p>
-		      From cases&nbsp;(1.b.iii and 1.d.ii.A), we have
-		      <btypes:TYPE>
-			<CST sp="true">
-			  <TDjudge>
-			    <lambda>
-			      <id name="z"/>
-			      <aExpr dash="'"/>
-			    </lambda>
-			    <type num="v"/>
-			  </TDjudge>
-			</CST>
-		      </btypes:TYPE>.
-		    </p>
-		  </li>
-		  <li>
-		    <p>
-		      From case&nbsp;(1.d.ii.B) and
+		      Now, using
 		      <btypes:TYPE>
 			<lem tag="T-inversion"/>
 		      </btypes:TYPE>
@@ -6932,9 +6860,21 @@
 		  </li>
 		  <li>
 		    <p>
-		      From case&nbsp;(1.d.ii.C), and 
+		      From cases&nbsp;(1.b.iii and 1.d.ii.A), we have
 		      <btypes:TYPE>
-			<def tag="maybe-consistent"/>
+			<CST sp="true">
+			  <TDjudge>
+			    <lambda>
+			      <id name="z"/>
+			      <aExpr dash="'"/>
+			    </lambda>
+			    <type num="v"/>
+			  </TDjudge>
+			</CST>
+		      </btypes:TYPE>.
+		      Using
+		      <btypes:TYPE>
+			<defn tag="maybe-consistent"/>
 		      </btypes:TYPE>,
 		      it is evident that
 		      <btypes:TYPE>
@@ -6958,6 +6898,32 @@
 			</CST>
 		      </btypes:TYPE>, since this is the previous step
 		      of the derivation.
+		    </p>
+		  </li>
+		  <li>
+		    <p>
+		      From cases&nbsp;(1.b.ii.B and 1.b.ii.C) and
+		      <btypes:TYPE>
+			<defn tag="consistent-typing"/>
+		      </btypes:TYPE>, we obtain
+		      <btypes:TYPE>
+			<Sjudge name="*">
+			  <assume>
+			    <extend>
+			      <gamma/>
+			      <tqExpr>
+				<id name="z"/>
+				<type num="a"/>
+			      </tqExpr>
+			    </extend>
+			    <store/>
+			  </assume>
+			  <tqExpr>
+			    <aExpr dash="'"/>
+			    <type num="r"/>
+			  </tqExpr>
+			</Sjudge>
+		      </btypes:TYPE>.
 		    </p>
 		  </li>
 		  <li>
@@ -7024,7 +6990,7 @@
 		  </li>
 		  <li>
 		    <p>
-		      Using cases&nbsp;(1.d.ii.E and 1.d.ii.F) and
+		      Using cases&nbsp;(1.d.ii.C and 1.d.ii.E) and
 		      <btypes:TYPE>
 			<lem tag="Consistency-Propagation-1"/>
 		      </btypes:TYPE>, we obtain
@@ -7057,12 +7023,72 @@
 		  </li>
 		  <li>
 		    <p>
-		      Using cases&nbsp;(1.d.ii.D, 1.d.ii.G, and 1.c.iii) and
+		      From case&nbsp;(1.b.ii) and 
+		      <btypes:TYPE>
+			<lem tag="Cst-Weakening"/>
+		      </btypes:TYPE> (weakening), we obtain
+		      <btypes:TYPE>
+			<CST>
+			  <gamma/>
+			  <store/>
+			  <Subst>
+			    <aSubMap/>
+			    <type num="v"/>
+			  </Subst>
+			</CST>
+		      </btypes:TYPE>. Using cases&nbsp;(1.c.i, 1.c.ii,
+		      and 1.d.ii.B), this can be written as
+		      <btypes:TYPE>
+			<CST>
+			  <Subst>
+			    <aSubMap/>
+			    <gamma/>
+			  </Subst>
+			  <Subst>
+			    <aSubMap/>
+			    <store/>
+			  </Subst>
+			  <Subst>
+			    <aSubMap/>
+			    <fn>
+			      <type num="a"/>
+			      <type num="r"/>
+			    </fn>
+			  </Subst>
+			</CST>
+		      </btypes:TYPE>, which can be re-arranged as
+		      <btypes:TYPE>
+			<CST>
+			  <Subst>
+			    <aSubMap/>
+			    <extend>
+			      <gamma/>
+			      <tqExpr>
+				<id name="z"/>
+				<type num="a"/>
+			      </tqExpr>
+			    </extend>
+			  </Subst>
+			  <Subst>
+			    <aSubMap/>
+			    <store/>
+			  </Subst>
+			  <Subst>
+			    <aSubMap/>
+			    <type num="r"/>
+			  </Subst>
+			</CST>
+		      </btypes:TYPE>.
+		    </p>
+		  </li>
+		  <li>
+		    <p>
+		      Using cases&nbsp;(1.d.ii.D, 1.d.ii.F, 1.d.ii.G, and 1.c.iii) and
 		      <btypes:TYPE>
 			<lem tag="T-TSubstitution"/>
-		      </btypes:TYPE>, we obtain
+		      </btypes:TYPE> (Type Substitution), we obtain
 		      <btypes:TYPE>
-			<Sjudge>
+			<Sjudge name="*">
 			  <assume>
 			    <Subst>
 			      <aSubMap/>
@@ -7088,9 +7114,9 @@
 			  </tqExpr>
 			</Sjudge>
 		      </btypes:TYPE>.
-		      That is,
+		      That is:
 		      <btypes:TYPE>
-			<Sjudge>
+			<Sjudge name="*">
 			  <assume>
 			    <extend>
 			      <Subst>
@@ -7123,61 +7149,28 @@
 		  </li>
 		  <li>
 		    <p>
-		      Now, from case&nbsp;(1.d.ii.H) and T-Lambda rule, we obtain
+		      Using cases&nbsp;(1.c.i and 1.c.ii), we can
+		      re-write case&nbsp;(1.d.ii.H) as:
 		      <btypes:TYPE>
-			<Sjudge>
+			<Sjudge name="*">
 			  <assume>
-			    <Subst>
-			      <aSubMap/>
+			    <extend>
 			      <gamma/>
-			    </Subst>
-			    <Subst>
-			      <aSubMap/>
-			      <store/>
-			    </Subst>
+			      <tqExpr>
+				<id name="z"/>
+				<Subst>
+				  <aSubMap/>
+				  <type num="a"/>
+				</Subst>
+			      </tqExpr>
+			    </extend>
+			    <store/>
 			  </assume>
 			  <tqExpr>
-			    <lambda>
-			      <id name="z"/>
-			      <aExpr dash="'"/>
-			    </lambda>
-			    <fn>
-			      <Subst>
-				<aSubMap/>
-				<type num="a"/>
-			      </Subst>
-			      <Subst>
-				<aSubMap/>
-				<type num="r"/>
-			      </Subst>
-			    </fn>
-			  </tqExpr>
-			</Sjudge>
-		      </btypes:TYPE>.
-		      That is,
-		      <btypes:TYPE>
-			<Sjudge>
-			  <assume>
+			    <aExpr dash="'"/>
 			    <Subst>
 			      <aSubMap/>
-			      <gamma/>
-			    </Subst>
-			    <Subst>
-			      <aSubMap/>
-			      <store/>
-			    </Subst>
-			  </assume>
-			  <tqExpr>
-			    <lambda>
-			      <id name="z"/>
-			      <aExpr dash="'"/>
-			    </lambda>
-			    <Subst>
-			      <aSubMap/>
-			      <fn>
-				<type num="a"/>
-				<type num="r"/>
-			      </fn>
+			      <type num="r"/>
 			    </Subst>
 			  </tqExpr>
 			</Sjudge>
@@ -7186,8 +7179,51 @@
 		  </li>
 		  <li>
 		    <p>
-		      Using cases&nbsp;(1.c.i and 1.c.ii), we can
-		      re-write case&nbsp;(1.d.ii.I) as:
+		      Now, from case&nbsp;(1.d.ii.I) and T-Lambda rule, we obtain
+		      <btypes:TYPE>
+			<TDjudge>
+			  <lambda>
+			    <id name="z"/>
+			    <aExpr dash="'"/>
+			  </lambda>
+			  <fn>
+			    <Subst>
+			      <aSubMap/>
+			      <type num="a"/>
+			    </Subst>
+			    <Subst>
+			      <aSubMap/>
+			      <type num="r"/>
+			    </Subst>
+			  </fn>
+			</TDjudge>
+		      </btypes:TYPE>.
+		      Since
+		      <btypes:TYPE>
+			<eq>
+			  <fn>
+			    <Subst>
+			      <aSubMap/>
+			      <type num="a"/>
+			    </Subst>
+			    <Subst>
+			      <aSubMap/>
+			      <type num="r"/>
+			    </Subst>
+			  </fn>
+			  <Subst>
+			    <aSubMap/>
+			    <fn>
+			      <type num="a"/>
+			      <type num="r"/>
+			    </fn>
+			  </Subst>
+			  <Subst>
+			    <aSubMap/>
+			    <type num="v"/>
+			  </Subst>
+			</eq>
+		      </btypes:TYPE>, we obtain
 		      <btypes:TYPE>
 			<TDjudge>
 			  <lambda>
@@ -7196,138 +7232,18 @@
 			  </lambda>
 			  <Subst>
 			    <aSubMap/>
-			    <fn>
-			      <type num="a"/>
-			      <type num="r"/>
-			    </fn>
+			    <type num="v"/>
 			  </Subst>
 			</TDjudge>
 		      </btypes:TYPE>.
-		    </p>
-		  </li>
-		  <li>
-		    <p>
-		      From case&nbsp;(1.b.ii) and 
+		      Using
 		      <btypes:TYPE>
-			<lem tag="Cst-Weakening"/>
-		      </btypes:TYPE> (weakening), we have 
+			<defn tag="consistent-typing"/>
+		      </btypes:TYPE> (lambda derivation clause
+		      introduces no new types into the set),
+		      we conclude that
 		      <btypes:TYPE>
-			<Cst>
-			  <assume/>
-			  <set>
-			    <gamma dash="'"/>
-			    <store/>
-			    <Subst>
-			      <aSubMap/>
-			      <type num="v"/>
-			    </Subst>
-			  </set>
-			</Cst>
-		      </btypes:TYPE>, and further since 
-		      <btypes:TYPE>
-			<sub>
-			  <gamma/>
-			  <gamma dash="'"/>
-		        </sub>
-		      </btypes:TYPE>,
-		      <btypes:TYPE>
-			<Cst>
-			  <assume/>
-			  <set>
-			    <gamma/>
-			    <store/>
-			    <Subst>
-			      <aSubMap/>
-			      <type num="v"/>
-			    </Subst>
-			  </set>
-			</Cst>
-		      </btypes:TYPE>.
-		    </p>
-		  </li>
-		  <li>
-		    <p>
-		      From case&nbsp;(1.d.ii.k), using
-		      cases&nbsp;(1.c.i, 1.c.ii, and 1.d.ii.D), we
-		      obtain
-		      <btypes:TYPE>
-			<Cst>
-			  <assume/>
-			  <set>
-			    <Subst>
-			      <aSubMap/>
-			      <gamma/>
-			    </Subst>
-			    <Subst>
-			      <aSubMap/>
-			      <store/>
-			    </Subst>
-			    <Subst>
-			      <aSubMap/>
-			      <fn>
-				<type num="a"/>
-				<type num="r"/>
-			      </fn>
-			    </Subst>
-			  </set>
-			</Cst>
-		      </btypes:TYPE>.
-		    </p>
-		  </li>
-		  <li>
-		    <p>
-		      Since
-		      <btypes:TYPE>
-			<eq>
-			  <type num="v"/>
-			  <fn>
-			    <type num="a"/>
-			    <type num="r"/>
-			  </fn>
-			</eq>
-		      </btypes:TYPE>, 
-		      from cases&nbsp;(1.d.ii.C, 1.d.ii.I, and
-		      1.d.ii.L) and 
-		      <btypes:TYPE>
-			<lem tag="Consistency-Propagation-2"/>
-		      </btypes:TYPE>, we obtain
-		      <btypes:TYPE>
-			<CST sp="yes">
-			  <Sjudge>
-			    <assume>
-			      <Subst>
-				<aSubMap/>
-				<gamma/>
-			      </Subst>
-			      <Subst>
-				<aSubMap/>
-				<store/>
-			      </Subst>
-			    </assume>
-			    <tqExpr>
-			      <lambda>
-				<id name="z"/>
-				<aExpr dash="'"/>
-			      </lambda>
-			      <Subst>
-				<aSubMap/>
-				<fn>
-				  <type num="a"/>
-				  <type num="r"/>
-				</fn>
-			      </Subst>
-			    </tqExpr>
-			  </Sjudge>
-			</CST>
-		      </btypes:TYPE>.
-		    </p>
-		  </li>
-		  <li>
-		    <p>
-		      Again, using cases&nbsp;(3.c.i and 3.c.ii)
-		      on case&nbsp;(3.d.ii.M), we obtain
-		      <btypes:TYPE>
-			<CST sp="yes">
+			<CST>
 			  <TDjudge>
 			    <lambda>
 			      <id name="z"/>
@@ -7335,20 +7251,11 @@
 			    </lambda>
 			    <Subst>
 			      <aSubMap/>
-			      <fn>
-				<type num="a"/>
-				<type num="r"/>
-			      </fn>
+			      <type num="v"/>
 			    </Subst>
 			  </TDjudge>
 			</CST>
-		      </btypes:TYPE>.
-		    </p>
-		  </li>
-		  <li>
-		    <p>
-		      Finally, from cases&nbsp;(3.d.ii.J and
-		      3.d.ii.N), we obtain
+		      </btypes:TYPE>, and therefore,
 		      <btypes:TYPE>
 			<TDjudge name="*">
 			  <lambda>
@@ -7357,13 +7264,10 @@
 			  </lambda>
 			  <Subst>
 			    <aSubMap/>
-			    <fn>
-			      <type num="a"/>
-			      <type num="r"/>
-			    </fn>
+			    <type num="v"/>
 			  </Subst>
 			</TDjudge>
-		      </btypes:TYPE>.
+		      </btypes:TYPE>
 		    </p>
 		  </li>
 		</ol>
