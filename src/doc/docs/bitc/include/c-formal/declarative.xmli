@@ -12,62 +12,110 @@
       We define some definitions used in the enforcement of value
       restriction.
     </p>
-    <example>
-      <p>
-	<btypes:TYPE>
-	  <fnxn name="Value">
-	    <aVal/>
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
+	    <pred name="Value">
+	      <aVal/>
+	    </pred>
+	  </lhs>
+	  <rhs>
 	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Value">
-	    <id/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="Value">
+	      <id/>
+	    </pred>
+	  </lhs>
+	  <rhs>
 	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Value">
-	    <hLoc/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="Value">
+	      <sLoc/>
+	    </pred>
+	  </lhs>
+	  <rhs>
 	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Value">
-	    <sLoc/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="Value">
+	      <hLoc/>
+	    </pred>
+	  </lhs>
+	  <rhs>
 	    <TRUE/>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Value">
-	    <dup>
-	      <aExpr/>
-	    </dup>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="Value">
+	      <dup>
+		<aExpr/>
+	      </dup>
+	    </pred>
+	  </lhs>
+	  <rhs>
 	    <pred name="Value">
 	      <aExpr/>
 	    </pred>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Value">
-	    <deref>
-	      <aExpr/>
-	    </deref>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="Value">
+	      <deref>
+		<aExpr/>
+	      </deref>
+	    </pred>
+	  </lhs>
+	  <rhs>
 	    <pred name="Value">
 	      <aExpr/>
 	    </pred>
-	  </fnxn>
-	  <br/>
-	  <eq>
-	    <grouping>
-	      <pred name="Value">
-		<if>
-		  <aExpr num="1"/>
-		  <aExpr num="2"/>
-		  <aExpr num="3"/>
-		</if>
-	      </pred>
-	      <br/>
-	    </grouping>
-	    <AND>
-	      <pred name="Value">
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="Value">
+	      <deref>
+		<aExpr/>
+	      </deref>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <pred name="Value">
+	      <aExpr/>
+	    </pred>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="Value">
+	      <if>
 		<aExpr num="1"/>
-	      </pred>
+		<aExpr num="2"/>
+		<aExpr num="3"/>
+	      </if>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <pred name="Value">
+	      <aExpr num="1"/>
+	    </pred>
+	  </rhs>
+	</equation>
+	<eqn-cnt>
+	  <rhs>
+	    <AND>
+	      <nothing/>
 	      <pred name="Value">
 		<aExpr num="2"/>
 	      </pred>
@@ -75,13 +123,18 @@
 		<aExpr num="3"/>
 	      </pred>
 	    </AND>
-	  </eq>
-	  <br/>
-	  <fnxn name="Value">
-	    <Pair>
-	      <aExpr num="1"/>
-	      <aExpr num="2"/>
-	    </Pair>
+	  </rhs>
+	</eqn-cnt>
+	<equation>
+	  <lhs>
+	    <pred name="Value">
+	      <Pair>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+	      </Pair>
+	    </pred>
+	  </lhs>
+	  <rhs>
 	    <AND>
 	      <pred name="Value">
 		<aExpr num="1"/>
@@ -90,32 +143,55 @@
 		<aExpr num="2"/>
 	      </pred>
 	    </AND>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Value">
-	    <fst>
-	      <aExpr/>
-	    </fst>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="Value">
+	      <fst>
+		<aExpr/>
+	      </fst>
+	    </pred>
+	  </lhs>
+	  <rhs>
 	    <pred name="Value">
 	      <aExpr/>
 	    </pred>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Value">
-	    <snd>
-	      <aExpr/>
-	    </snd>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="Value">
+	      <snd>
+		<aExpr/>
+	      </snd>
+	    </pred>
+	  </lhs>
+	  <rhs>
 	    <pred name="Value">
 	      <aExpr/>
 	    </pred>
-	  </fnxn>
-	  <br/>
-	  <fnxn name="Value">
-	    <let>
-	      <id/>
-	      <aExpr num="1"/>
-	      <aExpr num="2"/>
-	    </let>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="Value">
+	      <let>
+		<id/>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+	      </let>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="Value">
+	    </pred>
+	  </lhs>
+	  <rhs>
 	    <AND>
 	      <pred name="Value">
 		<aExpr num="1"/>
@@ -124,30 +200,37 @@
 		<aExpr num="2"/>
 	      </pred>
 	    </AND>
-	  </fnxn>
-	  <br/>
-	  <eq>
+	  </rhs>
+	</equation>
+	<equation sep="yes">
+	  <lhs>		
 	    <grouping>
 	      <pred name="Value">
 		<aExpr/>
 	      </pred>
-	      <text content=" (otherwise) "/>
+	      <text content=" (otherwise)"/>
 	    </grouping>
+	  </lhs>
+	  <rhs>
 	    <FALSE/>
-	  </eq>
-	  <br/>
-	  <br/>
-	  <fnxn name="Expansive">
-	    <aExpr/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>		
+	    <pred name="Expansive">
+	      <aExpr/>
+	    </pred>
+	  </lhs>
+	  <rhs>
 	    <NOT>
 	      <pred name="Value">
 		<aExpr/>
 	      </pred>
 	    </NOT>
-	  </fnxn>
-	</btypes:TYPE>
-      </p>
-    </example>
+	  </rhs>
+	</equation>
+      </VEqns>
+    </btypes:TYPE>
   </definition>
   <definition>
     <title>Stack and Heap Typing</title>
