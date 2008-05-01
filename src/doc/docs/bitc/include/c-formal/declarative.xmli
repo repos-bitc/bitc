@@ -232,179 +232,6 @@
       </VEqns>
     </btypes:TYPE>
   </definition>
-  <definition>
-    <title>Stack and Heap Typing</title>
-    <p>
-      A heap <btypes:TYPE><heap/></btypes:TYPE> and a stack
-      <btypes:TYPE><stack/></btypes:TYPE> are said to be <em>well
-	typed</em> with respect to a binding context
-      <btypes:TYPE><gamma/></btypes:TYPE> and store typing
-      <btypes:TYPE><store/></btypes:TYPE>, and written
-      <btypes:TYPE>
-	<Sjudge>
-	  <assume>
-	    <gamma/>
-	    <store/>
-	  </assume>
-	  <plus>
-	    <heap/>
-	    <stack/>
-	  </plus>
-	</Sjudge>
-	<text content=" if "/>
-      </btypes:TYPE>
-    </p>
-    <ol>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <eq>
-	      <dom><store/></dom>
-	      <unin>
-		<dom><heap/></dom>
-		<dom><stack/></dom>
-	      </unin>
-	    </eq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <forall>
-	      <in>
-		<hLoc/>
-		<dom><heap/></dom>
-	      </in>
-	    </forall>
-	    <text content=", "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <Msub>
-		<mapsto><heap/><hLoc/></mapsto>
-		<mapsto><store/><hLoc/></mapsto>
-	      </Msub>
-	    </Sjudge>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <forall>
-	      <in>
-		<sLoc/>
-		<dom><stack/></dom>
-	      </in>
-	    </forall>
-	    <text content=", "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <Msub>
-		<mapsto><stack/><sLoc/></mapsto>
-		<mapsto><store/><sLoc/></mapsto>
-	      </Msub>
-	    </Sjudge>
-	  </btypes:TYPE>
-	</p>
-      </li>
-    </ol>
-  </definition>
-  <definition id="valid-lval">
-    <title>Valid Lvalues</title>
-    <p>
-      We say that an lvalue
-      <btypes:TYPE>
-	<lVal/>
-      </btypes:TYPE> is valid with respect to a stack
-      <btypes:TYPE>
-	<stack/>
-      </btypes:TYPE> and heap
-      <btypes:TYPE>
-	<heap/>
-      </btypes:TYPE>, written
-      <btypes:TYPE>
-	<Sjudge name="v">
-	  <assume>
-	    <plus>
-	      <heap/>
-	      <stack/>
-	    </plus>
-	  </assume>
-	  <lVal/>
-	</Sjudge>
-      </btypes:TYPE> if one of the following conditions hold for some
-      <btypes:TYPE>
-	<path/>
-      </btypes:TYPE>:
-    </p>
-    <ol>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <eq>
-	      <lVal/>
-	      <sLoc/>
-	    </eq>
-	  </btypes:TYPE> or
-	  <btypes:TYPE>
-	    <eq>
-	      <lVal/>
-	      <select>
-		<sLoc/>
-		<path/>
-	      </select>
-	    </eq>
-	  </btypes:TYPE>, where
-	  <btypes:TYPE>
-	    <in>
-	      <sLoc/>
-	      <dom>
-		<stack/>
-	      </dom>
-	    </in>
-	  </btypes:TYPE>.
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <eq>
-	      <lVal/>
-	      <deref>
-		<hLoc/>
-	      </deref>
-	    </eq>
-	  </btypes:TYPE> or
-	  <btypes:TYPE>
-	    <eq>
-	      <lVal/>
-	      <select>
-		<deref>
-		  <hLoc/>
-		</deref>
-		<path/>
-	      </select>
-	    </eq>
-	  </btypes:TYPE>, where
-	  <btypes:TYPE>
-	    <in>
-	      <hLoc/>
-	      <dom>
-		<heap/>
-	      </dom>
-	    </in>
-	  </btypes:TYPE>.
-	</p>
-      </li>
-    </ol>
-  </definition>
   <definition id="constraint-colection">
     <title>Constraint Collection</title>
     <p>
@@ -854,6 +681,224 @@
 	</CST>
       </btypes:TYPE>
     </p>
+  </definition>
+  <definition id="stack-heap-typing">
+    <title>Stack and Heap Typing</title>
+    <p>
+      A heap <btypes:TYPE><heap/></btypes:TYPE> and a stack
+      <btypes:TYPE><stack/></btypes:TYPE> are said to be <em>well
+	typed</em> with respect to a binding context
+      <btypes:TYPE><gamma/></btypes:TYPE> and store typing
+      <btypes:TYPE><store/></btypes:TYPE>, and written
+      <btypes:TYPE>
+	<TDjudge>
+	  <plus>
+	    <heap/>
+	    <stack/>
+	  </plus>
+	</TDjudge>
+	<text content=" if "/>
+      </btypes:TYPE>
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <dom><store/></dom>
+	      <unin>
+		<dom><heap/></dom>
+		<dom><stack/></dom>
+	      </unin>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <forall>
+	      <in>
+		<hLoc/>
+		<dom><heap/></dom>
+	      </in>
+	    </forall>
+	    <text content=", "/>
+	    <TDjudge Msub="yes">
+	      <mapsto><heap/><hLoc/></mapsto>
+	      <mapsto><store/><hLoc/></mapsto>
+	    </TDjudge>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <forall>
+	      <in>
+		<sLoc/>
+		<dom><stack/></dom>
+	      </in>
+	    </forall>
+	    <text content=", "/>
+	    <TDjudge Msub="yes">
+	      <mapsto><stack/><sLoc/></mapsto>
+	      <mapsto><store/><sLoc/></mapsto>
+	    </TDjudge>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+    <p>
+      Similarly, we write
+      <btypes:TYPE>
+	<TDjudge name="*">
+	  <plus>
+	    <heap/>
+	    <stack/>
+	  </plus>
+	</TDjudge>
+	<text content=" if "/>
+      </btypes:TYPE>
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <dom><store/></dom>
+	      <unin>
+		<dom><heap/></dom>
+		<dom><stack/></dom>
+	      </unin>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <forall>
+	      <in>
+		<hLoc/>
+		<dom><heap/></dom>
+	      </in>
+	    </forall>
+	    <text content=", "/>
+	    <TDjudge Msub="yes" name="*">
+	      <mapsto><heap/><hLoc/></mapsto>
+	      <mapsto><store/><hLoc/></mapsto>
+	    </TDjudge>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <forall>
+	      <in>
+		<sLoc/>
+		<dom><stack/></dom>
+	      </in>
+	    </forall>
+	    <text content=", "/>
+	    <TDjudge Msub="yes" name="*">
+	      <mapsto><stack/><sLoc/></mapsto>
+	      <mapsto><store/><sLoc/></mapsto>
+	    </TDjudge>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </definition>
+  <definition id="valid-lval">
+    <title>Valid Lvalues</title>
+    <p>
+      We say that an lvalue
+      <btypes:TYPE>
+	<lVal/>
+      </btypes:TYPE> is valid with respect to a stack
+      <btypes:TYPE>
+	<stack/>
+      </btypes:TYPE> and heap
+      <btypes:TYPE>
+	<heap/>
+      </btypes:TYPE>, written
+      <btypes:TYPE>
+	<Sjudge name="v">
+	  <assume>
+	    <plus>
+	      <heap/>
+	      <stack/>
+	    </plus>
+	  </assume>
+	  <lVal/>
+	</Sjudge>
+      </btypes:TYPE> if one of the following conditions hold for some
+      <btypes:TYPE>
+	<path/>
+      </btypes:TYPE>:
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <lVal/>
+	      <sLoc/>
+	    </eq>
+	  </btypes:TYPE> or
+	  <btypes:TYPE>
+	    <eq>
+	      <lVal/>
+	      <select>
+		<sLoc/>
+		<path/>
+	      </select>
+	    </eq>
+	  </btypes:TYPE>, where
+	  <btypes:TYPE>
+	    <in>
+	      <sLoc/>
+	      <dom>
+		<stack/>
+	      </dom>
+	    </in>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <lVal/>
+	      <deref>
+		<hLoc/>
+	      </deref>
+	    </eq>
+	  </btypes:TYPE> or
+	  <btypes:TYPE>
+	    <eq>
+	      <lVal/>
+	      <select>
+		<deref>
+		  <hLoc/>
+		</deref>
+		<path/>
+	      </select>
+	    </eq>
+	  </btypes:TYPE>, where
+	  <btypes:TYPE>
+	    <in>
+	      <hLoc/>
+	      <dom>
+		<heap/>
+	      </dom>
+	    </in>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
   </definition>
   <lemma id="T-inversion">
     <title>Inversion of Typing Relation</title>
@@ -7487,13 +7532,13 @@
     <p>
       If
       <btypes:TYPE>
-	<Sjudge>
+	<Sjudge name="*">
 	  <assume>
 	    <extend>
 	      <gamma/>
 	      <tqExpr>
 		<id/>
-		<type num="0"/>
+		<type num="x"/>
 	      </tqExpr>
 	    </extend>
 	    <store/>
@@ -7503,24 +7548,18 @@
 	    <type/>
 	  </tqExpr>
 	</Sjudge>
-	<text content=", and for some "/>
-	<supeq>
-	  <store dash="'"/>
-	  <store/>
-	</supeq>
-	<text content=", "/>
-	<tqExpr>
-	  <mapsto>
-	    <store/>
-	    <sLoc/>
-	    <type num="0"/>
-	  </mapsto>
-	</tqExpr>
-	<text content=", then "/>
-	<Sjudge>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
+	<Sjudge name="*">
 	  <assume>
 	    <gamma/>
-	    <store dash="'"/>
+	    <extend>
+	      <store/>
+	      <mapping>
+		<sLoc/>
+		<type num="x"/>
+	      </mapping>
+	    </extend>
 	  </assume>
 	  <tqExpr>
 	    <subst>
@@ -7558,156 +7597,146 @@
 	ref="T-VSubstitution"/>.
     </p>
   </proof>
-  <lemma id="T-sh-safety">
-    <title>Stack and Heap Assignment</title>
-    <ol>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <text content="If "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <plus>
-		<extend>
-		  <heap/>
-		  <mapping>
-		    <hLoc/>
-		    <aVal/>
-		  </mapping>
-		</extend>
-		<stack/>
-	      </plus>
-	    </Sjudge>
-	    <text content=", and "/>
-	    <Msub>
-	      <mapsto>
-		<store/>
-		<hLoc/>
-	      </mapsto>
-	      <type/>
-	    </Msub>
-	    <text content=", and "/>
-	    <TDjudge>
-	      <aVal dash="'"/>
-	      <type/>
-	    </TDjudge>
-	    <text content=", then, "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <plus>
-		<extend>
-		  <heap/>
-		  <mapping>
-		    <hLoc/>
-		    <aVal dash="'"/>
-		  </mapping>
-		</extend>
-		<stack/>
-	      </plus>
-	    </Sjudge>
-	  </btypes:TYPE>.
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <text content="Similarly, if "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <plus>
-		<heap/>
-		<extend>
-		  <stack/>
-		  <mapping>
-		    <sLoc/>
-		    <aVal/>
-		  </mapping>
-		</extend>
-	      </plus>
-	    </Sjudge>
-	    <text content=" and  "/>
-	    <Msub>
-	      <mapsto>
-		<store/>
-		<sLoc/>
-	      </mapsto>
-	      <type/>
-	    </Msub>
-	    <text content=", and "/>
-	    <TDjudge>
-	      <aVal dash="'"/>
-	      <type/>
-	    </TDjudge>
-	    <text content=", then, "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <plus>
-		<heap/>
-		<extend>
-		  <stack/>
-		  <mapping>
-		    <sLoc/>
-		    <aVal dash="'"/>
-		  </mapping>
-		</extend>
-	      </plus>
-	    </Sjudge>
-	  </btypes:TYPE>.
-	</p>
-      </li>
-    </ol>
-  </lemma>
-  <proof>
-    <p>
-      Immediate from the definition of stack and heap typing.
-    </p>
-  </proof>
+<!--   <lemma id="T-sh-safety"> -->
+<!--     <title>Stack and Heap Assignment</title> -->
+<!--     <ol> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <text content="If "/> -->
+<!-- 	    <Sjudge> -->
+<!-- 	      <assume> -->
+<!-- 		<gamma/> -->
+<!-- 		<store/> -->
+<!-- 	      </assume> -->
+<!-- 	      <plus> -->
+<!-- 		<extend> -->
+<!-- 		  <heap/> -->
+<!-- 		  <mapping> -->
+<!-- 		    <hLoc/> -->
+<!-- 		    <aVal/> -->
+<!-- 		  </mapping> -->
+<!-- 		</extend> -->
+<!-- 		<stack/> -->
+<!-- 	      </plus> -->
+<!-- 	    </Sjudge> -->
+<!-- 	    <text content=", and "/> -->
+<!-- 	    <Msub> -->
+<!-- 	      <mapsto> -->
+<!-- 		<store/> -->
+<!-- 		<hLoc/> -->
+<!-- 	      </mapsto> -->
+<!-- 	      <type/> -->
+<!-- 	    </Msub> -->
+<!-- 	    <text content=", and "/> -->
+<!-- 	    <TDjudge> -->
+<!-- 	      <aVal dash="'"/> -->
+<!-- 	      <type/> -->
+<!-- 	    </TDjudge> -->
+<!-- 	    <text content=", then, "/> -->
+<!-- 	    <Sjudge> -->
+<!-- 	      <assume> -->
+<!-- 		<gamma/> -->
+<!-- 		<store/> -->
+<!-- 	      </assume> -->
+<!-- 	      <plus> -->
+<!-- 		<extend> -->
+<!-- 		  <heap/> -->
+<!-- 		  <mapping> -->
+<!-- 		    <hLoc/> -->
+<!-- 		    <aVal dash="'"/> -->
+<!-- 		  </mapping> -->
+<!-- 		</extend> -->
+<!-- 		<stack/> -->
+<!-- 	      </plus> -->
+<!-- 	    </Sjudge> -->
+<!-- 	  </btypes:TYPE>. -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <text content="Similarly, if "/> -->
+<!-- 	    <Sjudge> -->
+<!-- 	      <assume> -->
+<!-- 		<gamma/> -->
+<!-- 		<store/> -->
+<!-- 	      </assume> -->
+<!-- 	      <plus> -->
+<!-- 		<heap/> -->
+<!-- 		<extend> -->
+<!-- 		  <stack/> -->
+<!-- 		  <mapping> -->
+<!-- 		    <sLoc/> -->
+<!-- 		    <aVal/> -->
+<!-- 		  </mapping> -->
+<!-- 		</extend> -->
+<!-- 	      </plus> -->
+<!-- 	    </Sjudge> -->
+<!-- 	    <text content=" and  "/> -->
+<!-- 	    <Msub> -->
+<!-- 	      <mapsto> -->
+<!-- 		<store/> -->
+<!-- 		<sLoc/> -->
+<!-- 	      </mapsto> -->
+<!-- 	      <type/> -->
+<!-- 	    </Msub> -->
+<!-- 	    <text content=", and "/> -->
+<!-- 	    <TDjudge> -->
+<!-- 	      <aVal dash="'"/> -->
+<!-- 	      <type/> -->
+<!-- 	    </TDjudge> -->
+<!-- 	    <text content=", then, "/> -->
+<!-- 	    <Sjudge> -->
+<!-- 	      <assume> -->
+<!-- 		<gamma/> -->
+<!-- 		<store/> -->
+<!-- 	      </assume> -->
+<!-- 	      <plus> -->
+<!-- 		<heap/> -->
+<!-- 		<extend> -->
+<!-- 		  <stack/> -->
+<!-- 		  <mapping> -->
+<!-- 		    <sLoc/> -->
+<!-- 		    <aVal dash="'"/> -->
+<!-- 		  </mapping> -->
+<!-- 		</extend> -->
+<!-- 	      </plus> -->
+<!-- 	    </Sjudge> -->
+<!-- 	  </btypes:TYPE>. -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--     </ol> -->
+<!--   </lemma> -->
+<!--   <proof> -->
+<!--     <p> -->
+<!--       Immediate from the definition of stack and heap typing. -->
+<!--     </p> -->
+  <!--   </proof> -->
   <lemma id="T-preservation">
     <title>Preservation</title>
     <p>
+      If
       <btypes:TYPE>
-	<text content="If "/>
-	<Sjudge>
-	  <assume>
-	    <gamma/>
-	    <store/>
-	  </assume>
-	  <tqExpr>
-	    <aExpr/>
-	    <type/>
-	  </tqExpr>
-	</Sjudge>
-	<text content=" and "/>
-	<Sjudge>
-	  <assume>
-	    <gamma/>
-	    <store/>
-	  </assume>
+	<TDjudge name="*">
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE> and 
+      <btypes:TYPE>
+	<TDjudge name="*">
 	  <plus>
 	    <heap/>
 	    <stack/>
 	  </plus>
-	</Sjudge>
-	<text content=" then, "/>
-      </btypes:TYPE>
+	</TDjudge>
+      </btypes:TYPE> then,
     </p>
     <ol>
       <li>
 	<p>
+	  If
 	  <btypes:TYPE>
-	    <text content="If "/>
 	    <leval>
 	      <opState>
 		<stack/>
@@ -7720,13 +7749,17 @@
 		<aExpr dash="'"/>
 	      </opState>
 	    </leval>
-	    <text content=", then, there exists a "/>
+	  </btypes:TYPE>, then,
+	  <btypes:TYPE>
+	    <Exists/>
 	    <supeq>
 	      <store dash="'"/>
 	      <store/>
 	    </supeq>
-	    <text content=" such that "/>
-	    <Sjudge>
+	  </btypes:TYPE>
+	  such that
+	  <btypes:TYPE>
+	    <Sjudge name="*">
 	      <assume>
 		<gamma/>
 		<store dash="'"/>
@@ -7736,8 +7769,10 @@
 		<type/>
 	      </tqExpr>
 	    </Sjudge>
-	    <text content=" and "/>
-	    <Sjudge>
+	  </btypes:TYPE>
+	  and
+	  <btypes:TYPE>
+	    <Sjudge name="*">
 	      <assume>
 		<gamma/>
 		<store dash="'"/>
@@ -7747,14 +7782,13 @@
 		<stack dash="'"/>
 	      </plus>
 	    </Sjudge>
-	    <text content="."/>
-	  </btypes:TYPE>
+	  </btypes:TYPE>.
 	</p>
       </li>
       <li>
 	<p>
+	  If
 	  <btypes:TYPE>
-	    <text content="If "/>
 	    <eval>
 	      <opState>
 		<stack/>
@@ -7767,24 +7801,29 @@
 		<aExpr dash="'"/>
 	      </opState>
 	    </eval>
-	    <text content=", there exists a "/>
+	  </btypes:TYPE>, then,
+	  <btypes:TYPE>
+	    <Exists/>
 	    <supeq>
 	      <store dash="'"/>
 	      <store/>
 	    </supeq>
-	    <text content=" such that "/>
-	    <Sjudge>
+	  </btypes:TYPE>
+	  such that
+	  <btypes:TYPE>
+	    <Sjudge name="*">
 	      <assume>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
-	      <tqExpr>
+	      <Msub>
 		<aExpr dash="'"/>
 		<type dash="'"/>
-	      </tqExpr>
+	      </Msub>
 	    </Sjudge>
-	    <text content=",  "/>
-	    <Sjudge>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <Sjudge name="*">
 	      <assume>
 		<gamma/>
 		<store dash="'"/>
@@ -7794,17 +7833,16 @@
 		<stack dash="'"/>
 	      </plus>
 	    </Sjudge>
-	    <text content=" and "/>
-	    <eq>
-	      <minz>
-		<type/>
-	      </minz>
-	      <minz>
-		<type dash="'"/>
-	      </minz>
-	    </eq>
-	    <text content="."/>
-	  </btypes:TYPE>
+	  </btypes:TYPE>, and 
+	  <!-- This cannot be replaced directly with an Msub at the
+	  derivation as the type `t' is obtained from a previous
+	  derivation, and can be a mutable one -->
+	  <btypes:TYPE>
+	    <Msub>
+	      <type/>
+	      <type dash="'"/>
+	    </Msub>
+	  </btypes:TYPE>.
 	</p>
       </li>
     </ol>
@@ -7835,64 +7873,136 @@
       </li>
       <li>
 	<p>
-	  Case T-Sloc: Only right execution is applicable.
-	  We have
+	  Case T-Sloc: 
 	  <btypes:TYPE>
 	    <eq>
 	      <aExpr/>
 	      <sLoc/>
 	    </eq>
-	    <text content=" and "/>
-	    <tqExpr>
-	      <mapsto>
-		<store/>
-		<sLoc/>
-	      </mapsto>
-	      <type/>
-	    </tqExpr>
-	  </btypes:TYPE>.
-	  The only applicable step is E-Rval, and we have
-	  <btypes:TYPE>
-	    <eq>
-	      <aExpr dash="'"/>
-	      <mapsto>
-		<stack/>
-		<sLoc/>
-	      </mapsto>
-	    </eq>
-	  </btypes:TYPE>.
-	  From the definition of stack typing, we have:
-	  <btypes:TYPE>
-	    <Msub>
-	      <mapsto>
-		<stack/>
-		<sLoc/>
-	      </mapsto>
-	      <mapsto>
-		<store/>
-		<sLoc/>
-	      </mapsto>
-	    </Msub>
-	  </btypes:TYPE>
-	  and thus
-	  <btypes:TYPE>
-	    <Msub>
-	      <aExpr dash="'"/>
-	      <type/>
-	    </Msub>
-	  </btypes:TYPE>
-	  which implies
-	  <btypes:TYPE>
-	    <eq>
-	      <minz>
-		<type/>
-	      </minz>
-	      <minz>
-		<type dash="'"/>
-	      </minz>
-	    </eq>
 	  </btypes:TYPE>.
 	</p>
+	<btypes:TYPE>
+	  <Hrules rowsep="4pt" colsep="1">
+	    <tyRule>
+	      <tyPre>
+		<mapsto>
+		  <store/>
+		  <sLoc/>
+		  <type/>
+		</mapsto>
+	      </tyPre>
+	      <tyConc>
+		<TDjudge>
+		  <sLoc/>
+		  <type/>
+		</TDjudge>
+	      </tyConc>
+	    </tyRule>
+	  </Hrules>
+	</btypes:TYPE>
+	<ol>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<levalOp/> 
+	      </btypes:TYPE> None Applicable.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<evalOp/> 
+	      </btypes:TYPE> E-Rval:
+	    </p>
+	    <btypes:TYPE>
+	      <Hrules rowsep="4pt" colsep="1">
+		<opRule>
+		  <opPre>
+		    <mapsto>
+		      <stack/>            
+		      <sLoc/>
+		      <aVal/>
+		    </mapsto>
+		  </opPre>
+		  <opConc>
+		    <eval>
+		      <opState>
+			<stack/>
+			<heap/>
+			<sLoc/>
+		      </opState>
+		      <opState>
+			<stack/>
+			<heap/>
+			<aVal/>
+		      </opState>
+		    </eval>
+		  </opConc>
+		</opRule>
+	      </Hrules>
+	    </btypes:TYPE>
+	    <ol>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <eq>
+		      <aExpr dash="'"/>
+		      <mapsto>
+			<stack/>
+			<sLoc/>
+		      </mapsto>
+		      <aVal/>
+		    </eq>
+		  </btypes:TYPE>,
+		  <btypes:TYPE>
+		    <eq>
+		      <heap dash="'"/>
+		      <heap/>
+		    </eq>
+		  </btypes:TYPE>, and
+		  <btypes:TYPE>
+		    <eq>
+		      <stack dash="'"/>
+		      <stack/>
+		    </eq>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From 
+		  <btypes:TYPE>
+		    <TDjudge name="*">
+		      <plus>
+			<heap/>
+			<stack/>
+		      </plus>
+		    </TDjudge>
+		  </btypes:TYPE> and
+		  <btypes:TYPE>
+		    <defn tag="stack-heap-typing"/>
+		  </btypes:TYPE> (Stack and Heap Typing), we have
+		  <btypes:TYPE>
+		    <TDjudge Msub="yes" name="*">
+		      <mapsto>
+			<stack/>
+			<sLoc/>
+		      </mapsto>
+		      <type/>
+		    </TDjudge>
+		  </btypes:TYPE>. 
+		  That is,
+		  <btypes:TYPE>
+		    <TDjudge Msub="yes" name="*">
+		      <aVal/>
+		      <type/>
+		    </TDjudge>
+		  </btypes:TYPE>. 
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	</ol>
       </li>
 <!--       <li> -->
 <!-- 	<p> -->
