@@ -172,6 +172,8 @@
 <!ELEMENT Inter                 (%anyset.group;*, %anyset.group;)>
 <!ELEMENT diffOp                EMPTY>
 <!ELEMENT diff                  (%anyset.group;*, %anyset.group;)>
+<!ELEMENT mutexOp                EMPTY>
+<!ELEMENT mutex                 (%anyset.group;*, %anyset.group;)>
 <!ELEMENT map                   (%anything.group;%anyset.group;)>
 <!ELEMENT dom                   (%anyset.group;*)>
 <!ELEMENT range                 (%anyset.group;*)>

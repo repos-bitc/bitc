@@ -461,7 +461,9 @@
 	      <type/>
 	    </pred>
 	    <eq>
-	      <tvars name="alpha"/>
+	      <set>
+		<tvars name="alpha"/>
+	      </set>
 	      <diff>
 		<ftvs><type/></ftvs>
 		<ftvs><gamma/></ftvs>

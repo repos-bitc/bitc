@@ -523,8 +523,6 @@
 	    </eq>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
 	<tyRule>
 	  <tyPre>
 	    <grouping>
@@ -551,52 +549,51 @@
 	    </eq>
 	  </tyConc>
 	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <inter>
-		<dom>
-		  <aSubMap dash="'"/>
-		</dom>
-		<ftvs>
-		  <aSubMap/>
-		</ftvs>
-	      </inter>
-	      <Empty/>
-	    </eq>
-	    <grouping>
-	      <Forall/>
-	      <in>
-		<SubMap>
-		  <tvar/>
-		  <type/>
-		</SubMap>
-		<aSubMap dash="'"/>
-	      </in>
-	      <text content=", "/>
-	      <in>
-		<SubMap>
-		  <tvar/>
-		  <Subst>
-		    <aSubMap/>
-		    <type/>
-		  </Subst>
-		</SubMap>
-		<aSubMap dash="''"/>
-	      </in>
-	    </grouping>	      
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<aSubMap dash="'"/>
-	      </Subst>
-	      <aSubMap dash="''"/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
       </Hrules>
+<!--       <Hrules rowsep="4pt" colsep="2"> -->
+<!-- 	<tyRule> -->
+<!-- 	  <tyPre> -->
+<!-- 	    <mutex> -->
+<!-- 	      <dom> -->
+<!-- 		<aSubMap dash="'"/> -->
+<!-- 	      </dom> -->
+<!-- 	      <ftvs> -->
+<!-- 		<aSubMap/> -->
+<!-- 	      </ftvs> -->
+<!-- 	    </mutex> -->
+<!-- 	    <grouping> -->
+<!-- 	      <Forall/> -->
+<!-- 	      <in> -->
+<!-- 		<SubMap> -->
+<!-- 		  <tvar/> -->
+<!-- 		  <type/> -->
+<!-- 		</SubMap> -->
+<!-- 		<aSubMap dash="'"/> -->
+<!-- 	      </in> -->
+<!-- 	      <text content=", "/> -->
+<!-- 	      <in> -->
+<!-- 		<SubMap> -->
+<!-- 		  <tvar/> -->
+<!-- 		  <Subst> -->
+<!-- 		    <aSubMap/> -->
+<!-- 		    <type/> -->
+<!-- 		  </Subst> -->
+<!-- 		</SubMap> -->
+<!-- 		<aSubMap dash="''"/> -->
+<!-- 	      </in> -->
+<!-- 	    </grouping>	       -->
+<!-- 	  </tyPre> -->
+<!-- 	  <tyConc> -->
+<!-- 	    <eq> -->
+<!-- 	      <Subst> -->
+<!-- 		<aSubMap/> -->
+<!-- 		<aSubMap dash="'"/> -->
+<!-- 	      </Subst> -->
+<!-- 	      <aSubMap dash="''"/> -->
+<!-- 	    </eq> -->
+<!-- 	  </tyConc> -->
+<!-- 	</tyRule> -->
+<!--       </Hrules> -->
     </btypes:TYPE>
   </font>
   <caption><font size="small">Substitution Rules</font></caption>

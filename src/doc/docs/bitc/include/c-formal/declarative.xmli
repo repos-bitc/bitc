@@ -2472,17 +2472,14 @@
 		  <gamma/>
 		</supeq>
 		<text content=" and "/>
-		<eq>
-		  <inter>
-		    <ftvs>
-		      <gamma dash="'"/>
-		    </ftvs>
-		    <ftvs>
-		      <tvars name="alpha"/>
-		    </ftvs>
-		  </inter>
-		  <Empty/>
-		</eq>
+		<mutex>
+		  <ftvs>
+		    <gamma dash="'"/>
+		  </ftvs>
+		  <set>
+		    <tvars name="alpha"/>
+		  </set>
+		</mutex>
 		<text content=" then "/>
 		<Sjudge>
 		  <assume>
@@ -2509,17 +2506,14 @@
 		  <store/>
 		</supeq>
 		<text content=" and "/>
-		<eq>
-		  <inter>
-		    <ftvs>
-		      <store dash="'"/>
-		    </ftvs>
-		    <ftvs>
-		      <tvars name="alpha"/>
-		    </ftvs>
-		  </inter>
-		  <Empty/>
-		</eq>
+		<mutex>
+		  <ftvs>
+		    <store dash="'"/>
+		  </ftvs>
+		  <set>
+		    <tvars name="alpha"/>
+		  </set>
+		</mutex>
 		<text content=" then "/>
 		<Sjudge>
 		  <assume>
@@ -3510,17 +3504,14 @@
       <!-- Only S1 needs to be idempotent in this case -->
       If
       <btypes:TYPE>
-	<eq>
-	  <inter>
-	    <dom>
-	      <aSubMap num="2"/>
-	    </dom>
-	    <ftvs>
-	      <aSubMap num="1"/>
-	    </ftvs>
-	  </inter>
-	  <Empty/>
-	</eq>
+	<mutex>
+	  <dom>
+	    <aSubMap num="2"/>
+	  </dom>
+	  <ftvs>
+	    <aSubMap num="1"/>
+	  </ftvs>
+	</mutex>
       </btypes:TYPE>, 
       then, 
       <br/>
@@ -3667,17 +3658,14 @@
 	      <p>
 		Since
 		<btypes:TYPE>
-		  <eq>
-		    <inter>
-		      <dom>
-			<aSubMap num="2"/>
-		      </dom>
-		      <ftvs>
-			<aSubMap num="1"/>
-		      </ftvs>
-		    </inter>
-		    <Empty/>
-		  </eq>
+		  <mutex>
+		    <dom>
+		      <aSubMap num="2"/>
+		    </dom>
+		    <ftvs>
+		      <aSubMap num="1"/>
+		    </ftvs>
+		  </mutex>
 		</btypes:TYPE>, we have
 		<btypes:TYPE>
 		  <notin>
@@ -3712,17 +3700,14 @@
 	      <p>
 		Further, since
 		<btypes:TYPE>
-		  <eq>
-		    <inter>
-		      <dom>
-			<aSubMap num="2"/>
-		      </dom>
-		      <ftvs>
-			<aSubMap num="1"/>
-		      </ftvs>
-		    </inter>
-		    <Empty/>
-		  </eq>
+		  <mutex>
+		    <dom>
+		      <aSubMap num="2"/>
+		    </dom>
+		    <ftvs>
+		      <aSubMap num="1"/>
+		    </ftvs>
+		  </mutex>
 		</btypes:TYPE>, we have
 		<btypes:TYPE>
 		  <eq>
@@ -4947,19 +4932,16 @@
 	</eq>
       </btypes:TYPE>, where,
       <btypes:TYPE>
-	<eq>
-	  <inter>
-	    <set>
-	      <tvars name="beta"/>
-	    </set>
-	    <ftvs>
-	      <gamma/>
-	      <store/>
-	      <type/>
-	    </ftvs>
-	  </inter>
-	  <Empty/>
-	</eq>
+	<mutex>
+	  <set>
+	    <tvars name="beta"/>
+	  </set>
+	  <ftvs>
+	    <gamma/>
+	    <store/>
+	    <type/>
+	  </ftvs>
+	</mutex>
       </btypes:TYPE>, then
       <btypes:TYPE>
 	<Sjudge>
@@ -4996,16 +4978,17 @@
     </p>
   </proof>
   <lemma id="cst-streangthening">
-    <title><font color="blue">Strengthening of Consistency</font></title>
+    <title>Strengthening of Consistency</title>
     <p>
-      If:
+      If
     </p>
     <ol>
       <li>
 	<p>
 	  <btypes:TYPE>
 	    <CST>
-	      <solvables num="b"/>
+	      <type num="1"/>
+	      <type num="2"/>
 	    </CST>
 	  </btypes:TYPE>
 	</p>
@@ -5013,14 +4996,13 @@
       <li>
 	<p>
 	  <btypes:TYPE>
-	    <subeq>
+	    <models name="cst">
+	      <aSubMap/>
 	      <set>
-		<solvables num="a"/>
+		<type num="1"/>
+		<type num="2"/>
 	      </set>
-	      <set>
-		<solvables num="b"/>
-	      </set>
-	    </subeq>
+	    </models>
 	  </btypes:TYPE>
 	</p>
       </li>
@@ -5031,9 +5013,7 @@
 	      <assume/>
 	      <Subst>
 		<aSubMap/>
- 		<set>
-		  <solvables num="a"/>
-		</set>
+		<type num="1"/>
 	      </Subst>
 	    </Cst>
 	  </btypes:TYPE>
@@ -5044,36 +5024,15 @@
 	  <btypes:TYPE>
 	    <subeq>
 	      <inter>
-		<dom>
+		<ftvs>
 		  <aSubMap/>
-		</dom>
+		</ftvs>
 		<ftvs>
-		  <solvables num="b"/>
+		  <type num="2"/>
 		</ftvs>
 	      </inter>
 	      <ftvs>
-		<solvables num="a"/>
-	      </ftvs>
-	    </subeq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <subeq>
-	      <inter>
-		<ftvs>
-		  <range>
-		    <aSubMap/>
-		  </range>
-		</ftvs>
-		<ftvs>
-		  <solvables num="b"/>
-		</ftvs>
-	      </inter>
-	      <ftvs>
-		<solvables num="a"/>
+		<type num="1"/>
 	      </ftvs>
 	    </subeq>
 	  </btypes:TYPE>
@@ -5081,125 +5040,418 @@
       </li>
     </ol>
     <p>
-      Then,
+      Then, 
       <btypes:TYPE>
-	<Cst>
-	  <assume/>
+	<CST>
 	  <Subst>
 	    <aSubMap/>
-	    <set>
-	      <solvables num="b"/>
-	    </set>
+	    <type num="1"/>
 	  </Subst>
-	</Cst>
+	  <Subst>
+	    <aSubMap/>
+	    <type num="2"/>
+	  </Subst>
+	</CST>
       </btypes:TYPE>
     </p>
   </lemma>
   <proof>
+    <p>
+      By induction on the derivation of
+      <btypes:TYPE>
+	<Subst>
+	  <aSubMap/>
+	  <type num="2"/>
+	</Subst>
+      </btypes:TYPE>.
+    </p>
     <ol>
       <li>
-	<p>
-	  <btypes:TYPE>
-	    <Forall/>
-	    <in>
-	      <mbTop>
-		<tvar/>
-		<pType num="sb"/>
-	      </mbTop>
-	      <Subst>
-		<aSubMap/>
-		<solvables num="b"/>
-	      </Subst>
-	    </in>
-	  </btypes:TYPE> and
-	  <btypes:TYPE>
-	    <Forall/>
-	    <in>
-	      <mbTop>
-		<tvar/>
-		<pType num="sb" dash="'"/>
-	      </mbTop>
-	      <Subst>
-		<aSubMap/>
-		<solvables num="b"/>
-	      </Subst>
-	    </in>
-	  </btypes:TYPE>, we could have any of the following possibilities:
-	</p>
+	<btypes:TYPE>
+	  <Hrules>
+	    <text content="Case:"/>
+	    <tyRule>
+	      <tyPre>
+		<notin>
+		  <SubMap>
+		    <tvar/>
+		    <type/>
+		  </SubMap>
+		  <aSubMap/>
+		</notin>
+	      </tyPre>
+	      <tyConc>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <tvar/>
+		  </Subst>
+		  <tvar/>
+		</eq>
+	      </tyConc>
+	    </tyRule>
+	  </Hrules>
+	</btypes:TYPE>
 	<ol>
 	  <li>
 	    <p>
-	      Case
+	      If
 	      <btypes:TYPE>
 		<notin>
 		  <tvar/>
 		  <ftvs>
-		    <range>
+		    <Subst>
 		      <aSubMap/>
-		    </range>
+		      <type num="1"/>
+		    </Subst>
 		  </ftvs>
 		</notin>
-	      </btypes:TYPE>:
+	      </btypes:TYPE>, the result is evident from
+	      assumption&nbsp;(3).
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Consider the case
+	      <btypes:TYPE>
+		<in>
+		  <tvar/>
+		  <ftvs>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="1"/>
+		    </Subst>
+		  </ftvs>
+		</in>
+	      </btypes:TYPE>.
 	    </p>
 	    <ol>
 	      <li>
 		<p>
-		  In this case, 
+		  Supose
 		  <btypes:TYPE>
-		    <Exists/>
 		    <in>
-		      <mbTop>
-			<tvar/>
-			<pType num="s"/>
-		      </mbTop>
-		      <solvables num="b"/>
+		      <tvar/>
+		      <ftvs>
+			<type num="1"/>
+		      </ftvs>
 		    </in>
-		    <text content=" and "/>
+		  </btypes:TYPE>. We know that
+		  <btypes:TYPE>
 		    <in>
-		      <mbTop>
-			<tvar/>
-			<pType num="s" dash="'"/>
-		      </mbTop>
-		      <solvables num="b"/>
+		      <tvar/>
+		      <pred name="ntv">
+			<type num="2"/>
+		      </pred>
 		    </in>
-		    <text content=" | "/>
-		    <eq>
-		      <pType num="sb"/>
-		      <Subst>
-			<aSubMap/>
-			<pType num="b"/>
-		      </Subst>
-		    </eq>
-		    <text content=" and "/>
-		    <eq>
-		      <pType num="sb" dash="'"/>
-		      <Subst>
-			<aSubMap/>
-			<pType num="b" dash="'"/>
-		      </Subst>
-		    </eq>
 		  </btypes:TYPE>.
-		  We have:
+		  Therefore, from assumption&nbsp;(1) and 
 		  <btypes:TYPE>
-		    <eq under="minzT">
-		      <type num="1"/>
-		      <type num="2"/>
-		    </eq>
+		    <defn tag="maybe-consistent"/>
+		  </btypes:TYPE>, we have
+		  <btypes:TYPE>
+		    <in>
+		      <tvar/>
+		      <pred name="ntv">
+			<type num="1"/>
+		      </pred>
+		    </in>
+		  </btypes:TYPE>,
+		  <btypes:TYPE>
+		    <notin>
+		      <tvar/>
+		      <pred name="mtv">
+			<type num="1"/>
+		      </pred>
+		    </notin>
 		  </btypes:TYPE> and
 		  <btypes:TYPE>
-		    <eq under="minz">
-		      <type num="1"/>
-		      <type num="2"/>
-		    </eq>
-		  </btypes:TYPE>
+		    <notin>
+		      <tvar/>
+		      <pred name="Mtv">
+			<type num="1"/>
+		      </pred>
+		    </notin>
+		  </btypes:TYPE>. Now, the result follows from
+		  assumption&nbsp;(3).
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  If
+		  <btypes:TYPE>
+		    <notin>
+		      <tvar/>
+		      <ftvs>
+			<type num="1"/>
+		      </ftvs>
+		    </notin>
+		  </btypes:TYPE>, it means that
+		  <btypes:TYPE>
+		    <in>
+		      <tvar/>
+		      <ftvs>
+			<range>
+			  <aSubMap/>
+			</range>
+		      </ftvs>
+		    </in>
+		  </btypes:TYPE>. This case cannot happen due to 
+		  assumption&nbsp;(4).
 		</p>
 	      </li>
 	    </ol>
 	  </li>
 	</ol>
       </li>
+      <li>
+	<btypes:TYPE>
+	  <Hrules>
+	    <text content="Case:"/>
+	    <tyRule>
+	      <tyPre>
+		<in>
+		  <SubMap>
+		    <tvar/>
+		    <type/>
+		  </SubMap>
+		  <aSubMap/>
+		</in>
+	      </tyPre>
+	      <tyConc>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <tvar/>
+		  </Subst>
+		  <type/>
+		</eq>
+	      </tyConc>
+	    </tyRule>
+	  </Hrules>
+	</btypes:TYPE>
+	<ol>
+	  <li>
+	    <p>
+	      Due to assumption&nbsp;(4), it must be true that
+	      <btypes:TYPE>
+		<in>
+		  <tvar/>
+		  <ftvs>
+		    <type num="1"/>
+		  </ftvs>
+		</in>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	</ol>
+      </li>
     </ol>
   </proof>
+<!--   <lemma id="cst-streangthening-gen"> -->
+<!--     <title><font color="blue">Strengthening of Consistency</font></title> -->
+<!--     If: -->
+<!--     </p> -->
+<!--     <ol> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <CST> -->
+<!-- 	      <solvables num="b"/> -->
+<!-- 	    </CST> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <subeq> -->
+<!-- 	      <set> -->
+<!-- 		<solvables num="a"/> -->
+<!-- 	      </set> -->
+<!-- 	      <set> -->
+<!-- 		<solvables num="b"/> -->
+<!-- 	      </set> -->
+<!-- 	    </subeq> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Cst> -->
+<!-- 	      <assume/> -->
+<!-- 	      <Subst> -->
+<!-- 		<aSubMap/> -->
+<!--  		<set> -->
+<!-- 		  <solvables num="a"/> -->
+<!-- 		</set> -->
+<!-- 	      </Subst> -->
+<!-- 	    </Cst> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <subeq> -->
+<!-- 	      <inter> -->
+<!-- 		<dom> -->
+<!-- 		  <aSubMap/> -->
+<!-- 		</dom> -->
+<!-- 		<ftvs> -->
+<!-- 		  <solvables num="b"/> -->
+<!-- 		</ftvs> -->
+<!-- 	      </inter> -->
+<!-- 	      <ftvs> -->
+<!-- 		<solvables num="a"/> -->
+<!-- 	      </ftvs> -->
+<!-- 	    </subeq> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <subeq> -->
+<!-- 	      <inter> -->
+<!-- 		<ftvs> -->
+<!-- 		  <range> -->
+<!-- 		    <aSubMap/> -->
+<!-- 		  </range> -->
+<!-- 		</ftvs> -->
+<!-- 		<ftvs> -->
+<!-- 		  <solvables num="b"/> -->
+<!-- 		</ftvs> -->
+<!-- 	      </inter> -->
+<!-- 	      <ftvs> -->
+<!-- 		<solvables num="a"/> -->
+<!-- 	      </ftvs> -->
+<!-- 	    </subeq> -->
+<!-- 	  </btypes:TYPE> -->
+<!-- 	</p> -->
+<!--       </li> -->
+<!--     </ol> -->
+<!--     <p> -->
+<!--       Then, -->
+<!--       <btypes:TYPE> -->
+<!-- 	<Cst> -->
+<!-- 	  <assume/> -->
+<!-- 	  <Subst> -->
+<!-- 	    <aSubMap/> -->
+<!-- 	    <set> -->
+<!-- 	      <solvables num="b"/> -->
+<!-- 	    </set> -->
+<!-- 	  </Subst> -->
+<!-- 	</Cst> -->
+<!--       </btypes:TYPE> -->
+<!--     </p> -->
+<!--   </lemma> -->
+<!--   <proof> -->
+<!--     <ol> -->
+<!--       <li> -->
+<!-- 	<p> -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Forall/> -->
+<!-- 	    <in> -->
+<!-- 	      <mbTop> -->
+<!-- 		<tvar/> -->
+<!-- 		<pType num="sb"/> -->
+<!-- 	      </mbTop> -->
+<!-- 	      <Subst> -->
+<!-- 		<aSubMap/> -->
+<!-- 		<solvables num="b"/> -->
+<!-- 	      </Subst> -->
+<!-- 	    </in> -->
+<!-- 	  </btypes:TYPE> and -->
+<!-- 	  <btypes:TYPE> -->
+<!-- 	    <Forall/> -->
+<!-- 	    <in> -->
+<!-- 	      <mbTop> -->
+<!-- 		<tvar/> -->
+<!-- 		<pType num="sb" dash="'"/> -->
+<!-- 	      </mbTop> -->
+<!-- 	      <Subst> -->
+<!-- 		<aSubMap/> -->
+<!-- 		<solvables num="b"/> -->
+<!-- 	      </Subst> -->
+<!-- 	    </in> -->
+<!-- 	  </btypes:TYPE>, we could have any of the following possibilities: -->
+<!-- 	</p> -->
+<!-- 	<ol> -->
+<!-- 	  <li> -->
+<!-- 	    <p> -->
+<!-- 	      Case -->
+<!-- 	      <btypes:TYPE> -->
+<!-- 		<notin> -->
+<!-- 		  <tvar/> -->
+<!-- 		  <ftvs> -->
+<!-- 		    <range> -->
+<!-- 		      <aSubMap/> -->
+<!-- 		    </range> -->
+<!-- 		  </ftvs> -->
+<!-- 		</notin> -->
+<!-- 	      </btypes:TYPE>: -->
+<!-- 	    </p> -->
+<!-- 	    <ol> -->
+<!-- 	      <li> -->
+<!-- 		<p> -->
+<!-- 		  In this case,  -->
+<!-- 		  <btypes:TYPE> -->
+<!-- 		    <Exists/> -->
+<!-- 		    <in> -->
+<!-- 		      <mbTop> -->
+<!-- 			<tvar/> -->
+<!-- 			<pType num="s"/> -->
+<!-- 		      </mbTop> -->
+<!-- 		      <solvables num="b"/> -->
+<!-- 		    </in> -->
+<!-- 		    <text content=" and "/> -->
+<!-- 		    <in> -->
+<!-- 		      <mbTop> -->
+<!-- 			<tvar/> -->
+<!-- 			<pType num="s" dash="'"/> -->
+<!-- 		      </mbTop> -->
+<!-- 		      <solvables num="b"/> -->
+<!-- 		    </in> -->
+<!-- 		    <text content=" | "/> -->
+<!-- 		    <eq> -->
+<!-- 		      <pType num="sb"/> -->
+<!-- 		      <Subst> -->
+<!-- 			<aSubMap/> -->
+<!-- 			<pType num="b"/> -->
+<!-- 		      </Subst> -->
+<!-- 		    </eq> -->
+<!-- 		    <text content=" and "/> -->
+<!-- 		    <eq> -->
+<!-- 		      <pType num="sb" dash="'"/> -->
+<!-- 		      <Subst> -->
+<!-- 			<aSubMap/> -->
+<!-- 			<pType num="b" dash="'"/> -->
+<!-- 		      </Subst> -->
+<!-- 		    </eq> -->
+<!-- 		  </btypes:TYPE>. -->
+<!-- 		  We have: -->
+<!-- 		  <btypes:TYPE> -->
+<!-- 		    <eq under="minzT"> -->
+<!-- 		      <type num="1"/> -->
+<!-- 		      <type num="2"/> -->
+<!-- 		    </eq> -->
+<!-- 		  </btypes:TYPE> and -->
+<!-- 		  <btypes:TYPE> -->
+<!-- 		    <eq under="minz"> -->
+<!-- 		      <type num="1"/> -->
+<!-- 		      <type num="2"/> -->
+<!-- 		    </eq> -->
+<!-- 		  </btypes:TYPE> -->
+<!-- 		</p> -->
+<!-- 	      </li> -->
+<!-- 	    </ol> -->
+<!-- 	  </li> -->
+<!-- 	</ol> -->
+<!--       </li> -->
+<!--     </ol> -->
+<!--   </proof> -->
   <lemma id="Consistency-Propagation-1">
     <title>Consistency of Substitution over Type Derivation</title>
     <p>
@@ -5731,17 +5983,14 @@
 	</models>
       </btypes:TYPE>, and
       <btypes:TYPE>
-	<eq>
-	  <inter>
-	    <dom>
-	      <aSubMap num="2"/>
-	    </dom>
-	    <ftvs>
-	      <aSubMap num="1"/>
-	    </ftvs>
-	  </inter>
-	  <Empty/>
-	</eq>
+	<mutex>
+	  <dom>
+	    <aSubMap num="2"/>
+	  </dom>
+	  <ftvs>
+	    <aSubMap num="1"/>
+	  </ftvs>
+	</mutex>
       </btypes:TYPE>,
     </p>
     <p>
@@ -5822,7 +6071,7 @@
 	  <aSubMap num="2"/>
 	</dom>
       </btypes:TYPE>.
-      Here, we will have
+      <!-- NOTE: NOTE: Here, we will have
       <btypes:TYPE>
 	<eq>
 	  <Subst>
@@ -5831,7 +6080,10 @@
 	  </Subst>
 	  <aSubMap num="2" dash="'"/>
 	</eq>
-      </btypes:TYPE>, 
+      </btypes:TYPE>,
+      REMEMBER: This is for reference only. Substitution on 
+      substitutions was removed. That must be re-introduced
+      if this like is un-commented. -->
     </p>
   </proof>
   <lemma id="T-TSubstitution">
@@ -5879,17 +6131,14 @@
 	</CST>
       </btypes:TYPE>, and
       <btypes:TYPE>
-	<eq>
-	  <inter>
-	    <ftvs>
-	      <aSubMap/>
-	    </ftvs>
-	    <pred name="gtv">
-	      <gamma/>
-	    </pred>
-	  </inter>
-	  <Empty/>
-	</eq>
+	<mutex>
+	  <ftvs>
+	    <aSubMap/>
+	  </ftvs>
+	  <pred name="gtv">
+	    <gamma/>
+	  </pred>
+	</mutex>
       </btypes:TYPE>, we have
       <btypes:TYPE>
 	<Sjudge name="*">
@@ -6037,17 +6286,14 @@
 	    <p>
 	      Since 
 	      <btypes:TYPE>
-		<eq>
-		  <inter>
-		    <ftvs>
-		      <aSubMap/>
-		    </ftvs>
-		    <pred name="gtv">
-		      <gamma/>
-		    </pred>
-		  </inter>
-		  <Empty/>
-		</eq>
+		<mutex>
+		  <ftvs>
+		    <aSubMap/>
+		  </ftvs>
+		  <pred name="gtv">
+		    <gamma/>
+		  </pred>
+		</mutex>
 	      </btypes:TYPE>, we have
 	      <btypes:TYPE>
 		<eq>
@@ -6379,11 +6625,26 @@
 			<aSubMap/>
 		      </assume>
 		      <set>
-			<gamma/>
-			<store/>
-			<type/>
+			<TDjudge>
+			  <apply>
+			    <aExpr num="1"/>
+			    <aExpr num="2"/>
+			  </apply>
+			  <type/>
+			</TDjudge>
 		      </set>
 		    </models>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <CST>
+		      <gamma/>
+		      <store/>
+		      <type/>
+		    </CST>
 		  </btypes:TYPE>
 		</p>
 	      </li>
@@ -6391,8 +6652,60 @@
 	  </li>
 	  <li>
 	    <p>
-	      
+	      By induction hypothesis, we have:
 	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <Sjudge>
+		      <assume>
+			<Subst>
+			  <aSubMap/>
+			  <gamma/>
+			</Subst>
+			<Subst>
+			  <aSubMap/>
+			  <store/>
+			</Subst>
+		      </assume>
+		      <tqExpr>
+			<aExpr num="1"/>
+			<Subst>
+			  <aSubMap/>
+			  <type num="1"/>
+			</Subst>
+		      </tqExpr>
+		    </Sjudge>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <Sjudge>
+		      <assume>
+			<Subst>
+			  <aSubMap/>
+			  <gamma/>
+			</Subst>
+			<Subst>
+			  <aSubMap/>
+			  <store/>
+			</Subst>
+		      </assume>
+		      <tqExpr>
+			<aExpr num="2"/>
+			<Subst>
+			  <aSubMap/>
+			  <type num="2"/>
+			</Subst>
+		      </tqExpr>
+		    </Sjudge>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	    </ol>
 	  </li>
 	</ol>
       </li>
@@ -6725,17 +7038,14 @@
 	      <li>
 		<p>
 		  <btypes:TYPE>
-		    <eq>
-		      <inter>
-			<set>
-			  <tvars/>
-			</set>
-			<ftvs>
-			  <gamma/>
-			</ftvs>
-		      </inter>
-		      <Empty/>
-		    </eq>
+		    <mutex>
+		      <set>
+			<tvars/>
+		      </set>
+		      <ftvs>
+			<gamma/>
+		      </ftvs>
+		    </mutex>
 		  </btypes:TYPE>. That is,
 		  <btypes:TYPE>
 		    <eq>
@@ -6751,17 +7061,14 @@
 	      <li>
 		<p>
 		  <btypes:TYPE>
-		    <eq>
-		      <inter>
-			<set>
-			  <tvars/>
-			</set>
-			<ftvs>
-			  <store/>
-			</ftvs>
-		      </inter>
-		      <Empty/>
-		    </eq>
+		    <mutex>
+		      <set>
+			<tvars/>
+		      </set>
+		      <ftvs>
+			<store/>
+		      </ftvs>
+		    </mutex>
 		  </btypes:TYPE>. That is,
 		  <btypes:TYPE>
 		    <eq>
@@ -6777,17 +7084,14 @@
 	      <li>
 		<p>
 		  <btypes:TYPE>
-		    <eq>
-		      <inter>
-			<ftvs>
-			  <aSubMap/>
-			</ftvs>
-			<pred name="gtv">
-			  <gamma/>
-			</pred>
-		      </inter>
-		      <Empty/>
-		    </eq>
+		    <mutex>
+		      <ftvs>
+			<aSubMap/>
+		      </ftvs>
+		      <pred name="gtv">
+			<gamma/>
+		      </pred>
+		    </mutex>
 		  </btypes:TYPE>. 
 		</p>
 	      </li>

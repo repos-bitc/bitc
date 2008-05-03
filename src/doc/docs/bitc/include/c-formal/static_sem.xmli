@@ -103,6 +103,10 @@
 	    <aSet/>
 	    <aSet/>
 	  </unin>
+	  <inter>
+	    <aSet/>
+	    <aSet/>
+	  </inter>
 	</alternatives>            
       </bnf>
       <!--       <bnf desc="Sets"> -->
@@ -195,6 +199,46 @@
 	<aSubMap num="b"/> 
       </compose>
     </btypes:TYPE>. 
+    The 
+    <btypes:TYPE>
+      <mutexOp/>
+    </btypes:TYPE> operator denotes mutual exclusion of sets. 
+    That is,
+    <btypes:TYPE>
+      <mutex>
+	<aSet num="1"/>
+	<aSet num="2"/>
+      </mutex>
+    </btypes:TYPE> iff
+    <btypes:TYPE>
+      <eq>
+	<inter>
+	  <aSet num="1"/>
+	  <aSet num="2"/>
+	</inter>
+	<Empty/>
+      </eq>
+    </btypes:TYPE>.
+    As is customary, we write 
+    <btypes:TYPE>
+      <mutex>
+	<aSet num="1"/>
+	<aSet num="2"/>
+	<aSet num="3"/>
+      </mutex>
+    </btypes:TYPE> iff
+    <btypes:TYPE>
+      <mutex>
+	<aSet num="1"/>
+	<aSet num="2"/>
+      </mutex>
+    </btypes:TYPE> and
+    <btypes:TYPE>
+      <mutex>
+	<aSet num="2"/>
+	<aSet num="3"/>
+      </mutex>
+    </btypes:TYPE>.
   </p>
   <definition id="aleq">      
     <title>Algebraic equivalences</title>
@@ -633,17 +677,14 @@
       </compose>
     </btypes:TYPE>. An implication of idempotence is that
     <btypes:TYPE>
-      <eq>
-	<inter>
-	  <dom>
-	    <aSubMap/>
-	  </dom>
-	  <range>
-	    <aSubMap/>
-	  </range>
-	</inter>
-	<Empty/>
-      </eq>
+      <mutex>
+	<dom>
+	  <aSubMap/>
+	</dom>
+	<range>
+	  <aSubMap/>
+	</range>
+      </mutex>
     </btypes:TYPE>.
   </p>
   <p>
@@ -2857,43 +2898,17 @@
 	    </grouping>
 	  </tyPre>
 	  <tyPre>
-	    <eq>
-	      <inter>
-		<pred name="mtv">
-		  <solvables/>
-		</pred>
-		<pred name="ntv">
-		  <solvables/>
-		</pred>
-	      </inter>
-	      <Empty/>
-	    </eq>
-	  </tyPre>
-	  <tyPre>
-	    <eq>
-	      <inter>
-		<pred name="Mtv">
-		  <solvables/>
-		</pred>
-		<pred name="ntv">
-		  <solvables/>
-		</pred>
-	      </inter>
-	      <Empty/>
-	    </eq>
-	  </tyPre>
-	  <tyPre>
-	    <eq>
-	      <inter>
-		<pred name="mtv">
-		  <solvables/>
-		</pred>
-		<pred name="Mtv">
-		  <solvables/>
-		</pred>
-	      </inter>
-	      <Empty/>
-	    </eq>
+	    <mutex>
+	      <pred name="mtv">
+		<solvables/>
+	      </pred>
+	      <pred name="Mtv">
+		<solvables/>
+	      </pred>
+	      <pred name="ntv">
+		<solvables/>
+	      </pred>
+	    </mutex>
 	  </tyPre>
 	  <tyConc>
 	    <CST>

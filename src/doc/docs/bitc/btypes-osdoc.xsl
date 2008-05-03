@@ -320,16 +320,25 @@
   </xsl:template>
   <!-- unin -->
   <xsl:template match="unin" mode="formula">
-    <xsl:call-template name="print.unin"/>
+    <xsl:call-template name="print.infix.implied">
+      <xsl:with-param name="print.infix.implied.op">cup;</xsl:with-param> 
+    </xsl:call-template>
   </xsl:template> 
-  <!-- uninOp -->
-  <xsl:template match="Uninop" mode="formula">
-    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>cup;</xsl:text>
+  <!-- UninOp -->
+  <xsl:template match="UninOp" mode="formula">
+    <xsl:element name="b">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>cup;</xsl:text>
+    </xsl:element>
   </xsl:template>
-  <!-- unin -->
+  <!-- Unin -->
   <xsl:template match="Unin" mode="formula">
-    <xsl:call-template name="print.Unin"/>
+    <xsl:element name="b">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>cup;</xsl:text>
+    </xsl:element>
+    <xsl:call-template name="print.space"/>
+    <xsl:apply-templates mode="formula"/>
   </xsl:template> 
 
   <!-- interOp -->
@@ -339,7 +348,25 @@
   </xsl:template>
   <!-- inter -->
   <xsl:template match="inter" mode="formula">
-    <xsl:call-template name="print.inter"/>
+    <xsl:call-template name="print.infix.implied">
+      <xsl:with-param name="print.infix.implied.op">cap;</xsl:with-param> 
+    </xsl:call-template>
+  </xsl:template>  
+  <!-- InterOp -->
+  <xsl:template match="InterOp" mode="formula">
+    <xsl:element name="b">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>cap;</xsl:text>
+    </xsl:element>
+  </xsl:template>
+  <!-- Inter -->
+  <xsl:template match="Inter" mode="formula">
+    <xsl:element name="b">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>cap;</xsl:text>
+    </xsl:element>
+    <xsl:call-template name="print.space"/>
+    <xsl:apply-templates mode="formula"/>
   </xsl:template>  
 
   <!-- diffOp -->
@@ -349,8 +376,23 @@
   </xsl:template>
   <!-- diff -->
   <xsl:template match="diff" mode="formula">
-    <xsl:call-template name="print.diff"/>
+    <xsl:call-template name="print.infix">
+      <xsl:with-param name="print.infix.op">setmn;</xsl:with-param> 
+    </xsl:call-template>
   </xsl:template>  
+
+  <!-- mutexOp -->
+  <xsl:template match="mutexOp" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>osol;</xsl:text>
+  </xsl:template>
+  <!-- mutex -->
+  <xsl:template match="mutex" mode="formula">
+    <xsl:call-template name="print.infix">
+      <xsl:with-param name="print.infix.op">osol;</xsl:with-param> 
+    </xsl:call-template>
+  </xsl:template>  
+
 
   <!-- map -->
   <xsl:template match="map" mode="formula">
@@ -4021,55 +4063,6 @@
     <xsl:text>{|</xsl:text>
     <xsl:call-template name="print.children"/>
     <xsl:text>|}</xsl:text>
-  </xsl:template>  
-
-
-  <!-- Print a &union; b  -->
-  <xsl:template name="print.unin">
-    <xsl:call-template name="print.infix.implied">
-      <xsl:with-param name="print.infix.implied.op">cup;</xsl:with-param> 
-    </xsl:call-template>
-  </xsl:template>  
-
-  <!-- Print a &inter; b  -->
-  <xsl:template name="print.inter">
-    <xsl:call-template name="print.infix.implied">
-      <xsl:with-param name="print.infix.implied.op">cap;</xsl:with-param> 
-    </xsl:call-template>
-  </xsl:template>
-  
-  <!-- Print &union; b*  -->
-  <xsl:template name="print.Unin">
-    <xsl:element name="b">
-      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-      <xsl:text>cup;</xsl:text>
-    </xsl:element>
-    <xsl:call-template name="print.space"/>
-    <xsl:apply-templates mode="formula"/>
-  </xsl:template>  
-
-  <!-- Print &inter; b*  -->
-  <xsl:template name="print.Inter">
-    <xsl:element name="b">
-      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-      <xsl:text>cap;</xsl:text>
-    </xsl:element>
-    <xsl:call-template name="print.space"/>
-    <xsl:apply-templates mode="formula"/>
-  </xsl:template>  
-
-  <!-- Print  e &isin; set -->
-  <xsl:template name="print.isin">
-    <xsl:call-template name="print.infix">
-      <xsl:with-param name="print.infix.op">isin;</xsl:with-param> 
-    </xsl:call-template>
-  </xsl:template>  
-
-  <!-- Print  set1 \ set -->
-  <xsl:template name="print.diff">
-    <xsl:call-template name="print.infix">
-      <xsl:with-param name="print.infix.op">setmn;</xsl:with-param> 
-    </xsl:call-template>
   </xsl:template>  
   
   <!-- Print  fnxn(...) -->
