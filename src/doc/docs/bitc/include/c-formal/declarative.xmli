@@ -7,229 +7,59 @@
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
   <title>Declarative Type System</title>
   <definition id="val_res">
-    <title>Value Restriction</title>
-    <p>
-      We define some definitions used in the enforcement of value
-      restriction.
-    </p>
+    <title>Syntactic Value Expressions</title>
     <btypes:TYPE>
-      <VEqns>
-	<equation>
-	  <lhs>
-	    <pred name="Value">
-	      <aVal/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <TRUE/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Value">
+      <grammar notitle="yes">
+	<bnf desc="Value Exp">
+	  <vExp/>
+	  <alternatives>
+	    <Unit/>
+	    <true/>
+	    <false/>
+	    <lambda>
 	      <id/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <TRUE/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Value">
-	      <sLoc/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <TRUE/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Value">
-	      <hLoc/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <TRUE/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Value">
-	      <dup>
-		<aExpr/>
-	      </dup>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="Value">
 	      <aExpr/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Value">
-	      <deref>
-		<aExpr/>
-	      </deref>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="Value">
-	      <aExpr/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Value">
-	      <deref>
-		<aExpr/>
-	      </deref>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="Value">
-	      <aExpr/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Value">
-	      <if>
-		<aExpr num="1"/>
-		<aExpr num="2"/>
-		<aExpr num="3"/>
-	      </if>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="Value">
-	      <aExpr num="1"/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<eqn-cnt>
-	  <rhs>
-	    <AND>
-	      <nothing/>
-	      <pred name="Value">
-		<aExpr num="2"/>
-	      </pred>
-	      <pred name="Value">
-		<aExpr num="3"/>
-	      </pred>
-	    </AND>
-	  </rhs>
-	</eqn-cnt>
-	<equation>
-	  <lhs>
-	    <pred name="Value">
-	      <Pair>
-		<aExpr num="1"/>
-		<aExpr num="2"/>
-	      </Pair>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <AND>
-	      <pred name="Value">
-		<aExpr num="1"/>
-	      </pred>
-	      <pred name="Value">
-		<aExpr num="2"/>
-	      </pred>
-	    </AND>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Value">
-	      <fst>
-		<aExpr/>
-	      </fst>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="Value">
-	      <aExpr/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Value">
-	      <snd>
-		<aExpr/>
-	      </snd>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="Value">
-	      <aExpr/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Value">
-	      <let>
-		<id/>
-		<aExpr num="1"/>
-		<aExpr num="2"/>
-	      </let>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Value">
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <AND>
-	      <pred name="Value">
-		<aExpr num="1"/>
-	      </pred>
-	      <pred name="Value">
-		<aExpr num="2"/>
-	      </pred>
-	    </AND>
-	  </rhs>
-	</equation>
-	<equation sep="yes">
-	  <lhs>		
-	    <grouping>
-	      <pred name="Value">
-		<aExpr/>
-	      </pred>
-	      <text content=" (otherwise)"/>
-	    </grouping>
-	  </lhs>
-	  <rhs>
-	    <FALSE/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>		
-	    <pred name="Expansive">
-	      <aExpr/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <NOT>
-	      <pred name="Value">
-		<aExpr/>
-	      </pred>
-	    </NOT>
-	  </rhs>
-	</equation>
-      </VEqns>
+	    </lambda>
+	    <id/>
+	    <sLoc/>
+	    <hLoc/>
+	  </alternatives>
+	</bnf>
+	<bnfc desc="">
+	  <alternatives>
+	    <dup>
+	      <vExp/>
+	    </dup>
+	    <deref>
+	      <vExp/>
+	    </deref>
+	    <Pair>
+	      <vExp/>
+	      <vExp/>
+	    </Pair>
+	    <fst>
+	      <vExp/>
+	    </fst>
+	    <snd>
+	      <vExp/>
+	    </snd>
+	  </alternatives>
+	</bnfc>
+	<bnfc desc="">
+	  <alternatives>
+	    <if>
+	      <vExp/>
+	      <vExp/>
+	      <vExp/>
+	    </if>
+	    <let>
+	      <id/>
+	      <vExp/>
+	      <vExp/>
+	    </let>
+	  </alternatives>
+	</bnfc>
+      </grammar>
     </btypes:TYPE>
   </definition>
   <definition id="constraint-colection">

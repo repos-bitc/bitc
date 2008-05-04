@@ -18,31 +18,62 @@
 		<type/>
 	      </TS>
 	    </mapsto>
+	    <notin>
+	      <tvars name="beta"/>
+	      <ftvs>
+		<gamma/>
+		<store/>
+	      </ftvs>
+	    </notin>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <id/>
+	      <subst>
+		<type/>
+		<tvars/>
+		<tvars name="beta"/>
+	      </subst>		
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="T-Spec">
+	  <tyPre>
+	    <TDjudge>
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	    <subeq>
+	      <dom>
+		<aSubMap/>
+	      </dom>
+	      <diff>
+		<ftvs>
+		  <type/>
+		</ftvs>
+		<ftvs>
+		  <gamma/>
+		  <store/>
+		</ftvs>
+	      </diff>
+	    </subeq>
 	    <models name="cst">
 	      <assume>
 		<aSubMap/>
 	      </assume>
 	      <type/>
 	    </models>
-	    <eq>
-	      <dom>
-		<aSubMap/>
-	      </dom>
-	      <set>
-		<tvars/>
-	      </set>
-	    </eq>
 	  </tyPre>
 	  <tyConc>
 	    <TDjudge>
-	      <id/>
+	      <aExpr/>
 	      <Subst>
 		<aSubMap/>
 		<type/>
 	      </Subst>
 	    </TDjudge>
 	  </tyConc>
-	</tyRule>        
+	</tyRule>
 	<tyRule name=" T-Unit">
 	  <tyPre/>
 	  <tyConc>
@@ -52,6 +83,8 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-True">
 	  <tyPre/>
 	  <tyConc>
@@ -70,8 +103,21 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="T-Sloc">
+	  <tyPre>
+	    <mapsto>
+	      <store/>
+	      <sLoc/>
+	      <type/>
+	    </mapsto>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <sLoc/>
+	      <type/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
 	<tyRule name="T-Hloc">
 	  <tyPre>
 	    <mapsto>
@@ -86,21 +132,6 @@
 	      <ref>
 		<type/>
 	      </ref>
-	    </TDjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="T-Sloc">
-	  <tyPre>
-	    <mapsto>
-	      <store/>
-	      <sLoc/>
-	      <type/>
-	    </mapsto>
-	  </tyPre>
-	  <tyConc>
-	    <TDjudge>
-	      <sLoc/>
-	      <type/>
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
@@ -136,6 +167,8 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-App">
 	  <tyPre>
 	    <TDjudge Msub="yes">
@@ -168,8 +201,6 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-If">
 	  <tyPre>
 	    <TDjudge Msub="yes">
@@ -200,6 +231,8 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-Set">
 	  <tyPre>
 	    <!-- Msub is okay in this place because, given the
@@ -233,8 +266,6 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-Dup">
 	  <tyPre>
 	    <TDjudge Msub="yes">
@@ -275,6 +306,8 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-Pair">
 	  <tyPre>
 	    <TDjudge Msub="yes">
@@ -307,8 +340,6 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-Fst">
 	  <tyPre>
 	    <TDjudge>
@@ -359,6 +390,8 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-Let-M">
 	  <tyPre>
 	    <TDjudge Msub="yes">
@@ -399,42 +432,45 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="1">
 	<tyRule name="T-Let-P">
 	  <tyPre>
-	    <TDjudge>
-	      <aExpr num="1"/>
-	      <type num="1"/>
-	    </TDjudge>
-	    <Msub>
+	    <TDjudge Msub="yes">
+	      <vExp/>
 	      <type/>
-	      <type num="1"/>
-	    </Msub>
-	    <Sjudge name="gen">
-	      <assume>
-		<gamma/>
-		<store/>
-		<aExpr num="1"/>
-	      </assume>
-	      <GEN>
-		<type/>
-		<aTS/>
-	      </GEN>
-	    </Sjudge>
+	    </TDjudge>
+	    <pred name="Immut">
+	      <type/>
+	    </pred>
+	    <eq>
+	      <set>
+		<tvars/>
+	      </set>
+	      <diff>
+		<ftvs>
+		  <type/>
+		</ftvs>
+		<ftvs>
+		  <gamma/>
+		  <store/>
+		</ftvs>
+	      </diff>
+	    </eq>
 	    <Sjudge>
 	      <assume>
 		<extend>
 		  <gamma/>
 		  <mapping>
 		    <id/>
-		    <aTS/>
+		    <TS>
+		      <tvars/>
+		      <type/>
+		    </TS>
 		  </mapping>
 		</extend>
 		<store/>
 	      </assume>
 	      <tqExpr>
-		<aExpr num="2"/>
+		<aExpr/>
 		<type num="2"/>
 	      </tqExpr>
 	    </Sjudge>
@@ -444,48 +480,12 @@
 	      <paren>
 		<let kind="p">
 		  <id/>
-		  <aExpr num="1"/>
-		  <aExpr num="2"/>
+		  <vExp/>
+		  <aExpr/>
 		</let>
 	      </paren>
 	      <type num="2"/>
 	    </TDjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="T-Generalize">
-	  <tyPre>
-	    <pred name="Value">
-	      <aExpr/>
-	    </pred>
-	    <pred name="Immut">
-	      <type/>
-	    </pred>
-	    <eq>
-	      <set>
-		<tvars name="alpha"/>
-	      </set>
-	      <diff>
-		<ftvs><type/></ftvs>
-		<ftvs><gamma/></ftvs>
-		<ftvs><store/></ftvs>
-	      </diff>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="gen">
-	      <assume>
-		<gamma/>
-		<store/>
-		<aExpr/>
-	      </assume>                
-	      <GEN>
-		<type/>
-		<TS>
-		  <tvars name="alpha"/>
-		  <type/>
-		</TS>
-	      </GEN>                                
-	    </Sjudge>
 	  </tyConc>
 	</tyRule>
       </Hrules>
@@ -493,3 +493,5 @@
   </font>
   <caption><font size="small">Declarative Type Rules</font></caption>
 </figure>
+
+

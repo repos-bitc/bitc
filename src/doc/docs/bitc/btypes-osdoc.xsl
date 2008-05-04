@@ -2177,6 +2177,13 @@
     </xsl:element>
   </xsl:template>
 
+  <!-- vExp -->
+  <xsl:template match="vExp" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>thetav;</xsl:text>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>  
+
   <!-- Unit -->
   <xsl:template match="Unit" mode="formula">
     <!-- <xsl:element name="progident"> -->

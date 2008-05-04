@@ -948,6 +948,11 @@
                                dash     CDATA   #IMPLIED
                                hat      CDATA   #IMPLIED
 >
+<!ELEMENT vExp                EMPTY>
+<!ATTLIST vExp
+                               num      CDATA   #IMPLIED
+                               dash     CDATA   #IMPLIED
+>
 
 <!ELEMENT true                 EMPTY>
 <!ELEMENT false                EMPTY>
