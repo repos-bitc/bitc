@@ -35,49 +35,44 @@
 	    <aVal/>
 	    <aVal/>
 	  </Pair>
+	  <hLoc/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Value Expr">
+	<vExp/>
+	<alternatives>
+	  <aVal/>
+	  <id/>
+	  <sLoc/>
 	</alternatives>
       </bnf>
       <bnf desc="Expressions">
 	<aExpr/>
 	<alternatives>
-	  <Unit/>
-	  <true/> 
-	  <false/>
-	  <lambda>
-	    <id/>
-	    <aExpr/>
-	  </lambda>
+	  <vExp/>
 	  <apply>
 	    <aExpr/>
 	    <aExpr/>
 	  </apply>
-	</alternatives>
-      </bnf>
-      <bnfc desc="">
-	<alternatives>
 	  <assign>
 	    <aExpr/>
 	    <aExpr/>
 	  </assign> 
-	  <dup>
-	    <aExpr/>
-	  </dup>
-	  <deref>
-	    <aExpr/>
-	  </deref>
-	</alternatives>
-      </bnfc>
-      <bnfc desc="">
-	<alternatives>
 	  <if>
 	    <aExpr/>
 	    <aExpr/>
 	    <aExpr/>
 	  </if>
 	</alternatives>
-      </bnfc>
+      </bnf>
       <bnfc desc="">
 	<alternatives>
+	  <dup>
+	    <aExpr/>
+	  </dup>
+	  <deref>
+	    <aExpr/>
+	  </deref>
 	  <Pair>
 	    <aExpr/>
 	    <aExpr/>
@@ -106,6 +101,27 @@
 	  <lKind k="var"/>
 	  <lKind k="mono"/>
 	  <lKind k="poly"/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Locations">
+	<loc/>
+	<alternatives>
+	  <sLoc/>
+	  <hLoc/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Stack Loc"> 
+	<sLoc/>
+	<alternatives etc="yes">
+	  <sLoc num="1"/>
+	  <sLoc num="2"/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Heap Loc">
+	<hLoc/>
+	<alternatives etc="yes">
+	  <hLoc num="1"/>
+	  <hLoc num="2"/>
 	</alternatives>
       </bnf>
     </grammar>

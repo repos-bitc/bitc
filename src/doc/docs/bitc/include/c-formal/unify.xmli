@@ -213,10 +213,10 @@
 		<set>
 		  <eq>
 		    <mutable>
-		      <pType num="1"/>
+		      <ptype num="1"/>
 		    </mutable>
 		    <mutable>
-		      <pType num="2"/>
+		      <ptype num="2"/>
 		    </mutable>
 		  </eq>
 		</set>
@@ -230,8 +230,8 @@
 		<aCtset/>
 		<set>
 		  <eq>
-		    <pType num="1"/>
-		    <pType num="2"/>
+		    <ptype num="1"/>
+		    <ptype num="2"/>
 		  </eq>
 		</set>
 	      </unin>
@@ -286,11 +286,11 @@
 		  <eq>
 		    <mbTop>
 		      <tvar name="alpha"/>
-		      <pType num="1"/>
+		      <ptype num="1"/>
 		    </mbTop>
 		    <mbTop>
 		      <tvar name="beta"/>
-		      <pType num="2"/>
+		      <ptype num="2"/>
 		    </mbTop>
 		  </eq>
 		</set>
@@ -305,10 +305,10 @@
 		<set>
 		  <eq>
 		    <minzT>
-		      <pType num="1"/>
+		      <ptype num="1"/>
 		    </minzT>
 		    <minzT>
-		      <pType num="2"/>
+		      <ptype num="2"/>
 		    </minzT>
 		  </eq>
 		  <eq>
@@ -321,7 +321,7 @@
 	  </rhs>
 	</equation>	  
 	<!-- a!p1 = p2 -->
-	<equation sep="4pt">
+	<equation>
 	  <lhs>
 	    <unf>
 	      <unin>
@@ -329,9 +329,9 @@
 		  <eq>
 		    <mbTop>
 		      <tvar/>
-		      <pType/>
+		      <ptype/>
 		    </mbTop>
-		    <pType dash="'"/>
+		    <ptype dash="'"/>
 		  </eq>
 		</set>
 		<aCtset/>
@@ -345,22 +345,22 @@
 		<set>
 		  <eq>
 		    <minzT>
-		      <pType/>
+		      <ptype/>
 		    </minzT>
 		    <minzT>
-		      <pType dash="'"/>
+		      <ptype dash="'"/>
 		    </minzT>
 		  </eq>
 		  <eq>
 		    <tvar/>
-		    <pType dash="'"/>
+		    <ptype dash="'"/>
 		  </eq>
 		</set>
 	      </unin>
 	    </unf>
 	  </rhs>
 	</equation>
-	<!-- w1|p1 = w2|p2 -->
+	<!-- s1|p1 = s2|p2 -->
 	<equation>
 	  <lhs>
 	    <unf>
@@ -368,12 +368,12 @@
 		<set>
 		  <eq>
 		    <mbFull>
-		      <sType num="1"/>
-		      <pType num="1"/>
+		      <stype num="1"/>
+		      <ptype num="1"/>
 		    </mbFull>
 		    <mbFull>
-		      <sType num="2"/>
-		      <pType num="2"/>
+		      <stype num="2"/>
+		      <ptype num="2"/>
 		    </mbFull>
 		  </eq>
 		</set>
@@ -388,108 +388,22 @@
 		<set>
 		  <eq>
 		    <minz>
-		      <pType num="1"/>
+		      <ptype num="1"/>
 		    </minz>
 		    <minz>
-		      <pType num="2"/>
+		      <ptype num="2"/>
 		    </minz>
 		  </eq>
 		  <eq>
-		    <sType num="1"/>
-		    <sType num="2"/>
+		    <stype num="1"/>
+		    <stype num="2"/>
 		  </eq>
 		</set>
 	      </unin>
 	    </unf>
 	  </rhs>
 	</equation>
-	<!-- w|p = p' -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <mbFull>
-		      <sType/>
-		      <pType/>
-		    </mbFull>
-		    <pType dash="'"/>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <minz>
-		      <pType/>
-		    </minz>
-		    <minz>
-		      <pType dash="'"/>
-		    </minz>
-		  </eq>
-		  <eq>
-		    <sType/>
-		    <pType dash="'"/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>
-	<!-- a|p = b!p' -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <mbFull>
-		      <tvar name="alpha"/>
-		      <pType/>
-		    </mbFull>
-		    <mbTop>
-		      <tvar name="beta"/>
-		      <pType dash="'"/>
-		    </mbTop>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <minz>
-		      <pType/>
-		    </minz>
-		    <minz>
-		      <pType dash="'"/>
-		    </minz>
-		  </eq>
-		  <eq>
-		    <tvar name="alpha"/>
-		    <mbTop>
-		      <tvar name="beta"/>
-		      <pType dash="'"/>
-		    </mbTop>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>
-	<!-- M'a|p = b!p' -->
+	<!-- s|p = P -->
 	<equation sep="4pt">
 	  <lhs>
 	    <unf>
@@ -497,15 +411,10 @@
 		<set>
 		  <eq>
 		    <mbFull>
-		      <mutable>
-			<tvar name="alpha"/>
-		      </mutable>
-		      <pType/>
+		      <stype/>
+		      <ptype/>
 		    </mbFull>
-		    <mbTop>
-		      <tvar name="beta"/>
-		      <pType dash="'"/>
-		    </mbTop>
+		    <Ptype/>
 		  </eq>
 		</set>
 		<aCtset/>
@@ -519,23 +428,15 @@
 		<set>
 		  <eq>
 		    <minz>
-		      <pType/>
+		      <ptype/>
 		    </minz>
 		    <minz>
-		      <pType dash="'"/>
+		      <Ptype/>
 		    </minz>
 		  </eq>
 		  <eq>
-		    <tvar name="alpha"/>
-		    <mutable>
-		      <pType dash="'"/>
-		    </mutable>
-		  </eq>
-		  <eq>
-		    <tvar name="beta"/>
-		    <mutable>
-		      <pType dash="'"/>
-		    </mutable>
+		    <stype/>
+		    <Ptype/>
 		  </eq>
 		</set>
 	      </unin>
@@ -762,8 +663,8 @@
 	    <Forall>
 	      <collection>
 		<tvar name="alpha"/>
-		<sType/>
-		<pType/>
+		<stype/>
+		<ptype/>
 		<type/>
 		<type dash="'"/>
 		<type dash="''"/>
@@ -812,23 +713,23 @@
 	      </eq>
 	      <eq>
 		<mutable>
-		  <sType/>
+		  <stype/>
 		</mutable>
 		<mutable>
-		  <sType dash="'"/>
+		  <stype dash="'"/>
 		</mutable>
 	      </eq>
 	      <eq>
 		<mbFull>
-		  <pType/>
-		  <sType/>
+		  <ptype/>
+		  <stype/>
 		</mbFull>
 		<type/>
 	      </eq>
 	      <eq>
 		<mbTop>
-		  <sType/>
-		  <sType dsah="'"/>
+		  <stype/>
+		  <stype dsah="'"/>
 		</mbTop>
 		<type/>
 	      </eq>

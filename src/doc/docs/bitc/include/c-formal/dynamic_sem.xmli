@@ -8,27 +8,6 @@
   <title>Dynamic Semantics of <btypes:TYPE><language/></btypes:TYPE></title>
   <btypes:TYPE>        
     <grammar>
-      <bnf desc="Locations">
-	<loc/>
-	<alternatives>
-	  <sLoc/>
-	  <hLoc/>
-	</alternatives>
-      </bnf>
-      <bnf desc="Stack Locations"> 
-	<sLoc/>
-	<alternatives etc="yes">
-	  <sLoc num="1"/>
-	  <sLoc num="2"/>
-	</alternatives>
-      </bnf>
-      <bnf desc="Heap Locations">
-	<hLoc/>
-	<alternatives etc="yes">
-	  <hLoc num="1"/>
-	  <hLoc num="2"/>
-	</alternatives>
-      </bnf>
       <bnf desc="Stack">
 	<stack/>
 	<alternatives>
@@ -55,7 +34,7 @@
 	  </extend>
 	</alternatives>
       </bnf>
-      <bnf desc="sel-path">
+      <bnf desc="Selection Path">
 	<path/>
 	<alternatives>
 	  <texttt content="1"/>
@@ -85,21 +64,6 @@
 	  </select>
 	</alternatives>
       </bnf>
-      <bnf desc="Values">
-	<aVal/>
-	<alternatives>
-	  <text content="..."/>
-	  <hLoc/>
-	</alternatives>
-      </bnf>
-      <bnf desc="Expressions">
-	<aExpr/>
-	<alternatives>
-	  <text content="..."/>
-	  <sLoc/>
-	  <hLoc/>
-	</alternatives>
-      </bnf>
     </grammar>
   </btypes:TYPE>
   <p>
@@ -108,6 +72,7 @@
     expressions is denoted by <btypes:TYPE><evalOp/></btypes:TYPE>,
     and evaluation in a Lvalue context is given by the
     <btypes:TYPE><levalOp/></btypes:TYPE> relation.
+    <br/>
     <br/>
     <br/>
   </p>

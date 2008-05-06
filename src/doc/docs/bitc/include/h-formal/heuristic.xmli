@@ -32,18 +32,18 @@
 	</alternatives>
       </bnfc>
       <bnf desc="Unct. Types">
-	<sType/>
+	<stype/>
 	<alternatives>
 	  <tvar name="alpha"/>
 	  <unit/>
 	  <bool/>
-	  <fn M="yes"><sType/><sType/></fn>                  
+	  <fn M="yes"><stype/><stype/></fn>                  
 	</alternatives>                
       </bnf>
       <bnfc desc="">
 	<alternatives>
-	  <ref><sType/></ref>
-	  <mutable><sType/></mutable>
+	  <ref><stype/></ref>
+	  <mutable><stype/></mutable>
 	</alternatives>
       </bnfc>
       <bnf desc="Type Scheme">

@@ -1027,7 +1027,7 @@
 	      <opState>
 		<stack/>
 		<heap/>
-		<let kind="a">              
+		<let kind="x">              
 		  <id/>
 		  <aExpr num="1"/>
 		  <aExpr num="2"/>
@@ -1036,7 +1036,7 @@
 	      <opState>
 		<stack dash="'"/>
 		<heap dash="'"/>
-		<let kind="a">              
+		<let kind="x">              
 		  <id/>
 		  <aExpr num="1" dash="'"/>
 		  <aExpr num="2"/>

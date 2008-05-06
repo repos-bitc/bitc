@@ -1191,6 +1191,23 @@
     <xsl:call-template name="print.type"/>
   </xsl:template>
 
+  <!-- Special type syntax -->
+  <xsl:template match="stype" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>sigmav;</xsl:text>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>  
+  <xsl:template match="ptype" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rho;</xsl:text>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>  
+  <xsl:template match="Ptype" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rhov;</xsl:text>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>  
+  
   <!-- Type Variables -->
   <xsl:template match="tvar" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -1445,20 +1462,6 @@
 
  <!-- A constrained type -->
   <xsl:template match="aCtype" mode="formula">
-    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>rho;</xsl:text>
-    <xsl:call-template name="print.index.dash"/>
-  </xsl:template>  
-
- <!-- A special type: generic usage! -->
-  <xsl:template match="sType" mode="formula">
-    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>phiv;</xsl:text>
-    <xsl:call-template name="print.index.dash"/>
-  </xsl:template>  
-
-  <!-- ptype, same as aCtype -->
-  <xsl:template match="pType" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>rho;</xsl:text>
     <xsl:call-template name="print.index.dash"/>
@@ -2045,6 +2048,9 @@
       <xsl:if test="@placement='center'">
 	<xsl:attribute name="latex.center">yes</xsl:attribute>
       </xsl:if>
+      <xsl:if test="@break='yes'">
+	<xsl:attribute name="latex.long">yes</xsl:attribute>
+      </xsl:if>
       <xsl:element name="tbody">
 	<xsl:apply-templates mode="formula"/>	
       </xsl:element>
@@ -2180,7 +2186,7 @@
   <!-- vExp -->
   <xsl:template match="vExp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>thetav;</xsl:text>
+    <xsl:text>upsi;</xsl:text>
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>  
 
@@ -2476,6 +2482,12 @@
       <xsl:element name="sup">
 	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
 	<xsl:text>kappa;</xsl:text>
+      </xsl:element>
+    </xsl:if>
+    <xsl:if test="@kind='x'">
+      <xsl:element name="sup">
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>kappav;</xsl:text>
       </xsl:element>
     </xsl:if>
     <xsl:if test="*[1]">

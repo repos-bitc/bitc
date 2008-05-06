@@ -175,9 +175,9 @@
 	    <eq>
 	      <Subst>
 		<aSubMap/>
-		<pType/>
+		<ptype/>
 	      </Subst>
-	      <pType dash="'"/>
+	      <ptype dash="'"/>
 	    </eq>
 	  </tyPre>
 	  <tyConc>
@@ -185,11 +185,11 @@
 	      <Subst>
 		<aSubMap/>
 		<mutable>
-		  <pType/>
+		  <ptype/>
 		</mutable>
 	      </Subst>
 	      <mutable>
-		<pType dash="'"/>
+		<ptype dash="'"/>
 	      </mutable>
 	    </eq>
 	  </tyConc>
@@ -241,9 +241,9 @@
 	    <eq>
 	      <Subst>
 		<aSubMap/>
-		<pType/>
+		<ptype/>
 	      </Subst>
-	      <pType dash="'"/>
+	      <ptype dash="'"/>
 	    </eq>
 	  </tyPre>
 	  <tyConc>
@@ -252,12 +252,12 @@
 		<aSubMap/>
 		<mbTop>
 		  <tvar/>
-		  <pType/>
+		  <ptype/>
 		</mbTop>
 	      </Subst>
 	      <mbTop>
 		<tvar dash="'"/>
-		<pType dash="'"/>
+		<ptype dash="'"/>
 	      </mbTop>
 	    </eq>
 	  </tyConc>
@@ -269,10 +269,10 @@
 		<aSubMap/>
 		<tvar/>
 	      </Subst>
-	      <pType dash="'"/>
+	      <ptype dash="'"/>
 	    </eq>
 	    <neq>
-	      <pType dash="'"/>
+	      <ptype dash="'"/>
 	      <tvar dash="'"/>
 	    </neq>
 	  </tyPre>
@@ -282,10 +282,10 @@
 		<aSubMap/>
 		<mbTop>
 		  <tvar/>
-		  <pType/>
+		  <ptype/>
 		</mbTop>
 	      </Subst>
-	      <pType dash="'"/>
+	      <ptype dash="'"/>
 	    </eq>
 	  </tyConc>
 	</tyRule>
@@ -294,16 +294,16 @@
 	    <eq>
 	      <Subst>
 		<aSubMap/>
-		<sType/>
+		<stype/>
 	      </Subst>
-	      <sType dash="'"/>
+	      <stype dash="'"/>
 	    </eq>
 	    <eq>
 	      <Subst>
 		<aSubMap/>
-		<pType/>
+		<ptype/>
 	      </Subst>
-	      <pType dash="'"/>
+	      <ptype dash="'"/>
 	    </eq>
 	  </tyPre>
 	  <tyConc>
@@ -311,13 +311,13 @@
 	      <Subst>
 		<aSubMap/>
 		<mbFull>
-		  <sType/>
-		  <pType/>
+		  <stype/>
+		  <ptype/>
 		</mbFull>
 	      </Subst>
 	      <mbFull>
-		<sType dash="'"/>
-		<pType dash="'"/>
+		<stype dash="'"/>
+		<ptype dash="'"/>
 	      </mbFull>
 	    </eq>
 	  </tyConc>
@@ -327,13 +327,13 @@
 	    <eq>
 	      <Subst>
 		<aSubMap/>
-		<sType/>
+		<stype/>
 	      </Subst>
-	      <pType dash="'"/>
+	      <Ptype/>
 	    </eq>
 	    <neq>
-	      <pType dash="'"/>
-	      <sType dash="'"/>
+	      <Ptype/>
+	      <stype dash="'"/>
 	    </neq>
 	  </tyPre>
 	  <tyConc>
@@ -341,40 +341,11 @@
 	      <Subst>
 		<aSubMap/>
 		<mbFull>
-		  <sType/>
-		  <pType/>
+		  <stype/>
+		  <ptype/>
 		</mbFull>
 	      </Subst>
-	      <pType dash="'"/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<tvar/>
-	      </Subst>
-	      <mbTop>
-		<tvar dash="'"/>
-		<pType dash="'"/>
-	      </mbTop>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<mbFull>
-		  <tvar/>
-		  <pType/>
-		</mbFull>
-	      </Subst>
-	      <mbTop>
-		<tvar dash="'"/>
-		<pType dash="'"/>
-	      </mbTop>
+	      <Ptype/>
 	    </eq>
 	  </tyConc>
 	</tyRule>

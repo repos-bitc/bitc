@@ -470,8 +470,9 @@
                                | union
                                | comp
                                | aCtype
-                               | sType
-                               | pType
+                               | stype
+                               | ptype
+                               | Ptype
                                | ctype
                                | CType
                                | MBpair
@@ -563,6 +564,23 @@
                                num       CDATA   #IMPLIED
                                dash     CDATA    #IMPLIED
 >
+
+<!-- Special Types -->
+<!-- As \sigmav -->
+<!ATTLIST stype
+                               num        CDATA       #IMPLIED
+                               dash       DATA        #IMPLIED
+>
+<!-- As \rho>
+<!ATTLIST ptype
+                               num        CDATA       #IMPLIED
+                               dash       DATA        #IMPLIED
+>
+<!-- As \rhov>
+<!ATTLIST Ptype
+                               num        CDATA       #IMPLIED
+                               dash       DATA        #IMPLIED
+>
  
 <!ELEMENT tvar                 EMPTY>
 <!ATTLIST tvar
@@ -635,10 +653,6 @@
 <!ATTLIST aCtype
                                num        CDATA       #IMPLIED
                                dash       CDATA       #IMPLIED
->
-<!ATTLIST sType
-                               num        CDATA       #IMPLIED
-                               dash       DATA        #IMPLIED
 >
 
 <!-- Typeclass Constraint Notation -->
@@ -866,7 +880,7 @@
 <!ATTLIST grammar
                                notitle   CDATA    #IMPLIED
                                placement CDATA    #IMPLIED
-                               initsep   CDATA    #IMPLIED
+                               break    CDATA    #IMPLIED
 >
 <!ELEMENT bnf                  (%anything.group;, alternatives)>
 <!ATTLIST bnf

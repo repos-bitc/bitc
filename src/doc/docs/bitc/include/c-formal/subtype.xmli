@@ -37,17 +37,17 @@
 	<tyRule name="S-Mut">
 	  <tyPre>
 	    <Msub>
-	      <pType/>
-	      <pType dash="'"/>
+	      <ptype/>
+	      <ptype dash="'"/>
 	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <Msub>
 	      <mutable>
-		<pType/>
+		<ptype/>
 	      </mutable>
 	      <mutable>
-		<pType dash="'"/>
+		<ptype dash="'"/>
 	      </mutable>
 	    </Msub>
 	  </tyConc>
@@ -82,7 +82,7 @@
 	  <tyPre>
 	    <eq>
 	      <minzT>
-		<pType/>
+		<ptype/>
 	      </minzT>
 	      <type/>
 	    </eq>
@@ -91,7 +91,7 @@
 	    <Msub>
 	      <mbTop>
 		<tvar/>
-		<pType/>
+		<ptype/>
 	      </mbTop>
 	      <type/>
 	    </Msub>
@@ -101,7 +101,7 @@
 	  <tyPre>
 	    <eq>
 	      <maxzT>
-		<pType/>
+		<ptype/>
 	      </maxzT>
 	      <type/>
 	    </eq>
@@ -111,7 +111,7 @@
 	      <type/>
 	      <mbTop>
 		<tvar/>
-		<pType/>
+		<ptype/>
 	      </mbTop>
 	    </Msub>
  	  </tyConc>
@@ -120,7 +120,7 @@
 	  <tyPre>
 	    <eq>
 	      <minz>
-		<pType/>
+		<ptype/>
 	      </minz>
 	      <type/>
 	    </eq>
@@ -129,7 +129,7 @@
 	    <Msub>
 	      <mbFull>
 		<tvar/>
-		<pType/>
+		<ptype/>
 	      </mbFull>
 	      <type/>
 	    </Msub>
@@ -140,9 +140,9 @@
 	    <Msub>
 	      <mbFull>
 		<tvar/>
-		<pType/>
+		<ptype/>
 	      </mbFull>
-	      <pType dash="'"/>
+	      <ptype dash="'"/>
 	    </Msub>
 	  </tyPre>
 	  <tyConc>
@@ -151,10 +151,10 @@
 		<mutable>
 		  <tvar/>
 		</mutable>
-		<pType/>
+		<ptype/>
 	      </mbFull>
 	      <mutable>
-		<pType dash="'"/>
+		<ptype dash="'"/>
 	      </mutable>
 	    </Msub>
  	  </tyConc>
@@ -163,7 +163,7 @@
 	  <tyPre>
 	    <eq>
 	      <maxz>
-		<pType/>
+		<ptype/>
 	      </maxz>
 	      <type/>
 	    </eq>
@@ -172,8 +172,8 @@
 	    <Msub>
 	      <type/>
 	      <mbFull>
-		<sType/>
-		<pType/>
+		<stype/>
+		<ptype/>
 	      </mbFull>
 	    </Msub>
  	  </tyConc>
