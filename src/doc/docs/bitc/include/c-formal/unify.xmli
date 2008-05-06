@@ -205,7 +205,7 @@
 	    </unf>
 	  </rhs>
 	</equation>	
-	<!-- Ms1 = Ms2 -->
+	<!-- Mp1 = Mp2 -->
 	<equation>
 	  <lhs>
 	    <unf>
@@ -213,10 +213,10 @@
 		<set>
 		  <eq>
 		    <mutable>
-		      <sType num="1"/>
+		      <pType num="1"/>
 		    </mutable>
 		    <mutable>
-		      <sType num="2"/>
+		      <pType num="2"/>
 		    </mutable>
 		  </eq>
 		</set>
@@ -230,8 +230,8 @@
 		<aCtset/>
 		<set>
 		  <eq>
-		    <sType num="1"/>
-		    <sType num="2"/>
+		    <pType num="1"/>
+		    <pType num="2"/>
 		  </eq>
 		</set>
 	      </unin>
@@ -277,7 +277,7 @@
 	    </unf>
 	  </rhs>
 	</equation>	
-	<!-- mb(s1, s2) = s -->
+	<!-- 'a!p1 = 'b!p2 -->
 	<equation>
 	  <lhs>
 	    <unf>
@@ -285,10 +285,13 @@
 		<set>
 		  <eq>
 		    <mbTop>
-		      <sType num="1"/>
-		      <sType num="2"/>
+		      <tvar name="alpha"/>
+		      <pType num="1"/>
 		    </mbTop>
-		    <sType/>
+		    <mbTop>
+		      <tvar name="beta"/>
+		      <pType num="2"/>
+		    </mbTop>
 		  </eq>
 		</set>
 		<aCtset/>
@@ -302,22 +305,62 @@
 		<set>
 		  <eq>
 		    <minzT>
-		      <sType num="2"/>
- 		    </minzT>
+		      <pType num="1"/>
+		    </minzT>
 		    <minzT>
-		      <sType/>
+		      <pType num="2"/>
 		    </minzT>
 		  </eq>
 		  <eq>
-		    <sType num="1"/>
-		    <sType/>
+		    <tvar name="alpha"/>
+		    <tvar name="beta"/>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>	  
+	<!-- a!p1 = p2 -->
+	<equation sep="4pt">
+	  <lhs>
+	    <unf>
+	      <unin>
+		<set>
+		  <eq>
+		    <mbTop>
+		      <tvar/>
+		      <pType/>
+		    </mbTop>
+		    <pType dash="'"/>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <minzT>
+		      <pType/>
+		    </minzT>
+		    <minzT>
+		      <pType dash="'"/>
+		    </minzT>
+		  </eq>
+		  <eq>
+		    <tvar/>
+		    <pType dash="'"/>
 		  </eq>
 		</set>
 	      </unin>
 	    </unf>
 	  </rhs>
 	</equation>
-	<!-- MB(p, s) = p' -->
+	<!-- w1|p1 = w2|p2 -->
 	<equation>
 	  <lhs>
 	    <unf>
@@ -325,8 +368,51 @@
 		<set>
 		  <eq>
 		    <mbFull>
-		      <pType/>
+		      <sType num="1"/>
+		      <pType num="1"/>
+		    </mbFull>
+		    <mbFull>
+		      <sType num="2"/>
+		      <pType num="2"/>
+		    </mbFull>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <minz>
+		      <pType num="1"/>
+		    </minz>
+		    <minz>
+		      <pType num="2"/>
+		    </minz>
+		  </eq>
+		  <eq>
+		    <sType num="1"/>
+		    <sType num="2"/>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>
+	<!-- w|p = p' -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin>
+		<set>
+		  <eq>
+		    <mbFull>
 		      <sType/>
+		      <pType/>
 		    </mbFull>
 		    <pType dash="'"/>
 		  </eq>
@@ -342,14 +428,14 @@
 		<set>
 		  <eq>
 		    <minz>
-		      <sType/>
+		      <pType/>
 		    </minz>
 		    <minz>
 		      <pType dash="'"/>
 		    </minz>
 		  </eq>
 		  <eq>
-		    <pType/>
+		    <sType/>
 		    <pType dash="'"/>
 		  </eq>
 		</set>
@@ -357,20 +443,20 @@
 	    </unf>
 	  </rhs>
 	</equation>
-	<!-- mb(s1, s1') = mb(s2, s2') -->
+	<!-- a|p = b!p' -->
 	<equation>
 	  <lhs>
 	    <unf>
 	      <unin>
 		<set>
 		  <eq>
+		    <mbFull>
+		      <tvar name="alpha"/>
+		      <pType/>
+		    </mbFull>
 		    <mbTop>
-		      <sType num="1"/>
-		      <sType num="1" dash="'"/>
-		    </mbTop>
-		    <mbTop>
-		      <sType num="2"/>
-		      <sType num="2" dash="'"/>
+		      <tvar name="beta"/>
+		      <pType dash="'"/>
 		    </mbTop>
 		  </eq>
 		</set>
@@ -384,23 +470,26 @@
 		<aCtset/>
 		<set>
 		  <eq>
-		    <sType num="1"/>
-		    <sType num="2"/>
+		    <minz>
+		      <pType/>
+		    </minz>
+		    <minz>
+		      <pType dash="'"/>
+		    </minz>
 		  </eq>
 		  <eq>
-		    <minzT>
-		      <sType num="1" dash="'"/>
-		    </minzT>
-		    <minzT>
-		      <sType num="2" dash="'"/>
-		    </minzT>
+		    <tvar name="alpha"/>
+		    <mbTop>
+		      <tvar name="beta"/>
+		      <pType dash="'"/>
+		    </mbTop>
 		  </eq>
 		</set>
 	      </unin>
 	    </unf>
 	  </rhs>
-	</equation>	  
-	<!-- MB(s1, s1') = MB(s2, s2') -->
+	</equation>
+	<!-- M'a|p = b!p' -->
 	<equation sep="4pt">
 	  <lhs>
 	    <unf>
@@ -408,13 +497,15 @@
 		<set>
 		  <eq>
 		    <mbFull>
-		      <pType num="1"/>
-		      <sTtype num="1"/>
+		      <mutable>
+			<tvar name="alpha"/>
+		      </mutable>
+		      <pType/>
 		    </mbFull>
-		    <mbFull>
-		      <pType num="2"/>
-		      <sType num="2"/>
-		    </mbFull>
+		    <mbTop>
+		      <tvar name="beta"/>
+		      <pType dash="'"/>
+		    </mbTop>
 		  </eq>
 		</set>
 		<aCtset/>
@@ -427,16 +518,24 @@
 		<aCtset/>
 		<set>
 		  <eq>
-		    <pTtype num="1"/>
-		    <pType num="2"/>
+		    <minz>
+		      <pType/>
+		    </minz>
+		    <minz>
+		      <pType dash="'"/>
+		    </minz>
 		  </eq>
 		  <eq>
-		    <minz>
-		      <sType num="1"/>
-		    </minz>
-		    <minz>
-		      <sType num="2"/>
-		    </minz>
+		    <tvar name="alpha"/>
+		    <mutable>
+		      <pType dash="'"/>
+		    </mutable>
+		  </eq>
+		  <eq>
+		    <tvar name="beta"/>
+		    <mutable>
+		      <pType dash="'"/>
+		    </mutable>
 		  </eq>
 		</set>
 	      </unin>

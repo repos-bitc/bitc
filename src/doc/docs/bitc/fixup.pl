@@ -76,10 +76,9 @@ while(!eof(F)) {
 	#$l =~ s/$transR/$EM\{\\Rightarrow\}\\hskip -2.1ex\{\*\}/g;
 
 	#Equality onder another operator
-	#$l =~ s/=$EM\{\^\{$EM\{\\blacktriangledown\}\}\}/\\mbox\{$1\\hskip -0.9ex\\raise0.25ex\\hbox\{$EM\{\_\{\_$MIT\{$2\}\}\}\}\}/g;
 	$l =~ s/$EqSp1/\\mbox\{$1\\hskip -1.2ex\\lower 0.1ex\\hbox\{$EM\{\_\{\_\{$2\}\}\}\}\}/g;
-	$l =~ s/$EqSp2/\\mbox\{$1\\hskip -1.3ex\\raise 0.1ex\\hbox\{$EM\{\_\{\_\{$2\}\}\}\}\}/g;
-
+	$l =~ s/$EqSp2/\\mbox\{$1\\hskip -1.4ex\\raise 0.1ex\\hbox\{$EM\{\_\{\_\{$2\}\}\}\}\}/g;
+	
 	#Polymorphic constraint
 	$l =~ s/$pcstSp/\\mbox\{$1\\hskip -2ex$EM\{\^\{$MIT\{$2\}\}\}\}/g;
 	

@@ -341,7 +341,7 @@
 	      <Subst>
 		<aSubMap/>
 		<mbFull>
-		  <tvar/>
+		  <sType/>
 		  <pType/>
 		</mbFull>
 	      </Subst>
@@ -349,6 +349,38 @@
 	    </eq>
 	  </tyConc>
 	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<tvar/>
+	      </Subst>
+	      <mbTop>
+		<tvar dash="'"/>
+		<pType dash="'"/>
+	      </mbTop>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<mbFull>
+		  <tvar/>
+		  <pType/>
+		</mbFull>
+	      </Subst>
+	      <mbTop>
+		<tvar dash="'"/>
+		<pType dash="'"/>
+	      </mbTop>
+	    </eq>
+	  </tyConc>
+	</tyRule>
+	<!-- A substitution of a mbTop into the tvar
+	of a mbFull with a mutable type variable violates the grammar
+	of the language, and is therefore not a valid substitution -->
       </Hrules>
       <Hrules rowsep="4pt" colsep="2">
 	<tyRule>
