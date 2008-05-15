@@ -2,784 +2,782 @@
 <!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" >
 <figure id="hy_unify" fullwidth='yes' latex.placement="tbp">
-  <font size="small">
-    <btypes:TYPE
-      xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-      <VEqns>
-	<!-- Empty -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <Empty/>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <Pair>
-	      <Empty/>
-	      <EmptySubst/>
-	    </Pair>
-	  </rhs>
-	</equation>
-	<!-- t = t -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <type/>
-		    <type/>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
+  <btypes:TYPE
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+    <VEqns>
+      <!-- Empty -->
+      <equation>
+	<lhs>
+	  <unf>
+	    <Empty/>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <Pair>
+	    <Empty/>
+	    <EmptySubst/>
+	  </Pair>
+	</rhs>
+      </equation>
+      <!-- t = t -->
+      <equation>
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <type/>
+		  <type/>
+		</eq>
+	      </set>
 	      <aCtset/>
-	    </unf>
-	  </rhs>
-	</equation>
-	<!-- a = t | a notin t -->
-	<equation>	  
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <tvar name="alpha"/>
-		    <type/>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	    <notin>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <aCtset/>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- a = t | a notin t -->
+      <equation>	  
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <tvar name="alpha"/>
+		  <type/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <notin>
+	    <tvar name="alpha"/>
+	    <type/>
+	  </notin>
+	</lhs>
+	<rhs>
+	  <Pair>
+	    <aCtset num="i"/>
+	    <scomp>
+	      <aSubMap num="a"/>
+	      <aSubMap num="i"/>
+	    </scomp>	    
+	  </Pair>	 
+	  <eq>
+	    <aSubMap num="a"/>
+	    <SubMap>
 	      <tvar name="alpha"/>
 	      <type/>
-	    </notin>
-	  </lhs>
-	  <rhs>
-	    <Pair>
-	      <aCtset num="i"/>
-	      <scomp>
+	    </SubMap>
+	  </eq>
+	  <eq>
+	    <unf>
+	      <Subst>
 		<aSubMap num="a"/>
-		<aSubMap num="i"/>
-	      </scomp>	    
-	    </Pair>	 
-	    <eq>
-	      <aSubMap num="a"/>
-	      <SubMap>
-		<tvar name="alpha"/>
-		<type/>
-	      </SubMap>
-	    </eq>
-	    <eq>
-	      <unf>
-		<Subst>
-		  <aSubMap num="a"/>
-		  <aCtset/>
-		</Subst>
-	      </unf>
-	      <Pair>
-		<aCtset num="i"/>
-		<aSubMap num="i"/>
-	      </Pair>
-	    </eq>
-	  </rhs>
-	</equation>
-	<!-- k = K -->
-	<equation sep="4pt">
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <lKind k="var"/>
-		    <lKind/>
-		  </eq>
-		</set>
 		<aCtset/>
-	      </unin>
+	      </Subst>
 	    </unf>
-	  </lhs>
-	  <rhs>
 	    <Pair>
 	      <aCtset num="i"/>
-	      <scomp>
-		<aSubMap num="k"/>
-		<aSubMap num="i"/>
-	      </scomp>	    
-	    </Pair>	  	    
-	    <eq>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</rhs>
+      </equation>
+      <!-- k = K -->
+      <equation sep="4pt">
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <lKind k="var"/>
+		  <lKind/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <Pair>
+	    <aCtset num="i"/>
+	    <scomp>
 	      <aSubMap num="k"/>
-	      <SubMap>
-		<lKind k="var"/>
-		<lKind/>
-	      </SubMap>
-	    </eq>
-	    <eq>
-	      <unf>
-		<Subst>
-		  <aSubMap num="k"/>
-		  <aCtset/>
-		</Subst>
-	      </unf>
-	      <Pair>
-		<aCtset num="i"/>
-		<aSubMap num="i"/>
-	      </Pair>
-	    </eq>
-	  </rhs>
-	</equation>
-	<!-- t1->t2 = t1' -> t2' -->
-	<equation>
-	  <lhs>
+	      <aSubMap num="i"/>
+	    </scomp>	    
+	  </Pair>	  	    
+	  <eq>
+	    <aSubMap num="k"/>
+	    <SubMap>
+	      <lKind k="var"/>
+	      <lKind/>
+	    </SubMap>
+	  </eq>
+	  <eq>
 	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <fn>		    
-		      <type num="a"/>		    		    
-		      <type num="r"/>		    
-		    </fn>
-		    <fn>		    
-		      <type num="a" dash="'"/>		    		    
-		      <type num="r" dash="'"/>
-		    </fn>
-		  </eq>
-		</set>
+	      <Subst>
+		<aSubMap num="k"/>
 		<aCtset/>
-	      </unin>
+	      </Subst>
 	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <type num="a"/>
-		    <type num="a" dash="'"/>
-		  </eq>
-		  <eq>
-		    <type num="r"/>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</rhs>
+      </equation>
+      <!-- t1->t2 = t1' -> t2' -->
+      <equation>
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <fn>		    
+		    <type num="a"/>		    		    
+		    <type num="r"/>		    
+		  </fn>
+		  <fn>		    
+		    <type num="a" dash="'"/>		    		    
 		    <type num="r" dash="'"/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>	
-	<!-- ^t1 = ^t2 -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <ref>
-		      <type num="1"/>
-		    </ref>
-		    <ref>
-		      <type num="2"/>
-		    </ref>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
+		  </fn>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="a"/>
+		  <type num="a" dash="'"/>
+		</eq>
+		<eq>
+		  <type num="r"/>
+		  <type num="r" dash="'"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- ^t1 = ^t2 -->
+      <equation>
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <ref>
 		    <type num="1"/>
+		  </ref>
+		  <ref>
 		    <type num="2"/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>	
-	<!-- Mp1 = Mp2 -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <mutable>
-		      <ptype num="1"/>
-		    </mutable>
-		    <mutable>
-		      <ptype num="2"/>
-		    </mutable>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
+		  </ref>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="1"/>
+		  <type num="2"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- Mp1 = Mp2 -->
+      <equation>
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <mutable>
 		    <ptype num="1"/>
+		  </mutable>
+		  <mutable>
 		    <ptype num="2"/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>	
-	<!-- t1xt2 <= t1'xt2' -->
-	<equation sep="4pt">
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <pair>
-		      <type num="1"/>
-		      <type num="2"/>
-		    </pair>
-		    <pair>
-		      <type num="1" dash="'"/>
-		      <type num="2" dash="'"/>
-		    </pair>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
+		  </mutable>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <ptype num="1"/>
+		  <ptype num="2"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- t1xt2 <= t1'xt2' -->
+      <equation sep="4pt">
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <pair>
 		    <type num="1"/>
-		    <type num="1" dash="'"/>
-		  </eq>
-		  <eq>
 		    <type num="2"/>
+		  </pair>
+		  <pair>
+		    <type num="1" dash="'"/>
 		    <type num="2" dash="'"/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>	
-	<!-- 'a!p1 = 'b!p2 -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <mbTop>
-		      <tvar name="alpha"/>
-		      <ptype num="1"/>
-		    </mbTop>
-		    <mbTop>
-		      <tvar name="beta"/>
-		      <ptype num="2"/>
-		    </mbTop>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <minzT>
-		      <ptype num="1"/>
-		    </minzT>
-		    <minzT>
-		      <ptype num="2"/>
-		    </minzT>
-		  </eq>
-		  <eq>
+		  </pair>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="1"/>
+		  <type num="1" dash="'"/>
+		</eq>
+		<eq>
+		  <type num="2"/>
+		  <type num="2" dash="'"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- 'a!p1 = 'b!p2 -->
+      <equation>
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <mbTop>
 		    <tvar name="alpha"/>
+		    <ptype num="1"/>
+		  </mbTop>
+		  <mbTop>
 		    <tvar name="beta"/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>	  
-	<!-- a!p1 = p2 -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <mbTop>
-		      <tvar/>
-		      <ptype/>
-		    </mbTop>
-		    <ptype dash="'"/>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <minzT>
-		      <ptype/>
-		    </minzT>
-		    <minzT>
-		      <ptype dash="'"/>
-		    </minzT>
-		  </eq>
-		  <eq>
+		    <ptype num="2"/>
+		  </mbTop>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <minzT>
+		    <ptype num="1"/>
+		  </minzT>
+		  <minzT>
+		    <ptype num="2"/>
+		  </minzT>
+		</eq>
+		<eq>
+		  <tvar name="alpha"/>
+		  <tvar name="beta"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	  
+      <!-- a!p1 = p2 -->
+      <equation>
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <mbTop>
 		    <tvar/>
+		    <ptype/>
+		  </mbTop>
+		  <ptype dash="'"/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <minzT>
+		    <ptype/>
+		  </minzT>
+		  <minzT>
 		    <ptype dash="'"/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>
-	<!-- s1|p1 = s2|p2 -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <mbFull>
-		      <stype num="1"/>
-		      <ptype num="1"/>
-		    </mbFull>
-		    <mbFull>
-		      <stype num="2"/>
-		      <ptype num="2"/>
-		    </mbFull>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <minz>
-		      <ptype num="1"/>
-		    </minz>
-		    <minz>
-		      <ptype num="2"/>
-		    </minz>
-		  </eq>
-		  <eq>
+		  </minzT>
+		</eq>
+		<eq>
+		  <tvar/>
+		  <ptype dash="'"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- s1|p1 = s2|p2 -->
+      <equation>
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <mbFull>
 		    <stype num="1"/>
+		    <ptype num="1"/>
+		  </mbFull>
+		  <mbFull>
 		    <stype num="2"/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>
-	<!-- s|p = P -->
-	<equation sep="4pt">
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <eq>
-		    <mbFull>
-		      <stype/>
-		      <ptype/>
-		    </mbFull>
-		    <Ptype/>
-		  </eq>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <minz>
-		      <ptype/>
-		    </minz>
-		    <minz>
-		      <Ptype/>
-		    </minz>
-		  </eq>
-		  <eq>
+		    <ptype num="2"/>
+		  </mbFull>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <minz>
+		    <ptype num="1"/>
+		  </minz>
+		  <minz>
+		    <ptype num="2"/>
+		  </minz>
+		</eq>
+		<eq>
+		  <stype num="1"/>
+		  <stype num="2"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- s|p = P -->
+      <equation sep="4pt">
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <mbFull>
 		    <stype/>
+		    <ptype/>
+		  </mbFull>
+		  <Ptype/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <minz>
+		    <ptype/>
+		  </minz>
+		  <minz>
 		    <Ptype/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>
-	<!-- P(m, t1, t2) --> 
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <Pcst>
-		    <lKind k="mono"/>
-		    <type num="g"/>
-		    <type num="i"/>
-		  </Pcst>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <type num="g"/>
-		    <type num="i"/>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>	
-	<!-- P(p, t1, t2) | [](t1) --> 
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<set>
-		  <Pcst>
-		    <lKind k="poly"/>
-		    <type num="g"/>
-		    <type num="i"/>
-		  </Pcst>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	    <concrete>
-	      <type num="g"/>
-	    </concrete>
-	  </lhs>
-	  <rhs>
-	    <unf>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <type num="g"/>
-		    <minzD>
-		      <type num="g"/>
-		    </minzD>
-		  </eq>
-		  <eq>
-		    <type num="i"/>
-		    <minzD>
-		      <type num="i"/>
-		    </minzD>
-		  </eq>
-		</set>
-	      </unin>
-	    </unf>
-	  </rhs>
-	</equation>	
-	<!-- P(k, Mt1?, M?t2) --> 
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<aCtset num="*"/>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	    <eq>
-	      <aCtset num="*"/>
+		  </minz>
+		</eq>
+		<eq>
+		  <stype/>
+		  <Ptype/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- P(m, t1, t2) --> 
+      <equation>
+	<lhs>
+	  <unf>
+	    <unin>
 	      <set>
 		<Pcst>
-		  <lKind k="var"/>
+		  <lKind k="mono"/>
 		  <type num="g"/>
 		  <type num="i"/>
 		</Pcst>
 	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="g"/>
+		  <type num="i"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- P(p, t1, t2) | [](t1) --> 
+      <equation>
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<Pcst>
+		  <lKind k="poly"/>
+		  <type num="g"/>
+		  <type num="i"/>
+		</Pcst>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <concrete>
+	    <type num="g"/>
+	  </concrete>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="g"/>
+		  <minzD>
+		    <type num="g"/>
+		  </minzD>
+		</eq>
+		<eq>
+		  <type num="i"/>
+		  <minzD>
+		    <type num="i"/>
+		  </minzD>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- P(k, Mt1?, M?t2) --> 
+      <equation>
+	<lhs>
+	  <unf>
+	    <unin>
+	      <aCtset num="*"/>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <eq>
+	    <aCtset num="*"/>
+	    <set>
+	      <Pcst>
+		<lKind k="var"/>
+		<type num="g"/>
+		<type num="i"/>
+	      </Pcst>
+	    </set>
+	  </eq>
+	  <pred name="Mut">
+	    <type num="i"/>
+	  </pred>
+	</lhs>
+	<rhs>
+	  <Pair>
+	    <aCtset num="i"/>
+	    <scomp>
+	      <aSubMap num="k"/>
+	      <aSubMap num="i"/>
+	    </scomp>
+	  </Pair>
+	  <eq>
+	    <aSubMap num="k"/>
+	    <SubMap>
+	      <lKind k="var"/>
+	      <lKind k="mono"/>
+	    </SubMap>
+	  </eq>
+	  <eq>
+	    <unf>
+	      <Subst>
+		<aSubMap num="k"/>
+		<aCtset num="*"/>
+	      </Subst>
+	    </unf>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</rhs>
+      </equation>	
+      <!-- P(k, t, t1), P(k, t, t2)  t1 !~ t2 -->
+      <equation sep="4pt">
+	<lhs>
+	  <unf>
+	    <unin>
+	      <aCtset num="*"/>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <eq>
+	    <aCtset num="*"/>
+	    <set>
+	      <Pcst>
+		<lKind k="var"/>
+		<type/>
+		<type num="1"/>
+	      </Pcst>
+	      <Pcst>
+		<lKind k="var"/>
+		<type/>
+		<type num="2"/>
+	      </Pcst>
+	    </set>
+	  </eq>
+	  <eq>
+	    <unf>
+	      <unin>
+		<set>
+		  <eq>		    
+		    <type num="1"/>
+		    <type num="2"/>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <error/>
+	  </eq>
+	</lhs>
+	<rhs>
+	  <Pair>
+	    <aCtset num="i"/>
+	    <scomp>
+	      <aSubMap num="k"/>
+	      <aSubMap num="i"/>
+	    </scomp>
+	  </Pair>
+	  <eq>
+	    <aSubMap num="k"/>
+	    <SubMap>
+	      <lKind k="var"/>
+	      <lKind k="poly"/>
+	    </SubMap>
+	  </eq>
+	  <eq>
+	    <unf>
+	      <Subst>
+		<aSubMap num="k"/>
+		<aCtset num="*"/>
+	      </Subst>
+	    </unf>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</rhs>
+      </equation>	
+      <!-- Error (unhandled, un-unifiable) -->
+      <equation>
+	<lhs>
+	  <unf>
+	    <unin>
+	      <constraint/>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <notin>
+	    <constraint/>
+	    <unin>
+	      <aCtset num="e"/>
+	      <aCtset num="p"/>
+	    </unin>
+	  </notin>
+	</lhs>
+	<rhs>
+	  <error/>
+	</rhs>
+      </equation>
+    </VEqns>
+    <Hrules>
+      <eq>
+	<aCtset num="e"/>
+	<grouping>
+	  <Forall>
+	    <collection>
+	      <tvar name="alpha"/>
+	      <stype/>
+	      <ptype/>
+	      <type/>
+	      <type dash="'"/>
+	      <type dash="''"/>
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </collection>
+	  </Forall>
+	  <text content="|"/>
+	  <notin>
+	    <tvar name="alpha"/>
+	    <type dash="''"/>
+	  </notin>
+	  <space/>
+	  <text content="."/>
+	  <space/>	      
+	  <set>
+	    <eq>
+	      <type/>
+	      <type/>
 	    </eq>
+	    <eq>
+	      <tvar name="alpha"/>
+	      <type dsah="''"/>
+	    </eq>
+	    <eq>
+	      <lKind k="var"/>
+	      <lKind/>
+	    </eq>
+	    <eq>
+	      <fn>
+		<type/>
+		<type num="1"/>
+	      </fn>
+	      <fn>
+		<type dash="'"/>
+		<type num="1" dash="'"/>
+	      </fn>
+	    </eq>
+	    <eq>
+	      <ref>
+		<type/>
+	      </ref>
+	      <ref>
+		<type dash="'"/>
+	      </ref>
+	    </eq>
+	    <eq>
+	      <mutable>
+		<stype/>
+	      </mutable>
+	      <mutable>
+		<stype dash="'"/>
+	      </mutable>
+	    </eq>
+	    <eq>
+	      <mbFull>
+		<ptype/>
+		<stype/>
+	      </mbFull>
+	      <type/>
+	    </eq>
+	    <eq>
+	      <mbTop>
+		<stype/>
+		<stype dsah="'"/>
+	      </mbTop>
+	      <type/>
+	    </eq>
+	  </set>
+	</grouping>
+      </eq>
+    </Hrules>      
+    <Hrules>
+      <eq>
+	<aCtset num="p"/>
+	<grouping>
+	  <Forall>
+	    <collection>
+	      <lKind k="var"/>
+	      <lKind/>
+	      <type/>
+	      <type dash="'"/>
+	      <type num="i"/>
+	    </collection>
+	  </Forall>
+	  <text content="|"/>
+	  <NOT>
 	    <pred name="Mut">
 	      <type num="i"/>
 	    </pred>
-	  </lhs>
-	  <rhs>
-	    <Pair>
-	      <aCtset num="i"/>
-	      <scomp>
-		<aSubMap num="k"/>
-		<aSubMap num="i"/>
-	      </scomp>
-	    </Pair>
-	    <eq>
-	      <aSubMap num="k"/>
-	      <SubMap>
-		<lKind k="var"/>
-		<lKind k="mono"/>
-	      </SubMap>
-	    </eq>
-	    <eq>
-	      <unf>
-		<Subst>
-		  <aSubMap num="k"/>
-		  <aCtset num="*"/>
-		</Subst>
-	      </unf>
-	      <Pair>
-		<aCtset num="i"/>
-		<aSubMap num="i"/>
-	      </Pair>
-	    </eq>
-	  </rhs>
-	</equation>	
-	<!-- P(k, t, t1), P(k, t, t2)  t1 !~ t2 -->
-	<equation sep="4pt">
-	  <lhs>
-	    <unf>
-	      <unin>
-		<aCtset num="*"/>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	    <eq>
-	      <aCtset num="*"/>
-	      <set>
-		<Pcst>
-		  <lKind k="var"/>
-		  <type/>
-		  <type num="1"/>
-		</Pcst>
-		<Pcst>
-		  <lKind k="var"/>
-		  <type/>
-		  <type num="2"/>
-		</Pcst>
-	      </set>
-	    </eq>
-	    <eq>
-	      <unf>
-		<unin>
-		  <set>
-		    <eq>		    
-		      <type num="1"/>
-		      <type num="2"/>
-		    </eq>
-		  </set>
-		  <aCtset/>
-		</unin>
-	      </unf>
-	      <error/>
-	    </eq>
-	  </lhs>
-	  <rhs>
-	    <Pair>
-	      <aCtset num="i"/>
-	      <scomp>
-		<aSubMap num="k"/>
-		<aSubMap num="i"/>
-	      </scomp>
-	    </Pair>
-	    <eq>
-	      <aSubMap num="k"/>
-	      <SubMap>
-		<lKind k="var"/>
-		<lKind k="poly"/>
-	      </SubMap>
-	    </eq>
-	    <eq>
-	      <unf>
-		<Subst>
-		  <aSubMap num="k"/>
-		  <aCtset num="*"/>
-		</Subst>
-	      </unf>
-	      <Pair>
-		<aCtset num="i"/>
-		<aSubMap num="i"/>
-	      </Pair>
-	    </eq>
-	  </rhs>
-	</equation>	
-	<!-- Error (unhandled, un-unifiable) -->
-	<equation>
-	  <lhs>
-	    <unf>
-	      <unin>
-		<constraint/>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	    <notin>
-	      <constraint/>
-	      <unin>
-		<aCtset num="e"/>
-		<aCtset num="p"/>
-	      </unin>
-	    </notin>
-	  </lhs>
-	  <rhs>
-	    <error/>
-	  </rhs>
-	</equation>
-      </VEqns>
-      <Hrules>
-	<eq>
-	  <aCtset num="e"/>
-	  <grouping>
-	    <Forall>
-	      <collection>
-		<tvar name="alpha"/>
-		<stype/>
-		<ptype/>
-		<type/>
-		<type dash="'"/>
-		<type dash="''"/>
-		<type num="1"/>
-		<type num="1" dash="'"/>
-	      </collection>
-	    </Forall>
-	    <text content="|"/>
-	    <notin>
-	      <tvar name="alpha"/>
-	      <type dash="''"/>
-	    </notin>
-	    <space/>
-	    <text content="."/>
-	    <space/>	      
-	    <set>
-	      <eq>
-		<type/>
-		<type/>
-	      </eq>
-	      <eq>
-		<tvar name="alpha"/>
-		<type dsah="''"/>
-	      </eq>
-	      <eq>
-		<lKind k="var"/>
-		<lKind/>
-	      </eq>
-	      <eq>
-		<fn>
-		  <type/>
-		  <type num="1"/>
-		</fn>
-		<fn>
-		  <type dash="'"/>
-		  <type num="1" dash="'"/>
-		</fn>
-	      </eq>
-	      <eq>
-		<ref>
-		  <type/>
-		</ref>
-		<ref>
-		  <type dash="'"/>
-		</ref>
-	      </eq>
-	      <eq>
-		<mutable>
-		  <stype/>
-		</mutable>
-		<mutable>
-		  <stype dash="'"/>
-		</mutable>
-	      </eq>
-	      <eq>
-		<mbFull>
-		  <ptype/>
-		  <stype/>
-		</mbFull>
-		<type/>
-	      </eq>
-	      <eq>
-		<mbTop>
-		  <stype/>
-		  <stype dsah="'"/>
-		</mbTop>
-		<type/>
-	      </eq>
-	    </set>
-	  </grouping>
-	</eq>
-      </Hrules>      
-      <Hrules>
-	<eq>
-	  <aCtset num="p"/>
-	  <grouping>
-	    <Forall>
-	      <collection>
-		<lKind k="var"/>
-		<lKind/>
-		<type/>
-		<type dash="'"/>
-		<type num="i"/>
-	      </collection>
-	    </Forall>
-	    <text content="|"/>
-	    <NOT>
-	      <pred name="Mut">
-		<type num="i"/>
-	      </pred>
-	    </NOT>
-	    <space/>
-	    <textit content="."/>
-	    <space/>
-	    <set>
-	      <Pcst>
-		<lKind k="mono"/>
-		<type/>
-		<type dash="'"/>
-	      </Pcst>
-	      <Pcst>
-		<lKind k="poly"/>
-		<type/>
-		<type num="i"/>
-	      </Pcst>
-	      <Pcst>
-		<lKind k="var"/>
-		<type/>
-		<type dash="'"/>
-	      </Pcst>
-	    </set>
-	  </grouping>
-	</eq>
-      </Hrules>
-    </btypes:TYPE>
-  </font>
+	  </NOT>
+	  <space/>
+	  <textit content="."/>
+	  <space/>
+	  <set>
+	    <Pcst>
+	      <lKind k="mono"/>
+	      <type/>
+	      <type dash="'"/>
+	    </Pcst>
+	    <Pcst>
+	      <lKind k="poly"/>
+	      <type/>
+	      <type num="i"/>
+	    </Pcst>
+	    <Pcst>
+	      <lKind k="var"/>
+	      <type/>
+	      <type dash="'"/>
+	    </Pcst>
+	  </set>
+	</grouping>
+      </eq>
+    </Hrules>
+  </btypes:TYPE>
   <caption>Unification Algorithm</caption>
 </figure>

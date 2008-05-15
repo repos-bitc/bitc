@@ -519,6 +519,7 @@
 
 <!ENTITY % ct_set.group "
                                  aCtset              
+                                 bCtset              
                                | %setop.group;
 ">
 
@@ -731,11 +732,21 @@
 <!ELEMENT PcstOp               >
 <!ELEMENT Pcst                 (%anything.group;*)>
 
+<!-- infinite constraint -- unconstrained -->
+<!ELEMENT unct                 type>
+
 <!ELEMENT aCtset               EMPTY>
 <!ATTLIST aCtset
                                num       CDATA   #IMPLIED
                                dash     CDATA    #IMPLIED
 >
+
+<!ELEMENT bCtset               EMPTY>
+<!ATTLIST bCtset
+                               num       CDATA   #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
 <!-- ======================================================================
                 TypeScheme  
      ====================================================================== -->
@@ -1138,6 +1149,12 @@
 
 <!ELEMENT store                EMPTY>
 <!ATTLIST store
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+<!ELEMENT ctEnv                EMPTY>
+<!ATTLIST ctEnv
                                num      CDATA    #IMPLIED
                                dash     CDATA    #IMPLIED
 >

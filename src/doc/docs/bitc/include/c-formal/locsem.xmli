@@ -3,81 +3,79 @@
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
   <figure id="lval_rules" fullwidth='yes' latex.placement="tbp">
-  <font size="small">
-    <btypes:TYPE xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-      <Hrules>
-	<tyRule name="L-Id">
-	  <tyPre/>
-	  <tyConc>
-	    <Sjudge name="lval">
-	      <assume/>                  
-	      <id/>                  
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="L-Hloc">
-	  <tyPre/>
-	  <tyConc>
-	    <Sjudge name="lval">
-	      <assume/>                  
-	      <hLoc/>                  
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="L-Sloc">
-	  <tyPre/>
-	  <tyConc>
-	    <Sjudge name="lval">
-	      <assume/>                  
-	      <sLoc/>                  
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="L-Deref">
-	  <tyPre/>
-	  <tyConc>
-	    <Sjudge name="lval">
-	      <assume/>                  
-	      <deref>
-		<aExpr/>
-	      </deref>                  
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="L-Fst">
-	  <tyPre>
-	    <Sjudge name="lval">
-	      <assume/>                  
+  <btypes:TYPE xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+    <Hrules>
+      <tyRule name="L-Id">
+	<tyPre/>
+	<tyConc>
+	  <Sjudge name="lval">
+	    <assume/>                  
+	    <id/>                  
+	  </Sjudge>
+	</tyConc>
+      </tyRule>
+      <tyRule name="L-Hloc">
+	<tyPre/>
+	<tyConc>
+	  <Sjudge name="lval">
+	    <assume/>                  
+	    <hLoc/>                  
+	  </Sjudge>
+	</tyConc>
+      </tyRule>
+      <tyRule name="L-Sloc">
+	<tyPre/>
+	<tyConc>
+	  <Sjudge name="lval">
+	    <assume/>                  
+	    <sLoc/>                  
+	  </Sjudge>
+	</tyConc>
+      </tyRule>
+      <tyRule name="L-Deref">
+	<tyPre/>
+	<tyConc>
+	  <Sjudge name="lval">
+	    <assume/>                  
+	    <deref>
 	      <aExpr/>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="lval">
-	      <assume/>                  
-	      <fst>
-		<aExpr/>
-	      </fst>                  
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="L-Snd">
-	  <tyPre>
-	    <Sjudge name="lval">
-	      <assume/>                  
+	    </deref>                  
+	  </Sjudge>
+	</tyConc>
+      </tyRule>
+      <tyRule name="L-Fst">
+	<tyPre>
+	  <Sjudge name="lval">
+	    <assume/>                  
+	    <aExpr/>
+	  </Sjudge>
+	</tyPre>
+	<tyConc>
+	  <Sjudge name="lval">
+	    <assume/>                  
+	    <fst>
 	      <aExpr/>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="lval">
-	      <assume/>                  
-	      <snd>
-		<aExpr/>
-	      </snd>                  
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-    </btypes:TYPE>
-  </font>
-  <caption><font size="small">Location Semantics</font></caption>
+	    </fst>                  
+	  </Sjudge>
+	</tyConc>
+      </tyRule>
+      <tyRule name="L-Snd">
+	<tyPre>
+	  <Sjudge name="lval">
+	    <assume/>                  
+	    <aExpr/>
+	  </Sjudge>
+	</tyPre>
+	<tyConc>
+	  <Sjudge name="lval">
+	    <assume/>                  
+	    <snd>
+	      <aExpr/>
+	    </snd>                  
+	  </Sjudge>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+  </btypes:TYPE>
+  <caption>Location Semantics</caption>
 </figure>

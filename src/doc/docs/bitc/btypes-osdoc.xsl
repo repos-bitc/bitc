@@ -1074,7 +1074,7 @@
     <xsl:text>vdash;</xsl:text> 
     <xsl:text>)</xsl:text>    
   </xsl:template>
-
+  
   <!-- solvable -->
   <xsl:template match="solvable" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -1616,11 +1616,28 @@
     <xsl:call-template name="print.space"/>
     <xsl:apply-templates select="*[3]" mode="formula"/>
   </xsl:template>  
+
+  <!-- unct -->
+  <xsl:template match="unct" mode="formula">
+    <xsl:apply-templates select="*[1]" mode="formula"/>
+    <xsl:element name="sup">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>infin;</xsl:text>	
+    </xsl:element>
+  </xsl:template>  
   
   <!-- ct_set templates -->
   <xsl:template match="aCtset" mode="formula">
     <xsl:call-template name="print.mathcal">
       <xsl:with-param name="print.mathcal.letter">C</xsl:with-param> 
+    </xsl:call-template>
+    <xsl:call-template name="print.index.dash"/>    
+  </xsl:template>  
+
+  <!-- ct_set templates type 2 -->
+  <xsl:template match="bCtset" mode="formula">
+    <xsl:call-template name="print.mathmode">
+      <xsl:with-param name="print.mathmode.text">C</xsl:with-param> 
     </xsl:call-template>
     <xsl:call-template name="print.index.dash"/>    
   </xsl:template>  
@@ -2682,6 +2699,13 @@
   <xsl:template match="store" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>Sigma;</xsl:text>    
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>
+
+  <!-- ctEnv -->
+  <xsl:template match="ctEnv" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>Pi;</xsl:text>    
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>
 

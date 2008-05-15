@@ -3,601 +3,599 @@
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
   <figure id="subst_rules" fullwidth='yes' latex.placement="tbp">
-  <font size="small">
-    <btypes:TYPE
-      xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule>
-	  <tyPre>
-	    <notin>
-	      <SubMap>
-		<tvar/>
-		<type/>
-	      </SubMap>
-	      <aSubMap/>
-	    </notin>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<tvar/>
-	      </Subst>
+  <btypes:TYPE
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+    <Hrules rowsep="8pt" colsep="2">
+      <tyRule>
+	<tyPre>
+	  <notin>
+	    <SubMap>
 	      <tvar/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <in>
-	      <SubMap>
-		<tvar/>
-		<type/>
-	      </SubMap>
-	      <aSubMap/>
-	    </in>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<tvar/>
-	      </Subst>
 	      <type/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <notin>
-	      <SubMap>
-		<lKind k="var"/>
-		<lKind/>
-	      </SubMap>
+	    </SubMap>
+	    <aSubMap/>
+	  </notin>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
 	      <aSubMap/>
-	    </notin>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<lKind k="var"/>
-	      </Subst>
-	      <lKind/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <in>
-	      <SubMap>
-		<lKind k="var"/>
-		<lKind/>
-	      </SubMap>
+	      <tvar/>
+	    </Subst>
+	    <tvar/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <in>
+	    <SubMap>
+	      <tvar/>
+	      <type/>
+	    </SubMap>
+	    <aSubMap/>
+	  </in>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
 	      <aSubMap/>
-	    </in>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<lKind k="var"/>
-	      </Subst>
+	      <tvar/>
+	    </Subst>
+	    <type/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <notin>
+	    <SubMap>
+	      <lKind k="var"/>
 	      <lKind/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre/>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<bool/>
-	      </Subst>
+	    </SubMap>
+	    <aSubMap/>
+	  </notin>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <lKind k="var"/>
+	    </Subst>
+	    <lKind/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <in>
+	    <SubMap>
+	      <lKind k="var"/>
+	      <lKind/>
+	    </SubMap>
+	    <aSubMap/>
+	  </in>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <lKind k="var"/>
+	    </Subst>
+	    <lKind/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre/>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
 	      <bool/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre/>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<unit/>
-	      </Subst>
+	    </Subst>
+	    <bool/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="2">
+      <tyRule>
+	<tyPre/>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
 	      <unit/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<type num="1"/>
-	      </Subst>
-	      <type num="1" dash="'"/>
-	    </eq>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<type num="2"/>
-	      </Subst>
-	      <type num="2" dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<fn>
-		  <type num="1"/>
-		  <type num="2"/>
-		</fn>
-	      </Subst>
+	    </Subst>
+	    <unit/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <type num="1"/>
+	    </Subst>
+	    <type num="1" dash="'"/>
+	  </eq>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <type num="2"/>
+	    </Subst>
+	    <type num="2" dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
 	      <fn>
-		<type num="1" dash="'"/>
-		<type num="2" dash="'"/>
-	      </fn>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<type/>
-	      </Subst>
-	      <type dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<ref>
-		  <type/>
-		</ref>
-	      </Subst>
-	      <ref>
-		<type dash="'"/>
-	      </ref>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<ptype/>
-	      </Subst>
-	      <ptype dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<mutable>
-		  <ptype/>
-		</mutable>
-	      </Subst>
-	      <mutable>
-		<ptype dash="'"/>
-	      </mutable>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
 		<type num="1"/>
-	      </Subst>
-	      <type num="1" dash="'"/>
-	    </eq>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
 		<type num="2"/>
-	      </Subst>
+	      </fn>
+	    </Subst>
+	    <fn>
+	      <type num="1" dash="'"/>
 	      <type num="2" dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<pair>
-		  <type num="1"/>
-		  <type num="2"/>
-		</pair>
-	      </Subst>
-	      <pair>
-		<type num="1" dash="'"/>
-		<type num="2" dash="'"/>
-	      </pair>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<tvar/>
-	      </Subst>
-	      <tvar dash="'"/>
-	    </eq>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<ptype/>
-	      </Subst>
-	      <ptype dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<mbTop>
-		  <tvar/>
-		  <ptype/>
-		</mbTop>
-	      </Subst>
-	      <mbTop>
-		<tvar dash="'"/>
-		<ptype dash="'"/>
-	      </mbTop>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<tvar/>
-	      </Subst>
-	      <ptype dash="'"/>
-	    </eq>
-	    <neq>
-	      <ptype dash="'"/>
-	      <tvar dash="'"/>
-	    </neq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<mbTop>
-		  <tvar/>
-		  <ptype/>
-		</mbTop>
-	      </Subst>
-	      <ptype dash="'"/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<stype/>
-	      </Subst>
-	      <stype dash="'"/>
-	    </eq>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<ptype/>
-	      </Subst>
-	      <ptype dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<mbFull>
-		  <stype/>
-		  <ptype/>
-		</mbFull>
-	      </Subst>
-	      <mbFull>
-		<stype dash="'"/>
-		<ptype dash="'"/>
-	      </mbFull>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<stype/>
-	      </Subst>
-	      <Ptype/>
-	    </eq>
-	    <neq>
-	      <Ptype/>
-	      <stype dash="'"/>
-	    </neq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<mbFull>
-		  <stype/>
-		  <ptype/>
-		</mbFull>
-	      </Subst>
-	      <Ptype/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<!-- A substitution of a mbTop into the tvar
-	of a mbFull with a mutable type variable violates the grammar
-	of the language, and is therefore not a valid substitution -->
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<type num="i"/>
-	      </Subst>
-	      <type num="i" dash="'"/>
-	    </eq>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<lKind/>
-	      </Subst>
-	      <lKind dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<Pcst>
-		  <lKind/>
-		  <type num="g"/>
-		  <type num="i"/>
-		</Pcst>
-	      </Subst>
-	      <Pcst>
-		<lKind dash="'"/>
-		<type num="g"/>
-		<type num="i" dash="'"/>
-	      </Pcst>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <grouping>
-	      <Forall/>
-	      <in>
-		<constraint/>
-		<aCtset/>
-	      </in>
-	      <text content=", "/>
-	      <in>
-		<Subst>
-		  <aSubMap/>
-		  <constraint/>
-		</Subst>
-		<aCtset dash="'"/>
-	      </in>
-	    </grouping>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<aCtset/>
-	      </Subst>
-	      <aCtset dash="'"/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
+	    </fn>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <type/>
+	    </Subst>
+	    <type dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <ref>
 		<type/>
-	      </Subst>
+	      </ref>
+	    </Subst>
+	    <ref>
 	      <type dash="'"/>
-	    </eq>
-	    <eq>
+	    </ref>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <type num="1"/>
+	    </Subst>
+	    <type num="1" dash="'"/>
+	  </eq>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <type num="2"/>
+	    </Subst>
+	    <type num="2" dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	    </Subst>
+	    <pair>
+	      <type num="1" dash="'"/>
+	      <type num="2" dash="'"/>
+	    </pair>
+	  </eq>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="2">
+      <tyRule>
+	<tyPre>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <ptype/>
+	    </Subst>
+	    <ptype dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <mutable>
+		<ptype/>
+	      </mutable>
+	    </Subst>
+	    <mutable>
+	      <ptype dash="'"/>
+	    </mutable>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <tvar/>
+	    </Subst>
+	    <tvar dash="'"/>
+	  </eq>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <ptype/>
+	    </Subst>
+	    <ptype dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	    </Subst>
+	    <mbTop>
+	      <tvar dash="'"/>
+	      <ptype dash="'"/>
+	    </mbTop>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <tvar/>
+	    </Subst>
+	    <ptype dash="'"/>
+	  </eq>
+	  <neq>
+	    <ptype dash="'"/>
+	    <tvar dash="'"/>
+	  </neq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	    </Subst>
+	    <ptype dash="'"/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <stype/>
+	    </Subst>
+	    <stype dash="'"/>
+	  </eq>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <ptype/>
+	    </Subst>
+	    <ptype dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <mbFull>
+		<stype/>
+		<ptype/>
+	      </mbFull>
+	    </Subst>
+	    <mbFull>
+	      <stype dash="'"/>
+	      <ptype dash="'"/>
+	    </mbFull>
+	  </eq>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="2">
+      <tyRule>
+	<tyPre>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <stype/>
+	    </Subst>
+	    <Ptype/>
+	  </eq>
+	  <neq>
+	    <Ptype/>
+	    <stype dash="'"/>
+	  </neq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <mbFull>
+		<stype/>
+		<ptype/>
+	      </mbFull>
+	    </Subst>
+	    <Ptype/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <!-- A substitution of a mbTop into the tvar
+      of a mbFull with a mutable type variable violates the grammar
+      of the language, and is therefore not a valid substitution -->
+      <tyRule>
+	<tyPre>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <type num="i"/>
+	    </Subst>
+	    <type num="i" dash="'"/>
+	  </eq>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <lKind/>
+	    </Subst>
+	    <lKind dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <Pcst>
+		<lKind/>
+		<type num="g"/>
+		<type num="i"/>
+	      </Pcst>
+	    </Subst>
+	    <Pcst>
+	      <lKind dash="'"/>
+	      <type num="g"/>
+	      <type num="i" dash="'"/>
+	    </Pcst>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <grouping>
+	    <Forall/>
+	    <in>
+	      <constraint/>
+	      <aCtset/>
+	    </in>
+	    <text content=", "/>
+	    <in>
 	      <Subst>
 		<aSubMap/>
-		<aCtset/>
+		<constraint/>
 	      </Subst>
 	      <aCtset dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<TS>
-		  <tvars/>
-		  <ctype>
-		    <type/>
-		    <aCtset/>
-		  </ctype>
-		</TS>
-	      </Subst>
+	    </in>
+	  </grouping>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <aCtset/>
+	    </Subst>
+	    <aCtset dash="'"/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <type/>
+	    </Subst>
+	    <type dash="'"/>
+	  </eq>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <aCtset/>
+	    </Subst>
+	    <aCtset dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
 	      <TS>
 		<tvars/>
 		<ctype>
-		  <type dash="'"/>
-		  <aCtset dash="'"/>
+		  <type/>
+		  <aCtset/>
 		</ctype>
 	      </TS>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule>
-	  <tyPre>
-	    <grouping>
-	      <Forall/>
-	      <in>
-		<mapping>
-		  <id/>
+	    </Subst>
+	    <TS>
+	      <tvars/>
+	      <ctype>
+		<type dash="'"/>
+		<aCtset dash="'"/>
+	      </ctype>
+	    </TS>
+	  </eq>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="2">
+      <tyRule>
+	<tyPre>
+	  <grouping>
+	    <Forall/>
+	    <in>
+	      <mapping>
+		<id/>
+		<aTS/>
+	      </mapping>
+	      <gamma/>
+	    </in>
+	    <text content=", "/>
+	    <in>
+	      <mapping>
+		<id/>
+		<Subst>
+		  <aSubMap/>
 		  <aTS/>
-		</mapping>
-		<gamma/>
-	      </in>
-	      <text content=", "/>
-	      <in>
-		<mapping>
-		  <id/>
-		  <Subst>
-		    <aSubMap/>
-		    <aTS/>
-		  </Subst>
-		</mapping>
-		<gamma dash="'"/>
-	      </in>
-	    </grouping>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<gamma/>
-	      </Subst>
+		</Subst>
+	      </mapping>
 	      <gamma dash="'"/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <grouping>
-	      <Forall/>
-	      <in>
-		<mapping>
-		  <loc/>
+	    </in>
+	  </grouping>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <gamma/>
+	    </Subst>
+	    <gamma dash="'"/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <grouping>
+	    <Forall/>
+	    <in>
+	      <mapping>
+		<loc/>
+		<type/>
+	      </mapping>
+	      <store/>
+	    </in>
+	    <text content=", "/>
+	    <in>
+	      <mapping>
+		<loc/>
+		<Subst>
+		  <aSubMap/>
 		  <type/>
-		</mapping>
-		<store/>
-	      </in>
-	      <text content=", "/>
-	      <in>
-		<mapping>
-		  <loc/>
-		  <Subst>
-		    <aSubMap/>
-		    <type/>
-		  </Subst>
-		</mapping>
-		<store dash="'"/>
-	      </in>
-	    </grouping>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<store/>
-	      </Subst>
+		</Subst>
+	      </mapping>
 	      <store dash="'"/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <grouping>
-	      <Forall/>
+	    </in>
+	  </grouping>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <store/>
+	    </Subst>
+	    <store dash="'"/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <grouping>
+	    <Forall/>
+	    <lKind/>
+	    <text content=" in "/>
+	    <aExpr/>
+	    <text content=", "/>
+	    <Subst>
+	      <aSubMap/>
 	      <lKind/>
-	      <text content=" in "/>
+	    </Subst>
+	    <text content=" occurs correspondingly in "/>
+	    <aExpr dash="'"/>
+	  </grouping>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
 	      <aExpr/>
-	      <text content=", "/>
-	      <Subst>
-		<aSubMap/>
-		<lKind/>
-	      </Subst>
-	      <text content=" occurs correspondingly in "/>
-	      <aExpr dash="'"/>
-	    </grouping>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<aExpr/>
-	      </Subst>
-	      <aExpr dash="'"/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-<!--       <Hrules rowsep="4pt" colsep="2"> -->
-<!-- 	<tyRule> -->
-<!-- 	  <tyPre> -->
-<!-- 	    <mutex> -->
-<!-- 	      <dom> -->
-<!-- 		<aSubMap dash="'"/> -->
-<!-- 	      </dom> -->
-<!-- 	      <ftvs> -->
-<!-- 		<aSubMap/> -->
-<!-- 	      </ftvs> -->
-<!-- 	    </mutex> -->
-<!-- 	    <grouping> -->
-<!-- 	      <Forall/> -->
-<!-- 	      <in> -->
-<!-- 		<SubMap> -->
-<!-- 		  <tvar/> -->
-<!-- 		  <type/> -->
-<!-- 		</SubMap> -->
-<!-- 		<aSubMap dash="'"/> -->
-<!-- 	      </in> -->
-<!-- 	      <text content=", "/> -->
-<!-- 	      <in> -->
-<!-- 		<SubMap> -->
-<!-- 		  <tvar/> -->
-<!-- 		  <Subst> -->
-<!-- 		    <aSubMap/> -->
-<!-- 		    <type/> -->
-<!-- 		  </Subst> -->
-<!-- 		</SubMap> -->
-<!-- 		<aSubMap dash="''"/> -->
-<!-- 	      </in> -->
-<!-- 	    </grouping>	       -->
-<!-- 	  </tyPre> -->
-<!-- 	  <tyConc> -->
-<!-- 	    <eq> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<aSubMap dash="'"/> -->
-<!-- 	      </Subst> -->
-<!-- 	      <aSubMap dash="''"/> -->
-<!-- 	    </eq> -->
-<!-- 	  </tyConc> -->
-<!-- 	</tyRule> -->
-<!--       </Hrules> -->
-    </btypes:TYPE>
-  </font>
-  <caption><font size="small">Substitution Rules</font></caption>
+	    </Subst>
+	    <aExpr dash="'"/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+    <!--       <Hrules rowsep="4pt" colsep="2"> -->
+    <!-- 	<tyRule> -->
+    <!-- 	  <tyPre> -->
+    <!-- 	    <mutex> -->
+    <!-- 	      <dom> -->
+    <!-- 		<aSubMap dash="'"/> -->
+    <!-- 	      </dom> -->
+    <!-- 	      <ftvs> -->
+    <!-- 		<aSubMap/> -->
+    <!-- 	      </ftvs> -->
+    <!-- 	    </mutex> -->
+    <!-- 	    <grouping> -->
+    <!-- 	      <Forall/> -->
+    <!-- 	      <in> -->
+    <!-- 		<SubMap> -->
+    <!-- 		  <tvar/> -->
+    <!-- 		  <type/> -->
+    <!-- 		</SubMap> -->
+    <!-- 		<aSubMap dash="'"/> -->
+    <!-- 	      </in> -->
+    <!-- 	      <text content=", "/> -->
+    <!-- 	      <in> -->
+    <!-- 		<SubMap> -->
+    <!-- 		  <tvar/> -->
+    <!-- 		  <Subst> -->
+    <!-- 		    <aSubMap/> -->
+    <!-- 		    <type/> -->
+    <!-- 		  </Subst> -->
+    <!-- 		</SubMap> -->
+    <!-- 		<aSubMap dash="''"/> -->
+    <!-- 	      </in> -->
+    <!-- 	    </grouping>	       -->
+    <!-- 	  </tyPre> -->
+    <!-- 	  <tyConc> -->
+    <!-- 	    <eq> -->
+    <!-- 	      <Subst> -->
+    <!-- 		<aSubMap/> -->
+    <!-- 		<aSubMap dash="'"/> -->
+    <!-- 	      </Subst> -->
+    <!-- 	      <aSubMap dash="''"/> -->
+    <!-- 	    </eq> -->
+    <!-- 	  </tyConc> -->
+    <!-- 	</tyRule> -->
+    <!--       </Hrules> -->
+  </btypes:TYPE>
+  <caption>Substitution Rules</caption>
   </figure>

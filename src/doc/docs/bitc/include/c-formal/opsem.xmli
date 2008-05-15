@@ -3,7 +3,6 @@
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
   <figure id="dyn_sem_horz" fullwidth='yes' latex.placement="tbp">
-  <font size="small">
     <btypes:TYPE
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
       <opHorzRules>
@@ -1110,6 +1109,5 @@
 	</opRule>
       </opHorzRules>      
     </btypes:TYPE> 
-  </font>
-  <caption><font size="small">Small Step Operational Semantics</font></caption>
+  <caption>Small Step Operational Semantics</caption>
 </figure>
