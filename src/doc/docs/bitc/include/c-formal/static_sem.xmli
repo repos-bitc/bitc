@@ -4510,7 +4510,9 @@
 		  </btypes:TYPE>, and due to assumption&nbsp;(1)
 		  <btypes:TYPE>
 		    <subeq>
-		      <tvar/>
+		      <set>
+			<tvar/>
+		      </set>
 		      <spset>
 			<type num="1"/>
 		      </spset>
@@ -4638,12 +4640,11 @@
 	      </mbTop>
 	    </eq>
 	  </btypes:TYPE>:	
-	  Now, we proceed by further case analysis (3.c onwards)
 	</p>
 	<ol>
 	  <li>
 	    <p>
-	      Here, we have
+	      Due to assumption&nbsp;(1), we have
 	      <btypes:TYPE>
 		<in>
 		  <Tceq>
@@ -4685,6 +4686,107 @@
 		  <tvar/>
 		  <ptype/>
 		</mbTop>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Since
+	      <btypes:TYPE>
+		<eq>
+		  <spset>
+		    <type num="2"/>
+		  </spset>
+		  <unin>
+		    <spset>
+		      <ptype/>
+		    </spset>
+		    <set>
+		      <mbTop>
+			<tvar/>
+			<ptype/>
+		      </mbTop>
+		    </set>
+		  </unin>
+		</eq>
+	      </btypes:TYPE>, 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <spset>
+		      <type num="2"/>
+		    </spset>
+		  </Subst>
+		  <unin>
+		    <Subst>
+		      <aSubMap/>
+		      <spset>
+			<ptype/>
+		      </spset>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <set>
+			<mbTop>
+			  <tvar/>
+			  <ptype/>
+			</mbTop>
+		      </set>
+		    </Subst>
+		  </unin>
+		</eq>
+	      </btypes:TYPE>.
+	      Given the hypothesis in case&nbsp;(3.b), 
+	      if we have
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <Subst>
+		    <aSubMap/>
+		    <set>
+		      <mbTop>
+			<tvar/>
+			<ptype/>
+		      </mbTop>
+		    </set>
+		  </Subst>
+		</Sat>
+	      </btypes:TYPE>, we can prove
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <Subst>
+		    <aSubMap/>
+		    <set>
+		      <mbTop>
+			<tvar/>
+			<ptype/>
+		      </mbTop>
+		    </set>
+		  </Subst>
+		</Sat>
+	      </btypes:TYPE>
+	      using 
+	      <btypes:TYPE>
+		<lem tag="Cst-additive"/>
+	      </btypes:TYPE>.	      
+	    </p>
+	    <p>
+	      Now, we proceed by further case analysis to prove
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <Subst>
+		    <aSubMap/>
+		    <set>
+		      <mbTop>
+			<tvar/>
+			<ptype/>
+		      </mbTop>
+		    </set>
+		  </Subst>
+		</Sat>
 	      </btypes:TYPE>.
 	    </p>
 	  </li>
@@ -4784,7 +4886,22 @@
 	      </li>
 	      <li>
 		<p>
-		  From cases&nbsp;(3.c.i and 3.c.ii), it is evident that
+		  From cases&nbsp;(3.d.i and 3.d.ii) and
+		  <btypes:TYPE>
+		    <defn tag="maybe-consistent"/>
+		  </btypes:TYPE>, we obtain
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>
+		      <mbTop>
+			<tvar/>
+			<Subst>
+			  <aSubMap/>
+			  <ptype/>
+			</Subst>
+		      </mbTop>
+		    </Sat>
+		  </btypes:TYPE>. That is,
 		  <btypes:TYPE>
 		    <Sat>
 		      <bCtset num="s"/>
@@ -4794,76 +4911,6 @@
 			  <tvar/>
 			  <ptype/>
 			</mbTop>
-		      </Subst>
-		    </Sat>
-		  </btypes:TYPE>.
-		</p>
-	      </li>
-	      <li>
-		<p>
-		  It is evident that
-		  <btypes:TYPE>
-		    <eq>
-		      <spset>
-			<type num="2"/>
-		      </spset>
-		      <unin>
-			<spset>
-			  <ptype/>
-			</spset>
-			<set>
-			  <mbTop>
-			    <tvar/>
-			    <ptype/>
-			  </mbTop>
-			</set>
-		      </unin>
-		    </eq>
-		  </btypes:TYPE>.
-		  Therefore, 
-		  <btypes:TYPE>
-		    <eq>
-		      <Subst>
-			<aSubMap/>
-			<spset>
-			  <type num="2"/>
-			</spset>
-		      </Subst>
-		      <unin>
-			<Subst>
-			  <aSubMap/>
-			  <spset>
-			    <ptype/>
-			  </spset>
-			</Subst>
-			<Subst>
-			  <aSubMap/>
-			  <set>
-			    <mbTop>
-			      <tvar/>
-			      <ptype/>
-			    </mbTop>
-			  </set>
-			</Subst>
-		      </unin>
-		    </eq>
-		  </btypes:TYPE>.
-		</p>
-	      </li>
-	      <li>
-		<p>
-		  From cases&nbsp;(3.c.iv, 3.b, 3.c.iii) and
-		  <btypes:TYPE>
-		    <lem tag="Cst-additive"/>
-		  </btypes:TYPE>, we obtain
-		  <btypes:TYPE>
-		    <Sat>
-		      <bCtset num="s"/>	
-		      <Subst>
-			<aSubMap/>
-			<spset>
-			  <type num="2"/>
-			</spset>
 		      </Subst>
 		    </Sat>
 		  </btypes:TYPE>.
@@ -4978,7 +5025,7 @@
 	      </li>
 	      <li>
 		<p>
-		  From assumption&nbsp;(3), case&nbsp;(3.d.ii) and 
+		  From assumption&nbsp;(3), case&nbsp;(3.e.ii) and 
 		  <btypes:TYPE>
 		    <lem tag="Cst-Weakening"/>
 		  </btypes:TYPE> (weakening), we obtain
@@ -4994,7 +5041,14 @@
 		      </mbTop>
 		    </Sat>
 		  </btypes:TYPE>.
-		  Therefore,
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From case&nbsp;(3.e.iii) and
+		  <btypes:TYPE>
+		    <defn tag="maybe-consistent"/>
+		  </btypes:TYPE>, we conclude that 
 		  <btypes:TYPE>
 		    <in>
 		      <Tceq>
@@ -5017,7 +5071,7 @@
 	      </li>
 	      <li>
 		<p>
-		  From case&nbsp;(3.d.i), assumption&nbsp;(2), and
+		  From case&nbsp;(3.e.i), assumption&nbsp;(2), and
 		  <btypes:TYPE>
 		    <lem tag="T-sub-min"/>
 		  </btypes:TYPE>, we obtain
@@ -5033,7 +5087,7 @@
 		      </Subst>
 		    </eq>
 		  </btypes:TYPE>. 
-		  Using this with case&nbsp;(3.d.iii), we conclude
+		  Using this with case&nbsp;(3.e.iv), we conclude
 		  that
 		  <btypes:TYPE>
 		    <eq under="minzT">
@@ -5043,7 +5097,15 @@
 			<ptype/>
 		      </Subst>
 		    </eq>
-		  </btypes:TYPE>, and further
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From cases&nbsp;(3.e.iv and 3.e.v), and
+		  <btypes:TYPE>
+		    <defn tag="maybe-consistent"/>
+		  </btypes:TYPE>, we obtain
 		  <btypes:TYPE>
 		    <Sat>
 		      <bCtset num="s"/>	
@@ -5056,30 +5118,283 @@
 		      </mbTop>
 		    </Sat>
 		  </btypes:TYPE>.
+		  That is,
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>	
+		      <Subst>
+			<aSubMap/>
+			<mbTop>
+			  <tvar/>
+			  <ptype/>
+			</mbTop>
+		      </Subst>
+		    </Sat>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	  <li>
+	    <p>
+	      Case 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <tvar/>
+		  </Subst>
+		  <ptype dash="'"/>
+		</eq>
+	      </btypes:TYPE>:
+	      Here, 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <mbTop>
+		      <tvar/>
+		      <ptype/>
+		    </mbTop>
+		  </Subst>
+		  <ptype dash="'"/>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  Similar to case&nbsp;(3.d.i), we have
+		  <btypes:TYPE>
+		    <subeq>
+		      <set>
+			<mbTop>
+			  <tvar/>
+			  <ptype num="1"/>
+			</mbTop>
+		      </set>
+		      <spset>
+			<type num="1"/>
+		      </spset>
+		    </subeq>
+		  </btypes:TYPE>, for some 
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <ptype num="1"/>
+		      <ptype/>
+		    </eq>
+		  </btypes:TYPE>.
+		  Therefore,
+		  <btypes:TYPE>
+		    <subeq>
+		      <set>
+			<ptype dash="'"/>
+		      </set>
+		      <Subst>
+			<aSubMap/>
+			<spset>
+			  <type num="1"/>
+			</spset>
+		      </Subst>
+		    </subeq>
+		  </btypes:TYPE>.
 		</p>
 	      </li>
 	      <li>
 		<p>
-		  From case (3.d.iv) and induction hypothesis, we
-		  obtain
+		  From assumption&nbsp;(3), case&nbsp;(3.f.i) and 
+		  <btypes:TYPE>
+		    <lem tag="Cst-Weakening"/>
+		  </btypes:TYPE> (weakening), we obtain
 		  <btypes:TYPE>
 		    <Sat>
-		      <bCtset num="s"/>
+		      <bCtset num="s"/>	
+		      <set>
+			<ptype dash="'"/>
+		      </set>
 		    </Sat>
-		    <Subst>
-		      <aSubMap/>
-		      <spset>
-			<type num="2"/>
-		      </spset>
-		    </Subst>
-		  </btypes:TYPE>, similar to case&nbsp;(3.c.v).
+		  </btypes:TYPE>.
+		  That is,
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>	
+		      <Subst>
+			<aSubMap/>
+			<mbTop>
+			  <tvar/>
+			  <ptype/>
+			</mbTop>
+		      </Subst>
+		    </Sat>
+		  </btypes:TYPE>.
 		</p>
 	      </li>
 	    </ol>
 	  </li>
 	</ol>
       </li>
+      <li>
+	<p>
+	  Case 
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <mbFull>
+		<tvar/>
+		<ptype/>
+	      </mbFull>
+	    </eq>
+	  </btypes:TYPE>: Similar to case&nbsp;(2).
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <mbFull>
+		<tvar/>
+		<ptype/>
+	      </mbFull>
+	    </eq>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <mbFull>
+		<tvar/>
+		<ptype/>
+	      </mbFull>
+	    </eq>
+	  </btypes:TYPE> are trivial.	  
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <mutable>
+		<ptype/>
+	      </mutable>
+	    </eq>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <ref>
+		<type num="2" dash="'"/>
+	      </ref>
+	    </eq>
+	  </btypes:TYPE> follow from induction hypothesis.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <fn>
+		<type num="2" dash="'"/>
+		<type num="2" dash="''"/>
+	      </fn>
+	    </eq>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <pair>
+		<type num="2" dash="'"/>
+		<type num="2" dash="''"/>
+	      </pair>
+	    </eq>
+	  </btypes:TYPE> follow from induction hypothesis and
+	  <btypes:TYPE>
+	    <lem tag="Cst-additive"/>
+	  </btypes:TYPE>.
+	</p>
+      </li>
     </ol>
+  </proof>
+  <lemma id="cst-streangthening-cor">
+    <title>Corollary to Strengthening of Consistency</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<Sat>
+	  <bCtset/>
+	  <set>
+	    <solvables num="1"/>
+	    <solvables num="2"/>
+	  </set>
+	</Sat>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<models name="cst">
+	  <aSubMap/>
+	  <set>
+	    <solvables num="1"/>
+	    <solvables num="2"/>
+	  </set>
+	</models>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<Sat>
+	  <Subst>
+	    <aSubMap/>
+	    <bCtset/>
+	  </Subst>
+	  <Subst>
+	    <aSubMap/>
+	    <spset>
+	      <solvables num="1"/>
+	    </spset>
+	  </Subst>
+	</Sat>
+      </btypes:TYPE>, and
+      <btypes:TYPE>
+	<subeq>
+	  <inter>
+	    <dom>
+	      <aSubMap/>
+	    </dom>
+	    <ftvs>
+	      <solvables num="2"/>
+	    </ftvs>
+	  </inter>
+	  <ftvs>
+	    <solvables num="1"/>
+	  </ftvs>
+	</subeq>
+      </btypes:TYPE>
+      then, 
+      <btypes:TYPE>
+	<Sat>
+	  <Subst>
+	    <aSubMap/>
+	    <bCtset/>
+	  </Subst>
+	  <Subst>
+	    <aSubMap/>
+	    <spset>
+	      <solvables num="1"/>
+	      <solvables num="2"/>
+	    </spset>
+	  </Subst>
+	</Sat>
+      </btypes:TYPE>.
+    </p>
+  </lemma>
+  <proof>
+    <p>
+      By repeated application of 
+      <btypes:TYPE>
+	<lem tag="cst-streangthening"/>
+      </btypes:TYPE>, and using
+      <btypes:TYPE>
+	<lem tag="Cst-additive"/>
+      </btypes:TYPE>.	      
+    </p>
   </proof>
 <!--   <definition id="approx-types"> -->
 <!--     <title>Approximate Types</title> -->

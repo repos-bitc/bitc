@@ -202,7 +202,7 @@
 	    <unin>
 	      <nothing/>
 	      <spset>
-		<TDjudge Msub="yes">
+		<TDjudge>
 		  <aExpr num="2"/>
 		  <type num="2"/>
 		</TDjudge>
