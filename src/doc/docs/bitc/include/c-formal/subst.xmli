@@ -552,6 +552,102 @@
 	</tyConc>
       </tyRule>
     </Hrules>
+    <Hrules rowsep="4pt" colsep="2">
+      <tyRule>
+	<tyPre/>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <unct>
+		<tvar/>
+	      </unct>
+	    </Subst>
+	    <tvar/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <ptype/>
+	    </Subst>
+	    <ptype dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <Tceq>
+		<tvar/>
+		<ptype/>
+	      </Tceq>
+	    </Subst>
+	    <Tceq>
+	      <tvar/>
+	      <ptype dash="'"/>
+	    </Tceq>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <ptype/>
+	    </Subst>
+	    <ptype dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <ceq>
+		<tvar/>
+		<ptype/>
+	      </ceq>
+	    </Subst>
+	    <ceq>
+	      <tvar/>
+	      <ptype dash="'"/>
+	    </ceq>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <grouping>
+	    <Forall/>
+	    <in>
+	      <symbol name="mu"/>
+	      <bCtset/>
+	    </in>
+	    <text content=", "/>
+	    <in>
+	      <Subst>
+		<aSubMap/>
+		<symbol name="mu"/>
+	      </Subst>
+	      <bCtset dash="'"/>
+	    </in>
+	  </grouping>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <bCtset/>
+	    </Subst>
+	    <bCtset dash="'"/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+    </Hrules>
     <!--       <Hrules rowsep="4pt" colsep="2"> -->
     <!-- 	<tyRule> -->
     <!-- 	  <tyPre> -->

@@ -1621,8 +1621,9 @@
   <xsl:template match="unct" mode="formula">
     <xsl:apply-templates select="*[1]" mode="formula"/>
     <xsl:element name="sup">
-      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-      <xsl:text>infin;</xsl:text>	
+      <xsl:text>.</xsl:text>
+<!--       <xsl:text disable-output-escaping="yes">&amp;</xsl:text> -->
+<!--       <xsl:text>compfn;</xsl:text> -->
     </xsl:element>
   </xsl:template>  
   

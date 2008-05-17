@@ -105,35 +105,6 @@
 <!-- 	  </inter> -->
 <!-- 	</alternatives> -->
 <!--       </bnf> -->
-      <bnf desc="Compat. Constraint">
-	<symbol name="mu"/>
-	<alternatives>
-	  <tvar/>
-	  <Tceq>
-	    <tvar/>
-	    <ptype/>
-	  </Tceq>
-	  <ceq>
-	    <tvar/>
-	    <ptype/>
-	  </ceq>
-	</alternatives>
-      </bnf>
-      <bnf desc="Comat. Const. Sets">
-      	<bCtset/>
-      	<alternatives>
-      	  <Empty/>
-      	  <set>
-      	    <plural>
-      	      <symbol name="mu"/>
-      	    </plural>
-      	  </set>
-      	  <unin>
-      	    <bCtset/>
-      	    <bCtset/>
-      	  </unin>
-      	</alternatives>
-      </bnf>
       <bnf desc="Poly. Constraint">
 	<constraint/>
 	<alternatives>
@@ -156,6 +127,37 @@
       	  <unin>
       	    <aCtset/>
       	    <aCtset/>
+      	  </unin>
+      	</alternatives>
+      </bnf>
+      <bnf desc="Compat. Constraint">
+	<symbol name="mu"/>
+	<alternatives>
+	  <unct>
+	    <tvar/>
+	  </unct>
+	  <Tceq>
+	    <tvar/>
+	    <ptype/>
+	  </Tceq>
+	  <ceq>
+	    <tvar/>
+	    <ptype/>
+	  </ceq>
+	</alternatives>
+      </bnf>
+      <bnf desc="Comat. Const. Sets">
+      	<bCtset/>
+      	<alternatives>
+      	  <Empty/>
+      	  <set>
+      	    <plural>
+      	      <symbol name="mu"/>
+      	    </plural>
+      	  </set>
+      	  <unin>
+      	    <bCtset/>
+      	    <bCtset/>
       	  </unin>
       	</alternatives>
       </bnf>
@@ -3100,7 +3102,9 @@
       </btypes:TYPE> at the top level in only one of the forms
       <btypes:TYPE>
 	<collection or="yes">
-	  <tvar/>
+	  <unct>
+	    <tvar/>
+	  </unct>
 	  <Tceq>
 	    <tvar/>
 	    <ptype/>
@@ -3172,7 +3176,9 @@
 	<tyRule>
 	  <tyPre>
 	    <in>
-	      <tvar/>
+	      <unct>
+		<tvar/>
+	      </unct>
 	      <bCtset/>
 	    </in>
 	  </tyPre>
@@ -3868,13 +3874,12 @@
     <ol>
       <li>
 	<p>
-	  If
 	  <btypes:TYPE>
 	    <CST>
 	      <solvables/>
 	    </CST>
 	  </btypes:TYPE>
-	  then,
+	  iff
 	</p>
 	<ol>
 	  <li>
@@ -4141,7 +4146,7 @@
 		<solvables num="2"/>
 	      </set>
 	    </models>
-	  </btypes:TYPE>
+	  </btypes:TYPE>.
 	</p>
       </li>
       <li>
@@ -4171,7 +4176,7 @@
 		<solvables num="2"/>
 	      </set>
 	    </Sat>
-	  </btypes:TYPE>
+	  </btypes:TYPE>.
 	</p>
       </li>
     </ol>
@@ -4208,7 +4213,7 @@
       </li>
       <li>
 	<p>
-	  <btypes:TYPE>
+ 	  <btypes:TYPE>
 	    <models name="cst">
 	      <aSubMap/>
 	      <set>
@@ -4223,7 +4228,10 @@
 	<p>
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <Subst>
+		<aSubMap/>
+		<bCtset/>
+	      </Subst>
 	      <Subst>
 		<aSubMap/>
 		<spset>
@@ -4239,9 +4247,9 @@
 	  <btypes:TYPE>
 	    <subeq>
 	      <inter>
-		<ftvs>
+		<dom>
 		  <aSubMap/>
-		</ftvs>
+		</dom>
 		<ftvs>
 		  <type num="2"/>
 		</ftvs>
@@ -4258,11 +4266,13 @@
       Then, 
       <btypes:TYPE>
 	<Sat>
-	  <bCtset/>
+	  <Subst>
+	    <aSubMap/>
+	    <bCtset/>
+	  </Subst>
 	  <Subst>
 	    <aSubMap/>
 	    <spset>
-	      <type num="1"/>
 	      <type num="2"/>
 	    </spset>
 	  </Subst>
@@ -4272,21 +4282,108 @@
   </lemma>
   <proof>
     <p>
-      By induction on the derivation of
+      Let
       <btypes:TYPE>
-	<Subst>
-	  <aSubMap/>
-	  <type num="2"/>
-	</Subst>
-      </btypes:TYPE>, we proceed by case analysis on the final step.
+	<eq>
+	  <bCtset num="s"/>
+	  <Subst>
+	    <aSubMap/>
+	    <bCtset/>
+	  </Subst>
+	</eq>
+      </btypes:TYPE>. 
+      The proof is by induction on the structure of
+      <btypes:TYPE>
+	<type num="2"/>
+      </btypes:TYPE>. We proceed by case analysis on the final step.
     </p>
     <ol>
       <li>
-	<btypes:TYPE>
-	  <Hrules>
-	    <text content="Case:"/>
-	    <tyRule>
-	      <tyPre>
+	<p>
+	  From assumption&nbsp;(1) and 
+	  <btypes:TYPE>
+	    <lem tag="maybe-cst-properties"/>
+	  </btypes:TYPE> (property-3), we obtain
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <spset>
+		<type num="1"/>
+		<type num="2"/>
+	      </spset>
+	    </Sat>
+	  </btypes:TYPE>.
+	  Using
+	  <btypes:TYPE>
+	    <lem tag="Cst-Weakening"/>
+	  </btypes:TYPE> (weakening), we obtain
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<type num="1"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <spset>
+		<type num="1"/>
+	      </spset>
+	    </Sat>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<type num="2"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>, and
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <spset>
+		<type num="2"/>
+	      </spset>
+	    </Sat>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case: 
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <tvar/>
+	    </eq>
+	  </btypes:TYPE>.
+	  Due to 
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <spset>
+		<type num="2"/>
+	      </spset>
+	    </Sat>
+	  </btypes:TYPE>, we have
+	  <btypes:TYPE>
+	    <in>
+	      <unct>
+		<tvar/>
+	      </unct>
+	      <bCtset/>
+	    </in>
+	  </btypes:TYPE>.
+	  We proceed by further case analysis.
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      Case
+	      <btypes:TYPE>
 		<notin>
 		  <SubMap>
 		    <tvar/>
@@ -4294,56 +4391,115 @@
 		  </SubMap>
 		  <aSubMap/>
 		</notin>
-	      </tyPre>
-	      <tyConc>
+	      </btypes:TYPE>:
+	      Here,
+	      <btypes:TYPE>
 		<eq>
 		  <Subst>
 		    <aSubMap/>
-		    <tvar/>
+		    <type num="2"/>
 		  </Subst>
+		  <type num="2"/>
 		  <tvar/>
 		</eq>
-	      </tyConc>
-	    </tyRule>
-	  </Hrules>
-	</btypes:TYPE>
-	<ol>
-	  <li>
-	    <p>
-	      If
+	      </btypes:TYPE>.
+	      Since 
 	      <btypes:TYPE>
-		<notin>
-		  <tvar/>
-		  <ftvs>
-		    <Subst>
-		      <aSubMap/>
-		      <type num="1"/>
-		    </Subst>
-		  </ftvs>
-		</notin>
-	      </btypes:TYPE>, the result is evident from
-	      assumption&nbsp;(3).
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <unct>
+		      <tvar/>
+		    </unct>
+		  </Subst>
+		  <unct>
+		    <tvar/>
+		  </unct>
+		</eq>
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<in>
+		  <unct>
+		    <tvar/>
+		  </unct>
+		  <bCtset num="s"/>
+		</in>
+	      </btypes:TYPE>. 
+	      Further,
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <spset>
+		      <type num="2"/>
+		    </spset>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <spset>
+		      <tvar/>
+		    </spset>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <set>
+		      <tvar/>
+		    </set>
+		  </Subst>
+		  <set>
+		    <tvar/>
+		  </set>
+		</eq>
+	      </btypes:TYPE>. 
+	      Now, it is evident that 
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <Subst>
+		    <aSubMap/>
+		    <spset>
+		      <type num="2"/>
+		    </spset>
+		  </Subst>
+		</Sat>
+	      </btypes:TYPE>.
 	    </p>
 	  </li>
 	  <li>
 	    <p>
-	      Consider the case
+	      Case
 	      <btypes:TYPE>
-		<in>
-		  <tvar/>
-		  <ftvs>
-		    <Subst>
-		      <aSubMap/>
-		      <type num="1"/>
-		    </Subst>
-		  </ftvs>
-		</in>
+		<notin>
+		  <SubMap>
+		    <tvar/>
+		    <type/>
+		  </SubMap>
+		  <aSubMap/>
+		</notin>
+	      </btypes:TYPE>:
+	      Here,
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <type num="2"/>
+		  </Subst>
+		  <type/>
+		</eq>
 	      </btypes:TYPE>.
 	    </p>
 	    <ol>
 	      <li>
 		<p>
-		  Supose
+		  Since 
+		  <btypes:TYPE>
+		    <in>
+		      <tvar/>
+		      <dom>
+			<aSubMap/>
+		      </dom>
+		    </in>
+		  </btypes:TYPE>, due to assumption&nbsp;(3), we have
 		  <btypes:TYPE>
 		    <in>
 		      <tvar/>
@@ -4351,68 +4507,119 @@
 			<type num="1"/>
 		      </ftvs>
 		    </in>
-		  </btypes:TYPE>. We know that
+		  </btypes:TYPE>, and due to assumption&nbsp;(1)
 		  <btypes:TYPE>
-		    <in>
+		    <subeq>
 		      <tvar/>
-		      <pred name="ntv">
-			<type num="2"/>
-		      </pred>
-		    </in>
+		      <spset>
+			<type num="1"/>
+		      </spset>
+		    </subeq>
 		  </btypes:TYPE>.
-		  Therefore, from assumption&nbsp;(1) and 
-		  <btypes:TYPE>
-		    <defn tag="maybe-consistent"/>
-		  </btypes:TYPE>, we have
-		  <btypes:TYPE>
-		    <in>
-		      <tvar/>
-		      <pred name="ntv">
-			<type num="1"/>
-		      </pred>
-		    </in>
-		  </btypes:TYPE>,
-		  <btypes:TYPE>
-		    <notin>
-		      <tvar/>
-		      <pred name="mtv">
-			<type num="1"/>
-		      </pred>
-		    </notin>
-		  </btypes:TYPE> and
-		  <btypes:TYPE>
-		    <notin>
-		      <tvar/>
-		      <pred name="Mtv">
-			<type num="1"/>
-		      </pred>
-		    </notin>
-		  </btypes:TYPE>. Now, the result follows from
-		  assumption&nbsp;(3).
 		</p>
 	      </li>
 	      <li>
 		<p>
-		  If
+		  Therefore,
 		  <btypes:TYPE>
-		    <notin>
-		      <tvar/>
-		      <ftvs>
-			<type num="1"/>
-		      </ftvs>
-		    </notin>
-		  </btypes:TYPE>, it means that
+		    <subeq>
+		      <Subst>
+			<aSubMap/>
+			<set>
+			  <tvar/>
+			</set>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<spset>
+			  <type num="1"/>
+			</spset>
+		      </Subst>
+		    </subeq>
+		  </btypes:TYPE>. That is, 
 		  <btypes:TYPE>
-		    <in>
-		      <tvar/>
-		      <ftvs>
-			<range>
-			  <aSubMap/>
-			</range>
-		      </ftvs>
-		    </in>
-		  </btypes:TYPE>. This case cannot happen due to 
-		  assumption&nbsp;(4).
+		    <subeq>
+		      <set>
+			<type/>
+		      </set>
+		      <Subst>
+			<aSubMap/>
+			<spset>
+			  <type num="1"/>
+			</spset>
+		      </Subst>
+		    </subeq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From case&nbsp;(3.b.ii), assumption&nbsp;(3), and
+		  <btypes:TYPE>
+		    <lem tag="Cst-Weakening"/>
+		  </btypes:TYPE> (weakening), we obtain
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>
+		      <set>
+			<type/>
+		      </set>
+		    </Sat>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  We know that
+		  <btypes:TYPE>
+		    <eq>
+		      <spset>
+			<type num="2"/>
+		      </spset>
+		      <spset>
+			<tvar/>
+		      </spset>
+		      <set>
+			<tvar/>
+		      </set>
+		    </eq>
+		  </btypes:TYPE>.
+		  Therefore, 
+		  <btypes:TYPE>
+		    <eq>
+		      <Subst>
+			<aSubMap/>
+			<spset>
+			  <type num="2"/>
+			</spset>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<set>
+			  <tvar/>
+			</set>
+		      </Subst>
+		      <set>
+			<type/>
+		      </set>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From cases&nbsp;(3.c and 3.d), we conclude that
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>
+		    </Sat>
+		    <Subst>
+		      <aSubMap/>
+		      <spset>
+			<type num="2"/>
+		      </spset>
+		    </Subst>
+		  </btypes:TYPE>.
 		</p>
 	      </li>
 	    </ol>
@@ -4420,44 +4627,455 @@
 	</ol>
       </li>
       <li>
-	<btypes:TYPE>
-	  <Hrules>
-	    <text content="Case:"/>
-	    <tyRule>
-	      <tyPre>
+	<p>
+	  Case 
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	    </eq>
+	  </btypes:TYPE>:	
+	  Now, we proceed by further case analysis (3.c onwards)
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      Here, we have
+	      <btypes:TYPE>
 		<in>
-		  <SubMap>
+		  <Tceq>
 		    <tvar/>
-		    <type/>
-		  </SubMap>
-		  <aSubMap/>
+		    <ptype num="c"/>
+		  </Tceq>
+		  <bCtset/>
 		</in>
-	      </tyPre>
-	      <tyConc>
+	      </btypes:TYPE>, for some
+	      <btypes:TYPE>
+		<eq under="minzT">
+		  <ptype num="c"/>
+		  <ptype/>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      By induction hypothesis, we have
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <Subst>
+		    <aSubMap/>
+		    <spset>
+		      <ptype/>
+		    </spset>
+		  </Subst>
+		</Sat>
+	      </btypes:TYPE>.
+	      Note that we do not apply induction hypothesis on
+	      <btypes:TYPE>
+		<tvar/>
+	      </btypes:TYPE> since it is not an independent first-class
+	      component of the type 
+	      <btypes:TYPE>
+		<mbTop>
+		  <tvar/>
+		  <ptype/>
+		</mbTop>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+ 	  <li>
+	    <p>
+	      Case 
+	      <btypes:TYPE>
 		<eq>
 		  <Subst>
 		    <aSubMap/>
 		    <tvar/>
 		  </Subst>
-		  <type/>
-		</eq>
-	      </tyConc>
-	    </tyRule>
-	  </Hrules>
-	</btypes:TYPE>
-	<ol>
-	  <li>
-	    <p>
-	      Due to assumption&nbsp;(4), it must be true that
-	      <btypes:TYPE>
-		<in>
 		  <tvar/>
-		  <ftvs>
-		    <type num="1"/>
-		  </ftvs>
-		</in>
+		</eq>
+	      </btypes:TYPE>: That is,
+	      <btypes:TYPE>
+		<notin>
+		  <tvar/>
+		  <dom>
+		    <aSubMap/>
+		  </dom>
+		</notin>
+	      </btypes:TYPE>.
+	      Here, 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <mbTop>
+		      <tvar/>
+		      <ptype/>
+		    </mbTop>
+		  </Subst>
+		  <mbTop>
+		    <tvar/>
+		    <Subst>
+		      <aSubMap/>
+		      <ptype/>
+		    </Subst>
+		  </mbTop>
+		</eq>
 	      </btypes:TYPE>.
 	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  Since
+		  <btypes:TYPE>
+		    <in>
+		      <Tceq>
+			<tvar/>
+			<ptype num="c"/>
+		      </Tceq>
+		      <bCtset/>
+		    </in>
+		  </btypes:TYPE>, we have
+		  <btypes:TYPE>
+		    <in>
+		      <Tceq>
+			<tvar/>
+			<Subst>
+			  <aSubMap/>
+			  <ptype num="c"/>
+			</Subst>
+		      </Tceq>
+		      <bCtset num="s"/>
+		    </in>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From 
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <ptype num="c"/>
+		      <ptype/>
+		    </eq>
+		  </btypes:TYPE>, 
+		  assumption&nbsp;(2), and
+		  <btypes:TYPE>
+		    <lem tag="T-sub-min"/>
+		  </btypes:TYPE>, we obtain
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <Subst>
+			<aSubMap/>
+			<ptype num="c"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<ptype/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>. 
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From cases&nbsp;(3.c.i and 3.c.ii), it is evident that
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>
+		      <Subst>
+			<aSubMap/>
+			<mbTop>
+			  <tvar/>
+			  <ptype/>
+			</mbTop>
+		      </Subst>
+		    </Sat>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  It is evident that
+		  <btypes:TYPE>
+		    <eq>
+		      <spset>
+			<type num="2"/>
+		      </spset>
+		      <unin>
+			<spset>
+			  <ptype/>
+			</spset>
+			<set>
+			  <mbTop>
+			    <tvar/>
+			    <ptype/>
+			  </mbTop>
+			</set>
+		      </unin>
+		    </eq>
+		  </btypes:TYPE>.
+		  Therefore, 
+		  <btypes:TYPE>
+		    <eq>
+		      <Subst>
+			<aSubMap/>
+			<spset>
+			  <type num="2"/>
+			</spset>
+		      </Subst>
+		      <unin>
+			<Subst>
+			  <aSubMap/>
+			  <spset>
+			    <ptype/>
+			  </spset>
+			</Subst>
+			<Subst>
+			  <aSubMap/>
+			  <set>
+			    <mbTop>
+			      <tvar/>
+			      <ptype/>
+			    </mbTop>
+			  </set>
+			</Subst>
+		      </unin>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From cases&nbsp;(3.c.iv, 3.b, 3.c.iii) and
+		  <btypes:TYPE>
+		    <lem tag="Cst-additive"/>
+		  </btypes:TYPE>, we obtain
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>	
+		      <Subst>
+			<aSubMap/>
+			<spset>
+			  <type num="2"/>
+			</spset>
+		      </Subst>
+		    </Sat>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	  <li>
+	    <p>
+	      Case 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <tvar/>
+		  </Subst>
+		  <tvar name="beta"/>
+		</eq>
+	      </btypes:TYPE>:
+	      Here, 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <mbTop>
+		      <tvar/>
+		      <ptype/>
+		    </mbTop>
+		  </Subst>
+		  <mbTop>
+		    <tvar name="beta"/>
+		    <Subst>
+		      <aSubMap/>
+		      <ptype/>
+		    </Subst>
+		  </mbTop>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  Since 
+		  <btypes:TYPE>
+		    <in>
+		      <tvar/>
+		      <dom>
+			<aSubMap/>
+		      </dom>
+		    </in>
+		  </btypes:TYPE>, due to assumption&nbsp;(3), we have
+		  <btypes:TYPE>
+		    <in>
+		      <tvar/>
+		      <ftvs>
+			<type num="1"/>
+		      </ftvs>
+		    </in>
+		  </btypes:TYPE>.
+		  Due to assumption&nbsp;(1), 
+		  <btypes:TYPE>
+		    <defn tag="maybe-consistent"/>
+		  </btypes:TYPE>, and
+		  <btypes:TYPE>
+		    <lem tag="maybe-cst-properties"/>
+		  </btypes:TYPE> (property-1), 
+		  it must be true that
+		  <btypes:TYPE>
+		    <subeq>
+		      <set>
+			<mbTop>
+			  <tvar/>
+			  <ptype num="1"/>
+			</mbTop>
+		      </set>
+		      <spset>
+			<type num="1"/>
+		      </spset>
+		    </subeq>
+		  </btypes:TYPE>, for some 
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <ptype num="1"/>
+		      <ptype/>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  Therefore,
+		  <btypes:TYPE>
+		    <subeq>
+		      <set>
+			<mbTop>
+			  <tvar name="beta"/>
+			  <Subst>
+			    <aSubMap/>
+			    <ptype num="1"/>
+			  </Subst>
+			</mbTop>
+		      </set>
+		      <Subst>
+			<aSubMap/>
+			<spset>
+			  <type num="1"/>
+			</spset>
+		      </Subst>
+		    </subeq>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From assumption&nbsp;(3), case&nbsp;(3.d.ii) and 
+		  <btypes:TYPE>
+		    <lem tag="Cst-Weakening"/>
+		  </btypes:TYPE> (weakening), we obtain
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>	
+		      <mbTop>
+			<tvar name="beta"/>
+			<Subst>
+			  <aSubMap/>
+			  <ptype num="1"/>
+			</Subst>
+		      </mbTop>
+		    </Sat>
+		  </btypes:TYPE>.
+		  Therefore,
+		  <btypes:TYPE>
+		    <in>
+		      <Tceq>
+			<tvar name="beta"/>
+			<ptype num="c"/>
+		      </Tceq>
+		      <bCtset num="s"/>	
+		    </in>
+		  </btypes:TYPE> such that 
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <ptype num="c"/>
+		      <Subst>
+			<aSubMap/>
+			<ptype num="1"/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From case&nbsp;(3.d.i), assumption&nbsp;(2), and
+		  <btypes:TYPE>
+		    <lem tag="T-sub-min"/>
+		  </btypes:TYPE>, we obtain
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <Subst>
+			<aSubMap/>
+			<ptype num="1"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<ptype/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>. 
+		  Using this with case&nbsp;(3.d.iii), we conclude
+		  that
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <ptype num="c"/>
+		      <Subst>
+			<aSubMap/>
+			<ptype/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>, and further
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>	
+		      <mbTop>
+			<tvar name="beta"/>
+			<Subst>
+			  <aSubMap/>
+			  <ptype/>
+			</Subst>
+		      </mbTop>
+		    </Sat>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From case (3.d.iv) and induction hypothesis, we
+		  obtain
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>
+		    </Sat>
+		    <Subst>
+		      <aSubMap/>
+		      <spset>
+			<type num="2"/>
+		      </spset>
+		    </Subst>
+		  </btypes:TYPE>, similar to case&nbsp;(3.c.v).
+		</p>
+	      </li>
+	    </ol>
 	  </li>
 	</ol>
       </li>
