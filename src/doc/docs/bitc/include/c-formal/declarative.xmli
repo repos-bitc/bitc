@@ -1138,7 +1138,7 @@
       Other cases of the lemma are similar.
     </p>
   </proof>
-  <lemma id="T-progress">
+  <theorem id="T-progress">
     <title>Progress</title>
     <p>
       <btypes:TYPE>
@@ -1258,7 +1258,7 @@
 	</p>
       </li>
     </ol>
-  </lemma>
+  </theorem>
   <proof>
     <p>
       By induction on the typing derivation.
@@ -2893,13 +2893,7 @@
   <lemma id="T-Renaming">
     <title>Type Renaming</title>
     <p>
-      If
-      <btypes:TYPE>
-	<TDjudge>
-	  <aExpr/>
-	  <type/>
-	</TDjudge>
-      </btypes:TYPE> and
+      For any substitution
       <btypes:TYPE>
 	<eq>
 	  <aSubMap/>
@@ -2910,7 +2904,7 @@
 	    </SubMap>
 	  </plural>
 	</eq>
-      </btypes:TYPE>, where,
+      </btypes:TYPE> where
       <btypes:TYPE>
 	<mutex>
 	  <set>
@@ -2922,35 +2916,92 @@
 	    <type/>
 	  </ftvs>
 	</mutex>
-      </btypes:TYPE>, then
-      <btypes:TYPE>
-	<Sjudge>
-	  <assume>
-	    <Subst>
-	      <aSubMap/>
-	      <gamma/>
-	    </Subst>
-	    <Subst>
-	      <aSubMap/>
-	      <store/>
-	    </Subst>
-	  </assume>
-	  <tqExpr>
-	    <aExpr/>
-	    <Subst>
-	      <aSubMap/>
-	      <type/>
-	    </Subst>
-	  </tqExpr>
-	</Sjudge>
-      </btypes:TYPE>.
+      </btypes:TYPE>,
     </p>
+    <ol>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <TDjudge>
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	  </btypes:TYPE> 
+	  then
+	  <btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<Subst>
+		  <aSubMap/>
+		  <gamma/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <store/>
+		</Subst>
+	      </assume>
+	      <tqExpr>
+		<aExpr/>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </tqExpr>
+	    </Sjudge>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <TDjudge cst="yes">
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	  </btypes:TYPE> 
+	  then
+	  <btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<Subst>
+		  <aSubMap/>
+		  <aCtset/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <gamma/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <store/>
+		</Subst>
+	      </assume>
+	      <tqExpr>
+		<aExpr/>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </tqExpr>
+	    </Sjudge>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
   </lemma>
   <proof>
     <p>
       By straightforward induction on the derivation of 
       <btypes:TYPE>
 	<TDjudge>
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<TDjudge cst="yes">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
@@ -3035,7 +3086,7 @@
 	      <type num="a"/>
 	      <type num="r"/>
 	    </fn>
-	  </btypes:TYPE> in T-APP, or the type obtained by any
+	  </btypes:TYPE> in T-App, or the type obtained by any
 	  sub-derivation (for some sub-expression).
 	</p>
       </li>
@@ -4969,43 +5020,72 @@
     <title>Value Substitution</title>
     <p>
       If
-      <btypes:TYPE>
-	<Sjudge name="*">
-	  <assume>
-	    <extend>
-	      <gamma/>
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<aCtset/>
+		<extend>
+		  <gamma/>
+		  <tqExpr>
+		    <id/>
+		    <TS>
+		      <tvars/>
+		      <type num="v"/>
+		    </TS>
+		  </tqExpr>
+		</extend>
+		<store/>
+	      </assume>
 	      <tqExpr>
-		<id/>
-		<TS>
-		  <tvars/>
-		  <type num="v"/>
-		</TS>
+		<aExpr/>
+		<type/>
 	      </tqExpr>
-	    </extend>
-	    <store/>
-	  </assume>
-	  <tqExpr>
-	    <aExpr/>
-	    <type/>
-	  </tqExpr>
-	</Sjudge>
-	<text content=", "/>
-	<TDjudge name="*">
-	  <aVal/>
-	  <type num="v"/>
-	</TDjudge>
-	<text content=" and "/>
-	<!-- This predicate is necessary since the pair rule can
-	derive mutable types for pair of values (v,v) and the
-	substitution can go wrong if performed on the lhs of
-	an assignment. This predicate effectively rules out
-	substitution on the lhs of an assignment.--> 
-	<pred name="Immut">
-	  <type num="v"/>
-	</pred>
-	<text content=", then "/>
-	<Sjudge name="*">
+	    </Sjudge>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <TDjudge cst="yes">
+	      <aVal/>
+	      <type num="v"/>
+	    </TDjudge>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <pred name="Immut">
+	      <type num="v"/>
+	    </pred>
+	  </btypes:TYPE>
+	  <!-- This predicate is necessary since the pair rule can
+	  derive mutable types for pair of values (v,v) and the
+	  substitution can go wrong if performed on the lhs of
+	  an assignment. This predicate effectively rules out
+	  substitution on the lhs of an assignment.--> 	
+	</p>
+      </li>
+    </ol>
+    <p>
+      Then,
+      <btypes:TYPE>
+	<Exists/>
+	<subeq>
+	  <aCtset dash="'"/>
+	  <aCtset/>
+	</subeq>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<Sjudge>
 	  <assume>
+	    <aCtset dash="'"/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -5025,13 +5105,17 @@
     <p>
       By induction on the typing derivation of
       <btypes:TYPE>
-	<Sjudge name="*">
+	<Sjudge>
 	  <assume>
+	    <aCtset/>
 	    <extend>
 	      <gamma/>
 	      <tqExpr>
 		<id/>
-		<aTS/>
+		<TS>
+		  <tvars/>
+		  <type num="v"/>
+		</TS>
 	      </tqExpr>
 	    </extend>
 	    <store/>
@@ -5041,7 +5125,7 @@
 	    <type/>
 	  </tqExpr>
 	</Sjudge>
-      </btypes:TYPE>.
+      </btypes:TYPE>
       We proceed by case analysis on the final step of the
       derivation.
     </p>
@@ -6090,8 +6174,9 @@
     <p>
       If
       <btypes:TYPE>
-	<Sjudge name="*">
+	<Sjudge>
 	  <assume>
+	    <aCtset/>
 	    <extend>
 	      <gamma/>
 	      <tqExpr>
@@ -6108,7 +6193,8 @@
 	</Sjudge>
       </btypes:TYPE>, then
       <btypes:TYPE>
-	<Sjudge name="*">
+	<Sjudge>
+	  <aCtset/>
 	  <assume>
 	    <gamma/>
 	    <extend>
@@ -6136,6 +6222,7 @@
       By induction on the typing derivation of
       <btypes:TYPE>
 	<Sjudge>
+	  <aCtest/>
 	  <assume>
 	    <extend>
 	      <gamma/>
@@ -6271,18 +6358,18 @@
 <!--       Immediate from the definition of stack and heap typing. -->
 <!--     </p> -->
   <!--   </proof> -->
-  <lemma id="T-preservation">
+  <theorem id="T-preservation">
     <title>Preservation</title>
     <p>
       If
       <btypes:TYPE>
-	<TDjudge name="*">
+	<TDjudge cst="yes">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
       </btypes:TYPE> and 
       <btypes:TYPE>
-	<TDjudge name="*">
+	<TDjudge cst="yes">
 	  <plus>
 	    <heap/>
 	    <stack/>
@@ -6314,11 +6401,18 @@
 	      <store dash="'"/>
 	      <store/>
 	    </supeq>
-	  </btypes:TYPE>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <supeq>
+	      <aCtset dash="'"/>
+	      <aCtset/>
+	    </supeq>
+	  </btypes:TYPE> 
 	  such that
 	  <btypes:TYPE>
-	    <Sjudge name="*">
+	    <Sjudge>
 	      <assume>
+		<aCtset dash="'"/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -6330,8 +6424,9 @@
 	  </btypes:TYPE>
 	  and
 	  <btypes:TYPE>
-	    <Sjudge name="*">
+	    <Sjudge>
 	      <assume>
+		<aCtset dash="'"/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -6339,7 +6434,8 @@
 		<heap dash="'"/>
 		<stack dash="'"/>
 	      </plus>
-	    </Sjudge>
+	    </Sjudge
+>
 	  </btypes:TYPE>.
 	</p>
       </li>
@@ -6366,11 +6462,18 @@
 	      <store dash="'"/>
 	      <store/>
 	    </supeq>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <supeq>
+	      <aCtset dash="'"/>
+	      <aCtset/>
+	    </supeq>
 	  </btypes:TYPE>
 	  such that
 	  <btypes:TYPE>
-	    <Sjudge name="*">
+	    <Sjudge>
 	      <assume>
+		<aCtset dash="'"/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -6383,6 +6486,7 @@
 	  <btypes:TYPE>
 	    <Sjudge name="*">
 	      <assume>
+		<aCtset dash="'"/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -6404,7 +6508,7 @@
 	</p>
       </li>
     </ol>
-  </lemma>
+  </theorem>
   <proof>
     <p>
       By induction on the derivation of
@@ -7116,456 +7220,271 @@
 <!--       </li> -->
     </ol>
   </proof>
-<!--   <definition id="stuck_state"> -->
-<!--     <title>Stuck State</title> -->
-<!--     <p> -->
-<!--       A system state  -->
-<!--       <btypes:TYPE> -->
-<!-- 	<opState> -->
-<!-- 	  <stack/> -->
-<!-- 	  <heap/> -->
-<!-- 	  <aExpr/> -->
-<!-- 	</opState> -->
-<!--       </btypes:TYPE> -->
-<!--       is said to be <term>stuck</term> if -->
-<!--       <btypes:TYPE> -->
-<!-- 	<neq> -->
-<!-- 	  <aExpr/> -->
-<!-- 	  <aVal/> -->
-<!-- 	</neq> -->
-<!--       </btypes:TYPE> -->
-<!--       and there are no  -->
-<!--       <btypes:TYPE> -->
-<!-- 	<stack dash="'"/> -->
-<!-- 	<text content=", "/> -->
-<!-- 	<heap dash="'"/> -->
-<!-- 	<text content=", and "/> -->
-<!-- 	<aExpr dash="'"/> -->
-<!--       </btypes:TYPE>    -->
-<!--       such that  -->
-<!--       <btypes:TYPE> -->
-<!-- 	<eval> -->
-<!-- 	  <opState> -->
-<!-- 	    <stack/> -->
-<!-- 	    <heap/> -->
-<!-- 	    <aExpr/> -->
-<!-- 	  </opState> -->
-<!-- 	  <opState> -->
-<!-- 	    <stack dash="'"/> -->
-<!-- 	    <heap dash="'"/> -->
-<!-- 	    <aExpr dash="'"/> -->
-<!-- 	  </opState> -->
-<!-- 	</eval> -->
-<!--       </btypes:TYPE>. -->
-<!--     </p> -->
-<!--   </definition>       -->
-<!--   <theorem id="T-soundness"> -->
-<!--     <title>Type Soundness</title> -->
-<!--     <p> -->
-<!--       If  -->
-<!--       <btypes:TYPE> -->
-<!-- 	<Sjudge> -->
-<!-- 	  <assume> -->
-<!-- 	    <Empty/> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <tqExpr> -->
-<!-- 	    <aExpr/> -->
-<!-- 	    <type/> -->
-<!-- 	  </tqExpr> -->
-<!-- 	</Sjudge> -->
-<!-- 	<text content=" and "/> -->
-<!-- 	<Sjudge> -->
-<!-- 	  <assume> -->
-<!-- 	    <gamma/> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <plus> -->
-<!-- 	    <heap/> -->
-<!-- 	    <stack/> -->
-<!-- 	  </plus> -->
-<!-- 	</Sjudge>  -->
-<!-- 	<text content=" and "/> -->
-<!-- 	<eval many="yes"> -->
-<!-- 	  <opState> -->
-<!-- 	    <stack/> -->
-<!-- 	    <heap/> -->
-<!-- 	    <aExpr/> -->
-<!-- 	  </opState> -->
-<!-- 	  <opState> -->
-<!-- 	    <stack dash="'"/> -->
-<!-- 	    <heap dash="'"/> -->
-<!-- 	    <aExpr dash="'"/> -->
-<!-- 	  </opState> -->
-<!-- 	</eval> -->
-<!-- 	<text content=" then "/> -->
-<!-- 	<opState> -->
-<!-- 	  <stack dash="'"/> -->
-<!-- 	  <heap dash="'"/> -->
-<!-- 	  <aExpr dash="'"/> -->
-<!-- 	</opState> -->
-<!-- 	<text content=" is not stuck."/>             -->
-<!--       </btypes:TYPE> -->
-<!--       That is, execution of a well typed expression cannot lead to -->
-<!--       a stuck state. Here,  -->
-<!--       <btypes:TYPE> -->
-<!-- 	<evalOp many="yes"/> -->
-<!--       </btypes:TYPE > represents the  -->
-<!--       reflexive-transitive-closure of  -->
-<!--       <btypes:TYPE> -->
-<!-- 	<evalOp/> -->
-<!--       </btypes:TYPE>. -->
-<!--     </p> -->
-<!--   </theorem> -->
-<!--   <proof> -->
-<!--     <p> -->
-<!--       By straightforward induction on the length of    -->
-<!--       <btypes:TYPE> -->
-<!-- 	<evalOp many="yes"/> -->
-<!--       </btypes:TYPE>. If  -->
-<!--       <btypes:TYPE> -->
-<!-- 	<eq> -->
-<!-- 	  <aExpr/> -->
-<!-- 	  <aVal/> -->
-<!-- 	</eq> -->
-<!--       </btypes:TYPE>, proof is immediate. Otherwise, from  -->
-<!--       Lemma&nbsp;<xref ref="T-progress"/> (Progress), -->
-<!--       we know that we can take at least one step forward. Further, -->
-<!--       from Lemma&nbsp;<xref ref="T-preservation"/> (Preservation), -->
-<!--       we know that a (left/right) execution of a well -->
-<!--       typed expression in with respect to a well typed stack and heap -->
-<!--       will always result in another well typed expression, stack -->
-<!--       and heap. Proof now follows from induction hypothesis.   -->
-<!--     </p> -->
-<!--   </proof> -->
-<!--   <lemma id="C-progress"> -->
-<!--     <title>Progress</title> -->
-<!--     <p> -->
-<!--       <btypes:TYPE> -->
-<!-- 	<text content="If "/> -->
-<!-- 	<aExpr/> -->
-<!-- 	<text content=" is a closed, well typed term, "/>  -->
-<!-- 	<text content="that is, "/>  -->
-<!-- 	<Cjudge> -->
-<!-- 	  <aCtset/> -->
-<!-- 	  <Empty/> -->
-<!-- 	  <store/> -->
-<!-- 	  <aExpr/> -->
-<!-- 	  <type/> -->
-<!-- 	</Cjudge> -->
-<!-- 	<text content=" for some "/>  -->
-<!-- 	<type/>  -->
-<!-- 	<text content=", "/>  -->
-<!-- 	<aCtset/> -->
-<!-- 	<text content=", "/>  -->
-<!-- 	<store/> -->
-<!-- 	<text content=", and if "/>  -->
-<!-- 	<models name="cst"> -->
-<!-- 	  <assume/> -->
-<!-- 	  <aCtset/> -->
-<!-- 	</models> -->
-<!-- 	<text content=", then, given any heap "/>  -->
-<!-- 	<heap/> -->
-<!-- 	<text content=" and stack "/>  -->
-<!-- 	<stack/> -->
-<!-- 	<text content=" such that "/>  -->
-<!-- 	<Sjudge num="*"> -->
-<!-- 	  <assume> -->
-<!-- 	    <aCtset/> -->
-<!-- 	    <gamma/> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <plus> -->
-<!-- 	    <heap/> -->
-<!-- 	    <stack/> -->
-<!-- 	  </plus> -->
-<!-- 	</Sjudge>  -->
-<!-- 	<text content=", "/>             -->
-<!--       </btypes:TYPE> -->
-<!--     </p> -->
-<!--     <ol> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <text content=" If "/>                 -->
-<!-- 	    <Sjudge name="lval"> -->
-<!-- 	      <assume/> -->
-<!-- 	      <aExpr/> -->
-<!-- 	    </Sjudge> -->
-<!-- 	    <text content=", then "/>               -->
-<!-- 	    <aExpr/> -->
-<!-- 	    <text content=" is either a valid lvalue "/>  -->
-<!-- 	    <lVal/> -->
-<!-- 	    <text content=" (that is, "/> -->
-<!-- 	    <eq> -->
-<!-- 	      <lVal/> -->
-<!-- 	      <sLoc/> -->
-<!-- 	    </eq> -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <in> -->
-<!-- 	      <sLoc/> -->
-<!-- 	      <dom> -->
-<!-- 		<stack/> -->
-<!-- 	      </dom> -->
-<!-- 	    </in> -->
-<!-- 	    <text content=" or "/>  -->
-<!-- 	    <eq> -->
-<!-- 	      <lVal/> -->
-<!-- 	      <deref> -->
-<!-- 		<hLoc/> -->
-<!-- 	      </deref> -->
-<!-- 	    </eq> -->
-<!-- 	    <text content=", "/> -->
-<!-- 	    <in> -->
-<!-- 	      <hLoc/> -->
-<!-- 	      <dom> -->
-<!-- 		<heap/> -->
-<!-- 	      </dom> -->
-<!-- 	    </in> -->
-<!-- 	    <text content=") or else "/> -->
-<!-- 	    <Exists> -->
-<!-- 	      <aExpr dash="'"/> -->
-<!-- 	      <stack dash="'"/> -->
-<!-- 	      <heap dash="'"/> -->
-<!-- 	    </Exists> -->
-<!-- 	    <text content=" such that:"/>                -->
-<!-- 	    <leval> -->
-<!-- 	      <opState> -->
-<!-- 		<stack/> -->
-<!-- 		<heap/> -->
-<!-- 		<aExpr/> -->
-<!-- 	      </opState> -->
-<!-- 	      <opState> -->
-<!-- 		<stack dash="'"/> -->
-<!-- 		<heap dash="'"/> -->
-<!-- 		<aExpr dash="'"/> -->
-<!-- 	      </opState> -->
-<!-- 	    </leval> -->
-<!-- 	    <text content="."/>    -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p>               -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <aExpr/> -->
-<!-- 	    <text content=" is a value "/>  -->
-<!-- 	    <aVal/> -->
-<!-- 	    <text content=" or else "/>  -->
-<!-- 	    <Exists> -->
-<!-- 	      <aExpr dash="'"/> -->
-<!-- 	      <stack dash="'"/> -->
-<!-- 	      <heap dash="'"/> -->
-<!-- 	    </Exists> -->
-<!-- 	    <text content=" such that "/>                -->
-<!-- 	    <eval> -->
-<!-- 	      <opState> -->
-<!-- 		<stack/> -->
-<!-- 		<heap/> -->
-<!-- 		<aExpr/> -->
-<!-- 	      </opState> -->
-<!-- 	      <opState> -->
-<!-- 		<stack dash="'"/> -->
-<!-- 		<heap dash="'"/> -->
-<!-- 		<aExpr dash="'"/> -->
-<!-- 	      </opState> -->
-<!-- 	    </eval> -->
-<!-- 	    <text content="."/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--     </ol> -->
-<!--   </lemma> -->
-<!--   <lemma id="C-preservation"> -->
-<!--     <title>Preservation</title> -->
-<!--     <p> -->
-<!--       <btypes:TYPE>           -->
-<!-- 	<text content="If "/> -->
-<!-- 	<Cjudge> -->
-<!-- 	  <aCtset/> -->
-<!-- 	  <gamma/> -->
-<!-- 	  <store/> -->
-<!-- 	  <aExpr/> -->
-<!-- 	  <type/> -->
-<!-- 	</Cjudge> -->
-<!-- 	<text content=", "/> -->
-<!-- 	<models name="cst"> -->
-<!-- 	  <assume/> -->
-<!-- 	  <aCtset/> -->
-<!-- 	</models> -->
-<!-- 	<text content=", and "/> -->
-<!-- 	<Sjudge num="*"> -->
-<!-- 	  <assume> -->
-<!-- 	    <aCtset/> -->
-<!-- 	    <gamma/> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <plus> -->
-<!-- 	    <heap/> -->
-<!-- 	    <stack/> -->
-<!-- 	  </plus> -->
-<!-- 	</Sjudge>  -->
-<!-- 	<text content=", then, "/>     -->
-<!--       </btypes:TYPE> -->
-<!--     </p> -->
-<!--     <ol> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <text content="If "/> -->
-<!-- 	    <leval> -->
-<!-- 	      <opState> -->
-<!-- 		<stack/> -->
-<!-- 		<heap/> -->
-<!-- 		<aExpr/> -->
-<!-- 	      </opState> -->
-<!-- 	      <opState> -->
-<!-- 		<stack dash="'"/> -->
-<!-- 		<heap dash="'"/> -->
-<!-- 		<aExpr dash="'"/> -->
-<!-- 	      </opState> -->
-<!-- 	    </leval> -->
-<!-- 	    <text content=", then, there exists a "/> -->
-<!-- 	    <supeq> -->
-<!-- 	      <store dash="'"/> -->
-<!-- 	      <store/> -->
-<!-- 	    </supeq> -->
-<!-- 	    <text content=" such that "/> -->
-<!-- 	    <Cjudge> -->
-<!-- 	      <aCtset/> -->
-<!-- 	      <gamma/> -->
-<!-- 	      <store dash="'"/> -->
-<!-- 	      <aExpr dash="'"/> -->
-<!-- 	      <type/> -->
-<!-- 	    </Cjudge> -->
-<!-- 	    <text content=" and "/> -->
-<!-- 	    <Sjudge num="*"> -->
-<!-- 	      <assume> -->
-<!-- 		<aCtset/> -->
-<!-- 		<gamma/> -->
-<!-- 		<store dash="'"/> -->
-<!-- 	      </assume> -->
-<!-- 	      <plus> -->
-<!-- 		<heap dash="'"/> -->
-<!-- 		<stack dash="'"/> -->
-<!-- 	      </plus> -->
-<!-- 	    </Sjudge> -->
-<!-- 	    <text content="."/> -->
-<!-- 	  </btypes:TYPE>               -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  <btypes:TYPE>           -->
-<!-- 	    <text content="If "/> -->
-<!-- 	    <eval> -->
-<!-- 	      <opState> -->
-<!-- 		<stack/> -->
-<!-- 		<heap/> -->
-<!-- 		<aExpr/> -->
-<!-- 	      </opState> -->
-<!-- 	      <opState> -->
-<!-- 		<stack dash="'"/> -->
-<!-- 		<heap dash="'"/> -->
-<!-- 		<aExpr dash="'"/> -->
-<!-- 	      </opState> -->
-<!-- 	    </eval> -->
-<!-- 	    <text content=", there exists a "/> -->
-<!-- 	    <supeq> -->
-<!-- 	      <store dash="'"/> -->
-<!-- 	      <store/> -->
-<!-- 	    </supeq>                 -->
-<!-- 	    <text content=" such that "/> -->
-<!-- 	    <Cjudge> -->
-<!-- 	      <aCtset/> -->
-<!-- 	      <gamma/> -->
-<!-- 	      <store dash="'"/> -->
-<!-- 	      <aExpr dash="'"/> -->
-<!-- 	      <type dash="'"/> -->
-<!-- 	    </Cjudge> -->
-<!-- 	    <text content=",  "/> -->
-<!-- 	    <Sjudge num="*"> -->
-<!-- 	      <assume> -->
-<!-- 		<aCtset/> -->
-<!-- 		<gamma/> -->
-<!-- 		<store dash="'"/> -->
-<!-- 	      </assume> -->
-<!-- 	      <plus> -->
-<!-- 		<heap dash="'"/> -->
-<!-- 		<stack dash="'"/> -->
-<!-- 	      </plus> -->
-<!-- 	    </Sjudge> -->
-<!-- 	    <text content=" and "/> -->
-<!-- 	    <eq> -->
-<!-- 	      <minz> -->
-<!-- 		<type/> -->
-<!-- 	      </minz> -->
-<!-- 	      <minz> -->
-<!-- 		<type dash="'"/> -->
-<!-- 	      </minz> -->
-<!-- 	    </eq> -->
-<!-- 	    <text content="."/> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--     </ol> -->
-<!--   </lemma> -->
-<!--   <theorem id="C-soundness"> -->
-<!--     <title>Type Soundness</title> -->
-<!--     <p> -->
-<!--       If  -->
-<!--       <btypes:TYPE> -->
-<!-- 	<Cjudge> -->
-<!-- 	  <aCtset/> -->
-<!-- 	  <Empty/> -->
-<!-- 	  <store/> -->
-<!-- 	  <aExpr/> -->
-<!-- 	  <type/> -->
-<!-- 	</Cjudge> -->
-<!-- 	<text content=" and "/> -->
-<!-- 	<Sjudge num="*"> -->
-<!-- 	  <assume> -->
-<!-- 	    <aCtset/> -->
-<!-- 	    <gamma/> -->
-<!-- 	    <store/> -->
-<!-- 	  </assume> -->
-<!-- 	  <plus> -->
-<!-- 	    <heap/> -->
-<!-- 	    <stack/> -->
-<!-- 	  </plus> -->
-<!-- 	</Sjudge>  -->
-<!-- 	<text content=" and "/> -->
-<!-- 	<eval many="yes"> -->
-<!-- 	  <opState> -->
-<!-- 	    <stack/> -->
-<!-- 	    <heap/> -->
-<!-- 	    <aExpr/> -->
-<!-- 	  </opState> -->
-<!-- 	  <opState> -->
-<!-- 	    <stack dash="'"/> -->
-<!-- 	    <heap dash="'"/> -->
-<!-- 	    <aExpr dash="'"/> -->
-<!-- 	  </opState> -->
-<!-- 	</eval> -->
-<!-- 	<text content=" then "/> -->
-<!-- 	<opState> -->
-<!-- 	  <stack dash="'"/> -->
-<!-- 	  <heap dash="'"/> -->
-<!-- 	  <aExpr dash="'"/> -->
-<!-- 	</opState> -->
-<!-- 	<text content=" is not stuck."/>             -->
-<!--       </btypes:TYPE> -->
-<!--       That is, execution of a well typed expression cannot lead to -->
-<!--       a stuck state. Here,  -->
-<!--       <btypes:TYPE> -->
-<!-- 	<evalOp many="yes"/> -->
-<!--       </btypes:TYPE > represents the  -->
-<!--       reflexive-transitive-closure of  -->
-<!--       <btypes:TYPE> -->
-<!-- 	<evalOp/> -->
-<!--       </btypes:TYPE>. -->
-<!--     </p> -->
-<!--   </theorem> -->
+  <lemma id="T-preservation-cor">
+    <title>Corollary to Preservation</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<TDjudge name="*">
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE> and 
+      <btypes:TYPE>
+	<TDjudge name="*">
+	  <plus>
+	    <heap/>
+	    <stack/>
+	  </plus>
+	</TDjudge>
+      </btypes:TYPE> then,
+    </p>
+    <ol>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <leval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<aExpr dash="'"/>
+	      </opState>
+	    </leval>
+	  </btypes:TYPE>, then,
+	  <btypes:TYPE>
+	    <Exists/>
+	    <supeq>
+	      <store dash="'"/>
+	      <store/>
+	    </supeq>
+	  </btypes:TYPE>
+	  such that
+	  <btypes:TYPE>
+	    <Sjudge name="*">
+	      <assume>
+		<gamma/>
+		<store dash="'"/>
+	      </assume>
+	      <tqExpr>
+		<aExpr dash="'"/>
+		<type/>
+	      </tqExpr>
+	    </Sjudge>
+	  </btypes:TYPE>
+	  and
+	  <btypes:TYPE>
+	    <Sjudge name="*">
+	      <assume>
+		<gamma/>
+		<store dash="'"/>
+	      </assume>
+	      <plus>
+		<heap dash="'"/>
+		<stack dash="'"/>
+	      </plus>
+	    </Sjudge>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<aExpr/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<aExpr dash="'"/>
+	      </opState>
+	    </eval>
+	  </btypes:TYPE>, then,
+	  <btypes:TYPE>
+	    <Exists/>
+	    <supeq>
+	      <store dash="'"/>
+	      <store/>
+	    </supeq>
+	  </btypes:TYPE>
+	  such that
+	  <btypes:TYPE>
+	    <Sjudge name="*">
+	      <assume>
+		<gamma/>
+		<store dash="'"/>
+	      </assume>
+	      <Msub>
+		<aExpr dash="'"/>
+		<type dash="'"/>
+	      </Msub>
+	    </Sjudge>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <Sjudge name="*">
+	      <assume>
+		<gamma/>
+		<store dash="'"/>
+	      </assume>
+	      <plus>
+		<heap dash="'"/>
+		<stack dash="'"/>
+	      </plus>
+	    </Sjudge>
+	  </btypes:TYPE>, and 
+	  <btypes:TYPE>
+	    <Msub>
+	      <type/>
+	      <type dash="'"/>
+	    </Msub>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
+  </lemma>
+  <proof>
+    <p>
+      Using 
+      <btypes:TYPE>
+	<thm tag="T-preservation"/>
+      </btypes:TYPE>.
+    </p>
+  </proof>
+  <definition id="stuck_state">
+    <title>Stuck State</title>
+    <p>
+      A system state
+      <btypes:TYPE>
+	<opState>
+	  <stack/>
+	  <heap/>
+	  <aExpr/>
+	</opState>
+      </btypes:TYPE>
+      is said to be <term>stuck</term> if
+      <btypes:TYPE>
+	<neq>
+	  <aExpr/>
+	  <aVal/>
+	</neq>
+      </btypes:TYPE>
+      and there are no
+      <btypes:TYPE>
+	<stack dash="'"/>
+	<text content=", "/>
+	<heap dash="'"/>
+	<text content=", and "/>
+	<aExpr dash="'"/>
+      </btypes:TYPE>
+      such that
+      <btypes:TYPE>
+	<eval>
+	  <opState>
+	    <stack/>
+	    <heap/>
+	    <aExpr/>
+	  </opState>
+	  <opState>
+	    <stack dash="'"/>
+	    <heap dash="'"/>
+	    <aExpr dash="'"/>
+	  </opState>
+	</eval>
+      </btypes:TYPE>.
+    </p>
+  </definition>
+  <theorem id="T-soundness">
+    <title>Type Soundness</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<Sjudge name="*">
+	  <assume>
+	    <Empty/>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<Sjudge name="*">
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <plus>
+	    <heap/>
+	    <stack/>
+	  </plus>
+	</Sjudge>
+      </btypes:TYPE>, and
+      <btypes:TYPE>
+	<eval many="yes">
+	  <opState>
+	    <stack/>
+	    <heap/>
+	    <aExpr/>
+	  </opState>
+	  <opState>
+	    <stack dash="'"/>
+	    <heap dash="'"/>
+	    <aExpr dash="'"/>
+	  </opState>
+	</eval>
+      </btypes:TYPE>
+      then
+      <btypes:TYPE>
+	<opState>
+	  <stack dash="'"/>
+	  <heap dash="'"/>
+	  <aExpr dash="'"/>
+	</opState>
+      </btypes:TYPE>.
+      is not stuck.
+      That is, execution of a well typed expression cannot lead to
+      a stuck state. Here,
+      <btypes:TYPE>
+	<evalOp many="yes"/>
+      </btypes:TYPE > represents the
+      reflexive-transitive-closure of
+      <btypes:TYPE>
+	<evalOp/>
+      </btypes:TYPE>.
+    </p>
+  </theorem>
+  <proof>
+    <p>
+      By straightforward induction on the length of
+      <btypes:TYPE>
+	<evalOp many="yes"/>
+      </btypes:TYPE>. If
+      <btypes:TYPE>
+	<eq>
+	  <aExpr/>
+	  <aVal/>
+	</eq>
+      </btypes:TYPE>, proof is immediate. Otherwise, from
+      Lemma&nbsp;<xref ref="T-progress"/> (Progress),
+      we know that we can take at least one step forward. Further,
+      from Lemma&nbsp;<xref ref="T-preservation-cor"/> (Preservation),
+      we know that a (left/right) execution of a well
+      typed expression in with respect to a well typed stack and heap
+      will always result in another well typed expression, stack
+      and heap. Proof now follows from induction hypothesis.
+    </p>
+  </proof>
   </sect1>
 <!--   <lemma id="cann-derivation"> -->
 <!--     <title>Canonical Type Derivation</title> -->

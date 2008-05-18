@@ -3477,6 +3477,290 @@
 <!--       </btypes:TYPE>. -->
 <!--     </p> -->
   </definition>
+  <lemma id="maybe-cst-properties">
+    <title>Properties of consistent types</title>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables/>
+	    </CST>
+	  </btypes:TYPE>
+	  iff
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<Forall/>
+		<subeq>
+		  <set>
+		    <mbTop>
+		      <tvar/>
+		      <ptype/>
+		    </mbTop>
+		    <mbTop>
+		      <tvar/>
+		      <ptype dash="'"/>
+		    </mbTop>
+		  </set>
+		  <spset>
+		    <solvables/>
+		  </spset>
+		</subeq>
+	      </btypes:TYPE>, we have
+	      <btypes:TYPE>
+		<eq under="minzT">
+		  <ptype/>
+		  <ptype dash="'"/>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<Forall/>
+		<subeq>
+		  <set>
+		    <mbFull>
+		      <stype/>
+		      <ptype/>
+		    </mbFull>
+		    <mbFull>
+		      <stype dash="'"/>
+		      <ptype dash="'"/>
+		    </mbFull>
+		  </set>
+		  <spset>
+		    <solvables/>
+		  </spset>
+		</subeq>
+	      </btypes:TYPE> such that 
+	      <btypes:TYPE>
+		<eq under="minzT">
+		  <stype/>
+		  <stype dash="'"/>
+		</eq>
+	      </btypes:TYPE>, we have 
+	      <btypes:TYPE>
+		<eq under="minz">
+		  <ptype/>
+		  <ptype dash="'"/>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<mutex>
+		  <pred name="mtv">
+		    <solvables/>
+		  </pred>
+		  <pred name="Mtv">
+		    <solvables/>
+		  </pred>
+		  <pred name="ntv">
+		    <solvables/>
+		  </pred>
+		</mutex>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	</ol>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables/>
+	    </CST>
+	  </btypes:TYPE>
+	  iff
+	  <btypes:TYPE>
+	    <CST sp="yes">
+	      <solvables/>
+	    </CST>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>
+	  iff
+	  <btypes:TYPE>
+	    <Sat>
+	      <aCtset/>
+	      <spset>
+		<solvables/>
+	      </spset>
+	    </Sat>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </lemma>
+  <proof>
+    <p>
+      Evident from 
+      <btypes:TYPE>
+	<defn tag="maybe-consistent"/>
+      </btypes:TYPE>.
+    </p>
+  </proof>
+  <lemma id="Cst-Weakening">
+    <title>Weakening of Consistency</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<subeq>
+	  <set>
+	    <solvables num="2"/>
+	  </set>
+	  <set>
+	    <solvables num="1"/>
+	  </set>
+	</subeq>
+      </btypes:TYPE>, then,      
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<solvables num="1"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>
+	  implies
+	  <btypes:TYPE>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<solvables num="2"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables num="1"/>
+	    </CST>
+	  </btypes:TYPE>
+	  implies
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables num="2"/>
+	    </CST>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<solvables num="1"/>
+	      </set>
+	    </models>
+	  </btypes:TYPE>
+	  implies
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<solvables num="2"/>
+	      </set>
+	    </models>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Cst>
+	      <aSubMap/>
+	      <set>
+		<solvables num="1"/>
+	      </set>
+	    </Cst>
+	  </btypes:TYPE>
+	  implies
+	  <btypes:TYPE>
+	    <Cst>
+	      <aSubMap/>
+	      <set>
+		<solvables num="2"/>
+	      </set>
+	    </Cst>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>, then 
+	  <btypes:TYPE>
+	    <Forall/>
+	    <supeq>
+	      <aCtset dash="'"/>
+	      <aCtset/>
+	    </supeq>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <Sat>
+	      <aCtset dash="'"/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>
+	</p>
+      </li>      
+    </ol>
+  </lemma>
+  <proof>
+    <p>
+      Evident from 
+      <btypes:TYPE>
+	<defn tag="maybe-consistent"/>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<defn tag="subst-consistent"/>
+      </btypes:TYPE>.
+      Note that the larger constraint set
+      <btypes:TYPE>
+	<aCtset dash="'"/>
+      </btypes:TYPE> must not violate the constraint that type
+      variables are present once in only one form of relation within 
+      <btypes:TYPE>
+	<aCtset dash="'"/>
+      </btypes:TYPE>. We assume that this restriction holds 
+      vacuously henceforth. 
+    </p>
+  </proof>
   <lemma id="T-msm_eq_ms">
     <title>Substitution Canonicalization</title>
     <p>
@@ -3856,253 +4140,6 @@
 	</p>
       </li>
     </ol>
-  </proof>
-  <lemma id="maybe-cst-properties">
-    <title>Properties of consistent types</title>
-    <ol>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <CST>
-	      <solvables/>
-	    </CST>
-	  </btypes:TYPE>
-	  iff
-	</p>
-	<ol>
-	  <li>
-	    <p>
-	      <btypes:TYPE>
-		<Forall/>
-		<subeq>
-		  <set>
-		    <mbTop>
-		      <tvar/>
-		      <ptype/>
-		    </mbTop>
-		    <mbTop>
-		      <tvar/>
-		      <ptype dash="'"/>
-		    </mbTop>
-		  </set>
-		  <spset>
-		    <solvables/>
-		  </spset>
-		</subeq>
-	      </btypes:TYPE>, we have
-	      <btypes:TYPE>
-		<eq under="minzT">
-		  <ptype/>
-		  <ptype dash="'"/>
-		</eq>
-	      </btypes:TYPE>.
-	    </p>
-	  </li>
-	  <li>
-	    <p>
-	      <btypes:TYPE>
-		<Forall/>
-		<subeq>
-		  <set>
-		    <mbFull>
-		      <stype/>
-		      <ptype/>
-		    </mbFull>
-		    <mbFull>
-		      <stype dash="'"/>
-		      <ptype dash="'"/>
-		    </mbFull>
-		  </set>
-		  <spset>
-		    <solvables/>
-		  </spset>
-		</subeq>
-	      </btypes:TYPE> such that 
-	      <btypes:TYPE>
-		<eq under="minzT">
-		  <stype/>
-		  <stype dash="'"/>
-		</eq>
-	      </btypes:TYPE>, we have 
-	      <btypes:TYPE>
-		<eq under="minz">
-		  <ptype/>
-		  <ptype dash="'"/>
-		</eq>
-	      </btypes:TYPE>.
-	    </p>
-	  </li>
-	  <li>
-	    <p>
-	      <btypes:TYPE>
-		<mutex>
-		  <pred name="mtv">
-		    <solvables/>
-		  </pred>
-		  <pred name="Mtv">
-		    <solvables/>
-		  </pred>
-		  <pred name="ntv">
-		    <solvables/>
-		  </pred>
-		</mutex>
-	      </btypes:TYPE>
-	    </p>
-	  </li>
-	</ol>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <CST>
-	      <solvables/>
-	    </CST>
-	  </btypes:TYPE>
-	  iff
-	  <btypes:TYPE>
-	    <CST sp="yes">
-	      <solvables/>
-	    </CST>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <Sat>
-	      <aCtset/>
-	      <set>
-		<solvables/>
-	      </set>
-	    </Sat>
-	  </btypes:TYPE>
-	  iff
-	  <btypes:TYPE>
-	    <Sat>
-	      <aCtset/>
-	      <spset>
-		<solvables/>
-	      </spset>
-	    </Sat>
-	  </btypes:TYPE>
-	</p>
-      </li>
-    </ol>
-  </lemma>
-  <proof>
-    <p>
-      Evident from 
-      <btypes:TYPE>
-	<defn tag="maybe-consistent"/>
-      </btypes:TYPE>.
-    </p>
-  </proof>
-  <lemma id="Cst-Weakening">
-    <title>Weakening of Consistency</title>
-    <p>
-      If
-      <btypes:TYPE>
-	<subeq>
-	  <set>
-	    <solvables num="2"/>
-	  </set>
-	  <set>
-	    <solvables num="1"/>
-	  </set>
-	</subeq>
-      </btypes:TYPE>, then,      
-    </p>
-    <ol>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <Sat>
-	      <aCtset/>
-	      <set>
-		<solvables num="1"/>
-	      </set>
-	    </Sat>
-	  </btypes:TYPE>
-	  implies
-	  <btypes:TYPE>
-	    <Sat>
-	      <aCtset/>
-	      <set>
-		<solvables num="2"/>
-	      </set>
-	    </Sat>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <CST>
-	      <solvables num="1"/>
-	    </CST>
-	  </btypes:TYPE>
-	  implies
-	  <btypes:TYPE>
-	    <CST>
-	      <solvables num="2"/>
-	    </CST>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <models name="cst">
-	      <aSubMap/>
-	      <set>
-		<solvables num="1"/>
-	      </set>
-	    </models>
-	  </btypes:TYPE>
-	  implies
-	  <btypes:TYPE>
-	    <models name="cst">
-	      <aSubMap/>
-	      <set>
-		<solvables num="2"/>
-	      </set>
-	    </models>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <Cst>
-	      <aSubMap/>
-	      <set>
-		<solvables num="1"/>
-	      </set>
-	    </Cst>
-	  </btypes:TYPE>
-	  implies
-	  <btypes:TYPE>
-	    <Cst>
-	      <aSubMap/>
-	      <set>
-		<solvables num="2"/>
-	      </set>
-	    </Cst>
-	  </btypes:TYPE>
-	</p>
-      </li>
-    </ol>
-  </lemma>
-  <proof>
-    <p>
-      Evident from 
-      <btypes:TYPE>
-	<defn tag="maybe-consistent"/>
-      </btypes:TYPE> and
-      <btypes:TYPE>
-	<defn tag="subst-consistent"/>
-      </btypes:TYPE>.
-    </p>
   </proof>
   <lemma id="Cst-additive">
     <title>Aggregation of Consistency</title>

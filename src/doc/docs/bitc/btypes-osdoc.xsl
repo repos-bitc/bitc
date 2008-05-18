@@ -3120,8 +3120,8 @@
   <!-- gamma; store |-D expr : type , all inlined-->
   <xsl:template match="TDjudge" mode="formula">
     <xsl:if test = "@cst='yes'">	
-      <xsl:call-template name="print.mathmode">
-	<xsl:with-param name="print.mathmode.text">C</xsl:with-param> 
+      <xsl:call-template name="print.mathcal">
+	<xsl:with-param name="print.mathcal.letter">C</xsl:with-param> 
       </xsl:call-template>
       <xsl:call-template name="print.op.semis"/>	
     </xsl:if>      
