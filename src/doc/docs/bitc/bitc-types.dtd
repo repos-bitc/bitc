@@ -1274,7 +1274,8 @@
 <!ATTLIST TDjudge
                                name     CDATA    #IMPLIED
                                sub      yes      #IMPLIED
-                                Msub     yes      #IMPLIED
+                               Msub     yes      #IMPLIED
+                               cst      yes      #IMPLIED
 >
 
 <!ELEMENT TIjudge             (assume?, conclude, propagate?)>

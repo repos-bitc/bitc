@@ -44,15 +44,13 @@
 	  </lhs>
 	  <rhs>
 	    <spset>
-	      <rhs>
-		<gamma/>
-		<store/>
+	      <gamma/>
+	      <store/>
+	      <type/>
+	      <Subst>
+		<aSubMap/>
 		<type/>
-		<Subst>
-		  <aSubMap/>
-		  <type/>
-		</Subst>
-	      </rhs>
+	      </Subst>
 	    </spset>
 	  </rhs>
 	</equation>
@@ -233,6 +231,37 @@
     <p>
       We say that
       <btypes:TYPE>
+	<TDjudge cst="yes">
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE>, is a consistent type derivation under the
+      constraint set 
+      <btypes:TYPE>
+	<bCtset/>
+      </btypes:TYPE>
+      if
+      <btypes:TYPE>
+	<TDjudge>
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<Sat>
+	  <bCtset/>
+	  <spset>
+	    <TDjudge>
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	  </spset>
+	</Sat>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      We say that
+      <btypes:TYPE>
 	<TDjudge name="*">
 	  <aExpr/>
 	  <type/>
@@ -334,7 +363,7 @@
     <p>
       Similarly, we write
       <btypes:TYPE>
-	<TDjudge name="*">
+	<TDjudge cst="yes">
 	  <plus>
 	    <heap/>
 	    <stack/>
@@ -367,10 +396,10 @@
 	      </in>
 	    </forall>
 	    <text content=", "/>
-	    <TDjudge name="*">
+	    <TDjudge cst="yes">
 	      <mapsto><heap/><hLoc/></mapsto>
 	      <type/>
-	    </TDjudge>
+	    </TDjudge> 
 	    <text content=" such that "/>
 	    <Msub>
 	      <mapsto><store/><hLoc/></mapsto>
@@ -389,7 +418,7 @@
 	      </in>
 	    </forall>
 	    <text content=", "/>
-	    <TDjudge name="*">
+	    <TDjudge cst="yes">
 	      <mapsto><stack/><sLoc/></mapsto>
 	      <type/>
 	    </TDjudge>
@@ -3854,210 +3883,6 @@
       </btypes:TYPE>.
     </p>
   </proof>
-  <!--   <lemma id="cst-streangthening-gen">
-    <title><font color="blue">Strengthening of Consistency</font></title>
-    If:
-    </p>
-    <ol>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <CST>
-	      <solvables num="b"/>
-	    </CST>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <subeq>
-	      <set>
-		<solvables num="a"/>
-	      </set>
-	      <set>
-		<solvables num="b"/>
-	      </set>
-	    </subeq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <Cst>
-	      <assume/>
-	      <Subst>
-		<aSubMap/>
- 		<set>
-		  <solvables num="a"/>
-		</set>
-	      </Subst>
-	    </Cst>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <subeq>
-	      <inter>
-		<dom>
-		  <aSubMap/>
-		</dom>
-		<ftvs>
-		  <solvables num="b"/>
-		</ftvs>
-	      </inter>
-	      <ftvs>
-		<solvables num="a"/>
-	      </ftvs>
-	    </subeq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <subeq>
-	      <inter>
-		<ftvs>
-		  <range>
-		    <aSubMap/>
-		  </range>
-		</ftvs>
-		<ftvs>
-		  <solvables num="b"/>
-		</ftvs>
-	      </inter>
-	      <ftvs>
-		<solvables num="a"/>
-	      </ftvs>
-	    </subeq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-    </ol>
-    <p>
-      Then,
-      <btypes:TYPE>
-	<Cst>
-	  <assume/>
-	  <Subst>
-	    <aSubMap/>
-	    <set>
-	      <solvables num="b"/>
-	    </set>
-	  </Subst>
-	</Cst>
-      </btypes:TYPE>
-    </p>
-  </lemma>
-  <proof>
-    <ol>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <Forall/>
-	    <in>
-	      <mbTop>
-		<tvar/>
-		<ptype num="sb"/>
-	      </mbTop>
-	      <Subst>
-		<aSubMap/>
-		<solvables num="b"/>
-	      </Subst>
-	    </in>
-	  </btypes:TYPE> and
-	  <btypes:TYPE>
-	    <Forall/>
-	    <in>
-	      <mbTop>
-		<tvar/>
-		<ptype num="sb" dash="'"/>
-	      </mbTop>
-	      <Subst>
-		<aSubMap/>
-		<solvables num="b"/>
-	      </Subst>
-	    </in>
-	  </btypes:TYPE>, we could have any of the following possibilities:
-	</p>
-	<ol>
-	  <li>
-	    <p>
-	      Case
-	      <btypes:TYPE>
-		<notin>
-		  <tvar/>
-		  <ftvs>
-		    <range>
-		      <aSubMap/>
-		    </range>
-		  </ftvs>
-		</notin>
-	      </btypes:TYPE>:
-	    </p>
-	    <ol>
-	      <li>
-		<p>
-		  In this case,
-		  <btypes:TYPE>
-		    <Exists/>
-		    <in>
-		      <mbTop>
-			<tvar/>
-			<ptype num="s"/>
-		      </mbTop>
-		      <solvables num="b"/>
-		    </in>
-		    <text content=" and "/>
-		    <in>
-		      <mbTop>
-			<tvar/>
-			<ptype num="s" dash="'"/>
-		      </mbTop>
-		      <solvables num="b"/>
-		    </in>
-		    <text content=" | "/>
-		    <eq>
-		      <ptype num="sb"/>
-		      <Subst>
-			<aSubMap/>
-			<ptype num="b"/>
-		      </Subst>
-		    </eq>
-		    <text content=" and "/>
-		    <eq>
-		      <ptype num="sb" dash="'"/>
-		      <Subst>
-			<aSubMap/>
-			<ptype num="b" dash="'"/>
-		      </Subst>
-		    </eq>
-		  </btypes:TYPE>.
-		  We have:
-		  <btypes:TYPE>
-		    <eq under="minzT">
-		      <type num="1"/>
-		      <type num="2"/>
-		    </eq>
-		  </btypes:TYPE> and
-		  <btypes:TYPE>
-		    <eq under="minz">
-		      <type num="1"/>
-		      <type num="2"/>
-		    </eq>
-		  </btypes:TYPE>
-		</p>
-	      </li>
-	    </ol>
-	  </li>
-	</ol>
-      </li>
-    </ol>
-  </proof> -->
   <lemma id="Consistency-Propagation-1">
     <title>Consistency of Substitution over Type Derivation</title>
     <p>
@@ -4071,17 +3896,17 @@
 	</CST>
       </btypes:TYPE>, and 
       <btypes:TYPE>
-	<Cst>
+	<models name="cst">
 	  <aSubMap/>
 	  <set>
 	    <gamma/>
 	    <store/>
 	    <type/>
 	  </set>
-	</Cst>
+	</models>
       </btypes:TYPE>, then,
       <btypes:TYPE>
-	<Cst>
+	<models name="cst">
 	  <aSubMap/>
 	  <spset>
 	    <TDjudge>
@@ -4089,7 +3914,7 @@
 	      <type/>
 	    </TDjudge>
 	  </spset>
-	</Cst>
+	</models>
       </btypes:TYPE>.
     </p>
   </lemma>
@@ -4388,7 +4213,7 @@
 			<aSubMap/>
 			<ptype/>
 		      </Subst>
-		      <ptype/>
+		      <ptype dash="''"/>
 		    </eq>
 		  </btypes:TYPE>.      
 		</p>
@@ -4562,31 +4387,31 @@
     </p>
     <p>
       <btypes:TYPE>
-	<models name="cst">
-	  <assume>
-	    <aSubMap num="1"/>
-	  </assume>
-	  <type/>
-	</models>
-      </btypes:TYPE>, 
-      <btypes:TYPE>
-	<models name="cst">
-	  <assume>
-	    <aSubMap num="2"/>
-	  </assume>
-	  <type/>
-	</models>
-      </btypes:TYPE>, 
-      <btypes:TYPE>
-	<models name="cst">
-	  <assume>
-	    <aSubMap num="1"/>
-	  </assume>
-	  <Subst>
-	    <aSubMap num="2"/>
+	<Cst>
+	  <aSubMap num="1"/>
+	  <set>
 	    <type/>
-	  </Subst>
-	</models>
+	  </set>
+	</Cst>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<Cst>
+	  <aSubMap num="2"/>
+	  <set>
+	    <type/>
+	  </set>
+	</Cst>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<Cst>
+	  <aSubMap num="1"/>
+	  <set>
+	    <Subst>
+	      <aSubMap num="2"/>
+	      <type/>
+	    </Subst>
+	  </set>
+	</Cst>
       </btypes:TYPE>, and
       <btypes:TYPE>
 	<mutex>
@@ -4638,16 +4463,16 @@
 	</eq>
       </btypes:TYPE>, and 
       <btypes:TYPE>
-	<models name="cst">
-	  <assume>
-	    <aSubMap num="2" dash="'"/>
-	  </assume>
-	  <Subst>
-	    <aSubMap num="1"/>
-	    <type/>
-	  </Subst>
-	</models>
-      </btypes:TYPE>
+	<Cst>
+	  <aSubMap num="2" dash="'"/>
+	  <set>
+	    <Subst>
+	      <aSubMap num="1"/>
+	      <type/>
+	    </Subst>
+	  </set>
+	</Cst>
+      </btypes:TYPE>.
     </p>
   </lemma>
   <proof>
@@ -4696,59 +4521,80 @@
     <title>Type Substitution</title>
     <p>
       If
-      <btypes:TYPE>
-	<TDjudge name="*">
-	  <aExpr/>
-	  <type/>
-	</TDjudge>
-      </btypes:TYPE>, 
-      then for any substitution
-      <btypes:TYPE>
-	<aSubMap/>
-      </btypes:TYPE>
-      such that
-      <btypes:TYPE>
-	<models name="cst">
-	  <assume>
-	    <aSubMap/>
-	  </assume>
-	  <spset>
-	    <TDjudge>
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <TDjudge cst="yes">
 	      <aExpr/>
 	      <type/>
 	    </TDjudge>
-	  </spset>
-	</models>
-      </btypes:TYPE>,
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <spset>
+		<TDjudge>
+		  <aExpr/>
+		  <type/>
+		</TDjudge>
+	      </spset>
+	    </models>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Sat>
+	      <Subst>
+		<aSubMap/>
+		<bCtset/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<spset>
+		  <TDjudge>
+		    <aExpr/>
+		    <type/>
+		  </TDjudge>
+		</spset>
+	      </Subst>
+	    </Sat>	      
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <mutex>
+	      <ftvs>
+		<aSubMap/>
+	      </ftvs>
+	      <pred name="gtv">
+		<gamma/>
+	      </pred>
+	    </mutex>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+    <p>
+      Then,
       <btypes:TYPE>
-	<CST>
-	  <Subst>
-	    <aSubMap/>
-	    <gamma/>
-	  </Subst>
-	  <Subst>
-	    <aSubMap/>
-	    <store/>
-	  </Subst>
-	  <Subst>
-	    <aSubMap/>
-	    <type/>
-	  </Subst>
-	</CST>
-      </btypes:TYPE>, and
-      <btypes:TYPE>
-	<mutex>
-	  <ftvs>
-	    <aSubMap/>
-	  </ftvs>
-	  <pred name="gtv">
-	    <gamma/>
-	  </pred>
-	</mutex>
-      </btypes:TYPE>, we have
-      <btypes:TYPE>
-	<Sjudge name="*">
+	<Sjudge>
 	  <assume>
+	    <Subst>
+	      <aSubMap/>
+	      <bCtset/>
+	    </Subst>
 	    <Subst>
 	      <aSubMap/>
 	      <gamma/>
@@ -4779,6 +4625,16 @@
 	</TDjudge>
       </btypes:TYPE>. We proceed by case analysis on the last step of
       the derivation.
+      Let
+      <btypes:TYPE>
+	<eq>
+	  <bCtset num="s"/>
+	  <Subst>
+	    <aSubMap/>
+	    <bCtset/>
+	  </Subst>
+	</eq>
+      </btypes:TYPE>.
     </p>
     <ol>
       <li>
@@ -4809,21 +4665,20 @@
 			    <type num="i"/>
 			  </TS>
 			</mapsto>
-			<eq>
+			<Cst>
 			  <aSubMap num="n"/>
-			  <plural>
-			    <SubMap>
-			      <tvar/>
-			      <type dash="'"/>
-			    </SubMap>
-			  </plural>
+			  <set>
+			    <type num="i"/>
+			  </set>
+			</Cst>
+			<eq>
+			  <dom>
+			    <aSubMap/>
+			  </dom>
+			  <set>
+			    <tvars/>
+			  </set>
 			</eq>
-			<models name="cst">
-			  <assume>
-			    <aSubMap num="n"/>
-			  </assume>
-			  <type num="i"/>
-			</models>
 		      </tyPre>
 		      <tyConc>
 			<TDjudge>
@@ -4841,16 +4696,20 @@
 	      <li>
 		<p>
 		  <btypes:TYPE>
-		    <CST sp="yes">
-		      <TDjudge>
-			<id/>
-			<Subst>
-			  <aSubMap num="n"/>
-			  <type num="i"/>
-			</Subst>
-		      </TDjudge>
-		    </CST>
-		  </btypes:TYPE>		      
+		    <eq>
+		      <aExpr/>
+		      <id/>
+		    </eq>
+		  </btypes:TYPE> and
+		  <btypes:TYPE>
+		    <eq>
+		      <type/>
+		      <Subst>
+			<aSubMap num="n"/>
+			<type num="i"/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>.
 		</p>
 	      </li>
 	      <li>
@@ -4876,31 +4735,29 @@
 	      <li>
 		<p>
 		  <btypes:TYPE>
-		    <eq>
-		      <type/>
+		    <Sat>
+		      <bCtset num="s"/>
 		      <Subst>
-			<aSubMap num="n"/>
-			<type num="i"/>
+			<aSubMap/>
+			<spset>
+			  <TDjudge>
+			    <id/>
+			    <Subst>
+			      <aSubMap num="n"/>
+			      <type num="i"/>
+			    </Subst>
+			  </TDjudge>
+			</spset>
 		      </Subst>
-		    </eq>
-		  </btypes:TYPE>.
+		    </Sat>
+		  </btypes:TYPE>		      
 		</p>
 	      </li>
 	    </ol>
 	  </li>
 	  <li>
 	    <p>
-	      Since 
-	      <btypes:TYPE>
-		<mutex>
-		  <ftvs>
-		    <aSubMap/>
-		  </ftvs>
-		  <pred name="gtv">
-		    <gamma/>
-		  </pred>
-		</mutex>
-	      </btypes:TYPE>, we have
+	      From assumption&nbsp;(4), we have
 	      <btypes:TYPE>
 		<eq>
 		  <inter>
@@ -4962,51 +4819,108 @@
 	    </p>
 	  </li>
 	  <li>
-	    <p>
-	      From case&nbsp;(2.a.iii) and 
-	      <btypes:TYPE>
-		<lem tag="Cst-Weakening"/>
-	      </btypes:TYPE> (weakening), and case&nbsp;(2.a.i), 
-	      we have:
-	    </p>
 	    <ol>
 	      <li>
 		<p>
+		  From 	
+		  <btypes:TYPE>
+		    <defn tag="constraint-colection-ext"/>
+		  </btypes:TYPE>, we have
+		  <btypes:TYPE>
+		    <eq>
+		      <spset>
+			<TDjudge>
+			  <id/>
+			  <type/>
+			</TDjudge>
+		      </spset>
+		      <spset>
+			<gamma/>
+			<store/>
+			<type num="i"/>
+			<type/>
+		      </spset>
+		    </eq>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From case&nbsp;(2.a.iii and 2.d.i) and 
+		  <btypes:TYPE>
+		    <lem tag="Cst-Weakening"/>
+		  </btypes:TYPE> (weakening), we have
 		  <btypes:TYPE>
 		    <models name="cst">
 		      <assume>
 			<aSubMap/>
 		      </assume>
-		      <type num="i"/>
+		      <set>
+			<type num="i"/>
+		      </set>
 		    </models>
 		  </btypes:TYPE>.
-		</p>
-	      </li>
-	      <li>
-		<p>
+		  Again using case&nbsp;(2.a.iv), we obtain
 		  <btypes:TYPE>
-		    <models name="cst">
-		      <assume>
-			<aSubMap num="n"/>
-		      </assume>
-		      <type num="i"/>
-		    </models>
-		  </btypes:TYPE>.
-		</p>
-	      </li>
-	      <li>
-		<p>
-		  <btypes:TYPE>
-		    <models name="cst">
-		      <assume>
-			<aSubMap/>
-		      </assume>
+		    <Sat>
+		      <bCtset num="s"/>
 		      <Subst>
-			<aSubMap num="n"/>
+			<aSubMap/>
+			<spset>
+			  <type num="i"/>
+			</spset>
+		      </Subst>
+		    </Sat>
+		  </btypes:TYPE>, which implies
+		  <btypes:TYPE>
+		    <CST sp="yes">
+		      <Subst>
+			<aSubMap/>
 			<type num="i"/>
 		      </Subst>
-		    </models>
-		  </btypes:TYPE>.	      
+		    </CST>
+		  </btypes:TYPE>.
+		  Now using 
+		  <btypes:TYPE>
+		    <defn tag="subst-consistent"/>
+		  </btypes:TYPE>, we obtain
+		  <btypes:TYPE>
+		    <Cst>
+		      <aSubMap/>
+		      <set>
+			<type num="i"/>
+		      </set>
+		    </Cst>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From case&nbsp;(2.a.i), we have
+		  <btypes:TYPE>
+		    <Cst>
+		      <aSubMap num="n"/>
+		      <set>
+			<type num="i"/>
+		      </set>
+		    </Cst>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  Similar to case (2.d.ii), we obtain
+		  <btypes:TYPE>
+		    <Cst>
+		      <aSubMap/>
+		      <set>
+			<Subst>
+			  <aSubMap num="n"/>
+			  <type num="i"/>
+			</Subst>
+		      </set>
+		    </Cst>
+		  </btypes:TYPE>.
 		</p>
 	      </li>
 	    </ol>
@@ -5034,19 +4948,11 @@
 		      <dom>
 			<aSubMap num="n"/>
 		      </dom>
+		      <set>
+			<tvars/>
+		      </set>
 		    </eq>
-		  </btypes:TYPE>. That is,
-		  <btypes:TYPE>
-		    <eq>
-		      <aSubMap num="m"/>
-		      <plural>
-			<SubMap>
-			  <tvar/>
-			  <type dash="''"/>
-			</SubMap>
-		      </plural>
-		    </eq>
-		  </btypes:TYPE>.
+		  </btypes:TYPE>. 
 		</p>
 	      </li>
 	      <li>
@@ -5089,13 +4995,15 @@
 	      <li>
 		<p>
 		  <btypes:TYPE>
-		    <models name="cst">
+		    <Cst>
 		      <aSubMap num="m"/>
-		      <Subst>
-			<aSubMap/>
-			<type num="i"/>
-		      </Subst>
-		    </models>
+		      <set>
+			<Subst>
+			  <aSubMap/>
+			  <type num="i"/>
+			</Subst>
+		      </set>
+		    </Cst>
 		  </btypes:TYPE>.
 		</p>
 	      </li>
@@ -5118,7 +5026,7 @@
 		    </Subst>
 		  </assume>
 		  <tqExpr>
-		    <aExpr/>
+		    <id/>
 		    <Subst>
 		      <aSubMap num="m"/>
 		      <Subst>
@@ -5133,7 +5041,7 @@
 	  </li>
 	  <li>
 	    <p>
-	      From cases&nbsp;(2.g and 2.e.ii), we obtain
+	      From cases&nbsp;(2.f and 2.e.ii), we obtain
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
@@ -5147,7 +5055,220 @@
 		    </Subst>
 		  </assume>
 		  <tqExpr>
-		    <aExpr/>
+		    <id/>
+		    <Subst>
+		      <aSubMap/>
+		      <type/>
+		    </Subst>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From 	
+	      <btypes:TYPE>
+		<defn tag="constraint-colection-ext"/>
+	      </btypes:TYPE>, we have:
+	      <btypes:TYPE>
+		<eq>
+		  <spset>
+		    <Sjudge>
+		      <assume>
+			<Subst>
+			  <aSubMap/>
+			  <gamma/>
+			</Subst>
+			<Subst>
+			  <aSubMap/>
+			  <store/>
+			</Subst>
+		      </assume>
+		      <tqExpr>
+			<id/>
+			<Subst>
+			  <aSubMap/>
+			  <type/>
+			</Subst>
+		      </tqExpr>
+		    </Sjudge>
+		  </spset>
+		  <spset>
+		    <Subst>
+		      <aSubMap/>
+		      <gamma/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <store/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="i"/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <type/>
+		    </Subst>
+		  </spset>
+		</eq>
+	      </btypes:TYPE>.
+	      Clearly, 
+	      <btypes:TYPE>
+		<subeq>
+		  <spset>
+		    <Subst>
+		      <aSubMap/>
+		      <gamma/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <store/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="i"/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <type/>
+		    </Subst>
+		  </spset>
+		  <spset>
+		    <Subst>
+		      <aSubMap/>
+		      <spset>
+			<gamma/>
+			<store/>
+			<type num="i"/>
+			<type/>
+		      </spset>
+		    </Subst>
+		  </spset>
+		</subeq>
+	      </btypes:TYPE>.	      
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From cases&nbsp;(2.a.iv and 2.d.i), we have
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <Subst>
+		    <aSubMap/>
+		    <spset>
+		      <gamma/>
+		      <store/>
+		      <type num="i"/>
+		      <type/>
+		    </spset>
+		  </Subst>
+		</Sat>
+	      </btypes:TYPE>. Now, from 
+	      <btypes:TYPE>
+		<lem tag="maybe-cst-properties"/>
+	      </btypes:TYPE> (property-3), we obtain
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <spset>
+		    <Subst>
+		      <aSubMap/>
+		      <spset>
+			<gamma/>
+			<store/>
+			<type num="i"/>
+			<type/>
+		      </spset>
+		    </Subst>
+		  </spset>
+		</Sat>
+	      </btypes:TYPE>.	      
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Now, from cases&nbsp;(3.i and 3.h) and
+	      <btypes:TYPE>
+		<lem tag="Cst-Weakening"/>
+	      </btypes:TYPE> (weakening), we obtain
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <spset>
+		    <Subst>
+		      <aSubMap/>
+		      <gamma/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <store/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="i"/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <type/>
+		    </Subst>
+		  </spset>
+		</Sat>
+	      </btypes:TYPE> and therefore
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <spset>
+		    <Sjudge>
+		      <assume>
+			<Subst>
+			  <aSubMap/>
+			  <gamma/>
+			</Subst>
+			<Subst>
+			  <aSubMap/>
+			  <store/>
+			</Subst>
+		      </assume>
+		      <tqExpr>
+			<id/>
+			<Subst>
+			  <aSubMap/>
+			  <type/>
+			</Subst>
+		      </tqExpr>
+		    </Sjudge>
+		  </spset>
+		</Sat>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Finally, from cases&nbsp;(2.g and 2.j) and
+	      <btypes:TYPE>
+		<defn tag="consistent-typing"/>
+	      </btypes:TYPE>, we conclude that 
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <Subst>
+		      <aSubMap/>
+		      <bCtset/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <gamma/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <store/>
+		    </Subst>
+		  </assume>
+		  <tqExpr>
+		    <id/>
 		    <Subst>
 		      <aSubMap/>
 		      <type/>
