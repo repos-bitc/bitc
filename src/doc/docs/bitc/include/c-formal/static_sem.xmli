@@ -105,9 +105,13 @@
 <!-- 	  </inter> -->
 <!-- 	</alternatives> -->
 <!--       </bnf> -->
-      <bnf desc="Poly. Constraint">
+      <bnf desc="Constraints">
 	<constraint/>
 	<alternatives>
+	  <eq>
+	    <type/>
+	    <type/>
+	  </eq>
 	  <Pcst>
 	    <lKind/>
 	    <type/>
@@ -115,23 +119,7 @@
 	  </Pcst>
 	</alternatives>
       </bnf>
-      <bnf desc="Constraint Sets">
-      	<aCtset/>
-      	<alternatives>
-      	  <Empty/>
-      	  <set>
-      	    <plural>
-      	      <constraint/>
-      	    </plural>
-      	  </set>
-      	  <unin>
-      	    <aCtset/>
-      	    <aCtset/>
-      	  </unin>
-      	</alternatives>
-      </bnf>
-      <bnf desc="Compat. Constraint">
-	<symbol name="mu"/>
+      <bnfc desc="">
 	<alternatives>
 	  <unct>
 	    <tvar/>
@@ -145,19 +133,19 @@
 	    <ptype/>
 	  </ceq>
 	</alternatives>
-      </bnf>
-      <bnf desc="Comat. Const. Sets">
-      	<bCtset/>
+      </bnfc>
+      <bnf desc="Constraint Sets">
+      	<aCtset/>
       	<alternatives>
       	  <Empty/>
       	  <set>
       	    <plural>
-      	      <symbol name="mu"/>
+      	      <constraint/>
       	    </plural>
       	  </set>
       	  <unin>
-      	    <bCtset/>
-      	    <bCtset/>
+      	    <aCtset/>
+      	    <aCtset/>
       	  </unin>
       	</alternatives>
       </bnf>
@@ -3091,15 +3079,8 @@
     <p>
       Let
       <btypes:TYPE>
-	<bCtset/>
-      </btypes:TYPE> be a set of constraints such that
-      each type variable
-      <btypes:TYPE>
-	<tvar/>
-      </btypes:TYPE> appears at most once in 
-      <btypes:TYPE>
-	<bCtset/>
-      </btypes:TYPE> at the top level in only one of the forms
+	<aCtset/>
+      </btypes:TYPE> be a set of constraints of the form
       <btypes:TYPE>
 	<collection or="yes">
 	  <unct>
@@ -3114,14 +3095,21 @@
 	    <ptype/>
 	  </ceq>
 	</collection>
-      </btypes:TYPE>.
+      </btypes:TYPE>
+      such that a type variable
+      <btypes:TYPE>
+	<tvar/>
+      </btypes:TYPE> appears at most once in 
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE> in only one of the above positions.
     </p>
 <!--     <p> -->
 <!--       We write  -->
 <!--       <btypes:TYPE> -->
 <!-- 	<eq> -->
 <!-- 	  <dom> -->
-<!-- 	    <bCtset/> -->
+<!-- 	    <aCtset/> -->
 <!-- 	  </dom> -->
 <!-- 	  <tvars/> -->
 <!-- 	</eq> -->
@@ -3140,14 +3128,14 @@
 <!-- 	      <ptype/> -->
 <!-- 	    </ceq> -->
 <!-- 	  </collection> -->
-<!-- 	  <bCtset/> -->
+<!-- 	  <aCtset/> -->
 <!-- 	</in> -->
 <!--       </btypes:TYPE>. -->
 <!--       We write  -->
 <!--       <btypes:TYPE> -->
 <!-- 	<eq> -->
 <!-- 	  <range> -->
-<!-- 	    <bCtset/> -->
+<!-- 	    <aCtset/> -->
 <!-- 	  </range> -->
 <!-- 	  <plural> -->
 <!-- 	    <ptype/> -->
@@ -3167,7 +3155,7 @@
 <!-- 	      <ptype/> -->
 <!-- 	    </ceq> -->
 <!-- 	  </collection> -->
-<!-- 	  <bCtset/> -->
+<!-- 	  <aCtset/> -->
 <!-- 	</in> -->
 <!--       </btypes:TYPE>. -->
 <!--     </p> -->
@@ -3179,12 +3167,12 @@
 	      <unct>
 		<tvar/>
 	      </unct>
-	      <bCtset/>
+	      <aCtset/>
 	    </in>
 	  </tyPre>
 	  <tyConc>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <tvar/>
 	    </Sat>
 	  </tyConc>
@@ -3196,7 +3184,7 @@
 		<tvar/>
 		<ptype/>
 	      </Tceq>
-	      <bCtset/>
+	      <aCtset/>
 	    </in>
 	    <eq under="minzT">
 	      <ptype/>
@@ -3205,7 +3193,7 @@
 	  </tyPre>
 	  <tyConc>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <mbTop>
 		<tvar/>
 		<ptype dash="'"/>
@@ -3222,7 +3210,7 @@
 		<tvar/>
 		<ptype/>
 	      </ceq>
-	      <bCtset/>
+	      <aCtset/>
 	    </in>
 	    <eq under="minzT">
 	      <stype/>
@@ -3235,7 +3223,7 @@
 	  </tyPre>
 	  <tyConc>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <mbFull>
 		<stype/>
 		<ptype dash="'"/>
@@ -3246,7 +3234,7 @@
 	<tyRule>
 	  <tyPre>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <spset>
 		<solvables/>
 	      </spset>
@@ -3254,7 +3242,7 @@
 	  </tyPre>
 	  <tyConc>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <set>
 		<solvables/>
 	      </set>
@@ -3284,14 +3272,14 @@
 	      </Forall>
 	      <text content=", "/>
 	      <Sat>
-		<bCtset/>
+		<aCtset/>
 		<type/>
 	      </Sat>
 	    </grouping>
 	  </tyPre>
 	  <tyConc>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <set>
 		<types/>
 	      </set>
@@ -3302,10 +3290,10 @@
 	  <tyPre>
 	    <grouping>
 	      <Exists/>
-	      <bCtset/>
+	      <aCtset/>
 	      <text content=" | "/>
 	      <Sat>
-		<bCtset/>
+		<aCtset/>
 		<set>
 		  <solvables/>
 		</set>
@@ -3982,7 +3970,7 @@
 	<p>
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <set>
 		<solvables/>
 	      </set>
@@ -3991,7 +3979,7 @@
 	  iff
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <spset>
 		<solvables/>
 	      </spset>
@@ -4029,7 +4017,7 @@
 	<p>
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <set>
 		<solvables num="1"/>
 	      </set>
@@ -4038,7 +4026,7 @@
 	  implies
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <set>
 		<solvables num="2"/>
 	      </set>
@@ -4154,7 +4142,7 @@
 	  If
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <set>
 		<solvables num="1"/>
 	      </set>
@@ -4162,7 +4150,7 @@
 	  </btypes:TYPE> and
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <set>
 		<solvables num="2"/>
 	      </set>
@@ -4170,7 +4158,7 @@
 	  </btypes:TYPE>, then
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <set>
 		<solvables num="1"/>
 		<solvables num="2"/>
@@ -4202,7 +4190,7 @@
 	<p>
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <set>
 		<type num="1"/>
 		<type num="2"/>
@@ -4230,7 +4218,7 @@
 	    <Sat>
 	      <Subst>
 		<aSubMap/>
-		<bCtset/>
+		<aCtset/>
 	      </Subst>
 	      <Subst>
 		<aSubMap/>
@@ -4268,7 +4256,7 @@
 	<Sat>
 	  <Subst>
 	    <aSubMap/>
-	    <bCtset/>
+	    <aCtset/>
 	  </Subst>
 	  <Subst>
 	    <aSubMap/>
@@ -4285,10 +4273,10 @@
       Let
       <btypes:TYPE>
 	<eq>
-	  <bCtset num="s"/>
+	  <aCtset num="s"/>
 	  <Subst>
 	    <aSubMap/>
-	    <bCtset/>
+	    <aCtset/>
 	  </Subst>
 	</eq>
       </btypes:TYPE>. 
@@ -4306,7 +4294,7 @@
 	  </btypes:TYPE> (property-3), we obtain
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <spset>
 		<type num="1"/>
 		<type num="2"/>
@@ -4319,7 +4307,7 @@
 	  </btypes:TYPE> (weakening), we obtain
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <set>
 		<type num="1"/>
 	      </set>
@@ -4327,7 +4315,7 @@
 	  </btypes:TYPE>,
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <spset>
 		<type num="1"/>
 	      </spset>
@@ -4335,7 +4323,7 @@
 	  </btypes:TYPE>,
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <set>
 		<type num="2"/>
 	      </set>
@@ -4343,7 +4331,7 @@
 	  </btypes:TYPE>, and
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <spset>
 		<type num="2"/>
 	      </spset>
@@ -4363,7 +4351,7 @@
 	  Due to 
 	  <btypes:TYPE>
 	    <Sat>
-	      <bCtset/>
+	      <aCtset/>
 	      <spset>
 		<type num="2"/>
 	      </spset>
@@ -4374,7 +4362,7 @@
 	      <unct>
 		<tvar/>
 	      </unct>
-	      <bCtset/>
+	      <aCtset/>
 	    </in>
 	  </btypes:TYPE>.
 	  We proceed by further case analysis.
@@ -4422,7 +4410,7 @@
 		  <unct>
 		    <tvar/>
 		  </unct>
-		  <bCtset num="s"/>
+		  <aCtset num="s"/>
 		</in>
 	      </btypes:TYPE>. 
 	      Further,
@@ -4454,7 +4442,7 @@
 	      Now, it is evident that 
 	      <btypes:TYPE>
 		<Sat>
-		  <bCtset num="s"/>
+		  <aCtset num="s"/>
 		  <Subst>
 		    <aSubMap/>
 		    <spset>
@@ -4562,7 +4550,7 @@
 		  </btypes:TYPE> (weakening), we obtain
 		  <btypes:TYPE>
 		    <Sat>
-		      <bCtset num="s"/>
+		      <aCtset num="s"/>
 		      <set>
 			<type/>
 		      </set>
@@ -4613,7 +4601,7 @@
 		  From cases&nbsp;(3.c and 3.d), we conclude that
 		  <btypes:TYPE>
 		    <Sat>
-		      <bCtset num="s"/>
+		      <aCtset num="s"/>
 		    </Sat>
 		    <Subst>
 		      <aSubMap/>
@@ -4651,7 +4639,7 @@
 		    <tvar/>
 		    <ptype num="c"/>
 		  </Tceq>
-		  <bCtset/>
+		  <aCtset/>
 		</in>
 	      </btypes:TYPE>, for some
 	      <btypes:TYPE>
@@ -4667,7 +4655,7 @@
 	      By induction hypothesis, we have
 	      <btypes:TYPE>
 		<Sat>
-		  <bCtset num="s"/>
+		  <aCtset num="s"/>
 		  <Subst>
 		    <aSubMap/>
 		    <spset>
@@ -4741,7 +4729,7 @@
 	      if we have
 	      <btypes:TYPE>
 		<Sat>
-		  <bCtset num="s"/>
+		  <aCtset num="s"/>
 		  <Subst>
 		    <aSubMap/>
 		    <set>
@@ -4755,7 +4743,7 @@
 	      </btypes:TYPE>, we can prove
 	      <btypes:TYPE>
 		<Sat>
-		  <bCtset num="s"/>
+		  <aCtset num="s"/>
 		  <Subst>
 		    <aSubMap/>
 		    <set>
@@ -4776,7 +4764,7 @@
 	      Now, we proceed by further case analysis to prove
 	      <btypes:TYPE>
 		<Sat>
-		  <bCtset num="s"/>
+		  <aCtset num="s"/>
 		  <Subst>
 		    <aSubMap/>
 		    <set>
@@ -4840,7 +4828,7 @@
 			<tvar/>
 			<ptype num="c"/>
 		      </Tceq>
-		      <bCtset/>
+		      <aCtset/>
 		    </in>
 		  </btypes:TYPE>, we have
 		  <btypes:TYPE>
@@ -4852,7 +4840,7 @@
 			  <ptype num="c"/>
 			</Subst>
 		      </Tceq>
-		      <bCtset num="s"/>
+		      <aCtset num="s"/>
 		    </in>
 		  </btypes:TYPE>.
 		</p>
@@ -4892,7 +4880,7 @@
 		  </btypes:TYPE>, we obtain
 		  <btypes:TYPE>
 		    <Sat>
-		      <bCtset num="s"/>
+		      <aCtset num="s"/>
 		      <mbTop>
 			<tvar/>
 			<Subst>
@@ -4904,7 +4892,7 @@
 		  </btypes:TYPE>. That is,
 		  <btypes:TYPE>
 		    <Sat>
-		      <bCtset num="s"/>
+		      <aCtset num="s"/>
 		      <Subst>
 			<aSubMap/>
 			<mbTop>
@@ -5031,7 +5019,7 @@
 		  </btypes:TYPE> (weakening), we obtain
 		  <btypes:TYPE>
 		    <Sat>
-		      <bCtset num="s"/>	
+		      <aCtset num="s"/>	
 		      <mbTop>
 			<tvar name="beta"/>
 			<Subst>
@@ -5055,7 +5043,7 @@
 			<tvar name="beta"/>
 			<ptype num="c"/>
 		      </Tceq>
-		      <bCtset num="s"/>	
+		      <aCtset num="s"/>	
 		    </in>
 		  </btypes:TYPE> such that 
 		  <btypes:TYPE>
@@ -5108,7 +5096,7 @@
 		  </btypes:TYPE>, we obtain
 		  <btypes:TYPE>
 		    <Sat>
-		      <bCtset num="s"/>	
+		      <aCtset num="s"/>	
 		      <mbTop>
 			<tvar name="beta"/>
 			<Subst>
@@ -5121,7 +5109,7 @@
 		  That is,
 		  <btypes:TYPE>
 		    <Sat>
-		      <bCtset num="s"/>	
+		      <aCtset num="s"/>	
 		      <Subst>
 			<aSubMap/>
 			<mbTop>
@@ -5208,7 +5196,7 @@
 		  </btypes:TYPE> (weakening), we obtain
 		  <btypes:TYPE>
 		    <Sat>
-		      <bCtset num="s"/>	
+		      <aCtset num="s"/>	
 		      <set>
 			<ptype dash="'"/>
 		      </set>
@@ -5217,7 +5205,7 @@
 		  That is,
 		  <btypes:TYPE>
 		    <Sat>
-		      <bCtset num="s"/>	
+		      <aCtset num="s"/>	
 		      <Subst>
 			<aSubMap/>
 			<mbTop>
@@ -5322,7 +5310,7 @@
       If
       <btypes:TYPE>
 	<Sat>
-	  <bCtset/>
+	  <aCtset/>
 	  <set>
 	    <solvables num="1"/>
 	    <solvables num="2"/>
@@ -5342,7 +5330,7 @@
 	<Sat>
 	  <Subst>
 	    <aSubMap/>
-	    <bCtset/>
+	    <aCtset/>
 	  </Subst>
 	  <Subst>
 	    <aSubMap/>
@@ -5372,7 +5360,7 @@
 	<Sat>
 	  <Subst>
 	    <aSubMap/>
-	    <bCtset/>
+	    <aCtset/>
 	  </Subst>
 	  <Subst>
 	    <aSubMap/>
@@ -5396,6 +5384,37 @@
       </btypes:TYPE>.	      
     </p>
   </proof>
+<!--       <bnf desc="Compat. Constraint"> -->
+<!-- 	<symbol name="mu"/> -->
+<!-- 	<alternatives> -->
+<!-- 	  <unct> -->
+<!-- 	    <tvar/> -->
+<!-- 	  </unct> -->
+<!-- 	  <Tceq> -->
+<!-- 	    <tvar/> -->
+<!-- 	    <ptype/> -->
+<!-- 	  </Tceq> -->
+<!-- 	  <ceq> -->
+<!-- 	    <tvar/> -->
+<!-- 	    <ptype/> -->
+<!-- 	  </ceq> -->
+<!-- 	</alternatives> -->
+<!--       </bnf> -->
+<!--       <bnf desc="Comat. Const. Sets"> -->
+<!--       	<bCtset/> -->
+<!--       	<alternatives> -->
+<!--       	  <Empty/> -->
+<!--       	  <set> -->
+<!--       	    <plural> -->
+<!--       	      <symbol name="mu"/> -->
+<!--       	    </plural> -->
+<!--       	  </set> -->
+<!--       	  <unin> -->
+<!--       	    <bCtset/> -->
+<!--       	    <bCtset/> -->
+<!--       	  </unin> -->
+<!--       	</alternatives> -->
+<!--       </bnf> -->
 <!--   <definition id="approx-types"> -->
 <!--     <title>Approximate Types</title> -->
 <!--     <p> -->
