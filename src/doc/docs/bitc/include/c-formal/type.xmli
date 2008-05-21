@@ -44,6 +44,12 @@
 	      <type/>
 	    </TS>
 	  </mapsto>
+	  <!-- S |= t does not suffice here. Here is an example
+	  of a derivation that will go wrong during subject reduction 
+	  if we use only S |= t in this case.
+	  gamma(x) = \/'a'b'c. 'c ! ('a!int x 'b!bool)
+  	     (so t = 'c ! ('a!int x 'b!bool))
+	  S = ['a |-> 'd, 'b |-> 'd, 'c |-> int x bool] -->
 	  <Cst>
 	    <aSubMap/>
 	    <set>

@@ -433,7 +433,9 @@
 		<tvar/>
 	      </unct>
 	    </Subst>
-	    <tvar/>
+	    <unct>
+	      <tvar/>
+	    </unct>
 	  </eq>
 	</tyConc>
       </tyRule>
@@ -460,7 +462,9 @@
 	    </Subst>
 	    <Tceq>
 	      <tvar/>
-	      <ptype dash="'"/>
+	      <minzT>
+		<ptype dash="'"/>
+	      </minzT>
 	    </Tceq>
 	  </eq>
 	</tyConc>
@@ -486,7 +490,9 @@
 	    </Subst>
 	    <ceq>
 	      <tvar/>
-	      <ptype dash="'"/>
+	      <minz>
+		<ptype dash="'"/>
+	      </minz>
 	    </ceq>
 	  </eq>
 	</tyConc>

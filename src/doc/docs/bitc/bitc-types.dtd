@@ -369,6 +369,7 @@
 <!ELEMENT Forall               %anything.group;*>
 <!ELEMENT Exists               %anything.group;*>
 
+<!ELEMENT ST                   >
 
 <!ELEMENT iff                  %anything.group;*>
 <!ELEMENT pred                 %anything.group;*>

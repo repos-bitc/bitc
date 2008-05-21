@@ -1035,6 +1035,13 @@
     <xsl:call-template name="print.children.nbsp"/>  
     <xsl:call-template name="print.space"/>	  
   </xsl:template>
+  
+  <!-- Such That-->
+  <xsl:template match="ST" mode="formula">
+    <xsl:call-template name="print.space"/>	  
+    <xsl:text>|</xsl:text>  
+    <xsl:call-template name="print.space"/>	  
+  </xsl:template>
 
   <!-- iff -->
   <xsl:template match="iff" mode="formula">

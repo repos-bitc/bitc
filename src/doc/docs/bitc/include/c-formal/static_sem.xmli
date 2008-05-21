@@ -2102,6 +2102,22 @@
 	<equation>
 	  <lhs>
 	    <pred name="F">
+	      <set>
+		<solvables/>
+	      </set>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <Unin>
+	      <pred name="F">
+		<solvable/>
+	      </pred>
+	    </Unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
 	      <aSubMap/>
 	    </pred>
 	  </lhs>
@@ -2116,6 +2132,80 @@
 		<range>
 		  <aSubMap/>
 		</range>
+	      </pred>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <unct>
+		<tvar/>
+	      </unct>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <pred name="F">
+	      <tvar/>
+	    </pred>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <Tceq>
+		<tvar/>
+		<type/>
+	      </Tceq>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <pred name="F">
+		<tvar/>
+	      </pred>
+	      <pred name="F">
+		<type/>
+	      </pred>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <ceq>
+		<tvar/>
+		<type/>
+	      </ceq>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <pred name="F">
+		<tvar/>
+	      </pred>
+	      <pred name="F">
+		<type/>
+	      </pred>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <eq>
+		<type num="1"/>
+		<type num="2"/>
+	      </eq>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <pred name="F">
+		<type num="1"/>
+	      </pred>
+	      <pred name="F">
+		<type num="2"/>
 	      </pred>
 	    </unin>
 	  </rhs>
@@ -3074,35 +3164,199 @@
       </VEqns>
     </btypes:TYPE>
   </definition>
+  <definition id="compat-ctset">
+    <title>Compatibility Constraint Set</title>
+    <p>
+      We write
+      <btypes:TYPE>
+	<meta>
+	  <aCtset/>
+	</meta>
+      </btypes:TYPE> if the constraint set
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE>
+    </p>
+    <ol>
+      <li>
+	<p>
+	  Only consists of constraints of the form
+	  <btypes:TYPE>
+	    <collection or="yes">
+	      <unct>
+		<tvar/>
+	      </unct>
+	      <Tceq>
+		<tvar/>
+		<ptype/>
+	      </Tceq>
+	      <ceq>
+		<tvar/>
+		<ptype/>
+	      </ceq>
+	    </collection>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  A type variable 
+	  <btypes:TYPE>
+	    <tvar/>
+	  </btypes:TYPE> appears at most once in 
+	  <btypes:TYPE>
+	    <aCtset/>
+	  </btypes:TYPE> in only one of the above positions.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Forall/>
+	    <in>
+	      <Tceq>
+		<tvar/>
+		<ptype/>
+	      </Tceq>
+	      <aCtset/>
+	    </in>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <eq>
+	      <ptype/>
+	      <minzT>
+		<ptype/>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Forall/>
+	    <in>
+	      <ceq>
+		<tvar/>
+		<ptype/>
+	      </ceq>
+	      <aCtset/>
+	    </in>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <eq>
+	      <ptype/>
+	      <minz>
+		<ptype/>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
+    <p>
+      We write
+      <btypes:TYPE>
+	<eq>
+	  <dom>
+	    <aCtset/>
+	  </dom>
+	  <set>
+	    <grouping>
+	      <tvars/>
+	      <ST/>
+	      <collection or="yes">
+		<in>
+		  <unct>
+		    <tvar/>
+		  </unct>
+		  <aCtset/>
+		</in>
+ 		<in>
+		  <Tceq>
+		    <tvar/>
+		    <ptype/>
+		  </Tceq>
+		  <aCtset/>
+		</in>
+ 		<in>
+		  <ceq>
+		    <tvar/>
+		    <ptype/>
+		  </ceq>
+		  <aCtset/>
+		</in>
+	      </collection>
+	    </grouping>
+	  </set>
+	</eq>
+      </btypes:TYPE>. We write
+      <btypes:TYPE>
+	<eq>
+	  <range>
+	    <aCtset/>
+	  </range>
+	  <set>
+	    <grouping>
+	      <plural>
+		<ptype/>
+	      </plural>
+	      <ST/>
+	      <collection or="yes">
+ 		<in>
+		  <Tceq>
+		    <tvar/>
+		    <ptype/>
+		  </Tceq>
+		  <aCtset/>
+		</in>
+ 		<in>
+		  <ceq>
+		    <tvar/>
+		    <ptype/>
+		  </ceq>
+		  <aCtset/>
+		</in>
+	      </collection>
+	    </grouping>
+	  </set>
+	</eq>
+      </btypes:TYPE>.
+    </p>
+  </definition>
   <definition id="maybe-consistent">
     <title>Consistency of Maybe types</title>
     <p>
-      Let
+      For any constraint set 
       <btypes:TYPE>
 	<aCtset/>
-      </btypes:TYPE> be a set of constraints of the form
+      </btypes:TYPE> such that
       <btypes:TYPE>
-	<collection or="yes">
-	  <unct>
-	    <tvar/>
-	  </unct>
-	  <Tceq>
-	    <tvar/>
-	    <ptype/>
-	  </Tceq>
-	  <ceq>
-	    <tvar/>
-	    <ptype/>
-	  </ceq>
-	</collection>
-      </btypes:TYPE>
-      such that a type variable
+	<meta>
+	  <aCtset/>
+	</meta>
+      </btypes:TYPE>, we write
       <btypes:TYPE>
-	<tvar/>
-      </btypes:TYPE> appears at most once in 
+	<Sat>
+	  <aCtset/>
+	  <type/>
+	</Sat>
+      </btypes:TYPE> to denote that fact that the constraints 
+      embedded in 
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> are consistent with
       <btypes:TYPE>
 	<aCtset/>
-      </btypes:TYPE> in only one of the above positions.
+      </btypes:TYPE>. Similarly for
+      <btypes:TYPE>
+	<Sat>
+	  <aCtset/>
+	  <set>
+	    <solvables/>
+	  </set>
+	</Sat>
+      </btypes:TYPE>.
     </p>
 <!--     <p> -->
 <!--       We write  -->
@@ -3291,7 +3545,7 @@
 	    <grouping>
 	      <Exists/>
 	      <aCtset/>
-	      <text content=" | "/>
+	      <ST/>
 	      <Sat>
 		<aCtset/>
 		<set>
@@ -3349,7 +3603,7 @@
 		</Subst>
 		<ptype dash="'"/>
 	      </eq>
-	      <text content=" | "/>
+	      <ST/>
 	      <eq under="minzT">
 		<ptype dash="'"/>
 		<Subst>
@@ -3387,7 +3641,7 @@
 		</Subst>
 		<Ptype/>
 	      </eq>
-	      <text content=" | "/>
+	      <ST/>
 	      <eq under="minz">
 		<Ptype/>
 		<Subst>
@@ -3573,6 +3827,85 @@
       </li>
       <li>
 	<p>
+	  If
+	  <btypes:TYPE>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables/>
+	    </CST>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables/>
+	    </CST>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <Exists/>
+	    <aCtset/>
+	    <ST/>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables num="b"/>
+	    </CST>
+	  </btypes:TYPE>, 
+	  <btypes:TYPE>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<solvables num="s"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <subeq>
+	      <set>
+		<solvables num="s"/>
+	      </set>
+	      <set>
+		<solvables num="b"/>
+	      </set>
+	    </subeq>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <Exists/>
+	    <supeq>
+	      <aCtset dash="'"/>
+	      <aCtset/>
+	    </supeq>
+	    <ST/>
+	    <Sat>
+	      <aCtset/>
+	      <solvables/>
+	    </Sat>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
 	  <btypes:TYPE>
 	    <CST>
 	      <solvables/>
@@ -3605,6 +3938,70 @@
 	      </spset>
 	    </Sat>
 	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <subeq>
+	      <ftvs>
+		<set>
+		  <solvables/>
+		</set>
+	      </ftvs>
+	      <dom>
+		<aCtset/>
+	      </dom>
+	    </subeq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Sat>
+	      <aCtset/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <eq>
+	      <dom>
+		<aCtset/>
+	      </dom>
+	      <ftvs>
+		<set>
+		  <solvables/>
+		</set>
+	      </ftvs>
+	    </eq>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <eq>
+	      <ftvs>
+		<range>
+		  <aCtset/>
+		</range>
+	      </ftvs>
+	      <ftvs>
+		<set>
+		  <solvables/>
+		</set>
+	      </ftvs>
+	    </eq>
+	  </btypes:TYPE>.
 	</p>
       </li>
     </ol>
@@ -3728,7 +4125,12 @@
 	      <aCtset dash="'"/>
 	      <aCtset/>
 	    </supeq>
-	  </btypes:TYPE>,
+	  </btypes:TYPE> such that
+	  <btypes:TYPE>
+	    <meta>
+	      <aCtset dash="'"/>
+	    </meta>
+	  </btypes:TYPE>, 
 	  <btypes:TYPE>
 	    <Sat>
 	      <aCtset dash="'"/>
@@ -3736,7 +4138,52 @@
 		<solvables/>
 	      </set>
 	    </Sat>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Cst>
+	      <aSubMap/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Cst>
+	  </btypes:TYPE>, then 
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </models>
 	  </btypes:TYPE>
+	</p>
+      </li>      
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Cst>
+	      <aSubMap/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Cst>
+	  </btypes:TYPE>, then 
+	  <btypes:TYPE>
+	    <Cst>
+	      <assume/>
+	      <Subst>
+		<aSubMap/>
+		<spset>
+		  <solvables/>
+		</spset>
+	      </Subst>
+	    </Cst>
+	  </btypes:TYPE>.
 	</p>
       </li>      
     </ol>
@@ -3750,15 +4197,6 @@
       <btypes:TYPE>
 	<defn tag="subst-consistent"/>
       </btypes:TYPE>.
-      Note that the larger constraint set
-      <btypes:TYPE>
-	<aCtset dash="'"/>
-      </btypes:TYPE> must not violate the constraint that type
-      variables are present once in only one form of relation within 
-      <btypes:TYPE>
-	<aCtset dash="'"/>
-      </btypes:TYPE>. We assume that this restriction holds 
-      vacuously henceforth. 
     </p>
   </proof>
   <lemma id="T-msm_eq_ms">
@@ -5349,8 +5787,7 @@
 	<Sat>
 	  <aCtset/>
 	  <set>
-	    <solvables num="1"/>
-	    <solvables num="2"/>
+	    <solvables num="b"/>
 	  </set>
 	</Sat>
       </btypes:TYPE>, 
@@ -5358,10 +5795,19 @@
 	<models name="cst">
 	  <aSubMap/>
 	  <set>
-	    <solvables num="1"/>
-	    <solvables num="2"/>
+	    <solvables num="b"/>
 	  </set>
 	</models>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<subeq>
+	  <set>
+	    <solvables num="s"/>
+	  </set>
+	  <set>
+	    <solvables num="b"/>
+	  </set>
+	</subeq>
       </btypes:TYPE>,
       <btypes:TYPE>
 	<Sat>
@@ -5372,7 +5818,7 @@
 	  <Subst>
 	    <aSubMap/>
 	    <spset>
-	      <solvables num="1"/>
+	      <solvables num="s"/>
 	    </spset>
 	  </Subst>
 	</Sat>
@@ -5384,11 +5830,11 @@
 	      <aSubMap/>
 	    </dom>
 	    <ftvs>
-	      <solvables num="2"/>
+	      <solvables num="b"/>
 	    </ftvs>
 	  </inter>
 	  <ftvs>
-	    <solvables num="1"/>
+	    <solvables num="s"/>
 	  </ftvs>
 	</subeq>
       </btypes:TYPE>
@@ -5402,8 +5848,7 @@
 	  <Subst>
 	    <aSubMap/>
 	    <spset>
-	      <solvables num="1"/>
-	      <solvables num="2"/>
+	      <solvables num="b"/>
 	    </spset>
 	  </Subst>
 	</Sat>

@@ -2965,10 +2965,11 @@
 	  <btypes:TYPE>
 	    <Sjudge>
 	      <assume>
-		<Subst>
-		  <aSubMap/>
+		<subst>
 		  <aCtset/>
-		</Subst>
+		  <tvars name="alpha"/>
+		  <tvars name="beta"/>
+		</subst>
 		<Subst>
 		  <aSubMap/>
 		  <gamma/>
@@ -3006,6 +3007,37 @@
 	  <type/>
 	</TDjudge>
       </btypes:TYPE>.
+      Note that a textual substitution is necessary on the 
+      constraint set 
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE> since
+      <btypes:TYPE>
+	<Subst>
+	  <aSubMap/>
+	  <aCtset/>
+	</Subst>
+      </btypes:TYPE> does not substitute on the variables on the LHS
+      of constraints in 
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE> (see substitution rules in 
+      figure&nbsp;<xref ref="subst_rules"/>).
+      Further, 
+      <btypes:TYPE>
+	<subst>
+	  <aCtset/>
+	  <tvars name="alpha"/>
+	  <tvars name="beta"/>
+	</subst>
+      </btypes:TYPE> subsumes (and is consistent with)
+      <btypes:TYPE>
+	<Subst>
+	  <aSubMap/>
+	  <aCtset/>
+	</Subst>
+      </btypes:TYPE> since we are only substituting 
+      variables for variables.      
     </p>
   </proof>
   <lemma id="Consistency-Propagation-1">
@@ -5174,15 +5206,16 @@
 	      </btypes:TYPE>.
 	      and the desired result
 	      <btypes:TYPE>
-		<TDjudge name="*">
+		<TDjudge cst="yes">
 		  <id name="y"/>
 		  <type/>
 		</TDjudge>
 	      </btypes:TYPE>
 	      is immediate from the assumtion
 	      <btypes:TYPE>
-		<Sjudge name="*">
+		<Sjudge>
 		  <assume>
+		    <aCtset/>
 		    <extend>
 		      <gamma/>
 		      <tqExpr>
@@ -5248,13 +5281,7 @@
 		  </extend>
 		</eq>
 	      </btypes:TYPE>.
-	      By inversion of the 
-	      <btypes:TYPE>
-		<judgeOp name="*"/>
-	      </btypes:TYPE> judgement using
-	      <btypes:TYPE>
-		<defn tag="consistent-typing"/>
-	      </btypes:TYPE>, we have:
+	      In this case, we have
 	    </p>
 	    <ol>
 	      <li>
@@ -5270,21 +5297,20 @@
 			    <type num="v"/>
 			  </TS>
 			</mapsto>
-			<eq>
+			<Cst>
 			  <aSubMap/>
-			  <plural>
-			    <SubMap>
-			      <tvar/>
-			      <type dash="'"/>
-			    </SubMap>
-			  </plural>
-			</eq>
-			<models name="cst">
-			  <assume>
+			  <set>
+			    <type num="v"/>
+			  </set>
+			</Cst>
+			<eq>
+			  <dom>
 			    <aSubMap/>
-			  </assume>
-			  <type num="v"/>
-			</models>
+			  </dom>
+			  <set>
+			    <tvars/>
+			  </set>
+			</eq>
 		      </tyPre>
 		      <tyConc>
 			<Sjudge>
@@ -5308,8 +5334,8 @@
 	      <li>
 		<p>
 		  <btypes:TYPE>
-		    <Cst>
-		      <assume/>
+		    <Sat>
+		      <aCtset/>
 		      <spset>
 			<Sjudge>
 			  <assume>
@@ -5325,52 +5351,77 @@
 			  </tqExpr>
 			</Sjudge>
 		      </spset>
-		    </Cst>
+		    </Sat>
 		  </btypes:TYPE>
 		</p>
 	      </li>
 	      <li>
 		<p>
 		  <btypes:TYPE>
-		    <TDjudge>
+		    <TDjudge cst="yes">
 		      <aVal/>
 		      <type num="v"/>
 		    </TDjudge>
-		  </btypes:TYPE>.
+		  </btypes:TYPE>. That is,
 		</p>
-	      </li>
-	      <li>
-		<p>
-		  <btypes:TYPE>
-		    <Cst>
-		      <assume/>
-		      <spset>
+		<ol>
+		  <li>
+		    <p>
+		      <btypes:TYPE>
 			<TDjudge>
 			  <aVal/>
 			  <type num="v"/>
 			</TDjudge>
-		      </spset>
-		    </Cst>
-		  </btypes:TYPE>.
-		</p>
+		      </btypes:TYPE>
+		    </p>
+		  </li>
+		  <li>
+		    <p>
+		      <btypes:TYPE>
+			<Sat>
+			  <aCtset/>
+			  <spset>
+			    <TDjudge>
+			      <aVal/>
+			      <type num="v"/>
+			    </TDjudge>
+			  </spset>
+			</Sat>
+		      </btypes:TYPE>
+		    </p>
+		  </li>
+		</ol>
 	      </li>
 	    </ol>
 	    <p>
 	      We need to show that 
 	      <btypes:TYPE>
-		<TDjudge name="*">
-		  <aVal/>
-		  <Subst>
-		    <aSubMap/>
-		    <type num="v"/>
-		  </Subst>
-		</TDjudge>
+		<Exists/>
+		<supeq>
+		  <aCtset dash="'"/>
+		  <aCtset/>
+		</supeq>
+		<ST/>
+		<Sjudge>
+		  <assume>
+		    <aCtset dash="'"/>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aVal/>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="v"/>
+		    </Subst>
+		  </tqExpr>
+		</Sjudge>
 	      </btypes:TYPE>.
 	    </p>
 	  </li>
 	  <li>
 	    <p>
-	      We can assume that 
+	      Without loss of generality, we can assume that 
 	    </p>
 	    <ol>
 	      <li>
@@ -5443,6 +5494,364 @@
 	    </p>
 	  </li>
 	  <li>
+	    <p>
+	      Let 
+	      <btypes:TYPE>
+		<eq>
+		  <set>
+		    <tvars name="beta"/>
+		  </set>
+		  <diff>
+		    <ftvs>
+		      <aCtset/>
+		    </ftvs>
+		    <ftvs>
+		      <gamma/>
+		      <store/>
+		      <type num="v"/>
+		    </ftvs>
+		  </diff>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Let
+	      <btypes:TYPE>
+		<eq>
+		  <aSubMap num="a"/>
+		  <plural>
+		    <SubMap>
+		      <tvar name="alpha"/>
+		      <tvar name="gamma"/>
+		    </SubMap>
+		  </plural>
+		</eq>
+	      </btypes:TYPE> and
+	      <btypes:TYPE>
+		<eq>
+		  <aSubMap num="b"/>
+		  <plural>
+		    <SubMap>
+		      <tvar name="beta"/>
+		      <tvar name="delta"/>
+		    </SubMap>
+		  </plural>
+		</eq>
+	      </btypes:TYPE> be renaming substitutions such that 
+	      <btypes:TYPE>
+		<tvars name="gamma"/>
+	      </btypes:TYPE> and
+	      <btypes:TYPE>
+		<tvars name="delta"/>
+	      </btypes:TYPE> are new type variables.
+	      Let
+	      <btypes:TYPE>
+		<eq>
+		  <aSubMap num="ab"/>
+		  <compose>
+		    <aSubMap num="a"/>
+		    <aSubMap num="b"/>
+		  </compose>
+		</eq>
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<eq>
+		  <aCtset num="ab"/>
+		  <subst>
+		    <subst>
+		      <aCtset/>
+		      <tvars name="alpha"/>
+		      <tvars name="gamma"/>
+		    </subst>
+		    <tvars name="beta"/>
+		    <tvars name="delta"/>
+		  </subst>
+		</eq>
+	      </btypes:TYPE> and
+	      <btypes:TYPE>
+		<eq>
+		  <type num="va"/>
+		  <Subst>
+		    <aSubMap num="a"/>
+		    <type num="v"/>
+		  </Subst>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From cases&nbsp;(1.b.iii and 1.e) using
+	      <btypes:TYPE>
+		<lem tag="T-Renaming"/>
+	      </btypes:TYPE>, we obtain
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <aCtset num="ab"/>
+		    <Subst>
+		      <aSubMap num="ab"/>
+		      <gamma/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap num="ab"/>
+		      <store/>
+		    </Subst>
+		  </assume>
+		  <tqExpr>
+		    <aVal/>
+		    <Subst>
+		      <aSubMap num="ab"/>
+		      <type num="v"/>
+		    </Subst>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	      Due to cases&nbsp;(1.c.i, 1.c.ii, and 1.d), 
+	      this is equivalent to
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <aCtset num="ab"/>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aVal/>
+		    <type num="va"/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From case&nbsp;(1.b.i), we have
+	      <btypes:TYPE>
+		<eq>
+		  <dom>
+		    <aSubMap/>
+		  </dom>
+		  <set>
+		    <tvars/>
+		  </set>
+		</eq>
+	      </btypes:TYPE>. That is,
+	      <btypes:TYPE>
+		<eq>
+		  <aSubMap/>
+		  <plural>
+		    <SubMap>
+		      <tvar name="alpha"/>
+		      <type num="s"/>
+		    </SubMap>
+		  </plural>
+		</eq>
+	      </btypes:TYPE> for some 
+	      <btypes:TYPE>
+		<types num="s"/>
+	      </btypes:TYPE>.
+	      Let
+	      <btypes:TYPE>	
+		<eq>
+		  <aSubMap dash="'"/>
+		  <plural>
+		    <SubMap>
+		      <tvar name="gamma"/>
+		      <type num="s"/>
+		    </SubMap>
+		  </plural>
+		</eq>
+	      </btypes:TYPE>.
+	      Since 
+	      <btypes:TYPE>	
+		<tvars name="gamma"/>
+	      </btypes:TYPE> are new variables, we have
+	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  <btypes:TYPE>	
+		    <eq>
+		      <Subst>
+			<aSubMap dash="'"/>
+			<gamma/>
+		      </Subst>
+		      <gamma/>
+		    </eq>
+		  </btypes:TYPE> and
+		  <btypes:TYPE>	
+		    <eq>
+		      <Subst>
+			<aSubMap dash="'"/>
+			<store/>
+		      </Subst>
+		      <store/>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>	
+		    <eq>
+		      <Subst>
+			<aSubMap dash="'"/>
+			<type num="va"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<type num="v"/>
+		      </Subst>
+		      <type/>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	  <li>
+	    <p>
+	      From case&nbsp;(1.b.i) we have
+	      <btypes:TYPE>
+		<Cst>
+		  <aSubMap/>
+		  <set>
+		    <type num="v"/>
+		  </set>
+		</Cst>
+	      </btypes:TYPE>. By renaming variables
+	      <btypes:TYPE>
+		<plural>
+		  <SubMap>
+		    <tvar name="alpha"/>
+		    <tvar name="gamma"/>
+		  </SubMap>
+		</plural>
+	      </btypes:TYPE>, we obtain
+	      <btypes:TYPE>
+		<Cst>
+		  <aSubMap dash="'"/>
+		  <set>
+		    <type num="va"/>
+		  </set>
+		</Cst>
+	      </btypes:TYPE>.
+	      From this, using
+	      <btypes:TYPE>
+		<lem tag="Cst-Weakening"/>
+	      </btypes:TYPE> (weakening), we obtain
+	      <btypes:TYPE>
+		<Cst>
+		  <assume/>
+		  <Subst>
+		    <aSubMap dash="'"/>
+		    <spset>
+		      <type num="va"/>
+		    </spset>
+		  </Subst>
+		</Cst>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From case&nbsp;(1.b.ii) and
+	      <btypes:TYPE>
+		<lem tag="Cst-Weakening"/>
+	      </btypes:TYPE> (weakening), we obtain
+	      <btypes:TYPE>
+		<Sat>
+		  <aCtset/>
+		  <set>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="v"/>
+		    </Subst>
+		  </set>
+		</Sat>
+	      </btypes:TYPE>. Again, by applying the above renaming 
+	      of variables, we obtain
+	      <btypes:TYPE>
+		<Sat>
+		  <aCtset num="ab"/>
+		  <set>
+		    <Subst>
+		      <aSubMap dash="'"/>
+		      <type num="va"/>
+		    </Subst>
+		  </set>
+		</Sat>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Since 
+	      <btypes:TYPE>
+		<subeq>
+		  <set>
+		    <Subst>
+		      <aSubMap dash="'"/>
+		      <type num="va"/>
+		    </Subst>
+		  </set>
+		  <Subst>
+		    <aSubMap dash="'"/>
+		    <spset>
+		      <type num="va"/>
+		    </spset>
+		  </Subst>
+		</subeq>
+	      </btypes:TYPE>, using case&nbsp;(1.i) and
+	      <btypes:TYPE>
+		<lem tag="maybe-cst-properties"/>
+	      </btypes:TYPE> (property-4), we conclude that 
+	      <btypes:TYPE>
+		<Exists/>
+		<supeq>
+		  <aCtset num="ab" dash="'"/>
+		  <aCtset/>
+		</supeq>
+		<ST/>
+		<Sat>
+		  <aCtset num="ab" dash="'"/>
+		  <Subst>
+		    <aSubMap dash="'"/>
+		    <spset>
+		      <type num="va"/>
+		    </spset>
+		  </Subst>
+		</Sat>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Using case&nbsp;(1.g.i), case&nbsp;(1.j) can be written
+	      as
+	      <btypes:TYPE>
+		<Exists/>
+		<supeq>
+		  <aCtset num="ab" dash="'"/>
+		  <aCtset/>
+		</supeq>
+		<ST/>
+		<Sat>
+		  <aCtset num="ab" dash="'"/>
+		  <Subst>
+		    <aSubMap dash="'"/>
+		    <spset>
+		      <type num="va"/>
+		    </spset>
+		  </Subst>
+		</Sat>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <!-- <li>
 	    <p>
 	      Now, we proceed by induction on the structure of 
 	      <btypes:TYPE>
@@ -5974,8 +6383,8 @@
 		  Follows from induction hypothesis, and T-Pair rule.
 		</p>
 	      </li>
-	    </ol>
-	  </li>
+	    </ol> 
+	  </li> -->
 	</ol>
       </li>
       <li>
@@ -8384,7 +8793,7 @@
 		  </Subst>
 		  <ptype num="1"/>
 		</eq>
-		<text content=" | "/>
+                <ST/>
 		<neq>
 		  <ptype num="1"/>
 		  <tvar name="beta"/>
