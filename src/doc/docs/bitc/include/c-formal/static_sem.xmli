@@ -3989,7 +3989,7 @@
 	    </eq>
 	  </btypes:TYPE>, then
 	  <btypes:TYPE>
-	    <eq>
+	    <subeq>
 	      <ftvs>
 		<range>
 		  <aCtset/>
@@ -4000,7 +4000,7 @@
 		  <solvables/>
 		</set>
 	      </ftvs>
-	    </eq>
+	    </subeq>
 	  </btypes:TYPE>.
 	</p>
       </li>
