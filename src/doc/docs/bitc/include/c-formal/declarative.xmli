@@ -6683,46 +6683,65 @@
       <li>
 	<p>
 	  Case T-Lambda: We have
-	  <btypes:TYPE>
-	    <eq>
-	      <aExpr/>
-	      <lambda>
-		<id name="y"/>
-		<aExpr dash="'"/>
-	      </lambda>
-	    </eq>
-	    <text content=", and "/>
-	    <eq>
-	      <type/>
-	      <fn>
-		<type num="1"/>
-		<type num="2"/>
-	      </fn>
-	    </eq>
-	    
-	    <text content=", and "/>
-	    <Sjudge>
-	      <assume>
-		<extend>
-		  <gamma/>
-		  <tqExpr>
-		    <id/>
-		    <aTS/>
-		  </tqExpr>
-		  <tqExpr>
-		    <id name="y"/>
-		    <type num="1"/>
-		  </tqExpr>
-		</extend>
-		<store/>
-	      </assume>
-	      <tqExpr>
-		<aExpr dash="'"/>
-		<type num="2"/>
-	      </tqExpr>
-	    </Sjudge>
-	  </btypes:TYPE>.
 	</p>
+	<btypes:TYPE>
+	  <Hrules>
+	    <tyRule>
+	      <tyPre>
+		<Sjudge>
+		  <assume>
+		    <extend>
+		      <gamma/>
+		      <mapping>
+			<id name="x"/>
+			<TS>
+			  <tvars/>
+			  <type num="v"/>
+			</TS>
+		      </mapping>
+		      <mapping>
+			<id name="y"/>
+			<type num="1"/>
+		      </mapping>
+		    </extend>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr/>
+		    <type num="2"/>
+		  </tqExpr>
+		</Sjudge>
+	      </tyPre>
+	      <tyConc>
+		<Sjudge>
+		  <assume>
+		    <extend>
+		      <gamma/>
+		      <mapping>
+			<id name="x"/>
+			<TS>
+			  <tvars/>
+			  <type num="v"/>
+			</TS>
+		      </mapping>
+		    </extend>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <lambda>
+		      <id/>
+		      <aExpr/>
+		    </lambda>
+		    <fn>
+		      <type num="1"/>
+		      <type num="2"/>
+		    </fn>
+		  </tqExpr>
+		</Sjudge>
+	      </tyConc>
+	    </tyRule>
+	  </Hrules>
+	</btypes:TYPE>
 	<p>
 	  We can assume that
 	  <btypes:TYPE>
@@ -6731,137 +6750,328 @@
 	      <id name="y"/>
 	    </neq>
 	  </btypes:TYPE>.
-	  Since it is clear that the type
-	  <btypes:TYPE>
-	    <type num="1"/>
-	  </btypes:TYPE>
-	  of
-	  <btypes:TYPE>
-	    <id name="y"/>
-	  </btypes:TYPE>
-	  can either use variables already in
-	  <btypes:TYPE>
-	    <gamma/>
-	  </btypes:TYPE>
-	  or fresh type variables, we know that
-	  <btypes:TYPE>
-	    <eq>
-	      <inter>
-		<ftvs>
-		  <extend>
-		    <gamma/>
-		    <tqExpr>
-		      <id name="y"/>
-		      <type num="1"/>
-		    </tqExpr>
-		  </extend>
-		</ftvs>
-		<ftvs>
-		  <aTS/>
-		</ftvs>
-	      </inter>
-	      <Empty/>
-	    </eq>
-	  </btypes:TYPE>.
-	  Thus, by weakening lemma, we have:
-	  <btypes:TYPE>
-	    <Sjudge>
-	      <assume>
-		<extend>
-		  <gamma/>
-		  <tqExpr>
-		    <id name="y"/>
-		    <type num="1"/>
-		  </tqExpr>
-		</extend>
-		<store/>
-	      </assume>
-	      <tqExpr>
-		<aVal/>
-		<GEN>
-		  <type num="v"/>
-		  <aTS/>
-		</GEN>
-	      </tqExpr>
-	    </Sjudge>
-	  </btypes:TYPE>
-	  , and, by induction hypothesis,
-	  <btypes:TYPE>
-	    <Sjudge>
-	      <assume>
-		<extend>
-		  <gamma/>
-		  <tqExpr>
-		    <id name="y"/>
-		    <type num="1"/>
-		  </tqExpr>
-		</extend>
-		<store/>
-	      </assume>
-	      <tqExpr>
-		<subst>
-		  <aExpr dash="'"/>
-		  <id/>
-		  <aVal/>
-		</subst>
-		<type num="2"/>
-	      </tqExpr>
-	    </Sjudge>
-	  </btypes:TYPE>.
-	  Finally, by the T-Lambda rule, we have:
-	  <btypes:TYPE>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <tqExpr>
-		<lambda>
-		  <id name="y"/>
-		  <paren>
-		    <subst>
-		      <aExpr dash="'"/>
-		      <id/>
-		      <aVal/>
-		    </subst>
-		  </paren>
-		</lambda>
-		<fn>
-		  <type num="1"/>
-		  <type num="2"/>
-		</fn>
-	      </tqExpr>
-	    </Sjudge>
-	  </btypes:TYPE>, and thus,
-	  <btypes:TYPE>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <tqExpr>
-		<subst>
-		  <lambda>
-		    <id name="y"/>
-		    <aExpr dash="'"/>
-		  </lambda>
-		  <id/>
-		  <aVal/>
-		</subst>
-		<fn>
-		  <type num="1"/>
-		  <type num="2"/>
-		</fn>
-	      </tqExpr>
-	    </Sjudge>
-	  </btypes:TYPE>, which is the desired result.
+	  Now, the result follows from the induction hypothesis, and 
+	  the T-Lambda rule.
 	</p>
       </li>
       <li>
 	<p>
-	  T-Set case is similar, except that the substitution
-	  cannot happen on the LHS of an assignment, since we do
-	  not perform substitution of mutable values.
+	  Case T-App:  
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      In this case, writing
+	      <btypes:TYPE>
+		<eq>
+		  <gamma dash="'"/>
+		  <extend>
+		    <gamma/>
+		    <mapping>
+		      <id name="x"/>
+		      <TS>
+			<tvars/>
+			<type num="v"/>
+		      </TS>
+		    </mapping>
+		  </extend>
+		</eq>
+	      </btypes:TYPE>, we have:
+	    </p>
+	    <ol>
+	      <li>
+		<btypes:TYPE>
+		  <Hrules>
+		    <tyRule>
+		      <tyPre>
+			<Sjudge>
+			  <assume>
+			    <gamma dash="'"/>
+			    <store/>
+			  </assume>
+			  <tqExpr>
+			    <aExpr num="1"/>
+			    <type num="1"/>
+			  </tqExpr>
+			</Sjudge>
+			<Msub>
+			  <type num="1"/>
+			  <fn>
+			    <type num="a"/>
+			    <type num="r"/>
+			  </fn>
+			</Msub>
+		      </tyPre>
+		      <tyPre>
+			<Sjudge>
+			  <assume>
+			    <gamma dash="'"/>
+			    <store/>
+			  </assume>
+			  <tqExpr>
+			    <aExpr num="2"/>
+			    <type num="2"/>
+			  </tqExpr>
+			</Sjudge>
+			<Msub>
+			  <type num="2"/>
+			  <minz>
+			    <type num="a"/>
+			  </minz>
+			</Msub>
+			<Msub>
+			  <maxz>
+			    <type num="r"/>
+			  </maxz>
+			  <type/>
+			</Msub>
+		      </tyPre>
+		      <tyConc>
+			<Sjudge>
+			  <assume>
+			    <gamma dash="'"/>
+			    <store/>
+			  </assume>
+			  <tqExpr>
+			    <apply>
+			      <aExpr num="1"/>
+			      <aExpr num="2"/>
+			    </apply>
+			    <type/>
+			  </tqExpr>
+			</Sjudge>
+		      </tyConc>
+		    </tyRule>
+		  </Hrules>
+		</btypes:TYPE>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <Sat>
+		      <aCtset/>
+		      <spset>
+			<Sjudge>
+			  <assume>
+			    <gamma dash="'"/>
+			    <store/>
+			  </assume>
+			  <tqExpr>
+			    <apply>
+			      <aExpr num="1"/>
+			      <aExpr num="2"/>
+			    </apply>
+			    <type/>
+			  </tqExpr>
+			</Sjudge>
+		      </spset>
+		    </Sat>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	  <li>
+	    <p>
+	      From case&nbsp;(3.i) and weakening on case&nbsp;(3.ii),
+	      we have
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <aCtset/>
+		    <gamma dash="'"/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr num="1"/>
+		    <type num="1"/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	      Now, by induction hypothesis, we know that 
+	      <btypes:TYPE>
+		<Exists/>
+		<supeq>
+		  <aCtset dash="'"/>
+		  <aCtset/>
+		</supeq>
+		<ST/>
+		<Sjudge>
+		  <assume>
+		    <aCtset dash="'"/>
+ 		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <subst>
+		      <aExpr num="1"/>
+		      <id/>
+		      <aVal/>
+		    </subst>
+		    <type num="1"/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Similarly, we have
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <aCtset/>
+		    <gamma dash="'"/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr num="2"/>
+		    <type num="2"/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	      By 		  
+	      <btypes:TYPE>
+		<lem tag="Cst-Weakening"/>
+	      </btypes:TYPE> (weakening), we obtain
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <aCtset dash="'"/>
+		    <gamma dash="'"/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr num="2"/>
+		    <type num="2"/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	      Again, by induction hypothesis, we know that 
+	      <btypes:TYPE>
+		<Exists/>
+		<supeq>
+		  <aCtset dash="''"/>
+		  <aCtset dash="'"/>
+		</supeq>
+		<ST/>
+		<Sjudge>
+		  <assume>
+		    <aCtset dash="''"/>
+ 		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <subst>
+		      <aExpr num="2"/>
+		      <id/>
+		      <aVal/>
+		    </subst>
+		    <type num="2"/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From case&nbsp;(3.b) and
+	      <btypes:TYPE>
+		<lem tag="Cst-Weakening"/>
+	      </btypes:TYPE> (weakening), we obtain
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <aCtset dash="''"/>
+ 		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <subst>
+		      <aExpr num="1"/>
+		      <id/>
+		      <aVal/>
+		    </subst>
+		    <type num="1"/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Again by weakening wrt case&nbsp;(3.a.ii), we have
+	      <btypes:TYPE>
+		<Sat>
+		  <aCtset dash="''"/>
+		  <set>
+		    <type num="a"/>
+		    <type num="r"/>
+		    <type/>
+		  </set>
+		</Sat>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From cases&nbsp;(3.c and 3.d) and copy-coersion
+	      relations in case&nbsp;(3.a.i), using the T-App rule
+	      we obtain
+	      <btypes:TYPE>
+		<TDjudge>
+		  <apply>
+		    <subst>
+		      <aExpr num="1"/>
+		      <id/>
+		      <aVal/>
+		    </subst>
+		    <subst>
+		      <aExpr num="2"/>
+		      <id/>
+		      <aVal/>
+		    </subst>
+		  </apply>
+		  <type/>
+		</TDjudge>
+	      </btypes:TYPE>.
+	      Using cases&nbsp;(3.c, 3.d and 3.e) and
+	      <btypes:TYPE>
+		<defn tag="constraint-colection-ext"/>
+	      </btypes:TYPE>, we conclude that
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <aCtset dash="''"/>
+ 		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <apply>
+		      <subst>
+			<aExpr num="1"/>
+			<id/>
+			<aVal/>
+		      </subst>
+		      <subst>
+			<aExpr num="2"/>
+			<id/>
+			<aVal/>
+		      </subst>
+		    </apply>
+		    <type/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	</ol>
+      </li>
+      <li>
+	<p>
+	  T-Set case is to T-App, except that the substitution
+	  cannot happen on the LHS of an assignment 
+	  due to asspmption&nbsp;(3).
 	</p>
       </li>
       <li>
