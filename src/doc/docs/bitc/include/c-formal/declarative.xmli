@@ -330,10 +330,10 @@
 	      <type/>
 	    </TDjudge> 
 	    <text content=" such that "/>
-	    <Msub>
+	    <eq under="minz">
 	      <mapsto><store/><hLoc/></mapsto>
 	      <type/>
-	    </Msub>
+	    </eq>
 	  </btypes:TYPE>
 	</p>
       </li>
@@ -352,10 +352,10 @@
 	      <type/>
 	    </TDjudge>
 	    <text content=" such that "/>
-	    <Msub>
+	    <eq under="minz">
 	      <mapsto><store/><sLoc/></mapsto>
 	      <type/>
-	    </Msub>
+	    </eq>
 	  </btypes:TYPE>
 	</p>
       </li>
@@ -401,10 +401,10 @@
 	      <type/>
 	    </TDjudge> 
 	    <text content=" such that "/>
-	    <Msub>
+	    <eq under="minz">
 	      <mapsto><store/><hLoc/></mapsto>
 	      <type/>
-	    </Msub>
+	    </eq>
 	  </btypes:TYPE>
 	</p>
       </li>
@@ -423,10 +423,10 @@
 	      <type/>
 	    </TDjudge>
 	    <text content=" such that "/>
-	    <Msub>
+	    <eq under="minz">
 	      <mapsto><store/><sLoc/></mapsto>
 	      <type/>
-	    </Msub>
+	    </eq>
 	  </btypes:TYPE>
 	</p>
       </li>
@@ -7106,8 +7106,8 @@
       </btypes:TYPE>, then
       <btypes:TYPE>
 	<Sjudge>
-	  <aCtset/>
 	  <assume>
+	    <aCtset/>
 	    <gamma/>
 	    <extend>
 	      <store/>
@@ -7270,8 +7270,8 @@
 <!--       Immediate from the definition of stack and heap typing. -->
 <!--     </p> -->
   <!--   </proof> -->
-  <theorem id="T-preservation">
-    <title>Preservation</title>
+  <theorem id="T-subject-reduction">
+    <title>Subject Reduction</title>
     <p>
       If
       <btypes:TYPE>
@@ -7346,8 +7346,7 @@
 		<heap dash="'"/>
 		<stack dash="'"/>
 	      </plus>
-	    </Sjudge
->
+	    </Sjudge>
 	  </btypes:TYPE>.
 	</p>
       </li>
@@ -7394,7 +7393,7 @@
 		<type dash="'"/>
 	      </Msub>
 	    </Sjudge>
-	  </btypes:TYPE>,
+	  </btypes:TYPE> and
 	  <btypes:TYPE>
 	    <Sjudge name="*">
 	      <assume>
@@ -7407,15 +7406,17 @@
 		<stack dash="'"/>
 	      </plus>
 	    </Sjudge>
-	  </btypes:TYPE>, and 
-	  <!-- This cannot be replaced directly with an Msub at the
+	  </btypes:TYPE> and
+	  <!-- Old: This cannot be replaced directly with an Msub at the
 	  derivation as the type `t' is obtained from a previous
-	  derivation, and can be a mutable one -->
+	  derivation, and can be a mutable one
+	  New: We cannot just have a Msub relationship. See the 
+	  case for E-App rule -->
 	  <btypes:TYPE>
-	    <Msub>
+	    <eq under="minz">
 	      <type/>
 	      <type dash="'"/>
-	    </Msub>
+	    </eq>
 	  </btypes:TYPE>.
 	</p>
       </li>
@@ -7475,13 +7476,6 @@
 	  </Hrules>
 	</btypes:TYPE>
 	<ol>
-	  <li>
-	    <p>
-	      <btypes:TYPE>
-		<levalOp/> 
-	      </btypes:TYPE> None Applicable.
-	    </p>
-	  </li>
 	  <li>
 	    <p>
 	      <btypes:TYPE>
@@ -7546,7 +7540,7 @@
 		<p>
 		  From 
 		  <btypes:TYPE>
-		    <TDjudge name="*">
+		    <TDjudge cst="yes">
 		      <plus>
 			<heap/>
 			<stack/>
@@ -7557,21 +7551,722 @@
 		    <defn tag="stack-heap-typing"/>
 		  </btypes:TYPE> (Stack and Heap Typing), we have
 		  <btypes:TYPE>
-		    <TDjudge Msub="yes" name="*">
+		    <TDjudge cst="yes">
 		      <mapsto>
 			<stack/>
 			<sLoc/>
 		      </mapsto>
-		      <type/>
+		      <type dash="'"/>
 		    </TDjudge>
+		    <ST/>
+		    <eq under="minz">
+		      <mapsto>
+			<stack/>
+			<sLoc/>
+		      </mapsto>
+		      <type dash="'"/>
+		    </eq>
 		  </btypes:TYPE>. 
 		  That is,
 		  <btypes:TYPE>
-		    <TDjudge Msub="yes" name="*">
+		    <TDjudge cst="yes">
 		      <aVal/>
-		      <type/>
+		      <type dash="'"/>
 		    </TDjudge>
+		  </btypes:TYPE>, where
+		  <btypes:TYPE>
+		    <eq under="minz">
+		      <type/>
+		      <type dash="'"/>
+		    </eq>
 		  </btypes:TYPE>. 
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	</ol>
+      </li>
+      <li>
+	<p>
+	  Case T-App:
+	  <btypes:TYPE>
+	    <eq>
+	      <aExpr/>
+	      <apply>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+	      </apply>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+	<btypes:TYPE>
+	  <Hrules>
+	    <tyRule>
+	      <tyPre>
+		<Sjudge>
+		  <assume>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr num="1"/>
+		    <type num="1"/>
+		  </tqExpr>
+		</Sjudge>
+		<Msub>
+		  <type num="1"/>
+		  <fn>
+		    <type num="a"/>
+		    <type num="r"/>
+		  </fn>
+		</Msub>
+	      </tyPre>
+	      <tyPre>
+		<Sjudge>
+		  <assume>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr num="2"/>
+		    <type num="2"/>
+		  </tqExpr>
+		</Sjudge>
+		<Msub>
+		  <type num="2"/>
+		  <minz>
+		    <type num="a"/>
+		  </minz>
+		</Msub>
+		<Msub>
+		  <maxz>
+		    <type num="r"/>
+		  </maxz>
+		  <type/>
+		</Msub>
+	      </tyPre>
+	      <tyConc>
+		<Sjudge>
+		  <assume>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <apply>
+		      <aExpr num="1"/>
+		      <aExpr num="2"/>
+		    </apply>
+		    <type/>
+		  </tqExpr>
+		</Sjudge>
+	      </tyConc>
+	    </tyRule>
+	  </Hrules>
+	</btypes:TYPE>
+	<ol>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<evalOp/> 
+	      </btypes:TYPE> E-App1:
+	    </p>
+	    <btypes:TYPE>
+	      <opRule>
+		<opPre>
+		  <eval>
+		    <opState>
+		      <stack/>
+		      <heap/>            
+		      <aExpr num="1"/>
+		    </opState>
+		    <opState>
+		      <stack dash="'"/>
+		      <heap dash="'"/>
+		      <aExpr num="1" dash="'"/>
+		    </opState>
+		  </eval>
+		</opPre>
+		<opConc>
+		  <eval>
+		    <opState>
+		      <stack/>
+		      <heap/>
+		      <apply>
+			<aExpr num="1"/>
+			<aExpr num="2"/>
+		      </apply>
+		    </opState>
+		    <opState>
+		      <stack dash="'"/>
+		      <heap dash="'"/>
+		      <apply>
+			<aExpr num="1" dash="'"/>
+			<aExpr num="2"/>
+		      </apply>
+		    </opState>
+		  </eval>
+		</opConc>
+	      </opRule>
+	    </btypes:TYPE>
+	    <ol>
+	      <li>
+		<p>
+		  By using
+		  <btypes:TYPE>
+		    <lem tag="Cst-Weakening"/>
+		  </btypes:TYPE> (weakening) on the assumptions of
+		  T-App rule, we obtain
+		  <btypes:TYPE>
+		    <TDjudge cst="yes">
+		      <aExpr num="1"/>
+		      <type num="1"/>
+		    </TDjudge>
+		  </btypes:TYPE>.
+		  By induction hypothesis, we conclude that 
+		  <btypes:TYPE>
+		    <Exists/>
+		    <supeq>
+		      <store dash="'"/>
+		      <store/>
+		    </supeq>
+		  </btypes:TYPE> and
+		  <btypes:TYPE>
+		    <supeq>
+		      <aCtset dash="'"/>
+		      <aCtset/>
+		    </supeq>
+		  </btypes:TYPE> such that
+		  <btypes:TYPE>
+		    <Sjudge>
+		      <assume>
+			<aCtset dash="'"/>
+			<gamma/>
+			<store dash="'"/>
+		      </assume>
+		      <tqExpr>
+			<aExpr num="1"/>
+			<type num="1" dash="'"/>
+		      </tqExpr>
+		    </Sjudge>
+		  </btypes:TYPE> and
+		  <btypes:TYPE>
+		    <Sjudge>
+		      <assume>
+			<aCtset dash="'"/>
+			<gamma/>
+			<store dash="'"/>
+		      </assume>
+		      <plus>
+			<heap dash="'"/>
+			<stack dash="'"/>
+		      </plus>
+		    </Sjudge>
+		  </btypes:TYPE> and
+		  <btypes:TYPE>
+		    <eq under="minz">
+		      <type num="1"/>
+		      <type num="1" dash="'"/>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From case&nbsp;(3), we have
+		  <btypes:TYPE>
+		    <Msub>
+		      <type num="1"/>
+		      <fn>
+			<type num="a"/>
+			<type num="r"/>
+		      </fn>
+		    </Msub>
+		  </btypes:TYPE>.
+		  From case&nbsp;(3.a.i) we have
+		  <btypes:TYPE>
+		    <eq under="minz">
+		      <type num="1"/>
+		      <type num="1" dash="'"/>
+		    </eq>
+		  </btypes:TYPE>.
+		  Since
+		  <btypes:TYPE>
+		    <eq>
+		      <fn>
+			<type num="a"/>
+			<type num="r"/>
+		      </fn>
+		      <minz>
+			<fn>
+			  <type num="a"/>
+			  <type num="r"/>
+			</fn>
+		      </minz>
+		    </eq>
+		  </btypes:TYPE>, using 
+		  <btypes:TYPE>
+		    <lem tag="T-Subtype-properties"/>
+		  </btypes:TYPE>, we conclude that
+		  <btypes:TYPE>
+		    <Msub>
+		      <type num="1" dash="'"/>
+		      <fn>
+			<type num="a"/>
+			<type num="r"/>
+		      </fn>
+		    </Msub>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  Using weakening lemmas
+		  <btypes:TYPE>
+		    <lem tag="T-Weakening"/>
+		  </btypes:TYPE> and
+		  <btypes:TYPE>
+		    <lem tag="Cst-Weakening"/>
+		  </btypes:TYPE>, we obtain
+		  <btypes:TYPE>
+		    <Sjudge>
+		      <assume>
+			<aCtset dash="'"/>
+			<gamma/>
+			<store dash="'"/>
+		      </assume>
+		      <tqExpr>
+			<aExpr num="2"/>
+			<type num="2"/>
+		      </tqExpr>
+		    </Sjudge>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From case&nbsp;(3), we already have
+		  <btypes:TYPE>
+		    <Msub>
+		      <type num="2"/>
+		      <minz>
+			<type num="a"/>
+		      </minz>
+		    </Msub>
+		  </btypes:TYPE> and
+		  <btypes:TYPE>
+		    <Msub>
+		      <maxz>
+			<type num="r"/>
+		      </maxz>
+		      <type/>
+		    </Msub>
+		  </btypes:TYPE>. Clearly, these types are consistent
+		  with respect to the weakened constraints set
+		  <btypes:TYPE>
+		    <aCtset dash="'"/>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  Now, using the T-App rule and 
+		  <btypes:TYPE>
+		    <defn tag="constraint-colection-ext"/>
+		  </btypes:TYPE>, 
+		  we obtain
+		  <btypes:TYPE>
+		    <Sjudge>
+		      <assume>
+			<aCtset dash="'"/>
+			<gamma/>
+			<store dash="'"/>
+		      </assume>
+		      <tqExpr>
+			<apply>
+			  <aExpr num="1" dash="'"/>
+			  <aExpr num="2"/>
+			</apply>
+			<type/>
+		      </tqExpr>
+		    </Sjudge>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<evalOp/> 
+	      </btypes:TYPE> E-App2:
+	    </p>
+	    <btypes:TYPE>
+	      <opRule>
+		<opPre>
+		  <eval>
+		    <opState>
+		      <stack/>
+		      <heap/>            
+		      <aExpr num="2"/>
+		    </opState>
+		    <opState>
+		      <stack dash="'"/>
+		      <heap dash="'"/>
+		      <aExpr num="2" dash="'"/>
+		    </opState>
+		  </eval>
+		</opPre>
+		<opConc>
+		  <eval>
+		    <opState>
+		      <stack/>
+		      <heap/>
+		      <apply>
+			<aVal num="1"/>
+			<aExpr num="2"/>
+		      </apply>
+		    </opState>
+		    <opState>
+		      <stack dash="'"/>
+		      <heap dash="'"/>
+		      <apply>
+			<aVal num="1"/>
+			<aExpr num="2" dash="'"/>
+		      </apply>
+		    </opState>
+		  </eval>
+		</opConc>
+	      </opRule>
+	    </btypes:TYPE>
+	    <p>
+	      Similar to E-App1.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<evalOp/> 
+	      </btypes:TYPE> E-App:
+	    </p>
+	    <btypes:TYPE>
+	      <opRule>
+		<opPre>
+		  <notin>
+		    <sLoc/>
+		    <dom>
+		      <stack/>
+		    </dom>
+		  </notin>
+		</opPre>
+		<opConc>
+		  <eval>
+		    <opState>
+		      <stack/>
+		      <heap/>
+		      <apply>
+			<lambda>
+			  <id/>
+			  <aExpr num="x"/>
+			</lambda>
+			<aVal/>
+		      </apply>
+		    </opState>
+		    <opState>
+		      <extend>
+			<stack/>
+			<mapping>
+			  <sLoc/>
+			  <aVal/>
+			</mapping>  
+		      </extend>            
+		      <heap/>
+		      <subst>
+			<aExpr num="x"/>
+			<id/>
+			<sLoc/>
+		      </subst>
+		    </opState>
+		  </eval>
+		</opConc>
+	      </opRule>
+	    </btypes:TYPE>
+	    <ol>
+	      <li>
+		<p>
+		  Re-writing case&nbsp;(3) for
+		  <btypes:TYPE>
+		    <eq>
+		      <aExpr num="1"/>
+		      <lambda>
+			<id/>
+			<aExpr num="x"/>
+		      </lambda>
+		    </eq>
+		  </btypes:TYPE> and
+		  <btypes:TYPE>
+		    <eq>
+		      <aExpr num="2"/>
+		      <aVal/>
+		    </eq>
+		  </btypes:TYPE> and using 
+		  <btypes:TYPE>
+		    <lem tag="T-inversion"/>
+		  </btypes:TYPE> (inversion of typing), we have:
+		</p>
+		<btypes:TYPE>
+		  <Hrules>
+		    <tyRule>
+		      <tyPre>
+			<tyRule>
+			  <tyPre>
+			    <Sjudge>
+			      <assume>
+				<extend>
+				  <gamma/>
+				  <mapping>
+				    <id/>
+				    <type num="a"/>
+				  </mapping>
+				</extend>
+				<store/>
+			      </assume>
+			      <tqExpr>
+				<aExpr num="x"/>
+				<type num="r"/>
+			      </tqExpr>
+			    </Sjudge>
+			  </tyPre>
+			  <tyConc>
+			    <TDjudge>
+			      <lambda>
+				<id/>
+				<aExpr num="x"/>
+			      </lambda>
+			      <fn>
+				<type num="a"/>
+				<type num="r"/>
+			      </fn>
+			    </TDjudge>
+			  </tyConc>
+			</tyRule>
+			<TDjudge>
+			  <aVal/>
+			  <type num="2"/>
+			</TDjudge>
+		      </tyPre>
+		      <tyPre>
+			<Msub>
+			  <type num="1"/>
+			  <fn>
+			    <type num="a"/>
+			    <type num="r"/>
+			  </fn>
+			</Msub>
+			<Msub>
+			  <type num="2"/>
+			  <minz>
+			    <type num="a"/>
+			  </minz>
+			</Msub>
+			<Msub>
+			  <maxz>
+			    <type num="r"/>
+			  </maxz>
+			  <type/>
+			</Msub>
+		      </tyPre>
+		      <tyConc>
+			<Sjudge>
+			  <assume>
+			    <gamma/>
+			    <store/>
+			  </assume>
+			  <tqExpr>
+			    <apply>
+			      <lambda>
+				<id/>
+				<aExpr num="x"/>
+			      </lambda>
+			      <aVal/>
+			    </apply>
+			    <type/>
+			  </tqExpr>
+			</Sjudge>
+		      </tyConc>
+		    </tyRule>
+		  </Hrules>
+		</btypes:TYPE>
+		<p>
+		  We also have
+		  <btypes:TYPE>
+		    <Sat>
+		      <aCtset/>
+		      <Sjudge>
+			<assume>
+			  <gamma/>
+			  <store/>
+			</assume>
+			<tqExpr>
+			  <apply>
+			    <lambda>
+			      <id/>
+			      <aExpr num="x"/>
+			    </lambda>
+			    <aVal/>
+			  </apply>
+			  <type/>
+			</tqExpr>
+		      </Sjudge>
+		    </Sat>
+		  </btypes:TYPE>.		  
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From case&nbsp;(3.c.i), using weakening, we obtain
+		  <btypes:TYPE>
+		    <Sjudge>
+		      <assume>
+			<aCtset/>
+			<extend>
+			  <gamma/>
+			  <mapping>
+			    <id/>
+			    <type num="a"/>
+			  </mapping>
+			</extend>
+			<store/>
+		      </assume>
+		      <tqExpr>
+			<aExpr num="x"/>
+			<type num="r"/>
+		      </tqExpr>
+		    </Sjudge>
+		  </btypes:TYPE>
+		  Now, using 
+		  <btypes:TYPE>
+		    <lem tag="T-LSubstitution"/>
+		  </btypes:TYPE> (location substitution), we obtain
+		  <btypes:TYPE>
+		    <Sjudge>
+		      <assume>
+			<aCtset/>
+			<gamma/>
+			<extend>
+			  <store/>
+			  <mapping>
+			    <sLoc/>
+			    <type num="a"/>
+			  </mapping>
+			</extend>
+		      </assume>
+		      <tqExpr>
+			<subst>
+			  <aExpr num="x"/>
+			  <id/>
+			  <sLoc/>
+			</subst>
+			<type num="r"/>
+		      </tqExpr>
+		    </Sjudge>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From 
+		  <btypes:TYPE>
+		    <Msub>
+		      <maxz>
+			<type num="r"/>
+		      </maxz>
+		      <type/>
+		    </Msub>
+		  </btypes:TYPE>, using
+		  <btypes:TYPE>
+		    <lem tag="T-Subtype-properties"/>
+		  </btypes:TYPE>, we conclude that
+		  <btypes:TYPE>
+		    <eq under="minz">
+		      <type num="r"/>
+		      <type/>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  We have
+		  <btypes:TYPE>
+		    <Sjudge>
+		      <assume>
+			<aCtset/>
+			<gamma/>
+			<store/>
+		      </assume>
+		      <tqExpr>
+			<aVal/>
+			<type num="2"/>
+		      </tqExpr>
+		    </Sjudge>
+		  </btypes:TYPE>.
+		  From
+		  <btypes:TYPE>
+		    <Msub>
+		      <type num="2"/>
+		      <minz>
+			<type num="a"/>
+		      </minz>
+		    </Msub>
+		  </btypes:TYPE>, we obtain
+		  <btypes:TYPE>
+		    <eq under="minz">
+		      <type num="a"/>
+		      <type num="2"/>
+		    </eq>
+		  </btypes:TYPE>.
+		  Using these facts along with the assumption
+		  <btypes:TYPE>
+		    <Sjudge>
+		      <assume>
+			<aCtset/>
+			<gamma/>
+			<store/>
+		      </assume>
+		      <plus>
+			<heap/>
+			<stack/>
+		      </plus>
+		    </Sjudge>
+		  </btypes:TYPE> and
+		  <btypes:TYPE>
+		    <defn tag="stack-heap-typing"/>
+		  </btypes:TYPE>, we conclude that
+		  <btypes:TYPE>
+		    <Sjudge>
+		      <assume>
+			<aCtset/>
+			<gamma/>
+			<extend>
+			  <store/>
+			  <mapping>
+			    <sLoc/>
+			    <type num="a"/>
+			  </mapping>
+			</extend>
+		      </assume>
+		      <plus>
+			<heap/>
+			<extend>
+			  <stack/>
+			  <mapping>
+			    <sLoc/>
+			    <aVal/>
+			  </mapping>  
+			</extend>            
+		      </plus>
+		    </Sjudge>
+		  </btypes:TYPE>		  
 		</p>
 	      </li>
 	    </ol>
@@ -8132,8 +8827,8 @@
 <!--       </li> -->
     </ol>
   </proof>
-  <lemma id="T-preservation-cor">
-    <title>Corollary to Preservation</title>
+  <theorem id="T-preservation">
+    <title>Preservation</title>
     <p>
       If
       <btypes:TYPE>
@@ -8262,7 +8957,7 @@
 	</p>
       </li>
     </ol>
-  </lemma>
+  </theorem>
   <proof>
     <p>
       Using 
@@ -8390,7 +9085,7 @@
       </btypes:TYPE>, proof is immediate. Otherwise, from
       Lemma&nbsp;<xref ref="T-progress"/> (Progress),
       we know that we can take at least one step forward. Further,
-      from Lemma&nbsp;<xref ref="T-preservation-cor"/> (Preservation),
+      from Lemma&nbsp;<xref ref="T-preservation"/> (Preservation),
       we know that a (left/right) execution of a well
       typed expression in with respect to a well typed stack and heap
       will always result in another well typed expression, stack
