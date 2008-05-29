@@ -7494,16 +7494,26 @@
 				  <gamma/>
 				  <mapping>
 				    <id/>
-				    <type num="a"/>
+				    <type num="a" dash="'"/>
 				  </mapping>
 				</extend>
 				<store/>
 			      </assume>
 			      <tqExpr>
 				<aExpr num="x"/>
-				<type num="r"/>
+				<type num="r" dash="'"/>
 			      </tqExpr>
 			    </Sjudge>
+			  </tyPre>
+			  <tyPre>
+			    <eq under="minz">
+			      <type num="a"/>
+			      <type num="a" dash="'"/>
+			    </eq>
+			    <eq under="minz">
+			      <type num="r"/>
+			      <type num="r" dash="'"/>
+			    </eq>
 			  </tyPre>
 			  <tyConc>
 			    <TDjudge>
@@ -7601,18 +7611,22 @@
 			  <gamma/>
 			  <mapping>
 			    <id/>
-			    <type num="a"/>
+			    <type num="a" dash="'"/>
 			  </mapping>
 			</extend>
 			<store/>
 		      </assume>
 		      <tqExpr>
 			<aExpr num="x"/>
-			<type num="r"/>
+			<type num="r" dash="'"/>
 		      </tqExpr>
 		    </Sjudge>
 		  </btypes:TYPE>
-		  Now, using 
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  Using case&nbsp;(3.c.ii) and 
 		  <btypes:TYPE>
 		    <lem tag="T-LSubstitution"/>
 		  </btypes:TYPE> (location substitution), we obtain
@@ -7625,7 +7639,7 @@
 			  <store/>
 			  <mapping>
 			    <sLoc/>
-			    <type num="a"/>
+			    <type num="a" dash="'"/>
 			  </mapping>
 			</extend>
 		      </assume>
@@ -7635,7 +7649,7 @@
 			  <id/>
 			  <sLoc/>
 			</subst>
-			<type num="r"/>
+			<type num="r" dash="'"/>
 		      </tqExpr>
 		    </Sjudge>
 		  </btypes:TYPE>
@@ -7658,6 +7672,20 @@
 		  <btypes:TYPE>
 		    <eq under="minz">
 		      <type num="r"/>
+		      <type/>
+		    </eq>
+		  </btypes:TYPE>.
+		  We already have
+		  <btypes:TYPE>
+		    <eq under="minz">
+		      <type num="r"/>
+		      <type num="r" dash="'"/>
+		    </eq>
+		  </btypes:TYPE>.
+		  Therefore, we conclude that
+		  <btypes:TYPE>
+		    <eq under="minz">
+		      <type num="r" dash="'"/>
 		      <type/>
 		    </eq>
 		  </btypes:TYPE>.
@@ -7694,6 +7722,20 @@
 		      <type num="2"/>
 		    </eq>
 		  </btypes:TYPE>.
+		  From case&nbsp;(3.c.i), we have
+		  <btypes:TYPE>
+		    <eq under="minz">
+		      <type num="a"/>
+		      <type num="a" dash="'"/>
+		    </eq>
+		  </btypes:TYPE>.
+		  Therefore, we obtain
+		  <btypes:TYPE>
+		    <eq under="minz">
+		      <type num="a" dash="'"/>
+		      <type num="2"/>
+		    </eq>
+		  </btypes:TYPE>.
 		  Using these facts along with the assumption
 		  <btypes:TYPE>
 		    <Sjudge>
@@ -7720,7 +7762,7 @@
 			  <store/>
 			  <mapping>
 			    <sLoc/>
-			    <type num="a"/>
+			    <type num="a" dash="'"/>
 			  </mapping>
 			</extend>
 		      </assume>
@@ -7735,7 +7777,7 @@
 			</extend>            
 		      </plus>
 		    </Sjudge>
-		  </btypes:TYPE>		  
+		  </btypes:TYPE>.
 		</p>
 	      </li>
 	    </ol>
