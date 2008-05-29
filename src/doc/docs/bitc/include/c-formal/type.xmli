@@ -109,46 +109,6 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="T-Dup">
-	<tyPre>
-	  <TDjudge Msub="yes">
-	    <aExpr/>
-	    <type/>
-	  </TDjudge>
-	  <Msub>
-	    <type dash="'"/>
-	    <type/>
-	  </Msub>
-	</tyPre>
-	<tyConc>
-	  <TDjudge>
-	    <dup>
-	      <aExpr/>
-	    </dup>
-	    <ref>
-	      <type dash="'"/>
-	    </ref>
-	  </TDjudge>
-	</tyConc>
-      </tyRule>
-      <tyRule name="T-Deref">
-	<tyPre>
-	  <TDjudge Msub="yes">
-	    <aExpr/>
-	    <ref>
-	      <type/>
-	    </ref>
-	  </TDjudge>
-	</tyPre>
-	<tyConc>
-	  <TDjudge>
-	    <deref>
-	      <aExpr/>
-	    </deref>
-	    <type/>
-	  </TDjudge>
-	</tyConc>
-      </tyRule>
       <tyRule name="T-Lambda">
 	<tyPre>
 	  <Sjudge>
@@ -167,6 +127,14 @@
 	      <type num="2"/>
 	    </tqExpr>
 	  </Sjudge>
+	  <eq under="minz">
+	    <type num="1"/>
+	    <type num="1" dash="'"/>
+	  </eq>
+	  <eq under="minz">
+	    <type num="2"/>
+	    <type num="2" dash="'"/>
+	  </eq>
 	</tyPre>
 	<tyConc>
 	  <TDjudge>
@@ -175,8 +143,8 @@
 	      <aExpr/>
 	    </lambda>
 	    <fn>
-	      <type num="1"/>
-	      <type num="2"/>
+	      <type num="1" dash="'"/>
+	      <type num="2" dash="'"/>
 	    </fn>
 	  </TDjudge>
 	</tyConc>
@@ -320,10 +288,8 @@
 	    <aExpr/>
 	    <type/>
 	  </TDjudge>
-	  <eq>
-	    <minzT>
-	      <type/>
-	    </minzT>
+	  <eq under="minzT">
+	    <type/>
 	    <pair>
 	      <type num="1"/>
 	      <type num="2"/>
@@ -345,10 +311,8 @@
 	    <aExpr/>
 	    <type/>
 	  </TDjudge>
-	  <eq>
-	    <minzT>
-	      <type/>
-	    </minzT>
+	  <eq under="minzT">
+	    <type/>
 	    <pair>
 	      <type num="1"/>
 	      <type num="2"/>
@@ -364,6 +328,48 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
+      <tyRule name="T-Dup">
+	<tyPre>
+	  <TDjudge Msub="yes">
+	    <aExpr/>
+	    <type/>
+	  </TDjudge>
+	  <Msub>
+	    <type dash="'"/>
+	    <type/>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <TDjudge>
+	    <dup>
+	      <aExpr/>
+	    </dup>
+	    <ref>
+	      <type dash="'"/>
+	    </ref>
+	  </TDjudge>
+	</tyConc>
+      </tyRule>
+      <tyRule name="T-Deref">
+	<tyPre>
+	  <TDjudge Msub="yes">
+	    <aExpr/>
+	    <ref>
+	      <type/>
+	    </ref>
+	  </TDjudge>
+	</tyPre>
+	<tyConc>
+	  <TDjudge>
+	    <deref>
+	      <aExpr/>
+	    </deref>
+	    <type/>
+	  </TDjudge>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="1">
       <tyRule name="T-Let-M">
 	<tyPre>
 	  <TDjudge Msub="yes">
@@ -374,6 +380,8 @@
 	    <type/>
 	    <type num="1"/>
 	  </Msub>
+	</tyPre>
+	<tyPre>
 	  <Sjudge>
 	    <assume>
 	      <extend>
@@ -404,14 +412,17 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
-    </Hrules>
-    <Hrules rowsep="4pt" colsep="1">
       <tyRule name="T-Let-P">
 	<tyPre>
 	  <TDjudge Msub="yes">
 	    <vExp/>
 	    <type/>
 	  </TDjudge>
+	  <!-- The immut() restriction is very conservative.
+          For example, the following expression cannot be typed:
+	  p:'a!'b |- letP q = p 
+	  However, all such expressions can be typed as a letM, 
+	  so we lose no expressiveness. -->
 	  <pred name="Immut">
 	    <type/>
 	  </pred>
@@ -429,6 +440,8 @@
 	      </ftvs>
 	    </diff>
 	  </eq>
+	</tyPre>
+	<tyPre>
 	  <Sjudge>
 	    <assume>
 	      <extend>

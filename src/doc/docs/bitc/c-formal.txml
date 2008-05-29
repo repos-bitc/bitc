@@ -71,7 +71,7 @@
   <xi:include href="include/c-formal/subtype.xmli"/>
   <xi:include href="include/c-formal/type.xmli"/>
   <xi:include href="include/c-formal/declarative.xmli"/>
-  <xi:include href="include/c-formal/inter.xmli"/>
+  <!-- <xi:include href="include/c-formal/inter.xmli"/> -->
   <xi:include href="include/c-formal/infer.xmli"/>
   <xi:include href="include/c-formal/unify.xmli"/>
   <xi:include href="include/c-formal/equational.xmli"/>

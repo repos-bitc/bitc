@@ -147,8 +147,8 @@
 		  <aExpr/>
 		</lambda>
 		<fn>
-		  <type num="1"/>
-		  <type num="2"/>
+		  <type num="1" dash="'"/>
+		  <type num="2" dash="'"/>
 		</fn>
 	      </TDjudge>
 	    </spset>
@@ -174,6 +174,17 @@
 	    </spset>
 	  </rhs>
 	</equation>
+	<eqn-cnt>
+	  <rhs>
+	    <unin>
+	      <nothing/>
+	      <spset>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </spset>
+	    </unin>
+	  </rhs>
+	</eqn-cnt>
 	<equation>
 	  <lhs>
 	    <spset>
@@ -613,23 +624,33 @@
 		<type num="2" dash="'"/>
 	      </fn>
 	    </eq>
-	    <text content=", and "/>
+	    <text content=", such that "/>
 	    <Sjudge>
 	      <assume>
 		<extend>
 		  <gamma/>
 		  <mapping>
 		    <id/>
-		    <type num="1" dash="'"/>
+		    <type num="1"/>
 		  </mapping>
 		</extend>
 		<store/>
 	      </assume>
 	      <tqExpr>
 		<aExpr/>
-		<type num="2" dash="'"/>
+		<type num="2"/>
 	      </tqExpr>
 	    </Sjudge>
+	    <text content=" and "/>
+	    <eq under="minz">
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </eq>
+	    <text content=" and "/>
+	    <eq under="minz">
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </eq>
 	    <text content="."/>
 	  </btypes:TYPE>
 	</p>
@@ -2301,595 +2322,6 @@
       </btypes:TYPE>.
     </p>
   </proof>
-<!--   <proof> -->
-<!--     <p> -->
-<!--       By induction on the derivation of  -->
-<!--       <btypes:TYPE> -->
-<!-- 	<Msub> -->
-<!-- 	  <type num="1"/> -->
-<!-- 	  <type num="2"/> -->
-<!-- 	</Msub> -->
-<!--       </btypes:TYPE>. We give the proof for the first property only, -->
-<!--       the second property is similarly proved. -->
-<!--     </p> -->
-<!--     <ol> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case S-Refl is trivial. Cases S-Trans follows from induction -->
-<!-- 	  hypothesis. -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case S-Fn: Here,  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <type num="1"/> -->
-<!-- 	      <fn> -->
-<!-- 		<type num="a"/> -->
-<!-- 		<type num="r"/> -->
-<!-- 	      </fn> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE> and -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <type num="2"/> -->
-<!-- 	      <fn> -->
-<!-- 		<type num="a" dash="'"/> -->
-<!-- 		<type num="r" dash="'"/> -->
-<!-- 	      </fn> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE>, and we have -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Msub> -->
-<!-- 	      <fn> -->
-<!-- 		<type num="a"/> -->
-<!-- 		<type num="r"/> -->
-<!-- 	      </fn> -->
-<!-- 	      <fn> -->
-<!-- 		<type num="a" dash="'"/> -->
-<!-- 		<type num="r" dash="'"/> -->
-<!-- 	      </fn> -->
-<!-- 	    </Msub> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	</p> -->
-<!-- 	<ol> -->
-<!-- 	  <li> -->
-<!-- 	    <p> -->
-<!-- 	      From the assumptions of this derivation of -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<Msub> -->
-<!-- 		  <fn> -->
-<!-- 		    <type num="a"/> -->
-<!-- 		    <type num="r"/> -->
-<!-- 		  </fn> -->
-<!-- 		  <fn> -->
-<!-- 		    <type num="a" dash="'"/> -->
-<!-- 		    <type num="r" dash="'"/> -->
-<!-- 		  </fn> -->
-<!-- 		</Msub> -->
-<!-- 	      </btypes:TYPE>, we have -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<eq> -->
-<!-- 		  <minz> -->
-<!-- 		    <type num="a"/> -->
-<!-- 		  </minz> -->
-<!-- 		  <minz> -->
-<!-- 		    <type num="a" dash="'"/> -->
-<!-- 		  </minz> -->
-<!-- 		</eq> -->
-<!-- 	      </btypes:TYPE>, and -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<eq> -->
-<!-- 		  <maxz> -->
-<!-- 		    <type num="r"/> -->
-<!-- 		  </maxz> -->
-<!-- 		  <maxz> -->
-<!-- 		    <type num="r" dash="'"/> -->
-<!-- 		  </maxz> -->
-<!-- 		</eq> -->
-<!-- 	      </btypes:TYPE>. -->
-<!-- 	    </p> -->
-<!-- 	  </li> -->
-<!-- 	  <li> -->
-<!-- 	    <p> -->
-<!-- 	      Therefore, we must have -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<eq> -->
-<!-- 		  <Subst> -->
-<!-- 		    <aSubMap/> -->
-<!-- 		    <minz> -->
-<!-- 		      <type num="a"/> -->
-<!-- 		    </minz> -->
-<!-- 		  </Subst> -->
-<!-- 		  <Subst> -->
-<!-- 		    <aSubMap/> -->
-<!-- 		    <minz> -->
-<!-- 		      <type num="a" dash="'"/> -->
-<!-- 		    </minz> -->
-<!-- 		  </Subst> -->
-<!-- 		</eq> -->
-<!-- 	      </btypes:TYPE>, and -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<eq> -->
-<!-- 		  <Subst> -->
-<!-- 		    <aSubMap/> -->
-<!-- 		    <maxz> -->
-<!-- 		      <type num="r"/> -->
-<!-- 		    </maxz> -->
-<!-- 		  </Subst> -->
-<!-- 		  <Subst> -->
-<!-- 		    <aSubMap/> -->
-<!-- 		    <maxz> -->
-<!-- 		      <type num="r" dash="'"/> -->
-<!-- 		    </maxz> -->
-<!-- 		  </Subst> -->
-<!-- 		</eq> -->
-<!-- 	      </btypes:TYPE>. -->
-<!-- 	    </p> -->
-<!-- 	  </li> -->
-<!-- 	  <li> -->
-<!-- 	    <p> -->
-<!-- 	      Further, we can write: -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<eq> -->
-<!-- 		  <minz> -->
-<!-- 		    <Subst> -->
-<!-- 		      <aSubMap/> -->
-<!-- 		      <minz> -->
-<!-- 			<type num="a"/> -->
-<!-- 		      </minz> -->
-<!-- 		    </Subst> -->
-<!-- 		  </minz> -->
-<!-- 		  <minz> -->
-<!-- 		    <Subst> -->
-<!-- 		      <aSubMap/> -->
-<!-- 		      <minz> -->
-<!-- 			<type num="a" dash="'"/> -->
-<!-- 		      </minz> -->
-<!-- 		    </Subst> -->
-<!-- 		  </minz> -->
-<!-- 		</eq> -->
-<!-- 	      </btypes:TYPE>, and -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<eq> -->
-<!-- 		  <maxz> -->
-<!-- 		    <Subst> -->
-<!-- 		      <aSubMap/> -->
-<!-- 		      <maxz> -->
-<!-- 			<type num="r"/> -->
-<!-- 		      </maxz> -->
-<!-- 		    </Subst> -->
-<!-- 		  </maxz> -->
-<!-- 		  <maxz> -->
-<!-- 		    <Subst> -->
-<!-- 		      <aSubMap/> -->
-<!-- 		      <maxz> -->
-<!-- 			<type num="r" dash="'"/> -->
-<!-- 		      </maxz> -->
-<!-- 		    </Subst> -->
-<!-- 		  </maxz> -->
-<!-- 		</eq> -->
-<!-- 	      </btypes:TYPE>. -->
-<!-- 	    </p> -->
-<!-- 	  </li> -->
-<!-- 	  <li> -->
-<!-- 	    <p> -->
-<!-- 	      From case&nbsp;(2.c) and  -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<lem tag="T-msm_eq_ms"/> -->
-<!-- 	      </btypes:TYPE>, we can write: -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<eq> -->
-<!-- 		  <minz> -->
-<!-- 		    <Subst> -->
-<!-- 		      <aSubMap/> -->
-<!-- 		      <type num="a"/> -->
-<!-- 		    </Subst> -->
-<!-- 		  </minz> -->
-<!-- 		  <minz> -->
-<!-- 		    <Subst> -->
-<!-- 		      <aSubMap/> -->
-<!-- 		      <type num="a" dash="'"/> -->
-<!-- 		    </Subst> -->
-<!-- 		  </minz> -->
-<!-- 		</eq> -->
-<!-- 	      </btypes:TYPE>, and -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<eq> -->
-<!-- 		  <maxz> -->
-<!-- 		    <Subst> -->
-<!-- 		      <aSubMap/> -->
-<!-- 		      <type num="r"/> -->
-<!-- 		    </Subst> -->
-<!-- 		  </maxz> -->
-<!-- 		  <maxz> -->
-<!-- 		    <Subst> -->
-<!-- 		      <aSubMap/> -->
-<!-- 		      <type num="r" dash="'"/> -->
-<!-- 		    </Subst> -->
-<!-- 		  </maxz> -->
-<!-- 		</eq> -->
-<!-- 	      </btypes:TYPE>. -->
-<!-- 	    </p> -->
-<!-- 	  </li> -->
-<!-- 	  <li> -->
-<!-- 	    <p> -->
-<!-- 	      From case&nbsp;(2.d) and S-Fn rule, we conclude that -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<Msub> -->
-<!-- 		  <Subst> -->
-<!-- 		    <aSubMap/> -->
-<!-- 		    <fn> -->
-<!-- 		      <type num="a"/> -->
-<!-- 		      <type num="r"/> -->
-<!-- 		    </fn> -->
-<!-- 		  </Subst> -->
-<!-- 		  <Subst> -->
-<!-- 		    <aSubMap/> -->
-<!-- 		    <fn> -->
-<!-- 		      <type num="a" dash="'"/> -->
-<!-- 		      <type num="r" dash="'"/> -->
-<!-- 		    </fn> -->
-<!-- 		  </Subst> -->
-<!-- 		</Msub> -->
-<!-- 	      </btypes:TYPE>	       -->
-<!-- 	    </p> -->
-<!-- 	  </li> -->
-<!-- 	</ol> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case S-Pair: Follows from induction hypothesis, and the fact -->
-<!-- 	  that -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<type num="1"/> -->
-<!-- 	      </Subst> -->
-<!-- 	      <minz> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <type num="1"/> -->
-<!-- 		</Subst> -->
-<!-- 	      </minz> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE> and -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<type num="2"/> -->
-<!-- 	      </Subst> -->
-<!-- 	      <minz> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <type num="2"/> -->
-<!-- 		</Subst> -->
-<!-- 	      </minz> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE> implies -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<pair> -->
-<!-- 		  <type num="1"/> -->
-<!-- 		  <type num="2"/> -->
-<!-- 		</pair> -->
-<!-- 	      </Subst> -->
-<!-- 	      <minz> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <pair> -->
-<!-- 		    <type num="1"/> -->
-<!-- 		    <type num="2"/> -->
-<!-- 		  </pair> -->
-<!-- 		</Subst> -->
-<!-- 	      </minz> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case S-Mut: Cannot happen for first property (follows from -->
-<!-- 	  induction hypothesis for the second property). -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--       <li> -->
-<!-- 	<p> -->
-<!-- 	  Case S-MT1: There are two sub-cases to consider: -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <in> -->
-<!-- 	      <tvar name="alpha"/> -->
-<!-- 	      <dom> -->
-<!-- 		<aSubMap/> -->
-<!-- 	      </dom> -->
-<!-- 	    </in> -->
-<!-- 	  </btypes:TYPE> and -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <notin> -->
-<!-- 	      <tvar name="alpha"/> -->
-<!-- 	      <dom> -->
-<!-- 		<aSubMap/> -->
-<!-- 	      </dom> -->
-<!-- 	    </notin> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	</p> -->
-<!-- 	<ol> -->
-<!-- 	  <li> -->
-<!-- 	    <p> -->
-<!-- 	      Suppose -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<notin> -->
-<!-- 		  <tvar name="alpha"/> -->
-<!-- 		  <dom> -->
-<!-- 		    <aSubMap/> -->
-<!-- 		  </dom> -->
-<!-- 		</notin> -->
-<!-- 	      </btypes:TYPE>. -->
-<!-- 	      That is, -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<eq> -->
-<!-- 		  <Subst> -->
-<!-- 		    <aSubMap/> -->
-<!-- 		    <tvar name="alpha"/> -->
-<!-- 		  </Subst> -->
-<!-- 		  <tvar name="alpha"/> -->
-<!-- 		</eq> -->
-<!-- 	      </btypes:TYPE>.  -->
-<!-- 	      We know that  -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<eq> -->
-<!-- 		  <minzT> -->
-<!-- 		    <stype/> -->
-<!-- 		  </minzT> -->
-<!-- 		  <type/> -->
-<!-- 		</eq> -->
-<!-- 	      </btypes:TYPE>. -->
-<!-- 	      Therefore, we have -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<eq> -->
-<!-- 		  <Subst> -->
-<!-- 		    <aSubMap/> -->
-<!-- 		    <minzT> -->
-<!-- 		      <stype/> -->
-<!-- 		    </minzT> -->
-<!-- 		  </Subst> -->
-<!-- 		  <Subst> -->
-<!-- 		    <aSubMap/> -->
-<!-- 		    <type/> -->
-<!-- 		  </Subst> -->
-<!-- 		</eq> -->
-<!-- 	      </btypes:TYPE>, and further -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<eq> -->
-<!-- 		  <minzT> -->
-<!-- 		    <Subst> -->
-<!-- 		      <aSubMap/> -->
-<!-- 		      <minzT> -->
-<!-- 			<stype/> -->
-<!-- 		      </minzT> -->
-<!-- 		    </Subst> -->
-<!-- 		  </minzT> -->
-<!-- 		  <minzT> -->
-<!-- 		    <Subst> -->
-<!-- 		      <aSubMap/> -->
-<!-- 		      <type/> -->
-<!-- 		    </Subst> -->
-<!-- 		  </minzT> -->
-<!-- 		</eq> -->
-<!-- 	      </btypes:TYPE>. -->
-<!-- 	    </p> -->
-<!-- 	  </li> -->
-<!-- 	  <li> -->
-<!-- 	    <p> -->
-<!-- 	      From case&nbsp;(5.a) and -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<lem tag="T-msm_eq_ms"/> -->
-<!-- 	      </btypes:TYPE>, we can write: -->
-<!-- 	      <btypes:TYPE> -->
-<!-- 		<eq> -->
-<!-- 		  <minzT> -->
-<!-- 		    <Subst> -->
-<!-- 		      <aSubMap/> -->
-<!-- 		      <stype/> -->
-<!-- 		    </Subst> -->
-<!-- 		  </minzT> -->
-<!-- 		  <minzT> -->
-<!-- 		    <Subst> -->
-<!-- 		      <aSubMap/> -->
-<!-- 		      <type/> -->
-<!-- 		    </Subst> -->
-<!-- 		  </minzT> -->
-<!-- 		</eq> -->
-<!-- 	      </btypes:TYPE>. -->
-<!-- 	    </p> -->
-<!-- 	  </li> -->
-<!-- 	</ol> -->
-<!-- 	<p> -->
-<!-- 	  Since a substitution on strcturally equal types must preserve -->
-<!-- 	  equality, we have -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<minz> -->
-<!-- 		  <stype/> -->
-<!-- 		</minz> -->
-<!-- 	      </Subst> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<type/> -->
-<!-- 	      </Subst> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	</p> -->
-<!-- 	<p> -->
-<!-- 	  Otherwise,  -->
-<!-- 	  It must be true that -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<stype/> -->
-<!-- 	      </Subst> -->
-<!-- 	      <stype dash="'"/> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE> for some base type  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <stype dash="'"/> -->
-<!-- 	  </btypes:TYPE>, -->
-<!-- 	  because otherwise, the substitution will -->
-<!-- 	  violate the grammar within the type -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <mbTop> -->
-<!-- 	      <tvar name="alpha"/> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<stype/> -->
-<!-- 	      </Subst> -->
-<!-- 	    </mbTop> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  Given this, we can conclude that  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<maxzT> -->
-<!-- 		  <stype/> -->
-<!-- 		</maxzT> -->
-<!-- 	      </Subst> -->
-<!-- 	      <stype dash="''"/> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE> for some type -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <stype dash="''"/> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	</p> -->
-<!-- 	<p> -->
-<!-- 	  By induction hypothesis, we know that -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Msub> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<maxzT> -->
-<!-- 		  <stype/> -->
-<!-- 		</maxzT> -->
-<!-- 	      </Subst> -->
-<!-- 	      <minz> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <type/> -->
-<!-- 		</Subst> -->
-<!-- 	      </minz> -->
-<!-- 	    </Msub> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  Now, -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <maxzT> -->
-<!-- 	      <stype/> -->
-<!-- 	    </maxzT> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	  is equal to  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <stype/> -->
-<!-- 	  </btypes:TYPE> or -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <mutable> -->
-<!-- 	      <stype/> -->
-<!-- 	    </mutable> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  Since  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <stype/> -->
-<!-- 	  </btypes:TYPE> is not a maybe type,  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <maxzT> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <stype/> -->
-<!-- 		</Subst> -->
-<!-- 	      </maxzT> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<maxzT> -->
-<!-- 		  <stype/> -->
-<!-- 		</maxzT> -->
-<!-- 	      </Subst> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE>. Therefore, we have, -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Msub> -->
-<!-- 	      <maxzT> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <stype/> -->
-<!-- 		</Subst> -->
-<!-- 	      </maxzT> -->
-<!-- 	      <minz> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <type/> -->
-<!-- 		</Subst> -->
-<!-- 	      </minz> -->
-<!-- 	    </Msub> -->
-<!-- 	  </btypes:TYPE>. The result is obtainable from S-MT1 rule. -->
-<!-- 	  Let -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <stype num="1"/> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<Msub> -->
-<!-- 		  <maxzT> -->
-<!-- 		    <stype/> -->
-<!-- 		  </maxzT> -->
-<!-- 		</Msub> -->
-<!-- 	      </Subst> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE> and -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <eq> -->
-<!-- 	      <stype num="2"/> -->
-<!-- 	      <minz> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <type/> -->
-<!-- 		</Subst> -->
-<!-- 	      </minz> -->
-<!-- 	    </eq> -->
-<!-- 	  </btypes:TYPE>. -->
-<!-- 	  Since we have  -->
-	  
-<!-- 	  By inspecting the copy coercion rules, we determine that in -->
-<!-- 	  order for the relationship  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <Msub> -->
-<!-- 	      <stype num="1"/> -->
-<!-- 	      <minz> -->
-<!-- 		<Subst> -->
-<!-- 		  <aSubMap/> -->
-<!-- 		  <type/> -->
-<!-- 		</Subst> -->
-<!-- 	      </minz> -->
-<!-- 	    </Msub> -->
-<!-- 	  </btypes:TYPE> to hold,  -->
-<!-- 	  <btypes:TYPE> -->
-<!-- 	    <minz> -->
-<!-- 	      <Subst> -->
-<!-- 		<aSubMap/> -->
-<!-- 		<type/> -->
-<!-- 	      </Subst> -->
-<!-- 	    </minz> -->
-<!-- 	  </btypes:TYPE> -->
-<!-- 	</p> -->
-<!--       </li> -->
-<!--     </ol> -->
-<!--   </proof> -->
   <lemma id="T-Renaming">
     <title>Type Renaming</title>
     <p>
@@ -3111,8 +2543,11 @@
 	    </in>
 	  </btypes:TYPE> do not (necessarily) hold. For example, 
 	  <btypes:TYPE>
-	    <type dash="'"/>
-	  </btypes:TYPE> in T-Id, 
+	    <type num="1"/>
+	  </btypes:TYPE> and 
+	  <btypes:TYPE>
+	    <type num="2"/>
+	  </btypes:TYPE> in T-Lambda, 
 	  <btypes:TYPE>
 	    <fn>
 	      <type num="a"/>
@@ -4439,8 +3874,10 @@
       </li>
       <li>
 	<p>
-	  Case T-Lambda: Follows from induction hypothesis, using the 
-	  T-Lambda rule.
+	  Case T-Lambda: Follows from induction hypothesis, using
+	  <btypes:TYPE>
+	    <lem tag="T-sub-min"/>
+	  </btypes:TYPE> and the T-Lambda rule.
 	</p>
       </li>
       <li>
@@ -6711,6 +6148,14 @@
 		    <type num="2"/>
 		  </tqExpr>
 		</Sjudge>
+		<eq under="minz">
+		  <type num="1"/>
+		  <type num="1" dash="'"/>
+		</eq>
+		<eq under="minz">
+		  <type num="2"/>
+		  <type num="2" dash="'"/>
+		</eq>
 	      </tyPre>
 	      <tyConc>
 		<Sjudge>
@@ -6733,8 +6178,8 @@
 		      <aExpr/>
 		    </lambda>
 		    <fn>
-		      <type num="1"/>
-		      <type num="2"/>
+		      <type num="1" dash="'"/>
+		      <type num="2" dash="'"/>
 		    </fn>
 		  </tqExpr>
 		</Sjudge>

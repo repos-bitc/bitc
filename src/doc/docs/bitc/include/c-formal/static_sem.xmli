@@ -1952,6 +1952,10 @@
 	    <eq>
 	      <Subst>
 		<aSubMap/>
+		<type/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
 		<type num="1"/>
 	      </Subst>
 	      <unspecified/>
@@ -1977,6 +1981,12 @@
 	  and
 	  <btypes:TYPE>
 	    <collection>
+	      <pred name="Immut">
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </pred>
 	      <pred name="Immut">
 		<Subst>
 		  <aSubMap/>
