@@ -1863,9 +1863,20 @@
 
   <!-- unf -->
   <xsl:template match="unf" mode="formula">
-    <xsl:call-template name="print.mathcal">
-      <xsl:with-param name="print.mathcal.letter">U</xsl:with-param> 
-    </xsl:call-template>
+    <xsl:choose>
+      <xsl:when test = "@name">
+	<xsl:call-template name="print.mathcal">
+	  <xsl:with-param name="print.mathcal.letter">
+	    <xsl:value-of select="@name"/>
+	  </xsl:with-param> 
+	</xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:call-template name="print.mathcal">
+	  <xsl:with-param name="print.mathcal.letter">U</xsl:with-param> 
+	</xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:if test="@ac">
       <xsl:element name="sup">
 	<xsl:element name="sup">

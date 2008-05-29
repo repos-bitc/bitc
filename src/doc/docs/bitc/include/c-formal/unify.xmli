@@ -40,8 +40,37 @@
 	  </unf>
 	</rhs>
       </equation>
+      <!-- Commutativity: t1 = t2 -->
+      <equation>
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <type num="1"/>
+		  <type num="2"/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <type num="2"/>
+		  <type num="1"/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
       <!-- a = t | a notin t -->
-      <equation>	  
+      <equation sep="4pt">
 	<lhs>
 	  <unf>
 	    <unin>
@@ -78,50 +107,6 @@
 	    <unf>
 	      <Subst>
 		<aSubMap num="a"/>
-		<aCtset/>
-	      </Subst>
-	    </unf>
-	    <Pair>
-	      <aCtset num="i"/>
-	      <aSubMap num="i"/>
-	    </Pair>
-	  </eq>
-	</rhs>
-      </equation>
-      <!-- k = K -->
-      <equation sep="4pt">
-	<lhs>
-	  <unf>
-	    <unin>
-	      <set>
-		<eq>
-		  <lKind k="var"/>
-		  <lKind/>
-		</eq>
-	      </set>
-	      <aCtset/>
-	    </unin>
-	  </unf>
-	</lhs>
-	<rhs>
-	  <Pair>
-	    <aCtset num="i"/>
-	    <scomp>
-	      <aSubMap num="k"/>
-	      <aSubMap num="i"/>
-	    </scomp>	    
-	  </Pair>	  	    
-	  <eq>
-	    <aSubMap num="k"/>
-	    <SubMap>
-	      <lKind k="var"/>
-	      <lKind/>
-	    </SubMap>
-	  </eq>
-	  <eq>
-	    <unf>
-	      <Subst>
-		<aSubMap num="k"/>
 		<aCtset/>
 	      </Subst>
 	    </unf>
@@ -442,6 +427,54 @@
 	  </unf>
 	</rhs>
       </equation>
+      <!-- k = K -->
+      <!-- There is no K = K rule because it is not necessary. 
+           These constraints are not generated independently.
+           They only arise as a consequence of adding them from
+           substitutions in the I-Let rule -->
+      <equation>
+	<lhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <lKind k="var"/>
+		  <lKind/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <Pair>
+	    <aCtset num="i"/>
+	    <scomp>
+	      <aSubMap num="k"/>
+	      <aSubMap num="i"/>
+	    </scomp>	    
+	  </Pair>	  	    
+	  <eq>
+	    <aSubMap num="k"/>
+	    <SubMap>
+	      <lKind k="var"/>
+	      <lKind/>
+	    </SubMap>
+	  </eq>
+	  <eq>
+	    <unf>
+	      <Subst>
+		<aSubMap num="k"/>
+		<aCtset/>
+	      </Subst>
+	    </unf>
+	    <Pair>
+	      <aCtset num="i"/>
+	      <aSubMap num="i"/>
+	    </Pair>
+	  </eq>
+	</rhs>
+      </equation>
       <!-- P(m, t1, t2) --> 
       <equation>
 	<lhs>
@@ -645,7 +678,8 @@
 	  <notin>
 	    <constraint/>
 	    <unin>
-	      <aCtset num="e"/>
+	      <aCtset num="v"/>
+	      <aCtset num="s"/>
 	      <aCtset num="p"/>
 	    </unin>
 	  </notin>
@@ -657,24 +691,21 @@
     </VEqns>
     <Hrules>
       <eq>
-	<aCtset num="e"/>
+	<aCtset num="v"/>
 	<grouping>
 	  <Forall>
 	    <collection>
-	      <tvar name="alpha"/>
+	      <tvar/>
 	      <stype/>
 	      <ptype/>
 	      <type/>
 	      <type dash="'"/>
-	      <type dash="''"/>
-	      <type num="1"/>
-	      <type num="1" dash="'"/>
 	    </collection>
 	  </Forall>
-	  <text content="|"/>
+	  <ST/>
 	  <notin>
 	    <tvar name="alpha"/>
-	    <type dash="''"/>
+	    <type dash="'"/>
 	  </notin>
 	  <space/>
 	  <text content="."/>
@@ -685,13 +716,62 @@
 	      <type/>
 	    </eq>
 	    <eq>
-	      <tvar name="alpha"/>
-	      <type dsah="''"/>
+	      <tvar/>
+	      <type dash="'"/>
 	    </eq>
 	    <eq>
-	      <lKind k="var"/>
-	      <lKind/>
+	      <type dash="'"/>
+	      <tvar/>
 	    </eq>
+	    <eq>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	      <type/>
+	    </eq>
+	    <eq>
+	      <type/>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	    </eq>
+	    <eq>
+	      <mbFull>
+		<stype/>
+		<ptype/>
+	      </mbFull>
+	      <type/>
+	    </eq>
+	    <eq>
+	      <type/>
+	      <mbFull>
+		<stype/>
+		<ptype/>
+	      </mbFull>
+	    </eq>
+	  </set>
+	</grouping>
+      </eq>
+    </Hrules>
+    <Hrules>
+      <eq>
+	<aCtset num="s"/>
+	<grouping>
+	  <Forall>
+	    <collection>
+	      <ptype/>
+	      <type/>
+	      <type dash="'"/>
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </collection>
+	  </Forall>
+	  <space/>	      
+	  <text content="."/>
+	  <space/>	      
+	  <set>
 	    <eq>
 	      <fn>
 		<type/>
@@ -712,30 +792,16 @@
 	    </eq>
 	    <eq>
 	      <mutable>
-		<stype/>
+		<ptype/>
 	      </mutable>
 	      <mutable>
-		<stype dash="'"/>
+		<ptype dash="'"/>
 	      </mutable>
-	    </eq>
-	    <eq>
-	      <mbFull>
-		<ptype/>
-		<stype/>
-	      </mbFull>
-	      <type/>
-	    </eq>
-	    <eq>
-	      <mbTop>
-		<stype/>
-		<stype dsah="'"/>
-	      </mbTop>
-	      <type/>
 	    </eq>
 	  </set>
 	</grouping>
       </eq>
-    </Hrules>      
+    </Hrules>
     <Hrules>
       <eq>
 	<aCtset num="p"/>
@@ -749,7 +815,7 @@
 	      <type num="i"/>
 	    </collection>
 	  </Forall>
-	  <text content="|"/>
+	  <ST/>
 	  <NOT>
 	    <pred name="Mut">
 	      <type num="i"/>
@@ -759,6 +825,10 @@
 	  <textit content="."/>
 	  <space/>
 	  <set>
+	    <eq>
+	      <lKind k="var"/>
+	      <lKind/>
+	    </eq>
 	    <Pcst>
 	      <lKind k="mono"/>
 	      <type/>

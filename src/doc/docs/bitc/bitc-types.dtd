@@ -820,6 +820,7 @@
 <!-- Unify Function -->
 <!ELEMENT unf                  %constraint.group;>
 <!ATTLIST unf
+                               name      CDATA      #IMPLIED
                                ac        (yes|no)   #IMPLIED
                                cl        (yes|no)   #IMPLIED
 >

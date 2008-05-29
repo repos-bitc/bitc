@@ -292,11 +292,11 @@
 	  </TDjudge>
 	  <Msub>
 	    <type num="1" dash="'"/>
-	    <type/>
+	    <type num="1"/>
 	  </Msub>
 	  <Msub>
 	    <type num="2" dash="'"/>
-	    <type/>
+	    <type num="2"/>
 	  </Msub>
 	</tyPre>
 	<tyConc>

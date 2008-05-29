@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" >
-<figure id="hy_infer" fullwidth='yes' latex.placement="tbp">
+<figure id="intermediate" fullwidth='yes' latex.placement="tbp">
   <btypes:TYPE
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
     <Hrules  rowsep="4pt" colsep="2">
-      <tyRule name="I-Unit">
+      <tyRule name="N-Unit">
 	<tyPre/>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -25,10 +25,10 @@
 	  </TEjudge>
 	</tyConc>                
       </tyRule>   
-      <tyRule name="I-True">
+      <tyRule name="N-True">
 	<tyPre/>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -45,10 +45,10 @@
 	  </TEjudge>
 	</tyConc>
       </tyRule>   
-      <tyRule name="I-False">
+      <tyRule name="N-False">
 	<tyPre/>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -65,17 +65,14 @@
 	  </TEjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="I-Id">
+      <tyRule name="N-Id">
 	<tyPre>
 	  <mapsto>
 	    <gamma/>
 	    <id/>
 	    <TS>
 	      <tvars name="alpha"/>
-	      <ctype>
-		<type/>
-		<aCtset/>
-	      </ctype>
+	      <type/>
 	    </TS>
 	  </mapsto>
 	  <models name="new">
@@ -84,7 +81,7 @@
 	  </models>
 	</tyPre>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -100,18 +97,14 @@
 	      </tqExpr>
 	    </conclude>
 	    <constrain>
-	      <subst>
-		<aCtset/>
-		<tvars name="alpha"/>
-		<tvars name="beta"/>
-	      </subst>
+	      <Empty/>
 	    </constrain>
 	  </TEjudge>
 	</tyConc>
       </tyRule>
     </Hrules>
-    <Hrules  rowsep="4pt" colsep="2">
-      <tyRule name="I-Hloc">
+    <Hrules rowsep="4pt" colsep="2">
+      <tyRule name="N-Hloc">
 	<tyPre>
 	  <mapsto>
 	    <store/>
@@ -120,7 +113,7 @@
 	  </mapsto>
 	</tyPre>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -139,7 +132,7 @@
 	  </TEjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="I-Sloc">
+      <tyRule name="N-Sloc">
 	<tyPre>
 	  <mapsto>
 	    <store/>
@@ -148,7 +141,7 @@
 	  </mapsto>
 	</tyPre>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -165,9 +158,9 @@
 	  </TEjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="I-Lambda">
+      <tyRule name="N-Lambda">
 	<tyPre>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <extend>
 		<gamma/>
@@ -204,7 +197,7 @@
 	  </models>
 	</tyPre>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -246,9 +239,9 @@
       </tyRule>
     </Hrules>        
     <Hrules  rowsep="4pt" colsep="2">
-      <tyRule name="I-App">
+      <tyRule name="N-App">
 	<tyPre>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -263,7 +256,7 @@
 	      <aCtset num="1"/>                  
 	    </constrain>
 	  </TEjudge>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -292,7 +285,7 @@
 	  </models>
 	</tyPre>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -345,9 +338,9 @@
       </tyRule>
     </Hrules>        
     <Hrules  rowsep="4pt" colsep="2">
-      <tyRule name="I-If">
+      <tyRule name="N-If">
 	<tyPre>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -362,7 +355,7 @@
 	      <aCtset num="1"/>                  
 	    </constrain>
 	  </TEjudge>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -377,7 +370,7 @@
 	      <aCtset num="2"/>                  
 	    </constrain>
 	  </TEjudge>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -404,7 +397,7 @@
 	  </models>
 	</tyPre>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -457,9 +450,9 @@
       </tyRule>
     </Hrules>
     <Hrules  rowsep="4pt" colsep="2">
-      <tyRule name="I-Set">
+      <tyRule name="N-Set">
 	<tyPre>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -474,7 +467,7 @@
 	      <aCtset num="1"/>
 	    </constrain>
 	  </TEjudge>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -503,7 +496,7 @@
 	  </models>
 	</tyPre>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -544,9 +537,9 @@
 	  </TEjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="I-Dup">
+      <tyRule name="N-Dup">
 	<tyPre>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -571,7 +564,7 @@
 	  </models>
 	</tyPre>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -610,9 +603,9 @@
       </tyRule>
     </Hrules>
     <Hrules  rowsep="4pt" colsep="2">
-      <tyRule name="I-Deref">
+      <tyRule name="N-Deref">
 	<tyPre>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -634,7 +627,7 @@
 	  </models>
 	</tyPre>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -666,9 +659,9 @@
 	  </TEjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="I-Pair">
+      <tyRule name="N-Pair">
 	<tyPre>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -683,7 +676,7 @@
 	      <aCtset num="1"/>
 	    </constrain>
 	  </TEjudge>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -711,7 +704,7 @@
 	  </models>
 	</tyPre>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -761,9 +754,9 @@
       </tyRule>
     </Hrules>
     <Hrules  rowsep="4pt" colsep="2">
-      <tyRule name="I-Fst">
+      <tyRule name="N-Fst">
 	<tyPre>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -787,7 +780,7 @@
 	  </models>
 	</tyPre>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -829,9 +822,9 @@
 	  </TEjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="I-Snd">
+      <tyRule name="N-Snd">
 	<tyPre>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -855,7 +848,7 @@
 	  </models>
 	</tyPre>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -899,9 +892,9 @@
       </tyRule>
     </Hrules>
     <Hrules  rowsep="4pt" colsep="2">
-      <tyRule name="I-Let"> 
+      <tyRule name="N-Let-M"> 
 	<tyPre>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -916,12 +909,8 @@
 	      <aCtset num="1"/>                  
 	    </constrain>
 	  </TEjudge>
-	  <judge name="gen">
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <aExpr num="1"/>
-	      <symbol name="kappa"/>
+	  <eq>
+	    <unf name="N">
 	      <unin>
 		<aCtset num="1"/>  
 		<set>
@@ -934,46 +923,33 @@
 		  </eq>
 		</set>
 	      </unin>
-	    </assume>
-	    <conclude>
-	      <GEN>
-		<mbFull>
-		  <tvar name="alpha"/>
-		  <tvar name="beta"/>
-		</mbFull>
-		<aTS/>
-	      </GEN>
-	    </conclude>
-	    <propagate>
-	      <collection sep=";">
-		<aSubMap/>
-		<aCtset/>
-	      </collection>
-	    </propagate>
-	  </judge>
-	  <TEjudge name="i">
+	    </unf>
+	    <aSubMap/>
+	  </eq>
+	  <eq>
+	    <type/>
+	    <Subst>
+	      <aSubMap/>
+	      <mbFull>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </mbFull>
+	    </Subst>
+	  </eq>
+	  <TEjudge name="n">
 	    <assume>
 	      <extend>
-		<Subst>
-		  <aSubMap/>
-		  <gamma/>
-		</Subst>
+		<gamma/>
 		<mapping>
 		  <id/>
-		  <aTS/>
+		  <type/>
 		</mapping>
 	      </extend>
-	      <Subst>
-		<aSubMap/>
-		<store/>
-	      </Subst>
+	      <store/>
 	    </assume>
 	    <conclude>
 	      <tqExpr>
-		<Subst>
-		  <aSubMap/>
-		  <aExpr num="2"/>
-		</Subst>
+		<aExpr num="2"/>
 		<type num="2"/>
 	      </tqExpr>
 	    </conclude>
@@ -991,7 +967,142 @@
 	  </models>
 	</tyPre>
 	<tyConc>
-	  <TEjudge name="i">
+	  <TEjudge name="n">
+	    <assume>
+	      <gamma/>
+	      <store/>
+	    </assume>
+	    <conclude>
+	      <tqExpr>
+		<let kind="m">
+		  <id/>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</let>
+		<type num="2"/>
+	      </tqExpr>
+	    </conclude>
+	    <constrain>        
+	      <unin>
+		<aCtset num="1"/>
+		<aCtset num="2"/>
+	      </unin>
+	    </constrain>
+	  </TEjudge>
+	</tyConc>
+      </tyRule>        
+    </Hrules>
+    <Hrules  rowsep="4pt" colsep="2">
+      <tyRule name="N-Let-P"> 
+	<tyPre>
+	  <TEjudge name="n">
+	    <assume>
+	      <gamma/>
+	      <store/>
+	    </assume>
+	    <conclude>
+	      <tqExpr>
+		<vExp/>
+		<type num="1"/>
+	      </tqExpr>
+	    </conclude>
+	    <constrain>
+	      <aCtset num="1"/>                  
+	    </constrain>
+	  </TEjudge>
+	  <eq>
+	    <unf name="N">
+	      <aCtset num="1"/>                  
+	    </unf>
+	    <aSubMap num="1"/>
+	  </eq>
+	  <eq>
+	    <type num="1" dash="'"/>
+	    <minz>
+	      <Subst>
+		<aSubMap num="1"/>
+		<type num="1"/>
+	      </Subst>
+	    </minz>
+	  </eq>
+	  <eq>
+	    <unf name="N">
+	      <set>
+		<eq>
+		  <type/>
+		  <minzD>
+		    <type/>
+		  </minzD>
+		</eq>
+	      </set>
+	    </unf>
+	    <aSubMap num="2"/>
+	  </eq>
+	  <eq>
+	    <type/>
+	    <Subst>
+	      <aSubMap num="2"/>
+	      <type num="1" dash="'"/>
+	    </Subst>
+	  </eq>
+	</tyPre>
+	<tyPre>
+	  <eq>
+	    <set>
+	      <tvars name="alpha"/>
+	    </set>
+	    <diff>
+	      <ftvs>
+		<type/>
+	      </ftvs>
+	      <ftvs>
+		<Subst>
+		  <scomp>
+		    <aSubMap num="1"/>
+		    <aSubMap num="2"/>
+		  </scomp>
+		  <gamma/>
+		</Subst>
+		<Subst>
+		  <scomp>
+		    <aSubMap num="1"/>
+		    <aSubMap num="2"/>
+		  </scomp>
+		  <store/>
+		</Subst>
+	      </ftvs>
+	    </diff>
+	  </eq>
+	  <TEjudge name="n">
+	    <assume>
+	      <extend>
+		<gamma/>
+		<mapping>
+		  <id/>
+		  <TS>
+		    <tvars/>
+		    <type/>
+		  </TS>
+		</mapping>
+	      </extend>
+	      <store/>
+	    </assume>
+	    <conclude>
+	      <tqExpr>
+		<Subst>
+		  <aSubMap/>
+		  <aExpr num="2"/>
+		</Subst>
+		<type num="2"/>
+	      </tqExpr>
+	    </conclude>
+	    <constrain>
+	      <aCtset num="2"/>
+	    </constrain>
+	  </TEjudge>
+	</tyPre>
+	<tyConc>
+	  <TEjudge name="n">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -1008,210 +1119,442 @@
 	    </conclude>
 	    <constrain>        
 	      <unin>
-		<aCtset/>
+		<aCtset num="1"/>
 		<aCtset num="2"/>
-		<set>
-		  <forall> 
-		    <in>
-		      <SubMap>
-			<tvar name="delta"/>
-			<type/>
-		      </SubMap>
-		      <aSubMap/>
-		    </in>
-		  </forall>
-		  <eq>
-		    <tvar name="delta"/>
-		    <type/>
-		  </eq>
-		</set>
-		<set>
-		  <forall> 
-		    <in>
-		      <SubMap>
-			<lKind k="var"/>
-			<lKind/>
-		      </SubMap>
-		      <aSubMap/>
-		    </in>
-		  </forall>
-		  <eq>
-		    <lKind k="var"/>
-		    <lKind/>
-		  </eq>
-		</set>
 	      </unin>
 	    </constrain>
 	  </TEjudge>
 	</tyConc>
       </tyRule>        
     </Hrules>
-    <Hrules>
-      <tyRule name="Gen-Val">
-	<tyPre>
-	  <eq>
-	    <unf>
-	      <aCtset num="i"/>
-	    </unf>
-	    <Pair>
-	      <aCtset num="u"/>
-	      <aSubMap/>
-	    </Pair>
-	  </eq>
-	  <eq>
-	    <type/>
-	    <Subst>
-	      <aSubMap/>
-	      <type num="i"/>
-	    </Subst>
-	  </eq>
-	  <NOT>
-	    <pred name="Mut">
-	      <type/>
-	    </pred>
-	  </NOT>
-	  <eq>
-	    <aCtset/>
+    <VEqns>
+      <!-- Empty -->
+      <equation>
+	<lhs>
+	  <unf name="N">
+	    <Empty/>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <EmptySubst/>
+	</rhs>
+      </equation>
+      <!-- t = t -->
+      <equation>
+	<lhs>
+	  <unf name="N">
 	    <unin>
-	      <aCtset num="u"/>
 	      <set>
-		<Pcst>
-		  <lKind k="var"/>
+		<eq>
 		  <type/>
 		  <type/>
-		</Pcst>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf name="N">
+	    <aCtset/>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- Commutativity: t1 = t2 -->
+      <equation>
+	<lhs>
+	  <unf name="N">
+	    <unin>
+	      <set>
+		<eq>
+		  <type num="1"/>
+		  <type num="2"/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf name="N">
+	    <unin>
+	      <set>
+		<eq>
+		  <type num="2"/>
+		  <type num="1"/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- a = t | a notin t -->
+      <equation sep="4pt">
+	<lhs>
+	  <unf name="N">
+	    <unin>
+	      <set>
+		<eq>
+		  <tvar name="alpha"/>
+		  <type/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <notin>
+	    <tvar name="alpha"/>
+	    <type/>
+	  </notin>
+	</lhs>
+	<rhs>
+	  <scomp>
+	    <aSubMap num="a"/>
+	    <aSubMap num="i"/>
+	  </scomp>	    
+	  <eq>
+	    <aSubMap num="a"/>
+	    <SubMap>
+	      <tvar name="alpha"/>
+	      <type/>
+	    </SubMap>
+	  </eq>
+	  <eq>
+	    <unf name="N">
+	      <Subst>
+		<aSubMap num="a"/>
+		<aCtset/>
+	      </Subst>
+	    </unf>
+	    <aSubMap num="i"/>
+	  </eq>
+	</rhs>
+      </equation>
+      <!-- t1->t2 = t1' -> t2' -->
+      <equation>
+	<lhs>
+	  <unf name="N">
+	    <unin>
+	      <set>
+		<eq>
+		  <fn>		    
+		    <type num="a"/>		    		    
+		    <type num="r"/>		    
+		  </fn>
+		  <fn>		    
+		    <type num="a" dash="'"/>		    		    
+		    <type num="r" dash="'"/>
+		  </fn>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf name="N">
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="a"/>
+		  <type num="a" dash="'"/>
+		</eq>
+		<eq>
+		  <type num="r"/>
+		  <type num="r" dash="'"/>
+		</eq>
 	      </set>
 	    </unin>
-	  </eq>
-	</tyPre>
-	<tyPre>
-	  <eq>
-	    <set>
-	      <tvars name="alpha"/>
-	    </set>
-	    <diff>
-	      <ftvs>
-		<type/>
-		<aCtset/>
-	      </ftvs>
-	      <ftvs>
-		<Subst>
-		  <aSubMap/>
-		  <gamma/>
-		</Subst>
-		<Subst>
-		  <aSubMap/>
-		  <store/>
-		</Subst>
-	      </ftvs>
-	    </diff>
-	  </eq>
-	  <eq>
-	    <aTS/>
-	    <TS>
-	      <tvars name="alpha"/>
-	      <ctype>
-		<type/>
-		<aCtset/>
-	      </ctype>
-	    </TS>
-	  </eq>
-	  <models name="new">
-	    <assume/>
-	    <tvars name="beta"/>
-	  </models>
-	</tyPre>
-	<tyConc>
-	  <judge name="gen">
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <vExp/>
-	      <lKind k="var"/>
-	      <aCtset num="i"/>
-	    </assume>
-	    <conclude>
-	      <GEN>
-		<type num="i"/>
-		<aTS/>
-	      </GEN>    
-	    </conclude>   
-	    <propagate>
-	      <collection sep=";">
-		<aSubMap/>
-		<subst>
-		  <aCtset/>
-		  <tvars name="alpha"/>
-		  <tvars name="beta"/>
-		</subst>
-	      </collection>
-	    </propagate>	      
-	  </judge>
-	</tyConc>
-      </tyRule>
-      <tyRule name="Gen-Exp">
-	<tyPre>
-	  <eq>
-	    <unf>
-	      <aCtset num="i"/>
-	    </unf>
-	    <Pair>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- ^t1 = ^t2 -->
+      <equation>
+	<lhs>
+	  <unf name="N">
+	    <unin>
+	      <set>
+		<eq>
+		  <ref>
+		    <type num="1"/>
+		  </ref>
+		  <ref>
+		    <type num="2"/>
+		  </ref>
+		</eq>
+	      </set>
 	      <aCtset/>
-	      <aSubMap/>
-	    </Pair>
-	  </eq>
-	  <eq>
-	    <type/>
-	    <Subst>
-	      <aSubMap/>
-	      <type num="i"/>
-	    </Subst>
-	  </eq>
-	</tyPre>
-	<tyPre>
-	  <OR>
-	    <paren>
-	      <neq>
-		<aExpr/>
-		<vExp/>
-	      </neq>
-	    </paren>
-	    <pred name="Mut">
-	      <type/>
-	    </pred>
-	  </OR>
-	</tyPre>
-	<tyConc>
-	  <judge name="gen">
-	    <assume>
-	      <gamma/>
-	      <store/>
-	      <aExpr/>
-	      <lKind k="var"/>
-	      <aCtset num="i"/>
-	    </assume>
-	    <conclude>
-	      <GEN>
-		<type num="i"/>
-		<type/>
-	      </GEN>    
-	    </conclude>   
-	    <propagate>
-	      <collection sep=";">
-		<compose>
-		  <aSubMap/>
-		  <SubMap>
-		    <lKind k="var"/>
-		    <lKind k="mono"/>
-		  </SubMap>
-		</compose>
-		<aCtset/>
-	      </collection>
-	    </propagate>
-	  </judge>
-	</tyConc>
-      </tyRule>
-    </Hrules>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf name="N">
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="1"/>
+		  <type num="2"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- Mp1 = Mp2 -->
+      <equation>
+	<lhs>
+	  <unf name="N">
+	    <unin>
+	      <set>
+		<eq>
+		  <mutable>
+		    <ptype num="1"/>
+		  </mutable>
+		  <mutable>
+		    <ptype num="2"/>
+		  </mutable>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf name="N">
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <ptype num="1"/>
+		  <ptype num="2"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- t1xt2 <= t1'xt2' -->
+      <equation sep="4pt">
+	<lhs>
+	  <unf name="N">
+	    <unin>
+	      <set>
+		<eq>
+		  <pair>
+		    <type num="1"/>
+		    <type num="2"/>
+		  </pair>
+		  <pair>
+		    <type num="1" dash="'"/>
+		    <type num="2" dash="'"/>
+		  </pair>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf name="N">
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="1"/>
+		  <type num="1" dash="'"/>
+		</eq>
+		<eq>
+		  <type num="2"/>
+		  <type num="2" dash="'"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- 'a!p1 = 'b!p2 -->
+      <equation>
+	<lhs>
+	  <unf name="N">
+	    <unin>
+	      <set>
+		<eq>
+		  <mbTop>
+		    <tvar name="alpha"/>
+		    <ptype num="1"/>
+		  </mbTop>
+		  <mbTop>
+		    <tvar name="beta"/>
+		    <ptype num="2"/>
+		  </mbTop>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf name="N">
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <minzT>
+		    <ptype num="1"/>
+		  </minzT>
+		  <minzT>
+		    <ptype num="2"/>
+		  </minzT>
+		</eq>
+		<eq>
+		  <tvar name="alpha"/>
+		  <tvar name="beta"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	  
+      <!-- a!p1 = p2 -->
+      <equation>
+	<lhs>
+	  <unf name="N">
+	    <unin>
+	      <set>
+		<eq>
+		  <mbTop>
+		    <tvar/>
+		    <ptype/>
+		  </mbTop>
+		  <ptype dash="'"/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf name="N">
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <minzT>
+		    <ptype/>
+		  </minzT>
+		  <minzT>
+		    <ptype dash="'"/>
+		  </minzT>
+		</eq>
+		<eq>
+		  <tvar/>
+		  <ptype dash="'"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- s1|p1 = s2|p2 -->
+      <equation>
+	<lhs>
+	  <unf name="N">
+	    <unin>
+	      <set>
+		<eq>
+		  <mbFull>
+		    <stype num="1"/>
+		    <ptype num="1"/>
+		  </mbFull>
+		  <mbFull>
+		    <stype num="2"/>
+		    <ptype num="2"/>
+		  </mbFull>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf name="N">
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <minz>
+		    <ptype num="1"/>
+		  </minz>
+		  <minz>
+		    <ptype num="2"/>
+		  </minz>
+		</eq>
+		<eq>
+		  <stype num="1"/>
+		  <stype num="2"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- s|p = P -->
+      <equation sep="4pt">
+	<lhs>
+	  <unf name="N">
+	    <unin>
+	      <set>
+		<eq>
+		  <mbFull>
+		    <stype/>
+		    <ptype/>
+		  </mbFull>
+		  <Ptype/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf name="N">
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <minz>
+		    <ptype/>
+		  </minz>
+		  <minz>
+		    <Ptype/>
+		  </minz>
+		</eq>
+		<eq>
+		  <stype/>
+		  <Ptype/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <equation>
+	<lhs>
+	  <unf name="N">
+	    <unin>
+	      <constraint/>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <error/>
+	</rhs>
+      </equation>
+    </VEqns>
   </btypes:TYPE>
-  <caption>Type Inference Algorithm</caption>
+  <caption>Algorithmic Typing</caption>
 </figure>
