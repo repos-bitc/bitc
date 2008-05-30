@@ -1594,9 +1594,20 @@
 
   <!-- constraint -->
   <xsl:template match="constraint" mode="formula">
-    <xsl:call-template name="print.mathmode">
-      <xsl:with-param name="print.mathmode.text">c</xsl:with-param> 
-    </xsl:call-template>
+    <xsl:choose>
+      <xsl:when test="@name">
+	<xsl:call-template name="print.mathmode">
+	  <xsl:with-param name="print.mathmode.text">
+	    <xsl:value-of select="@name"/>
+	  </xsl:with-param>
+	</xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:call-template name="print.mathmode">
+	  <xsl:with-param name="print.mathmode.text">c</xsl:with-param> 
+	</xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:call-template name="print.index.dash"/>    
   </xsl:template>  
 

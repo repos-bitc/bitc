@@ -18,6 +18,133 @@
       types.
     </p>
   </definition>
+  <theorem>
+    <title>Soundness of Type Inference</title>
+    <p>
+      If 
+      <btypes:TYPE>
+	<TEjudge name="i">
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <aCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<CST>
+	  <gamma/>
+	  <store/>
+	</CST>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
+	<Forall/>
+	<aSubMap/>
+	<ST/>
+	<models name="sol">
+	  <aSubMap/>
+	  <aCtset/>
+	</models>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<Sjudge name="*">
+	  <assume>
+	    <Subst>
+	      <aSubMap/>
+	      <gamma/>
+	    </Subst>
+	    <Subst>
+	      <aSubMap/>
+	      <store/>
+	    </Subst>
+	  </assume>
+	  <Subst>
+	    <aSubMap/>
+	    <aExpr/>
+	  </Subst>
+	  <Subst>
+	    <aSubMap/>
+	    <type/>
+	  </Subst>
+	</Sjudge>
+      </btypes:TYPE>.
+    </p>
+  </theorem>
+  <theorem>
+    <title>Completeness of Type Inference</title>
+    <p>
+      If 
+      <btypes:TYPE>
+	<Sjudge name="*">
+	  <assume>
+	    <Subst>
+	      <aSubMap/>
+	      <gamma/>
+	    </Subst>
+	    <Subst>
+	      <aSubMap/>
+	      <store/>
+	    </Subst>
+	  </assume>
+	  <Subst>
+	    <aSubMap/>
+	    <aExpr/>
+	  </Subst>
+	  <Subst>
+	    <aSubMap/>
+	    <type/>
+	  </Subst>
+	</Sjudge>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
+	<Exists/>
+	<aSubMap dash="'"/>
+	<ST/>
+	<models name="sol">
+	  <aSubMap/>
+	  <aCtset/>
+	</models>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<TEjudge name="i">
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <aCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<eq>
+	  <aSubMap dash="'"/>
+	  <compose>
+	    <aSubMap/>
+	    <aSubMap num="new"/>
+	  </compose>
+	</eq>
+      </btypes:TYPE>, where
+      <btypes:TYPE>
+	<aSubMap new="'"/>
+      </btypes:TYPE> contains substitutions used for 
+      fresh type variables used in the inference derivation.
+    </p>
+  </theorem>
 <!--   <definition id="close"> -->
 <!--     <title>Constraint Set Closure</title> -->
 <!--     <p> -->
@@ -35,7 +162,7 @@
 <!--       in figure&nbsp;<xref ref="decl_rules"/> (note that this -->
 <!--       conversion is total); and by explicitely adding all transitive -->
 <!--       relationships. This conversion does not affect the MPCs in  -->
-<!--       <btypes:TYPE> -->
+  <!--       <btypes:TYPE> -->
 <!-- 	<aCtset/>  -->
 <!--       </btypes:TYPE>. -->
 <!--     </p> -->

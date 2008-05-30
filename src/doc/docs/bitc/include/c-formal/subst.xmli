@@ -424,6 +424,36 @@
 	</tyConc>
       </tyRule>
       <tyRule>
+	<tyPre>
+	  <grouping>
+	    <Forall/>
+	    <in>
+	      <constraint/>
+	      <aCtset/>
+	    </in>
+	    <text content=", "/>
+	    <in>
+	      <Subst>
+		<aSubMap/>
+		<constraint/>
+	      </Subst>
+	      <aCtset dash="'"/>
+	    </in>
+	  </grouping>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <aCtset/>
+	    </Subst>
+	    <aCtset dash="'"/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="2">
+      <tyRule>
 	<tyPre/>
 	<tyConc>
 	  <eq>
@@ -439,8 +469,6 @@
 	  </eq>
 	</tyConc>
       </tyRule>
-    </Hrules>
-    <Hrules rowsep="4pt" colsep="2">
       <tyRule>
 	<tyPre>
 	  <eq>
@@ -502,16 +530,16 @@
 	  <grouping>
 	    <Forall/>
 	    <in>
-	      <constraint/>
-	      <aCtset/>
+	      <constraint name="d"/>
+	      <bCtset/>
 	    </in>
 	    <text content=", "/>
 	    <in>
 	      <Subst>
 		<aSubMap/>
-		<constraint/>
+		<constraint name="d"/>
 	      </Subst>
-	      <aCtset dash="'"/>
+	      <bCtset dash="'"/>
 	    </in>
 	  </grouping>
 	</tyPre>
@@ -519,12 +547,14 @@
 	  <eq>
 	    <Subst>
 	      <aSubMap/>
-	      <aCtset/>
+	      <bCtset/>
 	    </Subst>
-	    <aCtset dash="'"/>
+	    <bCtset dash="'"/>
 	  </eq>
 	</tyConc>
       </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="2">
       <tyRule>
 	<tyPre>
 	  <eq>
@@ -534,6 +564,8 @@
 	    </Subst>
 	    <type dash="'"/>
 	  </eq>
+	</tyPre>
+	<tyPre>
 	  <eq>
 	    <Subst>
 	      <aSubMap/>
@@ -564,8 +596,6 @@
 	  </eq>
 	</tyConc>
       </tyRule>
-    </Hrules>
-    <Hrules rowsep="4pt" colsep="2">
       <tyRule>
 	<tyPre>
 	  <grouping>
@@ -578,17 +608,19 @@
 	      <gamma/>
 	    </in>
 	    <text content=", "/>
-	    <in>
-	      <mapping>
-		<id/>
-		<Subst>
-		  <aSubMap/>
-		  <aTS/>
-		</Subst>
-	      </mapping>
-	      <gamma dash="'"/>
-	    </in>
 	  </grouping>
+	</tyPre>
+	<tyPre>
+	  <in>
+	    <mapping>
+	      <id/>
+	      <Subst>
+		<aSubMap/>
+		<aTS/>
+	      </Subst>
+	    </mapping>
+	    <gamma dash="'"/>
+	  </in>
 	</tyPre>
 	<tyConc>
 	  <eq>
@@ -612,17 +644,19 @@
 	      <store/>
 	    </in>
 	    <text content=", "/>
-	    <in>
-	      <mapping>
-		<loc/>
-		<Subst>
-		  <aSubMap/>
-		  <type/>
-		</Subst>
-	      </mapping>
-	      <store dash="'"/>
-	    </in>
 	  </grouping>
+	</tyPre>
+	<tyPre>
+	  <in>
+	    <mapping>
+	      <loc/>
+	      <Subst>
+		<aSubMap/>
+		<type/>
+	      </Subst>
+	    </mapping>
+	    <store dash="'"/>
+	  </in>
 	</tyPre>
 	<tyConc>
 	  <eq>
@@ -638,17 +672,32 @@
 	<tyPre>
 	  <grouping>
 	    <Forall/>
-	    <lKind/>
+	    <lKind k="var" num="i"/>
 	    <text content=" in "/>
 	    <aExpr/>
 	    <text content=", "/>
-	    <Subst>
-	      <aSubMap/>
-	      <lKind/>
-	    </Subst>
-	    <text content=" occurs correspondingly in "/>
-	    <aExpr dash="'"/>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<lKind k="var" num="i"/>
+	      </Subst>
+	      <lKind num="i"/>
+	    </eq>
 	  </grouping>
+	</tyPre>
+	<tyPre>
+	  <eq>
+	    <aExpr dash="'"/>
+	    <subst>
+	      <aExpr/>
+	      <plural>
+		<lKind k="var" num="i"/>
+	      </plural>
+	      <plural>
+		<lKind num="i"/>
+	      </plural>
+	    </subst>
+	  </eq>
 	</tyPre>
 	<tyConc>
 	  <eq>

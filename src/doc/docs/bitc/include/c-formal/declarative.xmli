@@ -249,7 +249,7 @@
       </btypes:TYPE>, is a consistent type derivation under the
       constraint set 
       <btypes:TYPE>
-	<aCtset/>
+	<bCtset/>
       </btypes:TYPE>
       if
       <btypes:TYPE>
@@ -260,7 +260,7 @@
       </btypes:TYPE> and
       <btypes:TYPE>
 	<Sat>
-	  <aCtset/>
+	  <bCtset/>
 	  <spset>
 	    <TDjudge>
 	      <aExpr/>
@@ -2398,7 +2398,7 @@
 	    <Sjudge>
 	      <assume>
 		<subst>
-		  <aCtset/>
+		  <bCtset/>
 		  <tvars name="alpha"/>
 		  <tvars name="beta"/>
 		</subst>
@@ -2442,23 +2442,23 @@
       Note that a textual substitution is necessary on the 
       constraint set 
       <btypes:TYPE>
-	<aCtset/>
+	<bCtset/>
       </btypes:TYPE> since
       <btypes:TYPE>
 	<Subst>
 	  <aSubMap/>
-	  <aCtset/>
+	  <bCtset/>
 	</Subst>
       </btypes:TYPE> does not substitute on the variables on the LHS
       of constraints in 
       <btypes:TYPE>
-	<aCtset/>
+	<bCtset/>
       </btypes:TYPE> (see substitution rules in 
       figure&nbsp;<xref ref="subst_rules"/>).
       Further, 
       <btypes:TYPE>
 	<subst>
-	  <aCtset/>
+	  <bCtset/>
 	  <tvars name="alpha"/>
 	  <tvars name="beta"/>
 	</subst>
@@ -2466,7 +2466,7 @@
       <btypes:TYPE>
 	<Subst>
 	  <aSubMap/>
-	  <aCtset/>
+	  <bCtset/>
 	</Subst>
       </btypes:TYPE> since we are only substituting 
       variables for variables.      
@@ -3148,7 +3148,7 @@
 	    <Sat>
 	      <Subst>
 		<aSubMap/>
-		<aCtset/>
+		<bCtset/>
 	      </Subst>
 	      <Subst>
 		<aSubMap/>
@@ -3185,7 +3185,7 @@
 	  <assume>
 	    <Subst>
 	      <aSubMap/>
-	      <aCtset/>
+	      <bCtset/>
 	    </Subst>
 	    <Subst>
 	      <aSubMap/>
@@ -3220,10 +3220,10 @@
       Let
       <btypes:TYPE>
 	<eq>
-	  <aCtset num="s"/>
+	  <bCtset num="s"/>
 	  <Subst>
 	    <aSubMap/>
-	    <aCtset/>
+	    <bCtset/>
 	  </Subst>
 	</eq>
       </btypes:TYPE>.
@@ -3328,7 +3328,7 @@
 		<p>
 		  <btypes:TYPE>
 		    <Sat>
-		      <aCtset num="s"/>
+		      <bCtset num="s"/>
 		      <Subst>
 			<aSubMap/>
 			<spset>
@@ -3455,7 +3455,7 @@
 		  Again using case&nbsp;(2.a.iv), we obtain
 		  <btypes:TYPE>
 		    <Sat>
-		      <aCtset num="s"/>
+		      <bCtset num="s"/>
 		      <Subst>
 			<aSubMap/>
 			<spset>
@@ -3747,7 +3747,7 @@
 	      From cases&nbsp;(2.a.iv and 2.d.i), we have
 	      <btypes:TYPE>
 		<Sat>
-		  <aCtset num="s"/>
+		  <bCtset num="s"/>
 		  <Subst>
 		    <aSubMap/>
 		    <spset>
@@ -3764,7 +3764,7 @@
 	      </btypes:TYPE> (property-3), we obtain
 	      <btypes:TYPE>
 		<Sat>
-		  <aCtset num="s"/>
+		  <bCtset num="s"/>
 		  <spset>
 		    <Subst>
 		      <aSubMap/>
@@ -3788,7 +3788,7 @@
 	      </btypes:TYPE> (weakening), we obtain
 	      <btypes:TYPE>
 		<Sat>
-		  <aCtset num="s"/>
+		  <bCtset num="s"/>
 		  <spset>
 		    <Subst>
 		      <aSubMap/>
@@ -3811,7 +3811,7 @@
 	      </btypes:TYPE> and therefore
 	      <btypes:TYPE>
 		<Sat>
-		  <aCtset num="s"/>
+		  <bCtset num="s"/>
 		  <spset>
 		    <Sjudge>
 		      <assume>
@@ -3848,7 +3848,7 @@
 		  <assume>
 		    <Subst>
 		      <aSubMap/>
-		      <aCtset/>
+		      <bCtset/>
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
@@ -3964,7 +3964,7 @@
 		    <Sat>
 		      <Subst>
 			<aSubMap/>
-			<aCtset/>
+			<bCtset/>
 		      </Subst>
 		      <Subst>
 			<aSubMap/>
@@ -3992,7 +3992,7 @@
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
-		    <aCtset num="s"/>
+		    <bCtset num="s"/>
 		    <Subst>
 		      <aSubMap/>
 		      <gamma/>
@@ -4015,7 +4015,7 @@
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
-		    <aCtset num="s"/>
+		    <bCtset num="s"/>
 		    <Subst>
 		      <aSubMap/>
 		      <gamma/>
@@ -4065,7 +4065,7 @@
 		<p>
 		  <btypes:TYPE>
 		    <Sat>
-		      <aCtset num="s"/>
+		      <bCtset num="s"/>
 		      <spset>
 			<Sjudge>
 			  <assume>
@@ -4120,7 +4120,7 @@
 		<p>
 		  <btypes:TYPE>
 		    <Sat>
-		      <aCtset num="s"/>
+		      <bCtset num="s"/>
 		      <spset>
 			<Sjudge>
 			  <assume>
@@ -4313,7 +4313,7 @@
 	      Using weakening on case&nbsp;(4.a.ii), we obtain
 	      <btypes:TYPE>
 		<Sat>
-		  <aCtset num="s"/>
+		  <bCtset num="s"/>
 		  <fn>
 		    <type num="a"/>
 		    <type num="r"/>
@@ -4330,7 +4330,7 @@
 	      </btypes:TYPE> (constraint collection), we conclude that 
 	      <btypes:TYPE>
 		<Sat>
-		  <aCtset num="s"/>
+		  <bCtset num="s"/>
 		  <spset>
 		    <Sjudge>
 		      <assume>
@@ -4367,7 +4367,7 @@
 		  <assume>
 		    <Subst>
 		      <aSubMap/>
-		      <aCtset/>
+		      <bCtset/>
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
@@ -4496,7 +4496,7 @@
 	  <btypes:TYPE>
 	    <Sjudge>
 	      <assume>
-		<aCtset/>
+		<bCtset/>
 		<extend>
 		  <gamma/>
 		  <tqExpr>
@@ -4547,14 +4547,14 @@
       <btypes:TYPE>
 	<Exists/>
 	<subeq>
-	  <aCtset dash="'"/>
-	  <aCtset/>
+	  <bCtset dash="'"/>
+	  <bCtset/>
 	</subeq>
       </btypes:TYPE> such that
       <btypes:TYPE>
 	<Sjudge>
 	  <assume>
-	    <aCtset dash="'"/>
+	    <bCtset dash="'"/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -4576,7 +4576,7 @@
       <btypes:TYPE>
 	<Sjudge>
 	  <assume>
-	    <aCtset/>
+	    <bCtset/>
 	    <extend>
 	      <gamma/>
 	      <tqExpr>
@@ -4652,7 +4652,7 @@
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
-		    <aCtset/>
+		    <bCtset/>
 		    <extend>
 		      <gamma/>
 		      <tqExpr>
@@ -4772,7 +4772,7 @@
 		<p>
 		  <btypes:TYPE>
 		    <Sat>
-		      <aCtset/>
+		      <bCtset/>
 		      <spset>
 			<Sjudge>
 			  <assume>
@@ -4816,7 +4816,7 @@
 		    <p>
 		      <btypes:TYPE>
 			<Sat>
-			  <aCtset/>
+			  <bCtset/>
 			  <spset>
 			    <TDjudge>
 			      <aVal/>
@@ -4835,13 +4835,13 @@
 	      <btypes:TYPE>
 		<Exists/>
 		<supeq>
-		  <aCtset dash="'"/>
-		  <aCtset/>
+		  <bCtset dash="'"/>
+		  <bCtset/>
 		</supeq>
 		<ST/>
 		<Sjudge>
 		  <assume>
-		    <aCtset dash="'"/>
+		    <bCtset dash="'"/>
 		    <gamma/>
 		    <store/>
 		  </assume>
@@ -5012,12 +5012,12 @@
 	      <btypes:TYPE>
 		<Exists/>
 		<supeq>
-		  <aCtset num="big"/>
-		  <aCtset/>
+		  <bCtset num="big"/>
+		  <bCtset/>
 		</supeq>
 		<ST/>
 		<Sat>
-		  <aCtset num="big"/>
+		  <bCtset num="big"/>
 		  <Subst>
 		    <aSubMap/>
 		    <spset>
@@ -5065,7 +5065,7 @@
 		  </btypes:TYPE> (weakening), we obtain
 		  <btypes:TYPE>
 		    <Sat>
-		      <aCtset/>
+		      <bCtset/>
 		      <set>
 			<Subst>
 			  <aSubMap/>
@@ -5101,12 +5101,12 @@
 		  <btypes:TYPE>
 		    <Exists/>
 		    <supeq>
-		      <aCtset num="big"/>
-		      <aCtset/>
+		      <bCtset num="big"/>
+		      <bCtset/>
 		    </supeq>
 		    <ST/>
 		    <Sat>
-		      <aCtset num="big"/>
+		      <bCtset num="big"/>
 		      <Subst>
 			<aSubMap/>
 			<spset>
@@ -5135,7 +5135,7 @@
 		      <ptype/>
 		    </ceq>
 		  </grouping>
-		  <aCtset/>
+		  <bCtset/>
 		</in>
 		<ST/>
 		<notin>
@@ -5178,7 +5178,7 @@
 		      </Subst>
 		    </ceq>
 		  </grouping>
-		  <aCtset num="big"/>
+		  <bCtset num="big"/>
 		</in>
 	      </btypes:TYPE> such that
 	      <btypes:TYPE>
@@ -5192,7 +5192,7 @@
 	      </btypes:TYPE>, which violates the restriction
 	      <btypes:TYPE>
 		<meta>
-		  <aCtset num="big"/>
+		  <bCtset num="big"/>
 		</meta>
 	      </btypes:TYPE>.
 	    </p>
@@ -5202,12 +5202,12 @@
 	      We can write
 	      <btypes:TYPE>
 		<eq>
-		  <aCtset/>
+		  <bCtset/>
 		  <unin>
-		    <aCtset num="e"/>
-		    <aCtset num="t"/>
-		    <aCtset num="a"/>
-		    <aCtset num="r"/>
+		    <bCtset num="e"/>
+		    <bCtset num="t"/>
+		    <bCtset num="a"/>
+		    <bCtset num="r"/>
 		  </unin>
 		</eq>
 	      </btypes:TYPE> where:
@@ -5218,7 +5218,7 @@
 		  <btypes:TYPE>
 		    <eq>
 		      <dom>
-			<aCtset num="e"/>
+			<bCtset num="e"/>
 		      </dom>
 		      <ftvs>
 			<gamma/>
@@ -5233,7 +5233,7 @@
 		  <btypes:TYPE>
 		    <eq>
 		      <dom>
-			<aCtset num="t"/>
+			<bCtset num="t"/>
 		      </dom>
 		      <diff>
 			<ftvs>
@@ -5256,7 +5256,7 @@
 		  <btypes:TYPE>
 		    <eq>
 		      <dom>
-			<aCtset num="a"/>
+			<bCtset num="a"/>
 		      </dom>
 		      <set>
 			<tvars/>
@@ -5270,16 +5270,16 @@
 		  <btypes:TYPE>
 		    <mutex>
 		      <dom>
-			<aCtset num="e"/>
+			<bCtset num="e"/>
 		      </dom>
 		      <dom>
-			<aCtset num="t"/>
+			<bCtset num="t"/>
 		      </dom>
 		      <dom>
-			<aCtset num="a"/>
+			<bCtset num="a"/>
 		      </dom>
 		      <dom>
-			<aCtset num="r"/>
+			<bCtset num="r"/>
 		      </dom>
 		    </mutex>
 		  </btypes:TYPE>
@@ -5294,19 +5294,19 @@
 		  Let 
  		  <btypes:TYPE>
 		    <eq>
-		      <aCtset num="et"/>
+		      <bCtset num="et"/>
 		      <unin>
-			<aCtset num="e"/>
-			<aCtset num="t"/>
+			<bCtset num="e"/>
+			<bCtset num="t"/>
 		      </unin>
 		    </eq>
 		  </btypes:TYPE> and
  		  <btypes:TYPE>
 		    <eq>
-		      <aCtset num="ar"/>
+		      <bCtset num="ar"/>
 		      <unin>
-			<aCtset num="a"/>
-			<aCtset num="r"/>
+			<bCtset num="a"/>
+			<bCtset num="r"/>
 		      </unin>
 		    </eq>
 		  </btypes:TYPE> 
@@ -5322,7 +5322,7 @@
 		    <subeq>
 		      <ftvs>
 			<range>
-			  <aCtset num="e"/>
+			  <bCtset num="e"/>
 			</range>
 		      </ftvs>
 		      <ftvs>
@@ -5340,7 +5340,7 @@
 		    <subeq>
 		      <ftvs>
 			<range>
-			  <aCtset num="t"/>
+			  <bCtset num="t"/>
 			</range>
 		      </ftvs>
 		      <diff>
@@ -5363,10 +5363,10 @@
 		  <btypes:TYPE>
 		    <mutex>
 		      <ftvs>
-			<aCtset num="et"/>
+			<bCtset num="et"/>
 		      </ftvs>
 		      <dom>
-			<aCtset num="at"/>
+			<bCtset num="at"/>
 		      </dom>
 		    </mutex>
 		  </btypes:TYPE>.
@@ -5387,7 +5387,7 @@
 			<tvars name="beta"/>
 		      </set>
 		      <dom>
-			<aCtset num="r"/>
+			<bCtset num="r"/>
 		      </dom>
 		    </eq>
 		  </btypes:TYPE>.
@@ -5446,10 +5446,10 @@
 		<p>
 		  <btypes:TYPE>
 		    <eq>
-		      <aCtset num="ab"/>
+		      <bCtset num="ab"/>
 		      <subst>
 			<subst>
-			  <aCtset/>
+			  <bCtset/>
 			  <tvars name="alpha"/>
 			  <tvars name="gamma"/>
 			</subst>
@@ -5463,19 +5463,19 @@
 		  Due to case&nbsp;(1.g), 
 		  <btypes:TYPE>
 		    <eq>
-		      <aCtset num="ab"/>
+		      <bCtset num="ab"/>
 		      <unin>
-			<aCtset num="et"/>
-			<aCtset num="ar" dash="'"/>
+			<bCtset num="et"/>
+			<bCtset num="ar" dash="'"/>
 		      </unin>
 		    </eq>
 		  </btypes:TYPE>, where
 		  <btypes:TYPE>
 		    <eq>
-		      <aCtset num="ar" dash="'"/>
+		      <bCtset num="ar" dash="'"/>
 		      <subst>
 			<subst>
-			  <aCtset num="ar"/>
+			  <bCtset num="ar"/>
 			  <tvars name="alpha"/>
 			  <tvars name="gamma"/>
 			</subst>
@@ -5583,10 +5583,10 @@
 		  Let
 		  <btypes:TYPE>
 		    <eq>
-		      <aCtset dash="'"/>
+		      <bCtset dash="'"/>
 		      <unin>
-			<aCtset/>
-			<aCtset num="ab"/>
+			<bCtset/>
+			<bCtset num="ab"/>
 		      </unin>
 		    </eq>
 		  </btypes:TYPE>
@@ -5597,16 +5597,16 @@
 		  This can be written as:<br/>
 		  <btypes:TYPE>
 		    <eq>
-		      <aCtset dash="'"/>
+		      <bCtset dash="'"/>
 		      <unin>
-			<aCtset num="et"/>
-			<aCtset num="ar"/>
-			<aCtset num="et"/>
-			<aCtset num="ar" dash="'"/>
+			<bCtset num="et"/>
+			<bCtset num="ar"/>
+			<bCtset num="et"/>
+			<bCtset num="ar" dash="'"/>
 		      </unin>
 		      <unin>
-			<aCtset/>
-			<aCtset num="ar" dash="'"/>
+			<bCtset/>
+			<bCtset num="ar" dash="'"/>
 		      </unin>
 		    </eq>
 		  </btypes:TYPE>.
@@ -5617,13 +5617,13 @@
 		  Since 
 		  <btypes:TYPE>
 		    <dom>
-		      <aCtset num="ar" dash="'"/>
+		      <bCtset num="ar" dash="'"/>
 		    </dom>
 		  </btypes:TYPE> consists of new type variables,
 		  we have
 		  <btypes:TYPE>
 		    <meta>
-		      <aCtset dash="'"/>
+		      <bCtset dash="'"/>
 		    </meta>
 		  </btypes:TYPE>.
 		</p>
@@ -5635,22 +5635,22 @@
 		    <eq>
 		      <Subst>
 			<aSubMap dash="'"/>
-			<aCtset/>
+			<bCtset/>
 		      </Subst>
-		      <aCtset/>
+		      <bCtset/>
 		    </eq>
 		  </btypes:TYPE>, we have
 		  <btypes:TYPE>
 		    <eq>
 		      <Subst>
 			<aSubMap dash="'"/>
-			<aCtset dash="'"/>
+			<bCtset dash="'"/>
 		      </Subst>
 		      <unin>
-			<aCtset/>
+			<bCtset/>
 			<Subst>
 			  <aSubMap dash="'"/>
-			  <aCtset num="ar" dash="'"/>
+			  <bCtset num="ar" dash="'"/>
 			</Subst>
 		      </unin>
 		    </eq>
@@ -5668,7 +5668,7 @@
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
-		    <aCtset num="ab"/>
+		    <bCtset num="ab"/>
 		    <Subst>
 		      <aSubMap num="ab"/>
 		      <gamma/>
@@ -5693,7 +5693,7 @@
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
-		    <aCtset num="ab"/>
+		    <bCtset num="ab"/>
 		    <gamma/>
 		    <store/>
 		  </assume>
@@ -5714,7 +5714,7 @@
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
-		    <aCtset dash="'"/>
+		    <bCtset dash="'"/>
 		    <gamma/>
 		    <store/>
 		  </assume>
@@ -5783,7 +5783,7 @@
 		<p>
 		  <btypes:TYPE>
 		    <Sat>
-		      <aCtset dash="'"/>
+		      <bCtset dash="'"/>
 		      <spset>
 			<Sjudge>
 			  <assume>
@@ -5868,12 +5868,12 @@
 		  <btypes:TYPE>
 		    <Exists/>
 		    <supeq>
-		      <aCtset dash="''"/>
-		      <aCtset dash="'"/>
+		      <bCtset dash="''"/>
+		      <bCtset dash="'"/>
 		    </supeq>
 		    <ST/>
 		    <Sat>
-		      <aCtset dash="''"/>
+		      <bCtset dash="''"/>
 		      <Subst>
 			<aSubMap dash="'"/>
 			<spset>
@@ -5890,7 +5890,7 @@
 		    <Sat>
 		      <Subst>
 			<aSubMap dash="'"/>
-			<aCtset dash="''"/>
+			<bCtset dash="''"/>
 		      </Subst>
 		      <Subst>
 			<aSubMap dash="'"/>
@@ -5908,7 +5908,7 @@
 		  <btypes:TYPE>
 		    <Sjudge>
 		      <assume>
-			<aCtset dash="''"/>
+			<bCtset dash="''"/>
 			<gamma/>
 			<store/>
 		      </assume>
@@ -5920,7 +5920,7 @@
 		  </btypes:TYPE>. This implies
 		  <btypes:TYPE>
 		    <Sat>
-		      <aCtset dash="''"/>
+		      <bCtset dash="''"/>
 		      <spset>
 			<TDjudge>
 			  <aVal/>
@@ -5997,7 +5997,7 @@
 		    <Sat>
 		      <Subst>
 			<aSubMap dash="'"/>
-			<aCtset dash="''"/>
+			<bCtset dash="''"/>
 		      </Subst>
 		      <Subst>
 			<aSubMap dash="'"/>
@@ -6036,7 +6036,7 @@
 		  <assume>
 		    <Subst>
 		      <aSubMap dash="'"/>
-		      <aCtset dash="''"/>
+		      <bCtset dash="''"/>
 		    </Subst>
 		    <Subst>
 		      <aSubMap dash="'"/>
@@ -6062,7 +6062,7 @@
 		  <assume>
 		    <Subst>
 		      <aSubMap dash="'"/>
-		      <aCtset dash="''"/>
+		      <bCtset dash="''"/>
 		    </Subst>
 		    <gamma/>
 		    <store/>
@@ -6080,10 +6080,10 @@
 	      Now, 
 	      <btypes:TYPE>
 		<eq>
-		  <aCtset dash="''"/>
+		  <bCtset dash="''"/>
 		  <unin>
-		    <aCtset/>
-		    <aCtset num="rest"/>
+		    <bCtset/>
+		    <bCtset num="rest"/>
 		  </unin>
 		</eq>
 	      </btypes:TYPE>.
@@ -6092,13 +6092,13 @@
 		<eq>
 		  <Subst>
 		    <aSubMap dash="'"/>
-		    <aCtset dash="''"/>
+		    <bCtset dash="''"/>
 		  </Subst>
 		  <unin>
-		    <aCtset/>
+		    <bCtset/>
 		    <Subst>
 		      <aSubMap dash="'"/>
-		      <aCtset num="rest"/>
+		      <bCtset num="rest"/>
 		    </Subst>
 		  </unin>
 		</eq>
@@ -6108,9 +6108,9 @@
 		<supeq>
 		  <Subst>
 		    <aSubMap dash="'"/>
-		    <aCtset dash="''"/>
+		    <bCtset dash="''"/>
 		  </Subst>
-		  <aCtset/>
+		  <bCtset/>
 		</supeq>
 	      </btypes:TYPE>.
 	    </p>
@@ -6294,7 +6294,7 @@
 		<p>
 		  <btypes:TYPE>
 		    <Sat>
-		      <aCtset/>
+		      <bCtset/>
 		      <spset>
 			<Sjudge>
 			  <assume>
@@ -6323,7 +6323,7 @@
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
-		    <aCtset/>
+		    <bCtset/>
 		    <gamma dash="'"/>
 		    <store/>
 		  </assume>
@@ -6337,13 +6337,13 @@
 	      <btypes:TYPE>
 		<Exists/>
 		<supeq>
-		  <aCtset dash="'"/>
-		  <aCtset/>
+		  <bCtset dash="'"/>
+		  <bCtset/>
 		</supeq>
 		<ST/>
 		<Sjudge>
 		  <assume>
-		    <aCtset dash="'"/>
+		    <bCtset dash="'"/>
  		    <gamma/>
 		    <store/>
 		  </assume>
@@ -6365,7 +6365,7 @@
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
-		    <aCtset/>
+		    <bCtset/>
 		    <gamma dash="'"/>
 		    <store/>
 		  </assume>
@@ -6382,7 +6382,7 @@
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
-		    <aCtset dash="'"/>
+		    <bCtset dash="'"/>
 		    <gamma dash="'"/>
 		    <store/>
 		  </assume>
@@ -6396,13 +6396,13 @@
 	      <btypes:TYPE>
 		<Exists/>
 		<supeq>
-		  <aCtset dash="''"/>
-		  <aCtset dash="'"/>
+		  <bCtset dash="''"/>
+		  <bCtset dash="'"/>
 		</supeq>
 		<ST/>
 		<Sjudge>
 		  <assume>
-		    <aCtset dash="''"/>
+		    <bCtset dash="''"/>
  		    <gamma/>
 		    <store/>
 		  </assume>
@@ -6427,7 +6427,7 @@
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
-		    <aCtset dash="''"/>
+		    <bCtset dash="''"/>
  		    <gamma/>
 		    <store/>
 		  </assume>
@@ -6448,7 +6448,7 @@
 	      Again by weakening wrt case&nbsp;(3.a.ii), we have
 	      <btypes:TYPE>
 		<Sat>
-		  <aCtset dash="''"/>
+		  <bCtset dash="''"/>
 		  <set>
 		    <type num="a"/>
 		    <type num="r"/>
@@ -6487,7 +6487,7 @@
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
-		    <aCtset dash="''"/>
+		    <bCtset dash="''"/>
  		    <gamma/>
 		    <store/>
 		  </assume>
@@ -6533,7 +6533,7 @@
       <btypes:TYPE>
 	<Sjudge>
 	  <assume>
-	    <aCtset/>
+	    <bCtset/>
 	    <extend>
 	      <gamma/>
 	      <tqExpr>
@@ -6552,7 +6552,7 @@
       <btypes:TYPE>
 	<Sjudge>
 	  <assume>
-	    <aCtset/>
+	    <bCtset/>
 	    <gamma/>
 	    <extend>
 	      <store/>
@@ -6608,7 +6608,7 @@
 	  <btypes:TYPE>
 	    <Sjudge>
 	      <assume>
-		<aCtset/>
+		<bCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -6627,7 +6627,7 @@
 	  <btypes:TYPE>
 	    <Sjudge>
 	      <assume>
-		<aCtset/>
+		<bCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -6650,7 +6650,7 @@
 	  <btypes:TYPE>
 	    <Sjudge>
 	      <assume>
-		<aCtset/>
+		<bCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -6674,7 +6674,7 @@
 	  <btypes:TYPE>
 	    <Sjudge>
 	      <assume>
-		<aCtset/>
+		<bCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -6693,7 +6693,7 @@
 	  <btypes:TYPE>
 	    <Sjudge>
 	      <assume>
-		<aCtset/>
+		<bCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -6785,15 +6785,15 @@
 	  </btypes:TYPE> and
 	  <btypes:TYPE>
 	    <supeq>
-	      <aCtset dash="'"/>
-	      <aCtset/>
+	      <bCtset dash="'"/>
+	      <bCtset/>
 	    </supeq>
 	  </btypes:TYPE> 
 	  such that
 	  <btypes:TYPE>
 	    <Sjudge>
 	      <assume>
-		<aCtset dash="'"/>
+		<bCtset dash="'"/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -6807,7 +6807,7 @@
 	  <btypes:TYPE>
 	    <Sjudge>
 	      <assume>
-		<aCtset dash="'"/>
+		<bCtset dash="'"/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -6845,15 +6845,15 @@
 	  </btypes:TYPE> and
 	  <btypes:TYPE>
 	    <supeq>
-	      <aCtset dash="'"/>
-	      <aCtset/>
+	      <bCtset dash="'"/>
+	      <bCtset/>
 	    </supeq>
 	  </btypes:TYPE>
 	  such that
 	  <btypes:TYPE>
 	    <Sjudge>
 	      <assume>
-		<aCtset dash="'"/>
+		<bCtset dash="'"/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -6866,7 +6866,7 @@
 	  <btypes:TYPE>
 	    <Sjudge name="*">
 	      <assume>
-		<aCtset dash="'"/>
+		<bCtset dash="'"/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -7201,14 +7201,14 @@
 		  </btypes:TYPE> and
 		  <btypes:TYPE>
 		    <supeq>
-		      <aCtset dash="'"/>
-		      <aCtset/>
+		      <bCtset dash="'"/>
+		      <bCtset/>
 		    </supeq>
 		  </btypes:TYPE> such that
 		  <btypes:TYPE>
 		    <Sjudge>
 		      <assume>
-			<aCtset dash="'"/>
+			<bCtset dash="'"/>
 			<gamma/>
 			<store dash="'"/>
 		      </assume>
@@ -7221,7 +7221,7 @@
 		  <btypes:TYPE>
 		    <Sjudge>
 		      <assume>
-			<aCtset dash="'"/>
+			<bCtset dash="'"/>
 			<gamma/>
 			<store dash="'"/>
 		      </assume>
@@ -7299,7 +7299,7 @@
 		  <btypes:TYPE>
 		    <Sjudge>
 		      <assume>
-			<aCtset dash="'"/>
+			<bCtset dash="'"/>
 			<gamma/>
 			<store dash="'"/>
 		      </assume>
@@ -7332,7 +7332,7 @@
 		  </btypes:TYPE>. Clearly, these types are consistent
 		  with respect to the weakened constraints set
 		  <btypes:TYPE>
-		    <aCtset dash="'"/>
+		    <bCtset dash="'"/>
 		  </btypes:TYPE>.
 		</p>
 	      </li>
@@ -7346,7 +7346,7 @@
 		  <btypes:TYPE>
 		    <Sjudge>
 		      <assume>
-			<aCtset dash="'"/>
+			<bCtset dash="'"/>
 			<gamma/>
 			<store dash="'"/>
 		      </assume>
@@ -7579,7 +7579,7 @@
 		  We also have
 		  <btypes:TYPE>
 		    <Sat>
-		      <aCtset/>
+		      <bCtset/>
 		      <Sjudge>
 			<assume>
 			  <gamma/>
@@ -7606,7 +7606,7 @@
 		  <btypes:TYPE>
 		    <Sjudge>
 		      <assume>
-			<aCtset/>
+			<bCtset/>
 			<extend>
 			  <gamma/>
 			  <mapping>
@@ -7633,7 +7633,7 @@
 		  <btypes:TYPE>
 		    <Sjudge>
 		      <assume>
-			<aCtset/>
+			<bCtset/>
 			<gamma/>
 			<extend>
 			  <store/>
@@ -7697,7 +7697,7 @@
 		  <btypes:TYPE>
 		    <Sjudge>
 		      <assume>
-			<aCtset/>
+			<bCtset/>
 			<gamma/>
 			<store/>
 		      </assume>
@@ -7740,7 +7740,7 @@
 		  <btypes:TYPE>
 		    <Sjudge>
 		      <assume>
-			<aCtset/>
+			<bCtset/>
 			<gamma/>
 			<store/>
 		      </assume>
@@ -7756,7 +7756,7 @@
 		  <btypes:TYPE>
 		    <Sjudge>
 		      <assume>
-			<aCtset/>
+			<bCtset/>
 			<gamma/>
 			<extend>
 			  <store/>
@@ -8163,14 +8163,14 @@
       </btypes:TYPE>, we conclude that
       <btypes:TYPE>
 	<Exists/>
-	<aCtset num="d"/>
+	<bCtset num="d"/>
 	<text content=" and "/>
-	<aCtset num="sh"/>
+	<bCtset num="sh"/>
       </btypes:TYPE> such that
       <btypes:TYPE>
 	<Sjudge>
 	  <assume>
-	    <aCtset num="d"/>
+	    <bCtset num="d"/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -8183,7 +8183,7 @@
       <btypes:TYPE>
 	<Sjudge>
 	  <assume>
-	    <aCtset num="sh"/>
+	    <bCtset num="sh"/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -8202,30 +8202,30 @@
 	<store/>
       </btypes:TYPE>, we can construct a 
       <btypes:TYPE>
-	<aCtset/>
+	<bCtset/>
       </btypes:TYPE> such that
       <btypes:TYPE>
 	<supeq>
-	  <aCtset/>
-	  <aCtset num="d"/>
+	  <bCtset/>
+	  <bCtset num="d"/>
 	</supeq>
       </btypes:TYPE>,
       <btypes:TYPE>
 	<supeq>
-	  <aCtset/>
-	  <aCtset num="sh"/>
+	  <bCtset/>
+	  <bCtset num="sh"/>
 	</supeq>
       </btypes:TYPE>, and
       <btypes:TYPE>
 	<meta>
-	  <aCtset/>
+	  <bCtset/>
 	</meta>
       </btypes:TYPE>.
       Now, by weakening, we have
       <btypes:TYPE>
 	<Sjudge>
 	  <assume>
-	    <aCtset/>
+	    <bCtset/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -8238,7 +8238,7 @@
       <btypes:TYPE>
 	<Sjudge>
 	  <assume>
-	    <aCtset/>
+	    <bCtset/>
 	    <gamma/>
 	    <store/>
 	  </assume>

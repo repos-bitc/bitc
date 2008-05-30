@@ -726,7 +726,8 @@
 
 <!ELEMENT constraint           EMPTY>
 <!ATTLIST constraint
-                               num       CDATA   #IMPLIED
+                               name     CDATA   #IMPLIED
+                               num      CDATA   #IMPLIED
                                dash     CDATA    #IMPLIED
 >
 <!-- Polymorphic constraint -->
