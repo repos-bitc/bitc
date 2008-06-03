@@ -90,7 +90,7 @@
 	</lhs>
 	<rhs>
 	  <Pair>
-	    <aCtset num="i"/>
+	    <dCtset/>
 	    <scomp>
 	      <aSubMap num="a"/>
 	      <aSubMap num="i"/>
@@ -111,7 +111,7 @@
 	      </Subst>
 	    </unf>
 	    <Pair>
-	      <aCtset num="i"/>
+	      <dCtset/>
 	      <aSubMap num="i"/>
 	    </Pair>
 	  </eq>
@@ -448,7 +448,7 @@
 	</lhs>
 	<rhs>
 	  <Pair>
-	    <aCtset num="i"/>
+	    <dCtset/>
 	    <scomp>
 	      <aSubMap num="k"/>
 	      <aSubMap num="i"/>
@@ -469,7 +469,7 @@
 	      </Subst>
 	    </unf>
 	    <Pair>
-	      <aCtset num="i"/>
+	      <dCtset/>
 	      <aSubMap num="i"/>
 	    </Pair>
 	  </eq>
@@ -571,7 +571,7 @@
 	</lhs>
 	<rhs>
 	  <Pair>
-	    <aCtset num="i"/>
+	    <dCtset/>
 	    <scomp>
 	      <aSubMap num="k"/>
 	      <aSubMap num="i"/>
@@ -592,7 +592,7 @@
 	      </Subst>
 	    </unf>
 	    <Pair>
-	      <aCtset num="i"/>
+	      <dCtset/>
 	      <aSubMap num="i"/>
 	    </Pair>
 	  </eq>
@@ -639,7 +639,7 @@
 	</lhs>
 	<rhs>
 	  <Pair>
-	    <aCtset num="i"/>
+	    <dCtset/>
 	    <scomp>
 	      <aSubMap num="k"/>
 	      <aSubMap num="i"/>
@@ -660,7 +660,7 @@
 	      </Subst>
 	    </unf>
 	    <Pair>
-	      <aCtset num="i"/>
+	      <dCtset/>
 	      <aSubMap num="i"/>
 	    </Pair>
 	  </eq>

@@ -290,6 +290,8 @@
 <!ELEMENT Subst                (%subst.group;, %anything.group;)>
 <!-- e[a/b] -->
 <!ELEMENT subst                (%anything.group;, %anything.group;, %anything.group;)>
+<!ATTLIST spset
+                               special      yes    #IMPLIED
 <!-- constrained substitution bold[a/b]bold -->
 <!ELEMENT Csubst               (%anything.group;, %anything.group;, %anything.group;)>
  
@@ -745,6 +747,11 @@
 
 <!ELEMENT bCtset               EMPTY>
 <!ATTLIST bCtset
+                               num       CDATA   #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT dCtset               EMPTY>
+<!ATTLIST dCtset
                                num       CDATA   #IMPLIED
                                dash     CDATA    #IMPLIED
 >

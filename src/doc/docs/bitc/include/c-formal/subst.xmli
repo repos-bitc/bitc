@@ -393,16 +393,23 @@
 	  <eq>
 	    <Subst>
 	      <aSubMap/>
-	      <type num="i"/>
+	      <lKind/>
 	    </Subst>
-	    <type num="i" dash="'"/>
+	    <lKind dash="'"/>
 	  </eq>
 	  <eq>
 	    <Subst>
 	      <aSubMap/>
-	      <lKind/>
+	      <type num="g"/>
 	    </Subst>
-	    <lKind dash="'"/>
+	    <type num="g" dash="'"/>
+	  </eq>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <type num="i"/>
+	    </Subst>
+	    <type num="i" dash="'"/>
 	  </eq>
 	</tyPre>
 	<tyConc>
@@ -417,7 +424,7 @@
 	    </Subst>
 	    <Pcst>
 	      <lKind dash="'"/>
-	      <type num="g"/>
+	      <type num="g" dash="'"/>
 	      <type num="i" dash="'"/>
 	    </Pcst>
 	  </eq>
@@ -428,14 +435,14 @@
 	  <grouping>
 	    <Forall/>
 	    <in>
-	      <constraint/>
+	      <constraint name="u"/>
 	      <aCtset/>
 	    </in>
 	    <text content=", "/>
 	    <in>
 	      <Subst>
 		<aSubMap/>
-		<constraint/>
+		<constraint name="u"/>
 	      </Subst>
 	      <aCtset dash="'"/>
 	    </in>
@@ -530,14 +537,14 @@
 	  <grouping>
 	    <Forall/>
 	    <in>
-	      <constraint name="d"/>
+	      <constraint name="c"/>
 	      <bCtset/>
 	    </in>
 	    <text content=", "/>
 	    <in>
 	      <Subst>
 		<aSubMap/>
-		<constraint name="d"/>
+		<constraint name="c"/>
 	      </Subst>
 	      <bCtset dash="'"/>
 	    </in>

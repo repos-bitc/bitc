@@ -812,11 +812,27 @@
   
   <xsl:template match="subst" mode="formula">
     <xsl:apply-templates select="*[1]" mode="formula"/>	
-    <xsl:text>[</xsl:text>	  
+    <xsl:choose>
+      <xsl:when test="@special">
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>#x301A;</xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:text>[</xsl:text>	  
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:apply-templates select="*[3]" mode="formula"/>	
     <xsl:text>/</xsl:text>	  
     <xsl:apply-templates select="*[2]" mode="formula"/>	
-    <xsl:text>]</xsl:text>	  
+    <xsl:choose>
+      <xsl:when test="@special">
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>#x301B;</xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:text>]</xsl:text>	  
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>  
 
   <xsl:template match="Csubst" mode="formula">
@@ -1647,9 +1663,20 @@
   
   <!-- ct_set templates -->
   <xsl:template match="aCtset" mode="formula">
-    <xsl:call-template name="print.mathcal">
-      <xsl:with-param name="print.mathcal.letter">C</xsl:with-param> 
-    </xsl:call-template>
+    <xsl:choose>
+      <xsl:when test="@name">
+	<xsl:call-template name="print.mathcal">
+	  <xsl:with-param name="print.mathcal.letter">
+	    <xsl:value-of select="@name"/>
+	  </xsl:with-param> 
+	</xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:call-template name="print.mathcal">
+	  <xsl:with-param name="print.mathcal.letter">C</xsl:with-param> 
+	</xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:call-template name="print.index.dash"/>    
   </xsl:template>  
 
@@ -1658,6 +1685,17 @@
     <xsl:call-template name="print.mathmode">
       <xsl:with-param name="print.mathmode.text">C</xsl:with-param> 
     </xsl:call-template>
+    <xsl:call-template name="print.index.dash"/>    
+  </xsl:template>  
+
+  <!-- ct_set templates type 3 -->
+  <xsl:template match="dCtset" mode="formula">
+    <xsl:call-template name="print.mathcal">
+      <xsl:with-param name="print.mathcal.letter">D</xsl:with-param>
+    </xsl:call-template>
+    <!--     <xsl:call-template name="print.mathfrac"> -->
+    <!--       <xsl:with-param name="print.mathfrac.letter">C</xsl:with-param>  -->
+    <!--     </xsl:call-template> -->
     <xsl:call-template name="print.index.dash"/>    
   </xsl:template>  
   

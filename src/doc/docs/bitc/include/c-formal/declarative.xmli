@@ -6,7 +6,7 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
   <title>Declarative Type System</title>
-  <definition id="constraint-colection-ext">
+  <definition id="constraint-colection-ext-typ">
     <title>Constraint Collection over Type Derivation</title>
     <p>
       We write
@@ -17,15 +17,13 @@
 	    <type/>
 	  </TDjudge>
 	</spset>
-      </btypes:TYPE> to denote the set of all maybe types used in the
-      derivation of 
+      </btypes:TYPE> to denote the set of all constrained types and
+      unconstrained type variables used in the derivation of 
       <btypes:TYPE>
-	<spset>
-	  <TDjudge>
-	    <aExpr/>
-	    <type/>
-	  </TDjudge>
-	</spset>
+	<TDjudge>
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
       </btypes:TYPE>.
     </p>
     <btypes:TYPE>
@@ -3416,7 +3414,7 @@
 		<p>
 		  From 	
 		  <btypes:TYPE>
-		    <defn tag="constraint-colection-ext"/>
+		    <defn tag="constraint-colection-ext-typ"/>
 		  </btypes:TYPE>, we have
 		  <btypes:TYPE>
 		    <eq>
@@ -3661,7 +3659,7 @@
 	    <p>
 	      From 	
 	      <btypes:TYPE>
-		<defn tag="constraint-colection-ext"/>
+		<defn tag="constraint-colection-ext-typ"/>
 	      </btypes:TYPE>, we have:
 	      <btypes:TYPE>
 		<eq>
@@ -4326,7 +4324,7 @@
 		<lem tag="Cst-additive"/>
 	      </btypes:TYPE> (aggregation), along with 
 	      <btypes:TYPE>
-		<defn tag="constraint-colection-ext"/>
+		<defn tag="constraint-colection-ext-typ"/>
 	      </btypes:TYPE> (constraint collection), we conclude that 
 	      <btypes:TYPE>
 		<Sat>
@@ -6482,7 +6480,7 @@
 	      </btypes:TYPE>.
 	      Using cases&nbsp;(3.c, 3.d and 3.e) and
 	      <btypes:TYPE>
-		<defn tag="constraint-colection-ext"/>
+		<defn tag="constraint-colection-ext-typ"/>
 	      </btypes:TYPE>, we conclude that
 	      <btypes:TYPE>
 		<Sjudge>
@@ -7340,7 +7338,7 @@
 		<p>
 		  Now, using the T-App rule and 
 		  <btypes:TYPE>
-		    <defn tag="constraint-colection-ext"/>
+		    <defn tag="constraint-colection-ext-typ"/>
 		  </btypes:TYPE>, 
 		  we obtain
 		  <btypes:TYPE>

@@ -93,7 +93,7 @@
  	    <tvars/>
 	    <ctype>
 	      <type/>
-	      <aCtset/>
+	      <dCtset/>
 	    </ctype>
 	  </forall>
 	</alternatives>
@@ -115,22 +115,8 @@
 <!-- 	  </inter> -->
 <!-- 	</alternatives> -->
 <!--       </bnf> -->
-      <bnf desc="Unf. Constraints">
-	<constraint/>
-	<alternatives>
-	  <eq>
-	    <type/>
-	    <type/>
-	  </eq>
-	  <Pcst>
-	    <lKind/>
-	    <type/>
-	    <type/>
-	  </Pcst>
-	</alternatives>
-      </bnf>
       <bnf desc="Cmp. Constraints">
-	<constraint name="d"/>
+	<constraint name="c"/>
 	<alternatives>
 	  <unct>
 	    <tvar/>
@@ -145,23 +131,33 @@
 	  </ceq>
 	</alternatives>
       </bnf>
-      <bnf desc="Unf. Constraint Sets">
-      	<aCtset/>
+      <bnf desc="Cmp. Constraint Sets">
+      	<bCtset/>
       	<alternatives>
       	  <Empty/>
       	  <set>
       	    <plural>
-      	      <constraint/>
+      	      <constraint name="c"/>
       	    </plural>
       	  </set>
       	  <unin>
-      	    <aCtset/>
-      	    <aCtset/>
+      	    <bCtset/>
+      	    <bCtset/>
       	  </unin>
       	</alternatives>
       </bnf>
-      <bnf desc="Cmp. Constraint Sets">
-      	<bCtset/>
+      <bnf desc="Poly. Constraints">
+	<constraint name="d"/>
+	<alternatives>
+	  <Pcst>
+	    <lKind/>
+	    <type/>
+	    <type/>
+	  </Pcst>
+	</alternatives>
+      </bnf>
+      <bnf desc="Poly. Constraint Sets">
+      	<dCtset/>
       	<alternatives>
       	  <Empty/>
       	  <set>
@@ -170,8 +166,33 @@
       	    </plural>
       	  </set>
       	  <unin>
-      	    <bCtset/>
-      	    <bCtset/>
+      	    <dCtset/>
+      	    <dCtset/>
+      	  </unin>
+      	</alternatives>
+      </bnf>
+      <bnf desc="Unf. Constraints">
+	<constraint name="u"/>
+	<alternatives>
+	  <eq>
+	    <type/>
+	    <type/>
+	  </eq>
+	  <constraint name="d"/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Unf. Constraint Sets">
+      	<aCtset/>
+      	<alternatives>
+	  <Empty/>
+      	  <set>
+      	    <plural>
+      	      <constraint name="u"/>
+      	    </plural>
+      	  </set>
+      	  <unin>
+      	    <aCtset/>
+      	    <aCtset/>
       	  </unin>
       	</alternatives>
       </bnf>
@@ -223,10 +244,10 @@
 	<solvable/>
 	<alternatives>
 	  <type/>
+	  <aCtset/>
 	  <aTS/>
 	  <gamma/>
 	  <store/>
-	  <solvables/>
 	</alternatives>
       </bnf>
     </grammar>
@@ -1899,6 +1920,152 @@
       </VEqns>
     </btypes:TYPE>
   </definition>
+  <definition id="constraint-sol">      
+    <title>Constraint Satisfaction</title>
+    <p>
+      We write
+      <btypes:TYPE>
+	<models name="sol">
+	  <aSubMap/>
+	  <aCtset/>
+	</models>
+      </btypes:TYPE> 
+      to denote the fact that the substitution 
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE> satisfies the set of constraints
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE> as defined below:
+    </p>
+    <btypes:TYPE>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<type num="2"/>
+	      </Subst>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <models name="sol">
+	      <aSubMap/>
+	      <eq>
+		<type num="1"/>
+		<type num="2"/>
+	      </eq>
+	    </models>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<lKind/>
+	      </Subst>
+	      <lKind k="mono"/>
+	    </eq>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<type num="g"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<type num="i"/>
+	      </Subst>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <models name="sol">
+	      <aSubMap/>
+	      <Pcst>
+		<lKind/>
+		<type num="g"/>
+		<type num="i"/>
+	      </Pcst>
+	    </models>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<lKind/>
+	      </Subst>
+	      <lKind k="poly"/>
+	    </eq>
+	    <spEq>
+	      <Subst>
+		<aSubMap/>
+		<type num="i"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<type num="g"/>
+	      </Subst>
+	    </spEq>
+	    <pred name="Immut">
+	      <Subst>
+		<aSubMap/>
+		<type num="i"/>
+	      </Subst>
+	    </pred>
+	    <pred name="Immut">
+	      <Subst>
+		<aSubMap/>
+		<type num="i"/>
+	      </Subst>
+	    </pred>
+	  </tyPre>
+	  <tyConc>
+	    <models name="sol">
+	      <aSubMap/>
+	      <Pcst>
+		<lKind/>
+		<type num="g"/>
+		<type num="i"/>
+	      </Pcst>
+	    </models>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<constraint name="u"/>
+		<aCtset/>
+	      </in>
+	      <text content=", "/>
+	      <models name="sol">
+		<aSubMap/>
+		<constraint name="u"/>
+	      </models>
+	    </grouping>
+	  </tyPre>
+	  <tyConc>
+	    <models name="sol">
+	      <aSubMap/>
+	      <aCtset/>
+	    </models>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+  </definition>
   <definition id="eq-minz">      
     <title><btypes:TYPE><eqOp under="minzT"/></btypes:TYPE> and
       <btypes:TYPE><eqOp under="minz"/></btypes:TYPE></title>      
@@ -1937,100 +2104,6 @@
 	</eq>
       </btypes:TYPE>.
     </p>
-  </definition>
-  <definition id="pcst-sat">      
-    <title>MPC Satisfaction</title>      
-    <p>
-      A substitution 
-      <btypes:TYPE>
-	<aSubMap/>
-      </btypes:TYPE> satisfies the set of constraints
-      <btypes:TYPE>
-	<set>
-	  <Pcst>
-	    <lKind/>
-	    <type/>
-	    <type num="1"/>
-	  </Pcst>
-	  <unspecified/>
-	  <Pcst>
-	    <lKind/>
-	    <type/>
-	    <type num="n"/>
-	  </Pcst>
-	</set>
-      </btypes:TYPE> if and only if:
-    </p>
-    <ol>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<lKind/>
-	      </Subst>
-	      <lKind k="mono"/>
-	    </eq>
-	  </btypes:TYPE>
-	  and
-	  <btypes:TYPE>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<type/>
-	      </Subst>
-	      <Subst>
-		<aSubMap/>
-		<type num="1"/>
-	      </Subst>
-	      <unspecified/>
-	      <Subst>
-		<aSubMap/>
-		<type num="n"/>
-	      </Subst>
-	    </eq>
-	  </btypes:TYPE>, or
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <eq>
-	      <Subst>
-		<aSubMap/>
-		<lKind/>
-	      </Subst>
-	      <lKind k="poly"/>
-	    </eq>
-	  </btypes:TYPE>
-	  and
-	  <btypes:TYPE>
-	    <collection>
-	      <pred name="Immut">
-		<Subst>
-		  <aSubMap/>
-		  <type/>
-		</Subst>
-	      </pred>
-	      <pred name="Immut">
-		<Subst>
-		  <aSubMap/>
-		  <type num="1"/>
-		</Subst>
-	      </pred>
-	      <unspecified/>
-	      <pred name="Immut">
-		<Subst>
-		  <aSubMap/>
-		  <type num="n"/>
-		</Subst>
-	      </pred>
-	    </collection>
-	  </btypes:TYPE>
-	</p>
-      </li>
-    </ol>
   </definition>
   <definition id="ExtToSol">
     <title>Application to Solvable Entities</title>
@@ -2968,8 +3041,8 @@
 	  <solvable/>
 	</spset>
       </btypes:TYPE>
-      to denote the set of all maybe types 
-      structurally present in 
+      to denote the set of all constrained types and unconcstrained
+      type variables structurally present in 
       <btypes:TYPE>
 	<solvable/>
       </btypes:TYPE>.
@@ -2980,7 +3053,8 @@
 	</spset>
       </btypes:TYPE> relation, defined below, is extended to
       <btypes:TYPE>
-	<collection and="true">
+	<collection and="yes">
+	  <aCtset/>
 	  <aTS/>
 	  <gamma/>
 	  <store/>

@@ -18,8 +18,116 @@
       types.
     </p>
   </definition>
-  <theorem>
-    <title>Soundness of Type Inference</title>
+  <definition id="constraint-colection-ext-inf">
+    <title>Constraint Collection over Inference Derivation</title>
+    <p>
+      We write
+      <btypes:TYPE>
+	<spset>
+	  <TEjudge name="i">
+	    <assume>
+	      <gamma/>
+	      <store/>
+	    </assume>
+	    <conclude>
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>
+	    </conclude>
+	    <constrain>
+	      <aCtset/>
+	    </constrain>
+	  </TEjudge>
+	</spset>
+      </btypes:TYPE> to denote the set of all constrained types and
+      unconcstrained type variables used in the derivation of 
+      <btypes:TYPE>
+	<TEjudge name="i">
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <aCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE>.
+    </p>
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <TEjudge name="i">
+		<assume>
+		  <gamma/>
+		  <store/>
+		</assume>
+		<conclude>
+		  <tqExpr>
+		    <Unit/>
+		    <unit/>
+		  </tqExpr>
+		</conclude>
+		<constrain>
+		  <Empty/>
+		</constrain>
+	      </TEjudge>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <spset>
+	      <gamma/>
+	      <store/>
+	    </spset>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <TEjudge name="i">
+		<assume>
+		  <gamma/>
+		  <store/>
+		</assume>
+		<conclude>
+		  <tqExpr>
+		    <id/>
+		    <type/>
+		  </tqExpr>
+		</conclude>
+		<constrain>
+		  <aCtset/>
+		</constrain>
+	      </TEjudge>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <spset>
+		<gamma/>
+		<store/>
+		<type/>
+		<aCtset/>
+	      </spset>
+	    </unin>
+	  </rhs>
+	</equation>
+      </VEqns>
+    </btypes:TYPE>
+    <p>
+      Other cases are similar.
+    </p>
+  </definition>
+  <lemma>
+    <title>Consistency of Inferred Types</title>
     <p>
       If 
       <btypes:TYPE>
@@ -46,6 +154,194 @@
 	</CST>
       </btypes:TYPE>, then
       <btypes:TYPE>
+	<CST sp="yes">
+	  <TEjudge name="i">
+	    <assume>
+	      <gamma/>
+	      <store/>
+	    </assume>
+	    <conclude>
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>
+	    </conclude>
+	    <constrain>
+	      <aCtset/>
+	    </constrain>
+	  </TEjudge>
+	</CST>
+      </btypes:TYPE>.
+    </p>
+  </lemma>
+  <proof>
+    <p>
+      By straightforward induction on the derivation of
+      <btypes:TYPE>
+	<TEjudge name="i">
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <aCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE>.  
+      <font color="red">
+	Need to use unification properties here.
+      </font>
+    </p>
+  </proof>
+  <lemma>
+    <title>Substitution Consistency over Inference Derivation</title>
+    <p>
+      If 
+      <btypes:TYPE>
+	<TEjudge name="i">
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <aCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<Cst>
+	  <assume>
+	    <aSubMap/>
+	  </assume>
+	  <unin>
+	    <spset>
+	      <gamma/>
+	      <store/>
+	      <type/>
+	      <aCtset/>
+	    </spset>
+	  </unin>
+	</Cst>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
+	<Cst>
+	  <assume>
+	    <aSubMap/>
+	  </assume>
+	  <spset>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	  </spset>
+	</Cst>
+      </btypes:TYPE>.
+    </p>
+  </lemma>
+  <proof>
+    <p>
+      By straightforward induction on the derivation of
+      <btypes:TYPE>
+	<TEjudge name="i">
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <aCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE>, using the fact that we can assume
+      <btypes:TYPE>
+	<eq>
+	  <inter>
+	    <ftvs>
+	      <aSubMap/>
+	    </ftvs>
+	    <ftvs>
+	      <spset>
+		<TEjudge name="i">
+		  <assume>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <conclude>
+		    <tqExpr>
+		      <aExpr/>
+		      <type/>
+		    </tqExpr>
+		  </conclude>
+		  <constrain>
+		    <aCtset/>
+		  </constrain>
+		</TEjudge>
+	      </spset>
+	    </ftvs>
+	  </inter>
+	  <ftvs>
+	    <gamma/>
+	    <store/>
+	    <type/>
+	    <aCtset/>
+	  </ftvs>
+	</eq>
+      </btypes:TYPE>.
+      <font color="red">
+	Need to use unification properties here.
+      </font>
+    </p>
+  </proof>
+  <theorem>
+    <title>Soundness of Type Inference</title>
+    <p>
+      If 
+      <btypes:TYPE>
+	<TEjudge name="i">
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <aCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
 	<Forall/>
 	<aSubMap/>
 	<ST/>
@@ -53,7 +349,22 @@
 	  <aSubMap/>
 	  <aCtset/>
 	</models>
-      </btypes:TYPE>,
+      </btypes:TYPE> and 
+      <btypes:TYPE>
+	<Cst>
+	  <assume>
+	    <aSubMap/>
+	  </assume>
+	  <unin>
+	    <spset>
+	      <gamma/>
+	      <store/>
+	      <type/>
+	      <aCtset/>
+	    </spset>
+	  </unin>
+	</Cst>
+      </btypes:TYPE>, we have
       <btypes:TYPE>
 	<Sjudge name="*">
 	  <assume>
@@ -66,14 +377,95 @@
 	      <store/>
 	    </Subst>
 	  </assume>
-	  <Subst>
-	    <aSubMap/>
-	    <aExpr/>
-	  </Subst>
-	  <Subst>
-	    <aSubMap/>
-	    <type/>
-	  </Subst>
+	  <tqExpr>
+	    <Subst>
+	      <aSubMap/>
+	      <aExpr/>
+	    </Subst>
+	    <Subst>
+	      <aSubMap/>
+	      <type/>
+	    </Subst>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>.
+    </p>
+  </theorem>
+  <theorem>
+    <title>Corollary to Soundness of Type Inference</title>
+    <p>
+      If 
+      <btypes:TYPE>
+	<TEjudge name="i">
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <aCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<eq>
+	  <unf>
+	    <aCtset/>
+	  </unf>
+	  <Pair>
+	    <dCtset/>
+	    <aSubMap num="u"/>
+	  </Pair>
+	</eq>
+      </btypes:TYPE>, then,
+      <btypes:TYPE>
+	<Exists/>
+	<aSubMap num="s"/>
+	<ST/>
+	<models name="sol">
+	  <aSubMap num="s"/>
+	  <dCtset/>
+	</models>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<Sjudge name="*">
+	  <assume>
+	    <Subst>
+	      <scomp>
+		<aSubMap num="u"/>
+		<aSubMap num="s"/>
+	      </scomp>
+	      <gamma/>
+	    </Subst>
+	    <Subst>
+	      <scomp>
+		<aSubMap num="u"/>
+		<aSubMap num="s"/>
+	      </scomp>
+	      <store/>
+	    </Subst>
+	  </assume>
+	  <tqExpr>
+	    <Subst>
+	      <scomp>
+		<aSubMap num="u"/>
+		<aSubMap num="s"/>
+	      </scomp>
+	      <aExpr/>
+	    </Subst>
+	    <Subst>
+	      <scomp>
+		<aSubMap num="u"/>
+		<aSubMap num="s"/>
+	      </scomp>
+	      <type/>
+	    </Subst>
+	  </tqExpr>
 	</Sjudge>
       </btypes:TYPE>.
     </p>
@@ -94,14 +486,16 @@
 	      <store/>
 	    </Subst>
 	  </assume>
-	  <Subst>
-	    <aSubMap/>
-	    <aExpr/>
-	  </Subst>
-	  <Subst>
-	    <aSubMap/>
-	    <type/>
-	  </Subst>
+	  <tqExpr>
+	    <Subst>
+	      <aSubMap/>
+	      <aExpr/>
+	    </Subst>
+	    <Subst>
+	      <aSubMap/>
+	      <type/>
+	    </Subst>
+	  </tqExpr>
 	</Sjudge>
       </btypes:TYPE>, then
       <btypes:TYPE>
@@ -135,12 +529,12 @@
 	  <aSubMap dash="'"/>
 	  <compose>
 	    <aSubMap/>
-	    <aSubMap num="new"/>
+	    <aSubMap num="n"/>
 	  </compose>
 	</eq>
       </btypes:TYPE>, where
       <btypes:TYPE>
-	<aSubMap new="'"/>
+	<aSubMap num="n"/>
       </btypes:TYPE> contains substitutions used for 
       fresh type variables used in the inference derivation.
     </p>

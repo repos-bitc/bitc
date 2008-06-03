@@ -2,9 +2,22 @@
 
 (define p:(bool, bool) (#t, #f))
 
-(define (f x)
-  (set! x^ p)
-  )
+;(define (f x)
+;  (set! x^ p)
+;  )
+
+(define f (lambda (x)
+	    (let ((p (lambda (y) x))) p)))
+
+;val f: (forall 'a 'b 'c 'd 'e 'f 'g 'h 'i 'j 'k 'l 
+; *('K22446, (__letGather 'h|(fn ('i|'j) 'k|'c)), 
+;	    (__letGather 'l|((fn ('e|'f) 'g|'c)))) 
+;
+; *('K22474, 'a|(fn ('b|'c) 'd|((fn ('e|'f) 'g|'c))), 
+;	    'a|(fn ('b|'c) 'd|((fn ('e|'f) 'g|'c)))) ) 
+;
+;  'a|(fn ('b|'c) 'd|((fn ('e|'f) 'g|'c))))
+
 
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec) 0))

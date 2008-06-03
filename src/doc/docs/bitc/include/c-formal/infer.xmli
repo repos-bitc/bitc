@@ -74,7 +74,7 @@
 	      <tvars name="alpha"/>
 	      <ctype>
 		<type/>
-		<aCtset/>
+		<dCtset/>
 	      </ctype>
 	    </TS>
 	  </mapsto>
@@ -100,8 +100,8 @@
 	      </tqExpr>
 	    </conclude>
 	    <constrain>
-	      <subst>
-		<aCtset/>
+	      <subst special="yes">
+		<dCtset/>
 		<tvars name="alpha"/>
 		<tvars name="beta"/>
 	      </subst>
@@ -916,64 +916,60 @@
 	      <aCtset num="1"/>                  
 	    </constrain>
 	  </TEjudge>
+	  <eq>
+	    <aCtset num="1" dash="'"/>
+	    <unin>
+	      <aCtset num="1"/>
+	      <set>
+		<eq>
+		  <type num="1"/>
+		  <mbFull>
+		    <tvar name="gamma"/>
+		    <tvar name="beta"/>
+		  </mbFull>
+		</eq>
+	      </set>
+	    </unin>
+	  </eq>
+	  <eq>
+	    <type/>
+	    <mbFull>
+	      <tvar name="alpha"/>
+	      <tvar name="beta"/>
+	    </mbFull>
+	  </eq>
 	  <judge name="gen">
 	    <assume>
 	      <gamma/>
 	      <store/>
 	      <aExpr num="1"/>
 	      <symbol name="kappa"/>
-	      <unin>
-		<aCtset num="1"/>  
-		<set>
-		  <eq>
-		    <type num="1"/>
-		    <mbFull>
-		      <tvar name="gamma"/>
-		      <tvar name="beta"/>
-		    </mbFull>
-		  </eq>
-		</set>
-	      </unin>
+	      <aCtset num="1" dash="'"/>  
 	    </assume>
 	    <conclude>
-	      <GEN>
-		<mbFull>
-		  <tvar name="alpha"/>
-		  <tvar name="beta"/>
-		</mbFull>
-		<aTS/>
-	      </GEN>
-	    </conclude>
-	    <propagate>
 	      <collection sep=";">
-		<aSubMap/>
+		<GEN>
+		  <type/>
+		  <aTS/>
+		</GEN>
 		<aCtset/>
 	      </collection>
-	    </propagate>
+	    </conclude>
 	  </judge>
 	  <TEjudge name="i">
 	    <assume>
 	      <extend>
-		<Subst>
-		  <aSubMap/>
-		  <gamma/>
-		</Subst>
+		<gamma/>
 		<mapping>
 		  <id/>
 		  <aTS/>
 		</mapping>
 	      </extend>
-	      <Subst>
-		<aSubMap/>
-		<store/>
-	      </Subst>
+	      <store/>
 	    </assume>
 	    <conclude>
 	      <tqExpr>
-		<Subst>
-		  <aSubMap/>
-		  <aExpr num="2"/>
-		</Subst>
+		<aExpr num="2"/>
 		<type num="2"/>
 	      </tqExpr>
 	    </conclude>
@@ -1008,38 +1004,9 @@
 	    </conclude>
 	    <constrain>        
 	      <unin>
+		<aCtset num="1" dash="'"/>
 		<aCtset/>
 		<aCtset num="2"/>
-		<set>
-		  <forall> 
-		    <in>
-		      <SubMap>
-			<tvar name="delta"/>
-			<type/>
-		      </SubMap>
-		      <aSubMap/>
-		    </in>
-		  </forall>
-		  <eq>
-		    <tvar name="delta"/>
-		    <type/>
-		  </eq>
-		</set>
-		<set>
-		  <forall> 
-		    <in>
-		      <SubMap>
-			<lKind k="var"/>
-			<lKind/>
-		      </SubMap>
-		      <aSubMap/>
-		    </in>
-		  </forall>
-		  <eq>
-		    <lKind k="var"/>
-		    <lKind/>
-		  </eq>
-		</set>
 	      </unin>
 	    </constrain>
 	  </TEjudge>
@@ -1051,10 +1018,10 @@
 	<tyPre>
 	  <eq>
 	    <unf>
-	      <aCtset num="i"/>
+	      <aCtset/>
 	    </unf>
 	    <Pair>
-	      <aCtset num="u"/>
+	      <dCtset num="u"/>
 	      <aSubMap/>
 	    </Pair>
 	  </eq>
@@ -1071,9 +1038,9 @@
 	    </pred>
 	  </NOT>
 	  <eq>
-	    <aCtset/>
+	    <dCtset/>
 	    <unin>
-	      <aCtset num="u"/>
+	      <dCtset num="u"/>
 	      <set>
 		<Pcst>
 		  <lKind k="var"/>
@@ -1092,7 +1059,7 @@
 	    <diff>
 	      <ftvs>
 		<type/>
-		<aCtset/>
+		<dCtset/>
 	      </ftvs>
 	      <ftvs>
 		<Subst>
@@ -1109,17 +1076,13 @@
 	  <eq>
 	    <aTS/>
 	    <TS>
-	      <tvars name="alpha"/>
+	      <tvars/>
 	      <ctype>
 		<type/>
-		<aCtset/>
+		<dCtset/>
 	      </ctype>
 	    </TS>
 	  </eq>
-	  <models name="new">
-	    <assume/>
-	    <tvars name="beta"/>
-	  </models>
 	</tyPre>
 	<tyConc>
 	  <judge name="gen">
@@ -1128,24 +1091,23 @@
 	      <store/>
 	      <vExp/>
 	      <lKind k="var"/>
-	      <aCtset num="i"/>
+	      <aCtset/>
 	    </assume>
 	    <conclude>
-	      <GEN>
-		<type num="i"/>
-		<aTS/>
-	      </GEN>    
-	    </conclude>   
-	    <propagate>
 	      <collection sep=";">
-		<aSubMap/>
-		<subst>
-		  <aCtset/>
-		  <tvars name="alpha"/>
-		  <tvars name="beta"/>
-		</subst>
-	      </collection>
-	    </propagate>	      
+		<GEN>
+		  <type num="i"/>
+		  <aTS/>
+		</GEN> 
+		<set>
+		  <Pcst>
+		    <lKind k="var"/>
+		    <type/>
+		    <type/>
+		  </Pcst>
+		</set>
+	      </collection>   
+	    </conclude>   
 	  </judge>
 	</tyConc>
       </tyRule>
@@ -1153,10 +1115,10 @@
 	<tyPre>
 	  <eq>
 	    <unf>
-	      <aCtset num="i"/>
+	      <aCtset/>
 	    </unf>
 	    <Pair>
-	      <aCtset/>
+	      <dCtset/>
 	      <aSubMap/>
 	    </Pair>
 	  </eq>
@@ -1188,26 +1150,22 @@
 	      <store/>
 	      <aExpr/>
 	      <lKind k="var"/>
-	      <aCtset num="i"/>
+	      <aCtset/>
 	    </assume>
 	    <conclude>
-	      <GEN>
-		<type num="i"/>
-		<type/>
-	      </GEN>    
-	    </conclude>   
-	    <propagate>
 	      <collection sep=";">
-		<compose>
-		  <aSubMap/>
-		  <SubMap>
+		<GEN>
+		  <type num="i"/>
+		  <type/>
+		</GEN>
+		<set>
+		  <eq>
 		    <lKind k="var"/>
 		    <lKind k="mono"/>
-		  </SubMap>
-		</compose>
-		<aCtset/>
+		  </eq>
+		</set>
 	      </collection>
-	    </propagate>
+	    </conclude>   
 	  </judge>
 	</tyConc>
       </tyRule>

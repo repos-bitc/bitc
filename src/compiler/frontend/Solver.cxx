@@ -211,7 +211,7 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
     return true;
   }
 
-  // *(k, tg, ti), Immut(ti)
+  // *(k, tg, ti), Immut(tg)
   if(gen->isDeepImmut()) {
     PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), Immut(tg)" 
 			 << "Immut(tg) [k |-> p]." 
