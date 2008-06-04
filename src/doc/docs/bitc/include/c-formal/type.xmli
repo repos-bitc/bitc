@@ -282,7 +282,7 @@
       </tyRule>
     </Hrules>
     <Hrules rowsep="4pt" colsep="1">
-      <tyRule name="T-Fst">
+      <tyRule name="T-Sel">
 	<tyPre>
 	  <TDjudge>
 	    <aExpr/>
@@ -298,33 +298,10 @@
 	</tyPre>
 	<tyConc>
 	  <TDjudge>
-	    <fst>
+	    <ith>
 	      <aExpr/>
-	    </fst>
-	    <type num="1"/>
-	  </TDjudge>
-	</tyConc>
-      </tyRule>
-      <tyRule name="T-Snd">
-	<tyPre>
-	  <TDjudge>
-	    <aExpr/>
-	    <type/>
-	  </TDjudge>
-	  <eq under="minzT">
-	    <type/>
-	    <pair>
-	      <type num="1"/>
-	      <type num="2"/>
-	    </pair>
-	  </eq>
-	</tyPre>
-	<tyConc>
-	  <TDjudge>
-	    <snd>
-	      <aExpr/>
-	    </snd>
-	    <type num="2"/>
+	    </ith>
+	    <type num="i"/>
 	  </TDjudge>
 	</tyConc>
       </tyRule>

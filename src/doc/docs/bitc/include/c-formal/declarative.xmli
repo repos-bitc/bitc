@@ -1646,8 +1646,8 @@
 		</Sjudge>
 	      </btypes:TYPE>. 
 	      The first two steps of this derivation must be 
-	      T-Sloc and T-Fst.
-	      From the assumption of T-Fst rule, we must have
+	      T-Sloc and T-Sel.
+	      From the assumption of T-Sel rule, we must have
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
@@ -1854,7 +1854,7 @@
       </li>
       <li>
 	<p>
-	  Case T-Fst, Case T-Snd: Similar to case T-Deref.
+	  Case T-Sel: Similar to case T-Deref.
 	</p>
       </li>
       <li>
