@@ -1362,11 +1362,12 @@
 	  <btypes:TYPE>
 	    <aExpr num="1"/>
 	  </btypes:TYPE> is not a value, execution can continue via
-	  the E-App1# due to induction hypothesis. Similarly, if 
+	  the E-# (Right context redex) due to induction
+	  hypothesis. Similarly, if  
 	  <btypes:TYPE>
 	    <aExpr num="2"/>
 	  </btypes:TYPE>
-	  is not a value, we can take E-App2#. 
+	  is not a value, we can again take E-#. 
 	  Now, consider the case when both
 	  <btypes:TYPE>
 	    <aExpr num="1"/>
@@ -1462,12 +1463,12 @@
 	      <aExpr num="1"/>
 	    </Sjudge>
 	  </btypes:TYPE>
-	  we can take E-:=lhs# by induction hypothesis.
+	  we can take E-L# by induction hypothesis.
 	  Similarly, if
 	  <btypes:TYPE>
 	    <aExpr num="2"/>
 	  </btypes:TYPE>
-	  is not a value, we can take E-:=rhs#.
+	  is not a value, we can take E-#.
 	</p>
 	<p>
 	  Finally, we consider the case where
@@ -1541,7 +1542,7 @@
 		  </dom>
 		</in>
 	      </btypes:TYPE>. Now, execution can continue
-	      with E-:Stack.
+	      with E-:=Stack.
 	    </p>
 	  </li>
 	  <li>
@@ -1556,7 +1557,7 @@
 		  </deref>
 		</eq>
 	      </btypes:TYPE>, the execution can continue with step	    
-	      E:-Heap.
+	      E-:=Heap.
 	    </p>
 	  </li>
 	  <li>
@@ -1742,7 +1743,7 @@
 	  <li>
 	    <p>
 	      From cases&nbsp;(c and g), we conclude that the
-	      execution can continue using the E:-S.1 rule.
+	      execution can continue using the E-:=S.p rule.
 	    </p>
 	  </li>
 	  <li>
@@ -1759,7 +1760,7 @@
 		  </select>
 		</eq>
 	      </btypes:TYPE>, 
-	      the execution can continue using E:-S.2 rule.
+	      the execution can again continue using E-:=S.p rule.
 	    </p>
 	  </li>
 	  <li>
@@ -1769,30 +1770,16 @@
 		<eq>
 		  <aExpr num="1"/>
 		  <select>
-		    <fst>
+		    <ith>
 		      <deref>
 			<hLoc/>
 		      </deref>
-		    </fst>
+		    </ith>
 		    <path/>
 		  </select>
 		</eq>
 	      </btypes:TYPE>, 
-	      execution can continue using the E:-H1 rule, and if
-	      <btypes:TYPE>
-		<eq>
-		  <aExpr num="1"/>
-		  <select>
-		    <snd>
-		      <deref>
-			<hLoc/>
-		      </deref>
-		    </snd>
-		    <path/>
-		  </select>
-		</eq>
-	      </btypes:TYPE>, 
-	      execution can continue using the E:-H2 rule.
+	      execution can continue using the E-:=H.p rule.
 	    </p>
 	  </li>
 	</ol>
@@ -1800,7 +1787,7 @@
       <li>
 	<p>
 	  Case T-Dup: Only right execution is
-	  permitted, and can take E-Dup# or E-Dup as
+	  permitted, and can take E-# or E-Dup as
 	  applicable.
 	</p>
       </li>
@@ -1828,7 +1815,7 @@
 	      </Msub>
 	    </Sjudge>
 	  </btypes:TYPE>.
-	  Execution can take EL-^# or E-^# as
+	  Execution can take EL-^# or E-# as
 	  applicable if
 	  <btypes:TYPE>
 	    <aExpr num="1"/>
@@ -1898,7 +1885,7 @@
 	  <btypes:TYPE>
 	    <aExpr num="1"/>
 	  </btypes:TYPE>
-	  is not a value, we can take E-Let#.
+	  is not a value, we can take E-#.
 	  Otherwise, we can take E-Let-M.
 	</p>
       </li>
@@ -1932,7 +1919,7 @@
 	  <btypes:TYPE>
 	    <aExpr num="1"/>
 	  </btypes:TYPE>
-	  is not a value, we can take E-Let#.
+	  is not a value, we can take E-#.
 	  Otherwise, the execution can take E-Let-P.
 	</p>
       </li>
@@ -3252,13 +3239,13 @@
 			  <id/>
 			  <TS>
 			    <tvars/>
-			    <type num="i"/>
+			    <type num="x"/>
 			  </TS>
 			</mapsto>
 			<Cst>
-			  <aSubMap num="n"/>
+			  <aSubMap num="x"/>
 			  <set>
-			    <type num="i"/>
+			    <type num="x"/>
 			  </set>
 			</Cst>
 			<eq>
@@ -3274,8 +3261,8 @@
 			<TDjudge>
 			  <id/>
 			  <Subst>
-			    <aSubMap num="n"/>
-			    <type num="i"/>
+			    <aSubMap num="x"/>
+			    <type num="x"/>
 			  </Subst>
 			</TDjudge>
 		      </tyConc>
@@ -3295,8 +3282,8 @@
 		    <eq>
 		      <type/>
 		      <Subst>
-			<aSubMap num="n"/>
-			<type num="i"/>
+			<aSubMap num="x"/>
+			<type num="x"/>
 		      </Subst>
 		    </eq>
 		  </btypes:TYPE>.
@@ -3313,8 +3300,8 @@
 			<TDjudge>
 			  <id/>
 			  <Subst>
-			    <aSubMap num="n"/>
-			    <type num="i"/>
+			    <aSubMap num="x"/>
+			    <type num="x"/>
 			  </Subst>
 			</TDjudge>
 		      </spset>
@@ -3333,8 +3320,8 @@
 			  <TDjudge>
 			    <id/>
 			    <Subst>
-			      <aSubMap num="n"/>
-			      <type num="i"/>
+			      <aSubMap num="x"/>
+			      <type num="x"/>
 			    </Subst>
 			  </TDjudge>
 			</spset>
@@ -3365,7 +3352,7 @@
 	      <btypes:TYPE>
 		<eq>
 		  <dom>
-		    <aSubMap num="n"/>
+		    <aSubMap num="x"/>
 		  </dom>
 		  <set>
 		    <tvars/>
@@ -3376,7 +3363,7 @@
 		<eq>
 		  <inter>
 		    <dom>
-		      <aSubMap num="n"/>
+		      <aSubMap num="x"/>
 		    </dom>
 		    <ftvs>
 		      <aSubMap/>
@@ -3401,7 +3388,7 @@
 		    <tvars/>
 		    <Subst>
 		      <aSubMap/>
-		      <type num="i"/>
+		      <type num="x"/>
 		    </Subst>
 		  </TS>
 		</mapsto>
@@ -3427,7 +3414,7 @@
 		      <spset>
 			<gamma/>
 			<store/>
-			<type num="i"/>
+			<type num="x"/>
 			<type/>
 		      </spset>
 		    </eq>
@@ -3446,7 +3433,7 @@
 			<aSubMap/>
 		      </assume>
 		      <set>
-			<type num="i"/>
+			<type num="x"/>
 		      </set>
 		    </models>
 		  </btypes:TYPE>.
@@ -3457,7 +3444,7 @@
 		      <Subst>
 			<aSubMap/>
 			<spset>
-			  <type num="i"/>
+			  <type num="x"/>
 			</spset>
 		      </Subst>
 		    </Sat>
@@ -3466,7 +3453,7 @@
 		    <CST sp="yes">
 		      <Subst>
 			<aSubMap/>
-			<type num="i"/>
+			<type num="x"/>
 		      </Subst>
 		    </CST>
 		  </btypes:TYPE>.
@@ -3478,7 +3465,7 @@
 		    <Cst>
 		      <aSubMap/>
 		      <set>
-			<type num="i"/>
+			<type num="x"/>
 		      </set>
 		    </Cst>
 		  </btypes:TYPE>.
@@ -3489,9 +3476,9 @@
 		  From case&nbsp;(2.a.i), we have
 		  <btypes:TYPE>
 		    <Cst>
-		      <aSubMap num="n"/>
+		      <aSubMap num="x"/>
 		      <set>
-			<type num="i"/>
+			<type num="x"/>
 		      </set>
 		    </Cst>
 		  </btypes:TYPE>.
@@ -3505,8 +3492,8 @@
 		      <aSubMap/>
 		      <set>
 			<Subst>
-			  <aSubMap num="n"/>
-			  <type num="i"/>
+			  <aSubMap num="x"/>
+			  <type num="x"/>
 			</Subst>
 		      </set>
 		    </Cst>
@@ -3536,7 +3523,7 @@
 			<aSubMap num="m"/>
 		      </dom>
 		      <dom>
-			<aSubMap num="n"/>
+			<aSubMap num="x"/>
 		      </dom>
 		      <set>
 			<tvars/>
@@ -3553,14 +3540,14 @@
 			<aSubMap num="m"/>
 			<Subst>
 			  <aSubMap/>
-			  <type num="i"/>
+			  <type num="x"/>
 			</Subst>
 		      </Subst>
 		      <Subst>
 			<sSubMap/>
 			<Subst>
-			  <aSubMap num="n"/>
-			  <type num="i"/>
+			  <aSubMap num="x"/>
+			  <type num="x"/>
 			</Subst>
 		      </Subst>
 		    </eq>
@@ -3571,7 +3558,7 @@
 			<aSubMap num="m"/>
 			<Subst>
 			  <aSubMap/>
-			  <type num="i"/>
+			  <type num="x"/>
 			</Subst>
 		      </Subst>
 		      <Subst>
@@ -3590,7 +3577,7 @@
 		      <set>
 			<Subst>
 			  <aSubMap/>
-			  <type num="i"/>
+			  <type num="x"/>
 			</Subst>
 		      </set>
 		    </Cst>
@@ -3621,7 +3608,7 @@
 		      <aSubMap num="m"/>
 		      <Subst>
 			<aSubMap/>
-			<type num="i"/>
+			<type num="x"/>
 		      </Subst>
 		    </Subst>
 		  </tqExpr>
@@ -3695,7 +3682,7 @@
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
-		      <type num="i"/>
+		      <type num="x"/>
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
@@ -3718,7 +3705,7 @@
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
-		      <type num="i"/>
+		      <type num="x"/>
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
@@ -3731,7 +3718,7 @@
 		      <spset>
 			<gamma/>
 			<store/>
-			<type num="i"/>
+			<type num="x"/>
 			<type/>
 		      </spset>
 		    </Subst>
@@ -3751,7 +3738,7 @@
 		    <spset>
 		      <gamma/>
 		      <store/>
-		      <type num="i"/>
+		      <type num="x"/>
 		      <type/>
 		    </spset>
 		  </Subst>
@@ -3769,7 +3756,7 @@
 		      <spset>
 			<gamma/>
 			<store/>
-			<type num="i"/>
+			<type num="x"/>
 			<type/>
 		      </spset>
 		    </Subst>
@@ -3798,7 +3785,7 @@
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
-		      <type num="i"/>
+		      <type num="x"/>
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
@@ -7135,7 +7122,7 @@
 	    <p>
 	      <btypes:TYPE>
 		<evalOp/> 
-	      </btypes:TYPE> E-App1:
+	      </btypes:TYPE> E-# (1):
 	    </p>
 	    <btypes:TYPE>
 	      <opRule>
@@ -7365,7 +7352,7 @@
 	    <p>
 	      <btypes:TYPE>
 		<evalOp/> 
-	      </btypes:TYPE> E-App2:
+	      </btypes:TYPE> E-# (2):
 	    </p>
 	    <btypes:TYPE>
 	      <opRule>
@@ -7406,7 +7393,7 @@
 	      </opRule>
 	    </btypes:TYPE>
 	    <p>
-	      Similar to E-App1.
+	      Similar to E-# (1).
 	    </p>
 	  </li>
 	  <li>
@@ -7837,9 +7824,10 @@
 	  </Hrules>
 	</btypes:TYPE>
 	<p>
-	  Cases E-:=lhs# and E-:=rhs# follow from induction
+	  Cases E-L# and E-# follow from induction
 	  hypothesis, similar to the T-App case.
-	  Other cases follow from 
+	  Cases E-:=Stack, E-:=Heap, E=:=S.p and E-:=H.p
+	  follow from 
 	  <btypes:TYPE>
 	    <lem tag="T-sh-safety"/>
 	  </btypes:TYPE> (stack and heap assignment safety).
@@ -7908,8 +7896,8 @@
 	  </Hrules>
 	</btypes:TYPE>
 	<p>
-	  The case E-Let# follows from induction hypothesis using the 
-	  T-Let-M rule.The case E-Let-M follows from 
+	  The case E-# follows from induction hypothesis using the 
+	  T-Let-M rule. The case E-Let-M follows from 
 	  <btypes:TYPE>
 	    <lem tag="T-LSubstitution"/>
 	  </btypes:TYPE> (location substitution) similar to T-App.
@@ -7923,7 +7911,7 @@
 	      <aExpr/>
 	      <let kind="p">
 		<id/>
-		<vExp/>
+ 		<vExp/>
 		<aExpr/>
 	      </let>
 	    </eq>
@@ -7996,7 +7984,11 @@
 	  </Hrules>
 	</btypes:TYPE>
 	<p>
-	  The case E-Let# follows from induction hypothesis using the 
+	  The case E-# 
+	  (<btypes:TYPE>
+	    <vExp/>
+	  </btypes:TYPE> can take step E-Rval)
+	  follows from induction hypothesis using the 
 	  T-Let-P rule. The case E-Let-P follows from 
 	  <btypes:TYPE>
 	    <lem tag="T-VSubstitution"/>

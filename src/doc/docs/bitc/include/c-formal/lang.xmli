@@ -77,27 +77,36 @@
 	    <aExpr/>
 	    <aExpr/>
 	  </Pair>
-	  <fst>
+	  <ith>
 	    <aExpr/>
-	  </fst>
-	  <snd>
-	    <aExpr/>
-	  </snd>
+	  </ith>
 	</alternatives>
       </bnfc>
       <bnfc desc="">
 	<alternatives>
-	  <let kind="k">
+	  <let kind="x">
 	    <id/>
 	    <aExpr/>
 	    <aExpr/>
 	  </let>
 	</alternatives>
       </bnfc>
+      <bnf desc="Indices">
+	<collection>
+	  <ndx/>
+	</collection>
+	<alternatives>
+	  <texttt content="1"/>
+	  <texttt content="2"/>
+	  <other>
+	    <ndx/>
+	  </other>
+	</alternatives>
+      </bnf>
       <bnf desc="Let-kinds">
 	<lKind/>
 	<alternatives>
-	  <text content="-"/>
+	  <hole/>
 	  <lKind k="var"/>
 	  <lKind k="mono"/>
 	  <lKind k="poly"/>

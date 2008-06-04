@@ -37,8 +37,7 @@
       <bnf desc="Selection Path">
 	<path/>
 	<alternatives>
-	  <texttt content="1"/>
-	  <texttt content="2"/>
+	  <ndx/>
 	  <select>
 	    <path/>
 	    <path/>
@@ -64,6 +63,69 @@
 	  </select>
 	</alternatives>
       </bnf>
+      <bnf desc="Lval Redex">
+	<redex name="L"/>
+	<alternatives>
+	  <hole/>
+	  <assign>
+	    <redex name="L"/>
+	    <aExpr/>
+	  </assign> 
+	</alternatives>
+      </bnf>
+      <bnf desc="Redex">
+	<redex/>
+	<alternatives>
+	  <hole/>
+	  <apply>
+	    <redex/>
+	    <aExpr/>
+	  </apply>
+	  <apply>
+	    <aVal/>
+	    <redex/>
+	  </apply>
+	  <assign>
+	    <lVal/>
+	    <redex/>
+	  </assign> 
+	  <dup>
+	    <redex/>
+	  </dup>
+	  <deref>
+	    <redex/>
+	  </deref>
+	</alternatives>
+      </bnf>
+      <bnfc desc="">
+	<alternatives>
+	  <if>
+	    <redex/>
+	    <aExpr/>
+	    <aExpr/>
+	  </if>	  
+	  <Pair>
+	    <redex/>
+	    <aExpr/>
+	  </Pair>
+	</alternatives>
+      </bnfc>	  
+      <bnfc desc="">
+	<alternatives>
+	  <Pair>
+	    <aVal/>
+	    <redex/>
+	  </Pair>
+	  <ith>
+	    <redex/>
+	  </ith>
+	  <let kind="x">
+	    <id/>
+	    <redex/>
+	    <aExpr/>
+	  </let>
+	</alternatives>
+      </bnfc>
     </grammar>
   </btypes:TYPE>
   <p>
@@ -72,9 +134,6 @@
     expressions is denoted by <btypes:TYPE><evalOp/></btypes:TYPE>,
     and evaluation in a Lvalue context is given by the
     <btypes:TYPE><levalOp/></btypes:TYPE> relation.
-    <br/>
-    <br/>
-    <br/>
   </p>
   </sect1>
   

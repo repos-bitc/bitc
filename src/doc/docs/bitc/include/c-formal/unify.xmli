@@ -93,7 +93,7 @@
 	    <dCtset/>
 	    <scomp>
 	      <aSubMap num="a"/>
-	      <aSubMap num="i"/>
+	      <aSubMap num="u"/>
 	    </scomp>	    
 	  </Pair>	 
 	  <eq>
@@ -112,7 +112,7 @@
 	    </unf>
 	    <Pair>
 	      <dCtset/>
-	      <aSubMap num="i"/>
+	      <aSubMap num="u"/>
 	    </Pair>
 	  </eq>
 	</rhs>
@@ -451,7 +451,7 @@
 	    <dCtset/>
 	    <scomp>
 	      <aSubMap num="k"/>
-	      <aSubMap num="i"/>
+	      <aSubMap num="u"/>
 	    </scomp>	    
 	  </Pair>	  	    
 	  <eq>
@@ -470,7 +470,7 @@
 	    </unf>
 	    <Pair>
 	      <dCtset/>
-	      <aSubMap num="i"/>
+	      <aSubMap num="u"/>
 	    </Pair>
 	  </eq>
 	</rhs>
@@ -484,7 +484,7 @@
 		<Pcst>
 		  <lKind k="mono"/>
 		  <type num="g"/>
-		  <type num="i"/>
+		  <type num="s"/>
 		</Pcst>
 	      </set>
 	      <aCtset/>
@@ -498,7 +498,7 @@
 	      <set>
 		<eq>
 		  <type num="g"/>
-		  <type num="i"/>
+		  <type num="s"/>
 		</eq>
 	      </set>
 	    </unin>
@@ -514,7 +514,7 @@
 		<Pcst>
 		  <lKind k="poly"/>
 		  <type num="g"/>
-		  <type num="i"/>
+		  <type num="s"/>
 		</Pcst>
 	      </set>
 	      <aCtset/>
@@ -536,9 +536,9 @@
 		  </minzD>
 		</eq>
 		<eq>
-		  <type num="i"/>
+		  <type num="s"/>
 		  <minzD>
-		    <type num="i"/>
+		    <type num="s"/>
 		  </minzD>
 		</eq>
 	      </set>
@@ -561,12 +561,12 @@
 	      <Pcst>
 		<lKind k="var"/>
 		<type num="g"/>
-		<type num="i"/>
+		<type num="s"/>
 	      </Pcst>
 	    </set>
 	  </eq>
 	  <pred name="Mut">
-	    <type num="i"/>
+	    <type num="s"/>
 	  </pred>
 	</lhs>
 	<rhs>
@@ -574,7 +574,7 @@
 	    <dCtset/>
 	    <scomp>
 	      <aSubMap num="k"/>
-	      <aSubMap num="i"/>
+	      <aSubMap num="u"/>
 	    </scomp>
 	  </Pair>
 	  <eq>
@@ -593,7 +593,7 @@
 	    </unf>
 	    <Pair>
 	      <dCtset/>
-	      <aSubMap num="i"/>
+	      <aSubMap num="u"/>
 	    </Pair>
 	  </eq>
 	</rhs>
@@ -642,7 +642,7 @@
 	    <dCtset/>
 	    <scomp>
 	      <aSubMap num="k"/>
-	      <aSubMap num="i"/>
+	      <aSubMap num="u"/>
 	    </scomp>
 	  </Pair>
 	  <eq>
@@ -661,7 +661,7 @@
 	    </unf>
 	    <Pair>
 	      <dCtset/>
-	      <aSubMap num="i"/>
+	      <aSubMap num="u"/>
 	    </Pair>
 	  </eq>
 	</rhs>
@@ -812,13 +812,13 @@
 	      <lKind/>
 	      <type/>
 	      <type dash="'"/>
-	      <type num="i"/>
+	      <type num="s"/>
 	    </collection>
 	  </Forall>
 	  <ST/>
 	  <NOT>
 	    <pred name="Mut">
-	      <type num="i"/>
+	      <type num="s"/>
 	    </pred>
 	  </NOT>
 	  <space/>
@@ -837,7 +837,7 @@
 	    <Pcst>
 	      <lKind k="poly"/>
 	      <type/>
-	      <type num="i"/>
+	      <type num="s"/>
 	    </Pcst>
 	    <Pcst>
 	      <lKind k="var"/>

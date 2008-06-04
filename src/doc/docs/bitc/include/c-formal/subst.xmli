@@ -407,9 +407,9 @@
 	  <eq>
 	    <Subst>
 	      <aSubMap/>
-	      <type num="i"/>
+	      <type num="s"/>
 	    </Subst>
-	    <type num="i" dash="'"/>
+	    <type num="s" dash="'"/>
 	  </eq>
 	</tyPre>
 	<tyConc>
@@ -419,13 +419,13 @@
 	      <Pcst>
 		<lKind/>
 		<type num="g"/>
-		<type num="i"/>
+		<type num="s"/>
 	      </Pcst>
 	    </Subst>
 	    <Pcst>
 	      <lKind dash="'"/>
 	      <type num="g" dash="'"/>
-	      <type num="i" dash="'"/>
+	      <type num="s" dash="'"/>
 	    </Pcst>
 	  </eq>
 	</tyConc>
@@ -679,16 +679,16 @@
 	<tyPre>
 	  <grouping>
 	    <Forall/>
-	    <lKind k="var" num="i"/>
+	    <lKind k="var" num="j"/>
 	    <text content=" in "/>
 	    <aExpr/>
 	    <text content=", "/>
 	    <eq>
 	      <Subst>
 		<aSubMap/>
-		<lKind k="var" num="i"/>
+		<lKind k="var" num="j"/>
 	      </Subst>
-	      <lKind num="i"/>
+	      <lKind num="j"/>
 	    </eq>
 	  </grouping>
 	</tyPre>
@@ -698,10 +698,10 @@
 	    <subst>
 	      <aExpr/>
 	      <plural>
-		<lKind k="var" num="i"/>
+		<lKind k="var" num="j"/>
 	      </plural>
 	      <plural>
-		<lKind num="i"/>
+		<lKind num="j"/>
 	      </plural>
 	    </subst>
 	  </eq>

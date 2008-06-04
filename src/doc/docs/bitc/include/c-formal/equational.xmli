@@ -1103,7 +1103,7 @@
 <!-- 	<eq> -->
 <!-- 	  <aCtset/> -->
 <!-- 	  <Unin> -->
-<!-- 	    <aCtset num="i"/> -->
+<!-- 	    <aCtset num="j"/> -->
 <!-- 	  </Unin> -->
 <!-- 	</eq> -->
 <!--       </btypes:TYPE>,  -->
@@ -1115,8 +1115,8 @@
 <!-- 	    <forall> -->
 <!-- 	      <tvars name="alpha"/> -->
 <!-- 	      <ctype> -->
-<!-- 		<type num="i"/> -->
-<!-- 		<aCtset num="i"/> -->
+<!-- 		<type num="j"/> -->
+<!-- 		<aCtset num="j"/> -->
 <!-- 	      </ctype> -->
 <!-- 	    </forall> -->
 <!-- 	  </mapping> -->
@@ -1280,18 +1280,18 @@
 <!--       <Pcst> -->
 <!-- 	<lKind k="poly"/> -->
 <!-- 	<type num="g"/> -->
-<!-- 	<type num="i"/> -->
+<!-- 	<type num="s"/> -->
 <!--       </Pcst> -->
 <!--       <text content=", where"/> -->
 <!--       <space/> -->
 <!--       <pred name="Immut"> -->
-<!-- 	<type num="i"/> -->
+<!-- 	<type num="s"/> -->
 <!--       </pred> -->
 <!--       <text content=", and"/> -->
 <!--       <space/> -->
 <!--       <neq> -->
 <!-- 	<pred name="dtv"> -->
-<!-- 	  <type num="i"/> -->
+<!-- 	  <type num="s"/> -->
 <!-- 	</pred> -->
 <!-- 	<Empty/> -->
 <!--       </neq> -->

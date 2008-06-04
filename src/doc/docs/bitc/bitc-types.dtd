@@ -1028,11 +1028,17 @@
 <!ELEMENT ith                  %anyexpr.group;>
 <!ATTLIST ith
                                etc      CDATA    #IMPLIED
+>
+<!ELEMENT ndx                  %anyexpr.group;>
+<!ATTLIST ndx
+                               name      CDATA    #IMPLIED
                                num      CDATA    #IMPLIED
                                dash     CDATA    #IMPLIED
 >
+<!ELEMENT other                ndx>
+
 <!ELEMENT path                 >
-<!ATTLIST ith
+<!ATTLIST path
                                num      CDATA    #IMPLIED
                                dash     CDATA    #IMPLIED
 >
@@ -1175,6 +1181,13 @@
      ====================================================================== -->
 
 <!ELEMENT opState              (%stack.group;, %heap.group, %anyexpr.group;)>
+
+<!ELEMENT redex                %anyexpr.group;?>
+<!ATTLIST redex
+                               name       CDATA   #IMPLIED
+>
+<!ELEMENT hole                 >
+
 <!ELEMENT evalOp               EMPTY>
 <!ATTLIST evalOp
                                many       (yes|no)   #IMPLIED

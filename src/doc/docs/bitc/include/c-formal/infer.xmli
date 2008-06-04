@@ -1029,7 +1029,7 @@
 	    <type/>
 	    <Subst>
 	      <aSubMap/>
-	      <type num="i"/>
+	      <type dash="'"/>
 	    </Subst>
 	  </eq>
 	  <NOT>
@@ -1096,7 +1096,7 @@
 	    <conclude>
 	      <collection sep=";">
 		<GEN>
-		  <type num="i"/>
+		  <type dash="'"/>
 		  <aTS/>
 		</GEN> 
 		<set>
@@ -1126,7 +1126,7 @@
 	    <type/>
 	    <Subst>
 	      <aSubMap/>
-	      <type num="i"/>
+	      <type dash="'"/>
 	    </Subst>
 	  </eq>
 	</tyPre>
@@ -1155,7 +1155,7 @@
 	    <conclude>
 	      <collection sep=";">
 		<GEN>
-		  <type num="i"/>
+		  <type dash="'"/>
 		  <type/>
 		</GEN>
 		<set>

@@ -1979,7 +1979,7 @@
 	      </Subst>
 	      <Subst>
 		<aSubMap/>
-		<type num="i"/>
+		<type num="s"/>
 	      </Subst>
 	    </eq>
 	  </tyPre>
@@ -1989,7 +1989,7 @@
 	      <Pcst>
 		<lKind/>
 		<type num="g"/>
-		<type num="i"/>
+		<type num="s"/>
 	      </Pcst>
 	    </models>
 	  </tyConc>
@@ -2008,7 +2008,7 @@
 	    <spEq>
 	      <Subst>
 		<aSubMap/>
-		<type num="i"/>
+		<type num="s"/>
 	      </Subst>
 	      <Subst>
 		<aSubMap/>
@@ -2018,13 +2018,13 @@
 	    <pred name="Immut">
 	      <Subst>
 		<aSubMap/>
-		<type num="i"/>
+		<type num="s"/>
 	      </Subst>
 	    </pred>
 	    <pred name="Immut">
 	      <Subst>
 		<aSubMap/>
-		<type num="i"/>
+		<type num="s"/>
 	      </Subst>
 	    </pred>
 	  </tyPre>
@@ -2034,7 +2034,7 @@
 	      <Pcst>
 		<lKind/>
 		<type num="g"/>
-		<type num="i"/>
+		<type num="s"/>
 	      </Pcst>
 	    </models>
 	  </tyConc>
@@ -2147,15 +2147,15 @@
 	    <grouping>
 	      <Unin>
 		<pred name="F">
-		  <aTS num="i"/>
+		  <aTS num="j"/>
 		</pred>
 	      </Unin>
 	      <text content=", "/>
 	      <Forall/>
 	      <in>
 		<mapping>
-		  <id/>
-		  <aTS num="i"/>
+		  <id num="j"/>
+		  <aTS num="j"/>
 		</mapping>
 		<gamma/>
 	      </in>
@@ -2172,15 +2172,15 @@
 	    <grouping>
 	      <Unin>
 		<pred name="F">
-		  <type num="i"/>
+		  <type num="j"/>
 		</pred>
 	      </Unin>
 	      <text content=", "/>
 	      <Forall/>
 	      <in>
 		<mapping>
-		  <loc/>
-		  <type num="i"/>
+		  <loc num="j"/>
+		  <type num="j"/>
 		</mapping>
 		<store/>
 	      </in>
@@ -2350,13 +2350,13 @@
 	    <grouping>
 	      <Unin>
 		<pred name="F">
-		  <constraint num="i"/>
+		  <constraint name="u" num="j"/>
 		</pred>
 	      </Unin>
 	      <text content=", "/>
 	      <Forall/>
 	      <in>
-		<constraint num="i"/>
+		<constraint name="u" num="j"/>
 		<aCtset/>
 	      </in>
 	    </grouping>
@@ -2372,13 +2372,13 @@
 	    <grouping>
 	      <Unin>
 		<pred name="F">
-		  <constraint name="d" num="i"/>
+		  <constraint name="c" num="j"/>
 		</pred>
 	      </Unin>
 	      <text content=", "/>
 	      <Forall/>
 	      <in>
-		<constraint name="d" num="i"/>
+		<constraint name="c" num="j"/>
 		<bCtset/>
 	      </in>
 	    </grouping>
@@ -3278,15 +3278,15 @@
 	    <grouping>
 	      <Unin>
 		<pred name="gtv">
-		  <aTS num="i"/>
+		  <aTS num="j"/>
 		</pred>
 	      </Unin>
 	      <text content=", "/>
 	      <Forall/>
 	      <in>
 		<mapping>
-		  <id/>
-		  <aTS num="i"/>
+		  <id num="j"/>
+		  <aTS num="j"/>
 		</mapping>
 		<gamma/>
 	      </in>

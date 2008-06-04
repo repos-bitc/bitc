@@ -2330,13 +2330,15 @@
 
   <!-- loc -->
   <xsl:template match="loc" mode="formula">
-    <xsl:call-template name="print.mathcal">
-      <xsl:with-param name="print.mathcal.letter">L</xsl:with-param> 
+    <xsl:call-template name="print.mathmode">
+      <xsl:with-param name="print.mathmode.text">L</xsl:with-param>
     </xsl:call-template>
+    <!-- <xsl:call-template name="print.mathcal">
+      <xsl:with-param name="print.mathcal.letter">L</xsl:with-param> 
+    </xsl:call-template> -->
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>  
-
-
+  
   <!-- lambda -->
   <xsl:template match="lambda" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -2408,6 +2410,37 @@
     </xsl:if>    
   </xsl:template>
 
+  <!-- ndx -->
+  <xsl:template match="ndx" mode="formula">
+    <xsl:choose>
+      <xsl:when test="@name">
+	<xsl:element name="em">
+	  <xsl:value-of select="@name"/>
+	</xsl:element>
+	<!-- <xsl:call-template name="print.mathmode">
+	  <xsl:with-param name="print.mathmode.text">
+	    <xsl:value-of select="@name"/>
+	  </xsl:with-param> 
+	</xsl:call-template> -->
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:element name="em">
+	  <xsl:text>i</xsl:text>
+	</xsl:element>
+	<!-- <xsl:call-template name="print.mathmode">
+	  <xsl:with-param name="print.mathmode.text">i</xsl:with-param> 
+      </xsl:call-template> -->
+      </xsl:otherwise>
+    </xsl:choose>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>
+
+  <!-- other -->
+  <xsl:template match="other" mode="formula">
+    <xsl:text>!</xsl:text>
+    <xsl:apply-templates mode="formula"/>
+  </xsl:template>
+  
   <!-- ith -->
   <xsl:template match="ith" mode="formula">
     <xsl:apply-templates mode="formula"/>
@@ -2790,7 +2823,35 @@
       <xsl:apply-templates select="." mode="formula"/>	
     </xsl:for-each>
   </xsl:template>  
-  
+
+  <!-- redex -->
+  <xsl:template match="redex" mode="formula">
+    <xsl:choose>
+      <xsl:when test= "@name">
+	<xsl:call-template name="print.mathcal">
+	  <xsl:with-param name="print.mathcal.letter">
+	    <xsl:value-of select="@name"/>
+	  </xsl:with-param> 
+	</xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:call-template name="print.mathcal">
+	  <xsl:with-param name="print.mathcal.letter">R</xsl:with-param> 
+	</xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
+    <xsl:if test="*[1]">
+      <xsl:text>[</xsl:text>
+      <xsl:apply-templates select="*[1]" mode="formula"/>	
+      <xsl:text>]</xsl:text>
+    </xsl:if>
+  </xsl:template>  
+
+  <!-- hole -->
+  <xsl:template match="hole" mode="formula">
+    <xsl:text>-</xsl:text>    
+  </xsl:template>  
+
   <!-- evalOp -->
   <xsl:template match="evalOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
