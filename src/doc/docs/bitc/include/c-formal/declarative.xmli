@@ -1128,8 +1128,14 @@
 	  <bool/>
 	</eq>
       </btypes:TYPE>, it is clear that the final rule in the
-      derivation must be T-True, or T-False. A derivation with these
+      derivation must be T-Bool. A derivation with these
       rules is only possible if 
+      <btypes:TYPE>
+ 	<eq>
+	  <aVal/>
+	  <bVal/>
+	</eq>
+      </btypes:TYPE>. That is,
       <btypes:TYPE>
  	<eq>
 	  <aVal/>
@@ -1285,7 +1291,7 @@
     <ol>
       <li>
 	<p>
-	  Case T-Unit, T-True, T-False, T-Hloc, T-Lambda:
+	  Case T-Unit, T-Bool, T-Hloc, T-Lambda:
 	  (Values) Result is immediate for right execution, and
 	  cannot happen for left execution.
 	</p>
@@ -2642,7 +2648,7 @@
 	    <ol>
 	      <li>
 		<p>
-		  Due to the assumption 
+		  Due to the premise 
 		  <btypes:TYPE>
 		    <CST sp="yes">
 		      <TDjudge>
@@ -2678,7 +2684,7 @@
 	      </li>
 	      <li>
 		<p>
-		  From the assumption
+		  From the premise
 		  <btypes:TYPE>
 		    <models name="cst">
 		      <aSubMap/>
@@ -2735,7 +2741,7 @@
 	      </li>
 	      <li>
 		<p>
-		  From the assumption
+		  From the premise
 		  <btypes:TYPE>
 		    <models name="cst">
 		      <aSubMap/>
@@ -3216,7 +3222,7 @@
     <ol>
       <li>
 	<p>
-	  Cases T-Unit, T-True, T-False, T-Hloc and T-Sloc are trivial.
+	  Cases T-Unit, T-Bool, T-Hloc and T-Sloc are trivial.
 	</p>
       </li>
       <li>
@@ -3334,7 +3340,7 @@
 	  </li>
 	  <li>
 	    <p>
-	      From assumption&nbsp;(4), we have
+	      From premise&nbsp;(4), we have
 	      <btypes:TYPE>
 		<eq>
 		  <inter>
@@ -3973,7 +3979,7 @@
 	    <p>
 	      By induction hypothesis (by using case&nbsp;(4.a.i), 
 	      weakening on cases&nbsp;(4.a.ii and 4.a.iii), and
-	      assumption&nbsp;(4)), we have:
+	      premise&nbsp;(4)), we have:
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
@@ -6896,7 +6902,7 @@
     <ol>
       <li>
 	<p>
-	  Case T-Id, T-True, T-False, T-Hloc, T-Lambda  cannot
+	  Case T-Id, T-Bool, T-Hloc, T-Lambda  cannot
 	  happen.
 	</p>
       </li>
@@ -7721,7 +7727,7 @@
 		      <type num="2"/>
 		    </eq>
 		  </btypes:TYPE>.
-		  Using these facts along with the assumption
+		  Using these facts along with the premise
 		  <btypes:TYPE>
 		    <Sjudge>
 		      <assume>

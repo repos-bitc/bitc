@@ -140,11 +140,11 @@
       <opRule name="E-If">
 	<opPre>
 	  <eq>
-	    <aVal num="1"/>
+	    <bVal num="1"/>
 	    <true/>
 	  </eq>
 	  <eq>
-	    <aVal num="2"/>
+	    <bVal num="2"/>
 	    <false/>
 	  </eq>
 	</opPre>
@@ -154,7 +154,7 @@
 	      <stack/>
 	      <heap/>
 	      <if>
-		<aVal num="i"/>
+		<bVal num="i"/>
 		<aExpr num="1"/>
 		<aExpr num="2"/>
 	      </if>

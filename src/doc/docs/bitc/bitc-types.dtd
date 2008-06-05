@@ -988,11 +988,11 @@
                                num      CDATA   #IMPLIED
                                dash     CDATA   #IMPLIED
 >
-
-<!ELEMENT true                 EMPTY>
-<!ELEMENT false                EMPTY>
 <!ELEMENT Unit                 EMPTY> 
 <!-- ``Unit'' the expression is different from ``unit'' the type -->
+<!ELEMENT bVal                 EMPTY>
+<!ELEMENT true                 EMPTY>
+<!ELEMENT false                EMPTY>
 
 <!ELEMENT id                   EMPTY>
 <!ATTLIST id

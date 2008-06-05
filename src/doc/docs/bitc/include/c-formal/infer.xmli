@@ -25,7 +25,7 @@
 	  </TEjudge>
 	</tyConc>                
       </tyRule>   
-      <tyRule name="I-True">
+      <tyRule name="I-Bool">
 	<tyPre/>
 	<tyConc>
 	  <TEjudge name="i">
@@ -35,7 +35,7 @@
 	    </assume>
 	    <conclude>
 	      <tqExpr>
-		<true/>
+		<bVal/>
 		<bool/>
 	      </tqExpr>
 	    </conclude>
@@ -45,26 +45,6 @@
 	  </TEjudge>
 	</tyConc>
       </tyRule>   
-      <tyRule name="I-False">
-	<tyPre/>
-	<tyConc>
-	  <TEjudge name="i">
-	    <assume>
-	      <gamma/>
-	      <store/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<false/>
-		<bool/>
-	      </tqExpr>
-	    </conclude>
-	    <constrain>
-	      <Empty/>
-	    </constrain>
-	  </TEjudge>
-	</tyConc>
-      </tyRule>
       <tyRule name="I-Id">
 	<tyPre>
 	  <mapsto>
@@ -244,7 +224,7 @@
 	  </TEjudge>
 	</tyConc>
       </tyRule>
-    </Hrules>        
+    </Hrules>
     <Hrules  rowsep="4pt" colsep="2">
       <tyRule name="I-App">
 	<tyPre>
@@ -376,7 +356,7 @@
 	      <tqExpr>                      
 		<deref>
 		  <aExpr/>
-		</deref>
+		</deref> 
 		<tvar name="alpha"/>
 	      </tqExpr>
 	    </conclude>

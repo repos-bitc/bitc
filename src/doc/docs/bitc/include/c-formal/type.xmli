@@ -16,20 +16,11 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="T-True">
+      <tyRule name="T-Bool">
 	<tyPre/>
 	<tyConc>
 	  <TDjudge>
-	    <true/>
-	    <bool/>
-	  </TDjudge>
-	</tyConc>
-      </tyRule>
-      <tyRule name="T-False">
-	<tyPre/>
-	<tyConc>
-	  <TDjudge>
-	    <false/>
+	    <bVal/>
 	    <bool/>
 	  </TDjudge>
 	</tyConc>
@@ -75,8 +66,6 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>        
-    </Hrules>
-    <Hrules rowsep="4pt" colsep="1">
       <tyRule name="T-Hloc">
 	<tyPre>
 	  <mapsto>
@@ -94,6 +83,8 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="1">
       <tyRule name="T-Sloc">
 	<tyPre>
 	  <mapsto>
@@ -149,8 +140,6 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
-    </Hrules>
-    <Hrules rowsep="4pt" colsep="2">
       <tyRule name="T-App">
 	<tyPre>
 	  <TDjudge Msub="yes">
@@ -183,6 +172,8 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="2">
       <tyRule name="T-If">
 	<tyPre>
 	  <TDjudge Msub="yes">
@@ -213,8 +204,6 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
-    </Hrules>
-    <Hrules rowsep="4pt" colsep="1">
       <tyRule name="T-Set">
 	<tyPre>
 	  <!-- Msub is okay in this place because, given the
@@ -248,6 +237,8 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="1">
       <tyRule name="T-Pair">
 	<tyPre>
 	  <TDjudge Msub="yes">
@@ -280,8 +271,6 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
-    </Hrules>
-    <Hrules rowsep="4pt" colsep="1">
       <tyRule name="T-Sel">
 	<tyPre>
 	  <TDjudge>
@@ -305,28 +294,6 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="T-Dup">
-	<tyPre>
-	  <TDjudge Msub="yes">
-	    <aExpr/>
-	    <type/>
-	  </TDjudge>
-	  <Msub>
-	    <type dash="'"/>
-	    <type/>
-	  </Msub>
-	</tyPre>
-	<tyConc>
-	  <TDjudge>
-	    <dup>
-	      <aExpr/>
-	    </dup>
-	    <ref>
-	      <type dash="'"/>
-	    </ref>
-	  </TDjudge>
-	</tyConc>
-      </tyRule>
       <tyRule name="T-Deref">
 	<tyPre>
 	  <TDjudge Msub="yes">
@@ -347,6 +314,30 @@
       </tyRule>
     </Hrules>
     <Hrules rowsep="4pt" colsep="1">
+      <tyRule name="T-Dup">
+	<tyPre>
+	  <TDjudge Msub="yes">
+	    <aExpr/>
+	    <type/>
+	  </TDjudge>
+	</tyPre>
+	<tyPre>
+	  <Msub>
+	    <type dash="'"/>
+	    <type/>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <TDjudge>
+	    <dup>
+	      <aExpr/>
+	    </dup>
+	    <ref>
+	      <type dash="'"/>
+	    </ref>
+	  </TDjudge>
+	</tyConc>
+      </tyRule>
       <tyRule name="T-Let-M">
 	<tyPre>
 	  <TDjudge Msub="yes">

@@ -2278,10 +2278,20 @@
   <!-- Unit -->
   <xsl:template match="Unit" mode="formula">
     <!-- <xsl:element name="progident"> -->
-      <xsl:text>()</xsl:text>
-  <!-- </xsl:element> -->
+    <xsl:text>()</xsl:text>
+    <!-- </xsl:element> -->
   </xsl:template>  
 
+  <!-- True or False -->
+  <xsl:template match="bVal" mode="formula">
+    <!-- <xsl:element name="progident">
+      <xsl:text>b</xsl:text>
+    </xsl:element> -->
+    <xsl:call-template name="print.mathmode">
+      <xsl:with-param name="print.mathmode.text">b</xsl:with-param> 
+    </xsl:call-template>
+  </xsl:template>
+  
   <!-- true -->
   <xsl:template match="true" mode="formula">
     <xsl:element name="em">
@@ -2330,6 +2340,9 @@
 
   <!-- loc -->
   <xsl:template match="loc" mode="formula">
+    <!-- <xsl:element name="progident">
+      <xsl:text>L</xsl:text>
+    </xsl:element> -->
     <xsl:call-template name="print.mathmode">
       <xsl:with-param name="print.mathmode.text">L</xsl:with-param>
     </xsl:call-template>

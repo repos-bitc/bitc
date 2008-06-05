@@ -19,7 +19,7 @@
   complicate the unification algorithm. For example, suppose
   p: bool x bool, and consider the expression
   
-  \x. x:= p.
+  \x. x:= p. 
 
   The unification algorithm will initially assign x: 'a|'b, and at
   the set rule, generate constraints
@@ -4835,7 +4835,7 @@
     <ol>
       <li>
 	<p>
-	  From assumption&nbsp;(1) and 
+	  From premise&nbsp;(1) and 
 	  <btypes:TYPE>
 	    <lem tag="maybe-cst-properties"/>
 	  </btypes:TYPE> (property-3), we obtain
@@ -5034,7 +5034,7 @@
 			<aSubMap/>
 		      </dom>
 		    </in>
-		  </btypes:TYPE>, due to assumption&nbsp;(3), we have
+		  </btypes:TYPE>, due to premise&nbsp;(3), we have
 		  <btypes:TYPE>
 		    <in>
 		      <tvar/>
@@ -5042,7 +5042,7 @@
 			<type num="1"/>
 		      </ftvs>
 		    </in>
-		  </btypes:TYPE>, and due to assumption&nbsp;(1)
+		  </btypes:TYPE>, and due to premise&nbsp;(1)
 		  <btypes:TYPE>
 		    <subeq>
 		      <set>
@@ -5091,7 +5091,7 @@
 	      </li>
 	      <li>
 		<p>
-		  From case&nbsp;(3.b.ii), assumption&nbsp;(3), and
+		  From case&nbsp;(3.b.ii), premise&nbsp;(3), and
 		  <btypes:TYPE>
 		    <lem tag="Cst-Weakening"/>
 		  </btypes:TYPE> (weakening), we obtain
@@ -5179,7 +5179,7 @@
 	<ol>
 	  <li>
 	    <p>
-	      Due to assumption&nbsp;(1), we have
+	      Due to premise&nbsp;(1), we have
 	      <btypes:TYPE>
 		<in>
 		  <Tceq>
@@ -5401,7 +5401,7 @@
 		      <ptype/>
 		    </eq>
 		  </btypes:TYPE>, 
-		  assumption&nbsp;(2), and
+		  premise&nbsp;(2), and
 		  <btypes:TYPE>
 		    <lem tag="T-sub-min"/>
 		  </btypes:TYPE>, we obtain
@@ -5496,7 +5496,7 @@
 			<aSubMap/>
 		      </dom>
 		    </in>
-		  </btypes:TYPE>, due to assumption&nbsp;(3), we have
+		  </btypes:TYPE>, due to premise&nbsp;(3), we have
 		  <btypes:TYPE>
 		    <in>
 		      <tvar/>
@@ -5505,7 +5505,7 @@
 		      </ftvs>
 		    </in>
 		  </btypes:TYPE>.
-		  Due to assumption&nbsp;(1), 
+		  Due to premise&nbsp;(1), 
 		  <btypes:TYPE>
 		    <defn tag="maybe-consistent"/>
 		  </btypes:TYPE>, and
@@ -5560,7 +5560,7 @@
 	      </li>
 	      <li>
 		<p>
-		  From assumption&nbsp;(3), case&nbsp;(3.e.ii) and 
+		  From premise&nbsp;(3), case&nbsp;(3.e.ii) and 
 		  <btypes:TYPE>
 		    <lem tag="Cst-Weakening"/>
 		  </btypes:TYPE> (weakening), we obtain
@@ -5606,7 +5606,7 @@
 	      </li>
 	      <li>
 		<p>
-		  From case&nbsp;(3.e.i), assumption&nbsp;(2), and
+		  From case&nbsp;(3.e.i), premise&nbsp;(2), and
 		  <btypes:TYPE>
 		    <lem tag="T-sub-min"/>
 		  </btypes:TYPE>, we obtain
@@ -5737,7 +5737,7 @@
 	      </li>
 	      <li>
 		<p>
-		  From assumption&nbsp;(3), case&nbsp;(3.f.i) and 
+		  From premise&nbsp;(3), case&nbsp;(3.f.i) and 
 		  <btypes:TYPE>
 		    <lem tag="Cst-Weakening"/>
 		  </btypes:TYPE> (weakening), we obtain

@@ -126,6 +126,329 @@
       Other cases are similar.
     </p>
   </definition>
+  <definition id="infer-notation">
+    <title>Notational Derivations</title>
+    <p>
+      We define the following derivations for notational convenience:
+    </p>
+    <btypes:TYPE>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	    <models name="sol">
+	      <aSubMap/>
+	      <aCtset/>
+	    </models>
+	    <Cst>
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <set>
+		<gamma/>
+		<store/>
+		<type/>
+		<aCtset/>
+	      </set>
+	    </Cst>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>                
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	    <Sat>
+	      <bCtset/>
+	      <Subst>
+		<aSubMap/>
+		<spset>
+		  <TEjudge name="i">
+		    <assume>
+		      <gamma/>
+		      <store/>
+		    </assume>
+		    <conclude>
+		      <tqExpr>
+			<aExpr/>
+			<type/>
+		      </tqExpr>
+		    </conclude>
+		    <constrain>
+		      <aCtset/>
+		    </constrain>
+		  </TEjudge>
+		</spset>
+	      </Subst>
+	    </Sat>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<bCtset/>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>                
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	    </TEjudge>
+	  </tyConc>                
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<bCtset/>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<bCtset/>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	    </TEjudge>
+	  </tyConc>                
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <Sjudge>
+	      <assume>
+		<Subst>
+		  <aSubMap/>
+		  <gamma/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <store/>
+		</Subst>
+	      </assume>
+	      <tqExpr>
+		<Subst>
+		  <aSubMap/>
+		  <aExpr/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </tqExpr>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge>
+	      <assume>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>
+	    </Sjudge>
+	  </tyConc>                
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <Sjudge name="*">
+	      <assume>
+		<Subst>
+		  <aSubMap/>
+		  <gamma/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <store/>
+		</Subst>
+	      </assume>
+	      <tqExpr>
+		<Subst>
+		  <aSubMap/>
+		  <aExpr/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </tqExpr>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="*">
+	      <assume>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>
+	    </Sjudge>
+	  </tyConc>                
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <Sjudge>
+	      <assume>
+		<bCtset/>
+		<Subst>
+		  <aSubMap/>
+		  <gamma/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <store/>
+		</Subst>
+	      </assume>
+	      <tqExpr>
+		<Subst>
+		  <aSubMap/>
+		  <aExpr/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </tqExpr>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge>
+	      <assume>
+		<bCtset/>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>
+	    </Sjudge>
+	  </tyConc>                
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+  </definition>
   <lemma>
     <title>Consistency of Inferred Types</title>
     <p>
@@ -194,12 +517,10 @@
 	  </constrain>
 	</TEjudge>
       </btypes:TYPE>.  
-      <font color="red">
-	Need to use unification properties here.
-      </font>
+      <font color="blue">*</font>
     </p>
   </proof>
-  <lemma>
+  <lemma id="subst-infer-cst">
     <title>Substitution Consistency over Inference Derivation</title>
     <p>
       If 
@@ -226,12 +547,12 @@
 	    <aSubMap/>
 	  </assume>
 	  <unin>
-	    <spset>
+	    <set>
 	      <gamma/>
 	      <store/>
 	      <type/>
 	      <aCtset/>
-	    </spset>
+	    </set>
 	  </unin>
 	</Cst>
       </btypes:TYPE>, then
@@ -315,15 +636,51 @@
 	  </ftvs>
 	</eq>
       </btypes:TYPE>.
-      <font color="red">
-	Need to use unification properties here.
-      </font>
+      <font color="blue">*</font>
     </p>
   </proof>
   <theorem>
     <title>Soundness of Type Inference</title>
     <p>
       If 
+      <btypes:TYPE>
+	<TEjudge name="i">
+	  <assume>
+	    <bCtset/>
+	    <aSubMap/>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <aCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE> then
+      <btypes:TYPE>
+	<Sjudge>
+	  <assume>
+	    <bCtset/>
+	    <aSubMap/>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>.
+    </p>
+  </theorem>
+  <proof>
+    <p>
+      By induction on the derivation of
       <btypes:TYPE>
 	<TEjudge name="i">
 	  <assume>
@@ -340,52 +697,176 @@
 	    <aCtset/>
 	  </constrain>
 	</TEjudge>
-      </btypes:TYPE>, then
+      </btypes:TYPE>.
+    </p>
+    <ol>
+      <li>
+	<p>
+	  From the premise 
+	  <btypes:TYPE>
+	    <TEjudge name="i">
+	      <assume>
+		<bCtset/>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	  </btypes:TYPE>
+	  of the theorem, using 
+	  <btypes:TYPE>
+	    <defn tag="infer-notation"/>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <defn tag="subst-consistent"/>
+	  </btypes:TYPE>, and
+	  <btypes:TYPE>
+	    <lem tag="subst-infer-cst"/>
+	  </btypes:TYPE>, we obtain:
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<TEjudge name="i">
+		  <assume>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <conclude>
+		    <tqExpr>
+		      <aExpr/>
+		      <type/>
+		    </tqExpr>
+		  </conclude>
+		  <constrain>
+		    <aCtset/>
+		  </constrain>
+		</TEjudge>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<models name="sol">
+		  <aSubMap/>
+		  <aCtset/>
+		</models>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<models name="cst">
+		  <aSubMap/>
+		  <spset>
+		    <TEjudge name="i">
+		      <assume>
+			<gamma/>
+			<store/>
+		      </assume>
+		      <conclude>
+			<tqExpr>
+			  <aExpr/>
+			  <type/>
+			</tqExpr>
+		      </conclude>
+		      <constrain>
+			<aCtset/>
+		      </constrain>
+		    </TEjudge>
+		  </spset>
+		</models>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset/>
+		  <Subst>
+		    <aSubMap/>
+		    <spset>
+		      <TEjudge name="i">
+			<assume>
+			  <gamma/>
+			  <store/>
+			</assume>
+			<conclude>
+			  <tqExpr>
+			    <aExpr/>
+			    <type/>
+			  </tqExpr>
+			</conclude>
+			<constrain>
+			  <aCtset/>
+			</constrain>
+		      </TEjudge>
+		    </spset>
+		  </Subst>
+		</Sat>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	</ol>
+	<p>
+	  Now, we proceed by case analysis on the last step of the
+	  derivation. 
+	</p>
+      </li>
+      <li>
+	<p>
+	  Cases I-unit, I-Bool, I-Hloc and I-Sloc are trivial 
+	</p>
+      </li>
+      <li>
+	<p>
+	  
+	</p>
+      </li>
+    </ol>
+  </proof>
+  <theorem>
+    <title>Soundness of Type Inference</title>
+    <p>
+      If 
       <btypes:TYPE>
-	<Forall/>
-	<aSubMap/>
-	<ST/>
-	<models name="sol">
-	  <aSubMap/>
-	  <aCtset/>
-	</models>
-      </btypes:TYPE> and 
-      <btypes:TYPE>
-	<Cst>
+	<TEjudge name="i">
 	  <assume>
 	    <aSubMap/>
+	    <gamma/>
+	    <store/>
 	  </assume>
-	  <unin>
-	    <spset>
-	      <gamma/>
-	      <store/>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
 	      <type/>
-	      <aCtset/>
-	    </spset>
-	  </unin>
-	</Cst>
-      </btypes:TYPE>, we have
+	    </tqExpr>
+	  </conclude>
+	</TEjudge>
+      </btypes:TYPE> then
       <btypes:TYPE>
 	<Sjudge name="*">
 	  <assume>
-	    <Subst>
-	      <aSubMap/>
-	      <gamma/>
-	    </Subst>
-	    <Subst>
-	      <aSubMap/>
-	      <store/>
-	    </Subst>
+	    <aSubMap/>
+	    <gamma/>
+	    <store/>
 	  </assume>
 	  <tqExpr>
-	    <Subst>
-	      <aSubMap/>
-	      <aExpr/>
-	    </Subst>
-	    <Subst>
-	      <aSubMap/>
-	      <type/>
-	    </Subst>
+	    <aExpr/>
+	    <type/>
 	  </tqExpr>
 	</Sjudge>
       </btypes:TYPE>.
@@ -398,6 +879,7 @@
       <btypes:TYPE>
 	<TEjudge name="i">
 	  <assume>
+	    <aSubMap/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -477,24 +959,13 @@
       <btypes:TYPE>
 	<Sjudge name="*">
 	  <assume>
-	    <Subst>
-	      <aSubMap/>
-	      <gamma/>
-	    </Subst>
-	    <Subst>
-	      <aSubMap/>
-	      <store/>
-	    </Subst>
+	    <aSubMap/>
+	    <gamma/>
+	    <store/>
 	  </assume>
 	  <tqExpr>
-	    <Subst>
-	      <aSubMap/>
-	      <aExpr/>
-	    </Subst>
-	    <Subst>
-	      <aSubMap/>
-	      <type/>
-	    </Subst>
+	    <aExpr/>
+	    <type/>
 	  </tqExpr>
 	</Sjudge>
       </btypes:TYPE>, then
@@ -502,14 +973,11 @@
 	<Exists/>
 	<aSubMap dash="'"/>
 	<ST/>
-	<models name="sol">
-	  <aSubMap/>
-	  <aCtset/>
-	</models>
       </btypes:TYPE>,
       <btypes:TYPE>
 	<TEjudge name="i">
 	  <assume>
+	    <aSubMap dash="'"/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -519,11 +987,8 @@
 	      <type/>
 	    </tqExpr>
 	  </conclude>
-	  <constrain>
-	    <aCtset/>
-	  </constrain>
 	</TEjudge>
-      </btypes:TYPE> and
+      </btypes:TYPE>, and
       <btypes:TYPE>
 	<eq>
 	  <aSubMap dash="'"/>
@@ -534,9 +999,32 @@
 	</eq>
       </btypes:TYPE>, where
       <btypes:TYPE>
-	<aSubMap num="n"/>
-      </btypes:TYPE> contains substitutions used for 
-      fresh type variables used in the inference derivation.
+	<eq>
+	  <dom>
+	    <aSubMap num="n"/>
+	  </dom>
+	  <set>
+	    <grouping>
+	      <tvars/>
+	      <ST/>
+	      <tvar/>
+	      <text content=" is a fresh variable used in "/>
+	      <TEjudge name="i">
+		<assume>
+		  <gamma/>
+		  <store/>
+		</assume>
+		<conclude>
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
+		</conclude>
+	      </TEjudge>
+      	    </grouping>
+	  </set>
+	</eq>
+      </btypes:TYPE>.
     </p>
   </theorem>
 <!--   <definition id="close"> -->

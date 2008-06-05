@@ -21,12 +21,18 @@
 	  <id name="z"/>
 	</alternatives>
       </bnf>
+      <bnf desc="Booleans">
+	<bVal/>
+	<alternatives>
+	  <true/>
+	  <false/>
+	</alternatives>
+      </bnf>
       <bnf desc="Values">
 	<aVal/>
 	<alternatives>
 	  <Unit/>
-	  <true/> 
-	  <false/>
+	  <bVal/>
 	  <lambda>
 	    <id/>
 	    <aExpr/>
