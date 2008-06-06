@@ -90,7 +90,7 @@ while(!eof(F)) {
 
 	# \ensuremath{} redundancy elimination
 	$l =~ s/$emem/\\ensuremath{$1$2}/g;
-
+	
 	# Worst hack to fix \\ in the beginning of a line to \vspace(4pt}
 	# The correct thing to do is to add a @latex.ptsz arrtibute to 
 	# OSDOC's <br>

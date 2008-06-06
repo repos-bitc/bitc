@@ -58,6 +58,15 @@
 	      </ctype>
 	    </TS>
 	  </mapsto>
+	  <eq>
+	    <aSubMap/>
+	    <plural>
+	      <SubMap>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </SubMap>
+	    </plural>
+	  </eq>
 	  <models name="new">
 	    <assume/>
 	    <tvars name="beta"/>
@@ -72,19 +81,17 @@
 	    <conclude>
 	      <tqExpr>
 		<id/>
-		<subst>
+		<Subst>
+		  <aSubMap/>
 		  <type/>
-		  <tvars name="alpha"/>
-		  <tvars name="beta"/>
-		</subst>
+		</Subst>
 	      </tqExpr>
 	    </conclude>
 	    <constrain>
-	      <subst special="yes">
+	      <Subst sp="yes">
+		<aSubMap/>
 		<dCtset/>
-		<tvars name="alpha"/>
-		<tvars name="beta"/>
-	      </subst>
+	      </Subst>
 	    </constrain>
 	  </TEjudge>
 	</tyConc>

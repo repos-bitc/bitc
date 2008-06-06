@@ -288,10 +288,14 @@
 <!-- Apply a substitution -->
 <!-- S<e> -->
 <!ELEMENT Subst                (%subst.group;, %anything.group;)>
+<!ATTLIST Subst
+                               sp          yes    #IMPLIED
+>
 <!-- e[a/b] -->
 <!ELEMENT subst                (%anything.group;, %anything.group;, %anything.group;)>
-<!ATTLIST spset
+<!ATTLIST subst
                                special      yes    #IMPLIED
+>
 <!-- constrained substitution bold[a/b]bold -->
 <!ELEMENT Csubst               (%anything.group;, %anything.group;, %anything.group;)>
  
@@ -1059,6 +1063,8 @@
 <!ELEMENT apply                (%anyexpr.group;, %anyexpr.group;)>
 <!ELEMENT tqExpr               (%anyexpr.group;, %typescheme.group;)>
 <!ATTLIST tqExpr
+                               sub      yes     #IMPLIED
+                               Msub     yes     #IMPLIED
                                optional yes     #IMPLIED
                                nosp     yes     #IMPLIED
 >

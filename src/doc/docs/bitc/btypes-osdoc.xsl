@@ -859,6 +859,10 @@
   <xsl:template match="Subst" mode="formula">
     <xsl:apply-templates select="*[1]" mode="formula"/>	
     <xsl:choose>
+      <xsl:when test="@sp">
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>lang;</xsl:text>
+      </xsl:when>
       <xsl:when test="*[2] = set">
       </xsl:when>
       <xsl:when test="*[2] = spset">
@@ -870,6 +874,14 @@
     </xsl:choose>
     <xsl:apply-templates select="*[2]" mode="formula"/>	
     <xsl:choose>
+      <xsl:when test="@sp">
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>rang;</xsl:text>
+	<xsl:element name="sup">
+	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	  <xsl:text>prime;</xsl:text>
+	</xsl:element>
+      </xsl:when>
       <xsl:when test="*[2] = set">
       </xsl:when>
       <xsl:when test="*[2] = spset">
@@ -2567,6 +2579,14 @@
       </xsl:when>
       <xsl:when test = "@nosp">	      
 	<xsl:call-template name="print.op.qual"/>
+	<xsl:apply-templates select="*[2]" mode="formula"/> 
+      </xsl:when>
+      <xsl:when test = "@sub">
+	<xsl:call-template name="print.op.subqual"/>	
+	<xsl:apply-templates select="*[2]" mode="formula"/> 
+      </xsl:when>
+      <xsl:when test = "@Msub">
+	<xsl:call-template name="print.op.Mqual"/>	
 	<xsl:apply-templates select="*[2]" mode="formula"/> 
       </xsl:when>
       <xsl:otherwise>

@@ -2,7 +2,7 @@
 <!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
-  <figure id="hm_inter_rules" fullwidth='yes' 
+  <figure id="decl_type_rules" fullwidth='yes' 
     latex.placement="tbp">
   <btypes:TYPE
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">

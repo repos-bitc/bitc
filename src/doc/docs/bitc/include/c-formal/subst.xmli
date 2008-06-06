@@ -571,8 +571,6 @@
 	    </Subst>
 	    <type dash="'"/>
 	  </eq>
-	</tyPre>
-	<tyPre>
 	  <eq>
 	    <Subst>
 	      <aSubMap/>
@@ -616,8 +614,6 @@
 	    </in>
 	    <text content=", "/>
 	  </grouping>
-	</tyPre>
-	<tyPre>
 	  <in>
 	    <mapping>
 	      <id/>
@@ -652,8 +648,6 @@
 	    </in>
 	    <text content=", "/>
 	  </grouping>
-	</tyPre>
-	<tyPre>
 	  <in>
 	    <mapping>
 	      <loc/>
@@ -675,6 +669,8 @@
 	  </eq>
 	</tyConc>
       </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="2">
       <tyRule>
 	<tyPre>
 	  <grouping>
@@ -691,8 +687,6 @@
 	      <lKind num="j"/>
 	    </eq>
 	  </grouping>
-	</tyPre>
-	<tyPre>
 	  <eq>
 	    <aExpr dash="'"/>
 	    <subst>
@@ -713,6 +707,69 @@
 	      <aExpr/>
 	    </Subst>
 	    <aExpr dash="'"/>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <lKind/>
+	    </Subst>
+	    <lKind dash="'"/>
+	  </eq>
+	  <eq>
+	    <Subst>
+	      <aSubMap/>
+	      <type num="s"/>
+	    </Subst>
+	    <type num="s" dash="'"/>
+	  </eq>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst sp="yes">
+	      <aSubMap/>
+	      <Pcst>
+		<lKind/>
+		<type num="g"/>
+		<type num="s"/>
+	      </Pcst>
+	    </Subst>
+	    <Pcst>
+	      <lKind dash="'"/>
+	      <type num="g"/>
+	      <type num="s" dash="'"/>
+	    </Pcst>
+	  </eq>
+	</tyConc>
+      </tyRule>
+      <tyRule>
+	<tyPre>
+	  <grouping>
+	    <Forall/>
+	    <in>
+	      <constraint name="d"/>
+	      <dCtset/>
+	    </in>
+	    <text content=", "/>
+	    <in>
+	      <Subst sp="yes">
+		<aSubMap/>
+		<constraint name="d"/>
+	      </Subst>
+	      <dCtset dash="'"/>
+	    </in>
+	  </grouping>
+	</tyPre>
+	<tyConc>
+	  <eq>
+	    <Subst sp="yes">
+	      <aSubMap/>
+	      <dCtset/>
+	    </Subst>
+	    <dCtset dash="'"/>
 	  </eq>
 	</tyConc>
       </tyRule>

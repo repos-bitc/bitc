@@ -8312,7 +8312,7 @@
       <btypes:TYPE>
 	<Sjudge name="*">
 	  <assume>
-	    <gamma/>
+	    <Empty/>
 	    <store/>
 	  </assume>
 	  <plus>
@@ -8344,8 +8344,8 @@
 	</opState>
       </btypes:TYPE>.
       is not stuck.
-      That is, execution of a well typed expression cannot lead to
-      a stuck state. Here,
+      That is, execution of a closed, well typed expression cannot
+      lead to a stuck state. Here,
       <btypes:TYPE>
 	<evalOp many="yes"/>
       </btypes:TYPE > represents the

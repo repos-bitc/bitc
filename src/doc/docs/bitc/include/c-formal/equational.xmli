@@ -21,7 +21,10 @@
   <definition id="constraint-colection-ext-inf">
     <title>Constraint Collection over Inference Derivation</title>
     <p>
-      We write
+      Similar to 
+      <btypes:TYPE>
+	<defn tag="constraint-colection-ext-typ"/>
+      </btypes:TYPE>, we write
       <btypes:TYPE>
 	<spset>
 	  <TEjudge name="i">
@@ -329,10 +332,12 @@
 	  <tyPre>
 	    <Sjudge>
 	      <assume>
-		<Subst>
-		  <aSubMap/>
-		  <gamma/>
-		</Subst>
+		<canonical>
+		  <Subst>
+		    <aSubMap/>
+		    <gamma/>
+		  </Subst>
+		</canonical>
 		<Subst>
 		  <aSubMap/>
 		  <store/>
@@ -368,10 +373,12 @@
 	  <tyPre>
 	    <Sjudge name="*">
 	      <assume>
-		<Subst>
-		  <aSubMap/>
-		  <gamma/>
-		</Subst>
+		<canonical>
+		  <Subst>
+		    <aSubMap/>
+		    <gamma/>
+		  </Subst>
+		</canonical>
 		<Subst>
 		  <aSubMap/>
 		  <store/>
@@ -410,10 +417,12 @@
 	    <Sjudge>
 	      <assume>
 		<bCtset/>
-		<Subst>
-		  <aSubMap/>
-		  <gamma/>
-		</Subst>
+		<canonical>
+		  <Subst>
+		    <aSubMap/>
+		    <gamma/>
+		  </Subst>
+		</canonical>
 		<Subst>
 		  <aSubMap/>
 		  <store/>
@@ -833,8 +842,202 @@
       </li>
       <li>
 	<p>
-	  
+	  Case I-Id:
 	</p>
+	<ol>
+	  <li>
+	    <p>
+	      In this case, we have
+	    </p>
+	    <btypes:TYPE>
+	      <Hrules>
+		<tyRule>
+		  <tyPre>
+		    <mapsto>
+		      <gamma/>
+		      <id/>
+		      <TS>
+			<tvars name="alpha"/>
+			<ctype>
+			  <type/>
+			  <dCtset/>
+			</ctype>
+		      </TS>
+		    </mapsto>
+		    <eq>
+		      <aSubMap num="x"/>
+		      <plural>
+			<SubMap>
+			  <tvar name="alpha"/>
+			  <tvar name="beta"/>
+			</SubMap>
+		      </plural>
+		    </eq>
+		    <models name="new">
+		      <assume/>
+		      <tvars name="beta"/>
+		    </models>
+		  </tyPre>
+		  <tyConc>
+		    <TEjudge name="i">
+		      <assume>
+			<gamma/>
+			<store/>
+		      </assume>
+		      <conclude>
+			<tqExpr>
+			  <id/>
+			  <Subst>
+			    <aSubMap num="x"/>
+			    <type/>
+			  </Subst>
+			</tqExpr>
+		      </conclude>
+		      <constrain>
+			<Subst sp="yes">
+			  <aSubMap num="x"/>
+			  <dCtset/>
+			</Subst>
+		      </constrain>
+		    </TEjudge>
+		  </tyConc>
+		</tyRule>
+	      </Hrules>
+	    </btypes:TYPE>
+	  </li>
+	  <li>
+	    <p>
+	      Let
+	      <btypes:TYPE>
+		<eq>
+		  <type num="s"/>
+		  <Subst>
+		    <aSubMap/>
+		    <type/>
+		  </Subst>
+		</eq>
+	      </btypes:TYPE> and
+	      <btypes:TYPE>
+		<eq>
+		  <gamma num="s"/>
+		  <Subst>
+		    <aSubMap/>
+		    <gamma/>
+		  </Subst>
+		</eq>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Let
+	      <btypes:TYPE>
+		<eq>
+		  <set>
+		    <tvars/>
+		  </set>
+		  <unin>
+		    <set>
+		      <tvars name="gamma"/>
+		      <tvars name="delta"/>
+		      <tvars name="epsiv"/>
+		    </set>
+		  </unin>
+		</eq>
+	      </btypes:TYPE> such that
+	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <eq>
+		      <set>
+			<tvars name="gamma"/>
+			<tvars name="delta"/>
+		      </set>
+		      <inter>
+			<set>
+			  <tvars/>
+			</set>
+			<ftvs>
+			  <type num="s"/>
+			</ftvs>
+		      </inter>
+		    </eq>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <eq>
+		      <pred name="remtv">
+			<dCtset/>
+		      </pred>
+		      <set>
+			<tvars name="delta"/>
+		      </set>
+		    </eq>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  Evidently, 
+		  <btypes:TYPE>
+		    <eq>
+		      <mutex>
+			<tvars name="epsiv"/>
+			<ftvs>
+			  <type num="s"/>
+			</ftvs>
+		      </mutex>
+		    </eq>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	  <li>
+	    <p>
+	      Now, from 
+	      <btypes:TYPE>
+		<defn tag="canon-ts"/>
+	      </btypes:TYPE>, we have
+	      <btypes:TYPE>
+		<mapsto>
+		  <canonical>
+		    <gamma num="s"/>
+		  </canonical>
+		  <id/>
+		  <TS>
+		    <tvars name="gamma"/>
+		    <type num="s"/>
+		  </TS>
+		</mapsto>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Let
+	      <btypes:TYPE>
+		<eq>
+		  <aSubMap num="x" dash="'"/>
+		  <plural>
+		    <SubMap>
+		      <tvar name="gamma"/>
+		      <Subst>
+			<aSubMap/>
+			<tvar name="beta"/>
+		      </Subst>
+		    </SubMap>
+		  </plural>
+		</eq>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	</ol>
       </li>
     </ol>
   </proof>
