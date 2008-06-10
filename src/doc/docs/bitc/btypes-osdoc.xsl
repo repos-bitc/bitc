@@ -122,7 +122,7 @@
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>equiv;</xsl:text>
   </xsl:template>
-  <!-- eq -->
+  <!-- equiv -->
   <xsl:template match="equiv" mode="formula">
     <xsl:call-template name="print.infix">
       <xsl:with-param name="print.infix.op">equiv;</xsl:with-param> 

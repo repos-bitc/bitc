@@ -386,11 +386,14 @@
 	    <vExp/>
 	    <type/>
 	  </TDjudge>
-	  <!-- The immut() restriction is very conservative.
-          For example, the following expression cannot be typed:
-	  p:'a!'b |- letP q = p 
-	  However, all such expressions can be typed as a letM, 
-	  so we lose no expressiveness. -->
+	  <!-- The Immut() restriction is necessary to ensure
+	  soundness. ~Mut() will not suffice as it allows maybe types.
+	  A relaxation to this rule is possible, but is more
+	  complicated (all generalizable variables must be within 
+	  Immmutable wrappers, and the whole type must be ~Mut()
+	  
+	  The loss of expressivity in this case is for expressions
+	  like x:'a |- letP p = (\y.y, x) -->
 	  <pred name="Immut">
 	    <type/>
 	  </pred>

@@ -325,7 +325,9 @@
 	<Sjudge>
 	  <assume>
 	    <bCtset/>
-	    <gamma/>
+	    <canonical>
+	      <gamma/>
+	    </canonical>
 	    <store/>
 	  </assume>
 	  <tqExpr>
@@ -367,7 +369,9 @@
 	<Sjudge>
 	  <assume>
 	    <bCtset/>
-	    <gamma/>
+	    <canonical>
+	      <gamma/>
+	    </canonical>
 	    <store/>
 	  </assume>
 	  <tqExpr>

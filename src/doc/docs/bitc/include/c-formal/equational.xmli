@@ -330,6 +330,130 @@
       <Hrules>
 	<tyRule>
 	  <tyPre>
+	    <TEjudge name="d">
+	      <assume>
+		<Subst>
+		  <aSubMap/>
+		  <gamma/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <store/>
+		</Subst>
+	      </assume>
+	      <conclude>
+		<tqExpr>                      
+		  <Subst>
+		    <aSubMap/>
+		    <aExpr/>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <type/>
+		  </Subst>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<Subst>
+		  <aSubMap/>
+		  <dCtset/>
+		</Subst>
+	      </constrain>
+	    </TEjudge>
+	    <models name="sol">
+	      <Empty/>
+	      <Subst>
+		<aSubMap/>
+		<dCtset/>
+	      </Subst>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="d">
+	      <assume>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>                      
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<dCtset/>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>                
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <TEjudge name="d">
+	      <assume>
+		<bCtset/>
+		<Subst>
+		  <aSubMap/>
+		  <gamma/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <store/>
+		</Subst>
+	      </assume>
+	      <conclude>
+		<tqExpr>                      
+		  <Subst>
+		    <aSubMap/>
+		    <aExpr/>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <type/>
+		  </Subst>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<Subst>
+		  <aSubMap/>
+		  <dCtset/>
+		</Subst>
+	      </constrain>
+	    </TEjudge>
+	    <models name="sol">
+	      <Empty/>
+	      <Subst>
+		<aSubMap/>
+		<dCtset/>
+	      </Subst>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="d">
+	      <assume>
+		<bCtset/>
+		<aSubMap/>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>                      
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<dCtset/>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>                
+	</tyRule>
+      </Hrules>      
+      <Hrules>
+	<tyRule>
+	  <tyPre>
 	    <Sjudge>
 	      <assume>
 		<canonical>
@@ -666,24 +790,29 @@
 	      <type/>
 	    </tqExpr>
 	  </conclude>
-	  <constrain>
+	  gv c-	  <constrain>
 	    <aCtset/>
 	  </constrain>
 	</TEjudge>
       </btypes:TYPE> then
       <btypes:TYPE>
-	<Sjudge>
+	<TEjudge name="d">
 	  <assume>
 	    <bCtset/>
 	    <aSubMap/>
 	    <gamma/>
 	    <store/>
 	  </assume>
-	  <tqExpr>
-	    <aExpr/>
-	    <type/>
-	  </tqExpr>
-	</Sjudge>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <dCtset/>
+	  </constrain>
+	</TEjudge>
       </btypes:TYPE>.
     </p>
   </theorem>
@@ -916,7 +1045,7 @@
 		    <type/>
 		  </Subst>
 		</eq>
-	      </btypes:TYPE> and
+	      </btypes:TYPE>,
 	      <btypes:TYPE>
 		<eq>
 		  <gamma num="s"/>
@@ -925,7 +1054,19 @@
 		    <gamma/>
 		  </Subst>
 		</eq>
-	      </btypes:TYPE>
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<eq>
+		  <type num="sx"/>
+		  <Subst>
+		    <aSubMap/>
+		    <Subst>
+		      <aSubMap num="x"/>
+		      <type/>
+		    </Subst>
+		  </Subst>
+		</eq>
+	      </btypes:TYPE>.
 	    </p>
 	  </li>
 	  <li>
@@ -1042,7 +1183,133 @@
     </ol>
   </proof>
   <theorem>
-    <title>Soundness of Type Inference</title>
+    <title>Completeness of Type Inference</title>
+    <p>
+      If 
+      <btypes:TYPE>
+	<TEjudge name="d">
+	  <assume>
+	    <bCtset/>
+	    <aSubMap/>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <dCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
+	<Exists/>
+	<supeq>
+	  <aSubMap dash="'"/>
+	  <aSubMap/>
+	</supeq>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<Exists/>
+	<supeq>
+	  <bCtset dash="'"/>
+	  <bCtset/>
+	</supeq>
+      </btypes:TYPE> 
+      such that 
+      <btypes:TYPE>
+	<TEjudge name="i">
+	  <assume>
+	    <bCtset dash="'"/>
+	    <aSubMap dash="'"/>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <aCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<eq>
+	  <diff>
+	    <dom>
+	      <aSubMap dash="'"/>
+	    </dom>
+	    <dom>
+	      <aSubMap/>
+	    </dom>
+	  </diff>
+	  <diff>
+	    <dom>
+	      <aCtset dash="'"/>
+	    </dom>
+	    <dom>
+	      <aCtset/>
+	    </dom>
+	  </diff>
+	  <set>
+	    <grouping>
+	      <tvars/>
+	      <ST/>
+	      <tvar/>
+	      <text content=" is a fresh variable used in "/>
+	      <TEjudge name="i">
+		<assume>
+		  <gamma/>
+		  <store/>
+		</assume>
+		<conclude>
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
+		</conclude>
+		<constrain>
+		  <aCtset/>
+		</constrain>
+	      </TEjudge>
+      	    </grouping>
+	  </set>
+	</eq>
+      </btypes:TYPE>.
+    </p>
+  </theorem>
+  <proof>
+    <p>
+      By induction on the derivation of 
+      <btypes:TYPE>
+	<TEjudge name="d">
+	  <assume>
+	    <bCtset/>
+	    <aSubMap/>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	  <constrain>
+	    <dCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE>.      
+    </p>
+  </proof>
+  <theorem>
+    <title>Soundness of Type Inference [Direct]</title>
     <p>
       If 
       <btypes:TYPE>
@@ -1156,7 +1423,7 @@
     </p>
   </theorem>
   <theorem>
-    <title>Completeness of Type Inference</title>
+    <title>Completeness of Type Inference [Direct]</title>
     <p>
       If 
       <btypes:TYPE>
@@ -1174,9 +1441,12 @@
       </btypes:TYPE>, then
       <btypes:TYPE>
 	<Exists/>
-	<aSubMap dash="'"/>
-	<ST/>
-      </btypes:TYPE>,
+	<supeq>
+	  <aSubMap dash="'"/>
+	  <aSubMap/>
+	</supeq>
+      </btypes:TYPE> 
+      such that 
       <btypes:TYPE>
 	<TEjudge name="i">
 	  <assume>
@@ -1190,43 +1460,10 @@
 	      <type/>
 	    </tqExpr>
 	  </conclude>
+	  <constrain>
+	    <aCtset/>
+	  </constrain>
 	</TEjudge>
-      </btypes:TYPE>, and
-      <btypes:TYPE>
-	<eq>
-	  <aSubMap dash="'"/>
-	  <compose>
-	    <aSubMap/>
-	    <aSubMap num="n"/>
-	  </compose>
-	</eq>
-      </btypes:TYPE>, where
-      <btypes:TYPE>
-	<eq>
-	  <dom>
-	    <aSubMap num="n"/>
-	  </dom>
-	  <set>
-	    <grouping>
-	      <tvars/>
-	      <ST/>
-	      <tvar/>
-	      <text content=" is a fresh variable used in "/>
-	      <TEjudge name="i">
-		<assume>
-		  <gamma/>
-		  <store/>
-		</assume>
-		<conclude>
-		  <tqExpr>
-		    <aExpr/>
-		    <type/>
-		  </tqExpr>
-		</conclude>
-	      </TEjudge>
-      	    </grouping>
-	  </set>
-	</eq>
       </btypes:TYPE>.
     </p>
   </theorem>

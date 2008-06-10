@@ -162,5 +162,18 @@
 	<text content="Z"/>
       </subst>
     </btypes:TYPE>.
+    We also define
+    <btypes:TYPE>
+      <other>
+	<texttt content="1"/>
+      </other>
+      <texttt content="2"/>
+    </btypes:TYPE> and
+    <btypes:TYPE>
+      <other>
+	<texttt content="2"/>
+      </other>
+      <texttt content="1"/>
+    </btypes:TYPE>.
   </p>
   </sect1>

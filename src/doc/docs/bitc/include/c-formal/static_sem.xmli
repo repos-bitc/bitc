@@ -2018,7 +2018,7 @@
 	    <pred name="Immut">
 	      <Subst>
 		<aSubMap/>
-		<type num="s"/>
+		<type num="g"/>
 	      </Subst>
 	    </pred>
 	    <pred name="Immut">

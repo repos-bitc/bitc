@@ -349,8 +349,10 @@
 	  </TEjudge>
 	  <models name="new">
 	    <assume/>
-	    <tvar name="alpha"/>
-	    <tvar name="beta"/>
+	    <grouping>
+	      <tvar name="alpha"/>
+	      <tvar name="beta"/>
+	    </grouping>
 	  </models>
 	</tyPre>
 	<tyConc>
@@ -568,9 +570,11 @@
 		  <eq>
 		    <type num="1"/>
 		    <mbFull>
-		      <mutable>
-			<tvar name="alpha"/>
-		      </mutable>
+		      <paren>
+			<mutable>
+			  <tvar name="alpha"/>
+			</mutable>
+		      </paren>
 		      <tvar name="beta"/>
 		    </mbFull>
 		  </eq>
@@ -784,6 +788,7 @@
 	      <tvar name="beta"/>
 	      <tvar name="gamma"/>
 	      <tvar name="delta"/>	      
+	      <tvar name="epsiv"/>	      
 	    </grouping>
 	  </models>
 	</tyPre>
@@ -983,7 +988,7 @@
 	    <diff>
 	      <ftvs>
 		<type/>
-		<dCtset/>
+		<!-- <dCtset/> -->
 	      </ftvs>
 	      <ftvs>
 		<Subst>

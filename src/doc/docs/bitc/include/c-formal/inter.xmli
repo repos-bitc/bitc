@@ -737,21 +737,33 @@
 	      </set>
 	    </unin>
 	  </eq>
-	  <eq>
+	  <mutex>
+	    <diff>
+	      <tvars/>
+	      <pred name="rtv">
+		<dCtset/>
+	      </pred>
+	    </diff>
+	    <ftvs>
+	      <gamma/>
+	      <store/>
+	    </ftvs>
+	  </mutex>
+	  <!-- <eq>
 	    <set>
 	      <tvars name="alpha"/>
 	    </set>
 	    <diff>
 	      <ftvs>
 		<type/>
-		<dCtset/>
+		 <dCtset/>
 	      </ftvs>
 	      <ftvs>
 		<gamma/>
 		<store/>
 	      </ftvs>
 	    </diff>
-	  </eq>
+	  </eq> -->
 	  <TEjudge name="d">
 	    <assume>
 	      <extend>
@@ -810,7 +822,7 @@
 		<dCtset num="1"/>
 		<set>
 		  <Pcst>
-		    <lKind k="mono"/>
+		    <lKind/>
 		    <type/>
 		    <type/>
 		  </Pcst>
