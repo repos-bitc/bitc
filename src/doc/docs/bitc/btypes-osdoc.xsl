@@ -750,9 +750,15 @@
               Substitutions
      ====================================================================== -->
   <xsl:template match="aSubMap" mode="formula">
-    <!--     <xsl:text disable-output-escaping="yes">&amp;</xsl:text> -->
-    <!--     <xsl:text>thetas;</xsl:text> -->
-    <xsl:text>S</xsl:text>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>thetas;</xsl:text>
+    <!--     <xsl:text>S</xsl:text> -->
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>
+
+  <xsl:template match="aKmap" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>phis;</xsl:text>
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>
 
@@ -1639,6 +1645,38 @@
     <xsl:call-template name="print.index.dash"/>    
   </xsl:template>  
 
+  <!-- Polymorphic constraint * type -->
+  <!-- pcstOp -->
+  <xsl:template match="PcstOp" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>starf;</xsl:text>	
+    <xsl:element name="sup">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>kappa;</xsl:text>
+    </xsl:element>
+    <xsl:element name="sub">
+      <xsl:element name="sub">
+	<xsl:element name="em">
+	  <xsl:text>x</xsl:text>
+	</xsl:element>
+      </xsl:element>
+    </xsl:element>
+  </xsl:template>  
+  <!-- Pcst -->
+  <xsl:template match="pcst" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>starf;</xsl:text>	
+    <xsl:element name="sup">
+      <xsl:apply-templates select="*[2]" mode="formula"/>
+    </xsl:element>
+    <xsl:element name="sub">
+      <xsl:apply-templates select="*[1]" mode="formula"/>
+    </xsl:element>
+    <xsl:text>(</xsl:text>
+    <xsl:apply-templates select="*[3]" mode="formula"/>
+    <xsl:text>)</xsl:text>
+  </xsl:template>  
+  
   <!-- Polymorphic constraint -->
   <!-- PcstOp -->
   <xsl:template match="PcstOp" mode="formula">
@@ -1648,7 +1686,6 @@
       <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
       <xsl:text>kappa;</xsl:text>
     </xsl:element>
-    <xsl:apply-templates select="*[3]" mode="formula"/>
   </xsl:template>  
   <!-- Pcst -->
   <xsl:template match="Pcst" mode="formula">
@@ -1661,7 +1698,7 @@
     </xsl:element>
     <xsl:call-template name="print.space"/>
     <xsl:apply-templates select="*[3]" mode="formula"/>
-  </xsl:template>  
+  </xsl:template>    
 
   <!-- unct -->
   <xsl:template match="unct" mode="formula">
@@ -2236,10 +2273,10 @@
 
   <!-- aVal -->
   <xsl:template match="aVal" mode="formula">
-    <xsl:element name="em">
-      <xsl:text>v</xsl:text>
-      <xsl:call-template name="print.index.dash"/>
-    </xsl:element>
+    <xsl:call-template name="print.mathit">
+      <xsl:with-param name="print.mathit.text">v</xsl:with-param>
+    </xsl:call-template>
+    <xsl:call-template name="print.index.dash"/>
   </xsl:template>  
 
   <!-- aVal -->
@@ -2266,18 +2303,10 @@
   
   <!-- aExpr -->
   <xsl:template match="aExpr" mode="formula">
-    <xsl:element name="em">
-      <xsl:choose>
-	<xsl:when test="@hat='yes'">
-	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-	  <xsl:text>euml;</xsl:text>
-	</xsl:when>
-	<xsl:otherwise>
-	  <xsl:text>e</xsl:text>
-	</xsl:otherwise>
-      </xsl:choose>
-      <xsl:call-template name="print.index.dash"/>
-    </xsl:element>
+    <xsl:call-template name="print.mathit">
+      <xsl:with-param name="print.mathit.text">e</xsl:with-param>
+    </xsl:call-template>
+    <xsl:call-template name="print.index.dash"/>
   </xsl:template>
 
   <!-- vExp -->
@@ -2323,16 +2352,22 @@
     <xsl:element name="em">
       <xsl:choose>
 	<xsl:when test = "@name">
-	  <xsl:value-of select="@name"/>
+	  <xsl:call-template name="print.mathit">
+	    <xsl:with-param name="print.mathit.text">
+	      <xsl:value-of select="@name"/>
+	    </xsl:with-param>
+	  </xsl:call-template>
 	</xsl:when>
 	<xsl:otherwise>
-	  <xsl:text>x</xsl:text>
+	  <xsl:call-template name="print.mathit">
+	    <xsl:with-param name="print.mathit.text">x</xsl:with-param>
+	  </xsl:call-template>
 	</xsl:otherwise>
       </xsl:choose>
     </xsl:element>
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>  
-
+  
   <!-- hLoc -->
   <xsl:template match="hLoc" mode="formula">
     <xsl:element name="em">
@@ -2812,7 +2847,7 @@
 
   <!-- Stack -->
   <xsl:template match="stack" mode="formula">
-    <xsl:text>K</xsl:text>
+    <xsl:text>S</xsl:text>
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>
 
@@ -3240,6 +3275,9 @@
       <xsl:with-param name="print.derives.name">	
 	<xsl:value-of select="@name"/>
       </xsl:with-param> 
+      <xsl:with-param name="print.derives.sup">
+	<xsl:value-of select="@sup"/>
+      </xsl:with-param>
     </xsl:call-template>    	
     <xsl:apply-templates select="*[2]" mode="formula"/>
   </xsl:template>  
@@ -3281,11 +3319,21 @@
   <!-- gamma; store |-D expr : type , all inlined-->
   <xsl:template match="TDjudge" mode="formula">
     <xsl:if test = "@cst='yes'">	
-      <xsl:call-template name="print.mathcal">
-	<xsl:with-param name="print.mathcal.letter">C</xsl:with-param> 
+      <xsl:call-template name="print.mathmode">
+	<xsl:with-param name="print.mathmode.text">C</xsl:with-param> 
       </xsl:call-template>
       <xsl:call-template name="print.op.semis"/>	
+    </xsl:if>
+    <xsl:if test = "@D='yes'">	
+      <xsl:call-template name="print.mathcal">
+	<xsl:with-param name="print.mathcal.letter">D</xsl:with-param>
+      </xsl:call-template>
+      <xsl:call-template name="print.op.semis"/>
     </xsl:if>      
+    <xsl:if test="*[3]">
+      <xsl:apply-templates select="*[3]" mode="formula"/>
+      <xsl:call-template name="print.op.semis"/>	
+    </xsl:if>
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>Gamma;</xsl:text>
     <xsl:call-template name="print.op.semis"/>	
@@ -3295,23 +3343,25 @@
       <xsl:with-param name="print.derives.name">
 	<xsl:value-of select="@name"/>
       </xsl:with-param>
+      <xsl:with-param name="print.derives.sup">
+	<xsl:value-of select="@sup"/>
+      </xsl:with-param>
     </xsl:call-template>	
-    <xsl:for-each select="*">
-      <xsl:if test = "position() = 2">	
-	<xsl:choose>
- 	  <xsl:when test = "../@sub">
-	    <xsl:call-template name="print.op.subqual"/>	
-	  </xsl:when>
- 	  <xsl:when test = "../@Msub">
-	    <xsl:call-template name="print.op.Mqual"/>	
-	  </xsl:when>
-	  <xsl:otherwise>
-	    <xsl:call-template name="print.op.qual"/>	
-	  </xsl:otherwise>
-	</xsl:choose>
-      </xsl:if>
-      <xsl:apply-templates select="." mode="formula"/>	
-    </xsl:for-each>
+    <xsl:apply-templates select="*[1]" mode="formula"/>
+    <xsl:if test="*[2]">
+      <xsl:choose>
+	<xsl:when test = "@sub">
+	  <xsl:call-template name="print.op.subqual"/>	
+	</xsl:when>
+	<xsl:when test = "@Msub">
+	  <xsl:call-template name="print.op.Mqual"/>	
+	</xsl:when>
+	<xsl:otherwise>
+	  <xsl:call-template name="print.op.qual"/>	
+	</xsl:otherwise>
+      </xsl:choose>
+      <xsl:apply-templates select="*[2]" mode="formula"/>
+    </xsl:if>
   </xsl:template>  
   
   <!-- TIjudge -->
@@ -3553,6 +3603,22 @@
     </xsl:element>    
   </xsl:template>
 
+  <!-- mathit -->
+  <xsl:template name="print.mathit">
+    <xsl:param name="print.mathit.text"/>
+    <xsl:element name="b">
+      <xsl:element name="em">
+	<xsl:text>_</xsl:text>	
+      </xsl:element>
+    </xsl:element>
+    <xsl:value-of select="$print.mathit.text"/>
+    <xsl:element name="b">
+      <xsl:element name="em">
+	<xsl:text>_</xsl:text>	
+      </xsl:element>
+    </xsl:element>    
+  </xsl:template>
+
   <!-- mathbb -->
   <xsl:template name="print.mathbb">
     <xsl:param name="print.mathbb.letter"/>
@@ -3739,11 +3805,17 @@
   <!-- the derives operator -->
   <xsl:template name="print.derives">
     <xsl:param name="print.derives.name"/>
+    <xsl:param name="print.derives.sup"/>
     <xsl:param name="print.derives.sym"/>
 
     <xsl:call-template name="print.space"/>
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>vdash;</xsl:text> 
+    <xsl:if test="$print.derives.sup != ''">
+      <xsl:element name="sup">
+	<xsl:value-of select="$print.derives.sup"/>
+      </xsl:element>
+    </xsl:if>
     <xsl:choose>      
       <xsl:when test="$print.derives.name">
 	<xsl:element name="sub">

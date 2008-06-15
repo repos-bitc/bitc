@@ -17,6 +17,12 @@ $dummyem="$em\\{\\_\\{\\}\\}";
 $derive="$em\\{\\\\vdash\\}";
 $models="$em\\{\\\\models\\}";
 $deriveSp="($derive)$em\\{\\_($br)\\}";
+#$deriveSup="($derive)$em\\{\\^($br)\\}";
+#$derive1="($derive)$em\\{\\^($br)\\_($br)\\}";
+#$derive2="($derive)$em\\{\\_($br)\\^($br)\\}";
+#$derive3="($derive)$em\\{\\^($br)\\}$em\\{\\_($br)\\}";
+#$derive4="($derive)$em\\{\\_($br)\\}$em\\{\\^($br)\\}";
+
 $modelSp="($models)$em\\{\\_($br)\\}";
 #Unfortunately, the following two cases need different spacings
 $EqSp1="(=)$em\\{\\_(\\{$em\\{\\\\blacktriangledown\\}\\})\\}";
@@ -67,6 +73,8 @@ while(!eof(F)) {
 
 	# \textbf{\emph{\?}}text\textbf{\emph{\?}} to \ensuremath{\mathrm{text}}
 	$l =~ s/\\textbf\{\\emph\{\?\}\}([A-Za-z0-9]+)\\textbf\{\\emph\{\?\}\}/$EM\{\\mathrm\{$1\}\}/g;
+	# \textbf{\emph{\_}}text\textbf{\emph{\_}} to \ensuremath{\mathit{text}}
+	$l =~ s/\\textbf\{\\emph\{\{\\_\}\}\}([A-Za-z0-9]+)\\textbf\{\\emph\{\{\\_\}\}\}/$EM\{\\mathit\{$1\}\}/g;
 
 	#OK??
 	#Derivation and Modelling

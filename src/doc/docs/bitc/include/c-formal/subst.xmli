@@ -564,6 +564,16 @@
     <Hrules rowsep="4pt" colsep="2">
       <tyRule>
 	<tyPre>
+	  <mutex>
+	    <ftvs>
+	      <aSubMap/>
+	    </ftvs>
+	    <set>
+	      <tvars/>
+	    </set>
+	  </mutex>
+	</tyPre>
+	<tyPre>
 	  <eq>
 	    <Subst>
 	      <aSubMap/>
@@ -574,9 +584,9 @@
 	  <eq>
 	    <Subst>
 	      <aSubMap/>
-	      <aCtset/>
+	      <dCtset/>
 	    </Subst>
-	    <aCtset dash="'"/>
+	    <dCtset dash="'"/>
 	  </eq>
 	</tyPre>
 	<tyConc>
@@ -587,7 +597,7 @@
 		<tvars/>
 		<ctype>
 		  <type/>
-		  <aCtset/>
+		  <dCtset/>
 		</ctype>
 	      </TS>
 	    </Subst>
@@ -595,7 +605,7 @@
 	      <tvars/>
 	      <ctype>
 		<type dash="'"/>
-		<aCtset dash="'"/>
+		<dCtset dash="'"/>
 	      </ctype>
 	    </TS>
 	  </eq>
@@ -614,6 +624,8 @@
 	    </in>
 	    <text content=", "/>
 	  </grouping>
+	</tyPre>
+	<tyPre>
 	  <in>
 	    <mapping>
 	      <id/>
@@ -648,6 +660,8 @@
 	    </in>
 	    <text content=", "/>
 	  </grouping>
+	</tyPre>
+	<tyPre>
 	  <in>
 	    <mapping>
 	      <loc/>
@@ -669,8 +683,6 @@
 	  </eq>
 	</tyConc>
       </tyRule>
-    </Hrules>
-    <Hrules rowsep="4pt" colsep="2">
       <tyRule>
 	<tyPre>
 	  <grouping>
@@ -687,6 +699,8 @@
 	      <lKind num="j"/>
 	    </eq>
 	  </grouping>
+	</tyPre>
+	<tyPre>
 	  <eq>
 	    <aExpr dash="'"/>
 	    <subst>
@@ -710,114 +724,7 @@
 	  </eq>
 	</tyConc>
       </tyRule>
-      <tyRule>
-	<tyPre>
-	  <eq>
-	    <Subst>
-	      <aSubMap/>
-	      <lKind/>
-	    </Subst>
-	    <lKind dash="'"/>
-	  </eq>
-	  <eq>
-	    <Subst>
-	      <aSubMap/>
-	      <type num="s"/>
-	    </Subst>
-	    <type num="s" dash="'"/>
-	  </eq>
-	</tyPre>
-	<tyConc>
-	  <eq>
-	    <Subst sp="yes">
-	      <aSubMap/>
-	      <Pcst>
-		<lKind/>
-		<type num="g"/>
-		<type num="s"/>
-	      </Pcst>
-	    </Subst>
-	    <Pcst>
-	      <lKind dash="'"/>
-	      <type num="g"/>
-	      <type num="s" dash="'"/>
-	    </Pcst>
-	  </eq>
-	</tyConc>
-      </tyRule>
-      <tyRule>
-	<tyPre>
-	  <grouping>
-	    <Forall/>
-	    <in>
-	      <constraint name="d"/>
-	      <dCtset/>
-	    </in>
-	    <text content=", "/>
-	    <in>
-	      <Subst sp="yes">
-		<aSubMap/>
-		<constraint name="d"/>
-	      </Subst>
-	      <dCtset dash="'"/>
-	    </in>
-	  </grouping>
-	</tyPre>
-	<tyConc>
-	  <eq>
-	    <Subst sp="yes">
-	      <aSubMap/>
-	      <dCtset/>
-	    </Subst>
-	    <dCtset dash="'"/>
-	  </eq>
-	</tyConc>
-      </tyRule>
     </Hrules>
-    <!--       <Hrules rowsep="4pt" colsep="2"> -->
-    <!-- 	<tyRule> -->
-    <!-- 	  <tyPre> -->
-    <!-- 	    <mutex> -->
-    <!-- 	      <dom> -->
-    <!-- 		<aSubMap dash="'"/> -->
-    <!-- 	      </dom> -->
-    <!-- 	      <ftvs> -->
-    <!-- 		<aSubMap/> -->
-    <!-- 	      </ftvs> -->
-    <!-- 	    </mutex> -->
-    <!-- 	    <grouping> -->
-    <!-- 	      <Forall/> -->
-    <!-- 	      <in> -->
-    <!-- 		<SubMap> -->
-    <!-- 		  <tvar/> -->
-    <!-- 		  <type/> -->
-    <!-- 		</SubMap> -->
-    <!-- 		<aSubMap dash="'"/> -->
-    <!-- 	      </in> -->
-    <!-- 	      <text content=", "/> -->
-    <!-- 	      <in> -->
-    <!-- 		<SubMap> -->
-    <!-- 		  <tvar/> -->
-    <!-- 		  <Subst> -->
-    <!-- 		    <aSubMap/> -->
-    <!-- 		    <type/> -->
-    <!-- 		  </Subst> -->
-    <!-- 		</SubMap> -->
-    <!-- 		<aSubMap dash="''"/> -->
-    <!-- 	      </in> -->
-    <!-- 	    </grouping>	       -->
-    <!-- 	  </tyPre> -->
-    <!-- 	  <tyConc> -->
-    <!-- 	    <eq> -->
-    <!-- 	      <Subst> -->
-    <!-- 		<aSubMap/> -->
-    <!-- 		<aSubMap dash="'"/> -->
-    <!-- 	      </Subst> -->
-    <!-- 	      <aSubMap dash="''"/> -->
-    <!-- 	    </eq> -->
-    <!-- 	  </tyConc> -->
-    <!-- 	</tyRule> -->
-    <!--       </Hrules> -->
   </btypes:TYPE>
   <caption>Substitution Rules</caption>
   </figure>

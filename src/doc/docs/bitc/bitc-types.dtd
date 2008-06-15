@@ -280,6 +280,12 @@
                                subnum   CDATA    #IMPLIED
                                dash     CDATA    #IMPLIED
 >
+<!ELEMENT aKmap                EMPTY>
+<!ATTLIST aKmap
+                               num      CDATA    #IMPLIED
+                               subnum   CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
 <!ELEMENT SubMap               lnk*>
 <!ELEMENT compose              (%anything.group;*)>
 <!-- Special type of composition for substitutions only -->
@@ -521,6 +527,7 @@
 <!ENTITY % constraint.group "
                                  %predicates.group;
                                | Tclass 
+                               | pcst
                                | Pcst
 ">
 
@@ -737,6 +744,8 @@
                                dash     CDATA    #IMPLIED
 >
 <!-- Polymorphic constraint -->
+<!ELEMENT pcstOp               >
+<!ELEMENT pcst                 (%anything.group;*)>
 <!ELEMENT PcstOp               >
 <!ELEMENT Pcst                 (%anything.group;*)>
 
@@ -1286,6 +1295,7 @@
 <!-- Convenience form (Inference and declarative judgements) -->
 <!ELEMENT Sjudge              (assume, %anything.group;)>
 <!ATTLIST Sjudge
+                               sup       CDATA   #IMPLIED
                                name      CDATA   #IMPLIED
                                br        CDATA   #IMPLIED
 >
@@ -1305,6 +1315,8 @@
                                sub      yes      #IMPLIED
                                Msub     yes      #IMPLIED
                                cst      yes      #IMPLIED
+                               D        yes      #IMPLIED
+                               sup      yes      #IMPLIED
 >
 
 <!ELEMENT TIjudge             (assume?, conclude, propagate?)>

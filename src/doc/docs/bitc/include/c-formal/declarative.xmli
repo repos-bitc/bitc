@@ -6,13 +6,58 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
   <title>Declarative Type System</title>
+  <definition id="canonical-expressions">
+    <title>Canonical Expressions</title>
+    <p>
+      We say that an expression 
+      <btypes:TYPE>
+	<aExpr/>
+      </btypes:TYPE> is canonical if
+      all <progident>let</progident> expressions in
+      <btypes:TYPE>
+	<aExpr/>
+      </btypes:TYPE> are annotated with one of the 
+      kinds
+      <btypes:TYPE>
+	<lKind k="mono"/>
+      </btypes:TYPE> or
+      <btypes:TYPE>
+	<lKind k="poly"/>
+      </btypes:TYPE>.
+    </p>
+  </definition>
+  <definition id="weakened-type-derivation">
+    <title>Weakened Type Derivation</title>
+    <p>
+      We write 
+      <btypes:TYPE>
+	<TDjudge name="s" D="yes">
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE> 
+      <btypes:TYPE>
+	<TDjudge>
+	  <aExpr/>
+	  <type/>
+	  <dCtset dash="'"/>
+	</TDjudge>
+      </btypes:TYPE> for some
+      <btypes:TYPE>
+	<subeq>
+	  <dCtset dash="'"/>
+	  <dCtset/>
+	</subeq>
+      </btypes:TYPE>.
+    </p>
+  </definition>
   <definition id="constraint-colection-ext-typ">
     <title>Constraint Collection over Type Derivation</title>
     <p>
       We write
       <btypes:TYPE>
 	<spset>
-	  <TDjudge>
+	  <TDjudge D="yes">
 	    <aExpr/>
 	    <type/>
 	  </TDjudge>
@@ -20,7 +65,7 @@
       </btypes:TYPE> to denote the set of all constrained types and
       unconstrained type variables used in the derivation of 
       <btypes:TYPE>
-	<TDjudge>
+	<TDjudge D="yes">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
@@ -31,12 +76,9 @@
 	<equation>
 	  <lhs>
 	    <spset>
-	      <TDjudge>
+	      <TDjudge D="yes">
 		<id/>
-		<Subst>
-		  <aSubMap/>
-		  <type/>
-		</Subst>
+		<type/>
 	      </TDjudge>
 	    </spset>
 	  </lhs>
@@ -45,17 +87,14 @@
 	      <gamma/>
 	      <store/>
 	      <type/>
-	      <Subst>
-		<aSubMap/>
-		<type/>
-	      </Subst>
+	      <dCtset/>
 	    </spset>
 	  </rhs>
 	</equation>
 	<equation>
 	  <lhs>
 	    <spset>
-	      <TDjudge>
+	      <TDjudge D="yes">
 		<Unit/>
 		<unit/>
 	      </TDjudge>
@@ -65,13 +104,14 @@
 	    <spset>
 	      <gamma/>
 	      <store/>
+	      <dCtset/>
 	    </spset>
 	  </rhs>
 	</equation>
 	<equation>
 	  <lhs>
 	    <spset>
-	      <TDjudge>
+	      <TDjudge D="yes">
 		<true/>
 		<bool/>
 	      </TDjudge>
@@ -81,13 +121,14 @@
 	    <spset>
 	      <gamma/>
 	      <store/>
+	      <dCtset/>
 	    </spset>
 	  </rhs>
 	</equation>
 	<equation>
 	  <lhs>
 	    <spset>
-	      <TDjudge>
+	      <TDjudge D="yes">
 		<false/>
 		<bool/>
 	      </TDjudge>
@@ -97,13 +138,14 @@
 	    <spset>
 	      <gamma/>
 	      <store/>
+	      <dCtset/>
 	    </spset>
 	  </rhs>
 	</equation>
 	<equation>
 	  <lhs>
 	    <spset>
-	      <TDjudge>
+	      <TDjudge D="yes">
 		<hLoc/>
 		<ref>
 		  <type/>
@@ -116,13 +158,14 @@
 	      <gamma/>
 	      <store/>
 	      <type/>
+	      <dCtset/>
 	    </spset>
 	  </rhs>
 	</equation>
 	<equation>
 	  <lhs>
 	    <spset>
-	      <TDjudge>
+	      <TDjudge D="yes">
 		<sLoc/>
 		<type/>
 	      </TDjudge>
@@ -133,13 +176,14 @@
 	      <gamma/>
 	      <store/>
 	      <type/>
+	      <dCtset/>
 	    </spset>
 	  </rhs>
 	</equation>
 	<equation>
 	  <lhs>
 	    <spset>
-	      <TDjudge>
+	      <TDjudge D="yes">
 		<lambda>
 		  <id/>
 		  <aExpr/>
@@ -155,6 +199,7 @@
 	    <spset>
 	      <Sjudge>
 		<assume>
+		  <dCtset/>
 		  <extend>
 		    <gamma/>
 		    <mapping>
@@ -186,7 +231,7 @@
 	<equation>
 	  <lhs>
 	    <spset>
-	      <TDjudge>
+	      <TDjudge D="yes">
 		<apply>
 		  <aExpr num="1"/>
 		  <aExpr num="2"/>
@@ -197,7 +242,7 @@
 	  </lhs>
 	  <rhs>
 	    <spset>
-	      <TDjudge>
+	      <TDjudge D="yes">
 		<aExpr num="1"/>
 		<type num="1"/>
 	      </TDjudge>
@@ -209,7 +254,7 @@
 	    <unin>
 	      <nothing/>
 	      <spset>
-		<TDjudge>
+		<TDjudge D="yes">
 		  <aExpr num="2"/>
 		  <type num="2"/>
 		</TDjudge>
@@ -232,7 +277,26 @@
       </VEqns>
     </btypes:TYPE>
     <p>
-      Other cases are similar.
+      Other cases are similar. We write:
+      <br/>
+      <btypes:TYPE>
+	<eq>
+	  <spset>
+	    <TDjudge name="s" D="yes">
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	  </spset>
+	  <spset>
+	    <TDjudge name="s">
+	      <aExpr/>
+	      <type/>
+	      <dCtset dash="'"/>
+	    </TDjudge>
+	    <dCtset/>
+	  </spset>
+	</eq>
+      </btypes:TYPE>.
     </p>
   </definition>
   <definition id="consistent-typing">
@@ -240,7 +304,7 @@
     <p>
       We say that
       <btypes:TYPE>
-	<TDjudge cst="yes">
+	<TDjudge D="yes" cst="yes">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
@@ -251,7 +315,7 @@
       </btypes:TYPE>
       if
       <btypes:TYPE>
-	<TDjudge>
+	<TDjudge D="yes">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
@@ -260,7 +324,34 @@
 	<Sat>
 	  <bCtset/>
 	  <spset>
-	    <TDjudge>
+	    <TDjudge D="yes">
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	  </spset>
+	</Sat>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      Similarly, we write
+      <btypes:TYPE>
+	<TDjudge name="s" D="yes" cst="yes">
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE>
+      if
+      <btypes:TYPE>
+	<TDjudge name="s" D="yes">
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<Sat>
+	  <bCtset/>
+	  <spset>
+	    <TDjudge name="s" D="yes">
 	      <aExpr/>
 	      <type/>
 	    </TDjudge>
@@ -271,25 +362,25 @@
     <p>
       We say that
       <btypes:TYPE>
-	<TDjudge name="*">
+	<TDjudge D="yes" name="*">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
       </btypes:TYPE>, is a consistent type derivation if
       <btypes:TYPE>
-	<TDjudge>
+	<TDjudge name="s" D="yes">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
       </btypes:TYPE> and
       <btypes:TYPE>
 	<CST sp="yes">
-	  <TDjudge>
+	  <TDjudge name="s" D="yes">
 	    <aExpr/>
 	    <type/>
 	  </TDjudge>
 	</CST>
-      </btypes:TYPE>
+      </btypes:TYPE>.
     </p>
   </definition>
   <definition id="stack-heap-typing">
@@ -301,7 +392,7 @@
       <btypes:TYPE><gamma/></btypes:TYPE> and store typing
       <btypes:TYPE><store/></btypes:TYPE>, and written
       <btypes:TYPE>
-	<TDjudge>
+	<TDjudge name="s" D="yes">
 	  <plus>
 	    <heap/>
 	    <stack/>
@@ -334,7 +425,7 @@
 	      </in>
 	    </forall>
 	    <text content=", "/>
-	    <TDjudge>
+	    <TDjudge name="s" D="yes">
 	      <mapsto><heap/><hLoc/></mapsto>
 	      <type/>
 	    </TDjudge> 
@@ -356,7 +447,7 @@
 	      </in>
 	    </forall>
 	    <text content=", "/>
-	    <TDjudge>
+	    <TDjudge name="s" D="yes">
 	      <mapsto><stack/><sLoc/></mapsto>
 	      <type/>
 	    </TDjudge>
@@ -370,76 +461,24 @@
       </li>
     </ol>
     <p>
-      Similarly, we write
+      Similarly, we define
       <btypes:TYPE>
-	<TDjudge cst="yes">
+	<TDjudge name="s" D="yes" cst="yes">
 	  <plus>
 	    <heap/>
 	    <stack/>
 	  </plus>
 	</TDjudge>
-	<text content=" if "/>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<TDjudge D="yes" name="*">
+	  <plus>
+	    <heap/>
+	    <stack/>
+	  </plus>
+	</TDjudge>
       </btypes:TYPE>
     </p>
-    <ol>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <eq>
-	      <dom><store/></dom>
-	      <unin>
-		<dom><heap/></dom>
-		<dom><stack/></dom>
-	      </unin>
-	    </eq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <forall>
-	      <in>
-		<hLoc/>
-		<dom><heap/></dom>
-	      </in>
-	    </forall>
-	    <text content=", "/>
-	    <TDjudge cst="yes">
-	      <mapsto><heap/><hLoc/></mapsto>
-	      <type/>
-	    </TDjudge> 
-	    <text content=" such that "/>
-	    <eq under="minz">
-	      <mapsto><store/><hLoc/></mapsto>
-	      <type/>
-	    </eq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <forall>
-	      <in>
-		<sLoc/>
-		<dom><stack/></dom>
-	      </in>
-	    </forall>
-	    <text content=", "/>
-	    <TDjudge cst="yes">
-	      <mapsto><stack/><sLoc/></mapsto>
-	      <type/>
-	    </TDjudge>
-	    <text content=" such that "/>
-	    <eq under="minz">
-	      <mapsto><store/><sLoc/></mapsto>
-	      <type/>
-	    </eq>
-	  </btypes:TYPE>
-	</p>
-      </li>
-    </ol>
   </definition>
   <definition id="valid-lval">
     <title>Valid Lvalues</title>
@@ -537,7 +576,7 @@
 	<p>
 	  <btypes:TYPE>
 	    <text content="If "/>
-	    <TDjudge>
+	    <TDjudge name="s" D="yes">
 	      <Unit/>
 	      <type/>
 	    </TDjudge>
@@ -554,7 +593,7 @@
 	<p>
 	  <btypes:TYPE>
 	    <text content="If "/>
-	    <TDjudge>
+	    <TDjudge name="s" D="yes">
 	      <true/>
 	      <type/>
 	    </TDjudge>
@@ -571,7 +610,7 @@
 	<p>
 	  <btypes:TYPE>
 	    <text content="If "/>
-	    <TDjudge>
+	    <TDjudge name="s" D="yes">
 	      <false/>
 	      <type/>
 	    </TDjudge>
@@ -588,7 +627,7 @@
 	<p>
 	  <btypes:TYPE>
 	    <text content="If "/>
-	    <TDjudge>
+	    <TDjudge name="s" D="yes">
 	      <hLoc/>
 	      <type/>
 	    </TDjudge>
@@ -607,7 +646,7 @@
 	<p>
 	  <btypes:TYPE>
 	    <text content="If "/>
-	    <TDjudge>
+	    <TDjudge name="s" D="yes">
 	      <lambda>
 		<id/>
 		<aExpr/>
@@ -625,6 +664,7 @@
 	    <text content=", such that "/>
 	    <Sjudge>
 	      <assume>
+		<dCtset/>
 		<extend>
 		  <gamma/>
 		  <mapping>
@@ -657,25 +697,19 @@
 	<p>
 	  <btypes:TYPE>
 	    <text content="If "/>
-	    <TDjudge>
+	    <TDjudge name="s" D="yes">
 	      <deref>
 		<aExpr/>
 	      </deref>
 	      <type/>
 	    </TDjudge>
 	    <text content=" then "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <Msub>
-		<aExpr/>
-		<ref>
-		  <type/>
-		</ref>
-	      </Msub>
-	    </Sjudge>
+	    <TDjudge name="s" D="yes" Msub="yes">
+	      <aExpr/>
+	      <ref>
+		<type/>
+	      </ref>
+	    </TDjudge>
 	    <text content="."/>
 	  </btypes:TYPE>
 	</p>
@@ -910,7 +944,7 @@
 	<p>
 	  <btypes:TYPE>
 	    <text content="If "/>
-	    <TDjudge Msub="yes">
+	    <TDjudge name="s" D="yes" Msub="yes">
 	      <aVal/>
 	      <unit/>
 	    </TDjudge>
@@ -926,7 +960,7 @@
 	<p>
 	  <btypes:TYPE>
 	    <text content="If "/>
-	    <TDjudge Msub="yes">
+	    <TDjudge name="s" D="yes" Msub="yes">
 	      <aVal/>
 	      <bool/>
 	    </TDjudge>
@@ -944,7 +978,7 @@
 	<p>
 	  <btypes:TYPE>
 	    <text content="If "/>
-	    <TDjudge Msub="yes">
+	    <TDjudge name="s" D="yes" Msub="yes">
 	      <aVal/>
 	      <ref>
 		<type/>
@@ -969,7 +1003,7 @@
 	<p>
 	  <btypes:TYPE>
 	    <text content="If "/>
-	    <TDjudge Msub="yes">
+	    <TDjudge name="s" D="yes" Msub="yes">
 	      <aVal/>
 	      <fn>
 		<type num="1"/>
@@ -991,7 +1025,7 @@
 	<p>
 	  <btypes:TYPE>
 	    <text content="If "/>
-	    <TDjudge Msub="yes">
+	    <TDjudge name="s" D="yes" Msub="yes">
 	      <aVal/>
 	      <pair>
 		<type num="1"/>
@@ -1015,7 +1049,7 @@
     <p>
       By inspecting the possibilities for the derivation of
       <btypes:TYPE>
-	<TDjudge Msub="yes">
+	<TDjudge name="s" D="yes" Msub="yes">
 	  <aVal/>
 	  <type/>
 	</TDjudge>
@@ -1046,13 +1080,13 @@
     <p>
       Consider the case (2), where
       <btypes:TYPE>
-	<TDjudge Msub="yes">
+	<TDjudge name="s" D="yes" Msub="yes">
 	  <aVal/>
 	  <bool/>
 	</TDjudge>
       </btypes:TYPE>. That is,
       <btypes:TYPE>
-	<TDjudge>
+	<TDjudge name="s" D="yes">
 	  <aVal/>
 	  <type/>
 	</TDjudge>
@@ -1166,13 +1200,16 @@
   <theorem id="T-progress">
     <title>Progress</title>
     <p>
+      If
       <btypes:TYPE>
-	<text content="If "/>
 	<aExpr/>
-	<text content=" is a closed, well typed term, "/>
-	<text content="that is, "/>
-	<Sjudge>
+      </btypes:TYPE>
+      is a closed well typed canonical expresssion,
+      that is, 
+      <btypes:TYPE>
+	<Sjudge name="s">
 	  <assume>
+	    <dCtset/>
 	    <Empty/>
 	    <store/>
 	  </assume>
@@ -1181,17 +1218,23 @@
 	    <type/>
 	  </tqExpr>
 	</Sjudge>
-	<text content=" for some "/>
+      </btypes:TYPE> for some
+      <btypes:TYPE>
 	<type/>
-	<text content=" and "/>
+      </btypes:TYPE> and
+      <btypes:TYPE>
 	<store/>
-	<text content=", given any heap "/>
+      </btypes:TYPE>, given any heap
+      <btypes:TYPE>
 	<heap/>
-	<text content=" and stack "/>
+      </btypes:TYPE> and stack
+      <btypes:TYPE>
 	<stack/>
-	<text content=" such that "/>
-	<Sjudge>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<Sjudge name="s">
 	  <assume>
+	    <dCtset/>
 	    <Empty/>
 	    <store/>
 	  </assume>
@@ -1200,27 +1243,29 @@
 	    <stack/>
 	  </plus>
 	</Sjudge>
-	<text content=", "/>
-      </btypes:TYPE>
+      </btypes:TYPE>,
     </p>
     <ol>
       <li>
 	<p>
+	  If
 	  <btypes:TYPE>
-	    <text content=" If "/>
 	    <Sjudge name="lval">
 	      <assume/>
 	      <aExpr/>
 	    </Sjudge>
-	    <text content=", then "/>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
 	    <aExpr/>
-	    <text content=" is either a valid lvalue "/>
-	    <text content="(that is, "/>
+	  </btypes:TYPE>
+	  is either a valid lvalue (that is,
+	  <btypes:TYPE>
 	    <eq>
 	      <aExpr/>
 	      <lVal/>
 	    </eq>
-	    <text content=" and "/>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
 	    <Sjudge name="v">
 	      <assume>
 		<plus>
@@ -1230,13 +1275,15 @@
 	      </assume>
 	      <lVal/>
 	    </Sjudge>
-	    <text content=") or else "/>
+	  </btypes:TYPE>) or else
+	  <btypes:TYPE>
 	    <Exists>
 	      <aExpr dash="'"/>
 	      <stack dash="'"/>
 	      <heap dash="'"/>
 	    </Exists>
-	    <text content=" such that "/>
+	  </btypes:TYPE> such that
+	  <btypes:TYPE>
 	    <leval>
 	      <opState>
 		<stack/>
@@ -1249,23 +1296,25 @@
 		<aExpr dash="'"/>
 	      </opState>
 	    </leval>
-	    <text content="."/>
-	  </btypes:TYPE>
+	  </btypes:TYPE>.
 	</p>
       </li>
       <li>
 	<p>
 	  <btypes:TYPE>
 	    <aExpr/>
-	    <text content=" is a value "/>
+	  </btypes:TYPE> is a value
+	  <btypes:TYPE>
 	    <aVal/>
-	    <text content=" or else "/>
+	  </btypes:TYPE> or else
+	  <btypes:TYPE>
 	    <Exists>
 	      <aExpr dash="'"/>
 	      <stack dash="'"/>
 	      <heap dash="'"/>
 	    </Exists>
-	    <text content=" such that "/>
+	  </btypes:TYPE> such that
+	  <btypes:TYPE>
 	    <eval>
 	      <opState>
 		<stack/>
@@ -1278,8 +1327,7 @@
 		<aExpr dash="'"/>
 	      </opState>
 	    </eval>
-	    <text content="."/>
-	  </btypes:TYPE>
+	  </btypes:TYPE>.
 	</p>
       </li>
     </ol>
@@ -1287,6 +1335,19 @@
   <proof>
     <p>
       By induction on the type derivation.
+      <btypes:TYPE>
+	<Sjudge name="s">
+	  <assume>
+	    <dCtset/>
+	    <Empty/>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>
     </p>
     <ol>
       <li>
@@ -1313,8 +1374,9 @@
 	  execution and can always continue with E-Rval rule as the
 	  stack is well typed
 	  (<btypes:TYPE>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
+		<dCtset/>
 		<Empty/>
 		<store/>
 	      </assume>
@@ -1339,8 +1401,9 @@
 	      </apply>
 	    </eq>
 	    <text content=", "/>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
+		<dCtset/>
 		<Empty/>
 		<store/>
 	      </assume>
@@ -1353,8 +1416,9 @@
 	      </Msub>
 	    </Sjudge>
 	    <text content=", and "/>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
+		<dCtset/>
 		<Empty/>
 		<store/>
 	      </assume>
@@ -1382,8 +1446,9 @@
 	  </btypes:TYPE>
 	  are values. Since we know that
 	  <btypes:TYPE>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
+		<dCtset num="1"/>
 		<Empty/>
 		<store/>
 	      </assume>
@@ -1429,8 +1494,9 @@
 	      </assign>
 	    </eq>
 	    <text content=", "/>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
+		<dCtset/>
 		<Empty/>
 		<store/>
 	      </assume>
@@ -1442,8 +1508,9 @@
 	      </Msub>
 	    </Sjudge>
 	    <text content=", "/>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
+		<dCtset/>
 		<Empty/>
 		<store/>
 	      </assume>
@@ -1601,8 +1668,9 @@
 	    <p>
 	      We know that 
 	      <btypes:TYPE>
-		<Sjudge>
+		<Sjudge name="s">
 		  <assume>
+		    <dCtset/>
 		    <Empty/>
 		    <store/>
 		  </assume>
@@ -1615,8 +1683,9 @@
 		</Sjudge>
 	      </btypes:TYPE>, which is equivalent to
 	      <btypes:TYPE>
-		<Sjudge>
+		<Sjudge name="s">
 		  <assume>
+		    <dCtset/>
 		    <Empty/>
 		    <store/>
 		  </assume>
@@ -1635,8 +1704,9 @@
 	      </btypes:TYPE>.
 	      That is,
 	      <btypes:TYPE>
-		<Sjudge>
+		<Sjudge name="s">
 		  <assume>
+		    <dCtset/>
 		    <Empty/>
 		    <store/>
 		  </assume>
@@ -1655,8 +1725,9 @@
 	      T-Sloc and T-Sel.
 	      From the assumption of T-Sel rule, we must have
 	      <btypes:TYPE>
-		<Sjudge>
+		<Sjudge name="s">
 		  <assume>
+		    <dCtset/>
 		    <Empty/>
 		    <store/>
 		  </assume>
@@ -1699,8 +1770,9 @@
 	      </btypes:TYPE>, 
 	      since we have
 	      <btypes:TYPE>
-		<Sjudge>
+		<Sjudge name="s">
 		  <assume>
+		    <dCtset/>
 		    <Empty/>
 		    <store/>
 		  </assume>
@@ -1712,8 +1784,9 @@
 	      </btypes:TYPE>, 
 	      we conclude that 
 	      <btypes:TYPE>
-		<Sjudge>
+		<Sjudge name="s">
 		  <assume>
+		    <dCtset/>
 		    <Empty/>
 		    <store/>
 		  </assume>
@@ -1808,8 +1881,9 @@
 	      </deref>
 	    </eq>
 	    <text content=", and "/>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
+		<dCtset/>
 		<Empty/>
 		<store/>
 	      </assume>
@@ -1876,8 +1950,9 @@
 	      </let>
 	    </eq>
 	    <text content=", "/>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
+		<dCtset/>
 		<Empty/>
 		<store/>
 	      </assume>
@@ -1897,12 +1972,12 @@
       </li>
       <li>
 	<p>
-	  Case T-Let-P: Only right execution is applicable. We have:
+	  Case T-Let-MP: Only right execution is applicable. We have:
 	  <btypes:TYPE>
 	    <eq>
 	      <aExpr/>
 	      <paren>
-		<let kind="p">
+		<let kind="x">
 		  <id/>
 		  <aExpr num="1"/>
 		  <aExpr num="2"/>
@@ -1910,7 +1985,7 @@
 	      </paren>
 	    </eq>
 	    <text content=", "/>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
 		<Empty/>
 		<store/>
@@ -1926,7 +2001,19 @@
 	    <aExpr num="1"/>
 	  </btypes:TYPE>
 	  is not a value, we can take E-#.
-	  Otherwise, the execution can take E-Let-P.
+	  Otherwise, the execution can take E-Let-P if
+	  <btypes:TYPE>
+	    <eq>
+	      <lKind/>
+	      <lKind k="poly"/>
+	    </eq>
+	  </btypes:TYPE> or E-Let-M if
+	  <btypes:TYPE>
+	    <eq>
+	      <lKind/>
+	      <lKind k="mono"/>
+	    </eq>
+	  </btypes:TYPE>.
 	</p>
       </li>
     </ol>
@@ -1936,7 +2023,7 @@
     <p>
       If
       <btypes:TYPE>
-	<TDjudge>
+	<TDjudge D="yes">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
@@ -1956,6 +2043,46 @@
 	<text content=", "/>
 	<Sjudge>
 	  <assume>
+	    <dCtset/>
+	    <gamma dash="'"/>
+	    <store dash="'"/>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      If
+      <btypes:TYPE>
+	<TDjudge name="s" D="yes">
+	  <aExpr/>
+	  <type/>
+	</TDjudge>
+      </btypes:TYPE>,
+      then
+      <btypes:TYPE>
+	<Forall/>
+	<supeq>
+	  <gamma dash="'"/>
+	  <gamma/>
+	</supeq>
+	<text content=", "/>
+	<supeq>
+	  <store dash="'"/>
+	  <store/>
+	</supeq>
+	<text content=" and "/>
+	<supeq>
+	  <dCtset dash="'"/>
+	  <dCtset/>
+	</supeq>
+	<text content=", "/>
+	<Sjudge>
+	  <assume>
+	    <dCtset dash="'"/>
 	    <gamma dash="'"/>
 	    <store dash="'"/>
 	  </assume>
@@ -1971,7 +2098,7 @@
     <p>
       By straightforward induction on the derivation of
       <btypes:TYPE>
-	<TDjudge>
+	<TDjudge D="yes">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
@@ -2346,7 +2473,7 @@
 	<p>
 	  If
 	  <btypes:TYPE>
-	    <TDjudge>
+	    <TDjudge D="yes">
 	      <aExpr/>
 	      <type/>
 	    </TDjudge>
@@ -2355,6 +2482,10 @@
 	  <btypes:TYPE>
 	    <Sjudge>
 	      <assume>
+		<Subst>
+		  <aSubMap/>
+		  <dCtset/>
+		</Subst>
 		<Subst>
 		  <aSubMap/>
 		  <gamma/>
@@ -2379,7 +2510,7 @@
 	<p>
 	  If
 	  <btypes:TYPE>
-	    <TDjudge cst="yes">
+	    <TDjudge D="yes" cst="yes">
 	      <aExpr/>
 	      <type/>
 	    </TDjudge>
@@ -2388,11 +2519,14 @@
 	  <btypes:TYPE>
 	    <Sjudge>
 	      <assume>
-		<subst>
+		<Subst>
+		  <aSubMap/>
 		  <bCtset/>
-		  <tvars name="alpha"/>
-		  <tvars name="beta"/>
-		</subst>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <dCtset/>
+		</Subst>
 		<Subst>
 		  <aSubMap/>
 		  <gamma/>
@@ -2419,48 +2553,17 @@
     <p>
       By straightforward induction on the derivation of 
       <btypes:TYPE>
-	<TDjudge>
+	<TDjudge D="yes">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
       </btypes:TYPE> and
       <btypes:TYPE>
-	<TDjudge cst="yes">
+	<TDjudge D="yes" cst="yes">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
       </btypes:TYPE>.
-      Note that a textual substitution is necessary on the 
-      constraint set 
-      <btypes:TYPE>
-	<bCtset/>
-      </btypes:TYPE> since
-      <btypes:TYPE>
-	<Subst>
-	  <aSubMap/>
-	  <bCtset/>
-	</Subst>
-      </btypes:TYPE> does not substitute on the variables on the LHS
-      of constraints in 
-      <btypes:TYPE>
-	<bCtset/>
-      </btypes:TYPE> (see substitution rules in 
-      figure&nbsp;<xref ref="subst_rules"/>).
-      Further, 
-      <btypes:TYPE>
-	<subst>
-	  <bCtset/>
-	  <tvars name="alpha"/>
-	  <tvars name="beta"/>
-	</subst>
-      </btypes:TYPE> subsumes (and is consistent with)
-      <btypes:TYPE>
-	<Subst>
-	  <aSubMap/>
-	  <bCtset/>
-	</Subst>
-      </btypes:TYPE> since we are only substituting 
-      variables for variables.      
     </p>
   </proof>
   <lemma id="Consistency-Propagation">
@@ -2469,7 +2572,7 @@
       If
       <btypes:TYPE>
 	<CST sp="yes">
-	  <TDjudge>
+	  <TDjudge D="yes">
 	    <aExpr/>
 	    <type/>
 	  </TDjudge>
@@ -2482,6 +2585,7 @@
 	    <gamma/>
 	    <store/>
 	    <type/>
+	    <dCtset/>
 	  </set>
 	</models>
       </btypes:TYPE>, then,
@@ -2489,7 +2593,7 @@
 	<models name="cst">
 	  <aSubMap/>
 	  <spset>
-	    <TDjudge>
+	    <TDjudge D="yes">
 	      <aExpr/>
 	      <type/>
 	    </TDjudge>
@@ -2502,7 +2606,7 @@
     <p>
       By induction on the derivation of 
       <btypes:TYPE>
-	<TDjudge>
+	<TDjudge D="yes">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
@@ -2651,7 +2755,7 @@
 		  Due to the premise 
 		  <btypes:TYPE>
 		    <CST sp="yes">
-		      <TDjudge>
+		      <TDjudge D="yes">
 			<aExpr/>
 			<type/>
 		      </TDjudge>
@@ -2692,6 +2796,7 @@
 			<gamma/>
 			<store/>
 			<type/>
+			<dCtset/>
 		      </set>
 		    </models>
 		  </btypes:TYPE>, and 
@@ -2943,7 +3048,7 @@
 	    <type num="s"/>
 	  </btypes:TYPE> used in the derivation of
 	  <btypes:TYPE>
-	    <TDjudge>
+	    <TDjudge D="yes">
 	      <aExpr/>
 	      <type/>
 	    </TDjudge>
@@ -2952,7 +3057,7 @@
 	    <models name="cst">
 	      <aSubMap/>
 	      <spset>
-		<TDjudge>
+		<TDjudge D="yes">
 		  <aExpr/>
 		  <type/>
 		</TDjudge>
@@ -3109,7 +3214,7 @@
       <li>
 	<p>
 	  <btypes:TYPE>
-	    <TDjudge cst="yes">
+	    <TDjudge D="yes" cst="yes">
 	      <aExpr/>
 	      <type/>
 	    </TDjudge>
@@ -3124,7 +3229,7 @@
 		<aSubMap/>
 	      </assume>
 	      <spset>
-		<TDjudge>
+		<TDjudge D="yes">
 		  <aExpr/>
 		  <type/>
 		</TDjudge>
@@ -3144,27 +3249,13 @@
 	      <Subst>
 		<aSubMap/>
 		<spset>
-		  <TDjudge>
+		  <TDjudge D="yes">
 		    <aExpr/>
 		    <type/>
 		  </TDjudge>
 		</spset>
 	      </Subst>
 	    </Sat>	      
-	  </btypes:TYPE>
-	</p>
-      </li>
-      <li>
-	<p>
-	  <btypes:TYPE>
-	    <mutex>
-	      <ftvs>
-		<aSubMap/>
-	      </ftvs>
-	      <pred name="gtv">
-		<gamma/>
-	      </pred>
-	    </mutex>
 	  </btypes:TYPE>
 	</p>
       </li>
@@ -3177,6 +3268,10 @@
 	    <Subst>
 	      <aSubMap/>
 	      <bCtset/>
+	    </Subst>
+	    <Subst>
+	      <aSubMap/>
+	      <dCtset/>
 	    </Subst>
 	    <Subst>
 	      <aSubMap/>
@@ -3202,7 +3297,7 @@
     <p>
       By induction on the derivation of
       <btypes:TYPE>
-	<TDjudge>
+	<TDjudge D="yes">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
@@ -3218,6 +3313,12 @@
 	  </Subst>
 	</eq>
       </btypes:TYPE>.
+      <em>
+	Need to fix the proof for 
+	<btypes:TYPE>
+	  <dCtset/>
+	</btypes:TYPE> introduction.
+      </em>
     </p>
     <ol>
       <li>
@@ -3303,7 +3404,7 @@
 			<aSubMap/>
 		      </assume>
 		      <spset>
-			<TDjudge>
+			<TDjudge D="yes">
 			  <id/>
 			  <Subst>
 			    <aSubMap num="x"/>
@@ -3323,7 +3424,7 @@
 		      <Subst>
 			<aSubMap/>
 			<spset>
-			  <TDjudge>
+			  <TDjudge D="yes">
 			    <id/>
 			    <Subst>
 			      <aSubMap num="x"/>
@@ -3412,7 +3513,7 @@
 		  <btypes:TYPE>
 		    <eq>
 		      <spset>
-			<TDjudge>
+			<TDjudge D="yes">
 			  <id/>
 			  <type/>
 			</TDjudge>
@@ -4488,13 +4589,17 @@
 	    <Sjudge>
 	      <assume>
 		<bCtset/>
+		<dCtset/>
 		<extend>
 		  <gamma/>
 		  <tqExpr>
 		    <id/>
 		    <TS>
 		      <tvars/>
-		      <type num="v"/>
+		      <ctype>
+			<type num="v"/>
+			<dCtset num="v"/>
+		      </ctype>
 		    </TS>
 		  </tqExpr>
 		</extend>
@@ -4514,6 +4619,7 @@
 	    <TDjudge cst="yes">
 	      <aVal/>
 	      <type num="v"/>
+	      <dCtset num="v"/>
 	    </TDjudge>
 	  </btypes:TYPE>
 	</p>
@@ -4529,7 +4635,8 @@
 	  derive mutable types for pair of values (v,v) and the
 	  substitution can go wrong if performed on the lhs of
 	  an assignment. This predicate effectively rules out
-	  substitution on the lhs of an assignment.--> 	
+	  substitution on the lhs of an assignment, unless within a
+	  dereferenced expression --> 	
 	</p>
       </li>
     </ol>
@@ -4537,15 +4644,16 @@
       Then,
       <btypes:TYPE>
 	<Exists/>
-	<subeq>
+	<supeq>
 	  <bCtset dash="'"/>
 	  <bCtset/>
-	</subeq>
+	</supeq>
       </btypes:TYPE> such that
       <btypes:TYPE>
 	<Sjudge>
 	  <assume>
 	    <bCtset dash="'"/>
+	    <dCtset/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -4559,7 +4667,7 @@
 	  </tqExpr>
 	</Sjudge>
       </btypes:TYPE>
-    </p>
+    </p>    
   </lemma>
   <proof>
     <p>
@@ -4568,6 +4676,7 @@
 	<Sjudge>
 	  <assume>
 	    <bCtset/>
+	    <dCtset/>
 	    <extend>
 	      <gamma/>
 	      <tqExpr>
@@ -4588,6 +4697,12 @@
       </btypes:TYPE>
       We proceed by case analysis on the final step of the
       derivation.
+      <em>
+	Need to fix the proof for 
+	<btypes:TYPE>
+	  <dCtset/>
+	</btypes:TYPE> introduction.
+      </em>
     </p>
     <ol>
       <li>
@@ -6505,9 +6620,10 @@
       </li>
       <li>
 	<p>
-	  T-Set case is to T-App, except that the substitution
-	  cannot happen on the LHS of an assignment 
-	  due to asspmption&nbsp;(3).
+	  T-Set case is to T-App. 
+	  Premise&nbsp;(3) guarantees that the substitution
+	  cannot happen on the LHS of an assignment except within a
+	  dereferenced expression. 
 	</p>
       </li>
       <li>
@@ -6517,6 +6633,136 @@
       </li>
     </ol>
   </proof>
+  <lemma id="T-VSubstitution2">
+    <title>Corollary to Value Substitution</title>
+    <p>
+      If
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Sjudge>
+	      <assume>
+		<bCtset/>
+		<dCtset/>
+		<extend>
+		  <gamma/>
+		  <tqExpr>
+		    <id/>
+		    <TS>
+		      <tvars/>
+		      <ctype>
+			<type num="v"/>
+			<unin>
+			  <dCtset num="v"/>
+			  <pcst>
+			    <id/>
+			    <lKind k="poly"/>
+			    <type num="v"/>
+			  </pcst>
+			</unin>
+		      </ctype>
+		    </TS>
+		  </tqExpr>
+		</extend>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>
+	    </Sjudge>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <TDjudge cst="yes">
+	      <aVal/>
+	      <type num="v"/>
+	      <dCtset num="v"/>
+	    </TDjudge>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <models>
+	      <assume/>
+	      <dCtset/>
+	    </models>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+    <p>
+      Then,
+      <btypes:TYPE>
+	<Exists/>
+	<supeq>
+	  <bCtset dash="'"/>
+	  <bCtset/>
+	</supeq>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<Sjudge>
+	  <assume>
+	    <bCtset dash="'"/>
+	    <dCtset/>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <subst>
+	      <aExpr/>
+	      <id/>
+	      <aVal/>
+	    </subst>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>
+    </p>    
+  </lemma>
+  <proof>
+    <p>
+      Similar to 
+      <btypes:TYPE>
+	<lem tag="T-VSubstitution"/>
+      </btypes:TYPE>.
+      The premise
+      <btypes:TYPE>
+	<models>
+	  <assume/>
+	  <dCtset/>
+	</models>
+      </btypes:TYPE>      
+      guarantees that
+      <btypes:TYPE>
+	<Forall/>
+	<in>
+	  <pcst>
+	    <id/>
+	    <lKind name="poly"/>
+	    <type num="v" dash="'"/>
+	  </pcst>
+	  <dCtset/>
+	</in>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<pred name="Immut">
+	  <type num="v" dash="'"/>
+	</pred>
+      </btypes:TYPE>, which ensures that all instantiations 
+      of
+      <btypes:TYPE>
+	<id/>
+      </btypes:TYPE> are immutable.
+    </p>
+  </proof>
   <lemma id="T-LSubstitution">
     <title>Location Substitution</title>
     <p>
@@ -6525,6 +6771,7 @@
 	<Sjudge>
 	  <assume>
 	    <bCtset/>
+	    <dCtset/>
 	    <extend>
 	      <gamma/>
 	      <tqExpr>
@@ -6544,6 +6791,7 @@
 	<Sjudge>
 	  <assume>
 	    <bCtset/>
+	    <dCtset/>
 	    <gamma/>
 	    <extend>
 	      <store/>
@@ -6586,8 +6834,88 @@
 	    <type/>
 	  </tqExpr>
 	</Sjudge>
-      </btypes:TYPE>, similar to lemma <xref
-	ref="T-VSubstitution"/>.
+      </btypes:TYPE>, similar to
+      <btypes:TYPE>
+	<lem tag="T-VSubstitution"/>
+      </btypes:TYPE>.
+    </p>
+  </proof>
+  <lemma id="T-LSubstitution2">
+    <title>Corollary to Location Substitution</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<Sjudge>
+	  <assume>
+	    <bCtset/>
+	    <dCtset/>
+	    <extend>
+	      <gamma/>
+	      <tqExpr>
+		<id/>
+		<TS>
+		  <tvars/>
+		  <ctype>
+		    <type num="v"/>
+		    <unin>
+		      <dCtset num="v"/>
+		      <pcst>
+			<id/>
+			<lKind k="mono"/>
+			<type num="v"/>
+		      </pcst>
+		    </unin>
+		  </ctype>
+		</TS>
+	      </tqExpr>
+	    </extend>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>
+      and
+      <btypes:TYPE>
+	<models>
+	  <assume/>
+	  <dCtset/>
+	</models>
+      </btypes:TYPE>, then
+      <btypes:TYPE>
+	<Sjudge>
+	  <assume>
+	    <bCtset/>
+	    <dCtset/>
+	    <gamma/>
+	    <extend>
+	      <store/>
+	      <mapping>
+		<sLoc/>
+		<type num="x"/>
+	      </mapping>
+	    </extend>
+	  </assume>
+	  <tqExpr>
+	    <subst>
+	      <aExpr/>
+	      <id/>
+	      <sLoc/>
+	    </subst>
+	    <type/>
+	  </tqExpr>
+	</Sjudge>
+      </btypes:TYPE>.
+    </p>
+  </lemma>
+  <proof>
+    <p>
+      Similar to
+      <btypes:TYPE>
+	<lem tag="T-LSubstitution"/>
+      </btypes:TYPE>.
     </p>
   </proof>
   <lemma id="T-sh-safety">
@@ -6597,9 +6925,10 @@
 	<p>
 	  If
 	  <btypes:TYPE>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
 		<bCtset/>
+		<dCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -6616,9 +6945,10 @@
 	    </Sjudge>
 	  </btypes:TYPE>, and
 	  <btypes:TYPE>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
 		<bCtset/>
+		<dCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -6639,9 +6969,10 @@
 	  </btypes:TYPE>,
 	  then
 	  <btypes:TYPE>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
 		<bCtset/>
+		<dCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -6663,9 +6994,10 @@
 	<p>
 	  If
 	  <btypes:TYPE>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
 		<bCtset/>
+		<dCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -6682,9 +7014,10 @@
 	    </Sjudge>
 	  </btypes:TYPE>, and
 	  <btypes:TYPE>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
 		<bCtset/>
+		<dCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -6704,8 +7037,10 @@
 	    </eq>
 	  </btypes:TYPE>, then
 	  <btypes:TYPE>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
+		<bCtset/>
+		<dCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -6733,21 +7068,30 @@
   <theorem id="T-subject-reduction">
     <title>Subject Reduction</title>
     <p>
-      If
+      For any canonical expression 
       <btypes:TYPE>
-	<TDjudge cst="yes">
+	<aExpr/>
+      </btypes:TYPE>, if
+      <btypes:TYPE>
+	<TDjudge name="s" D="yes" cst="yes">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
-      </btypes:TYPE> and 
+      </btypes:TYPE>, 
       <btypes:TYPE>
-	<TDjudge cst="yes">
+	<TDjudge name="s" D="yes" cst="yes">
 	  <plus>
 	    <heap/>
 	    <stack/>
 	  </plus>
 	</TDjudge>
-      </btypes:TYPE> then,
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<models>
+	  <assume/>
+	  <dCtset/>
+	</models>
+      </btypes:TYPE>, then,
     </p>
     <ol>
       <li>
@@ -6782,9 +7126,10 @@
 	  </btypes:TYPE> 
 	  such that
 	  <btypes:TYPE>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
 		<bCtset dash="'"/>
+		<dCtset/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -6796,9 +7141,10 @@
 	  </btypes:TYPE>
 	  and
 	  <btypes:TYPE>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
 		<bCtset dash="'"/>
+		<dCtset/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -6842,22 +7188,24 @@
 	  </btypes:TYPE>
 	  such that
 	  <btypes:TYPE>
-	    <Sjudge>
+	    <Sjudge name="s">
 	      <assume>
 		<bCtset dash="'"/>
+		<dCtset/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
-	      <Msub>
+	      <tqExpr>
 		<aExpr dash="'"/>
 		<type dash="'"/>
-	      </Msub>
+	      </tqExpr>
 	    </Sjudge>
 	  </btypes:TYPE> and
 	  <btypes:TYPE>
-	    <Sjudge name="*">
+	    <Sjudge name="s">
 	      <assume>
 		<bCtset dash="'"/>
+		<dCtset/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -6888,6 +7236,8 @@
       <btypes:TYPE>
 	<Sjudge>
 	  <assume>
+	    <bCtset/>
+	    <dCtset/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -6911,10 +7261,17 @@
 	  Case T-Sloc: 
 	  <btypes:TYPE>
 	    <eq>
-	      <aExpr/>
+	      <aExpr/> 
 	      <sLoc/>
 	    </eq>
 	  </btypes:TYPE>.
+	  We have, for some 
+	  <btypes:TYPE>
+	    <subeq>
+	      <dCtset dash="'"/>
+	      <dCtset/>
+	    </subeq>
+	  </btypes:TYPE>,
 	</p>
 	<btypes:TYPE>
 	  <Hrules>
@@ -6930,6 +7287,7 @@
 		<TDjudge>
 		  <sLoc/>
 		  <type/>
+		  <dCtset dash="'"/>
 		</TDjudge>
 	      </tyConc>
 	    </tyRule>
@@ -7000,7 +7358,7 @@
 		<p>
 		  From 
 		  <btypes:TYPE>
-		    <TDjudge cst="yes">
+		    <TDjudge name="s" D="yes" cst="yes">
 		      <plus>
 			<heap/>
 			<stack/>
@@ -7011,7 +7369,7 @@
 		    <defn tag="stack-heap-typing"/>
 		  </btypes:TYPE> (Stack and Heap Typing), we have
 		  <btypes:TYPE>
-		    <TDjudge cst="yes">
+		    <TDjudge name="s" D="yes" cst="yes">
 		      <mapsto>
 			<stack/>
 			<sLoc/>
@@ -7029,7 +7387,7 @@
 		  </btypes:TYPE>. 
 		  That is,
 		  <btypes:TYPE>
-		    <TDjudge cst="yes">
+		    <TDjudge name="s" D="yes" cst="yes">
 		      <aVal/>
 		      <type dash="'"/>
 		    </TDjudge>
@@ -7057,7 +7415,19 @@
 		<aExpr num="2"/>
 	      </apply>
 	    </eq>
-	  </btypes:TYPE>
+	  </btypes:TYPE>. We have for some 
+	  <btypes:TYPE>
+	    <subeq>
+	      <dCtset num="1"/>
+	      <dCtset/>
+	    </subeq>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <subeq>
+	      <dCtset num="2"/>
+	      <dCtset/>
+	    </subeq>
+	  </btypes:TYPE>,
 	</p>
 	<btypes:TYPE>
 	  <Hrules>
@@ -7065,6 +7435,7 @@
 	      <tyPre>
 		<Sjudge>
 		  <assume>
+		    <dCtset num="1"/>
 		    <gamma/>
 		    <store/>
 		  </assume>
@@ -7084,6 +7455,7 @@
 	      <tyPre>
 		<Sjudge>
 		  <assume>
+		    <dCtset num="2"/>
 		    <gamma/>
 		    <store/>
 		  </assume>
@@ -7108,6 +7480,10 @@
 	      <tyConc>
 		<Sjudge>
 		  <assume>
+		    <unin>
+		      <dCtset num="1"/>
+		      <dCtset num="2"/>
+		    </unin>
 		    <gamma/>
 		    <store/>
 		  </assume>
@@ -7177,7 +7553,7 @@
 		  </btypes:TYPE> (weakening) on the assumptions of
 		  T-App rule, we obtain
 		  <btypes:TYPE>
-		    <TDjudge cst="yes">
+		    <TDjudge name="s" D="yes" cst="yes">
 		      <aExpr num="1"/>
 		      <type num="1"/>
 		    </TDjudge>
@@ -7197,9 +7573,10 @@
 		    </supeq>
 		  </btypes:TYPE> such that
 		  <btypes:TYPE>
-		    <Sjudge>
+		    <Sjudge name="s">
 		      <assume>
 			<bCtset dash="'"/>
+			<dCtset/>
 			<gamma/>
 			<store dash="'"/>
 		      </assume>
@@ -7210,9 +7587,10 @@
 		    </Sjudge>
 		  </btypes:TYPE> and
 		  <btypes:TYPE>
-		    <Sjudge>
+		    <Sjudge name="s">
 		      <assume>
 			<bCtset dash="'"/>
+			<dCtset/>
 			<gamma/>
 			<store dash="'"/>
 		      </assume>
@@ -7288,9 +7666,10 @@
 		    <lem tag="Cst-Weakening"/>
 		  </btypes:TYPE>, we obtain
 		  <btypes:TYPE>
-		    <Sjudge>
+		    <Sjudge name="s">
 		      <assume>
 			<bCtset dash="'"/>
+			<dCtset/>
 			<gamma/>
 			<store dash="'"/>
 		      </assume>
@@ -7335,9 +7714,10 @@
 		  </btypes:TYPE>, 
 		  we obtain
 		  <btypes:TYPE>
-		    <Sjudge>
+		    <Sjudge name="s">
 		      <assume>
 			<bCtset dash="'"/>
+			<dCtset/>
 			<gamma/>
 			<store dash="'"/>
 		      </assume>
@@ -7471,7 +7851,20 @@
 		  </btypes:TYPE> and using 
 		  <btypes:TYPE>
 		    <lem tag="T-inversion"/>
-		  </btypes:TYPE> (inversion of typing), we have:
+		  </btypes:TYPE> (inversion of typing), we have, for
+		  some
+		  <btypes:TYPE>
+		    <subeq>
+		      <dCtset num="1"/>
+		      <dCtset/>
+		    </subeq>
+		  </btypes:TYPE> and
+		  <btypes:TYPE>
+		    <subeq>
+		      <dCtset num="2"/>
+		      <dCtset/>
+		    </subeq>
+		  </btypes:TYPE>,
 		</p>
 		<btypes:TYPE>
 		  <Hrules>
@@ -7482,6 +7875,7 @@
 			    <Sjudge>
 			      <assume>
 				<extend>
+				  <dCtset num="1"/>
 				  <gamma/>
 				  <mapping>
 				    <id/>
@@ -7516,12 +7910,14 @@
 				<type num="a"/>
 				<type num="r"/>
 			      </fn>
+			      <dCtset num="1"/>
 			    </TDjudge>
 			  </tyConc>
 			</tyRule>
 			<TDjudge>
 			  <aVal/>
 			  <type num="2"/>
+			  <dCtset num="2"/>
 			</TDjudge>
 		      </tyPre>
 		      <tyPre>
@@ -7548,6 +7944,10 @@
 		      <tyConc>
 			<Sjudge>
 			  <assume>
+			    <unin>
+			      <dCtset num="1"/>
+			      <dCtset num="2"/>
+			    </unin>
 			    <gamma/>
 			    <store/>
 			  </assume>
@@ -7571,22 +7971,28 @@
 		  <btypes:TYPE>
 		    <Sat>
 		      <bCtset/>
-		      <Sjudge>
-			<assume>
-			  <gamma/>
-			  <store/>
-			</assume>
-			<tqExpr>
-			  <apply>
-			    <lambda>
-			      <id/>
-			      <aExpr num="x"/>
-			    </lambda>
-			    <aVal/>
-			  </apply>
-			  <type/>
-			</tqExpr>
-		      </Sjudge>
+		      <spset>
+			<Sjudge>
+			  <assume>
+			    <unin>
+			      <dCtset num="1"/>
+			      <dCtset num="2"/>
+			    </unin>
+			    <gamma/>
+			    <store/>
+			  </assume>
+			  <tqExpr>
+			    <apply>
+			      <lambda>
+				<id/>
+				<aExpr num="x"/>
+			      </lambda>
+			      <aVal/>
+			    </apply>
+			    <type/>
+			  </tqExpr>
+			</Sjudge>
+		      </spset>
 		    </Sat>
 		  </btypes:TYPE>.		  
 		</p>
@@ -7598,6 +8004,7 @@
 		    <Sjudge>
 		      <assume>
 			<bCtset/>
+			<dCtset num="1"/>
 			<extend>
 			  <gamma/>
 			  <mapping>
@@ -7625,6 +8032,7 @@
 		    <Sjudge>
 		      <assume>
 			<bCtset/>
+			<dCtset num="1"/>
 			<gamma/>
 			<extend>
 			  <store/>
@@ -7643,7 +8051,31 @@
 			<type num="r" dash="'"/>
 		      </tqExpr>
 		    </Sjudge>
-		  </btypes:TYPE>
+		  </btypes:TYPE> and therefore,
+		  <btypes:TYPE>
+		    <Sjudge name="s">
+		      <assume>
+			<bCtset/>
+			<dCtset/>
+			<gamma/>
+			<extend>
+			  <store/>
+			  <mapping>
+			    <sLoc/>
+			    <type num="a" dash="'"/>
+			  </mapping>
+			</extend>
+		      </assume>
+		      <tqExpr>
+			<subst>
+			  <aExpr num="x"/>
+			  <id/>
+			  <sLoc/>
+			</subst>
+			<type num="r" dash="'"/>
+		      </tqExpr>
+		    </Sjudge>
+		  </btypes:TYPE>.
 		</p>
 	      </li>
 	      <li>
@@ -7686,9 +8118,10 @@
 		<p>
 		  We have
 		  <btypes:TYPE>
-		    <Sjudge>
+		    <Sjudge name="s">
 		      <assume>
 			<bCtset/>
+			<dCtset/>
 			<gamma/>
 			<store/>
 		      </assume>
@@ -7729,9 +8162,10 @@
 		  </btypes:TYPE>.
 		  Using these facts along with the premise
 		  <btypes:TYPE>
-		    <Sjudge>
+		    <Sjudge name="s">
 		      <assume>
 			<bCtset/>
+			<dCtset/>
 			<gamma/>
 			<store/>
 		      </assume>
@@ -7745,9 +8179,10 @@
 		    <defn tag="stack-heap-typing"/>
 		  </btypes:TYPE>, we conclude that
 		  <btypes:TYPE>
-		    <Sjudge>
+		    <Sjudge name="s">
 		      <assume>
 			<bCtset/>
+			<dCtset/>
 			<gamma/>
 			<extend>
 			  <store/>
@@ -7795,6 +8230,7 @@
 		<TDjudge>
 		  <aExpr num="1"/>
 		  <type num="1"/>
+		  <dCtset num="1"/>
 		</TDjudge>
 		<Msub>
 		  <type num="1"/>
@@ -7807,6 +8243,7 @@
 		<TDjudge>
 		  <aExpr num="2"/>
 		  <type num="2"/>
+		  <dCtset num="2"/>
 		</TDjudge>
 		<Msub>
 		  <type num="2"/>
@@ -7824,6 +8261,10 @@
 		    <aExpr num="2"/>
 		  </assign>
 		  <unit/>
+		  <unin>
+		    <dCtset num="1"/>
+		    <dCtset num="2"/>
+		  </unin>
 		</TDjudge>
 	      </tyConc>
 	    </tyRule>
@@ -7860,6 +8301,7 @@
 		<TDjudge>
 		  <aExpr num="1"/>
 		  <type num="1"/>
+		  <dCtset num="1"/>
 		</TDjudge>
 		<Msub>
 		  <type num="1"/>
@@ -7869,9 +8311,12 @@
 		  <type/>
 		  <type dash="'"/>
 		</Msub>
+	      </tyPre>
+	      <tyPre>
 		<Sjudge>
 		  <assume>
 		    <extend>
+		      <dCtset num="2"/>
 		      <gamma/>
 		      <mapping>
 			<id/>
@@ -7896,6 +8341,10 @@
 		    </let>
 		  </paren>
 		  <type num="2"/>
+		  <unin>
+		    <dCtset num="1"/>
+		    <dCtset num="2"/>
+		  </unin>
 		</TDjudge>
 	      </tyConc>
 	    </tyRule>
@@ -7911,7 +8360,7 @@
       </li>
       <li>
 	<p>
-	  Case T-Let-P:
+	  Case T-Let-MP:
 	  <btypes:TYPE>
 	    <eq>
 	      <aExpr/>
@@ -7930,16 +8379,31 @@
 		<TDjudge>
 		  <vExp/>
 		  <type num="v"/>
+		  <dCtset num="1"/>
 		</TDjudge>
 		<Msub>
 		  <type num="v"/>
-		  <type/>
+		  <type num="1"/>
 		</Msub>
-		<pred name="Immut">
+		<Msub>
 		  <type/>
-		</pred>
+		  <type num="1"/>
+		</Msub>
 	      </tyPre>
 	      <tyPre>
+		<eq>
+		  <dCtset dash="'"/>
+		  <unin>
+		    <dCtset num="1"/>
+		    <set>
+		      <pcst>
+			<id/>
+			<lKind/>
+			<type/>
+		      </pcst>
+		    </set>
+		  </unin>
+		</eq>
 		<eq>
 		  <set>
 		    <tvars name="alpha"/>
@@ -7947,6 +8411,7 @@
 		  <diff>
 		    <ftvs>
 		      <type/>
+		      <dCtset dash="'"/>
 		    </ftvs>
 		    <ftvs>
 		      <gamma/>
@@ -7954,15 +8419,21 @@
 		    </ftvs>
 		  </diff>
 		</eq>
+	      </tyPre>
+	      <tyPre>
 		<Sjudge>
 		  <assume>
 		    <extend>
+		      <dCtset num="2"/>
 		      <gamma/>
 		      <mapping>
 			<id/>
 			<TS>
 			  <tvars/>
-			  <type/>
+			  <ctype>
+			    <type/>
+			    <dCtset dash="'"/>
+			  </ctype>
 			</TS>
 		      </mapping>
 		    </extend>
@@ -7972,18 +8443,30 @@
 		    <aExpr/>
 		    <type dash="'"/>
 		  </tqExpr>
+		  <models name="new">
+		    <assume/>
+		    <tvars name="beta"/>
+		  </models>
 		</Sjudge>
 	      </tyPre>
 	      <tyConc>
 		<TDjudge>
 		  <paren>
-		    <let kind="p">
+		    <let kind="x">
 		      <id/>
 		      <vExp/>
 		      <aExpr/>
 		    </let>
 		  </paren>
-		  <type dash="'"/>
+		  <type num="2"/>
+		  <unin>
+		    <subst>
+		      <dCtset/>
+		      <tvars name="alpha"/>
+		      <tvars name="beta"/>
+		    </subst>
+		    <dCtset num="2"/>
+		  </unin>
 		</TDjudge>
 	      </tyConc>
 	    </tyRule>
@@ -7991,14 +8474,46 @@
 	</btypes:TYPE>
 	<p>
 	  The case E-# 
-	  (<btypes:TYPE>
-	    <vExp/>
-	  </btypes:TYPE> can take step E-Rval)
 	  follows from induction hypothesis using the 
-	  T-Let-P rule. The case E-Let-P follows from 
+	  T-Let-P rule. This is because 
 	  <btypes:TYPE>
-	    <lem tag="T-VSubstitution"/>
+	    <vExp/>
+	  </btypes:TYPE> can only take E-# steps that only have leaf
+	  derivations of E-Rval step E-Rval steps, which does not
+	  change the constraint set 
+	  <btypes:TYPE>
+	    <dCtset num="1"/>
+	  </btypes:TYPE> in the type derivation.
+	  If 
+	  <btypes:TYPE>
+	    <eq>
+	      <lKind/>
+	      <lKind k="poly"/>
+	    </eq>
+	  </btypes:TYPE>, the case E-Let-P follows from 
+	  <btypes:TYPE>
+	    <lem tag="T-VSubstitution2"/>
 	  </btypes:TYPE> (value substitution).
+	  Otherwise, if 
+	  <btypes:TYPE>
+	    <eq>
+	      <lKind/>
+	      <lKind k="mono"/>
+	    </eq>
+	  </btypes:TYPE>, the case E-Let-M follows from 
+	  <btypes:TYPE>
+	    <lem tag="T-LSubstitution2"/>
+	  </btypes:TYPE> (location substitution).
+	  The case
+	  <btypes:TYPE>
+	    <eq>
+	      <lKind/>
+	      <lKind k="var"/>
+	    </eq>
+	  </btypes:TYPE> cannot happen since 
+	  <btypes:TYPE>
+	    <aExpr/>
+	  </btypes:TYPE> is a canonical expression.
 	</p>
       </li>
     </ol>
@@ -8006,20 +8521,30 @@
   <theorem id="T-preservation">
     <title>Preservation</title>
     <p>
-      If
+      For any canonical expression 
       <btypes:TYPE>
-	<TDjudge name="*">
+	<aExpr/>
+      </btypes:TYPE>,      
+      if
+      <btypes:TYPE>
+	<TDjudge D="yes" name="*">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
-      </btypes:TYPE> and 
+      </btypes:TYPE>, 
       <btypes:TYPE>
-	<TDjudge name="*">
+	<TDjudge D="yes" name="*">
 	  <plus>
 	    <heap/>
 	    <stack/>
 	  </plus>
 	</TDjudge>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<models>
+	  <assume/>
+	  <dCtset/>
+	</models>
       </btypes:TYPE> then,
     </p>
     <ol>
@@ -8051,6 +8576,7 @@
 	  <btypes:TYPE>
 	    <Sjudge name="*">
 	      <assume>
+		<dCtset/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -8064,6 +8590,7 @@
 	  <btypes:TYPE>
 	    <Sjudge name="*">
 	      <assume>
+		<dCtset/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -8103,18 +8630,20 @@
 	  <btypes:TYPE>
 	    <Sjudge name="*">
 	      <assume>
+		<dCtset/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
-	      <Msub>
+	      <tqExpr>
 		<aExpr dash="'"/>
 		<type dash="'"/>
-	      </Msub>
+	      </tqExpr>
 	    </Sjudge>
 	  </btypes:TYPE> and
 	  <btypes:TYPE>
 	    <Sjudge name="*">
 	      <assume>
+		<dCtset/>
 		<gamma/>
 		<store dash="'"/>
 	      </assume>
@@ -8138,13 +8667,13 @@
     <p>
       From
       <btypes:TYPE>
-	<TDjudge name="*">
+	<TDjudge D="yes" name="*">
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
       </btypes:TYPE> and 
       <btypes:TYPE>
-	<TDjudge name="*">
+	<TDjudge D="yes" name="*">
 	  <plus>
 	    <heap/>
 	    <stack/>
@@ -8167,6 +8696,7 @@
 	<Sjudge>
 	  <assume>
 	    <bCtset num="d"/>
+	    <dCtset/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -8180,6 +8710,7 @@
 	<Sjudge>
 	  <assume>
 	    <bCtset num="sh"/>
+	    <dCtset/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -8219,9 +8750,10 @@
       </btypes:TYPE>.
       Now, by weakening, we have
       <btypes:TYPE>
-	<Sjudge>
+	<Sjudge name="s">
 	  <assume>
 	    <bCtset/>
+	    <dCtset/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -8232,9 +8764,10 @@
 	</Sjudge>
       </btypes:TYPE> and
       <btypes:TYPE>
-	<Sjudge>
+	<Sjudge name="s">
 	  <assume>
 	    <bCtset/>
+	    <dCtset/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -8296,10 +8829,14 @@
   <theorem id="T-soundness">
     <title>Type Soundness</title>
     <p>
-      If
+      For any canonical expression 
+      <btypes:TYPE>
+	<aExpr/>
+      </btypes:TYPE>, if
       <btypes:TYPE>
 	<Sjudge name="*">
 	  <assume>
+	    <dCtset/>
 	    <Empty/>
 	    <store/>
 	  </assume>
@@ -8312,6 +8849,7 @@
       <btypes:TYPE>
 	<Sjudge name="*">
 	  <assume>
+	    <dCtset/>
 	    <Empty/>
 	    <store/>
 	  </assume>
@@ -8320,6 +8858,12 @@
 	    <stack/>
 	  </plus>
 	</Sjudge>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<models>
+	  <assume/>
+	  <dCtset/>
+	</models>
       </btypes:TYPE>, and
       <btypes:TYPE>
 	<eval many="yes">
@@ -8342,10 +8886,9 @@
 	  <heap dash="'"/>
 	  <aExpr dash="'"/>
 	</opState>
-      </btypes:TYPE>.
-      is not stuck.
-      That is, execution of a closed, well typed expression cannot
-      lead to a stuck state. Here,
+      </btypes:TYPE> is not stuck.
+      That is, execution of a closed, canonical, well typed expression
+      cannot lead to a stuck state. Here,
       <btypes:TYPE>
 	<evalOp many="yes"/>
       </btypes:TYPE > represents the

@@ -13,6 +13,7 @@
 	  <TDjudge>
 	    <Unit/>
 	    <unit/>
+	    <Empty/>
 	  </TDjudge>
 	</tyConc>
       </tyRule>
@@ -22,6 +23,7 @@
 	  <TDjudge>
 	    <bVal/>
 	    <bool/>
+	    <Empty/>
 	  </TDjudge>
 	</tyConc>
       </tyRule>
@@ -32,7 +34,10 @@
 	    <id/>
 	    <TS>
 	      <tvars/>
-	      <type/>
+	      <ctype>
+		<type/>
+		<dCtset/>
+	      </ctype>
 	    </TS>
 	  </mapsto>
 	  <!-- S |= t does not suffice here. Here is an example
@@ -45,6 +50,7 @@
 	    <aSubMap/>
 	    <set>
 	      <type/>
+	      <dCtset/>
 	    </set>
 	  </Cst>
 	  <eq>
@@ -63,9 +69,15 @@
 	      <aSubMap/>
 	      <type/>
 	    </Subst>
+	    <Subst>
+	      <aSubMap/>
+	      <dCtset/>
+	    </Subst>
 	  </TDjudge>
 	</tyConc>
       </tyRule>        
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="1">
       <tyRule name="T-Hloc">
 	<tyPre>
 	  <mapsto>
@@ -80,11 +92,10 @@
 	    <ref>
 	      <type/>
 	    </ref>
+	    <Empty/>
 	  </TDjudge>
 	</tyConc>
       </tyRule>
-    </Hrules>
-    <Hrules rowsep="4pt" colsep="1">
       <tyRule name="T-Sloc">
 	<tyPre>
 	  <mapsto>
@@ -97,6 +108,7 @@
 	  <TDjudge>
 	    <sLoc/>
 	    <type/>
+	    <Empty/>
 	  </TDjudge>
 	</tyConc>
       </tyRule>
@@ -104,6 +116,7 @@
 	<tyPre>
 	  <Sjudge>
 	    <assume>
+	      <dCtset/>
 	      <extend>
 		<gamma/>
 		<mapping>
@@ -137,9 +150,12 @@
 	      <type num="1" dash="'"/>
 	      <type num="2" dash="'"/>
 	    </fn>
+	    <dCtset/>
 	  </TDjudge>
 	</tyConc>
       </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="2">
       <tyRule name="T-App">
 	<tyPre>
 	  <TDjudge Msub="yes">
@@ -148,12 +164,14 @@
 	      <type num="a"/>
 	      <type num="r"/>
 	    </fn>
+	    <dCtset num="1"/>
 	  </TDjudge>
 	  <TDjudge Msub="yes">
 	    <aExpr num="2"/>
 	    <minz>
 	      <type num="a"/>
 	    </minz>
+	    <dCtset num="2"/>
 	  </TDjudge>
 	  <Msub>
 	    <maxz>
@@ -169,38 +187,10 @@
 	      <aExpr num="2"/>
 	    </apply>
 	    <type/>
-	  </TDjudge>
-	</tyConc>
-      </tyRule>
-    </Hrules>
-    <Hrules rowsep="4pt" colsep="2">
-      <tyRule name="T-If">
-	<tyPre>
-	  <TDjudge Msub="yes">
-	    <aExpr num="1"/>
-	    <bool/>
-	  </TDjudge>
-	  <TDjudge Msub="yes">
-	    <aExpr num="2"/>
-	    <type/>
-	  </TDjudge>
-	  <TDjudge Msub="yes">
-	    <aExpr num="3"/>
-	    <type/>
-	  </TDjudge>
-	  <Msub>
-	    <type dash="'"/>
-	    <type/>
-	  </Msub>
-	</tyPre>
-	<tyConc>
-	  <TDjudge>
-	    <if>
-	      <aExpr num="1"/> 
-	      <aExpr num="2"/>
-	      <aExpr num="3"/>
-	    </if>
-	    <type dash="'"/>
+	    <unin>
+	      <dCtset num="1"/>
+	      <dCtset num="2"/>
+	    </unin>
 	  </TDjudge>
 	</tyConc>
       </tyRule>
@@ -217,6 +207,7 @@
 	    <mutable>
 	      <ptype/>
 	    </mutable>
+	    <dCtset num="1"/>
 	  </TDjudge>
 	  <Sjudge name="lval">
 	    <assume/>
@@ -225,6 +216,7 @@
 	  <TDjudge Msub="yes">
 	    <aExpr num="2"/>
 	    <ptype/>
+	    <dCtset num="2"/>
 	  </TDjudge>
 	</tyPre>
 	<tyConc>
@@ -234,6 +226,50 @@
 	      <aExpr num="2"/>
 	    </assign>
 	    <unit/>
+	    <unin>
+	      <dCtset num="1"/>
+	      <dCtset num="2"/>
+	    </unin>
+	  </TDjudge>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="2">
+      <tyRule name="T-If">
+	<tyPre>
+	  <TDjudge Msub="yes">
+	    <aExpr num="1"/>
+	    <bool/>
+	    <dCtset num="1"/>
+	  </TDjudge>
+	  <TDjudge Msub="yes">
+	    <aExpr num="2"/>
+	    <type/>
+	    <dCtset num="2"/>
+	  </TDjudge>
+	  <TDjudge Msub="yes">
+	    <aExpr num="3"/>
+	    <type/>
+	    <dCtset num="3"/>
+	  </TDjudge>
+	  <Msub>
+	    <type dash="'"/>
+	    <type/>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <TDjudge>
+	    <if>
+	      <aExpr num="1"/> 
+	      <aExpr num="2"/>
+	      <aExpr num="3"/>
+	    </if>
+	    <type dash="'"/>
+	    <unin>
+	      <dCtset num="1"/>
+	      <dCtset num="2"/>
+	      <dCtset num="3"/>
+	    </unin>
 	  </TDjudge>
 	</tyConc>
       </tyRule>
@@ -244,10 +280,12 @@
 	  <TDjudge Msub="yes">
 	    <aExpr num="1"/>
 	    <type num="1"/>
+	    <dCtset num="1"/>
 	  </TDjudge>
 	  <TDjudge Msub="yes">
 	    <aExpr num="2"/>
 	    <type num="2"/>
+	    <dCtset num="2"/>
 	  </TDjudge>
 	  <Msub>
 	    <type num="1" dash="'"/>
@@ -268,6 +306,10 @@
 	      <type num="1" dash="'"/>
 	      <type num="2" dash="'"/>
 	    </pair>
+	    <unin>
+	      <dCtset num="1"/>
+	      <dCtset num="2"/>
+	    </unin>
 	  </TDjudge>
 	</tyConc>
       </tyRule>
@@ -276,6 +318,7 @@
 	  <TDjudge>
 	    <aExpr/>
 	    <type/>
+	    <dCtset/>
 	  </TDjudge>
 	  <eq under="minzT">
 	    <type/>
@@ -291,24 +334,7 @@
 	      <aExpr/>
 	    </ith>
 	    <type num="i"/>
-	  </TDjudge>
-	</tyConc>
-      </tyRule>
-      <tyRule name="T-Deref">
-	<tyPre>
-	  <TDjudge Msub="yes">
-	    <aExpr/>
-	    <ref>
-	      <type/>
-	    </ref>
-	  </TDjudge>
-	</tyPre>
-	<tyConc>
-	  <TDjudge>
-	    <deref>
-	      <aExpr/>
-	    </deref>
-	    <type/>
+	    <dCtset/>
 	  </TDjudge>
 	</tyConc>
       </tyRule>
@@ -319,9 +345,8 @@
 	  <TDjudge Msub="yes">
 	    <aExpr/>
 	    <type/>
+	    <dCtset/>
 	  </TDjudge>
-	</tyPre>
-	<tyPre>
 	  <Msub>
 	    <type dash="'"/>
 	    <type/>
@@ -335,6 +360,27 @@
 	    <ref>
 	      <type dash="'"/>
 	    </ref>
+	    <dCtset/>
+	  </TDjudge>
+	</tyConc>
+      </tyRule>
+      <tyRule name="T-Deref">
+	<tyPre>
+	  <TDjudge Msub="yes">
+	    <aExpr/>
+	    <ref>
+	      <type/>
+	    </ref>
+	    <dCtset/>
+	  </TDjudge>
+	</tyPre>
+	<tyConc>
+	  <TDjudge>
+	    <deref>
+	      <aExpr/>
+	    </deref>
+	    <type/>
+	    <dCtset/>
 	  </TDjudge>
 	</tyConc>
       </tyRule>
@@ -343,15 +389,15 @@
 	  <TDjudge Msub="yes">
 	    <aExpr num="1"/>
 	    <type num="1"/>
+	    <dCtset num="1"/>
 	  </TDjudge>
 	  <Msub>
 	    <type/>
 	    <type num="1"/>
 	  </Msub>
-	</tyPre>
-	<tyPre>
 	  <Sjudge>
 	    <assume>
+	      <dCtset num="2"/>
 	      <extend>
 		<gamma/>
 		<mapping>
@@ -377,26 +423,50 @@
 	      </let>
 	    </paren>
 	    <type num="2"/>
+	    <unin>
+	      <dCtset num="1"/>
+	      <dCtset num="2"/>
+	    </unin>
 	  </TDjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="T-Let-P">
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="1">
+      <!-- The Immut() restriction is necessary to ensure
+      soundness. ~Mut() will not suffice as it allows maybe types.
+      A relaxation to this rule is possible, but is more
+      complicated (all generalizable variables must be within 
+      Immmutable wrappers, and the whole type must be ~Mut()
+      
+      The loss of expressivity in this case is for expressions
+      like x:'a |- letP p = (\y.y, x)
+
+      Currently, the Immut() restriction is achieved by the
+      consistency of D, the instantiation constraint set -->
+      <tyRule name="T-Let-MP">
 	<tyPre>
 	  <TDjudge Msub="yes">
 	    <vExp/>
-	    <type/>
+	    <type num="1"/>
+	    <dCtset num="1"/>
 	  </TDjudge>
-	  <!-- The Immut() restriction is necessary to ensure
-	  soundness. ~Mut() will not suffice as it allows maybe types.
-	  A relaxation to this rule is possible, but is more
-	  complicated (all generalizable variables must be within 
-	  Immmutable wrappers, and the whole type must be ~Mut()
-	  
-	  The loss of expressivity in this case is for expressions
-	  like x:'a |- letP p = (\y.y, x) -->
-	  <pred name="Immut">
+	  <Msub>
 	    <type/>
-	  </pred>
+	    <type num="1"/>
+	  </Msub>
+	  <eq>
+	    <dCtset/>
+	    <unin>
+	      <dCtset num="1"/>
+	      <set>
+		<pcst>
+		  <id/>
+		  <lKind/>
+		  <type/>
+		</pcst>
+	      </set>
+	    </unin>
+	  </eq>
 	  <eq>
 	    <set>
 	      <tvars name="alpha"/>
@@ -404,6 +474,7 @@
 	    <diff>
 	      <ftvs>
 		<type/>
+		<dCtset/>
 	      </ftvs>
 	      <ftvs>
 		<gamma/>
@@ -411,17 +482,19 @@
 	      </ftvs>
 	    </diff>
 	  </eq>
-	</tyPre>
-	<tyPre>
 	  <Sjudge>
 	    <assume>
+	      <dCtset num="2"/>
 	      <extend>
 		<gamma/>
 		<mapping>
 		  <id/>
 		  <TS>
 		    <tvars/>
-		    <type/>
+		    <ctype>
+		      <type/>
+		      <dCtset/>
+		    </ctype>
 		  </TS>
 		</mapping>
 	      </extend>
@@ -429,20 +502,32 @@
 	    </assume>
 	    <tqExpr>
 	      <aExpr/>
-	      <type dash="'"/>
+	      <type num="2"/>
 	    </tqExpr>
 	  </Sjudge>
+	  <models name="new">
+	    <assume/>
+	    <tvars name="beta"/>
+	  </models>
 	</tyPre>
 	<tyConc>
 	  <TDjudge>
 	    <paren>
-	      <let kind="p">
+	      <let kind="x">
 		<id/>
 		<vExp/>
 		<aExpr/>
 	      </let>
 	    </paren>
-	    <type dash="'"/>
+	    <type num="2"/>
+	    <unin>
+	      <subst>
+		<dCtset/>
+		<tvars name="alpha"/>
+		<tvars name="beta"/>
+	      </subst>
+	      <dCtset num="2"/>
+	    </unin>
 	  </TDjudge>
 	</tyConc>
       </tyRule>

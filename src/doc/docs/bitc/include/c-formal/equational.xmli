@@ -790,7 +790,7 @@
 	      <type/>
 	    </tqExpr>
 	  </conclude>
-	  gv c-	  <constrain>
+	  <constrain>
 	    <aCtset/>
 	  </constrain>
 	</TEjudge>
