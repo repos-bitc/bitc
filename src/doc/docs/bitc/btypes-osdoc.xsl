@@ -315,14 +315,35 @@
 
   <!-- uninOp -->
   <xsl:template match="uninOp" mode="formula">
-    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>cup;</xsl:text>
+    <xsl:choose>
+      <xsl:when test="@excl">
+	<xsl:element name="em">
+	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	  <xsl:text>cup;</xsl:text>
+	</xsl:element>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>cup;</xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
   <!-- unin -->
   <xsl:template match="unin" mode="formula">
-    <xsl:call-template name="print.infix.implied">
-      <xsl:with-param name="print.infix.implied.op">cup;</xsl:with-param> 
-    </xsl:call-template>
+    <xsl:choose>
+      <xsl:when test="@excl">
+	<xsl:element name="em">
+	  <xsl:call-template name="print.infix.implied">
+	    <xsl:with-param name="print.infix.implied.op">cup;</xsl:with-param> 
+	  </xsl:call-template>
+	</xsl:element>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:call-template name="print.infix.implied">
+	  <xsl:with-param name="print.infix.implied.op">cup;</xsl:with-param> 
+	</xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template> 
   <!-- UninOp -->
   <xsl:template match="UninOp" mode="formula">
@@ -780,39 +801,38 @@
     <xsl:if test="count(*) &lt; 1">
       <xsl:text>*** ERROR: At least one substitution required for scomp ***</xsl:text>  
     </xsl:if>
-    <xsl:element name="em">
-      <xsl:text>S</xsl:text>
-      <xsl:element name="sub">
-	<xsl:for-each select="*">
-	  <xsl:if test = ". != aSubMap">
-	    <xsl:text>*** ERROR: Only SubMaps allowed in scomp ***</xsl:text>
-	  </xsl:if>
-	  <xsl:choose>
-	    <xsl:when test = "@num">
-	      <xsl:if test = "position() &gt; 1">
-		<xsl:text>.</xsl:text>
-	      </xsl:if>
-	      <xsl:value-of select="@num"/>
-	      <xsl:if test="@subnum">
-		<xsl:element name="sub">
-		  <xsl:value-of select="@subnum"/>
-		</xsl:element>
-	      </xsl:if>
-	    </xsl:when>
-	    <xsl:otherwise>
-	      <xsl:text>*** ERROR: scomp without subscript not allowed ***</xsl:text>
-	    </xsl:otherwise>
-	  </xsl:choose>
-	  <xsl:if test = "@dash">
-	    <xsl:call-template name="print.primed_text">
-	      <xsl:with-param name="print.primed_text.text">
-		<xsl:value-of select="@dash"/>
-	      </xsl:with-param>
-	    </xsl:call-template>
-	    <xsl:text>*** ERROR: scomp with prime not allowed ***</xsl:text>
-	  </xsl:if>
-	</xsl:for-each>
-      </xsl:element>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>thetas;</xsl:text>
+    <xsl:element name="sub">
+      <xsl:for-each select="*">
+	<xsl:if test = ". != aSubMap">
+	  <xsl:text>*** ERROR: Only SubMaps allowed in scomp ***</xsl:text>
+	</xsl:if>
+	<xsl:choose>
+	  <xsl:when test = "@num">
+	    <xsl:if test = "position() &gt; 1">
+	      <xsl:text>.</xsl:text>
+	    </xsl:if>
+	    <xsl:value-of select="@num"/>
+	    <xsl:if test="@subnum">
+	      <xsl:element name="sub">
+		<xsl:value-of select="@subnum"/>
+	      </xsl:element>
+	    </xsl:if>
+	  </xsl:when>
+	  <xsl:otherwise>
+	    <xsl:text>*** ERROR: scomp without subscript not allowed ***</xsl:text>
+	  </xsl:otherwise>
+	</xsl:choose>
+	<xsl:if test = "@dash">
+	  <xsl:call-template name="print.primed_text">
+	    <xsl:with-param name="print.primed_text.text">
+	      <xsl:value-of select="@dash"/>
+	    </xsl:with-param>
+	  </xsl:call-template>
+	  <xsl:text>*** ERROR: scomp with prime not allowed ***</xsl:text>
+	</xsl:if>
+      </xsl:for-each>
     </xsl:element>
   </xsl:template>
   
@@ -883,10 +903,6 @@
       <xsl:when test="@sp">
 	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
 	<xsl:text>rang;</xsl:text>
-	<xsl:element name="sup">
-	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-	  <xsl:text>prime;</xsl:text>
-	</xsl:element>
       </xsl:when>
       <xsl:when test="*[2] = set">
       </xsl:when>
@@ -4227,6 +4243,7 @@
     <xsl:param name="print.infix.noamp"/>
     <xsl:param name="print.infix.br"/>
     <xsl:param name="print.infix.nosp"/>
+    <xsl:param name="print.infix.em"/>
     
     <xsl:for-each select="*">
       <xsl:apply-templates select="." mode="formula"/>
@@ -4242,10 +4259,22 @@
 	    <xsl:call-template name="print.space"/>
 	  </xsl:otherwise>
 	</xsl:choose>
-	<xsl:if test="$print.infix.noamp != 'yes'">
-	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-	</xsl:if>
-	<xsl:value-of select="$print.infix.op"/>
+	<xsl:choose>
+	  <xsl:when test="$print.infix.em='yes'">
+	    <xsl:element name="em">
+	      <xsl:if test="$print.infix.noamp != 'yes'">
+		<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	      </xsl:if>
+	      <xsl:value-of select="$print.infix.op"/>
+	    </xsl:element>
+	  </xsl:when>
+	  <xsl:otherwise>
+	    <xsl:if test="$print.infix.noamp != 'yes'">
+	      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	    </xsl:if>
+	    <xsl:value-of select="$print.infix.op"/>
+	  </xsl:otherwise>
+	</xsl:choose>
 	<xsl:if test="$print.infix.sup != ''">
 	  <xsl:element name="sup">
 	    <xsl:if test="$print.infix.sup.noamp != 'yes'">
@@ -4280,27 +4309,30 @@
   <!-- Print type op type with implied attributes -->
   <xsl:template name="print.infix.implied">
     <xsl:param name="print.infix.implied.op"/>
-	<xsl:call-template name="print.infix">
-	  <xsl:with-param name="print.infix.op">
-	    <xsl:value-of select="$print.infix.implied.op"/>
-	  </xsl:with-param> 
-	  <xsl:with-param name="print.infix.br">
-	    <xsl:value-of select="@br"/>	
-	  </xsl:with-param>
-	  <xsl:with-param name="print.infix.nosp">
-	    <xsl:value-of select="@nosp"/>
-	  </xsl:with-param>
-	  <xsl:with-param name="print.infix.sub">
-	    <xsl:choose>
-	      <xsl:when test="@under='minzT'">
-		<xsl:text>dtrif;</xsl:text>
-	      </xsl:when>
-	      <xsl:when test="@under='minz'">
-		<xsl:text>xdtri;</xsl:text>
-	      </xsl:when>
-	    </xsl:choose>
-	  </xsl:with-param>
-	</xsl:call-template>    
+    <xsl:call-template name="print.infix">
+      <xsl:with-param name="print.infix.op">
+	<xsl:value-of select="$print.infix.implied.op"/>
+      </xsl:with-param> 
+      <xsl:with-param name="print.infix.br">
+	<xsl:value-of select="@br"/>	
+      </xsl:with-param>
+      <xsl:with-param name="print.infix.em">
+	<xsl:value-of select="@excl"/>
+      </xsl:with-param>
+      <xsl:with-param name="print.infix.nosp">
+	<xsl:value-of select="@nosp"/>
+      </xsl:with-param>
+      <xsl:with-param name="print.infix.sub">
+	<xsl:choose>
+	  <xsl:when test="@under='minzT'">
+	    <xsl:text>dtrif;</xsl:text>
+	  </xsl:when>
+	  <xsl:when test="@under='minz'">
+	    <xsl:text>xdtri;</xsl:text>
+	  </xsl:when>
+	</xsl:choose>
+      </xsl:with-param>
+    </xsl:call-template>    
   </xsl:template>
 
   <!-- Print type op type -->

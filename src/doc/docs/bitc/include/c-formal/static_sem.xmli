@@ -289,6 +289,23 @@
 	<aSubMap num="b"/> 
       </compose>
     </btypes:TYPE>. 
+    We also abbreviate substitution over sets
+    <btypes:TYPE>
+      <Subst sp="yes">
+	<aSubMap/>
+	<set>
+	  <unspecified/>
+	</set>
+      </Subst>
+    </btypes:TYPE> as
+    <btypes:TYPE>
+      <Subst>
+	<aSubMap/>
+	<set>
+	  <unspecified/>
+	</set>
+      </Subst>
+    </btypes:TYPE>.
     The 
     <btypes:TYPE>
       <mutexOp/>
@@ -1984,37 +2001,26 @@
 	    <grouping>
 	      <Forall/>
 	      <in>
-		<grouping>
-		  <pcst>
-		    <id name="y"/>
-		    <lKind k="poly"/>
-		    <type num="1"/>
-		  </pcst>
-		  <text content=" ... "/>
-		  <pcst>
-		    <id name="y"/>
-		    <lKind k="poly"/>
-		    <type num="n"/>
-		  </pcst>
-		</grouping>
+		<pcst>
+		  <id name="y"/>
+		  <lKind k="poly"/>
+		  <type/>
+		</pcst>
 		<dCtset/>
 	      </in>
 	      <text content=", "/>
 	      <pred name="Immut">
-		<type num="1"/>
-	      </pred>
-	      <text content=" ... "/>
-	      <pred name="Immut">
-		<type num="n"/>
+		<type/>
 	      </pred>
 	    </grouping>
 	  </tyPre>
 	  <tyPre>
 	    <grouping>
+	      <Forall/>
 	      <in>
 		<pcst>
 		  <id name="x"/>
-		  <lKind k="mono"/>
+		  <lKind num="1"/>
 		  <type num="1"/>
 		</pcst>
 		<dCtset/>
@@ -2023,11 +2029,16 @@
 	      <in>
 		<pcst>
 		  <id name="y"/>
-		  <lKind k="poly"/>
-		  <type num="1"/>
+		  <lKind num="2"/>
+		  <type num="2"/>
 		</pcst>
 		<dCtset/>
 	      </in>
+	      <text content=", "/>
+	      <neq>
+		<lKind num="1"/>
+		<lKind num="2"/>
+	      </neq>
 	      <text content=" implies "/>
 	      <neq>
 		<id/>
@@ -2044,24 +2055,6 @@
 	</tyRule>
       </Hrules>
       <Hrules>
-	<tyRule>
-	  <tyPre>
-	    <grouping>
-	      <Forall/>
-	      <subeq>
-		<dCtset/>
-		<aCtset/>
-	      </subeq>
-	      <text content=", "/>
-	    </grouping>
-	  </tyPre>
-	  <tyConc>
-	    <models>
-	      <assume/>
-	      <aCtset/>
-	    </models>
-	  </tyConc>
-	</tyRule>
 	<tyRule>
 	  <tyPre>
 	    <grouping>
@@ -2112,19 +2105,66 @@
 		</Subst>
 	      </eq>
 	    </grouping>
+	  </tyPre>
+	  <tyPre>
+	    <eq>
+	      <dCtset/>
+	      <set>
+		<grouping>
+		  <Forall/>
+		  <Subst>
+		    <aSubMap/>
+		    <pcst>
+		      <id/>
+		      <lKind/>
+		      <type/>
+		    </pcst>
+		  </Subst>
+		  <ST/>
+		  <in>
+		    <pcst>
+		      <id/>
+		      <lKind/>
+		      <type/>
+		    </pcst>
+		    <aCtset/>
+		  </in>
+		</grouping>
+	      </set>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="sol">
+	      <aSubMap/>
+	      <leadsto>
+		<aCtset/>
+		<dCtset/>
+	      </leadsto>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <Sjudge name="sol">
+	      <aSubMap/>
+	      <leadsto>
+		<aCtset/>
+		<dCtset/>
+	      </leadsto>
+	    </Sjudge>
 	    <models>
 	      <assume/>
-	      <Subst>
-		<aSubMap/>
-		<aCtset/>
-	      </Subst>
+	      <dCtset/>
 	    </models>
 	  </tyPre>
 	  <tyConc>
-	    <models name="sol">
-	      <assume/>
-	      <aCtset/>
-	    </models>
+	    <Sjudge name="sat">
+	      <aSubMap/>
+	      <leadsto>
+		<aCtset/>
+		<dCtset/>
+	      </leadsto>
+	    </Sjudge>
 	  </tyConc>
 	</tyRule>
       </Hrules>

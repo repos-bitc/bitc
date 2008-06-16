@@ -879,6 +879,7 @@
 	      <tvar name="alpha"/>
 	      <tvar name="beta"/>
 	      <tvar name="gamma"/>
+	      <lKind k="var"/>
 	    </grouping>
 	  </models>
 	</tyPre>
@@ -1043,6 +1044,7 @@
 	      <tvar name="gamma"/>
 	      <tvar name="delta"/>
 	      <tvars name="epsiv"/>
+	      <lKind k="var"/>
 	    </grouping>
 	  </models>
 	</tyPre>

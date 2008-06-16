@@ -134,6 +134,15 @@
     expressions is denoted by <btypes:TYPE><evalOp/></btypes:TYPE>,
     and evaluation in a Lvalue context is given by the
     <btypes:TYPE><levalOp/></btypes:TYPE> relation.
+    A literal substitution of Z for Y in X is written using the
+    standard notation:
+    <btypes:TYPE>
+      <subst>
+	<text content="X"/>
+	<text content="Y"/>
+	<text content="Z"/>
+      </subst>
+    </btypes:TYPE>.
   </p>
   </sect1>
   

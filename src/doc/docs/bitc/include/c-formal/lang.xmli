@@ -153,16 +153,7 @@
     All the above syntactic forms can be parenthesized without
     change in meaning. The let-kind ``-'' is a placeholder for the
     unkinded (input) <progident>let</progident> form.
-    A literal substitution of Z for Y in X is written using the
-    standard notation:
-    <btypes:TYPE>
-      <subst>
-	<text content="X"/>
-	<text content="Y"/>
-	<text content="Z"/>
-      </subst>
-    </btypes:TYPE>.
-    We also define
+    We define
     <btypes:TYPE>
       <eq>
 	<other>
@@ -179,5 +170,9 @@
 	<texttt content="1"/>
       </eq>
     </btypes:TYPE>.
+    The operator
+    <btypes:TYPE>
+      <uninOp excl="yes"/>
+    </btypes:TYPE> represents the disjoint union of sets.
   </p>
   </sect1>

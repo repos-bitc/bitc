@@ -185,8 +185,12 @@
                                dash       CDATA       #IMPLIED
 >
 
+<!ATTLIST uninOp
+                                excl    CDATA    #IMPLIED
+>
 <!ATTLIST unin
                                 br      CDATA    #IMPLIED
+                                excl    CDATA    #IMPLIED
                                 nosp    CDATA    #IMPLIED
 >
 <!ATTLIST inter

@@ -23,7 +23,7 @@
       <equation>
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<eq>
 		  <type/>
@@ -44,7 +44,7 @@
       <equation>
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<eq>
 		  <type num="1"/>
@@ -73,7 +73,7 @@
       <equation sep="4pt">
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<eq>
 		  <tvar name="alpha"/>
@@ -121,7 +121,7 @@
       <equation>
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<eq>
 		  <fn>		    
@@ -160,7 +160,7 @@
       <equation>
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<eq>
 		  <ref>
@@ -193,7 +193,7 @@
       <equation>
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<eq>
 		  <mutable>
@@ -226,7 +226,7 @@
       <equation sep="4pt">
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<eq>
 		  <pair>
@@ -265,7 +265,7 @@
       <equation>
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<eq>
 		  <mbTop>
@@ -308,7 +308,7 @@
       <equation>
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<eq>
 		  <mbTop>
@@ -348,7 +348,7 @@
       <equation>
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<eq>
 		  <mbFull>
@@ -391,7 +391,7 @@
       <equation sep="4pt">
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<eq>
 		  <mbFull>
@@ -435,7 +435,7 @@
       <equation>
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<eq>
 		  <lKind k="var"/>
@@ -479,7 +479,7 @@
       <equation>
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<pcst>
 		  <id/>
@@ -541,7 +541,7 @@
       <equation>
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<pcst>
 		  <id/>
@@ -598,7 +598,7 @@
       <equation>
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <set>
 		<pcst>
 		  <id/>
@@ -655,17 +655,19 @@
       <equation sep="4pt">
 	<lhs>
 	  <unf>
-	    <unin>
-	      <pcst>
-		<id/>
-		<lKind k="var"/>
-		<type num="1"/>
-	      </pcst>
-	      <pcst>
-		<id/>
-		<lKind k="var"/>
-		<type num="2"/>
-	      </pcst>
+	    <unin excl="yes">
+	      <set>
+		<pcst>
+		  <id/>
+		  <lKind k="var"/>
+		  <type num="1"/>
+		</pcst>
+		<pcst>
+		  <id/>
+		  <lKind k="var"/>
+		  <type num="2"/>
+		</pcst>
+	      </set>
 	      <aCtset/>
 	    </unin>
 	  </unf>
@@ -704,16 +706,18 @@
 	      <Subst>
 		<aSubMap num="k"/>
 		<unin>
-		  <pcst>
-		    <id/>
-		    <lKind k="var"/>
-		    <type num="1"/>
-		  </pcst>
-		  <pcst>
-		    <id/>
-		    <lKind k="var"/>
-		    <type num="2"/>
-		  </pcst>
+		  <set>
+		    <pcst>
+		      <id/>
+		      <lKind k="var"/>
+		      <type num="1"/>
+		    </pcst>
+		    <pcst>
+		      <id/>
+		      <lKind k="var"/>
+		      <type num="2"/>
+		    </pcst>
+		  </set>
 		  <aCtset/>
 		</unin>
 	      </Subst>
@@ -729,7 +733,7 @@
       <equation>
 	<lhs>
 	  <unf>
-	    <unin>
+	    <unin excl="yes">
 	      <constraint/>
 	      <aCtset/>
 	    </unin>

@@ -153,10 +153,13 @@
 		<aCtset/>
 	      </constrain>
 	    </TEjudge>
-	    <models name="sol">
+	    <Sjudge name="sol">
 	      <aSubMap/>
-	      <aCtset/>
-	    </models>
+	      <leadsto>
+		<aCtset/>
+		<dCtset/>
+	      </leadsto>
+	    </Sjudge>
 	    <Cst>
 	      <assume>
 		<aSubMap/>
@@ -183,10 +186,10 @@
 		</tqExpr>
 	      </conclude>
 	      <constrain>
-		<aCtset/>
+		<dCtset/>
 	      </constrain>
 	    </TEjudge>
-	  </tyConc>                
+	  </tyConc>
 	</tyRule>
       </Hrules>
       <Hrules>
@@ -205,7 +208,7 @@
 		</tqExpr>
 	      </conclude>
 	      <constrain>
-		<aCtset/>
+		<dCtset/>
 	      </constrain>
 	    </TEjudge>
 	    <Sat>
@@ -247,221 +250,25 @@
 		</tqExpr>
 	      </conclude>
 	      <constrain>
-		<aCtset/>
-	      </constrain>
-	    </TEjudge>
-	  </tyConc>                
-	</tyRule>
-      </Hrules>
-      <Hrules>
-	<tyRule>
-	  <tyPre>
-	    <TEjudge name="i">
-	      <assume>
-		<aSubMap/>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr/>
-		  <type/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<aCtset/>
-	      </constrain>
-	    </TEjudge>
-	  </tyPre>
-	  <tyConc>
-	    <TEjudge name="i">
-	      <assume>
-		<aSubMap/>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr/>
-		  <type/>
-		</tqExpr>
-	      </conclude>
-	    </TEjudge>
-	  </tyConc>                
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <TEjudge name="i">
-	      <assume>
-		<bCtset/>
-		<aSubMap/>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr/>
-		  <type/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<aCtset/>
-	      </constrain>
-	    </TEjudge>
-	  </tyPre>
-	  <tyConc>
-	    <TEjudge name="i">
-	      <assume>
-		<bCtset/>
-		<aSubMap/>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr/>
-		  <type/>
-		</tqExpr>
-	      </conclude>
-	    </TEjudge>
-	  </tyConc>                
-	</tyRule>
-      </Hrules>
-      <Hrules>
-	<tyRule>
-	  <tyPre>
-	    <TEjudge name="d">
-	      <assume>
-		<Subst>
-		  <aSubMap/>
-		  <gamma/>
-		</Subst>
-		<Subst>
-		  <aSubMap/>
-		  <store/>
-		</Subst>
-	      </assume>
-	      <conclude>
-		<tqExpr>                      
-		  <Subst>
-		    <aSubMap/>
-		    <aExpr/>
-		  </Subst>
-		  <Subst>
-		    <aSubMap/>
-		    <type/>
-		  </Subst>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<Subst>
-		  <aSubMap/>
-		  <dCtset/>
-		</Subst>
-	      </constrain>
-	    </TEjudge>
-	    <models name="sol">
-	      <Empty/>
-	      <Subst>
-		<aSubMap/>
-		<dCtset/>
-	      </Subst>
-	    </models>
-	  </tyPre>
-	  <tyConc>
-	    <TEjudge name="d">
-	      <assume>
-		<aSubMap/>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>                      
-		  <aExpr/>
-		  <type/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
 		<dCtset/>
 	      </constrain>
 	    </TEjudge>
 	  </tyConc>                
 	</tyRule>
       </Hrules>
-      <Hrules>
-	<tyRule>
-	  <tyPre>
-	    <TEjudge name="d">
-	      <assume>
-		<bCtset/>
-		<Subst>
-		  <aSubMap/>
-		  <gamma/>
-		</Subst>
-		<Subst>
-		  <aSubMap/>
-		  <store/>
-		</Subst>
-	      </assume>
-	      <conclude>
-		<tqExpr>                      
-		  <Subst>
-		    <aSubMap/>
-		    <aExpr/>
-		  </Subst>
-		  <Subst>
-		    <aSubMap/>
-		    <type/>
-		  </Subst>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<Subst>
-		  <aSubMap/>
-		  <dCtset/>
-		</Subst>
-	      </constrain>
-	    </TEjudge>
-	    <models name="sol">
-	      <Empty/>
-	      <Subst>
-		<aSubMap/>
-		<dCtset/>
-	      </Subst>
-	    </models>
-	  </tyPre>
-	  <tyConc>
-	    <TEjudge name="d">
-	      <assume>
-		<bCtset/>
-		<aSubMap/>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>                      
-		  <aExpr/>
-		  <type/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<dCtset/>
-	      </constrain>
-	    </TEjudge>
-	  </tyConc>                
-	</tyRule>
-      </Hrules>      
       <Hrules>
 	<tyRule>
 	  <tyPre>
 	    <Sjudge>
 	      <assume>
-		<canonical>
-		  <Subst>
-		    <aSubMap/>
-		    <gamma/>
-		  </Subst>
-		</canonical>
+		<Subst>
+		  <aSubMap/>
+		  <dCtset/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <gamma/>
+		</Subst>
 		<Subst>
 		  <aSubMap/>
 		  <store/>
@@ -483,6 +290,7 @@
 	    <Sjudge>
 	      <assume>
 		<aSubMap/>
+		<dCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -493,16 +301,20 @@
 	    </Sjudge>
 	  </tyConc>                
 	</tyRule>
+      </Hrules>
+      <Hrules>
 	<tyRule>
 	  <tyPre>
 	    <Sjudge name="*">
 	      <assume>
-		<canonical>
-		  <Subst>
-		    <aSubMap/>
-		    <gamma/>
-		  </Subst>
-		</canonical>
+		<Subst>
+		  <aSubMap/>
+		  <dCtset/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <gamma/>
+		</Subst>
 		<Subst>
 		  <aSubMap/>
 		  <store/>
@@ -524,6 +336,7 @@
 	    <Sjudge name="*">
 	      <assume>
 		<aSubMap/>
+		<dCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -541,12 +354,14 @@
 	    <Sjudge>
 	      <assume>
 		<bCtset/>
-		<canonical>
-		  <Subst>
-		    <aSubMap/>
-		    <gamma/>
-		  </Subst>
-		</canonical>
+		<Subst>
+		  <aSubMap/>
+		  <dCtset/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <gamma/>
+		</Subst>
 		<Subst>
 		  <aSubMap/>
 		  <store/>
@@ -569,6 +384,7 @@
 	      <assume>
 		<bCtset/>
 		<aSubMap/>
+		<dCtset/>
 		<gamma/>
 		<store/>
 	      </assume>
@@ -791,15 +607,16 @@
 	    </tqExpr>
 	  </conclude>
 	  <constrain>
-	    <aCtset/>
+	    <dCtset/>
 	  </constrain>
 	</TEjudge>
       </btypes:TYPE> then
       <btypes:TYPE>
-	<TEjudge name="d">
+	<Sjudge>
 	  <assume>
 	    <bCtset/>
 	    <aSubMap/>
+	    <dCtset/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -809,10 +626,7 @@
 	      <type/>
 	    </tqExpr>
 	  </conclude>
-	  <constrain>
-	    <dCtset/>
-	  </constrain>
-	</TEjudge>
+	</Sjudge>
       </btypes:TYPE>.
     </p>
   </theorem>
@@ -898,7 +712,10 @@
 	      <btypes:TYPE>
 		<models name="sol">
 		  <aSubMap/>
-		  <aCtset/>
+		  <leadsto>
+		    <aCtset/>
+		    <dCtset/>
+		  </leadsto>
 		</models>
 	      </btypes:TYPE>
 	    </p>
@@ -971,214 +788,18 @@
       </li>
       <li>
 	<p>
-	  Case I-Id:
+	  Case I-Id: folows from cases&nbsp;(1.b and 1.c)the fact that
+	  variable replacement is always consistent.
 	</p>
-	<ol>
-	  <li>
-	    <p>
-	      In this case, we have
-	    </p>
-	    <btypes:TYPE>
-	      <Hrules>
-		<tyRule>
-		  <tyPre>
-		    <mapsto>
-		      <gamma/>
-		      <id/>
-		      <TS>
-			<tvars name="alpha"/>
-			<ctype>
-			  <type/>
-			  <dCtset/>
-			</ctype>
-		      </TS>
-		    </mapsto>
-		    <eq>
-		      <aSubMap num="x"/>
-		      <plural>
-			<SubMap>
-			  <tvar name="alpha"/>
-			  <tvar name="beta"/>
-			</SubMap>
-		      </plural>
-		    </eq>
-		    <models name="new">
-		      <assume/>
-		      <tvars name="beta"/>
-		    </models>
-		  </tyPre>
-		  <tyConc>
-		    <TEjudge name="i">
-		      <assume>
-			<gamma/>
-			<store/>
-		      </assume>
-		      <conclude>
-			<tqExpr>
-			  <id/>
-			  <Subst>
-			    <aSubMap num="x"/>
-			    <type/>
-			  </Subst>
-			</tqExpr>
-		      </conclude>
-		      <constrain>
-			<Subst sp="yes">
-			  <aSubMap num="x"/>
-			  <dCtset/>
-			</Subst>
-		      </constrain>
-		    </TEjudge>
-		  </tyConc>
-		</tyRule>
-	      </Hrules>
-	    </btypes:TYPE>
-	  </li>
-	  <li>
-	    <p>
-	      Let
-	      <btypes:TYPE>
-		<eq>
-		  <type num="s"/>
-		  <Subst>
-		    <aSubMap/>
-		    <type/>
-		  </Subst>
-		</eq>
-	      </btypes:TYPE>,
-	      <btypes:TYPE>
-		<eq>
-		  <gamma num="s"/>
-		  <Subst>
-		    <aSubMap/>
-		    <gamma/>
-		  </Subst>
-		</eq>
-	      </btypes:TYPE>,
-	      <btypes:TYPE>
-		<eq>
-		  <type num="sx"/>
-		  <Subst>
-		    <aSubMap/>
-		    <Subst>
-		      <aSubMap num="x"/>
-		      <type/>
-		    </Subst>
-		  </Subst>
-		</eq>
-	      </btypes:TYPE>.
-	    </p>
-	  </li>
-	  <li>
-	    <p>
-	      Let
-	      <btypes:TYPE>
-		<eq>
-		  <set>
-		    <tvars/>
-		  </set>
-		  <unin>
-		    <set>
-		      <tvars name="gamma"/>
-		      <tvars name="delta"/>
-		      <tvars name="epsiv"/>
-		    </set>
-		  </unin>
-		</eq>
-	      </btypes:TYPE> such that
-	    </p>
-	    <ol>
-	      <li>
-		<p>
-		  <btypes:TYPE>
-		    <eq>
-		      <set>
-			<tvars name="gamma"/>
-			<tvars name="delta"/>
-		      </set>
-		      <inter>
-			<set>
-			  <tvars/>
-			</set>
-			<ftvs>
-			  <type num="s"/>
-			</ftvs>
-		      </inter>
-		    </eq>
-		  </btypes:TYPE>
-		</p>
-	      </li>
-	      <li>
-		<p>
-		  <btypes:TYPE>
-		    <eq>
-		      <pred name="remtv">
-			<dCtset/>
-		      </pred>
-		      <set>
-			<tvars name="delta"/>
-		      </set>
-		    </eq>
-		  </btypes:TYPE>
-		</p>
-	      </li>
-	      <li>
-		<p>
-		  Evidently, 
-		  <btypes:TYPE>
-		    <eq>
-		      <mutex>
-			<tvars name="epsiv"/>
-			<ftvs>
-			  <type num="s"/>
-			</ftvs>
-		      </mutex>
-		    </eq>
-		  </btypes:TYPE>
-		</p>
-	      </li>
-	    </ol>
-	  </li>
-	  <li>
-	    <p>
-	      Now, from 
-	      <btypes:TYPE>
-		<defn tag="canon-ts"/>
-	      </btypes:TYPE>, we have
-	      <btypes:TYPE>
-		<mapsto>
-		  <canonical>
-		    <gamma num="s"/>
-		  </canonical>
-		  <id/>
-		  <TS>
-		    <tvars name="gamma"/>
-		    <type num="s"/>
-		  </TS>
-		</mapsto>
-	      </btypes:TYPE>
-	    </p>
-	  </li>
-	  <li>
-	    <p>
-	      Let
-	      <btypes:TYPE>
-		<eq>
-		  <aSubMap num="x" dash="'"/>
-		  <plural>
-		    <SubMap>
-		      <tvar name="gamma"/>
-		      <Subst>
-			<aSubMap/>
-			<tvar name="beta"/>
-		      </Subst>
-		    </SubMap>
-		  </plural>
-		</eq>
-	      </btypes:TYPE>
-	    </p>
-	  </li>
-	</ol>
+      </li>
+      <li>
+	<p>
+	  Case I-Lambda follows from induction hypothesis, and the
+	  fact that the required equality under
+	  <btypes:TYPE>
+	    <minzOp/>
+	  </btypes:TYPE> evidently holds.
+	</p>
       </li>
     </ol>
   </proof>
@@ -1187,10 +808,11 @@
     <p>
       If 
       <btypes:TYPE>
-	<TEjudge name="d">
+	<Sjudge>
 	  <assume>
 	    <bCtset/>
 	    <aSubMap/>
+	    <dCtset/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -1200,10 +822,7 @@
 	      <type/>
 	    </tqExpr>
 	  </conclude>
-	  <constrain>
-	    <dCtset/>
-	  </constrain>
-	</TEjudge>
+	</Sjudge>
       </btypes:TYPE>, then
       <btypes:TYPE>
 	<Exists/>
@@ -1213,7 +832,6 @@
 	</supeq>
       </btypes:TYPE> and
       <btypes:TYPE>
-	<Exists/>
 	<supeq>
 	  <bCtset dash="'"/>
 	  <bCtset/>
@@ -1235,7 +853,7 @@
 	    </tqExpr>
 	  </conclude>
 	  <constrain>
-	    <aCtset/>
+	    <dCtset/>
 	  </constrain>
 	</TEjudge>
       </btypes:TYPE> and
@@ -1288,9 +906,31 @@
     <p>
       By induction on the derivation of 
       <btypes:TYPE>
-	<TEjudge name="d">
+	<TDjudge>
 	  <assume>
 	    <bCtset/>
+	    <aSubMap/>
+	    <dCtset/>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <conclude>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </conclude>
+	</TDjudge>
+      </btypes:TYPE>.      
+    </p>
+  </proof>
+  <theorem>
+    <title>Soundness of Type Inference</title>
+    <p>
+      If 
+      <btypes:TYPE>
+	<TEjudge name="i">
+	  <assume>
 	    <aSubMap/>
 	    <gamma/>
 	    <store/>
@@ -1305,32 +945,12 @@
 	    <dCtset/>
 	  </constrain>
 	</TEjudge>
-      </btypes:TYPE>.      
-    </p>
-  </proof>
-  <theorem>
-    <title>Soundness of Type Inference [Direct]</title>
-    <p>
-      If 
-      <btypes:TYPE>
-	<TEjudge name="i">
-	  <assume>
-	    <aSubMap/>
-	    <gamma/>
-	    <store/>
-	  </assume>
-	  <conclude>
-	    <tqExpr>
-	      <aExpr/>
-	      <type/>
-	    </tqExpr>
-	  </conclude>
-	</TEjudge>
       </btypes:TYPE> then
       <btypes:TYPE>
 	<Sjudge name="*">
 	  <assume>
 	    <aSubMap/>
+	    <dCtset/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -1343,13 +963,12 @@
     </p>
   </theorem>
   <theorem>
-    <title>Corollary to Soundness of Type Inference</title>
+    <title>Type Chekability</title>
     <p>
       If 
       <btypes:TYPE>
 	<TEjudge name="i">
 	  <assume>
-	    <aSubMap/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -1370,7 +989,7 @@
 	    <aCtset/>
 	  </unf>
 	  <Pair>
-	    <dCtset/>
+	    <dCtset num="u"/>
 	    <aSubMap num="u"/>
 	  </Pair>
 	</eq>
@@ -1378,58 +997,44 @@
       <btypes:TYPE>
 	<Exists/>
 	<aSubMap num="s"/>
-	<ST/>
-	<models name="sol">
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<Sjudge name="sat">
 	  <aSubMap num="s"/>
-	  <dCtset/>
-	</models>
+	  <leadsto>
+	    <dCtset num="u"/>
+	    <dCtset/>
+	  </leadsto>
+	</Sjudge>
       </btypes:TYPE> and
       <btypes:TYPE>
 	<Sjudge name="*">
 	  <assume>
-	    <Subst>
-	      <scomp>
-		<aSubMap num="u"/>
-		<aSubMap num="s"/>
-	      </scomp>
-	      <gamma/>
-	    </Subst>
-	    <Subst>
-	      <scomp>
-		<aSubMap num="u"/>
-		<aSubMap num="s"/>
-	      </scomp>
-	      <store/>
-	    </Subst>
+	    <scomp>
+	      <aSubMap num="u"/>
+	      <aSubMap num="s"/>
+	    </scomp>
+	    <dCtset/>
+	    <gamma/>
+	    <store/>
 	  </assume>
 	  <tqExpr>
-	    <Subst>
-	      <scomp>
-		<aSubMap num="u"/>
-		<aSubMap num="s"/>
-	      </scomp>
-	      <aExpr/>
-	    </Subst>
-	    <Subst>
-	      <scomp>
-		<aSubMap num="u"/>
-		<aSubMap num="s"/>
-	      </scomp>
-	      <type/>
-	    </Subst>
+	    <aExpr/>
+	    <type/>
 	  </tqExpr>
 	</Sjudge>
       </btypes:TYPE>.
     </p>
   </theorem>
   <theorem>
-    <title>Completeness of Type Inference [Direct]</title>
+    <title>Completeness of Type Inference</title>
     <p>
       If 
       <btypes:TYPE>
 	<Sjudge name="*">
 	  <assume>
 	    <aSubMap/>
+	    <dCtset/>
 	    <gamma/>
 	    <store/>
 	  </assume>
@@ -1461,7 +1066,7 @@
 	    </tqExpr>
 	  </conclude>
 	  <constrain>
-	    <aCtset/>
+	    <dCtset/>
 	  </constrain>
 	</TEjudge>
       </btypes:TYPE>.

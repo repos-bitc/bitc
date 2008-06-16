@@ -24,13 +24,13 @@ $deriveSp="($derive)$em\\{\\_($br)\\}";
 #$derive4="($derive)$em\\{\\_($br)\\}$em\\{\\^($br)\\}";
 
 $modelSp="($models)$em\\{\\_($br)\\}";
-#Unfortunately, the following two cases need different spacings
 $EqSp1="(=)$em\\{\\_(\\{$em\\{\\\\blacktriangledown\\}\\})\\}";
 $EqSp2="(=)$em\\{\\_(\\{$em\\{\\\\bigtriangledown\\}\\})\\}";
 $pcst="$em\\{\\\\hookrightarrow\\}";
 $pcstSp="($pcst)$em\\{\\^($br)\\}";
 $bigcup="\\\\textbf\\{$em\\{\\\\cup\\}\\}";
 $bigcap="\\\\textbf\\{$em\\{\\\\cap\\}\\}";
+$exclcup="\\\\emph\\{$em\\{\\\\cup\\}\\}";
 $emset="$em($br)";
 $plural1="$emset$em\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}";
 $plural2="$em\\{($br)\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}\\}";
@@ -53,6 +53,7 @@ while(!eof(F)) {
 	#Bold-Ops - Big-Ops
 	$l =~ s/$bigcup/$EM\{\\bigcup\}/g;
 	$l =~ s/$bigcap/$EM\{\\bigcap\}/g;
+	$l =~ s/$exclcup/$EM\{\\mathaccent\\cdot\\cup\}/g;
 	
         #{| to {\!| and |} to |\!}
 	# Note that this is *not* paranthesizing replacement
@@ -84,8 +85,10 @@ while(!eof(F)) {
 	#$l =~ s/$transR/$EM\{\\Rightarrow\}\\hskip -2.1ex\{\*\}/g;
 
 	#Equality onder another operator
-	$l =~ s/$EqSp1/\\mbox\{$1\\hskip -1.2ex\\lower 0.1ex\\hbox\{$EM\{\_\{\_\{$2\}\}\}\}\}/g;
-	$l =~ s/$EqSp2/\\mbox\{$1\\hskip -1.4ex\\raise 0.1ex\\hbox\{$EM\{\_\{\_\{$2\}\}\}\}\}/g;
+	$l =~ s/$EqSp1/\\mbox\{=\\hskip -1.2ex\\lower 0.1ex\\hbox\{$EM\{\_\{\_\{\\blacktriangledown\}\}\}\}\}/g;
+	$l =~ s/$EqSp2/\\mbox\{=\\hskip -1.2ex\\lower 0.3ex\\hbox\{$EM\{\_\{\{\\triangledown\}\}\}\}\}/g;
+	#$l =~ s/$EqSp1/$EM\{\{=\}\\atop\{\\blacktriangledown\}\}/g;
+	#$l =~ s/$EqSp2/\\mbox\{=\\hskip -1.4ex\\raise 0.1ex\\hbox\{$EM\{\_\{\_\{\\bigtriangledown\}\}\}\}\}/g;
 	
 	#Polymorphic constraint
 	$l =~ s/$pcstSp/\\mbox\{$1\\hskip -2ex$EM\{\^\{$MIT\{$2\}\}\}\}/g;
