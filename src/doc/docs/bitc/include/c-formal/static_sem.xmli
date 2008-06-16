@@ -178,6 +178,10 @@
 	    <type/>
 	    <type/>
 	  </eq>
+	  <eq>
+	    <lKind k="var"/>
+	    <lKind/>
+	  </eq>
 	  <constraint name="d"/>
 	</alternatives>
       </bnf>
@@ -2065,14 +2069,8 @@
 	      <in>
 		<paren>
 		  <eq>
-		    <Subst>
-		      <aSubMap/>
-		      <type num="1"/>
-		    </Subst>
-		    <Subst>
-		      <aSubMap/>
-		      <type num="2"/>
-		    </Subst>
+		    <type num="1"/>
+		    <type num="2"/>
 		  </eq>
 		</paren>
 		<aCtset/>
@@ -2086,6 +2084,31 @@
 		<Subst>
 		  <aSubMap/>
 		  <type num="2"/>
+		</Subst>
+	      </eq>
+	    </grouping>
+	  </tyPre>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<paren>
+		  <eq>
+		    <lKind k="var"/>
+		    <lKind/>
+		  </eq>
+		</paren>
+		<aCtset/>
+	      </in>
+	      <text content=", "/>
+	      <eq>
+		<Subst>
+		  <aSubMap/>
+		  <lKind k="var"/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <lKind/>
 		</Subst>
 	      </eq>
 	    </grouping>

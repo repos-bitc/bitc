@@ -475,98 +475,142 @@
 	  </eq>
 	</rhs>
       </equation>
-      <!-- P(m, t1, t2) --> 
+      <!-- *mx(t1), *mx(t2) --> 
       <equation>
 	<lhs>
 	  <unf>
 	    <unin>
 	      <set>
-		<Pcst>
+		<pcst>
+		  <id/>
 		  <lKind k="mono"/>
-		  <type num="g"/>
-		  <type num="s"/>
-		</Pcst>
+		  <type num="1"/>
+		</pcst>
+		<pcst>
+		  <id/>
+		  <lKind k="mono"/>
+		  <type num="2"/>
+		</pcst>
 	      </set>
 	      <aCtset/>
 	    </unin>
 	  </unf>
 	</lhs>
 	<rhs>
-	  <unf>
+	  <Pair>
 	    <unin>
-	      <aCtset/>
-	      <set>
-		<eq>
-		  <type num="g"/>
-		  <type num="s"/>
-		</eq>
-	      </set>
-	    </unin>
-	  </unf>
+	      <dCtset/>
+	      <Subst>
+		<aSubMap/>
+		<set>
+		  <pcst>
+		    <id/>
+		    <lKind k="mono"/>
+		    <type num="1"/>
+		  </pcst>
+		  <pcst>
+		    <id/>
+		    <lKind k="mono"/>
+		    <type num="2"/>
+		  </pcst>
+		</set>
+	      </Subst>	
+	    </unin>	
+	    <aSubMap/>
+	  </Pair>
+	  <eq>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <type num="1"/>
+		    <type num="2"/>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	    <Pair>
+	      <dCtset/>
+	      <aSubMap/>
+	    </Pair>
+	  </eq>
 	</rhs>
-      </equation>	
-      <!-- P(p, t1, t2) | [](t1) --> 
+      </equation>
+      <!-- *Px(t) [](t)  --> 
       <equation>
 	<lhs>
 	  <unf>
 	    <unin>
 	      <set>
-		<Pcst>
+		<pcst>
+		  <id/>
 		  <lKind k="poly"/>
-		  <type num="g"/>
-		  <type num="s"/>
-		</Pcst>
+		  <type/>
+		</pcst>
 	      </set>
 	      <aCtset/>
 	    </unin>
 	  </unf>
 	  <concrete>
-	    <type num="g"/>
+	    <type/>
 	  </concrete>
 	</lhs>
 	<rhs>
-	  <unf>
+	  <Pair>
 	    <unin>
-	      <aCtset/>
-	      <set>
-		<eq>
-		  <type num="g"/>
-		  <minzD>
-		    <type num="g"/>
-		  </minzD>
-		</eq>
-		<eq>
-		  <type num="s"/>
-		  <minzD>
-		    <type num="s"/>
-		  </minzD>
-		</eq>
-	      </set>
-	    </unin>
-	  </unf>
+	      <dCtset/>
+	      <Subst>
+		<aSubMap/>
+		<set>
+		  <pcst>
+		    <id/>
+		    <lKind k="poly"/>
+		    <type/>
+		  </pcst>
+		</set>
+	      </Subst>	
+	    </unin>	
+	    <aSubMap/>
+	  </Pair>
+	  <eq>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <type/>
+		    <minzD>
+		      <type/>
+		    </minzD>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	    <Pair>
+	      <dCtset/>
+	      <aSubMap/>
+	    </Pair>
+	  </eq>
 	</rhs>
-      </equation>	
-      <!-- P(k, Mt1?, M?t2) --> 
+      </equation>
+      <!-- *kx(Mt) --> 
       <equation>
 	<lhs>
 	  <unf>
 	    <unin>
-	      <aCtset num="*"/>
+	      <set>
+		<pcst>
+		  <id/>
+		  <lKind k="var"/>
+		  <type/>
+		</pcst>
+	      </set>
 	      <aCtset/>
 	    </unin>
 	  </unf>
-	  <eq>
-	    <aCtset num="*"/>
-	    <set>
-	      <Pcst>
-		<lKind k="var"/>
-		<type num="g"/>
-		<type num="s"/>
-	      </Pcst>
-	    </set>
-	  </eq>
 	  <pred name="Mut">
-	    <type num="s"/>
+	    <type/>
 	  </pred>
 	</lhs>
 	<rhs>
@@ -588,7 +632,16 @@
 	    <unf>
 	      <Subst>
 		<aSubMap num="k"/>
-		<aCtset num="*"/>
+		<unin>
+		  <set>
+		    <pcst>
+		      <id/>
+		      <lKind k="var"/>
+		      <type/>
+		    </pcst>
+		  </set>
+		  <aCtset/>
+		</unin>
 	      </Subst>
 	    </unf>
 	    <Pair>
@@ -597,31 +650,25 @@
 	    </Pair>
 	  </eq>
 	</rhs>
-      </equation>	
-      <!-- P(k, t, t1), P(k, t, t2)  t1 !~ t2 -->
+      </equation>
+      <!-- *kx(t1), *kx(t2)  t1 !~ t2 -->
       <equation sep="4pt">
 	<lhs>
 	  <unf>
 	    <unin>
-	      <aCtset num="*"/>
+	      <pcst>
+		<id/>
+		<lKind k="var"/>
+		<type num="1"/>
+	      </pcst>
+	      <pcst>
+		<id/>
+		<lKind k="var"/>
+		<type num="2"/>
+	      </pcst>
 	      <aCtset/>
 	    </unin>
 	  </unf>
-	  <eq>
-	    <aCtset num="*"/>
-	    <set>
-	      <Pcst>
-		<lKind k="var"/>
-		<type/>
-		<type num="1"/>
-	      </Pcst>
-	      <Pcst>
-		<lKind k="var"/>
-		<type/>
-		<type num="2"/>
-	      </Pcst>
-	    </set>
-	  </eq>
 	  <eq>
 	    <unf>
 	      <unin>
@@ -656,7 +703,19 @@
 	    <unf>
 	      <Subst>
 		<aSubMap num="k"/>
-		<aCtset num="*"/>
+		<unin>
+		  <pcst>
+		    <id/>
+		    <lKind k="var"/>
+		    <type num="1"/>
+		  </pcst>
+		  <pcst>
+		    <id/>
+		    <lKind k="var"/>
+		    <type num="2"/>
+		  </pcst>
+		  <aCtset/>
+		</unin>
 	      </Subst>
 	    </unf>
 	    <Pair>
@@ -808,17 +867,17 @@
 	<grouping>
 	  <Forall>
 	    <collection>
+	      <id/>
 	      <lKind k="var"/>
 	      <lKind/>
 	      <type/>
 	      <type dash="'"/>
-	      <type num="s"/>
 	    </collection>
 	  </Forall>
 	  <ST/>
 	  <NOT>
 	    <pred name="Mut">
-	      <type num="s"/>
+	      <type dash="'"/>
 	    </pred>
 	  </NOT>
 	  <space/>
@@ -829,21 +888,21 @@
 	      <lKind k="var"/>
 	      <lKind/>
 	    </eq>
-	    <Pcst>
+	    <pcst>
+	      <id/>
 	      <lKind k="mono"/>
 	      <type/>
-	      <type dash="'"/>
-	    </Pcst>
-	    <Pcst>
+	    </pcst>
+	    <pcst>
+	      <id/>
 	      <lKind k="poly"/>
-	      <type/>
-	      <type num="s"/>
-	    </Pcst>
-	    <Pcst>
+	      <type dash="'"/>
+	    </pcst>
+	    <pcst>
+	      <id/>
 	      <lKind k="var"/>
 	      <type/>
-	      <type dash="'"/>
-	    </Pcst>
+	    </pcst>
 	  </set>
 	</grouping>
       </eq>
