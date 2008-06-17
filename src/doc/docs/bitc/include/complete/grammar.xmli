@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+    <font size="small">
+  <table>
+    <tbody>
+      <tr valign="top">
+	<td>
+	  <btypes:TYPE
+	    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+	    <grammar notitle="yes">
+	      <bnf desc="Identifiers">
+		<id/>
+		<alternatives etc="yes">
+		  <id name="y"/>
+		  <id name="z"/>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Stack Loc">
+		<sLoc/>
+		<alternatives etc="yes">
+		  <sLoc num="1"/>
+		  <sLoc num="2"/>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Heap Loc">
+		<hLoc/>
+		<alternatives etc="yes">
+		  <hLoc num="1"/>
+		  <hLoc num="2"/>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="lvalues">
+		<lVal/>
+		<alternatives>
+		  <sLoc/>
+		  <deref>
+		    <hLoc/>
+		  </deref>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Values">
+		<aVal/>
+		<alternatives>
+		  <Unit/>
+		  <true/>
+		  <false/>
+		  <hLoc/>
+		  <lambda>
+		    <id/>
+		    <aExpr/>
+		  </lambda>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Exprs.">
+		<aExpr/>
+		<alternatives>
+		  <aVal/>
+		  <id/>
+		  <sLoc/>
+		  <apply>
+		    <aExpr/>
+		    <aExpr/>
+		  </apply>
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
+		  <assign>
+		    <aExpr/>
+		    <aExpr/>
+		  </assign>
+		</alternatives>
+		<dup>
+		  <aExpr/>
+		</dup>
+	      </bnf>
+	      <bnfc>
+		<alternatives>		  
+		  <deref>
+		    <aExpr/>
+		  </deref>
+		  <if>
+		    <aExpr/>
+		    <aExpr/>
+		    <aExpr/>
+		  </if>
+		</alternatives>
+	      </bnfc>
+	      <bnfc>
+		<alternatives>		  
+		  <let kind="k">
+		    <tqExpr optional="yes">
+		      <id/>
+		      <type/>
+		    </tqExpr>
+		    <aExpr/>
+		    <aExpr/>
+		  </let>
+		</alternatives>
+	      </bnfc>
+	      <bnf desc="Let-kinds">
+		<symbol name="kappa"/>
+		<alternatives>
+		  <text content="-"/>
+		  <symbol name="alpha"/>
+		  <symbol name="psi"/>
+		  <symbol name="forall"/>
+		</alternatives>
+	      </bnf>
+	    </grammar>
+	  </btypes:TYPE>
+	</td>
+	<td>
+	  <btypes:TYPE
+	    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+	    <grammar notitle="true">
+	      <bnf desc="Types">
+		<type/>
+		<alternatives>
+		  <tvar name="alpha"/>
+		  <unit/>
+		  <bool/>
+		  <fn><type/><type/></fn>                  
+		</alternatives>                
+	      </bnf>
+	      <bnfc>
+		<alternatives>
+		  <ref><type/></ref>
+		  <mutable><type/></mutable>
+		  <ctype>
+		    <type/>
+		    <aCtset/>
+		  </ctype>
+		  <mbpair>
+		    <type/>
+		    <type/>
+		  </mbpair>
+		</alternatives>
+	      </bnfc>
+	      <bnf desc="TypeScheme">
+		<aTS/>
+		<alternatives>
+		  <type/>
+		  <forall>                    
+		    <tvar name="alpha"/>
+		    <aTS/>
+		  </forall>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Bind Env">
+		<gamma/>
+		<alternatives>
+		  <Empty/>
+		  <extend>
+		    <gamma/>
+		    <mapping>
+		      <id/>
+		      <aTS/>
+		    </mapping>
+		  </extend>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Store Typ">
+		<store/>
+		<alternatives>
+		  <Empty/>
+		  <extend>
+		    <store/>
+		    <mapping>
+		      <hLoc/>
+		      <type/>
+		    </mapping>
+		  </extend>
+		  <extend>
+		    <store/>
+		    <mapping>
+		      <sLoc/>
+		      <type/>
+		    </mapping>
+		  </extend>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Constraints">
+		<aCtset/>
+		<alternatives>
+		  <Empty/>
+		  <set>
+		    <alternatives>                      
+		      <eq>
+			<type/>
+			<type/>
+		      </eq>
+		      <ceq>
+			<type/>
+			<type/> 
+		      </ceq>
+		      <Tsub>
+			<type/>
+			<type/> 
+		      </Tsub>
+		    </alternatives>
+		  </set>
+		</alternatives>            
+	      </bnf>
+	      <bnf desc="Subst.">            
+		<aSubMap/>            
+		<alternatives>
+		  <Empty/>
+		  <SubMap>
+		    <tvar name="alpha"/>
+		    <type/>
+		  </SubMap>
+		  <compose>
+		    <aSubMap/>
+		    <aSubMap/>
+		  </compose>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Stack">
+		<stack/>
+		<alternatives>
+		  <Empty/>
+		  <extend>
+		    <stack/>
+		    <mapping>
+		      <sLoc/>
+		      <aVal/>
+		    </mapping>
+		  </extend>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Heap">
+		<heap/>
+		<alternatives>
+		  <Empty/>
+		  <extend>
+		    <heap/>
+		    <mapping>
+		      <hLoc/>
+		      <aVal/>
+		    </mapping>
+		  </extend>
+		</alternatives>
+	      </bnf>
+	    </grammar>
+	  </btypes:TYPE>
+	</td>
+      </tr>
+    </tbody>
+  </table>    
+    </font>
+  
+  

@@ -44,17 +44,19 @@ BITC_SRC=../../..
 MY_XML=changes closures PLOS2006-shap PLOS2006 polyinst 
 MY_XML+=relnotes-0.10 relnotes-0.9 spec
 MY_TYPE_XML=c-formal e-formal h-formal mut-formal 
-MY_TYPE_XML+=mutinfer sys-infer core
+MY_TYPE_XML+=complete core mutinfer sys-infer 
 
 OSDOC_XML_SRC=$(MY_XML) $(MY_TYPE_XML)
 
-CLEANLIST=bitc-grammar.c mutinfer.xml old_sys-infer.xml sys-infer.xml 
-CLEANLIST+=c-formal.xml h-formal.xml mut-formal.xml
+CLEANLIST=bitc-grammar.c mutinfer.xml sys-infer.xml 
+CLEANLIST+=c-formal.xml h-formal.xml e-formal.xml mut-formal.xml
+CLEANLIST+=core.xml complete.xml
 XSL_BTYPE=btypes-osdoc.xsl
 FIX_LTX='./fixup.pl'
 
 #Do not add these .xmli files into clean list
 SYSINFER_INCLUDE=include/sys-infer/$(wildcard *.xmli)
+COMPLETE_INCLUDE=include/complete/$(wildcard *.xmli)
 CORE_INCLUDE=include/core/$(wildcard *.xmli)
 H_FORMAL_INCLUDE=include/h-formal/$(wildcard *.xmli)
 C_FORMAL_INCLUDE=include/c-formal/$(wildcard *.xmli)
@@ -90,6 +92,9 @@ sys-infer.xml: sys-infer.txml $(XSL_BTYPE) $(SYSINFER_INCLUDE)
 	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
 core.xml: core.txml $(XSL_BTYPE) $(CORE_INCLUDE)
+	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
+
+complete.xml: complete.txml $(XSL_BTYPE) $(COMPLETE_INCLUDE)
 	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
 %.ps: %.ltx

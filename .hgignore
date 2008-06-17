@@ -54,6 +54,7 @@ src/doc/docs/dir.dev.gxml
 
 # Some hand-built documents:
 src/doc/docs/bitc/core.xml
+src/doc/docs/bitc/complete.xml
 src/doc/docs/bitc/h-formal.xml
 src/doc/docs/bitc/c-formal.xml
 src/doc/docs/bitc/e-formal.xml
