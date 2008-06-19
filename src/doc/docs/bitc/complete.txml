@@ -65,42 +65,23 @@
   <sect1>
     <title>Introduction</title>
     <p>
-      Systems programs rely on fine-grain control of data
-      representation and use of state to achieve performance,
-      conformance to hardware specification, and temporal
-      predictability. Robustness and reuse of systems codes can be
-      greatly improved by leveraging modern programming language
-      features &mdash; such as static type safety, type inference,
-      higher order functions, and polymorphism &mdash; but only if
-      these features can be provided without sacrificing the above
-      mentioned requirements. No existing language supports both of
-      these feature sets simultaneously. Therefore, systems
-      programmers continue to use Ada&nbsp;<cite ref="ISO1995Ada"/>,
-      C&nbsp;<cite ref="ISO1999ANSI-C"/>, 
-      C++&nbsp;<cite ref="ISO1998C++"/> or
-      resort to domain specific and assembly level languages. We first
-      discuss the support for these features in existing languages,
-      identify the challenges in combining these feature sets and
-      describe our approach toward solving this problem. 
-    </p>
-    <p>
-      <leadin>Type Inference and Polymorphism:</leadin> Type
-      inference achieves the advantages of static typing
-      with a lower burden on the programmer, facilitating rapid
-      prototyping and development. Polymorphic type inference 
-      (c.f. ML&nbsp;<cite ref="milner97definition"/> or 
-      Haskell&nbsp;<cite ref="peytonjones2003haskellrevisedreport"/>)
-      combines the advantages of static type safety with much of the
-      convenience provided by dynamically typed languages like
-      Python&nbsp;<cite ref="pythonSpec"/>. 
-      Automatic inference of polymorphism simplifies generic programming, and
-	therefore increases the reuse and reliability of code.
-      Safe languages like Java&nbsp;<cite ref="javaSpec"/>, 
-      C#&nbsp;<cite ref="csharpSpec"/>, 
-      or Vault&nbsp;<cite ref="DeLineMSRVault"/> do not support type
-      inference. Cyclone&nbsp;<cite ref="Jim2002Cyclone"/> supports
-      polymorphism only for functions that are explicitly
-      annotated with a polymorphic type.  
+      Recent advances in the theory and practice of programming
+      languages have resulted in modern languages and tools that
+      provide certain correctness guarantees regarding the execution
+      of programs. However, these advances have not been effectively
+      applied to the construction of <em>systems programs</em>, the
+      core components of a computer system. One of the primary causes
+      of this problem is the fact that existing languages do not
+      simultaneously support modern language features such as static
+      type safety, type inference, higher order functions,
+      polymorphism <foreignphrase>etc.</foreignphrase> and features
+      that are critical to the correctness and performance of systems
+      programs such as prescriptive data structure representation and
+      use of mutation. In this paper, we endeavour to bride this gap
+      between modern language design and systems programming. We
+      first discuss the support for these features in existing
+      languages, identify the challenges in combining these feature
+      sets and describe our approach toward solving this problem. 
     </p>
     <p>
       <leadin>Representation Control:</leadin> A systems programming
@@ -123,82 +104,122 @@
     </p>
     <p>
       The philosophy of ML-like languages is that programs specify
-      semantics and not realization (implementation). However, in
-      systems programs, statements about representation and location
-      are <em>prescriptive</em>, not <em>descriptive</em>.       
-      Compilers like TIL&nbsp;<cite ref="Tarditi1996TIL"/> 
-      implement unboxed representation as a discretionary
-      optimization. Prescriptive requirements are not discretionary.  
-      First class treatment of representation is required in systems
-      programming languages.
+      semantics and not realization (implementation). Omitting the
+      details of representation and allocation from the language
+      definition greatly simplifies mathematical description of the
+      language. However, in systems programs, statements about
+      representation and location are <em>prescriptive</em>, not
+      <em>descriptive</em>. Compilers like TIL&nbsp;<cite
+	ref="Tarditi1996TIL"/> implement unboxed representation as a
+      discretionary optimization. Prescriptive requirements are not
+      discretionary. Formal treatment of representation is required in
+      systems programming languages.
     </p>
     <p>
-      <leadin>Mutability Support:</leadin>
-      One of the key features essential for systems
-      programming is support for first class mutability (c.f. C). The
-      support for mutability must be first class in the sense that any
-      location (stack or heap) can be mutable, and we should
-      be able to specify mutability at field level granularity. Many
-      modern programming languages &mdash; particularly those that
-      support type inference &mdash; do not support this first class
-      notion of mutability.  ML does not support first class
-      mutability; all mutable cells must reside in the heap. In
-      Haskell, all state must be encapsulated within Monads&nbsp;<cite
-	ref="peytonjones1993monads"/>. 
-      In contrast to the C-like languages, these functional
-      languages <em>do</em> have a mathematically sound notion of
-      immutability.
+      <leadin>Mutability Support:</leadin> One of the key features
+      essential for systems programming is support for mutability. The
+      support for mutability must be complete in the sense that any
+      location (stack or heap, boxed or unboxed) can be mutable. From
+      a performance standpoint, mutability of stack locations is very
+      desirable because the stack is typically cache hot, and stack
+      allocations do not involve garbage collection overhead.
+      Mutability of stack locations is a requirement in the case of
+      high-assurance kernels which cannot afford dynamic memory
+      allocation beyond initialization. Modern languages like ML
+      provide limited support for mutability &mdash; all mutable
+      (<progident>ref</progident>) cells must reside in the heap.
+      While this restricted mutability model simplifies the
+      formalism by maintaining a clear separation of immutable
+      bindings and mutable references, it is insufficiently expressive
+      from a systems programming perspective.
+      Haskell is a pure functional language in which mutable state must be
+      encapsulated within Monads&nbsp;<cite ref="peytonjones1993monads"/>. 
     </p>
     <p>
-      We have identified three features &mdash; unboxed
-      representation, mutability and polymorphic type inference &mdash;
-      that are desirable in a systems programming language.  
-      While several existing languages support two of these features,
-      none combine all three of them elegantly. In
-      this paper, we endeavor to bridge this gap between
-      systems programming and modern language designs through the
-      BitC&nbsp;<cite ref="shapBitcSpec2006"/> programming language. BitC is a
-      direct expression of typed lambda calculus with side effects,
-      extended to be able to reflect the semantics of explicit
-      representation. It supports polymorphic type inference and a
-      new model of mutability which is expressive and has sound
-      semantics.
+      <leadin>Type Inference and Polymorphism:</leadin> Type
+      inference achieves the advantages of static typing
+      with a lower burden on the programmer, facilitating rapid
+      prototyping and development. Polymorphic type inference 
+      (c.f. ML&nbsp;<cite ref="milner97definition"/> or 
+      Haskell&nbsp;<cite ref="peytonjones2003haskellrevisedreport"/>)
+      combines the advantages of static type safety with much of the
+      convenience provided by dynamically typed languages like
+      Python&nbsp;<cite ref="pythonSpec"/>. 
+      Automatic inference of polymorphism simplifies generic programming, and
+	therefore increases the reuse and reliability of code.
+      Safe languages like Java&nbsp;<cite ref="javaSpec"/>, 
+      C#&nbsp;<cite ref="csharpSpec"/>, 
+      or Vault&nbsp;<cite ref="DeLineMSRVault"/> do not support type
+      inference. Cyclone&nbsp;<cite ref="Jim2002Cyclone"/> features
+      partial type inference and supports polymorphism only for
+      functions that are explicitly annotated with a polymorphic type.
     </p>
     <p>
-      BitC is a call-by-value expression language. BitC's support for
-      unboxed mutability makes it desirable to allow some freedom in
-      the compatibility of types with respect to their mutability at
-      copy boundaries. This kind of compatibility has ramifications
-      for type inference since there is no longer a unique way to type
-      an expression. However, usability constraints require that we
-      minimize the amount of type annotations required from the
-      programmer. In this paper, we discuss some of these issues, and
-      present a solution based on a simple extension to the
-      Hindley-Milner inference algorithm&nbsp;<cite
-	ref="Milner1978W"/> that applies certain
-      heuristics to subjectively infer the <em>appropriate</em> type
-      for all expressions.   
+      Support for the above features as well as static type safety
+      in existing languages is summarized by the following table:
+    </p>
+    <xi:include href="include/complete/lang-comp.xmli"/>
+    <p>
+      <br/>
+      <br/>
+      While several of the existing safe
+      languages support two of the three features  &mdash; unboxed
+      representation, mutability and polymorphic type inference
+      &mdash; none combine all of them elegantly. Therefore,
+      systems programmers either continue to use languages such as
+      Ada&nbsp;<cite ref="ISO1995Ada"/>, 
+      C&nbsp;<cite ref="ISO1999ANSI-C"/>, 
+      C++&nbsp;<cite ref="ISO1998C++"/>,
+      <foreignphrase>etc.</foreignphrase>, or follow a ``two
+      language'' discipline where the system is implemented using a
+      combination of safe and unsafe languages. For example, the
+      SwitchWare&nbsp;<cite ref="Alexander98"/>
+      active network architecture is largely implemented in
+      Ocaml&nbsp;<cite ref="LeroyOcaml"/>, but uses
+      C implementations of certain high performance
+      components such as SHA-1 hash function.
+    </p>
+    <p>
+      The presence of unboxed data structures and mutability presents
+      several challenges for type inference. Mutability is an
+      attribute of the <em>location</em> storing a value and not the
+      value itself. Therefore, two expressions across a copy boundary
+      (ex: formal vs actual arguments of a call-by value function) can
+      differ in their mutability. This creates a situation where type
+      and mutability inference is not purely syntax directed. Type
+      inference is further complicated due to well known problems with
+      the interaction of mutability and polymorphism&nbsp;<cite
+	ref="wrightValRes1995"/>. This has
+      forced a second-class treatment of mutability in ML-like
+      languages and a lack of inferred polymorphism in others.
+    </p>
+    <p>
+      In this paper, we present a new type system and formal
+      foundations for a safe systems programming language that
+      supports all of the desirable features mentioned above.
+      The type system features a new model of mutability which is
+      expressive and has sound semantics. In order to support unboxed
+      mutability and principal polymorphic type inference, the type
+      system uses types that are polymorphic <em>over</em> mutability
+      and polymorphism itself. We also present a sound and complete
+      type inference system through an extension of the
+      Hindley-Milner algorithm&nbsp;<cite ref="Milner1978W"/>. 
+      Safety of the type system as well as soundness and completeness
+      of the inference algorithm have been proved.
     </p>
   </sect1>
   <sect1 id="language">
     <title>The Language</title>
     <p>
-      BitC is a safe, systems programming language. A detailed
-      description of the language and its support for systems
-      programming (including a rich set of primitive data types and
-      bit-fields, type classes&nbsp;<cite ref="jones1995qualtypes"/>
-      for overloading, representation of explicitly boxed and unboxed
-      data-structures, discriminated unions, tagged-unions with
-      inlined discriminators, <foreignphrase>etc.</foreignphrase>) can
-      be found in the language definition&nbsp;<cite
-	ref="shapBitcSpec2006"/>. In this paper, we limit our
-      presentation to a core calculus of BitC called 
+      In the interest of brevity, we define
       <btypes:TYPE>
 	<language/>
-      </btypes:TYPE> in the interest of brevity. The user
-      visible part of <btypes:TYPE>
+      </btypes:TYPE>, a core systems programming language calculus. 
+      <btypes:TYPE>
 	<language/>
-      </btypes:TYPE> is defined below:
+      </btypes:TYPE> is a direct expression of lambda
+      calculus with side effects, extended to be able to reflect the
+      semantics of explicit representation. 
     </p>
     <font size="small">
       <btypes:TYPE>
@@ -615,20 +636,10 @@
 	  <lambda>
 	    <id name="x"/>
 	    <paren>
-	      <let>
-		<id name="_"/>
-		<assign>
-		  <id name="x"/>
-		  <apply>
-		    <id name="some-fnxn"/>
-		    <id name="x"/>
-		  </apply>
-		</assign>
-		<apply>
-		  <id name="fnxn-returning-unit"/>
-		  <id name="x"/>
-		</apply>
-	      </let>
+	      <assign>
+		<id name="x"/>
+		<false/>
+	      </assign>
 	    </paren>
 	  </lambda>
 	  <let>	    
@@ -3757,6 +3768,17 @@
   <!--   </sect1> -->
   <bibliography>
       <font size="scriptsize">
+    <bibentry label="Alexander98"> 
+      <!-- <key>Alexander98</key> -->
+      D. S. Alexander, W. A. Arbaugh, M. W. Hicks, P. Kakkar,
+      A. D. Keromytis, J. T. Moore, C. A. Gunder, S. M. Nettles,
+      and J. M. Smith. 
+      ``The SwitchWare active network architecture''
+      <doctitle>
+	IEEE Network
+      </doctitle>
+      May/June 1998.
+    </bibentry>
     <bibentry label="Biagioni2001FoxNet"> 
       <!-- <key>Biagioni01</key> -->
       E. Biagioni, R. Harper, and P. Lee
@@ -3784,6 +3806,14 @@
       School of Computer Science, Carnegie Mellon University, 
       June 1999. 
     </bibentry> 
+    <bibentry label="csharpSpec"> 
+      <!-- <key>ECMA06</key> -->
+      ECMA International
+      ``Standard ECMA-334 C# Language Specification''
+      <link href="http://www.ecma-international.org/publications/standards/Ecma-334.htm">
+        <progident>http://www.ecma-international.org/publications/standards/Ecma-334.htm</progident>
+      </link><!--,2006.-->
+    </bibentry>
     <bibentry label="foster2006Cqual">
       <!-- <key>Foster06</key> -->
       J. S. Foster, R. Johnson, J. Kodumal, and A. Aiken
@@ -3828,7 +3858,7 @@
       <!-- <key>ISO98</key> -->
       International Std. Organization
       <doctitle>ISO/IEC FDIS 14882:1998(E) (Prog.
-	Languages - C++)</doctitle>, 1998.
+	Lang. - C++)</doctitle>, 1998.
     </bibentry>
     <bibentry label="ISO1999ANSI-C">
       <!-- <key>ISO99</key> -->
@@ -3880,13 +3910,15 @@
 	Libraries: The Revised report</doctitle>. Cambridge University
 	Press, 2003.
     </bibentry>
-    <bibentry label="csharpSpec"> 
-      <!-- <key>ECMA06</key> -->
-      ECMA International
-      ``Standard ECMA-334 C# Language Specification''
-      <link href="http://www.ecma-international.org/publications/standards/Ecma-334.htm">
-        <progident>http://www.ecma-international.org/publications/standards/Ecma-334.htm</progident>
-      </link><!--,2006.-->
+    <bibentry label="LeroyOcaml">
+      <!-- <key>Leroy05</key> -->
+      Xavier Leroy,  
+      ``The Objective Caml System Release 3.09, Documentation and
+      User's Manual.''
+      <link
+        href="http://caml.inria.fr/pub/docs/manual-ocaml/index.html">
+        <progident>http://caml.inria.fr/pub/docs/ manual-ocaml/index.html</progident>
+      </link> 
     </bibentry>
     <bibentry label="Milner1978W">
       <!-- <key>Milner78</key> -->
@@ -4223,7 +4255,7 @@
 	
 <!--  LocalWords:  ctype fnxn paren initsep colsep globals tbody valign td Loc
  -->
-<!--  LocalWords:  Exprs TypeScheme Env Rval Oth cst Prog mutinfer de facto
+<!--  LocalWords:  Exprs TypeScheme Env Rval Oth cst Prog mutinfer de facto SHA
  -->
-<!--  LocalWords:  scriptsize FDIS
+<!--  LocalWords:  scriptsize FDIS Keromytis Gunder
  -->

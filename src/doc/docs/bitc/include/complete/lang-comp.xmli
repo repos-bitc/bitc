@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+<!--     <floatingtable id="language-feature-comparison" -->
+<!--     latex.placement="tb"> -->
+<font size="small">
+  <table latex.colspec="l|c|c|c|c|c|c|c|c|c">
+    <tbody>
+      <tr lineafter="yes">
+	<td/>
+	<td>
+	  C/Asm
+	</td>
+	<td>
+	  Safe-C
+	</td>
+	<td>
+	  CCured
+	</td>
+	<td>
+	  Cyclone
+	</td>
+	<td>
+	  Vault
+	</td>
+	<td>
+	  Scheme
+	</td>
+	<td>
+	  Java
+	</td>
+	<td>
+	  ML
+	</td>
+	<td>
+	  Haskell
+	</td>
+      </tr>
+      <tr lineafter="yes">
+	<td>
+	  Representation
+	</td>
+	<!-- C -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- Safe-C -->
+	<td>
+	</td>
+	<!-- CCured -->
+	<td>
+	</td>
+	<!-- Cyclone -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- Vault -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- Scheme -->
+	<td>
+	</td>
+	<!-- Java -->
+	<td>
+	</td>
+	<!-- ML -->
+	<td>
+	</td>
+	<!-- Haskell -->
+	<td>
+	</td>
+      </tr>
+      <tr lineafter="yes">
+	<td>
+	  Mutability
+	</td>
+	<!-- C -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- Safe-C -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- CCured -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- Cyclone -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- Vault -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- Scheme -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- Java -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- ML -->
+	<td>
+	</td>
+	<!-- Haskell -->
+	<td>
+	</td>
+      </tr>
+      <tr lineafter="yes">
+	<td>
+	  Static Type Safety
+	</td>
+	<!-- C -->
+	<td>
+	</td>
+	<!-- Safe-C -->
+	<td>
+	</td>
+	<!-- CCured -->
+	<td>
+	</td>
+	<!-- Cyclone -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- Vault -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- Scheme -->
+	<td>
+	</td>
+	<!-- Java -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- ML -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- Haskell -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+      </tr>
+      <tr lineafter="yes">
+	<td>
+	  Poly. Type Inf.
+	</td>
+	<!-- C -->
+	<td>
+	</td>
+	<!-- Safe-C -->
+	<td>
+	</td>
+	<!-- CCured -->
+	<td>
+	</td>
+	<!-- Cyclone -->
+	<td>
+	</td>
+	<!-- Vault -->
+	<td>
+	</td>
+	<!-- Scheme -->
+	<td>
+	</td>
+	<!-- Java -->
+	<td>
+	</td>
+	<!-- ML -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- Haskell -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+      </tr>
+    </tbody>
+  </table>
+  </font>
+<!--   <caption>Language Feature Comparison</caption> -->
+  <!-- </floatingtable> -->

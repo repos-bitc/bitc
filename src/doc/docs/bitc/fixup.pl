@@ -106,7 +106,10 @@ while(!eof(F)) {
 	# The correct thing to do is to add a @latex.ptsz arrtibute to 
 	# OSDOC's <br>
 	$l =~ s/^\\\\/\\vspace\{4pt\}/g;
-
+	
+	#\emph{?}Y\emph{?} -> \checkmark
+	$l =~ s/\\emph\{\?\}Y\\emph\{\?\}/$EM\{\\checkmark\}/g;
+	
 	#Remove unnecessary copyright
 	$l =~ s/\\typesetcopyright\{\}//g;
 	
