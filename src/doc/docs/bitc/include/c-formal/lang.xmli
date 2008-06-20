@@ -170,9 +170,5 @@
 	<texttt content="1"/>
       </eq>
     </btypes:TYPE>.
-    The operator
-    <btypes:TYPE>
-      <uninOp excl="yes"/>
-    </btypes:TYPE> represents the disjoint union of sets.
   </p>
   </sect1>

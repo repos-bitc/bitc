@@ -72,16 +72,16 @@
       applied to the construction of <em>systems programs</em>, the
       core components of a computer system. One of the primary causes
       of this problem is the fact that existing languages do not
-      simultaneously support modern language features such as static
-      type safety, type inference, higher order functions,
-      polymorphism <foreignphrase>etc.</foreignphrase> and features
+      simultaneously support modern language features (such as static
+      type safety, type inference, higher order functions and
+      polymorphism) and features
       that are critical to the correctness and performance of systems
-      programs such as prescriptive data structure representation and
-      use of mutation. In this paper, we endeavour to bride this gap
+      programs (such as prescriptive data structure representation and
+      mutability). In this paper, we endeavour to bride this gap
       between modern language design and systems programming. We
       first discuss the support for these features in existing
       languages, identify the challenges in combining these feature
-      sets and describe our approach toward solving this problem. 
+      sets and then describe our approach toward solving this problem. 
     </p>
     <p>
       <leadin>Representation Control:</leadin> A systems programming
@@ -155,8 +155,9 @@
       functions that are explicitly annotated with a polymorphic type.
     </p>
     <p>
-      Support for the above features as well as static type safety
-      in existing languages is summarized by the following table:
+      The following table summarizes the support available in 
+      existing languages for the above features and static
+      type safety:
     </p>
     <xi:include href="include/complete/lang-comp.xmli"/>
     <p>
@@ -211,7 +212,7 @@
   <sect1 id="language">
     <title>The Language</title>
     <p>
-      In the interest of brevity, we define
+      For purposes of presentation in this paper, we define
       <btypes:TYPE>
 	<language/>
       </btypes:TYPE>, a core systems programming language calculus. 
@@ -221,202 +222,9 @@
       calculus with side effects, extended to be able to reflect the
       semantics of explicit representation. 
     </p>
-    <font size="small">
-      <btypes:TYPE>
-	<grammar notitle="yes">
-	  <bnf desc="Patterns">
-	    <pattern/>
-	    <alternatives>
-	      <id/>	      
-	      <tqExpr>
-		<pattern/>
-		<type/>
-	      </tqExpr>
-	      <Pair>
-		<pattern/>
-		<pattern/>
-	      </Pair>
-	      <List>
-		<plural>
-		  <pattern num=";"/>
-		</plural>
-	      </List>
-	      <Cons>		
-		<id/>	      
-		<pattern/>
-	      </Cons>
-	    </alternatives>
-	  </bnf>
-	  <bnf desc="Values">
-	    <aVal/>
-	    <alternatives>
-	      <Unit/>
-	      <true/>
-	      <false/>
-	      <lambda>
-		<pattern/>
-		<aExpr/>
-	      </lambda>
-	      <Pair>
-		<aVal/>
-		<aVal/>
-	      </Pair>
-	      <List>
-		<plural>
-		  <aVal num=";"/>
-		</plural>
-	      </List>
-	    </alternatives>
-	  </bnf>
-	  <bnf desc="Expressions">
-	    <aExpr/>
-	    <alternatives>
-	      <id/>
-	      <Unit/>
-	      <true/>
-	      <false/>
-	      <lambda>
-		<pattern/>
-		<aExpr/>
-	      </lambda>
-	      <apply>
-		<aExpr/>
-		<aExpr/>
-	      </apply>
-	      <tqExpr>
-		<aExpr/>
-		<type/>
-	      </tqExpr>
-	      <assign>
-		<aExpr/>
-		<aExpr/>
-	      </assign> 
-	      <dup>
-		<aExpr/>
-	      </dup>
-	      <deref>
-		<aExpr/>
-	      </deref>
-	    </alternatives>
-	  </bnf>
-	  <bnfc desc="">
-	    <alternatives>	      
-	      <Pair>
-		<aExpr/>
-		<aExpr/>
-	      </Pair>
-	      <fst>
-		<aExpr/>
-	      </fst>
-	      <snd>
-		<aExpr/>
-	      </snd>
-	      <List>	      
-		<plural>
-		  <aExpr num=";"/>
-		</plural>
-	      </List>
-	      <Cons>
-		<aExpr/>
-		<aExpr/>
-	      </Cons>	    
-	      <match optionalElse="yes">
-		<aExpr/>
-		<pattern/>
-		<aExpr/>		
-		<aExpr/>
-	      </match>	    
-	    </alternatives>
-	  </bnfc>
-	  <bnfc desc="">
-	    <alternatives>
-	      <if>
-		<aExpr/>
-		<aExpr/>
-		<aExpr/>
-	      </if>
-	      <let>
-		<tqExpr optional="yes">
-		  <id/>
-		  <aTS/>
-		</tqExpr>
-		<aExpr/>
-		<aExpr/>
-	      </let>
-	    </alternatives>
-	  </bnfc>
-	  <bnf desc="Types">
-	    <type/>
-	    <alternatives>
-	      <tvar name="alpha"/>
-	      <unit/>
-	      <bool/>
-	      <fn><type/><type/></fn>                  
-	      <ref><type/></ref>
-	      <mutable><type/></mutable>
-	      <pair><type/><type/></pair>
-	      <list><type/></list>
-	      <ctype><type/><aCtset/></ctype>
-	    </alternatives>
-	  </bnf>
-	  <bnf desc="Type Scheme">
-	    <aTS/>
-	    <alternatives>
-	      <type/>
-	      <forall>                    
-		<tvars name="alpha"/>
-		<aTS/>
-	      </forall>
-	    </alternatives>
-	  </bnf>
-	  <bnf desc="Constraints">
-	    <aCtset/>
-	    <alternatives>
-	      <Empty/>
-	      <set>
-		<alternatives>                      
-		  <eq>
-		    <type/>
-		    <type/>
-		  </eq>
-		  <ceq>
-		    <type/>
-		    <type/> 
-		  </ceq>
-		</alternatives>            
-	      </set>
-	    </alternatives>
-	  </bnf>	  
-	</grammar>
-      </btypes:TYPE>
-    </font>
+    <xi:include href="include/complete/lang.xmli"/>
     <p>
-      Program variables are denoted by 
-      <btypes:TYPE>
-	<id name="x"/>
-      </btypes:TYPE>, 
-      <btypes:TYPE>
-	<id name="y"/>
-      </btypes:TYPE>,
-      <foreignphrase>etc.</foreignphrase>
-      and type variables by 
-      <btypes:TYPE>
-	<tvar name="alpha"/>
-      </btypes:TYPE>, 
-      <btypes:TYPE>
-	<tvar name="beta"/>
-      </btypes:TYPE>,
-      <foreignphrase>etc.</foreignphrase>
-      <btypes:TYPE>
-	<plural>
-	  <id name="X" num=";"/>
-	</plural>
-      </btypes:TYPE> denotes zero or more 
-      <btypes:TYPE>
-	<id name="X"/>
-      </btypes:TYPE>s separated by a semicolon.
-      The <em>[]</em> brackets denote optional parts of
-      syntax. 
+      The type
       <btypes:TYPE>
 	<ref>
 	  <type/>
@@ -424,33 +232,20 @@
       </btypes:TYPE> represents a reference (pointer) type and 
       <btypes:TYPE>
 	<mutable>
-	  <type/>
+	  <ptype/>
 	</mutable>
       </btypes:TYPE> represents a mutable type. 
-      The type 
-      <btypes:TYPE>
-	<ctype>
-	  <type/>
-	  <aCtset/>
-	</ctype>
-      </btypes:TYPE> is a constrained type with the set of constraints 
-      <btypes:TYPE>
-	<aCtset/>
-      </btypes:TYPE>. 	  
-	The relation 
-      <btypes:TYPE>
-	<ceqOp/>
-      </btypes:TYPE> will be defined in 
-      section&nbsp;<xref ref="copy_compat"/>. 
-      The <progident>let</progident> construct can be used for
-      allocating (possibly mutable) stack variables and to create
-      let-polymorphic bindings. The expression
+      The expression
       <btypes:TYPE>
 	<dup>
 	  <aExpr/>
 	</dup>
       </btypes:TYPE>,
-      where e is of type
+      where 
+      <btypes:TYPE>
+	<aExpr/>
+      </btypes:TYPE>
+      has type
       <btypes:TYPE>
 	<type/>
       </btypes:TYPE>,
@@ -466,12 +261,10 @@
 	<aExpr/>
       </btypes:TYPE>. 
       The <progident>^</progident> operator is used to
-      dereference heap cells. The <progident>:=</progident> operator  
-      updates (mutates) both stack and heap locations. Unlike ML,
-      <progident>:=</progident> does not dereference its target. 
+      dereference heap cells.       
       Pairs <progident>(,)</progident>
       are <em>unboxed</em> structures whose
-      constituent elements contiguously allocated on the
+      constituent elements are contiguously allocated on the
       stack, or in their containing data-structure. 
       <btypes:TYPE>
 	<fst>
@@ -481,9 +274,57 @@
 	<snd>
 	  <aExpr/>
 	</snd>
-      </btypes:TYPE> perform selection from pair values.
-      Lists <progident>[...]</progident> 
-      have a <em>boxed</em> representation.
+      </btypes:TYPE> perform selection from pairs.
+      We define
+      <btypes:TYPE>
+	<eq>
+	  <other>
+	    <texttt content="1"/>
+	  </other>
+	  <texttt content="2"/>
+	</eq>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<eq>
+	  <other>
+	    <texttt content="2"/>
+	  </other>
+	  <texttt content="1"/>
+	  </eq>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      The <progident>let</progident> construct can be used for
+      allocating (possibly mutable) stack variables and to create
+      let-polymorphic bindings.
+      <progident>let</progident>&nbsp;<btypes:TYPE>
+	<tqExpr optional="yes">
+	  <id/>
+	  <type/>
+	</tqExpr>
+      </btypes:TYPE> represents optional type qualification of
+      let-bound variables. The <progident>:=</progident> operator
+      mutates both stack locations (let-bound locals function
+      parameters) and heap locations (<progident>dup</progident>ed
+      values). Unlike ML, <progident>:=</progident> does not
+      dereference its target.  
+    </p>
+    <p>
+      <btypes:TYPE>
+	<language/>
+      </btypes:TYPE> does
+      not include an address <progident>&amp;</progident> operator to
+      obtain the address of stack locations. First, the safety
+      of <progident>&amp;</progident> operator is an orthogonal
+      problem that has been studied in the literature&nbsp;<cite
+	ref="Grossman2006qtypes"/> and can be incorporated
+      into the language if necessary.
+      Second, it is unclear whether the <progident>&amp;</progident>
+      operator is necessary in a safe systems programming language.
+      There are examples of high performance security kernels
+      that have been constructed without taking the address of stack
+      variables, even though they rely on stack allocation and
+      mutation for correctness and performance&nbsp;<cite ref="shapiro1999EROS"/>. 
     </p>
   </sect1>
   <sect1 id="mut_model">
@@ -508,8 +349,7 @@
     <p>
       The other well known model of mutability is the C model, wherein
       the support for mutability is ``first-class'' in the sense that
-      <em>locations</em> with mutable type can be passed as arguments
-      and stored in data-structures. This model permits mutation of
+      <em>all</em> locations can be mutable. This model permits mutation of
       stack variables and unboxed values. There is a notion of
       <em>lvalues</em> which are expressions that can be the target of
       an assignment, and <em>rvalues</em>, that are otherwise used in
@@ -610,7 +450,7 @@
 	    <id name="L" num="v"/>
 	  </snd>
 	  <deref>
-	    <id name="L" num="v"/>
+	    <aExpr/>
 	  </deref>	  
 	  <tqExpr>
 	    <id name="L" num="v"/>
@@ -631,7 +471,7 @@
       <br/>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <btypes:TYPE>
-	<let br2="9">
+	<let>
 	  <id name="fnxn"/>
 	  <lambda>
 	    <id name="x"/>
@@ -684,7 +524,7 @@
 	<id name="y"/>
       </btypes:TYPE> and occupies a different location, 
       this expression is type safe. We refer to this notion
-      of compatibility of types as <term>copy compatibility</term>,
+      of compatibility of types as <term>copy compatibility</term>.
       denoted by &cong;. In this example,
       <btypes:TYPE>
 	<ceq>
@@ -697,80 +537,158 @@
     </p>
     <p>
       Copy compatibility need not be restricted to the outermost
-      mutability compatibility, but must not extend past a reference
+      mutability compatibility      
+      (<btypes:TYPE>
+	<TceqOp/>
+      </btypes:TYPE>), but must not extend past a reference
       boundary in order ensure that every location has unique type.
       We define copy compatibility for 
       <btypes:TYPE>
 	<language/>
       </btypes:TYPE> as:
     </p>    
-    <btypes:TYPE>
-      <Hrules initsep="15" colsep="3">
-	<tyRule>
-	  <tyPre/>
-	  <tyConc>
-	    <ceq>                
-	      <type/>
-	      <type/>
-	    </ceq>
-	  </tyConc>                
-	</tyRule>   
-	<tyRule>
-	  <tyPre>
-	    <ceq>                
-	      <type/>
-	      <type dash="'"/>
-	    </ceq>	    
-	  </tyPre>
-	  <tyConc>
-	    <ceq>                
-	      <type/>
-	      <mutable>
-		<type dash="'"/>
-	      </mutable>
-	    </ceq>
-	  </tyConc>                
-	</tyRule>   
-	<tyRule>
-	  <tyPre>
-	    <ceq>                
-	      <type/>
-	      <type dash="'"/>
-	    </ceq>	    
-	  </tyPre>
-	  <tyConc>
-	    <ceq>                
-	      <type dash="'"/>
-	      <type/>
-	    </ceq>
-	  </tyConc>                
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <ceq>                
-	      <type num="1"/>
-	      <type num="1" dash="'"/>
-	    </ceq>	    
-	    <ceq>                
-	      <type num="2"/>
-	      <type num="2" dash="'"/>
-	    </ceq>	    
-	  </tyPre>
-	  <tyConc>
-	    <ceq>         
-	      <pair>
+    <font size="small">
+      <btypes:TYPE>
+	<Hrules initsep="20" colsep="3">
+	  <tyRule>
+	    <tyPre/>
+	    <tyConc>
+	      <Tceq>                
+		<type/>
+		<type/>
+	      </Tceq>
+	    </tyConc>                
+	  </tyRule>
+	  <tyRule>
+	    <tyPre>
+	      <Tceq>
 		<type num="1"/>
 		<type num="2"/>
-	      </pair>
-	      <pair>
+	      </Tceq>
+	    </tyPre>
+	    <tyConc>
+	      <Tceq>
+		<type num="2"/>
+		<type num="1"/>
+	      </Tceq>
+	    </tyConc>
+	  </tyRule>
+	  <tyRule>
+	    <tyPre>
+	      <Tceq>                
+		<type num="1"/>
+		<type num="2"/>
+	      </Tceq>
+	      <Tceq>                
+		<type num="2"/>
+		<type num="3"/>
+	      </Tceq>	    
+	    </tyPre>
+	    <tyConc>
+	      <Tceq>
+		<type num="1"/>
+		<type num="3"/>
+	      </Tceq>
+	    </tyConc>                
+	  </tyRule>
+	  <tyRule>
+	    <tyPre/>
+	    <tyConc>
+	      <Tceq>                
+		<mutable>
+		  <ptype/>
+		</mutable>
+		<ptype/>
+	      </Tceq>
+	    </tyConc>
+	  </tyRule>
+	</Hrules>
+	<Hrules initsep="2" colsep="3">
+	  <tyRule>
+	    <tyPre/>
+	    <tyConc>
+	      <ceq>                
+		<type/>
+		<type/>
+	      </ceq>
+	    </tyConc>                
+	  </tyRule>   
+	  <tyRule>
+	    <tyPre>
+	      <ceq>                
+		<type num="1"/>
+		<type num="2"/>
+	      </ceq>	    
+	    </tyPre>
+	    <tyConc>
+	      <ceq>
+		<type num="2"/>
+		<type num="1"/>
+	      </ceq>
+	    </tyConc>                
+	  </tyRule>
+	  <tyRule>
+	    <tyPre>
+	      <ceq>                
+		<type num="1"/>
+		<type num="2"/>
+	      </ceq>
+	      <ceq>                
+		<type num="2"/>
+		<type num="3"/>
+	      </ceq>	    
+	    </tyPre>
+	    <tyConc>
+	      <ceq>
+		<type num="1"/>
+		<type num="3"/>
+	      </ceq>
+	    </tyConc>                
+	  </tyRule>
+	  <tyRule>
+	    <tyPre>
+	      <ceq>                
+		<type/>
+		<ptype/>
+	      </ceq>	    
+	    </tyPre>
+	    <tyConc>
+	      <ceq>                
+		<type/>
+		<mutable>
+		  <ptype/>
+		</mutable>
+	      </ceq>
+	    </tyConc>                
+	  </tyRule>   
+	  <tyRule>
+	    <tyPre>
+	      <ceq>                
+		<type num="1"/>
 		<type num="1" dash="'"/>
+	      </ceq>
+	      <ceq>
+		<type num="2"/>
 		<type num="2" dash="'"/>
-	      </pair>
-	    </ceq>
-	  </tyConc>                
-	</tyRule>
-      </Hrules>
-    </btypes:TYPE>
+	      </ceq>
+	    </tyPre>
+	    <tyConc>
+	      <ceq>
+		<pair>
+		  <type num="1"/>
+		  <type num="2"/>
+		</pair>
+		<pair>
+		  <type num="1" dash="'"/>
+		  <type num="2" dash="'"/>
+		</pair>
+	      </ceq>
+	    </tyConc>                
+	  </tyRule>
+	</Hrules>
+      </btypes:TYPE>
+    </font>
+    <br/>
     <p>
       Copy compatibility can be permitted at argument passing, new
       variable binding, assignment, and basically at argument/return

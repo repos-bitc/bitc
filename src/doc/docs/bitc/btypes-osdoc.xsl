@@ -1782,20 +1782,15 @@
   </xsl:template>
 
   <xsl:template match="TS" mode="formula">
-    <xsl:if test="count(*) &gt; 1">
-      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-      <xsl:text>forall;</xsl:text>  
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>forall;</xsl:text>  
+    <xsl:apply-templates select="*[1]" mode="formula"/>	
+    <xsl:text>.</xsl:text>    
+    <xsl:apply-templates select="*[2]" mode="formula"/>	
+    <xsl:if test="*[3]">
+      <xsl:text>\</xsl:text>    
+      <xsl:apply-templates select="*[3]" mode="formula"/>	
     </xsl:if>
-    <xsl:for-each select="*">
-      <xsl:apply-templates select="." mode="formula"/>	
-      <xsl:if test = "position() &lt; (last()-1)">
-	<xsl:call-template name="print.op.comma"/>
-      </xsl:if>
-      <xsl:if test = "position() = (last()-1)">
-	<xsl:call-template name="print.space"/>
-	<xsl:text>.</xsl:text>    
-      </xsl:if>
-    </xsl:for-each>
   </xsl:template>
   
 <!-- ======================================================================
@@ -2233,25 +2228,10 @@
   <!-- bnf2 -->
   <xsl:template match="bnf2" mode="formula">    
     <xsl:element name="tr">
-      <xsl:for-each select="*">
-	<xsl:element name="td">
-	  <xsl:attribute name="align">left</xsl:attribute>	  
-	  <xsl:if test="../@colspan">
-	    <xsl:attribute name="colspan">
-	      <xsl:value-of select="../@colspan"/>
-	    </xsl:attribute>
-	  </xsl:if>
-	  <xsl:element name="table">
-	    <xsl:attribute name="valign">top</xsl:attribute>
-	    <xsl:element name="tbody">
-	      <xsl:apply-templates select="." mode="formula"/>		
-	    </xsl:element>
-	  </xsl:element>
-	</xsl:element>
-      </xsl:for-each>
+      <xsl:apply-templates mode="formula"/>	
     </xsl:element>
   </xsl:template>
-
+  
   <!-- bnfc -->
   <xsl:template match="bnfc" mode="formula">
     <xsl:element name="tr">

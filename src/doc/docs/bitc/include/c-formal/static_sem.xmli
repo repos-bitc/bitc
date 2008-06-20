@@ -37,7 +37,7 @@
 	  <tvar name="beta"/>
 	  <tvar name="gamma"/>
 	  <tvar name="delta"/>
-	  <tvar name="epsi"/>
+	  <tvar name="epsiv"/>
 	</alternatives>
       </bnf>
       <bnf desc="M-Vars">
@@ -198,6 +198,10 @@
       	    <aCtset/>
       	    <aCtset/>
       	  </unin>
+      	  <unin excl="yes">
+      	    <aCtset/>
+      	    <aCtset/>
+      	  </unin>
       	</alternatives>
       </bnf>
       <bnf desc="Substitutions">            
@@ -306,6 +310,10 @@
 	</set>
       </Subst>
     </btypes:TYPE>.
+    The operator
+    <btypes:TYPE>
+      <uninOp excl="yes"/>
+    </btypes:TYPE> represents the disjoint union of sets.
     The 
     <btypes:TYPE>
       <mutexOp/>
