@@ -1005,6 +1005,11 @@
                                num      CDATA   #IMPLIED
                                dash     CDATA   #IMPLIED
 >
+<!ELEMENT lExp                EMPTY>
+<!ATTLIST lExp
+                               num      CDATA   #IMPLIED
+                               dash     CDATA   #IMPLIED
+>
 <!ELEMENT Unit                 EMPTY> 
 <!-- ``Unit'' the expression is different from ``unit'' the type -->
 <!ELEMENT bVal                 EMPTY>

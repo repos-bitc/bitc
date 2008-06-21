@@ -511,7 +511,7 @@
 	    </assume>
 	    <conclude>
 	      <tqExpr>
-		<aExpr num="1"/>
+		<lExp/>
 		<type num="1"/>
 	      </tqExpr>
 	    </conclude>
@@ -526,7 +526,7 @@
 	    </assume>
 	    <conclude>
 	      <tqExpr>
-		<aExpr num="2"/>
+		<aExpr/>
 		<type num="2"/>
 	      </tqExpr>
 	    </conclude>
@@ -534,10 +534,6 @@
 	      <aCtset num="2"/>
 	    </constrain>
 	  </TEjudge>
-	  <Sjudge name="lval">
-	    <assume/>
-	    <aExpr num="1"/>
-	  </Sjudge>
 	  <models name="new">
 	    <assume/>
 	    <grouping>
@@ -556,8 +552,8 @@
 	    <conclude>
 	      <tqExpr>
 		<assign>
-		  <aExpr num="1"/>
-		  <aExpr num="2"/>
+		  <lExp/>
+		  <aExpr/>
 		</assign>
 		<unit/>
 	      </tqExpr>

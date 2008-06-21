@@ -52,6 +52,22 @@
 	  <sLoc/>
 	</alternatives>
       </bnf>
+      <bnf desc="Left Expr">
+	<lExp/>
+	<alternatives>
+	  <id/>
+	  <sLoc/>
+	  <deref>
+	    <hLoc/>
+	  </deref>
+	  <deref>
+	    <aExpr/>
+	  </deref>
+	  <ith>
+	    <lExp/>
+	  </ith>
+	</alternatives>
+      </bnf>
       <bnf desc="Expressions">
 	<aExpr/>
 	<alternatives>
@@ -61,7 +77,7 @@
 	    <aExpr/>
 	  </apply>
 	  <assign>
-	    <aExpr/>
+	    <lExp/>
 	    <aExpr/>
 	  </assign> 
 	  <if>

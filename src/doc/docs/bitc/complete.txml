@@ -185,7 +185,7 @@
       several challenges for type inference. Mutability is an
       attribute of the <em>location</em> storing a value and not the
       value itself. Therefore, two expressions across a copy boundary
-      (ex: formal vs actual arguments of a call-by value function) can
+      (ex: formal vs actual arguments of a function) can
       differ in their mutability. This creates a situation where type
       and mutability inference is not purely syntax directed. Type
       inference is further complicated due to well known problems with
@@ -304,8 +304,8 @@
 	</tqExpr>
       </btypes:TYPE> represents optional type qualification of
       let-bound variables. The <progident>:=</progident> operator
-      mutates both stack locations (let-bound locals function
-      parameters) and heap locations (<progident>dup</progident>ed
+      mutates both stack locations (let-bound locals, function
+      parameters) and heap locations (<progident>dup</progident>-ed
       values). Unlike ML, <progident>:=</progident> does not
       dereference its target.  
     </p>
@@ -351,9 +351,9 @@
       the support for mutability is ``first-class'' in the sense that
       <em>all</em> locations can be mutable. This model permits mutation of
       stack variables and unboxed values. There is a notion of
-      <em>lvalues</em> which are expressions that can be the target of
-      an assignment, and <em>rvalues</em>, that are otherwise used in
-      computations. The extraction of the value from a (mutable)
+      <em>left</em> expressions which can be the target of an
+      assignment, and <em>right</em> expressions represent all other
+      computations. The extraction of the value from a (mutable) 
       location is implicit, and does not require dereferencing.
       However, in this model, types cannot distinguish mutable values
       from immutable ones. For example, in C it is legal to write: 
@@ -430,34 +430,11 @@
 	  </mutable>
 	</ref>
       </btypes:TYPE>).
-      In order to support unboxed mutability, we still need to have a
-      notion of lvalues. This not only preserves the programmer's
-      mental model of the relationship between locations storage, but
-      also ensures that compiler transformations are semantics
-      preserving. In  
-      <btypes:TYPE>
-	<language/>
-      </btypes:TYPE>, the legal lvalues are defined by:
-      <btypes:TYPE>      
-	<id name="L" num="v"/>
-	<text content=" ::= "/>
-	<alternatives>
-	  <id name="x"/>
-	  <fst>
-	    <id name="L" num="v"/>
-	  </fst>
-	  <snd>
-	    <id name="L" num="v"/>
-	  </snd>
-	  <deref>
-	    <aExpr/>
-	  </deref>	  
-	  <tqExpr>
-	    <id name="L" num="v"/>
-	    <type/>
-	  </tqExpr>	  
-	</alternatives>
-      </btypes:TYPE>
+      Similar to the C model, a notion of left expressions (defined in
+      Section&nbsp;<xref ref="language"/>) is necessary to preserve
+      the programmer's mental model of the relationship between
+      locations storage and to ensure that compiler transformations
+      are semantics preserving.
     </p>
   </sect1>
   <sect1 id="copy_compat">
@@ -692,8 +669,8 @@
     <p>
       Copy compatibility can be permitted at argument passing, new
       variable binding, assignment, and basically at argument/return
-      positions of all expressions, except where an lvalue is expected
-      or returned. For example, the expression
+      positions of all expressions, except where a left expression is
+      expected or returned. For example, the expression
       <btypes:TYPE>
 	<tqExpr>
 	  <paren>
@@ -706,9 +683,9 @@
 	    <type/>
 	  </mutable>
 	</tqExpr>
-      </btypes:TYPE> is illegal since identifiers are lvalues, but 
+      </btypes:TYPE> is ill typed, but 
       the branches of a conditional can have
-      different but copy compatible types, as in:
+      different but copy compatible types as in:
       <btypes:TYPE>
 	<if>
 	  <true/>
@@ -729,57 +706,11 @@
   <sect1 id="infer">
     <title>Type Inference</title>
     <p>
-      We would like to employ an inference algorithm with the
-      following properties:  
-    </p>
-    <ol>
-      <li>
-	<p>
-	  The inference algorithm must be decidable without 
-	  programmer annotations. The problem with programmer
-	  annotations is pragmatic rather than ideological: ease of
-	  prototyping requires that these annotations be minimized.    
-	</p>
-      </li>
-      <li>
-	<p>
-	  The inference algorithm must ideally be complete. In the
-	  absence of principal types, it must minimize programmer
-	  annotations in the common case, and must be capable of
-	  inferring all sound types at least when guided by explicit
-	  annotation. This requirement is orthogonal to
-	  requirement&nbsp;(1).
-	</p>
-      </li>
-      <li>
-	<p>
-	  The inference algorithm must automatically infer
-	  polymorphism (without programmer annotations) in order to
-	  maximize code reuse and encourage good software engineering.
-	</p>
-      </li>
-      <li>
-	<p>
-	  The inference algorithm must not require whole program
-	  analysis. Whole program inference precludes
-	  separate compilation, poses scalability problems for large
-	  projects, and can result in surprising behaviour if the
-	  inferred types for a program change due to modifications in
-	  a distant part of the code base.
-	</p>
-      </li>
-    </ol>
-    <p>
-      With these considerations in mind, we chose a
-      variation of the Hindley-Milner algorithm&nbsp;<cite
-	ref="Milner1978W"/> in <btypes:TYPE> 
+      We now consider the problem of designing a type inference
+      algorithm for 
+      <btypes:TYPE>
 	<language/>
-      </btypes:TYPE>. We now describe challenges for type inference
-      due to copy compatibility, explore the design choices, and
-      finally present our solution. 
-    </p>
-    <p>
-      <leadin>Challenges Due to Copy Compatibility:</leadin>
+      </btypes:TYPE>.
       When an exact type compatibility requirement is replaced in the
       language design by copy compatibility, it is no longer possible
       to infer a unique (simple) type for the expression. For example,
@@ -808,82 +739,13 @@
 	<mutable>
 	  <bool/>
 	</mutable>
-      </btypes:TYPE>. Therefore, we give
+      </btypes:TYPE>. Therefore, unlike ML, type inference is not
+      purely syntax directed in 
       <btypes:TYPE>
-	<id name="p"/>
-      </btypes:TYPE>  the so-called ``maybe'' type
-      <btypes:TYPE>
-	<mbpair>
-	  <tvar name="alpha"/> 	  
-	  <bool/>
-	</mbpair>
-      </btypes:TYPE>, which is a shorthand for the
-      constrained type 
-      <btypes:TYPE> 
-	  <ctype> 
-	  <tvar name="alpha"/> 
-	  <set>
-	    <ceq> 
-	      <tvar name="alpha"/> 
-	      <bool/>
-	    </ceq> 
-	  </set>
-	</ctype> 
+	<language/>
       </btypes:TYPE>.
-      The actual type will later get resolved to either
-      <btypes:TYPE>
-	<bool/>
-      </btypes:TYPE> or
-      <btypes:TYPE>
-	<mutable>
-	  <bool/>
-	</mutable>
-      </btypes:TYPE>.
-      Similarly, in the expression 
-      (inferred types are shown beside
-      <btypes:TYPE>
-	<symbol name="par"/>
-      </btypes:TYPE>). 
-      <br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <btypes:TYPE> 
-	<let>
-	  <id name="pr"/>
-	  <Pair>
-	    <true/>
-	    <false/>
-	  </Pair>
-	  <unspecified/>
-	</let>
-	<text content="      "/>
-	<symbol name="par"/>
-	<text content="      "/>
-	<tqExpr>	  
-	  <id name="pr"/>
-	  <mbpair>
-	    <tvar name="alpha"/>
-	    <paren>
-	      <pair>
-		<mbpair>
-		  <tvar name="beta"/>
-		  <bool/>
-		</mbpair>
-		<mbpair>
-		  <tvar name="gamma"/>
-		  <bool/>
-		</mbpair>
-	      </pair>
-	    </paren>
-	  </mbpair>
-	</tqExpr>
-      </btypes:TYPE>
-      <br/>
-      copy compatibility is introduced at both the pair construction
-      (arguments passed to the pair constructor), and the 
-      formation of a new binding. 
     </p>
     <p>
-      <leadin>Why Should We Infer Mutability?</leadin>
       It is natural to ask why mutability should be inferred at all.
       That is: why not require explicit annotation for all mutable
       values, and infer immutable types by default? In a language with
@@ -913,30 +775,28 @@
 	<let>
 	  <id name="xyz"/>
 	  <tqExpr>
-	    <List>
-	      <paren>
-		<apply>
-		  <id name="fst"/>
-		  <tqExpr nosp="yes">
-		    <Pair>
-		      <id name="m"/>
-		      <false/>
-		    </Pair>
-		    <pair>
-		      <mutable>
-			<bool/>
-		      </mutable>
+	    <dup>
+	      <apply>
+		<id name="fst"/>
+		<tqExpr nosp="yes">
+		  <Pair>
+		    <id name="m"/>
+		    <false/>
+		  </Pair>
+		  <pair>
+		    <mutable>
 		      <bool/>
-		    </pair>
-		  </tqExpr>
-		</apply>
-	      </paren>
-	    </List>
-	    <List>
+		    </mutable>
+		    <bool/>
+		  </pair>
+		</tqExpr>
+	      </apply>
+	    </dup>
+	    <ref>
 	      <mutable>
 		<bool/>
 	      </mutable>
-	    </List>
+	    </ref>
 	  </tqExpr>
 	  <unspecified/>
 	</let>
@@ -945,9 +805,514 @@
       Therefore, if mutability is not inferred, it results in a
       substantial increase in the number of programmer annotations,
       and type inference becomes ineffective.
+      In order to maximize code reuse and encourage
+      good software engineering, the inference algorithm must also
+      automatically infer polymorphism without programmer annotations.
     </p>
     <p>
-      <leadin>Incompleteness of Inference</leadin>
+      With the above considerations in mind, the desirable
+      charecteristics of a type inference algorithm for  
+      <btypes:TYPE>
+	<language/>
+      </btypes:TYPE> are:
+    </p>
+    <ol>
+      <li>
+	<p>
+	  It must be sound, complete, and decidable without any 
+	  type annotations.
+	</p>
+      </li>
+      <li>
+	<p>
+	  It must infer types that are intelligible to the programmer.
+	  That is, it must avoid the main drawback of many inference
+	  systems with subtyping, where the inferred principal type is
+	  presented a set of equations and inequations.
+	</p>
+      </li>
+      <li>
+	<p>
+	  It must automatically infer both polymorphism and
+	  mutability.
+	</p>
+      </li>
+      <li>
+	<p>
+	  It must not require whole program analysis. Whole program
+	  inference poses scalability problems due to lack of separate
+	  compilation, and can result in surprising behaviour if the
+	  inferred types change due to modifications in a distant part
+	  of the code base. 
+	</p>
+      </li>
+    </ol>
+    <p>
+      In order to address the above requirements, we propose a
+      variant of the Hindley-Milner algorithm&nbsp;<cite
+	ref="Milner1978W"/>. This algorithm uses polymorphism over
+      mutability and polymorphism itself in order to infer principal
+      types for       
+      <btypes:TYPE>
+	<language/>
+      </btypes:TYPE> programs.
+    </p>
+    <p>
+      <leadin>Polymorphism Over Mutability</leadin>
+      In order to infer principal types in a language with copy
+      compatibility, we define the following constrained types that
+      allow us to infer types with variable mutability:
+      <br/>
+      <btypes:TYPE>
+	<equiv>
+	  <mbTop>
+	    <tvar/>
+	    <ptype/>
+	  </mbTop>
+	  <ctype>
+	    <tvar/>
+	    <set>
+	      <Tceq>
+		<tvar/>
+		<ptype/>
+	      </Tceq>
+	    </set>
+	  </ctype>
+	</equiv>
+      </btypes:TYPE>:
+      any type equal to base type 
+      <btypes:TYPE>
+	<ptype/>
+      </btypes:TYPE> except for top level mutability.
+      <br/>
+      <btypes:TYPE>
+	<equiv>
+	  <mbFull>
+	    <stype/>
+	    <ptype/>
+	  </mbFull>
+	  <ctype>
+	    <stype/>
+	    <set>
+	      <ceq>
+		<stype/>
+		<ptype/>
+	      </ceq>
+	    </set>
+	  </ctype>
+	</equiv>
+      </btypes:TYPE>:
+      any type copy compatible with
+      <btypes:TYPE>
+	<ptype/>
+      </btypes:TYPE>, where
+      <btypes:TYPE>
+	<eq>
+	  <stype/>
+	  <grouping>
+	    <tvar/>
+	    <text content=" or "/>
+	    <mutable>
+	      <tvar/>
+	    </mutable>
+	  </grouping>
+	</eq>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      Now, in the expression
+      <btypes:TYPE>
+	<let>
+	  <id name="p"/>
+	  <true/>
+	</let>
+      </btypes:TYPE>, 
+      we can give
+      <btypes:TYPE>
+	<id name="p"/>
+      </btypes:TYPE>  the type
+      <btypes:TYPE>
+	<mbFull>
+	  <tvar/> 	  
+	  <bool/>
+	</mbFull>
+      </btypes:TYPE>.
+      During inference, the type can later get resolved to either
+      <btypes:TYPE>
+	<bool/>
+      </btypes:TYPE> or
+      <btypes:TYPE>
+	<mutable>
+	  <bool/>
+	</mutable>
+      </btypes:TYPE>.
+      The forms 
+      <btypes:TYPE>
+	<mbTop>
+	  <tvar/>
+	  <bool/>
+	</mbTop>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<mbFull>
+	  <stype/>
+	  <bool/>
+	</mbFull>
+      </btypes:TYPE> respectively provide fine grained and coarse
+      grained control over expressing types with 
+      variable mutability. For example:
+    </p>
+    <font size="small">
+    <table fullwidth="yes" latex.colspec="c|c|c">
+      <tbody>
+	<tr lineafter="yes">
+	  <td><p>Type</p></td>
+	  <td><p>Instances</p></td>
+	  <td><p>Non-Instances</p></td>
+	</tr>
+	<!-- Row -->
+	<tr lineafter="yes">
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<mbTop>
+		  <tvar/>
+		  <pair>
+		    <bool/>
+		    <unit/>
+		  </pair>
+		</mbTop>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<pair>
+		  <bool/>
+		  <unit/>
+		</pair>
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<mutable>
+		  <pair>
+		    <bool/>
+		    <unit/>
+		  </pair>
+		</mutable>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<pair>
+		  <mutable>
+		    <bool/>
+		  </mutable>
+		  <unit/>
+		</pair>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	</tr>
+	<!-- Row -->
+	<tr>
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<mbFull>
+		  <tvar/>
+		  <pair>
+		    <bool/>
+		    <unit/>
+		  </pair>
+		</mbFull>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<pair>
+		  <bool/>
+		  <unit/>
+		</pair>
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<mutable>
+		  <pair>
+		    <mutable>
+		      <bool/>
+		    </mutable>
+		    <mutable>
+		      <unit/>
+		    </mutable>
+		  </pair>
+		</mutable>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<pair>
+		  <unit/>
+		  <bool/>
+		</pair>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	</tr>
+	<tr lineafter="yes">
+	  <td/>
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<pair>
+		  <mutable>
+		    <bool/>
+		  </mutable>
+		  <unit/>
+		</pair>
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<mbTop>
+		  <tvar name="beta"/>
+		  <pair>
+		    <bool/>
+		    <unit/>
+		  </pair>
+		</mbTop>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td/>
+	</tr>
+	<!-- Row -->
+	<tr lineafter="yes">
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<mbFull>
+		  <mutable>
+		    <tvar/>
+		  </mutable>
+		  <pair>
+		    <bool/>
+		    <unit/>
+		  </pair>
+		</mbFull>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<mutable>
+		  <pair>
+		    <bool/>
+		    <unit/>
+		  </pair>
+		</mutable>
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<mutable>
+		  <pair>
+		    <bool/>
+		    <mutable>
+		      <unit/>
+		    </mutable>
+		  </pair>
+		</mutable>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<pair>
+		  <bool/>
+		  <unit/>
+		</pair>
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<mbTop>
+		  <tvar name="beta"/>
+		  <pair>
+		    <bool/>
+		    <unit/>
+		  </pair>
+		</mbTop>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	</tr>
+	<!-- Row -->
+	<tr lineafter="yes">
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<mbFull>
+		  <tvar/>
+		  <ref>
+		    <bool/>
+		  </ref>
+		</mbFull>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<ref>
+		  <bool/>
+		</ref>
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<mutable>
+		  <ref>
+		    <bool/>
+		  </ref>
+		</mutable>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<ref>	
+		  <mutable>
+		    <bool/>
+		  </mutable>
+		</ref>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	</tr>
+	<!-- Row -->
+      </tbody>
+    </table>
+    </font>
+    <br/>
+    <p>
+      The grammar does not allow types such as
+      <btypes:TYPE>
+	<mutable>
+	  <paren>
+	    <mbTop>
+	      <tvar/>
+	      <bool/>
+	    </mbTop>
+	  </paren>
+	</mutable>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<mbTop>
+	  <tvar name="beta"/>
+	  <mbFull>
+	    <tvar/>
+	    <bool/>
+	  </mbFull>
+	</mbTop>
+      </btypes:TYPE> <foreignphrase>etc.</foreignphrase>
+    </p>
+    <p>
+      By embedding constraints within types, we obtain an elegant
+      representation of constrained types that can be intuitively 
+      presented to the user. For example, 
+      <br/>
+      we can write
+      <btypes:TYPE>
+	<tqExpr>
+	  <id name="fnxn"/>
+	  <mbFull>
+	    <tvar name="alpha"/>
+	    <fn>
+	      <ref>
+		<mbTop>
+		  <tvar name="beta"/>
+		  <pair>
+		    <bool/>
+		    <mbFull>
+		      <tvar name="gamma"/>
+		      <tvar name="delta"/>
+		    </mbFull>
+		  </pair>
+		</mbTop>
+	      </ref>
+	      <unit/>
+	    </fn>
+	  </mbFull>
+	</tqExpr>
+      </btypes:TYPE> 
+      <br/>
+      rather than
+      <btypes:TYPE>
+	<tqExpr>
+	  <id name="fnxn"/>
+	  <ctype>
+	    <tvar name="alpha"/>
+	    <set>
+	      <ceq>
+		<fn>
+		  <ref>
+		    <tvar name="beta"/>
+		  </ref>
+		  <unit/>
+		</fn>
+	      </ceq>
+	      <Tceq>
+		<tvar name="beta"/>
+		<pair>
+		  <bool/>
+		  <tvar name="gamma"/>
+		</pair>
+	      </Tceq>
+	      <ceq>
+		<tvar name="gamma"/>
+		<tvar name="delta"/>
+	      </ceq>
+	    </set>
+	  </ctype>
+	</tqExpr>
+      </btypes:TYPE>. 
+      <br/>
+      Every type of the form
+      <btypes:TYPE>
+	<mbFull>
+	  <stype/>
+	  <ptype/>
+	</mbFull>
+      </btypes:TYPE> can be realized through a canonical
+      representation using
+      <btypes:TYPE>
+	<mbTop>
+	  <tvar/>
+	  <ptype/>
+	</mbTop>
+      </btypes:TYPE> types. However, during type inference, we need to
+      use types of the form
+      <btypes:TYPE>
+	<mbFull>
+	  <tvar/>
+	  <tvar name="beta"/>
+	</mbFull>
+      </btypes:TYPE> to represent any type that is copy compatible 
+      with 
+      <btypes:TYPE>
+	<tvar name="beta"/>
+      </btypes:TYPE>, even if
+      <btypes:TYPE>
+	<tvar name="beta"/>
+      </btypes:TYPE> later unifies with a more concrete (ex: pair) type.
+    </p>
+    <p>
+      Will eventually quantify to get polymorphism ...
+      Function types issue here.
+    </p>
+    <p>
+      <leadin>Soundness implications</leadin>
       The key idea of maybe types 
       <btypes:TYPE>
 	<mbpair>
@@ -1043,7 +1408,7 @@
       without making major changes to the core type system.
     </p>
     <p>
-      <leadin>Inference Considerations</leadin>
+      <leadin>Polymorphism over Polymorphism</leadin>
       First, we consider how to resolve copy compatibility
       constraints at a let boundary. One possibility is
       to fix all unresolved maybe types to immutable

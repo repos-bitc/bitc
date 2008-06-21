@@ -52,6 +52,22 @@
 		  </Pair>
 		</alternatives>
 	      </bnf>
+	      <bnf desc="Left Expr">
+		<lExp/>
+		<alternatives>
+		  <id/>
+		  <deref>
+		    <aExpr/>
+		  </deref>
+		  <ith>
+		    <lExp/>
+		  </ith>
+		  <tqExpr>
+		    <lExp/>
+		    <type/>
+		  </tqExpr>
+		</alternatives>
+	      </bnf>
 	      <bnf desc="Expressions">
 		<aExpr/>
 		<alternatives>
@@ -62,21 +78,25 @@
 		    <aExpr/>
 		  </apply>
 		  <assign>
-		    <aExpr/>
+		    <lExp/>
 		    <aExpr/>
 		  </assign> 
 		</alternatives>
 	      </bnf>
-	      <bnfc desc="">
+	      <bnfc compact="yes" desc="">
 		<alternatives>
 		  <if>
 		    <aExpr/>
 		    <aExpr/>
 		    <aExpr/>
 		  </if>
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
 		</alternatives>
 	      </bnfc>
-	      <bnfc desc="">
+	      <bnfc compact="yes" desc="">
 		<alternatives>
 		  <dup>
 		    <aExpr/>
@@ -84,10 +104,6 @@
 		  <deref>
 		    <aExpr/>
 		  </deref>
-		</alternatives>
-	      </bnfc>
-	      <bnfc desc="">
-		<alternatives>
 		  <Pair>
 		    <aExpr/>
 		    <aExpr/>
@@ -95,13 +111,9 @@
 		  <ith>
 		    <aExpr/>
 		  </ith>
-		  <tqExpr>
-		    <aExpr/>
-		    <type/>
-		  </tqExpr>
 		</alternatives>
 	      </bnfc>
-	      <bnfc desc="">
+	      <bnfc compact="yes" desc="">
 		<alternatives>
 		  <grouping>
 		    <let>
@@ -112,11 +124,7 @@
 		      <aExpr/>
 		      <aExpr/>
 		    </let>
-		    <nothing/>
-		    <nothing/>
-		    <nothing/>
-		    <nothing/>
-		    <nothing/>
+		    <space n="15"/>
 		  </grouping>
 		</alternatives>
 	      </bnfc>
@@ -225,3 +233,4 @@
   </table>
   <br/>
 </font>
+  

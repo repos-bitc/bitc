@@ -2247,17 +2247,31 @@
 	  </xsl:if>
 	</xsl:element>
       </xsl:element>
-      <xsl:element name="td">
-	<xsl:element name="p">
-	  <xsl:call-template name="print.space"/>
-	</xsl:element>
-      </xsl:element>      
-      <xsl:element name="td">
-	<xsl:element name="p">
-	  <xsl:call-template name="print.op.alt"/>
-	  <xsl:apply-templates mode="formula"/>	
-	</xsl:element>
-      </xsl:element>
+      <xsl:choose>
+	<xsl:when test="@compact">
+	  <xsl:element name="td">
+	    <xsl:attribute name="align">left</xsl:attribute>
+	    <xsl:attribute name="colspan">2</xsl:attribute>
+	    <xsl:element name="p">
+	      <xsl:call-template name="print.op.alt"/>
+	      <xsl:apply-templates mode="formula"/>	
+	    </xsl:element>
+	  </xsl:element>
+	</xsl:when>
+	<xsl:otherwise>
+	  <xsl:element name="td">
+	    <xsl:element name="p">
+	      <xsl:call-template name="print.space"/>
+	    </xsl:element>
+	  </xsl:element>
+	  <xsl:element name="td">
+	    <xsl:element name="p">
+	      <xsl:call-template name="print.op.alt"/>
+	      <xsl:apply-templates mode="formula"/>	
+	    </xsl:element>
+	  </xsl:element>
+	</xsl:otherwise>
+      </xsl:choose>
     </xsl:element>
   </xsl:template>
 
@@ -2275,7 +2289,7 @@
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>  
 
-  <!-- aVal -->
+  <!-- lVal -->
   <xsl:template match="lVal" mode="formula">
     <xsl:element name="em">
       <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -2309,6 +2323,14 @@
   <xsl:template match="vExp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>upsi;</xsl:text>
+    <xsl:call-template name="print.index.dash"/>
+  </xsl:template>  
+
+  <!-- lExp -->
+  <xsl:template match="lExp" mode="formula">
+    <xsl:call-template name="print.mathit">
+      <xsl:with-param name="print.mathit.text">l</xsl:with-param>
+    </xsl:call-template>
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>  
 
@@ -2375,9 +2397,7 @@
 
   <!-- sLoc -->
   <xsl:template match="sLoc" mode="formula">
-    <xsl:element name="em">
-      <xsl:text>l</xsl:text>    
-    </xsl:element>
+    <xsl:text>l</xsl:text>    
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>  
 

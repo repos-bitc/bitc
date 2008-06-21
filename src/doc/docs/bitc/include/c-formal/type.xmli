@@ -203,18 +203,14 @@
 	  pair constructor, function constructor are okay).
 	  M'a|p' where p' <|: p  --> 
 	  <TDjudge Msub="yes">
-	    <aExpr num="1"/>
+	    <lExp/>
 	    <mutable>
 	      <ptype/>
 	    </mutable>
 	    <dCtset num="1"/>
 	  </TDjudge>
-	  <Sjudge name="lval">
-	    <assume/>
-	    <aExpr num="1"/>
-	  </Sjudge>
 	  <TDjudge Msub="yes">
-	    <aExpr num="2"/>
+	    <aExpr/>
 	    <ptype/>
 	    <dCtset num="2"/>
 	  </TDjudge>
@@ -222,8 +218,8 @@
 	<tyConc>
 	  <TDjudge>
 	    <assign>
-	      <aExpr num="1"/>
-	      <aExpr num="2"/>
+	      <lExp/>
+	      <aExpr/>
 	    </assign>
 	    <unit/>
 	    <unin>
