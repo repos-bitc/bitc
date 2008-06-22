@@ -1220,64 +1220,69 @@
     <p>
       By embedding constraints within types, we obtain an elegant
       representation of constrained types that can be intuitively 
-      presented to the user. For example, 
-      <br/>
-      we can write
+      presented to the user. For example, the expression
       <btypes:TYPE>
-	<tqExpr>
-	  <id name="fnxn"/>
+	<lambda>
+	  <id/>
+	  <paren>
+	    <assign>
+	      <deref>
+		<fst>
+		  <id/>
+		</fst>
+	      </deref>
+	      <snd>
+		<id/>
+	      </snd>
+	    </assign>
+	  </paren>
+	</lambda>
+      </btypes:TYPE>
+      can be typed as
+      <btypes:TYPE>
+	<fn>
 	  <mbFull>
 	    <tvar name="alpha"/>
-	    <fn>
+	    <pair>
 	      <ref>
-		<mbTop>
+		<mutable>
 		  <tvar name="beta"/>
-		  <pair>
-		    <bool/>
-		    <mbFull>
-		      <tvar name="gamma"/>
-		      <tvar name="delta"/>
-		    </mbFull>
-		  </pair>
-		</mbTop>
+		</mutable>
 	      </ref>
-	      <unit/>
-	    </fn>
-	  </mbFull>
-	</tqExpr>
-      </btypes:TYPE> 
-      <br/>
-      rather than
-      <btypes:TYPE>
-	<tqExpr>
-	  <id name="fnxn"/>
-	  <ctype>
-	    <tvar name="alpha"/>
-	    <set>
-	      <ceq>
-		<fn>
-		  <ref>
-		    <tvar name="beta"/>
-		  </ref>
-		  <unit/>
-		</fn>
-	      </ceq>
-	      <Tceq>
-		<tvar name="beta"/>
-		<pair>
-		  <bool/>
-		  <tvar name="gamma"/>
-		</pair>
-	      </Tceq>
-	      <ceq>
+	      <mbFull>
 		<tvar name="gamma"/>
-		<tvar name="delta"/>
-	      </ceq>
-	    </set>
-	  </ctype>
-	</tqExpr>
+		<tvar name="beta"/>
+	      </mbFull>
+	    </pair>
+	  </mbFull>
+	  <unit/>
+	</fn>
+      </btypes:TYPE>, rather than
+      <btypes:TYPE>
+	<ctype>
+	  <fn>
+	    <tvar name="alpha"/>
+	    <unit/>
+	  </fn>
+	  <set>
+	    <ceq>
+	      <tvar name="alpha"/>
+	      <pair>
+		<ref>
+		  <mutable>
+		    <tvar name="beta"/>
+		  </mutable>
+		</ref>
+		<tvar name="gamma"/>
+	      </pair>
+	    </ceq>
+	    <ceq>
+	      <tvar name="gamma"/>
+	      <tvar name="beta"/>
+	    </ceq>
+	  </set>
+	</ctype>
       </btypes:TYPE>. 
-      <br/>
       Every type of the form
       <btypes:TYPE>
 	<mbFull>
@@ -1285,7 +1290,7 @@
 	  <ptype/>
 	</mbFull>
       </btypes:TYPE> can be realized through a canonical
-      representation using
+      (and verbose) representation using
       <btypes:TYPE>
 	<mbTop>
 	  <tvar/>
@@ -1298,18 +1303,126 @@
 	  <tvar/>
 	  <tvar name="beta"/>
 	</mbFull>
-      </btypes:TYPE> to represent any type that is copy compatible 
-      with 
+      </btypes:TYPE> to represent a type that is compatible 
+      with any instantiation of  
       <btypes:TYPE>
 	<tvar name="beta"/>
-      </btypes:TYPE>, even if
-      <btypes:TYPE>
-	<tvar name="beta"/>
-      </btypes:TYPE> later unifies with a more concrete (ex: pair) type.
+      </btypes:TYPE>.
     </p>
     <p>
-      Will eventually quantify to get polymorphism ...
-      Function types issue here.
+      Due to copy compatibility at argument and return positions, two
+      function types are <em>equal</em> regardless of the shallow
+      mutability of the argument and return types. 
+      Therefore, we follow a convension that all function types must be
+      written with immutable types at copy compatible positions. The
+      intuition here is that type of a function must be described in
+      the interface form, and must hide the ``internal'' mutability
+      information. For example, the function  
+      <btypes:TYPE> 
+	<lambda>
+	  <id name="x"/>
+	  <paren>
+	    <assign>
+	      <id name="x"/>
+	      <true/>
+	    </assign>
+	  </paren>
+	</lambda>
+      </btypes:TYPE>, has external type 
+      <btypes:TYPE> 
+	<fn>
+	  <bool/>
+	  <unit/>
+	</fn>
+      </btypes:TYPE> even though the internal type is
+      <btypes:TYPE> 
+	<fn>
+	  <mutable>
+	    <bool/>
+	  </mutable>
+	  <unit/>
+	</fn>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      <btypes:TYPE>
+	<language/>
+      </btypes:TYPE> is a let-polymorphic language. At a let boundary,
+      we can quantify over variables that range over mutability, thus
+      achieving mutability polymorphism. For example,
+      in the expression
+      <btypes:TYPE> 
+	<let>
+	  <id name="f"/>
+	  <lambda>
+	    <id/>
+	    <if>
+	      <deref>
+		<id/>
+	      </deref>
+	      <Unit/>
+	      <Unit/>
+	    </if>
+	  </lambda>
+	</let>
+      </btypes:TYPE>,
+      <btypes:TYPE> 
+	<id name="f"/>
+      </btypes:TYPE> can be given the type
+      <btypes:TYPE> 
+	<TS>
+	  <tvar/>
+	  <fn>
+	    <ref>
+	      <mbFull>
+		<tvar/>
+		<bool/>
+	      </mbFull>
+	    </ref>
+	    <unit/>
+	  </fn>
+	</TS>
+      </btypes:TYPE>. Now, if
+      <btypes:TYPE> 
+	<tqExpr>
+	  <id name="m"/>
+	  <ref>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	  </ref>
+	</tqExpr>
+      </btypes:TYPE> and
+      <btypes:TYPE> 
+	<tqExpr>
+	  <id name="n"/>
+	  <ref>
+	    <bool/>
+	  </ref>
+	</tqExpr>
+      </btypes:TYPE>, the applications
+      <btypes:TYPE> 
+	<apply>
+	  <id name="f"/>
+	  <id name="m"/>
+	</apply>
+      </btypes:TYPE> and
+      <btypes:TYPE> 
+	<apply>
+	  <id name="f"/>
+	  <id name="n"/>
+	</apply>
+      </btypes:TYPE> are well typed.
+      Since the type of 
+      <btypes:TYPE> 
+	<id name="f"/>
+      </btypes:TYPE> ranges over the mutability variants o
+      <btypes:TYPE> 
+	<bool/>
+      </btypes:TYPE> its type is polymorphic over mutability.
+      The next sections discuss certain complications that arise
+      during the inference of such types, present our solution to the
+      problem.
     </p>
     <p>
       <leadin>Soundness implications</leadin>
@@ -1616,571 +1729,6 @@
       <br/>
       which is a correct typing, but is most likely not what the
       programmer expects.
-    </p>
-  </sect1>
-  <sect1 id="proposal">
-    <title>Type Inference in <btypes:TYPE><language/></btypes:TYPE></title>
-    <p>
-      Having identified the various issues and trade-offs involved in
-      type inference, we now describe the particular design choices
-      made in BitC/<btypes:TYPE><language/></btypes:TYPE> for handling
-      copy compatibility. They have been driven in part by our
-      experience writing BitC programs. In <btypes:TYPE> <language/>
-      </btypes:TYPE>, we allow copy compatibility to the full extent,
-      up to a reference boundary. We allow copy compatibility to be
-      invoked at arguments and return positions of all expressions
-      that do not expect a location (lvalue). 
-    </p>
-    <p>
-      At a let boundary, an unresolved maybe type
-      <btypes:TYPE>
-	<mbpair>
-	  <tvar name="alpha"/>
-	  <type/>
-	</mbpair>
-      </btypes:TYPE>      
-      is resolved to 
-      <btypes:TYPE>
-	<type/>
-      </btypes:TYPE>.
-      Intuitively, this means that we will default maybe types to the
-      types of their original copies unless a better type is inferred
-      or specified. The type 
-      <btypes:TYPE>
-	<type/>
-      </btypes:TYPE>
-      of the original value is remembered as a ``hint'' to fix
-      unresolved maybe types at a let boundary. Here, we are
-      approximating the user's intent to the lexical ``flow'' of type
-      information. For example, in the following expression,
-      <br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <btypes:TYPE>
-	<let>
-	  <tqExpr>
-	    <id name="mb"/>
-	    <mutable>
-	      <bool/>
-	    </mutable>
-	  </tqExpr>
-	  <true/>	  
-	  <let>
-	    <id name="l1"/>
-	    <List>
-	      <id name="mb"/>
-	    </List>
-	    <let>
-	      <tqExpr>
-		<id name="l2"/>
-		<mutable>
-		  <list>
-		    <bool/>
-		  </list>
-		</mutable>
-	      </tqExpr>
-	      <List>
-		<id name="mb"/>
-	      </List>
-	    </let>
-	  </let>
-	  <unspecified/>
-	</let>	
-      </btypes:TYPE>
-      <br/>
-      the type 
-      <btypes:TYPE>
-	<mbpair>
-	  <tvar name="beta"/>
-	  <list>	  
-	    <mbpair>
-	      <tvar name="alpha"/>
-	      <mutable>
-		<bool/>
-	      </mutable>
-	    </mbpair>
-	  </list>
-	</mbpair>
-      </btypes:TYPE>
-      is first inferred for both 
-      <btypes:TYPE>
-	<id name="l1"/>
-	<text content=" and "/>
-	<id name="l2"/>	
-      </btypes:TYPE> (due to copies at list construction and
-	binding). In the case of 
-      <btypes:TYPE>
-	<id name="l1"/>
-      </btypes:TYPE>, the final type is resolved to
-      <btypes:TYPE>
-	<list>	  
-	  <mutable>
-	    <bool/>
-	  </mutable>
-	</list>
-      </btypes:TYPE> in accordance to the hints since we have no
-      further information. The type of
-      <btypes:TYPE>
-	<id name="l2"/>
-      </btypes:TYPE>
-      is
-      <btypes:TYPE>
-	<mutable>
-	  <list>
-	    <bool/>
-	  </list>
-	</mutable>
-      </btypes:TYPE>, since we have a (consistent) annotation -- 
-      there are no unresolved maybe types. Further, under this
-      scheme, the  
-      <btypes:TYPE>
-	<id name="listCopy"/>
-      </btypes:TYPE> example described in the previous section gets
-      the more intuitive type
-      <btypes:TYPE> 
-	<forall>
-	  <tvar name="alpha"/>
-	  <fn>
-	    <list>
-	      <tvar name="alpha"/>
-	    </list>
-	    <list>
-	      <tvar name="alpha"/>
-	    </list>
-	  </fn>
-	</forall>
-      </btypes:TYPE>.
-      In the case of conflicting hints, we pick the most immutable
-      type obtainable from all hints. This ensures that inferred types
-      are always deterministic. For example:
-      <br/>
-      <btypes:TYPE> 
-	<let>
-	  <id name="bp"/>
-	  <if br2="24">
-	    <true/>
-	    <tqExpr>
-	      <Pair>
-		<true/>
-		<false/>
-	      </Pair>
-	      <pair>
-		<mutable>
-		  <bool/>
-		</mutable>
-		<bool/>
-	      </pair>
-	    </tqExpr>
-	    <tqExpr>
-	      <Pair>
-		<false/>
-		<true/>
-	      </Pair>
-	      <pair>
-		<bool/>
-		<mutable>
-		  <bool/>
-		</mutable>
-	      </pair>
-	    </tqExpr>
-	  </if>
-	  <unspecified/>
-	</let>
-	<text content="      "/>
-	<symbol name="par"/>
-	<text content="      "/>
-	<tqExpr>
-	  <id name="bp"/>
-	  <pair>
-	    <bool/>
-	    <bool/>
-	  </pair>
-	</tqExpr>
-      </btypes:TYPE>
-      <br/>
-      Here, the hints provided by the two branches
-      of the <progident>if</progident> do not agree, and we
-      resolve the conflict by picking 
-      <btypes:TYPE> 
-	<pair>
-	  <bool/>
-	  <bool/>
-	</pair>
-      </btypes:TYPE> as the effective hint.
-    </p>
-    <p>
-      In the case of locally defined identifiers, the top-most
-      mutability is inferred by studying the syntactic usage of the
-      identifier. That is, if the identifier is used as the target of
-      an assignment (<progident>:=</progident>), it is given a
-      shallowly mutable type. This is an <foreignphrase>ad
-	hoc</foreignphrase> rule that reduces the need for
-      explicit programmer annotations in the common
-      case like iterators. 
-      In a full language like BitC, this rule
-      must not be used for globals in order to keep inference
-      deterministic. Further, this ``infer mutability first'' rule
-      cannot, in general, be extended beyond shallow mutability. For
-      example, in the expression
-      <btypes:TYPE> 
-	<let>
-	  <id name="fPtr"/>
-	  <dup>
-	    <lambda>
-	      <id name="x"/>
-	      <id name="x"/>
-	    </lambda>
-	  </dup>
-	  <Pair>
-	    <apply>
-	      <id name="useF1"/>
-	      <id name="fPtr"/>
-	    </apply>
-	    <apply>
-	      <id name="useF2"/>
-	      <id name="fPtr"/>
-	    </apply>
-	  </Pair>
-	</let>
-      </btypes:TYPE>,      
-      we do not have enough local information
-      <em>before</em> type inference to determine whether
-      <btypes:TYPE> 
-	<id name="useF1"/>
-      </btypes:TYPE>
-      and
-      <btypes:TYPE> 
-	<id name="useF2"/>
-      </btypes:TYPE>
-      set the contents of the cell pointed to by
-      <btypes:TYPE> 
-	<id name="fPtr"/>
-      </btypes:TYPE>, or use it polymorphically.
-    </p>
-    <p>
-      Due to copy compatibility, two function types are <em>equal</em>
-      regardless of the shallow mutability of the argument and return
-      types. Therefore, we enforce a syntactic restriction that all
-      function types must be written with immutable types at copy
-      compatible positions. The intuition here is that type of a
-      function must be described in the interface form, and must hide
-      the ``internal'' mutability information. For example, for the
-      function definition 
-      <btypes:TYPE> 
-	<let>
-	  <id name="f"/>
-	  <lambda>
-	    <id name="x"/>
-	    <assign>
-	      <id name="x"/>
-	      <true/>
-	    </assign>
-	  </lambda>
-	  <unspecified/>
-	</let>
-      </btypes:TYPE>, the external type is
-      <btypes:TYPE> 
-	<tqExpr>
-	  <id name="f"/>
-	  <fn>
-	    <bool/>
-	    <unit/>
-	  </fn>
-	</tqExpr>
-      </btypes:TYPE>, and the internal type is
-      <btypes:TYPE> 
-	<tqExpr>
-	  <id name="f"/>
-	  <fn>
-	    <mutable>
-	      <bool/>
-	    </mutable>
-	    <unit/>
-	  </fn>
-	</tqExpr>
-      </btypes:TYPE>.
-    </p>
-    <p>
-      We must ensure that the internal types of a function
-      do not influence the result type of applications, but the effect
-      of arguments on the return types must be preserved. This ensures
-      that the implementation of an abstraction can be changed (ex:
-      from a pure recursive computation to loop involving mutation)
-      unbeknownst to its callers. For example:
-    </p>
-    <table>
-      <tbody>
-	<tr valign="top">
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<let>
-		  <tqExpr>
-		    <id name="p"/>
-		    <mutable>
-		      <bool/>
-		    </mutable>
-		  </tqExpr>
-		  <true/>
-		  <nothing/>
-		</let>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>	    
-	      <btypes:TYPE>
-		<group>
-		  <text content="      "/>
-		  <symbol name="par"/>
-		  <text content="      "/>
-		  <tqExpr>
-		    <id name="p"/>
-		    <mutable>
-		      <bool/>
-		    </mutable>
-		  </tqExpr>
-		</group>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	</tr>
-	<tr valign="top">	
-	  <td>
-	    <p>
-	      &nbsp;&nbsp;&nbsp;
-	      <btypes:TYPE>
-		<let>
-		  <id name="f"/>
-		  <lambda>
-		    <id name="x"/>
-		    <id name="p"/>
-		  </lambda>
-		  <let>
-		    <id name="g"/>
-		    <lambda>
-		      <id name="x"/>
-		      <id name="x"/>
-		    </lambda>
-		    <nothing/>
-		  </let>
-		</let>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<group>
-		  <text content="      "/>
-		  <symbol name="par"/>
-		  <text content="      "/>
-		  <tqExpr>
-		    <id name="f"/>
-		    <forall>
-		      <tvar name="alpha"/>
-		      <fn>
-			<tvar name="alpha"/>
-			<bool/>
-		      </fn>
-		    </forall>
-		  </tqExpr>
-		  <text content=" ; "/>
-		  <tqExpr>
-		    <id name="g"/>
-		    <forall>
-		      <tvar name="alpha"/>
-		      <fn>
-			<tvar name="alpha"/>
-			<tvar name="alpha"/>
-		      </fn>
-		    </forall>
-		  </tqExpr>
-		</group>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	</tr>
-	<tr valign="top">
-	  <td>
-	    <p>
-	      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	      <btypes:TYPE>
-		<let>
-		  <id name="ff"/>
-		  <apply>
-		    <id name="f"/>
-		    <id name="p"/>
-		  </apply>
-		  <let>		  
-		    <id name="gg"/>
-		    <apply>
-		      <id name="g"/>
-		      <id name="p"/>
-		    </apply>
-		    <unspecified/>
-		  </let>
-		</let>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<group>
-		  <text content="      "/>
-		  <symbol name="par"/>
-		  <text content="      "/>
-		  <tqExpr>
-		    <id name="ff"/>
-		    <bool/>
-		  </tqExpr>
-		  <text content=" ; "/>
-		  <tqExpr>
-		    <id name="gg"/>
-		    <mutable>
-		      <bool/>
-		    </mutable>
-		  </tqExpr>
-		</group>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	</tr>
-      </tbody>
-    </table>
-    <p>
-      The function
-      <btypes:TYPE>
-	<id name="f"/> 
-      </btypes:TYPE>
-      returns 
-      <btypes:TYPE>
-	<tqExpr>
-	  <id name="p"/> 
-	  <mutable>
-	    <bool/>
-	  </mutable>
-	</tqExpr>
-      </btypes:TYPE>, regardless of its input.
-      The external type of 
-      <btypes:TYPE>
-	<id name="f"/> 
-      </btypes:TYPE> abstracts away the mutability of 
-      <btypes:TYPE>
-	<id name="p"/> 
-      </btypes:TYPE>, and thus,
-      <btypes:TYPE>
-	<id name="ff"/> 
-      </btypes:TYPE> gets the type
-      <btypes:TYPE>
-	<bool/>
-      </btypes:TYPE>. 
-      <btypes:TYPE>
-	<id name="g"/> 
-      </btypes:TYPE>
-      is an identity function which returns its argument. 
-      The external type of 
-      <btypes:TYPE>
-	<id name="g"/> 
-      </btypes:TYPE> preserves the mutability of the actual argument
-      <btypes:TYPE>
-	<id name="p"/> 
-      </btypes:TYPE>, and thus
-      <btypes:TYPE>
-	<id name="gg"/> 
-      </btypes:TYPE> gets the type 
-      <btypes:TYPE>
-	<mutable>
-	  <bool/>
-	</mutable>
-      </btypes:TYPE>.
-    </p>
-    <p>
-      <em>Mutability Polymorphism:</em>
-      A type is said to be mutability-polymorphic if it ranges over
-      all [im]mutability variants of a particular type. 
-      For example, 
-      <btypes:TYPE>
-	<forall>
-	  <tvar name="alpha"/>
-	  <mbpair>
-	    <tvar name="alpha"/>
-	    <bool/>
-	  </mbpair>
-	</forall>
-      </btypes:TYPE> is mutability polymorphic over 
-      <btypes:TYPE>
-	<bool/>
-      </btypes:TYPE>. 
-      By far the most useful case of this feature is to
-      define functions that are mutability-polymorphic over concrete
-      types, since functions with a polymorphic type such as 
-      <btypes:TYPE>
-	<forall>
-	  <tvar name="alpha"/>
-	  <fn>
-	    <tvar name="alpha"/>
-	    <tvar name="alpha"/>
-	  </fn>
-	</forall>
-      </btypes:TYPE> are polymorphic over all
-      types, mutable or immutable.
-      The above inference algorithm tries to heuristically fix the
-      mutability of all expressions (including functions). However,
-      this behavior can be overridden by explicit annotation. For
-      example, the definition: 
-      <br/>
-      <btypes:TYPE>
-	<let>
-	  <tqExpr>
-	    <id name="allTrue"/>
-	    <forall>
-	      <tvar name="alpha"/>
-	      <fn>
-		<List>
-		  <mbpair>
-		    <tvar name="alpha"/>
-		    <bool/>
-		  </mbpair>
-		</List>
-		<bool/>
-	      </fn>
-	    </forall>
-	  </tqExpr>
-	  <unspecified/>
-	  <unspecified/>
-	</let>
-      </btypes:TYPE>
-      <btypes:TYPE>
-	<symbol name="par"/>
-	<text content="      "/>
-	<tqExpr>
-	  <id name="allTrue"/>
-	  <forall>
-	    <tvar name="alpha"/>
-	    <fn>
-	      <List>
-		<mbpair>
-		  <tvar name="alpha"/>
-		  <bool/>
-		</mbpair>
-	      </List>
-	      <bool/>
-	    </fn>
-	  </forall>
-	</tqExpr>
-      </btypes:TYPE>
-      <br/>
-      defines
-      <btypes:TYPE>
-	<id name="allTrue"/>
-      </btypes:TYPE>,
-      a function whose argument is mutability-polymorphic over 
-      <btypes:TYPE>
-	<List>
-	  <bool/>
-	</List>
-      </btypes:TYPE>.
     </p>
   </sect1>
   <sect1 id="formal">
