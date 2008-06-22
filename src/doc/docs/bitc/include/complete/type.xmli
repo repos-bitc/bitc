@@ -1,0 +1,711 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+     <!ENTITY TSZ "scriptsize">
+]>
+  <figure id="decl_type_rules" fullwidth='yes' 
+    latex.placement="tb">
+  <font size="scriptsize">
+    <btypes:TYPE
+      xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule titlesz="&TSZ;" name="S-Refl">
+	  <tyPre/>
+	  <tyConc>
+	    <Msub>
+	      <type/>
+	      <type/>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="S-Trans">
+	  <tyPre>
+	    <Msub>
+	      <type num="0"/>
+	      <type num="1"/>
+	    </Msub>
+	    <Msub>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <type num="0"/>
+	      <type num="2"/>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="S-Mut">
+	  <tyPre>
+	    <Msub>
+	      <ptype/>
+	      <ptype dash="'"/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mutable>
+		<ptype/>
+	      </mutable>
+	      <mutable>
+		<ptype dash="'"/>
+	      </mutable>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="S-Pair">
+	  <tyPre>
+	    <Msub>
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </Msub>
+	    <Msub>
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	      <pair>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </pair>
+	    </Msub>
+	  </tyConc>
+	</tyRule>  
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule titlesz="&TSZ;" name="S-MT1">
+	  <tyPre>
+	    <eq>
+	      <minzT>
+		<ptype/>
+	      </minzT>
+	      <type/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	      <type/>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="S-MT2">
+	  <tyPre>
+	    <eq>
+	      <maxzT>
+		<ptype/>
+	      </maxzT>
+	      <type/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <type/>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="S-MF1">
+	  <tyPre>
+	    <eq>
+	      <minz>
+		<ptype/>
+	      </minz>
+	      <type/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbFull>
+		<tvar/>
+		<ptype/>
+	      </mbFull>
+	      <type/>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="S-MF2">
+	  <tyPre>
+	    <Msub>
+	      <mbFull>
+		<tvar/>
+		<ptype/>
+	      </mbFull>
+	      <ptype dash="'"/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <mbFull>
+		<mutable>
+		  <tvar/>
+		</mutable>
+		<ptype/>
+	      </mbFull>
+	      <mutable>
+		<ptype dash="'"/>
+	      </mutable>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="S-MF3">
+	  <tyPre>
+	    <eq>
+	      <maxz>
+		<ptype/>
+	      </maxz>
+	      <type/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Msub>
+	      <type/>
+	      <mbFull>
+		<stype/>
+		<ptype/>
+	      </mbFull>
+	    </Msub>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule titlesz="&TSZ;" name=" T-Unit">
+	  <tyPre/>
+	  <tyConc>
+	    <TDjudge>
+	      <Unit/>
+	      <unit/>
+	      <Empty/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="T-Bool">
+	  <tyPre/>
+	  <tyConc>
+	    <TDjudge>
+	      <bVal/>
+	      <bool/>
+	      <Empty/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="T-Id">
+	  <tyPre>
+	    <mapsto>
+	      <gamma/>
+	      <id/>
+	      <TS>
+		<tvars/>
+		<ctype>
+		  <type/>
+		  <dCtset/>
+		</ctype>
+	      </TS>
+	    </mapsto>
+	    <!-- S |= t does not suffice here. Here is an example
+	    of a derivation that will go wrong during subject reduction 
+	    if we use only S |= t in this case.
+	    gamma(x) = \/'a'b'c. 'c ! ('a!int x 'b!bool)
+	    (so t = 'c ! ('a!int x 'b!bool))
+	    S = ['a |-> 'd, 'b |-> 'd, 'c |-> int x bool] -->
+	    <Cst>
+	      <aSubMap/>
+	      <set>
+		<type/>
+		<dCtset/>
+	      </set>
+	    </Cst>
+	    <eq>
+	      <dom>
+		<aSubMap/>
+	      </dom>
+	      <set>
+		<tvars/>
+	      </set>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <id/>
+	      <Subst>
+		<aSubMap/>
+		<type/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<dCtset/>
+	      </Subst>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>        
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule titlesz="&TSZ;" name="T-Hloc">
+	  <tyPre>
+	    <mapsto>
+	      <store/>
+	      <hLoc/>
+	      <type/>
+	    </mapsto>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <hLoc/>
+	      <ref>
+		<type/>
+	      </ref>
+	      <Empty/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="T-Sloc">
+	  <tyPre>
+	    <mapsto>
+	      <store/>
+	      <sLoc/>
+	      <type/>
+	    </mapsto>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <sLoc/>
+	      <type/>
+	      <Empty/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="T-Lambda">
+	  <tyPre>
+	    <Sjudge>
+	      <assume>
+		<dCtset/>
+		<extend>
+		  <gamma/>
+		  <mapping>
+		    <id/>
+		    <type num="1"/>
+		  </mapping>
+		</extend>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aExpr/>
+		<type num="2"/>
+	      </tqExpr>
+	    </Sjudge>
+	    <eq under="minz">
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </eq>
+	    <eq under="minz">
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <lambda>
+		<id/>
+		<aExpr/>
+	      </lambda>
+	      <fn>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </fn>
+	      <dCtset/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule titlesz="&TSZ;" name="T-App">
+	  <tyPre>
+	    <TDjudge Msub="yes">
+	      <aExpr num="1"/>
+	      <fn>
+		<type num="a"/>
+		<type num="r"/>
+	      </fn>
+	      <dCtset num="1"/>
+	    </TDjudge>
+	    <TDjudge Msub="yes">
+	      <aExpr num="2"/>
+	      <minz>
+		<type num="a"/>
+	      </minz>
+	      <dCtset num="2"/>
+	    </TDjudge>
+	    <Msub>
+	      <maxz>
+		<type num="r"/>
+	      </maxz>
+	      <type/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <apply>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+	      </apply>
+	      <type/>
+	      <unin>
+		<dCtset num="1"/>
+		<dCtset num="2"/>
+	      </unin>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="T-Set">
+	  <tyPre>
+	    <!-- Msub is okay in this place because, given the
+	    definition of subtyping, the type t which is t <|: Mp can
+	    only be of the form: 
+	    Mp', where p' <|: p (ex: immutable variations within
+	    pair constructor, function constructor are okay).
+	    M'a|p' where p' <|: p  --> 
+	    <TDjudge Msub="yes">
+	      <lExp/>
+	      <mutable>
+		<ptype/>
+	      </mutable>
+	      <dCtset num="1"/>
+	    </TDjudge>
+	    <TDjudge Msub="yes">
+	      <aExpr/>
+	      <ptype/>
+	      <dCtset num="2"/>
+	    </TDjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <assign>
+		<lExp/>
+		<aExpr/>
+	      </assign>
+	      <unit/>
+	      <unin>
+		<dCtset num="1"/>
+		<dCtset num="2"/>
+	      </unin>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule titlesz="&TSZ;" name="T-If">
+	  <tyPre>
+	    <TDjudge Msub="yes">
+	      <aExpr num="1"/>
+	      <bool/>
+	      <dCtset num="1"/>
+	    </TDjudge>
+	    <TDjudge Msub="yes">
+	      <aExpr num="2"/>
+	      <type/>
+	      <dCtset num="2"/>
+	    </TDjudge>
+	    <TDjudge Msub="yes">
+	      <aExpr num="3"/>
+	      <type/>
+	      <dCtset num="3"/>
+	    </TDjudge>
+	    <Msub>
+	      <type dash="'"/>
+	      <type/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <if>
+		<aExpr num="1"/> 
+		<aExpr num="2"/>
+		<aExpr num="3"/>
+	      </if>
+	      <type dash="'"/>
+	      <unin>
+		<dCtset num="1"/>
+		<dCtset num="2"/>
+		<dCtset num="3"/>
+	      </unin>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule titlesz="&TSZ;" name="T-Pair">
+	  <tyPre>
+	    <TDjudge Msub="yes">
+	      <aExpr num="1"/>
+	      <type num="1"/>
+	      <dCtset num="1"/>
+	    </TDjudge>
+	    <TDjudge Msub="yes">
+	      <aExpr num="2"/>
+	      <type num="2"/>
+	      <dCtset num="2"/>
+	    </TDjudge>
+	    <Msub>
+	      <type num="1" dash="'"/>
+	      <type num="1"/>
+	    </Msub>
+	    <Msub>
+	      <type num="2" dash="'"/>
+	      <type num="2"/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <Pair>
+		<aExpr num="1"/>
+		<aExpr num="2"/>
+	      </Pair>
+	      <pair>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </pair>
+	      <unin>
+		<dCtset num="1"/>
+		<dCtset num="2"/>
+	      </unin>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="T-Sel">
+	  <tyPre>
+	    <TDjudge>
+	      <aExpr/>
+	      <type/>
+	      <dCtset/>
+	    </TDjudge>
+	    <eq under="minzT">
+	      <type/>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <ith>
+		<aExpr/>
+	      </ith>
+	      <type num="i"/>
+	      <dCtset/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule titlesz="&TSZ;" name="T-Dup">
+	  <tyPre>
+	    <TDjudge Msub="yes">
+	      <aExpr/>
+	      <type/>
+	      <dCtset/>
+	    </TDjudge>
+	    <Msub>
+	      <type dash="'"/>
+	      <type/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <dup>
+		<aExpr/>
+	      </dup>
+	      <ref>
+		<type dash="'"/>
+	      </ref>
+	      <dCtset/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="T-Deref">
+	  <tyPre>
+	    <TDjudge Msub="yes">
+	      <aExpr/>
+	      <ref>
+		<type/>
+	      </ref>
+	      <dCtset/>
+	    </TDjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <deref>
+		<aExpr/>
+	      </deref>
+	      <type/>
+	      <dCtset/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="T-Let-M">
+	  <tyPre>
+	    <TDjudge Msub="yes">
+	      <aExpr num="1"/>
+	      <type num="1"/>
+	      <dCtset num="1"/>
+	    </TDjudge>
+	    <Msub>
+	      <type/>
+	      <type num="1"/>
+	    </Msub>
+	    <Sjudge>
+	      <assume>
+		<dCtset num="2"/>
+		<extend>
+		  <gamma/>
+		  <mapping>
+		    <id/>
+		    <type/>
+		  </mapping>
+		</extend>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aExpr num="2"/>
+		<type num="2"/>
+	      </tqExpr>
+	    </Sjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <paren>
+		<let kind="m">
+		  <id/>
+		  <aExpr num="1"/>
+		  <aExpr num="2"/>
+		</let>
+	      </paren>
+	      <type num="2"/>
+	      <unin>
+		<dCtset num="1"/>
+		<dCtset num="2"/>
+	      </unin>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<!-- The Immut() restriction is necessary to ensure
+	soundness. ~Mut() will not suffice as it allows maybe types.
+	A relaxation to this rule is possible, but is more
+	complicated (all generalizable variables must be within 
+	Immmutable wrappers, and the whole type must be ~Mut()
+	
+	The loss of expressivity in this case is for expressions
+	like x:'a |- letP p = (\y.y, x)
+
+	Currently, the Immut() restriction is achieved by the
+	consistency of D, the instantiation constraint set -->
+	<tyRule titlesz="&TSZ;" name="T-Let-MP">
+	  <tyPre>
+	    <TDjudge Msub="yes">
+	      <vExp/>
+	      <type num="1"/>
+	      <dCtset num="1"/>
+	    </TDjudge>
+	    <Msub>
+	      <type/>
+	      <type num="1"/>
+	    </Msub>
+	    <eq>
+	      <dCtset/>
+	      <unin>
+		<dCtset num="1"/>
+		<set>
+		  <pcst>
+		    <id/>
+		    <lKind/>
+		    <type/>
+		  </pcst>
+		</set>
+	      </unin>
+	    </eq>
+	    <eq>
+	      <set>
+		<tvars name="alpha"/>
+	      </set>
+	      <diff>
+		<ftvs>
+		  <type/>
+		  <dCtset/>
+		</ftvs>
+		<ftvs>
+		  <gamma/>
+		  <store/>
+		</ftvs>
+	      </diff>
+	    </eq>
+	  </tyPre>
+	  <tyPre>
+	    <Sjudge>
+	      <assume>
+		<dCtset num="2"/>
+		<extend>
+		  <gamma/>
+		  <mapping>
+		    <id/>
+		    <TS>
+		      <tvars/>
+		      <ctype>
+			<type/>
+			<dCtset/>
+		      </ctype>
+		    </TS>
+		  </mapping>
+		</extend>
+		<store/>
+	      </assume>
+	      <tqExpr>
+		<aExpr/>
+		<type num="2"/>
+	      </tqExpr>
+	    </Sjudge>
+	    <models name="new">
+	      <assume/>
+	      <tvars name="beta"/>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <paren>
+		<let kind="x">
+		  <id/>
+		  <vExp/>
+		  <aExpr/>
+		</let>
+	      </paren>
+	      <type num="2"/>
+	      <unin>
+		<subst>
+		  <dCtset/>
+		  <tvars name="alpha"/>
+		  <tvars name="beta"/>
+		</subst>
+		<dCtset num="2"/>
+	      </unin>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+  </font>
+  <caption>Declarative Type Rules</caption>
+  </figure>

@@ -1347,6 +1347,7 @@
 <!ELEMENT tyRule               tyPre, tyConc> 
 <!ATTLIST tyRule
                                name      CDATA   #IMPLIED
+                               titleszo   CDATA   #IMPLIED
 >
 
 <!-- ======================================================================

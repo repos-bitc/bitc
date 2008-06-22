@@ -50,6 +50,10 @@
 	  <aVal/>
 	  <id/>
 	  <sLoc/>
+	  <Pair>
+	    <vExp/>
+	    <vExp/>
+	  </Pair>
 	</alternatives>
       </bnf>
       <bnf desc="Left Expr">

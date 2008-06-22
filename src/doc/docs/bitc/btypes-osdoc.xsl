@@ -3040,7 +3040,21 @@
 	  <!-- <xsl:attribute name="lineafter">yes</xsl:attribute> -->
 	  <xsl:element name="td">
 	    <xsl:element name="p">				    
-	      <xsl:apply-templates select="@name" mode="formula"/>	
+	      <xsl:choose>
+		<xsl:when test="@titlesz != ''">
+		  <xsl:element name="font">		
+		    <xsl:attribute name="size">
+		      <xsl:value-of select="@titlesz"/>
+		    </xsl:attribute>
+		    <xsl:element name="b">		
+		      <xsl:apply-templates select="@name" mode="formula"/>	
+		    </xsl:element>
+		  </xsl:element>
+		</xsl:when>
+		<xsl:otherwise>
+		  <xsl:apply-templates select="@name" mode="formula"/>
+		</xsl:otherwise>
+	      </xsl:choose>
 	    </xsl:element>
 	  </xsl:element>
 	  <xsl:element name="td">
@@ -3069,41 +3083,56 @@
 
   <!-- equation -->
   <xsl:template match="equation" mode="formula">
-    <xsl:element name="tr">
-      <xsl:attribute name="valign">top</xsl:attribute>
-      
-      <!-- LHS -->
-      <xsl:element name="td">
-	<xsl:attribute name="align">right</xsl:attribute>
+    <xsl:choose>
+      <xsl:when test="../@leftalign">
 	<xsl:apply-templates select="*[1]" mode="formula"/>
-      </xsl:element>
-      
-      <!-- the = sign -->
-      <xsl:element name="td">
+	<xsl:call-template name="print.space"/>
+	<xsl:call-template name="print.space"/>
 	<xsl:text>=</xsl:text>
-      </xsl:element>
-      
-      <!-- RHS -->      
-      <xsl:element name="td">
-	<xsl:attribute name="align">left</xsl:attribute>	  
-	<xsl:apply-templates select="*[2]" mode="formula"/>	
-      </xsl:element>
-      <xsl:if test="@sep">
-	<xsl:element name="br">
-	  <xsl:attribute name="latex.ptsz">
-	    <xsl:value-of select="@sep"/>
-	  </xsl:attribute>
+	<xsl:call-template name="print.space"/>
+	<xsl:call-template name="print.space"/>
+	<xsl:apply-templates select="*[2]" mode="formula"/>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:element name="tr">
+	  <xsl:attribute name="valign">top</xsl:attribute>
+	  
+	  <!-- LHS -->
+	  <xsl:element name="td">
+	    <xsl:attribute name="align">right</xsl:attribute>
+	    <xsl:apply-templates select="*[1]" mode="formula"/>
+	  </xsl:element>
+	  
+	  <!-- the = sign -->
+	  <xsl:element name="td">
+	    <xsl:text>=</xsl:text>
+	  </xsl:element>
+	  
+	  <!-- RHS -->      
+	  <xsl:element name="td">
+	    <xsl:attribute name="align">left</xsl:attribute>	  
+	    <xsl:apply-templates select="*[2]" mode="formula"/>	
+	  </xsl:element>
+	  <xsl:if test="@sep">
+	    <xsl:element name="br">
+	      <xsl:attribute name="latex.ptsz">
+		<xsl:value-of select="@sep"/>
+	      </xsl:attribute>
+	    </xsl:element>
+	  </xsl:if>          
 	</xsl:element>
-      </xsl:if>          
-    </xsl:element>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
   
   <xsl:template match="eqn-cnt" mode="formula">
     <xsl:element name="tr">
       <xsl:attribute name="valign">top</xsl:attribute>
       
-      <!-- STUB for LHS -->
+      <!-- LHS -->
       <xsl:element name="td">
+	<xsl:attribute name="align">right</xsl:attribute>	  
+	<xsl:apply-templates select="*[1]" mode="formula"/>	
       </xsl:element>
       
       <!-- STUB for the = sign -->
@@ -3113,7 +3142,7 @@
       <!-- RHS -->      
       <xsl:element name="td">
 	<xsl:attribute name="align">left</xsl:attribute>	  
-	<xsl:apply-templates select="*[1]" mode="formula"/>	
+	<xsl:apply-templates select="*[2]" mode="formula"/>	
       </xsl:element>
       <xsl:if test="@sep">
 	<xsl:element name="br">
@@ -3137,13 +3166,20 @@
 
   <!-- VEqns -->
   <xsl:template match="VEqns" mode="formula">
-    <xsl:element name="table">
-      <xsl:attribute name="valign">top</xsl:attribute>      
-      <xsl:attribute name="latex.center">yes</xsl:attribute>
-      <xsl:element name="tbody">
+    <xsl:choose>
+      <xsl:when test="@leftalign">
 	<xsl:apply-templates mode="formula"/>	
-      </xsl:element>
-    </xsl:element>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:element name="table">
+	  <xsl:attribute name="valign">top</xsl:attribute>      
+	  <xsl:attribute name="latex.center">yes</xsl:attribute>
+	  <xsl:element name="tbody">
+	    <xsl:apply-templates mode="formula"/>	
+	  </xsl:element>
+	</xsl:element>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
   
 <!-- ======================================================================
@@ -4571,7 +4607,7 @@
     <xsl:for-each select="*">
       <xsl:if test = "position() &gt; 1">
 	<xsl:if test = "position() = 2">
-	  <xsl:call-template name="print.space"/>
+ 	  <xsl:call-template name="print.space"/>
 	  <xsl:text>|</xsl:text>
 	  <xsl:call-template name="print.space"/>
 	</xsl:if>
@@ -4608,12 +4644,26 @@
 	<!-- OpRule Name -->
 	<xsl:if test="@name">
 	  <xsl:element name="tr">
-	    <xsl:attribute name="valign">top</xsl:attribute>
+ 	    <xsl:attribute name="valign">top</xsl:attribute>
 	    <xsl:element name="td">
 	      <xsl:element name="p">		
-		<xsl:element name="b">		
-		  <xsl:value-of select="@name"/>
-		</xsl:element>
+		<xsl:choose>
+		  <xsl:when test="@titlesz != ''">
+		    <xsl:element name="font">		
+		      <xsl:attribute name="size">
+			<xsl:value-of select="@titlesz"/>
+		      </xsl:attribute>
+		      <xsl:element name="b">		
+			<xsl:value-of select="@name"/>
+		      </xsl:element>
+		    </xsl:element>
+		  </xsl:when>
+		  <xsl:otherwise>
+		    <xsl:element name="b">		
+		      <xsl:value-of select="@name"/>
+		    </xsl:element>
+		  </xsl:otherwise>
+		</xsl:choose>
 	      </xsl:element>
 	    </xsl:element>
 	  </xsl:element>

@@ -218,6 +218,7 @@
 	  </rhs>
 	</equation>
 	<eqn-cnt>
+	  <lhs/>
 	  <rhs>
 	    <unin>
 	      <nothing/>
@@ -250,6 +251,7 @@
 	  </rhs>
 	</equation>
 	<eqn-cnt>
+	  <lhs/>
 	  <rhs>
 	    <unin>
 	      <nothing/>
@@ -263,6 +265,7 @@
 	  </rhs>
 	</eqn-cnt>
 	<eqn-cnt>
+	  <lhs/>
 	  <rhs>
 	    <unin>
 	      <nothing/>

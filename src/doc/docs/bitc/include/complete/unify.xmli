@@ -1,643 +1,923 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
-               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
-]>
- <figure id="hm_solve" fullwidth='yes' latex.placement="htb">
+<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" >
+<figure id="hy_unify" fullwidth='yes' latex.placement="tb">
   <font size="scriptsize">
     <btypes:TYPE
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="Unify">
-	  <tyPre>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<Xform name="real" isEntity="yes">
-		  <type num="1"/>
-		</Xform>
-		<Xform name="real" isEntity="yes">
-		  <type num="2"/>
-		</Xform>
-	      </eq>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <UNIFY>
-	      <type num="1"/>
-	      <type num="2"/>
-	      <aSubMap/>
-	    </UNIFY>
-	  </tyConc>
-	</tyRule>
-       <tyRule name="U-Refl">
-          <tyPre/>
-          <tyConc>
-            <Sjudge name="u">
-              <assume>
-                <Empty/>
-              </assume>
-              <eq>
-                <type/>
-                <type/>
-              </eq>
-            </Sjudge>
-          </tyConc>
-        </tyRule>
-	<tyRule name="U-Commut">
-	  <tyPre>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<type/>
-		<type dash="'"/>
-	      </eq>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<type dash="'"/>
-		<type/>
-	      </eq>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="U-Tvar">
-	  <tyPre>
-	    <neq>
+      <VEqns>
+	<!-- Empty -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <Empty/>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <Pair>
+	      <Empty/>
+	      <EmptySubst/>
+	    </Pair>
+	  </rhs>
+	</equation>
+	<!-- t = t -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <eq>
+		    <type/>
+		    <type/>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <aCtset/>
+	    </unf>
+	  </rhs>
+	</equation>
+	<!-- Commutativity: t1 = t2 -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <eq>
+		    <type num="1"/>
+		    <type num="2"/>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <unin>
+		<set>
+		  <eq>
+		    <type num="2"/>
+		    <type num="1"/>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>
+	<!-- a = t | a notin t -->
+	<equation sep="4pt">
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <eq>
+		    <tvar name="alpha"/>
+		    <type/>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <notin>
 	      <tvar name="alpha"/>
 	      <type/>
-	    </neq>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="u">
-	      <assume>
-		<SubMap>
-		  <tvar name="alpha"/>
-		  <type/>
-		</SubMap>
-	      </assume>
-	      <eq>
+	    </notin>
+	  </lhs>
+	  <rhs>
+	    <Pair>
+	      <dCtset/>
+	      <scomp>
+		<aSubMap num="a"/>
+		<aSubMap num="u"/>
+	      </scomp>	    
+	    </Pair>	 
+	    <eq>
+	      <aSubMap num="a"/>
+	      <SubMap>
 		<tvar name="alpha"/>
 		<type/>
-	      </eq>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="U-Mut">
-	  <tyPre>                
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<type num="1"/>
-		<type num="2"/>
-	      </eq>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<mutable>
-		  <type num="1"/>
-		</mutable>
-		<mutable>
-		  <type num="2"/>
-		</mutable>
-	      </eq>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="U-Fn">
-	  <tyPre>                
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>	      
-		<type num="1"/>
-		<type num="1" dash="'"/>
-	      </eq>
-	    </Sjudge>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap dash="'"/>
-	      </assume>
-	      <eq>
+	      </SubMap>
+	    </eq>
+	    <eq>
+	      <unf>
+		<Subst>
+		  <aSubMap num="a"/>
+		  <aCtset/>
+		</Subst>
+	      </unf>
+	      <Pair>
+		<dCtset/>
+		<aSubMap num="u"/>
+	      </Pair>
+	    </eq>
+	  </rhs>
+	</equation>
+	<!-- t1->t2 = t1' -> t2' -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <eq>
+		    <fn>		    
+		      <type num="a"/>		    		    
+		      <type num="r"/>		    
+		    </fn>
+		    <fn>		    
+		      <type num="a" dash="'"/>		    		    
+		      <type num="r" dash="'"/>
+		    </fn>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <type num="a"/>
+		    <type num="a" dash="'"/>
+		  </eq>
+		  <eq>
+		    <type num="r"/>
+		    <type num="r" dash="'"/>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>	
+	<!-- ^t1 = ^t2 -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <eq>
+		    <ref>
+		      <type num="1"/>
+		    </ref>
+		    <ref>
+		      <type num="2"/>
+		    </ref>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <type num="1"/>
+		    <type num="2"/>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>	
+	<!-- Mp1 = Mp2 -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <eq>
+		    <mutable>
+		      <ptype num="1"/>
+		    </mutable>
+		    <mutable>
+		      <ptype num="2"/>
+		    </mutable>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <ptype num="1"/>
+		    <ptype num="2"/>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>	
+	<!-- t1xt2 <= t1'xt2' -->
+	<equation sep="4pt">
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <eq>
+		    <pair>
+		      <type num="1"/>
+		      <type num="2"/>
+		    </pair>
+		    <pair>
+		      <type num="1" dash="'"/>
+		      <type num="2" dash="'"/>
+		    </pair>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <type num="1"/>
+		    <type num="1" dash="'"/>
+		  </eq>
+		  <eq>
+		    <type num="2"/>
+		    <type num="2" dash="'"/>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>	
+	<!-- 'a!p1 = 'b!p2 -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <eq>
+		    <mbTop>
+		      <tvar name="alpha"/>
+		      <ptype num="1"/>
+		    </mbTop>
+		    <mbTop>
+		      <tvar name="beta"/>
+		      <ptype num="2"/>
+		    </mbTop>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <minzT>
+		      <ptype num="1"/>
+		    </minzT>
+		    <minzT>
+		      <ptype num="2"/>
+		    </minzT>
+		  </eq>
+		  <eq>
+		    <tvar name="alpha"/>
+		    <tvar name="beta"/>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>	  
+	<!-- a!p1 = p2 -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <eq>
+		    <mbTop>
+		      <tvar/>
+		      <ptype/>
+		    </mbTop>
+		    <ptype dash="'"/>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <minzT>
+		      <ptype/>
+		    </minzT>
+		    <minzT>
+		      <ptype dash="'"/>
+		    </minzT>
+		  </eq>
+		  <eq>
+		    <tvar/>
+		    <ptype dash="'"/>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>
+	<!-- s1|p1 = s2|p2 -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <eq>
+		    <mbFull>
+		      <stype num="1"/>
+		      <ptype num="1"/>
+		    </mbFull>
+		    <mbFull>
+		      <stype num="2"/>
+		      <ptype num="2"/>
+		    </mbFull>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <minz>
+		      <ptype num="1"/>
+		    </minz>
+		    <minz>
+		      <ptype num="2"/>
+		    </minz>
+		  </eq>
+		  <eq>
+		    <stype num="1"/>
+		    <stype num="2"/>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>
+	<!-- s|p = P -->
+	<equation sep="4pt">
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <eq>
+		    <mbFull>
+		      <stype/>
+		      <ptype/>
+		    </mbFull>
+		    <Ptype/>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <unf>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <minz>
+		      <ptype/>
+		    </minz>
+		    <minz>
+		      <Ptype/>
+		    </minz>
+		  </eq>
+		  <eq>
+		    <stype/>
+		    <Ptype/>
+		  </eq>
+		</set>
+	      </unin>
+	    </unf>
+	  </rhs>
+	</equation>
+	<!-- k = K -->
+	<!-- There is no K = K rule because it is not necessary. 
+	These constraints are not generated independently.
+	They only arise as a consequence of adding them from
+	substitutions in the I-Let rule -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <eq>
+		    <lKind k="var"/>
+		    <lKind/>
+		  </eq>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <Pair>
+	      <dCtset/>
+	      <scomp>
+		<aSubMap num="k"/>
+		<aSubMap num="u"/>
+	      </scomp>	    
+	    </Pair>	  	    
+	    <eq>
+	      <aSubMap num="k"/>
+	      <SubMap>
+		<lKind k="var"/>
+		<lKind/>
+	      </SubMap>
+	    </eq>
+	  </rhs>
+	</equation>
+	<eqn-cnt>
+	  <lhs/>
+	  <rhs>
+	    <eq>
+	      <unf>
+		<Subst>
+		  <aSubMap num="k"/>
+		  <aCtset/>
+		</Subst>
+	      </unf>
+	      <Pair>
+		<dCtset/>
+		<aSubMap num="u"/>
+	      </Pair>
+	    </eq>
+	  </rhs>
+	</eqn-cnt>
+	<!-- *mx(t1), *mx(t2) --> 
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <pcst>
+		    <id/>
+		    <lKind k="mono"/>
+		    <type num="1"/>
+		  </pcst>
+		  <pcst>
+		    <id/>
+		    <lKind k="mono"/>
+		    <type num="2"/>
+		  </pcst>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </lhs>
+	  <rhs>
+	    <Pair>
+	      <unin>
+		<dCtset/>
 		<Subst>
 		  <aSubMap/>
-		  <type num="2"/>
-		</Subst>
-		<Subst>
-		  <aSubMap/>
-		  <type num="2" dash="'"/>
-		</Subst>
-	      </eq>
-	    </Sjudge>
-	    <models name="acl">
-	      <assume/>
-	      <compose>
-		<aSubMap/>
-		<aSubMap dash="'"/>
-	      </compose>
-	    </models>
-	  </tyPre>
-	  <tyConc> 
-	    <Sjudge name="u">
-	      <assume>
-		<compose>
-		  <aSubMap/>
-		  <aSubMap dash="'"/>
-		</compose>
-	      </assume>
-	      <eq>
-		<fn>
-		  <type num="1"/>
-		  <type num="2"/>
-		</fn>
-		<fn>
-		  <type num="1" dash="'"/>
-		  <type num="2" dash="'"/>
-		</fn>
-	      </eq>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="U-Floor">
-	  <tyPre>                
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<type num="1"/>
-		<type num="2"/>
-	      </eq>
+		  <set>
+		    <pcst>
+		      <id/>
+		      <lKind k="mono"/>
+		      <type num="1"/>
+		    </pcst>
+		    <pcst>
+		      <id/>
+		      <lKind k="mono"/>
+		      <type num="2"/>
+		    </pcst>
+		  </set>
+		</Subst>	
+	      </unin>	
 	      <aSubMap/>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<floor>
-		  <type num="1"/>
-		</floor>
-		<floor>
-		  <type num="2"/>
-		</floor>
-	      </eq>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="U-Ceil">
-	  <tyPre>                
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<type num="1"/>
-		<type num="2"/>
-	      </eq>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<ceil>
-		  <type num="1"/>
-		</ceil>
-		<ceil>
-		  <type num="2"/>
-		</ceil>
-	      </eq>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-      </Hrules> 
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="U-Ref">
-	  <tyPre>                
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<type num="1"/>
-		<type num="2"/>
-	      </eq>
-	    </Sjudge>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<ref>
-		  <type num="1"/>
-		</ref>
-		<ref>
-		  <type num="2"/>
-		</ref>
-	      </eq>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule> 
-	<tyRule name="U-Mb-Mb">
-	  <tyPre>                
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<inner>
-		  <type num="1" dash="'"/>
-		</inner>
-		<inner>
-		  <type num="2" dash="'"/>
-		</inner>
-	      </eq>
-	    </Sjudge>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap dash="'"/>
-	      </assume>
-	      <eq>
-		<Subst>
-		  <aSubMap/>
-		  <type num="1"/>
-		</Subst>
-		<Subst>
-		  <aSubMap/>
-		  <type num="2"/>
-		</Subst>
-	      </eq>
-	    </Sjudge>
-	    <models name="acl">
-	      <assume/>  
-	      <compose>
-		<aSubMap/>
-		<aSubMap dash="'"/>
-	      </compose>
-	    </models>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="u">
-	      <assume>
-		<compose>
-		  <aSubMap/>
-		  <aSubMap dash="'"/>
-		</compose>
-	      </assume>
-	      <eq>
-		<mbpair>
-		  <type num="1"/>
-		  <type num="1" dash="'"/>
-		</mbpair>
-		<mbpair>
-		  <type num="2"/>
-		  <type num="2" dash="'"/>
-		</mbpair>
-	      </eq>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>     
+	    </Pair>
 	    <eq>
+	      <unf>
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <eq>
+		      <type num="1"/>
+		      <type num="2"/>
+		    </eq>
+		  </set>
+		</unin>
+	      </unf>
+	      <Pair>
+		<dCtset/>
+		<aSubMap/>
+	      </Pair>
+	    </eq>
+	  </rhs>
+	</equation>
+	<!-- *Px(t) [](t)  --> 
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <pcst>
+		    <id/>
+		    <lKind k="poly"/>
+		    <type/>
+		  </pcst>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <concrete>
 	      <type/>
-	      <mbpair>
-		<type num="1"/>
-		<type num="2"/>
-	      </mbpair>
-	    </eq>
-	  </tyPre>
-	  <tyPre>
-	    <eq>
-	      <inner>
-		<type num="2"/>
-	      </inner>
-	      <type num="2" dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <inner>
-		<type/>
-	      </inner>
-	      <type num="2" dash="'"/>
-	    </eq>
-	  </tyConc>
-	</tyRule>	
-      </Hrules> 
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule name="U-Mb-Oth">
-	  <tyPre>
-	    <neq>
-	      <type num="2"/>
-	      <mbpair>
-		<type num="3"/>
-		<type num="3" dash="'"/>
-	      </mbpair>
-	    </neq>
-	    <neq>
-	      <type num="2"/>
-	      <tvar name="alpha"/>
-	    </neq>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <eq>
-		<inner>
-		  <type num="1" dash="'"/>
-		</inner>
-		<minz>
-		  <type num="2"/>
-		</minz>
-	      </eq>
-	    </Sjudge>
-	    <Sjudge name="u">
-	      <assume>
-		<aSubMap dash="'"/>
-	      </assume>
-	      <eq>
+	    </concrete>
+	  </lhs>
+	  <rhs>
+	    <Pair>
+	      <unin>
+		<dCtset/>
 		<Subst>
 		  <aSubMap/>
-		  <type num="1"/>
-		</Subst>
-		<Subst>
-		  <aSubMap/>
-		  <type num="2"/>
-		</Subst>
-	      </eq>
-	    </Sjudge>
-	    <models name="acl">
-	      <assume/>
-	      <compose>
+		  <set>
+		    <pcst>
+		      <id/>
+		      <lKind k="poly"/>
+		      <type/>
+		    </pcst>
+		  </set>
+		</Subst>	
+	      </unin>	
+	      <aSubMap/>
+	    </Pair>
+	    <eq>
+	      <unf>
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <eq>
+		      <type/>
+		      <minzD>
+			<type/>
+		      </minzD>
+		    </eq>
+		  </set>
+		</unin>
+	      </unf>
+	      <Pair>
+		<dCtset/>
 		<aSubMap/>
-		<aSubMap dash="'"/>
-	      </compose>
-	    </models>
-	  </tyPre>
-	  <tyConc>
-	    <Sjudge name="u">
-	      <assume>
-		<compose>
-		  <aSubMap/>
-		  <aSubMap dash="'"/>
-		</compose>
-	      </assume>
-	      <eq>
-		<mbpair>
-		  <type num="1"/>
-		  <type num="1" dash="'"/>
-		</mbpair>
-		<type num="2"/>
-	      </eq>
-	    </Sjudge>
-	  </tyConc>
-	</tyRule>
-	<tyRule name="">
-	  <tyPre>
-	    <neq>
+	      </Pair>
+	    </eq>
+	  </rhs>
+	</equation>
+	<!-- *kx(Mt) --> 
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <pcst>
+		    <id/>
+		    <lKind k="var"/>
+		    <type/>
+		  </pcst>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <pred name="Mut">
 	      <type/>
-	      <mbpair>
-		<type num="1"/>
-		<type num="2"/>
-	      </mbpair>
-	    </neq>
-	  </tyPre>
-	  <tyConc>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <Pair>
+	      <dCtset/>
+	      <scomp>
+		<aSubMap num="k"/>
+		<aSubMap num="u"/>
+	      </scomp>
+	    </Pair>
 	    <eq>
-	      <inner>
-		<type/>
-	      </inner>
-	      <minz>
-		<type/>
-	      </minz>
+	      <aSubMap num="k"/>
+	      <SubMap>
+		<lKind k="var"/>
+		<lKind k="mono"/>
+	      </SubMap>
 	    </eq>
-	  </tyConc>
-	</tyRule>
-      </Hrules> 
-      <Hrules rowsep="4pt" colsep="2">
-	<tyRule>
-	  <tyPre/>
-	  <tyConc>
 	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<tvar name="alpha"/>
-	      </Xform>
+	      <unf>
+		<Subst>
+		  <aSubMap num="k"/>
+		  <unin>
+		    <set>
+		      <pcst>
+			<id/>
+			<lKind k="var"/>
+			<type/>
+		      </pcst>
+		    </set>
+		    <aCtset/>
+		  </unin>
+		</Subst>
+	      </unf>
+	      <Pair>
+		<dCtset/>
+		<aSubMap num="u"/>
+	      </Pair>
+	    </eq>
+	  </rhs>
+	</equation>
+	<!-- *kx(t1), *kx(t2)  t1 !~ t2 -->
+	<equation sep="4pt">
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <pcst>
+		    <id/>
+		    <lKind k="var"/>
+		    <type num="1"/>
+		  </pcst>
+		  <pcst>
+		    <id/>
+		    <lKind k="var"/>
+		    <type num="2"/>
+		  </pcst>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <eq>
+	      <unf>
+		<unin>
+		  <set>
+		    <eq>		    
+		      <type num="1"/>
+		      <type num="2"/>
+		    </eq>
+		  </set>
+		  <aCtset/>
+		</unin>
+	      </unf>
+	      <error/>
+	    </eq>
+	  </lhs>
+	  <rhs>
+	    <Pair>
+	      <dCtset/>
+	      <scomp>
+		<aSubMap num="k"/>
+		<aSubMap num="u"/>
+	      </scomp>
+	    </Pair>
+	    <eq>
+	      <aSubMap num="k"/>
+	      <SubMap>
+		<lKind k="var"/>
+		<lKind k="poly"/>
+	      </SubMap>
+	    </eq>
+	    <eq>
+	      <unf>
+		<Subst>
+		  <aSubMap num="k"/>
+		  <unin>
+		    <set>
+		      <pcst>
+			<id/>
+			<lKind k="var"/>
+			<type num="1"/>
+		      </pcst>
+		      <pcst>
+			<id/>
+			<lKind k="var"/>
+			<type num="2"/>
+		      </pcst>
+		    </set>
+		    <aCtset/>
+		  </unin>
+		</Subst>
+	      </unf>
+	      <Pair>
+		<dCtset/>
+		<aSubMap num="u"/>
+	      </Pair>
+	    </eq>
+	  </rhs>
+	</equation>	
+	<!-- Error (unhandled, un-unifiable) -->
+	<equation>
+	  <lhs>
+	    <unf>
+	      <unin excl="yes">
+		<constraint/>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	    <notin>
+	      <constraint/>
+	      <unin>
+		<aCtset num="v"/>
+		<aCtset num="s"/>
+		<aCtset num="p"/>
+	      </unin>
+	    </notin>
+	  </lhs>
+	  <rhs>
+	    <error/>
+	  </rhs>
+	</equation>
+      </VEqns>
+      <Hrules>
+	<eq>
+	  <aCtset num="v"/>
+	  <grouping>
+	    <Forall>
+	      <collection>
+		<tvar/>
+		<stype/>
+		<ptype/>
+		<type/>
+		<type dash="'"/>
+	      </collection>
+	    </Forall>
+	    <ST/>
+	    <notin>
 	      <tvar name="alpha"/>
-	    </eq>      
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre/>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<bool/>
-	      </Xform>
-	      <floor>
-		<bool/>
-	      </floor>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre/>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<unit/>
-	      </Xform>
-	      <floor>
-		<unit/>
-	      </floor>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<type/>
-	      </Xform>
 	      <type dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<mutable>
-		  <type/>
-		</mutable>
-	      </Xform>
-	      <ceil>
-		<mutable>
-		  <type dash="'"/>
-		</mutable>
-	      </ceil>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
+	    </notin>
+	    <space/>
+	    <text content="."/>
+	    <space/>	      
+	    <set>
+	      <eq>
 		<type/>
-	      </Xform>
-	      <type dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<ref>
-		  <type/>
-		</ref>
-	      </Xform>
-	      <floor>
-		<ref>
-		  <type dash="'"/>
-		</ref>
-	      </floor>
-	    </eq>
-	  </tyConc>
-	</tyRule>
+		<type/>
+	      </eq>
+	      <eq>
+		<tvar/>
+		<type dash="'"/>
+	      </eq>
+	      <eq>
+		<type dash="'"/>
+		<tvar/>
+	      </eq>
+	      <eq>
+		<mbTop>
+		  <tvar/>
+		  <ptype/>
+		</mbTop>
+		<type/>
+	      </eq>
+	      <eq>
+		<type/>
+		<mbTop>
+		  <tvar/>
+		  <ptype/>
+		</mbTop>
+	      </eq>
+	      <eq>
+		<mbFull>
+		  <stype/>
+		  <ptype/>
+		</mbFull>
+		<type/>
+	      </eq>
+	      <eq>
+		<type/>
+		<mbFull>
+		  <stype/>
+		  <ptype/>
+		</mbFull>
+	      </eq>
+	    </set>
+	  </grouping>
+	</eq>
       </Hrules>
-      <Hrules colsep="2">
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
+      <Hrules>
+	<eq>
+	  <aCtset num="s"/>
+	  <grouping>
+	    <Forall>
+	      <collection>
+		<ptype/>
+		<type/>
+		<type dash="'"/>
 		<type num="1"/>
-	      </Xform>
-	      <type num="1" dash="'"/>
-	    </eq>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<type num="2"/>
-	      </Xform>
-	      <type num="2" dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<fn>
-		  <type num="1"/>
-		  <type num="2"/>
-		</fn>
-	      </Xform>
-	      <floor>
-		<fn>
-		  <type num="1" dash="'"/>
-		  <type num="2" dash="'"/>
-		</fn>
-	      </floor>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<type num="1"/>
-	      </Xform>
-	      <type num="1" dash="'"/>
-	    </eq>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<type num="2"/>
-	      </Xform>
-	      <type num="2" dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<mbpair>
-		  <type num="1"/>
-		  <type num="2"/>
-		</mbpair>
-	      </Xform>
-	      <mbpair>
 		<type num="1" dash="'"/>
-		<type num="2" dash="'"/>
-	      </mbpair>
-	    </eq>
-	  </tyConc>
-	</tyRule>           
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<minz>
+	      </collection>
+	    </Forall>
+	    <space/>	      
+	    <text content="."/>
+	    <space/>	      
+	    <set>
+	      <eq>
+		<fn>
 		  <type/>
-		</minz>
-	      </Xform>
-	      <type dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<floor>
+		  <type num="1"/>
+		</fn>
+		<fn>
+		  <type dash="'"/>
+		  <type num="1" dash="'"/>
+		</fn>
+	      </eq>
+	      <eq>
+		<ref>
 		  <type/>
-		</floor>
-	      </Xform>
-	      <floor>
-		<type dash="'"/>	      
-	      </floor>
-	    </eq>
-	  </tyConc>
-	</tyRule>
-	<tyRule>
-	  <tyPre>
-	    <eq>
-	      <Xform name="real" isEntity="yes">	      
-		<maxz>
-		  <type/>
-		</maxz>
-	      </Xform>
-	      <type dash="'"/>
-	    </eq>
-	  </tyPre>
-	  <tyConc>
-	    <eq>
-	      <Xform name="real" isEntity="yes">
-		<ceil>
-		  <type/>
-		</ceil>
-	      </Xform>
-	      <type dash="'"/>
-	    </eq>
-	  </tyConc>
-	</tyRule>
+		</ref>
+		<ref>
+		  <type dash="'"/>
+		</ref>
+	      </eq>
+	      <eq>
+		<mutable>
+		  <ptype/>
+		</mutable>
+		<mutable>
+		  <ptype dash="'"/>
+		</mutable>
+	      </eq>
+	    </set>
+	  </grouping>
+	</eq>
+      </Hrules>
+      <Hrules>
+	<eq>
+	  <aCtset num="p"/>
+	  <grouping>
+	    <Forall>
+	      <collection>
+		<id/>
+		<lKind k="var"/>
+		<lKind/>
+		<type/>
+		<type dash="'"/>
+	      </collection>
+	    </Forall>
+	    <ST/>
+	    <NOT>
+	      <pred name="Mut">
+		<type dash="'"/>
+	      </pred>
+	    </NOT>
+	    <space/>
+	    <textit content="."/>
+	    <space/>
+	    <set>
+	      <eq>
+		<lKind k="var"/>
+		<lKind/>
+	      </eq>
+	      <pcst>
+		<id/>
+		<lKind k="mono"/>
+		<type/>
+	      </pcst>
+	      <pcst>
+		<id/>
+		<lKind k="poly"/>
+		<type dash="'"/>
+	      </pcst>
+	      <pcst>
+		<id/>
+		<lKind k="var"/>
+		<type/>
+	      </pcst>
+	    </set>
+	  </grouping>
+	</eq>
       </Hrules>
     </btypes:TYPE>
   </font>
-  <caption><font size="small">Unification Rules.</font></caption>
+  <caption>Unification Algorithm</caption>
 </figure>

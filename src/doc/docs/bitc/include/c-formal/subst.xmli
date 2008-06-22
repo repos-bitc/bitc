@@ -400,33 +400,26 @@
 	  <eq>
 	    <Subst>
 	      <aSubMap/>
-	      <type num="g"/>
+	      <type/>
 	    </Subst>
-	    <type num="g" dash="'"/>
-	  </eq>
-	  <eq>
-	    <Subst>
-	      <aSubMap/>
-	      <type num="s"/>
-	    </Subst>
-	    <type num="s" dash="'"/>
+	    <type dash="'"/>
 	  </eq>
 	</tyPre>
 	<tyConc>
 	  <eq>
 	    <Subst>
 	      <aSubMap/>
-	      <Pcst>
+	      <pcst>
+		<id/>
 		<lKind/>
-		<type num="g"/>
-		<type num="s"/>
-	      </Pcst>
+		<type/>
+	      </pcst>
 	    </Subst>
-	    <Pcst>
+	    <pcst>
+	      <id/>
 	      <lKind dash="'"/>
-	      <type num="g" dash="'"/>
-	      <type num="s" dash="'"/>
-	    </Pcst>
+	      <type dash="'"/>
+	    </pcst>
 	  </eq>
 	</tyConc>
       </tyRule>

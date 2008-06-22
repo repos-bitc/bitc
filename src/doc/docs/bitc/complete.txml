@@ -1733,22 +1733,11 @@
   </sect1>
   <sect1 id="formal">
     <title>Formalization</title>
-    <p>
-      We now formalize our type system and inference
-      algorithm. Due to space limitations, we will limit our
-      presentation to the following subset of 
-      <btypes:TYPE>
-	<language/>
-      </btypes:TYPE>, called
-      <btypes:TYPE>
-	<language dash="'"/>
-      </btypes:TYPE>.
-    </p>
-    <xi:include href="include/core/grammar.xmli"/>
+    <xi:include href="include/complete/grammar.xmli"/>
     <p>      
       The calculus of 
       <btypes:TYPE>
-	<language dash="'"/>
+	<language/>
       </btypes:TYPE> defines two kinds of
       locations: stack locations holding unboxed values, and heap
       locations holding boxed values. Heap locations are first class
@@ -1790,10 +1779,10 @@
         <let kind="p"/>
       </btypes:TYPE>.      
     </p>
-    <xi:include href="include/core/opsem.xmli"/>
+    <xi:include href="include/complete/opsem.xmli"/>
     <p>
-      <leadin>Dynamic Semantics</leadin>
-      The system state is represented by the triple 
+      <leadin>Dynamic Semantics</leadin> The system state is
+      represented by the triple
       <btypes:TYPE>
 	<opState>
 	  <stack/>
@@ -2038,7 +2027,8 @@
       lazily. The meta-constructors are also idempotent in our
       algebra of types.
     </p>
-    <xi:include href="include/core/decl.xmli"/>
+    <xi:include href="include/complete/subst.xmli"/>
+    <xi:include href="include/complete/type.xmli"/>
     <p>    
       <leadin>Declarative Type Rules</leadin>
       The declarative type rules for our core language are given in 
@@ -2564,9 +2554,8 @@
 	</btypes:TYPE>.
       </font>
     </p>
-    <xi:include href="include/core/infer.xmli"/>
-    <xi:include href="include/core/unify.xmli"/>
-    <xi:include href="include/core/solve.xmli"/>
+    <xi:include href="include/complete/infer.xmli"/>
+    <xi:include href="include/complete/unify.xmli"/>
     <p>
       <leadin>Type Inference Algorithm</leadin>	
     </p>
