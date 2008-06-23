@@ -201,7 +201,7 @@
       The type system features a new model of mutability which is
       expressive and has sound semantics. In order to support unboxed
       mutability and principal polymorphic type inference, the type
-      system uses types that are polymorphic <em>over</em> mutability
+      system uses types that are range over mutability
       and polymorphism itself. We also present a sound and complete
       type inference system through an extension of the
       Hindley-Milner algorithm&nbsp;<cite ref="Milner1978W"/>. 
@@ -310,6 +310,7 @@
       dereference its target.  
     </p>
     <p>
+      <font color="purple">
       <btypes:TYPE>
 	<language/>
       </btypes:TYPE> does
@@ -324,7 +325,9 @@
       There are examples of high performance security kernels
       that have been constructed without taking the address of stack
       variables, even though they rely on stack allocation and
-      mutation for correctness and performance&nbsp;<cite ref="shapiro1999EROS"/>. 
+      mutation for correctness and 
+      performance&nbsp;<cite ref="shapiro1999EROS"/>. 
+      </font>
     </p>
   </sect1>
   <sect1 id="mut_model">
@@ -837,15 +840,6 @@
 	  presented a set of equations and inequations.
 	</p>
       </li>
-      <li>
-	<p>
-	  It must not require whole program analysis. Whole program
-	  inference poses scalability problems due to lack of separate
-	  compilation, and can result in surprising behaviour if the
-	  inferred types change due to modifications in a distant part
-	  of the code base. 
-	</p>
-      </li>
     </ol>
     <p>
       In order to address the above requirements, we propose a
@@ -1196,28 +1190,6 @@
     </font>
     <br/>
     <p>
-      The grammar does not allow types such as
-      <btypes:TYPE>
-	<mutable>
-	  <paren>
-	    <mbTop>
-	      <tvar/>
-	      <bool/>
-	    </mbTop>
-	  </paren>
-	</mutable>
-      </btypes:TYPE>,
-      <btypes:TYPE>
-	<mbTop>
-	  <tvar name="beta"/>
-	  <mbFull>
-	    <tvar/>
-	    <bool/>
-	  </mbFull>
-	</mbTop>
-      </btypes:TYPE> <foreignphrase>etc.</foreignphrase>
-    </p>
-    <p>
       By embedding constraints within types, we obtain an elegant
       representation of constrained types that can be intuitively 
       presented to the user. For example, the expression
@@ -1318,7 +1290,28 @@
       </btypes:TYPE>, even if 
       <btypes:TYPE>
 	<tvar name="beta"/>
-      </btypes:TYPE> later resolves to a more concrete (ex: pair) type.
+      </btypes:TYPE> later resolves to a more concrete (ex: pair)
+      type.
+      The grammar does not allow unnecessarily complex types such as
+      <btypes:TYPE>
+	<mutable>
+	  <paren>
+	    <mbTop>
+	      <tvar/>
+	      <bool/>
+	    </mbTop>
+	  </paren>
+	</mutable>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<mbTop>
+	  <tvar name="beta"/>
+	  <mbFull>
+	    <tvar/>
+	    <bool/>
+	  </mbFull>
+	</mbTop>
+      </btypes:TYPE> <foreignphrase>etc.</foreignphrase>
     </p>
     <p>
       Due to copy compatibility at argument and return positions, two
@@ -1356,44 +1349,643 @@
       </btypes:TYPE>.
     </p>
     <p>
+      <btypes:TYPE> 
+	<language/>
+      </btypes:TYPE> is a let-polymorphic
+      language. At a let boundary, we would like to quantify over
+      variables that range over mutability, in order to achievve
+      mutability polymorphism. The next sections discuss certain
+      complications that arise during the inference of such types,
+      present our solution to the problem.
+    </p>
+    <p>
+      <leadin>Soundness implications</leadin>
+      Like ML,
       <btypes:TYPE>
 	<language/>
-      </btypes:TYPE> is a let-polymorphic language. At a let boundary,
-      we can quantify over variables that range over mutability, thus
-      achieving mutability polymorphism. For example,
-      in the expression
-      <btypes:TYPE> 
+      </btypes:TYPE> enforces the
+      value restriction&nbsp;<cite ref="wrightValRes1995"/> to
+      preserve soundness of polymorphic typing. This
+      means that the type of 
+      <btypes:TYPE>
+	<id/>
+      </btypes:TYPE> 
+      in 
+      <btypes:TYPE>
 	<let>
-	  <id name="f"/>
+	  <id/>
+	  <aExpr num="1"/>
+	  <aExpr num="2"/>
+	</let>
+      </btypes:TYPE> can only be generalized if 
+      <btypes:TYPE>
+	<aExpr num="1"/>
+      </btypes:TYPE> is an <em>immutable</em> syntactic value.
+      <!-- As is customary,
+      values 
+      <btypes:TYPE>
+	<aVal/>
+      </btypes:TYPE>, 
+      Variables, and pairs of the above are considered syntactic
+      values in
+      <btypes:TYPE>
+	<language/>
+      </btypes:TYPE>. -->
+      Due to the presence of unboxed mutability, we must add the
+      immutable qualifier to the syntactic value clause.
+      For example, in the expression
+      <btypes:TYPE>
+	<let>
+	  <id name="id"/>
 	  <lambda>
 	    <id/>
-	    <if>
-	      <deref>
-		<id/>
-	      </deref>
-	      <Unit/>
-	      <Unit/>
-	    </if>
+	    <id/>
 	  </lambda>
 	</let>
-      </btypes:TYPE>,
-      <btypes:TYPE> 
-	<id name="f"/>
-      </btypes:TYPE> can be given the type
-      <btypes:TYPE> 
+      </btypes:TYPE>, the type of 
+      <btypes:TYPE>
+	<id name="id"/>
+      </btypes:TYPE> before generalization is
+      <btypes:TYPE>
+	<mbFull>
+	  <tvar name="beta"/>
+	  <fn>
+	    <tvar/>
+	    <tvar/>
+	  </fn>
+	</mbFull>
+      </btypes:TYPE>. However, giving
+      <btypes:TYPE>
+	<id name="id"/>
+      </btypes:TYPE> the generalized type
+      <btypes:TYPE>
 	<TS>
+	  <grouping>
+	    <tvar name="alpha"/>
+	    <tvar name="beta"/>
+	  </grouping>
+	  <mbFull>
+	    <tvar name="beta"/>
+	    <fn>
+	      <tvar/>
+	      <tvar/>
+	    </fn>
+	  </mbFull>
+	</TS>
+      </btypes:TYPE> is unsound, since it permits
+      expressions such as 
+      <btypes:TYPE>
+	<let>
+	  <id name="id"/>
+	  <lambda>
+	    <id/>
+	    <id/>
+	  </lambda>
+	  <Pair>
+	    <assign>
+	      <id name="id"/>
+	      <lambda>
+		<id/>
+		<true/>
+	      </lambda>
+	    </assign>
+	    <apply>
+	      <id name="id"/>
+	      <Unit/>
+	    </apply>
+	  </Pair>
+	</let>
+      </btypes:TYPE> to type check.
+      We can give
+      <btypes:TYPE>
+	<id name="id"/>
+      </btypes:TYPE> either the polymorphic type
+      <btypes:TYPE>
+	<forall>
 	  <tvar/>
 	  <fn>
-	    <ref>
-	      <mbFull>
-		<tvar/>
-		<bool/>
-	      </mbFull>
-	    </ref>
-	    <unit/>
+	    <tvar/>
+	    <tvar/>
 	  </fn>
-	</TS>
-      </btypes:TYPE>. Now, if
+	</forall>
+      </btypes:TYPE>, or the monomorphic type
+      <btypes:TYPE>
+	<mbpair>
+	  <tvar name="beta"/>
+	  <fn>
+	    <tvar/>
+	    <tvar/>
+	  </fn>
+	</mbpair>	  
+      </btypes:TYPE>. However, neither is a principal type for
+      <btypes:TYPE>
+	<id name="id"/>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      <leadin>Overloading Polymorphism</leadin>
+      Due to the above interaction of polymorphism and unboxed
+      mutability, a traditional HM-style inference algorithm cannot 
+      defer decisions about the mutability
+      of types past their generalization. Therefore, current
+      algorithms fix the mutability of types before generalization
+      based on certain heuristics &mdash; thus sacrificing 
+      completeness&nbsp;<cite ref="sridhar2006plos"/>. 
+      In order to alliveate this problem, we propose the use of 
+      constrained types that are range over both mutability and
+      polymorphism.
+    </p>
+    <p>
+      We introduce a new form of constraint
+      <btypes:TYPE> 
+	<pcst>
+	  <id/>
+	  <lKind/>
+	  <type/>
+	</pcst>
+      </btypes:TYPE>, which enforces consistency restrictions on
+      instantiations of generalized types.
+      The constraint 
+      <btypes:TYPE> 
+	<pcst>
+	  <id/>
+	  <lKind/>
+	  <type/>
+	</pcst>
+      </btypes:TYPE> mandates that the identifier 
+      <btypes:TYPE> 
+	<id/>
+      </btypes:TYPE> can be instantiated according to the kind
+      <btypes:TYPE> 
+	<lKind/>
+      </btypes:TYPE>, where
+      <btypes:TYPE> 
+	<lKind/>
+      </btypes:TYPE>&nbsp;=&nbsp;<btypes:TYPE> 
+	<lKind k="mono"/>
+      </btypes:TYPE>&nbsp;or&nbsp;<btypes:TYPE> 
+	<lKind k="poly"/>
+      </btypes:TYPE>. If 
+      <btypes:TYPE> 
+	<eq>
+	  <lKind/>
+	  <lKind k="mono"/>
+	</eq>
+      </btypes:TYPE>, the instantiation of 
+      <btypes:TYPE> 
+	<id/>
+      </btypes:TYPE> must be monomorphic. That is, all uses of 
+      <btypes:TYPE> 
+	<id/>
+      </btypes:TYPE> must instantiate
+      <btypes:TYPE> 
+	<type/>
+      </btypes:TYPE> to the same type
+      <btypes:TYPE> 
+	<type dash="'"/>
+      </btypes:TYPE>. Here, 
+      <btypes:TYPE> 
+	<type dash="'"/>
+      </btypes:TYPE> is permitted to be a mutable type. 
+      If 
+      <btypes:TYPE> 
+	<eq>
+	  <lKind/>
+	  <lKind k="poly"/>
+	</eq>
+      </btypes:TYPE>, different uses of 
+      <btypes:TYPE> 
+	<id/>
+      </btypes:TYPE> can instantiate 
+      <btypes:TYPE> 
+	<type/>
+      </btypes:TYPE> differently, but all such instantiations must be
+      immutable.
+      At the point of definition (<progident>let</progident>), if the
+      exact instantiation kind of a variable is unknown, we add the
+      constraint
+      <btypes:TYPE> 
+	<pcst>
+	  <id/>
+	  <lKind k="var"/>
+	  <type/>
+	</pcst>
+      </btypes:TYPE>, where
+      <btypes:TYPE> 
+	<lKind k="var"/>
+      </btypes:TYPE> ranges over
+      <btypes:TYPE> 
+	<lKind k="mono"/>
+      </btypes:TYPE> and
+      <btypes:TYPE> 
+	<lKind k="poly"/>
+      </btypes:TYPE>. The correct instantiation kind can later be
+      determined based on the uses of 
+      <btypes:TYPE> 
+	<id/>
+      </btypes:TYPE>, and consistency semantics enforced accordingly.
+    </p>
+    <p>
+      In this approach, the definition of 
+      <btypes:TYPE> 
+	<id name="id"/>
+      </btypes:TYPE> will be given the principal constrained type:
+      <br/>
+      <btypes:TYPE> 
+	<space n="8"/>
+	<let>
+	  <id name="id"/>
+	  <lambda>
+	    <id/>
+	    <id/>
+	  </lambda>
+	  <aExpr/>
+	</let>
+	<space n="10"/>
+	<tqExpr>
+	  <id name="id"/>
+	  <btypes:TYPE>
+	    <TS>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </grouping>
+	      <ctype>
+		<mbFull>
+		  <tvar name="beta"/>
+		  <fn>
+		    <tvar/>
+		    <tvar/>
+		  </fn>
+		</mbFull>
+		<set>
+		  <pcst>
+		    <id name="id"/>
+		    <lKind k="var"/>
+		    <mbFull>
+		      <tvar name="beta"/>
+		      <fn>
+			<tvar/>
+			<tvar/>
+		      </fn>
+		    </mbFull>
+		  </pcst>
+		</set>
+	      </ctype>
+	    </TS>
+	  </btypes:TYPE>
+	</tqExpr>
+      </btypes:TYPE>
+      <br/>
+      Every time
+      <btypes:TYPE> 
+	<id name="id"/>
+      </btypes:TYPE> is instantiated to type
+      <btypes:TYPE> 
+	<type dash="'"/>
+      </btypes:TYPE> in
+      <btypes:TYPE> 
+	<aExpr/>
+      </btypes:TYPE>, the constraints
+      <btypes:TYPE> 
+	<pcst>
+	  <id name="id"/>
+	  <lKind k="var"/>
+	  <type dash="'"/>
+	</pcst>
+      </btypes:TYPE> are collected.
+      <btypes:TYPE> 
+	<aExpr/>
+      </btypes:TYPE> is declared type correct only if the set of all
+      instantiated constraints are consistent for some
+      <btypes:TYPE> 
+	<lKind k="var"/>
+      </btypes:TYPE>. Note that we do not quantify over
+      <btypes:TYPE> 
+	<lKind k="var"/> 
+      </btypes:TYPE>.
+    </p> 
+    <font size="small">
+    <table fullwidth="yes" latex.colspec="c|c|c">
+      <tbody>
+	<tr lineafter="yes">
+	  <td>
+	    <p>Example of
+	      <btypes:TYPE> 
+		<aExpr/>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      Constraint set
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      Kind/Type asign.
+	    </p>
+	  </td>
+	</tr>
+	<!-- Row -->
+	<tr lineafter="yes">
+	  <td>
+	    <p>
+	      <btypes:TYPE> 
+		<Pair>
+		  <apply>
+		    <id name="id"/>
+		    <true/>
+		  </apply>
+		  <apply>
+		    <id name="id"/>
+		    <Unit/>
+		  </apply>
+		</Pair>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE> 
+		<set>
+		  <pcst>
+		    <id name="id"/>
+		    <lKind k="var"/>
+		    <fn>
+		      <bool/>
+		      <bool/>
+		    </fn>
+		  </pcst>
+		  <pcst>
+		    <id name="id"/>
+		    <lKind k="var"/>
+		    <fn>
+		      <unit/>
+		      <unit/>
+		    </fn>
+		  </pcst>
+		</set>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE> 
+		<mapping>
+		  <lKind k="var"/>
+		  <lKind k="poly"/>
+		</mapping>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	</tr>
+	<!-- Row -->
+	<tr lineafter="yes">
+	  <td>
+	    <p>
+	      <btypes:TYPE> 
+		<assign>
+		  <id name="id"/>
+		  <lambda>
+		    <id/>
+		    <id/>
+		  </lambda>
+		</assign>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE> 
+		<set>
+		  <pcst>
+		    <id name="id"/>
+		    <lKind k="var"/>
+		    <mutable>
+		      <fn>
+			<tvar name="gamma"/>
+			<tvar name="gamma"/>
+		      </fn>
+		    </mutable>
+		  </pcst>
+		</set>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE> 
+		<mapping>
+		  <lKind k="var"/>
+		  <lKind k="mono"/>
+		</mapping>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	</tr>
+	<!-- Row -->
+	<tr lineafter="yes">
+	  <td>
+	    <p>
+	      <btypes:TYPE> 
+		<Pair>
+		  <apply>
+		    <id name="id"/>
+		    <true/>
+		  </apply>
+		  <assign>
+		    <id name="id"/>
+		    <lambda>
+		      <id/>
+		      <Unit/>
+		    </lambda>
+		  </assign>
+		</Pair>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE> 
+		<set>
+		  <pcst>
+		    <id name="id"/>
+		    <lKind k="var"/>
+		    <fn>
+		      <bool/>
+		      <bool/>
+		    </fn>
+		  </pcst>
+		  <pcst>
+		    <id name="id"/>
+		    <lKind k="var"/>
+		    <mutable>
+		      <fn>
+			<unit/>
+			<unit/>
+		      </fn>
+		    </mutable>
+		  </pcst>
+		</set>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <progident>Type Error</progident>
+	    </p>
+	  </td>
+	</tr>
+	<!-- Row -->
+	<tr lineafter="yes">
+	  <td>
+	    <p>
+	      <btypes:TYPE> 
+		<apply>
+		  <id name="id"/>
+		  <id name="id"/>
+		</apply>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE> 
+		<set>
+		  <pcst>
+		    <id name="id"/>
+		    <lKind k="var"/>
+		    <mbFull>
+		      <tvar name="beta" num="1"/>
+		      <fn>
+			<tvar name="alpha" num="1"/>
+			<tvar name="alpha" num="1"/>
+		      </fn>
+		    </mbFull>
+		  </pcst>
+		  <pcst>
+		    <id name="id"/>
+		    <lKind k="var"/>
+		    <mbFull>
+		      <tvar name="beta" num="2"/>
+		      <fn>
+ 			<tvar name="alpha" num="2"/>
+			<tvar name="alpha" num="2"/>
+		      </fn>
+		    </mbFull>
+		  </pcst>
+		</set>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE> 
+		<mapping>
+		  <lKind k="var"/>
+		  <grouping>
+		    <lKind k="mono"/>
+		    <text content=" or "/>
+		    <lKind k="poly"/>
+		  </grouping>
+		</mapping>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	</tr>
+	<!-- Row -->
+      </tbody>
+    </table>
+    </font>
+    <br/>
+    <p>
+      The final case type checks with either kind, under the 
+      type assignments 
+      (<btypes:TYPE> 
+	<eq>
+	  <tvar name="alpha" num="1"/>
+	  <tvar name="alpha" num="2"/>
+	</eq>
+      </btypes:TYPE>,
+      <btypes:TYPE> 
+	<eq>
+	  <tvar name="beta" num="1"/>
+	  <tvar name="beta" num="2"/>
+	</eq>
+      </btypes:TYPE>) if
+      <btypes:TYPE> 
+	<mapping>
+	  <lKind k="var"/>
+	  <lKind k="mono"/>
+	</mapping>
+      </btypes:TYPE> and
+      (<btypes:TYPE> 
+	<eq>
+	  <tvar name="beta" num="1"/>
+	  <fn>
+	    <tvar name="alpha" num="1"/>
+	    <tvar name="alpha" num="1"/>
+	  </fn>
+	</eq>
+      </btypes:TYPE>,
+      <btypes:TYPE> 
+	<eq>
+	  <tvar name="beta" num="2"/>
+	  <fn>
+	    <tvar name="alpha" num="2"/>
+	    <tvar name="alpha" num="2"/>
+	  </fn>
+	</eq>
+      </btypes:TYPE>) if
+      <btypes:TYPE> 
+	<mapping>
+	  <lKind k="var"/>
+	  <lKind k="poly"/>
+	</mapping>
+      </btypes:TYPE>.
+      The intuision behind 
+      <btypes:TYPE> 
+	<pcst>
+	  <id/>
+	  <lKind k="var"/>
+	  <type/>
+	</pcst>
+      </btypes:TYPE> constraints is to achieve a form of
+      <em>overloading</em> over polymorphism and mutability.
+      We can think of 
+      <btypes:TYPE> 
+	<pcst>
+	  <id/>
+	  <lKind k="var"/>
+	  <type/>
+	</pcst>
+      </btypes:TYPE> as a 
+      type class&nbsp;<cite ref="jones1995qualtypes"/> constraint that
+      has exactly one possible mutable instance
+      <btypes:TYPE> 
+	<pcst>
+	  <id/>
+	  <lKind k="mono"/>
+	  <type num="m"/>
+	</pcst>
+      </btypes:TYPE>, or an infinite number of
+      <btypes:TYPE> 
+	<pcst>
+	  <id/>
+	  <lKind k="poly"/>
+	  <type num="p"/>
+	</pcst>
+      </btypes:TYPE> instances where all types
+      <btypes:TYPE> 
+	<types num="p"/>
+      </btypes:TYPE> are immutable.
+    </p>
+    <p>
+      In practice, once the kind of instantiation is inferred, the
+      type scheme can be presented in a simplified
+      to the programmer. 
+      For example, suppose
       <btypes:TYPE> 
 	<tqExpr>
 	  <id name="m"/>
@@ -1411,338 +2003,153 @@
 	    <bool/>
 	  </ref>
 	</tqExpr>
-      </btypes:TYPE>, the applications
+      </btypes:TYPE>.
+      In the expression
       <btypes:TYPE> 
-	<apply>
+	<let>
 	  <id name="f"/>
-	  <id name="m"/>
-	</apply>
-      </btypes:TYPE> and
-      <btypes:TYPE> 
-	<apply>
-	  <id name="f"/>
-	  <id name="n"/>
-	</apply>
-      </btypes:TYPE> are well typed.
-      Since the type of 
+	  <lambda>
+	    <id/>
+	    <if>
+	      <deref>
+		<id/>
+	      </deref>
+	      <Unit/>
+	      <Unit/>
+	    </if>
+	  </lambda>
+	  <Pair>
+	    <apply>
+	      <id name="f"/>
+	      <id name="m"/>
+	    </apply>
+	    <apply>
+	      <id name="f"/>
+	      <id name="n"/>
+	    </apply>
+	  </Pair>
+	</let>
+      </btypes:TYPE>,
       <btypes:TYPE> 
 	<id name="f"/>
-      </btypes:TYPE> ranges over the mutability variants o
+      </btypes:TYPE>
+      is given the type
       <btypes:TYPE> 
-	<bool/>
-      </btypes:TYPE> its type is polymorphic over mutability.
-      The next sections discuss certain complications that arise
-      during the inference of such types, present our solution to the
-      problem.
-    </p>
-    <p>
-      <leadin>Soundness implications</leadin>
-      The key idea of maybe types 
-      <btypes:TYPE>
-	<mbpair>
-	  <tvar name="alpha"/>
-	  <type/>
-	</mbpair>
-      </btypes:TYPE> is to defer commitments about the
-      mutability status of types, and thus infer most-general types
-      wherever possible. 
-      <btypes:TYPE>
-	<language/>
-      </btypes:TYPE> is a let-polymorphic language and enforces the
-      value restriction&nbsp;<cite ref="wrightValRes1995"/>. This
-      means that the decision about the mutability of types cannot
-      &mdash; in general &mdash; be deferred past their let
-      bindings. For example, in the case of the expression:
-      <btypes:TYPE>
-	<let>
-	  <id name="p"/>
-	  <List/>
-	  <unspecified/>
-	</let>
-      </btypes:TYPE>, 
-      we cannot give
-      <btypes:TYPE>
-	<id name="p"/>
-      </btypes:TYPE> the type
-      <btypes:TYPE>
-	<Forall>
-	  <tvar name="alpha"/>
-	  <tvar name="beta"/>
-	</Forall>
-	<text content="."/>
-	<mbpair>
-	  <tvar name="beta"/>
-	  <list>	    
+	<TS>
+	  <grouping>
 	    <tvar name="alpha"/>
-	  </list>
-	</mbpair>	  
-      </btypes:TYPE>
-      (or 
-      <btypes:TYPE>
-	<forall>
-	  <tvar name="alpha"/>
-	  <mutable>
-	    <list>	    
-	      <tvar name="alpha"/>
-	    </list>
-	  </mutable>	  
-	</forall>	
-      </btypes:TYPE>
-      or 
-      <btypes:TYPE>
-	<forall>
-	  <tvar name="alpha"/>
-	  <mbpair>
 	    <tvar name="beta"/>
-	    <list>	    
-	      <tvar name="alpha"/>
-	    </list>
-	  </mbpair>	  
-	</forall>	
-      </btypes:TYPE>).
-      We must instead choose one of the polymorphic type
-      <btypes:TYPE>
-	<forall>
-	  <tvar name="alpha"/>
-	  <list>	    
-	    <tvar name="alpha"/>
-	  </list>
-	</forall>
-      </btypes:TYPE> or the monomorphic type
-      <btypes:TYPE>
-	<mbpair>
-	  <tvar name="beta"/>
-	  <list>	    
-	    <tvar name="alpha"/>
-	  </list>
-	</mbpair>	  
-      </btypes:TYPE>
-      That is, there is no principal type that can be inferred for
-      <btypes:TYPE>
-	<id name="p"/>
-      </btypes:TYPE>. Given this, we must fix these maybe
-      types to be either mutable or immutable at a let-boundary. 
-      That is, the language definition must  pick some solution for
-      unsolved copy compatibility constraints <em>before</em> type
-      generalization. 
-      In <btypes:TYPE> 
-	<language/>
-      </btypes:TYPE>, we trade
-      completeness of inference to obtain a more expressive language
-      without making major changes to the core type system.
-    </p>
-    <p>
-      <leadin>Polymorphism over Polymorphism</leadin>
-      An informal description of the inference algorithm
-      for full BitC can be found in&nbsp;<cite ref="sridhar2006plos"/>.
-      First, we consider how to resolve copy compatibility
-      constraints at a let boundary. One possibility is
-      to fix all unresolved maybe types to immutable
-      versions. For example: 
-      <br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <btypes:TYPE> 
-	<let>
-	  <id name="pf"/>
-	  <Pair>
-	    <tqExpr>
-	      <id name="n"/>
-	      <mutable>
-		<bool/>
-	      </mutable>
-	    </tqExpr>
-	    <lambda>
-	      <id name="x"/>
-	      <id name="x"/>
-	    </lambda>
-	  </Pair>
-	  <unspecified/>
-	</let>
-	<text content="      "/>
-	<symbol name="par"/>
-	<text content="      "/>
-	<tqExpr>
-	  <id name="pf"/>
-	  <forall>
-	    <tvar name="alpha"/>
-	    <pair>
-	      <bool/>
-	      <paren>
-		<fn>
-		  <tvar name="alpha"/>
-		  <tvar name="alpha"/>
-		</fn>
-	      </paren>
-	    </pair>
-	  </forall>
-	</tqExpr>
-      </btypes:TYPE>
-      <br/>
-      This scheme will preserve all polymorphism possible, but will
-      mandate a programmer annotation for every mutable value.
-      If mutable variants are chosen instead, no polymorphism can be
-      inferred by default. Therefore, neither of these 
-      solutions are satisfactory. Further, from the standpoint of good
-      programming ideology and static analysis, the inferred
-      types must not be promiscuous with respect to mutability.  
-    </p>  
-    <p>
-      The previous section argued that we ``lose'' precision of
-      inferred types (with respect to mutability) by the
-      introduction of copy compatibility. Therefore, we can choose
-      whether (or not) to introduce copy compatibility at various
-      constructs like new bindings, function application/return,
-      constructors, conditional expressions,
-      <foreignphrase>etc</foreignphrase>. Another dimension of
-      trade-off is whether to permit copy compatibility to the maximum
-      permissible limit (as defined in section&nbsp;<xref
-	ref="copy_compat"/>), or restrict it to top-level shallow
-      mutability compatibility only. A further option is to require
-      that all polymorphism be contained within function types,
-      since function types can be polymorphic even if they
-      abstract over mutable or maybe types.
-    </p>
-    <p>
-      Unless handled with care, full use of copy compatibility can
-      result in the inferred types that are counter-intuitive to the
-      programmer. For example:
-      <br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <btypes:TYPE> 
-	<let>
-	  <id name="copyList"/>
-	  <lambda>
-	    <id name="lst"/>
-	    <match br2="36">
-	      <id name="lst"/>		  
-	      <List/>
-	      <List/>
-	      <match>
-		<id name="lst"/>		  
-		<Cons>
-		  <id name="x"/>
-		  <id name="rest"/>
-		</Cons>
-		<Cons>
-		  <id name="x"/>
-		  <apply>
-		    <id name="copyList"/>
-		    <id name="rest"/>
-		  </apply>
-		</Cons>
-	      </match>
-	    </match>
-	  </lambda>
-	  <unspecified/>
-	</let>
-      </btypes:TYPE>
-      <br/>
-      For a na&iuml;ve reader, the type of
-      <btypes:TYPE> 
-	<id name="copyList"/>
-      </btypes:TYPE> appears to be
-      <btypes:TYPE> 
-	<forall>
-	  <tvar name="alpha"/>
-	  <fn>
-	    <list>
-	      <tvar name="alpha"/>
-	    </list>
-	    <list>
-	      <tvar name="alpha"/>
-	    </list>
-	  </fn>
-	</forall>
-      </btypes:TYPE>
-      but is actually the more general type:
-      <btypes:TYPE>
-      	<Forall>
-      	  <tvar name="alpha"/>
-      	  <tvar name="beta"/>
-      	</Forall>
-	<text content=". "/>
-	<ctype>
-	  <fn>
-	    <list>
-	      <tvar name="alpha"/>
-	    </list>
-	    <list>
-	      <tvar name="beta"/>
-	    </list>
-	  </fn>
-	  <set>
-	    <ceq>
-	      <tvar name="alpha"/>
-	      <tvar name="beta"/>	      
-	    </ceq>
-	  </set>
-	</ctype>
-      </btypes:TYPE>.
-      <!--       <btypes:TYPE>  -->
-      <!-- 	<Forall> -->
-      <!-- 	  <tvar name="alpha"/> -->
-      <!-- 	  <tvar name="beta"/> -->
-      <!-- 	  <tvar name="gamma"/> -->
-      <!-- 	</Forall> -->
-      <!-- 	<fn> -->
-      <!-- 	  <list> -->
-      <!-- 	    <mbpair> -->
-      <!-- 	      <tvar name="beta"/> -->
-      <!-- 	      <tvar name="alpha"/> -->
-      <!-- 	    </mbpair> -->
-      <!-- 	  </list> -->
-      <!-- 	  <list> -->
-      <!-- 	    <mbpair> -->
-      <!-- 	      <tvar name="gamma"/> -->
-      <!-- 	      <tvar name="alpha"/> -->
-      <!-- 	    </mbpair> -->
-      <!-- 	  </list> -->
-      <!-- 	</fn> -->
-      <!--       </btypes:TYPE>. --> 
-      Even though both the argument and return types of
-      <btypes:TYPE> 
-	<id name="copyList"/>
-      </btypes:TYPE> are of (boxed) list type, they are
-      only required to be copy compatible because
-      <btypes:TYPE> 
-	<id name="copyList"/>
-      </btypes:TYPE> copies the constituent elements, thereby using
-      new locations. 
-      Now, if we default maybe types that are ultimately unresolved to
-      immutable, in the following definition we obtain:
-      <br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <btypes:TYPE>
-	<let>
-	  <id name="mutLst2"/>
-	  <apply>
-	    <id name="copyList"/>
-	    <tqExpr nospace="yes">
-	      <id name="mutLst"/>
-	      <list>
-		<mutable>
+	  </grouping>
+	  <mbFull>
+	    <tvar name="beta"/>
+	    <fn>
+	      <ref>
+		<mbFull>
+		  <tvar/>
 		  <bool/>
-		</mutable>
-	      </list>
-	    </tqExpr>
-	  </apply>
-	  <unspecified/>
-	</let>
-	<text content="      "/>
-	<symbol name="par"/>
-	<text content="      "/>
+		</mbFull>
+	      </ref>
+	      <unit/>
+	    </fn>
+	  </mbFull>
+	  <pcst>
+	    <id name="f"/>
+	    <lKind k="var"/>
+	    <mbFull>
+	      <tvar name="beta"/>
+	      <fn>
+		<ref>
+		  <mbFull>
+		    <tvar/>
+		    <bool/>
+		  </mbFull>
+		</ref>
+		<unit/>
+	      </fn>
+	    </mbFull>
+	  </pcst>
+	</TS>
+      </btypes:TYPE>. However, based on the polymorphic usage, we
+      conclude that
+      <btypes:TYPE> 
+	<mapping>
+	  <lKind k="var"/>
+	  <lKind k="poly"/>
+	</mapping>
+      </btypes:TYPE>.
+      We can now simplify the type scheme of 
+      <btypes:TYPE> 
+	<id name="f"/>
+      </btypes:TYPE> to obtain
+      <btypes:TYPE> 
 	<tqExpr>
-	  <id name="mutLst"/>
-	  <list>	    
-	    <bool/>	    
-	  </list>
+	  <id name="f"/>
+	  <TS>
+	    <tvar name="alpha"/>
+	    <fn>
+	      <ref>
+		<mbFull>
+		  <tvar/>
+		  <bool/>
+		</mbFull>
+	      </ref>
+	      <unit/>
+	    </fn>
+	  </TS>
 	</tqExpr>
-	<text content="   !!"/>
-      </btypes:TYPE>
-      <br/>
-      which is a correct typing, but is most likely not what the
-      programmer expects.
+      </btypes:TYPE>.
+      Since all function types are  immutable, the mutability of the
+      argument type need not be fixed, thus preserving mutability
+      polymorphism. 
     </p>
+    <p>
+      In summary, we have used a system of constrained types to
+      design a principle polymorphic type inference system that meets
+      all of the design goals set at the beginning of this section. In
+      the next section, we present a formal description of our type
+      system and inference algorithm. 
+    </p>
+    <!-- <btypes:TYPE> 
+	<let>
+	  <id name="map"/>
+	  <lambda>
+	    <id name="f"/>
+	    <lambda>
+ 	      <id name="x"/>
+	      <Pair>
+		<apply>
+		  <id name="f"/>
+		  <fst>
+		    <id name="x"/>
+		  </fst>
+		</apply>
+		<apply>
+		  <id name="f"/>
+		  <fst>
+		    <id name="x"/>
+		  </fst>
+		</apply>
+	      </Pair>
+	    </lambda>
+	  </lambda>
+	  <Pair>
+	    <map>
+	      <id name="id"/>
+	      <Pair>
+		<true/>
+		<false/>
+	      </Pair>
+	    </map>
+	    <map>
+	      <id name="id"/>
+	      <Pair>
+		<Unit/>
+		<Unit/>
+	      </Pair>
+	    </map>
+	  </Pair>
+	</let>
+      </btypes:TYPE> -->
   </sect1>
   <!-- <sect1 id="formal">
     <title>Formalization</title>
@@ -3454,18 +3861,15 @@
     <title>Related Work</title>
     <p>
       Grossman&nbsp;<cite ref="Grossman2006qtypes"/> provides a theory
-      of using quantified types with imperative C style mutation and
-      <progident>&amp;</progident> operator for Cyclone. However, his
-      formalization requires explicit annotation for all polymorphic
-      definitions and instantiations. Since C (and Cyclone) have no
-      notion of immutability, both languages require explicit
-      annotation of polymorphism. In contrast, we believe that the
-      best way to integrate polymorphism into the systems programming
-      paradigm is by automatic &mdash; albeit incomplete &mdash;
-      inference. A further contribution of our work (in comparison
-      to&nbsp;<cite ref="Grossman2006qtypes"/>) is that we give a
-      formal specification and proof of correctness of the inference
-      algorithm, not just the type system.
+      of using quantified types with imperative C style mutation for
+      Cyclone. However, his formalization requires explicit annotation
+      for all polymorphic definitions and instantiations. In contrast,
+      we believe that the best way to integrate polymorphism into the
+      systems programming paradigm is by automatic inference. A
+      further contribution of our work (in comparison to&nbsp;<cite
+      ref="Grossman2006qtypes"/>) is that we 
+      give a formal specification and proof of correctness of the
+      inference algorithm, not just the type system.
     </p>
     <p>
       C's <progident>const</progident> notion of immutability-by-alias
@@ -3480,7 +3884,7 @@
       (transitive immutability-by-reference),
       <foreignphrase>etc.</foreignphrase> These techniques are
       orthogonal and complementary to the immutability-by-location
-      property in BitC/<btypes:TYPE><language/></btypes:TYPE>. For
+      property in <btypes:TYPE><language/></btypes:TYPE>. For
       example, we could have types like
       <btypes:TYPE>
 	<paren>
@@ -3523,7 +3927,10 @@
       types and qualifiers (mutability) becomes co-dependent: we need
       base types to infer qualifiers; but, we also need the qualifiers
       to infer base types due to the value
-      restriction. BitC/<btypes:TYPE><language/></btypes:TYPE> supports
+      restriction. 
+      <btypes:TYPE>
+	<language/>
+      </btypes:TYPE> supports
       a polymorphic language and performs simultaneous
       inference of base types and mutability.
     </p>
@@ -3542,12 +3949,11 @@
     </p>
     <p>
       First class mutability introduces challenges for type inference
-      at copy boundaries. We have proposed a novel algorithm that 
-      infers principal types by using polymorphism over mutability and
-      polymorphism itself. To our knowledge, this is the first sound
-      and complete algorithm that automatically infers both mutability
-      and polymorphism in a systems programming language with unboxed
-      mutability. 
+      at copy boundaries. We have proposed a novel algorithm that
+      infers principal types using a system of constrained types. To
+      our knowledge, this is the first sound and complete algorithm
+      that infers both mutability and polymorphism in a systems
+      programming language with copy compatibility.  
     </p>
     <p>    
       The type inference algorithm is implemented as part of the
@@ -3809,8 +4215,8 @@
       S. Sridhar, J. S. Shapiro and S. F. Smith
       ``Proof of Soundness of BitC Type System and Inference Algorithm''
       <link
-	href="http://bitc-lang.org/docs/bitc/formal.pdf">
-	<progident>http://www.bitc-lang.org/docs/bitc/formal.pdf</progident>
+	href="http://bitc-lang.org/docs/bitc/c-formal.pdf">
+	<progident>http://www.bitc-lang.org/docs/bitc/c-formal.pdf</progident>
       </link><!-- , 2007 -->.
     </bibentry>
     <bibentry label="Tarditi1996TIL"> 

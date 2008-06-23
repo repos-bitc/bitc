@@ -1663,7 +1663,7 @@
 
   <!-- Polymorphic constraint * type -->
   <!-- pcstOp -->
-  <xsl:template match="PcstOp" mode="formula">
+  <xsl:template match="pcstOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>starf;</xsl:text>	
     <xsl:element name="sup">
@@ -2367,22 +2367,20 @@
 
   <!-- id -->
   <xsl:template match="id" mode="formula">
-    <xsl:element name="em">
-      <xsl:choose>
-	<xsl:when test = "@name">
-	  <xsl:call-template name="print.mathit">
-	    <xsl:with-param name="print.mathit.text">
-	      <xsl:value-of select="@name"/>
-	    </xsl:with-param>
-	  </xsl:call-template>
-	</xsl:when>
-	<xsl:otherwise>
-	  <xsl:call-template name="print.mathit">
-	    <xsl:with-param name="print.mathit.text">x</xsl:with-param>
-	  </xsl:call-template>
-	</xsl:otherwise>
-      </xsl:choose>
-    </xsl:element>
+    <xsl:choose>
+      <xsl:when test = "@name">
+	<xsl:call-template name="print.mathit">
+	  <xsl:with-param name="print.mathit.text">
+	    <xsl:value-of select="@name"/>
+	  </xsl:with-param>
+	</xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:call-template name="print.mathit">
+	  <xsl:with-param name="print.mathit.text">x</xsl:with-param>
+	</xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:call-template name="print.index.dash"/>
   </xsl:template>  
   
