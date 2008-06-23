@@ -711,10 +711,9 @@
       <btypes:TYPE>
 	<language/>
       </btypes:TYPE>.
-      When an exact type compatibility requirement is replaced in the
-      language design by copy compatibility, it is no longer possible
-      to infer a unique (simple) type for the expression. For example,
-      in the expression
+      Due to copy compatibility, it is no longer possible
+      to infer a unique (simple) type for all expressions. 
+      For example, in the expression
       <btypes:TYPE>
 	<let>
 	  <id name="p"/>
@@ -751,7 +750,7 @@
       values, and infer immutable types by default? In a language with
       copy compatibility, this will result in a proliferation of type 
       annotations. Constructor applications, 
-      (polymorphic) type instantiations, accessor functions,
+      polymorphic type instantiations, accessor functions,
       <foreignphrase>etc.</foreignphrase> 
       will have to be explicitly annotated with their types. For
       example, if
@@ -805,13 +804,14 @@
       Therefore, if mutability is not inferred, it results in a
       substantial increase in the number of programmer annotations,
       and type inference becomes ineffective.
-      In order to maximize code reuse and encourage
-      good software engineering, the inference algorithm must also
-      automatically infer polymorphism without programmer annotations.
+      It is desirable that the inference algorithm must
+      automatically infer polymorphism (without any programmer
+      annotations) as well, since this leads to better software
+      engineering by maximizing code reuse.
     </p>
     <p>
-      With the above considerations in mind, the desirable
-      charecteristics of a type inference algorithm for  
+      Therefore, the desirable charecteristics of a type inference
+      algorithm for   
       <btypes:TYPE>
 	<language/>
       </btypes:TYPE> are:
@@ -819,8 +819,14 @@
     <ol>
       <li>
 	<p>
-	  It must be sound, complete, and decidable without any 
-	  type annotations.
+	  It must be sound, complete, and decidable without programmer
+	  annotations. 
+	</p>
+      </li>
+      <li>
+	<p>
+	  It must automatically infer both polymorphism and
+	  mutability.
 	</p>
       </li>
       <li>
@@ -829,12 +835,6 @@
 	  That is, it must avoid the main drawback of many inference
 	  systems with subtyping, where the inferred principal type is
 	  presented a set of equations and inequations.
-	</p>
-      </li>
-      <li>
-	<p>
-	  It must automatically infer both polymorphism and
-	  mutability.
 	</p>
       </li>
       <li>
@@ -950,13 +950,13 @@
       <btypes:TYPE>
 	<mbTop>
 	  <tvar/>
-	  <bool/>
+	  <ptype/>
 	</mbTop>
       </btypes:TYPE> and
       <btypes:TYPE>
 	<mbFull>
 	  <stype/>
-	  <bool/>
+	  <ptype/>
 	</mbFull>
       </btypes:TYPE> respectively provide fine grained and coarse
       grained control over expressing types with 
@@ -1290,24 +1290,35 @@
 	  <ptype/>
 	</mbFull>
       </btypes:TYPE> can be realized through a canonical
-      (and verbose) representation using
+      representation using
       <btypes:TYPE>
 	<mbTop>
 	  <tvar/>
 	  <ptype/>
 	</mbTop>
-      </btypes:TYPE> types. However, during type inference, we need to
-      use types of the form
+      </btypes:TYPE> types. 
+      Types of the form
+      <btypes:TYPE>
+	<mbFull>
+	  <stype/>
+	  <ptype/>
+	</mbFull>
+      </btypes:TYPE> not only provide a compact representation, but
+      are also required during type inference.
+      For example, the type
       <btypes:TYPE>
 	<mbFull>
 	  <tvar/>
 	  <tvar name="beta"/>
 	</mbFull>
-      </btypes:TYPE> to represent a type that is compatible 
-      with any instantiation of  
+      </btypes:TYPE> represents a type that is compatible 
+      with   
       <btypes:TYPE>
 	<tvar name="beta"/>
-      </btypes:TYPE>.
+      </btypes:TYPE>, even if 
+      <btypes:TYPE>
+	<tvar name="beta"/>
+      </btypes:TYPE> later resolves to a more concrete (ex: pair) type.
     </p>
     <p>
       Due to copy compatibility at argument and return positions, two
@@ -1522,6 +1533,8 @@
     </p>
     <p>
       <leadin>Polymorphism over Polymorphism</leadin>
+      An informal description of the inference algorithm
+      for full BitC can be found in&nbsp;<cite ref="sridhar2006plos"/>.
       First, we consider how to resolve copy compatibility
       constraints at a let boundary. One possibility is
       to fix all unresolved maybe types to immutable
@@ -1731,7 +1744,7 @@
       programmer expects.
     </p>
   </sect1>
-  <sect1 id="formal">
+  <!-- <sect1 id="formal">
     <title>Formalization</title>
     <xi:include href="include/complete/grammar.xmli"/>
     <p>      
@@ -3436,35 +3449,7 @@
 	</btypes:TYPE>
 .      </font>
     </p>
-    <!-- <p>
-      <font size="small">	
-	The inference algorithm is not complete. For example, we
-	cannot type the expression 
-	<btypes:TYPE>
-	  <let>
-	    <id name="id"/>
-	    <dup>
-	      <lambda>
-		<id name="x"/>
-		<id name="x"/>
-	      </lambda>
-	    </dup>
-	    <assign>
-	      <deref>
-		<id name="id"/>
-	      </deref>
-	      <deref>
-		<id name="id"/>
-	      </deref>
-	    </assign>
-	  </let>
-	</btypes:TYPE> without the help of an annotation for 
-	<btypes:TYPE>
-	  <id name="id"/>
-	</btypes:TYPE>.
-      </font>
-    </p> -->
-  </sect1>
+  </sect1> -->
   <sect1 id="related">
     <title>Related Work</title>
     <p>
@@ -3557,24 +3542,20 @@
     </p>
     <p>
       First class mutability introduces challenges for type inference
-      at copy boundaries. There is a fundamental conflict of goals
-      between the inference of principal types and copy
-      compatibility. We have proposed an inference algorithm that
-      resolves this conflict through a combination of hinting
-      mechanisms and selective heuristics. This algorithm is
-      deterministic, does not require whole program analysis, and
-      minimizes programmer annotations in the common case. We have
-      provided a formal framework for this type system, and
-      implemented it as part of the BitC compiler. The source code can
-      be obtained from <progident>http://bitc-lang.org</progident>.
+      at copy boundaries. We have proposed a novel algorithm that 
+      infers principal types by using polymorphism over mutability and
+      polymorphism itself. To our knowledge, this is the first sound
+      and complete algorithm that automatically infers both mutability
+      and polymorphism in a systems programming language with unboxed
+      mutability. 
     </p>
-    <p>            
-      The bootstrap compiler for BitC has been implemented in
-      C++. Currently, the backend emits portable C code. The
-      core of the compiler involves 28,686 lines of C++ code, of
+    <p>    
+      The type inference algorithm is implemented as part of the
+      BitC&nbsp;<cite ref="shapBitcSpec2006"/> language compiler.
+      The core of the compiler involves 28,686 lines of C++ code, of
       which implementation of the type system accounts for about 6,894
-      lines. An informal description of the inference algorithm
-      for full BitC can be found in&nbsp;<cite ref="sridhar2006plos"/>.            
+      lines. The source code can be obtained from
+      <progident>http://bitc-lang.org</progident>.  
     </p>
   </sect1>
   <!--   <sect1 id="acknowledgments" numbered="no"> -->
