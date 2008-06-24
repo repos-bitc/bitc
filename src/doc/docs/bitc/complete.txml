@@ -813,7 +813,7 @@
       engineering by maximizing code reuse.
     </p>
     <p>
-      Therefore, the desirable charecteristics of a type inference
+      Therefore, the desirable characteristics of a type inference
       algorithm for   
       <btypes:TYPE>
 	<language/>
@@ -1317,7 +1317,7 @@
       Due to copy compatibility at argument and return positions, two
       function types are <em>equal</em> regardless of the shallow
       mutability of the argument and return types. 
-      Therefore, we follow a convension that all function types must be
+      Therefore, we follow a convention that all function types must be
       written with immutable types at copy compatible positions. The
       intuition here is that type of a function must be described in
       the interface form, and must hide the ``internal'' mutability
@@ -1353,7 +1353,7 @@
 	<language/>
       </btypes:TYPE> is a let-polymorphic
       language. At a let boundary, we would like to quantify over
-      variables that range over mutability, in order to achievve
+      variables that range over mutability, in order to achieve
       mutability polymorphism. The next sections discuss certain
       complications that arise during the inference of such types,
       present our solution to the problem.
@@ -1491,7 +1491,7 @@
       algorithms fix the mutability of types before generalization
       based on certain heuristics &mdash; thus sacrificing 
       completeness&nbsp;<cite ref="sridhar2006plos"/>. 
-      In order to alliveate this problem, we propose the use of 
+      In order to alleviate this problem, we propose the use of 
       constrained types that are range over both mutability and
       polymorphism.
     </p>
@@ -1512,10 +1512,10 @@
 	  <lKind/>
 	  <type/>
 	</pcst>
-      </btypes:TYPE> mandates that the identifier 
+      </btypes:TYPE> requires that the identifier 
       <btypes:TYPE> 
 	<id/>
-      </btypes:TYPE> can be instantiated according to the kind
+      </btypes:TYPE> must only be instantiated according to the kind
       <btypes:TYPE> 
 	<lKind/>
       </btypes:TYPE>, where
@@ -1579,11 +1579,12 @@
       </btypes:TYPE> and
       <btypes:TYPE> 
 	<lKind k="poly"/>
-      </btypes:TYPE>. The correct instantiation kind can later be
-      determined based on the uses of 
+      </btypes:TYPE>. The correct instantiation kind is 
+      determined later based on the uses of  
       <btypes:TYPE> 
 	<id/>
-      </btypes:TYPE>, and consistency semantics enforced accordingly.
+      </btypes:TYPE>, and consistency semantics are enforced
+      accordingly. 
     </p>
     <p>
       In this approach, the definition of 
@@ -1683,7 +1684,7 @@
 	  </td>
 	  <td>
 	    <p>
-	      Kind/Type asign.
+	      Kind assignment
 	    </p>
 	  </td>
 	</tr>
@@ -1944,7 +1945,7 @@
 	  <lKind k="poly"/>
 	</mapping>
       </btypes:TYPE>.
-      The intuision behind 
+      The intuition behind 
       <btypes:TYPE> 
 	<pcst>
 	  <id/>
@@ -1982,29 +1983,10 @@
       </btypes:TYPE> are immutable.
     </p>
     <p>
-      In practice, once the kind of instantiation is inferred, the
-      type scheme can be presented in a simplified
+      In practice, once the correct kind of instantiation is inferred,
+      the type scheme can be presented in a simplified form
       to the programmer. 
-      For example, suppose
-      <btypes:TYPE> 
-	<tqExpr>
-	  <id name="m"/>
-	  <ref>
-	    <mutable>
-	      <bool/>
-	    </mutable>
-	  </ref>
-	</tqExpr>
-      </btypes:TYPE> and
-      <btypes:TYPE> 
-	<tqExpr>
-	  <id name="n"/>
-	  <ref>
-	    <bool/>
-	  </ref>
-	</tqExpr>
-      </btypes:TYPE>.
-      In the expression
+      For example, consider the expression
       <btypes:TYPE> 
 	<let>
 	  <id name="f"/>
@@ -2029,32 +2011,34 @@
 	    </apply>
 	  </Pair>
 	</let>
-      </btypes:TYPE>,
+      </btypes:TYPE>, where
       <btypes:TYPE> 
-	<id name="f"/>
-      </btypes:TYPE>
-      is given the type
+	<tqExpr>
+	  <id name="m"/>
+	  <ref>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	  </ref>
+	</tqExpr>
+      </btypes:TYPE> and
       <btypes:TYPE> 
-	<TS>
-	  <grouping>
-	    <tvar name="alpha"/>
-	    <tvar name="beta"/>
-	  </grouping>
-	  <mbFull>
-	    <tvar name="beta"/>
-	    <fn>
-	      <ref>
-		<mbFull>
-		  <tvar/>
-		  <bool/>
-		</mbFull>
-	      </ref>
-	      <unit/>
-	    </fn>
-	  </mbFull>
-	  <pcst>
-	    <id name="f"/>
-	    <lKind k="var"/>
+	<tqExpr>
+	  <id name="n"/>
+	  <ref>
+	    <bool/>
+	  </ref>
+	</tqExpr>
+      </btypes:TYPE>.
+      Here,
+      <btypes:TYPE> 
+	<tqExpr>
+	  <id name="f"/>
+	  <TS>
+	    <grouping>
+	      <tvar name="alpha"/>
+	      <tvar name="beta"/>
+	    </grouping>
 	    <mbFull>
 	      <tvar name="beta"/>
 	      <fn>
@@ -2067,8 +2051,26 @@
 		<unit/>
 	      </fn>
 	    </mbFull>
-	  </pcst>
-	</TS>
+	    <set>
+	    <pcst>
+	      <id name="f"/>
+	      <lKind k="var"/>
+	      <mbFull>
+		<tvar name="beta"/>
+		<fn>
+		  <ref>
+		    <mbFull>
+		      <tvar/>
+		      <bool/>
+		    </mbFull>
+		  </ref>
+		  <unit/>
+		</fn>
+	      </mbFull>
+	    </pcst>
+	    </set>
+	  </TS>
+	</tqExpr>
       </btypes:TYPE>. However, based on the polymorphic usage, we
       conclude that
       <btypes:TYPE> 
@@ -2151,10 +2153,10 @@
 	</let>
       </btypes:TYPE> -->
   </sect1>
-  <!-- <sect1 id="formal">
+  <sect1 id="formal">
     <title>Formalization</title>
     <xi:include href="include/complete/grammar.xmli"/>
-    <p>      
+    <!--<p>      
       The calculus of 
       <btypes:TYPE>
 	<language/>
@@ -3855,8 +3857,8 @@
 	  </TIjudge>
 	</btypes:TYPE>
 .      </font>
-    </p>
-  </sect1> -->
+  </p> -->
+  </sect1>
   <sect1 id="related">
     <title>Related Work</title>
     <p>
@@ -3944,8 +3946,8 @@
       enough to permit mutation of unboxed/stack locations, and at the
       same time guarantees that types are definitive about the
       mutability of every location across all aliases. 
-      This type system meets the requirements for systems programming
-      languages. 
+      This type system meets the requirements of systems programming
+      languages.
     </p>
     <p>
       First class mutability introduces challenges for type inference
@@ -3958,10 +3960,14 @@
     <p>    
       The type inference algorithm is implemented as part of the
       BitC&nbsp;<cite ref="shapBitcSpec2006"/> language compiler.
-      The core of the compiler involves 28,686 lines of C++ code, of
-      which implementation of the type system accounts for about 6,894
-      lines. The source code can be obtained from
-      <progident>http://bitc-lang.org</progident>.  
+      <font color="purple">
+	The core of the compiler involves 22,433 lines of C++ code, of
+	which implementation of the type system accounts for about
+	7,816 lines.
+      </font> The source code can be obtained from
+      <link href="http://www.ecma-international.org/publications/standards/Ecma-334.htm">
+	<progident>http://bitc-lang.org</progident>.  
+      </link>
     </p>
   </sect1>
   <!--   <sect1 id="acknowledgments" numbered="no"> -->
@@ -4151,15 +4157,15 @@
 <!--       </doctitle>  -->
 <!--       pp 128­139, 2002. -->
 <!--     </bibentry> -->
-    <bibentry label="pierce2002TypesBook">
-      <!-- <key>Pierce02</key> -->
-      B. C. Pierce
-      ``Types and Programming Languages''
-      <doctitle>
-	The MIT Press, Massachusetts Institute of Technology
-      </doctitle>
-      ISBN 0-262-16209-1, 2002.      
-    </bibentry>
+<!--     <bibentry label="pierce2002TypesBook"> -->
+<!--       <key>Pierce02</key> -->
+<!--       B. C. Pierce -->
+<!--       ``Types and Programming Languages'' -->
+<!--       <doctitle> -->
+<!-- 	The MIT Press, Massachusetts Institute of Technology -->
+<!--       </doctitle> -->
+<!--       ISBN 0-262-16209-1, 2002.       -->
+<!--     </bibentry> -->
     <bibentry label="javaSpec">
       <!-- <key>Gosling05</key> -->
       J. Gosling, B. Joy, G. Steele, and G. Bracha
@@ -4464,5 +4470,7 @@
  -->
 <!--  LocalWords:  Exprs TypeScheme Env Rval Oth cst Prog mutinfer de facto SHA
  -->
-<!--  LocalWords:  scriptsize FDIS Keromytis Gunder
+<!--  LocalWords:  scriptsize FDIS Keromytis Gunder SwitchWare inequations
+ -->
+<!--  LocalWords:  Arbaugh Kakkar
  -->
