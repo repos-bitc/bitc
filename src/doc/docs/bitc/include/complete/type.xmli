@@ -209,10 +209,8 @@
 	      <id/>
 	      <TS>
 		<tvars/>
-		<ctype>
-		  <type/>
-		  <dCtset/>
-		</ctype>
+		<type/>
+		<dCtset/>
 	      </TS>
 	    </mapsto>
 	    <!-- S |= t does not suffice here. Here is an example
@@ -369,41 +367,6 @@
 	    </TDjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule titlesz="&TSZ;" name="T-Set">
-	  <tyPre>
-	    <!-- Msub is okay in this place because, given the
-	    definition of subtyping, the type t which is t <|: Mp can
-	    only be of the form: 
-	    Mp', where p' <|: p (ex: immutable variations within
-	    pair constructor, function constructor are okay).
-	    M'a|p' where p' <|: p  --> 
-	    <TDjudge Msub="yes">
-	      <lExp/>
-	      <mutable>
-		<ptype/>
-	      </mutable>
-	      <dCtset num="1"/>
-	    </TDjudge>
-	    <TDjudge Msub="yes">
-	      <aExpr/>
-	      <ptype/>
-	      <dCtset num="2"/>
-	    </TDjudge>
-	  </tyPre>
-	  <tyConc>
-	    <TDjudge>
-	      <assign>
-		<lExp/>
-		<aExpr/>
-	      </assign>
-	      <unit/>
-	      <unin>
-		<dCtset num="1"/>
-		<dCtset num="2"/>
-	      </unin>
-	    </TDjudge>
-	  </tyConc>
-	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="2">
 	<tyRule titlesz="&TSZ;" name="T-If">
@@ -503,6 +466,41 @@
 	</tyRule>
       </Hrules>
       <Hrules rowsep="4pt" colsep="1">
+	<tyRule titlesz="&TSZ;" name="T-Set">
+	  <tyPre>
+	    <!-- Msub is okay in this place because, given the
+	    definition of subtyping, the type t which is t <|: Mp can
+	    only be of the form: 
+	    Mp', where p' <|: p (ex: immutable variations within
+	    pair constructor, function constructor are okay).
+	    M'a|p' where p' <|: p  --> 
+	    <TDjudge Msub="yes">
+	      <lExp/>
+	      <mutable>
+		<ptype/>
+	      </mutable>
+	      <dCtset num="1"/>
+	    </TDjudge>
+	    <TDjudge Msub="yes">
+	      <aExpr/>
+	      <ptype/>
+	      <dCtset num="2"/>
+	    </TDjudge>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <assign>
+		<lExp/>
+		<aExpr/>
+	      </assign>
+	      <unit/>
+	      <unin>
+		<dCtset num="1"/>
+		<dCtset num="2"/>
+	      </unin>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
 	<tyRule titlesz="&TSZ;" name="T-Dup">
 	  <tyPre>
 	    <TDjudge Msub="yes">
@@ -543,6 +541,30 @@
 		<aExpr/>
 	      </deref>
 	      <type/>
+	      <dCtset/>
+	    </TDjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule titlesz="&TSZ;" name="T-Alloc">
+	  <tyPre>
+	    <TDjudge Msub="yes">
+	      <aExpr/>
+	      <type/>
+	      <dCtset/>
+	    </TDjudge>
+	    <Msub>
+	      <type dash="'"/>
+	      <type/>
+	    </Msub>
+	  </tyPre>
+	  <tyConc>
+	    <TDjudge>
+	      <copy>
+		<aExpr/>
+	      </copy>
+	      <type dash="'"/>
 	      <dCtset/>
 	    </TDjudge>
 	  </tyConc>
@@ -655,11 +677,9 @@
 		  <mapping>
 		    <id/>
 		    <TS>
-		      <tvars/>
-		      <ctype>
-			<type/>
-			<dCtset/>
-		      </ctype>
+ 		      <tvars/>
+		      <type/>
+		      <dCtset/>
 		    </TS>
 		  </mapping>
 		</extend>

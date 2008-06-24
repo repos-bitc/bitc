@@ -55,10 +55,8 @@
 	      <id/>
 	      <TS>
 		<tvars name="alpha"/>
-		<ctype>
-		  <type/>
-		  <dCtset/>
-		</ctype>
+		<type/>
+		<dCtset/>
 	      </TS>
 	    </mapsto>
 	    <eq>
@@ -333,64 +331,6 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule titlesz="&TSZ;" name="I-Deref">
-	  <tyPre>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr/>
-		  <type/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<aCtset/>
-	      </constrain>
-	    </TEjudge>
-	    <models name="new">
-	      <assume/>
-	      <grouping>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-	      </grouping>
-	    </models>
-	  </tyPre>
-	  <tyConc>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>                      
-		  <deref>
-		    <aExpr/>
-		  </deref> 
-		  <tvar name="alpha"/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>                    
-		<unin>
-		  <aCtset/>
-		  <set>
-		    <eq>
-		      <type/>
-		      <mbFull>
-			<tvar name="beta"/>
-			<ref>
-			  <tvar name="alpha"/>
-			</ref>
-		      </mbFull>
-		    </eq>
-		  </set>
-		</unin>
-	      </constrain>
-	    </TEjudge>
-	  </tyConc>
-	</tyRule>
       </Hrules>        
       <Hrules  rowsep="4pt" colsep="2">
 	<tyRule titlesz="&TSZ;" name="I-If">
@@ -590,6 +530,66 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
+	<tyRule titlesz="&TSZ;" name="I-Deref">
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>                      
+		  <deref>
+		    <aExpr/>
+		  </deref> 
+		  <tvar name="alpha"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>                    
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <eq>
+		      <type/>
+		      <mbFull>
+			<tvar name="beta"/>
+			<ref>
+			  <tvar name="alpha"/>
+			</ref>
+		      </mbFull>
+		    </eq>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>        
+      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule titlesz="&TSZ;" name="I-Dup">
 	  <tyPre>
 	    <TEjudge name="i">
@@ -654,8 +654,6 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
-      </Hrules>
-      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule titlesz="&TSZ;" name="I-Pair">
 	  <tyPre>
 	    <TEjudge name="i">
@@ -716,6 +714,8 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
+      </Hrules>
+      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule titlesz="&TSZ;" name="I-Sel">
 	  <tyPre>
 	    <TEjudge name="i">
@@ -733,6 +733,16 @@
 		<aCtset/>
 	      </constrain>
 	    </TEjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+		<tvar name="gamma"/>
+		<tvar name="delta"/>	      
+		<tvar name="epsiv"/>	      
+	      </grouping>
+	    </models>
 	    <eq>
 	      <type num="1"/>
 	      <mbFull>
@@ -747,16 +757,6 @@
 		<tvar name="delta"/>
 	      </mbFull>
 	    </eq>
-	    <models name="new">
-	      <assume/>
-	      <grouping>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-		<tvar name="gamma"/>
-		<tvar name="delta"/>	      
-		<tvar name="epsiv"/>	      
-	      </grouping>
-	    </models>
 	  </tyPre>
 	  <tyConc>
 	    <TEjudge name="i">
@@ -785,6 +785,66 @@
 			  <type num="2"/>
 			</pair>
 		      </mbTop>
+		    </eq>
+		  </set>
+		</unin>
+	      </constrain>
+	    </TEjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule titlesz="&TSZ;" name="I-Alloc">
+	  <tyPre>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr/>
+		  <type/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset/>
+	      </constrain>
+	    </TEjudge>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+		<tvar name="gamma"/>
+	      </grouping>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>                      
+		  <copy>
+		    <aExpr/>
+		  </copy> 
+		  <mbFull>
+		    <tvar name="alpha"/>
+ 		    <tvar name="beta"/>
+		  </mbFull>
+		</tqExpr>
+	      </conclude>
+	      <constrain>                    
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <eq>
+		      <type/>
+		      <mbFull>
+			<tvar name="gamma"/>
+			<tvar name="beta"/>
+		      </mbFull>
 		    </eq>
 		  </set>
 		</unin>
@@ -908,7 +968,7 @@
 	    </TEjudge>
 	    <eq>
 	      <aCtset num="1" dash="'"/>
-	      <unin>
+	      <unin nosp="yes">
 		<aCtset num="1"/>
 		<set>
 		  <eq>
@@ -926,14 +986,14 @@
 		<aCtset num="1" dash="'"/>
 	      </unf>
 	      <Pair>
-		<dCtset num="u"/>
+		<dCtset dash="'"/>
 		<aSubMap/>
 	      </Pair>
 	    </eq>
 	    <eq>
 	      <dCtset/>
-	      <unin>
-		<dCtset num="u"/>
+	      <unin nosp="yes">
+		<dCtset dash="'"/>
 		<set>
 		  <pcst>
 		    <id/>
@@ -984,10 +1044,8 @@
 		    <id/>
 		    <TS>
 		      <tvars/>
-		      <ctype>
-			<type/>
-			<dCtset/>
-		      </ctype>
+		      <type/>
+		      <dCtset/>
 		    </TS>
 		  </mapping>
 		</extend>

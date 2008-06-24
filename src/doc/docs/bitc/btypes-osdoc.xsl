@@ -1787,6 +1787,7 @@
     <xsl:call-template name="print.index.dash"/>    
   </xsl:template>
 
+  <!-- TS: Type Scheme -->
   <xsl:template match="TS" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
     <xsl:text>forall;</xsl:text>  
@@ -1794,7 +1795,7 @@
     <xsl:text>.</xsl:text>    
     <xsl:apply-templates select="*[2]" mode="formula"/>	
     <xsl:if test="*[3]">
-      <xsl:text>\</xsl:text>    
+      <xsl:text>\</xsl:text>
       <xsl:apply-templates select="*[3]" mode="formula"/>	
     </xsl:if>
   </xsl:template>
