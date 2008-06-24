@@ -80,7 +80,7 @@
 	</tyRule>  
       </Hrules>
       <Hrules rowsep="4pt" colsep="2">
-	<tyRule titlesz="&TSZ;" name="S-MT1">
+	<tyRule titlesz="&TSZ;" name="S-Mt1">
 	  <tyPre>
 	    <eq>
 	      <minzT>
@@ -99,7 +99,7 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule titlesz="&TSZ;" name="S-MT2">
+	<tyRule titlesz="&TSZ;" name="S-Mt2">
 	  <tyPre>
 	    <eq>
 	      <maxzT>
@@ -118,7 +118,7 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule titlesz="&TSZ;" name="S-MF1">
+	<tyRule titlesz="&TSZ;" name="S-Mf1">
 	  <tyPre>
 	    <eq>
 	      <minz>
@@ -137,7 +137,7 @@
 	    </Msub>
 	  </tyConc>
 	</tyRule>
-	<tyRule titlesz="&TSZ;" name="S-MF2">
+	<tyRule titlesz="&TSZ;" name="S-Mf2">
 	  <tyPre>
 	    <Msub>
 	      <mbFull>
@@ -458,14 +458,6 @@
 	      <type num="2"/>
 	      <dCtset num="2"/>
 	    </TDjudge>
-	    <Msub>
-	      <type num="1" dash="'"/>
-	      <type num="1"/>
-	    </Msub>
-	    <Msub>
-	      <type num="2" dash="'"/>
-	      <type num="2"/>
-	    </Msub>
 	  </tyPre>
 	  <tyConc>
 	    <TDjudge>
@@ -474,8 +466,8 @@
 		<aExpr num="2"/>
 	      </Pair>
 	      <pair>
-		<type num="1" dash="'"/>
-		<type num="2" dash="'"/>
+		<type num="1"/>
+		<type num="2"/>
 	      </pair>
 	      <unin>
 		<dCtset num="1"/>

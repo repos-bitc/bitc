@@ -30,40 +30,6 @@
 	    </eval>
 	  </opConc>
 	</opRule>
-	<opRule name="E-L#">
-	  <opPre>
-	    <leval>
-	      <opState>
-		<stack/>
-		<heap/>            
-		<aExpr/>
-	      </opState>
-	      <opState>
-		<stack dash="'"/>
-		<heap dash="'"/>
-		<aExpr dash="'"/>
-	      </opState>
-	    </leval>
-	  </opPre>
-	  <opConc>
-	    <eval>
-	      <opState>
-		<stack/>
-		<heap/>            
-		<redex name="L">
-		  <aExpr/>
-		</redex>
-	      </opState>
-	      <opState>
-		<stack dash="'"/>
-		<heap dash="'"/>
-		<redex name="L">
-		  <aExpr dash="'"/>
-		</redex>
-	      </opState>
-	    </eval>
-	  </opConc>
-	</opRule>
 	<opRule name="E-#">
 	  <opPre>
 	    <eval>
@@ -94,6 +60,38 @@
 		<redex>
 		  <aExpr dash="'"/>
 		</redex>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-@">
+	  <opPre>
+	    <notin>
+	      <sLoc/>
+	      <dom>
+		<stack/>
+	      </dom>
+	    </notin>
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<copy>
+		  <aVal/>
+		</copy>
+	      </opState>
+	      <opState>
+		<extend>
+		  <stack/>
+		  <mapping>
+		    <sLoc/>
+		    <aVal/>
+		  </mapping>  
+		</extend>            
+		<heap/>
+		<sLoc/>
 	      </opState>
 	    </eval>
 	  </opConc>
@@ -129,11 +127,13 @@
 		  </mapping>  
 		</extend>            
 		<heap/>
-		<subst>
-		  <aExpr/>
-		  <id/>
-		  <sLoc/>
-		</subst>
+		<copy>
+		  <subst>
+		    <aExpr/>
+		    <id/>
+		    <sLoc/>
+		  </subst>
+		</copy>
 	      </opState>
 	    </eval>
 	  </opConc>
@@ -163,7 +163,9 @@
 	      <opState>
 		<stack/>
 		<heap/>
-		<aExpr num="i"/>
+		<copy>
+		  <aExpr num="i"/>
+		</copy>
 	      </opState>
 	    </eval>
 	  </opConc>
@@ -277,6 +279,42 @@
 		<stack/>
 		<heap/>
 		<aVal/>
+	      </opState>
+	    </eval>
+	  </opConc>
+	</opRule>
+	<opRule name="E-:=#">
+	  <opPre>
+	    <leval>
+	      <opState>
+		<stack/>
+		<heap/>            
+		<lExp/>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<lExp dash="'"/>
+	      </opState>
+	    </leval>
+	  </opPre>
+	  <opConc>
+	    <eval>
+	      <opState>
+		<stack/>
+		<heap/>
+		<assign>
+		  <lExp/>
+		  <aExpr/>
+		</assign>
+	      </opState>
+	      <opState>
+		<stack dash="'"/>
+		<heap dash="'"/>
+		<assign>
+		  <lExp/>
+		  <aExpr/>
+		</assign>
 	      </opState>
 	    </eval>
 	  </opConc>

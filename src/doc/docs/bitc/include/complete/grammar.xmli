@@ -55,6 +55,9 @@
 		  <unspecified/>
 		  <sLoc/>
 		  <hLoc/>
+		  <copy>
+		    <aExpr/>
+		  </copy>
 		</alternatives>
 	      </bnf>
 	      <bnf desc="Left Expr">
@@ -127,7 +130,7 @@
 		  </extend>
 		</alternatives>
 	      </bnf>
-	      <bnf desc="Bind Env.">
+	      <bnf desc="Env.">
 		<gamma/>
 		<alternatives>
 		  <Empty/>
@@ -140,7 +143,7 @@
 		  </extend>
 		</alternatives>
 	      </bnf>
-	      <bnf desc="Store Typ.">
+	      <bnf desc="Store">
 		<store/>
 		<alternatives>
 		  <Empty/>
@@ -171,14 +174,26 @@
 		  </compose>
 		</alternatives>
 	      </bnf>
-	      <bnf desc="L. Redex">
-		<redex name="L"/>
+	      <bnf desc="Unf. Ct.">
+		<aCtset/>
 		<alternatives>
-		  <hole/>
-		  <assign>
-		    <redex name="L"/>
-		    <aExpr/>
-		  </assign> 
+		  <dCtset/>
+		  <set>
+		    <eq>
+		      <type/>
+		      <type/>
+		    </eq>
+		  </set>
+		  <set>
+		    <eq>
+		      <lKind k="var"/>
+		      <lKind/>
+		    </eq>
+		  </set>
+		  <unin>
+		    <aCtset/>
+		    <aCtset/>
+		  </unin>
 		</alternatives>
 	      </bnf>
 	      <bnf desc="Redex">
@@ -232,6 +247,9 @@
 		    <redex/>
 		    <aExpr/>
 		  </let>
+		  <copy>
+		    <redex/>
+		  </copy>
 		</alternatives>
 	      </bnfc>
 	    </grammar>
@@ -241,6 +259,7 @@
     </tbody>
   </table>    
 </font>
+  
   
   
   

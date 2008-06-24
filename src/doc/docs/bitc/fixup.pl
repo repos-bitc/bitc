@@ -55,6 +55,9 @@ while(!eof(F)) {
 	$l =~ s/$bigcap/$EM\{\\bigcap\}/g;
 	$l =~ s/$exclcup/$EM\{\\mathaccent\\cdot\\cup\}/g;
 	
+	#FIX: TEMP: vprop -> bullet (Need bullet / big dot symbol
+	$l =~ s/\\propto/\\bullet/g;
+
         #{| to {\!| and |} to |\!}
 	# Note that this is *not* paranthesizing replacement
 	$l =~ s/\{\\\{\}\{\\textbar\}/$EM\{\\\{\\!\|\}/g;
@@ -85,10 +88,11 @@ while(!eof(F)) {
 	#$l =~ s/$transR/$EM\{\\Rightarrow\}\\hskip -2.1ex\{\*\}/g;
 
 	#Equality onder another operator
-	$l =~ s/$EqSp1/\\mbox\{=\\hskip -1.2ex\\lower 0.1ex\\hbox\{$EM\{\_\{\_\{\\blacktriangledown\}\}\}\}\}/g;
-	$l =~ s/$EqSp2/\\mbox\{=\\hskip -1.2ex\\lower 0.3ex\\hbox\{$EM\{\_\{\{\\triangledown\}\}\}\}\}/g;
+	$l =~ s/$EqSp1/$EM\{\\stackrel\{\\blacktriangledown\}\{=\}\}/g;
+	$l =~ s/$EqSp2/$EM\{\\stackrel\{\\triangledown\}\{=\}\}/g;
+	#$l =~ s/$EqSp1/\\mbox\{=\\hskip -1.2ex\\lower 0.1ex\\hbox\{$EM\{\_\{\_\{\\blacktriangledown\}\}\}\}\}/g;
+	#$l =~ s/$EqSp2/\\mbox\{=\\hskip -1.2ex\\lower 0.3ex\\hbox\{$EM\{\_\{\{\\triangledown\}\}\}\}\}/g;
 	#$l =~ s/$EqSp1/$EM\{\{=\}\\atop\{\\blacktriangledown\}\}/g;
-	#$l =~ s/$EqSp2/\\mbox\{=\\hskip -1.4ex\\raise 0.1ex\\hbox\{$EM\{\_\{\_\{\\bigtriangledown\}\}\}\}\}/g;
 	
 	#Polymorphic constraint
 	$l =~ s/$pcstSp/\\mbox\{$1\\hskip -2ex$EM\{\^\{$MIT\{$2\}\}\}\}/g;

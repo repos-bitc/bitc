@@ -2156,23 +2156,15 @@
   <sect1 id="formal">
     <title>Formalization</title>
     <xi:include href="include/complete/grammar.xmli"/>
-    <!--<p>      
-      The calculus of 
+    <p>      
+      In order to formalize the semantics of
       <btypes:TYPE>
 	<language/>
-      </btypes:TYPE> defines two kinds of
-      locations: stack locations holding unboxed values, and heap
-      locations holding boxed values. Heap locations are first class
-      values, but stack locations are not. This distinction
-      is sufficient to illustrate the two cases that must be handled
-      by the type system: the types of values passed / copied by
-      value (only) need to be copy compatible, but the types of values passed by
-      reference must be strictly equal. More complex rules can be
-      constructed based on these primitive cases.
-    </p>
-    <p>
-      In this calculus, we make a distinction between two ``kinds'' of 
-      <progident>let</progident> expressions &mdash;      
+      </btypes:TYPE>, we extend the calculus with stack and heap
+      locations. Heap locations are first class values, but stack
+      locations are not. Further, we annotate all 
+      <progident>let</progident> expressions with their appropriate
+      kinds &mdash;
       <btypes:TYPE>
         <let kind="m"/>
       </btypes:TYPE>: monomorphic, possibly mutable
@@ -2188,18 +2180,6 @@
       part of the input program.
       The correct kind of <progident>let</progident> is
       inferred from the static type information.
-      The kind ``-'' is a placeholder for the unkinded input
-      <progident>let</progident> expression.
-      We write 
-      <btypes:TYPE>
-        <let kind="a"/>
-      </btypes:TYPE> to range over 
-      <btypes:TYPE>
-        <let kind="m"/>
-      </btypes:TYPE> and
-      <btypes:TYPE>
-        <let kind="p"/>
-      </btypes:TYPE>.      
     </p>
     <xi:include href="include/complete/opsem.xmli"/>
     <p>
@@ -2243,31 +2223,34 @@
       rules for our core language. We assume that the program is
       alpha-converted so that there are no name collisions due to
       inner bindings.  Following the theoretical
-      development in&nbsp;<cite ref="Grossman2006qtypes"/>, we give separate execution
-      semantics for left and right execution (evaluation of
-      expressions that appear on the LHS and RHS of an assignment 
+      development in&nbsp;<cite ref="Grossman2006qtypes"/>, we give
+      separate execution semantics for left evaluation
+      (execution of left expressions
       <btypes:TYPE>
-	<assign>
-	  <aExpr num="l"/>
-	  <aExpr num="r"/>
-	</assign>
-      </btypes:TYPE>) denoted by 
-      <btypes:TYPE><levalOp/></btypes:TYPE> and 
-      <btypes:TYPE><evalOp/></btypes:TYPE> respectively. 
+	<lExp/>
+      </btypes:TYPE> on the LHS of an assignment, denoted by
+      <btypes:TYPE>
+	<levalOp/>
+      </btypes:TYPE>) and 
+      right evaluation
+      (<btypes:TYPE>
+	<evalOp/>
+      </btypes:TYPE>) respectively. 
     </p>
     <p>
       Since the E-Dup and E-^ rules work only on the heap, we can only
       capture references to heap cells. Stack locations cannot escape
       beyond their scope since E-Rval rule performs implicit value
       extraction from stack locations in rvalue contexts. State
-      updates can be performed either on the stack or on the heap &nbsp;
-      (E-:=Stack and E-:=Heap). The stack is modeled as a pseudo-heap.
+      updates can be performed 
+      either on the stack or on the heap&nbsp;(E-:=* rules). The stack
+      is modeled as a pseudo-heap. 
       This enables us to abstract away details such as
       closure-construction and garbage collection while illustrating
-      the core semantics (they can later be reified
-      independently).
+      the core semantics, as they can later be reified
+      independently.
     </p>
-    <p>
+    <!-- <p>
       <leadin>Static Semantics</leadin>
       A substitution of Z for Y in X is written as:
       <btypes:TYPE>
@@ -2448,14 +2431,14 @@
       maximize the mutability of a type, but are interpreted
       lazily. The meta-constructors are also idempotent in our
       algebra of types.
-    </p>
-    <xi:include href="include/complete/subst.xmli"/>
+  </p> -->
+    <xi:include href="include/complete/operators.xmli"/>
     <xi:include href="include/complete/type.xmli"/>
-    <p>    
+    <!-- <p>    
       <leadin>Declarative Type Rules</leadin>
       The declarative type rules for our core language are given in 
       Figure&nbsp;<xref ref="decl_all_rules"/>. The standard type
-      judgment  
+    judgment  
       <btypes:TYPE>
 	<TDjudge>
 	  <aExpr/>
@@ -2975,10 +2958,10 @@
 	  <evalOp many="yes"/>
 	</btypes:TYPE>.
       </font>
-    </p>
+  </p> -->
     <xi:include href="include/complete/infer.xmli"/>
     <xi:include href="include/complete/unify.xmli"/>
-    <p>
+    <!-- <p>
       <leadin>Type Inference Algorithm</leadin>	
     </p>
     <p>
@@ -3856,7 +3839,7 @@
 	    </propagate>
 	  </TIjudge>
 	</btypes:TYPE>
-.      </font>
+  </font>
   </p> -->
   </sect1>
   <sect1 id="related">

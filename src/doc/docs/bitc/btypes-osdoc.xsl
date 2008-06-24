@@ -1011,16 +1011,22 @@
 
   <!-- TRUE -->
   <xsl:template match="TRUE" mode="formula">
-    <xsl:element name="b">
+    <!-- <xsl:element name="b">
       <xsl:text>true</xsl:text>
-    </xsl:element>
+  </xsl:element> -->
+    <xsl:call-template name="print.mathmode">
+      <xsl:with-param name="print.mathmode.text">true</xsl:with-param> 
+    </xsl:call-template>
   </xsl:template>
   
   <!-- FALSE -->
   <xsl:template match="FALSE" mode="formula">
-    <xsl:element name="b">
+    <!-- <xsl:element name="b">
       <xsl:text>false</xsl:text>
-    </xsl:element>
+    </xsl:element> -->
+    <xsl:call-template name="print.mathmode">
+      <xsl:with-param name="print.mathmode.text">false</xsl:with-param> 
+    </xsl:call-template>
   </xsl:template>
 
   <!-- AND -->
@@ -2645,6 +2651,13 @@
     </xsl:choose>
   </xsl:template>  
   
+  <!-- copy -->
+  <xsl:template match="copy" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>vprop;</xsl:text>
+    <xsl:apply-templates mode="formula"/>
+  </xsl:template>  
+
   <!-- dup -->
   <xsl:template match="dup" mode="formula">
     <xsl:element name="progident">
@@ -2652,7 +2665,7 @@
     </xsl:element>
     <xsl:call-template name="print.params"/>
   </xsl:template>  
-
+  
   <!-- deref -->
   <xsl:template match="deref" mode="formula">
     <xsl:apply-templates mode="formula"/>
