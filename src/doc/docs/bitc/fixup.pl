@@ -121,8 +121,8 @@ while(!eof(F)) {
 
 	#FIX until osdoc section emission is fixed for LLNCS
 	$l =~ s/\\newcommand\{\\mySection\}\[1\]\{\\section\*\{#1\}\}/\\newcommand\{\\mySection\}\[1\]\{\\section\{#1\}\}/g;
-	$l =~ s/\\newcommand\{\\mySubSection\}\[1\]\{\\subsection\*\{#1\}\}/\\newcommand\{\\mySubSection\}\[1\]\{\\subsection\{#1\}\}/g;
-	$l =~ s/\\newcommand\{\\mySubsubSection\}\[1\]\{\\subsubsection\*\{#1\}\}/\\newcommand\{\\mySubsubtion\}\[1\]\{\\subsubsection\{#1\}\}/g;
+	$l =~ s/\\newcommand\{\\mySubsection\}\[1\]\{\\subsection\*\{#1\}\}/\\newcommand\{\\mySubsection\}\[1\]\{\\subsection\{#1\}\}/g;
+	$l =~ s/\\newcommand\{\\mySubsubsection\}\[1\]\{\\subsubsection\*\{#1\}\}/\\newcommand\{\\mySubsubsection\}\[1\]\{\\subsubsection\{#1\}\}/g;
 	
     } while($ol ne $l);
     

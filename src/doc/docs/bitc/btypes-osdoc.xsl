@@ -1108,11 +1108,22 @@
 
   <!-- pred -->
   <xsl:template match="pred" mode="formula">
-    <xsl:call-template name="print.mathmode">
-      <xsl:with-param name="print.mathmode.text">
-	<xsl:value-of select="@name"/>
-      </xsl:with-param> 
-    </xsl:call-template>
+    <xsl:choose>
+      <xsl:when test="@meta">
+	<xsl:call-template name="print.mathcal">
+	  <xsl:with-param name="print.mathcal.letter">
+	    <xsl:value-of select="@name"/>
+	  </xsl:with-param> 
+	</xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:call-template name="print.mathmode">
+	  <xsl:with-param name="print.mathmode.text">
+	    <xsl:value-of select="@name"/>
+	  </xsl:with-param> 
+	</xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:call-template name="print.index.dash"/>
     <xsl:call-template name="print.params"/>
   </xsl:template>
@@ -2923,7 +2934,7 @@
   <!-- redex -->
   <xsl:template match="redex" mode="formula">
     <xsl:choose>
-      <xsl:when test= "@name">
+      <xsl:when test="@name">
 	<xsl:call-template name="print.mathcal">
 	  <xsl:with-param name="print.mathcal.letter">
 	    <xsl:value-of select="@name"/>

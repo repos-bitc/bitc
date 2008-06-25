@@ -3,7 +3,7 @@
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
      <!ENTITY TSZ "scriptsize">
 ]>
-<figure id="hy_infer" fullwidth='yes' latex.placement="tb">
+  <figure id="hy_infer" fullwidth='yes' latex.placement="tb">
   <font size="scriptsize">
     <btypes:TYPE
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
@@ -1079,3 +1079,4 @@
   </font>
   <caption>Type Inference Algorithm</caption>
 </figure>
+  

@@ -35,22 +35,22 @@
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
-      </btypes:TYPE> 
-      <btypes:TYPE>
-	<TDjudge>
-	  <aExpr/>
-	  <type/>
-	  <dCtset dash="'"/>
-	</TDjudge>
-      </btypes:TYPE> for some
-      <btypes:TYPE>
-	<subeq>
-	  <dCtset dash="'"/>
-	  <dCtset/>
-	</subeq>
-      </btypes:TYPE>.
-    </p>
-  </definition>
+	</btypes:TYPE> if
+	<btypes:TYPE>
+	  <TDjudge>
+	    <aExpr/>
+	    <type/>
+	    <dCtset dash="'"/>
+	  </TDjudge>
+	</btypes:TYPE> for some
+	<btypes:TYPE>
+	  <subeq>
+	    <dCtset dash="'"/>
+	    <dCtset/>
+	  </subeq>
+	</btypes:TYPE>.
+      </p>
+    </definition>
   <definition id="constraint-colection-ext-typ">
     <title>Constraint Collection over Type Derivation</title>
     <p>
@@ -63,7 +63,7 @@
 	  </TDjudge>
 	</spset>
       </btypes:TYPE> to denote the set of all constrained types and
-      unconstrained type variables used in the derivation of 
+	unconstrained type variables used in the derivation of 
       <btypes:TYPE>
 	<TDjudge D="yes">
 	  <aExpr/>
@@ -1200,7 +1200,7 @@
       Other cases of the lemma are similar.
     </p>
   </proof>
-  <theorem id="T-progress">
+    <theorem id="T-progress">
     <title>Progress</title>
     <p>
       If
@@ -8923,3 +8923,4 @@
     </p>
   </proof>
   </sect1>
+  

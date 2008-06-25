@@ -390,7 +390,8 @@
 <!ELEMENT iff                  %anything.group;*>
 <!ELEMENT pred                 %anything.group;*>
 <!ATTLIST pred
-                               name       CDATA #REQUIRED
+                               name      CDATA    #REQUIRED
+                               name      (YES|NO) #REQUIRED
                                num       CDATA    #IMPLIED
                                dash      CDATA    #IMPLIED
 >

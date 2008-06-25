@@ -77,12 +77,12 @@
       polymorphism) and features
       that are critical to the correctness and performance of systems
       programs (such as prescriptive data structure representation and
-      mutability). In this paper, we endeavour to bride this gap
+      mutability). In this paper, we endeavor to bride this gap
       between modern language design and systems programming. We
       first discuss the support for these features in existing
       languages, identify the challenges in combining these feature
       sets and then describe our approach toward solving this problem. 
-    </p>
+    </p> 
     <p>
       <leadin>Representation Control:</leadin> A systems programming
       language must be expressive enough to specify details of
@@ -209,1035 +209,1017 @@
       of the inference algorithm have been proved.
     </p>
   </sect1>
-  <sect1 id="language">
-    <title>The Language</title>
+  <sect1 id="informal">
+    <title>Informal Overview</title>
     <p>
-      For purposes of presentation in this paper, we define
-      <btypes:TYPE>
-	<language/>
-      </btypes:TYPE>, a core systems programming language calculus. 
-      <btypes:TYPE>
-	<language/>
-      </btypes:TYPE> is a direct expression of lambda
-      calculus with side effects, extended to be able to reflect the
-      semantics of explicit representation. 
+      In this section, we give an informal description of our type
+      system and inference algorithm.
     </p>
-    <xi:include href="include/complete/lang.xmli"/>
-    <p>
-      The type
-      <btypes:TYPE>
-	<ref>
-	  <type/>
-	</ref>
-      </btypes:TYPE> represents a reference (pointer) type and 
-      <btypes:TYPE>
-	<mutable>
-	  <ptype/>
-	</mutable>
-      </btypes:TYPE> represents a mutable type. 
-      The expression
-      <btypes:TYPE>
-	<dup>
-	  <aExpr/>
-	</dup>
-      </btypes:TYPE>,
-      where 
-      <btypes:TYPE>
-	<aExpr/>
-      </btypes:TYPE>
-      has type
-      <btypes:TYPE>
-	<type/>
-      </btypes:TYPE>,
-      returns a reference 
-      of type
-      <btypes:TYPE>
-	<ref>
-	  <type/>
-	</ref>
-      </btypes:TYPE> to a heap-allocated <em>copy</em>
-      of the value of 
-      <btypes:TYPE>
-	<aExpr/>
-      </btypes:TYPE>. 
-      The <progident>^</progident> operator is used to
-      dereference heap cells.       
-      Pairs <progident>(,)</progident>
-      are <em>unboxed</em> structures whose
-      constituent elements are contiguously allocated on the
-      stack, or in their containing data-structure. 
-      <btypes:TYPE>
-	<fst>
-	  <aExpr/>
-	</fst>
-	<text content=" and "/>
-	<snd>
-	  <aExpr/>
-	</snd>
-      </btypes:TYPE> perform selection from pairs.
-      We define
-      <btypes:TYPE>
-	<eq>
-	  <other>
-	    <texttt content="1"/>
-	  </other>
-	  <texttt content="2"/>
-	</eq>
-      </btypes:TYPE> and
-      <btypes:TYPE>
-	<eq>
-	  <other>
-	    <texttt content="2"/>
-	  </other>
-	  <texttt content="1"/>
-	  </eq>
-      </btypes:TYPE>.
-    </p>
-    <p>
-      The <progident>let</progident> construct can be used for
-      allocating (possibly mutable) stack variables and to create
-      let-polymorphic bindings.
-      <progident>let</progident>&nbsp;<btypes:TYPE>
-	<tqExpr optional="yes">
-	  <id/>
-	  <type/>
-	</tqExpr>
-      </btypes:TYPE> represents optional type qualification of
-      let-bound variables. The <progident>:=</progident> operator
-      mutates both stack locations (let-bound locals, function
-      parameters) and heap locations (<progident>dup</progident>-ed
-      values). Unlike ML, <progident>:=</progident> does not
-      dereference its target.  
-    </p>
-    <p>
-      <font color="purple">
-      <btypes:TYPE>
-	<language/>
-      </btypes:TYPE> does
-      not include an address <progident>&amp;</progident> operator to
-      obtain the address of stack locations. First, the safety
-      of <progident>&amp;</progident> operator is an orthogonal
-      problem that has been studied in the literature&nbsp;<cite
-	ref="Grossman2006qtypes"/> and can be incorporated
-      into the language if necessary.
-      Second, it is unclear whether the <progident>&amp;</progident>
-      operator is necessary in a safe systems programming language.
-      There are examples of high performance security kernels
-      that have been constructed without taking the address of stack
-      variables, even though they rely on stack allocation and
-      mutation for correctness and 
-      performance&nbsp;<cite ref="shapiro1999EROS"/>. 
-      </font>
-    </p>
-  </sect1>
-  <sect1 id="mut_model">
-    <title>The Mutability Model</title>
-    <p>
-      Traditionally, there are two models of mutability studied in the
-      case of imperative languages. One of them is the ML model, where
-      there is a clear separation between name bindings and updatable
-      locations. All updatable (mutable) locations live in the heap
-      within ``ref cells''. Fetching the value inside a ref cell
-      requires an explicit dereferencing operation. The major
-      advantage of this approach is that types are definitive about the
-      mutability of every location, across all aliases. In this sense,
-      we can say that the support for mutability is mathematically
-      ``well-founded.'' This model benefits tools
-      that perform static analysis or model checking because
-      conclusions drawn about location immutability need never be
-      conservative. This model of mutability also increases the amount
-      of optimization the compiler can safely perform without complex
-      alias analysis.
-    </p>
-    <p>
-      The other well known model of mutability is the C model, wherein
-      the support for mutability is ``first-class'' in the sense that
-      <em>all</em> locations can be mutable. This model permits mutation of
-      stack variables and unboxed values. There is a notion of
-      <em>left</em> expressions which can be the target of an
-      assignment, and <em>right</em> expressions represent all other
-      computations. The extraction of the value from a (mutable) 
-      location is implicit, and does not require dereferencing.
-      However, in this model, types cannot distinguish mutable values
-      from immutable ones. For example, in C it is legal to write: 
-      <br/>
-      <progident>
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	const bool *cp = ...;   
-	bool *p = cp;
-	*p = false;  // OK!
-      </progident>
-    </p>
-    <p>
-      The alleged ``constness'' of the location pointed to by
-      <progident>cp</progident> is a local property (only) with
-      respect to the alias <progident>cp</progident> and not a
-      statement of true immutability of the target location. 
-      The compiler or other analytical engines are not entitled to
-      believe that certain locations or fields are constant even if so
-      declared.
-    </p>
-    <p>
-      <btypes:TYPE>
-	<language/>
-      </btypes:TYPE>
-      supports well-founded first class mutability. Similar to
-      ML, we impose the ``one location, one type'' rule.
-      <br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <btypes:TYPE>
-	<let>
-	  <tqExpr>
-	    <id name="cp"/>
-	    <ref>
-	      <bool/>
-	    </ref>
-	  </tqExpr>
+    <sect2 id="language">
+      <title>The Language</title>
+      <p>
+	For purposes of presentation in this paper, we define
+	<btypes:TYPE>
+	  <language/>
+	</btypes:TYPE>, a core systems programming language calculus. 
+	<btypes:TYPE>
+	  <language/>
+	</btypes:TYPE> is a direct expression of lambda
+	calculus with side effects, extended to be able to reflect the
+	semantics of explicit representation. 
+      </p>
+      <xi:include href="include/complete/lang.xmli"/>
+      <p>
+	The type
+	<btypes:TYPE>
+	  <ref>
+	    <type/>
+	  </ref>
+	</btypes:TYPE> represents a reference (pointer) type and 
+	<btypes:TYPE>
+	  <mutable>
+	    <ptype/>
+	  </mutable>
+	</btypes:TYPE> represents a mutable type. 
+	The expression
+	<btypes:TYPE>
 	  <dup>
-	    <true/>
+	    <aExpr/>
 	  </dup>
+	</btypes:TYPE>,
+	where 
+	<btypes:TYPE>
+	  <aExpr/>
+	</btypes:TYPE>
+	has type
+	<btypes:TYPE>
+	  <type/>
+	</btypes:TYPE>,
+	returns a reference 
+	of type
+	<btypes:TYPE>
+	  <ref>
+	    <type/>
+	  </ref>
+	</btypes:TYPE> to a heap-allocated <em>copy</em>
+	of the value of 
+	<btypes:TYPE>
+	  <aExpr/>
+	</btypes:TYPE>. 
+	The <progident>^</progident> operator is used to
+	dereference heap cells.       
+	Pairs <progident>(,)</progident>
+	are <em>unboxed</em> structures whose
+	constituent elements are contiguously allocated on the
+	stack, or in their containing data-structure. 
+	<btypes:TYPE>
+	  <fst>
+	    <aExpr/>
+	  </fst>
+	  <text content=" and "/>
+	  <snd>
+	    <aExpr/>
+	  </snd>
+	</btypes:TYPE> perform selection from pairs.
+	We define
+	<btypes:TYPE>
+	  <eq>
+	    <other>
+	      <texttt content="1"/>
+	    </other>
+	    <texttt content="2"/>
+	  </eq>
+	</btypes:TYPE> and
+	<btypes:TYPE>
+	  <eq>
+	    <other>
+	      <texttt content="2"/>
+	    </other>
+	    <texttt content="1"/>
+	  </eq>
+	</btypes:TYPE>.
+      </p>
+      <p>
+	The <progident>let</progident> construct can be used for
+	allocating (possibly mutable) stack variables and to create
+	let-polymorphic bindings.
+	<progident>let</progident>&nbsp;<btypes:TYPE>
+	  <tqExpr optional="yes">
+	    <id/>
+	    <type/>
+	  </tqExpr>
+	</btypes:TYPE> represents optional type qualification of
+	let-bound variables. The <progident>:=</progident> operator
+	mutates both stack locations (let-bound locals, function
+	parameters) and heap locations (<progident>dup</progident>-ed
+	values). Unlike ML, <progident>:=</progident> does not
+	dereference its target.  
+      </p>
+      <p>
+	<font color="purple">
+	  <btypes:TYPE>
+	    <language/>
+	  </btypes:TYPE> does
+	  not include an address <progident>&amp;</progident> operator to
+	  obtain the address of stack locations. First, the safety
+	  of <progident>&amp;</progident> operator is an orthogonal
+	  problem that has been studied in the literature&nbsp;<cite
+	    ref="Grossman2006qtypes"/> and can be incorporated
+	  into the language if necessary.
+	  Second, it is unclear whether the <progident>&amp;</progident>
+	  operator is necessary in a safe systems programming language.
+	  There are examples of high performance security kernels
+	  that have been constructed without taking the address of stack
+	  variables, even though they rely on stack allocation and
+	  mutation for correctness and 
+	  performance&nbsp;<cite ref="shapiro1999EROS"/>. 
+	</font>
+      </p>
+    </sect2>
+    <sect2 id="mut_model">
+      <title>The Mutability Model</title>
+      <p>
+	Traditionally, there are two models of mutability studied in the
+	case of imperative languages. One of them is the ML model, where
+	there is a clear separation between name bindings and updatable
+	locations. All updatable (mutable) locations live in the heap
+	within ``ref cells''. Fetching the value inside a ref cell
+	requires an explicit dereferencing operation. The major
+	advantage of this approach is that types are definitive about the
+	mutability of every location, across all aliases. In this sense,
+	we can say that the support for mutability is mathematically
+	``well-founded.'' This model benefits tools
+	that perform static analysis or model checking because
+	conclusions drawn about location immutability need never be
+	conservative. This model of mutability also increases the amount
+	of optimization the compiler can safely perform without complex
+	alias analysis.
+      </p>
+      <p>
+	The other well known model of mutability is the C model, wherein
+	the support for mutability is ``first-class'' in the sense that
+	<em>all</em> locations can be mutable. This model permits mutation of
+	stack variables and unboxed values. There is a notion of
+	<em>left</em> expressions which can be the target of an
+	assignment, and <em>right</em> expressions represent all other
+	computations. The extraction of the value from a (mutable) 
+	location is implicit, and does not require dereferencing.
+	However, in this model, types cannot distinguish mutable values
+	from immutable ones. For example, in C it is legal to write: 
+	<br/>
+	<progident>
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	  const bool *cp = ...;   
+	  bool *p = cp;
+	  *p = false;  // OK!
+	</progident>
+      </p>
+      <p>
+	The alleged ``constness'' of the location pointed to by
+	<progident>cp</progident> is a local property (only) with
+	respect to the alias <progident>cp</progident> and not a
+	statement of true immutability of the target location. 
+	The compiler or other analytical engines are not entitled to
+	believe that certain locations or fields are constant even if so
+	declared.
+      </p>
+      <p>
+	<btypes:TYPE>
+	  <language/>
+	</btypes:TYPE>
+	supports well-founded first class mutability. Similar to
+	ML, we impose the ``one location, one type'' rule.
+	<br/>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<btypes:TYPE>
 	  <let>
 	    <tqExpr>
-	      <id name="p"/>
+	      <id name="cp"/>
+	      <ref>
+		<bool/>
+	      </ref>
+	    </tqExpr>
+	    <dup>
+	      <true/>
+	    </dup>
+	    <let>
+	      <tqExpr>
+		<id name="p"/>
+		<ref>
+		  <mutable>
+		    <bool/>
+		  </mutable>
+		</ref>
+	      </tqExpr>
+	      <id name="cp"/>
+	    </let>
+	  </let>
+	</btypes:TYPE>
+	&nbsp;&nbsp;
+	<progident>
+	  (* Error *)
+	</progident>
+	<br/>
+	We see that
+	<btypes:TYPE>
+	  <id name="cp"/>
+	</btypes:TYPE> has the type reference to bool
+	(<btypes:TYPE>
+	  <ref>
+	    <bool/>
+	  </ref>
+	</btypes:TYPE>). This type is incompatible with that of 
+	<btypes:TYPE>
+	  <id name="p"/>
+	</btypes:TYPE>, reference to mutable-bool
+	(<btypes:TYPE>
+	  <ref>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	  </ref>
+	</btypes:TYPE>).
+	Similar to the C model, a notion of left expressions (defined in
+	Section&nbsp;<xref ref="language"/>) is necessary to preserve
+	the programmer's mental model of the relationship between
+	locations storage and to ensure that compiler transformations
+	are semantics preserving.
+      </p>
+    </sect2>
+    <sect2 id="copy_compat">
+      <title>Copy Compatibility</title> 
+      <p>
+	Since <btypes:TYPE> <language/> </btypes:TYPE> is a
+	call-by-value language, it is desirable that we allow some
+	freedom in the compatibility of types with respect to their
+	mutability at a copy boundary. For example, in the
+	following expression: 
+	<br/>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<btypes:TYPE>
+	  <let>
+	    <id name="fnxn"/>
+	    <lambda>
+	      <id name="x"/>
+	      <paren>
+		<assign>
+		  <id name="x"/>
+		  <false/>
+		</assign>
+	      </paren>
+	    </lambda>
+	    <let>	    
+	      <tqExpr>
+		<id name="y"/>
+		<bool/>
+	      </tqExpr>
+	      <true/>
+	      <apply>
+		<id name="fnxn"/>
+		<id name="y"/>
+	      </apply>
+	    </let>
+	  </let>
+	</btypes:TYPE>
+	<br/>
+	the type of
+	<btypes:TYPE>
+	  <id name="fnxn"/>
+	</btypes:TYPE> is
+	<btypes:TYPE>
+	  <fn>
+	    <paren>
+	      <mutable>
+		<bool/>
+	      </mutable>
+	    </paren>
+	    <unit/>
+	  </fn>
+	</btypes:TYPE>, whereas that of the actual argument
+	<btypes:TYPE>
+	  <id name="y"/>
+	</btypes:TYPE> is
+	<btypes:TYPE>
+	  <bool/>
+	</btypes:TYPE>.
+	Since the formal argument
+	<btypes:TYPE>
+	  <id name="x"/>
+	</btypes:TYPE> is a <em>copy</em> of 
+	<btypes:TYPE>
+	  <id name="y"/>
+	</btypes:TYPE> and occupies a different location, 
+	this expression is type safe. We refer to this notion
+	of compatibility of types as <term>copy compatibility</term>.
+	denoted by &cong;. In this example,
+	<btypes:TYPE>
+	  <ceq>
+	    <bool/>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	  </ceq>
+	</btypes:TYPE>.
+      </p>
+      <p>
+	Copy compatibility need not be restricted to the outermost
+	mutability compatibility      
+	(<btypes:TYPE>
+	  <TceqOp/>
+	</btypes:TYPE>), but must not extend past a reference
+	boundary in order ensure that every location has unique type.
+	We define copy compatibility for 
+	<btypes:TYPE>
+	  <language/>
+	</btypes:TYPE> as:
+      </p>    
+      <font size="small">
+	<btypes:TYPE>
+	  <Hrules initsep="20" colsep="3">
+	    <tyRule>
+	      <tyPre/>
+	      <tyConc>
+		<Tceq>                
+		  <type/>
+		  <type/>
+		</Tceq>
+	      </tyConc>                
+	    </tyRule>
+	    <tyRule>
+	      <tyPre>
+		<Tceq>
+		  <type num="1"/>
+		  <type num="2"/>
+		</Tceq>
+	      </tyPre>
+	      <tyConc>
+		<Tceq>
+		  <type num="2"/>
+		  <type num="1"/>
+		</Tceq>
+	      </tyConc>
+	    </tyRule>
+	    <tyRule>
+	      <tyPre>
+		<Tceq>                
+		  <type num="1"/>
+		  <type num="2"/>
+		</Tceq>
+		<Tceq>                
+		  <type num="2"/>
+		  <type num="3"/>
+		</Tceq>	    
+	      </tyPre>
+	      <tyConc>
+		<Tceq>
+		  <type num="1"/>
+		  <type num="3"/>
+		</Tceq>
+	      </tyConc>                
+	    </tyRule>
+	    <tyRule>
+	      <tyPre/>
+	      <tyConc>
+		<Tceq>                
+		  <mutable>
+		    <ptype/>
+		  </mutable>
+		  <ptype/>
+		</Tceq>
+	      </tyConc>
+	    </tyRule>
+	  </Hrules>
+	  <Hrules initsep="2" colsep="3">
+	    <tyRule>
+	      <tyPre/>
+	      <tyConc>
+		<ceq>                
+		  <type/>
+		  <type/>
+		</ceq>
+	      </tyConc>                
+	    </tyRule>   
+	    <tyRule>
+	      <tyPre>
+		<ceq>                
+		  <type num="1"/>
+		  <type num="2"/>
+		</ceq>	    
+	      </tyPre>
+	      <tyConc>
+		<ceq>
+		  <type num="2"/>
+		  <type num="1"/>
+		</ceq>
+	      </tyConc>                
+	    </tyRule>
+	    <tyRule>
+	      <tyPre>
+		<ceq>                
+		  <type num="1"/>
+		  <type num="2"/>
+		</ceq>
+		<ceq>                
+		  <type num="2"/>
+		  <type num="3"/>
+		</ceq>	    
+	      </tyPre>
+	      <tyConc>
+		<ceq>
+		  <type num="1"/>
+		  <type num="3"/>
+		</ceq>
+	      </tyConc>                
+	    </tyRule>
+	    <tyRule>
+	      <tyPre>
+		<ceq>                
+		  <type/>
+		  <ptype/>
+		</ceq>	    
+	      </tyPre>
+	      <tyConc>
+		<ceq>                
+		  <type/>
+		  <mutable>
+		    <ptype/>
+		  </mutable>
+		</ceq>
+	      </tyConc>                
+	    </tyRule>   
+	    <tyRule>
+	      <tyPre>
+		<ceq>                
+		  <type num="1"/>
+		  <type num="1" dash="'"/>
+		</ceq>
+		<ceq>
+		  <type num="2"/>
+		  <type num="2" dash="'"/>
+		</ceq>
+	      </tyPre>
+	      <tyConc>
+		<ceq>
+		  <pair>
+		    <type num="1"/>
+		    <type num="2"/>
+		  </pair>
+		  <pair>
+		    <type num="1" dash="'"/>
+		    <type num="2" dash="'"/>
+		  </pair>
+		</ceq>
+	      </tyConc>                
+	    </tyRule>
+	  </Hrules>
+	</btypes:TYPE>
+      </font>
+      <br/>
+      <p>
+	Copy compatibility can be permitted at argument passing, new
+	variable binding, assignment, and basically at argument/return
+	positions of all expressions, except where a left expression is
+	expected or returned. For example, the expression
+	<btypes:TYPE>
+	  <tqExpr>
+	    <paren>
+	      <tqExpr>
+		<id name="x"/>
+		<type/>
+	      </tqExpr>
+	    </paren>
+	    <mutable>
+	      <type/>
+	    </mutable>
+	  </tqExpr>
+	</btypes:TYPE> is ill typed, but 
+	the branches of a conditional can have
+	different but copy compatible types as in:
+	<btypes:TYPE>
+	  <if>
+	    <true/>
+	    <tqExpr>
+	      <id name="a"/>
+	      <type/>
+	    </tqExpr>
+	    <tqExpr>
+	      <id name="b"/>
+	      <mutable>
+		<type/>
+	      </mutable>
+	    </tqExpr>
+	  </if>
+	</btypes:TYPE>.
+      </p>
+    </sect2>
+    <sect2 id="infer">
+      <title>Type Inference</title>
+      <p>
+	We now consider the problem of designing a type inference
+	algorithm for 
+	<btypes:TYPE>
+	  <language/>
+	</btypes:TYPE>.
+	Due to copy compatibility, it is no longer possible
+	to infer a unique (simple) type for all expressions. 
+	For example, in the expression
+	<btypes:TYPE>
+	  <let>
+	    <id name="p"/>
+	    <true/>
+	  </let>
+	</btypes:TYPE>, 
+	we know that the type of the literal
+	<btypes:TYPE>
+	  <true/>
+	</btypes:TYPE> is
+	<btypes:TYPE>
+	  <bool/>
+	</btypes:TYPE>, but the type of
+	<btypes:TYPE>
+	  <id name="p"/>
+	</btypes:TYPE>
+	could either be
+	<btypes:TYPE>
+	  <bool/>
+	</btypes:TYPE> or
+	<btypes:TYPE>
+	  <mutable>
+	    <bool/>
+	  </mutable>
+	</btypes:TYPE>. Therefore, unlike ML, type inference is not
+	purely syntax directed in 
+	<btypes:TYPE>
+	  <language/>
+	</btypes:TYPE>.
+      </p>
+      <p>
+	It is natural to ask why mutability should be inferred at all.
+	That is: why not require explicit annotation for all mutable
+	values, and infer immutable types by default? In a language with
+	copy compatibility, this will result in a proliferation of type 
+	annotations. Constructor applications, 
+	polymorphic type instantiations, accessor functions,
+	<foreignphrase>etc.</foreignphrase> 
+	will have to be explicitly annotated with their types. For
+	example, if
+	<btypes:TYPE> 
+	  <id name="fst"/>
+	</btypes:TYPE>
+	is an accessor function that returns the first element of a
+	pair, and  
+	<btypes:TYPE> 
+	  <id name="m"/>
+	</btypes:TYPE>
+	is a variable of type
+	<btypes:TYPE> 
+	  <mutable>
+	    <bool/>
+	  </mutable>
+	</btypes:TYPE>, we will have to write: 
+	<br/>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<btypes:TYPE> 
+	  <let>
+	    <id name="xyz"/>
+	    <tqExpr>
+	      <dup>
+		<apply>
+		  <id name="fst"/>
+		  <tqExpr nosp="yes">
+		    <Pair>
+		      <id name="m"/>
+		      <false/>
+		    </Pair>
+		    <pair>
+		      <mutable>
+			<bool/>
+		      </mutable>
+		      <bool/>
+		    </pair>
+		  </tqExpr>
+		</apply>
+	      </dup>
 	      <ref>
 		<mutable>
 		  <bool/>
 		</mutable>
 	      </ref>
 	    </tqExpr>
-	    <id name="cp"/>
+	    <unspecified/>
 	  </let>
-	</let>
-      </btypes:TYPE>
-      &nbsp;&nbsp;
-      <progident>
-	(* Error *)
-      </progident>
-      <br/>
-      We see that
-      <btypes:TYPE>
-	<id name="cp"/>
-      </btypes:TYPE> has the type reference to bool
-      (<btypes:TYPE>
-	<ref>
-	  <bool/>
-	</ref>
-      </btypes:TYPE>). This type is incompatible with that of 
-       <btypes:TYPE>
-	<id name="p"/>
-      </btypes:TYPE>, reference to mutable-bool
-      (<btypes:TYPE>
-	<ref>
-	  <mutable>
-	    <bool/>
-	  </mutable>
-	</ref>
-      </btypes:TYPE>).
-      Similar to the C model, a notion of left expressions (defined in
-      Section&nbsp;<xref ref="language"/>) is necessary to preserve
-      the programmer's mental model of the relationship between
-      locations storage and to ensure that compiler transformations
-      are semantics preserving.
-    </p>
-  </sect1>
-  <sect1 id="copy_compat">
-    <title>Copy Compatibility</title> 
-    <p>
-      Since <btypes:TYPE> <language/> </btypes:TYPE> is a
-      call-by-value language, it is desirable that we allow some
-      freedom in the compatibility of types with respect to their
-      mutability at a copy boundary. For example, in the
-      following expression: 
-      <br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <btypes:TYPE>
-	<let>
-	  <id name="fnxn"/>
-	  <lambda>
-	    <id name="x"/>
-	    <paren>
-	      <assign>
-		<id name="x"/>
-		<false/>
-	      </assign>
-	    </paren>
-	  </lambda>
-	  <let>	    
-	    <tqExpr>
-	      <id name="y"/>
-	      <bool/>
-	    </tqExpr>
-	    <true/>
-	    <apply>
-	      <id name="fnxn"/>
-	      <id name="y"/>
-	    </apply>
-	  </let>
-	</let>
-      </btypes:TYPE>
-      <br/>
-      the type of
-      <btypes:TYPE>
-	<id name="fnxn"/>
-      </btypes:TYPE> is
-      <btypes:TYPE>
-	<fn>
-	  <paren>
-	    <mutable>
-	      <bool/>
-	    </mutable>
-	  </paren>
-	  <unit/>
-	</fn>
-      </btypes:TYPE>, whereas that of the actual argument
-      <btypes:TYPE>
-	<id name="y"/>
-      </btypes:TYPE> is
-      <btypes:TYPE>
-	<bool/>
-      </btypes:TYPE>.
-      Since the formal argument
-      <btypes:TYPE>
-	<id name="x"/>
-      </btypes:TYPE> is a <em>copy</em> of 
-      <btypes:TYPE>
-	<id name="y"/>
-      </btypes:TYPE> and occupies a different location, 
-      this expression is type safe. We refer to this notion
-      of compatibility of types as <term>copy compatibility</term>.
-      denoted by &cong;. In this example,
-      <btypes:TYPE>
-	<ceq>
-	  <bool/>
-	  <mutable>
-	    <bool/>
-	  </mutable>
-	</ceq>
-      </btypes:TYPE>.
-    </p>
-    <p>
-      Copy compatibility need not be restricted to the outermost
-      mutability compatibility      
-      (<btypes:TYPE>
-	<TceqOp/>
-      </btypes:TYPE>), but must not extend past a reference
-      boundary in order ensure that every location has unique type.
-      We define copy compatibility for 
-      <btypes:TYPE>
-	<language/>
-      </btypes:TYPE> as:
-    </p>    
-    <font size="small">
-      <btypes:TYPE>
-	<Hrules initsep="20" colsep="3">
-	  <tyRule>
-	    <tyPre/>
-	    <tyConc>
-	      <Tceq>                
-		<type/>
-		<type/>
-	      </Tceq>
-	    </tyConc>                
-	  </tyRule>
-	  <tyRule>
-	    <tyPre>
-	      <Tceq>
-		<type num="1"/>
-		<type num="2"/>
-	      </Tceq>
-	    </tyPre>
-	    <tyConc>
-	      <Tceq>
-		<type num="2"/>
-		<type num="1"/>
-	      </Tceq>
-	    </tyConc>
-	  </tyRule>
-	  <tyRule>
-	    <tyPre>
-	      <Tceq>                
-		<type num="1"/>
-		<type num="2"/>
-	      </Tceq>
-	      <Tceq>                
-		<type num="2"/>
-		<type num="3"/>
-	      </Tceq>	    
-	    </tyPre>
-	    <tyConc>
-	      <Tceq>
-		<type num="1"/>
-		<type num="3"/>
-	      </Tceq>
-	    </tyConc>                
-	  </tyRule>
-	  <tyRule>
-	    <tyPre/>
-	    <tyConc>
-	      <Tceq>                
-		<mutable>
+	</btypes:TYPE>
+	<br/>
+	Therefore, if mutability is not inferred, it results in a
+	substantial increase in the number of programmer annotations,
+	and type inference becomes ineffective.
+	It is desirable that the inference algorithm must
+	automatically infer polymorphism (without any programmer
+	annotations) as well, since this leads to better software
+	engineering by maximizing code reuse.
+      </p>
+      <p>
+	Therefore, the desirable characteristics of a type inference
+	algorithm for   
+	<btypes:TYPE>
+	  <language/>
+	</btypes:TYPE> are:
+      </p>
+      <ol>
+	<li>
+	  <p>
+	    It must be sound, complete, and decidable without programmer
+	    annotations. 
+	  </p>
+	</li>
+	<li>
+	  <p>
+	    It must automatically infer both polymorphism and
+	    mutability.
+	  </p>
+	</li>
+	<li>
+	  <p>
+	    It must infer types that are intelligible to the programmer.
+	    That is, it must avoid the main drawback of many inference
+	    systems with subtyping, where the inferred principal type is
+	    presented a set of equations and inequations.
+	  </p>
+	</li>
+      </ol>
+      <p>
+	In order to address the above requirements, we propose a
+	variant of the Hindley-Milner algorithm&nbsp;<cite
+	  ref="Milner1978W"/>. This algorithm uses polymorphism over
+	mutability and polymorphism itself in order to infer principal
+	types for       
+	<btypes:TYPE>
+	  <language/>
+	</btypes:TYPE> programs.
+      </p>
+      <p>
+	<leadin>Polymorphism Over Mutability</leadin>
+	In order to infer principal types in a language with copy
+	compatibility, we define the following constrained types that
+	allow us to infer types with variable mutability:
+	<br/>
+	<btypes:TYPE>
+	  <equiv>
+	    <mbTop>
+	      <tvar/>
+	      <ptype/>
+	    </mbTop>
+	    <ctype>
+	      <tvar/>
+	      <set>
+		<Tceq>
+		  <tvar/>
 		  <ptype/>
-		</mutable>
-		<ptype/>
-	      </Tceq>
-	    </tyConc>
-	  </tyRule>
-	</Hrules>
-	<Hrules initsep="2" colsep="3">
-	  <tyRule>
-	    <tyPre/>
-	    <tyConc>
-	      <ceq>                
-		<type/>
-		<type/>
-	      </ceq>
-	    </tyConc>                
-	  </tyRule>   
-	  <tyRule>
-	    <tyPre>
-	      <ceq>                
-		<type num="1"/>
-		<type num="2"/>
-	      </ceq>	    
-	    </tyPre>
-	    <tyConc>
-	      <ceq>
-		<type num="2"/>
-		<type num="1"/>
-	      </ceq>
-	    </tyConc>                
-	  </tyRule>
-	  <tyRule>
-	    <tyPre>
-	      <ceq>                
-		<type num="1"/>
-		<type num="2"/>
-	      </ceq>
-	      <ceq>                
-		<type num="2"/>
-		<type num="3"/>
-	      </ceq>	    
-	    </tyPre>
-	    <tyConc>
-	      <ceq>
-		<type num="1"/>
-		<type num="3"/>
-	      </ceq>
-	    </tyConc>                
-	  </tyRule>
-	  <tyRule>
-	    <tyPre>
-	      <ceq>                
-		<type/>
-		<ptype/>
-	      </ceq>	    
-	    </tyPre>
-	    <tyConc>
-	      <ceq>                
-		<type/>
-		<mutable>
+		</Tceq>
+	      </set>
+	    </ctype>
+	  </equiv>
+	</btypes:TYPE>:
+	any type equal to base type 
+	<btypes:TYPE>
+	  <ptype/>
+	</btypes:TYPE> except for top level mutability.
+	<br/>
+	<btypes:TYPE>
+	  <equiv>
+	    <mbFull>
+	      <stype/>
+	      <ptype/>
+	    </mbFull>
+	    <ctype>
+	      <stype/>
+	      <set>
+		<ceq>
+		  <stype/>
 		  <ptype/>
-		</mutable>
-	      </ceq>
-	    </tyConc>                
-	  </tyRule>   
-	  <tyRule>
-	    <tyPre>
-	      <ceq>                
-		<type num="1"/>
-		<type num="1" dash="'"/>
-	      </ceq>
-	      <ceq>
-		<type num="2"/>
-		<type num="2" dash="'"/>
-	      </ceq>
-	    </tyPre>
-	    <tyConc>
-	      <ceq>
-		<pair>
-		  <type num="1"/>
-		  <type num="2"/>
-		</pair>
-		<pair>
-		  <type num="1" dash="'"/>
-		  <type num="2" dash="'"/>
-		</pair>
-	      </ceq>
-	    </tyConc>                
-	  </tyRule>
-	</Hrules>
-      </btypes:TYPE>
-    </font>
-    <br/>
-    <p>
-      Copy compatibility can be permitted at argument passing, new
-      variable binding, assignment, and basically at argument/return
-      positions of all expressions, except where a left expression is
-      expected or returned. For example, the expression
-      <btypes:TYPE>
-	<tqExpr>
-	  <paren>
-	    <tqExpr>
-	      <id name="x"/>
-	      <type/>
-	    </tqExpr>
-	  </paren>
-	  <mutable>
-	    <type/>
-	  </mutable>
-	</tqExpr>
-      </btypes:TYPE> is ill typed, but 
-      the branches of a conditional can have
-      different but copy compatible types as in:
-      <btypes:TYPE>
-	<if>
-	  <true/>
-	  <tqExpr>
-	    <id name="a"/>
-	    <type/>
-	  </tqExpr>
-	  <tqExpr>
-	    <id name="b"/>
-	    <mutable>
-	      <type/>
-	    </mutable>
-	  </tqExpr>
-	</if>
-      </btypes:TYPE>.
-    </p>
-  </sect1>
-  <sect1 id="infer">
-    <title>Type Inference</title>
-    <p>
-      We now consider the problem of designing a type inference
-      algorithm for 
-      <btypes:TYPE>
-	<language/>
-      </btypes:TYPE>.
-      Due to copy compatibility, it is no longer possible
-      to infer a unique (simple) type for all expressions. 
-      For example, in the expression
-      <btypes:TYPE>
-	<let>
-	  <id name="p"/>
-	  <true/>
-	</let>
-      </btypes:TYPE>, 
-      we know that the type of the literal
-      <btypes:TYPE>
-	<true/>
-      </btypes:TYPE> is
-      <btypes:TYPE>
-	<bool/>
-      </btypes:TYPE>, but the type of
-      <btypes:TYPE>
-	<id name="p"/>
-      </btypes:TYPE>
-      could either be
-      <btypes:TYPE>
-	<bool/>
-      </btypes:TYPE> or
-      <btypes:TYPE>
-	<mutable>
-	  <bool/>
-	</mutable>
-      </btypes:TYPE>. Therefore, unlike ML, type inference is not
-      purely syntax directed in 
-      <btypes:TYPE>
-	<language/>
-      </btypes:TYPE>.
-    </p>
-    <p>
-      It is natural to ask why mutability should be inferred at all.
-      That is: why not require explicit annotation for all mutable
-      values, and infer immutable types by default? In a language with
-      copy compatibility, this will result in a proliferation of type 
-      annotations. Constructor applications, 
-      polymorphic type instantiations, accessor functions,
-      <foreignphrase>etc.</foreignphrase> 
-      will have to be explicitly annotated with their types. For
-      example, if
-      <btypes:TYPE> 
-	<id name="fst"/>
-      </btypes:TYPE>
-      is an accessor function that returns the first element of a
-      pair, and  
-      <btypes:TYPE> 
-	<id name="m"/>
-      </btypes:TYPE>
-      is a variable of type
-      <btypes:TYPE> 
-	<mutable>
-	  <bool/>
-	</mutable>
-      </btypes:TYPE>, we will have to write: 
-      <br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <btypes:TYPE> 
-	<let>
-	  <id name="xyz"/>
-	  <tqExpr>
-	    <dup>
-	      <apply>
-		<id name="fst"/>
-		<tqExpr nosp="yes">
-		  <Pair>
-		    <id name="m"/>
-		    <false/>
-		  </Pair>
-		  <pair>
-		    <mutable>
-		      <bool/>
-		    </mutable>
-		    <bool/>
-		  </pair>
-		</tqExpr>
-	      </apply>
-	    </dup>
-	    <ref>
+		</ceq>
+	      </set>
+	    </ctype>
+	  </equiv>
+	</btypes:TYPE>:
+	any type copy compatible with
+	<btypes:TYPE>
+	  <ptype/>
+	</btypes:TYPE>, where
+	<btypes:TYPE>
+	  <eq>
+	    <stype/>
+	    <grouping>
+	      <tvar/>
+	      <text content=" or "/>
 	      <mutable>
-		<bool/>
+		<tvar/>
 	      </mutable>
-	    </ref>
-	  </tqExpr>
-	  <unspecified/>
-	</let>
-      </btypes:TYPE>
-      <br/>
-      Therefore, if mutability is not inferred, it results in a
-      substantial increase in the number of programmer annotations,
-      and type inference becomes ineffective.
-      It is desirable that the inference algorithm must
-      automatically infer polymorphism (without any programmer
-      annotations) as well, since this leads to better software
-      engineering by maximizing code reuse.
-    </p>
-    <p>
-      Therefore, the desirable characteristics of a type inference
-      algorithm for   
-      <btypes:TYPE>
-	<language/>
-      </btypes:TYPE> are:
-    </p>
-    <ol>
-      <li>
-	<p>
-	  It must be sound, complete, and decidable without programmer
-	  annotations. 
-	</p>
-      </li>
-      <li>
-	<p>
-	  It must automatically infer both polymorphism and
-	  mutability.
-	</p>
-      </li>
-      <li>
-	<p>
-	  It must infer types that are intelligible to the programmer.
-	  That is, it must avoid the main drawback of many inference
-	  systems with subtyping, where the inferred principal type is
-	  presented a set of equations and inequations.
-	</p>
-      </li>
-    </ol>
-    <p>
-      In order to address the above requirements, we propose a
-      variant of the Hindley-Milner algorithm&nbsp;<cite
-	ref="Milner1978W"/>. This algorithm uses polymorphism over
-      mutability and polymorphism itself in order to infer principal
-      types for       
-      <btypes:TYPE>
-	<language/>
-      </btypes:TYPE> programs.
-    </p>
-    <p>
-      <leadin>Polymorphism Over Mutability</leadin>
-      In order to infer principal types in a language with copy
-      compatibility, we define the following constrained types that
-      allow us to infer types with variable mutability:
-      <br/>
-      <btypes:TYPE>
-	<equiv>
+	    </grouping>
+	  </eq>
+	</btypes:TYPE>.
+      </p>
+      <p>
+	Now, in the expression
+	<btypes:TYPE>
+	  <let>
+	    <id name="p"/>
+	    <true/>
+	  </let>
+	</btypes:TYPE>, 
+	we can give
+	<btypes:TYPE>
+	  <id name="p"/>
+	</btypes:TYPE>  the type
+	<btypes:TYPE>
+	  <mbFull>
+	    <tvar/> 	  
+	    <bool/>
+	  </mbFull>
+	</btypes:TYPE>.
+	During inference, the type can later get resolved to either
+	<btypes:TYPE>
+	  <bool/>
+	</btypes:TYPE> or
+	<btypes:TYPE>
+	  <mutable>
+	    <bool/>
+	  </mutable>
+	</btypes:TYPE>.
+	The forms 
+	<btypes:TYPE>
 	  <mbTop>
 	    <tvar/>
 	    <ptype/>
 	  </mbTop>
-	  <ctype>
-	    <tvar/>
-	    <set>
-	      <Tceq>
-		<tvar/>
-		<ptype/>
-	      </Tceq>
-	    </set>
-	  </ctype>
-	</equiv>
-      </btypes:TYPE>:
-      any type equal to base type 
-      <btypes:TYPE>
-	<ptype/>
-      </btypes:TYPE> except for top level mutability.
-      <br/>
-      <btypes:TYPE>
-	<equiv>
+	</btypes:TYPE> and
+	<btypes:TYPE>
 	  <mbFull>
 	    <stype/>
 	    <ptype/>
 	  </mbFull>
-	  <ctype>
-	    <stype/>
-	    <set>
-	      <ceq>
-		<stype/>
-		<ptype/>
-	      </ceq>
-	    </set>
-	  </ctype>
-	</equiv>
-      </btypes:TYPE>:
-      any type copy compatible with
-      <btypes:TYPE>
-	<ptype/>
-      </btypes:TYPE>, where
-      <btypes:TYPE>
-	<eq>
-	  <stype/>
-	  <grouping>
-	    <tvar/>
-	    <text content=" or "/>
-	    <mutable>
-	      <tvar/>
-	    </mutable>
-	  </grouping>
-	</eq>
-      </btypes:TYPE>.
-    </p>
-    <p>
-      Now, in the expression
-      <btypes:TYPE>
-	<let>
-	  <id name="p"/>
-	  <true/>
-	</let>
-      </btypes:TYPE>, 
-      we can give
-      <btypes:TYPE>
-	<id name="p"/>
-      </btypes:TYPE>  the type
-      <btypes:TYPE>
-	<mbFull>
-	  <tvar/> 	  
-	  <bool/>
-	</mbFull>
-      </btypes:TYPE>.
-      During inference, the type can later get resolved to either
-      <btypes:TYPE>
-	<bool/>
-      </btypes:TYPE> or
-      <btypes:TYPE>
-	<mutable>
-	  <bool/>
-	</mutable>
-      </btypes:TYPE>.
-      The forms 
-      <btypes:TYPE>
-	<mbTop>
-	  <tvar/>
-	  <ptype/>
-	</mbTop>
-      </btypes:TYPE> and
-      <btypes:TYPE>
-	<mbFull>
-	  <stype/>
-	  <ptype/>
-	</mbFull>
-      </btypes:TYPE> respectively provide fine grained and coarse
-      grained control over expressing types with 
-      variable mutability. For example:
-    </p>
-    <font size="small">
-    <table fullwidth="yes" latex.colspec="c|c|c">
-      <tbody>
-	<tr lineafter="yes">
-	  <td><p>Type</p></td>
-	  <td><p>Instances</p></td>
-	  <td><p>Non-Instances</p></td>
-	</tr>
-	<!-- Row -->
-	<tr lineafter="yes">
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<mbTop>
-		  <tvar/>
-		  <pair>
-		    <bool/>
-		    <unit/>
-		  </pair>
-		</mbTop>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<pair>
-		  <bool/>
-		  <unit/>
-		</pair>
-	      </btypes:TYPE>,
-	      <btypes:TYPE>
-		<mutable>
-		  <pair>
-		    <bool/>
-		    <unit/>
-		  </pair>
-		</mutable>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<pair>
-		  <mutable>
-		    <bool/>
-		  </mutable>
-		  <unit/>
-		</pair>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	</tr>
-	<!-- Row -->
-	<tr>
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<mbFull>
-		  <tvar/>
-		  <pair>
-		    <bool/>
-		    <unit/>
-		  </pair>
-		</mbFull>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<pair>
-		  <bool/>
-		  <unit/>
-		</pair>
-	      </btypes:TYPE>,
-	      <btypes:TYPE>
-		<mutable>
-		  <pair>
-		    <mutable>
+	</btypes:TYPE> respectively provide fine grained and coarse
+	grained control over expressing types with 
+	variable mutability. For example:
+      </p>
+      <font size="small">
+	<table fullwidth="yes" latex.colspec="c|c|c">
+	  <tbody>
+	    <tr lineafter="yes">
+	      <td><p>Type</p></td>
+	      <td><p>Instances</p></td>
+	      <td><p>Non-Instances</p></td>
+	    </tr>
+	    <!-- Row -->
+	    <tr lineafter="yes">
+	      <td>
+		<p>
+		  <btypes:TYPE>
+		    <mbTop>
+		      <tvar/>
+		      <pair>
+			<bool/>
+			<unit/>
+		      </pair>
+		    </mbTop>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE>
+		    <pair>
 		      <bool/>
-		    </mutable>
-		    <mutable>
 		      <unit/>
-		    </mutable>
-		  </pair>
-		</mutable>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<pair>
-		  <unit/>
-		  <bool/>
-		</pair>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	</tr>
-	<tr lineafter="yes">
-	  <td/>
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<pair>
-		  <mutable>
-		    <bool/>
-		  </mutable>
-		  <unit/>
-		</pair>
-	      </btypes:TYPE>,
-	      <btypes:TYPE>
-		<mbTop>
-		  <tvar name="beta"/>
-		  <pair>
-		    <bool/>
-		    <unit/>
-		  </pair>
-		</mbTop>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td/>
-	</tr>
-	<!-- Row -->
-	<tr lineafter="yes">
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<mbFull>
-		  <mutable>
-		    <tvar/>
-		  </mutable>
-		  <pair>
-		    <bool/>
-		    <unit/>
-		  </pair>
-		</mbFull>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<mutable>
-		  <pair>
-		    <bool/>
-		    <unit/>
-		  </pair>
-		</mutable>
-	      </btypes:TYPE>,
-	      <btypes:TYPE>
-		<mutable>
-		  <pair>
-		    <bool/>
+		    </pair>
+		  </btypes:TYPE>,
+		  <btypes:TYPE>
 		    <mutable>
-		      <unit/>
+		      <pair>
+			<bool/>
+			<unit/>
+		      </pair>
 		    </mutable>
-		  </pair>
-		</mutable>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<pair>
-		  <bool/>
-		  <unit/>
-		</pair>
-	      </btypes:TYPE>,
-	      <btypes:TYPE>
-		<mbTop>
-		  <tvar name="beta"/>
-		  <pair>
-		    <bool/>
-		    <unit/>
-		  </pair>
-		</mbTop>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	</tr>
-	<!-- Row -->
-	<tr lineafter="yes">
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<mbFull>
-		  <tvar/>
-		  <ref>
-		    <bool/>
-		  </ref>
-		</mbFull>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<ref>
-		  <bool/>
-		</ref>
-	      </btypes:TYPE>,
-	      <btypes:TYPE>
-		<mutable>
-		  <ref>
-		    <bool/>
-		  </ref>
-		</mutable>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE>
-		<ref>	
-		  <mutable>
-		    <bool/>
-		  </mutable>
-		</ref>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	</tr>
-	<!-- Row -->
-      </tbody>
-    </table>
-    </font>
-    <br/>
-    <p>
-      By embedding constraints within types, we obtain an elegant
-      representation of constrained types that can be intuitively 
-      presented to the user. For example, the expression
-      <btypes:TYPE>
-	<lambda>
-	  <id/>
-	  <paren>
-	    <assign>
-	      <deref>
-		<fst>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE>
+		    <pair>
+		      <mutable>
+			<bool/>
+		      </mutable>
+		      <unit/>
+		    </pair>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	    </tr>
+	    <!-- Row -->
+	    <tr>
+	      <td>
+		<p>
+		  <btypes:TYPE>
+		    <mbFull>
+		      <tvar/>
+		      <pair>
+			<bool/>
+			<unit/>
+		      </pair>
+		    </mbFull>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE>
+		    <pair>
+		      <bool/>
+		      <unit/>
+		    </pair>
+		  </btypes:TYPE>,
+		  <btypes:TYPE>
+		    <mutable>
+		      <pair>
+			<mutable>
+			  <bool/>
+			</mutable>
+			<mutable>
+			  <unit/>
+			</mutable>
+		      </pair>
+		    </mutable>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE>
+		    <pair>
+		      <unit/>
+		      <bool/>
+		    </pair>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	    </tr>
+	    <tr lineafter="yes">
+	      <td/>
+	      <td>
+		<p>
+		  <btypes:TYPE>
+		    <pair>
+		      <mutable>
+			<bool/>
+		      </mutable>
+		      <unit/>
+		    </pair>
+		  </btypes:TYPE>,
+		  <btypes:TYPE>
+		    <mbTop>
+		      <tvar name="beta"/>
+		      <pair>
+			<bool/>
+			<unit/>
+		      </pair>
+		    </mbTop>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td/>
+	    </tr>
+	    <!-- Row -->
+	    <tr lineafter="yes">
+	      <td>
+		<p>
+		  <btypes:TYPE>
+		    <mbFull>
+		      <mutable>
+			<tvar/>
+		      </mutable>
+		      <pair>
+			<bool/>
+			<unit/>
+		      </pair>
+		    </mbFull>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE>
+		    <mutable>
+		      <pair>
+			<bool/>
+			<unit/>
+		      </pair>
+		    </mutable>
+		  </btypes:TYPE>,
+		  <btypes:TYPE>
+		    <mutable>
+		      <pair>
+			<bool/>
+			<mutable>
+			  <unit/>
+			</mutable>
+		      </pair>
+		    </mutable>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE>
+		    <pair>
+		      <bool/>
+		      <unit/>
+		    </pair>
+		  </btypes:TYPE>,
+		  <btypes:TYPE>
+		    <mbTop>
+		      <tvar name="beta"/>
+		      <pair>
+			<bool/>
+			<unit/>
+		      </pair>
+		    </mbTop>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	    </tr>
+	    <!-- Row -->
+	    <tr lineafter="yes">
+	      <td>
+		<p>
+		  <btypes:TYPE>
+		    <mbFull>
+		      <tvar/>
+		      <ref>
+			<bool/>
+		      </ref>
+		    </mbFull>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE>
+		    <ref>
+		      <bool/>
+		    </ref>
+		  </btypes:TYPE>,
+		  <btypes:TYPE>
+		    <mutable>
+		      <ref>
+			<bool/>
+		      </ref>
+		    </mutable>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE>
+		    <ref>	
+		      <mutable>
+			<bool/>
+		      </mutable>
+		    </ref>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	    </tr>
+	    <!-- Row -->
+	  </tbody>
+	</table>
+      </font>
+      <br/>
+      <p>
+	By embedding constraints within types, we obtain an elegant
+	representation of constrained types that can be intuitively 
+	presented to the user. For example, the expression
+	<btypes:TYPE>
+	  <lambda>
+	    <id/>
+	    <paren>
+	      <assign>
+		<deref>
+		  <fst>
+		    <id/>
+		  </fst>
+		</deref>
+		<snd>
 		  <id/>
-		</fst>
-	      </deref>
-	      <snd>
-		<id/>
-	      </snd>
-	    </assign>
-	  </paren>
-	</lambda>
-      </btypes:TYPE>
-      can be typed as
-      <btypes:TYPE>
-	<fn>
-	  <mbFull>
-	    <tvar name="alpha"/>
-	    <pair>
-	      <ref>
-		<mutable>
-		  <tvar name="beta"/>
-		</mutable>
-	      </ref>
-	      <mbFull>
-		<tvar name="gamma"/>
-		<tvar name="beta"/>
-	      </mbFull>
-	    </pair>
-	  </mbFull>
-	  <unit/>
-	</fn>
-      </btypes:TYPE>, rather than
-      <btypes:TYPE>
-	<ctype>
+		</snd>
+	      </assign>
+	    </paren>
+	  </lambda>
+	</btypes:TYPE>
+	can be typed as
+	<btypes:TYPE>
 	  <fn>
-	    <tvar name="alpha"/>
-	    <unit/>
-	  </fn>
-	  <set>
-	    <ceq>
+	    <mbFull>
 	      <tvar name="alpha"/>
 	      <pair>
 		<ref>
@@ -1245,185 +1227,192 @@
 		    <tvar name="beta"/>
 		  </mutable>
 		</ref>
-		<tvar name="gamma"/>
+		<mbFull>
+		  <tvar name="gamma"/>
+		  <tvar name="beta"/>
+		</mbFull>
 	      </pair>
-	    </ceq>
-	    <ceq>
-	      <tvar name="gamma"/>
-	      <tvar name="beta"/>
-	    </ceq>
-	  </set>
-	</ctype>
-      </btypes:TYPE>. 
-      Every type of the form
-      <btypes:TYPE>
-	<mbFull>
-	  <stype/>
-	  <ptype/>
-	</mbFull>
-      </btypes:TYPE> can be realized through a canonical
-      representation using
-      <btypes:TYPE>
-	<mbTop>
-	  <tvar/>
-	  <ptype/>
-	</mbTop>
-      </btypes:TYPE> types. 
-      Types of the form
-      <btypes:TYPE>
-	<mbFull>
-	  <stype/>
-	  <ptype/>
-	</mbFull>
-      </btypes:TYPE> not only provide a compact representation, but
-      are also required during type inference.
-      For example, the type
-      <btypes:TYPE>
-	<mbFull>
-	  <tvar/>
-	  <tvar name="beta"/>
-	</mbFull>
-      </btypes:TYPE> represents a type that is compatible 
-      with   
-      <btypes:TYPE>
-	<tvar name="beta"/>
-      </btypes:TYPE>, even if 
-      <btypes:TYPE>
-	<tvar name="beta"/>
-      </btypes:TYPE> later resolves to a more concrete (ex: pair)
-      type.
-      The grammar does not allow unnecessarily complex types such as
-      <btypes:TYPE>
-	<mutable>
-	  <paren>
-	    <mbTop>
-	      <tvar/>
-	      <bool/>
-	    </mbTop>
-	  </paren>
-	</mutable>
-      </btypes:TYPE>,
-      <btypes:TYPE>
-	<mbTop>
-	  <tvar name="beta"/>
+	    </mbFull>
+	    <unit/>
+	  </fn>
+	</btypes:TYPE>, rather than
+	<btypes:TYPE>
+	  <ctype>
+	    <fn>
+	      <tvar name="alpha"/>
+	      <unit/>
+	    </fn>
+	    <set>
+	      <ceq>
+		<tvar name="alpha"/>
+		<pair>
+		  <ref>
+		    <mutable>
+		      <tvar name="beta"/>
+		    </mutable>
+		  </ref>
+		  <tvar name="gamma"/>
+		</pair>
+	      </ceq>
+	      <ceq>
+		<tvar name="gamma"/>
+		<tvar name="beta"/>
+	      </ceq>
+	    </set>
+	  </ctype>
+	</btypes:TYPE>. 
+	Every type of the form
+	<btypes:TYPE>
+	  <mbFull>
+	    <stype/>
+	    <ptype/>
+	  </mbFull>
+	</btypes:TYPE> can be realized through a canonical
+	representation using
+	<btypes:TYPE>
+	  <mbTop>
+	    <tvar/>
+	    <ptype/>
+	  </mbTop>
+	</btypes:TYPE> types. 
+	Types of the form
+	<btypes:TYPE>
+	  <mbFull>
+	    <stype/>
+	    <ptype/>
+	  </mbFull>
+	</btypes:TYPE> not only provide a compact representation, but
+	are also required during type inference.
+	For example, the type
+	<btypes:TYPE>
 	  <mbFull>
 	    <tvar/>
-	    <bool/>
+	    <tvar name="beta"/>
 	  </mbFull>
-	</mbTop>
-      </btypes:TYPE> <foreignphrase>etc.</foreignphrase>
-    </p>
-    <p>
-      Due to copy compatibility at argument and return positions, two
-      function types are <em>equal</em> regardless of the shallow
-      mutability of the argument and return types. 
-      Therefore, we follow a convention that all function types must be
-      written with immutable types at copy compatible positions. The
-      intuition here is that type of a function must be described in
-      the interface form, and must hide the ``internal'' mutability
-      information. For example, the function  
-      <btypes:TYPE> 
-	<lambda>
-	  <id name="x"/>
-	  <paren>
-	    <assign>
-	      <id name="x"/>
-	      <true/>
-	    </assign>
-	  </paren>
-	</lambda>
-      </btypes:TYPE>, has external type 
-      <btypes:TYPE> 
-	<fn>
-	  <bool/>
-	  <unit/>
-	</fn>
-      </btypes:TYPE> even though the internal type is
-      <btypes:TYPE> 
-	<fn>
+	</btypes:TYPE> represents a type that is compatible 
+	with   
+	<btypes:TYPE>
+	  <tvar name="beta"/>
+	</btypes:TYPE>, even if 
+	<btypes:TYPE>
+	  <tvar name="beta"/>
+	</btypes:TYPE> later resolves to a more concrete (ex: pair)
+	type.
+	The grammar does not allow unnecessarily complex types such as
+	<btypes:TYPE>
 	  <mutable>
-	    <bool/>
+	    <paren>
+	      <mbTop>
+		<tvar/>
+		<bool/>
+	      </mbTop>
+	    </paren>
 	  </mutable>
-	  <unit/>
-	</fn>
-      </btypes:TYPE>.
-    </p>
-    <p>
-      <btypes:TYPE> 
-	<language/>
-      </btypes:TYPE> is a let-polymorphic
-      language. At a let boundary, we would like to quantify over
-      variables that range over mutability, in order to achieve
-      mutability polymorphism. The next sections discuss certain
-      complications that arise during the inference of such types,
-      present our solution to the problem.
-    </p>
-    <p>
-      <leadin>Soundness implications</leadin>
-      Like ML,
-      <btypes:TYPE>
-	<language/>
-      </btypes:TYPE> enforces the
-      value restriction&nbsp;<cite ref="wrightValRes1995"/> to
-      preserve soundness of polymorphic typing. This
-      means that the type of 
-      <btypes:TYPE>
-	<id/>
-      </btypes:TYPE> 
-      in 
-      <btypes:TYPE>
-	<let>
+	</btypes:TYPE>,
+	<btypes:TYPE>
+	  <mbTop>
+	    <tvar name="beta"/>
+	    <mbFull>
+	      <tvar/>
+	      <bool/>
+	    </mbFull>
+	  </mbTop>
+	</btypes:TYPE> <foreignphrase>etc.</foreignphrase>
+      </p>
+      <p>
+	Due to copy compatibility at argument and return positions, two
+	function types are <em>equal</em> regardless of the shallow
+	mutability of the argument and return types. 
+	Therefore, we follow a convention that all function types must be
+	written with immutable types at copy compatible positions. The
+	intuition here is that type of a function must be described in
+	the interface form, and must hide the ``internal'' mutability
+	information. For example, the function  
+	<btypes:TYPE> 
+	  <lambda>
+	    <id name="x"/>
+	    <paren>
+	      <assign>
+		<id name="x"/>
+		<true/>
+	      </assign>
+	    </paren>
+	  </lambda>
+	</btypes:TYPE>, has external type 
+	<btypes:TYPE> 
+	  <fn>
+	    <bool/>
+	    <unit/>
+	  </fn>
+	</btypes:TYPE> even though the internal type is
+	<btypes:TYPE> 
+	  <fn>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	    <unit/>
+	  </fn>
+	</btypes:TYPE>.
+      </p>
+      <p>
+	<btypes:TYPE> 
+	  <language/>
+	</btypes:TYPE> is a let-polymorphic
+	language. At a let boundary, we would like to quantify over
+	variables that range over mutability, in order to achieve
+	mutability polymorphism. The next sections discuss certain
+	complications that arise during the inference of such types,
+	present our solution to the problem.
+      </p>
+      <p>
+	<leadin>Soundness implications</leadin>
+	Like ML,
+	<btypes:TYPE>
+	  <language/>
+	</btypes:TYPE> enforces the
+	value restriction&nbsp;<cite ref="wrightValRes1995"/> to
+	preserve soundness of polymorphic typing. This
+	means that the type of 
+	<btypes:TYPE>
 	  <id/>
+	</btypes:TYPE> 
+	in 
+	<btypes:TYPE>
+	  <let>
+	    <id/>
+	    <aExpr num="1"/>
+	    <aExpr num="2"/>
+	  </let>
+	</btypes:TYPE> can only be generalized if 
+	<btypes:TYPE>
 	  <aExpr num="1"/>
-	  <aExpr num="2"/>
-	</let>
-      </btypes:TYPE> can only be generalized if 
-      <btypes:TYPE>
-	<aExpr num="1"/>
-      </btypes:TYPE> is an <em>immutable</em> syntactic value.
-      <!-- As is customary,
-      values 
-      <btypes:TYPE>
+	</btypes:TYPE> is an <em>immutable</em> syntactic value.
+	<!-- As is customary,
+	values 
+	<btypes:TYPE>
 	<aVal/>
       </btypes:TYPE>, 
-      Variables, and pairs of the above are considered syntactic
-      values in
-      <btypes:TYPE>
+	Variables, and pairs of the above are considered syntactic
+	values in
+	<btypes:TYPE>
 	<language/>
       </btypes:TYPE>. -->
-      Due to the presence of unboxed mutability, we must add the
-      immutable qualifier to the syntactic value clause.
-      For example, in the expression
-      <btypes:TYPE>
-	<let>
+	Due to the presence of unboxed mutability, we must add the
+	immutable qualifier to the syntactic value clause.
+	For example, in the expression
+	<btypes:TYPE>
+	  <let>
+	    <id name="id"/>
+	    <lambda>
+	      <id/>
+	      <id/>
+	    </lambda>
+	  </let>
+	</btypes:TYPE>, the type of 
+	<btypes:TYPE>
 	  <id name="id"/>
-	  <lambda>
-	    <id/>
-	    <id/>
-	  </lambda>
-	</let>
-      </btypes:TYPE>, the type of 
-      <btypes:TYPE>
-	<id name="id"/>
-      </btypes:TYPE> before generalization is
-      <btypes:TYPE>
-	<mbFull>
-	  <tvar name="beta"/>
-	  <fn>
-	    <tvar/>
-	    <tvar/>
-	  </fn>
-	</mbFull>
-      </btypes:TYPE>. However, giving
-      <btypes:TYPE>
-	<id name="id"/>
-      </btypes:TYPE> the generalized type
-      <btypes:TYPE>
-	<TS>
-	  <grouping>
-	    <tvar name="alpha"/>
-	    <tvar name="beta"/>
-	  </grouping>
+	</btypes:TYPE> before generalization is
+	<btypes:TYPE>
 	  <mbFull>
 	    <tvar name="beta"/>
 	    <fn>
@@ -1431,609 +1420,11 @@
 	      <tvar/>
 	    </fn>
 	  </mbFull>
-	</TS>
-      </btypes:TYPE> is unsound, since it permits
-      expressions such as 
-      <btypes:TYPE>
-	<let>
+	</btypes:TYPE>. However, giving
+	<btypes:TYPE>
 	  <id name="id"/>
-	  <lambda>
-	    <id/>
-	    <id/>
-	  </lambda>
-	  <Pair>
-	    <assign>
-	      <id name="id"/>
-	      <lambda>
-		<id/>
-		<true/>
-	      </lambda>
-	    </assign>
-	    <apply>
-	      <id name="id"/>
-	      <Unit/>
-	    </apply>
-	  </Pair>
-	</let>
-      </btypes:TYPE> to type check.
-      We can give
-      <btypes:TYPE>
-	<id name="id"/>
-      </btypes:TYPE> either the polymorphic type
-      <btypes:TYPE>
-	<forall>
-	  <tvar/>
-	  <fn>
-	    <tvar/>
-	    <tvar/>
-	  </fn>
-	</forall>
-      </btypes:TYPE>, or the monomorphic type
-      <btypes:TYPE>
-	<mbpair>
-	  <tvar name="beta"/>
-	  <fn>
-	    <tvar/>
-	    <tvar/>
-	  </fn>
-	</mbpair>	  
-      </btypes:TYPE>. However, neither is a principal type for
-      <btypes:TYPE>
-	<id name="id"/>
-      </btypes:TYPE>.
-    </p>
-    <p>
-      <leadin>Overloading Polymorphism</leadin>
-      Due to the above interaction of polymorphism and unboxed
-      mutability, a traditional HM-style inference algorithm cannot 
-      defer decisions about the mutability
-      of types past their generalization. Therefore, current
-      algorithms fix the mutability of types before generalization
-      based on certain heuristics &mdash; thus sacrificing 
-      completeness&nbsp;<cite ref="sridhar2006plos"/>. 
-      In order to alleviate this problem, we propose the use of 
-      constrained types that are range over both mutability and
-      polymorphism.
-    </p>
-    <p>
-      We introduce a new form of constraint
-      <btypes:TYPE> 
-	<pcst>
-	  <id/>
-	  <lKind/>
-	  <type/>
-	</pcst>
-      </btypes:TYPE>, which enforces consistency restrictions on
-      instantiations of generalized types.
-      The constraint 
-      <btypes:TYPE> 
-	<pcst>
-	  <id/>
-	  <lKind/>
-	  <type/>
-	</pcst>
-      </btypes:TYPE> requires that the identifier 
-      <btypes:TYPE> 
-	<id/>
-      </btypes:TYPE> must only be instantiated according to the kind
-      <btypes:TYPE> 
-	<lKind/>
-      </btypes:TYPE>, where
-      <btypes:TYPE> 
-	<lKind/>
-      </btypes:TYPE>&nbsp;=&nbsp;<btypes:TYPE> 
-	<lKind k="mono"/>
-      </btypes:TYPE>&nbsp;or&nbsp;<btypes:TYPE> 
-	<lKind k="poly"/>
-      </btypes:TYPE>. If 
-      <btypes:TYPE> 
-	<eq>
-	  <lKind/>
-	  <lKind k="mono"/>
-	</eq>
-      </btypes:TYPE>, the instantiation of 
-      <btypes:TYPE> 
-	<id/>
-      </btypes:TYPE> must be monomorphic. That is, all uses of 
-      <btypes:TYPE> 
-	<id/>
-      </btypes:TYPE> must instantiate
-      <btypes:TYPE> 
-	<type/>
-      </btypes:TYPE> to the same type
-      <btypes:TYPE> 
-	<type dash="'"/>
-      </btypes:TYPE>. Here, 
-      <btypes:TYPE> 
-	<type dash="'"/>
-      </btypes:TYPE> is permitted to be a mutable type. 
-      If 
-      <btypes:TYPE> 
-	<eq>
-	  <lKind/>
-	  <lKind k="poly"/>
-	</eq>
-      </btypes:TYPE>, different uses of 
-      <btypes:TYPE> 
-	<id/>
-      </btypes:TYPE> can instantiate 
-      <btypes:TYPE> 
-	<type/>
-      </btypes:TYPE> differently, but all such instantiations must be
-      immutable.
-      At the point of definition (<progident>let</progident>), if the
-      exact instantiation kind of a variable is unknown, we add the
-      constraint
-      <btypes:TYPE> 
-	<pcst>
-	  <id/>
-	  <lKind k="var"/>
-	  <type/>
-	</pcst>
-      </btypes:TYPE>, where
-      <btypes:TYPE> 
-	<lKind k="var"/>
-      </btypes:TYPE> ranges over
-      <btypes:TYPE> 
-	<lKind k="mono"/>
-      </btypes:TYPE> and
-      <btypes:TYPE> 
-	<lKind k="poly"/>
-      </btypes:TYPE>. The correct instantiation kind is 
-      determined later based on the uses of  
-      <btypes:TYPE> 
-	<id/>
-      </btypes:TYPE>, and consistency semantics are enforced
-      accordingly. 
-    </p>
-    <p>
-      In this approach, the definition of 
-      <btypes:TYPE> 
-	<id name="id"/>
-      </btypes:TYPE> will be given the principal constrained type:
-      <br/>
-      <btypes:TYPE> 
-	<space n="8"/>
-	<let>
-	  <id name="id"/>
-	  <lambda>
-	    <id/>
-	    <id/>
-	  </lambda>
-	  <aExpr/>
-	</let>
-	<space n="10"/>
-	<tqExpr>
-	  <id name="id"/>
-	  <btypes:TYPE>
-	    <TS>
-	      <grouping>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-	      </grouping>
-	      <ctype>
-		<mbFull>
-		  <tvar name="beta"/>
-		  <fn>
-		    <tvar/>
-		    <tvar/>
-		  </fn>
-		</mbFull>
-		<set>
-		  <pcst>
-		    <id name="id"/>
-		    <lKind k="var"/>
-		    <mbFull>
-		      <tvar name="beta"/>
-		      <fn>
-			<tvar/>
-			<tvar/>
-		      </fn>
-		    </mbFull>
-		  </pcst>
-		</set>
-	      </ctype>
-	    </TS>
-	  </btypes:TYPE>
-	</tqExpr>
-      </btypes:TYPE>
-      <br/>
-      Every time
-      <btypes:TYPE> 
-	<id name="id"/>
-      </btypes:TYPE> is instantiated to type
-      <btypes:TYPE> 
-	<type dash="'"/>
-      </btypes:TYPE> in
-      <btypes:TYPE> 
-	<aExpr/>
-      </btypes:TYPE>, the constraints
-      <btypes:TYPE> 
-	<pcst>
-	  <id name="id"/>
-	  <lKind k="var"/>
-	  <type dash="'"/>
-	</pcst>
-      </btypes:TYPE> are collected.
-      <btypes:TYPE> 
-	<aExpr/>
-      </btypes:TYPE> is declared type correct only if the set of all
-      instantiated constraints are consistent for some
-      <btypes:TYPE> 
-	<lKind k="var"/>
-      </btypes:TYPE>. Note that we do not quantify over
-      <btypes:TYPE> 
-	<lKind k="var"/> 
-      </btypes:TYPE>.
-    </p> 
-    <font size="small">
-    <table fullwidth="yes" latex.colspec="c|c|c">
-      <tbody>
-	<tr lineafter="yes">
-	  <td>
-	    <p>Example of
-	      <btypes:TYPE> 
-		<aExpr/>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      Constraint set
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      Kind assignment
-	    </p>
-	  </td>
-	</tr>
-	<!-- Row -->
-	<tr lineafter="yes">
-	  <td>
-	    <p>
-	      <btypes:TYPE> 
-		<Pair>
-		  <apply>
-		    <id name="id"/>
-		    <true/>
-		  </apply>
-		  <apply>
-		    <id name="id"/>
-		    <Unit/>
-		  </apply>
-		</Pair>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE> 
-		<set>
-		  <pcst>
-		    <id name="id"/>
-		    <lKind k="var"/>
-		    <fn>
-		      <bool/>
-		      <bool/>
-		    </fn>
-		  </pcst>
-		  <pcst>
-		    <id name="id"/>
-		    <lKind k="var"/>
-		    <fn>
-		      <unit/>
-		      <unit/>
-		    </fn>
-		  </pcst>
-		</set>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE> 
-		<mapping>
-		  <lKind k="var"/>
-		  <lKind k="poly"/>
-		</mapping>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	</tr>
-	<!-- Row -->
-	<tr lineafter="yes">
-	  <td>
-	    <p>
-	      <btypes:TYPE> 
-		<assign>
-		  <id name="id"/>
-		  <lambda>
-		    <id/>
-		    <id/>
-		  </lambda>
-		</assign>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE> 
-		<set>
-		  <pcst>
-		    <id name="id"/>
-		    <lKind k="var"/>
-		    <mutable>
-		      <fn>
-			<tvar name="gamma"/>
-			<tvar name="gamma"/>
-		      </fn>
-		    </mutable>
-		  </pcst>
-		</set>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE> 
-		<mapping>
-		  <lKind k="var"/>
-		  <lKind k="mono"/>
-		</mapping>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	</tr>
-	<!-- Row -->
-	<tr lineafter="yes">
-	  <td>
-	    <p>
-	      <btypes:TYPE> 
-		<Pair>
-		  <apply>
-		    <id name="id"/>
-		    <true/>
-		  </apply>
-		  <assign>
-		    <id name="id"/>
-		    <lambda>
-		      <id/>
-		      <Unit/>
-		    </lambda>
-		  </assign>
-		</Pair>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE> 
-		<set>
-		  <pcst>
-		    <id name="id"/>
-		    <lKind k="var"/>
-		    <fn>
-		      <bool/>
-		      <bool/>
-		    </fn>
-		  </pcst>
-		  <pcst>
-		    <id name="id"/>
-		    <lKind k="var"/>
-		    <mutable>
-		      <fn>
-			<unit/>
-			<unit/>
-		      </fn>
-		    </mutable>
-		  </pcst>
-		</set>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <progident>Type Error</progident>
-	    </p>
-	  </td>
-	</tr>
-	<!-- Row -->
-	<tr lineafter="yes">
-	  <td>
-	    <p>
-	      <btypes:TYPE> 
-		<apply>
-		  <id name="id"/>
-		  <id name="id"/>
-		</apply>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE> 
-		<set>
-		  <pcst>
-		    <id name="id"/>
-		    <lKind k="var"/>
-		    <mbFull>
-		      <tvar name="beta" num="1"/>
-		      <fn>
-			<tvar name="alpha" num="1"/>
-			<tvar name="alpha" num="1"/>
-		      </fn>
-		    </mbFull>
-		  </pcst>
-		  <pcst>
-		    <id name="id"/>
-		    <lKind k="var"/>
-		    <mbFull>
-		      <tvar name="beta" num="2"/>
-		      <fn>
- 			<tvar name="alpha" num="2"/>
-			<tvar name="alpha" num="2"/>
-		      </fn>
-		    </mbFull>
-		  </pcst>
-		</set>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	  <td>
-	    <p>
-	      <btypes:TYPE> 
-		<mapping>
-		  <lKind k="var"/>
-		  <grouping>
-		    <lKind k="mono"/>
-		    <text content=" or "/>
-		    <lKind k="poly"/>
-		  </grouping>
-		</mapping>
-	      </btypes:TYPE>
-	    </p>
-	  </td>
-	</tr>
-	<!-- Row -->
-      </tbody>
-    </table>
-    </font>
-    <br/>
-    <p>
-      The final case type checks with either kind, under the 
-      type assignments 
-      (<btypes:TYPE> 
-	<eq>
-	  <tvar name="alpha" num="1"/>
-	  <tvar name="alpha" num="2"/>
-	</eq>
-      </btypes:TYPE>,
-      <btypes:TYPE> 
-	<eq>
-	  <tvar name="beta" num="1"/>
-	  <tvar name="beta" num="2"/>
-	</eq>
-      </btypes:TYPE>) if
-      <btypes:TYPE> 
-	<mapping>
-	  <lKind k="var"/>
-	  <lKind k="mono"/>
-	</mapping>
-      </btypes:TYPE> and
-      (<btypes:TYPE> 
-	<eq>
-	  <tvar name="beta" num="1"/>
-	  <fn>
-	    <tvar name="alpha" num="1"/>
-	    <tvar name="alpha" num="1"/>
-	  </fn>
-	</eq>
-      </btypes:TYPE>,
-      <btypes:TYPE> 
-	<eq>
-	  <tvar name="beta" num="2"/>
-	  <fn>
-	    <tvar name="alpha" num="2"/>
-	    <tvar name="alpha" num="2"/>
-	  </fn>
-	</eq>
-      </btypes:TYPE>) if
-      <btypes:TYPE> 
-	<mapping>
-	  <lKind k="var"/>
-	  <lKind k="poly"/>
-	</mapping>
-      </btypes:TYPE>.
-      The intuition behind 
-      <btypes:TYPE> 
-	<pcst>
-	  <id/>
-	  <lKind k="var"/>
-	  <type/>
-	</pcst>
-      </btypes:TYPE> constraints is to achieve a form of
-      <em>overloading</em> over polymorphism and mutability.
-      We can think of 
-      <btypes:TYPE> 
-	<pcst>
-	  <id/>
-	  <lKind k="var"/>
-	  <type/>
-	</pcst>
-      </btypes:TYPE> as a 
-      type class&nbsp;<cite ref="jones1995qualtypes"/> constraint that
-      has exactly one possible mutable instance
-      <btypes:TYPE> 
-	<pcst>
-	  <id/>
-	  <lKind k="mono"/>
-	  <type num="m"/>
-	</pcst>
-      </btypes:TYPE>, or an infinite number of
-      <btypes:TYPE> 
-	<pcst>
-	  <id/>
-	  <lKind k="poly"/>
-	  <type num="p"/>
-	</pcst>
-      </btypes:TYPE> instances where all types
-      <btypes:TYPE> 
-	<types num="p"/>
-      </btypes:TYPE> are immutable.
-    </p>
-    <p>
-      In practice, once the correct kind of instantiation is inferred,
-      the type scheme can be presented in a simplified form
-      to the programmer. 
-      For example, consider the expression
-      <btypes:TYPE> 
-	<let>
-	  <id name="f"/>
-	  <lambda>
-	    <id/>
-	    <if>
-	      <deref>
-		<id/>
-	      </deref>
-	      <Unit/>
-	      <Unit/>
-	    </if>
-	  </lambda>
-	  <Pair>
-	    <apply>
-	      <id name="f"/>
-	      <id name="m"/>
-	    </apply>
-	    <apply>
-	      <id name="f"/>
-	      <id name="n"/>
-	    </apply>
-	  </Pair>
-	</let>
-      </btypes:TYPE>, where
-      <btypes:TYPE> 
-	<tqExpr>
-	  <id name="m"/>
-	  <ref>
-	    <mutable>
-	      <bool/>
-	    </mutable>
-	  </ref>
-	</tqExpr>
-      </btypes:TYPE> and
-      <btypes:TYPE> 
-	<tqExpr>
-	  <id name="n"/>
-	  <ref>
-	    <bool/>
-	  </ref>
-	</tqExpr>
-      </btypes:TYPE>.
-      Here,
-      <btypes:TYPE> 
-	<tqExpr>
-	  <id name="f"/>
+	</btypes:TYPE> the generalized type
+	<btypes:TYPE>
 	  <TS>
 	    <grouping>
 	      <tvar name="alpha"/>
@@ -2042,19 +1433,618 @@
 	    <mbFull>
 	      <tvar name="beta"/>
 	      <fn>
-		<ref>
-		  <mbFull>
-		    <tvar/>
-		    <bool/>
-		  </mbFull>
-		</ref>
-		<unit/>
+		<tvar/>
+		<tvar/>
 	      </fn>
 	    </mbFull>
-	    <set>
-	    <pcst>
-	      <id name="f"/>
-	      <lKind k="var"/>
+	  </TS>
+	</btypes:TYPE> is unsound, since it permits
+	expressions such as 
+	<btypes:TYPE>
+	  <let>
+	    <id name="id"/>
+	    <lambda>
+	      <id/>
+	      <id/>
+	    </lambda>
+	    <Pair>
+	      <assign>
+		<id name="id"/>
+		<lambda>
+		  <id/>
+		  <true/>
+		</lambda>
+	      </assign>
+	      <apply>
+		<id name="id"/>
+		<Unit/>
+	      </apply>
+	    </Pair>
+	  </let>
+	</btypes:TYPE> to type check.
+	We can give
+	<btypes:TYPE>
+	  <id name="id"/>
+	</btypes:TYPE> either the polymorphic type
+	<btypes:TYPE>
+	  <forall>
+	    <tvar/>
+	    <fn>
+	      <tvar/>
+	      <tvar/>
+	    </fn>
+	  </forall>
+	</btypes:TYPE>, or the monomorphic type
+	<btypes:TYPE>
+	  <mbpair>
+	    <tvar name="beta"/>
+	    <fn>
+	      <tvar/>
+	      <tvar/>
+	    </fn>
+	  </mbpair>	  
+	</btypes:TYPE>. However, neither is a principal type for
+	<btypes:TYPE>
+	  <id name="id"/>
+	</btypes:TYPE>.
+      </p>
+      <p>
+	<leadin>Overloading Polymorphism</leadin>
+	Due to the above interaction of polymorphism and unboxed
+	mutability, a traditional HM-style inference algorithm cannot 
+	defer decisions about the mutability
+	of types past their generalization. Therefore, current
+	algorithms fix the mutability of types before generalization
+	based on certain heuristics &mdash; thus sacrificing 
+	completeness&nbsp;<cite ref="sridhar2006plos"/>. 
+	In order to alleviate this problem, we propose the use of 
+	constrained types that are range over both mutability and
+	polymorphism.
+      </p>
+      <p>
+	We introduce a new form of constraint
+	<btypes:TYPE> 
+	  <pcst>
+	    <id/>
+	    <lKind/>
+	    <type/>
+	  </pcst>
+	</btypes:TYPE>, which enforces consistency restrictions on
+	instantiations of generalized types.
+	The constraint 
+	<btypes:TYPE> 
+	  <pcst>
+	    <id/>
+	    <lKind/>
+	    <type/>
+	  </pcst>
+	</btypes:TYPE> requires that the identifier 
+	<btypes:TYPE> 
+	  <id/>
+	</btypes:TYPE> must only be instantiated according to the kind
+	<btypes:TYPE> 
+	  <lKind/>
+	</btypes:TYPE>, where
+	<btypes:TYPE> 
+	  <lKind/>
+	</btypes:TYPE>&nbsp;=&nbsp;<btypes:TYPE> 
+	  <lKind k="mono"/>
+	</btypes:TYPE>&nbsp;or&nbsp;<btypes:TYPE> 
+	  <lKind k="poly"/>
+	</btypes:TYPE>. If 
+	<btypes:TYPE> 
+	  <eq>
+	    <lKind/>
+	    <lKind k="mono"/>
+	  </eq>
+	</btypes:TYPE>, the instantiation of 
+	<btypes:TYPE> 
+	  <id/>
+	</btypes:TYPE> must be monomorphic. That is, all uses of 
+	<btypes:TYPE> 
+	  <id/>
+	</btypes:TYPE> must instantiate
+	<btypes:TYPE> 
+	  <type/>
+	</btypes:TYPE> to the same type
+	<btypes:TYPE> 
+	  <type dash="'"/>
+	</btypes:TYPE>. Here, 
+	<btypes:TYPE> 
+	  <type dash="'"/>
+	</btypes:TYPE> is permitted to be a mutable type. 
+	If 
+	<btypes:TYPE> 
+	  <eq>
+	    <lKind/>
+	    <lKind k="poly"/>
+	  </eq>
+	</btypes:TYPE>, different uses of 
+	<btypes:TYPE> 
+	  <id/>
+	</btypes:TYPE> can instantiate 
+	<btypes:TYPE> 
+	  <type/>
+	</btypes:TYPE> differently, but all such instantiations must be
+	immutable.
+	At the point of definition (<progident>let</progident>), if the
+	exact instantiation kind of a variable is unknown, we add the
+	constraint
+	<btypes:TYPE> 
+	  <pcst>
+	    <id/>
+	    <lKind k="var"/>
+	    <type/>
+	  </pcst>
+	</btypes:TYPE>, where
+	<btypes:TYPE> 
+	  <lKind k="var"/>
+	</btypes:TYPE> ranges over
+	<btypes:TYPE> 
+	  <lKind k="mono"/>
+	</btypes:TYPE> and
+	<btypes:TYPE> 
+	  <lKind k="poly"/>
+	</btypes:TYPE>. The correct instantiation kind is 
+	determined later based on the uses of  
+	<btypes:TYPE> 
+	  <id/>
+	</btypes:TYPE>, and consistency semantics are enforced
+	accordingly. 
+      </p>
+      <p>
+	In this approach, the definition of 
+	<btypes:TYPE> 
+	  <id name="id"/>
+	</btypes:TYPE> will be given the principal constrained type:
+	<br/>
+	<btypes:TYPE> 
+	  <space n="8"/>
+	  <let>
+	    <id name="id"/>
+	    <lambda>
+	      <id/>
+	      <id/>
+	    </lambda>
+	    <aExpr/>
+	  </let>
+	  <space n="10"/>
+	  <tqExpr>
+	    <id name="id"/>
+	    <btypes:TYPE>
+	      <TS>
+		<grouping>
+		  <tvar name="alpha"/>
+		  <tvar name="beta"/>
+		</grouping>
+		<ctype>
+		  <mbFull>
+		    <tvar name="beta"/>
+		    <fn>
+		      <tvar/>
+		      <tvar/>
+		    </fn>
+		  </mbFull>
+		  <set>
+		    <pcst>
+		      <id name="id"/>
+		      <lKind k="var"/>
+		      <mbFull>
+			<tvar name="beta"/>
+			<fn>
+			  <tvar/>
+			  <tvar/>
+			</fn>
+		      </mbFull>
+		    </pcst>
+		  </set>
+		</ctype>
+	      </TS>
+	    </btypes:TYPE>
+	  </tqExpr>
+	</btypes:TYPE>
+	<br/>
+	Every time
+	<btypes:TYPE> 
+	  <id name="id"/>
+	</btypes:TYPE> is instantiated to type
+	<btypes:TYPE> 
+	  <type dash="'"/>
+	</btypes:TYPE> in
+	<btypes:TYPE> 
+	  <aExpr/>
+	</btypes:TYPE>, the constraints
+	<btypes:TYPE> 
+	  <pcst>
+	    <id name="id"/>
+	    <lKind k="var"/>
+	    <type dash="'"/>
+	  </pcst>
+	</btypes:TYPE> are collected.
+	<btypes:TYPE> 
+	  <aExpr/>
+	</btypes:TYPE> is declared type correct only if the set of all
+	instantiated constraints are consistent for some
+	<btypes:TYPE> 
+	  <lKind k="var"/>
+	</btypes:TYPE>. Note that we do not quantify over
+	<btypes:TYPE> 
+	  <lKind k="var"/> 
+	</btypes:TYPE>.
+      </p> 
+      <font size="small">
+	<table fullwidth="yes" latex.colspec="c|c|c">
+	  <tbody>
+	    <tr lineafter="yes">
+	      <td>
+		<p>Example of
+		  <btypes:TYPE> 
+		    <aExpr/>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  Constraint set
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  Kind assignment
+		</p>
+	      </td>
+	    </tr>
+	    <!-- Row -->
+	    <tr>
+	      <td>
+		<p>
+		  <btypes:TYPE> 
+		    <Pair>
+		      <apply>
+			<id name="id"/>
+			<true/>
+		      </apply>
+		      <apply>
+			<id name="id"/>
+			<Unit/>
+		      </apply>
+		    </Pair>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE> 
+		    <set>
+		      <pcst>
+			<id name="id"/>
+			<lKind k="var"/>
+			<fn>
+			  <bool/>
+			  <bool/>
+			</fn>
+		      </pcst>
+		      <pcst>
+			<id name="id"/>
+			<lKind k="var"/>
+			<fn>
+			  <unit/>
+			  <unit/>
+			</fn>
+		      </pcst>
+		    </set>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE> 
+		    <mapping>
+		      <lKind k="var"/>
+		      <lKind k="poly"/>
+		    </mapping>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	    </tr>
+	    <!-- Row -->
+	    <tr>
+	      <td>
+		<p>
+		  <btypes:TYPE> 
+		    <assign>
+		      <id name="id"/>
+		      <lambda>
+			<id/>
+			<id/>
+		      </lambda>
+		    </assign>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE> 
+		    <set>
+		      <pcst>
+			<id name="id"/>
+			<lKind k="var"/>
+			<mutable>
+			  <fn>
+			    <tvar name="gamma"/>
+			    <tvar name="gamma"/>
+			  </fn>
+			</mutable>
+		      </pcst>
+		    </set>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE> 
+		    <mapping>
+		      <lKind k="var"/>
+		      <lKind k="mono"/>
+		    </mapping>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	    </tr>
+	    <!-- Row -->
+	    <tr>
+	      <td>
+		<p>
+		  <btypes:TYPE> 
+		    <Pair>
+		      <apply>
+			<id name="id"/>
+			<true/>
+		      </apply>
+		      <assign>
+			<id name="id"/>
+			<lambda>
+			  <id/>
+			  <Unit/>
+			</lambda>
+		      </assign>
+		    </Pair>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE> 
+		    <set>
+		      <pcst>
+			<id name="id"/>
+			<lKind k="var"/>
+			<fn>
+			  <bool/>
+			  <bool/>
+			</fn>
+		      </pcst>
+		      <pcst>
+			<id name="id"/>
+			<lKind k="var"/>
+			<mutable>
+			  <fn>
+			    <unit/>
+			    <unit/>
+			  </fn>
+			</mutable>
+		      </pcst>
+		    </set>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <progident>Type Error</progident>
+		</p>
+	      </td>
+	    </tr>
+	    <!-- Row -->
+	    <tr lineafter="yes">
+	      <td>
+		<p>
+		  <btypes:TYPE> 
+		    <apply>
+		      <id name="id"/>
+		      <id name="id"/>
+		    </apply>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE> 
+		    <set>
+		      <pcst>
+			<id name="id"/>
+			<lKind k="var"/>
+			<mbFull>
+			  <tvar name="beta" num="1"/>
+			  <fn>
+			    <tvar name="alpha" num="1"/>
+			    <tvar name="alpha" num="1"/>
+			  </fn>
+			</mbFull>
+		      </pcst>
+		      <pcst>
+			<id name="id"/>
+			<lKind k="var"/>
+			<mbFull>
+			  <tvar name="beta" num="2"/>
+			  <fn>
+			    <tvar name="alpha" num="2"/>
+			    <tvar name="alpha" num="2"/>
+			  </fn>
+			</mbFull>
+		      </pcst>
+		    </set>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	      <td>
+		<p>
+		  <btypes:TYPE> 
+		    <mapping>
+		      <lKind k="var"/>
+		      <grouping>
+			<lKind k="mono"/>
+			<text content=" or "/>
+			<lKind k="poly"/>
+		      </grouping>
+		    </mapping>
+		  </btypes:TYPE>
+		</p>
+	      </td>
+	    </tr>
+	    <!-- Row -->
+	  </tbody>
+	</table>
+      </font>
+      <br/>
+      <p>
+	The final case type checks with either kind, under the 
+	type assignments 
+	(<btypes:TYPE> 
+	  <eq>
+	    <tvar name="alpha" num="1"/>
+	    <tvar name="alpha" num="2"/>
+	  </eq>
+	</btypes:TYPE>,
+	<btypes:TYPE> 
+	  <eq>
+	    <tvar name="beta" num="1"/>
+	    <tvar name="beta" num="2"/>
+	  </eq>
+	</btypes:TYPE>) if
+	<btypes:TYPE> 
+	  <mapping>
+	    <lKind k="var"/>
+	    <lKind k="mono"/>
+	  </mapping>
+	</btypes:TYPE> and
+	(<btypes:TYPE> 
+	  <eq>
+	    <tvar name="beta" num="1"/>
+	    <fn>
+	      <tvar name="alpha" num="1"/>
+	      <tvar name="alpha" num="1"/>
+	    </fn>
+	  </eq>
+	</btypes:TYPE>,
+	<btypes:TYPE> 
+	  <eq>
+	    <tvar name="beta" num="2"/>
+	    <fn>
+	      <tvar name="alpha" num="2"/>
+	      <tvar name="alpha" num="2"/>
+	    </fn>
+	  </eq>
+	</btypes:TYPE>) if
+	<btypes:TYPE> 
+	  <mapping>
+	    <lKind k="var"/>
+	    <lKind k="poly"/>
+	  </mapping>
+	</btypes:TYPE>.
+	The intuition behind 
+	<btypes:TYPE> 
+	  <pcst>
+	    <id/>
+	    <lKind k="var"/>
+	    <type/>
+	  </pcst>
+	</btypes:TYPE> constraints is to achieve a form of
+	<em>overloading</em> over polymorphism and mutability.
+	We can think of 
+	<btypes:TYPE> 
+	  <pcst>
+	    <id/>
+	    <lKind k="var"/>
+	    <type/>
+	  </pcst>
+	</btypes:TYPE> as a 
+	type class&nbsp;<cite ref="jones1995qualtypes"/> constraint that
+	has exactly one possible mutable instance
+	<btypes:TYPE> 
+	  <pcst>
+	    <id/>
+	    <lKind k="mono"/>
+	    <type num="m"/>
+	  </pcst>
+	</btypes:TYPE>, or an infinite number of
+	<btypes:TYPE> 
+	  <pcst>
+	    <id/>
+	    <lKind k="poly"/>
+	    <type num="p"/>
+	  </pcst>
+	</btypes:TYPE> instances where all types
+	<btypes:TYPE> 
+	  <types num="p"/>
+	</btypes:TYPE> are immutable.
+      </p>
+      <p>
+	In practice, once the correct kind of instantiation is inferred,
+	the type scheme can be presented in a simplified form
+	to the programmer. 
+	For example, consider the expression
+	<btypes:TYPE> 
+	  <let>
+	    <id name="f"/>
+	    <lambda>
+	      <id/>
+	      <if>
+		<deref>
+		  <id/>
+		</deref>
+		<Unit/>
+		<Unit/>
+	      </if>
+	    </lambda>
+	    <Pair>
+	      <apply>
+		<id name="f"/>
+		<id name="m"/>
+	      </apply>
+	      <apply>
+		<id name="f"/>
+		<id name="n"/>
+	      </apply>
+	    </Pair>
+	  </let>
+	</btypes:TYPE>, where
+	<btypes:TYPE> 
+	  <tqExpr>
+	    <id name="m"/>
+	    <ref>
+	      <mutable>
+		<bool/>
+	      </mutable>
+	    </ref>
+	  </tqExpr>
+	</btypes:TYPE> and
+	<btypes:TYPE> 
+	  <tqExpr>
+	    <id name="n"/>
+	    <ref>
+	      <bool/>
+	    </ref>
+	  </tqExpr>
+	</btypes:TYPE>.
+	Here,
+	<btypes:TYPE> 
+	  <tqExpr>
+	    <id name="f"/>
+	    <TS>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </grouping>
 	      <mbFull>
 		<tvar name="beta"/>
 		<fn>
@@ -2067,94 +2057,111 @@
 		  <unit/>
 		</fn>
 	      </mbFull>
-	    </pcst>
-	    </set>
-	  </TS>
-	</tqExpr>
-      </btypes:TYPE>. However, based on the polymorphic usage, we
-      conclude that
-      <btypes:TYPE> 
-	<mapping>
-	  <lKind k="var"/>
-	  <lKind k="poly"/>
-	</mapping>
-      </btypes:TYPE>.
-      We can now simplify the type scheme of 
-      <btypes:TYPE> 
-	<id name="f"/>
-      </btypes:TYPE> to obtain
-      <btypes:TYPE> 
-	<tqExpr>
+	      <set>
+		<pcst>
+		  <id name="f"/>
+		  <lKind k="var"/>
+		  <mbFull>
+		    <tvar name="beta"/>
+		    <fn>
+		      <ref>
+			<mbFull>
+			  <tvar/>
+			  <bool/>
+			</mbFull>
+		      </ref>
+		      <unit/>
+		    </fn>
+		  </mbFull>
+		</pcst>
+	      </set>
+	    </TS>
+	  </tqExpr>
+	</btypes:TYPE>. However, based on the polymorphic usage, we
+	conclude that
+	<btypes:TYPE> 
+	  <mapping>
+	    <lKind k="var"/>
+	    <lKind k="poly"/>
+	  </mapping>
+	</btypes:TYPE>.
+	We can now simplify the type scheme of 
+	<btypes:TYPE> 
 	  <id name="f"/>
-	  <TS>
-	    <tvar name="alpha"/>
-	    <fn>
-	      <ref>
-		<mbFull>
-		  <tvar/>
-		  <bool/>
-		</mbFull>
-	      </ref>
-	      <unit/>
-	    </fn>
-	  </TS>
-	</tqExpr>
-      </btypes:TYPE>.
-      Since all function types are  immutable, the mutability of the
-      argument type need not be fixed, thus preserving mutability
-      polymorphism. 
-    </p>
-    <p>
-      In summary, we have used a system of constrained types to
-      design a principle polymorphic type inference system that meets
-      all of the design goals set at the beginning of this section. In
-      the next section, we present a formal description of our type
-      system and inference algorithm. 
-    </p>
-    <!-- <btypes:TYPE> 
-	<let>
-	  <id name="map"/>
-	  <lambda>
+	</btypes:TYPE> to obtain
+	<btypes:TYPE> 
+	  <tqExpr>
 	    <id name="f"/>
-	    <lambda>
- 	      <id name="x"/>
-	      <Pair>
-		<apply>
-		  <id name="f"/>
-		  <fst>
-		    <id name="x"/>
-		  </fst>
-		</apply>
-		<apply>
-		  <id name="f"/>
-		  <fst>
-		    <id name="x"/>
-		  </fst>
-		</apply>
-	      </Pair>
-	    </lambda>
-	  </lambda>
-	  <Pair>
-	    <map>
-	      <id name="id"/>
-	      <Pair>
-		<true/>
-		<false/>
-	      </Pair>
-	    </map>
-	    <map>
-	      <id name="id"/>
-	      <Pair>
-		<Unit/>
-		<Unit/>
-	      </Pair>
-	    </map>
-	  </Pair>
-	</let>
-      </btypes:TYPE> -->
+	    <TS>
+	      <tvar name="alpha"/>
+	      <fn>
+		<ref>
+		  <mbFull>
+		    <tvar/>
+		    <bool/>
+		  </mbFull>
+		</ref>
+		<unit/>
+	      </fn>
+	    </TS>
+	  </tqExpr>
+	</btypes:TYPE>.
+	Since all function types are  immutable, the mutability of the
+	argument type need not be fixed, thus preserving mutability
+	polymorphism. 
+      </p>
+      <p>
+	In summary, we have used a system of constrained types to
+	design a principle polymorphic type inference system that meets
+	all of the design goals set at the beginning of this section. In
+	the next section, we present a formal description of our type
+	system and inference algorithm. 
+      </p>
+      <!-- <btypes:TYPE> 
+      <let>
+      <id name="map"/>
+      <lambda>
+      <id name="f"/>
+      <lambda>
+      <id name="x"/>
+      <Pair>
+      <apply>
+      <id name="f"/>
+      <fst>
+      <id name="x"/>
+    </fst>
+    </apply>
+      <apply>
+      <id name="f"/>
+      <fst>
+      <id name="x"/>
+    </fst>
+    </apply>
+    </Pair>
+    </lambda>
+    </lambda>
+      <Pair>
+      <map>
+      <id name="id"/>
+      <Pair>
+      <true/>
+      <false/>
+    </Pair>
+    </map>
+      <map>
+      <id name="id"/>
+      <Pair>
+      <Unit/>
+      <Unit/>
+    </Pair>
+    </map>
+    </Pair>
+    </let>
+    </btypes:TYPE> -->
+    </sect2>
   </sect1>
   <sect1 id="formal">
-    <title>Formalization</title>
+    <title>Formal Description</title>
     <xi:include href="include/complete/grammar.xmli"/>
     <p>      
       In order to formalize the semantics of
@@ -2180,6 +2187,8 @@
       part of the input program.
       The correct kind of <progident>let</progident> is
       inferred from the static type information.
+      We do not show the semantics for type-qualified expressions as
+      they are trivial. 
     </p>
     <xi:include href="include/complete/opsem.xmli"/>
     <p>
@@ -2250,32 +2259,71 @@
       the core semantics, as they can later be reified
       independently.
     </p>
-    <!-- <p>
+    <xi:include href="include/complete/operators.xmli"/>
+    <p>
       <leadin>Static Semantics</leadin>
-      A substitution of Z for Y in X is written as:
+      Fig.&nbsp;<xref ref="operators"/> defines several operators and
+      predicates on types that we use in this section.
+      The meta operator
       <btypes:TYPE>
-	<subst>
-	  <text content="X"/>
-	  <text content="Y"/>
-	  <text content="Z"/>          
-	</subst>
-      </btypes:TYPE>.
-      The application of a substitution
+	<pred meta="yes" name="F"/>
+      </btypes:TYPE> is a placeholder for the
+      operators defined in the individual columns.
+      The operators
       <btypes:TYPE>
-	<aSubMap/>
-      </btypes:TYPE> on X is written as
+	<maxzTOp/>
+      </btypes:TYPE>
+      and
       <btypes:TYPE>
-	<Subst>
-	  <aSubMap/>
-	  <text content="X"/>
-	</Subst>
-      </btypes:TYPE>. 
-      We represent mathematical properties as: 
+	<minzTOp/>
+      </btypes:TYPE> respectively increase and decrease the shallow
+      top-level mutability of a type.
+      The operators
       <btypes:TYPE>
-	<models name="property">
-	  <text content="assumption"/>
-	  <text content="subject"/>
-	</models>
+	<maxzOp/>
+      </btypes:TYPE>
+      and
+      <btypes:TYPE>
+	<minzOp/>
+      </btypes:TYPE> maximize / minimize the mutability
+      of a type up to a reference or function boundary.
+      The operator
+      <btypes:TYPE>
+	<minzDOp/>
+      </btypes:TYPE> removes all mutability in a type up to a function
+      boundary.  
+      We write
+      <btypes:TYPE>
+	<eq under="minzT">
+	  <type num="1"/>
+	  <type num="2"/>
+	</eq>
+      </btypes:TYPE> as a shorthand for
+      <btypes:TYPE>
+	<eq>
+	  <minzT>
+	    <type num="1"/>
+	  </minzT>
+	  <minzT>
+	    <type num="2"/>
+	  </minzT>
+	</eq>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<eq under="minz">
+	  <type num="1"/>
+	  <type num="2"/>
+	</eq>
+      </btypes:TYPE> for
+      <btypes:TYPE>
+	<eq>
+	  <minz>
+	    <type num="1"/>
+	  </minz>
+	  <minz>
+	    <type num="2"/>
+	  </minz>
+	</eq>
       </btypes:TYPE>.
       In our algebra of types, the mutable type constructor is
       idempotent. That is, we have the equivalence: 
@@ -2291,158 +2339,469 @@
 	  </mutable>
 	</equiv>
       </btypes:TYPE>.
-      We define the operators
-      <btypes:TYPE><maxzOp/></btypes:TYPE> and
-      <btypes:TYPE><minzOp/></btypes:TYPE> that increase or
-      decrease the mutability of a type as:
-      <btypes:TYPE>
-	<text content="  "/>
-	<eq>
-	  <maxz>
-	    <mutable>
-	      <type/>
-	    </mutable>
-	  </maxz>
-	  <mutable>
-	    <type/>
-	  </mutable>
-	</eq>
-	<text content=", "/>
-	<eq>
-	  <maxz>
-	    <type/>
-	  </maxz>
-	  <mutable>
-	    <type/>
-	  </mutable>
-	</eq>
-	<text content=" and "/>
-	<eq>
-	  <minz>
-	    <mutable>
-	      <type/>
-	    </mutable>
-	  </minz>
-	  <type/>
-	</eq>
-	<text content=", "/>
-	<eq>
-	  <minz>
-	    <type/>
-	  </minz>
-	  <type/>
-	</eq>
-      </btypes:TYPE>
-      , where
-      <btypes:TYPE>
-	<neq>
-	  <type/>
-	  <mutable>
-	    <type dash="'"/>
-	  </mutable>
-	</neq>
-      </btypes:TYPE>.
-      Note that
-      <btypes:TYPE>
-	<forall>
-	  <type/>
-	  <ceq>
-	    <minz>
-	      <type/>
-	    </minz>
-	    <type/>
-	    <maxz>
-	      <type/>
-	    </maxz>
-	  </ceq>
-	</forall>
-	<text content="."/>
-      </btypes:TYPE>	  
     </p>
     <p>
-      Copy compatibility is realized in the type system by using
-      <em>copy coercion</em> rules that are similar to
-      subtyping rules (the rules beginning with ``S'' in
-      Figure&nbsp;<xref ref="decl_all_rules"/>). Copy compatibility 
-      can be written in terms of these coercions as 
+      The application of a substitution 
       <btypes:TYPE>
-	<ceq>
-	  <type num="1"/>
-	  <type num="2"/>
-	</ceq>
+	<aSubMap/>
+      </btypes:TYPE> on a type
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> is written
+      <btypes:TYPE>
+	<Subst>
+	  <aSubMap/>
+	  <type/>
+	</Subst>
+      </btypes:TYPE> and is also defined
+      in Fig.&nbsp;<xref ref="operators"/>. The substitution on
+      constrained types is defined in a manner that preserves well
+      formed-ness with respect to the grammar of types.
+      Substitution on an expression
+      <btypes:TYPE>
+	<aExpr/>
       </btypes:TYPE>
-      <em>iff</em>
+      performs substitutions for kind variables 
       <btypes:TYPE>
-	<Tsub>
-	  <type num="1"/>
-	  <minz>
-	    <type num="2"/>
-	  </minz>
-	</Tsub>
-      </btypes:TYPE>
-      <em>iff</em>
+	<lKind k="var"/>
+      </btypes:TYPE> present as 
+      <progident>let</progident>-annotations in 
       <btypes:TYPE>
-	<Tsub>
-	  <maxz>
-	    <type num="1"/>
-	  </maxz>
-	  <type num="2"/>
-	</Tsub>
+	<aExpr/>
       </btypes:TYPE>.
-      The S-Ref rule ensures that copy compatibility does not
-      extend beyond a ref-boundary. Since two function types are
-      equal regardless of the shallow mutability of the argument and
-      return positions, we write all function types in normalized
-      form.  The (contravariant) argument type is written in the
-      maximally immutable form (devoid of shallow mutability), and the
-      (covariant) return type is written in the maximally mutable
-      form.  This ensures that the ``outer'' type of a function is
-      maximally permissive with respect to mutability. The S-Fn rule
-      therefore is invariant in terms of its arguments and return
-      types. [This normalization is different from the type displayed to the
-      user, which is discussed in section&nbsp;<xref ref="proposal"/>.]  
+      <btypes:TYPE>
+	<spset>
+	  <type/>
+	</spset>
+      </btypes:TYPE> 
+      denotes the set of all constrained types and unconstrained
+      type variables structurally present in 
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE>.
+      Substitution and constraint collection is extended to
+      <btypes:TYPE>
+	<collection and="yes">
+	  <aTS/>
+	  <gamma/>
+	  <store/>
+	  <set>
+	    <types/>
+	  </set>
+	</collection>
+      </btypes:TYPE> in the natural, capture-avoiding manner.
     </p>
-    <p>
-      During type inference, if we infer the type:
-      <btypes:TYPE>
-	<fn>
-	  <minz>
-	    <type num="arg"/>
-	  </minz>
-	  <maxz>
-	    <type num="ret"/>
-	  </maxz>            
-	</fn>
-      </btypes:TYPE>
-      as the type of a function, its normalization could
-      later be violated due to substitution of type-variables. 
-      Therefore, we define the 
-      <btypes:TYPE>
-	<floor>
+    <definition id="maybe-consistent">
+      <title>Consistency of Constrained types</title>
+      <p>
+	Let 
+	<btypes:TYPE>
+	  <pred name="mtv">
+	    <type/>
+	  </pred>
+	</btypes:TYPE> denote the set of all type variables 
+	<btypes:TYPE>
+	  <tvars/>
+	</btypes:TYPE>
+	present in the type 
+	<btypes:TYPE>
 	  <type/>
-	</floor>
-      </btypes:TYPE> and 
-      <btypes:TYPE>
-	<ceil>
+	</btypes:TYPE> constrained in the form 
+	<btypes:TYPE>
+	  <mbTop>
+	    <tvar/>
+	    <ptype/>
+	  </mbTop>
+	</btypes:TYPE>,
+	<btypes:TYPE>
+	  <pred name="Mtv">
+	    <type/>
+	  </pred>
+	</btypes:TYPE> denote the set of all type variables 
+	in 
+	<btypes:TYPE>
 	  <type/>
-	</ceil>
+	</btypes:TYPE>	
+	constrained in the form 
+	<btypes:TYPE>
+	  <mbFull>
+	    <tvar/>
+	    <ptype/>
+	  </mbFull>
+	</btypes:TYPE> or
+	<btypes:TYPE>
+	  <mbFull>
+	    <mutable>
+	      <tvar/>
+	    </mutable>
+	    <ptype/>
+	  </mbFull>
+	</btypes:TYPE>, and
+	<btypes:TYPE>
+	  <pred name="ntv">
+	    <type/>
+	  </pred>
+	</btypes:TYPE> denote the set of all unconstrained type
+	variables  in 
+	<btypes:TYPE>
+	  <type/>
+	</btypes:TYPE>.
+	We now define the notion of consistent types as: 
+      </p>
+      <font size="small">
+	<btypes:TYPE>
+	  <Hrules>
+	    <tyRule>
+	      <tyPre>
+		<grouping>
+		  <Forall/>
+		  <subeq>
+		    <set>
+		      <mbTop>
+			<tvar/>
+			<ptype/>
+		      </mbTop>
+		      <mbTop>
+			<tvar/>
+			<ptype dash="'"/>
+		      </mbTop>
+		    </set>
+		    <spset>
+		      <types/>
+		    </spset>
+		  </subeq>
+		  <text content=", we have "/>
+		  <eq under="minzT">
+		    <ptype/>
+		    <ptype dash="'"/>
+		  </eq>
+		</grouping>
+	      </tyPre>
+	      <tyPre>
+		<grouping>
+		  <Forall/>
+		  <subeq>
+		    <set>
+		      <mbFull>
+			<stype/>
+			<ptype/>
+		      </mbFull>
+		      <mbFull>
+			<stype dash="'"/>
+			<ptype dash="'"/>
+		      </mbFull>
+		    </set>
+		    <spset>
+		      <types/>
+		    </spset>
+		  </subeq>
+		  <text content=" such that "/>
+		  <eq under="minzT">
+		    <stype/>
+		    <stype dash="'"/>
+		  </eq>
+		  <text content=", we have "/>
+		  <eq under="minz">
+		    <ptype/>
+		    <ptype dash="'"/>
+		  </eq>
+		</grouping>
+	      </tyPre>
+	      <tyPre>
+		<grouping>
+		  <pred name="mtv">
+		    <type/>
+		  </pred>
+		  <text content=", "/>
+		  <pred name="mtv">
+		    <type/>
+		  </pred>
+		  <text content=", and "/>
+		  <pred name="mtv">
+		    <type/>
+		  </pred>
+		  <text content=" are mutually exclusive."/>
+		</grouping>
+	      </tyPre>	    
+	      <tyConc>
+		<CST>
+		  <types/>
+		</CST>
+	      </tyConc>
+	    </tyRule>
+	  </Hrules>
+	</btypes:TYPE>
+      </font>
+    </definition>
+    <definition id="subst-consistent">
+      <title>Consistency of substitutions</title>
+      <p>
+	A consistent substitution is one that
+	does not violate the constraints embedded as maybe types.
+      </p>
+      <font size="small">
+	<btypes:TYPE>
+	  <Hrules colsep="6">
+	    <tyRule>
+	      <tyPre>
+		<grouping>
+		  <Forall/>
+		  <in>
+		    <mbTop>
+		      <tvar/>
+		      <ptype/>
+		    </mbTop>
+		    <spset>
+		      <types/>
+		    </spset>
+		  </in>
+		  <text content=", "/>
+		  <eq>
+		    <Subst>
+		      <aSubMap/>
+		      <tvar/>
+		    </Subst>
+		    <tvar name="beta"/>
+		  </eq>
+		  <text content=" or "/>
+		  <eq>
+		    <Subst>
+		      <aSubMap/>
+		      <tvar/>
+		    </Subst>
+		    <ptype dash="'"/>
+		  </eq>
+		  <ST/>
+		  <eq under="minzT">
+		    <ptype dash="'"/>
+		    <Subst>
+		      <aSubMap/>
+		      <ptype/>
+		    </Subst>
+		  </eq>
+		</grouping>
+	      </tyPre>
+	      <tyPre>
+		<grouping>
+		  <Forall/>
+		  <in>
+		    <mbFull>
+		      <stype/>
+		      <ptype/>
+		    </mbFull>
+		    <spset>
+		      <types/>
+		    </spset>
+		  </in>
+		  <text content=", "/>
+		  <eq>
+		    <Subst>
+		      <aSubMap/>
+		      <stype/>
+		    </Subst>
+		    <stype dash="'"/>
+		  </eq>
+		  <text content=" or "/>
+		  <eq>
+		    <Subst>
+		      <aSubMap/>
+		      <stype/>
+		    </Subst>
+		    <Ptype/>
+		  </eq>
+		  <ST/>
+		  <eq under="minz">
+		    <Ptype/>
+		    <Subst>
+		      <aSubMap/>
+		      <ptype/>
+		    </Subst>
+		  </eq>
+		</grouping>
+	      </tyPre>
+	      <tyConc>
+		<models name="cst">
+		  <assume>
+		    <aSubMap/>
+		  </assume>
+		  <set>
+		    <types/>
+		  </set>
+		</models>
+	      </tyConc>
+	    </tyRule>
+	    <tyRule>
+	      <tyPre>
+		<models name="cst">
+		  <assume>
+		    <aSubMap/>
+		  </assume>
+		  <set>
+		    <types/>
+		  </set>
+		</models>
+	      </tyPre>
+	      <tyPre>
+		<Cst>
+		  <assume/>
+		  <Subst>
+		    <aSubMap/>
+		    <spset>
+		      <types/>
+		    </spset>
+		  </Subst>
+		</Cst>
+	      </tyPre>
+	      <tyConc>
+		<Cst>
+		  <aSubMap/>
+		  <set>
+		    <types/>
+		  </set>
+		</Cst>
+	      </tyConc>
+	    </tyRule>
+	  </Hrules>
+	</btypes:TYPE>
+      </font>
+    </definition>
+    <definition id="constraint-cst">      
+      <title>Consistency of Instantiation Constraints</title>
+      <p>
+	We write
+	<btypes:TYPE>
+	  <models>
+	    <assume/>
+	    <dCtset/>
+	  </models>
+	</btypes:TYPE> if the set of instantiation constraints
+	<btypes:TYPE>
+	  <dCtset/>
+	</btypes:TYPE> as consistent as defined below.
+      </p>
+      <btypes:TYPE>
+	<Hrules>
+	  <tyRule>
+	    <tyPre>
+	      <grouping>
+		<Forall/>
+		<in>
+		  <grouping>
+		    <pcst>
+		      <id/>
+		      <lKind k="mono"/>
+		      <type num="1"/>
+		    </pcst>
+		    <text content=" ... "/>
+		    <pcst>
+		      <id/>
+		      <lKind k="mono"/>
+		      <type num="n"/>
+		    </pcst>
+		  </grouping>
+		  <dCtset/>
+		</in>
+		<text content=", "/>
+		<eq>
+		  <type num="1"/>
+		  <text content=" ... "/>
+		  <type num="n"/>
+		</eq>
+	      </grouping>
+	      <grouping>
+		<space n="6"/>
+		<Forall/>
+		<in>
+		  <pcst>
+		    <id name="y"/>
+		    <lKind k="poly"/>
+		    <type/>
+		  </pcst>
+		  <dCtset/>
+		</in>
+		<text content=", "/>
+		<pred name="Immut">
+		  <type/>
+		</pred>
+	      </grouping>
+	    </tyPre>
+	    <tyPre>
+	      <grouping>
+		<Forall/>
+		<in>
+		  <pcst>
+		    <id name="x"/>
+		    <lKind num="1"/>
+		    <type num="1"/>
+		  </pcst>
+		  <dCtset/>
+		</in>
+		<text content=" and "/>
+		<in>
+		  <pcst>
+		    <id name="y"/>
+		    <lKind num="2"/>
+		    <type num="2"/>
+		  </pcst>
+		  <dCtset/>
+		</in>
+		<text content=", "/>
+		<neq>
+		  <lKind num="1"/>
+		  <lKind num="2"/>
+		</neq>
+		<text content=" implies "/>
+		<neq>
+		  <id/>
+		  <id name="y"/>
+		</neq>
+	      </grouping>
+	    </tyPre>
+	    <tyConc>
+	      <models>
+		<assume/>
+		<dCtset/>
+	      </models>
+	    </tyConc>
+	  </tyRule>
+	</Hrules>
       </btypes:TYPE>
-      ``meta-constructors'' which (respectively) minimize and
-      maximize the mutability of a type, but are interpreted
-      lazily. The meta-constructors are also idempotent in our
-      algebra of types.
-  </p> -->
-    <xi:include href="include/complete/operators.xmli"/>
+    </definition>
     <xi:include href="include/complete/type.xmli"/>
-    <!-- <p>    
+    <p>    
       <leadin>Declarative Type Rules</leadin>
-      The declarative type rules for our core language are given in 
-      Figure&nbsp;<xref ref="decl_all_rules"/>. The standard type
-    judgment  
+      Fig.&nbsp;<xref ref="decl_type_rules"/> presents a declarative
+      definition of the type system of 
+      <btypes:TYPE>
+	<language/>
+      </btypes:TYPE>.
+      In this type system, copy compatibility is realized 
+      through <em>copy coercion</em> rules that are similar to
+      subtyping rules (the rules beginning with ``S'' in
+      Figure&nbsp;<xref ref="decl_type_rules"/>).
+      Since reference types 
+      <btypes:TYPE>
+	<ref>
+	  <type/>
+	</ref>
+      </btypes:TYPE> are handled only by the S-Refl,
+      it ensures that types are not coerced beyond a reference
+      boundary. Two function types are coercible only if they are
+      structurally identical (also handled by S-Refl rule). 
+      Here, the contravariance/covariance of argument/return types is
+      unnecessary as we can follow a standard convention with
+      respect to the mutability of argument/return types 
+      at copy positions. 
+      The rules for typing expressions (beginning with ``T'')
+      introduce these coercions all non-lvalue positions.
+    </p>
+    <p>
+      The type judgment  
       <btypes:TYPE>
 	<TDjudge>
 	  <aExpr/>
 	  <type/>
+	  <dCtset/>
 	</TDjudge>
       </btypes:TYPE> is understood as: given a binding environment 
       <btypes:TYPE>
@@ -2456,12 +2815,15 @@
       </btypes:TYPE> has type
       <btypes:TYPE>
 	<type/>
+      </btypes:TYPE> subject to the instantiation constraints
+      <btypes:TYPE>
+	<dCtset/>
       </btypes:TYPE>. We write 
       <btypes:TYPE>
-	<Tsub>
+	<Msub>
 	  <aExpr/>                  
 	  <type/>                  
-	</Tsub>
+	</Msub>
       </btypes:TYPE> as a shorthand for:
       <btypes:TYPE>
 	<tqExpr>
@@ -2469,374 +2831,263 @@
 	  <type dash="'"/>                  
 	</tqExpr>
 	<text content=", "/>
-	<Tsub>
+	<Msub>
 	  <type dash="'"/>
 	  <type/>
-	</Tsub>
+	</Msub>
       </btypes:TYPE>, for some type
       <btypes:TYPE>
 	<type dash="'"/>                  
-      </btypes:TYPE>.
-      In the type rules, we introduce copy coercions at
-      all positions where copy compatibility is applicable.
-      Lvalue restrictions given in section&nbsp;<xref
-	ref="mut_model"/> are enforced by the judgment 
-      <btypes:TYPE>
-	<judgeOp name="lval"/>
-      </btypes:TYPE>, and type generalization at a
-      <progident>let</progident> is decided by the judgment 
-      <btypes:TYPE>
-	<judgeOp name="gen"/>
       </btypes:TYPE>.
     </p>
     <p>
       We prove the soundness of our type system by demonstrating
       subject reduction. A full proof can be
       found in&nbsp;<cite ref="sridhar2007formal"/>.
-    </p>
-    <p>
-      <font size="small">
-	<leadin>Definition 1 (Heap and Stack typing)</leadin>
-	<em>
-	  A heap <btypes:TYPE><heap/></btypes:TYPE> and a stack
-	  <btypes:TYPE><stack/></btypes:TYPE> are said to be
-	  <em>well typed</em> with respect to a binding context 
-	  <btypes:TYPE><gamma/></btypes:TYPE> and store typing
-	  <btypes:TYPE><store/></btypes:TYPE>, and written 
-	  <btypes:TYPE>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <plus>
-		<heap/>
-		<stack/>
-	      </plus>
-	    </Sjudge>
-	  </btypes:TYPE>
-	  if
-	  (1) 
-	  <btypes:TYPE>
-	    <eq>
-	      <dom><store/></dom>
-	      <unin>
-		<dom><heap/></dom>
-		<dom><stack/></dom>
-	      </unin>
-	    </eq>
-	  </btypes:TYPE>,
-	  (2)	  
-	  <btypes:TYPE>
-	    <Forall>
-	      <in>
-		<hLoc/>
-		<dom><heap/></dom>
-	      </in>
-	    </Forall>
-	  </btypes:TYPE>,
-	  <br/>
-	  <btypes:TYPE>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <Tsub>
-		<mapsto><heap/><hLoc/></mapsto>
-		<mapsto><store/><hLoc/></mapsto>
-	      </Tsub>
-	    </Sjudge>            
-	  </btypes:TYPE>,
-	  and 
-	  (3)
-	  <btypes:TYPE>
-	    <forall>
-	      <in>
-		<sLoc/>
-		<dom><stack/></dom>
-	      </in>
-	    </forall>
-	    <text content=", "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <Tsub>
-		<mapsto><stack/><sLoc/></mapsto>
-		<mapsto><store/><sLoc/></mapsto>
-	      </Tsub>
-	    </Sjudge>            
-	  </btypes:TYPE>.
-	</em>
-      </font>
-    </p>
-    <p>
-      <font size="small">
-	<leadin>Lemma 1 (Preservation)</leadin>
-	<em>
-	  If
-	  <btypes:TYPE>          
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <tqExpr>
-		<aExpr/>
-		<type/>
-	      </tqExpr>
-	    </Sjudge>
-	    <text content=" and "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <plus>
-		<heap/>
-		<stack/>
-	      </plus>
-	    </Sjudge> 
-	    <text content=" then, "/>    
-	  </btypes:TYPE>
-	  <br/>
-	  (1) If
-	  <btypes:TYPE>
-	    <leval>
-	      <opState>
-		<stack/>
-		<heap/>
-		<aExpr/>
-	      </opState>
-	      <opState>
-		<stack dash="'"/>
-		<heap dash="'"/>
-		<aExpr dash="'"/>
-	      </opState>
-	    </leval>
-	    <text content=", then "/>
-	    <Exists/>
-	    <supeq>
-	      <store dash="'"/>
-	      <store/>
-	    </supeq>
-	    <text content=" such that "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store dash="'"/>
-	      </assume>
-	      <tqExpr>
-		<aExpr dash="'"/>
-		<type/>
-	      </tqExpr>                    
-	    </Sjudge>
-	    <text content=" and "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store dash="'"/>
-	      </assume>
-	      <plus>
-		<heap dash="'"/>
-		<stack dash="'"/>
-	      </plus>
-	    </Sjudge>
-	    <text content="."/>
-	  </btypes:TYPE>              
-	  <br/>
-	  (2) If
-	  <btypes:TYPE>          
-	    <eval>
-	      <opState>
-		<stack/>
-		<heap/>
-		<aExpr/>
-	      </opState>
-	      <opState>
-		<stack dash="'"/>
-		<heap dash="'"/>
-		<aExpr dash="'"/>
-	      </opState>
-	    </eval>
-	    <text content=", then "/>
-	    <Exists/>
-	    <supeq>
-	      <store dash="'"/>
-	      <store/>
-	    </supeq>                
-	    <text content=" such that "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store dash="'"/>
-	      </assume>
-	      <Tsub>
-		<aExpr dash="'"/>
-		<type dash="'"/>
-	      </Tsub>                    
-	    </Sjudge>
-	    <text content=", "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store dash="'"/>
-	      </assume>
-	      <plus>
-		<heap dash="'"/>
-		<stack dash="'"/>
-	      </plus>
-	    </Sjudge>
-	    <text content=" and "/>
-	    <eq>
-	      <minz>
-		<type/>
-	      </minz>
-	      <minz>
-		<type dash="'"/>
-	      </minz>
-	    </eq>
-	    <text content="."/>
-	  </btypes:TYPE>
-	</em>
-      </font>
-    </p>
-    <p>
-      <font size="small">
-	<leadin>Lemma 2 (Progress)</leadin>
-	<em>
-	  If
-	  <btypes:TYPE>
-	    <aExpr/>
-	    <text content=" is a closed, well typed term, "/> 
-	    <text content="that is, "/> 
-	    <Sjudge>
-	      <assume>
-		<Empty/>
-		<store/>
-	      </assume>
-	      <tqExpr>
-		<aExpr/>
-		<type/>
-	      </tqExpr>
-	    </Sjudge>
-	    <text content=" for some "/> 
-	    <type/>
-	    <text content=" and "/> 
-	    <store/>
-	    <text content=", given any heap "/> 
-	    <heap/>
-	    <text content=" and stack "/> 
-	    <stack/>
-	    <text content=" such that "/> 
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <plus>
-		<heap/>
-		<stack/>
-	      </plus>
-	    </Sjudge> 
-	    <text content=", "/>            
-	  </btypes:TYPE>
-	  <br/>
-	  (1) If
-	  <btypes:TYPE>
-	    <Sjudge name="lval">
-	      <assume/>
+    </p> 
+    <definition id="canonical-expressions">
+      <title>Canonical Expressions</title>
+      <p>
+	We say that an expression 
+	<btypes:TYPE>
+	  <aExpr/>
+	</btypes:TYPE> is canonical if
+	all <progident>let</progident> expressions in
+	<btypes:TYPE>
+	  <aExpr/>
+	</btypes:TYPE> are annotated with one of the 
+	kinds
+	<btypes:TYPE>
+	  <lKind k="mono"/>
+	</btypes:TYPE> or
+	<btypes:TYPE>
+	  <lKind k="poly"/>
+	</btypes:TYPE>.
+      </p>
+    </definition>
+    <definition id="consistent-typing">
+      <title>Consistent Type Derivation</title>
+      <p>
+	Let
+	<btypes:TYPE>
+	  <spset>
+	    <TDjudge D="yes">
 	      <aExpr/>
-	    </Sjudge>
-	    <text content=", then "/>              
+	      <type/>
+	    </TDjudge>
+	  </spset>
+	</btypes:TYPE> denote the extension of the constraint
+	collection function to the set of all types used in the
+	derivation of
+	<btypes:TYPE>
+	  <TDjudge D="yes">
 	    <aExpr/>
-	    <text content=" is either a valid lvalue "/> 
-	    <lVal/>
-	    <text content=" (that is, "/>
-	    <eq>
-	      <lVal/>
-	      <sLoc/>
-	    </eq>
-	    <text content=", "/>
-	    <in>
-	      <sLoc/>
-	      <dom>
+	    <type/>
+	  </TDjudge>
+	</btypes:TYPE>.
+	We say that
+	<btypes:TYPE>
+	  <TDjudge D="yes" name="*">
+	    <aExpr/>
+	    <type/>
+	  </TDjudge>
+	</btypes:TYPE> is a consistent derivation
+	if
+	<btypes:TYPE>
+	  <TDjudge>
+	    <aExpr/>
+	    <type/>
+	    <dCtset dash="'"/>
+	  </TDjudge>
+	</btypes:TYPE>
+	for some
+	<btypes:TYPE>
+	  <subeq>
+	    <dCtset dash="'"/>
+	    <dCtset/>
+	  </subeq>
+	</btypes:TYPE>,	and
+	<btypes:TYPE>
+	  <CST sp="yes">
+	    <TDjudge name="s" D="yes">
+	      <aExpr/>
+	      <type/>
+	    </TDjudge>
+	  </CST>
+	</btypes:TYPE>.
+      </p>
+    </definition>
+    <xi:include href="include/complete/infer.xmli"/>
+    <xi:include href="include/complete/unify.xmli"/>
+    <definition id="stack-heap-typing">
+      <title>Stack and Heap Typing</title>
+      <p>
+	A heap <btypes:TYPE><heap/></btypes:TYPE> and a stack
+	<btypes:TYPE><stack/></btypes:TYPE> are said to be <em>well
+	  typed</em> with respect to 
+	<btypes:TYPE><gamma/></btypes:TYPE>, 
+	<btypes:TYPE><store/></btypes:TYPE> and
+	<btypes:TYPE><dCtset/></btypes:TYPE> as follows.
+      </p> 
+      <font size="small">
+	<btypes:TYPE>
+	  <Hrules colsep="6">
+	    <tyRule>
+	      <tyPre>
+		<eq>
+		  <dom><store/></dom>
+		  <unin>
+		    <dom><heap/></dom>
+		    <dom><stack/></dom>
+		  </unin>
+		</eq>
+		<grouping>
+		  <forall>
+		    <in>
+		      <hLoc/>
+		      <dom><heap/></dom>
+		    </in>
+		  </forall>
+		  <text content=", "/>
+		  <TDjudge name="*" D="yes">
+		    <mapsto><heap/><hLoc/></mapsto>
+		    <type/>
+		  </TDjudge> 
+		  <text content=" such that "/>
+		  <eq under="minz">
+		    <mapsto><store/><hLoc/></mapsto>
+		    <type/>
+		  </eq>
+		</grouping>
+	      </tyPre>
+	      <tyPre>
+		<grouping>
+		  <forall>
+		    <in>
+		      <sLoc/>
+		      <dom><stack/></dom>
+		    </in>
+		  </forall>
+		  <text content=", "/>
+		  <TDjudge name="*" D="yes">
+		    <mapsto><stack/><sLoc/></mapsto>
+		    <type/>
+		  </TDjudge>
+		  <text content=" such that "/>
+		  <eq under="minz">
+		    <mapsto><store/><sLoc/></mapsto>
+		    <type/>
+		  </eq>
+		</grouping>
+	      </tyPre>
+	      <tyConc>
+		<TDjudge name="*" D="yes">
+		  <plus>
+		    <heap/>
+		    <stack/>
+		  </plus>
+		</TDjudge>
+	      </tyConc>
+	    </tyRule>
+	  </Hrules>
+	</btypes:TYPE>
+      </font>
+    </definition>
+    <definition id="valid-lval">
+      <title>Valid Lvalues</title>
+      <p>
+	We say that an lvalue
+	<btypes:TYPE>
+	  <lVal/>
+	</btypes:TYPE> is valid with respect to a stack
+	<btypes:TYPE>
+	  <stack/>
+	</btypes:TYPE> and heap
+	<btypes:TYPE>
+	  <heap/>
+	</btypes:TYPE>, written
+	<btypes:TYPE>
+	  <Sjudge name="v">
+	    <assume>
+	      <plus>
+		<heap/>
 		<stack/>
-	      </dom>
-	    </in>
-	    <text content=" or "/> 
-	    <eq>
-	      <lVal/>
+	      </plus>
+	    </assume>
+	    <lVal/>
+	  </Sjudge>
+	</btypes:TYPE> if one of the following conditions hold for some
+	<btypes:TYPE>
+	  <path/>
+	</btypes:TYPE>:
+	(1)
+	<btypes:TYPE>
+	  <eq>
+	    <lVal/>
+	    <sLoc/>
+	  </eq>
+	</btypes:TYPE> or
+	<btypes:TYPE>
+	  <eq>
+	    <lVal/>
+	    <select>
+	      <sLoc/>
+	      <path/>
+	    </select>
+	  </eq>
+	</btypes:TYPE>, where
+	<btypes:TYPE>
+	  <in>
+	    <sLoc/>
+	    <dom>
+	      <stack/>
+	    </dom>
+	  </in>
+	</btypes:TYPE>.
+	(2)
+	<btypes:TYPE>
+	  <eq>
+	    <lVal/>
+	    <deref>
+	      <hLoc/>
+	    </deref>
+	  </eq>
+	</btypes:TYPE> or
+	<btypes:TYPE>
+	  <eq>
+	    <lVal/>
+	    <select>
 	      <deref>
 		<hLoc/>
 	      </deref>
-	    </eq>
-	    <text content=", "/>
-	    <in>
-	      <hLoc/>
-	      <dom>
-		<heap/>
-	      </dom>
-	    </in>
-	    <text content=") or else "/>
-	    <Exists>
-	      <aExpr dash="'"/>
-	      <stack dash="'"/>
-	      <heap dash="'"/>
-	    </Exists>
-	    <text content=" such that "/>               
-	    <leval>
-	      <opState>
-		<stack/>
-		<heap/>
-		<aExpr/>
-	      </opState>
-	      <opState>
-		<stack dash="'"/>
-		<heap dash="'"/>
-		<aExpr dash="'"/>
-	      </opState>
-	    </leval>
-	    <text content="."/>   
-	  </btypes:TYPE>
-	  <br/>
-	  (2)
-	  <btypes:TYPE>
-	    <aExpr/>
-	    <text content=" is a value "/> 
-	    <aVal/>
-	    <text content=" or else "/> 
-	    <Exists>
-	      <aExpr dash="'"/>
-	      <stack dash="'"/>
-	      <heap dash="'"/>
-	    </Exists>
-	    <text content=" such that "/>               
-	    <eval>
-	      <opState>
-		<stack/>
-		<heap/>
-		<aExpr/>
-	      </opState>
-	      <opState>
-		<stack dash="'"/>
-		<heap dash="'"/>
-		<aExpr dash="'"/>
-	      </opState>
-	    </eval>
-	    <text content="."/>
-	  </btypes:TYPE>
-	</em>
-	<br/>
-	<em>Proof.</em>
-	(Lemma 1 and 2)
-	By induction on the derivation of 
+	      <path/>
+	    </select>
+	  </eq>
+	</btypes:TYPE>, where
 	<btypes:TYPE>
-	  <Sjudge>
+	  <in>
+	    <hLoc/>
+	    <dom>
+	      <heap/>
+	    </dom>
+	  </in>
+	</btypes:TYPE>.
+      </p>
+    </definition>
+    <theorem id="T-progress">
+      <title>Progress</title>
+      <p>
+	If
+	<btypes:TYPE>
+	  <aExpr/>
+	</btypes:TYPE>
+	is a closed well typed canonical expression,
+	that is, 
+	<btypes:TYPE>
+	  <Sjudge name="*">
 	    <assume>
-	      <gamma/>
+	      <dCtset/>
+	      <Empty/>
 	      <store/>
 	    </assume>
 	    <tqExpr>
@@ -2844,124 +3095,381 @@
 	      <type/>
 	    </tqExpr>
 	  </Sjudge>
-	</btypes:TYPE>.
-      </font>
-    </p>
-    <p>
-      <font size="small">
-	<leadin>Definition 2 (Stuck State)</leadin>
-	<em>
-	  A system state 
-	  <btypes:TYPE>
+	</btypes:TYPE> for some
+	<btypes:TYPE>
+	  <type/>
+	</btypes:TYPE> and
+	<btypes:TYPE>
+	  <store/>
+	</btypes:TYPE>, given any heap
+	<btypes:TYPE>
+	  <heap/>
+	</btypes:TYPE> and stack
+	<btypes:TYPE>
+	  <stack/>
+	</btypes:TYPE> such that
+	<btypes:TYPE>
+	  <Sjudge name="*">
+	    <assume>
+	      <dCtset/>
+	      <Empty/>
+	      <store/>
+	    </assume>
+	    <plus>
+	      <heap/>
+	      <stack/>
+	    </plus>
+	  </Sjudge>
+	</btypes:TYPE>,
+      </p>
+      <ol>
+	<li>
+	  <p>
+	    If
+	    <btypes:TYPE>
+	      <Sjudge name="lval">
+		<assume/>
+		<aExpr/>
+	      </Sjudge>
+	    </btypes:TYPE>, then
+	    <btypes:TYPE>
+	      <aExpr/>
+	    </btypes:TYPE>
+	    is either a valid lvalue (that is,
+	    <btypes:TYPE>
+	      <eq>
+		<aExpr/>
+		<lVal/>
+	      </eq>
+	    </btypes:TYPE> and
+	    <btypes:TYPE>
+	      <Sjudge name="v">
+		<assume>
+		  <plus>
+		    <heap/>
+		    <stack/>
+		  </plus>
+		</assume>
+		<lVal/>
+	      </Sjudge>
+	    </btypes:TYPE>) or else
+	    <btypes:TYPE>
+	      <Exists>
+		<aExpr dash="'"/>
+		<stack dash="'"/>
+		<heap dash="'"/>
+	      </Exists>
+	    </btypes:TYPE> such that
+	    <btypes:TYPE>
+	      <leval>
+		<opState>
+		  <stack/>
+		  <heap/>
+		  <aExpr/>
+		</opState>
+		<opState>
+		  <stack dash="'"/>
+		  <heap dash="'"/>
+		  <aExpr dash="'"/>
+		</opState>
+	      </leval>
+	    </btypes:TYPE>.
+	  </p>
+	</li>
+	<li>
+	  <p>
+	    <btypes:TYPE>
+	      <aExpr/>
+	    </btypes:TYPE> is a value
+	    <btypes:TYPE>
+	      <aVal/>
+	    </btypes:TYPE> or else
+	    <btypes:TYPE>
+	      <Exists>
+		<aExpr dash="'"/>
+		<stack dash="'"/>
+		<heap dash="'"/>
+	      </Exists>
+	    </btypes:TYPE> such that
+	    <btypes:TYPE>
+	      <eval>
+		<opState>
+		  <stack/>
+		  <heap/>
+		  <aExpr/>
+		</opState>
+		<opState>
+		  <stack dash="'"/>
+		  <heap dash="'"/>
+		  <aExpr dash="'"/>
+		</opState>
+	      </eval>
+	    </btypes:TYPE>.
+	  </p>
+	</li>
+      </ol>
+    </theorem>
+    <theorem id="T-preservation">
+      <title>Preservation</title>
+      <p>
+	For any canonical expression 
+	<btypes:TYPE>
+	  <aExpr/>
+	</btypes:TYPE>,      
+	if
+	<btypes:TYPE>
+	  <TDjudge D="yes" name="*">
+	    <aExpr/>
+	    <type/>
+	  </TDjudge>
+	</btypes:TYPE>, 
+	<btypes:TYPE>
+	  <TDjudge D="yes" name="*">
+	    <plus>
+	      <heap/>
+	      <stack/>
+	    </plus>
+	  </TDjudge>
+	</btypes:TYPE> and
+	<btypes:TYPE>
+	  <models>
+	    <assume/>
+	    <dCtset/>
+	  </models>
+	</btypes:TYPE> then,
+      </p>
+      <ol>
+	<li>
+	  <p>
+	    If
+	    <btypes:TYPE>
+	      <leval>
+		<opState>
+		  <stack/>
+		  <heap/>
+		  <aExpr/>
+		</opState>
+		<opState>
+		  <stack dash="'"/>
+		  <heap dash="'"/>
+		  <aExpr dash="'"/>
+		</opState>
+	      </leval>
+	    </btypes:TYPE>, then,
+	    <btypes:TYPE>
+	      <Exists/>
+	      <supeq>
+		<store dash="'"/>
+		<store/>
+	      </supeq>
+	    </btypes:TYPE>
+	    such that
+	    <btypes:TYPE>
+	      <Sjudge name="*">
+		<assume>
+		  <dCtset/>
+		  <gamma/>
+		  <store dash="'"/>
+		</assume>
+		<tqExpr>
+		  <aExpr dash="'"/>
+		  <type/>
+		</tqExpr>
+	      </Sjudge>
+	    </btypes:TYPE>
+	    and
+	    <btypes:TYPE>
+	      <Sjudge name="*">
+		<assume>
+		  <dCtset/>
+		  <gamma/>
+		  <store dash="'"/>
+		</assume>
+		<plus>
+		  <heap dash="'"/>
+		  <stack dash="'"/>
+		</plus>
+	      </Sjudge>
+	    </btypes:TYPE>.
+	  </p>
+	</li>
+	<li>
+	  <p>
+	    If
+	    <btypes:TYPE>
+	      <eval>
+		<opState>
+		  <stack/>
+		  <heap/>
+		  <aExpr/>
+		</opState>
+		<opState>
+		  <stack dash="'"/>
+		  <heap dash="'"/>
+		  <aExpr dash="'"/>
+		</opState>
+	      </eval>
+	    </btypes:TYPE>, then,
+	    <btypes:TYPE>
+	      <Exists/>
+	      <supeq>
+		<store dash="'"/>
+		<store/>
+	      </supeq>
+	    </btypes:TYPE>
+	    such that
+	    <btypes:TYPE>
+	      <Sjudge name="*">
+		<assume>
+		  <dCtset/>
+		  <gamma/>
+		  <store dash="'"/>
+		</assume>
+		<tqExpr>
+		  <aExpr dash="'"/>
+		  <type dash="'"/>
+		</tqExpr>
+	      </Sjudge>
+	    </btypes:TYPE> and
+	    <btypes:TYPE>
+	      <Sjudge name="*">
+		<assume>
+		  <dCtset/>
+		  <gamma/>
+		  <store dash="'"/>
+		</assume>
+		<plus>
+		  <heap dash="'"/>
+		  <stack dash="'"/>
+		</plus>
+	      </Sjudge>
+	    </btypes:TYPE> and 
+	    <btypes:TYPE>
+	      <eq under="minz">
+		<type/>
+		<type dash="'"/>
+	      </eq>
+	    </btypes:TYPE>.
+	  </p>
+	</li>
+      </ol>
+    </theorem>
+    <definition id="stuck_state">
+      <title>Stuck State</title>
+      <p>
+	A system state
+	<btypes:TYPE>
+	  <opState>
+	    <stack/>
+	    <heap/>
+	    <aExpr/>
+	  </opState>
+	</btypes:TYPE>
+	is said to be <term>stuck</term> if
+	<btypes:TYPE>
+	  <neq>
+	    <aExpr/>
+	    <aVal/>
+	  </neq>
+	</btypes:TYPE>
+	and there are no
+	<btypes:TYPE>
+	  <stack dash="'"/>
+	  <text content=", "/>
+	  <heap dash="'"/>
+	  <text content=", and "/>
+	  <aExpr dash="'"/>
+	</btypes:TYPE>
+	such that
+	<btypes:TYPE>
+	  <eval>
 	    <opState>
 	      <stack/>
 	      <heap/>
 	      <aExpr/>
 	    </opState>
-	  </btypes:TYPE>
-	  is said to be <term>stuck</term> if
-	  <btypes:TYPE>
-	    <neq>
-	      <aExpr/>
-	      <aVal/>
-	    </neq>
-	  </btypes:TYPE>
-	  and there are no 
-	  <btypes:TYPE>
-	    <stack dash="'"/>
-	    <text content=", "/>
-	    <heap dash="'"/>
-	    <text content=", and "/>
-	    <aExpr dash="'"/>
-	  </btypes:TYPE>   
-	  such that 
-	  <btypes:TYPE>
-	    <eval>
-	      <opState>
-		<stack/>
-		<heap/>
-		<aExpr/>
-	      </opState>
-	      <opState>
-		<stack dash="'"/>
-		<heap dash="'"/>
-		<aExpr dash="'"/>
-	      </opState>
-	    </eval>
-	  </btypes:TYPE>.
-	</em>
-      </font>
-    </p>
-    <p>
-      <font size="small">
-	<leadin>Theorem 1 (Type Soundness)</leadin>
-	<em>
-	  Let 
-	  <btypes:TYPE>
-	    <evalOp many="yes"/>
-	  </btypes:TYPE> denote the reflexive-transitive-closure of 
-	  <btypes:TYPE>
-	    <evalOp/>
-	  </btypes:TYPE>.          
-	  If 
-	  <btypes:TYPE>
-	    <Sjudge>
-	      <assume>
-		<Empty/>
-		<store/>
-	      </assume>
-	      <tqExpr>
-		<aExpr/>
-		<type/>
-	      </tqExpr>
-	    </Sjudge>
-	    <text content=" and "/>
-	    <Sjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <plus>
-		<heap/>
-		<stack/>
-	      </plus>
-	    </Sjudge> 
-	    <text content=" and "/>
-	    <eval many="yes">
-	      <opState>
-		<stack/>
-		<heap/>
-		<aExpr/>
-	      </opState>
-	      <opState>
-		<stack dash="'"/>
-		<heap dash="'"/>
-		<aExpr dash="'"/>
-	      </opState>
-	    </eval>
-	    <text content=" then "/>
 	    <opState>
 	      <stack dash="'"/>
 	      <heap dash="'"/>
 	      <aExpr dash="'"/>
 	    </opState>
-	    <text content=" is not stuck."/>            
-	  </btypes:TYPE>
-	  That is, execution of a well typed expression cannot lead to
-	  a stuck state. 
-	</em>
-	<br/>
-	<em>Proof:</em>
-	By straightforward induction on the
-	length of   
+	  </eval>
+	</btypes:TYPE>.
+      </p>
+    </definition>
+    <theorem id="T-soundness">
+      <title>Type Soundness</title>
+      <p>
+	For any canonical expression 
+	<btypes:TYPE>
+	  <aExpr/>
+	</btypes:TYPE>, if
+	<btypes:TYPE>
+	  <Sjudge name="*">
+	    <assume>
+	      <dCtset/>
+	      <Empty/>
+	      <store/>
+	    </assume>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </Sjudge>
+	</btypes:TYPE>,
+	<btypes:TYPE>
+	  <Sjudge name="*">
+	    <assume>
+	      <dCtset/>
+	      <Empty/>
+	      <store/>
+	    </assume>
+	    <plus>
+	      <heap/>
+	      <stack/>
+	    </plus>
+	  </Sjudge>
+	</btypes:TYPE>, 
+	<btypes:TYPE>
+	  <models>
+	    <assume/>
+	    <dCtset/>
+	  </models>
+	</btypes:TYPE>, and
+	<btypes:TYPE>
+	  <eval many="yes">
+	    <opState>
+	      <stack/>
+	      <heap/>
+	      <aExpr/>
+	    </opState>
+	    <opState>
+	      <stack dash="'"/>
+	      <heap dash="'"/>
+	      <aExpr dash="'"/>
+	    </opState>
+	  </eval>
+	</btypes:TYPE>
+	then
+	<btypes:TYPE>
+	  <opState>
+	    <stack dash="'"/>
+	    <heap dash="'"/>
+	    <aExpr dash="'"/>
+	  </opState>
+	</btypes:TYPE> is not stuck.
+	That is, execution of a closed, canonical, well typed expression
+	cannot lead to a stuck state. Here,
 	<btypes:TYPE>
 	  <evalOp many="yes"/>
+	</btypes:TYPE > represents the
+	reflexive-transitive-closure of
+	<btypes:TYPE>
+	  <evalOp/>
 	</btypes:TYPE>.
-      </font>
-  </p> -->
-    <xi:include href="include/complete/infer.xmli"/>
-    <xi:include href="include/complete/unify.xmli"/>
-    <!-- <p>
+      </p>
+    </theorem>
+    <p>
       <leadin>Type Inference Algorithm</leadin>	
     </p>
     <p>
@@ -2980,850 +3488,439 @@
     </p>
     <p>
       The type inference algorithm is as shown in
-      Figure&nbsp;<xref ref="hm_infer"/>. 
-      The inference judgment 
-      <btypes:TYPE>
-	<TIjudge>
-	  <assume>
-	    <gamma/>
-	    <store/>
-	  </assume>
-	  <conclude>
+      Figure&nbsp;<xref ref="hy_infer"/>. 
+      The inference judgment and
+      unification rules are as shown in 
+      Figure&nbsp;<xref ref="hy_unify"/>.
+    </p>
+    <definition id="constraint-sol">      
+      <title>Constraint Satisfaction</title>
+      <p>
+	We write
+	<btypes:TYPE>
+	  <models name="sol">
+	    <aSubMap/>
+	    <aCtset/>
+	  </models>
+	</btypes:TYPE> 
+	to denote the fact that the substitution 
+	<btypes:TYPE>
+	  <aSubMap/>
+	</btypes:TYPE> satisfies the set of constraints
+	<btypes:TYPE>
+	  <aCtset/>
+	</btypes:TYPE> as defined below:
+      </p>
+      <font size="small">
+	<btypes:TYPE>
+	  <Hrules colsep="4">
+	    <tyRule>
+	      <tyPre>
+		<grouping>
+		  <Forall/>
+		  <in>
+		    <paren>
+		      <eq>
+			<type num="1"/>
+			<type num="2"/>
+		      </eq>
+		    </paren>
+		    <aCtset/>
+		  </in>
+		  <text content=", "/>
+		  <eq>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="1"/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="2"/>
+		    </Subst>
+		  </eq>
+		</grouping>
+		<grouping>
+		  <Forall/>
+		  <in>
+		    <paren>
+		      <eq>
+			<lKind k="var"/>
+			<lKind/>
+		      </eq>
+		    </paren>
+		    <aCtset/>
+		  </in>
+		  <text content=", "/>
+		  <eq>
+		    <Subst>
+		      <aSubMap/>
+		      <lKind k="var"/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <lKind/>
+		    </Subst>
+		  </eq>
+		</grouping>
+	      </tyPre>
+	      <tyPre>
+		<eq>
+		  <dCtset/>
+		  <set>
+		    <grouping>
+		      <Forall/>
+		      <Subst>
+			<aSubMap/>
+			<pcst>
+			  <id/>
+			  <lKind/>
+			  <type/>
+			</pcst>
+		      </Subst>
+		      <ST/>
+		      <in>
+			<pcst>
+			  <id/>
+			  <lKind/>
+			  <type/>
+			</pcst>
+			<aCtset/>
+		      </in>
+		    </grouping>
+		  </set>
+		</eq>
+	      </tyPre>
+	      <tyConc>
+		<Sjudge name="sol">
+		  <aSubMap/>
+		  <leadsto>
+		    <aCtset/>
+		    <dCtset/>
+		  </leadsto>
+		</Sjudge>
+	      </tyConc>
+	    </tyRule>
+	    <tyRule>
+	      <tyPre>
+		<Sjudge name="sol">
+		  <aSubMap/>
+		  <leadsto>
+		    <aCtset/>
+		    <dCtset/>
+		  </leadsto>
+		</Sjudge>
+	      </tyPre>
+	      <tyPre>
+		<models>
+		  <assume/>
+		  <dCtset/>
+		</models>
+	      </tyPre>
+	      <tyConc>
+		<Sjudge name="sat">
+		  <aSubMap/>
+		  <leadsto>
+		    <aCtset/>
+		    <dCtset/>
+		  </leadsto>
+		</Sjudge>
+	      </tyConc>
+	    </tyRule>
+	  </Hrules>
+	</btypes:TYPE>
+      </font>
+    </definition>
+    <definition id="infer-notation">
+      <title>Notational Derivations</title>
+      <p>
+	We define the following derivations for notational convenience:
+      </p>
+      <font size="small">
+	<btypes:TYPE>
+	  <Hrules colsep="8">
+	    <tyRule>
+	      <tyPre>
+		<TEjudge name="i">
+		  <assume>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <conclude>
+		    <tqExpr>
+		      <aExpr/>
+		      <type/>
+		    </tqExpr>
+		  </conclude>
+		  <constrain>
+		    <aCtset/>
+		  </constrain>
+		</TEjudge>
+		<Sjudge name="sol">
+		  <aSubMap/>
+		  <leadsto>
+		    <aCtset/>
+		    <dCtset/>
+		  </leadsto>
+		</Sjudge>
+	      </tyPre>
+	      <tyPre>
+		<Cst>
+		  <assume>
+		    <aSubMap/>
+		  </assume>
+		  <set>
+		    <gamma/>
+		    <store/>
+		    <type/>
+		    <aCtset/>
+		  </set>
+		</Cst>
+	      </tyPre>
+	      <tyConc>
+		<TEjudge name="i">
+		  <assume>
+		    <aSubMap/>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <conclude>
+		    <tqExpr>
+		      <aExpr/>
+		      <type/>
+		    </tqExpr>
+		  </conclude>
+		  <constrain>
+		    <dCtset/>
+		  </constrain>
+		</TEjudge>
+	      </tyConc>
+	    </tyRule>
+	    <tyRule>
+	      <tyPre/>
+	      <tyPre>
+		<Sjudge name="*">
+		  <assume>
+		    <Subst>
+		      <aSubMap/>
+		      <dCtset/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <gamma/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <store/>
+		    </Subst>
+		  </assume>
+		  <tqExpr>
+		    <Subst>
+		      <aSubMap/>
+		      <aExpr/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <type/>
+		    </Subst>
+		  </tqExpr>
+		</Sjudge>
+	      </tyPre>
+	      <tyConc>
+		<Sjudge name="*">
+		  <assume>
+		    <aSubMap/>
+		    <dCtset/>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
+		</Sjudge>
+	      </tyConc>                
+	    </tyRule>
+	  </Hrules>
+	</btypes:TYPE>
+      </font>
+    </definition>
+    <theorem id="unify-correct">
+      <title>Correctness of Unification</title>
+      <p>
+	If
+	<btypes:TYPE>
+	  <eq>
+	    <unf>
+	      <aCtset/>
+	    </unf>
+	    <Pair>
+	      <dCtset/>
+	      <aSubMap/>
+	    </Pair>
+	  </eq>
+	</btypes:TYPE>, then
+	<btypes:TYPE>
+	  <Sjudge name="sol">
+	    <aSubMap/>
+	    <leadsto>
+	      <aCtset/>
+	      <dCtset/>
+	    </leadsto>
+	  </Sjudge>
+	</btypes:TYPE>
+      </p>
+    </theorem>
+    <theorem id="unify-satisfiable">
+      <title>Satisfiability of Unified Constraints</title>
+      <p>
+	If
+	<btypes:TYPE>
+	  <eq>
+	    <unf>
+	      <aCtset/>
+	    </unf>
+	    <Pair>
+	      <dCtset/>
+	      <aSubMap num="u"/>
+	    </Pair>
+	  </eq>
+	</btypes:TYPE>, then
+	<btypes:TYPE>
+	  <Exists/>
+	  <aSubMap num="s"/>
+	</btypes:TYPE> such that
+	<btypes:TYPE>
+	  <Sjudge name="sat">
+	    <scomp>
+	      <aSubMap num="u"/>
+	      <aSubMap num="s"/>
+	    </scomp>
+	    <leadsto>
+	      <aCtset/>
+	      <dCtset/>
+	    </leadsto>
+	  </Sjudge>
+	</btypes:TYPE>.
+      </p>
+    </theorem>
+    <theorem id="unify-principal">
+      <title>Principality of Unified Types</title>
+      <p>
+	If
+	<btypes:TYPE>
+	  <eq>
+	    <unf>
+	      <aCtset/>
+	    </unf>
+	    <Pair>
+	      <dCtset/>
+	      <aSubMap num="u"/>
+	    </Pair>
+	  </eq>
+	</btypes:TYPE>, where 
+	<btypes:TYPE>
+	  <aCtset/>
+	</btypes:TYPE> is a set of constraints obtained from the type
+	inference algorithm, then
+	<btypes:TYPE>
+	  <Forall/>
+	  <aSubMap num="s"/>
+	</btypes:TYPE> such that
+	<btypes:TYPE>
+	  <Sjudge name="sol">
+	    <aSubMap num="s"/>
+	    <leadsto>
+	      <aCtset/>
+	      <dCtset dash="'"/>
+	    </leadsto>
+	  </Sjudge>
+	</btypes:TYPE>, we have
+	<btypes:TYPE>
+	  <supeq>
+	    <aSubMap num="s"/>
+	    <aSubMap num="u"/>
+	  </supeq>
+	</btypes:TYPE>.
+      </p>
+    </theorem>
+    <theorem id="unify-decidable">
+      <title>Decidability of Unification</title>
+      <p>
+	A canonical derivation of
+	<btypes:TYPE>
+	  <unf>
+	    <aCtset/>
+	  </unf>
+	</btypes:TYPE>, where no two applications of the reflexive rule
+	happen consecutively, halts forall
+	<btypes:TYPE>
+	  <aCtset/>
+	</btypes:TYPE>.
+	That is,
+	<btypes:TYPE>
+	  <Forall/>
+	  <aCtset/>
+	</btypes:TYPE>,
+	<btypes:TYPE>
+	  <unf>
+	    <aCtset/>
+	  </unf>
+	</btypes:TYPE> decidably either succeeds with
+	<btypes:TYPE>
+	  <Pair>
+	    <dCtset/>
+	    <aSubMap/>
+	  </Pair>
+	</btypes:TYPE> or fails with 
+	<btypes:TYPE>
+	  <error/>
+	</btypes:TYPE>.
+      </p>
+    </theorem>
+    <theorem>
+      <title>Soundness of Type Inference</title>
+      <p>
+	If 
+	<btypes:TYPE>
+	  <TEjudge name="i">
+	    <assume>
+	      <aSubMap/>
+	      <gamma/>
+	      <store/>
+	    </assume>
+	    <conclude>
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>
+	    </conclude>
+	    <constrain>
+	      <dCtset/>
+	    </constrain>
+	  </TEjudge>
+	</btypes:TYPE>, then
+	<btypes:TYPE>
+	  <Sjudge name="*">
+	    <assume>
+	      <aSubMap/>
+	      <dCtset/>
+	      <gamma/>
+	      <store/>
+	    </assume>
 	    <tqExpr>
 	      <aExpr/>
 	      <type/>
 	    </tqExpr>
-	  </conclude>
-	  <propagate>
-	    <aSubMap/>
-	  </propagate>
-	</TIjudge>
-      </btypes:TYPE>
-      should be understood as: given the binding context
-      <btypes:TYPE><gamma/></btypes:TYPE> and the store typing
-      <btypes:TYPE><store/></btypes:TYPE>, we infer the type 
-      <btypes:TYPE><type/></btypes:TYPE> for the expression 
-      <btypes:TYPE><aExpr/></btypes:TYPE>.
-      <btypes:TYPE><aSubMap/></btypes:TYPE> is list of substitutions 
-      obtained by unifications performed during inference, and must be
-      propagated to further derivations. The judgment
-      <btypes:TYPE>
-	<models name="new">
-	  <assume/>
-	  <tvars name="alpha"/>
-	</models>
-      </btypes:TYPE> identifies new type variables.
-    </p>
-    <p>
-      The I-Lambda rule uses
-      the meta-constructors defined above to infer a
-      normalized type for functions. The I-App rule infers copy
-      compatible types by introducing maybe types at three
-      positions &mdash; the function type itself (by unifying 
-      <btypes:TYPE>
-	<Subst>
-	  <aSubMap num="2"/>
-	  <type num="1"/>
-	</Subst>
-      </btypes:TYPE> and
-      <btypes:TYPE>
-	<mbpair>
-	  <tvar name="beta"/>
-	  <fn>
-	    <floor>
-	      <tvar name="delta"/>
-	    </floor>
-	    <ceil>
-	      <tvar name="alpha"/>
-	    </ceil>
-	  </fn>
-	</mbpair>
-      </btypes:TYPE>), the argument type (by unifying 
-      <btypes:TYPE>
-	<type num="2"/>
-      </btypes:TYPE> with 
-      <btypes:TYPE>
-	<mbpair>
-	  <tvar name="gamma"/>
-	  <floor>
-	    <Subst>
-	      <aSubMap num="1" dash="'"/>
-	      <tvar name="delta"/>
-	    </Subst>
-	  </floor>
-	</mbpair>
-      </btypes:TYPE>) and the return type (through	
-      <btypes:TYPE>
-	<mbpair>
-	  <tvar name="epsiv"/>
-	  <Subst>
-	    <aSubMap num="2" dash="'"/>
-	    <minz>
-	      <Subst>
-		<aSubMap num="1" dash="'"/>
-		<tvar name="alpha"/>
-	      </Subst>
-	    </minz>
-	    <type/>
-	  </Subst>
-	</mbpair>	    
-      </btypes:TYPE>).
-      The hint for the return type
-      <btypes:TYPE>
-	<type/>
-      </btypes:TYPE> is computed in a way that masks the internal
-      mutability of a function, but preserves the mutability
-      introduced by actual arguments.(see section&nbsp;<xref
-	ref="proposal"/>). We start with an
-      immutable version of the function's return type
-      <btypes:TYPE>
-	<minz>
-	  <Subst>
-	    <aSubMap num="1" dash="'"/>
-	    <tvar name="alpha"/>
-	  </Subst>
-	</minz>
-      </btypes:TYPE>, and then substitute the result of
-      the argument unification to obtain
-      <btypes:TYPE>
-	<Subst>
-	  <aSubMap num="2" dash="'"/>
-	  <minz>
-	    <Subst>
-	      <aSubMap num="1" dash="'"/>
-	      <tvar name="alpha"/>
-	    </Subst>
-	  </minz>
-	  <type/>
-	</Subst>
-      </btypes:TYPE> as the hint for the return type.
-      Similarly, the I-If rule infers copy compatible types
-      for the two branches and the result. It calculates the most
-      immutable type as the hint for the result type by computing
-      the join&nbsp;<cite ref="pierce2002TypesBook"/> of 
-      <btypes:TYPE>
-	<Subst>
-	  <aSubMap dash="'"/>
-	  <type num="2"/>
-	</Subst>
-	<text content=" and "/>
-	<Subst>
-	  <aSubMap dash="'"/>
-	  <type num="3"/>
-	</Subst>
-      </btypes:TYPE> (note that two copy compatible types always
-      have a join). Other rules are similar.
-    </p>
-    <p>
-      Unification rules are as shown in 
-      Figure&nbsp;<xref ref="hm_unify"/>.
-      The unification judgment
-      <btypes:TYPE>
-	<UNIFY>
-	  <type num="1"/>                  
-	  <type num="2"/>
-	  <aSubMap/>
-	</UNIFY>
-      </btypes:TYPE>
-      is understood as: 
-      <btypes:TYPE>
-	<type num="1"/>                  
-      </btypes:TYPE>
-      unifies with
-      <btypes:TYPE>
-	<type num="2"/>
-      </btypes:TYPE>
-      under the substitution
-      <btypes:TYPE>
-	<aSubMap/>
-      </btypes:TYPE>. 
-      The function 
-      <btypes:TYPE>
-	<Xform name="real" isEntity="yes">
-	  <type/>
-	</Xform>
-      </btypes:TYPE> introduces normalizing meta constructors
-      around types so that equivalences such as 
-      <btypes:TYPE>
-	<equiv>
-	  <bool/>
-	  <floor>
-	    <bool/>
-	  </floor>
-	</equiv>
-      </btypes:TYPE> are maintained. The 
-      <btypes:TYPE>
-	<judgeOp name="u"/>
-      </btypes:TYPE> rules perform the actual unification. 
-      The interesting cases are U-Mb-Mb and
-      U-Mb-Oth. The U-Mb-Oth rule shows the unification of a maybe type 
-      <btypes:TYPE>
-	<mbpair>
-	  <type num="1"/>
-	  <type num="1" dash="'"/>
-	</mbpair>
-      </btypes:TYPE> 
-      with an unconstrained type  
-      <btypes:TYPE>
-	<type num="2"/>
-      </btypes:TYPE>. In this case, an immutable version of the
-      constraint is extracted by the 
-      <btypes:TYPE>
-	<inner/>
-      </btypes:TYPE> operator, and is unified with an immutable
-      version of 
-      <btypes:TYPE>
-	<type num="2"/>
-      </btypes:TYPE>. Once compatibility is established, we unify
-      the type 
-      <btypes:TYPE>
-	<type num="1"/>
-      </btypes:TYPE> to equal 
-      <btypes:TYPE>
-	<type num="2"/>
-      </btypes:TYPE>.  U-Mb-Mb shows the unification of two maybe
-      types. After establishing compatibility, 
-      we unify the actual types  
-      <btypes:TYPE>
-	<type num="1"/>
-      </btypes:TYPE> and 
-      <btypes:TYPE>
-	<type num="2"/> 
-      </btypes:TYPE> so that they ultimately resolve to the same
-      type. 
-    </p>	
-    <p>
-      A constraint solver for solving copy compatibility constraints at 
-      let-boundaries is 
-      defined in Figure&nbsp;<xref ref="hm_solve"/>.          
-      The judgment 
-      <btypes:TYPE>
-	<Sjudge name="solve">
-	  <assume>
-	    <aSubMap/>
-	    <id/>
-	    <aExpr/>
-	  </assume>
-	  <corUp>
-	    <type num="1"/>
-	    <type num="2"/>
-	  </corUp>
-	</Sjudge>
-      </btypes:TYPE>
-      should be read as: the (possibly) constrained type 
-      <btypes:TYPE>
-	<type num="1"/>
-      </btypes:TYPE>
-      for the identifier
-      <btypes:TYPE>
-	<id/>
-      </btypes:TYPE>
-      (possibly) used in the expression
-      <btypes:TYPE>
-	<aExpr/>
-      </btypes:TYPE>
-      is transformed to the unconstrained type
-      <btypes:TYPE>
-	<type num="2"/>
-      </btypes:TYPE>
-      by solving all the copy compatibility constraints.
-      The 
-      <btypes:TYPE>
-	<judgeOp name="s"/>
-      </btypes:TYPE> rules solve the copy compatibility
-      constraints within maybe types using their hints
-      (Sol-Ct-Var), unless the maybe type has already unified
-      with an unconstrained type (Sol-Ct-Const).
-      The 	  
-      <btypes:TYPE>
-	<judgeOp name="solve"/>
-      </btypes:TYPE> rule fixes the top-level mutability of maybe
-      types based on whether the identifier 
-      <btypes:TYPE>
-	<id/>
-      </btypes:TYPE> is actually the target of an assignment 
-      within
-      <btypes:TYPE>
-	<aExpr/>
-      </btypes:TYPE> 
-      using the predicate <btypes:TYPE>
-	<pred name="mut">	    
-	  <id/>
-	  <aExpr/>
-	</pred>
-      </btypes:TYPE>.
-    </p>
-    <p>
-      <font size="small">
-	<leadin>Definition 4 (Normalization of Constrained
-	  Types)</leadin>
-	<em> 
-	  We write the normalization of a type 
-	  <btypes:TYPE>	    
-	    <type/>
-	  </btypes:TYPE> as:
-	  <btypes:TYPE>
-	    <eq>              
-	      <normalize>
-		<type/>
-	      </normalize>
-	      <ctype>
-		<canonical>
-		  <type/>
-		</canonical>
-		<aCtset/>
-	      </ctype>
-	    </eq>
-	  </btypes:TYPE>, wherein:
-	  (1) All meta-constructors in 
-	  <btypes:TYPE>
-	    <canonical>
-	      <type/>
-	    </canonical>
-	  </btypes:TYPE>      
-	  are fully interpreted using the equivalences:
-	  <btypes:TYPE>
-	    <equiv>
-	      <floor>
-		<type/>
-	      </floor>
-	      <minz>
-		<type/>
-	      </minz>
-	    </equiv>
-	    <text content=" and "/>
-	    <equiv>
-	      <ceil>
-		<type/>
-	      </ceil>
-	      <maxz>
-		<type/>
-	      </maxz>
-	    </equiv>
-	  </btypes:TYPE>,
-	  (2) 
-	  <btypes:TYPE>
-	    <canonical>
-	      <type/>
-	    </canonical>
-	  </btypes:TYPE>
-	  contains no constrained types.
-	  We write  
-	  <btypes:TYPE>
-	    <eq>
-	      <normalize>
-		<type/>
-	      </normalize>
-	      <canonical>
-		<type/>
-	      </canonical>
-	    </eq>
-	  </btypes:TYPE> if
-	  <btypes:TYPE>
-	    <eq>              
-	      <normalize>
-		<type/>
-	      </normalize>
-	      <ctype>
-		<canonical>
-		  <type/>
-		</canonical>
-		<aCtset/>
-	      </ctype>
-	    </eq>
-	  </btypes:TYPE>, and 
-	  <btypes:TYPE>
-	    <aCtset/>
-	  </btypes:TYPE> consists only of tautologies. 
-	</em>
-      </font>
-    </p>
-    <p>
-      <font size="small">
-	<leadin>Definition 5 (Normalization of Constraint Sets)</leadin>
-	<em>
-	  A constraint set 
-	  <btypes:TYPE>
-	    <canonical>
-	      <aCtset/>
-	    </canonical>
-	  </btypes:TYPE> is said to be the normalized form of 
-	  <btypes:TYPE>
-	    <aCtset/>
-	  </btypes:TYPE>
-	  (that is, 
-	  <btypes:TYPE>
-	    <eq>
-	      <normalize>
-		<aCtset/>
-	      </normalize>
-	      <canonical>
-		<aCtset/>
-	      </canonical>
-	    </eq>
-	  </btypes:TYPE>)
-	  if it is written as a set of atomic constraints by using the
-	  copy coercion rules defined in Figure&nbsp;<xref
-	    ref="decl_all_rules"/>, and all transitively applicable
-	  relationships explicitly added. Note that this conversion
-	  is total. 
-	</em>
-      </font>
-    </p>
-    <p>
-      <font size="small">
-	<leadin>Definition 6 (Normalization of Contexts)</leadin>
-	<em>
-	  The binding context 
-	  <btypes:TYPE>
-	    <canonical>
-	      <gamma/>
-	    </canonical>
-	  </btypes:TYPE> is said to be the normalized form of 
-	  <btypes:TYPE>
-	    <gamma/>
-	  </btypes:TYPE> 
-	  (that is, 
-	  <btypes:TYPE>
-	    <eq>              
-	      <normalize>
-		<gamma/>
-	      </normalize>
-	      <canonical>
-		<gamma/>
-	      </canonical>
-	    </eq>
-	  </btypes:TYPE>) if          
-	  <btypes:TYPE>
-	    <Forall>
-	      <in>
-		<tqExpr>
-		  <id/>
-		  <type/>
-		</tqExpr>
-		<gamma/>
-	      </in>
-	    </Forall>
-	    <text content=", "/>
-	    <in>
-	      <tqExpr>
-		<id/>
-		<canonical>
-		  <type/>
-		</canonical>
-	      </tqExpr>
-	      <canonical>
-		<gamma/>
-	      </canonical>
-	    </in>
-	    <text content=" and "/>
-	    <eq>
-	      <normalize>
-		<type/>
-	      </normalize>
-	      <canonical>
-		<type/>
-	      </canonical>
-	    </eq>
-	  </btypes:TYPE>.
-	  Similarly, 
-	  <btypes:TYPE>
-	    <eq>              
-	      <normalize>
-		<store/>
-	      </normalize>
-	      <canonical>
-		<store/>
-	      </canonical>
-	    </eq>
-	  </btypes:TYPE>) if          
-	  <btypes:TYPE>
-	    <Forall>
-	      <in>
-		<tqExpr>
-		  <hLoc/>
-		  <type/>
-		</tqExpr>
-		<store/>
-	      </in>
-	    </Forall>
-	    <text content=", "/>
-	    <in>
-	      <tqExpr>
-		<hLoc/>
-		<canonical>
-		  <type/>
-		</canonical>
-	      </tqExpr>
-	      <canonical>
-		<store/>
-	      </canonical>
-	    </in>
-	    <text content=" and "/>
-	    <eq>
-	      <normalize>
-		<type/>
-	      </normalize>
-	      <canonical>
-		<type/>
-	      </canonical>
-	    </eq>
-	    <text content="; and "/>
-	    <Forall>
-	      <in>
-		<tqExpr>
-		  <sLoc/>
-		  <type/>
-		</tqExpr>
-		<store/>
-	      </in>
-	    </Forall>
-	    <text content=", "/>
-	    <in>
-	      <tqExpr>
-		<sLoc/>
-		<canonical>
-		  <type/>
-		</canonical>
-	      </tqExpr>
-	      <canonical>
-		<store/>
-	      </canonical>
-	    </in>
-	    <text content=", and "/>
-	    <eq>
-	      <normalize>
-		<type/>
-	      </normalize>
-	      <canonical>
-		<type/>
-	      </canonical>
-	    </eq>
-	  </btypes:TYPE>.
-	</em>
-      </font>
-    </p>
-    <p>
-      <font size="small">
-	<leadin>Definition 7 (Consistent and Acyclic
-	  Constraints)</leadin>
-	<em>
-	  We write
-	  <btypes:TYPE>
-	    <models name="cst">   
-	      <assume/>
-	      <aCtset/>
-	    </models>                 
-	  </btypes:TYPE> if 
-	  <btypes:TYPE>
-	    <aCtset/>
-	  </btypes:TYPE> does not (transitively) include any
-	  contradictions like 
-	  <btypes:TYPE>
-	    <Tsub>
-	      <bool/>
-	      <unit/>
-	    </Tsub>
-	  </btypes:TYPE>. 
-	  We write
-	  <btypes:TYPE>
-	    <models name="cst">   
-	      <assume/>
-	      <type/>
-	    </models>  
-	    <text content=" if "/>
-	    <eq>
-	      <normalize>
-		<type/>
-	      </normalize>
-	      <ctype>
-		<canonical>
-		  <type/>
-		</canonical>
-		<aCtset/>
-	      </ctype>
-	    </eq>
-	    <text content=" and "/>
-	    <models name="cst">   
-	      <assume/>
-	      <aCtset/>
-	    </models>  	    
-	  </btypes:TYPE>.
-	  The 
-	  <btypes:TYPE>
-	    <assume/>
-	    <models name="acl"/>   
-	  </btypes:TYPE>
-	  judgment asserts that a set of constraints
-	  are acyclic. We write 
-	  <btypes:TYPE>
-	    <models name="ca">   
-	      <assume/>
-	      <aCtset/>
-	    </models>  
-	    <text content=" iff "/>
-	    <models name="cst">   
-	      <assume/>
-	      <aCtset/>
-	    </models>  	    
-	    <text content=" and "/>
-	    <models name="acl">   
-	      <assume/>
-	      <aCtset/>
-	    </models>  	    	    
-	  </btypes:TYPE>.
-	</em>
-      </font>
-    </p>
-    <p>
-      <font size="small">
-      <leadin>Lemma 3 (Correctness of Unification)</leadin>
-	<em>
-	  <btypes:TYPE>
-	    <text content="If "/>
-	    <eq>
-	      <normalize>
-		<type num="1"/>
-	      </normalize>
-	      <ctype>
-		<canonical>
-		  <type num="1"/>
-		</canonical>
-		<aCtset num="1"/>
-	      </ctype>
-	    </eq>            
-	    <text content=", "/>
-	    <eq>
-	      <normalize>
-		<type num="2"/>
-	      </normalize>
-	      <ctype>
-		<canonical>
-		  <type num="2"/>
-		</canonical>		
-		<aCtset num="2"/>
-	      </ctype>
-	    </eq>
-	    <text content=", "/>
-	    <models name="ca">   
-	      <assume/>
-	      <aCtset num="1"/>
-	    </models>                 
-	    <text content=", "/>
-	    <models name="ca">   
-	      <assume/>
-	      <aCtset num="2"/>
-	    </models>                 
-	    <text content=", "/>
-	    <UNIFY>
-	      <type num="1"/>
-	      <type num="2"/>              
-	      <aSubMap/>
-	    </UNIFY>
-	    <text content=", and "/>
-	    <eq>
-	      <aCtset/>
-	      <canonical>
-		<unin>
-		  <set>
-		    <eq>
-		      <canonical>
-			<type num="1"/>
-		      </canonical>
-		      <canonical>
-			<type num="2"/>
-		      </canonical>
-		    </eq>
-		  </set> 
-		  <aCtset num="1"/>
-		  <aCtset num="2"/>
-		</unin>
-	      </canonical>
-	    </eq>	      
-	    <text content=", then "/>
-	    <models name="ca">   
-	      <assume/>
-	      <aCtset/>
-	    </models>                 
-	    <text content="."/>
-	  </btypes:TYPE>
-	</em>
-      </font>
-    </p>
-    <p>
-      <font size="small">
-	<leadin>Lemma 4 (Correctness of the Constraint Solver)</leadin>
-	<em>
-	  If
-	  <btypes:TYPE>
-	    <Sjudge name="s">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <corUp>
-		<type/>
-		<type dash="'"/>
-	      </corUp>
-	    </Sjudge>
-	    <text content=" then "/>
-	    <eq>
-	      <normalize>
-		<Subst>
-		  <aSubMap/>
-		  <type/>
-		</Subst>
-	      </normalize>
-	      <canonical>
-		<type dash="'"/>
-	      </canonical>
-	    </eq>
-	  </btypes:TYPE>.
-	</em>
-      </font>
-    </p>
-    <p>
-      <font size="small">
-	<leadin>Lemma 5 (Totality of the Solver)</leadin>
-	<em>
-	  If          
-	  <btypes:TYPE>
-	    <models name="cst">
-	      <assume/>
-	      <type/>
-	    </models>
-	    <text content=", then "/>
-	    <Exists>
-	      <aSubMap/>
-	    </Exists>
-	    <text content=" such that "/>            
-	    <Sjudge name="s">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <corUp>
-		<type/>
-		<type dash="'"/>
-	      </corUp>	     
-	    </Sjudge>
-	  </btypes:TYPE>.
-	</em>
-      </font>
-    </p>
-    <p>
-      <font size="small">
-	<leadin>Lemma 6 (Decidability of Unification and Solver)</leadin>
-	<em>
-	  If 
-	  <btypes:TYPE>
-	    <models name="acl">
-	      <assume/>
-	      <type/>
-	    </models>
-	    <text content=" and "/>
-	    <models name="acl">
-	      <assume/>
-	      <type dash="'"/>
-	    </models>
-	  </btypes:TYPE>, then,        
-	  a normalizing derivation of 
-	  <btypes:TYPE>
-	    <UNIFY>
-	      <type/>
-	      <type dash="'"/>
-	      <aSubMap/>
-	    </UNIFY>
-	  </btypes:TYPE>
-	  where no two uses of U-Commut occur consecutively, and, 
-	  the derivation of
-	  <btypes:TYPE>
-	    <Sjudge name="s">
-	      <assume>
-		<aSubMap/>
-	      </assume>
-	      <corUp>
-		<type/>
-		<type dash="''"/>
-	      </corUp>
-	    </Sjudge>
-	    <text content=" are decidable."/>
-	  </btypes:TYPE>
-	</em>
-      </font>
-    </p>
-    <p>
-      <font size="small">
-	<leadin>Theorem 2 (Soundness of Inference)</leadin>
-	<em>
-	  <btypes:TYPE>
-	    <text content="If "/>
-	    <TIjudge>
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr/>
-		  <type/>
-		</tqExpr>
-	      </conclude>
-	      <propagate>
-		<aSubMap num="1"/>
-	      </propagate>
-	    </TIjudge>
-	    <text content=" and "/>
-	    <Sjudge name="s">
-	      <assume>
-		<aSubMap num="2"/>
-	      </assume>
-	      <corUp>
-		<type/>
-		<type dash="'"/>
-	      </corUp>
-	    </Sjudge>
-	    <text content=" then "/>          
-	    <exists>
-	      <aSubMap dash="'"/>
-	    </exists>
-	    <text content=" such that "/>
-	    <eq>
-	      <aSubMap/>
-	      <compose>		
-		<aSubMap dash="'"/>
-		<aSubMap num="1"/>
-		<aSubMap num="2"/>
-	      </compose>
-	    </eq>
-	    <text content=" and "/>
-	    <Sjudge>
-	      <assume>
-		<canonical>
-		  <Subst>
-		    <aSubMap/>
-		    <gamma/>
-		  </Subst>
-		</canonical>	
-		<canonical>
-		  <Subst>
-		    <aSubMap/>
-		    <store/>
-		  </Subst>
-		</canonical>
-	      </assume>
-	      <tqExpr>
-		<aExpr/>
-		<canonical>
-		  <type dash="'"/>
-		</canonical>
-	      </tqExpr>
-	    </Sjudge>	    
-	  </btypes:TYPE>.
-	</em>
-	<br/>
-	<em>Proof:</em>
-	By induction on the derivation of 
+	  </Sjudge>
+	</btypes:TYPE>.
+      </p>
+    </theorem>
+    <theorem>
+      <title>Type Chekability</title>
+      <p>
+	If 
 	<btypes:TYPE>
-	  <TIjudge>
+	  <TEjudge name="i">
 	    <assume>
 	      <gamma/>
 	      <store/>
@@ -3834,13 +3931,109 @@
 		<type/>
 	      </tqExpr>
 	    </conclude>
-	    <propagate>
-	      <aSubMap num="1"/>
-	    </propagate>
-	  </TIjudge>
-	</btypes:TYPE>
-  </font>
-  </p> -->
+	    <constrain>
+	      <aCtset/>
+	    </constrain>
+	  </TEjudge>
+	</btypes:TYPE> and
+	<btypes:TYPE>
+	  <eq>
+	    <unf>
+	      <aCtset/>
+	    </unf>
+	    <Pair>
+	      <dCtset num="u"/>
+	      <aSubMap num="u"/>
+	    </Pair>
+	  </eq>
+	</btypes:TYPE>, then,
+	<btypes:TYPE>
+	  <Exists/>
+	  <aSubMap num="s"/>
+	</btypes:TYPE> such that
+	<btypes:TYPE>
+	  <Sjudge name="sat">
+	    <aSubMap num="s"/>
+	    <leadsto>
+	      <dCtset num="u"/>
+	      <dCtset/>
+	    </leadsto>
+	  </Sjudge>
+	</btypes:TYPE>, 
+	<btypes:TYPE>
+	  <Subst>
+	    <scomp>
+	      <aSubMap num="u"/>
+	      <aSubMap num="s"/>
+	    </scomp>
+	    <aExpr/>
+	  </Subst>
+	</btypes:TYPE> is canonical, and
+	<btypes:TYPE>
+	  <Sjudge name="*">
+	    <assume>
+	      <scomp>
+		<aSubMap num="u"/>
+		<aSubMap num="s"/>
+	      </scomp>
+	      <dCtset/>
+	      <gamma/>
+	      <store/>
+	    </assume>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </Sjudge>
+	</btypes:TYPE>.
+      </p>
+    </theorem>
+    <theorem>
+      <title>Completeness of Type Inference</title>
+      <p>
+	If 
+	<btypes:TYPE>
+	  <Sjudge name="*">
+	    <assume>
+	      <aSubMap/>
+	      <dCtset/>
+	      <gamma/>
+	      <store/>
+	    </assume>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	  </Sjudge>
+	</btypes:TYPE>, then
+	<btypes:TYPE>
+	  <Exists/>
+	  <supeq>
+	    <aSubMap dash="'"/>
+	    <aSubMap/>
+	  </supeq>
+	</btypes:TYPE> 
+	such that 
+	<btypes:TYPE>
+	  <TEjudge name="i">
+	    <assume>
+	      <aSubMap dash="'"/>
+	      <gamma/>
+	      <store/>
+	    </assume>
+	    <conclude>
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>
+	    </conclude>
+	    <constrain>
+	      <dCtset/>
+	    </constrain>
+	  </TEjudge>
+	</btypes:TYPE>.
+      </p>
+    </theorem>
   </sect1>
   <sect1 id="related">
     <title>Related Work</title>
@@ -4453,7 +4646,9 @@
  -->
 <!--  LocalWords:  Exprs TypeScheme Env Rval Oth cst Prog mutinfer de facto SHA
  -->
-<!--  LocalWords:  scriptsize FDIS Keromytis Gunder SwitchWare inequations
+<!--  LocalWords:  scriptsize FDIS Keromytis Gunder SwitchWare inequations NEB
  -->
-<!--  LocalWords:  Arbaugh Kakkar
+<!--  LocalWords:  Arbaugh Kakkar polymorphism TIL HM Refl contravariance co pp
+ -->
+<!--  LocalWords:  decidably Chekability Trans Int Std ISBN Comp
  -->

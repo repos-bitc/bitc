@@ -941,7 +941,7 @@
       <btypes:TYPE><minzTOp/></btypes:TYPE> increase or
       decrease the topmost level mutability of a type. 
     </p>
-    <btypes:TYPE>
+      <btypes:TYPE>
       <!-- Full maximization -->
       <VEqns>
 	<equation>
