@@ -7,8 +7,8 @@
       xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
       <VEqns>
 	<!-- Empty -->
-	<equation>
-	  <lhs>
+	<equation name="U-Empty">
+	<lhs>
 	    <unf>
 	      <Empty/>
 	    </unf>
@@ -21,7 +21,7 @@
 	  </rhs>
 	</equation>
 	<!-- t = t -->
-	<equation>
+	<equation name="U-Eql">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -42,7 +42,7 @@
 	  </rhs>
 	</equation>
 	<!-- Commutativity: t1 = t2 -->
-	<equation>
+	<equation name="U-Refl">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -71,7 +71,7 @@
 	  </rhs>
 	</equation>
 	<!-- a = t | a notin t -->
-	<equation sep="4pt">
+	<equation name="U-Var">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -90,36 +90,48 @@
 	    </notin>
 	  </lhs>
 	  <rhs>
-	    <Pair>
-	      <dCtset/>
-	      <scomp>
-		<aSubMap num="a"/>
-		<aSubMap num="u"/>
-	      </scomp>	    
-	    </Pair>	 
-	    <eq>
-	      <aSubMap num="a"/>
-	      <SubMap>
-		<tvar name="alpha"/>
-		<type/>
-	      </SubMap>
-	    </eq>
-	    <eq>
-	      <unf>
-		<Subst>
-		  <aSubMap num="a"/>
-		  <aCtset/>
-		</Subst>
-	      </unf>
+	    <grouping>
 	      <Pair>
 		<dCtset/>
-		<aSubMap num="u"/>
-	      </Pair>
-	    </eq>
+		<scomp>
+		  <aSubMap num="a"/>
+		  <aSubMap num="u"/>
+		</scomp>	    
+	      </Pair>	 
+	      <text content=" where "/>
+	      <eq>
+		<aSubMap num="a"/>
+		<SubMap>
+		  <tvar name="alpha"/>
+		  <type/>
+		</SubMap>
+	      </eq>
+	      <text content=" and "/>
+	    </grouping>
 	  </rhs>
 	</equation>
+	<eqn-cnt name="" sep="4pt">
+	  <lhs/>
+	  <rhs>
+	    <grouping>
+	      <!-- <space n="2"/> -->
+	      <eq>
+		<unf>
+		  <Subst>
+		    <aSubMap num="a"/>
+		    <aCtset/>
+		  </Subst>
+		</unf>
+		<Pair>
+		  <dCtset/>
+		  <aSubMap num="u"/>
+		</Pair>
+	      </eq>
+	    </grouping>
+	  </rhs>
+	</eqn-cnt>
 	<!-- t1->t2 = t1' -> t2' -->
-	<equation>
+	<equation name="U-Fn">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -158,7 +170,7 @@
 	  </rhs>
 	</equation>	
 	<!-- ^t1 = ^t2 -->
-	<equation>
+	<equation name="U-Ref">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -191,7 +203,7 @@
 	  </rhs>
 	</equation>	
 	<!-- Mp1 = Mp2 -->
-	<equation>
+	<equation name="U-Mut">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -224,7 +236,7 @@
 	  </rhs>
 	</equation>	
 	<!-- t1xt2 <= t1'xt2' -->
-	<equation sep="4pt">
+	<equation name="U-Pair" sep="4pt">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -263,7 +275,7 @@
 	  </rhs>
 	</equation>	
 	<!-- 'a!p1 = 'b!p2 -->
-	<equation>
+	<equation name="U-Mt1">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -306,7 +318,7 @@
 	  </rhs>
 	</equation>	  
 	<!-- a!p1 = p2 -->
-	<equation>
+	<equation name="U-Mt2">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -346,7 +358,7 @@
 	  </rhs>
 	</equation>
 	<!-- s1|p1 = s2|p2 -->
-	<equation>
+	<equation name="U-Mf1">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -389,7 +401,7 @@
 	  </rhs>
 	</equation>
 	<!-- s|p = P -->
-	<equation sep="4pt">
+	<equation name="U-Mf2" sep="4pt">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -433,7 +445,7 @@
 	These constraints are not generated independently.
 	They only arise as a consequence of adding them from
 	substitutions in the I-Let rule -->
-	<equation>
+	<equation name="U-K">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -448,41 +460,48 @@
 	    </unf>
 	  </lhs>
 	  <rhs>
-	    <Pair>
-	      <dCtset/>
-	      <scomp>
-		<aSubMap num="k"/>
-		<aSubMap num="u"/>
-	      </scomp>	    
-	    </Pair>	  	    
-	    <eq>
-	      <aSubMap num="k"/>
-	      <SubMap>
-		<lKind k="var"/>
-		<lKind/>
-	      </SubMap>
-	    </eq>
-	  </rhs>
-	</equation>
-	<eqn-cnt>
-	  <lhs/>
-	  <rhs>
-	    <eq>
-	      <unf>
-		<Subst>
-		  <aSubMap num="k"/>
-		  <aCtset/>
-		</Subst>
-	      </unf>
+	    <grouping>
 	      <Pair>
 		<dCtset/>
-		<aSubMap num="u"/>
-	      </Pair>
-	    </eq>
+		<scomp>
+		  <aSubMap num="k"/>
+		  <aSubMap num="u"/>
+		</scomp>	    
+	      </Pair>	
+ 	      <text content=" where "/>
+	      <eq>
+		<aSubMap num="k"/>
+		<SubMap>
+		  <lKind k="var"/>
+		  <lKind/>
+		</SubMap>
+	      </eq>
+	      <text content=" and "/>
+	    </grouping>
+	  </rhs>
+	</equation>
+	<eqn-cnt name="">
+	  <lhs/>
+	  <rhs>
+	    <grouping>
+	      <!-- <space n="2"/> -->
+	      <eq>
+		<unf>
+		  <Subst>
+		    <aSubMap num="k"/>
+		    <aCtset/>
+		  </Subst>
+		</unf>
+		<Pair>
+		  <dCtset/>
+		  <aSubMap num="u"/>
+		</Pair>
+	      </eq>
+	    </grouping>
 	  </rhs>
 	</eqn-cnt>
 	<!-- *mx(t1), *mx(t2) --> 
-	<equation>
+	<equation name="U-Mct1">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -503,48 +522,59 @@
 	    </unf>
 	  </lhs>
 	  <rhs>
-	    <Pair>
-	      <unin>
-		<dCtset/>
-		<Subst>
-		  <aSubMap/>
-		  <set>
-		    <pcst>
-		      <id/>
-		      <lKind k="mono"/>
-		      <type num="1"/>
-		    </pcst>
-		    <pcst>
-		      <id/>
-		      <lKind k="mono"/>
-		      <type num="2"/>
-		    </pcst>
-		  </set>
-		</Subst>	
-	      </unin>	
-	      <aSubMap/>
-	    </Pair>
-	    <eq>
-	      <unf>
-		<unin>
-		  <aCtset/>
-		  <set>
-		    <eq>
-		      <type num="1"/>
-		      <type num="2"/>
-		    </eq>
-		  </set>
-		</unin>
-	      </unf>
+	    <grouping>
 	      <Pair>
-		<dCtset/>
+		<unin>
+		  <dCtset/>
+		  <Subst>
+		    <aSubMap/>
+		    <set>
+		      <pcst>
+			<id/>
+			<lKind k="mono"/>
+			<type num="1"/>
+		      </pcst>
+		      <pcst>
+			<id/>
+			<lKind k="mono"/>
+			<type num="2"/>
+		      </pcst>
+		    </set>
+		  </Subst>	
+		</unin>	
 		<aSubMap/>
 	      </Pair>
-	    </eq>
+	      <text content=" where "/>
+	    </grouping>
 	  </rhs>
 	</equation>
+	<eqn-cnt name="">
+	  <lhs/>
+	  <rhs>
+	    <grouping>
+	      <!-- <space n="2"/> -->
+	      <eq>
+		<unf>
+		  <unin>
+		    <aCtset/>
+		    <set>
+		      <eq>
+			<type num="1"/>
+			<type num="2"/>
+		      </eq>
+		    </set>
+		  </unin>
+		</unf>
+		<Pair>
+		  <dCtset/>
+		  <aSubMap/>
+		</Pair>
+	      </eq>
+	    </grouping>
+	  </rhs>
+	</eqn-cnt>
 	<!-- *Px(t) [](t)  --> 
-	<equation>
+	<equation name="U-Pct1">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -563,45 +593,56 @@
 	    </concrete>
 	  </lhs>
 	  <rhs>
-	    <Pair>
-	      <unin>
-		<dCtset/>
-		<Subst>
-		  <aSubMap/>
-		  <set>
-		    <pcst>
-		      <id/>
-		      <lKind k="poly"/>
-		      <type/>
-		    </pcst>
-		  </set>
-		</Subst>	
-	      </unin>	
-	      <aSubMap/>
-	    </Pair>
-	    <eq>
-	      <unf>
-		<unin>
-		  <aCtset/>
-		  <set>
-		    <eq>
-		      <type/>
-		      <minzD>
-			<type/>
-		      </minzD>
-		    </eq>
-		  </set>
-		</unin>
-	      </unf>
+	    <grouping>
 	      <Pair>
-		<dCtset/>
+		<unin>
+		  <dCtset/>
+		  <Subst>
+		    <aSubMap/>
+		    <set>
+		      <pcst>
+			<id/>
+			<lKind k="poly"/>
+			<type/>
+		      </pcst>
+		    </set>
+		  </Subst>	
+		</unin>	
 		<aSubMap/>
 	      </Pair>
-	    </eq>
+	      <text content=" where "/>
+	    </grouping>
 	  </rhs>
 	</equation>
+	<eqn-cnt name="">
+	  <lhs/>
+	  <rhs>
+	    <grouping>
+	      <apace n="2"/>
+	      <eq>
+		<unf>
+		  <unin>
+		    <aCtset/>
+		    <set>
+		      <eq>
+			<type/>
+			<minzD>
+			  <type/>
+			</minzD>
+		      </eq>
+		    </set>
+		  </unin>
+		</unf>
+		<Pair>
+		  <dCtset/>
+		  <aSubMap/>
+		</Pair>
+	      </eq>
+	    </grouping>
+	  </rhs>
+	</eqn-cnt>
 	<!-- *kx(Mt) --> 
-	<equation>
+	<equation name="U-Mct2">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -620,123 +661,155 @@
 	    </pred>
 	  </lhs>
 	  <rhs>
-	    <Pair>
-	      <dCtset/>
-	      <scomp>
-		<aSubMap num="k"/>
-		<aSubMap num="u"/>
-	      </scomp>
-	    </Pair>
-	    <eq>
-	      <aSubMap num="k"/>
-	      <SubMap>
-		<lKind k="var"/>
-		<lKind k="mono"/>
-	      </SubMap>
-	    </eq>
-	    <eq>
-	      <unf>
-		<Subst>
-		  <aSubMap num="k"/>
-		  <unin>
-		    <set>
-		      <pcst>
-			<id/>
-			<lKind k="var"/>
-			<type/>
-		      </pcst>
-		    </set>
-		    <aCtset/>
-		  </unin>
-		</Subst>
-	      </unf>
+	    <grouping>
 	      <Pair>
 		<dCtset/>
-		<aSubMap num="u"/>
+		<scomp>
+		  <aSubMap num="k"/>
+		  <aSubMap num="u"/>
+		</scomp>
 	      </Pair>
-	    </eq>
+	      <text content=" where "/>
+	      <eq>
+		<aSubMap num="k"/>
+		<SubMap>
+		  <lKind k="var"/>
+		  <lKind k="mono"/>
+		</SubMap>
+	      </eq>
+	      <text content=" and "/>
+	    </grouping>
 	  </rhs>
 	</equation>
+	<eqn-cnt name="">
+	  <lhs/>
+	  <rhs>
+	    <grouping>
+	      <!-- <space n="2"/> -->
+	      <eq>
+		<unf>
+		  <Subst>
+		    <aSubMap num="k"/>
+		    <unin>
+		      <set>
+			<pcst>
+			  <id/>
+			  <lKind k="var"/>
+			  <type/>
+			</pcst>
+		      </set>
+		      <aCtset/>
+		    </unin>
+		  </Subst>
+		</unf>
+		<Pair>
+		  <dCtset/>
+		  <aSubMap num="u"/>
+		</Pair>
+	      </eq>
+	    </grouping>
+	  </rhs>
+	</eqn-cnt>
 	<!-- *kx(t1), *kx(t2)  t1 !~ t2 -->
-	<equation sep="4pt">
+	<equation name="U-Pct2">
 	  <lhs>
-	    <unf>
-	      <unin excl="yes">
-		<set>
-		  <pcst>
-		    <id/>
-		    <lKind k="var"/>
-		    <type num="1"/>
-		  </pcst>
-		  <pcst>
-		    <id/>
-		    <lKind k="var"/>
-		    <type num="2"/>
-		  </pcst>
-		</set>
-		<aCtset/>
-	      </unin>
-	    </unf>
-	    <eq>
+	    <grouping>
 	      <unf>
-		<unin>
+		<unin excl="yes">
 		  <set>
-		    <eq>		    
+		    <pcst>
+		      <id/>
+		      <lKind k="var"/>
 		      <type num="1"/>
+		    </pcst>
+		    <pcst>
+		      <id/>
+		      <lKind k="var"/>
 		      <type num="2"/>
-		    </eq>
+		    </pcst>
 		  </set>
 		  <aCtset/>
 		</unin>
 	      </unf>
-	      <error/>
-	    </eq>
+	      <text content=" when "/>
+	    </grouping>
 	  </lhs>
 	  <rhs>
-	    <Pair>
-	      <dCtset/>
-	      <scomp>
-		<aSubMap num="k"/>
-		<aSubMap num="u"/>
-	      </scomp>
-	    </Pair>
-	    <eq>
-	      <aSubMap num="k"/>
-	      <SubMap>
-		<lKind k="var"/>
-		<lKind k="poly"/>
-	      </SubMap>
-	    </eq>
-	    <eq>
-	      <unf>
-		<Subst>
+	    <grouping>
+	      <Pair>
+		<dCtset/>
+		<scomp>
 		  <aSubMap num="k"/>
+		  <aSubMap num="u"/>
+		</scomp>
+	      </Pair>
+	      <text content=" where "/>
+	      <eq>
+		<aSubMap num="k"/>
+		<SubMap>
+		  <lKind k="var"/>
+		  <lKind k="poly"/>
+		</SubMap>
+	      </eq>
+	    </grouping>
+	    <text content=" and "/>
+	  </rhs>
+	</equation>
+	<eqn-cnt name="" sep="4pt">
+	  <lhs>
+	    <grouping>
+	      <!-- <space n="2"/> -->
+	      <eq>
+		<unf>
 		  <unin>
 		    <set>
-		      <pcst>
-			<id/>
-			<lKind k="var"/>
+		      <eq>		    
 			<type num="1"/>
-		      </pcst>
-		      <pcst>
-			<id/>
-			<lKind k="var"/>
 			<type num="2"/>
-		      </pcst>
+		      </eq>
 		    </set>
 		    <aCtset/>
 		  </unin>
-		</Subst>
-	      </unf>
-	      <Pair>
-		<dCtset/>
-		<aSubMap num="u"/>
-	      </Pair>
-	    </eq>
+		</unf>
+		<error/>
+	      </eq>
+	      <space n="5"/>
+	    </grouping>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <!-- <space n="2"/> -->
+	      <eq>
+		<unf>
+		  <Subst>
+		    <aSubMap num="k"/>
+		    <unin>
+		      <set>
+			<pcst>
+			  <id/>
+			  <lKind k="var"/>
+			  <type num="1"/>
+			</pcst>
+			<pcst>
+			  <id/>
+			  <lKind k="var"/>
+			  <type num="2"/>
+			</pcst>
+		      </set>
+		      <aCtset/>
+		    </unin>
+		  </Subst>
+		</unf>
+		<Pair>
+		  <dCtset/>
+		  <aSubMap num="u"/>
+		</Pair>
+	      </eq>
+	    </grouping>
 	  </rhs>
-	</equation>	
+	</eqn-cnt>	
 	<!-- Error (unhandled, un-unifiable) -->
-	<equation>
+	<equation name="U-Error">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">

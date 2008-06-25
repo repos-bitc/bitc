@@ -64,38 +64,6 @@
 	    </eval>
 	  </opConc>
 	</opRule>
-	<opRule name="E-@">
-	  <opPre>
-	    <notin>
-	      <sLoc/>
-	      <dom>
-		<stack/>
-	      </dom>
-	    </notin>
-	  </opPre>
-	  <opConc>
-	    <eval>
-	      <opState>
-		<stack/>
-		<heap/>
-		<copy>
-		  <aVal/>
-		</copy>
-	      </opState>
-	      <opState>
-		<extend>
-		  <stack/>
-		  <mapping>
-		    <sLoc/>
-		    <aVal/>
-		  </mapping>  
-		</extend>            
-		<heap/>
-		<sLoc/>
-	      </opState>
-	    </eval>
-	  </opConc>
-	</opRule>
 	<opRule name="E-App">
 	  <opPre>
 	    <notin>
@@ -127,13 +95,11 @@
 		  </mapping>  
 		</extend>            
 		<heap/>
-		<copy>
-		  <subst>
-		    <aExpr/>
-		    <id/>
-		    <sLoc/>
-		  </subst>
-		</copy>
+		<subst>
+		  <aExpr/>
+		  <id/>
+		  <sLoc/>
+		</subst>
 	      </opState>
 	    </eval>
 	  </opConc>
@@ -163,9 +129,7 @@
 	      <opState>
 		<stack/>
 		<heap/>
-		<copy>
-		  <aExpr num="i"/>
-		</copy>
+		<aExpr num="i"/>
 	      </opState>
 	    </eval>
 	  </opConc>

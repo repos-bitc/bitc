@@ -654,68 +654,6 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule titlesz="&TSZ;" name="I-Pair">
-	  <tyPre>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr num="1"/>
-		  <type num="1"/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<aCtset num="1"/>
-	      </constrain>
-	    </TEjudge>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <aExpr num="2"/>
-		  <type num="2"/>
-		</tqExpr>
-	      </conclude>
-	      <constrain>
-		<aCtset num="2"/>
-	      </constrain>
-	    </TEjudge>
-	  </tyPre>
-	  <tyConc>
-	    <TEjudge name="i">
-	      <assume>
-		<gamma/>
-		<store/>
-	      </assume>
-	      <conclude>
-		<tqExpr>
-		  <Pair>
-		    <aExpr num="1"/>
-		    <aExpr num="2"/>
-		  </Pair>  
-		  <pair>
-		    <type num="1"/>
-		    <type num="2"/>
-		  </pair>
-		</tqExpr>
-	      </conclude>                  
-	      <constrain>
-		<unin>
-		  <aCtset num="1"/>
-		  <aCtset num="2"/>
-		</unin>
-	      </constrain>
-	    </TEjudge>
-	  </tyConc>
-	</tyRule>
-      </Hrules>
-      <Hrules  rowsep="4pt" colsep="2">
 	<tyRule titlesz="&TSZ;" name="I-Sel">
 	  <tyPre>
 	    <TEjudge name="i">
@@ -733,16 +671,6 @@
 		<aCtset/>
 	      </constrain>
 	    </TEjudge>
-	    <models name="new">
-	      <assume/>
-	      <grouping>
-		<tvar name="alpha"/>
-		<tvar name="beta"/>
-		<tvar name="gamma"/>
-		<tvar name="delta"/>	      
-		<tvar name="epsiv"/>	      
-	      </grouping>
-	    </models>
 	    <eq>
 	      <type num="1"/>
 	      <mbFull>
@@ -757,6 +685,16 @@
 		<tvar name="delta"/>
 	      </mbFull>
 	    </eq>
+	    <models name="new">
+	      <assume/>
+	      <grouping>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+		<tvar name="gamma"/>
+		<tvar name="delta"/>	      
+		<tvar name="epsiv"/>	      
+	      </grouping>
+	    </models>
 	  </tyPre>
 	  <tyConc>
 	    <TEjudge name="i">
@@ -792,7 +730,9 @@
 	    </TEjudge>
 	  </tyConc>
 	</tyRule>
-	<tyRule titlesz="&TSZ;" name="I-Alloc">
+      </Hrules>
+      <Hrules  rowsep="4pt" colsep="2">
+	<tyRule name="I-Pair">
 	  <tyPre>
 	    <TEjudge name="i">
 	      <assume>
@@ -801,20 +741,38 @@
 	      </assume>
 	      <conclude>
 		<tqExpr>
-		  <aExpr/>
-		  <type/>
+		  <aExpr num="1"/>
+		  <type num="1"/>
 		</tqExpr>
 	      </conclude>
 	      <constrain>
-		<aCtset/>
+		<aCtset num="1"/>
+	      </constrain>
+	    </TEjudge>
+	    <TEjudge name="i">
+	      <assume>
+		<gamma/>
+		<store/>
+	      </assume>
+	      <conclude>
+		<tqExpr>
+		  <aExpr num="2"/>
+		  <type num="2"/>
+		</tqExpr>
+	      </conclude>
+	      <constrain>
+		<aCtset num="2"/>
 	      </constrain>
 	    </TEjudge>
 	    <models name="new">
 	      <assume/>
 	      <grouping>
 		<tvar name="alpha"/>
+		<tvar name="alpha" dash="'"/>
 		<tvar name="beta"/>
+		<tvar name="beta" dash="'"/>
 		<tvar name="gamma"/>
+		<tvar name="delta"/>
 	      </grouping>
 	    </models>
 	  </tyPre>
@@ -825,25 +783,40 @@
 		<store/>
 	      </assume>
 	      <conclude>
-		<tqExpr>                      
-		  <copy>
-		    <aExpr/>
-		  </copy> 
-		  <mbFull>
-		    <tvar name="alpha"/>
- 		    <tvar name="beta"/>
-		  </mbFull>
+		<tqExpr>
+		  <Pair>
+		    <aExpr num="1"/>
+		    <aExpr num="2"/>
+		  </Pair>  
+		  <pair>
+		    <mbFull>
+		      <tvar name="alpha"/>
+		      <tvar name="gamma"/>
+		    </mbFull>
+		    <mbFull>
+		      <tvar name="beta"/>
+		      <tvar name="delta"/>
+		    </mbFull>
+		  </pair>
 		</tqExpr>
-	      </conclude>
-	      <constrain>                    
+	      </conclude>                  
+	      <constrain>
 		<unin>
-		  <aCtset/>
+		  <aCtset num="1"/>
+		  <aCtset num="2"/>
 		  <set>
 		    <eq>
-		      <type/>
+		      <type num="1"/>
 		      <mbFull>
+			<tvar name="alpha" dash="'"/>
 			<tvar name="gamma"/>
-			<tvar name="beta"/>
+		      </mbFull>
+		    </eq>
+		    <eq>
+		      <type num="2"/>
+		      <mbFull>
+			<tvar name="beta" dash="'"/>
+			<tvar name="delta"/>
 		      </mbFull>
 		    </eq>
 		  </set>

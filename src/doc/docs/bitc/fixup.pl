@@ -83,7 +83,9 @@ while(!eof(F)) {
 	#OK??
 	#Derivation and Modelling
 	$l =~ s/$deriveSp/\\mbox\{$1\\hskip -0.9ex\\raise0.25ex\\hbox\{$EM\{\_\{\_$MIT\{$2\}\}\}\}\}/g;
-	$l =~ s/$modelSp/\\mbox\{$1\\hskip -1.2ex$EM\{\_\{_$MIT\{$2\}\}\}\}/g;
+	$l =~ s/$modelSp/\\mbox\{$1\\hskip -1.4ex$EM\{\_\{_$MIT\{$2\}\}\}\}/g;
+	#$l =~ s/$modelSp/$EM\{\\stackrel\{\\models\}\{\_\{$2\}\}\}/g;
+	
 	#Transitive Right execution
 	#$l =~ s/$transR/$EM\{\\Rightarrow\}\\hskip -2.1ex\{\*\}/g;
 

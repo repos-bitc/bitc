@@ -55,9 +55,6 @@
 		  <unspecified/>
 		  <sLoc/>
 		  <hLoc/>
-		  <copy>
-		    <aExpr/>
-		  </copy>
 		</alternatives>
 	      </bnf>
 	      <bnf desc="Left Expr">
@@ -143,7 +140,7 @@
 		  </extend>
 		</alternatives>
 	      </bnf>
-	      <bnf desc="Store">
+	      <bnf desc="Store Typ">
 		<store/>
 		<alternatives>
 		  <Empty/>
@@ -174,7 +171,7 @@
 		  </compose>
 		</alternatives>
 	      </bnf>
-	      <bnf desc="Unf. Ct.">
+	      <bnf desc="Unf. Ctset">
 		<aCtset/>
 		<alternatives>
 		  <dCtset/>
@@ -247,9 +244,6 @@
 		    <redex/>
 		    <aExpr/>
 		  </let>
-		  <copy>
-		    <redex/>
-		  </copy>
 		</alternatives>
 	      </bnfc>
 	    </grammar>

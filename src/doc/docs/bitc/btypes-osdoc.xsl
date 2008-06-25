@@ -3109,9 +3109,18 @@
 	<xsl:element name="tr">
 	  <xsl:attribute name="valign">top</xsl:attribute>
 	  
+	  <xsl:if test="@name">
+	    <xsl:element name="td">
+	      <xsl:attribute name="align">left</xsl:attribute>
+	      <xsl:element name="b">
+		<xsl:value-of select="@name"/>
+	      </xsl:element>
+	    </xsl:element>
+	  </xsl:if>
+
 	  <!-- LHS -->
 	  <xsl:element name="td">
-	    <xsl:attribute name="align">right</xsl:attribute>
+ 	    <xsl:attribute name="align">right</xsl:attribute>
 	    <xsl:apply-templates select="*[1]" mode="formula"/>
 	  </xsl:element>
 	  
@@ -3140,6 +3149,16 @@
   <xsl:template match="eqn-cnt" mode="formula">
     <xsl:element name="tr">
       <xsl:attribute name="valign">top</xsl:attribute>
+
+      <xsl:if test="@name">
+	<xsl:element name="td">
+	  <xsl:attribute name="align">left</xsl:attribute>
+	  <xsl:element name="b">
+	    <xsl:value-of select="@name"/>
+	  </xsl:element>
+	</xsl:element>
+      </xsl:if>
+
       
       <!-- LHS -->
       <xsl:element name="td">
