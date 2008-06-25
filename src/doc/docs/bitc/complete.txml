@@ -2170,8 +2170,8 @@
       </btypes:TYPE>, we extend the calculus with stack and heap
       locations. Heap locations are first class values, but stack
       locations are not. Further, we annotate all 
-      <progident>let</progident> expressions with their appropriate
-      kinds &mdash;
+      <progident>let</progident> expressions with a kind
+      &mdash;
       <btypes:TYPE>
         <let kind="m"/>
       </btypes:TYPE>: monomorphic, possibly mutable
@@ -2180,7 +2180,14 @@
         <let kind="p"/>
       </btypes:TYPE>: polymorphic definitions.
       The two kinds of <progident>let</progident> expressions have
-      different execution semantics. This distinction is
+      different execution semantics. 
+      We write
+      <btypes:TYPE>
+        <let kind="var"/>
+      </btypes:TYPE> to range over the two kinds of
+      <progident>let</progident>
+      expressions.
+      This distinction is
       similar to Smith and Volpano's Polymorphic-C&nbsp;<cite
         ref="Smith1998polymorphicC"/>. However, unlike 
       Polymorphic-C, let-kind is <em>meta syntax</em>, and is not a
@@ -2397,54 +2404,112 @@
 	Let 
 	<btypes:TYPE>
 	  <pred name="mtv">
-	    <type/>
+	    <types/>
 	  </pred>
-	</btypes:TYPE> denote the set of all type variables 
+	</btypes:TYPE>, 
 	<btypes:TYPE>
-	  <tvars/>
-	</btypes:TYPE>
-	present in the type 
+	  <pred name="Mtv">
+	    <types/>
+	  </pred>
+	</btypes:TYPE>, and
 	<btypes:TYPE>
-	  <type/>
-	</btypes:TYPE> constrained in the form 
+	  <pred name="ntv">
+	    <types/>
+	  </pred>
+	</btypes:TYPE> be the set of all type variables in 
+	<btypes:TYPE>
+	  <set>
+	    <types/>
+	  </set>
+	</btypes:TYPE> constrained by
 	<btypes:TYPE>
 	  <mbTop>
 	    <tvar/>
 	    <ptype/>
 	  </mbTop>
-	</btypes:TYPE>,
-	<btypes:TYPE>
-	  <pred name="Mtv">
-	    <type/>
-	  </pred>
-	</btypes:TYPE> denote the set of all type variables 
-	in 
-	<btypes:TYPE>
-	  <type/>
-	</btypes:TYPE>	
-	constrained in the form 
+	</btypes:TYPE>, constrained by
 	<btypes:TYPE>
 	  <mbFull>
-	    <tvar/>
+	    <stype/>
 	    <ptype/>
 	  </mbFull>
-	</btypes:TYPE> or
+	</btypes:TYPE> and unconstrained
+	respectively. That is,
 	<btypes:TYPE>
-	  <mbFull>
-	    <mutable>
-	      <tvar/>
-	    </mutable>
-	    <ptype/>
-	  </mbFull>
-	</btypes:TYPE>, and
+	  <eq>
+	    <pred name="mtv">
+	      <types/>
+	    </pred>
+	    <set>
+	      <grouping>
+		<tvar/>
+		<ST/>
+		<in>
+		  <mbTop>
+		    <tvar/>
+		    <ptype/>
+		  </mbTop>
+		  <spset>
+		    <types/>
+		  </spset>
+		</in>
+	      </grouping>
+	    </set>
+	  </eq>
+	</btypes:TYPE> and
 	<btypes:TYPE>
-	  <pred name="ntv">
-	    <type/>
-	  </pred>
-	</btypes:TYPE> denote the set of all unconstrained type
-	variables  in 
+	  <eq>
+	    <pred name="Mtv">
+	      <types/>
+	    </pred>
+	    <set>
+	      <grouping>
+		<tvar/>
+		<ST/>
+		<in>
+		  <mbFull>
+		    <tvar/>
+		    <ptype/>
+		  </mbFull>
+		  <spset>
+		    <types/>
+		  </spset>
+		</in>
+		<text content=" or "/>
+		<in>
+		  <mbFull>
+		    <mutable>
+		      <tvar/>
+		    </mutable>
+		    <ptype/>
+		  </mbFull>
+		  <spset>
+		    <types/>
+		  </spset>
+		</in>
+	      </grouping>
+	    </set>
+	  </eq>
+	</btypes:TYPE>
+	and
 	<btypes:TYPE>
-	  <type/>
+	  <eq>
+	    <pred name="ntv">
+	      <types/>
+	    </pred>
+	    <set>
+	      <grouping>
+		<tvar/>
+		<ST/>
+		<in>
+		  <tvar/>
+		  <spset>
+		    <types/>
+		  </spset>
+		</in>
+	      </grouping>
+	    </set>
+	  </eq>
 	</btypes:TYPE>.
 	We now define the notion of consistent types as: 
       </p>
@@ -2510,15 +2575,15 @@
 	      <tyPre>
 		<grouping>
 		  <pred name="mtv">
-		    <type/>
+		    <types/>
 		  </pred>
 		  <text content=", "/>
-		  <pred name="mtv">
-		    <type/>
+		  <pred name="Mtv">
+		    <types/>
 		  </pred>
 		  <text content=", and "/>
-		  <pred name="mtv">
-		    <type/>
+		  <pred name="ntv">
+		    <types/>
 		  </pred>
 		  <text content=" are mutually exclusive."/>
 		</grouping>
@@ -2666,7 +2731,7 @@
       </font>
     </definition>
     <definition id="constraint-cst">      
-      <title>Consistency of Instantiation Constraints</title>
+      <title>Consistency of Polymorphic Instantiation</title>
       <p>
 	We write
 	<btypes:TYPE>
@@ -3791,10 +3856,10 @@
 	</btypes:TYPE> such that
 	<btypes:TYPE>
 	  <Sjudge name="sat">
-	    <scomp>
+	    <compose>
 	      <aSubMap num="u"/>
 	      <aSubMap num="s"/>
-	    </scomp>
+	    </compose>
 	    <leadsto>
 	      <aCtset/>
 	      <dCtset/>
