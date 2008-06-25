@@ -3787,7 +3787,7 @@
       <btypes:TYPE>
 	<uninOp excl="yes"/>
       </btypes:TYPE> represents disjoint union of sets.
-      The U-Mt* and U-Mf* rules perform unification of constained
+      The U-Mt* and U-Mf* rules perform unification of constrained
       types with other constrained/unconstrained types. Here, an
       immutable version of the two types  
       are unified to establish compatibility. Then, the constrained
@@ -3814,7 +3814,7 @@
 	</set>
       </btypes:TYPE>, the U-Mf2 rule results in incompleteness due to 
       the unification of base types. 
-      Here, completeness is ensured with the coperation
+      Here, completeness is ensured with the cooperation
       of the inference system, which ensures that such constraints are
       not generated.
       The inference algorithm only produces 
@@ -3848,6 +3848,16 @@
 	<store/>
       </btypes:TYPE> do not violate this canonical representation of
       types. 
+    </p>
+    <p>
+      The key observation here is that the copy compatility
+      is a special restricted form of subtyping. Since the type of 
+      the copy can be anywhere in the lattice of copy compatible 
+      types, subtyping requirements are always
+      with respect a local maxima (the most immutable compatible
+      type). We exploit this behavior to design a simple unification
+      algorithm that only uses equality constraints over constrained
+      types.
     </p>
     <p>
       The U-Mct1 ensures that all instantiations of monomorphic kind
@@ -5004,5 +5014,7 @@
  -->
 <!--  LocalWords:  Arbaugh Kakkar polymorphism TIL HM Refl contravariance co pp
  -->
-<!--  LocalWords:  decidably Chekability Trans Int Std ISBN Comp
+<!--  LocalWords:  decidably Chekability Trans Int Std ISBN Comp Mf Sel Mct
+ -->
+<!--  LocalWords:  monomorphically concretizable Checkability
  -->
