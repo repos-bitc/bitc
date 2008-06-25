@@ -2511,7 +2511,7 @@
 	    </set>
 	  </eq>
 	</btypes:TYPE>.
-	We now define the notion of consistent types as: 
+	We define the notion of consistent types: 
       </p>
       <font size="small">
 	<btypes:TYPE>
@@ -3623,6 +3623,14 @@
     <theorem id="T-soundness">
       <title>Type Soundness</title>
       <p>
+	Let
+	<btypes:TYPE>
+	  <evalOp many="yes"/>
+	</btypes:TYPE > denote the
+	reflexive-transitive-closure of
+	<btypes:TYPE>
+	  <evalOp/>
+	</btypes:TYPE>.
 	For any canonical expression 
 	<btypes:TYPE>
 	  <aExpr/>
@@ -3682,14 +3690,7 @@
 	  </opState>
 	</btypes:TYPE> is not stuck.
 	That is, execution of a closed, canonical, well typed expression
-	cannot lead to a stuck state. Here,
-	<btypes:TYPE>
-	  <evalOp many="yes"/>
-	</btypes:TYPE > represents the
-	reflexive-transitive-closure of
-	<btypes:TYPE>
-	  <evalOp/>
-	</btypes:TYPE>.
+	cannot lead to a stuck state. 
       </p>
     </theorem>
     <xi:include href="include/complete/infer.xmli"/>
@@ -3710,9 +3711,155 @@
     </definition>
     <p>
       The type inference algorithm is as shown in
-      Figure&nbsp;<xref ref="hy_infer"/> and
-      unification rules are as shown in 
+      Figure&nbsp;<xref ref="hy_infer"/>. The 
+      The inference judgment  
+      <btypes:TYPE>
+	<TEjudge>
+	  <assume>
+	    <gamma/>
+	    <store/>
+	  </assume>
+	  <tqExpr>
+	    <aExpr/>
+	    <type/>
+	  </tqExpr>
+	  <constrain>
+	    <aCtset/>
+	  </constrain>
+	</TEjudge>
+      </btypes:TYPE> is understood as: given a binding environment 
+      <btypes:TYPE>
+	<gamma/>
+      </btypes:TYPE> and store typing
+      <btypes:TYPE>
+	<store/>
+      </btypes:TYPE>, the expression
+      <btypes:TYPE>
+	<aExpr/>
+      </btypes:TYPE> has type
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> subject to the constraints
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE>. The algorithm infers most general types by
+      introducing constraint types of the form
+      <btypes:TYPE>
+	<mbFull>
+	  <stype/>
+	  <ptype/>
+	</mbFull>
+      </btypes:TYPE> at all copy compatible positions.
+    </p>
+    <p>
+      The unification rules algorithm is shown in 
       Figure&nbsp;<xref ref="hy_unify"/>.
+      The unification of a constraint set
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE> either fails with an 
+      error
+      <btypes:TYPE>
+	<error/>
+      </btypes:TYPE>, or produces the pair
+      <btypes:TYPE>
+	<Pair>
+	  <dCtset/>
+	  <aSubMap/>
+	</Pair>
+      </btypes:TYPE>.
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE> is a solution for all equality constraints 
+      and some of the instantiation constraints in
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE>.
+      <btypes:TYPE>
+	<dCtset/>
+      </btypes:TYPE> is the set of instantiation constraints in
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE> on which 
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE> has been applied.
+      <btypes:TYPE>
+	<uninOp excl="yes"/>
+      </btypes:TYPE> represents disjoint union of sets.
+      The U-Mt* and U-Mf* rules perform unification of constained
+      types with other constrained/unconstrained types. Here, an
+      immutable version of the two types  
+      are unified to establish compatibility. Then, the constrained
+      type is made to equal the other type exactly by unifying 
+      its variable part with the other.
+      Of particular interest is the U-Mf2 rule, which performs
+      unification across the two forms of constrained types.
+      If we have a unification constraint such as
+      <btypes:TYPE>
+	<set>
+	  <eq>
+	    <mbTop>
+	      <tvar/>
+	      <tvar name="beta"/>
+	    </mbTop>
+	    <mbFull>
+	      <tvar name="gamma"/>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	    </mbFull>
+	  </eq>
+	</set>
+      </btypes:TYPE>, the U-Mf2 rule results in incompleteness due to 
+      the unification of base types. 
+      Here, completeness is ensured with the coperation
+      of the inference system, which ensures that such constraints are
+      not generated.
+      The inference algorithm only produces 
+      <btypes:TYPE>
+	<mbTop>
+	  <tvar/>
+	  <ptype/>
+	</mbTop>
+      </btypes:TYPE> types of the form
+      <btypes:TYPE>
+	<mbTop>
+	  <tvar name="epsiv"/>
+	  <pair>
+	    <mbFull>
+	      <tvar name="alpha"/>
+	      <tvar name="beta"/>
+	    </mbFull>
+	    <mbFull>
+	      <tvar name="gamma"/>
+	      <tvar name="delta"/>
+	    </mbFull>
+	  </pair>
+	</mbTop>
+      </btypes:TYPE> in the I-Sel rule, which propagates the freedom
+      of mutability compatibility ``one level down.''
+      Without loss of generality, we assume that
+      <btypes:TYPE>
+	<gamma/>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<store/>
+      </btypes:TYPE> do not violate this canonical representation of
+      types. 
+    </p>
+    <p>
+      The U-Mct1 ensures that all instantiations of monomorphic kind
+      are the same. U-Pct1 rule forces any concretizable
+      instantiation of polymorphic kind to immutable. 
+      The U-Mct2 rule infers monomorphic kind based on the mutability
+      of the instantiated type, and U-Pct2 infers polymorphic kind if
+      a variable 
+      <btypes:TYPE>
+	<id/>
+      </btypes:TYPE> is instantiated polymorphically to two types that
+      do not inter-unify.
     </p>
     <definition id="constraint-sol">      
       <title>Constraint Satisfaction</title>
@@ -4072,29 +4219,10 @@
 	  <unf>
 	    <aCtset/>
 	  </unf>
-	</btypes:TYPE>, where no two applications of the reflexive rule
+	</btypes:TYPE>, where no two applications of U-Refl rule
 	happen consecutively, halts forall
 	<btypes:TYPE>
 	  <aCtset/>
-	</btypes:TYPE>.
-	That is,
-	<btypes:TYPE>
-	  <Forall/>
-	  <aCtset/>
-	</btypes:TYPE>,
-	<btypes:TYPE>
-	  <unf>
-	    <aCtset/>
-	  </unf>
-	</btypes:TYPE> decidably either succeeds with
-	<btypes:TYPE>
-	  <Pair>
-	    <dCtset/>
-	    <aSubMap/>
-	  </Pair>
-	</btypes:TYPE> or fails with 
-	<btypes:TYPE>
-	  <error/>
 	</btypes:TYPE>.
       </p>
     </theorem>
