@@ -2841,9 +2841,10 @@
 	<language/>
       </btypes:TYPE>.
       In this type system, copy compatibility is realized 
-      through <em>copy coercion</em> rules that are similar to
-      subtyping rules (the rules beginning with ``S'' in
-      Figure&nbsp;<xref ref="decl_type_rules"/>).
+      through <em>copy coercion</em> rules 
+      (beginning with `S' in 
+      Fig.&nbsp;<xref ref="decl_type_rules"/>) that are similar to 
+      subtyping rules.
       Since reference types 
       <btypes:TYPE>
 	<ref>
@@ -2856,9 +2857,9 @@
       Here, the contravariance/covariance of argument/return types is
       unnecessary as we can follow a standard convention with
       respect to the mutability of argument/return types 
-      at copy positions. 
-      The rules for typing expressions (beginning with ``T'')
-      introduce these coercions all non-lvalue positions.
+      at copy positions. The rules for typing expressions (beginning
+      with `T') introduce these coercions all copy-compatible
+      positions.
     </p>
     <p>
       The type judgment  
@@ -2904,11 +2905,136 @@
       <btypes:TYPE>
 	<type dash="'"/>                  
       </btypes:TYPE>.
+      The rule T-Lambda permits the interface type of a function be
+      different from its internal type (as explained in
+      Sec.&nbsp;<xref ref="infer"/>).
+      The rule T-App introduces copy-coercions at argument and return
+      positions of an application. T-Let-M rule types 
+      <progident>let</progident> expressions monomorphically, and
+      and thus requires a
+      <btypes:TYPE>
+	<let kind="m"/>
+      </btypes:TYPE> annotation.
+      In this case, the expression 
+      <btypes:TYPE>
+	<aExpr num="1"/>
+      </btypes:TYPE> is permitted to be expansive (need not be a 
+      syntactic value 
+      <btypes:TYPE>
+	<vExp/>
+      </btypes:TYPE>).
+      The T-Let-MP rule types <progident>let</progident> expressions
+      where the expression being bound is a syntactic value.
+      It assigns 
+      <btypes:TYPE>
+	<id/>
+      </btypes:TYPE> a constrained type scheme along with the 
+      polymorphic instantiation constraint
+      <btypes:TYPE>
+	<pcst>
+	  <id/>
+	  <lKind/>
+	  <type/>
+	</pcst>
+      </btypes:TYPE>. The T-Id rule instantiates types and
+      constraints. The instantiated constraints are collected over
+      the entire derivation, so that we can enforce instantiation
+      consistency.  
     </p>
     <p>
       We prove the soundness of our type system by demonstrating
-      subject reduction. A full proof can be
-      found in&nbsp;<cite ref="sridhar2007formal"/>.
+      subject reduction. 
+      The interesting case is the safety of polymorphic
+      <progident>let</progident> expressions. The 
+      T-Let-MP rule does not require that the type
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> being quantified over be immutable, but adds the 
+      <btypes:TYPE>
+	<pcst>
+	  <id/>
+	  <lKind/>
+	  <type/>
+	</pcst>
+      </btypes:TYPE> constraint.
+      Now, if we have a derivation
+      <btypes:TYPE>
+	<TDjudge>
+	  <aExpr/>
+	  <type/>
+	  <dCtset/>
+	</TDjudge>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<models>
+	  <assume/>
+	  <dCtset/>
+	</models>
+      </btypes:TYPE>, then one of the two cases must follow.
+      (1) If any instantiation of
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> is mutable, then
+      <btypes:TYPE>
+	<eq>
+	  <lKind/>
+	  <lKind k="mono"/>
+	</eq>
+      </btypes:TYPE>.
+      In this case, execution proceeds through the E-Let-M rule,
+      which create a stack location for 
+      <btypes:TYPE>
+	<id/>
+      </btypes:TYPE>. Therefore, 
+      <btypes:TYPE>
+	<id/>
+      </btypes:TYPE> is permitted to be the target of an
+      assignment.
+      <btypes:TYPE>
+	<models>
+	  <assume/>
+	  <dCtset/>
+	</models>
+      </btypes:TYPE> ensures that all instantiations of 
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> are identical, which ensures that the type of
+      a location does not change.
+      (2) 
+      If 
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> is instantiated polymorphically, then
+      <btypes:TYPE>
+	<eq>
+	  <lKind/>
+	  <lKind k="poly"/>
+	</eq>
+      </btypes:TYPE>.
+      Execution proceeds through the E-Let-P rule, which performs
+      a value substitution. 
+      Here,  
+      <btypes:TYPE>
+	<models>
+	  <assume/>
+	  <dCtset/>
+	</models>
+      </btypes:TYPE> ensures that all instantiations are deeply
+      immutable. Therefore, 
+      <btypes:TYPE>
+	<id/>
+      </btypes:TYPE> cannot be directly used
+      (in the forms
+      <btypes:TYPE>
+	<id/>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<select>
+	  <id/>
+	  <path/>
+	</select>
+      </btypes:TYPE>) as the target of an assignment, which ensures
+      that the value substitution cannot lead to a stuck state.
     </p> 
     <definition id="canonical-expressions">
       <title>Canonical Expressions</title>
@@ -2952,7 +3078,7 @@
 	</btypes:TYPE>.
 	We say that
 	<btypes:TYPE>
-	  <TDjudge D="yes" name="*">
+	  <TDjudge D="yes" name="ct">
 	    <aExpr/>
 	    <type/>
 	  </TDjudge>
@@ -2962,28 +3088,60 @@
 	  <TDjudge>
 	    <aExpr/>
 	    <type/>
-	    <dCtset dash="'"/>
-	  </TDjudge>
-	</btypes:TYPE>
-	for some
-	<btypes:TYPE>
-	  <subeq>
-	    <dCtset dash="'"/>
 	    <dCtset/>
-	  </subeq>
+	  </TDjudge>
 	</btypes:TYPE>,	and
 	<btypes:TYPE>
 	  <CST sp="yes">
-	    <TDjudge name="s" D="yes">
+	    <TDjudge D="yes">
 	      <aExpr/>
 	      <type/>
 	    </TDjudge>
 	  </CST>
 	</btypes:TYPE>.
+	<br/>
+	We also write
+	<btypes:TYPE>
+	  <TDjudge D="yes" name="*">
+	    <aExpr/>
+	    <type/>
+	  </TDjudge>
+	</btypes:TYPE> 
+	if
+	<btypes:TYPE>
+	  <TDjudge>
+	    <aExpr/>
+	    <type/>
+	    <dCtset dash="'"/>
+	  </TDjudge>
+	</btypes:TYPE> for some
+	<btypes:TYPE>
+	  <subeq>
+	    <dCtset dash="'"/>
+	    <dCtset/>
+	  </subeq>
+	</btypes:TYPE>,
+	and
+	<br/>
+	<btypes:TYPE>
+	  <Cst>
+	    <assume/>
+	    <unin>
+	      <spset>
+		<dCtset/>
+	      </spset>
+	      <spset>
+		<TDjudge>
+		  <aExpr/>
+		  <type/>
+		  <dCtset dash="'"/>
+		</TDjudge>
+	      </spset>
+	    </unin>
+	  </Cst>
+	</btypes:TYPE>.
       </p>
     </definition>
-    <xi:include href="include/complete/infer.xmli"/>
-    <xi:include href="include/complete/unify.xmli"/>
     <definition id="stack-heap-typing">
       <title>Stack and Heap Typing</title>
       <p>
@@ -3534,27 +3692,25 @@
 	</btypes:TYPE>.
       </p>
     </theorem>
+    <xi:include href="include/complete/infer.xmli"/>
+    <xi:include href="include/complete/unify.xmli"/>
     <p>
       <leadin>Type Inference Algorithm</leadin>	
     </p>
-    <p>
-      <font size="small">
-	<leadin>Definition 3 (Type Inference)</leadin>
-	<em>
-	  Type inference is a program
-	  transformation that accepts a program in which
-	  <progident>let</progident> expressions are not annotated
-	  with their kinds, and returns the same programs in which
-	  <progident>let</progident> expressions are annotated with
-	  their kinds and all expressions are annotated with their
-	  types.
-	</em>
-      </font>
-    </p>
+    <definition id="inference-process">
+      <title>Type Inference</title>
+      <p>
+	Type inference is a program transformation that accepts a
+	program in which <em><progident>let</progident></em> expressions are
+	not annotated with their kinds, and returns the same program
+	with <em><progident>let</progident></em> expressions annotated
+	with their kinds and all expressions annotated with their
+	types.
+      </p>
+    </definition>
     <p>
       The type inference algorithm is as shown in
-      Figure&nbsp;<xref ref="hy_infer"/>. 
-      The inference judgment and
+      Figure&nbsp;<xref ref="hy_infer"/> and
       unification rules are as shown in 
       Figure&nbsp;<xref ref="hy_unify"/>.
     </p>
@@ -3981,7 +4137,7 @@
       </p>
     </theorem>
     <theorem>
-      <title>Type Chekability</title>
+      <title>Type Checkability</title>
       <p>
 	If 
 	<btypes:TYPE>
@@ -4000,47 +4156,47 @@
 	      <aCtset/>
 	    </constrain>
 	  </TEjudge>
-	</btypes:TYPE> and
+	</btypes:TYPE> and 
 	<btypes:TYPE>
 	  <eq>
 	    <unf>
 	      <aCtset/>
 	    </unf>
 	    <Pair>
-	      <dCtset num="u"/>
-	      <aSubMap num="u"/>
+	      <dCtset/>
+	      <aSubMap/>
 	    </Pair>
 	  </eq>
 	</btypes:TYPE>, then,
 	<btypes:TYPE>
 	  <Exists/>
-	  <aSubMap num="s"/>
+	  <aSubMap dash="'"/>
 	</btypes:TYPE> such that
 	<btypes:TYPE>
-	  <Sjudge name="sat">
-	    <aSubMap num="s"/>
-	    <leadsto>
-	      <dCtset num="u"/>
+	  <models>
+	    <assume/>
+	    <Subst>
+	      <aSubMap dash="'"/>
 	      <dCtset/>
-	    </leadsto>
-	  </Sjudge>
-	</btypes:TYPE>, 
+	    </Subst>
+	  </models>
+	</btypes:TYPE> and
 	<btypes:TYPE>
 	  <Subst>
-	    <scomp>
-	      <aSubMap num="u"/>
-	      <aSubMap num="s"/>
-	    </scomp>
+	    <compose>
+	      <aSubMap/>
+	      <aSubMap dash="'"/>
+	    </compose>
 	    <aExpr/>
 	  </Subst>
 	</btypes:TYPE> is canonical, and
 	<btypes:TYPE>
 	  <Sjudge name="*">
 	    <assume>
-	      <scomp>
-		<aSubMap num="u"/>
-		<aSubMap num="s"/>
-	      </scomp>
+	      <compose>
+		<aSubMap/>
+		<aSubMap dash="'"/>
+	      </compose>
 	      <dCtset/>
 	      <gamma/>
 	      <store/>
@@ -4099,6 +4255,11 @@
 	</btypes:TYPE>.
       </p>
     </theorem>
+    <p>
+      Proofs for safety of the type system and soundness and
+      completeness of the inference algorithm can be
+      found in&nbsp;<cite ref="sridhar2007formal"/>.
+    </p>
   </sect1>
   <sect1 id="related">
     <title>Related Work</title>
