@@ -36,6 +36,7 @@ $plural1="$emset$em\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}";
 $plural2="$em\\{($br)\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}\\}";
 $plural3="\\{($BR)\\}$em\\{\\^\\{\\*\\}\\}";
 $pluralbad="$em\\{\\^\\{\\*\\}\\}";
+$transR="\\{$em\\{\\\\Rightarrow\\}\\}\\*";
 
 while(!eof(F)) {    
     $l = <F>;
@@ -87,7 +88,7 @@ while(!eof(F)) {
 	#$l =~ s/$modelSp/$EM\{\\stackrel\{\\models\}\{\_\{$2\}\}\}/g;
 	
 	#Transitive Right execution
-	#$l =~ s/$transR/$EM\{\\Rightarrow\}\\hskip -2.1ex\{\*\}/g;
+	$l =~ s/$transR/$EM\{\\stackrel\{\*\}\{\\Rightarrow\}\}/g;
 
 	#Equality onder another operator
 	$l =~ s/$EqSp1/$EM\{\\stackrel\{\\blacktriangledown\}\{=\}\}/g;

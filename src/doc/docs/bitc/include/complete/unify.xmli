@@ -275,7 +275,7 @@
 	  </rhs>
 	</equation>	
 	<!-- 'a!p1 = 'b!p2 -->
-	<equation name="U-Mt1">
+	<equation name="U-Ct1">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -318,7 +318,7 @@
 	  </rhs>
 	</equation>	  
 	<!-- a!p1 = p2 -->
-	<equation name="U-Mt2">
+	<equation name="U-Ct2">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -358,7 +358,7 @@
 	  </rhs>
 	</equation>
 	<!-- s1|p1 = s2|p2 -->
-	<equation name="U-Mf1">
+	<equation name="U-Ct3">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -401,7 +401,7 @@
 	  </rhs>
 	</equation>
 	<!-- s|p = P -->
-	<equation name="U-Mf2" sep="4pt">
+	<equation name="U-Ct4" sep="4pt">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -501,7 +501,7 @@
 	  </rhs>
 	</eqn-cnt>
 	<!-- *mx(t1), *mx(t2) --> 
-	<equation name="U-Mct1">
+	<equation name="U-Om1">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -574,7 +574,7 @@
 	  </rhs>
 	</eqn-cnt>
 	<!-- *Px(t) [](t)  --> 
-	<equation name="U-Pct1">
+	<equation name="U-Op1">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -642,7 +642,7 @@
 	  </rhs>
 	</eqn-cnt>
 	<!-- *kx(Mt) --> 
-	<equation name="U-Mct2">
+	<equation name="U-Om2">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -711,7 +711,7 @@
 	  </rhs>
 	</eqn-cnt>
 	<!-- *kx(t1), *kx(t2)  t1 !~ t2 -->
-	<equation name="U-Pct2">
+	<equation name="U-Op2">
 	  <lhs>
 	    <grouping>
 	      <unf>
@@ -994,4 +994,5 @@
   </font>
   <caption>Unification Algorithm</caption>
 </figure>
+  
   
