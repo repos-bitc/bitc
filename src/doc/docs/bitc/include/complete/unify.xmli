@@ -21,7 +21,7 @@
 	  </rhs>
 	</equation>
 	<!-- t = t -->
-	<equation name="U-Eql">
+	<equation name="U-Refl">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
@@ -42,7 +42,7 @@
 	  </rhs>
 	</equation>
 	<!-- Commutativity: t1 = t2 -->
-	<equation name="U-Refl">
+	<equation name="U-Sym">
 	  <lhs>
 	    <unf>
 	      <unin excl="yes">
