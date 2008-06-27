@@ -43,7 +43,7 @@ while(!eof(F)) {
     
     do {
 	$ol = $l;
-	
+
 	#Subscript / Superscript handling
 	$l =~ s/$sups$subs/$EM\{^$1_$2\}/g;
 	$l =~ s/$subs$sups/$EM\{_$1^$2\}/g;
@@ -99,7 +99,10 @@ while(!eof(F)) {
 	
 	#Polymorphic constraint
 	$l =~ s/$pcstSp/\\mbox\{$1\\hskip -2ex$EM\{\^\{$MIT\{$2\}\}\}\}/g;
-	
+
+	# Reduce the spacing after figures
+	#$l =~ s/\\caption($br)\\end/\\caption$1\\vspace\{-4ex\}\\end/g;
+
 	#Plural handling
 	#FIX: Deal with parentheses
 	$l =~ s/$plural1/$EM\{\\overline\{$1$2$3\}\}/g;
@@ -124,6 +127,8 @@ while(!eof(F)) {
 	$l =~ s/\\newcommand\{\\mySection\}\[1\]\{\\section\*\{#1\}\}/\\newcommand\{\\mySection\}\[1\]\{\\section\{#1\}\}/g;
 	$l =~ s/\\newcommand\{\\mySubsection\}\[1\]\{\\subsection\*\{#1\}\}/\\newcommand\{\\mySubsection\}\[1\]\{\\subsection\{#1\}\}/g;
 	$l =~ s/\\newcommand\{\\mySubsubsection\}\[1\]\{\\subsubsection\*\{#1\}\}/\\newcommand\{\\mySubsubsection\}\[1\]\{\\subsubsection\{#1\}\}/g;
+
+	
 	
     } while($ol ne $l);
     

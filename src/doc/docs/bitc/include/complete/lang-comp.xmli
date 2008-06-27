@@ -5,7 +5,7 @@
 <!--     <floatingtable id="language-feature-comparison" -->
 <!--     latex.placement="tb"> -->
 <font size="small">
-  <table latex.colspec="l|c|c|c|c|c|c|c|c|c">
+  <table latex.colspec="l|c|c|c|c|c|c|c|c">
     <tbody>
       <tr lineafter="yes">
 	<td/>
@@ -24,9 +24,9 @@
 	<td>
 	  Vault
 	</td>
-	<td>
+	<!-- <td>
 	  Scheme
-	</td>
+	</td> -->
 	<td>
 	  Java
 	</td>
@@ -59,9 +59,9 @@
 	<td>
 	  <em>?</em>Y<em>?</em>
 	</td>
-	<!-- Scheme -->
+	<!-- Scheme 
 	<td>
-	</td>
+	</td>-->
 	<!-- Java -->
 	<td>
 	</td>
@@ -74,7 +74,7 @@
       </tr>
       <tr lineafter="yes">
 	<td>
-	  Complete Mut.
+	  Complete Mutability
 	</td>
 	<!-- C -->
 	<td>
@@ -96,10 +96,10 @@
 	<td>
 	  <em>?</em>Y<em>?</em>
 	</td>
-	<!-- Scheme -->
+	<!-- Scheme
 	<td>
 	  <em>?</em>Y<em>?</em>
-	</td>
+	</td> -->
 	<!-- Java -->
 	<td>
 	  <em>?</em>Y<em>?</em>
@@ -113,7 +113,7 @@
       </tr>
       <tr lineafter="yes">
 	<td>
-	  Well founded Mut.
+	  Well-founded Mutability&nbsp;&nbsp;
 	</td>
 	<!-- C -->
 	<td>
@@ -130,9 +130,9 @@
 	<!-- Vault -->
 	<td>
 	</td>
-	<!-- Scheme -->
+	<!-- Scheme
 	<td>
-	</td>
+	</td> -->
 	<!-- Java -->
 	<td>
 	</td>
@@ -166,9 +166,9 @@
 	<td>
 	  <em>?</em>Y<em>?</em>
 	</td>
-	<!-- Scheme -->
+	<!-- Scheme
 	<td>
-	</td>
+	</td> -->
 	<!-- Java -->
 	<td>
 	  <em>?</em>Y<em>?</em>
@@ -201,9 +201,9 @@
 	<!-- Vault -->
 	<td>
 	</td>
-	<!-- Scheme -->
+	<!-- Scheme
 	<td>
-	</td>
+	</td> -->
 	<!-- Java -->
 	<td>
 	</td>

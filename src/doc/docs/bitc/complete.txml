@@ -141,27 +141,21 @@
     </p>
     <p>
       <leadin>Well-founded Mutability</leadin>
-      The major
-      advantage of this approach is that types are definitive about the
-      mutability of every location, across all aliases. In this sense,
-      we can say that the support for mutability is mathematically
-      ``well-founded.''
-
-      In the ML model of mutability
-      there is a clear separation between name bindings and updatable
-      locations. All updatable (mutable) locations live in the heap
-      within ``ref cells''. Fetching the value inside a ref cell
-      requires an explicit dereferencing operation. 
-
-
-      This model benefits tools
-      that perform static analysis or model checking because
-      conclusions drawn about location immutability need never be
-      conservative. This model of mutability also increases the amount
-      of optimization the compiler can safely perform without complex
-      alias analysis.
-      In the C-model, types cannot distinguish mutable values
-      from immutable ones. For example, in C it is legal to write: 
+      The mutability support in a language is said to be
+      mathematically `well founded' if the (im)mutability
+      of every location  if fixed across all aliases, during the
+      entire execution of a program. In this model, 
+      there is a sound notion of immutability of locations. This
+      benefits tools that perform static analysis or model checking
+      because conclusions drawn about the immutability of a location
+      need never be conservative. It also increases the amount of
+      optimization that a compiler can safely perform without complex
+      alias analysis. Polymorphic type inference systems such as
+      Hindley-Milner algorithm&nbsp;<cite ref="Milner1978W"/> also
+      rely on a sound notion of immutability. ML supports well-founded
+      mutability since types are definitive about the (im)mutability
+      of every location. In contrast, C does not support this
+      feature. For example, in C it is legal to write:   
       <br/>
       <progident>
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -173,10 +167,10 @@
       The alleged ``constness'' of the location pointed to by
       <progident>cp</progident> is a local property (only) with
       respect to the alias <progident>cp</progident> and not a
-      statement of true immutability of the target location. 
-      The compiler or other analytical engines are not entitled to
-      believe that certain locations or fields are constant even if so
-      declared.
+      statement of true immutability of the target location.
+      The analysis and optimization of critical
+      systems programs can be improved by using a language whose
+      mutability model is well-founded. 
     </p>
     <p>
       <leadin>Type Inference and Polymorphism</leadin> Type
@@ -201,37 +195,43 @@
       type safety:
     </p>
     <xi:include href="include/complete/lang-comp.xmli"/>
+    <br/>
+    <br/>
     <p>
-      <br/>
-      <br/>
       While several of the existing safe
       languages support two of the three features  &mdash; unboxed
       representation, mutability and polymorphic type inference
-      &mdash; none combine all of them elegantly. Therefore,
+      &mdash; none combine all of them elegantly. 
+      Further, none of the existing languages support a mutability
+      model that is both complete and well founded.
+      Therefore,
       systems programmers either continue to use languages such as
       Ada&nbsp;<cite ref="ISO1995Ada"/>, 
-      C&nbsp;<cite ref="ISO1999ANSI-C"/>, 
-      C++&nbsp;<cite ref="ISO1998C++"/>,
-      <foreignphrase>etc.</foreignphrase>, or follow a ``two
-      language'' discipline where the system is implemented using a
+      C&nbsp;<cite ref="ISO1999ANSI-C"/>, and
+      C++&nbsp;<cite ref="ISO1998C++"/>, or follow a ``two
+      language'' discipline where they use a
       combination of safe and unsafe languages. For example, the
       SwitchWare&nbsp;<cite ref="Alexander98"/>
-      active network architecture is largely implemented in
-      Ocaml&nbsp;<cite ref="LeroyOcaml"/>, but uses
-      C implementations of certain high performance
-      components such as SHA-1 hash function.
+      active network architecture is largely written in
+      Ocaml&nbsp;<cite ref="LeroyOcaml"/>, but 
+      performance critical components such as SHA-1 hash computation
+      are implemented in C.
     </p>
     <p>
-      The presence of unboxed data structures and mutability presents
-      several challenges for type inference. Mutability is an
-      attribute of the <em>location</em> storing a value and not the
-      value itself. Therefore, two expressions across a copy boundary
-      (ex: formal vs actual arguments of a function) can
-      differ in their mutability. This creates a situation where type
-      and mutability inference is not purely syntax directed. Type
-      inference is further complicated due to well known problems with
-      the interaction of mutability and polymorphism&nbsp;<cite
-	ref="wrightValRes1995"/>. This has
+      The combination of mutability and unboxed
+      representation presents several challenges for type
+      inference. Mutability is an attribute of the <em>location</em>
+      storing a value and not the value itself. Therefore, two
+      expressions across a copy boundary can differ in their
+      mutability. We refer to this notion of mutability compatibility
+      of types as <em>copy compatibility</em>. For example, since the
+      formal and actual arguments of a call-by-value function
+      occupy different locations, their types need not be
+      equal but must be copy compatible. Copy compatibility creates a
+      situation where type and mutability inference is not 
+      purely syntax directed. Type inference is further complicated
+      due to well known problems with the interaction of mutability
+      and polymorphism&nbsp;<cite ref="wrightValRes1995"/>. This has
       forced a second-class treatment of mutability in ML-like
       languages and a lack of inferred polymorphism in others.
     </p>
@@ -239,15 +239,13 @@
       In this paper, we present a new type system and formal
       foundations for a safe systems programming language that
       supports all of the desirable features mentioned above.
-      The type system features a new model of mutability which is
-      expressive and has sound semantics. In order to support unboxed
-      mutability and principal polymorphic type inference, the type
-      system uses types that are range over mutability
-      and polymorphism itself. We also present a sound and complete
-      type inference system through an extension of the
-      Hindley-Milner algorithm&nbsp;<cite ref="Milner1978W"/>. 
-      Safety of the type system as well as soundness and completeness
-      of the inference algorithm have been proved.
+      The type system features a well-founded, complete mutability
+      model which is both expressive and has sound semantics. 
+      We propose a principal polymorphic type inference algorithm 
+      for a language with copy compatibility semantics using a system
+      of constrained types range over mutability and
+      polymorphism. Safety of the type system as well as soundness and
+      completeness of the inference algorithm have been proved.
     </p>
   </sect1>
   <sect1 id="informal">
@@ -335,8 +333,6 @@
 	  <texttt content="1"/>
 	</eq>
       </btypes:TYPE>.
-    </p>
-    <p>
       The <progident>let</progident> construct can be used for
       allocating (possibly mutable) stack variables and to create
       let-polymorphic bindings.
@@ -346,20 +342,20 @@
 	  <type/>
 	</tqExpr>
       </btypes:TYPE> represents optional type qualification of
-      let-bound variables. The <progident>:=</progident> operator
-      mutates both stack locations (let-bound locals, function
-      parameters) and heap locations (<progident>dup</progident>-ed
-      values). Unlike ML, <progident>:=</progident> does not
-      dereference its target.  
-    </p>
+      let-bound variables.     </p>
     <p>
       <leadin>The Mutability Model</leadin>
-      The support for mutability in
       <btypes:TYPE>
 	<language/>
-      </btypes:TYPE>
-      both well-founded and complete. Similar to
-      ML, we impose the ``one location, one type'' rule.
+      </btypes:TYPE> supports well-founded, complete mutability.
+      The mutability support is complete since the
+      <progident>:=</progident> operator mutates both stack locations
+      (let-bound locals, function parameters) and heap locations
+      (<progident>dup</progident>-ed values). It can also perform
+      in-place updates to individual fields of unboxed pairs.
+      The mutability support is well-founded since we impose the 
+      ``one location, one type'' rule. For example, in the following
+      expression,
       <br/>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <btypes:TYPE>
@@ -391,7 +387,6 @@
 	(* Error *)
       </progident>
       <br/>
-      We see that
       <btypes:TYPE>
 	<id name="cp"/>
       </btypes:TYPE> has the type reference to bool
@@ -399,7 +394,7 @@
 	<ref>
 	  <bool/>
 	</ref>
-      </btypes:TYPE>). This type is incompatible with that of 
+      </btypes:TYPE>), which is incompatible with that of 
       <btypes:TYPE>
 	<id name="p"/>
       </btypes:TYPE>, reference to mutable-bool
@@ -410,18 +405,21 @@
 	  </mutable>
 	</ref>
       </btypes:TYPE>).
-      Similar to the C model, a notion of left expressions (defined
-      by the above grammar) is necessary to preserve
-      the programmer's mental model of the relationship between
-      locations storage and to ensure that compiler transformations
-      are semantics preserving.
+      Unlike ML, <progident>:=</progident> does not dereference its target.  
+      The expressions that can appear on the left of an assignment
+      <progident>:=</progident> are restricted  to
+      left expressions (defined by the above grammar).
+      This not only preserves the programmer's mental model of the
+      relationship between locations storage, but also ensures that
+      compiler transformations are semantics preserving.
     </p>
     <p>
       <leadin>Copy Compatibility</leadin> 
-      Since <btypes:TYPE> <language/> </btypes:TYPE> is a
-      call-by-value language, it is desirable that we allow some
-      freedom in the compatibility of types with respect to their
-      mutability at a copy boundary. For example, in the
+      <btypes:TYPE> <language/> </btypes:TYPE> is a
+      call-by-value language, and supports 
+      copy compatibility (&cong;), which permits locations across a
+      copy boundary to differ in their mutability.
+      For example, in the
       following expression: 
       <br/>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -471,16 +469,15 @@
       <btypes:TYPE>
 	<bool/>
       </btypes:TYPE>.
-      Since the formal argument
+      Since 
       <btypes:TYPE>
 	<id name="x"/>
       </btypes:TYPE> is a <em>copy</em> of 
       <btypes:TYPE>
 	<id name="y"/>
       </btypes:TYPE> and occupies a different location, 
-      this expression is type safe. We refer to this notion
-      of compatibility of types as <term>copy compatibility</term>.
-      denoted by &cong;. In this example,
+      this expression is type safe. 
+      Here, we have the copy compatibility
       <btypes:TYPE>
 	<ceq>
 	  <bool/>
@@ -1513,6 +1510,23 @@
 	  <id/>
 	</btypes:TYPE>, and consistency semantics are enforced
 	accordingly. 
+	The variable
+	<btypes:TYPE> 
+	  <id/>
+	</btypes:TYPE> in
+	<btypes:TYPE> 
+	  <pcst>
+	    <id/>
+	    <lKind k="var"/>
+	    <type/>
+	  </pcst>
+	</btypes:TYPE> represents the program point
+	(<progident>let</progident>) at which this constraint is
+	generated. We assume that there are no name collisions due to
+	inner bindings so that every 
+	<btypes:TYPE> 
+	  <id/>
+	</btypes:TYPE> names a unique program point.
       </p>
       <p>
 	In this approach, the definition of 
@@ -1827,6 +1841,7 @@
 	  </tbody>
 	</table>
       </font>
+      <br/>
       <br/>
       <p>
 	The final case type checks with either kind, under the 
