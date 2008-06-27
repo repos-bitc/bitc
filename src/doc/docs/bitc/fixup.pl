@@ -77,7 +77,7 @@ while(!eof(F)) {
 	$l =~ s/\\textbf\{\\emph\{\*\}\}([A-Za-z])\\textbf\{\\emph\{\*\}\}/$EM\{\\mathfrak{$1}\}/g;
 
 	# \textbf{\emph{\?}}text\textbf{\emph{\?}} to \ensuremath{\mathrm{text}}
-	$l =~ s/\\textbf\{\\emph\{\?\}\}([A-Za-z0-9]+)\\textbf\{\\emph\{\?\}\}/$EM\{\\mathrm\{$1\}\}/g;
+	$l =~ s/\\textbf\{\\emph\{\?\}\}([A-Za-z0-9\(\)]+)\\textbf\{\\emph\{\?\}\}/$EM\{\\mathrm\{$1\}\}/g;
 	# \textbf{\emph{\_}}text\textbf{\emph{\_}} to \ensuremath{\mathit{text}}
 	$l =~ s/\\textbf\{\\emph\{\{\\_\}\}\}([A-Za-z0-9]+)\\textbf\{\\emph\{\{\\_\}\}\}/$EM\{\\mathit\{$1\}\}/g;
 

@@ -420,7 +420,7 @@
     </xsl:element>    
     <xsl:call-template name="print.params"/>
   </xsl:template>  
-
+  
   <!-- dom --> 
   <xsl:template match="dom" mode="formula">
     <xsl:element name="em">
@@ -1123,7 +1123,9 @@
       </xsl:otherwise>
     </xsl:choose>
     <xsl:call-template name="print.index.dash"/>
-    <xsl:call-template name="print.params"/>
+    <xsl:call-template name="print.params">
+      <xsl:with-param name="print.params.math">yes</xsl:with-param>
+    </xsl:call-template>
   </xsl:template>
 
   <!-- constrained entities -->
@@ -1913,7 +1915,9 @@
 
   <!-- MsubOp -->
   <xsl:template match="MsubOp" mode="formula">
-    <xsl:call-template name="print.op.Mqual"/>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>ltrie;</xsl:text>
+    <xsl:text>:</xsl:text>
   </xsl:template>
   <!-- Msub -->
   <xsl:template match="Msub" mode="formula">
@@ -4231,10 +4235,29 @@
 
   <!-- Print Parameters, with paranthesis only if necessary  -->
   <xsl:template name="print.params">
+    <xsl:param name="print.params.math"/>     
     <xsl:if test = "*">
-      <xsl:text>(</xsl:text>      
+      <xsl:choose>
+	<xsl:when test="$print.params.math">
+	  <xsl:call-template name="print.mathmode">
+	    <xsl:with-param name="print.mathmode.text">(</xsl:with-param>
+	  </xsl:call-template>
+	</xsl:when>
+	<xsl:otherwise>
+	  <xsl:text>(</xsl:text>      
+	</xsl:otherwise>
+      </xsl:choose>
       <xsl:call-template name="print.children"/>
-      <xsl:text>)</xsl:text>      
+      <xsl:choose>
+	<xsl:when test="$print.params.math">
+	  <xsl:call-template name="print.mathmode">
+	    <xsl:with-param name="print.mathmode.text">)</xsl:with-param>
+	  </xsl:call-template>
+	</xsl:when>
+	<xsl:otherwise>
+	  <xsl:text>)</xsl:text>      
+	</xsl:otherwise>
+      </xsl:choose>
     </xsl:if> 
   </xsl:template>
 
@@ -4242,9 +4265,9 @@
   <xsl:template name="print.params_paren">
     <xsl:text>(</xsl:text>      
     <xsl:call-template name="print.children"/>
-    <xsl:text>)</xsl:text>      
+    <xsl:text>)</xsl:text>
   </xsl:template>
-  
+
   <!-- Print comma separated list of children  -->
   <xsl:template name="print.children.nbsp">
     <xsl:for-each select="*">

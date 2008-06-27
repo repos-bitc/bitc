@@ -93,10 +93,10 @@
 	    <grouping>
 	      <Pair>
 		<dCtset/>
-		<scomp>
+		<compose>
 		  <aSubMap num="a"/>
 		  <aSubMap num="u"/>
-		</scomp>	    
+		</compose>	    
 	      </Pair>	 
 	      <text content=" where "/>
 	      <eq>
@@ -447,10 +447,10 @@
 	    <grouping>
 	      <Pair>
 		<dCtset/>
-		<scomp>
+		<compose>
 		  <aSubMap num="k"/>
 		  <aSubMap num="u"/>
-		</scomp>	    
+		</compose>	    
 	      </Pair>	
  	      <text content=" where "/>
 	      <eq>
@@ -648,10 +648,10 @@
 	    <grouping>
 	      <Pair>
 		<dCtset/>
-		<scomp>
+		<compose>
 		  <aSubMap num="k"/>
 		  <aSubMap num="u"/>
-		</scomp>
+		</compose>
 	      </Pair>
 	      <text content=" where "/>
 	      <eq>
@@ -721,10 +721,10 @@
 	    <grouping>
 	      <Pair>
 		<dCtset/>
-		<scomp>
+		<compose>
 		  <aSubMap num="k"/>
 		  <aSubMap num="u"/>
-		</scomp>
+		</compose>
 	      </Pair>
 	      <text content=" where "/>
 	      <eq>
