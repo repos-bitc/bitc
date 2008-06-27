@@ -332,11 +332,9 @@
   <xsl:template match="unin" mode="formula">
     <xsl:choose>
       <xsl:when test="@excl">
-	<xsl:element name="em">
-	  <xsl:call-template name="print.infix.implied">
-	    <xsl:with-param name="print.infix.implied.op">cup;</xsl:with-param> 
-	  </xsl:call-template>
-	</xsl:element>
+	<xsl:call-template name="print.infix.implied">
+	  <xsl:with-param name="print.infix.implied.op">cup;</xsl:with-param> 
+	</xsl:call-template>
       </xsl:when>
       <xsl:otherwise>
 	<xsl:call-template name="print.infix.implied">
@@ -1689,9 +1687,9 @@
     </xsl:element>
     <xsl:element name="sub">
       <xsl:element name="sub">
-	<xsl:element name="em">
-	  <xsl:text>x</xsl:text>
-	</xsl:element>
+	<xsl:call-template name="print.mathit">
+	  <xsl:with-param name="print.mathit.text">x</xsl:with-param>
+	</xsl:call-template>
       </xsl:element>
     </xsl:element>
   </xsl:template>  
@@ -1987,7 +1985,7 @@
     <xsl:call-template name="print.op.eq"/>
     <xsl:apply-templates select="*[2]" mode="formula"/>	
   </xsl:template>
-
+  
   <!-- unf -->
   <xsl:template match="unf" mode="formula">
     <xsl:choose>

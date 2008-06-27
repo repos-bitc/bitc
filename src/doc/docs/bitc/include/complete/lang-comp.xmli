@@ -74,7 +74,7 @@
       </tr>
       <tr lineafter="yes">
 	<td>
-	  Mutability
+	  Complete Mut.
 	</td>
 	<!-- C -->
 	<td>
@@ -109,6 +109,40 @@
 	</td>
 	<!-- Haskell -->
 	<td>
+	</td>
+      </tr>
+      <tr lineafter="yes">
+	<td>
+	  Well founded Mut.
+	</td>
+	<!-- C -->
+	<td>
+	</td>
+	<!-- Safe-C -->
+	<td>
+	</td>
+	<!-- CCured -->
+	<td>
+	</td>
+	<!-- Cyclone -->
+	<td>
+	</td>
+	<!-- Vault -->
+	<td>
+	</td>
+	<!-- Scheme -->
+	<td>
+	</td>
+	<!-- Java -->
+	<td>
+	</td>
+	<!-- ML -->
+	<td>
+	  <em>?</em>Y<em>?</em>
+	</td>
+	<!-- Haskell -->
+	<td>
+	  <em>?</em>Y<em>?</em>
 	</td>
       </tr>
       <tr lineafter="yes">
@@ -187,4 +221,5 @@
   </font>
 <!--   <caption>Language Feature Comparison</caption> -->
   <!-- </floatingtable> -->
+  
   

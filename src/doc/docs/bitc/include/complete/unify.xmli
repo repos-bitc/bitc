@@ -300,13 +300,9 @@
 	      <unin>
 		<aCtset/>
 		<set>
-		  <eq>
-		    <minzT>
-		      <ptype num="1"/>
-		    </minzT>
-		    <minzT>
-		      <ptype num="2"/>
-		    </minzT>
+		  <eq under="minzT">
+		    <ptype num="1"/>
+		    <ptype num="2"/>
 		  </eq>
 		  <eq>
 		    <tvar name="alpha"/>
@@ -340,13 +336,9 @@
 	      <unin>
 		<aCtset/>
 		<set>
-		  <eq>
-		    <minzT>
-		      <ptype/>
-		    </minzT>
-		    <minzT>
-		      <ptype dash="'"/>
-		    </minzT>
+		  <eq under="minzT">
+		    <ptype/>
+		    <ptype dash="'"/>
 		  </eq>
 		  <eq>
 		    <tvar/>
@@ -383,13 +375,9 @@
 	      <unin>
 		<aCtset/>
 		<set>
-		  <eq>
-		    <minz>
-		      <ptype num="1"/>
-		    </minz>
-		    <minz>
-		      <ptype num="2"/>
-		    </minz>
+		  <eq under="minz">
+		    <ptype num="1"/>
+		    <ptype num="2"/>
 		  </eq>
 		  <eq>
 		    <stype num="1"/>
@@ -423,13 +411,9 @@
 	      <unin>
 		<aCtset/>
 		<set>
-		  <eq>
-		    <minz>
-		      <ptype/>
-		    </minz>
-		    <minz>
-		      <Ptype/>
-		    </minz>
+		  <eq under="minz">
+		    <ptype/>
+		    <Ptype/>
 		  </eq>
 		  <eq>
 		    <stype/>
@@ -731,7 +715,6 @@
 		  <aCtset/>
 		</unin>
 	      </unf>
-	      <text content=" when "/>
 	    </grouping>
 	  </lhs>
 	  <rhs>
@@ -751,14 +734,14 @@
 		  <lKind k="poly"/>
 		</SubMap>
 	      </eq>
+	      <text content=" and "/>
 	    </grouping>
-	    <text content=" and "/>
 	  </rhs>
 	</equation>
 	<eqn-cnt name="" sep="4pt">
 	  <lhs>
 	    <grouping>
-	      <!-- <space n="2"/> -->
+	      <text content=" where "/>
 	      <eq>
 		<unf>
 		  <unin>
@@ -773,7 +756,6 @@
 		</unf>
 		<error/>
 	      </eq>
-	      <space n="5"/>
 	    </grouping>
 	  </lhs>
 	  <rhs>
