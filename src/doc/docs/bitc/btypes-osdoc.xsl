@@ -3647,6 +3647,13 @@
     <xsl:element name="br"/>
   </xsl:template>
 
+  <!-- vspace hack -->
+  <xsl:template match="vspace" mode="formula">
+    <xsl:text>..</xsl:text>
+    <xsl:value-of select="@ptsz"/>
+    <xsl:element name="br"/>
+  </xsl:template>
+
   <!-- I think this comment is stale -->
   <!-- Handle the defaulting behavior. We don't use this, but we
   *would* use it if we wanted to handle this stuff inline. -->

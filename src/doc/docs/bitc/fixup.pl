@@ -116,6 +116,10 @@ while(!eof(F)) {
 	# The correct thing to do is to add a @latex.ptsz arrtibute to 
 	# OSDOC's <br>
 	$l =~ s/^\\\\/\\vspace\{4pt\}/g;
+
+	# hack in some vspaces
+	$l =~ s/\.\.([\-0-9a-z]+)\\\\/\\vspace\{$1\}/g;
+	
 	
 	#\emph{?}Y\emph{?} -> \checkmark
 	$l =~ s/\\emph\{\?\}Y\\emph\{\?\}/$EM\{\\checkmark\}/g;

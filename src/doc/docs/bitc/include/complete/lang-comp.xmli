@@ -2,36 +2,34 @@
 <!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
-<!--     <floatingtable id="language-feature-comparison" -->
-<!--     latex.placement="tb"> -->
 <font size="small">
   <table latex.colspec="l|c|c|c|c|c|c|c|c">
     <tbody>
       <tr lineafter="yes">
 	<td/>
 	<td>
-	  C/Asm
+	  C/Asm&nbsp;
 	</td>
 	<td>
-	  Safe-C
+	  Safe-C&nbsp;
 	</td>
 	<td>
-	  CCured
+	  CCured&nbsp;
 	</td>
 	<td>
-	  Cyclone
+	  Cyclone&nbsp;
 	</td>
 	<td>
-	  Vault
+	  Vault&nbsp;
 	</td>
 	<!-- <td>
-	  Scheme
+	  Scheme&nbsp;
 	</td> -->
 	<td>
-	  Java
+	  Java&nbsp;
 	</td>
 	<td>
-	  ML
+	  ML&nbsp;
 	</td>
 	<td>
 	  Haskell
@@ -113,7 +111,7 @@
       </tr>
       <tr lineafter="yes">
 	<td>
-	  Well-founded Mutability&nbsp;&nbsp;
+	  Consistent Mutability&nbsp;&nbsp;
 	</td>
 	<!-- C -->
 	<td>
@@ -219,7 +217,8 @@
     </tbody>
   </table>
   </font>
-<!--   <caption>Language Feature Comparison</caption> -->
-  <!-- </floatingtable> -->
   
   
+
+<!--  LocalWords:  Asm CCured
+ -->

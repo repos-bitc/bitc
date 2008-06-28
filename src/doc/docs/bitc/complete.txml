@@ -70,28 +70,30 @@
       applied to the construction of <em>systems programs</em>, the
       core components of a computer system. One of the primary causes
       of this problem is the fact that existing languages do not
-      simultaneously support modern language features (such as static
-      type safety, type inference, higher order functions and
-      polymorphism) and features
+      simultaneously support modern language features &mdash; such as
+      static type safety, type inference, higher order functions and
+      polymorphism &mdash; as well as features
       that are critical to the correctness and performance of systems
-      programs (such as prescriptive data structure representation and
-      mutability). In this paper, we endeavor to bridge this gap
-      between modern language design and systems programming. We
-      first discuss the support for these features in existing
-      languages, identify the challenges in combining these feature
-      sets and then describe our approach toward solving this problem. 
+      programs such as prescriptive data structure
+      representation and mutability. In this paper, we endeavor to
+      bridge this gap between modern language design and systems
+      programming. We first discuss the support for these features in
+      existing languages, identify the challenges in combining these
+      feature sets and then describe our approach toward 
+      solving this problem.  
     </p> 
     <p>
       <leadin>Representation Control</leadin> A systems programming
       language must be expressive enough to specify details of
-      representation including data-structure layout (boxed or
-      unboxed) and allocation (stack or heap). For systems programs,
+      representation including boxed/unboxed data-structure layout and 
+      stack/heap allocation. For systems programs,
       this is both a correctness as well as a performance
       requirement. Systems programs interact with the hardware through
-      data structures (such as page tables) whose representation is
+      data structures such as page tables whose representation is
       dictated by the hardware. Conformance to these representation
       specifications is necessary for correctness. 
-      Languages like ML&nbsp;<cite ref="milner97definition"/> omit
+      Languages like ML&nbsp;<cite ref="milner97definition"/>
+      intentionally omit
       details of representation from the language definition, since
       this greatly simplifies the mathematical description of the
       language. Compilers like TIL&nbsp;<cite ref="Tarditi1996TIL"/> 
@@ -106,9 +108,10 @@
       Systems programs also rely on representation control
       for performance since it affects cache locality
       and paging behavior. This expressiveness is also crucial for
-      interfacing with external C / assembly code and data. For
+      interfacing with external C&nbsp;<cite ref="ISO1999ANSI-C"/> or
+      assembly code and data. For 
       example, a careful implementation of the TCP/IP
-      protocol stack in Standard ML incurs a substantial overhead of
+      protocol stack in Standard ML incurred a substantial overhead of
       up to 10x increase in system load and a 40x slowdown in
       accessing external memory relative to the equivalent C
       implementation&nbsp;<cites>  
@@ -116,42 +119,44 @@
 	<cite ref="Derby1999Foxnet"/>
       </cites>.
       This shows that representation control is as important as, or even
-      more important than high level algorithms for the performance of
-      systems programs. 
+      more important than, high level algorithms for the performance of
+      systems tasks. 
     </p>
     <p>
       <leadin>Complete Mutability</leadin> One of the key features
       essential for systems programming is support for mutability. The
       support for mutability must be `complete' in the sense that any
-      location (stack or heap, boxed or unboxed) can be mutable. 
+      location &mdash; whether on the stack, heap, or within other
+      unboxed structures &mdash; can be mutated. 
       Allocation of mutable cells on the stack boosts performance
-      since the top of the stack is typically accessible from the data
-      cache, and it does not involve garbage collection overhead. This
-      is particularly important for high confidence and/or embedded
-      kernels as they  cannot tolerate unpredictable variance in
-      overhead caused by heap allocation and collection. ML-like
-      languages only provide limited support for mutability wherein
-      all mutable (<progident>ref</progident>) cells must reside in the
-      heap. Pure languages like 
-      Haskell&nbsp;<cite ref="peytonjones2003haskellrevisedreport"/>
-      have a more restrictive 
-      monadic model&nbsp;<cite ref="peytonjones1993monads"/> of
-      encapsulated state. These restricted models of mutability are
+      because (1) the top of the stack is typically accessible from
+      the data cache (2) stack locations are directly addressable
+      and therefore do not require the extra dereferencing involved in
+      the case of heap locations (3) stack allocation does
+      not involve  garbage collection overhead. This is particularly
+      important for high confidence and/or embedded kernels as they
+      cannot tolerate unpredictable variance in overhead caused by
+      heap allocation and collection. ML-like languages only require
+      all mutable (<progident>ref</progident>) cells to reside on the
+      heap. In pure languages like 
+      Haskell&nbsp;<cite ref="peytonjones2003haskellrevisedreport"/>,
+      support for mutability is even more restrictive than ML. 
+      These restricted models of mutability are
       insufficiently expressive from a systems programming perspective.
     </p>
     <p>
-      <leadin>Well-founded Mutability</leadin>
+      <leadin>Consistent Mutability</leadin>
       The mutability support in a language is said to be
-      mathematically `well founded' if the (im)mutability
-      of every location  if fixed across all aliases, during the
-      entire execution of a program. In this model, 
-      there is a sound notion of immutability of locations. This
-      benefits tools that perform static analysis or model checking
-      because conclusions drawn about the immutability of a location
-      need never be conservative. It also increases the amount of
-      optimization that a compiler can safely perform without complex
-      alias analysis. Polymorphic type inference systems such as
-      Hindley-Milner algorithm&nbsp;<cite ref="Milner1978W"/> also
+      consistent if the (im)mutability
+      of every location  is invariant across all aliases over program
+      execution. In this model, there is a sound notion of
+      immutability of locations. This benefits tools that perform
+      static analysis or model checking because conclusions drawn
+      about the immutability of a location need never be
+      conservative. It also increases the amount of optimization that
+      a compiler can safely perform without complex alias
+      analysis. Polymorphic type inference systems such as
+      Hindley-Milner algorithm&nbsp;<cite ref="Milner1978W"/> also 
       rely on a sound notion of immutability. ML supports well-founded
       mutability since types are definitive about the (im)mutability
       of every location. In contrast, C does not support this
@@ -187,7 +192,7 @@
       or Vault&nbsp;<cite ref="DeLineMSRVault"/> do not support type
       inference. Cyclone&nbsp;<cite ref="Jim2002Cyclone"/> features
       partial type inference and supports polymorphism only for
-      functions that are explicitly annotated with a polymorphic type.
+      functions with explicit type annotations.
     </p>
     <p>
       The following table summarizes the support available in 
@@ -198,12 +203,17 @@
     <br/>
     <br/>
     <p>
+      In this paper, we present a new type system and formal
+      foundations for a safe systems programming language that
+      supports all of the above features.
+    </p>
+    <!-- <p>
       While several of the existing safe
       languages support two of the three features  &mdash; unboxed
       representation, mutability and polymorphic type inference
       &mdash; none combine all of them elegantly. 
       Further, none of the existing languages support a mutability
-      model that is both complete and well founded.
+      model that is both complete and consistent.
       Therefore,
       systems programmers either continue to use languages such as
       Ada&nbsp;<cite ref="ISO1995Ada"/>, 
@@ -216,47 +226,45 @@
       Ocaml&nbsp;<cite ref="LeroyOcaml"/>, but 
       performance critical components such as SHA-1 hash computation
       are implemented in C.
-    </p>
+  </p> -->
     <p>
       The combination of mutability and unboxed
       representation presents several challenges for type
       inference. Mutability is an attribute of the <em>location</em>
       storing a value and not the value itself. Therefore, two
-      expressions across a copy boundary can differ in their
+      expressions across a copy boundary (ex: arguments copied at a
+      function call) can differ in their
       mutability. We refer to this notion of mutability compatibility
-      of types as <em>copy compatibility</em>. For example, since the
-      formal and actual arguments of a call-by-value function
-      occupy different locations, their types need not be
-      equal but must be copy compatible. Copy compatibility creates a
-      situation where type and mutability inference is not 
-      purely syntax directed. Type inference is further complicated
+      of types as <em>copy compatibility</em>. Copy compatibility
+      creates a situation where type and mutability inference cannot 
+      be purely syntax-directed. Type inference is further complicated
       due to well known problems with the interaction of mutability
       and polymorphism&nbsp;<cite ref="wrightValRes1995"/>. This has
       forced a second-class treatment of mutability in ML-like
       languages and a lack of inferred polymorphism in others.
     </p>
     <p>
-      In this paper, we present a new type system and formal
-      foundations for a safe systems programming language that
-      supports all of the desirable features mentioned above.
-      The type system features a well-founded, complete mutability
-      model which is both expressive and has sound semantics. 
-      We propose a principal polymorphic type inference algorithm 
-      for a language with copy compatibility semantics using a system
-      of constrained types range over mutability and
+      In this paper, we present a sound and complete polymorphic type
+      inference algorithm for a language that features consistent and
+      complete mutability support. In order to overcome the challenges
+      posed by copy compatibility, the underlying type system uses a
+      system of constrained types range over mutability and
       polymorphism. Safety of the type system as well as soundness and
       completeness of the inference algorithm have been proved.
     </p>
   </sect1>
   <sect1 id="informal">
     <title>Informal Overview</title>
+    <btypes:TYPE>
+      <vspace ptsz="-2ex"/>
+    </btypes:TYPE>
     <p>
       In this section, we give an informal description of our type
       system and inference algorithm. 
       For purposes of presentation in this paper, we define
       <btypes:TYPE>
-	<language/>
-      </btypes:TYPE>, a core systems programming language calculus. 
+	<language/> </btypes:TYPE>, a core systems programming
+      language calculus.
       <btypes:TYPE>
 	<language/>
       </btypes:TYPE> is a direct expression of lambda
@@ -417,10 +425,9 @@
       <leadin>Copy Compatibility</leadin> 
       <btypes:TYPE> <language/> </btypes:TYPE> is a
       call-by-value language, and supports 
-      copy compatibility (&cong;), which permits locations across a
+      copy compatibility, which permits locations across a
       copy boundary to differ in their mutability.
-      For example, in the
-      following expression: 
+      For example, in the following expression: 
       <br/>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <btypes:TYPE>
@@ -477,7 +484,7 @@
 	<id name="y"/>
       </btypes:TYPE> and occupies a different location, 
       this expression is type safe. 
-      Here, we have the copy compatibility
+      Thus, we write
       <btypes:TYPE>
 	<ceq>
 	  <bool/>
@@ -485,7 +492,7 @@
 	    <bool/>
 	  </mutable>
 	</ceq>
-      </btypes:TYPE>.
+      </btypes:TYPE>, where &cong; indicates copy compatibility.
     </p>
     <p>
       Copy compatibility must not extend past a reference
@@ -584,10 +591,11 @@
     </font>
     <br/>
     <p>
-      Copy compatibility can be permitted at argument passing, new
-      variable binding, assignment, and basically at argument/return
-      positions of all expressions, except where a left expression is
-      expected or returned. For example, the expression
+      Copy compatibility is allowed all positions where a copy is
+      performed: at argument passing, new
+      variable binding, assignment, and basically in all expressions
+      where a left-expression is not expected or returned.
+      For example, the expression  
       <btypes:TYPE>
 	<tqExpr>
 	  <paren>
@@ -602,7 +610,8 @@
 	</tqExpr>
       </btypes:TYPE> is ill typed, but 
       the branches of a conditional can have
-      different but copy compatible types as in:
+      different but copy compatible types
+      as in:
       <btypes:TYPE>
 	<if>
 	  <true/>
@@ -617,10 +626,17 @@
 	    </mutable>
 	  </tqExpr>
 	</if>
-      </btypes:TYPE>.
+      </btypes:TYPE>, since the semantics are unchanged if 
+      temporary bindings are introduced in each branch.
     </p>
+    <btypes:TYPE>
+      <vspace ptsz="-4pt"/>
+    </btypes:TYPE>
     <sect2 id="infer">
       <title>Type Inference</title>
+      <btypes:TYPE>
+	<vspace ptsz="-3pt"/>
+      </btypes:TYPE>
       <p>
 	We now consider the problem of designing a type inference
 	algorithm for 
@@ -663,9 +679,9 @@
       <p>
 	It is natural to ask why mutability should be inferred at all.
 	That is: why not require explicit annotation for all mutable
-	values, and infer immutable types by default? In a language with
-	copy compatibility, this will result in a proliferation of type 
-	annotations. Constructor applications, 
+	values, and infer immutable types by default? Unfortunately,
+	in a language with copy compatibility, this will result in a
+	proliferation of type annotations. Constructor applications, 
 	polymorphic type instantiations, accessor functions,
 	<foreignphrase>etc.</foreignphrase> 
 	will have to be explicitly annotated with their types. For
@@ -731,29 +747,24 @@
 	<btypes:TYPE>
 	  <language/>
 	</btypes:TYPE> are:
-      </p>
-      <ol>
-	<li>
-	  <p>
-	    It must be sound, complete, and decidable without programmer
+	<br/>
+	(1) It must be sound, complete, and decidable without programmer
 	    annotations. 
-	  </p>
-	</li>
-	<li>
-	  <p>
-	    It must automatically infer both polymorphism and
+	<br/>
+	(2) It must automatically infer both polymorphism and
 	    mutability.
-	  </p>
-	</li>
-	<li>
-	  <p>
-	    It must infer types that are intelligible to the programmer.
-	    That is, it must avoid the main drawback of many inference
-	    systems with subtyping, where the inferred principal type is
-	    presented a set of equations and inequations.
-	  </p>
-	</li>
-      </ol>
+	<br/>
+	(3) It must infer types that are intelligible to the programmer.
+	That is, it must 
+	<br/>
+	&nbsp;&nbsp;&nbsp;
+	avoid the main drawback of many inference
+	systems with subtyping, where 
+	<br/>
+	&nbsp;&nbsp;&nbsp;
+	the inferred principal type is
+	presented a set of equations and inequations.
+      </p>
       <p>
 	In order to address the above requirements, we propose a
 	variant of the Hindley-Milner algorithm&nbsp;<cite
@@ -1194,14 +1205,13 @@
 	    <ptype/>
 	  </mbTop>
 	</btypes:TYPE> types. 
-	Types of the form
+	However, types of the form
 	<btypes:TYPE>
 	  <mbFull>
 	    <stype/>
 	    <ptype/>
 	  </mbFull>
-	</btypes:TYPE> not only provide a compact representation, but
-	are also required during type inference.
+	</btypes:TYPE> are critical for type inference.
 	For example, the type
 	<btypes:TYPE>
 	  <mbFull>
@@ -1217,33 +1227,13 @@
 	  <tvar name="beta"/>
 	</btypes:TYPE> later resolves to a more concrete (ex: pair)
 	type.
-	The grammar does not allow unnecessarily complex types such as
-	<btypes:TYPE>
-	  <mutable>
-	    <paren>
-	      <mbTop>
-		<tvar/>
-		<bool/>
-	      </mbTop>
-	    </paren>
-	  </mutable>
-	</btypes:TYPE>,
-	<btypes:TYPE>
-	  <mbTop>
-	    <tvar name="beta"/>
-	    <mbFull>
-	      <tvar/>
-	      <bool/>
-	    </mbFull>
-	  </mbTop>
-	</btypes:TYPE> <foreignphrase>etc.</foreignphrase>
       </p>
       <p>
-	Due to copy compatibility at argument and return positions, two
-	function types are <em>equal</em> regardless of the shallow
-	mutability of the argument and return types. 
-	Therefore, we follow a convention that all function types must be
-	written with immutable types at copy compatible positions. The
+	Since we allow copy compatibility at function argument and
+	return positions, two function types are equal regardless of
+	the shallow mutability of the argument and return types. 
+	Therefore, we follow a convention of writing all function
+	types with immutable types at copy compatible positions. The
 	intuition here is that type of a function must be described in
 	the interface form, and must hide the ``internal'' mutability
 	information. For example, the function  
@@ -1416,19 +1406,19 @@
 	algorithms fix the mutability of types before generalization
 	based on certain heuristics &mdash; thus sacrificing 
 	completeness&nbsp;<cite ref="sridhar2006plos"/>. 
-	In order to alleviate this problem, we propose the use of 
-	constrained types that are range over both mutability and
+	In order to alleviate this problem, we use a new form of 
+	constrained types that range over both mutability and
 	polymorphism.
       </p>
       <p>
-	We introduce a new form of constraint
+	We introduce constraints
 	<btypes:TYPE> 
 	  <pcst>
 	    <id/>
 	    <lKind/>
 	    <type/>
 	  </pcst>
-	</btypes:TYPE>, which enforces consistency restrictions on
+	</btypes:TYPE> to enforce consistency restrictions on
 	instantiations of generalized types.
 	The constraint 
 	<btypes:TYPE> 
@@ -1440,7 +1430,7 @@
 	</btypes:TYPE> requires that the identifier 
 	<btypes:TYPE> 
 	  <id/>
-	</btypes:TYPE> must only be instantiated according to the kind
+	</btypes:TYPE> only be instantiated according to the kind
 	<btypes:TYPE> 
 	  <lKind/>
 	</btypes:TYPE>, where
@@ -1522,8 +1512,8 @@
 	  </pcst>
 	</btypes:TYPE> represents the program point
 	(<progident>let</progident>) at which this constraint is
-	generated. We assume that there are no name collisions due to
-	inner bindings so that every 
+	generated. We assume that there are no name collisions 
+	so that	every such  
 	<btypes:TYPE> 
 	  <id/>
 	</btypes:TYPE> names a unique program point.
@@ -2105,7 +2095,8 @@
       <btypes:TYPE>
 	<language/>
       </btypes:TYPE>, we extend the calculus with stack and heap
-      locations. Heap locations are first class values, but stack
+      locations (Fig.&nbsp;<xref ref="grammar"/>). Heap locations are
+      first class values, but stack 
       locations are not. Further, we annotate all 
       <progident>let</progident> expressions with a kind
       &mdash;
@@ -2131,21 +2122,6 @@
       part of the input program.
       The correct kind of <progident>let</progident> is
       inferred from the static type information.
-      An expression 
-      <btypes:TYPE>
-	<aExpr/>
-      </btypes:TYPE> is said to be <em>standard</em> if
-      all <progident>let</progident> expressions in
-      <btypes:TYPE>
-	<aExpr/>
-      </btypes:TYPE> are annotated with one of the 
-      kinds
-      <btypes:TYPE>
-	<lKind k="mono"/>
-      </btypes:TYPE> or
-      <btypes:TYPE>
-	<lKind k="poly"/>
-      </btypes:TYPE>.
       We do not show the semantics for type-qualified expressions as
       they are trivial. 
     </p>
@@ -2290,6 +2266,24 @@
 	  </mutable>
 	</equiv>
       </btypes:TYPE>).
+      The predicates 
+      <btypes:TYPE>
+	<pred name="Immut"/>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<pred name="Mut"/>
+      </btypes:TYPE> identify types that are observably immutable and
+      mutable respectively. 
+      The
+      <btypes:TYPE>
+	<concrete>
+	  <type/>
+	</concrete>
+      </btypes:TYPE> predicate tests if the type
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> is concretizable by fixing variables that
+      range over mutability.
     </p>
     <p>
       <btypes:TYPE>
@@ -2351,8 +2345,26 @@
       </btypes:TYPE> in the natural, capture-avoiding manner.
     </p>
     <font size="small">
+    <p>
+      <leadin>Definition 1 (Canonical Expressions).</leadin>
+      An expression 
+      <btypes:TYPE>
+	<aExpr/>
+      </btypes:TYPE> is said to be <em>canonical</em> if
+      all <progident>let</progident> expressions in
+      <btypes:TYPE>
+	<aExpr/>
+      </btypes:TYPE> are annotated with one of the 
+      kinds
+      <btypes:TYPE>
+	<lKind k="mono"/>
+      </btypes:TYPE> or
+      <btypes:TYPE>
+	<lKind k="poly"/>
+      </btypes:TYPE>.
+    </p>
       <p>
-	<leadin>Definition 1 (Consistency of Constrained types).</leadin>
+	<leadin>Definition 2 (Consistency of Constrained types).</leadin>
 	<em>
 	  Let 
 	  <btypes:TYPE>
@@ -2552,7 +2564,7 @@
 	</em>
       </p>
       <p>
-	<leadin>Definition 2 (Consistency of substitutions).</leadin>
+	<leadin>Definition 3 (Consistency of substitutions).</leadin>
 	<em>
 	  A substitution 
 	  <btypes:TYPE>
@@ -2673,7 +2685,7 @@
 	</em>
       </p>
       <p>
-	<leadin>Definition 3 (Consistency of &starf; constraints).</leadin>
+	<leadin>Definition 4 (Consistency of &starf; constraints).</leadin>
 	<em>
 	  A set of &starf; constraints 
 	  <btypes:TYPE>
@@ -2819,7 +2831,7 @@
       </btypes:TYPE> has type
       <btypes:TYPE>
 	<type/>
-      </btypes:TYPE> subject to the &starf; constraints
+      </btypes:TYPE> subject to the set of &starf; constraints
       <btypes:TYPE>
 	<dCtset/>
       </btypes:TYPE>. We write
@@ -2882,7 +2894,17 @@
     </p>
     <p>
       We prove the soundness of our type system by demonstrating
-      subject reduction. 
+      subject reduction. Here, we prove that the type of an expression
+      is preserved exactly by left-execution, which ensures that
+      the type of a location does not change during the execution of a
+      program. We also show that right execution preserves types
+      except for shallow mutability. The result of a right execution
+      can only be used in copy compatible positions, or as the target
+      of a dereference. In the former case, preservation of shallow
+      mutability is unnecessary, and in the later, the type
+      within the reference is preserved exactly. 
+    </p>
+    <p>
       The interesting case is the safety of polymorphic
       <progident>let</progident> expressions. The 
       T-Let-MP rule does not require that the type
@@ -2977,7 +2999,7 @@
     </p> 
     <font size="small">
       <p>
-	<leadin>Definition 4 (Consistent Type Derivation).</leadin>
+	<leadin>Definition 5 (Consistent Type Derivation).</leadin>
 	<em>
 	  Let
 	  <btypes:TYPE>
@@ -3042,7 +3064,7 @@
 	</em>
       </p>
       <p>
-	<leadin>Definition 5 (Stack and Heap Typing)</leadin>
+	<leadin>Definition 6 (Stack and Heap Typing)</leadin>
 	<em>
 	  A heap <btypes:TYPE><heap/></btypes:TYPE> and a stack
 	  <btypes:TYPE><stack/></btypes:TYPE> are said to be <em>well
@@ -3112,7 +3134,7 @@
 	</em>
       </p>
       <p>
-	<leadin>Definition 6 (Valid Lvalues).</leadin>
+	<leadin>Definition 7 (Valid Lvalues).</leadin>
 	<em>
 	  We say that an lvalue
 	  <btypes:TYPE>
@@ -3199,7 +3221,7 @@
 	  <btypes:TYPE>
 	    <aExpr/>
 	  </btypes:TYPE>
-	  is a closed well typed standard expression,
+	  is a closed well typed canonical expression,
 	  that is, 
 	  <btypes:TYPE>
 	    <Sjudge name="*">
@@ -3323,7 +3345,7 @@
       <p>
 	<leadin>Lemma 2 (Preservation).</leadin>
 	<em>
-	  For any standard expression 
+	  For any canonical expression 
 	  <btypes:TYPE>
 	    <aExpr/>
 	  </btypes:TYPE>,      
@@ -3464,7 +3486,7 @@
 	</em>
       </p>
       <p>
-	<leadin>Definition 7 (Stuck State).</leadin>
+	<leadin>Definition 8 (Stuck State).</leadin>
 	<em>
 	  A system state
 	  <btypes:TYPE>
@@ -3517,7 +3539,7 @@
 	  <btypes:TYPE>
 	    <evalOp/>
 	  </btypes:TYPE>.
-	  For any standard expression 
+	  For any canonical expression 
 	  <btypes:TYPE>
 	    <aExpr/>
 	  </btypes:TYPE>, if
@@ -3580,7 +3602,7 @@
 	      <aExpr dash="'"/>
 	    </opState>
 	  </btypes:TYPE> is not stuck.
-	  That is, execution of a closed, standard, well typed expression
+	  That is, execution of a closed, canonical, well typed expression
 	  cannot lead to a stuck state. 
 	</em>
       </p>
@@ -3629,14 +3651,7 @@
       </btypes:TYPE> subject to the constraints
       <btypes:TYPE>
 	<aCtset/>
-      </btypes:TYPE>. The algorithm infers most general types by
-      introducing constraint types of the form
-      <btypes:TYPE>
-	<mbFull>
-	  <stype/>
-	  <ptype/>
-	</mbFull>
-      </btypes:TYPE> at all copy compatible positions.
+      </btypes:TYPE>. 
       <btypes:TYPE>
 	<models name="new">
 	  <assume/>
@@ -3644,6 +3659,38 @@
 	</models> 
       </btypes:TYPE> identifies fresh type variables used in the
       inference derivation.
+    </p>
+    <p>
+      The inference algorithm infers most general types by
+      introducing constraint types of the form
+      <btypes:TYPE>
+	<mbFull>
+	  <stype/>
+	  <ptype/>
+	</mbFull>
+      </btypes:TYPE> at all copy compatible positions.
+      For example, the I-App rule introduces copy compatibility for
+      the function type itself, the argument and the return types.
+      The I-Sel rule represents the pair type as
+      <btypes:TYPE>
+	<mbTop>
+	  <tvar name="epsiv"/>
+	  <pair>
+	    <mbFull>
+	      <tvar name="alpha"/>
+	      <tvar name="beta"/>
+	    </mbFull>
+	    <mbFull>
+	      <tvar name="gamma"/>
+	      <tvar name="delta"/>
+	    </mbFull>
+	  </pair>
+	</mbTop>
+      </btypes:TYPE>, which (1) permits top-level
+      mutability of the pair type to be either mutable or immutable
+      (2) ensures that the type of the selection is exactly same as
+      the type of the field being selected
+      (3) propagates full copy compatibility ``one level down.''  
     </p>
     <p>
       The unification algorithm is shown in 
@@ -3665,13 +3712,13 @@
       <btypes:TYPE>
 	<aSubMap/>
       </btypes:TYPE> is a solution for all equality constraints 
-      and some of the &starf; in
+      and some of the &starf; constraints in
       <btypes:TYPE>
 	<aCtset/>
       </btypes:TYPE>.
       <btypes:TYPE>
 	<dCtset/>
-      </btypes:TYPE> is the set of &starf; in
+      </btypes:TYPE> is the set of &starf; constraints in
       <btypes:TYPE>
 	<aCtset/>
       </btypes:TYPE> on which 
@@ -3684,66 +3731,15 @@
       The U-Ct* rules perform unification of constrained
       types with other constrained/unconstrained types. First, an
       immutable version of the two types  
-      are unified to establish compatibility. Then, the constrained
+      are unified to establish compatibility 
+      (through constraints involving <btypes:TYPE>
+	<eqOp under="minzT"/>
+      </btypes:TYPE> and 
+      <btypes:TYPE>
+	<eqOp under="minz"/>
+      </btypes:TYPE>). Then, the constrained
       type is made to equal the other type exactly by unifying 
       its variable part with the other type.
-      Of particular interest is the U-Oct4 rule, which performs
-      unification across the two forms of constrained types.
-      If we have a unification constraint such as
-      <btypes:TYPE>
-	<set>
-	  <eq>
-	    <mbFull>
-	      <tvar name="gamma"/>
-	      <pair>
-		<type num="1"/>
-		<type num="2"/>
-	      </pair>
-	    </mbFull>
-	    <mbTop>
-	      <tvar/>
-	      <tvar name="beta"/>
-	    </mbTop>
-	  </eq>
-	</set>
-      </btypes:TYPE>, the U-Oct4 rule results in incompleteness due to 
-      the unification of base types. 
-      Here, completeness is ensured with the cooperation
-      of the inference system, which ensures that such constraints are
-      not generated.
-      The inference algorithm only produces 
-      <btypes:TYPE>
-	<mbTop>
-	  <tvar/>
-	  <ptype/>
-	</mbTop>
-      </btypes:TYPE> types of the form
-      <btypes:TYPE>
-	<mbTop>
-	  <tvar name="epsiv"/>
-	  <pair>
-	    <mbFull>
-	      <tvar name="alpha"/>
-	      <tvar name="beta"/>
-	    </mbFull>
-	    <mbFull>
-	      <tvar name="gamma"/>
-	      <tvar name="delta"/>
-	    </mbFull>
-	  </pair>
-	</mbTop>
-      </btypes:TYPE> in the I-Sel rule, which propagates the freedom
-      of mutability compatibility ``one level down.''
-      Without loss of generality, we assume that
-      <btypes:TYPE>
-	<gamma/>
-      </btypes:TYPE> and
-      <btypes:TYPE>
-	<store/>
-      </btypes:TYPE> do not violate this canonical representation of
-      types. 
-    </p>
-    <p>
       The key observation here is that the copy compatibility
       is a special restricted form of subtyping. Since the type of 
       the copy can be anywhere in the lattice of copy compatible 
@@ -3767,7 +3763,7 @@
     </p>
     <font size="small">
       <p>
-	<leadin>Definition 8 (Constraint Satisfaction).</leadin>
+	<leadin>Definition 9 (Constraint Satisfaction).</leadin>
 	<em>
 	  The satisfaction of a constraint set
 	  <btypes:TYPE>
@@ -3835,7 +3831,6 @@
 		  <dCtset/>
 		  <set>
 		    <grouping>
-		      <Forall/>
 		      <Subst>
 			<aSubMap/>
 			<pcst>
@@ -3898,7 +3893,7 @@
       </font>
       <br/>
       <p>
-	<leadin>Definition 9 (Notational Derivations).</leadin>
+	<leadin>Definition 10 (Notational Derivations).</leadin>
 	<em>
 	  We write:
 	  <br/>
@@ -4211,7 +4206,7 @@
 	      </compose>
 	      <aExpr/>
 	    </Subst>
-	  </btypes:TYPE> is standard, and
+	  </btypes:TYPE> is canonical, and
 	  <btypes:TYPE>
 	    <Sjudge name="*">
 	      <assume>
@@ -4409,8 +4404,8 @@
   <!--   </sect1> -->
   <bibliography>
     <font size="scriptsize">
-      <bibentry label="Alexander98"> 
-	<!-- <key>Alexander98</key> -->
+      <!-- <bibentry label="Alexander98"> 
+	 <key>Alexander98</key>
 	D. S. Alexander, W. A. Arbaugh, M. W. Hicks, P. Kakkar,
 	A. D. Keromytis, J. T. Moore, C. A. Gunder, S. M. Nettles,
 	and J. M. Smith. 
@@ -4419,7 +4414,7 @@
 	  IEEE Network
 	</doctitle>
 	May/June 1998.
-      </bibentry>
+      </bibentry> -->
       <bibentry label="Biagioni2001FoxNet"> 
 	<!-- <key>Biagioni01</key> -->
 	E. Biagioni, R. Harper, and P. Lee
@@ -4488,19 +4483,19 @@
 	  Programming</doctitle> pp. 168&ndash;179, 
 	2005.
       </bibentry>
-      <bibentry label="ISO1995Ada">
-	<!-- <key>ISO95</key> -->
+    <!-- <bibentry label="ISO1995Ada">
+	 <key>ISO95</key>
 	International Std. Organization
 	<doctitle>ISO/IEC 8652:1995 (Information
 	  Technology &mdash; Prog.
 	  Languages &mdash; Ada)</doctitle>, 1995.
-      </bibentry>
-      <bibentry label="ISO1998C++">
-	<!-- <key>ISO98</key> -->
+      </bibentry> -->
+    <!-- <bibentry label="ISO1998C++">
+	 <key>ISO98</key>
 	International Std. Organization
 	<doctitle>ISO/IEC FDIS 14882:1998(E) (Prog.
 	  Lang. - C++)</doctitle>, 1998.
-      </bibentry>
+      </bibentry> -->
       <bibentry label="ISO1999ANSI-C">
 	<!-- <key>ISO99</key> -->
 	International Std. Organization
@@ -4551,8 +4546,8 @@
 	  Libraries: The Revised report</doctitle>. Cambridge University
 	Press, 2003.
       </bibentry>
-      <bibentry label="LeroyOcaml">
-	<!-- <key>Leroy05</key> -->
+    <!-- <bibentry label="LeroyOcaml">
+	 <key>Leroy05</key>
 	Xavier Leroy,  
 	``The Objective Caml System Release 3.09, Documentation and
 	User's Manual.''
@@ -4560,7 +4555,7 @@
 	  href="http://caml.inria.fr/pub/docs/manual-ocaml/index.html">
 	  <progident>http://caml.inria.fr/pub/docs/ manual-ocaml/index.html</progident>
 	</link> 
-      </bibentry>
+      </bibentry> -->
       <bibentry label="Milner1978W">
 	<!-- <key>Milner78</key> -->
 	R. Milner 

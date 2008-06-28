@@ -2,9 +2,11 @@
 <!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
-<font size="small"  
-  xmlns:xi="http://www.w3.org/2001/XInclude"
-  xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <figure id="grammar" fullwidth='yes' 
+    latex.placement="tbh"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <font size="small">
   <table>
     <tbody>
       <tr valign="top">
@@ -253,8 +255,5 @@
     </tbody>
   </table>    
 </font>
-  
-  
-  
-  
-  
+  <caption>Extended <btypes:TYPE><language/></btypes:TYPE> grammar</caption>
+</figure>
