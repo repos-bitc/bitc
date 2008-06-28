@@ -83,10 +83,10 @@
       solving this problem.  
     </p> 
     <p>
-      <leadin>Representation Control</leadin> A systems programming
+      <leadin>Representation Control</leadin> <font color="blue">A systems programming
       language must be expressive enough to specify details of
       representation including boxed/unboxed data-structure layout and 
-      stack/heap allocation. For systems programs,
+      stack/heap allocation. </font> For systems programs,
       this is both a correctness as well as a performance
       requirement. Systems programs interact with the hardware through
       data structures such as page tables whose representation is
@@ -123,7 +123,7 @@
       systems tasks. 
     </p>
     <p>
-      <leadin>Complete Mutability</leadin> One of the key features
+      <leadin>Complete Mutability</leadin> <font color="blue">One of the key features
       essential for systems programming is support for mutability. The
       support for mutability must be `complete' in the sense that any
       location &mdash; whether on the stack, heap, or within other
@@ -142,7 +142,7 @@
       Haskell&nbsp;<cite ref="peytonjones2003haskellrevisedreport"/>,
       support for mutability is even more restrictive than ML. 
       These restricted models of mutability are
-      insufficiently expressive from a systems programming perspective.
+      insufficiently expressive from a systems programming perspective.</font>
     </p>
     <p>
       <leadin>Consistent Mutability</leadin>
@@ -157,7 +157,7 @@
       a compiler can safely perform without complex alias
       analysis. Polymorphic type inference systems such as
       Hindley-Milner algorithm&nbsp;<cite ref="Milner1978W"/> also 
-      rely on a sound notion of immutability. ML supports well-founded
+      rely on a sound notion of immutability. ML supports consistent
       mutability since types are definitive about the (im)mutability
       of every location. In contrast, C does not support this
       feature. For example, in C it is legal to write:   
@@ -174,8 +174,8 @@
       respect to the alias <progident>cp</progident> and not a
       statement of true immutability of the target location.
       The analysis and optimization of critical
-      systems programs can be improved by using a language whose
-      mutability model is well-founded. 
+      systems programs can be improved by using a language 
+      with a consistent mutability model. 
     </p>
     <p>
       <leadin>Type Inference and Polymorphism</leadin> Type
@@ -249,8 +249,8 @@
       complete mutability support. In order to overcome the challenges
       posed by copy compatibility, the underlying type system uses a
       system of constrained types range over mutability and
-      polymorphism. Safety of the type system as well as soundness and
-      completeness of the inference algorithm have been proved.
+      polymorphism. Safety of the type system as well as the soundness
+      and completeness of the type inference algorithm have been proved.
     </p>
   </sect1>
   <sect1 id="informal">
@@ -355,13 +355,13 @@
       <leadin>The Mutability Model</leadin>
       <btypes:TYPE>
 	<language/>
-      </btypes:TYPE> supports well-founded, complete mutability.
+      </btypes:TYPE> supports consistent, complete mutability.
       The mutability support is complete since the
       <progident>:=</progident> operator mutates both stack locations
       (let-bound locals, function parameters) and heap locations
       (<progident>dup</progident>-ed values). It can also perform
       in-place updates to individual fields of unboxed pairs.
-      The mutability support is well-founded since we impose the 
+      The mutability support is consistent since we impose the 
       ``one location, one type'' rule. For example, in the following
       expression,
       <br/>
@@ -4367,8 +4367,8 @@
     <p>
       In this paper, we have defined a language and type system 
       for systems programming which integrates all of unboxed
-      representation, well-founded complete mutability support, and
-      polymorphism. The mutability model is expressive enough to
+      representation, consistent and complete mutability support, as
+      well as polymorphism. The mutability model is expressive enough to
       permit mutation of unboxed/stack locations, and at the same time
       guarantees that types are definitive about the mutability of
       every location across all aliases. 
