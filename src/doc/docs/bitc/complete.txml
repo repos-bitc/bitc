@@ -83,10 +83,10 @@
       solving this problem.  
     </p> 
     <p>
-      <leadin>Representation Control</leadin> <font color="blue">A systems programming
+      <leadin>Representation Control</leadin> A systems programming
       language must be expressive enough to specify details of
       representation including boxed/unboxed data-structure layout and 
-      stack/heap allocation. </font> For systems programs,
+      stack/heap allocation.  For systems programs,
       this is both a correctness as well as a performance
       requirement. Systems programs interact with the hardware through
       data structures such as page tables whose representation is
@@ -123,7 +123,7 @@
       systems tasks. 
     </p>
     <p>
-      <leadin>Complete Mutability</leadin> <font color="blue">One of the key features
+      <leadin>Complete Mutability</leadin> One of the key features
       essential for systems programming is support for mutability. The
       support for mutability must be `complete' in the sense that any
       location &mdash; whether on the stack, heap, or within other
@@ -136,13 +136,13 @@
       not involve  garbage collection overhead. This is particularly
       important for high confidence and/or embedded kernels as they
       cannot tolerate unpredictable variance in overhead caused by
-      heap allocation and collection. ML-like languages only require
+      heap allocation and collection. ML-like languages require
       all mutable (<progident>ref</progident>) cells to reside on the
       heap. In pure languages like 
       Haskell&nbsp;<cite ref="peytonjones2003haskellrevisedreport"/>,
-      support for mutability is even more restrictive than ML. 
+	the support for mutability is even more restrictive than ML. 
       These restricted models of mutability are
-      insufficiently expressive from a systems programming perspective.</font>
+      insufficiently expressive from a systems programming perspective.
     </p>
     <p>
       <leadin>Consistent Mutability</leadin>
@@ -245,12 +245,13 @@
     </p>
     <p>
       In this paper, we present a sound and complete polymorphic type
-      inference algorithm for a language that features consistent and
-      complete mutability support. In order to overcome the challenges
+      inference algorithm for a language that supports consistent and
+      complete mutability. In order to overcome the challenges
       posed by copy compatibility, the underlying type system uses a
-      system of constrained types range over mutability and
+      system of constrained types that range over mutability and
       polymorphism. Safety of the type system as well as the soundness
-      and completeness of the type inference algorithm have been proved.
+      and completeness of the type inference algorithm have been
+      proved.
     </p>
   </sect1>
   <sect1 id="informal">
@@ -4367,8 +4368,8 @@
     <p>
       In this paper, we have defined a language and type system 
       for systems programming which integrates all of unboxed
-      representation, consistent and complete mutability support, as
-      well as polymorphism. The mutability model is expressive enough to
+      representation, consistent complete mutability support, and
+      polymorphism. The mutability model is expressive enough to 
       permit mutation of unboxed/stack locations, and at the same time
       guarantees that types are definitive about the mutability of
       every location across all aliases. 
