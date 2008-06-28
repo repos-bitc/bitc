@@ -2369,6 +2369,7 @@
     <xsl:call-template name="print.mathmode">
       <xsl:with-param name="print.mathmode.text">b</xsl:with-param> 
     </xsl:call-template>
+    <xsl:call-template name="print.index.dash"/>
   </xsl:template>
   
   <!-- true -->

@@ -147,7 +147,7 @@
     <p>
       <leadin>Consistent Mutability</leadin>
       The mutability support in a language is said to be
-      consistent if the (im)mutability
+      `consistent' if the (im)mutability
       of every location  is invariant across all aliases over program
       execution. In this model, there is a sound notion of
       immutability of locations. This benefits tools that perform
@@ -244,7 +244,7 @@
       languages and a lack of inferred polymorphism in others.
     </p>
     <p>
-      In this paper, we present a sound and complete polymorphic type
+      We present a sound and complete polymorphic type
       inference algorithm for a language that supports consistent and
       complete mutability. In order to overcome the challenges
       posed by copy compatibility, the underlying type system uses a
@@ -497,7 +497,7 @@
     </p>
     <p>
       Copy compatibility must not extend past a reference
-      boundary in order ensure that every location has unique type.
+      boundary in order ensure that every location has a unique type.
       We define copy compatibility for 
       <btypes:TYPE>
 	<language/>
@@ -612,7 +612,7 @@
       </btypes:TYPE> is ill typed, but 
       the branches of a conditional can have
       different but copy compatible types
-      as in:
+      as in
       <btypes:TYPE>
 	<if>
 	  <true/>
@@ -769,9 +769,9 @@
       <p>
 	In order to address the above requirements, we propose a
 	variant of the Hindley-Milner algorithm&nbsp;<cite
-	  ref="Milner1978W"/>. This algorithm uses polymorphism over
-	mutability and polymorphism itself in order to infer principal
-	types for       
+	  ref="Milner1978W"/>. This algorithm uses constrained types
+	that range over mutability and polymorphism in order to infer
+	principal types for       
 	<btypes:TYPE>
 	  <language/>
 	</btypes:TYPE> programs.
@@ -2348,11 +2348,12 @@
     <font size="small">
     <p>
       <leadin>Definition 1 (Canonical Expressions).</leadin>
+	<em>
       An expression 
       <btypes:TYPE>
 	<aExpr/>
       </btypes:TYPE> is said to be <em>canonical</em> if
-      all <progident>let</progident> expressions in
+      all <em><progident>let</progident></em> expressions in
       <btypes:TYPE>
 	<aExpr/>
       </btypes:TYPE> are annotated with one of the 
@@ -2363,6 +2364,7 @@
       <btypes:TYPE>
 	<lKind k="poly"/>
       </btypes:TYPE>.
+	</em>
     </p>
       <p>
 	<leadin>Definition 2 (Consistency of Constrained types).</leadin>
@@ -2892,6 +2894,12 @@
       constraints. The instantiated constraints are collected over
       the entire derivation, so that we can enforce instantiation
       consistency.  
+      <btypes:TYPE>
+	<models name="new">
+	  <assume/>
+	  <tvars/>
+	</models> 
+      </btypes:TYPE> identifies fresh type variables.
     </p>
     <p>
       We prove the soundness of our type system by demonstrating
@@ -2989,7 +2997,7 @@
       (in the forms
       <btypes:TYPE>
 	<id/>
-      </btypes:TYPE>, 
+      </btypes:TYPE> or
       <btypes:TYPE>
 	<select>
 	  <id/>
@@ -3222,7 +3230,7 @@
 	  <btypes:TYPE>
 	    <aExpr/>
 	  </btypes:TYPE>
-	  is a closed well typed canonical expression,
+	  is a closed canonical well typed expression,
 	  that is, 
 	  <btypes:TYPE>
 	    <Sjudge name="*">
@@ -3497,7 +3505,7 @@
 	      <aExpr/>
 	    </opState>
 	  </btypes:TYPE>
-	  is said to be <term>stuck</term> if
+	  is said to be <em>stuck</em> if
 	  <btypes:TYPE>
 	    <neq>
 	      <aExpr/>
@@ -3653,17 +3661,10 @@
       <btypes:TYPE>
 	<aCtset/>
       </btypes:TYPE>. 
-      <btypes:TYPE>
-	<models name="new">
-	  <assume/>
-	  <tvars/>
-	</models> 
-      </btypes:TYPE> identifies fresh type variables used in the
-      inference derivation.
     </p>
     <p>
       The inference algorithm infers most general types by
-      introducing constraint types of the form
+      introducing constrained types of the form
       <btypes:TYPE>
 	<mbFull>
 	  <stype/>
@@ -3729,6 +3730,8 @@
       <btypes:TYPE>
 	<uninOp excl="yes"/>
       </btypes:TYPE> represents disjoint union of sets.
+    </p>
+    <p>
       The U-Ct* rules perform unification of constrained
       types with other constrained/unconstrained types. First, an
       immutable version of the two types  
@@ -3739,7 +3742,7 @@
       <btypes:TYPE>
 	<eqOp under="minz"/>
       </btypes:TYPE>). Then, the constrained
-      type is made to equal the other type exactly by unifying 
+      type is made to exactly equal the other type by unifying 
       its variable part with the other type.
       The key observation here is that the copy compatibility
       is a special restricted form of subtyping. Since the type of 
@@ -4305,7 +4308,7 @@
       C's <progident>const</progident> notion of immutability-by-alias
       offers localized checking of immutability properties, and
       encourages good programming practice by serving as documentation
-      of programmers intentions.  Other systems have proposed
+      of programmers' intentions.  Other systems have proposed
       immutability-by-name&nbsp;<cite ref="DeLineMSRVault"/>,
       referential immutability&nbsp;<cites>
 	<cite ref="shapiro1999EROS"/>
@@ -4643,7 +4646,8 @@
       <bibentry label="sridhar2007formal">
 	<!-- <key>Sridhar07</key> -->
 	S. Sridhar, J. S. Shapiro and S. F. Smith
-	``Proof of Soundness of BitC Type System and Inference Algorithm''
+	``The BitC Type System and Inference Algorithm: Proofs of
+	Soundness and Completeness''
 	<link
 	  href="http://bitc-lang.org/docs/bitc/c-formal.pdf">
 	  <progident>http://www.bitc-lang.org/docs/bitc/c-formal.pdf</progident>

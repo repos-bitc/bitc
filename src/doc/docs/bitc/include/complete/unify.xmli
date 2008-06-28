@@ -886,6 +886,7 @@
 	    <Forall>
 	      <collection>
 		<ptype/>
+		<ptype dash="'"/>
 		<type/>
 		<type dash="'"/>
 		<type num="1"/>
