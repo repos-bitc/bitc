@@ -3000,7 +3000,7 @@ id : T
           <progident>let</progident> form.
         </p>
         <sect3>
-          <title>Reference Parameters</title>
+          <title>By-Reference Parameters</title>
           <p>
             By-reference
             parameters provide an optimized argument passing mechanism
