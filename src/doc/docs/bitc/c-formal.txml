@@ -6,8 +6,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
   <docinfo ptsz='default' latex.otheroptions="nocopyrightspace" latex.documentclass="sigplanconf">
-    <title>A Theory of Well-founded First Class Mutability</title>
-<!--     <title>A Theory of Meta-Polymorphism in Stateful &lambda;&mdash;Calculus</title> -->
+    <title>The BitC Type System and Inference Algorithm: Proofs of
+      Soundness and Completeness</title>
     <authorgroup>
       <author>
       	<firstname>Swaroop</firstname>
@@ -67,7 +67,6 @@
   <xi:include href="include/c-formal/opsem.xmli"/>
   <xi:include href="include/c-formal/subst.xmli"/>
   <xi:include href="include/c-formal/static_sem.xmli"/>
-  <xi:include href="include/c-formal/locsem.xmli"/>
   <xi:include href="include/c-formal/subtype.xmli"/>
   <xi:include href="include/c-formal/type.xmli"/>
   <xi:include href="include/c-formal/declarative.xmli"/>

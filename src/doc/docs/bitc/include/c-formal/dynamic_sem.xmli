@@ -63,16 +63,6 @@
 	  </select>
 	</alternatives>
       </bnf>
-      <bnf desc="Lval Redex">
-	<redex name="L"/>
-	<alternatives>
-	  <hole/>
-	  <assign>
-	    <redex name="L"/>
-	    <aExpr/>
-	  </assign> 
-	</alternatives>
-      </bnf>
       <bnf desc="Redex">
 	<redex/>
 	<alternatives>
