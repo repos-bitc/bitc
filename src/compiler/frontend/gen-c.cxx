@@ -508,6 +508,18 @@ toCtype(GCPtr<Type> typ, string IDname="", unsigned long flags=0,
   return out.str();
 }
 
+static inline bool
+isUnitType(GCPtr<Type> ty)
+{
+  return (ty->getBareType()->kind == ty_unit);
+}
+
+static inline bool
+isUnitType(GCPtr<AST> ast)
+{
+  return isUnitType(ast->symType);
+}
+
 static inline std::string
 decl(GCPtr<Type> typ, string idName, unsigned flags=0,
      size_t field_bits=0)
@@ -623,25 +635,46 @@ emit_fnxn_decl(INOstream &out, GCPtr<AST> ast,
   GCPtr<Type> fnargvec = fnType->Args()->getBareType();
   assert(argvec->children->size() == fnargvec->components->size());
 
-  out << toCtype(retType);
+  /* If return type is unit, emit void as a special case. */
+  if (isUnitType(retType))
+    out << "void";
+  else
+    out << toCtype(retType);
   if(!oneLine)
     out << endl;
   
   out << pfx << CMangle(id) << " ";
   out << "(";
   assert(startParam <= argvec->children->size());
+  int paramCount = 0;
   for(size_t i=startParam; i < argvec->children->size(); i++) {
-    if(i > startParam)
-      out << ", ";
-    
     GCPtr<AST> pat = argvec->child(i);
     assert(pat->astType == at_identPattern);
     GCPtr<AST> arg = pat->child(0);
     unsigned long flags = ((fnargvec->CompFlags(i) &
 			    COMP_BYREF)?CTYP_BYREF:0);
+
+    /* Do not emit parameters of type unit, since there is no point
+     * passing them. Even if they are mutable, the
+     * passed actual parameter is already initialized and therefore
+     * already holds the unit value. Since it can only be overwritten
+     * by another copy of the unit value, we simply short-circuit any
+     * possible assignment.
+     */
+    if (isUnitType(arg))
+      continue;
+    
+    if(paramCount)
+      out << ", ";
     
     out << decl(arg, "", flags);
+    paramCount++;
   }
+
+  /* If no parameters got emitted, say f(void) explicitly. */
+  if (paramCount == 0)
+    out << "void";
+
   out << ")";
 }
 
@@ -676,6 +709,37 @@ emit_fnxn_label(std::ostream& errStream,
   GCPtr<AST> body = lam->child(1);
   GCPtr<AST> ret=0;
   
+  /* While emitting the function parameters, we omitted any parameters
+   * of unit type, because there is no point passing those or letting
+   * them occupy storage. However, code within the procedure may
+   * refer to those variables, so we need to define them locally. 
+   *
+   * Note that even if the formal paramter is by-ref, it's value
+   * cannot change because there is only one legal value and it is
+   * already initialized. We can simply declare a (possibly mutable)
+   * local of unit type and initialize it to the unit literal here.
+   *
+   * This will often result in parameters of unit type being
+   * eliminated by the C optimizer on the grounds that they are
+   * unreachable.
+   */
+
+  GCPtr<AST> argvec = lam->child(0);
+  for(size_t i= 0; i < argvec->children->size(); i++) {
+    GCPtr<AST> pat = argvec->child(i);
+
+    assert(pat->astType == at_identPattern);
+    GCPtr<AST> arg = pat->child(0);
+
+    if (isUnitType(arg)) {
+      /* Note that even if the formal paramter is by-ref, we aren't
+       * going to pass anything back here, so we can simply re-declare a
+       * (possibly mutable) local of unit type and initialize it to
+       * the unit literal here. */
+      out << decl(arg, "", 0) << " = " << "0;" << '\n';
+    }
+  }
+
   assert(body->astType == at_container);
   if(body->child(1)->astType == at_letStar) {
     CHKERR(errFree, toc(errStream, uoc, body, out, CMangle(id), 
@@ -688,10 +752,18 @@ emit_fnxn_label(std::ostream& errStream,
     ret = body->child(1); // trivial return
   }
   assert(ret);
-  out <<  "return ";
+
+  /* If function returns unit, we run the body for side effects and
+     perform a return without any value. */
+  if (! isUnitType(ret))
+    out << "return ";
   CHKERR(errFree, toc(errStream, uoc, ret, out, CMangle(id), 
 		      lam, 1, flags));	
   out << ";" << endl;
+
+  if (isUnitType(ret))
+    out << "return;" << endl;
+
   out.less();
   out << "}" << endl;
 
@@ -712,13 +784,17 @@ emit_fnxn_label(std::ostream& errStream,
     out.more();
     
     GCPtr<AST> argvec = lam->child(0);    
-    out << "return " << CMangle(id) << "(currentClosurePtr";
+    if (! isUnitType(ret))
+      out << "return ";
+    out << CMangle(id) << "(currentClosurePtr";
     for(size_t i=1; i < argvec->children->size(); i++) {
       GCPtr<AST> pat = argvec->child(i);
       GCPtr<AST> arg = pat->child(0);
       out << ", " << CMangle(arg);
     }
     out << ");" << endl; 
+    if (isUnitType(ret))
+      out << "return;" << endl;
     out.less();
     out << "}" << endl <<endl;
   }
@@ -1553,19 +1629,25 @@ toc(std::ostream& errStream,
 	GCPtr<Type> ret = id->symType->getBareType()->Ret();
 	GCPtr<Type> args = id->symType->getBareType()->Args();
 	
-	out << toCtype(ret) << " "	
-	    << CMangle(id) << " (";
+	out << (isUnitType(ret) ? "void" : toCtype(ret)) << " ";
+	out << CMangle(id) << " (";
 	
+	size_t argCount = 0;
 	for(size_t i=0; i < args->components->size(); i++) {
 	  GCPtr<Type> arg = args->CompType(i);
-	  if(i > 0)
+	  if (isUnitType(arg))
+	    continue;
+	  if(argCount > 0)
 	    out << ", ";
 	  
 	  out << toCtype(arg) << " ";
 	  if(args->CompFlags(i) & COMP_BYREF)
 	    out << "*";
 	  out << " arg" << i;
+	  argCount++;
 	}
+	if (argCount == 0)
+	  out << "void";
 	out << ");"
 	    << std::endl;
       }
@@ -1817,14 +1899,37 @@ toc(std::ostream& errStream,
       
       GCPtr<Type> clType = ast->child(0)->symType->getBareType();
       assert(clType->kind == ty_fn);
+      GCPtr<Type> retType = clType->Ret()->getType();
       GCPtr<Type> argsType = clType->Args()->getType();
+
+      /* If function returns unit type, we emit it to C as returning
+       * void. This is necessary in order to be able to declare
+       * external procedures in C. Which is all well and good, except
+       * that we need to get back the unit instance after the function
+       * returns. Re-introduce the unit instance here by turning such
+       * calls into a comma expression of the form
+       *
+       *    ( fn(args), 0 )
+       */
+      if (isUnitType(retType))
+	out << "(";
 
       TOC(errStream, uoc, ast->child(0), out, IDname, 
 	  ast, 0, flags);
       
       out << "(";
+      size_t count = 0;
       for(size_t c=1; c < ast->children->size(); c++) {
-	if(c > 1)
+	/* Do not emit anything at an argument position that is of
+	 * unit type. Remember that we have run the SSA pass, so any
+	 * side effects from this computation have already been
+	 * computed. With that handled, it is okay to just not pass
+	 * the parameter here.
+	 */
+	if (isUnitType(ast->child(c)))
+	  continue;
+
+	if(count > 1)
 	  out << ", ";	    
 	
 	if(argsType->CompFlags(c-1) & COMP_BYREF) {	  
@@ -1834,8 +1939,13 @@ toc(std::ostream& errStream,
 	
 	TOC(errStream, uoc, ast->child(c), out, IDname, 
 	    ast, c, flags);
+	count++;
       }
       out << ")";
+
+      if (isUnitType(retType))
+	out << ",0)";
+
       break;
     }
 
@@ -2392,19 +2502,25 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
 	  << t->asString()
 	  << "*/" << endl;
       out << "typedef " 
-	  << toCtype(ret)
+	  << (isUnitType(ret) ? "void" : toCtype(ret))
 	  << "  (*"
 	  << CMangle(t->mangledString(true))
 	  << ") (";
 
+      size_t argCount = 0;
       for(size_t i=0; i < args->components->size(); i++) {
 	GCPtr<Type> arg = args->CompType(i);
-	if(i > 0)
+	if (isUnitType(arg))
+	  continue;
+	if(argCount > 0)
 	  out << ", ";
 	
 	out << toCtype(arg)	
 	    << " arg" << i;
+	argCount++;
       }
+      if (argCount == 0)
+	out << "void";
       out << ");"
 	  << endl << endl;            
       break;
@@ -2679,25 +2795,36 @@ EmitGlobalInitializers(std::ostream& errStream,
 	  GCPtr<Type> ret = fnType->Ret();
 	  GCPtr<Type> args = fnType->Args()->getBareType();
 	  
-	  out << toCtype(ret) << endl	  
+	  out << (isUnitType(ret) ? toCtype(ret) : "void") << endl	  
 	      << CMangle(label);
 	  out << "(";
+	  size_t argCount;
 	  for(size_t i=0; i < args->components->size(); i++) {
-	    if(i > 0)
-	      out << ", ";
-	    
 	    GCPtr<Type> arg = args->CompType(i);
+	    if (isUnitType(arg))
+	      continue;
+
+	    if(argCount > 0)
+	      out << ", ";
 	    out << toCtype(arg) << " arg" << i;
+	    argCount++;
 	  }
+	  if (argCount == 0)
+	    out << "void";
 	  out << ")" << endl;
 	  out << "{" << endl;
 	  out.more();
 	  
-	  // We won't get caught here, BitC functions 
-	  // must return something! 
-	  out << "return " << CMangle(id);
+	  if (!isUnitType(ret))
+	    out << "return ";
+
+	  out << CMangle(id);
 	  out << "(";
 	  for(size_t i=0; i < args->components->size(); i++) {
+	    GCPtr<Type> arg = args->CompType(i);
+	    if (isUnitType(arg))
+	      continue;
+
 	    if(i > 0)
 	      out << ", ";
 	    
