@@ -47,6 +47,7 @@ MY_TYPE_XML=c-formal e-formal h-formal mut-formal
 MY_TYPE_XML+=complete core mutinfer sys-infer 
 
 OSDOC_XML_SRC=$(MY_XML) $(MY_TYPE_XML)
+OSDOC_SBOX_SRC=$(wildcard *.sbox)
 
 CLEANLIST=bitc-grammar.c mutinfer.xml sys-infer.xml 
 CLEANLIST+=c-formal.xml h-formal.xml e-formal.xml mut-formal.xml
