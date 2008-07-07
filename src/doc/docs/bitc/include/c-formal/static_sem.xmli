@@ -89,13 +89,11 @@
 	<aTS/>
 	<alternatives>
 	  <type/>
-	  <forall>                    
+	  <TS>
  	    <tvars/>
-	    <ctype>
-	      <type/>
-	      <dCtset/>
-	    </ctype>
-	  </forall>
+	    <type/>
+	    <dCtset/>
+	  </TS>
 	</alternatives>
       </bnf>
 <!--       <bnf desc="Sets"> -->
@@ -222,7 +220,7 @@
 	  </compose>
 	</alternatives>
       </bnf>
-      <bnf desc="Kind Subst">            
+      <!-- <bnf desc="Kind Subst">            
 	<aKmap/>            
 	<alternatives>
 	  <EmptySubst/>
@@ -235,7 +233,7 @@
 	    <aKmap/>
 	  </compose>
 	</alternatives>
-      </bnf>
+      </bnf> -->
       <bnf desc="Binding Environment">
 	<gamma/>
 	<alternatives>
@@ -539,6 +537,24 @@
 	    <Tceq>
 	      <type num="2"/>
 	      <type num="1"/>
+	    </Tceq>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <Tceq>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </Tceq>
+	    <Tceq>
+	      <type num="2"/>
+	      <type num="3"/>
+	    </Tceq>
+	  </tyPre>
+	  <tyConc>
+	    <Tceq>
+	      <type num="1"/>
+	      <type num="3"/>
 	    </Tceq>
 	  </tyConc>
 	</tyRule>
@@ -2502,651 +2518,6 @@
       </VEqns>
     </btypes:TYPE>.
   </definition>
-  <definition id="ftvs">
-    <title>Free Type Variables</title>
-    <p>
-      We denote the set of free type variables in a type
-      <btypes:TYPE><type/></btypes:TYPE> as
-      <btypes:TYPE><ftvs><type/></ftvs></btypes:TYPE>. 
-    </p>
-    <btypes:TYPE>
-      <VEqns>
-	<equation>
-	  <lhs>
-	    <ftvs>
-	      <tvar/>
-	    </ftvs>
-	  </lhs>
-	  <rhs>
-	    <set>
-	      <tvar/>
-	    </set>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <ftvs>
-	      <unit/>
-	    </ftvs>
-	  </lhs>
-	  <rhs>
-	    <empty/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <ftvs>
-	      <bool/>
-	    </ftvs>
-	  </lhs>
-	  <rhs>
-	    <empty/>                
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <ftvs>
-	      <ref>
-		<type/>
-	      </ref>
-	    </ftvs>
-	  </lhs>
-	  <rhs>
-	    <ftvs>                  
-	      <type/>                  
-	    </ftvs>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <ftvs>
-	      <mutable>
-		<ptype/>
-	      </mutable>
-	    </ftvs>
-	  </lhs>
-	  <rhs>
-	    <ftvs>                  
-	      <type/>                  
-	    </ftvs>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <ftvs>
-	      <fn>
-		<type num="1"/>
-		<type num="2"/>
-	      </fn>
-	    </ftvs>
-	  </lhs>
-	  <rhs>
-	    <unin>
-	      <ftvs>
-		<type num="1"/>
-	      </ftvs>                    
-	      <ftvs>
-		<type num="2"/>
-	      </ftvs>                    
-	    </unin>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <ftvs>
-	      <pair>
-		<type num="1"/>
-		<type num="2"/>
-	      </pair>
-	    </ftvs>                                  
-	  </lhs>
-	  <rhs>
-	    <unin>
-	      <ftvs>
-		<type num="1"/>
-	      </ftvs>                    
-	      <ftvs>
-		<type num="2"/>
-	      </ftvs>
-	    </unin>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <ftvs>
-	      <mbTop>
-		<tvar/>
-		<ptype/>
-	      </mbTop>
-	    </ftvs>                                  
-	  </lhs>
-	  <rhs>
-	    <unin>
-	      <ftvs>
-		<tvar/>
-	      </ftvs>                    
-	      <ftvs>
-		<ptype/>
-	      </ftvs>                    
-	    </unin>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <ftvs>
-	      <mbFull>
-		<stype/>
-		<ptype/>
-	      </mbFull>
-	    </ftvs>                                  
-	  </lhs>
-	  <rhs>
-	    <unin>
-	      <ftvs>
-		<stype/>
-	      </ftvs>
-	      <ftvs>
-		<ptype/>
-	      </ftvs>
-	    </unin>
-	  </rhs>
-	</equation>
-      </VEqns>
-    </btypes:TYPE>.
-  </definition>
-  <definition id="MNTVs">
-    <title>mtvs, Mtvs, Ntvs</title>
-    <p>
-      <btypes:TYPE>
-	<pred name="mtv">
-	  <solvable/>
-	</pred>
-      </btypes:TYPE> defines the set of all type variables
-      <btypes:TYPE>
-	<tvars/>
-      </btypes:TYPE> 
-      such that
-      <btypes:TYPE>
-	<tvar/>
-      </btypes:TYPE> occurs in 
-      <btypes:TYPE>
-	<solvable/>
-      </btypes:TYPE>
-      within a maybe type in the form 
-      <btypes:TYPE>
-	<mbTop>
-	  <tvar/>
-	  <ptype/>
-	</mbTop>            
-      </btypes:TYPE>.
-      Similarly,
-      <btypes:TYPE>
-	<pred name="Mtv">
-	  <solvable/>
-	</pred>
-      </btypes:TYPE> defines the set of all type variables
-      <btypes:TYPE>
-	<tvars/>
-      </btypes:TYPE>
-      such that
-      <btypes:TYPE>
-	<tvar/>
-      </btypes:TYPE> occurs in     
-      <btypes:TYPE>
-	<solvable/>
-      </btypes:TYPE> 
-      within a maybe type in the form
-      <btypes:TYPE>
-	<mbFull>
-	  <tvar/>
-	  <ptype/>
-	</mbFull>            
-      </btypes:TYPE> or 
-      <btypes:TYPE>
-	<mbFull>
-	  <mutable>
-	    <tvar/>
-	  </mutable>
-	  <ptype/>
-	</mbFull>            
-      </btypes:TYPE>.
-      <btypes:TYPE>
-	<pred name="ntv">
-	  <solvable/>
-	</pred>
-      </btypes:TYPE> defines the set of unconstrained variables (that
-      don't appear in any of the above two forms).
-    </p>
-    <btypes:TYPE>
-      <!-- mtvs -->
-      <VEqns>
-	<equation>
-	  <lhs>
-	    <pred name="mtv">
-	      <tvar/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <empty/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="mtv">
-	      <unit/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <empty/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="mtv">
-	      <bool/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <empty/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="mtv">
-	      <ref>
-		<type/>
-	      </ref>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="mtv">
-	      <type/>
-	    </pred>
-	  </rhs>
-	</equation>	
-	<equation>
-	  <lhs>
-	    <pred name="mtv">
-	      <mutable>
-		<ptype/>
-	      </mutable>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="mtv">
-	      <ptype/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="mtv">
-	      <fn>
-		<type num="1"/>
-		<type num="2"/>
-	      </fn>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <unin>
-	      <pred name="mtv">
-		<type num="1"/>
-	      </pred>
-	      <pred name="mtv">
-		<type num="2"/>
-	      </pred>
-	    </unin>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="mtv">
-	      <pair>
-		<type num="1"/>
-		<type num="2"/>
-	      </pair>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <unin>
-	      <pred name="mtv">
-		<type num="1"/>
-	      </pred>
-	      <pred name="mtv">
-		<type num="2"/>
-	      </pred>
-	    </unin>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="mtv">
-	      <mbTop>
-		<tvar/>
-		<ptype/>
-	      </mbTop>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
- 	    <unin>
-	      <set>
-		<tvar/>
-	      </set>
-	      <pred name="mtv">
-		<ptype/>
-	      </pred>
-	    </unin>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="mtv">
-	      <mbFull>
-		<stype/>
-		<ptype/>
-	      </mbFull>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="mtv">
-	      <ptype/>
-	    </pred>
-	  </rhs>
-	</equation>
-      </VEqns>
-      <!-- Mtvs -->
-      <VEqns>
-	<equation>
-	  <lhs>
-	    <pred name="Mtv">
-	      <tvar/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <empty/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Mtv">
-	      <unit/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <empty/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Mtv">
-	      <bool/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <empty/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Mtv">
-	      <ref>
-		<type/>
-	      </ref>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="Mtv">
-	      <type/>
-	    </pred>
-	  </rhs>
-	</equation>	
-	<equation>
-	  <lhs>
-	    <pred name="Mtv">
-	      <mutable>
-		<ptype/>
-	      </mutable>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="Mtv">
-	      <ptype/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Mtv">
-	      <fn>
-		<type num="1"/>
-		<type num="2"/>
-	      </fn>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <unin>
-	      <pred name="Mtv">
-		<type num="1"/>
-	      </pred>
-	      <pred name="Mtv">
-		<type num="2"/>
-	      </pred>
-	    </unin>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Mtv">
-	      <pair>
-		<type num="1"/>
-		<type num="2"/>
-	      </pair>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <unin>
-	      <pred name="Mtv">
-		<type num="1"/>
-	      </pred>
-	      <pred name="Mtv">
-		<type num="2"/>
-	      </pred>
-	    </unin>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Mtv">
-	      <mbTop>
-		<tvar/>
-		<ptype/>
-	      </mbTop>                       
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="Mtv">
-	      <ptype/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Mtv">
-	      <mbFull>
-		<tvar/>
-		<ptype/>
-	      </mbFull>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <unin>
-	      <set>
-		<tvar/>
-	      </set>
-	      <pred name="Mtv">
-		<ptype/>
-	      </pred>
-	    </unin>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="Mtv">
-	      <mbFull>
-		<mutable>
-		  <tvar/>
-		</mutable>
-		<ptype/>
-	      </mbFull>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <unin>
-	      <set>
-		<tvar/>
-	      </set>
-	      <pred name="Mtv">
-		<ptype/>
-	      </pred>
-	    </unin>
-	  </rhs>
-	</equation>
-      </VEqns>
-      <!-- ntvs -->
-      <VEqns>
-	<equation>
-	  <lhs>
-	    <pred name="ntv">
-	      <tvar/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <set>
-	      <tvar/>
-	    </set>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="ntv">
-	      <unit/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <empty/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="ntv">
-	      <bool/>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <empty/>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="ntv">
-	      <ref>
-		<type/>
-	      </ref>                            
-	    </pred>              
-	  </lhs>
-	  <rhs>
-	    <pred name="ntv">
-	      <type/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="ntv">
-	      <mutable>
-		<ptype/>
-	      </mutable>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="ntv">
-	      <ptype/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="ntv">
-	      <fn>
-		<type num="1"/>
-		<type num="2"/>
-	      </fn>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <unin>
-	      <pred name="ntv">
-		<type num="1"/>
-	      </pred>
-	      <pred name="ntv">
-		<type num="2"/>
-	      </pred>
-	    </unin>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="ntv">
-	      <pair>
-		<type num="1"/>
-		<type num="2"/>
-	      </pair>                            
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <unin>
-	      <pred name="ntv">
-		<type num="1"/>
-	      </pred>
-	      <pred name="ntv">
-		<type num="2"/>
-	      </pred>
-	    </unin>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="ntv">
-	      <mbTop>
-		<tvar/>
-		<ptype/>
-	      </mbTop>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="ntv">
-	      <ptype/>
-	    </pred>
-	  </rhs>
-	</equation>
-	<equation>
-	  <lhs>
-	    <pred name="ntv">
-	      <mbFull>
-		<stype/>
-		<ptype/>
-	      </mbFull>
-	    </pred>
-	  </lhs>
-	  <rhs>
-	    <pred name="ntv">
-	      <ptype/>
-	    </pred>
-	  </rhs>
-	</equation>
-      </VEqns>
-    </btypes:TYPE>
-  </definition>
   <definition id="constraint-colection">
     <title>Constraint Collection</title>
     <p>
@@ -3355,61 +2726,282 @@
       </VEqns>
     </btypes:TYPE>
   </definition>
-  <definition id="GTVs">
-    <title>Generalized Type variables</title>
+  <definition id="ftvs">
+    <title>Free Type Variables</title>
     <p>
-      <btypes:TYPE>
-	<pred name="gtv">
-	  <sigma/>
-	</pred>
-      </btypes:TYPE> defines the set of all generalized type variables 
-      in a type-scheme. We extend this definition to a binding
-      environment in a straightforward way.
+      We denote the set of free type variables in a type
+      <btypes:TYPE><type/></btypes:TYPE> as
+      <btypes:TYPE><ftvs><type/></ftvs></btypes:TYPE>. 
     </p>
     <btypes:TYPE>
       <VEqns>
 	<equation>
 	  <lhs>
-	    <pred name="gtv">
-	      <TS>
-		<tvars/>
-		<type/>
-	      </TS>
-	    </pred>
+	    <ftvs>
+	      <tvar/>
+	    </ftvs>
 	  </lhs>
 	  <rhs>
 	    <set>
-	      <tvars/>
-	    </set>	      
+	      <tvar/>
+	    </set>
 	  </rhs>
 	</equation>
 	<equation>
 	  <lhs>
-	    <pred name="gtv">
-	      <gamma/>
-	    </pred>
+	    <ftvs>
+	      <unit/>
+	    </ftvs>
 	  </lhs>
 	  <rhs>
-	    <grouping>
-	      <Unin>
-		<pred name="gtv">
-		  <aTS num="j"/>
-		</pred>
-	      </Unin>
-	      <text content=", "/>
-	      <Forall/>
-	      <in>
-		<mapping>
-		  <id num="j"/>
-		  <aTS num="j"/>
-		</mapping>
-		<gamma/>
-	      </in>
-	    </grouping>
+	    <empty/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <bool/>
+	    </ftvs>
+	  </lhs>
+	  <rhs>
+	    <empty/>                
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <ref>
+		<type/>
+	      </ref>
+	    </ftvs>
+	  </lhs>
+	  <rhs>
+	    <ftvs>                  
+	      <type/>                  
+	    </ftvs>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <mutable>
+		<ptype/>
+	      </mutable>
+	    </ftvs>
+	  </lhs>
+	  <rhs>
+	    <ftvs>                  
+	      <type/>                  
+	    </ftvs>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	    </ftvs>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>                    
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>                    
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	    </ftvs>                                  
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>                    
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	    </ftvs>                                  
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <ftvs>
+		<tvar/>
+	      </ftvs>                    
+	      <ftvs>
+		<ptype/>
+	      </ftvs>                    
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <mbFull>
+		<stype/>
+		<ptype/>
+	      </mbFull>
+	    </ftvs>                                  
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <ftvs>
+		<stype/>
+	      </ftvs>
+	      <ftvs>
+		<ptype/>
+	      </ftvs>
+	    </unin>
 	  </rhs>
 	</equation>
       </VEqns>
-    </btypes:TYPE>
+    </btypes:TYPE>.
+  </definition>
+  <definition id="MNTVs">
+    <title>mtvs, Mtvs, Ntvs</title>
+    <p>
+      <btypes:TYPE>
+	<pred name="mtv">
+	  <solvable/>
+	</pred>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<pred name="Mtv">
+	  <solvable/>
+	</pred>
+      </btypes:TYPE>, and
+      <btypes:TYPE>
+	<pred name="ntv">
+	  <solvable/>
+	</pred>
+      </btypes:TYPE> denote the set of all type variables appearing in 
+      <btypes:TYPE>
+	<solvable/>
+      </btypes:TYPE> constrained by
+      <btypes:TYPE>
+	<mbTop>
+	  <tvar/>
+	  <ptype/>
+	</mbTop>
+      </btypes:TYPE>, by
+      <btypes:TYPE>
+	<mbFull>
+	  <stype/>
+	  <ptype/>
+	</mbFull>
+      </btypes:TYPE> and unconstrained
+      respectively.
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <pred name="mtv">
+		<types/>
+	      </pred>
+	      <set>
+		<grouping>
+		  <tvar/>
+		  <ST/>
+		  <in>
+		    <mbTop>
+		      <tvar/>
+		      <ptype/>
+		    </mbTop>
+		    <spset>
+		      <types/>
+		    </spset>
+		  </in>
+		</grouping>
+	      </set>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <pred name="Mtv">
+		<types/>
+	      </pred>
+	      <set>
+		<grouping>
+		  <tvar/>
+		  <ST/>
+		  <in>
+		    <mbFull>
+		      <tvar/>
+		      <ptype/>
+		    </mbFull>
+		    <spset>
+		      <types/>
+		    </spset>
+		  </in>
+		  <text content=" or "/>
+		  <in>
+		    <mbFull>
+		      <mutable>
+			<tvar/>
+		      </mutable>
+		      <ptype/>
+		    </mbFull>
+		    <spset>
+		      <types/>
+		    </spset>
+		  </in>
+		</grouping>
+	      </set>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <pred name="ntv">
+		<types/>
+	      </pred>
+	      <set>
+		<grouping>
+		  <tvar/>
+		  <ST/>
+		  <in>
+		    <tvar/>
+		    <spset>
+		      <types/>
+		    </spset>
+		  </in>
+		</grouping>
+	      </set>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
   </definition>
   <definition id="compat-ctset">
     <title>Compatibility Constraint Set</title>

@@ -2,7 +2,7 @@
 <!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
-  <figure id="dyn_sem_horz" fullwidth='yes' latex.placement="tbp">
+  <figure id="dyn_sem_horz" fullwidth='yes' latex.placement="tb">
   <btypes:TYPE
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
     <opHorzRules>
@@ -25,40 +25,6 @@
 	      <stack/>
 	      <heap/>
 	      <aVal/>
-	    </opState>
-	  </eval>
-	</opConc>
-      </opRule>
-      <opRule name="E-L#">
-	<opPre>
-	  <leval>
-	    <opState>
-	      <stack/>
-	      <heap/>            
-	      <aExpr/>
-	    </opState>
-	    <opState>
-	      <stack dash="'"/>
-	      <heap dash="'"/>
-	      <aExpr dash="'"/>
-	    </opState>
-	  </leval>
-	</opPre>
-	<opConc>
-	  <eval>
-	    <opState>
-	      <stack/>
-	      <heap/>            
-	      <redex name="L">
-		<aExpr/>
-	      </redex>
-	    </opState>
-	    <opState>
-	      <stack dash="'"/>
-	      <heap dash="'"/>
-	      <redex name="L">
-		<aExpr dash="'"/>
-	      </redex>
 	    </opState>
 	  </eval>
 	</opConc>
@@ -280,6 +246,42 @@
 	  </eval>
 	</opConc>
       </opRule>
+      <opRule name="E-:=#">
+	<opPre>
+	  <leval>
+	    <opState>
+	      <stack/>
+	      <heap/>            
+	      <lExp/>
+	    </opState>
+	    <opState>
+	      <stack dash="'"/>
+	      <heap dash="'"/>
+	      <lExp dash="'"/>
+	    </opState>
+	  </leval>
+	</opPre>
+	<opConc>
+	  <eval>
+	    <opState>
+	      <stack/>
+	      <heap/>
+	      <assign>
+		<lExp/>
+		<aExpr/>
+	      </assign>
+	    </opState>
+	    <opState>
+	      <stack dash="'"/>
+	      <heap dash="'"/>
+	      <assign>
+		<lExp/>
+		<aExpr/>
+	      </assign>
+	    </opState>
+	  </eval>
+	</opConc>
+      </opRule>
       <opRule name="E-:=Stack">
 	<opPre/>
 	<opConc>
@@ -348,24 +350,59 @@
       </opRule>
       <opRule name="E-:=S.p">
 	<opPre>
-	  <eval>
-	    <opState>
-	      <extend>
-		<stack/>
-		<mapping>
+	  <eq>
+	    <aVal num="!i" dash="'"/>
+	    <aVal num="!i"/>
+	  </eq>
+	  <opState>
+	    <extend>
+	      <stack/>
+	      <mapping>
+		<sLoc/>
+		<aVal num="i"/>
+	      </mapping>
+	    </extend>
+	    <heap/>
+	    <assign>
+	      <select>
+		<sLoc/>
+		<path/>
+	      </select>
+	      <aVal num="i" dash="'"/>
+	    </assign>
+	  </opState>
+	</opPre>
+	<opConc>
+	  <opState>
+	    <extend>
+	      <stack/>
+	      <mapping>
+		<sLoc/>
+		<Pair>
+		  <aVal num="1"/>
+		  <aVal num="2"/>	
+		</Pair>
+	      </mapping>
+	    </extend>
+	    <heap/>
+	    <assign>
+	      <select>
+		<ith>
 		  <sLoc/>
-		  <aVal num="i"/>
-		</mapping>
-	      </extend>
-	      <heap/>
-	      <assign>
-		<select>
-		  <sLoc/>
-		  <path/>
-		</select>
-		<aVal num="i" dash="'"/>
-	      </assign>
-	    </opState>
+		</ith>
+		<path/>
+	      </select>
+	      <aVal num="i" dash="'"/>
+	    </assign>
+	  </opState>
+	</opConc>
+      </opRule>
+      <opRule>
+	<opPre>
+	  <grouping>
+	    <space n="20"/>
+	    <evalOp/>
+	    <space/>
 	    <opState>
 	      <extend>
 		<stack/>
@@ -377,36 +414,14 @@
 	      <heap/>
 	      <Unit/>
 	    </opState>
-	  </eval>
-	  <eq>
-	    <aVal num="!i" dash="'"/>
-	    <aVal num="!i"/>
-	  </eq>
+	    <space n="8"/>
+	  </grouping>
 	</opPre>
 	<opConc>
-	  <eval>
-	    <opState>
-	      <extend>
-		<stack/>
-		<mapping>
-		  <sLoc/>
-		  <Pair>
-		    <aVal num="1"/>
-		    <aVal num="2"/>	
-		  </Pair>
-		</mapping>
-	      </extend>
-	      <heap/>
-	      <assign>
-		<select>
-		  <ith>
-		    <sLoc/>
-		  </ith>
-		  <path/>
-		</select>
-		<aVal num="i" dash="'"/>
-	      </assign>
-	    </opState>
+	  <grouping>
+	    <space n="25"/>
+	    <evalOp/>
+	    <space/>
 	    <opState>
 	      <extend>
 		<stack/>
@@ -421,31 +436,68 @@
 	      <heap/>
 	      <Unit/>
 	    </opState>
-	  </eval>
+	  </grouping>
 	</opConc>
       </opRule>
       <opRule name="E-:=H.p">
 	<opPre>
-	  <eval>
-	    <opState>
-	      <stack/>
-	      <extend>
-		<heap/>
-		<mapping>
+	  <eq>
+	    <aVal num="!i" dash="'"/>
+	    <aVal num="!i"/>
+	  </eq>
+	  <opState>
+	    <stack/>
+	    <extend>
+	      <heap/>
+	      <mapping>
+		<hLoc/>
+		<aVal num="i"/>
+	      </mapping>
+	    </extend>
+	    <assign>
+	      <select>
+		<deref>
 		  <hLoc/>
-		  <aVal num="i"/>
-		</mapping>
-	      </extend>
-	      <assign>
-		<select>
+		</deref>
+		<path/>
+	      </select>
+	      <aVal num="i" dash="'"/>
+	    </assign>
+	  </opState>
+	</opPre>
+	<opConc>
+	  <opState>
+	    <stack/>
+	    <extend>
+	      <heap/>
+	      <mapping>
+		<hLoc/>
+		<Pair>
+		  <aVal num="1"/>
+		  <aVal num="2"/>	
+		</Pair>
+	      </mapping>
+	    </extend>
+	    <assign>
+	      <select>
+		<ith>
 		  <deref>
 		    <hLoc/>
 		  </deref>
-		  <path/>
-		</select>
-		<aVal num="i" dash="'"/>
-	      </assign>
-	    </opState>
+		</ith>
+		<path/>
+	      </select>
+	      <aVal num="i" dash="'"/>
+	    </assign>
+	  </opState>
+	</opConc>
+      </opRule>
+      <opRule>
+	<opPre>
+	  <grouping>
+	    <space n="20"/>
+	    <evalOp/>
+	    <space/>
 	    <opState>
 	      <stack/>
 	      <extend>
@@ -457,38 +509,13 @@
 	      </extend>
 	      <Unit/>
 	    </opState>
-	  </eval>
-	  <eq>
-	    <aVal num="!i" dash="'"/>
-	    <aVal num="!i"/>
-	  </eq>
+	    <space n="8"/>
+	  </grouping>
 	</opPre>
 	<opConc>
-	  <eval>
-	    <opState>
-	      <stack/>
-	      <extend>
-		<heap/>
-		<mapping>
-		  <hLoc/>
-		  <Pair>
-		    <aVal num="1"/>
-		    <aVal num="2"/>	
-		  </Pair>
-		</mapping>
-	      </extend>
-	      <assign>
-		<select>
-		  <ith>
-		    <deref>
-		      <hLoc/>
-		    </deref>
-		  </ith>
-		  <path/>
-		</select>
-		<aVal num="i" dash="'"/>
-	      </assign>
-	    </opState>
+	  <grouping>
+	    <space n="25"/>
+	    <evalOp/>
 	    <opState>
 	      <stack/>
 	      <extend>
@@ -503,7 +530,7 @@
 	      </extend>
 	      <Unit/>
 	    </opState>
-	  </eval>
+	  </grouping>
 	</opConc>
       </opRule>
       <opRule name="E-Let-M">

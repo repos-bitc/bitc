@@ -28,6 +28,18 @@
 	  <false/>
 	</alternatives>
       </bnf>
+      <bnf desc="Indices">
+	<collection>
+	  <ndx/>
+	</collection>
+	<alternatives>
+	  <texttt content="1"/>
+	  <texttt content="2"/>
+	  <other>
+	    <ndx/>
+	  </other>
+	</alternatives>
+      </bnf>
       <bnf desc="Values">
 	<aVal/>
 	<alternatives>
@@ -44,7 +56,7 @@
 	  <hLoc/>
 	</alternatives>
       </bnf>
-      <bnf desc="Value Expr">
+      <bnf desc="Syn. Value">
 	<vExp/>
 	<alternatives>
 	  <aVal/>
@@ -61,9 +73,6 @@
 	<alternatives>
 	  <id/>
 	  <sLoc/>
-	  <deref>
-	    <hLoc/>
-	  </deref>
 	  <deref>
 	    <aExpr/>
 	  </deref>
@@ -117,18 +126,6 @@
 	  </let>
 	</alternatives>
       </bnfc>
-      <bnf desc="Indices">
-	<collection>
-	  <ndx/>
-	</collection>
-	<alternatives>
-	  <texttt content="1"/>
-	  <texttt content="2"/>
-	  <other>
-	    <ndx/>
-	  </other>
-	</alternatives>
-      </bnf>
       <bnf desc="Let-kinds">
 	<lKind/>
 	<alternatives>

@@ -1251,13 +1251,16 @@
     <ol>
       <li>
 	<p>
-	  If
+	  If 
 	  <btypes:TYPE>
-	    <Sjudge name="lval">
-	      <assume/>
+	    <aExpr/>
+	  </btypes:TYPE> is a left expression
+	  (<btypes:TYPE>
+	    <eq>
 	      <aExpr/>
-	    </Sjudge>
-	  </btypes:TYPE>, then
+	      <lExp/>
+	    </eq>
+	  </btypes:TYPE>), then
 	  <btypes:TYPE>
 	    <aExpr/>
 	  </btypes:TYPE>
@@ -1393,8 +1396,7 @@
       </li>
       <li>
 	<p>
-	  Case T-App: Only right execution is possible, no application is well
-	  typed as an lvalue. We have:
+	  Case T-App: Only right execution is possible. We have:
 	  <btypes:TYPE>
 	    <eq>
 	      <aExpr/>
@@ -1441,13 +1443,13 @@
 	    <aExpr num="2"/>
 	  </btypes:TYPE>
 	  is not a value, we can again take E-#. 
-	  Now, consider the case when both
+	  If both
 	  <btypes:TYPE>
 	    <aExpr num="1"/>
 	    <text content=" and "/>
 	    <aExpr num="2"/>
 	  </btypes:TYPE>
-	  are values. Since we know that
+	  are values, since we know that
 	  <btypes:TYPE>
 	    <Sjudge name="s">
 	      <assume>
@@ -1492,8 +1494,8 @@
 	    <eq>
 	      <aExpr/>
 	      <assign>
-		<aExpr num="1"/>
-		<aExpr num="2"/>
+		<lExp/>
+		<aExpr/>
 	      </assign>
 	    </eq>
 	    <text content=", "/>
@@ -1504,13 +1506,13 @@
 		<store/>
 	      </assume>
 	      <Msub>
-		<aExpr num="1"/>
+		<lExp/>
 		<mutable>
 		  <ptype/>
 		</mutable>
 	      </Msub>
 	    </Sjudge>
-	    <text content=", "/>
+	    <text content=", and "/>
 	    <Sjudge name="s">
 	      <assume>
 		<dCtset/>
@@ -1518,31 +1520,29 @@
 		<store/>
 	      </assume>
 	      <Msub>
-		<aExpr num="2"/>
+		<aExpr/>
 		<ptype/>
 	      </Msub>
-	    </Sjudge>
-	    <text content=", and "/>
-	    <Sjudge name="lval">
-	      <assume/>
-	      <aExpr num="1"/>
 	    </Sjudge>
 	  </btypes:TYPE>.
 	  If
 	  <btypes:TYPE>
-	    <aExpr num="1"/>
+	    <lExp/>
 	  </btypes:TYPE>
-	  not an lvalue, since we have
+	  not an lvalue (that is,
 	  <btypes:TYPE>
-	    <Sjudge name="lval">
-	      <assume/>
-	      <aExpr num="1"/>
-	    </Sjudge>
-	  </btypes:TYPE>
-	  we can take E-L# by induction hypothesis.
-	  Similarly, if
+	    <neq>
+	      <lExp/>
+	      <lVal/>
+	    </neq>
+	  </btypes:TYPE>),
+	  we can take E-L# for any
 	  <btypes:TYPE>
-	    <aExpr num="2"/>
+	    <lExp/>
+	  </btypes:TYPE> by induction hypothesis.
+	  If
+	  <btypes:TYPE>
+	    <aExpr/>
 	  </btypes:TYPE>
 	  is not a value, we can take E-#.
 	</p>
@@ -1550,12 +1550,12 @@
 	  Finally, we consider the case where
 	  <btypes:TYPE>
 	    <eq>
-	      <aExpr num="1"/>
+	      <lExp/>
 	      <lVal/>
 	    </eq>
 	    <text content=" and "/>
 	    <eq>
-	      <aExpr num="2"/>
+	      <aExpr/>
 	      <aVal/>
 	    </eq>
 	  </btypes:TYPE>.
@@ -1592,7 +1592,7 @@
 	      Suppose
 	      <btypes:TYPE>
 		<eq>
-		  <aExpr num="1"/>
+		  <lExp/>
 		  <lVal/>
 		  <sLoc/>
 		</eq>
@@ -1626,7 +1626,7 @@
 	      Similarly, if 
 	      <btypes:TYPE>
 		<eq>
-		  <aExpr num="1"/>
+		  <lExp/>
 		  <lVal/>
 		  <deref>
 		    <hLoc/>
@@ -8231,7 +8231,7 @@
 	    <tyRule>
 	      <tyPre>
 		<TDjudge>
-		  <aExpr num="1"/>
+		  <lExp/>
 		  <type num="1"/>
 		  <dCtset num="1"/>
 		</TDjudge>
@@ -8244,7 +8244,7 @@
 	      </tyPre>
 	      <tyPre>
 		<TDjudge>
-		  <aExpr num="2"/>
+		  <aExpr/>
 		  <type num="2"/>
 		  <dCtset num="2"/>
 		</TDjudge>
@@ -8252,16 +8252,12 @@
 		  <type num="2"/>
 		  <ptype/>
 		</Msub>
-		<Sjudge name="lval">
-		  <assume/>
-		  <aExpr num="1"/>
-		</Sjudge>
 	      </tyPre>
 	      <tyConc>
 		<TDjudge>
 		  <assign>
-		    <aExpr num="1"/>
-		    <aExpr num="2"/>
+		    <lExp/>
+		    <aExpr/>
 		  </assign>
 		  <unit/>
 		  <unin>
