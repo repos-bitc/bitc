@@ -34,10 +34,8 @@
 	    <id/>
 	    <TS>
 	      <tvars/>
-	      <ctype>
-		<type/>
-		<dCtset/>
-	      </ctype>
+	      <type/>
+	      <dCtset/>
 	    </TS>
 	  </mapsto>
 	  <!-- S |= t does not suffice here. Here is an example
@@ -487,10 +485,8 @@
 		  <id/>
 		  <TS>
 		    <tvars/>
-		    <ctype>
-		      <type/>
-		      <dCtset/>
-		    </ctype>
+		    <type/>
+		    <dCtset/>
 		  </TS>
 		</mapping>
 	      </extend>
