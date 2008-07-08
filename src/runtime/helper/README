@@ -1,0 +1,19 @@
+This directory contains two "helper" programs that are not normally
+run as part of the library build.
+
+
+genops.sh:   When code is emitted via the gen-c.cxx back end, the file
+             bitc/runtime.h is included at the top of all BitC
+             compiler output files. In that file, there is a
+             depressingly long series of built-in operations that
+             define sign extension, zero extension, and truncation
+             operators on bitfields. These are, to put it mildly,
+             a royal pain in the ass to update, because there are so
+             many entries.
+
+             The genops.sh emits them automatically.
+
+gen.cxx:     This is a similar file whose purpose was to emit a bunch
+             of instance definitions that made every bitfield type a
+             member of the Integral type class. This turned out to be
+             a bad idea, and the file is probably now stale.
