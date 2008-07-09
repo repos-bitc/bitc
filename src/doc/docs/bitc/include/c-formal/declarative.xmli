@@ -2384,60 +2384,199 @@
   </proof>
   <lemma id="T-SSubstitution">
     <title>Subtype Substitution</title>
-    <p>
-      If
-      <btypes:TYPE>
-	<Msub>
-	  <type num="1"/>
-	  <type num="2"/>
-	</Msub>
-      </btypes:TYPE> and
-      <btypes:TYPE>
-	<models name="cst">
-	  <aSubMap/>
-	  <set>
-	    <type num="1"/>
-	    <type num="2"/>
-	  </set>
-	</models>
-      </btypes:TYPE>, then,
-      <btypes:TYPE>
-	<Msub>
-	  <Subst>
-	    <aSubMap/>
-	    <type num="1"/>
-	  </Subst>
-	  <minz>
-	    <Subst>
-	      <aSubMap/>
-	      <type num="2"/>
-	    </Subst>
-	  </minz>
-	</Msub>
-      </btypes:TYPE> and
-      <btypes:TYPE>
-	<Msub>
-	  <maxz>
-	    <Subst>
-	      <aSubMap/>
+    <ol>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Msub>
 	      <type num="1"/>
-	    </Subst>
-	  </maxz>
-	  <Subst>
-	    <aSubMap/>
-	    <type num="2"/>
-	  </Subst>
-	</Msub>
-      </btypes:TYPE>
-    </p>
+	      <type num="2"/>
+	    </Msub>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<type num="1"/>
+		<type num="2"/>
+	      </set>
+	    </models>
+	  </btypes:TYPE>, then,
+	  <btypes:TYPE>
+	    <Msub>
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <type num="2"/>
+		</Subst>
+	      </minz>
+	    </Msub>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <Msub>
+	      <maxz>
+		<Subst>
+		  <aSubMap/>
+		  <type num="1"/>
+		</Subst>
+	      </maxz>
+	      <Subst>
+		<aSubMap/>
+		<type num="2"/>
+	      </Subst>
+	    </Msub>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<mbTop>
+		  <tvar name="alpha"/>
+		  <ptype num="1"/>
+		</mbTop>
+		<mbTop>
+		  <tvar name="beta"/>
+		  <ptype num="2"/>
+		</mbTop>
+	      </set>
+	    </models>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <eq under="minzT">
+	      <Subst>
+		<aSubMap/>
+		<mbTop>
+		  <tvar name="alpha"/>
+		  <ptype num="1"/>
+		</mbTop>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<mbTop>
+		  <tvar name="beta"/>
+		  <ptype num="2"/>
+		</mbTop>
+	      </Subst>		
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<mbFull>
+		  <stype num="1"/>
+		  <ptype num="1"/>
+		</mbFull>
+		<mbFull>
+		  <stype num="2"/>
+		  <ptype num="2"/>
+		</mbFull>
+	      </set>
+	    </models>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <eq under="minz">
+	      <Subst>
+		<aSubMap/>
+		<mbFull>
+		  <stype num="1"/>
+		  <ptype num="1"/>
+		</mbFull>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<mbFull>
+		  <stype num="2"/>
+		  <ptype num="2"/>
+		</mbFull>
+	      </Subst>		
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<mbFull>
+		  <stype num="1"/>
+		  <ptype num="1"/>
+		</mbFull>
+		<mbFull>
+		  <stype num="2"/>
+		  <ptype num="2"/>
+		</mbFull>
+	      </set>
+	    </models>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <Msub>
+	      <maxz>
+		<Subst>
+		  <aSubMap/>
+		  <mbFull>
+		    <stype num="1"/>
+		    <ptype num="1"/>
+		  </mbFull>
+		</Subst>
+	      </maxz>
+	      <Subst>
+		<aSubMap/>
+		<mbFull>
+		  <stype num="2"/>
+		  <ptype num="2"/>
+		</mbFull>
+	      </Subst>		
+	    </Msub>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <Msub>
+	      <Subst>
+		<aSubMap/>
+		<mbFull>
+		  <stype num="1"/>
+		  <ptype num="1"/>
+		</mbFull>
+	      </Subst>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <mbFull>
+		    <stype num="2"/>
+		    <ptype num="2"/>
+		  </mbFull>
+		</Subst>
+	      </minz>
+	    </Msub>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
   </lemma>
   <proof>
     <p>
       By using
       <btypes:TYPE>
 	<lem tag="T-Subtype-properties"/>
-      </btypes:TYPE> (properties 1 and 2)
-      and
+      </btypes:TYPE> (properties 1 and 2) and
       <btypes:TYPE>
 	<lem tag="T-sub-min"/>
       </btypes:TYPE>.
@@ -8828,6 +8967,14 @@
   <theorem id="T-soundness">
     <title>Type Soundness</title>
     <p>
+      Let
+      <btypes:TYPE>
+	<evalOp many="yes"/>
+      </btypes:TYPE > denote the
+      reflexive-transitive-closure of
+      <btypes:TYPE>
+	<evalOp/>
+      </btypes:TYPE>.
       For any canonical expression 
       <btypes:TYPE>
 	<aExpr/>
@@ -8887,14 +9034,7 @@
 	</opState>
       </btypes:TYPE> is not stuck.
       That is, execution of a closed, canonical, well typed expression
-      cannot lead to a stuck state. Here,
-      <btypes:TYPE>
-	<evalOp many="yes"/>
-      </btypes:TYPE > represents the
-      reflexive-transitive-closure of
-      <btypes:TYPE>
-	<evalOp/>
-      </btypes:TYPE>.
+      cannot lead to a stuck state.
     </p>
   </theorem>
   <proof>
