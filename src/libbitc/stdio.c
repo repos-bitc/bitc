@@ -89,7 +89,7 @@ DEFUN(bitc_stdio_open, bitc_string_t *nm, bitc_string_t *mode)
 }
 DEFCLOSURE(bitc_stdio_open);
 
-bitc_unit_t
+void
 DEFUN(bitc_stdio_close, ty_bitc_stdioStream *ios)
 {
   fix_stdio_stream(ios);
@@ -98,8 +98,6 @@ DEFUN(bitc_stdio_close, ty_bitc_stdioStream *ios)
     fclose(ios->f);
     ios->f = NULL;
   }
-
-  return BITC_UNIT;
 }
 DEFCLOSURE(bitc_stdio_close);
   
@@ -188,7 +186,7 @@ DEFCLOSURE(bitc_stdio_read_char);
 
 // A BitC char is a 32-bit UNICODE UCS-4 code point. The BitC external
 // representation is UTF-8, so we need to transcode it here. 
-bitc_unit_t
+void
 DEFUN(bitc_stdio_write_char, ty_bitc_stdioStream *ios, bitc_char_t ucs4)
 {
   ssize_t result;
@@ -237,8 +235,6 @@ DEFUN(bitc_stdio_write_char, ty_bitc_stdioStream *ios, bitc_char_t ucs4)
     bitc_throw(&val_ExAtEOF);
   else if (result < 0)
     bitc_throw(&val_ExNoPermission);
-
-  return BITC_UNIT;
 }
 DEFCLOSURE(bitc_stdio_write_char);
 
@@ -260,15 +256,13 @@ DEFCLOSURE(bitc_stdio_read_byte);
 
 // Note: This is deficient, because it is not doing proper unicode
 // code point encoding.
-bitc_unit_t
+void
 DEFUN(bitc_stdio_write_byte, ty_bitc_stdioStream *ios, bitc_uns8_t c)
 {
   fix_stdio_stream(ios);
 
   if ( fwrite(&c, 1, 1, ios->f) < 0 )
     bitc_throw(&val_ExNoPermission);
-
-  return BITC_UNIT;
 }
 DEFCLOSURE(bitc_stdio_write_byte);
 
