@@ -49,6 +49,7 @@ BackEnd BackEnd::backends[] = {
   { "c", pn_npass, op_ssaTrans, 0, EmitC, 0 },
   { "h", pn_npass, op_ssaTrans, 0, EmitHeader, BK_HDR_MODE },
   { "obj", pn_npass, op_ssaTrans, 0, EmitObj, 0 },
+  { "bito", pn_npass, op_none, EmitBitO, 0, BK_UOC_MODE },
   { "xmldump", pn_parse, op_none, XMLdump, 0, 0 },
   { "Xmlpp", pn_parse, op_none, XMLpp, 0, 0 },
   { "xmltypes", pn_typeCheck, op_none, XMLtypesPP, 0, 0 }

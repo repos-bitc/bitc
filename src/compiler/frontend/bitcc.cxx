@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -34,6 +34,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  **************************************************************************/
+
+/** @file
+ *
+ * @brief Command line driver for the static, whole-program BitC
+ * compiler.
+ *
+ * There are three input file extensions:
+ *
+ *   .bitc  - bitc interface files
+ *   .bits  - bitc source files
+ *   .bito  - bitc "object" files.
+ *
+ * This compiler basically operates in three modes:
+ *
+ *  1. source->object mode, in which X.bits is checked and re-emitted
+ *     as X.bito, which is a legal BitC file. We pretend that such
+ *     files are object files for command line handling purposes.
+ *
+ *     This mode can be identified by the presence of the -c option on
+ *     the command line. If -c is specified, no output will be emitted.
+ *
+ *  2. As a header file synthesizer, in which an interface file is
+ *     re-emitted as a C header file, allowing portions of the
+ *     low-level runtime to be implemented in C.
+ *
+ *     This usage can be identified by the presence of the -h option
+ *     on the command line, but has no effect if -c is also specified.
+ *
+ *     Note that -h is a convenience shorthand for --lang h.
+ *
+ *  3. As a linker, in which some number of .bits and .bito files are
+ *     combined to form an executable. This is actually the
+ *     whole-program compiler mode.
+ *
+ *     This mode can be identified by the @em absence of either the -c
+ *     or the -h options on the command line.
+ */
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -120,16 +157,21 @@ bool Options::heuristicInference = false;
 #define LOPT_NOPRELUDE    277   /* Don't process prelude */
 #define LOPT_DBG_TVARS    278   /* Show globally unqiue tvar naming */
 #define LOPT_HEURISTIC    279   /* Use Heuristic Inference */
+#define LOPT_HELP         280   /* Display usage information. */
+#define LOPT_LANG         281   /* Specify the desired output
+				   language. */
 
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
   { "decorate",             0,  0, LOPT_PPDECORATE },
   { "dumpafter",            1,  0, LOPT_DUMPAFTER },
   { "dumptypes",            1,  0, LOPT_DUMPTYPES },
+  { "eqinfer",              0,  0, LOPT_EQ_INFER },
   { "free-advice",          0,  0, LOPT_ADVISORY },
   { "full-qual-types",      0,  0, LOPT_FQ_TYPES },
-  { "help",                 0,  0, 'h' },
-  { "eqinfer",              0,  0, LOPT_EQ_INFER },
+  { "help",                 0,  0, LOPT_HELP },
+  { "heuristic-inf",        0,  0, LOPT_HEURISTIC },
+  { "language",             1,  0, LOPT_LANG },
   { "nostdinc",             0,  0, LOPT_NOSTDINC },
   { "nostdlib",             0,  0, LOPT_NOSTDLIB },
   { "ppfqns",               0,  0, LOPT_PPFQNS },
@@ -146,7 +188,6 @@ struct option longopts[] = {
   { "stopafter",            1,  0, LOPT_STOPAFTER },
   { "no-gc",                0,  0, LOPT_NOGC },
   { "no-prelude",           0,  0, LOPT_NOPRELUDE },
-  { "heuristic-inf",        0,  0, LOPT_HEURISTIC },
   { "version",              0,  0, 'V' },
 #if 0
   /* Options that have short-form equivalents: */
@@ -158,7 +199,6 @@ struct option longopts[] = {
   { "header",               1,  0, 'h' },
   { "include",              1,  0, 'I' },
   { "index"  ,              1,  0, 'n' },
-  { "language",             1,  0, 'l' },
   { "outdir",               1,  0, 'D' },
   { "output",               1,  0, 'o' },
   { "verbose",              0,  0, 'v' },
@@ -170,20 +210,27 @@ void
 help()
 {
   std::cerr 
-    << "Usage:" << endl
-    << "  bitcc [-o outfile] [-l language] [-I include] files"
-    << endl
-    << "  bitcc -V|--version" << endl
-    << "  bitcc -h|--help" << endl
-    << "Debugging options:" << endl
-    << "  --showlex --showparse --showpasses" << endl
-    << "  --showpassnames --stopafter --version" << endl
-    << "  --decorate --dumpafter 'pass' --dumptypes 'pass'" << endl
-    << "  --showtypes 'uoc' " << endl
-    //<< "  --xmltypes 'uoc' " << endl
-    << "  --ppfqns --full-qual-types" << endl
-    << "  --raw-tvars --show-maybes --show-all-tccs " << endl
-    << "Languages: xmlpp, xmldump, xmltypes, bitcpp, showtypes, c, h, obj" << endl;
+    << "Common Usage:" << endl
+    //    << "  bitcc [-I include] -c file1.bits ...\n"
+    << "  bitcc [-I include] [-o outfile.bito] -c file.bits\n"
+    // << "  bitcc [-I include] -h file.bitc ...\n"
+    << "  bitcc [-I include] [-o outfile.h] -h file.bitc\n"
+    << "  bitcc [file1.bito|library.a] ... [-o exefile]\n"
+    << "  bitcc -V|--version\n"
+    << "  bitcc --help\n"
+    << "\n"
+    << "Debugging options:\n"
+    << "  --showlex --showparse --showpasses\n"
+    << "  --stopafter 'pass'\n"
+    << "  --decorate --dumpafter 'pass' --dumptypes 'pass'\n"
+    << "  --showtypes 'uoc' \n"
+    //<< "  --xmltypes 'uoc' \n"
+    << "  --ppfqns --full-qual-types\n"
+    << "  --raw-tvars --show-maybes --show-all-tccs \n"
+    << "\n"
+    << "Languages: xmlpp, xmldump, xmltypes, bitcpp, showtypes, bito,"
+    << "   c, h, obj\n" 
+    << flush;
 }
  
 void
@@ -194,6 +241,17 @@ fatal()
   exit(1);
 }
 
+
+BackEnd *
+FindBackEnd(const char *nm)
+{
+  for (size_t i = 0; i < BackEnd::nBackEnd; i++) {
+    if (BackEnd::backends[i].name == nm)
+      return &BackEnd::backends[i]; //&OK
+  }
+
+  return NULL;
+}
 
 void 
 handle_sigsegv(int param)
@@ -241,7 +299,7 @@ main(int argc, char *argv[])
 #endif
 
   while ((c = getopt_long(argc, argv, 
-			  "e:o:l:VhI:L:",
+			  "e:o:l:VchI:L:",
 			  longopts, 0
 		     )) != -1) {
     switch(c) {
@@ -423,21 +481,41 @@ main(int argc, char *argv[])
 	break;
       }
 
-    case 'l':
+    case 'c':
       {
 	if (Options::backEnd) {
 	  std::cerr << "Can only specify one output language.\n";
 	  exit(1);
 	}
-	for (size_t i = 0; i < BackEnd::nBackEnd; i++) {
-	  if (BackEnd::backends[i].name == optarg) {
-	    Options::backEnd = &BackEnd::backends[i]; //&OK
-	  }
+
+	Options::backEnd = FindBackEnd("bito");
+	break;
+      }
+
+    case 'h':
+      {
+	if (Options::backEnd) {
+	  std::cerr << "Can only specify one output language.\n";
+	  exit(1);
 	}
+
+	Options::backEnd = FindBackEnd("h");
+	break;
+      }
+
+    case LOPT_LANG:
+      {
+	if (Options::backEnd) {
+	  std::cerr << "Can only specify one output language.\n";
+	  exit(1);
+	}
+
+	Options::backEnd = FindBackEnd(optarg);
 	if (!Options::backEnd) {
 	  std::cerr << "Unknown target language.\n";
 	  exit(1);
 	}
+
 	break;
       }
 
@@ -448,7 +526,7 @@ main(int argc, char *argv[])
 	break;
       }
 
-    case 'h': 
+    case LOPT_HELP: 
       {
 	help();
 	exit(0);
@@ -534,6 +612,7 @@ main(int argc, char *argv[])
 
   /* Per-file backend output after processing frontend, if any */
   bool doFinal = true;
+
   /* Output for interfaces */
   for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
     GCPtr<UocInfo> puoci = UocInfo::ifList->elem(i);
@@ -561,6 +640,8 @@ main(int argc, char *argv[])
   if (!doFinal)
     exit(1);
 
+  if (Options::backEnd->flags & BK_UOC_MODE)
+    exit(0);
 
   /************************************************************/
   /*   The mid zone, build the polyinstantiate + big-ast      */

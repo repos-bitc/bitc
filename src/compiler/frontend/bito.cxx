@@ -1,9 +1,6 @@
-#ifndef BACKEND_HXX
-#define BACKEND_HXX
-
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -38,34 +35,56 @@
  *
  **************************************************************************/
 
+/** @file
+ *
+ * @brief Back end to emit BitC "object" files.
+ *
+ * Calling this a back end is moderately laughable. All it does is
+ * pretty-print the original UoC.
+ */
+
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <dirent.h>
+#include <fstream>
 #include <iostream>
+#include <string>
+#include <sstream>
+#include "Version.hxx"
 #include "UocInfo.hxx"
 #include "AST.hxx"
+#include "Options.hxx"
+#if 0
+#include "Environment.hxx"
+#include "Symtab.hxx"
+#include "inter-pass.hxx"
+#include <errno.h>
+#include "backend.hxx"
+#include "INOstream.hxx"
+#include "Clconv.hxx"
+#include "gen-c.hxx"
+#include <libsherpa/utf8.hxx>
+#include <cctype>
+#endif
 
-typedef bool (*BackEndFn) (std::ostream& out, std::ostream& err,
-			   GCPtr<UocInfo> uoc);
+bool
+EmitBitO(std::ostream &optStream, std::ostream &errStream,
+	 GCPtr<UocInfo> uoc)
+{
+  std::ofstream out(Options::outputFileName.c_str(),
+		    std::ios_base::out|std::ios_base::trunc);
 
-bool XMLpp(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
-bool XMLdump(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
-bool XMLtypesPP(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
-bool EmitHeader(std::ostream& out, std::ostream& err, 
-		GCPtr<UocInfo> uoc);
-bool EmitC(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
-bool EmitObj(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
-bool EmitBitO(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
+  if (!out.is_open()) 
+    errStream << "Couldn't open output file \""
+	      << Options::outputFileName
+	      << "\" -- "
+	      << strerror(errno)
+	      << endl;
 
-struct BackEnd {
-  std::string name;
-  Pass needPass;
-  OnePass oPass;
-  BackEndFn fn;    // per-file backend-fn
-  BackEndFn plfn; // one-pass, post-link backend-fn
-  static size_t nBackEnd;
-  static BackEnd backends[];
-  unsigned long flags;
-};
 
-#define BK_HDR_MODE 0x001u
-#define BK_UOC_MODE 0x002u
+  uoc->PrettyPrint(out, false);
 
-#endif /* BACKEND_HXX */
+  return true;
+}
+

@@ -107,6 +107,7 @@ OBJECTS=\
 	$(BUILDDIR)/Tail.o \
 	$(BUILDDIR)/InstLamHoist.o \
 	$(BUILDDIR)/SSA.o \
+	$(BUILDDIR)/bito.o \
 	$(BUILDDIR)/gen-c.o
 
 TARGETS=$(BUILDDIR)/bitcc

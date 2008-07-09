@@ -65,7 +65,7 @@ OBJECTS=$(C_SOURCES:%.c=$(BUILDDIR)/%.o)
 $(OBJECTS): $(BUILDDIR)/bitc-runtime.h
 
 $(BUILDDIR)/bitc-runtime.h: $(BUILDDIR) $(BITC_SOURCES)
-	$(BITC_SRC)/compiler/frontend/BUILD/bitcc $(INC) -l h -o $@ bitc-runtime.bitc
+	$(BITC_SRC)/compiler/frontend/BUILD/bitcc $(INC) -h -o $@ bitc-runtime.bitc
 
 all: BUILD/libbitc.a
 
