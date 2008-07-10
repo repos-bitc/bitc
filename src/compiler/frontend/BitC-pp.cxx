@@ -235,7 +235,7 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
     {
       if (ast->child(1)->astType == at_lambda &&
 	  ast->child(1)->printVariant == 1) {
-	out << "(define ";
+	out << "(" << ast->atKwd();
 
 	size_t oldIndent = out.indentToHere();
 
@@ -255,6 +255,18 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
 
 	out.more();
 	doChildren(out, iLambda, 1, true, showTypes);
+	out << ")";
+      }
+      else if (ast->child(1)->astType == at_lambda) {
+	out << "(" << ast->atKwd() << " ";
+
+	// Procedure name:
+	BitcP(out, ast->child(0), showTypes);
+
+	out << endl;
+	out.more();
+
+	doChildren(out, ast, 1, false, showTypes);
 	out << ")";
       }
       else {
@@ -757,7 +769,13 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
 
     // The following just recurse:
   case at_module:
-    out.more();
+    if (ast->printVariant == 0)	{
+      // explicit module form
+      out << "(" << ast->atKwd() << " ";
+      BitcP(out, ast->child(0), showTypes);
+      out.more();
+    }
+
     /* Dont call doChildren; that will put spaces in front
        of the top level forms. Remember, bitc-version has
        already been emitted without a space */
@@ -766,6 +784,11 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
 	out << endl;
       BitcP(out, ast->child(i), showTypes);
     }
+
+    if (ast->printVariant == 0) {
+      out << ")";
+    }
+
     break;
     
   case at_interface:

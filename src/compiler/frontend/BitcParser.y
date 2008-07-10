@@ -365,6 +365,7 @@ module: mod_definitions  {
  SHOWPARSE("module -> mod_definitions");
  $$ = $1;
  $$->astType = at_module;
+ $$->printVariant = 1;
 };
 
 module: '(' tk_MODULE ifident optdocstring mod_definitions ')' {
@@ -1451,13 +1452,11 @@ lambdapattern: '(' tk_THE '(' tk_BY_REF type ')' ident ')' {
 
 expr_seq: expr {
   SHOWPARSE("expr_seq -> expr");
-  // If the astType survives, it will be at_ibegin:
   $$ = new AST(at_begin, $1->loc, $1);
   $$->printVariant = 1;
 };
 expr_seq: value_definition {
   SHOWPARSE("expr_seq -> value_definition");
-  // If the astType survives, it will be at_ibegin:
   $$ = new AST(at_begin, $1->loc, $1);
   $$->printVariant = 1;
 };
