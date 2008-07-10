@@ -1067,6 +1067,9 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
 	}	  
       }
      
+      // The (nullable 'a) union is declared in the preamble and
+      // requires special handling for tag numbering.
+      bool isNullable = (cardelli && uIdent->s == "nullable");
 
       if(isEnum) {
 	assert(!seenRef);
@@ -1076,6 +1079,8 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
       else if(cardelli) {	
 	assert(!isEnum);
 	uIdent->Flags |= CARDELLI_UN;
+	if (isNullable)
+	  uIdent->Flags |= NULLABLE_UN;
 	lastTagValueCardelli = (2 * lastTagValue) - 1;
       }
       
@@ -1093,6 +1098,8 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
 		  << "  isEnum = " << isEnum 
 		  << std::endl
 		  << "  cardelli = " << cardelli 
+		  << std::endl
+		  << "  nullable = " << isNullable
 		  << std::endl;
     }
     

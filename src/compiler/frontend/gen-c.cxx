@@ -1304,13 +1304,32 @@ toc(std::ostream& errStream,
       out << "typedef enum {" << endl;
       out.more(); 
 	
-      if (ident->Flags & CARDELLI_UN) {
+      if (ident->Flags & NULLABLE_UN) {
 	assert(!repr);
+
+	// Nullable is a special case, and we fake the
+	// tag values.
 	for(size_t c=0; c < ctrs->children->size(); c++) {
 	  GCPtr<AST> ctr = ctrs->child(c);
-	  if(ctr->children->size() > 1)
+	  if(ctr->children->size() > 1) {
+	    out << ENUM_PFX << CMangle(ctr->child(0))
+		<< " = 1," << endl;	
+	  }
+	  else {
+	    out << ENUM_PFX << CMangle(ctr->child(0));
+	    out << " = 0," << endl;
+	  }
+	}
+      }
+      else if (ident->Flags & CARDELLI_UN) {
+	assert(!repr);
+	// Nullable is handled as special case.
+	for(size_t c=0; c < ctrs->children->size(); c++) {
+	  GCPtr<AST> ctr = ctrs->child(c);
+	  if(ctr->children->size() > 1) {
 	    out << ENUM_PFX << CMangle(ctr->child(0))
 		<< " = 0," << endl;	
+	  }
 	  else {
 	    out << ENUM_PFX << CMangle(ctr->child(0));
 	    out << " = ";
@@ -1432,6 +1451,16 @@ toc(std::ostream& errStream,
       }
       else if (ident->Flags & SINGLE_LEG_UN) {
 	out << "return 0;" << endl;
+      }
+      else if (ident->Flags & NULLABLE_UN) {
+	out << "if (" << accessor << ")" << endl;
+	out.more();
+	out << "return 1;" << endl;
+	out.less();
+	out << "else" << endl;
+	out.more();
+	out << "return 0;" << endl;
+	out.less();
       }
       else if (ident->Flags & CARDELLI_UN) {
 	out << "if (" << accessor << " & 0x1u)" << endl;

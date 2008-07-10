@@ -103,6 +103,7 @@ enum primOp {
 #define ID_IS_PRIVATE    0x00200000u  
 			 	      
 			 	      
+#define ID_IS_METHOD     0x00400000u  
 #define LB_POSTPONED     0x00800000u  
                                       
 #define ID_IS_FIELD      0x01000000u
@@ -115,7 +116,7 @@ enum primOp {
 #define SINGLE_LEG_UN    0x20000000u
 #define CARDELLI_UN      0x40000000u
 
-#define ID_IS_METHOD     0x80000000u 
+#define NULLABLE_UN      0x80000000u  
 
 
 

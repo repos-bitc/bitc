@@ -131,6 +131,7 @@ enum primOp {
 #define ID_IS_PRIVATE    0x00200000u  // Global ID in source module with
 			 	      // no interface decl, so does not
 			 	      // escape file.
+#define ID_IS_METHOD     0x00400000u  // Typeclass method definitions
 #define LB_POSTPONED     0x00800000u  // Don't emit this letbinding
                                       // at the let.
 #define ID_IS_FIELD      0x01000000u
@@ -143,7 +144,7 @@ enum primOp {
 #define SINGLE_LEG_UN    0x20000000u
 #define CARDELLI_UN      0x40000000u
 
-#define ID_IS_METHOD     0x80000000u // Typeclass method definitions
+#define NULLABLE_UN      0x80000000u  // Special handling for nullable 'a
 
 ///////////////// SECOND ROUND OF FLAGS  /////////////////////
 

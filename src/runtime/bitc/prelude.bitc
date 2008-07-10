@@ -46,7 +46,11 @@
 
   (defunion (optional 'a):val
     none
-    (some som:'a))
+    (some value:'a))
+  
+  (defunion (nullable 'a):val
+    Null
+    (non-null ptr:'a))
   
   (defunion (list 'a):ref
     nil

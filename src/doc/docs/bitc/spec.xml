@@ -1276,25 +1276,38 @@ use</literallayout>
 	    </p>
           </sect4>
           <sect4>
-            <title>Elided Tag Representation</title>
+            <title>Tag Representation</title>
             <p>
-              In the absence of an explicit type tag declaration, a
-              union having exactly one leg whose first element is of
-              reference type, all of whose other constructors are
-              enumeration values, shall be represented without using
-              additional storage for the type tag. The value
-              <em>zero</em> shall be used as the low-level
-              representation for the tag associated with the union leg
-              whose first element is of reference type.<footnote>
-                <p>
-                  This representation is often referred to as the
-                  ``Cardelli optimization.'' It permits LISP-style
-                  cons cells to be represented using two words, and
-                  also permits the <progident>optional</progident>
-                  union to be represented in a single word whenever
-                  the element type is of reference type.
-                </p>
-              </footnote>
+              The prelude type
+              <progident>(nullable&nbsp;'a)</progident> must be
+              implemented in a single pointer-sized machine word, with
+              the <progident>Null</progident> case being tagged by a
+              word value of zero and the <progident>ptr</progident>
+              case being tagged by a non-null word value. This yields
+              a concrete representation that is compatible with the
+              representation of nullable pointers in other languages.
+            </p>
+            <p>
+              The following representation requirements are required
+              unless they cannot be legally implemented on the
+              underlying machine, as in JVM or CLR.
+            </p>
+            <p>
+              In the absence of an explicit declaration of the type
+              tag representation, a union type having exactly one
+              union leg whose first element is of type
+              <progident>(ref&nbsp;'a)</progident> or
+              <progident>(nullable&nbsp;'a)</progident>, and all of
+              whose other legs have no fields shall be represented in
+              such a way that the tag word reuses the storage of the
+              ref/nullable field. The ref/nullable leg shall be
+              denoted by a tag field whose least significant bit is
+              zero. The n'th enumeration leg's tag value (in order of
+              appearance) shall be encoded as
+              <progident>n*2+1</progident>.  This representation is
+              sometimes known as the Cardelli optimization, because it
+              permits a two-word implementation of CONS cells, as in
+              Scheme or LISP.
             </p>
             <p>
               If a union type tag is explicitly declared to be of a
@@ -1304,25 +1317,13 @@ use</literallayout>
               <progident>align&gt;=2<sup>b</sup></progident>, the
               total number of distinct legs of the union does not
               exceed <progident>2<sup>b</sup></progident>, and there
-              is exactly one union leg whose first element is of
-              reference type, then the tag representation shall be
-              chosen in such a way that leg whose first element is of
-              reference type does not reserve additional storage for
-              the tag value.  The value <em>zero</em> shall be used as
-              the low-level representation for the tag associated with
-              the union leg whose first element is of reference type.<footnote>
-                <p>
-                  This is a variant of the ``Cardelli optimization.''
-                  It permits the classic LISP fixnum/bignum
-                  discrimination to be accomplished within a single
-                  word. A further generalization of this rule is
-                  possible to handle multiple legs whose first element
-                  is of reference type, but this generalization
-                  requires an additional mask operation. We have
-                  chosen not to adopt it so that there is no ``hidden
-                  cost'' in this case.
-                </p>
-              </footnote>
+              is exactly one union leg whose first element is of type
+              <progident>(ref&nbsp;'a)</progident> or
+              <progident>(nullable&nbsp;'a)</progident>, then the tag
+              field shall overlay the least significant bits of the
+              ref/nullable field, the tag value zero shall denote the
+              ref/nullable leg, and all other tag values shall be
+              non-zero.
             </p>
 	  </sect4>
 	</sect3>
@@ -4269,18 +4270,23 @@ id : T
 (defstruct (pair 'a 'b):val 
   fst:'a snd:'b)
 
-; Nullable pointers:
+; Optional values:
 (defunion (optional 'a):val 
-  none (some 'a))
+  none (some value:'a))
+
+; Nullable pointers:
+(defunion (nullable 'a):val 
+  Null (non-null ptr:(ref 'a))
 
 ; Homogeneous lists:
-(defunion (list 'a):val 
-  nil (cons 'a (list 'a)))
+(defunion (list 'a) 
+  nil
+  (cons car:'a cdr:(list 'a)))
 
 ; Bignums
 (defunion int:val
-  (fix (bitfield int32 31))
-  (big (ref (bool, (vector word)))))</literallayout>
+  (fix f:(bitfield int32 31))
+  (big b:(ref (bool, (vector word)))))</literallayout>
     </sect1>
     <sect1>
       <title>Foundational Type Classes</title>

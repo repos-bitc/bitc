@@ -1,6 +1,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;; Copyright (C) 2006, Johns Hopkins University.
+;; Copyright (C) 2008, Johns Hopkins University.
 ;; All rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or
@@ -36,31 +36,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
+(provide main bitc.main)
 
-   ;; Unions
-(defunion (mylist 'a):ref Nil (Cons myCar:'a myCdr:(mylist 'a))) 
-
-(defunion (ll 'a 'b 'c 'd 'e 'f 'g 'h 'i 'j 'k 'l 'm 'n 'o 'p 'q 'r 's 't 'u 'v 'w 'x 'y 'z 'aa 'bb 'cde) NONE)
-
-(defunion (u3 'a 'b 'c) (u3con a:'a b:'b c:'c))
-(define u3-instance (u3con #\c (the int32 1) #\d))
-
-; (define u3conn u3con) ; SHOULD NOT WORK
-
-(define s:bool #t)
-(define p #f)
-
-(define s2:(mutable bool) #t)
-(define p2 (the bool #t))
-
-(define uuu 
-  (the (u3 char int32 char) 
-       (u3con #\c (the int32 1) #\d)))
-
-(defunion u4 u4con1 u4con2)
-(define u4ins (the u4 u4con1))
-
-(define myif (if #t #t #f))
-
-(define pq (Cons (the int32 10) Nil))
-(define utest (if #t Nil (Cons (the int32 10) Nil)))
+(define main.main:(fn ((vector string)) int32)
+  (lambda(argvec)
+    (let ((np Null))
+      (switch tmp np
+	      (Null 0)
+	      (non-null 1)))))
