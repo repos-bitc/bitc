@@ -2730,9 +2730,6 @@ id : T
       <sect2>
         <title>Expression Sequences</title>
         <p>
-          <em>Derived form</em>
-        </p>
-        <p>
           The expression:
         </p>
         <literallayout>
@@ -2746,14 +2743,6 @@ id : T
           produced by the last <em>expression</em> executed in the
           begin block.
         </p>
-        <p>
-          <leadin>Derivation</leadin> The canonical rewriting of the
-          <progident>begin</progident> form using core language
-          constructs is:
-        </p>
-        <literallayout>
-(begin <em>e1</em> ... <em>e2</em>) =&gt;
-((lambda () <em>e1</em> ... <em>e2</em>))</literallayout>
       </sect2>
       <sect2>
         <title>Iteration</title>
@@ -2762,7 +2751,8 @@ id : T
         </p>
         <p>
           BitC provides the looping construct
-          <progident>do</progident> as a derived form.
+          <progident>do</progident>, which conditionally evaluates its body
+          multiple times.
         </p>
         <literallayout>
 (do ((<em>bp<sub>1</sub></em> <em>e<sub>init-1</sub></em> <em>e<sub>step-1</sub></em>)
@@ -2809,39 +2799,10 @@ id : T
           initiated over the loop body as previously described.
         </p>
         <p>
-          <leadin>Derivation</leadin> The canonical rewriting of the
-          <progident>do</progident> form using core language
-          constructs is:
-        </p>
-        <literallayout>
-(do ((<em>bp<sub>1</sub></em> <em>e<sub>init-1</sub></em> <em>e<sub>step-1</sub></em>)
-     ...
-     (<em>bp<sub>n</sub></em> <em>e<sub>init-n</sub></em> <em>e<sub>step-n</sub></em>))
-    (<em>e<sub>test</sub></em> <em>e<sub>result</sub></em>)
-   <em>e<sub>body-1</sub></em>
-   ...
-   <em>e<sub>body-n</sub></em>) =&gt;
-(letrec
-  ((__loop
-    (lambda (<em>bp<sub>1</sub></em> ... <em>bp<sub>n</sub></em>)
-      (if <em>e<sub>test</sub></em> <em>e<sub>result</sub></em>
-          (begin
-            <em>e<sub>body-1</sub></em>
-            ...
-            <em>e<sub>body-n</sub></em>
-            (__loop <em>e<sub>step-1</sub></em>
-                    ...
-                    <em>e<sub>step-n</sub></em>))))))
-  (__loop <em>e<sub>init-1</sub></em> .. <em>e<sub>init-n</sub></em>))</literallayout>
-        <p>
-          Note the because <progident>do</progident> is defined in
-          terms of <progident>lambda</progident> application, value
-          restrictions on argument bindings apply.
-        </p>
-        <p>
-          <leadin>Pragmatics:</leadin> The
-          <progident>do</progident> form is guaranteed to be processed
-          tail recursively, as implied by the canonical rewriting.
+          The <progident>do</progident> form is not
+          let-polymorphic. In consequence, the binding patterns bound
+          within the <progident>do</progident> form are not
+          polymorphic bindings.
         </p>
       </sect2>
       <sect2>
@@ -4574,10 +4535,6 @@ id : T
       </sect2>
       <sect2>
         <title>Expressions</title>
-        <p>
-          Productions for derived forms are shown with their
-          non-terminal underlined.
-        </p>
         <literallayout indent="no">
 <em>ident</em> ::= Id | Id.Id
 <em>expr</em> ::= <em>eform</em>
