@@ -228,8 +228,8 @@ help()
     << "  --ppfqns --full-qual-types\n"
     << "  --raw-tvars --show-maybes --show-all-tccs \n"
     << "\n"
-    << "Languages: xmlpp, xmldump, xmltypes, bitcpp, showtypes, bito,"
-    << "   c, h, obj\n" 
+    << "Languages: xmlpp, xmldump, xmltypes, bitcpp, showtypes, bito,\n"
+    << "           c, h, obj\n" 
     << flush;
 }
  
