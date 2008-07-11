@@ -113,14 +113,14 @@ bool
 UocInfo::fe_beginSimp(std::ostream& errStream,
 		      bool init, unsigned long flags)
 { 
-  BEG_SIMP_DEBUG if (isSourceUoc)
+  BEG_SIMP_DEBUG if (isUocType(SourceUoc))
     PrettyPrint(errStream);
   
   BEG_SIMP_DEBUG std::cerr << "fe_beginSimp" << std::endl;
   bool stillOK = true;
   ast = beginSimp(ast, errStream, &stillOK);
 
-  BEG_SIMP_DEBUG if (isSourceUoc)
+  BEG_SIMP_DEBUG if (isUocType(SourceUoc))
     PrettyPrint(errStream);
 
   return true;

@@ -71,31 +71,32 @@ OnePassInfo UocInfo::onePassInfo[] = {
 };
 
 
-UocInfo::UocInfo(std::string _uocName, bool _isSourceUoc)
+static std::string 
+UocNameFromSrcName(const std::string& srcFileName)
+{
+  // Use the filename with the extension (if any) chopped off.
+  size_t lastDot = srcFileName.rfind(".");
+  return srcFileName.substr(0, lastDot);
+}
+
+UocInfo::UocInfo(std::string _uocName, GCPtr<Path> _path,
+		 UocType _theUocType)
 {
   lastCompletedPass = pn_none;
-  isSourceUoc = _isSourceUoc;
+  theUocType = _theUocType;
   ast = 0;
   env = 0;
   gamma = 0;
 
   uocName = _uocName;
-  if (isSourceUoc) {
-    path = new sherpa::Path(uocName);
-    size_t lastDot = uocName.rfind(".");
-    if (lastDot != std::string::npos)
-      uocName = uocName.substr(0, lastDot);
-  }
-  else {
-    path = resolveInterfacePath(uocName);
-  }
+  path = _path;
 }
 
 UocInfo::UocInfo(GCPtr<UocInfo> uoc)
 {
   uocName = uoc->uocName;
   path = uoc->path;
-  isSourceUoc = uoc->isSourceUoc;
+  theUocType = uoc->theUocType;
   lastCompletedPass = uoc->lastCompletedPass;
   ast = uoc->ast;
   env = uoc->env;
@@ -150,7 +151,9 @@ UocInfo::addTopLevelForm(GCPtr<AST> def)
 GCPtr<UocInfo> 
 UocInfo::compileSource(const std::string& srcFileName)
 {
-  GCPtr<UocInfo> puoci = new UocInfo(srcFileName, true);
+  GCPtr<Path> path = new sherpa::Path(srcFileName);
+  GCPtr<UocInfo> puoci = 
+    new UocInfo(UocNameFromSrcName(srcFileName), path, SourceUoc);
 
   puoci->Compile();
 
@@ -191,7 +194,7 @@ UocInfo::importInterface(std::ostream& errStream,
   }
 
   // Didn't find it. Actually need to do some work. Bother.
-  puoci = new UocInfo(ifName, false);
+  puoci = new UocInfo(ifName, resolveInterfacePath(ifName), InterfaceUoc);
   if(ifName == "bitc.prelude") {
     puoci->flags |= (UOC_IS_BUILTIN | UOC_IS_PRELUDE);
     
@@ -291,7 +294,7 @@ UocInfo::fe_parse(std::ostream& errStream, bool init,
 
   assert(ast->astType == at_start);
 
-  if (ast->child(0)->astType == at_interface && isSourceUoc) {
+  if (ast->child(0)->astType == at_interface && isUocType(SourceUoc)) {
     errStream << ast->child(0)->loc.asString()
 	      << ": Warning: interface units of compilation should "
 	      << "no longer\n"

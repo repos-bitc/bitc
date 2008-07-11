@@ -679,7 +679,8 @@ main(int argc, char *argv[])
   UocInfo::addAllCandidateEPs(); 
 #endif
 
-  GCPtr<UocInfo> unifiedUOC = new UocInfo("*emit*", true);
+  GCPtr<UocInfo> unifiedUOC = 
+    new UocInfo("*emit*", 0 /* no path */, UocInfo::SourceUoc);
   initUnifiedUoc(unifiedUOC);
 
   // Update all of the defForm pointers so that we can find things:

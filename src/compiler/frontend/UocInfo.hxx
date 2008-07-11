@@ -102,9 +102,16 @@ class UocInfo : public Countable {
   static GCPtr<Path> resolveInterfacePath(std::string ifName);
 
 public:
+  enum UocType {
+    SourceUoc,
+    InterfaceUoc
+  };
+private:
+  UocType theUocType;
+
+public:
   std::string uocName;		// either ifName or simulated
   GCPtr<Path> path;
-  bool isSourceUoc;
   unsigned long flags;
   
   Pass lastCompletedPass;
@@ -112,6 +119,15 @@ public:
   GCPtr<AST> ast;
   GCPtr<Environment<AST> > env;
   GCPtr<Environment<TypeScheme> > gamma;
+
+  // This will be replaced when we rotate the parse/pass relationship.
+  inline UocType getUocType() {
+    return theUocType;
+  }
+
+  inline bool isUocType(UocType t) {
+    return (theUocType == t);
+  }
 
   // This is the Instance environment. 
   // Currently indexed by FQN onto a list of Instances 
@@ -133,7 +149,7 @@ public:
    
   GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv;
   
-  UocInfo(std::string _uocName, bool _isSourceUoc);
+  UocInfo(std::string _uocName, GCPtr<Path> _path, UocType _theUocType);
   UocInfo(GCPtr<UocInfo> uoc);
 
   /* Take an empty UOC, create an empty *module* AST for it,
