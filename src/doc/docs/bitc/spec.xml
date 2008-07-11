@@ -347,8 +347,8 @@
 	<literallayout indent="no">
 #f            #t            and           
 apply         array         array-length
-array-nth     begin         bitc-version  
-bitfield      bool          by-ref 
+array-nth     begin         bitc-version
+bitfield      bool          by-ref        
 case          catch         char          
 cond          declare       defaxiom      
 defexception  define        definvariant  
@@ -359,34 +359,36 @@ dup           enable        exception
 extends       external      fill          
 fixint        float         if            
 import        int8          int16         
-int32         int64         interface
-fn            lambda        let
-letrec        member        mutable
-not           opaque        or
-otherwise     pair          proclaim
-provide       quad          ref
-set!          string        suspend
-switch        tag           the
-throw         try           tyfn
-uint8         uint16        uint32
-uint64        use           val
-vector        vector-length vector-nth
+int32         int64         interface     
+fn            lambda        let           
+letrec        member        mutable       
+not           opaque        or            
+otherwise     pair          proclaim      
+provide       quad          ref           
+set!          string        suspend       
+switch        tag           the           
+throw         try           tyfn          
+uint8         uint16        uint32        
+uint64        use           val           
+vector        vector-length vector-nth    
 word</literallayout>
 	<p>
 	  The following identifiers are reserved for use as future
 	  keywords:
 	</p>
 	<literallayout indent="no">
-assert        check         coindset      
-constrain     defequiv      defobject     
+assert        block         break         
+check         coindset      constrain     
+continue      defequiv      defobject     
 defrefine     deftype       defvariant    
-do*           import!       indset
+do*           import!       indset        
 inner-ref     int           label         
 let*          list          literal       
 location      module        namespace     
-nth           read-only     require
-sensory       sizeof        super
-tycon         using         value-at</literallayout>
+nth           read-only     require       
+return        return-from   sensory       
+sizeof        super         tycon         
+using         value-at</literallayout>
 	<p>
           In addition to the reserved words identified above, all
 	  definitions provided in the standard prelude are implicitly
