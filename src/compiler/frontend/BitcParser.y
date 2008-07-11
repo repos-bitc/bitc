@@ -59,7 +59,7 @@ using namespace std;
 #define YYSTYPE ParseType
 #define YYLEX_PARAM (SexprLexer *)lexer
 #undef yyerror
-#define yyerror(lexer, topast, s) lexer->ReportParseError(s)
+#define yyerror(lexer, s) lexer->ReportParseError(s)
 
 #include "SexprLexer.hxx"
 
@@ -98,7 +98,6 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 
 %pure-parser
 %parse-param {SexprLexer *lexer}
-%parse-param {GCPtr<AST> & topAst}
 
 %token <tok> tk_Reserved	/* reserved words */
 
@@ -278,28 +277,22 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 start: version module {
   SHOWPARSE("start -> version module");
   $$ = new AST(at_start, $1->loc, $2, $1);
-  topAst = $$;
   return 0;
 };
 
 start : module {
   SHOWPARSE("start -> module");
-  $$ = new AST(at_start, $1->loc, $1);
-  topAst = $$;
   return 0;
 };
 
 start: version interface {
   SHOWPARSE("start -> version interface");
-  $$ = new AST(at_start, $1->loc, $2, $1);
-  topAst = $$;
   return 0;
 };
 
 start: interface {
   SHOWPARSE("start -> interface");
-  $$ = new AST(at_start, $1->loc, $1);
-  topAst = $$;
+
   return 0;
 };
 
@@ -345,6 +338,36 @@ interface: '(' tk_INTERFACE ifident {
   GCPtr<AST> ifIdent = new AST(at_ident, $3);
   $$ = new AST(at_interface, $2.loc, ifIdent);
   $$->addChildrenFrom($6);
+
+  std::string uocName = ifIdent->s;
+  GCPtr<UocInfo> uoc = 
+    new UocInfo(uocName, lexer->here.origin, $$);
+
+  if(uocName == "bitc.prelude")
+    uoc->flags |= (UOC_IS_BUILTIN | UOC_IS_PRELUDE);
+
+  /* Put the UoC onto the interface list so that we do not recurse on
+     import. */
+  UocInfo::ifList->append(uoc);
+  uoc->Compile();
+
+#if 0
+  // The following code was in the old implementation of
+  // importInterface, but it seems that it must have been broken,
+  // because UocInfo::ifList was never replaced with newIfList. I am
+  // retaining it here long enough to check with Swaroop why this was
+  // okay.
+
+  // The interface that we just compiled may have (recursively)
+  // imported other interfaces. Now that we have successfully compiled
+  // this interface, migrate it to the end of the interface list.
+  GCPtr< CVector<GCPtr<UocInfo> > > newIfList = new CVector<GCPtr<UocInfo> >;  
+
+  for (size_t i = 0; i < UocInfo::ifList->size(); i++)
+    if (UocInfo::ifList->elem(i) != puoci) 
+      newIfList->append(UocInfo::ifList->elem(i));  
+  newIfList->append(puoci);
+#endif
 };
 
 ifident: {
@@ -366,12 +389,26 @@ module: mod_definitions  {
  $$ = $1;
  $$->astType = at_module;
  $$->printVariant = 1;
+
+ // Construct, compile, and admit the parsed UoC:
+ GCPtr<UocInfo> uoc = 
+   new UocInfo(UocInfo::UocNameFromSrcName(lexer->here.origin),
+	       lexer->here.origin, $$);
+ uoc->Compile();
+ UocInfo::srcList->append(uoc);
 };
 
 module: '(' tk_MODULE ifident optdocstring mod_definitions ')' {
  SHOWPARSE("module -> ( tk_MODULE ifident optdocstring mod_definitions )");
  $$ = $5;
  $$->astType = at_module;
+
+ // Construct, compile, and admit the parsed UoC:
+ GCPtr<UocInfo> uoc = 
+   new UocInfo(UocInfo::UocNameFromSrcName(lexer->here.origin),
+	       lexer->here.origin, $$);
+ uoc->Compile();
+ UocInfo::srcList->append(uoc);
 };
 
 // INTERFACE TOP LEVEL DEFINITIONS

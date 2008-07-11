@@ -378,8 +378,8 @@ SexprLexer::ReportParseWarning(std::string msg)
 }
 
 SexprLexer::SexprLexer(std::ostream& _err, std::istream& _in, 
-		       GCPtr<Path> inputPath)
-  :here(inputPath, 1, 0), inStream(_in), errStream(_err)
+		       const std::string& origin)
+  :here(origin, 1, 0), inStream(_in), errStream(_err)
 {
   inStream.unsetf(std::ios_base::skipws);
 

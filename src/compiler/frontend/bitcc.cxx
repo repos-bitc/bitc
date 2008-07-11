@@ -603,12 +603,12 @@ main(int argc, char *argv[])
   // FIX: TEMPORARY
   if(!Options::noPrelude) {
     sherpa::LexLoc loc = LexLoc();
-    UocInfo::importInterface(std::cerr, loc, "bitc.prelude");
+    (void) UocInfo::importInterface(std::cerr, loc, "bitc.prelude");
   }
   
   // Compile everything
   for(int i = 0; i < argc; i++)
-    (void) UocInfo::compileSource(argv[i]);
+    UocInfo::CompileFromFile(argv[i]);
 
   /* Per-file backend output after processing frontend, if any */
   bool doFinal = true;
@@ -679,9 +679,9 @@ main(int argc, char *argv[])
   UocInfo::addAllCandidateEPs(); 
 #endif
 
-  GCPtr<UocInfo> unifiedUOC = 
-    new UocInfo("*emit*", 0 /* no path */, UocInfo::SourceUoc);
-  initUnifiedUoc(unifiedUOC);
+  /* Create a new unit of compilation that will become the grand,
+     unified UoC */
+  GCPtr<UocInfo> unifiedUOC = UocInfo::CreateUnifiedUoC();
 
   // Update all of the defForm pointers so that we can find things:
   UocInfo::findAllDefForms();

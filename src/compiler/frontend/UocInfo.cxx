@@ -71,31 +71,31 @@ OnePassInfo UocInfo::onePassInfo[] = {
 };
 
 
-static std::string 
-UocNameFromSrcName(const std::string& srcFileName)
+std::string 
+UocInfo::UocNameFromSrcName(const std::string& srcFileName)
 {
   // Use the filename with the extension (if any) chopped off.
   size_t lastDot = srcFileName.rfind(".");
   return srcFileName.substr(0, lastDot);
 }
 
-UocInfo::UocInfo(std::string _uocName, GCPtr<Path> _path,
-		 UocType _theUocType)
+UocInfo::UocInfo(const std::string& _uocName, const std::string& _origin,
+		 GCPtr<AST> _ast)
 {
   lastCompletedPass = pn_none;
-  theUocType = _theUocType;
-  ast = 0;
+  ast = _ast;
+  theUocType = (ast->astType == at_module) ? SourceUoc : InterfaceUoc;
   env = 0;
   gamma = 0;
 
   uocName = _uocName;
-  path = _path;
+  origin = _origin;
 }
 
 UocInfo::UocInfo(GCPtr<UocInfo> uoc)
 {
   uocName = uoc->uocName;
-  path = uoc->path;
+  origin = uoc->origin;
   theUocType = uoc->theUocType;
   lastCompletedPass = uoc->lastCompletedPass;
   ast = uoc->ast;
@@ -104,21 +104,31 @@ UocInfo::UocInfo(GCPtr<UocInfo> uoc)
   instEnv = uoc->instEnv;
 }
 
-void
-UocInfo::initUoc(std::ostream& errStream)
+GCPtr<UocInfo>
+UocInfo::CreateUnifiedUoC()
 {
-  LexLoc loc;  
-  ast = new AST(at_start, loc, 
-		new AST(at_module, loc),
-		new AST(at_version, loc,
-			new AST(at_stringLiteral, loc)));
+  LexLoc loc;
+  GCPtr<AST> ast = new AST(at_start, loc, 
+			   new AST(at_module, loc),
+			   new AST(at_version, loc,
+				   new AST(at_stringLiteral, loc)));
   ast->child(1)->child(0)->s = BITC_VERSION;
   ast->child(1)->child(0)->litValue.s = BITC_VERSION;
 
-  env = new Environment<AST>(uocName);
-  gamma = new Environment<TypeScheme>(uocName);
-  instEnv = new Environment< CVector<GCPtr<Instance> > >(uocName);
+  std::string uocName = "*emit*";
+  GCPtr<UocInfo> uoc = new UocInfo(uocName, "*internal*", ast);
+
+  uoc->env = new Environment<AST>(uocName);
+  uoc->gamma = new Environment<TypeScheme>(uocName);
+  uoc->instEnv = new Environment< CVector<GCPtr<Instance> > >(uocName);
+
+  uoc->env = uoc->env->newDefScope();
+  uoc->gamma = uoc->gamma->newDefScope();
+  uoc->instEnv = uoc->instEnv->newDefScope();  
+
+  return uoc;
 }
+
 
 GCPtr<Path> 
 UocInfo::resolveInterfacePath(std::string ifName)
@@ -148,17 +158,51 @@ UocInfo::addTopLevelForm(GCPtr<AST> def)
   modIf->children->append(def);  
 }
 
-GCPtr<UocInfo> 
-UocInfo::compileSource(const std::string& srcFileName)
+bool
+UocInfo::CompileFromFile(const std::string& srcFileName)
 {
-  GCPtr<Path> path = new sherpa::Path(srcFileName);
-  GCPtr<UocInfo> puoci = 
-    new UocInfo(UocNameFromSrcName(srcFileName), path, SourceUoc);
+  // Use binary mode so that newline conversion and character set
+  // conversion is not done by the stdio library.
+  std::ifstream fin(srcFileName.c_str(), std::ios_base::binary);
 
-  puoci->Compile();
+  if (!fin.is_open()) {
+    std::cerr << "Couldn't open input file \""
+	      << srcFileName
+	      << std::flush;
+    return false;
+  }
 
-  UocInfo::srcList->append(puoci);
-  return puoci;
+  SexprLexer lexer(std::cerr, fin, srcFileName);
+
+  // This is no longer necessary, because the parser now handles it
+  // for all interfaces whose name starts with "bitc.xxx"
+  //
+  // if (this->flags & UOC_IS_PRELUDE)
+  //   lexer.isRuntimeUoc = true;
+
+  lexer.setDebug(Options::showLex);
+
+  extern int bitcparse(SexprLexer *lexer);
+  bitcparse(&lexer);  
+  // On exit, ast is a pointer to the AST tree root.
+  
+  fin.close();
+
+  if (lexer.num_errors != 0u)
+    return false;
+
+#if 0
+  assert(ast->astType == at_start);
+
+  if (ast->child(0)->astType == at_interface && isUocType(SourceUoc)) {
+    errStream << ast->child(0)->loc.asString()
+	      << ": Warning: interface units of compilation should "
+	      << "no longer\n"
+	      << "    be given on the command line.\n";
+  }
+#endif
+
+  return true;
 }
 
 GCPtr<UocInfo> 
@@ -193,14 +237,8 @@ UocInfo::importInterface(std::ostream& errStream,
     exit(1);
   }
 
-  // Didn't find it. Actually need to do some work. Bother.
-  puoci = new UocInfo(ifName, resolveInterfacePath(ifName), InterfaceUoc);
-  if(ifName == "bitc.prelude") {
-    puoci->flags |= (UOC_IS_BUILTIN | UOC_IS_PRELUDE);
-    
-  }
-
-  if (!puoci->path) {
+  GCPtr<Path> path = resolveInterfacePath(ifName);
+  if (!path) {
     errStream
       << loc.asString() << ": "
       << "Import failed for interface \"" << ifName << "\".\n"
@@ -208,23 +246,11 @@ UocInfo::importInterface(std::ostream& errStream,
     exit(1);
   }
 
-  // Need to append *first* so that we don't recurse infinitely 
-  // while loading this interface:
-  UocInfo::ifList->append(puoci);
+  CompileFromFile(path->asString());
 
-  puoci->Compile();
-
-  // The interface that we just compiled may have (recursively)
-  // imported other interfaces. Now that we have successfully compiled
-  // this interface, migrate it to the end of the interface list.
-  GCPtr< CVector<GCPtr<UocInfo> > > newIfList = new CVector<GCPtr<UocInfo> >;  
-
-  for (size_t i = 0; i < UocInfo::ifList->size(); i++)
-    if (UocInfo::ifList->elem(i) != puoci) 
-      newIfList->append(UocInfo::ifList->elem(i));  
-  newIfList->append(puoci);
-
-  return puoci;
+  // If we survived the compile, the interface is now in the ifList
+  // and can be found.
+  return findInterface(ifName);
 }
 
 bool
@@ -261,45 +287,9 @@ bool
 UocInfo::fe_parse(std::ostream& errStream, bool init,
 		  unsigned long flags)
 {
-  // Use binary mode so that newline conversion and character set
-  // conversion is not done by the stdio library.
-  std::ifstream fin(path->c_str(), std::ios_base::binary);
-
-  if (!fin.is_open()) {
-    errStream << "Couldn't open input file \""
-	      << *path
-	      << "\"\n";
-  }
-
-  SexprLexer lexer(std::cerr, fin, path);
-
-  // This is no longer necessary, because the parser now handles it
-  // for all interfaces whose name starts with "bitc.xxx"
-  //
-  // if (this->flags & UOC_IS_PRELUDE)
-  //   lexer.isRuntimeUoc = true;
-
-  lexer.setDebug(Options::showLex);
-
-  extern int bitcparse(SexprLexer *lexer, GCPtr<AST> &topAst);
-  bitcparse(&lexer, ast);  
-  // On exit, ast is a pointer to the AST tree root.
-  
-  fin.close();
-
-  if (lexer.num_errors != 0u) {
-    ast = new AST(at_Null);
-    return false;
-  }
-
-  assert(ast->astType == at_start);
-
-  if (ast->child(0)->astType == at_interface && isUocType(SourceUoc)) {
-    errStream << ast->child(0)->loc.asString()
-	      << ": Warning: interface units of compilation should "
-	      << "no longer\n"
-	      << "    be given on the command line.\n";
-  }
+  // The parse pass is now vestigial. The only reason that it still
+  // exists is to preserve the ability to get a post-parse dump of the
+  // parse tree in various output languages.
 
   return true;
 }
@@ -330,7 +320,7 @@ UocInfo::Compile()
 
     if(!ast->isValid()) {
       std::cerr << "PANIC: Invalid AST built for file \""	
-		<< path->asString()
+		<< origin
 		<< "\"."
 		<< "[Pass: "
 		<< passInfo[i].descrip
@@ -385,7 +375,7 @@ UocInfo::DoBackend()
 
     if(!ast->isValid()) {
       std::cerr << "PANIC: Invalid AST built for file \""
-		<< path->asString()
+		<< origin
 		<< "\"."
 		<< "Please report this problem.\n"; 
       std::cerr << ast->asString() << std::endl;

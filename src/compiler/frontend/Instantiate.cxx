@@ -148,7 +148,7 @@ using namespace std;
 /*
   The main environment(s) which the Unified-UOC thinks it has, is the
   UOC where the output of the polyinstantiator resides. By prior
-  arrangement (see initUnifiedUOC) we will build wrappers around the
+  arrangement (see CreateUnifiedUOC) we will build wrappers around the
   main environments, which will hold the mega-environments. In this
   way, when the resolver/type-checker looks at the environment, it can
   find ALL definitions (from all input and output).
@@ -164,14 +164,6 @@ using namespace std;
   that they are both reachable from the unifiedUOC and that any such
   separation is only a matter of emphasis. */ 
 
-void 
-initUnifiedUoc(GCPtr<UocInfo> uoc)
-{
-  uoc->initUoc(cerr);
-  uoc->env = uoc->env->newDefScope();
-  uoc->gamma = uoc->gamma->newDefScope();
-  uoc->instEnv = uoc->instEnv->newDefScope();  
-}
 
 /* We have previously established that we need to build a
    mega-Env from all UOCs. How do we want to build it? Of

@@ -111,7 +111,7 @@ private:
 
 public:
   std::string uocName;		// either ifName or simulated
-  GCPtr<Path> path;
+  std::string origin;		// typically the file name
   unsigned long flags;
   
   Pass lastCompletedPass;
@@ -120,13 +120,12 @@ public:
   GCPtr<Environment<AST> > env;
   GCPtr<Environment<TypeScheme> > gamma;
 
-  // This will be replaced when we rotate the parse/pass relationship.
-  inline UocType getUocType() {
-    return theUocType;
+  inline bool isSourceUoc() {
+    return (ast->astType == at_module);
   }
 
-  inline bool isUocType(UocType t) {
-    return (theUocType == t);
+  inline bool isInterfaceUoc() {
+    return (ast->astType == at_interface);
   }
 
   // This is the Instance environment. 
@@ -149,12 +148,13 @@ public:
    
   GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv;
   
-  UocInfo(std::string _uocName, GCPtr<Path> _path, UocType _theUocType);
+  UocInfo(const std::string& _uocName, const std::string& _origin, GCPtr<AST> _ast);
   UocInfo(GCPtr<UocInfo> uoc);
 
-  /* Take an empty UOC, create an empty *module* AST for it,
-     Initialize all environments by calling RandT */
-  void initUoc(std::ostream& errStream);
+  /* Create a fresh, empty UOC that is set up to become the unified
+   * output UoC module, initializing all environments by hand.
+   */
+  static GCPtr<UocInfo> CreateUnifiedUoC();
 
   static GCPtr<CVector<GCPtr<Path> > > searchPath;
 
@@ -174,8 +174,13 @@ public:
   importInterface(std::ostream&, const LexLoc& loc, 
 		  const std::string& ifName);
 
-  static GCPtr<UocInfo> 
-  compileSource(const std::string& srcFileName);
+  static std::string 
+  UocNameFromSrcName(const std::string& srcFileName);
+
+  // Parse a file, admitting source and/or interface units of
+  // compilation into the ifList or the srcList as a side effect.
+  static bool 
+  CompileFromFile(const std::string& srcFileName);
 
   // Individual passes:
 #define PASS(nm,short,descrip)				  \

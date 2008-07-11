@@ -142,13 +142,13 @@ UocInfo::fe_HoistInstLam(std::ostream& errStream,
 { 
   bool errFree = true;
 
-  ILH_DEBUG if (isUocType(SourceUoc))
+  ILH_DEBUG if (isSourceUoc())
     PrettyPrint(errStream);
 
   ILH_DEBUG std::cerr << "cl_HoistInstLam" << std::endl;
   cl_HoistInstLam(this);
 
-  ILH_DEBUG if (isUocType(SourceUoc))
+  ILH_DEBUG if (isSourceUoc())
     PrettyPrint(errStream);
 
   ILH_DEBUG std::cerr << "RandT" << std::endl;

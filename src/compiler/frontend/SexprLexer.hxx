@@ -67,7 +67,7 @@ struct SexprLexer {
   void ungetChar(ucs4_t);
 
   SexprLexer(std::ostream& _err, std::istream& _in, 
-	     GCPtr<Path> inputPath);
+	     const std::string& origin);
 
   void ReportParseError();
   void ReportParseError(std::string  /* msg */);
