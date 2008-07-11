@@ -214,7 +214,7 @@ help()
     //    << "  bitcc [-I include] -c file1.bits ...\n"
     << "  bitcc [-I include] [-o outfile.bito] -c file.bits\n"
     // << "  bitcc [-I include] -h file.bitc ...\n"
-    << "  bitcc [-I include] [-o outfile.h] -h file.bitc\n"
+    << "  bitcc [-I include] [-o outfile.h] -h file.bits\n"
     << "  bitcc [file1.bito|library.a] ... [-o exefile]\n"
     << "  bitcc -V|--version\n"
     << "  bitcc --help\n"

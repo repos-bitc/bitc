@@ -355,12 +355,12 @@ UocInfo::addAllCandidateEPs()
 {
   for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
     GCPtr<UocInfo> puoci = UocInfo::ifList->elem(i);
-    addCandidates(puoci->ast->child(0));
+    addCandidates(puoci->ast);
   }  
 
   for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
     GCPtr<UocInfo> puoci = UocInfo::srcList->elem(i);
-    addCandidates(puoci->ast->child(0));
+    addCandidates(puoci->ast);
   }
 
   //for(size_t c=0; c < Options::entryPts.size(); c++)
