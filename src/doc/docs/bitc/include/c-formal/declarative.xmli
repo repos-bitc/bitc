@@ -3455,12 +3455,12 @@
 	  </Subst>
 	</eq>
       </btypes:TYPE>.
-      <em>
+      <!-- <em>
 	Need to fix the proof for 
 	<btypes:TYPE>
 	  <dCtset/>
 	</btypes:TYPE> introduction.
-      </em>
+      </em> -->
     </p>
     <ol>
       <li>
@@ -4839,12 +4839,12 @@
       </btypes:TYPE>
       We proceed by case analysis on the final step of the
       derivation.
-      <em>
+      <!-- <em>
 	Need to fix the proof for 
 	<btypes:TYPE>
 	  <dCtset/>
 	</btypes:TYPE> introduction.
-      </em>
+      </em> -->
     </p>
     <ol>
       <li>
