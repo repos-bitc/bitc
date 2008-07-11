@@ -1827,31 +1827,6 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       break;
     }
 
-  case at_start:
-    {
-      // match at_module
-    
-      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
-		uflags, trail,  mode, TI_NONE);
-    
-      if (ast->children->size() > 1) {
-	// match at_version
-	TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
-		  uflags, trail,  mode, TI_NONE);
-      }
-
-      break;
-    }
-
-  case at_version:
-    {
-      // match at_stringLiteral
-      //       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP,
-      // 		uflags, trail,  USE_MODE, TI_COMP2);
-
-      break;
-    }
-
   case at_module:
     {
       for(size_t c = 0; c < ast->children->size(); c++) {
@@ -4668,7 +4643,7 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
   
   TI_TOP_DEBUG
     errStream << "Now Processing " << uocName
-	      << " ast = " << ast->astTypeName()
+	      << " ast = " << uocAst->astTypeName()
 	      << std::endl;
   
   GCPtr<CVector<GCPtr<Type> > > impTypes = new CVector<GCPtr<Type> >;
@@ -4694,13 +4669,13 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
       instEnv = new Environment< CVector<GCPtr<Instance> > >(this->uocName);
     }
     if((flags & TYP_NO_PRELUDE) == 0)
-      CHKERR(errFree, initGamma(std::cerr, gamma, instEnv, ast, flags));
+      CHKERR(errFree, initGamma(std::cerr, gamma, instEnv, uocAst, flags));
     
     if(!errFree)
       return false;
   }
 
-  CHKERR(errFree, typeInfer(errStream, ast, gamma, instEnv, 
+  CHKERR(errFree, typeInfer(errStream, uocAst, gamma, instEnv, 
 			    impTypes, false, 
 			    new TCConstraints, flags, trail, 
 			    USE_MODE, TI_NONE));
@@ -4710,7 +4685,7 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
     errStream << "- - - - - - - - - - - - - - - - - - - - - - - " 
 	      << endl;
     
-    GCPtr<AST> mod = ast->child(0);
+    GCPtr<AST> mod = uocAst;
     for(size_t i=0; i < mod->children->size(); i++) {
       GCPtr<AST> ast = mod->child(i);
       errStream << ast->atKwd() << std::endl;

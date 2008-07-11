@@ -149,14 +149,14 @@ bool
 initGamma(std::ostream& errStream, 
 	  GCPtr<Environment<TypeScheme> > gamma,
 	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	  const GCPtr<AST> ast, unsigned long uflags)
+	  const GCPtr<AST> topAst, unsigned long uflags)
 {
   bool errFree = true;
   // Make sure I am not processing the prelude itself
   // cout << "Processing " << ast->child(1)->child(0)->s 
   //      << std::endl;
-  if(ast->child(0)->astType == at_interface &&
-     ast->child(0)->child(0)->s == "bitc.prelude") {
+  if(topAst->astType == at_interface &&
+     topAst->child(0)->s == "bitc.prelude") {
     // cout << "Processing Prelude " << std::endl;
     return true;
   }
@@ -176,7 +176,7 @@ initGamma(std::ostream& errStream,
   }
 
   if(i == UocInfo::ifList->size()) {
-    errStream << ast->loc << ": "
+    errStream << topAst->loc << ": "
 	      << "Internal Compiler Error. "
 	      << "Prelude has NOT been processed till " 
 	      << "type inference."
@@ -185,7 +185,7 @@ initGamma(std::ostream& errStream,
   }
   
   if(!preenv || !preInsts) {
-    errStream << ast->loc << ": "
+    errStream << topAst->loc << ": "
 	      << "Internal Compiler Error. "
 	      << "Prelude's Gamma is NULL "
 	      << std::endl;

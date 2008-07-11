@@ -124,7 +124,6 @@ findusedef(std::ostream &errStream,
 
   case at_Null:
   case at_AnyGroup:
-  case at_version:
   case agt_literal:
   case agt_tvar:
   case agt_var:
@@ -250,14 +249,6 @@ findusedef(std::ostream &errStream,
       default:
 	break;
       }
-      break;
-    }
-
-  case at_start:
-    {
-      for(size_t c=0; c < ast->children->size(); c++)
-	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
-				   NULL_MODE, boundVars, freeVars));
       break;
     }
 
@@ -893,7 +884,7 @@ cl_convert(GCPtr<UocInfo> uoc)
 {
   GCPtr< CVector<GCPtr<AST> > > outAsts = new CVector<GCPtr<AST> >;
 
-  GCPtr<AST> modOrIf = uoc->ast->child(0);
+  GCPtr<AST> modOrIf = uoc->uocAst;
 
   for (size_t c = 0;c < modOrIf->children->size(); c++) {
     GCPtr<AST> child = modOrIf->child(c);
@@ -1080,7 +1071,8 @@ UocInfo::be_clconv(std::ostream& errStream,
   
   CLCONV_DEBUG std::cerr << "findusedef 1" << std::endl;
 
-  CHKERR(errFree, findusedef(errStream, ast, ast, NULL_MODE, boundVars, freeVars));
+  CHKERR(errFree, findusedef(errStream, uocAst, uocAst,
+			     NULL_MODE, boundVars, freeVars));
   
   if(!errFree)
     return false;
@@ -1088,7 +1080,7 @@ UocInfo::be_clconv(std::ostream& errStream,
   CLCONV_DEBUG PrettyPrint(errStream, true);
 
   CLCONV_DEBUG std::cerr << "cl_heapify" << std::endl;
-  ast = cl_heapify(ast);
+  uocAst = cl_heapify(uocAst);
 
   CLCONV_DEBUG PrettyPrint(errStream, true);
 
@@ -1101,8 +1093,9 @@ UocInfo::be_clconv(std::ostream& errStream,
   CLCONV_DEBUG std::cerr << "findusedef 2" << std::endl;
 
   // This *shouldn't* be necessary, but it doesn't hurt anything.
-  clearusedef(ast);
-  findusedef(errStream, ast, ast, NULL_MODE, boundVars, freeVars);
+  clearusedef(uocAst);
+  findusedef(errStream, uocAst, uocAst, NULL_MODE,
+	     boundVars, freeVars);
 
   CLCONV_DEBUG PrettyPrint(errStream);
 
@@ -1117,7 +1110,7 @@ UocInfo::be_clconv(std::ostream& errStream,
 	 RandT(errStream, true, CL_SYM_FLAGS, CL_TYP_FLAGS));
   
   if(!errFree)
-    std::cerr << ast->asString();
+    std::cerr << uocAst->asString();
   assert(errFree);
 
   return true;

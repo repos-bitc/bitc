@@ -223,7 +223,6 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 //%token <tok> tk_SEQUENCEREF
 //%token <tok> tk_SEQUENCELENGTH
    
-%type <ast> start version
 %type <ast> module interface
 %type <ast> defpattern
 %type <ast> mod_definitions mod_definition
@@ -276,7 +275,6 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 
 start: version module {
   SHOWPARSE("start -> version module");
-  $$ = new AST(at_start, $1->loc, $2, $1);
   return 0;
 };
 
@@ -300,10 +298,9 @@ start: interface {
 version: '(' tk_BITC_VERSION strLit ')' {
   SHOWPARSE("version -> ( BITC-VERSION strLit )");
   if(!CheckVersionCompatibility($3->s)) {
-    std::string s = "Warning: BitC version conflict " + $3->s + " vs " + Version();
-    lexer->ReportParseWarning(s);
+    std::string s = ": Warning: BitC version conflict " + $3->s + " vs " + Version();
+    lexer->ReportParseWarning($3->loc, s);
   }
-  $$ = new AST(at_version, $2.loc, $3);
 }; 
 
 // Documentation comments. These are added only in productions where
@@ -339,6 +336,13 @@ interface: '(' tk_INTERFACE ifident {
   $$ = new AST(at_interface, $2.loc, ifIdent);
   $$->addChildrenFrom($6);
 
+  if (lexer->isCommandLineInput) {
+    char *s =
+      ": Warning: interface units of compilation should no longer\n"
+      "    be given on the command line.\n";
+    lexer->ReportParseWarning($$->loc, s);
+  }
+
   std::string uocName = ifIdent->s;
   GCPtr<UocInfo> uoc = 
     new UocInfo(uocName, lexer->here.origin, $$);
@@ -346,9 +350,22 @@ interface: '(' tk_INTERFACE ifident {
   if(uocName == "bitc.prelude")
     uoc->flags |= (UOC_IS_BUILTIN | UOC_IS_PRELUDE);
 
-  /* Put the UoC onto the interface list so that we do not recurse on
-     import. */
-  UocInfo::ifList->append(uoc);
+  GCPtr<UocInfo> existingUoc = UocInfo::findInterface(uocName);
+
+  if (existingUoc) {
+    std::string s = "Error: This interface has already been loaded from "
+      + existingUoc->uocAst->loc.asString();
+    lexer->ReportParseError($$->loc, s);
+
+  }
+  else  {
+    /* Put the UoC onto the interface list so that we do not recurse on
+       import. */
+    UocInfo::ifList->append(uoc);
+  }
+    
+  // Regardless, compile the new interface to check for further
+  // warnings and/or errors:
   uoc->Compile();
 
 #if 0

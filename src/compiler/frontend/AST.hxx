@@ -261,8 +261,6 @@ enum AstType {
     at_intLiteral,
     at_floatLiteral,
     at_stringLiteral,
-    at_start,
-    at_version,
     at_module,
     at_interface,
     at_defunion,

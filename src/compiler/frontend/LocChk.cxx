@@ -141,7 +141,7 @@ UocInfo::fe_locCheck(std::ostream& errStream,
 		     bool init, unsigned long flags)
 {
   bool errFree = true;  
-  LocChk(errStream, errFree, ast, false);  
+  LocChk(errStream, errFree, uocAst, false);  
   return errFree;
 }
 

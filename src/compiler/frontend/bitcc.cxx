@@ -608,7 +608,7 @@ main(int argc, char *argv[])
   
   // Compile everything
   for(int i = 0; i < argc; i++)
-    UocInfo::CompileFromFile(argv[i]);
+    UocInfo::CompileFromFile(argv[i], true);
 
   /* Per-file backend output after processing frontend, if any */
   bool doFinal = true;

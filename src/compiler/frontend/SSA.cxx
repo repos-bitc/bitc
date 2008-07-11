@@ -311,21 +311,6 @@ ssa(std::ostream& errStream,
       break;
     }
     
-  case at_start:
-    {
-      // match at_version
-      
-      // match at_module / at_interface
-      SSA(errStream, uoc, ast->child(0), grandLet, 
-	     identList, ast, 1, flags); 
-      break;
-    }
-    
-  case at_version:
-    {
-      break;
-    }
-
   case at_interface:
   case at_module:
     {            
@@ -1040,8 +1025,8 @@ UocInfo::be_ssaTrans(std::ostream& errStream,
 
   GCPtr<UocInfo> uoc = this;
   
-  CHKERR(errFree, ssa(errStream, uoc, uoc->ast, NULL, 
-			 NULL, uoc->ast, 0, flags));
+  CHKERR(errFree, ssa(errStream, uoc, uoc->uocAst, NULL, 
+			 NULL, uoc->uocAst, 0, flags));
   
   //errStream << "ATransed AST = " << std::endl 
   //	    << uoc->ast->asString() << std::endl;

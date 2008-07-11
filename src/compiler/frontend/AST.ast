@@ -560,11 +560,11 @@ LEAF stringLiteral;
 GROUP tvar = ident;
 
 // COMPILATION UNITS [2.5]
-AST start = CompilationUnit version?;
+// AST start = CompilationUnit version?;
 GROUP CompilationUnit = module | interface;
 
 // VERSION [2.5]
-AST version = stringLiteral;
+// AST version = stringLiteral;
 
 // MODULES [2.5]
 AST module = definition*;

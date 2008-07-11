@@ -102,30 +102,23 @@ class UocInfo : public Countable {
   static GCPtr<Path> resolveInterfacePath(std::string ifName);
 
 public:
-  enum UocType {
-    SourceUoc,
-    InterfaceUoc
-  };
-private:
-  UocType theUocType;
-
-public:
   std::string uocName;		// either ifName or simulated
   std::string origin;		// typically the file name
   unsigned long flags;
   
   Pass lastCompletedPass;
 
-  GCPtr<AST> ast;
+  bool fromCommandLine;
+  GCPtr<AST> uocAst;
   GCPtr<Environment<AST> > env;
   GCPtr<Environment<TypeScheme> > gamma;
 
   inline bool isSourceUoc() {
-    return (ast->astType == at_module);
+    return (uocAst->astType == at_module);
   }
 
   inline bool isInterfaceUoc() {
-    return (ast->astType == at_interface);
+    return (uocAst->astType == at_interface);
   }
 
   // This is the Instance environment. 
@@ -148,7 +141,8 @@ public:
    
   GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv;
   
-  UocInfo(const std::string& _uocName, const std::string& _origin, GCPtr<AST> _ast);
+  UocInfo(const std::string& _uocName, const std::string& _origin, 
+	  GCPtr<AST> _uocAst);
   UocInfo(GCPtr<UocInfo> uoc);
 
   /* Create a fresh, empty UOC that is set up to become the unified
@@ -180,7 +174,7 @@ public:
   // Parse a file, admitting source and/or interface units of
   // compilation into the ifList or the srcList as a side effect.
   static bool 
-  CompileFromFile(const std::string& srcFileName);
+  CompileFromFile(const std::string& srcFileName, bool fromCmdLine);
 
   // Individual passes:
 #define PASS(nm,short,descrip)				  \

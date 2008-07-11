@@ -190,7 +190,7 @@ UocInfo::fe_reprSimp(std::ostream& errStream,
 		     bool init, unsigned long flags)
 {
   bool errFree = true;
-  ast = reprXform(ast, errStream, errFree);
+  uocAst = reprXform(uocAst, errStream, errFree);
   return errFree;
 }
 

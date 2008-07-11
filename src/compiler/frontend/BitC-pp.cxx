@@ -199,16 +199,6 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
       
     break;
 
-  case at_start:
-    if (ast->children->size() > 1) {
-      BitcP(out, ast->child(1), showTypes);
-      out << endl;
-    }
-
-    BitcP(out, ast->child(0), showTypes);
-    break;
-
-    
   case at_usesel:
     BitcP(out, ast->child(0), showTypes);
     out << ".";
@@ -386,7 +376,6 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
       break;
     }
 
-  case at_version:
   case at_vector:
   case at_vectorType:
   case at_makevectorL:
@@ -976,10 +965,6 @@ doShowTypes(std::ostream& out, GCPtr<AST> ast,
       break;
     }
 
-  case at_start:
-    doShowTypes(out, ast->child(0), gamma, showMangName, raw, tvP);
-    break;
-
   case at_interface:
   case at_module:
     {
@@ -1118,19 +1103,16 @@ AST::PrettyPrint(bool decorated) const
 void
 UocInfo::PrettyPrint(std::ostream& out, bool decorated)
 {
-  assert (ast->astType == at_start);
+  assert (uocAst->astType == at_module
+	  || uocAst->astType == at_interface);
 
-  if (ast->children->size() > 1) {
-    ast->child(1)->PrettyPrint(out, decorated);
-    out << endl;
-  }
-  ast->child(0)->PrettyPrint(out, decorated);
+  uocAst->PrettyPrint(out, decorated);
   out << endl;
 }
 
 void
 UocInfo::ShowTypes(std::ostream& out)
 {
-  doShowTypes(out, ast, gamma, false);  
+  doShowTypes(out, uocAst, gamma, false);  
 }
 

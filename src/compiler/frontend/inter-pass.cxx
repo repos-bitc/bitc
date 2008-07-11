@@ -77,7 +77,7 @@ UocInfo::TypeCheck(std::ostream& errStream, bool init,
   // be careful about old types. Pay attention to
   // bindIdentDef() function which preserves types
   // if a type already exists.
-  ast->clearTypes();  
+  uocAst->clearTypes();  
 
   errFree = fe_typeCheck(errStream, init, tflags);    
   if(!errFree) 
@@ -102,7 +102,7 @@ UocInfo::RandT(std::ostream& errStream,
   
   if(!errFree)
     errStream << "WHILE R&Ting:" << std::endl
-	      << ast->asString() << std::endl;
+	      << uocAst->asString() << std::endl;
   
   return errFree;
 }
@@ -159,7 +159,7 @@ UocInfo::RandTexpr(std::ostream& errStream,
 {
   bool errFree = true;
   GCPtr<UocInfo> myUoc = new UocInfo(this);
-  myUoc->ast = expr;
+  myUoc->uocAst = expr;
   
   if(altEnvSet) {
     myUoc->env = altEnvSet->env;
@@ -319,12 +319,12 @@ UocInfo::findAllDefForms()
 {
   for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
     GCPtr<UocInfo> puoci = UocInfo::srcList->elem(i);
-    puoci->findDefForms(puoci->ast);
+    puoci->findDefForms(puoci->uocAst);
   }
 
   for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
     GCPtr<UocInfo> puoci = UocInfo::ifList->elem(i);
-    puoci->findDefForms(puoci->ast);
+    puoci->findDefForms(puoci->uocAst);
   }
 }
 
@@ -355,12 +355,12 @@ UocInfo::addAllCandidateEPs()
 {
   for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
     GCPtr<UocInfo> puoci = UocInfo::ifList->elem(i);
-    addCandidates(puoci->ast);
+    addCandidates(puoci->uocAst);
   }  
 
   for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
     GCPtr<UocInfo> puoci = UocInfo::srcList->elem(i);
-    addCandidates(puoci->ast);
+    addCandidates(puoci->uocAst);
   }
 
   //for(size_t c=0; c < Options::entryPts.size(); c++)

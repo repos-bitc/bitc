@@ -353,8 +353,6 @@ isExpansive(std::ostream& errStream,
   case at_valCat:
   case at_opaqueCat:
   case agt_category:
-  case at_start:
-  case at_version:
   case at_module:
   case at_define:
   case at_defunion:

@@ -194,7 +194,6 @@ TopInit(std::ostream& errStream,
       break;
     }
 
-  case at_version:
   case at_Null: 
     // switch contains at_Null of otherwise clause is absent. 
   case at_defunion:
@@ -292,13 +291,6 @@ TopInit(std::ostream& errStream,
       break;
     }
     
-  case at_start:
-    {
-      // match at_module / at_interface
-      TOPINIT(ast->child(0), flags);
-      break;
-    }
-
   case at_interface:
     {
       // match agt_definition*
@@ -464,7 +456,7 @@ UocInfo::fe_initCheck(std::ostream& errStream,
   return true;
 
   bool errFree = true;
-  CHKERR(errFree, TopInit(errStream, ast, flags));
+  CHKERR(errFree, TopInit(errStream, uocAst, flags));
   
   return errFree;
 }

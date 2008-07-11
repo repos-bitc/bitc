@@ -80,11 +80,10 @@ UocInfo::UocNameFromSrcName(const std::string& srcFileName)
 }
 
 UocInfo::UocInfo(const std::string& _uocName, const std::string& _origin,
-		 GCPtr<AST> _ast)
+		 GCPtr<AST> _uocAst)
 {
   lastCompletedPass = pn_none;
-  ast = _ast;
-  theUocType = (ast->astType == at_module) ? SourceUoc : InterfaceUoc;
+  uocAst = _uocAst;
   env = 0;
   gamma = 0;
 
@@ -92,13 +91,16 @@ UocInfo::UocInfo(const std::string& _uocName, const std::string& _origin,
   origin = _origin;
 }
 
+// Why does this exist? Are we actually using it anywhere?
+// I'm concerned because it isn't doing deep copy, I don't understand
+// whether it *needs* to do deep copy (or not), and there is no
+// comment here answering my question.
 UocInfo::UocInfo(GCPtr<UocInfo> uoc)
 {
   uocName = uoc->uocName;
   origin = uoc->origin;
-  theUocType = uoc->theUocType;
   lastCompletedPass = uoc->lastCompletedPass;
-  ast = uoc->ast;
+  uocAst = uoc->uocAst;
   env = uoc->env;
   gamma = uoc->gamma;
   instEnv = uoc->instEnv;
@@ -108,12 +110,7 @@ GCPtr<UocInfo>
 UocInfo::CreateUnifiedUoC()
 {
   LexLoc loc;
-  GCPtr<AST> ast = new AST(at_start, loc, 
-			   new AST(at_module, loc),
-			   new AST(at_version, loc,
-				   new AST(at_stringLiteral, loc)));
-  ast->child(1)->child(0)->s = BITC_VERSION;
-  ast->child(1)->child(0)->litValue.s = BITC_VERSION;
+  GCPtr<AST> ast = new AST(at_module, loc);
 
   std::string uocName = "*emit*";
   GCPtr<UocInfo> uoc = new UocInfo(uocName, "*internal*", ast);
@@ -154,12 +151,12 @@ UocInfo::resolveInterfacePath(std::string ifName)
 void 
 UocInfo::addTopLevelForm(GCPtr<AST> def)
 {
-  GCPtr<AST> modIf = ast->child(0);
-  modIf->children->append(def);  
+  assert(uocAst->astType == at_module);
+  uocAst->children->append(def);  
 }
 
 bool
-UocInfo::CompileFromFile(const std::string& srcFileName)
+UocInfo::CompileFromFile(const std::string& srcFileName, bool fromCmdLine)
 {
   // Use binary mode so that newline conversion and character set
   // conversion is not done by the stdio library.
@@ -172,7 +169,7 @@ UocInfo::CompileFromFile(const std::string& srcFileName)
     return false;
   }
 
-  SexprLexer lexer(std::cerr, fin, srcFileName);
+  SexprLexer lexer(std::cerr, fin, srcFileName, fromCmdLine);
 
   // This is no longer necessary, because the parser now handles it
   // for all interfaces whose name starts with "bitc.xxx"
@@ -190,17 +187,6 @@ UocInfo::CompileFromFile(const std::string& srcFileName)
 
   if (lexer.num_errors != 0u)
     return false;
-
-#if 0
-  assert(ast->astType == at_start);
-
-  if (ast->child(0)->astType == at_interface && isUocType(SourceUoc)) {
-    errStream << ast->child(0)->loc.asString()
-	      << ": Warning: interface units of compilation should "
-	      << "no longer\n"
-	      << "    be given on the command line.\n";
-  }
-#endif
 
   return true;
 }
@@ -224,7 +210,7 @@ UocInfo::importInterface(std::ostream& errStream,
   // IS a gratuitously stupid way to do it.
   GCPtr<UocInfo> puoci = findInterface(ifName);
 
-  if (puoci && puoci->ast)
+  if (puoci && puoci->uocAst)
     return puoci;
 
   if (puoci) {
@@ -246,7 +232,7 @@ UocInfo::importInterface(std::ostream& errStream,
     exit(1);
   }
 
-  CompileFromFile(path->asString());
+  CompileFromFile(path->asString(), false);
 
   // If we survived the compile, the interface is now in the ifList
   // and can be found.
@@ -318,7 +304,7 @@ UocInfo::Compile()
       exit(1);
     }
 
-    if(!ast->isValid()) {
+    if(!uocAst->isValid()) {
       std::cerr << "PANIC: Invalid AST built for file \""	
 		<< origin
 		<< "\"."
@@ -326,7 +312,7 @@ UocInfo::Compile()
 		<< passInfo[i].descrip
 		<< "] "
 		<< "Please report this problem.\n"; 
-      std::cerr << ast->asString() << std::endl;
+      std::cerr << uocAst->asString() << std::endl;
       exit(1);
     }
 
@@ -373,12 +359,12 @@ UocInfo::DoBackend()
       exit(1);
     }
 
-    if(!ast->isValid()) {
+    if(!uocAst->isValid()) {
       std::cerr << "PANIC: Invalid AST built for file \""
 		<< origin
 		<< "\"."
 		<< "Please report this problem.\n"; 
-      std::cerr << ast->asString() << std::endl;
+      std::cerr << uocAst->asString() << std::endl;
       exit(1);
     }
 

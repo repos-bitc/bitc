@@ -67,7 +67,6 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
     break;
 
   case at_AnyGroup:
-  case at_version:
   case agt_literal:
   case agt_tvar:
   case agt_var:
@@ -185,12 +184,6 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_container:
     {
       markTail(ast->child(1), fn, bps, isTail);
-      break;
-    }
-
-  case at_start:
-    {
-      markTail(ast->child(0), fn, bps, isTail);
       break;
     }
 
@@ -353,6 +346,6 @@ UocInfo::be_tail(std::ostream& errStream,
 
   GCPtr<UocInfo> uoc = this;
   
-  markTail(uoc->ast, NULL, NULL, true);
+  markTail(uoc->uocAst, NULL, NULL, true);
   return errFree;
 }

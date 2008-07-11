@@ -295,7 +295,7 @@ bool
 UocInfo::fe_reprCheck(std::ostream& errStream, 
 		      bool init, unsigned long flags)
 {
-  bool errFree = reprCheck(errStream, ast);
+  bool errFree = reprCheck(errStream, uocAst);
   return errFree;
 }
 

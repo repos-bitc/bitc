@@ -154,14 +154,14 @@ XMLd(std::ostream& out, GCPtr<AST> ast, bool showLoc)
 bool
 XMLpp(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc)
 {
-  XMLp(out, uoc->ast, "", false);
+  XMLp(out, uoc->uocAst, "", false);
   return true;
 }
 
 bool
 XMLdump(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc)
 {
-  XMLd(out, uoc->ast, false);
+  XMLd(out, uoc->uocAst, false);
   out << std::endl;
   return true;
 }
@@ -252,7 +252,6 @@ XMLtypes(INOstream &out, GCPtr<AST> ast, bool raw=false)
       break;
     }
         
-  case at_start:
   case at_proclaim:
   case at_defexception:
   case at_deftypeclass:
@@ -292,7 +291,7 @@ XML_types_PP(std::ostream &out, GCPtr<AST> ast, bool raw=false)
 bool
 XMLtypesPP(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc)
 {
-  XML_types_PP(out, uoc->ast, false);
+  XML_types_PP(out, uoc->uocAst, false);
   return true;
 }
 

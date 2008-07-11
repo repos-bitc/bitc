@@ -51,6 +51,7 @@ struct SexprLexer {
   bool debug;
   bool isRuntimeUoc;
   bool ifIdentMode;
+  bool isCommandLineInput;
   std::istream& inStream;
   std::ostream& errStream;
 
@@ -67,11 +68,21 @@ struct SexprLexer {
   void ungetChar(ucs4_t);
 
   SexprLexer(std::ostream& _err, std::istream& _in, 
-	     const std::string& origin);
+	     const std::string& origin,
+	     bool commandLineInput);
+
+  void ReportParseError(const LexLoc& where, std::string  /* msg */);
+  void ReportParseWarning(const LexLoc& where, std::string  /* msg */);
 
   void ReportParseError();
-  void ReportParseError(std::string  /* msg */);
-  void ReportParseWarning(std::string  /* msg */);
+  void ReportParseError(std::string msg)
+  {
+    ReportParseError(here, msg);
+  }
+  inline void ReportParseWarning(std::string msg)
+  {
+    ReportParseWarning(here, msg);
+  }
 
   inline void setDebug(bool showlex)
   {

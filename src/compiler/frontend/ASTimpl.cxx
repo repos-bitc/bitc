@@ -238,12 +238,6 @@ AST::atKwd() const
   case at_stringLiteral:
     return "<stringLiteral>";
 
-  case at_start:
-    return "<start>";
-
-  case at_version:
-    return "bitc-version";
-
   case at_module:
     return "module";
 
@@ -670,7 +664,6 @@ bool
 AST::leadsToTopLevelForm()
 {
   switch(astType) {
-  case at_start:
   case at_module:
   case at_interface:
   case at_define:

@@ -1053,8 +1053,6 @@ toc(std::ostream& errStream,
     }
 
     // Should have skipped through these
-  case at_start:
-  case at_version:
   case at_interface:
   case at_module:
     {  
@@ -2584,15 +2582,14 @@ emit_arr_vec_fn_types(GCPtr<AST> ast,
 } 
 
 
-bool
+static bool
 TypesTOC(std::ostream& errStream, 
 	 GCPtr<UocInfo> uoc,
-	 GCPtr<AST> start,  
 	 INOstream &out,
 	 unsigned long flags)
 {
   bool errFree = true;
-  GCPtr<AST> mod = start->child(0);
+  GCPtr<AST> mod = uoc->uocAst;
   GCPtr< CVector<string> > arrVec = new CVector<string>; 
   GCPtr< CVector<string> > vecVec = new CVector<string>; 
   GCPtr< CVector<string> > fnVec = new CVector<string>; 
@@ -2732,10 +2729,9 @@ emitInitProc(std::ostream& errStream, GCPtr<AST> ast, GCPtr<UocInfo> uoc,
   return errorFree;
 }
 
-bool
+static bool
 EmitGlobalInitializers(std::ostream& errStream, 
 		       GCPtr<UocInfo> uoc,
-		       GCPtr<AST> start, 
 		       INOstream &out,
 		       unsigned long flags)
 {
@@ -2745,7 +2741,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 
   initStream.more();
   
-  GCPtr<AST> mod = start->child(0);
+  GCPtr<AST> mod = uoc->uocAst;
   for(size_t c = 0; c < mod->children->size(); c++) {
     GCPtr<AST> ast = mod->child(c);
 
@@ -2914,7 +2910,7 @@ EmitGlobalInitializers(std::ostream& errStream,
   return errFree;
 }
 
-bool
+static bool
 EmitMain(INOstream &out)
 {
   bool errFree = true;
@@ -2981,16 +2977,15 @@ EmitMain(INOstream &out)
   return errFree;
 }
 
-bool
+static bool
 ValuesTOH(std::ostream& errStream, 
 	  GCPtr<UocInfo> uoc,
-	  GCPtr<AST> start, 
 	  INOstream &out,
 	  unsigned long flags)
 {
   bool errFree = true;
   
-  GCPtr<AST> mod = start->child(0);
+  GCPtr<AST> mod = uoc->uocAst;
   for(size_t c = 0; c < mod->children->size(); c++) {
     GCPtr<AST> ast = mod->child(c);
     switch(ast->astType) {
@@ -3059,17 +3054,16 @@ GenerateCoutput(std::ostream &errStream, INOstream &out,
     out << "bitc_exception_t *curException;" << endl << endl;
   }
 
-  CHKERR(errFree, TypesTOC(errStream, uoc, uoc->ast, 
-			   out, flags));
+  CHKERR(errFree, TypesTOC(errStream, uoc, out, flags));
 
   if(flags & TOC_HEADER_MODE) {
-    CHKERR(errFree, ValuesTOH(errStream, uoc, uoc->ast, out, flags));
+    CHKERR(errFree, ValuesTOH(errStream, uoc, out, flags));
   }
   else {
     // If there are *any* entry points, emit the procedure that
     // handles global initialization so that it can be called:
     if (Options::entryPts->size())
-      CHKERR(errFree, EmitGlobalInitializers(errStream, uoc, uoc->ast, out, flags));    
+      CHKERR(errFree, EmitGlobalInitializers(errStream, uoc, out, flags));    
 
     // If bitc.main.main is an entry point, emit the wrapping main
     // procedure that calls the global initializers and processes the

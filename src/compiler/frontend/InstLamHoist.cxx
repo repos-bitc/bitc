@@ -64,7 +64,7 @@ cl_HoistInstLam(GCPtr<UocInfo> uoc)
 {
   GCPtr<CVector<GCPtr<AST> > > outAsts = new CVector<GCPtr<AST> >;
 
-  GCPtr<AST> modOrIf = uoc->ast->child(0);
+  GCPtr<AST> modOrIf = uoc->uocAst;
 
   for (size_t c = 0;c < modOrIf->children->size(); c++) {
     GCPtr<AST> child = modOrIf->child(c);

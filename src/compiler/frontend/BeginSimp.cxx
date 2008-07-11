@@ -118,7 +118,7 @@ UocInfo::fe_beginSimp(std::ostream& errStream,
   
   BEG_SIMP_DEBUG std::cerr << "fe_beginSimp" << std::endl;
   bool stillOK = true;
-  ast = beginSimp(ast, errStream, &stillOK);
+  uocAst = beginSimp(uocAst, errStream, &stillOK);
 
   BEG_SIMP_DEBUG if (isSourceUoc())
     PrettyPrint(errStream);

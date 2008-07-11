@@ -519,7 +519,6 @@ name2fqn(GCPtr<AST> ast)
       break;
     }
 
-  case at_start:
   case at_module:
   case at_use_case:
     {
@@ -2043,7 +2042,7 @@ UocInfo::instantiate(ostream &errStream,
     
   INST_DEBUG
     cerr << "Unified UOC after instantiation is "
-	 << ast->asString() << endl;
+	 << uocAst->asString() << endl;
   CHKERR(errFree, RandT(errStream, true, POLY_SYM_FLAGS,
 			POLY_TYP_FLAGS, "[[Post Instantiation]]"));
   
@@ -2066,7 +2065,7 @@ UocInfo::instantiateBatch(ostream &errStream,
   
   INST_DEBUG
     cerr << "Unified UOC after instantiation is "
-	 << ast->asString() << endl;
+	 << uocAst->asString() << endl;
   CHKERR(errFree, RandT(errStream, true, POLY_SYM_FLAGS,
 			POLY_TYP_FLAGS, "Post Instantiation: ")); 
   

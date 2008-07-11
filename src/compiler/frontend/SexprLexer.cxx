@@ -360,9 +360,9 @@ SexprLexer::ReportParseError()
 }
  
 void
-SexprLexer::ReportParseError(std::string msg)
+SexprLexer::ReportParseError(const LexLoc& where, std::string msg)
 {
-  errStream << here
+  errStream << where
 	    << ": "
 	    << msg << std::endl;
 
@@ -370,15 +370,16 @@ SexprLexer::ReportParseError(std::string msg)
 }
 
 void
-SexprLexer::ReportParseWarning(std::string msg)
+SexprLexer::ReportParseWarning(const LexLoc& where, std::string msg)
 {
-  errStream << here
+  errStream << where
 	    << ": "
 	    << msg << std::endl;
 }
 
 SexprLexer::SexprLexer(std::ostream& _err, std::istream& _in, 
-		       const std::string& origin)
+		       const std::string& origin,
+		       bool commandLineInput)
   :here(origin, 1, 0), inStream(_in), errStream(_err)
 {
   inStream.unsetf(std::ios_base::skipws);
@@ -386,6 +387,7 @@ SexprLexer::SexprLexer(std::ostream& _err, std::istream& _in,
   num_errors = 0;
   isRuntimeUoc = false;
   ifIdentMode = false;
+  isCommandLineInput = commandLineInput;
   debug = false;
   putbackChar = -1;
 }

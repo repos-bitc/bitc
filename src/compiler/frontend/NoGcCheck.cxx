@@ -101,7 +101,7 @@ UocInfo::fe_noAllocCheck(std::ostream& errStream,
   bool errFree=true;
 
   if(Options::nogc)
-    CHKERR(errFree, AllocCheck(errStream, ast));  
+    CHKERR(errFree, AllocCheck(errStream, uocAst));  
   return errFree;
 }
 

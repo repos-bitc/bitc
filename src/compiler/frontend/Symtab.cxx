@@ -680,28 +680,6 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_start:
-    {
-      // match at_module / at_interface
-      RESOLVE(ast->child(0), env, lamLevel, NULL_MODE, identType, 
-	      NULL, flags);
-
-      if (ast->children->size() > 1) {
-	// match at_version
-	RESOLVE(ast->child(1), env, lamLevel, NULL_MODE, identType, 
-		NULL, flags);
-      }
-      break;
-    }
-  case at_version:
-    {
-      // match at_stringLiteral
-      RESOLVE(ast->child(0), env, lamLevel, NULL_MODE, identType, 
-	      NULL, flags);
-
-      break;
-    }
-
   case at_interface:
     {
       flags |= IS_INTERFACE;
@@ -2378,14 +2356,14 @@ initEnv(std::ostream& errStream,
 	GCPtr<Environment<AST> > env)
 {
   // See if I am processing the prelude or some other file.
-  if(ast->child(0)->astType == at_interface &&
-     ast->child(0)->child(0)->s == "bitc.prelude") {
+  if(ast->astType == at_interface &&
+     ast->child(0)->s == "bitc.prelude") {
     //    cout << "Processing Prelude " << std::endl;   
 
     return true;
   }
   
-  //  cout << "Processing " << ast->child(0)->child(0)->s << std::endl;
+  //  cout << "Processing " << ast->child(0)->s << std::endl;
   // "use" everything in the prelude
   GCPtr<Environment<AST> > preenv = 0;
   size_t i;
@@ -2440,10 +2418,10 @@ UocInfo::fe_symresolve(std::ostream& errStream,
     }      
 
     if((flags & SYM_NO_PRELUDE) == 0)
-      initEnv(std::cerr, ast, env);
+      initEnv(std::cerr, uocAst, env);
   }
   
-  CHKERR(errFree, resolve(errStream, ast, env, NULL, USE_MODE, 
+  CHKERR(errFree, resolve(errStream, uocAst, env, NULL, USE_MODE, 
 			  id_type, NULL, flags));
 
   return errFree;
