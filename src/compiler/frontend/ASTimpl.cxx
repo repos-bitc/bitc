@@ -117,6 +117,8 @@ AST::makeIntLit(const sherpa::LToken &tok)
   return ast;
 }
 
+/// @bug This is not doing the correct conversion. It completely
+/// ignores the radix encoding and the exponent encoding.
 GCPtr<AST> 
 AST::makeFloatLit(const sherpa::LToken &tok) 
 { 

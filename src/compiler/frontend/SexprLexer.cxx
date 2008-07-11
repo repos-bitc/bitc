@@ -390,6 +390,7 @@ SexprLexer::SexprLexer(std::ostream& _err, std::istream& _in,
   isCommandLineInput = commandLineInput;
   debug = false;
   putbackChar = -1;
+  nModules = 0;
 }
 
 long 

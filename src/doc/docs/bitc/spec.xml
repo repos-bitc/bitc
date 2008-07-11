@@ -680,13 +680,25 @@ float double quad</literallayout>
 	  specified by the <progident>bitc-version</progident> form.
 	</p>
         <p>
-          In the case of an interface compilation unit, the optional
+          In an interface compilation unit, the optional
           <progident>bitc-version</progident> form is followed by
-          exactly one <progident>interface</progident> form. In source
-          compilation units, the <progident>bitc-version</progident>
-          form is followed by an arbitrary sequence of imports,
-          definitions, declarations, and use forms that are
-          <em>not</em> <progident>interface</progident> forms.
+          exactly one <progident>interface</progident> form
+          (Section&nbsp;<xref ref="Interfaces"/>).  In a source
+          compilation unit, the optional
+          <progident>bitc-version</progident> form is followed by one
+          or more <progident>module</progident> forms (Section <xref
+          ref="Interfaces"/>).
+        </p>
+        <p>
+          A source compilation unit may alternatively consist of the
+          optional <progident>bitc-version</progident> form followed
+          by an arbitrary sequence of imports, definitions,
+          declarations, and use forms that are <em>not</em>
+          <progident>interface</progident> forms. In this case the
+          forms following the <progident>bitc-version</progident> are
+          deemed to be implicitly enclosed by a
+          <progident>module</progident> form, and the compilation unit
+          defines exactly one source module.
         </p>
         <sect3>
           <title>Definitions and Declarations</title>
@@ -3875,7 +3887,7 @@ id : T
         </p>
       </sect2>
     </sect1>
-    <sect1>
+    <sect1 id="Interfaces">
       <title>Interfaces</title>
       <p>
         An interface describes a public set of definitions and
@@ -4137,6 +4149,28 @@ id : T
         </p>
       </sect2>
     </sect1>
+    <sect1 id="Modules">
+      <title>Source Modules</title>
+      <p>
+        A source unit of compilation consists of one or more
+        modules. Each module consists of a
+        <progident>module</progident> form containing an arbitrary
+        sequence of imports, definitions, declarations, and use forms
+        that are <em>not</em> <progident>interface</progident> forms.
+      </p>
+      <p>
+        The module syntax is:
+      </p>
+        <literallayout>
+(module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> <em>mod_form</em><sup>+</sup>)</literallayout>
+      <p>
+        A source module constitutes a scope.  Except for those
+        definitions that are explicitly exported using
+        <progident>provide</progident> (Section <xref ref="provide"/>),
+        identifiers bound in a module are not visible in other source
+        modules.
+      </p>
+    </sect1>
     <sect1>
       <title>Storage Model</title>
       <p>
@@ -4387,13 +4421,16 @@ id : T
       <sect2>
         <title>Interfaces, Units of Compilation</title>
 <literallayout indent="no">
-<em>start</em> ::= <em>version</em> <em>module</em>
-  | <em>version</em> <em>interface</em>
-<em>version</em> ::= (bitc-version StringLit)
+<em>start</em> ::= <em>version</em><sup>?</sup> <em>interface</em>
+  | <em>version</em><sup>?</sup> <em>module</em><sup>+</sup>
+  | <em>version</em><sup>?</sup> <em>implicit_module</em>
 <em>ifname</em> ::= {Id.}<sup>*</sup> Id
 <em>interface</em> ::=
   (interface <em>ifname</em> <em>docstring</em><sup>?</sup> <em>def</em><sup>+</sup>)
-<em>module</em> ::= {<em>provide</em> | <em>def</em>}<sup>+</sup>
+<em>module</em> ::= 
+  (module <em>ifname</em><sup>?</sup> <em>docstring</em><sup>?</sup> <em>mod_def</em><sup>+</sup>)
+<em>mod_def</em> ::= <em>def</em> | <em>provide</em>
+<em>implicit_module</em> ::= <em>mod_def</em><sup>+</sup>
 <em>import</em> ::= (import Id <em>ifname</em>)
 <em>provide</em> ::= (provide Id <em>ifname</em>)
 <em>usedecl</em> ::=

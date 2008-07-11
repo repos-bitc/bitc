@@ -168,8 +168,10 @@ public:
   importInterface(std::ostream&, const LexLoc& loc, 
 		  const std::string& ifName);
 
+  // This is only used within the parser, and perhaps should not be
+  // part of UocInfo.
   static std::string 
-  UocNameFromSrcName(const std::string& srcFileName);
+  UocNameFromSrcName(const std::string& srcFileName, unsigned ndx);
 
   // Parse a file, admitting source and/or interface units of
   // compilation into the ifList or the srcList as a side effect.

@@ -38,11 +38,17 @@
  *
  **************************************************************************/
 
-#define BITC_VERSION ("0.10")
+#define BITC_MAJOR 0
+#define BITC_MINOR 10
+#define BITC_VERSION "0.10"
 
 inline bool CheckVersionCompatibility(std::string ver) {
   return (ver == BITC_VERSION);
 }
+
+//inline bool CheckVersionCompatibility(BigNum major, BigNum minor) {
+//  return ((major == BITC_MAJOR) && (minor == BITC_MINOR));
+//}
 
 inline std::string Version() {
   return (BITC_VERSION);

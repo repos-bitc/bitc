@@ -51,6 +51,7 @@
 #include "inter-pass.hxx"
 #include "SexprLexer.hxx"
 #include <libsherpa/CVector.hxx>
+#include <libsherpa/util.hxx>
 
 using namespace sherpa;
 
@@ -72,11 +73,11 @@ OnePassInfo UocInfo::onePassInfo[] = {
 
 
 std::string 
-UocInfo::UocNameFromSrcName(const std::string& srcFileName)
+UocInfo::UocNameFromSrcName(const std::string& srcFileName, unsigned ndx)
 {
   // Use the filename with the extension (if any) chopped off.
   size_t lastDot = srcFileName.rfind(".");
-  return srcFileName.substr(0, lastDot);
+  return srcFileName.substr(0, lastDot) + "#" + unsigned_str(ndx);
 }
 
 UocInfo::UocInfo(const std::string& _uocName, const std::string& _origin,

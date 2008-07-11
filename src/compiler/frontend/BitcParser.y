@@ -223,7 +223,8 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 //%token <tok> tk_SEQUENCEREF
 //%token <tok> tk_SEQUENCELENGTH
    
-%type <ast> module interface
+%type <ast> module implicit_module module_seq
+%type <ast> interface
 %type <ast> defpattern
 %type <ast> mod_definitions mod_definition
 %type <ast> if_definitions if_definition
@@ -273,28 +274,37 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 // This definition od start mus be changed as it ignores
 // junk after the body.
 
-start: version module {
-  SHOWPARSE("start -> version module");
+start: version uoc_body {
+  SHOWPARSE("start -> version uoc_body");
   return 0;
 };
 
-start : module {
-  SHOWPARSE("start -> module");
+start: uoc_body {
+  SHOWPARSE("start -> uoc_body");
   return 0;
 };
 
-start: version interface {
-  SHOWPARSE("start -> version interface");
-  return 0;
-};
+//start: interface {
+//  SHOWPARSE("start -> interface");
+//
+//  return 0;
+//};
 
-start: interface {
-  SHOWPARSE("start -> interface");
+uoc_body: interface {
+  SHOWPARSE("uocbody -> interface");
+}
 
-  return 0;
-};
+uoc_body: implicit_module {
+  SHOWPARSE("uocbody -> implicit_module");
+}
+
+uoc_body: module_seq {
+  SHOWPARSE("uocbody -> module_seq");
+}
 
 // VERSION [2.5]
+
+// We cannot do optversion, because that would require two token look-ahead.
 version: '(' tk_BITC_VERSION strLit ')' {
   SHOWPARSE("version -> ( BITC-VERSION strLit )");
   if(!CheckVersionCompatibility($3->s)) {
@@ -302,6 +312,18 @@ version: '(' tk_BITC_VERSION strLit ')' {
     lexer->ReportParseWarning($3->loc, s);
   }
 }; 
+
+// It would be really nice to support this, but the tokenizer will
+// report the literal as a floating point value. We could, I suppose,
+// crack that back into its constituent parts, but I don't have the
+// energy to implement that today.
+// version: '(' tk_BITC_VERSION intLit '.' intLit ')' {
+//   SHOWPARSE("version -> ( BITC-VERSION intLit '.' intLit )");
+//   if(!CheckVersionCompatibility($3->litValue.i, $5->litValue.i)) {
+//     std::string s = ": Warning: BitC version conflict " + $3->s + " vs " + Version();
+//     lexer->ReportParseWarning($3->loc, s);
+//   }
+// }; 
 
 // Documentation comments. These are added only in productions where
 // they do NOT appear before expr_seq. If a string literal appears as
@@ -401,16 +423,32 @@ ifident: ifident '.' {
 };
 
 // MODULES [2.5]
-module: mod_definitions  {
- SHOWPARSE("module -> mod_definitions");
+implicit_module: mod_definitions  {
+ SHOWPARSE("implicit_module -> mod_definitions");
  $$ = $1;
  $$->astType = at_module;
  $$->printVariant = 1;
 
  // Construct, compile, and admit the parsed UoC:
  GCPtr<UocInfo> uoc = 
-   new UocInfo(UocInfo::UocNameFromSrcName(lexer->here.origin),
+   new UocInfo(UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules),
 	       lexer->here.origin, $$);
+ lexer->nModules++;
+
+ uoc->Compile();
+ UocInfo::srcList->append(uoc);
+};
+
+module: '(' tk_MODULE optdocstring mod_definitions ')' {
+ SHOWPARSE("module -> ( tk_MODULE optdocstring mod_definitions )");
+ $$ = $4;
+ $$->astType = at_module;
+
+ // Construct, compile, and admit the parsed UoC:
+ GCPtr<UocInfo> uoc = 
+   new UocInfo(UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules),
+	       lexer->here.origin, $$);
+ lexer->nModules++;
  uoc->Compile();
  UocInfo::srcList->append(uoc);
 };
@@ -420,13 +458,24 @@ module: '(' tk_MODULE ifident optdocstring mod_definitions ')' {
  $$ = $5;
  $$->astType = at_module;
 
- // Construct, compile, and admit the parsed UoC:
+ // Construct, compile, and admit the parsed UoC.
+ // Note that we do not even consider the user-provided module name
+ // for purposes of internal naming, because it is not significant.
  GCPtr<UocInfo> uoc = 
-   new UocInfo(UocInfo::UocNameFromSrcName(lexer->here.origin),
+   new UocInfo(UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules),
 	       lexer->here.origin, $$);
+ lexer->nModules++;
  uoc->Compile();
  UocInfo::srcList->append(uoc);
 };
+
+module_seq: module {
+ SHOWPARSE("module_seq -> module");
+}
+
+module_seq: module_seq module {
+ SHOWPARSE("module_seq -> module_seq module");
+}
 
 // INTERFACE TOP LEVEL DEFINITIONS
 if_definitions: if_definition {

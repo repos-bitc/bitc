@@ -55,6 +55,8 @@ struct SexprLexer {
   std::istream& inStream;
   std::ostream& errStream;
 
+  unsigned nModules;
+
   int nDigits;
   int radix;
 
