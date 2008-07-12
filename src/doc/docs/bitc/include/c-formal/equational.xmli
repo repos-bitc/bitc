@@ -1878,12 +1878,504 @@
 	      </btypes:TYPE>.
 	    </p>
 	  </li>
-	  <!-- <li>
-	  <p>
-	</p>
-	</li> -->
+	  <li>
+	    <p>
+	      From case&nbsp;(1.b) and the constraint
+	      <btypes:TYPE>
+		<eq>
+		  <type num="1"/>
+		  <mbFull>
+		    <tvar name="alpha"/>
+		    <fn>
+		      <mbFull>
+			<tvar name="beta" dash="'"/>
+			<tvar name="beta"/>
+		      </mbFull>
+		      <mbFull>
+			<tvar name="gamma" dash="'"/>
+			<tvar name="gamma"/>
+		      </mbFull>
+		    </fn>
+		  </mbFull>
+		</eq>
+	      </btypes:TYPE>, we have
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <type num="1"/>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <mbFull>
+		      <tvar name="alpha"/>
+		      <fn>
+			<mbFull>
+			  <tvar name="beta" dash="'"/>
+			  <tvar name="beta"/>
+			</mbFull>
+			<mbFull>
+			  <tvar name="gamma" dash="'"/>
+			  <tvar name="gamma"/>
+			</mbFull>
+		      </fn>
+		    </mbFull>
+		  </Subst>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Since
+	      <btypes:TYPE>
+		<Msub>
+		  <Subst>
+		    <aSubMap/>
+		    <type num="1"/>
+		  </Subst>
+		  <minz>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="1"/>
+		    </Subst>
+		  </minz>
+		</Msub>
+	      </btypes:TYPE>, we have
+	      <btypes:TYPE>
+		<Msub>
+		  <Subst>
+		    <aSubMap/>
+		    <type num="1"/>
+		  </Subst>
+		  <minz>
+		    <Subst>
+		      <aSubMap/>
+		      <mbFull>
+			<tvar name="alpha"/>
+			<fn>
+			  <mbFull>
+			    <tvar name="beta" dash="'"/>
+			    <tvar name="beta"/>
+			  </mbFull>
+			  <mbFull>
+			    <tvar name="gamma" dash="'"/>
+			    <tvar name="gamma"/>
+			  </mbFull>
+			</fn>
+		      </mbFull>
+		    </Subst>
+		  </minz>
+		</Msub>
+	      </btypes:TYPE>.
+	      From case&nbsp;(1.d) and
+	      <btypes:TYPE>
+		<lem tag="T-msm_eq_ms"/>
+	      </btypes:TYPE>, we have
+	      <btypes:TYPE>
+		<eq br="yes">
+		  <minz>
+		    <Subst>
+		    <aSubMap/>
+		      <mbFull>
+			<tvar name="alpha"/>
+			<fn>
+			  <mbFull>
+			    <tvar name="beta" dash="'"/>
+			    <tvar name="beta"/>
+			  </mbFull>
+			  <mbFull>
+			    <tvar name="gamma" dash="'"/>
+			    <tvar name="gamma"/>
+			  </mbFull>
+			</fn>
+		      </mbFull>
+		    </Subst>
+		  </minz>
+		  <minz>
+		    <Subst>
+		      <aSubMap/>
+		      <minz>
+			<mbFull>
+			  <tvar name="alpha"/>
+			  <fn>
+			    <mbFull>
+			      <tvar name="beta" dash="'"/>
+			      <tvar name="beta"/>
+			    </mbFull>
+			    <mbFull>
+			      <tvar name="gamma" dash="'"/>
+			      <tvar name="gamma"/>
+			    </mbFull>
+			  </fn>
+			</mbFull>
+		      </minz>
+		    </Subst>
+		  </minz>
+		</eq>
+	      </btypes:TYPE>.
+	      Further, we have
+	      <btypes:TYPE>
+		<eq br="yes">
+		  <minz>
+		    <Subst>
+		      <aSubMap/>
+		      <minz>
+			<fn>
+			  <mbFull>
+			    <tvar name="beta" dash="'"/>
+			    <tvar name="beta"/>
+			  </mbFull>
+			  <mbFull>
+			    <tvar name="gamma" dash="'"/>
+			    <tvar name="gamma"/>
+			  </mbFull>
+			</fn>
+		      </minz>
+		    </Subst>
+		  </minz>
+		  <minz>
+		    <Subst>
+		      <aSubMap/>
+		      <fn>
+			<mbFull>
+			  <tvar name="beta" dash="'"/>
+			  <tvar name="beta"/>
+			</mbFull>
+			<mbFull>
+			  <tvar name="gamma" dash="'"/>
+			  <tvar name="gamma"/>
+			</mbFull>
+		      </fn>
+		    </Subst>
+		  </minz>
+		  <fn>
+		    <Subst>
+		      <aSubMap/>
+		      <mbFull>
+			<tvar name="beta" dash="'"/>
+			<tvar name="beta"/>
+		      </mbFull>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <mbFull>
+			<tvar name="gamma" dash="'"/>
+			<tvar name="gamma"/>
+		      </mbFull>
+		    </Subst>
+		  </fn>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From cases&nbsp;(5.f and 5.g), we have
+	      <btypes:TYPE>
+		<Msub>
+		  <Subst>
+		    <aSubMap/>
+		    <type num="1"/>
+		  </Subst>
+		  <fn>
+		    <Subst>
+		      <aSubMap/>
+		      <mbFull>
+			<tvar name="beta" dash="'"/>
+			<tvar name="beta"/>
+		      </mbFull>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <mbFull>
+			<tvar name="gamma" dash="'"/>
+			<tvar name="gamma"/>
+		      </mbFull>
+		    </Subst>
+		  </fn>
+		</Msub>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Similarly, using the constraint 
+	      <btypes:TYPE>
+		<eq>
+		  <type num="2"/>
+		  <mbFull>
+		    <tvar name="delta"/>
+		    <tvar name="beta"/>
+		  </mbFull>
+		</eq>
+	      </btypes:TYPE>, we obtain
+	      <btypes:TYPE>
+		<Msub>
+		  <Subst>
+		    <aSubMap/>
+		    <type num="2"/>
+		  </Subst>
+		  <minz>
+		    <Subst>
+		      <aSubMap/>
+		      <mbFull>
+			<tvar name="delta"/>
+			<tvar name="beta"/>
+		      </mbFull>
+		    </Subst>
+		  </minz>		      
+		</Msub>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Similarly, using the constraint 
+	      <btypes:TYPE>
+		<eq>
+		  <type num="2"/>
+		  <mbFull>
+		    <tvar name="delta"/>
+		    <tvar name="beta"/>
+		  </mbFull>
+		</eq>
+	      </btypes:TYPE>, we obtain
+	      <btypes:TYPE>
+		<Msub>
+		  <Subst>
+		    <aSubMap/>
+		    <type num="2"/>
+		  </Subst>
+		  <minz>
+		    <Subst>
+		      <aSubMap/>
+		      <mbFull>
+			<tvar name="delta"/>
+			<tvar name="beta"/>
+		      </mbFull>
+		    </Subst>
+		  </minz>		      
+		</Msub>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From case&nbsp;(1.d), using weakening, we obtain
+ 	      <btypes:TYPE>
+		<models name="cst">
+		  <aSubMap/>
+		  <set>
+		    <mbFull>
+		      <tvar name="gamma" dash="'"/>
+		      <tvar name="gamma"/>
+		    </mbFull>
+		    <mbFull>
+		      <tvar name="epsiv"/>
+		      <tvar name="gamma"/>
+		    </mbFull>
+		  </set>
+		</models>
+	      </btypes:TYPE>. Now, from
+	      <btypes:TYPE>
+		<lem tag="T-SSubstitution"/>
+	      </btypes:TYPE> (property 4), we conclude that 
+ 	      <btypes:TYPE>
+		<Msub>
+		  <maxz>
+		    <Subst>
+		      <aSubMap/>
+		      <mbFull>
+			<tvar name="gamma" dash="'"/>
+			<tvar name="gamma"/>
+		      </mbFull>
+		    </Subst>
+		  </maxz>
+		  <Subst>
+		    <aSubMap/>
+		    <mbFull>
+		      <tvar name="epsiv"/>
+		      <tvar name="gamma"/>
+		    </mbFull>
+		  </Subst>
+		</Msub>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From cases&nbsp;(5.d, 5.h, 5.i and 5.k) 
+	      and the T-App rule, we conclude that
+ 	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <aSubMap/>
+		    <dCtset/>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <apply>
+		      <aExpr num="1"/>
+		      <aExpr num="2"/>
+		    </apply>
+		    <mbFull>
+		      <tvar name="epsiv"/>
+		      <tvar name="gamma"/>			
+		    </mbFull>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	      Finally, using this with case&nbsp;(1), we conclude that
+ 	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <aCtset/>
+		    <aSubMap/>
+		    <dCtset/>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <apply>
+		      <aExpr num="1"/>
+		      <aExpr num="2"/>
+		    </apply>
+		    <mbFull>
+		      <tvar name="epsiv"/>
+		      <tvar name="gamma"/>			
+		    </mbFull>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
 	</ol>
       </li>
+      <li>
+	<p>
+	  Case I-Let-Exp: In this case, we have:
+	</p>
+	<btypes:TYPE>
+	  <tyRule name=""> 
+	    <tyPre>
+	      <TEjudge name="i">
+		<assume>
+		  <gamma/>
+		  <store/>
+		</assume>
+		<conclude>
+		  <tqExpr>
+		    <aExpr num="1"/>
+		    <type num="1"/>
+		  </tqExpr>
+		</conclude>
+		<constrain>
+		  <aCtset num="1"/>                  
+		</constrain>
+	      </TEjudge>
+	      <neq>
+		<aExpr num="1"/>
+		<vExp/>
+	      </neq>
+	    </tyPre>
+	    <tyPre>
+	      <TEjudge name="i">
+		<assume>
+		  <extend>
+		    <gamma/>
+		    <mapping>
+		      <id/>
+		      <mbFull>
+			<tvar name="alpha"/>
+			<tvar name="beta"/>
+		      </mbFull>
+		    </mapping>
+		  </extend>
+		  <store/>
+		</assume>
+		<conclude>
+		  <tqExpr>
+		    <aExpr num="2"/>
+		    <type num="2"/>
+		  </tqExpr>
+		</conclude>
+		<constrain>
+		  <aCtset num="2"/>
+		</constrain>
+	      </TEjudge>
+	      <models name="new">
+		<assume/>
+		<grouping>
+		  <tvar name="alpha"/>
+		  <tvar name="beta"/>
+		  <tvar name="gamma"/>
+		  <lKind k="var"/>
+		</grouping>
+	      </models>
+	    </tyPre>
+	    <tyConc>
+	      <TEjudge name="i">
+		<assume>
+		  <gamma/>
+		  <store/>
+		</assume>
+		<conclude>
+		  <tqExpr>
+		    <let kind="k">
+		      <id/>
+		      <aExpr num="1"/>
+		      <aExpr num="2"/>
+		    </let>
+		    <type num="2"/>
+		  </tqExpr>
+		</conclude>
+		<constrain>        
+		  <aCtset/>
+		</constrain>
+	      </TEjudge>
+	    </tyConc>
+	  </tyRule>        
+	</btypes:TYPE>
+	<p>
+	  where 
+	  <btypes:TYPE>
+	    <eq>
+	      <aCtset/>
+	      <unin>
+		<aCtset num="1"/>
+		<set>
+		  <eq>
+		    <type num="1"/>
+		    <mbFull>
+		      <tvar name="gamma"/>
+		      <tvar name="beta"/>
+		    </mbFull>
+		  </eq>
+		  <eq>
+		    <lKind k="var"/>
+		    <lKind k="mono"/>
+		  </eq>
+		</set>
+		<aCtset num="2"/>
+	      </unin>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+	<p>
+	  Proof is similar to the I-App case, proof follows from
+	  induction hypothesis using the T-Let-M rule, case&nbsp;(1)
+	  and  <btypes:TYPE>
+	    <lem tag="T-SSubstitution"/>
+	  </btypes:TYPE> (property 4).
+	</p>
+      </li>
+      <!-- <li>
+	<p>
+	  Case I-Let-Val:
+	</p>
+      </li> -->
     </ol>
   </proof>
   <theorem id="infer_completeness">
