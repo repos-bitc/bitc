@@ -60,8 +60,6 @@
 
 PROGNAME=`basename $0`
 
-FLATTENHTML=${BITC_ROOT}/src/build/bin/flatten-html
-
 # Solaris 'id' command is in the wrong place:
 if [ -x /usr/xpg4/bin/id ]
 then
@@ -83,161 +81,136 @@ owner=`${id} -n -u`
 
 if [ -x /bin/chown ]
 then
-	chown=/bin/chown
+  chown=/bin/chown
 elif [ -x /usr/sbin/chown ]
 then
-	chown=/usr/sbin/chown
+  chown=/usr/sbin/chown
 else
-	echo "chown not found"
-	exit 1
+  echo "chown not found"
+  exit 1
 fi
 
 cflag="-c"
 
 dfltmode=0644	# unless directory
-html=no
 
 set -- `getopt cdhg:m:o: $*`
 for i in $*
 do
-	case $i in
-	-c)	cflag=""; shift;;  # no sense passing it twice
-	-s)	strip="-s"; shift;;
-	-d)	dir="-d"; dfltmode="0755"; shift;;
-	-m)	mode=$2; shift; shift;;
-	-g)	group=$2; shift; shift;;
-	-o)	owner=$2; shift; shift;;
-	-h)	html="yes"; shift;;
-	--)	shift; break;;
-	esac
+  case $i in
+    -c)	cflag=""; shift;;  # no sense passing it twice
+    -s)	strip="-s"; shift;;
+    -d)	dir="-d"; dfltmode="0755"; shift;;
+    -m)	mode=$2; shift; shift;;
+    -g)	group=$2; shift; shift;;
+    -o)	owner=$2; shift; shift;;
+    --)	shift; break;;
+  esac
 done
 
 mode=${mode:-${dfltmode}}
 
-# SHELL FUNCTIONS NOT SUPPORTED UNDER TRUE /bin/sh!!!
-#
-#function install_file() {
-#    local src=$1
-#    local target=$2
-#
-#    if [ $html = "yes" ]
-#    then
-#	${EROS_ROOT}/src/build/bin/flatten-html < $src > inst-tmp.html
-#	src="inst-tmp.html"
-#    fi
-#
-#    if cmp -s $src $target
-#    then
-#	# content is identical - just make sure of the modes
-#	chmod $mode $target
-#	${chown} $owner:$group $target
-#    else
-#	install $cflag $strip -g $group -o $owner -m $mode $src $target
-#    fi
-#
-#    if [ $html = "yes" ]
-#    then
-#	rm -f inst-tmp.html
-#    fi
-#}
-
 if [ $# -eq 0 ]
 then
-    echo "${PROGNAME}: requires at least one argument" >&2
-    exit 1
+  echo "${PROGNAME}: requires at least one argument" >&2
+  exit 1
 fi
 
 if [ -n "$dir" ]
 then
-	if [ -n "$strip" ]
-	then
-		echo "${PROGNAME}: -d and -s options mutually exclusive" >&2
-		exit 1
-	fi
+  if [ -n "$strip" ]
+  then
+    echo "${PROGNAME}: -d and -s options mutually exclusive" >&2
+    exit 1
+  fi
 
-	for d in $*
-	do
-		if [ -d $d ]
-		then
-			chmod $mode $d;
-			${chown} $owner:$group $d
-		else
-			${install} -d -g $group -o $owner -m $mode $d
-		fi
-	done
+  # Hack alert: It is both cumbersome and awkward to need to use
+  # a series of "coyinstall -d" commands to ensure that the
+  # full directory path is populated, and for the most part
+  # we don't actually care about directory ownership except in
+  # rare leaf directories.
+  #
+  # We therefore borrow a trick here from "mkinstalldirs" and
+  # fabricate all directories along the path as needed, using
+  # the specified user and group ONLY for those directories that
+  # we actually create.
+  #
+  # Note this means that if you want a leaf directory a/b/c to have
+  # unusual ownership, you may need to:
+  #
+  #    coyinstall -d a/b
+  #    coyinstall -u user -g group a/b/c
+  #
+  # to ensure that the leading path is already created.
+  for d in $*
+  do
+    fnord=`echo ":${d}" | sed -ne 's/^:\//#/;s/^://;s/\// /g;s/^#/\//;p'`
+
+    pathcomp=
+
+    for frag in ${fnord}
+    do
+      pathcomp="${pathcomp}${frag}"
+
+      if [ ! -d ${pathcomp} ]
+      then
+        ${install} -d -g $group -o $owner -m $mode $d
+      fi
+
+      pathcomp="${pathcomp}/"
+    done
+  done
 elif [ $# -eq 2 ]
 then
-	target=$2
-	src=$1
+  target=$2
+  src=$1
 
-	if [ -d $target ]
-	then
-		target=$target/`basename $src`
-	fi
+  if [ -d $target ]
+  then
+    target=$target/`basename $src`
+  fi
 
-	# install_file $src $target
+  # install_file $src $target
 
-	if [ $html = "yes" ]
-	then
-	    ${FLATTENHTML} < $src > inst-tmp.html
-	    src="inst-tmp.html"
-	fi
-
-	if cmp -s $src $target
-	then
-	    # content is identical - just make sure of the modes
-	    chmod $mode $target
-	    ${chown} ${owner}:${group} $target
-	else
-	    ${install} $cflag $strip -g $group -o $owner -m $mode $src $target
-	fi
-
-	if [ $html = "yes" ]
-	then
-	    rm -f inst-tmp.html
-	fi
+  if cmp -s $src $target
+  then
+    # content is identical - just make sure of the modes
+    chmod $mode $target
+    ${chown} ${owner}:${group} $target
+  else
+    ${install} $cflag $strip -g $group -o $owner -m $mode $src $target
+  fi
 else
-	if [ $# -lt 2 ]
-	then
-		echo ${PROGNAME}: insufficent arguments >&2
-		exit 1
-	fi
+  if [ $# -lt 2 ]
+  then
+	  echo ${PROGNAME}: insufficent arguments >&2
+	  exit 1
+  fi
 
-	while [ $# -gt 1 ]
-	do
-		# Following disGUSTing hack is to figure out what the
-		# last argument is:
-		for arg in $*
-		do
-			target=$arg;
-		done
-		# target is now last argument.
+  while [ $# -gt 1 ]
+  do
+    # Following disGUSTing hack is to figure out what the
+    # last argument is:
+    for arg in $*
+    do
+      target=$arg;
+    done
+    # target is now last argument.
 
-		target=$target/`basename $1`
-		src=$1
+    target=$target/`basename $1`
+    src=$1
 
-		#install_file $src $target
+    #install_file $src $target
 
-		if [ $html = "yes" ]
-		then
-		    ${FLATTENHTML} < $src > inst-tmp.html
-		    src="inst-tmp.html"
-		fi
+    if cmp -s $src $target
+    then
+      # content is identical - just make sure of the modes
+      chmod $mode $target
+      ${chown} ${owner}:${group} $target
+    else
+      ${install} $cflag $strip -g $group -o $owner -m $mode $src $target
+    fi
 
-		if cmp -s $src $target
-		then
-		    # content is identical - just make sure of the modes
-		    chmod $mode $target
-		    ${chown} ${owner}:${group} $target
-		else
-		    ${install} $cflag $strip -g $group -o $owner -m $mode $src $target
-		fi
-
-		if [ $html = "yes" ]
-		then
-		    rm -f inst-tmp.html
-		fi
-
-		shift
-	done
+    shift
+  done
 fi
