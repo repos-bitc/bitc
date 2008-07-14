@@ -926,7 +926,7 @@
 	    </assume>
 	    <conclude>
 	      <tqExpr>
-		<aExpr num="1"/>
+		<vExp/>
 		<type num="1"/>
 	      </tqExpr>
 	    </conclude>
@@ -1021,7 +1021,7 @@
 	    </assume>
 	    <conclude>
 	      <tqExpr>
-		<aExpr num="2"/>
+		<aExpr/>
 		<type num="2"/>
 	      </tqExpr>
 	    </conclude>
@@ -1050,8 +1050,8 @@
 	      <tqExpr>
 		<let kind="k">
 		  <id/>
-		  <aExpr num="1"/>
-		  <aExpr num="2"/>
+		  <vExp/>
+		  <aExpr/>
 		</let>
 		<type num="2"/>
 	      </tqExpr>

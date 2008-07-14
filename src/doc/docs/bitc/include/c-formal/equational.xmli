@@ -553,10 +553,10 @@
 	</Sjudge>
       </btypes:TYPE>, we have
       <btypes:TYPE>
-	<supeq>
-	  <aSubMap num="s"/>
+	<spEq>
 	  <aSubMap num="u"/>
-	</supeq>
+	  <aSubMap num="s"/>
+	</spEq>
       </btypes:TYPE>.
     </p>
   </theorem>
@@ -2371,11 +2371,633 @@
 	  </btypes:TYPE> (property 4).
 	</p>
       </li>
-      <!-- <li>
+      <li>
 	<p>
 	  Case I-Let-Val:
 	</p>
-      </li> -->
+	<ol>
+	  <li>
+	    <p>
+	      In this case, we have:
+	    </p>
+	    <btypes:TYPE>
+	      <tyRule> 
+		<tyPre>
+		  <TEjudge name="i">
+		    <assume>
+		      <gamma/>
+		      <store/>
+		    </assume>
+		    <conclude>
+		      <tqExpr>
+			<vExp/>
+			<type num="1"/>
+		      </tqExpr>
+		    </conclude>
+		    <constrain>
+		      <aCtset num="1"/>                  
+		    </constrain>
+		  </TEjudge>
+		  <eq>
+		    <aCtset num="1" dash="'"/>
+		    <unin>
+		      <aCtset num="1"/>
+		      <set>
+			<eq>
+			  <type num="1"/>
+			  <mbFull>
+			    <tvar name="gamma"/>
+			    <tvar name="beta"/>
+			  </mbFull>
+			</eq>
+		      </set>
+		    </unin>
+		  </eq>
+		</tyPre>
+		<tyPre>
+		  <eq>
+		    <unf>
+		      <aCtset num="1" dash="'"/>
+		    </unf>
+		    <Pair>
+		      <dCtset num="u"/>
+		      <aSubMap num="u"/>
+		    </Pair>
+		  </eq>
+		  <eq>
+		    <dCtset num="s"/>
+		    <unin>
+		      <dCtset num="u"/>
+		      <set>
+			<pcst>
+			  <id/>
+			  <lKind k="var"/>
+			  <type num="s"/>
+			</pcst>
+		      </set>
+		    </unin>
+		  </eq>
+		</tyPre>
+		<tyPre>
+		  <eq>
+		    <type num="s"/>
+		    <Subst>
+		      <aSubMap num="u"/>
+		      <mbFull>
+			<tvar name="delta"/>
+			<tvar name="beta"/>
+		      </mbFull>
+		    </Subst>
+		  </eq>
+		  <eq>
+		    <set>
+		      <tvars name="alpha"/>
+		    </set>
+		    <diff>
+		      <ftvs>
+			<type num="s"/>
+			<dCtset num="s"/>
+		      </ftvs>
+		      <ftvs>
+			<Subst>
+			  <aSubMap num="u"/>
+			  <gamma/>
+			</Subst>
+			<Subst>
+			  <aSubMap num="u"/>
+			  <store/>
+			</Subst>
+		      </ftvs>
+		    </diff>
+		  </eq>
+		</tyPre>
+		<tyPre>
+		  <TEjudge name="i">
+		    <assume>
+		      <extend>
+			<gamma/>
+			<mapping>
+			  <id/>
+			  <TS>
+			    <tvars/>
+			    <type num="s"/>
+			    <dCtset num="s"/>
+			  </TS>
+			</mapping>
+		      </extend>
+		      <store/>
+		    </assume>
+		    <conclude>
+		      <tqExpr>
+			<aExpr/>
+			<type num="2"/>
+		      </tqExpr>
+		    </conclude>
+		    <constrain>
+		      <aCtset num="2"/>
+		    </constrain>
+		  </TEjudge>
+		  <models name="new">
+		    <assume/>
+		    <grouping>
+		      <tvar name="beta"/>
+		      <tvar name="gamma"/>
+		      <tvar name="delta"/>
+		      <tvars name="epsiv"/>
+		      <lKind k="var"/>
+		    </grouping>
+		  </models>
+		</tyPre>
+		<tyConc>
+		  <TEjudge name="i">
+		    <assume>
+		      <gamma/>
+		      <store/>
+		    </assume>
+		    <conclude>
+		      <tqExpr>
+			<let kind="k">
+			  <id/>
+			  <aExpr num="1"/>
+			  <aExpr num="2"/>
+			</let>
+			<type num="2"/>
+		      </tqExpr>
+		    </conclude>
+		    <constrain>        
+		      <unin>
+			<subst>
+			  <aCtset num="1" dash="'"/>
+			  <tvars name="alpha"/>
+			  <tvars name="epsiv"/>
+			</subst>
+			<aCtset num="2"/>
+		      </unin>
+		    </constrain>
+		  </TEjudge>
+		</tyConc>
+	      </tyRule>
+	    </btypes:TYPE>
+	  </li>
+	  <li>
+	    <p>
+	      From case&nbsp;(7.a) and 
+	      <btypes:TYPE>
+		<thm tag="unify-correct"/>
+	      </btypes:TYPE>, we have
+	      <btypes:TYPE>
+		<Sjudge name="sol">
+		  <aSubMap num="u"/>
+		  <leadsto>
+		    <aCtset dash="'"/>
+		    <dCtset num="u"/>
+		  </leadsto>
+		</Sjudge>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      By weakening on case&nbsp;(1.b), we have
+	      <btypes:TYPE>
+		<Sjudge name="sol">
+		  <aSubMap/>
+		  <leadsto>
+		    <subst>
+		      <aCtset num="1" dash="'"/>
+		      <tvars name="alpha"/>
+		      <tvars name="epsiv"/>
+		    </subst>
+		    <dCtset num="1"/>
+		  </leadsto>
+		</Sjudge>
+	      </btypes:TYPE> and
+	      <btypes:TYPE>
+		<Sjudge name="sol">
+		  <aSubMap/>
+		  <leadsto>
+		    <aCtset num="2"/>
+		    <dCtset num="2"/>
+		  </leadsto>
+		</Sjudge>
+	      </btypes:TYPE>
+	      for some
+	      <btypes:TYPE>
+		<dCtset num="1"/>
+	      </btypes:TYPE> and
+	      <btypes:TYPE>
+		<dCtset num="2"/>
+	      </btypes:TYPE>.
+	      Further,
+	      <btypes:TYPE>
+		<eq>
+		  <dCtset/>
+		  <unin>
+		    <dCtset num="1"/>
+		    <dCtset num="2"/>
+		  </unin>
+		</eq>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From cases&nbsp;(7.c and 7.d), 
+	      <btypes:TYPE>
+		<thm tag="unify-principal"/>
+	      </btypes:TYPE> and the fact that the variables
+	      <btypes:TYPE>
+		<tvars/>
+	      </btypes:TYPE> are purely local to the derivation
+	      <btypes:TYPE>
+		<TEjudge name="i">
+		  <assume>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <conclude>
+		    <tqExpr>
+		      <vExp/>
+		      <type num="1"/>
+		    </tqExpr>
+		  </conclude>
+		  <constrain>
+		    <aCtset num="1"/>                  
+		  </constrain>
+		</TEjudge>
+	      </btypes:TYPE>, we conclude that
+	      <btypes:TYPE>
+		<Exists/>
+		<aSubMap dash="'"/>
+	      </btypes:TYPE>
+	      such that
+	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <spEq>
+		      <aSubMap num="u"/>
+		      <aSubMap dash="'"/>
+		    </spEq>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <Sjudge name="sol">
+		      <aSubMap dash="'"/>
+		      <leadsto>
+			<aCtset dash="'"/>
+			<Subst>
+			  <aSubMap dash="'"/>
+			  <dCtset num="u"/>
+			</Subst>
+		      </leadsto>
+		    </Sjudge>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <TEjudge name="i">
+		      <assume>
+			<bCtset/>
+			<aSubMap dash="'"/>
+			<gamma/>
+			<store/>
+		      </assume>
+		      <conclude>
+			<tqExpr>
+			  <vExp/>
+			  <type num="1"/>
+			</tqExpr>
+		      </conclude>
+		      <constrain>
+			<aCtset num="1"/>                  
+		      </constrain>
+		    </TEjudge>
+		  </btypes:TYPE>		  
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <eq>
+		      <Subst>
+			<aSubMap dash="'"/>
+			<gamma/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<gamma/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>,
+		  <btypes:TYPE>
+		    <eq>
+		      <Subst>
+			<aSubMap dash="'"/>
+			<store/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<store/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>,
+		  <btypes:TYPE>
+		    <eq>
+		      <Subst>
+			<aSubMap dash="'"/>
+			<type num="1"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<type num="1"/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>,
+		  <btypes:TYPE>
+		    <eq>
+		      <Subst>
+			<aSubMap dash="'"/>
+			<type num="s"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<type num="s"/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>, and
+		  <btypes:TYPE>
+		    <eq>
+		      <Subst>
+			<aSubMap dash="'"/>
+			<dCtset num="s"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<dCtset num="s"/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <eq>
+		      <set>
+			<tvars name="alpha"/>
+		      </set>
+		      <diff>
+			<ftvs>
+			  <Subst>
+			    <aSubMap/>
+			    <type num="s"/>
+			  </Subst>
+			  <Subst>
+			    <aSubMap/>
+			    <dCtset num="s"/>
+			  </Subst>
+			</ftvs>
+			<ftvs>
+			  <Subst>
+			    <aSubMap dash="'"/>
+			    <gamma/>
+			  </Subst>
+			  <Subst>
+			    <aSubMap dash="'"/>
+			    <store/>
+			  </Subst>
+			</ftvs>
+		      </diff>
+		    </eq>
+		  </btypes:TYPE>. 
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	  <li>
+	    <p>
+	      From case&nbsp;(7.d.iii) and induction hypothesis, 
+	      we obtain
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <bCtset/>
+		    <aSubMap dash="'"/>
+		    <dCtset num="u"/>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <vExp/>
+		    <type num="1"/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	      Due to case&nbsp;(7.d.iv), this can be written as
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <bCtset/>
+		    <aSubMap/>
+		    <dCtset num="u"/>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <vExp/>
+		    <type num="1"/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Let
+	      <btypes:TYPE>
+		<eq>
+		  <type num="1" dash="'"/>
+		  <minz>
+		    <Subst>
+		      <aSubMap/>
+		      <type num="1"/>
+		    </Subst>
+		  </minz>
+		</eq>
+	      </btypes:TYPE>.
+	      Evidently, 
+	      <btypes:TYPE>
+		<Msub>
+		  <Subst>
+		    <aSubMap/>
+		    <type num="1"/>
+		  </Subst>
+		  <type num="1" dash="'"/>
+		</Msub>
+	      </btypes:TYPE>.
+	      using this in case&nbsp;(7.e), we obtain
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <bCtset/>
+		    <aSubMap/>
+		    <dCtset num="u"/>
+		    <gamma/>
+		    <store/>
+		  </assume>
+		  <Msub>
+		    <vExp/>
+		    <type num="1" dash="'"/>
+		  </Msub>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Similar to the I-App case, using 
+	      <btypes:TYPE>
+		<lem tag="T-SSubstitution"/>
+	      </btypes:TYPE> (property 4), we obtain
+	      <btypes:TYPE>
+		<Msub>
+		  <Subst>
+		    <aSubMap/>
+		    <type num="s"/>
+		  </Subst>
+		  <type num="1" dash="'"/>
+		</Msub>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Evidently,
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <dCtset/>
+		  </Subst>
+		  <unin>
+		    <Subst>
+		      <aSubMap/>
+		      <dCtset num="u"/>
+		    </Subst>
+		    <set>
+		      <pcst>
+			<id/>
+			<lKind k="var"/>
+			<Subst>
+			  <aSubMap/>
+			  <type/>
+			</Subst>
+		      </pcst>
+		    </set>
+		  </unin>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From cases&nbsp;(7.d.v and 7.d.iv), we have
+	      <btypes:TYPE>
+		<eq>
+		  <set>
+		    <tvars name="alpha"/>
+		  </set>
+		  <diff>
+		    <ftvs>
+		      <Subst>
+			<aSubMap/>
+			<type num="s"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<dCtset num="s"/>
+		      </Subst>
+		    </ftvs>
+		    <ftvs>
+		      <Subst>
+			<aSubMap/>
+			<gamma/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<store/>
+		      </Subst>
+		    </ftvs>
+		  </diff>
+		</eq>
+	      </btypes:TYPE>. 
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      From weakening on case&nbsp;(1) and induction
+	      hypothesis, we have
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <bCtset/>
+		    <aSubMap/>
+		    <dCtset num="2"/>
+		    <extend>
+		      <gamma/>
+		      <mapping>
+			<id/>
+			<TS>
+			  <tvars/>
+			  <type num="s"/>
+			  <dCtset num="s"/>
+			</TS>
+		      </mapping>
+		    </extend>
+		    <store/>
+		  </assume>
+		  <tqExpr>
+		    <aExpr/>
+		    <type num="2"/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Finally, from cases&nbsp;(7.f, 7.g, 7.h, 7.i, 7.j and
+	      1), using the T-Let-MP rule, we conclude that
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <bCtset/>
+		    <aSubMap/>
+		    <dCtset/>
+		    <gamma/>
+		    <store/>
+ 		  </assume>
+		  <tqExpr>
+		    <let>
+		      <id/>
+		      <vExp/>
+		      <aExpr/>
+		    </let>
+		    <type num="2"/>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	</ol>
+      </li>
     </ol>
   </proof>
   <theorem id="infer_completeness">
@@ -2493,6 +3115,10 @@
 	  </tqExpr>
 	</Sjudge>
       </btypes:TYPE>.      
+      Proof is straightforward, given 
+      <btypes:TYPE>
+	<thm tag="unify-principal"/>
+      </btypes:TYPE>.
     </p>
   </proof>
   <theorem id="infer_soundness2">
