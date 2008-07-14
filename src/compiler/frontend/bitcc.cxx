@@ -125,7 +125,7 @@ GCPtr<CVector<std::string> > Options::showTypesUocs;
 GCPtr<CVector<std::string> > Options::xmlTypesUocs;
 bool Options::ppFQNS = false;
 bool Options::ppDecorate = false;
-bool Options::verbose = false;
+unsigned Options::verbose = 0;
 GCPtr<CVector<std::string> > Options::entryPts;
 BackEnd *Options::backEnd = 0;
 std::string Options::outputFileName;
@@ -139,6 +139,8 @@ bool Options::heuristicInference = false;
 GCPtr<CVector<std::string> > Options::LinkPreOptionsGCC;
 GCPtr<CVector<std::string> > Options::CompilePreOptionsGCC;
 GCPtr<CVector<std::string> > Options::LinkPostOptionsGCC;
+
+GCPtr<CVector<std::string> > Options::SystemDirs;
 
 #define LOPT_SHOWLEX      257   /* Show tokens */
 #define LOPT_SHOWPARSE    258   /* Show parse */
@@ -166,6 +168,8 @@ GCPtr<CVector<std::string> > Options::LinkPostOptionsGCC;
 #define LOPT_HELP         280   /* Display usage information. */
 #define LOPT_LANG         281   /* Specify the desired output
 				   language. */
+#define LOPT_SYSTEM       282   /* Specify the desired output
+				   language. */
 
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
@@ -192,6 +196,7 @@ struct option longopts[] = {
   { "showtypes",            1,  0, LOPT_SHOW_TYPES },
   { "xmltypes",             1,  0, LOPT_XML_TYPES },
   { "stopafter",            1,  0, LOPT_STOPAFTER },
+  { "system",               1,  0, LOPT_SYSTEM },
   { "no-gc",                0,  0, LOPT_NOGC },
   { "no-prelude",           0,  0, LOPT_NOPRELUDE },
   { "verbose",              0,  0, 'v' },
@@ -333,6 +338,7 @@ main(int argc, char *argv[])
   Options::CompilePreOptionsGCC = new CVector<std::string>;
   Options::LinkPreOptionsGCC = new CVector<std::string>;
   Options::LinkPostOptionsGCC = new CVector<std::string>;
+  Options::SystemDirs = new CVector<std::string>;
   UocInfo::searchPath = new CVector<GCPtr<Path> >;
   UocInfo::ifList = new CVector<GCPtr<UocInfo> >;
   UocInfo::srcList = new CVector<GCPtr<UocInfo> >;
@@ -593,7 +599,11 @@ main(int argc, char *argv[])
       }
 
     case 'v':
-      Options::verbose = true;
+      Options::verbose++;
+      if (Options::verbose > 1) {
+	AddCompileArgumentForGCC("-v");
+	AddLinkArgumentForGCC("-v");
+      }
       break;
 
     case 'c':
@@ -669,6 +679,10 @@ main(int argc, char *argv[])
       UocInfo::searchPath->append(new Path(optarg));
       break;
 
+    case LOPT_SYSTEM:
+      Options::SystemDirs->append(optarg);
+      break;
+
     case 'l':
       {
 	AddLinkArgumentForGCC("-l");
@@ -701,6 +715,22 @@ main(int argc, char *argv[])
     }
   }
   
+  for (size_t i = 0; i < Options::SystemDirs->size(); i++) {
+    stringstream incpath;
+    incpath << Options::SystemDirs->elem(i) << "/include";
+    
+    UocInfo::searchPath->append(new Path(incpath.str()));
+    Options::CompilePreOptionsGCC->append("-I");
+    Options::CompilePreOptionsGCC->append(incpath.str());
+
+    stringstream libpath;
+    libpath << Options::SystemDirs->elem(i) << "/lib";
+    Options::libDirs->append(new Path(libpath.str()));
+    Options::LinkPostOptionsGCC->append("-L");
+    Options::LinkPostOptionsGCC->append(libpath.str());
+  }
+
+#if 0
   const char *root_dir = getenv("COYOTOS_ROOT");
   const char *xenv_dir = getenv("COYOTOS_XENV");
 
@@ -738,6 +768,7 @@ main(int argc, char *argv[])
       Options::libDirs->append(new Path(libpath.str()));
     }
   }
+#endif
 
   /* From this point on, argc and argv should no longer be consulted. */
 

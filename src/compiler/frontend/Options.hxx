@@ -62,7 +62,7 @@ struct Options {
   static bool showPasses;
   static bool ppFQNS;
   static bool ppDecorate;
-  static bool verbose;
+  static unsigned verbose;	// 0 = no, 1 = show exec, 2 = forward
   /** @brief Suppress load of the prelude.
    *
    * This is an internal testing option to suppress loading the
@@ -89,6 +89,8 @@ struct Options {
    * we insert the C file produced by bitcc.
    */
   static GCPtr<CVector<std::string> > LinkPostOptionsGCC;
+
+  static GCPtr<CVector<std::string> > SystemDirs;
 
   static bool Wall; // All Warnings are errors.
   static bool nogc; // no garbage collection mode

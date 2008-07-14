@@ -3164,11 +3164,14 @@ EmitObj(std::ostream &optStream, std::ostream &errStream,
       opt << " " << Options::LinkPreOptionsGCC->elem(i);
 
     opt << " bitc.out.o";
-    opt << " -lbitc";
-    opt << " -lgc";
 
     for (size_t i = 0; i < Options::LinkPostOptionsGCC->size(); i++)
       opt << " " << Options::LinkPostOptionsGCC->elem(i);
+
+    if (Options::useStdLib) {
+      opt << " -lbitc";
+      opt << " -lgc";
+    }
 
 #if 0
     for (size_t i = 0; i < UocInfo::searchPath->size(); i++)

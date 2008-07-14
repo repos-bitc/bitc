@@ -44,11 +44,13 @@ GC_INC=
 GC_LIBDIR=
 GC_LIB=-lgc
 
-INC+=-I$(BITC_XENV)/host/include $(GC_INC)
+HOSTDIR=$(BITC_SRC)/../host
+INC+=$(GC_INC)
 SOURCE= $(wildcard *.bitc)
 OBJECTS=$(SOURCE:%.bitc=BUILD/%.o)
 BITCC=$(BITC_SRC)/compiler/frontend/BUILD/bitcc
-LIBBITC=$(BITC_SRC)/libbitc/BUILD/libbitc.a
+RUN_BITCC=$(BITCC) --system $(HOSTDIR)
+LIBBITC=$(HOSTDIR)/lib/libbitc.a
 RUN=a.out
 GCCWARN+=-Wno-unused
 LIBS=$(GC_LIBDIR) $(LIBBITC) $(GC_LIB)
@@ -102,18 +104,19 @@ $(BUILDDIR)/sha1-file.test: ARGS="file.input 128028"
 $(BUILDDIR)/sha1-file.test: EXPECT_OUTPUT=sha1-file.stdout
 $(BUILDDIR)/sha1-test.test: EXPECT_OUTPUT=sha1-test.stdout 
 
-$(BUILDDIR)/%: $(BUILDDIR)/%.o $(LIBBITC)
-	$(NATIVE_GCC) $(CFLAGS) -o $@ $< $(LIBS)
+$(BUILDDIR)/%: %.bitc $(BITCC) #$(LIBBITC)
+	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $<
 
-.PRECIOUS: $(SOURCE:%.bitc=%.c)
+# .PRECIOUS: $(SOURCE:%.bitc=%.c)
 
-sha1-file.c: sha1-file.bitc  $(BITCC)
-	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/libbitc --lang c -o $@ $< $(BITC_SRC)/lib/crypt/sha1.bitc
-
-sha1-test.c: sha1-test.bitc  $(BITCC)
-	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/libbitc --lang c -o $@ $< $(BITC_SRC)/lib/crypt/sha1.bitc
+#sha1-file.c: sha1-file.bitc  $(BITCC)
+#	$(RUN_BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/libbitc --lang c -o $@ $< $(BITC_SRC)/lib/crypt/sha1.bitc
+#
+#sha1-test.c: sha1-test.bitc  $(BITCC)
+#	$(RUN_BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/libbitc --lang c -o $@ $< $(BITC_SRC)/lib/crypt/sha1.bitc
+#
 
 %.c: %.bitc  $(BITCC)
-	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/libbitc --lang c -o $@ $<
+	$(RUN_BITCC) $(BITCOPT) $(INC) --lang c -o $@ $<
 
 -include $(BUILDDIR)/.*.m
