@@ -2608,7 +2608,7 @@ TypesTOC(std::ostream& errStream,
 
 	out << "/***************************************" << endl
 	    << "   " << ast->loc << endl
-	    << "   " << ast->asString() 
+	    << "   " << ast->asString() << endl
 	    << "***************************************/" << endl;
 	CHKERR(errFree, toc(errStream, uoc, ast, out, "", 
 			    mod, c, flags));
@@ -2629,7 +2629,7 @@ TypesTOC(std::ostream& errStream,
  
 	out << "/***************************************" << endl
 	    << "   " << ast->loc << endl
-	    << "   " << ast->asString() 
+	    << "   " << ast->asString() << endl
 	    << "***************************************/" << endl;
 	GCPtr<AST> ident = ast->child(0);
 	if((ident->Flags & DEF_DECLARED) == 0) 
@@ -2662,7 +2662,7 @@ TypesTOC(std::ostream& errStream,
 
 	out << "/***************************************" << endl
 	    << "   " << ast->loc << endl
-	    << "   " << ast->asString() 
+	    << "   " << ast->asString() << endl
 	    << "***************************************/" << endl;
 	CHKERR(errFree, toc(errStream, uoc, ast, out, "", 
 			    mod, c, flags));
@@ -2755,7 +2755,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 
 	out << "/***************************************" << endl
 	    << "   " << ast->loc << endl
-	    << "   " << ast->asString() 
+	    << "   " << ast->asString() << endl
 	    << "***************************************/" << endl;    
 	
 	GCPtr<AST> id = ast->getID();
@@ -2821,10 +2821,10 @@ EmitGlobalInitializers(std::ostream& errStream,
 	  GCPtr<Type> ret = fnType->Ret();
 	  GCPtr<Type> args = fnType->Args()->getBareType();
 	  
-	  out << (isUnitType(ret) ? toCtype(ret) : "void") << endl	  
+	  out << (isUnitType(ret) ? "void" : toCtype(ret)) << endl	  
 	      << CMangle(label);
 	  out << "(";
-	  size_t argCount;
+	  size_t argCount = 0;
 	  for(size_t i=0; i < args->components->size(); i++) {
 	    GCPtr<Type> arg = args->CompType(i);
 	    if (isUnitType(arg))
@@ -2874,7 +2874,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 
 	out << "/***************************************" << endl
 	    << "   " << ast->loc << endl
-	    << "   " << ast->asString() 
+	    << "   " << ast->asString() << endl
 	    << "***************************************/" << endl;    
 	
 	CHKERR(errFree, toc(errStream, uoc, ast, out, "", 
