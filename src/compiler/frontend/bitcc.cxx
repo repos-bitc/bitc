@@ -128,7 +128,8 @@ bool Options::ppDecorate = false;
 GCPtr<CVector<std::string> > Options::entryPts;
 BackEnd *Options::backEnd = 0;
 std::string Options::outputFileName;
-GCPtr<CVector<GCPtr<Path> > > Options::libPath;
+GCPtr<CVector<GCPtr<Path> > > Options::libDirs;
+GCPtr<CVector<std::string> > Options::inputs;
 bool Options::Wall = false;
 bool Options::nogc = false;
 GCPtr<TvPrinter> Options::debugTvP = new TvPrinter;
@@ -262,11 +263,40 @@ handle_sigsegv(int param)
   exit(1);
 }
 
+bool
+ResolveLibPath(std::string name, std::string& resolvedName)
+{
+  // We either saw -lname or -l name. What we need to do here is
+  // check the currently known library paths for a resolution. If we
+  // find a file matching "libname.bita" on the search path, we add it
+  // to the list of inputs.
+  //
+  // In some cases, -lmumble will indicate simultaneously a need to
+  // add an input file named ..../libmumble.bita and also an archive
+  // library named .../libmumble.a. This arises in libbitc, for
+  // example, where some of the library is implemented in C.
+  //
+  // Unfortunately, this means that the @em absence of
+  // .../libmumble.bita does not reliably indicate an error.
+
+  Path nmPath = Path(name) << ".bita";
+
+  for (size_t i = 0; i < Options::libDirs->size(); i++) {
+    Path testPath = *Options::libDirs->elem(i) + nmPath;
+    if (testPath.exists()) {
+      resolvedName = testPath.asString();
+      return true;
+    }
+  }
+
+  return false;    
+}
+
 int
 main(int argc, char *argv[]) 
 {
   int c;
-  extern int optind;
+  //  extern int optind;
   int opterr = 0;
   bool userAddedEntryPts = false;
 
@@ -274,7 +304,8 @@ main(int argc, char *argv[])
   Options::showTypesUocs = new CVector<std::string>;
   Options::xmlTypesUocs = new CVector<std::string>;
   Options::entryPts = new CVector<std::string>;
-  Options::libPath = new CVector<GCPtr<Path> >;
+  Options::libDirs = new CVector<GCPtr<Path> >;
+  Options::inputs = new CVector<std::string>;
   UocInfo::searchPath = new CVector<GCPtr<Path> >;
   UocInfo::ifList = new CVector<GCPtr<UocInfo> >;
   UocInfo::srcList = new CVector<GCPtr<UocInfo> >;
@@ -298,11 +329,38 @@ main(int argc, char *argv[])
   }
 #endif
 
+  /// Note the "-" at the start of the getopt_long option string. In
+  /// order to generate behavior that is compatible with other
+  /// compilers (and linkers), we need to process library archives in
+  /// strict left-to-right form, without regard to whether they appear
+  /// in .../libfoo.a or -lbar format. That is: -lbar must be treated
+  /// as if macro-expanded
+  ///
+  /// But it is possible to see things like:
+  ///
+  ///    bitc a.bito b.bito libfoo.a -L path -lbar -o out
+  ///
+  /// This  means that there is left-context sensitivity to
+  /// consider, because the inputs are:
+  ///
+  ///    a.bito b.bito libfoo.a ResolveLibPath("lbar")
+  ///
+  /// and the behavior of ResolveLibPath relies on having processed
+  /// the -L options appearing to its left and NOT any -L options
+  /// appearing to its right. To make matters even more fun, we have
+  /// to selectively accumulate some of these options to be passed
+  /// along to gcc, and given the interspersal we need to do so in an
+  /// order-preserving way.
+
   while ((c = getopt_long(argc, argv, 
-			  "e:o:l:VchI:L:",
+			  "-e:o:l:VchI:L:",
 			  longopts, 0
 		     )) != -1) {
     switch(c) {
+    case 1:
+      Options::inputs->append(optarg);
+      break;
+
     case 'V':
       cerr << "Bitc Version: " << BITC_VERSION << endl;
       exit(0);
@@ -540,8 +598,16 @@ main(int argc, char *argv[])
       UocInfo::searchPath->append(new Path(optarg));
       break;
 
+    case 'l':
+      {
+	std::string resolvedName;
+	if (ResolveLibPath(optarg, resolvedName))
+	    Options::inputs->append(resolvedName);
+	break;
+      }
+
     case 'L':
-      Options::libPath->append(new Path(optarg));
+      Options::libDirs->append(new Path(optarg));
       break;
 
     default:
@@ -561,8 +627,13 @@ main(int argc, char *argv[])
 
     if (Options::useStdInc)
       UocInfo::searchPath->append(new Path(incpath.str()));
+#if 0
+    // Thankfully, this is not actually what --nostdlib means. What it
+    // means is that we should not automatically add -lbitc to the
+    // link line.
     if (Options::useStdLib)
-      Options::libPath->append(new Path(libpath.str()));
+      Options::libDirs->append(new Path(libpath.str()));
+#endif
   }
 
   if (xenv_dir) {
@@ -574,13 +645,12 @@ main(int argc, char *argv[])
     if (Options::useStdInc)
       UocInfo::searchPath->append(new Path(incpath.str()));
     if (Options::useStdLib)
-      Options::libPath->append(new Path(libpath.str()));
+      Options::libDirs->append(new Path(libpath.str()));
   }
 
-  argc -= optind;
-  argv += optind;
-  
-  if (argc == 0)
+  /* From this point on, argc and argv should no longer be consulted. */
+
+  if (Options::inputs->size() == 0)
     opterr++;
 
   if (opterr) {
@@ -607,8 +677,8 @@ main(int argc, char *argv[])
   }
   
   // Compile everything
-  for(int i = 0; i < argc; i++)
-    UocInfo::CompileFromFile(argv[i], true);
+  for(size_t i = 0; i < Options::inputs->size(); i++)
+    UocInfo::CompileFromFile(Options::inputs->elem(i), true);
 
   /* Per-file backend output after processing frontend, if any */
   bool doFinal = true;

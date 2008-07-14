@@ -76,7 +76,8 @@ struct Options {
   static GCPtr<CVector<std::string> > entryPts;
   static BackEnd *backEnd;
   static std::string outputFileName;
-  static GCPtr<CVector<GCPtr<Path> > > libPath;
+  static GCPtr<CVector<GCPtr<Path> > > libDirs;
+  static GCPtr<CVector<std::string> > inputs;
   static bool Wall; // All Warnings are errors.
   static bool nogc; // no garbage collection mode
   static GCPtr<TvPrinter> debugTvP;

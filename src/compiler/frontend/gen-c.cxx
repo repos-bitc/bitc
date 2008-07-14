@@ -3144,8 +3144,8 @@ EmitObj(std::ostream &optStream, std::ostream &errStream,
   for (size_t i = 0; i < UocInfo::searchPath->size(); i++)
     opt << " -I " << *UocInfo::searchPath->elem(i);
 
-  for (size_t i = 0; i < Options::libPath->size(); i++)
-    opt << " -L " << *Options::libPath->elem(i);
+  for (size_t i = 0; i < Options::libDirs->size(); i++)
+    opt << " -L " << *Options::libDirs->elem(i);
 
   opt << " -o " << Options::outputFileName;
   opt << " bitc.out.c";
