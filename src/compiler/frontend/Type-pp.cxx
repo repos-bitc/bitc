@@ -192,7 +192,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 	if (i > 0) 
 	  ss << " ";
 	if(t->CompFlags(i) & COMP_BYREF)
-	  ss << "(byref " 
+	  ss << "(by-ref " 
 	     << t->CompType(i)->asString(tvP, traverse)
 	     << ")";
 	else	   

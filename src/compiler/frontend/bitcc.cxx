@@ -308,7 +308,7 @@ ResolveLibPath(std::string name, std::string& resolvedName)
   // Unfortunately, this means that the @em absence of
   // .../libmumble.bita does not reliably indicate an error.
 
-  Path nmPath = Path(name) << ".bita";
+  Path nmPath = Path("lib" + name + ".bita");
 
   for (size_t i = 0; i < Options::libDirs->size(); i++) {
     Path testPath = *Options::libDirs->elem(i) + nmPath;
@@ -376,7 +376,7 @@ main(int argc, char *argv[])
   /// This  means that there is left-context sensitivity to
   /// consider, because the inputs are:
   ///
-  ///    a.bito b.bito libfoo.a ResolveLibPath("lbar")
+  ///    a.bito b.bito libfoo.a ResolveLibPath("bar")
   ///
   /// and the behavior of ResolveLibPath relies on having processed
   /// the -L options appearing to its left and NOT any -L options
@@ -728,6 +728,12 @@ main(int argc, char *argv[])
     Options::libDirs->append(new Path(libpath.str()));
     Options::LinkPostOptionsGCC->append("-L");
     Options::LinkPostOptionsGCC->append(libpath.str());
+  }
+
+  if (Options::useStdLib) {
+    std::string resolvedName;
+    if (ResolveLibPath("bitc", resolvedName))
+      Options::inputs->append(resolvedName);
   }
 
 #if 0
