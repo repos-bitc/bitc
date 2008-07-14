@@ -46,9 +46,9 @@
 
 BackEnd BackEnd::backends[] = {
   // The first one is the default.
+  { "obj", pn_npass, op_ssaTrans, 0, 0, EmitObj, 0 },
   { "c", pn_npass, op_ssaTrans, 0, 0, EmitC, 0 },
   { "h", pn_npass, op_ssaTrans, 0, 0, EmitHeader, BK_HDR_MODE },
-  { "obj", pn_npass, op_ssaTrans, 0, 0, EmitObj, 0 },
   { "bito", pn_npass, op_none, 0, EmitBitO, 0, BK_UOC_MODE },
   { "xmldump", pn_parse, op_none, XMLdump, 0, 0, 0 },
   { "Xmlpp", pn_parse, op_none, XMLpp, 0, 0, 0 },

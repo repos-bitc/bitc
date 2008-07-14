@@ -125,6 +125,7 @@ GCPtr<CVector<std::string> > Options::showTypesUocs;
 GCPtr<CVector<std::string> > Options::xmlTypesUocs;
 bool Options::ppFQNS = false;
 bool Options::ppDecorate = false;
+bool Options::verbose = false;
 GCPtr<CVector<std::string> > Options::entryPts;
 BackEnd *Options::backEnd = 0;
 std::string Options::outputFileName;
@@ -134,6 +135,10 @@ bool Options::Wall = false;
 bool Options::nogc = false;
 GCPtr<TvPrinter> Options::debugTvP = new TvPrinter;
 bool Options::heuristicInference = false;
+
+GCPtr<CVector<std::string> > Options::LinkPreOptionsGCC;
+GCPtr<CVector<std::string> > Options::CompilePreOptionsGCC;
+GCPtr<CVector<std::string> > Options::LinkPostOptionsGCC;
 
 #define LOPT_SHOWLEX      257   /* Show tokens */
 #define LOPT_SHOWPARSE    258   /* Show parse */
@@ -189,6 +194,7 @@ struct option longopts[] = {
   { "stopafter",            1,  0, LOPT_STOPAFTER },
   { "no-gc",                0,  0, LOPT_NOGC },
   { "no-prelude",           0,  0, LOPT_NOPRELUDE },
+  { "verbose",              0,  0, 'v' },
   { "version",              0,  0, 'V' },
 #if 0
   /* Options that have short-form equivalents: */
@@ -242,6 +248,24 @@ fatal()
   exit(1);
 }
 
+
+static bool SawFirstBitcInput = false;
+void
+AddLinkArgumentForGCC(const std::string& s)
+{
+  if (SawFirstBitcInput)
+    Options::LinkPostOptionsGCC->append(s);
+  else {
+    Options::LinkPreOptionsGCC->append(s);
+  }
+}
+
+void
+AddCompileArgumentForGCC(const std::string& s)
+{
+  if (!SawFirstBitcInput)
+    Options::CompilePreOptionsGCC->append(s);    
+}
 
 BackEnd *
 FindBackEnd(const char *nm)
@@ -306,6 +330,9 @@ main(int argc, char *argv[])
   Options::entryPts = new CVector<std::string>;
   Options::libDirs = new CVector<GCPtr<Path> >;
   Options::inputs = new CVector<std::string>;
+  Options::CompilePreOptionsGCC = new CVector<std::string>;
+  Options::LinkPreOptionsGCC = new CVector<std::string>;
+  Options::LinkPostOptionsGCC = new CVector<std::string>;
   UocInfo::searchPath = new CVector<GCPtr<Path> >;
   UocInfo::ifList = new CVector<GCPtr<UocInfo> >;
   UocInfo::srcList = new CVector<GCPtr<UocInfo> >;
@@ -353,13 +380,36 @@ main(int argc, char *argv[])
   /// order-preserving way.
 
   while ((c = getopt_long(argc, argv, 
-			  "-e:o:l:VchI:L:",
+			  "-e:o:O:l:VvchI:L:",
 			  longopts, 0
 		     )) != -1) {
     switch(c) {
     case 1:
-      Options::inputs->append(optarg);
-      break;
+      {
+	Path p(optarg);
+	std::string sfx = p.suffix();
+
+	if (
+	    // Interface files. Probably should not appear on the
+	    // command line, but this may be a case of obsolete
+	    // usage. Allow it for now.
+	    (sfx == ".bitc")
+	    // BitC source file.
+	    || (sfx == ".bits")
+	    // BitC "object" file.
+	    || (sfx == ".bito")
+	    // BitC archive file.
+	    || (sfx == ".bita")) {
+
+	  SawFirstBitcInput = true;
+	  Options::inputs->append(optarg);
+	}
+	else
+	  // Else it is something to be passed through to GCC:
+	  AddLinkArgumentForGCC(optarg);
+
+	break;
+      }
 
     case 'V':
       cerr << "Bitc Version: " << BITC_VERSION << endl;
@@ -368,10 +418,13 @@ main(int argc, char *argv[])
 
     case LOPT_NOSTDINC:
       Options::useStdInc = false;
+      AddCompileArgumentForGCC("--nostdinc");
+      AddLinkArgumentForGCC("--nostdinc");
       break;
 
     case LOPT_NOSTDLIB:
       Options::useStdLib = false;
+      AddLinkArgumentForGCC("--nostdlib");
       break;
 
     case LOPT_SHOWPARSE:
@@ -539,12 +592,22 @@ main(int argc, char *argv[])
 	break;
       }
 
+    case 'v':
+      Options::verbose = true;
+      break;
+
     case 'c':
       {
 	if (Options::backEnd) {
 	  std::cerr << "Can only specify one output language.\n";
 	  exit(1);
 	}
+
+	// Issue: if we are passed a .c file, shouldn't we pass that
+	// along to GCC in this case? Problem: what if there aren't
+	// any inputs exclusively for GCC?
+	//
+	// AddArgumentForGCC("-c");
 
 	Options::backEnd = FindBackEnd("bito");
 	break;
@@ -592,14 +655,25 @@ main(int argc, char *argv[])
 
     case 'o':
       Options::outputFileName = optarg;
+
+      AddLinkArgumentForGCC("-o");
+      AddLinkArgumentForGCC(optarg);
+
       break;
 
     case 'I':
+      AddCompileArgumentForGCC("-I");
+      AddCompileArgumentForGCC(optarg);
+      AddLinkArgumentForGCC("-I");
+      AddLinkArgumentForGCC(optarg);
       UocInfo::searchPath->append(new Path(optarg));
       break;
 
     case 'l':
       {
+	AddLinkArgumentForGCC("-l");
+	AddLinkArgumentForGCC(optarg);
+
 	std::string resolvedName;
 	if (ResolveLibPath(optarg, resolvedName))
 	    Options::inputs->append(resolvedName);
@@ -607,7 +681,18 @@ main(int argc, char *argv[])
       }
 
     case 'L':
+      AddLinkArgumentForGCC("-L");
+      AddLinkArgumentForGCC(optarg);
+
       Options::libDirs->append(new Path(optarg));
+      break;
+
+    case 'O':
+      AddCompileArgumentForGCC("-O");
+      AddCompileArgumentForGCC(optarg);
+      AddLinkArgumentForGCC("-O");
+      AddLinkArgumentForGCC(optarg);
+
       break;
 
     default:
@@ -627,13 +712,15 @@ main(int argc, char *argv[])
 
     if (Options::useStdInc)
       UocInfo::searchPath->append(new Path(incpath.str()));
-#if 0
+
     // Thankfully, this is not actually what --nostdlib means. What it
     // means is that we should not automatically add -lbitc to the
     // link line.
-    if (Options::useStdLib)
+    if (Options::useStdLib) {
+      AddLinkArgumentForGCC("-L");
+      AddLinkArgumentForGCC(libpath.str());
       Options::libDirs->append(new Path(libpath.str()));
-#endif
+    }
   }
 
   if (xenv_dir) {
@@ -644,8 +731,12 @@ main(int argc, char *argv[])
 
     if (Options::useStdInc)
       UocInfo::searchPath->append(new Path(incpath.str()));
-    if (Options::useStdLib)
+
+    if (Options::useStdLib) {
+      AddLinkArgumentForGCC("-L");
+      AddLinkArgumentForGCC(libpath.str());
       Options::libDirs->append(new Path(libpath.str()));
+    }
   }
 
   /* From this point on, argc and argv should no longer be consulted. */

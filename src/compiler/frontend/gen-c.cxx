@@ -1956,7 +1956,7 @@ toc(std::ostream& errStream,
 	if (isUnitType(ast->child(c)))
 	  continue;
 
-	if(count > 1)
+	if(count > 0)
 	  out << ", ";	    
 	
 	if(argsType->CompFlags(c-1) & COMP_BYREF) {	  
@@ -3138,24 +3138,58 @@ EmitObj(std::ostream &optStream, std::ostream &errStream,
   if(!result)
     return false;
   
-  stringstream opt;
-  opt << "gcc -O2 ";
+  /* First GCC invocation is to compile the .c file into a .o file: */
+  {
+    stringstream opt;
+    opt << "gcc -c ";
 
-  for (size_t i = 0; i < UocInfo::searchPath->size(); i++)
-    opt << " -I " << *UocInfo::searchPath->elem(i);
+    for (size_t i = 0; i < Options::CompilePreOptionsGCC->size(); i++)
+      opt << " " << Options::CompilePreOptionsGCC->elem(i);
 
-  for (size_t i = 0; i < Options::libDirs->size(); i++)
-    opt << " -L " << *Options::libDirs->elem(i);
+    opt << " --std=c99";
+    opt << " -o bitc.out.o";
+    opt << " bitc.out.c";
 
-  opt << " -o " << Options::outputFileName;
-  opt << " bitc.out.c";
-  opt << " -lbitc";
-  opt << " -lgc";
-  opt << " --std=c99";
+    if (Options::verbose)
+      std::cerr  << opt.str() << std::endl;
 
-  std::cerr  << opt.str() << std::endl;
+    system(opt.str().c_str());
+  }
 
-  system(opt.str().c_str());
+  {
+    stringstream opt;
+    opt << "gcc";
+
+    for (size_t i = 0; i < Options::LinkPreOptionsGCC->size(); i++)
+      opt << " " << Options::LinkPreOptionsGCC->elem(i);
+
+    opt << " bitc.out.o";
+    opt << " -lbitc";
+    opt << " -lgc";
+
+    for (size_t i = 0; i < Options::LinkPostOptionsGCC->size(); i++)
+      opt << " " << Options::LinkPostOptionsGCC->elem(i);
+
+#if 0
+    for (size_t i = 0; i < UocInfo::searchPath->size(); i++)
+      opt << " -I " << *UocInfo::searchPath->elem(i);
+
+    for (size_t i = 0; i < Options::libDirs->size(); i++)
+      opt << " -L " << *Options::libDirs->elem(i);
+
+    opt << " -o " << Options::outputFileName;
+    opt << " bitc.out.c";
+    opt << " -lbitc";
+    opt << " -lgc";
+    opt << " --std=c99";
+#endif
+
+    if (Options::verbose)
+      std::cerr  << opt.str() << std::endl;
+
+    system(opt.str().c_str());
+  }
+
   //system("rm -f bitc.out.c");
   
   return true;

@@ -108,12 +108,12 @@ $(BUILDDIR)/%: $(BUILDDIR)/%.o $(LIBBITC)
 .PRECIOUS: $(SOURCE:%.bitc=%.c)
 
 sha1-file.c: sha1-file.bitc  $(BITCC)
-	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/runtime -o $@ $< $(BITC_SRC)/lib/crypt/sha1.bitc
+	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/runtime --lang c -o $@ $< $(BITC_SRC)/lib/crypt/sha1.bitc
 
 sha1-test.c: sha1-test.bitc  $(BITCC)
-	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/runtime -o $@ $< $(BITC_SRC)/lib/crypt/sha1.bitc
+	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/runtime --lang c -o $@ $< $(BITC_SRC)/lib/crypt/sha1.bitc
 
 %.c: %.bitc  $(BITCC)
-	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/runtime -o $@ $<
+	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/runtime --lang c -o $@ $<
 
 -include $(BUILDDIR)/.*.m
