@@ -3190,7 +3190,7 @@ EmitObj(std::ostream &optStream, std::ostream &errStream,
     system(opt.str().c_str());
   }
 
-  //system("rm -f bitc.out.c");
+  system("rm -f bitc.out.o");
   
   return true;
 }
