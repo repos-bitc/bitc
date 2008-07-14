@@ -46,13 +46,13 @@
 
 BackEnd BackEnd::backends[] = {
   // The first one is the default.
-  { "c", pn_npass, op_ssaTrans, 0, EmitC, 0 },
-  { "h", pn_npass, op_ssaTrans, 0, EmitHeader, BK_HDR_MODE },
-  { "obj", pn_npass, op_ssaTrans, 0, EmitObj, 0 },
-  { "bito", pn_npass, op_none, EmitBitO, 0, BK_UOC_MODE },
-  { "xmldump", pn_parse, op_none, XMLdump, 0, 0 },
-  { "Xmlpp", pn_parse, op_none, XMLpp, 0, 0 },
-  { "xmltypes", pn_typeCheck, op_none, XMLtypesPP, 0, 0 }
+  { "c", pn_npass, op_ssaTrans, 0, 0, EmitC, 0 },
+  { "h", pn_npass, op_ssaTrans, 0, 0, EmitHeader, BK_HDR_MODE },
+  { "obj", pn_npass, op_ssaTrans, 0, 0, EmitObj, 0 },
+  { "bito", pn_npass, op_none, 0, EmitBitO, 0, BK_UOC_MODE },
+  { "xmldump", pn_parse, op_none, XMLdump, 0, 0, 0 },
+  { "Xmlpp", pn_parse, op_none, XMLpp, 0, 0, 0 },
+  { "xmltypes", pn_typeCheck, op_none, XMLtypesPP, 0, 0, 0 }
 };
 
 size_t BackEnd::nBackEnd = sizeof(BackEnd::backends) / sizeof(BackEnd);

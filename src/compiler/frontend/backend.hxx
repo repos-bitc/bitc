@@ -45,6 +45,8 @@
 typedef bool (*BackEndFn) (std::ostream& out, std::ostream& err,
 			   GCPtr<UocInfo> uoc);
 
+typedef bool (*MidEndFn) (std::ostream& out, std::ostream& err);
+
 bool XMLpp(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
 bool XMLdump(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
 bool XMLtypesPP(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
@@ -52,14 +54,17 @@ bool EmitHeader(std::ostream& out, std::ostream& err,
 		GCPtr<UocInfo> uoc);
 bool EmitC(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
 bool EmitObj(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
-bool EmitBitO(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
+
+
+bool EmitBitO(std::ostream& out, std::ostream& err);
 
 struct BackEnd {
   std::string name;
   Pass needPass;
   OnePass oPass;
-  BackEndFn fn;    // per-file backend-fn
-  BackEndFn plfn; // one-pass, post-link backend-fn
+  BackEndFn fn;			// per-file backend-fn
+  MidEndFn  midfn;		// pre-GrandUOC pass
+  BackEndFn plfn;		// one-pass, post-link backend-fn
   static size_t nBackEnd;
   static BackEnd backends[];
   unsigned long flags;

@@ -637,6 +637,15 @@ main(int argc, char *argv[])
       doFinal = false;
   } 
 
+  /* We have completed all of the per-UOC passes. Assuming that we did
+   * so successfully, run any required mid-end function:
+   */
+  if (doFinal) {
+    if (Options::backEnd->midfn) {
+      Options::backEnd->midfn(std::cout, std::cerr);
+    }
+  }
+
   if (!doFinal)
     exit(1);
 

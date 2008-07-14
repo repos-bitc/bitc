@@ -69,8 +69,7 @@
 #endif
 
 bool
-EmitBitO(std::ostream &optStream, std::ostream &errStream,
-	 GCPtr<UocInfo> uoc)
+EmitBitO(std::ostream &optStream, std::ostream &errStream)
 {
   std::ofstream out(Options::outputFileName.c_str(),
 		    std::ios_base::out|std::ios_base::trunc);
@@ -83,7 +82,13 @@ EmitBitO(std::ostream &optStream, std::ostream &errStream,
 	      << endl;
 
 
-  uoc->PrettyPrint(out, false);
+  out << "(bitc-version \"" << BITC_VERSION << "\")" << endl;
+
+  for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
+    GCPtr<UocInfo> uoc = UocInfo::srcList->elem(i);
+
+    uoc->PrettyPrint(out, false);
+  }
 
   return true;
 }

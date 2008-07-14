@@ -758,27 +758,31 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
 
     // The following just recurse:
   case at_module:
-    if (ast->printVariant == 0)	{
-      // explicit module form
-      out << "(" << ast->atKwd() << " ";
-      BitcP(out, ast->child(0), showTypes);
+    {
+      out << "(" << ast->atKwd();
       out.more();
-    }
 
-    /* Dont call doChildren; that will put spaces in front
-       of the top level forms. Remember, bitc-version has
-       already been emitted without a space */
-    for(unsigned i = 0; i < ast->children->size(); i++) {
-      if (i > 0)
-	out << endl;
-      BitcP(out, ast->child(i), showTypes);
-    }
+      if (ast->printVariant != 0) {
+	// explicit module form. Put name on same line:
+	out << " ";
+	BitcP(out, ast->child(0), showTypes);
+      }
+      else
+	// Each form on its own line:
+	out << std::endl;
 
-    if (ast->printVariant == 0) {
+      /* Dont call doChildren; that will put spaces in front
+	 of the top level forms. Remember, bitc-version has
+	 already been emitted without a space */
+      for(unsigned i = 0; i < ast->children->size(); i++) {
+	if (i > 0)
+	  out << std::endl;
+	BitcP(out, ast->child(i), showTypes);
+      }
       out << ")";
-    }
 
-    break;
+      break;
+    }
     
   case at_interface:
   case at_lambda:
