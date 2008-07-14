@@ -45,11 +45,17 @@ GC_INC=
 INC+=-I$(BITC_SRC)/runtime -I. -I$(BITC_XENV)/host/include $(GC_INC) 
 #INC+=-I../include
 
+BITCC=$(BITC_SRC)/compiler/frontend/BUILD/bitcc
+
 include $(BITC_SRC)/build/make/makerules.mk
 
 BITC_SOURCES=\
-	$(wildcard $(BITC_SRC)/runtime/bitc/*.bitc) \
-	$(wildcard $(BITC_SRC)/runtime/bitc/*/*.bitc)
+	$(wildcard *.bits) \
+	$(wildcard */*.bits)
+
+BITC_IFS=\
+	$(wildcard *.bitc) \
+	$(wildcard */*.bitc)
 
 # mkclosure.c is sourced from the appropriate target architecture directory
 # by virtue of the VPATH setting below. Contrary to appearences, it is not
@@ -58,6 +64,9 @@ C_SOURCES=\
 	$(wildcard *.c) \
 	mkclosure.c
 
+C_HDR=\
+	$(wildcard */*.h)
+
 VPATH=.:$(BITC_TARGET)
 
 OBJECTS=$(C_SOURCES:%.c=$(BUILDDIR)/%.o)
@@ -65,17 +74,30 @@ OBJECTS=$(C_SOURCES:%.c=$(BUILDDIR)/%.o)
 $(OBJECTS): $(BUILDDIR)/bitc-runtime.h
 
 $(BUILDDIR)/bitc-runtime.h: $(BUILDDIR) $(BITC_SOURCES)
-	$(BITC_SRC)/compiler/frontend/BUILD/bitcc $(INC) -h -o $@ bitc-runtime.bitc
+	$(BITCC) $(INC) -h -o $@ bitc-runtime.bitc
 
-all: BUILD/libbitc.a
+all: BUILD/libbitc.a BUILD/libbitc.bita
 
 install: all
 	$(INSTALL) -d $(BITC_ROOT)/host
 	$(INSTALL) -d $(BITC_ROOT)/host/lib
+	$(INSTALL) -d $(BITC_ROOT)/host/include
 	$(INSTALL) -m 0644 BUILD/libbitc.a $(BITC_ROOT)/host/lib
+	$(INSTALL) -m 0644 BUILD/libbitc.bita $(BITC_ROOT)/host/lib
+	for if in $(BITC_IFS); do \
+	  $(INSTALL) -d $(BITC_ROOT)/host/include/`dirname $$if`; \
+	  $(INSTALL) -m 0644 $$if $(BITC_ROOT)/host/include/`dirname $$if`; \
+	done
+	for hdr in $(C_HDR); do \
+	  $(INSTALL) -d $(BITC_ROOT)/host/include/`dirname $$hdr`; \
+	  $(INSTALL) -m 0644 $$hdr $(BITC_ROOT)/host/include/`dirname $$hdr`; \
+	done
 
 BUILD/libbitc.a: $(OBJECTS)
 	ar -crv $@ $(OBJECTS)
+
+BUILD/libbitc.bita: $(BITC_SOURCES)
+	$(BITCC) $(INC) -c -o $@ $(BITC_SOURCES)
 
 -include $(BUILDDIR)/.*.m
 
