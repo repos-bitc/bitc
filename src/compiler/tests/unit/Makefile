@@ -53,7 +53,7 @@ RUN=a.out
 GCCWARN+=-Wno-unused
 LIBS=$(GC_LIBDIR) $(LIBBITC) $(GC_LIB)
 
-CFLAGS+=-g -I$(PWD)/$(BITC_SRC)/runtime
+CFLAGS+=-g -I$(PWD)/$(BITC_SRC)/libbitc
 c-source: $(SOURCE:%.bitc=%.c)
 objects: $(OBJECTS)
 all: link
@@ -108,12 +108,12 @@ $(BUILDDIR)/%: $(BUILDDIR)/%.o $(LIBBITC)
 .PRECIOUS: $(SOURCE:%.bitc=%.c)
 
 sha1-file.c: sha1-file.bitc  $(BITCC)
-	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/runtime --lang c -o $@ $< $(BITC_SRC)/lib/crypt/sha1.bitc
+	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/libbitc --lang c -o $@ $< $(BITC_SRC)/lib/crypt/sha1.bitc
 
 sha1-test.c: sha1-test.bitc  $(BITCC)
-	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/runtime --lang c -o $@ $< $(BITC_SRC)/lib/crypt/sha1.bitc
+	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/libbitc --lang c -o $@ $< $(BITC_SRC)/lib/crypt/sha1.bitc
 
 %.c: %.bitc  $(BITCC)
-	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/runtime --lang c -o $@ $<
+	$(BITCC) $(BITCOPT) -I. -I $(BITC_SRC)/libbitc --lang c -o $@ $<
 
 -include $(BUILDDIR)/.*.m
