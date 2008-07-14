@@ -311,7 +311,7 @@ AST::atKwd() const
     return "bitfield";
 
   case at_byrefType:
-    return "byref";
+    return "by-ref";
 
   case at_refType:
     return "ref";
