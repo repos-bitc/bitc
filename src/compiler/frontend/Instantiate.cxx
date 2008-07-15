@@ -526,6 +526,8 @@ name2fqn(GCPtr<AST> ast)
       break;
     }
 
+    // Special handling for switch unnecessary, if symbolDef is null
+    // recursion stops.
   default:
     {
       for (size_t c = 0; c < ast->children->size(); c++)
@@ -622,24 +624,34 @@ substitute(GCPtr<AST> ast, GCPtr<AST> from, GCPtr<AST> to)
 { 
   switch(ast->astType) {
   case at_ident:    
-    if(ast->symbolDef == from) {
-      assert((ast->Flags2 & IDENT_MANGLED) == 0);
-    
-      NAMKARAN(ast, to->s);
-      ast->symbolDef = to;      
+    {
+      if(ast->symbolDef == from) {
+	assert((ast->Flags2 & IDENT_MANGLED) == 0);
+	
+	NAMKARAN(ast, to->s);
+	ast->symbolDef = to;      
+      }
+      return ast;
     }
-    return ast;
 
   case at_typeapp:
-    if(ast->child(0)->symbolDef == from) 
-      return substitute(ast->child(0), from, to);    
-    // fall through
+    {
+      if(ast->child(0)->symbolDef == from) 
+	return substitute(ast->child(0), from, to);
 
+      for(size_t c = 0; c < ast->children->size(); c++)
+	ast->child(c) = substitute(ast->child(c), from, to);
+      
+      return ast;
+    }
+      
   default:
-    for(size_t c = 0; c < ast->children->size(); c++)
-      ast->child(c) = substitute(ast->child(c), from, to);
-
-    return ast;
+    {
+      for(size_t c = 0; c < ast->children->size(); c++)
+	ast->child(c) = substitute(ast->child(c), from, to);
+      
+      return ast;
+    }
   }
 }
 
@@ -654,11 +666,12 @@ tvarSub(GCPtr<AST> ast, GCPtr<AST> tv, GCPtr<Type> typ)
       return typeAsAst(typ, ast->loc); 
     else
       return ast;    
-
+    
   default:    
     for(size_t c = 0; c < ast->children->size(); c++)
       ast->child(c) = tvarSub(ast->child(c), tv, typ);
     return ast;
+    
   }
 }
 
@@ -693,6 +706,16 @@ tvarInst(GCPtr<AST> ast, GCPtr<AST> scope,
       newTvAst->Flags2 |= TVAR_IS_DEF | TVAR_POLY_SPECIAL;
       newBinds.append(new Pair<GCPtr<AST> , GCPtr<AST> >(def, newTvAst));
       return newTvAst;
+    }
+    
+
+  case at_switch:
+  case at_try:
+    {
+      for(size_t c = 0; c < ast->children->size(); c++)
+	if(c != IGNORE(ast))
+	  ast->child(c) = tvarInst(ast->child(c), scope, newBinds);
+      return ast;
     }
     
   default:    
@@ -1401,6 +1424,17 @@ UocInfo::recInstantiate(ostream &errStream,
 	ast->child(c) = recInstantiate(errStream, 
 				       ast->child(c),
 				       errFree, worklist);      
+      break;
+    }
+    
+  case at_switch:
+  case at_try:
+    {
+      for (size_t c = 0; c < ast->children->size(); c++)
+	if(c != IGNORE(ast))
+	  ast->child(c) = recInstantiate(errStream, 
+					 ast->child(c),
+					 errFree, worklist);
       break;
     }
     

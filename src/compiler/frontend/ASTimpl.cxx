@@ -440,9 +440,9 @@ AST::atKwd() const
   case at_otherwise:
     return "otherwise";
 
-  case at_switchR:
+  case at_switch:
     return "switch";
-
+    
   case at_sw_legs:
     return "<sw_legs>";
 
@@ -458,7 +458,7 @@ AST::atKwd() const
   case at_inner_ref:
     return "inner_ref";
 
-  case at_tryR:
+  case at_try:
     return "try";
 
   case at_throw:
@@ -783,6 +783,9 @@ AST::rename(GCPtr<AST> from, std::string newName)
     if(me == from || symbolDef == from)
       s = newName;
     break;
+  
+    // switched identifier also gets renamed in 
+    // the encoded at_switch and at_try positions here
     
   default:
     for(size_t c = 0; c < children->size(); c++)

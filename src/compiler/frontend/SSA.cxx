@@ -850,15 +850,16 @@ ssa(std::ostream& errStream,
     }
 
 
-  case at_switchR:
-  case at_tryR:
+  case at_switch:
+  case at_try:
     {           
       GCPtr<AST> res = AST::genSym(ast, "t");
       addIL(identList, res);
       
       // The result of the top-expression is a return value	
       // only in the case of a try block
-      if(ast->astType == at_tryR) {
+      // Top-expression is at position 1 for switch ans position 0 for try
+      if(ast->astType == at_try) {
 	GCPtr<AST> gl = newGrandLet(ast);
 	SSA(errStream, uoc, ast->child(0), gl, identList, 
 	    ast, 0, flags);	
@@ -866,26 +867,19 @@ ssa(std::ostream& errStream,
 	SETGL(ast->child(0), gl);
       }
       else {
-	SSA(errStream, uoc, ast->child(0), grandLet, identList, 
-	    ast, 0, flags);
-	ast->child(0) = FEXPR(grandLet);	
+	SSA(errStream, uoc, ast->child(1), grandLet, identList, 
+	    ast, 1, flags);
+	ast->child(1) = FEXPR(grandLet);	
       }
       
-      GCPtr<AST> cases = ast->child(1);      
+      GCPtr<AST> cases = ast->child(2);      
       // the cases
       for(c=0; c < cases->children->size(); c++) {
 	GCPtr<AST> theCase = cases->child(c);
 	GCPtr<AST> gl = newGrandLet(theCase);
-	
-	if(ast->astType == at_switchR || ast->astType == at_tryR) {
-	  addIL(identList, theCase->child(0));
-	}
-	else {
-	  // Case only
-	  SSA(errStream, uoc, theCase->child(0), gl, 
-	      identList, theCase, 0, flags);
-	}
-	
+
+	addIL(identList, theCase->child(0));
+
 	SSA(errStream, uoc, theCase->child(1), gl, 
 	    identList, theCase, 1, flags);
 
@@ -894,7 +888,7 @@ ssa(std::ostream& errStream,
       }
 
       // otherwise
-      GCPtr<AST> ow = ast->child(2);
+      GCPtr<AST> ow = ast->child(3);
       if(ow->astType == at_otherwise) {
 	GCPtr<AST> owExpr = ow->child(0);
 	GCPtr<AST> gl = newGrandLet(owExpr);

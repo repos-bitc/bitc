@@ -2103,10 +2103,12 @@ toc(std::ostream& errStream,
       break;
     }
 
-  case at_switchR:
+  case at_switch:
     {
-      GCPtr<AST> topExp = ast->child(0);
-      GCPtr<AST> cases = ast->child(1);
+      GCPtr<AST> topExp = ast->child(1);
+      GCPtr<AST> cases = ast->child(2);
+      GCPtr<AST> ow = ast->child(3);
+
       GCPtr<Type> t = topExp->symType->getBareType();
       
       out << "switch(";
@@ -2161,13 +2163,12 @@ toc(std::ostream& errStream,
 	out << endl;
       } // for each case
 
-      if(ast->child(2)->astType != at_Null) {
+      if(ow->astType != at_Null) {
 	out << "default:" << endl;
 	out.more();
 	out << "{" << endl;
 	out.more();
-	TOC(errStream, uoc, ast->child(2)->child(0), 
-	    out, IDname, ast->child(2), 2, flags);
+	TOC(errStream, uoc, ow->child(0), out, IDname, ow, 2, flags);
 	out << "break;";
 	out << endl;
 	out.less();
@@ -2189,11 +2190,11 @@ toc(std::ostream& errStream,
       break;
     }
 
-  case at_tryR:
+  case at_try:
     {
       GCPtr<AST> topExpr = ast->child(0);
-      GCPtr<AST> cases = ast->child(1);
-      GCPtr<AST> ow = ast->child(2);
+      GCPtr<AST> cases = ast->child(2);
+      GCPtr<AST> ow = ast->child(3);
       out << "{" << endl;
       out.more();
       out << "jmp_buf jb;" << endl;
@@ -2245,8 +2246,7 @@ toc(std::ostream& errStream,
       if(ow->astType != at_Null) {
 	out << "else {" << endl;
 	out.more();
-	TOC(errStream, uoc, ow->child(0), 
-	    out, IDname, ow, 0, flags);
+	TOC(errStream, uoc, ow->child(0), out, IDname, ow, 0, flags);
 	out.less();
 	out << "}" << endl;
 	out << endl;

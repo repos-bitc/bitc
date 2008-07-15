@@ -296,16 +296,23 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
 
   case at_cond:
   case at_cond_legs:
-  case at_switchR:
   case at_sw_legs:
   case at_otherwise:
-  case at_tryR:
   case at_throw:
   case at_setClosure:
   case at_copyREF:
-   {
-     for(size_t c = 0; c < ast->children->size(); c++)
+    {
+      for(size_t c = 0; c < ast->children->size(); c++)
 	markTail(ast->child(c), fn, bps, isTail);
+      break;
+    }
+
+  case at_switch:
+  case at_try:
+    {
+      for(size_t c = 0; c < ast->children->size(); c++)
+	if(c != IGNORE(ast))
+	  markTail(ast->child(c), fn, bps, isTail);
       break;
     }
 

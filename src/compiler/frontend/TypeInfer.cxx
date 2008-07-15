@@ -1528,11 +1528,23 @@ CheckLetrecFnxnRestriction(std::ostream &errStream, GCPtr<AST> ast)
 						 ast->child(0)));
       break;
     }
+
+  case at_switch:
+  case at_try:
+    {
+      for(size_t c=0; c < ast->children->size(); c++)
+	if(c != IGNORE(ast))
+	  CHKERR(errFree, CheckLetrecFnxnRestriction(errStream, 
+						     ast->child(c)));
+      break;
+    }
+
   default:
     {
       for(size_t c=0; c < ast->children->size(); c++)
 	CHKERR(errFree, CheckLetrecFnxnRestriction(errStream, 
 						   ast->child(c)));
+      break;
     }
   }
   return errFree;
@@ -3960,7 +3972,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       break;
     }
     
-  case at_switchR:    
+  case at_switch:    
     {      
       /*------------------------------------------------
         A(v) = ['a1.. 'am] C11(r1) | ... | C1p(r1) |
@@ -3970,20 +3982,22 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
          A, x:r1 |- e1:t1 ... A, x:rn |- en:tn   A |- ew: tw
          U(t1 = 'a1|'b) ... U(tn = 'an|'b)   U(tw = 'aw|'b)
 	_________________________________________________
-           A |- (switch e (C11 ... C1p x1 e1)
-                               ...
-                          (Cn1 ... Cnq xn en)
-                          (ow             ew)): 'c|'b
+           A |- (switch x e (C11 ... C1p x1 e1)
+                                 ...
+                            (Cn1 ... Cnq xn en)
+                            (ow             ew)): 'c|'b
 	------------------------------------------------*/
 
+      // match at at_ident
+
       // match at agt_expr
-      GCPtr<AST> topExpr = ast->child(0);
+      GCPtr<AST> topExpr = ast->child(1);
       TYPEINFER(topExpr, gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
       
       GCPtr<Type> tv = newTvar(ast);
       // match at_case_legs
-      GCPtr<AST> cases = ast->child(1);
+      GCPtr<AST> cases = ast->child(2);
       for(size_t c = 0; c < cases->children->size(); c++) {
 	GCPtr<AST> thecase = cases->child(c);
 	for(size_t j=2; j < thecase->children->size(); j++) {
@@ -4009,7 +4023,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       cases->symType = MBF(tv);
 
       // match at_otherwise
-      GCPtr<AST> otherwise = ast->child(2);
+      GCPtr<AST> otherwise = ast->child(3);
       if(otherwise->astType != at_Null) {
 	TYPEINFER(otherwise, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
@@ -4219,7 +4233,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       break;
     }
     
-  case at_tryR:
+  case at_try:
     {
       /*------------------------------------------------
            A(exn) =  E11(r11) | ... | E1p(r1p) | ... |
@@ -4229,7 +4243,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       A |- e1:t1 ...  A, x:rm |- em:tm ...   [A |- ew: tw]
       U(t1 = 'a1|'b) ... U(tm = 'am|'b) ... [U(tw = 'aw|'b)]
 	_________________________________________________
-         A |- (try e 
+         A |- (try e x
                    (catch (E11 ... E1p    e1)
 		               ...
                           (Em          xm em)
@@ -4239,17 +4253,21 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
       // match agt_expr
       GCPtr<Type> tv = newTvar(ast);
-      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
+      GCPtr<AST> expr = ast->child(0);     
+      TYPEINFER(expr, gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
-      CHKERR(errFree, unify(errStream, trail, ast->child(0), 
-			    ast->child(0)->symType, MBF(tv), uflags));
+      CHKERR(errFree, unify(errStream, trail, expr, 
+			    expr->symType, MBF(tv), uflags));
       
       ast->symType = MBF(tv);
       
       if(!errFree)
 	break;
 
-      GCPtr<AST> cases = ast->child(1);     
+      // match at_ident: ignore
+
+      // match at_sw_legs
+      GCPtr<AST> cases = ast->child(2);     
       cases->symType = MBF(tv);
       for (size_t c = 0; c < cases->children->size(); c++) {
 	GCPtr<AST> theCase = cases->child(c);
@@ -4298,8 +4316,9 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	
 	theCase->symType = expr->symType;
       }
-
-      GCPtr<AST> ow = ast->child(2);
+      
+      // match agt_ow
+      GCPtr<AST> ow = ast->child(3);
       if(ow->astType != at_Null) {
 	TYPEINFER(ow->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);

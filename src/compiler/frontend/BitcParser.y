@@ -1892,7 +1892,7 @@ eform: '(' tk_DUP expr ')' {
 // SWITCH
 eform: '(' tk_SWITCH ident expr sw_legs ow ')' {
   SHOWPARSE("eform -> ( SWITCH ident expr sw_legs ow)");
-  $$ = new AST(at_switchR, $2.loc, $4, $5, $6);
+  $$ = new AST(at_switch, $2.loc, $3, $4, $5, $6);
   for(size_t c =0; c < $5->children->size(); c++) {
     GCPtr<AST> sw_leg = $5->child(c);
     sw_leg->children->insert(0, $3->getDCopy());
@@ -1995,7 +1995,7 @@ typecase_leg: '(' bindingpattern expr ')'  {
 // TRY/CATCH [7.15.1]
 eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
   SHOWPARSE("eform -> ( TRY expr ( CATCH ( ident sw_legs ) ) )");
-  $$ = new AST(at_tryR, $2.loc, $3, $7, $8);
+  $$ = new AST(at_try, $2.loc, $3, $6, $7, $8);
   for(size_t c =0; c < $7->children->size(); c++) {
     GCPtr<AST> sw_leg = $7->child(c);
     sw_leg->children->insert(0, $6->getDCopy());

@@ -237,13 +237,13 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
-  case at_switchR:
+  case at_switch:
     {
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
-				       ast->child(1)));
-      if(ast->child(2)->astType != at_Null)
+				       ast->child(2)));
+      if(ast->child(3)->astType != at_Null)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
-					 ast->child(2)));
+					 ast->child(3)));
       break;
     }
 
@@ -327,7 +327,7 @@ isExpansive(std::ostream& errStream,
       break;
     }
    
-  case at_tryR:
+  case at_try:
   case at_throw:
     {
       itsExpansive = true;

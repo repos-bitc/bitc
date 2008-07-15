@@ -2004,19 +2004,21 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_switchR:
+  case at_switch:
     {
+      // match at at_ident: ignore
+
       // match at agt_expr
-      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
+      RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
 	      id_value, currLB, flags);    
 
       // match at_case_legs or at_sw_legs
-      RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
+      RESOLVE(ast->child(2), env, lamLevel, USE_MODE, 
 	      id_value, currLB, flags);
 
       // match at_otherwise (agt_ow)
-      if(ast->child(2)->astType != at_Null) 
-	RESOLVE(ast->child(2), env, lamLevel, USE_MODE, 
+      if(ast->child(3)->astType != at_Null) 
+	RESOLVE(ast->child(3), env, lamLevel, USE_MODE, 
 		id_value, currLB, flags);
 
       break;
@@ -2067,19 +2069,21 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_tryR:
+  case at_try:
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      id_value, currLB, flags);
     
+      // match_at_ident: ignore
+
       // match at_case_legs
-      RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
+      RESOLVE(ast->child(2), env, lamLevel, USE_MODE, 
 	      id_value, currLB, flags | WITHIN_CATCH);
 
       // match at_otherwise
-      if(ast->child(2)->astType != at_Null) 
-	RESOLVE(ast->child(2), env, lamLevel, USE_MODE, 
+      if(ast->child(3)->astType != at_Null) 
+	RESOLVE(ast->child(3), env, lamLevel, USE_MODE, 
 		id_value, currLB, flags | WITHIN_CATCH);
       break;
     }

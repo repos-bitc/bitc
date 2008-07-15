@@ -518,14 +518,14 @@ AST::tagName(const AstType at)
     return "at_mkClosure";
   case at_setClosure:
     return "at_setClosure";
-  case at_switchR:
-    return "at_switchR";
+  case at_switch:
+    return "at_switch";
   case at_sw_legs:
     return "at_sw_legs";
   case at_sw_leg:
     return "at_sw_leg";
-  case at_tryR:
-    return "at_tryR";
+  case at_try:
+    return "at_try";
   case at_throw:
     return "at_throw";
   case at_let:
@@ -811,14 +811,14 @@ AST::astName() const
     return "mkClosure";
   case at_setClosure:
     return "setClosure";
-  case at_switchR:
-    return "switchR";
+  case at_switch:
+    return "switch";
   case at_sw_legs:
     return "sw_legs";
   case at_sw_leg:
     return "sw_leg";
-  case at_tryR:
-    return "tryR";
+  case at_try:
+    return "try";
   case at_throw:
     return "throw";
   case at_let:
@@ -1016,10 +1016,10 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00", // at_copyREF
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00", // at_mkClosure
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00", // at_setClosure
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00", // at_switchR
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00", // at_switch
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00", // at_sw_legs
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00", // at_sw_leg
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00", // at_tryR
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00", // at_try
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00", // at_throw
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00", // at_let
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00", // at_letbindings
@@ -3677,7 +3677,19 @@ AST::isValid() const
     }
     break;
 
-  case at_switchR: // normal AST:
+  case at_switch: // normal AST:
+    // match at_ident
+    if(c >= children->size()) {
+      astChNumError(*this, c+1, children->size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_ident], child(c)->astType)) {
+      astChTypeError(*this, at_ident, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
     // match agt_expr
     if(c >= children->size()) {
       astChNumError(*this, c+1, children->size());
@@ -3713,10 +3725,6 @@ AST::isValid() const
       errorsPresent = true;
     }
     c++;
-
-    // match at_ident?
-    if ((c < children->size()) && ISSET(astMembers[at_ident], child(c)->astType))
-      c++;
 
     if(c != children->size()) {
       astChNumError(*this, c, children->size());
@@ -3794,7 +3802,7 @@ AST::isValid() const
     }
     break;
 
-  case at_tryR: // normal AST:
+  case at_try: // normal AST:
     // match agt_expr
     if(c >= children->size()) {
       astChNumError(*this, c+1, children->size());
@@ -3803,6 +3811,18 @@ AST::isValid() const
     }
     if (!ISSET(astMembers[agt_expr], child(c)->astType)) {
       astChTypeError(*this, agt_expr, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
+    // match at_ident
+    if(c >= children->size()) {
+      astChNumError(*this, c+1, children->size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_ident], child(c)->astType)) {
+      astChTypeError(*this, at_ident, child(c)->astType, c);
       errorsPresent = true;
     }
     c++;
@@ -3830,10 +3850,6 @@ AST::isValid() const
       errorsPresent = true;
     }
     c++;
-
-    // match at_ident?
-    if ((c < children->size()) && ISSET(astMembers[at_ident], child(c)->astType))
-      c++;
 
     if(c != children->size()) {
       astChNumError(*this, c, children->size());

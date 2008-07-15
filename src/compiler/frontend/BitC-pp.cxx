@@ -271,13 +271,19 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
     }
 
 
-  case at_tryR:
+  case at_try:
     out << "(" << ast->atKwd();
     BitcP(out, ast->child(0), showTypes);
+    out << endl;
+    out.more();
     out << "(catch ";
     BitcP(out, ast->child(1), showTypes);
+    out << " ";
     BitcP(out, ast->child(2), showTypes);
+    out << " ";
+    BitcP(out, ast->child(3), showTypes);
     out << ")";
+    out.less();
     out << ")";
     break;
 
@@ -359,7 +365,6 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
   case at_if:
   case at_and:
   case at_or:
-  case at_switchR:
   case at_reprrepr:
     {
       out << "(" << ast->atKwd() << " ";
@@ -376,6 +381,7 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
       break;
     }
 
+  case at_switch:
   case at_vector:
   case at_vectorType:
   case at_makevectorL:
@@ -739,7 +745,6 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
   case at_dobinding:
   case at_dotest:
   case at_cond_leg:
-  case at_sw_leg:
   case at_typeapp:
     //  case at_catchclause:
   case at_tcapp:
@@ -754,6 +759,16 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
 	out << ")";
 	break;
       }
+    }
+
+  case at_sw_leg:
+    {
+      out << "(";
+      doChildren(out, ast, 2, false, showTypes);
+      out << " ";
+      BitcP(out, ast->child(1), showTypes);
+      out << ")";
+      break;
     }
 
     // The following just recurse:

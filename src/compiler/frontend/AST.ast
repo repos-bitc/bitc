@@ -725,9 +725,9 @@ GROUP eform = literal | var | unit
             | array_length | vector_length 
             | lambda | suspend
             | apply | struct_apply | ucon_apply
-            | if | and | or | not | cond | switchR
+            | if | and | or | not | cond | switch
             | setbang | dup | deref | inner_ref
-	    | tryR | throw | let | letStar | letrec 
+	    | try | throw | let | letStar | letrec 
  	    | container | do 
 	    | mkClosure | allocREF | copyREF | setClosure
             // | loop | typecase | casebang 
@@ -820,7 +820,7 @@ AST mkClosure = expr ident;
 AST setClosure = ident expr expr+;
 
 // SWITCH
-AST switchR = expr sw_legs ow ident?;
+AST switch = ident expr sw_legs ow;
 AST sw_legs = sw_leg+;
 AST sw_leg = ident expr ucon+;
 GROUP ow = otherwise | Null;
@@ -830,7 +830,7 @@ AST typecase = typecase_leg+;
 AST typecase_leg = identPattern expr;*/
 
 // TRY/CATCH [7.15.1]
-AST tryR = expr sw_legs ow ident?;
+AST try = expr ident sw_legs ow;
 // THROW  [7.15.2]               
 AST throw = expr;
 

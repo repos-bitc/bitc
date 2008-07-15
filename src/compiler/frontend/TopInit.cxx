@@ -343,7 +343,6 @@ TopInit(std::ostream& errStream,
   case at_and:
   case at_or:
   case at_not: 
-  case at_tryR:
   case at_throw:
   case at_cond:
   case at_cond_legs:
@@ -351,7 +350,6 @@ TopInit(std::ostream& errStream,
   case at_dup:
   case at_deref:
   case at_inner_ref:
-  case at_switchR:
   case at_sw_legs:
   case at_otherwise:
   case at_let:
@@ -369,7 +367,15 @@ TopInit(std::ostream& errStream,
       break;
     }
 
-
+  case at_try:
+  case at_switch:
+    {
+      for (size_t c = 0; c < ast->children->size(); c++)
+	if(c != IGNORE(ast))
+	  TOPINIT(ast->child(c), flags);
+      break;
+    }
+    
   case at_struct_apply:
   case at_ucon_apply: 
     {

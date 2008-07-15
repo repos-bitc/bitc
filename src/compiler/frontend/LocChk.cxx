@@ -125,6 +125,16 @@ LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
       LocChk(errStream, errFree, ast->child(0), inSET);
       return false;
     }
+
+  case at_switch:
+  case at_try:
+    {
+      for (size_t c = 0; c < ast->children->size(); c++)
+	if(c != IGNORE(ast))
+	  LocChk(errStream, errFree, ast->child(c), inSET);
+      
+      return false;
+    }
     
   default:
     {

@@ -447,10 +447,8 @@ findusedef(std::ostream &errStream,
   case at_cond_legs:
   case at_dup:
   case at_deref:
-  case at_switchR:
   case at_sw_legs:
   case at_otherwise:
-  case at_tryR:
   case at_throw:
   case at_array_length:
   case at_vector_length:
@@ -464,6 +462,16 @@ findusedef(std::ostream &errStream,
       for(size_t c=0; c<ast->children->size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
+      break;
+    }
+
+  case at_switch:
+  case at_try:
+    {
+      for(size_t c=0; c<ast->children->size();c++)
+	if(c != IGNORE(ast))
+	  CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
+				     USE_MODE, boundVars, freeVars));
       break;
     }
 
@@ -1046,6 +1054,15 @@ cl_heapify(GCPtr<AST> ast)
 	CLCONV_DEBUG std::cerr << "Needs deref " << ast->s << std::endl;
 	ast = new AST(at_deref, ast->loc, ast);
       }
+      break;
+    }
+
+  case at_switch:
+  case at_try:
+    {
+      for (size_t c = 0; c < ast->children->size(); c++)
+	if(c != IGNORE(ast))
+	  ast->child(c) = cl_heapify(ast->child(c));
       break;
     }
     

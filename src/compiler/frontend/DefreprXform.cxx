@@ -177,6 +177,7 @@ reprXform(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
     
   default:
     {
+      // value definitions are ignored
       for(size_t c=0; c < ast->children->size(); c++)
 	ast->child(c) = reprXform(ast->child(c), errStream, errFree);
       break;

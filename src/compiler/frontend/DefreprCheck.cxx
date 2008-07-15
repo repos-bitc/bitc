@@ -282,6 +282,7 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
 
   default:
     {
+      // only defunion clause has meaning
       for(size_t c=0; c < ast->children->size(); c++)
 	CHKERR(errFree, reprCheck(errStream, ast->child(c)));
       break;
