@@ -40,6 +40,7 @@
 #include "UocInfo.hxx"
 #include "Options.hxx"
 #include "AST.hxx"
+#include "Pair.hxx"
 #include "Type.hxx"
 #include "TypeScheme.hxx"
 #include "Typeclass.hxx"
@@ -55,7 +56,7 @@ initGamma(std::ostream& errStream,
 bool
 checkImpreciseTypes(std::ostream& errStream, 
 		    const GCPtr<Environment<TypeScheme> > gamma,
-		    GCPtr<CVector<GCPtr<Type> > > impTypes);
+		    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes);
 void
 useIFGamma(const std::string& idName,
 	   GCPtr<Environment<TypeScheme> > fromEnv, 

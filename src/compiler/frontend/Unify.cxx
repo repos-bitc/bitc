@@ -603,6 +603,7 @@ Unify(std::ostream& errStream,
 
 bool
 acyclic(std::ostream& errStream,
+	GCPtr<AST> errAst,
 	GCPtr<Type> typ, 
 	GCPtr< WorkList<GCPtr<Type> > > worklist, // Types currently visiting
  	GCPtr< DoneList<GCPtr<Type> > > donelist, // Types Known to be OK 
@@ -635,7 +636,7 @@ acyclic(std::ostream& errStream,
     
     // By now, we know that the current type is already 
     // in the worklist
-    std::cerr << "\t" << t->ast->loc << ": " 
+    std::cerr << "\t" << errAst->loc << ": " 
     	      << t->asString(NULL, false) 
     	      << std::endl;
     for(size_t i=0; i<worklist->size(); i++)
@@ -648,14 +649,14 @@ acyclic(std::ostream& errStream,
 	
   assert(worklist->add(t));
   for(size_t i=0; i < t->components->size(); i++) {
-    CHKERR(errFree, acyclic(errStream, t->CompType(i), worklist, 
-			    donelist,
+    CHKERR(errFree, acyclic(errStream, errAst, t->CompType(i),
+			    worklist, donelist,
 			    (inref || t->kind == ty_ref)));
   }
 
 //   for(size_t i=0; i < t->typeArgs->size(); i++) {
-//     CHKERR(errFree, acyclic(errStream, t->TypeArg(i), worklist, 
-// 			    donelist,
+//     CHKERR(errFree, acyclic(errStream, errAst, t->TypeArg(i),  
+// 			    worklist, donelist,
 // 			    (inref || t->kind == ty_ref)));
 //   }
 
@@ -679,7 +680,7 @@ unify(std::ostream& errStream,
   GCPtr< WorkList<GCPtr<Type> > > worklist = new WorkList<GCPtr<Type> >;
   GCPtr< DoneList<GCPtr<Type> > > donelist = new DoneList<GCPtr<Type> >;
   CHKERR(errFree, Unify(errStream, trail, errAst, ft, st, flags));
-  CHKERR(errFree, acyclic(errStream, ft, worklist, donelist));
+  CHKERR(errFree, acyclic(errStream, errAst, ft, worklist, donelist));
 
   return errFree;
 }

@@ -108,6 +108,7 @@ $(BUILDDIR)/io-time.test: EXPECT_OUTPUT=io-time.stdout
 $(BUILDDIR)/sha1-file.test: ARGS="file.input 128028"
 $(BUILDDIR)/sha1-file.test: EXPECT_OUTPUT=sha1-file.stdout
 $(BUILDDIR)/sha1-test.test: EXPECT_OUTPUT=sha1-test.stdout 
+$(BUILDDIR)/twomodule.test: EXPECT_OUTPUT=twomodule.stdout 
 
 $(BUILDDIR)/%: %.bitc $(BITCC) $(BUILDDIR)  $(LIBBITC_C_RUNTIME) #$(LIBBITC)
 	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME) -lgc

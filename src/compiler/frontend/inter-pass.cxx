@@ -49,6 +49,7 @@
 #include "UocInfo.hxx"
 #include "Options.hxx"
 #include "AST.hxx"
+#include "Pair.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
 #include "inter-pass.hxx"
@@ -140,7 +141,7 @@ bool
 typeInfer(std::ostream& errStream, GCPtr<AST> ast, 
 	  GCPtr<Environment<TypeScheme> > gamma,
 	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	  GCPtr<CVector<GCPtr<Type> > > impTypes,
+	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes,
 	  bool isVP, 
 	  GCPtr<TCConstraints> tcc,
 	  unsigned long uflags,

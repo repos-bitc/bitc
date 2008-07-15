@@ -47,7 +47,7 @@ struct Pair : public Countable {
     :fst(f), snd(s)
   {
   }
-
+  
   Pair(const Pair& p)
     :fst(p.fst), snd(p.snd)
   {
