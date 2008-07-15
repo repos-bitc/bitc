@@ -45,11 +45,13 @@ GC_LIBDIR=
 GC_LIB=-lgc
 
 HOSTDIR=$(BITC_SRC)/../host
+LIBBITC_SRC=$(BITC_SRC)/libbitc
+LIBBITC_C_RUNTIME=$(BITC_SRC)/libbitc/$(BUILDDIR)/libbitc.a
 INC+=$(GC_INC)
 SOURCE= $(wildcard *.bitc)
 OBJECTS=$(SOURCE:%.bitc=BUILD/%.o)
-BITCC=$(BITC_SRC)/compiler/frontend/BUILD/bitcc
-RUN_BITCC=$(BITCC) --system $(HOSTDIR)
+BITCC=$(BITC_SRC)/compiler/frontend/$(BUILDDIR)/bitcc
+RUN_BITCC=$(BITCC) -I $(LIBBITC_SRC) --nostdlib # --system $(HOSTDIR)
 LIBBITC=$(HOSTDIR)/lib/libbitc.a
 RUN=a.out
 GCCWARN+=-Wno-unused
@@ -75,6 +77,9 @@ EXPECT_OUTPUT=/dev/null
 USE_INPUT=/dev/null
 ARGS=""
 TESTOPTS=-v
+
+$(LIBBITC_C_RUNTIME):
+	make -C $(LIBBITC_SRC) $(BUILDDIR)/libbitc.a
 
 $(BUILDDIR)/%.test: $(BUILDDIR)/%
 	@../testit.sh ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -i $(USE_INPUT) "$< $(ARGS)"
@@ -104,8 +109,8 @@ $(BUILDDIR)/sha1-file.test: ARGS="file.input 128028"
 $(BUILDDIR)/sha1-file.test: EXPECT_OUTPUT=sha1-file.stdout
 $(BUILDDIR)/sha1-test.test: EXPECT_OUTPUT=sha1-test.stdout 
 
-$(BUILDDIR)/%: %.bitc $(BITCC) #$(LIBBITC)
-	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $<
+$(BUILDDIR)/%: %.bitc $(BITCC) $(BUILDDIR)  $(LIBBITC_C_RUNTIME) #$(LIBBITC)
+	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME) -lgc
 
 # .PRECIOUS: $(SOURCE:%.bitc=%.c)
 
