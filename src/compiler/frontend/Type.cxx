@@ -64,8 +64,8 @@ using namespace sherpa;
 using namespace std;
 
 unsigned long long Type::typeCount=0;
-GCPtr<Type> Type::Kmono = new Type(ty_kfix, (GCPtr<AST>)0);
-GCPtr<Type> Type::Kpoly = new Type(ty_kfix, (GCPtr<AST>)0);
+GCPtr<Type> Type::Kmono = new Type(ty_kfix);
+GCPtr<Type> Type::Kpoly = new Type(ty_kfix);
 
 static struct {
   const char *nm;
@@ -923,7 +923,7 @@ Type::SetTvarsToUnit()
   
   for(size_t i=0; i < tvs->size(); i++) {
     GCPtr<Type> ftv = (*tvs)[i]->getType();
-    GCPtr<Type> unit = new Type(ty_unit, ftv->ast);
+    GCPtr<Type> unit = new Type(ty_unit);
     ftv->link = unit;
   }
 }
@@ -949,10 +949,9 @@ comp::comp(const std::string s, GCPtr<Type> t, unsigned long _flags)
 //   flags = c.flags;  
 // }
 
-#define TYPE_CTR_INIT(k, a, _defAst) do {   	\
+#define TYPE_CTR_INIT(k) do {			\
     kind = k;					\
-    ast = a;					\
-    defAst = _defAst;				\
+    defAst = GCPtr<AST>(0);			\
     arrlen = new ArrLen(0);			\
     Isize = 0;					\
     minSignedRep = 0;				\
@@ -968,39 +967,23 @@ comp::comp(const std::string s, GCPtr<Type> t, unsigned long _flags)
   } while(0);
 
 
-Type::Type(const Kind k, GCPtr<AST> a, GCPtr<AST> _defAst)
+Type::Type(const Kind k)
   : uniqueID(genTypeID())
 {
-  TYPE_CTR_INIT(k, a, _defAst);
-}
-
-Type::Type(const Kind k, GCPtr<AST> a, GCPtr<Type> child)
-  : uniqueID(genTypeID())
-{
-  TYPE_CTR_INIT(k, a, GCPtr<AST>(0));
-  components->append(new comp(child));
-}
-
-Type::Type(const Kind k, GCPtr<AST> a, 
-	   GCPtr<Type> child1, GCPtr<Type> child2)
-  : uniqueID(genTypeID())
-{
-  TYPE_CTR_INIT(k, a, GCPtr<AST>(0));
-  components->append(new comp(child1));
-  components->append(new comp(child2));
+  TYPE_CTR_INIT(k);
 }
 
 Type::Type(const Kind k, GCPtr<Type> child)
   : uniqueID(genTypeID())
 {
-  TYPE_CTR_INIT(k, child->ast, GCPtr<AST>(0));
+  TYPE_CTR_INIT(k);
   components->append(new comp(child));
 }
 
 Type::Type(const Kind k, GCPtr<Type> child1, GCPtr<Type> child2)
   : uniqueID(genTypeID())
 {
-  TYPE_CTR_INIT(k, child1->ast, GCPtr<AST>(0));
+  TYPE_CTR_INIT(k);
   components->append(new comp(child1));
   components->append(new comp(child2));
 }
@@ -1010,9 +993,7 @@ Type::Type(GCPtr<Type>  t)
   : uniqueID(genTypeID())
 {
   assert(t);
-  assert(t->ast);
   kind = t->kind;
-  ast = t->ast;
   defAst = t->defAst;
   myContainer = t->myContainer;
   link = t->link;    
@@ -1048,7 +1029,7 @@ GCPtr<Type>
 Type::getDCopy()
 {
   GCPtr<Type> t = getType();
-  GCPtr<TypeScheme> sigma = new TypeScheme(t);
+  GCPtr<TypeScheme> sigma = new TypeScheme(t, NULL);
   // sigma's ftvs are empty, therefore, TypeSpecialize will link
   // all type-variables to the original ones
   GCPtr<Type> newTyp = sigma->type_instance_copy();
@@ -1074,7 +1055,8 @@ Type::eql(GCPtr<Type> t, bool verbose, std::ostream &errStream,
 	  GCPtr<Trail> trail)
 {
   std::stringstream ss;  
-  bool errFree = unify(ss, trail, this->ast, this, t, uflags);
+  LexLoc internalLocation;
+  bool errFree = unify(ss, trail, internalLocation, this, t, uflags);
   
   if(!keepSub)
     trail->rollBack();

@@ -2059,7 +2059,7 @@ toc(std::ostream& errStream,
       GCPtr<AST> hackIdent = new AST(at_ident, ast->loc);
       hackIdent->s = "__bitc_temp_mvec";
       hackIdent->Flags |= ID_IS_GENSYM; // don't add extra astID after name
-      hackIdent->symType = new Type(ty_word, hackIdent);
+      hackIdent->symType = new Type(ty_word);
       GCPtr<AST> apply = new AST(at_apply, ast->loc, 
 			   ast->child(1), hackIdent);
       TOC(errStream, uoc, apply, out, IDname, ast, 1, flags);

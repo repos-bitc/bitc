@@ -65,17 +65,14 @@ struct TypeScheme : public Countable {
   // This helps tcc sharing for definitions that are 
   // defined within the same letrec, etc.
   GCPtr<TCConstraints> tcc;
-  
-  //trivial_TypeScheme
-  TypeScheme(GCPtr<Type> ty,
-	     GCPtr<TCConstraints> _tcc = NULL);
-  
-  TypeScheme(GCPtr<Type> ty, GCPtr<AST> ast,
+
+  // The constructor
+  TypeScheme(GCPtr<Type> _tau, GCPtr<AST> _ast,
 	     GCPtr<TCConstraints> _tcc = NULL);
   
   // The generalizer
   bool generalize(std::ostream& errStream,
-		  LexLoc &errLoc,
+		  const LexLoc &errLoc,
 		  GCPtr<const Environment<TypeScheme> > gamma,
 		  GCPtr<const Environment<CVector<GCPtr<Instance> > > >instEnv, 
 		  GCPtr<const AST> expr, 
@@ -116,11 +113,11 @@ struct TypeScheme : public Countable {
   bool normalizeConstruction(GCPtr<Trail> trail);
 
   bool solvePredicates(std::ostream &errStream,
-		       LexLoc &errLoc,
+		       const LexLoc &errLoc,
 		       GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
 		       GCPtr<Trail> trail);
   
-  bool checkAmbiguity(std::ostream &errStream, LexLoc &errLoc);
+  bool checkAmbiguity(std::ostream &errStream, const LexLoc &errLoc);
   bool migratePredicates(GCPtr<TCConstraints> parentTCC);    
   
   // In the presence of PCSTs, the substitution within type schemes is

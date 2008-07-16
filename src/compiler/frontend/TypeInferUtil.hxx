@@ -67,13 +67,6 @@ useIFInsts(const std::string& idName,
 	   GCPtr<Environment< CVector<GCPtr<Instance> > > >fromEnv, 
 	   GCPtr<Environment< CVector<GCPtr<Instance> > > >toEnv);
 
-// bool
-// useIFInsts(std::ostream &errStream,
-// 	   LexLoc &errLoc,
-// 	   GCPtr<Environment< CVector<GCPtr<Instance> > > >fromEnv, 
-// 	   GCPtr<Environment< CVector<GCPtr<Instance> > > >toEnv,
-// 	   unsigned long uflags);
-
 bool
 initGamma(std::ostream& errStream, 
 	  GCPtr<Environment<TypeScheme> > gamma,

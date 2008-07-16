@@ -56,12 +56,12 @@
 
 bool unify(std::ostream& errStream,
 	   GCPtr<Trail> trail,
-	   GCPtr<AST> errAst, GCPtr<Type> ft, 
-	   GCPtr<Type> st, unsigned long uflags);
+	   const LexLoc &errLoc,
+	   GCPtr<Type> ft, GCPtr<Type> st, 
+	   unsigned long uflags);
 
 bool unifyPrim(std::ostream& errStream,
-	       GCPtr<Trail> trail,
-	       GCPtr<AST> errAst, GCPtr<Type> tau, 
-	       std::string ptype);
+	       GCPtr<Trail> trail, const LexLoc &errLoc, 
+	       GCPtr<Type> tau, std::string ptype);
 
 #endif /* UNIFY_HXX */

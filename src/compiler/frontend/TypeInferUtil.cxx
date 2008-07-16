@@ -193,10 +193,7 @@ initGamma(std::ostream& errStream,
   }
   
   useIFGamma(std::string(), preenv, gamma);
-  LexLoc internalLocation;
   useIFInsts(std::string(), preInsts, instEnv);
-  //   CHKERR(errFree, useIFInsts(errStream, internalLocation, 
-  // 			     preInsts, instEnv, uflags));
   return errFree;
 }
 

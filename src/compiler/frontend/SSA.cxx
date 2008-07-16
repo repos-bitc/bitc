@@ -601,14 +601,14 @@ ssa(std::ostream& errStream,
       lt->fqn = FQName("bitc.prelude", "__index_lt");
       lt->symType = new Type(ty_fn, 
 			     new Type(ty_fnarg, 
-				      new Type(ty_word, lt),
-				      new Type(ty_word, lt)),
-			     new Type(ty_bool, lt));
+				      new Type(ty_word),
+				      new Type(ty_word)),
+			     new Type(ty_bool));
       InstMangle(lt);
 
       IOB->s = "IndexBoundsError";
       IOB->fqn = FQName("bitc.prelude", "IndexBoundsError");
-      IOB->symType = new Type(ty_exn, IOB);
+      IOB->symType = new Type(ty_exn);
       InstMangle(IOB);
 
       GCPtr<AST> len;
@@ -764,7 +764,7 @@ ssa(std::ostream& errStream,
 	GCPtr<AST> falseAst =  new AST(at_boolLiteral, ast->child(c)->loc);
 	falseAst->litValue.b = false;
 	falseAst->s = "#f";
-	falseAst->symType = new Type(ty_bool, falseAst);
+	falseAst->symType = new Type(ty_bool);
 
 	ifAst->symType = ast->child(c)->symType;
 	ifAst->children->append(ast->child(c));
@@ -794,7 +794,7 @@ ssa(std::ostream& errStream,
 	GCPtr<AST> trueAst =  new AST(at_boolLiteral, ast->child(c)->loc);
 	trueAst->litValue.b = true;
 	trueAst->s = "#t";
-	trueAst->symType = new Type(ty_bool, trueAst);
+	trueAst->symType = new Type(ty_bool);
 
 	ifAst->symType = ast->child(c)->symType;
 	ifAst->children->append(ast->child(c));

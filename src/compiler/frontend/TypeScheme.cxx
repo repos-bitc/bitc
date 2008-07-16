@@ -61,17 +61,9 @@
 using namespace sherpa;
 using namespace std;
 
-TypeScheme::TypeScheme(GCPtr<Type> ty, GCPtr<TCConstraints> _tcc)
+TypeScheme::TypeScheme(GCPtr<Type> _tau, GCPtr<AST> _ast, GCPtr<TCConstraints> _tcc)
 {
-  tau = ty;
-  ast = ty->ast;
-  tcc = _tcc;
-  ftvs = new CVector<GCPtr<Type> >;
-}
-
-TypeScheme::TypeScheme(GCPtr<Type> ty, GCPtr<AST> _ast, GCPtr<TCConstraints> _tcc)
-{
-  tau = ty;
+  tau = _tau;
   ast = _ast;
   tcc = _tcc;
   ftvs = new CVector<GCPtr<Type> >;
@@ -87,7 +79,7 @@ TypeScheme::type_instance_copy()
   //std::cout << "Instantiating by copy " << this->asString();
 
   for(size_t i=0; i<ftvs->size(); i++)
-    nftvs.append(newTvar(Ftv(i)->ast));
+    nftvs.append(newTvar());
 
   GCPtr<CVector<GCPtr<Type> > > cnftvs = new CVector<GCPtr<Type> >;
   GCPtr<CVector<GCPtr<Type> > > cftvs = new CVector<GCPtr<Type> >;
@@ -127,11 +119,11 @@ TypeScheme::ts_instance(bool fullCopy)
 {
   normalize();
 
-  GCPtr<TypeScheme> ts = new TypeScheme(tau);
+  GCPtr<TypeScheme> ts = new TypeScheme(tau, ast);
   ts->tau = NULL;
 
   for(size_t i=0; i<ftvs->size(); i++) 
-    ts->ftvs->append(newTvar(Ftv(i)->ast));
+    ts->ftvs->append(newTvar());
   
   GCPtr<CVector<GCPtr<Type> > > cnftvs = new CVector<GCPtr<Type> >;
   GCPtr<CVector<GCPtr<Type> > > cftvs = new CVector<GCPtr<Type> >;

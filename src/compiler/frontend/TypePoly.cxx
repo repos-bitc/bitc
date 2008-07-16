@@ -472,7 +472,7 @@ static bool genSteps[6][11] = {
 
 bool
 TypeScheme::generalize(std::ostream& errStream, 
-		       LexLoc &errLoc,
+		       const LexLoc &errLoc,
 		       GCPtr<const Environment<TypeScheme> > gamma,
 		       GCPtr<const Environment<CVector<GCPtr<Instance> > > >
 		       instEnv, 
@@ -536,8 +536,8 @@ TypeScheme::generalize(std::ostream& errStream,
   // Step 2
   GEN_STEP(mode, gs_pcst) {
     if(!tau->isDeepMut() && !tau->isDeepImmut()) {
-      GCPtr<Type> pcst = new Constraint(ty_pcst, tau->ast); 
-      pcst->components->append(new comp(new Type(ty_kvar, tau->ast)));
+      GCPtr<Type> pcst = new Constraint(ty_pcst); 
+      pcst->components->append(new comp(new Type(ty_kvar)));
       pcst->components->append(new comp(tau)); // General Type
       pcst->components->append(new comp(tau)); // Instantiation Type
       tcc->addPred(pcst);
@@ -657,7 +657,7 @@ TypeScheme::generalize(std::ostream& errStream,
 	
 	for(size_t i=0; i < dummys->size(); i++) {
 	  GCPtr<Type> ftv = dummys->elem(i)->getType();
-	  ftv->link = new Type(ty_dummy, ftv->ast);
+	  ftv->link = new Type(ty_dummy);
 	}
 	
 	errStream << errLoc << ": WARNING: The type of"
@@ -748,7 +748,7 @@ updateSigmas(GCPtr<const AST> bp, GCPtr<CVector<GCPtr<Type> > > ftvs,
 
 bool
 generalizePat(std::ostream& errStream,
-	      LexLoc &errLoc,
+	      const LexLoc &errLoc,
 	      GCPtr<Environment<TypeScheme> > gamma,
 	      GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
 	      GCPtr<AST> bp, GCPtr<AST> expr,
@@ -761,7 +761,7 @@ generalizePat(std::ostream& errStream,
   // Make a temporary typeScheme for the pattern.
   // Individual identifiers' TypeScheme will be updated after the 
   // pattern is generalized as a whole.
-  GCPtr<TypeScheme> sigma = new TypeScheme(bp->symType, tcc);
+  GCPtr<TypeScheme> sigma = new TypeScheme(bp->symType, bp, tcc);
   
   CHKERR(errFree, 
 	 sigma->generalize(errStream, errLoc, 
@@ -905,7 +905,7 @@ TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
 *********************************************************************/
 
 bool 
-TypeScheme::checkAmbiguity(std::ostream &errStream, LexLoc &errLoc)
+TypeScheme::checkAmbiguity(std::ostream &errStream, const LexLoc &errLoc)
 {
 #if 0
   bool errFree =true;
@@ -975,7 +975,6 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
   GCPtr<Type> retType = theType;
   
   INS_DEBUG std::cout << "To Specialize " 
-		      << '`' << ast->s << '\''
 		      << this->asString()  
 		      << std::endl;  
 
@@ -1054,7 +1053,6 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
   }
   
   INS_DEBUG std::cout << "\t Specialized " 
-		      << '`' << ast->s << '\''
 		      << getType()->asString(NULL) 
 		      << " to " 
 		      << retType->getType()->asString(NULL) 

@@ -239,16 +239,6 @@ public:
   GCPtr<CVector<GCPtr<comp> > > components;
   GCPtr<CVector<GCPtr<Type> > > typeArgs;  
     
-  // Backpointer to the AST. Should be used only to attribute location
-  // information for error reporting. Note carefully that if you have
-  // done a getType(), you are probably looking at some other type
-  // record (one that unified) that has an unrelated location. If you
-  // need this, you need the one from the AST.symType pointer directly.
-  //
-  // Note that it is being misused in the error reporting logic!
-  // ANS: I fixed this in most cases.
-  NoGCPtr<AST> ast;
-
   // Mark Flags:  used for Traversal
   // Used to prevent infinite recursion
   // while printing infinitely recursivetypes.
@@ -258,14 +248,9 @@ public:
   unsigned flags;               
 
   // Main (Base) Constructor
-  Type(const Kind k, GCPtr<AST> a, GCPtr<AST> defAST = 0);
+  Type(const Kind k);
   // Copy Constructor.
   Type(GCPtr<Type> t); 
-  // Wrapper Constructor, obtains component nodes as arguments.
-  Type(const Kind k, GCPtr<AST> ast, GCPtr<Type> child);
-  Type(const Kind k, GCPtr<AST> ast, 
-       GCPtr<Type> child1, GCPtr<Type> child2);
-  // Wrapper Constructors, similar to above, but obtain AST from child1
   Type(const Kind k, GCPtr<Type> child);
   Type(const Kind k, GCPtr<Type> child1, GCPtr<Type> child2);
 

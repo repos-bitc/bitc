@@ -561,7 +561,7 @@ name2fqn(GCPtr<AST> ast)
 // a type-qualification. This is a helper function to do that. 
 // It gets type in AST form, and prepares it in the current context.
 static GCPtr<AST>
-typeAsAst(GCPtr<Type> t, LexLoc& loc)
+typeAsAst(GCPtr<Type> t, const LexLoc& loc)
 {
   GCPtr<AST> tAst = t->asAST(loc);
   name2fqn(tAst);
@@ -699,7 +699,7 @@ tvarInst(GCPtr<AST> ast, GCPtr<AST> scope,
 	  return newBinds[i]->snd->Use();	
       }
       
-      GCPtr<Type> newTV = new Type(ty_tvar, ast);
+      GCPtr<Type> newTV = new Type(ty_tvar);
       GCPtr<AST> newTvAst = newTV->asAST(ast->loc, 
 				   new TvPrinter(false));
       newTvAst->symbolDef = newTvAst;

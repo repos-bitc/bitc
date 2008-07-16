@@ -120,7 +120,8 @@ Instance::satisfies(std::ostream &errStream,
     return true;
 
   std::stringstream ss;
-  CHKERR(unifies, sigma->solvePredicates(ss, pred->ast->loc, 
+  LexLoc internalLocation;
+  CHKERR(unifies, sigma->solvePredicates(ss, internalLocation, 
 					 instEnv, new Trail));
   
   if(!unifies)

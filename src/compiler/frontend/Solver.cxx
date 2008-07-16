@@ -498,7 +498,7 @@ handleEquPreds(std::ostream &errStream, GCPtr<Trail> trail,
 
 
 bool
-TypeScheme::solvePredicates(std::ostream &errStream, LexLoc &errLoc,
+TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 			    GCPtr< const Environment< CVector<GCPtr<Instance> > > > instEnv,
 			    GCPtr<Trail> trail)
 {
