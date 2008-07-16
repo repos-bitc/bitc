@@ -176,21 +176,8 @@ GCPtr<CVector<std::string> > Options::SystemDirs;
 #define LOPT_NOALLOC      283   /* Statically reject heap-allocating
 				   operations and constructs */
 
-#define LOPT_O1           290
-#define LOPT_O2           291
-#define LOPT_O3           292
-#define LOPT_O4           293
-#define LOPT_O5           294
-#define LOPT_O6           295
-
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
-  { "O1",                   0,  0, LOPT_O1 },
-  { "O2",                   0,  0, 'O' /* LOPT_O2 */ },
-  { "O3",                   0,  0, LOPT_O3 },
-  { "O4",                   0,  0, LOPT_O4 },
-  { "O5",                   0,  0, LOPT_O5 },
-  { "O6",                   0,  0, LOPT_O6 },
   { "debug-tvars",          0,  0, LOPT_DBG_TVARS },
   { "decorate",             0,  0, LOPT_PPDECORATE },
   { "dumpafter",            1,  0, LOPT_DUMPAFTER },
@@ -405,7 +392,7 @@ main(int argc, char *argv[])
   /// order-preserving way.
 
   while ((c = getopt_long(argc, argv, 
-			  "-e:o:Ol:VvchI:L:",
+			  "-e:o:O::l:VvchI:L:",
 			  longopts, 0
 		     )) != -1) {
     switch(c) {
@@ -724,14 +711,11 @@ main(int argc, char *argv[])
       Options::libDirs->append(new Path(optarg));
       break;
 
-    case LOPT_O1:
     case 'O':			// a.k.a. -O2
-    case LOPT_O3:
-    case LOPT_O4:
-    case LOPT_O5:
-    case LOPT_O6:
       {
-	std::string optlevel = "-O" + unsigned_str(c-LOPT_O1 + 1);
+	std::string optlevel = "-O";
+	if (optarg)
+	  optlevel += + optarg;
 
 	AddCompileArgumentForGCC(optlevel);
 	AddLinkArgumentForGCC("-O");
