@@ -48,7 +48,10 @@ HOSTDIR=$(BITC_SRC)/../host
 LIBBITC_SRC=$(BITC_SRC)/libbitc
 LIBBITC_C_RUNTIME=$(BITC_SRC)/libbitc/$(BUILDDIR)/libbitc.a
 INC+=$(GC_INC)
-SOURCE= $(wildcard *.bitc)
+# If a test case is temporarily broken, add it to BROKEN_SOURCE via
+#  make BROKEN_SOURCE="bad-test.bitc bad-test2.bitc"
+BROKEN_SOURCE=
+SOURCE= $(filter-out $(BROKEN_SOURCE),$(wildcard *.bitc))
 OBJECTS=$(SOURCE:%.bitc=BUILD/%.o)
 BITCC=$(BITC_SRC)/compiler/frontend/$(BUILDDIR)/bitcc
 RUN_BITCC=$(BITCC) -I $(LIBBITC_SRC) --nostdlib # --system $(HOSTDIR)
