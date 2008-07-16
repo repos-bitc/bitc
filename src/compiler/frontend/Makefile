@@ -98,7 +98,7 @@ OBJECTS=\
 	$(BUILDDIR)/Constraints.o \
 	$(BUILDDIR)/Solver.o \
 	$(BUILDDIR)/LocChk.o \
-	$(BUILDDIR)/NoGcCheck.o \
+	$(BUILDDIR)/NoAllocCheck.o \
 	$(BUILDDIR)/Special.o\
 	$(BUILDDIR)/TvPrinter.o \
 	$(BUILDDIR)/backend.o \
