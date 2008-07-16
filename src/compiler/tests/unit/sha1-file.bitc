@@ -103,11 +103,12 @@
 ; (TS "SHA1: " (- stop start))
     
  ;(set! start (stdlib.getTimeStamp))
-    (stdio.write-char stdio.stdout #\tab)
     (do ((i 0 (+ i 1)))
 	((>= i 20) ())
-	(stdio.write-int stdio.stdout (array-nth digest i) 16)
-	(stdio.write-char stdio.stdout #\space))
+	(if (> i 0)
+	    (begin (stdio.write-char stdio.stdout #\space) ())
+	    ())
+	(stdio.write-int stdio.stdout (array-nth digest i) 16))
     (stdio.write-char stdio.stdout #\linefeed)
     
  ;(set! stop (stdlib.getTimeStamp)) 
