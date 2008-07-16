@@ -1,0 +1,449 @@
+.de URL
+\\$2 \(laURL: \\$1 \(ra\\$3
+..
+.if \n[.g] .mso www.tmac
+.TH BITCC 1 2008-07-16 BitC BitC Programmer's Manual
+.SH NAME
+bitcc \- BitC whole-program compiler
+.SH SYNOPSYS
+.PD 0
+.HP
+.B bitcc -c
+[\fIoptions\fP]
+[\fB-I\fP\fIdir\fP...]
+[\fB-o\fP\fIoutfile.bito\fP] 
+\fIinfile\fP...
+.br
+compile BitC sources
+.HP
+.B bitcc -h
+[\fIoptions\fP]
+[\fB-I\fP\fIdir\fP...]
+[\fB-o\fP\fIoutfile.h\fP] 
+\fIinfile\fP...
+.br
+generate C header file
+.HP
+.B bitcc
+[\fIoptions\fP]
+[\fB-I\fP\fIdir\fP...]
+[\fB-L\fP\fIdir\fP...]
+[\fB-o\fP\fIexefile\fP] 
+\fIinfile\fP...
+.br
+generate executable
+.HP
+.B bitcc -V|--version
+.br
+show compiler version information
+.HP
+.B bitcc --help
+.br
+display complete option information
+.PD
+
+.SH DESCRIPTION
+
+.B bitcc
+is a whole-program compiler for programs written in the BitC
+programming language. The current implementation is a research
+prototyping vehicle; the surface syntax of the language is expected to
+be redesigned as soon as the r1.0 language feature set is fully
+stabilized. The current language specification for BitC is maintained
+at the 
+.URL "http://www.bitc-lang.org" "BitC web site" .
+.P
+.B bitcc
+can be invoked in one of three ways: (1) as a source code checker
+(\fBbitc -c\fP) producing an ``object file.'', (2) as a header file
+generator (\fBbitc -h\fP) producing a C header file that it is useful
+for implementing parts of the supporting runtime system or
+native-coded runtime libraries, and (3) as a compiler/linker
+(\fBbitc\fP) that produces a standalone executable file. Because
+.B bitcc
+is a whole-program compiler, the only advantage in file-at-a-time
+compilation is checking source files for errors; the purpose of the
+various command line variants is to conform to the expectations of
+other parts of conventional command-line tool chains (e.g.
+.B make
+) and to enable the fabrication of BitC libraries.
+
+.SS "Compiling Source Files"
+When used in source file compilation mode (\fBbitc -c\fP), the
+.B bitcc
+compiler performs symbol resolution checking, type inference/checking,
+checks on location semantics, consistency of 
+.B defrepr
+forms, and (where requested) confirms that no heap allocation is
+performed. These checks are sufficient to only linkage errors
+(multiply defined or missing symbols) can occur at final compile time.
+.P
+In the current compiler, the output \fIoutfile.bito\fP is a BitC
+source file containing all of the provided source units of compilation
+in a single output file. The output does not precisely match the
+input, because certain simplification passes are performed early in
+the compile.
+.P
+Future versions of the compiler will instead emit a bytecode format to
+the \fIoutfile.bito\fP file; developers creating tool chains should
+treat the contents and format of the \fI.bito\fP file as opaque until
+specified.
+.SS "Generating Header Files"
+Portions of the runtime implementation for the
+.B bitcc
+compiler are implemented in C, notably the primitive I/O subroutines.
+When used in header file generation mode (\fBbitc -h\fP),
+.B bitcc
+accepts one or more source, object, or library files and processes
+these to determine all interfaces required for the compilation of
+those files. The interfaces are in turn processed to identify all
+identifiers that are proclaimed external in their
+.B proclaim
+forms.
+A single header file is emitted to \fIoutfile.h\fP containing
+C declarations for those procedures and all types (recursively) needed
+to process the associated arguments.
+.P
+The purpose of this mechanism is to support the implementation of
+wrapping implementations for native operating system interfaces and/or
+existing C libraries that have not yet been transcoded into 
+BitC. The current interface is likely to be revised, so wrappers
+implemented in this way should be expected to incur an ongoing
+maintenance cost. While the code emitted by the 
+.B bitcc
+compiler yields undeniably poor performance, this is expected to
+improve very rapidly; BitC offers both a safer language with principled
+abstraction mechanisms. Resorting to C merely for reasons of
+performance is therefore not recommended.
+
+.SS "Producing Executables"
+
+When run with neither the
+.B -c
+or
+.B -h
+options,
+.B bitcc
+generates a stand-alone binary file as long as all input source files
+check correctly and there are no missing or multiply-defined symbols
+or conflicting typeclass instances. The BitC inputs are processed in
+turn to form checked units of compilation. A demand-driven
+recursive polyinstantiation is then performed to generate a
+first-order BitC program using a runtime-provided explicit closure
+construction primitive. This program is emitted as C code, which is
+passed to the native C compiler to generate a conventional object
+file. The object file is then linked using the native linker to
+produce an executable.
+.P
+When generating an executable, it is recommended that optimization be
+requested from the native compiler. The output of 
+.B bitcc
+relies heavily on the underlying C compiler to perform common
+sub-expression dead code elimination, and explicitly directed
+inlining.
+
+.\" .SH SEE ALSO
+
+.SH OPTIONS
+.SS "Option Summary"
+Here is a summary of options to
+.BR bitcc .
+Explanations are in the following sections
+
+.IP "\fIOutput Specification\fP"
+.B -c -h 
+.BI --emit= backend 
+
+.IP "\fIGeneral Options\fP"
+.B -v --help --version -V
+\fB-O\fP[\fIlevel\fP]
+.BI -o file 
+.B --no-prelude
+.B --no-alloc
+
+.IP "\fIDirectory Options\fP"
+.BI -I dir
+.BI -L dir
+.BI --system= dir
+.B --nostdinc
+
+.IP "\fILinker Options\fP"
+.BI -l library
+.B --nostdlib
+-B --no-gc
+
+.IP "\fIDebugging Options\fP"
+.B --decorate
+.BI --dumpafter= pass
+.BI --dumptypes= pass
+.B --eqinfer
+.B --free-advice
+.B --full-qual-types
+.B --heuristic-inf
+.B --ppfqns
+.B --raw-tvars
+.B --debug-tvars
+.B --show-maybes
+.B --show-all-tccs
+.B --showlex
+.B --showparse
+.B --showpasses
+.B --showpassnames
+.BI --showtypes= pass
+.BI --xmltypes= pass
+.BI --stopafter= pass
+
+.SS "Input File Types and Their Handling"
+For any given input file, the file name suffix determines what
+processing is performed:
+
+.IP \fIfile\fP\fB.bitc\fP:
+A file containing a single BitC interface specification. This will be
+processed as a BitC unit of compilation. While interface files may be
+given on the command line for checking purposes, the usual means of
+incorporating these files into a compilation is through an
+\fBimport\fP construct. It is not recommended to specify an interface
+file on the command line.
+
+.IP \fIfile\fP\fB.bits\fP:
+A file containing one or more BitC source modules. This will be
+processed as a BitC unit of compilation.
+
+.IP \fIfile\fP\fB.bito\fP:
+A file that is pretending to be a BitC object file, but in the current
+.B bitcc
+implementation actually contains one or more checked BitC source
+modules. This will be processed as a BitC unit of compilation.
+
+.IP \fIfile\fP\fB.bita\fP:
+A file that is pretending to be a BitC archive library file, but in the current
+.B bitcc
+implementation is actually a BitC ``object'' file.  This will be
+processed as a BitC unit of compilation.
+
+.IP \fB-l\fP\fIname\fP
+The \fB-l\fP\fIname\fP option serves a dual purpose. When 
+.B bitcc
+encounters a \fB-l\fP\fIname\fP option, it searches the preceding
+specified library search paths for a file named
+\fBlib\fP\fIname\fP\fB.bita\fP. If such a file is found, it is
+processed exactly as if a fully resolved path to
+\fBlib\fP\fIname\fP\fB.bita\fP had been given on the command line. The
+\fB-l\fP\fIname\fP option is 
+.I additionally
+passed to the system linker so that the corresponding archive library
+will be used. This means that \fB-l\fP\fIname\fP refers to a BitC
+archive library and/or a native archive library, according to which of
+these exist on the target platform.
+
+.IP \fIothers\fP
+When producing an executable file, all files whose extensions are not
+recognized by the
+.B bitcc
+compiler will be passed to the linker without modification.
+
+If the subordinate C compiler is invoked, any pertinent options,
+option arguments, and input files that
+were specified on the
+.B bitcc
+command line will be passed to the subordinate compiler in order of
+appearance. The first bitc source file named on the input command line
+will be replaced with the name of the generated C or object file, and
+the remaining bitc source files named on the command line will be
+omitted.
+
+.SS "Output Specification"
+If the
+.BR --version
+or
+.BR -V
+options are given, no compilation is performed. The version number of
+the compiler and the language version supported are printed end
+execution halts.
+
+If the
+.B --help
+option is given, no compilation is performed. A help message providing
+a list of recognized options is printed and execution halts. This
+output is also given if an unrecognized option is presented to the
+compiler.
+
+Depending on the back end selected, processing can involve up to six
+stages: parsing, per-unit processing, mid-end processing, the gather
+phase, compilation, and linking, always in that order.
+.B bitcc
+can process multiple input files in single execution.
+.B bitcc
+always produces a single output file, and in this respect it differs
+from command line compilers for other languages.
+.P
+The output type produced by a
+.B bitcc
+invocation depends on the selected back end, which is specified by the 
+.B --emit
+.I backend-name 
+option. The currently recognize back ends are:
+
+.IP "\fB--emit exe\fP"
+Emits an object file that is the result of compiling the consolidated
+ANSI Standard (C99) C file that contains all of the code in the input
+files that is reachable from \fBbitc.main\fP. This is the default back
+end. All phases of the compiler are run.
+
+.IP "\fB--emit h\fP"
+Emits a header file for use in native library construction. The
+\fB-h\fP option is a shorthand for \fB--emit h\fP. All BitC phases of
+the compiler are run. The native C compiler is not invoked.
+
+.IP "\fB--emit c\fP"
+Emits an ANSI Standard (C99) C file that contains all of the code in
+the input files that is reachable from \fBbitc.main\fP. All BitC phases of
+the compiler are run. The native C compiler is not invoked.
+
+.IP "\fB--emit bito\fP"
+Emits a BitC ``object'' file that contains the consolidated input of
+all source files presented on the command line. The
+\fB-c\fP option is a shorthand for \fB--emit obj\fP. All BitC phases of
+the compiler are run. The native C compiler is not invoked.
+
+.IP "\fB--emit xmldump\fP"
+Emits a dump of the internal abstract syntax tree in XML form. Only
+the front-end (checking) phases of the compiler is executed. This
+back end is known to be stale and may be dropped.
+
+.IP "\fB--emit xmlpp\fP"
+Emits a dump of the internal abstract syntax tree in XML form. This is
+a "pretty" XML format in which contained XML elements are properly
+nested. Only the parse phase of the compiler is executed. This back
+end is known to be stale and may be dropped.
+
+.IP "\fB--emit xmltypes\fP"
+Emits a dump of the internal abstract syntax tree in XML form. The
+difference between this and the "xmlpp" back end is that it is run
+after the type inference pass has been performed, and the output XML
+includes complete type information.  This back end is known to be
+stale and may be dropped.
+
+.SS "General Options"
+
+The general options are:
+
+.IP "\fB-o\fP \fIfile\fP"
+Emit output to the specified output file \fIfile\fP.
+
+.IP "\fB-O\fP[\fIlevel\fP]"
+Request optimization. If \fIlevel\fP is given, it must be a number
+between 1 and 6 (inclusive). If no \fIlevel\fP is given, \fB-O2\fP is
+assumed.  The requested optimization level will be passed to the
+underlying compiler.
+
+.IP \fB--no-prelude\fP
+Do not load the standard prelude when compiling. This option is
+primarily useful when 
+
+.IP \fB--no-alloc\fP
+Reject any compilation unit that performs a heap-allocating operation,
+whether implicitly or explicitly. This option supports generation of
+binaries that must run within a static or semi-dynamic total heap
+bound by ensuring that heap allocation occurs only in those source
+units and procedures that are intended to allocate storage, and is not
+inadvertently introduced in any other compilation unit.
+.IP
+Note that the test implemented is a static, syntactic test. It is
+still possible to perform inadvertent heap allocation by passing an
+allocating procedure as a first-class procedure argument. A stronger
+test would require global region inference, which is possible but
+beyond the scope of what the
+.B bitcc
+prototype implements.
+
+.SS "Directory Options"
+
+The following options control directory usage in the front end, the C
+compiler, or the linker:
+
+.IP "\fB-I\fP \fIdir\fP"
+Adds the directory \fIdir\fP to the include search list. The include
+search list is used by the C compiler to resolve header file
+locations, and is used by the
+.B bitcc
+compiler to specify the search directories for interface units of
+compilation. When an interface named \fIa.b\fP is imported, the
+include directory roots will be searched in left to right order for a
+file named \fIdir\fP/\fIa/b\fP\fB.bitc\fP, where \fIdir\dP is the
+include root directory.
+
+.IP \fB--nostdinc\fP
+Every BitC compiler has one or more standard locations for interface
+files. These locations are normally appended to the include directory
+list after all options have been processed. If \fB--nostdinc\fP is
+specified, the system include directories will not be appended. Note
+that this option is passed to the underlying C compiler as well.
+
+.IP "\fB--system\fP \fIdir\fP"
+Every BitC compiler has one or more standard locations for interface
+files and libraries. These traditionally take the form
+\fIroot\fP\fB/include\fP and \fIroot\fP\fB/lib\fP. If the
+\fB--system\fP option is given, the \fIroot\fP portion of these paths
+is replaced by \fIdir\fP. This option is primarily useful for testing
+and/or cross compilation. Note that this option is \fInot\fP passed to
+the underlying C compiler.
+
+.SS "Linker Options"
+
+The following options influence the behavior of the link phase:
+
+.IP "\fB-l\fP \fIname\fP"
+The named library is searched for BitC source units, and is also
+passed to the underlying linker.
+
+.IP \fB--nostdlib\fP
+The BitC standard runtime library is usually imported by the BitC
+compiler, and is linked into the executable by adding \fB-lbitc\fP
+just after the last BitC-generated input is passed to the linker. If
+\fB--nostdlib\fP is specified, this action is suppressed. Note that
+this option is passed to the underlying C compiler as well, so it has
+the effect of suppressing the standard C library unless that is
+explicitly specified on the command line.
+
+.IP \fB--no-gc\fP
+If \fB--no-gc\fP is specified, the garbage collection library is not
+linked into the output executable.
+
+.SH ENVIRONMENT
+The
+.B bitcc
+front end does not consult environment variables to determine its
+behavior. The underlying C compiler and/or linker may do so, and their
+associated documentation should be checked.
+
+.SH "SEE ALSO"
+
+.IR gcc (1),
+.IR ld (1)
+and the associated Info entries.
+
+.SH AUTHORS
+Swaroop Sridhar and Jonathan S. Shapiro
+
+.SH COPYRIGHT
+Copyright (c) 2008, The EROS Group, LLC.
+
+Permission is hereby granted to copy, redistribute, and/or modify this
+page provided the copyright notice is maintained, the names of the
+modifiers are added to the list of authors, and the names of the
+copyright holders and authors are not used to endorse or promote
+products derived from this document without specific prior written
+permission.
+
+BITCC IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
