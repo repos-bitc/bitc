@@ -146,22 +146,4 @@ using namespace std;
               LHS of set!, deref, dup, array-nth, vector-nth, select.
 
        (ex:  if, cond, switch, try-catch, and, or, not, array, 
-             vector, make-vector, make-vector, apply, 
-             ucon_apply, struct_apply, etc). 
-
-      - bindings let/letrec/letStar/define     
-
-  This kind of compatibility shall hereby be called copy-compatibility.
-
-7. We could, in principle provide the copy-compatibility at the return
-   position of an application as well. However, as an explicit desgn
-   choice, the return value is treated as exactly compatible. 
-
-   Otherwise, functions like: (define (id x) x) will no longer return
-   precisely what they accept. Of course, this can be forced by means
-   of an explicit annotation *at every use of id*, the definition
-   itself has no control over the top-level mutability of the return
-   type. But, we need the annotation in the "normal" case, and writing
-   an annotation at every use case is combersome. 
-
-   Anot
+             vector, make-vector, make-vector,
