@@ -60,9 +60,10 @@ LIBS=$(GC_LIBDIR) $(LIBBITC) $(GC_LIB)
 CFLAGS+=-g -I$(PWD)/$(BITC_SRC)/libbitc
 c-source: $(SOURCE:%.bitc=%.c)
 objects: $(OBJECTS)
-all: link
 
-link: $(SOURCE:%.bitc=BUILD/%)
+.PRECIOUS: $(SOURCE:%.bitc=BUILD/%)
+
+all:  $(SOURCE:%.bitc=BUILD/%)
 
 test: $(SOURCE:%.bitc=BUILD/%.test)
 
@@ -110,15 +111,15 @@ $(BUILDDIR)/sha1-file.test: EXPECT_OUTPUT=sha1-file.stdout
 $(BUILDDIR)/sha1-test.test: EXPECT_OUTPUT=sha1-test.stdout 
 $(BUILDDIR)/twomodule.test: EXPECT_OUTPUT=twomodule.stdout 
 
-$(BUILDDIR)/%: %.bitc $(BITCC) $(BUILDDIR)  $(LIBBITC_C_RUNTIME) #$(LIBBITC)
+$(BUILDDIR)/%: %.bitc $(BITCC) $(LIBBITC_C_RUNTIME) | $(BUILDDIR)
 	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME) -lgc
 
 # .PRECIOUS: $(SOURCE:%.bitc=%.c)
 
-$(BUILDDIR)/sha1-test: sha1-test.bitc  $(BITCC) $(BUILDDIR) $(LIBBITC)
+$(BUILDDIR)/sha1-test: sha1-test.bitc  $(BITCC) $(LIBBITC) | $(BUILDDIR)
 	$(BITCC) --system $(HOSTDIR) $(BITOPT) $(INC) -v -o $@  $< -lgc
 
-$(BUILDDIR)/sha1-file: sha1-file.bitc  $(BITCC) $(BUILDDIR) $(LIBBITC)
+$(BUILDDIR)/sha1-file: sha1-file.bitc  $(BITCC) $(LIBBITC) | $(BUILDDIR)
 	$(BITCC) --system $(HOSTDIR) $(BITOPT) $(INC) -v -o $@  $< -lgc
 
 %.c: %.bitc  $(BITCC)
