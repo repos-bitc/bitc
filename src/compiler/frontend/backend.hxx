@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -53,7 +53,7 @@ bool XMLtypesPP(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
 bool EmitHeader(std::ostream& out, std::ostream& err, 
 		GCPtr<UocInfo> uoc);
 bool EmitC(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
-bool EmitObj(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
+bool EmitExe(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
 
 
 bool EmitBitO(std::ostream& out, std::ostream& err);

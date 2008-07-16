@@ -3116,7 +3116,7 @@ EmitC(std::ostream &optStream, std::ostream &errStream,
 }
 
 bool
-EmitObj(std::ostream &optStream, std::ostream &errStream,
+EmitExe(std::ostream &optStream, std::ostream &errStream,
 	GCPtr<UocInfo> uoc)
 {
   std::ofstream csrc("bitc.out.c",
@@ -3168,10 +3168,11 @@ EmitObj(std::ostream &optStream, std::ostream &errStream,
     for (size_t i = 0; i < Options::LinkPostOptionsGCC->size(); i++)
       opt << " " << Options::LinkPostOptionsGCC->elem(i);
 
-    if (Options::useStdLib) {
+    if (Options::useStdLib)
       opt << " -lbitc";
+
+    if (!Options::noGC)
       opt << " -lgc";
-    }
 
 #if 0
     for (size_t i = 0; i < UocInfo::searchPath->size(); i++)

@@ -85,11 +85,13 @@
 
 
 #include <fstream>
+#include <iostream>
+
 #include <getopt.h>
 #include <langinfo.h>
 
 #include <libsherpa/Path.hxx>
-#include <iostream>
+#include <libsherpa/util.hxx>
 
 #include "Version.hxx"
 #include "UocInfo.hxx"
@@ -132,7 +134,8 @@ std::string Options::outputFileName;
 GCPtr<CVector<GCPtr<Path> > > Options::libDirs;
 GCPtr<CVector<std::string> > Options::inputs;
 bool Options::Wall = false;
-bool Options::nogc = false;
+bool Options::noGC = false;
+bool Options::noAlloc = false;
 GCPtr<TvPrinter> Options::debugTvP = new TvPrinter;
 bool Options::heuristicInference = false;
 
@@ -166,41 +169,57 @@ GCPtr<CVector<std::string> > Options::SystemDirs;
 #define LOPT_DBG_TVARS    278   /* Show globally unqiue tvar naming */
 #define LOPT_HEURISTIC    279   /* Use Heuristic Inference */
 #define LOPT_HELP         280   /* Display usage information. */
-#define LOPT_LANG         281   /* Specify the desired output
+#define LOPT_EMIT         281   /* Specify the desired output
 				   language. */
 #define LOPT_SYSTEM       282   /* Specify the desired output
 				   language. */
+#define LOPT_NOALLOC      283   /* Statically reject heap-allocating
+				   operations and constructs */
+
+#define LOPT_O1           290
+#define LOPT_O2           291
+#define LOPT_O3           292
+#define LOPT_O4           293
+#define LOPT_O5           294
+#define LOPT_O6           295
 
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
+  { "O1",                   0,  0, LOPT_O1 },
+  { "O2",                   0,  0, 'O' /* LOPT_O2 */ },
+  { "O3",                   0,  0, LOPT_O3 },
+  { "O4",                   0,  0, LOPT_O4 },
+  { "O5",                   0,  0, LOPT_O5 },
+  { "O6",                   0,  0, LOPT_O6 },
+  { "debug-tvars",          0,  0, LOPT_DBG_TVARS },
   { "decorate",             0,  0, LOPT_PPDECORATE },
   { "dumpafter",            1,  0, LOPT_DUMPAFTER },
   { "dumptypes",            1,  0, LOPT_DUMPTYPES },
+  { "emit",                 1,  0, LOPT_EMIT },
   { "eqinfer",              0,  0, LOPT_EQ_INFER },
   { "free-advice",          0,  0, LOPT_ADVISORY },
   { "full-qual-types",      0,  0, LOPT_FQ_TYPES },
   { "help",                 0,  0, LOPT_HELP },
   { "heuristic-inf",        0,  0, LOPT_HEURISTIC },
-  { "language",             1,  0, LOPT_LANG },
+  { "no-alloc",             0,  0, LOPT_NOALLOC },
+  { "no-gc",                0,  0, LOPT_NOGC },
+  { "no-prelude",           0,  0, LOPT_NOPRELUDE },
   { "nostdinc",             0,  0, LOPT_NOSTDINC },
   { "nostdlib",             0,  0, LOPT_NOSTDLIB },
   { "ppfqns",               0,  0, LOPT_PPFQNS },
   { "raw-tvars",            0,  0, LOPT_RAW_TVARS },
-  { "debug-tvars",          0,  0, LOPT_DBG_TVARS },
-  { "show-maybes",          0,  0, LOPT_SHOW_MAYBES },
   { "show-all-tccs",        0,  0, LOPT_SA_TCC },
+  { "show-maybes",          0,  0, LOPT_SHOW_MAYBES },
   { "showlex",              0,  0, LOPT_SHOWLEX },
   { "showparse",            0,  0, LOPT_SHOWPARSE },
   { "showpasses",           0,  0, LOPT_SHOWPASSES },
   { "showpassnames",        0,  0, LOPT_SHOWPASSNMS },
   { "showtypes",            1,  0, LOPT_SHOW_TYPES },
-  { "xmltypes",             1,  0, LOPT_XML_TYPES },
   { "stopafter",            1,  0, LOPT_STOPAFTER },
   { "system",               1,  0, LOPT_SYSTEM },
-  { "no-gc",                0,  0, LOPT_NOGC },
-  { "no-prelude",           0,  0, LOPT_NOPRELUDE },
   { "verbose",              0,  0, 'v' },
   { "version",              0,  0, 'V' },
+  { "xmltypes",             1,  0, LOPT_XML_TYPES },
 #if 0
   /* Options that have short-form equivalents: */
   { "debug",                0,  0, 'd' },
@@ -386,7 +405,7 @@ main(int argc, char *argv[])
   /// order-preserving way.
 
   while ((c = getopt_long(argc, argv, 
-			  "-e:o:O:l:VvchI:L:",
+			  "-e:o:Ol:VvchI:L:",
 			  longopts, 0
 		     )) != -1) {
     switch(c) {
@@ -454,7 +473,11 @@ main(int argc, char *argv[])
       break;
 
     case LOPT_NOGC:
-      Options::nogc = true;
+      Options::noGC = true;
+      break;
+
+    case LOPT_NOALLOC:
+      Options::noAlloc = true;
       break;
 
     case LOPT_NOPRELUDE:
@@ -634,7 +657,7 @@ main(int argc, char *argv[])
 	break;
       }
 
-    case LOPT_LANG:
+    case LOPT_EMIT:
       {
 	if (Options::backEnd) {
 	  std::cerr << "Can only specify one output language.\n";
@@ -701,11 +724,19 @@ main(int argc, char *argv[])
       Options::libDirs->append(new Path(optarg));
       break;
 
-    case 'O':
-      AddCompileArgumentForGCC("-O");
-      AddCompileArgumentForGCC(optarg);
-      AddLinkArgumentForGCC("-O");
-      AddLinkArgumentForGCC(optarg);
+    case LOPT_O1:
+    case 'O':			// a.k.a. -O2
+    case LOPT_O3:
+    case LOPT_O4:
+    case LOPT_O5:
+    case LOPT_O6:
+      {
+	std::string optlevel = "-O" + unsigned_str(c-LOPT_O1 + 1);
+
+	AddCompileArgumentForGCC(optlevel);
+	AddLinkArgumentForGCC("-O");
+	AddLinkArgumentForGCC(optlevel);
+      }
 
       break;
 

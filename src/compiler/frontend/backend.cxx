@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -46,12 +46,12 @@
 
 BackEnd BackEnd::backends[] = {
   // The first one is the default.
-  { "obj", pn_npass, op_ssaTrans, 0, 0, EmitObj, 0 },
+  { "exe", pn_npass, op_ssaTrans, 0, 0, EmitExe, 0 },
   { "c", pn_npass, op_ssaTrans, 0, 0, EmitC, 0 },
   { "h", pn_npass, op_ssaTrans, 0, 0, EmitHeader, BK_HDR_MODE },
   { "bito", pn_npass, op_none, 0, EmitBitO, 0, BK_UOC_MODE },
   { "xmldump", pn_parse, op_none, XMLdump, 0, 0, 0 },
-  { "Xmlpp", pn_parse, op_none, XMLpp, 0, 0, 0 },
+  { "xmlpp", pn_parse, op_none, XMLpp, 0, 0, 0 },
   { "xmltypes", pn_typeCheck, op_none, XMLtypesPP, 0, 0, 0 }
 };
 

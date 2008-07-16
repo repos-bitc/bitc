@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -221,11 +221,11 @@ findusedef(std::ostream &errStream,
 	  if(boundVars->contains(ast->symbolDef)) 
 	    break;
 	  
-	  if(Options::nogc) {
+	  if(Options::noAlloc) {
 	    errStream << ast->loc << ": "
 		      << "Usage of identifier " << ast->s
 		      << " mandates closure conversion -- "
-		      << "disallowed in nogc mode"
+		      << "disallowed in noAlloc mode"
 		      << std::endl;
 	    errFree = false;
 	  }

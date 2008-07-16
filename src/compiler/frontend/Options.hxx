@@ -93,7 +93,8 @@ struct Options {
   static GCPtr<CVector<std::string> > SystemDirs;
 
   static bool Wall; // All Warnings are errors.
-  static bool nogc; // no garbage collection mode
+  static bool noGC; // no garbage collection mode
+  static bool noAlloc; // statically reject heap-allocating constructs
   static GCPtr<TvPrinter> debugTvP;
   static bool heuristicInference;
 };
