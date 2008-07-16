@@ -60,29 +60,35 @@ BITC_IFS=\
 # mkclosure.c is sourced from the appropriate target architecture directory
 # by virtue of the VPATH setting below. Contrary to appearences, it is not
 # matched by the wildcard.
+NOGC_SOURCES=\
+	$(wildcard nogc-*.c)
 C_SOURCES=\
-	$(wildcard *.c) \
+	$(filter-out $(NOGC_SOURCES),$(wildcard *.c)) \
 	mkclosure.c
+
 
 C_HDR=\
 	$(wildcard */*.h)
 
 VPATH=.:$(BITC_TARGET)
 
-OBJECTS=$(C_SOURCES:%.c=$(BUILDDIR)/%.o)
+RUNTIME_OBJECTS=$(C_SOURCES:%.c=$(BUILDDIR)/%.o)
+NOGC_OBJECTS=$(NOGC_SOURCES:%.c=$(BUILDDIR)/%.o)
+OBJECTS=$(RUNTIME_OBJECTS) $(NOGC_OBJECTS)
 
 $(OBJECTS): $(BUILDDIR)/bitc-runtime.h
 
-$(BUILDDIR)/bitc-runtime.h: $(BUILDDIR) $(BITC_SOURCES)
+$(BUILDDIR)/bitc-runtime.h: $(BITC_SOURCES) | $(BUILDDIR)
 	$(BITCC) $(INC) -h -o $@ bitc-runtime.bitc
 
-all: BUILD/libbitc.a BUILD/libbitc.bita
+all: BUILD/libbitc.a BUILD/libbitc.bita BUILD/libbitc-no-gc.a
 
 install: all
 	$(INSTALL) -d $(BITC_ROOT)/host
 	$(INSTALL) -d $(BITC_ROOT)/host/lib
 	$(INSTALL) -d $(BITC_ROOT)/host/include
 	$(INSTALL) -m 0644 BUILD/libbitc.a $(BITC_ROOT)/host/lib
+	$(INSTALL) -m 0644 BUILD/libbitc-no-gc.a $(BITC_ROOT)/host/lib
 	$(INSTALL) -m 0644 BUILD/libbitc.bita $(BITC_ROOT)/host/lib
 	for if in $(BITC_IFS); do \
 	  $(INSTALL) -d $(BITC_ROOT)/host/include/`dirname $$if`; \
@@ -93,11 +99,14 @@ install: all
 	  $(INSTALL) -m 0644 $$hdr $(BITC_ROOT)/host/include/`dirname $$hdr`; \
 	done
 
-BUILD/libbitc.a: $(OBJECTS)
-	ar -crv $@ $(OBJECTS)
+BUILD/libbitc.a: $(RUNTIME_OBJECTS)
+	ar -crv $@ $(RUNTIME_OBJECTS)
 
 BUILD/libbitc.bita: $(BITC_SOURCES)
 	$(BITCC) $(INC) -c -o $@ $(BITC_SOURCES)
+
+BUILD/libbitc-no-gc.a: $(NOGC_OBJECTS)
+	ar -crv $@ $(NOGC_OBJECTS)
 
 -include $(BUILDDIR)/.*.m
 

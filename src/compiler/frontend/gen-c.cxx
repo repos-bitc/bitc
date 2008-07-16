@@ -3171,7 +3171,9 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
     if (Options::useStdLib)
       opt << " -lbitc";
 
-    if (!Options::noGC)
+    if (Options::noGC)
+      opt << " -lbitc-no-gc";
+    else
       opt << " -lgc";
 
 #if 0

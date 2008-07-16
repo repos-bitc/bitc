@@ -47,6 +47,7 @@ GC_LIB=-lgc
 HOSTDIR=$(BITC_SRC)/../host
 LIBBITC_SRC=$(BITC_SRC)/libbitc
 LIBBITC_C_RUNTIME=$(BITC_SRC)/libbitc/$(BUILDDIR)/libbitc.a
+LIBBITC_NO_GC=$(BITC_SRC)/libbitc/$(BUILDDIR)/libbitc-no-gc.a
 INC+=$(GC_INC)
 # If a test case is temporarily broken, add it to BROKEN_SOURCE via
 #  make BROKEN_SOURCE="bad-test.bitc bad-test2.bitc"
@@ -55,10 +56,11 @@ SOURCE= $(filter-out $(BROKEN_SOURCE),$(wildcard *.bitc))
 OBJECTS=$(SOURCE:%.bitc=BUILD/%.o)
 BITCC=$(BITC_SRC)/compiler/frontend/$(BUILDDIR)/bitcc
 RUN_BITCC=$(BITCC) -I $(LIBBITC_SRC) --nostdlib # --system $(HOSTDIR)
-LIBBITC=$(HOSTDIR)/lib/libbitc.a
+#LIBBITC=$(HOSTDIR)/lib/libbitc.a
+
 RUN=a.out
 GCCWARN+=-Wno-unused
-LIBS=$(GC_LIBDIR) $(LIBBITC) $(GC_LIB)
+#LIBS=$(GC_LIBDIR) $(LIBBITC) $(GC_LIB)
 
 CFLAGS+=-g -I$(PWD)/$(BITC_SRC)/libbitc
 c-source: $(SOURCE:%.bitc=%.c)
@@ -84,6 +86,9 @@ TESTOPTS=-v
 
 $(LIBBITC_C_RUNTIME):
 	make -C $(LIBBITC_SRC) $(BUILDDIR)/libbitc.a
+
+$(LIBBITC_NO_GC):
+	make -C $(LIBBITC_SRC) $(BUILDDIR)/libbitc-no-gc.a
 
 $(BUILDDIR)/%.test: $(BUILDDIR)/%
 	@../testit.sh ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -i $(USE_INPUT) "$< $(ARGS)"
@@ -115,15 +120,17 @@ $(BUILDDIR)/sha1-test.test: EXPECT_OUTPUT=sha1-test.stdout
 $(BUILDDIR)/twomodule.test: EXPECT_OUTPUT=twomodule.stdout 
 
 $(BUILDDIR)/%: %.bitc $(BITCC) $(LIBBITC_C_RUNTIME) | $(BUILDDIR)
-	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME) -lgc
+	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME)
 
 # .PRECIOUS: $(SOURCE:%.bitc=%.c)
 
-$(BUILDDIR)/sha1-test: sha1-test.bitc  $(BITCC) $(LIBBITC) | $(BUILDDIR)
-	$(BITCC) --system $(HOSTDIR) $(BITOPT) $(INC) -v -o $@  $< -lgc
+LIBBITC_SHA1_SRC=$(BITC_SRC)/libbitc/crypt/sha1.bits
 
-$(BUILDDIR)/sha1-file: sha1-file.bitc  $(BITCC) $(LIBBITC) | $(BUILDDIR)
-	$(BITCC) --system $(HOSTDIR) $(BITOPT) $(INC) -v -o $@  $< -lgc
+$(BUILDDIR)/sha1-test: sha1-test.bitc  $(BITCC) $(LIBBITC_SHA1_SRC) | $(BUILDDIR)
+	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
+
+$(BUILDDIR)/sha1-file: sha1-file.bitc  $(BITCC) $(LIBBITC_SHA1_SRC) | $(BUILDDIR)
+	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
 
 %.c: %.bitc  $(BITCC)
 	$(RUN_BITCC) $(BITCOPT) $(INC) --lang c -o $@ $<
