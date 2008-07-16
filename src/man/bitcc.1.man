@@ -357,6 +357,16 @@ beyond the scope of what the
 .B bitcc
 prototype implements.
 
+.IP "\fB-v\fP"
+If given once, instructs 
+.B bitcc
+to print the command lines used for
+subordinate command execution. This is sometimes useful for linkage
+debugging. If given more than once, additionally instructs
+.B bitcc
+to pass the \fB-v\fP option to the underlying C compiler,
+making the complete tool chain execution visible to inspection.
+
 .SS "Directory Options"
 
 The following options control directory usage in the front end, the C
