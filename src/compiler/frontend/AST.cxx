@@ -2210,16 +2210,7 @@ AST::isValid() const
     }
     c++;
 
-    // match at_ifsel+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
-      errorsPresent = true;
-      break;
-    }
-    if (!ISSET(astMembers[at_ifsel], child(c)->astType)) {
-      astChTypeError(*this, at_ifsel, child(c)->astType, 1);
-      errorsPresent = true;
-    }
+    // match at_ifsel*
     while (c < children->size()) {
       if (!ISSET(astMembers[at_ifsel], child(c)->astType))
         astChTypeError(*this, at_ifsel, child(c)->astType, c);

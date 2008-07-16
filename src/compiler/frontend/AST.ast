@@ -649,7 +649,7 @@ AST define = identPattern expr constraints;
 AST import = ident ifident;
 AST provide = ident ifident;
  
-AST from = ifident ifsel+;
+AST from = ifident ifsel*;
 AST ifsel = ident ident;
 
 // DECLARES cannot be empty from the input, but we do insert

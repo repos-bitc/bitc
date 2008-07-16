@@ -1205,34 +1205,41 @@ resolve(std::ostream& errStream,
 	errorFree = false;
 	break;
       }
-      
-      for (size_t c = 1; c < ast->children->size(); c++) {
-	GCPtr<AST> alias = ast->child(c);
-	GCPtr<AST> thisName = alias->child(0);
-	GCPtr<AST> thatName = alias->child(1);
-	
-	RESOLVE(thatName, iface->env, lamLevel, USE_MODE,
-		id_usebinding, currLB, 
-		((flags & (~NEW_TV_OK))) | NO_CHK_USE_TYPE);
-	
-	if(!errorFree)
-	  break;
-	
-	GCPtr<AST> oldDef = env->getBinding(thisName->s);
-	if(oldDef) {
-	  errStream << alias->loc << ": Conflict for alias definition"
-		    << thisName->s
-		    << ". Previously defined at "
-		    << oldDef->loc
-		    << std::endl;
-	  errorFree = false;
-	  break;
-	}
-	
-	tmpEnv->addBinding(thisName->s, thatName->symbolDef);
-	tmpEnv->setFlags(thisName->s, BF_PRIVATE);
+
+      if(ast->children->size() == 1) {
+	// This is an import-all form
+	useIF(std::string(), iface->env, tmpEnv);
       }
-      
+      else {
+	// Need to import only certain bindings
+	for (size_t c = 1; c < ast->children->size(); c++) {
+	  GCPtr<AST> alias = ast->child(c);
+	  GCPtr<AST> thisName = alias->child(0);
+	  GCPtr<AST> thatName = alias->child(1);
+	
+	  RESOLVE(thatName, iface->env, lamLevel, USE_MODE,
+		  id_usebinding, currLB, 
+		  ((flags & (~NEW_TV_OK))) | NO_CHK_USE_TYPE);
+	
+	  if(!errorFree)
+	    break;
+	
+	  GCPtr<AST> oldDef = env->getBinding(thisName->s);
+	  if(oldDef) {
+	    errStream << alias->loc << ": Conflict for alias definition"
+		      << thisName->s
+		      << ". Previously defined at "
+		      << oldDef->loc
+		      << std::endl;
+	    errorFree = false;
+	    break;
+	  }
+	
+	  tmpEnv->addBinding(thisName->s, thatName->symbolDef);
+	  tmpEnv->setFlags(thisName->s, BF_PRIVATE);
+	}
+      }
+
       env->mergeBindingsFrom(tmpEnv);
       break;
     }
