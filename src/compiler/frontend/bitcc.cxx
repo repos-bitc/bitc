@@ -715,10 +715,9 @@ main(int argc, char *argv[])
       {
 	std::string optlevel = "-O";
 	if (optarg)
-	  optlevel += + optarg;
+	  optlevel += optarg;
 
 	AddCompileArgumentForGCC(optlevel);
-	AddLinkArgumentForGCC("-O");
 	AddLinkArgumentForGCC(optlevel);
       }
 
