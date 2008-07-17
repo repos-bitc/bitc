@@ -1,6 +1,6 @@
 %{
   /*
-   * Copyright (C) 2005, The EROS Group, LLC.
+   * Copyright (C) 2008, The EROS Group, LLC.
    * All rights reserved.
    *
    * Redistribution and use in source and binary forms, with or
