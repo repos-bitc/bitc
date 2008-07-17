@@ -159,10 +159,10 @@ isExpansive(std::ostream& errStream,
 
   case at_dobinding:
     {
-      itsExpansive = isExpansive(errStream, gamma,
-				 ast->child(1));
-      itsExpansive = isExpansive(errStream, gamma,
-				 ast->child(2));
+      CHKEXP(itsExpansive, isExpansive(errStream, gamma,
+				       ast->child(1)));
+      CHKEXP(itsExpansive, isExpansive(errStream, gamma,
+				       ast->child(2)));
       break;
     }
 
@@ -192,6 +192,8 @@ isExpansive(std::ostream& errStream,
   case at_if:
     {
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
+				       ast->child(0)));
+      CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 				       ast->child(1)));
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 				       ast->child(2)));
@@ -200,6 +202,8 @@ isExpansive(std::ostream& errStream,
 
   case at_when:
     {
+      CHKEXP(itsExpansive, isExpansive(errStream, gamma,
+				       ast->child(0)));
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 				       ast->child(1)));
       break;
