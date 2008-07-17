@@ -1167,12 +1167,6 @@ use</literallayout>
 	</sect3>
 	<sect3>
 	  <title>Unions</title>
-          <note>
-            <p>
-              This is a proposed replacement to the current
-              <progident>defunion</progident> form.
-            </p>
-          </note>
 	  <p>
 	    The <progident>defunion</progident> form defines
 	    enumerations, discriminated unions, and mixes of
@@ -3867,7 +3861,7 @@ id : T
 <literallayout>
 (define (4th-elem vec)
   (vector-nth vec 4))
-5th-elem: (fn ((vector 'a word))
+4th-elem: (fn ((vector 'a word))
               (location 'a))</literallayout>
         <p indent="no">
           Given such an accessor function, it would even be possible
