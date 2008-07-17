@@ -36,7 +36,7 @@
 ##########################################################################
 
 default: package
-BITC_SRC=../../..
+BITC_SRC=../..
 CLEANLIST=*.c BUILD/*.o core.*
 
 include $(BITC_SRC)/build/make/makerules.mk

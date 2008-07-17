@@ -36,7 +36,7 @@
 ##########################################################################
 
 default: package
-BITC_SRC=../../..
+BITC_SRC=../..
 
 include $(BITC_SRC)/build/make/makerules.mk
 

@@ -36,49 +36,37 @@
 ##########################################################################
 
 default: package
-BITC_SRC=../../..
-
-CLEANLIST=*.cxx cgen
-OBJECTS=BUILD/cgen.o BUILD/GC.o
-SOURCE= toc.bitc
-ALLFILES=$(wildcard *.bitc)
-OLANG=c
-BITCC=$(BITC_SRC)/compiler/frontend/BUILD/bitcc
-BITCINC=-I $(BITC_SRC)/runtime -I.
-BITCLIB=-L $(BITC_SRC)/libbitc
-RUN=a.out
-CFLAGS+=-g -I$(PWD)/$(BITC_SRC)/runtime -I/coyotos/host/include
-LIBGC=-lgc 
-LIBBITC=$(BITC_SRC)/libbitc/BUILD/libbitc.a
+BITC_SRC=../..
 
 include $(BITC_SRC)/build/make/makerules.mk
 
-# The new inference algorithm is in promitive stage, trying some test cases.
-new:
-#	$(BITCC) -I $(BITC_SRC)/runtime --no-prelude --full-qual-types --showtypes fnxn fnxn.bitc
-	$(BITCC) -I $(BITC_SRC)/runtime -o fnxn.c --full-qual-types --dumptypes typecheck fnxn.bitc
+INC+=-I$(BITC_XENV)/host/include
+SOURCE= $(wildcard src*.bitc)
+OBJECTS=$(SOURCE:%.bitc=BUILD/%.o)
+BITCC=$(BITC_SRC)/compiler/frontend/BUILD/bitcc
+RUN=a.out
+GCCWARN+=-Wno-unused
+ILANG=c
+GCLIB=$(BITC_XENV)/host/lib/libgc.a
 
-all:
-	$(BITCC) $(BITCINC) $(BITCLIB) -l $(OLANG) $(BITCOPT) $(SOURCE)
+CFLAGS+=-g -I$(PWD)/$(BITC_SRC)/runtime
+c-source: $(SOURCE:%.bitc=%.$(ILANG))
+all: $(OBJECTS)
 
-obj: $(SOURCE:.bitc=.c)
-	$(NATIVE_GCC) $(CFLAGS) -o $(SOURCE:.bitc=.out) $(SOURCE:.bitc=.c) $(LIBGC) $(LIBBITC)
+link: $(OBJECTS:%.o=%.out)
 
-%.$(OLANG): %.bitc  $(BITCC)
-	$(BITCC) $(BITCINC) $(BITCLIB) -l $(OLANG) $(BITCOPT) -o $@ $<
+run: $(OBJECTS:%.o=%.out)
+	for i in $(OBJECTS:%.o=%.out); do echo $$i; $$i; echo""; done
 
-#GC.o: $(BITC_SRC)/runtime/GC.cxx
+%.out: %.o
+	$(NATIVE_GCC) $(CFLAGS) -o $@ $< $(GCLIB)
 
-cgen: $(OBJECTS)
-	$(GPLUS) $(GPLUSFLAGS) $(OBJECTS) $(LIBS) -o $@
+.PRECIOUS: $(SOURCE:%.bitc=%.$(ILANG))
 
-run: all $(RUN)
-	./$(RUN)
+check.c: $(SOURCE) $(BITCC)
+	$(BITCC) -I. -l c -o $@ $(SOURCE)
 
-#%.c: %.bitc  $(BITCC)
-#	$(BITCC) $(BITCINC) $(BITCLIB) -l c -o $@ $< 
-
-#clean:
-#	-rm -f *.c *.o
+clean:
+	-rm -f *.c BUILD/*.o core.*
 
 -include $(BUILDDIR)/.*.m

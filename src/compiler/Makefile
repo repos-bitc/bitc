@@ -41,9 +41,5 @@ BITC_SRC=..
 
 # Important that astmaker come first, since later tools use it.
 DIRS=frontend
-CLEANDIRS=$(DIRS) tests/unit tests/issues
-#DIRS+=runtime
-#DIRS+=c-gen
-#DIRS+=emacs
 
 include $(BITC_SRC)/build/make/pkgrules.mk
