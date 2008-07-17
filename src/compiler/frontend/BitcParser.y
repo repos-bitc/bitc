@@ -1829,6 +1829,15 @@ eform: '(' expr expr_seq ')' { /* apply to one or more args */
 };
  
 // IF [7.11.1]
+eform: '(' tk_IF expr expr ')' {
+  SHOWPARSE("eform -> (IF expr expr expr )");
+  GCPtr<AST> impliedBegin = 
+    new AST(at_begin, $3->loc, $3, 
+	    $$ = new AST(at_unit, $3->loc));
+  $$ = new AST(at_if, $2.loc, impliedBegin, new AST(at_unit, $2.loc));
+  $$->printVariant = 1;
+};
+
 eform: '(' tk_IF expr expr expr ')' {
   SHOWPARSE("eform -> (IF expr expr expr )");
   $$ = new AST(at_if, $2.loc, $3, $4, $5);

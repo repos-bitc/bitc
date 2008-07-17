@@ -2165,15 +2165,19 @@ id : T
   <em>e</em> ... <em>e</em>)</literallayout>
 	<p indent="no">
 	  where each <progident><em>bp</em></progident> is a binding
-	  pattern.  The second form is a convenience shorthand for:
+	  pattern.  The second form is a derived form:
 	</p>
 	<literallayout>
+(define (<em>id</em> [<em>bp<sub>1</sub></em> ... <em>bp<sub>n</sub></em>])
+  <em>e</em> ... <em>e</em>) =&gt;
 (define id
-  (lambda ([<em>bp<sub>1</sub></em> ... <em>bp<sub>n</sub></em>])
-    <em>e</em> ... <em>e</em>))</literallayout>
+  (letrec ((id (lambda ([<em>bp<sub>1</sub></em> ... <em>bp<sub>n</sub></em>])
+                    <em>e</em> ... <em>e</em>)))
+    id))</literallayout>
 	<p indent="no">
 	  where each <progident><em>bp<sub>i</sub></em></progident> is a
-	  binding pattern.
+	  binding pattern. Note the introduction of the letrec, which
+	  supports simple recursion.
 	</p>
         <p>
 	  The right hand form of a <progident>define</progident> is
@@ -3084,7 +3088,8 @@ id : T
             control flow:
           </p>
           <literallayout>
-(if <em>e<sub>test</sub></em> <em>e<sub>then</sub></em> <em>e<sub>else</sub></em>)</literallayout>
+(if <em>e<sub>test</sub></em> <em>e<sub>then</sub></em> <em>e<sub>else</sub></em>)
+(if <em>e<sub>test</sub></em> <em>e<sub>then</sub></em>)</literallayout>
           <p>
             Where <progident><em>e<sub>test</sub></em></progident>,
             <progident><em>e<sub>then</sub></em></progident>, and
@@ -3092,8 +3097,9 @@ id : T
             expressions.
           </p>
           <p>
-            The value of an <progident>if</progident> form is either the value of
-            the <progident><em>e<sub>then</sub></em></progident> form or
+            The value of an <progident>if</progident> form is either
+            the value of the
+            <progident><em>e<sub>then</sub></em></progident> form or
             the value of the
             <progident><em>e<sub>else</sub></em></progident>
             expression. Exactly one of the
@@ -3107,53 +3113,31 @@ id : T
             must be of boolean type.
           </p>
           <p>
-            The values returned by the
-            <progident><em>e<sub>then</sub></em></progident> and
-            <progident><em>e<sub>else</sub></em></progident> forms must be
-            compatible with the type expected by the outer expression
-            within which the <progident>if</progident> expression is
-            nested.<footnote><p>If the value of an
-                <progident>if</progident> form is not captured, then there
-                is no real need to require that its
-                <progident><em>e<sub>then</sub></em></progident> and
-                <progident><em>e<sub>else</sub></em></progident> parts
-                return values of the same type. In this case, the
-                following could be permitted:</p>
-              <literallayout>
-(begin
-  (if <em>e<sub>test</sub></em> 32 false)
-  e1)</literallayout>
-              <p indent="no">
-                because the return value is not captured. Only in
-                situations where the return value of the
-                <progident>if</progident> <em>is</em> captured is it
-                really required for the
-                <progident><em>e<sub>then</sub></em></progident> and
-                <progident><em>e<sub>else</sub></em></progident>
-                expressions must return values that are compatible with
-                the receiver.
-              </p>
-              <p>
-                I'm inclined not to try to take any advantage of this for
-                now. One can always solve the problem of compatibility by
-                writing:
-              </p>
-              <literallayout>
-(begin
-  (if <em>e<sub>test</sub></em> (begin 32 ())
-            (begin false ()))
-  e1)</literallayout>
-            </footnote>
+            If both <progident><em>e<sub>then</sub></em></progident>
+            and <progident><em>e<sub>else</sub></em></progident> are
+            present, their return values must be of compatible type.
+            If only the
+            <progident><em>e<sub>then</sub></em></progident> clause is
+            present, then the result type of the
+            <progident>if</progident> is Unit, and the
+            <progident><em>e<sub>then</sub></em></progident> form is
+            implicitly understood to be wrapped in a
+            <progident>begin</progident> form having the Unit
+            constructor as its last expression.
           </p>
           <p>
             <leadin>Derivation</leadin> The canonical rewriting of
             <progident>if</progident> is:
           </p>
           <literallayout>
-(if <em>e<sub>1</sub></em> <em>e<sub>2</sub></em> <em>e<sub>3</sub></em>) =&gt;
-(case <em>e<sub>1</sub></em>
-  (#t <em>e<sub>2</sub></em>)
-  (#f <em>e<sub>3</sub></em>))</literallayout>
+(if <em>e<sub>test</sub></em> <em>e<sub>then</sub></em> <em>e<sub>else</sub></em>) =&gt;
+(case <em>e<sub>test</sub></em>
+  (#t <em>e<sub>then</sub></em>)
+  (#f <em>e<sub>else</sub></em>))
+(if <em>e<sub>test</sub></em> <em>e<sub>then</sub></em>) =&gt;
+(case <em>e<sub>test</sub></em>
+  (#t <em>e<sub>then</sub></em> ())
+  (#f ())</literallayout>
         </sect3>
 	<sect3>
 	  <title>not</title>
@@ -3175,6 +3159,7 @@ id : T
             <progident>not</progident> is:
           </p>
           <literallayout>
+(not <em>e</em>) =&gt;
 (if <em>e</em> #f #t)</literallayout>
         </sect3>
 	<sect3>
