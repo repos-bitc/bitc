@@ -1911,6 +1911,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
+  case at_when:
   case at_and:
   case at_or:
   case at_not:

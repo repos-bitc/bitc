@@ -340,6 +340,7 @@ TopInit(std::ostream& errStream,
   case at_array_nth:
   case at_vector_nth:
   case at_if:
+  case at_when:
   case at_and:
   case at_or:
   case at_not: 

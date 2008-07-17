@@ -755,6 +755,27 @@ ssa(std::ostream& errStream,
       break;
     }
     
+  case at_when:
+    {
+      SSA(errStream, uoc, ast->child(0), grandLet, identList, 
+	     ast, 0, flags);
+      ast->child(0) = FEXPR(grandLet);
+
+      GCPtr<AST> res = AST::genSym(ast, "t");
+      GCPtr<AST> gl1 = newGrandLet(ast);
+
+      SSA(errStream, uoc, ast->child(1), gl1, identList, 
+	     ast, 1, flags);
+
+      FEXPR(gl1) = addLB(gl1, identList, FEXPR(gl1), 
+			 0, res, true);
+      SETGL(ast->child(1), gl1);
+
+      GCPtr<AST> topres = UseCase(res);
+      FEXPR(grandLet) = addLB(grandLet, identList, ast, LB_IS_DUMMY, topres, false);
+      break;
+    }
+    
   case at_and:
     {
       GCPtr<AST> ifizedAST = new AST(at_if, ast->child(0)->loc);
@@ -830,7 +851,7 @@ ssa(std::ostream& errStream,
 	ifAst->children->append(caseleg->child(0));
 	ifAst->children->append(caseleg->child(1));
 
-	ifAst->children->append(new AST(at_if, 
+	ifAst->children->append(new AST(at_if,
 				       caselegs->child(c)->loc));
 	prev = ifAst;
 	ifAst = ifAst->child(2);	

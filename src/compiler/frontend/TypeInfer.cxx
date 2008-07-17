@@ -3712,6 +3712,37 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       break;
     }
 
+  case at_when:
+    {
+      /* FIX: shap doesn't know the type rule here. Swaroop should
+	 check this. */
+       /*------------------------------------------------
+   	    A |- e0:t0 
+         U(t0 = 'a|bool)
+	 ___________________________________________
+              A |- unit: ()
+       ------------------------------------------------*/
+
+      // match agt_expr
+      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP2);      
+      
+      CHKERR(errFree, unify(errStream, trail, ast->child(0)->loc, 
+			    ast->child(0)->symType,
+			    MBF(new Type(ty_bool)), 
+			    uflags));
+      
+      // match agt_expr
+      TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP2);
+      // FIX: Is a CHKERR call required here, given that there are no
+      // constraints to enforce?
+      
+
+      ast->symType = new Type(ty_unit);
+      break;
+    }
+
   case at_and:
   case at_or:
   case at_not:

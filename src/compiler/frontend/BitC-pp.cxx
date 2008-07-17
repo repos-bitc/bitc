@@ -361,6 +361,19 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
       break;
     }
 
+  case at_when:
+    {
+      out << "(" << ast->atKwd() << " ";
+
+      (void) out.indentToHere();
+
+      BitcP(out, ast->child(0), showTypes);
+      out << endl;
+      doChildren(out, ast->child(1), 0, false, showTypes);
+      out << ")";
+      break;
+    }
+
   case at_begin:
   case at_if:
   case at_and:

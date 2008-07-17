@@ -256,6 +256,13 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
       break;
     }
 
+  case at_when:
+    {
+      //markTail(ast->child(0), fn, bps, false);
+      markTail(ast->child(1), fn, bps, isTail);
+      break;
+    }
+
   case at_apply:
     {
       markTail(ast->child(0), fn, bps, isTail);

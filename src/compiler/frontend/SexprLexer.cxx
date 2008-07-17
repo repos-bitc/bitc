@@ -285,6 +285,7 @@ struct KeyWord {
   { "vector",           tk_VECTOR },
   { "vector-length",    tk_VECTOR_LENGTH },
   { "vector-nth",       tk_VECTOR_NTH },
+  { "when",             tk_WHEN },
   { "where",            tk_WHERE },
   { "word",             tk_WORD }
   

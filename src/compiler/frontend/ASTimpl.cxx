@@ -419,6 +419,9 @@ AST::atKwd() const
   case at_if:
     return "if";
 
+  case at_when:
+    return "when";
+
   case at_and:
     return "and";
 

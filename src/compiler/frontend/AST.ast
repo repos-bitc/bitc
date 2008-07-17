@@ -725,7 +725,7 @@ GROUP eform = literal | var | unit
             | array_length | vector_length 
             | lambda | suspend
             | apply | struct_apply | ucon_apply
-            | if | and | or | not | cond | switch
+            | if | when | and | or | not | cond | switch
             | setbang | dup | deref | inner_ref
 	    | try | throw | let | letStar | letrec 
  	    | container | do 
@@ -788,13 +788,15 @@ AST ucon_apply = ucon expr+;
 
 // IF [7.11.1]
 AST if = expr expr expr;
-// AND [7.11.2]                  
+// IF [7.11.2]
+AST when = expr expr;
+// AND [7.11.3]                  
 AST and = expr+;
-// OR [7.11.3]
+// OR [7.11.4]
 AST or = expr+;
-// NOT [7.11.2]                  
+// NOT [7.11.5]                  
 AST not = expr;
-// COND [7.11.4]           
+// COND [7.11.6]           
 AST cond = cond_legs otherwise;
 AST cond_legs = cond_leg*;
 AST cond_leg = expr expr;

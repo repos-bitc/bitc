@@ -337,6 +337,7 @@ enum AstType {
     at_struct_apply,
     at_ucon_apply,
     at_if,
+    at_when,
     at_and,
     at_or,
     at_not,

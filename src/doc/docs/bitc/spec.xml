@@ -3088,8 +3088,7 @@ id : T
             control flow:
           </p>
           <literallayout>
-(if <em>e<sub>test</sub></em> <em>e<sub>then</sub></em> <em>e<sub>else</sub></em>)
-(if <em>e<sub>test</sub></em> <em>e<sub>then</sub></em>)</literallayout>
+(if <em>e<sub>test</sub></em> <em>e<sub>then</sub></em> <em>e<sub>else</sub></em>)</literallayout>
           <p>
             Where <progident><em>e<sub>test</sub></em></progident>,
             <progident><em>e<sub>then</sub></em></progident>, and
@@ -3113,17 +3112,10 @@ id : T
             must be of boolean type.
           </p>
           <p>
-            If both <progident><em>e<sub>then</sub></em></progident>
-            and <progident><em>e<sub>else</sub></em></progident> are
-            present, their return values must be of compatible type.
-            If only the
-            <progident><em>e<sub>then</sub></em></progident> clause is
-            present, then the result type of the
-            <progident>if</progident> is Unit, and the
-            <progident><em>e<sub>then</sub></em></progident> form is
-            implicitly understood to be wrapped in a
-            <progident>begin</progident> form having the Unit
-            constructor as its last expression.
+            The types of the
+            <progident><em>e<sub>then</sub></em></progident> and
+            <progident><em>e<sub>else</sub></em></progident> must be
+            compatible.
           </p>
           <p>
             <leadin>Derivation</leadin> The canonical rewriting of
@@ -3138,6 +3130,47 @@ id : T
 (case <em>e<sub>test</sub></em>
   (#t <em>e<sub>then</sub></em> ())
   (#f ())</literallayout>
+        </sect3>
+        <sect3>
+          <title>when</title>
+          <p>
+            <em>Derived form</em>
+          </p>
+          <p>
+            The <progident>when</progident> form is used to represent
+            conditional control flow when only one condition is of interest:
+          </p>
+          <literallayout>
+(when <em>e<sub>test</sub></em> <em>e<sub>then</sub></em> ...)</literallayout>
+          <p>
+            Where <progident><em>e<sub>test</sub></em></progident> and
+            <progident><em>e<sub>then</sub></em></progident> are BitC
+            expressions.
+          </p>
+          <p>
+            The 
+            <progident><em>e<sub>test</sub></em></progident> expression
+            must compatible with boolean. There are no restrictions on
+            the types of the
+            <progident><em>e<sub>then</sub></em></progident> forms.
+            The type of a <progident>when</progident> form is Unit.
+          </p>
+          <p>
+            The 
+            <progident><em>e<sub>then</sub></em></progident> forms are
+            evaluated only if the value of the 
+            <progident><em>e<sub>test</sub></em></progident> form is
+            <progident>#t</progident>.
+          </p>
+          <p>
+            <leadin>Derivation</leadin> The canonical rewriting of
+            <progident>when</progident> is:
+          </p>
+          <literallayout>
+(when <em>e<sub>test</sub></em> <em>e<sub>then</sub></em> ...) =&gt;
+(case <em>e<sub>test</sub></em>
+  (#t <em>e<sub>then</sub></em> ... ())
+  (#f ()))</literallayout>
         </sect3>
 	<sect3>
 	  <title>not</title>

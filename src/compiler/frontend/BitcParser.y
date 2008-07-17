@@ -142,6 +142,7 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 
 %token <tok> tk_THE
 %token <tok> tk_IF
+%token <tok> tk_WHEN
 %token <tok> tk_AND
 %token <tok> tk_OR
 %token <tok> tk_NOT
@@ -1829,34 +1830,17 @@ eform: '(' expr expr_seq ')' { /* apply to one or more args */
 };
  
 // IF [7.11.1]
-eform: '(' tk_IF expr expr ')' {
-  SHOWPARSE("eform -> (IF expr expr expr )");
-  GCPtr<AST> impliedBegin = 
-    new AST(at_begin, $3->loc, $3, 
-	    $$ = new AST(at_unit, $3->loc));
-  $$ = new AST(at_if, $2.loc, impliedBegin, new AST(at_unit, $2.loc));
-  $$->printVariant = 1;
-};
-
 eform: '(' tk_IF expr expr expr ')' {
   SHOWPARSE("eform -> (IF expr expr expr )");
   $$ = new AST(at_if, $2.loc, $3, $4, $5);
 };
 
-// AND [7.11.2]                  
-eform: '(' tk_AND expr_seq ')'  {
-  SHOWPARSE("eform -> ( AND expr_seq )");
-  $$ = $3;
-  $$->loc = $2.loc;
-  $$->astType = at_and;
-};
-
-// OR [7.11.3]
-eform: '(' tk_OR expr_seq ')'  {
-  SHOWPARSE("eform -> ( OR expr_seq )");
-  $$ = $3;
-  $$->loc = $2.loc;
-  $$->astType = at_or;
+// WHEN [7.11.2]
+eform: '(' tk_WHEN expr expr_seq ')' {
+  SHOWPARSE("eform -> (WHEN expr_seq )");
+  $4->astType = at_begin;
+  $4->printVariant = 1;
+  $$ = new AST(at_when, $2.loc, $3, $4);
 };
 
 // NOT [7.11.3]
@@ -1865,7 +1849,23 @@ eform: '(' tk_NOT expr ')'  {
   $$ = new AST(at_not, $2.loc, $3);
 };
 
-// COND [7.11.4]           
+// AND [7.11.4]                  
+eform: '(' tk_AND expr_seq ')'  {
+  SHOWPARSE("eform -> ( AND expr_seq )");
+  $$ = $3;
+  $$->loc = $2.loc;
+  $$->astType = at_and;
+};
+
+// OR [7.11.5]
+eform: '(' tk_OR expr_seq ')'  {
+  SHOWPARSE("eform -> ( OR expr_seq )");
+  $$ = $3;
+  $$->loc = $2.loc;
+  $$->astType = at_or;
+};
+
+// COND [7.11.6]           
 eform: '(' tk_COND  condcases  otherwise ')'  {
   SHOWPARSE("eform -> (COND  ( condcases ) ) ");
   $$ = new AST(at_cond, $2.loc, $3, $4);

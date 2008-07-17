@@ -2337,16 +2337,16 @@ toc(std::ostream& errStream,
   case at_if:
     {
       GCPtr<AST> testAst = ast->child(0);
-      GCPtr<AST> ifAst = ast->child(1);
+      GCPtr<AST> thenAst = ast->child(1);
       GCPtr<AST> elseAst = ast->child(2);
       out << "if(";
       TOC(errStream, uoc, testAst, out, IDname, 
 	  ast, 0, flags);      
       out << ") {" << endl;
       out.more();
-      TOC(errStream, uoc, ifAst, out, IDname, 
+      TOC(errStream, uoc, thenAst, out, IDname, 
 	  ast, 1, flags);
-      if(ifAst->astType != at_letStar)
+      if(thenAst->astType != at_letStar)
 	out << ";";
       out << endl;
       out.less();
@@ -2356,6 +2356,26 @@ toc(std::ostream& errStream,
       TOC(errStream, uoc, elseAst, out, IDname, 
 	  ast, 2, flags);
       if(elseAst->astType != at_letStar)
+	out << ";";
+      out << endl;
+      out.less();
+      out << "}" << endl;
+      break;
+    }
+    
+  case at_when:
+    {
+      GCPtr<AST> testAst = ast->child(0);
+      GCPtr<AST> thenAst = ast->child(1);
+
+      out << "if(";
+      TOC(errStream, uoc, testAst, out, IDname, 
+	  ast, 0, flags);      
+      out << ") {" << endl;
+      out.more();
+      TOC(errStream, uoc, thenAst, out, IDname, 
+	  ast, 1, flags);
+      if(thenAst->astType != at_letStar)
 	out << ";";
       out << endl;
       out.less();

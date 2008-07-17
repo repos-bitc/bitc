@@ -198,6 +198,13 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
+  case at_when:
+    {
+      CHKEXP(itsExpansive, isExpansive(errStream, gamma,
+				       ast->child(1)));
+      break;
+    }
+
   case at_cond:
     {
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
