@@ -1728,7 +1728,7 @@ use</literallayout>
         lists of type <progident>'a</progident> and returning a value
         of type <progident>'a</progident>. It is defined over all
         types <progident>'a</progident> such that there is an
-        instiation of the <progident>(Ord&nbsp;'a)</progident> type
+        instantiation of the <progident>(Ord&nbsp;'a)</progident> type
         class.''
       </p>
       <p>
@@ -2113,6 +2113,45 @@ nm : <em>function-type</em></literallayout>
         <p>
           Qualifications may similarly appear in the binding patterns
           of structure, union, and value declarations.
+        </p>
+      </sect2>
+      <sect2>
+        <title>Primitive Type Classes</title>
+        <p>
+          BitC defines three ``primitive'' type classes. These cover
+          cases that cannot be cleanly expressed within the language,
+          or describe type compatibility constraints that are part of
+          the language's intrinsic type compatibility rules.
+        </p>
+        <p>
+          <leadin><progident>(ref-types&nbsp;'a)</progident></leadin> is the type
+          class consisting of all heap-allocated types:
+          <progident>(ref&nbsp;'a)</progident>,
+          <progident>(vector&nbsp;'a)</progident>, and
+          <progident>string</progident>. Use of this type class is
+          appropriate when a structure or union should not be
+          instantiated over value types. The
+          <progident>(nullable&nbsp;'a)</progident> type is an example
+          of this.
+        </p>
+        <p>
+          <leadin><progident>(copy-compat&nbsp;'a&nbsp;'b)</progident></leadin>
+          is an equivalence relation containing all pairs of types
+          <progident>'a</progident> and
+          <progident>'b</progident> that are ``copy compatible''. That
+          is: all types for which a value of type
+          <progident>'b</progident> may be assigned to a location of
+          type <progident>(mutable&nbsp;'a)</progident>, and all types
+          for which a formal parameter of type
+          <progident>'a</progident> may be passed an actual parameter
+          of type <progident>'b</progident>.
+        </p>
+        <p>
+          <leadin><progident>(top-copy-compat&nbsp;'a&nbsp;'b)</progident></leadin>
+          is an equivalence relation containing all pairs of types
+          <progident>'a</progident> that are either
+          <progident>'b</progident> or
+          <progident>(mutable&nbsp;'b)</progident>.
         </p>
       </sect2>
     </sect1>
@@ -4284,8 +4323,10 @@ id : T
   none (some value:'a))
 
 ; Nullable pointers:
-(defunion (nullable 'a):val 
-  Null (non-null ptr:(ref 'a))
+(defunion
+  (forall (ref-types 'a)
+    (nullable 'a):val 
+     Null (non-null ptr:(ref 'a))))
 
 ; Homogeneous lists:
 (defunion (list 'a) 
