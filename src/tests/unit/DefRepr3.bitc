@@ -39,12 +39,12 @@
 (provide main bitc.main)
 
 (defrepr repr:val
-  (Ct1 i:int32 k:int32 j:bool   (where (= i 10) (= k 10)))
-  (Ct2 i:int32 k:int32 (where (= i 1) (= k 10)))
+  (Ct1 i:int32 k:int32 j:bool   (where (== i 10) (== k 10)))
+  (Ct2 i:int32 k:int32 (where (== i 1) (== k 10)))
 
   ;; MUST NOT WORK
-  ;;(Ct3 i:int32 j:bool k:int32  (where (= i 30))) 
-  ;;(Ct4 i:int32 r:quad (where (= i 40) (= r 10))) 
+  ;;(Ct3 i:int32 j:bool k:int32  (where (== i 30))) 
+  ;;(Ct4 i:int32 r:quad (where (== i 40) (== r 10))) 
   )
  
 (define main.main:(fn ((vector string)) int32)

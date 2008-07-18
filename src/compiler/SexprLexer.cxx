@@ -171,6 +171,7 @@ struct KeyWord {
   const char *nm;
   int  tokValue;
 } keywords[] = {
+  { "=",                '=' },	// singleton '=' is not an identifier.
   { "and",              tk_AND },
   { "apply",            tk_APPLY },
   { "array",            tk_ARRAY },
@@ -180,8 +181,8 @@ struct KeyWord {
   { "begin",            tk_BEGIN },
   { "bitc-version",     tk_BITC_VERSION },
   { "bitfield",         tk_BITFIELD },
-  { "bool",             tk_BOOL },
   { "block",            tk_Reserved },
+  { "bool",             tk_BOOL },
   { "break",            tk_Reserved },
   { "by-ref",           tk_BY_REF },
   { "case",             tk_CASE },
@@ -202,8 +203,8 @@ struct KeyWord {
   { "defrefine",        tk_Reserved },
   { "defrepr",          tk_DEFREPR },
   { "defstruct",        tk_DEFSTRUCT },
-  { "defthm",           tk_DEFTHM },
   { "deftheory",        tk_Reserved },
+  { "defthm",           tk_DEFTHM },
   { "deftypeclass",     tk_DEFTYPECLASS },
   { "defunion",         tk_DEFUNION },
   { "defvariant",       tk_Reserved },
@@ -240,7 +241,7 @@ struct KeyWord {
   { "literal",          tk_Reserved },
   { "location",         tk_Reserved },
   //  { "make-vector",      tk_MAKE_VECTOR },
-  { "make-vector",     tk_MAKE_VECTORL },
+  { "make-vector",      tk_MAKE_VECTORL },
   { "member",           tk_MEMBER },   /* REDUNDANT */
   { "method",           tk_METHOD },
   { "module",           tk_MODULE },

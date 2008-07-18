@@ -1,6 +1,6 @@
 %{
   /*
-   * Copyright (C) 2008, The EROS Group, LLC.
+   * copyright		 (C) 2008, The EROS Group, LLC.
    * All rights reserved.
    *
    * Redistribution and use in source and binary forms, with or
@@ -113,6 +113,7 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 /* Primary types and associated hand-recognized literals: */
 %token <tok> '(' ')' ','	/* unit */
 %token <tok> '[' ']'	/* unit */
+%token <tok> '='	/* unit */
 %token <tok> tk_BOOL
 %token <tok> tk_TRUE   /* #t */
 %token <tok> tk_FALSE  /* #f */
@@ -1014,10 +1015,10 @@ use_case: ident '.' ident {
   $$ = new AST(at_use_case, $1->loc, newident, usesel);
   $$->printVariant = 1;
 };
-use_case: '(' ident ident '.' ident ')' { 
+use_case: '(' ident '=' ident '.' ident ')' { 
   SHOWPARSE("use_case -> (ident ident :: ident)");
   $2->Flags |= (ID_IS_GLOBAL);
-  GCPtr<AST> usesel = new AST(at_usesel, $3->loc, $3, $5);
+  GCPtr<AST> usesel = new AST(at_usesel, $4->loc, $4, $6);
   $$ = new AST(at_use_case, $2->loc, $2, usesel);
 };
 
@@ -1035,15 +1036,10 @@ alias: ident {
   SHOWPARSE("alias -> ident");
   $$ = new AST(at_ifsel, $1->loc, $1, $1->getDCopy());
 };
-alias: '(' ident ident ident ')' {
-  SHOWPARSE("alias -> ( = ident ident )");
+alias: '(' ident '=' ident ')' {
+  SHOWPARSE("alias -> ( ident = ident )");
   
-  if($2->s != "=") {
-    cerr << $2->loc << ": Syntax error, expecting `='.\n";
-    lexer->num_errors++;
-  }
-
-  $$ = new AST(at_ifsel, $2->loc, $3, $4);
+  $$ = new AST(at_ifsel, $2->loc, $2, $4);
 };
 
 
@@ -1155,8 +1151,8 @@ repr_reprs: repr_reprs repr_repr {
 repr_repr: '(' ident ident intLit')' {
   SHOWPARSE("repr_repr ->  ( = ident intLit )");
 
-  if($2->s != "=") {
-    cerr << $2->loc << ": Syntax error, expecting `='.\n";
+  if($2->s != "==") {
+    cerr << $2->loc << ": Syntax error, expecting `=='.\n";
     lexer->num_errors++;
   }
   
