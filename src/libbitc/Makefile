@@ -45,7 +45,7 @@ GC_INC=
 INC+=-I$(BITC_SRC)/runtime -I. -I$(BITC_XENV)/host/include $(GC_INC) 
 #INC+=-I../include
 
-BITCC=$(BITC_SRC)/compiler/frontend/BUILD/bitcc
+BITCC=$(BITC_SRC)/compiler/BUILD/bitcc
 
 include $(BITC_SRC)/build/make/makerules.mk
 

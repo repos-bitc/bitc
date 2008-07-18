@@ -54,7 +54,7 @@ INC+=$(GC_INC)
 BROKEN_SOURCE=
 SOURCE= $(filter-out $(BROKEN_SOURCE),$(wildcard *.bitc))
 OBJECTS=$(SOURCE:%.bitc=BUILD/%.o)
-BITCC=$(BITC_SRC)/compiler/frontend/$(BUILDDIR)/bitcc
+BITCC=$(BITC_SRC)/compiler/$(BUILDDIR)/bitcc
 RUN_BITCC=$(BITCC) -O -I $(LIBBITC_SRC) --nostdlib # --system $(HOSTDIR)
 #LIBBITC=$(HOSTDIR)/lib/libbitc.a
 
@@ -71,6 +71,8 @@ objects: $(OBJECTS)
 all:  $(SOURCE:%.bitc=BUILD/%)
 
 test: $(SOURCE:%.bitc=BUILD/%.test)
+
+install: all test
 
 comp:
 	make run > comp.stdout 2> comp.stderr
