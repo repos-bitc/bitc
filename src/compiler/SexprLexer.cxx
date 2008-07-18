@@ -61,7 +61,7 @@ valid_char_printable(uint32_t ucs4)
 static bool
 valid_ident_punct(uint32_t ucs4)
 {
-  if (strchr("!$%&*+-/<>=?@_~", ucs4))
+  if (strchr("!$%&|*+-/<>=?@_~", ucs4))
     return true;
   return false;
 }

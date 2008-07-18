@@ -321,7 +321,7 @@
 	  <em>any</em> position of an identifier.
 	</p>
 	<literallayout>
-! $ % &amp; * + - / \ &lt; = &gt; ? @ _ ~</literallayout>
+! $ % &amp; | * + - / \ &lt; = &gt; ? @ _ ~</literallayout>
 <!--         <p> -->
 <!--           An identifier may be optionally qualified by an interface -->
 <!--           binding name followed by a period (``.'').  -->
