@@ -1624,6 +1624,106 @@ use</literallayout>
           describes a mutable reference to a memory location in the
           heap. 
         </p>
+        <p>
+          The combination of mutability and value types in the BitC
+          type system raises the need to specify what happens at
+          ``copy boundaries.'' Given a value of type
+          <progident>'a</progident> and a location or formal parameter
+          (the receiver) of type <progident>'b</progident>, when is
+          the value compatible with the receiver for purposes of
+          argument passing and assignment?  We refer to this as
+          <term>copy compatibility</term>.
+        </p>
+        <sect3>
+          <title>Trivial Copy Compatibility</title>
+          <p>
+            The types <progident>'a</progident> and
+            <progident>(mutable&nbsp;'a)</progident> are trivially copy
+            compatible, because they differ only in top-level
+            mutability. A location of type
+            <progident>(mutable&nbsp;'a)</progident> may be assigned a
+            value of either type, and a parameter of type
+            <progident>'a</progident> may be passed a value of either
+            type.
+          </p>
+          <p>
+            The intrinsic type class
+            <progident>(top-copy-compat&nbsp;'a&nbsp;'b)</progident>
+            describes a relation between all pairs of types
+            <progident>'a</progident> and <progident>'b</progident>
+            that are trivially copy compatible.  This type class is
+            rarely the right thing to use in input programs, but may
+            sometimes be seen in the type checker output.
+          </p>
+        </sect3>
+        <sect3>
+          <title>Structural Copy Compatibility</title>
+          <p>
+            Two structured types <progident>'a</progident> and
+            <progident>'b</progident> are structurally copy compatible
+            if (a) they are trivially copy compatible or (b) they are
+            value types that are fieldwise structurally copy
+            compatible. Note that this definition explicitly does
+            <em>not</em> descend recursively across reference
+            types. The conceptual intuition is this: any element that
+            will actually be copied by assignment or argument passing
+            must be compatible ignoring mutability, but any object
+            that is <em>pointed to</em> must have exactly matching
+            type in both the value and its receiver.
+          </p>
+          <p>
+            The intrinsic type class
+            <progident>(copy-compat&nbsp;'a&nbsp;'b)</progident>
+            describes a relation between all pairs of types
+            <progident>'a</progident> and <progident>'b</progident>
+            that are structually copy compatible. If you are trying to
+            abstract over mutability, this type class is usually the
+            one that you want. Note that
+            <progident>(top-copy-compat&nbsp;'a)</progident> implies
+            <progident>(copy-compat&nbsp;'a)</progident>, but the
+            reverse is not true.
+          </p>
+        </sect3>
+        <sect3>
+          <title>Inner and Outer Procedure Types</title>
+          <p>
+            A curious consequence of copy compatibility is that
+            functions have two types. Consider the function:
+          </p>
+          <literallayout>
+(define (inc x:(mutable int32))
+  (set! x (+ x 1))
+  x)</literallayout>
+          <p indent="no">
+            From the inside, <progident>x</progident> is a mutable
+            location, and since <progident>x</progident> is returned,
+            the return type of this function is
+            <progident>(mutable&nbsp;int32)</progident>. From this, we
+            would conclude that the type of <progident>inc</progident>
+            should be:
+          </p>
+<literallayout>
+inc: (fn (mutable int32) (mutable int32))</literallayout>
+          <p indent="no">
+            Given the copy compatibility rules, however, the 
+            fact that <progident>inc</progident> internally mutates
+            its argument is not something that the caller needs to
+            know in order to call <progident>inc</progident>
+            directly. The externally observable type reported for
+            <progident>inc</progident> therefore strips trivial
+            mutability, giving:
+          </p>
+<literallayout>
+inc: (fn int32 int32)</literallayout>
+          <p>
+            In addition to preserving abstraction, reducing type
+            incompatibilities at function reference types, and
+            providing some degree of separation of concerns, copy
+            compatibility can also be exploited by polyinstantiating
+            implementations to significantly reduce the amount of
+            redundant instantiation that would otherwise be required.
+          </p>
+        </sect3>
       </sect2>
 <!--       <sect2> -->
 <!--         <title>Method Types</title> -->
@@ -2149,9 +2249,11 @@ nm : <em>function-type</em></literallayout>
         <p>
           <leadin><progident>(top-copy-compat&nbsp;'a&nbsp;'b)</progident></leadin>
           is an equivalence relation containing all pairs of types
-          <progident>'a</progident> that are either
-          <progident>'b</progident> or
-          <progident>(mutable&nbsp;'b)</progident>.
+          <progident>'a</progident>, <progident>'b</progident> such
+          that <progident>'a=='b</progident>,
+          <progident>(mutable&nbsp;'a)=='b</progident>, or
+          <progident>'a==(mutable&nbsp;'b)</progident>. That is: types
+          that are the same ignoring top-level mutability.
         </p>
       </sect2>
     </sect1>
