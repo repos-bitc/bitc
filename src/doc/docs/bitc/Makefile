@@ -98,11 +98,9 @@ core.xml: core.txml $(XSL_BTYPE) $(CORE_INCLUDE)
 complete.xml: complete.txml $(XSL_BTYPE) $(COMPLETE_INCLUDE)
 	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
-%.ps: %.ltx
+$(MY_TYPE_XML:%=%.ltx): %.ltx : %.xml.ltx
 	$(FIX_LTX) $< |\
 	awk '$$1 ~ /\\begin{alltt}/ {if(pre != ""){print pre;} pre = $$0;}\
 	     $$1 !~ /\\begin{alltt}/ {print pre; pre = $$0;}\
 	     END {print $$0;}' - |\
-	sed '/./,/^$$/!d' - > $*.fix.ltx
-	$(OSDOC_RUNLATEX) $*.fix.ltx
-	dvips -t letter -o $@ $*.fix.dvi
+	sed '/./,/^$$/!d' - > $@
