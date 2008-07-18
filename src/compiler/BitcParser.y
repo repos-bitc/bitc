@@ -1349,10 +1349,11 @@ type: fntype {
   $$ = $1;
 }
 fntype: '(' tk_FN '(' ')' type ')' {
-  SHOWPARSE("fntype -> ( FN ( types ) type )");
+  SHOWPARSE("fntype -> ( FN () type )");
   GCPtr<AST> fnargVec = new AST(at_fnargVec, $3.loc);
   $$ = new AST(at_fn, $2.loc, fnargVec, $5);
 };
+
 fntype: '(' tk_FN '(' types_pl_byref ')' type ')'  {
   SHOWPARSE("fntype -> ( FN ( types_pl_byref ) type )");
   $$ = new AST(at_fn, $2.loc, $4, $6);
