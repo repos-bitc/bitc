@@ -1012,12 +1012,18 @@ use</literallayout>
 	    types (including type variables), then:
 	  </p>
 	  <literallayout>
-(fn <em>t<sub>arg</sub></em> <em>t<sub>result</sub></em>)</literallayout>
+(fn (<em>t<sub>arg_1</sub></em>...<em>t<sub>arg_n</sub></em>) <em>t<sub>result</sub></em>)</literallayout>
 	  <p indent="no">
-	    is the type of a function taking a single argument of type
-	    <em>t<sub>arg</sub></em> and returning a value of type
-	    <progident><em>t<sub>result</sub></em></progident>.
+	    is the type of a function taking <em>n</em> arguments of
+	    types <em>t<sub>arg1</sub></em> through
+	    <em>t<sub>argn</sub></em>, respectively, and returning a
+	    value of type
+	    <progident><em>t<sub>result</sub></em></progident>. The
+	    type of a
+	    function taking zero arguments is written as:
           </p>
+	  <literallayout>
+(fn () <em>t<sub>result</sub></em>)</literallayout>
           <p>
             Function types are considered reference types that denote
             an object of statically undefined size. The size and
@@ -1685,6 +1691,25 @@ use</literallayout>
           </p>
         </sect3>
         <sect3>
+          <title>Shallow vs. Deep Mutability</title>
+          <p>
+            If <progident>'a</progident> is an immutable type, and if
+            all of its unboxed fields (recursively) are of immutable
+            type up to <progident>ref</progident> boundaries, then
+            <progident>'a</progident> is set to be <term>shallow
+            immutable</term>. If any of those elements are mutable,
+            then <progident>'a</progident> is said to be <term>shallow
+            mutable</term>.  We use the term <term>deep mutable</term>
+            to refer to mutable types that appear <em>behind</em> a
+            <progident>ref</progident> boundary.
+          </p>
+          <p>
+            The type
+            <progident>(ref&nbsp;(mutable&nbsp;'a))</progident> is
+            shallow immutable but deep mutable.
+          </p>
+        </sect3>
+        <sect3>
           <title>Inner and Outer Procedure Types</title>
           <p>
             A curious consequence of copy compatibility is that
@@ -1703,7 +1728,7 @@ use</literallayout>
             should be:
           </p>
 <literallayout>
-inc: (fn (mutable int32) (mutable int32))</literallayout>
+inc: (fn ((mutable int32)) (mutable int32))</literallayout>
           <p indent="no">
             Given the copy compatibility rules, however, the 
             fact that <progident>inc</progident> internally mutates
@@ -1714,7 +1739,7 @@ inc: (fn (mutable int32) (mutable int32))</literallayout>
             mutability, giving:
           </p>
 <literallayout>
-inc: (fn int32 int32)</literallayout>
+inc: (fn (int32) int32)</literallayout>
           <p>
             In addition to preserving abstraction, reducing type
             incompatibilities at function reference types, and
@@ -2421,7 +2446,19 @@ id : T
             </footnote> --> Evaluation of the initialization
             expressions occurs in order from
             <progident>e<sub>1</sub></progident> to
-            <progident>e<sub>n</sub></progident>.  The environment in
+            <progident>e<sub>n</sub></progident>.  The syntax of
+            <progident>letrec</progident> is:
+          </p>
+          <literallayout>
+(let ((x <em>e<sub>1</sub></em>)
+      ...
+      (y <em>e<sub>2</sub></em>))
+  ; <em>x, y are bound in:</em>
+  <em>e<sub>body-1</sub></em>
+  ...
+  <em>e<sub>body-n</sub></em>)</literallayout>
+          <p>
+            The environment in
             which the expression(s) are evaluated contains (via
             unification) the identifiers being bound in the current
             <progident>letrec</progident> form. This allows
@@ -2462,7 +2499,7 @@ id : T
 <!--     (fn (<em>e<sub>1</sub></em>, <em>e<sub>2</sub></em>))) -->
 <!-- </literallayout> -->
           <p>
-            The value of a <progident>let</progident> form is the value
+            The value of a <progident>letrec</progident> form is the value
             of the last form executed within the body.
           </p>
           <p>
@@ -2496,10 +2533,20 @@ id : T
         <sect3>
           <title>local define</title>
           <p>
-            The <progident>define</progident> form may be used in an
-            expression sequence, provided it is not the last form of
-            the expression sequence. In this context,
-            <progident>define</progident> is a derived form.
+            The <progident>define</progident> form may be used to
+            introduce local definitions in any expression sequence,
+            provided the local define is not the last form of the
+            sequence.  For this purpose, the bodies of
+            <progident>begin</progident>,
+            <progident>lambda</progident> (including those implied by
+            derived form rewrites), <progident>let</progident>,
+            <progident>letrec</progident>,
+            <progident>while</progident>, or
+            <progident>do-while</progident> constitute expression
+            sequences.
+          </p>
+          <p>
+            Local <progident>define</progident> is a derived form.
             The canonical rewriting of the local
             <progident>define</progident> form using core language
             constructs is:
@@ -2508,14 +2555,19 @@ id : T
 (begin ...
   (define id e<sub>def</sub>) e<sub>2</sub> [...]) =&gt;
 (begin ...
-  (letrec ((id e<sub>def</sub>))
+  (let ((id e<sub>def</sub>))
+    e<sub>2</sub> [...]))
+(begin ...
+  (define (id [args]) e<sub>def</sub>) e<sub>2</sub> [...]) =&gt;
+(begin ...
+  (letrec ((id (lambda(args) e<sub>def</sub>)))
     e<sub>2</sub> [...]))</literallayout>
           <p indent="no">
             This rewrite proceeds left to right. Successive defines
-            are gathered into <progident>letrec</progident> forms that
-            are progressively more deeply nested. Adjacent
-            <progident>define</progident> forms are <em>not</em>
-            gathered into a single <progident>letrec</progident> body.
+            are gathered into <progident>let</progident> or
+            <progident>letrec</progident> forms that are progressively
+            more deeply nested, which means that later local
+            definitions of an identifier shadow earlier definitions.
           </p>
         </sect3>
       </sect2>
@@ -4334,6 +4386,104 @@ id : T
     <sect1>
       <title>Pragmatics</title>
       <sect2>
+        <title>Closure Construction</title>
+        <p>
+          BitC seeks to enable the crafting of programs that do not
+          make unexpected use of the heap, and which can make use of
+          <progident>lambda</progident> and
+          <progident>letrec</progident> forms to describe rich
+          [mutual] tail recursions. Becuase of this, it is necessary
+          to state the <em>minimal</em> degree of closure analysis
+          that every BitC compiler is required to perform when
+          constructing closures, and more generally, the conditions
+          under which closures will be formed at all.
+        </p>
+        <p>
+          Closure
+          construction proceeds in two phases. During the initial
+          phase, free identifiers are added to the closure and the
+          program is rewritten to heap-allocate closed values if that
+          is necessary. During the second phase, a check is performed
+          to determine whether the resulting closure is not actually
+          necessary.
+        </p>
+        <p>
+          <leadin>Phase 1</leadin> Given an identifier
+          <progident>id</progident> appearing free in a
+          <progident>lambda</progident> form <progident>L</progident>:
+        </p>
+        <ol>
+          <li>
+            <p>
+              <leadin>Globals</leadin> If <progident>id</progident>
+              resolves to a globally defined identifier, it will not
+              be added to any closure record.
+            </p>
+          </li>
+          <li>
+            <p>
+              <leadin>Closed Lambda Forms</leadin> If
+              <progident>id:t</progident> is an immutably bound
+              identifier whose initializing form is a
+              <progident>lambda</progident> term (i.e. a literal
+              <progident>lambda</progident>, not merely an expression
+              returning a value of function type), and
+              <progident>id</progident> appears in L <em>in
+              non-applicative position</em>, then
+              <progident>id</progident>, then a corresponding field of
+              type T is added to the closure record, and this field is
+              populated at closure construction time by a
+              <em>copy</em> of <progident>id</progident>.
+            </p>
+          </li>
+          <li>
+            <p>
+              <leadin>Shallow Immutables</leadin> If
+              <progident>id:T</progident> is a locally bound
+              identifier of shallow immutable type, then a
+              corresponding field of type T is added to the closure
+              record, and this field is populated at closure
+              construction time by a <em>copy</em> of
+              <progident>id</progident>.
+            </p>
+          </li>
+          <li>
+            <p>
+              <leadin>Shallow Mutables</leadin> If
+              <progident>id:T</progident> is a locally bound
+              identifier of shallow mutable type, then the program
+              must be rewritten in such a way as to heap-allocate
+              <progident>id</progident>, thereby converting it into a
+              deep mutable value that is shallow immutable. The
+              resulting reference
+              <progident>id:(ref&nbsp;T)</progident> is then closure
+              converted as a shallow immutable identifier.
+            </p>
+          </li>
+        </ol>
+        <p>
+          <leadin>Phase 2</leadin> If a closure record was created in
+          phase 1, but all elements of that closure were added as a
+          consequence of rule 2 (closed lambda forms), then no
+          explicitly allocatd closure record is either required or
+          permitted. All of the closed lambda forms can be represented
+          using labels without any intervening heap-allocated
+          procedure objects.
+        </p>
+        <p>
+          Whether or not a closure record is fabricated for a given
+          <progident>lambda</progident> form <progident>L</progident>,
+          if an identifier <progident>id</progident> resolves to a
+          closed lambda form, then any use-occurrence appearing in
+          applicative position in <progident>L</progident> must be
+          implemented by a call (or if tail recursive, jump) to the
+          associated <progident>lambda</progident> form's
+          <em>label</em> rather than proceeding through any procedure
+          object that may have been allocated for
+          <progident>id</progident>.
+        </p>
+      </sect2>
+      <sect2>
         <title>Tail Recursion</title>
         <p>
           BitC provides no syntactic form providing for non-recursive
@@ -4361,24 +4511,19 @@ id : T
         <ul>
           <li>
             <p>
-              Within any function <progident>f</progident>, calls to
-              <progident>f</progident> that appear in tail position
-              w.r.t. the body of <progident>f</progident> must be tail
-              recursive.
-            </p>
-          </li>
-          <li>
-            <p>
-              The <progident>do</progident> construct is properly
-              tail recursive.
-            </p>
-          </li>
-          <li>
-            <p>
               Within a <progident>letrec</progident>, calls to any
               function bound in the letrec that appear in tail position
               within some function bound by the
               <progident>letrec</progident> must be tail recursive.
+            </p>
+          </li>
+          <li>
+            <p>
+              Within any function <progident>f</progident>, calls to
+              <progident>f</progident> that appear in tail position
+              w.r.t. the body of <progident>f</progident> must be tail
+              recursive. This is actually a special case of the first
+              rule.
             </p>
           </li>
         </ul>
