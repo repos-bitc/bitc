@@ -38,7 +38,8 @@
 (bitc-version "0.10")
 (define (id x) x)
 
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec)
 ;  (set! (array-nth (array 1 2 3) 2) 25:int32)

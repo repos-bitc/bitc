@@ -36,7 +36,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 (defstruct bst f1:(bitfield bool 1) (fill (bitfield uint32 31)))
 
 (define bstv (bst #t))

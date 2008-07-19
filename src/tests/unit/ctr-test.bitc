@@ -36,7 +36,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 
 (defunion (unin 'a 'b) (C1 c1:'a c11:'b) (C2 c2:'a))
  

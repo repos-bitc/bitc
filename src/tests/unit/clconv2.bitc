@@ -43,7 +43,8 @@
 
 (bitc-version "0.10")
 (import stdio bitc.stdio)
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 
 (define (id x) x)
 

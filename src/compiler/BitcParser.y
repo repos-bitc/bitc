@@ -1,6 +1,6 @@
 %{
   /*
-   * copyright		 (C) 2008, The EROS Group, LLC.
+   * Copyright (C) 2008, The EROS Group, LLC.
    * All rights reserved.
    *
    * Redistribution and use in source and binary forms, with or
@@ -234,7 +234,8 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 %type <ast> proclaim_definition
 %type <ast> ptype_name val
 %type <ast> type_definition typapp use_cases use_case
-%type <ast> type_decl externals impList alias
+%type <ast> type_decl externals alias
+%type <ast> importList provideList
 %type <ast> type_cpair eform_cpair
 %type <ast> value_definition tc_definition ti_definition
 %type <ast> import_definition provide_definition
@@ -961,8 +962,8 @@ proclaim_definition: '(' tk_PROCLAIM defident ':' qual_type optdocstring externa
 
 import_definition: '(' tk_IMPORT ident ifident ')' {
   SHOWPARSE("import_definition -> ( IMPORT ident ifident )");
-  $3->uoc = UocInfo::importInterface(lexer->errStream, $4.loc, $4.str);
   GCPtr<AST> ifIdent = new AST(at_ifident, $4);
+  ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $4.loc, $4.str);
   $$ = new AST(at_import, $2.loc, $3, ifIdent); 
 };
 
@@ -981,8 +982,8 @@ import_definition: '(' tk_FROM ifident ')' {
   $$ = new AST(at_from, $2.loc, ifIdent);
 };
 
-import_definition: '(' tk_FROM ifident tk_IMPORT impList ')' {
-  SHOWPARSE("import_definition -> (FROM ifident IMPORT impList)");
+import_definition: '(' tk_FROM ifident tk_IMPORT importList ')' {
+  SHOWPARSE("import_definition -> (FROM ifident IMPORT importList)");
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   GCPtr<AST> ifIdent = new AST(at_ifident, $3);
   $$ = new AST(at_from, $2.loc, ifIdent);
@@ -990,11 +991,12 @@ import_definition: '(' tk_FROM ifident tk_IMPORT impList ')' {
 };
 
 // PROVIDE DEFINITION [8.3]
-provide_definition: '(' tk_PROVIDE ident ifident ')' {
+provide_definition: '(' tk_PROVIDE ifident provideList ')' {
   SHOWPARSE("provide_definition -> (PROVIDE ident ifident)");
-  $3->uoc = UocInfo::importInterface(lexer->errStream, $4.loc, $4.str);
-  GCPtr<AST> ifIdent = new AST(at_ifident, $4);
-  $$ = new AST(at_provide, $2.loc, $3, ifIdent); 
+  GCPtr<AST> ifIdent = new AST(at_ifident, $3);
+  ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
+  $$ = new AST(at_provide, $2.loc, ifIdent); 
+  $$->addChildrenFrom($4);
 };
 
 use_cases: use_case {
@@ -1022,12 +1024,23 @@ use_case: '(' ident '=' ident '.' ident ')' {
   $$ = new AST(at_use_case, $2->loc, $2, usesel);
 };
 
-impList: alias {
-  SHOWPARSE("impList -> alias");
+provideList: ident {
+  SHOWPARSE("provideList -> ident");
   $$ = new AST(at_Null, $1->loc, $1);
 };
-impList: impList alias {
-  SHOWPARSE("impList -> impList alias");
+
+provideList: provideList ident {
+  SHOWPARSE("provideList -> provideList ident");
+  $$ = $1;
+  $$->addChild($2);
+};
+
+importList: alias {
+  SHOWPARSE("importList -> alias");
+  $$ = new AST(at_Null, $1->loc, $1);
+};
+importList: importList alias {
+  SHOWPARSE("importList -> importList alias");
   $$ = $1;
   $$->addChild($2);
 };
@@ -2220,6 +2233,12 @@ useident: ident '.' ident {
   SHOWPARSE("useident -> ident . ident");
   $$ = new AST(at_usesel, $1->loc, $1, $3);
 };
+
+//defident: ident {
+//  SHOWPARSE("defident -> ident");
+//  $1->Flags |= (ID_IS_GLOBAL);
+//  $$ = $1;
+//};
 
 defident: useident {
   SHOWPARSE("defident -> useident");

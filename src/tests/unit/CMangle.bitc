@@ -36,7 +36,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 
 (define $ (the int32 100))
 (define $@%<> (the int32 25))

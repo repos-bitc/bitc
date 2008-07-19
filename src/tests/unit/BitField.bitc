@@ -35,7 +35,8 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 
 (defstruct s
   a : (bitfield uint32 2)

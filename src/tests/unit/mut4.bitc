@@ -36,7 +36,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 
 (defstruct St:val f1:(mutable int32) f2:bool)
 (define main.main:(fn ((vector string)) int32)

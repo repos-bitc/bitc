@@ -36,7 +36,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 
 (define i0 (the int32 0))
  

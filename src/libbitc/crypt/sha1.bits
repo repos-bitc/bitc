@@ -110,7 +110,12 @@
 (module sha1-impl
   (import stdio bitc.stdio)
   (import stdlib bitc.stdlib)
-  (provide sha1 crypt.sha1)
+  (import sha1 crypt.sha1)
+  (provide crypt.sha1
+	   shaResultAsString 
+	   sha1Reset
+	   sha1Result
+	   sha1Input)
 
 
   ;; Define the SHA1 circular left shift operation

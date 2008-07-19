@@ -45,7 +45,8 @@
 (define (lv-nm lst:(list char))
   (list->vector lst))
 
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argv)
     (lv-m (cons #\a nil:(list (mutable char))))

@@ -37,7 +37,8 @@
 
 (bitc-version "0.10")
 (module MainModule
-  (provide main bitc.main)
+(import main bitc.main)
+  (provide bitc.main main)
   (import stdio bitc.stdio)
 
   (define main.main:(fn ((vector string)) int32)

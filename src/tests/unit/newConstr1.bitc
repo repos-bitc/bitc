@@ -39,7 +39,8 @@
 
 ;; New dotted syntax (type.constructor) for union constructors.
 
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec)   
     (list.cons #t list.nil) 0))

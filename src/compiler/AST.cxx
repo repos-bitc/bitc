@@ -2172,18 +2172,6 @@ AST::isValid() const
     break;
 
   case at_provide: // normal AST:
-    // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
-      errorsPresent = true;
-      break;
-    }
-    if (!ISSET(astMembers[at_ident], child(c)->astType)) {
-      astChTypeError(*this, at_ident, child(c)->astType, c);
-      errorsPresent = true;
-    }
-    c++;
-
     // match at_ifident
     if(c >= children->size()) {
       astChNumError(*this, c+1, children->size());
@@ -2192,6 +2180,18 @@ AST::isValid() const
     }
     if (!ISSET(astMembers[at_ifident], child(c)->astType)) {
       astChTypeError(*this, at_ifident, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
+    // match at_ident
+    if(c >= children->size()) {
+      astChNumError(*this, c+1, children->size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_ident], child(c)->astType)) {
+      astChTypeError(*this, at_ident, child(c)->astType, c);
       errorsPresent = true;
     }
     c++;

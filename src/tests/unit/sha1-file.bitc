@@ -39,7 +39,8 @@
 (import stdio bitc.stdio)
 (import stdlib bitc.stdlib)
 (import sha1 crypt.sha1)
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 
 
 (define (TS str ts)

@@ -4306,13 +4306,24 @@ id : T
           syntax of provide is:
         </p>
         <literallayout>
-(provide <em>local-name</em> <em>interface-name</em>)</literallayout>
+(provide <em>interface-name</em> <em>ident</em><sup>+</sup>)</literallayout>
         <p indent="no">
-          For example:
+          Where each <progident><em>ident</em></progident> is an
+          identifier proclaimed by the named interface. That is: the
+          name as specified in the interface rather than any alias of
+          that name that may have been locally bound.
+        </p>
+        <p>
+          The effect of <progident>provide</progident> is to
+          <em>authorize</em> the definition of the named
+          identifiers. The definitions must then be defined by binding
+          an arbitrarily selected local alias of the public identifier.
+For example:
         </p>
         <literallayout>
 (bitc-version "&BitcVersion;")
-(provide ln sample)
+(import ln sample)
+(provide sample tree-of)
 
 (defstruct (ln.tree-of 'a):ref
   left : (optional
@@ -4322,20 +4333,19 @@ id : T
   height
   value : 'a)</literallayout>
         <p indent="no">
-          Note that the <progident>provide</progident> form imports
-          the corresponding interface. Note further that because the
-          interface introduces the defining name for
-          <progident>tree-of</progident>, the following alternative
+          The requirement that an arbitrary alias be defined can
+          result in strange appearances. The following alternative
           definition is equivalent in all respects to the one above:
-        </p> 
+          </p>
         <literallayout>
 (bitc-version "&BitcVersion;")
-(provide ln sample)
-(use (tree-of = ln.tree-of))
+(import ln sample)
+(provide sample tree-of)
+(use (mumble = ln.tree-of))
 
-(defstruct (tree-of 'a):ref
-  left : (optional (tree-of 'a))
-  right : (optional (ree-of 'a))
+(defstruct (mumble 'a):ref
+  left : (optional (mumble 'a))
+  right : (optional (mumble 'a))
   height
   value : 'a)</literallayout>
         <p>

@@ -36,7 +36,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 
 (define i0 0:int32)
 
@@ -61,6 +62,7 @@
 ;(define p6 (let ((m:'a (let ((n:'a (lambda (x) x))) n)))
 ;	     (m #t) (m i0) ))
 
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec)  0))

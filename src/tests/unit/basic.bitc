@@ -39,6 +39,7 @@
 
 ;; The simplest test
 
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec) 0)) 

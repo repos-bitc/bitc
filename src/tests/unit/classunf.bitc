@@ -41,7 +41,8 @@
 
 
 (bitc-version "0.10")
-(provide main bitc.main)
+(import main bitc.main)
+(provide bitc.main main)
 
 (define (fnxn x) (let ((log (== x 0))) #t))
 
