@@ -198,6 +198,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
     }
 
   case at_define:
+  case at_recdef:
     {
       if(ast->child(1)->astType == at_lambda) {
 	ast->child(0)->child(0)->defbps = ast->child(1)->child(0);

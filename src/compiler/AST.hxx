@@ -288,6 +288,7 @@ enum AstType {
     at_use_case,
     at_proclaim,
     at_define,
+    at_recdef,
     at_import,
     at_provide,
     at_from,

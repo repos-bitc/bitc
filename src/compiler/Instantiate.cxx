@@ -575,6 +575,7 @@ clearConstraints(GCPtr<AST> ast)
 {
   switch(ast->astType) {
   case at_define:
+  case at_recdef:
   case at_proclaim:
     assert(ast->child(2)->astType == at_constraints);
     ast->child(2)->children->erase();
@@ -748,6 +749,7 @@ buildNewDeclaration(GCPtr<AST> def, GCPtr<Type> typ)
   
   switch(def->astType) {
   case at_define:
+  case at_recdef:
   case at_proclaim:
   case at_defexception:
     decl = new AST(at_proclaim, def->loc, ident,
@@ -1726,6 +1728,7 @@ UocInfo::doInstantiate(ostream &errStream,
   // letbinding to the AST here, before we RandT for the first time.
   switch(copy->astType) {
   case at_define:
+  case at_recdef:
   case at_letbinding:
     {
       // For a definition, fix the type by emitting a concrete type
@@ -1887,6 +1890,7 @@ UocInfo::doInstantiate(ostream &errStream,
 
   switch(copy->astType) {
   case at_define:
+  case at_recdef:
   case at_letbinding:
     {
       // Instantiate any types in the qualification we just emitted

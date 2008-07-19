@@ -302,6 +302,7 @@ findusedef(std::ostream &errStream,
     }
 
   case at_define:
+  case at_recdef:
     {
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(1), 
 				 USE_MODE, boundVars, freeVars));
@@ -663,7 +664,7 @@ cl_convert_ast(GCPtr<AST> ast,
   bool hoistChildren = true;
 
   /* Pre Processing */  
-  if(ast->astType == at_define) {
+  if(ast->astType == at_define || ast->astType == at_recdef) {
     hoistChildren = false;
 
     GCPtr<AST> ident = ast->getID();
@@ -819,7 +820,8 @@ cl_convert_ast(GCPtr<AST> ast,
 	CLCONV_DEBUG ast->PrettyPrint(std::cerr);
 	
 	// AST define = bindingPattern expr;
-	GCPtr<AST> newDef = new AST(at_define, ast->loc);
+	// FIX: should this be done with at_recdef or at_define?
+	GCPtr<AST> newDef = new AST(at_recdef, ast->loc);
       
 	GCPtr<AST> lamName = AST::genSym(ast, "lam");
 	lamName->identType = id_value;

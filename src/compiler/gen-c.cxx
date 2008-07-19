@@ -688,7 +688,7 @@ emit_fnxn_label(std::ostream& errStream,
 		unsigned long flags)
 {
   bool errFree = true;
-  assert(ast->astType == at_define);
+  assert(ast->astType == at_define || ast->astType == at_recdef);
   GCPtr<AST> id = ast->child(0)->child(0);
   assert(id->isFnxn());
   bool isHeader = (flags & TOC_HEADER_MODE);
@@ -1713,6 +1713,7 @@ toc(std::ostream& errStream,
       break;
     }
     
+  case at_recdef:
   case at_define:
     {
       GCPtr<AST> id = ast->child(0)->child(0);
@@ -2692,6 +2693,7 @@ TypesTOC(std::ostream& errStream,
       }
       
     case at_proclaim:
+    case at_recdef:
     case at_define:
       {
 	emit_arr_vec_fn_types(ast, out, arrVec, vecVec, 
@@ -2716,7 +2718,7 @@ emitInitProc(std::ostream& errStream, GCPtr<AST> ast, GCPtr<UocInfo> uoc,
 {
   bool answer = true;
   bool errorFree = true;
-  assert(ast->astType == at_define);
+  assert(ast->astType == at_define || ast->astType == at_recdef);
   out << "static " 
       << toCtype(ast->getID()->symType)
       << endl
@@ -2767,6 +2769,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 
     switch(ast->astType) {
     case at_define:
+    case at_recdef:
       {
 	// Later, we might consider: 
 	//initStream << "#line " << ast->loc.line 

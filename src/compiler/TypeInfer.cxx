@@ -2239,8 +2239,10 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       break;
     }
 
+  case at_recdef:
   case at_define:
     {
+      // FIX: need to adjust the type rule?
       /*------------------------------------------------
 	        t' = 'a|'b       [U(t = t')]
    	     A, x:t' |- e:t1    U(t1 = 'c|'b)	
@@ -2257,14 +2259,24 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
       GCPtr<TCConstraints> currTcc = new TCConstraints;
       
-      // match agt_bindingPattern
-      // match agt_expr
-      TYPEINFER(ast->child(0), defGamma, instEnv, impTypes, isVP, 
-		currTcc, uflags, trail, DEF_MODE, TI_NONE);
+      // FIX: not clear if this care is needed here.
+      if (ast->astType == at_recdef) {
+	// match agt_bindingPattern
+	// match agt_expr
+	TYPEINFER(ast->child(0), defGamma, instEnv, impTypes, isVP, 
+		  currTcc, uflags, trail, DEF_MODE, TI_NONE);
+      }
 
       TYPEINFER(ast->child(1), defGamma, instEnv, impTypes, isVP, 
 		currTcc, uflags, trail, USE_MODE, TI_NONE);
       
+      if (ast->astType == at_define) {
+	// match agt_bindingPattern
+	// match agt_expr
+	TYPEINFER(ast->child(0), defGamma, instEnv, impTypes, isVP, 
+		  currTcc, uflags, trail, DEF_MODE, TI_NONE);
+      }
+
       TYPEINFER(ast->child(2), defGamma, instEnv, impTypes, isVP, 
 		currTcc, uflags, trail,  mode, TI_CONSTR);
 
@@ -4740,7 +4752,7 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
     for(size_t i=0; i < mod->children->size(); i++) {
       GCPtr<AST> ast = mod->child(i);
       errStream << ast->atKwd() << std::endl;
-      if(ast->astType == at_define) {
+      if(ast->astType == at_define || ast->astType == at_recdef) {
 	GCPtr<AST> id = ast->child(0)->child(0);
 	errStream << id->asString() << ": "	
 		  << id->scheme->asString(Options::debugTvP, true)

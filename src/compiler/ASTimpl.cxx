@@ -269,6 +269,7 @@ AST::atKwd() const
     return "defstruct";
 
   case at_define:
+  case at_recdef:
     return "define";
 
   case at_declares:
@@ -648,6 +649,7 @@ AST::isTopLevelForm()
 {
   switch(astType) {
   case at_define:
+  case at_recdef:
   case at_defstruct:
   case at_defunion:
   case at_declunion:
@@ -672,6 +674,7 @@ AST::leadsToTopLevelForm()
   case at_module:
   case at_interface:
   case at_define:
+  case at_recdef:
   case at_defstruct:
   case at_defunion:
   case at_declunion:
@@ -724,6 +727,7 @@ AST::getID()
 {
   switch(astType) {
   case at_define:
+  case at_recdef:
   case at_letbinding:
   case at_dobinding:
     return child(0)->child(0);

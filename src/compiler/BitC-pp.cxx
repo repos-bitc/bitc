@@ -221,10 +221,8 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
     // the convenience syntax.
     //
     ///////////////////////////////////////////////////////////
-  case at_define:
+  case at_recdef:
     {
-      if (ast->child(1)->astType == at_lambda &&
-	  ast->child(1)->printVariant == 1) {
 	out << "(" << ast->atKwd();
 
 	size_t oldIndent = out.indentToHere();
@@ -246,8 +244,13 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
 	out.more();
 	doChildren(out, iLambda, 1, true, showTypes);
 	out << ")";
-      }
-      else if (ast->child(1)->astType == at_lambda) {
+
+	break;
+    }
+
+  case at_define:
+    {
+      if (ast->child(1)->astType == at_lambda) {
 	out << "(" << ast->atKwd() << " ";
 
 	// Procedure name:
@@ -1091,6 +1094,7 @@ doShowTypes(std::ostream& out, GCPtr<AST> ast,
     }
      
   case at_define:
+  case at_recdef:
     {
       doShowTypes(out, ast->child(0), gamma, 
 		  showMangName, raw, tvP);

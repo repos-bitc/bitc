@@ -927,7 +927,7 @@ value_definition: '(' tk_DEFINE '(' defident ')' expr_seq ')'  {
     new AST(at_lambda, $2.loc, new AST(at_argVec, $5.loc), $6);
   iLambda->printVariant = 1;
   GCPtr<AST> iP = new AST(at_identPattern, $4->loc, $4);
-  $$ = new AST(at_define, $2.loc, iP, iLambda);
+  $$ = new AST(at_recdef, $2.loc, iP, iLambda);
   $$->addChild(new AST(at_constraints));
 };
 
@@ -941,7 +941,7 @@ value_definition: '(' tk_DEFINE '(' defident lambdapatterns ')'
   GCPtr<AST> iLambda = new AST(at_lambda, $2.loc, $5, $7);
   iLambda->printVariant = 1;
   GCPtr<AST> iP = new AST(at_identPattern, $4->loc, $4);
-  $$ = new AST(at_define, $2.loc, iP, iLambda);
+  $$ = new AST(at_recdef, $2.loc, iP, iLambda);
   $$->addChild(new AST(at_constraints));
 };
 

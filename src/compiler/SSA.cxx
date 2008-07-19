@@ -375,6 +375,7 @@ ssa(std::ostream& errStream,
     }
     
   case at_define:
+  case at_recdef:
     {
       if(ast->child(1)->astType == at_lambda) {
 	SSA(errStream, uoc, ast->child(1), grandLet, identList, 

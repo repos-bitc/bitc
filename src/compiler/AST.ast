@@ -580,7 +580,7 @@ GROUP type_definition = defunion | defstruct
                    /*  | deftype  */
                       | defexception;
 GROUP tc_definition = deftypeclass | definstance;
-GROUP value_definition = define;
+GROUP value_definition = define | recdef;
 GROUP if_definition = proclaim | from
                     | import | provide
                     | declare | use;
@@ -642,10 +642,11 @@ AST proclaim = ident qtype constraints;
 
 // DEFINE  [5.1]
 AST define = identPattern expr constraints;
+AST recdef = identPattern expr constraints;
 
 // IMPORT DEFINITIONS [8.2]
 AST import = ident ifident;
-AST provide = ifident ident;
+AST provide = ifident ident+;
  
 AST from = ifident ifsel*;
 AST ifsel = ident ident;
@@ -711,7 +712,7 @@ AST identPattern = var qtype?;
 
 // TYPE QUALIFIED EXPRESSIONS  [7.3]
 GROUP expr = eform | tqexpr;
-GROUP expr_or_define = expr | define;
+GROUP expr_or_define = expr | define | recdef;
 AST tqexpr = eform type;
 
 // EXPRESSIONS [7]

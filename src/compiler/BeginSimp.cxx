@@ -64,10 +64,12 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool *stillOK)
 
   if (ast->astType == at_begin) {
     for (size_t c = 0; c < ast->children->size(); c++) {
-      if (ast->child(c)->astType == at_define) {
+      if (ast->child(c)->astType == at_define ||
+	  ast->child(c)->astType == at_recdef) {
 	GCPtr<AST> def = ast->child(c);
-	GCPtr<AST> letBinding = new AST(at_letbinding, def->loc, 
-				  def->child(0), def->child(1));
+	GCPtr<AST> letBinding = 
+	  new AST(at_letbinding,
+		  def->loc, def->child(0), def->child(1));
 	letBinding->Flags |= LB_REC_BIND;
 
 	// The definition is not a global
@@ -91,7 +93,8 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool *stillOK)
 
 	// Insert the new letrec:
 	GCPtr<AST> theLetRec = 
-	  new AST(at_letrec, def->loc, 
+	  new AST((ast->child(c)->astType == at_define) ? at_let : at_letrec,
+		  def->loc, 
 		  new AST(at_letbindings, def->loc, letBinding),
 		  body,
 		  def->child(2));

@@ -310,6 +310,7 @@ TopInit(std::ostream& errStream,
     }
     
   case at_define:
+  case at_recdef:
     {
       TOPINIT(ast->child(1), flags);      
 

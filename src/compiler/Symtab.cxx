@@ -988,6 +988,7 @@ resolve(std::ostream& errStream,
       break;
     }    
 
+  case at_recdef:
   case at_define:
     {
       GCPtr<Environment<AST> > tmpEnv = env->newDefScope();
@@ -1002,16 +1003,28 @@ resolve(std::ostream& errStream,
       assert(ast->child(0)->astType == at_identPattern);
       ast->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
       
-      // match agt_bindingPattern
-      RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
-	      id_value, ast, 
-	      flags | (NEW_TV_OK) | BIND_PUBLIC);
+      if (ast->astType == at_recdef) {
+	// Binding patterns must be in scope.
+	// match agt_bindingPattern
+	RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
+		id_value, ast, 
+		flags | (NEW_TV_OK) | BIND_PUBLIC);
+      }
 
       // match agt_expr
       RESOLVE(ast->child(1), tmpEnv, lamLevel, USE_MODE, 
 	      id_value, ast, 
 	      flags | (NEW_TV_OK) & (~INCOMPLETE_OK));
       
+      if (ast->astType == at_define) {
+	// Binding patterns not in scope within expr, so handle them
+	// later.
+	// match agt_bindingPattern
+	RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
+		id_value, ast, 
+		flags | (NEW_TV_OK) | BIND_PUBLIC);
+      }
+
       // match at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
 	      id_type, ast, 

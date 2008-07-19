@@ -2331,34 +2331,18 @@ id : T
   <em>e</em> ... <em>e</em>)</literallayout>
 	<p indent="no">
 	  where each <progident><em>bp</em></progident> is a binding
-	  pattern.  The second form is a derived form:
-	</p>
-	<literallayout>
-(define (<em>id</em> [<em>bp<sub>1</sub></em> ... <em>bp<sub>n</sub></em>])
-  <em>e</em> ... <em>e</em>) =&gt;
-(define id
-  (letrec ((id (lambda ([<em>bp<sub>1</sub></em> ... <em>bp<sub>n</sub></em>])
-                    <em>e</em> ... <em>e</em>)))
-    id))</literallayout>
-	<p indent="no">
-	  where each <progident><em>bp<sub>i</sub></em></progident> is a
-	  binding pattern. Note the introduction of the letrec, which
-	  supports simple recursion.
-	</p>
-        <p>
-	  The right hand form of a <progident>define</progident> is
-	  evaluated to obtain a value, which is then pattern matched
-	  against the pattern being bound. For each identifier
-	  <progident>x</progident> that appears in the binding
-	  pattern, then identifier is bound in the currently active
-	  environment to the positionally corresponding element within
-	  the value resulting from the evaluation of the expression.
-	</p>
-        <p>
-          Identifiers defined within a single
+	  pattern.  In the first form, the newly bound identifiers are
+	  not in scope within the body. The second form permits
+	  recursive bindings.
+          Identifiers defined within a recursive
           <progident>define</progident> are deemed ``incomplete''
           until the end of the enclosing <progident>define</progident>
           form.
+	</p>
+        <p>
+	  The right hand form of a <progident>define</progident> is
+	  evaluated to obtain a value, which is then bound to the
+	  identifier on the left-hand side.
         </p>
 	<p>
 	  Mutually recursive procedure definitions at top level can be
