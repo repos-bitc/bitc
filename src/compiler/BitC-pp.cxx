@@ -223,29 +223,29 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
     ///////////////////////////////////////////////////////////
   case at_recdef:
     {
-	out << "(" << ast->atKwd();
-
-	size_t oldIndent = out.indentToHere();
-
-	out << " (";
-
-	// Procedure name:
-	BitcP(out, ast->child(0), showTypes);
-
-	// Procedure arguments:
-	GCPtr<AST> iLambda = ast->child(1);
-	doChildren(out, iLambda->child(0), 0, true, showTypes);
-
-	out << ")";
-
-	out << std::endl;
-	out.setIndent(oldIndent);
-
-	out.more();
-	doChildren(out, iLambda, 1, true, showTypes);
-	out << ")";
-
-	break;
+      out << "(" << ast->atKwd();
+      
+      size_t oldIndent = out.indentToHere();
+      
+      out << " (";
+      
+      // Procedure name:
+      BitcP(out, ast->child(0), showTypes);
+      
+      // Procedure arguments:
+      GCPtr<AST> iLambda = ast->child(1);
+      doChildren(out, iLambda->child(0), 0, true, showTypes);
+      
+      out << ")";
+      
+      out << std::endl;
+      out.setIndent(oldIndent);
+      
+      out.more();
+      doChildren(out, iLambda, 1, true, showTypes);
+      out << ")";
+      
+      break;
     }
 
   case at_define:

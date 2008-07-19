@@ -1,5 +1,5 @@
-#ifndef TYPEINFERCOMMON_HXX
-#define TYPEINFERCOMMON_HXX
+#ifndef TYPEINFERUTIL_HXX
+#define TYPEINFERUTIL_HXX
 /**************************************************************************
  *
  * Copyright (C) 2006, Johns Hopkins University.
@@ -56,7 +56,8 @@ initGamma(std::ostream& errStream,
 bool
 checkImpreciseTypes(std::ostream& errStream, 
 		    const GCPtr<Environment<TypeScheme> > gamma,
-		    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes);
+		    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
+		                             GCPtr<AST> > > > > impTypes);
 void
 useIFGamma(const std::string& idName,
 	   GCPtr<Environment<TypeScheme> > fromEnv, 
@@ -76,4 +77,4 @@ initGamma(std::ostream& errStream,
 size_t
 nCtArgs(GCPtr<Type> t);
 
-#endif /* TYPEINFERCOMMON_HXX */
+#endif /* TYPEINFERUTIL_HXX */

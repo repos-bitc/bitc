@@ -81,7 +81,8 @@ bool
 typeInfer(std::ostream& errStream, GCPtr<AST> ast, 
 	  GCPtr<Environment<TypeScheme> > gamma,
 	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes,
+	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
+                                   GCPtr<AST> > > > > impTypes,
 	  bool isVP, 
 	  GCPtr<TCConstraints> tcc,
 	  unsigned long uflags,
@@ -258,7 +259,8 @@ static bool
 ProcessLetExprs(std::ostream& errStream, GCPtr<AST> lbs, 
 		GCPtr<Environment<TypeScheme> > gamma,
 		GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-		GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes,
+		GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
+                                         GCPtr<AST> > > > > impTypes,
 		bool isVP, GCPtr<TCConstraints> tcc,
 		unsigned long uflags, GCPtr<Trail> trail,
 		int mode, unsigned flags)
@@ -277,7 +279,8 @@ static bool
 ProcessLetBinds(std::ostream& errStream, GCPtr<AST> lbs, 
 		GCPtr<Environment<TypeScheme> > gamma,
 		GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-		GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes,
+		GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
+                                         GCPtr<AST> > > > > impTypes,
 		bool isVP, GCPtr<TCConstraints> tcc,
 		unsigned long uflags, GCPtr<Trail> trail,
 		int mode, unsigned flags)
@@ -347,7 +350,8 @@ makeLetGather(GCPtr<AST> lbs, GCPtr<AST> &bAst, GCPtr<AST> &vAst)
 bool
 checkImpreciseTypes(std::ostream& errStream, 
 		    const GCPtr<Environment<TypeScheme> > gamma,
-		    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes)
+		    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
+                                             GCPtr<AST> > > > > impTypes)
 {
   bool errFree = true;
   for(size_t i=0; i<impTypes->size(); i++) {
@@ -576,7 +580,8 @@ bool
 InferTvList(std::ostream& errStream, GCPtr<AST> tvList, 
 	    GCPtr<Environment<TypeScheme> > gamma,
 	    GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes,
+	    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
+                                     GCPtr<AST> > > > > impTypes,
 	    bool isVP, 
 	    GCPtr<TCConstraints> tcc,
 	    unsigned long uflags,
@@ -644,7 +649,8 @@ bool
 InferStruct(std::ostream& errStream, GCPtr<AST> ast, 
 	    GCPtr<Environment<TypeScheme> > gamma,
 	    GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes,
+	    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
+                                     GCPtr<AST> > > > > impTypes,
 	    bool isVP, 
 	    GCPtr<TCConstraints> tcc,
 	    unsigned long uflags,
@@ -760,7 +766,8 @@ bool
 InferUnion(std::ostream& errStream, GCPtr<AST> ast, 
 	   GCPtr<Environment<TypeScheme> > gamma,
 	   GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	   GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes,
+	   GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
+                                    GCPtr<AST> > > > > impTypes,
 	   bool isVP, 
 	   GCPtr<TCConstraints> tcc,
 	   unsigned long uflags,
@@ -1145,7 +1152,8 @@ bool
 InferTypeClass(std::ostream& errStream, GCPtr<AST> ast, 
 	       GCPtr<Environment<TypeScheme> > gamma,
 	       GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	       GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes,
+	       GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
+                                        GCPtr<AST> > > > > impTypes,
 	       bool isVP, 
 	       GCPtr<TCConstraints> tcc,
 	       unsigned long uflags,
@@ -1271,7 +1279,8 @@ bool
 InferInstance(std::ostream& errStream, GCPtr<AST> ast, 
 	      GCPtr<Environment<TypeScheme> > gamma,
 	      GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	      GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes,
+	      GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
+                                       GCPtr<AST> > > > > impTypes,
 	      bool isVP, 
 	      GCPtr<TCConstraints> tcc,
 	      unsigned long uflags,
@@ -1556,7 +1565,8 @@ bool
 typeInfer(std::ostream& errStream, GCPtr<AST> ast, 
 	  GCPtr<Environment<TypeScheme> > gamma,
 	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes,
+	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
+                                   GCPtr<AST> > > > > impTypes,
 	  bool isVP, 
 	  GCPtr<TCConstraints> tcc,
 	  unsigned long uflags,
@@ -2242,13 +2252,19 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
   case at_recdef:
   case at_define:
     {
-      // FIX: need to adjust the type rule?
       /*------------------------------------------------
-	        t' = 'a|'b       [U(t = t')]
-   	     A, x:t' |- e:t1    U(t1 = 'c|'b)	
+	        t' = 'a|'b     [U(t = t')]
+       	          A |- e:t1    U(t1 = 'c|'b)	
           S = generalize(A, t', e)   EXTEND A with x:S
 	_______________________________________________
     	        A |- (define x:[t] = e): t'
+
+
+	          t' = 'a|'b   [U(t = t')]
+   	     A, x:t' |- e:t1    U(t1 = 'c|'b)	
+          S = generalize(A, t', e)   EXTEND A with x:S
+	_______________________________________________
+    	        A |- (recdef x:[t] = e): t'
      ---------------------------------------------------*/
       // Maybe, we have a prior declaration?
       GCPtr<AST> ident = ast->getID();
@@ -2259,7 +2275,6 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
       GCPtr<TCConstraints> currTcc = new TCConstraints;
       
-      // FIX: not clear if this care is needed here.
       if (ast->astType == at_recdef) {
 	// match agt_bindingPattern
 	// match agt_expr

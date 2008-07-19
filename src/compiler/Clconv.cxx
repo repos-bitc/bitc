@@ -239,8 +239,8 @@ findusedef(std::ostream &errStream,
 	  }
 
 	  CLCONV_DEBUG std::cerr << "Append " << ast->symbolDef->fqn
-			      << " to freeVars" << std::endl;
-
+				 << " to freeVars" << std::endl;
+	  
 	  if (!freeVars->contains(ast->symbolDef))
 	    freeVars->append(ast->symbolDef);
 	  break;
@@ -528,19 +528,31 @@ findusedef(std::ostream &errStream,
   case at_do:
     {
       GCPtr<AST> dbs = ast->child(0);      
+      // Initializers
       for (size_t c = 0; c < dbs->children->size(); c++) {
 	GCPtr<AST> db = dbs->child(c);
-	
 	CHKERR(errFree, findusedef(errStream, topAst, db->child(1), 
-				   USE_MODE, boundVars, freeVars));
-	CHKERR(errFree, findusedef(errStream, topAst, db->child(0), 
-				   LOCAL_MODE, boundVars, freeVars));
-	CHKERR(errFree, findusedef(errStream, topAst, db->child(2), 
 				   USE_MODE, boundVars, freeVars));
       }
       
+      // Binding
+      for (size_t c = 0; c < dbs->children->size(); c++) {
+	GCPtr<AST> db = dbs->child(c);
+	CHKERR(errFree, findusedef(errStream, topAst, db->child(0), 
+				   LOCAL_MODE, boundVars, freeVars));
+      }
+      
+      //Step-wise update
+      for (size_t c = 0; c < dbs->children->size(); c++) {
+	GCPtr<AST> db = dbs->child(c);
+	CHKERR(errFree, findusedef(errStream, topAst, ast->child(2), 
+				   USE_MODE, boundVars, freeVars));
+      }
+      
+      // Test
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(1), 
 				 USE_MODE, boundVars, freeVars));
+      // Boody
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(2), 
 				 USE_MODE, boundVars, freeVars));
       break;
@@ -820,7 +832,8 @@ cl_convert_ast(GCPtr<AST> ast,
 	CLCONV_DEBUG ast->PrettyPrint(std::cerr);
 	
 	// AST define = bindingPattern expr;
-	// FIX: should this be done with at_recdef or at_define?
+	// This can be done as a recdef since we don't allow top-level
+	// names to be shadowed.
 	GCPtr<AST> newDef = new AST(at_recdef, ast->loc);
       
 	GCPtr<AST> lamName = AST::genSym(ast, "lam");
