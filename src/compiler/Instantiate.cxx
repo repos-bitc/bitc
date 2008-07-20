@@ -506,7 +506,6 @@ name2fqn(GCPtr<AST> ast)
     }
 
   case at_module:
-  case at_use_case:
     {
       assert(false);
       break;

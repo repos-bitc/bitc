@@ -419,7 +419,7 @@ isExpansive(std::ostream& errStream,
   case at_interface:
   case at_importAs:
   case at_provide:
-  case at_from:
+  case at_import:
   case at_ifsel:
   case agt_CompilationUnit:
   case at_defexception:
@@ -430,8 +430,6 @@ isExpansive(std::ostream& errStream,
   case at_method_decl:
   case at_definstance:
   case at_methods:
-  case at_use:
-  case at_use_case:
   case agt_tc_definition:
   case agt_if_definition:
   case agt_ow:

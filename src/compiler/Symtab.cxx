@@ -1164,68 +1164,6 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_use:
-    {
-      GCPtr<Environment<AST> > tmpEnv = env->newScope();
-      ast->envs.env = tmpEnv;
-
-      for (size_t c = 0; c < ast->children->size(); c++)
-	RESOLVE(ast->child(c), tmpEnv, lamLevel, USE_MODE,
-		id_usebinding, currLB,
-		flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
-
-      env->mergeBindingsFrom(tmpEnv);
-      break;
-    }
-
-  case at_use_case:
-    {
-      /** FIX ME : The incompleteness restriction is NOT enforced here
-	  This needs to be fixed after a resolution algorithm is
-	  specified. The resolution algorithm must identify what
-	  identifiers are declared complete across a interface/module
-	  definition.  
-
-	  The problem here is that there can be a cyclic construction,
-	  which leads to infinite loop in the construction logic.
-	  For example:
-
-	  Interface A:
-	  (interface ifa
-   	    (proclaim a:uint32))
-
-	  Interface B:
-	  (interface ifb
-	    (proclaim b:uint32))
-
-
-	  Source A:
-	  (import ifb ifb)
-          (provide ifa ifa)
-          (define ifa.a ifb.b)
-
-          Source B:
-	  (import ifa ifa)
-	  (provide ifb ifb)
-	  (define ifb.b ifa.a)
-
-	  This test case can be found in tests/defloop. ***/
-      RESOLVE(ast->child(1), env, lamLevel, USE_MODE,
-	      id_usebinding, currLB, 
-	      ((flags & (~NEW_TV_OK))) | NO_CHK_USE_TYPE);
-
-      if (!errorFree)
-	break;
-      
-      env->addBinding(ast->child(0)->s,
-		      ast->child(1)->symbolDef); 
-      env->setFlags(ast->child(0)->s,
-		    ((env->getFlags(ast->child(0)->s)) |
-		     BF_PRIVATE)); 
-      
-      break;
-    }
-
   case at_ifident:
     break;
     
@@ -1307,7 +1245,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_from:
+  case at_import:
     {
       // from ifName alias+
       GCPtr<Environment<AST> > tmpEnv = env->newScope();

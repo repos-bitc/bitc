@@ -947,7 +947,6 @@ toc(std::ostream& errStream,
   case agt_fielditem:
   case at_localFrame:
   case at_frameBindings:
-  case at_use_case:
   case at_ifident:
   case agt_ucon:
 
@@ -980,10 +979,9 @@ toc(std::ostream& errStream,
   case at_deftypeclass:
   case at_definstance:
   case at_methods:
-  case at_use:
   case at_importAs:
   case at_provide:
-  case at_from:
+  case at_import:
   case at_ifsel:
   case at_tvlist:
 

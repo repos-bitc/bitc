@@ -1883,36 +1883,6 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
     }
     break;
 
-  case at_use:
-    {      
-      ast->symType = new Type(ty_tvar);
-
-      for(size_t c = 0; c < ast->children->size(); c++)
-	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
-		  uflags, trail,  mode, TI_NONE);
-      break;
-    }
-
-  case at_use_case:
-    {
-      ast->symType = new Type(ty_tvar);
-      
-      GCPtr<TypeScheme> sigma = gamma->getBinding(ast->child(1)->s);
-      
-      if(!sigma) {
-	errStream << ast->loc << ": "
-		  << " attempt to use " << ast->child(1)->s 
-		  << ", which has an unknown, or buggy type"
-		  << std::endl;
-	errFree = false;
-	break;
-      }
-
-      gamma->addBinding(ast->child(0)->s, sigma);
-      gamma->setFlags(ast->child(0)->s, BF_PRIVATE);
-      break;
-    }
-
   case at_defunion:
     {
       GCPtr<Environment<TypeScheme> > defGamma = gamma->newDefScope();
@@ -2363,7 +2333,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       break;
     }
 
-  case at_from:
+  case at_import:
     {
       GCPtr<Environment<TypeScheme> > tmpGamma = gamma->newScope();
       ast->envs.gamma = gamma;

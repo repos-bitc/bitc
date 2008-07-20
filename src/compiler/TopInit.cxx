@@ -218,12 +218,10 @@ TopInit(std::ostream& errStream,
   case at_method_decl:
   case at_definstance:
   case at_methods:
-  case at_use:
-  case at_use_case:
   case at_ifident:
   case at_importAs:
   case at_provide:
-  case at_from:
+  case at_import:
   case at_ifsel:
   case at_declares:
   case at_declare:

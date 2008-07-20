@@ -120,7 +120,6 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 %token <tok> tk_CHAR
 %token <tok> tk_STRING
 %token <tok> tk_FLOAT
-%token <tok> tk_FROM
 %token <tok> tk_DOUBLE
 %token <tok> tk_DUP
 %token <tok> tk_QUAD
@@ -171,7 +170,6 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 %token <tok> tk_PROCLAIM
 %token <tok> tk_EXTERNAL
 %token <tok> tk_TAG
-%token <tok> tk_USE
 %token <tok> tk_DEFEXCEPTION
 
 %token <tok> tk_MUTABLE
@@ -233,7 +231,7 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 %type <ast> common_definition
 %type <ast> proclaim_definition
 %type <ast> ptype_name val
-%type <ast> type_definition typapp use_cases use_case
+%type <ast> type_definition typapp
 %type <ast> type_decl externals alias
 %type <ast> importList provideList
 %type <ast> type_cpair eform_cpair
@@ -974,26 +972,18 @@ import_definition: '(' tk_IMPORT ifident tk_AS ident ')' {
   $$ = new AST(at_importAs, $2.loc, ifIdent, $5); 
 };
 
-// USE [8.2]
-import_definition:  '(' tk_USE use_cases ')' {
-  SHOWPARSE("import_definition -> ( USE uses )");
-  $$ = $3;
-  $$->loc = $2.loc;
-  $$->astType = at_use;
-};
-
 import_definition: '(' tk_IMPORT ifident ')' {
   SHOWPARSE("import_definition -> (FROM ifident)");
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   GCPtr<AST> ifIdent = new AST(at_ifident, $3);
-  $$ = new AST(at_from, $2.loc, ifIdent);
+  $$ = new AST(at_import, $2.loc, ifIdent);
 };
 
 import_definition: '(' tk_IMPORT ifident importList ')' {
   SHOWPARSE("import_definition -> (FROM ifident IMPORT importList)");
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   GCPtr<AST> ifIdent = new AST(at_ifident, $3);
-  $$ = new AST(at_from, $2.loc, ifIdent);
+  $$ = new AST(at_import, $2.loc, ifIdent);
   $$->addChildrenFrom($4);
 };
 
@@ -1004,31 +994,6 @@ provide_definition: '(' tk_PROVIDE ifident provideList ')' {
   ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = new AST(at_provide, $2.loc, ifIdent); 
   $$->addChildrenFrom($4);
-};
-
-use_cases: use_case {
-  SHOWPARSE("use_cases -> use_case");
-  $$ = new AST(at_Null, $1->loc, $1);
-};
-use_cases: use_cases use_case {
-  SHOWPARSE("use_cases -> use_cases use_case");
-  $$ = $1;
-  $$->addChild($2);
-};
-use_case: ident '.' ident { 
-  SHOWPARSE("use_case -> ident . ident");
-  GCPtr<AST> newident = new AST(at_ident, $3->loc);
-  newident->s = $3->s;
-  newident->Flags |= (ID_IS_GLOBAL);
-  GCPtr<AST> usesel = new AST(at_usesel, $1->loc, $1, $3);
-  $$ = new AST(at_use_case, $1->loc, newident, usesel);
-  $$->printVariant = 1;
-};
-use_case: '(' ident '.' ident tk_AS ident ')' { 
-  SHOWPARSE("use_case -> (ident . ident AS ident)");
-  $2->Flags |= (ID_IS_GLOBAL);
-  GCPtr<AST> usesel = new AST(at_usesel, $2->loc, $2, $4);
-  $$ = new AST(at_use_case, $6->loc, $6, usesel);
 };
 
 provideList: ident {

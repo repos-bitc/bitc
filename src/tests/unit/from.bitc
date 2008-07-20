@@ -37,8 +37,9 @@
 
 (bitc-version "0.10")
 
-(from bitc.main import main)
-(from bitc.list import (map as MAP))
+(import bitc.main main)
+(import bitc.list (map as MAP))
+
 (define main:(fn ((vector string)) int32)
   (lambda (argvec)
     (MAP (lambda (x) x) (cons #t nil))
