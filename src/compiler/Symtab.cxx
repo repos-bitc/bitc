@@ -139,16 +139,19 @@ findInterface(std::ostream& errStream, GCPtr<AST> ifAst)
 	      
 static void
 aliasPublicBindings(const std::string& idName,
-      GCPtr<Environment<AST> > fromEnv, 
-      GCPtr<Environment<AST> > toEnv)
+		    GCPtr<Environment<AST> > fromEnv, 
+		    GCPtr<Environment<AST> > toEnv,
+		    bool enforceOneAlias)
 {
   for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
     GCPtr<Binding<AST> > bdng = fromEnv->bindings->elem(i);
     
-    if (bdng->flags & BF_PRIVATE) {
+    if (bdng->flags & BF_PRIVATE)
       continue;
-    }
-      
+
+    if (enforceOneAlias && (bdng->flags & BF_HAS_ALIAS))
+      continue;
+
     std::string s = bdng->nm;
     GCPtr<AST> ast = bdng->val;
 
@@ -156,6 +159,9 @@ aliasPublicBindings(const std::string& idName,
       s = idName + "." + s;
 
     toEnv->addBinding(s, ast);
+    // FIX: I am not convinced that BF_COMPLETE is correct here. We
+    // might have imported a forward declaration for a type that we
+    // have yet to define!
     toEnv->setFlags(s, BF_PRIVATE|BF_COMPLETE);
   }
 }
@@ -1240,7 +1246,7 @@ resolve(std::ostream& errStream,
       idAst->envs.gamma = ifAst->envs.gamma;
       idAst->envs.instEnv = ifAst->envs.instEnv;
 
-      aliasPublicBindings(idAst->s, idAst->envs.env, tmpEnv);
+      aliasPublicBindings(idAst->s, idAst->envs.env, tmpEnv, false);
       env->mergeBindingsFrom(tmpEnv);
       break;
     }
@@ -1271,26 +1277,46 @@ resolve(std::ostream& errStream,
 
       if(ast->children->size() == 1) {
 	// This is an import-all form
-	aliasPublicBindings(std::string(), iface->env, tmpEnv);
+	aliasPublicBindings(std::string(), iface->env, tmpEnv, true);
       }
       else {
 	// Need to import only certain bindings
 	for (size_t c = 1; c < ast->children->size(); c++) {
 	  GCPtr<AST> alias = ast->child(c);
-	  GCPtr<AST> thisName = alias->child(0);
-	  GCPtr<AST> thatName = alias->child(1);
+	  GCPtr<AST> localName = alias->child(0);
+	  GCPtr<AST> pubName = alias->child(1);
 	
-	  RESOLVE(thatName, iface->env, lamLevel, USE_MODE,
+	  RESOLVE(pubName, iface->env, lamLevel, USE_MODE,
 		  id_usebinding, currLB, 
 		  ((flags & (~NEW_TV_OK))) | NO_CHK_USE_TYPE);
 	
 	  if(!errorFree)
 	    break;
-	
-	  GCPtr<AST> oldDef = env->getBinding(thisName->s);
+
+	  // Enforce the "one alias" rule.
+	  GCPtr<Binding<AST> > bndg = 
+	    ifName->envs.env->doGetBinding(pubName->s);
+
+#if 0
+	// This method does not work, because the xeroxed environment
+	// is re-visited when resolution is re-run later.
+	  if (bndg->flags & BF_HAS_ALIAS) {
+	    errStream << alias->loc << ": The public identifier "
+		      << pubName->s
+		      << " already has a top-level alias in this"
+		      << " unit of compilation." 
+		      << std::endl;
+	    errorFree = false;
+	    break;
+	  }
+
+	  bndg->flags |= BF_HAS_ALIAS;
+#endif
+
+	  GCPtr<AST> oldDef = env->getBinding(localName->s);
 	  if(oldDef) {
 	    errStream << alias->loc << ": Conflict for alias definition"
-		      << thisName->s
+		      << localName->s
 		      << ". Previously defined at "
 		      << oldDef->loc
 		      << std::endl;
@@ -1298,8 +1324,8 @@ resolve(std::ostream& errStream,
 	    break;
 	  }
 	
-	  tmpEnv->addBinding(thisName->s, thatName->symbolDef);
-	  tmpEnv->setFlags(thisName->s, BF_PRIVATE);
+	  tmpEnv->addBinding(localName->s, pubName->symbolDef);
+	  tmpEnv->setFlags(localName->s, BF_PRIVATE);
 	}
       }
 
@@ -2468,7 +2494,7 @@ initEnv(std::ostream& errStream,
     return false;
   }
   
-  aliasPublicBindings(std::string(), preenv, env);
+  aliasPublicBindings(std::string(), preenv, env, true);
   return true;
 }
 
