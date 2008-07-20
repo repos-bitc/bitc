@@ -108,9 +108,9 @@
 
 (bitc-version "0.10")
 (module sha1-impl
-  (import stdio bitc.stdio)
-  (import stdlib bitc.stdlib)
-  (import sha1 crypt.sha1)
+  (import bitc.stdio as stdio)
+  (import bitc.stdlib as stdlib)
+  (import crypt.sha1 as sha1)
   (provide crypt.sha1
 	   shaResultAsString 
 	   sha1Reset

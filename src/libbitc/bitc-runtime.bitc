@@ -39,5 +39,5 @@
 ;; those elements of the BitC runtime that are implemented in C.
 
 (bitc-version "0.10")
-(import str bitc.string)
-(import stdio bitc.stdio)
+(import bitc.string as str)
+(import bitc.stdio as stdio)

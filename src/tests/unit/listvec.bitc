@@ -36,7 +36,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(import vec bitc.vector)
+(import bitc.vector as vec)
 (use vec.list->vector)
 
 (define (lv-m lst:(list (mutable char)))
@@ -45,7 +45,7 @@
 (define (lv-nm lst:(list char))
   (list->vector lst))
 
-(import main bitc.main)
+(import bitc.main as main)
 (provide bitc.main main)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argv)

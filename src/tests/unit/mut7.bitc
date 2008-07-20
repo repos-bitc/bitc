@@ -41,7 +41,7 @@
 ;; dump the types of these expressions and see if they are as expected
 ;; as the type inference of mutability is changes or readjusted.
 
-(import ls bitc.list)
+(import bitc.list as ls)
 
 (define (id x) x)
 
@@ -74,7 +74,7 @@
 (define (lvmq lst:(list (mutable char)))
   (l2vq lst))
 
-(import main bitc.main)
+(import bitc.main as main)
 (provide bitc.main main)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec) 0))

@@ -42,7 +42,7 @@
 	      (pair #t #f):(pair (mutable bool) bool) 
 	      (pair #f #t):(pair bool (mutable bool))))
 
-(import main bitc.main)
+(import bitc.main as main)
 (provide bitc.main main)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argv) 0))

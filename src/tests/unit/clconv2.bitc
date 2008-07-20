@@ -42,8 +42,8 @@
 ;;   -- abstract
 
 (bitc-version "0.10")
-(import stdio bitc.stdio)
-(import main bitc.main)
+(import bitc.stdio as stdio)
+(import bitc.main as main)
 (provide bitc.main main)
 
 (define (id x) x)

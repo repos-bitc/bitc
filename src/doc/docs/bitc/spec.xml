@@ -348,30 +348,30 @@
 #f            #t            and           
 apply         array         array-length
 array-nth     begin         bitc-version
-bitfield      bool          by-ref        
-case          catch         char          
-cond          declare       defaxiom      
-defexception  define        definvariant  
-defrepr       defstruct     deftheory     
-defthm        defunion      deref         
-disable       do            double        
-dup           enable        exception     
-extends       external      fill          
-fixint        float         if            
-import        int8          int16         
-int32         int64         interface     
-fn            lambda        let           
-letrec        member        mutable       
-not           opaque        or            
-otherwise     pair          proclaim      
-provide       quad          ref           
-set!          string        suspend       
-switch        tag           the           
-throw         try           tyfn          
-uint8         uint16        uint32        
-uint64        use           val           
-vector        vector-length vector-nth    
-word          =</literallayout>
+as            bitfield      bool          
+by-ref        case          catch         
+char          cond          declare       
+defaxiom      defexception  define        
+definvariant  defrepr       defstruct     
+deftheory     defthm        defunion      
+deref         disable       do            
+double        dup           enable        
+exception     extends       external      
+fill          fixint        float         
+if            import        int8          
+int16         int32         int64         
+interface     fn            lambda        
+let           letrec        member        
+mutable       not           opaque        
+or            otherwise     pair          
+proclaim      provide       quad          
+ref           set!          string        
+suspend       switch        tag           
+the           throw         try           
+tyfn          uint8         uint16        
+uint32        uint64        use           
+val           vector        vector-length 
+vector-nth    word          </literallayout>
 	<p>
 	  The following identifiers are reserved for use as future
 	  keywords:
@@ -2870,7 +2870,7 @@ id : T
             <progident>list-&gt;vector</progident> may be written as:
           </p>
 <literallayout>
-(import ls bitc.list)
+(import bitc.list as ls)
 (define (list->vector lst)
   (make-vector
     (length lst)
@@ -4169,7 +4169,7 @@ id : T
           a top-level <progident>import</progident> form:
         </p>
         <literallayout>
-(import <em>local-name</em> <em>interface-name</em>)
+(import <em>interface-name</em> as <em>local-name</em>)
         </literallayout>
         <p indent="no">
           where <progident><em>interface-name</em></progident> is an
@@ -4195,7 +4195,7 @@ id : T
           where <progident><em>use-form</em></progident> is one of:
         </p>
 <literallayout>
-(<em>local-id</em> = <em>if-qualified-id</em>)
+(<em>if-qualified-id</em> as <em>local-id</em>)
 <em>if-qualified-id</em></literallayout>
         <p indent="no">
           For example, given the
@@ -4209,14 +4209,14 @@ id : T
           and an import statement
         </p>
         <literallayout>
-(import ifnm sample2)</literallayout>
+(import sample2 as ifnm)</literallayout>
         <p indent="no">
           an importing compilation can avoid the need to write
           ``<progident>ifnm.</progident>'' pervasively by writing:
         </p>
         <literallayout>
-(import ifnm sample2)
-(use (x = ifnm.i) ifnm.j)</literallayout>
+(import sample2 as ifnm)
+(use (ifnm.i as x) ifnm.j)</literallayout>
         <p indent="no">
           The effect of this is that <progident>ifnm.i</progident> is
           aliased by the local name <progident>x</progident> and
@@ -4306,7 +4306,7 @@ For example:
         </p>
         <literallayout>
 (bitc-version "&BitcVersion;")
-(import ln sample)
+(import sample as ln)
 (provide sample tree-of)
 
 (defstruct (ln.tree-of 'a):ref
@@ -4323,9 +4323,9 @@ For example:
           </p>
         <literallayout>
 (bitc-version "&BitcVersion;")
-(import ln sample)
+(import sample as ln)
 (provide sample tree-of)
-(use (mumble = ln.tree-of))
+(use (ln.tree-of as mumble))
 
 (defstruct (mumble 'a):ref
   left : (optional (mumble 'a))
@@ -4729,10 +4729,10 @@ For example:
   (module <em>ifname</em><sup>?</sup> <em>docstring</em><sup>?</sup> <em>mod_def</em><sup>+</sup>)
 <em>mod_def</em> ::= <em>def</em> | <em>provide</em>
 <em>implicit_module</em> ::= <em>mod_def</em><sup>+</sup>
-<em>import</em> ::= (import Id <em>ifname</em>)
-<em>provide</em> ::= (provide Id <em>ifname</em>)
+<em>import</em> ::= (import <em>ifname</em> as Id)
+<em>provide</em> ::= (provide Id <em>ifname</em> Id<sup>+</sup>)
 <em>usedecl</em> ::=
-    (use {Id.Id | (Id '=' Id.Id)}<sup>+</sup>)
+    (use {Id.Id | (Id.Id as Id)}<sup>+</sup>)
 <em>def</em> ::= <em>import</em>
   | <em>usedecl</em>
   | <em>typedef</em>

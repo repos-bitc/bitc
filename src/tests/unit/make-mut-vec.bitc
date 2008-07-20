@@ -36,11 +36,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(import main bitc.main)
+(import bitc.main as main)
 (provide bitc.main main)
 
 ;; Test for the library-routine (make-mutable-vector ... )
-(import vec bitc.vector)
+(import bitc.vector as vec)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec)   
     (let ((mvec (vec.make-mutable-vector 10 #t)))
