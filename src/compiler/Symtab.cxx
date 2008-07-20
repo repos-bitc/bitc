@@ -138,7 +138,7 @@ findInterface(std::ostream& errStream, GCPtr<AST> ifAst)
 }
 	      
 static void
-useIF(const std::string& idName,
+aliasPublicBindings(const std::string& idName,
       GCPtr<Environment<AST> > fromEnv, 
       GCPtr<Environment<AST> > toEnv)
 {
@@ -1268,9 +1268,11 @@ resolve(std::ostream& errStream,
       break;
     }    
 
-  case at_import:
+  case at_importAs:
     {
-      GCPtr<AST> ifAst = ast->child(1);
+      GCPtr<AST> ifAst = ast->child(0); 
+      GCPtr<AST> idAst = ast->child(1);
+
       importIfBinding(errStream, env, ifAst);
 
       // import ident ifname
@@ -1279,7 +1281,7 @@ resolve(std::ostream& errStream,
 
       ast->envs.env = tmpEnv;
       
-      if (ast->child(1)->s == env->uocName) {
+      if (ifAst->s == env->uocName) {
 	errStream << ast->loc << ": "
 		  << "Cannot import an undefined interface. "
 		  << std::endl;
@@ -1288,19 +1290,19 @@ resolve(std::ostream& errStream,
 	break;
       }
       
-      RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE,
+      RESOLVE(idAst, tmpEnv, lamLevel, DEF_MODE,
 	      id_interface, NULL, flags);
-      ast->child(0)->ifName = ast->child(1)->s;
+      idAst->ifName = ifAst->s;
       // The interface name must not be exported
-      env->setFlags(ast->child(0)->s,
-		    ((env->getFlags(ast->child(0)->s)) |
+      env->setFlags(idAst->s,
+		    ((env->getFlags(idAst->s)) |
 		     BF_PRIVATE)); 
    
-      ast->child(0)->envs.env = ifAst->envs.env;
-      ast->child(0)->envs.gamma = ifAst->envs.gamma;
-      ast->child(0)->envs.instEnv = ifAst->envs.instEnv;
+      idAst->envs.env = ifAst->envs.env;
+      idAst->envs.gamma = ifAst->envs.gamma;
+      idAst->envs.instEnv = ifAst->envs.instEnv;
 
-      useIF(ast->child(0)->s, ast->child(0)->envs.env, tmpEnv);
+      aliasPublicBindings(idAst->s, idAst->envs.env, tmpEnv);
       env->mergeBindingsFrom(tmpEnv);
       break;
     }
@@ -1331,7 +1333,7 @@ resolve(std::ostream& errStream,
 
       if(ast->children->size() == 1) {
 	// This is an import-all form
-	useIF(std::string(), iface->env, tmpEnv);
+	aliasPublicBindings(std::string(), iface->env, tmpEnv);
       }
       else {
 	// Need to import only certain bindings
@@ -2528,7 +2530,7 @@ initEnv(std::ostream& errStream,
     return false;
   }
   
-  useIF(std::string(), preenv, env);
+  aliasPublicBindings(std::string(), preenv, env);
   return true;
 }
 

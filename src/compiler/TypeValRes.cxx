@@ -417,7 +417,7 @@ isExpansive(std::ostream& errStream,
   case agt_eform:
   case at_proclaim:
   case at_interface:
-  case at_import:
+  case at_importAs:
   case at_provide:
   case at_from:
   case at_ifsel:

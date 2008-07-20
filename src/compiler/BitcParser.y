@@ -971,7 +971,7 @@ import_definition: '(' tk_IMPORT ifident tk_AS ident ')' {
   SHOWPARSE("import_definition -> ( IMPORT ident ifident )");
   GCPtr<AST> ifIdent = new AST(at_ifident, $3);
   ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
-  $$ = new AST(at_import, $2.loc, $5, ifIdent); 
+  $$ = new AST(at_importAs, $2.loc, ifIdent, $5); 
 };
 
 // USE [8.2]
@@ -989,27 +989,12 @@ import_definition: '(' tk_IMPORT ifident ')' {
   $$ = new AST(at_from, $2.loc, ifIdent);
 };
 
-import_definition: '(' tk_FROM ifident ')' {
-  SHOWPARSE("import_definition -> (FROM ifident)");
-  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
-  GCPtr<AST> ifIdent = new AST(at_ifident, $3);
-  $$ = new AST(at_from, $2.loc, ifIdent);
-};
-
 import_definition: '(' tk_IMPORT ifident importList ')' {
   SHOWPARSE("import_definition -> (FROM ifident IMPORT importList)");
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   GCPtr<AST> ifIdent = new AST(at_ifident, $3);
   $$ = new AST(at_from, $2.loc, ifIdent);
   $$->addChildrenFrom($4);
-};
-
-import_definition: '(' tk_FROM ifident tk_IMPORT importList ')' {
-  SHOWPARSE("import_definition -> (FROM ifident IMPORT importList)");
-  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
-  GCPtr<AST> ifIdent = new AST(at_ifident, $3);
-  $$ = new AST(at_from, $2.loc, ifIdent);
-  $$->addChildrenFrom($5);
 };
 
 // PROVIDE DEFINITION [8.3]

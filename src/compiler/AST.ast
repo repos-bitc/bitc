@@ -582,7 +582,7 @@ GROUP type_definition = defunion | defstruct
 GROUP tc_definition = deftypeclass | definstance;
 GROUP value_definition = define | recdef;
 GROUP if_definition = proclaim | from
-                    | import | provide
+                    | importAs | provide
                     | declare | use;
 
 // NEWUNION TYPES [3.6.2]                
@@ -645,7 +645,7 @@ AST define = identPattern expr constraints;
 AST recdef = identPattern expr constraints;
 
 // IMPORT DEFINITIONS [8.2]
-AST import = ident ifident;
+AST importAs = ifident ident;
 AST provide = ifident ident+;
  
 AST from = ifident ifsel*;

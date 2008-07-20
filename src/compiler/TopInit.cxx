@@ -221,7 +221,7 @@ TopInit(std::ostream& errStream,
   case at_use:
   case at_use_case:
   case at_ifident:
-  case at_import:
+  case at_importAs:
   case at_provide:
   case at_from:
   case at_ifsel:

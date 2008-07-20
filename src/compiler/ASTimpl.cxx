@@ -510,7 +510,7 @@ AST::atKwd() const
   case at_dummyType:
     return "#dummy#";
 
-  case at_import:
+  case at_importAs:
     return "import";
 
   case at_provide:
@@ -656,7 +656,7 @@ AST::isTopLevelForm()
   case at_declstruct:
   case at_proclaim:
   case at_declare:
-  case at_import:
+  case at_importAs:
   case at_provide:
   case at_defexception:    
   case at_use:
@@ -681,7 +681,7 @@ AST::leadsToTopLevelForm()
   case at_declstruct:
   case at_proclaim:
   case at_declare:
-  case at_import:
+  case at_importAs:
   case at_provide:
   case at_defexception:    
   case at_use:

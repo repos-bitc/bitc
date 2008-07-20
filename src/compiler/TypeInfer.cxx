@@ -2335,21 +2335,31 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       break;
     }
     
-  case at_import:
-  case at_provide:
+  case at_importAs:
     {
+      GCPtr<AST> ifAst = ast->child(0);
+      GCPtr<AST> idAst = ast->child(1);
+
       GCPtr<Environment<TypeScheme> > tmpGamma = gamma->newScope();
       ast->envs.gamma = gamma;
       
-      assert(ast->child(0)->envs.gamma);
-      assert(ast->child(0)->envs.instEnv);
+      assert(idAst->envs.gamma);
+      assert(idAst->envs.instEnv);
       
-      useIFGamma(ast->child(0)->s, ast->child(0)->envs.gamma,
+      useIFGamma(idAst->s, idAst->envs.gamma,
 		 tmpGamma);
-      useIFInsts(ast->child(0)->s, ast->child(0)->envs.instEnv, 
+      useIFInsts(idAst->s, idAst->envs.instEnv, 
 		 instEnv);
       
       gamma->mergeBindingsFrom(tmpGamma);
+      break;
+    }
+
+  case at_provide:
+    {
+      // In the new at_provide scheme, at_provide does not imply any
+      // import, so we probably should not be attempting any type
+      // inference here anymore.
       break;
     }
 

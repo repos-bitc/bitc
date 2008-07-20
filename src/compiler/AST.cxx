@@ -396,8 +396,8 @@ AST::tagName(const AstType at)
     return "at_define";
   case at_recdef:
     return "at_recdef";
-  case at_import:
-    return "at_import";
+  case at_importAs:
+    return "at_importAs";
   case at_provide:
     return "at_provide";
   case at_from:
@@ -693,8 +693,8 @@ AST::astName() const
     return "define";
   case at_recdef:
     return "recdef";
-  case at_import:
-    return "import";
+  case at_importAs:
+    return "importAs";
   case at_provide:
     return "provide";
   case at_from:
@@ -963,7 +963,7 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_proclaim
   (unsigned char *)"\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_define
   (unsigned char *)"\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_recdef
-  (unsigned char *)"\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_import
+  (unsigned char *)"\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_importAs
   (unsigned char *)"\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_provide
   (unsigned char *)"\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_from
   (unsigned char *)"\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_ifsel
@@ -2188,19 +2188,7 @@ AST::isValid() const
     }
     break;
 
-  case at_import: // normal AST:
-    // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
-      errorsPresent = true;
-      break;
-    }
-    if (!ISSET(astMembers[at_ident], child(c)->astType)) {
-      astChTypeError(*this, at_ident, child(c)->astType, c);
-      errorsPresent = true;
-    }
-    c++;
-
+  case at_importAs: // normal AST:
     // match at_ifident
     if(c >= children->size()) {
       astChNumError(*this, c+1, children->size());
@@ -2209,6 +2197,18 @@ AST::isValid() const
     }
     if (!ISSET(astMembers[at_ifident], child(c)->astType)) {
       astChTypeError(*this, at_ifident, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
+    // match at_ident
+    if(c >= children->size()) {
+      astChNumError(*this, c+1, children->size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_ident], child(c)->astType)) {
+      astChTypeError(*this, at_ident, child(c)->astType, c);
       errorsPresent = true;
     }
     c++;

@@ -289,7 +289,7 @@ enum AstType {
     at_proclaim,
     at_define,
     at_recdef,
-    at_import,
+    at_importAs,
     at_provide,
     at_from,
     at_ifsel,

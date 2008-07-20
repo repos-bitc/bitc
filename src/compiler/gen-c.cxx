@@ -981,7 +981,7 @@ toc(std::ostream& errStream,
   case at_definstance:
   case at_methods:
   case at_use:
-  case at_import:
+  case at_importAs:
   case at_provide:
   case at_from:
   case at_ifsel:
