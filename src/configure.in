@@ -1,0 +1,78 @@
+dnl Copyright (c) 2006, The EROS Group, LLC.
+dnl
+dnl Copyright (C) 2008, The EROS Group, LLC.
+dnl All rights reserved.
+dnl
+dnl Redistribution and use in source and binary forms, with or
+dnl without modification, are permitted provided that the following
+dnl conditions are met:
+dnl
+dnl   - Redistributions of source code must contain the above 
+dnl     copyright notice, this list of conditions, and the following
+dnl     disclaimer. 
+dnl
+dnl   - Redistributions in binary form must reproduce the above
+dnl     copyright notice, this list of conditions, and the following
+dnl     disclaimer in the documentation and/or other materials 
+dnl     provided with the distribution.
+dnl
+dnl   - Neither the names of the copyright holders nor the names of any
+dnl     of any contributors may be used to endorse or promote products
+dnl     derived from this software without specific prior written
+dnl     permission. 
+dnl
+dnl THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+dnl "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+dnl LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+dnl A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+dnl OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+dnl SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+dnl LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+dnl DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+dnl THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+dnl (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+dnl OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+dnl
+
+AC_PREREQ(2.61)
+AC_INIT
+AC_CONFIG_SRCDIR([compiler/AST.ast])
+AC_CONFIG_HEADER(config.h)
+
+AC_CANONICAL_TARGET
+
+# Canonicalize CPU to platform. If all else fails, use target_cpu
+case $target_cpu in
+  i@<:@34567@:>@86)  TARGET_ARCH=i386;;
+  *)           TARGET_ARCH=$target_cpu;;
+esac
+
+AC_SUBST([TARGET_ARCH])
+
+VERSION="0.0.1"
+BUILD="1"
+LANGUAGE_VERSION="0.10"
+
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_CC_STDC
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+
+AC_CHECK_PROG(HAVE_TEXI2DVI, texi2dvi, yes, no)
+AC_CHECK_PROG(HAVE_DVIPS, dvips, yes, no)
+
+AC_CHECK_HEADERS(stdint.h inttypes.h)
+
+AC_C_CONST
+AC_TYPE_SIZE_T
+
+AC_SUBST([VERSION])
+AC_SUBST([LANGUAGE_VERSION])
+AC_SUBST([BUILD])
+
+AC_CONFIG_FILES([Makefile] [compiler/Makefile] [compiler/config.h]
+                [libbitc/Makefile] [tests/Makefile] [tests/unit/Makefile])
+
+AC_OUTPUT

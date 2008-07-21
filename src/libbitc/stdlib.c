@@ -1,6 +1,6 @@
 #include <unistd.h>
 
-#include <BUILD/bitc-runtime.h>
+#include "BUILD/bitc-runtime.h"
 
 /* (proclaim atoi: (fn (string) int32) external bitc_stdlib_atoi) */
 bitc_int32_t
@@ -36,7 +36,7 @@ bitc_stdlib_rdtsc()
   unsigned long temp1=0;
   unsigned long temp2=0;  
   unsigned long long ts=0;
-  asm volatile("rdtsc\t\n"
+  __asm__ volatile("rdtsc\t\n"
 	       "movl %%eax, %0\t\n"
 	       "movl %%edx, %1\t\n"
 	       : "=m" (temp1), "=m" (temp2)

@@ -42,6 +42,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <cctype>
+#include <sherpa/utf8.hxx>
+
 #include "Version.hxx"
 #include "UocInfo.hxx"
 #include "AST.hxx"
@@ -53,8 +56,8 @@
 #include "Options.hxx"
 #include "INOstream.hxx"
 #include "gen-c.hxx"
-#include <sherpa/utf8.hxx>
-#include <cctype>
+
+#include "config.h"
 
 using namespace sherpa;
 using namespace std;
@@ -3146,12 +3149,11 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
   /* First GCC invocation is to compile the .c file into a .o file: */
   {
     stringstream opt;
-    opt << "gcc -c ";
+    opt << STD_CC_CMD << " -c ";
 
     for (size_t i = 0; i < Options::CompilePreOptionsGCC->size(); i++)
       opt << " " << Options::CompilePreOptionsGCC->elem(i);
 
-    opt << " --std=c99";
     opt << " -o bitc.out.o";
     opt << " bitc.out.c";
 
@@ -3182,20 +3184,6 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
       opt << " -lbitc-no-gc";
     else
       opt << " -lgc";
-
-#if 0
-    for (size_t i = 0; i < UocInfo::searchPath->size(); i++)
-      opt << " -I " << *UocInfo::searchPath->elem(i);
-
-    for (size_t i = 0; i < Options::libDirs->size(); i++)
-      opt << " -L " << *Options::libDirs->elem(i);
-
-    opt << " -o " << Options::outputFileName;
-    opt << " bitc.out.c";
-    opt << " -lbitc";
-    opt << " -lgc";
-    opt << " --std=c99";
-#endif
 
     if (Options::verbose)
       std::cerr  << opt.str() << std::endl;
