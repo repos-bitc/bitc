@@ -42,9 +42,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
+#include <sherpa/UExcept.hxx>
+#include <sherpa/CVector.hxx>
+#include <sherpa/avl.hxx>
 #include <assert.h>
 #include "UocInfo.hxx"
 #include "Options.hxx"
@@ -57,7 +57,7 @@
 #include "Pair.hxx"
 #include "inter-pass.hxx"
 #include "Unify.hxx"
-#include <libsherpa/BigNum.hxx>
+#include <sherpa/BigNum.hxx>
 #include "TypeInferUtil.hxx"
 
 using namespace sherpa;

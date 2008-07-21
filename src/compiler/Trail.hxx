@@ -41,7 +41,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
-#include <libsherpa/CVector.hxx>
+#include <sherpa/CVector.hxx>
 
 struct Type;
 

@@ -52,9 +52,8 @@
 #include "backend.hxx"
 #include "Options.hxx"
 #include "INOstream.hxx"
-#include "Clconv.hxx"
 #include "gen-c.hxx"
-#include <libsherpa/utf8.hxx>
+#include <sherpa/utf8.hxx>
 #include <cctype>
 
 using namespace sherpa;

@@ -39,10 +39,8 @@
  **************************************************************************/
 
 #include <string>
-#include <libsherpa/LToken.hxx>
-#include <libsherpa/CVector.hxx>
+#include <sherpa/GCPtr.hxx>
 
-#include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "UocInfo.hxx"

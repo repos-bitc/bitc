@@ -1,9 +1,8 @@
-#ifndef CLCONV_HXX
-#define CLCONV_HXX
-
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, The EROS
+ *   Group, LLC. 
+ * Copyright (C) 2004, 2005, 2006, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -38,20 +37,70 @@
  *
  **************************************************************************/
 
-#include <stdlib.h>
-#include <dirent.h>
-#include <fstream>
-#include <iostream>
-#include <sstream>
+#include <stdint.h>
 #include <string>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
-#include "AST.hxx"
-#include "UocInfo.hxx"
+#include "UExcept.hxx"
 
-// Set to true if you want to hoist all lambdas unconditionally
-#define HOISTALL true
+namespace sherpa {
 
-#endif /* CLCONV_HXX */
+  UExceptionType::UExceptionType(const std::string& s)
+    : name(s)
+  {
+  }
+
+  UExceptionType::~UExceptionType()
+  {
+  }
+
+  UExceptionBase::~UExceptionBase()
+  {
+  }
+
+  UExceptionBase::UExceptionBase(const UExceptionType *et,
+				 const char *file, int line, 
+				 const std::string& msg)
+  {
+    this->et = et;
+    this->msg = msg;
+    this->file = file;
+    this->line = line;
+  }
+  UExceptionBase::UExceptionBase(const UExceptionBase& cme)
+  {
+    this->et = cme.et;
+    this->msg = cme.msg;
+    this->file = cme.file;
+    this->line = cme.line;
+  }
+
+#define DEF_UEXCEPT(nm) UExceptionType nm(#nm)
+
+  namespace excpt {
+    DEF_UEXCEPT(Assert);
+    DEF_UEXCEPT(OutOfMemory);
+    DEF_UEXCEPT(IntegrityFail);
+    DEF_UEXCEPT(Malformed);
+    DEF_UEXCEPT(BadValue);
+    DEF_UEXCEPT(NullArg);
+    DEF_UEXCEPT(NoAccess);
+    DEF_UEXCEPT(NoObject);
+    DEF_UEXCEPT(ObjectExists);
+    DEF_UEXCEPT(Truncated);
+    DEF_UEXCEPT(Overrun);
+    DEF_UEXCEPT(Subprocess);
+    DEF_UEXCEPT(LockFail);
+    DEF_UEXCEPT(LostLock);
+    DEF_UEXCEPT(UniverseDied);
+    DEF_UEXCEPT(NoConnect);
+    DEF_UEXCEPT(NoAuth);
+    DEF_UEXCEPT(Environ);
+    DEF_UEXCEPT(VersionError);
+    DEF_UEXCEPT(ConnLost);
+    DEF_UEXCEPT(IoError);
+    DEF_UEXCEPT(BadOpcode);
+    DEF_UEXCEPT(PrngError);
+    DEF_UEXCEPT(BoundsError);
+    DEF_UEXCEPT(Unspecified);
+  };
+
+} /* namespace sherpa */

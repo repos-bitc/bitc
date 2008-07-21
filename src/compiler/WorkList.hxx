@@ -39,11 +39,11 @@
  **************************************************************************/
 
 #include <stdlib.h>
+#include <assert.h>
 #include <iostream>
 #include <string>
-#include <libsherpa/CVector.hxx>
-#include <Eliminate.hxx>
-#include <assert.h>
+#include <sherpa/CVector.hxx>
+#include "Eliminate.hxx"
 
 // This is intentionally not a subclass of Donelist. 
 // There should be no compatibility.

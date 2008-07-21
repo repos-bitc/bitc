@@ -5,9 +5,9 @@
 
 
 #include <string>
-#include <libsherpa/LToken.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/GCPtr.hxx>
+#include <sherpa/LToken.hxx>
+#include <sherpa/CVector.hxx>
+#include <sherpa/GCPtr.hxx>
 
 
 #include <stdint.h>

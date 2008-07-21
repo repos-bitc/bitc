@@ -55,10 +55,10 @@ CLEANLIST=y.tab.c y.tab.h y.output
 #CLEANLIST+=SexprLexer.c
 #CLEANLIST=./AST.cxx ./AST.hxx
 
-LIBS= -L../../libsherpa/BUILD $(GC_LIBDIR) $(LIBSHERPA) -lgmp -licuuc
+LIBS= $(GC_LIBDIR) -lgmp -licuuc
 LIBS+=$(GC_LIB)
 
-OBJECTS=\
+COMPILER_OBJECTS=\
 	$(BUILDDIR)/SexprLexer.o \
 	$(BUILDDIR)/LitValue.o \
 	$(BUILDDIR)/AST.o \
@@ -110,7 +110,12 @@ OBJECTS=\
 	$(BUILDDIR)/bito.o \
 	$(BUILDDIR)/gen-c.o
 
+SHERPA_OBJECTS=$(patsubst %.cxx,$(BUILDDIR)/%.o,$(notdir $(wildcard sherpa/*.cxx)))
+OBJECTS=$(COMPILER_OBJECTS) $(SHERPA_OBJECTS)
+
 TARGETS=$(BUILDDIR)/bitcc
+
+VPATH=.:libsherpa
 
 all: $(TARGETS)
 

@@ -38,12 +38,6 @@
  *
  **************************************************************************/
 
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/avl.hxx>
-#include "AST.hxx"
-#include "Environment.hxx"
-
-
 /* Definitions of flags used in Symbol Resolution */
 #define NO_CHK_USE_TYPE     0x000001u
 #define INCOMPLETE_OK       0x000002u

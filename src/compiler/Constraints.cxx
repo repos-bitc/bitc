@@ -42,8 +42,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
+#include <sherpa/UExcept.hxx>
+#include <sherpa/CVector.hxx>
 #include <assert.h>
 
 #include "UocInfo.hxx"

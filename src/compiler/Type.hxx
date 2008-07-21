@@ -43,7 +43,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <libsherpa/UExcept.hxx>
+
 #include "AST.hxx"
 #include "debug.hxx"
 #include "TvPrinter.hxx"

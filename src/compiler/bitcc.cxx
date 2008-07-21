@@ -90,8 +90,8 @@
 #include <getopt.h>
 #include <langinfo.h>
 
-#include <libsherpa/Path.hxx>
-#include <libsherpa/util.hxx>
+#include <sherpa/Path.hxx>
+#include <sherpa/util.hxx>
 
 #include "Version.hxx"
 #include "UocInfo.hxx"
@@ -131,7 +131,7 @@ unsigned Options::verbose = 0;
 GCPtr<CVector<std::string> > Options::entryPts;
 BackEnd *Options::backEnd = 0;
 std::string Options::outputFileName;
-GCPtr<CVector<GCPtr<Path> > > Options::libDirs;
+GCPtr<CVector<std::string> > Options::libDirs;
 GCPtr<CVector<std::string> > Options::inputs;
 bool Options::Wall = false;
 bool Options::noGC = false;
@@ -317,7 +317,7 @@ ResolveLibPath(std::string name, std::string& resolvedName)
   Path nmPath = Path("lib" + name + ".bita");
 
   for (size_t i = 0; i < Options::libDirs->size(); i++) {
-    Path testPath = *Options::libDirs->elem(i) + nmPath;
+    Path testPath = Path(Options::libDirs->elem(i)) + nmPath;
     if (testPath.exists()) {
       resolvedName = testPath.asString();
       return true;
@@ -339,7 +339,7 @@ main(int argc, char *argv[])
   Options::showTypesUocs = new CVector<std::string>;
   Options::xmlTypesUocs = new CVector<std::string>;
   Options::entryPts = new CVector<std::string>;
-  Options::libDirs = new CVector<GCPtr<Path> >;
+  Options::libDirs = new CVector<std::string>;
   Options::inputs = new CVector<std::string>;
   Options::CompilePreOptionsGCC = new CVector<std::string>;
   Options::LinkPreOptionsGCC = new CVector<std::string>;
@@ -708,7 +708,7 @@ main(int argc, char *argv[])
       AddLinkArgumentForGCC("-L");
       AddLinkArgumentForGCC(optarg);
 
-      Options::libDirs->append(new Path(optarg));
+      Options::libDirs->append(optarg);
       break;
 
     case 'O':			// a.k.a. -O2
@@ -739,7 +739,7 @@ main(int argc, char *argv[])
 
     stringstream libpath;
     libpath << Options::SystemDirs->elem(i) << "/lib";
-    Options::libDirs->append(new Path(libpath.str()));
+    Options::libDirs->append(libpath.str());
     Options::LinkPostOptionsGCC->append("-L");
     Options::LinkPostOptionsGCC->append(libpath.str());
   }

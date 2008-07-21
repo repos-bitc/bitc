@@ -40,9 +40,9 @@
 
 #include <unicode/uchar.h>
 
-#include <libsherpa/utf8.hxx>
-#include <libsherpa/LexLoc.hxx>
-#include <libsherpa/utf8.hxx>
+#include <sherpa/utf8.hxx>
+#include <sherpa/LexLoc.hxx>
+#include <sherpa/utf8.hxx>
 
 #include "BUILD/BitcParser.hxx"
 
