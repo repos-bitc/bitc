@@ -115,7 +115,7 @@ OBJECTS=$(COMPILER_OBJECTS) $(SHERPA_OBJECTS)
 
 TARGETS=$(BUILDDIR)/bitcc
 
-VPATH=.:libsherpa
+VPATH=.:sherpa
 
 all: $(TARGETS)
 
