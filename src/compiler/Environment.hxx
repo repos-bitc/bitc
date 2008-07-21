@@ -60,8 +60,6 @@ using namespace sherpa;
    in Symtab.cxx */
 #define BF_PROVIDING 0x10u /* Interface binding that we are
 			      providing. */
-#define BF_HAS_ALIAS 0x20u /* Interface public name has already been
-			      aliased in current unit of compilation. */
 
 template <class T>
 struct Binding : public Countable {

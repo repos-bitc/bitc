@@ -4255,19 +4255,19 @@ id : T
             local alias is bound under the specified local name
             instead.
           </p>
-<!--           <p> -->
-<!--             It is a compile-time error to form more than one top-level -->
-<!--             alias in a single unit of compilation for the same public -->
-<!--             name in a given interface. -->
-<!--           </p> -->
+          <p>
+            It is a compile-time error to form more than one top-level
+            alias in a single unit of compilation for the same public
+            name in a given interface.
+          </p>
         </sect3>
         <sect3>
           <title>Promiscuous Import</title>
           <p>
             The promiscuous import form imports all public identifiers
-            from the imported interface.
-<!--  that do not already have -->
-<!--             top-level aliases in the importing unit of compilation. -->
+            from the imported interface
+            that do not already have
+            top-level aliases in the importing unit of compilation.
             The syntax of this form is:
           </p>
           <literallayout>
