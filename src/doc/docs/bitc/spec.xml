@@ -275,9 +275,10 @@
         standard <cite ref="unicode410"/>. Input units must be encoded
         using the UTF-8 encoding and Normalization Form C.  All
         keywords and syntactically significant punctuation fall within
-        the US-ASCII subset, and the language provides for US-ASCII
-        encodable ``escapes'' that can be used to express the full
-        Unicode character code space in character and string literals.
+        the 7-bit US-ASCII subset, and the language provides for 7-bit
+        US-ASCII encodable ``escapes'' that can be used to express the
+        full Unicode character code space in character and string
+        literals.
       </p>
       <p>
         Tokens are terminated by white space if not otherwise
@@ -338,6 +339,45 @@
           Reserved words are not identifiers.
 	</p>
       </sect2>
+      <sect2 id="if-identifiers">
+	<title>Interface Names and Identifiers</title>
+	<p>
+          Interface names consist of a sequence of interface
+	  identifiers joined by dots (``.'').  
+          An interface may start with any interface identifier
+	  character, followed by any interface continue character. In
+	  addition, an underscore (``_'') may appear in any position
+	  of an interface identifier, and a hyphen (``-'') may be used
+	  in any position <em>other than</em> the first position.
+        </p>
+        <p>
+	  Interface identifier characters are the Unicode identifier
+	  characters (Unicode 4.1.0 <cite ref="unicode410"/> character
+	  class XID_Start) falling within the 7-bit US ASCII subset
+	  (the first 128 Unicode code points). Interface continue
+	  characters are similarly the Unicode identifier continue
+	  characters (Unicode 4.1.0 <cite ref="unicode410"/> character
+	  class XID_Continue) falling within the 7-bit US ASCII
+	  subset.
+        </p>
+        <p>
+          The restriction on acceptable character code points in interface
+	  identifiers is designed to ensure that interface names can
+	  be mapped directly to file names in current file systems. It
+	  is expected that the legal namespace for interface
+	  identifiers will expand as the capabilities of widely used
+	  file system interfaces improve.
+        </p>
+	<p>
+          Interface names whose leading interface identifier is
+	  ``bitc'' are reserved for use by the BitC runtime system and
+	  standard library.
+	</p>
+	<p>
+          Reserved words are <em>permitted</em> as interface
+          identifiers.
+	</p>
+      </sect2>
       <sect2>
 	<title>Reserved Words</title>
 	<p>
@@ -348,30 +388,30 @@
 #f            #t            and           
 apply         array         array-length
 array-nth     begin         bitc-version
-bitfield      bool          by-ref        
-case          catch         char          
-cond          declare       defaxiom      
-defexception  define        definvariant  
-defrepr       defstruct     deftheory     
-defthm        defunion      deref         
-disable       do            double        
-dup           enable        exception     
-extends       external      fill          
-fixint        float         if            
-import        int8          int16         
-int32         int64         interface     
-fn            lambda        let           
-letrec        member        mutable       
-not           opaque        or            
-otherwise     pair          proclaim      
-provide       quad          ref           
-set!          string        suspend       
-switch        tag           the           
-throw         try           tyfn          
-uint8         uint16        uint32        
-uint64        use           val           
-vector        vector-length vector-nth    
-word          =</literallayout>
+as            bitfield      bool          
+by-ref        case          catch         
+char          cond          declare       
+defaxiom      defexception  define        
+definvariant  defrepr       defstruct     
+deftheory     defthm        defunion      
+deref         disable       do            
+double        dup           enable        
+exception     extends       external      
+fill          fixint        float         
+if            import        int8          
+int16         int32         int64         
+interface     fn            lambda        
+let           letrec        member        
+mutable       not           opaque        
+or            otherwise     pair          
+proclaim      provide       quad          
+ref           set!          string        
+suspend       switch        tag           
+the           throw         try           
+tyfn          uint8         uint16        
+uint32        uint64        use           
+val           vector        vector-length 
+vector-nth    word          </literallayout>
 	<p>
 	  The following identifiers are reserved for use as future
 	  keywords:
@@ -2331,34 +2371,18 @@ id : T
   <em>e</em> ... <em>e</em>)</literallayout>
 	<p indent="no">
 	  where each <progident><em>bp</em></progident> is a binding
-	  pattern.  The second form is a derived form:
-	</p>
-	<literallayout>
-(define (<em>id</em> [<em>bp<sub>1</sub></em> ... <em>bp<sub>n</sub></em>])
-  <em>e</em> ... <em>e</em>) =&gt;
-(define id
-  (letrec ((id (lambda ([<em>bp<sub>1</sub></em> ... <em>bp<sub>n</sub></em>])
-                    <em>e</em> ... <em>e</em>)))
-    id))</literallayout>
-	<p indent="no">
-	  where each <progident><em>bp<sub>i</sub></em></progident> is a
-	  binding pattern. Note the introduction of the letrec, which
-	  supports simple recursion.
-	</p>
-        <p>
-	  The right hand form of a <progident>define</progident> is
-	  evaluated to obtain a value, which is then pattern matched
-	  against the pattern being bound. For each identifier
-	  <progident>x</progident> that appears in the binding
-	  pattern, then identifier is bound in the currently active
-	  environment to the positionally corresponding element within
-	  the value resulting from the evaluation of the expression.
-	</p>
-        <p>
-          Identifiers defined within a single
+	  pattern.  In the first form, the newly bound identifiers are
+	  not in scope within the body. The second form permits
+	  recursive bindings.
+          Identifiers defined within a recursive
           <progident>define</progident> are deemed ``incomplete''
           until the end of the enclosing <progident>define</progident>
           form.
+	</p>
+        <p>
+	  The right hand form of a <progident>define</progident> is
+	  evaluated to obtain a value, which is then bound to the
+	  identifier on the left-hand side.
         </p>
 	<p>
 	  Mutually recursive procedure definitions at top level can be
@@ -2886,7 +2910,7 @@ id : T
             <progident>list-&gt;vector</progident> may be written as:
           </p>
 <literallayout>
-(import ls bitc.list)
+(import bitc.list as ls)
 (define (list->vector lst)
   (make-vector
     (length lst)
@@ -4095,29 +4119,34 @@ id : T
     <sect1 id="Interfaces">
       <title>Interfaces</title>
       <p>
-        An interface describes a public set of definitions and
-        declarations. From the client perspective, it describes the
-        identifiers that are published by some providing body of
-        code. From the provider perspective, it describes a collection
-        of identifiers that are to be exported from the providing
-        implementation.
+        BitC recognizes two kinds of compilation units: interfaces and
+        modules.  An interface contains a public set of definitions
+        and declarations.  From the perspective of an importer, it
+        describes the identifiers that are published by one or more
+        providing bodies of code. From the implementor perspective, an
+        interface describes a set of declarations that must be
+        exported by some providing module. Interfaces provide the only
+        means by which functions and types may be shared across
+        multiple units of compilation.
       </p>
       <p>
-        An interface is the <em>only</em> means by which an identifier
-        defined in one source compilation unit can be used in
-        another. Unless declared as part of an interface, identifiers
-        declared or defined in a source unit of compilation are
-        <em>local</em> to that source unit of compilation.
+        A module contains a private set of definitions and
+        delarations. In most cases, these are not visible outside of
+        the scope of the module. The exception is when a module
+        imports some interface and also declares explicitly that it
+        provides definitions for one or more public declarations of
+        that interface.
       </p>
       <sect2>
-        <title>Defining an Interface</title>
+        <title>Specifying an Interface</title>
         <p>
           An interface unit of compilation consists of a
           <progident>bitc-version</progident> form followed by a
           single <progident>interface</progident> form. The
-          <progident>interface</progident> form wraps a
-          sequence of imports, aliases, definitions, and
-          declarations. For example, the interface:
+          <progident>interface</progident> form wraps a sequence of
+          imports, aliases, definitions, and declarations that
+          describe the public identifiers associated with that
+          interface. For example, the interface:
         </p>
         <literallayout>
 (interface sample
@@ -4136,23 +4165,6 @@ id : T
           unit of compilation, and that <progident>y</progident> is a
           value of type <progident>int32</progident> declared in some
           (unspecified) source unit of compilation.
-        </p>
-        <p>
-          Interface names consist of one or more identifiers separated
-          by dots (``.'').  Each identifier must begin with an upper
-          or lower case alphabetic character or underscore, which may
-          be followed by upper and lower alphabetic characters,
-          numbers, underscore, and hyphen. To ensure compatibility
-          with existing file systems, the character set for interface
-          names is restricted to the 7-bit ASCII subset. It is
-          intended that future implementations will relax this
-          restriction.<footnote><p>This restriction exists to ensure
-          that there can be a straightforward mapping from identifier
-          names to file names in current file systems.</p></footnote>
-          Interface names are <em>not</em> restricted by the BitC
-          reserved words, except that interface names beginning with
-          ``<progident>bitc.</progident>'' are reserved for use by the
-          runtime system.
         </p>
         <p>
           Note that the declaration of <progident>tree-of</progident>
@@ -4180,79 +4192,94 @@ id : T
       <sect2>
         <title>Importing an Interface, Aliasing</title>
         <p>
-          In order to use the identifiers supplied by this interface,
-          the client unit of compilation must import the interface using
-          a top-level <progident>import</progident> form:
+          In order to use the identifiers supplied by an interface,
+          the client unit of compilation must first import those
+          identifiers using a top-level <progident>import</progident>
+          form. There are three such forms.  It is a compile-time
+          error if any local identifier bound by an
+          <progident>import</progident> is already bound.
         </p>
-        <literallayout>
-(import <em>local-name</em> <em>interface-name</em>)
-        </literallayout>
-        <p indent="no">
-          where <progident><em>interface-name</em></progident> is an
-          interface name from the namespace of interface names and
-          <progident><em>local-name</em></progident> is an identifier
-          to be bound in the current scope that should be used to
-          designate the elements of this interface. A
-          <progident><em>use</em></progident> form may only appear at
-          tope level. Following this import and
-          <progident>use</progident>, if the imported interface
-          defines a type <progident>my-tree</progident>, this type can
-          be referenced as:
-        </p>
-        <literallayout>
-(define (f local-name:my-tree)
-  ...)</literallayout>
-        <p>
-          The syntax of <progident>use</progident> is:
-        </p>
-        <literallayout>
-(use <em>use-form</em> ... <em>use-form</em>)</literallayout>
-        <p indent="no">
-          where <progident><em>use-form</em></progident> is one of:
-        </p>
-<literallayout>
-(<em>local-id</em> = <em>if-qualified-id</em>)
-<em>if-qualified-id</em></literallayout>
-        <p indent="no">
-          For example, given the
-          interface:
-        </p>
-        <literallayout>
-(interface sample2
-  (proclaim i : int32))
-  (proclaim j : int32))</literallayout>
-        <p indent="no">
-          and an import statement
-        </p>
-        <literallayout>
-(import ifnm sample2)</literallayout>
-        <p indent="no">
-          an importing compilation can avoid the need to write
-          ``<progident>ifnm.</progident>'' pervasively by writing:
-        </p>
-        <literallayout>
-(import ifnm sample2)
-(use (x = ifnm.i) ifnm.j)</literallayout>
-        <p indent="no">
-          The effect of this is that <progident>ifnm.i</progident> is
-          aliased by the local name <progident>x</progident> and
-          <progident>ifnm.j</progident> is aliased by the local name
-          <progident>j</progident>. A
-          <progident><em>use-form</em></progident> of the form
-          <progident><em>prefix</em>.<em>ident</em></progident> is
-          interpreted exactly as if
-          <progident>(<em>ident</em>&nbsp;<em>prefix</em>.<em>ident</em>)</progident>
-          had been written.
-        </p>
-        <p>
-          Like the defining and declaring forms, the
-          <progident>use</progident> form introduces a name that may
-          not subsequently be rebound in the outermost scope. In
-          <em>contrast</em> to the defining and declaring forms, the
-          appearance of an <progident>use</progident> declaration
-          within an interface does <em>not</em> introduce an exported
-          name.
-        </p>
+        <sect3>
+          <title>Hygienic Import</title>
+          <p>
+            The syntax of the hygienic import form is:
+          </p>
+          <literallayout>
+(import <em>if-name</em> as <em>local-name</em>)</literallayout>
+          <p indent="no">
+            where <progident><em>if-name</em></progident> is an
+            interface name and
+            <progident><em>local-name</em></progident> is an identifier
+            to be bound in the current scope. If
+            <progident><em>pubName</em></progident> is a name published by
+            <progident>TheInterface</progident>, then after executing
+          </p>
+          <literallayout>
+(import TheInterface as myName)</literallayout>
+          <p indent="no">
+            it is legal to write
+            <progident>myName.<em>pubName</em></progident> at any
+            identifier use occurrence. In such a use,
+            <progident>myName.<em>pubName</em></progident> acts as an
+            <em>alias</em> of the public name.
+          </p>
+          <p>
+            Hygienic import preserves a strong distinction between the
+            namespace of the imported interface and the local namespace
+            of the importing unit of compilation. This is appropriate
+            when importing interfaces that are not fully mature, or for
+            which the possibility of future name collisions as a result
+            of interface evolution must be defended against.
+          </p>
+        </sect3>
+        <sect3>
+          <title>Qualified Import</title>
+          <p>
+            The qualified import syntax imports <em>selected</em>
+            public identifiers from a specified interface. The
+            selected identifiers are aliased (after optional
+            re-naming) in the top-level namespace of the importing
+            unit of compilation. The syntax of this form is:
+          </p>
+          <literallayout>
+(import <em>if-name</em> <em>ident-or-remap</em><sup>+</sup>)</literallayout>
+          <p>
+            where <em>ident-of-remap</em> is either some identifier
+            published by the imported interface or it is:
+          </p>
+          <literallayout>
+(<em>pubName</em> as <em>localName</em>)</literallayout>
+          <p indent="no">
+            If a single identifier is given, the local alias is bound
+            using the public name. If the ``as'' variant is given, the
+            local alias is bound under the specified local name
+            instead.
+          </p>
+          <p>
+            It is a compile-time error to form more than one top-level
+            alias in a single unit of compilation for the same public
+            name in a given interface.
+          </p>
+        </sect3>
+        <sect3>
+          <title>Promiscuous Import</title>
+          <p>
+            The promiscuous import form imports all public identifiers
+            from the imported interface
+            that do not already have
+            top-level aliases in the importing unit of compilation.
+            The syntax of this form is:
+          </p>
+          <literallayout>
+(import <em>if-name</em>)</literallayout>
+          <p indent="no">
+            This form does not support identifier re-naming on import.
+            Name collisions resulting from import can, if necessary,
+            be managed by first performing a qualified import that
+            re-maps the colliding public name, and then performing a
+            promiscuous import to import the remainder of the interface.
+          </p>
+        </sect3>
         <sect3>
           <title>Compile-Time Import Resolution</title>
           <p>
@@ -4306,13 +4333,24 @@ id : T
           syntax of provide is:
         </p>
         <literallayout>
-(provide <em>local-name</em> <em>interface-name</em>)</literallayout>
+(provide <em>interface-name</em> <em>ident</em><sup>+</sup>)</literallayout>
         <p indent="no">
-          For example:
+          Where each <progident><em>ident</em></progident> is an
+          identifier proclaimed by the named interface. That is: the
+          name as specified in the interface rather than any alias of
+          that name that may have been locally bound.
+        </p>
+        <p>
+          The effect of <progident>provide</progident> is to
+          <em>authorize</em> the definition of the named
+          identifiers. The definitions must then be defined by binding
+          an arbitrarily selected local alias of the public identifier.
+For example:
         </p>
         <literallayout>
 (bitc-version "&BitcVersion;")
-(provide ln sample)
+(import sample as ln)
+(provide sample tree-of)
 
 (defstruct (ln.tree-of 'a):ref
   left : (optional
@@ -4322,20 +4360,19 @@ id : T
   height
   value : 'a)</literallayout>
         <p indent="no">
-          Note that the <progident>provide</progident> form imports
-          the corresponding interface. Note further that because the
-          interface introduces the defining name for
-          <progident>tree-of</progident>, the following alternative
+          The requirement that an arbitrary alias be defined can
+          result in strange appearances. The following alternative
           definition is equivalent in all respects to the one above:
-        </p> 
+          </p>
         <literallayout>
 (bitc-version "&BitcVersion;")
-(provide ln sample)
-(use (tree-of = ln.tree-of))
+(import sample as ln)
+(provide sample tree-of)
+(use (ln.tree-of as mumble))
 
-(defstruct (tree-of 'a):ref
-  left : (optional (tree-of 'a))
-  right : (optional (ree-of 'a))
+(defstruct (mumble 'a):ref
+  left : (optional (mumble 'a))
+  right : (optional (mumble 'a))
   height
   value : 'a)</literallayout>
         <p>
@@ -4735,10 +4772,10 @@ id : T
   (module <em>ifname</em><sup>?</sup> <em>docstring</em><sup>?</sup> <em>mod_def</em><sup>+</sup>)
 <em>mod_def</em> ::= <em>def</em> | <em>provide</em>
 <em>implicit_module</em> ::= <em>mod_def</em><sup>+</sup>
-<em>import</em> ::= (import Id <em>ifname</em>)
-<em>provide</em> ::= (provide Id <em>ifname</em>)
+<em>import</em> ::= (import <em>ifname</em> as Id)
+<em>provide</em> ::= (provide Id <em>ifname</em> Id<sup>+</sup>)
 <em>usedecl</em> ::=
-    (use {Id.Id | (Id '=' Id.Id)}<sup>+</sup>)
+    (use {Id.Id | (Id.Id as Id)}<sup>+</sup>)
 <em>def</em> ::= <em>import</em>
   | <em>usedecl</em>
   | <em>typedef</em>

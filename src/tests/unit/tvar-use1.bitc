@@ -43,7 +43,8 @@
       #t)))
 
 
-(provide main bitc.main)
+(import bitc.main as main)
+(provide bitc.main main)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec) 
     (somefun nil) 0))

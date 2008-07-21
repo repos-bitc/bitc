@@ -52,8 +52,14 @@ using namespace sherpa;
 #define BF_PRIVATE   0x1u  /* Binding is a private binding */
 #define BF_COMPLETE  0x2u  /* Binding def is completed */
 #define BF_REBIND    0x4u  /* On merge, this binding should replace
-			     any existing binding. */
+			      any existing binding. */
 #define BF_NO_MERGE  0x8u  /* This flag should not survive a merger */
+
+/* The following two flags should only be found in the private per-UoC
+   copy of the interface environment that is made in importIfBinding()
+   in Symtab.cxx */
+#define BF_PROVIDING 0x10u /* Interface binding that we are
+			      providing. */
 
 template <class T>
 struct Binding : public Countable {

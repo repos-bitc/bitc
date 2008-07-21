@@ -419,20 +419,6 @@ getInstName(GCPtr<const AST> def, GCPtr<Type> typ)
   if(typ->isUcon() || typ->isUval())
     uAdjTyp = typ->getUnionType();
 
-  if(def->s == "ceq") {
-    std::cerr << "Came Here for "
-	      << def->asString()
-	      << " wrt "
-	      << uAdjTyp->asString(Options::debugTvP)
-	      << std::endl;
-    
-    std::cerr << "### ";
-    std::cerr << uAdjTyp->asString(Options::debugTvP);
-    std::cerr << " ---> ";
-    std::cerr << uAdjTyp->mangledString();
-    std::cerr << std::endl;
-  }
-  
   string fqnString = def->fqn.asString();
   ss << "_" << fqnString.size() << fqnString;
   ss << "#" << uAdjTyp->mangledString();
@@ -520,7 +506,6 @@ name2fqn(GCPtr<AST> ast)
     }
 
   case at_module:
-  case at_use_case:
     {
       assert(false);
       break;
@@ -575,6 +560,7 @@ clearConstraints(GCPtr<AST> ast)
 {
   switch(ast->astType) {
   case at_define:
+  case at_recdef:
   case at_proclaim:
     assert(ast->child(2)->astType == at_constraints);
     ast->child(2)->children->erase();
@@ -748,6 +734,7 @@ buildNewDeclaration(GCPtr<AST> def, GCPtr<Type> typ)
   
   switch(def->astType) {
   case at_define:
+  case at_recdef:
   case at_proclaim:
   case at_defexception:
     decl = new AST(at_proclaim, def->loc, ident,
@@ -1165,9 +1152,20 @@ UocInfo::recInstantiate(ostream &errStream,
       // Explicitely re-write EVERY type-qualification by hand. 
       // Otherwise tvar-scoping will play havoc due to copy -- 
       // especially at let/letrec
+      //
+      // Need to be careful here about byref types: The byref
+      // type goes on the function type, not on the identifier's type
+      // Therefore, need to preserve by-ref AST qualifications as is.
+
       if(ast->children->size() > 1) {
-	ast->child(1) = typeAsAst(ast->child(0)->symType,
-				  ast->child(1)->loc);
+	GCPtr<AST> typeAST = typeAsAst(ast->child(0)->symType,
+				       ast->child(1)->loc);
+	if(ast->child(1)->astType == at_byrefType)
+	  ast->child(1) = new AST(at_byrefType, 
+				  typeAST->loc, typeAST);
+	else
+	  ast->child(1) = typeAST;
+	
 	RANDT_DROP(ast->child(1), "[[IP R&T]]", UNIFIED_ENVS);	
 	
 	ast->child(1) = recInstantiate(errStream, 
@@ -1726,6 +1724,7 @@ UocInfo::doInstantiate(ostream &errStream,
   // letbinding to the AST here, before we RandT for the first time.
   switch(copy->astType) {
   case at_define:
+  case at_recdef:
   case at_letbinding:
     {
       // For a definition, fix the type by emitting a concrete type
@@ -1887,6 +1886,7 @@ UocInfo::doInstantiate(ostream &errStream,
 
   switch(copy->astType) {
   case at_define:
+  case at_recdef:
   case at_letbinding:
     {
       // Instantiate any types in the qualification we just emitted

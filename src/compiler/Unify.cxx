@@ -202,6 +202,55 @@ UnifyMbCt(std::ostream& errStream, GCPtr<Trail> trail,
   return true;
 }
 
+// While unifying two fnArgs, it is better to report the entire
+// function type rather than the argument types (if we know the 
+// full function type).
+// Therefore, this function is called from the Unifier
+// from both ty_fn case (in which case the errt1 and errt2
+// types are the full function types) and the
+// ty_fnarg case )in thich case errt1 = t1 and errt2=t2)
+static bool 
+UnifyFnArgs(std::ostream& errStream, GCPtr<Trail> trail,
+	    const LexLoc &errLoc,
+ 	    GCPtr<Type> errt1, GCPtr<Type> errt2,
+	    GCPtr<Type> t1, GCPtr<Type> t2,
+	    unsigned long flags)
+{
+  bool errFree = true;
+  t1 = t1->getType();
+  t2 = t2->getType();
+  assert(t1->kind == ty_fnarg);
+  assert(t2->kind == ty_fnarg);
+  
+  if (t1->components->size() != t2->components->size()) {
+    return typeError(errStream, errLoc, errt1, errt2);
+  }
+  
+  for(size_t i=0; i< t1->components->size(); i++) {
+    
+    if ((t1->CompFlags(i) & COMP_BYREF_P) &&
+	((t2->CompFlags(i) & COMP_BYREF_P) == 0)) {
+      t1->CompFlags(i) &= ~COMP_BYREF_P;
+      t1->CompFlags(i) |= t2->CompFlags(i) & COMP_BYREF;
+    }
+    else if ((t2->CompFlags(i) & COMP_BYREF_P) &&
+	     ((t1->CompFlags(i) & COMP_BYREF_P) == 0)) {
+      t2->CompFlags(i) &= ~COMP_BYREF_P;
+      t2->CompFlags(i) |= t1->CompFlags(i) & COMP_BYREF;
+    }
+    else if(t1->CompFlags(i) != t2->CompFlags(i)) {
+      errFree = typeError(errStream, errLoc, errt1, errt2);
+      break;
+    }
+    
+    CHKERR(errFree, Unify(errStream, trail, errLoc,
+			  t1->CompType(i), 
+			  t2->CompType(i), flags));
+  }
+
+  return errFree;
+}
+
 static bool
 Unify(std::ostream& errStream,
       GCPtr<Trail> trail, 
@@ -370,23 +419,11 @@ Unify(std::ostream& errStream,
       assert(t1->components->size() == 2);
       assert(t2->components->size() == 2);
 
-      // I have repeated this code here and in
-      // ty_fnarg because, in the presence of a type-error,
-      // it is better to report the entire function type
-      // rather than the argument types.
       GCPtr<Type> t1Args = t1->Args();
       GCPtr<Type> t2Args = t2->Args();
-
-      if (t1Args->components->size() != t2Args->components->size()) {
-	errFree = typeError(errStream, errLoc, t1, t2);
-	break;	// no point unifying the args, might segfault
-      }
-
-      for(size_t i=0; i< t1Args->components->size(); i++)
-	CHKERR(errFree, Unify(errStream, trail, errLoc,
-			      t1Args->CompType(i), 
-			      t2Args->CompType(i), flags));
-
+      CHKERR(errFree, UnifyFnArgs(errStream, trail, errLoc, 
+				  t1, t2, t1Args, t2Args, flags));
+      
       CHKERR(errFree, 
 	     Unify(errStream, trail, errLoc, t1->Ret(), 
 		   t2->Ret(), flags));
@@ -395,32 +432,8 @@ Unify(std::ostream& errStream,
 
   case ty_fnarg:
     {
-      if (t1->components->size() != t2->components->size()) {
-	errFree = typeError(errStream, errLoc, t1, t2);
-	break;
-      }
-	
-      for(size_t i=0; i< t1->components->size(); i++) {
-
-	if ((t1->CompFlags(i) & COMP_BYREF_P) &&
-	    ((t2->CompFlags(i) & COMP_BYREF_P) == 0)) {
-	  t1->CompFlags(i) &= ~COMP_BYREF_P;
-	  t1->CompFlags(i) |= t1->CompFlags(i) & COMP_BYREF;
-	}
-	else if ((t2->CompFlags(i) & COMP_BYREF_P) &&
-		 ((t1->CompFlags(i) & COMP_BYREF_P) == 0)) {
-	  t2->CompFlags(i) &= ~COMP_BYREF_P;
-	  t2->CompFlags(i) |= t2->CompFlags(i) & COMP_BYREF;
-	}
-	else if(t1->CompFlags(i) != t2->CompFlags(i)) {
-	  errFree = typeError(errStream, errLoc, t1, t2);
-	  break;
-	}
-	  	    
-	CHKERR(errFree, Unify(errStream, trail, errLoc,
-			      t1->CompType(i), 
-			      t2->CompType(i), flags));
-      }
+      CHKERR(errFree, UnifyFnArgs(errStream, trail, errLoc, 
+				  t1, t2, t1, t2, flags));
       break;
     }
 

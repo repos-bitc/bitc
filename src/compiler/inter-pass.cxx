@@ -141,7 +141,8 @@ bool
 typeInfer(std::ostream& errStream, GCPtr<AST> ast, 
 	  GCPtr<Environment<TypeScheme> > gamma,
 	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes,
+	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
+                                   GCPtr<AST> > > > > impTypes,
 	  bool isVP, 
 	  GCPtr<TCConstraints> tcc,
 	  unsigned long uflags,
@@ -231,6 +232,7 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
     }
     
   case at_define:
+  case at_recdef:
     {
       GCPtr<AST> id = ast->child(0)->child(0);
       MARKDEF(id, ast);
@@ -337,7 +339,8 @@ addCandidates(GCPtr<AST> mod)
     GCPtr<AST> id = ast->getID();
     switch(ast->astType) {
     case at_proclaim: // proclaims needed to keep externalNames
-    case at_define:      
+    case at_define:
+    case at_recdef:
     case at_defexception:
       if(id->symType->isConcrete())
 	Options::entryPts->append(id->fqn.asString());

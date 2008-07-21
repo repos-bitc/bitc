@@ -49,6 +49,7 @@
 ;;(define p3:(St (mutable bool) bool) (St #t #f))
 (define p4:(St  bool (mutable bool)) (St #t #f))
 
-(provide main bitc.main)
+(import bitc.main as main)
+(provide bitc.main main)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec) 0))

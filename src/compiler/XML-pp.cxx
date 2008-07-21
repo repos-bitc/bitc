@@ -260,6 +260,7 @@ XMLtypes(INOstream &out, GCPtr<AST> ast, bool raw=false)
   case at_defstruct:
   case at_declstruct:
   case at_define:
+  case at_recdef:
   case at_identPattern:
     XMLtypes(out, ast->child(0), raw);
     break;
@@ -269,9 +270,8 @@ XMLtypes(INOstream &out, GCPtr<AST> ast, bool raw=false)
     break;    
     
   case at_declare:
-  case at_import:
+  case at_importAs:
   case at_provide:
-  case at_use:
     break;
     
   default:

@@ -100,7 +100,6 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_method_decls:
   case at_method_decl: 
   case at_usesel:
-  case at_use_case:
   case at_letGather:
   case agt_ucon:
     {
@@ -121,10 +120,9 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_declunion:
   case at_declstruct:
   case at_declrepr:
-  case at_use:
-  case at_import:
+  case at_importAs:
   case at_provide:
-  case at_from:
+  case at_import:
   case at_ifsel:
   case at_declares:
   case at_declare:
@@ -198,6 +196,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
     }
 
   case at_define:
+  case at_recdef:
     {
       if(ast->child(1)->astType == at_lambda) {
 	ast->child(0)->child(0)->defbps = ast->child(1)->child(0);

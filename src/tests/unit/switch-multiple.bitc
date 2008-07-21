@@ -36,7 +36,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(provide main bitc.main)
+(import bitc.main as main)
+(provide bitc.main main)
 
 ;; In the case of unions, both legs of the union must have 
 ;; identical types to be cased-over.

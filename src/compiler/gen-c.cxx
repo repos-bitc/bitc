@@ -623,6 +623,46 @@ emit_ct_inits(INOstream &out, GCPtr<AST> fields,
 }
 
 static void
+emit_fnxn_type(INOstream &out, std::string &id, GCPtr<Type> fn,
+	       bool makePointer=false)
+{
+  fn = fn->getType();
+  GCPtr<Type> ret = fn->Ret()->getType();
+  GCPtr<Type> args = fn->Args()->getBareType();
+
+  /* If return type is unit, emit void as a special case. */
+  if (isUnitType(ret))
+    out << "void ";
+  else 
+    out << toCtype(ret) << " ";
+  
+  
+  if(!makePointer)
+    out << CMangle(id) << " ";
+  else
+    out << "(*" << CMangle(id) << ") ";
+    
+  out << "(";
+  size_t argCount = 0;
+  for(size_t i=0; i < args->components->size(); i++) {
+    GCPtr<Type> arg = args->CompType(i);
+    if (isUnitType(arg))
+      continue;
+    if(argCount > 0)
+      out << ", ";
+	  
+    out << toCtype(arg) << " ";
+    if(args->CompFlags(i) & COMP_BYREF)
+      out << "*";
+    out << " arg" << argCount;
+    argCount++;
+  }
+  if (argCount == 0)
+    out << "void";
+  out << ")";
+}
+
+static void
 emit_fnxn_decl(INOstream &out, GCPtr<AST> ast, 
 	       bool oneLine, std::string pfx="", 
 	       size_t startParam=0)
@@ -688,7 +728,7 @@ emit_fnxn_label(std::ostream& errStream,
 		unsigned long flags)
 {
   bool errFree = true;
-  assert(ast->astType == at_define);
+  assert(ast->astType == at_define || ast->astType == at_recdef);
   GCPtr<AST> id = ast->child(0)->child(0);
   assert(id->isFnxn());
   bool isHeader = (flags & TOC_HEADER_MODE);
@@ -790,7 +830,8 @@ emit_fnxn_label(std::ostream& errStream,
     for(size_t i=1; i < argvec->children->size(); i++) {
       GCPtr<AST> pat = argvec->child(i);
       GCPtr<AST> arg = pat->child(0);
-      out << ", " << CMangle(arg);
+      if(!isUnitType(arg))
+	out << ", " << CMangle(arg);
     }
     out << ");" << endl; 
     if (isUnitType(ret))
@@ -906,7 +947,6 @@ toc(std::ostream& errStream,
   case agt_fielditem:
   case at_localFrame:
   case at_frameBindings:
-  case at_use_case:
   case at_ifident:
   case agt_ucon:
 
@@ -939,10 +979,9 @@ toc(std::ostream& errStream,
   case at_deftypeclass:
   case at_definstance:
   case at_methods:
-  case at_use:
-  case at_import:
+  case at_importAs:
   case at_provide:
-  case at_from:
+  case at_import:
   case at_ifsel:
   case at_tvlist:
 
@@ -1653,30 +1692,9 @@ toc(std::ostream& errStream,
       // out << "const ";
             
       if(id->symType->isFnxn() && !id->symType->isMutable()) {
-	GCPtr<Type> ret = id->symType->getBareType()->Ret();
-	GCPtr<Type> args = id->symType->getBareType()->Args();
-	
-	out << (isUnitType(ret) ? "void" : toCtype(ret)) << " ";
-	out << CMangle(id) << " (";
-	
-	size_t argCount = 0;
-	for(size_t i=0; i < args->components->size(); i++) {
-	  GCPtr<Type> arg = args->CompType(i);
-	  if (isUnitType(arg))
-	    continue;
-	  if(argCount > 0)
-	    out << ", ";
-	  
-	  out << toCtype(arg) << " ";
-	  if(args->CompFlags(i) & COMP_BYREF)
-	    out << "*";
-	  out << " arg" << i;
-	  argCount++;
-	}
-	if (argCount == 0)
-	  out << "void";
-	out << ");"
-	    << std::endl;
+	std::string name = (id->externalName.size())?id->externalName:id->s;
+	emit_fnxn_type(out, name, id->symType);
+	out << ";" << endl;
       }
       else {
 	declare(out, id, "");
@@ -1713,6 +1731,7 @@ toc(std::ostream& errStream,
       break;
     }
     
+  case at_recdef:
   case at_define:
     {
       GCPtr<AST> id = ast->child(0)->child(0);
@@ -2540,37 +2559,15 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
       if(alreadyEmitted(t, fnVec))
 	break;
 
-      fnVec->append(CMangle(t->mangledString(true)));
-      
-      GCPtr<Type> args = t->Args()->getBareType(); 
-      GCPtr<Type> ret = t->Ret()->getBareType(); 
-      
+      std::string fnName = t->mangledString(true);
+      fnVec->append(CMangle(fnName));
       out << "/* Typedef in anticipation of the function (pointer) type:"
 	  << endl
 	  << t->asString()
 	  << "*/" << endl;
-      out << "typedef " 
-	  << (isUnitType(ret) ? "void" : toCtype(ret))
-	  << "  (*"
-	  << CMangle(t->mangledString(true))
-	  << ") (";
-
-      size_t argCount = 0;
-      for(size_t i=0; i < args->components->size(); i++) {
-	GCPtr<Type> arg = args->CompType(i);
-	if (isUnitType(arg))
-	  continue;
-	if(argCount > 0)
-	  out << ", ";
-	
-	out << toCtype(arg)	
-	    << " arg" << i;
-	argCount++;
-      }
-      if (argCount == 0)
-	out << "void";
-      out << ");"
-	  << endl << endl;            
+      out << "typedef ";
+      emit_fnxn_type(out, fnName, t, true);
+      out << ";" << endl << endl;
       break;
     }
     
@@ -2692,6 +2689,7 @@ TypesTOC(std::ostream& errStream,
       }
       
     case at_proclaim:
+    case at_recdef:
     case at_define:
       {
 	emit_arr_vec_fn_types(ast, out, arrVec, vecVec, 
@@ -2716,7 +2714,7 @@ emitInitProc(std::ostream& errStream, GCPtr<AST> ast, GCPtr<UocInfo> uoc,
 {
   bool answer = true;
   bool errorFree = true;
-  assert(ast->astType == at_define);
+  assert(ast->astType == at_define || ast->astType == at_recdef);
   out << "static " 
       << toCtype(ast->getID()->symType)
       << endl
@@ -2767,6 +2765,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 
     switch(ast->astType) {
     case at_define:
+    case at_recdef:
       {
 	// Later, we might consider: 
 	//initStream << "#line " << ast->loc.line 
@@ -2841,23 +2840,8 @@ EmitGlobalInitializers(std::ostream& errStream,
 	  GCPtr<Type> ret = fnType->Ret();
 	  GCPtr<Type> args = fnType->Args()->getBareType();
 	  
-	  out << (isUnitType(ret) ? "void" : toCtype(ret)) << endl	  
-	      << CMangle(label);
-	  out << "(";
-	  size_t argCount = 0;
-	  for(size_t i=0; i < args->components->size(); i++) {
-	    GCPtr<Type> arg = args->CompType(i);
-	    if (isUnitType(arg))
-	      continue;
-
-	    if(argCount > 0)
-	      out << ", ";
-	    out << toCtype(arg) << " arg" << i;
-	    argCount++;
-	  }
-	  if (argCount == 0)
-	    out << "void";
-	  out << ")" << endl;
+	  emit_fnxn_type(out, label->s, id->symType);
+	  out << endl;
 	  out << "{" << endl;
 	  out.more();
 	  
@@ -3158,6 +3142,8 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
   if(!result)
     return false;
   
+  int status;
+
   /* First GCC invocation is to compile the .c file into a .o file: */
   {
     stringstream opt;
@@ -3173,7 +3159,9 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
     if (Options::verbose)
       std::cerr  << opt.str() << std::endl;
 
-    system(opt.str().c_str());
+    status = system(opt.str().c_str());
+    if (WEXITSTATUS(status))
+      goto done;
   }
 
   {
@@ -3213,11 +3201,13 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
     if (Options::verbose)
       std::cerr  << opt.str() << std::endl;
 
-    system(opt.str().c_str());
+    status = system(opt.str().c_str());
   }
 
-  system("rm -f bitc.out.o");
+ done:
+  Path("bitc.out.c").remove();
+  Path("bitc.out.o").remove();
   
-  return true;
+  return WEXITSTATUS(status) ? false : true;
 }
 

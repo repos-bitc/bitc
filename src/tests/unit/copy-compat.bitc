@@ -41,7 +41,8 @@
 			(fn ('a) (ref 'b)))
   (lambda (x) (dup x)))
 
-(provide main bitc.main)
+(import bitc.main as main)
+(provide bitc.main main)
 (define main.main:(fn ((vector string)) int32) 
   (lambda (argv)  
     ((dupize1 #t), (dupize2 #f))

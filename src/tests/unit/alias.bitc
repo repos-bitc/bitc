@@ -36,13 +36,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-
-;; Tests new local define syntax.
-
-(import bitc.main as main)
+(import bitc.main main)
 (provide bitc.main main)
-(define main.main:(fn ((vector string)) int32)
-  (lambda (argvec) 
-    (define (m) 0:int32)
-    (define (close) (m))
-    (close)))
+(import bitc.stdio as stdio)
+
+(define main:(fn ((vector string)) int32)
+  (lambda (argvec)
+    0))

@@ -83,8 +83,8 @@
 
 (bitc-version "0.10")
 (interface crypt.sha1
-  (import stdio bitc.stdio)
-  (import stdlib bitc.stdlib)
+  (import bitc.stdio as stdio)
+  (import bitc.stdlib as stdlib)
 
 
   ;; Definition of SHA1 context

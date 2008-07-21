@@ -37,7 +37,8 @@
 
 (bitc-version "0.10")
 
-(provide main bitc.main)
+(import bitc.main as main)
+(provide bitc.main main)
 
 (define (abc x)
   (let ((id (lambda (y) y)))

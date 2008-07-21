@@ -36,9 +36,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(import stdio bitc.stdio)
-(import stdlib bitc.stdlib)
-(provide main bitc.main)
+(import bitc.stdio as stdio)
+(import bitc.stdlib as stdlib)
+(import bitc.main as main)
+(provide bitc.main main)
 
 
 (define (TS str ts)

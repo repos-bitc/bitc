@@ -221,33 +221,36 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
     // the convenience syntax.
     //
     ///////////////////////////////////////////////////////////
+  case at_recdef:
+    {
+      out << "(" << ast->atKwd();
+      
+      size_t oldIndent = out.indentToHere();
+      
+      out << " (";
+      
+      // Procedure name:
+      BitcP(out, ast->child(0), showTypes);
+      
+      // Procedure arguments:
+      GCPtr<AST> iLambda = ast->child(1);
+      doChildren(out, iLambda->child(0), 0, true, showTypes);
+      
+      out << ")";
+      
+      out << std::endl;
+      out.setIndent(oldIndent);
+      
+      out.more();
+      doChildren(out, iLambda, 1, true, showTypes);
+      out << ")";
+      
+      break;
+    }
+
   case at_define:
     {
-      if (ast->child(1)->astType == at_lambda &&
-	  ast->child(1)->printVariant == 1) {
-	out << "(" << ast->atKwd();
-
-	size_t oldIndent = out.indentToHere();
-
-	out << " (";
-
-	// Procedure name:
-	BitcP(out, ast->child(0), showTypes);
-
-	// Procedure arguments:
-	GCPtr<AST> iLambda = ast->child(1);
-	doChildren(out, iLambda->child(0), 0, true, showTypes);
-
-	out << ")";
-
-	out << std::endl;
-	out.setIndent(oldIndent);
-
-	out.more();
-	doChildren(out, iLambda, 1, true, showTypes);
-	out << ")";
-      }
-      else if (ast->child(1)->astType == at_lambda) {
+      if (ast->child(1)->astType == at_lambda) {
 	out << "(" << ast->atKwd() << " ";
 
 	// Procedure name:
@@ -537,16 +540,27 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
       break;
     }
 
-  case at_import:
+  case at_importAs:
+    {
+      GCPtr<AST> ifAst = ast->child(0); 
+      GCPtr<AST> idAst = ast->child(1);
+
+      out << "(" << ast->atKwd();
+      BitcP(out, ifAst, showTypes);
+      out << " as ";
+      BitcP(out, idAst, showTypes);
+      out << ")";
+      break;
+    }
+
   case at_provide:
   case at_defexception:
-  case at_use:
     out << "(" << ast->atKwd();
     doChildren(out, ast, 0, true, showTypes);
     out << ")";
     break;
 
-  case at_from:
+  case at_import:
     out << "(" << ast->atKwd();
     BitcP(out, ast->child(0), showTypes);
     out << " import ";
@@ -761,7 +775,6 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
   case at_typeapp:
     //  case at_catchclause:
   case at_tcapp:
-  case at_use_case:
     {
       if (ast->printVariant == 1) {
 	doChildren(out, ast, 1, false, showTypes);
@@ -1013,10 +1026,9 @@ doShowTypes(std::ostream& out, GCPtr<AST> ast,
       
       for(; i<ast->children->size(); i++) {
 	switch(ast->child(i)->astType){
-	case at_import:
+	case at_importAs:
 	case at_provide:
 	case at_declare:
-	case at_use:
 	  break;
 	default:
 	  doShowTypes(out, ast->child(i), gamma, 
@@ -1037,9 +1049,8 @@ doShowTypes(std::ostream& out, GCPtr<AST> ast,
     break;
     
   case at_declare:
-  case at_import:
+  case at_importAs:
   case at_provide:
-  case at_use:
     break;
 
   case at_defexception:
@@ -1091,6 +1102,7 @@ doShowTypes(std::ostream& out, GCPtr<AST> ast,
     }
      
   case at_define:
+  case at_recdef:
     {
       doShowTypes(out, ast->child(0), gamma, 
 		  showMangName, raw, tvP);

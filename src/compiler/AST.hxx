@@ -58,8 +58,6 @@ enum primOp {
 
 #define ID_IS_TVAR       0x00000001u
 #define ID_IS_CTOR       0x00000002u
-#define ID_IS_IMPORTER   0x00000004u
-#define ID_IS_PROVIDER   0x00000008u
 #define AST_IS_VALPAT    0x00000010u  
 #define ID_IS_GLOBAL     0x00000020u
 #define ID_IS_GENSYM     0x00000040u  
@@ -286,13 +284,12 @@ enum AstType {
     at_constraints,
     at_definstance,
     at_methods,
-    at_use,
-    at_use_case,
     at_proclaim,
     at_define,
-    at_import,
+    at_recdef,
+    at_importAs,
     at_provide,
-    at_from,
+    at_import,
     at_ifsel,
     at_declares,
     at_declare,

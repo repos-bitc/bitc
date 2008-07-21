@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2008, Johns Hopkins University.
+ * Copyright (c) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -99,62 +99,11 @@ warnUnresRef(std::ostream& errStream,
 }
 #endif
 
-static void
-useIF(const std::string& idName,
-      GCPtr<Environment<AST> > fromEnv, 
-      GCPtr<Environment<AST> > toEnv)
-{
-  for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
-    GCPtr<Binding<AST> > bdng = fromEnv->bindings->elem(i);
-    
-    if (bdng->flags & BF_PRIVATE) {
-      continue;
-    }
-      
-    std::string s = bdng->nm;
-    GCPtr<AST> ast = bdng->val;
-
-    if (idName.size())
-      s = idName + "." + s;
-
-    toEnv->addBinding(s, ast);
-    toEnv->setFlags(s, BF_PRIVATE|BF_COMPLETE);
-  }
-}
-
-static void
-bindIdentDef(GCPtr<AST> ast, GCPtr<Environment<AST> > env, 
-	     IdentType identType, GCPtr<AST> currLB,
-	     unsigned flags)
-{  
-  if (ast->Flags & ID_IS_TVAR) {
-    env->addDefBinding(ast->s, ast);
-    env->setFlags(ast->s, BF_COMPLETE | BF_NO_MERGE);
-
-    assert(currLB);
-    ast->tvarLB = currLB;   
-  }
-  else
-    env->addBinding(ast->s, ast);
-
-  // Type (arguments) Variables are not bound to incompleteness
-  // restriction  I believe the following check is sufficient.
-  // If there is problem, I will have to pass around an additional
-  // bool addToIncomplete parameter, or at the caller, add them to a
-  // dummy list.
-  
-  ast->identType = identType;
-//   cout << "Added "<< ast->s << " at " << ast->loc 
-//        <<" with idType = " 
-//        << identTypeToString(identType)
-//        << std::endl;
-
-}
-
 static GCPtr<UocInfo>
 findInterface(std::ostream& errStream, GCPtr<AST> ifAst)
 {
   GCPtr<UocInfo> iface=NULL;
+
   for(size_t i=0; i < UocInfo::ifList->size(); i++) {
     GCPtr<UocInfo> thisIface = UocInfo::ifList->elem(i);
     if(thisIface->uocName == ifAst->s) {
@@ -188,6 +137,164 @@ findInterface(std::ostream& errStream, GCPtr<AST> ifAst)
   return iface;
 }
 	      
+static void
+aliasPublicBindings(const std::string& idName,
+		    GCPtr<Environment<AST> > aliasEnv, 
+		    GCPtr<Environment<AST> > fromEnv, 
+		    GCPtr<Environment<AST> > toEnv)
+{
+  for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
+    GCPtr<Binding<AST> > bdng = fromEnv->bindings->elem(i);
+    
+    if (bdng->flags & BF_PRIVATE)
+      continue;
+
+    std::string s = bdng->nm;
+    GCPtr<AST> ast = bdng->val;
+
+    if (aliasEnv && 
+	aliasEnv->getBinding(ast->fqn.asString("::")))
+      continue;
+
+
+    if (idName.size())
+      s = idName + "." + s;
+
+    toEnv->addBinding(s, ast);
+
+    // @bug There is a moderately serious bug here. If the importing
+    // module is a consumer of an incomplete proclaim, then the
+    // working assumption is that there are global initialization
+    // constraints, and those constraints ensure that the provider has
+    // already defined the proclaimed symbol, in which case it should
+    // be marked complete in the importing module's context.
+    //
+    // However, it must NOT be marked complete in the *providing*
+    // module's context until it is actually defined, and this yields
+    // the following dilemma:
+    //
+    //  (import theModule X) ;; causing to be marked locally complete)
+    //  ... use of X requiring completeness ...
+    //  (provide theModule X) ;; at which point we suddenly realize
+    //    that it can't be complete. We can un-mark it here, but the
+    //    damage has already been done by the use.
+    //
+    // This is all tied in with the general problem of initialization
+    // ordering.
+    toEnv->setFlags(s, BF_PRIVATE|BF_COMPLETE);
+  }
+}
+
+static void
+importIfBinding(std::ostream& errStream, 
+		GCPtr<Environment<AST> > aliasEnv,
+		GCPtr<AST> ifName)
+{
+  findInterface(errStream, ifName);
+  std::string canonicalIfName = ifName->s;
+
+  // If we have seen this interface before, use the original import:
+  GCPtr<AST> ifAst = aliasEnv->getBinding(canonicalIfName);
+  if (ifAst) {
+    // Override the environments populated by findInterface with the
+    // canonical duplicates.
+    ifName->envs.env = ifAst->envs.env;
+    ifName->envs.gamma = ifAst->envs.gamma;
+    ifName->envs.instEnv = ifAst->envs.instEnv;
+  }
+
+  aliasEnv->addBinding(canonicalIfName, ifName);
+
+  // Need to form the canonical duplicate environment in the current
+  // importing UoC for this interface.
+  GCPtr<Environment<AST> > dupEnv = 
+    new Environment<AST>(ifName->envs.env->uocName);
+
+  for (size_t i = 0; i < ifName->envs.env->bindings->size(); i++) {
+    GCPtr<Binding<AST> > bdng = ifName->envs.env->bindings->elem(i);
+    
+    if (bdng->flags & BF_PRIVATE) {
+      continue;
+    }
+      
+    std::string s = bdng->nm;
+    GCPtr<AST> ast = bdng->val;
+
+    dupEnv->addBinding(s, ast);
+    dupEnv->setFlags(s, bdng->flags);
+  }
+
+  ifName->envs.env = dupEnv;
+}
+
+static bool
+providing(GCPtr<Environment<AST> > env, GCPtr<AST> sym)
+{
+  std::string canonicalIfName = "::" + sym->fqn.iface;
+  GCPtr<Binding<AST> > bndg = env->doGetBinding(canonicalIfName);
+
+  // If there is no binding for the canonicalIfName, then we are
+  // processing the grand output AST, and providing has already been
+  // checked.  In all per-UoC cases there will necessarily be a
+  // binding, and we need to check the BF_PROVIDING flag.
+  if (!bndg) return true;
+
+  return (bndg->flags & BF_PROVIDING);
+}
+
+bool
+makeLocalAlias(GCPtr<Environment<AST> > fromEnv,
+	       std::string fromName,
+	       GCPtr<Environment<AST> > toEnv, 
+	       const std::string& toPfx,
+	       GCPtr<AST> toIdent)
+{
+  GCPtr<Binding<AST> > bndg = fromEnv->doGetBinding(fromName);
+
+  if (bndg->flags & BF_PRIVATE)
+    return false;
+      
+  GCPtr<AST> ast = bndg->val;
+
+  std::string s = toIdent->s;
+  if (toPfx.size())
+    s = toPfx + "." + s;
+
+  toEnv->addBinding(s, ast);
+  toEnv->setFlags(s, BF_PRIVATE|BF_COMPLETE);
+
+  return true;
+}
+
+static void
+bindIdentDef(GCPtr<AST> ast, GCPtr<Environment<AST> > env, 
+	     IdentType identType, GCPtr<AST> currLB,
+	     unsigned flags)
+{  
+  if (ast->Flags & ID_IS_TVAR) {
+    env->addDefBinding(ast->s, ast);
+    env->setFlags(ast->s, BF_COMPLETE | BF_NO_MERGE);
+
+    assert(currLB);
+    ast->tvarLB = currLB;   
+  }
+  else
+    env->addBinding(ast->s, ast);
+
+  // Type (arguments) Variables are not bound to incompleteness
+  // restriction  I believe the following check is sufficient.
+  // If there is problem, I will have to pass around an additional
+  // bool addToIncomplete parameter, or at the caller, add them to a
+  // dummy list.
+  
+  ast->identType = identType;
+//   cout << "Added "<< ast->s << " at " << ast->loc 
+//        <<" with idType = " 
+//        << identTypeToString(identType)
+//        << std::endl;
+
+}
+
 
 
 static void
@@ -205,9 +312,10 @@ markLatestComplete(GCPtr<Environment<AST> > env)
 }
 
 //WARNING: **REQUIRES** answer and errorFree.
+// Carries aliasEnv passively throughout, as if closed over.
 #define RESOLVE(ast,env,lamLevel,mode,identType,currLB,flags)	\
   do {								\
-    answer = resolve(errStream, (ast), (env), (lamLevel),	\
+    answer = resolve(errStream, (ast), aliasEnv, (env), (lamLevel), \
 		     (mode), (identType), (currLB), (flags));	\
     if(answer == false)						\
       errorFree = false;					\
@@ -226,6 +334,7 @@ markLatestComplete(GCPtr<Environment<AST> > env)
 bool
 resolve(std::ostream& errStream, 
 	GCPtr<AST> ast, 
+	GCPtr<Environment<AST> > aliasEnv,
 	GCPtr<Environment<AST> > env,
 	GCPtr<Environment<AST> > lamLevel,
 	int mode, 
@@ -332,17 +441,23 @@ resolve(std::ostream& errStream,
 		
 	  GCPtr<AST> sym = env->getBinding(ast->s);
 	
-	  if((flags & NEEDS_PRIOR_DECL) && !sym) {
-	    errStream << ast->loc << ": " 
-		      << ast->s << " NEEDS prior declaration. "
-		      << " Are you defining in the correct namespace?"
-		      << std::endl;
-	    errorFree = false;
-	    break;
-	  }
-	  
 	  if(sym) {
 	    if(sym->isDecl) {
+	      if (sym->uoc != ast->uoc && !providing(env, sym)) {
+		// We are defining an ident that has an existing
+		// binding that came about through import. Confirm
+		// that we also marked it as providable:
+
+		errStream << ast->loc << ": " 
+			  << ast->s
+			  << " aliases an interface symbol that"
+			  << " is not being provided."
+			  << std::endl;
+		errorFree = false;
+		break;
+		
+	      }
+
 	      if(sym->identType != identType) {
 		errStream << ast->loc << ": " 
 			  << ast->s << " is declared/defined here as"
@@ -354,6 +469,7 @@ resolve(std::ostream& errStream,
 		break;
 	      }
 	      
+	      // FIX: This is a BUG!
 	      sym->defn = ast;
 	      ast->decl = sym;
 	      env->removeBinding(ast->s);
@@ -652,16 +768,6 @@ resolve(std::ostream& errStream,
 	break;
       }
       
-      if(mode == DEF_MODE && 
-	 (!(iface->symbolDef->Flags & ID_IS_PROVIDER))) {
-	errStream << ast->loc << ": "
-		  << iface->s << " is NOT a provider, but is here "
-		  << " attempting to define."
-		  << std::endl;
-	errorFree = false;
-	break;
-      }
-
       ast->fqn = FQName(ast->child(0)->symbolDef->ifName,
 			ast->child(1)->s);
 
@@ -670,12 +776,13 @@ resolve(std::ostream& errStream,
       ast->identType = ast->child(1)->identType;
       ast->Flags = ast->child(1)->Flags;
       ast->Flags |= ID_IS_GLOBAL;
+      ast->uoc = ast->child(0)->symbolDef->uoc;
 
       ast->children->erase();
 
       // SHOULD THE PUBLIC FLAG BE TAKEN OFF HERE ??
       RESOLVE(ast, env, lamLevel, mode, identType, currLB,  
-	      (flags & (~BIND_PUBLIC)) | NEEDS_PRIOR_DECL);
+	      (flags & (~BIND_PUBLIC)));
 
       break;
     }
@@ -909,6 +1016,7 @@ resolve(std::ostream& errStream,
       break;
     }    
 
+  case at_recdef:
   case at_define:
     {
       GCPtr<Environment<AST> > tmpEnv = env->newDefScope();
@@ -923,16 +1031,28 @@ resolve(std::ostream& errStream,
       assert(ast->child(0)->astType == at_identPattern);
       ast->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
       
-      // match agt_bindingPattern
-      RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
-	      id_value, ast, 
-	      flags | (NEW_TV_OK) | BIND_PUBLIC);
+      if (ast->astType == at_recdef) {
+	// Binding patterns must be in scope.
+	// match agt_bindingPattern
+	RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
+		id_value, ast, 
+		flags | (NEW_TV_OK) | BIND_PUBLIC);
+      }
 
       // match agt_expr
       RESOLVE(ast->child(1), tmpEnv, lamLevel, USE_MODE, 
 	      id_value, ast, 
 	      flags | (NEW_TV_OK) & (~INCOMPLETE_OK));
       
+      if (ast->astType == at_define) {
+	// Binding patterns not in scope within expr, so handle them
+	// later.
+	// match agt_bindingPattern
+	RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
+		id_value, ast, 
+		flags | (NEW_TV_OK) | BIND_PUBLIC);
+      }
+
       // match at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
 	      id_type, ast, 
@@ -1072,79 +1192,62 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_use:
-    {
-      GCPtr<Environment<AST> > tmpEnv = env->newScope();
-      ast->envs.env = tmpEnv;
-
-      for (size_t c = 0; c < ast->children->size(); c++)
-	RESOLVE(ast->child(c), tmpEnv, lamLevel, USE_MODE,
-		id_usebinding, currLB,
-		flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
-
-      env->mergeBindingsFrom(tmpEnv);
-      break;
-    }
-
-  case at_use_case:
-    {
-      /** FIX ME : The incompleteness restriction is NOT enforced here
-	  This needs to be fixed after a resolution algorithm is
-	  specified. The resolution algorithm must identify what
-	  identifiers are declared complete across a interface/module
-	  definition.  
-
-	  The problem here is that there can be a cyclic construction,
-	  which leads to infinite loop in the construction logic.
-	  For example:
-
-	  Interface A:
-	  (interface ifa
-   	    (proclaim a:uint32))
-
-	  Interface B:
-	  (interface ifb
-	    (proclaim b:uint32))
-
-
-	  Source A:
-	  (import ifb ifb)
-          (provide ifa ifa)
-          (define ifa.a ifb.b)
-
-          Source B:
-	  (import ifa ifa)
-	  (provide ifb ifb)
-	  (define ifb.b ifa.a)
-
-	  This test case can be found in tests/defloop. ***/
-      RESOLVE(ast->child(1), env, lamLevel, USE_MODE,
-	      id_usebinding, currLB, 
-	      ((flags & (~NEW_TV_OK))) | NO_CHK_USE_TYPE);
-
-      if (!errorFree)
-	break;
-      
-      env->addBinding(ast->child(0)->s,
-		      ast->child(1)->symbolDef); 
-      env->setFlags(ast->child(0)->s,
-		    ((env->getFlags(ast->child(0)->s)) |
-		     BF_PRIVATE)); 
-      
-      break;
-    }
-
   case at_ifident:
     break;
     
-  case at_import:
   case at_provide:
     {
+      GCPtr<AST> ifAst = ast->child(0);
+      importIfBinding(errStream, aliasEnv, ifAst);
+
+      GCPtr<Environment<AST> > ifEnv = ifAst->envs.env;
+
+      for (size_t i = 1; i < ast->children->size(); i++) {
+	GCPtr<AST> provideName=ast->child(i);
+	GCPtr<Binding<AST> > bndg = ifEnv->doGetBinding(provideName->s);
+        if (!bndg) {
+	  errStream << ast->loc << ": "
+		    << provideName->s
+		    << " not found in interface "
+		    << ifAst->s
+		    << std::endl;
+	  
+	  errorFree = false;
+	  break;
+	}
+
+	if (!bndg->val->isDecl) {
+	  errStream << ast->loc << ": Cannot provide "
+		    << provideName->s
+		    << " in interface "
+		    << ifAst->s
+		    << ", which is defined in the interface."
+		    << std::endl;
+	  
+	  errorFree = false;
+	  break;
+	}
+
+	bndg->flags |= BF_PROVIDING;
+      }
+
+      break;
+    }    
+
+  case at_importAs:
+    {
+      GCPtr<AST> ifAst = ast->child(0); 
+      GCPtr<AST> idAst = ast->child(1);
+
+      importIfBinding(errStream, aliasEnv, ifAst);
+
       // import ident ifname
       GCPtr<Environment<AST> > tmpEnv = env->newScope();
+	//	new Environment<AST>(ifAst->envs.env->uocName);
+
       ast->envs.env = tmpEnv;
       
-      if (ast->child(1)->s == env->uocName) {
+      if (ifAst->s == env->uocName) {
 	errStream << ast->loc << ": "
 		  << "Cannot import an undefined interface. "
 		  << std::endl;
@@ -1153,36 +1256,24 @@ resolve(std::ostream& errStream,
 	break;
       }
       
-      RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE,
+      RESOLVE(idAst, tmpEnv, lamLevel, DEF_MODE,
 	      id_interface, NULL, flags);
-      ast->child(0)->ifName = ast->child(1)->s;
+      idAst->ifName = ifAst->s;
       // The interface name must not be exported
-      env->setFlags(ast->child(0)->s,
-		    ((env->getFlags(ast->child(0)->s)) |
+      env->setFlags(idAst->s,
+		    ((env->getFlags(idAst->s)) |
 		     BF_PRIVATE)); 
    
-      if(ast->astType == at_import)
-	ast->child(0)->Flags |= ID_IS_IMPORTER;
-      else
-	ast->child(0)->Flags |= ID_IS_PROVIDER;
+      idAst->envs.env = ifAst->envs.env;
+      idAst->envs.gamma = ifAst->envs.gamma;
+      idAst->envs.instEnv = ifAst->envs.instEnv;
 
-      GCPtr<UocInfo> iface = findInterface(errStream, ast->child(1)); 
-      if(!iface) {
-	// Error message printed in findInterface() function
-	errorFree = false;
-	break;
-      }
-
-      ast->child(0)->envs.env = iface->env;
-      ast->child(0)->envs.gamma = iface->gamma;
-      ast->child(0)->envs.instEnv = iface->instEnv;
-
-      useIF(ast->child(0)->s, ast->child(0)->envs.env, tmpEnv);
+      aliasPublicBindings(idAst->s, NULL, idAst->envs.env, tmpEnv);
       env->mergeBindingsFrom(tmpEnv);
       break;
     }
 
-  case at_from:
+  case at_import:
     {
       // from ifName alias+
       GCPtr<Environment<AST> > tmpEnv = env->newScope();
@@ -1208,26 +1299,49 @@ resolve(std::ostream& errStream,
 
       if(ast->children->size() == 1) {
 	// This is an import-all form
-	useIF(std::string(), iface->env, tmpEnv);
+	aliasPublicBindings(std::string(), aliasEnv, iface->env, tmpEnv);
       }
       else {
 	// Need to import only certain bindings
 	for (size_t c = 1; c < ast->children->size(); c++) {
 	  GCPtr<AST> alias = ast->child(c);
-	  GCPtr<AST> thisName = alias->child(0);
-	  GCPtr<AST> thatName = alias->child(1);
+	  GCPtr<AST> localName = alias->child(0);
+	  GCPtr<AST> pubName = alias->child(1);
 	
-	  RESOLVE(thatName, iface->env, lamLevel, USE_MODE,
+	  RESOLVE(pubName, iface->env, lamLevel, USE_MODE,
 		  id_usebinding, currLB, 
 		  ((flags & (~NEW_TV_OK))) | NO_CHK_USE_TYPE);
 	
 	  if(!errorFree)
 	    break;
-	
-	  GCPtr<AST> oldDef = env->getBinding(thisName->s);
+
+	  // Enforce the "one alias" rule.
+	  GCPtr<Binding<AST> > bndg = 
+	    ifName->envs.env->doGetBinding(pubName->s);
+
+	  std::string pubFQN = bndg->val->fqn.asString("::");
+
+	  GCPtr<AST> oldAlias = aliasEnv->getBinding(pubFQN);
+	  if (oldAlias) {
+	    errStream << alias->loc << ": The public identifier "
+		      << pubFQN
+		      << ", being aliased here to " 
+		      << pubName->s
+		      << ", was previously aliased to "
+		      << oldAlias->s
+		      << " at "
+		      << oldAlias->loc
+		      << std::endl;
+	    errorFree = false;
+	    break;
+	  }
+	    
+	  aliasEnv->addBinding(pubFQN, localName);
+
+	  GCPtr<AST> oldDef = env->getBinding(localName->s);
 	  if(oldDef) {
 	    errStream << alias->loc << ": Conflict for alias definition"
-		      << thisName->s
+		      << localName->s
 		      << ". Previously defined at "
 		      << oldDef->loc
 		      << std::endl;
@@ -1235,8 +1349,8 @@ resolve(std::ostream& errStream,
 	    break;
 	  }
 	
-	  tmpEnv->addBinding(thisName->s, thatName->symbolDef);
-	  tmpEnv->setFlags(thisName->s, BF_PRIVATE);
+	  tmpEnv->addBinding(localName->s, pubName->symbolDef);
+	  tmpEnv->setFlags(localName->s, BF_PRIVATE);
 	}
       }
 
@@ -2365,6 +2479,7 @@ resolve(std::ostream& errStream,
 static bool
 initEnv(std::ostream& errStream,
 	GCPtr<AST> ast,
+	GCPtr<Environment<AST> > aliasEnv,
 	GCPtr<Environment<AST> > env)
 {
   // See if I am processing the prelude or some other file.
@@ -2405,7 +2520,7 @@ initEnv(std::ostream& errStream,
     return false;
   }
   
-  useIF(std::string(), preenv, env);
+  aliasPublicBindings(std::string(), aliasEnv, preenv, env);
   return true;
 }
 
@@ -2419,6 +2534,8 @@ UocInfo::fe_symresolve(std::ostream& errStream,
   if(Options::noPrelude)
     flags |= SYM_NO_PRELUDE;
   
+  GCPtr<Environment<AST> > aliasEnv = new Environment<AST>("*aliases*");
+
   if(init) {    
     if(flags & SYM_REINIT) {
       assert(env);      
@@ -2430,11 +2547,11 @@ UocInfo::fe_symresolve(std::ostream& errStream,
     }      
 
     if((flags & SYM_NO_PRELUDE) == 0)
-      initEnv(std::cerr, uocAst, env);
+      initEnv(std::cerr, uocAst, aliasEnv, env);
   }
   
-  CHKERR(errFree, resolve(errStream, uocAst, env, NULL, USE_MODE, 
-			  id_type, NULL, flags));
+  CHKERR(errFree, resolve(errStream, uocAst, aliasEnv, env, NULL, 
+			  USE_MODE, id_type, NULL, flags));
 
   return errFree;
 }

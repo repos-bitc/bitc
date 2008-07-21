@@ -36,7 +36,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(provide main bitc.main)
+(import bitc.main as main)
+(provide bitc.main main)
 
 (defstruct (st 'a) f1:(bitfield int32 20) f2: 'a)
 (define st1 (st 10 #t))

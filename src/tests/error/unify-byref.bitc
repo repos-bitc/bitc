@@ -35,14 +35,19 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Unification waas wrongly permitted across function types
+;; with normal/byref parameters. This is now fixed,
+;; but here is the test case that originally compiled okay.
+
 (bitc-version "0.10")
 
-;; Tests new local define syntax.
-
-(import bitc.main as main)
+(import main bitc.main)
 (provide bitc.main main)
+
+(define (f (x:(by-ref 'a)) x))
+(define (g (x) x))
+
 (define main.main:(fn ((vector string)) int32)
-  (lambda (argvec) 
-    (define (m) 0:int32)
-    (define (close) (m))
-    (close)))
+  (lambda argVec:
+    (if #t f g) ;; wrong!
+    0:int32))

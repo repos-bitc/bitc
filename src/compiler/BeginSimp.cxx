@@ -57,30 +57,38 @@ using namespace sherpa;
 
 // Remove any wrapping BEGIN that has just one child.
 static GCPtr<AST> 
-beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool *stillOK)
+beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
 {
   for (size_t c = 0; c < ast->children->size(); c++)
-    ast->child(c) = beginSimp(ast->child(c), errStream, stillOK);
+    ast->child(c) = beginSimp(ast->child(c), errStream, errFree);
 
   if (ast->astType == at_begin) {
     for (size_t c = 0; c < ast->children->size(); c++) {
-      if (ast->child(c)->astType == at_define) {
+      if (ast->child(c)->astType == at_define ||
+	  ast->child(c)->astType == at_recdef) {
+	bool rec = (ast->child(c)->astType == at_recdef);
 	GCPtr<AST> def = ast->child(c);
-	GCPtr<AST> letBinding = new AST(at_letbinding, def->loc, 
-				  def->child(0), def->child(1));
-	letBinding->Flags |= LB_REC_BIND;
-
+	GCPtr<AST> letBinding = 
+	  new AST(at_letbinding,
+		  def->loc, def->child(0), def->child(1));
+	if(rec)
+	  letBinding->Flags |= LB_REC_BIND;
+	
 	// The definition is not a global
 	def->child(0)->child(0)->Flags &= ~ID_IS_GLOBAL;
 	GCPtr<AST> body = new AST(at_begin, ast->child(c)->loc);
-
+	
 	for (size_t bc = c+1; bc < ast->children->size(); bc++)
 	  body->addChild(ast->child(bc));
-
+	
 	if (body->children->size() == 0) {
-	  // Error: define at end of BEGIN form
+	  errStream << def->loc << ": "
+		    << "definition not permitted as the "
+		    << "last expression in a sequece."
+		    << std::endl;
+	  errFree = false;
 	}
-
+	
 	// Trim the remaining children of this begin:
 	// while (ast->children->size() > c+1)
 	//   ast->children->Remove(ast->children->size()-1);
@@ -88,14 +96,13 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool *stillOK)
 	for(size_t i=0; i <= c; i++)
 	  newChildren->append(ast->child(i));
 	ast->children = newChildren;
-
+	
 	// Insert the new letrec:
 	GCPtr<AST> theLetRec = 
-	  new AST(at_letrec, def->loc, 
+	  new AST((rec ? at_letrec : at_let), def->loc, 
 		  new AST(at_letbindings, def->loc, letBinding),
-		  body,
-		  def->child(2));
-	ast->child(c) = beginSimp(theLetRec, errStream, stillOK);
+		  body, def->child(2));
+	ast->child(c) = beginSimp(theLetRec, errStream, errFree);
 
 	// Stop processing this begin:
 	break;
@@ -117,8 +124,8 @@ UocInfo::fe_beginSimp(std::ostream& errStream,
     PrettyPrint(errStream);
   
   BEG_SIMP_DEBUG std::cerr << "fe_beginSimp" << std::endl;
-  bool stillOK = true;
-  uocAst = beginSimp(uocAst, errStream, &stillOK);
+  bool errFree = true;
+  uocAst = beginSimp(uocAst, errStream, errFree);
 
   BEG_SIMP_DEBUG if (isSourceUoc())
     PrettyPrint(errStream);

@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -171,12 +171,12 @@ struct KeyWord {
   const char *nm;
   int  tokValue;
 } keywords[] = {
-  { "=",                '=' },	// singleton '=' is not an identifier.
   { "and",              tk_AND },
   { "apply",            tk_APPLY },
   { "array",            tk_ARRAY },
   { "array-length",     tk_ARRAY_LENGTH },
   { "array-nth",        tk_ARRAY_NTH },
+  { "as",               tk_AS },
   { "assert",           tk_Reserved },
   { "begin",            tk_BEGIN },
   { "bitc-version",     tk_BITC_VERSION },
@@ -221,7 +221,6 @@ struct KeyWord {
   { "float",            tk_FLOAT },
   { "fn",               tk_FN },
   { "forall",           tk_FORALL },
-  { "from",             tk_FROM },
   { "hide",             tk_HIDE },
   { "if",               tk_IF },
   { "import",           tk_IMPORT },
@@ -279,7 +278,6 @@ struct KeyWord {
   { "uint32",           tk_UINT32 },
   { "uint64",           tk_UINT64 },
   { "uint8",            tk_UINT8 },
-  { "use",              tk_USE },
   { "using",            tk_Reserved },
   { "val",              tk_VAL },
   { "value-at",         tk_Reserved },

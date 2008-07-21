@@ -36,7 +36,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(provide main bitc.main)
+(import bitc.main as main)
+(provide bitc.main main)
 
 ;; Test to ensure that maximize mutability() does not violate
 ;; dictionary lookup.

@@ -80,6 +80,7 @@ cl_HoistInstLam(GCPtr<UocInfo> uoc)
 	if (meth->astType != at_ident) {
 	  // It's an expression. Need to hoist it into a new binding.
 
+	  // FIX: redef or define?
 	  GCPtr<AST> newDef = new AST(at_define, meth->loc);
 
 	  GCPtr<AST> lamName = AST::genSym(meth, "lam");

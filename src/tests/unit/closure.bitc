@@ -35,7 +35,8 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(provide main bitc.main)
+(import bitc.main as main)
+(provide bitc.main main)
 
 (define f
   (lambda (x) (lambda (y) (+ x y))))

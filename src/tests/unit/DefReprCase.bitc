@@ -36,7 +36,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(provide main bitc.main)
+(import bitc.main as main)
+(provide bitc.main main)
 
 (defrepr repr:val
   (Ct1 i:int32 j:bool (where (== i 0)))

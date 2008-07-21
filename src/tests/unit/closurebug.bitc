@@ -35,14 +35,15 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; This test cases tests for a bug in the C code generator that 
+;; failed to introduce local variables for removed arguments of unit
+;; type in wrapper routines for closure converted functions.
+
 (bitc-version "0.10")
-
-;; Tests new local define syntax.
-
 (import bitc.main as main)
 (provide bitc.main main)
+
+(define f (letrec ((ff (lambda (x) ff 0))) ff))
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec) 
-    (define (m) 0:int32)
-    (define (close) (m))
-    (close)))
+    (f 0)))
