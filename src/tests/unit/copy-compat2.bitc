@@ -40,7 +40,7 @@
 		       (fn ((ref 'a)) bool))
   (lambda (x) #t))
 
-(import main bitc.main)
+(import bitc.main as main)
 (provide bitc.main main)
 (define main.main:(fn ((vector string)) int32) 
   (lambda (argv)  

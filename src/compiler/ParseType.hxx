@@ -38,8 +38,7 @@
  *
  **************************************************************************/
 
-#include <libsherpa/Path.hxx>
-#include <libsherpa/LToken.hxx>
+#include <sherpa/LToken.hxx>
 #include "AST.hxx"
 
 typedef struct ParseType ParseType;

@@ -42,9 +42,9 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
+#include <sherpa/UExcept.hxx>
+#include <sherpa/CVector.hxx>
+#include <sherpa/avl.hxx>
 #include <assert.h>
 
 #include "UocInfo.hxx"
@@ -52,7 +52,6 @@
 #include "Type.hxx"
 #include "TypeInfer.hxx"
 #include "inter-pass.hxx"
-#include "Clconv.hxx"
 #include "Options.hxx"
 
 using namespace sherpa;
@@ -154,7 +153,6 @@ findusedef(std::ostream &errStream,
   case at_tcdecls:
   case at_tyfn:
   case at_usesel:
-  case at_use_case:
   case at_identList:
   case at_container:
   case at_defrepr:
@@ -176,10 +174,9 @@ findusedef(std::ostream &errStream,
   case at_declunion:
   case at_declstruct:
   case at_declrepr:
-  case at_use:
-  case at_import:
+  case at_importAs:
   case at_provide:
-  case at_from:
+  case at_import:
   case at_ifsel:
   case at_declares:
   case at_declare:

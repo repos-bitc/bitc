@@ -42,9 +42,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
+#include <sherpa/UExcept.hxx>
+#include <sherpa/CVector.hxx>
+#include <sherpa/avl.hxx>
 #include <assert.h>
 #include "AST.hxx"
 #include "Type.hxx"

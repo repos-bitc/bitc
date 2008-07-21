@@ -36,8 +36,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (interface bitc.string
-  (import lst bitc.list)
-  (import vec bitc.vector)
+  (import bitc.list as lst)
+  (import bitc.vector as vec)
 
   (proclaim string-length : (fn (string) word) external bitc_string_length)
   (proclaim string-nth :    (fn (string word) char) external bitc_string_nth)

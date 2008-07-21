@@ -36,7 +36,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(import main bitc.main)
+(import bitc.main as main)
 (provide bitc.main main)
 
 (define main.main:(fn ((vector string)) int32)
@@ -50,7 +50,7 @@
 ;   (letrec ((oe:('a, 'b) ((lambda (x) (oe.fst x)), (lambda(y) (oe.snd y)))))
 ;     oe))
 
-(import main bitc.main)
+(import bitc.main as main)
 ; (provide bitc.main main)
 ; (define (main.main argv:(vector string))  
 ;   (oe.fst oe.snd)

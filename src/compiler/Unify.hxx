@@ -44,10 +44,10 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
 #include <assert.h>
+
+#include <sherpa/GCPtr.hxx>
+
 #include "AST.hxx"
 #include "Environment.hxx"
 #include "Type.hxx"

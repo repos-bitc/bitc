@@ -37,8 +37,8 @@
 
 (bitc-version "0.10")
 (interface bitc.stdio
-  (import str bitc.string)
-  (import lst bitc.list)
+  (import bitc.string as str)
+  (import bitc.list as lst)
 
   (defstruct stream : ref external bitc_stdioStream)
 

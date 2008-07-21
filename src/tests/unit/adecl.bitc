@@ -36,7 +36,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(import main bitc.main)
+(import bitc.main as main)
 (provide bitc.main main)
 
 (define a23 (array (array 1:int32 2 3)

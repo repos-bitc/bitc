@@ -55,18 +55,6 @@
 #include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Options.hxx"
-#if 0
-#include "Environment.hxx"
-#include "Symtab.hxx"
-#include "inter-pass.hxx"
-#include <errno.h>
-#include "backend.hxx"
-#include "INOstream.hxx"
-#include "Clconv.hxx"
-#include "gen-c.hxx"
-#include <libsherpa/utf8.hxx>
-#include <cctype>
-#endif
 
 bool
 EmitBitO(std::ostream &optStream, std::ostream &errStream)

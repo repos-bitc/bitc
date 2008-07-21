@@ -40,7 +40,6 @@
 
 #include <iostream>
 
-#include <libsherpa/Path.hxx>
 #include "ParseType.hxx"
 
 typedef long ucs4_t;

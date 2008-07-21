@@ -50,8 +50,8 @@
 #include "Options.hxx"
 #include "inter-pass.hxx"
 #include "SexprLexer.hxx"
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/util.hxx>
+#include <sherpa/CVector.hxx>
+#include <sherpa/util.hxx>
 
 using namespace sherpa;
 

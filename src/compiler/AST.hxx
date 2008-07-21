@@ -5,9 +5,9 @@
 
 
 #include <string>
-#include <libsherpa/LToken.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/GCPtr.hxx>
+#include <sherpa/LToken.hxx>
+#include <sherpa/CVector.hxx>
+#include <sherpa/GCPtr.hxx>
 
 
 #include <stdint.h>
@@ -284,14 +284,12 @@ enum AstType {
     at_constraints,
     at_definstance,
     at_methods,
-    at_use,
-    at_use_case,
     at_proclaim,
     at_define,
     at_recdef,
-    at_import,
+    at_importAs,
     at_provide,
-    at_from,
+    at_import,
     at_ifsel,
     at_declares,
     at_declare,

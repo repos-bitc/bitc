@@ -540,16 +540,27 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
       break;
     }
 
-  case at_import:
+  case at_importAs:
+    {
+      GCPtr<AST> ifAst = ast->child(0); 
+      GCPtr<AST> idAst = ast->child(1);
+
+      out << "(" << ast->atKwd();
+      BitcP(out, ifAst, showTypes);
+      out << " as ";
+      BitcP(out, idAst, showTypes);
+      out << ")";
+      break;
+    }
+
   case at_provide:
   case at_defexception:
-  case at_use:
     out << "(" << ast->atKwd();
     doChildren(out, ast, 0, true, showTypes);
     out << ")";
     break;
 
-  case at_from:
+  case at_import:
     out << "(" << ast->atKwd();
     BitcP(out, ast->child(0), showTypes);
     out << " import ";
@@ -764,7 +775,6 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
   case at_typeapp:
     //  case at_catchclause:
   case at_tcapp:
-  case at_use_case:
     {
       if (ast->printVariant == 1) {
 	doChildren(out, ast, 1, false, showTypes);
@@ -1016,10 +1026,9 @@ doShowTypes(std::ostream& out, GCPtr<AST> ast,
       
       for(; i<ast->children->size(); i++) {
 	switch(ast->child(i)->astType){
-	case at_import:
+	case at_importAs:
 	case at_provide:
 	case at_declare:
-	case at_use:
 	  break;
 	default:
 	  doShowTypes(out, ast->child(i), gamma, 
@@ -1040,9 +1049,8 @@ doShowTypes(std::ostream& out, GCPtr<AST> ast,
     break;
     
   case at_declare:
-  case at_import:
+  case at_importAs:
   case at_provide:
-  case at_use:
     break;
 
   case at_defexception:

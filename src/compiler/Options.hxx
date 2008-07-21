@@ -39,8 +39,7 @@
  **************************************************************************/
 
 #include <dirent.h>
-#include <libsherpa/Path.hxx>
-#include <libsherpa/CVector.hxx>
+#include <sherpa/CVector.hxx>
 #include "backend.hxx"
 #include "Special.hxx"
 #include "TvPrinter.hxx"
@@ -77,7 +76,7 @@ struct Options {
   static GCPtr<CVector<std::string> > entryPts;
   static BackEnd *backEnd;
   static std::string outputFileName;
-  static GCPtr<CVector<GCPtr<Path> > > libDirs;
+  static GCPtr<CVector<std::string> > libDirs;
   static GCPtr<CVector<std::string> > inputs;
 
   /** @brief Options and files that should be passed to GCC @em before

@@ -36,7 +36,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(import main bitc.main)
+(import bitc.main as main)
 (provide bitc.main main)
 (define p:(mutable bool) #f) 
 (define V1  (vector #t p))

@@ -44,7 +44,7 @@
 (define p1:(pair bool (mutable bool)) (pair #t mb))
 (define p2:(pair (mutable bool) bool) p1)
 
-(import main bitc.main)
+(import bitc.main as main)
 (provide bitc.main main)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec) p1 p2 0))

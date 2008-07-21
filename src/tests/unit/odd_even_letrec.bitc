@@ -49,7 +49,7 @@
     (odd #t):bool
     (odd 10:int32):int32 ))
 
-(import main bitc.main)
+(import bitc.main as main)
 (provide bitc.main main)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec) 0))

@@ -43,8 +43,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/avl.hxx>
+
 #include "AST.hxx"
 #include "Type.hxx"
 #include "Typeclass.hxx"

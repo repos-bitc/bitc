@@ -52,9 +52,8 @@
 #include "backend.hxx"
 #include "Options.hxx"
 #include "INOstream.hxx"
-#include "Clconv.hxx"
 #include "gen-c.hxx"
-#include <libsherpa/utf8.hxx>
+#include <sherpa/utf8.hxx>
 #include <cctype>
 
 using namespace sherpa;
@@ -947,7 +946,6 @@ toc(std::ostream& errStream,
   case agt_fielditem:
   case at_localFrame:
   case at_frameBindings:
-  case at_use_case:
   case at_ifident:
   case agt_ucon:
 
@@ -980,10 +978,9 @@ toc(std::ostream& errStream,
   case at_deftypeclass:
   case at_definstance:
   case at_methods:
-  case at_use:
-  case at_import:
+  case at_importAs:
   case at_provide:
-  case at_from:
+  case at_import:
   case at_ifsel:
   case at_tvlist:
 
@@ -3144,6 +3141,8 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
   if(!result)
     return false;
   
+  int status;
+
   /* First GCC invocation is to compile the .c file into a .o file: */
   {
     stringstream opt;
@@ -3159,7 +3158,9 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
     if (Options::verbose)
       std::cerr  << opt.str() << std::endl;
 
-    system(opt.str().c_str());
+    status = system(opt.str().c_str());
+    if (WEXITSTATUS(status))
+      goto done;
   }
 
   {
@@ -3199,11 +3200,13 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
     if (Options::verbose)
       std::cerr  << opt.str() << std::endl;
 
-    system(opt.str().c_str());
+    status = system(opt.str().c_str());
   }
 
-  system("rm -f bitc.out.o");
+ done:
+  Path("bitc.out.c").remove();
+  Path("bitc.out.o").remove();
   
-  return true;
+  return WEXITSTATUS(status) ? false : true;
 }
 

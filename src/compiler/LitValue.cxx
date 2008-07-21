@@ -45,7 +45,7 @@
 #include <assert.h>
 
 #include "LitValue.hxx"
-#include <libsherpa/utf8.hxx>
+#include <sherpa/utf8.hxx>
 
 uint32_t
 LitValue::DecodeStringCharacter(const char *s, const char **next)

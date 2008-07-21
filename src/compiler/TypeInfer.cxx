@@ -42,9 +42,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
+#include <sherpa/UExcept.hxx>
+#include <sherpa/CVector.hxx>
+#include <sherpa/avl.hxx>
 #include <assert.h>
 #include "UocInfo.hxx"
 #include "Options.hxx"
@@ -57,7 +57,7 @@
 #include "Pair.hxx"
 #include "inter-pass.hxx"
 #include "Unify.hxx"
-#include <libsherpa/BigNum.hxx>
+#include <sherpa/BigNum.hxx>
 #include "TypeInferUtil.hxx"
 
 using namespace sherpa;
@@ -1883,36 +1883,6 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
     }
     break;
 
-  case at_use:
-    {      
-      ast->symType = new Type(ty_tvar);
-
-      for(size_t c = 0; c < ast->children->size(); c++)
-	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
-		  uflags, trail,  mode, TI_NONE);
-      break;
-    }
-
-  case at_use_case:
-    {
-      ast->symType = new Type(ty_tvar);
-      
-      GCPtr<TypeScheme> sigma = gamma->getBinding(ast->child(1)->s);
-      
-      if(!sigma) {
-	errStream << ast->loc << ": "
-		  << " attempt to use " << ast->child(1)->s 
-		  << ", which has an unknown, or buggy type"
-		  << std::endl;
-	errFree = false;
-	break;
-      }
-
-      gamma->addBinding(ast->child(0)->s, sigma);
-      gamma->setFlags(ast->child(0)->s, BF_PRIVATE);
-      break;
-    }
-
   case at_defunion:
     {
       GCPtr<Environment<TypeScheme> > defGamma = gamma->newDefScope();
@@ -2335,25 +2305,35 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       break;
     }
     
-  case at_import:
-  case at_provide:
+  case at_importAs:
     {
+      GCPtr<AST> ifAst = ast->child(0);
+      GCPtr<AST> idAst = ast->child(1);
+
       GCPtr<Environment<TypeScheme> > tmpGamma = gamma->newScope();
       ast->envs.gamma = gamma;
       
-      assert(ast->child(0)->envs.gamma);
-      assert(ast->child(0)->envs.instEnv);
+      assert(idAst->envs.gamma);
+      assert(idAst->envs.instEnv);
       
-      useIFGamma(ast->child(0)->s, ast->child(0)->envs.gamma,
+      useIFGamma(idAst->s, idAst->envs.gamma,
 		 tmpGamma);
-      useIFInsts(ast->child(0)->s, ast->child(0)->envs.instEnv, 
+      useIFInsts(idAst->s, idAst->envs.instEnv, 
 		 instEnv);
       
       gamma->mergeBindingsFrom(tmpGamma);
       break;
     }
 
-  case at_from:
+  case at_provide:
+    {
+      // In the new at_provide scheme, at_provide does not imply any
+      // import, so we probably should not be attempting any type
+      // inference here anymore.
+      break;
+    }
+
+  case at_import:
     {
       GCPtr<Environment<TypeScheme> > tmpGamma = gamma->newScope();
       ast->envs.gamma = gamma;

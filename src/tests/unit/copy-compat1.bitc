@@ -43,7 +43,7 @@
 (define fgh:(forall ((copy-compat (ref 'a) (ref 'a))) (fn ('a 'b) ())) 
   (lambda (x:'a y:'b) ()))
 
-(import main bitc.main)
+(import bitc.main as main)
 (provide bitc.main main)
 (define main.main:(fn ((vector string)) int32) 
   (lambda (argv)  

@@ -38,7 +38,7 @@
  *
  **************************************************************************/
 
-#include <libsherpa/CVector.hxx>
+#include <sherpa/CVector.hxx>
 #include <iostream>
 
 using namespace sherpa;
@@ -54,6 +54,10 @@ using namespace sherpa;
 #define BF_REBIND    0x4u  /* On merge, this binding should replace
 			      any existing binding. */
 #define BF_NO_MERGE  0x8u  /* This flag should not survive a merger */
+
+/* The following two flags should only be found in the private per-UoC
+   copy of the interface environment that is made in importIfBinding()
+   in Symtab.cxx */
 #define BF_PROVIDING 0x10u /* Interface binding that we are
 			      providing. */
 

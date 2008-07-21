@@ -581,9 +581,9 @@ GROUP type_definition = defunion | defstruct
                       | defexception;
 GROUP tc_definition = deftypeclass | definstance;
 GROUP value_definition = define | recdef;
-GROUP if_definition = proclaim | from
-                    | import | provide
-                    | declare | use;
+GROUP if_definition = proclaim | import
+                    | importAs | provide
+                    | declare;
 
 // NEWUNION TYPES [3.6.2]                
 AST defunion = ident tvlist category declares constructors constraints;
@@ -633,10 +633,6 @@ AST constraints = tcapp*;
 AST definstance = tcapp methods constraints; 
 AST methods = expr*;
 
-// USE [8.2]
-AST use = use_case+;
-AST use_case = ident var;
-
 // PROCLAIM DEFINITION -- VALUES [6.2]
 AST proclaim = ident qtype constraints;
 
@@ -645,10 +641,10 @@ AST define = identPattern expr constraints;
 AST recdef = identPattern expr constraints;
 
 // IMPORT DEFINITIONS [8.2]
-AST import = ident ifident;
+AST importAs = ifident ident;
 AST provide = ifident ident+;
  
-AST from = ifident ifsel*;
+AST import = ifident ifsel*;
 AST ifsel = ident ident;
 
 // DECLARES cannot be empty from the input, but we do insert

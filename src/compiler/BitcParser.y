@@ -113,14 +113,13 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 /* Primary types and associated hand-recognized literals: */
 %token <tok> '(' ')' ','	/* unit */
 %token <tok> '[' ']'	/* unit */
-%token <tok> '='	/* unit */
+%token <tok> tk_AS
 %token <tok> tk_BOOL
 %token <tok> tk_TRUE   /* #t */
 %token <tok> tk_FALSE  /* #f */
 %token <tok> tk_CHAR
 %token <tok> tk_STRING
 %token <tok> tk_FLOAT
-%token <tok> tk_FROM
 %token <tok> tk_DOUBLE
 %token <tok> tk_DUP
 %token <tok> tk_QUAD
@@ -171,7 +170,6 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 %token <tok> tk_PROCLAIM
 %token <tok> tk_EXTERNAL
 %token <tok> tk_TAG
-%token <tok> tk_USE
 %token <tok> tk_DEFEXCEPTION
 
 %token <tok> tk_MUTABLE
@@ -233,7 +231,7 @@ GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 %type <ast> common_definition
 %type <ast> proclaim_definition
 %type <ast> ptype_name val
-%type <ast> type_definition typapp use_cases use_case
+%type <ast> type_definition typapp
 %type <ast> type_decl externals alias
 %type <ast> importList provideList
 %type <ast> type_cpair eform_cpair
@@ -960,34 +958,33 @@ proclaim_definition: '(' tk_PROCLAIM defident ':' qual_type optdocstring externa
 // ({ALPHA} | [_\-]) (({ALPHA} | {DECDIGIT} | [_\-])*
 // IMPORT DEFINITIONS [8.2]
 
-import_definition: '(' tk_IMPORT ident ifident ')' {
+//import_definition: '(' tk_IMPORT ident ifident ')' {
+//  SHOWPARSE("import_definition -> ( IMPORT ident ifident )");
+//  GCPtr<AST> ifIdent = new AST(at_ifident, $4);
+//  ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $4.loc, $4.str);
+//  $$ = new AST(at_import, $2.loc, $3, ifIdent); 
+//};
+
+import_definition: '(' tk_IMPORT ifident tk_AS ident ')' {
   SHOWPARSE("import_definition -> ( IMPORT ident ifident )");
-  GCPtr<AST> ifIdent = new AST(at_ifident, $4);
-  ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $4.loc, $4.str);
-  $$ = new AST(at_import, $2.loc, $3, ifIdent); 
+  GCPtr<AST> ifIdent = new AST(at_ifident, $3);
+  ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
+  $$ = new AST(at_importAs, $2.loc, ifIdent, $5); 
 };
 
-// USE [8.2]
-import_definition:  '(' tk_USE use_cases ')' {
-  SHOWPARSE("import_definition -> ( USE uses )");
-  $$ = $3;
-  $$->loc = $2.loc;
-  $$->astType = at_use;
-};
-
-import_definition: '(' tk_FROM ifident ')' {
+import_definition: '(' tk_IMPORT ifident ')' {
   SHOWPARSE("import_definition -> (FROM ifident)");
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   GCPtr<AST> ifIdent = new AST(at_ifident, $3);
-  $$ = new AST(at_from, $2.loc, ifIdent);
+  $$ = new AST(at_import, $2.loc, ifIdent);
 };
 
-import_definition: '(' tk_FROM ifident tk_IMPORT importList ')' {
+import_definition: '(' tk_IMPORT ifident importList ')' {
   SHOWPARSE("import_definition -> (FROM ifident IMPORT importList)");
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   GCPtr<AST> ifIdent = new AST(at_ifident, $3);
-  $$ = new AST(at_from, $2.loc, ifIdent);
-  $$->addChildrenFrom($5);
+  $$ = new AST(at_import, $2.loc, ifIdent);
+  $$->addChildrenFrom($4);
 };
 
 // PROVIDE DEFINITION [8.3]
@@ -997,31 +994,6 @@ provide_definition: '(' tk_PROVIDE ifident provideList ')' {
   ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = new AST(at_provide, $2.loc, ifIdent); 
   $$->addChildrenFrom($4);
-};
-
-use_cases: use_case {
-  SHOWPARSE("use_cases -> use_case");
-  $$ = new AST(at_Null, $1->loc, $1);
-};
-use_cases: use_cases use_case {
-  SHOWPARSE("use_cases -> use_cases use_case");
-  $$ = $1;
-  $$->addChild($2);
-};
-use_case: ident '.' ident { 
-  SHOWPARSE("use_case -> ident . ident");
-  GCPtr<AST> newident = new AST(at_ident, $3->loc);
-  newident->s = $3->s;
-  newident->Flags |= (ID_IS_GLOBAL);
-  GCPtr<AST> usesel = new AST(at_usesel, $1->loc, $1, $3);
-  $$ = new AST(at_use_case, $1->loc, newident, usesel);
-  $$->printVariant = 1;
-};
-use_case: '(' ident '=' ident '.' ident ')' { 
-  SHOWPARSE("use_case -> (ident ident :: ident)");
-  $2->Flags |= (ID_IS_GLOBAL);
-  GCPtr<AST> usesel = new AST(at_usesel, $4->loc, $4, $6);
-  $$ = new AST(at_use_case, $2->loc, $2, usesel);
 };
 
 provideList: ident {
@@ -1047,12 +1019,14 @@ importList: importList alias {
 
 alias: ident {
   SHOWPARSE("alias -> ident");
+  // The two identifiers in this case are textually the same, but the
+  // need to end up with distinct AST nodes, thus getDCopy().
   $$ = new AST(at_ifsel, $1->loc, $1, $1->getDCopy());
 };
-alias: '(' ident '=' ident ')' {
-  SHOWPARSE("alias -> ( ident = ident )");
+alias: '(' ident tk_AS ident ')' {
+  SHOWPARSE("alias -> ( ident AS ident )");
   
-  $$ = new AST(at_ifsel, $2->loc, $2, $4);
+  $$ = new AST(at_ifsel, $2->loc, $4, $2);
 };
 
 

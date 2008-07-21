@@ -489,12 +489,6 @@ AST::atKwd() const
   case at_letrec:
     return "letrec";
 
-  case at_use:
-    return "use";
-
-  case at_use_case:
-    return "<use_case>";
-
   case at_deftypeclass:
     return "deftypeclass";
 
@@ -510,14 +504,14 @@ AST::atKwd() const
   case at_dummyType:
     return "#dummy#";
 
-  case at_import:
+  case at_importAs:
     return "import";
 
   case at_provide:
     return "provide";
 
-  case at_from:
-    return "from";
+  case at_import:
+    return "import";
 
   case at_ifsel:
     return "<ifsel>";
@@ -656,10 +650,9 @@ AST::isTopLevelForm()
   case at_declstruct:
   case at_proclaim:
   case at_declare:
-  case at_import:
+  case at_importAs:
   case at_provide:
   case at_defexception:    
-  case at_use:
     return true;
     
   default:
@@ -681,10 +674,9 @@ AST::leadsToTopLevelForm()
   case at_declstruct:
   case at_proclaim:
   case at_declare:
-  case at_import:
+  case at_importAs:
   case at_provide:
   case at_defexception:    
-  case at_use:
     return true;
     
   default:

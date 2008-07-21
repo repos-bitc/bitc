@@ -43,7 +43,7 @@
 (define refID:(forall ((ref-types 'a)) (fn ('a) 'a)) 
   (lambda (x) x))
 
-(import main bitc.main)
+(import bitc.main as main)
 (provide bitc.main main)
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec) 

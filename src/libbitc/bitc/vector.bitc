@@ -36,7 +36,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (interface bitc.vector
-  (import ls bitc.list)
+  (import bitc.list as lst)
 
   (define (vector-map vec :(vector 'a) f:(fn ('a) ()))
     "Apply procedure f to each element of vector."
@@ -58,9 +58,9 @@
   (define (make-mutable-vector n:word e:(mutable 'a))
     (make-vector n (lambda (i) e)))
 
-  (define (list->vector lst)
+  (define (list->vector l)
     "Given a list, return a vector of its elements."
-    (make-vector (length lst) 
-		 (lambda (n) (ls.list-nth lst n))))
+    (make-vector (length l) 
+		 (lambda (n) (lst.list-nth l n))))
   )
 

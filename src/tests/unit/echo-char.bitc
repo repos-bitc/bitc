@@ -36,9 +36,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(import main bitc.main)
+(import bitc.main as main)
 (provide bitc.main main)
-(import stdio bitc.stdio)
+(import bitc.stdio as stdio)
 
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec)

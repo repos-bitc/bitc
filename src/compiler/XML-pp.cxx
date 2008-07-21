@@ -270,9 +270,8 @@ XMLtypes(INOstream &out, GCPtr<AST> ast, bool raw=false)
     break;    
     
   case at_declare:
-  case at_import:
+  case at_importAs:
   case at_provide:
-  case at_use:
     break;
     
   default:
