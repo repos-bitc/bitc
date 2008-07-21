@@ -152,6 +152,7 @@ AST::AST(GCPtr<AST> ast, bool shallowCopyChildren)
   ID = ++(AST::astCount);  
   identType = ast->identType;
   s = ast->s;
+  loc = ast->loc;
   fqn = ast->fqn;
   Flags = ast->Flags;
   Flags2 = ast->Flags2;
@@ -224,6 +225,7 @@ AST::set(GCPtr<AST> ast)
 {  
   astType = ast->astType;
   s = ast->s;
+  loc = ast->loc;
   identType = ast->identType;
   Flags = ast->Flags;
   Flags2 = ast->Flags2;
