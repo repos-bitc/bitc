@@ -1,5 +1,5 @@
-#ifndef VERSION_HXX
-#define VERSION_HXX
+#ifndef COMPILER_CONFIG_H
+#define COMPILER_CONFIG_H
 
 /**************************************************************************
  *
@@ -38,18 +38,8 @@
  *
  **************************************************************************/
 
-#include "config.h"
+static const char *STD_CC_CMD = "@CC@";
 
-inline bool CheckVersionCompatibility(std::string ver) {
-  return (ver == BITC_VERSION);
-}
+static const char *BITC_VERSION = "@LANGUAGE_VERSION@";
 
-//inline bool CheckVersionCompatibility(BigNum major, BigNum minor) {
-//  return ((major == BITC_MAJOR) && (minor == BITC_MINOR));
-//}
-
-inline std::string Version() {
-  return (BITC_VERSION);
-}
-
-#endif /* VERSION_HXX */
+#endif /* COMPILER_CONFIG_H */

@@ -1,6 +1,6 @@
 #include <gc/gc.h>
 #include <inttypes.h>
-#include <BUILD/bitc-runtime.h>
+#include "../BUILD/bitc-runtime.h"
 
 void *
 bitc_make_closure(void *closureP, void *procP)

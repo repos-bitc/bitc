@@ -1,0 +1,217 @@
+#
+# Copyright (C) 2008, The EROS Group, LLC.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or
+# without modification, are permitted provided that the following
+# conditions are met:
+#
+#   - Redistributions of source code must contain the above 
+#     copyright notice, this list of conditions, and the following
+#     disclaimer. 
+#
+#   - Redistributions in binary form must reproduce the above
+#     copyright notice, this list of conditions, and the following
+#     disclaimer in the documentation and/or other materials 
+#     provided with the distribution.
+#
+#   - Neither the names of the copyright holders nor the names of any
+#     of any contributors may be used to endorse or promote products
+#     derived from this software without specific prior written
+#     permission. 
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+
+# @configure_input@
+
+SHELL = /bin/sh
+
+#### Start of system configuration section. ####
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+
+CXX = @CXX@
+CC = @CC@
+AR = ar
+VERSION=@VERSION@
+BUILD=@BUILD@
+RANLIB=@RANLIB@
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+CFLAGS = @CFLAGS@ 
+CXXFLAGS = @CXXFLAGS@ 
+LDFLAGS = @LDFLAGS@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir = @bindir@
+libdir = @libdir@
+includedir = @includedir@
+datadir = @datadir@
+datarootdir = @datarootdir@
+
+MAKEINFO = makeinfo
+TEXI2DVI = texi2dvi
+
+# shap: I have seen autoconf get this consistently wrong, which
+# is why the following obscure test is present. Surely there must
+# be a better way? I don't like this solution either, as it does not
+# work robustly when the user messes with --prefix...
+
+# Where to put the Info files
+shareinfodir=$(findstring $(datadir)/info,$(wildcard $(datadir)/*))
+infodir = $(if $(shareinfodir),$(shareinfodir),@infodir@)
+
+# Where to put the manual pages.
+sharemandir=$(findstring $(datadir)/man,$(wildcard $(datadir)/*))
+mandir = $(if $(sharemandir),$(sharemandir),@mandir@)
+
+mkinstalldirs = $(top_srcdir)/mkinstalldirs
+
+#### End of system configuration section. ####
+
+FLAGS_TO_PASS = \
+	AR='$(AR)' \
+	CC='$(CC)' \
+	CFLAGS='$(CFLAGS)' \
+	CXX='$(CXX)' \
+	CXXFLAGS='$(CXXFLAGS)' \
+	LIBPROGS='$(LIBPROGS)' \
+	MAKE='$(MAKE)' \
+	MAKEINFO='$(MAKEINFO)' \
+	RANLIB='$(RANLIB)' \
+	TEXI2DVI='$(TEXI2DVI)' \
+	YACC='$(YACC)' \
+	bindir='$(bindir)' \
+	infodir='$(infodir)' \
+	libdir='$(libdir)' \
+	mandir='$(mandir)' \
+	datadir='$(datadir)' \
+	datarootdir='$(datarootdir)' \
+	prefix='$(prefix)' \
+	exec_prefix='$(exec_prefix)'
+
+ifeq "@HAVE_MAKEINFO@" "no"
+SKIP_DOCS="yes"
+endif
+ifeq "@HAVE_TEXI2DVI@" "no"
+SKIP_DOCS="yes"
+endif
+ifeq "@HAVE_DVIPS@" "no"
+SKIP_DOCS="yes"
+endif
+
+default: all
+
+TEST_SUBDIRS=tests
+ifeq "$(SKIP_DOCS)" ""
+DOC_SUBDIRS=doc
+endif
+
+SUBDIRS=compiler libbitc $(DOC_SUBDIRS)
+CLEAN_SUBDIRS=tests
+
+.PHONY: all install uninstall installdirs
+all install uninstall installdirs: Makefile all-local
+	@for subdir in $(SUBDIRS); do \
+	  echo "making $@ in $$subdir"; \
+	  ( cd $$subdir && $(MAKE) $(FLAGS_TO_PASS) $@ ) || exit 1; \
+	done
+
+installdirs: installdirs-local
+
+install: all install-local install-info
+uninstall: uninstall-info
+
+.PHONY: all-local
+all-local:
+
+install-info:
+uninstall-info:
+
+#.PHONY: info dvi clean-info install-info
+#info dvi clean-info install-info uninstall-info:
+#	cd doc && $(MAKE) $(FLAGS_TO_PASS) $@ || exit 1
+
+.PHONY: install-local
+install-local: all-local
+	@: nothing to do locally
+
+.PHONY: installdirs-local
+installdirs-local: all-local
+	@: nothing to do locally
+
+.PHONY: tags
+tags:
+	@for dir in $(TSUBDIRS); do echo making $@ in $$dir; cd $$dir && $(MAKE) $(FLAGS_TO_PASS) $@ || exit 1; cd ..; done
+	@echo making $@ in .
+	@ctags `for i in \`$(MAKE) SUBDIRS="$(TSUBDIRS)" ls\` ; do echo $(srcdir)/$$i ; done`
+
+.PHONY: TAGS
+TAGS:
+	@for dir in $(TSUBDIRS); do echo making $@ in $$dir; cd $$dir && $(MAKE) $(FLAGS_TO_PASS) $@ || exit 1; cd ..; done
+	@echo making $@ in .
+	@etags `for i in \`$(MAKE) SUBDIRS="$(TSUBDIRS)" ls | grep -v 'make\[[0-9]\]'\` ; do echo $(srcdir)/$$i ; done`
+
+.PHONY: ls
+ls:
+	@for dir in $(SUBDIRS); do \
+		for i in `cd $$dir && $(MAKE) $(FLAGS_TO_PASS) $@ | grep -v 'make\[[0-9]\]'` ; do \
+			echo $$dir/$$i ; \
+		done ; \
+	done
+
+.PHONY: clean
+clean: clean-local
+	@for dir in $(SUBDIRS); do echo making $@ in $$dir; cd $$dir && $(MAKE) $(FLAGS_TO_PASS) $@ || exit 1; cd ..; done
+	@for dir in $(CLEAN_SUBDIRS); do echo making $@ in $$dir; cd $$dir && $(MAKE) $(FLAGS_TO_PASS) $@ || exit 1; cd ..; done
+
+.PHONY: distclean
+distclean: distclean-local
+	@for dir in $(SUBDIRS); do echo making $@ in $$dir; cd $$dir && $(MAKE) $(FLAGS_TO_PASS) $@ || exit 1; cd ..; done
+	@for dir in $(CLEAN_SUBDIRS); do echo making $@ in $$dir; cd $$dir && $(MAKE) $(FLAGS_TO_PASS) $@ || exit 1; cd ..; done
+	rm -f Makefile
+
+.PHONY: realclean
+realclean: realclean-local
+	@for dir in $(SUBDIRS); do echo making $@ in $$dir; cd $$dir && $(MAKE) $(FLAGS_TO_PASS) $@ || exit 1; cd ..; done
+	@for dir in $(CLEAN_SUBDIRS); do echo making $@ in $$dir; cd $$dir && $(MAKE) $(FLAGS_TO_PASS) $@ || exit 1; cd ..; done
+	rm -f config.status
+
+.PHONY: mostlyclean-local
+mostlyclean-local:
+	-find . -name '*.m' -exec rm {} \;
+	rm -f *~
+	-rm -rf .\#* \#*
+	-rm -rf self-ca
+
+.PHONY: clean-local
+clean-local: mostlyclean-local
+
+.PHONY: distclean-local
+distclean-local: clean-local
+	rm -f Makefile
+	rm -f tags TAGS
+	-rm -f *.rpm *.tgz
+
+.PHONY: realclean-local
+realclean-local: distclean-local
+
+
+# Tell versions [3.59,3.63) of GNU make not to export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

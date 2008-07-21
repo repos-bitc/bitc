@@ -4,9 +4,17 @@ syntax: regexp
 
 syntax: glob
 
+src/configure
+src/config.h
+src/config.status
+src/compiler/config.h
+
 # Emacs turds:
 *~
 \#*
+
+# Automake/autoconf turds:
+autom4te.cache
 
 callgrind.out.*
 cachegrind.out.*
