@@ -3142,6 +3142,8 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
   if(!result)
     return false;
   
+  int status;
+
   /* First GCC invocation is to compile the .c file into a .o file: */
   {
     stringstream opt;
@@ -3157,7 +3159,9 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
     if (Options::verbose)
       std::cerr  << opt.str() << std::endl;
 
-    system(opt.str().c_str());
+    status = system(opt.str().c_str());
+    if (WEXITSTATUS(status))
+      goto done;
   }
 
   {
@@ -3197,11 +3201,13 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
     if (Options::verbose)
       std::cerr  << opt.str() << std::endl;
 
-    system(opt.str().c_str());
+    status = system(opt.str().c_str());
   }
 
-  system("rm -f bitc.out.o");
+ done:
+  Path("bitc.out.c").remove();
+  Path("bitc.out.o").remove();
   
-  return true;
+  return WEXITSTATUS(status) ? false : true;
 }
 
