@@ -1329,7 +1329,7 @@ use</literallayout>
 	      constructor.
 	    </p>
           </sect4>
-          <sect4>
+          <sect4 id="TagRepresentation">
             <title>Tag Representation</title>
             <p>
               The prelude type
