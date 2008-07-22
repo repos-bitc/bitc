@@ -12,6 +12,7 @@ src/compiler/Makefile
 src/Makefile
 src/compiler/Makefile
 src/libbitc/Makefile
+src/man/Makefile
 src/tests/Makefile
 src/tests/unit/Makefile
 
