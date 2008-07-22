@@ -114,5 +114,8 @@ BUILD:
 BUILD/%.gz: %.man | BUILD
 	gzip -c $< > $@
 
+clean:
+	-rm -rf BUILD
+
 -include BUILD/.*.m
 
