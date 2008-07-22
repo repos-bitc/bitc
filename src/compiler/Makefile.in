@@ -55,6 +55,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 CFLAGS = @CFLAGS@ 
 CXXFLAGS = @CXXFLAGS@ 
 LDFLAGS = @LDFLAGS@
+ASTMAKER = @ASTMAKER@
 
 prefix=@prefix@
 exec_prefix=@exec_prefix@
