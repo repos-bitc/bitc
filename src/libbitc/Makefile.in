@@ -81,11 +81,22 @@ infodir = $(if $(shareinfodir),$(shareinfodir),@infodir@)
 sharemandir=$(findstring $(datadir)/man,$(wildcard $(datadir)/*))
 mandir = $(if $(sharemandir),$(sharemandir),@mandir@)
 
+destdir = $(if $(DESTDIR),$(DESTDIR)/,)
+
 mkinstalldirs = $(top_srcdir)/mkinstalldirs
 
 #### End of system configuration section. ####
 
-TARGETS=BUILD/libbitc.a BUILD/libbitc.bita BUILD/libbitc-no-gc.a
+
+# A bit of GNU-make thuggery. You didn't realize that GNU Make was this horrible?
+# I considered just implementing SIOD in GNU make...
+
+car = $(firstword $1)
+cdr = $(wordlist 2,$(words $1),$1)
+reverse=$(strip $(if $1,$(call reverse,$(call cdr,$1)) $(call car,$1)))
+
+
+TARGETS=libbitc.a libbitc.bita libbitc-no-gc.a
 INC+=-I.
 BITCC=@top_srcdir@/compiler/BUILD/bitcc
 
@@ -96,6 +107,8 @@ BITC_SOURCES=\
 BITC_IFS=\
 	$(wildcard *.bitc) \
 	$(wildcard */*.bitc)
+
+BITC_IF_DIRS=$(sort $(dir $(BITC_IFS)))
 
 # mkclosure.c is sourced from the appropriate target architecture directory
 # by virtue of the VPATH setting below. Contrary to appearences, it is not
@@ -108,7 +121,9 @@ C_SOURCES=\
 	mkclosure.c
 
 C_HDR=\
-	$(wildcard */*.h)
+	$(filter-out BUILD/bitc-runtime.h,$(wildcard */*.h))
+
+C_HDR_DIRS=$(sort $(dir $(C_HDR)))
 
 VPATH=.:@TARGET_ARCH@
 
@@ -116,14 +131,15 @@ RUNTIME_OBJECTS=$(C_SOURCES:%.c=BUILD/%.o)
 NOGC_OBJECTS=$(NOGC_SOURCES:%.c=BUILD/%.o)
 OBJECTS=$(RUNTIME_OBJECTS) $(NOGC_OBJECTS)
 
-all: $(TARGETS)
+all: $(TARGETS:%=BUILD/%)
 
 BUILD:
 	mkdir -p BUILD
 
 $(OBJECTS): BUILD/bitc-runtime.h | BUILD
 
-BUILD/bitc-runtime.h: $(BITC_SOURCES)
+BUILD/bitc-runtime.h: $(BITC_SOURCES) $(BITCC)
+
 	$(BITCC) $(INC) -h -o $@ bitc-runtime.bitc
 
 C_DEP=@$(CC) $(CFLAGS) $(INC) -M -MT $@ -MF $(patsubst %.o,%.m,$@) $<
@@ -132,18 +148,39 @@ CXX_DEP=@$(CXX) $(CXXFLAGS) $(INC) -M -MT $@ -MF $(patsubst %.o,%.m,$@) $<
 CXX_BUILD=$(CXX) $(CXXFLAGS) $(INC) -c $< -o $@
 
 install: all
-	$(mkinstalldirs) $(DESTDIR)/$(libdir)
-	$(mkinstalldirs) $(DESTDIR)/$(includedir)
-	$(INSTALL) -m 0644 BUILD/libbitc.a $(DESTDIR)/$(libdir)
-	$(INSTALL) -m 0644 BUILD/libbitc-no-gc.a $(DESTDIR)/$(libdir)
-	$(INSTALL) -m 0644 BUILD/libbitc.bita $(DESTDIR)/$(libdir)
+	$(mkinstalldirs) $(destdir)$(libdir)
+	$(mkinstalldirs) $(destdir)$(includedir)
+	for tgt in $(TARGETS); do \
+	  $(INSTALL) -m 0644 BUILD/$$tgt $(destdir)$(libdir)/$$tgt; \
+	done
+	for ifd in $(BITC_IF_DIRS); do \
+	  $(mkinstalldirs) $(destdir)$(includedir)/$$ifd; \
+	done
 	for if in $(BITC_IFS); do \
-	  $(INSTALL) -d $(DESTDIR)/$(includedir)/`dirname $$if`; \
-	  $(INSTALL) -m 0644 $$if $(DESTDIR)/$(includedir)/`dirname $$if`; \
+	  $(INSTALL) -m 0644 $$if $(destdir)$(includedir)/$$if; \
+	done
+	for hdrd in $(C_HDR_DIRS); do \
+	  $(mkinstalldirs) $(destdir)$(includedir)/$$hdrd; \
 	done
 	for hdr in $(C_HDR); do \
-	  $(INSTALL) -d $(DESTDIR)/$(includedir)/`dirname $$hdr`; \
-	  $(INSTALL) -m 0644 $$hdr $(DESTDIR)/$(includedir)/`dirname $$hdr`; \
+	  $(INSTALL) -m 0644 $$hdr $(destdir)$(includedir)/$$hdr; \
+	done
+
+uninstall:
+	for tgt in $(TARGETS); do \
+	  rm $(destdir)$(libdir)/$$tgt; \
+	done
+	for if in $(BITC_IFS); do \
+	  rm -f $(destdir)$(includedir)/$$if; \
+	done
+	for ifd in $(call reverse,$(BITC_IF_DIRS)); do \
+	  rmdir $(destdir)$(includedir)/$$ifd; \
+	done
+	for hdr in $(C_HDR); do \
+	  rm -f $(destdir)$(includedir)/$$hdr; \
+	done
+	for hdrd in $(call reverse,$(C_HDR_DIRS)); do \
+	  rmdir $(destdir)$(includedir)/$$hdrd; \
 	done
 
 BUILD/libbitc.a: $(RUNTIME_OBJECTS) | BUILD

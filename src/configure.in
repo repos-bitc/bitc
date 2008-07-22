@@ -60,8 +60,13 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 
+AC_CHECK_PROG(HAVE_MAKEINFO, makeinfo, yes, no)
 AC_CHECK_PROG(HAVE_TEXI2DVI, texi2dvi, yes, no)
 AC_CHECK_PROG(HAVE_DVIPS, dvips, yes, no)
+
+CHECK_OSDOC
+
+AC_CHECK_FILE(/usr/share/osdoc)
 
 AC_CHECK_HEADERS(stdint.h inttypes.h)
 
@@ -72,7 +77,12 @@ AC_SUBST([VERSION])
 AC_SUBST([LANGUAGE_VERSION])
 AC_SUBST([BUILD])
 
-AC_CONFIG_FILES([Makefile] [compiler/Makefile] [compiler/config.h]
-                [libbitc/Makefile] [tests/Makefile] [tests/unit/Makefile])
+AC_CONFIG_FILES([Makefile] 
+ 	        [compiler/config.h]
+		[compiler/Makefile]
+		[libbitc/Makefile]
+		[man/Makefile]
+                [tests/Makefile]
+                [tests/unit/Makefile])
 
 AC_OUTPUT

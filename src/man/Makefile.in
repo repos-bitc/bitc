@@ -35,28 +35,84 @@
 #
 ##########################################################################
 
-default: package
-BITC_SRC=..
+# @configure_input@
 
-include $(BITC_SRC)/build/make/makerules.mk
+SHELL = /bin/sh
+
+#### Start of system configuration section. ####
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+
+CXX = @CXX@
+CC = @CC@
+AR = ar
+VERSION=@VERSION@
+BUILD=@BUILD@
+RANLIB=@RANLIB@
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+CFLAGS = @CFLAGS@
+CXXFLAGS = @CXXFLAGS@
+LDFLAGS = @LDFLAGS@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir = @bindir@
+libdir = @libdir@
+includedir = @includedir@
+datadir = @datadir@
+datarootdir = @datarootdir@
+
+MAKEINFO = makeinfo
+TEXI2DVI = texi2dvi
+
+# shap: I have seen autoconf get this consistently wrong, which
+# is why the following obscure test is present. Surely there must
+# be a better way? I don't like this solution either, as it does not
+# work robustly when the user messes with --prefix...
+
+# Where to put the Info files
+shareinfodir=$(findstring $(datadir)/info,$(wildcard $(datadir)/*))
+infodir = $(if $(shareinfodir),$(shareinfodir),@infodir@)
+
+# Where to put the manual pages.
+sharemandir=$(findstring $(datadir)/man,$(wildcard $(datadir)/*))
+mandir = $(if $(sharemandir),$(sharemandir),@mandir@)
+man1dir = $(mandir)/man1
+
+destdir = $(if $(DESTDIR),$(DESTDIR)/,)
+
+mkinstalldirs = $(top_srcdir)/mkinstalldirs
+
+#### End of system configuration section. ####
 
 MANSRC=$(wildcard *.man)
 MAN1SRC=$(wildcard *.1.man)
 #MANROOT=$(word 1 $(wildcard $(BITC_SRC)/../host/man /usr/share/man /usr/man))
 MANROOT=$(BITC_SRC)/../host/man
 
-TARGETS=$(MANSRC:%.man=$(BUILDDIR)/%.gz)
-
-install: all
-	$(INSTALL) -d $(MANROOT)/man1
-	for page in $(MAN1SRC:%.man=%); do \
-	  $(INSTALL) -m 0644 $(BUILDDIR)/$${page}.gz $(MANROOT)/man1; \
-	done
+TARGETS=$(MANSRC:%.man=BUILD/%.gz)
 
 all:	$(TARGETS)
 
-$(BUILDDIR)/%.gz: %.man | $(BUILDDIR)
+install: all
+	$(mkinstalldirs) $(destdir)/$(man1dir)
+	for page in $(MAN1SRC:%.man=%); do \
+	  $(INSTALL) -m 0644 BUILD/$${page}.gz $(destdir)$(man1dir); \
+	done
+
+uninstall:
+	for page in $(MAN1SRC:%.man=%); do \
+	  rm $(destdir)$(man1dir)/$${page}.gz; \
+	done
+
+BUILD:
+	mkdir -p BUILD
+
+BUILD/%.gz: %.man | BUILD
 	gzip -c $< > $@
 
--include $(BUILDDIR)/.*.m
+-include BUILD/.*.m
 

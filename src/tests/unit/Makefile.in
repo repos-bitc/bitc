@@ -186,7 +186,7 @@ BUILD/sha1-file: sha1-file.bitc  $(BITCC) $(LIBBITC_SHA1_SRC)
 DEPFILES=$(wildcard BUILD/*.m)
 
 clean:
-	-rm -f $(TARGETS) $(OBJECTS) $(DEPFILES) $(CLEANLIST)
+	-rm -rf BUILD
 
 DEPFILES=$(wildcard BUILD/*.m)
 -include $(DEPFILES)

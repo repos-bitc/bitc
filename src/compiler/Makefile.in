@@ -80,6 +80,8 @@ infodir = $(if $(shareinfodir),$(shareinfodir),@infodir@)
 sharemandir=$(findstring $(datadir)/man,$(wildcard $(datadir)/*))
 mandir = $(if $(sharemandir),$(sharemandir),@mandir@)
 
+destdir = $(if $(DESTDIR),$(DESTDIR)/,)
+
 mkinstalldirs = $(top_srcdir)/mkinstalldirs
 
 #### End of system configuration section. ####
@@ -89,7 +91,7 @@ GC_LIB=-lgccpp -lgc
 
 INC=-I. $(GC_INC)
 
-TARGETS=BUILD/bitcc
+TARGETS=bitcc
 
 #CLEANLIST+=SexprLexer.c
 #CLEANLIST=./AST.cxx ./AST.hxx
@@ -104,13 +106,16 @@ OBJECTS=\
 
 VPATH=.:sherpa
 
-all: $(TARGETS)
+all: $(TARGETS:%=BUILD/%)
 
 run: all
 
 install: all
-	$(mkinstalldirs) $(DESTDIR)/$(bindir)
-	$(INSTALL_PROGRAM) $(TARGETS) $(DESTDIR)/$(bindir)
+	$(mkinstalldirs) $(destdir)$(bindir)
+	$(INSTALL_PROGRAM) $(TARGETS:%=BUILD/%) $(destdir)$(bindir)
+
+uninstall:
+	rm $(destdir)$(bindir)/$(TARGETS)
 
 BUILD:
 	mkdir -p BUILD
@@ -121,7 +126,7 @@ $(OBJECTS): AST.hxx
 CXX_DEP=@$(CXX) $(CXXFLAGS) $(INC) -M -MT $@ -MF $(patsubst %.o,%.m,$@) $<
 CXX_BUILD=$(CXX) $(CXXFLAGS) $(INC) -c $< -o $@
 
-$(TARGETS): $(OBJECTS) | BUILD
+BUILD/bitcc: $(OBJECTS) | BUILD
 	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LIBS) -o $@
 
 BUILD/%.o: %.cxx | BUILD
