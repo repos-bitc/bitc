@@ -141,7 +141,7 @@ BUILD:
 	mkdir -p BUILD
 
 # Always check that these are up to date.
-.phony: $(BITCC) $(LIBBITC_C_RUNTIME) $(LIBBITC_NO_GC)
+.PHONY: $(BITCC) $(LIBBITC_C_RUNTIME) $(LIBBITC_NO_GC)
 
 
 $(LIBBITC_C_RUNTIME): $(BITCC)
