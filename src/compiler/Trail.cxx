@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -36,11 +36,13 @@
  **************************************************************************/
 
 #include <stdlib.h>
+#include <assert.h>
+
+#include <libsherpa/CVector.hxx>
+
 #include "Type.hxx"
 #include "Trail.hxx"
 #include "Options.hxx"
-#include <assert.h>
-#include <libsherpa/CVector.hxx>
 #include "Eliminate.hxx"
 
 using namespace sherpa;

@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,16 +35,16 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <dirent.h>
+#include <sstream>
 
 #include "Type.hxx"
 #include "TypeScheme.hxx"
 #include "Typeclass.hxx"
 #include "AST.hxx"
 #include "Environment.hxx"
-#include <assert.h>
-#include <sstream>
 #include "inter-pass.hxx"
 
 using namespace sherpa;

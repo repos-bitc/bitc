@@ -35,13 +35,13 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <assert.h>
 
 #include "AST.hxx"
 #include "Environment.hxx"

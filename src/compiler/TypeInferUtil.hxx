@@ -2,7 +2,7 @@
 #define TYPEINFERUTIL_HXX
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or

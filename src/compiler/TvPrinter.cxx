@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,6 +35,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -43,7 +44,6 @@
 #include <string>
 #include <libsherpa/UExcept.hxx>
 #include <libsherpa/CVector.hxx>
-#include <assert.h>
 #include "AST.hxx"
 #include "Type.hxx"
 #include <sstream>

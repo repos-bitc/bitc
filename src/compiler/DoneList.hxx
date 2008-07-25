@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -38,13 +38,15 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdlib.h>
 #include <iostream>
 #include <string>
+
 #include <libsherpa/CVector.hxx>
 #include <libsherpa/GCPtr.hxx>
-#include <Eliminate.hxx>
-#include <assert.h>
+
+#include "Eliminate.hxx"
 
 template <class T>
 struct DoneList : public sherpa::Countable {

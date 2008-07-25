@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -39,6 +39,7 @@
    immediate lambdas, we need to hoist them and give them proper
    names so that the polyinstantiator has something to mangle. */
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -46,9 +47,9 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+
 #include <libsherpa/UExcept.hxx>
 #include <libsherpa/CVector.hxx>
-#include <assert.h>
 
 #include "UocInfo.hxx"
 #include "AST.hxx"

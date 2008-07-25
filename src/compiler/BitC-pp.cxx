@@ -35,13 +35,14 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <string>
 #include <iostream>
-#include <assert.h>
+
 #include "UocInfo.hxx"
 #include "Options.hxx"
 #include "AST.hxx"

@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -38,11 +38,13 @@
  *
  **************************************************************************/
 
-#include <stdlib.h>
 #include <assert.h>
+#include <stdlib.h>
 #include <iostream>
 #include <string>
+
 #include <libsherpa/CVector.hxx>
+
 #include "Eliminate.hxx"
 
 // This is intentionally not a subclass of Donelist. 

@@ -35,6 +35,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -42,9 +43,9 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+
 #include <libsherpa/UExcept.hxx>
 #include <libsherpa/CVector.hxx>
-#include <assert.h>
 
 #include "UocInfo.hxx"
 #include "AST.hxx"

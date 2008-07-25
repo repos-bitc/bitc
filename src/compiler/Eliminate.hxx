@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -38,8 +38,8 @@
  *
  **************************************************************************/
 
-#include <stdlib.h>
 #include <assert.h>
+#include <stdlib.h>
 
 template<class T>
 static sherpa::GCPtr< sherpa::CVector<T> >
