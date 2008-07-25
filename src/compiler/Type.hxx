@@ -63,6 +63,7 @@ const char *KindName(Kind k);
 typedef long long TargetSWord;
 
 struct Type;
+struct TCConstraints;
 
 #define COMP_UNIN_DISCM 0x1u // Union discriminator of defrepr
 #define COMP_INVALID    0x2u // Field (component) in a defrepr leg is
@@ -292,6 +293,8 @@ public:
   bool isRefType();
   bool isValType();
   bool isByrefType();
+  bool isNullableType();
+  bool isConstrainedToRefType(sherpa::GCPtr<TCConstraints> tcc);
   bool isFnxn();
   bool isBaseConstType(); // Integers, floats, string, bool, unit, dummy.
 // #if 0

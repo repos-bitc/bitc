@@ -1402,7 +1402,8 @@ toc(std::ostream& errStream,
 	  
 	  if (!repr)
 	    if ((ident->Flags & SINGLE_LEG_UN) == 0)
-	      if(((ident->Flags & CARDELLI_UN) == 0) || 
+	      if((((ident->Flags & CARDELLI_UN) == 0) &&
+		  ((ident->Flags & NULLABLE_UN) == 0)) || 
 		 (ctr->children.size() == 1)) {
 		out << decl(ident->tagType, "tag", CTYP_EMIT_BF,
 			    ident->field_bits)<< ";" << endl;

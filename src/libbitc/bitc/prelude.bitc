@@ -38,17 +38,31 @@
 (bitc-version "0.10")
 (interface bitc.prelude
 
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;    Exception Defintions
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (proclaim OutOfMemory : exception external ExOutOfMemory)
   (proclaim IndexBoundsError : exception external ExIndexBoundsError)
   
   (defexception OutOfMemory)
   (defexception IndexBoundsError)
 
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;    SPECIAL built-in  typeclasses (no instances needed)
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  
+  (deftypeclass (ref-types 'a))
+  (deftypeclass (copy-compat 'a 'b))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;    Structure and union definitions 
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
   (defunion (optional 'a):val
     none
     (some value:'a))
   
-  (defunion (nullable 'a):val
+  (defunion (forall ((ref-types 'a)) (nullable 'a)):val
     Null
     (non-null ptr:'a))
   
@@ -65,6 +79,11 @@
   ;;    ;; Big representation: sign plus digits mod word size
   ;;    (big (ref (pair bool (vector word)))))
   
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;    Primitive arithmetic proclaimations 
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
   ;; Following is a sleazy (but clever -- blame Swaroop) trick for
   ;; getting comparison operations defined for the built-in types with
   ;; minimal hassle. We define the comparison operations as
@@ -300,11 +319,5 @@
   (definstance (Length (vector 'a))
     (lambda (x) (vector-length x)))
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;    SPECIAL built-in  typeclasses (no instances needed)
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  
-  (deftypeclass (ref-types 'a))
-  (deftypeclass (copy-compat 'a 'b))
  )
 

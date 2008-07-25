@@ -739,9 +739,9 @@ Type::markSignMbs(bool cppos)
       for(size_t i=0; i < t->typeArgs->size(); i++) {
 	GCPtr<Type> arg = t->TypeArg(i)->getType();
 	if(t->argCCOK(i))
-	  t->CompType(i)->markSignMbs(cppos);
+	  arg->markSignMbs(cppos);
 	else
-	  t->CompType(i)->markSignMbs(false);
+	  arg->markSignMbs(false);
       }
       break;
     }
@@ -753,7 +753,7 @@ Type::markSignMbs(bool cppos)
     {
       for(size_t i=0; i < t->typeArgs->size(); i++) {
 	GCPtr<Type> arg = t->TypeArg(i)->getType();
-	t->TypeArg(i)->markSignMbs(false);
+	arg->markSignMbs(false);
       }
       break;
     }

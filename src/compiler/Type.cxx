@@ -364,6 +364,38 @@ Type::isByrefType()
 }
 
 bool 
+Type::isNullableType()
+{
+  GCPtr<Type> t = getBareType();
+  return (t->kind == ty_unionv &&
+	  (t->defAst->Flags & NULLABLE_UN));
+}
+
+
+// Is the current type constrained by (ref-types t) 
+// within the constraint set tcc?
+bool 
+Type::isConstrainedToRefType(sherpa::GCPtr<TCConstraints> tcc)
+{
+  GCPtr<Type> t = getType();
+  
+  for(size_t i=0; i < tcc->pred->size(); i++) {
+    GCPtr<Typeclass> pred = tcc->Pred(i);
+    
+    const std::string &ref_types = SpecialNames::spNames.sp_ref_types; 
+    
+    if(pred->defAst->s == ref_types) {
+      GCPtr<Type> arg = pred->TypeArg(0)->getType();
+      if(strictlyEquals(arg, false, true))
+	return true;
+    }
+  }
+
+  return false;
+}
+
+
+bool 
 Type::isFnxn()
 {
   GCPtr<Type> t = getBareType();

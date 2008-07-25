@@ -1063,11 +1063,13 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
 	    break;
 	  }
 	  
-	  if(ctr->child(1)->symType->isRefType())
+	  if(ctr->child(1)->symType->isRefType() || 
+	     ctr->child(1)->symType->isConstrainedToRefType(sigma->tcc) ||
+	     ctr->child(1)->symType->isNullableType())
 	    seenRef = true;
 	  else
 	    cardelli = false;
-	    
+	  
 	  break;
 	  
 	default:
@@ -2129,7 +2131,6 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		  << std::endl;
       }
 
-
       /* Special Handling for the copy-compatibility constraint 
          The copy-compat type-class constraint is transformed into a
          unification constraint using maybe-types, and the constraint
@@ -2148,7 +2149,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 			      MBF(tv), uflags));
 	tcc->clearPred(tc);
       }
-
+      
       ast->symType = tc;
       break;
     }
