@@ -14,3 +14,4 @@
 m4_include([aclocal/ax_boost_base.m4])
 m4_include([aclocal/ax_boost_filesystem.m4])
 m4_include([aclocal/check_libicuuc.m4])
+m4_include([aclocal/check_osdoc.m4])
