@@ -88,14 +88,30 @@ namespace sherpa {
       oneDigit = 0;
     }
 
-    inline BigNum(uint32_t u, bool neg = false)
+    inline BigNum(uint32_t u, bool neg)
     {
       negative = neg;
       nDigits = 1;
       oneDigit = u;
     }
 
-    BigNum(uint64_t u, bool neg = false);
+    BigNum(uint64_t u, bool neg);
+
+    // Ideally, we would just have a pair of constructors above with
+    // an OPTIONAL boolean negation. Unfortunately, there are
+    // compilers that will not resolve the overload correctly given
+    //
+    //   BigNum bn = (size_t) i;
+    //
+    // The following constructors exist so that this case will have an
+    // exact match:
+    
+    inline BigNum(uint32_t u) {
+      negative = false;
+      nDigits = 1;
+      oneDigit = u;
+    }
+    BigNum(uint64_t u);
 
     inline BigNum(int32_t i)
     {

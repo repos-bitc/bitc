@@ -445,6 +445,21 @@ namespace sherpa {
     }
   }
 
+  BigNum::BigNum(uint64_t u)
+  {
+    negative = false;
+    if (u > UINT32_T_MAX) {
+      nDigits = 2;
+      digits = new uint32_t[nDigits];
+      digits[0] = u;		// truncating
+      digits[1] = (u >> 32);
+    }
+    else {
+      nDigits = 1;
+      oneDigit = u;
+    }
+  }
+
   // This should be called *only* in return position, because it
   // potentially modifies an argument!!
   inline 
