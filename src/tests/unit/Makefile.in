@@ -109,10 +109,8 @@ GCCWARN+=-Wno-unused
 #LIBS=$(GC_LIBDIR) $(LIBBITC) $(GC_LIB)
 
 CFLAGS+=-g -I$(PWD)/@top_srcdir@/libbitc
-c-source: $(SOURCE:%.bitc=%.c)
-objects: $(OBJECTS)
 
-.PRECIOUS: $(SOURCE:%.bitc=%)
+default: test
 
 all:  $(TARGETS)
 
@@ -124,6 +122,9 @@ all:  $(TARGETS)
 test: all $(SOURCE:%.bitc=%.test)
 
 install: all test
+
+c-source: $(SOURCE:%.bitc=%.c)
+objects: $(OBJECTS)
 
 comp:
 	make run > comp.stdout 2> comp.stderr
