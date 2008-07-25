@@ -44,8 +44,8 @@ SHELL = /bin/sh
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 
-CXX = @CXX@
-CC = @CC@
+CXX = @CCACHE@ @CXX@
+CC = @CCACHE@ @CC@
 AR = ar
 VERSION=@VERSION@
 BUILD=@BUILD@
