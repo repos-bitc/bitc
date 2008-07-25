@@ -56,6 +56,7 @@ CFLAGS = @CFLAGS@
 CXXFLAGS = @CXXFLAGS@ 
 LDFLAGS = @LDFLAGS@
 ASTMAKER = @ASTMAKER@
+LIBS = @LIBS@
 
 prefix=@prefix@
 exec_prefix=@exec_prefix@
@@ -86,19 +87,23 @@ destdir = $(if $(DESTDIR),$(DESTDIR)/,)
 mkinstalldirs = $(top_srcdir)/mkinstalldirs
 
 #### End of system configuration section. ####
-
 GC_INC=
 GC_LIB=-lgccpp -lgc
 
-INC=-I. $(GC_INC)
+CXXFLAGS += @BOOST_CPPFLAGS@
+LDFLAGS += @BOOST_LDFLAGS@
+LIBS += @BOOST_FILESYSTEM_LIB@
+LIBS+=$(GC_LIB)
+
+INC+=-I. $(GC_INC)
 
 TARGETS=bitcc
 
 #CLEANLIST+=SexprLexer.c
 #CLEANLIST=./AST.cxx ./AST.hxx
 
-LIBS= $(GC_LIBDIR) -lgmp -licuuc
-LIBS+=$(GC_LIB)
+
+LDFLAGS += @BOOST_LDFLAGS@
 
 OBJECTS=\
 	$(patsubst %.cxx,BUILD/%.o,$(filter-out BitcParser.cxx,$(wildcard *.cxx))) \
@@ -128,7 +133,7 @@ CXX_DEP=@$(CXX) $(CXXFLAGS) $(INC) -M -MT $@ -MF $(patsubst %.o,%.m,$@) $<
 CXX_BUILD=$(CXX) $(CXXFLAGS) $(INC) -c $< -o $@
 
 BUILD/bitcc: $(OBJECTS) | BUILD
-	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LIBS) -o $@
+	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LIBS) $(LDFLAGS) -o $@
 
 BUILD/%.o: %.cxx | BUILD
 	@$(CXX_DEP)
