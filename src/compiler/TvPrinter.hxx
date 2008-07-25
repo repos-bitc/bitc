@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -43,20 +43,23 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <libsherpa/avl.hxx>
+#include <map>
 
 struct Type;
 
 struct TvPrinter : public sherpa::Countable {
 private:
+  typedef std::map <unsigned long long, std::string> TvMap;
+
   bool prettyPrint;
   std::string pfx;
   unsigned long long count;
-  sherpa::AvlMap <unsigned long long, std::string> tvMap;
+  TvMap tvMap;
   std::string newTvName();
+
 public:
   TvPrinter(const bool pp=true, const std::string& pfx = "'");
-  sherpa::GCPtr<sherpa::CVector<std::string> > getAllTvarStrings();
+  std::vector<std::string> getAllTvarStrings();
   std::string tvName(sherpa::GCPtr<const Type> tvar);
 };
 

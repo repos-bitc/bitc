@@ -43,7 +43,6 @@
 #include <string>
 #include <libsherpa/UExcept.hxx>
 #include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
 #include <assert.h>
 #include <sstream>
 

@@ -44,7 +44,6 @@
 #include <string>
 #include <libsherpa/UExcept.hxx>
 #include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
 #include <assert.h>
 
 #include "UocInfo.hxx"
@@ -621,17 +620,17 @@ cl_rewrite_captured_idents(GCPtr<AST> ast, GCPtr<AST> clenvName)
 
 static GCPtr<AST>
 getClenvUse(GCPtr<AST> ast, GCPtr<AST> clenvName, 
-	    GCPtr<CVector<std::string> > tvs)
+	    std::vector<std::string>& tvs)
 {
   GCPtr<AST> clType;
-  if(tvs->size()) {
+  if(tvs.size()) {
     GCPtr<AST> typeApp = new AST(at_typeapp, ast->loc);
     typeApp->addChild(clenvName->Use());
     
-    for(size_t i=0; i<tvs->size(); i++) {
+    for(size_t i=0; i<tvs.size(); i++) {
       GCPtr<AST> tv = new AST(at_ident, ast->loc);
       tv->Flags |= ID_IS_TVAR;
-      tv->s = tv->fqn.ident = tvs->elem(i);
+      tv->s = tv->fqn.ident = tvs[i];
       typeApp->addChild(tv);
     }
     
@@ -751,7 +750,6 @@ cl_convert_ast(GCPtr<AST> ast,
       
       GCPtr<AST> clenvName = 0;
       GCPtr<TvPrinter> tvP = new TvPrinter;
-      GCPtr<CVector<std::string> > tvs = new CVector<std::string>;
 
       CLCONV_DEBUG std::cerr << "Processing lambda. " << std::endl;
 
@@ -759,6 +757,8 @@ cl_convert_ast(GCPtr<AST> ast,
       // lambdas and/or introduced a closure conversion, which will
       // have introduced new identifiers.
       findusedef(std::cerr, ast, ast, NULL_MODE, boundVars, freeVars);
+
+      std::vector<std::string> tvs;
 
       // Closure object is only generated if we actually have some
       // free variables.
@@ -807,13 +807,14 @@ cl_convert_ast(GCPtr<AST> ast,
       
 	// If the Type of arg contains a type variable,	  
 	// then add to the tvlist.
-	// This case is impossible if closure conversion happens
+	// No type variables can appear if closure conversion happens
 	// after polyinstantiation.      
 	tvs = tvP->getAllTvarStrings();
-	for(size_t i=0; i<tvs->size(); i++) {
+
+	for(size_t i=0; i < tvs.size(); i++) {
 	  GCPtr<AST> tv = new AST(at_ident, tvlist->loc);
 	  tv->Flags |= ID_IS_TVAR;
-	  tv->s = tv->fqn.ident = tvs->elem(i);
+	  tv->s = tv->fqn.ident = tvs[i];
 	  tvlist->children.push_back(tv);
 	}
       
@@ -858,6 +859,8 @@ cl_convert_ast(GCPtr<AST> ast,
 	  GCPtr<AST> clArgName = new AST(at_ident, ast->loc);
 	  clArgName->s = clArgName->fqn.ident = "__clArg";
 	  GCPtr<AST> clArgPat = new AST(at_identPattern, ast->loc, clArgName);      
+	  // Note: tvs was populated in the if(needsClosure) above
+	  // if(shouldHoist).
 	  GCPtr<AST> clType = getClenvUse(ast, clenvName, tvs);
 	  
 	  lamType->child(0)->children.insert(lamType->child(0)->children.begin(),
