@@ -8,8 +8,6 @@
 #include <string>
 #include "AST.hxx"
 
-using namespace sherpa;
-
 
 #include "Type.hxx"
 #include "Special.hxx"

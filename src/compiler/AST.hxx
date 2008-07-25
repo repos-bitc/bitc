@@ -410,7 +410,7 @@ enum { at_NUM_ASTTYPE = agt_ow };
 #endif /* AST_TOKEN_TYPE */
 
 #ifndef AST_SUPERCLASS
-#define AST_SUPERCLASS ::boost::enable_shared_from_this<AST>
+#define AST_SUPERCLASS boost::enable_shared_from_this<AST>
 #endif /* AST_SUPERCLASS */
 
 class AST :public AST_SUPERCLASS { 
