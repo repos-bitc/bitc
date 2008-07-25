@@ -66,10 +66,10 @@ struct Instance : public Countable {
   }
   
   bool equals(std::ostream &errStream, GCPtr<Instance> ins, 
-	      GCPtr<const Environment< CVector<GCPtr<Instance> > > >
+	      GCPtr<const InstEnvironment >
 	      instEnv) const;
   bool satisfies(std::ostream &errStream, GCPtr<Typeclass> pred, 
-		 GCPtr<const Environment< CVector<GCPtr<Instance> > > >
+		 GCPtr<const InstEnvironment >
 		 instEnv) const;
   std::string asString();
   std::string asXML();

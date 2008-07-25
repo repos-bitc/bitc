@@ -1,5 +1,5 @@
-#ifndef SHERPA_UTIL_HXX
-#define SHERPA_UTIL_HXX
+#ifndef LIBSHERPA_UTIL_HXX
+#define LIBSHERPA_UTIL_HXX
 
 /**************************************************************************
  *
@@ -72,4 +72,4 @@ namespace sherpa {
 
 } /* namespace sherpa */
 
-#endif /* SHERPA_UTIL_HXX */
+#endif /* LIBSHERPA_UTIL_HXX */

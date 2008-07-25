@@ -220,7 +220,7 @@ Environment<AST>::getLocalBinding(const std::string& nm) const;
 template GCPtr<Binding<TypeScheme> > 
 Environment<TypeScheme>::getLocalBinding(const std::string& nm) const;
 template GCPtr<Binding< CVector<GCPtr<Instance> > > >
-Environment< CVector<GCPtr<Instance> > >::getLocalBinding
+InstEnvironment::getLocalBinding
 (const std::string& nm) const;
 
 template GCPtr<Binding<AST> > 
@@ -228,7 +228,7 @@ Environment<AST>::doGetBinding(const std::string& nm) const;
 template GCPtr<Binding<TypeScheme> > 
 Environment<TypeScheme>::doGetBinding(const std::string& nm) const;
 template GCPtr<Binding< CVector<GCPtr<Instance> > > >
-Environment< CVector<GCPtr<Instance> > >::doGetBinding
+InstEnvironment::doGetBinding
 (const std::string& nm) const;
 
 template void
@@ -239,7 +239,7 @@ Environment<TypeScheme>::addBinding(const std::string& nm,
 				    GCPtr<TypeScheme> val,
 				    bool rebind);
 template void
-Environment< CVector<GCPtr<Instance> > >::addBinding
+InstEnvironment::addBinding
 (const std::string& nm, GCPtr<CVector<GCPtr<Instance> > > val, bool rebind);
 
 
@@ -248,14 +248,14 @@ Environment<AST>::unbind(size_t n);
 template void 
 Environment<TypeScheme>::unbind(size_t n);
 template void 
-Environment< CVector<GCPtr<Instance> > >::unbind(size_t n);
+InstEnvironment::unbind(size_t n);
 
 template void
 Environment<AST>::removeBinding(const std::string& nm);
 template void
 Environment<TypeScheme>::removeBinding(const std::string& nm);
 template void
-Environment< CVector<GCPtr<Instance> > >::removeBinding
+InstEnvironment::removeBinding
 (const std::string& nm);
 
 template void
@@ -265,7 +265,7 @@ template void
 Environment<TypeScheme>::updateKey(const std::string& from,
 				   const std::string& to);
 template void
-Environment< CVector<GCPtr<Instance> > >::updateKey
+InstEnvironment::updateKey
 (const std::string& from, const std::string& to);
 
 
@@ -273,24 +273,24 @@ template GCPtr<Environment<AST> >
 Environment<AST>::newScope();
 template GCPtr<Environment<TypeScheme> > 
 Environment<TypeScheme>::newScope();
-template GCPtr<Environment< CVector<GCPtr<Instance> > > > 
-Environment< CVector<GCPtr<Instance> > >::newScope();
+template GCPtr<InstEnvironment > 
+InstEnvironment::newScope();
 
 
 template GCPtr<Environment<AST> > 
 Environment<AST>::newDefScope();
 template GCPtr<Environment<TypeScheme> > 
 Environment<TypeScheme>::newDefScope();
-template GCPtr<Environment< CVector<GCPtr<Instance> > > > 
-Environment< CVector<GCPtr<Instance> > >::newDefScope();
+template GCPtr<InstEnvironment > 
+InstEnvironment::newDefScope();
 
 template bool 
 Environment<AST>::isAncestor(GCPtr<Environment<AST> > env);
 template bool 
 Environment<TypeScheme>::isAncestor(GCPtr<Environment<TypeScheme> > env);
 template bool 
-Environment< CVector<GCPtr<Instance> > >::isAncestor
-(GCPtr<Environment< CVector<GCPtr<Instance> > > > env);
+InstEnvironment::isAncestor
+(GCPtr<InstEnvironment > env);
 
 template void
 Environment<AST>::mergeBindingsFrom
@@ -301,8 +301,8 @@ Environment<TypeScheme>::mergeBindingsFrom
 (GCPtr<Environment<TypeScheme> > from,
  bool complete);
 template void
-Environment< CVector<GCPtr<Instance> > >::mergeBindingsFrom
-(GCPtr<Environment< CVector<GCPtr<Instance> > > >  from,
+InstEnvironment::mergeBindingsFrom
+(GCPtr<InstEnvironment >  from,
  bool complete);
 
 template std::string
@@ -310,12 +310,12 @@ Environment<AST>::asString() const;
 template std::string
 Environment<TypeScheme>::asString() const;
 template std::string
-Environment< CVector<GCPtr<Instance> > >::asString() const;
+InstEnvironment::asString() const;
 
 template
 Environment<AST>::~Environment();
 template
 Environment<TypeScheme>::~Environment();
 template
-Environment< CVector<GCPtr<Instance> > >::~Environment();
+InstEnvironment::~Environment();
  

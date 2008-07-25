@@ -62,10 +62,10 @@ using namespace sherpa;
 using namespace std;
 
 bool isExpansive(std::ostream& errStream, 
-		GCPtr<const Environment<TypeScheme> > gamma,
+		GCPtr<const TSEnvironment > gamma,
 		GCPtr<const AST> ast);
 bool isExpansive(std::ostream& errStream, 
-		 GCPtr<const Environment<TypeScheme> > gamma,
+		 GCPtr<const TSEnvironment > gamma,
 		 GCPtr<Type> typ);
 
 /**********************************************************
@@ -109,7 +109,7 @@ Type::boundInType(GCPtr<Type> tv)
 }
 
 bool
-Type::boundInGamma(GCPtr<const Environment<TypeScheme> > gamma)
+Type::boundInGamma(GCPtr<const TSEnvironment > gamma)
 {
   GCPtr<Type> tvar = getType();
   while (gamma) {
@@ -179,7 +179,7 @@ TypeScheme::collectAllFtvs()
 // that are unbound in gamma
 void
 Type::collectftvsWrtGamma(GCPtr<CVector<GCPtr<Type> > > tvs,
-			  GCPtr<const Environment<TypeScheme> > gamma)
+			  GCPtr<const TSEnvironment > gamma)
 {   
   GCPtr<Type> t = getType();
 
@@ -215,7 +215,7 @@ Type::collectftvsWrtGamma(GCPtr<CVector<GCPtr<Type> > > tvs,
 static void
 remftvsWrtFnDeps(GCPtr<CVector<GCPtr<Type> > > &ftvs,
 		 const GCPtr<CVector<GCPtr<Type> > > fnDeps,
-		 GCPtr<const Environment<TypeScheme> > gamma)
+		 GCPtr<const TSEnvironment > gamma)
 {
   // closure wrt tvs in fnDeps influenced by Gamma.
   GCPtr<CVector<GCPtr<Type> > > closure = 
@@ -251,7 +251,7 @@ remftvsWrtFnDeps(GCPtr<CVector<GCPtr<Type> > > &ftvs,
 // Collect the Free Type Variables in a type
 // that are unbound in gamma
 void
-TypeScheme::collectftvs(GCPtr<const Environment<TypeScheme> > gamma)
+TypeScheme::collectftvs(GCPtr<const TSEnvironment > gamma)
 {
   tau->collectftvsWrtGamma(ftvs, gamma);  
   if(tcc) {    
@@ -473,8 +473,8 @@ static bool genSteps[6][11] = {
 bool
 TypeScheme::generalize(std::ostream& errStream, 
 		       const LexLoc &errLoc,
-		       GCPtr<const Environment<TypeScheme> > gamma,
-		       GCPtr<const Environment<CVector<GCPtr<Instance> > > >
+		       GCPtr<const TSEnvironment > gamma,
+		       GCPtr<const InstEnvironment >
 		       instEnv, 
 		       GCPtr<const AST> expr, 
 		       GCPtr<TCConstraints> parentTCC,
@@ -749,8 +749,8 @@ updateSigmas(GCPtr<const AST> bp, GCPtr<CVector<GCPtr<Type> > > ftvs,
 bool
 generalizePat(std::ostream& errStream,
 	      const LexLoc &errLoc,
-	      GCPtr<Environment<TypeScheme> > gamma,
-	      GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
+	      GCPtr<TSEnvironment > gamma,
+	      GCPtr<const InstEnvironment > instEnv,
 	      GCPtr<AST> bp, GCPtr<AST> expr,
 	      GCPtr<TCConstraints> tcc,
 	      GCPtr<TCConstraints> parentTCC,

@@ -72,8 +72,8 @@ struct TypeScheme : public Countable {
   // The generalizer
   bool generalize(std::ostream& errStream,
 		  const LexLoc &errLoc,
-		  GCPtr<const Environment<TypeScheme> > gamma,
-		  GCPtr<const Environment<CVector<GCPtr<Instance> > > >instEnv, 
+		  GCPtr<const TSEnvironment > gamma,
+		  GCPtr<const InstEnvironment >instEnv, 
 		  GCPtr<const AST> expr, 
 		  GCPtr<TCConstraints >parentTCC,
 		  GCPtr<Trail> trail,
@@ -107,13 +107,13 @@ struct TypeScheme : public Countable {
   
   // Collect all tvs wrt tau, and tcc->pred, but NOT tcc->fnDeps
   void collectAllFtvs();
-  void collectftvs(GCPtr<const Environment<TypeScheme> > gamma);
+  void collectftvs(GCPtr<const TSEnvironment > gamma);
   bool removeUnInstFtvs();
   bool normalizeConstruction(GCPtr<Trail> trail);
 
   bool solvePredicates(std::ostream &errStream,
 		       const LexLoc &errLoc,
-		       GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
+		       GCPtr<const InstEnvironment > instEnv,
 		       GCPtr<Trail> trail);
   
   bool checkAmbiguity(std::ostream &errStream, const LexLoc &errLoc);

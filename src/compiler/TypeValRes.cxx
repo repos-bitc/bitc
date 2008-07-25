@@ -83,7 +83,7 @@ if(ans == true) \
 
 bool
 isExpansive(std::ostream& errStream, 
-	    GCPtr<const Environment<TypeScheme> > gamma,
+	    GCPtr<const TSEnvironment > gamma,
 	    GCPtr<const AST> ast) 
 {
   bool itsExpansive = false;
@@ -458,7 +458,7 @@ isExpansive(std::ostream& errStream,
 
 bool
 isExpansive(std::ostream& errStream, 
-	    GCPtr<const Environment<TypeScheme> > gamma,
+	    GCPtr<const TSEnvironment > gamma,
 	    GCPtr<Type> typ) 
 {
   bool itsExpansive = false;

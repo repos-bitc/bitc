@@ -975,7 +975,7 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
 
 static void 
 doShowTypes(std::ostream& out, GCPtr<AST> ast, 
-	    GCPtr<Environment<TypeScheme> > gamma,
+	    GCPtr<TSEnvironment > gamma,
 	    bool showMangName,
 	    bool raw = false,
 	    GCPtr<TvPrinter> tvP=NULL)

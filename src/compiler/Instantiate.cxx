@@ -206,8 +206,8 @@ using namespace std;
 
 
 static void 
-importSymBindings(GCPtr<Environment<AST> > fromEnv, 
-		  GCPtr<Environment<AST> > toEnv)
+importSymBindings(GCPtr<ASTEnvironment > fromEnv, 
+		  GCPtr<ASTEnvironment > toEnv)
 {
   for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
     GCPtr<Binding<AST> > bdng = fromEnv->bindings->elem(i);
@@ -224,8 +224,8 @@ importSymBindings(GCPtr<Environment<AST> > fromEnv,
 }
 
 static void 
-importTSBindings(GCPtr<Environment<TypeScheme> > fromEnv, 
-		 GCPtr<Environment<TypeScheme> > toEnv)
+importTSBindings(GCPtr<TSEnvironment > fromEnv, 
+		 GCPtr<TSEnvironment > toEnv)
 {
   for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
     GCPtr<Binding<TypeScheme> > bdng = fromEnv->bindings->elem(i);
@@ -244,8 +244,8 @@ importTSBindings(GCPtr<Environment<TypeScheme> > fromEnv,
 }
 
 static void 
-importInstBindings(GCPtr<Environment< CVector<GCPtr<Instance> > > > fromEnv,
-		   GCPtr<Environment< CVector<GCPtr<Instance> > > > toEnv)
+importInstBindings(GCPtr<InstEnvironment > fromEnv,
+		   GCPtr<InstEnvironment > toEnv)
 {
   for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
     GCPtr<Binding< CVector<GCPtr<Instance> > > > bdng = 
@@ -287,9 +287,9 @@ UpdateMegaEnvs(GCPtr<UocInfo> uoc)
   // The input uoc is the unifiedUOC, So, get the megaENVs
   // from the current uoc by fetching the parents of the
   // current envs.
-  GCPtr<Environment<AST> > megaEnv = uoc->env->parent;
-  GCPtr<Environment<TypeScheme> > megaGamma = uoc->gamma->parent;
-  GCPtr<Environment< CVector<GCPtr<Instance> > > > megaInstEnv =
+  GCPtr<ASTEnvironment > megaEnv = uoc->env->parent;
+  GCPtr<TSEnvironment > megaGamma = uoc->gamma->parent;
+  GCPtr<InstEnvironment > megaInstEnv =
     uoc->instEnv->parent;
   
   INST_ENV_DEBUG

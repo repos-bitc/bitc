@@ -110,8 +110,8 @@ public:
 
   bool fromCommandLine;
   GCPtr<AST> uocAst;
-  GCPtr<Environment<AST> > env;
-  GCPtr<Environment<TypeScheme> > gamma;
+  GCPtr<ASTEnvironment > env;
+  GCPtr<TSEnvironment > gamma;
 
   inline bool isSourceUoc() {
     return (uocAst->astType == at_module);
@@ -139,7 +139,7 @@ public:
   // to jump and make this change unless I know that this
   // implementation of instances works. 
    
-  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv;
+  GCPtr<InstEnvironment > instEnv;
   
   UocInfo(const std::string& _uocName, const std::string& _origin, 
 	  GCPtr<AST> _uocAst);

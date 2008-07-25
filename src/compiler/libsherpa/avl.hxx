@@ -1,5 +1,5 @@
-#ifndef SHERPA_AVL_HXX
-#define SHERPA_AVL_HXX
+#ifndef LIBSHERPA_AVL_HXX
+#define LIBSHERPA_AVL_HXX
 
 /**************************************************************************
  *
@@ -479,4 +479,4 @@ struct AvlSet : public AvlMap<KeyType, bool> {
 // mode:c++
 // End:
 
-#endif /* SHERPA_AVL_HXX */
+#endif /* LIBSHERPA_AVL_HXX */

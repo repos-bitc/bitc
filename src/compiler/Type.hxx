@@ -411,7 +411,7 @@ public:
   /* Is my type bound in the environment? Usually only used in the
      case of type variables to determine if it must be 
      generalized, or not */
-  bool boundInGamma(GCPtr<const Environment<TypeScheme> > gamma);
+  bool boundInGamma(GCPtr<const TSEnvironment > gamma);
   
   // Collect ALL ftvs regardless of gamma
   // This APPENDS TO the vector `tvs'. 
@@ -420,7 +420,7 @@ public:
   // Collect the Free Type Variables in a type
   // that are unbound in gamma
   void collectftvsWrtGamma(GCPtr<CVector<GCPtr<Type> > > tvs,
-			   GCPtr<const Environment<TypeScheme> > gamma);
+			   GCPtr<const TSEnvironment > gamma);
 
   // Meta-polymorphism
   static GCPtr<Type> Kmono;

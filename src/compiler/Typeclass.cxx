@@ -63,7 +63,7 @@ using namespace std;
 
 bool 
 Instance::equals(std::ostream &errStream, GCPtr<Instance> ins, 
-		 GCPtr<const Environment< sherpa::CVector<GCPtr<Instance> > > >
+		 GCPtr<const InstEnvironment >
 		 instEnv) const
 {
   GCPtr<TypeScheme> mySigma = ts->ts_instance_copy();
@@ -105,7 +105,7 @@ Instance::equals(std::ostream &errStream, GCPtr<Instance> ins,
 bool 
 Instance::satisfies(std::ostream &errStream,
 		    GCPtr<Typeclass> pred, 		    
-		    GCPtr<const Environment< sherpa::CVector<GCPtr<Instance> > > >
+		    GCPtr<const InstEnvironment >
 		    instEnv) const
 {
   bool unifies = true;

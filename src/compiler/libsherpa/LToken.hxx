@@ -1,5 +1,5 @@
-#ifndef SHERPA_LTOKEN_HXX
-#define SHERPA_LTOKEN_HXX
+#ifndef LIBSHERPA_LTOKEN_HXX
+#define LIBSHERPA_LTOKEN_HXX
 
 /**************************************************************************
  *
@@ -110,4 +110,4 @@ namespace sherpa {
 
 } /* namespace sherpa */
 
-#endif /* SHERPA_LTOKEN_HXX */
+#endif /* LIBSHERPA_LTOKEN_HXX */

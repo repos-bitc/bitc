@@ -1,5 +1,5 @@
-#ifndef SHERPA_GCPTR_HXX
-#define SHERPA_GCPTR_HXX
+#ifndef LIBSHERPA_GCPTR_HXX
+#define LIBSHERPA_GCPTR_HXX
 
 /*
  * Copyright (c) 2006, The EROS Group, LLC. All rights reserved.
@@ -445,4 +445,4 @@ namespace sherpa {
 // mode:c++
 // End:
 
-#endif /* SHERPA_GCPTR_HXX */
+#endif /* LIBSHERPA_GCPTR_HXX */

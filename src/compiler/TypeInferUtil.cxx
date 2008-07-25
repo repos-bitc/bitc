@@ -101,8 +101,8 @@ nCtArgs(GCPtr<Type> t)
 /* Use all bindings in the some other environment */
 void
 useIFGamma(const std::string& idName,
-	   GCPtr<Environment<TypeScheme> > fromEnv, 
-	   GCPtr<Environment<TypeScheme> > toEnv)
+	   GCPtr<TSEnvironment > fromEnv, 
+	   GCPtr<TSEnvironment > toEnv)
 {
   for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
     GCPtr<Binding<TypeScheme> > bdng = fromEnv->bindings->elem(i);
@@ -124,8 +124,8 @@ useIFGamma(const std::string& idName,
 
 void
 useIFInsts(const std::string& idName,
-	   GCPtr<Environment< CVector<GCPtr<Instance> > > >fromEnv, 
-	   GCPtr<Environment< CVector<GCPtr<Instance> > > >toEnv)
+	   GCPtr<InstEnvironment >fromEnv, 
+	   GCPtr<InstEnvironment >toEnv)
 {
   for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
     GCPtr<Binding< CVector<GCPtr<Instance> > > > bdng = fromEnv->bindings->elem(i);
@@ -147,8 +147,8 @@ useIFInsts(const std::string& idName,
 /* Initialize my environment */
 bool
 initGamma(std::ostream& errStream, 
-	  GCPtr<Environment<TypeScheme> > gamma,
-	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	  GCPtr<TSEnvironment > gamma,
+	  GCPtr<InstEnvironment > instEnv,
 	  const GCPtr<AST> topAst, unsigned long uflags)
 {
   bool errFree = true;
@@ -162,8 +162,8 @@ initGamma(std::ostream& errStream,
   }
   
   // "use" everything in the prelude
-  GCPtr<Environment<TypeScheme> > preenv = 0;
-  GCPtr<Environment< CVector<GCPtr<Instance> > > > preInsts = 0;
+  GCPtr<TSEnvironment > preenv = 0;
+  GCPtr<InstEnvironment > preInsts = 0;
   
   size_t i;
 

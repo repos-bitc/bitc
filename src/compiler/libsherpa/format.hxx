@@ -1,5 +1,5 @@
-#ifndef SHERPA_FORMAT_H
-#define SHERPA_FORMAT_H
+#ifndef LIBSHERPA_FORMAT_H
+#define LIBSHERPA_FORMAT_H
 
 /**************************************************************************
  *
@@ -62,4 +62,4 @@ namespace sherpa {
 // mode:c++
 // End:
 
-#endif /* SHERPA_FORMAT_H */
+#endif /* LIBSHERPA_FORMAT_H */

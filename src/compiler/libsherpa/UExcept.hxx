@@ -1,5 +1,5 @@
-#ifndef SHERPA_UEXCEPT_H
-#define SHERPA_UEXCEPT_H
+#ifndef LIBSHERPA_UEXCEPT_H
+#define LIBSHERPA_UEXCEPT_H
 
 /**************************************************************************
  *
@@ -156,4 +156,4 @@ namespace sherpa {
 // mode:c++
 // End:
 
-#endif /* SHERPA_UEXCEPT_H */
+#endif /* LIBSHERPA_UEXCEPT_H */

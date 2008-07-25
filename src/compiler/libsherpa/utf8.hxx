@@ -1,5 +1,5 @@
-#ifndef SHERPA_UTF8_HXX
-#define SHERPA_UTF8_HXX
+#ifndef LIBSHERPA_UTF8_HXX
+#define LIBSHERPA_UTF8_HXX
 
 /**************************************************************************
  *
@@ -55,4 +55,4 @@ unsigned
 utf8_encode(uint32_t ucs4,  char utf8[7]);
 
 }
-#endif /* SHERPA_UTF8_HXX */
+#endif /* LIBSHERPA_UTF8_HXX */

@@ -311,7 +311,7 @@ handleSpecialPred(std::ostream &errStream, GCPtr<Trail> trail,
 bool
 handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
 	     GCPtr<Typeclass> pred, GCPtr<TCConstraints> tcc, 
-	     GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
+	     GCPtr<const InstEnvironment > instEnv,
 	     bool must_solve, bool trial_mode, bool &handled)
 {
   TCSOL_DEBUG errStream << "\t\tInstance Solver for: "
@@ -499,7 +499,7 @@ handleEquPreds(std::ostream &errStream, GCPtr<Trail> trail,
 
 bool
 TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
-			    GCPtr< const Environment< CVector<GCPtr<Instance> > > > instEnv,
+			    GCPtr< const InstEnvironment > instEnv,
 			    GCPtr<Trail> trail)
 {
 /* handled: Signifies any changes to the tcc individual handler

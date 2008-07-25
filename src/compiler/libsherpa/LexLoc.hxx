@@ -1,5 +1,5 @@
-#ifndef SHERPA_LEXLOC_HXX
-#define SHERPA_LEXLOC_HXX
+#ifndef LIBSHERPA_LEXLOC_HXX
+#define LIBSHERPA_LEXLOC_HXX
 
 /**************************************************************************
  *
@@ -110,4 +110,4 @@ namespace sherpa {
 
 }
 
-#endif /* SHERPA_LEXLOC_HXX */
+#endif /* LIBSHERPA_LEXLOC_HXX */

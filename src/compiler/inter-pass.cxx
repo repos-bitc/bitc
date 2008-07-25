@@ -130,8 +130,8 @@ UocInfo::unwrapEnvs()
 bool
 resolve(std::ostream& errStream, 
 	GCPtr<AST> ast, 
-	GCPtr<Environment<AST> > env,
-	GCPtr<Environment<AST> > lamLevel,
+	GCPtr<ASTEnvironment > env,
+	GCPtr<ASTEnvironment > lamLevel,
 	int mode, 
 	IdentType identType,
 	GCPtr<AST> currLB,
@@ -139,8 +139,8 @@ resolve(std::ostream& errStream,
 
 bool
 typeInfer(std::ostream& errStream, GCPtr<AST> ast, 
-	  GCPtr<Environment<TypeScheme> > gamma,
-	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	  GCPtr<TSEnvironment > gamma,
+	  GCPtr<InstEnvironment > instEnv,
 	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
                                    GCPtr<AST> > > > > impTypes,
 	  bool isVP, 

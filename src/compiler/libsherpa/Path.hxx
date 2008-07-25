@@ -1,5 +1,5 @@
-#ifndef SHERPA_PATH_HXX
-#define SHERPA_PATH_HXX
+#ifndef LIBSHERPA_PATH_HXX
+#define LIBSHERPA_PATH_HXX
 
 /*
  * Copyright (c) 2007, The EROS Group, LLC. All rights reserved.
@@ -414,4 +414,4 @@ namespace sherpa {
 // mode:c++
 // End:
 
-#endif /* SHERPA_PATH_HXX */
+#endif /* LIBSHERPA_PATH_HXX */

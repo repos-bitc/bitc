@@ -116,9 +116,9 @@ UocInfo::CreateUnifiedUoC()
   std::string uocName = "*emit*";
   GCPtr<UocInfo> uoc = new UocInfo(uocName, "*internal*", ast);
 
-  uoc->env = new Environment<AST>(uocName);
-  uoc->gamma = new Environment<TypeScheme>(uocName);
-  uoc->instEnv = new Environment< CVector<GCPtr<Instance> > >(uocName);
+  uoc->env = new ASTEnvironment(uocName);
+  uoc->gamma = new TSEnvironment(uocName);
+  uoc->instEnv = new InstEnvironment(uocName);
 
   uoc->env = uoc->env->newDefScope();
   uoc->gamma = uoc->gamma->newDefScope();

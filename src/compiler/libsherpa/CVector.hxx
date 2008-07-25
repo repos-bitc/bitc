@@ -1,5 +1,5 @@
-#ifndef SHERPA_CVECTOR_HXX
-#define SHERPA_CVECTOR_HXX
+#ifndef LIBSHERPA_CVECTOR_HXX
+#define LIBSHERPA_CVECTOR_HXX
 
 /**************************************************************************
  *
@@ -232,4 +232,4 @@ namespace sherpa {
   };
 
 } /* namespace sherpa */
-#endif /* SHERPA_CVECTOR_HXX */
+#endif /* LIBSHERPA_CVECTOR_HXX */

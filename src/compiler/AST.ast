@@ -247,9 +247,9 @@ enum primOp {
 
 struct AST;
 struct envSet : public Countable{
-  GCPtr<Environment<AST> > env;
-  GCPtr<Environment<TypeScheme> > gamma;
-  GCPtr<Environment< sherpa::CVector<GCPtr<Instance> > > > instEnv;
+  GCPtr<ASTEnvironment > env;
+  GCPtr<TSEnvironment > gamma;
+  GCPtr<InstEnvironment > instEnv;
   
   envSet()
   {
@@ -258,8 +258,8 @@ struct envSet : public Countable{
     instEnv = NULL;
   }
 
-  envSet(GCPtr<Environment<AST> > _env, GCPtr<Environment<TypeScheme> >_gamma,
-	 GCPtr<Environment< sherpa::CVector<GCPtr<Instance> > > > _instEnv)
+  envSet(GCPtr<ASTEnvironment > _env, GCPtr<TSEnvironment >_gamma,
+	 GCPtr<InstEnvironment > _instEnv)
   {
     env = _env;
     gamma = _gamma;

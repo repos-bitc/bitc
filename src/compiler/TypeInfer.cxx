@@ -79,8 +79,8 @@ using namespace std;
 
 bool
 typeInfer(std::ostream& errStream, GCPtr<AST> ast, 
-	  GCPtr<Environment<TypeScheme> > gamma,
-	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	  GCPtr<TSEnvironment > gamma,
+	  GCPtr<InstEnvironment > instEnv,
 	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
                                    GCPtr<AST> > > > > impTypes,
 	  bool isVP, 
@@ -91,18 +91,18 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  unsigned flags);
 
 bool isExpansive(std::ostream& errStream, 
-		 GCPtr<const Environment<TypeScheme> > gamma,
+		 GCPtr<const TSEnvironment > gamma,
 		 GCPtr<AST> ast);
 
 bool isExpansive(std::ostream& errStream, 
-		 GCPtr<const Environment<TypeScheme> > gamma,
+		 GCPtr<const TSEnvironment > gamma,
 		 GCPtr<Type> typ);
 
 bool
 generalizePat(std::ostream& errStream,
 	      const sherpa::LexLoc &errLoc,
-	      GCPtr<Environment<TypeScheme> > gamma,
-	      GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
+	      GCPtr<TSEnvironment > gamma,
+	      GCPtr<const InstEnvironment > instEnv,
 	      GCPtr<AST> bp, GCPtr<AST> expr,
 	      GCPtr<TCConstraints> tcc,
 	      GCPtr<TCConstraints> parentTCC,
@@ -135,7 +135,7 @@ buildFnFromApp(GCPtr<AST> ast, unsigned long uflags)
 
 static GCPtr<TypeScheme> 
 bindIdentDef(GCPtr<AST> ast, 
-	     GCPtr<Environment<TypeScheme> > gamma,
+	     GCPtr<TSEnvironment > gamma,
 	     unsigned long bindFlags,
 	     unsigned long flags)
 {
@@ -257,8 +257,8 @@ findComponent(std::ostream& errStream,
 
 static bool
 ProcessLetExprs(std::ostream& errStream, GCPtr<AST> lbs, 
-		GCPtr<Environment<TypeScheme> > gamma,
-		GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+		GCPtr<TSEnvironment > gamma,
+		GCPtr<InstEnvironment > instEnv,
 		GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
                                          GCPtr<AST> > > > > impTypes,
 		bool isVP, GCPtr<TCConstraints> tcc,
@@ -277,8 +277,8 @@ ProcessLetExprs(std::ostream& errStream, GCPtr<AST> lbs,
 
 static bool
 ProcessLetBinds(std::ostream& errStream, GCPtr<AST> lbs, 
-		GCPtr<Environment<TypeScheme> > gamma,
-		GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+		GCPtr<TSEnvironment > gamma,
+		GCPtr<InstEnvironment > instEnv,
 		GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
                                          GCPtr<AST> > > > > impTypes,
 		bool isVP, GCPtr<TCConstraints> tcc,
@@ -349,7 +349,7 @@ makeLetGather(GCPtr<AST> lbs, GCPtr<AST> &bAst, GCPtr<AST> &vAst)
 
 bool
 checkImpreciseTypes(std::ostream& errStream, 
-		    const GCPtr<Environment<TypeScheme> > gamma,
+		    const GCPtr<TSEnvironment > gamma,
 		    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
                                              GCPtr<AST> > > > > impTypes)
 {
@@ -486,8 +486,8 @@ checkConstraints(std::ostream& errStream,
 static bool
 matchDefDecl(std::ostream& errStream, 
 	     GCPtr<Trail> trail,
-	     GCPtr<const Environment<TypeScheme> > gamma,
-	     GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	     GCPtr<const TSEnvironment > gamma,
+	     GCPtr<InstEnvironment > instEnv,
 	     GCPtr<TypeScheme> declSigma,
 	     GCPtr<TypeScheme> defSigma,
 	     unsigned long flags,
@@ -578,8 +578,8 @@ matchDefDecl(std::ostream& errStream,
 
 bool
 InferTvList(std::ostream& errStream, GCPtr<AST> tvList, 
-	    GCPtr<Environment<TypeScheme> > gamma,
-	    GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	    GCPtr<TSEnvironment > gamma,
+	    GCPtr<InstEnvironment > instEnv,
 	    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
                                      GCPtr<AST> > > > > impTypes,
 	    bool isVP, 
@@ -647,8 +647,8 @@ markCCC(GCPtr<Type> ct)
 // Called only for definitions
 bool
 InferStruct(std::ostream& errStream, GCPtr<AST> ast, 
-	    GCPtr<Environment<TypeScheme> > gamma,
-	    GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	    GCPtr<TSEnvironment > gamma,
+	    GCPtr<InstEnvironment > instEnv,
 	    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
                                      GCPtr<AST> > > > > impTypes,
 	    bool isVP, 
@@ -764,8 +764,8 @@ InferStruct(std::ostream& errStream, GCPtr<AST> ast,
 // Called only for definitions
 bool
 InferUnion(std::ostream& errStream, GCPtr<AST> ast, 
-	   GCPtr<Environment<TypeScheme> > gamma,
-	   GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	   GCPtr<TSEnvironment > gamma,
+	   GCPtr<InstEnvironment > instEnv,
 	   GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
                                     GCPtr<AST> > > > > impTypes,
 	   bool isVP, 
@@ -1150,8 +1150,8 @@ superDAG(GCPtr<AST> super, GCPtr<AST> curr)
 
 bool
 InferTypeClass(std::ostream& errStream, GCPtr<AST> ast, 
-	       GCPtr<Environment<TypeScheme> > gamma,
-	       GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	       GCPtr<TSEnvironment > gamma,
+	       GCPtr<InstEnvironment > instEnv,
 	       GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
                                         GCPtr<AST> > > > > impTypes,
 	       bool isVP, 
@@ -1277,8 +1277,8 @@ InferTypeClass(std::ostream& errStream, GCPtr<AST> ast,
 
 bool
 InferInstance(std::ostream& errStream, GCPtr<AST> ast, 
-	      GCPtr<Environment<TypeScheme> > gamma,
-	      GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	      GCPtr<TSEnvironment > gamma,
+	      GCPtr<InstEnvironment > instEnv,
 	      GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
                                        GCPtr<AST> > > > > impTypes,
 	      bool isVP, 
@@ -1298,7 +1298,7 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
   if(tcapp->children.size())
     TCident = tcapp->child(0);
   
-  GCPtr<Environment<TypeScheme> > defGamma = gamma->newDefScope();
+  GCPtr<TSEnvironment > defGamma = gamma->newDefScope();
   ast->envs.gamma = defGamma;
   ast->envs.instEnv = instEnv;
   
@@ -1563,8 +1563,8 @@ CheckLetrecFnxnRestriction(std::ostream &errStream, GCPtr<AST> ast)
 
 bool
 typeInfer(std::ostream& errStream, GCPtr<AST> ast, 
-	  GCPtr<Environment<TypeScheme> > gamma,
-	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	  GCPtr<TSEnvironment > gamma,
+	  GCPtr<InstEnvironment > instEnv,
 	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
                                    GCPtr<AST> > > > > impTypes,
 	  bool isVP, 
@@ -1885,7 +1885,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
   case at_defunion:
     {
-      GCPtr<Environment<TypeScheme> > defGamma = gamma->newDefScope();
+      GCPtr<TSEnvironment > defGamma = gamma->newDefScope();
       ast->envs.gamma = defGamma;
       
       GCPtr<AST> category = ast->child(2);
@@ -1902,7 +1902,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
   case at_defstruct:
     {
-      GCPtr<Environment<TypeScheme> > defGamma = gamma->newDefScope();
+      GCPtr<TSEnvironment > defGamma = gamma->newDefScope();
       ast->envs.gamma = defGamma;
 
       GCPtr<AST> category = ast->child(2);
@@ -1921,7 +1921,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
   case at_declstruct:
   case at_declrepr:
     {
-      GCPtr<Environment<TypeScheme> > defGamma = gamma->newDefScope();
+      GCPtr<TSEnvironment > defGamma = gamma->newDefScope();
       ast->envs.gamma = defGamma;
 
       // match at_ident
@@ -2010,7 +2010,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	------------------------------------------------*/
       
       // FIX Incompeteness Issue here
-      GCPtr<Environment<TypeScheme> > defGamma = gamma->newDefScope();
+      GCPtr<TSEnvironment > defGamma = gamma->newDefScope();
       ast->envs.gamma = defGamma;
 
       GCPtr<TCConstraints> newTcc = new TCConstraints;
@@ -2073,7 +2073,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
   case at_deftypeclass:
     {
-      GCPtr<Environment<TypeScheme> > defGamma = gamma->newDefScope();
+      GCPtr<TSEnvironment > defGamma = gamma->newDefScope();
       ast->envs.gamma = defGamma;
 
       CHKERR(errFree, InferTypeClass(errStream, ast, defGamma, instEnv,
@@ -2168,7 +2168,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       // Maybe, we have a prior declaration?
       GCPtr<TypeScheme> declTS = gamma->getBinding(ctr->s);
 
-      GCPtr<Environment<TypeScheme> > defGamma = gamma->newDefScope();
+      GCPtr<TSEnvironment > defGamma = gamma->newDefScope();
       ast->envs.gamma = defGamma;
 
       GCPtr<TCConstraints> myTcc = new TCConstraints;
@@ -2240,7 +2240,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<AST> ident = ast->getID();
       GCPtr<TypeScheme> declTS = gamma->getBinding(ident->s);
 
-      GCPtr<Environment<TypeScheme> > defGamma = gamma->newDefScope();
+      GCPtr<TSEnvironment > defGamma = gamma->newDefScope();
       ast->envs.gamma = defGamma;
 
       GCPtr<TCConstraints> currTcc = new TCConstraints;
@@ -2310,7 +2310,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<AST> ifAst = ast->child(0);
       GCPtr<AST> idAst = ast->child(1);
 
-      GCPtr<Environment<TypeScheme> > tmpGamma = gamma->newScope();
+      GCPtr<TSEnvironment > tmpGamma = gamma->newScope();
       ast->envs.gamma = gamma;
       
       assert(idAst->envs.gamma);
@@ -2335,7 +2335,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
   case at_import:
     {
-      GCPtr<Environment<TypeScheme> > tmpGamma = gamma->newScope();
+      GCPtr<TSEnvironment > tmpGamma = gamma->newScope();
       ast->envs.gamma = gamma;
 
       GCPtr<AST> ifName = ast->child(0);
@@ -3323,7 +3323,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
       // match agt_bindingPattern
       // match agt_expr
-      GCPtr<Environment<TypeScheme> > lamGamma = gamma->newScope();
+      GCPtr<TSEnvironment > lamGamma = gamma->newScope();
       ast->envs.gamma = lamGamma;
       
       GCPtr<AST> argVec = ast->child(0);
@@ -4166,7 +4166,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
     {
       // This is used only in the case of a union leg match.
       // match agt_valuePattern
-      GCPtr<Environment<TypeScheme> > legGamma = gamma->newScope();
+      GCPtr<TSEnvironment > legGamma = gamma->newScope();
       ast->envs.gamma = legGamma;
 
       /* Deal with the constructors first */
@@ -4326,7 +4326,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  }
 	}	
 	
-	GCPtr<Environment<TypeScheme> > legGamma = gamma;
+	GCPtr<TSEnvironment > legGamma = gamma;
 	if(theCase->children.size() == 3) {
 	  legGamma = gamma->newScope();
 	  theCase->envs.gamma = legGamma;
@@ -4415,7 +4415,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
                          (et  er)  eb): tr
 	------------------------------------------------*/
       // match at_letbindings
-      GCPtr<Environment<TypeScheme> > doGamma = gamma->newScope();
+      GCPtr<TSEnvironment > doGamma = gamma->newScope();
       ast->envs.gamma = doGamma;
 
       GCPtr<TCConstraints> doTcc = new TCConstraints;
@@ -4527,7 +4527,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
          A |- (letrec ((x1[:t1] e1) ... (xn[:tn] en)) e): t
 	------------------------------------------------*/
       // match at_letbindings
-      GCPtr<Environment<TypeScheme> > letGamma = gamma->newScope();
+      GCPtr<TSEnvironment > letGamma = gamma->newScope();
       GCPtr<TCConstraints> letTcc = new TCConstraints;
 
       GCPtr<AST> lbs = ast->child(0);
@@ -4610,7 +4610,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	------------------------------------------------*/
 
       // match at_letbindings
-      GCPtr<Environment<TypeScheme> > letGamma = gamma->newScope();
+      GCPtr<TSEnvironment > letGamma = gamma->newScope();
       
       GCPtr<AST> lbs = ast->child(0);
       lbs->symType = new Type(ty_tvar);
@@ -4723,8 +4723,8 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
       instEnv = instEnv->parent->newDefScope();      
     }
     else {
-      gamma = new Environment<TypeScheme>(this->uocName);
-      instEnv = new Environment< CVector<GCPtr<Instance> > >(this->uocName);
+      gamma = new TSEnvironment(this->uocName);
+      instEnv = new InstEnvironment(this->uocName);
     }
     if((flags & TYP_NO_PRELUDE) == 0)
       CHKERR(errFree, initGamma(std::cerr, gamma, instEnv, uocAst, flags));

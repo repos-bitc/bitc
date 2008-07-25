@@ -50,28 +50,28 @@ obtainFullUnionType(GCPtr<Type> t);
 
 bool
 initGamma(std::ostream& errStream, 
-	  GCPtr<Environment<TypeScheme> > gamma,
-	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	  GCPtr<TSEnvironment > gamma,
+	  GCPtr<InstEnvironment > instEnv,
 	  const GCPtr<AST> ast, unsigned long uflags);
 bool
 checkImpreciseTypes(std::ostream& errStream, 
-		    const GCPtr<Environment<TypeScheme> > gamma,
+		    const GCPtr<TSEnvironment > gamma,
 		    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
 		                             GCPtr<AST> > > > > impTypes);
 void
 useIFGamma(const std::string& idName,
-	   GCPtr<Environment<TypeScheme> > fromEnv, 
-	   GCPtr<Environment<TypeScheme> > toEnv);
+	   GCPtr<TSEnvironment > fromEnv, 
+	   GCPtr<TSEnvironment > toEnv);
 
 void
 useIFInsts(const std::string& idName,
-	   GCPtr<Environment< CVector<GCPtr<Instance> > > >fromEnv, 
-	   GCPtr<Environment< CVector<GCPtr<Instance> > > >toEnv);
+	   GCPtr<InstEnvironment >fromEnv, 
+	   GCPtr<InstEnvironment >toEnv);
 
 bool
 initGamma(std::ostream& errStream, 
-	  GCPtr<Environment<TypeScheme> > gamma,
-	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
+	  GCPtr<TSEnvironment > gamma,
+	  GCPtr<InstEnvironment > instEnv,
 	  const GCPtr<AST> ast, unsigned long uflags);
 
 size_t

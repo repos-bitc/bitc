@@ -145,4 +145,16 @@ struct Environment : public Countable {
 
   std::string asString() const;
 };
+
+// A couple of kinds of environments that we will be defining
+// elsewhere:
+struct Instance;
+typedef Environment<sherpa::CVector<sherpa::GCPtr<Instance> > > InstEnvironment;
+
+struct AST;
+typedef Environment<AST> ASTEnvironment;
+
+struct TypeScheme;
+typedef Environment<TypeScheme> TSEnvironment;
+
 #endif /* ENVIRONMENT_HXX */
