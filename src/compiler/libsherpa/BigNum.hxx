@@ -119,8 +119,9 @@ namespace sherpa {
       nDigits = 1;
       oneDigit = (i < 0) ? -i : i;
     }
+    BigNum(int64_t i);
 
-    BigNum(const std::string& s, size_t radix = 0);
+    BigNum(const std::string& s, uint32_t radix = 0);
 
     BigNum(const BigNum&);
     
@@ -216,10 +217,10 @@ namespace sherpa {
       return *this;
     }
 
-    std::string asString(size_t radix = 10) const;
+    std::string asString(uint32_t radix = 10) const;
 
-    void toStream(std::ostream& strm, size_t radix = 10) const;
-    void fromStream(std::istream& strm, size_t radix = 10);
+    void toStream(std::ostream& strm, uint32_t radix = 10) const;
+    void fromStream(std::istream& strm, uint32_t radix = 10);
 
     inline uint32_t as_uint32() const
     {

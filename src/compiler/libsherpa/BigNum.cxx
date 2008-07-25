@@ -460,6 +460,29 @@ namespace sherpa {
     }
   }
 
+  BigNum::BigNum(int64_t i)
+  {
+    if (i < 0) {
+      negative = true;
+      i = -i;
+    }
+    else
+      negative = false;
+
+    // Rest proceeds as for uint64_t:
+    uint64_t u = i;
+    if (u > UINT32_T_MAX) {
+      nDigits = 2;
+      digits = new uint32_t[nDigits];
+      digits[0] = u;		// truncating
+      digits[1] = (u >> 32);
+    }
+    else {
+      nDigits = 1;
+      oneDigit = u;
+    }
+  }
+
   // This should be called *only* in return position, because it
   // potentially modifies an argument!!
   inline 
@@ -486,13 +509,23 @@ namespace sherpa {
     }
   }
 
-  BigNum::BigNum(const std::string& s, size_t radix)
+  BigNum::BigNum(const std::string& s, uint32_t radix)
   {
+    // Defer setting is_negative, because the iterative multiplication
+    // by radix can get the wrong answer if there is an even number of
+    // digits.
+
+    bool is_negative = false;
+
+    // Initialize to zero so that we are well-formed for the loop below.
     negative = false;
+    nDigits = 1;
+    oneDigit = 0;
+
     size_t i = 0;
 
     if (s[0] == '-') {
-      negative = true;
+      is_negative = true;
       i++;
     }
     else if (s[0] == '+') {
@@ -512,9 +545,6 @@ namespace sherpa {
 	radix = 10;
     }
 
-    nDigits = 1;
-    oneDigit = 0;
-
     for (; i < s.size(); i++) {
       char c = s[i];
       uint32_t thisDigit = 0;
@@ -528,6 +558,9 @@ namespace sherpa {
 
       *this = *this * radix + thisDigit;
     }
+
+    if (is_negative)
+      negative = is_negative;
   }
 
   BigNum BigNum::operator+(const BigNum& other) const 
@@ -707,7 +740,7 @@ namespace sherpa {
     return BigNum(nv.len, nv.vec, negative);
   }
 
-  std::string BigNum::asString(size_t radix) const
+  std::string BigNum::asString(uint32_t radix) const
   {
     static const char *hexdigits = "0123456789ABCDEF";
     std::string s;
@@ -790,12 +823,12 @@ namespace sherpa {
     return s;
   }
 
-  void BigNum::toStream(std::ostream& strm, size_t radix) const
+  void BigNum::toStream(std::ostream& strm, uint32_t radix) const
   {
     strm << asString(radix);
   }
 
-  void BigNum::fromStream(std::istream& strm, size_t radix)
+  void BigNum::fromStream(std::istream& strm, uint32_t radix)
   {
     *this = 0;
 
