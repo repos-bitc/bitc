@@ -121,7 +121,7 @@ all:  $(TARGETS)
 # test executions get interleaved with the compiles. By adding "all"
 # as a precondition, we ensure that the compile phase happens first
 # so that all of the results are reported together.
-test: $(SOURCE:%.bitc=%.test)
+test: all $(SOURCE:%.bitc=%.test)
 
 install: all test
 
