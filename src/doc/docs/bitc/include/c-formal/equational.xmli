@@ -44,7 +44,7 @@
 	  </TEjudge>
 	</spset>
       </btypes:TYPE> to denote the set of all constrained types and
-      unconcstrained type variables used in the derivation of 
+      unconstrained type variables used in the derivation of 
       <btypes:TYPE>
 	<TEjudge name="i">
 	  <assume>

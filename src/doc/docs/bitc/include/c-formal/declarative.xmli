@@ -35,22 +35,22 @@
 	  <aExpr/>
 	  <type/>
 	</TDjudge>
-	</btypes:TYPE> if
-	<btypes:TYPE>
-	  <TDjudge>
-	    <aExpr/>
-	    <type/>
-	    <dCtset dash="'"/>
-	  </TDjudge>
-	</btypes:TYPE> for some
-	<btypes:TYPE>
-	  <subeq>
-	    <dCtset dash="'"/>
-	    <dCtset/>
-	  </subeq>
-	</btypes:TYPE>.
-      </p>
-    </definition>
+      </btypes:TYPE> if
+      <btypes:TYPE>
+	<TDjudge>
+	  <aExpr/>
+	  <type/>
+	  <dCtset dash="'"/>
+	</TDjudge>
+      </btypes:TYPE> for some
+      <btypes:TYPE>
+	<subeq>
+	  <dCtset dash="'"/>
+	  <dCtset/>
+	</subeq>
+      </btypes:TYPE>.
+    </p>
+  </definition>
   <definition id="constraint-colection-ext-typ">
     <title>Constraint Collection over Type Derivation</title>
     <p>
@@ -2814,6 +2814,7 @@
 		<gamma/>
 		<store/>
 		<type/>
+		<dctset/>
 	      </ftvs>
 	    </subeq>
 	  </btypes:TYPE>.
@@ -3220,7 +3221,7 @@
 	<Cst>
 	  <aSubMap num="1"/>
 	  <set>
-	    <type/>
+	    <solvables/>
 	  </set>
 	</Cst>
       </btypes:TYPE>, 
@@ -3228,7 +3229,7 @@
 	<Cst>
 	  <aSubMap num="2"/>
 	  <set>
-	    <type/>
+	    <solvables/>
 	  </set>
 	</Cst>
       </btypes:TYPE>, 
@@ -3238,7 +3239,7 @@
 	  <set>
 	    <Subst>
 	      <aSubMap num="2"/>
-	      <type/>
+	      <solvables/>
 	    </Subst>
 	  </set>
 	</Cst>
@@ -3280,14 +3281,14 @@
 	    <aSubMap num="2" dash="'"/>
 	    <Subst>
 	      <aSubMap num="1"/>
-	      <type/>
+	      <solvables/>
 	    </Subst>
 	  </Subst>
 	  <Subst>
 	    <aSubMap num="1"/>
 	    <Subst>
 	      <aSubMap num="2"/>
-	      <type/>
+	      <solvables/>
 	    </Subst>
 	  </Subst>
 	</eq>
@@ -3298,7 +3299,7 @@
 	  <set>
 	    <Subst>
 	      <aSubMap num="1"/>
-	      <type/>
+	      <solvables/>
 	    </Subst>
 	  </set>
 	</Cst>
@@ -3489,17 +3490,19 @@
 			  <TS>
 			    <tvars/>
 			    <type num="x"/>
+			    <dCtset num="x"/>
 			  </TS>
 			</mapsto>
 			<Cst>
 			  <aSubMap num="x"/>
 			  <set>
 			    <type num="x"/>
+			    <dCtset num="x"/>
 			  </set>
 			</Cst>
 			<eq>
 			  <dom>
-			    <aSubMap/>
+			    <aSubMap num="x"/>
 			  </dom>
 			  <set>
 			    <tvars/>
@@ -3510,12 +3513,16 @@
 			<TDjudge>
 			  <id/>
 			  <Subst>
+			    <aSubMap/>
+			    <type/>
+			  </Subst>
+			  <Subst>
 			    <aSubMap num="x"/>
-			    <type num="x"/>
+			    <dCtset num="x"/>
 			  </Subst>
 			</TDjudge>
 		      </tyConc>
-		    </tyRule>
+		    </tyRule>        
 		  </Hrules>      
 		</btypes:TYPE>
 	      </li>
@@ -3526,7 +3533,7 @@
 		      <aExpr/>
 		      <id/>
 		    </eq>
-		  </btypes:TYPE> and
+		  </btypes:TYPE>,
 		  <btypes:TYPE>
 		    <eq>
 		      <type/>
@@ -3535,7 +3542,16 @@
 			<type num="x"/>
 		      </Subst>
 		    </eq>
-		  </btypes:TYPE>.
+		  </btypes:TYPE> and
+		  <btypes:TYPE>
+		    <eq>
+		      <dCtset/>
+		      <Subst>
+			<aSubMap num="x"/>
+			<dCtset num="x"/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>
 		</p>
 	      </li>
 	      <li>
@@ -3663,8 +3679,8 @@
 		      <spset>
 			<gamma/>
 			<store/>
-			<type num="x"/>
 			<type/>
+			<dCtset/>
 		      </spset>
 		    </eq>
 		  </btypes:TYPE>
@@ -3683,9 +3699,23 @@
 		      </assume>
 		      <set>
 			<type num="x"/>
+			<dCtset num="x"/>
 		      </set>
 		    </models>
 		  </btypes:TYPE>.
+		  (Note: 
+		  <btypes:TYPE>
+		    <subeq>
+		      <spset>
+			<type num="x"/>
+		      </spset>
+		      <spset>
+			<gamma/>
+		      </spset>
+		    </subeq>
+		  </btypes:TYPE>).
+		</p>
+		<p>
 		  Again using case&nbsp;(2.a.iv), we obtain
 		  <btypes:TYPE>
 		    <Sat>
@@ -3694,19 +3724,26 @@
 			<aSubMap/>
 			<spset>
 			  <type num="x"/>
+			  <dCtset num="x"/>
 			</spset>
 		      </Subst>
 		    </Sat>
 		  </btypes:TYPE>, which implies
 		  <btypes:TYPE>
-		    <CST sp="yes">
+		    <Cst>
+		      <assume/>
 		      <Subst>
 			<aSubMap/>
-			<type num="x"/>
+			<spset>
+			  <type num="x"/>
+			  <dCtset num="x"/>
+			</spset>
 		      </Subst>
-		    </CST>
+		    </Cst>
 		  </btypes:TYPE>.
-		  Now using 
+		</p>
+		<p>
+		  Now, using 
 		  <btypes:TYPE>
 		    <defn tag="subst-consistent"/>
 		  </btypes:TYPE>, we obtain
@@ -3715,6 +3752,7 @@
 		      <aSubMap/>
 		      <set>
 			<type num="x"/>
+			<dCtset num="x"/>
 		      </set>
 		    </Cst>
 		  </btypes:TYPE>.
@@ -3728,6 +3766,7 @@
 		      <aSubMap num="x"/>
 		      <set>
 			<type num="x"/>
+			<dCtset num="x"/>
 		      </set>
 		    </Cst>
 		  </btypes:TYPE>.
@@ -3744,6 +3783,10 @@
 			  <aSubMap num="x"/>
 			  <type num="x"/>
 			</Subst>
+			<Subst>
+			  <aSubMap num="x"/>
+			  <dCtset num="x"/>
+			</Subst>
 		      </set>
 		    </Cst>
 		  </btypes:TYPE>.
@@ -3753,7 +3796,7 @@
 	  </li>
 	  <li>
 	    <p>
-	      From cases&nbsp;(2.d.i, 2.d.ii, 2.d.iii, and 2.b), 
+	      From cases&nbsp;(2.d.ii, 2.d.iii, 2.d.iv, and 2.b), 
 	      and
 	      <btypes:TYPE>
 		<lem tag="Composistion-Rearrange"/>
@@ -3793,7 +3836,7 @@
 			</Subst>
 		      </Subst>
 		      <Subst>
-			<sSubMap/>
+			<aSubMap/>
 			<Subst>
 			  <aSubMap num="x"/>
 			  <type num="x"/>
@@ -3821,12 +3864,53 @@
 	      <li>
 		<p>
 		  <btypes:TYPE>
+		    <eq>
+		      <Subst>
+			<aSubMap num="m"/>
+			<Subst>
+			  <aSubMap/>
+			  <dCtset num="x"/>
+			</Subst>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<Subst>
+			  <aSubMap num="x"/>
+			  <dCtset num="x"/>
+			</Subst>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>. That is,
+		  <btypes:TYPE>
+		    <eq>
+		      <Subst>
+			<aSubMap num="m"/>
+			<Subst>
+			  <aSubMap/>
+			  <dCtset num="x"/>
+			</Subst>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<dCtset/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>		
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
 		    <Cst>
 		      <aSubMap num="m"/>
 		      <set>
 			<Subst>
 			  <aSubMap/>
 			  <type num="x"/>
+			</Subst>
+			<Subst>
+			  <aSubMap/>
+			  <dCtset num="x"/>
 			</Subst>
 		      </set>
 		    </Cst>
@@ -3837,11 +3921,18 @@
 	  </li>
 	  <li>
 	    <p>
-	      From cases&nbsp;(2.c, 2.e.i and 2.e,iii), and the T-Id rule
+	      From cases&nbsp;(2.c, 2.e.i and 2.e,iv), and the T-Id rule
 	      we obtain
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
+		    <Subst>
+		      <aSubMap num="m"/>
+		      <Subst>
+			<aSubMap/>
+			<dCtset num="x"/>
+		      </Subst>
+		    </Subst>
 		    <Subst>
 		      <aSubMap/>
 		      <gamma/>
@@ -3867,10 +3958,14 @@
 	  </li>
 	  <li>
 	    <p>
-	      From cases&nbsp;(2.f and 2.e.ii), we obtain
+	      From cases&nbsp;(2.f, 2.e.ii and 2.e.iii), we obtain
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
+		    <Subst>
+		      <aSubMap/>
+		      <dCtset/>
+		    </Subst>
 		    <Subst>
 		      <aSubMap/>
 		      <gamma/>
@@ -3904,6 +3999,10 @@
 		      <assume>
 			<Subst>
 			  <aSubMap/>
+			  <dCtset/>
+			</Subst>
+			<Subst>
+			  <aSubMap/>
 			  <gamma/>
 			</Subst>
 			<Subst>
@@ -3931,11 +4030,11 @@
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
-		      <type num="x"/>
+		      <type/>
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
-		      <type/>
+		      <dCtset/>
 		    </Subst>
 		  </spset>
 		</eq>
@@ -3954,11 +4053,11 @@
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
-		      <type num="x"/>
+		      <type/>
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
-		      <type/>
+		      <dCtset/>
 		    </Subst>
 		  </spset>
 		  <spset>
@@ -3967,8 +4066,8 @@
 		      <spset>
 			<gamma/>
 			<store/>
-			<type num="x"/>
 			<type/>
+			<dCtset/>
 		      </spset>
 		    </Subst>
 		  </spset>
@@ -3987,8 +4086,8 @@
 		    <spset>
 		      <gamma/>
 		      <store/>
-		      <type num="x"/>
 		      <type/>
+		      <dCtset/>
 		    </spset>
 		  </Subst>
 		</Sat>
@@ -4005,8 +4104,8 @@
 		      <spset>
 			<gamma/>
 			<store/>
-			<type num="x"/>
 			<type/>
+			<dCtset/>
 		      </spset>
 		    </Subst>
 		  </spset>
@@ -4034,11 +4133,11 @@
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
-		      <type num="x"/>
+		      <type/>
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
-		      <type/>
+		      <dCtset/>
 		    </Subst>
 		  </spset>
 		</Sat>
@@ -4049,6 +4148,10 @@
 		  <spset>
 		    <Sjudge>
 		      <assume>
+			<Subst>
+			  <aSubMap/>
+			  <dCtset/>
+			</Subst>
 			<Subst>
 			  <aSubMap/>
 			  <gamma/>
@@ -4083,6 +4186,10 @@
 		    <Subst>
 		      <aSubMap/>
 		      <bCtset/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <dCtset/>
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
@@ -4132,6 +4239,7 @@
 			<TDjudge>
 			  <aExpr num="1"/>
 			  <type num="1"/>
+			  <dCtset num="1"/>
 			</TDjudge>
 			<Msub>
 			  <type num="1"/>
@@ -4145,6 +4253,7 @@
 			<TDjudge Msub="yes">
 			  <aExpr num="2"/>
 			  <type num="2"/>
+			  <dCtset num="2"/>
 			</TDjudge>
 			<Msub>
 			  <type num="2"/>
@@ -4175,6 +4284,19 @@
 	      <li>
 		<p>
 		  <btypes:TYPE>
+		    <eq>
+		      <dCtset/>
+		      <unin>
+			<dCtset num="1"/>
+			<dCtset num="2"/>
+		      </unin>
+		    </eq>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
 		    <models name="cst">
 		      <assume>
 			<aSubMap/>
@@ -4186,6 +4308,7 @@
 			    <aExpr num="2"/>
 			  </apply>
 			  <type/>
+			  <dCtset/>
 			</TDjudge>
 		      </spset>
 		    </models>
@@ -4209,6 +4332,7 @@
 			      <aExpr num="2"/>
 			    </apply>
 			    <type/>
+			    <dCtset/>
 			  </TDjudge>
 			</spset>
 		      </Subst>
@@ -4221,12 +4345,16 @@
 	  <li>
 	    <p>
 	      By induction hypothesis (by using case&nbsp;(4.a.i), 
-	      weakening on cases&nbsp;(4.a.ii and 4.a.iii), and
+	      weakening on cases&nbsp;(4.a.iii and 4.a.iv), and
 	      premise&nbsp;(4)), we have:
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
 		    <bCtset num="s"/>
+		    <Subst>
+		      <aSubMap/>
+		      <dCtset num="1"/>
+		    </Subst>
 		    <Subst>
 		      <aSubMap/>
 		      <gamma/>
@@ -4252,6 +4380,10 @@
 		    <bCtset num="s"/>
 		    <Subst>
 		      <aSubMap/>
+		      <dCtset num="2"/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
 		      <gamma/>
 		    </Subst>
 		    <Subst>
@@ -4275,6 +4407,10 @@
 		  <btypes:TYPE>
 		    <Sjudge>
 		      <assume>
+			<Subst>
+			  <aSubMap/>
+			  <dCtset num="1"/>
+			</Subst>
 			<Subst>
 			  <aSubMap/>
 			  <gamma/>
@@ -4305,6 +4441,10 @@
 			  <assume>
 			    <Subst>
 			      <aSubMap/>
+			      <dCtset num="1"/>
+			    </Subst>
+			    <Subst>
+			      <aSubMap/>
 			      <gamma/>
 			    </Subst>
 			    <Subst>
@@ -4330,6 +4470,10 @@
 		  <btypes:TYPE>
 		    <Sjudge>
 		      <assume>
+			<Subst>
+			  <aSubMap/>
+			  <dCtset num="2"/>
+			</Subst>
 			<Subst>
 			  <aSubMap/>
 			  <gamma/>
@@ -4358,6 +4502,10 @@
 		      <spset>
 			<Sjudge>
 			  <assume>
+			    <Subst>
+			      <aSubMap/>
+			      <dCtset num="2"/>
+			    </Subst>
 			    <Subst>
 			      <aSubMap/>
 			      <gamma/>
@@ -4393,7 +4541,7 @@
 		    <type num="r"/>
 		  </fn>
 		</Msub>
-	      </btypes:TYPE>. Using weakening on case&nbsp;(4.a.ii)
+	      </btypes:TYPE>. Using weakening on case&nbsp;(4.a.iii)
 	      and 
 	      <btypes:TYPE>
 		<lem tag="T-SSubstitution"/>
@@ -4454,7 +4602,7 @@
 		  </minz>
 		</Msub>
 	      </btypes:TYPE>. 
-	      Using weakening on case&nbsp;(4.a.ii)
+	      Using weakening on case&nbsp;(4.a.iii)
 	      and 
 	      <btypes:TYPE>
 		<lem tag="T-msm_eq_ms"/>
@@ -4477,6 +4625,7 @@
 		  </minz>
 		</eq>
 	      </btypes:TYPE>. 
+	      Therefore,
 	      <btypes:TYPE>
 		<Msub>
 		  <Subst>
@@ -4514,11 +4663,21 @@
 	  </li>
 	  <li>
 	    <p>
-	      From cases&nbsp;(4.b.i, 4.b.ii, 4.c, 4.d and 4.e) and
+	      From cases&nbsp;(4.b.i, 4.b.iii, 4.c, 4.d and 4.e) and
 	      using T-App rule, we conclude that
 	      <btypes:TYPE>
 		<Sjudge>
 		  <assume>
+		    <unin>
+		      <Subst>
+			<aSubMap/>
+			<dCtset num="1"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<dCtset num="2"/>
+		      </Subst>
+		    </unin>
 		    <Subst>
 		      <aSubMap/>
 		      <gamma/>
@@ -4540,19 +4699,50 @@
 		  </tqExpr>
 		</Sjudge>
 	      </btypes:TYPE>
+	      That is,
+	      <btypes:TYPE>
+		<Sjudge>
+		  <assume>
+		    <Subst>
+		      <aSubMap/>
+		      <dCtset/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <gamma/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <store/>
+		    </Subst>
+		  </assume>
+		  <tqExpr>
+		    <apply>
+		      <aExpr num="1"/>
+		      <aExpr num="1"/>
+		    </apply>
+		    <Subst>
+		      <aSubMap/>
+		      <type/>
+		    </Subst>
+		  </tqExpr>
+		</Sjudge>
+	      </btypes:TYPE>.
 	    </p>
 	  </li>
 	  <li>
 	    <p>
-	      Using weakening on case&nbsp;(4.a.ii), we obtain
+	      Using weakening on case&nbsp;(4.a.iv), we obtain
 	      <btypes:TYPE>
 		<Sat>
 		  <bCtset num="s"/>
-		  <fn>
-		    <type num="a"/>
-		    <type num="r"/>
-		  </fn>
-		  <type/>
+		  <set>
+		    <fn>
+		      <type num="a"/>
+		      <type num="r"/>
+		    </fn>
+		    <type/>
+		  </set>
 		</Sat>
 	      </btypes:TYPE>. Using this and cases&nbsp;(4.b.ii
 	      and 4.b.iv), and 
@@ -4568,6 +4758,10 @@
 		  <spset>
 		    <Sjudge>
 		      <assume>
+			<Subst>
+			  <aSubMap/>
+			  <dCtset/>
+			</Subst>
 			<Subst>
 			  <aSubMap/>
 			  <gamma/>
@@ -4605,6 +4799,10 @@
 		    </Subst>
 		    <Subst>
 		      <aSubMap/>
+		      <dCtset/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
 		      <gamma/>
 		    </Subst>
 		    <Subst>
@@ -4630,7 +4828,7 @@
       </li>
       <li>
 	<p>
-	  Case T-Let-P: In this case, we have
+	  Case T-Let-MP: In this case, we have
 	</p>
 	<btypes:TYPE>
 	  <Hrules>
@@ -4638,18 +4836,36 @@
 	      <tyPre>
 		<TDjudge Msub="yes">
 		  <vExp/>
-		  <type/>
+		  <type num="1"/>
+		  <dCtset num="1"/>
 		</TDjudge>
-		<pred name="Immut">
-		  <type/>
-		</pred>
+		<Msub>
+		  <type num="x"/>
+		  <type num="1"/>
+		</Msub>
+		<eq>
+		  <dCtset num="x"/>
+		  <unin>
+		    <dCtset num="1"/>
+		    <set>
+		      <pcst>
+			<id/>
+			<lKind/>
+			<type num="x"/>
+		      </pcst>
+		    </set>
+		  </unin>
+		</eq>
+	      </tyPre>
+	      <tyPre>
 		<eq>
 		  <set>
 		    <tvars name="alpha"/>
 		  </set>
 		  <diff>
 		    <ftvs>
-		      <type/>
+		      <type num="x"/>
+		      <dCtset num="x"/>
 		    </ftvs>
 		    <ftvs>
 		      <gamma/>
@@ -4657,17 +4873,23 @@
 		    </ftvs>
 		  </diff>
 		</eq>
+		<models name="new">
+		  <assume/>
+		  <tvars name="beta"/>
+		</models>
 	      </tyPre>
 	      <tyPre>
 		<Sjudge>
 		  <assume>
+		    <dCtset num="2"/>
 		    <extend>
 		      <gamma/>
 		      <mapping>
 			<id/>
 			<TS>
 			  <tvars/>
-			  <type/>
+			  <type num="x"/>
+			  <dCtset num="x"/>
 			</TS>
 		      </mapping>
 		    </extend>
@@ -4675,20 +4897,28 @@
 		  </assume>
 		  <tqExpr>
 		    <aExpr/>
-		    <type dash="'"/>
+		    <type num="2"/>
 		  </tqExpr>
 		</Sjudge>
 	      </tyPre>
 	      <tyConc>
 		<TDjudge>
 		  <paren>
-		    <let kind="p">
+		    <let kind="x">
 		      <id/>
 		      <vExp/>
 		      <aExpr/>
 		    </let>
 		  </paren>
-		  <type dash="'"/>
+		  <type num="2"/>
+		  <unin>
+		    <subst>
+		      <dCtset/>
+		      <tvars name="alpha"/>
+		      <tvars name="beta"/>
+		    </subst>
+		    <dCtset num="2"/>
+		  </unin>
 		</TDjudge>
 	      </tyConc>
 	    </tyRule>
@@ -4703,12 +4933,12 @@
 		<aSubMap/>
 	      </ftvs>
 	      <set>
-		<tvars/>
+		<tvars name="alpha"/>
 	      </set>
 	    </mutex>
 	  </btypes:TYPE> since type schemes are equal under 
 	  <btypes:TYPE>
-	    <tvar name="alpha"/>
+	    <tvar/>
 	  </btypes:TYPE>-renaming of generalized variables.
 	</p>
       </li>
