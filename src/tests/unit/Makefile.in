@@ -92,6 +92,9 @@ GC_LIB=-lgc
 LIBBITC_SRC=@top_srcdir@/libbitc
 LIBBITC_C_RUNTIME=@top_srcdir@/libbitc/BUILD/libbitc.a
 LIBBITC_NO_GC=@top_srcdir@/libbitc/BUILD/libbitc-no-gc.a
+
+BITCC_SRC=@top_srcdir@/compiler
+
 INC+=$(GC_INC)
 # If a test case is temporarily broken, add it to BROKEN_SOURCE via
 #  make BROKEN_SOURCE="bad-test.bitc bad-test2.bitc"
@@ -113,6 +116,11 @@ objects: $(OBJECTS)
 
 all:  $(TARGETS)
 
+# Strictly speaking, it is sufficient to depend on the individual 
+# test cases here, but that has the unfortunate consequence that the
+# test executions get interleaved with the compiles. By adding "all"
+# as a precondition, we ensure that the compile phase happens first
+# so that all of the results are reported together.
 test: $(SOURCE:%.bitc=%.test)
 
 install: all test
@@ -132,11 +140,18 @@ TESTOPTS=-v
 BUILD:
 	mkdir -p BUILD
 
-$(LIBBITC_C_RUNTIME):
+# Always check that these are up to date.
+.phony: $(BITCC) $(LIBBITC_C_RUNTIME) $(LIBBITC_NO_GC)
+
+
+$(LIBBITC_C_RUNTIME): $(BITCC)
 	make -C $(LIBBITC_SRC) BUILD/libbitc.a
 
-$(LIBBITC_NO_GC):
+$(LIBBITC_NO_GC): $(BITCC)
 	make -C $(LIBBITC_SRC) BUILD/libbitc-no-gc.a
+
+$(BITCC):
+	make -C $(BITCC_SRC) BUILD/bitcc
 
 %.test: BUILD/% | BUILD
 	@../testit.sh ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -i $(USE_INPUT) "./$< $(ARGS)"
