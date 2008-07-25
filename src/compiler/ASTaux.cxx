@@ -179,10 +179,8 @@ AST::AST(GCPtr<AST> ast, bool shallowCopyChildren)
   unin_discm = ast->unin_discm;
   total_fill = ast->total_fill;
 
-  children = new CVector<GCPtr<AST> >;  
   if(shallowCopyChildren)
-    for(size_t i=0; i<ast->children->size(); i++)
-      children->append(ast->child(i));  
+    children = ast->children;
 }
 
  
@@ -191,8 +189,8 @@ AST::getTrueCopy()
 {  
   GCPtr<AST> to = new AST(this, false);
   
-  for(size_t i=0; i < children->size(); i++)
-    to->children->append(child(i)->getTrueCopy());
+  for(size_t i=0; i < children.size(); i++)
+    to->children.push_back(child(i)->getTrueCopy());
   
   return to;
 }
@@ -213,8 +211,8 @@ AST::getDCopy()
   to->defForm = NULL;
   to->defbps = NULL;
 
-  for(size_t i=0; i<children->size(); i++)
-    to->children->append(child(i)->getDCopy());
+  for(size_t i=0; i<children.size(); i++)
+    to->children.push_back(child(i)->getDCopy());
   return to;
 }
 
@@ -251,7 +249,5 @@ AST::set(GCPtr<AST> ast)
   unin_discm = ast->unin_discm;
   total_fill = ast->total_fill;
 
-  this->children->erase();
-  for(size_t i=0; i<ast->children->size(); i++)
-    children->append(ast->child(i));
+  children = ast->children;
 }

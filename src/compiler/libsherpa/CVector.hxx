@@ -41,7 +41,7 @@
  **************************************************************************/
 
 #include <stdlib.h>
-#include "GCPtr.hxx"
+#include <libsherpa/GCPtr.hxx>
 
 namespace sherpa {
 

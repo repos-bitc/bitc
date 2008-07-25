@@ -86,9 +86,9 @@ XMLp(std::ostream& out, GCPtr<AST> ast, std::string pad, bool showLoc)
     }
   }
  
-  if (ast->children->size()) {
+  if (ast->children.size()) {
     out << ">\n";
-    for(unsigned i = 0; i < ast->children->size(); i++)
+    for(unsigned i = 0; i < ast->children.size(); i++)
       XMLp(out, ast->child(i), pad + "   ", showLoc);
     out << pad
 	<< "</" 
@@ -138,9 +138,9 @@ XMLd(std::ostream& out, GCPtr<AST> ast, bool showLoc)
     }
   }
 
-  if (ast->children->size()) {
+  if (ast->children.size()) {
     out << ">";
-    for(unsigned i = 0; i < ast->children->size(); i++)
+    for(unsigned i = 0; i < ast->children.size(); i++)
       XMLd(out, ast->child(i), showLoc);
     out << "</" 
 	<< AST::tagName(ast->astType)
@@ -242,7 +242,7 @@ XMLtypes(INOstream &out, GCPtr<AST> ast, bool raw=false)
       }
       out << "'/>" << endl;
       out << "<br/>" << endl;
-      for(; i<ast->children->size(); i++) {
+      for(; i<ast->children.size(); i++) {
 	XMLtypes(out, ast->child(i), raw);
 	out << "<br/>" << endl;
       }      

@@ -160,10 +160,10 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
 
       /* The fields in the when cluses must be of integer-type
          This may be relaxed later. */
-      for(size_t c=0; c < ctrs->children->size(); c++) {
+      for(size_t c=0; c < ctrs->children.size(); c++) {
 	GCPtr<AST> ctrc = ctrs->child(c);
 	
-	for(size_t i=1; i < ctrc->children->size(); i++) {
+	for(size_t i=1; i < ctrc->children.size(); i++) {
 	  GCPtr<AST> fldi = ctrc->child(i);
 
 	  if(fldi->astType == at_field)
@@ -181,19 +181,19 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
       
       /* Ascertain that common fields are at the same bit-offset
          and have the same type */
-      for(size_t c=0; c < ctrs->children->size(); c++) {
+      for(size_t c=0; c < ctrs->children.size(); c++) {
 	GCPtr<AST> ctrc = ctrs->child(c);
 
-	for(size_t i=1; i < ctrc->children->size(); i++) {
+	for(size_t i=1; i < ctrc->children.size(); i++) {
 	  GCPtr<AST> fldi = ctrc->child(i);
 	  if(fldi->astType != at_field)
 	    continue;
 	  
  	  size_t offc = bitOffset(ctrc, i);	  	  
-	  for(size_t d=c+1; d < ctrs->children->size(); d++) {
+	  for(size_t d=c+1; d < ctrs->children.size(); d++) {
 	    GCPtr<AST> ctrd = ctrs->child(d);
 	    
-	    for(size_t j=1; j < ctrd->children->size(); j++) {
+	    for(size_t j=1; j < ctrd->children.size(); j++) {
 	      GCPtr<AST> fldj = ctrd->child(j);
 	      if(fldj->astType != at_field)
 		continue;
@@ -227,13 +227,13 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
       }
       
       /* Ascertain that ``where'' fields are decisive */      
-      for(size_t c=0; c < ctrs->children->size(); c++) {
+      for(size_t c=0; c < ctrs->children.size(); c++) {
 	GCPtr<AST> ctrc = ctrs->child(c);
 	
 	GCPtr< CVector< GCPtr< Pair<std::string, size_t> > > > when = 
 	  new CVector< GCPtr< Pair< std::string, size_t> > >;
 	
-	for(size_t i=1; i < ctrc->children->size(); i++) {
+	for(size_t i=1; i < ctrc->children.size(); i++) {
 	  GCPtr<AST> fldi = ctrc->child(i);
 	  if(fldi->Flags2 & FLD_IS_DISCM) {
 	    assert(fldi->astType == at_field);
@@ -241,11 +241,11 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
 	  }
 	}
 	
-	for(size_t d=c+1; d < ctrs->children->size(); d++) {
+	for(size_t d=c+1; d < ctrs->children.size(); d++) {
 	  GCPtr<AST> ctrd = ctrs->child(d);
 	  bool differ=false;
 
-	  for(size_t j=1; (!differ) && (j < ctrd->children->size()); j++) {
+	  for(size_t j=1; (!differ) && (j < ctrd->children.size()); j++) {
 	    GCPtr<AST> fldj = ctrd->child(j);
 
 	    if(fldj->Flags2 & FLD_IS_DISCM) {
@@ -283,7 +283,7 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
   default:
     {
       // only defunion clause has meaning
-      for(size_t c=0; c < ast->children->size(); c++)
+      for(size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, reprCheck(errStream, ast->child(c)));
       break;
     }

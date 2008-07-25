@@ -40,8 +40,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <sherpa/UExcept.hxx>
-#include <sherpa/CVector.hxx>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
 #include "UocInfo.hxx"
 #include "Options.hxx"
 #include "AST.hxx"

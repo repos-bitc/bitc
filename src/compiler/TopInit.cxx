@@ -292,7 +292,7 @@ TopInit(std::ostream& errStream,
   case at_interface:
     {
       // match agt_definition*
-      for (size_t c = 1; c < ast->children->size(); c++)
+      for (size_t c = 1; c < ast->children.size(); c++)
 	TOPINIT(ast->child(c), flags);
 
       break;
@@ -301,7 +301,7 @@ TopInit(std::ostream& errStream,
   case at_module:
     {
       // match agt_definition*
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	TOPINIT(ast->child(c), flags);
       
       break;
@@ -361,7 +361,7 @@ TopInit(std::ostream& errStream,
   case at_dobindings:
   case at_dobinding:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	TOPINIT(ast->child(c), flags);
       
       break;
@@ -370,7 +370,7 @@ TopInit(std::ostream& errStream,
   case at_try:
   case at_switch:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	if(c != IGNORE(ast))
 	  TOPINIT(ast->child(c), flags);
       break;
@@ -379,7 +379,7 @@ TopInit(std::ostream& errStream,
   case at_struct_apply:
   case at_ucon_apply: 
     {
-      for (size_t c = 1; c < ast->children->size(); c++)
+      for (size_t c = 1; c < ast->children.size(); c++)
 	TOPINIT(ast->child(c), flags);
       
       break;
@@ -391,7 +391,7 @@ TopInit(std::ostream& errStream,
       pop_type pop = primOp(ast->child(0));
       switch(pop) {
       case pop_sclar:
-	for(size_t i=1; i < ast->children->size(); i++)
+	for(size_t i=1; i < ast->children.size(); i++)
 	  if(!ast->child(0)->symType->isScalar()) {
 	    errFree = false;
 	    break;
@@ -399,7 +399,7 @@ TopInit(std::ostream& errStream,
 	break;
 
       case pop_intFl:
-	for(size_t i=1; i < ast->children->size(); i++)
+	for(size_t i=1; i < ast->children.size(); i++)
 	  if(!ast->child(0)->symType->isPrimInt() &&
 	     !ast->child(0)->symType->isPrimFloat()) {
 	    errFree = false;
@@ -408,7 +408,7 @@ TopInit(std::ostream& errStream,
 	break;
 
       case pop_int:
-	for(size_t i=1; i < ast->children->size(); i++)
+	for(size_t i=1; i < ast->children.size(); i++)
 	  if(!ast->child(0)->symType->isPrimInt()) {
 	    errFree = false;
 	    break;

@@ -42,9 +42,9 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <sherpa/UExcept.hxx>
-#include <sherpa/CVector.hxx>
-#include <sherpa/avl.hxx>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
+#include <libsherpa/avl.hxx>
 #include <assert.h>
 
 #include "UocInfo.hxx"
@@ -64,7 +64,7 @@ using namespace sherpa;
 static void
 markRecBound(GCPtr<AST> ast)
 {
-  for(size_t c=0; c < ast->children->size(); c++)
+  for(size_t c=0; c < ast->children.size(); c++)
     markRecBound(ast->child(c));
   if (ast->astType == at_ident)
     ast->Flags2 |= ID_IS_RECBOUND;
@@ -79,7 +79,7 @@ clearusedef(GCPtr<AST> ast)
 {
   ast->Flags2 &= ~(ID_IS_DEF|ID_IS_USE|ID_IS_CLOSED|ID_IS_CAPTURED|ID_NEEDS_HEAPIFY|ID_IS_RECBOUND);
 
-  for(size_t c=0; c < ast->children->size(); c++)
+  for(size_t c=0; c < ast->children.size(); c++)
     clearusedef(ast->child(c));
 }
 
@@ -94,7 +94,7 @@ used(GCPtr<AST> id, GCPtr<AST> ast)
     return true;
   }
   
-  for(size_t i=0; i < ast->children->size(); i++) 
+  for(size_t i=0; i < ast->children.size(); i++) 
     if(used(id, ast->child(i)))
       return true;
   
@@ -368,14 +368,14 @@ findusedef(std::ostream &errStream,
   case at_interface:
   case at_module:
     {
-      for(size_t c=0; c < ast->children->size(); c++)
+      for(size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   NULL_MODE, boundVars, freeVars));
       break;
     }
   case at_methods:
     {
-      for(size_t c=0; c < ast->children->size(); c++)
+      for(size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -401,7 +401,7 @@ findusedef(std::ostream &errStream,
   case at_fill:
   case at_reserved:
     {
-      for(size_t c=0; c < ast->children->size(); c++)
+      for(size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   TYPE_MODE, boundVars, freeVars));
       break;
@@ -411,7 +411,7 @@ findusedef(std::ostream &errStream,
   case at_field:
   case at_defexception:
     {
-      for(size_t c=1; c<ast->children->size();c++)
+      for(size_t c=1; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   TYPE_MODE, boundVars, freeVars));
       break;
@@ -419,7 +419,7 @@ findusedef(std::ostream &errStream,
 
   case at_argVec:
     {
-      for(size_t c=0; c<ast->children->size();c++)
+      for(size_t c=0; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   LOCAL_MODE, boundVars, freeVars));
       break;
@@ -427,7 +427,7 @@ findusedef(std::ostream &errStream,
 
   case at_setbang:
     {
-      for(size_t c=0; c<ast->children->size();c++)
+      for(size_t c=0; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -457,7 +457,7 @@ findusedef(std::ostream &errStream,
   case at_makevectorL:    
   case at_apply:
     {
-      for(size_t c=0; c<ast->children->size();c++)
+      for(size_t c=0; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -466,7 +466,7 @@ findusedef(std::ostream &errStream,
   case at_switch:
   case at_try:
     {
-      for(size_t c=0; c<ast->children->size();c++)
+      for(size_t c=0; c<ast->children.size();c++)
 	if(c != IGNORE(ast))
 	  CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				     USE_MODE, boundVars, freeVars));
@@ -488,7 +488,7 @@ findusedef(std::ostream &errStream,
   case at_ucon_apply:
   case at_struct_apply:
     {
-      for(size_t c=1; c<ast->children->size();c++)
+      for(size_t c=1; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -497,7 +497,7 @@ findusedef(std::ostream &errStream,
   case at_if:
   case at_when:
     {
-      for(size_t c=0; c<ast->children->size();c++)
+      for(size_t c=0; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -516,7 +516,7 @@ findusedef(std::ostream &errStream,
     {
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(0), 
 				 LOCAL_MODE, boundVars, freeVars));
-      for(size_t c=1; c<ast->children->size();c++)
+      for(size_t c=1; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -526,21 +526,21 @@ findusedef(std::ostream &errStream,
     {
       GCPtr<AST> dbs = ast->child(0);      
       // Initializers
-      for (size_t c = 0; c < dbs->children->size(); c++) {
+      for (size_t c = 0; c < dbs->children.size(); c++) {
 	GCPtr<AST> db = dbs->child(c);
 	CHKERR(errFree, findusedef(errStream, topAst, db->child(1), 
 				   USE_MODE, boundVars, freeVars));
       }
       
       // Binding
-      for (size_t c = 0; c < dbs->children->size(); c++) {
+      for (size_t c = 0; c < dbs->children.size(); c++) {
 	GCPtr<AST> db = dbs->child(c);
 	CHKERR(errFree, findusedef(errStream, topAst, db->child(0), 
 				   LOCAL_MODE, boundVars, freeVars));
       }
       
       //Step-wise update
-      for (size_t c = 0; c < dbs->children->size(); c++) {
+      for (size_t c = 0; c < dbs->children.size(); c++) {
 	GCPtr<AST> db = dbs->child(c);
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(2), 
 				   USE_MODE, boundVars, freeVars));
@@ -571,7 +571,7 @@ findusedef(std::ostream &errStream,
       GCPtr<AST> lbs = ast->child(0);
 
       // For each individual binding // match at_letbinding+
-      for (size_t c = 0; c < lbs->children->size(); c++) {
+      for (size_t c = 0; c < lbs->children.size(); c++) {
 	GCPtr<AST> lb = lbs->child(c);
 
 	CHKERR(errFree, findusedef(errStream, topAst, lb->child(1), 
@@ -594,7 +594,7 @@ findusedef(std::ostream &errStream,
 GCPtr<AST> 
 cl_rewrite_captured_idents(GCPtr<AST> ast, GCPtr<AST> clenvName)
 {
-  for (size_t c = 0; c < ast->children->size(); c++)
+  for (size_t c = 0; c < ast->children.size(); c++)
     ast->child(c) = 
       cl_rewrite_captured_idents(ast->child(c), clenvName);
 
@@ -650,13 +650,13 @@ rewriteMyCapture(GCPtr<AST> ast, GCPtr<AST> me, GCPtr<AST> him)
 {
   if(ast->astType == at_set_closure) {
     GCPtr<AST> envApp = ast->child(1);
-    for(size_t c=1; c < envApp->children->size(); c++)
+    for(size_t c=1; c < envApp->children.size(); c++)
       if(envApp->child(c)->symbolDef == me)
 	envApp->child(c) = him->Use();
     return;
   }
   
-  for(size_t c=0; c < ast->children->size(); c++)
+  for(size_t c=0; c < ast->children.size(); c++)
     rewriteMyCapture(ast->child(c), me, him);
 } 
 #endif
@@ -665,9 +665,9 @@ rewriteMyCapture(GCPtr<AST> ast, GCPtr<AST> me, GCPtr<AST> him)
 // Walk an AST. If it contains a lambda form that is going 
 // to require a closure record, fabricate the closure record 
 // and append it to outASTs
-GCPtr<AST> 
+static GCPtr<AST> 
 cl_convert_ast(GCPtr<AST> ast, 
-	       GCPtr< CVector<GCPtr<AST> > > outAsts, 
+	       std::vector<GCPtr<AST> >& outAsts, 
 	       bool shouldHoist)
 {
   bool hoistChildren = true;
@@ -688,12 +688,12 @@ cl_convert_ast(GCPtr<AST> ast,
 	proclaim->child(0)->Flags |= DEF_IS_EXTERNAL;
       
       ast->Flags2 |= PROCLAIM_IS_INTERNAL;
-      outAsts->append(proclaim);      
+      outAsts.push_back(proclaim);      
     }
   }
 
   /* Process children (inside-out) */
-  for (size_t c = 0; c < ast->children->size(); c++)
+  for (size_t c = 0; c < ast->children.size(); c++)
     ast->child(c) = 
       cl_convert_ast(ast->child(c), outAsts, hoistChildren);
   
@@ -707,7 +707,7 @@ cl_convert_ast(GCPtr<AST> ast,
       // A list of copyclosures to append in the end.
       GCPtr<AST> ccs = new AST(at_begin, expr->loc);
 
-      for(size_t c=0; c < lbs->children->size(); c++) {
+      for(size_t c=0; c < lbs->children.size(); c++) {
 	GCPtr<AST> lb = lbs->child(c);
 	GCPtr<AST> id = lb->child(0)->child(0);
 	
@@ -723,7 +723,7 @@ cl_convert_ast(GCPtr<AST> ast,
 	  qual = cl_convert_ast(qual, outAsts, hoistChildren);
 	  GCPtr<AST> ac = new AST(at_allocREF, rhs->loc, qual);
 	  GCPtr<AST> cc = new AST(at_copyREF, rhs->loc, id->Use(), rhs);
-	  ccs->children->append(cc);
+	  ccs->children.push_back(cc);
 	  lb->child(1) = ac;
 	}
       }
@@ -814,12 +814,12 @@ cl_convert_ast(GCPtr<AST> ast,
 	  GCPtr<AST> tv = new AST(at_ident, tvlist->loc);
 	  tv->Flags |= ID_IS_TVAR;
 	  tv->s = tv->fqn.ident = tvs->elem(i);
-	  tvlist->children->append(tv);
+	  tvlist->children.push_back(tv);
 	}
       
 	// Okay. We have built the type declaration for the closure
 	// record. Append it to outAsts
-	outAsts->append(defStruct);
+	outAsts.push_back(defStruct);
       }            
 
       //////////// Hoist the inner Lambda ///////////////
@@ -860,15 +860,16 @@ cl_convert_ast(GCPtr<AST> ast,
 	  GCPtr<AST> clArgPat = new AST(at_identPattern, ast->loc, clArgName);      
 	  GCPtr<AST> clType = getClenvUse(ast, clenvName, tvs);
 	  
-	  lamType->child(0)->children->insert(0, clType);
+	  lamType->child(0)->children.insert(lamType->child(0)->children.begin(),
+					     clType);
 	  clArgPat->addChild(clType->getDCopy());
-	  argVec->children->insert(0, clArgPat);
+	  argVec->children.insert(argVec->children.begin(), clArgPat);
       
 	  ast->child(1) = cl_rewrite_captured_idents(body, clArgName);
 	}
 	
 	// We have built the hoisted procedure. Emit that:
-	outAsts->append(newDef);
+	outAsts.push_back(newDef);
       
 	CLCONV_DEBUG ast->PrettyPrint(newDef);      
       
@@ -903,15 +904,15 @@ cl_convert_ast(GCPtr<AST> ast,
 void
 cl_convert(GCPtr<UocInfo> uoc)
 {
-  GCPtr< CVector<GCPtr<AST> > > outAsts = new CVector<GCPtr<AST> >;
+  std::vector<GCPtr<AST> > outAsts;
 
   GCPtr<AST> modOrIf = uoc->uocAst;
 
-  for (size_t c = 0;c < modOrIf->children->size(); c++) {
+  for (size_t c = 0;c < modOrIf->children.size(); c++) {
     GCPtr<AST> child = modOrIf->child(c);
    
     child = cl_convert_ast(child, outAsts, true);
-    outAsts->append(child);
+    outAsts.push_back(child);
   }
 
   modOrIf->children = outAsts;
@@ -929,7 +930,7 @@ collectHeapifiedArgs(GCPtr<AST> ast,
     capturedArgs->append(ast);
   }
 
-  for(size_t i=0; i < ast->children->size(); i++)
+  for(size_t i=0; i < ast->children.size(); i++)
     collectHeapifiedArgs(ast->child(i), capturedArgs);
 }
 
@@ -974,7 +975,7 @@ cl_heapify(GCPtr<AST> ast)
       
       // The RHS is not yet dup'd here. This will happen when this let
       // is processed in the at_letbinding handler.
-      for (size_t i = 0; i < args->children->size(); i++) {
+      for (size_t i = 0; i < args->children.size(); i++) {
 	GCPtr<AST> arg = args->child(i)->child(0);
 	if((arg->Flags2 & ID_NEEDS_HEAPIFY) == 0)
 	  continue;
@@ -1030,7 +1031,7 @@ cl_heapify(GCPtr<AST> ast)
  
 	// if the binding pattern was qualified by a type qualification,
 	// wrap that in a REF:
-	if (bpattern->children->size() == 2)
+	if (bpattern->children.size() == 2)
 	  bpattern->child(1) = 
 	    new AST(at_refType, bpattern->loc, bpattern->child(1));
       }
@@ -1073,7 +1074,7 @@ cl_heapify(GCPtr<AST> ast)
   case at_switch:
   case at_try:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	if(c != IGNORE(ast))
 	  ast->child(c) = cl_heapify(ast->child(c));
       break;
@@ -1081,7 +1082,7 @@ cl_heapify(GCPtr<AST> ast)
     
   default:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	ast->child(c) = cl_heapify(ast->child(c));
       break;
     }

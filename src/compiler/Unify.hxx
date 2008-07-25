@@ -46,7 +46,7 @@
 #include <string>
 #include <assert.h>
 
-#include <sherpa/GCPtr.hxx>
+#include <libsherpa/GCPtr.hxx>
 
 #include "AST.hxx"
 #include "Environment.hxx"

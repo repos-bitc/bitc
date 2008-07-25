@@ -46,8 +46,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <sherpa/UExcept.hxx>
-#include <sherpa/CVector.hxx>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
 #include <assert.h>
 #include "AST.hxx"
 #include "inter-pass.hxx"
@@ -58,11 +58,11 @@ using namespace sherpa;
 static GCPtr<AST> 
 beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
 {
-  for (size_t c = 0; c < ast->children->size(); c++)
+  for (size_t c = 0; c < ast->children.size(); c++)
     ast->child(c) = beginSimp(ast->child(c), errStream, errFree);
 
   if (ast->astType == at_begin) {
-    for (size_t c = 0; c < ast->children->size(); c++) {
+    for (size_t c = 0; c < ast->children.size(); c++) {
       if (ast->child(c)->astType == at_define ||
 	  ast->child(c)->astType == at_recdef) {
 	bool rec = (ast->child(c)->astType == at_recdef);
@@ -77,10 +77,10 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
 	def->child(0)->child(0)->Flags &= ~ID_IS_GLOBAL;
 	GCPtr<AST> body = new AST(at_begin, ast->child(c)->loc);
 	
-	for (size_t bc = c+1; bc < ast->children->size(); bc++)
+	for (size_t bc = c+1; bc < ast->children.size(); bc++)
 	  body->addChild(ast->child(bc));
 	
-	if (body->children->size() == 0) {
+	if (body->children.size() == 0) {
 	  errStream << def->loc << ": "
 		    << "definition not permitted as the "
 		    << "last expression in a sequece."
@@ -89,11 +89,11 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
 	}
 	
 	// Trim the remaining children of this begin:
-	// while (ast->children->size() > c+1)
-	//   ast->children->Remove(ast->children->size()-1);
-	GCPtr<CVector<GCPtr<AST> > > newChildren = new CVector<GCPtr<AST> >;
+	// while (ast->children.size() > c+1)
+	//   ast->children->Remove(ast->children.size()-1);
+	std::vector<GCPtr<AST> > newChildren;
 	for(size_t i=0; i <= c; i++)
-	  newChildren->append(ast->child(i));
+	  newChildren.push_back(ast->child(i));
 	ast->children = newChildren;
 	
 	// Insert the new letrec:
@@ -109,7 +109,7 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
     }
   }
 
-  if (ast->astType == at_begin && ast->children->size() == 1)
+  if (ast->astType == at_begin && ast->children.size() == 1)
     return ast->child(0);
 
   return ast;

@@ -41,9 +41,9 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <sherpa/UExcept.hxx>
-#include <sherpa/CVector.hxx>
-#include <sherpa/avl.hxx>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
+#include <libsherpa/avl.hxx>
 #include <assert.h>
 #include <sstream>
 
@@ -74,7 +74,7 @@ calc_struct_size(const GCPtr<Type> t)
   // Fill elements and repr discriminators are not a part of the type.
   // So, we need a separate count for the type components.
   size_t compCnt=0;
-  for(size_t i=start; i < base->children->size(); i++) {
+  for(size_t i=start; i < base->children.size(); i++) {
     GCPtr<AST> fld = base->child(i);
     
     switch(fld->astType) {
@@ -119,7 +119,7 @@ calc_unin_size(const GCPtr<Type> t)
   GCPtr<AST> base = t->defAst->defForm;
   
   size_t max=0;
-  for(size_t i=0; i < base->children->size(); i++) {
+  for(size_t i=0; i < base->children.size(); i++) {
     GCPtr<AST> ctr = base->child(i);
 
     // Constructors like `nil' having no arguments do not count.

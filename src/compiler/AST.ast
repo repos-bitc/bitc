@@ -42,6 +42,11 @@
 #include "LitValue.hxx"
 #include "Environment.hxx"
 #include "debug.hxx"
+
+#include <libsherpa/GCPtr.hxx>
+#define AST_SMART_PTR sherpa::GCPtr
+#define AST_SUPERCLASS Countable
+
 }
 
 %header { 

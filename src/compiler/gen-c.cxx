@@ -43,7 +43,7 @@
 #include <string>
 #include <sstream>
 #include <cctype>
-#include <sherpa/utf8.hxx>
+#include <libsherpa/utf8.hxx>
 
 #include "Version.hxx"
 #include "UocInfo.hxx"
@@ -574,7 +574,7 @@ emit_ct_args(INOstream &out, GCPtr<AST> fields, size_t start=0)
   out << "(";
 
   bool emitted1=false;
-  for(size_t c = start; c < fields->children->size(); c++) {
+  for(size_t c = start; c < fields->children.size(); c++) {
     GCPtr<AST> field = fields->child(c);
     
     if(field->astType == at_fill || 
@@ -597,7 +597,7 @@ static void
 emit_ct_inits(INOstream &out, GCPtr<AST> fields, 
 	      string pre="", size_t start=0)
 {
-  for(size_t i = start; i < fields->children->size(); i++) {
+  for(size_t i = start; i < fields->children.size(); i++) {
     GCPtr<AST> field = fields->child(i);
     if(field->astType == at_fill)
       continue;
@@ -675,7 +675,7 @@ emit_fnxn_decl(INOstream &out, GCPtr<AST> ast,
   GCPtr<AST> lam = ast->child(1);
   GCPtr<AST> argvec = lam->child(0);
   GCPtr<Type> fnargvec = fnType->Args()->getBareType();
-  assert(argvec->children->size() == fnargvec->components->size());
+  assert(argvec->children.size() == fnargvec->components->size());
 
   /* If return type is unit, emit void as a special case. */
   if (isUnitType(retType))
@@ -687,9 +687,9 @@ emit_fnxn_decl(INOstream &out, GCPtr<AST> ast,
   
   out << pfx << CMangle(id) << " ";
   out << "(";
-  assert(startParam <= argvec->children->size());
+  assert(startParam <= argvec->children.size());
   int paramCount = 0;
-  for(size_t i=startParam; i < argvec->children->size(); i++) {
+  for(size_t i=startParam; i < argvec->children.size(); i++) {
     GCPtr<AST> pat = argvec->child(i);
     assert(pat->astType == at_identPattern);
     GCPtr<AST> arg = pat->child(0);
@@ -767,7 +767,7 @@ emit_fnxn_label(std::ostream& errStream,
    */
 
   GCPtr<AST> argvec = lam->child(0);
-  for(size_t i= 0; i < argvec->children->size(); i++) {
+  for(size_t i= 0; i < argvec->children.size(); i++) {
     GCPtr<AST> pat = argvec->child(i);
 
     assert(pat->astType == at_identPattern);
@@ -829,7 +829,7 @@ emit_fnxn_label(std::ostream& errStream,
     if (! isUnitType(ret))
       out << "return ";
     out << CMangle(id) << "(currentClosurePtr";
-    for(size_t i=1; i < argvec->children->size(); i++) {
+    for(size_t i=1; i < argvec->children.size(); i++) {
       GCPtr<AST> pat = argvec->child(i);
       GCPtr<AST> arg = pat->child(0);
       if(!isUnitType(arg))
@@ -1236,7 +1236,7 @@ toc(std::ostream& errStream,
 
   case at_fields:
     {
-      for(size_t c=0; c < ast->children->size(); c++) {
+      for(size_t c=0; c < ast->children.size(); c++) {
 	TOC(errStream, uoc, ast->child(c), out, IDname, 
 	    ast, c, flags);	
       }
@@ -1280,14 +1280,14 @@ toc(std::ostream& errStream,
       GCPtr<AST> ctr = ast->child(0)->getCtr();
       
       if(ctr->symType->isException() && 
-	 (ast->children->size() == 1)) {
+	 (ast->children.size() == 1)) {
       	out << "&" << CVAL_PFX << CMangle(ast->child(0));
       	break;
       }
 
       out << CTOR_PFX << CMangle(ctr)
 	  << "(";
-      for(size_t c=1; c < ast->children->size(); c++) {
+      for(size_t c=1; c < ast->children.size(); c++) {
 	if(c > 1)
 	  out << ", ";
 	
@@ -1348,9 +1348,9 @@ toc(std::ostream& errStream,
 
 	// Nullable is a special case, and we fake the
 	// tag values.
-	for(size_t c=0; c < ctrs->children->size(); c++) {
+	for(size_t c=0; c < ctrs->children.size(); c++) {
 	  GCPtr<AST> ctr = ctrs->child(c);
-	  if(ctr->children->size() > 1) {
+	  if(ctr->children.size() > 1) {
 	    out << ENUM_PFX << CMangle(ctr->child(0))
 		<< " = 1," << endl;	
 	  }
@@ -1363,9 +1363,9 @@ toc(std::ostream& errStream,
       else if (ident->Flags & CARDELLI_UN) {
 	assert(!repr);
 	// Nullable is handled as special case.
-	for(size_t c=0; c < ctrs->children->size(); c++) {
+	for(size_t c=0; c < ctrs->children.size(); c++) {
 	  GCPtr<AST> ctr = ctrs->child(c);
-	  if(ctr->children->size() > 1) {
+	  if(ctr->children.size() > 1) {
 	    out << ENUM_PFX << CMangle(ctr->child(0))
 		<< " = 0," << endl;	
 	  }
@@ -1378,7 +1378,7 @@ toc(std::ostream& errStream,
 	}
       }
       else {
-	for(size_t c=0; c < ctrs->children->size(); c++) {
+	for(size_t c=0; c < ctrs->children.size(); c++) {
 	  GCPtr<AST> ctr = ctrs->child(c);
 	  out << ENUM_PFX << CMangle(ctr->child(0))
 	      << " = " << c
@@ -1392,7 +1392,7 @@ toc(std::ostream& errStream,
       
       
       out << "/*** Structures for constructor legs ***/" << endl;
-      for(size_t c = 0; c < ctrs->children->size(); c++) {
+      for(size_t c = 0; c < ctrs->children.size(); c++) {
 	GCPtr<AST> ctr = ctrs->child(c);
 	GCPtr<AST> ctrID = ctr->child(0);
 	
@@ -1403,12 +1403,12 @@ toc(std::ostream& errStream,
 	  if (!repr)
 	    if ((ident->Flags & SINGLE_LEG_UN) == 0)
 	      if(((ident->Flags & CARDELLI_UN) == 0) || 
-		 (ctr->children->size() == 1)) {
+		 (ctr->children.size() == 1)) {
 		out << decl(ident->tagType, "tag", CTYP_EMIT_BF,
 			    ident->field_bits)<< ";" << endl;
 	      }
 	  
-	  for(size_t i = 1; i < ctr->children->size(); i++) {
+	  for(size_t i = 1; i < ctr->children.size(); i++) {
 	    GCPtr<AST> field = ctr->child(i);
 	    TOC(errStream, uoc, field, out, IDname, ctr, i, flags);      
 	  }
@@ -1432,7 +1432,7 @@ toc(std::ostream& errStream,
       if (!repr)
 	out << TAG_PFX << CMangle(ident) << " tag;" << endl;
       
-      for(size_t c = 0; c < ctrs->children->size(); c++) {
+      for(size_t c = 0; c < ctrs->children.size(); c++) {
 	GCPtr<AST> ctr = ctrs->child(c);
 	out << TY_PFX << CMangle(ctr->child(0)) << " "
 	    << "leg_" << CMangle(ctr->child(0)) << ";" << endl;	
@@ -1458,11 +1458,11 @@ toc(std::ostream& errStream,
       string accessor = "arg->tag";
       
       if(repr) {
-	for(size_t c = 0; c < ctrs->children->size(); c++) {
+	for(size_t c = 0; c < ctrs->children.size(); c++) {
 	  GCPtr<AST> ctr = ctrs->child(c);
 	  out << "if (";
 	  bool emitted1=false;
-	  for(size_t i = 1; i < ctr->children->size(); i++) {
+	  for(size_t i = 1; i < ctr->children.size(); i++) {
 	    GCPtr<AST> field = ctr->child(i);
 	    if(field->Flags2 & FLD_IS_DISCM) {
 	      if(emitted1)
@@ -1534,7 +1534,7 @@ toc(std::ostream& errStream,
 	pre = "val->";
       }
 
-      for(size_t c = 0; c < ctrs->children->size(); c++) {
+      for(size_t c = 0; c < ctrs->children.size(); c++) {
 	GCPtr<AST> ctr = ctrs->child(c);	
 	GCPtr<AST> ctrID = ctr->child(0);
 	out << "INLINE " << toCtype(ident->symType) << endl
@@ -1550,7 +1550,7 @@ toc(std::ostream& errStream,
 	if(!repr)
 	  if ((ident->Flags & SINGLE_LEG_UN) == 0)
 	    if(((ident->Flags & CARDELLI_UN) == 0) || 
-	       (ctr->children->size() == 1)) {
+	       (ctr->children.size() == 1)) {
 	      out << "leg.tag = " << ENUM_PFX << CMangle(ctrID) 
 		  << ";" << endl;
 	    }
@@ -1601,11 +1601,11 @@ toc(std::ostream& errStream,
 	    << "\"" << ident->fqn.ident << "\"" << ";" << endl;
       }
 
-      if(ast->children->size() > 1) {
+      if(ast->children.size() > 1) {
 	out << "typedef struct {" << endl;
 	out.more();
 	out << "const char* __name;" << endl;
-	for(size_t c = 1; c < ast->children->size(); c++) {
+	for(size_t c = 1; c < ast->children.size(); c++) {
 	  GCPtr<AST> field = ast->child(c);
 	  if(field->astType == at_fill)
 	    continue;
@@ -1789,7 +1789,7 @@ toc(std::ostream& errStream,
 
   case at_container:
     {
-      if(ast->child(0)->children->size() != 0) {
+      if(ast->child(0)->children.size() != 0) {
 	//out++;
 	TOC(errStream, uoc, ast->child(0), out, IDname, 
 	    ast, 0, flags);      
@@ -1807,7 +1807,7 @@ toc(std::ostream& errStream,
 
   case at_identList:
     {
-      for(size_t c=0; c < ast->children->size(); c++)
+      for(size_t c=0; c < ast->children.size(); c++)
 	declare(out, ast->child(c));	
       break;
     }
@@ -1833,7 +1833,7 @@ toc(std::ostream& errStream,
     {
       GCPtr<AST> dbs = ast->child(0);
       
-      for (size_t c = 0; c < dbs->children->size(); c++) {
+      for (size_t c = 0; c < dbs->children.size(); c++) {
 	GCPtr<AST> db = dbs->child(c);
 	GCPtr<AST> init = db->child(1);
 	TOC(errStream, uoc, init, out, IDname, db, 1, flags);      
@@ -1876,7 +1876,7 @@ toc(std::ostream& errStream,
       if(body->astType != at_letStar)
 	out << ";" << endl;
 
-      for (size_t c = 0; c < dbs->children->size(); c++) {
+      for (size_t c = 0; c < dbs->children.size(); c++) {
 	GCPtr<AST> db = dbs->child(c);
 	GCPtr<AST> step = db->child(2);
 	TOC(errStream, uoc, step, out, IDname, db, 2, flags);      
@@ -1893,7 +1893,7 @@ toc(std::ostream& errStream,
   case at_begin:
     {
       // out++;
-      for (size_t c = 0; c < ast->children->size(); c++) {
+      for (size_t c = 0; c < ast->children.size(); c++) {
 	TOC(errStream, uoc, ast->child(c), out, IDname, 
 	    ast, c, flags);      
 	
@@ -1929,9 +1929,9 @@ toc(std::ostream& errStream,
 	if(id->Flags & SELF_TAIL) {
 	  GCPtr<AST> lbps = id->symbolDef->defbps;
 	  assert(lbps);
-	  assert(ast->children->size() == lbps->children->size() + 1);
+	  assert(ast->children.size() == lbps->children.size() + 1);
 	  out << "/* Tail recursive application: */ " << endl;
-	  for(size_t c = 0; c < lbps->children->size(); c++) {
+	  for(size_t c = 0; c < lbps->children.size(); c++) {
 	    GCPtr<AST> ident = lbps->child(c)->child(0);
 	    TOC(errStream, uoc, ident, out, IDname, 
 		lbps->child(c), 0, flags);
@@ -1967,7 +1967,7 @@ toc(std::ostream& errStream,
       
       out << "(";
       size_t count = 0;
-      for(size_t c=1; c < ast->children->size(); c++) {
+      for(size_t c=1; c < ast->children.size(); c++) {
 	/* Do not emit anything at an argument position that is of
 	 * unit type. Remember that we have run the SSA pass, so any
 	 * side effects from this computation have already been
@@ -2000,7 +2000,7 @@ toc(std::ostream& errStream,
   case at_array:    
     {
       assert(IDname.size());
-      for (size_t c = 0; c < ast->children->size(); c++) {
+      for (size_t c = 0; c < ast->children.size(); c++) {
 	out << IDname << ".elem[" << c << "] = ";
  	TOC(errStream, uoc, ast->child(c), out, IDname, 
 	    ast, c, flags);
@@ -2020,18 +2020,18 @@ toc(std::ostream& errStream,
       out << IDname << " = (" << toCtype(t) << ") " 
 	  << "GC_ALLOC(sizeof("
 	  << CMangle(t->mangledString(true)) << ") + " 
-	  << "(" << ast->children->size() << " * sizeof("
+	  << "(" << ast->children.size() << " * sizeof("
 	  << toCtype(t->Base()) << ")));"
 	  << endl;
  
-      out << IDname << "->len = " << ast->children->size() 
+      out << IDname << "->len = " << ast->children.size() 
 	  << ";" << endl;
       out << IDname << "->elem = (("
 	  << toCtype(t->Base())
 	  << " *) (((char *) " << IDname << ") + "
 	  << "sizeof(" << CMangle(t->mangledString(true)) << ")));"
 	  << endl;
-      for (size_t c = 0; c < ast->children->size(); c++) {
+      for (size_t c = 0; c < ast->children.size(); c++) {
 	out << IDname << "->elem[" << c << "] = ";
  	TOC(errStream, uoc, ast->child(c), out, IDname, 
 	    ast, c, flags);
@@ -2146,13 +2146,13 @@ toc(std::ostream& errStream,
       out << ") {" << endl;;
       out.more();
       
-      for(size_t c=0; c < cases->children->size(); c++) {
+      for(size_t c=0; c < cases->children.size(); c++) {
 	
 	GCPtr<AST> theCase = cases->child(c);
 	GCPtr<AST> expr = theCase->child(1);
 	GCPtr<AST> legIdent = theCase->child(0);
 
-	for(size_t n=2; n < theCase->children->size(); n++) {
+	for(size_t n=2; n < theCase->children.size(); n++) {
 	  GCPtr<AST> ctr = theCase->child(n)->getCtr();
 	  
 	  std::string leg = CMangle(ctr);	  
@@ -2235,7 +2235,7 @@ toc(std::ostream& errStream,
       out << "curCatchBlock = lastJB;" << endl;
 
       // Too bad I cannot use a switch ... 
-      for(size_t c = 0; c < cases->children->size(); c++) {	
+      for(size_t c = 0; c < cases->children.size(); c++) {	
 	GCPtr<AST> theCase = cases->child(c);
 	GCPtr<AST> expr = theCase->child(1);
 	GCPtr<AST> legIdent = theCase->child(0);
@@ -2244,7 +2244,7 @@ toc(std::ostream& errStream,
 	  out << "else " << endl;
 	 
 	out << "if(";
-	for(size_t n=2; n < theCase->children->size(); n++) {
+	for(size_t n=2; n < theCase->children.size(); n++) {
 	  GCPtr<AST> exn = theCase->child(n);
 	  
 	  if(n > 2)
@@ -2438,7 +2438,7 @@ toc(std::ostream& errStream,
 
   case at_letbindings:
     {
-      for(size_t i=0; i < ast->children->size(); i++)
+      for(size_t i=0; i < ast->children.size(); i++)
 	TOC(errStream, uoc, ast->child(i), out, IDname, 
 	    ast, i, flags);      
       break;
@@ -2595,7 +2595,7 @@ emit_arr_vec_fn_types(GCPtr<AST> ast,
 			     arrVec, vecVec, fnVec);
   
 
-  for(size_t c = 0; c < ast->children->size(); c++)
+  for(size_t c = 0; c < ast->children.size(); c++)
     emit_arr_vec_fn_types(ast->child(c), out, 
 			     arrVec, vecVec, fnVec);
 } 
@@ -2613,7 +2613,7 @@ TypesTOC(std::ostream& errStream,
   GCPtr< CVector<string> > vecVec = new CVector<string>; 
   GCPtr< CVector<string> > fnVec = new CVector<string>; 
   
-  for(size_t c=0; (c < mod->children->size()); c++) {
+  for(size_t c=0; (c < mod->children.size()); c++) {
     GCPtr<AST> ast = mod->child(c);
 
     switch(ast->astType) {
@@ -2762,7 +2762,7 @@ EmitGlobalInitializers(std::ostream& errStream,
   initStream.more();
   
   GCPtr<AST> mod = uoc->uocAst;
-  for(size_t c = 0; c < mod->children->size(); c++) {
+  for(size_t c = 0; c < mod->children.size(); c++) {
     GCPtr<AST> ast = mod->child(c);
 
     switch(ast->astType) {
@@ -2992,7 +2992,7 @@ ValuesTOH(std::ostream& errStream,
   bool errFree = true;
   
   GCPtr<AST> mod = uoc->uocAst;
-  for(size_t c = 0; c < mod->children->size(); c++) {
+  for(size_t c = 0; c < mod->children.size(); c++) {
     GCPtr<AST> ast = mod->child(c);
     switch(ast->astType) {
     case at_proclaim:

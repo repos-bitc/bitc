@@ -44,7 +44,7 @@
 
 #include <string>
 #include <dirent.h>
-#include "GCPtr.hxx"
+#include <libsherpa/GCPtr.hxx>
 
 namespace sherpa {
   /// @brief Encapsulation of an open directory.

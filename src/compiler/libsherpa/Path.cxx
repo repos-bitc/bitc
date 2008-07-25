@@ -43,8 +43,8 @@
 #include <string.h>
 
 #include "Path.hxx"
-#include "UExcept.hxx"
-#include "CVector.hxx"
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
 #include <vector>
 
 namespace sherpa {

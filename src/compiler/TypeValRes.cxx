@@ -42,9 +42,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <sherpa/UExcept.hxx>
-#include <sherpa/CVector.hxx>
-#include <sherpa/avl.hxx>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
+#include <libsherpa/avl.hxx>
 #include <assert.h>
 
 #include "UocInfo.hxx"
@@ -144,7 +144,7 @@ isExpansive(std::ostream& errStream,
   case at_letbindings:
   case at_dobindings:
     {
-      for(size_t i=0; !itsExpansive && i < ast->children->size(); i++)
+      for(size_t i=0; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;
@@ -170,7 +170,7 @@ isExpansive(std::ostream& errStream,
   case at_dotest:
   case at_begin:
     {
-      for(size_t i=0; !itsExpansive && i < ast->children->size(); i++)
+      for(size_t i=0; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;
@@ -220,7 +220,7 @@ isExpansive(std::ostream& errStream,
 
   case at_cond_legs:
     {
-      for(size_t i=0; !itsExpansive && i < ast->children->size(); i++)
+      for(size_t i=0; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;
@@ -260,7 +260,7 @@ isExpansive(std::ostream& errStream,
 
   case at_sw_legs:
     {
-      for(size_t i=0; !itsExpansive && i < ast->children->size(); i++)
+      for(size_t i=0; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;
@@ -290,7 +290,7 @@ isExpansive(std::ostream& errStream,
   case at_vector:
   case at_array:
     {
-      for(size_t i=0; !itsExpansive && i < ast->children->size(); i++)
+      for(size_t i=0; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;
@@ -323,7 +323,7 @@ isExpansive(std::ostream& errStream,
   case at_inner_ref:
   case at_deref:
     {    
-      for(size_t i=0; !itsExpansive && i < ast->children->size(); i++)
+      for(size_t i=0; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;
@@ -332,7 +332,7 @@ isExpansive(std::ostream& errStream,
   case at_struct_apply:
   case at_ucon_apply:
     {
-      for(size_t i=1; !itsExpansive && i < ast->children->size(); i++)
+      for(size_t i=1; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;

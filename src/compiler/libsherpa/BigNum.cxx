@@ -38,8 +38,8 @@
 #include <assert.h>
 #include <string>
 #include <string.h>  /* For memset() */
-#include "BigNum.hxx"
-#include "UExcept.hxx"
+#include <libsherpa/BigNum.hxx>
+#include <libsherpa/UExcept.hxx>
 
 // Note that this implementation relies on calloc() for the sake of
 // using realloc, but we only do this on heap-allocated arrays of

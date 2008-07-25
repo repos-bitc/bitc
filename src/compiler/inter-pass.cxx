@@ -42,8 +42,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <sherpa/UExcept.hxx>
-#include <sherpa/CVector.hxx>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
 #include <assert.h>
 
 #include "UocInfo.hxx"
@@ -258,7 +258,7 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
       GCPtr<AST> id = ast->child(0);
       MARKDEF(id, ast);
       GCPtr<AST> ctrs = ast->child(4);
-      for(size_t i=0; i < ctrs->children->size(); i++) {
+      for(size_t i=0; i < ctrs->children.size(); i++) {
 	GCPtr<AST> ctr = ctrs->child(i);
 	GCPtr<AST> ctrID = ctr->child(0);
 	MARKDEF(ctrID, ast);
@@ -273,7 +273,7 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
       MARKDEF(id, ast);
 	
       GCPtr<AST> methods = ast->child(3);
-      for(size_t i = 0; i < methods->children->size(); i++) {
+      for(size_t i = 0; i < methods->children.size(); i++) {
 	GCPtr<AST> method = methods->child(i);
 	GCPtr<AST> mID = method->child(0);
 	MARKDEF(mID, ast);
@@ -311,7 +311,7 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
   }
   
   if(processChildren)
-    for(size_t c=0; c < ast->children->size(); c++)
+    for(size_t c=0; c < ast->children.size(); c++)
       findDefForms(ast->child(c), local, top);	  
 }
 
@@ -334,7 +334,7 @@ UocInfo::findAllDefForms()
 static void
 addCandidates(GCPtr<AST> mod)
 {
-  for(size_t c = 0; c < mod->children->size(); c++) {
+  for(size_t c = 0; c < mod->children.size(); c++) {
     GCPtr<AST> ast = mod->child(c);
     GCPtr<AST> id = ast->getID();
     switch(ast->astType) {

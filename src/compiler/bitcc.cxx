@@ -90,8 +90,8 @@
 #include <getopt.h>
 #include <langinfo.h>
 
-#include <sherpa/Path.hxx>
-#include <sherpa/util.hxx>
+#include <libsherpa/Path.hxx>
+#include <libsherpa/util.hxx>
 
 #include "Version.hxx"
 #include "UocInfo.hxx"

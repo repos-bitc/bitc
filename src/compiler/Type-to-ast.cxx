@@ -41,9 +41,9 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <sherpa/UExcept.hxx>
-#include <sherpa/CVector.hxx>
-#include <sherpa/avl.hxx>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
+#include <libsherpa/avl.hxx>
 #include <assert.h>
 #include <sstream>
 
@@ -227,7 +227,7 @@ Type::asAST(const sherpa::LexLoc &loc,
 	if(t->CompFlags(i) & COMP_BYREF)
 	  arg = new AST(at_byrefType, arg->loc, arg);
 	
-	ast->children->append(arg);
+	ast->children.push_back(arg);
       }
       break;
     }
@@ -252,7 +252,7 @@ Type::asAST(const sherpa::LexLoc &loc,
       if(t->typeArgs->size() > 0) {
 	ast = new AST(at_typeapp, loc, ast);
 	for(size_t i=0; i < t->typeArgs->size(); i++)
-	  ast->children->append(t->TypeArg(i)->asAST(loc, tvP));
+	  ast->children.push_back(t->TypeArg(i)->asAST(loc, tvP));
       }
       break;
     }
@@ -268,7 +268,7 @@ Type::asAST(const sherpa::LexLoc &loc,
       if(t->typeArgs->size() > 0) {
 	ast = new AST(at_typeapp, loc, ast);
 	for(size_t i=0; i < t->typeArgs->size(); i++)
-	  ast->children->append(t->TypeArg(i)->asAST(loc, tvP));
+	  ast->children.push_back(t->TypeArg(i)->asAST(loc, tvP));
       }
       break;
     }

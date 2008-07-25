@@ -36,6 +36,7 @@ dnl
 
 AC_PREREQ(2.61)
 AC_INIT
+AC_CONFIG_MACRO_DIR(aclocal)
 AC_CONFIG_SRCDIR([compiler/AST.ast])
 AC_CONFIG_HEADER(config.h)
 
@@ -60,9 +61,14 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 
+AC_CHECK_PROGS(CCACHE, ccache, "")
 AC_CHECK_PROG(HAVE_MAKEINFO, makeinfo, yes, no)
 AC_CHECK_PROG(HAVE_TEXI2DVI, texi2dvi, yes, no)
 AC_CHECK_PROG(HAVE_DVIPS, dvips, yes, no)
+
+dnl Set the inline keyword appropriately for the platform
+AC_C_INLINE
+
 AC_PATH_PROG(ASTMAKER, astmaker)
 
 CHECK_OSDOC
@@ -70,6 +76,20 @@ CHECK_OSDOC
 AC_CHECK_FILE(/usr/share/osdoc)
 
 AC_CHECK_HEADERS(stdint.h inttypes.h)
+AC_CHECK_HEADERS(unicode/uchar.h)
+
+AX_BOOST_BASE(1.33.1)
+AX_BOOST_FILESYSTEM
+CHECK_LIBICUUC
+
+AC_LANG([C++])
+AC_CHECK_HEADERS([boost/shared_ptr.hpp] \
+                 [boost/version.hpp] \
+                 [boost/enable_shared_from_this.hpp] \
+                 [boost/filesystem/convenience.hpp] \
+                 [boost/filesystem/operations.hpp] \
+                 [boost/filesystem/path.hpp] )
+AC_LANG([C])
 
 AC_C_CONST
 AC_TYPE_SIZE_T

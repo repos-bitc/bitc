@@ -189,7 +189,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_module:
     {
       size_t c = (ast->astType == at_module)?0:1;
-      for(; c < ast->children->size(); c++)
+      for(; c < ast->children.size(); c++)
 	markTail(ast->child(c), fn, bps, isTail); 
 
       break;
@@ -221,9 +221,9 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
     
   case at_begin:
     {
-      //     for (size_t i = 0; i < ast->children->size() - 1; i++)
+      //     for (size_t i = 0; i < ast->children.size() - 1; i++)
       //       markTail(ast->child(i), fn, bps, false);
-      markTail(ast->child(ast->children->size() - 1), fn, bps, isTail);
+      markTail(ast->child(ast->children.size() - 1), fn, bps, isTail);
       break;
     }
     
@@ -265,7 +265,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_apply:
     {
       markTail(ast->child(0), fn, bps, isTail);
-      //       for (size_t i = 1; i < ast->children->size(); i++)
+      //       for (size_t i = 1; i < ast->children.size(); i++)
       // 	markTail(ast->child(i), fn, bps, false);
 	
       break;
@@ -274,7 +274,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_ucon_apply:
   case at_struct_apply:
     {
-      //       for(size_t c = 1; c < ast->children->size(); c++)
+      //       for(size_t c = 1; c < ast->children.size(); c++)
       // 	markTail(ast->child(i), fn, bps, false);
       
       break;
@@ -308,7 +308,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_setClosure:
   case at_copyREF:
     {
-      for(size_t c = 0; c < ast->children->size(); c++)
+      for(size_t c = 0; c < ast->children.size(); c++)
 	markTail(ast->child(c), fn, bps, isTail);
       break;
     }
@@ -316,7 +316,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_switch:
   case at_try:
     {
-      for(size_t c = 0; c < ast->children->size(); c++)
+      for(size_t c = 0; c < ast->children.size(); c++)
 	if(c != IGNORE(ast))
 	  markTail(ast->child(c), fn, bps, isTail);
       break;
@@ -340,7 +340,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_letStar:
     {
       //       GCPtr<AST> lbs = ast->child(0);
-      //       for(size_t c = 0; c < lbs->children->size(); c++) {
+      //       for(size_t c = 0; c < lbs->children.size(); c++) {
       // 	GCPtr<AST> lb = lbs->child(c);
       // 	markTail(lb->child(1), fn, bps, false);
       //       }

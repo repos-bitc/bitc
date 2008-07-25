@@ -18,6 +18,7 @@ using namespace sherpa;
 using namespace sherpa ;
 unsigned long long AST::astCount = 0;
 
+
 AST::~AST()
 {
 }
@@ -25,7 +26,6 @@ AST::~AST()
 AST::AST(const AstType at)
 {
   astType = at;
-  children = new CVector<sherpa::GCPtr<AST> >;
 
   ID = ++(AST::astCount);
   identType = id_unresolved;
@@ -52,10 +52,9 @@ AST::AST(const AstType at)
   parentLB = 0;
 }
 
-AST::AST(const AstType at, const LToken& tok)
+AST::AST(const AstType at, const AST_TOKEN_TYPE& tok)
 {
   astType = at;
-  children = new CVector<sherpa::GCPtr<AST> >;
   loc = tok.loc;
   s = tok.str;
 
@@ -84,10 +83,9 @@ AST::AST(const AstType at, const LToken& tok)
   parentLB = 0;
 }
 
-AST::AST(const AstType at, const LexLoc& _loc)
+AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc)
 {
   astType = at;
-  children = new CVector<sherpa::GCPtr<AST> >;
   loc = _loc;
 
   ID = ++(AST::astCount);
@@ -115,11 +113,10 @@ AST::AST(const AstType at, const LexLoc& _loc)
   parentLB = 0;
 }
 
-AST::AST(const AstType at, const LexLoc& _loc,
-         sherpa::GCPtr<AST> child1)
+AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
+         AST_SMART_PTR<AST> child1)
 {
   astType = at;
-  children = new CVector<sherpa::GCPtr<AST> >;
   loc = _loc;
   addChild(child1);
 
@@ -148,12 +145,11 @@ AST::AST(const AstType at, const LexLoc& _loc,
   parentLB = 0;
 }
 
-AST::AST(const AstType at, const LexLoc& _loc,
-         sherpa::GCPtr<AST> child1,
-         sherpa::GCPtr<AST> child2)
+AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
+         AST_SMART_PTR<AST> child1,
+         AST_SMART_PTR<AST> child2)
 {
   astType = at;
-  children = new CVector<sherpa::GCPtr<AST> >;
   loc = _loc;
   addChild(child1);
   addChild(child2);
@@ -183,13 +179,12 @@ AST::AST(const AstType at, const LexLoc& _loc,
   parentLB = 0;
 }
 
-AST::AST(const AstType at, const LexLoc& _loc,
-         sherpa::GCPtr<AST> child1,
-         sherpa::GCPtr<AST> child2,
-         sherpa::GCPtr<AST> child3)
+AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
+         AST_SMART_PTR<AST> child1,
+         AST_SMART_PTR<AST> child2,
+         AST_SMART_PTR<AST> child3)
 {
   astType = at;
-  children = new CVector<sherpa::GCPtr<AST> >;
   loc = _loc;
   addChild(child1);
   addChild(child2);
@@ -220,14 +215,13 @@ AST::AST(const AstType at, const LexLoc& _loc,
   parentLB = 0;
 }
 
-AST::AST(const AstType at, const LexLoc& _loc,
-         sherpa::GCPtr<AST> child1,
-         sherpa::GCPtr<AST> child2,
-         sherpa::GCPtr<AST> child3,
-         sherpa::GCPtr<AST> child4)
+AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
+         AST_SMART_PTR<AST> child1,
+         AST_SMART_PTR<AST> child2,
+         AST_SMART_PTR<AST> child3,
+         AST_SMART_PTR<AST> child4)
 {
   astType = at;
-  children = new CVector<sherpa::GCPtr<AST> >;
   loc = _loc;
   addChild(child1);
   addChild(child2);
@@ -259,15 +253,14 @@ AST::AST(const AstType at, const LexLoc& _loc,
   parentLB = 0;
 }
 
-AST::AST(const AstType at, const LexLoc& _loc,
-         sherpa::GCPtr<AST> child1,
-         sherpa::GCPtr<AST> child2,
-         sherpa::GCPtr<AST> child3,
-         sherpa::GCPtr<AST> child4,
-         sherpa::GCPtr<AST> child5)
+AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
+         AST_SMART_PTR<AST> child1,
+         AST_SMART_PTR<AST> child2,
+         AST_SMART_PTR<AST> child3,
+         AST_SMART_PTR<AST> child4,
+         AST_SMART_PTR<AST> child5)
 {
   astType = at;
-  children = new CVector<sherpa::GCPtr<AST> >;
   loc = _loc;
   addChild(child1);
   addChild(child2);
@@ -300,16 +293,16 @@ AST::AST(const AstType at, const LexLoc& _loc,
   parentLB = 0;
 }
 
-std::string
+::std::string
 AST::getTokenString()
 {
   return s;
 }
 
 void
-AST::addChild(sherpa::GCPtr<AST> child)
+AST::addChild(AST_SMART_PTR<AST> child)
 {
-  children->append(child);
+  children.push_back(child);
 }
 
 const char *
@@ -898,20 +891,20 @@ void
 astChTypeError(const AST &myAst, const AstType exp_at,
                const AstType act_at, size_t child)
 {
-  std::cerr << myAst.loc.asString() << ": " << myAst.astTypeName();
-  std::cerr << " has incompatible Child# " << child;
-  std::cerr << ". Expected " << AST::tagName(exp_at) << ", "; 
-  std::cerr << "Obtained " << AST::tagName(act_at) << "." << std::endl;
+  ::std::cerr << myAst.loc.asString() << ": " << myAst.astTypeName();
+  ::std::cerr << " has incompatible Child# " << child;
+  ::std::cerr << ". Expected " << AST::tagName(exp_at) << ", "; 
+  ::std::cerr << "Obtained " << AST::tagName(act_at) << "." << ::std::endl;
 }
 
 void
 astChNumError(const AST &myAst, const size_t exp_ch,
                const size_t act_ch)
 {
-  std::cerr << myAst.loc.asString() << ": " << myAst.astTypeName();
-  std::cerr << " has wrong number of children. ";
-  std::cerr << "Expected " << exp_ch << ", ";
-  std::cerr << "Obtained " << act_ch << "." << std::endl;
+  ::std::cerr << myAst.loc.asString() << ": " << myAst.astTypeName();
+  ::std::cerr << " has wrong number of children. ";
+  ::std::cerr << "Expected " << exp_ch << ", ";
+  ::std::cerr << "Obtained " << act_ch << "." << ::std::endl;
 }
 
 static const unsigned char *astMembers[] = {
@@ -1068,7 +1061,7 @@ AST::isValid() const
   size_t specNdx;
   bool errorsPresent = false;
 
-  for (c = 0; c < children->size(); c++) {
+  for (c = 0; c < children.size(); c++) {
     if (!child(c)->isValid())
       errorsPresent = true;
   }
@@ -1078,37 +1071,37 @@ AST::isValid() const
 
   switch(astType) {
   case at_Null: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_AnyGroup: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_ident: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_ifident: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_usesel: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1119,8 +1112,8 @@ AST::isValid() const
     c++;
 
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1130,65 +1123,65 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_boolLiteral: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_charLiteral: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_intLiteral: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_floatLiteral: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_stringLiteral: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_module: // normal AST:
     // match agt_definition*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_definition], child(c)->astType))
         astChTypeError(*this, agt_definition, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_interface: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1199,22 +1192,22 @@ AST::isValid() const
     c++;
 
     // match agt_definition*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_definition], child(c)->astType))
         astChTypeError(*this, agt_definition, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_defunion: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1225,8 +1218,8 @@ AST::isValid() const
     c++;
 
     // match at_tvlist
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1237,8 +1230,8 @@ AST::isValid() const
     c++;
 
     // match agt_category
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1249,8 +1242,8 @@ AST::isValid() const
     c++;
 
     // match at_declares
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1261,8 +1254,8 @@ AST::isValid() const
     c++;
 
     // match at_constructors
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1273,8 +1266,8 @@ AST::isValid() const
     c++;
 
     // match at_constraints
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1284,16 +1277,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_declunion: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1304,8 +1297,8 @@ AST::isValid() const
     c++;
 
     // match at_tvlist
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1316,8 +1309,8 @@ AST::isValid() const
     c++;
 
     // match agt_category
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1328,8 +1321,8 @@ AST::isValid() const
     c++;
 
     // match at_constraints
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1339,16 +1332,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_defstruct: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1359,8 +1352,8 @@ AST::isValid() const
     c++;
 
     // match at_tvlist
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1371,8 +1364,8 @@ AST::isValid() const
     c++;
 
     // match agt_category
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1383,8 +1376,8 @@ AST::isValid() const
     c++;
 
     // match at_declares
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1395,8 +1388,8 @@ AST::isValid() const
     c++;
 
     // match at_fields
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1407,8 +1400,8 @@ AST::isValid() const
     c++;
 
     // match at_constraints
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1418,16 +1411,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_declstruct: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1438,8 +1431,8 @@ AST::isValid() const
     c++;
 
     // match at_tvlist
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1450,8 +1443,8 @@ AST::isValid() const
     c++;
 
     // match agt_category
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1462,8 +1455,8 @@ AST::isValid() const
     c++;
 
     // match at_constraints
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1473,16 +1466,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_defrepr: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1493,8 +1486,8 @@ AST::isValid() const
     c++;
 
     // match agt_category
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1505,8 +1498,8 @@ AST::isValid() const
     c++;
 
     // match at_declares
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1517,8 +1510,8 @@ AST::isValid() const
     c++;
 
     // match at_reprctrs
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1528,16 +1521,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_declrepr: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1548,8 +1541,8 @@ AST::isValid() const
     c++;
 
     // match agt_category
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1559,16 +1552,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_reprctrs: // normal AST:
     // match at_reprctr+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1576,22 +1569,22 @@ AST::isValid() const
       astChTypeError(*this, at_reprctr, child(c)->astType, 0);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_reprctr], child(c)->astType))
         astChTypeError(*this, at_reprctr, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_reprctr: // normal AST:
     // match at_constructor
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1602,8 +1595,8 @@ AST::isValid() const
     c++;
 
     // match at_reprrepr+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1611,22 +1604,22 @@ AST::isValid() const
       astChTypeError(*this, at_reprrepr, child(c)->astType, 1);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_reprrepr], child(c)->astType))
         astChTypeError(*this, at_reprrepr, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_reprrepr: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1637,8 +1630,8 @@ AST::isValid() const
     c++;
 
     // match at_intLiteral
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1648,37 +1641,37 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_refCat: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_valCat: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_opaqueCat: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_defexception: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1689,22 +1682,22 @@ AST::isValid() const
     c++;
 
     // match at_field*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_field], child(c)->astType))
         astChTypeError(*this, at_field, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_deftypeclass: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1715,8 +1708,8 @@ AST::isValid() const
     c++;
 
     // match at_tvlist
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1727,8 +1720,8 @@ AST::isValid() const
     c++;
 
     // match at_tcdecls
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1739,8 +1732,8 @@ AST::isValid() const
     c++;
 
     // match at_method_decls
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1751,8 +1744,8 @@ AST::isValid() const
     c++;
 
     // match at_constraints
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1762,30 +1755,30 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_tcdecls: // normal AST:
     // match at_tyfn*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_tyfn], child(c)->astType))
         astChTypeError(*this, at_tyfn, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_tyfn: // normal AST:
     // match at_fnargVec
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1796,8 +1789,8 @@ AST::isValid() const
     c++;
 
     // match agt_tvar
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1807,16 +1800,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_tcapp: // normal AST:
     // match agt_var
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1827,8 +1820,8 @@ AST::isValid() const
     c++;
 
     // match agt_type+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1836,36 +1829,36 @@ AST::isValid() const
       astChTypeError(*this, agt_type, child(c)->astType, 1);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_type], child(c)->astType))
         astChTypeError(*this, agt_type, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_method_decls: // normal AST:
     // match at_method_decl*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_method_decl], child(c)->astType))
         astChTypeError(*this, at_method_decl, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_method_decl: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1876,8 +1869,8 @@ AST::isValid() const
     c++;
 
     // match at_fn
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1887,16 +1880,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_qualType: // normal AST:
     // match at_constraints
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1907,8 +1900,8 @@ AST::isValid() const
     c++;
 
     // match agt_type
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1918,30 +1911,30 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_constraints: // normal AST:
     // match at_tcapp*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_tcapp], child(c)->astType))
         astChTypeError(*this, at_tcapp, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_definstance: // normal AST:
     // match at_tcapp
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1952,8 +1945,8 @@ AST::isValid() const
     c++;
 
     // match at_methods
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1964,8 +1957,8 @@ AST::isValid() const
     c++;
 
     // match at_constraints
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -1975,30 +1968,30 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_methods: // normal AST:
     // match agt_expr*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_expr], child(c)->astType))
         astChTypeError(*this, agt_expr, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_proclaim: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2009,8 +2002,8 @@ AST::isValid() const
     c++;
 
     // match agt_qtype
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2021,8 +2014,8 @@ AST::isValid() const
     c++;
 
     // match at_constraints
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2032,16 +2025,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_define: // normal AST:
     // match at_identPattern
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2052,8 +2045,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2064,8 +2057,8 @@ AST::isValid() const
     c++;
 
     // match at_constraints
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2075,16 +2068,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_recdef: // normal AST:
     // match at_identPattern
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2095,8 +2088,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2107,8 +2100,8 @@ AST::isValid() const
     c++;
 
     // match at_constraints
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2118,16 +2111,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_importAs: // normal AST:
     // match at_ifident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2138,8 +2131,8 @@ AST::isValid() const
     c++;
 
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2149,16 +2142,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_provide: // normal AST:
     // match at_ifident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2169,8 +2162,8 @@ AST::isValid() const
     c++;
 
     // match at_ident+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2178,22 +2171,22 @@ AST::isValid() const
       astChTypeError(*this, at_ident, child(c)->astType, 1);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_ident], child(c)->astType))
         astChTypeError(*this, at_ident, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_import: // normal AST:
     // match at_ifident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2204,22 +2197,22 @@ AST::isValid() const
     c++;
 
     // match at_ifsel*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_ifsel], child(c)->astType))
         astChTypeError(*this, at_ifsel, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_ifsel: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2230,8 +2223,8 @@ AST::isValid() const
     c++;
 
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2241,30 +2234,30 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_declares: // normal AST:
     // match at_declare*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_declare], child(c)->astType))
         astChTypeError(*this, at_declare, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_declare: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2275,33 +2268,33 @@ AST::isValid() const
     c++;
 
     // match agt_type?
-    if ((c < children->size()) && ISSET(astMembers[agt_type], child(c)->astType))
+    if ((c < children.size()) && ISSET(astMembers[agt_type], child(c)->astType))
       c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_tvlist: // normal AST:
     // match agt_tvar*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_tvar], child(c)->astType))
         astChTypeError(*this, agt_tvar, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_constructors: // normal AST:
     // match at_constructor+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2309,22 +2302,22 @@ AST::isValid() const
       astChTypeError(*this, at_constructor, child(c)->astType, 0);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_constructor], child(c)->astType))
         astChTypeError(*this, at_constructor, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_constructor: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2335,36 +2328,36 @@ AST::isValid() const
     c++;
 
     // match agt_fielditem*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_fielditem], child(c)->astType))
         astChTypeError(*this, agt_fielditem, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_fields: // normal AST:
     // match agt_fielditem*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_fielditem], child(c)->astType))
         astChTypeError(*this, agt_fielditem, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_field: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2375,8 +2368,8 @@ AST::isValid() const
     c++;
 
     // match agt_type
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2386,16 +2379,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_fill: // normal AST:
     // match agt_type
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2405,16 +2398,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_reserved: // normal AST:
     // match agt_type
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2425,8 +2418,8 @@ AST::isValid() const
     c++;
 
     // match at_intLiteral
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2436,16 +2429,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_bitfield: // normal AST:
     // match at_primaryType
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2456,8 +2449,8 @@ AST::isValid() const
     c++;
 
     // match at_intLiteral
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2467,16 +2460,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_refType: // normal AST:
     // match agt_type
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2486,16 +2479,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_byrefType: // normal AST:
     // match agt_type
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2505,16 +2498,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_valType: // normal AST:
     // match agt_type
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2524,16 +2517,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_fn: // normal AST:
     // match at_fnargVec
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2544,8 +2537,8 @@ AST::isValid() const
     c++;
 
     // match agt_type
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2555,37 +2548,37 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_primaryType: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_fnargVec: // normal AST:
     // match agt_type*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_type], child(c)->astType))
         astChTypeError(*this, agt_type, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_arrayType: // normal AST:
     // match agt_type
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2596,8 +2589,8 @@ AST::isValid() const
     c++;
 
     // match at_intLiteral
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2607,16 +2600,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_vectorType: // normal AST:
     // match agt_type
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2627,19 +2620,19 @@ AST::isValid() const
     c++;
 
     // match at_intLiteral?
-    if ((c < children->size()) && ISSET(astMembers[at_intLiteral], child(c)->astType))
+    if ((c < children.size()) && ISSET(astMembers[at_intLiteral], child(c)->astType))
       c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_mutableType: // normal AST:
     // match agt_type
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2649,16 +2642,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_typeapp: // normal AST:
     // match agt_var
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2669,8 +2662,8 @@ AST::isValid() const
     c++;
 
     // match agt_type+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2678,36 +2671,36 @@ AST::isValid() const
       astChTypeError(*this, agt_type, child(c)->astType, 1);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_type], child(c)->astType))
         astChTypeError(*this, agt_type, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_exceptionType: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_dummyType: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_identPattern: // normal AST:
     // match agt_var
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2718,19 +2711,19 @@ AST::isValid() const
     c++;
 
     // match agt_qtype?
-    if ((c < children->size()) && ISSET(astMembers[agt_qtype], child(c)->astType))
+    if ((c < children.size()) && ISSET(astMembers[agt_qtype], child(c)->astType))
       c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_tqexpr: // normal AST:
     // match agt_eform
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2741,8 +2734,8 @@ AST::isValid() const
     c++;
 
     // match agt_type
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2752,23 +2745,23 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_unit: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_suspend: // normal AST:
     // match agt_var
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2779,8 +2772,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2790,16 +2783,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_makevectorL: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2810,8 +2803,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2821,16 +2814,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_vector: // normal AST:
     // match agt_expr+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2838,22 +2831,22 @@ AST::isValid() const
       astChTypeError(*this, agt_expr, child(c)->astType, 0);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_expr], child(c)->astType))
         astChTypeError(*this, agt_expr, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_array: // normal AST:
     // match agt_expr+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2861,22 +2854,22 @@ AST::isValid() const
       astChTypeError(*this, agt_expr, child(c)->astType, 0);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_expr], child(c)->astType))
         astChTypeError(*this, agt_expr, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_begin: // normal AST:
     // match agt_expr_or_define+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2884,22 +2877,22 @@ AST::isValid() const
       astChTypeError(*this, agt_expr_or_define, child(c)->astType, 0);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_expr_or_define], child(c)->astType))
         astChTypeError(*this, agt_expr_or_define, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_select: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2910,8 +2903,8 @@ AST::isValid() const
     c++;
 
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2921,16 +2914,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_fqCtr: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2941,8 +2934,8 @@ AST::isValid() const
     c++;
 
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2952,16 +2945,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_sel_ctr: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2972,8 +2965,8 @@ AST::isValid() const
     c++;
 
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -2983,16 +2976,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_array_nth: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3003,8 +2996,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3014,16 +3007,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_vector_nth: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3034,8 +3027,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3045,16 +3038,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_array_length: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3064,16 +3057,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_vector_length: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3083,16 +3076,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_lambda: // normal AST:
     // match at_argVec
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3103,8 +3096,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3114,30 +3107,30 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_argVec: // normal AST:
     // match at_identPattern*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_identPattern], child(c)->astType))
         astChTypeError(*this, at_identPattern, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_apply: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3148,22 +3141,22 @@ AST::isValid() const
     c++;
 
     // match agt_expr*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_expr], child(c)->astType))
         astChTypeError(*this, agt_expr, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_struct_apply: // normal AST:
     // match agt_var
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3174,8 +3167,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3183,22 +3176,22 @@ AST::isValid() const
       astChTypeError(*this, agt_expr, child(c)->astType, 1);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_expr], child(c)->astType))
         astChTypeError(*this, agt_expr, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_ucon_apply: // normal AST:
     // match agt_ucon
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3209,8 +3202,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3218,22 +3211,22 @@ AST::isValid() const
       astChTypeError(*this, agt_expr, child(c)->astType, 1);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_expr], child(c)->astType))
         astChTypeError(*this, agt_expr, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_if: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3244,8 +3237,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3256,8 +3249,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3267,16 +3260,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_when: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3287,8 +3280,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3298,16 +3291,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_and: // normal AST:
     // match agt_expr+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3315,22 +3308,22 @@ AST::isValid() const
       astChTypeError(*this, agt_expr, child(c)->astType, 0);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_expr], child(c)->astType))
         astChTypeError(*this, agt_expr, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_or: // normal AST:
     // match agt_expr+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3338,22 +3331,22 @@ AST::isValid() const
       astChTypeError(*this, agt_expr, child(c)->astType, 0);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_expr], child(c)->astType))
         astChTypeError(*this, agt_expr, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_not: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3363,16 +3356,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_cond: // normal AST:
     // match at_cond_legs
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3383,8 +3376,8 @@ AST::isValid() const
     c++;
 
     // match at_otherwise
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3394,30 +3387,30 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_cond_legs: // normal AST:
     // match at_cond_leg*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_cond_leg], child(c)->astType))
         astChTypeError(*this, at_cond_leg, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_cond_leg: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3428,8 +3421,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3439,16 +3432,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_otherwise: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3458,16 +3451,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_setbang: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3478,8 +3471,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3489,16 +3482,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_deref: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3508,16 +3501,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_dup: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3527,16 +3520,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_inner_ref: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3547,8 +3540,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3558,16 +3551,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_allocREF: // normal AST:
     // match agt_type
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3577,16 +3570,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_copyREF: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3597,8 +3590,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3608,16 +3601,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_mkClosure: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3628,8 +3621,8 @@ AST::isValid() const
     c++;
 
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3639,16 +3632,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_setClosure: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3659,8 +3652,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3671,8 +3664,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3680,22 +3673,22 @@ AST::isValid() const
       astChTypeError(*this, agt_expr, child(c)->astType, 2);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_expr], child(c)->astType))
         astChTypeError(*this, agt_expr, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_switch: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3706,8 +3699,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3718,8 +3711,8 @@ AST::isValid() const
     c++;
 
     // match at_sw_legs
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3730,8 +3723,8 @@ AST::isValid() const
     c++;
 
     // match agt_ow
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3741,16 +3734,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_sw_legs: // normal AST:
     // match at_sw_leg+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3758,22 +3751,22 @@ AST::isValid() const
       astChTypeError(*this, at_sw_leg, child(c)->astType, 0);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_sw_leg], child(c)->astType))
         astChTypeError(*this, at_sw_leg, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_sw_leg: // normal AST:
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3784,8 +3777,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3796,8 +3789,8 @@ AST::isValid() const
     c++;
 
     // match agt_ucon+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3805,22 +3798,22 @@ AST::isValid() const
       astChTypeError(*this, agt_ucon, child(c)->astType, 2);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[agt_ucon], child(c)->astType))
         astChTypeError(*this, agt_ucon, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_try: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3831,8 +3824,8 @@ AST::isValid() const
     c++;
 
     // match at_ident
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3843,8 +3836,8 @@ AST::isValid() const
     c++;
 
     // match at_sw_legs
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3855,8 +3848,8 @@ AST::isValid() const
     c++;
 
     // match agt_ow
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3866,16 +3859,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_throw: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3885,16 +3878,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_let: // normal AST:
     // match at_letbindings
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3905,8 +3898,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3917,8 +3910,8 @@ AST::isValid() const
     c++;
 
     // match at_constraints
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3928,16 +3921,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_letbindings: // normal AST:
     // match at_letbinding+
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3945,22 +3938,22 @@ AST::isValid() const
       astChTypeError(*this, at_letbinding, child(c)->astType, 0);
       errorsPresent = true;
     }
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_letbinding], child(c)->astType))
         astChTypeError(*this, at_letbinding, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_letbinding: // normal AST:
     // match at_identPattern
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3971,8 +3964,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -3982,16 +3975,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_letrec: // normal AST:
     // match at_letbindings
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4002,8 +3995,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4014,8 +4007,8 @@ AST::isValid() const
     c++;
 
     // match at_constraints
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4025,16 +4018,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_do: // normal AST:
     // match at_dobindings
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4045,8 +4038,8 @@ AST::isValid() const
     c++;
 
     // match at_dotest
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4057,8 +4050,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4068,30 +4061,30 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_dobindings: // normal AST:
     // match at_dobinding*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_dobinding], child(c)->astType))
         astChTypeError(*this, at_dobinding, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_dobinding: // normal AST:
     // match at_identPattern
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4102,8 +4095,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4114,8 +4107,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4125,16 +4118,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_dotest: // normal AST:
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4145,8 +4138,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4156,16 +4149,16 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_localFrame: // normal AST:
     // match at_frameBindings
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4176,8 +4169,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4187,30 +4180,30 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_frameBindings: // normal AST:
     // match at_identPattern*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_identPattern], child(c)->astType))
         astChTypeError(*this, at_identPattern, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_letStar: // normal AST:
     // match at_letbindings
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4221,8 +4214,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4232,30 +4225,30 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_identList: // normal AST:
     // match at_ident*
-    while (c < children->size()) {
+    while (c < children.size()) {
       if (!ISSET(astMembers[at_ident], child(c)->astType))
         astChTypeError(*this, at_ident, child(c)->astType, c);
       c++;
     }
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_container: // normal AST:
     // match at_identList
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4266,8 +4259,8 @@ AST::isValid() const
     c++;
 
     // match agt_expr
-    if(c >= children->size()) {
-      astChNumError(*this, c+1, children->size());
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
@@ -4277,26 +4270,26 @@ AST::isValid() const
     }
     c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_docString: // normal AST:
     // match at_stringLiteral?
-    if ((c < children->size()) && ISSET(astMembers[at_stringLiteral], child(c)->astType))
+    if ((c < children.size()) && ISSET(astMembers[at_stringLiteral], child(c)->astType))
       c++;
 
-    if(c != children->size()) {
-      astChNumError(*this, c, children->size());
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
       errorsPresent = true;
     }
     break;
 
   case at_letGather: // leaf AST:
-    if(children->size() != 0) {
-      astChNumError(*this, 0, children->size());
+    if(children.size() != 0) {
+      astChNumError(*this, 0, children.size());
       errorsPresent = true;
     }
     break;

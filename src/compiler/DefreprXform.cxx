@@ -112,7 +112,7 @@ reprXform(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
   case at_reprctrs:
     {
       GCPtr<AST> ctrs = new AST(at_constructors, ast->loc);
-      for(size_t c=0; c < ast->children->size(); c++)
+      for(size_t c=0; c < ast->children.size(); c++)
 	ctrs->addChild(reprXform(ast->child(c), errStream, errFree));
       ast = ctrs;
       break;
@@ -122,11 +122,11 @@ reprXform(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
     {
       GCPtr<AST> ctr = ast->child(0);      
 
-      for(size_t i=1; i < ast->children->size(); i++) {
+      for(size_t i=1; i < ast->children.size(); i++) {
 	GCPtr<AST> where = ast->child(i);
 	bool found = false;
 
-	for(size_t j=1; j < ctr->children->size(); j++) {
+	for(size_t j=1; j < ctr->children.size(); j++) {
 	  GCPtr<AST> fld = ctr->child(j);
 		  
 	  if(where->child(0)->s == fld->child(0)->s) {
@@ -178,7 +178,7 @@ reprXform(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
   default:
     {
       // value definitions are ignored
-      for(size_t c=0; c < ast->children->size(); c++)
+      for(size_t c=0; c < ast->children.size(); c++)
 	ast->child(c) = reprXform(ast->child(c), errStream, errFree);
       break;
     }

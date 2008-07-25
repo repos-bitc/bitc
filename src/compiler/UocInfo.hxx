@@ -38,9 +38,9 @@
  *
  **************************************************************************/
 
-#include <sherpa/Path.hxx>
-#include <sherpa/LexLoc.hxx>
-#include <sherpa/CVector.hxx>
+#include <libsherpa/Path.hxx>
+#include <libsherpa/LexLoc.hxx>
+#include <libsherpa/CVector.hxx>
 
 #include "Environment.hxx"
 #include "AST.hxx"

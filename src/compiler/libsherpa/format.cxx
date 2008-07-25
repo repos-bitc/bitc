@@ -46,7 +46,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "format.hxx"
+#include <libsherpa/format.hxx>
 
 namespace sherpa {
   std::string vformat(const char *fmt, va_list ap)

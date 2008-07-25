@@ -41,8 +41,8 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
-#include <sherpa/CVector.hxx>
-#include <sherpa/GCPtr.hxx>
+#include <libsherpa/CVector.hxx>
+#include <libsherpa/GCPtr.hxx>
 #include <Eliminate.hxx>
 #include <assert.h>
 

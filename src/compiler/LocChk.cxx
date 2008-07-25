@@ -42,9 +42,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <sherpa/UExcept.hxx>
-#include <sherpa/CVector.hxx>
-#include <sherpa/avl.hxx>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
+#include <libsherpa/avl.hxx>
 #include <assert.h>
 #include "AST.hxx"
 #include "Type.hxx"
@@ -67,7 +67,7 @@ LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
   case at_vector_nth:
   case at_deref:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	LocChk(errStream, errFree, ast->child(c), false);
        
       return true;
@@ -129,7 +129,7 @@ LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
   case at_switch:
   case at_try:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	if(c != IGNORE(ast))
 	  LocChk(errStream, errFree, ast->child(c), inSET);
       
@@ -138,7 +138,7 @@ LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
     
   default:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	LocChk(errStream, errFree, ast->child(c), inSET);
 
       return false;

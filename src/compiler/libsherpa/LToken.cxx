@@ -46,7 +46,7 @@
 #include <string>
 #include <sstream>
 
-#include "LToken.hxx"
+#include <libsherpa/LToken.hxx>
 
 namespace sherpa {
 

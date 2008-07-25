@@ -67,13 +67,13 @@ static inline GCPtr<AST>
 getLastLB(GCPtr<AST> grandLet)
 {
   GCPtr<AST> lbs = grandLet->child(0);
-  return lbs->child(lbs->children->size() - 1);
+  return lbs->child(lbs->children.size() - 1);
 }
 
 static void
 addIL(GCPtr<AST> identList, GCPtr<AST> id)
 {
-  identList->children->append(id);
+  identList->children.push_back(id);
 }
 
 
@@ -103,7 +103,7 @@ addLB(GCPtr<AST> grandLet, GCPtr<AST> identList,
   GCPtr<AST> ip = new AST(at_identPattern, id->loc, id);
   GCPtr<AST> lb = new AST(at_letbinding, ip->loc, ip, ast);
   lb->Flags |= (LB_IS_ART | lbFlags);
-  grandLet->child(0)->children->append(lb);
+  grandLet->child(0)->children.push_back(lb);
   if(addToIL)
     addIL(identList, id);  
   return UseCase(id);
@@ -144,7 +144,7 @@ warnTmp(std::ostream &errStream, GCPtr<AST> ast)
 
 #define SETGL(exp, gl)			   \
   do {					   \
-    if((gl)->child(0)->children->size()) \
+    if((gl)->child(0)->children.size()) \
       (exp) = (gl);			   \
     else				   \
       (exp) = FEXPR(gl);		   \
@@ -189,7 +189,7 @@ isTrivialInit(GCPtr<AST> ast)
     
   case at_begin:
     {
-      for(size_t c = 0; c < ast->children->size(); c++)
+      for(size_t c = 0; c < ast->children.size(); c++)
 	if(!isTrivialInit(ast->child(c)))
 	  return false;
       return true;
@@ -315,7 +315,7 @@ ssa(std::ostream& errStream,
     {            
       // match agt_definition*
       for (c = (ast->astType == at_interface)?1:0;
-	   c < ast->children->size(); 
+	   c < ast->children.size(); 
 	   c++) {
 	GCPtr<AST> defn = ast->child(c);
 	SSA(errStream, uoc, defn, grandLet, 
@@ -458,7 +458,7 @@ ssa(std::ostream& errStream,
   case at_copyREF:
   case at_setClosure:
     {      
-      for(c=0; c < ast->children->size(); c++) {
+      for(c=0; c < ast->children.size(); c++) {
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 
 	    ast, c, flags);
 	ast->child(c) = FEXPR(grandLet);
@@ -473,7 +473,7 @@ ssa(std::ostream& errStream,
   case at_struct_apply:
   case at_ucon_apply: 
     {
-      for(c=0; c < ast->children->size(); c++) {
+      for(c=0; c < ast->children.size(); c++) {
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 
 	    ast, c, flags);
 	ast->child(c) = FEXPR(grandLet);
@@ -489,7 +489,7 @@ ssa(std::ostream& errStream,
   case at_throw:
   case at_mkClosure:
     {
-      for(c=0; c < ast->children->size(); c++) {
+      for(c=0; c < ast->children.size(); c++) {
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 
 	    ast, c, flags);
  	ast->child(c) = FEXPR(grandLet);
@@ -638,7 +638,7 @@ ssa(std::ostream& errStream,
 	  ast, 0, flags);
       ast->child(0) = FEXPR(grandLet);
       
-      for(c=1; c < ast->children->size(); c++) {
+      for(c=1; c < ast->children.size(); c++) {
 	
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 
 	    ast, c, flags);
@@ -706,7 +706,7 @@ ssa(std::ostream& errStream,
 
   case at_begin:
     {
-      for(c=0; c < ast->children->size(); c++) {
+      for(c=0; c < ast->children.size(); c++) {
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 
 	       ast, c, flags);
 	ast->child(c) = FEXPR(grandLet);
@@ -717,7 +717,7 @@ ssa(std::ostream& errStream,
 
   case at_not:
     {
-      for(c=0; c < ast->children->size(); c++) {
+      for(c=0; c < ast->children.size(); c++) {
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 
 	       ast, c, flags);
 	ast->child(c) = FEXPR(grandLet);
@@ -780,25 +780,25 @@ ssa(std::ostream& errStream,
       GCPtr<AST> ifizedAST = new AST(at_if, ast->child(0)->loc);
       GCPtr<AST> ifAst = ifizedAST;
       GCPtr<AST> prev = NULL;
-      for(c = 0; c < ast->children->size() - 1; c++) {
+      for(c = 0; c < ast->children.size() - 1; c++) {
 	GCPtr<AST> falseAst =  new AST(at_boolLiteral, ast->child(c)->loc);
 	falseAst->litValue.b = false;
 	falseAst->s = "#f";
 	falseAst->symType = new Type(ty_bool);
 
 	ifAst->symType = ast->child(c)->symType;
-	ifAst->children->append(ast->child(c));
-	ifAst->children->append(new AST(at_if, ast->child(c+1)->loc));
-	ifAst->children->append(falseAst);
+	ifAst->children.push_back(ast->child(c));
+	ifAst->children.push_back(new AST(at_if, ast->child(c+1)->loc));
+	ifAst->children.push_back(falseAst);
 	prev = ifAst;
 	ifAst = ifAst->child(1);
       }
       
       if(prev)
 	prev->child(1) = ifAst = 
-	  ast->child(ast->children->size() -1);
+	  ast->child(ast->children.size() -1);
       else
-	ifAst = ast->child(ast->children->size() -1);
+	ifAst = ast->child(ast->children.size() -1);
 	
       parent->child(chno) = ifizedAST;
       SSA(errStream, uoc, ifizedAST, grandLet, identList, 
@@ -810,25 +810,25 @@ ssa(std::ostream& errStream,
       GCPtr<AST> ifizedAST = new AST(at_if, ast->child(0)->loc);
       GCPtr<AST> ifAst = ifizedAST;
       GCPtr<AST> prev = NULL;
-      for(c = 0; c < ast->children->size() - 1; c++) {
+      for(c = 0; c < ast->children.size() - 1; c++) {
 	GCPtr<AST> trueAst =  new AST(at_boolLiteral, ast->child(c)->loc);
 	trueAst->litValue.b = true;
 	trueAst->s = "#t";
 	trueAst->symType = new Type(ty_bool);
 
 	ifAst->symType = ast->child(c)->symType;
-	ifAst->children->append(ast->child(c));
-	ifAst->children->append(trueAst);
-	ifAst->children->append(new AST(at_if, ast->child(c+1)->loc));
+	ifAst->children.push_back(ast->child(c));
+	ifAst->children.push_back(trueAst);
+	ifAst->children.push_back(new AST(at_if, ast->child(c+1)->loc));
 	prev = ifAst;
 	ifAst = ifAst->child(2);
       }      
 
       if(prev)
 	prev->child(2) = ifAst = 
-	  ast->child(ast->children->size() -1);
+	  ast->child(ast->children.size() -1);
       else
-	ifAst = ast->child(ast->children->size() -1);
+	ifAst = ast->child(ast->children.size() -1);
 	
       parent->child(chno) = ifizedAST;
       SSA(errStream, uoc, ifizedAST, grandLet, identList, 
@@ -843,14 +843,14 @@ ssa(std::ostream& errStream,
       GCPtr<AST> ifizedAST = new AST(at_if, caselegs->loc);
       GCPtr<AST> ifAst = ifizedAST;
       GCPtr<AST> prev = NULL;
-      for(c = 0; c < caselegs->children->size(); c++) {
+      for(c = 0; c < caselegs->children.size(); c++) {
 	GCPtr<AST> caseleg = caselegs->child(c);	
 	ifAst->loc = caseleg->loc;
 	ifAst->symType = caseleg->symType;
-	ifAst->children->append(caseleg->child(0));
-	ifAst->children->append(caseleg->child(1));
+	ifAst->children.push_back(caseleg->child(0));
+	ifAst->children.push_back(caseleg->child(1));
 
-	ifAst->children->append(new AST(at_if,
+	ifAst->children.push_back(new AST(at_if,
 				       caselegs->child(c)->loc));
 	prev = ifAst;
 	ifAst = ifAst->child(2);	
@@ -894,7 +894,7 @@ ssa(std::ostream& errStream,
       
       GCPtr<AST> cases = ast->child(2);      
       // the cases
-      for(c=0; c < cases->children->size(); c++) {
+      for(c=0; c < cases->children.size(); c++) {
 	GCPtr<AST> theCase = cases->child(c);
 	GCPtr<AST> gl = newGrandLet(theCase);
 
@@ -934,7 +934,7 @@ ssa(std::ostream& errStream,
       GCPtr<AST> theIdent;
 
       GCPtr<AST> dbs = ast->child(0);     
-      for (size_t c = 0; c < dbs->children->size(); c++) {
+      for (size_t c = 0; c < dbs->children.size(); c++) {
 	GCPtr<AST> db = dbs->child(c);
 	assert(db->child(0)->astType == at_identPattern);	
 	GCPtr<AST> ident = db->child(0)->child(0);
@@ -994,7 +994,7 @@ ssa(std::ostream& errStream,
 
       // Let bindings
       GCPtr<AST> lbs = ast->child(0);     
-      for (size_t c = 0; c < lbs->children->size(); c++) {
+      for (size_t c = 0; c < lbs->children.size(); c++) {
 	GCPtr<AST> lb = lbs->child(c);
 	assert(lb->child(0)->astType == at_identPattern);	
 	GCPtr<AST> ident = lb->child(0)->child(0);

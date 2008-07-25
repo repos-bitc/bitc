@@ -40,7 +40,7 @@
 #include "Trail.hxx"
 #include "Options.hxx"
 #include <assert.h>
-#include <sherpa/CVector.hxx>
+#include <libsherpa/CVector.hxx>
 #include "Eliminate.hxx"
 
 using namespace sherpa;

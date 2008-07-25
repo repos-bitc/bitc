@@ -64,7 +64,7 @@ warnUnresRef(std::ostream& errStream,
   bool errorFree = true;
   
   assert(mod->astType == at_module);
-  for(size_t c=0; c < mod->children->size(); c++) {
+  for(size_t c=0; c < mod->children.size(); c++) {
     GCPtr<AST> ast = mod->child(c);
     switch(ast->astType) {
     case at_declunion:
@@ -778,7 +778,7 @@ resolve(std::ostream& errStream,
       ast->Flags |= ID_IS_GLOBAL;
       ast->uoc = ast->child(0)->symbolDef->uoc;
 
-      ast->children->erase();
+      ast->children.clear();
 
       // SHOULD THE PUBLIC FLAG BE TAKEN OFF HERE ??
       RESOLVE(ast, env, lamLevel, mode, identType, currLB,  
@@ -792,7 +792,7 @@ resolve(std::ostream& errStream,
       flags |= IS_INTERFACE;
 
       // match agt_definition*
-      for (size_t c = 1; c < ast->children->size(); c++)
+      for (size_t c = 1; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
 		NULL, flags);
 
@@ -803,7 +803,7 @@ resolve(std::ostream& errStream,
     {
       flags |= IS_MODULE;
       // match agt_definition*
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
 		NULL, flags);
 
@@ -856,10 +856,10 @@ resolve(std::ostream& errStream,
       if(ast->astType == at_defunion) {
 	GCPtr<AST> ctrs = ast->child(4);
 	GCPtr< CVector<std::string> > names = new CVector<std::string> ;
-	for(size_t c=0; c < ctrs->children->size(); c++) {
+	for(size_t c=0; c < ctrs->children.size(); c++) {
 	  GCPtr<AST> ctr = ctrs->child(c);
 	  names.append(ctr->child(0)->s);
-	  for(size_t d=1; d < ctr->children->size(); d++) {
+	  for(size_t d=1; d < ctr->children.size(); d++) {
 	    GCPtr<AST> field = ctr->child(d);
 	    if(names.contains(field->child(0)->s)) {
 	      errStream << field->child(0)->loc << ": "
@@ -981,7 +981,7 @@ resolve(std::ostream& errStream,
       GCPtr<Environment<AST> > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
-      IdentType it = ((ast->children->size() > 1) ? 
+      IdentType it = ((ast->children.size() > 1) ? 
 		      id_constructor : id_value);
       
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
@@ -994,7 +994,7 @@ resolve(std::ostream& errStream,
       // match at_fields+
       GCPtr< CVector<std::string> > names = new CVector<std::string>;
       names->append(ast->child(0)->s);
-      for (size_t c = 1; c < ast->children->size(); c++) {
+      for (size_t c = 1; c < ast->children.size(); c++) {
 	GCPtr<AST> field = ast->child(c);
 	RESOLVE(field, tmpEnv, lamLevel, USE_MODE, 
 		id_type, ast, 
@@ -1105,7 +1105,7 @@ resolve(std::ostream& errStream,
   case at_tcdecls:
     {
       // match at agt_tcdecl+ 
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, 
 		USE_MODE, identType, currLB,  flags);
       
@@ -1131,7 +1131,7 @@ resolve(std::ostream& errStream,
 	      id_typeclass, currLB, flags);
 
       // match at agt_type+
-      for (size_t c = 1; c < ast->children->size(); c++)
+      for (size_t c = 1; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		id_type, currLB, flags);
 
@@ -1141,7 +1141,7 @@ resolve(std::ostream& errStream,
   case at_method_decls:
     {
       // match at at_method_decl+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, 
 		DEF_MODE, id_value, currLB, flags);
       
@@ -1185,7 +1185,7 @@ resolve(std::ostream& errStream,
   case at_methods:
     { 
       // match at expr+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, 
 		USE_MODE, id_value, currLB, flags);
       
@@ -1202,7 +1202,7 @@ resolve(std::ostream& errStream,
 
       GCPtr<Environment<AST> > ifEnv = ifAst->envs.env;
 
-      for (size_t i = 1; i < ast->children->size(); i++) {
+      for (size_t i = 1; i < ast->children.size(); i++) {
 	GCPtr<AST> provideName=ast->child(i);
 	GCPtr<Binding<AST> > bndg = ifEnv->doGetBinding(provideName->s);
         if (!bndg) {
@@ -1297,13 +1297,13 @@ resolve(std::ostream& errStream,
 	break;
       }
 
-      if(ast->children->size() == 1) {
+      if(ast->children.size() == 1) {
 	// This is an import-all form
 	aliasPublicBindings(std::string(), aliasEnv, iface->env, tmpEnv);
       }
       else {
 	// Need to import only certain bindings
-	for (size_t c = 1; c < ast->children->size(); c++) {
+	for (size_t c = 1; c < ast->children.size(); c++) {
 	  GCPtr<AST> alias = ast->child(c);
 	  GCPtr<AST> localName = alias->child(0);
 	  GCPtr<AST> pubName = alias->child(1);
@@ -1367,7 +1367,7 @@ resolve(std::ostream& errStream,
   case at_declares:
     {
       // match at_declare*
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, NULL_MODE, identType,  
 		currLB,  flags);
 
@@ -1399,7 +1399,7 @@ resolve(std::ostream& errStream,
       }	
 	    
       // match agt_type?
-      if (ast->children->size() > 1) {
+      if (ast->children.size() > 1) {
 	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
 		id_type, currLB, flags);
       }
@@ -1410,7 +1410,7 @@ resolve(std::ostream& errStream,
   case at_tvlist:
     {
       // match agt_tvar*
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, mode, identType, 
 		currLB, flags);
 
@@ -1432,7 +1432,7 @@ resolve(std::ostream& errStream,
       
       // FIX: Isn't this stale now? Aren't constructor names
       // now constrained to unqualified idents?
-      for (size_t c = 0; c < ast->children->size(); c++) {
+      for (size_t c = 0; c < ast->children.size(); c++) {
 	if(varConst) {
 	  if(ast->child(c)->child(0)->astType != at_usesel ||
 	     ast->child(c)->child(0)->child(0)->s != ifName) {
@@ -1463,7 +1463,7 @@ resolve(std::ostream& errStream,
     {
       // match at_ident
       // careful: Constructors taking no arguments are treated as values.
-      if(ast->children->size() > 1)
+      if(ast->children.size() > 1)
 	RESOLVE(ast->child(0), env, lamLevel, DEF_MODE,
 		id_constructor,  currLB, 
 		flags | BIND_PUBLIC);
@@ -1474,7 +1474,7 @@ resolve(std::ostream& errStream,
       
       ast->child(0)->Flags |= ID_IS_CTOR;
             
-      for (size_t c = 1; c < ast->children->size(); c++) {
+      for (size_t c = 1; c < ast->children.size(); c++) {
 	GCPtr<AST> fldc = ast->child(c);
 	RESOLVE(fldc, env, lamLevel, USE_MODE, identType,
 		currLB, flags); 
@@ -1502,7 +1502,7 @@ resolve(std::ostream& errStream,
   case at_fields:
     {
       // match at_field*
-      for (size_t c = 0; c < ast->children->size(); c++) {
+      for (size_t c = 0; c < ast->children.size(); c++) {
 	GCPtr<AST> fldc = ast->child(c);
 	RESOLVE(fldc, env, lamLevel, USE_MODE, identType,
 		currLB, flags); 
@@ -1533,7 +1533,7 @@ resolve(std::ostream& errStream,
       ast->child(0)->fqn = FQName(FQ_NOIF, ast->child(0)->s);
 
       // match agt_type?
-      if (ast->children->size() > 1) {
+      if (ast->children.size() > 1) {
 	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
 		id_type, currLB, 
 		flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
@@ -1623,7 +1623,7 @@ resolve(std::ostream& errStream,
   case at_fnargVec:
     {
       // match agt_type*
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		id_type, currLB, flags);
 
@@ -1662,7 +1662,7 @@ resolve(std::ostream& errStream,
 	      id_type, currLB, flags);
 
       // match at_intLiteral?
-      if (ast->children->size() > 1) {
+      if (ast->children.size() > 1) {
 	RESOLVE(ast->child(1), env, lamLevel, NULL_MODE, identType,
 		currLB, flags); 
       }
@@ -1692,7 +1692,7 @@ resolve(std::ostream& errStream,
   case at_typeapp:
     {
       // match agt_var agt_tvar+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		id_type, currLB, flags);
 
@@ -1710,7 +1710,7 @@ resolve(std::ostream& errStream,
 
   case at_constraints:
     {
-      for(size_t c=0; c < ast->children->size(); c++)
+      for(size_t c=0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		id_type, currLB, flags);
       break;
@@ -1751,7 +1751,7 @@ resolve(std::ostream& errStream,
       
       // Type Qualifications ONLY in Binding Patterns
       // match agt_type?
-      if (ast->children->size() > 1) {
+      if (ast->children.size() > 1) {
 	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, id_type,
 		currLB, flags); 
       }
@@ -1790,7 +1790,7 @@ resolve(std::ostream& errStream,
   case at_allocREF:
     {
       // match at_type, at_fn+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, id_type, currLB, flags);
       break;
     }
@@ -1798,7 +1798,7 @@ resolve(std::ostream& errStream,
   case at_mkClosure:
     {
       // match at_type, at_fn+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		id_value, currLB, 
 		flags | INCOMPLETE_OK);
@@ -1809,7 +1809,7 @@ resolve(std::ostream& errStream,
   case at_setClosure:
     {
       // match at_type, at_fn+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		id_value, currLB, flags);
       break;
@@ -1833,7 +1833,7 @@ resolve(std::ostream& errStream,
   case at_vector:
     {
       // match agt_expr+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, id_value,
 		currLB, flags); 
 
@@ -1843,7 +1843,7 @@ resolve(std::ostream& errStream,
   case at_begin:
     {
       // match agt_expr+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, id_value,
 		currLB, flags);
 
@@ -1957,7 +1957,7 @@ resolve(std::ostream& errStream,
 
       // match agt_bindingPatterns
       GCPtr<AST> argVec = ast->child(0);
-      for (size_t c = 0; c < argVec->children->size(); c++)
+      for (size_t c = 0; c < argVec->children.size(); c++)
 	RESOLVE(argVec->child(c), lamEnv, lamEnv, DEF_MODE, 
 		id_value, currLB, flags);
 
@@ -2000,7 +2000,7 @@ resolve(std::ostream& errStream,
  
       unsigned long clFlags = 0;      
       
-      for (size_t c = 1; c < ast->children->size(); c++)
+      for (size_t c = 1; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		id_value, currLB, 
 		flags | clFlags);
@@ -2031,7 +2031,7 @@ resolve(std::ostream& errStream,
   case at_not:
     {
       // match agt_expr+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		id_value, currLB, flags);
 
@@ -2053,7 +2053,7 @@ resolve(std::ostream& errStream,
   case at_cond_legs:
     {
       // match at_cond_leg+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		id_value, currLB, flags);
 
@@ -2149,7 +2149,7 @@ resolve(std::ostream& errStream,
   case at_sw_legs:
     {
       // match at_case_leg+ or at_sw_leg+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		id_value, currLB, flags);
 
@@ -2169,14 +2169,14 @@ resolve(std::ostream& errStream,
       ast->child(0)->Flags2 |= ID_FOR_SWITCH;
 
       /* match at_expr */
-      if((flags & WITHIN_CATCH) && (ast->children->size() > 3))
+      if((flags & WITHIN_CATCH) && (ast->children.size() > 3))
 	flags |= WITHIN_CATCH_MC;
 	
       RESOLVE(ast->child(1), legEnv, lamLevel, USE_MODE, 
 	      id_value, currLB, flags);
 
       /* match at_ident -- the constructors*/
-      for(size_t c=2; c < ast->children->size(); c++)
+      for(size_t c=2; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), legEnv, lamLevel, USE_MODE, 
 		id_value, currLB, (flags | RESOLVE_APPLY_MODE));      
       
@@ -2237,7 +2237,7 @@ resolve(std::ostream& errStream,
       
       // match at_dobindings
       // First process the initializers.
-      for (size_t c = 0; c < dbs->children->size(); c++) {
+      for (size_t c = 0; c < dbs->children.size(); c++) {
 	GCPtr<AST> db = dbs->child(c);	
 	GCPtr<AST> init = db->child(1);
 	RESOLVE(init, doEnv, lamLevel, USE_MODE, id_value, 
@@ -2245,7 +2245,7 @@ resolve(std::ostream& errStream,
       }
             
       // First add the definitions.
-      for (size_t c = 0; c < dbs->children->size(); c++) {
+      for (size_t c = 0; c < dbs->children.size(); c++) {
 	GCPtr<AST> db = dbs->child(c);	
 	GCPtr<AST> localDef = db->child(0);
 	//GCPtr<AST> init = db->child(1);
@@ -2257,7 +2257,7 @@ resolve(std::ostream& errStream,
       markComplete(doEnv);
       
       // Then process all the next step initializers
-      for (size_t c = 0; c < dbs->children->size(); c++) {
+      for (size_t c = 0; c < dbs->children.size(); c++) {
 	GCPtr<AST> db = dbs->child(c);	
 	GCPtr<AST> step = db->child(2);
 	RESOLVE(step, doEnv, lamLevel, USE_MODE, 
@@ -2278,7 +2278,7 @@ resolve(std::ostream& errStream,
     
   case at_dotest:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		id_value, currLB, flags);
       break;
@@ -2305,7 +2305,7 @@ resolve(std::ostream& errStream,
       // First Evaluate ALL the Expressions, then bind the values
       // match agt_expr
       // For each individual binding // match at_letbinding+
-      for (size_t c = 0; c < lbs->children->size(); c++) {
+      for (size_t c = 0; c < lbs->children.size(); c++) {
 	GCPtr<AST> lb = lbs->child(c);
 	
 	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
@@ -2314,7 +2314,7 @@ resolve(std::ostream& errStream,
       
       // match agt_bindingPattern
       // For each individual binding // match at_letbinding+
-      for (size_t c = 0; c < lbs->children->size(); c++) {
+      for (size_t c = 0; c < lbs->children.size(); c++) {
 	GCPtr<AST> lb = lbs->child(c);
 	
 	// match agt_bindingPattern
@@ -2360,7 +2360,7 @@ resolve(std::ostream& errStream,
       // individually
       // match agt_expr
       // For each individual binding // match at_letbinding+
-      for (size_t c = 0; c < lbs->children->size(); c++) {
+      for (size_t c = 0; c < lbs->children.size(); c++) {
 	GCPtr<AST> lb = lbs->child(c);
 	
 	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
@@ -2406,7 +2406,7 @@ resolve(std::ostream& errStream,
       lbs->Flags2 &= ~LBS_PROCESSED;
 
       // For each individual binding // match at_letbinding+
-      for (size_t c = 0; c < lbs->children->size(); c++) {
+      for (size_t c = 0; c < lbs->children.size(); c++) {
 	GCPtr<AST> lb = lbs->child(c);
       
 	// match agt_bindingPattern
@@ -2417,7 +2417,7 @@ resolve(std::ostream& errStream,
       }      
     
       // For each individual binding // match at_letbinding+
-      for (size_t c = 0; c < lbs->children->size(); c++) {
+      for (size_t c = 0; c < lbs->children.size(); c++) {
 	GCPtr<AST> lb = lbs->child(c);
 
 	// match agt_expr

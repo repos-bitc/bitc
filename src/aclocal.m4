@@ -1,12 +1,16 @@
-AC_DEFUN([CHECK_OSDOC], [
-  AC_CHECK_FILE(/usr/share/osdoc)
-  if test "$ac_cv_file__usr_share_osdoc" = "yes"; then
-    AC_DEFINE(HAVE_OSDOC, 1,
-              [Define if you have the OSDoc documentation tools])
-    HAVE_OSDOC="yes"
-  else
-    HAVE_OSDOC="no"
-    AC_MSG_WARN([Documentation cannot be built without OSDoc])
-  fi
-  AC_SUBST(HAVE_OSDOC)
-])dnl
+# generated automatically by aclocal 1.10 -*- Autoconf -*-
+
+# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+# 2005, 2006  Free Software Foundation, Inc.
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+m4_include([aclocal/ax_boost_base.m4])
+m4_include([aclocal/ax_boost_filesystem.m4])
+m4_include([aclocal/check_libicuuc.m4])

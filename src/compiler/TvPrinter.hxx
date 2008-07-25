@@ -43,7 +43,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <sherpa/avl.hxx>
+#include <libsherpa/avl.hxx>
 
 struct Type;
 

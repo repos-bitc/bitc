@@ -42,9 +42,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <sherpa/UExcept.hxx>
-#include <sherpa/CVector.hxx>
-#include <sherpa/avl.hxx>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
+#include <libsherpa/avl.hxx>
 #include <assert.h>
 #include "AST.hxx"
 #include "Type.hxx"
@@ -84,7 +84,7 @@ AllocCheck(std::ostream &errStream, GCPtr<AST> ast)
     break;
   }
   
-  for (size_t c = 0; c < ast->children->size(); c++)
+  for (size_t c = 0; c < ast->children.size(); c++)
     CHKERR(errFree, AllocCheck(errStream, ast->child(c)));
   
   return errFree;	   

@@ -515,7 +515,7 @@ name2fqn(GCPtr<AST> ast)
     // recursion stops.
   default:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	name2fqn(ast->child(c));
       break;
     }
@@ -563,19 +563,19 @@ clearConstraints(GCPtr<AST> ast)
   case at_recdef:
   case at_proclaim:
     assert(ast->child(2)->astType == at_constraints);
-    ast->child(2)->children->erase();
+    ast->child(2)->children.clear();
     break;
 
   case at_declstruct:
   case at_declunion:
     assert(ast->child(3)->astType == at_constraints);
-    ast->child(3)->children->erase();
+    ast->child(3)->children.clear();
     break;
 
   case at_defstruct:
   case at_defunion:
     assert(ast->child(5)->astType == at_constraints);
-    ast->child(5)->children->erase();
+    ast->child(5)->children.clear();
     break;
     
   case at_defexception:
@@ -584,7 +584,7 @@ clearConstraints(GCPtr<AST> ast)
   case at_let:
   case at_letrec:
     assert(ast->child(2)->astType == at_constraints);
-    ast->child(2)->children->erase();
+    ast->child(2)->children.clear();
     break;
     
   default:
@@ -625,7 +625,7 @@ substitute(GCPtr<AST> ast, GCPtr<AST> from, GCPtr<AST> to)
       if(ast->child(0)->symbolDef == from) 
 	return substitute(ast->child(0), from, to);
 
-      for(size_t c = 0; c < ast->children->size(); c++)
+      for(size_t c = 0; c < ast->children.size(); c++)
 	ast->child(c) = substitute(ast->child(c), from, to);
       
       return ast;
@@ -633,7 +633,7 @@ substitute(GCPtr<AST> ast, GCPtr<AST> from, GCPtr<AST> to)
       
   default:
     {
-      for(size_t c = 0; c < ast->children->size(); c++)
+      for(size_t c = 0; c < ast->children.size(); c++)
 	ast->child(c) = substitute(ast->child(c), from, to);
       
       return ast;
@@ -654,7 +654,7 @@ tvarSub(GCPtr<AST> ast, GCPtr<AST> tv, GCPtr<Type> typ)
       return ast;    
     
   default:    
-    for(size_t c = 0; c < ast->children->size(); c++)
+    for(size_t c = 0; c < ast->children.size(); c++)
       ast->child(c) = tvarSub(ast->child(c), tv, typ);
     return ast;
     
@@ -698,7 +698,7 @@ tvarInst(GCPtr<AST> ast, GCPtr<AST> scope,
   case at_switch:
   case at_try:
     {
-      for(size_t c = 0; c < ast->children->size(); c++)
+      for(size_t c = 0; c < ast->children.size(); c++)
 	if(c != IGNORE(ast))
 	  ast->child(c) = tvarInst(ast->child(c), scope, newBinds);
       return ast;
@@ -706,7 +706,7 @@ tvarInst(GCPtr<AST> ast, GCPtr<AST> scope,
     
   default:    
     {
-      for(size_t c = 0; c < ast->children->size(); c++)
+      for(size_t c = 0; c < ast->children.size(); c++)
 	ast->child(c) = tvarInst(ast->child(c), scope, newBinds);
       return ast;
     }
@@ -775,11 +775,11 @@ getIDFromInstantiation(GCPtr<AST> oldDefID, GCPtr<AST> newDef)
   
   // If we are looking for a constructor, find it and return 
   if(oldDefID->isUnionLeg()) {
-    oldDef->children->elem(4) = oldDef->children->elem(4);
+    oldDef->children[4] = oldDef->children[4];
     GCPtr<AST> oldCtrs = oldDef->child(4);
     GCPtr<AST> newCtrs = newDef->child(4);
     GCPtr<AST> newCtr = NULL;
-    for(size_t c=0; c < oldCtrs->children->size(); c++)
+    for(size_t c=0; c < oldCtrs->children.size(); c++)
       if(oldCtrs->child(c)->child(0) == oldDefID)
 	newCtr = newCtrs->child(c)->child(0);
     
@@ -1067,7 +1067,7 @@ UocInfo::recInstantiate(ostream &errStream,
     
   case at_typeapp:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	ast->child(c) = recInstantiate(errStream, 
 				       ast->child(c),
 				       errFree, worklist);
@@ -1120,7 +1120,7 @@ UocInfo::recInstantiate(ostream &errStream,
 
   case at_declare:
     {
-      if(ast->children->size() > 1)
+      if(ast->children.size() > 1)
 	ast->child(1) = recInstantiate(errStream, 
 				       ast->child(1),
 				       errFree, worklist);
@@ -1157,7 +1157,7 @@ UocInfo::recInstantiate(ostream &errStream,
       // type goes on the function type, not on the identifier's type
       // Therefore, need to preserve by-ref AST qualifications as is.
 
-      if(ast->children->size() > 1) {
+      if(ast->children.size() > 1) {
 	GCPtr<AST> typeAST = typeAsAst(ast->child(0)->symType,
 				       ast->child(1)->loc);
 	if(ast->child(1)->astType == at_byrefType)
@@ -1281,7 +1281,7 @@ UocInfo::recInstantiate(ostream &errStream,
       // all polymorphism and qualifications/constraints here. 
       // Since no non-value can be polymorphic, this check will ensure
       // that we do not drop any state change.
-      for(size_t i=0; i < originalLbs->children->size(); i++) {
+      for(size_t i=0; i < originalLbs->children.size(); i++) {
 	GCPtr<AST> lb = originalLbs->child(i);
 	GCPtr<AST> ident = lb->child(0)->child(0);
 	if(((lb->Flags2 & LB_INSTANTIATED) == 0) &&
@@ -1298,7 +1298,7 @@ UocInfo::recInstantiate(ostream &errStream,
       // In case after instantiation, it so happens that no
       // let-bindings are carried forward, just drop the
       // let-expression, and return the let-body.
-      if(newLbs->children->size() > 0)
+      if(newLbs->children.size() > 0)
 	ast = newLet;
       else
 	ast = newExpr;
@@ -1347,7 +1347,7 @@ UocInfo::recInstantiate(ostream &errStream,
     {
       GCPtr<AST> args = ast->child(0);
       GCPtr<AST> body = ast->child(1);
-      for(size_t c=0; c < args->children->size(); c++) {
+      for(size_t c=0; c < args->children.size(); c++) {
 	GCPtr<AST> argPat = args->child(c);
 	GCPtr<AST> arg = argPat->child(0);
 	string oldName = arg->s;
@@ -1369,7 +1369,7 @@ UocInfo::recInstantiate(ostream &errStream,
   case at_dobinding:
     {
       // init and update
-      for (size_t c = 1; c < ast->children->size(); c++)
+      for (size_t c = 1; c < ast->children.size(); c++)
 	ast->child(c) = recInstantiate(errStream, 
 				       ast->child(c),
 				       errFree, worklist);      
@@ -1382,7 +1382,7 @@ UocInfo::recInstantiate(ostream &errStream,
       GCPtr<AST> doTest = ast->child(1);
       GCPtr<AST> doExprs = ast->child(2);      
 
-      for (size_t c = 0; c < doBds->children->size(); c++) {
+      for (size_t c = 0; c < doBds->children.size(); c++) {
 	GCPtr<AST> doBd = doBds->child(c);
 	GCPtr<AST> local = doBd->child(0)->child(0);
 
@@ -1391,7 +1391,7 @@ UocInfo::recInstantiate(ostream &errStream,
 	NAMKARAN(local, getInstName(local, local->symType));
 	ast->envs.updateKey(oldName, local->s);
 
-	for (size_t d = 0; d < doBds->children->size(); d++) {
+	for (size_t d = 0; d < doBds->children.size(); d++) {
 	  GCPtr<AST> update = doBds->child(d)->child(2);
 	  substitute(update, local, local); 
 	}
@@ -1399,7 +1399,7 @@ UocInfo::recInstantiate(ostream &errStream,
 	substitute(doExprs, local, local); 
       }
       
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	ast->child(c) = recInstantiate(errStream, 
 				       ast->child(c),
 				       errFree, worklist);      
@@ -1418,7 +1418,7 @@ UocInfo::recInstantiate(ostream &errStream,
       substitute(expr, local, local); //!!      
       
       // expr and all constructors
-      for (size_t c = 1; c < ast->children->size(); c++)
+      for (size_t c = 1; c < ast->children.size(); c++)
 	ast->child(c) = recInstantiate(errStream, 
 				       ast->child(c),
 				       errFree, worklist);      
@@ -1428,7 +1428,7 @@ UocInfo::recInstantiate(ostream &errStream,
   case at_switch:
   case at_try:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	if(c != IGNORE(ast))
 	  ast->child(c) = recInstantiate(errStream, 
 					 ast->child(c),
@@ -1439,7 +1439,7 @@ UocInfo::recInstantiate(ostream &errStream,
   default:
     {
       // Obviously,
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	ast->child(c) = recInstantiate(errStream, 
 				       ast->child(c),
 				       errFree, worklist);      
@@ -1597,7 +1597,7 @@ UocInfo::doInstantiate(ostream &errStream,
   else {
     GCPtr<AST> innerLet = getInnerLet(defIdent);
     GCPtr<AST> innerLbs = innerLet->child(0);
-    for(size_t c=0; c < innerLbs->children->size(); c++) {
+    for(size_t c=0; c < innerLbs->children.size(); c++) {
       GCPtr<AST> id = innerLbs->child(c)->getID();
       if(id->s == newName)
 	alreadyInstantiated = id;
@@ -1735,10 +1735,10 @@ UocInfo::doInstantiate(ostream &errStream,
       GCPtr<AST> ip = copy->child(0);
       assert(ip->astType == at_identPattern);      
       GCPtr<AST> typAST = typeAsAst(typ, copy->loc); 
-      if(ip->children->size() > 1)
+      if(ip->children.size() > 1)
 	ip->child(1) = typAST;	
       else 
-	ip->children->append(typAST);	
+	ip->children.push_back(typAST);	
      
       if(!globalInst) {
 	// In the case of local definitions, we add the copied 
@@ -1750,7 +1750,7 @@ UocInfo::doInstantiate(ostream &errStream,
 	assert(copy->astType == at_letbinding);
 	GCPtr<AST> innerLet = getInnerLet(copy);
 	GCPtr<AST> innerLbs = innerLet->child(0);
-	innerLbs->children->append(copy);
+	innerLbs->children.push_back(copy);
 
 	// We also need to fixup any references to 
 	// type-variables scoped at the current let-binding.
@@ -1789,7 +1789,7 @@ UocInfo::doInstantiate(ostream &errStream,
     {
       // Even lesser work here, remove any type variables, and we are
       // done (possibly polymorphic -> concrete).
-      copy->child(1)->children->erase();
+      copy->child(1)->children.clear();
       break;
     }
 
@@ -1797,7 +1797,7 @@ UocInfo::doInstantiate(ostream &errStream,
     {
       // First the new definition is concrete, remove 
       // type-variables.
-      copy->child(1)->children->erase();
+      copy->child(1)->children.clear();
 
       // We happily replaced the use of old name wiith new name and
       // removed type-variables. But there may be typeapps in the
@@ -1805,12 +1805,12 @@ UocInfo::doInstantiate(ostream &errStream,
       // fix that before recursing over the fields.
       
       GCPtr<AST> defTvList = def->child(1);
-      assert(typ->typeArgs->size() == defTvList->children->size());
+      assert(typ->typeArgs->size() == defTvList->children.size());
       GCPtr<AST> copyFields = copy->child(4);
-      for(size_t i=0; i < defTvList->children->size(); i++) {
+      for(size_t i=0; i < defTvList->children.size(); i++) {
 	GCPtr<AST> defTv = defTvList->child(i);
 	GCPtr<Type> arg = typ->TypeArg(i);
-	for(size_t j=0; j < copyFields->children->size(); j++) {
+	for(size_t j=0; j < copyFields->children.size(); j++) {
 	  GCPtr<AST> copyField = copyFields->child(j);
 	  if(copyField->astType == at_fill)
 	    continue; 
@@ -1823,13 +1823,13 @@ UocInfo::doInstantiate(ostream &errStream,
     
   case at_defunion:
     {
-      copy->child(1)->children->erase();
+      copy->child(1)->children.clear();
 
       GCPtr<AST> defTvList = def->child(1);
-      assert(typ->typeArgs->size() == defTvList->children->size());
+      assert(typ->typeArgs->size() == defTvList->children.size());
 
       GCPtr<AST> copyCtrs = copy->child(4);
-      for(size_t j=0; j < copyCtrs->children->size(); j++) {	  
+      for(size_t j=0; j < copyCtrs->children.size(); j++) {	  
 	GCPtr<AST> copyCtr = copyCtrs->child(j);
 	  
 	// Unions are a little more complicated. We must:
@@ -1839,11 +1839,11 @@ UocInfo::doInstantiate(ostream &errStream,
 	GCPtr<AST> copyCtrID = copyCtr->child(0);
 	NAMKARAN(copyCtrID, getInstName(copyCtrID, typ));
 
-	for(size_t i=0; i < defTvList->children->size(); i++) {
+	for(size_t i=0; i < defTvList->children.size(); i++) {
 	  GCPtr<AST> defTv = defTvList->child(i);
 	  GCPtr<Type> arg = typ->TypeArg(i);
 
-	  for(size_t k=1; k < copyCtr->children->size(); k++) {
+	  for(size_t k=1; k < copyCtr->children.size(); k++) {
 	    GCPtr<AST> copyField = copyCtr->child(k);
 	    if(copyField->astType == at_fill)
 	      continue; 
@@ -1933,7 +1933,7 @@ UocInfo::doInstantiate(ostream &errStream,
   case at_defexception:
     {
       // Instantiate the fields, if any
-      for(size_t c=1; c < copy->children->size(); c++)
+      for(size_t c=1; c < copy->children.size(); c++)
 	copy->child(c) = recInstantiate(errStream, copy->child(c), 
 					errFree, worklist);
       break;

@@ -40,7 +40,7 @@
 
 #include <inttypes.h>
 #include <string>
-#include <sherpa/BigNum.hxx>
+#include <libsherpa/BigNum.hxx>
 
 using namespace sherpa;
 

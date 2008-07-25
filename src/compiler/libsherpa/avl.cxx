@@ -48,8 +48,8 @@
 
 #include <string>
 
-#include "UExcept.hxx"
-#include "avl.hxx"
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/avl.hxx>
 
 #ifndef max
 #define max(a,b) (((a) < (b)) ? (b) : (a))

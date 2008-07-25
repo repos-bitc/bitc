@@ -42,9 +42,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <sherpa/UExcept.hxx>
-#include <sherpa/CVector.hxx>
-#include <sherpa/avl.hxx>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
+#include <libsherpa/avl.hxx>
 #include <assert.h>
 #include "AST.hxx"
 #include "Type.hxx"
@@ -163,7 +163,7 @@ MakeFrame(GCPtr<AST> ast, GCPtr<AST> frameBindings)
   }
 
   // Do the children recursively
-  for (size_t i = 0; i < ast->children->size(); i++) {
+  for (size_t i = 0; i < ast->children.size(); i++) {
     MakeFrame(ast->child(i), frameBindings);
   }
 }
@@ -180,7 +180,7 @@ LetInsert(GCPtr<AST> ast, bool skip = false)
       //      bool needRewrite = false;
 
       // First, figure out if we require a rewrite:
-      for (size_t c = 0; c < ast->children->size(); c++) {
+      for (size_t c = 0; c < ast->children.size(); c++) {
 	GCPtr<AST> child = ast->child(c);
 	LetInsert(child);
       }
@@ -201,7 +201,7 @@ LetInsert(GCPtr<AST> ast, bool skip = false)
     break;
   }
 
-  for (size_t i = 0; i < ast->children->size(); i++) {
+  for (size_t i = 0; i < ast->children.size(); i++) {
     LetInsert(ast->child(i));
   }
 }

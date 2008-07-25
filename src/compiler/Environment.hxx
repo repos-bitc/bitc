@@ -38,7 +38,7 @@
  *
  **************************************************************************/
 
-#include <sherpa/CVector.hxx>
+#include <libsherpa/CVector.hxx>
 #include <iostream>
 
 using namespace sherpa;

@@ -50,8 +50,8 @@
  * We then use templates to instantiate type-specific avl trees.
  */
 
-#include <sherpa/UExcept.hxx>
-#include <sherpa/GCPtr.hxx>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/GCPtr.hxx>
 
 // FIX: Following comment needs repair
 

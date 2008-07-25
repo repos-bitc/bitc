@@ -45,7 +45,7 @@
 
 #include <stdlib.h>  // for strtoul()
 
-#include "LexLoc.hxx"
+#include <libsherpa/LexLoc.hxx>
 
 namespace sherpa {
   LexLoc LexLoc::Unspecified("<internal>", 0,0);

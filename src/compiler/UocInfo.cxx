@@ -50,8 +50,8 @@
 #include "Options.hxx"
 #include "inter-pass.hxx"
 #include "SexprLexer.hxx"
-#include <sherpa/CVector.hxx>
-#include <sherpa/util.hxx>
+#include <libsherpa/CVector.hxx>
+#include <libsherpa/util.hxx>
 
 using namespace sherpa;
 
@@ -153,7 +153,7 @@ void
 UocInfo::addTopLevelForm(GCPtr<AST> def)
 {
   assert(uocAst->astType == at_module);
-  uocAst->children->append(def);  
+  uocAst->children.push_back(def);  
 }
 
 bool

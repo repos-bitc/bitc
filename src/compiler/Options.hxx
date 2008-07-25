@@ -39,7 +39,7 @@
  **************************************************************************/
 
 #include <dirent.h>
-#include <sherpa/CVector.hxx>
+#include <libsherpa/CVector.hxx>
 #include "backend.hxx"
 #include "Special.hxx"
 #include "TvPrinter.hxx"

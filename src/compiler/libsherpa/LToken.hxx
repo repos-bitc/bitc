@@ -40,7 +40,7 @@
  *
  **************************************************************************/
 
-#include "LexLoc.hxx"
+#include <libsherpa/LexLoc.hxx>
 /* #include "CVector.hxx" */
 
 /// @brief A lexically indivisible unit of text with an associated

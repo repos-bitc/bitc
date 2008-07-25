@@ -635,7 +635,7 @@ identTypeToString(IdentType id)
 void
 AST::disown(size_t s)
 {
-  children = eliminate<GCPtr<AST> >(children, s);
+  children.erase(children.begin() + s);
 }
 
 bool 
@@ -688,7 +688,7 @@ void
 AST::clearTypes() {
   symType = NULL;
   scheme = NULL;
-  for(size_t i=0; i<children->size(); i++)
+  for(size_t i=0; i<children.size(); i++)
     child(i)->clearTypes();
 }
 
@@ -787,7 +787,7 @@ AST::rename(GCPtr<AST> from, std::string newName)
     // the encoded at_switch and at_try positions here
     
   default:
-    for(size_t c = 0; c < children->size(); c++)
+    for(size_t c = 0; c < children.size(); c++)
       child(c)->rename(from, newName);
     break;
   }

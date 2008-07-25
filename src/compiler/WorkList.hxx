@@ -42,7 +42,7 @@
 #include <assert.h>
 #include <iostream>
 #include <string>
-#include <sherpa/CVector.hxx>
+#include <libsherpa/CVector.hxx>
 #include "Eliminate.hxx"
 
 // This is intentionally not a subclass of Donelist. 

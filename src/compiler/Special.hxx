@@ -39,7 +39,7 @@
  **************************************************************************/
 
 #include <string>
-#include <sherpa/GCPtr.hxx>
+#include <libsherpa/GCPtr.hxx>
 
 #include "AST.hxx"
 #include "Type.hxx"

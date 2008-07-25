@@ -5,9 +5,7 @@
 
 
 #include <string>
-#include <sherpa/LToken.hxx>
-#include <sherpa/CVector.hxx>
-#include <sherpa/GCPtr.hxx>
+#include <vector>
 
 
 #include <stdint.h>
@@ -15,6 +13,11 @@
 #include "LitValue.hxx"
 #include "Environment.hxx"
 #include "debug.hxx"
+
+#include <libsherpa/GCPtr.hxx>
+#define AST_SMART_PTR sherpa::GCPtr
+#define AST_SUPERCLASS Countable
+
 
  
 
@@ -249,155 +252,176 @@ struct envSet : public Countable{
 
 
 enum AstType {
-    at_Null,
-    at_AnyGroup,
-    at_ident,
-    at_ifident,
-    at_usesel,
-    at_boolLiteral,
-    at_charLiteral,
-    at_intLiteral,
-    at_floatLiteral,
-    at_stringLiteral,
-    at_module,
-    at_interface,
-    at_defunion,
-    at_declunion,
-    at_defstruct,
-    at_declstruct,
-    at_defrepr,
-    at_declrepr,
-    at_reprctrs,
-    at_reprctr,
-    at_reprrepr,
-    at_refCat,
-    at_valCat,
-    at_opaqueCat,
-    at_defexception,
-    at_deftypeclass,
-    at_tcdecls,
-    at_tyfn,
-    at_tcapp,
-    at_method_decls,
-    at_method_decl,
-    at_qualType,
-    at_constraints,
-    at_definstance,
-    at_methods,
-    at_proclaim,
-    at_define,
-    at_recdef,
-    at_importAs,
-    at_provide,
-    at_import,
-    at_ifsel,
-    at_declares,
-    at_declare,
-    at_tvlist,
-    at_constructors,
-    at_constructor,
-    at_fields,
-    at_field,
-    at_fill,
-    at_reserved,
-    at_bitfield,
-    at_refType,
-    at_byrefType,
-    at_valType,
-    at_fn,
-    at_primaryType,
-    at_fnargVec,
-    at_arrayType,
-    at_vectorType,
-    at_mutableType,
-    at_typeapp,
-    at_exceptionType,
-    at_dummyType,
-    at_identPattern,
-    at_tqexpr,
-    at_unit,
-    at_suspend,
-    at_makevectorL,
-    at_vector,
-    at_array,
-    at_begin,
-    at_select,
-    at_fqCtr,
-    at_sel_ctr,
-    at_array_nth,
-    at_vector_nth,
-    at_array_length,
-    at_vector_length,
-    at_lambda,
-    at_argVec,
-    at_apply,
-    at_struct_apply,
-    at_ucon_apply,
-    at_if,
-    at_when,
-    at_and,
-    at_or,
-    at_not,
-    at_cond,
-    at_cond_legs,
-    at_cond_leg,
-    at_otherwise,
-    at_setbang,
-    at_deref,
-    at_dup,
-    at_inner_ref,
-    at_allocREF,
-    at_copyREF,
-    at_mkClosure,
-    at_setClosure,
-    at_switch,
-    at_sw_legs,
-    at_sw_leg,
-    at_try,
-    at_throw,
-    at_let,
-    at_letbindings,
-    at_letbinding,
-    at_letrec,
-    at_do,
-    at_dobindings,
-    at_dobinding,
-    at_dotest,
-    at_localFrame,
-    at_frameBindings,
-    at_letStar,
-    at_identList,
-    at_container,
-    at_docString,
-    at_letGather,
-    agt_var,
-    agt_literal,
-    agt_tvar,
-    agt_CompilationUnit,
-    agt_definition,
-    agt_type_definition,
-    agt_tc_definition,
-    agt_value_definition,
-    agt_if_definition,
-    agt_category,
-    agt_fielditem,
-    agt_qtype,
-    agt_type,
-    agt_expr,
-    agt_expr_or_define,
-    agt_eform,
-    agt_ucon,
-    agt_ow,
+  at_Null,
+  at_AnyGroup,
+  at_ident,
+  at_ifident,
+  at_usesel,
+  at_boolLiteral,
+  at_charLiteral,
+  at_intLiteral,
+  at_floatLiteral,
+  at_stringLiteral,
+  at_module,
+  at_interface,
+  at_defunion,
+  at_declunion,
+  at_defstruct,
+  at_declstruct,
+  at_defrepr,
+  at_declrepr,
+  at_reprctrs,
+  at_reprctr,
+  at_reprrepr,
+  at_refCat,
+  at_valCat,
+  at_opaqueCat,
+  at_defexception,
+  at_deftypeclass,
+  at_tcdecls,
+  at_tyfn,
+  at_tcapp,
+  at_method_decls,
+  at_method_decl,
+  at_qualType,
+  at_constraints,
+  at_definstance,
+  at_methods,
+  at_proclaim,
+  at_define,
+  at_recdef,
+  at_importAs,
+  at_provide,
+  at_import,
+  at_ifsel,
+  at_declares,
+  at_declare,
+  at_tvlist,
+  at_constructors,
+  at_constructor,
+  at_fields,
+  at_field,
+  at_fill,
+  at_reserved,
+  at_bitfield,
+  at_refType,
+  at_byrefType,
+  at_valType,
+  at_fn,
+  at_primaryType,
+  at_fnargVec,
+  at_arrayType,
+  at_vectorType,
+  at_mutableType,
+  at_typeapp,
+  at_exceptionType,
+  at_dummyType,
+  at_identPattern,
+  at_tqexpr,
+  at_unit,
+  at_suspend,
+  at_makevectorL,
+  at_vector,
+  at_array,
+  at_begin,
+  at_select,
+  at_fqCtr,
+  at_sel_ctr,
+  at_array_nth,
+  at_vector_nth,
+  at_array_length,
+  at_vector_length,
+  at_lambda,
+  at_argVec,
+  at_apply,
+  at_struct_apply,
+  at_ucon_apply,
+  at_if,
+  at_when,
+  at_and,
+  at_or,
+  at_not,
+  at_cond,
+  at_cond_legs,
+  at_cond_leg,
+  at_otherwise,
+  at_setbang,
+  at_deref,
+  at_dup,
+  at_inner_ref,
+  at_allocREF,
+  at_copyREF,
+  at_mkClosure,
+  at_setClosure,
+  at_switch,
+  at_sw_legs,
+  at_sw_leg,
+  at_try,
+  at_throw,
+  at_let,
+  at_letbindings,
+  at_letbinding,
+  at_letrec,
+  at_do,
+  at_dobindings,
+  at_dobinding,
+  at_dotest,
+  at_localFrame,
+  at_frameBindings,
+  at_letStar,
+  at_identList,
+  at_container,
+  at_docString,
+  at_letGather,
+  agt_var,
+  agt_literal,
+  agt_tvar,
+  agt_CompilationUnit,
+  agt_definition,
+  agt_type_definition,
+  agt_tc_definition,
+  agt_value_definition,
+  agt_if_definition,
+  agt_category,
+  agt_fielditem,
+  agt_qtype,
+  agt_type,
+  agt_expr,
+  agt_expr_or_define,
+  agt_eform,
+  agt_ucon,
+  agt_ow,
 };
 
-enum { at_NUM_ASTTYPE = agt_ow};
-class AST : public Countable { 
+enum { at_NUM_ASTTYPE = agt_ow };
+
+#ifndef AST_SMART_PTR
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#define AST_SMART_PTR boost::shared_ptr
+#endif /* AST_SMART_PTR */
+
+#ifndef AST_LOCATION_TYPE
+#include <libsherpa/LexLoc.hxx>
+#define AST_LOCATION_TYPE sherpa::LexLoc
+#endif /* AST_LOCATION_TYPE */
+
+#ifndef AST_TOKEN_TYPE
+#include <libsherpa/LToken.hxx>
+#define AST_TOKEN_TYPE sherpa::LToken
+#endif /* AST_TOKEN_TYPE */
+
+#ifndef AST_SUPERCLASS
+#define AST_SUPERCLASS ::boost::enable_shared_from_this<AST>
+#endif /* AST_SUPERCLASS */
+
+class AST :public AST_SUPERCLASS { 
   bool isOneOf(AstType);
 public:
   AstType        astType;
-  std::string    s;
-  sherpa::LexLoc loc;
-  sherpa::GCPtr< sherpa::CVector<sherpa::GCPtr<AST> > > children;
+  ::std::string    s;
+  AST_LOCATION_TYPE loc;
+  ::std::vector<AST_SMART_PTR<AST> > children;
 
 
  private:  
@@ -608,42 +632,125 @@ public:
 
   AST(const AstType at = at_Null);
   // for literals:
-  AST(const AstType at, const sherpa::LToken& tok);
-  AST(const AstType at, const sherpa::LexLoc &loc);
-  AST(const AstType at, const sherpa::LexLoc &loc,
-      sherpa::GCPtr<AST> child1);
-  AST(const AstType at, const sherpa::LexLoc &loc,
-      sherpa::GCPtr<AST> child1,
-      sherpa::GCPtr<AST> child2);
-  AST(const AstType at, const sherpa::LexLoc &loc,
-      sherpa::GCPtr<AST> child1,
-      sherpa::GCPtr<AST> child2,
-      sherpa::GCPtr<AST> child3);
-  AST(const AstType at, const sherpa::LexLoc &loc,
-      sherpa::GCPtr<AST> child1,
-      sherpa::GCPtr<AST> child2,
-      sherpa::GCPtr<AST> child3,
-      sherpa::GCPtr<AST> child4);
-  AST(const AstType at, const sherpa::LexLoc &loc,
-      sherpa::GCPtr<AST> child1,
-      sherpa::GCPtr<AST> child2,
-      sherpa::GCPtr<AST> child3,
-      sherpa::GCPtr<AST> child4,
-      sherpa::GCPtr<AST> child5);
+  AST(const AstType at, const AST_TOKEN_TYPE& tok);
+  AST(const AstType at, const AST_LOCATION_TYPE &loc);
+  AST(const AstType at, const AST_LOCATION_TYPE &loc,
+      AST_SMART_PTR<AST> child1);
+  AST(const AstType at, const AST_LOCATION_TYPE &loc,
+      AST_SMART_PTR<AST> child1,
+      AST_SMART_PTR<AST> child2);
+  AST(const AstType at, const AST_LOCATION_TYPE &loc,
+      AST_SMART_PTR<AST> child1,
+      AST_SMART_PTR<AST> child2,
+      AST_SMART_PTR<AST> child3);
+  AST(const AstType at, const AST_LOCATION_TYPE &loc,
+      AST_SMART_PTR<AST> child1,
+      AST_SMART_PTR<AST> child2,
+      AST_SMART_PTR<AST> child3,
+      AST_SMART_PTR<AST> child4);
+  AST(const AstType at, const AST_LOCATION_TYPE &loc,
+      AST_SMART_PTR<AST> child1,
+      AST_SMART_PTR<AST> child2,
+      AST_SMART_PTR<AST> child3,
+      AST_SMART_PTR<AST> child4,
+      AST_SMART_PTR<AST> child5);
   ~AST();
 
-  sherpa::GCPtr<AST> & child(size_t i) const
+  // Helper quasi-constructors
+  static inline AST_SMART_PTR<AST>
+  make(const AstType at = at_Null)
   {
-    return children->elem(i);
+    AST *ast = new AST(at);
+    return AST_SMART_PTR<AST>(ast);
   }
 
-  void addChild(sherpa::GCPtr<AST> child);
-  std::string getTokenString();
+  static inline AST_SMART_PTR<AST>
+  make(const AstType at, const AST_TOKEN_TYPE& tok)
+  {
+    AST *ast = new AST(at, tok);
+    return AST_SMART_PTR<AST>(ast);
+  }
+
+  static inline AST_SMART_PTR<AST>
+  make(const AstType at, const AST_LOCATION_TYPE &loc)
+  {
+    AST *ast = new AST(at, loc);
+    return AST_SMART_PTR<AST>(ast);
+  }
+
+  static inline AST_SMART_PTR<AST>
+  make(const AstType at, const AST_LOCATION_TYPE &loc,
+       AST_SMART_PTR<AST> child1)
+  {
+    AST *ast = new AST(at, loc, child1);
+    return AST_SMART_PTR<AST>(ast);
+  }
+
+  static inline AST_SMART_PTR<AST>
+  make(const AstType at, const AST_LOCATION_TYPE &loc,
+       const AST_SMART_PTR<AST>& child1,
+       const AST_SMART_PTR<AST>& child2)
+  {
+    AST *ast = new AST(at, loc, child1, child2);
+    return AST_SMART_PTR<AST>(ast);
+  }
+
+  static inline AST_SMART_PTR<AST>
+  make(const AstType at, const AST_LOCATION_TYPE &loc,
+       const AST_SMART_PTR<AST>& child1,
+       const AST_SMART_PTR<AST>& child2,
+       const AST_SMART_PTR<AST>& child3)
+  {
+    AST *ast = new AST(at, loc, child1, child2,
+                       child3);
+    return AST_SMART_PTR<AST>(ast);
+  }
+
+  static inline AST_SMART_PTR<AST>
+  make(const AstType at, const AST_LOCATION_TYPE &loc,
+       const AST_SMART_PTR<AST>& child1,
+       const AST_SMART_PTR<AST>& child2,
+       const AST_SMART_PTR<AST>& child3,
+       const AST_SMART_PTR<AST>& child4)
+  {
+    AST *ast = new AST(at, loc, child1, child2,
+                       child3, child4);
+    return AST_SMART_PTR<AST>(ast);
+  }
+
+  static inline AST_SMART_PTR<AST>
+  make(const AstType at, const AST_LOCATION_TYPE &loc,
+       const AST_SMART_PTR<AST>& child1,
+       const AST_SMART_PTR<AST>& child2,
+       const AST_SMART_PTR<AST>& child3,
+       const AST_SMART_PTR<AST>& child4,
+       const AST_SMART_PTR<AST>& child5)
+  {
+    AST *ast = new AST(at, loc, child1, child2,
+                       child3, child4, child5);
+    return AST_SMART_PTR<AST>(ast);
+  }
+
+
+  AST_SMART_PTR<AST>
+  child(size_t i) const
+  {
+    return children[i];
+  }
+
+  AST_SMART_PTR<AST>&
+  child(size_t i)
+  {
+    return children[i];
+  }
+
+  void addChild(AST_SMART_PTR<AST> child);
+  ::std::string getTokenString();
 
   void
-  addChildrenFrom(sherpa::GCPtr<AST> other)
+  addChildrenFrom(AST_SMART_PTR<AST> other)
   {
-    for(size_t i = 0; i < other->children->size(); i++)
+    for(size_t i = 0; i < other->children.size(); i++)
       addChild(other->child(i));
   }
 

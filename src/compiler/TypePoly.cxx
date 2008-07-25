@@ -42,9 +42,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <sherpa/UExcept.hxx>
-#include <sherpa/CVector.hxx>
-#include <sherpa/avl.hxx>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
+#include <libsherpa/avl.hxx>
 #include <assert.h>
 
 #include "UocInfo.hxx"
@@ -733,7 +733,7 @@ updateSigmas(GCPtr<const AST> bp, GCPtr<CVector<GCPtr<Type> > > ftvs,
     
   case at_letGather:
     {
-      for (size_t c = 0; c < bp->children->size(); c++)
+      for (size_t c = 0; c < bp->children.size(); c++)
 	updateSigmas(bp->child(c), ftvs, tcc);
       break;
     }

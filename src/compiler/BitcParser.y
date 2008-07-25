@@ -87,7 +87,7 @@ inline int bitclex(YYSTYPE *lvalp, SexprLexer *lexer)
 // the expression value and not a documentation comment.
 GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
 {
-  if (exprSeq->children->size() > 1 &&
+  if (exprSeq->children.size() > 1 &&
       exprSeq->child(0)->astType == at_stringLiteral)
     exprSeq->disown(0);
 
@@ -504,7 +504,7 @@ constrained_definition: '(' tk_FORALL constraints type_val_definition ')' {
   // move the (forall ...) syntax to the outside without doing major
   // surgery on the compiler internals.
 
-  uint32_t nChildren = $4->children->size();
+  uint32_t nChildren = $4->children.size();
 
   GCPtr<AST> tvConstraints= $4->child(nChildren-1);
   tvConstraints->addChildrenFrom($3);
@@ -1789,7 +1789,7 @@ eform: '(' tk_VECTOR_LENGTH expr ')' {
 // convenience syntax: multiple arguments
 eform: '(' tk_LAMBDA '(' ')' expr_seq ')'  {
   SHOWPARSE("lambda -> ( LAMBDA lambdapatterns expr_seq )");
-  if ($5->children->size() == 1 && $5->child(0)->astType == at_begin)
+  if ($5->children.size() == 1 && $5->child(0)->astType == at_begin)
     $5 = $5->child(0);
   GCPtr<AST> argVec = new AST(at_argVec, $3.loc);
   $$ = new AST(at_lambda, $2.loc, argVec, $5);
@@ -1797,7 +1797,7 @@ eform: '(' tk_LAMBDA '(' ')' expr_seq ')'  {
 
 eform: '(' tk_LAMBDA '(' lambdapatterns ')' expr_seq ')'  {
   SHOWPARSE("lambda -> ( LAMBDA lambdapatterns expr_seq )");
-  if ($6->children->size() == 1 && $6->child(0)->astType == at_begin)
+  if ($6->children.size() == 1 && $6->child(0)->astType == at_begin)
     $6 = $6->child(0);
   $$ = new AST(at_lambda, $2.loc, $4, $6);
 };
@@ -1893,9 +1893,9 @@ eform: '(' tk_DUP expr ')' {
 eform: '(' tk_SWITCH ident expr sw_legs ow ')' {
   SHOWPARSE("eform -> ( SWITCH ident expr sw_legs ow)");
   $$ = new AST(at_switch, $2.loc, $3, $4, $5, $6);
-  for(size_t c =0; c < $5->children->size(); c++) {
+  for(size_t c =0; c < $5->children.size(); c++) {
     GCPtr<AST> sw_leg = $5->child(c);
-    sw_leg->children->insert(0, $3->getDCopy());
+    sw_leg->children.insert(sw_leg->children.begin(), $3->getDCopy());
   }
 };
 
@@ -1996,9 +1996,9 @@ typecase_leg: '(' bindingpattern expr ')'  {
 eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
   SHOWPARSE("eform -> ( TRY expr ( CATCH ( ident sw_legs ) ) )");
   $$ = new AST(at_try, $2.loc, $3, $6, $7, $8);
-  for(size_t c =0; c < $7->children->size(); c++) {
+  for(size_t c =0; c < $7->children.size(); c++) {
     GCPtr<AST> sw_leg = $7->child(c);
-    sw_leg->children->insert(0, $6->getDCopy());
+    sw_leg->children.insert(sw_leg->children.begin(), $6->getDCopy());
   }
 };
 
@@ -2043,7 +2043,7 @@ let_eform: '(' tk_LETREC '(' letbindings ')' expr_seq ')' {
   $6->astType = at_begin;
   $6->printVariant = 1;
   GCPtr<AST> lbs = $4;
-  for(size_t c=0; c < lbs->children->size(); c++)
+  for(size_t c=0; c < lbs->children.size(); c++)
     lbs->child(c)->Flags |= LB_REC_BIND;
   
   $$ = new AST(at_letrec, $2.loc, $4, $6);
@@ -2069,7 +2069,7 @@ eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
   GCPtr<AST> recCall = new AST(at_apply, $4->loc);
   recCall->addChild(theIdent->Use());
 
-  for (size_t b = 0; b < doBindings->children->size(); b++) {
+  for (size_t b = 0; b < doBindings->children.size(); b++) {
     GCPtr<AST> binding = doBindings->child(b);
     recCall->addChild(binding->child(2));
   }
@@ -2081,7 +2081,7 @@ eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
 
   // The lambda args are the left-most elements of the DO bindings
   GCPtr<AST> lamArgs = new AST(at_argVec, $4->loc);
-  for (size_t b = 0; b < doBindings->children->size(); b++) {
+  for (size_t b = 0; b < doBindings->children.size(); b++) {
     GCPtr<AST> binding = doBindings->child(b);
     lamArgs->addChild(binding->child(0));
   }
@@ -2099,7 +2099,7 @@ eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
   // The letrec body proper consists entirely of an APPLY form that
   // makes the initial lambda call:
   GCPtr<AST> letBody = new AST(at_apply, $1.loc, theIdent->Use());
-  for (size_t b = 0; b < doBindings->children->size(); b++) {
+  for (size_t b = 0; b < doBindings->children.size(); b++) {
     GCPtr<AST> binding = doBindings->child(b);
     letBody->addChild(binding->child(1));
   }

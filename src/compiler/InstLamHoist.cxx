@@ -46,9 +46,9 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <sherpa/UExcept.hxx>
-#include <sherpa/CVector.hxx>
-#include <sherpa/avl.hxx>
+#include <libsherpa/UExcept.hxx>
+#include <libsherpa/CVector.hxx>
+#include <libsherpa/avl.hxx>
 #include <assert.h>
 
 #include "UocInfo.hxx"
@@ -62,11 +62,11 @@ using namespace sherpa;
 static void
 cl_HoistInstLam(GCPtr<UocInfo> uoc)
 {
-  GCPtr<CVector<GCPtr<AST> > > outAsts = new CVector<GCPtr<AST> >;
+  std::vector<GCPtr<AST> > outAsts;
 
   GCPtr<AST> modOrIf = uoc->uocAst;
 
-  for (size_t c = 0;c < modOrIf->children->size(); c++) {
+  for (size_t c = 0;c < modOrIf->children.size(); c++) {
     GCPtr<AST> child = modOrIf->child(c);
 
     if (child->astType == at_definstance) {
@@ -75,7 +75,7 @@ cl_HoistInstLam(GCPtr<UocInfo> uoc)
       // FIX: This is **utterly failing** to hoist the constraints, so
       // any constraint that is not on an instantiated variable will
       // not do the right thing.
-      for (size_t m = 0; m < methods->children->size(); m++) {
+      for (size_t m = 0; m < methods->children.size(); m++) {
 	GCPtr<AST> meth = methods->child(m);
 	if (meth->astType != at_ident) {
 	  // It's an expression. Need to hoist it into a new binding.
@@ -92,7 +92,7 @@ cl_HoistInstLam(GCPtr<UocInfo> uoc)
 	  newDef->addChild(meth);
 	  newDef->addChild(new AST(at_constraints));
 
-	  outAsts->append(newDef);
+	  outAsts.push_back(newDef);
 
 	  GCPtr<AST> instName = lamName->Use();
 	  GCPtr<AST> the = new AST(at_tqexpr);
@@ -105,7 +105,7 @@ cl_HoistInstLam(GCPtr<UocInfo> uoc)
       }
     }
 
-    outAsts->append(child);
+    outAsts.push_back(child);
   }
   
   modOrIf->children = outAsts;
