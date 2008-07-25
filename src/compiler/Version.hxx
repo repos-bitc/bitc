@@ -44,7 +44,7 @@ inline bool CheckVersionCompatibility(std::string ver) {
   return (ver == BITC_VERSION);
 }
 
-//inline bool CheckVersionCompatibility(BigNum major, BigNum minor) {
+//inline bool CheckVersionCompatibility(sherpa::BigNum major, sherpa::BigNum minor) {
 //  return ((major == BITC_MAJOR) && (minor == BITC_MINOR));
 //}
 

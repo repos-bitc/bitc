@@ -41,7 +41,6 @@
 #include <libsherpa/CVector.hxx>
 #include <iostream>
 
-using namespace sherpa;
 
 // Type of (sub) environment, if any.
 // Universal, In module scope, or in record scope
@@ -62,12 +61,12 @@ using namespace sherpa;
 			      providing. */
 
 template <class T>
-struct Binding : public Countable {
+struct Binding : public sherpa::Countable {
   std::string nm;
-  GCPtr<T> val;
+  sherpa::GCPtr<T> val;
   unsigned flags;
 
-  Binding(const std::string& _nm, GCPtr<T> _val)
+  Binding(const std::string& _nm, sherpa::GCPtr<T> _val)
   {
     nm = _nm;
     val = _val;
@@ -76,22 +75,22 @@ struct Binding : public Countable {
 };
 
 template <class T>
-struct Environment : public Countable {
+struct Environment : public sherpa::Countable {
   std::string uocName;
-  GCPtr<Environment<T> > parent; // in the chain of environments
-  GCPtr<Environment<T> > defEnv; // definition level env
+  sherpa::GCPtr<Environment<T> > parent; // in the chain of environments
+  sherpa::GCPtr<Environment<T> > defEnv; // definition level env
 
-  GCPtr< CVector<GCPtr<Binding<T> > > > bindings;
+  sherpa::GCPtr< sherpa::CVector<sherpa::GCPtr<Binding<T> > > > bindings;
 
-  GCPtr< Binding<T> >
+  sherpa::GCPtr< Binding<T> >
   doGetBinding(const std::string& nm) const;
 
-  GCPtr< Binding<T> >
+  sherpa::GCPtr< Binding<T> >
   getLocalBinding(const std::string& nm) const;
 
   Environment(std::string _uocName)
   {
-    bindings = new CVector<GCPtr< Binding<T> > >;
+    bindings = new sherpa::CVector<sherpa::GCPtr< Binding<T> > >;
     uocName = _uocName;
     parent = 0;
     defEnv = 0;
@@ -99,10 +98,10 @@ struct Environment : public Countable {
 
   ~Environment();
 
-  void addBinding(const std::string& name, GCPtr<T> val, 
+  void addBinding(const std::string& name, sherpa::GCPtr<T> val, 
 		  bool rebind = false);
   void
-  addDefBinding(const std::string& name, GCPtr<T> val)
+  addDefBinding(const std::string& name, sherpa::GCPtr<T> val)
   {
     defEnv->addBinding(name, val);
   }
@@ -113,35 +112,35 @@ struct Environment : public Countable {
   // Updates the most-current binding.
   void updateKey(const std::string& from, const std::string& to);
 
-  inline GCPtr<T>
+  inline sherpa::GCPtr<T>
   getBinding(const std::string& nm) const
   {
-    GCPtr<const Binding<T> > binding = doGetBinding(nm);
+    sherpa::GCPtr<const Binding<T> > binding = doGetBinding(nm);
     return (binding ? binding->val : NULL);
   }
 
   inline unsigned
   getFlags(const std::string& nm)
   {
-    GCPtr<const Binding<T> > binding = doGetBinding(nm);
+    sherpa::GCPtr<const Binding<T> > binding = doGetBinding(nm);
     return (binding ? binding->flags : 0);
   }
 
   inline void
   setFlags(const std::string& nm, unsigned long flags)
   {
-    GCPtr<Binding<T> > binding = doGetBinding(nm);
+    sherpa::GCPtr<Binding<T> > binding = doGetBinding(nm);
     if (binding) binding->flags |= flags;
   }
 
-  void mergeBindingsFrom(GCPtr<Environment<T> > from, bool complete=true);
+  void mergeBindingsFrom(sherpa::GCPtr<Environment<T> > from, bool complete=true);
   
-  GCPtr<Environment<T> > newScope();
+  sherpa::GCPtr<Environment<T> > newScope();
 
-  GCPtr<Environment<T> > newDefScope();
+  sherpa::GCPtr<Environment<T> > newDefScope();
 
   // Is env my ancestor?
-  bool isAncestor(GCPtr<Environment<T> > env);
+  bool isAncestor(sherpa::GCPtr<Environment<T> > env);
 
   std::string asString() const;
 };

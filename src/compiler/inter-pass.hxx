@@ -78,10 +78,10 @@
 #define IGNORE(ast) ((size_t)(((ast)->astType == at_switch)?0:1))
 
 void BitcP(std::ostream& out, 
-	   const GCPtr<AST> ast, 
+	   const sherpa::GCPtr<AST> ast, 
 	   bool showTypes);
 
-void addDecl(GCPtr<AST> decl);
+void addDecl(sherpa::GCPtr<AST> decl);
 extern void fatal();
 
 #endif /* INTER_PASS_HXX */

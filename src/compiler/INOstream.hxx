@@ -47,8 +47,6 @@
 #include <assert.h>
 #include <sstream>
 
-using namespace sherpa;
-using namespace std;
 
 // This is a completely sleazy way of making an automatically indenting 
 // stream.
@@ -145,10 +143,10 @@ struct INOstream {
   // it in order to recognize when a fill is required, but we don't
   // really intend to flush the underlying output stream.
   inline
-  INOstream& operator<<(ostream& (*pf)(ostream&))
+  INOstream& operator<<(std::ostream& (*pf)(std::ostream&))
   {
     INOstream& inostrm = *this;
-    if (pf == (ostream& (*)(ostream&)) std::endl) {
+    if (pf == (std::ostream& (*)(std::ostream&)) std::endl) {
       inostrm << '\n';
     }
     else {
@@ -159,7 +157,7 @@ struct INOstream {
   }
 
   inline
-  INOstream& operator<<(ios_base& (*pf)(ios_base&))
+  INOstream& operator<<(std::ios_base& (*pf)(std::ios_base&))
   {
     INOstream& inostrm = *this;
     inostrm.doIndent();
@@ -266,7 +264,7 @@ struct INOstream {
   inline
   INOstream& operator<<(T ob)
   {
-    stringstream ss;
+    std::stringstream ss;
     ss << ob;
 
     INOstream& inostrm = *this;

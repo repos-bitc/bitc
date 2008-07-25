@@ -94,21 +94,21 @@ struct Type;
                              // (extected) functions that we build
                              // with the actual functions.
 
-struct comp : public Countable {
+struct comp : public sherpa::Countable {
   std::string name;
-  GCPtr<Type> typ;
+  sherpa::GCPtr<Type> typ;
   unsigned long flags;
 
   comp() {flags=0;} 
-  comp(GCPtr<Type> t, unsigned long _flags=0);
-  comp(const std::string s, GCPtr<Type> t, unsigned long _flags=0);
+  comp(sherpa::GCPtr<Type> t, unsigned long _flags=0);
+  comp(const std::string s, sherpa::GCPtr<Type> t, unsigned long _flags=0);
   //comp(const comp &c);
 };  
 
 // The only reason for this class is that we need
-// Countable to use GCPtr for an indirection 
+// Countable to use sherpa::GCPtr for an indirection 
 // over array length
-struct ArrLen : public Countable {
+struct ArrLen : public sherpa::Countable {
   uint64_t  len;
   ArrLen(uint64_t _len) {len = _len;}
 };
@@ -157,7 +157,7 @@ struct TypeScheme;
 // specialization. ((TY_RESTRICTED was here too.))
 #define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | TY_CLOS | TY_COERCE) 
 
-struct Type : public Countable {
+struct Type : public sherpa::Countable {
   
   friend struct TypeScheme;
 
@@ -175,7 +175,7 @@ struct Type : public Countable {
 public:
   Kind kind;
   
-  GCPtr<Type> link; // Linked into a chain of types 
+  sherpa::GCPtr<Type> link; // Linked into a chain of types 
                             // constrained by equality
   
   /* If this is the type node that is authoritative
@@ -196,12 +196,12 @@ public:
 
   // defAST points to the AST of the defining occurrence. This field
   // is set for ty_struct*, ty_union*, tu_ucon, ty_exn
-  GCPtr<AST> defAst;			// Defining occurrence (or declare)
+  sherpa::GCPtr<AST> defAst;			// Defining occurrence (or declare)
 
   // If type is a union constructor, points to identifier AST of the
   // defining occurrence of the defunion.  If type is a type class
   // method type, points to the identifier AST of the typeclass.
-  GCPtr<AST> myContainer;
+  sherpa::GCPtr<AST> myContainer;
 
   // Note that we use two different kinds, ty_int/ty_impint,
   // ty_float/ty_impfloat, to deal with whether the concrete type of a
@@ -230,29 +230,29 @@ public:
   // variable. Copy constructor and TypeSpecialize DO NOT copy this
   // variable deeply.  This "variable" is not subject to
   // generalization.  
-  GCPtr<ArrLen> arrlen;	// Length in the case of an array type
+  sherpa::GCPtr<ArrLen> arrlen;	// Length in the case of an array type
   
   size_t    Isize;		// size in fixint
-  GCPtr<CVector<GCPtr<Type> > > fnDeps; // Functional Dependencies (for 
+  sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > fnDeps; // Functional Dependencies (for 
                                    //   Type classes only).
   
-  GCPtr<CVector<GCPtr<comp> > > components;
-  GCPtr<CVector<GCPtr<Type> > > typeArgs;  
+  sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<comp> > > components;
+  sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > typeArgs;  
     
   // Mark Flags:  used for Traversal
   // Used to prevent infinite recursion
   // while printing infinitely recursivetypes.
   unsigned mark;                // General traversal
   unsigned pMark;               // Type printer
-  GCPtr<Type> sp;			// Type specializer.
+  sherpa::GCPtr<Type> sp;			// Type specializer.
   unsigned flags;               
 
   // Main (Base) Constructor
   Type(const Kind k);
   // Copy Constructor.
-  Type(GCPtr<Type> t); 
-  Type(const Kind k, GCPtr<Type> child);
-  Type(const Kind k, GCPtr<Type> child1, GCPtr<Type> child2);
+  Type(sherpa::GCPtr<Type> t); 
+  Type(const Kind k, sherpa::GCPtr<Type> child);
+  Type(const Kind k, sherpa::GCPtr<Type> child1, sherpa::GCPtr<Type> child2);
 
   // Makes a deep copy , but ** LINKS TVARS TO ORIGINAL ONES ** 
   // This function calls TypeSpecialize on a typeScheme with
@@ -260,20 +260,20 @@ public:
   // This is different from the type_instance() in 
   // the typeScheme class in that this function makes a copy
   // of non-tvars, while type_instance() returns the original type.
-  GCPtr<Type> getDCopy();
+  sherpa::GCPtr<Type> getDCopy();
 
 private:
-  GCPtr<const Type> getTypePrim() const;
-  GCPtr<Type> getTypePrim();
+  sherpa::GCPtr<const Type> getTypePrim() const;
+  sherpa::GCPtr<Type> getTypePrim();
 
 public:
-  GCPtr<Type> getType();  
-  GCPtr <const Type> getType() const;
+  sherpa::GCPtr<Type> getType();  
+  sherpa::GCPtr <const Type> getType() const;
   
   // Get the type without mutability / fix / maybe
-  GCPtr<Type> getBareType();  
+  sherpa::GCPtr<Type> getBareType();  
   // Get the type without some combinations of the above
-  GCPtr<Type> getTheType(bool mutableOK=false, bool maybeOK=false);   
+  sherpa::GCPtr<Type> getTheType(bool mutableOK=false, bool maybeOK=false);   
 
   // The only reason the following unctions are not marked const is
   // that they call getType(), which uses the mark flag. 
@@ -305,7 +305,7 @@ public:
   bool isPrimaryType();
   bool isPrimInt();
   bool isPrimFloat();
-  void SetTvarsTo(GCPtr<Type> t);
+  void SetTvarsTo(sherpa::GCPtr<Type> t);
   void SetTvarsToUnit();
   bool isInteger();
   bool isIntegral();
@@ -347,7 +347,7 @@ public:
 
   /* Produce Type ty_union[rv] from ty_ucon[rv] or ty_uval[rv]
      ONLY typeArgs are polylated */
-  GCPtr<Type> getUnionType();
+  sherpa::GCPtr<Type> getUnionType();
     
   size_t size();
 
@@ -364,26 +364,26 @@ public:
      comparisons between two types */
 
 private:  
-  bool eql(GCPtr<Type> t, bool verbose, std::ostream &errStream,
+  bool eql(sherpa::GCPtr<Type> t, bool verbose, std::ostream &errStream,
 	   unsigned long uflags, bool keepSub,
-	   GCPtr<Trail> trail=new Trail);
+	   sherpa::GCPtr<Trail> trail=new Trail);
 public:
   // Returns true of the type `t' is structurally equal to `this'
   // under alpha renaming (and declarations unify with definitions)
   // 
   // The next function strictlyEquals removes the above two
   // restrictions. 
-  bool equals(GCPtr<Type> t, bool verbose=false,
+  bool equals(sherpa::GCPtr<Type> t, bool verbose=false,
 	      std::ostream &errStream=std::cerr);
-  bool strictlyEquals(GCPtr<Type> t, bool verbose=false,
+  bool strictlyEquals(sherpa::GCPtr<Type> t, bool verbose=false,
 		      bool noAlphaRename=false,
 		      std::ostream &errStream=std::cerr);  
-  bool unifyWith(GCPtr<Type> t, bool verbose=false,
-		 GCPtr<Trail> trail=new Trail,
+  bool unifyWith(sherpa::GCPtr<Type> t, bool verbose=false,
+		 sherpa::GCPtr<Trail> trail=new Trail,
 		 std::ostream &errStream=std::cerr);
 
   // Unify Ignoring rigidity
-  bool forcedUnify(GCPtr<Type> t, bool verbose=false,
+  bool forcedUnify(sherpa::GCPtr<Type> t, bool verbose=false,
 		   std::ostream &errStream=std::cerr);
   
   // All Tvars are rigid?
@@ -392,76 +392,76 @@ public:
   // Equality under alpha renaming of all (including rigid)
   // variables. The following functions are the same as equals and
   // strictlyEquals except for the fact that they ignore rigidity.
-  bool equalsA(GCPtr<Type> t, bool verbose=false,
+  bool equalsA(sherpa::GCPtr<Type> t, bool verbose=false,
 	       std::ostream &errStream=std::cerr);
-  bool strictlyEqualsA(GCPtr<Type> t, bool verbose=false,
+  bool strictlyEqualsA(sherpa::GCPtr<Type> t, bool verbose=false,
 		       std::ostream &errStream=std::cerr);
   
   /* Test for copy compatibility 
      two versions based on inner function equal or equalsA? */
-  bool copy_compatible(GCPtr<Type> t, bool verbose=false,
+  bool copy_compatible(sherpa::GCPtr<Type> t, bool verbose=false,
 			   std::ostream &errStream=std::cerr);
-  bool copy_compatibleA(GCPtr<Type> t, bool verbose=false,
+  bool copy_compatibleA(sherpa::GCPtr<Type> t, bool verbose=false,
 			      std::ostream &errStream=std::cerr);
  
   /* Methods to support polymorphism */
   /* Is that Type variable contained in my type somewhere (deeply)? */
-  bool boundInType(GCPtr<Type> tv);
+  bool boundInType(sherpa::GCPtr<Type> tv);
   
   /* Is my type bound in the environment? Usually only used in the
      case of type variables to determine if it must be 
      generalized, or not */
-  bool boundInGamma(GCPtr<const TSEnvironment > gamma);
+  bool boundInGamma(sherpa::GCPtr<const TSEnvironment > gamma);
   
   // Collect ALL ftvs regardless of gamma
   // This APPENDS TO the vector `tvs'. 
-  void collectAllftvs(GCPtr<CVector<GCPtr<Type> > > tvs);
+  void collectAllftvs(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > tvs);
 
   // Collect the Free Type Variables in a type
   // that are unbound in gamma
-  void collectftvsWrtGamma(GCPtr<CVector<GCPtr<Type> > > tvs,
-			   GCPtr<const TSEnvironment > gamma);
+  void collectftvsWrtGamma(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > tvs,
+			   sherpa::GCPtr<const TSEnvironment > gamma);
 
   // Meta-polymorphism
-  static GCPtr<Type> Kmono;
-  static GCPtr<Type> Kpoly;
+  static sherpa::GCPtr<Type> Kmono;
+  static sherpa::GCPtr<Type> Kpoly;
   
 private:
-  GCPtr<Type> 
-  TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
-		     GCPtr<CVector<GCPtr<Type> > > nftvs);
+  sherpa::GCPtr<Type> 
+  TypeSpecializeReal(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > ftvs,
+		     sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > nftvs);
   
   // Clear the sp (specialization) field of type records recursively.
   void clear_sp();
   
 public:
-  GCPtr<Type> 
-  TypeSpecialize(GCPtr<CVector<GCPtr<Type> > > ftvs,
-		 GCPtr<CVector<GCPtr<Type> > > nftvs);
+  sherpa::GCPtr<Type> 
+  TypeSpecialize(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > ftvs,
+		 sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > nftvs);
 
   /* Methods to deal with mutability issues */
   // Fix all Maybe types surrounding type records containing a
   // polymorphic type variables, except in the case of those maybes
   // directly surrounding type variables, unless clearall is
   // mentioned. 
-  bool fixMaybes(GCPtr<CVector<GCPtr<Type> > > ftvs, 
-		 GCPtr<Trail> trail,
+  bool fixMaybes(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > ftvs, 
+		 sherpa::GCPtr<Trail> trail,
 		 bool clearAll);
 
   // Wrapper for the above function with the clearAll flag set.
   void clearAllMaybes();
   
 public:
-  void adjMaybe(GCPtr<Trail> trail, bool markedOnly=false,
+  void adjMaybe(sherpa::GCPtr<Trail> trail, bool markedOnly=false,
 		bool minimize=false, bool adjFn=false);
   
   // Get the maximally-mutable, but copy-compatible type.
-  GCPtr<Type> maximizeMutability(GCPtr<Trail> trail=new Trail);
+  sherpa::GCPtr<Type> maximizeMutability(sherpa::GCPtr<Trail> trail=new Trail);
   // Get the minimally-mutable, but copy-compatible type.
-  GCPtr<Type> minimizeMutability(GCPtr<Trail> trail=new Trail);
-  GCPtr<Type> maximizeTopMutability(GCPtr<Trail> trail=new Trail);
-  GCPtr<Type> minimizeTopMutability(GCPtr<Trail> trail=new Trail);
-  GCPtr<Type> minimizeDeepMutability(GCPtr<Trail> trail=new Trail);
+  sherpa::GCPtr<Type> minimizeMutability(sherpa::GCPtr<Trail> trail=new Trail);
+  sherpa::GCPtr<Type> maximizeTopMutability(sherpa::GCPtr<Trail> trail=new Trail);
+  sherpa::GCPtr<Type> minimizeTopMutability(sherpa::GCPtr<Trail> trail=new Trail);
+  sherpa::GCPtr<Type> minimizeDeepMutability(sherpa::GCPtr<Trail> trail=new Trail);
 
   // Check if maximally / minimally mutable
   bool isMaxMutable();
@@ -470,7 +470,7 @@ public:
   /* Determine Candidacy for Copy-Compatibility for type variables
      only, argument is a composite-type that is searched 
      to determine ccc-ness */  
-  bool determineCCC(GCPtr<Type> comp, bool inRefType=false);
+  bool determineCCC(sherpa::GCPtr<Type> comp, bool inRefType=false);
   
   // See if nth typeArg is a CCC based on the TY_CCC flag markings
   bool argCCOK(size_t argN);  
@@ -481,15 +481,15 @@ public:
   std::string toString();  
   // Use Output
   std::string 
-  asString(GCPtr<TvPrinter> tvP = new TvPrinter(), 
+  asString(sherpa::GCPtr<TvPrinter> tvP = new TvPrinter(), 
 	   bool traverse = true);
 
-  void asXML(GCPtr<TvPrinter> tvP, INOstream &out);
-  std::string asXML(GCPtr<TvPrinter> tvP = new TvPrinter());
+  void asXML(sherpa::GCPtr<TvPrinter> tvP, INOstream &out);
+  std::string asXML(sherpa::GCPtr<TvPrinter> tvP = new TvPrinter());
   
-  GCPtr<AST> 
-  asAST(const LexLoc &loc,
-	GCPtr<TvPrinter> tvP = new TvPrinter());
+  sherpa::GCPtr<AST> 
+  asAST(const sherpa::LexLoc &loc,
+	sherpa::GCPtr<TvPrinter> tvP = new TvPrinter());
   // Ignore mutability, Ignore Top-level Mutability, or
   // Maximize mutability of type-args
   std::string mangledString(bool igMut=false, bool igTlMut=false,
@@ -502,19 +502,19 @@ public:
   static Kind getRefKind(Kind valKind);
 
   /* Typeclass special */
-  bool addFnDep(GCPtr<Type> tc);
+  bool addFnDep(sherpa::GCPtr<Type> tc);
 
   /* PUBLIC Accessors (Conveniecnce Forms) */
   //Accessing Type Arguments and Components
-  GCPtr<Type> & TypeArg(size_t i) const
+  sherpa::GCPtr<Type> & TypeArg(size_t i) const
   {
     return (*typeArgs)[i];
   }
-  GCPtr<comp> & Component(size_t i) const
+  sherpa::GCPtr<comp> & Component(size_t i) const
   {
     return (*components)[i];
   }
-  GCPtr<Type> & CompType(size_t i) const
+  sherpa::GCPtr<Type> & CompType(size_t i) const
   {
     return (*components)[i]->typ;
   }
@@ -527,34 +527,34 @@ public:
     return (*components)[i]->flags;
   }
   //Functional Dependencies
-  GCPtr<Type> & FnDep(size_t i) const
+  sherpa::GCPtr<Type> & FnDep(size_t i) const
   {
     return (*fnDeps)[i];
   }
   //Argument and return types of function-types
-  GCPtr<Type> & Args() const
+  sherpa::GCPtr<Type> & Args() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn);
     return CompType(0);
   }  
-  GCPtr<Type> & Ret() const
+  sherpa::GCPtr<Type> & Ret() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn);
     return CompType(1);
   }  
   //The Inner type of Maybe-types
-  GCPtr<Type> &Var() const
+  sherpa::GCPtr<Type> &Var() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
     return CompType(0);
   }  
-  GCPtr<Type> & Core() const
+  sherpa::GCPtr<Type> & Core() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
     return CompType(1);
   }
   // The first component of an array/vector/mutable/ref type
-  GCPtr<Type> & Base() const
+  sherpa::GCPtr<Type> & Base() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_mutable || 
  			  kind == ty_byref || 

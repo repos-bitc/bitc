@@ -43,17 +43,17 @@
 #include "AST.hxx"
 
 typedef bool (*BackEndFn) (std::ostream& out, std::ostream& err,
-			   GCPtr<UocInfo> uoc);
+			   sherpa::GCPtr<UocInfo> uoc);
 
 typedef bool (*MidEndFn) (std::ostream& out, std::ostream& err);
 
-bool XMLpp(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
-bool XMLdump(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
-bool XMLtypesPP(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
+bool XMLpp(std::ostream& out, std::ostream& err, sherpa::GCPtr<UocInfo> uoc);
+bool XMLdump(std::ostream& out, std::ostream& err, sherpa::GCPtr<UocInfo> uoc);
+bool XMLtypesPP(std::ostream& out, std::ostream& err, sherpa::GCPtr<UocInfo> uoc);
 bool EmitHeader(std::ostream& out, std::ostream& err, 
-		GCPtr<UocInfo> uoc);
-bool EmitC(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
-bool EmitExe(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
+		sherpa::GCPtr<UocInfo> uoc);
+bool EmitC(std::ostream& out, std::ostream& err, sherpa::GCPtr<UocInfo> uoc);
+bool EmitExe(std::ostream& out, std::ostream& err, sherpa::GCPtr<UocInfo> uoc);
 
 
 bool EmitBitO(std::ostream& out, std::ostream& err);

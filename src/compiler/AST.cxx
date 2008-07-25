@@ -15,7 +15,7 @@ using namespace sherpa;
 #include "Special.hxx"
 #include "UocInfo.hxx"
 
-using namespace sherpa ;
+using namespace sherpa;
 unsigned long long AST::astCount = 0;
 
 

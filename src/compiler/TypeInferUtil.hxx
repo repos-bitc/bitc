@@ -45,36 +45,36 @@
 #include "TypeScheme.hxx"
 #include "Typeclass.hxx"
 
-GCPtr<Type>
-obtainFullUnionType(GCPtr<Type> t);
+sherpa::GCPtr<Type>
+obtainFullUnionType(sherpa::GCPtr<Type> t);
 
 bool
 initGamma(std::ostream& errStream, 
-	  GCPtr<TSEnvironment > gamma,
-	  GCPtr<InstEnvironment > instEnv,
-	  const GCPtr<AST> ast, unsigned long uflags);
+	  sherpa::GCPtr<TSEnvironment > gamma,
+	  sherpa::GCPtr<InstEnvironment > instEnv,
+	  const sherpa::GCPtr<AST> ast, unsigned long uflags);
 bool
 checkImpreciseTypes(std::ostream& errStream, 
-		    const GCPtr<TSEnvironment > gamma,
-		    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-		                             GCPtr<AST> > > > > impTypes);
+		    const sherpa::GCPtr<TSEnvironment > gamma,
+		    sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Pair<sherpa::GCPtr<Type>, 
+		                             sherpa::GCPtr<AST> > > > > impTypes);
 void
 useIFGamma(const std::string& idName,
-	   GCPtr<TSEnvironment > fromEnv, 
-	   GCPtr<TSEnvironment > toEnv);
+	   sherpa::GCPtr<TSEnvironment > fromEnv, 
+	   sherpa::GCPtr<TSEnvironment > toEnv);
 
 void
 useIFInsts(const std::string& idName,
-	   GCPtr<InstEnvironment >fromEnv, 
-	   GCPtr<InstEnvironment >toEnv);
+	   sherpa::GCPtr<InstEnvironment >fromEnv, 
+	   sherpa::GCPtr<InstEnvironment >toEnv);
 
 bool
 initGamma(std::ostream& errStream, 
-	  GCPtr<TSEnvironment > gamma,
-	  GCPtr<InstEnvironment > instEnv,
-	  const GCPtr<AST> ast, unsigned long uflags);
+	  sherpa::GCPtr<TSEnvironment > gamma,
+	  sherpa::GCPtr<InstEnvironment > instEnv,
+	  const sherpa::GCPtr<AST> ast, unsigned long uflags);
 
 size_t
-nCtArgs(GCPtr<Type> t);
+nCtArgs(sherpa::GCPtr<Type> t);
 
 #endif /* TYPEINFERUTIL_HXX */

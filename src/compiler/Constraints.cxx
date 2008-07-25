@@ -55,6 +55,8 @@
 #include "Typeclass.hxx"
 #include "inter-pass.hxx"
 
+using namespace sherpa;
+
 bool 
 TCConstraints::contains(GCPtr<Typeclass> tc) 
 {

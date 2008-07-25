@@ -57,20 +57,20 @@
    creating the type variable is unification of the types across all
    legs of a datastructure or expression.*/
 
-static inline GCPtr<Type> 
+static inline sherpa::GCPtr<Type> 
 newTvar()
 {
   return new Type(ty_tvar);
 }
 
-static inline GCPtr<Type> 
-MBF(GCPtr<Type> t)
+static inline sherpa::GCPtr<Type> 
+MBF(sherpa::GCPtr<Type> t)
 {
   return new Type(ty_mbFull, newTvar(), t->minimizeMutability());
 }
 
-static inline GCPtr<Type> 
-MBT(GCPtr<Type> t)
+static inline sherpa::GCPtr<Type> 
+MBT(sherpa::GCPtr<Type> t)
 {
   return new Type(ty_mbTop, newTvar(), t->getBareType());
 }

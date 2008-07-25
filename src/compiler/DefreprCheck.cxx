@@ -53,6 +53,7 @@
 #include "Options.hxx"
 #include "Pair.hxx"
 
+using namespace sherpa;
 
 /**********************************************************************
 Consider the defrepr:

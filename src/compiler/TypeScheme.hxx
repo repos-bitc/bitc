@@ -52,72 +52,72 @@
 enum GeneralizeMode {gen_instance=0, gen_top=1, gen_local=2, 
 		     gen_Hinstance=3, gen_Htop=4, gen_Hlocal=5};
 
-struct TypeScheme : public Countable {
+struct TypeScheme : public sherpa::Countable {
   
-  GCPtr<Type> tau;
-  GCPtr<AST> ast; // Need to maintained the official version here,
+  sherpa::GCPtr<Type> tau;
+  sherpa::GCPtr<AST> ast; // Need to maintained the official version here,
                   // Type pointers get linked, typeschemes don't
-  GCPtr<CVector<GCPtr<Type> > > ftvs;
+  sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > ftvs;
   
   // Type class constraints 
   // Note: Leave this as a pointer, not an embedded vector.
   // This helps tcc sharing for definitions that are 
   // defined within the same letrec, etc.
-  GCPtr<TCConstraints> tcc;
+  sherpa::GCPtr<TCConstraints> tcc;
 
   // The constructor
-  TypeScheme(GCPtr<Type> _tau, GCPtr<AST> _ast,
-	     GCPtr<TCConstraints> _tcc = NULL);
+  TypeScheme(sherpa::GCPtr<Type> _tau, sherpa::GCPtr<AST> _ast,
+	     sherpa::GCPtr<TCConstraints> _tcc = NULL);
   
   // The generalizer
   bool generalize(std::ostream& errStream,
-		  const LexLoc &errLoc,
-		  GCPtr<const TSEnvironment > gamma,
-		  GCPtr<const InstEnvironment >instEnv, 
-		  GCPtr<const AST> expr, 
-		  GCPtr<TCConstraints >parentTCC,
-		  GCPtr<Trail> trail,
+		  const sherpa::LexLoc &errLoc,
+		  sherpa::GCPtr<const TSEnvironment > gamma,
+		  sherpa::GCPtr<const InstEnvironment >instEnv, 
+		  sherpa::GCPtr<const AST> expr, 
+		  sherpa::GCPtr<TCConstraints >parentTCC,
+		  sherpa::GCPtr<Trail> trail,
 		  GeneralizeMode gen);
   
   // The function that actually makes a copy of the 
   // contained type. This function calls TypeSpecialize.
   // This function is called by type_instance()
   // and getDCopy() function in Type class.
-  GCPtr<Type> type_instance_copy();
+  sherpa::GCPtr<Type> type_instance_copy();
   
   // Type Instance, if there are no ftvs, returns the original tau  
-  GCPtr<Type> type_instance();
+  sherpa::GCPtr<Type> type_instance();
   
   // Type scheme's instance (including TC constraints)
-  GCPtr<TypeScheme> ts_instance(bool copy=false);
-  GCPtr<TypeScheme> ts_instance_copy();
+  sherpa::GCPtr<TypeScheme> ts_instance(bool copy=false);
+  sherpa::GCPtr<TypeScheme> ts_instance_copy();
   
   // Read carefully:
   // Appends constraints that corrrespond to at least one
   // free variable in this scheme's ftvs to _tcc
-  void addConstraints(GCPtr<TCConstraints> _tcc) const;
+  void addConstraints(sherpa::GCPtr<TCConstraints> _tcc) const;
   // or ones that correspond to any of the added predicates
-  void TransAddConstraints(GCPtr<TCConstraints> _tcc) const;
+  void TransAddConstraints(sherpa::GCPtr<TCConstraints> _tcc) const;
   
-  //GCPtr<Type> type_copy();
-  std::string asString(GCPtr<TvPrinter> tvP=new TvPrinter, 
+  //sherpa::GCPtr<Type> type_copy();
+  std::string asString(sherpa::GCPtr<TvPrinter> tvP=new TvPrinter, 
 		       bool norm=false);
-  void asXML(GCPtr<TvPrinter> tvP, INOstream &out);
-  std::string asXML(GCPtr<TvPrinter> tvP = new TvPrinter);
+  void asXML(sherpa::GCPtr<TvPrinter> tvP, INOstream &out);
+  std::string asXML(sherpa::GCPtr<TvPrinter> tvP = new TvPrinter);
   
   // Collect all tvs wrt tau, and tcc->pred, but NOT tcc->fnDeps
   void collectAllFtvs();
-  void collectftvs(GCPtr<const TSEnvironment > gamma);
+  void collectftvs(sherpa::GCPtr<const TSEnvironment > gamma);
   bool removeUnInstFtvs();
-  bool normalizeConstruction(GCPtr<Trail> trail);
+  bool normalizeConstruction(sherpa::GCPtr<Trail> trail);
 
   bool solvePredicates(std::ostream &errStream,
-		       const LexLoc &errLoc,
-		       GCPtr<const InstEnvironment > instEnv,
-		       GCPtr<Trail> trail);
+		       const sherpa::LexLoc &errLoc,
+		       sherpa::GCPtr<const InstEnvironment > instEnv,
+		       sherpa::GCPtr<Trail> trail);
   
-  bool checkAmbiguity(std::ostream &errStream, const LexLoc &errLoc);
-  bool migratePredicates(GCPtr<TCConstraints> parentTCC);    
+  bool checkAmbiguity(std::ostream &errStream, const sherpa::LexLoc &errLoc);
+  bool migratePredicates(sherpa::GCPtr<TCConstraints> parentTCC);    
   
   // In the presence of PCSTs, the substitution within type schemes is
   // not capture avoiding. Therefore, there might be some
@@ -130,13 +130,13 @@ struct TypeScheme : public Countable {
 
   /* FIX: THIS MUST NEVER BE USED IN lhs OF ASSIGNMENT! */
   /* PUBLIC Accessors (Convenience Forms) */
-  GCPtr<Type> & Ftv(size_t i)
+  sherpa::GCPtr<Type> & Ftv(size_t i)
   {
     return (*ftvs)[i];
   }  
-  GCPtr<Type>  Ftv(size_t i) const
+  sherpa::GCPtr<Type>  Ftv(size_t i) const
   {
-    GCPtr<Type> t = (*ftvs)[i];
+    sherpa::GCPtr<Type> t = (*ftvs)[i];
     return t;
   }  
 };

@@ -47,7 +47,7 @@ struct ParseType {
 				 * tokenizer. Used for strings,
 				 * characters, numerical values. */
 
-  GCPtr<AST> ast;
+  sherpa::GCPtr<AST> ast;
 
   ParseType()
   {

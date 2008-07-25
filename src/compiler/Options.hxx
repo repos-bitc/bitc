@@ -71,30 +71,30 @@ struct Options {
   static bool noPrelude;
   static bool dumpAfterMidEnd;
   static bool dumpTypesAfterMidEnd;
-  static GCPtr<CVector<std::string> > showTypesUocs;
-  static GCPtr<CVector<std::string> > xmlTypesUocs;
-  static GCPtr<CVector<std::string> > entryPts;
+  static sherpa::GCPtr<sherpa::CVector<std::string> > showTypesUocs;
+  static sherpa::GCPtr<sherpa::CVector<std::string> > xmlTypesUocs;
+  static sherpa::GCPtr<sherpa::CVector<std::string> > entryPts;
   static BackEnd *backEnd;
   static std::string outputFileName;
-  static GCPtr<CVector<std::string> > libDirs;
-  static GCPtr<CVector<std::string> > inputs;
+  static sherpa::GCPtr<sherpa::CVector<std::string> > libDirs;
+  static sherpa::GCPtr<sherpa::CVector<std::string> > inputs;
 
   /** @brief Options and files that should be passed to GCC @em before
    * we insert the C file produced by bitcc.
    */
-  static GCPtr<CVector<std::string> > LinkPreOptionsGCC;
-  static GCPtr<CVector<std::string> > CompilePreOptionsGCC;
+  static sherpa::GCPtr<sherpa::CVector<std::string> > LinkPreOptionsGCC;
+  static sherpa::GCPtr<sherpa::CVector<std::string> > CompilePreOptionsGCC;
   /** @brief Options and files that should be passed to GCC @em after
    * we insert the C file produced by bitcc.
    */
-  static GCPtr<CVector<std::string> > LinkPostOptionsGCC;
+  static sherpa::GCPtr<sherpa::CVector<std::string> > LinkPostOptionsGCC;
 
-  static GCPtr<CVector<std::string> > SystemDirs;
+  static sherpa::GCPtr<sherpa::CVector<std::string> > SystemDirs;
 
   static bool Wall; // All Warnings are errors.
   static bool noGC; // no garbage collection mode
   static bool noAlloc; // statically reject heap-allocating constructs
-  static GCPtr<TvPrinter> debugTvP;
+  static sherpa::GCPtr<TvPrinter> debugTvP;
   static bool heuristicInference;
 };
 

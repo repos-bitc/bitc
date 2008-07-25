@@ -45,7 +45,7 @@
 typedef long ucs4_t;
 
 struct SexprLexer {
-  LexLoc here;
+  sherpa::LexLoc here;
   int num_errors;
   bool debug;
   bool isRuntimeUoc;
@@ -72,8 +72,8 @@ struct SexprLexer {
 	     const std::string& origin,
 	     bool commandLineInput);
 
-  void ReportParseError(const LexLoc& where, std::string  /* msg */);
-  void ReportParseWarning(const LexLoc& where, std::string  /* msg */);
+  void ReportParseError(const sherpa::LexLoc& where, std::string  /* msg */);
+  void ReportParseWarning(const sherpa::LexLoc& where, std::string  /* msg */);
 
   void ReportParseError();
   void ReportParseError(std::string msg)

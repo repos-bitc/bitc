@@ -47,11 +47,11 @@
 
 /* Structure that isused by the specializer */
 struct spStruct {  
-  GCPtr<AST> ast; 
-  GCPtr<Type> typ;
+  sherpa::GCPtr<AST> ast; 
+  sherpa::GCPtr<Type> typ;
   bool lifted;
 
-  spStruct(GCPtr<AST> _ast, GCPtr<Type> _typ)
+  spStruct(sherpa::GCPtr<AST> _ast, sherpa::GCPtr<Type> _typ)
   {
     typ = _typ;
     ast = _ast;
@@ -84,7 +84,7 @@ struct SpecialNames {
 
   SpecialNames();
   std::string getSpName(unsigned name);
-  void fixUpSpNames(GCPtr<UocInfo> prelude);
+  void fixUpSpNames(sherpa::GCPtr<UocInfo> prelude);
   static SpecialNames spNames;
 };
 

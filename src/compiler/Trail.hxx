@@ -45,23 +45,23 @@
 
 struct Type;
 
-struct Trail : public Countable {
-  GCPtr<CVector<GCPtr<Type> > > vec;
+struct Trail : public sherpa::Countable {
+  sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > vec;
   
   Trail() 
   {
-    vec = new sherpa::CVector<GCPtr<Type> >;
+    vec = new sherpa::CVector<sherpa::GCPtr<Type> >;
   }
   
   size_t snapshot() const { return vec->size(); }
   
   // Substitution works on Type Variables only
-  void subst(GCPtr<Type> from, GCPtr<Type> to);
+  void subst(sherpa::GCPtr<Type> from, sherpa::GCPtr<Type> to);
   // Generic Link
-  void link(GCPtr<Type> from, GCPtr<Type> to);
+  void link(sherpa::GCPtr<Type> from, sherpa::GCPtr<Type> to);
   void rollBack(const size_t upto=0);
   
-  void release(const size_t n, GCPtr<Type> rel);  
+  void release(const size_t n, sherpa::GCPtr<Type> rel);  
 };
 
 #endif /* TRAIL_HXX */

@@ -47,8 +47,8 @@
 #include <assert.h>
 
 template <class T>
-struct DoneList : public Countable {
-  GCPtr< sherpa::CVector<T> > vec;
+struct DoneList : public sherpa::Countable {
+  sherpa::GCPtr< sherpa::CVector<T> > vec;
   
   DoneList()
   {

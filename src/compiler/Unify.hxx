@@ -55,13 +55,13 @@
 #include "backend.hxx"
 
 bool unify(std::ostream& errStream,
-	   GCPtr<Trail> trail,
-	   const LexLoc &errLoc,
-	   GCPtr<Type> ft, GCPtr<Type> st, 
+	   sherpa::GCPtr<Trail> trail,
+	   const sherpa::LexLoc &errLoc,
+	   sherpa::GCPtr<Type> ft, sherpa::GCPtr<Type> st, 
 	   unsigned long uflags);
 
 bool unifyPrim(std::ostream& errStream,
-	       GCPtr<Trail> trail, const LexLoc &errLoc, 
-	       GCPtr<Type> tau, std::string ptype);
+	       sherpa::GCPtr<Trail> trail, const sherpa::LexLoc &errLoc, 
+	       sherpa::GCPtr<Type> tau, std::string ptype);
 
 #endif /* UNIFY_HXX */

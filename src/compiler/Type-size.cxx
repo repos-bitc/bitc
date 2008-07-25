@@ -52,6 +52,8 @@
 #include "Type.hxx"
 #include "machine-dep.hxx"
 
+using namespace sherpa;
+
 static size_t
 calc_struct_size(const GCPtr<Type> t)
 {

@@ -42,11 +42,11 @@
 #include <assert.h>
 
 template<class T>
-static GCPtr< sherpa::CVector<T> >
-eliminate(GCPtr< sherpa::CVector<T> >vec, size_t n)
+static sherpa::GCPtr< sherpa::CVector<T> >
+eliminate(sherpa::GCPtr< sherpa::CVector<T> >vec, size_t n)
 {
   assert(n < vec->size());  
-  GCPtr<sherpa::CVector<T> > newVec = new sherpa::CVector<T>;
+  sherpa::GCPtr<sherpa::CVector<T> > newVec = new sherpa::CVector<T>;
 
   for(size_t i=0; i < n; i++)
     newVec->append(vec->elem(i));

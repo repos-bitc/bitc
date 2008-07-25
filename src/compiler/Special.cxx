@@ -40,6 +40,8 @@
 #include <string>
 #include "Special.hxx"
 
+using namespace sherpa;
+
 SpecialNames SpecialNames::spNames;
 
 SpecialNames::SpecialNames()

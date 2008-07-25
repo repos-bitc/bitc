@@ -98,8 +98,8 @@ struct OnePassInfo {
 // unit of compilation (source or interface). In the source case, the
 // /name/ field will be the file name. In the interface case, the
 // /name/ will be the "ifname" reported in the import statement.
-class UocInfo : public Countable {
-  static GCPtr<Path> resolveInterfacePath(std::string ifName);
+class UocInfo : public sherpa::Countable {
+  static sherpa::GCPtr<sherpa::Path> resolveInterfacePath(std::string ifName);
 
 public:
   std::string uocName;		// either ifName or simulated
@@ -109,9 +109,9 @@ public:
   Pass lastCompletedPass;
 
   bool fromCommandLine;
-  GCPtr<AST> uocAst;
-  GCPtr<ASTEnvironment > env;
-  GCPtr<TSEnvironment > gamma;
+  sherpa::GCPtr<AST> uocAst;
+  sherpa::GCPtr<ASTEnvironment > env;
+  sherpa::GCPtr<TSEnvironment > gamma;
 
   inline bool isSourceUoc() {
     return (uocAst->astType == at_module);
@@ -139,33 +139,33 @@ public:
   // to jump and make this change unless I know that this
   // implementation of instances works. 
    
-  GCPtr<InstEnvironment > instEnv;
+  sherpa::GCPtr<InstEnvironment > instEnv;
   
   UocInfo(const std::string& _uocName, const std::string& _origin, 
-	  GCPtr<AST> _uocAst);
-  UocInfo(GCPtr<UocInfo> uoc);
+	  sherpa::GCPtr<AST> _uocAst);
+  UocInfo(sherpa::GCPtr<UocInfo> uoc);
 
   /* Create a fresh, empty UOC that is set up to become the unified
    * output UoC module, initializing all environments by hand.
    */
-  static GCPtr<UocInfo> CreateUnifiedUoC();
+  static sherpa::GCPtr<UocInfo> CreateUnifiedUoC();
 
-  static GCPtr<CVector<GCPtr<Path> > > searchPath;
+  static sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<sherpa::Path> > > searchPath;
 
   // FIX -- All of these should be locals
 
   // The presence of a UocInfo record in the ifList indicates that
   // parsing of an interface has at least started. If the /ast/ pointer
   // is non-null, the parse has been completed.
-  static GCPtr<CVector<GCPtr<UocInfo> > > ifList;
-  static GCPtr<CVector<GCPtr<UocInfo> > > srcList;
-  //  static GCPtr<UocInfo> linkedUoc;  // grand Uoc after linkage
+  static sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<UocInfo> > > ifList;
+  static sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<UocInfo> > > srcList;
+  //  static sherpa::GCPtr<UocInfo> linkedUoc;  // grand Uoc after linkage
 
-  static GCPtr<UocInfo> 
+  static sherpa::GCPtr<UocInfo> 
   findInterface(const std::string& ifName);
 
-  static GCPtr<UocInfo> 
-  importInterface(std::ostream&, const LexLoc& loc, 
+  static sherpa::GCPtr<UocInfo> 
+  importInterface(std::ostream&, const sherpa::LexLoc& loc, 
 		  const std::string& ifName);
 
   // This is only used within the parser, and perhaps should not be
@@ -205,7 +205,7 @@ public:
   // FOLLOWING ARE IN inter-pass.cxx
   //
   //////////////////////////////////////////////////////
-  void findDefForms(GCPtr<AST> start, GCPtr<AST> local=NULL, GCPtr<AST> top=NULL);
+  void findDefForms(sherpa::GCPtr<AST> start, sherpa::GCPtr<AST> local=NULL, sherpa::GCPtr<AST> top=NULL);
   static void findAllDefForms();
   
   // Add all candidate Entry-points to the entry-point vectror
@@ -251,39 +251,39 @@ public:
 	     std::string pre = "Internal Compiler error :");
 
   bool RandTexpr(std::ostream& errStream,
-		 GCPtr<AST> ast,
+		 sherpa::GCPtr<AST> ast,
 		 unsigned long rflags=0,
 		 unsigned long tflags=0,
 		 std::string pre = "Internal Compiler error :",
 		 bool keepResults = true,
-		 GCPtr<envSet> altEnvSet=NULL);
+		 sherpa::GCPtr<envSet> altEnvSet=NULL);
 
   //////////////////////////////////////////////////////
   //
   // New instantiation logic:
   //
   //////////////////////////////////////////////////////
-  static GCPtr<AST> lookupByFqn(const std::string& s, 
-			  GCPtr<UocInfo> &targetUoc);
+  static sherpa::GCPtr<AST> lookupByFqn(const std::string& s, 
+			  sherpa::GCPtr<UocInfo> &targetUoc);
   
 
 private:
-  void addTopLevelForm(GCPtr<AST> ast); // Add a new Top-level form
+  void addTopLevelForm(sherpa::GCPtr<AST> ast); // Add a new Top-level form
 
   bool instantiateFQN(std::ostream &errStream, 
 			 const std::string& fqn);
 
   // The main AST specializer/ instantiator
-  GCPtr<AST> doInstantiate(std::ostream &errStream, 
-		     GCPtr<AST> defAST, 
-		     GCPtr<Type> typ,
+  sherpa::GCPtr<AST> doInstantiate(std::ostream &errStream, 
+		     sherpa::GCPtr<AST> defAST, 
+		     sherpa::GCPtr<Type> typ,
 		     bool &errFree,
-		     GCPtr<WorkList<std::string> > worklist);
+		     sherpa::GCPtr<WorkList<std::string> > worklist);
 
-  GCPtr<AST> recInstantiate(std::ostream &errStream, 
-		      GCPtr<AST> ast,
+  sherpa::GCPtr<AST> recInstantiate(std::ostream &errStream, 
+		      sherpa::GCPtr<AST> ast,
 		      bool &errFree,
-		      GCPtr<WorkList<std::string> > worklist); // Recursively walk the
+		      sherpa::GCPtr<WorkList<std::string> > worklist); // Recursively walk the
                      // specialized AST, and specialize the body.
 
 public:
@@ -291,7 +291,7 @@ public:
 		   const std::string& fqn);
   
   bool instantiateBatch(std::ostream &errStream, 
-			GCPtr<const CVector<std::string> > fqns);
+			sherpa::GCPtr<const sherpa::CVector<std::string> > fqns);
 
 };
 

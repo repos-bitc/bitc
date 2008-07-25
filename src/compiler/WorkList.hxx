@@ -49,8 +49,8 @@
 // There should be no compatibility.
 
 template <class T>
-struct WorkList : public Countable {
-  GCPtr<CVector<T> > vec;
+struct WorkList : public sherpa::Countable {
+  sherpa::GCPtr<sherpa::CVector<T> > vec;
   
   WorkList()
   {

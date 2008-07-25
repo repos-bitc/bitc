@@ -56,6 +56,8 @@
 #include "AST.hxx"
 #include "Options.hxx"
 
+using namespace sherpa;
+
 bool
 EmitBitO(std::ostream &optStream, std::ostream &errStream)
 {
@@ -67,10 +69,10 @@ EmitBitO(std::ostream &optStream, std::ostream &errStream)
 	      << Options::outputFileName
 	      << "\" -- "
 	      << strerror(errno)
-	      << endl;
+	      << std::endl;
 
 
-  out << "(bitc-version \"" << BITC_VERSION << "\")" << endl;
+  out << "(bitc-version \"" << BITC_VERSION << "\")" << std::endl;
 
   for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
     GCPtr<UocInfo> uoc = UocInfo::srcList->elem(i);

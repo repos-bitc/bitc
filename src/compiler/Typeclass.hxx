@@ -55,21 +55,21 @@ typedef Type Typeclass;
 typedef Typeclass Constraint; 
 typedef TCConstraints Constraints; 
 
-struct Instance : public Countable {
-  GCPtr<TypeScheme> ts;
-  GCPtr<AST> ast;
+struct Instance : public sherpa::Countable {
+  sherpa::GCPtr<TypeScheme> ts;
+  sherpa::GCPtr<AST> ast;
   
-  Instance(GCPtr<TypeScheme> _ts, GCPtr<AST>_ins)
+  Instance(sherpa::GCPtr<TypeScheme> _ts, sherpa::GCPtr<AST>_ins)
   {
     ts = _ts;
     ast = _ins;
   }
   
-  bool equals(std::ostream &errStream, GCPtr<Instance> ins, 
-	      GCPtr<const InstEnvironment >
+  bool equals(std::ostream &errStream, sherpa::GCPtr<Instance> ins, 
+	      sherpa::GCPtr<const InstEnvironment >
 	      instEnv) const;
-  bool satisfies(std::ostream &errStream, GCPtr<Typeclass> pred, 
-		 GCPtr<const InstEnvironment >
+  bool satisfies(std::ostream &errStream, sherpa::GCPtr<Typeclass> pred, 
+		 sherpa::GCPtr<const InstEnvironment >
 		 instEnv) const;
   std::string asString();
   std::string asXML();
@@ -79,34 +79,34 @@ struct Instance : public Countable {
 
 /* Type class constraints */
  
-struct TCConstraints : public Countable {
+struct TCConstraints : public sherpa::Countable {
   // Type class predicates
-  GCPtr<CVector<GCPtr<Typeclass> > > pred;
+  sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Typeclass> > > pred;
   
   TCConstraints()
   {
-    pred = new CVector<GCPtr<Typeclass> >;
+    pred = new sherpa::CVector<sherpa::GCPtr<Typeclass> >;
   }
 
   size_t size() { return pred->size(); }
 
-  void addPred(GCPtr<Typeclass> tc);
+  void addPred(sherpa::GCPtr<Typeclass> tc);
   void clearPred(size_t n);
-  void clearPred(GCPtr<Constraint> ct);
+  void clearPred(sherpa::GCPtr<Constraint> ct);
 
   void normalize();
   
-  bool contains(GCPtr<Typeclass> tc);
-  void collectAllFnDeps(GCPtr<CVector<GCPtr<Type> > > fnDeps);
+  bool contains(sherpa::GCPtr<Typeclass> tc);
+  void collectAllFnDeps(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > fnDeps);
   
   // Compute the closure of all functional dependencies 
   // supplied in the vector
-  static void close(GCPtr<CVector<GCPtr<Type> > > closure,
-		    GCPtr<const CVector<GCPtr<Type> > > fnDeps);
-  void clearHintsOnPreds(GCPtr<Trail> trail);  
+  static void close(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > closure,
+		    sherpa::GCPtr<const sherpa::CVector<sherpa::GCPtr<Type> > > fnDeps);
+  void clearHintsOnPreds(sherpa::GCPtr<Trail> trail);  
 
   /* PUBLIC Accessors (Conveniecnce Forms) */
-  GCPtr<Type> & Pred(size_t i)
+  sherpa::GCPtr<Type> & Pred(size_t i)
   {
     return (*pred)[i];
   }  

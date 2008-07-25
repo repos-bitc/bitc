@@ -45,13 +45,11 @@
 
 #include <libsherpa/GCPtr.hxx>
 #define AST_SMART_PTR sherpa::GCPtr
-#define AST_SUPERCLASS Countable
+#define AST_SUPERCLASS sherpa::Countable
 
 }
 
 %header { 
-
-using namespace sherpa;
 
 //template <class T> typedef struct environment;
 
@@ -246,10 +244,10 @@ enum primOp {
 #define MASK_FLAGS2_FROM_USE   (ID_IS_CAPTURED)
 
 struct AST;
-struct envSet : public Countable{
-  GCPtr<ASTEnvironment > env;
-  GCPtr<TSEnvironment > gamma;
-  GCPtr<InstEnvironment > instEnv;
+struct envSet : public sherpa::Countable{
+  sherpa::GCPtr<ASTEnvironment > env;
+  sherpa::GCPtr<TSEnvironment > gamma;
+  sherpa::GCPtr<InstEnvironment > instEnv;
   
   envSet()
   {
@@ -258,8 +256,8 @@ struct envSet : public Countable{
     instEnv = NULL;
   }
 
-  envSet(GCPtr<ASTEnvironment > _env, GCPtr<TSEnvironment >_gamma,
-	 GCPtr<InstEnvironment > _instEnv)
+  envSet(sherpa::GCPtr<ASTEnvironment > _env, sherpa::GCPtr<TSEnvironment >_gamma,
+	 sherpa::GCPtr<InstEnvironment > _instEnv)
   {
     env = _env;
     gamma = _gamma;
@@ -299,10 +297,10 @@ struct envSet : public Countable{
 
   unsigned printVariant;	// which syntax to use for pretty printing
 
-  GCPtr<TypeScheme> scheme;		// defining occurrences only
-  GCPtr<Type> symType;		// the (pre-unified) type
-  GCPtr<AST> symbolDef;
-  NoGCPtr <UocInfo> uoc;  
+  sherpa::GCPtr<TypeScheme> scheme;		// defining occurrences only
+  sherpa::GCPtr<Type> symType;		// the (pre-unified) type
+  sherpa::GCPtr<AST> symbolDef;
+  sherpa::NoGCPtr<UocInfo> uoc;  
 
   bool isDecl;                  // is This a declaration or definition?
 
@@ -322,8 +320,8 @@ struct envSet : public Countable{
  
   // If this is a declaration, and a definition for it has been
   // seen, then defn points to the definition.
-  GCPtr<AST> defn;  // Pointer to the definition, on a declaration AST 
-  GCPtr<AST> decl;  // Pointer to the definitive declaration (the first
+  sherpa::GCPtr<AST> defn;  // Pointer to the definition, on a declaration AST 
+  sherpa::GCPtr<AST> decl;  // Pointer to the definitive declaration (the first
               // one), on a definition AST.   
 
   // If this is a global identifier, fqn is its canonical fully
@@ -349,13 +347,13 @@ struct envSet : public Countable{
   envSet envs;
 
   // For Polyinstantiation:. // CHANGED THIS TO GCPTR
-  GCPtr< sherpa::CVector<spStruct *> > special;
+  sherpa::GCPtr< sherpa::CVector<spStruct *> > special;
   // If this is the root of a polymorphic expression, stores a 
   // pointer to all specializations.
   bool polyinst; // Polyinstantiation Marker (donelist) to avoid 
                  // infinite recursion.
   bool reached; 
-  GCPtr<AST> defForm; // defIdent->defining form pointer .
+  sherpa::GCPtr<AST> defForm; // defIdent->defining form pointer .
   // defForm has context sensitive meaning. 
   // This is basically a hack in the absence of parent pointers, where
   // I must reach back into the definition and get the defining form,
@@ -394,9 +392,9 @@ struct envSet : public Countable{
   //
   //
 
-  GCPtr<AST> defbps; // used in the case of loop, tail-recursion
+  sherpa::GCPtr<AST> defbps; // used in the case of loop, tail-recursion
   
-  GCPtr<Type> tagType;   // Type of the tag in case of unions
+  sherpa::GCPtr<Type> tagType;   // Type of the tag in case of unions
   size_t field_bits; // No. of bits in a bitfield type
   // Also propagated updards onto: 
   //   at_field, at_fill, at_reserved, tagtype (declare) at_declares,
@@ -408,24 +406,24 @@ struct envSet : public Countable{
                      // contains total number of fill bits
                      // that is not a reported by the type record.
 
-  GCPtr<TypeScheme> stSigma; // Union constructors only
+  sherpa::GCPtr<TypeScheme> stSigma; // Union constructors only
                        // TypeSchemes for the corresponding
                        // Structure definitions.                          
-  GCPtr<AST> stCtr;    // Pointer to the constructor that
+  sherpa::GCPtr<AST> stCtr;    // Pointer to the constructor that
                        // holds such a structure.
 
   // Tracking scope of type-variables.
-  GCPtr<AST> tvarLB;         // LB at which this tvar is scoped
-  GCPtr<AST> parentLB;       // LB within which this at_letbindings is
+  sherpa::GCPtr<AST> tvarLB;         // LB at which this tvar is scoped
+  sherpa::GCPtr<AST> parentLB;       // LB within which this at_letbindings is
   // contained, everything is contained within the top-level
   // definition. The resolver marks the above two markers. No need to
   // worry about them in copy-operations.
 
-  static GCPtr<AST> makeBoolLit(const sherpa::LToken &tok);
-  static GCPtr<AST> makeIntLit(const sherpa::LToken &tok);
-  static GCPtr<AST> makeStringLit(const sherpa::LToken &tok);
-  static GCPtr<AST> makeCharLit(const sherpa::LToken &tok);
-  static GCPtr<AST> makeFloatLit(const sherpa::LToken &tok);
+  static sherpa::GCPtr<AST> makeBoolLit(const sherpa::LToken &tok);
+  static sherpa::GCPtr<AST> makeIntLit(const sherpa::LToken &tok);
+  static sherpa::GCPtr<AST> makeStringLit(const sherpa::LToken &tok);
+  static sherpa::GCPtr<AST> makeCharLit(const sherpa::LToken &tok);
+  static sherpa::GCPtr<AST> makeFloatLit(const sherpa::LToken &tok);
 
   // Disengage a children[]  AST
   void disown(size_t s);
@@ -434,11 +432,11 @@ struct envSet : public Countable{
   // This will not have any particular type assigned to it, and is
   // intended to be used in the front end passes before the type
   // checker is involved.
-  static GCPtr<AST> genIdent(const char *pfx = "tmp", const bool isTV = false);
+  static sherpa::GCPtr<AST> genIdent(const char *pfx = "tmp", const bool isTV = false);
 
   // Generate an at_ident AST providing a temporary symbol that is
   // type-compatible with the type of the passed AST /lhs/.
-  static GCPtr<AST> genSym(GCPtr<AST> lhs, 
+  static sherpa::GCPtr<AST> genSym(sherpa::GCPtr<AST> lhs, 
 		     const char *pfx="tmp",
 		     const bool isTV = false);
 
@@ -448,39 +446,39 @@ struct envSet : public Countable{
   // if getPattern is true, it adds the identPattern ASTs
   // instead of ident ASTs
   void getIds(std::ostream &errStream, 
-	      GCPtr<sherpa::CVector<GCPtr<AST> > > ids,
+	      sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<AST> > > ids,
 	      bool getPattern = false);  
-  GCPtr<Type> getType(); 
-  GCPtr<const Type> getType() const;
+  sherpa::GCPtr<Type> getType(); 
+  sherpa::GCPtr<const Type> getType() const;
   
-  GCPtr<AST> getCtr(); // Union constructors may be written as Ctr or
+  sherpa::GCPtr<AST> getCtr(); // Union constructors may be written as Ctr or
   // union.Ctr, this function returns the pure constructor.
 
   // Given a defining occurrence, return an AST for the use occurrence.
-  GCPtr<AST> Use();
+  sherpa::GCPtr<AST> Use();
 
   // The copy constructor -- make an exact (except ID) shallow copy.
-  AST(GCPtr<AST> ast, bool shallowCopyChildren=true);
+  AST(sherpa::GCPtr<AST> ast, bool shallowCopyChildren=true);
 
   // Makes an exact copy, deep, including symbolDef, type, etc.
-  GCPtr<AST> getTrueCopy();
+  sherpa::GCPtr<AST> getTrueCopy();
 
   // Makes an exact copy, deep, but clear symbolDef, type, etc.
-  GCPtr<AST> getDCopy();
+  sherpa::GCPtr<AST> getDCopy();
 
   // Set myself to another, mutator (probably a bad idea).
-  void set(GCPtr<AST> ast);
+  void set(sherpa::GCPtr<AST> ast);
 
   // Rename identifier `from' to `to' within `this' AST
   // Rename is based on symbolDef. `from' must be a defining form. If
   // (and only if) `from' is found within `this' AST, 
   // it is also renamed.  
-  void rename(GCPtr<AST> from, std::string newName);
+  void rename(sherpa::GCPtr<AST> from, std::string newName);
 
   std::string asString() const;
   std::string mangledString() const;
 
-  GCPtr<AST> getID();
+  sherpa::GCPtr<AST> getID();
   bool isUnionLeg();
   bool isMethod();
 
@@ -496,7 +494,7 @@ struct envSet : public Countable{
 #include "Special.hxx"
 #include "UocInfo.hxx"
 
-using namespace sherpa ;
+using namespace sherpa;
 unsigned long long AST::astCount = 0;
 }
 

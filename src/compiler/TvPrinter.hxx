@@ -47,7 +47,7 @@
 
 struct Type;
 
-struct TvPrinter : public Countable {
+struct TvPrinter : public sherpa::Countable {
 private:
   bool prettyPrint;
   std::string pfx;
@@ -56,8 +56,8 @@ private:
   std::string newTvName();
 public:
   TvPrinter(const bool pp=true, const std::string& pfx = "'");
-  GCPtr<CVector<std::string> > getAllTvarStrings();
-  std::string tvName(GCPtr<const Type> tvar);
+  sherpa::GCPtr<sherpa::CVector<std::string> > getAllTvarStrings();
+  std::string tvName(sherpa::GCPtr<const Type> tvar);
 };
 
 

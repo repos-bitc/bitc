@@ -52,6 +52,8 @@
 #include "backend.hxx"
 #include "Options.hxx"
 
+using namespace sherpa;
+
 /**********************************************************************
 Consider the defrepr:
 

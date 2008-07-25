@@ -16,12 +16,10 @@
 
 #include <libsherpa/GCPtr.hxx>
 #define AST_SMART_PTR sherpa::GCPtr
-#define AST_SUPERCLASS Countable
+#define AST_SUPERCLASS sherpa::Countable
 
 
  
-
-using namespace sherpa;
 
 
 
@@ -215,10 +213,10 @@ enum primOp {
 #define MASK_FLAGS2_FROM_USE   (ID_IS_CAPTURED)
 
 struct AST;
-struct envSet : public Countable{
-  GCPtr<ASTEnvironment > env;
-  GCPtr<TSEnvironment > gamma;
-  GCPtr<InstEnvironment > instEnv;
+struct envSet : public sherpa::Countable{
+  sherpa::GCPtr<ASTEnvironment > env;
+  sherpa::GCPtr<TSEnvironment > gamma;
+  sherpa::GCPtr<InstEnvironment > instEnv;
   
   envSet()
   {
@@ -227,8 +225,8 @@ struct envSet : public Countable{
     instEnv = NULL;
   }
 
-  envSet(GCPtr<ASTEnvironment > _env, GCPtr<TSEnvironment >_gamma,
-	 GCPtr<InstEnvironment > _instEnv)
+  envSet(sherpa::GCPtr<ASTEnvironment > _env, sherpa::GCPtr<TSEnvironment >_gamma,
+	 sherpa::GCPtr<InstEnvironment > _instEnv)
   {
     env = _env;
     gamma = _gamma;
@@ -439,10 +437,10 @@ public:
 
   unsigned printVariant;	
 
-  GCPtr<TypeScheme> scheme;		
-  GCPtr<Type> symType;		
-  GCPtr<AST> symbolDef;
-  NoGCPtr <UocInfo> uoc;  
+  sherpa::GCPtr<TypeScheme> scheme;		
+  sherpa::GCPtr<Type> symType;		
+  sherpa::GCPtr<AST> symbolDef;
+  sherpa::NoGCPtr<UocInfo> uoc;  
 
   bool isDecl;                  
 
@@ -462,8 +460,8 @@ public:
  
   
   
-  GCPtr<AST> defn;  
-  GCPtr<AST> decl;  
+  sherpa::GCPtr<AST> defn;  
+  sherpa::GCPtr<AST> decl;  
               
 
   
@@ -489,13 +487,13 @@ public:
   envSet envs;
 
   
-  GCPtr< sherpa::CVector<spStruct *> > special;
+  sherpa::GCPtr< sherpa::CVector<spStruct *> > special;
   
   
   bool polyinst; 
                  
   bool reached; 
-  GCPtr<AST> defForm; 
+  sherpa::GCPtr<AST> defForm; 
   
   
   
@@ -534,9 +532,9 @@ public:
   
   
 
-  GCPtr<AST> defbps; 
+  sherpa::GCPtr<AST> defbps; 
   
-  GCPtr<Type> tagType;   
+  sherpa::GCPtr<Type> tagType;   
   size_t field_bits; 
   
   
@@ -548,24 +546,24 @@ public:
                      
                      
 
-  GCPtr<TypeScheme> stSigma; 
+  sherpa::GCPtr<TypeScheme> stSigma; 
                        
                        
-  GCPtr<AST> stCtr;    
+  sherpa::GCPtr<AST> stCtr;    
                        
 
   
-  GCPtr<AST> tvarLB;         
-  GCPtr<AST> parentLB;       
+  sherpa::GCPtr<AST> tvarLB;         
+  sherpa::GCPtr<AST> parentLB;       
   
   
   
 
-  static GCPtr<AST> makeBoolLit(const sherpa::LToken &tok);
-  static GCPtr<AST> makeIntLit(const sherpa::LToken &tok);
-  static GCPtr<AST> makeStringLit(const sherpa::LToken &tok);
-  static GCPtr<AST> makeCharLit(const sherpa::LToken &tok);
-  static GCPtr<AST> makeFloatLit(const sherpa::LToken &tok);
+  static sherpa::GCPtr<AST> makeBoolLit(const sherpa::LToken &tok);
+  static sherpa::GCPtr<AST> makeIntLit(const sherpa::LToken &tok);
+  static sherpa::GCPtr<AST> makeStringLit(const sherpa::LToken &tok);
+  static sherpa::GCPtr<AST> makeCharLit(const sherpa::LToken &tok);
+  static sherpa::GCPtr<AST> makeFloatLit(const sherpa::LToken &tok);
 
   
   void disown(size_t s);
@@ -574,11 +572,11 @@ public:
   
   
   
-  static GCPtr<AST> genIdent(const char *pfx = "tmp", const bool isTV = false);
+  static sherpa::GCPtr<AST> genIdent(const char *pfx = "tmp", const bool isTV = false);
 
   
   
-  static GCPtr<AST> genSym(GCPtr<AST> lhs, 
+  static sherpa::GCPtr<AST> genSym(sherpa::GCPtr<AST> lhs, 
 		     const char *pfx="tmp",
 		     const bool isTV = false);
 
@@ -588,39 +586,39 @@ public:
   
   
   void getIds(std::ostream &errStream, 
-	      GCPtr<sherpa::CVector<GCPtr<AST> > > ids,
+	      sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<AST> > > ids,
 	      bool getPattern = false);  
-  GCPtr<Type> getType(); 
-  GCPtr<const Type> getType() const;
+  sherpa::GCPtr<Type> getType(); 
+  sherpa::GCPtr<const Type> getType() const;
   
-  GCPtr<AST> getCtr(); 
+  sherpa::GCPtr<AST> getCtr(); 
   
 
   
-  GCPtr<AST> Use();
+  sherpa::GCPtr<AST> Use();
 
   
-  AST(GCPtr<AST> ast, bool shallowCopyChildren=true);
+  AST(sherpa::GCPtr<AST> ast, bool shallowCopyChildren=true);
 
   
-  GCPtr<AST> getTrueCopy();
+  sherpa::GCPtr<AST> getTrueCopy();
 
   
-  GCPtr<AST> getDCopy();
+  sherpa::GCPtr<AST> getDCopy();
 
   
-  void set(GCPtr<AST> ast);
+  void set(sherpa::GCPtr<AST> ast);
 
   
   
   
   
-  void rename(GCPtr<AST> from, std::string newName);
+  void rename(sherpa::GCPtr<AST> from, std::string newName);
 
   std::string asString() const;
   std::string mangledString() const;
 
-  GCPtr<AST> getID();
+  sherpa::GCPtr<AST> getID();
   bool isUnionLeg();
   bool isMethod();
 

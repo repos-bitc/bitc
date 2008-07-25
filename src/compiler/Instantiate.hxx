@@ -52,6 +52,6 @@
 #include "Type.hxx"
 
 /* Rename an AST with its instantiated name */
-void InstMangle(GCPtr<AST> def);
-void initUnifiedUoc(GCPtr<UocInfo> uoc);
+void InstMangle(sherpa::GCPtr<AST> def);
+void initUnifiedUoc(sherpa::GCPtr<UocInfo> uoc);
 #endif /* INSTANTIATE_HXX */

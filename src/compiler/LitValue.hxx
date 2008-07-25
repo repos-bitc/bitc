@@ -42,17 +42,16 @@
 #include <string>
 #include <libsherpa/BigNum.hxx>
 
-using namespace sherpa;
 
 struct LitValue {
   bool   b;        /* boolean Values */
   unsigned long c; /* utf32 code points */
-  BigNum i;	   /* large precision integers */
+  sherpa::BigNum i;	   /* large precision integers */
   double d;	   /* doubles, floats          */
 
   // FIX: (shap) the original input is being saved in
   // AST.s for replay purposes. String literals need
-  // to be stored here as a CVector of character 
+  // to be stored here as a sherpa::CVector of character 
   // representations.
   std::string s;  /* String Literals          */
 
