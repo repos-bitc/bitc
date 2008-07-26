@@ -4,7 +4,6 @@ syntax: regexp
 
 syntax: glob
 
-src/configure
 src/config.h
 src/config.status
 src/compiler/config.h
