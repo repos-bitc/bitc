@@ -39,6 +39,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <string.h>
 #include <fstream>
 #include <iostream>
 #include <string>
