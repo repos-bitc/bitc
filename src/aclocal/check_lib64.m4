@@ -29,7 +29,7 @@ AC_DEFUN([CHECK_LIB64], [
       if test -d "/usr/lib64"; then
         AC_MSG_RESULT(yes)
         if test "$libdir" = '${exec_prefix}/lib'; then
-          AC_MSG_NOTICE([*** Whacking libdir to ${exec_prefix}/lib64 ***])
+          AC_MSG_NOTICE([*** Whacking libdir to \${exec_prefix}/lib64 ***])
           libdir='${exec_prefix}/lib64';
         fi
       else
