@@ -94,8 +94,17 @@ struct Options {
   static bool Wall; // All Warnings are errors.
   static bool noGC; // no garbage collection mode
   static bool noAlloc; // statically reject heap-allocating constructs
-  static sherpa::GCPtr<TvPrinter> debugTvP;
   static bool heuristicInference;
+
+  /// @brief TvPrinter to support debugging output.
+  ///
+  /// This is not actually an option, but it used by some options. The
+  /// purpose of this TvPrinter is to provide a globally consistent
+  /// mapping from type variables to names. Through this mapping, it
+  /// becomes possible for several passes to print their type variable
+  /// names consistently, which makes understanding the transformation
+  /// that was performed easier.
+  static sherpa::GCPtr<TvPrinter> debugTvP;
 };
 
 #endif /* OPTIONS_HXX */
