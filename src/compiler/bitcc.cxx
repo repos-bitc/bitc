@@ -307,10 +307,6 @@ main(int argc, char *argv[])
   //  extern int optind;
   int opterr = 0;
 
-  // Allocate memory for some static members
-  UocInfo::ifList = new CVector<GCPtr<UocInfo> >;
-  UocInfo::srcList = new CVector<GCPtr<UocInfo> >;
-
   signal(SIGSEGV, handle_sigsegv);
 
 #if 0
@@ -789,8 +785,9 @@ main(int argc, char *argv[])
   bool doFinal = true;
 
   /* Output for interfaces */
-  for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::ifList->elem(i);
+  for(UocMap::iterator itr = UocInfo::ifList.begin();
+      itr != UocInfo::ifList.end(); ++itr) {
+    GCPtr<UocInfo> puoci = itr->second;
     
     if (puoci->lastCompletedPass >= Options::backEnd->needPass) {
       if (Options::backEnd->fn)
@@ -801,8 +798,9 @@ main(int argc, char *argv[])
   } 
 
   /* Output for Source modules */
-  for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::srcList->elem(i);
+  for(UocMap::iterator itr = UocInfo::srcList.begin();
+      itr != UocInfo::srcList.end(); ++itr) {
+    GCPtr<UocInfo> puoci = itr->second;
 
     if (puoci->lastCompletedPass >= Options::backEnd->needPass){
       if (Options::backEnd->fn)

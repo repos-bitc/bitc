@@ -166,28 +166,30 @@ initGamma(std::ostream& errStream,
   
   size_t i;
 
-  for(i=0; i < UocInfo::ifList->size(); i++) {
-    if(UocInfo::ifList->elem(i)->uocName == "bitc.prelude") {
-      preenv = UocInfo::ifList->elem(i)->gamma;
-      preInsts = UocInfo::ifList->elem(i)->instEnv;
-      break;
+  {
+    UocMap::iterator itr = UocInfo::ifList.find("bitc.prelude");
+    if (itr == UocInfo::ifList.end()) {
+      errStream << topAst->loc << ": "
+		<< "Internal Compiler Error. "
+		<< "Prelude has NOT been processed till " 
+		<< "type inference."
+		<< std::endl;
+      // GCFIX: Why does this return on error instead of exiting? This
+      // is a FATAL compiler errors!
+      return false;
     }
+
+    preenv = itr->second->gamma;
+    preInsts = itr->second->instEnv;
   }
 
-  if(i == UocInfo::ifList->size()) {
-    errStream << topAst->loc << ": "
-	      << "Internal Compiler Error. "
-	      << "Prelude has NOT been processed till " 
-	      << "type inference."
-	      << std::endl;
-    return false;
-  }
-  
   if(!preenv || !preInsts) {
     errStream << topAst->loc << ": "
 	      << "Internal Compiler Error. "
 	      << "Prelude's Gamma is NULL "
 	      << std::endl;
+    // GCFIX: Why does this return on error instead of exiting? This
+    // is a FATAL compiler errors!
     return false;
   }
   

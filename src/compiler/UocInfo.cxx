@@ -60,8 +60,8 @@ using namespace boost;
 using namespace sherpa;
 
 vector<filesystem::path> UocInfo::searchPath;
-GCPtr<CVector<GCPtr<UocInfo> > > UocInfo::ifList;
-GCPtr<CVector<GCPtr<UocInfo> > > UocInfo::srcList;
+UocMap UocInfo::ifList;
+UocMap UocInfo::srcList;
 
 bool UocInfo::mainIsDefined = false;
 
@@ -210,12 +210,11 @@ bool
 GCPtr<UocInfo> 
 UocInfo::findInterface(const std::string& ifName)
 {
-  for (size_t i = 0; i < ifList->size(); i++) {
-    if (ifList->elem(i)->uocName == ifName)
-      return ifList->elem(i);
-  }
+  UocMap::iterator itr = UocInfo::ifList.find(ifName);
+  if (itr == UocInfo::ifList.end())
+    return NULL;
 
-  return NULL;
+  return itr->second;
 }
 
 GCPtr<UocInfo> 

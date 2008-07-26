@@ -40,7 +40,6 @@
 
 #include <set>
 #include <boost/filesystem/path.hpp>
-#include <libsherpa/CVector.hxx>
 #include "backend.hxx"
 #include "Special.hxx"
 #include "TvPrinter.hxx"

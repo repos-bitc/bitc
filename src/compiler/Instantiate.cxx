@@ -299,8 +299,9 @@ UpdateMegaEnvs(GCPtr<UocInfo> uoc)
 	 << "#Instances = " << megaInstEnv->bindings->size() 
 	 << endl;
 
-  for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::ifList->elem(i);
+  for(UocMap::iterator itr = UocInfo::ifList.begin();
+      itr != UocInfo::ifList.end(); ++itr) {
+    GCPtr<UocInfo> puoci = itr->second;
     if((puoci->flags & UOC_IS_MUTABLE) ||
        ((puoci->flags & UOC_SEEN_BY_INST) == 0)) {
       INST_ENV_DEBUG
@@ -315,8 +316,9 @@ UpdateMegaEnvs(GCPtr<UocInfo> uoc)
     }
   }  
 
-  for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::srcList->elem(i);
+  for(UocMap::iterator itr = UocInfo::srcList.begin();
+      itr != UocInfo::srcList.end(); ++itr) {
+    GCPtr<UocInfo> puoci = itr->second;
     if((puoci->flags & UOC_IS_MUTABLE) ||
        ((puoci->flags &UOC_SEEN_BY_INST) == 0)) {
       INST_ENV_DEBUG
@@ -357,28 +359,29 @@ UocInfo::lookupByFqn(const string& fqn, GCPtr<UocInfo> &targetUoc)
   // qualification that can never be satisfied.
 
   // Search all interfaces
-  for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
-    GCPtr<UocInfo> uoc = UocInfo::ifList->elem(i);
+  {
+    UocMap::iterator itr = UocInfo::ifList.find(ifName);
 
-    if (uoc->uocName != ifName) 
-      continue;
+    if (itr != UocInfo::ifList.end()) {
+      GCPtr<UocInfo> uoc = itr->second;
+
+      targetUoc = uoc;
+      GCPtr<AST> def = uoc->env->getBinding(idName);
+      assert(def->fqn.asString() == fqn);
+
+      // If this is a declaration, then try to get the definition if
+      // one exists, and return that.
+      if(def->defn)
+	def = def->defn;
     
-
-    targetUoc = uoc;
-    GCPtr<AST> def = uoc->env->getBinding(idName);
-    assert(def->fqn.asString() == fqn);
-
-    // If this is a declaration, then try to get the definition if
-    // one exists, and return that.
-    if(def->defn)
-      def = def->defn;
-    
-    return def->defForm;
+      return def->defForm;
+    }
   }
 
   // Next all source modules
-  for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
-    GCPtr<UocInfo> uoc = UocInfo::srcList->elem(i);
+  for(UocMap::iterator itr = UocInfo::srcList.begin();
+      itr != UocInfo::srcList.end(); ++itr) {
+    GCPtr<UocInfo> uoc = itr->second;
 
     if (uoc->uocName != ifName) 
       continue;    

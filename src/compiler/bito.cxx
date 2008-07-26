@@ -75,8 +75,9 @@ EmitBitO(std::ostream &optStream, std::ostream &errStream)
 
   out << "(bitc-version \"" << BITC_VERSION << "\")" << std::endl;
 
-  for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
-    GCPtr<UocInfo> uoc = UocInfo::srcList->elem(i);
+  for(UocMap::iterator itr = UocInfo::srcList.begin();
+      itr != UocInfo::srcList.end(); ++itr) {
+    GCPtr<UocInfo> uoc = itr->second;
 
     uoc->PrettyPrint(out, false);
   }

@@ -384,7 +384,7 @@ interface: '(' tk_INTERFACE ifident {
   else  {
     /* Put the UoC onto the interface list so that we do not recurse on
        import. */
-    UocInfo::ifList->append(uoc);
+    UocInfo::ifList[uocName] = uoc;
   }
     
   // Regardless, compile the new interface to check for further
@@ -431,13 +431,14 @@ implicit_module: mod_definitions  {
  $$->printVariant = 1;
 
  // Construct, compile, and admit the parsed UoC:
- GCPtr<UocInfo> uoc = 
-   new UocInfo(UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules),
-	       lexer->here.origin, $$);
+ string uocName = 
+   UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
+
+ GCPtr<UocInfo> uoc = new UocInfo(uocName, lexer->here.origin, $$);
  lexer->nModules++;
 
  uoc->Compile();
- UocInfo::srcList->append(uoc);
+ UocInfo::srcList[uocName] = uoc;
 };
 
 module: '(' tk_MODULE optdocstring mod_definitions ')' {
@@ -445,13 +446,14 @@ module: '(' tk_MODULE optdocstring mod_definitions ')' {
  $$ = $4;
  $$->astType = at_module;
 
+ string uocName = 
+   UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
+
  // Construct, compile, and admit the parsed UoC:
- GCPtr<UocInfo> uoc = 
-   new UocInfo(UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules),
-	       lexer->here.origin, $$);
+ GCPtr<UocInfo> uoc = new UocInfo(uocName, lexer->here.origin, $$);
  lexer->nModules++;
  uoc->Compile();
- UocInfo::srcList->append(uoc);
+ UocInfo::srcList[uocName] = uoc;
 };
 
 module: '(' tk_MODULE ifident optdocstring mod_definitions ')' {
@@ -462,12 +464,13 @@ module: '(' tk_MODULE ifident optdocstring mod_definitions ')' {
  // Construct, compile, and admit the parsed UoC.
  // Note that we do not even consider the user-provided module name
  // for purposes of internal naming, because it is not significant.
- GCPtr<UocInfo> uoc = 
-   new UocInfo(UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules),
-	       lexer->here.origin, $$);
+ string uocName = 
+   UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
+
+ GCPtr<UocInfo> uoc = new UocInfo(uocName, lexer->here.origin, $$);
  lexer->nModules++;
  uoc->Compile();
- UocInfo::srcList->append(uoc);
+ UocInfo::srcList[uocName] = uoc;
 };
 
 module_seq: module {

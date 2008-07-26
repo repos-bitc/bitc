@@ -104,12 +104,10 @@ findInterface(std::ostream& errStream, GCPtr<AST> ifAst)
 {
   GCPtr<UocInfo> iface=NULL;
 
-  for(size_t i=0; i < UocInfo::ifList->size(); i++) {
-    GCPtr<UocInfo> thisIface = UocInfo::ifList->elem(i);
-    if(thisIface->uocName == ifAst->s) {
-      iface = thisIface;
-      break;
-    }
+  UocMap::iterator itr = UocInfo::ifList.find(ifAst->s);
+  if (itr != UocInfo::ifList.end()) {
+    GCPtr<UocInfo> thisIface = itr->second;
+    iface = thisIface;
   }
       
   if(!iface) {
@@ -2495,24 +2493,23 @@ initEnv(std::ostream& errStream,
   GCPtr<ASTEnvironment > preenv = 0;
   size_t i;
 
-  for(i=0; i < UocInfo::ifList->size(); i++) {
-    if(UocInfo::ifList->elem(i)->uocName == "bitc.prelude") {
-      preenv = UocInfo::ifList->elem(i)->env;
-      break;
+  {
+    UocMap::iterator itr = UocInfo::ifList.find("bitc.prelude");
+    if (itr == UocInfo::ifList.end()) {
+      errStream << ast->loc << ": "
+		<< "Internal Compiler Error. "
+		<< " Prelude has NOT been processed."
+		<< std::endl;
+      // GCFIX: Why does this return on error instead of exiting? This
+      // is a FATAL compiler errors!
+      return false;
     }
-  }
-  
-  assert(preenv);
-  
-  if(i == UocInfo::ifList->size()) {
-    errStream << ast->loc << ": "
-	      << "Internal Compiler Error. "
-	      << " Prelude has NOT been processed."
-	      << std::endl;
-    return false;
+    preenv = itr->second->env;
   }
   
   if(!preenv) {
+    // GCFIX: Why does this return on error instead of exiting? This
+    // is a FATAL compiler errors!
     errStream << ast->loc << ": "
 	      << "Internal Compiler Error. "
 	      << " Prelude's environment is NULL "

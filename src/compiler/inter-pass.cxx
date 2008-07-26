@@ -321,13 +321,15 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
 void
 UocInfo::findAllDefForms()
 {
-  for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::srcList->elem(i);
+  for(UocMap::iterator itr = UocInfo::srcList.begin();
+      itr != UocInfo::srcList.end(); ++itr) {
+    GCPtr<UocInfo> puoci = itr->second;
     puoci->findDefForms(puoci->uocAst);
   }
 
-  for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::ifList->elem(i);
+  for(UocMap::iterator itr = UocInfo::ifList.begin();
+      itr != UocInfo::ifList.end(); ++itr) {
+    GCPtr<UocInfo> puoci = itr->second;
     puoci->findDefForms(puoci->uocAst);
   }
 }
@@ -358,13 +360,15 @@ addCandidates(GCPtr<AST> mod)
 void  
 UocInfo::addAllCandidateEPs()
 {
-  for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::ifList->elem(i);
+  for(UocMap::iterator itr = UocInfo::ifList.begin();
+      itr != UocInfo::ifList.end(); ++itr) {
+    GCPtr<UocInfo> puoci = itr->second;
     addCandidates(puoci->uocAst);
   }  
 
-  for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::srcList->elem(i);
+  for(UocMap::iterator itr = UocInfo::srcList.begin();
+      itr != UocInfo::srcList.end(); ++itr) {
+    GCPtr<UocInfo> puoci = itr->second;
     addCandidates(puoci->uocAst);
   }
 

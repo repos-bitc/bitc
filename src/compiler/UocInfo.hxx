@@ -44,7 +44,6 @@
 
 #include <boost/filesystem/path.hpp>
 #include <libsherpa/LexLoc.hxx>
-#include <libsherpa/CVector.hxx>
 
 #include "Environment.hxx"
 #include "AST.hxx"
@@ -97,6 +96,9 @@ struct OnePassInfo {
   bool stopAfter;		// for debugging
 };
 
+
+class UocInfo;
+typedef std::map<std::string, sherpa::GCPtr<UocInfo> > UocMap;
 
 // Unit Of Compilation Info. One of these is constructed for each
 // unit of compilation (source or interface). In the source case, the
@@ -161,8 +163,8 @@ public:
   // The presence of a UocInfo record in the ifList indicates that
   // parsing of an interface has at least started. If the /ast/ pointer
   // is non-null, the parse has been completed.
-  static sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<UocInfo> > > ifList;
-  static sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<UocInfo> > > srcList;
+  static UocMap ifList;
+  static UocMap srcList;
   //  static sherpa::GCPtr<UocInfo> linkedUoc;  // grand Uoc after linkage
 
   static sherpa::GCPtr<UocInfo> 
