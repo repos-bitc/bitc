@@ -70,7 +70,8 @@ struct BackEnd {
   unsigned long flags;
 };
 
-#define BK_HDR_MODE 0x001u
-#define BK_UOC_MODE 0x002u
+#define BK_HDR_MODE 0x001u	// generating headers only
+#define BK_UOC_MODE 0x002u	// running per-UOC passes only
+#define BK_LINKING  0x004u	// linking. Need libraries to resolve.
 
 #endif /* BACKEND_HXX */

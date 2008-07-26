@@ -65,19 +65,19 @@ namespace Options {
   unsigned verbose = 0;
   set<string> entryPts;
   BackEnd *backEnd = 0;
-  std::string outputFileName;
-  GCPtr<CVector<std::string> > libDirs;
-  GCPtr<CVector<std::string> > inputs;
+  string outputFileName;
+  vector<filesystem::path> libDirs;
+  vector<filesystem::path> inputs;
   bool Wall = false;
   bool noGC = false;
   bool noAlloc = false;
   GCPtr<TvPrinter> debugTvP = new TvPrinter;
   bool heuristicInference = false;
 
-  GCPtr<CVector<std::string> > LinkPreOptionsGCC;
-  GCPtr<CVector<std::string> > CompilePreOptionsGCC;
-  GCPtr<CVector<std::string> > LinkPostOptionsGCC;
+  vector<string> LinkPreOptionsGCC;
+  vector<string> CompilePreOptionsGCC;
+  vector<string> LinkPostOptionsGCC;
 
-  GCPtr<CVector<std::string> > SystemDirs;
+  vector<filesystem::path> SystemDirs;
 
 }

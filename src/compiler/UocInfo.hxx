@@ -42,7 +42,7 @@
 #include <string>
 #include <ostream>
 
-#include <libsherpa/Path.hxx>
+#include <boost/filesystem/path.hpp>
 #include <libsherpa/LexLoc.hxx>
 #include <libsherpa/CVector.hxx>
 
@@ -103,7 +103,7 @@ struct OnePassInfo {
 // /name/ field will be the file name. In the interface case, the
 // /name/ will be the "ifname" reported in the import statement.
 class UocInfo : public sherpa::Countable {
-  static sherpa::GCPtr<sherpa::Path> resolveInterfacePath(std::string ifName);
+  static boost::filesystem::path resolveInterfacePath(std::string ifName);
 
 public:
   std::string uocName;		// either ifName or simulated
@@ -154,7 +154,7 @@ public:
    */
   static sherpa::GCPtr<UocInfo> CreateUnifiedUoC();
 
-  static sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<sherpa::Path> > > searchPath;
+  static std::vector<boost::filesystem::path> searchPath;
 
   // FIX -- All of these should be locals
 
@@ -180,7 +180,7 @@ public:
   // Parse a file, admitting source and/or interface units of
   // compilation into the ifList or the srcList as a side effect.
   static bool 
-  CompileFromFile(const std::string& srcFileName, bool fromCmdLine);
+  CompileFromFile(const boost::filesystem::path& src, bool fromCmdLine);
 
   // Individual passes:
 #define PASS(nm,short,descrip)				  \

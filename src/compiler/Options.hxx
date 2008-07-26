@@ -78,19 +78,19 @@ namespace Options {
   extern std::set<std::string> entryPts;
   extern BackEnd *backEnd;
   extern std::string outputFileName;
-  extern sherpa::GCPtr<sherpa::CVector<std::string> > libDirs;
-  extern sherpa::GCPtr<sherpa::CVector<std::string> > inputs;
+  extern std::vector<boost::filesystem::path> libDirs;
+  extern std::vector<boost::filesystem::path> inputs;
 
   /// @brief Options and files that should be passed to GCC @em before
   /// we insert the C file produced by bitcc.
-  extern sherpa::GCPtr<sherpa::CVector<std::string> > LinkPreOptionsGCC;
-  extern sherpa::GCPtr<sherpa::CVector<std::string> > CompilePreOptionsGCC;
+  extern std::vector<std::string> LinkPreOptionsGCC;
+  extern std::vector<std::string> CompilePreOptionsGCC;
 
   /// @brief Options and files that should be passed to GCC @em after
   /// we insert the C file produced by bitcc.
-  extern sherpa::GCPtr<sherpa::CVector<std::string> > LinkPostOptionsGCC;
+  extern std::vector<std::string> LinkPostOptionsGCC;
 
-  extern sherpa::GCPtr<sherpa::CVector<std::string> > SystemDirs;
+  extern std::vector<boost::filesystem::path> SystemDirs;
 
   extern bool Wall; // All Warnings are errors.
   extern bool noGC; // no garbage collection mode

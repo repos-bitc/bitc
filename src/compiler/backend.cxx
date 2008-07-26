@@ -45,7 +45,7 @@
 
 BackEnd BackEnd::backends[] = {
   // The first one is the default.
-  { "exe", pn_npass, op_ssaTrans, 0, 0, EmitExe, 0 },
+  { "exe", pn_npass, op_ssaTrans, 0, 0, EmitExe, BK_LINKING },
   { "c", pn_npass, op_ssaTrans, 0, 0, EmitC, 0 },
   { "h", pn_npass, op_ssaTrans, 0, 0, EmitHeader, BK_HDR_MODE },
   { "bito", pn_npass, op_none, 0, EmitBitO, 0, BK_UOC_MODE },

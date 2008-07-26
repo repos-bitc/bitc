@@ -90,7 +90,8 @@
 #include <getopt.h>
 #include <langinfo.h>
 
-#include <libsherpa/Path.hxx>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/convenience.hpp>
 #include <libsherpa/util.hxx>
 
 #include "Version.hxx"
@@ -101,8 +102,10 @@
 #include "INOstream.hxx"
 #include "Instantiate.hxx"
 #include "TvPrinter.hxx"
-using namespace sherpa;
+
 using namespace std;
+using namespace boost;
+using namespace sherpa;
 
 #define BITC_COMPILER_MODE        0x1u
 #define BITC_INTERPRETER_MODE     0x2u
@@ -228,9 +231,9 @@ void
 AddLinkArgumentForGCC(const std::string& s)
 {
   if (SawFirstBitcInput)
-    Options::LinkPostOptionsGCC->append(s);
+    Options::LinkPostOptionsGCC.push_back(s);
   else {
-    Options::LinkPreOptionsGCC->append(s);
+    Options::LinkPreOptionsGCC.push_back(s);
   }
 }
 
@@ -238,7 +241,7 @@ void
 AddCompileArgumentForGCC(const std::string& s)
 {
   if (!SawFirstBitcInput)
-    Options::CompilePreOptionsGCC->append(s);    
+    Options::CompilePreOptionsGCC.push_back(s);    
 }
 
 BackEnd *
@@ -261,8 +264,8 @@ handle_sigsegv(int param)
   exit(1);
 }
 
-bool
-ResolveLibPath(std::string name, std::string& resolvedName)
+filesystem::path
+ResolveLibPath(std::string name)
 {
   // We either saw -lname or -l name. What we need to do here is
   // check the currently known library paths for a resolution. If we
@@ -277,17 +280,25 @@ ResolveLibPath(std::string name, std::string& resolvedName)
   // Unfortunately, this means that the @em absence of
   // .../libmumble.bita does not reliably indicate an error.
 
-  Path nmPath = Path("lib" + name + ".bita");
+  string fullNm = "lib" + name + ".bita";
 
-  for (size_t i = 0; i < Options::libDirs->size(); i++) {
-    Path testPath = Path(Options::libDirs->elem(i)) + nmPath;
-    if (testPath.exists()) {
-      resolvedName = testPath.asString();
-      return true;
+  for (size_t i = 0; i < Options::libDirs.size(); i++) {
+    filesystem::path testPath = Options::libDirs[i] / fullNm;
+    if (filesystem::exists(testPath)) {
+      if (!filesystem::is_regular(testPath)) {
+	std::cerr << "bitcc: error: \"-l" << name 
+		  << "\" resolves to \""
+		  << testPath
+		  << "\", which is not a regular file."
+		  << endl;
+	exit(1);
+      }
+
+      return testPath;
     }
   }
 
-  return false;    
+  return filesystem::path();    
 }
 
 int
@@ -298,13 +309,6 @@ main(int argc, char *argv[])
   int opterr = 0;
 
   // Allocate memory for some static members
-  Options::libDirs = new CVector<std::string>;
-  Options::inputs = new CVector<std::string>;
-  Options::CompilePreOptionsGCC = new CVector<std::string>;
-  Options::LinkPreOptionsGCC = new CVector<std::string>;
-  Options::LinkPostOptionsGCC = new CVector<std::string>;
-  Options::SystemDirs = new CVector<std::string>;
-  UocInfo::searchPath = new CVector<GCPtr<Path> >;
   UocInfo::ifList = new CVector<GCPtr<UocInfo> >;
   UocInfo::srcList = new CVector<GCPtr<UocInfo> >;
 
@@ -357,8 +361,7 @@ main(int argc, char *argv[])
     switch(c) {
     case 1:
       {
-	Path p(optarg);
-	std::string sfx = p.suffix();
+	std::string sfx = filesystem::extension(optarg);
 
 	if (
 	    // Interface files. Probably should not appear on the
@@ -373,7 +376,7 @@ main(int argc, char *argv[])
 	    || (sfx == ".bita")) {
 
 	  SawFirstBitcInput = true;
-	  Options::inputs->append(optarg);
+	  Options::inputs.push_back(optarg);
 	}
 	else
 	  // Else it is something to be passed through to GCC:
@@ -642,11 +645,11 @@ main(int argc, char *argv[])
       AddCompileArgumentForGCC(optarg);
       AddLinkArgumentForGCC("-I");
       AddLinkArgumentForGCC(optarg);
-      UocInfo::searchPath->append(new Path(optarg));
+      UocInfo::searchPath.push_back(optarg);
       break;
 
     case LOPT_SYSTEM:
-      Options::SystemDirs->append(optarg);
+      Options::SystemDirs.push_back(optarg);
       break;
 
     case 'l':
@@ -654,9 +657,9 @@ main(int argc, char *argv[])
 	AddLinkArgumentForGCC("-l");
 	AddLinkArgumentForGCC(optarg);
 
-	std::string resolvedName;
-	if (ResolveLibPath(optarg, resolvedName))
-	    Options::inputs->append(resolvedName);
+	filesystem::path path = ResolveLibPath(optarg);
+	if (!path.empty())
+	  Options::inputs.push_back(path.string());
 	break;
       }
 
@@ -664,7 +667,7 @@ main(int argc, char *argv[])
       AddLinkArgumentForGCC("-L");
       AddLinkArgumentForGCC(optarg);
 
-      Options::libDirs->append(optarg);
+      Options::libDirs.push_back(optarg);
       break;
 
     case 'O':			// a.k.a. -O2
@@ -685,25 +688,30 @@ main(int argc, char *argv[])
     }
   }
   
-  for (size_t i = 0; i < Options::SystemDirs->size(); i++) {
-    stringstream incpath;
-    incpath << Options::SystemDirs->elem(i) << "/include";
+  for (size_t i = 0; i < Options::SystemDirs.size(); i++) {
+    filesystem::path incPath = Options::SystemDirs[i] / "include";
     
-    UocInfo::searchPath->append(new Path(incpath.str()));
-    Options::CompilePreOptionsGCC->append("-I");
-    Options::CompilePreOptionsGCC->append(incpath.str());
+    UocInfo::searchPath.push_back(incPath);
+    Options::CompilePreOptionsGCC.push_back("-I");
+    Options::CompilePreOptionsGCC.push_back(incPath.string());
 
-    stringstream libpath;
-    libpath << Options::SystemDirs->elem(i) << "/lib";
-    Options::libDirs->append(libpath.str());
-    Options::LinkPostOptionsGCC->append("-L");
-    Options::LinkPostOptionsGCC->append(libpath.str());
+    /// @bug: What about lib64?
+    std::string lib_leaf_name = filesystem::path(AUTOCONF_LIBDIR).leaf();
+    filesystem::path libPath = Options::SystemDirs[i] / lib_leaf_name;
+    Options::libDirs.push_back(libPath);
+    Options::LinkPostOptionsGCC.push_back("-L");
+    Options::LinkPostOptionsGCC.push_back(libPath.string());
   }
 
   if (Options::useStdLib) {
-    std::string resolvedName;
-    if (ResolveLibPath("bitc", resolvedName))
-      Options::inputs->append(resolvedName);
+    filesystem::path path = ResolveLibPath("bitc");
+    if (path.empty() && (Options::backEnd->flags & BK_LINKING)) {
+      cerr << "Cannot find bitc standard library, which is needed"
+	   << endl;
+      exit(1);
+    }
+    if (!path.empty())
+      Options::inputs.push_back(path.string());
   }
 
 #if 0
@@ -748,7 +756,7 @@ main(int argc, char *argv[])
 
   /* From this point on, argc and argv should no longer be consulted. */
 
-  if (Options::inputs->size() == 0)
+  if (!Options::inputs.empty())
     opterr++;
 
   if (opterr) {
@@ -775,8 +783,8 @@ main(int argc, char *argv[])
   }
   
   // Compile everything
-  for(size_t i = 0; i < Options::inputs->size(); i++)
-    UocInfo::CompileFromFile(Options::inputs->elem(i), true);
+  for(size_t i = 0; i < Options::inputs.size(); i++)
+    UocInfo::CompileFromFile(Options::inputs[i], true);
 
   /* Per-file backend output after processing frontend, if any */
   bool doFinal = true;

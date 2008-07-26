@@ -43,7 +43,9 @@
 #include <string>
 #include <sstream>
 #include <cctype>
+
 #include <libsherpa/utf8.hxx>
+#include <boost/filesystem/operations.hpp>
 
 #include "config.h"
 
@@ -60,8 +62,9 @@
 
 #define TOC_HEADER_MODE 0x01u
 
-using namespace sherpa;
 using namespace std;
+using namespace boost;
+using namespace sherpa;
 
 const char *TY_PFX   = "ty_";
 const char *CTOR_PFX = "ct_";
@@ -3153,8 +3156,8 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
     stringstream opt;
     opt << STD_CC_CMD << " -c ";
 
-    for (size_t i = 0; i < Options::CompilePreOptionsGCC->size(); i++)
-      opt << " " << Options::CompilePreOptionsGCC->elem(i);
+    for (size_t i = 0; i < Options::CompilePreOptionsGCC.size(); i++)
+      opt << " " << Options::CompilePreOptionsGCC[i];
 
     opt << " -o bitc.out.o";
     opt << " bitc.out.c";
@@ -3171,13 +3174,13 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
     stringstream opt;
     opt << "gcc";
 
-    for (size_t i = 0; i < Options::LinkPreOptionsGCC->size(); i++)
-      opt << " " << Options::LinkPreOptionsGCC->elem(i);
+    for (size_t i = 0; i < Options::LinkPreOptionsGCC.size(); i++)
+      opt << " " << Options::LinkPreOptionsGCC[i];
 
     opt << " bitc.out.o";
 
-    for (size_t i = 0; i < Options::LinkPostOptionsGCC->size(); i++)
-      opt << " " << Options::LinkPostOptionsGCC->elem(i);
+    for (size_t i = 0; i < Options::LinkPostOptionsGCC.size(); i++)
+      opt << " " << Options::LinkPostOptionsGCC[i];
 
     if (Options::useStdLib)
       opt << " -lbitc";
@@ -3194,8 +3197,8 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
   }
 
  done:
-  Path("bitc.out.c").remove();
-  Path("bitc.out.o").remove();
+  filesystem::remove("bitc.out.c");
+  filesystem::remove("bitc.out.o");
   
   return WEXITSTATUS(status) ? false : true;
 }
