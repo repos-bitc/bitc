@@ -1,5 +1,5 @@
-#ifndef INOSTREAM_HXX
-#define INOSTREAM_HXX
+#ifndef LIBSHERPA_INOSTREAM_HXX
+#define LIBSHERPA_INOSTREAM_HXX
 
 /**************************************************************************
  *
@@ -42,6 +42,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <dirent.h>
+#include <string.h>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -285,4 +286,4 @@ struct INOstream {
 
 } /* namespace sherpa */
 
-#endif /* INOSTREAM_HXX */
+#endif /* LIBSHERPA_INOSTREAM_HXX */
