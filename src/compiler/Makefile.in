@@ -150,11 +150,18 @@ BUILD/BitcParser.o: BUILD/BitcParser.cxx | BUILD
 	@$(CXX_DEP)
 	$(CXX_BUILD)
 
+# If ASTMAKER is not locally available, simply drop these rules.
+# The output files should have been shipped in proper form, but not
+# all source code control systems get the associated time stamps right.
+# ASTMAKER is only needed if you are changing the AST for the compiler,
+# and if you are doing that, you definitely need to install the tool!
+ifneq "$(ASTMAKER)" ""
 AST.cxx: AST.ast AST.hxx
 	$(ASTMAKER) -s AST.ast
 
 AST.hxx: AST.ast
 	$(ASTMAKER) -h AST.ast
+endif
 
 clean:
 	-rm -rf BUILD
