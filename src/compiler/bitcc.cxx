@@ -755,7 +755,7 @@ main(int argc, char *argv[])
 
   /* From this point on, argc and argv should no longer be consulted. */
 
-  if (!Options::inputs.empty())
+  if (Options::inputs.empty())
     opterr++;
 
   if (opterr) {
