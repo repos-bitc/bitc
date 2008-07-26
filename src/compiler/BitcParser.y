@@ -360,7 +360,7 @@ interface: '(' tk_INTERFACE ifident {
   $$->addChildrenFrom($6);
 
   if (lexer->isCommandLineInput) {
-    char *s =
+    const char *s =
       ": Warning: interface units of compilation should no longer\n"
       "    be given on the command line.\n";
     lexer->ReportParseWarning($$->loc, s);
