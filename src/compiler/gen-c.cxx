@@ -3070,7 +3070,7 @@ GenerateCoutput(std::ostream &errStream, INOstream &out,
   else {
     // If there are *any* entry points, emit the procedure that
     // handles global initialization so that it can be called:
-    if (Options::entryPts->size())
+    if (!Options::entryPts.empty())
       CHKERR(errFree, EmitGlobalInitializers(errStream, uoc, out, flags));    
 
     // If bitc.main.main is an entry point, emit the wrapping main

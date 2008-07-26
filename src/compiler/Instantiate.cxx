@@ -2089,13 +2089,26 @@ UocInfo::instantiate(ostream &errStream,
  
 bool
 UocInfo::instantiateBatch(ostream &errStream, 
-			  GCPtr<const CVector<string> > epNames)
+			  set<string>& epNames)
 {
   bool errFree = true;
   UpdateMegaEnvs(this);
   
-  for (size_t ep = 0; ep < epNames->size(); ep++)
-    CHKERR(errFree, instantiateFQN(errStream, epNames->elem(ep)));  
+  /// The following symbols are introduced by code that is added in the
+  /// SSA pass. This code is added @em after polyinstantiation, and
+  /// consequently cannot be discovered by the demand-driven incremental
+  /// instantiation process. Add them to the emission list by hand here
+  /// to ensure that they get emitted.
+  ///
+  /// These need to be instantiated before any of the user-specified
+  /// entry points are instantiated, because the entry point
+  /// instantiations may reference these.
+  CHKERR(errFree, instantiateFQN(errStream, "bitc.prelude.__index_lt"));
+  CHKERR(errFree, instantiateFQN(errStream, "bitc.prelude.IndexBoundsError"));
+
+  for(set<string>::iterator itr = epNames.begin();
+      itr != epNames.end(); ++itr)
+    CHKERR(errFree, instantiateFQN(errStream, (*itr)));  
   
   INST_DEBUG
     cerr << "Unified UOC after instantiation is "

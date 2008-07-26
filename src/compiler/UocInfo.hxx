@@ -38,6 +38,10 @@
  *
  **************************************************************************/
 
+#include <set>
+#include <string>
+#include <ostream>
+
 #include <libsherpa/Path.hxx>
 #include <libsherpa/LexLoc.hxx>
 #include <libsherpa/CVector.hxx>
@@ -291,7 +295,7 @@ public:
 		   const std::string& fqn);
   
   bool instantiateBatch(std::ostream &errStream, 
-			sherpa::GCPtr<const sherpa::CVector<std::string> > fqns);
+			std::set<std::string>& fqns);
 
 };
 

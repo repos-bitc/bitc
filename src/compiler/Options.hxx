@@ -75,7 +75,7 @@ namespace Options {
   extern bool dumpTypesAfterMidEnd;
   extern std::set<std::string> showTypesUocs;
   extern std::set<std::string> xmlTypesUocs;
-  extern sherpa::GCPtr<sherpa::CVector<std::string> > entryPts;
+  extern std::set<std::string> entryPts;
   extern BackEnd *backEnd;
   extern std::string outputFileName;
   extern sherpa::GCPtr<sherpa::CVector<std::string> > libDirs;

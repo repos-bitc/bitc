@@ -296,10 +296,8 @@ main(int argc, char *argv[])
   int c;
   //  extern int optind;
   int opterr = 0;
-  bool userAddedEntryPts = false;
 
   // Allocate memory for some static members
-  Options::entryPts = new CVector<std::string>;
   Options::libDirs = new CVector<std::string>;
   Options::inputs = new CVector<std::string>;
   Options::CompilePreOptionsGCC = new CVector<std::string>;
@@ -621,8 +619,7 @@ main(int argc, char *argv[])
 
     case 'e':
       {	
-	userAddedEntryPts = true;
-	Options::entryPts->append(optarg);
+	Options::entryPts.insert(optarg);
 	break;
       }
 
@@ -829,27 +826,18 @@ main(int argc, char *argv[])
 #if (BITC_CURRENT_MODE == BITC_COMPILER_MODE)
   /* Build the list of things to be instantiated */
 
-  /** The following symbols are introduced by code that is added in the
-   * SSA pass. This code is added @em after polyinstantiation, and
-   * consequently cannot be discovered by the demand-driven incremental
-   * instantiation process. Add them to the emission list by hand here
-   * to ensure that they get emitted.
-   */
-  Options::entryPts->append("bitc.prelude.__index_lt");
-  Options::entryPts->append("bitc.prelude.IndexBoundsError");  
-
-  /** If we are not compiling in header mode, we also need to emit
-   * code for the primary entry point, which is generally
-   * bitc.main.main. All else will follow from that as
-   * polyinstantiation proceeds.
-   *
-   * Header mode is a bit different. In that mode we are converting
-   * interfaces into header files, and there is no particular entry
-   * point to emit.
-   */
-  if(!userAddedEntryPts &&
+  /// If we are not compiling in header mode, we need to emit code for
+  /// the primary entry point. In the absence of some other
+  /// specification by the user, that entry point is
+  /// bitc.main.main. All else will follow from that as
+  /// polyinstantiation proceeds.
+  ///
+  /// Header mode is a bit different. In that mode we are converting
+  /// interfaces into header files, and there is no particular entry
+  /// point to emit.
+  if(Options::entryPts.empty() &&
      ((Options::backEnd->flags & BK_HDR_MODE) == 0))
-    Options::entryPts->append("bitc.main.main");
+    Options::entryPts.insert("bitc.main.main");
 
   /** Add all other top level forms that might cause
    * side-effects. These are the top-level initializers. This is a

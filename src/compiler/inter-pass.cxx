@@ -344,7 +344,7 @@ addCandidates(GCPtr<AST> mod)
     case at_recdef:
     case at_defexception:
       if(id->symType->isConcrete())
-	Options::entryPts->append(id->fqn.asString());
+	Options::entryPts.insert(id->fqn.asString());
       
       break;
       
