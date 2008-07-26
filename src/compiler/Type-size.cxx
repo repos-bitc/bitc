@@ -45,7 +45,6 @@
 #include <sstream>
 
 #include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
 
 #include "AST.hxx"
 #include "Type.hxx"

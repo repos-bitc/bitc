@@ -45,7 +45,6 @@
 #include <string>
 
 #include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
 
 #include "Options.hxx"
 #include "UocInfo.hxx"

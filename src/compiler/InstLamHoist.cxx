@@ -49,7 +49,6 @@
 #include <string>
 
 #include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
 
 #include "UocInfo.hxx"
 #include "AST.hxx"

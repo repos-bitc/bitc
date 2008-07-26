@@ -38,7 +38,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <libsherpa/CVector.hxx>
 
 #include "Options.hxx"
 #include "Type.hxx"

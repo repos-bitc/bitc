@@ -49,7 +49,6 @@
 #include <string>
 
 #include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
 
 #include "AST.hxx"
 #include "inter-pass.hxx"

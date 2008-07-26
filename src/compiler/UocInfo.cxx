@@ -52,7 +52,6 @@
 #include "SexprLexer.hxx"
 
 #include <boost/filesystem/operations.hpp>
-#include <libsherpa/CVector.hxx>
 #include <libsherpa/util.hxx>
 
 using namespace std;
