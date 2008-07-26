@@ -42,7 +42,6 @@
 #include "AST.hxx"
 #include "Type.hxx"
 #include "die.hxx"
-#include "Eliminate.hxx"
 
 /* Definitions of mode used in Symbol Resolution 
    and Type-inference */

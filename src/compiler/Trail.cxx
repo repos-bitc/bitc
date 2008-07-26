@@ -42,7 +42,6 @@
 #include "Options.hxx"
 #include "Type.hxx"
 #include "Trail.hxx"
-#include "Eliminate.hxx"
 
 using namespace sherpa;
 
@@ -68,7 +67,7 @@ Trail::link(GCPtr<Type> from, GCPtr<Type> to)
 	      << to->asString(Options::debugTvP)
 	      << std::endl;
   
-  vec->append(from);   
+  vec.push_back(from);   
   from->link = to; 
 } 
 
@@ -97,34 +96,30 @@ Trail::subst(GCPtr<Type> from, GCPtr<Type> to)
 	      << std::endl;
 
   
-  vec->append(from);   
+  vec.push_back(from);   
   from->link = to; 
 }
 
 void
 Trail::rollBack(size_t upto)
 {
-  assert(upto <= vec->size());
-  GCPtr< CVector<GCPtr<Type> > > newVec = new CVector<GCPtr<Type> >;
+  assert(upto <= vec.size());
   
-  for(size_t i = 0; i < upto; i++)
-    newVec->append(vec->elem(i));
-
-  for(size_t i = upto; i < vec->size(); i++) {
-    vec->elem(i)->link = NULL;
+  for(size_t i = upto; i < vec.size(); i++) {
+    vec[i]->link = NULL;
     TRAIL_DEBUG 
       std::cerr << "[RB] Releasing: "
-		<< vec->elem(i)->asString(Options::debugTvP)
+		<< vec[i]->asString(Options::debugTvP)
 		<< std::endl;
   }
 
-  vec = newVec;
+  vec.erase(vec.begin() + upto, vec.end());
 }
 
 void
 Trail::release(const size_t n, GCPtr<Type> rel)
 {
-  assert(vec->elem(n) == rel); // not getType()
+  assert(vec[n] == rel); // not getType()
   
   rel->link = NULL;
   
@@ -133,5 +128,5 @@ Trail::release(const size_t n, GCPtr<Type> rel)
 	      << rel->asString(Options::debugTvP)
 	      << std::endl;
 
-  vec = eliminate(vec, n);
+  vec.erase(vec.begin() + n);
 }

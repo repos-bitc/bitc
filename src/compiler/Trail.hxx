@@ -41,19 +41,17 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
-#include <libsherpa/CVector.hxx>
 
 struct Type;
 
 struct Trail : public sherpa::Countable {
-  sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > vec;
+  std::vector<sherpa::GCPtr<Type> > vec;
   
   Trail() 
   {
-    vec = new sherpa::CVector<sherpa::GCPtr<Type> >;
   }
   
-  size_t snapshot() const { return vec->size(); }
+  size_t snapshot() const { return vec.size(); }
   
   // Substitution works on Type Variables only
   void subst(sherpa::GCPtr<Type> from, sherpa::GCPtr<Type> to);
