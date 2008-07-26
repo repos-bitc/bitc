@@ -72,6 +72,7 @@ struct Instance : public sherpa::Countable {
 		 sherpa::GCPtr<const InstEnvironment >
 		 instEnv) const;
   std::string asString();
+
   std::string asXML();
   void asXML(INOstream &out);
 };

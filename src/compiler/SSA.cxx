@@ -47,7 +47,6 @@
 #include "Unify.hxx"
 #include "inter-pass.hxx"
 #include "Special.hxx"
-#include "Options.hxx"
 #include "Instantiate.hxx"
 
 using namespace sherpa;

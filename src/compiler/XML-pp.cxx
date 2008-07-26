@@ -44,7 +44,6 @@
 #include "AST.hxx"
 #include "backend.hxx"
 #include "INOstream.hxx"
-#include "Options.hxx"
 
 using namespace std;
 using namespace sherpa;
@@ -294,4 +293,3 @@ XMLtypesPP(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc)
   XML_types_PP(out, uoc->uocAst, false);
   return true;
 }
-

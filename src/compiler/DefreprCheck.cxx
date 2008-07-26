@@ -50,7 +50,6 @@
 #include "Symtab.hxx"
 #include "inter-pass.hxx"
 #include "backend.hxx"
-#include "Options.hxx"
 #include "Pair.hxx"
 
 using namespace sherpa;

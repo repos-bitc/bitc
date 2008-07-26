@@ -102,6 +102,7 @@ struct TypeScheme : public sherpa::Countable {
   //sherpa::GCPtr<Type> type_copy();
   std::string asString(sherpa::GCPtr<TvPrinter> tvP=new TvPrinter, 
 		       bool norm=false);
+
   void asXML(sherpa::GCPtr<TvPrinter> tvP, INOstream &out);
   std::string asXML(sherpa::GCPtr<TvPrinter> tvP = new TvPrinter);
   

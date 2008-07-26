@@ -42,12 +42,12 @@
 #include <iostream>
 #include <sstream>
 
+#include "Options.hxx"
 #include "Version.hxx"
 #include "UocInfo.hxx"
 #include "Symtab.hxx"
 #include "Type.hxx"
 #include "backend.hxx"
-#include "Options.hxx"
 #include "inter-pass.hxx"
 #include "SexprLexer.hxx"
 #include <libsherpa/CVector.hxx>
@@ -295,7 +295,7 @@ UocInfo::Compile()
     
     bool showTypes = false;
     
-    if(Options::showTypesUocs->contains(uocName))
+    if(Options::showTypesUocs.find(uocName) != Options::showTypesUocs.end())
       showTypes = true;
     
     if (! (this->*passInfo[i].fn)(std::cerr, true, 0) ) {

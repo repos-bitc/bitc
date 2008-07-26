@@ -42,7 +42,6 @@
 #include <string>
 #include "backend.hxx"
 #include "UocInfo.hxx"
-#include "Options.hxx"
 
 BackEnd BackEnd::backends[] = {
   // The first one is the default.

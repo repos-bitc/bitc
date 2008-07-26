@@ -43,9 +43,9 @@
 #include <iostream>
 #include <string>
 
+#include "Options.hxx"
 #include "AST.hxx"
 #include "Environment.hxx"
-#include "Options.hxx"
 #include "Symtab.hxx"
 #include "inter-pass.hxx"
 

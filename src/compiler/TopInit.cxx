@@ -45,7 +45,6 @@
 
 #include "AST.hxx"
 #include "Environment.hxx"
-#include "Options.hxx"
 #include "Symtab.hxx"
 #include "inter-pass.hxx"
 

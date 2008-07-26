@@ -38,63 +38,64 @@
  *
  **************************************************************************/
 
-#include <dirent.h>
+#include <set>
+#include <boost/filesystem/path.hpp>
 #include <libsherpa/CVector.hxx>
 #include "backend.hxx"
 #include "Special.hxx"
 #include "TvPrinter.hxx"
 
 /* Flags set from command line option */
-struct Options {
-  static bool showParse;
-  static bool showLex;
-  static bool showTypes;
-  static bool xmlTypes;
-  static bool showPP;
-  static bool useStdInc;
-  static bool useStdLib;
-  static bool advisory;
-  static bool rawTvars;
-  static bool showMaybes;
-  static bool FQtypes;
-  static bool showAllTccs;
-  static bool showPasses;
-  static bool ppFQNS;
-  static bool ppDecorate;
-  static unsigned verbose;	// 0 = no, 1 = show exec, 2 = forward
-  /** @brief Suppress load of the prelude.
-   *
-   * This is an internal testing option to suppress loading the
-   * prelude while working on incomplete parts of the compiler.  This
-   * option should not be exposed to users.
-   */
-  static bool noPrelude;
-  static bool dumpAfterMidEnd;
-  static bool dumpTypesAfterMidEnd;
-  static sherpa::GCPtr<sherpa::CVector<std::string> > showTypesUocs;
-  static sherpa::GCPtr<sherpa::CVector<std::string> > xmlTypesUocs;
-  static sherpa::GCPtr<sherpa::CVector<std::string> > entryPts;
-  static BackEnd *backEnd;
-  static std::string outputFileName;
-  static sherpa::GCPtr<sherpa::CVector<std::string> > libDirs;
-  static sherpa::GCPtr<sherpa::CVector<std::string> > inputs;
+namespace Options {
+  extern bool showParse;
+  extern bool showLex;
+  extern bool showTypes;
+  extern bool xmlTypes;
+  extern bool showPP;
+  extern bool useStdInc;
+  extern bool useStdLib;
+  extern bool advisory;
+  extern bool rawTvars;
+  extern bool showMaybes;
+  extern bool FQtypes;
+  extern bool showAllTccs;
+  extern bool showPasses;
+  extern bool ppFQNS;
+  extern bool ppDecorate;
+  extern unsigned verbose;	// 0 = no, 1 = show exec, 2 = forward
 
-  /** @brief Options and files that should be passed to GCC @em before
-   * we insert the C file produced by bitcc.
-   */
-  static sherpa::GCPtr<sherpa::CVector<std::string> > LinkPreOptionsGCC;
-  static sherpa::GCPtr<sherpa::CVector<std::string> > CompilePreOptionsGCC;
-  /** @brief Options and files that should be passed to GCC @em after
-   * we insert the C file produced by bitcc.
-   */
-  static sherpa::GCPtr<sherpa::CVector<std::string> > LinkPostOptionsGCC;
+  /// @brief Suppress load of the prelude.
+  ///
+  /// This is an internal testing option to suppress loading the
+  /// prelude while working on incomplete parts of the compiler.  This
+  /// option should not be exposed to users.
+  ///
+  extern bool noPrelude;
+  extern bool dumpAfterMidEnd;
+  extern bool dumpTypesAfterMidEnd;
+  extern std::set<std::string> showTypesUocs;
+  extern std::set<std::string> xmlTypesUocs;
+  extern sherpa::GCPtr<sherpa::CVector<std::string> > entryPts;
+  extern BackEnd *backEnd;
+  extern std::string outputFileName;
+  extern sherpa::GCPtr<sherpa::CVector<std::string> > libDirs;
+  extern sherpa::GCPtr<sherpa::CVector<std::string> > inputs;
 
-  static sherpa::GCPtr<sherpa::CVector<std::string> > SystemDirs;
+  /// @brief Options and files that should be passed to GCC @em before
+  /// we insert the C file produced by bitcc.
+  extern sherpa::GCPtr<sherpa::CVector<std::string> > LinkPreOptionsGCC;
+  extern sherpa::GCPtr<sherpa::CVector<std::string> > CompilePreOptionsGCC;
 
-  static bool Wall; // All Warnings are errors.
-  static bool noGC; // no garbage collection mode
-  static bool noAlloc; // statically reject heap-allocating constructs
-  static bool heuristicInference;
+  /// @brief Options and files that should be passed to GCC @em after
+  /// we insert the C file produced by bitcc.
+  extern sherpa::GCPtr<sherpa::CVector<std::string> > LinkPostOptionsGCC;
+
+  extern sherpa::GCPtr<sherpa::CVector<std::string> > SystemDirs;
+
+  extern bool Wall; // All Warnings are errors.
+  extern bool noGC; // no garbage collection mode
+  extern bool noAlloc; // statically reject heap-allocating constructs
+  extern bool heuristicInference;
 
   /// @brief TvPrinter to support debugging output.
   ///
@@ -104,7 +105,7 @@ struct Options {
   /// becomes possible for several passes to print their type variable
   /// names consistently, which makes understanding the transformation
   /// that was performed easier.
-  static sherpa::GCPtr<TvPrinter> debugTvP;
-};
+  extern sherpa::GCPtr<TvPrinter> debugTvP;
+} /* namespace Options */;
 
 #endif /* OPTIONS_HXX */

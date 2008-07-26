@@ -45,7 +45,10 @@
 #include <cctype>
 #include <libsherpa/utf8.hxx>
 
+#include "config.h"
+
 #include "Version.hxx"
+#include "Options.hxx"
 #include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Environment.hxx"
@@ -53,11 +56,9 @@
 #include "inter-pass.hxx"
 #include <errno.h>
 #include "backend.hxx"
-#include "Options.hxx"
 #include "INOstream.hxx"
-#include "gen-c.hxx"
 
-#include "config.h"
+#define TOC_HEADER_MODE 0x01u
 
 using namespace sherpa;
 using namespace std;

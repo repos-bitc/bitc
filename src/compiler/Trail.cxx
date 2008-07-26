@@ -40,9 +40,9 @@
 
 #include <libsherpa/CVector.hxx>
 
+#include "Options.hxx"
 #include "Type.hxx"
 #include "Trail.hxx"
-#include "Options.hxx"
 #include "Eliminate.hxx"
 
 using namespace sherpa;

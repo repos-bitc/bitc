@@ -51,10 +51,11 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+
 #include "Version.hxx"
+#include "Options.hxx"
 #include "UocInfo.hxx"
 #include "AST.hxx"
-#include "Options.hxx"
 
 using namespace sherpa;
 

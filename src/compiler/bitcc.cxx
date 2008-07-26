@@ -108,43 +108,6 @@ using namespace std;
 #define BITC_INTERPRETER_MODE     0x2u
 #define BITC_CURRENT_MODE BITC_COMPILER_MODE
 
-bool Options::showParse = false;
-bool Options::showTypes = false;
-bool Options::xmlTypes = false;
-bool Options::showLex = false;
-bool Options::useStdInc = true;
-bool Options::useStdLib = true;
-bool Options::advisory = false;
-bool Options::rawTvars = false;
-bool Options::showMaybes = false;
-bool Options::FQtypes = true;
-bool Options::showAllTccs = false;
-bool Options::showPasses = false;
-bool Options::noPrelude = false; 
-bool Options::dumpAfterMidEnd = false;
-bool Options::dumpTypesAfterMidEnd = false;
-GCPtr<CVector<std::string> > Options::showTypesUocs;
-GCPtr<CVector<std::string> > Options::xmlTypesUocs;
-bool Options::ppFQNS = false;
-bool Options::ppDecorate = false;
-unsigned Options::verbose = 0;
-GCPtr<CVector<std::string> > Options::entryPts;
-BackEnd *Options::backEnd = 0;
-std::string Options::outputFileName;
-GCPtr<CVector<std::string> > Options::libDirs;
-GCPtr<CVector<std::string> > Options::inputs;
-bool Options::Wall = false;
-bool Options::noGC = false;
-bool Options::noAlloc = false;
-GCPtr<TvPrinter> Options::debugTvP = new TvPrinter;
-bool Options::heuristicInference = false;
-
-GCPtr<CVector<std::string> > Options::LinkPreOptionsGCC;
-GCPtr<CVector<std::string> > Options::CompilePreOptionsGCC;
-GCPtr<CVector<std::string> > Options::LinkPostOptionsGCC;
-
-GCPtr<CVector<std::string> > Options::SystemDirs;
-
 #define LOPT_SHOWLEX      257   /* Show tokens */
 #define LOPT_SHOWPARSE    258   /* Show parse */
 #define LOPT_DUMPAFTER    259   /* PP after this pass */
@@ -336,8 +299,6 @@ main(int argc, char *argv[])
   bool userAddedEntryPts = false;
 
   // Allocate memory for some static members
-  Options::showTypesUocs = new CVector<std::string>;
-  Options::xmlTypesUocs = new CVector<std::string>;
   Options::entryPts = new CVector<std::string>;
   Options::libDirs = new CVector<std::string>;
   Options::inputs = new CVector<std::string>;
@@ -596,15 +557,13 @@ main(int argc, char *argv[])
 
     case LOPT_SHOW_TYPES:
       {
-	if(!Options::showTypesUocs->contains(optarg))
-	  Options::showTypesUocs->append(optarg);
+	Options::showTypesUocs.insert(optarg);
 	break;
       }
 
     case LOPT_XML_TYPES:
       {
-	if(!Options::xmlTypesUocs->contains(optarg))
-	  Options::xmlTypesUocs->append(optarg);
+	Options::xmlTypesUocs.insert(optarg);
 	break;
       }
 

@@ -46,8 +46,8 @@
 #include <libsherpa/UExcept.hxx>
 #include <libsherpa/CVector.hxx>
 
-#include "UocInfo.hxx"
 #include "Options.hxx"
+#include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
