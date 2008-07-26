@@ -108,6 +108,4 @@ AC_CONFIG_FILES([Makefile]
                 [tests/Makefile]
                 [tests/unit/Makefile])
 
-echo cross_compiling=$cross_compiling
-echo libdir=$libdir
 AC_OUTPUT
