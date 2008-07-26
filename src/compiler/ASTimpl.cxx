@@ -695,15 +695,15 @@ AST::clearTypes() {
 
 void 
 AST::getIds(std::ostream &errStream,
-	    GCPtr< CVector<GCPtr<AST> > > ids,
+	    std::vector<GCPtr<AST> >& ids,
 	    bool getPattern)
 {
   switch(astType) {
   case at_identPattern:
     if(getPattern)
-      ids->append(this);
+      ids.push_back(this);
     else
-      ids->append(child(0));
+      ids.push_back(child(0));
     break;
     
   default:

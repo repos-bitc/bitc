@@ -586,7 +586,7 @@ public:
   
   
   void getIds(std::ostream &errStream, 
-	      sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<AST> > > ids,
+	      std::vector<sherpa::GCPtr<AST> >& ids,
 	      bool getPattern = false);  
   sherpa::GCPtr<Type> getType(); 
   sherpa::GCPtr<const Type> getType() const;
