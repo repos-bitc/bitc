@@ -42,6 +42,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 namespace sherpa {
 
@@ -232,32 +233,34 @@ namespace sherpa {
       return (getDigit(1) << 32) | getDigit(0);
     }
   };
+
+  // Curiously, if these are removed from the namespace then
+  // overloadin creap in very quickly.
+  inline
+  std::ostream& operator<<(std::ostream& strm, const sherpa::BigNum& bn)
+  {
+    if (strm.flags() & strm.hex)
+      bn.toStream(strm, 16);
+    else if (strm.flags() & strm.oct)
+      bn.toStream(strm, 8);
+    else
+      bn.toStream(strm, 10);
+
+    return strm;
+  }
+
+  inline
+  std::istream& operator>>(std::istream& strm, sherpa::BigNum& bn)
+  {
+    if (strm.flags() & strm.hex)
+      bn.fromStream(strm, 16);
+    else if (strm.flags() & strm.oct)
+      bn.fromStream(strm, 8);
+    else
+      bn.fromStream(strm, 10);
+
+    return strm;
+  }
 } /* namespace sherpa */
-
-inline
-std::ostream& operator<<(std::ostream& strm, const sherpa::BigNum& bn)
-{
-  if (strm.flags() & strm.hex)
-    bn.toStream(strm, 16);
-  else if (strm.flags() & strm.oct)
-    bn.toStream(strm, 8);
-  else
-    bn.toStream(strm, 10);
-
-  return strm;
-}
-
-inline
-std::istream& operator>>(std::istream& strm, sherpa::BigNum& bn)
-{
-  if (strm.flags() & strm.hex)
-    bn.fromStream(strm, 16);
-  else if (strm.flags() & strm.oct)
-    bn.fromStream(strm, 8);
-  else
-    bn.fromStream(strm, 10);
-
-  return strm;
-}
 
 #endif /* LIBSHERPA_BIGNUM_HXX */

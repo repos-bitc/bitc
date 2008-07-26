@@ -43,7 +43,6 @@
 #include <iostream>
 #include "AST.hxx"
 #include "backend.hxx"
-#include "INOstream.hxx"
 
 using namespace std;
 using namespace sherpa;

@@ -46,7 +46,6 @@
 
 #include "AST.hxx"
 #include "Type.hxx"
-#include "INOstream.hxx"
 
 struct TypeScheme;
 struct TCConstraints;
@@ -74,7 +73,7 @@ struct Instance : public sherpa::Countable {
   std::string asString();
 
   std::string asXML();
-  void asXML(INOstream &out);
+  void asXML(sherpa::INOstream &out);
 };
 
 

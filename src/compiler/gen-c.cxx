@@ -38,6 +38,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <errno.h>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -45,6 +46,8 @@
 #include <cctype>
 
 #include <libsherpa/utf8.hxx>
+#include <libsherpa/INOstream.hxx>
+#include <libsherpa/BigNum.hxx>
 #include <boost/filesystem/operations.hpp>
 
 #include "config.h"
@@ -56,9 +59,7 @@
 #include "Environment.hxx"
 #include "Symtab.hxx"
 #include "inter-pass.hxx"
-#include <errno.h>
 #include "backend.hxx"
-#include "INOstream.hxx"
 
 #define TOC_HEADER_MODE 0x01u
 

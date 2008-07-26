@@ -99,7 +99,6 @@
 #include "Options.hxx"
 #include "AST.hxx"
 #include "backend.hxx"
-#include "INOstream.hxx"
 #include "Instantiate.hxx"
 #include "TvPrinter.hxx"
 

@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2008, Johns Hopkins University.
+ * Copyright (C) 2006, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -47,6 +47,7 @@
 #include <string>
 #include <sstream>
 
+namespace sherpa {
 
 // This is a completely sleazy way of making an automatically indenting 
 // stream.
@@ -70,6 +71,13 @@ struct INOstream {
     depth += i;
   }
 
+  size_t indent_for_macro()
+  {
+    size_t odepth = depth;
+    depth = 0;
+    return odepth;
+  }
+
   inline int indentToHere()
   {
     size_t old_depth = depth;
@@ -88,6 +96,7 @@ struct INOstream {
 
   inline void less()
   {
+    assert(depth >= 2);
     indent(-2);
   }
 
@@ -273,5 +282,7 @@ struct INOstream {
   }
 
 };
+
+} /* namespace sherpa */
 
 #endif /* INOSTREAM_HXX */

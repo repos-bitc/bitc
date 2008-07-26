@@ -50,7 +50,6 @@
 #include "TypeInfer.hxx"
 #include "inter-pass.hxx"
 #include "TypeScheme.hxx"
-#include "INOstream.hxx"
 
 using namespace sherpa;
 using namespace std;

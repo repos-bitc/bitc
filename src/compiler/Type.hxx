@@ -44,12 +44,13 @@
 #include <iostream>
 #include <string>
 
+#include <libsherpa/INOstream.hxx>
+
 #include "AST.hxx"
 #include "debug.hxx"
 #include "TvPrinter.hxx"
 #include "Environment.hxx"
 #include "Trail.hxx"
-#include "INOstream.hxx"
 
 // Elements of the Kind enumeration have moved to kind.def
 
@@ -487,7 +488,7 @@ public:
   asString(sherpa::GCPtr<TvPrinter> tvP = new TvPrinter(), 
 	   bool traverse = true);
 
-  void asXML(sherpa::GCPtr<TvPrinter> tvP, INOstream &out);
+  void asXML(sherpa::GCPtr<TvPrinter> tvP, sherpa::INOstream &out);
   std::string asXML(sherpa::GCPtr<TvPrinter> tvP = new TvPrinter());
   
   sherpa::GCPtr<AST> 

@@ -50,7 +50,6 @@
 #include "Type.hxx"
 #include "inter-pass.hxx"
 #include "Instantiate.hxx"
-#include "INOstream.hxx"
 #include "Pair.hxx"
 
 using namespace sherpa;

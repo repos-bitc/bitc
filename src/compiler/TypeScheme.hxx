@@ -47,7 +47,6 @@
 #include "AST.hxx"
 #include "Type.hxx"
 #include "Typeclass.hxx"
-#include "INOstream.hxx"
 
 enum GeneralizeMode {gen_instance=0, gen_top=1, gen_local=2, 
 		     gen_Hinstance=3, gen_Htop=4, gen_Hlocal=5};
@@ -103,7 +102,7 @@ struct TypeScheme : public sherpa::Countable {
   std::string asString(sherpa::GCPtr<TvPrinter> tvP=new TvPrinter, 
 		       bool norm=false);
 
-  void asXML(sherpa::GCPtr<TvPrinter> tvP, INOstream &out);
+  void asXML(sherpa::GCPtr<TvPrinter> tvP, sherpa::INOstream &out);
   std::string asXML(sherpa::GCPtr<TvPrinter> tvP = new TvPrinter);
   
   // Collect all tvs wrt tau, and tcc->pred, but NOT tcc->fnDeps
