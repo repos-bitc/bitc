@@ -284,12 +284,12 @@ private:
 		     sherpa::GCPtr<AST> defAST, 
 		     sherpa::GCPtr<Type> typ,
 		     bool &errFree,
-		     sherpa::GCPtr<WorkList<std::string> > worklist);
+		     WorkList<std::string>& worklist);
 
   sherpa::GCPtr<AST> recInstantiate(std::ostream &errStream, 
 		      sherpa::GCPtr<AST> ast,
 		      bool &errFree,
-		      sherpa::GCPtr<WorkList<std::string> > worklist); // Recursively walk the
+		      WorkList<std::string>& worklist); // Recursively walk the
                      // specialized AST, and specialize the body.
 
 public:

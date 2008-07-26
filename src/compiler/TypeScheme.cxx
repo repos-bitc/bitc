@@ -172,7 +172,7 @@ TypeScheme::ts_instance_copy()
 void
 TypeScheme::addConstraints(GCPtr<TCConstraints> _tcc) const
 {
-  if(tcc == NULL)
+  if(!tcc)
     return;
   
   GCPtr<CVector<GCPtr<Type> > > allftvs = new CVector<GCPtr<Type> >;

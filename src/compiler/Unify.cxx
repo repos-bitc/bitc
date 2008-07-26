@@ -56,7 +56,6 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 #include "WorkList.hxx"
-#include "DoneList.hxx"
 #include "Unify.hxx"
 
 using namespace sherpa;
@@ -617,8 +616,8 @@ bool
 acyclic(std::ostream& errStream,
 	const LexLoc &errLoc,
 	GCPtr<Type> typ, 
-	GCPtr< WorkList<GCPtr<Type> > > worklist, // Types currently visiting
- 	GCPtr< DoneList<GCPtr<Type> > > donelist, // Types Known to be OK 
+	WorkList<GCPtr<Type> >& worklist, // Types currently visiting
+ 	DoneList<GCPtr<Type> >& donelist, // Types Known to be OK 
 	bool inref=false)
 {
   assert(typ);
@@ -629,10 +628,10 @@ acyclic(std::ostream& errStream,
   //std::cout << "Acyclic: Processing: " << t->asString(Options::debugTvP)
   //	    << std::endl;
   
-  if (donelist->contains(t))
+  if (donelist.contains(t))
     return true;
   
-  if(worklist->contains(t)) {
+  if(worklist.contains(t)) {
     
     if(t->kind == ty_structr ||
        t->kind == ty_unionr || 
@@ -645,20 +644,23 @@ acyclic(std::ostream& errStream,
     
     std::cerr << errLoc << ": " 
 	      << "Cyclic Type Definitions among the following " 
-	      << worklist->size() << " types:" << std::endl;
+	      << worklist.size() << " types:" << std::endl;
     
     // By now, we know that the current type is already 
     // in the worklist
     std::cerr << t->asString(NULL, false) 
     	      << std::endl;
-    for(size_t i=0; i<worklist->size(); i++)
-      std::cerr << worklist->elem(i)->asString(NULL, false)
+    for(WorkList<GCPtr<Type> >::iterator itr = worklist.begin();
+	itr != worklist.end(); ++itr)
+      std::cerr << (*itr)->asString(NULL, false)
 		<< std::endl;
     fatal();
     return false;
   }
 	
-  assert(worklist->add(t));
+  assert(!worklist.contains(t));
+  worklist.insert(t);
+
   for(size_t i=0; i < t->components->size(); i++) {
     CHKERR(errFree, acyclic(errStream, errLoc, t->CompType(i),
 			    worklist, donelist,
@@ -671,9 +673,9 @@ acyclic(std::ostream& errStream,
 // 			    (inref || t->kind == ty_ref)));
 //   }
 
-  worklist->done(t);   
+  worklist.erase(t);   
   if(errFree)
-    donelist->add(t);
+    donelist.insert(t);
   
   //std::cout << "--"
   //          << std::endl;
@@ -689,8 +691,8 @@ unify(std::ostream& errStream,
       unsigned long flags) 
 {
   bool errFree = true;
-  GCPtr< WorkList<GCPtr<Type> > > worklist = new WorkList<GCPtr<Type> >;
-  GCPtr< DoneList<GCPtr<Type> > > donelist = new DoneList<GCPtr<Type> >;
+  WorkList<GCPtr<Type> > worklist;
+  DoneList<GCPtr<Type> > donelist;
   CHKERR(errFree, Unify(errStream, trail, errLoc, ft, st, flags));
   CHKERR(errFree, acyclic(errStream, errLoc, ft, worklist, donelist));
 

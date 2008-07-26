@@ -44,6 +44,7 @@
 
 #include <typeinfo>
 #include <assert.h>
+#include <stdint.h>
 
 namespace sherpa {
   /// The original implementation of Countable just used an integer, but
@@ -242,12 +243,19 @@ namespace sherpa {
       return *pObject;
     }
 
-    inline bool operator==(const GCPtr& other)
+    // This doesn't really belong in GCPtr, but it is necessary
+    // if we want to implement std::set over them...
+    inline bool operator<(const GCPtr& other) const
+    {
+      return ((uintptr_t)pObject) < ((uintptr_t)other.pObject);
+    }
+
+    inline bool operator==(const GCPtr& other) const
     {
       return pObject == other.pObject;
     }
 
-    inline bool operator!=(const GCPtr& other)
+    inline bool operator!=(const GCPtr& other) const
     {
       return pObject != other.pObject;
     }

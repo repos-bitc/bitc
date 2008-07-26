@@ -990,7 +990,7 @@ GCPtr<AST>
 UocInfo::recInstantiate(ostream &errStream, 
 			GCPtr<AST> ast,
 			bool &errFree,
-			GCPtr<WorkList<string> > worklist)
+			WorkList<string>& worklist)
 {
   INST_DEBUG
     cerr << "RecInstantiate: " 
@@ -1468,7 +1468,7 @@ UocInfo::doInstantiate(ostream &errStream,
 		       GCPtr<AST> ast,
 		       GCPtr<Type> typ,
 		       bool &errFree,
-		       GCPtr<WorkList<string> > worklist)
+		       WorkList<string>& worklist)
 {  
   // INPUT: /ast/ is the *defining* occurence of an identifier whise
   //        definition must be instantiated to the type /typ/
@@ -1627,7 +1627,7 @@ UocInfo::doInstantiate(ostream &errStream,
   // point. This is necessary to ensure that mutually recursive
   // instantiations do not loop for ever
   
-  if(worklist->contains(wkName)) {
+  if(worklist.contains(wkName)) {
 
     // In the case of local definitions (within a letrec), we cannot
     // emit a declaratin. Instead, make up an identifer AST with the
@@ -1688,7 +1688,7 @@ UocInfo::doInstantiate(ostream &errStream,
   // If we reach  here, we have never seen this definition before, so,
   // need to really instantiate it. So, add this definition to the
   // worklist and mark that we are on it.
-  worklist->add(wkName);
+  worklist.insert(wkName);
   
    
   // Make a copy of the definition, make a true-copy, we need the
@@ -1968,7 +1968,7 @@ UocInfo::doInstantiate(ostream &errStream,
 
   // Now that we are (almost) done, remove current entry from the
   // worklist so that we are really done
-  worklist->done(wkName);
+  worklist.erase(wkName);
 
   INST_DEBUG
     cerr << "Instantiated: " << def->asString()
@@ -2056,7 +2056,7 @@ UocInfo::instantiateFQN(ostream &errStream,
     ino << endl;
   }
 
-  GCPtr<WorkList<string> > worklist = new WorkList<string>; 
+  WorkList<string> worklist;
   doInstantiate(errStream, defIdent,
 		defIdent->symType, errFree, worklist);
 

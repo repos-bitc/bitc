@@ -38,71 +38,81 @@
  *
  **************************************************************************/
 
-#include <assert.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <iostream>
 #include <string>
-
-#include <libsherpa/CVector.hxx>
-
-#include "Eliminate.hxx"
+#include <vector>
+#include <libsherpa/GCPtr.hxx>
 
 // This is intentionally not a subclass of Donelist. 
 // There should be no compatibility.
 
-template <class T>
-struct WorkList : public sherpa::Countable {
-  sherpa::GCPtr<sherpa::CVector<T> > vec;
+template <class T, const bool isDoneSet>
+struct BaseWorkList {
+  // GCFIX: Is this merely a set? If so, should it be encoded that
+  // way?
+
+  typedef std::set<T> WorkSet;
+  WorkSet set;
   
-  WorkList()
+  typedef typename WorkSet::iterator iterator;
+
+  BaseWorkList()
   {
-    vec = new sherpa::CVector<T>;
   }
 
   bool 
   contains(const T &probe) const
   {
-    return vec->contains(probe);
+    return (set.find(probe) != set.end());
   }
 
-  size_t 
-  pos(const T& probe) const
-  {
-    for (size_t i = 0; i < vec->size(); i++)
-      if (vec->elem(i) == probe) 
-	return i;
-    
-    assert(false);
+  inline iterator begin() { return set.begin(); }
+  inline iterator end() {   return set.end(); }
+
+  inline void erase(const iterator& itr) {
+    return set.erase(itr);
   }
 
-  T
-  elem(const size_t n) const
-  {
-    return vec->elem(n);
+  inline void erase(const T& key) {
+    set.erase(key);
   }
 
-  size_t 
-  size() const
-  {
-    return vec->size();
-  }
-  
-  bool 
-  add(T &probe)
-  {
-    if(contains(probe))
-      return false;
-
-    vec->append(probe);
-    return true;
+  inline void find(const T& key) {
+    return set.find(key);
   }
 
-  void
-  done(const T &probe)
-  {
-    size_t p = pos(probe);
-    vec = eliminate(vec, p); 
-  }  
+  void insert(const T &probe) {
+    set.insert(probe);
+  }
+
+  inline void clear() { set.clear(); }
+
+  inline size_t size() { return set.size(); }
+
+  inline size_t count() { return set.count(); }
+
+  inline bool empty() { return set.empty(); }
+};
+
+template <class T>
+struct WorkList : public BaseWorkList<T, false> {
+  static inline sherpa::GCPtr<WorkList<T> >
+  make() {
+    WorkList<T> *tmp = new WorkList<T>();
+    return sherpa::GCPtr<WorkList<T> >(tmp);
+  }
+};
+
+template <class T>
+struct DoneList : public BaseWorkList<T, true> {
+  static inline sherpa::GCPtr<DoneList<T> >
+  make() {
+    DoneList<T> *tmp = new DoneList<T>();
+    return sherpa::GCPtr<DoneList<T> >(tmp);
+  }
 };
 
 #endif /* WORKLIST_HXX */
+
