@@ -305,14 +305,6 @@ markComplete(GCPtr<ASTEnvironment > env)
     itr->second->flags |= BF_COMPLETE;
 }
 
-// GCFIX
-static void
-markLatestComplete(GCPtr<ASTEnvironment > env)
-{
-  if(env->size())
-    env->getLatest()->flags |= BF_COMPLETE;
-}
-
 //WARNING: **REQUIRES** answer and errorFree.
 // Carries aliasEnv passively throughout, as if closed over.
 #define RESOLVE(ast,env,lamLevel,mode,identType,currLB,flags)	\
@@ -2166,18 +2158,8 @@ resolve(std::ostream& errStream,
       /* match at_ident -- the contents after cracking the constructor */
       RESOLVE(ast->child(0), legEnv, lamLevel, DEF_MODE, 
 	      id_value, currLB, flags);
-      // GCFIX
-      //
-      // The old code here was usign legEnv->bindings->child(0), which
-      // should be the latest binding. I want to get rid of that
-      // relationship between temporal order and position. In this
-      // case, if I understand the logic, the latest thing bound ought
-      // to have been ast->child(0)->s:
-      // SWAROOP-CHECK
       ASTEnvironment::iterator itr = legEnv->find(ast->child(0)->s);
       assert(itr != legEnv->end());
-      assert(itr->second == legEnv->getLatest());
-      assert(itr->second->val = ast->child(0));
       itr->second->flags |= BF_COMPLETE;
       ast->child(0)->Flags2 |= ID_FOR_SWITCH;
 
@@ -2384,15 +2366,9 @@ resolve(std::ostream& errStream,
 	assert(lb->child(0)->astType == at_identPattern);
 	lb->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
 
-	// GCFIX: If I understand the logic here, the result of
-	// getLatest() (which is being marked complete) should be the
-	// most recently resolved ident, which should be locatable by
-	// the following find:
-	// SWAROOP-CHECK
 	ASTEnvironment::iterator itr = 
 	  letEnv->find(lb->child(0)->child(0)->s);
-	assert(itr->second == letEnv->getLatest());
-	markLatestComplete(letEnv);
+	itr->second->flags |= BF_COMPLETE;
       }
 
       // Now we are done with all let-bindings
