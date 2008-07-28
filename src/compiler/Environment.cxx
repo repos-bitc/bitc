@@ -54,9 +54,9 @@ template<class T>
 GCPtr<Binding<T> > 
 Environment<T>::getLocalBinding(const std::string& nm) const
 {
-  for (size_t i = 0; i < bindings->size(); i++)
-    if (bindings->elem(i)->nm == nm)
-      return bindings->elem(i);
+  const_iterator itr = bindings.find(nm);
+  if (itr != bindings.end())
+    return itr->second;
 
   return NULL;
 }
@@ -85,9 +85,9 @@ Environment<T>::asString() const
   if (parent)
     ss << parent->asString();
   
-  for(size_t i=0; i < bindings->size(); i++)
-    ss << bindings->elem(i)->nm << ": "
-       << bindings->elem(i)->val
+  for (const_iterator itr = begin(); itr != end(); ++itr)
+    ss << itr->second->nm << ": "
+       << itr->second->val
        << std::endl;
   
   ss << std::endl;
@@ -96,21 +96,13 @@ Environment<T>::asString() const
 }
 
 template<class T>
-void 
-Environment<T>::unbind(size_t n)
-{
-  bindings = eliminate<GCPtr<Binding<T> > >(bindings, n);  
-}
-
-template<class T>
 void
 Environment<T>::removeBinding(const std::string& nm)
 {
-  for (size_t i = 0; i < bindings->size(); i++) {
-    if (bindings->elem(i)->nm == nm) {
-      unbind(i);
-      return;
-    }
+  iterator itr = bindings.find(nm);
+  if (itr != bindings.end()) {
+    bindings.erase(itr);
+    return;
   }
 
   if (parent)
@@ -119,20 +111,21 @@ Environment<T>::removeBinding(const std::string& nm)
 
 template<class T>
 void
-Environment<T>::addBinding(const std::string& name, 
+Environment<T>::addBinding(const std::string& nm, 
 			   GCPtr<T> val, 
 			   bool rebind)
 {
   if (rebind) {
-    GCPtr<Binding<T> > binding = doGetBinding(name);
-    if (binding) {
-      binding->val = val;
-      binding->flags = 0;
+    iterator itr = bindings.find(nm);
+    if (itr != bindings.end()){
+      itr->second->val = val;
+      itr->second->flags = 0;
       return;
     }
   }
 
-  bindings->insert(0, new Binding<T>(name, val));
+  bindings[nm] = new Binding<T>(nm, val);
+  latest = bindings[nm]; 
 }
 
 template<class T>
@@ -140,11 +133,12 @@ void
 Environment<T>::updateKey(const std::string& from, 
 			  const std::string& to)
 {
-  for (size_t i = 0; i < bindings->size(); i++) {
-    if (bindings->elem(i)->nm == from) {
-      bindings->elem(i)->nm = to;
-      return;
-    }
+  iterator itr = bindings.find(from);
+  if (itr != bindings.end()) {
+    sherpa::GCPtr<Binding<T> > b = itr->second;
+    bindings.erase(itr);
+    bindings[to] = b;
+    return;
   }
 
   if (parent)
@@ -189,10 +183,11 @@ template<class T>
 void
 Environment<T>::mergeBindingsFrom(GCPtr<Environment<T> > from, bool complete)
 {
-  for(size_t i = 0; i < from->bindings->size(); i++) {
-    const std::string& nm = from->bindings->elem(i)->nm;
-    GCPtr<T> val = from->bindings->elem(i)->val;
-    unsigned long flags = from->bindings->elem(i)->flags;
+  for(iterator itr = from->begin();
+      itr != from->end(); ++itr ) {
+    const std::string& nm = itr->second->nm;
+    GCPtr<T> val = itr->second->val;
+    unsigned long flags = itr->second->flags;
 
     if (flags & BF_NO_MERGE)
       continue;
@@ -243,13 +238,6 @@ template void
 InstEnvironment::addBinding
 (const std::string& nm, GCPtr<CVector<GCPtr<Instance> > > val, bool rebind);
 
-
-template void 
-Environment<AST>::unbind(size_t n);
-template void 
-Environment<TypeScheme>::unbind(size_t n);
-template void 
-InstEnvironment::unbind(size_t n);
 
 template void
 Environment<AST>::removeBinding(const std::string& nm);

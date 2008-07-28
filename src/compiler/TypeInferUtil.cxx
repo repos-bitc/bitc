@@ -102,8 +102,9 @@ useIFGamma(const std::string& idName,
 	   GCPtr<TSEnvironment > fromEnv, 
 	   GCPtr<TSEnvironment > toEnv)
 {
-  for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
-    GCPtr<Binding<TypeScheme> > bdng = fromEnv->bindings->elem(i);
+  for(TSEnvironment::iterator itr = fromEnv->begin();
+      itr != fromEnv->end(); ++itr) {
+    GCPtr<Binding<TypeScheme> > bdng = itr->second;
 
     if (bdng->flags & BF_PRIVATE)
       continue;
@@ -125,8 +126,9 @@ useIFInsts(const std::string& idName,
 	   GCPtr<InstEnvironment >fromEnv, 
 	   GCPtr<InstEnvironment >toEnv)
 {
-  for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
-    GCPtr<Binding< CVector<GCPtr<Instance> > > > bdng = fromEnv->bindings->elem(i);
+  for(InstEnvironment::iterator itr = fromEnv->begin();
+      itr != fromEnv->end(); ++itr) {
+    GCPtr<Binding< CVector<GCPtr<Instance> > > > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE)
       continue;

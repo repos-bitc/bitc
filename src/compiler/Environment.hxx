@@ -40,6 +40,8 @@
 
 #include <libsherpa/CVector.hxx>
 #include <iostream>
+#include <map>
+#include <string>
 
 
 // Type of (sub) environment, if any.
@@ -80,7 +82,39 @@ struct Environment : public sherpa::Countable {
   sherpa::GCPtr<Environment<T> > parent; // in the chain of environments
   sherpa::GCPtr<Environment<T> > defEnv; // definition level env
 
-  sherpa::GCPtr< sherpa::CVector<sherpa::GCPtr<Binding<T> > > > bindings;
+  typedef typename std::map<std::string, sherpa::GCPtr<Binding<T> > >::iterator iterator;
+  typedef typename std::map<std::string, sherpa::GCPtr<Binding<T> > >::const_iterator const_iterator;
+  std::map<std::string, sherpa::GCPtr<Binding<T> > > bindings;
+
+private:
+  sherpa::GCPtr<Binding<T> > latest;
+public:
+  sherpa::GCPtr<Binding<T> > getLatest() {
+    return latest;
+  }
+
+  iterator begin() {
+    return bindings.begin();
+  }
+  iterator end() {
+    return bindings.end();
+  }
+  iterator find(std::string s) {
+    return bindings.find(s);
+  }
+  const_iterator find(std::string s) const {
+    return bindings.find(s);
+  }
+  const_iterator begin() const {
+    return bindings.begin();
+  }
+  const_iterator end() const {
+    return bindings.end();
+  }
+  size_t size() const {
+    return bindings.size();
+  }
+
 
   sherpa::GCPtr< Binding<T> >
   doGetBinding(const std::string& nm) const;
@@ -90,7 +124,6 @@ struct Environment : public sherpa::Countable {
 
   Environment(std::string _uocName)
   {
-    bindings = new sherpa::CVector<sherpa::GCPtr< Binding<T> > >;
     uocName = _uocName;
     parent = 0;
     defEnv = 0;
@@ -106,7 +139,6 @@ struct Environment : public sherpa::Countable {
     defEnv->addBinding(name, val);
   }
 
-  void unbind(size_t n);
   void removeBinding(const std::string& name);
 
   // Updates the most-current binding.

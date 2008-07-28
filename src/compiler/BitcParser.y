@@ -390,24 +390,6 @@ interface: '(' tk_INTERFACE ifident {
   // Regardless, compile the new interface to check for further
   // warnings and/or errors:
   uoc->Compile();
-
-#if 0
-  // The following code was in the old implementation of
-  // importInterface, but it seems that it must have been broken,
-  // because UocInfo::ifList was never replaced with newIfList. I am
-  // retaining it here long enough to check with Swaroop why this was
-  // okay.
-
-  // The interface that we just compiled may have (recursively)
-  // imported other interfaces. Now that we have successfully compiled
-  // this interface, migrate it to the end of the interface list.
-  GCPtr< CVector<GCPtr<UocInfo> > > newIfList = new CVector<GCPtr<UocInfo> >;  
-
-  for (size_t i = 0; i < UocInfo::ifList->size(); i++)
-    if (UocInfo::ifList->elem(i) != puoci) 
-      newIfList->append(UocInfo::ifList->elem(i));  
-  newIfList->append(puoci);
-#endif
 };
 
 ifident: {

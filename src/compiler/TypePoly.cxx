@@ -112,8 +112,9 @@ Type::boundInGamma(GCPtr<const TSEnvironment > gamma)
 {
   GCPtr<Type> tvar = getType();
   while (gamma) {
-    for(size_t i = 0; i < gamma->bindings->size(); i++) {
-      GCPtr<TypeScheme> sigma = gamma->bindings->elem(i)->val;
+    for(TSEnvironment::const_iterator itr = gamma->begin();
+	itr != gamma->end(); ++itr) {
+      GCPtr<TypeScheme> sigma = itr->second->val;
 
       for (size_t tv = 0; tv < sigma->ftvs->size(); tv++) {
 	if (sigma->Ftv(tv)->uniqueID == tvar->uniqueID)

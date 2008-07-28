@@ -141,8 +141,9 @@ aliasPublicBindings(const std::string& idName,
 		    GCPtr<ASTEnvironment > fromEnv, 
 		    GCPtr<ASTEnvironment > toEnv)
 {
-  for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
-    GCPtr<Binding<AST> > bdng = fromEnv->bindings->elem(i);
+  for(ASTEnvironment::iterator itr = fromEnv->begin();
+      itr != fromEnv->end(); ++itr) {
+    GCPtr<Binding<AST> > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE)
       continue;
@@ -208,8 +209,9 @@ importIfBinding(std::ostream& errStream,
   GCPtr<ASTEnvironment > dupEnv = 
     new ASTEnvironment(ifName->envs.env->uocName);
 
-  for (size_t i = 0; i < ifName->envs.env->bindings->size(); i++) {
-    GCPtr<Binding<AST> > bdng = ifName->envs.env->bindings->elem(i);
+  for(ASTEnvironment::iterator itr = ifName->envs.env->begin();
+      itr != ifName->envs.env->end(); ++itr) {
+    GCPtr<Binding<AST> > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE) {
       continue;
@@ -298,15 +300,17 @@ bindIdentDef(GCPtr<AST> ast, GCPtr<ASTEnvironment > env,
 static void
 markComplete(GCPtr<ASTEnvironment > env)
 {
-  for(size_t i = 0; i < env->bindings->size(); i++)
-    env->bindings->elem(i)->flags |= BF_COMPLETE;
+  for(ASTEnvironment::iterator itr = env->begin();
+      itr != env->end(); ++itr)
+    itr->second->flags |= BF_COMPLETE;
 }
 
+// GCFIX
 static void
 markLatestComplete(GCPtr<ASTEnvironment > env)
 {
-  if(env->bindings->size())
-    env->bindings->elem(env->bindings->size() - 1)->flags |= BF_COMPLETE;
+  if(env->size())
+    env->getLatest()->flags |= BF_COMPLETE;
 }
 
 //WARNING: **REQUIRES** answer and errorFree.
@@ -2162,8 +2166,19 @@ resolve(std::ostream& errStream,
       /* match at_ident -- the contents after cracking the constructor */
       RESOLVE(ast->child(0), legEnv, lamLevel, DEF_MODE, 
 	      id_value, currLB, flags);
-      assert(legEnv->bindings->elem(0)->val = ast->child(0));
-      legEnv->bindings->elem(0)->flags |= BF_COMPLETE;
+      // GCFIX
+      //
+      // The old code here was usign legEnv->bindings->child(0), which
+      // should be the latest binding. I want to get rid of that
+      // relationship between temporal order and position. In this
+      // case, if I understand the logic, the latest thing bound ought
+      // to have been ast->child(0)->s:
+      // SWAROOP-CHECK
+      ASTEnvironment::iterator itr = legEnv->find(ast->child(0)->s);
+      assert(itr != legEnv->end());
+      assert(itr->second == legEnv->getLatest());
+      assert(itr->second->val = ast->child(0));
+      itr->second->flags |= BF_COMPLETE;
       ast->child(0)->Flags2 |= ID_FOR_SWITCH;
 
       /* match at_expr */
@@ -2369,6 +2384,14 @@ resolve(std::ostream& errStream,
 	assert(lb->child(0)->astType == at_identPattern);
 	lb->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
 
+	// GCFIX: If I understand the logic here, the result of
+	// getLatest() (which is being marked complete) should be the
+	// most recently resolved ident, which should be locatable by
+	// the following find:
+	// SWAROOP-CHECK
+	ASTEnvironment::iterator itr = 
+	  letEnv->find(lb->child(0)->child(0)->s);
+	assert(itr->second == letEnv->getLatest());
 	markLatestComplete(letEnv);
       }
 

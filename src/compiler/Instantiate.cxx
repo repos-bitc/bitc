@@ -208,8 +208,9 @@ static void
 importSymBindings(GCPtr<ASTEnvironment > fromEnv, 
 		  GCPtr<ASTEnvironment > toEnv)
 {
-  for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
-    GCPtr<Binding<AST> > bdng = fromEnv->bindings->elem(i);
+  for(ASTEnvironment::iterator itr = fromEnv->begin(); 
+      itr != fromEnv->end(); ++ itr) {
+    GCPtr<Binding<AST> > bdng = itr->second;
 
     if ((bdng->flags & BF_PRIVATE) == 0) {
       toEnv->addBinding(bdng->val->fqn.asString(), bdng->val,
@@ -226,8 +227,9 @@ static void
 importTSBindings(GCPtr<TSEnvironment > fromEnv, 
 		 GCPtr<TSEnvironment > toEnv)
 {
-  for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
-    GCPtr<Binding<TypeScheme> > bdng = fromEnv->bindings->elem(i);
+  for(TSEnvironment::iterator itr = fromEnv->begin();
+      itr != fromEnv->end(); ++ itr) {
+    GCPtr<Binding<TypeScheme> > bdng = itr->second;
 
     if ((bdng->flags & BF_PRIVATE) == 0) {
       toEnv->addBinding(bdng->val->ast->fqn.asString(),
@@ -246,9 +248,10 @@ static void
 importInstBindings(GCPtr<InstEnvironment > fromEnv,
 		   GCPtr<InstEnvironment > toEnv)
 {
-  for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
+  for(InstEnvironment::iterator itr = fromEnv->begin();
+      itr != fromEnv->end(); ++ itr) {
     GCPtr<Binding< CVector<GCPtr<Instance> > > > bdng = 
-      fromEnv->bindings->elem(i);
+      itr->second;
 
     if (bdng->flags & BF_PRIVATE)
       continue;    
@@ -292,11 +295,11 @@ UpdateMegaEnvs(GCPtr<UocInfo> uoc)
     uoc->instEnv->parent;
   
   INST_ENV_DEBUG
-    cerr << "#envs = " << megaEnv->bindings->size() 
+    cerr << "#envs = " << megaEnv->size() 
 	 << endl
-	 << "#tss = " << megaGamma->bindings->size() 
+	 << "#tss = " << megaGamma->size() 
 	 << endl
-	 << "#Instances = " << megaInstEnv->bindings->size() 
+	 << "#Instances = " << megaInstEnv->size() 
 	 << endl;
 
   for(UocMap::iterator itr = UocInfo::ifList.begin();
