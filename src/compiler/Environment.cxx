@@ -46,7 +46,6 @@
 #include "AST.hxx"
 #include "Environment.hxx"
 #include "inter-pass.hxx"
-#include "Eliminate.hxx"
 
 using namespace sherpa;
 

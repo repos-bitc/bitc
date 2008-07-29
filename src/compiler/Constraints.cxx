@@ -53,7 +53,6 @@
 #include "TypeScheme.hxx"
 #include "Typeclass.hxx"
 #include "inter-pass.hxx"
-#include "Eliminate.hxx"
 
 using namespace std;
 using namespace sherpa;
