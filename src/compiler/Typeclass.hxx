@@ -43,6 +43,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <set>
 
 #include "AST.hxx"
 #include "Type.hxx"
@@ -81,35 +82,43 @@ struct Instance : public sherpa::Countable {
  
 struct TCConstraints : public sherpa::Countable {
   // Type class predicates
-  sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Typeclass> > > pred;
+  std::set<sherpa::GCPtr<Typeclass> > pred;
   
+  typedef std::set<sherpa::GCPtr<Typeclass> >::iterator iterator;
+
   TCConstraints()
   {
-    pred = new sherpa::CVector<sherpa::GCPtr<Typeclass> >;
   }
 
-  size_t size() { return pred->size(); }
+  bool empty() const {
+    return pred.empty();
+  }
+
+  size_t size() const {
+    return pred.size();
+  }
 
   void addPred(sherpa::GCPtr<Typeclass> tc);
-  void clearPred(size_t n);
   void clearPred(sherpa::GCPtr<Constraint> ct);
 
   void normalize();
   
   bool contains(sherpa::GCPtr<Typeclass> tc);
-  void collectAllFnDeps(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > fnDeps);
+
+  void collectAllFnDeps(std::set<sherpa::GCPtr<Type> >& fnDeps);
   
   // Compute the closure of all functional dependencies 
   // supplied in the vector
-  static void close(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > closure,
-		    sherpa::GCPtr<const sherpa::CVector<sherpa::GCPtr<Type> > > fnDeps);
+  static void close(std::set<sherpa::GCPtr<Type> >& closure,
+		    const std::set<sherpa::GCPtr<Type> >& fnDeps);
   void clearHintsOnPreds(sherpa::GCPtr<Trail> trail);  
 
-  /* PUBLIC Accessors (Conveniecnce Forms) */
-  sherpa::GCPtr<Type> & Pred(size_t i)
-  {
-    return (*pred)[i];
-  }  
+  iterator begin() {
+    return pred.begin();
+  }
+  iterator end() {
+    return pred.end();
+  }
 };
 
 

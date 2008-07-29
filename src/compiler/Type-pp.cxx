@@ -389,15 +389,16 @@ TypeScheme::asString(GCPtr<TvPrinter> tvP, bool norm)
 
   if(tcc) {
     if(Options::showAllTccs) {
-      if(tcc->pred->size()) {
+      if(tcc->size()) {
 	if(!forall) {
 	  ss << "(forall";
 	  forall = true;
 	}
 
 	ss << " (";
-	for(size_t i=0; i < tcc->pred->size(); i++) {
-	  GCPtr<Typeclass> pred = tcc->Pred(i)->getType();
+	for(TCConstraints::iterator itr = tcc->begin();
+	    itr != tcc->end(); ++itr) {
+	  GCPtr<Typeclass> pred = (*itr)->getType();
 	  ss << pred->asString(tvP) << " ";
 	  
 	  if(pred->fnDeps)	  
@@ -413,15 +414,16 @@ TypeScheme::asString(GCPtr<TvPrinter> tvP, bool norm)
       //addConstraints(_tcc);
       GCPtr<TCConstraints> _tcc = tcc;
 
-      if(_tcc->pred->size()) {
- 	for(size_t i=0; i < _tcc->pred->size(); i++) {
-	  if(((_tcc->Pred(i)->flags & TY_CT_SUBSUMED) == 0) && 
-	     ((_tcc->Pred(i)->flags & TY_CT_SELF) == 0)) {
+      if(_tcc->size()) {
+	for(TCConstraints::iterator itr = _tcc->begin();
+	    itr != _tcc->end(); ++itr) {
+	  if((((*itr)->flags & TY_CT_SUBSUMED) == 0) && 
+	     (((*itr)->flags & TY_CT_SELF) == 0)) {
 	    if(!forall) {
 	      ss << "(forall (";
 	      forall = true;
 	    }
-	    ss << _tcc->Pred(i)->asString(tvP) << " ";	  
+	    ss << (*itr)->asString(tvP) << " ";	  
 	  }
 	}
 

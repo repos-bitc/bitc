@@ -55,13 +55,14 @@
 #include "inter-pass.hxx"
 #include "Eliminate.hxx"
 
+using namespace std;
 using namespace sherpa;
 
 bool 
 TCConstraints::contains(GCPtr<Typeclass> tc) 
 {
-  for(size_t c = 0; c < pred->size(); c++) 
-    if(Pred(c)->strictlyEquals(tc, false, true))
+  for(iterator itr = begin(); itr != end(); ++itr)
+    if((*itr)->strictlyEquals(tc, false, true))
       return true;
 
   return false;
@@ -70,43 +71,37 @@ TCConstraints::contains(GCPtr<Typeclass> tc)
 void 
 TCConstraints::addPred(GCPtr<Typeclass> tc) 
 {
-  size_t c;
-  for(c = 0; c < pred->size(); c++) 
-    if(Pred(c)->strictlyEquals(tc, false, true)) {
+  for(iterator itr = begin(); itr != end(); ++itr) {
+    if((*itr)->strictlyEquals(tc, false, true)) {
       if(tc->flags & TY_CT_SUBSUMED)
-	Pred(c)->flags |= TY_CT_SUBSUMED;
-      break;
+	(*itr)->flags |= TY_CT_SUBSUMED;
+      return;
     }  
-
-  if(c == pred->size()) {
-    pred->append(tc);
   }
-}
 
-void 
-TCConstraints::clearPred(size_t n) 
-{
-  pred = eliminate<GCPtr<Typeclass> >(pred, n);
-} 
+  pred.insert(tc);
+}
 
 void 
 TCConstraints::clearPred(GCPtr<Constraint> ct) 
 {
   ct =  ct->getType();
-  for(size_t c = 0; c < pred->size(); c++) {
-    GCPtr<Constraint> pr = Pred(c)->getType();
-    if(pr == ct)
-      return clearPred(c);
+  for(iterator itr = begin(); itr != end(); ++itr) {
+    GCPtr<Constraint> pr = (*itr)->getType();
+    if(pr == ct) {
+      pred.erase(itr);
+      return;
+    }
   }
 }
 
 void 
 TCConstraints::normalize() 
 {
-  GCPtr<CVector<GCPtr<Typeclass> > > allPreds = pred;
-  pred = new CVector<GCPtr<Typeclass> >;
+  set<GCPtr<Typeclass> > allPreds = pred;
+  pred.clear();
   
-  for(size_t c=0; c < allPreds->size(); c++)
-    addPred((*allPreds)[c]);
+  for(iterator itr = allPreds.begin(); itr != allPreds.end(); ++itr)
+    addPred((*itr));
 }
 

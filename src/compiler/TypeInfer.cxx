@@ -422,24 +422,28 @@ checkConstraints(std::ostream& errStream,
   defSigma->addConstraints(defTcc);
   declSigma->addConstraints(declTcc);
 
-  if(defTcc->pred->size() != declTcc->pred->size()) 
+  if(defTcc->size() != declTcc->size()) 
     errFree = false;
   
-  for(size_t i = 0; errFree && i < defTcc->pred->size(); i++)
-    defTcc->Pred(i)->mark |= unmatched;
-  for(size_t j = 0; errFree && j < declTcc->pred->size(); j++)
-    declTcc->Pred(j)->mark |= unmatched;
+  for(TCConstraints::iterator itr = defTcc->begin();
+      errFree && itr != defTcc->end(); ++itr)
+    (*itr)->mark |= unmatched;
+  for(TCConstraints::iterator itr_j = declTcc->begin();
+      errFree && itr_j != declTcc->end(); ++itr_j)
+    (*itr_j)->mark |= unmatched;
 
-  for(size_t i = 0; errFree && i < defTcc->pred->size(); i++) {
-    GCPtr<Typeclass> defct = defTcc->Pred(i);
+  for(TCConstraints::iterator itr = defTcc->begin();
+      errFree && itr != defTcc->end(); ++itr) {
+    GCPtr<Typeclass> defct = (*itr);
       
     if((defct->mark & unmatched) == 0)
       continue;
       
     bool unified = false;
       
-    for(size_t j = 0; errFree && j < declTcc->pred->size(); j++) {
-      GCPtr<Typeclass> declct = declTcc->Pred(j);
+    for(TCConstraints::iterator itr_j = declTcc->begin();
+	errFree && itr_j != declTcc->end(); ++itr_j) {
+      GCPtr<Typeclass> declct = (*itr_j);
 
       if((defct->mark & unmatched) == 0)
 	continue;
@@ -456,11 +460,13 @@ checkConstraints(std::ostream& errStream,
       errFree = false;
   }
 
-  for(size_t i = 0; errFree && i < defTcc->pred->size(); i++)
-    if(defTcc->Pred(i)->mark & unmatched)
+  for(TCConstraints::iterator itr = defTcc->begin();
+      errFree && itr != defTcc->end(); ++itr)
+    if((*itr)->mark & unmatched)
       errFree = false;
-  for(size_t j = 0; errFree && j < declTcc->pred->size(); j++)
-    if(declTcc->Pred(j)->mark & unmatched)
+  for(TCConstraints::iterator itr_j = declTcc->begin();
+      errFree && itr_j != declTcc->end(); ++itr_j)
+    if((*itr_j)->mark & unmatched)
       errFree = false;  
 
   if(!errFree) {
@@ -1138,8 +1144,9 @@ superDAG(GCPtr<AST> super, GCPtr<AST> curr)
   GCPtr<TCConstraints> tcc = super->scheme->tcc;
   assert(tcc);
 
-  for(size_t c = 0; c < tcc->pred->size(); c++) {
-    GCPtr<Typeclass> pred = tcc->Pred(c);
+  for(TCConstraints::iterator itr = tcc->begin();
+      itr != tcc->end(); ++itr) {
+    GCPtr<Typeclass> pred = (*itr);
     if(pred->flags & TY_CT_SELF)
       continue;
 
@@ -1227,8 +1234,9 @@ InferTypeClass(std::ostream& errStream, GCPtr<AST> ast,
     
     GCPtr<TypeScheme> mSigma = new TypeScheme(mType, mID, 
 					      new TCConstraints);
-    for(size_t i=0; i < sigma->tcc->pred->size(); i++)
-      mSigma->tcc->addPred(sigma->tcc->Pred(i));
+    for(TCConstraints::iterator itr = sigma->tcc->begin();
+	itr != sigma->tcc->end(); ++itr)
+      mSigma->tcc->addPred((*itr));
  
     do { // Dummy loop
       if(!mType) {
@@ -1309,8 +1317,9 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
 	    myTcc, uflags, trail, USE_MODE, TI_CONSTR);
 
   // Mark myself
-  for(size_t m=0; m < myTcc->pred->size(); m++) {
-    GCPtr<Typeclass> pred = myTcc->Pred(m);
+  for(TCConstraints::iterator itr = myTcc->begin();
+      itr != myTcc->end(); ++itr) {
+    GCPtr<Typeclass> pred = (*itr);
     if(pred->defAst == TCident->symbolDef)
       pred->flags |= TY_CT_SELF;
   }
@@ -1340,8 +1349,9 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
     
     //errStream << ast->loc << ": #Preds = " << myTcc->pred->size()
     //		<< std::endl;
-    for(size_t i = 0; i < myTcc->pred->size(); i++) {
-      GCPtr<Typeclass> pred = myTcc->Pred(i)->getType();
+    for(TCConstraints::iterator itr = myTcc->begin();
+	itr != myTcc->end(); ++itr) {
+      GCPtr<Typeclass> pred = (*itr)->getType();
       //errStream << "Processing : " << pred->asString()
       //	  << std::endl;
       if(pred->fnDeps)
@@ -1392,10 +1402,12 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
       // I don't have to do a ts_instance_copy() here.
       GCPtr<TCConstraints> theirTcc = inst->ast->scheme->tcc;
 
-      for(size_t l = 0; l < myTcc->pred->size(); l++) {
-	GCPtr<Typeclass> myPred = myTcc->Pred(l)->getType();
-	for(size_t m = 0; m < theirTcc->pred->size(); m++) {
-	  GCPtr<Typeclass> theirPred = theirTcc->Pred(m)->getType();
+      for(TCConstraints::iterator itr = myTcc->begin();
+	  itr != myTcc->end(); ++itr) {
+	GCPtr<Typeclass> myPred = (*itr)->getType();
+	for(TCConstraints::iterator itr_m = theirTcc->begin();
+	    itr_m != theirTcc->end(); ++itr_m) {
+	  GCPtr<Typeclass> theirPred = (*itr_m)->getType();
 
 	  if((myPred->defAst == theirPred->defAst) &&  
 	     (myPred->fnDeps && theirPred->fnDeps))
@@ -1839,8 +1851,9 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  }
 	  
 	  if(tsIns->tcc) {
-	    for(size_t i = 0; i < tsIns->tcc->pred->size(); i++) {
-	      GCPtr<Typeclass> pred = tsIns->tcc->Pred(i)->getType();	      
+	    for(TCConstraints::iterator itr = tsIns->tcc->begin();
+		itr != tsIns->tcc->end(); ++itr) {
+	      GCPtr<Typeclass> pred = (*itr)->getType();	      
 	      if(flags & TI_TCC_SUB)
 		pred->flags |= TY_CT_SUBSUMED;
 	      tcc->addPred(pred);

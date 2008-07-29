@@ -170,8 +170,9 @@ TypeScheme::collectAllFtvs()
 {
   tau->collectAllftvs(ftvs);  
   if(tcc) {
-    for(size_t i=0; i < tcc->pred->size(); i++)
-      tcc->Pred(i)->collectAllftvs(ftvs);      
+    for(TCConstraints::iterator itr = tcc->begin();
+	itr != tcc->end(); ++itr)
+      (*itr)->collectAllftvs(ftvs);      
   }  
 }
 
@@ -214,22 +215,22 @@ Type::collectftvsWrtGamma(GCPtr<CVector<GCPtr<Type> > > tvs,
 // Functional Dependencies
 static void
 remftvsWrtFnDeps(GCPtr<CVector<GCPtr<Type> > > &ftvs,
-		 const GCPtr<CVector<GCPtr<Type> > > fnDeps,
+		 set<GCPtr<Type> > fnDeps,
 		 GCPtr<const TSEnvironment > gamma)
 {
   // closure wrt tvs in fnDeps influenced by Gamma.
-  GCPtr<CVector<GCPtr<Type> > > closure = 
-    new CVector<GCPtr<Type> >;
+  set<GCPtr<Type> > closure;
 
-  for(size_t i=0; i < fnDeps->size(); i++) {
-    GCPtr<Type> fnDep = fnDeps->elem(i);
+  for(set<GCPtr<Type> >::iterator itr = fnDeps.begin();
+      itr != fnDeps.end(); ++itr) {
+    GCPtr<Type> fnDep = (*itr);
     GCPtr<CVector<GCPtr<Type> > > tvs =
       new CVector<GCPtr<Type> >;
     fnDep->collectAllftvs(tvs);
     for(size_t j=0; j < tvs->size(); j++) {
       GCPtr<Type> tv = (*tvs)[j];
-      if(!closure->contains(tv) && tv->boundInGamma(gamma))
-	closure->append(tv);
+      if(closure.find(tv) == closure.end() && tv->boundInGamma(gamma))
+	closure.insert(tv);
     }
   }
 
@@ -238,7 +239,7 @@ remftvsWrtFnDeps(GCPtr<CVector<GCPtr<Type> > > &ftvs,
   GCPtr<CVector<GCPtr<Type> > > newFtvs = new CVector<GCPtr<Type> >;
   for(size_t i=0; i < ftvs->size(); i++) {
     GCPtr<Type> ftv = ftvs->elem(i)->getType();
-    if(!closure->contains(ftv))
+    if(closure.find(ftv) == closure.end())
       newFtvs->append(ftv);
   }
 
@@ -255,12 +256,13 @@ TypeScheme::collectftvs(GCPtr<const TSEnvironment > gamma)
 {
   tau->collectftvsWrtGamma(ftvs, gamma);  
   if(tcc) {    
-    for(size_t i=0; i < tcc->pred->size(); i++) {
-      GCPtr<Typeclass> pred = tcc->Pred(i);
+    for(TCConstraints::iterator itr = tcc->begin();
+	itr != tcc->end(); ++itr) {
+      GCPtr<Typeclass> pred = (*itr);
       pred->collectftvsWrtGamma(ftvs, gamma);  
     }
  
-    GCPtr<CVector<GCPtr<Type> > > allFnDeps = new CVector<GCPtr<Type> >;
+    set<GCPtr<Type> > allFnDeps;
     tcc->collectAllFnDeps(allFnDeps);
     remftvsWrtFnDeps(ftvs, allFnDeps, gamma);
   }
@@ -282,8 +284,9 @@ TypeScheme::removeUnInstFtvs()
       ftv->flags |= TY_CLOS;
   }
 
-  for(size_t i=0; i < tcc->size(); i++) {
-    GCPtr<Constraint> ct = tcc->Pred(i)->getType();
+  for(TCConstraints::iterator itr = tcc->begin();
+      itr != tcc->end(); ++itr) {
+    GCPtr<Constraint> ct = (*itr)->getType();
 
     bool mustAdd=false;
     for(size_t c=0; c < ftvs->size(); c++) {
@@ -332,8 +335,9 @@ TypeScheme::normalizeConstruction(GCPtr<Trail> trail)
   
   tau->markSignMbs(false);
   
-  for(size_t i=0; i < tcc->size(); i++) {
-    GCPtr<Constraint> ct = tcc->Pred(i)->getType();
+  for(TCConstraints::iterator itr = tcc->begin();
+      itr != tcc->end(); ++itr) {
+    GCPtr<Constraint> ct = (*itr)->getType();
     ct->markSignMbs(true);
   }
 
@@ -350,8 +354,9 @@ TypeScheme::normalizeConstruction(GCPtr<Trail> trail)
   // TY_COERCE flag is not cleared, but it does not matter, because
   // all of these types are substituted within the next adjMaybe call.
   tau->adjMaybe(trail, true, false, true);
-  for(size_t i=0; i < tcc->size(); i++) {
-    GCPtr<Constraint> ct = tcc->Pred(i)->getType();
+  for(TCConstraints::iterator itr = tcc->begin();
+      itr != tcc->end(); ++itr) {
+    GCPtr<Constraint> ct = (*itr)->getType();
     ct->adjMaybe(trail, true, false, true);
   }
   
@@ -554,8 +559,9 @@ TypeScheme::generalize(std::ostream& errStream,
     tau->adjMaybe(trail, false, true);
 
     bool cleared = false;
-    for(size_t i=0; i < tcc->size(); i++) {
-      GCPtr<Type> pred = tcc->Pred(i);
+    for(TCConstraints::iterator itr = tcc->begin();
+	itr != tcc->end(); ++itr) {
+      GCPtr<Type> pred = (*itr);
       if(!pred->isPcst())
 	continue;
 
@@ -578,11 +584,12 @@ TypeScheme::generalize(std::ostream& errStream,
     }
 
     if(cleared) {
-      GCPtr< CVector< GCPtr<Typeclass> > > oldPreds = tcc->pred;
-      tcc->pred = new CVector< GCPtr<Typeclass> >;
+      set< GCPtr<Typeclass> > oldPreds = tcc->pred;
+      tcc->pred.clear();
       
-      for(size_t i=0; i < oldPreds->size(); i++) {
-	GCPtr<Type> pred = oldPreds->elem(i);
+      for(TCConstraints::iterator itr = oldPreds.begin();
+	  itr != oldPreds.end(); ++itr) {
+	GCPtr<Type> pred = (*itr);
 	if(!pred->isPcst())
 	  tcc->addPred(pred);
       }
@@ -718,8 +725,9 @@ updateSigmas(GCPtr<const AST> bp, GCPtr<CVector<GCPtr<Type> > > ftvs,
 	}
 	
 	if(tcc)
-	  for(size_t c=0; c < tcc->size(); c++) {
-	    GCPtr<Constraint> pred = tcc->Pred(c);
+	  for(TCConstraints::iterator itr = tcc->begin();
+	      itr != tcc->end(); ++itr) {
+	    GCPtr<Constraint> pred = (*itr);
 	    if(pred->boundInType(ftvs->elem(i))) {
 	      sigma->ftvs->append(ftvs->elem(i));
 	      break;
@@ -807,11 +815,11 @@ TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
     return false;
   
   bool migrated = false;
-  GCPtr<CVector<GCPtr<Typeclass> > > newPred =
-    new CVector<GCPtr<Typeclass> >;
+  set<GCPtr<Typeclass> > newPred;
   
-  for(size_t i=0; i < tcc->pred->size(); i++) {
-    GCPtr<Typeclass> pred = tcc->Pred(i)->getType();
+  for(TCConstraints::iterator itr = tcc->begin();
+      itr != tcc->end(); ++itr) {
+    GCPtr<Typeclass> pred = (*itr)->getType();
     GCPtr< CVector< GCPtr<Type> > > allFtvs = new CVector<GCPtr<Type> >;
     pred->collectAllftvs(allFtvs);
     
@@ -828,7 +836,7 @@ TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
     }
     
     if(hasFtv) {
-      newPred->append(pred);
+      newPred.insert(pred);
     }
     else {
       parentTCC->addPred(pred);

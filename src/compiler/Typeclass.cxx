@@ -82,8 +82,9 @@ Instance::equals(std::ostream &errStream, GCPtr<Instance> ins,
   assert(hisSigma->tcc);
   
   // This will also add self constraints.
-  for(size_t j=0; j < hisSigma->tcc->pred->size(); j++) {
-    GCPtr<Typeclass> hisPred = hisSigma->tcc->Pred(j);      
+  for (TCConstraints::iterator itr = hisSigma->tcc->begin(); 
+       itr != hisSigma->tcc->end(); ++itr) {
+    GCPtr<Typeclass> hisPred = (*itr);
     mySigma->tcc->addPred(hisPred);
   }
   
@@ -94,7 +95,7 @@ Instance::equals(std::ostream &errStream, GCPtr<Instance> ins,
   if(!unifies)
     return false;
   
-  if (mySigma->tcc->pred->size() == 0)
+  if (mySigma->tcc->empty())
     return true;
   else
     return false;
@@ -125,7 +126,7 @@ Instance::satisfies(std::ostream &errStream,
   if(!unifies)
     return false;
   
-  if (sigma->tcc->pred->size() == 0)
+  if (sigma->tcc->empty())
     return true;
   else
     return false;
@@ -160,15 +161,15 @@ Typeclass::addFnDep(GCPtr<Type> dep)
 }
 
 void
-TCConstraints::collectAllFnDeps(GCPtr<CVector<GCPtr<Type> > > fnDeps)
+TCConstraints::collectAllFnDeps(set<GCPtr<Type> >& fnDeps)
 {
-  for(size_t i=0; i < pred->size(); i++) {
-    GCPtr<Typeclass> pr = Pred(i)->getType();    
+  for(iterator itr = begin(); itr != end(); ++itr) {
+    GCPtr<Typeclass> pr = (*itr)->getType();    
     if(pr->fnDeps)
       for(size_t j=0; j < pr->fnDeps->size(); j++) {
 	GCPtr<Type> fnDep = pr->FnDep(j)->getType();
 	assert(fnDep->kind == ty_tyfn);
-	fnDeps->append(fnDep);
+	fnDeps.insert(fnDep);
       }
   }  
 }
@@ -180,16 +181,17 @@ TCConstraints::collectAllFnDeps(GCPtr<CVector<GCPtr<Type> > > fnDeps)
 // must be used.
 
 void 
-TCConstraints::close(GCPtr<CVector<GCPtr<Type> > > closure,
-		     GCPtr<const CVector<GCPtr<Type> > > fnDeps)
+TCConstraints::close(set<GCPtr<Type> >& closure,
+		     const set<GCPtr<Type> >& fnDeps)
 {
   size_t newSize = 0; 
   size_t oldSize = 0;
   
   do {
     oldSize = newSize;    
-    for(size_t i=0; i < fnDeps->size(); i++) {
-      GCPtr<Type> fnDep = fnDeps->elem(i)->getType();
+    for(set<GCPtr<Type> >::iterator itr = fnDeps.begin();
+	itr != fnDeps.end(); ++itr) {
+      GCPtr<Type> fnDep = (*itr)->getType();
       GCPtr<Type> fnDepArgs = fnDep->Args()->getType();
       GCPtr<Type> fnDepRet = fnDep->Ret()->getType();      
       GCPtr< CVector <GCPtr<Type> > > argTvs = new CVector <GCPtr<Type> >;
@@ -198,7 +200,7 @@ TCConstraints::close(GCPtr<CVector<GCPtr<Type> > > closure,
       bool foundAll = true;
       for(size_t j=0; j < argTvs->size(); j++) {
 	GCPtr<Type> argTv = argTvs->elem(j);
-	if(!closure->contains(argTv)) {
+	if(closure.find(argTv) == closure.end()) {
 	  foundAll = false;
 	  break;
 	}
@@ -208,11 +210,11 @@ TCConstraints::close(GCPtr<CVector<GCPtr<Type> > > closure,
 	fnDepRet->collectAllftvs(retTvs);	
 	for(size_t j=0; j < retTvs->size(); j++) {
 	  GCPtr<Type> retTv = retTvs->elem(j);
-	  if(!closure->contains(retTv))
-	    closure->append(retTv);
+	  if(closure.find(retTv) == closure.end())
+	    closure.insert(retTv);
 	}
       }	
     }
-    newSize = closure->size();
+    newSize = closure.size();
   } while(newSize > oldSize);
 }

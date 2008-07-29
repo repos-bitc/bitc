@@ -427,11 +427,11 @@ TypeScheme::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 
   out << "<CType>" << endl;
   out.more();
-  if(_tcc->pred->size()) {
-    
-    for(size_t i=0; i < _tcc->pred->size(); i++)
-      if(mustShowPred(_tcc->Pred(i)))
-	_tcc->Pred(i)->asXML(tvP);
+  if(_tcc->size()) {
+    for(TCConstraints::iterator itr = _tcc->begin();
+	itr != _tcc->end(); ++itr)
+      if(mustShowPred((*itr)))
+	(*itr)->asXML(tvP);
   }
   
   tau->asXML(tvP, out);

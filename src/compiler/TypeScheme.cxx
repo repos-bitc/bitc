@@ -142,13 +142,14 @@ TypeScheme::ts_instance(bool fullCopy)
     addConstraints(_tcc);
     
     ts->tcc = new TCConstraints;
-    for(size_t i = 0; i < _tcc->pred->size(); i++) {
+    for(TCConstraints::iterator itr = _tcc->begin();
+	itr != _tcc->end(); ++itr) {
       GCPtr<Typeclass> pred;
       
       if(fullCopy || ftvs->size() > 0)
-	pred = _tcc->Pred(i)->TypeSpecializeReal(cftvs, cnftvs);
+	pred = (*itr)->TypeSpecializeReal(cftvs, cnftvs);
       else
-	pred = _tcc->Pred(i);
+	pred = (*itr);
       
       ts->tcc->addPred(pred);
     }
@@ -157,8 +158,9 @@ TypeScheme::ts_instance(bool fullCopy)
   tau->clear_sp();
 
   if(tcc)
-    for(size_t i = 0; i < tcc->size(); i++)
-      tcc->Pred(i)->clear_sp();
+    for(TCConstraints::iterator itr = tcc->begin();
+	itr != tcc->end(); ++itr)
+      (*itr)->clear_sp();
   
   return ts;
 }
@@ -178,12 +180,14 @@ TypeScheme::addConstraints(GCPtr<TCConstraints> _tcc) const
   GCPtr<CVector<GCPtr<Type> > > allftvs = new CVector<GCPtr<Type> >;
   tau->collectAllftvs(allftvs);
   
-  for(size_t i = 0; i < tcc->pred->size(); i++)    
+  for(TCConstraints::iterator itr = tcc->begin();
+      itr != tcc->end(); ++itr) {
     for(size_t j=0; j < allftvs->size(); j++)      
-      if(tcc->Pred(i)->boundInType((*allftvs)[j])) {
-	_tcc->addPred(tcc->Pred(i));
+      if((*itr)->boundInType((*allftvs)[j])) {
+	_tcc->addPred((*itr));
 	break;
       }
+  }
   
   //if(tcc->pred.size()) {
   // std::cout << tau->ast->loc << "AddConstraints("
@@ -221,11 +225,12 @@ TypeScheme::normalize()
   ftvs = newTvs;
   
   if(tcc) {
-    GCPtr< CVector< GCPtr<Constraint> > > allPreds = tcc->pred;
-    tcc->pred = new CVector< GCPtr<Constraint> >;
+    set< GCPtr<Constraint> > allPreds = tcc->pred;
+    tcc->pred.clear();
     
-    for(size_t c=0; c < allPreds->size(); c++) {
-      GCPtr<Constraint> ct = allPreds->elem(c)->getType();
+    for(TCConstraints::iterator itr = allPreds.begin();
+	itr != allPreds.end(); ++itr) {
+      GCPtr<Constraint> ct = (*itr)->getType();
       if(!ct->isPcst()) {
 	tcc->addPred(ct);
 	continue;

@@ -221,8 +221,9 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
   }
 
   /* U(*(k, tg, ti), *(k, tg, ti')), ti !=~= ti' */
-  for(size_t c=0; c < cset->size(); c++) {
-    GCPtr<Constraint> newCt = cset->Pred(c)->getType();
+  for (TCConstraints::iterator itr = cset->begin(); 
+       itr != cset->end(); ++itr) {
+    GCPtr<Constraint> newCt = (*itr)->getType();
     if(newCt == ct)
       continue;
 
@@ -385,8 +386,9 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
   tcc->clearPred(pred);
   
   if(instScheme->tcc)
-    for(size_t c=0; c < instScheme->tcc->pred->size(); c++) {
-      GCPtr<Typeclass> instPred = instScheme->tcc->Pred(c);
+    for (TCConstraints::iterator itr = instScheme->tcc->begin(); 
+	 itr != instScheme->tcc->end(); ++itr) {
+      GCPtr<Typeclass> instPred = (*itr);
 
       // Add all preconditions, except for the self-condition
       // added to all instances. Remember that the 
@@ -414,8 +416,9 @@ handleEquPreds(std::ostream &errStream, GCPtr<Trail> trail,
   // domain are held rigid.
   handled = false;
   rigidify(vars);
-  for(size_t c=0; c < tcc->size(); c++) {
-    GCPtr<Constraint> newCt = tcc->Pred(c)->getType();
+  for (TCConstraints::iterator itr = tcc->begin(); 
+       itr != tcc->end(); ++itr) {
+    GCPtr<Constraint> newCt = (*itr)->getType();
     if(newCt == pred)
       continue;
     
@@ -520,8 +523,9 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
     GCPtr<Typeclass> errPred = NULL;
     bool errFreeNow = true;
     
-    for(size_t i=0; i < tcc->pred->size(); i++) {
-      GCPtr<Typeclass> pred = tcc->Pred(i);
+    for (TCConstraints::iterator itr = tcc->begin(); 
+	 itr != tcc->end(); ++itr) {
+      GCPtr<Typeclass> pred = (*itr);
       errPred = pred;
       bool handlable = false;
       

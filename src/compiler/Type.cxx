@@ -378,8 +378,8 @@ Type::isConstrainedToRefType(sherpa::GCPtr<TCConstraints> tcc)
 {
   GCPtr<Type> t = getType();
   
-  for(size_t i=0; i < tcc->pred->size(); i++) {
-    GCPtr<Typeclass> pred = tcc->Pred(i);
+  for(TCConstraints::iterator itr = tcc->begin(); itr != tcc->end(); ++itr) {
+    GCPtr<Typeclass> pred = (*itr);
     
     const std::string &ref_types = SpecialNames::spNames.sp_ref_types; 
     
