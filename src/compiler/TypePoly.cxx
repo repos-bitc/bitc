@@ -99,9 +99,9 @@ Type::boundInType(GCPtr<Type> tv)
     bound = t->TypeArg(i)->boundInType(tv);
 
   // Deal with fnDeps if present
-  if(t->fnDeps)
-    for(size_t i=0; (!bound) && (i < t->fnDeps->size()); i++) 
-      bound = t->FnDep(i)->boundInType(tv);
+  for(TypeSet::iterator itr = t->fnDeps.begin();
+      (!bound) && itr != t->fnDeps.end(); ++itr)
+    bound = (*itr)->boundInType(tv);
   
   t->mark &= ~MARK1;
   return bound;
@@ -156,9 +156,9 @@ Type::collectAllftvs(GCPtr<CVector<GCPtr<Type> > > tvs)
     for(size_t i=0; i < t->typeArgs->size(); i++)
       t->TypeArg(i)->collectAllftvs(tvs);
 
-    if(t->fnDeps)
-      for(size_t i=0; i < t->fnDeps->size(); i++)
-	t->FnDep(i)->collectAllftvs(tvs);
+    for(TypeSet::iterator itr = t->fnDeps.begin();
+	itr != t->fnDeps.end(); ++itr)
+      (*itr)->collectAllftvs(tvs);
   }
 
   t->mark &= ~MARK3;
@@ -170,7 +170,7 @@ TypeScheme::collectAllFtvs()
 {
   tau->collectAllftvs(ftvs);  
   if(tcc) {
-    for(TCConstraints::iterator itr = tcc->begin();
+    for(TypeSet::iterator itr = tcc->begin();
 	itr != tcc->end(); ++itr)
       (*itr)->collectAllftvs(ftvs);      
   }  
@@ -201,9 +201,9 @@ Type::collectftvsWrtGamma(GCPtr<CVector<GCPtr<Type> > > tvs,
     for(size_t i=0; i < t->typeArgs->size(); i++)
       t->TypeArg(i)->collectftvsWrtGamma(tvs, gamma);
 
-    if(t->fnDeps)
-      for(size_t i=0; i < t->fnDeps->size(); i++) 
-	t->FnDep(i)->collectftvsWrtGamma(tvs, gamma);
+    for(TypeSet::iterator itr = t->fnDeps.begin();
+	itr != t->fnDeps.end(); ++itr)
+      (*itr)->collectftvsWrtGamma(tvs, gamma);
   }
 
   t->mark &= ~MARK2;
@@ -215,13 +215,13 @@ Type::collectftvsWrtGamma(GCPtr<CVector<GCPtr<Type> > > tvs,
 // Functional Dependencies
 static void
 remftvsWrtFnDeps(GCPtr<CVector<GCPtr<Type> > > &ftvs,
-		 set<GCPtr<Type> > fnDeps,
+		 TypeSet fnDeps,
 		 GCPtr<const TSEnvironment > gamma)
 {
   // closure wrt tvs in fnDeps influenced by Gamma.
-  set<GCPtr<Type> > closure;
+  TypeSet closure;
 
-  for(set<GCPtr<Type> >::iterator itr = fnDeps.begin();
+  for(TypeSet::iterator itr = fnDeps.begin();
       itr != fnDeps.end(); ++itr) {
     GCPtr<Type> fnDep = (*itr);
     GCPtr<CVector<GCPtr<Type> > > tvs =
@@ -256,13 +256,13 @@ TypeScheme::collectftvs(GCPtr<const TSEnvironment > gamma)
 {
   tau->collectftvsWrtGamma(ftvs, gamma);  
   if(tcc) {    
-    for(TCConstraints::iterator itr = tcc->begin();
+    for(TypeSet::iterator itr = tcc->begin();
 	itr != tcc->end(); ++itr) {
       GCPtr<Typeclass> pred = (*itr);
       pred->collectftvsWrtGamma(ftvs, gamma);  
     }
  
-    set<GCPtr<Type> > allFnDeps;
+    TypeSet allFnDeps;
     tcc->collectAllFnDeps(allFnDeps);
     remftvsWrtFnDeps(ftvs, allFnDeps, gamma);
   }
@@ -284,7 +284,7 @@ TypeScheme::removeUnInstFtvs()
       ftv->flags |= TY_CLOS;
   }
 
-  for(TCConstraints::iterator itr = tcc->begin();
+  for(TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     GCPtr<Constraint> ct = (*itr)->getType();
 
@@ -335,7 +335,7 @@ TypeScheme::normalizeConstruction(GCPtr<Trail> trail)
   
   tau->markSignMbs(false);
   
-  for(TCConstraints::iterator itr = tcc->begin();
+  for(TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     GCPtr<Constraint> ct = (*itr)->getType();
     ct->markSignMbs(true);
@@ -354,7 +354,7 @@ TypeScheme::normalizeConstruction(GCPtr<Trail> trail)
   // TY_COERCE flag is not cleared, but it does not matter, because
   // all of these types are substituted within the next adjMaybe call.
   tau->adjMaybe(trail, true, false, true);
-  for(TCConstraints::iterator itr = tcc->begin();
+  for(TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     GCPtr<Constraint> ct = (*itr)->getType();
     ct->adjMaybe(trail, true, false, true);
@@ -559,7 +559,7 @@ TypeScheme::generalize(std::ostream& errStream,
     tau->adjMaybe(trail, false, true);
 
     bool cleared = false;
-    for(TCConstraints::iterator itr = tcc->begin();
+    for(TypeSet::iterator itr = tcc->begin();
 	itr != tcc->end(); ++itr) {
       GCPtr<Type> pred = (*itr);
       if(!pred->isPcst())
@@ -587,7 +587,7 @@ TypeScheme::generalize(std::ostream& errStream,
       set< GCPtr<Typeclass> > oldPreds = tcc->pred;
       tcc->pred.clear();
       
-      for(TCConstraints::iterator itr = oldPreds.begin();
+      for(TypeSet::iterator itr = oldPreds.begin();
 	  itr != oldPreds.end(); ++itr) {
 	GCPtr<Type> pred = (*itr);
 	if(!pred->isPcst())
@@ -725,7 +725,7 @@ updateSigmas(GCPtr<const AST> bp, GCPtr<CVector<GCPtr<Type> > > ftvs,
 	}
 	
 	if(tcc)
-	  for(TCConstraints::iterator itr = tcc->begin();
+	  for(TypeSet::iterator itr = tcc->begin();
 	      itr != tcc->end(); ++itr) {
 	    GCPtr<Constraint> pred = (*itr);
 	    if(pred->boundInType(ftvs->elem(i))) {
@@ -815,9 +815,9 @@ TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
     return false;
   
   bool migrated = false;
-  set<GCPtr<Typeclass> > newPred;
+  TypeSet newPred;
   
-  for(TCConstraints::iterator itr = tcc->begin();
+  for(TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     GCPtr<Typeclass> pred = (*itr)->getType();
     GCPtr< CVector< GCPtr<Type> > > allFtvs = new CVector<GCPtr<Type> >;
@@ -979,7 +979,6 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
   theType->flags &= ~TY_SP_MASK;
   theType->typeArgs->erase();
   theType->components->erase();
-  theType->fnDeps = NULL;
   GCPtr<Type> retType = theType;
   
   INS_DEBUG std::cout << "To Specialize " 
@@ -1046,11 +1045,19 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
 	}
 
 	/* Deal with fnDeps if any */
-	if(t->fnDeps) {
-	  theType->fnDeps = new CVector<GCPtr<Type> >;
+	if (t->fnDeps.size()) {
+	  // GCFIX: The old code nullified fnDeps here, relying on
+	  // addFnDep to reallocate. I had an assert here
+	  // assert(theTye->empty()) which failed. Since theType is
+	  // constructed just above, an I don't see anything jumping
+	  // out at me in the code here that is adding to
+	  // theType->fnDeps, I do not understand why that assert
+	  // failed, but it did. Need to ask Swaroop why.
+	  theType->fnDeps.clear();
 
-	  for(size_t i=0; i<t->fnDeps->size(); i++) {
-	    GCPtr<Type> fnDep = t->FnDep(i)->TypeSpecializeReal(ftvs, nftvs);
+	  for(TypeSet::iterator itr = t->fnDeps.begin();
+	      itr != t->fnDeps.end(); ++itr) {
+	    GCPtr<Type> fnDep = (*itr)->TypeSpecializeReal(ftvs, nftvs);
 	    theType->addFnDep(fnDep);
 	  }
 	}
@@ -1085,9 +1092,9 @@ Type::clear_sp()
   for(size_t i=0; i<t->components->size(); i++)
     t->CompType(i)->clear_sp();
 
-  if(t->fnDeps)
-    for(size_t i=0; i<t->fnDeps->size(); i++)
-      t->FnDep(i)->clear_sp();
+  for(TypeSet::iterator itr = t->fnDeps.begin();
+      itr != t->fnDeps.end(); ++itr)
+    (*itr)->clear_sp();
 }
 
 /**********************************************************

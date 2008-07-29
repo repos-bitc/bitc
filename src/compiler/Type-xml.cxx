@@ -428,7 +428,7 @@ TypeScheme::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
   out << "<CType>" << endl;
   out.more();
   if(_tcc->size()) {
-    for(TCConstraints::iterator itr = _tcc->begin();
+    for(TypeSet::iterator itr = _tcc->begin();
 	itr != _tcc->end(); ++itr)
       if(mustShowPred((*itr)))
 	(*itr)->asXML(tvP);

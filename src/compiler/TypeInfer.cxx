@@ -425,14 +425,14 @@ checkConstraints(std::ostream& errStream,
   if(defTcc->size() != declTcc->size()) 
     errFree = false;
   
-  for(TCConstraints::iterator itr = defTcc->begin();
+  for(TypeSet::iterator itr = defTcc->begin();
       errFree && itr != defTcc->end(); ++itr)
     (*itr)->mark |= unmatched;
-  for(TCConstraints::iterator itr_j = declTcc->begin();
+  for(TypeSet::iterator itr_j = declTcc->begin();
       errFree && itr_j != declTcc->end(); ++itr_j)
     (*itr_j)->mark |= unmatched;
 
-  for(TCConstraints::iterator itr = defTcc->begin();
+  for(TypeSet::iterator itr = defTcc->begin();
       errFree && itr != defTcc->end(); ++itr) {
     GCPtr<Typeclass> defct = (*itr);
       
@@ -441,7 +441,7 @@ checkConstraints(std::ostream& errStream,
       
     bool unified = false;
       
-    for(TCConstraints::iterator itr_j = declTcc->begin();
+    for(TypeSet::iterator itr_j = declTcc->begin();
 	errFree && itr_j != declTcc->end(); ++itr_j) {
       GCPtr<Typeclass> declct = (*itr_j);
 
@@ -460,11 +460,11 @@ checkConstraints(std::ostream& errStream,
       errFree = false;
   }
 
-  for(TCConstraints::iterator itr = defTcc->begin();
+  for(TypeSet::iterator itr = defTcc->begin();
       errFree && itr != defTcc->end(); ++itr)
     if((*itr)->mark & unmatched)
       errFree = false;
-  for(TCConstraints::iterator itr_j = declTcc->begin();
+  for(TypeSet::iterator itr_j = declTcc->begin();
       errFree && itr_j != declTcc->end(); ++itr_j)
     if((*itr_j)->mark & unmatched)
       errFree = false;  
@@ -1144,7 +1144,7 @@ superDAG(GCPtr<AST> super, GCPtr<AST> curr)
   GCPtr<TCConstraints> tcc = super->scheme->tcc;
   assert(tcc);
 
-  for(TCConstraints::iterator itr = tcc->begin();
+  for(TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     GCPtr<Typeclass> pred = (*itr);
     if(pred->flags & TY_CT_SELF)
@@ -1234,7 +1234,7 @@ InferTypeClass(std::ostream& errStream, GCPtr<AST> ast,
     
     GCPtr<TypeScheme> mSigma = new TypeScheme(mType, mID, 
 					      new TCConstraints);
-    for(TCConstraints::iterator itr = sigma->tcc->begin();
+    for(TypeSet::iterator itr = sigma->tcc->begin();
 	itr != sigma->tcc->end(); ++itr)
       mSigma->tcc->addPred((*itr));
  
@@ -1317,7 +1317,7 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
 	    myTcc, uflags, trail, USE_MODE, TI_CONSTR);
 
   // Mark myself
-  for(TCConstraints::iterator itr = myTcc->begin();
+  for(TypeSet::iterator itr = myTcc->begin();
       itr != myTcc->end(); ++itr) {
     GCPtr<Typeclass> pred = (*itr);
     if(pred->defAst == TCident->symbolDef)
@@ -1349,37 +1349,38 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
     
     //errStream << ast->loc << ": #Preds = " << myTcc->pred->size()
     //		<< std::endl;
-    for(TCConstraints::iterator itr = myTcc->begin();
+    for(TypeSet::iterator itr = myTcc->begin();
 	itr != myTcc->end(); ++itr) {
       GCPtr<Typeclass> pred = (*itr)->getType();
       //errStream << "Processing : " << pred->asString()
       //	  << std::endl;
-      if(pred->fnDeps)
-	for(size_t d = 0; d < pred->fnDeps->size(); d++) {
-	  GCPtr<Typeclass> fnDep =  pred->FnDep(d);
-	  GCPtr< CVector<GCPtr<Type> > > domain = new CVector<GCPtr<Type> >;
-	  GCPtr< CVector<GCPtr<Type> > > range = new CVector<GCPtr<Type> >;
-	  fnDep->Args()->collectAllftvs(domain);
-	  fnDep->Ret()->collectAllftvs(range);
+
+      for(TypeSet::iterator itr_d = pred->fnDeps.begin(); 
+	  itr_d != pred->fnDeps.end(); ++itr_d) {
+	GCPtr<Typeclass> fnDep =  (*itr_d);
+	GCPtr< CVector<GCPtr<Type> > > domain = new CVector<GCPtr<Type> >;
+	GCPtr< CVector<GCPtr<Type> > > range = new CVector<GCPtr<Type> >;
+	fnDep->Args()->collectAllftvs(domain);
+	fnDep->Ret()->collectAllftvs(range);
 	  
-	  //errStream << "  Processing : " << fnDep->asString()
-	  //	      << std::endl;
+	//errStream << "  Processing : " << fnDep->asString()
+	//	      << std::endl;
 	  
-	  for(size_t j=0; j < range->size(); j++) {
-	    if(!domain->contains(range->elem(j))) {
-	      errStream << ast->loc << ": "
-			<< "Invalid Instance. Definition contradicts"
-			<< " with the functional dependency "
-			<< fnDep->asString() << " of predicate "
-			<< pred->asString() << ". At least one "
-			<< " type variable in the range was not in"
-			<< " the domain."
-			<< std::endl;
-	      errFree = false;
-	      break;
-	    }
+	for(size_t j=0; j < range->size(); j++) {
+	  if(!domain->contains(range->elem(j))) {
+	    errStream << ast->loc << ": "
+		      << "Invalid Instance. Definition contradicts"
+		      << " with the functional dependency "
+		      << fnDep->asString() << " of predicate "
+		      << pred->asString() << ". At least one "
+		      << " type variable in the range was not in"
+		      << " the domain."
+		      << std::endl;
+	    errFree = false;
+	    break;
 	  }
 	}
+      }
     }
 
     if(!errFree) 
@@ -1402,21 +1403,24 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
       // I don't have to do a ts_instance_copy() here.
       GCPtr<TCConstraints> theirTcc = inst->ast->scheme->tcc;
 
-      for(TCConstraints::iterator itr = myTcc->begin();
+      for(TypeSet::iterator itr = myTcc->begin();
 	  itr != myTcc->end(); ++itr) {
 	GCPtr<Typeclass> myPred = (*itr)->getType();
-	for(TCConstraints::iterator itr_m = theirTcc->begin();
+	for(TypeSet::iterator itr_m = theirTcc->begin();
 	    itr_m != theirTcc->end(); ++itr_m) {
 	  GCPtr<Typeclass> theirPred = (*itr_m)->getType();
 
 	  if((myPred->defAst == theirPred->defAst) &&  
-	     (myPred->fnDeps && theirPred->fnDeps))
-	    for(size_t j = 0; j < myPred->fnDeps->size(); j++) {
-	      GCPtr<Type> myFnDep =  myPred->FnDep(j)->getType();
+	     (myPred->fnDeps.size() && theirPred->fnDeps.size()))
+	    for(TypeSet::iterator itr_j = myPred->fnDeps.begin();
+		itr_j != myPred->fnDeps.end(); ++itr_j) {
+	      GCPtr<Type> myFnDep =  (*itr_j)->getType();
 	      GCPtr<Type> myDomain = myFnDep->Args();
 		  
-	      for(size_t k = 0; k < theirPred->fnDeps->size(); k++) {		  
-		GCPtr<Type> theirFnDep =  theirPred->FnDep(k)->getType();
+	      for(TypeSet::iterator itr_k = 
+		    theirPred->fnDeps.begin();
+		  itr_k != theirPred->fnDeps.end(); ++itr_k) {
+		GCPtr<Type> theirFnDep =  (*itr_k)->getType();
 		GCPtr<Type> theirDomain = theirFnDep->Args();
 		    
 		assert(myFnDep->defAst == theirFnDep->defAst);
@@ -1851,7 +1855,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  }
 	  
 	  if(tsIns->tcc) {
-	    for(TCConstraints::iterator itr = tsIns->tcc->begin();
+	    for(TypeSet::iterator itr = tsIns->tcc->begin();
 		itr != tsIns->tcc->end(); ++itr) {
 	      GCPtr<Typeclass> pred = (*itr)->getType();	      
 	      if(flags & TI_TCC_SUB)

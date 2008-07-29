@@ -43,6 +43,8 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <set>
+#include <vector>
 
 #include <libsherpa/INOstream.hxx>
 
@@ -159,6 +161,9 @@ struct TypeScheme;
 // specialization. ((TY_RESTRICTED was here too.))
 #define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | TY_CLOS | TY_COERCE) 
 
+struct Type;
+typedef std::set<sherpa::GCPtr<Type > > TypeSet;
+
 struct Type : public sherpa::Countable {
   
   friend struct TypeScheme;
@@ -235,8 +240,8 @@ public:
   sherpa::GCPtr<ArrLen> arrlen;	// Length in the case of an array type
   
   size_t    Isize;		// size in fixint
-  sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > fnDeps; // Functional Dependencies (for 
-                                   //   Type classes only).
+  TypeSet   fnDeps;		// Functional Dependencies (for 
+				//   Type classes only).
   
   sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<comp> > > components;
   sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > typeArgs;  
@@ -529,11 +534,6 @@ public:
   unsigned long& CompFlags(size_t i) const
   {
     return (*components)[i]->flags;
-  }
-  //Functional Dependencies
-  sherpa::GCPtr<Type> & FnDep(size_t i) const
-  {
-    return (*fnDeps)[i];
   }
   //Argument and return types of function-types
   sherpa::GCPtr<Type> & Args() const

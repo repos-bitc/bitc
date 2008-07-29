@@ -57,8 +57,8 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
-using namespace sherpa;
 using namespace std;
+using namespace sherpa;
 
 static GCPtr< CVector< GCPtr<Type> > > 
 getDomain(GCPtr<Typeclass> t)
@@ -68,20 +68,20 @@ getDomain(GCPtr<Typeclass> t)
   for(size_t i=0; i < t->typeArgs->size(); i++)
     dom->append(t->TypeArg(i));
   
-  if(t->fnDeps)
-    for(size_t fd = 0; fd < t->fnDeps->size(); fd++) {
-      GCPtr<Type> fdep = t->FnDep(fd);
-      GCPtr<Type> ret = fdep->Ret();
+  for(TypeSet::iterator itr = t->fnDeps.begin(); 
+      itr != t->fnDeps.end(); ++itr) {
+    GCPtr<Type> fdep = (*itr);
+    GCPtr<Type> ret = fdep->Ret();
       
-      GCPtr< CVector< GCPtr<Type> > > newDom = 
-	new CVector< GCPtr<Type> >;
+    GCPtr< CVector< GCPtr<Type> > > newDom = 
+      new CVector< GCPtr<Type> >;
       
-      for(size_t i=0; i < dom->size(); i++)
-	if(dom->elem(i)->getType() != ret->getType())
-	  newDom->append(dom->elem(i));
+    for(size_t i=0; i < dom->size(); i++)
+      if(dom->elem(i)->getType() != ret->getType())
+	newDom->append(dom->elem(i));
       
-      dom = newDom;
-    }
+    dom = newDom;
+  }
   
   return dom;
 }
@@ -221,7 +221,7 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
   }
 
   /* U(*(k, tg, ti), *(k, tg, ti')), ti !=~= ti' */
-  for (TCConstraints::iterator itr = cset->begin(); 
+  for (TypeSet::iterator itr = cset->begin(); 
        itr != cset->end(); ++itr) {
     GCPtr<Constraint> newCt = (*itr)->getType();
     if(newCt == ct)
@@ -386,7 +386,7 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
   tcc->clearPred(pred);
   
   if(instScheme->tcc)
-    for (TCConstraints::iterator itr = instScheme->tcc->begin(); 
+    for (TypeSet::iterator itr = instScheme->tcc->begin(); 
 	 itr != instScheme->tcc->end(); ++itr) {
       GCPtr<Typeclass> instPred = (*itr);
 
@@ -416,7 +416,7 @@ handleEquPreds(std::ostream &errStream, GCPtr<Trail> trail,
   // domain are held rigid.
   handled = false;
   rigidify(vars);
-  for (TCConstraints::iterator itr = tcc->begin(); 
+  for (TypeSet::iterator itr = tcc->begin(); 
        itr != tcc->end(); ++itr) {
     GCPtr<Constraint> newCt = (*itr)->getType();
     if(newCt == pred)
@@ -523,7 +523,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
     GCPtr<Typeclass> errPred = NULL;
     bool errFreeNow = true;
     
-    for (TCConstraints::iterator itr = tcc->begin(); 
+    for (TypeSet::iterator itr = tcc->begin(); 
 	 itr != tcc->end(); ++itr) {
       GCPtr<Typeclass> pred = (*itr);
       errPred = pred;

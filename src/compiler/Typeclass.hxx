@@ -81,11 +81,10 @@ struct Instance : public sherpa::Countable {
 /* Type class constraints */
  
 struct TCConstraints : public sherpa::Countable {
-  // Type class predicates
-  std::set<sherpa::GCPtr<Typeclass> > pred;
+  // Type class predicates (which are, in turn, instances of Type
+  TypeSet pred;
+  typedef TypeSet::iterator iterator;
   
-  typedef std::set<sherpa::GCPtr<Typeclass> >::iterator iterator;
-
   TCConstraints()
   {
   }
@@ -105,12 +104,12 @@ struct TCConstraints : public sherpa::Countable {
   
   bool contains(sherpa::GCPtr<Typeclass> tc);
 
-  void collectAllFnDeps(std::set<sherpa::GCPtr<Type> >& fnDeps);
+  void collectAllFnDeps(TypeSet& fnDeps);
   
   // Compute the closure of all functional dependencies 
   // supplied in the vector
-  static void close(std::set<sherpa::GCPtr<Type> >& closure,
-		    const std::set<sherpa::GCPtr<Type> >& fnDeps);
+  static void close(TypeSet& closure,
+		    const TypeSet& fnDeps);
   void clearHintsOnPreds(sherpa::GCPtr<Trail> trail);  
 
   iterator begin() {

@@ -82,7 +82,7 @@ Instance::equals(std::ostream &errStream, GCPtr<Instance> ins,
   assert(hisSigma->tcc);
   
   // This will also add self constraints.
-  for (TCConstraints::iterator itr = hisSigma->tcc->begin(); 
+  for (TypeSet::iterator itr = hisSigma->tcc->begin(); 
        itr != hisSigma->tcc->end(); ++itr) {
     GCPtr<Typeclass> hisPred = (*itr);
     mySigma->tcc->addPred(hisPred);
@@ -146,17 +146,16 @@ Typeclass::addFnDep(GCPtr<Type> dep)
   if(dep->kind != ty_tyfn)
     assert(false);
   
-  if(!fnDeps)
-    fnDeps = new CVector<GCPtr<Type> >;
-
-  for(c = 0; c < fnDeps->size(); c++)
-    if(FnDep(c)->strictlyEquals(dep, false, true))
+  for(TypeSet::iterator itr = fnDeps.begin(); 
+      itr != fnDeps.end(); ++itr) {
+    if((*itr)->strictlyEquals(dep, false, true))
       return false;
+  }
 
   //   std::cout << "Adding fnDep " << dep->asString(NULL) 
   //   	    << " to " << this->asString(NULL) << "."
   //   	    << std::endl;
-  fnDeps->append(dep);
+  fnDeps.insert(dep);
   return true;
 }
 
@@ -165,12 +164,13 @@ TCConstraints::collectAllFnDeps(set<GCPtr<Type> >& fnDeps)
 {
   for(iterator itr = begin(); itr != end(); ++itr) {
     GCPtr<Typeclass> pr = (*itr)->getType();    
-    if(pr->fnDeps)
-      for(size_t j=0; j < pr->fnDeps->size(); j++) {
-	GCPtr<Type> fnDep = pr->FnDep(j)->getType();
-	assert(fnDep->kind == ty_tyfn);
-	fnDeps.insert(fnDep);
-      }
+
+    for(TypeSet::iterator itr_j=pr->fnDeps.begin();
+	itr_j != pr->fnDeps.end(); ++itr_j) {
+      GCPtr<Type> fnDep = (*itr_j)->getType();
+      assert(fnDep->kind == ty_tyfn);
+      fnDeps.insert(fnDep);
+    }
   }  
 }
 
@@ -181,15 +181,15 @@ TCConstraints::collectAllFnDeps(set<GCPtr<Type> >& fnDeps)
 // must be used.
 
 void 
-TCConstraints::close(set<GCPtr<Type> >& closure,
-		     const set<GCPtr<Type> >& fnDeps)
+TCConstraints::close(TypeSet& closure,
+		     const TypeSet& fnDeps)
 {
   size_t newSize = 0; 
   size_t oldSize = 0;
   
   do {
     oldSize = newSize;    
-    for(set<GCPtr<Type> >::iterator itr = fnDeps.begin();
+    for(TypeSet::iterator itr = fnDeps.begin();
 	itr != fnDeps.end(); ++itr) {
       GCPtr<Type> fnDep = (*itr)->getType();
       GCPtr<Type> fnDepArgs = fnDep->Args()->getType();

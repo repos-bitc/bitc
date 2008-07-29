@@ -142,7 +142,7 @@ TypeScheme::ts_instance(bool fullCopy)
     addConstraints(_tcc);
     
     ts->tcc = new TCConstraints;
-    for(TCConstraints::iterator itr = _tcc->begin();
+    for(TypeSet::iterator itr = _tcc->begin();
 	itr != _tcc->end(); ++itr) {
       GCPtr<Typeclass> pred;
       
@@ -158,7 +158,7 @@ TypeScheme::ts_instance(bool fullCopy)
   tau->clear_sp();
 
   if(tcc)
-    for(TCConstraints::iterator itr = tcc->begin();
+    for(TypeSet::iterator itr = tcc->begin();
 	itr != tcc->end(); ++itr)
       (*itr)->clear_sp();
   
@@ -180,7 +180,7 @@ TypeScheme::addConstraints(GCPtr<TCConstraints> _tcc) const
   GCPtr<CVector<GCPtr<Type> > > allftvs = new CVector<GCPtr<Type> >;
   tau->collectAllftvs(allftvs);
   
-  for(TCConstraints::iterator itr = tcc->begin();
+  for(TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     for(size_t j=0; j < allftvs->size(); j++)      
       if((*itr)->boundInType((*allftvs)[j])) {
@@ -228,7 +228,7 @@ TypeScheme::normalize()
     set< GCPtr<Constraint> > allPreds = tcc->pred;
     tcc->pred.clear();
     
-    for(TCConstraints::iterator itr = allPreds.begin();
+    for(TypeSet::iterator itr = allPreds.begin();
 	itr != allPreds.end(); ++itr) {
       GCPtr<Constraint> ct = (*itr)->getType();
       if(!ct->isPcst()) {

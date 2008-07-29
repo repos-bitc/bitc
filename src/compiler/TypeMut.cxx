@@ -571,9 +571,9 @@ Type::adjMaybe(GCPtr<Trail> trail, bool markedOnly,
       for(size_t i=0; i<t->components->size(); i++)
 	t->CompType(i)->adjMaybe(trail, markedOnly, minimize, adjFn);
       
-      if(t->fnDeps)
-	for(size_t i=0; i < t->fnDeps->size(); i++)
-	  t->FnDep(i)->adjMaybe(trail, markedOnly, minimize, adjFn);
+      for(TypeSet::iterator itr = t->fnDeps.begin();
+	  itr != t->fnDeps.end(); ++itr)
+	(*itr)->adjMaybe(trail, markedOnly, minimize, adjFn);
       
       break;
     }

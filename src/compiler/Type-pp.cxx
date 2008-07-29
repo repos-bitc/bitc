@@ -396,15 +396,14 @@ TypeScheme::asString(GCPtr<TvPrinter> tvP, bool norm)
 	}
 
 	ss << " (";
-	for(TCConstraints::iterator itr = tcc->begin();
+	for(TypeSet::iterator itr = tcc->begin();
 	    itr != tcc->end(); ++itr) {
 	  GCPtr<Typeclass> pred = (*itr)->getType();
 	  ss << pred->asString(tvP) << " ";
 	  
-	  if(pred->fnDeps)	  
-	    for(size_t j=0; j < pred->fnDeps->size(); j++) {
-	      ss << pred->FnDep(j)->asString(tvP) << " ";
-	    }
+	  for(TypeSet::iterator itr_j = pred->fnDeps.begin();
+	      itr_j != pred->fnDeps.end(); ++itr_j)
+	    ss << (*itr_j)->asString(tvP) << " ";
 	}
 	ss << ") ";
       }
@@ -415,7 +414,7 @@ TypeScheme::asString(GCPtr<TvPrinter> tvP, bool norm)
       GCPtr<TCConstraints> _tcc = tcc;
 
       if(_tcc->size()) {
-	for(TCConstraints::iterator itr = _tcc->begin();
+	for(TypeSet::iterator itr = _tcc->begin();
 	    itr != _tcc->end(); ++itr) {
 	  if((((*itr)->flags & TY_CT_SUBSUMED) == 0) && 
 	     (((*itr)->flags & TY_CT_SELF) == 0)) {

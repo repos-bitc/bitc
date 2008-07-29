@@ -97,7 +97,7 @@ TCConstraints::clearPred(GCPtr<Constraint> ct)
 void 
 TCConstraints::normalize() 
 {
-  set<GCPtr<Typeclass> > allPreds = pred;
+  TypeSet allPreds = pred;
   pred.clear();
   
   for(iterator itr = allPreds.begin(); itr != allPreds.end(); ++itr)

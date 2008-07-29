@@ -378,7 +378,7 @@ Type::isConstrainedToRefType(sherpa::GCPtr<TCConstraints> tcc)
 {
   GCPtr<Type> t = getType();
   
-  for(TCConstraints::iterator itr = tcc->begin(); itr != tcc->end(); ++itr) {
+  for(TypeSet::iterator itr = tcc->begin(); itr != tcc->end(); ++itr) {
     GCPtr<Typeclass> pred = (*itr);
     
     const std::string &ref_types = SpecialNames::spNames.sp_ref_types; 
@@ -1043,11 +1043,7 @@ Type::Type(GCPtr<Type>  t)
   for(size_t i=0; i<t->components->size(); i++)
     components->append(new comp(t->CompName(i), t->CompType(i), t->CompFlags(i)));
 
-  if(t->fnDeps) {
-    fnDeps = new CVector<GCPtr<Type> >;
-    for(size_t i=0; i<t->fnDeps->size(); i++)
-      fnDeps->append(t->FnDep(i));
-  }
+  fnDeps = t->fnDeps;
 
   mark = 0;
   pMark = 0;  
