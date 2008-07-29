@@ -38,11 +38,13 @@
  *
  **************************************************************************/
 
-#include <libsherpa/CVector.hxx>
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 
+#include <libsherpa/GCPtr.hxx>
+#include <libsherpa/CVector.hxx>
 
 // Type of (sub) environment, if any.
 // Universal, In module scope, or in record scope

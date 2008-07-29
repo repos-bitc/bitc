@@ -44,6 +44,7 @@
 #include "debug.hxx"
 
 #include <libsherpa/GCPtr.hxx>
+#include <libsherpa/CVector.hxx>
 #define AST_SMART_PTR sherpa::GCPtr
 #define AST_SUPERCLASS sherpa::Countable
 
