@@ -487,7 +487,11 @@ public:
   envSet envs;
 
   
-  sherpa::GCPtr< sherpa::CVector<spStruct *> > special;
+  
+  
+
+  
+  sherpa::GCPtr<sherpa::CVector<spStruct *> > special;
   
   
   bool polyinst; 

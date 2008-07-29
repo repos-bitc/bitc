@@ -45,7 +45,7 @@
 #include "Type.hxx"
 #include "UocInfo.hxx"
 
-/* Structure that isused by the specializer */
+/* Structure that is used by the specializer */
 struct spStruct {  
   sherpa::GCPtr<AST> ast; 
   sherpa::GCPtr<Type> typ;
