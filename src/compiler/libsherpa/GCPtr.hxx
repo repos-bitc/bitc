@@ -128,6 +128,8 @@ namespace sherpa {
 #endif
   };
 
+  struct dynamic_cast_tag {};
+
   // Forward declaration:
   template<class T> class NoGCPtr;
 
@@ -137,6 +139,8 @@ namespace sherpa {
   /// be used to point to objects derived from Countable. 
   template<class T> 
   class GCPtr {
+    template<class T2> friend class GCPtr;
+
   public:
     struct BoolConversionSupport {
       int dummy;
@@ -157,10 +161,18 @@ namespace sherpa {
     }
 
     /// @brief Copy constructor for GCPtrs to derived classes.
-    template<typename T2>
-    inline GCPtr(const GCPtr<T2> & other)
+    template<class T2>
+    inline GCPtr(GCPtr<T2> const& other)
     {
-      pObject = other ? &*other : 0;
+      pObject = other.pObject;
+      pObject->IncrementRefCount();
+    }
+
+    /// @brief Copy constructor for GCPtrs to derived classes.
+    template<typename T2>
+    inline GCPtr(const GCPtr<T2> & other, dynamic_cast_tag)
+    {
+      pObject = dynamic_cast<T2 *>(other.pObject);
       pObject->IncrementRefCount();
     }
 
@@ -181,7 +193,7 @@ namespace sherpa {
     /// below, which I do not understand.
     inline GCPtr& operator=(const GCPtr& p)
     {
-      T* pOtherObject = p ? &*p : 0;
+      T* pOtherObject = p.pObject;
 
       /* Careful: order of increment/decrement matters! */
       pOtherObject->IncrementRefCount();
@@ -199,7 +211,7 @@ namespace sherpa {
     template<typename T2>
     inline GCPtr& operator=(const GCPtr<T2>& p)
     {
-      T2* pOtherObject = p ? &*p : 0;
+      T2* pOtherObject = p.pObject;
 
       /* Careful: order of increment/decrement matters! */
       pOtherObject->IncrementRefCount();
@@ -219,16 +231,6 @@ namespace sherpa {
       pObject = p;
 
       return *this;
-    }
-
-    template<typename T2>
-    inline GCPtr<T2> upcast()
-    {
-      T2* pUpcastedPtr = dynamic_cast<T2 *>(pObject);
-      if (pUpcastedPtr == 0)
-	throw std::bad_cast();
-
-      return GCPtr<T2>(pUpcastedPtr);
     }
 
     inline T* operator -> () const
@@ -271,6 +273,13 @@ namespace sherpa {
       return (unsigned long) pObject;
     }
   };
+
+  template<typename T1, typename T2>
+  inline GCPtr<T2>
+  dynamic_pointer_cast(GCPtr<T1> const& ptr)
+  {
+    return GCPtr<T2>(ptr.pObject, dynamic_cast_tag());
+  }
 
   /// @brief Non-counting pointer implementation compatible with
   /// GCPtr. See also Countable.
