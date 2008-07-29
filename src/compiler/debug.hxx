@@ -66,5 +66,6 @@
 #define TRAIL_DEBUG       DEBUG_OFF   // Debug Type Linking
 #define TS_NORM_DEBUG     DEBUG_OFF   // Debug TypeScheme Normalization
 #define TYPE_ACC_DEBUG    DEBUG_OFF
-
+#define DEF_DECL_DEBUG    DEBUG_OFF   // Debug Definition-Declaration consistency checking
+                          
 #endif /* DEBUG_HXX */

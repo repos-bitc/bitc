@@ -447,7 +447,7 @@ checkConstraints(std::ostream& errStream,
 
       if((defct->mark & unmatched) == 0)
 	continue;
-
+      
       if(defct->strictlyEquals(declct)) {
 	defct->mark &= ~unmatched;
 	declct->mark &= ~unmatched;
@@ -501,6 +501,9 @@ matchDefDecl(std::ostream& errStream,
   bool errorFree = true;   
   const GCPtr<AST> decl = declSigma->ast;
   GCPtr<const AST>  def = defSigma->ast;
+  bool verbose = false;
+  DEF_DECL_DEBUG 
+    verbose = true;
   
   if(flags & DEF_DECL_NO_MATCH)
     return true;  
@@ -515,12 +518,6 @@ matchDefDecl(std::ostream& errStream,
     GCPtr<Type> declT = declTS->tau->getType();
     GCPtr<Type> defT  = defTS->tau->getType();
     
-    // Rigidness preservation.
-    for(size_t i=0; i < defTS->ftvs->size(); i++) {
-      assert(declTS->Ftv(i)->kind == ty_tvar);
-      declTS->Ftv(i)->link = defTS->Ftv(i);
-    }
-    
     if(fnCopyCompatibility && declT->isFnxn() && defT->isFnxn()) {
       declTS = declSigma->ts_instance_copy();
       declT = declTS->tau->getType();      
@@ -531,33 +528,46 @@ matchDefDecl(std::ostream& errStream,
 	for(size_t c=0; c < argsDecl->components.size(); c++) {	    
 	  GCPtr<Type> argDecl = argsDecl->CompType(c)->minimizeMutability();
 	  GCPtr<Type> argDef = argsDef->CompType(c)->minimizeMutability();
-	  CHKERR(errorFree, argDecl->strictlyEquals(argDef));
-	  
-	  if(!errorFree) {
-	    errStream << "ARG@Def " 
-		      << argDef->asString(Options::debugTvP)
-		      << " != "
-		      << "ARG@Decl " 
-		      << argDecl->asString(Options::debugTvP)
-		      << std::endl;
-	  }
+	  CHKERR(errorFree, argDecl->strictlyEquals(argDef, verbose));
 	}
       }
-      else
+      else {
 	errorFree = false;
+      }
       
       GCPtr<Type> retDecl = declT->getBareType()->Ret()->minimizeMutability();
       GCPtr<Type> retDef = defT->getBareType()->Ret()->minimizeMutability();
-      CHKERR(errorFree, retDecl->strictlyEquals(retDef));
+      CHKERR(errorFree, retDecl->strictlyEquals(retDef, verbose));
     }
     else {
-      CHKERR(errorFree, declT->strictlyEquals(defT));
+      CHKERR(errorFree, declT->strictlyEquals(defT, verbose));
     }
 
     if(errorFree)
       CHKERR(errorFree, checkConstraints(errStream, defTS, declTS, decl));
+
+    // Rigidness preservation:
+    // Make sure that after unification, the declaration/definition is
+    // no less general than what was previously declared.
+    // The number of type variables are initially determined to be
+    // equal, but this check catches errors such as:
+    // 1) DECL: \/'a. 'a -> int
+    //    DEF:  \/'a. int -> 'a 
+    //    POST UNIFY: int -> int
+    // 2) DECL: \/'a,'b. 'a -> 'b -> 'b
+    //    DEF:  \/'a,'b. 'a -> 'a -> 'b
+    //    POST UNIFY: \/'a. 'a -> 'a -> 'a
+    for(size_t i=0; errorFree && i < defTS->ftvs->size(); i++) {
+      GCPtr<Type> ftv = defTS->Ftv(i)->getType();
+      CHKERR(errorFree, (ftv->kind == ty_tvar));
+      
+      for(size_t j=i+1; errorFree && j < defTS->ftvs->size(); j++) {
+	GCPtr<Type> jtv = defTS->Ftv(j)->getType();
+	CHKERR(errorFree, (ftv != jtv));
+      }
+    }
   }
-  
+
   if(!errorFree)
     errStream << def->loc <<": The type of " << def->s 
 	      << " at definition/declaration "  << defSigma->asString()
@@ -566,12 +576,6 @@ matchDefDecl(std::ostream& errStream,
 	      << decl->loc << ": declaration / definition "
 	      << declSigma->asString() << " EXACTLY."
 	      << std::endl;
-  
-  // unify for real. At this point, it may be reasonable to 
-  // do this in one step using ONLY UNIFY_STRICT flag
-  //CHKERR(errorFree, unify(errStream, trail, gamma, decl,
-  //			      decl->symType, 
-  //			      sigma->tau, UNIFY_STRICT));
   
   return errorFree;
 }
