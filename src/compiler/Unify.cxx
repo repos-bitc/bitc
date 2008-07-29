@@ -116,10 +116,10 @@ UnifyDecl(std::ostream& errStream,
   assert(t1->kind != ty_uconv || t1->kind != ty_uconr);
   assert(t1->kind != ty_uvalv || t1->kind != ty_uvalr);
 
-  if(t1->typeArgs->size() != t2->typeArgs->size())
+  if(t1->typeArgs.size() != t2->typeArgs.size())
     return typeError(errStream, errLoc, t1, t2);
     
-  for(size_t i=0; i<t1->typeArgs->size(); i++)
+  for(size_t i=0; i<t1->typeArgs.size(); i++)
     CHKERR(errFree, Unify(errStream, trail, errLoc, t1->TypeArg(i), 
 			  t2->TypeArg(i), flags)); 
     
@@ -150,15 +150,15 @@ UnifyStructUnion(std::ostream& errStream,
     if(t1->defAst != t2->defAst)
       return typeError(errStream, errLoc, t1, t2);
 
-    if (t1->components->size() == 0 || t2->components->size() == 0) 
+    if (t1->components.size() == 0 || t2->components.size() == 0) 
       return UnifyDecl(errStream, trail, errLoc, t1, t2, flags);
   }
   
   size_t n = trail->snapshot();
   trail->link(t1, t2);  
   
-  assert(t1->typeArgs->size() == t2->typeArgs->size());  
-  for(size_t i=0; i<t1->typeArgs->size(); i++) 
+  assert(t1->typeArgs.size() == t2->typeArgs.size());  
+  for(size_t i=0; i<t1->typeArgs.size(); i++) 
     CHKERR(errFree, Unify(errStream, trail, errLoc, t1->TypeArg(i), 
 			  t2->TypeArg(i), flags));
   
@@ -219,11 +219,11 @@ UnifyFnArgs(std::ostream& errStream, GCPtr<Trail> trail,
   assert(t1->kind == ty_fnarg);
   assert(t2->kind == ty_fnarg);
   
-  if (t1->components->size() != t2->components->size()) {
+  if (t1->components.size() != t2->components.size()) {
     return typeError(errStream, errLoc, errt1, errt2);
   }
   
-  for(size_t i=0; i< t1->components->size(); i++) {
+  for(size_t i=0; i< t1->components.size(); i++) {
     
     if ((t1->CompFlags(i) & COMP_BYREF_P) &&
 	((t2->CompFlags(i) & COMP_BYREF_P) == 0)) {
@@ -413,8 +413,8 @@ Unify(std::ostream& errStream,
   case ty_tyfn:
   case ty_fn:
     {
-      assert(t1->components->size() == 2);
-      assert(t2->components->size() == 2);
+      assert(t1->components.size() == 2);
+      assert(t2->components.size() == 2);
 
       GCPtr<Type> t1Args = t1->Args();
       GCPtr<Type> t2Args = t2->Args();
@@ -452,12 +452,12 @@ Unify(std::ostream& errStream,
 
   case ty_letGather:
     {      
-      if(t1->components->size() != t2->components->size()) {
+      if(t1->components.size() != t2->components.size()) {
 	errFree = typeError(errStream, errLoc, t1, t2);
 	break;
       }
 
-      for(size_t i=0; i<t1->components->size(); i++) 
+      for(size_t i=0; i<t1->components.size(); i++) 
 	CHKERR(errFree, 
 	       Unify(errStream, trail, errLoc, t1->CompType(i), 
 		     t2->CompType(i), flags));
@@ -540,8 +540,8 @@ Unify(std::ostream& errStream,
   case ty_ref:
   case ty_byref:
     {
-      assert(t1->components->size() == 1);
-      assert(t2->components->size() == 1);
+      assert(t1->components.size() == 1);
+      assert(t2->components.size() == 1);
       CHKERR(errFree,
 	     Unify(errStream, trail, errLoc, t1->Base(), 
 		   t2->Base(), flags));
@@ -561,12 +561,12 @@ Unify(std::ostream& errStream,
 	break;
       }
 	
-      if(t1->typeArgs->size() != t2->typeArgs->size()) {
+      if(t1->typeArgs.size() != t2->typeArgs.size()) {
 	errFree = typeError(errStream, errLoc, t1, t2);
 	break;
       }
 	
-      for(size_t i = 0; i < t1->typeArgs->size(); i++) {
+      for(size_t i = 0; i < t1->typeArgs.size(); i++) {
 	  
 	CHKERR(errFree, Unify(errStream, trail, errLoc, 
 			      t1->TypeArg(i), t2->TypeArg(i),
@@ -581,8 +581,8 @@ Unify(std::ostream& errStream,
   case ty_subtype:
   case ty_pcst:
     {
-      assert(t1->components->size() == t2->components->size());
-      for(size_t i=0; i < t1->components->size(); i++) 
+      assert(t1->components.size() == t2->components.size());
+      for(size_t i=0; i < t1->components.size(); i++) 
 	CHKERR(errFree,
 	       Unify(errStream, trail, errLoc, t1->CompType(i), 
 		     t2->CompType(i), flags));
@@ -661,13 +661,12 @@ acyclic(std::ostream& errStream,
   assert(!worklist.contains(t));
   worklist.insert(t);
 
-  for(size_t i=0; i < t->components->size(); i++) {
+  for(size_t i=0; i < t->components.size(); i++)
     CHKERR(errFree, acyclic(errStream, errLoc, t->CompType(i),
 			    worklist, donelist,
 			    (inref || t->kind == ty_ref)));
-  }
 
-//   for(size_t i=0; i < t->typeArgs->size(); i++) {
+//   for(size_t i=0; i < t->typeArgs.size(); i++) {
 //     CHKERR(errFree, acyclic(errStream, errLoc, t->TypeArg(i),  
 // 			    worklist, donelist,
 // 			    (inref || t->kind == ty_ref)));

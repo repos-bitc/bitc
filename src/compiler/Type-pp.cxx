@@ -175,7 +175,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
   case ty_fn:
     {
-      assert(t->components->size() == 2);
+      assert(t->components.size() == 2);
       ss << "(fn " 
 	 << t->Args()->asString(tvP, traverse) 
 	 << " " 
@@ -187,7 +187,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   case ty_fnarg:
     {
       ss <<  "(";
-      for(size_t i=0; i < t->components->size(); i++) {
+      for(size_t i=0; i < t->components.size(); i++) {
 	if (i > 0) 
 	  ss << " ";
 	if(t->CompFlags(i) & COMP_BYREF)
@@ -204,7 +204,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
   case ty_tyfn:
     {
-      assert(t->components->size() == 2);
+      assert(t->components.size() == 2);
       ss << "(tyfn " 
 	 <<  t->Args()->asString(tvP, traverse) 
 	 << " " 
@@ -216,7 +216,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   case ty_letGather:
     {
       ss <<  "(__letGather ";
-      for(size_t i=0; i < t->components->size(); i++) {
+      for(size_t i=0; i < t->components.size(); i++) {
 	if (i > 0) ss << " ";
 	ss << t->CompType(i)->asString(tvP, traverse);
       }
@@ -227,11 +227,11 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   case ty_structv:
   case ty_structr:
     {
-      if(t->typeArgs->size() == 0)
+      if(t->typeArgs.size() == 0)
 	ss << printName(t->defAst);
       else {
 	ss << "(" << printName(t->defAst);
-	for(size_t i=0; i < t->typeArgs->size(); i++)
+	for(size_t i=0; i < t->typeArgs.size(); i++)
 	  ss << " " << t->TypeArg(i)->asString(tvP, traverse);
 	ss << ")";
       }
@@ -248,11 +248,11 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   case ty_uconv: 
   case ty_uconr:
     {
-      if(t->typeArgs->size() == 0)
+      if(t->typeArgs.size() == 0)
 	ss << printName(t->myContainer);
       else {
 	ss << "(" << printName(t->myContainer);
-	for(size_t i=0; i < t->typeArgs->size(); i++)
+	for(size_t i=0; i < t->typeArgs.size(); i++)
 	  ss << " " << t->TypeArg(i)->asString(tvP, traverse);
 	ss << ")";
       }
@@ -261,11 +261,11 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
     }
 
   case ty_typeclass:    
-    if(t->typeArgs->size() == 0)
+    if(t->typeArgs.size() == 0)
       ss << printName(t->defAst);
     else {
       ss << "(" << printName(t->defAst);
-	for(size_t i=0; i < t->typeArgs->size(); i++)
+	for(size_t i=0; i < t->typeArgs.size(); i++)
 	  ss << " " << t->TypeArg(i)->asString(tvP, traverse);
 	ss << ")";
     }
@@ -291,7 +291,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
     
   case ty_ref:
     {
-      assert(t->components->size() == 1);
+      assert(t->components.size() == 1);
       ss << "(ref "
 	 << t->Base()->asString(tvP, traverse) 
 	 << ")";
@@ -300,7 +300,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
   case ty_byref:
     {
-      assert(t->components->size() == 1);
+      assert(t->components.size() == 1);
       ss << "(by-ref "
 	 << t->Base()->asString(tvP, traverse) 
 	 << ")";
@@ -337,7 +337,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   case ty_pcst:
     {
       ss << "*(";
-      for(size_t i=0; i<t->components->size(); i++) {
+      for(size_t i=0; i<t->components.size(); i++) {
 	if(i > 0)
 	  ss << ", ";
 	ss << t->CompType(i)->asString(tvP, traverse);

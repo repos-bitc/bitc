@@ -184,7 +184,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 
   case ty_fn:
     {
-      assert(t->components->size() == 2);
+      assert(t->components.size() == 2);
       out << "<fn>" << endl;
       out.more();
       out << "<tuple>" << endl;
@@ -200,7 +200,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 
   case ty_fnarg:
     {
-      for(size_t i=0; i < t->components->size(); i++) {
+      for(size_t i=0; i < t->components.size(); i++) {
 	if(t->CompFlags(i) & COMP_BYREF) {
 	  out << " <byref> ";
 	  t->CompType(i)->asXML(tvP, out);
@@ -215,7 +215,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
     
   case ty_tyfn:
     {
-      assert(t->components->size() == 2);
+      assert(t->components.size() == 2);
       out << "<tyfn>" << endl;
       out.more();
       out << "<tuple>" << endl;
@@ -240,7 +240,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
     {
       out << "<struct inline='yes' name='" << printName(t->defAst) <<"'>" << endl; 
       out.more();
-      for(size_t i=0; i < t->typeArgs->size(); i++)
+      for(size_t i=0; i < t->typeArgs.size(); i++)
 	t->TypeArg(i)->asXML(tvP, out);
       out.less();
       out << "</struct>" << endl;
@@ -263,7 +263,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
     {
       out << "<union inline='yes' name='" << printName(t->myContainer) <<"'>" << endl; 
       out.more();
-      for(size_t i=0; i < t->typeArgs->size(); i++)
+      for(size_t i=0; i < t->typeArgs.size(); i++)
 	t->TypeArg(i)->asXML(tvP, out);
       out.less();
       out << "</union>" << endl;
@@ -274,7 +274,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
     {
       out << "<typeclass name='" << printName(t->defAst) <<"'>" << endl; 
       out.more();
-      for(size_t i=0; i < t->typeArgs->size(); i++)
+      for(size_t i=0; i < t->typeArgs.size(); i++)
 	t->TypeArg(i)->asXML(tvP, out);
       out.less();
       out << "</typeclass>" << endl;
@@ -361,7 +361,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
       t->CompType(0)->asXML(tvP, out);
       t->CompType(1)->asXML(tvP, out);
       out << "</pcst>" << endl; 
-      for(size_t i=0; i<t->components->size(); i++)
+      for(size_t i=0; i<t->components.size(); i++)
 	t->CompType(i)->asXML(tvP, out);
       break;
     }

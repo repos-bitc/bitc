@@ -65,7 +65,7 @@ getDomain(GCPtr<Typeclass> t)
 {
   GCPtr< CVector< GCPtr<Type> > > dom = new CVector< GCPtr<Type> >;
   
-  for(size_t i=0; i < t->typeArgs->size(); i++)
+  for(size_t i=0; i < t->typeArgs.size(); i++)
     dom->append(t->TypeArg(i));
   
   for(TypeSet::iterator itr = t->fnDeps.begin(); 
@@ -270,7 +270,7 @@ handleSpecialPred(std::ostream &errStream, GCPtr<Trail> trail,
   const std::string &ref_types = SpecialNames::spNames.sp_ref_types; 
   if(pred->defAst->s == ref_types) {
     handlable = true;
-    assert(pred->typeArgs->size() == 1);
+    assert(pred->typeArgs.size() == 1);
     GCPtr<Type> it = pred->TypeArg(0)->getType();
 
     SPSOL_DEBUG errStream << "\t\tCase RefTypes for "
@@ -347,7 +347,7 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
     // positions. That is, if an argument is used in a 
     // method within a reference, this step must be 
     // skipped on that argument. 
-    for(size_t c=0; c < inst->typeArgs->size(); c++)
+    for(size_t c=0; c < inst->typeArgs.size(); c++)
       inst->TypeArg(c) = MBF(inst->TypeArg(c));
     
     if(pred->equals(inst)) {

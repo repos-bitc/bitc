@@ -225,10 +225,10 @@ Type::getType() const
   GCPtr<const Type> t = getTypePrim();
   
   if(t->kind == ty_mutable) {    
-    GCPtr<Type> in = t->components->elem(0)->typ->getTypePrim();
+    GCPtr<Type> in = t->components[0]->typ->getTypePrim();
     while(in->kind == ty_mutable) {
       t = in;
-      in = t->components->elem(0)->typ->getTypePrim();
+      in = t->components[0]->typ->getTypePrim();
     }
   }
   
@@ -612,7 +612,7 @@ Type::isUnion(bool ignMut)
 {
   GCPtr<Type> t = ((ignMut) ? getBareType() : getType());
   return (((t->kind == ty_unionv) || (t->kind == ty_unionr)) &&
-	  (t->components->size() != 0));
+	  (t->components.size()));
 }
 
 bool 
@@ -662,10 +662,10 @@ Type::isDeepMut()
     break;
 
   default:
-    for(size_t i=0;!mut &&  i < t->components->size(); i++)
+    for(size_t i=0;!mut &&  i < t->components.size(); i++)
       mut = t->CompType(i)->isDeepMut();
    
-    for(size_t i=0; !mut && i < t->typeArgs->size(); i++)
+    for(size_t i=0; !mut && i < t->typeArgs.size(); i++)
       mut = t->TypeArg(i)->isDeepMut();
 
     // No need to check functional dependencies
@@ -700,10 +700,10 @@ Type::isDeepImmut()
     break;
     
   default:
-    for(size_t i=0; immut && i < t->components->size(); i++)
+    for(size_t i=0; immut && i < t->components.size(); i++)
       immut = t->CompType(i)->isDeepImmut();
     
-    for(size_t i=0; immut && i < t->typeArgs->size(); i++)
+    for(size_t i=0; immut && i < t->typeArgs.size(); i++)
       immut = t->TypeArg(i)->isDeepImmut();
 
     // No need to check functional dependencies
@@ -742,10 +742,10 @@ Type::isConcretizable()
     break;
     
   default:
-    for(size_t i=0; concretizable && i < t->components->size(); i++)
+    for(size_t i=0; concretizable && i < t->components.size(); i++)
       concretizable = t->CompType(i)->isConcretizable();
     
-    for(size_t i=0; concretizable && i < t->typeArgs->size(); i++)
+    for(size_t i=0; concretizable && i < t->typeArgs.size(); i++)
       concretizable = t->TypeArg(i)->isConcretizable();
     
     // No need to check functional dependencies
@@ -769,7 +769,7 @@ Type::getUnionType()
   GCPtr<Type> t = uCopy->getBareType();
   t->kind = (uType->isRefType() ? ty_unionr : ty_unionv);
   t->defAst = t->myContainer;
-  t->components->erase();
+  t->components.clear();
   return uCopy;
 }
 
@@ -801,7 +801,7 @@ Type::isDecl()
   case ty_unionr:
   case ty_structv:
   case ty_structr:
-    return (t->components->size() == 0);
+    return (t->components.empty());
 
   default:
     return false;
@@ -881,7 +881,7 @@ Type::isOfInfiniteType()
   case ty_subtype:
   case ty_pcst:
     {      
-      for(size_t i=0; !infType && (i < typeArgs->size()); i++)
+      for(size_t i=0; !infType && (i < typeArgs.size()); i++)
       	if(TypeArg(i)->isOfInfiniteType())
       	  infType = true;
 
@@ -993,8 +993,6 @@ comp::comp(const std::string s, GCPtr<Type> t, unsigned long _flags)
     myContainer = NULL;				\
     link = 0;					\
     flags = 0;					\
-    components = new CVector<GCPtr<comp> >;     \
-    typeArgs = new CVector<GCPtr<Type> >;       \
   } while(0);
 
 
@@ -1008,15 +1006,15 @@ Type::Type(const Kind k, GCPtr<Type> child)
   : uniqueID(genTypeID())
 {
   TYPE_CTR_INIT(k);
-  components->append(new comp(child));
+  components.push_back(new comp(child));
 }
 
 Type::Type(const Kind k, GCPtr<Type> child1, GCPtr<Type> child2)
   : uniqueID(genTypeID())
 {
   TYPE_CTR_INIT(k);
-  components->append(new comp(child1));
-  components->append(new comp(child2));
+  components.push_back(new comp(child1));
+  components.push_back(new comp(child2));
 }
 
 // Copy constructor, except distinct uniqueID
@@ -1033,17 +1031,12 @@ Type::Type(GCPtr<Type>  t)
   minSignedRep = t->minSignedRep;
   minUnsignedRep = t->minUnsignedRep;
 
-  components = new CVector<GCPtr<comp> >;
-  typeArgs = new CVector<GCPtr<Type> >;
-
-  for(size_t i=0; i<t->typeArgs->size(); i++)
-    typeArgs->append(t->TypeArg(i));
-  
-    
-  for(size_t i=0; i<t->components->size(); i++)
-    components->append(new comp(t->CompName(i), t->CompType(i), t->CompFlags(i)));
-
+  typeArgs = t->typeArgs;
   fnDeps = t->fnDeps;
+    
+  for(size_t i=0; i<t->components.size(); i++)
+    components.push_back(new comp(t->CompName(i), t->CompType(i), t->CompFlags(i)));
+
 
   mark = 0;
   pMark = 0;  

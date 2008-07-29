@@ -431,7 +431,7 @@ toCtype(GCPtr<Type> typ, string IDname="", unsigned long flags=0,
 
   case ty_fnarg:
     {
-      for(size_t i=0; i<t->components->size(); i++) {
+      for(size_t i=0; i<t->components.size(); i++) {
 	if (i > 0) 
 	  out << ", ";
 	out << toCtype(t->CompType(i), IDname, flags, arrsz);
@@ -651,7 +651,7 @@ emit_fnxn_type(INOstream &out, std::string &id, GCPtr<Type> fn,
     
   out << "(";
   size_t argCount = 0;
-  for(size_t i=0; i < args->components->size(); i++) {
+  for(size_t i=0; i < args->components.size(); i++) {
     GCPtr<Type> arg = args->CompType(i);
     if (isUnitType(arg))
       continue;
@@ -680,7 +680,7 @@ emit_fnxn_decl(INOstream &out, GCPtr<AST> ast,
   GCPtr<AST> lam = ast->child(1);
   GCPtr<AST> argvec = lam->child(0);
   GCPtr<Type> fnargvec = fnType->Args()->getBareType();
-  assert(argvec->children.size() == fnargvec->components->size());
+  assert(argvec->children.size() == fnargvec->components.size());
 
   /* If return type is unit, emit void as a special case. */
   if (isUnitType(retType))
@@ -1722,7 +1722,7 @@ toc(std::ostream& errStream,
 	      << ";" << endl;
 	}
 	
-	for(size_t i=0; i < args->components->size(); i++) {
+	for(size_t i=0; i < args->components.size(); i++) {
 	  GCPtr<Type> arg = args->CompType(i);
 	  
 	  if(!typeIsUnmangled(arg)) {
@@ -2498,11 +2498,11 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
 
   t->mark |= MARK13;
 
-  for(size_t i=0; i<t->typeArgs->size(); i++)
+  for(size_t i=0; i<t->typeArgs.size(); i++)
     emit_arr_vec_fn_types(t->TypeArg(i), out, 
 			     arrVec, vecVec, fnVec);
   
-  for(size_t i=0; i<t->components->size(); i++)
+  for(size_t i=0; i<t->components.size(); i++)
     emit_arr_vec_fn_types(t->CompType(i), out, 
 			     arrVec, vecVec, fnVec);
   
@@ -2858,7 +2858,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 
 	  out << CMangle(id);
 	  out << "(";
-	  for(size_t i=0; i < args->components->size(); i++) {
+	  for(size_t i=0; i < args->components.size(); i++) {
 	    GCPtr<Type> arg = args->CompType(i);
 	    if (isUnitType(arg))
 	      continue;

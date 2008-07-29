@@ -128,7 +128,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 #endif
 
   case ty_fn:
-    assert(components->size() == 2);
+    assert(components.size() == 2);
     
     ss << "FN" 
        << Args()->mangledString(igMut, true,maxArgMut)
@@ -137,8 +137,8 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     break;
 
   case ty_fnarg:
-    ss << components->size();
-    for(size_t i=0; i<components->size(); i++) {
+    ss << components.size();
+    for(size_t i=0; i<components.size(); i++) {
       if(CompFlags(i) & COMP_BYREF)
 	ss << "Z";
       ss << CompType(i)->mangledString(igMut, true, 
@@ -148,7 +148,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
   case ty_letGather:
     ss << "LG";
-    for(size_t i=0; i<components->size(); i++) {
+    for(size_t i=0; i<components.size(); i++) {
       ss << CompType(i)->mangledString(igMut, igTlMut, 
 					      maxArgMut);
     }
@@ -160,10 +160,10 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     {
       ss << "S"
 	 << ((kind == ty_structv) ? "V" : "R")
-	 << typeArgs->size() 
+	 << typeArgs.size() 
 	 << "_" << defAst->s.size() << defAst->s;
 
-      for(size_t i=0; i < typeArgs->size(); i++)
+      for(size_t i=0; i < typeArgs.size(); i++)
 	ss << TypeArg(i)->mangledString(igMut, false, 
 					 maxArgMut);
       break;
@@ -173,7 +173,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     {
       ss << "TC"
 	 << "_" << defAst->s.size() << defAst->s;
-      for(size_t i=0; i < typeArgs->size(); i++)
+      for(size_t i=0; i < typeArgs.size(); i++)
 	ss << TypeArg(i)->mangledString(igMut, false, 
 					 maxArgMut);
       
@@ -189,10 +189,10 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     {
       ss << "U"
 	 << (isRefType() ? "R" : "V")
-	 << typeArgs->size() 
+	 << typeArgs.size() 
 	 << "_" << myContainer->s.size() << myContainer->s;
 
-      for(size_t i=0; i < typeArgs->size(); i++)
+      for(size_t i=0; i < typeArgs.size(); i++)
 	ss << TypeArg(i)->mangledString(igMut, false, maxArgMut);
     }
     break;
@@ -202,17 +202,17 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     {
       ss << "D"
 	 << (isRefType() ? "R" : "V")
-	 << typeArgs->size() 
+	 << typeArgs.size() 
 	 << "_" << myContainer->s.size() << myContainer->s;
 
-      for(size_t i=0; i < typeArgs->size(); i++)
+      for(size_t i=0; i < typeArgs.size(); i++)
 	ss << TypeArg(i)->mangledString(igMut, false, maxArgMut);
     }
     break;
 
   case ty_array:
     {
-      assert(components->size() == 1);
+      assert(components.size() == 1);
       ss << "J" << Base()->mangledString(igMut, false, maxArgMut)
 	 << "__" << arrlen->len;
       break;
@@ -220,23 +220,23 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     
   case ty_vector:
     {
-      assert(components->size() == 1);
+      assert(components.size() == 1);
       ss << "K" << Base()->mangledString(igMut, false, maxArgMut);
       break;
     }
 
   case ty_ref:
-    assert(components->size() == 1);
+    assert(components.size() == 1);
     ss << "R" << Base()->mangledString(igMut, false, maxArgMut);
     break;
 
   case ty_byref:
-    assert(components->size() == 1);
+    assert(components.size() == 1);
     ss << "Z" << Base()->mangledString(igMut, false, maxArgMut);
     break;
 
   case ty_mutable:
-    assert(components->size() == 1);
+    assert(components.size() == 1);
     if(!igMut && !igTlMut)
       ss << "M";
     ss << Base()->mangledString(igMut, false, maxArgMut);

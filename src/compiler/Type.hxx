@@ -243,8 +243,8 @@ public:
   TypeSet   fnDeps;		// Functional Dependencies (for 
 				//   Type classes only).
   
-  sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<comp> > > components;
-  sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > typeArgs;  
+  std::vector<sherpa::GCPtr<comp> > components;
+  std::vector<sherpa::GCPtr<Type> > typeArgs;  
     
   // Mark Flags:  used for Traversal
   // Used to prevent infinite recursion
@@ -515,25 +515,33 @@ public:
 
   /* PUBLIC Accessors (Conveniecnce Forms) */
   //Accessing Type Arguments and Components
-  sherpa::GCPtr<Type> & TypeArg(size_t i) const
+  const sherpa::GCPtr<Type> & TypeArg(size_t i) const
   {
-    return (*typeArgs)[i];
+    return typeArgs[i];
   }
-  sherpa::GCPtr<comp> & Component(size_t i) const
+  const sherpa::GCPtr<comp> & Component(size_t i) const
   {
-    return (*components)[i];
+    return components[i];
+  }
+  sherpa::GCPtr<Type> & TypeArg(size_t i)
+  {
+    return typeArgs[i];
+  }
+  sherpa::GCPtr<comp> & Component(size_t i)
+  {
+    return components[i];
   }
   sherpa::GCPtr<Type> & CompType(size_t i) const
   {
-    return (*components)[i]->typ;
+    return components[i]->typ;
   }
   std::string& CompName(size_t i) const
   {
-    return (*components)[i]->name;
+    return components[i]->name;
   }
   unsigned long& CompFlags(size_t i) const
   {
-    return (*components)[i]->flags;
+    return components[i]->flags;
   }
   //Argument and return types of function-types
   sherpa::GCPtr<Type> & Args() const
@@ -565,7 +573,7 @@ public:
  			  kind == ty_ref || 
 			  kind == ty_array || 
 			  kind == ty_vector);
-    return (*components)[0]->typ;
+    return components[0]->typ;
   }
 };
 

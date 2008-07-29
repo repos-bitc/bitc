@@ -924,8 +924,8 @@ getDefToInstantiate(ostream &errStream, GCPtr<UocInfo> unifiedUOC,
     // Then find out which method we are concerned about.
     size_t nthMethod = 0;
     bool found = false;
-    for(size_t i = 0; i < pred->components->size(); i++) {
-      GCPtr<Type> ithMethod = pred->components->elem(i)->typ->getType();
+    for(size_t i = 0; i < pred->components.size(); i++) {
+      GCPtr<Type> ithMethod = pred->components[i]->typ->getType();
       if(ithMethod->defAst == def) {
 	nthMethod = i;
 	found = true;
@@ -936,7 +936,7 @@ getDefToInstantiate(ostream &errStream, GCPtr<UocInfo> unifiedUOC,
 
     // Unify the method's type with the necessary type (type at
     // current use).
-    assert(pred->components->elem(nthMethod)->typ->unifyWith(typ));
+    assert(pred->components[nthMethod]->typ->unifyWith(typ));
     
     // Now pred contains the properly specialized type. This should
     // have enough information to uniquely identify the instance we
@@ -1810,7 +1810,7 @@ UocInfo::doInstantiate(ostream &errStream,
       // fix that before recursing over the fields.
       
       GCPtr<AST> defTvList = def->child(1);
-      assert(typ->typeArgs->size() == defTvList->children.size());
+      assert(typ->typeArgs.size() == defTvList->children.size());
       GCPtr<AST> copyFields = copy->child(4);
       for(size_t i=0; i < defTvList->children.size(); i++) {
 	GCPtr<AST> defTv = defTvList->child(i);
@@ -1831,7 +1831,7 @@ UocInfo::doInstantiate(ostream &errStream,
       copy->child(1)->children.clear();
 
       GCPtr<AST> defTvList = def->child(1);
-      assert(typ->typeArgs->size() == defTvList->children.size());
+      assert(typ->typeArgs.size() == defTvList->children.size());
 
       GCPtr<AST> copyCtrs = copy->child(4);
       for(size_t j=0; j < copyCtrs->children.size(); j++) {	  

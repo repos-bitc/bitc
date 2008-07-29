@@ -91,11 +91,11 @@ Type::boundInType(GCPtr<Type> tv)
   t->mark |= MARK1;
   bool bound = false;
   
-  for(size_t i=0; (!bound) && (i < t->components->size()); i++) 
+  for(size_t i=0; (!bound) && (i < t->components.size()); i++) 
     bound = t->CompType(i)->boundInType(tv);
 
   // To consider cases like (define aNil nil)
-  for(size_t i=0; (!bound) && (i < t->typeArgs->size()); i++) 
+  for(size_t i=0; (!bound) && (i < t->typeArgs.size()); i++) 
     bound = t->TypeArg(i)->boundInType(tv);
 
   // Deal with fnDeps if present
@@ -150,10 +150,10 @@ Type::collectAllftvs(GCPtr<CVector<GCPtr<Type> > > tvs)
     }
   }      
   else {
-    for(size_t i=0; i < t->components->size(); i++)
+    for(size_t i=0; i < t->components.size(); i++)
       t->CompType(i)->collectAllftvs(tvs);
 
-    for(size_t i=0; i < t->typeArgs->size(); i++)
+    for(size_t i=0; i < t->typeArgs.size(); i++)
       t->TypeArg(i)->collectAllftvs(tvs);
 
     for(TypeSet::iterator itr = t->fnDeps.begin();
@@ -190,15 +190,15 @@ Type::collectftvsWrtGamma(GCPtr<CVector<GCPtr<Type> > > tvs,
   t->mark |= MARK2;
 
   if(t->kind == ty_tvar) {
-    assert(t->components->size() == 0);
+    assert(t->components.size() == 0);
     if(!t->boundInGamma(gamma) && !(tvs->contains(t))) 
       tvs->append(t);
   }
   else {
-    for(size_t i=0; i < t->components->size(); i++)      
+    for(size_t i=0; i < t->components.size(); i++)      
       t->CompType(i)->collectftvsWrtGamma(tvs, gamma);
     
-    for(size_t i=0; i < t->typeArgs->size(); i++)
+    for(size_t i=0; i < t->typeArgs.size(); i++)
       t->TypeArg(i)->collectftvsWrtGamma(tvs, gamma);
 
     for(TypeSet::iterator itr = t->fnDeps.begin();
@@ -542,9 +542,9 @@ TypeScheme::generalize(std::ostream& errStream,
   GEN_STEP(mode, gs_pcst) {
     if(!tau->isDeepMut() && !tau->isDeepImmut()) {
       GCPtr<Type> pcst = new Constraint(ty_pcst); 
-      pcst->components->append(new comp(new Type(ty_kvar)));
-      pcst->components->append(new comp(tau)); // General Type
-      pcst->components->append(new comp(tau)); // Instantiation Type
+      pcst->components.push_back(new comp(new Type(ty_kvar)));
+      pcst->components.push_back(new comp(tau)); // General Type
+      pcst->components.push_back(new comp(tau)); // Instantiation Type
       tcc->addPred(pcst);
       
       GEN_DEBUG errStream << "[2] With Pcst: " 
@@ -977,8 +977,8 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
   GCPtr<Type> t = getType();
   GCPtr<Type> theType = new Type(t);
   theType->flags &= ~TY_SP_MASK;
-  theType->typeArgs->erase();
-  theType->components->erase();
+  theType->typeArgs.clear();
+  theType->components.clear();
   GCPtr<Type> retType = theType;
   
   INS_DEBUG std::cout << "To Specialize " 
@@ -999,11 +999,11 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
     case ty_pcst:
       {
 	// the let-kind and generic type are added as is.
-	theType->components->append(new comp(t->CompType(0)));
-	theType->components->append(new comp(t->CompType(1)));
+	theType->components.push_back(new comp(t->CompType(0)));
+	theType->components.push_back(new comp(t->CompType(1)));
 	// The instance of the constraint is specialized.
 	GCPtr<Type> ins = t->CompType(2)->TypeSpecializeReal(ftvs, nftvs);
-	theType->components->append(new comp(ins));
+	theType->components.push_back(new comp(ins));
 	break;
       }
     case ty_tvar:
@@ -1028,20 +1028,20 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
     default:
       {      
 	/* Deal with Type-args */
-	for(size_t i=0; i<t->typeArgs->size(); i++) {
+	for(size_t i=0; i<t->typeArgs.size(); i++) {
 	  GCPtr<Type> arg = t->TypeArg(i)->getType();
 	  GCPtr<Type> newArg = arg->TypeSpecializeReal(ftvs, nftvs);
 	  
-	  theType->typeArgs->append(newArg);
+	  theType->typeArgs.push_back(newArg);
 	}
             
 	/* Deal with Components */
-	for(size_t i=0; i<t->components->size(); i++) {
+	for(size_t i=0; i<t->components.size(); i++) {
 	  comp *nComp = 
 	    new comp(t->CompName(i),
 		     t->CompType(i)->TypeSpecializeReal(ftvs, nftvs),
 		     t->CompFlags(i));
-	  theType->components->append(nComp);
+	  theType->components.push_back(nComp);
 	}
 
 	/* Deal with fnDeps if any */
@@ -1086,10 +1086,10 @@ Type::clear_sp()
 
   t->sp = NULL;
 
-  for(size_t i=0; i<t->typeArgs->size(); i++)
+  for(size_t i=0; i<t->typeArgs.size(); i++)
     t->TypeArg(i)->clear_sp();
 
-  for(size_t i=0; i<t->components->size(); i++)
+  for(size_t i=0; i<t->components.size(); i++)
     t->CompType(i)->clear_sp();
 
   for(TypeSet::iterator itr = t->fnDeps.begin();

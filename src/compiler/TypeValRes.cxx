@@ -507,7 +507,7 @@ isExpansive(std::ostream& errStream,
   case ty_letGather:
   case ty_array:
   case ty_vector:
-    for(size_t i=0; i<t->components->size(); i++) 
+    for(size_t i=0; i<t->components.size(); i++) 
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 				       t->CompType(i)));
     break;
@@ -527,11 +527,11 @@ isExpansive(std::ostream& errStream,
   case ty_subtype:
   case ty_pcst:
     {    
-      for(size_t i=0; i<t->typeArgs->size(); i++) 
+      for(size_t i=0; i<t->typeArgs.size(); i++) 
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 t->TypeArg(i)));
     
-      for(size_t i=0; i<t->components->size(); i++) 
+      for(size_t i=0; i<t->components.size(); i++) 
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 t->CompType(i)));
       break;

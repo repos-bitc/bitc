@@ -210,7 +210,7 @@ Type::asAST(const sherpa::LexLoc &loc,
 
   case ty_fn:
     {
-      assert(t->components->size() == 2);
+      assert(t->components.size() == 2);
       GCPtr<AST> arg = t->Args()->asAST(loc, tvP);
       GCPtr<AST> ret = t->Ret()->asAST(loc, tvP);
       ast = new AST(at_fn, loc, arg, ret);
@@ -220,7 +220,7 @@ Type::asAST(const sherpa::LexLoc &loc,
   case ty_fnarg:
     {
       ast = new AST(at_fnargVec, loc);
-      for(size_t i=0; i < t->components->size(); i++) {
+      for(size_t i=0; i < t->components.size(); i++) {
 	GCPtr<AST> arg = t->CompType(i)->asAST(loc, tvP);
 	if(t->CompFlags(i) & COMP_BYREF)
 	  arg = new AST(at_byrefType, arg->loc, arg);
@@ -247,9 +247,9 @@ Type::asAST(const sherpa::LexLoc &loc,
       //ast = new AST(at_ident, loc);
       //ast->s = t->defAst->s;
       //ast->symbolDef = t->defAst;
-      if(t->typeArgs->size() > 0) {
+      if(t->typeArgs.size() > 0) {
 	ast = new AST(at_typeapp, loc, ast);
-	for(size_t i=0; i < t->typeArgs->size(); i++)
+	for(size_t i=0; i < t->typeArgs.size(); i++)
 	  ast->children.push_back(t->TypeArg(i)->asAST(loc, tvP));
       }
       break;
@@ -263,9 +263,9 @@ Type::asAST(const sherpa::LexLoc &loc,
       ast = t->myContainer->Use();
       //ast = new AST(at_ident, loc);
       //ast->s = t->myContainer->s;
-      if(t->typeArgs->size() > 0) {
+      if(t->typeArgs.size()) {
 	ast = new AST(at_typeapp, loc, ast);
-	for(size_t i=0; i < t->typeArgs->size(); i++)
+	for(size_t i=0; i < t->typeArgs.size(); i++)
 	  ast->children.push_back(t->TypeArg(i)->asAST(loc, tvP));
       }
       break;
@@ -292,21 +292,21 @@ Type::asAST(const sherpa::LexLoc &loc,
     }
   case ty_ref:
     {
-      assert(t->components->size() == 1);
+      assert(t->components.size() == 1);
       GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = new AST(at_refType, loc, typ);
       break;
     }
   case ty_byref:
     {
-      assert(t->components->size() == 1);
+      assert(t->components.size() == 1);
       GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = new AST(at_byrefType, loc, typ);
       break;
     }
   case ty_mutable:
     {
-      assert(t->components->size() == 1);
+      assert(t->components.size() == 1);
       GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = new AST(at_mutableType, loc, typ);
       break;

@@ -68,9 +68,9 @@ obtainFullUnionType(GCPtr<Type> t)
   GCPtr<Type> uType = uScheme->type_instance_copy()->getType();
 
   assert(uType->kind == ty_unionv || uType->kind == ty_unionr);
-  assert(uType->typeArgs->size() == t->typeArgs->size());
+  assert(uType->typeArgs.size() == t->typeArgs.size());
 
-  for(size_t c=0; c < uType->typeArgs->size(); c++)
+  for(size_t c=0; c < uType->typeArgs.size(); c++)
     t->TypeArg(c)->unifyWith(uType->TypeArg(c));
   
   return uType;
@@ -83,7 +83,7 @@ nCtArgs(GCPtr<Type> t)
   t = t->getBareType();
   
   size_t cnt=0;
-  for(size_t i=0; i < t->components->size(); i++)
+  for(size_t i=0; i < t->components.size(); i++)
     if((t->CompFlags(i) & COMP_UNIN_DISCM) ==0)
       cnt++;
 

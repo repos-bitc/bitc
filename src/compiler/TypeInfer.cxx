@@ -124,7 +124,7 @@ buildFnFromApp(GCPtr<AST> ast, unsigned long uflags)
     GCPtr<Type> argi = MBF(newTvar());
     GCPtr<comp> ncomp = new comp(argi);
     ncomp->flags |= COMP_BYREF_P;
-    targ->components->append(ncomp);
+    targ->components.push_back(ncomp);
   }
   
   GCPtr<Type> ret = MBF(newTvar());
@@ -187,7 +187,7 @@ findField(std::ostream& errStream,
 	  GCPtr<Type> t, GCPtr<AST> fld, GCPtr<Type> &fType)
 {
   t = t->getBareType();
-  for(size_t i=0; i < t->components->size(); i++)
+  for(size_t i=0; i < t->components.size(); i++)
     if(t->CompName(i) == fld->s) {
       fType = t->CompType(i);
       return true;
@@ -216,7 +216,7 @@ findComponent(std::ostream& errStream,
   if(sut->isUType())
     sut = obtainFullUnionType(sut)->getType();
   
-  if(sut->components->size() == 0) {
+  if(sut->components.empty()) {
     errStream << ast->loc << ": "
 	      << "cannot dereference fields as only "
 	      << "an opaque declaration is available."
@@ -225,7 +225,7 @@ findComponent(std::ostream& errStream,
   }
   
   bool valid=false;
-  for(size_t i=0; i < sut->components->size(); i++)
+  for(size_t i=0; i < sut->components.size(); i++)
     if(sut->CompName(i) == ast->child(1)->s) {
       fct = sut->CompType(i)->getType();	  
       valid = ((sut->CompFlags(i) & COMP_INVALID) == 0);
@@ -333,8 +333,8 @@ makeLetGather(GCPtr<AST> lbs, GCPtr<AST> &bAst, GCPtr<AST> &vAst)
     
     bAst->addChild(lb->child(0));
     vAst->addChild(lb->child(1));
-    bType->components->append(new comp(lb->getID()->symType));
-    vType->components->append(new comp(lb->child(1)->symType));
+    bType->components.push_back(new comp(lb->getID()->symType));
+    vType->components.push_back(new comp(lb->child(1)->symType));
   }
   
   bAst->symType = bType;
@@ -527,8 +527,8 @@ matchDefDecl(std::ostream& errStream,
       
       GCPtr<Type> argsDecl = declT->getBareType()->Args();
       GCPtr<Type> argsDef = defT->getBareType()->Args();
-      if(argsDecl->components->size() == argsDef->components->size()) {
-	for(size_t c=0; c < argsDecl->components->size(); c++) {	    
+      if(argsDecl->components.size() == argsDef->components.size()) {
+	for(size_t c=0; c < argsDecl->components.size(); c++) {	    
 	  GCPtr<Type> argDecl = argsDecl->CompType(c)->minimizeMutability();
 	  GCPtr<Type> argDef = argsDef->CompType(c)->minimizeMutability();
 	  CHKERR(errorFree, argDecl->strictlyEquals(argDef));
@@ -602,7 +602,7 @@ InferTvList(std::ostream& errStream, GCPtr<AST> tvList,
     GCPtr<Type> tvType = tv->symType->getType();
     assert(tvType->kind == ty_tvar);
     tvType->flags |= TY_RIGID;
-    container->typeArgs->append(tvType);
+    container->typeArgs.push_back(tvType);
   }
 
   return errFree;
@@ -636,12 +636,12 @@ markCCC(GCPtr<Type> ct)
   // We first need to mark all arguments CCCOK, and then remove
   // those that are not OK so that determoneCCC can get recursive
   // type definitions right.
-  for(size_t i = 0; i < ct->typeArgs->size(); i++) {
+  for(size_t i = 0; i < ct->typeArgs.size(); i++) {
     GCPtr<Type> arg = ct->TypeArg(i)->getType();
     arg->flags |= TY_CCC;
   }
   
-  for(size_t i = 0; i < ct->typeArgs->size(); i++) {
+  for(size_t i = 0; i < ct->typeArgs.size(); i++) {
     GCPtr<Type> arg = ct->TypeArg(i)->getType();      
     if(!arg->determineCCC(ct))
       arg->flags &= ~TY_CCC;
@@ -719,7 +719,7 @@ InferStruct(std::ostream& errStream, GCPtr<AST> ast,
     switch(field->astType) {
     case at_field:
       {
-	st->components->append(new comp(field->child(0)->s,
+	st->components.push_back(new comp(field->child(0)->s,
 					field->child(1)->symType));
 	break;
       }
@@ -864,7 +864,7 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
 	  if(field->Flags2 & FLD_IS_DISCM)
 	    nComp->flags |= COMP_UNIN_DISCM;
 	  
-	  ctrId->symType->components->append(nComp);
+	  ctrId->symType->components.push_back(nComp);
 	  break;
 	}
       case at_fill:
@@ -891,7 +891,7 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
     // type arguments rather than a copy. But since every instance is 
     // newly obtained, this is OK.
     for(size_t i = 0; i < tvList->children.size(); i++) {
-      ctrId->symType->typeArgs->append(tvList->child(i)->symType);
+      ctrId->symType->typeArgs.push_back(tvList->child(i)->symType);
     }
     
     // Don't add ctrSigma to gamma yet. Constructors are 
@@ -899,7 +899,7 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
     ctrId->scheme = ctrSigma;
     
     GCPtr<comp> nComp = new comp(ctrId->s, ctrId->symType);
-    uIdent->symType->components->append(nComp);
+    uIdent->symType->components.push_back(nComp);
   } 
 
   // Add Ftvs so that they get generalized in future uses
@@ -941,15 +941,15 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<AST> thatCtr = ctrs->child(i)->child(0);
       GCPtr<Type> thatCtrType = thatCtr->symType->getType();
       
-      if(ctrType->components->size() != 
-	 thatCtrType->components->size())
+      if(ctrType->components.size() != 
+	 thatCtrType->components.size())
 	continue;
       
       // Since there can be no constructors with only fills
       // and no field names are repeated, it is sufficient
       // to check types regardless of fills.
       bool same = true;
-      for(size_t j=0; j < ctrType->components->size(); j++) {	
+      for(size_t j=0; j < ctrType->components.size(); j++) {	
 	GCPtr<comp> thisComp = ctrType->Component(j);
 	GCPtr<comp> thatComp = thatCtrType->Component(j);
 	
@@ -972,14 +972,14 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
     if(!stSigma) {
       sType = new Type(ty_structv);
       sType->defAst = ctr; // structures have names like (cons 'a)
-      for(size_t i=0; i < ctrType->components->size(); i++)
-	sType->components->append(new comp(ctrType->CompName(i),
+      for(size_t i=0; i < ctrType->components.size(); i++)
+	sType->components.push_back(new comp(ctrType->CompName(i),
 					  ctrType->CompType(i)));
       // Comp's Flags are not necesary here ?
  
       
-      for(size_t i=0; i < ctrType->typeArgs->size(); i++)
-	sType->typeArgs->append(ctrType->TypeArg(i));
+      for(size_t i=0; i < ctrType->typeArgs.size(); i++)
+	sType->typeArgs.push_back(ctrType->TypeArg(i));
       
       stSigma = new TypeScheme(sType, ctr, sigma->tcc); 
       for(size_t i=0; i < ctrSigma->ftvs->size(); i++)
@@ -1203,8 +1203,8 @@ InferTypeClass(std::ostream& errStream, GCPtr<AST> ast,
 	      uflags, trail, USE_MODE, TI_TYP_EXP);
     TYPEINFER(range, gamma, instEnv, impTypes, isVP, sigma->tcc, 
 	      uflags, trail, USE_MODE, TI_TYP_EXP);
-    tyfn->components->append(new comp(domain->symType));
-    tyfn->components->append(new comp(range->symType));
+    tyfn->components.push_back(new comp(domain->symType));
+    tyfn->components.push_back(new comp(range->symType));
     
     //errStream << "***"
     //          << domain->asString() << ": "
@@ -1263,7 +1263,7 @@ InferTypeClass(std::ostream& errStream, GCPtr<AST> ast,
       mType->myContainer = ident;
       mID->scheme = mSigma;      
       GCPtr<comp> nComp = new comp(mID->s,mType); 
-      ident->symType->components->append(nComp);      
+      ident->symType->components.push_back(nComp);      
     } while(0);				   
   }
 
@@ -1460,7 +1460,7 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
  
   tcapp->scheme = new TypeScheme(tc, tcapp, myTcc);
       
-  size_t nMethods = tc->components->size();
+  size_t nMethods = tc->components.size();
   if(methods->children.size() == nMethods) {
     for(size_t i = 0; i < nMethods; i++) {
       GCPtr<Type> mtType = tc->CompType(i);
@@ -1697,7 +1697,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       assert(icSigma);
       
       GCPtr<Typeclass> ic = icSigma->type_instance_copy();
-      assert(ic->typeArgs->size() == 1);
+      assert(ic->typeArgs.size() == 1);
       ast->symType = ic->TypeArg(0)->getType();
       tcc->addPred(ic);
       break;
@@ -1725,7 +1725,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       assert(fcSigma);
       
       GCPtr<Typeclass> fc = fcSigma->type_instance_copy();
-      assert(fc->typeArgs->size() == 1);
+      assert(fc->typeArgs.size() == 1);
       ast->symType = fc->TypeArg(0)->getType();
       tcc->addPred(fc);
       break;
@@ -1844,10 +1844,10 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
 	  if((flags & TI_TYP_EXP) && 
 	     ((flags & TI_TYP_APP) == 0) && 
-	     (ins->typeArgs->size() > 0)) {
+	     (ins->typeArgs.size() > 0)) {
 	    errStream << ast->loc << ": "
 		      << ast->s << " cannot be instantiated without " 
-		      << ins->typeArgs->size() << " type arguments."
+		      << ins->typeArgs.size() << " type arguments."
 		      << std::endl;
 	    
 	    ast->symType = newTvar();
@@ -2125,7 +2125,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	break;
       }
 
-      if(tc->typeArgs->size() == (ast->children.size() - 1)) {
+      if(tc->typeArgs.size() == (ast->children.size() - 1)) {
 	for(size_t i = 1; i < ast->children.size(); i++) {
 	  TYPEINFER(ast->child(i), gamma, instEnv, impTypes, isVP, tcc,
 		    uflags, trail, USE_MODE, TI_COMP1);
@@ -2140,7 +2140,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		  << "Typeclass cannot be Partially "
 		  << "or over instantiated. "
 		  << "Typeclass " << tc->asString()
-		  << " expects " << tc->typeArgs->size() 
+		  << " expects " << tc->typeArgs.size() 
 		  << " args, but is here applied to "
 		  << (ast->children.size() - 1) << "."
 		  << std::endl;
@@ -2209,14 +2209,14 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		  isVP, sigma->tcc,
 		  uflags, trail, USE_MODE, TI_TYP_EXP);
 	GCPtr<Type> t1 = field->child(1)->getType();
-	t->components->append(new comp(field->child(0)->s, t1));
+	t->components.push_back(new comp(field->child(0)->s, t1));
       }
 
       // Build the structure type for the component structure.
       GCPtr<Type> sType = new Type(ty_structv);
       sType->defAst = ctr;
-      for(size_t i=0; i < t->components->size(); i++)
-	sType->components->append(new comp(t->CompName(i),
+      for(size_t i=0; i < t->components.size(); i++)
+	sType->components.push_back(new comp(t->CompName(i),
 					  t->CompType(i)));
       
       ctr->stCtr = ctr;
@@ -2556,7 +2556,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       }
 #ifdef KEEP_BF
       ast->symType = new Type(ty_bitfield);
-      ast->symType->components->append(new comp(ast->child(0)->symType));
+      ast->symType->components.push_back(new comp(ast->child(0)->symType));
       // match at_intLiteral
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  mode, TI_COMP2);
@@ -2585,7 +2585,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Type> t = ast->child(0)->getType();
     
       ast->symType = new Type(ty_byref);
-      ast->symType->components->append(new comp(t));
+      ast->symType->components.push_back(new comp(t));
     
       break;
     }
@@ -2599,7 +2599,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Type> t = ast->child(0)->getType();
     
       ast->symType = new Type(ty_ref);
-      ast->symType->components->append(new comp(t));
+      ast->symType->components.push_back(new comp(t));
     
       break;
     }
@@ -2632,7 +2632,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	{
 	  GCPtr<Type> tvar = new Type(ty_tvar);
 	  t->kind = ty_ref;	  
-	  t->components->append(new comp(tvar));
+	  t->components.push_back(new comp(tvar));
 	  ast->symType = tvar;
 	  break;
 	}
@@ -2656,7 +2656,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       case ty_structr:
       case ty_unionr:
 	{
-	  if (t->components->size() == 0) {
+	  if (t->components.size() == 0) {
 	    errStream << ast->loc << ": "
 		      << "Target of (val 'a) must be a defined type "
 		      << "(not just declared)." 
@@ -2709,9 +2709,9 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       ast->symType = new Type(ty_fn);
       GCPtr<Type> fnarg = ast->child(0)->symType->getType();
-      ast->symType->components->append(new comp(fnarg));
+      ast->symType->components.push_back(new comp(fnarg));
       GCPtr<comp> nComp = new comp(ast->child(1)->getType());
-      ast->symType->components->append(nComp);    
+      ast->symType->components.push_back(nComp);    
       break;
     }
 
@@ -2729,7 +2729,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  nComp->flags |= COMP_BYREF;
 	}
 	
-	fnarg->components->append(nComp);
+	fnarg->components.push_back(nComp);
       }
       ast->symType = fnarg;
       break;
@@ -2749,7 +2749,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
     
       GCPtr<Type> arrType = new Type(ty_array);
       ast->symType = arrType;
-      arrType->components->append(new comp(ast->child(0)->symType));
+      arrType->components.push_back(new comp(ast->child(0)->symType));
 
       // match at_intLiteral
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
@@ -2770,7 +2770,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		uflags, trail,  mode, TI_COMP1);
     
       ast->symType = new Type(ty_vector);
-      ast->symType->components->append(new comp(ast->child(0)->symType));
+      ast->symType->components.push_back(new comp(ast->child(0)->symType));
 
       break;
     }
@@ -2792,7 +2792,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       }
       else {
 	ast->symType = new Type(ty_mutable);
-	ast->symType->components->append(new comp(t));
+	ast->symType->components.push_back(new comp(t));
       }
       break;
     }
@@ -2842,19 +2842,19 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       GCPtr<Type> sut = t;
       
-      if((ast->children.size()-1) != sut->typeArgs->size()) {
+      if((ast->children.size()-1) != sut->typeArgs.size()) {
 	errStream << ast->child(0)->loc << ": "
 		  << ast->child(0)->s << " - Type cannot be" 
 		  << " partially/over instantiated" 
 		  << " For type " << sut->asString()
-		  << ", " << sut->typeArgs->size()
+		  << ", " << sut->typeArgs.size()
 		  << " arguments are needed. But obtained "
 		  << ast->children.size() -1
 		  << std::endl;
 	errFree = false;
       }
       else { 
-	for(size_t i=0; i < sut->typeArgs->size(); i++) {
+	for(size_t i=0; i < sut->typeArgs.size(); i++) {
 	  TYPEINFER(ast->child(i+1), gamma, instEnv, impTypes, isVP, tcc,
 		    uflags, trail,  USE_MODE, TI_COMP1);
 	  
@@ -3004,7 +3004,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  mode, TI_COMP2);
       
-	gatherType->components->append(new comp(ast->child(c)->symType));
+	gatherType->components.push_back(new comp(ast->child(c)->symType));
       }
       break;
     }
@@ -3226,7 +3226,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Type> tr = stScheme->type_instance_copy();
 
       if(tr->isValType())
-	for(size_t i=0; i < tr->typeArgs->size(); i++) {
+	for(size_t i=0; i < tr->typeArgs.size(); i++) {
 	  GCPtr<Type> arg = tr->TypeArg(i)->getType();
 	  if(tr->argCCOK(i))
 	    trail->subst(arg, MBF(newTvar()));
@@ -3361,7 +3361,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  nComp = new comp(MBF(argType));
 	}
 	
-	fnarg->components->append(nComp);
+	fnarg->components.push_back(nComp);
       }
 
       TYPEINFER(ast->child(1), lamGamma, instEnv, impTypes, 
@@ -3436,7 +3436,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Type> clFnType = fullClFnType->getBareType();
       assert(clFnType->isFnxn());
       GCPtr<Type> args = clFnType->Args()->getType();
-      assert(args->components->size() >= 1);
+      assert(args->components.size() >= 1);
       GCPtr<Type> clArg = args->CompType(0);
       // Make sure we have the right env on all the functions.
       CHKERR(errFree, unify(errStream, trail, clEnv->loc, 
@@ -3448,12 +3448,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Type> mkClArg = mkClType->Args()->getType(); 
       assert(mkClArg->kind == ty_fnarg);
       
-      // To Achieve: mkClArg->components->remove (0);
-      GCPtr<CVector<GCPtr<comp> > > rcomp = new CVector<GCPtr<comp> >;
-      for(size_t r=1; r < mkClArg->components->size(); r++)
-	rcomp->append(mkClArg->Component(r));
-      mkClArg->components = rcomp;
-      /////////////////////////////////////
+      mkClArg->components.erase(mkClArg->components.begin());
 
       ast->symType = fullMkClType;
       break;
@@ -3604,8 +3599,8 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  break;
       }
 
-      for(size_t i=0, j=1; i < t->components->size(); i++) {
-	GCPtr<comp> ctrComp = t->components->elem(i);
+      for(size_t i=0, j=1; i < t->components.size(); i++) {
+	GCPtr<comp> ctrComp = t->components[i];
 	if(ctrComp->flags & COMP_UNIN_DISCM)
 	  continue;
 	
@@ -3667,7 +3662,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	errFree = false;
 	break;
       }
-      if(t->components->size() == 0) {
+      if(t->components.size() == 0) {
 	errStream << ast->child(0)->loc << ": "
 		  << ast->child(0)->s << " cannot instantiate without "
 		  << "definition in scope."
@@ -3675,7 +3670,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	errFree = false;
 	break;
       }
-      if((ast->children.size()-1) != t->components->size()) {
+      if((ast->children.size()-1) != t->components.size()) {
 	errStream << ast->child(0)->loc << ": "
 		  << "Structure " << ast->child(0)->s << " cannot be" 
 		  << " partially/over instantiated."	
@@ -3685,7 +3680,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	break;
       }
 
-      for(size_t i=0; i < t->components->size(); i++) {
+      for(size_t i=0; i < t->components.size(); i++) {
 	GCPtr<AST> arg = ast->child(i+1);
 	TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
@@ -4109,7 +4104,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  GCPtr<AST> ctr = thecase->child(i)->getCtr();	  
 	  bool found=false;
 	  
-	  for(size_t j=0; j < uType->components->size(); j++) {
+	  for(size_t j=0; j < uType->components.size(); j++) {
 	    if(!uType->CompType(j))
 	      continue;
 	    
@@ -4133,7 +4128,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 
 
       bool moreCases = false;
-      for(size_t j=0; j < uType->components->size(); j++) 
+      for(size_t j=0; j < uType->components.size(); j++) 
 	if(uType->CompType(j)) {
 	  moreCases = true;
 	  break;
@@ -4143,7 +4138,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	if(otherwise->astType == at_Null) {
 	  errStream << ast->loc << ": The following cases"
 		    << "are not covered: ";
-	  for(size_t j=0; j < uType->components->size(); j++) {
+	  for(size_t j=0; j < uType->components.size(); j++) {
 	    GCPtr<Type> cTyp = uType->CompType(j)->getType();
 	    if(j > 0)
 	      errStream << ", ";
@@ -4195,8 +4190,8 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       GCPtr<Type> stType = stSigma->type_instance_copy();
       /* If we decide to alow the unification of the structure
 	 type with the union type, this must be done there */
-      assert(stType->typeArgs->size() == aCtrType->typeArgs->size());      
-      for(size_t m=0; m < stType->typeArgs->size(); m++) {
+      assert(stType->typeArgs.size() == aCtrType->typeArgs.size());      
+      for(size_t m=0; m < stType->typeArgs.size(); m++) {
 	CHKERR(errFree, unify(errStream, trail, ast->loc, 
 			      stType->TypeArg(m), 
 			      aCtrType->TypeArg(m), uflags));	
@@ -4249,11 +4244,11 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	    continue;
 	  
 	  const GCPtr<const Type> ctType = ctr->stSigma->tau;
-	  for(size_t ac=0; ac < stType->components->size(); ac++) {
+	  for(size_t ac=0; ac < stType->components.size(); ac++) {
 	    GCPtr<comp> stComp = stType->Component(ac);
 	    bool found=false;	    
 	    
-	    for(size_t tc=0; tc < ctType->components->size(); tc++) {
+	    for(size_t tc=0; tc < ctType->components.size(); tc++) {
 	      const GCPtr<const comp> ctComp = ctType->Component(tc);
 	      
 	      if(ctComp->name == stComp->name) {

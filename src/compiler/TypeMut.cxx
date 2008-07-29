@@ -307,7 +307,7 @@ Type::maximizeMutability(GCPtr<Trail> trail)
   case ty_reprv:
     {
       rt = t->getDCopy();
-      for(size_t i=0; i < rt->typeArgs->size(); i++) {
+      for(size_t i=0; i < rt->typeArgs.size(); i++) {
 	GCPtr<Type> arg = rt->TypeArg(i)->getType();
 
 	if(rt->argCCOK(i)) {
@@ -325,7 +325,7 @@ Type::maximizeMutability(GCPtr<Trail> trail)
   case ty_letGather:
     {
       rt = t->getDCopy();
-      for(size_t i=0; i < t->components->size(); i++)
+      for(size_t i=0; i < t->components.size(); i++)
 	rt->CompType(i) = t->CompType(i)->maximizeMutability(trail); 
       break;
     }
@@ -381,7 +381,7 @@ Type::minimizeMutability(GCPtr<Trail> trail)
   case ty_reprv:
     {
       rt = t->getDCopy();
-      for(size_t i=0; i < rt->typeArgs->size(); i++) {
+      for(size_t i=0; i < rt->typeArgs.size(); i++) {
 	GCPtr<Type> arg = rt->TypeArg(i)->getType();
 	if(rt->argCCOK(i)) {
 	  GCPtr<Type> argMin =
@@ -396,7 +396,7 @@ Type::minimizeMutability(GCPtr<Trail> trail)
   case ty_letGather:
     {
       rt = t->getDCopy();
-      for(size_t i=0; i < t->components->size(); i++) 
+      for(size_t i=0; i < t->components.size(); i++) 
 	rt->CompType(i) = t->CompType(i)->minimizeMutability(trail);
       break;
     }
@@ -459,7 +459,7 @@ Type::minimizeDeepMutability(GCPtr<Trail> trail)
   case ty_reprr:
     {
       rt = t->getDCopy();
-      for(size_t i=0; i < rt->typeArgs->size(); i++) {
+      for(size_t i=0; i < rt->typeArgs.size(); i++) {
 	GCPtr<Type> arg = rt->TypeArg(i)->getType();
 	GCPtr<Type> argMin =
 	  arg->minimizeDeepMutability(trail)->getType(); 
@@ -473,7 +473,7 @@ Type::minimizeDeepMutability(GCPtr<Trail> trail)
   case ty_letGather:
     {
       rt = t->getDCopy();
-      for(size_t i=0; i < t->components->size(); i++) {
+      for(size_t i=0; i < t->components.size(); i++) {
 	rt->CompType(i) =
 	  t->CompType(i)->minimizeDeepMutability(trail);
       }
@@ -565,10 +565,10 @@ Type::adjMaybe(GCPtr<Trail> trail, bool markedOnly,
 
   default:
     {
-      for(size_t i=0; i < t->typeArgs->size(); i++) 
+      for(size_t i=0; i < t->typeArgs.size(); i++) 
 	t->TypeArg(i)->adjMaybe(trail, markedOnly, minimize, adjFn);
       
-      for(size_t i=0; i<t->components->size(); i++)
+      for(size_t i=0; i<t->components.size(); i++)
 	t->CompType(i)->adjMaybe(trail, markedOnly, minimize, adjFn);
       
       for(TypeSet::iterator itr = t->fnDeps.begin();
@@ -589,7 +589,7 @@ Type::argCCOK(size_t argN)
 {
   GCPtr<Type> t = getType();
   assert(t->isValType());
-  assert(argN < t->typeArgs->size());
+  assert(argN < t->typeArgs.size());
   assert(t->defAst);
 
   // Be REALLY careful about bt. It is the type in the scheme.
@@ -636,12 +636,12 @@ Type::determineCCC(GCPtr<Type> t, bool inRefType)
 
   default:
     {
-      for(size_t i=0; cccOK && (i<t->typeArgs->size()); i++) 
+      for(size_t i=0; cccOK && (i<t->typeArgs.size()); i++) 
 	cccOK = determineCCC(t->TypeArg(i), 
 			     inRefType || t->isRefType() || 
 			     (!t->argCCOK(i)));
       
-      for(size_t i=0; cccOK && (i<t->components->size()); i++)
+      for(size_t i=0; cccOK && (i<t->components.size()); i++)
 	cccOK = determineCCC(t->CompType(i), t->isRefType());
       
       // I think no need to process fnDeps here.
@@ -716,14 +716,14 @@ Type::markSignMbs(bool cppos)
     
   case ty_fnarg:
     {
-      for(size_t i=0; i < t->components->size(); i++)
+      for(size_t i=0; i < t->components.size(); i++)
 	t->CompType(i)->markSignMbs(true);
       break;
     }
     
   case ty_letGather:
     {
-      for(size_t i=0; i < t->components->size(); i++)
+      for(size_t i=0; i < t->components.size(); i++)
 	t->CompType(i)->markSignMbs(cppos);
       break;
     }
@@ -734,7 +734,7 @@ Type::markSignMbs(bool cppos)
   case ty_uconv: 
   case ty_reprv:
     {
-      for(size_t i=0; i < t->typeArgs->size(); i++) {
+      for(size_t i=0; i < t->typeArgs.size(); i++) {
 	GCPtr<Type> arg = t->TypeArg(i)->getType();
 	if(t->argCCOK(i))
 	  arg->markSignMbs(cppos);
@@ -749,7 +749,7 @@ Type::markSignMbs(bool cppos)
   case ty_uconr: 
   case ty_reprr:
     {
-      for(size_t i=0; i < t->typeArgs->size(); i++) {
+      for(size_t i=0; i < t->typeArgs.size(); i++) {
 	GCPtr<Type> arg = t->TypeArg(i)->getType();
 	arg->markSignMbs(false);
       }
@@ -819,7 +819,7 @@ Type::fixupFnTypes()
 
   case ty_fnarg:
     {
-      for(size_t i=0; i < t->components->size(); i++) {
+      for(size_t i=0; i < t->components.size(); i++) {
 	t->CompType(i)->fixupFnTypes();
 	GCPtr<Type> arg = t->CompType(i)->getType();
 	if((t->CompFlags(i) & COMP_BYREF) == 0) {
@@ -842,7 +842,7 @@ Type::fixupFnTypes()
   case ty_uconr: 
   case ty_reprr:
     {
-      for(size_t i=0; i < t->typeArgs->size(); i++)
+      for(size_t i=0; i < t->typeArgs.size(); i++)
 	t->TypeArg(i)->fixupFnTypes();
       
       break;
@@ -850,7 +850,7 @@ Type::fixupFnTypes()
 
   case ty_letGather:
     {
-      for(size_t i=0; i < t->components->size(); i++) 
+      for(size_t i=0; i < t->components.size(); i++) 
 	t->CompType(i)->fixupFnTypes();
       break;
     }
