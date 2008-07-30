@@ -56,6 +56,7 @@ CFLAGS = @CFLAGS@
 CXXFLAGS = @CXXFLAGS@ 
 LDFLAGS = @LDFLAGS@
 ASTMAKER = @ASTMAKER@
+BISON = @BISON@
 LIBS = @LIBS@
 
 prefix=@prefix@
@@ -144,7 +145,7 @@ BUILD/%.o: %.cxx | BUILD
 #	$(CXX_BUILD) 
 
 BUILD/BitcParser.cxx BUILD/BitcParser.hxx: BitcParser.y
-	bison -t -p bitc -v -d -o BUILD/BitcParser.cxx -y BitcParser.y
+	$(BISON) -t -p bitc -v -d -o BUILD/BitcParser.cxx -y BitcParser.y
 
 BUILD/BitcParser.o: BUILD/BitcParser.cxx | BUILD
 	@$(CXX_DEP)

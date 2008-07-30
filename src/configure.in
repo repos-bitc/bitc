@@ -72,6 +72,9 @@ dnl Set the inline keyword appropriately for the platform
 AC_C_INLINE
 
 AC_PATH_PROG(ASTMAKER, astmaker)
+PROG_BISON_VERSION([2.3],[],[
+  AC_MSG_ERROR([Bison version >=2.3 is required.])
+])
 
 CHECK_OSDOC
 

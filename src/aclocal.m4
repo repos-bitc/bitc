@@ -14,6 +14,8 @@
 m4_include([aclocal/ax_boost_base.m4])
 m4_include([aclocal/ax_boost_filesystem.m4])
 m4_include([aclocal/ax_boost_system.m4])
+m4_include([aclocal/ax_compare_version.m4])
 m4_include([aclocal/check_lib64.m4])
 m4_include([aclocal/check_libicuuc.m4])
 m4_include([aclocal/check_osdoc.m4])
+m4_include([aclocal/prog_bison_version.m4])
