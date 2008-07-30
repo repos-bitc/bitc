@@ -48,59 +48,102 @@
 #include <stddef.h>
 
 #define GCPTR_SUPPORT_RAW
+//#define GCPTR_DEBUG
 
 /** @file This is a non-invasive variant of the original sherpa GCPtr
  * that has some debugging features. */
 namespace sherpa {
+  template <class T>
+  inline void checked_delete(T *x) {
+    typedef char type_must_be_complete[sizeof(T)?1:-1];
+    (void) sizeof(type_must_be_complete);
+    delete x;
+  }
+
   struct dynamic_cast_tag {};
   struct shared_from_this_tag {};
 
   struct GCRefCounter {
-    const void * pObject;
+#ifndef GCPTR_SUPPORT_RAW
+    static inline GCRefCounter *Find(const void *ob) {
+      if (ob == NULL)
+	return &NullPtrCounter;
+      return 0;
+    }
+    inline void Register() {
+    }
+    inline void Deregister() {
+    }
+#else
+    static GCRefCounter *Find(const void *ob);
+    void Register();
+    void Deregister();
+#endif
+
+    const void *pObject;
     size_t nCounted;
     size_t nWeak;
 
-    GCRefCounter(const void *ptr) {
-      pObject = ptr;
+    GCRefCounter(const void *ob) {
+      pObject = ob;
       nCounted = 0;
       nWeak = 0;
+
+#ifndef GCPTR_DEBUG
+      Register();
+#endif
     }
 
-    GCRefCounter(const void *ptr, size_t _nCounted, size_t _nWeak) {
-      pObject = ptr;
+    GCRefCounter(const void *ob, size_t _nCounted, size_t _nWeak) {
+      pObject = ob;
       nCounted = _nCounted;
       nWeak = _nWeak;
+
+      Register();
+    }
+
+    virtual ~GCRefCounter() {
     }
 
     void incCount() {
       assert(pObject || this == &NullPtrCounter);
       nCounted++;
     }
+
     void incWeakCount() {
       nWeak++;
     }
 
-    bool decCount() {
-      bool needsDelete = false;
+    // This really ought to be abstract, but I need it to be concrete
+    // so that NullPtrCounter can be constructed
+    virtual void destroy() {}
 
+    virtual size_t obSize() { return 0; }
+
+    void decCount() {
       assert(nCounted);
 
-      nCounted--;
+      // Order of operation matters here, because the target object
+      // may have a weak pointer to itself, and we do not want to
+      // trigger recursive self-deletion of the GCRefCounter.
 
-      if (nCounted == 0) {
-	needsDelete = true;
-	pObject = 0;
+      if (nCounted == 1) {
+	Deregister();
+	destroy();
       }
+
+      nCounted--;
 
       assert(nCounted || (pObject == 0));
 
       // If there are still any references at all, refcount object
       // must remain valid:
       if (nCounted + nWeak)
-	return false;
+	return;
+
+      assert(this != &NullPtrCounter);
 
       delete this;
-      return needsDelete;
     }
 
     void decWeakCount() {
@@ -113,10 +156,37 @@ namespace sherpa {
       if (nCounted + nWeak)
 	return;
 
+      assert(this != &NullPtrCounter);
+
       delete this;
     }
 
     static GCRefCounter NullPtrCounter;
+  };
+
+  template<class T>
+  struct T_GCRefCounter : public GCRefCounter {
+    T_GCRefCounter(T *pObject) 
+      : GCRefCounter(pObject)
+    {
+#ifdef GCPTR_DEBUG
+      Register();
+#endif
+    }
+
+    size_t obSize() {
+      return sizeof(T);
+    }
+
+    void destroy() {
+      // Order of operations is important here. If we do not zero
+      // pObject before calling checked_delete(), then an object
+      // derived from enable_shared_from_this will assert when
+      // decWeakCount() is called.
+      T *tmp = (T *)pObject;
+      pObject = 0;
+      checked_delete (tmp);
+    }
   };
 
   /// @brief Common base class for counted and weak pointers. 
@@ -128,29 +198,58 @@ namespace sherpa {
     struct BoolConversionSupport {
       int dummy;
     };
-
-#ifndef GCPTR_SUPPORT_RAW
-    static inline GCRefCounter *GetRefCounter(const void *ob) {
-      if (ob == NULL)
-	return &NullPtrCounter;
-      return new GCRefCounter(ob);
-    }
-    static inline void DeregisterObject(const void *ob) {
-    }
-#else
-    static GCRefCounter *GetRefCounter(const void *ob);
-    static void DeregisterObject(const void *ob);
-#endif
   };
 
   // Forward declaration:
   template<class T> class NoGCPtr;
 
+  /// @brief Reference counting, non-invasive pointer implementation.
+  ///
+  /// There is a pernicious problem in the assignment operators. It
+  /// has bitten me multiple times, so I want to document it
+  /// here. Because operator= accepts its argument by reference, it
+  /// is possible to see an assignment of the form x=x.y where y is a
+  /// member of x. In this case, the reference passed to the
+  /// assignment operator is an internal pointer to a field of x. If x
+  /// has no other outstanding references at the time of this
+  /// assignment, it will be destroyed by the assignment. If the
+  /// necessary fields of x.y have not been copied to a temporary
+  /// first, the results are not what you wanted.
+  ///
+  /// To make matters worse, this problem is masked by most versions
+  /// of malloc(), because the stale data will still be out there
+  /// (because no reallocation has yet occurred). In my case, it was
+  /// revealed by the Boehm collector, because that collector eagerly
+  /// zeroes storage on reclamation. The current GCPtr implementation
+  /// now makes the requisite temporary copies.
+  ///
+  /// Finally, note that the GCPtr which was x.y will be getting
+  /// destroyed when its parent gets destroyed, so you need to bump
+  /// the reference count before taking the temporary.
+  ///
+  /// These issues do not apply when assigning to weak pointers,
+  /// because a weak pointer cannot (by definition) be the last of its
+  /// kind, and assignment therefore cannot trigger deletion of the
+  /// target. The bug here is not triggered by direct assignment
+  /// provided the reference count increment/decrement order is
+  /// handled correctly.
   template<class T>
-  struct GCPtr : public PtrBase {
+  class GCPtr : public PtrBase {
+    template<class T2> friend class GCPtr;
+    template<class T2> friend class NoGCPtr;
+
     T *pObject;
     GCRefCounter *rc;
 
+    GCRefCounter *GetRefCounter(T *ob) {
+      GCRefCounter *rc = GCRefCounter::Find(ob);
+      if (!rc)
+	rc = new T_GCRefCounter<T>(ob);
+
+      return rc;
+    }
+
+  public:
     // As if assigned from NULL
     GCPtr() {
       pObject = 0;
@@ -179,6 +278,30 @@ namespace sherpa {
       rc->incCount();
     }
 
+    // This one works for downcast, but not for upcast. Technically it
+    // would subsume the one above, but the X(const X&) constructor has
+    // special meaning in C++.
+    template<typename T2>
+    inline GCPtr(const NoGCPtr<T2>& wp)
+    {
+      if (wp.valid()) {
+	assert(wp.rc);
+
+	rc = wp.rc;
+	pObject = wp.pObject;
+
+	assert(rc);
+	rc->incCount();
+      }
+      else {
+	// Weak pointer is deceased. Result is NULL pointer.
+	pObject = 0;
+	rc = &GCRefCounter::NullPtrCounter;
+	assert(rc);
+	rc->incCount();
+      }
+    }
+
     /// @brief Copy constructor using dynamic_cast.
     template<typename T2>
     inline GCPtr(const GCPtr<T2> & other, dynamic_cast_tag) {
@@ -203,43 +326,78 @@ namespace sherpa {
     inline ~GCPtr()
     {
       assert(rc);
-      if (rc->decCount()) {
-	DeregisterObject(pObject);
-	delete pObject;
-      }
+      rc->decCount();
     }
 
     /// @brief Default assignment operator.
     inline GCPtr& operator=(const GCPtr& p) {
       assert(p.rc);
       assert(rc);
+      
       p.rc->incCount();
+
+      GCRefCounter *tmpRC = p.rc;
+      T *tmpObject = p.pObject;
+
       rc->decCount();
 
-      pObject = p.pObject;
-      rc = p.rc;
+      pObject = tmpObject;
+      rc = tmpRC;
 
       return *this;
     }
 
-    /// @brief Default assignment operator.
+    /// @brief General assignment operator (including subclass to
+    /// superclass conversion)
     template<typename T2>
-    inline GCPtr& operator=(const GCPtr& p)
+    inline GCPtr& operator=(const GCPtr<T2>& p)
     {
       assert(p.rc);
       assert(rc);
       p.rc->incCount();
+
+      GCRefCounter *tmpRC = p.rc;
+      T *tmpObject = p.pObject;
+
       rc->decCount();
 
-      pObject = p.pObject;
-      rc = p.rc;
+      pObject = tmpObject;
+      rc = tmpRC;
+
+      return *this;
+    }
+
+    /// @brief Assignment from weak pointer (including subclass to
+    /// superclass conversion)
+    template<typename T2>
+    inline GCPtr& operator=(const NoGCPtr<T2>& wp)
+    {
+      if (wp.valid()) {
+	assert(wp.rc);
+	assert(rc);
+	wp.rc->incCount();
+
+	GCRefCounter *tmpRC = wp.rc;
+	T *tmpObject = wp.pObject;
+
+	rc->decCount();
+
+	pObject = tmpObject;
+	rc = tmpRC;
+      }
+      else {
+	// Weak pointer is deceased. Result is NULL pointer.
+	pObject = 0;
+	rc = &GCRefCounter::NullPtrCounter;
+	assert(rc);
+	rc->incCount();
+      }
 
       return *this;
     }
 
     /// @brief Assignment from raw pointer.
-    template<typename T2>
-    inline GCPtr& operator=(T2 *ptr)
+    inline GCPtr& operator=(T *ptr)
     {
       pObject = ptr;
 
@@ -302,10 +460,21 @@ namespace sherpa {
   };
 
   template<class T>
-  struct NoGCPtr : public PtrBase {
+  class NoGCPtr : public PtrBase {
+    template<class T2> friend class GCPtr;
+
     T *pObject;
     GCRefCounter *rc;
 
+    GCRefCounter *GetRefCounter(T *ob) {
+      GCRefCounter *rc = GCRefCounter::Find(ob);
+      if (!rc)
+	rc = new T_GCRefCounter<T>(ob);
+
+      return rc;
+    }
+
+  public:
     // As if assigned from NULL
     NoGCPtr() {
       pObject = 0;
@@ -322,19 +491,19 @@ namespace sherpa {
       rc->incWeakCount();
     }
 
-    inline NoGCPtr(const GCPtr<T>& other)
-    {
-      pObject = other.pObject;
-      rc = other.rc;
-      assert(rc);
-      rc->incWeakCount();
-    }
+    //inline NoGCPtr(const GCPtr<T>& other)
+    //{
+    //pObject = other.pObject;
+    // rc = other.rc;
+    //assert(rc);
+    //    rc->incWeakCount();
+    // }
 
     // This one works for downcast, but not for upcast. Technically it
     // would subsume the one above, but the X(const X&) constructor has
     // special meaning in C++.
     template<typename T2>
-    inline NoGCPtr(const NoGCPtr& other)
+    inline NoGCPtr(const NoGCPtr<T2>& other)
     {
       pObject = other.pObject;
       rc = other.rc;
@@ -424,6 +593,13 @@ namespace sherpa {
       return *this;
     }
 
+    bool valid() const {
+      assert(rc);
+      return (rc->nCounted != 0);
+    }
+#if 0
+    // Being of uncertain contents, weak pointers are neither
+    // orderable nor comparable.
     inline T* operator -> () const
     {
       assert(pObject->nCounted());
@@ -458,6 +634,7 @@ namespace sherpa {
     {
       return pObject ? &BoolConversionSupport::dummy : 0;
     }
+#endif
   };
 
   template <typename T>

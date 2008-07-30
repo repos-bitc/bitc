@@ -437,7 +437,10 @@ resolve(std::ostream& errStream,
 	
 	  if(sym) {
 	    if(sym->isDecl) {
-	      if (sym->uoc != ast->uoc && !providing(env, sym)) {
+	      GCPtr<UocInfo> symUOC = sym->uoc;
+	      GCPtr<UocInfo> astUOC = ast->uoc;
+
+	      if (symUOC != astUOC && !providing(env, sym)) {
 		// We are defining an ident that has an existing
 		// binding that came about through import. Confirm
 		// that we also marked it as providable:

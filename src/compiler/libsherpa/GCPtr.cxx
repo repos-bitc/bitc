@@ -39,6 +39,7 @@
  */
 
 #include <map>
+#include <iostream>
 #include <libsherpa/GCPtr.hxx>
 
 using namespace std;
@@ -49,26 +50,49 @@ namespace sherpa {
   static ObMap obMap;
 
   GCRefCounter *
-  PtrBase::GetRefCounter(const void *ob)
+  GCRefCounter::Find(const void *ob)
   {
     if (ob == NULL)
       return &GCRefCounter::NullPtrCounter;
 
     // check if already registered here
     ObMap::iterator itr = obMap.find(ob);
-    if (itr != obMap.end())
+    if (itr != obMap.end()) {
+      assert(itr->second);
       return itr->second;
+    }
 
-    // Allocate and register new counter object
-    GCRefCounter *rc = new GCRefCounter(ob);
-    obMap[ob] = rc;
-
-    return rc;
+    return NULL;
   }
 
-  void PtrBase::DeregisterObject(const void *ob) 
+  void
+  GCRefCounter::Register() 
   {
-    ObMap::iterator itr = obMap.find(ob);
+#ifdef GCPTR_DEBUG
+    void *obEnd = (void *) (((uintptr_t)pObject) + obSize());
+    std::cerr << "Register " << hex << pObject << dec
+	      << ".." << hex << obEnd << dec
+	      << " (" << obSize() << ")" << std::endl;
+#endif
+
+    ObMap::iterator itr = obMap.find(pObject);
+    assert (itr == obMap.end());
+
+    assert(this);
+    obMap[pObject] = this;
+  }
+
+  void 
+  GCRefCounter::Deregister()
+  {
+#ifdef GCPTR_DEBUG
+    void *obEnd = (void *) (((uintptr_t)pObject) + obSize());
+    std::cerr << "Deregister " << hex << pObject << dec
+	      << ".." << hex << obEnd << dec
+	      << " (" << obSize() << ")" << std::endl;
+#endif
+
+    ObMap::iterator itr = obMap.find(pObject);
     obMap.erase(itr);
   }
 #endif
