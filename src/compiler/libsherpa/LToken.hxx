@@ -3,8 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, The EROS
- *   Group, LLC. 
+ * Copyright (C) 2008, The EROS Group, LLC. 
  * Copyright (C) 2004, 2005, 2006, Johns Hopkins University.
  * All rights reserved.
  *
@@ -41,7 +40,6 @@
  **************************************************************************/
 
 #include <libsherpa/LexLoc.hxx>
-/* #include "CVector.hxx" */
 
 /// @brief A lexically indivisible unit of text with an associated
 /// location.
@@ -75,10 +73,8 @@ namespace sherpa {
       return str[pos];
     }
 
-    std::string asEncodedString() const;
-
     LToken()
-      :loc(LexLoc::Unspecified), str()
+      :loc(), str()
     {
     }
 
@@ -96,7 +92,7 @@ namespace sherpa {
 
     LToken(const std::string& that)
     {
-      this->loc = LexLoc::Unspecified;
+      this->loc = LexLoc();
       this->str = that;
     }
 

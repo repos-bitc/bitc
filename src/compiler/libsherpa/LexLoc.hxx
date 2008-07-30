@@ -3,8 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, The EROS
- *   Group, LLC. 
+ * Copyright (C) 2008, The EROS Group, LLC. 
  * Copyright (C) 2004, 2005, 2006, Johns Hopkins University.
  * All rights reserved.
  *
@@ -81,17 +80,6 @@ namespace sherpa {
     }
 
     std::string asString() const;
-    std::string encode() const;
-
-    static LexLoc decode(const std::string& s);
-    static size_t skip(const std::string& s, size_t start);
-
-    inline const char *c_str() const
-    {
-      return asString().c_str();
-    }
-
-    static LexLoc Unspecified;
 
     LexLoc operator+(size_t sz) const
     {
