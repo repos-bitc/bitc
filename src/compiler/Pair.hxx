@@ -39,7 +39,7 @@
  **************************************************************************/
 
 template <class F, class S> 
-struct Pair : public sherpa::Countable {
+struct Pair {
   F fst;
   S snd;
   

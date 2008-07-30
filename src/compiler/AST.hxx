@@ -17,7 +17,7 @@
 #include <libsherpa/GCPtr.hxx>
 #include <libsherpa/CVector.hxx>
 #define AST_SMART_PTR sherpa::GCPtr
-#define AST_SUPERCLASS sherpa::Countable
+#define AST_SUPERCLASS sherpa::enable_shared_from_this<AST>
 
 
  
@@ -214,7 +214,7 @@ enum primOp {
 #define MASK_FLAGS2_FROM_USE   (ID_IS_CAPTURED)
 
 struct AST;
-struct envSet : public sherpa::Countable{
+struct envSet {
   sherpa::GCPtr<ASTEnvironment > env;
   sherpa::GCPtr<TSEnvironment > gamma;
   sherpa::GCPtr<InstEnvironment > instEnv;

@@ -98,7 +98,7 @@ struct TCConstraints;
                              // (extected) functions that we build
                              // with the actual functions.
 
-struct comp : public sherpa::Countable {
+struct comp {
   std::string name;
   sherpa::GCPtr<Type> typ;
   unsigned long flags;
@@ -109,10 +109,12 @@ struct comp : public sherpa::Countable {
   //comp(const comp &c);
 };  
 
+// GCFIX: This constraint no longer applies.
+
 // The only reason for this class is that we need
 // Countable to use sherpa::GCPtr for an indirection 
 // over array length
-struct ArrLen : public sherpa::Countable {
+struct ArrLen {
   uint64_t  len;
   ArrLen(uint64_t _len) {len = _len;}
 };
@@ -164,7 +166,7 @@ struct TypeScheme;
 struct Type;
 typedef std::set<sherpa::GCPtr<Type > > TypeSet;
 
-struct Type : public sherpa::Countable {
+struct Type {
   
   friend struct TypeScheme;
 

@@ -47,7 +47,7 @@
 
 struct Type;
 
-struct TvPrinter : public sherpa::Countable {
+struct TvPrinter {
 private:
   typedef std::map <unsigned long long, std::string> TvMap;
 

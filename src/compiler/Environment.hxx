@@ -65,7 +65,7 @@
 			      providing. */
 
 template <class T>
-struct Binding : public sherpa::Countable {
+struct Binding {
   std::string nm;
   sherpa::GCPtr<T> val;
   unsigned flags;
@@ -79,7 +79,7 @@ struct Binding : public sherpa::Countable {
 };
 
 template <class T>
-struct Environment : public sherpa::Countable {
+struct Environment {
   std::string uocName;
   sherpa::GCPtr<Environment<T> > parent; // in the chain of environments
   sherpa::GCPtr<Environment<T> > defEnv; // definition level env

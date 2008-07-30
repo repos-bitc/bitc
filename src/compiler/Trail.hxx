@@ -44,7 +44,7 @@
 
 struct Type;
 
-struct Trail : public sherpa::Countable {
+struct Trail {
   std::vector<sherpa::GCPtr<Type> > vec;
   
   Trail() 

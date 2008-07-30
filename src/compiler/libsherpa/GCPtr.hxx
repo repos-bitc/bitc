@@ -2,7 +2,7 @@
 #define LIBSHERPA_GCPTR_HXX
 
 /*
- * Copyright (c) 2006, The EROS Group, LLC. All rights reserved.
+ * Copyright (c) 2008, The EROS Group, LLC. All rights reserved.
  * Copyright (c) 2004, The EROS Group, LLC and Johns Hopkins
  * University. All rights reserved.
  * 
@@ -45,203 +45,235 @@
 #include <typeinfo>
 #include <assert.h>
 #include <stdint.h>
+#include <stddef.h>
 
+#define GCPTR_SUPPORT_RAW
+
+/** @file This is a non-invasive variant of the original sherpa GCPtr
+ * that has some debugging features. */
 namespace sherpa {
-  /// The original implementation of Countable just used an integer, but
-  /// this created problems for constant pointers. The issue is that the
-  /// refcount field of a const Countable cannot be incremented and
-  /// decremented (because it is const). I introduced the GCRefCounter
-  /// class to take advantage of a failure in the C++ type system: const
-  /// objects can legally contain pointers to non-const objects. This
-  /// allows us to say "const Serializable *" and still be able to
-  /// increment/decrement the reference count by indirecting to the
-  /// mutable GCRefCounter object that sits in the heap.
-  struct GCRefCounter {
-    unsigned refCount;
-    GCRefCounter()
-    {
-      refCount = 0;
-    }
-  };
-
-  /// @brief Common base class used by the reference counting pointer
-  /// implementation (GCPtr).
-  ///
-  /// It may seem surprising that the IncrementRefCount() and
-  /// DecrementRefCount() methods are implemented here. This is because
-  /// of a bug in g++ wherein it is impossible for Counter to declare:
-  ///
-  /// @verbatim
-  ///   template<class T> friend class GCPtr;
-  /// @endverbatim
-  class Countable {
-    GCRefCounter *theCounter;
-
-  public:
-    /// @brief Constructor for a countable object.
-    ///
-    /// This is mildly tricky. The problem is that for statically
-    /// allocated objects we need to arrange for the reference count to
-    /// be incremented by 1 extra to guarantee that the expiration of
-    /// any GcPtr that points to it does not cause an attempt to
-    /// deallocate a statically declared object. The following test
-    /// assumes that the stack grows downwards.
-  
-    Countable()
-      : theCounter(new GCRefCounter)
-    {
-    }
-
-    Countable(const Countable&)
-      : theCounter(new GCRefCounter)
-    {
-    }
-    virtual ~Countable();
-
-    inline Countable& operator=(const Countable&)
-    {
-      /* Do NOT change the target refcount! */
-      return *this;
-    }
-
-    static void TraceDangles(bool on);
-
-#ifdef DOXYGEN
-  private:
-#endif
-    /// @deprecated This method would be private but for what appears to
-    /// be a g++ bug.
-    inline void IncrementRefCount(void) const
-    {
-      if (this)
-	theCounter->refCount++;
-    }
-    /// @deprecated This method would be private but for what appears to
-    /// be a g++ bug.
-    void DecrementRefCount(void) const;
-
-    bool ValidRefCount(void) const {
-      return theCounter->refCount ? true : false;
-    }
-#ifdef DOXYGEN
-  public:
-#endif
-  };
-
   struct dynamic_cast_tag {};
+  struct shared_from_this_tag {};
 
-  // Forward declaration:
-  template<class T> class NoGCPtr;
+  struct GCRefCounter {
+    const void * pObject;
+    size_t nCounted;
+    size_t nWeak;
 
-  /// @brief Reference counting pointer implementation. See also Countable.
+    GCRefCounter(const void *ptr) {
+      pObject = ptr;
+      nCounted = 0;
+      nWeak = 0;
+    }
+
+    GCRefCounter(const void *ptr, size_t _nCounted, size_t _nWeak) {
+      pObject = ptr;
+      nCounted = _nCounted;
+      nWeak = _nWeak;
+    }
+
+    void incCount() {
+      assert(pObject || this == &NullPtrCounter);
+      nCounted++;
+    }
+    void incWeakCount() {
+      nWeak++;
+    }
+
+    bool decCount() {
+      bool needsDelete = false;
+
+      assert(nCounted);
+
+      nCounted--;
+
+      if (nCounted == 0) {
+	needsDelete = true;
+	pObject = 0;
+      }
+
+      assert(nCounted || (pObject == 0));
+
+      // If there are still any references at all, refcount object
+      // must remain valid:
+      if (nCounted + nWeak)
+	return false;
+
+      delete this;
+      return needsDelete;
+    }
+
+    void decWeakCount() {
+      nWeak--;
+
+      assert(nCounted || (pObject == 0));
+
+      // If there are still any references at all, refcount object
+      // must remain valid:
+      if (nCounted + nWeak)
+	return;
+
+      delete this;
+    }
+
+    static GCRefCounter NullPtrCounter;
+  };
+
+  /// @brief Common base class for counted and weak pointers. 
   ///
-  /// GCPtr is a reference-counting pointer implementation. It can only
-  /// be used to point to objects derived from Countable. 
-  template<class T> 
-  class GCPtr {
-    template<class T2> friend class GCPtr;
-
-  public:
+  /// This exists primarily so that we can keep GetRefCounter()
+  /// private to the implementation.
+  class PtrBase {
+  protected:
     struct BoolConversionSupport {
       int dummy;
     };
 
-  private:
+#ifndef GCPTR_SUPPORT_RAW
+    static inline GCRefCounter *GetRefCounter(const void *ob) {
+      if (ob == NULL)
+	return &NullPtrCounter;
+      return new GCRefCounter(ob);
+    }
+    static inline void DeregisterObject(const void *ob) {
+    }
+#else
+    static GCRefCounter *GetRefCounter(const void *ob);
+    static void DeregisterObject(const void *ob);
+#endif
+  };
+
+  // Forward declaration:
+  template<class T> class NoGCPtr;
+
+  template<class T>
+  struct GCPtr : public PtrBase {
     T *pObject;
-  public:
-    inline GCPtr()
-    {
+    GCRefCounter *rc;
+
+    // As if assigned from NULL
+    GCPtr() {
       pObject = 0;
+      rc = &GCRefCounter::NullPtrCounter;
+      assert(rc);
+      rc->incCount();
     }
 
     inline GCPtr(const GCPtr& other)
     {
       pObject = other.pObject;
-      pObject->IncrementRefCount();
+      rc = other.rc;
+      assert(rc);
+      rc->incCount();
     }
 
-    /// @brief Copy constructor for GCPtrs to derived classes.
-    template<class T2>
-    inline GCPtr(GCPtr<T2> const& other)
+    // This one works for downcast, but not for upcast. Technically it
+    // would subsume the one above, but the X(const X&) constructor has
+    // special meaning in C++.
+    template<typename T2>
+    inline GCPtr(const GCPtr<T2>& other)
     {
       pObject = other.pObject;
-      pObject->IncrementRefCount();
+      rc = other.rc;
+      assert(rc);
+      rc->incCount();
     }
 
-    /// @brief Copy constructor for GCPtrs to derived classes.
+    /// @brief Copy constructor using dynamic_cast.
     template<typename T2>
-    inline GCPtr(const GCPtr<T2> & other, dynamic_cast_tag)
-    {
+    inline GCPtr(const GCPtr<T2> & other, dynamic_cast_tag) {
       pObject = dynamic_cast<T2 *>(other.pObject);
-      pObject->IncrementRefCount();
+      // If dynamic_cast fails it will return NULL, in which case this
+      // acts like assignment from a NULL GCPtr
+      rc = pObject ? other.rc : &GCRefCounter::NullPtrCounter;
+      assert(rc);
+      rc->incCount();
     }
 
     // For use in construction from raw pointers:
     inline GCPtr(T* obPtr)
     {
       pObject = obPtr;
-      pObject->IncrementRefCount();
+      rc = GetRefCounter(pObject);
+
+      assert(rc);
+      rc->incCount();
     }
+
     inline ~GCPtr()
     {
-      pObject->DecrementRefCount();
+      assert(rc);
+      if (rc->decCount()) {
+	DeregisterObject(pObject);
+	delete pObject;
+      }
     }
 
     /// @brief Default assignment operator.
-    ///
-    /// Curiously, this doesn't conflict with the templated version
-    /// below, which I do not understand.
+    inline GCPtr& operator=(const GCPtr& p) {
+      assert(p.rc);
+      assert(rc);
+      p.rc->incCount();
+      rc->decCount();
+
+      pObject = p.pObject;
+      rc = p.rc;
+
+      return *this;
+    }
+
+    /// @brief Default assignment operator.
+    template<typename T2>
     inline GCPtr& operator=(const GCPtr& p)
     {
-      T* pOtherObject = p.pObject;
+      assert(p.rc);
+      assert(rc);
+      p.rc->incCount();
+      rc->decCount();
 
-      /* Careful: order of increment/decrement matters! */
-      pOtherObject->IncrementRefCount();
-      pObject->DecrementRefCount();
-      pObject = pOtherObject;
+      pObject = p.pObject;
+      rc = p.rc;
 
       return *this;
     }
 
-    /// @brief Pointer coersion assignment operator.
-    ///
-    /// This one gets triggered when you do an assignment of a derived
-    /// class GCPtr to a base class GCPtr. Curiously, it doesn't seem to
-    /// conflict with the default assignment operator above.
+    /// @brief Assignment from raw pointer.
     template<typename T2>
-    inline GCPtr& operator=(const GCPtr<T2>& p)
+    inline GCPtr& operator=(T2 *ptr)
     {
-      T2* pOtherObject = p.pObject;
+      pObject = ptr;
 
-      /* Careful: order of increment/decrement matters! */
-      pOtherObject->IncrementRefCount();
-      pObject->DecrementRefCount();
-      pObject = pOtherObject;
+      rc = GetRefCounter(pObject);
+      assert(rc);
+
+      rc->incCount();
 
       return *this;
     }
 
-    /// @brief Assignment from suitable raw pointer.
-    template<typename T2>
-    inline GCPtr& operator=(T2* p)
+#if 0
+    inline T* operator -> ()
     {
-      /* Careful: order of increment/decrement matters! */
-      ((Countable *)p)->IncrementRefCount();
-      pObject->DecrementRefCount();
-      pObject = p;
-
-      return *this;
+      assert(rc->nCounted);
+      return pObject;
     }
+
+    inline T& operator * ()
+    {
+      assert(rc->nCounted);
+      return *pObject;
+    }
+#endif
 
     inline T* operator -> () const
     {
-      assert(pObject->ValidRefCount());
+      assert(rc->nCounted);
       return pObject;
     }
 
     inline T& operator * () const
     {
-      assert(pObject->ValidRefCount());
+      assert(rc->nCounted);
       return *pObject;
     }
 
@@ -267,172 +299,156 @@ namespace sherpa {
     {
       return pObject ? &BoolConversionSupport::dummy : 0;
     }
-
-    unsigned long value()
-    {
-      return (unsigned long) pObject;
-    }
   };
 
-  template<typename T1, typename T2>
-  inline GCPtr<T2>
-  dynamic_pointer_cast(GCPtr<T1> const& ptr)
-  {
-    return GCPtr<T2>(ptr.pObject, dynamic_cast_tag());
-  }
-
-  /// @brief Non-counting pointer implementation compatible with
-  /// GCPtr. See also Countable.
-  ///
-  /// This variant should be used for upward-pointing pointers that
-  /// should not be counted.
-  template<class T> 
-  class NoGCPtr {
-  public:
-    struct BoolConversionSupport {
-      int dummy;
-    };
-
-  private:
+  template<class T>
+  struct NoGCPtr : public PtrBase {
     T *pObject;
-  public:
-    inline NoGCPtr()
-    {
+    GCRefCounter *rc;
+
+    // As if assigned from NULL
+    NoGCPtr() {
       pObject = 0;
+      rc = &GCRefCounter::NullPtrCounter;
+      assert(rc);
+      rc->incWeakCount();
     }
 
     inline NoGCPtr(const NoGCPtr& other)
     {
-      pObject = other ? &*other : 0;
+      pObject = other.pObject;
+      rc = other.rc;
+      assert(rc);
+      rc->incWeakCount();
     }
 
     inline NoGCPtr(const GCPtr<T>& other)
     {
-      pObject = other ? &*other : 0;
+      pObject = other.pObject;
+      rc = other.rc;
+      assert(rc);
+      rc->incWeakCount();
     }
 
-    /// @brief Copy constructor for NoGCPtrs to derived classes.
+    // This one works for downcast, but not for upcast. Technically it
+    // would subsume the one above, but the X(const X&) constructor has
+    // special meaning in C++.
     template<typename T2>
-    inline NoGCPtr(const NoGCPtr<T2> & other)
+    inline NoGCPtr(const NoGCPtr& other)
     {
-      pObject = other ? &*other : 0;
+      pObject = other.pObject;
+      rc = other.rc;
+      assert(rc);
+      rc->incWeakCount();
     }
 
+    // This one works for downcast, but not for upcast. Technically it
+    // would subsume the one above, but the X(const X&) constructor has
+    // special meaning in C++.
     template<typename T2>
-    inline NoGCPtr(const GCPtr<T2> & other)
+    inline NoGCPtr(const GCPtr<T2>& other)
     {
-      pObject = other ? &*other : 0;
+      pObject = other.pObject;
+      rc = other.rc;
+      assert(rc);
+      rc->incWeakCount();
     }
 
-    // For use in construction from raw pointers:
-    inline NoGCPtr(T* obPtr)
-    {
-      pObject = obPtr;
-      pObject->IncrementRefCount();
+    /// @brief Copy constructor using dynamic_cast.
+    template<typename T2>
+    inline NoGCPtr(const NoGCPtr<T2> & other, dynamic_cast_tag) {
+      pObject = dynamic_cast<T2 *>(other.pObject);
+      // If dynamic_cast fails it will return NULL, in which case this
+      // acts like assignment from a NULL NoGCPtr
+      rc = pObject ? other.rc : &GCRefCounter::NullPtrCounter;
+      assert(rc);
+      rc->incWeakCount();
     }
+
+    /// @brief Copy constructor using dynamic_cast.
+    inline NoGCPtr(T *ptr, shared_from_this_tag) {
+      pObject = ptr;
+
+      rc = GetRefCounter(pObject);
+      assert(rc);
+      rc->incWeakCount();
+    }
+
     inline ~NoGCPtr()
     {
+      rc->decWeakCount();
     }
 
     /// @brief Default assignment operator.
-    ///
-    /// Curiously, this doesn't conflict with the templated version
-    /// below, which I do not understand.
+    inline NoGCPtr& operator=(const NoGCPtr& p) {
+      assert(p.rc);
+      assert(rc);
+      p.rc->incWeakCount();
+      rc->decWeakCount();
+
+      pObject = p.pObject;
+      rc = p.rc;
+
+      return *this;
+    }
+
+    /// @brief Default assignment operator.
+    template<typename T2>
     inline NoGCPtr& operator=(const NoGCPtr& p)
     {
-      T* pOtherObject = (p ? &*p : 0);
+      assert(p.rc);
+      assert(rc);
 
-      /* Careful: order of increment/decrement matters! */
-      pObject = pOtherObject;
+      p.rc->incWeakCount();
+      rc->decWeakCount();
 
-      return *this;
-    }
-
-    inline NoGCPtr& operator=(const GCPtr<T>& p)
-    {
-      T* pOtherObject = (p ? &*p : 0);
-
-      /* Careful: order of increment/decrement matters! */
-      pObject = pOtherObject;
+      pObject = p.pObject;
+      rc = p.rc;
 
       return *this;
     }
 
-    /// @brief Pointer coersion assignment operator.
-    ///
-    /// This one gets triggered when you do an assignment of a derived
-    /// class NoGCPtr to a base class NoGCPtr. Curiously, it doesn't seem to
-    /// conflict with the default assignment operator above.
-    template<typename T2>
-    inline NoGCPtr& operator=(const NoGCPtr<T2>& p)
-    {
-      T2* pOtherObject = p ? &*p : 0;
-
-      /* Careful: order of increment/decrement matters! */
-      pObject = pOtherObject;
-
-      return *this;
-    }
-
+    /// @brief Default assignment operator.
     template<typename T2>
     inline NoGCPtr& operator=(const GCPtr<T2>& p)
     {
-      T2* pOtherObject = p ? &*p : 0;
+      assert(p.rc);
+      assert(rc);
 
-      /* Careful: order of increment/decrement matters! */
-      pObject = pOtherObject;
+      p.rc->incWeakCount();
+      rc->decWeakCount();
 
-      return *this;
-    }
-
-    /// @brief Assignment from suitable raw pointer.
-    template<typename T2>
-    inline NoGCPtr& operator=(T2* p)
-    {
-      /* Careful: order of increment/decrement matters! */
-      pObject = p;
+      pObject = p.pObject;
+      rc = p.rc;
 
       return *this;
-    }
-
-    template<typename T2>
-    inline NoGCPtr<T2> upcast()
-    {
-      T2* pUpcastedPtr = dynamic_cast<T2 *>(pObject);
-      if (pUpcastedPtr == 0)
-	throw std::bad_cast();
-
-      return NoGCPtr<T2>(pUpcastedPtr);
     }
 
     inline T* operator -> () const
     {
-      assert(pObject->ValidRefCount());
+      assert(pObject->nCounted());
       return pObject;
     }
 
     inline T& operator * () const
     {
-      assert(pObject->ValidRefCount());
+      assert(pObject->nCounted);
       return *pObject;
     }
 
-    inline bool operator==(const NoGCPtr& other)
+    // This doesn't really belong in NoGCPtr, but it is necessary
+    // if we want to implement std::set over them...
+    inline bool operator<(const NoGCPtr& other) const
+    {
+      return ((uintptr_t)pObject) < ((uintptr_t)other.pObject);
+    }
+
+    inline bool operator==(const NoGCPtr& other) const
     {
       return pObject == other.pObject;
     }
 
-    inline bool operator==(const GCPtr<T>& other)
-    {
-      return pObject == other.pObject;
-    }
-
-    inline bool operator!=(const NoGCPtr& other)
-    {
-      return pObject != other.pObject;
-    }
-
-    inline bool operator!=(const GCPtr<T>& other)
+    inline bool operator!=(const NoGCPtr& other) const
     {
       return pObject != other.pObject;
     }
@@ -442,19 +458,19 @@ namespace sherpa {
     {
       return pObject ? &BoolConversionSupport::dummy : 0;
     }
+  };
 
-    /// @brief Conversion to GCPtr
-    ///
-    /// This should be enough to cover most comparisons, assignments,
-    /// and initializers.
-    inline operator GCPtr<T> () const
-    {
-      return GCPtr<T>(pObject);
+  template <typename T>
+  class enable_shared_from_this {
+    NoGCPtr<T> gc_this;
+
+  public:
+    NoGCPtr<T> shared_from_this() {
+      return gc_this;
     }
 
-    unsigned long value()
-    {
-      return (unsigned long) pObject;
+    enable_shared_from_this() 
+      :gc_this((T *)this, shared_from_this_tag()) {
     }
   };
 } /* namespace sherpa */

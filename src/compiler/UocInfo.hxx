@@ -104,7 +104,7 @@ typedef std::map<std::string, sherpa::GCPtr<UocInfo> > UocMap;
 // unit of compilation (source or interface). In the source case, the
 // /name/ field will be the file name. In the interface case, the
 // /name/ will be the "ifname" reported in the import statement.
-class UocInfo : public sherpa::Countable {
+class UocInfo : public sherpa::enable_shared_from_this<UocInfo> {
   static boost::filesystem::path resolveInterfacePath(std::string ifName);
 
 public:

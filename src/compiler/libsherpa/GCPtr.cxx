@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004, The EROS Group, LLC and Johns Hopkins
+ * Copyright (c) 2008, The EROS Group, LLC and Johns Hopkins
  * University. All rights reserved.
  * 
  * This software was developed to support the EROS secure operating
@@ -38,45 +38,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GCPtr.hxx"
+#include <map>
+#include <libsherpa/GCPtr.hxx>
 
-extern unsigned end;
+using namespace std;
 
 namespace sherpa {
-  static bool keepDangles = false;
+#ifdef GCPTR_SUPPORT_RAW
+  typedef map<const void *, GCRefCounter *> ObMap;
+  static ObMap obMap;
 
-  void Countable::TraceDangles(bool on)
+  GCRefCounter *
+  PtrBase::GetRefCounter(const void *ob)
   {
-    keepDangles = on;
+    if (ob == NULL)
+      return &GCRefCounter::NullPtrCounter;
+
+    // check if already registered here
+    ObMap::iterator itr = obMap.find(ob);
+    if (itr != obMap.end())
+      return itr->second;
+
+    // Allocate and register new counter object
+    GCRefCounter *rc = new GCRefCounter(ob);
+    obMap[ob] = rc;
+
+    return rc;
   }
 
-  Countable::~Countable()
+  void PtrBase::DeregisterObject(const void *ob) 
   {
-    delete theCounter;
+    ObMap::iterator itr = obMap.find(ob);
+    obMap.erase(itr);
   }
+#endif
 
-  /// @deprecated This method would be private but for what appears to
-  /// be a g++ bug.
-  void 
-  Countable::DecrementRefCount(void) const
-  {
-    if (this) {
-      theCounter->refCount--;
-
-      /* Do not delete the object if it is global static. */
-      if ((theCounter->refCount == 0) &&
-	  !keepDangles &&
-	  ( ((unsigned long) this) > ((unsigned long) &end) ))
-	{
-	  // The cast is a workaround to the fact that it is illegal
-	  // to call a destructor via a constant pointer. In many
-	  // cases, constant GCPtrs are all we are carrying around for
-	  // the target object, and we really do want to delete it
-	  // when the last pointer goes away.
-	  delete (Countable *) this;
-	}
-    }
-  }
+  // Static counter object for null pointers. Note that since this
+  // starts with a non-zero count, it should never get deleted.
+  GCRefCounter GCRefCounter::NullPtrCounter(NULL, 1, 0);
 }
 
 // Local Variables:

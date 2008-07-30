@@ -46,7 +46,7 @@
 namespace sherpa {
 
   template<class T>
-  struct CVector : public Countable {
+  struct CVector {
     enum { increment = 20 };
     size_t len;
     size_t maxLen;

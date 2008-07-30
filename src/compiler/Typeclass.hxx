@@ -55,7 +55,7 @@ typedef Type Typeclass;
 typedef Typeclass Constraint; 
 typedef TCConstraints Constraints; 
 
-struct Instance : public sherpa::Countable {
+struct Instance {
   sherpa::GCPtr<TypeScheme> ts;
   sherpa::GCPtr<AST> ast;
   
@@ -80,7 +80,7 @@ struct Instance : public sherpa::Countable {
 
 /* Type class constraints */
  
-struct TCConstraints : public sherpa::Countable {
+struct TCConstraints {
   // Type class predicates (which are, in turn, instances of Type
   TypeSet pred;
   typedef TypeSet::iterator iterator;
