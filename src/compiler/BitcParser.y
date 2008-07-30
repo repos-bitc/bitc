@@ -959,15 +959,15 @@ import_definition: '(' tk_IMPORT ifident tk_AS ident ')' {
 
 import_definition: '(' tk_IMPORT ifident ')' {
   SHOWPARSE("import_definition -> (FROM ifident)");
-  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   GCPtr<AST> ifIdent = new AST(at_ifident, $3);
+  ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = new AST(at_import, $2.loc, ifIdent);
 };
 
 import_definition: '(' tk_IMPORT ifident importList ')' {
   SHOWPARSE("import_definition -> (FROM ifident IMPORT importList)");
-  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   GCPtr<AST> ifIdent = new AST(at_ifident, $3);
+  ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = new AST(at_import, $2.loc, ifIdent);
   $$->addChildrenFrom($4);
 };
