@@ -162,7 +162,6 @@ AST::AST(GCPtr<AST> ast, bool shallowCopyChildren)
   decl = ast->decl;
   symType = ast->symType;
   scheme = ast->scheme;
-  uoc = ast->uoc;
   envs = ast->envs;
   special = ast->special;
   polyinst = ast->polyinst;
@@ -233,7 +232,6 @@ AST::set(GCPtr<AST> ast)
   decl = ast->decl;
   symType = ast->symType;
   scheme = ast->scheme;
-  uoc = ast->uoc;
   envs = ast->envs;
   special = ast->special;
   polyinst = ast->polyinst;

@@ -202,7 +202,6 @@ UocInfo::RandTexpr(std::ostream& errStream,
 void
 UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
 {
-  ast->uoc = shared_from_this();
   bool processChildren = true; 
 
   switch(ast->astType) {        

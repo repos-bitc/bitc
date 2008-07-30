@@ -953,21 +953,21 @@ proclaim_definition: '(' tk_PROCLAIM defident ':' qual_type optdocstring externa
 import_definition: '(' tk_IMPORT ifident tk_AS ident ')' {
   SHOWPARSE("import_definition -> ( IMPORT ident ifident )");
   GCPtr<AST> ifIdent = new AST(at_ifident, $3);
-  ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
+  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = new AST(at_importAs, $2.loc, ifIdent, $5); 
 };
 
 import_definition: '(' tk_IMPORT ifident ')' {
   SHOWPARSE("import_definition -> (FROM ifident)");
   GCPtr<AST> ifIdent = new AST(at_ifident, $3);
-  ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
+  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = new AST(at_import, $2.loc, ifIdent);
 };
 
 import_definition: '(' tk_IMPORT ifident importList ')' {
   SHOWPARSE("import_definition -> (FROM ifident IMPORT importList)");
   GCPtr<AST> ifIdent = new AST(at_ifident, $3);
-  ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
+  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = new AST(at_import, $2.loc, ifIdent);
   $$->addChildrenFrom($4);
 };
@@ -976,7 +976,7 @@ import_definition: '(' tk_IMPORT ifident importList ')' {
 provide_definition: '(' tk_PROVIDE ifident provideList ')' {
   SHOWPARSE("provide_definition -> (PROVIDE ident ifident)");
   GCPtr<AST> ifIdent = new AST(at_ifident, $3);
-  ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
+  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = new AST(at_provide, $2.loc, ifIdent); 
   $$->addChildrenFrom($4);
 };

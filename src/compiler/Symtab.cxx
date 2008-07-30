@@ -437,10 +437,8 @@ resolve(std::ostream& errStream,
 	
 	  if(sym) {
 	    if(sym->isDecl) {
-	      GCPtr<UocInfo> symUOC = sym->uoc;
-	      GCPtr<UocInfo> astUOC = ast->uoc;
-
-	      if (symUOC != astUOC && !providing(env, sym)) {
+	      if ((sym->fqn.iface != ast->fqn.iface) &&
+		  !providing(env, sym)) {
 		// We are defining an ident that has an existing
 		// binding that came about through import. Confirm
 		// that we also marked it as providable:
@@ -773,7 +771,6 @@ resolve(std::ostream& errStream,
       ast->identType = ast->child(1)->identType;
       ast->Flags = ast->child(1)->Flags;
       ast->Flags |= ID_IS_GLOBAL;
-      ast->uoc = ast->child(0)->symbolDef->uoc;
 
       ast->children.clear();
 

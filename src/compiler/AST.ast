@@ -301,7 +301,6 @@ struct envSet {
   sherpa::GCPtr<TypeScheme> scheme;		// defining occurrences only
   sherpa::GCPtr<Type> symType;		// the (pre-unified) type
   sherpa::GCPtr<AST> symbolDef;
-  sherpa::NoGCPtr<UocInfo> uoc;  
 
   bool isDecl;                  // is This a declaration or definition?
 

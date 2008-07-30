@@ -441,7 +441,6 @@ public:
   sherpa::GCPtr<TypeScheme> scheme;		
   sherpa::GCPtr<Type> symType;		
   sherpa::GCPtr<AST> symbolDef;
-  sherpa::NoGCPtr<UocInfo> uoc;  
 
   bool isDecl;                  
 
