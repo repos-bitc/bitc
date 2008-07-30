@@ -3166,7 +3166,7 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
     if (Options::verbose)
       std::cerr  << opt.str() << std::endl;
 
-    status = system(opt.str().c_str());
+    status = ::system(opt.str().c_str());
     if (WEXITSTATUS(status))
       goto done;
   }
@@ -3194,7 +3194,7 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
     if (Options::verbose)
       std::cerr  << opt.str() << std::endl;
 
-    status = system(opt.str().c_str());
+    status = ::system(opt.str().c_str());
   }
 
  done:
