@@ -35,9 +35,7 @@ AST::AST(const AstType at)
   scheme = 0;
   symType = 0;
   symbolDef = 0;
-  
   defn = 0;
-  special = 0;
   defForm = 0;
   defbps = 0;
   decl = 0;
@@ -66,9 +64,7 @@ AST::AST(const AstType at, const AST_TOKEN_TYPE& tok)
   scheme = 0;
   symType = 0;
   symbolDef = 0;
-  
   defn = 0;
-  special = 0;
   defForm = 0;
   defbps = 0;
   decl = 0;
@@ -96,9 +92,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc)
   scheme = 0;
   symType = 0;
   symbolDef = 0;
-  
   defn = 0;
-  special = 0;
   defForm = 0;
   defbps = 0;
   decl = 0;
@@ -128,9 +122,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   scheme = 0;
   symType = 0;
   symbolDef = 0;
-  
   defn = 0;
-  special = 0;
   defForm = 0;
   defbps = 0;
   decl = 0;
@@ -162,9 +154,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   scheme = 0;
   symType = 0;
   symbolDef = 0;
-  
   defn = 0;
-  special = 0;
   defForm = 0;
   defbps = 0;
   decl = 0;
@@ -198,9 +188,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   scheme = 0;
   symType = 0;
   symbolDef = 0;
-  
   defn = 0;
-  special = 0;
   defForm = 0;
   defbps = 0;
   decl = 0;
@@ -236,9 +224,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   scheme = 0;
   symType = 0;
   symbolDef = 0;
-  
   defn = 0;
-  special = 0;
   defForm = 0;
   defbps = 0;
   decl = 0;
@@ -276,9 +262,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   scheme = 0;
   symType = 0;
   symbolDef = 0;
-  
   defn = 0;
-  special = 0;
   defForm = 0;
   defbps = 0;
   decl = 0;

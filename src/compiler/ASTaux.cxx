@@ -163,7 +163,6 @@ AST::AST(GCPtr<AST> ast, bool shallowCopyChildren)
   symType = ast->symType;
   scheme = ast->scheme;
   envs = ast->envs;
-  special = ast->special;
   polyinst = ast->polyinst;
   reached = ast->reached;
   defForm = ast->defForm;
@@ -204,7 +203,6 @@ AST::getDCopy()
   to->symType = NULL;
   to->scheme = NULL;
   to->envs = envs;
-  to->special = NULL;
   to->polyinst = false;
   to->reached = false;
   to->defForm = NULL;
@@ -233,7 +231,6 @@ AST::set(GCPtr<AST> ast)
   symType = ast->symType;
   scheme = ast->scheme;
   envs = ast->envs;
-  special = ast->special;
   polyinst = ast->polyinst;
   reached = ast->reached;
   defForm = ast->defForm;

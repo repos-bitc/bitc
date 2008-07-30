@@ -15,7 +15,6 @@
 #include "debug.hxx"
 
 #include <libsherpa/GCPtr.hxx>
-#include <libsherpa/CVector.hxx>
 #define AST_SMART_PTR sherpa::GCPtr
 #define AST_SUPERCLASS sherpa::enable_shared_from_this<AST>
 
@@ -490,8 +489,11 @@ public:
   
   
 
+#if 0
   
-  sherpa::GCPtr<sherpa::CVector<spStruct *> > special;
+  sherpa::GCPtr<std::vector<spStruct *> > special;
+#endif
+
   
   
   bool polyinst; 

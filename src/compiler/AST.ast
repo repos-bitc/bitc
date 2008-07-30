@@ -44,7 +44,6 @@
 #include "debug.hxx"
 
 #include <libsherpa/GCPtr.hxx>
-#include <libsherpa/CVector.hxx>
 #define AST_SMART_PTR sherpa::GCPtr
 #define AST_SUPERCLASS sherpa::enable_shared_from_this<AST>
 
@@ -346,12 +345,6 @@ struct envSet {
   //   Environments at that point 
   envSet envs;
 
-  // GCFIX: the following needs to be changed to
-  // std::vector<GCPtr<spStruct> >, but that involves a circular dependency
-  // until we convert to boost::shared_ptr
-
-  // For Polyinstantiation:. // CHANGED THIS TO GCPTR
-  sherpa::GCPtr<sherpa::CVector<spStruct *> > special;
   // If this is the root of a polymorphic expression, stores a 
   // pointer to all specializations.
   bool polyinst; // Polyinstantiation Marker (donelist) to avoid 
@@ -516,9 +509,7 @@ unsigned long long AST::astCount = 0;
   scheme = 0;
   symType = 0;
   symbolDef = 0;
-  // uoc = 0;
   defn = 0;
-  special = 0;
   defForm = 0;
   defbps = 0;
   decl = 0;
