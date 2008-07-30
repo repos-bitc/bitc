@@ -487,15 +487,6 @@ public:
 
   
   
-  
-
-#if 0
-  
-  sherpa::GCPtr<std::vector<spStruct *> > special;
-#endif
-
-  
-  
   bool polyinst; 
                  
   bool reached; 
