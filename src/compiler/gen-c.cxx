@@ -42,6 +42,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <set>
 #include <sstream>
 #include <cctype>
 
@@ -754,7 +755,7 @@ emit_fnxn_label(std::ostream& errStream,
   
   GCPtr<AST> lam = ast->child(1);
   GCPtr<AST> body = lam->child(1);
-  GCPtr<AST> ret=0;
+  GCPtr<AST> ret= sherpa::GC_NULL;
   
   /* While emitting the function parameters, we omitted any parameters
    * of unit type, because there is no point passing those or letting
@@ -1071,10 +1072,10 @@ toc(std::ostream& errStream,
 	GCPtr<Type> t = id->symType->getBareType(); 
 	if(t->kind == ty_uvalv || t->kind == ty_uvalr ||
 	   t->kind == ty_exn) {
-	  GCPtr<AST> dummy = new AST(at_ucon_apply, ast->loc, ast);
+	  GCPtr<AST> dummy = AST::make(at_ucon_apply, ast->loc, ast);
 	  dummy->symType = ast->symType;
 	  TOC(errStream, uoc, dummy, out, IDname, 
-	      NULL, 0, flags);	  
+	      sherpa::GC_NULL, 0, flags);	  
 	}
 	break;
       }
@@ -1865,7 +1866,7 @@ toc(std::ostream& errStream,
 	
       out << "if(";
       TOC(errStream, uoc, theCond, out, IDname, 
-	  NULL, 0, flags);      
+	  sherpa::GC_NULL, 0, flags);      
       out << ") {" << endl;
       out.more();
       TOC(errStream, uoc, res, out, IDname, 
@@ -2083,11 +2084,11 @@ toc(std::ostream& errStream,
       out << IDname << "->elem[__bitc_temp_mvec] = ";
       /* This is actually an application, get at_apply case to do the
 	 work :) */
-      GCPtr<AST> hackIdent = new AST(at_ident, ast->loc);
+      GCPtr<AST> hackIdent = AST::make(at_ident, ast->loc);
       hackIdent->s = "__bitc_temp_mvec";
       hackIdent->Flags |= ID_IS_GENSYM; // don't add extra astID after name
-      hackIdent->symType = new Type(ty_word);
-      GCPtr<AST> apply = new AST(at_apply, ast->loc, 
+      hackIdent->symType = Type::make(ty_word);
+      GCPtr<AST> apply = AST::make(at_apply, ast->loc, 
 			   ast->child(1), hackIdent);
       TOC(errStream, uoc, apply, out, IDname, ast, 1, flags);
       out << ";" << endl;
@@ -2472,25 +2473,18 @@ toc(std::ostream& errStream,
 
 static bool
 alreadyEmitted(GCPtr<Type> t, 
-	       GCPtr< CVector<string> > vec)
+	       const set<string>& theSet)
 {
-  for(size_t c = 0; c < vec->size(); c++)
-    if(vec->contains(CMangle(t->mangledString(true))))
-      return true;
-  
-  //std::cerr << "Emiting: " << CMangle(t->mangledString(true))
-  //	  << " for " << t->asString()
-  // 	  << std::endl;
-  
-  return false;
+  std::string nm = CMangle(t->mangledString(true));
+  return (theSet.find(nm) != theSet.end());
 }
 
-void
+static void
 emit_arr_vec_fn_types(GCPtr<Type> candidate, 
-			 INOstream &out,
-			 GCPtr< CVector<string> > arrVec,
-			 GCPtr< CVector<string> > vecVec,
-			 GCPtr< CVector<string> > fnVec)
+		      INOstream &out,
+		      set<string>& arrSet,
+		      set<string>& vecSet,
+		      set<string>& fnSet)
 {
   GCPtr<Type> t = candidate->getBareType();
   if(t->mark & MARK13)
@@ -2500,23 +2494,23 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
 
   for(size_t i=0; i<t->typeArgs.size(); i++)
     emit_arr_vec_fn_types(t->TypeArg(i), out, 
-			     arrVec, vecVec, fnVec);
+			     arrSet, vecSet, fnSet);
   
   for(size_t i=0; i<t->components.size(); i++)
     emit_arr_vec_fn_types(t->CompType(i), out, 
-			     arrVec, vecVec, fnVec);
+			     arrSet, vecSet, fnSet);
   
   switch(t->kind) {
   case ty_array:
     {
-      if(alreadyEmitted(t, arrVec))
+      if(alreadyEmitted(t, arrSet))
 	break;
 
       if(t->arrlen->len == 0) {
 	assert(false);
       }
 
-      arrVec->append(CMangle(t->mangledString(true)));
+      arrSet.insert(CMangle(t->mangledString(true)));
       //emitted = true;
       //std::cerr << "Emitted: " << CMangle(t->mangledString(true))
       //	  << " for " << t->asString()
@@ -2540,10 +2534,10 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
 
   case ty_vector:
     {
-      if(alreadyEmitted(t, vecVec))
+      if(alreadyEmitted(t, vecSet))
 	break;
 
-      vecVec->append(CMangle(t->mangledString(true)));
+      vecSet.insert(CMangle(t->mangledString(true)));
       
       GCPtr<Type> et = t->Base()->getBareType(); 
       out << "/* Typedef in anticipation of the vector type:"
@@ -2564,11 +2558,11 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
 
   case ty_fn:
     {
-      if(alreadyEmitted(t, fnVec))
+      if(alreadyEmitted(t, fnSet))
 	break;
 
       std::string fnName = t->mangledString(true);
-      fnVec->append(CMangle(fnName));
+      fnSet.insert(CMangle(fnName));
       out << "/* Typedef in anticipation of the function (pointer) type:"
 	  << endl
 	  << t->asString()
@@ -2589,21 +2583,21 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
 } 
 
   
-void
+static void
 emit_arr_vec_fn_types(GCPtr<AST> ast, 
-			 INOstream &out,
-			 GCPtr< CVector<string> > arrVec,
-			 GCPtr< CVector<string> > vecVec,
-			 GCPtr< CVector<string> > fnVec)
+		      INOstream &out,
+		      set<string>& arrSet,
+		      set<string>& vecSet,
+		      set<string>& fnSet)
 {  
   if(ast->symType)
     emit_arr_vec_fn_types(ast->symType, out,
-			     arrVec, vecVec, fnVec);
+			     arrSet, vecSet, fnSet);
   
 
   for(size_t c = 0; c < ast->children.size(); c++)
     emit_arr_vec_fn_types(ast->child(c), out, 
-			     arrVec, vecVec, fnVec);
+			     arrSet, vecSet, fnSet);
 } 
 
 
@@ -2615,9 +2609,9 @@ TypesTOC(std::ostream& errStream,
 {
   bool errFree = true;
   GCPtr<AST> mod = uoc->uocAst;
-  GCPtr< CVector<string> > arrVec = new CVector<string>; 
-  GCPtr< CVector<string> > vecVec = new CVector<string>; 
-  GCPtr< CVector<string> > fnVec = new CVector<string>; 
+  set<string> arrSet;
+  set<string> vecSet;
+  set<string> fnSet;
   
   for(size_t c=0; (c < mod->children.size()); c++) {
     GCPtr<AST> ast = mod->child(c);
@@ -2649,8 +2643,8 @@ TypesTOC(std::ostream& errStream,
 	//    << " \"" << *(ast->loc.path) << "\""
 	//    << std::endl;
 
-	emit_arr_vec_fn_types(ast, out, arrVec, vecVec, 
-				 fnVec);
+	emit_arr_vec_fn_types(ast, out, arrSet, vecSet, 
+				 fnSet);
  
 	out << "/***************************************" << endl
 	    << "   " << ast->loc << endl
@@ -2682,8 +2676,8 @@ TypesTOC(std::ostream& errStream,
 	//    << " \"" << *(ast->loc.path) << "\""
 	//    << std::endl;
 	
-	emit_arr_vec_fn_types(ast, out, arrVec, vecVec, 
-				 fnVec); 
+	emit_arr_vec_fn_types(ast, out, arrSet, vecSet, 
+				 fnSet); 
 
 	out << "/***************************************" << endl
 	    << "   " << ast->loc << endl
@@ -2700,8 +2694,8 @@ TypesTOC(std::ostream& errStream,
     case at_recdef:
     case at_define:
       {
-	emit_arr_vec_fn_types(ast, out, arrVec, vecVec, 
-				 fnVec);
+	emit_arr_vec_fn_types(ast, out, arrSet, vecSet, 
+				 fnSet);
 	break;
       }
 
@@ -2786,7 +2780,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 	    << "***************************************/" << endl;    
 	
 	GCPtr<AST> id = ast->getID();
-	GCPtr<AST> label = NULL;
+	GCPtr<AST> label = sherpa::GC_NULL;
 	bool wrapperNeeded = false;
 
 	// Case 0: Immutable functions that are not of the form
@@ -2801,7 +2795,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 	if ((id->symType->isFnxn()) && (!id->symType->isMutable()) &&
 	    (ast->child(1)->astType != at_lambda)) {
 	  wrapperNeeded = true;
-	  label = new AST(id);
+	  label = AST::make(id);
 	  ast->rename(id, WFN_PFX + id->s);
 	}
 	
@@ -2822,7 +2816,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 	  // declaration for the (mutable) pointer, then the label
 	  // (full function), and finally, initialize the pointer.
 	  
-	  GCPtr<AST> ptr = new AST(id);
+	  GCPtr<AST> ptr = AST::make(id);
 	  id->s = MFN_PFX + id->s;
 	  out << "extern " << decl(ptr) << ";" << endl;
 	  CHKERR(errFree, toc(errStream, uoc, ast, out, "", 

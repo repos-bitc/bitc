@@ -178,26 +178,26 @@ p: (CL (maybe-1 'a)) => (fn ('a) ())
 bool 
 Type::copy_compatible(GCPtr<Type> t, bool verbose, std::ostream &errStream)
 {
-  return MBF(this)->equals(MBF(t), verbose, errStream);
+  return MBF(shared_from_this())->equals(MBF(t), verbose, errStream);
 }
 
 bool 
 Type::copy_compatibleA(GCPtr<Type> t, bool verbose, std::ostream &errStream)
 {
-  return MBF(this)->equalsA(MBF(t), verbose, errStream);
+  return MBF(shared_from_this())->equalsA(MBF(t), verbose, errStream);
 }
 
 static inline GCPtr<Type> 
 addMutable(GCPtr<Type> t)
 {
-  return new Type(ty_mutable, t->getBareType());
+  return Type::make(ty_mutable, t->getBareType());
 }
 
 GCPtr<Type> 
 Type::maximizeTopMutability(GCPtr<Trail> trail)
 {
   GCPtr<Type> t = getType();
-  GCPtr<Type> rt = NULL;
+  GCPtr<Type> rt = sherpa::GC_NULL;
   
   switch(t->kind) {
     
@@ -233,7 +233,7 @@ GCPtr<Type>
 Type::minimizeTopMutability(GCPtr<Trail> trail)
 {
   GCPtr<Type> t = getType();
-  GCPtr<Type> rt = NULL;
+  GCPtr<Type> rt = sherpa::GC_NULL;
   
   switch(t->kind) {
     
@@ -270,7 +270,7 @@ GCPtr<Type>
 Type::maximizeMutability(GCPtr<Trail> trail)
 {
   GCPtr<Type> t = getType();
-  GCPtr<Type> rt = NULL;
+  GCPtr<Type> rt = sherpa::GC_NULL;
 
   if(t->mark & MARK17)
     return t;
@@ -294,7 +294,7 @@ Type::maximizeMutability(GCPtr<Trail> trail)
     
   case ty_array:
     {
-      rt = new Type(t);
+      rt = Type::make(t);
       rt->Base() = t->Base()->maximizeMutability(trail);
       rt = addMutable(t);      
       break;
@@ -345,7 +345,7 @@ GCPtr<Type>
 Type::minimizeMutability(GCPtr<Trail> trail)
 {
   GCPtr<Type> t = getType();
-  GCPtr<Type> rt = NULL;
+  GCPtr<Type> rt = sherpa::GC_NULL;
   
   if(t->mark & MARK19)
     return t;
@@ -369,7 +369,7 @@ Type::minimizeMutability(GCPtr<Trail> trail)
 
   case ty_array:
     {
-      rt = new Type(t);
+      rt = Type::make(t);
       rt->Base() = t->Base()->minimizeMutability(trail);
       break;
     }
@@ -416,7 +416,7 @@ GCPtr<Type>
 Type::minimizeDeepMutability(GCPtr<Trail> trail)
 {
   GCPtr<Type> t = getType();
-  GCPtr<Type> rt = NULL;
+  GCPtr<Type> rt = sherpa::GC_NULL;
   
   if(t->mark & MARK24)
     return t;
@@ -442,7 +442,7 @@ Type::minimizeDeepMutability(GCPtr<Trail> trail)
   case ty_vector:
   case ty_array:
     {
-      rt = new Type(t);
+      rt = Type::make(t);
       rt->Base() = t->Base()->minimizeDeepMutability(trail);
       break;
     }
@@ -622,7 +622,7 @@ Type::determineCCC(GCPtr<Type> t, bool inRefType)
   switch(t->kind) {
   case ty_tvar:				       
     {
-      if((t == this) && (inRefType))
+      if((t == shared_from_this()) && (inRefType))
 	cccOK = false;
       break;
     }

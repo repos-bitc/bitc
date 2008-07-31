@@ -77,13 +77,13 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 { 
 
   if(Options::rawTvars)
-    tvP = 0;
+    tvP = sherpa::GC_NULL;
 
   GCPtr<Type> t;
   if(traverse)
     t = getType();
   else
-    t = this;
+    t = shared_from_this();
   
   if(t->pMark >= 2)
     return " ... ";

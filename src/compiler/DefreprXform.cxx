@@ -94,17 +94,17 @@ reprXform(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
   switch(ast->astType) {
   case at_defrepr:
     {
-      GCPtr<AST> unin = new AST(ast, false); 
+      GCPtr<AST> unin = AST::make(ast, false); 
       
       unin->astType = at_defunion;
       unin->Flags2 |= UNION_IS_REPR;
       unin->addChild(ast->child(0)); // identifier
       unin->child(0)->Flags2 |= UNION_IS_REPR;
-      unin->addChild(new AST(at_tvlist, ast->loc)); // empty tvlist
+      unin->addChild(AST::make(at_tvlist, ast->loc)); // empty tvlist
       unin->addChild(ast->child(1));  // category
       unin->addChild(reprXform(ast->child(2), errStream, errFree));  // declares
       unin->addChild(reprXform(ast->child(3), errStream, errFree)); // constructors
-      unin->addChild(new AST(at_constraints, ast->loc)); // constraints
+      unin->addChild(AST::make(at_constraints, ast->loc)); // constraints
       ast = unin;
 
       break;
@@ -112,7 +112,7 @@ reprXform(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
     
   case at_reprctrs:
     {
-      GCPtr<AST> ctrs = new AST(at_constructors, ast->loc);
+      GCPtr<AST> ctrs = AST::make(at_constructors, ast->loc);
       for(size_t c=0; c < ast->children.size(); c++)
 	ctrs->addChild(reprXform(ast->child(c), errStream, errFree));
       ast = ctrs;
@@ -164,14 +164,14 @@ reprXform(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
     
   case at_declrepr:
     {
-      GCPtr<AST> unin = new AST(ast, false);
+      GCPtr<AST> unin = AST::make(ast, false);
       
       unin->astType = at_declunion;
       unin->Flags2 |= UNION_IS_REPR;
       unin->addChild(ast->child(0)); // identifier
-      unin->addChild(new AST(at_tvlist)); // empty tvlist
+      unin->addChild(AST::make(at_tvlist)); // empty tvlist
       unin->addChild(ast->child(1));  // category
-      unin->addChild(new AST(at_tvlist, ast->loc)); // constraints
+      unin->addChild(AST::make(at_tvlist, ast->loc)); // constraints
       ast = unin;
       break;
     }

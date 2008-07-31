@@ -63,7 +63,8 @@ using namespace sherpa;
 static GCPtr< CVector< GCPtr<Type> > > 
 getDomain(GCPtr<Typeclass> t)
 {
-  GCPtr< CVector< GCPtr<Type> > > dom = new CVector< GCPtr<Type> >;
+  GCPtr< CVector< GCPtr<Type> > > dom = 
+    CVector< GCPtr<Type> >::make();
   
   for(size_t i=0; i < t->typeArgs.size(); i++)
     dom->append(t->TypeArg(i));
@@ -74,7 +75,7 @@ getDomain(GCPtr<Typeclass> t)
     GCPtr<Type> ret = fdep->Ret();
       
     GCPtr< CVector< GCPtr<Type> > > newDom = 
-      new CVector< GCPtr<Type> >;
+      CVector< GCPtr<Type> >::make();
       
     for(size_t i=0; i < dom->size(); i++)
       if(dom->elem(i)->getType() != ret->getType())
@@ -89,7 +90,7 @@ getDomain(GCPtr<Typeclass> t)
 static GCPtr< CVector< GCPtr<Type> > >
 getDomVars(GCPtr< CVector< GCPtr<Type> > > dom)
 {
-  GCPtr< CVector< GCPtr<Type> > > vars = new CVector< GCPtr<Type> >;
+  GCPtr< CVector< GCPtr<Type> > > vars = CVector< GCPtr<Type> >::make();
   
   for(size_t i=0; i < dom->size(); i++) {
     GCPtr<Type> arg = dom->elem(i)->getType();
@@ -336,7 +337,7 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
     }
   }
 
-  GCPtr<TypeScheme> instScheme = NULL;  
+  GCPtr<TypeScheme> instScheme = sherpa::GC_NULL;  
   for(size_t j=0; j < insts->size(); j++) {
     GCPtr<TypeScheme> ts = (insts->elem(j))->ts->ts_instance_copy();
     GCPtr<Type> inst = ts->tau;
@@ -520,7 +521,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
   
   do {
     handled = false;
-    GCPtr<Typeclass> errPred = NULL;
+    GCPtr<Typeclass> errPred = sherpa::GC_NULL;
     bool errFreeNow = true;
     
     for (TypeSet::iterator itr = tcc->begin(); 

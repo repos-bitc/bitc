@@ -65,7 +65,7 @@ TypeScheme::TypeScheme(GCPtr<Type> _tau, GCPtr<AST> _ast, GCPtr<TCConstraints> _
   tau = _tau;
   ast = _ast;
   tcc = _tcc;
-  ftvs = new CVector<GCPtr<Type> >;
+  ftvs = CVector<GCPtr<Type> >::make();
 }
 
 GCPtr<Type> 
@@ -80,8 +80,8 @@ TypeScheme::type_instance_copy()
   for(size_t i=0; i<ftvs->size(); i++)
     nftvs.append(newTvar());
 
-  GCPtr<CVector<GCPtr<Type> > > cnftvs = new CVector<GCPtr<Type> >;
-  GCPtr<CVector<GCPtr<Type> > > cftvs = new CVector<GCPtr<Type> >;
+  GCPtr<CVector<GCPtr<Type> > > cnftvs = CVector<GCPtr<Type> >::make();
+  GCPtr<CVector<GCPtr<Type> > > cftvs = CVector<GCPtr<Type> >::make();
   
   for(size_t i=0; i<ftvs->size(); i++) {
     cftvs->append(Ftv(i));
@@ -118,14 +118,14 @@ TypeScheme::ts_instance(bool fullCopy)
 {
   normalize();
 
-  GCPtr<TypeScheme> ts = new TypeScheme(tau, ast);
-  ts->tau = NULL;
+  GCPtr<TypeScheme> ts = TypeScheme::make(tau, ast);
+  ts->tau = sherpa::GC_NULL;
 
   for(size_t i=0; i<ftvs->size(); i++) 
     ts->ftvs->append(newTvar());
   
-  GCPtr<CVector<GCPtr<Type> > > cnftvs = new CVector<GCPtr<Type> >;
-  GCPtr<CVector<GCPtr<Type> > > cftvs = new CVector<GCPtr<Type> >;
+  GCPtr<CVector<GCPtr<Type> > > cnftvs = CVector<GCPtr<Type> >::make();
+  GCPtr<CVector<GCPtr<Type> > > cftvs = CVector<GCPtr<Type> >::make();
   
   for(size_t i=0; i<ftvs->size(); i++) {
     cftvs->append(Ftv(i));
@@ -138,10 +138,10 @@ TypeScheme::ts_instance(bool fullCopy)
     ts->tau = tau;
  
   if(tcc) {
-    GCPtr<TCConstraints> _tcc = new TCConstraints;
+    GCPtr<TCConstraints> _tcc = TCConstraints::make();
     addConstraints(_tcc);
     
-    ts->tcc = new TCConstraints;
+    ts->tcc = TCConstraints::make();
     for(TypeSet::iterator itr = _tcc->begin();
 	itr != _tcc->end(); ++itr) {
       GCPtr<Typeclass> pred;
@@ -177,7 +177,7 @@ TypeScheme::addConstraints(GCPtr<TCConstraints> _tcc) const
   if(!tcc)
     return;
   
-  GCPtr<CVector<GCPtr<Type> > > allftvs = new CVector<GCPtr<Type> >;
+  GCPtr<CVector<GCPtr<Type> > > allftvs = CVector<GCPtr<Type> >::make();
   tau->collectAllftvs(allftvs);
   
   for(TypeSet::iterator itr = tcc->begin();
@@ -213,7 +213,7 @@ TypeScheme::normalize()
 	      << std::endl;
   
   
-  GCPtr< CVector< GCPtr<Type> > > newTvs = new CVector< GCPtr<Type> >;
+  GCPtr< CVector< GCPtr<Type> > > newTvs = CVector< GCPtr<Type> >::make();
   for(size_t c=0; c < ftvs->size(); c++) {
     GCPtr<Type> ftv = Ftv(c)->getType();
     

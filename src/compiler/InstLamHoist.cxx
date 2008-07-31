@@ -80,21 +80,21 @@ cl_HoistInstLam(GCPtr<UocInfo> uoc)
 	  // It's an expression. Need to hoist it into a new binding.
 
 	  // FIX: redef or define?
-	  GCPtr<AST> newDef = new AST(at_define, meth->loc);
+	  GCPtr<AST> newDef = AST::make(at_define, meth->loc);
 
 	  GCPtr<AST> lamName = AST::genSym(meth, "lam");
 	  lamName->identType = id_value;
 	  lamName->Flags |= ID_IS_GLOBAL;
 
-	  GCPtr<AST> lamPat = new AST(at_identPattern, meth->loc, lamName);
+	  GCPtr<AST> lamPat = AST::make(at_identPattern, meth->loc, lamName);
 	  newDef->addChild(lamPat);
 	  newDef->addChild(meth);
-	  newDef->addChild(new AST(at_constraints));
+	  newDef->addChild(AST::make(at_constraints));
 
 	  outAsts.push_back(newDef);
 
 	  GCPtr<AST> instName = lamName->Use();
-	  GCPtr<AST> the = new AST(at_tqexpr);
+	  GCPtr<AST> the = AST::make(at_tqexpr);
 	  the->addChild(instName);
 	  the->addChild(meth->symType->asAST(meth->loc));
 
@@ -146,7 +146,7 @@ UocInfo::fe_HoistInstLam(std::ostream& errStream,
     PrettyPrint(errStream);
 
   ILH_DEBUG std::cerr << "cl_HoistInstLam" << std::endl;
-  cl_HoistInstLam(this);
+  cl_HoistInstLam(shared_from_this());
 
   ILH_DEBUG if (isSourceUoc())
     PrettyPrint(errStream);

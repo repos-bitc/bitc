@@ -64,7 +64,7 @@ Type::toString()
 {
   stringstream ss;
   
-  if(getType() != this)
+  if(getType() != shared_from_this())
     return getType()->toString();
 
   if(pMark >= 2)
@@ -323,7 +323,7 @@ Type::toString()
 
   case ty_kfix:
     {
-      GCPtr<Type> t = this; // To satisfy libsherpa
+      GCPtr<Type> t = shared_from_this(); // To satisfy libsherpa
       if(t == Type::Kmono)
 	ss << "m";
       else if(t == Type::Kpoly)

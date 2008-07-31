@@ -54,10 +54,10 @@ using namespace sherpa;
 static inline GCPtr<AST> 
 newGrandLet(GCPtr<AST> ref)
 {
-  GCPtr<AST> lbs = new AST(at_letbindings, ref->loc);
-  GCPtr<AST> res = new AST(at_ident, ref->loc);
+  GCPtr<AST> lbs = AST::make(at_letbindings, ref->loc);
+  GCPtr<AST> res = AST::make(at_ident, ref->loc);
   res->s = res->fqn.ident = "NULL";
-  GCPtr<AST> grandLet = new AST(at_letStar, ref->loc, lbs, res);
+  GCPtr<AST> grandLet = AST::make(at_letStar, ref->loc, lbs, res);
   return grandLet;
 }
 
@@ -94,13 +94,13 @@ UseCase(GCPtr<AST> ast)
 static GCPtr<AST> 
 addLB(GCPtr<AST> grandLet, GCPtr<AST> identList, 
       GCPtr<AST> ast, unsigned long lbFlags=0,
-      GCPtr<AST> id=NULL, bool addToIL=true)
+      GCPtr<AST> id=sherpa::GC_NULL, bool addToIL=true)
 {
   if(!id)
     id = AST::genSym(ast, "t");
   id->symType = ast->symType;
-  GCPtr<AST> ip = new AST(at_identPattern, id->loc, id);
-  GCPtr<AST> lb = new AST(at_letbinding, ip->loc, ip, ast);
+  GCPtr<AST> ip = AST::make(at_identPattern, id->loc, id);
+  GCPtr<AST> lb = AST::make(at_letbinding, ip->loc, ip, ast);
   lb->Flags |= (LB_IS_ART | lbFlags);
   grandLet->child(0)->children.push_back(lb);
   if(addToIL)
@@ -294,7 +294,7 @@ ssa(std::ostream& errStream,
 		<< ast->astTypeName()
 		<< std::endl;
       
-      FEXPR(grandLet) = NULL;
+      FEXPR(grandLet) = sherpa::GC_NULL;
       errorFree = false;
       break;
     }
@@ -384,15 +384,15 @@ ssa(std::ostream& errStream,
       }
       else {
 	GCPtr<AST> gl = newGrandLet(ast);
-	identList = new AST(at_identList, ast->loc);
+	identList = AST::make(at_identList, ast->loc);
 	
 	SSA(errStream, uoc, ast->child(1), gl, identList, 
 	    ast, 1, flags);
 	
-	GCPtr<AST> body=0;
+	GCPtr<AST> body = sherpa::GC_NULL;
 	SETGL(body, gl);
 	assert(body);
-	ast->child(1) = new AST(at_container, ast->loc, identList, body);	
+	ast->child(1) = AST::make(at_container, ast->loc, identList, body);	
       }
       break;
     }
@@ -400,17 +400,17 @@ ssa(std::ostream& errStream,
   case at_lambda:
     {
       GCPtr<AST> gl = newGrandLet(ast);
-      identList = new AST(at_identList, ast->loc);
+      identList = AST::make(at_identList, ast->loc);
       
       SSA(errStream, uoc, ast->child(0), gl, identList, 
 	     ast, 0, flags);
       SSA(errStream, uoc, ast->child(1), gl, identList, 
 	     ast, 1, flags);
       
-      GCPtr<AST> body = 0;
+      GCPtr<AST> body = sherpa::GC_NULL;
       SETGL(body, gl);
       assert(body);
-      ast->child(1) = new AST(at_container, ast->loc, identList, body);
+      ast->child(1) = AST::make(at_container, ast->loc, identList, body);
 	
       // FEXPR carry over
       break;
@@ -544,18 +544,18 @@ ssa(std::ostream& errStream,
 	// change the resultant value to 
 	// inner-ref.
 	
-	GCPtr<AST> tempAst = NULL;
+	GCPtr<AST> tempAst = sherpa::GC_NULL;
 	if(expr->symType->getBareType()->kind == ty_vector) {
 	  // Vector-Index
-	  tempAst = new AST(at_vector_nth, expr->loc, 
+	  tempAst = AST::make(at_vector_nth, expr->loc, 
 			    expr, ndx);
 	  
 	}
 	else {
 	  // ref(Array)-Index
 	  assert(expr->symType->getBareType()->kind == ty_ref);
-	  tempAst = new AST(at_array_nth, expr->loc, 
-			    new AST(at_deref, expr->loc, expr), ndx);	  
+	  tempAst = AST::make(at_array_nth, expr->loc, 
+			    AST::make(at_deref, expr->loc, expr), ndx);	  
 	}
 	
 	// Careful: tempAst has no real parent. 
@@ -565,7 +565,7 @@ ssa(std::ostream& errStream,
 	// further cases as the sub-expression have already been
 	// SSAed in the previous steps. 
 	SSA(errStream, uoc, tempAst, grandLet, identList, 
-	    NULL, 0, flags);      
+	    sherpa::GC_NULL, 0, flags);      
 	
       }
 
@@ -591,34 +591,34 @@ ssa(std::ostream& errStream,
       ndx = ast->child(1);
 
       
-      GCPtr<AST> lt = new AST(at_ident, ast->loc);
-      GCPtr<AST> unit = new AST(at_unit, ast->loc);
-      GCPtr<AST> IOB = new AST(at_ident, ast->loc);
+      GCPtr<AST> lt = AST::make(at_ident, ast->loc);
+      GCPtr<AST> unit = AST::make(at_unit, ast->loc);
+      GCPtr<AST> IOB = AST::make(at_ident, ast->loc);
 
       lt->s = "__index_lt";
       lt->fqn = FQName("bitc.prelude", "__index_lt");
-      lt->symType = new Type(ty_fn, 
-			     new Type(ty_fnarg, 
-				      new Type(ty_word),
-				      new Type(ty_word)),
-			     new Type(ty_bool));
+      lt->symType = Type::make(ty_fn, 
+			     Type::make(ty_fnarg, 
+				      Type::make(ty_word),
+				      Type::make(ty_word)),
+			     Type::make(ty_bool));
       InstMangle(lt);
 
       IOB->s = "IndexBoundsError";
       IOB->fqn = FQName("bitc.prelude", "IndexBoundsError");
-      IOB->symType = new Type(ty_exn);
+      IOB->symType = Type::make(ty_exn);
       InstMangle(IOB);
 
       GCPtr<AST> len;
       if(ast->astType == at_array_nth)
-	len = new AST(at_array_length, ast->loc, UseCase(expr));
+	len = AST::make(at_array_length, ast->loc, UseCase(expr));
       else
-	len = new AST(at_vector_length, ast->loc, UseCase(expr));
+	len = AST::make(at_vector_length, ast->loc, UseCase(expr));
       
-      GCPtr<AST> ltApp = new AST(at_apply, ast->loc, lt, UseCase(ndx), len);
+      GCPtr<AST> ltApp = AST::make(at_apply, ast->loc, lt, UseCase(ndx), len);
       
-      GCPtr<AST> throwAst = new AST(at_throw, ast->loc, IOB);
-      GCPtr<AST> ifAst = new AST(at_if, ast->loc, ltApp, unit, throwAst);
+      GCPtr<AST> throwAst = AST::make(at_throw, ast->loc, IOB);
+      GCPtr<AST> ifAst = AST::make(at_if, ast->loc, ltApp, unit, throwAst);
       addLB(grandLet, identList, ifAst, LB_IS_DUMMY);      
       
       FEXPR(grandLet) = ast;
@@ -776,18 +776,18 @@ ssa(std::ostream& errStream,
     
   case at_and:
     {
-      GCPtr<AST> ifizedAST = new AST(at_if, ast->child(0)->loc);
+      GCPtr<AST> ifizedAST = AST::make(at_if, ast->child(0)->loc);
       GCPtr<AST> ifAst = ifizedAST;
-      GCPtr<AST> prev = NULL;
+      GCPtr<AST> prev = sherpa::GC_NULL;
       for(c = 0; c < ast->children.size() - 1; c++) {
-	GCPtr<AST> falseAst =  new AST(at_boolLiteral, ast->child(c)->loc);
+	GCPtr<AST> falseAst =  AST::make(at_boolLiteral, ast->child(c)->loc);
 	falseAst->litValue.b = false;
 	falseAst->s = "#f";
-	falseAst->symType = new Type(ty_bool);
+	falseAst->symType = Type::make(ty_bool);
 
 	ifAst->symType = ast->child(c)->symType;
 	ifAst->children.push_back(ast->child(c));
-	ifAst->children.push_back(new AST(at_if, ast->child(c+1)->loc));
+	ifAst->children.push_back(AST::make(at_if, ast->child(c+1)->loc));
 	ifAst->children.push_back(falseAst);
 	prev = ifAst;
 	ifAst = ifAst->child(1);
@@ -806,19 +806,19 @@ ssa(std::ostream& errStream,
     }
   case at_or:
     {
-      GCPtr<AST> ifizedAST = new AST(at_if, ast->child(0)->loc);
+      GCPtr<AST> ifizedAST = AST::make(at_if, ast->child(0)->loc);
       GCPtr<AST> ifAst = ifizedAST;
-      GCPtr<AST> prev = NULL;
+      GCPtr<AST> prev = sherpa::GC_NULL;
       for(c = 0; c < ast->children.size() - 1; c++) {
-	GCPtr<AST> trueAst =  new AST(at_boolLiteral, ast->child(c)->loc);
+	GCPtr<AST> trueAst =  AST::make(at_boolLiteral, ast->child(c)->loc);
 	trueAst->litValue.b = true;
 	trueAst->s = "#t";
-	trueAst->symType = new Type(ty_bool);
+	trueAst->symType = Type::make(ty_bool);
 
 	ifAst->symType = ast->child(c)->symType;
 	ifAst->children.push_back(ast->child(c));
 	ifAst->children.push_back(trueAst);
-	ifAst->children.push_back(new AST(at_if, ast->child(c+1)->loc));
+	ifAst->children.push_back(AST::make(at_if, ast->child(c+1)->loc));
 	prev = ifAst;
 	ifAst = ifAst->child(2);
       }      
@@ -839,9 +839,9 @@ ssa(std::ostream& errStream,
     {
       GCPtr<AST> caselegs = ast->child(0);
       GCPtr<AST> ow = ast->child(1)->child(0);
-      GCPtr<AST> ifizedAST = new AST(at_if, caselegs->loc);
+      GCPtr<AST> ifizedAST = AST::make(at_if, caselegs->loc);
       GCPtr<AST> ifAst = ifizedAST;
-      GCPtr<AST> prev = NULL;
+      GCPtr<AST> prev = sherpa::GC_NULL;
       for(c = 0; c < caselegs->children.size(); c++) {
 	GCPtr<AST> caseleg = caselegs->child(c);	
 	ifAst->loc = caseleg->loc;
@@ -849,7 +849,7 @@ ssa(std::ostream& errStream,
 	ifAst->children.push_back(caseleg->child(0));
 	ifAst->children.push_back(caseleg->child(1));
 
-	ifAst->children.push_back(new AST(at_if,
+	ifAst->children.push_back(AST::make(at_if,
 				       caselegs->child(c)->loc));
 	prev = ifAst;
 	ifAst = ifAst->child(2);	
@@ -1036,10 +1036,10 @@ UocInfo::be_ssaTrans(std::ostream& errStream,
 {  
   bool errFree = true;
 
-  GCPtr<UocInfo> uoc = this;
+  GCPtr<UocInfo> uoc = shared_from_this();
   
-  CHKERR(errFree, ssa(errStream, uoc, uoc->uocAst, NULL, 
-			 NULL, uoc->uocAst, 0, flags));
+  CHKERR(errFree, ssa(errStream, uoc, uoc->uocAst, sherpa::GC_NULL, 
+		      sherpa::GC_NULL, uoc->uocAst, 0, flags));
   
   //errStream << "ATransed AST = " << std::endl 
   //	    << uoc->ast->asString() << std::endl;

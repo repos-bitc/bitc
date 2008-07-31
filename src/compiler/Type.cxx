@@ -63,8 +63,8 @@ using namespace sherpa;
 using namespace std;
 
 unsigned long long Type::typeCount=0;
-GCPtr<Type> Type::Kmono = new Type(ty_kfix);
-GCPtr<Type> Type::Kpoly = new Type(ty_kfix);
+GCPtr<Type> Type::Kmono = Type::make(ty_kfix);
+GCPtr<Type> Type::Kpoly = Type::make(ty_kfix);
 
 static struct {
   const char *nm;
@@ -154,7 +154,7 @@ Type::getRefKind(const Kind valKind)
 GCPtr<const Type> 
 Type::getTypePrim() const
 { 
-  GCPtr<const Type> curr = this;
+  GCPtr<const Type> curr = shared_from_this();
   while(curr->link)
     curr = curr->link;
   
@@ -164,7 +164,7 @@ Type::getTypePrim() const
 GCPtr<Type> 
 Type::getTypePrim()
 { 
-  GCPtr<Type> curr = this;
+  GCPtr<Type> curr = shared_from_this();
   while(curr->link)
     curr = curr->link;
   
@@ -813,7 +813,7 @@ Type::isOfInfiniteType()
 {
   bool infType = false;
 
-  if(getType() != this)
+  if(getType() != shared_from_this())
     return getType()->isOfInfiniteType();
 
   if(mark & MARK6) 
@@ -931,7 +931,7 @@ Type::needsCaptureConversion()
 bool 
 Type::isConcrete()
 {
-  GCPtr< CVector<GCPtr<Type> > > tvs = new CVector<GCPtr<Type> >;
+  GCPtr< CVector<GCPtr<Type> > > tvs = CVector<GCPtr<Type> >::make();
   collectAllftvs(tvs);
   return (tvs->size() == 0);
 }
@@ -939,7 +939,7 @@ Type::isConcrete()
 void 
 Type::SetTvarsTo(GCPtr<Type> t)
 {
-  GCPtr< CVector<GCPtr<Type> > > tvs = new CVector<GCPtr<Type> >;
+  GCPtr< CVector<GCPtr<Type> > > tvs = CVector<GCPtr<Type> >::make();
   collectAllftvs(tvs);
   
   for(size_t i=0; i < tvs->size(); i++)
@@ -949,12 +949,12 @@ Type::SetTvarsTo(GCPtr<Type> t)
 void 
 Type::SetTvarsToUnit()
 {
-  GCPtr< CVector<GCPtr<Type> > > tvs = new CVector<GCPtr<Type> >;
+  GCPtr< CVector<GCPtr<Type> > > tvs = CVector<GCPtr<Type> >::make();
   collectAllftvs(tvs);
   
   for(size_t i=0; i < tvs->size(); i++) {
     GCPtr<Type> ftv = (*tvs)[i]->getType();
-    GCPtr<Type> unit = new Type(ty_unit);
+    GCPtr<Type> unit = Type::make(ty_unit);
     ftv->link = unit;
   }
 }
@@ -982,16 +982,16 @@ comp::comp(const std::string s, GCPtr<Type> t, unsigned long _flags)
 
 #define TYPE_CTR_INIT(k) do {			\
     kind = k;					\
-    defAst = GCPtr<AST>(0);			\
-    arrlen = new ArrLen(0);			\
+    defAst = sherpa::GC_NULL;			\
+    arrlen = ArrLen::make(0);			\
     Isize = 0;					\
     minSignedRep = 0;				\
     minUnsignedRep = 0;				\
     mark = 0;					\
     pMark = 0;					\
-    sp = NULL;					\
-    myContainer = NULL;				\
-    link = 0;					\
+    sp = sherpa::GC_NULL;			\
+    myContainer = sherpa::GC_NULL;		\
+    link = sherpa::GC_NULL;			\
     flags = 0;					\
   } while(0);
 
@@ -1006,15 +1006,15 @@ Type::Type(const Kind k, GCPtr<Type> child)
   : uniqueID(genTypeID())
 {
   TYPE_CTR_INIT(k);
-  components.push_back(new comp(child));
+  components.push_back(comp::make(child));
 }
 
 Type::Type(const Kind k, GCPtr<Type> child1, GCPtr<Type> child2)
   : uniqueID(genTypeID())
 {
   TYPE_CTR_INIT(k);
-  components.push_back(new comp(child1));
-  components.push_back(new comp(child2));
+  components.push_back(comp::make(child1));
+  components.push_back(comp::make(child2));
 }
 
 // Copy constructor, except distinct uniqueID
@@ -1035,12 +1035,12 @@ Type::Type(GCPtr<Type>  t)
   fnDeps = t->fnDeps;
     
   for(size_t i=0; i<t->components.size(); i++)
-    components.push_back(new comp(t->CompName(i), t->CompType(i), t->CompFlags(i)));
+    components.push_back(comp::make(t->CompName(i), t->CompType(i), t->CompFlags(i)));
 
 
   mark = 0;
   pMark = 0;  
-  sp = NULL;
+  sp = sherpa::GC_NULL;
   flags = t->flags;
 }
 
@@ -1049,7 +1049,7 @@ GCPtr<Type>
 Type::getDCopy()
 {
   GCPtr<Type> t = getType();
-  GCPtr<TypeScheme> sigma = new TypeScheme(t, NULL);
+  GCPtr<TypeScheme> sigma = TypeScheme::make(t, sherpa::GC_NULL);
   // sigma's ftvs are empty, therefore, TypeSpecialize will link
   // all type-variables to the original ones
   GCPtr<Type> newTyp = sigma->type_instance_copy();
@@ -1076,7 +1076,8 @@ Type::eql(GCPtr<Type> t, bool verbose, std::ostream &errStream,
 {
   std::stringstream ss;  
   LexLoc internalLocation;
-  bool errFree = unify(ss, trail, internalLocation, this, t, uflags);
+  bool errFree = unify(ss, trail, internalLocation, 
+		       shared_from_this(), t, uflags);
   
   if(!keepSub)
     trail->rollBack();
@@ -1143,7 +1144,7 @@ Type::strictlyEqualsA(GCPtr<Type> t, bool verbose,
 bool
 Type::allTvarsRigid()
 {
-  GCPtr< CVector<GCPtr<Type> > > ftvs = new CVector<GCPtr<Type> >;
+  GCPtr< CVector<GCPtr<Type> > > ftvs = CVector<GCPtr<Type> >::make();
   getType()->collectAllftvs(ftvs);
   for(size_t i=0; i < ftvs->size(); i++) 
     if((ftvs->elem(i)->flags & TY_RIGID) == 0)

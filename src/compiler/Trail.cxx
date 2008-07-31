@@ -106,7 +106,7 @@ Trail::rollBack(size_t upto)
   assert(upto <= vec.size());
   
   for(size_t i = upto; i < vec.size(); i++) {
-    vec[i]->link = NULL;
+    vec[i]->link = sherpa::GC_NULL;
     TRAIL_DEBUG 
       std::cerr << "[RB] Releasing: "
 		<< vec[i]->asString(Options::debugTvP)
@@ -121,7 +121,7 @@ Trail::release(const size_t n, GCPtr<Type> rel)
 {
   assert(vec[n] == rel); // not getType()
   
-  rel->link = NULL;
+  rel->link = sherpa::GC_NULL;
   
   TRAIL_DEBUG 
     std::cerr << "[RB] Releasing: "

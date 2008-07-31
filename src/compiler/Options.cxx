@@ -71,7 +71,7 @@ namespace Options {
   bool Wall = false;
   bool noGC = false;
   bool noAlloc = false;
-  GCPtr<TvPrinter> debugTvP = new TvPrinter;
+  GCPtr<TvPrinter> debugTvP = TvPrinter::make();
   bool heuristicInference = false;
 
   vector<string> LinkPreOptionsGCC;

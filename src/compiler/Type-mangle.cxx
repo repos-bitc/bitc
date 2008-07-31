@@ -70,7 +70,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
   stringstream ss;
   
-  if(getType() != this)
+  if(getType() != shared_from_this())
     return getType()->mangledString(igMut, igTlMut, maxArgMut);
 
   if(mark & MARK5) {

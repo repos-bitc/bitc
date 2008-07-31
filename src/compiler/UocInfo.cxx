@@ -88,8 +88,8 @@ UocInfo::UocInfo(const std::string& _uocName, const std::string& _origin,
 {
   lastCompletedPass = pn_none;
   uocAst = _uocAst;
-  env = 0;
-  gamma = 0;
+  env = sherpa::GC_NULL;
+  gamma = sherpa::GC_NULL;
 
   uocName = _uocName;
   origin = _origin;
@@ -114,14 +114,14 @@ GCPtr<UocInfo>
 UocInfo::CreateUnifiedUoC()
 {
   LexLoc loc;
-  GCPtr<AST> ast = new AST(at_module, loc);
+  GCPtr<AST> ast = AST::make(at_module, loc);
 
   std::string uocName = "*emit*";
-  GCPtr<UocInfo> uoc = new UocInfo(uocName, "*internal*", ast);
+  GCPtr<UocInfo> uoc = UocInfo::make(uocName, "*internal*", ast);
 
-  uoc->env = new ASTEnvironment(uocName);
-  uoc->gamma = new TSEnvironment(uocName);
-  uoc->instEnv = new InstEnvironment(uocName);
+  uoc->env = ASTEnvironment::make(uocName);
+  uoc->gamma = TSEnvironment::make(uocName);
+  uoc->instEnv = InstEnvironment::make(uocName);
 
   uoc->env = uoc->env->newDefScope();
   uoc->gamma = uoc->gamma->newDefScope();
@@ -211,7 +211,7 @@ UocInfo::findInterface(const std::string& ifName)
 {
   UocMap::iterator itr = UocInfo::ifList.find(ifName);
   if (itr == UocInfo::ifList.end())
-    return NULL;
+    return sherpa::GC_NULL;
 
   return itr->second;
 }

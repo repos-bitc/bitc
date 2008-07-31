@@ -90,7 +90,7 @@ Instance::equals(std::ostream &errStream, GCPtr<Instance> ins,
   
   std::stringstream ss;
   CHKERR(unifies, mySigma->solvePredicates(ss, ast->loc, 
-					   instEnv, new Trail)); 
+					   instEnv, Trail::make())); 
   
   if(!unifies)
     return false;
@@ -121,7 +121,7 @@ Instance::satisfies(std::ostream &errStream,
   std::stringstream ss;
   LexLoc internalLocation;
   CHKERR(unifies, sigma->solvePredicates(ss, internalLocation, 
-					 instEnv, new Trail));
+					 instEnv, Trail::make()));
   
   if(!unifies)
     return false;
@@ -135,7 +135,7 @@ Instance::satisfies(std::ostream &errStream,
 bool 
 Typeclass::addFnDep(GCPtr<Type> dep) 
 {
-  if(getType() != this)
+  if(getType() != shared_from_this())
     return getType()->addFnDep(dep); // getType() OK
   
   size_t c;
@@ -194,8 +194,8 @@ TCConstraints::close(TypeSet& closure,
       GCPtr<Type> fnDep = (*itr)->getType();
       GCPtr<Type> fnDepArgs = fnDep->Args()->getType();
       GCPtr<Type> fnDepRet = fnDep->Ret()->getType();      
-      GCPtr< CVector <GCPtr<Type> > > argTvs = new CVector <GCPtr<Type> >;
-      GCPtr< CVector <GCPtr<Type> > > retTvs = new CVector <GCPtr<Type> >;
+      GCPtr< CVector <GCPtr<Type> > > argTvs = CVector <GCPtr<Type> >::make();
+      GCPtr< CVector <GCPtr<Type> > > retTvs = CVector <GCPtr<Type> >::make();
       fnDepArgs->collectAllftvs(argTvs);      
       bool foundAll = true;
       for(size_t j=0; j < argTvs->size(); j++) {

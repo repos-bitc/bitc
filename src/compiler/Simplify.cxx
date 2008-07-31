@@ -104,16 +104,16 @@ LetWrap(GCPtr<AST> ast)
   std::stringstream ss;
   ss << "_ltmp" << ltmpCounter++;
 
-  GCPtr<AST> let = new AST(at_let, ast->loc);
-  GCPtr<AST> letBindings = new AST(at_letbindings, ast->loc);
-  GCPtr<AST> binding = new AST(at_letbinding, ast->loc);
-  GCPtr<AST> idPattern = new AST(at_identPattern, ast->loc);
-  GCPtr<AST> id = new AST(at_ident, ast->loc);
-  GCPtr<AST> useid = new AST(at_ident, ast->loc);
+  GCPtr<AST> let = AST::make(at_let, ast->loc);
+  GCPtr<AST> letBindings = AST::make(at_letbindings, ast->loc);
+  GCPtr<AST> binding = AST::make(at_letbinding, ast->loc);
+  GCPtr<AST> idPattern = AST::make(at_identPattern, ast->loc);
+  GCPtr<AST> id = AST::make(at_ident, ast->loc);
+  GCPtr<AST> useid = AST::make(at_ident, ast->loc);
 
   let->addChild(letBindings);
   let->addChild(useid);
-  let->addChild(new AST(at_constraints));
+  let->addChild(AST::make(at_constraints));
 
   letBindings->addChild(binding);
 

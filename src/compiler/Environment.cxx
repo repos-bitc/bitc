@@ -57,7 +57,7 @@ Environment<T>::getLocalBinding(const std::string& nm) const
   if (itr != bindings.end())
     return itr->second;
 
-  return NULL;
+  return sherpa::GC_NULL;
 }
 
 template<class T>
@@ -72,7 +72,7 @@ Environment<T>::doGetBinding(const std::string& nm) const
   if (parent)
     return parent->doGetBinding(nm);
 
-  return NULL;
+  return sherpa::GC_NULL;
 }
 
 template<class T>
@@ -123,7 +123,7 @@ Environment<T>::addBinding(const std::string& nm,
     }
   }
 
-  bindings[nm] = new Binding<T>(nm, val);
+  bindings[nm] = Binding<T>::make(nm, val);
   latest = bindings[nm]; 
 }
 
@@ -148,8 +148,8 @@ template<class T>
 GCPtr<Environment<T> > 
 Environment<T>::newScope()
 {
-  GCPtr<Environment<T> > nEnv = new Environment<T>(uocName);
-  nEnv->parent = this;
+  GCPtr<Environment<T> > nEnv = Environment<T>::make(uocName);
+  nEnv->parent = this->shared_from_this();
   nEnv->defEnv = defEnv;
 
   return nEnv;

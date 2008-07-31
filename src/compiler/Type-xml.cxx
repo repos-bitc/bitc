@@ -72,7 +72,7 @@ void
 Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out) 
 { 
   if(Options::rawTvars)
-    tvP = 0;
+    tvP = sherpa::GC_NULL;
 
   GCPtr<Type> t = getType();
 
@@ -411,7 +411,7 @@ void
 TypeScheme::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 {
   normalize();
-  GCPtr<TCConstraints> _tcc = new TCConstraints;
+  GCPtr<TCConstraints> _tcc = TCConstraints::make();
   out << "<TS>" << endl;
   out.more();
   
@@ -454,7 +454,7 @@ TypeScheme::asXML(GCPtr<TvPrinter> tvP)
 void 
 Instance::asXML(INOstream &out)
 {
-  ts->asXML(NULL, out);
+  ts->asXML(sherpa::GC_NULL, out);
 }
 
 std::string 

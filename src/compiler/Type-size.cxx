@@ -57,7 +57,7 @@ calc_struct_size(const GCPtr<Type> t)
 {
   size_t start=0;
   size_t sz = 0;
-  GCPtr<AST> base = NULL;
+  GCPtr<AST> base = sherpa::GC_NULL;
 
   if(t->kind == ty_structv) {
     start = 0;
@@ -147,7 +147,7 @@ calc_unin_size(const GCPtr<Type> t)
 size_t
 Type::size() 
 { 
-  if(getType() != this)
+  if(getType() != shared_from_this())
     return link->getType()->size();
 
   if(mark & MARK21)
@@ -233,13 +233,13 @@ Type::size()
       //       theSize += defAst->total_fill;
       //       break;
       
-      theSize = calc_struct_size(this);
+      theSize = calc_struct_size(shared_from_this());
       break;
     }
 
   case ty_unionv: 
     {
-      theSize = calc_unin_size(this);
+      theSize = calc_unin_size(shared_from_this());
       break;
     }
 

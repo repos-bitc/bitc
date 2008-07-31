@@ -225,7 +225,7 @@ remftvsWrtFnDeps(GCPtr<CVector<GCPtr<Type> > > &ftvs,
       itr != fnDeps.end(); ++itr) {
     GCPtr<Type> fnDep = (*itr);
     GCPtr<CVector<GCPtr<Type> > > tvs =
-      new CVector<GCPtr<Type> >;
+      CVector<GCPtr<Type> >::make();
     fnDep->collectAllftvs(tvs);
     for(size_t j=0; j < tvs->size(); j++) {
       GCPtr<Type> tv = (*tvs)[j];
@@ -236,7 +236,7 @@ remftvsWrtFnDeps(GCPtr<CVector<GCPtr<Type> > > &ftvs,
 
   TCConstraints::close(closure, fnDeps);
   
-  GCPtr<CVector<GCPtr<Type> > > newFtvs = new CVector<GCPtr<Type> >;
+  GCPtr<CVector<GCPtr<Type> > > newFtvs = CVector<GCPtr<Type> >::make();
   for(size_t i=0; i < ftvs->size(); i++) {
     GCPtr<Type> ftv = ftvs->elem(i)->getType();
     if(closure.find(ftv) == closure.end())
@@ -306,7 +306,7 @@ TypeScheme::removeUnInstFtvs()
       }
   }
 
-  GCPtr< CVector< GCPtr<Type> > > newTvs = new CVector < GCPtr<Type> >;
+  GCPtr< CVector< GCPtr<Type> > > newTvs = CVector < GCPtr<Type> >::make();
   for(size_t c=0; c < ftvs->size(); c++) {
     GCPtr<Type> ftv = Ftv(c)->getType();
     if(ftv->flags & TY_CLOS) {
@@ -341,7 +341,7 @@ TypeScheme::normalizeConstruction(GCPtr<Trail> trail)
     ct->markSignMbs(true);
   }
 
-  GCPtr< CVector< GCPtr<Type> > > newTvs = new CVector < GCPtr<Type> >;
+  GCPtr< CVector< GCPtr<Type> > > newTvs = CVector < GCPtr<Type> >::make();
   for(size_t c=0; c < ftvs->size(); c++) {
     GCPtr<Type> ftv = Ftv(c)->getType();
     if((ftv->flags & TY_COERCE) == 0)
@@ -541,10 +541,10 @@ TypeScheme::generalize(std::ostream& errStream,
   // Step 2
   GEN_STEP(mode, gs_pcst) {
     if(!tau->isDeepMut() && !tau->isDeepImmut()) {
-      GCPtr<Type> pcst = new Constraint(ty_pcst); 
-      pcst->components.push_back(new comp(new Type(ty_kvar)));
-      pcst->components.push_back(new comp(tau)); // General Type
-      pcst->components.push_back(new comp(tau)); // Instantiation Type
+      GCPtr<Type> pcst = Constraint::make(ty_pcst); 
+      pcst->components.push_back(comp::make(Type::make(ty_kvar)));
+      pcst->components.push_back(comp::make(tau)); // General Type
+      pcst->components.push_back(comp::make(tau)); // Instantiation Type
       tcc->addPred(pcst);
       
       GEN_DEBUG errStream << "[2] With Pcst: " 
@@ -660,11 +660,11 @@ TypeScheme::generalize(std::ostream& errStream,
 
       if(ftvs->size()) {
 	GCPtr< CVector< GCPtr<Type> > > dummys = ftvs;
-	ftvs = new CVector< GCPtr<Type> >;
+	ftvs = CVector< GCPtr<Type> >::make();
 	
 	for(size_t i=0; i < dummys->size(); i++) {
 	  GCPtr<Type> ftv = dummys->elem(i)->getType();
-	  ftv->link = new Type(ty_dummy);
+	  ftv->link = Type::make(ty_dummy);
 	}
 	
 	errStream << errLoc << ": WARNING: The type of"
@@ -769,7 +769,7 @@ generalizePat(std::ostream& errStream,
   // Make a temporary typeScheme for the pattern.
   // Individual identifiers' TypeScheme will be updated after the 
   // pattern is generalized as a whole.
-  GCPtr<TypeScheme> sigma = new TypeScheme(bp->symType, bp, tcc);
+  GCPtr<TypeScheme> sigma = TypeScheme::make(bp->symType, bp, tcc);
   
   CHKERR(errFree, 
 	 sigma->generalize(errStream, errLoc, 
@@ -820,7 +820,7 @@ TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
   for(TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     GCPtr<Typeclass> pred = (*itr)->getType();
-    GCPtr< CVector< GCPtr<Type> > > allFtvs = new CVector<GCPtr<Type> >;
+    GCPtr< CVector< GCPtr<Type> > > allFtvs = CVector<GCPtr<Type> >::make();
     pred->collectAllftvs(allFtvs);
     
     assert(allFtvs->size() != 0);
@@ -975,7 +975,7 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
 			 GCPtr<CVector<GCPtr<Type> > > nftvs)
 {
   GCPtr<Type> t = getType();
-  GCPtr<Type> theType = new Type(t);
+  GCPtr<Type> theType = Type::make(t);
   theType->flags &= ~TY_SP_MASK;
   theType->typeArgs.clear();
   theType->components.clear();
@@ -999,11 +999,11 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
     case ty_pcst:
       {
 	// the let-kind and generic type are added as is.
-	theType->components.push_back(new comp(t->CompType(0)));
-	theType->components.push_back(new comp(t->CompType(1)));
+	theType->components.push_back(comp::make(t->CompType(0)));
+	theType->components.push_back(comp::make(t->CompType(1)));
 	// The instance of the constraint is specialized.
 	GCPtr<Type> ins = t->CompType(2)->TypeSpecializeReal(ftvs, nftvs);
-	theType->components.push_back(new comp(ins));
+	theType->components.push_back(comp::make(ins));
 	break;
       }
     case ty_tvar:
@@ -1037,10 +1037,10 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
             
 	/* Deal with Components */
 	for(size_t i=0; i<t->components.size(); i++) {
-	  comp *nComp = 
-	    new comp(t->CompName(i),
-		     t->CompType(i)->TypeSpecializeReal(ftvs, nftvs),
-		     t->CompFlags(i));
+	  GCPtr<comp> nComp = 
+	    comp::make(t->CompName(i),
+		       t->CompType(i)->TypeSpecializeReal(ftvs, nftvs),
+		       t->CompFlags(i));
 	  theType->components.push_back(nComp);
 	}
 
@@ -1068,9 +1068,9 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
   }
   
   INS_DEBUG std::cout << "\t Specialized " 
-		      << getType()->asString(NULL) 
+		      << getType()->asString(sherpa::GC_NULL)
 		      << " to " 
-		      << retType->getType()->asString(NULL) 
+		      << retType->getType()->asString(sherpa::GC_NULL)
 		      << std::endl;
   
   return retType;
@@ -1084,7 +1084,7 @@ Type::clear_sp()
   if(!t->sp)
     return;
 
-  t->sp = NULL;
+  t->sp = sherpa::GC_NULL;
 
   for(size_t i=0; i<t->typeArgs.size(); i++)
     t->TypeArg(i)->clear_sp();
