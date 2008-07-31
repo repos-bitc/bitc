@@ -93,16 +93,16 @@ static GCPtr<AST>
 getTypeAst(GCPtr<AST> fld)
 {
   switch(fld->astType) {
-    case at_field:
+  case at_field:
     return fld->child(1);
     
-    case at_fill:
-    case at_reserved:
+  case at_fill:
+  case at_reserved:
     return fld->child(0);
 
-    default:
+  default:
     assert(false);
-    return NULL;
+    return GC_NULL;
   }
 }
 
@@ -231,13 +231,17 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
 	GCPtr<AST> ctrc = ctrs->child(c);
 	
 	GCPtr< CVector< GCPtr< Pair<std::string, size_t> > > > when = 
-	  new CVector< GCPtr< Pair< std::string, size_t> > >;
+	  CVector< GCPtr< Pair< std::string, size_t> > >::make();
 	
 	for(size_t i=1; i < ctrc->children.size(); i++) {
 	  GCPtr<AST> fldi = ctrc->child(i);
 	  if(fldi->Flags2 & FLD_IS_DISCM) {
 	    assert(fldi->astType == at_field);
-	    when->append(new Pair<std::string, size_t>(fldi->child(0)->s, fldi->unin_discm));
+
+	    Pair<std::string, size_t> *tmp =
+	      new Pair<std::string, size_t>(fldi->child(0)->s, fldi->unin_discm);
+	    GCPtr<Pair<std::string, size_t> > newPair(tmp);
+	    when->append(newPair);
 	  }
 	}
 	

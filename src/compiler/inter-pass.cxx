@@ -148,7 +148,7 @@ UocInfo::RandTexpr(std::ostream& errStream,
 		   GCPtr<EnvSet> altEnvSet)
 {
   bool errFree = true;
-  GCPtr<UocInfo> myUoc = new UocInfo(this);
+  GCPtr<UocInfo> myUoc = UocInfo::make(shared_from_this());
   myUoc->uocAst = expr;
   
   if(altEnvSet) {

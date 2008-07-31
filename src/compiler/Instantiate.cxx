@@ -348,7 +348,7 @@ UocInfo::lookupByFqn(const string& fqn, GCPtr<UocInfo> &targetUoc)
   string::size_type lastDot = fqn.rfind('.');
   string ifName = fqn.substr(0, lastDot);
   string idName = fqn.substr(lastDot+1, fqn.size());
-  targetUoc = NULL;
+  targetUoc = sherpa::GC_NULL;
 
  
   // Search all Interfaces and source modules serially for the AST
@@ -399,7 +399,7 @@ UocInfo::lookupByFqn(const string& fqn, GCPtr<UocInfo> &targetUoc)
     return def->defForm;
   }
   
-  return 0;
+  return GC_NULL;
 }
 
 // Get the Instantiated name for the polyinstantiated AST in the 
@@ -531,7 +531,7 @@ name2fqn(GCPtr<AST> ast)
                   MORE HELPER FUNCTIONS AND MACROS
 *******************************************************************/
 
-#define UNIFIED_ENVS NULL
+#define UNIFIED_ENVS sherpa::GC_NULL
 
 // Warning: The following macros need local errStream
 #define RANDT_DROP(expr, mess, env) do {		\
@@ -690,12 +690,16 @@ tvarInst(GCPtr<AST> ast, GCPtr<AST> scope,
 	  return newBinds[i]->snd->Use();	
       }
       
-      GCPtr<Type> newTV = new Type(ty_tvar);
+      GCPtr<Type> newTV = Type::make(ty_tvar);
       GCPtr<AST> newTvAst = newTV->asAST(ast->loc, 
-				   new TvPrinter(false));
+				   TvPrinter::make(false));
       newTvAst->symbolDef = newTvAst;
       newTvAst->Flags2 |= TVAR_IS_DEF | TVAR_POLY_SPECIAL;
-      newBinds.append(new Pair<GCPtr<AST> , GCPtr<AST> >(def, newTvAst));
+
+      Pair<GCPtr<AST> , GCPtr<AST> > *tmp =
+	new Pair<GCPtr<AST> , GCPtr<AST> >(def, newTvAst);
+      GCPtr<Pair<GCPtr<AST> , GCPtr<AST> > > newPair(tmp);
+      newBinds.append(newPair);
       return newTvAst;
     }
     
@@ -735,28 +739,28 @@ buildNewDeclaration(GCPtr<AST> def, GCPtr<Type> typ)
   assert(ident->isGlobal());
 
   NAMKARAN(ident, getInstName(ident, typ));
-  GCPtr<AST> decl = NULL;
+  GCPtr<AST> decl = sherpa::GC_NULL;
   
   switch(def->astType) {
   case at_define:
   case at_recdef:
   case at_proclaim:
   case at_defexception:
-    decl = new AST(at_proclaim, def->loc, ident,
+    decl = AST::make(at_proclaim, def->loc, ident,
 		   typeAsAst(typ, ident->loc),
-		   new AST(at_constraints, def->loc));
+		   AST::make(at_constraints, def->loc));
     break;
 
   case at_declstruct:
-    decl = new AST(at_declstruct, def->loc, ident,
-		   new AST(at_tvlist, ident->loc),
-		   new AST(at_constraints, def->loc));
+    decl = AST::make(at_declstruct, def->loc, ident,
+		   AST::make(at_tvlist, ident->loc),
+		   AST::make(at_constraints, def->loc));
     break;
 
   case at_declunion:
-    decl = new AST(at_declunion, def->loc, ident,
-		   new AST(at_tvlist, ident->loc),
-		   new AST(at_constraints, def->loc));
+    decl = AST::make(at_declunion, def->loc, ident,
+		   AST::make(at_tvlist, ident->loc),
+		   AST::make(at_constraints, def->loc));
     break;
 
   default:
@@ -783,7 +787,7 @@ getIDFromInstantiation(GCPtr<AST> oldDefID, GCPtr<AST> newDef)
     oldDef->children[4] = oldDef->children[4];
     GCPtr<AST> oldCtrs = oldDef->child(4);
     GCPtr<AST> newCtrs = newDef->child(4);
-    GCPtr<AST> newCtr = NULL;
+    GCPtr<AST> newCtr = sherpa::GC_NULL;
     for(size_t c=0; c < oldCtrs->children.size(); c++)
       if(oldCtrs->child(c)->child(0) == oldDefID)
 	newCtr = newCtrs->child(c)->child(0);
@@ -804,7 +808,7 @@ getIDFromInstantiation(GCPtr<AST> oldDefID, GCPtr<AST> newDef)
 static GCPtr<AST> 
 getOuterLet(GCPtr<AST> ast)
 {
-  GCPtr<AST> outerLet=NULL;
+  GCPtr<AST> outerLet = sherpa::GC_NULL;
   switch(ast->astType) {
   case at_ident:
     assert(!ast->symbolDef);
@@ -1055,7 +1059,7 @@ UocInfo::recInstantiate(ostream &errStream,
 	  errStream << "COERCING " 
 		    << ast->symType->asString(Options::debugTvP) 
 		    << " to ";
-	ast->symType->adjMaybe(new Trail, false, false, true);
+	ast->symType->adjMaybe(Trail::make(), false, false, true);
 	ast->symType->SetTvarsToUnit();
 	INST_DEBUG
 	  errStream << ast->symType->asString(Options::debugTvP) 
@@ -1166,7 +1170,7 @@ UocInfo::recInstantiate(ostream &errStream,
 	GCPtr<AST> typeAST = typeAsAst(ast->child(0)->symType,
 				       ast->child(1)->loc);
 	if(ast->child(1)->astType == at_byrefType)
-	  ast->child(1) = new AST(at_byrefType, 
+	  ast->child(1) = AST::make(at_byrefType, 
 				  typeAST->loc, typeAST);
 	else
 	  ast->child(1) = typeAST;
@@ -1218,7 +1222,7 @@ UocInfo::recInstantiate(ostream &errStream,
 	  errStream << "Lit-COERCING " 
 		    << ast->symType->asString(Options::debugTvP) 
 		    << " to ";
-	ast->symType->adjMaybe(new Trail, false, false, true);
+	ast->symType->adjMaybe(Trail::make(), false, false, true);
 	INST_DEBUG
 	  errStream << ast->symType->asString(Options::debugTvP) 
 		    << endl;
@@ -1226,7 +1230,7 @@ UocInfo::recInstantiate(ostream &errStream,
 
       assert(ast->symType->isConcrete());
 
-      ast = new AST(at_tqexpr, ast->loc, ast,
+      ast = AST::make(at_tqexpr, ast->loc, ast,
 		    typeAsAst(ast->symType, ast->loc));
       RANDT_DROP(ast, "[[IntFloat R&T]]", UNIFIED_ENVS);
       break;	
@@ -1254,11 +1258,11 @@ UocInfo::recInstantiate(ostream &errStream,
       GCPtr<AST> originalLbs = ast->child(0);
       GCPtr<AST> originalExpr = ast->child(1);
 
-      GCPtr<AST> newLet = new AST(ast->astType, ast->loc,
-			    new AST(at_letbindings, 
+      GCPtr<AST> newLet = AST::make(ast->astType, ast->loc,
+			    AST::make(at_letbindings, 
 				    originalLbs->loc),
 			    originalExpr,
-			    new AST(at_constraints,
+			    AST::make(at_constraints,
 				    ast->child(2)->loc)); 
       
       GCPtr<AST> newLbs = newLet->child(0);
@@ -1268,7 +1272,7 @@ UocInfo::recInstantiate(ostream &errStream,
       ast->child(1) = newLet;
       
       // We re-built the let-expression, So, remark all defForms.
-      findDefForms(ast, NULL, ast->defForm);      
+      findDefForms(ast, sherpa::GC_NULL, ast->defForm);      
 
       INST_DEBUG
 	errStream << "recInstantiate: WrappedLet =  "
@@ -1487,7 +1491,7 @@ UocInfo::doInstantiate(ostream &errStream,
   // definition to instantiate. ex: In the case of
   // constructors, entire union must be instantiated. Special
   // handling is necessary for methods, etc.
-  GCPtr<AST> def = getDefToInstantiate(errStream, this, ast, typ);
+  GCPtr<AST> def = getDefToInstantiate(errStream, shared_from_this(), ast, typ);
   
   assert((def->astType != at_deftypeclass) || 
 	 (def->astType == at_definstance));
@@ -1596,7 +1600,7 @@ UocInfo::doInstantiate(ostream &errStream,
   //          R&Ted independent of the let-wrapper. There is no
   //          environment there.
   
-  GCPtr<AST> alreadyInstantiated=NULL;
+  GCPtr<AST> alreadyInstantiated = sherpa::GC_NULL;
   if(globalInst)
     alreadyInstantiated = env->getBinding(newName);
   else {
@@ -1639,7 +1643,7 @@ UocInfo::doInstantiate(ostream &errStream,
     // some day.
     if(!globalInst) {
       GCPtr<AST> res = ast->getDCopy();
-      res->symbolDef = NULL;
+      res->symbolDef = sherpa::GC_NULL;
       NAMKARAN(res, newName);
 
       INST_DEBUG
@@ -1953,8 +1957,8 @@ UocInfo::doInstantiate(ostream &errStream,
     // Now we have the newly instantiated AST to be added to our
     // environment. Before that, perform some cleanup in order to
     // eliminate any references to the old module.  
-    copy->getID()->decl = NULL;
-    copy->getID()->defn = NULL;
+    copy->getID()->decl = sherpa::GC_NULL;
+    copy->getID()->defn = sherpa::GC_NULL;
     
     // FINALLY, add the new form to my UOC in the case
     addTopLevelForm(copy);
@@ -2032,7 +2036,7 @@ UocInfo::instantiateFQN(ostream &errStream,
 			   const string& epName)
 {
   bool errFree = true;
-  GCPtr<UocInfo> targetUoc = NULL;    
+  GCPtr<UocInfo> targetUoc = sherpa::GC_NULL;
   GCPtr<AST> def = UocInfo::lookupByFqn(epName, targetUoc);
 
   if (!def) {
@@ -2075,7 +2079,7 @@ UocInfo::instantiate(ostream &errStream,
 		     const string& epName)
 {
   bool errFree = true;
-  UpdateMegaEnvs(this);
+  UpdateMegaEnvs(shared_from_this());
 
   CHKERR(errFree, instantiateFQN(errStream, epName));  
     
@@ -2097,7 +2101,7 @@ UocInfo::instantiateBatch(ostream &errStream,
 			  set<string>& epNames)
 {
   bool errFree = true;
-  UpdateMegaEnvs(this);
+  UpdateMegaEnvs(shared_from_this());
   
   /// The following symbols are introduced by code that is added in the
   /// SSA pass. This code is added @em after polyinstantiation, and

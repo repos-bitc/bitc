@@ -102,7 +102,7 @@ warnUnresRef(std::ostream& errStream,
 static GCPtr<UocInfo>
 findInterface(std::ostream& errStream, GCPtr<AST> ifAst)
 {
-  GCPtr<UocInfo> iface=NULL;
+  GCPtr<UocInfo> iface=GC_NULL;
 
   UocMap::iterator itr = UocInfo::ifList.find(ifAst->s);
   if (itr != UocInfo::ifList.end()) {
@@ -116,7 +116,7 @@ findInterface(std::ostream& errStream, GCPtr<AST> ifAst)
 	      << "Interface " << ifAst->s
 	      << " has NOT been processed"
 	      << std::endl;
-    return NULL;
+    return GC_NULL;
   }
   
   if(!iface->env || !iface->gamma || !iface->instEnv) { 
@@ -125,7 +125,7 @@ findInterface(std::ostream& errStream, GCPtr<AST> ifAst)
 	      << "Interface " << ifAst->s
 	      << " has at least one NULL environment"
 	      << std::endl;
-    return NULL;
+    return GC_NULL;
   }
   
   ifAst->envs.env = iface->env;
@@ -207,7 +207,7 @@ importIfBinding(std::ostream& errStream,
   // Need to form the canonical duplicate environment in the current
   // importing UoC for this interface.
   GCPtr<ASTEnvironment > dupEnv = 
-    new ASTEnvironment(ifName->envs.env->uocName);
+    ASTEnvironment::make(ifName->envs.env->uocName);
 
   for(ASTEnvironment::iterator itr = ifName->envs.env->begin();
       itr != ifName->envs.env->end(); ++itr) {
@@ -707,7 +707,7 @@ resolve(std::ostream& errStream,
 	  if(def->Flags & ID_IS_TVAR) {	    	    
 	    assert(currLB);
 	    
-	    GCPtr<AST> thisLB = NULL;
+	    GCPtr<AST> thisLB = GC_NULL;
 	    if(def->tvarLB->envs.env->isAncestor(currLB->envs.env))
 	      thisLB = currLB;
 	    else
@@ -745,7 +745,7 @@ resolve(std::ostream& errStream,
       GCPtr<AST> iface = ast->child(0);
       
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, id_interface, 
-	      NULL, flags);
+	      GC_NULL, flags);
       if(!errorFree)
 	break;
 
@@ -788,7 +788,7 @@ resolve(std::ostream& errStream,
       // match agt_definition*
       for (size_t c = 1; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
-		NULL, flags);
+		GC_NULL, flags);
 
       break;
     }
@@ -799,7 +799,7 @@ resolve(std::ostream& errStream,
       // match agt_definition*
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
-		NULL, flags);
+		GC_NULL, flags);
 
 #if 0
       if((flags & NO_RESOLVE_DECL) == 0)	
@@ -986,7 +986,7 @@ resolve(std::ostream& errStream,
       // The exception value is defined and is complete
       
       // match at_fields+
-      GCPtr< CVector<std::string> > names = new CVector<std::string>;
+      GCPtr< CVector<std::string> > names = CVector<std::string>::make();
       names->append(ast->child(0)->s);
       for (size_t c = 1; c < ast->children.size(); c++) {
 	GCPtr<AST> field = ast->child(c);
@@ -1251,7 +1251,7 @@ resolve(std::ostream& errStream,
       }
       
       RESOLVE(idAst, tmpEnv, lamLevel, DEF_MODE,
-	      id_interface, NULL, flags);
+	      id_interface, GC_NULL, flags);
       idAst->ifName = ifAst->s;
       // The interface name must not be exported
       env->setFlags(idAst->s,
@@ -1262,7 +1262,7 @@ resolve(std::ostream& errStream,
       idAst->envs.gamma = ifAst->envs.gamma;
       idAst->envs.instEnv = ifAst->envs.instEnv;
 
-      aliasPublicBindings(idAst->s, NULL, idAst->envs.env, tmpEnv);
+      aliasPublicBindings(idAst->s, GC_NULL, idAst->envs.env, tmpEnv);
       env->mergeBindingsFrom(tmpEnv);
       break;
     }
@@ -2489,7 +2489,7 @@ initEnv(std::ostream& errStream,
   
   //  cout << "Processing " << ast->child(0)->s << std::endl;
   // "use" everything in the prelude
-  GCPtr<ASTEnvironment > preenv = 0;
+  GCPtr<ASTEnvironment > preenv = GC_NULL;
   size_t i;
 
   {
@@ -2530,7 +2530,7 @@ UocInfo::fe_symresolve(std::ostream& errStream,
   if(Options::noPrelude)
     flags |= SYM_NO_PRELUDE;
   
-  GCPtr<ASTEnvironment > aliasEnv = new ASTEnvironment("*aliases*");
+  GCPtr<ASTEnvironment > aliasEnv = ASTEnvironment::make("*aliases*");
 
   if(init) {    
     if(flags & SYM_REINIT) {
@@ -2539,15 +2539,15 @@ UocInfo::fe_symresolve(std::ostream& errStream,
       env = env->parent->newDefScope();
     }
     else {
-      env = new ASTEnvironment(this->uocName);
+      env = ASTEnvironment::make(uocName);
     }      
 
     if((flags & SYM_NO_PRELUDE) == 0)
       initEnv(std::cerr, uocAst, aliasEnv, env);
   }
   
-  CHKERR(errFree, resolve(errStream, uocAst, aliasEnv, env, NULL, 
-			  USE_MODE, id_type, NULL, flags));
+  CHKERR(errFree, resolve(errStream, uocAst, aliasEnv, env, GC_NULL, 
+			  USE_MODE, id_type, GC_NULL, flags));
 
   return errFree;
 }
