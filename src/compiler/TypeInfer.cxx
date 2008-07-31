@@ -508,7 +508,7 @@ matchDefDecl(std::ostream& errStream,
   if(flags & DEF_DECL_NO_MATCH)
     return true;  
   
-  if(declSigma->ftvs->size() != defSigma->ftvs->size()) {
+  if(declSigma->ftvs.size() != defSigma->ftvs.size()) {
     errorFree = false;
   }
   else {
@@ -557,14 +557,17 @@ matchDefDecl(std::ostream& errStream,
     // 2) DECL: \/'a,'b. 'a -> 'b -> 'b
     //    DEF:  \/'a,'b. 'a -> 'a -> 'b
     //    POST UNIFY: \/'a. 'a -> 'a -> 'a
-    for(size_t i=0; errorFree && i < defTS->ftvs->size(); i++) {
-      GCPtr<Type> ftv = defTS->Ftv(i)->getType();
-      CHKERR(errorFree, (ftv->kind == ty_tvar));
-      
-      for(size_t j=i+1; errorFree && j < defTS->ftvs->size(); j++) {
-	GCPtr<Type> jtv = defTS->Ftv(j)->getType();
-	CHKERR(errorFree, (ftv != jtv));
+    {
+      TypeSet gottenTypes;
+
+      for(TypeSet::iterator itr = defTS->ftvs.begin(); 
+	  errorFree && itr != defTS->ftvs.end(); ++itr) {
+	GCPtr<Type> ftv = (*itr)->getType();
+	gottenTypes.insert(ftv);
+	CHKERR(errorFree, (ftv->kind == ty_tvar));
       }
+
+      CHKERR(errorFree, gottenTypes.size() == defTS->ftvs.size());
     }
   }
 
@@ -625,7 +628,7 @@ addTvsToSigma(std::ostream& errStream, GCPtr<AST> tvList,
     GCPtr<AST> tv = tvList->child(i);
     GCPtr<Type> tvType = tv->symType->getType();
     assert(tvType->kind == ty_tvar);
-    sigma->ftvs->append(tvType);
+    sigma->ftvs.insert(tvType);
   }
 }
 
@@ -986,8 +989,7 @@ InferUnion(std::ostream& errStream, GCPtr<AST> ast,
 	sType->typeArgs.push_back(ctrType->TypeArg(i));
       
       stSigma = TypeScheme::make(sType, ctr, sigma->tcc); 
-      for(size_t i=0; i < ctrSigma->ftvs->size(); i++)
-	stSigma->ftvs->append(ctrSigma->Ftv(i));
+      stSigma->ftvs = ctrSigma->ftvs;
 
       ctr->stCtr = ctr;
       ctr->stSigma = stSigma;
@@ -1365,16 +1367,17 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
       for(TypeSet::iterator itr_d = pred->fnDeps.begin(); 
 	  itr_d != pred->fnDeps.end(); ++itr_d) {
 	GCPtr<Typeclass> fnDep =  (*itr_d);
-	GCPtr< CVector<GCPtr<Type> > > domain = CVector<GCPtr<Type> >::make();
-	GCPtr< CVector<GCPtr<Type> > > range = CVector<GCPtr<Type> >::make();
+	TypeSet domain;
+	TypeSet range;
 	fnDep->Args()->collectAllftvs(domain);
 	fnDep->Ret()->collectAllftvs(range);
 	  
 	//errStream << "  Processing : " << fnDep->asString()
 	//	      << std::endl;
 	  
-	for(size_t j=0; j < range->size(); j++) {
-	  if(!domain->contains(range->elem(j))) {
+	for(TypeSet::iterator itr_j = range.begin();
+	    itr_j != range.end(); ++itr_j) {
+	  if(domain.find(*itr_j) == domain.end()) {
 	    errStream << ast->loc << ": "
 		      << "Invalid Instance. Definition contradicts"
 		      << " with the functional dependency "
@@ -1995,7 +1998,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       CHKERR(errFree, sigma->solvePredicates(errStream, ident->loc,
 					     instEnv, trail)); 
 
-      if (sigma->ftvs->size() && ast->getID()->externalName.size()) {
+      if (sigma->ftvs.size() && ast->getID()->externalName.size()) {
 	errStream << ast->loc << ": Polymorphic declarations may not specify "
 		  << "an external identifier."
 		  << std::endl;
@@ -2076,7 +2079,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		  << std::endl;
       }
       
-      if (sigma->ftvs->size() && ast->getID()->externalName.size()) {
+      if (sigma->ftvs.size() && ast->getID()->externalName.size()) {
 	errStream << ast->loc << ": Polymorphic declarations may not specify "
 		  << "an external identifier."
 		  << std::endl;
@@ -4282,7 +4285,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 		tcc, uflags, trail,  REDEF_MODE, TI_COMP2);
       stIdent->symType = stType;
       stIdent->scheme->tau = stType;
-      assert(stIdent->scheme->ftvs->size() == 0);
+      assert(stIdent->scheme->ftvs.empty());
 
       // match agt_expr
       TYPEINFER(ast->child(1), legGamma, instEnv, impTypes, isVP, 
@@ -4363,7 +4366,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
 	  GCPtr<Type> stType = onlyCtr->symbolDef->stSigma->type_instance_copy();
 	  stIdent->symType = stType;
 	  stIdent->scheme->tau = stType;
-	  assert(stIdent->scheme->ftvs->size() == 0);
+	  assert(stIdent->scheme->ftvs.empty());
 	}
 	
 	GCPtr<AST> expr = theCase->child(1);

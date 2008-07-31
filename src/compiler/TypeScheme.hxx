@@ -56,7 +56,7 @@ struct TypeScheme {
   sherpa::GCPtr<Type> tau;
   sherpa::GCPtr<AST> ast; // Need to maintained the official version here,
                   // Type pointers get linked, typeschemes don't
-  sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > ftvs;
+  TypeSet ftvs;
   
   // Type class constraints 
   // Note: Leave this as a pointer, not an embedded vector.
@@ -137,6 +137,7 @@ struct TypeScheme {
   // satisfied and no longer need to be present.
   bool normalize();
 
+#if 0
   /* FIX: THIS MUST NEVER BE USED IN lhs OF ASSIGNMENT! */
   /* PUBLIC Accessors (Convenience Forms) */
   sherpa::GCPtr<Type> & Ftv(size_t i)
@@ -148,6 +149,7 @@ struct TypeScheme {
     sherpa::GCPtr<Type> t = (*ftvs)[i];
     return t;
   }  
+#endif
 };
 
 #endif /* TYPESCHEME_HXX */

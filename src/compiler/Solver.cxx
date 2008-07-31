@@ -60,26 +60,24 @@
 using namespace std;
 using namespace sherpa;
 
-static GCPtr< CVector< GCPtr<Type> > > 
+static TypeSet
 getDomain(GCPtr<Typeclass> t)
 {
-  GCPtr< CVector< GCPtr<Type> > > dom = 
-    CVector< GCPtr<Type> >::make();
+  TypeSet dom;
   
   for(size_t i=0; i < t->typeArgs.size(); i++)
-    dom->append(t->TypeArg(i));
+    dom.insert(t->TypeArg(i));
   
   for(TypeSet::iterator itr = t->fnDeps.begin(); 
       itr != t->fnDeps.end(); ++itr) {
     GCPtr<Type> fdep = (*itr);
     GCPtr<Type> ret = fdep->Ret();
       
-    GCPtr< CVector< GCPtr<Type> > > newDom = 
-      CVector< GCPtr<Type> >::make();
+    TypeSet newDom;
       
-    for(size_t i=0; i < dom->size(); i++)
-      if(dom->elem(i)->getType() != ret->getType())
-	newDom->append(dom->elem(i));
+    for(TypeSet::iterator itr_d = dom.begin(); itr_d != dom.end(); ++itr_d)
+      if((*itr_d)->getType() != ret->getType())
+	newDom.insert(*itr_d);
       
     dom = newDom;
   }
@@ -87,13 +85,13 @@ getDomain(GCPtr<Typeclass> t)
   return dom;
 }
 
-static GCPtr< CVector< GCPtr<Type> > >
-getDomVars(GCPtr< CVector< GCPtr<Type> > > dom)
+static TypeSet
+getDomVars(const TypeSet& dom)
 {
-  GCPtr< CVector< GCPtr<Type> > > vars = CVector< GCPtr<Type> >::make();
+  TypeSet vars;
   
-  for(size_t i=0; i < dom->size(); i++) {
-    GCPtr<Type> arg = dom->elem(i)->getType();
+  for(TypeSet::iterator itr = dom.begin(); itr != dom.end(); ++itr) {
+    GCPtr<Type> arg = (*itr)->getType();
     arg->collectAllftvs(vars);
   }
   
@@ -101,10 +99,10 @@ getDomVars(GCPtr< CVector< GCPtr<Type> > > dom)
 }
 
 static bool
-mustSolve(GCPtr< CVector< GCPtr<Type> > > dom)
+mustSolve(const TypeSet& dom)
 {
-  for(size_t i=0; i < dom->size(); i++) {
-    GCPtr<Type> arg = dom->elem(i)->getType();
+  for(TypeSet::iterator itr = dom.begin(); itr != dom.end(); ++itr) {
+    GCPtr<Type> arg = (*itr)->getType();
     if(arg->isTvar())
       return false;
   }
@@ -113,20 +111,20 @@ mustSolve(GCPtr< CVector< GCPtr<Type> > > dom)
 }
 
 static void
-rigidify(GCPtr< CVector< GCPtr<Type> > > vars)
+rigidify(TypeSet& vars)
 {  
-  for(size_t i=0; i < vars->size(); i++) {
-    GCPtr<Type> arg = vars->elem(i)->getType();
+  for(TypeSet::iterator itr = vars.begin(); itr != vars.end(); ++itr) {
+    GCPtr<Type> arg = (*itr)->getType();
     assert(arg->kind == ty_tvar);
     arg->flags |= TY_RIGID;
   }
 }
 
 static void
-unrigidify(GCPtr< CVector< GCPtr<Type> > > vars)
+unrigidify(TypeSet& vars)
 {  
-  for(size_t i=0; i < vars->size(); i++) {
-    GCPtr<Type> arg = vars->elem(i)->getType();
+  for(TypeSet::iterator itr = vars.begin(); itr != vars.end(); ++itr) {
+    GCPtr<Type> arg = (*itr)->getType();
     assert(arg->kind == ty_tvar);
     arg->flags &= ~TY_RIGID;
   }
@@ -407,10 +405,10 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
   return true;
 }
 
-bool
+static bool
 handleEquPreds(std::ostream &errStream, GCPtr<Trail> trail,
 	       GCPtr<Typeclass> pred, GCPtr<TCConstraints> tcc, 
-	       GCPtr< CVector< GCPtr<Type> > > vars,
+	       TypeSet& vars,
 	       bool &handled)
 {
   // Equality of domain types in two type class predicated is achieved
@@ -564,8 +562,8 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
       if(handlable)
 	continue;
       
-      GCPtr< CVector< GCPtr<Type> > > dom = getDomain(pred);
-      GCPtr< CVector< GCPtr<Type> > > vars = getDomVars(dom);
+      TypeSet dom = getDomain(pred);
+      TypeSet vars = getDomVars(dom);
       bool ms = mustSolve(dom);
       if(ms) {
  	// Step 3.a

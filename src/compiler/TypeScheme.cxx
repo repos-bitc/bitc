@@ -65,7 +65,6 @@ TypeScheme::TypeScheme(GCPtr<Type> _tau, GCPtr<AST> _ast, GCPtr<TCConstraints> _
   tau = _tau;
   ast = _ast;
   tcc = _tcc;
-  ftvs = CVector<GCPtr<Type> >::make();
 }
 
 GCPtr<Type> 
@@ -78,8 +77,9 @@ TypeScheme::type_instance_copy()
   vector<GCPtr<Type> > cnftvs;
   vector<GCPtr<Type> > cftvs;
   
-  for(size_t i=0; i<ftvs->size(); i++) {
-    cftvs.push_back(Ftv(i));
+  for(TypeSet::iterator itr_i = ftvs.begin(); 
+      itr_i != ftvs.end(); ++itr_i) {
+    cftvs.push_back(*itr_i);
     cnftvs.push_back(newTvar());
   }
   
@@ -97,7 +97,7 @@ TypeScheme::type_instance()
   //std::cout << "Instantiating " << this->asString();
 
   GCPtr<Type> t;
-  if(ftvs->size() == 0)
+  if(ftvs.empty())
     t = tau;
   else
     t = type_instance_copy();
@@ -119,14 +119,15 @@ TypeScheme::ts_instance(bool fullCopy)
   vector<GCPtr<Type> > cnftvs;
   vector<GCPtr<Type> > cftvs;
   
-  for(size_t i=0; i<ftvs->size(); i++) {
+  for(TypeSet::iterator itr_i = ftvs.begin(); 
+      itr_i != ftvs.end(); ++itr_i) {
     GCPtr<Type> tv = newTvar();
-    ts->ftvs->append(tv);
-    cftvs.push_back(Ftv(i));
+    ts->ftvs.insert(tv);
+    cftvs.push_back(*itr_i);
     cnftvs.push_back(tv);
   }
   
-  if(fullCopy || (ftvs->size() > 0))
+  if(fullCopy || ftvs.size())
     ts->tau = tau->TypeSpecializeReal(cftvs, cnftvs);  
   else 
     ts->tau = tau;
@@ -140,7 +141,7 @@ TypeScheme::ts_instance(bool fullCopy)
 	itr != _tcc->end(); ++itr) {
       GCPtr<Typeclass> pred;
       
-      if(fullCopy || ftvs->size() > 0)
+      if(fullCopy || ftvs.size())
 	pred = (*itr)->TypeSpecializeReal(cftvs, cnftvs);
       else
 	pred = (*itr);
@@ -171,14 +172,15 @@ TypeScheme::addConstraints(GCPtr<TCConstraints> _tcc) const
   if(!tcc)
     return;
   
-  GCPtr<CVector<GCPtr<Type> > > allftvs = CVector<GCPtr<Type> >::make();
-  tau->collectAllftvs(allftvs);
+  TypeSet allFtvs;
+  tau->collectAllftvs(allFtvs);
   
   for(TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
-    for(size_t j=0; j < allftvs->size(); j++)      
-      if((*itr)->boundInType((*allftvs)[j])) {
-	_tcc->addPred((*itr));
+    for(TypeSet::iterator itr_j = allFtvs.begin();
+	itr_j != allFtvs.end(); ++itr_j)
+      if((*itr)->boundInType(*itr_j)) {
+	_tcc->addPred(*itr);
 	break;
       }
   }
@@ -207,12 +209,13 @@ TypeScheme::normalize()
 	      << std::endl;
   
   
-  GCPtr< CVector< GCPtr<Type> > > newTvs = CVector< GCPtr<Type> >::make();
-  for(size_t c=0; c < ftvs->size(); c++) {
-    GCPtr<Type> ftv = Ftv(c)->getType();
+  TypeSet newTvs;
+  for(TypeSet::iterator itr_c = ftvs.begin();
+      itr_c != ftvs.end(); ++itr_c) {
+    GCPtr<Type> ftv = (*itr_c)->getType();
     
     if(ftv->kind == ty_tvar)
-      newTvs->append(ftv);
+      newTvs.insert(ftv);
     else
       changed = true;
   }

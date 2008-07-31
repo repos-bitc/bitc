@@ -116,8 +116,9 @@ Type::boundInGamma(GCPtr<const TSEnvironment > gamma)
 	itr != gamma->end(); ++itr) {
       GCPtr<TypeScheme> sigma = itr->second->val;
 
-      for (size_t tv = 0; tv < sigma->ftvs->size(); tv++) {
-	if (sigma->Ftv(tv)->uniqueID == tvar->uniqueID)
+      for (TypeSet::iterator tv = sigma->ftvs.begin();
+	   tv != sigma->ftvs.end(); ++tv) {
+	if ((*tv)->uniqueID == tvar->uniqueID)
 	  return true;
       }
       
@@ -135,7 +136,7 @@ Type::boundInGamma(GCPtr<const TSEnvironment > gamma)
 // This APPENDS TO the vector `tvs'. IT IS NOT NECESSARY THAT
 // `tvs' BE EMPTY TO START WITH. 
 void
-Type::collectAllftvs(GCPtr<CVector<GCPtr<Type> > > tvs)
+Type::collectAllftvs(TypeSet& tvs)
 {
   GCPtr<Type> t = getType();
   
@@ -145,9 +146,7 @@ Type::collectAllftvs(GCPtr<CVector<GCPtr<Type> > > tvs)
   t->mark |= MARK3;
   
   if(t->kind == ty_tvar) {
-    if(!(tvs->contains(t))) {
-      tvs->append(t);
-    }
+    tvs.insert(t);
   }      
   else {
     for(size_t i=0; i < t->components.size(); i++)
@@ -179,7 +178,7 @@ TypeScheme::collectAllFtvs()
 // Collect the Free Type Variables in a type
 // that are unbound in gamma
 void
-Type::collectftvsWrtGamma(GCPtr<CVector<GCPtr<Type> > > tvs,
+Type::collectftvsWrtGamma(TypeSet& tvs,
 			  GCPtr<const TSEnvironment > gamma)
 {   
   GCPtr<Type> t = getType();
@@ -191,8 +190,8 @@ Type::collectftvsWrtGamma(GCPtr<CVector<GCPtr<Type> > > tvs,
 
   if(t->kind == ty_tvar) {
     assert(t->components.size() == 0);
-    if(!t->boundInGamma(gamma) && !(tvs->contains(t))) 
-      tvs->append(t);
+    if(!t->boundInGamma(gamma))
+      tvs.insert(t);
   }
   else {
     for(size_t i=0; i < t->components.size(); i++)      
@@ -214,7 +213,7 @@ Type::collectftvsWrtGamma(GCPtr<CVector<GCPtr<Type> > > tvs,
 // by type variablles that are bound in Gamma through
 // Functional Dependencies
 static void
-remftvsWrtFnDeps(GCPtr<CVector<GCPtr<Type> > > &ftvs,
+remftvsWrtFnDeps(TypeSet &ftvs,
 		 TypeSet fnDeps,
 		 GCPtr<const TSEnvironment > gamma)
 {
@@ -224,23 +223,23 @@ remftvsWrtFnDeps(GCPtr<CVector<GCPtr<Type> > > &ftvs,
   for(TypeSet::iterator itr = fnDeps.begin();
       itr != fnDeps.end(); ++itr) {
     GCPtr<Type> fnDep = (*itr);
-    GCPtr<CVector<GCPtr<Type> > > tvs =
-      CVector<GCPtr<Type> >::make();
+    TypeSet tvs;
     fnDep->collectAllftvs(tvs);
-    for(size_t j=0; j < tvs->size(); j++) {
-      GCPtr<Type> tv = (*tvs)[j];
-      if(closure.find(tv) == closure.end() && tv->boundInGamma(gamma))
+    for(TypeSet::iterator itr_j = tvs.begin();
+	itr_j != tvs.end(); ++itr_j) {
+      GCPtr<Type> tv = (*itr_j);
+      if(tv->boundInGamma(gamma))
 	closure.insert(tv);
     }
   }
 
   TCConstraints::close(closure, fnDeps);
   
-  GCPtr<CVector<GCPtr<Type> > > newFtvs = CVector<GCPtr<Type> >::make();
-  for(size_t i=0; i < ftvs->size(); i++) {
-    GCPtr<Type> ftv = ftvs->elem(i)->getType();
+  TypeSet newFtvs;
+  for(TypeSet::iterator itr = ftvs.begin(); itr != ftvs.end(); ++itr) {
+    GCPtr<Type> ftv = (*itr)->getType();
     if(closure.find(ftv) == closure.end())
-      newFtvs->append(ftv);
+      newFtvs.insert(ftv);
   }
 
   ftvs = newFtvs;
@@ -278,8 +277,9 @@ TypeScheme::removeUnInstFtvs()
 {
   bool removed = false;
 
-  for(size_t c=0; c < ftvs->size(); c++) {
-    GCPtr<Type> ftv = Ftv(c)->getType();
+  for(TypeSet::iterator itr_c = ftvs.begin();
+      itr_c != ftvs.end(); ++itr_c) {
+    GCPtr<Type> ftv = (*itr_c)->getType();
     if(tau->boundInType(ftv))
       ftv->flags |= TY_CLOS;
   }
@@ -289,28 +289,32 @@ TypeScheme::removeUnInstFtvs()
     GCPtr<Constraint> ct = (*itr)->getType();
 
     bool mustAdd=false;
-    for(size_t c=0; c < ftvs->size(); c++) {
-      GCPtr<Type> ftv = Ftv(c)->getType();
+    for(TypeSet::iterator itr_c = ftvs.begin();
+	itr_c != ftvs.end(); ++itr_c) {
+      GCPtr<Type> ftv = (*itr_c)->getType();
       if(ct->boundInType(ftv) && (ftv->flags & TY_CLOS)) {
 	mustAdd = true;
 	break;
       }
     }
 
-    if(mustAdd)
-      for(size_t c=0; c < ftvs->size(); c++) {
-	GCPtr<Type> ftv = Ftv(c)->getType();
+    if(mustAdd) {
+      for(TypeSet::iterator itr_c = ftvs.begin();
+	  itr_c != ftvs.end(); ++itr_c) {
+	GCPtr<Type> ftv = (*itr_c)->getType();
 	
 	if(ct->boundInType(ftv))
 	  ftv->flags |= TY_CLOS;
       }
+    }
   }
 
-  GCPtr< CVector< GCPtr<Type> > > newTvs = CVector < GCPtr<Type> >::make();
-  for(size_t c=0; c < ftvs->size(); c++) {
-    GCPtr<Type> ftv = Ftv(c)->getType();
+  TypeSet newTvs;
+  for(TypeSet::iterator itr_c = ftvs.begin();
+      itr_c != ftvs.end(); ++itr_c) {
+    GCPtr<Type> ftv = (*itr_c)->getType();
     if(ftv->flags & TY_CLOS) {
-      newTvs->append(ftv);
+      newTvs.insert(ftv);
       ftv->flags &= ~TY_CLOS;
     }
     else
@@ -328,8 +332,9 @@ TypeScheme::normalizeConstruction(GCPtr<Trail> trail)
 {
   bool removed = false;
 
-  for(size_t c=0; c < ftvs->size(); c++) {
-    GCPtr<Type> ftv = Ftv(c)->getType();
+  for(TypeSet::iterator itr_c = ftvs.begin();
+      itr_c != ftvs.end(); ++itr_c) {
+    GCPtr<Type> ftv = (*itr_c)->getType();
     ftv->flags |= TY_COERCE;
   }
   
@@ -341,11 +346,12 @@ TypeScheme::normalizeConstruction(GCPtr<Trail> trail)
     ct->markSignMbs(true);
   }
 
-  GCPtr< CVector< GCPtr<Type> > > newTvs = CVector < GCPtr<Type> >::make();
-  for(size_t c=0; c < ftvs->size(); c++) {
-    GCPtr<Type> ftv = Ftv(c)->getType();
+  TypeSet newTvs;
+  for(TypeSet::iterator itr_c = ftvs.begin();
+      itr_c != ftvs.end(); ++itr_c) {
+    GCPtr<Type> ftv = (*itr_c)->getType();
     if((ftv->flags & TY_COERCE) == 0)
-      newTvs->append(ftv);
+      newTvs.insert(ftv);
     else
       removed = true;
   }
@@ -658,12 +664,13 @@ TypeScheme::generalize(std::ostream& errStream,
     if (expansive) {
       collectftvs(gamma);
 
-      if(ftvs->size()) {
-	GCPtr< CVector< GCPtr<Type> > > dummys = ftvs;
-	ftvs = CVector< GCPtr<Type> >::make();
+      if(ftvs.size()) {
+	TypeSet dummys = ftvs;
+	ftvs.clear();
 	
-	for(size_t i=0; i < dummys->size(); i++) {
-	  GCPtr<Type> ftv = dummys->elem(i)->getType();
+	for(TypeSet::iterator itr = dummys.begin();
+	    itr != dummys.end(); ++itr) {
+	  GCPtr<Type> ftv = (*itr)->getType();
 	  ftv->link = Type::make(ty_dummy);
 	}
 	
@@ -706,8 +713,8 @@ TypeScheme::generalize(std::ostream& errStream,
  **********************************************************/
 
 /* Helper routines to generalize a pattern */
-void
-updateSigmas(GCPtr<const AST> bp, GCPtr<CVector<GCPtr<Type> > > ftvs,
+static void
+updateSigmas(GCPtr<const AST> bp, const TypeSet& ftvs,
 	     GCPtr<TCConstraints> tcc)
 {
   switch(bp->astType) {
@@ -718,9 +725,10 @@ updateSigmas(GCPtr<const AST> bp, GCPtr<CVector<GCPtr<Type> > > ftvs,
       assert(ident->scheme);
       GCPtr<Type> tau = sigma->tau;;
       
-      for(size_t i=0; i<ftvs->size(); i++) {
-	if(tau->boundInType(ftvs->elem(i))) {
-	  sigma->ftvs->append(ftvs->elem(i));
+      for(TypeSet::iterator itr_i = ftvs.begin();
+	  itr_i != ftvs.end(); ++itr_i) {
+	if(tau->boundInType(*itr_i)) {
+	  sigma->ftvs.insert(*itr_i);
 	  continue;
 	}
 	
@@ -728,8 +736,8 @@ updateSigmas(GCPtr<const AST> bp, GCPtr<CVector<GCPtr<Type> > > ftvs,
 	  for(TypeSet::iterator itr = tcc->begin();
 	      itr != tcc->end(); ++itr) {
 	    GCPtr<Constraint> pred = (*itr);
-	    if(pred->boundInType(ftvs->elem(i))) {
-	      sigma->ftvs->append(ftvs->elem(i));
+	    if(pred->boundInType(*itr_i)) {
+	      sigma->ftvs.insert(*itr_i);
 	      break;
 	    }
 	  }
@@ -820,16 +828,17 @@ TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
   for(TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     GCPtr<Typeclass> pred = (*itr)->getType();
-    GCPtr< CVector< GCPtr<Type> > > allFtvs = CVector<GCPtr<Type> >::make();
+    TypeSet allFtvs;
     pred->collectAllftvs(allFtvs);
     
-    assert(allFtvs->size() != 0);
+    assert(allFtvs.size());
     
     bool hasFtv = false;
-    for(size_t j=0; j < allFtvs->size(); j++) {
-      GCPtr<Type> ftv = allFtvs->elem(j)->getType();
+    for(TypeSet::iterator itr_j = allFtvs.begin();
+	itr_j != allFtvs.end(); ++itr_j) {
+      GCPtr<Type> ftv = (*itr_j)->getType();
       
-      if(ftvs->contains(ftv)) {
+      if(ftvs.find(ftv) != ftvs.end()) {
 	hasFtv = true;
 	break;
       }

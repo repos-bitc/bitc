@@ -415,8 +415,9 @@ TypeScheme::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
   out << "<TS>" << endl;
   out.more();
   
-  for(size_t i=0; i < ftvs->size(); i++)      
-    out << Ftv(i)->asXML(tvP);      
+  for(TypeSet::iterator itr_i = ftvs.begin();
+      itr_i != ftvs.end(); ++itr_i)
+    out << (*itr_i)->asXML(tvP);      
   
   if(tcc) {    
     if(Options::showAllTccs)

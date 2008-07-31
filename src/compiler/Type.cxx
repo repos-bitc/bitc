@@ -931,29 +931,29 @@ Type::needsCaptureConversion()
 bool 
 Type::isConcrete()
 {
-  GCPtr< CVector<GCPtr<Type> > > tvs = CVector<GCPtr<Type> >::make();
+  TypeSet tvs;
   collectAllftvs(tvs);
-  return (tvs->size() == 0);
+  return (tvs.empty());
 }
 
 void 
 Type::SetTvarsTo(GCPtr<Type> t)
 {
-  GCPtr< CVector<GCPtr<Type> > > tvs = CVector<GCPtr<Type> >::make();
+  TypeSet tvs;
   collectAllftvs(tvs);
   
-  for(size_t i=0; i < tvs->size(); i++)
-    (*tvs)[i]->getType()->link = t;
+  for(TypeSet::iterator itr = tvs.begin(); itr != tvs.end(); ++itr)
+    (*itr)->getType()->link = t;
 }
 
 void 
 Type::SetTvarsToUnit()
 {
-  GCPtr< CVector<GCPtr<Type> > > tvs = CVector<GCPtr<Type> >::make();
+  TypeSet tvs;
   collectAllftvs(tvs);
   
-  for(size_t i=0; i < tvs->size(); i++) {
-    GCPtr<Type> ftv = (*tvs)[i]->getType();
+  for(TypeSet::iterator itr = tvs.begin(); itr != tvs.end(); ++itr) {
+    GCPtr<Type> ftv = (*itr)->getType();
     GCPtr<Type> unit = Type::make(ty_unit);
     ftv->link = unit;
   }
@@ -1144,10 +1144,11 @@ Type::strictlyEqualsA(GCPtr<Type> t, bool verbose,
 bool
 Type::allTvarsRigid()
 {
-  GCPtr< CVector<GCPtr<Type> > > ftvs = CVector<GCPtr<Type> >::make();
+  TypeSet ftvs;
   getType()->collectAllftvs(ftvs);
-  for(size_t i=0; i < ftvs->size(); i++) 
-    if((ftvs->elem(i)->flags & TY_RIGID) == 0)
+  for(TypeSet::iterator itr = ftvs.begin(); itr != ftvs.end(); ++itr) {
+    if(((*itr)->flags & TY_RIGID) == 0)
       return false;
+  }
   return true;
 }

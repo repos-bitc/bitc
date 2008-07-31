@@ -379,11 +379,12 @@ TypeScheme::asString(GCPtr<TvPrinter> tvP, bool norm)
     normalize();
   
   if(Options::FQtypes)
-    if(ftvs->size()) {
+    if(ftvs.size()) {
       ss << "(forall";
       forall = true;
-      for(size_t i=0; i < ftvs->size(); i++)      
-	ss << " " << Ftv(i)->asString(tvP);      
+      for(TypeSet::iterator itr_i = ftvs.begin(); 
+	  itr_i != ftvs.end(); ++itr_i)
+	ss << " " << (*itr_i)->asString(tvP);      
       ss << " ";
     }
 
