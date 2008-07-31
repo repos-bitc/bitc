@@ -38,6 +38,8 @@
  *
  **************************************************************************/
 
+#include <libsherpa/GCPtr.hxx>
+
 template <class F, class S> 
 struct Pair {
   F fst;
@@ -48,6 +50,12 @@ struct Pair {
   {
   }
   
+  static sherpa::GCPtr<Pair<F,S> >
+  make(F f, S s) {
+    Pair<F, S> *tmp = new Pair<F, S>(f, s);
+    return sherpa::GCPtr<Pair<F,S> >(tmp);
+  }
+
   Pair(const Pair& p)
     :fst(p.fst), snd(p.snd)
   {

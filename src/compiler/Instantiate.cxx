@@ -696,10 +696,7 @@ tvarInst(GCPtr<AST> ast, GCPtr<AST> scope,
       newTvAst->symbolDef = newTvAst;
       newTvAst->Flags2 |= TVAR_IS_DEF | TVAR_POLY_SPECIAL;
 
-      Pair<GCPtr<AST> , GCPtr<AST> > *tmp =
-	new Pair<GCPtr<AST> , GCPtr<AST> >(def, newTvAst);
-      GCPtr<Pair<GCPtr<AST> , GCPtr<AST> > > newPair(tmp);
-      newBinds.append(newPair);
+      newBinds.append(Pair<GCPtr<AST> , GCPtr<AST> >::make(def, newTvAst));
       return newTvAst;
     }
     

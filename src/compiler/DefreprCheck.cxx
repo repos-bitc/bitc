@@ -238,10 +238,7 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
 	  if(fldi->Flags2 & FLD_IS_DISCM) {
 	    assert(fldi->astType == at_field);
 
-	    Pair<std::string, size_t> *tmp =
-	      new Pair<std::string, size_t>(fldi->child(0)->s, fldi->unin_discm);
-	    GCPtr<Pair<std::string, size_t> > newPair(tmp);
-	    when->append(newPair);
+	    when->append(Pair<std::string, size_t>::make(fldi->child(0)->s, fldi->unin_discm));
 	  }
 	}
 	
