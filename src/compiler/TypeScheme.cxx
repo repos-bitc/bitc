@@ -73,19 +73,14 @@ TypeScheme::type_instance_copy()
 {
   normalize();
 
-  CVector<GCPtr<Type> > nftvs;
-  
   //std::cout << "Instantiating by copy " << this->asString();
 
-  for(size_t i=0; i<ftvs->size(); i++)
-    nftvs.append(newTvar());
-
-  GCPtr<CVector<GCPtr<Type> > > cnftvs = CVector<GCPtr<Type> >::make();
-  GCPtr<CVector<GCPtr<Type> > > cftvs = CVector<GCPtr<Type> >::make();
+  vector<GCPtr<Type> > cnftvs;
+  vector<GCPtr<Type> > cftvs;
   
   for(size_t i=0; i<ftvs->size(); i++) {
-    cftvs->append(Ftv(i));
-    cnftvs->append(nftvs[i]);
+    cftvs.push_back(Ftv(i));
+    cnftvs.push_back(newTvar());
   }
   
   GCPtr<Type> t = tau->TypeSpecialize(cftvs, cnftvs); 
@@ -121,15 +116,14 @@ TypeScheme::ts_instance(bool fullCopy)
   GCPtr<TypeScheme> ts = TypeScheme::make(tau, ast);
   ts->tau = GC_NULL;
 
-  for(size_t i=0; i<ftvs->size(); i++) 
-    ts->ftvs->append(newTvar());
-  
-  GCPtr<CVector<GCPtr<Type> > > cnftvs = CVector<GCPtr<Type> >::make();
-  GCPtr<CVector<GCPtr<Type> > > cftvs = CVector<GCPtr<Type> >::make();
+  vector<GCPtr<Type> > cnftvs;
+  vector<GCPtr<Type> > cftvs;
   
   for(size_t i=0; i<ftvs->size(); i++) {
-    cftvs->append(Ftv(i));
-    cnftvs->append(ts->Ftv(i));
+    GCPtr<Type> tv = newTvar();
+    ts->ftvs->append(tv);
+    cftvs.push_back(Ftv(i));
+    cnftvs.push_back(tv);
   }
   
   if(fullCopy || (ftvs->size() > 0))

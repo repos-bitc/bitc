@@ -971,8 +971,8 @@ TypeScheme::checkAmbiguity(std::ostream &errStream, const LexLoc &errLoc)
 ***********************************************************/
 
 GCPtr<Type> 
-Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
-			 GCPtr<CVector<GCPtr<Type> > > nftvs)
+Type::TypeSpecializeReal(const std::vector<sherpa::GCPtr<Type> >& ftvs,
+			 std::vector<sherpa::GCPtr<Type> >& nftvs)
 {
   GCPtr<Type> t = getType();
   GCPtr<Type> theType = Type::make(t);
@@ -1009,10 +1009,10 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
     case ty_tvar:
       {
 	size_t i=0;
-	for(i=0; i<ftvs->size(); i++) {
-	  GCPtr<Type> ftv = ftvs->elem(i)->getType();	  
+	for(i=0; i<ftvs.size(); i++) {
+	  GCPtr<Type> ftv = ftvs[i]->getType();	  
 	  if(ftv->kind == ty_tvar && t->uniqueID == ftv->uniqueID) {
-	    theType->link = nftvs->elem(i); 
+	    theType->link = nftvs[i]; 
 	    break;
 	  }
 	}
@@ -1020,7 +1020,7 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
 	// If the variable was NOT in ftv list, then 
 	// we should link it to the original, in order to honor
 	// variable capture
-	if(i == ftvs->size())
+	if(i == ftvs.size())
 	  theType->link = t;
       	break;
       }
@@ -1102,8 +1102,8 @@ Type::clear_sp()
 ***********************************************************/
 
 GCPtr<Type> 
-Type::TypeSpecialize(GCPtr<CVector<GCPtr<Type> > > ftvs,
-		     GCPtr<CVector<GCPtr<Type> > > nftvs)
+Type::TypeSpecialize(const std::vector<sherpa::GCPtr<Type> >& ftvs,
+		     std::vector<sherpa::GCPtr<Type> >& nftvs)
 {
   GCPtr<Type> specializedType = TypeSpecializeReal(ftvs, nftvs);
   clear_sp();

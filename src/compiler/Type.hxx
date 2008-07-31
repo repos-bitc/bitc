@@ -498,16 +498,16 @@ public:
   
 private:
   sherpa::GCPtr<Type> 
-  TypeSpecializeReal(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > ftvs,
-		     sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > nftvs);
+  TypeSpecializeReal(const std::vector<sherpa::GCPtr<Type> >& ftvs,
+		 std::vector<sherpa::GCPtr<Type> >& nftvs);
   
   // Clear the sp (specialization) field of type records recursively.
   void clear_sp();
   
 public:
   sherpa::GCPtr<Type> 
-  TypeSpecialize(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > ftvs,
-		 sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > nftvs);
+  TypeSpecialize(const std::vector<sherpa::GCPtr<Type> >& ftvs,
+		 std::vector<sherpa::GCPtr<Type> >& nftvs);
 
   /* Methods to deal with mutability issues */
   // Fix all Maybe types surrounding type records containing a
