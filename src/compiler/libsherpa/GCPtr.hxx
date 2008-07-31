@@ -49,7 +49,7 @@
 
 #define GCPTR_SUPPORT_RAW
 //#define GCPTR_DEBUG
-//#define GCPTR_EXPLICIT
+#define GCPTR_EXPLICIT
 
 /** @file This is a non-invasive variant of the original sherpa GCPtr
  * that has some debugging features. */
