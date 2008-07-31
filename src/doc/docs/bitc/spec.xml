@@ -4219,9 +4219,14 @@ id : T
           <p indent="no">
             it is legal to write
             <progident>myName.<em>pubName</em></progident> at any
-            identifier use occurrence. In such a use,
-            <progident>myName.<em>pubName</em></progident> acts as an
-            <em>alias</em> of the public name.
+            identifier use occurrence. This is referred to as a
+            <term>hygienic alias</term>. Hygienic aliases may appear
+            in any use occurrence where an identifier might ordinarily
+            appear. When a hygienic alias names a provided symbol, the
+            hygienic alias may also appear as the defined
+            identifier of a top-level definition. Hygienic aliases may
+            <em>not</em> appear in the defined position of a
+            <em>local</em> definition.
           </p>
           <p>
             Hygienic import preserves a strong distinction between the

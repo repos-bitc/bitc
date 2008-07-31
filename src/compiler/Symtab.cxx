@@ -228,18 +228,26 @@ importIfBinding(std::ostream& errStream,
 }
 
 static bool
-providing(GCPtr<ASTEnvironment > env, GCPtr<AST> sym)
+providing(GCPtr<ASTEnvironment > aliasEnv, const FQName& fqn)
 {
-  std::string canonicalIfName = "::" + sym->fqn.iface;
-  GCPtr<Binding<AST> > bndg = env->doGetBinding(canonicalIfName);
+  // Retrieve the thinned public environment for this fqn:
+  GCPtr<AST> ifName = aliasEnv->getBinding(fqn.iface);
 
-  // If there is no binding for the canonicalIfName, then we are
-  // processing the grand output AST, and providing has already been
-  // checked.  In all per-UoC cases there will necessarily be a
-  // binding, and we need to check the BF_PROVIDING flag.
-  if (!bndg) return true;
+  // If there is no binding for the canonical interface name, then we
+  // areb processing the grand output AST, and providing has already
+  // been checked.
+  if (!ifName)
+    return true;
 
-  return (bndg->flags & BF_PROVIDING);
+  GCPtr<ASTEnvironment > pubEnv = ifName->envs.env;
+
+  // Retrieve the binding (if any) for fqn.ident:
+  GCPtr<Binding<AST> > bdng = pubEnv->doGetBinding(fqn.ident);
+
+  assert(bdng);
+
+  // Check the BF_PROVIDING flag on the binding:
+  return (bdng->flags & BF_PROVIDING);
 }
 
 bool
@@ -410,6 +418,8 @@ resolve(std::ostream& errStream,
     
   case at_ident:
     {
+	// If you change the way this works, see the comment in the
+	// at_usesel case first!
       if(!ast->fqn.isInitialized()) {
 	if (ast->isGlobal()) {
 	  ast->fqn = FQName(env->uocName, ast->s);
@@ -438,7 +448,7 @@ resolve(std::ostream& errStream,
 	  if(sym) {
 	    if(sym->isDecl) {
 	      if ((sym->fqn.iface != ast->fqn.iface) &&
-		  !providing(env, sym)) {
+		  !providing(env, ast->fqn)) {
 		// We are defining an ident that has an existing
 		// binding that came about through import. Confirm
 		// that we also marked it as providable:
@@ -742,6 +752,46 @@ resolve(std::ostream& errStream,
     
   case at_usesel:
     {
+      /// @paragraph hygienic-symbols Hygienic Symbol Strategy
+      ///
+      /// Hygienic symbols are decidedly odd. Syntactically they look
+      /// like structure references, but the LHS is actually a local
+      /// identifier that names an <em>environment</em>. More
+      /// precisely, it names a local copy of the imported interface's
+      /// environment that contains only the public symbols of that
+      /// interface.
+      ///
+      /// We handle this through an outright kludge. At the point of
+      /// hygienic import, we bind both the ifalias (for uniqueness)
+      /// and all of the imported identifiers. The imported
+      /// identifiers get bound in the local namespace using
+      /// "ifalias.ifident" (note that '.' is not a legal identifier
+      /// character, so this cannot be matched otherwise).
+      ///
+      /// At defining and use occurrences, we recognize the selector
+      /// pattern in the parser and generate an at_usesel AST node for
+      /// it. We then arrive here, where we re-write the at_usesel
+      /// node IN PLACE, rewriting it into an at_ident node whose name
+      /// is "ifalias.ident", where "ifalias" is our local name for
+      /// the interface's public environment. We then recurse by hand
+      /// **on the same node** (the one that we just re-wrote) to get
+      /// the symbol resolved.
+      ///
+      /// The only problem with that is that the recursive resolution
+      /// is going to give us an FQN whose @p iface component is the
+      /// current UoC and whose @p ident component is our forged
+      /// "ifalias.ident". Ultimately, the at_usesel is actually an
+      /// <em>alias</em> of the other symbol, so its FQN needs to be
+      /// the FQN of the external symbol. We ensure this by whacking
+      /// it back to the right thing <em>after</em> the hand-recursing
+      /// resolution returns.
+      ///
+      /// Finally, note that BeginSimp has done a rewrite of all local
+      /// at_define and at_recdef forms into at_let and at_letrec
+      /// forms, respectively. That pass has checked that no at_usesel
+      /// can be bound by a local definition. I do wonder if perhaps
+      /// we should not catch this case syntactically in the parser.
+
       GCPtr<AST> iface = ast->child(0);
       
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, id_interface, 
@@ -763,8 +813,8 @@ resolve(std::ostream& errStream,
 	break;
       }
       
-      ast->fqn = FQName(ast->child(0)->symbolDef->ifName,
-			ast->child(1)->s);
+      FQName importedFQN = FQName(ast->child(0)->symbolDef->ifName,
+				  ast->child(1)->s);
 
       ast->s = ast->child(0)->s + "." + ast->child(1)->s;
       ast->astType = at_ident;
@@ -777,6 +827,8 @@ resolve(std::ostream& errStream,
       // SHOULD THE PUBLIC FLAG BE TAKEN OFF HERE ??
       RESOLVE(ast, env, lamLevel, mode, identType, currLB,  
 	      (flags & (~BIND_PUBLIC)));
+
+      ast->fqn = importedFQN;
 
       break;
     }
@@ -1013,6 +1065,10 @@ resolve(std::ostream& errStream,
   case at_recdef:
   case at_define:
     {
+      /// Note that BeginSimp has re-written all local define and
+      /// recdef forms into at_let and at_letrec, respectively, so if
+      /// we see at_define or at_refdef here, it is a top-level form.
+
       GCPtr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 

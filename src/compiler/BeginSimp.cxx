@@ -68,6 +68,18 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
 	  ast->child(c)->astType == at_recdef) {
 	bool rec = (ast->child(c)->astType == at_recdef);
 	GCPtr<AST> def = ast->child(c);
+
+	// at_usesel is not allowed to appear in a defining occurrence
+	// of a local at_define or at_recdef.
+	//
+ 	// It might be better to catch this in the parser.
+	if (def->child(0)->child(0)->astType == at_usesel) {
+	  errStream << def->loc << ": "
+		    << "Hygienically aliased names cannot be defined locally."
+		    << std::endl;
+	  errFree = false;
+	}
+
 	GCPtr<AST> letBinding = 
 	  AST::make(at_letbinding,
 		  def->loc, def->child(0), def->child(1));
