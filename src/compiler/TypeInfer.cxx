@@ -1515,7 +1515,7 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
     for(set<GCPtr<Instance> >::iterator itr = currInsts->begin();
 	itr != currInsts->end(); ++itr) {
       GCPtr<Instance> inst = (*itr);
-      if(inst->equals(errStream, myInstance, instEnv)) {
+      if(inst->overlaps(myInstance)) {
 	errStream << tcapp->loc << ": "
 		  << "Instance declaration "
 		  << sigma->asString() << " conflicts with "
@@ -1524,8 +1524,8 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
 		  << "(" << inst->ts->asString() << ")."
 		  << std::endl;
 	errFree = false;
-	break;				  
-      }	
+	break;
+      }
     } 
 
     if(!errFree)

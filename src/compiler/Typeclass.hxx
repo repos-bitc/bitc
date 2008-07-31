@@ -71,12 +71,11 @@ struct Instance {
     return sherpa::GCPtr<Instance>(tmp);
   }
 
-  bool equals(std::ostream &errStream, sherpa::GCPtr<Instance> ins, 
-	      sherpa::GCPtr<const InstEnvironment >
-	      instEnv) const;
-  bool satisfies(std::ostream &errStream, sherpa::GCPtr<Typeclass> pred, 
-		 sherpa::GCPtr<const InstEnvironment >
-		 instEnv) const;
+  bool equals(sherpa::GCPtr<Instance> ins, 
+	      sherpa::GCPtr<const InstEnvironment > instEnv) const;
+  bool overlaps(sherpa::GCPtr<Instance> ins) const;
+  bool satisfies(sherpa::GCPtr<Typeclass> pred, 
+		 sherpa::GCPtr<const InstEnvironment > instEnv) const;
   std::string asString();
 
   std::string asXML();

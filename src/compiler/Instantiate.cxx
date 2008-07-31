@@ -957,7 +957,7 @@ getDefToInstantiate(ostream &errStream, GCPtr<UocInfo> unifiedUOC,
     for(matchingInstance = insts->begin();
 	matchingInstance != insts->end(); ++matchingInstance) {
       GCPtr<Instance> currInst = (*matchingInstance);
-      if(currInst->satisfies(errStream, pred, unifiedUOC->instEnv))
+      if(currInst->satisfies(pred, unifiedUOC->instEnv))
 	break;
     }
     

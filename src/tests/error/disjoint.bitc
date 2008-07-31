@@ -35,30 +35,39 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Test for non-overlapping restriction for instances.
+;; The following program contains three overlapping instances for the
+;; typeclass ABC. The InferInstance() routine was wrongly using
+;; Instance::equal() for overlapping checking, which proved
+;; insufficient. This is now replaced with Instance::overlaps().
+;; The following code must not be accepted by the compiler.
+
+
 (bitc-version "0.10")
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define (id x) x)
+(define i0 (the int32 0))
  
 (define (FUN x:'a y:'a) #t)
 
 (deftypeclass (ABC 'a)
- FN: (fn ('a 'a) bool))
+  FN: (fn ('a 'a) bool))
 
 (definstance (forall ((IntLit 'a)) (ABC 'a))
- FUN)
+  FUN)
 
 (definstance (forall ((FloatLit 'a)) (ABC 'a))
- FUN)
+  FUN)
 
 (definstance  (ABC char)
- FUN)
+  FUN)
 
-;must not work
-;(definstance  (ABC int32)
-; FUN)
-
+;; must not work
+;;(definstance  (ABC int32)
+;; FUN)
+  
 (define main.main:(fn ((vector string)) int32)
-  (lambda (argvec)
-    (FN 10:int32 10) 0))
+  (lambda (argvec) 
+    (FN i0 i0) i0))
+

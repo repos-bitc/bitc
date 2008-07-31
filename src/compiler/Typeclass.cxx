@@ -60,9 +60,8 @@ using namespace sherpa;
 using namespace std;
 
 bool 
-Instance::equals(std::ostream &errStream, GCPtr<Instance> ins, 
-		 GCPtr<const InstEnvironment >
-		 instEnv) const
+Instance::equals(GCPtr<Instance> ins, 
+		 GCPtr<const InstEnvironment > instEnv) const
 {
   GCPtr<TypeScheme> mySigma = ts->ts_instance_copy();
   GCPtr<TypeScheme> hisSigma = ins->ts->ts_instance_copy();
@@ -101,9 +100,38 @@ Instance::equals(std::ostream &errStream, GCPtr<Instance> ins,
     return false;
 }
 
+// Check Instance overlapping:
+// Currently, all instances must be absolurely non-overlapping --
+// that is, non-unifiable.
+//
+// The operlapping check is different from equality check
+// For example, consider a class ABC wherein, we have instances
+//
+// (definstance (forall ((IntLit 'a)) (ABC 'a))  ... )
+// (definstance (forall ((FloatLit 'a)) (ABC 'a)) ...)
+//
+// The two instances are not equal, both have type (ABC 'a), and
+// therefore are overlapping. 
+//
+// If we declare these instances as non-overlapping, in the constraint
+// solver, if we have a constraint (ABC int32) The solver can 
+// 1) First come across the (((FloatLit 'a)) (ABC 'a)) instance
+// 2) Deem 'a unifiable with int32, assuming non-overlap
+// 3) Add pre-condition (FloatLit int32) which is unsatisfiable.
+//
+// The solver unifies with the first unifiable instance. It is not a
+// backtracking solver which tries other instances if the overall
+// solving fails for an instance. 
+
 bool 
-Instance::satisfies(std::ostream &errStream,
-		    GCPtr<Typeclass> pred, 		    
+Instance::overlaps(sherpa::GCPtr<Instance> ins) const
+{
+  return ts->tau->equals(ins->ts->tau); 
+}
+
+
+bool 
+Instance::satisfies(GCPtr<Typeclass> pred, 		    
 		    GCPtr<const InstEnvironment >
 		    instEnv) const
 {
