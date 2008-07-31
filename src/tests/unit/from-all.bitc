@@ -39,6 +39,7 @@
 
 (import bitc.main)
 (import bitc.list)
+(provide bitc.main main)
 
 (define main:(fn ((vector string)) int32)
   (lambda (argvec)

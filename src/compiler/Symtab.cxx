@@ -448,7 +448,7 @@ resolve(std::ostream& errStream,
 	  if(sym) {
 	    if(sym->isDecl) {
 	      if ((sym->fqn.iface != ast->fqn.iface) &&
-		  !providing(env, ast->fqn)) {
+		  !providing(aliasEnv, sym->fqn)) {
 		// We are defining an ident that has an existing
 		// binding that came about through import. Confirm
 		// that we also marked it as providable:
@@ -1329,9 +1329,9 @@ resolve(std::ostream& errStream,
       GCPtr<ASTEnvironment > tmpEnv = env->newScope();
       ast->envs.env = tmpEnv;
      
-      GCPtr<AST> ifName = ast->child(0);
+      GCPtr<AST> ifAst = ast->child(0);
 
-      if (ifName->s == env->uocName) {
+      if (ifAst->s == env->uocName) {
 	errStream << ast->loc << ": "
 		  << "Cannot import an undefined interface. "
 		  << std::endl;
@@ -1340,16 +1340,11 @@ resolve(std::ostream& errStream,
 	break;
       }
 
-      GCPtr<UocInfo> iface = findInterface(errStream, ifName);
-      if(!iface) {
-	// Error message printed in findInterface() function
-	errorFree = false;
-	break;
-      }
+      importIfBinding(errStream, aliasEnv, ifAst);
 
       if(ast->children.size() == 1) {
 	// This is an import-all form
-	aliasPublicBindings(std::string(), aliasEnv, iface->env, tmpEnv);
+	aliasPublicBindings(std::string(), aliasEnv, ifAst->envs.env, tmpEnv);
       }
       else {
 	// Need to import only certain bindings
@@ -1358,7 +1353,7 @@ resolve(std::ostream& errStream,
 	  GCPtr<AST> localName = alias->child(0);
 	  GCPtr<AST> pubName = alias->child(1);
 	
-	  RESOLVE(pubName, iface->env, lamLevel, USE_MODE,
+	  RESOLVE(pubName, ifAst->envs.env, lamLevel, USE_MODE,
 		  id_usebinding, currLB, 
 		  ((flags & (~NEW_TV_OK))) | NO_CHK_USE_TYPE);
 	
@@ -1367,7 +1362,7 @@ resolve(std::ostream& errStream,
 
 	  // Enforce the "one alias" rule.
 	  GCPtr<Binding<AST> > bndg = 
-	    ifName->envs.env->doGetBinding(pubName->s);
+	    ifAst->envs.env->doGetBinding(pubName->s);
 
 	  std::string pubFQN = bndg->val->fqn.asString("::");
 
