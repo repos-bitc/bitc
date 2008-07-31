@@ -2524,38 +2524,16 @@
       We write 
       <btypes:TYPE>
 	<spset>
-	  <solvable/>
+	  <type/>
 	</spset>
       </btypes:TYPE>
       to denote the set of all constrained types and unconcstrained
       type variables structurally present in 
       <btypes:TYPE>
-	<solvable/>
-      </btypes:TYPE>.
-      The 
-      <btypes:TYPE>
-	<spset>
-	  <type/>
-	</spset>
-      </btypes:TYPE> relation, defined below, is extended to
-      <btypes:TYPE>
-	<collection and="yes">
-	  <aCtset/>
-	  <aTS/>
-	  <gamma/>
-	  <store/>
-	  <solvables/>
-	</collection>
-      </btypes:TYPE> using the function
-      <btypes:TYPE>
-	<pred name="F"/>
-      </btypes:TYPE> defined in 
-      <btypes:TYPE>
-	<defn tag="ExtToSol"/>
+	<type/>
       </btypes:TYPE>.
     </p>
     <btypes:TYPE>
-      <!-- Full maximization -->
       <VEqns>
 	<equation>
 	  <lhs>
@@ -2725,6 +2703,67 @@
 	</equation>
       </VEqns>
     </btypes:TYPE>
+    <p>
+      The 
+      <btypes:TYPE>
+	<spset>
+	  <type/>
+	</spset>
+      </btypes:TYPE> relation, is extended to
+      <btypes:TYPE>
+	<spset>
+	  <solvable/>
+	</spset>
+      </btypes:TYPE> through the 
+      <btypes:TYPE>
+	<pred name="F"/>
+      </btypes:TYPE> operator 
+      (<btypes:TYPE>
+	<defn tag="ExtToSol"/>
+      </btypes:TYPE>), except in the case of 
+      type schemes
+      (<btypes:TYPE>
+	<aTS/>
+      </btypes:TYPE>).
+      Here, we take a monomorphic view of constraints embedded in type
+      schemes and define
+      <btypes:TYPE>
+	<spset>
+	  <aTS/>
+	</spset>
+      </btypes:TYPE> as:
+    </p>
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <TS>
+		<tvars/>
+		<type/>
+		<dCtset/>
+	      </TS>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <spset>
+		<type/>
+	      </spset>
+	      <spset>
+		<dCtset/>
+	      </spset>
+	    </unin>
+	  </rhs>
+	</equation>
+      </VEqns>
+    </btypes:TYPE>
+    <p>
+      The collected constraints can be understood to be working in a
+      flat overlay type system, which operates above the
+      tree-structured underlying type system that respects variable
+      quantification.
+    </p>
   </definition>
   <definition id="ftvs">
     <title>Free Type Variables</title>
@@ -3633,7 +3672,9 @@
 	  <btypes:TYPE>
 	    <Exists/>
 	    <bCtset/>
-	    <ST/>
+	  </btypes:TYPE>
+	  such that
+	  <btypes:TYPE>
 	    <Sat>
 	      <bCtset/>
 	      <set>
@@ -3675,10 +3716,14 @@
 	      <bCtset dash="'"/>
 	      <bCtset/>
 	    </supeq>
-	    <ST/>
+	  </btypes:TYPE>
+	  such that
+	  <btypes:TYPE>
 	    <Sat>
 	      <bCtset/>
-	      <solvables/>
+	      <set>
+		<solvables num="b"/>
+	      </set>
 	    </Sat>
 	  </btypes:TYPE>.
 	</p>

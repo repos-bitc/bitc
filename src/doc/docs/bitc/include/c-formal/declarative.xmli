@@ -3456,12 +3456,6 @@
 	  </Subst>
 	</eq>
       </btypes:TYPE>.
-      <!-- <em>
-	Need to fix the proof for 
-	<btypes:TYPE>
-	  <dCtset/>
-	</btypes:TYPE> introduction.
-      </em> -->
     </p>
     <ol>
       <li>
@@ -5069,12 +5063,6 @@
       </btypes:TYPE>
       We proceed by case analysis on the final step of the
       derivation.
-      <!-- <em>
-	Need to fix the proof for 
-	<btypes:TYPE>
-	  <dCtset/>
-	</btypes:TYPE> introduction.
-      </em> -->
     </p>
     <ol>
       <li>
@@ -5124,6 +5112,7 @@
 		<TDjudge cst="yes">
 		  <id name="y"/>
 		  <type/>
+		  <dCtset/>
 		</TDjudge>
 	      </btypes:TYPE>
 	      is immediate from the assumtion
@@ -5131,6 +5120,7 @@
 		<Sjudge>
 		  <assume>
 		    <bCtset/>
+		    <dCtset/>
 		    <extend>
 		      <gamma/>
 		      <tqExpr>
@@ -5170,7 +5160,17 @@
 		  </subst>
 		  <aVal/>
 		</eq>
-	      </btypes:TYPE> and
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<eq>
+		  <dCtset/>
+		  <Subst>
+		    <aSubMap/>
+		    <dCtset num="v"/>
+		  </Subst>
+		</eq>
+	      </btypes:TYPE>
+	      and
 	      <btypes:TYPE>
 		<eq>
 		  <type/>
@@ -5210,12 +5210,14 @@
 			  <TS>
 			    <tvars/>
 			    <type num="v"/>
+			    <dCtset num="v"/>
 			  </TS>
 			</mapsto>
 			<Cst>
 			  <aSubMap/>
 			  <set>
 			    <type num="v"/>
+			    <dCtset num="v"/>
 			  </set>
 			</Cst>
 			<eq>
@@ -5230,6 +5232,10 @@
 		      <tyConc>
 			<Sjudge>
 			  <assume>
+			    <Subst>
+			      <aSubMap/>
+			      <dCtset num="v"/>
+			    </Subst>
 			    <gamma dash="'"/>
 			    <store/>
 			  </assume>
@@ -5254,6 +5260,10 @@
 		      <spset>
 			<Sjudge>
 			  <assume>
+			    <Subst>
+			      <aSubMap/>
+			      <dCtset num="v"/>
+			    </Subst>
 			    <gamma dash="'"/>
 			    <store/>
 			  </assume>
@@ -5276,6 +5286,7 @@
 		    <TDjudge cst="yes">
 		      <aVal/>
 		      <type num="v"/>
+		      <dCtset num="v"/>
 		    </TDjudge>
 		  </btypes:TYPE>. That is,
 		</p>
@@ -5286,6 +5297,7 @@
 			<TDjudge>
 			  <aVal/>
 			  <type num="v"/>
+			  <dCtset num="v"/>
 			</TDjudge>
 		      </btypes:TYPE>
 		    </p>
@@ -5299,6 +5311,7 @@
 			    <TDjudge>
 			      <aVal/>
 			      <type num="v"/>
+			      <dCtset num="v"/>
 			    </TDjudge>
 			  </spset>
 			</Sat>
@@ -5316,10 +5329,14 @@
 		  <bCtset dash="'"/>
 		  <bCtset/>
 		</supeq>
-		<ST/>
+		<text content=" such that "/>
 		<Sjudge>
 		  <assume>
 		    <bCtset dash="'"/>
+		    <Subst>
+		      <aSubMap/>
+		      <dCtset num="v"/>
+		    </Subst>
 		    <gamma/>
 		    <store/>
 		  </assume>
@@ -5336,7 +5353,7 @@
 	  </li>
 	  <li>
 	    <p>
-	      Without loss of generality, we can assume that 
+	      We know that
 	    </p>
 	    <ol>
 	      <li>
@@ -5387,42 +5404,23 @@
 	      </li>
 	      <li>
 		<p>
-		  <btypes:TYPE>
-		    <mutex>
-		      <ftvs>
-			<aSubMap/>
-		      </ftvs>
-		      <pred name="gtv">
-			<gamma/>
-		      </pred>
-		    </mutex>
-		  </btypes:TYPE>. 
-		</p>
-	      </li>
-	      <li>
-		<p>
+		  Without loss of generality, we can assume that 
 		  <btypes:TYPE> 
 		    <ftvs>
 		      <range>
 			<aSubMap/>
 		      </range>
 		    </ftvs>
-		  </btypes:TYPE> consists of type variables in
+		  </btypes:TYPE> consists of variables in
 		  <btypes:TYPE> 
-		    <diff>
-		      <ftvs>
-			<gamma/>
-			<store/>
-			<type num="v"/>
-		      </ftvs>
-		      <set>
-			<tvars/>
-		      </set>
-		    </diff>
-		  </btypes:TYPE> or fresh type variables.
-		</p>
-		<p>
-		  The above properties can always be made to
+		    <ftvs>
+		      <gamma/>
+		      <store/>
+		      <type num="v"/>
+		      <dCtset num="v"/>
+		    </ftvs>
+		  </btypes:TYPE>, or fresh type variables.
+		  This property can always be made to
 		  hold by suitable renaming of variables and using 
 		  <btypes:TYPE>
 		    <lem tag="T-Renaming"/>
@@ -5431,6 +5429,7 @@
 	      </li>
 	      <li>
 		<p>
+		  Without loss of generality, we can assume that 
 		  <btypes:TYPE>
 		    <subeq>
 		      <set>
@@ -5438,31 +5437,10 @@
 		      </set>
 		      <ftvs>
 			<type num="v"/>
+			<dCtset num="v"/>
 		      </ftvs>
 		    </subeq>
-		  </btypes:TYPE>. 
-		  <br/>
-		  This is because, due to renamability of variables, we have
-		  <btypes:TYPE>
-		    <eq>
-		      <inter>
-			<ftvs>
-			  <spset>
-			    <TDjudge>
-			      <aVal/>
-			      <type num="v"/>
-			    </TDjudge>
-			  </spset>
-			</ftvs>
-			<set>
-			  <tvars/>
-			</set>
-		      </inter>
-		      <ftvs>
-			<type num="v"/>
-		      </ftvs>
-		    </eq>
-		  </btypes:TYPE> , and any 
+		  </btypes:TYPE>, since any 
 		  <btypes:TYPE> 
 		    <subeq>
 		      <set>
@@ -5472,11 +5450,14 @@
 			<tvars/>
 		      </set>
 		    </subeq>
-		    <ST/>
+		  </btypes:TYPE>
+		  such that
+		  <btypes:TYPE>
 		    <notin>
 		      <tvar name="beta"/>
 		      <ftvs>
 			<type num="v"/>
+			<dCtset num="v"/>
 		      </ftvs>
 		    </notin>
 		  </btypes:TYPE> can be ignored.
@@ -5493,13 +5474,16 @@
 		  <bCtset num="big"/>
 		  <bCtset/>
 		</supeq>
-		<ST/>
+	      </btypes:TYPE>
+	      such that
+	      <btypes:TYPE>
 		<Sat>
 		  <bCtset num="big"/>
 		  <Subst>
 		    <aSubMap/>
 		    <spset>
 		      <type num="v"/>
+		      <dCtset num="v"/>
 		    </spset>
 		  </Subst>
 		</Sat>
@@ -5515,6 +5499,7 @@
 		      <aSubMap/>
 		      <set>
 			<type num="v"/>
+			<dCtset num="v"/>
 		      </set>
 		    </Cst>
 		  </btypes:TYPE>.
@@ -5529,6 +5514,7 @@
 			<aSubMap/>
 			<spset>
 			  <type num="v"/>
+			  <dCtset num="v"/>
 			</spset>
 		      </Subst>
 		    </Cst>
@@ -5549,6 +5535,10 @@
 			  <aSubMap/>
 			  <type num="v"/>
 			</Subst>
+			<Subst>
+			  <aSubMap/>
+			  <dCtset num="v"/>
+			</Subst>
 		      </set>
 		    </Sat>
 		  </btypes:TYPE>.
@@ -5564,15 +5554,20 @@
 			  <aSubMap/>
 			  <type num="v"/>
 			</Subst>
+			<Subst>
+			  <aSubMap/>
+			  <dCtset num="v"/>
+			</Subst>
 		      </set>
 		      <Subst>
 			<aSubMap/>
 			<spset>
 			  <type num="v"/>
+			  <dCtset num="v"/>
 			</spset>
 		      </Subst>
 		    </subeq>
-		  </btypes:TYPE>, using case&nbsp;(1.i) and
+		  </btypes:TYPE>, using case&nbsp;(1.d.i) and
 		  <btypes:TYPE>
 		    <lem tag="maybe-cst-properties"/>
 		  </btypes:TYPE> (property-4), we conclude that 
@@ -5582,13 +5577,16 @@
 		      <bCtset num="big"/>
 		      <bCtset/>
 		    </supeq>
-		    <ST/>
+		  </btypes:TYPE>
+		  such that
+		  <btypes:TYPE>
 		    <Sat>
 		      <bCtset num="big"/>
 		      <Subst>
 			<aSubMap/>
 			<spset>
 			  <type num="v"/>
+			  <dCtset num="v"/>
 			</spset>
 		      </Subst>
 		    </Sat>
@@ -5599,8 +5597,8 @@
 	  </li>
 	  <li>
 	    <p>
-	      <btypes:TYPE>
-		<Forall/>
+	      Forall
+ 	      <btypes:TYPE>
 		<in>
 		  <grouping>
 		    <Tceq>
@@ -5615,7 +5613,9 @@
 		  </grouping>
 		  <bCtset/>
 		</in>
-		<ST/>
+	      </btypes:TYPE>,
+	      where
+ 	      <btypes:TYPE>
 		<notin>
 		  <tvar name="beta"/>
 		  <set>
@@ -5623,6 +5623,7 @@
 		  </set>
 		</notin>
 	      </btypes:TYPE>, 
+	      we must have
 	      <btypes:TYPE>
 		<mutex>
 		  <ftvs>
@@ -5633,11 +5634,9 @@
 		  </set>
 		</mutex>
 	      </btypes:TYPE>.
-	    </p>
-	    <p>
-	      Otherwise, due to case&nbsp;(1.d), 
+	      Otherwise, due to case&nbsp;(1.d.iii), 
+	      there exists
 	      <btypes:TYPE>
-		<Exists/>
 		<in>
 		  <grouping>
 		    <Tceq>
@@ -5716,6 +5715,7 @@
 		      <diff>
 			<ftvs>
 			  <type num="v"/>
+			  <dCtset num="v"/>
 			</ftvs>
 			<ftvs>
 			  <gamma/>
@@ -5792,7 +5792,7 @@
 	      </li>
 	      <li>
 		<p>
-		  From case(1.f.i), weakening on (1.a.ii), and
+		  From case(1.f.i), weakening on (1.b.ii), and
 		  <btypes:TYPE>
 		    <lem tag="maybe-cst-properties"/>
 		  </btypes:TYPE> (property-8), we have
@@ -5826,6 +5826,7 @@
 			  <gamma/>
 			  <store/>
 			  <type num="v"/>
+			  <dCtset num="v"/>
 			</ftvs>
 			<set>
 			  <tvars/>
@@ -5938,7 +5939,7 @@
 		  </btypes:TYPE>.
 		</p>
 		<p>
-		  Due to case&nbsp;(1.g), 
+		  Due to case&nbsp;(1.g.iv), 
 		  <btypes:TYPE>
 		    <eq>
 		      <bCtset num="ab"/>
@@ -5974,7 +5975,16 @@
 			<type num="v"/>
 		      </Subst>
 		    </eq>
-		  </btypes:TYPE>.
+		  </btypes:TYPE>, and
+		  <btypes:TYPE>
+		    <eq>
+		      <dCtset num="va"/>
+		      <Subst>
+			<aSubMap num="a"/>
+			<dCtset num="v"/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>
 		</p>
 	      </li>
 	      <li>
@@ -6003,9 +6013,8 @@
 		  </btypes:TYPE>
 		</p>
 		<p>
-		  Note that 
+		  Note that forall
  		  <btypes:TYPE>	
-		    <Forall/>
 		    <type num="s"/>
 		  </btypes:TYPE> above,
  		  <btypes:TYPE>	
@@ -6016,9 +6025,9 @@
 		      </Subst>
 		      <type num="s"/>
 		    </eq>
-		  </btypes:TYPE> due to case&nbsp;(1.c.iv).
-		</p>
-		<p>
+		  </btypes:TYPE> due to case&nbsp;(1.c.iii).
+		  Similarly, due to cases&nbsp;(3.c.i, 3.c.ii and 3.h.vii)
+		  we have
 		  <btypes:TYPE>	
 		    <eq>
 		      <Subst>
@@ -6036,7 +6045,7 @@
 		      </Subst>
 		      <store/>
 		    </eq>
-		  </btypes:TYPE>, and
+		  </btypes:TYPE>, 
 		  <btypes:TYPE>	
 		    <eq>
 		      <Subst>
@@ -6048,6 +6057,19 @@
 			<type num="v"/>
 		      </Subst>
 		      <type/>
+		    </eq>
+		  </btypes:TYPE>, and
+		  <btypes:TYPE>	
+		    <eq>
+		      <Subst>
+			<aSubMap dash="'"/>
+			<dCtset num="va"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<dCtset num="v"/>
+		      </Subst>
+		      <dCtset/>
 		    </eq>
 		  </btypes:TYPE>.
 		</p>
@@ -6149,6 +6171,10 @@
 		    <bCtset num="ab"/>
 		    <Subst>
 		      <aSubMap num="ab"/>
+		      <dCtset num="v"/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap num="ab"/>
 		      <gamma/>
 		    </Subst>
 		    <Subst>
@@ -6172,6 +6198,7 @@
 		<Sjudge>
 		  <assume>
 		    <bCtset num="ab"/>
+		    <dCtset num="va"/>
 		    <gamma/>
 		    <store/>
 		  </assume>
@@ -6193,6 +6220,7 @@
 		<Sjudge>
 		  <assume>
 		    <bCtset dash="'"/>
+		    <dCtset num="va"/>
 		    <gamma/>
 		    <store/>
 		  </assume>
@@ -6221,14 +6249,18 @@
 			  <TS>
 			    <tvars name="gamma"/>
 			    <type num="va"/>
+			    <dCtset num="va"/>
 			  </TS>
 			</mapsto>
 			<Cst>
 			  <aSubMap/>
 			  <set>
 			    <type num="va"/>
+			    <dCtset num="va"/>
 			  </set>
 			</Cst>
+		      </tyPre>
+		      <tyPre>
 			<eq>
 			  <dom>
 			    <aSubMap dash="'"/>
@@ -6241,6 +6273,10 @@
 		      <tyConc>
 			<Sjudge>
 			  <assume>
+			    <Subst>
+			      <aSubMap dash="'"/>
+			      <dCtset num="va"/>
+			    </Subst>
 			    <gamma dash="'"/>
 			    <store/>
 			  </assume>
@@ -6265,6 +6301,10 @@
 		      <spset>
 			<Sjudge>
 			  <assume>
+			    <Subst>
+			      <aSubMap dash="'"/>
+			      <dCtset num="va"/>
+			    </Subst>
 			    <gamma dash="'"/>
 			    <store/>
 			  </assume>
@@ -6291,6 +6331,7 @@
 		  <aSubMap dash="'"/>
 		  <set>
 		    <type num="va"/>
+		    <dCtset num="va"/>
 		  </set>
 		</Cst>
 	      </btypes:TYPE>, which implies by weakening,
@@ -6299,6 +6340,7 @@
 		  <aSubMap dash="'"/>
 		  <set>
 		    <type num="va"/>
+		    <dCtset num="va"/>
 		  </set>
 		</models>
 	      </btypes:TYPE>, and further due to case&nbsp;(1.h.vii), 
@@ -6309,6 +6351,7 @@
 		    <gamma/>
 		    <store/>
 		    <type num="va"/>
+		    <dCtset num="va"/>
 		  </set>
 		</models>
 	      </btypes:TYPE>.
@@ -6318,6 +6361,7 @@
 		  <TDjudge>
 		    <aVal/>
 		    <type num="va"/>
+		    <dCtset num="va"/>
 		  </TDjudge>
 		</CST>
 	      </btypes:TYPE>. Using these facts with
@@ -6331,6 +6375,7 @@
 		    <TDjudge>
 		      <aVal/>
 		      <type num="va"/>
+		      <dCtset num="va"/>
 		    </TDjudge>
 		  </spset>
 		</models>
@@ -6356,6 +6401,7 @@
 			<aSubMap dash="'"/>
 			<spset>
 			  <type num="va"/>
+			  <dCtset num="va"/>
 			</spset>
 		      </Subst>
 		    </Sat>
@@ -6374,6 +6420,7 @@
 			<aSubMap dash="'"/>
 			<spset>
 			  <type num="va"/>
+			  <dCtset num="va"/>
 			</spset>
 		      </Subst>
 		    </Sat>
@@ -6387,6 +6434,7 @@
 		    <Sjudge>
 		      <assume>
 			<bCtset dash="''"/>
+			<dCtset num="va"/>
 			<gamma/>
 			<store/>
 		      </assume>
@@ -6403,6 +6451,7 @@
 			<TDjudge>
 			  <aVal/>
 			  <type num="va"/>
+			  <dCtset num="va"/>
 			</TDjudge>
 		      </spset>
 		    </Sat>
@@ -6416,11 +6465,13 @@
 		    <subeq>
 		      <set>
 			<type num="va"/>
+			<dCtset num="va"/>
 		      </set>
 		      <spset>
 			<TDjudge>
 			  <aVal/>
 			  <type num="va"/>
+			  <dCtset num="va"/>
 			</TDjudge>
 		      </spset>
 		    </subeq>
@@ -6429,14 +6480,15 @@
 	      </li>
 	      <li>
 		<p>
-		  From cases&nbsp;(1.c.v and 1.h.ii) we conclude that
+		  From cases&nbsp;(1.c.iv and 1.h.ii) we conclude that
 		  <btypes:TYPE>
 		    <subeq>
 		      <dom>
 			<aSubMap dash="'"/>
 		      </dom>
 		      <ftvs>
-			<type num="v"/>
+			<type num="va"/>
+			<dCtset num="va"/>
 		      </ftvs>
 		    </subeq>
 		  </btypes:TYPE>. This implies
@@ -6451,13 +6503,15 @@
 			    <TDjudge>
 			      <aVal/>
 			      <type num="va"/>
+			      <dCtset num="va"/>
 			    </TDjudge>
 			  </spset>
 			</ftvs>
 		      </inter>
 		      <ftvs>
 			<set>
-			  <type num="v"/>
+			  <type num="va"/>
+			  <dCtset num="va"/>
 			</set>
 		      </ftvs>
 		    </subeq>
@@ -6483,6 +6537,7 @@
 			  <TDjudge>
 			    <aVal/>
 			    <type num="va"/>
+			    <dCtset num="va"/>
 			  </TDjudge>
 			</spset>
 		      </Subst>
@@ -6494,18 +6549,7 @@
 	  </li>
 	  <li>
 	    <p>
-	      Evidently,
-	      <btypes:TYPE>
-		<mutex>
-		  <dom>
-		    <aSubMap dash="'"/>
-		  </dom>
-		  <pred name="gtv">
-		    <gamma/>
-		  </pred>
-		</mutex>
-	      </btypes:TYPE>. 
-	      Now, from cases&nbsp;(1.n.ii, 1.m and 1.n.v) and
+	      From cases&nbsp;(1.n.ii, 1.m and 1.n.v) and
 	      <btypes:TYPE>
 		<lem tag="T-TSubstitution"/>
 	      </btypes:TYPE> (type substitution), we conclude that
@@ -6515,6 +6559,10 @@
 		    <Subst>
 		      <aSubMap dash="'"/>
 		      <bCtset dash="''"/>
+		    </Subst>
+		    <Subst>
+		      <aSubMap dash="'"/>
+		      <dCtset num="va"/>
 		    </Subst>
 		    <Subst>
 		      <aSubMap dash="'"/>
@@ -6542,6 +6590,7 @@
 		      <aSubMap dash="'"/>
 		      <bCtset dash="''"/>
 		    </Subst>
+		    <dCtset/>
 		    <gamma/>
 		    <store/>
 		  </assume>
@@ -6605,6 +6654,7 @@
 	      <tyPre>
 		<Sjudge>
 		  <assume>
+		    <dCtset/>
 		    <extend>
 		      <gamma/>
 		      <mapping>
@@ -6626,6 +6676,8 @@
 		    <type num="2"/>
 		  </tqExpr>
 		</Sjudge>
+	      </tyPre>
+	      <tyPre>
 		<eq under="minz">
 		  <type num="1"/>
 		  <type num="1" dash="'"/>
@@ -6638,6 +6690,7 @@
 	      <tyConc>
 		<Sjudge>
 		  <assume>
+		    <dCtset/>
 		    <extend>
 		      <gamma/>
 		      <mapping>
@@ -6709,6 +6762,7 @@
 		      <tyPre>
 			<Sjudge>
 			  <assume>
+			    <dCtset num="1"/>
 			    <gamma dash="'"/>
 			    <store/>
 			  </assume>
@@ -6728,6 +6782,7 @@
 		      <tyPre>
 			<Sjudge>
 			  <assume>
+			    <dCtset num="2"/>
 			    <gamma dash="'"/>
 			    <store/>
 			  </assume>
@@ -6752,6 +6807,7 @@
 		      <tyConc>
 			<Sjudge>
 			  <assume>
+			    <dCtset/>
 			    <gamma dash="'"/>
 			    <store/>
 			  </assume>
@@ -6776,6 +6832,7 @@
 		      <spset>
 			<Sjudge>
 			  <assume>
+			    <dCtset/>
 			    <gamma dash="'"/>
 			    <store/>
 			  </assume>
@@ -6792,6 +6849,19 @@
 		  </btypes:TYPE>
 		</p>
 	      </li>
+	      <li>
+		<p>
+		  <btypes:TYPE>
+		    <eq>
+		      <dCtset/>
+		      <unin>
+			<dCtset num="1"/>
+			<dCtset num="2"/>
+		      </unin>
+		    </eq>
+		  </btypes:TYPE>
+		</p>
+	      </li>
 	    </ol>
 	  </li>
 	  <li>
@@ -6802,6 +6872,7 @@
 		<Sjudge>
 		  <assume>
 		    <bCtset/>
+		    <dCtset num="1"/>
 		    <gamma dash="'"/>
 		    <store/>
 		  </assume>
@@ -6822,6 +6893,7 @@
 		<Sjudge>
 		  <assume>
 		    <bCtset dash="'"/>
+		    <dCtset num="1"/>
  		    <gamma/>
 		    <store/>
 		  </assume>
@@ -6844,6 +6916,7 @@
 		<Sjudge>
 		  <assume>
 		    <bCtset/>
+		    <dCtset num="2"/>
 		    <gamma dash="'"/>
 		    <store/>
 		  </assume>
@@ -6861,6 +6934,7 @@
 		<Sjudge>
 		  <assume>
 		    <bCtset dash="'"/>
+		    <dCtset num="2"/>
 		    <gamma dash="'"/>
 		    <store/>
 		  </assume>
@@ -6881,6 +6955,7 @@
 		<Sjudge>
 		  <assume>
 		    <bCtset dash="''"/>
+		    <dCtset num="2"/>
  		    <gamma/>
 		    <store/>
 		  </assume>
@@ -6906,6 +6981,7 @@
 		<Sjudge>
 		  <assume>
 		    <bCtset dash="''"/>
+		    <dCtset num="1"/>
  		    <gamma/>
 		    <store/>
 		  </assume>
@@ -6956,6 +7032,7 @@
 		    </subst>
 		  </apply>
 		  <type/>
+		  <dCtset/>
 		</TDjudge>
 	      </btypes:TYPE>.
 	      Using cases&nbsp;(3.c, 3.d and 3.e) and
@@ -6966,6 +7043,7 @@
 		<Sjudge>
 		  <assume>
 		    <bCtset dash="''"/>
+		    <dCtset/>
  		    <gamma/>
 		    <store/>
 		  </assume>
