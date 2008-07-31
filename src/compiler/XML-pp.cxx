@@ -194,7 +194,7 @@ static void
 emitXMLType(INOstream &out, std::string name, GCPtr<TypeScheme> ts,
 	    bool raw=false)
 {
-  GCPtr<TvPrinter> tvP = sherpa::GC_NULL;
+  GCPtr<TvPrinter> tvP = GC_NULL;
   if(!raw)
     tvP = TvPrinter::make();
   

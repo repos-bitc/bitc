@@ -94,7 +94,7 @@ UseCase(GCPtr<AST> ast)
 static GCPtr<AST> 
 addLB(GCPtr<AST> grandLet, GCPtr<AST> identList, 
       GCPtr<AST> ast, unsigned long lbFlags=0,
-      GCPtr<AST> id=sherpa::GC_NULL, bool addToIL=true)
+      GCPtr<AST> id=GC_NULL, bool addToIL=true)
 {
   if(!id)
     id = AST::genSym(ast, "t");
@@ -294,7 +294,7 @@ ssa(std::ostream& errStream,
 		<< ast->astTypeName()
 		<< std::endl;
       
-      FEXPR(grandLet) = sherpa::GC_NULL;
+      FEXPR(grandLet) = GC_NULL;
       errorFree = false;
       break;
     }
@@ -389,7 +389,7 @@ ssa(std::ostream& errStream,
 	SSA(errStream, uoc, ast->child(1), gl, identList, 
 	    ast, 1, flags);
 	
-	GCPtr<AST> body = sherpa::GC_NULL;
+	GCPtr<AST> body = GC_NULL;
 	SETGL(body, gl);
 	assert(body);
 	ast->child(1) = AST::make(at_container, ast->loc, identList, body);	
@@ -407,7 +407,7 @@ ssa(std::ostream& errStream,
       SSA(errStream, uoc, ast->child(1), gl, identList, 
 	     ast, 1, flags);
       
-      GCPtr<AST> body = sherpa::GC_NULL;
+      GCPtr<AST> body = GC_NULL;
       SETGL(body, gl);
       assert(body);
       ast->child(1) = AST::make(at_container, ast->loc, identList, body);
@@ -544,7 +544,7 @@ ssa(std::ostream& errStream,
 	// change the resultant value to 
 	// inner-ref.
 	
-	GCPtr<AST> tempAst = sherpa::GC_NULL;
+	GCPtr<AST> tempAst = GC_NULL;
 	if(expr->symType->getBareType()->kind == ty_vector) {
 	  // Vector-Index
 	  tempAst = AST::make(at_vector_nth, expr->loc, 
@@ -565,7 +565,7 @@ ssa(std::ostream& errStream,
 	// further cases as the sub-expression have already been
 	// SSAed in the previous steps. 
 	SSA(errStream, uoc, tempAst, grandLet, identList, 
-	    sherpa::GC_NULL, 0, flags);      
+	    GC_NULL, 0, flags);      
 	
       }
 
@@ -778,7 +778,7 @@ ssa(std::ostream& errStream,
     {
       GCPtr<AST> ifizedAST = AST::make(at_if, ast->child(0)->loc);
       GCPtr<AST> ifAst = ifizedAST;
-      GCPtr<AST> prev = sherpa::GC_NULL;
+      GCPtr<AST> prev = GC_NULL;
       for(c = 0; c < ast->children.size() - 1; c++) {
 	GCPtr<AST> falseAst =  AST::make(at_boolLiteral, ast->child(c)->loc);
 	falseAst->litValue.b = false;
@@ -808,7 +808,7 @@ ssa(std::ostream& errStream,
     {
       GCPtr<AST> ifizedAST = AST::make(at_if, ast->child(0)->loc);
       GCPtr<AST> ifAst = ifizedAST;
-      GCPtr<AST> prev = sherpa::GC_NULL;
+      GCPtr<AST> prev = GC_NULL;
       for(c = 0; c < ast->children.size() - 1; c++) {
 	GCPtr<AST> trueAst =  AST::make(at_boolLiteral, ast->child(c)->loc);
 	trueAst->litValue.b = true;
@@ -841,7 +841,7 @@ ssa(std::ostream& errStream,
       GCPtr<AST> ow = ast->child(1)->child(0);
       GCPtr<AST> ifizedAST = AST::make(at_if, caselegs->loc);
       GCPtr<AST> ifAst = ifizedAST;
-      GCPtr<AST> prev = sherpa::GC_NULL;
+      GCPtr<AST> prev = GC_NULL;
       for(c = 0; c < caselegs->children.size(); c++) {
 	GCPtr<AST> caseleg = caselegs->child(c);	
 	ifAst->loc = caseleg->loc;
@@ -1038,8 +1038,8 @@ UocInfo::be_ssaTrans(std::ostream& errStream,
 
   GCPtr<UocInfo> uoc = shared_from_this();
   
-  CHKERR(errFree, ssa(errStream, uoc, uoc->uocAst, sherpa::GC_NULL, 
-		      sherpa::GC_NULL, uoc->uocAst, 0, flags));
+  CHKERR(errFree, ssa(errStream, uoc, uoc->uocAst, GC_NULL, 
+		      GC_NULL, uoc->uocAst, 0, flags));
   
   //errStream << "ATransed AST = " << std::endl 
   //	    << uoc->ast->asString() << std::endl;

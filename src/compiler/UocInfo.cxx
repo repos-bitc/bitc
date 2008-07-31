@@ -88,8 +88,8 @@ UocInfo::UocInfo(const std::string& _uocName, const std::string& _origin,
 {
   lastCompletedPass = pn_none;
   uocAst = _uocAst;
-  env = sherpa::GC_NULL;
-  gamma = sherpa::GC_NULL;
+  env = GC_NULL;
+  gamma = GC_NULL;
 
   uocName = _uocName;
   origin = _origin;
@@ -211,7 +211,7 @@ UocInfo::findInterface(const std::string& ifName)
 {
   UocMap::iterator itr = UocInfo::ifList.find(ifName);
   if (itr == UocInfo::ifList.end())
-    return sherpa::GC_NULL;
+    return GC_NULL;
 
   return itr->second;
 }

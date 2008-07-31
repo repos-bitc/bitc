@@ -162,8 +162,8 @@ initGamma(std::ostream& errStream,
   }
   
   // "use" everything in the prelude
-  GCPtr<TSEnvironment > preenv = sherpa::GC_NULL;
-  GCPtr<InstEnvironment > preInsts = sherpa::GC_NULL;
+  GCPtr<TSEnvironment > preenv = GC_NULL;
+  GCPtr<InstEnvironment > preInsts = GC_NULL;
   
   size_t i;
 

@@ -65,8 +65,8 @@ typeError(std::ostream& errStream, const LexLoc &errLoc,
 	  GCPtr<Type> t1, GCPtr<Type> t2)
 {
   errStream << errLoc << ": Type Error."
-	    << "Expected " << t1->asString(sherpa::GC_NULL) 
-	    << ", Obtained " << t2->asString(sherpa::GC_NULL)
+	    << "Expected " << t1->asString(GC_NULL) 
+	    << ", Obtained " << t2->asString(GC_NULL)
 	    << std::endl;
   
   //   if(errStream == std::cerr)
@@ -648,11 +648,11 @@ acyclic(std::ostream& errStream,
     
     // By now, we know that the current type is already 
     // in the worklist
-    std::cerr << t->asString(sherpa::GC_NULL, false) 
+    std::cerr << t->asString(GC_NULL, false) 
     	      << std::endl;
     for(WorkList<GCPtr<Type> >::iterator itr = worklist.begin();
 	itr != worklist.end(); ++itr)
-      std::cerr << (*itr)->asString(sherpa::GC_NULL, false)
+      std::cerr << (*itr)->asString(GC_NULL, false)
 		<< std::endl;
     fatal();
     return false;

@@ -348,7 +348,7 @@ UocInfo::lookupByFqn(const string& fqn, GCPtr<UocInfo> &targetUoc)
   string::size_type lastDot = fqn.rfind('.');
   string ifName = fqn.substr(0, lastDot);
   string idName = fqn.substr(lastDot+1, fqn.size());
-  targetUoc = sherpa::GC_NULL;
+  targetUoc = GC_NULL;
 
  
   // Search all Interfaces and source modules serially for the AST
@@ -531,7 +531,7 @@ name2fqn(GCPtr<AST> ast)
                   MORE HELPER FUNCTIONS AND MACROS
 *******************************************************************/
 
-#define UNIFIED_ENVS sherpa::GC_NULL
+#define UNIFIED_ENVS GC_NULL
 
 // Warning: The following macros need local errStream
 #define RANDT_DROP(expr, mess, env) do {		\
@@ -736,7 +736,7 @@ buildNewDeclaration(GCPtr<AST> def, GCPtr<Type> typ)
   assert(ident->isGlobal());
 
   NAMKARAN(ident, getInstName(ident, typ));
-  GCPtr<AST> decl = sherpa::GC_NULL;
+  GCPtr<AST> decl = GC_NULL;
   
   switch(def->astType) {
   case at_define:
@@ -784,7 +784,7 @@ getIDFromInstantiation(GCPtr<AST> oldDefID, GCPtr<AST> newDef)
     oldDef->children[4] = oldDef->children[4];
     GCPtr<AST> oldCtrs = oldDef->child(4);
     GCPtr<AST> newCtrs = newDef->child(4);
-    GCPtr<AST> newCtr = sherpa::GC_NULL;
+    GCPtr<AST> newCtr = GC_NULL;
     for(size_t c=0; c < oldCtrs->children.size(); c++)
       if(oldCtrs->child(c)->child(0) == oldDefID)
 	newCtr = newCtrs->child(c)->child(0);
@@ -805,7 +805,7 @@ getIDFromInstantiation(GCPtr<AST> oldDefID, GCPtr<AST> newDef)
 static GCPtr<AST> 
 getOuterLet(GCPtr<AST> ast)
 {
-  GCPtr<AST> outerLet = sherpa::GC_NULL;
+  GCPtr<AST> outerLet = GC_NULL;
   switch(ast->astType) {
   case at_ident:
     assert(!ast->symbolDef);
@@ -1269,7 +1269,7 @@ UocInfo::recInstantiate(ostream &errStream,
       ast->child(1) = newLet;
       
       // We re-built the let-expression, So, remark all defForms.
-      findDefForms(ast, sherpa::GC_NULL, ast->defForm);      
+      findDefForms(ast, GC_NULL, ast->defForm);      
 
       INST_DEBUG
 	errStream << "recInstantiate: WrappedLet =  "
@@ -1597,7 +1597,7 @@ UocInfo::doInstantiate(ostream &errStream,
   //          R&Ted independent of the let-wrapper. There is no
   //          environment there.
   
-  GCPtr<AST> alreadyInstantiated = sherpa::GC_NULL;
+  GCPtr<AST> alreadyInstantiated = GC_NULL;
   if(globalInst)
     alreadyInstantiated = env->getBinding(newName);
   else {
@@ -1640,7 +1640,7 @@ UocInfo::doInstantiate(ostream &errStream,
     // some day.
     if(!globalInst) {
       GCPtr<AST> res = ast->getDCopy();
-      res->symbolDef = sherpa::GC_NULL;
+      res->symbolDef = GC_NULL;
       NAMKARAN(res, newName);
 
       INST_DEBUG
@@ -1954,8 +1954,8 @@ UocInfo::doInstantiate(ostream &errStream,
     // Now we have the newly instantiated AST to be added to our
     // environment. Before that, perform some cleanup in order to
     // eliminate any references to the old module.  
-    copy->getID()->decl = sherpa::GC_NULL;
-    copy->getID()->defn = sherpa::GC_NULL;
+    copy->getID()->decl = GC_NULL;
+    copy->getID()->defn = GC_NULL;
     
     // FINALLY, add the new form to my UOC in the case
     addTopLevelForm(copy);
@@ -2033,7 +2033,7 @@ UocInfo::instantiateFQN(ostream &errStream,
 			   const string& epName)
 {
   bool errFree = true;
-  GCPtr<UocInfo> targetUoc = sherpa::GC_NULL;
+  GCPtr<UocInfo> targetUoc = GC_NULL;
   GCPtr<AST> def = UocInfo::lookupByFqn(epName, targetUoc);
 
   if (!def) {

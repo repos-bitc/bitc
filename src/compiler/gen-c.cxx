@@ -755,7 +755,7 @@ emit_fnxn_label(std::ostream& errStream,
   
   GCPtr<AST> lam = ast->child(1);
   GCPtr<AST> body = lam->child(1);
-  GCPtr<AST> ret= sherpa::GC_NULL;
+  GCPtr<AST> ret= GC_NULL;
   
   /* While emitting the function parameters, we omitted any parameters
    * of unit type, because there is no point passing those or letting
@@ -1075,7 +1075,7 @@ toc(std::ostream& errStream,
 	  GCPtr<AST> dummy = AST::make(at_ucon_apply, ast->loc, ast);
 	  dummy->symType = ast->symType;
 	  TOC(errStream, uoc, dummy, out, IDname, 
-	      sherpa::GC_NULL, 0, flags);	  
+	      GC_NULL, 0, flags);	  
 	}
 	break;
       }
@@ -1866,7 +1866,7 @@ toc(std::ostream& errStream,
 	
       out << "if(";
       TOC(errStream, uoc, theCond, out, IDname, 
-	  sherpa::GC_NULL, 0, flags);      
+	  GC_NULL, 0, flags);      
       out << ") {" << endl;
       out.more();
       TOC(errStream, uoc, res, out, IDname, 
@@ -2780,7 +2780,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 	    << "***************************************/" << endl;    
 	
 	GCPtr<AST> id = ast->getID();
-	GCPtr<AST> label = sherpa::GC_NULL;
+	GCPtr<AST> label = GC_NULL;
 	bool wrapperNeeded = false;
 
 	// Case 0: Immutable functions that are not of the form

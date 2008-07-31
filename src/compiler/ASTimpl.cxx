@@ -686,8 +686,8 @@ AST::leadsToTopLevelForm()
 
 void
 AST::clearTypes() {
-  symType = sherpa::GC_NULL;
-  scheme = sherpa::GC_NULL;
+  symType = GC_NULL;
+  scheme = GC_NULL;
   for(size_t i=0; i<children.size(); i++)
     child(i)->clearTypes();
 }
@@ -734,7 +734,7 @@ AST::getID()
     return child(0);
     
   default:
-    return sherpa::GC_NULL;
+    return GC_NULL;
   }
 }
 
@@ -769,7 +769,7 @@ AST::getCtr()
     return child(1);
 
   assert(false);
-  return sherpa::GC_NULL;
+  return GC_NULL;
 }
 
 /* Rename identifier `from' to `to' in `ast' */ 

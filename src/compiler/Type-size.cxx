@@ -57,7 +57,7 @@ calc_struct_size(const GCPtr<Type> t)
 {
   size_t start=0;
   size_t sz = 0;
-  GCPtr<AST> base = sherpa::GC_NULL;
+  GCPtr<AST> base = GC_NULL;
 
   if(t->kind == ty_structv) {
     start = 0;

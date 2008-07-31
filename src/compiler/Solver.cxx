@@ -337,7 +337,7 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
     }
   }
 
-  GCPtr<TypeScheme> instScheme = sherpa::GC_NULL;  
+  GCPtr<TypeScheme> instScheme = GC_NULL;  
   for(size_t j=0; j < insts->size(); j++) {
     GCPtr<TypeScheme> ts = (insts->elem(j))->ts->ts_instance_copy();
     GCPtr<Type> inst = ts->tau;
@@ -521,7 +521,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
   
   do {
     handled = false;
-    GCPtr<Typeclass> errPred = sherpa::GC_NULL;
+    GCPtr<Typeclass> errPred = GC_NULL;
     bool errFreeNow = true;
     
     for (TypeSet::iterator itr = tcc->begin(); 

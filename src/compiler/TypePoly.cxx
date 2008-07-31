@@ -1068,9 +1068,9 @@ Type::TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
   }
   
   INS_DEBUG std::cout << "\t Specialized " 
-		      << getType()->asString(sherpa::GC_NULL)
+		      << getType()->asString(GC_NULL)
 		      << " to " 
-		      << retType->getType()->asString(sherpa::GC_NULL)
+		      << retType->getType()->asString(GC_NULL)
 		      << std::endl;
   
   return retType;
@@ -1084,7 +1084,7 @@ Type::clear_sp()
   if(!t->sp)
     return;
 
-  t->sp = sherpa::GC_NULL;
+  t->sp = GC_NULL;
 
   for(size_t i=0; i<t->typeArgs.size(); i++)
     t->TypeArg(i)->clear_sp();

@@ -64,7 +64,7 @@ GCPtr<AST>
 Type::asAST(const sherpa::LexLoc &loc,
 	    GCPtr<TvPrinter> tvP)
 { 
-  GCPtr<AST> ast = sherpa::GC_NULL;
+  GCPtr<AST> ast = GC_NULL;
   GCPtr<Type> t = getType();  
 
   if(t->pMark >= 1) {

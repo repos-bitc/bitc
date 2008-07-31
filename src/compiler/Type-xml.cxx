@@ -72,7 +72,7 @@ void
 Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out) 
 { 
   if(Options::rawTvars)
-    tvP = sherpa::GC_NULL;
+    tvP = GC_NULL;
 
   GCPtr<Type> t = getType();
 
@@ -454,7 +454,7 @@ TypeScheme::asXML(GCPtr<TvPrinter> tvP)
 void 
 Instance::asXML(INOstream &out)
 {
-  ts->asXML(sherpa::GC_NULL, out);
+  ts->asXML(GC_NULL, out);
 }
 
 std::string 

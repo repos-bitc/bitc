@@ -982,16 +982,16 @@ comp::comp(const std::string s, GCPtr<Type> t, unsigned long _flags)
 
 #define TYPE_CTR_INIT(k) do {			\
     kind = k;					\
-    defAst = sherpa::GC_NULL;			\
+    defAst = GC_NULL;			\
     arrlen = ArrLen::make(0);			\
     Isize = 0;					\
     minSignedRep = 0;				\
     minUnsignedRep = 0;				\
     mark = 0;					\
     pMark = 0;					\
-    sp = sherpa::GC_NULL;			\
-    myContainer = sherpa::GC_NULL;		\
-    link = sherpa::GC_NULL;			\
+    sp = GC_NULL;			\
+    myContainer = GC_NULL;		\
+    link = GC_NULL;			\
     flags = 0;					\
   } while(0);
 
@@ -1040,7 +1040,7 @@ Type::Type(GCPtr<Type>  t)
 
   mark = 0;
   pMark = 0;  
-  sp = sherpa::GC_NULL;
+  sp = GC_NULL;
   flags = t->flags;
 }
 
@@ -1049,7 +1049,7 @@ GCPtr<Type>
 Type::getDCopy()
 {
   GCPtr<Type> t = getType();
-  GCPtr<TypeScheme> sigma = TypeScheme::make(t, sherpa::GC_NULL);
+  GCPtr<TypeScheme> sigma = TypeScheme::make(t, GC_NULL);
   // sigma's ftvs are empty, therefore, TypeSpecialize will link
   // all type-variables to the original ones
   GCPtr<Type> newTyp = sigma->type_instance_copy();

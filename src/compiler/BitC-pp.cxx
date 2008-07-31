@@ -978,7 +978,7 @@ doShowTypes(std::ostream& out, GCPtr<AST> ast,
 	    GCPtr<TSEnvironment > gamma,
 	    bool showMangName,
 	    bool raw = false,
-	    GCPtr<TvPrinter> tvP=sherpa::GC_NULL)
+	    GCPtr<TvPrinter> tvP=GC_NULL)
 {
   switch(ast->astType) {
   case at_ident:

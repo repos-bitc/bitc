@@ -32,20 +32,20 @@ AST::AST(const AstType at)
   isDecl = false;
   polyinst = false;
   reached = false;
-  scheme = sherpa::GC_NULL;
-  symType = sherpa::GC_NULL;
-  symbolDef = sherpa::GC_NULL;
-  defn = sherpa::GC_NULL;
-  defForm = sherpa::GC_NULL;
-  defbps = sherpa::GC_NULL;
-  decl = sherpa::GC_NULL;
+  scheme = GC_NULL;
+  symType = GC_NULL;
+  symbolDef = GC_NULL;
+  defn = GC_NULL;
+  defForm = GC_NULL;
+  defbps = GC_NULL;
+  decl = GC_NULL;
   printVariant = 0;		
-  tagType = sherpa::GC_NULL;
+  tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
   total_fill = 0;
-  tvarLB = sherpa::GC_NULL;
-  parentLB = sherpa::GC_NULL;
+  tvarLB = GC_NULL;
+  parentLB = GC_NULL;
 }
 
 AST::AST(const AstType at, const AST_TOKEN_TYPE& tok)
@@ -61,20 +61,20 @@ AST::AST(const AstType at, const AST_TOKEN_TYPE& tok)
   isDecl = false;
   polyinst = false;
   reached = false;
-  scheme = sherpa::GC_NULL;
-  symType = sherpa::GC_NULL;
-  symbolDef = sherpa::GC_NULL;
-  defn = sherpa::GC_NULL;
-  defForm = sherpa::GC_NULL;
-  defbps = sherpa::GC_NULL;
-  decl = sherpa::GC_NULL;
+  scheme = GC_NULL;
+  symType = GC_NULL;
+  symbolDef = GC_NULL;
+  defn = GC_NULL;
+  defForm = GC_NULL;
+  defbps = GC_NULL;
+  decl = GC_NULL;
   printVariant = 0;		
-  tagType = sherpa::GC_NULL;
+  tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
   total_fill = 0;
-  tvarLB = sherpa::GC_NULL;
-  parentLB = sherpa::GC_NULL;
+  tvarLB = GC_NULL;
+  parentLB = GC_NULL;
 }
 
 AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc)
@@ -89,20 +89,20 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc)
   isDecl = false;
   polyinst = false;
   reached = false;
-  scheme = sherpa::GC_NULL;
-  symType = sherpa::GC_NULL;
-  symbolDef = sherpa::GC_NULL;
-  defn = sherpa::GC_NULL;
-  defForm = sherpa::GC_NULL;
-  defbps = sherpa::GC_NULL;
-  decl = sherpa::GC_NULL;
+  scheme = GC_NULL;
+  symType = GC_NULL;
+  symbolDef = GC_NULL;
+  defn = GC_NULL;
+  defForm = GC_NULL;
+  defbps = GC_NULL;
+  decl = GC_NULL;
   printVariant = 0;		
-  tagType = sherpa::GC_NULL;
+  tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
   total_fill = 0;
-  tvarLB = sherpa::GC_NULL;
-  parentLB = sherpa::GC_NULL;
+  tvarLB = GC_NULL;
+  parentLB = GC_NULL;
 }
 
 AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
@@ -119,20 +119,20 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   isDecl = false;
   polyinst = false;
   reached = false;
-  scheme = sherpa::GC_NULL;
-  symType = sherpa::GC_NULL;
-  symbolDef = sherpa::GC_NULL;
-  defn = sherpa::GC_NULL;
-  defForm = sherpa::GC_NULL;
-  defbps = sherpa::GC_NULL;
-  decl = sherpa::GC_NULL;
+  scheme = GC_NULL;
+  symType = GC_NULL;
+  symbolDef = GC_NULL;
+  defn = GC_NULL;
+  defForm = GC_NULL;
+  defbps = GC_NULL;
+  decl = GC_NULL;
   printVariant = 0;		
-  tagType = sherpa::GC_NULL;
+  tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
   total_fill = 0;
-  tvarLB = sherpa::GC_NULL;
-  parentLB = sherpa::GC_NULL;
+  tvarLB = GC_NULL;
+  parentLB = GC_NULL;
 }
 
 AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
@@ -151,20 +151,20 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   isDecl = false;
   polyinst = false;
   reached = false;
-  scheme = sherpa::GC_NULL;
-  symType = sherpa::GC_NULL;
-  symbolDef = sherpa::GC_NULL;
-  defn = sherpa::GC_NULL;
-  defForm = sherpa::GC_NULL;
-  defbps = sherpa::GC_NULL;
-  decl = sherpa::GC_NULL;
+  scheme = GC_NULL;
+  symType = GC_NULL;
+  symbolDef = GC_NULL;
+  defn = GC_NULL;
+  defForm = GC_NULL;
+  defbps = GC_NULL;
+  decl = GC_NULL;
   printVariant = 0;		
-  tagType = sherpa::GC_NULL;
+  tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
   total_fill = 0;
-  tvarLB = sherpa::GC_NULL;
-  parentLB = sherpa::GC_NULL;
+  tvarLB = GC_NULL;
+  parentLB = GC_NULL;
 }
 
 AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
@@ -185,20 +185,20 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   isDecl = false;
   polyinst = false;
   reached = false;
-  scheme = sherpa::GC_NULL;
-  symType = sherpa::GC_NULL;
-  symbolDef = sherpa::GC_NULL;
-  defn = sherpa::GC_NULL;
-  defForm = sherpa::GC_NULL;
-  defbps = sherpa::GC_NULL;
-  decl = sherpa::GC_NULL;
+  scheme = GC_NULL;
+  symType = GC_NULL;
+  symbolDef = GC_NULL;
+  defn = GC_NULL;
+  defForm = GC_NULL;
+  defbps = GC_NULL;
+  decl = GC_NULL;
   printVariant = 0;		
-  tagType = sherpa::GC_NULL;
+  tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
   total_fill = 0;
-  tvarLB = sherpa::GC_NULL;
-  parentLB = sherpa::GC_NULL;
+  tvarLB = GC_NULL;
+  parentLB = GC_NULL;
 }
 
 AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
@@ -221,20 +221,20 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   isDecl = false;
   polyinst = false;
   reached = false;
-  scheme = sherpa::GC_NULL;
-  symType = sherpa::GC_NULL;
-  symbolDef = sherpa::GC_NULL;
-  defn = sherpa::GC_NULL;
-  defForm = sherpa::GC_NULL;
-  defbps = sherpa::GC_NULL;
-  decl = sherpa::GC_NULL;
+  scheme = GC_NULL;
+  symType = GC_NULL;
+  symbolDef = GC_NULL;
+  defn = GC_NULL;
+  defForm = GC_NULL;
+  defbps = GC_NULL;
+  decl = GC_NULL;
   printVariant = 0;		
-  tagType = sherpa::GC_NULL;
+  tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
   total_fill = 0;
-  tvarLB = sherpa::GC_NULL;
-  parentLB = sherpa::GC_NULL;
+  tvarLB = GC_NULL;
+  parentLB = GC_NULL;
 }
 
 AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
@@ -259,20 +259,20 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   isDecl = false;
   polyinst = false;
   reached = false;
-  scheme = sherpa::GC_NULL;
-  symType = sherpa::GC_NULL;
-  symbolDef = sherpa::GC_NULL;
-  defn = sherpa::GC_NULL;
-  defForm = sherpa::GC_NULL;
-  defbps = sherpa::GC_NULL;
-  decl = sherpa::GC_NULL;
+  scheme = GC_NULL;
+  symType = GC_NULL;
+  symbolDef = GC_NULL;
+  defn = GC_NULL;
+  defForm = GC_NULL;
+  defbps = GC_NULL;
+  decl = GC_NULL;
   printVariant = 0;		
-  tagType = sherpa::GC_NULL;
+  tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
   total_fill = 0;
-  tvarLB = sherpa::GC_NULL;
-  parentLB = sherpa::GC_NULL;
+  tvarLB = GC_NULL;
+  parentLB = GC_NULL;
 }
 
 ::std::string

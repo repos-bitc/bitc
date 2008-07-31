@@ -57,7 +57,7 @@ Environment<T>::getLocalBinding(const std::string& nm) const
   if (itr != bindings.end())
     return itr->second;
 
-  return sherpa::GC_NULL;
+  return GC_NULL;
 }
 
 template<class T>
@@ -72,7 +72,7 @@ Environment<T>::doGetBinding(const std::string& nm) const
   if (parent)
     return parent->doGetBinding(nm);
 
-  return sherpa::GC_NULL;
+  return GC_NULL;
 }
 
 template<class T>

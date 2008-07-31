@@ -197,7 +197,7 @@ GCPtr<Type>
 Type::maximizeTopMutability(GCPtr<Trail> trail)
 {
   GCPtr<Type> t = getType();
-  GCPtr<Type> rt = sherpa::GC_NULL;
+  GCPtr<Type> rt = GC_NULL;
   
   switch(t->kind) {
     
@@ -233,7 +233,7 @@ GCPtr<Type>
 Type::minimizeTopMutability(GCPtr<Trail> trail)
 {
   GCPtr<Type> t = getType();
-  GCPtr<Type> rt = sherpa::GC_NULL;
+  GCPtr<Type> rt = GC_NULL;
   
   switch(t->kind) {
     
@@ -270,7 +270,7 @@ GCPtr<Type>
 Type::maximizeMutability(GCPtr<Trail> trail)
 {
   GCPtr<Type> t = getType();
-  GCPtr<Type> rt = sherpa::GC_NULL;
+  GCPtr<Type> rt = GC_NULL;
 
   if(t->mark & MARK17)
     return t;
@@ -345,7 +345,7 @@ GCPtr<Type>
 Type::minimizeMutability(GCPtr<Trail> trail)
 {
   GCPtr<Type> t = getType();
-  GCPtr<Type> rt = sherpa::GC_NULL;
+  GCPtr<Type> rt = GC_NULL;
   
   if(t->mark & MARK19)
     return t;
@@ -416,7 +416,7 @@ GCPtr<Type>
 Type::minimizeDeepMutability(GCPtr<Trail> trail)
 {
   GCPtr<Type> t = getType();
-  GCPtr<Type> rt = sherpa::GC_NULL;
+  GCPtr<Type> rt = GC_NULL;
   
   if(t->mark & MARK24)
     return t;

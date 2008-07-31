@@ -748,7 +748,7 @@ cl_convert_ast(GCPtr<AST> ast,
       GCPtr<CVector<GCPtr<AST> > > freeVars = CVector<GCPtr<AST> >::make();
       GCPtr<CVector<GCPtr<AST> > > boundVars = CVector<GCPtr<AST> >::make();
       
-      GCPtr<AST> clenvName = sherpa::GC_NULL;
+      GCPtr<AST> clenvName = GC_NULL;
       GCPtr<TvPrinter> tvP = TvPrinter::make();
 
       CLCONV_DEBUG std::cerr << "Processing lambda. " << std::endl;

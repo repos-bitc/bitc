@@ -359,6 +359,6 @@ UocInfo::be_tail(std::ostream& errStream,
 
   GCPtr<UocInfo> uoc = shared_from_this();
   
-  markTail(uoc->uocAst, sherpa::GC_NULL, sherpa::GC_NULL, true);
+  markTail(uoc->uocAst, GC_NULL, GC_NULL, true);
   return errFree;
 }

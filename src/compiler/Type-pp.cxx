@@ -77,7 +77,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 { 
 
   if(Options::rawTvars)
-    tvP = sherpa::GC_NULL;
+    tvP = GC_NULL;
 
   GCPtr<Type> t;
   if(traverse)

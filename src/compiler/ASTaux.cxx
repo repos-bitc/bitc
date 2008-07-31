@@ -197,16 +197,16 @@ GCPtr<AST>
 AST::getDCopy()
 {  
   GCPtr<AST> to = AST::make(shared_from_this(), false);
-  to->symbolDef = sherpa::GC_NULL;
-  to->defn = sherpa::GC_NULL;
-  to->decl = sherpa::GC_NULL;
-  to->symType = sherpa::GC_NULL;
-  to->scheme = sherpa::GC_NULL;
+  to->symbolDef = GC_NULL;
+  to->defn = GC_NULL;
+  to->decl = GC_NULL;
+  to->symType = GC_NULL;
+  to->scheme = GC_NULL;
   to->envs = envs;
   to->polyinst = false;
   to->reached = false;
-  to->defForm = sherpa::GC_NULL;
-  to->defbps = sherpa::GC_NULL;
+  to->defForm = GC_NULL;
+  to->defbps = GC_NULL;
 
   for(size_t i=0; i<children.size(); i++)
     to->children.push_back(child(i)->getDCopy());

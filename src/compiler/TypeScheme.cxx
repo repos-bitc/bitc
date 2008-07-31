@@ -119,7 +119,7 @@ TypeScheme::ts_instance(bool fullCopy)
   normalize();
 
   GCPtr<TypeScheme> ts = TypeScheme::make(tau, ast);
-  ts->tau = sherpa::GC_NULL;
+  ts->tau = GC_NULL;
 
   for(size_t i=0; i<ftvs->size(); i++) 
     ts->ftvs->append(newTvar());
