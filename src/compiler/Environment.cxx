@@ -47,6 +47,7 @@
 #include "Environment.hxx"
 #include "inter-pass.hxx"
 
+using namespace std;
 using namespace sherpa;
 
 template<class T>
@@ -214,7 +215,7 @@ template GCPtr<Binding<AST> >
 Environment<AST>::getLocalBinding(const std::string& nm) const;
 template GCPtr<Binding<TypeScheme> > 
 Environment<TypeScheme>::getLocalBinding(const std::string& nm) const;
-template GCPtr<Binding< CVector<GCPtr<Instance> > > >
+template GCPtr<Binding<set<GCPtr<Instance> > > >
 InstEnvironment::getLocalBinding
 (const std::string& nm) const;
 
@@ -222,7 +223,7 @@ template GCPtr<Binding<AST> >
 Environment<AST>::doGetBinding(const std::string& nm) const;
 template GCPtr<Binding<TypeScheme> > 
 Environment<TypeScheme>::doGetBinding(const std::string& nm) const;
-template GCPtr<Binding< CVector<GCPtr<Instance> > > >
+template GCPtr<Binding<set<GCPtr<Instance> > > >
 InstEnvironment::doGetBinding
 (const std::string& nm) const;
 
@@ -235,7 +236,7 @@ Environment<TypeScheme>::addBinding(const std::string& nm,
 				    bool rebind);
 template void
 InstEnvironment::addBinding
-(const std::string& nm, GCPtr<CVector<GCPtr<Instance> > > val, bool rebind);
+(const std::string& nm, GCPtr<set<GCPtr<Instance> > > val, bool rebind);
 
 
 template void

@@ -47,6 +47,7 @@
 #include <vector>
 
 #include <libsherpa/INOstream.hxx>
+#include <libsherpa/CVector.hxx>
 
 #include "AST.hxx"
 #include "debug.hxx"

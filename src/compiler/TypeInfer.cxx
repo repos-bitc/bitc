@@ -1282,8 +1282,12 @@ InferTypeClass(std::ostream& errStream, GCPtr<AST> ast,
   }
   
   assert(!instEnv->getBinding(ident->fqn.asString()));
-  instEnv->addBinding(ident->fqn.asString(), 
-		      CVector<GCPtr<Instance> >::make());
+
+  set<GCPtr<Instance> > *instSetPtr = new set<GCPtr<Instance> >;
+  sherpa::GCPtr<set<GCPtr<Instance> > > instSetGcPtr = 
+    sherpa::GCPtr<set<GCPtr<Instance> > > (instSetPtr);
+  
+  instEnv->addBinding(ident->fqn.asString(), instSetGcPtr);
   ast->symType = ident->symType;
   return errFree;
 }
@@ -1342,7 +1346,7 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
   GCPtr<Typeclass> tc = tcapp->symType->getType();
 
   // Get the set of current instances 
-  GCPtr<CVector<GCPtr<Instance> > > currInsts = 
+  GCPtr<set<GCPtr<Instance> > > currInsts = 
     instEnv->getBinding(tc->defAst->fqn.asString());
 
   
@@ -1401,8 +1405,9 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
     // functional dependencies. The other two loops occur because
     // fnDeps are stored inside predicates. 
     // Is there a better algorithm?
-    for(size_t i = 0; i < currInsts->size(); i++) {
-      GCPtr<Instance> inst = currInsts->elem(i);
+    for(set<GCPtr<Instance> >::iterator itr = currInsts->begin();
+	itr != currInsts->end(); ++itr) {
+      GCPtr<Instance> inst = (*itr);
       // Since Equals will not unify any variables in place,
       // I don't have to do a ts_instance_copy() here.
       GCPtr<TCConstraints> theirTcc = inst->ast->scheme->tcc;
@@ -1507,8 +1512,9 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
     // with existing instances
     assert(currInsts);
   
-    for(size_t i = 0; i < currInsts->size(); i++) {
-      GCPtr<Instance> inst = currInsts->elem(i);
+    for(set<GCPtr<Instance> >::iterator itr = currInsts->begin();
+	itr != currInsts->end(); ++itr) {
+      GCPtr<Instance> inst = (*itr);
       if(inst->equals(errStream, myInstance, instEnv)) {
 	errStream << tcapp->loc << ": "
 		  << "Instance declaration "
@@ -1527,7 +1533,7 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
   }
   
   // Add current Predicate.
-  currInsts->append(myInstance);
+  currInsts->insert(myInstance);
   
   //errStream << "Added " << sigma->asString() 
   //	    << " to " << tc->defAst->s << std::endl;

@@ -52,8 +52,8 @@
 #include "Instantiate.hxx"
 #include "Pair.hxx"
 
-using namespace sherpa;
 using namespace std;
+using namespace sherpa;
 
 #if #INST_DEBUG == #DEBUG_ON
 #define STRICTLYEQUALS(x) strictlyEqualsA(x, DEBUG_VERBOSE)
@@ -250,29 +250,33 @@ importInstBindings(GCPtr<InstEnvironment > fromEnv,
 {
   for(InstEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++ itr) {
-    GCPtr<Binding< CVector<GCPtr<Instance> > > > bdng = 
+    GCPtr<Binding<set<GCPtr<Instance> > > > bdng = 
       itr->second;
 
     if (bdng->flags & BF_PRIVATE)
       continue;    
 
-    GCPtr<CVector<GCPtr<Instance> > > fromInsts = bdng->val;      
+    GCPtr<set<GCPtr<Instance> > > fromInsts = bdng->val;      
     if(fromInsts->size() == 0)
       continue;
     
-    // We need the FQN of the typeclass. So, reach into the instance
-    // definition's AST, the then get the AST of the Typeclass being
-    // defined and then its FQN.
-    GCPtr<AST> instAST = fromInsts->elem(0)->ast;
+    // We need the FQN of the typeclass. Choose an arbitrary member of
+    // the instance set, reach into that instance's definition's AST,
+    // the get the AST of the Typeclass being defined and then its
+    // FQN.
+    set<GCPtr<Instance> >::iterator itr = fromInsts->begin();
+
+    GCPtr<AST> instAST = (*itr)->ast;
     GCPtr<AST> tcAST = instAST->child(0)->child(0)->symbolDef;
     string tcFQN = tcAST->fqn.asString();
 
-    GCPtr<CVector<GCPtr<Instance> > > toInsts = toEnv->getBinding(tcFQN); 
+    GCPtr<set<GCPtr<Instance> > > toInsts = toEnv->getBinding(tcFQN); 
     if(toInsts) {
       cerr << "Available non-private instance for "
 	   << tcFQN << ": ";
-      for (size_t j = 0; j < fromInsts->size(); j++)
-	cerr << toInsts->elem(j)->asString() << "     ";
+      for (set<GCPtr<Instance> >::iterator itr_j = toInsts->begin();
+	   itr_j != toInsts->end(); ++itr_j)
+	cerr << (*itr_j)->asString() << "     ";
       cerr << endl;
       assert(false);
     }
@@ -945,22 +949,22 @@ getDefToInstantiate(ostream &errStream, GCPtr<UocInfo> unifiedUOC,
     // instance among all the instances we have for the 
     // current typeclass.
     
-    GCPtr<CVector<GCPtr<Instance> > > insts = 
+    GCPtr<set<GCPtr<Instance> > > insts = 
       unifiedUOC->instEnv->getBinding(tcID->fqn.asString());
-    found = false;
-    size_t nthInstance = 0;
-    for(size_t j=0; j < insts->size(); j++) {
-      GCPtr<Instance> currInst = insts->elem(j);
-      if(currInst->satisfies(errStream, pred, unifiedUOC->instEnv)) {
-	nthInstance = j;
-	found = true;
+
+    set<GCPtr<Instance> >::iterator matchingInstance;
+
+    for(matchingInstance = insts->begin();
+	matchingInstance != insts->end(); ++matchingInstance) {
+      GCPtr<Instance> currInst = (*matchingInstance);
+      if(currInst->satisfies(errStream, pred, unifiedUOC->instEnv))
 	break;
-      }
     }
     
+    found = (matchingInstance != insts->end());
     assert(found);
     
-    GCPtr<AST> instAST = insts->elem(nthInstance)->ast;
+    GCPtr<AST> instAST = (*matchingInstance)->ast;
     GCPtr<AST> theMethod = instAST->child(1)->child(nthMethod);
 
     // If an immediate lambda was present, then InstLamHoist hoisted

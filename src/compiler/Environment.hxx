@@ -41,10 +41,9 @@
 #include <iostream>
 #include <map>
 #include <string>
-#include <vector>
+#include <set>
 
 #include <libsherpa/GCPtr.hxx>
-#include <libsherpa/CVector.hxx>
 
 // Type of (sub) environment, if any.
 // Universal, In module scope, or in record scope
@@ -194,9 +193,14 @@ public:
 };
 
 // A couple of kinds of environments that we will be defining
-// elsewhere:
+// elsewhere.
+
+// In abstract, an InstEnvironment is a set. In future, we may use
+// lexical resolution for instances, in which case we will either need
+// to change this or we will need to make use of lexically nested
+// instance environments.
 struct Instance;
-typedef Environment<sherpa::CVector<sherpa::GCPtr<Instance> > > InstEnvironment;
+typedef Environment<std::set<sherpa::GCPtr<Instance> > > InstEnvironment;
 
 struct AST;
 typedef Environment<AST> ASTEnvironment;

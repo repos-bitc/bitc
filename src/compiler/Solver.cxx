@@ -320,7 +320,7 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
 			<< (trial_mode ? " [TRIAL]" : "")
 			<< std::endl;
 
-  GCPtr<CVector<GCPtr<Instance> > > insts = 
+  GCPtr<set<GCPtr<Instance> > > insts = 
     instEnv->getBinding(pred->defAst->fqn.asString());
   
   if(!insts) {
@@ -338,8 +338,9 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
   }
 
   GCPtr<TypeScheme> instScheme = GC_NULL;  
-  for(size_t j=0; j < insts->size(); j++) {
-    GCPtr<TypeScheme> ts = (insts->elem(j))->ts->ts_instance_copy();
+  for(set<GCPtr<Instance> >::iterator itr_j = insts->begin();
+      itr_j != insts->end(); ++itr_j) {
+    GCPtr<TypeScheme> ts = (*itr_j)->ts->ts_instance_copy();
     GCPtr<Type> inst = ts->tau;
 
     

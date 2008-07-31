@@ -256,9 +256,9 @@ struct EnvSet {
   }
 
   static inline sherpa::GCPtr<EnvSet>
-  make(sherpa::GCPtr<Environment<AST> > _env, 
-       sherpa::GCPtr<Environment<TypeScheme> >_gamma,
-       sherpa::GCPtr<Environment< sherpa::CVector<sherpa::GCPtr<Instance> > > > _instEnv)
+  make(sherpa::GCPtr<ASTEnvironment> _env, 
+       sherpa::GCPtr<TSEnvironment>_gamma,
+       sherpa::GCPtr<InstEnvironment> _instEnv)
   {
     EnvSet *tmp = new EnvSet(_env, _gamma, _instEnv);
     return sherpa::GCPtr<EnvSet>(tmp);

@@ -128,13 +128,13 @@ useIFInsts(const std::string& idName,
 {
   for(InstEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
-    GCPtr<Binding< CVector<GCPtr<Instance> > > > bdng = itr->second;
+    GCPtr<Binding<set<GCPtr<Instance> > > > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE)
       continue;
     
     std::string s = bdng->nm;
-    GCPtr<CVector<GCPtr<Instance> > > insts = bdng->val;
+    GCPtr<set<GCPtr<Instance> > > insts = bdng->val;
     
     if (idName.size())
       s = idName + "." + s;
