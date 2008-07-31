@@ -222,12 +222,13 @@ TCConstraints::close(TypeSet& closure,
       GCPtr<Type> fnDep = (*itr)->getType();
       GCPtr<Type> fnDepArgs = fnDep->Args()->getType();
       GCPtr<Type> fnDepRet = fnDep->Ret()->getType();      
-      GCPtr< CVector <GCPtr<Type> > > argTvs = CVector <GCPtr<Type> >::make();
-      GCPtr< CVector <GCPtr<Type> > > retTvs = CVector <GCPtr<Type> >::make();
+      TypeSet argTvs;
+      TypeSet retTvs;
       fnDepArgs->collectAllftvs(argTvs);      
       bool foundAll = true;
-      for(size_t j=0; j < argTvs->size(); j++) {
-	GCPtr<Type> argTv = argTvs->elem(j);
+      for(TypeSet::iterator itr_j = argTvs.begin();
+	  itr_j != argTvs.end(); ++itr_j) {
+	GCPtr<Type> argTv = (*itr_j);
 	if(closure.find(argTv) == closure.end()) {
 	  foundAll = false;
 	  break;
@@ -236,8 +237,9 @@ TCConstraints::close(TypeSet& closure,
 
       if(foundAll) {	
 	fnDepRet->collectAllftvs(retTvs);	
-	for(size_t j=0; j < retTvs->size(); j++) {
-	  GCPtr<Type> retTv = retTvs->elem(j);
+	for(TypeSet::iterator itr_j = retTvs.begin();
+	    itr_j != retTvs.end(); ++itr_j) {
+	  GCPtr<Type> retTv = (*itr_j);
 	  if(closure.find(retTv) == closure.end())
 	    closure.insert(retTv);
 	}

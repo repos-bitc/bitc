@@ -485,11 +485,11 @@ public:
   
   // Collect ALL ftvs regardless of gamma
   // This APPENDS TO the vector `tvs'. 
-  void collectAllftvs(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > tvs);
+  void collectAllftvs(/* OUT */ TypeSet &tvs);
 
   // Collect the Free Type Variables in a type
   // that are unbound in gamma
-  void collectftvsWrtGamma(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > tvs,
+  void collectftvsWrtGamma(/* OUT */ TypeSet& tvs,
 			   sherpa::GCPtr<const TSEnvironment > gamma);
 
   // Meta-polymorphism
@@ -499,7 +499,7 @@ public:
 private:
   sherpa::GCPtr<Type> 
   TypeSpecializeReal(const std::vector<sherpa::GCPtr<Type> >& ftvs,
-		 std::vector<sherpa::GCPtr<Type> >& nftvs);
+		     std::vector<sherpa::GCPtr<Type> >& nftvs);
   
   // Clear the sp (specialization) field of type records recursively.
   void clear_sp();
@@ -514,8 +514,7 @@ public:
   // polymorphic type variables, except in the case of those maybes
   // directly surrounding type variables, unless clearall is
   // mentioned. 
-  bool fixMaybes(sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Type> > > ftvs, 
-		 sherpa::GCPtr<Trail> trail,
+  bool fixMaybes(const TypeSet& ftvs, sherpa::GCPtr<Trail> trail,
 		 bool clearAll);
 
   // Wrapper for the above function with the clearAll flag set.
