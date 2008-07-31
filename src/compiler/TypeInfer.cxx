@@ -1283,11 +1283,10 @@ InferTypeClass(std::ostream& errStream, GCPtr<AST> ast,
   
   assert(!instEnv->getBinding(ident->fqn.asString()));
 
-  set<GCPtr<Instance> > *instSetPtr = new set<GCPtr<Instance> >;
-  sherpa::GCPtr<set<GCPtr<Instance> > > instSetGcPtr = 
-    sherpa::GCPtr<set<GCPtr<Instance> > > (instSetPtr);
+  InstanceSet *instSet = new set<GCPtr<Instance> >;
+  GCPtr<InstanceSet> instSetPtr(instSet);
   
-  instEnv->addBinding(ident->fqn.asString(), instSetGcPtr);
+  instEnv->addBinding(ident->fqn.asString(), instSetPtr);
   ast->symType = ident->symType;
   return errFree;
 }
@@ -1346,7 +1345,7 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
   GCPtr<Typeclass> tc = tcapp->symType->getType();
 
   // Get the set of current instances 
-  GCPtr<set<GCPtr<Instance> > > currInsts = 
+  GCPtr<InstanceSet> currInsts = 
     instEnv->getBinding(tc->defAst->fqn.asString());
 
   
@@ -1405,7 +1404,7 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
     // functional dependencies. The other two loops occur because
     // fnDeps are stored inside predicates. 
     // Is there a better algorithm?
-    for(set<GCPtr<Instance> >::iterator itr = currInsts->begin();
+    for(InstanceSet::iterator itr = currInsts->begin();
 	itr != currInsts->end(); ++itr) {
       GCPtr<Instance> inst = (*itr);
       // Since Equals will not unify any variables in place,
@@ -1512,7 +1511,7 @@ InferInstance(std::ostream& errStream, GCPtr<AST> ast,
     // with existing instances
     assert(currInsts);
   
-    for(set<GCPtr<Instance> >::iterator itr = currInsts->begin();
+    for(InstanceSet::iterator itr = currInsts->begin();
 	itr != currInsts->end(); ++itr) {
       GCPtr<Instance> inst = (*itr);
       if(inst->overlaps(myInstance)) {

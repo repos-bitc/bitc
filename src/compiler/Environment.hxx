@@ -200,7 +200,8 @@ public:
 // to change this or we will need to make use of lexically nested
 // instance environments.
 struct Instance;
-typedef Environment<std::set<sherpa::GCPtr<Instance> > > InstEnvironment;
+typedef std::set<sherpa::GCPtr<Instance> > InstanceSet;
+typedef Environment<InstanceSet> InstEnvironment;
 
 struct AST;
 typedef Environment<AST> ASTEnvironment;
