@@ -334,7 +334,7 @@ version: '(' tk_BITC_VERSION strLit ')' {
 // extractor.
 docstring: tk_String {
   SHOWPARSE("docstring -> STRING");
-  $$ = new AST(at_docString, $1.loc, AST::makeStringLit($1));
+  $$ = AST::make(at_docString, $1.loc, AST::makeStringLit($1));
 };
 optdocstring: docstring {
   SHOWPARSE("optdocstring -> docstring");
@@ -342,7 +342,7 @@ optdocstring: docstring {
 };
 optdocstring: {
   SHOWPARSE("optdocstring -> ");
-  $$ = new AST(at_docString);
+  $$ = AST::make(at_docString);
 };
 
 // TODO: The ident in interface rule should be restricted to 
@@ -355,8 +355,8 @@ interface: '(' tk_INTERFACE ifident {
   }
   optdocstring if_definitions ')' {
   SHOWPARSE("interface -> INTERFACE ifident optdocstring if_definitions");  
-  GCPtr<AST> ifIdent = new AST(at_ident, $3);
-  $$ = new AST(at_interface, $2.loc, ifIdent);
+  GCPtr<AST> ifIdent = AST::make(at_ident, $3);
+  $$ = AST::make(at_interface, $2.loc, ifIdent);
   $$->addChildrenFrom($6);
 
   if (lexer->isCommandLineInput) {
@@ -368,7 +368,7 @@ interface: '(' tk_INTERFACE ifident {
 
   std::string uocName = ifIdent->s;
   GCPtr<UocInfo> uoc = 
-    new UocInfo(uocName, lexer->here.origin, $$);
+    UocInfo::make(uocName, lexer->here.origin, $$);
 
   if(uocName == "bitc.prelude")
     uoc->flags |= (UOC_IS_BUILTIN | UOC_IS_PRELUDE);
@@ -416,7 +416,7 @@ implicit_module: mod_definitions  {
  string uocName = 
    UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
 
- GCPtr<UocInfo> uoc = new UocInfo(uocName, lexer->here.origin, $$);
+ GCPtr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
  lexer->nModules++;
 
  uoc->Compile();
@@ -432,7 +432,7 @@ module: '(' tk_MODULE optdocstring mod_definitions ')' {
    UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
 
  // Construct, compile, and admit the parsed UoC:
- GCPtr<UocInfo> uoc = new UocInfo(uocName, lexer->here.origin, $$);
+ GCPtr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
  lexer->nModules++;
  uoc->Compile();
  UocInfo::srcList[uocName] = uoc;
@@ -449,7 +449,7 @@ module: '(' tk_MODULE ifident optdocstring mod_definitions ')' {
  string uocName = 
    UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
 
- GCPtr<UocInfo> uoc = new UocInfo(uocName, lexer->here.origin, $$);
+ GCPtr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
  lexer->nModules++;
  uoc->Compile();
  UocInfo::srcList[uocName] = uoc;
@@ -466,7 +466,7 @@ module_seq: module_seq module {
 // INTERFACE TOP LEVEL DEFINITIONS
 if_definitions: if_definition {
   SHOWPARSE("if_definitions -> if_definition");
-  $$ = new AST(at_Null, $1->loc, $1);
+  $$ = AST::make(at_Null, $1->loc, $1);
 };
 
 if_definitions: if_definitions if_definition {
@@ -498,7 +498,7 @@ constrained_definition: '(' tk_FORALL constraints type_val_definition ')' {
 
 mod_definitions: mod_definition {
   SHOWPARSE("definitions -> definition");
-  $$ = new AST(at_Null, $1->loc, $1);
+  $$ = AST::make(at_Null, $1->loc, $1);
 };
 
 mod_definitions: mod_definitions mod_definition {
@@ -582,7 +582,7 @@ constraint_seq: constraint_seq constraint {
  
 constraint_seq: constraint {
  SHOWPARSE("constraint_seq -> constraint");  
- $$ = new AST(at_constraints, $1->loc, $1);
+ $$ = AST::make(at_constraints, $1->loc, $1);
 };
 
 constraint: typapp {
@@ -593,33 +593,33 @@ constraint: typapp {
 
 constraint: useident {
  SHOWPARSE("constraint -> useident");  
- $$ = new AST(at_tcapp, $1->loc, $1); 
+ $$ = AST::make(at_tcapp, $1->loc, $1); 
 };
 
 
 // FIX: This should probably get its own AST type.
 ptype_name: defident {
   SHOWPARSE("ptype_name -> defident");
-  GCPtr<AST> tvlist = new AST(at_tvlist, $1->loc);
-  GCPtr<AST> constraints = new AST(at_constraints, $1->loc);
-  $$ = new AST(at_Null, $1->loc, $1, tvlist, constraints);  
+  GCPtr<AST> tvlist = AST::make(at_tvlist, $1->loc);
+  GCPtr<AST> constraints = AST::make(at_constraints, $1->loc);
+  $$ = AST::make(at_Null, $1->loc, $1, tvlist, constraints);  
 };
 
 ptype_name: '(' defident tvlist ')' {
   SHOWPARSE("ptype_name -> '(' defident tvlist ')'");
-  GCPtr<AST> constraints = new AST(at_constraints, $2->loc);
-  $$ = new AST(at_Null, $2->loc, $2, $3, constraints);
+  GCPtr<AST> constraints = AST::make(at_constraints, $2->loc);
+  $$ = AST::make(at_Null, $2->loc, $2, $3, constraints);
 };
 
 ptype_name: '(' tk_FORALL constraints defident ')' {
   SHOWPARSE("ptype_name -> '(' FORALL constraints '(' defident tvlist ')' ')' ");
-  GCPtr<AST> tvlist = new AST(at_tvlist, $4->loc);
-  $$ = new AST(at_Null, $2.loc, $4, tvlist, $3);
+  GCPtr<AST> tvlist = AST::make(at_tvlist, $4->loc);
+  $$ = AST::make(at_Null, $2.loc, $4, tvlist, $3);
 };
 
 ptype_name: '(' tk_FORALL constraints '(' defident tvlist ')' ')' {
   SHOWPARSE("ptype_name -> '(' FORALL constraints '(' defident tvlist ')' ')' ");
-  $$ = new AST(at_Null, $2.loc, $5, $6, $3);
+  $$ = AST::make(at_Null, $2.loc, $5, $6, $3);
 };
 
 
@@ -627,7 +627,7 @@ ptype_name: '(' tk_FORALL constraints '(' defident tvlist ')' ')' {
 type_definition: '(' tk_DEFSTRUCT ptype_name val optdocstring declares fields ')'  {
   SHOWPARSE("type_definition -> ( DEFSTRUCT ptype_name val "
 	    "optdocstring declares fields )");
-  $$ = new AST(at_defstruct, $2.loc, $3->child(0), $3->child(1), $4,
+  $$ = AST::make(at_defstruct, $2.loc, $3->child(0), $3->child(1), $4,
 	       $6, $7);
   $$->child(0)->defForm = $$;
   $$->addChild($3->child(2));
@@ -638,7 +638,7 @@ type_definition: '(' tk_DEFSTRUCT ptype_name val optdocstring declares fields ')
 type_definition: '(' tk_DEFUNION ptype_name val optdocstring declares constructors  ')'  {
   SHOWPARSE("type_definition -> ( DEFUNION ptype_name val "
 	    "optdocstring declares constructors");
-  $$ = new AST(at_defunion, $2.loc, $3->child(0), $3->child(1), $4,
+  $$ = AST::make(at_defunion, $2.loc, $3->child(0), $3->child(1), $4,
 	       $6, $7);
   $$->child(0)->defForm = $$;
   $$->addChild($3->child(2));  
@@ -648,7 +648,7 @@ type_definition: '(' tk_DEFUNION ptype_name val optdocstring declares constructo
 /* type_definition: '(' tk_DEFREPR defident val optdocstring declares reprbody  ')'  { */
 /*   SHOWPARSE("type_definition -> ( DEFUNION ptype_name val " */
 /* 	    "optdocstring declares reprbody"); */
-/*   $$ = new AST(at_defrepr, $2.loc, $3->child(0), $3->child(1), $4, */
+/*   $$ = AST::make(at_defrepr, $2.loc, $3->child(0), $3->child(1), $4, */
 /* 	       $6, $7); */
 /*   $$->addChild($3->child(2));   */
 /* }; */
@@ -659,7 +659,7 @@ type_definition: '(' tk_DEFUNION ptype_name val optdocstring declares constructo
 
 /* reprbodyitems: reprbodyitem { */
 /*   SHOWPARSE("reprbodyitems -> reprbodyitem"); */
-/*   $$ = new AST(at_reprbody, $1->loc, $1); */
+/*   $$ = AST::make(at_reprbody, $1->loc, $1); */
 /* }; */
 
 /* reprbodyitems: reprbodyitems reprbodyitem { */
@@ -693,7 +693,7 @@ type_definition: '(' tk_DEFUNION ptype_name val optdocstring declares constructo
 
 /* reprcase: reprcaseleg { */
 /*   SHOWPARSE("reprcase -> reprcaseleg"); */
-/*   $$ = new AST(at_reprcase, $1->loc, $1); */
+/*   $$ = AST::make(at_reprcase, $1->loc, $1); */
 /* }; */
 
 /* reprcase: reprcase reprcaseleg { */
@@ -704,13 +704,13 @@ type_definition: '(' tk_DEFUNION ptype_name val optdocstring declares constructo
 
 /* reprcaseleg: '(' reprtags reprbody ')' { */
 /*   SHOWPARSE("reprcaseleg -> reprtags reprbody"); */
-/*   $$ = new AST(at_reprcaselegR, $1.loc, $3); */
+/*   $$ = AST::make(at_reprcaselegR, $1.loc, $3); */
 /*   $$->addChildrenFrom($2); */
 /* }; */
 
 /* reprtags: ident { */
 /*   SHOWPARSE("reprtags -> ident"); */
-/*   $$ = new AST(at_reprtag, $1->loc, $1); /\* dummy AST type *\/ */
+/*   $$ = AST::make(at_reprtag, $1->loc, $1); /\* dummy AST type *\/ */
 /* }; */
 
 /* reprtags: reprtags ident { */
@@ -723,7 +723,7 @@ type_definition: '(' tk_DEFUNION ptype_name val optdocstring declares constructo
 type_definition: '(' tk_DEFREPR defident val optdocstring declares repr_constructors  ')'  {
   SHOWPARSE("type_definition -> ( DEFREPR defident val "
 	    "optdocstring declares repr_constructors");
-  $$ = new AST(at_defrepr, $2.loc, $3, $4, $6, $7);
+  $$ = AST::make(at_defrepr, $2.loc, $3, $4, $6, $7);
   $$->child(0)->defForm = $$;
 };
 
@@ -731,19 +731,19 @@ type_definition: '(' tk_DEFREPR defident val optdocstring declares repr_construc
 // External declarations
 externals: /* nothing */ {
   SHOWPARSE("externals -> ");
-  $$ = new AST(at_Null);
+  $$ = AST::make(at_Null);
   $$->Flags = 0;
 };
 
 externals: tk_EXTERNAL {
   SHOWPARSE("externals -> EXTERNAL");
-  $$ = new AST(at_Null, $1.loc);
+  $$ = AST::make(at_Null, $1.loc);
   $$->Flags = DEF_IS_EXTERNAL;
 };
 
 externals: tk_EXTERNAL exident {
   SHOWPARSE("externals -> EXTERNAL exident");
-  $$ = new AST(at_Null, $1.loc);
+  $$ = AST::make(at_Null, $1.loc);
   $$->Flags = DEF_IS_EXTERNAL;  
   $$->externalName = $2->s;
 };
@@ -752,7 +752,7 @@ externals: tk_EXTERNAL exident {
 // STRUCTURE DECLARATIONS
 type_decl: '(' tk_DEFSTRUCT ptype_name val externals ')' {
   SHOWPARSE("type_decl -> ( DEFSTRUCT ptype_name val externals )");
-  $$ = new AST(at_declstruct, $2.loc, $3->child(0), $3->child(1), $4,
+  $$ = AST::make(at_declstruct, $2.loc, $3->child(0), $3->child(1), $4,
 	       $3->child(2));
   $$->child(0)->defForm = $$;
   $$->Flags |= $5->Flags;
@@ -763,7 +763,7 @@ type_decl: '(' tk_DEFSTRUCT ptype_name val externals ')' {
 // UNION DECLARATIONS
 type_decl: '(' tk_DEFUNION ptype_name val externals ')' {
   SHOWPARSE("type_decl -> ( DEFUNION ptype_name val )");
-  $$ = new AST(at_declunion, $2.loc, $3->child(0), $3->child(1), $4,
+  $$ = AST::make(at_declunion, $2.loc, $3->child(0), $3->child(1), $4,
 	       $3->child(2));
   $$->child(0)->defForm = $$;
   $$->Flags |= $5->Flags;
@@ -774,7 +774,7 @@ type_decl: '(' tk_DEFUNION ptype_name val externals ')' {
 // REPR DECLARATIONS
 type_decl: '(' tk_DEFREPR defident val externals ')' {
   SHOWPARSE("type_decl -> ( DEFREPR defident val externals )");
-  $$ = new AST(at_declrepr, $2.loc, $3, $4);
+  $$ = AST::make(at_declrepr, $2.loc, $3, $4);
   $$->child(0)->defForm = $$;
   $$->Flags |= $5->Flags;
   $$->getID()->Flags |= $5->Flags;
@@ -785,36 +785,36 @@ type_decl: '(' tk_DEFREPR defident val externals ')' {
 
 val: { 
   SHOWPARSE("val -> <empty>");
-  $$ = new AST(at_refCat);
+  $$ = AST::make(at_refCat);
   $$->printVariant = 1;
 };
 
 val: ':' tk_VAL {
   SHOWPARSE("val -> ':' VAL");
-  $$ = new AST(at_valCat, $2);
+  $$ = AST::make(at_valCat, $2);
 };
 val: ':' tk_OPAQUE {
   SHOWPARSE("val -> ':' OPAQUE");
-  $$ = new AST(at_opaqueCat, $2);
+  $$ = AST::make(at_opaqueCat, $2);
 };
 val: ':' tk_REF {
   /* Same as :ref, since that is the default. */
   SHOWPARSE("val -> ':' REF");
-  $$ = new AST(at_refCat, $2);
+  $$ = AST::make(at_refCat, $2);
 };
  
 // EXCEPTION DEFINITION [3.10]
 type_definition: '(' tk_DEFEXCEPTION ident optdocstring ')' {
   SHOWPARSE("type_definition -> ( defexception ident )");
   $3->Flags |= ID_IS_GLOBAL;
-  $$ = new AST(at_defexception, $2.loc, $3);
+  $$ = AST::make(at_defexception, $2.loc, $3);
   $$->child(0)->defForm = $$;
 };
 
 type_definition: '(' tk_DEFEXCEPTION ident optdocstring fields ')' {
   SHOWPARSE("type_definition -> ( defexception ident fields )");
   $3->Flags |= ID_IS_GLOBAL;
-  $$ = new AST(at_defexception, $2.loc, $3);
+  $$ = AST::make(at_defexception, $2.loc, $3);
   $$->child(0)->defForm = $$;
   $$->addChildrenFrom($5);
 };
@@ -824,14 +824,14 @@ type_definition: '(' tk_DEFEXCEPTION ident optdocstring fields ')' {
 
 tc_definition: '(' tk_DEFTYPECLASS ptype_name optdocstring tc_decls method_decls ')' {
   SHOWPARSE("tc_definition -> ( DEFTYPECLASS ptype_name optdocstring tc_decls method_decls)");
-  $$ = new AST(at_deftypeclass, $2.loc, $3->child(0), 
+  $$ = AST::make(at_deftypeclass, $2.loc, $3->child(0), 
 	       $3->child(1), $5, $6, $3->child(2));  
   $$->child(0)->defForm = $$;
 };
 
 tc_decls: {
   SHOWPARSE("tcdecls -> <empty>");
-  $$ = new AST(at_tcdecls);
+  $$ = AST::make(at_tcdecls);
 };
 
 tc_decls: tc_decls tc_decl {
@@ -846,13 +846,13 @@ tc_decl: '(' tk_TYFN '(' tvlist ')' typevar ')' {
   // are not accepptable.
   SHOWPARSE("tc_decl -> ( TYFN ( tvlist ) typevar )");
   $4->astType = at_fnargVec;
-  $$ = new AST(at_tyfn, $2.loc, $4, $6);  
+  $$ = AST::make(at_tyfn, $2.loc, $4, $6);  
 };
 
 method_decls: /* Nothing */ {
   SHOWPARSE("method_decls -> ");
   LexLoc loc;
-  $$ = new AST(at_method_decls, loc);
+  $$ = AST::make(at_method_decls, loc);
 };
 
 method_decls: method_decls method_decl {
@@ -864,7 +864,7 @@ method_decls: method_decls method_decl {
 method_decl: ident ':' fntype {
   SHOWPARSE("method_decl -> ident : fntype");
   $1->Flags |= (ID_IS_GLOBAL | ID_IS_METHOD);
-  $$ = new AST(at_method_decl, $1->loc, $1, $3);
+  $$ = AST::make(at_method_decl, $1->loc, $1, $3);
 };
 
 // TYPE CLASS INSTANTIATIONS [4.2]
@@ -873,14 +873,14 @@ method_decl: ident ':' fntype {
 ti_definition: '(' tk_DEFINSTANCE qual_constraint method_seq ')' {
   SHOWPARSE("ti_definition -> ( DEFINSTANCE qual_constraint [docstring] method_seq)");
   $4 = stripDocString($4);
-  $$ = new AST(at_definstance, $2.loc, $3->child(1), $4, 
+  $$ = AST::make(at_definstance, $2.loc, $3->child(1), $4, 
 	       $3->child(0));  
 };
 
 method_seq: /* Nothing */ {
   SHOWPARSE("method_seq -> ");
   LexLoc loc;
-  $$ = new AST(at_methods, loc);
+  $$ = AST::make(at_methods, loc);
 };
 
 method_seq: expr_seq {
@@ -892,13 +892,13 @@ method_seq: expr_seq {
 // DEFINE  [5.1]
 value_definition: '(' tk_DEFINE defpattern expr ')'  {
   SHOWPARSE("value_definition -> ( DEFINE  defpattern expr )");
-  $$ = new AST(at_define, $2.loc, $3, $4);
-  $$->addChild(new AST(at_constraints));
+  $$ = AST::make(at_define, $2.loc, $3, $4);
+  $$->addChild(AST::make(at_constraints));
 };
 value_definition: '(' tk_DEFINE defpattern docstring expr ')'  {
   SHOWPARSE("value_definition -> ( DEFINE  defpattern docstring expr )");
-  $$ = new AST(at_define, $2.loc, $3, $5);
-  $$->addChild(new AST(at_constraints));
+  $$ = AST::make(at_define, $2.loc, $3, $5);
+  $$->addChild(AST::make(at_constraints));
 };
 
 // Define convenience syntax case 1: no arguments
@@ -907,11 +907,11 @@ value_definition: '(' tk_DEFINE '(' defident ')' expr_seq ')'  {
   SHOWPARSE("value_definition -> ( DEFINE  ( defident ) [docstring] expr_seq )");
   $6 = stripDocString($6);
   GCPtr<AST> iLambda =
-    new AST(at_lambda, $2.loc, new AST(at_argVec, $5.loc), $6);
+    AST::make(at_lambda, $2.loc, AST::make(at_argVec, $5.loc), $6);
   iLambda->printVariant = 1;
-  GCPtr<AST> iP = new AST(at_identPattern, $4->loc, $4);
-  $$ = new AST(at_recdef, $2.loc, iP, iLambda);
-  $$->addChild(new AST(at_constraints));
+  GCPtr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
+  $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
+  $$->addChild(AST::make(at_constraints));
 };
 
 // Define convenience syntax case 3: one or more arguments
@@ -921,21 +921,21 @@ value_definition: '(' tk_DEFINE '(' defident lambdapatterns ')'
   SHOWPARSE("value_definition -> ( DEFINE  ( defident lambdapatterns ) "
 	    "[docstring] expr_seq )");
   $7 = stripDocString($7);
-  GCPtr<AST> iLambda = new AST(at_lambda, $2.loc, $5, $7);
+  GCPtr<AST> iLambda = AST::make(at_lambda, $2.loc, $5, $7);
   iLambda->printVariant = 1;
-  GCPtr<AST> iP = new AST(at_identPattern, $4->loc, $4);
-  $$ = new AST(at_recdef, $2.loc, iP, iLambda);
-  $$->addChild(new AST(at_constraints));
+  GCPtr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
+  $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
+  $$->addChild(AST::make(at_constraints));
 };
 
 // PROCLAIM DEFINITION -- VALUES [6.2]
 proclaim_definition: '(' tk_PROCLAIM defident ':' qual_type optdocstring externals ')' {
   SHOWPARSE("if_definition -> ( PROCLAIM ident : qual_type externals optdocstring )");
-  $$ = new AST(at_proclaim, $2.loc, $3, $5);
+  $$ = AST::make(at_proclaim, $2.loc, $3, $5);
   $$->Flags |= $7->Flags;
   $$->getID()->Flags |= $7->Flags;
   $$->getID()->externalName = $7->externalName;
-  $$->addChild(new AST(at_constraints));
+  $$->addChild(AST::make(at_constraints));
 };
 
 // TODO: The second ident in import rule, and the ident in the provide rule 
@@ -945,45 +945,45 @@ proclaim_definition: '(' tk_PROCLAIM defident ':' qual_type optdocstring externa
 
 //import_definition: '(' tk_IMPORT ident ifident ')' {
 //  SHOWPARSE("import_definition -> ( IMPORT ident ifident )");
-//  GCPtr<AST> ifIdent = new AST(at_ifident, $4);
+//  GCPtr<AST> ifIdent = AST::make(at_ifident, $4);
 //  ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $4.loc, $4.str);
-//  $$ = new AST(at_import, $2.loc, $3, ifIdent); 
+//  $$ = AST::make(at_import, $2.loc, $3, ifIdent); 
 //};
 
 import_definition: '(' tk_IMPORT ifident tk_AS ident ')' {
   SHOWPARSE("import_definition -> ( IMPORT ident ifident )");
-  GCPtr<AST> ifIdent = new AST(at_ifident, $3);
+  GCPtr<AST> ifIdent = AST::make(at_ifident, $3);
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
-  $$ = new AST(at_importAs, $2.loc, ifIdent, $5); 
+  $$ = AST::make(at_importAs, $2.loc, ifIdent, $5); 
 };
 
 import_definition: '(' tk_IMPORT ifident ')' {
   SHOWPARSE("import_definition -> (FROM ifident)");
-  GCPtr<AST> ifIdent = new AST(at_ifident, $3);
+  GCPtr<AST> ifIdent = AST::make(at_ifident, $3);
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
-  $$ = new AST(at_import, $2.loc, ifIdent);
+  $$ = AST::make(at_import, $2.loc, ifIdent);
 };
 
 import_definition: '(' tk_IMPORT ifident importList ')' {
   SHOWPARSE("import_definition -> (FROM ifident IMPORT importList)");
-  GCPtr<AST> ifIdent = new AST(at_ifident, $3);
+  GCPtr<AST> ifIdent = AST::make(at_ifident, $3);
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
-  $$ = new AST(at_import, $2.loc, ifIdent);
+  $$ = AST::make(at_import, $2.loc, ifIdent);
   $$->addChildrenFrom($4);
 };
 
 // PROVIDE DEFINITION [8.3]
 provide_definition: '(' tk_PROVIDE ifident provideList ')' {
   SHOWPARSE("provide_definition -> (PROVIDE ident ifident)");
-  GCPtr<AST> ifIdent = new AST(at_ifident, $3);
+  GCPtr<AST> ifIdent = AST::make(at_ifident, $3);
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
-  $$ = new AST(at_provide, $2.loc, ifIdent); 
+  $$ = AST::make(at_provide, $2.loc, ifIdent); 
   $$->addChildrenFrom($4);
 };
 
 provideList: ident {
   SHOWPARSE("provideList -> ident");
-  $$ = new AST(at_Null, $1->loc, $1);
+  $$ = AST::make(at_Null, $1->loc, $1);
 };
 
 provideList: provideList ident {
@@ -994,7 +994,7 @@ provideList: provideList ident {
 
 importList: alias {
   SHOWPARSE("importList -> alias");
-  $$ = new AST(at_Null, $1->loc, $1);
+  $$ = AST::make(at_Null, $1->loc, $1);
 };
 importList: importList alias {
   SHOWPARSE("importList -> importList alias");
@@ -1006,28 +1006,28 @@ alias: ident {
   SHOWPARSE("alias -> ident");
   // The two identifiers in this case are textually the same, but the
   // need to end up with distinct AST nodes, thus getDCopy().
-  $$ = new AST(at_ifsel, $1->loc, $1, $1->getDCopy());
+  $$ = AST::make(at_ifsel, $1->loc, $1, $1->getDCopy());
 };
 alias: '(' ident tk_AS ident ')' {
   SHOWPARSE("alias -> ( ident AS ident )");
   
-  $$ = new AST(at_ifsel, $2->loc, $4, $2);
+  $$ = AST::make(at_ifsel, $2->loc, $4, $2);
 };
 
 
 // definition: '(' tk_DEFTHM ident expr ')'  {
 //    SHOWPARSE("definition -> ( DEFTHM ident expr )");
-//    $$ = new AST(at_defthm, $2.loc, $3, $4);
+//    $$ = AST::make(at_defthm, $2.loc, $3, $4);
 // };
 // definition: '(' tk_MUTUAL_RECURSION definitions ')'  {
 //    SHOWPARSE("definition -> ( MUTUAL-RECURSION Defs )");
-//    $$ = new AST(at_mutual_recursion, $2.loc);   
+//    $$ = AST::make(at_mutual_recursion, $2.loc);   
 //    $$->addChildrenFrom($3);
 // };
 
 declares: {
   SHOWPARSE("declares -> <empty>");
-  $$ = new AST(at_declares);
+  $$ = AST::make(at_declares);
 };
 declares: declares declare {
   SHOWPARSE("declares -> declares declare");
@@ -1042,7 +1042,7 @@ declare: '(' tk_DECLARE decls ')' {
 
 decls: decl {
   SHOWPARSE("decls -> decl");
-  $$ = new AST(at_declares, $1->loc, $1);
+  $$ = AST::make(at_declares, $1->loc, $1);
 };
 
 decls: decls decl {
@@ -1053,22 +1053,22 @@ decls: decls decl {
 
 decl: '(' ident type_pl_bf ')' {
   SHOWPARSE("decl -> ( ident type_pl_bf )");
-  $$ = new AST(at_declare, $2->loc, $2, $3);
+  $$ = AST::make(at_declare, $2->loc, $2, $3);
 };
 //decl: '(' ident ')' {
 //  SHOWPARSE("decl -> ( ident )");
-//  $$ = new AST(at_declare, $2->loc, $2);
+//  $$ = AST::make(at_declare, $2->loc, $2);
 //};
 decl: ident {
   SHOWPARSE("decl -> ident");
-  $$ = new AST(at_declare, $1->loc, $1);
+  $$ = AST::make(at_declare, $1->loc, $1);
 };
 
 
 /* defunion Constructors */
 constructors: constructor {
   SHOWPARSE("constructors -> constructor");
-  $$ = new AST(at_constructors, $1->loc, $1);
+  $$ = AST::make(at_constructors, $1->loc, $1);
 };
 constructors: constructors constructor {
   SHOWPARSE("constructors -> constructors constructor");
@@ -1078,19 +1078,19 @@ constructors: constructors constructor {
 constructor: ident { 	       	  /* simple constructor */ 
   SHOWPARSE("constructor -> defident");
   $1->Flags |= (ID_IS_GLOBAL);
-  $$ = new AST(at_constructor, $1->loc, $1);
+  $$ = AST::make(at_constructor, $1->loc, $1);
 };
 constructor: '(' ident fields ')' {  /* compound constructor */ 
   SHOWPARSE("constructor ->  ( ident fields )");
   $2->Flags |= (ID_IS_GLOBAL);
-  $$ = new AST(at_constructor, $2->loc, $2);
+  $$ = AST::make(at_constructor, $2->loc, $2);
   $$->addChildrenFrom($3);
 };
 
 /* defrepr Constructors */
 repr_constructors: repr_constructor {
   SHOWPARSE("repr_constructors -> repr_constructor");
-  $$ = new AST(at_reprctrs, $1->loc, $1);
+  $$ = AST::make(at_reprctrs, $1->loc, $1);
 };
 repr_constructors: repr_constructors repr_constructor {
   SHOWPARSE("repr_constructors -> repr_constructors repr_constructor");
@@ -1100,20 +1100,20 @@ repr_constructors: repr_constructors repr_constructor {
 /* repr_constructor: ident repr_reprs { 	       	  /\* simple constructor *\/  */
 /*   SHOWPARSE("repr_constructor -> defident"); */
 /*   $1->Flags |= (ID_IS_GLOBAL); */
-/*   $$ = new AST(at_reprctr, $1->loc, $1); */
+/*   $$ = AST::make(at_reprctr, $1->loc, $1); */
 /* }; */
 repr_constructor: '(' ident fields '('tk_WHERE repr_reprs')' ')' {  /* compound constructor */ 
   SHOWPARSE("repr_constructor ->  ( ident fields ( WHERE repr_reprs ) )");
   $2->Flags |= (ID_IS_GLOBAL);
-  GCPtr<AST> ctr = new AST(at_constructor, $2->loc, $2);
+  GCPtr<AST> ctr = AST::make(at_constructor, $2->loc, $2);
   ctr->addChildrenFrom($3);
-  $$ = new AST(at_reprctr, $2->loc, ctr);
+  $$ = AST::make(at_reprctr, $2->loc, ctr);
   $$->addChildrenFrom($6);
 };
 
 repr_reprs: repr_repr {
   SHOWPARSE("repr_reprs -> repr_repr");
-  $$ = new AST(at_Null, $1->loc, $1);
+  $$ = AST::make(at_Null, $1->loc, $1);
 };
 repr_reprs: repr_reprs repr_repr {
   SHOWPARSE("repr_reprs -> repr_reprs repr_repr");
@@ -1128,14 +1128,14 @@ repr_repr: '(' ident ident intLit')' {
     lexer->num_errors++;
   }
   
-  $$ = new AST(at_reprrepr, $2->loc, $3, $4);
+  $$ = AST::make(at_reprrepr, $2->loc, $3, $4);
 };
 
 
 /* defstruct / constructor / exception fields */
 fields: field  {
   SHOWPARSE("fields -> field");
-  $$ = new AST(at_fields, $1->loc, $1);
+  $$ = AST::make(at_fields, $1->loc, $1);
 };
 
 fields: fields field {
@@ -1147,28 +1147,28 @@ fields: fields field {
 field: ident ':' type_pl_bf  {
   SHOWPARSE("field -> ident : type_pl_bf");
   $1->Flags |= ID_IS_FIELD;
-  $$ = new AST(at_field, $1->loc, $1, $3);
+  $$ = AST::make(at_field, $1->loc, $1, $3);
 };
 
 field: '(' tk_THE type_pl_bf ident ')'  {
   SHOWPARSE("field -> '(' THE type_pl_bf ident ')'");
   $4->Flags |= ID_IS_FIELD;
-  $$ = new AST(at_field, $1.loc, $4, $3);
+  $$ = AST::make(at_field, $1.loc, $4, $3);
 };
 
 field: '(' tk_FILL bitfieldtype ')'  {
   SHOWPARSE("field -> '(' FILL type ')'");
-  $$ = new AST(at_fill, $1.loc, $3);
+  $$ = AST::make(at_fill, $1.loc, $3);
 };
 
 field: '(' tk_RESERVED bitfieldtype intLit ')'  {
   SHOWPARSE("field -> '(' RESERVED bitfieldtype intLit ')'");
-  $$ = new AST(at_fill, $1.loc, $3);
+  $$ = AST::make(at_fill, $1.loc, $3);
 };
 
 tvlist: typevar  {
   SHOWPARSE("tvlist -> typevar");
-  $$ = new AST(at_tvlist, $1->loc, $1);
+  $$ = AST::make(at_tvlist, $1->loc, $1);
 };
 tvlist: tvlist typevar {
   SHOWPARSE("tvlist -> tvlist typevar");
@@ -1179,7 +1179,7 @@ tvlist: tvlist typevar {
 // TYPES [3]
 types: type  {
   SHOWPARSE("types -> type");
-  $$ = new AST(at_Null);
+  $$ = AST::make(at_Null);
   $$->addChild($1);
 }; 
 types: types type {
@@ -1196,13 +1196,13 @@ type: useident  { 			/* previously defined type */
 // PRIMARY TYPES [3.2]             
 type: '(' ')' {
   SHOWPARSE("type -> ( )");
-  $$ = new AST(at_primaryType, $1.loc);
+  $$ = AST::make(at_primaryType, $1.loc);
   $$->s = "unit";		/* for lookup! */
 };
 
 bool_type: tk_BOOL {
   SHOWPARSE("bool_type -> BOOL");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 
 type: bool_type {
@@ -1212,44 +1212,44 @@ type: bool_type {
 
 type: tk_CHAR {
   SHOWPARSE("type -> CHAR");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 type: tk_STRING {
   SHOWPARSE("type -> STRING");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 
 int_type: tk_INT8 {
   SHOWPARSE("int_type -> INT8");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 int_type: tk_INT16 {
   SHOWPARSE("int_type -> INT16");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 int_type: tk_INT32 {
   SHOWPARSE("int_type -> INT32");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 int_type: tk_INT64 {
   SHOWPARSE("int_type -> INT64");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 uint_type: tk_UINT8 {
   SHOWPARSE("uint_type -> UINT8");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 uint_type: tk_UINT16 {
   SHOWPARSE("uint_type -> UINT16");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 uint_type: tk_UINT32 {
   SHOWPARSE("uint_type -> UINT32");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 uint_type: tk_UINT64 {
   SHOWPARSE("type -> UINT64");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 
 any_int_type: int_type {
@@ -1262,20 +1262,20 @@ any_int_type: uint_type {
 };
 any_int_type: tk_WORD {
   SHOWPARSE("any_int_type -> WORD");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 
 float_type: tk_FLOAT {
   SHOWPARSE("float_type -> FLOAT");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 float_type: tk_DOUBLE {
   SHOWPARSE("float_type -> DOUBLE");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 float_type: tk_QUAD {
   SHOWPARSE("float_type -> QUAD");
-  $$ = new AST(at_primaryType, $1);
+  $$ = AST::make(at_primaryType, $1);
 };
 
 type: any_int_type {
@@ -1290,7 +1290,7 @@ type: float_type {
 // EXCEPTION type
 type: tk_EXCEPTION {
   SHOWPARSE("type -> EXCEPTION");
-  $$ = new AST(at_exceptionType, $1.loc);
+  $$ = AST::make(at_exceptionType, $1.loc);
 };
 
 // TYPE VARIABLES [3.3]            
@@ -1302,13 +1302,13 @@ type: typevar  {
 // REF TYPES [3.4.1]               
 type: '(' tk_REF type ')' {
   SHOWPARSE("type -> ( REF type )");
-  $$ = new AST(at_refType, $2.loc, $3);
+  $$ = AST::make(at_refType, $2.loc, $3);
 };
 
 // VAL TYPES [3.4.2]
 type: '(' tk_VAL type ')' {
   SHOWPARSE("type -> ( VAL type )");
-  $$ = new AST(at_valType, $2.loc, $3);
+  $$ = AST::make(at_valType, $2.loc, $3);
 };
 
 // FUNCTION TYPES [3.4.3]
@@ -1318,26 +1318,26 @@ type: fntype {
 }
 fntype: '(' tk_FN '(' ')' type ')' {
   SHOWPARSE("fntype -> ( FN () type )");
-  GCPtr<AST> fnargVec = new AST(at_fnargVec, $3.loc);
-  $$ = new AST(at_fn, $2.loc, fnargVec, $5);
+  GCPtr<AST> fnargVec = AST::make(at_fnargVec, $3.loc);
+  $$ = AST::make(at_fn, $2.loc, fnargVec, $5);
 };
 
 fntype: '(' tk_FN '(' types_pl_byref ')' type ')'  {
   SHOWPARSE("fntype -> ( FN ( types_pl_byref ) type )");
-  $$ = new AST(at_fn, $2.loc, $4, $6);
+  $$ = AST::make(at_fn, $2.loc, $4, $6);
 };
 
 type_cpair: type ',' type {
   SHOWPARSE("type_cpair -> type ',' type");
-  $$ = new AST(at_typeapp, $2.loc,
-	       new AST(at_ident, LToken($2.loc, "pair")),
+  $$ = AST::make(at_typeapp, $2.loc,
+	       AST::make(at_ident, LToken($2.loc, "pair")),
 	       $1, $3);
   $$->printVariant = 1;
 };
 type_cpair: type ',' type_cpair {
   SHOWPARSE("type_cpair -> type ',' type_cpair");
-  $$ = new AST(at_typeapp, $2.loc,
-	       new AST(at_ident, LToken($2.loc, "pair")),
+  $$ = AST::make(at_typeapp, $2.loc,
+	       AST::make(at_ident, LToken($2.loc, "pair")),
 	       $1, $3);
   $$->printVariant = 1;
 };
@@ -1350,12 +1350,12 @@ type: '(' type_cpair ')' {
 // ARRAY TYPE [3.5.1]                 
 type: '(' tk_ARRAY type intLit ')'  {
   SHOWPARSE("type -> ( ARRAY type intLit )");
-  $$ = new AST(at_arrayType, $2.loc, $3, $4);
+  $$ = AST::make(at_arrayType, $2.loc, $3, $4);
 };
 // VECTOR TYPE [3.5.2]               
 type: '(' tk_VECTOR type ')' {
   SHOWPARSE("type -> (VECTOR type )");
-  $$ = new AST(at_vectorType, $2.loc, $3);
+  $$ = AST::make(at_vectorType, $2.loc, $3);
 };
 
 // TYPE CONSTRUCTORS (typapp)
@@ -1366,24 +1366,24 @@ type: typapp {
 
 typapp: '(' useident types ')' {
   SHOWPARSE("typeapp -> ( useident types )");
-  $$ = new AST(at_typeapp, $2->loc, $2);
+  $$ = AST::make(at_typeapp, $2->loc, $2);
   $$->addChildrenFrom($3);
 };
 
 // MUTABLE TYPE [3.7]              
 type: '(' tk_MUTABLE type ')' {
   SHOWPARSE("type -> ( MUTABLE type )");
-  $$ = new AST(at_mutableType, $2.loc, $3);
+  $$ = AST::make(at_mutableType, $2.loc, $3);
 };
 
 // BITFIELD TYPE
 bitfieldtype: '(' tk_BITFIELD any_int_type intLit ')' {
   SHOWPARSE("bitfieldtype -> ( BITFIELD any_int_type intLit )");
-  $$ = new AST(at_bitfield, $2.loc, $3, $4);
+  $$ = AST::make(at_bitfield, $2.loc, $3, $4);
 };
 bitfieldtype: '(' tk_BITFIELD bool_type intLit ')' {
   SHOWPARSE("bitfieldtype -> ( BITFIELD bool_type intLit )");
-  $$ = new AST(at_bitfield, $2.loc, $3, $4);
+  $$ = AST::make(at_bitfield, $2.loc, $3, $4);
 };
 
 // Any-type, including bitfield type
@@ -1407,12 +1407,12 @@ type_pl_byref: type {
 
 type_pl_byref: '(' tk_BY_REF type ')' {
   SHOWPARSE("type_pl_byref -> ( BY-REF type )");
-  $$ = new AST(at_byrefType, $2.loc, $3);
+  $$ = AST::make(at_byrefType, $2.loc, $3);
 };
 
 types_pl_byref: type_pl_byref {
   SHOWPARSE("types_pl_byref -> type_pl_byref");
-  $$ = new AST(at_fnargVec);
+  $$ = AST::make(at_fnargVec);
   $$->addChild($1);
 }; 
 types_pl_byref: types_pl_byref type_pl_byref {
@@ -1431,43 +1431,43 @@ qual_type: type {
 
 qual_type: '(' tk_FORALL constraints type ')' {
  SHOWPARSE("qual_type -> ( FORALL constraints type )");
- $$ = new AST(at_qualType, $2.loc, $3, $4);
+ $$ = AST::make(at_qualType, $2.loc, $3, $4);
 };
 
 qual_constraint: constraint {
   SHOWPARSE("qual_typeapp -> constraint");
-  GCPtr<AST> constrs = new AST(at_constraints, $1->loc);
-  $$ = new AST(at_qualType, $1->loc, constrs, $1);
+  GCPtr<AST> constrs = AST::make(at_constraints, $1->loc);
+  $$ = AST::make(at_qualType, $1->loc, constrs, $1);
 }; 
 qual_constraint: '(' tk_FORALL constraints constraint ')' {
   SHOWPARSE("qual_typeapp -> ( FORALL constraints constraint )");
-  $$ = new AST(at_qualType, $2.loc, $3, $4);
+  $$ = AST::make(at_qualType, $2.loc, $3, $4);
 }; 
 
 // METHOD TYPES [3.9]
 /* type: '(' tk_METHOD tvapp fntype')' { */
 /*   SHOWPARSE("METHOD tcapp fntype )"); */
-/*   GCPtr<AST> tcreqs = new AST(at_tcreqs, $3->loc, $3); */
-/*   $$ = new AST(at_methodType, $2.loc, tcreqs, $4); */
+/*   GCPtr<AST> tcreqs = AST::make(at_tcreqs, $3->loc, $3); */
+/*   $$ = AST::make(at_methodType, $2.loc, tcreqs, $4); */
 /* }; */
 
 /* type: '(' tk_METHOD '(' tk_AND tcreqs ')' fntype')' { */
 /*   SHOWPARSE("tcreq -> ( var tvlist )"); */
-/*   $$ = new AST(at_methodType, $2.loc, $5, $7); */
+/*   $$ = AST::make(at_methodType, $2.loc, $5, $7); */
 /* }; */
 
 // BINDING PATTERNS [5.1]
 bindingpattern: ident {
   SHOWPARSE("bindingpattern -> ident");
-  $$ = new AST(at_identPattern, $1->loc, $1);
+  $$ = AST::make(at_identPattern, $1->loc, $1);
 };
 bindingpattern: ident ':' type {
   SHOWPARSE("bindingpattern -> ident : type");
-  $$ = new AST(at_identPattern, $1->loc, $1, $3);
+  $$ = AST::make(at_identPattern, $1->loc, $1, $3);
 };
 bindingpattern: '(' tk_THE type ident ')' {
   SHOWPARSE("bindingpattern -> ident : type");
-  $$ = new AST(at_identPattern, $1.loc, $4, $3);
+  $$ = AST::make(at_identPattern, $1.loc, $4, $3);
 };
 
 // There are no defpattern sequences, because there is no top-level
@@ -1475,22 +1475,22 @@ bindingpattern: '(' tk_THE type ident ')' {
 // DEFPATTERN
 defpattern: defident {
   SHOWPARSE("defpattern -> defident");
-  $$ = new AST(at_identPattern, $1->loc, $1);
+  $$ = AST::make(at_identPattern, $1->loc, $1);
 };
 defpattern: defident ':' qual_type {
   SHOWPARSE("defpattern -> defident : qual_type");
-  $$ = new AST(at_identPattern, $1->loc, $1, $3);
+  $$ = AST::make(at_identPattern, $1->loc, $1, $3);
 };
 defpattern: '(' tk_THE qual_type defident ')' {
   SHOWPARSE("defpattern -> (THE qual_type defident)");
-  $$ = new AST(at_identPattern, $1.loc, $4, $3);
+  $$ = AST::make(at_identPattern, $1.loc, $4, $3);
 };
 
 
 /* Lambda Patterns -- with an additional by-ref annotation */
 lambdapatterns: lambdapattern {
   SHOWPARSE("lambdapatterns -> lambdapattern");
-  $$ = new AST(at_argVec, $1->loc);
+  $$ = AST::make(at_argVec, $1->loc);
   $$->addChild($1);
 };
 lambdapatterns: lambdapatterns lambdapattern {
@@ -1501,24 +1501,24 @@ lambdapatterns: lambdapatterns lambdapattern {
 
 lambdapattern: ident {
   SHOWPARSE("lambdapattern -> ident");
-  $$ = new AST(at_identPattern, $1->loc, $1);
+  $$ = AST::make(at_identPattern, $1->loc, $1);
 };
 
 lambdapattern: ident ':' type_pl_byref {
   SHOWPARSE("lambdapattern -> ident : type_pl_byref");
-  $$ = new AST(at_identPattern, $1->loc, $1, $3);
+  $$ = AST::make(at_identPattern, $1->loc, $1, $3);
   if($3->astType == at_byrefType)
     $1->Flags2 |= ARG_BYREF;
 };
 
 lambdapattern: '(' tk_THE type ident ')' {
   SHOWPARSE("lambdapattern -> ( the type ident ) ");
-  $$ = new AST(at_identPattern, $1.loc, $4, $3);  
+  $$ = AST::make(at_identPattern, $1.loc, $4, $3);  
 };
 
 lambdapattern: '(' tk_THE '(' tk_BY_REF type ')' ident ')' {
   SHOWPARSE("lambdapattern -> ( the ( by-ref type ) ident )");
-  $$ = new AST(at_identPattern, $1.loc, $7, $5);
+  $$ = AST::make(at_identPattern, $1.loc, $7, $5);
   $5->Flags2 |= ARG_BYREF;
 };
 
@@ -1532,12 +1532,12 @@ lambdapattern: '(' tk_THE '(' tk_BY_REF type ')' ident ')' {
 
 expr_seq: expr {
   SHOWPARSE("expr_seq -> expr");
-  $$ = new AST(at_begin, $1->loc, $1);
+  $$ = AST::make(at_begin, $1->loc, $1);
   $$->printVariant = 1;
 };
 expr_seq: value_definition {
   SHOWPARSE("expr_seq -> value_definition");
-  $$ = new AST(at_begin, $1->loc, $1);
+  $$ = AST::make(at_begin, $1->loc, $1);
   $$->printVariant = 1;
 };
 expr_seq: expr_seq expr {
@@ -1553,10 +1553,10 @@ expr_seq: expr_seq value_definition {
 //expr_seq: value_definition expr_seq {
 //  // AST define = identPattern expr constraints;
 //  SHOWPARSE("expr_seq -> value_definition expr_seq");
-//  GCPtr<AST> letBinding = new AST(at_letbinding, $1->loc, 
+//  GCPtr<AST> letBinding = AST::make(at_letbinding, $1->loc, 
 //			    $1->child(0), $1->child(1));
-//  $$ = new AST(at_letrec, $1->loc, 
-//	       new AST(at_letbindings, $1->loc, letBinding),
+//  $$ = AST::make(at_letrec, $1->loc, 
+//	       AST::make(at_letbindings, $1->loc, letBinding),
 //	       $2,
 //	       $1->child(2));
 //};
@@ -1569,7 +1569,7 @@ expr: eform {
 };
 expr: eform ':' type {
   SHOWPARSE("expr -> eform : type");
-  $$ = new AST(at_tqexpr, $1->loc, $1, $3);
+  $$ = AST::make(at_tqexpr, $1->loc, $1, $3);
 };
 expr: the_expr {
   SHOWPARSE("expr -> the_expr");
@@ -1579,7 +1579,7 @@ expr: the_expr {
 the_expr: '(' tk_THE type eform ')' {
   SHOWPARSE("the_expr -> ( THE type eform )");
   // Note: argument order swapped for historical reasons.
-  $$ = new AST(at_tqexpr, $2.loc, $4, $3);
+  $$ = AST::make(at_tqexpr, $2.loc, $4, $3);
 
   if($4->Flags2 & AST_IS_LOCATION)
     $$->Flags2 |= AST_IS_LOCATION;  
@@ -1588,7 +1588,7 @@ the_expr: '(' tk_THE type eform ')' {
 // SUSPENDED EXPRESSIONS
 expr: '(' tk_SUSPEND useident expr ')' {
   SHOWPARSE("expr -> ( SUSPEND useident expr )");
-  $$ = new AST(at_suspend, $2.loc, $3, $4);
+  $$ = AST::make(at_suspend, $2.loc, $3, $4);
 };
 
 // LITERALS  [7.1]
@@ -1600,7 +1600,7 @@ eform: literal {
 // UNIT EXPRESSIONS   [7.4.1]
 eform: '(' ')' {
   SHOWPARSE("eform -> ()");
-  $$ = new AST(at_unit, $1.loc);
+  $$ = AST::make(at_unit, $1.loc);
 };
 
 // Expressions that involve locations:
@@ -1647,49 +1647,49 @@ eform: ident {
 // probably require argument declarations in any case.
 eform: eform '.' ident {
   SHOWPARSE("eform -> eform . ident");
-  $$ = new AST(at_select, $1->loc, $1, $3);
+  $$ = AST::make(at_select, $1->loc, $1, $3);
   $$->Flags2 |= AST_IS_LOCATION;
 };
 
 eform: the_expr '.' ident {
   SHOWPARSE("eform -> the_expr . ident");
-  $$ = new AST(at_select, $1->loc, $1, $3);
+  $$ = AST::make(at_select, $1->loc, $1, $3);
   $$->Flags2 |= AST_IS_LOCATION;
 };
 
 eform: '(' tk_MEMBER expr ident ')' {
   SHOWPARSE("eform -> ( member expr ident )");
-  $$ = new AST(at_select, $2.loc, $3, $4);
+  $$ = AST::make(at_select, $2.loc, $3, $4);
   $$->Flags2 |= AST_IS_LOCATION;
 };
 
 // NTH-REF [7.8.2]          
 eform: expr '[' expr ']' {
   SHOWPARSE("eform -> expr [ expr ]");
-  $$ = new AST(at_vector_nth, $1->loc, $1, $3);
+  $$ = AST::make(at_vector_nth, $1->loc, $1, $3);
 };
 
 eform: '(' tk_ARRAY_NTH expr expr ')' {
   SHOWPARSE("eform -> ( ARRAY-NTH expr expr )");
-  $$ = new AST(at_array_nth, $2.loc, $3, $4);
+  $$ = AST::make(at_array_nth, $2.loc, $3, $4);
   $$->Flags2 |= AST_IS_LOCATION;
 };
 eform: '(' tk_VECTOR_NTH expr expr ')' {
   SHOWPARSE("eform -> ( VECTOR-NTH expr expr )");
-  $$ = new AST(at_vector_nth, $2.loc, $3, $4);
+  $$ = AST::make(at_vector_nth, $2.loc, $3, $4);
   $$->Flags2 |= AST_IS_LOCATION;
 };
 
 // DEREF [7.13.2]                
 eform: expr '^' {
   SHOWPARSE("eform -> expr ^");
-  $$ = new AST(at_deref, $1->loc, $1); 
+  $$ = AST::make(at_deref, $1->loc, $1); 
   $$->printVariant = 1;
   $$->Flags2 |= AST_IS_LOCATION;
 };
 eform: '(' tk_DEREF expr ')' {
   SHOWPARSE("eform -> ( DEREF expr )");
-  $$ = new AST(at_deref, $2.loc, $3);
+  $$ = AST::make(at_deref, $2.loc, $3);
   $$->Flags2 |= AST_IS_LOCATION;
 };
 
@@ -1699,7 +1699,7 @@ eform: '(' tk_DEREF expr ')' {
 // type-checking phase.
 /* eform: '(' tk_INNER_REF expr expr ')' { */
 /*   SHOWPARSE("eform -> ( INNER_REF expr expr)"); */
-/*   $$ = new AST(at_inner_ref, $2.loc, $3, $4); */
+/*   $$ = AST::make(at_inner_ref, $2.loc, $3, $4); */
 /* }; */
 
 // End of locations
@@ -1707,15 +1707,15 @@ eform: '(' tk_DEREF expr ')' {
 // PAIR EXPRESSIONS
 eform_cpair: expr ',' expr {
   SHOWPARSE("eform_cpair -> expr ',' expr");
-  $$ = new AST(at_apply, $2.loc,
-	       new AST(at_ident, LToken($2.loc, "pair")),
+  $$ = AST::make(at_apply, $2.loc,
+	       AST::make(at_ident, LToken($2.loc, "pair")),
 	       $1, $3);
   $$->printVariant = 1;
 };
 eform_cpair: expr ',' eform_cpair {
   SHOWPARSE("eform_cpair -> expr ',' eform_cpair");
-  $$ = new AST(at_apply, $2.loc,
-	       new AST(at_ident, LToken($2.loc, "pair")),
+  $$ = AST::make(at_apply, $2.loc,
+	       AST::make(at_ident, LToken($2.loc, "pair")),
 	       $1, $3);
   $$->printVariant = 1;
 };
@@ -1726,7 +1726,7 @@ eform: '(' eform_cpair ')' {
 
 eform: '(' tk_MAKE_VECTORL expr expr ')' {
   SHOWPARSE("eform -> ( MAKE-VECTOR expr expr )");
-  $$ = new AST(at_makevectorL, $2.loc, $3, $4);
+  $$ = AST::make(at_makevectorL, $2.loc, $3, $4);
 };
 
 // VECTORS [7.4.3]
@@ -1756,12 +1756,12 @@ eform: '(' tk_BEGIN expr_seq ')' {
 // ARRAY-LENGTH [7.8.1]
 eform: '(' tk_ARRAY_LENGTH expr ')' {
   SHOWPARSE("eform -> ( ARRAY-LENGTH expr expr )");
-  $$ = new AST(at_array_length, $2.loc, $3);
+  $$ = AST::make(at_array_length, $2.loc, $3);
 };
 // VECTOR-LENGTH [7.8.1]
 eform: '(' tk_VECTOR_LENGTH expr ')' {
   SHOWPARSE("eform -> ( VECTOR-LENGTH expr expr )");
-  $$ = new AST(at_vector_length, $2.loc, $3);
+  $$ = AST::make(at_vector_length, $2.loc, $3);
 };
 
 // LAMBDA [7.9]
@@ -1769,39 +1769,39 @@ eform: '(' tk_VECTOR_LENGTH expr ')' {
 //eform: '(' tk_LAMBDA lambdapattern expr_seq ')'  {
 //  SHOWPARSE("lambda -> ( LAMBDA lambdapattern expr_seq )");
 //  $4->astType = at_ibegin;
-//  $$ = new AST(at_xlambda, $2.loc, $3, $4);
+//  $$ = AST::make(at_xlambda, $2.loc, $3, $4);
 //};
 // convenience syntax: multiple arguments
 eform: '(' tk_LAMBDA '(' ')' expr_seq ')'  {
   SHOWPARSE("lambda -> ( LAMBDA lambdapatterns expr_seq )");
   if ($5->children.size() == 1 && $5->child(0)->astType == at_begin)
     $5 = $5->child(0);
-  GCPtr<AST> argVec = new AST(at_argVec, $3.loc);
-  $$ = new AST(at_lambda, $2.loc, argVec, $5);
+  GCPtr<AST> argVec = AST::make(at_argVec, $3.loc);
+  $$ = AST::make(at_lambda, $2.loc, argVec, $5);
 };
 
 eform: '(' tk_LAMBDA '(' lambdapatterns ')' expr_seq ')'  {
   SHOWPARSE("lambda -> ( LAMBDA lambdapatterns expr_seq )");
   if ($6->children.size() == 1 && $6->child(0)->astType == at_begin)
     $6 = $6->child(0);
-  $$ = new AST(at_lambda, $2.loc, $4, $6);
+  $$ = AST::make(at_lambda, $2.loc, $4, $6);
 };
 
 // APPLICATION [7.10]          
 eform: '(' expr ')' { /* apply to zero args */ 
   SHOWPARSE("eform -> ( expr )");
-  $$ = new AST(at_apply, $2->loc, $2);
+  $$ = AST::make(at_apply, $2->loc, $2);
 };
 eform: '(' expr expr_seq ')' { /* apply to one or more args */ 
   SHOWPARSE("eform -> ( expr expr_seq )");
-  $$ = new AST(at_apply, $2->loc, $2);
+  $$ = AST::make(at_apply, $2->loc, $2);
   $$->addChildrenFrom($3);
 };
  
 // IF [7.11.1]
 eform: '(' tk_IF expr expr expr ')' {
   SHOWPARSE("eform -> (IF expr expr expr )");
-  $$ = new AST(at_if, $2.loc, $3, $4, $5);
+  $$ = AST::make(at_if, $2.loc, $3, $4, $5);
 };
 
 // WHEN [7.11.2]
@@ -1809,13 +1809,13 @@ eform: '(' tk_WHEN expr expr_seq ')' {
   SHOWPARSE("eform -> (WHEN expr_seq )");
   $4->astType = at_begin;
   $4->printVariant = 1;
-  $$ = new AST(at_when, $2.loc, $3, $4);
+  $$ = AST::make(at_when, $2.loc, $3, $4);
 };
 
 // NOT [7.11.3]
 eform: '(' tk_NOT expr ')'  {
   SHOWPARSE("eform -> ( NOT expr )");
-  $$ = new AST(at_not, $2.loc, $3);
+  $$ = AST::make(at_not, $2.loc, $3);
 };
 
 // AND [7.11.4]                  
@@ -1837,12 +1837,12 @@ eform: '(' tk_OR expr_seq ')'  {
 // COND [7.11.6]           
 eform: '(' tk_COND  condcases  otherwise ')'  {
   SHOWPARSE("eform -> (COND  ( condcases ) ) ");
-  $$ = new AST(at_cond, $2.loc, $3, $4);
+  $$ = AST::make(at_cond, $2.loc, $3, $4);
 };
 
 condcases: condcase {
   SHOWPARSE("condcases -> condcase");
-  $$ = new AST(at_cond_legs, $1->loc, $1);
+  $$ = AST::make(at_cond_legs, $1->loc, $1);
 };
 
 condcases: condcases condcase {
@@ -1853,31 +1853,31 @@ condcases: condcases condcase {
 
 condcase: '(' expr expr_seq ')'  {
   SHOWPARSE("condcase -> ( expr expr_seq )");
-  $$ = new AST(at_cond_leg, $1.loc, $2, $3);
+  $$ = AST::make(at_cond_leg, $1.loc, $2, $3);
 };
 
 // SET! [7.12.1]                 
 eform: '(' tk_SET expr expr ')' {
   SHOWPARSE("eform -> ( SET! expr expr )");
-  $$ = new AST(at_setbang, $2.loc, $3, $4);
+  $$ = AST::make(at_setbang, $2.loc, $3, $4);
 };
 
 // READ-ONLY [7.12.2]
 //eform: '(' tk_READ_ONLY expr ')' {
 //  SHOWPARSE("eform -> ( MUTABLE expr )");
-//  $$ = new AST(at_read_only, $2.loc, $3);
+//  $$ = AST::make(at_read_only, $2.loc, $3);
 //};
 
 // DUP
 eform: '(' tk_DUP expr ')' {
   SHOWPARSE("eform -> ( DUP expr )");
-  $$ = new AST(at_dup, $2.loc, $3);
+  $$ = AST::make(at_dup, $2.loc, $3);
 };
 
 // SWITCH
 eform: '(' tk_SWITCH ident expr sw_legs ow ')' {
   SHOWPARSE("eform -> ( SWITCH ident expr sw_legs ow)");
-  $$ = new AST(at_switch, $2.loc, $3, $4, $5, $6);
+  $$ = AST::make(at_switch, $2.loc, $3, $4, $5, $6);
   for(size_t c =0; c < $5->children.size(); c++) {
     GCPtr<AST> sw_leg = $5->child(c);
     sw_leg->children.insert(sw_leg->children.begin(), $3->getDCopy());
@@ -1886,7 +1886,7 @@ eform: '(' tk_SWITCH ident expr sw_legs ow ')' {
 
 sw_legs: sw_leg {
   SHOWPARSE("sw_legs -> sw_leg");
-  $$ = new AST(at_sw_legs, $1->loc, $1);
+  $$ = AST::make(at_sw_legs, $1->loc, $1);
 };
 
 sw_legs: sw_legs sw_leg {
@@ -1897,18 +1897,18 @@ sw_legs: sw_legs sw_leg {
 
 sw_leg: '(' switch_match expr_seq ')'  {
   SHOWPARSE("sw_leg -> ( switch_match expr_seq )");
-  $$ = new AST(at_sw_leg, $1.loc, $3, $2);
+  $$ = AST::make(at_sw_leg, $1.loc, $3, $2);
 };
 
 sw_leg: '(' '(' switch_matches ')' expr_seq ')'  {
   SHOWPARSE("sw_leg -> ( ( switch_matches ) expr_seq )");
-  $$ = new AST(at_sw_leg, $1.loc, $5);
+  $$ = AST::make(at_sw_leg, $1.loc, $5);
   $$->addChildrenFrom($3);
 };
 
 switch_matches: switch_match {
   SHOWPARSE("switch_matches -> switch_match");
-  $$ = new AST(at_Null, $1->loc, $1);
+  $$ = AST::make(at_Null, $1->loc, $1);
 };
 
 switch_matches: switch_matches switch_match {
@@ -1932,13 +1932,13 @@ switch_match: ident {
 
 switch_match: ident '.' ident {
   SHOWPARSE("switch_match -> useident");  
-  $$ = new AST(at_select, $1->loc, $1, $3);
+  $$ = AST::make(at_select, $1->loc, $1, $3);
 };
 
 switch_match: ident '.' ident '.' ident {
   SHOWPARSE("switch_match -> useident '.' useident");
-  GCPtr<AST> usesel = new AST(at_usesel, $1->loc, $1, $3);  
-  $$ = new AST(at_select, $1->loc, usesel, $5);
+  GCPtr<AST> usesel = AST::make(at_usesel, $1->loc, $1, $3);  
+  $$ = AST::make(at_select, $1->loc, usesel, $5);
 };
 
 ow: otherwise {
@@ -1948,12 +1948,12 @@ ow: otherwise {
 
 ow: { //empty
   SHOWPARSE("ow -> Null");
-  $$ = new AST(at_Null);
+  $$ = AST::make(at_Null);
 };
 
 otherwise: '(' tk_OTHERWISE expr_seq')' {
   SHOWPARSE("otherwise -> ( OTHERWISE expr_seq)");
-  $$ = new AST(at_otherwise, $2.loc, $3);
+  $$ = AST::make(at_otherwise, $2.loc, $3);
 };
 
 /* // TYPECASE  [11]            
@@ -1964,7 +1964,7 @@ eform: '(' tk_TYPECASE '(' typecase_legs ')' ')'  {
 };
 typecase_legs: typecase_leg {
   SHOWPARSE("typecase_legs -> typecase_leg");
-  $$ = new AST(at_typecase, $1->loc);
+  $$ = AST::make(at_typecase, $1->loc);
   $$->addChild($1);
 };
 typecase_legs: typecase_legs typecase_leg {
@@ -1974,13 +1974,13 @@ typecase_legs: typecase_legs typecase_leg {
 };
 typecase_leg: '(' bindingpattern expr ')'  {
   SHOWPARSE("typecase_leg -> ( Bindingpattern expr )");
-  $$ = new AST(at_typecase_leg, $1.loc, $2, $3);
+  $$ = AST::make(at_typecase_leg, $1.loc, $2, $3);
   }; */
 
 // TRY/CATCH [7.15.1]
 eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
   SHOWPARSE("eform -> ( TRY expr ( CATCH ( ident sw_legs ) ) )");
-  $$ = new AST(at_try, $2.loc, $3, $6, $7, $8);
+  $$ = AST::make(at_try, $2.loc, $3, $6, $7, $8);
   for(size_t c =0; c < $7->children.size(); c++) {
     GCPtr<AST> sw_leg = $7->child(c);
     sw_leg->children.insert(sw_leg->children.begin(), $6->getDCopy());
@@ -1990,7 +1990,7 @@ eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
 // THROW  [7.15.2]               
 eform: '(' tk_THROW expr ')' {
   SHOWPARSE("eform -> ( THROW expr )");
-  $$ = new AST(at_throw, $2.loc, $3);
+  $$ = AST::make(at_throw, $2.loc, $3);
 };
 
 // let / letrec forms
@@ -2005,12 +2005,12 @@ let_eform: '(' tk_LET '(' letbindings ')' expr_seq ')' {
   SHOWPARSE("eform -> (LET (letbindings) expr_seq)");
   $6->astType = at_begin;
   $6->printVariant = 1;
-  $$ = new AST(at_let, $2.loc, $4, $6);
-  $$->addChild(new AST(at_constraints));
+  $$ = AST::make(at_let, $2.loc, $4, $6);
+  $$->addChild(AST::make(at_constraints));
 };
 letbindings: letbinding {
   SHOWPARSE("letbindings -> letbinding");
-  $$ = new AST(at_letbindings, $1->loc, $1);
+  $$ = AST::make(at_letbindings, $1->loc, $1);
 };
 letbindings: letbindings letbinding {
   SHOWPARSE("letbindings -> letbindings letbinding");
@@ -2019,7 +2019,7 @@ letbindings: letbindings letbinding {
 };
 letbinding: '(' bindingpattern expr ')' {
   SHOWPARSE("letbinding -> ( bindingpattern expr )");
-  $$ = new AST(at_letbinding, $2->loc, $2, $3);
+  $$ = AST::make(at_letbinding, $2->loc, $2, $3);
 };
 
 // LETREC [7.16.2]               
@@ -2031,15 +2031,15 @@ let_eform: '(' tk_LETREC '(' letbindings ')' expr_seq ')' {
   for(size_t c=0; c < lbs->children.size(); c++)
     lbs->child(c)->Flags |= LB_REC_BIND;
   
-  $$ = new AST(at_letrec, $2.loc, $4, $6);
-  $$->addChild(new AST(at_constraints));
+  $$ = AST::make(at_letrec, $2.loc, $4, $6);
+  $$->addChild(AST::make(at_constraints));
 };
 
 eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
   SHOWPARSE("eform -> (DO (dobindings) dotest expr_seq)");
 
 #if 1
-  $$ = new AST(at_do, $2.loc, $4, $6, $7);
+  $$ = AST::make(at_do, $2.loc, $4, $6, $7);
 #else
   GCPtr<AST> doBindings = $4;
 
@@ -2051,7 +2051,7 @@ eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
   // call.
 
   // Formulate the recursive call
-  GCPtr<AST> recCall = new AST(at_apply, $4->loc);
+  GCPtr<AST> recCall = AST::make(at_apply, $4->loc);
   recCall->addChild(theIdent->Use());
 
   for (size_t b = 0; b < doBindings->children.size(); b++) {
@@ -2060,12 +2060,12 @@ eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
   }
 
   // Make up the begin:
-  GCPtr<AST> doBody = new AST(at_begin, $7->loc);
+  GCPtr<AST> doBody = AST::make(at_begin, $7->loc);
   doBody->addChild($7);		// add the existing body
   doBody->addChild(recCall);	// add the recursive call
 
   // The lambda args are the left-most elements of the DO bindings
-  GCPtr<AST> lamArgs = new AST(at_argVec, $4->loc);
+  GCPtr<AST> lamArgs = AST::make(at_argVec, $4->loc);
   for (size_t b = 0; b < doBindings->children.size(); b++) {
     GCPtr<AST> binding = doBindings->child(b);
     lamArgs->addChild(binding->child(0));
@@ -2073,32 +2073,32 @@ eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
 
   // The lambda body is going to be an IF testing termination and
   // conditionally performing the initial call.
-  GCPtr<AST> lamBody = new AST(at_if, $6->loc);
+  GCPtr<AST> lamBody = AST::make(at_if, $6->loc);
   {
     lamBody->addChildrenFrom($6); /* adds IF-TEST and THEN expr */
     lamBody->addChild(doBody);	/* adds ELSE expr */
   }
 
-  GCPtr<AST> theLambda = new AST(at_lambda, $7->loc, lamArgs, lamBody);
+  GCPtr<AST> theLambda = AST::make(at_lambda, $7->loc, lamArgs, lamBody);
   
   // The letrec body proper consists entirely of an APPLY form that
   // makes the initial lambda call:
-  GCPtr<AST> letBody = new AST(at_apply, $1.loc, theIdent->Use());
+  GCPtr<AST> letBody = AST::make(at_apply, $1.loc, theIdent->Use());
   for (size_t b = 0; b < doBindings->children.size(); b++) {
     GCPtr<AST> binding = doBindings->child(b);
     letBody->addChild(binding->child(1));
   }
 
-  GCPtr<AST> theBinding = new AST(at_letbinding, $1.loc);
+  GCPtr<AST> theBinding = AST::make(at_letbinding, $1.loc);
   theBinding->Flags |= LB_REC_BIND;
   
-  theBinding->addChild(new AST(at_identPattern, $1.loc, theIdent));
+  theBinding->addChild(AST::make(at_identPattern, $1.loc, theIdent));
   theBinding->addChild(theLambda);
 
-  GCPtr<AST> letBindings = new AST(at_letbindings, $1.loc, theBinding);
+  GCPtr<AST> letBindings = AST::make(at_letbindings, $1.loc, theBinding);
 
-  GCPtr<AST> letRec = new AST(at_letrec, $1.loc, letBindings, letBody, 
-			new AST(at_constraints));
+  GCPtr<AST> letRec = AST::make(at_letrec, $1.loc, letBindings, letBody, 
+			AST::make(at_constraints));
   letRec->printVariant = 1;
 
   $$ = letRec;
@@ -2108,7 +2108,7 @@ eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
 
 dobindings: {
   SHOWPARSE("dobindings -> <empty>");
-  $$ = new AST(at_dobindings);
+  $$ = AST::make(at_dobindings);
 };
 dobindings: ne_dobindings {
   SHOWPARSE("dobindings -> ne_dobindings");
@@ -2116,7 +2116,7 @@ dobindings: ne_dobindings {
 };
 ne_dobindings: dobinding {
   SHOWPARSE("ne_dobindings -> dobinding");
-  $$ = new AST(at_dobindings, $1->loc, $1);
+  $$ = AST::make(at_dobindings, $1->loc, $1);
 };
 ne_dobindings: ne_dobindings dobinding {
   SHOWPARSE("ne_dobindings -> ne_dobindings dobinding");
@@ -2125,11 +2125,11 @@ ne_dobindings: ne_dobindings dobinding {
 };
 dobinding: '(' bindingpattern expr expr ')' {
   SHOWPARSE("dobinding -> ( bindingpattern expr )");
-  $$ = new AST(at_dobinding, $2->loc, $2, $3, $4);
+  $$ = AST::make(at_dobinding, $2->loc, $2, $3, $4);
 };
 dotest: '(' expr expr ')' {
   SHOWPARSE("dobinding -> ( expr expr )");
-  $$ = new AST(at_dotest, $2->loc, $2, $3);  
+  $$ = AST::make(at_dotest, $2->loc, $2, $3);  
 };
 
 /* Literals and Variables */
@@ -2161,18 +2161,18 @@ literal: strLit {
 // External identifiers are not subject to reserved word restrictions...
 exident: tk_Ident {
   SHOWPARSE("exident -> <Ident " + $1.str + ">");
-  $$ = new AST(at_ident, $1);
+  $$ = AST::make(at_ident, $1);
 };
 
 exident: tk_Reserved {
   SHOWPARSE("exident -> <Reserved " + $1.str + ">");
-  $$ = new AST(at_ident, $1);
+  $$ = AST::make(at_ident, $1);
 };
 
 // IDENTIFIERS [2.2]
 ident: tk_Ident {
   SHOWPARSE("ident -> <Ident " + $1.str + ">");
-  $$ = new AST(at_ident, $1);
+  $$ = AST::make(at_ident, $1);
 };
 
 ident: tk_Reserved {
@@ -2180,7 +2180,7 @@ ident: tk_Reserved {
   cerr << $1.loc.asString() << ": The token \"" << $1.str 
        << "\" is reserved for future use.\n";
   lexer->num_errors++;
-  $$ = new AST(at_ident, $1);
+  $$ = AST::make(at_ident, $1);
 };
 
 useident: ident {
@@ -2190,7 +2190,7 @@ useident: ident {
 
 useident: ident '.' ident { 
   SHOWPARSE("useident -> ident . ident");
-  $$ = new AST(at_usesel, $1->loc, $1, $3);
+  $$ = AST::make(at_usesel, $1->loc, $1, $3);
 };
 
 //defident: ident {
@@ -2208,7 +2208,7 @@ defident: useident {
 // TYPE VARIABLES [3.3]
 typevar: tk_TypeVar {
   SHOWPARSE("typevar -> <TypeVar=" + $1.str + ">");
-  $$ = new AST(at_ident, $1);
+  $$ = AST::make(at_ident, $1);
   $$->Flags |= ID_IS_TVAR;
 }; 
 

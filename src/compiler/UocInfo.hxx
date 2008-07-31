@@ -151,6 +151,19 @@ public:
 	  sherpa::GCPtr<AST> _uocAst);
   UocInfo(sherpa::GCPtr<UocInfo> uoc);
 
+  static inline sherpa::GCPtr<UocInfo>
+  make(const std::string& _uocName, const std::string& _origin, 
+	  sherpa::GCPtr<AST> _uocAst) {
+    UocInfo *tmp = new UocInfo(_uocName, _origin, _uocAst);
+    return sherpa::GCPtr<UocInfo>(tmp);
+  }
+
+  static inline sherpa::GCPtr<UocInfo>
+  make(sherpa::GCPtr<UocInfo> uoc) {
+    UocInfo *tmp = new UocInfo(uoc);
+    return sherpa::GCPtr<UocInfo>(tmp);
+  }
+
   /* Create a fresh, empty UOC that is set up to become the unified
    * output UoC module, initializing all environments by hand.
    */
@@ -211,7 +224,9 @@ public:
   // FOLLOWING ARE IN inter-pass.cxx
   //
   //////////////////////////////////////////////////////
-  void findDefForms(sherpa::GCPtr<AST> start, sherpa::GCPtr<AST> local=NULL, sherpa::GCPtr<AST> top=NULL);
+  void findDefForms(sherpa::GCPtr<AST> start, 
+		    sherpa::GCPtr<AST> local=sherpa::GC_NULL, 
+		    sherpa::GCPtr<AST> top=sherpa::GC_NULL);
   static void findAllDefForms();
   
   // Add all candidate Entry-points to the entry-point vectror
@@ -262,7 +277,7 @@ public:
 		 unsigned long tflags=0,
 		 std::string pre = "Internal Compiler error :",
 		 bool keepResults = true,
-		 sherpa::GCPtr<envSet> altEnvSet=NULL);
+		 sherpa::GCPtr<EnvSet> altEnvSet=sherpa::GC_NULL);
 
   //////////////////////////////////////////////////////
   //

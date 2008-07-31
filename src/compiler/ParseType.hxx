@@ -51,12 +51,12 @@ struct ParseType {
 
   ParseType()
   {
-    ast = 0;
+    ast = sherpa::GC_NULL;
   }
 
   ~ParseType()
   {
-    ast = 0;
+    ast = sherpa::GC_NULL;
   }
 };
 

@@ -63,6 +63,12 @@ namespace sherpa {
       maxLen = sz;
     }
 
+    static inline GCPtr<CVector<T> >
+    make(size_t sz = 0) {
+      CVector<T> *tmp = new CVector<T>(sz);
+      return GCPtr<CVector<T> >(tmp);
+    }
+
     CVector(const CVector<T>& vec)
     {
       len = vec.len;

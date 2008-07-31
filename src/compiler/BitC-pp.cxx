@@ -978,7 +978,7 @@ doShowTypes(std::ostream& out, GCPtr<AST> ast,
 	    GCPtr<TSEnvironment > gamma,
 	    bool showMangName,
 	    bool raw = false,
-	    GCPtr<TvPrinter> tvP=NULL)
+	    GCPtr<TvPrinter> tvP=sherpa::GC_NULL)
 {
   switch(ast->astType) {
   case at_ident:
@@ -988,7 +988,7 @@ doShowTypes(std::ostream& out, GCPtr<AST> ast,
     // tvars in a single definition.
 
     if (!raw)
-      tvP = new TvPrinter;
+      tvP = TvPrinter::make();
     
     out << ast->s  << ": "
       	<< ((!ast->scheme)
@@ -1073,7 +1073,7 @@ doShowTypes(std::ostream& out, GCPtr<AST> ast,
   case at_definstance:
     {
       if (!raw && (!tvP))
-	tvP = new TvPrinter;
+	tvP = TvPrinter::make();
 
       out << "  " << "Instance : "
 	  << ((!ast->scheme)
@@ -1131,7 +1131,7 @@ AST::PrettyPrint(std::ostream& strm, bool decorated,
 		 bool endline) const
 {
   INOstream out(strm);
-  BitcP(out, this, decorated);
+  BitcP(out, shared_from_this(), decorated);
   if(endline)
     out << std::endl;
 }
@@ -1140,7 +1140,7 @@ void
 AST::PrettyPrint(bool decorated) const
 {
   INOstream out(std::cerr);
-  BitcP(out, this, decorated);
+  BitcP(out, shared_from_this(), decorated);
   std::cerr << endl;
 }
 

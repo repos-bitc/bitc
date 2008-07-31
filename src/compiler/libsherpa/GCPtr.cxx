@@ -49,6 +49,8 @@ namespace sherpa {
   typedef map<const void *, GCRefCounter *> ObMap;
   static ObMap obMap;
 
+  GC_Null_tag GC_NULL;
+
   GCRefCounter *
   GCRefCounter::Find(const void *ob)
   {

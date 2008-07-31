@@ -51,6 +51,12 @@ struct Trail {
   {
   }
   
+  static inline sherpa::GCPtr<Trail>
+  make() {
+    Trail *tmp = new Trail;
+    return sherpa::GCPtr<Trail>(tmp);
+  }
+
   size_t snapshot() const { return vec.size(); }
   
   // Substitution works on Type Variables only

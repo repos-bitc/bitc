@@ -68,7 +68,7 @@ AST::getType() const
 GCPtr<AST> 
 AST::genIdent(const char *label, const bool isTV)
 {
-  GCPtr<AST> id = new AST(at_ident);
+  GCPtr<AST> id = AST::make(at_ident);
 
   std::stringstream ss;
   if(isTV)
@@ -139,7 +139,7 @@ AST::Use()
   GCPtr<AST> idUse = getDCopy();
   idUse->Flags  &= ~MASK_FLAGS_FROM_USE;
   idUse->Flags2 &= ~MASK_FLAGS2_FROM_USE;    
-  idUse->symbolDef = this;
+  idUse->symbolDef = shared_from_this();
   if(symType)
     idUse->symType = symType->getDCopy();
   return idUse;
@@ -185,7 +185,7 @@ AST::AST(GCPtr<AST> ast, bool shallowCopyChildren)
 GCPtr<AST> 
 AST::getTrueCopy()
 {  
-  GCPtr<AST> to = new AST(this, false);
+  GCPtr<AST> to = AST::make(shared_from_this(), false);
   
   for(size_t i=0; i < children.size(); i++)
     to->children.push_back(child(i)->getTrueCopy());
@@ -196,17 +196,17 @@ AST::getTrueCopy()
 GCPtr<AST> 
 AST::getDCopy()
 {  
-  GCPtr<AST> to = new AST(this, false);
-  to->symbolDef = NULL;
-  to->defn = NULL;
-  to->decl = NULL;
-  to->symType = NULL;
-  to->scheme = NULL;
+  GCPtr<AST> to = AST::make(shared_from_this(), false);
+  to->symbolDef = sherpa::GC_NULL;
+  to->defn = sherpa::GC_NULL;
+  to->decl = sherpa::GC_NULL;
+  to->symType = sherpa::GC_NULL;
+  to->scheme = sherpa::GC_NULL;
   to->envs = envs;
   to->polyinst = false;
   to->reached = false;
-  to->defForm = NULL;
-  to->defbps = NULL;
+  to->defForm = sherpa::GC_NULL;
+  to->defbps = sherpa::GC_NULL;
 
   for(size_t i=0; i<children.size(); i++)
     to->children.push_back(child(i)->getDCopy());

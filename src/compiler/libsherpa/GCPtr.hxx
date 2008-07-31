@@ -49,6 +49,7 @@
 
 #define GCPTR_SUPPORT_RAW
 //#define GCPTR_DEBUG
+// #define GCPTR_EXPLICIT
 
 /** @file This is a non-invasive variant of the original sherpa GCPtr
  * that has some debugging features. */
@@ -59,6 +60,9 @@ namespace sherpa {
     (void) sizeof(type_must_be_complete);
     delete x;
   }
+
+  struct GC_Null_tag {};
+  extern GC_Null_tag GC_NULL;
 
   struct dynamic_cast_tag {};
   struct shared_from_this_tag {};
@@ -266,6 +270,13 @@ namespace sherpa {
       rc->incCount();
     }
 
+    GCPtr(GC_Null_tag) {
+      pObject = 0;
+      rc = &GCRefCounter::NullPtrCounter;
+      assert(rc);
+      rc->incCount();
+    }
+
     // This one works for downcast, but not for upcast. Technically it
     // would subsume the one above, but the X(const X&) constructor has
     // special meaning in C++.
@@ -282,6 +293,9 @@ namespace sherpa {
     // would subsume the one above, but the X(const X&) constructor has
     // special meaning in C++.
     template<typename T2>
+#ifdef GCPTR_EXPLICIT
+    explicit 
+#endif
     inline GCPtr(const NoGCPtr<T2>& wp)
     {
       if (wp.valid()) {
@@ -314,6 +328,9 @@ namespace sherpa {
     }
 
     // For use in construction from raw pointers:
+#ifdef GCPTR_EXPLICIT
+    explicit
+#endif
     inline GCPtr(T* obPtr)
     {
       pObject = obPtr;
@@ -396,6 +413,7 @@ namespace sherpa {
       return *this;
     }
 
+#ifndef GCPTR_EXPLICIT
     /// @brief Assignment from raw pointer.
     inline GCPtr& operator=(T *ptr)
     {
@@ -408,6 +426,7 @@ namespace sherpa {
 
       return *this;
     }
+#endif
 
 #if 0
     inline T* operator -> ()
@@ -642,8 +661,14 @@ namespace sherpa {
     NoGCPtr<T> gc_this;
 
   public:
-    NoGCPtr<T> shared_from_this() {
-      return gc_this;
+    GCPtr<T> shared_from_this() {
+      GCPtr<T> p(gc_this);
+      return p;
+    }
+
+    GCPtr<const T> shared_from_this() const {
+      GCPtr<const T> p(gc_this);
+      return p;
     }
 
     enable_shared_from_this() 

@@ -57,7 +57,7 @@ using namespace sherpa;
 GCPtr<AST> 
 AST::makeBoolLit(const sherpa::LToken &tok)
 {
-  GCPtr<AST> ast = new AST(at_boolLiteral, tok);
+  GCPtr<AST> ast = AST::make(at_boolLiteral, tok);
   if(tok.str == "#t")
     ast->litValue.b = true;
   else
@@ -72,7 +72,7 @@ AST::makeCharLit(const sherpa::LToken &tok)
   // FIX: (shap) This needs to convert to ordinal representation
   // and use a more appropriate element type.
 
-  GCPtr<AST> ast = new AST(at_charLiteral, tok);
+  GCPtr<AST> ast = AST::make(at_charLiteral, tok);
   //  mpz_init_set_str(ast->litValue.i, tok.is.c_str(), 0);
 
   ast->litValue.c = LitValue::DecodeCharacter(tok.str);
@@ -82,7 +82,7 @@ AST::makeCharLit(const sherpa::LToken &tok)
 GCPtr<AST>  
 AST::makeIntLit(const sherpa::LToken &tok) 
 {
-  GCPtr<AST> ast = new AST(at_intLiteral, tok);
+  GCPtr<AST> ast = AST::make(at_intLiteral, tok);
   std::string num = "";
   bool negative = false;
 
@@ -122,7 +122,7 @@ AST::makeIntLit(const sherpa::LToken &tok)
 GCPtr<AST> 
 AST::makeFloatLit(const sherpa::LToken &tok) 
 { 
-  GCPtr<AST> ast = new AST(at_floatLiteral, tok);
+  GCPtr<AST> ast = AST::make(at_floatLiteral, tok);
   ast->litBase = 10;  
   ast->litValue.d = strtod(tok.str.c_str(), 0);
 #if 0
@@ -203,7 +203,7 @@ AST::makeFloatLit(const sherpa::LToken &tok)
 GCPtr<AST> 
 AST::makeStringLit(const sherpa::LToken &tok)
 {
-  GCPtr<AST> ast = new AST(at_stringLiteral, tok);
+  GCPtr<AST> ast = AST::make(at_stringLiteral, tok);
   ast->litValue.s = tok.str;
   
   return ast;
@@ -686,8 +686,8 @@ AST::leadsToTopLevelForm()
 
 void
 AST::clearTypes() {
-  symType = NULL;
-  scheme = NULL;
+  symType = sherpa::GC_NULL;
+  scheme = sherpa::GC_NULL;
   for(size_t i=0; i<children.size(); i++)
     child(i)->clearTypes();
 }
@@ -701,7 +701,7 @@ AST::getIds(std::ostream &errStream,
   switch(astType) {
   case at_identPattern:
     if(getPattern)
-      ids.push_back(this);
+      ids.push_back(shared_from_this());
     else
       ids.push_back(child(0));
     break;
@@ -734,7 +734,7 @@ AST::getID()
     return child(0);
     
   default:
-    return NULL;
+    return sherpa::GC_NULL;
   }
 }
 
@@ -763,20 +763,20 @@ GCPtr<AST>
 AST::getCtr()
 {
   if(astType == at_ident)
-    return this;
+    return shared_from_this();
   
   if (astType == at_fqCtr)
     return child(1);
 
   assert(false);
-  return NULL;
+  return sherpa::GC_NULL;
 }
 
 /* Rename identifier `from' to `to' in `ast' */ 
 void
 AST::rename(GCPtr<AST> from, std::string newName)
 { 
-  GCPtr<AST> me = this;
+  GCPtr<AST> me = shared_from_this();
   switch(astType) {
   case at_ident:    
     if(me == from || symbolDef == from)

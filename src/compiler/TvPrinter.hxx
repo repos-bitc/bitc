@@ -59,6 +59,13 @@ private:
 
 public:
   TvPrinter(const bool pp=true, const std::string& pfx = "'");
+
+  static inline sherpa::GCPtr<TvPrinter>
+  make(const bool pp=true, const std::string& pfx = "'") {
+    TvPrinter *tmp = new TvPrinter(pp, pfx);
+    return sherpa::GCPtr<TvPrinter>(tmp);
+  }
+
   std::vector<std::string> getAllTvarStrings();
   std::string tvName(sherpa::GCPtr<const Type> tvar);
 };

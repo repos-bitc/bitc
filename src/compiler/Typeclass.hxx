@@ -65,6 +65,12 @@ struct Instance {
     ast = _ins;
   }
   
+  static inline sherpa::GCPtr<Instance>
+  make(sherpa::GCPtr<TypeScheme> _ts, sherpa::GCPtr<AST>_ins) {
+    Instance *tmp = new Instance(_ts, _ins);
+    return sherpa::GCPtr<Instance>(tmp);
+  }
+
   bool equals(std::ostream &errStream, sherpa::GCPtr<Instance> ins, 
 	      sherpa::GCPtr<const InstEnvironment >
 	      instEnv) const;
@@ -117,6 +123,12 @@ struct TCConstraints {
   }
   iterator end() {
     return pred.end();
+  }
+
+  static inline sherpa::GCPtr<TCConstraints>
+  make() {
+    TCConstraints *tmp = new TCConstraints();
+    return sherpa::GCPtr<TCConstraints>(tmp);
   }
 };
 

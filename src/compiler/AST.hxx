@@ -213,19 +213,19 @@ enum primOp {
 #define MASK_FLAGS2_FROM_USE   (ID_IS_CAPTURED)
 
 struct AST;
-struct envSet {
-  sherpa::GCPtr<ASTEnvironment > env;
-  sherpa::GCPtr<TSEnvironment > gamma;
-  sherpa::GCPtr<InstEnvironment > instEnv;
+struct EnvSet {
+  sherpa::GCPtr<ASTEnvironment> env;
+  sherpa::GCPtr<TSEnvironment> gamma;
+  sherpa::GCPtr<InstEnvironment> instEnv;
   
-  envSet()
+  EnvSet()
   {
-    env = NULL;
-    gamma = NULL;
-    instEnv = NULL;
+    env = sherpa::GC_NULL;
+    gamma = sherpa::GC_NULL;
+    instEnv = sherpa::GC_NULL;
   }
 
-  envSet(sherpa::GCPtr<ASTEnvironment > _env, sherpa::GCPtr<TSEnvironment >_gamma,
+  EnvSet(sherpa::GCPtr<ASTEnvironment > _env, sherpa::GCPtr<TSEnvironment >_gamma,
 	 sherpa::GCPtr<InstEnvironment > _instEnv)
   {
     env = _env;
@@ -233,7 +233,7 @@ struct envSet {
     instEnv = _instEnv;
   }
 
-  envSet(envSet &envs)
+  EnvSet(EnvSet &envs)
   {
     env = envs.env;
     gamma = envs.gamma;
@@ -245,6 +245,30 @@ struct envSet {
   {
     env->updateKey(from, to);
     gamma->updateKey(from, to);
+  }
+
+  
+  static inline sherpa::GCPtr<EnvSet>
+  make()
+  {
+    EnvSet *tmp = new EnvSet();
+    return sherpa::GCPtr<EnvSet>(tmp);
+  }
+
+  static inline sherpa::GCPtr<EnvSet>
+  make(sherpa::GCPtr<Environment<AST> > _env, 
+       sherpa::GCPtr<Environment<TypeScheme> >_gamma,
+       sherpa::GCPtr<Environment< sherpa::CVector<sherpa::GCPtr<Instance> > > > _instEnv)
+  {
+    EnvSet *tmp = new EnvSet(_env, _gamma, _instEnv);
+    return sherpa::GCPtr<EnvSet>(tmp);
+  }
+
+  static inline sherpa::GCPtr<EnvSet>
+  make(EnvSet &envs)
+  {
+    EnvSet *tmp = new EnvSet(envs);
+    return sherpa::GCPtr<EnvSet>(tmp);
   }
 };
 
@@ -483,7 +507,7 @@ public:
   
   
   
-  envSet envs;
+  EnvSet envs;
 
   
   
@@ -596,6 +620,12 @@ public:
 
   
   AST(sherpa::GCPtr<AST> ast, bool shallowCopyChildren=true);
+
+  static inline sherpa::GCPtr<AST>
+  make(sherpa::GCPtr<AST> ast, bool shallowCopyChildren=true) {
+    AST *tmp = new AST(ast,shallowCopyChildren);
+    return sherpa::GCPtr<AST>(tmp);
+  }
 
   
   sherpa::GCPtr<AST> getTrueCopy();

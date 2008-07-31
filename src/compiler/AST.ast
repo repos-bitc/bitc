@@ -244,19 +244,19 @@ enum primOp {
 #define MASK_FLAGS2_FROM_USE   (ID_IS_CAPTURED)
 
 struct AST;
-struct envSet {
-  sherpa::GCPtr<ASTEnvironment > env;
-  sherpa::GCPtr<TSEnvironment > gamma;
-  sherpa::GCPtr<InstEnvironment > instEnv;
+struct EnvSet {
+  sherpa::GCPtr<ASTEnvironment> env;
+  sherpa::GCPtr<TSEnvironment> gamma;
+  sherpa::GCPtr<InstEnvironment> instEnv;
   
-  envSet()
+  EnvSet()
   {
-    env = NULL;
-    gamma = NULL;
-    instEnv = NULL;
+    env = sherpa::GC_NULL;
+    gamma = sherpa::GC_NULL;
+    instEnv = sherpa::GC_NULL;
   }
 
-  envSet(sherpa::GCPtr<ASTEnvironment > _env, sherpa::GCPtr<TSEnvironment >_gamma,
+  EnvSet(sherpa::GCPtr<ASTEnvironment > _env, sherpa::GCPtr<TSEnvironment >_gamma,
 	 sherpa::GCPtr<InstEnvironment > _instEnv)
   {
     env = _env;
@@ -264,7 +264,7 @@ struct envSet {
     instEnv = _instEnv;
   }
 
-  envSet(envSet &envs)
+  EnvSet(EnvSet &envs)
   {
     env = envs.env;
     gamma = envs.gamma;
@@ -276,6 +276,30 @@ struct envSet {
   {
     env->updateKey(from, to);
     gamma->updateKey(from, to);
+  }
+
+  /* Quasi-constructors: */
+  static inline sherpa::GCPtr<EnvSet>
+  make()
+  {
+    EnvSet *tmp = new EnvSet();
+    return sherpa::GCPtr<EnvSet>(tmp);
+  }
+
+  static inline sherpa::GCPtr<EnvSet>
+  make(sherpa::GCPtr<Environment<AST> > _env, 
+       sherpa::GCPtr<Environment<TypeScheme> >_gamma,
+       sherpa::GCPtr<Environment< sherpa::CVector<sherpa::GCPtr<Instance> > > > _instEnv)
+  {
+    EnvSet *tmp = new EnvSet(_env, _gamma, _instEnv);
+    return sherpa::GCPtr<EnvSet>(tmp);
+  }
+
+  static inline sherpa::GCPtr<EnvSet>
+  make(EnvSet &envs)
+  {
+    EnvSet *tmp = new EnvSet(envs);
+    return sherpa::GCPtr<EnvSet>(tmp);
   }
 };
 
@@ -343,7 +367,7 @@ struct envSet {
   //   Environments of imported interface
   // In the case of at_let, at_letrec, at_letStar, at_define ...
   //   Environments at that point 
-  envSet envs;
+  EnvSet envs;
 
   // If this is the root of a polymorphic expression, stores a 
   // pointer to all specializations.
@@ -457,6 +481,12 @@ struct envSet {
   // The copy constructor -- make an exact (except ID) shallow copy.
   AST(sherpa::GCPtr<AST> ast, bool shallowCopyChildren=true);
 
+  static inline sherpa::GCPtr<AST>
+  make(sherpa::GCPtr<AST> ast, bool shallowCopyChildren=true) {
+    AST *tmp = new AST(ast,shallowCopyChildren);
+    return sherpa::GCPtr<AST>(tmp);
+  }
+
   // Makes an exact copy, deep, including symbolDef, type, etc.
   sherpa::GCPtr<AST> getTrueCopy();
 
@@ -506,20 +536,20 @@ unsigned long long AST::astCount = 0;
   isDecl = false;
   polyinst = false;
   reached = false;
-  scheme = 0;
-  symType = 0;
-  symbolDef = 0;
-  defn = 0;
-  defForm = 0;
-  defbps = 0;
-  decl = 0;
+  scheme = sherpa::GC_NULL;
+  symType = sherpa::GC_NULL;
+  symbolDef = sherpa::GC_NULL;
+  defn = sherpa::GC_NULL;
+  defForm = sherpa::GC_NULL;
+  defbps = sherpa::GC_NULL;
+  decl = sherpa::GC_NULL;
   printVariant = 0;		// until otherwise stated
-  tagType = 0;
+  tagType = sherpa::GC_NULL;
   field_bits = 0;
   unin_discm = 0;
   total_fill = 0;
-  tvarLB = 0;
-  parentLB = 0;
+  tvarLB = sherpa::GC_NULL;
+  parentLB = sherpa::GC_NULL;
 }
 
 // AST built for version 0.9

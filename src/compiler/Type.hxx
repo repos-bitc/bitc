@@ -106,6 +106,26 @@ struct comp {
   comp() {flags=0;} 
   comp(sherpa::GCPtr<Type> t, unsigned long _flags=0);
   comp(const std::string s, sherpa::GCPtr<Type> t, unsigned long _flags=0);
+
+  // Quasi-constructors
+  static inline sherpa::GCPtr<comp>
+  make() {
+    comp *tmp = new comp();
+    return sherpa::GCPtr<comp>(tmp);
+  }
+
+  static inline sherpa::GCPtr<comp>
+  make(const sherpa::GCPtr<Type>& t, unsigned long _flags=0) {
+    comp *tmp = new comp(t, _flags);
+    return sherpa::GCPtr<comp>(tmp);
+  }
+
+  static inline sherpa::GCPtr<comp>
+  make(const std::string& s, 
+       const sherpa::GCPtr<Type>& t, unsigned long _flags=0) {
+    comp *tmp = new comp(s, t, _flags);
+    return sherpa::GCPtr<comp>(tmp);
+  }
   //comp(const comp &c);
 };  
 
@@ -117,6 +137,13 @@ struct comp {
 struct ArrLen {
   uint64_t  len;
   ArrLen(uint64_t _len) {len = _len;}
+
+  // Quasi-constructor
+  static inline sherpa::GCPtr<ArrLen>
+  make(uint64_t _len) {
+    ArrLen *tmp = new ArrLen(_len);
+    return sherpa::GCPtr<ArrLen>(tmp);
+  }
 };
 
 
@@ -166,7 +193,7 @@ struct TypeScheme;
 struct Type;
 typedef std::set<sherpa::GCPtr<Type > > TypeSet;
 
-struct Type {
+struct Type : public sherpa::enable_shared_from_this<Type> {
   
   friend struct TypeScheme;
 
@@ -262,6 +289,37 @@ public:
   Type(sherpa::GCPtr<Type> t); 
   Type(const Kind k, sherpa::GCPtr<Type> child);
   Type(const Kind k, sherpa::GCPtr<Type> child1, sherpa::GCPtr<Type> child2);
+
+  // Quasi-constructors
+  static inline sherpa::GCPtr<Type>
+  make(const Kind k)
+  {
+    Type *tmp = new Type(k);
+    return sherpa::GCPtr<Type>(tmp);
+  }
+
+  static inline sherpa::GCPtr<Type>
+  make(const sherpa::GCPtr<Type>& t)
+  {
+    Type *tmp = new Type(t);
+    return sherpa::GCPtr<Type>(tmp);
+  }
+
+  static inline sherpa::GCPtr<Type>
+  make(const Kind k, const sherpa::GCPtr<Type>& child)
+  {
+    Type *tmp = new Type(k, child);
+    return sherpa::GCPtr<Type>(tmp);
+  }
+
+  static inline sherpa::GCPtr<Type>
+  make(const Kind k,
+       const sherpa::GCPtr<Type>& child1, 
+       const sherpa::GCPtr<Type>& child2)
+  {
+    Type *tmp = new Type(k, child1, child2);
+    return sherpa::GCPtr<Type>(tmp);
+  }
 
   // Makes a deep copy , but ** LINKS TVARS TO ORIGINAL ONES ** 
   // This function calls TypeSpecialize on a typeScheme with
@@ -377,7 +435,7 @@ public:
 private:  
   bool eql(sherpa::GCPtr<Type> t, bool verbose, std::ostream &errStream,
 	   unsigned long uflags, bool keepSub,
-	   sherpa::GCPtr<Trail> trail=new Trail);
+	   sherpa::GCPtr<Trail> trail=Trail::make());
 public:
   // Returns true of the type `t' is structurally equal to `this'
   // under alpha renaming (and declarations unify with definitions)
@@ -390,7 +448,7 @@ public:
 		      bool noAlphaRename=false,
 		      std::ostream &errStream=std::cerr);  
   bool unifyWith(sherpa::GCPtr<Type> t, bool verbose=false,
-		 sherpa::GCPtr<Trail> trail=new Trail,
+		 sherpa::GCPtr<Trail> trail=Trail::make(),
 		 std::ostream &errStream=std::cerr);
 
   // Unify Ignoring rigidity
@@ -467,12 +525,12 @@ public:
 		bool minimize=false, bool adjFn=false);
   
   // Get the maximally-mutable, but copy-compatible type.
-  sherpa::GCPtr<Type> maximizeMutability(sherpa::GCPtr<Trail> trail=new Trail);
+  sherpa::GCPtr<Type> maximizeMutability(sherpa::GCPtr<Trail> trail=Trail::make());
   // Get the minimally-mutable, but copy-compatible type.
-  sherpa::GCPtr<Type> minimizeMutability(sherpa::GCPtr<Trail> trail=new Trail);
-  sherpa::GCPtr<Type> maximizeTopMutability(sherpa::GCPtr<Trail> trail=new Trail);
-  sherpa::GCPtr<Type> minimizeTopMutability(sherpa::GCPtr<Trail> trail=new Trail);
-  sherpa::GCPtr<Type> minimizeDeepMutability(sherpa::GCPtr<Trail> trail=new Trail);
+  sherpa::GCPtr<Type> minimizeMutability(sherpa::GCPtr<Trail> trail=Trail::make());
+  sherpa::GCPtr<Type> maximizeTopMutability(sherpa::GCPtr<Trail> trail=Trail::make());
+  sherpa::GCPtr<Type> minimizeTopMutability(sherpa::GCPtr<Trail> trail=Trail::make());
+  sherpa::GCPtr<Type> minimizeDeepMutability(sherpa::GCPtr<Trail> trail=Trail::make());
 
   // Check if maximally / minimally mutable
   bool isMaxMutable();
@@ -492,15 +550,15 @@ public:
   std::string toString();  
   // Use Output
   std::string 
-  asString(sherpa::GCPtr<TvPrinter> tvP = new TvPrinter(), 
+  asString(sherpa::GCPtr<TvPrinter> tvP = TvPrinter::make(), 
 	   bool traverse = true);
 
   void asXML(sherpa::GCPtr<TvPrinter> tvP, sherpa::INOstream &out);
-  std::string asXML(sherpa::GCPtr<TvPrinter> tvP = new TvPrinter());
+  std::string asXML(sherpa::GCPtr<TvPrinter> tvP = TvPrinter::make());
   
   sherpa::GCPtr<AST> 
   asAST(const sherpa::LexLoc &loc,
-	sherpa::GCPtr<TvPrinter> tvP = new TvPrinter());
+	sherpa::GCPtr<TvPrinter> tvP = TvPrinter::make());
   // Ignore mutability, Ignore Top-level Mutability, or
   // Maximize mutability of type-args
   std::string mangledString(bool igMut=false, bool igTlMut=false,

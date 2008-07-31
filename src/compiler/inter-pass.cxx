@@ -43,17 +43,18 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <map>
 
 #include <libsherpa/UExcept.hxx>
 
 #include "Options.hxx"
 #include "UocInfo.hxx"
 #include "AST.hxx"
-#include "Pair.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
 #include "inter-pass.hxx"
 
+using namespace std;
 using namespace sherpa;
 
 bool 
@@ -137,19 +138,6 @@ resolve(std::ostream& errStream,
 	GCPtr<AST> currLB,
 	unsigned long flags);
 
-bool
-typeInfer(std::ostream& errStream, GCPtr<AST> ast, 
-	  GCPtr<TSEnvironment > gamma,
-	  GCPtr<InstEnvironment > instEnv,
-	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-                                   GCPtr<AST> > > > > impTypes,
-	  bool isVP, 
-	  GCPtr<TCConstraints> tcc,
-	  unsigned long uflags,
-	  GCPtr<Trail> trail,
-	  int mode,
-	  unsigned flags);
-
 bool 
 UocInfo::RandTexpr(std::ostream& errStream,
 		   GCPtr<AST> expr,
@@ -157,7 +145,7 @@ UocInfo::RandTexpr(std::ostream& errStream,
 		   unsigned long tflags,
 		   std::string mesg,
 		   bool keepResults,
-		   GCPtr<envSet> altEnvSet)
+		   GCPtr<EnvSet> altEnvSet)
 {
   bool errFree = true;
   GCPtr<UocInfo> myUoc = new UocInfo(this);

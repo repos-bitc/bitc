@@ -76,10 +76,17 @@ struct Binding {
     val = _val;
     flags = 0;
   }
+
+  static inline sherpa::GCPtr<Binding>
+  make (const std::string& _nm, sherpa::GCPtr<T> _val) {
+    Binding *tmp = new Binding(_nm, _val);
+    return sherpa::GCPtr<Binding>(tmp);
+  }
 };
 
 template <class T>
-struct Environment {
+struct Environment 
+  : public sherpa::enable_shared_from_this<Environment<T> > {
   std::string uocName;
   sherpa::GCPtr<Environment<T> > parent; // in the chain of environments
   sherpa::GCPtr<Environment<T> > defEnv; // definition level env
@@ -127,8 +134,14 @@ public:
   Environment(std::string _uocName)
   {
     uocName = _uocName;
-    parent = 0;
-    defEnv = 0;
+    parent = sherpa::GC_NULL;
+    defEnv = sherpa::GC_NULL;
+  }
+
+  static inline sherpa::GCPtr<Environment>
+  make(std::string _uocName) {
+    Environment *tmp = new Environment(_uocName);
+    return sherpa::GCPtr<Environment>(tmp);
   }
 
   ~Environment();
@@ -150,7 +163,8 @@ public:
   getBinding(const std::string& nm) const
   {
     sherpa::GCPtr<const Binding<T> > binding = doGetBinding(nm);
-    return (binding ? binding->val : NULL);
+    if (binding) return binding->val;
+    return sherpa::GC_NULL;
   }
 
   inline unsigned

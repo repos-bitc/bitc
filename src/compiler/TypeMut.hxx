@@ -60,19 +60,19 @@
 static inline sherpa::GCPtr<Type> 
 newTvar()
 {
-  return new Type(ty_tvar);
+  return Type::make(ty_tvar);
 }
 
 static inline sherpa::GCPtr<Type> 
 MBF(sherpa::GCPtr<Type> t)
 {
-  return new Type(ty_mbFull, newTvar(), t->minimizeMutability());
+  return Type::make(ty_mbFull, newTvar(), t->minimizeMutability());
 }
 
 static inline sherpa::GCPtr<Type> 
 MBT(sherpa::GCPtr<Type> t)
 {
-  return new Type(ty_mbTop, newTvar(), t->getBareType());
+  return Type::make(ty_mbTop, newTvar(), t->getBareType());
 }
 
 #endif /* TYPEMUT_HXX */

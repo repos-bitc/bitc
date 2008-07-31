@@ -66,8 +66,17 @@ struct TypeScheme {
 
   // The constructor
   TypeScheme(sherpa::GCPtr<Type> _tau, sherpa::GCPtr<AST> _ast,
-	     sherpa::GCPtr<TCConstraints> _tcc = NULL);
+	     sherpa::GCPtr<TCConstraints> _tcc = sherpa::GC_NULL);
   
+  static inline sherpa::GCPtr<TypeScheme>
+  make(const sherpa::GCPtr<Type>& _tau, 
+       const sherpa::GCPtr<AST>& _ast,
+       const sherpa::GCPtr<TCConstraints> &_tcc = 
+       sherpa::GC_NULL) {
+    TypeScheme *tmp = new TypeScheme(_tau, _ast, _tcc);
+    return sherpa::GCPtr<TypeScheme>(tmp);
+  }
+
   // The generalizer
   bool generalize(std::ostream& errStream,
 		  const sherpa::LexLoc &errLoc,
@@ -99,11 +108,11 @@ struct TypeScheme {
   void TransAddConstraints(sherpa::GCPtr<TCConstraints> _tcc) const;
   
   //sherpa::GCPtr<Type> type_copy();
-  std::string asString(sherpa::GCPtr<TvPrinter> tvP=new TvPrinter, 
+  std::string asString(sherpa::GCPtr<TvPrinter> tvP=TvPrinter::make(),
 		       bool norm=false);
 
   void asXML(sherpa::GCPtr<TvPrinter> tvP, sherpa::INOstream &out);
-  std::string asXML(sherpa::GCPtr<TvPrinter> tvP = new TvPrinter);
+  std::string asXML(sherpa::GCPtr<TvPrinter> tvP = TvPrinter::make());
   
   // Collect all tvs wrt tau, and tcc->pred, but NOT tcc->fnDeps
   void collectAllFtvs();

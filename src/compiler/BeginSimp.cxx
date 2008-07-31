@@ -69,14 +69,14 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
 	bool rec = (ast->child(c)->astType == at_recdef);
 	GCPtr<AST> def = ast->child(c);
 	GCPtr<AST> letBinding = 
-	  new AST(at_letbinding,
+	  AST::make(at_letbinding,
 		  def->loc, def->child(0), def->child(1));
 	if(rec)
 	  letBinding->Flags |= LB_REC_BIND;
 	
 	// The definition is not a global
 	def->child(0)->child(0)->Flags &= ~ID_IS_GLOBAL;
-	GCPtr<AST> body = new AST(at_begin, ast->child(c)->loc);
+	GCPtr<AST> body = AST::make(at_begin, ast->child(c)->loc);
 	
 	for (size_t bc = c+1; bc < ast->children.size(); bc++)
 	  body->addChild(ast->child(bc));
@@ -99,8 +99,8 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
 	
 	// Insert the new letrec:
 	GCPtr<AST> theLetRec = 
-	  new AST((rec ? at_letrec : at_let), def->loc, 
-		  new AST(at_letbindings, def->loc, letBinding),
+	  AST::make((rec ? at_letrec : at_let), def->loc, 
+		  AST::make(at_letbindings, def->loc, letBinding),
 		  body, def->child(2));
 	ast->child(c) = beginSimp(theLetRec, errStream, errFree);
 

@@ -1882,8 +1882,8 @@ UocInfo::doInstantiate(ostream &errStream,
   INST_DEBUG
     cerr << "Copy after name fixup: " << copy->asString() << endl;  
   
-  GCPtr<envSet> envset = (globalInst ? UNIFIED_ENVS 
-			  : (new envSet(getOuterLet(copy)->envs)));
+  GCPtr<EnvSet> envset = (globalInst ? UNIFIED_ENVS 
+			  : (EnvSet::make(getOuterLet(copy)->envs)));
   RANDT_DROP(copy, "[[Inst: R&T-1: ]]", envset);
   
   // Now that the expression is typed, recurse over the body and
