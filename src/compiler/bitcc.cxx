@@ -683,6 +683,10 @@ main(int argc, char *argv[])
     }
   }
   
+  // Select default backend if none chosen otherwise.
+  if(Options::backEnd == 0)
+    Options::backEnd = &BackEnd::backends[0];
+
   for (size_t i = 0; i < Options::SystemDirs.size(); i++) {
     filesystem::path incPath = Options::SystemDirs[i] / "include";
     
@@ -709,46 +713,6 @@ main(int argc, char *argv[])
       Options::inputs.push_back(path.string());
   }
 
-#if 0
-  const char *root_dir = getenv("COYOTOS_ROOT");
-  const char *xenv_dir = getenv("COYOTOS_XENV");
-
-  if (root_dir) {
-    stringstream incpath;
-    stringstream libpath;
-    incpath << root_dir << "/host/include";
-    libpath << root_dir << "/host/lib";
-
-    if (Options::useStdInc)
-      UocInfo::searchPath->append(new Path(incpath.str()));
-
-    // Thankfully, this is not actually what --nostdlib means. What it
-    // means is that we should not automatically add -lbitc to the
-    // link line.
-    if (Options::useStdLib) {
-      AddLinkArgumentForGCC("-L");
-      AddLinkArgumentForGCC(libpath.str());
-      Options::libDirs->append(new Path(libpath.str()));
-    }
-  }
-
-  if (xenv_dir) {
-    stringstream incpath;
-    stringstream libpath;
-    incpath << xenv_dir << "/host/include";
-    libpath << xenv_dir << "/host/lib";
-
-    if (Options::useStdInc)
-      UocInfo::searchPath->append(new Path(incpath.str()));
-
-    if (Options::useStdLib) {
-      AddLinkArgumentForGCC("-L");
-      AddLinkArgumentForGCC(libpath.str());
-      Options::libDirs->append(new Path(libpath.str()));
-    }
-  }
-#endif
-
   /* From this point on, argc and argv should no longer be consulted. */
 
   if (Options::inputs.empty())
@@ -757,10 +721,6 @@ main(int argc, char *argv[])
   if (opterr) {
     std::cerr << "Usage: Try bitcc --help" << std::endl;
     exit(0);
-  }
-
-  if(Options::backEnd == 0) {
-    Options::backEnd = &BackEnd::backends[0];
   }
 
   if (Options::outputFileName.size() == 0)
