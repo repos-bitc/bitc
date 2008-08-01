@@ -392,6 +392,7 @@ SexprLexer::SexprLexer(std::ostream& _err, std::istream& _in,
   debug = false;
   putbackChar = -1;
   nModules = 0;
+  radix = 10;			// until otherwise noted
 }
 
 long 
@@ -472,7 +473,7 @@ SexprLexer::getChar()
  checkDigit:
   thisToken += utf;
 
-  if (digitValue(c) < radix)
+  if (digitValue(ucs4) >= 0 && digitValue(ucs4) < radix)
     nDigits++;
 
   return ucs4;
