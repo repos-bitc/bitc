@@ -81,6 +81,8 @@ namespace sherpa {
 
     std::string asString() const;
 
+    const char *c_str() const;
+
     LexLoc operator+(size_t sz) const
     {
       return LexLoc(origin, line, offset + sz);

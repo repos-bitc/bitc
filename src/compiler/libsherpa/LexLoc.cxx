@@ -61,6 +61,12 @@ namespace sherpa {
       return "<internal>";
   }
 
+  const char *
+  LexLoc::c_str() const
+  {
+    return asString().c_str();
+  }
+
   // Implementation of this lives in LTokString.cxx, along with all of
   // the other decoding logic.
   void
