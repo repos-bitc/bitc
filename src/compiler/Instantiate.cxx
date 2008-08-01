@@ -38,11 +38,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <errno.h>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <errno.h>
+#include <map>
 
 #include "Options.hxx"
 #include "UocInfo.hxx"
@@ -50,7 +51,6 @@
 #include "Type.hxx"
 #include "inter-pass.hxx"
 #include "Instantiate.hxx"
-#include "Pair.hxx"
 
 using namespace std;
 using namespace sherpa;
@@ -60,6 +60,8 @@ using namespace sherpa;
 #else
 #define STRICTLYEQUALS(x) strictlyEqualsA(x)
 #endif
+
+typedef map<GCPtr<AST>, GCPtr<AST> > AstMap;
 
 
 /*******************************************************************
@@ -673,8 +675,7 @@ tvarSub(GCPtr<AST> ast, GCPtr<AST> tv, GCPtr<Type> typ)
 // ``Instantiate'' type variables scoped at 
 //   the current letbinging to new type variables.
 static GCPtr<AST> 
-tvarInst(GCPtr<AST> ast, GCPtr<AST> scope, 
-	 CVector< GCPtr<Pair<GCPtr<AST> , GCPtr<AST> > > > &newBinds)
+tvarInst(GCPtr<AST> ast, GCPtr<AST> scope, AstMap &newBinds)
 {
   switch(ast->astType) {
   case at_ident:
@@ -689,10 +690,9 @@ tvarInst(GCPtr<AST> ast, GCPtr<AST> scope,
       if(def->tvarLB != scope)
 	return ast;
       
-      for(size_t i=0; i < newBinds.size(); i++) {
-	if(newBinds[i]->fst == def)
-	  return newBinds[i]->snd->Use();	
-      }
+      AstMap::iterator itr = newBinds.find(def);
+      if (itr != newBinds.end())
+	return itr->second->Use();
       
       GCPtr<Type> newTV = Type::make(ty_tvar);
       GCPtr<AST> newTvAst = newTV->asAST(ast->loc, 
@@ -700,7 +700,7 @@ tvarInst(GCPtr<AST> ast, GCPtr<AST> scope,
       newTvAst->symbolDef = newTvAst;
       newTvAst->Flags2 |= TVAR_IS_DEF | TVAR_POLY_SPECIAL;
 
-      newBinds.append(Pair<GCPtr<AST> , GCPtr<AST> >::make(def, newTvAst));
+      newBinds[def] = newTvAst;
       return newTvAst;
     }
     
@@ -1775,7 +1775,7 @@ UocInfo::doInstantiate(ostream &errStream,
 	// error. Therefore, we need to rename all variables that are
 	// scoped at this let-bindings.
 
-	CVector< GCPtr<Pair<GCPtr<AST> , GCPtr<AST> > > > newBinds;
+	AstMap newBinds;
 	tvarInst(copy, getOuterLet(copy)->child(0), newBinds);
       }
  
