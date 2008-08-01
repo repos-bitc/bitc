@@ -984,7 +984,7 @@ comp::comp(const std::string s, shared_ptr<Type> t, unsigned long _flags)
 #define TYPE_CTR_INIT(k) do {			\
     kind = k;					\
     defAst = GC_NULL;			\
-    arrlen = ArrLen::make(0);			\
+    arrLen = ArrLen::make(0);			\
     Isize = 0;					\
     minSignedRep = 0;				\
     minUnsignedRep = 0;				\
@@ -1027,7 +1027,7 @@ Type::Type(shared_ptr<Type>  t)
   defAst = t->defAst;
   myContainer = t->myContainer;
   link = t->link;    
-  arrlen = t->arrlen; // Copies the indirection
+  arrLen = t->arrLen; // Copies the indirection
   Isize = t->Isize;
   minSignedRep = t->minSignedRep;
   minUnsignedRep = t->minUnsignedRep;

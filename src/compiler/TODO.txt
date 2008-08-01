@@ -6,23 +6,17 @@ can declare that the compiler is "done".
 1.  Go through all of the FIX comments and either correct them or remove
     them.
 
-2.  (shap) add support for source file archives into the front end.
-
 3.  Implement (swaroop) initialization restriction.
 
     Should this defer?
 
-4.  When initializer restrictions are implemented, removed hack that
+2.  When initializer restrictions are implemented, removed hack that
     everything at top level with concrete type is considered a root.
 
-5.  (shap) Rearrange the tree for build using autoconf.
+3.  (shap) Rearrange the tree for build using autoconf.
 
-6.  (shap) Remove qual_type and friends now that we can do outer
+4.  (shap) Remove qual_type and friends now that we can do outer
     forall, but check the impact on the document first.
-
-7.  Modify typing of array/vector indices so that any integral type
-    (not just word type) is admissible. In case of ambiguity, 
-    the index must default to word? or be polymorphic if possible?
 
 ======= LATER =======
 
@@ -34,19 +28,12 @@ can declare that the compiler is "done".
 
 3.  write it all up.
 
-4.  For those ASTs that are carrying things in weird positions, clean
-    them up.
+4.  Typeclasses with overlapping instances.
 
-5.  Typeclasses with overlapping instances.
-
-6.  [DONE, not specified] Figure out how to handle proclaim/define
+5.  [DONE, not specified] Figure out how to handle proclaim/define
     unification and specify it.
 
     Decided on exact match.
-
-7.  Change external name declaration method to use a DECLARE form.
-
-8.  [DROP] Fix Tail-call analyzer to allow running before hoisting.
 
 ===== COMPLETED ======
 
@@ -179,20 +166,34 @@ can declare that the compiler is "done".
 32. [DONE] Document the principles of operation for the type inference
     machine and specifically the handling of mutation.
 
-33.  Finish new, incremental-friendly (?) polyinstantiator.
+33. Finish new, incremental-friendly (?) polyinstantiator.
 
-34.  Introduce ALLOC-REF, COPY-REF, similar to ALLOC-CLOSURE,
+34. Introduce ALLOC-REF, COPY-REF, similar to ALLOC-CLOSURE,
     COPY-CLOSURE.
 
-35.  (shap) Kill comma syntax, re-instate TUPLE
+35. (shap) Kill comma syntax, re-instate TUPLE
 
 
-36.  Redo closure conversion for LETREC to remove function-only
+36. Redo closure conversion for LETREC to remove function-only
     restriction (using ALLOC-REF, COPY-REF).
 
-37.  Finish DEFREPR implementation
+37. [DONE] Finish DEFREPR implementation
 
-38.  [DONE] Check all uses of CVector::remove() and correct them.
+38. [DONE] Check all uses of CVector::remove() and correct them.
+
+39. [DONE} For those ASTs that are carrying things in weird positions,
+    clean them up.
+
+40. [DROP] Change external name declaration method to use a DECLARE
+    form.
+
+41. [DROP] Fix Tail-call analyzer to allow running before hoisting.
+
+42. [DONE] Add support for source file archives into the front end.
+
+43. [DROP] Modify typing of array/vector indices so that any integral
+    type (not just word type) is admissible. In case of ambiguity, 
+    the index must default to word? or be polymorphic if possible?
 
 ===== DEFERRED ======
 

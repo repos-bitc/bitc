@@ -279,7 +279,7 @@ Type::asAST(const sherpa::LexLoc &loc,
     {
       shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
       shared_ptr<AST> intLit = AST::make(at_intLiteral, loc);
-      intLit->litValue.i = t->arrlen->len;
+      intLit->litValue.i = t->arrLen->len;
       intLit->litBase = 10;
       intLit->s = intLit->litValue.i.asString(10);
       ast = AST::make(at_arrayType, loc, typ, intLit);

@@ -176,9 +176,7 @@ initGamma(std::ostream& errStream,
 		<< "Prelude has NOT been processed till " 
 		<< "type inference."
 		<< std::endl;
-      // GCFIX: Why does this return on error instead of exiting? This
-      // is a FATAL compiler errors!
-      return false;
+      ::exit(1);
     }
 
     preenv = itr->second->gamma;
@@ -190,9 +188,7 @@ initGamma(std::ostream& errStream,
 	      << "Internal Compiler Error. "
 	      << "Prelude's Gamma is NULL "
 	      << std::endl;
-    // GCFIX: Why does this return on error instead of exiting? This
-    // is a FATAL compiler errors!
-    return false;
+    ::exit(1);
   }
   
   useIFGamma(std::string(), preenv, gamma);

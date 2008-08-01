@@ -284,7 +284,7 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
 
   case ty_array:
     {
-      out << "<array sz='" << t->arrlen->len  <<"'>" << endl;
+      out << "<array sz='" << t->arrLen->len  <<"'>" << endl;
       out.more();
       t->Base()->asXML(tvP, out);
       out.less();

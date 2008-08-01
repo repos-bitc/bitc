@@ -129,11 +129,13 @@ struct comp {
   //comp(const comp &c);
 };  
 
-// GCFIX: This constraint no longer applies.
-
-// The only reason for this class is that we need
-// Countable to use boost::shared_ptr for an indirection 
-// over array length
+// Array lengths can in some cases get unified even when their
+// containing type cannot. See the comment on the arrLen field in
+// class Type.
+//
+// This wrapper class was necessary for the early GCPtr
+// implementation. We could remove it now, but having a wrapper to
+// provide the make() function is useful.
 struct ArrLen {
   uint64_t  len;
   ArrLen(uint64_t _len) {len = _len;}
@@ -266,7 +268,16 @@ public:
   // variable. Copy constructor and TypeSpecialize DO NOT copy this
   // variable deeply.  This "variable" is not subject to
   // generalization.  
-  boost::shared_ptr<ArrLen> arrlen;	// Length in the case of an array type
+  //
+  // Shap adds (based on explanation from Swaroop): the use case here
+  // arises from copy compatibility. In particular, given a copy
+  // between
+  //       (mutable (array T n))  <->  (array T n)
+  //
+  // we need to unify the T and the n, but we cannot unify the overall
+  // types, because they differ w.r.t. mutability.
+
+  boost::shared_ptr<ArrLen> arrLen;	// Length in the case of an array type
   
   size_t    Isize;		// size in fixint
   TypeSet   fnDeps;		// Functional Dependencies (for 

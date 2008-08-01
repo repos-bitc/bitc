@@ -2102,7 +2102,7 @@ toc(std::ostream& errStream,
 
   case at_array_length:
     {
-      out << ast->child(0)->symType->getBareType()->arrlen->len;
+      out << ast->child(0)->symType->getBareType()->arrLen->len;
       break;
     } 
 
@@ -2507,7 +2507,7 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
       if(alreadyEmitted(t, arrSet))
 	break;
 
-      if(t->arrlen->len == 0) {
+      if(t->arrLen->len == 0) {
 	assert(false);
       }
 
@@ -2526,7 +2526,7 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
       out << "typedef struct {" << endl;
       out.more();
 
-      out << toCtype(et) << " elem[" << t->arrlen->len << "];" << endl;
+      out << toCtype(et) << " elem[" << t->arrLen->len << "];" << endl;
       out.less();
       out << "} " << CMangle(t->mangledString(true)) 
 	  << ";" << endl << endl;

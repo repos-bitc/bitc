@@ -253,7 +253,7 @@ Type::size()
     
   case ty_array:
     {
-      theSize = Base()->size() * arrlen->len;
+      theSize = Base()->size() * arrLen->len;
       break;
     }
     

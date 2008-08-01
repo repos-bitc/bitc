@@ -2528,9 +2528,7 @@ initEnv(std::ostream& errStream,
 		<< "Internal Compiler Error. "
 		<< " Prelude has NOT been processed."
 		<< std::endl;
-      // GCFIX: Why does this return on error instead of exiting? This
-      // is a FATAL compiler errors!
-      return false;
+      ::exit(1);
     }
     preenv = itr->second->env;
   }
@@ -2542,7 +2540,7 @@ initEnv(std::ostream& errStream,
 	      << "Internal Compiler Error. "
 	      << " Prelude's environment is NULL "
 	      << std::endl;
-    return false;
+    ::exit(1);
   }
   
   aliasPublicBindings(std::string(), aliasEnv, preenv, env);

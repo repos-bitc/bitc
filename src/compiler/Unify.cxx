@@ -472,24 +472,24 @@ Unify(std::ostream& errStream,
 	     Unify(errStream, trail, errLoc, t1->Base(), 
 		   t2->Base(), flags));
 
-      if(t1->arrlen->len == t2->arrlen->len)
+      if(t1->arrLen->len == t2->arrLen->len)
 	break;
       
       // Array lengths did not Unify
-      if(t1->arrlen->len == 0) {
-	t1->arrlen->len = t2->arrlen->len;
+      if(t1->arrLen->len == 0) {
+	t1->arrLen->len = t2->arrLen->len;
 	break;
       }
-      else if(t2->arrlen->len == 0) {
-	t2->arrlen->len = t1->arrlen->len;
+      else if(t2->arrLen->len == 0) {
+	t2->arrLen->len = t1->arrLen->len;
 	break;
       }
       else {
 	errStream << errLoc 
-		  << ": Array Lengths do not match. "
-		  << t1->arrlen->len
+		  << ": Array lengths do not match. "
+		  << t1->arrLen->len
 		  << " vs " 
-		  << t2->arrlen->len
+		  << t2->arrLen->len
 		  << std::endl;
 	errFree = false;
       }

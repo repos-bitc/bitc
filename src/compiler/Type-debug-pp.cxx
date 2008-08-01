@@ -265,7 +265,7 @@ Type::toString()
 
   case ty_array:
     ss <<  "(array " << Base()->toString() 
-       << " " << arrlen->len << ")";
+       << " " << arrLen->len << ")";
     break;
     
   case ty_vector:

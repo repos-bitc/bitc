@@ -277,7 +277,7 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
       ss << "(array "
 	 << t->Base()->asString(tvP, traverse)
 	 << " "
-	 << t->arrlen->len
+	 << t->arrLen->len
 	 << ")";
       break;
     }

@@ -50,9 +50,6 @@
 
 template <class T, const bool isDoneSet>
 struct BaseWorkList {
-  // GCFIX: Is this merely a set? If so, should it be encoded that
-  // way?
-
   typedef std::set<T> WorkSet;
   WorkSet set;
   

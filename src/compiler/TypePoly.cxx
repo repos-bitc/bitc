@@ -1056,13 +1056,6 @@ Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
 
 	/* Deal with fnDeps if any */
 	if (t->fnDeps.size()) {
-	  // GCFIX: The old code nullified fnDeps here, relying on
-	  // addFnDep to reallocate. I had an assert here
-	  // assert(theTye->empty()) which failed. Since theType is
-	  // constructed just above, an I don't see anything jumping
-	  // out at me in the code here that is adding to
-	  // theType->fnDeps, I do not understand why that assert
-	  // failed, but it did. Need to ask Swaroop why.
 	  theType->fnDeps.clear();
 
 	  for(TypeSet::iterator itr = t->fnDeps.begin();

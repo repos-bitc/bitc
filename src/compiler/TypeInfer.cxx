@@ -358,7 +358,7 @@ checkImpreciseTypes(std::ostream& errStream,
     switch(t->kind) {
     case ty_array:
       {
-	if(t->arrlen->len == 0) {
+	if(t->arrLen->len == 0) {
 	  errStream << ast->loc << ": "
 		    << "Type " << t->asString() 
 		    << " is not precise enough "
@@ -2764,7 +2764,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       CHKERR(errFree, unifyPrim(errStream, trail, ast->child(1)->loc, 
 				ast->child(1)->symType, "word")); 
 
-      arrType->arrlen->len = ast->child(1)->litValue.i.as_uint32();
+      arrType->arrLen->len = ast->child(1)->litValue.i.as_uint32();
       break;
     }
 
@@ -3073,7 +3073,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       Kind k = (ast->astType == at_array) ? ty_array : ty_vector;
       shared_ptr<Type> compType = MBF(newTvar());
       ast->symType = Type::make(k, compType);
-      ast->symType->arrlen->len = ast->children.size();
+      ast->symType->arrLen->len = ast->children.size();
       
       // match agt_expr+
       for (size_t c = 0; c < ast->children.size(); c++) {
