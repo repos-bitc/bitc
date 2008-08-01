@@ -1973,6 +1973,262 @@
       </VEqns>
     </btypes:TYPE>
   </definition>
+  <definition id="eq-minz">      
+    <title><btypes:TYPE><eqOp under="minzT"/></btypes:TYPE> and
+      <btypes:TYPE><eqOp under="minz"/></btypes:TYPE></title>      
+    <p>
+      We write
+      <btypes:TYPE>
+	<eq under="minzT">
+	  <type num="1"/>
+	  <type num="2"/>
+	</eq>
+      </btypes:TYPE> if
+      <btypes:TYPE>
+	<eq>
+	  <minzT>
+	    <type num="1"/>
+	  </minzT>
+	  <minzT>
+	    <type num="2"/>
+	  </minzT>
+	</eq>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<eq under="minz">
+	  <type num="1"/>
+	  <type num="2"/>
+	</eq>
+      </btypes:TYPE> if
+      <btypes:TYPE>
+	<eq>
+	  <minz>
+	    <type num="1"/>
+	  </minz>
+	  <minz>
+	    <type num="2"/>
+	  </minz>
+	</eq>
+      </btypes:TYPE>.
+    </p>
+  </definition>
+  <definition id="type-equiv">      
+    <title>Type Equivalence</title>
+    <p>
+      We define      
+      <btypes:TYPE>
+	<symbol name="equiv"/>
+      </btypes:TYPE> as an equivalence relation on types such that
+      two constained types with equal variable part, but compatible
+      constraint part are considered equivalent.
+    </p>
+    <btypes:TYPE>
+      <Hrules>
+	<tyRule>
+	  <tyPre/>
+	  <tyConc>
+	    <equiv>            
+	      <type/>
+	      <type/>
+	    </equiv>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <equiv>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </equiv>
+	  </tyPre>
+	  <tyConc>
+	    <equiv>
+	      <type num="2"/>
+	      <type num="1"/>
+	    </equiv>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <equiv>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </equiv>
+	    <equiv>
+	      <type num="2"/>
+	      <type num="3"/>
+	    </equiv>
+	  </tyPre>
+	  <tyConc>
+	    <equiv>
+	      <type num="1"/>
+	      <type num="3"/>
+	    </equiv>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <equiv>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </equiv>
+	  </tyPre>
+	  <tyConc>
+	    <equiv>
+	      <ref>
+		<type num="1"/>
+	      </ref>
+	      <ref>
+		<type num="2"/>
+	      </ref>
+	    </equiv>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <equiv>
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </equiv>
+	    <equiv>
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </equiv>
+	  </tyPre>
+	  <tyConc>
+	    <equiv>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	      <fn>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </fn>
+	    </equiv>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <equiv>
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </equiv>
+	    <equiv>
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </equiv>
+	  </tyPre>
+	  <tyConc>
+	    <equiv>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	      <pair>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </pair>
+	    </equiv>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <equiv>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </equiv>
+	  </tyPre>
+	  <tyConc>
+	    <equiv>
+	      <mutable>
+		<type num="1"/>
+	      </mutable>
+	      <mutable>
+		<type num="2"/>
+	      </mutable>
+	    </equiv>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <equiv>
+	      <minzT>
+		<ptype num="1"/>
+	      </minzT>
+	      <minzT>
+		<ptype num="2"/>
+	      </minzT>
+	    </equiv>
+	  </tyPre>
+	  <tyConc>
+	    <equiv>
+	      <mbTop>
+		<tvar/>
+		<ptype num="1"/>
+	      </mbTop>
+	      <mbTop>
+		<tvar/>
+		<ptype num="2"/>
+	      </mbTop>
+	    </equiv>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <equiv>
+	      <minz>
+		<ptype num="1"/>
+	      </minz>
+	      <minz>
+		<ptype num="2"/>
+	      </minz>
+	    </equiv>
+	  </tyPre>
+	  <tyConc>
+	    <equiv>
+	      <mbTop>
+		<stype/>
+		<ptype num="1"/>
+	      </mbTop>
+	      <mbTop>
+		<stype/>
+		<ptype num="2"/>
+	      </mbTop>
+	    </equiv>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+    <p>
+      The type equivalence 
+      <btypes:TYPE>
+	<symbol name="equiv"/>
+      </btypes:TYPE> 
+      and type equality
+      <btypes:TYPE>
+	<symbol name="equals"/>
+      </btypes:TYPE> relations are structurally differnt but 
+      semantically equivalent.
+      Therefore, we use type equivalence relation interchangably with
+      type equality. That is, in our algebra of types,  
+      <btypes:TYPE>
+	<eq>
+	  <type num="1"/>
+	  <type num="2"/>
+	</eq>
+      </btypes:TYPE> holds whenever
+      <btypes:TYPE>
+	<equiv>
+	  <type num="1"/>
+	  <type num="2"/>
+	</equiv>
+      </btypes:TYPE>.
+    </p>
+  </definition>
   <definition id="constraint-sol">      
     <title>Constraint Satisfaction</title>
     <p>
@@ -2193,45 +2449,6 @@
 	</tyRule>
       </Hrules>
     </btypes:TYPE>
-  </definition>
-  <definition id="eq-minz">      
-    <title><btypes:TYPE><eqOp under="minzT"/></btypes:TYPE> and
-      <btypes:TYPE><eqOp under="minz"/></btypes:TYPE></title>      
-    <p>
-      We write
-      <btypes:TYPE>
-	<eq under="minzT">
-	  <type num="1"/>
-	  <type num="2"/>
-	</eq>
-      </btypes:TYPE> if
-      <btypes:TYPE>
-	<eq>
-	  <minzT>
-	    <type num="1"/>
-	  </minzT>
-	  <minzT>
-	    <type num="2"/>
-	  </minzT>
-	</eq>
-      </btypes:TYPE> and
-      <btypes:TYPE>
-	<eq under="minz">
-	  <type num="1"/>
-	  <type num="2"/>
-	</eq>
-      </btypes:TYPE> if
-      <btypes:TYPE>
-	<eq>
-	  <minz>
-	    <type num="1"/>
-	  </minz>
-	  <minz>
-	    <type num="2"/>
-	  </minz>
-	</eq>
-      </btypes:TYPE>.
-    </p>
   </definition>
   <definition id="ExtToSol">
     <title>Application to Solvable Entities</title>
