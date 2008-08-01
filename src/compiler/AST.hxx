@@ -757,19 +757,19 @@ public:
   }
 
 
-  AST_SMART_PTR<AST>
+  const AST_SMART_PTR<AST>
   child(size_t i) const
   {
     return children[i];
   }
 
-  AST_SMART_PTR<AST>
+  AST_SMART_PTR<AST>&
   child(size_t i)
   {
     return children[i];
   }
 
-  void addChild(AST_SMART_PTR<AST> child);
+  void addChild(AST_SMART_PTR<AST> cld);
   ::std::string getTokenString();
 
   void

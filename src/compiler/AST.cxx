@@ -282,9 +282,9 @@ AST::getTokenString()
 }
 
 void
-AST::addChild(AST_SMART_PTR<AST> child)
+AST::addChild(AST_SMART_PTR<AST> cld)
 {
-  children.push_back(child);
+  children.push_back(cld);
 }
 
 const char *
