@@ -53,14 +53,15 @@
 #include "TypeScheme.hxx"
 #include "TypeMut.hxx"
 #include "Typeclass.hxx"
-#include "Pair.hxx"
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 #include <libsherpa/BigNum.hxx>
 #include "TypeInferUtil.hxx"
 
-using namespace sherpa;
 using namespace std;
+using namespace sherpa;
+
+typedef map<GCPtr<Type>, GCPtr<AST> > TypeAstMap;
 
 /**************************************************************/
 /*                     Some Declarations                      */
@@ -76,12 +77,11 @@ using namespace std;
 		      (trail), (mode), (flags))));		\
   }while(0)
 
-bool
+static bool
 typeInfer(std::ostream& errStream, GCPtr<AST> ast, 
 	  GCPtr<TSEnvironment > gamma,
 	  GCPtr<InstEnvironment > instEnv,
-	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-                                   GCPtr<AST> > > > > impTypes,
+	  TypeAstMap& impTypes,
 	  bool isVP, 
 	  GCPtr<TCConstraints> tcc,
 	  unsigned long uflags,
@@ -258,8 +258,7 @@ static bool
 ProcessLetExprs(std::ostream& errStream, GCPtr<AST> lbs, 
 		GCPtr<TSEnvironment > gamma,
 		GCPtr<InstEnvironment > instEnv,
-		GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-                                         GCPtr<AST> > > > > impTypes,
+		TypeAstMap& impTypes,
 		bool isVP, GCPtr<TCConstraints> tcc,
 		unsigned long uflags, GCPtr<Trail> trail,
 		int mode, unsigned flags)
@@ -278,8 +277,7 @@ static bool
 ProcessLetBinds(std::ostream& errStream, GCPtr<AST> lbs, 
 		GCPtr<TSEnvironment > gamma,
 		GCPtr<InstEnvironment > instEnv,
-		GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-                                         GCPtr<AST> > > > > impTypes,
+		TypeAstMap& impTypes,
 		bool isVP, GCPtr<TCConstraints> tcc,
 		unsigned long uflags, GCPtr<Trail> trail,
 		int mode, unsigned flags)
@@ -346,16 +344,16 @@ makeLetGather(GCPtr<AST> lbs, GCPtr<AST> &bAst, GCPtr<AST> &vAst)
 /*                Type consistency checkng                   */
 /**************************************************************/
 
-bool
+static bool
 checkImpreciseTypes(std::ostream& errStream, 
 		    const GCPtr<TSEnvironment > gamma,
-		    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-                                             GCPtr<AST> > > > > impTypes)
+		    TypeAstMap& impTypes)
 {
   bool errFree = true;
-  for(size_t i=0; i<impTypes->size(); i++) {
-    GCPtr<AST> ast = impTypes->elem(i)->snd;
-    GCPtr<Type> t = impTypes->elem(i)->fst->getBareType();
+  for (TypeAstMap::iterator itr = impTypes.begin();
+       itr != impTypes.end(); ++itr) {
+    GCPtr<Type> t = itr->first->getBareType();
+    GCPtr<AST> ast = itr->second;
     switch(t->kind) {
     case ty_array:
       {
@@ -588,12 +586,11 @@ matchDefDecl(std::ostream& errStream,
 /****                   MAIN INFERENCE ROUTINES            ****/
 /**************************************************************/
 
-bool
+static bool
 InferTvList(std::ostream& errStream, GCPtr<AST> tvList, 
 	    GCPtr<TSEnvironment > gamma,
 	    GCPtr<InstEnvironment > instEnv,
-	    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-                                     GCPtr<AST> > > > > impTypes,
+	    TypeAstMap& impTypes,
 	    bool isVP, 
 	    GCPtr<TCConstraints> tcc,
 	    unsigned long uflags,
@@ -657,12 +654,11 @@ markCCC(GCPtr<Type> ct)
 
 
 // Called only for definitions
-bool
+static bool
 InferStruct(std::ostream& errStream, GCPtr<AST> ast, 
 	    GCPtr<TSEnvironment > gamma,
 	    GCPtr<InstEnvironment > instEnv,
-	    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-                                     GCPtr<AST> > > > > impTypes,
+	    TypeAstMap& impTypes,
 	    bool isVP, 
 	    GCPtr<TCConstraints> tcc,
 	    unsigned long uflags,
@@ -774,12 +770,11 @@ InferStruct(std::ostream& errStream, GCPtr<AST> ast,
 
 
 // Called only for definitions
-bool
+static bool
 InferUnion(std::ostream& errStream, GCPtr<AST> ast, 
 	   GCPtr<TSEnvironment > gamma,
 	   GCPtr<InstEnvironment > instEnv,
-	   GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-                                    GCPtr<AST> > > > > impTypes,
+	   TypeAstMap& impTypes,
 	   bool isVP, 
 	   GCPtr<TCConstraints> tcc,
 	   unsigned long uflags,
@@ -1162,12 +1157,11 @@ superDAG(GCPtr<AST> super, GCPtr<AST> curr)
   return true;
 }
 
-bool
+static bool
 InferTypeClass(std::ostream& errStream, GCPtr<AST> ast, 
 	       GCPtr<TSEnvironment > gamma,
 	       GCPtr<InstEnvironment > instEnv,
-	       GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-                                        GCPtr<AST> > > > > impTypes,
+	       TypeAstMap& impTypes,
 	       bool isVP, 
 	       GCPtr<TCConstraints> tcc,
 	       unsigned long uflags,
@@ -1293,12 +1287,11 @@ InferTypeClass(std::ostream& errStream, GCPtr<AST> ast,
   return errFree;
 }
 
-bool
+static bool
 InferInstance(std::ostream& errStream, GCPtr<AST> ast, 
 	      GCPtr<TSEnvironment > gamma,
 	      GCPtr<InstEnvironment > instEnv,
-	      GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-                                       GCPtr<AST> > > > > impTypes,
+	      TypeAstMap& impTypes,
 	      bool isVP, 
 	      GCPtr<TCConstraints> tcc,
 	      unsigned long uflags,
@@ -1590,12 +1583,11 @@ CheckLetrecFnxnRestriction(std::ostream &errStream, GCPtr<AST> ast)
   return errFree;
 }
 
-bool
+static bool
 typeInfer(std::ostream& errStream, GCPtr<AST> ast, 
 	  GCPtr<TSEnvironment > gamma,
 	  GCPtr<InstEnvironment > instEnv,
-	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-                                   GCPtr<AST> > > > > impTypes,
+	  TypeAstMap& impTypes,
 	  bool isVP, 
 	  GCPtr<TCConstraints> tcc,
 	  unsigned long uflags,
@@ -3116,7 +3108,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       
       GCPtr<Type> av = MBF(Type::make(k, newTvar()));
       if(ast->astType == at_array_length)
-	impTypes->append(Pair<GCPtr<Type> , GCPtr<AST> >::make(av, ast->child(0)));
+	impTypes[av] = ast->child(0);
 
       CHKERR(errFree, unify(errStream, trail, ast->child(0)->loc, 
 			    ast->child(0)->symType, av, uflags));
@@ -3149,7 +3141,7 @@ typeInfer(std::ostream& errStream, GCPtr<AST> ast,
       if(ast->astType == at_array_nth) {
 	cmp = MBF(newTvar());
 	av = MBT(Type::make(ty_array, cmp));
-	impTypes->append(Pair<GCPtr<Type>, GCPtr<AST> >::make(av, ast->child(0)));
+	impTypes[av] = ast->child(0);
       }
       else {
 	cmp = newTvar();
@@ -4727,8 +4719,7 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
 	      << " ast = " << uocAst->astTypeName()
 	      << std::endl;
   
-  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > > > impTypes = 
-    CVector<GCPtr<Pair<GCPtr<Type>, GCPtr<AST> > > >::make();
+  TypeAstMap impTypes;
   GCPtr<Trail> trail = Trail::make();
   bool errFree = true;
 
