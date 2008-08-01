@@ -104,6 +104,7 @@
 
 using namespace std;
 using namespace boost;
+using namespace boost;
 using namespace sherpa;
 
 #define BITC_COMPILER_MODE        0x1u
@@ -747,7 +748,7 @@ main(int argc, char *argv[])
   /* Output for interfaces */
   for(UocMap::iterator itr = UocInfo::ifList.begin();
       itr != UocInfo::ifList.end(); ++itr) {
-    GCPtr<UocInfo> puoci = itr->second;
+    shared_ptr<UocInfo> puoci = itr->second;
     
     if (puoci->lastCompletedPass >= Options::backEnd->needPass) {
       if (Options::backEnd->fn)
@@ -760,7 +761,7 @@ main(int argc, char *argv[])
   /* Output for Source modules */
   for(UocMap::iterator itr = UocInfo::srcList.begin();
       itr != UocInfo::srcList.end(); ++itr) {
-    GCPtr<UocInfo> puoci = itr->second;
+    shared_ptr<UocInfo> puoci = itr->second;
 
     if (puoci->lastCompletedPass >= Options::backEnd->needPass){
       if (Options::backEnd->fn)
@@ -814,7 +815,7 @@ main(int argc, char *argv[])
 
   /* Create a new unit of compilation that will become the grand,
      unified UoC */
-  GCPtr<UocInfo> unifiedUOC = UocInfo::CreateUnifiedUoC();
+  shared_ptr<UocInfo> unifiedUOC = UocInfo::CreateUnifiedUoC();
 
   // Update all of the defForm pointers so that we can find things:
   UocInfo::findAllDefForms();

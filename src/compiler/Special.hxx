@@ -39,7 +39,7 @@
  **************************************************************************/
 
 #include <string>
-#include <libsherpa/GCPtr.hxx>
+#include "shared_ptr.hxx"
 
 #include "AST.hxx"
 #include "Type.hxx"
@@ -47,11 +47,11 @@
 
 /* Structure that is used by the specializer */
 struct spStruct {  
-  sherpa::GCPtr<AST> ast; 
-  sherpa::GCPtr<Type> typ;
+  boost::shared_ptr<AST> ast; 
+  boost::shared_ptr<Type> typ;
   bool lifted;
 
-  spStruct(sherpa::GCPtr<AST> _ast, sherpa::GCPtr<Type> _typ)
+  spStruct(boost::shared_ptr<AST> _ast, boost::shared_ptr<Type> _typ)
   {
     typ = _typ;
     ast = _ast;
@@ -84,7 +84,7 @@ struct SpecialNames {
 
   SpecialNames();
   std::string getSpName(unsigned name);
-  void fixUpSpNames(sherpa::GCPtr<UocInfo> prelude);
+  void fixUpSpNames(boost::shared_ptr<UocInfo> prelude);
   static SpecialNames spNames;
 };
 

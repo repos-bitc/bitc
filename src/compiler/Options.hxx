@@ -104,7 +104,7 @@ namespace Options {
   /// becomes possible for several passes to print their type variable
   /// names consistently, which makes understanding the transformation
   /// that was performed easier.
-  extern sherpa::GCPtr<TvPrinter> debugTvP;
+  extern boost::shared_ptr<TvPrinter> debugTvP;
 } /* namespace Options */;
 
 #endif /* OPTIONS_HXX */

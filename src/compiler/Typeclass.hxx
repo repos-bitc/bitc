@@ -56,26 +56,26 @@ typedef Typeclass Constraint;
 typedef TCConstraints Constraints; 
 
 struct Instance {
-  sherpa::GCPtr<TypeScheme> ts;
-  sherpa::GCPtr<AST> ast;
+  boost::shared_ptr<TypeScheme> ts;
+  boost::shared_ptr<AST> ast;
   
-  Instance(sherpa::GCPtr<TypeScheme> _ts, sherpa::GCPtr<AST>_ins)
+  Instance(boost::shared_ptr<TypeScheme> _ts, boost::shared_ptr<AST>_ins)
   {
     ts = _ts;
     ast = _ins;
   }
   
-  static inline sherpa::GCPtr<Instance>
-  make(sherpa::GCPtr<TypeScheme> _ts, sherpa::GCPtr<AST>_ins) {
+  static inline boost::shared_ptr<Instance>
+  make(boost::shared_ptr<TypeScheme> _ts, boost::shared_ptr<AST>_ins) {
     Instance *tmp = new Instance(_ts, _ins);
-    return sherpa::GCPtr<Instance>(tmp);
+    return boost::shared_ptr<Instance>(tmp);
   }
 
-  bool equals(sherpa::GCPtr<Instance> ins, 
-	      sherpa::GCPtr<const InstEnvironment > instEnv) const;
-  bool overlaps(sherpa::GCPtr<Instance> ins) const;
-  bool satisfies(sherpa::GCPtr<Typeclass> pred, 
-		 sherpa::GCPtr<const InstEnvironment > instEnv) const;
+  bool equals(boost::shared_ptr<Instance> ins, 
+	      boost::shared_ptr<const InstEnvironment > instEnv) const;
+  bool overlaps(boost::shared_ptr<Instance> ins) const;
+  bool satisfies(boost::shared_ptr<Typeclass> pred, 
+		 boost::shared_ptr<const InstEnvironment > instEnv) const;
   std::string asString();
 
   std::string asXML();
@@ -102,12 +102,12 @@ struct TCConstraints {
     return pred.size();
   }
 
-  void addPred(sherpa::GCPtr<Typeclass> tc);
-  void clearPred(sherpa::GCPtr<Constraint> ct);
+  void addPred(boost::shared_ptr<Typeclass> tc);
+  void clearPred(boost::shared_ptr<Constraint> ct);
 
   void normalize();
   
-  bool contains(sherpa::GCPtr<Typeclass> tc);
+  bool contains(boost::shared_ptr<Typeclass> tc);
 
   void collectAllFnDeps(TypeSet& fnDeps);
   
@@ -115,7 +115,7 @@ struct TCConstraints {
   // supplied in the vector
   static void close(TypeSet& closure,
 		    const TypeSet& fnDeps);
-  void clearHintsOnPreds(sherpa::GCPtr<Trail> trail);  
+  void clearHintsOnPreds(boost::shared_ptr<Trail> trail);  
 
   iterator begin() {
     return pred.begin();
@@ -124,10 +124,10 @@ struct TCConstraints {
     return pred.end();
   }
 
-  static inline sherpa::GCPtr<TCConstraints>
+  static inline boost::shared_ptr<TCConstraints>
   make() {
     TCConstraints *tmp = new TCConstraints();
-    return sherpa::GCPtr<TCConstraints>(tmp);
+    return boost::shared_ptr<TCConstraints>(tmp);
   }
 };
 

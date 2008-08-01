@@ -53,6 +53,7 @@
 #include "backend.hxx"
 
 using namespace std;
+using namespace boost;
 using namespace sherpa;
 
 /**********************************************************************
@@ -90,8 +91,8 @@ For all constructors Ctrx, Ctry, Ctrz ...:
 
 ***************************************************************/
 
-static GCPtr<AST> 
-getTypeAst(GCPtr<AST> fld)
+static shared_ptr<AST> 
+getTypeAst(shared_ptr<AST> fld)
 {
   switch(fld->astType) {
   case at_field:
@@ -108,12 +109,12 @@ getTypeAst(GCPtr<AST> fld)
 }
 
 static size_t 
-bitOffset(GCPtr<AST> leg, size_t n)
+bitOffset(shared_ptr<AST> leg, size_t n)
 {
   size_t off = 0;
   for(size_t c=1; c < n; c++) {
-    GCPtr<AST> fld = leg->child(c);
-    GCPtr<AST> fldType = getTypeAst(fld);    
+    shared_ptr<AST> fld = leg->child(c);
+    shared_ptr<AST> fldType = getTypeAst(fld);    
     if(fldType->astType == at_bitfield)
       off += fldType->field_bits;
     else
@@ -127,10 +128,10 @@ bitOffset(GCPtr<AST> leg, size_t n)
    Therefore, extra checking is necessary. */
 
 static bool 
-TypesAgree(GCPtr<AST> fld1, GCPtr<AST> fld2)
+TypesAgree(shared_ptr<AST> fld1, shared_ptr<AST> fld2)
 {
-  GCPtr<AST> fT1 = getTypeAst(fld1);    
-  GCPtr<AST> fT2 = getTypeAst(fld2);
+  shared_ptr<AST> fT1 = getTypeAst(fld1);    
+  shared_ptr<AST> fT2 = getTypeAst(fld2);
 
   if((fT1->symType->strictlyEquals(fT2->symType)) &&
      (fT1->field_bits == fT2->field_bits))
@@ -141,7 +142,7 @@ TypesAgree(GCPtr<AST> fld1, GCPtr<AST> fld2)
 
 
 bool
-reprCheck(std::ostream& errStream, GCPtr<AST> ast)
+reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
 {
   bool errFree = true;
   switch(ast->astType) {
@@ -157,15 +158,15 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
       if((ast->Flags2 & UNION_IS_REPR) == 0)
 	break;
 
-      GCPtr<AST> ctrs = ast->child(4);
+      shared_ptr<AST> ctrs = ast->child(4);
 
       /* The fields in the when cluses must be of integer-type
          This may be relaxed later. */
       for(size_t c=0; c < ctrs->children.size(); c++) {
-	GCPtr<AST> ctrc = ctrs->child(c);
+	shared_ptr<AST> ctrc = ctrs->child(c);
 	
 	for(size_t i=1; i < ctrc->children.size(); i++) {
-	  GCPtr<AST> fldi = ctrc->child(i);
+	  shared_ptr<AST> fldi = ctrc->child(i);
 
 	  if(fldi->astType == at_field)
 	    if(fldi->Flags2 & FLD_IS_DISCM)
@@ -183,19 +184,19 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
       /* Ascertain that common fields are at the same bit-offset
          and have the same type */
       for(size_t c=0; c < ctrs->children.size(); c++) {
-	GCPtr<AST> ctrc = ctrs->child(c);
+	shared_ptr<AST> ctrc = ctrs->child(c);
 
 	for(size_t i=1; i < ctrc->children.size(); i++) {
-	  GCPtr<AST> fldi = ctrc->child(i);
+	  shared_ptr<AST> fldi = ctrc->child(i);
 	  if(fldi->astType != at_field)
 	    continue;
 	  
  	  size_t offc = bitOffset(ctrc, i);	  	  
 	  for(size_t d=c+1; d < ctrs->children.size(); d++) {
-	    GCPtr<AST> ctrd = ctrs->child(d);
+	    shared_ptr<AST> ctrd = ctrs->child(d);
 	    
 	    for(size_t j=1; j < ctrd->children.size(); j++) {
-	      GCPtr<AST> fldj = ctrd->child(j);
+	      shared_ptr<AST> fldj = ctrd->child(j);
 	      if(fldj->astType != at_field)
 		continue;
 	      
@@ -229,13 +230,13 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
       
       /* Ascertain that ``where'' fields are decisive */      
       for(size_t c=0; c < ctrs->children.size(); c++) {
-	GCPtr<AST> ctrc = ctrs->child(c);
+	shared_ptr<AST> ctrc = ctrs->child(c);
 	
 	typedef map<string, size_t> WhenMap;
 	WhenMap when;
 	
 	for(size_t i=1; i < ctrc->children.size(); i++) {
-	  GCPtr<AST> fldi = ctrc->child(i);
+	  shared_ptr<AST> fldi = ctrc->child(i);
 	  if(fldi->Flags2 & FLD_IS_DISCM) {
 	    assert(fldi->astType == at_field);
 
@@ -244,11 +245,11 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
 	}
 	
 	for(size_t d=c+1; d < ctrs->children.size(); d++) {
-	  GCPtr<AST> ctrd = ctrs->child(d);
+	  shared_ptr<AST> ctrd = ctrs->child(d);
 	  bool differ=false;
 
 	  for(size_t j=1; (!differ) && (j < ctrd->children.size()); j++) {
-	    GCPtr<AST> fldj = ctrd->child(j);
+	    shared_ptr<AST> fldj = ctrd->child(j);
 
 	    if(fldj->Flags2 & FLD_IS_DISCM) {
 	      assert(fldj->astType == at_field);

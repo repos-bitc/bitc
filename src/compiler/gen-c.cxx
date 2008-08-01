@@ -66,6 +66,7 @@
 
 using namespace std;
 using namespace boost;
+using namespace boost;
 using namespace sherpa;
 
 const char *TY_PFX   = "ty_";
@@ -292,11 +293,11 @@ CMangle(std::string idName)
 
 #define CMGL_ID_FLD 0x1u
 std::string
-CMangle(GCPtr<AST> ast, unsigned long flags = 0)
+CMangle(shared_ptr<AST> ast, unsigned long flags = 0)
 {  
   assert(ast->astType == at_ident);
   
-  GCPtr<AST> id = ast;
+  shared_ptr<AST> id = ast;
 
   if(id->symbolDef)
     id = id->symbolDef;
@@ -321,19 +322,19 @@ CMangle(GCPtr<AST> ast, unsigned long flags = 0)
 
 /* Forward Declaration */
 bool
-toc(std::ostream& errStream, GCPtr<UocInfo> uoc,
-    GCPtr<AST> ast, INOstream &out, const string &IDname,
-    GCPtr<AST> parent, const size_t chno, unsigned long flags);
+toc(std::ostream& errStream, shared_ptr<UocInfo> uoc,
+    shared_ptr<AST> ast, INOstream &out, const string &IDname,
+    shared_ptr<AST> parent, const size_t chno, unsigned long flags);
 
 #define CTYP_EMIT_BF      0x01u	// bitfield
 #define CTYP_BYREF        0x02u // Used to declare by-ref 
                                 // arguments in decl() routine.
  
 static string
-toCtype(GCPtr<Type> typ, string IDname="", unsigned long flags=0, 
+toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0, 
 	uint64_t arrsz = 0) 
 {
-  GCPtr<Type> t = typ->getBareType();
+  shared_ptr<Type> t = typ->getBareType();
   stringstream out;
   
   switch(t->kind) {
@@ -517,19 +518,19 @@ toCtype(GCPtr<Type> typ, string IDname="", unsigned long flags=0,
 }
 
 static inline bool
-isUnitType(GCPtr<Type> ty)
+isUnitType(shared_ptr<Type> ty)
 {
   return (ty->getBareType()->kind == ty_unit);
 }
 
 static inline bool
-isUnitType(GCPtr<AST> ast)
+isUnitType(shared_ptr<AST> ast)
 {
   return isUnitType(ast->symType);
 }
 
 static inline std::string
-decl(GCPtr<Type> typ, string idName, unsigned flags=0,
+decl(shared_ptr<Type> typ, string idName, unsigned flags=0,
      size_t field_bits=0)
 {
   stringstream ss;
@@ -547,7 +548,7 @@ decl(GCPtr<Type> typ, string idName, unsigned flags=0,
 }
 
 static inline std::string
-decl(GCPtr<AST> id, string idPrefix="", unsigned flags=0, 
+decl(shared_ptr<AST> id, string idPrefix="", unsigned flags=0, 
      unsigned long cmFlags=0)
 {
   assert(id->astType == at_ident);
@@ -567,7 +568,7 @@ decl(GCPtr<AST> id, string idPrefix="", unsigned flags=0,
 }
 
 static inline void
-declare(INOstream &out, GCPtr<AST> id, string prefix="", 
+declare(INOstream &out, shared_ptr<AST> id, string prefix="", 
 	unsigned flags=0)
 {  
   out << decl(id, prefix, flags) << ";" << endl;
@@ -575,13 +576,13 @@ declare(INOstream &out, GCPtr<AST> id, string prefix="",
 
 
 static void
-emit_ct_args(INOstream &out, GCPtr<AST> fields, size_t start=0)
+emit_ct_args(INOstream &out, shared_ptr<AST> fields, size_t start=0)
 {  
   out << "(";
 
   bool emitted1=false;
   for(size_t c = start; c < fields->children.size(); c++) {
-    GCPtr<AST> field = fields->child(c);
+    shared_ptr<AST> field = fields->child(c);
     
     if(field->astType == at_fill || 
        field->astType == at_reserved || 
@@ -600,11 +601,11 @@ emit_ct_args(INOstream &out, GCPtr<AST> fields, size_t start=0)
 }
 
 static void
-emit_ct_inits(INOstream &out, GCPtr<AST> fields, 
+emit_ct_inits(INOstream &out, shared_ptr<AST> fields, 
 	      string pre="", size_t start=0)
 {
   for(size_t i = start; i < fields->children.size(); i++) {
-    GCPtr<AST> field = fields->child(i);
+    shared_ptr<AST> field = fields->child(i);
     if(field->astType == at_fill)
       continue;
 	  
@@ -631,12 +632,12 @@ emit_ct_inits(INOstream &out, GCPtr<AST> fields,
 }
 
 static void
-emit_fnxn_type(INOstream &out, std::string &id, GCPtr<Type> fn,
+emit_fnxn_type(INOstream &out, std::string &id, shared_ptr<Type> fn,
 	       bool makePointer=false)
 {
   fn = fn->getType();
-  GCPtr<Type> ret = fn->Ret()->getType();
-  GCPtr<Type> args = fn->Args()->getBareType();
+  shared_ptr<Type> ret = fn->Ret()->getType();
+  shared_ptr<Type> args = fn->Args()->getBareType();
 
   /* If return type is unit, emit void as a special case. */
   if (isUnitType(ret))
@@ -653,7 +654,7 @@ emit_fnxn_type(INOstream &out, std::string &id, GCPtr<Type> fn,
   out << "(";
   size_t argCount = 0;
   for(size_t i=0; i < args->components.size(); i++) {
-    GCPtr<Type> arg = args->CompType(i);
+    shared_ptr<Type> arg = args->CompType(i);
     if (isUnitType(arg))
       continue;
     if(argCount > 0)
@@ -671,16 +672,16 @@ emit_fnxn_type(INOstream &out, std::string &id, GCPtr<Type> fn,
 }
 
 static void
-emit_fnxn_decl(INOstream &out, GCPtr<AST> ast, 
+emit_fnxn_decl(INOstream &out, shared_ptr<AST> ast, 
 	       bool oneLine, std::string pfx="", 
 	       size_t startParam=0)
 {
-  GCPtr<AST> id = ast->child(0)->child(0);
-  GCPtr<Type> fnType = id->symType->getBareType();
-  GCPtr<Type> retType = fnType->Ret()->getType();
-  GCPtr<AST> lam = ast->child(1);
-  GCPtr<AST> argvec = lam->child(0);
-  GCPtr<Type> fnargvec = fnType->Args()->getBareType();
+  shared_ptr<AST> id = ast->child(0)->child(0);
+  shared_ptr<Type> fnType = id->symType->getBareType();
+  shared_ptr<Type> retType = fnType->Ret()->getType();
+  shared_ptr<AST> lam = ast->child(1);
+  shared_ptr<AST> argvec = lam->child(0);
+  shared_ptr<Type> fnargvec = fnType->Args()->getBareType();
   assert(argvec->children.size() == fnargvec->components.size());
 
   /* If return type is unit, emit void as a special case. */
@@ -696,9 +697,9 @@ emit_fnxn_decl(INOstream &out, GCPtr<AST> ast,
   assert(startParam <= argvec->children.size());
   int paramCount = 0;
   for(size_t i=startParam; i < argvec->children.size(); i++) {
-    GCPtr<AST> pat = argvec->child(i);
+    shared_ptr<AST> pat = argvec->child(i);
     assert(pat->astType == at_identPattern);
-    GCPtr<AST> arg = pat->child(0);
+    shared_ptr<AST> arg = pat->child(0);
     unsigned long flags = ((fnargvec->CompFlags(i) &
 			    COMP_BYREF)?CTYP_BYREF:0);
 
@@ -728,16 +729,16 @@ emit_fnxn_decl(INOstream &out, GCPtr<AST> ast,
 
 static bool
 emit_fnxn_label(std::ostream& errStream, 
-		GCPtr<UocInfo> uoc,
-		GCPtr<AST> ast,
+		shared_ptr<UocInfo> uoc,
+		shared_ptr<AST> ast,
 		INOstream &out,
-		GCPtr<AST> parent, 
+		shared_ptr<AST> parent, 
 		const size_t chno,
 		unsigned long flags)
 {
   bool errFree = true;
   assert(ast->astType == at_define || ast->astType == at_recdef);
-  GCPtr<AST> id = ast->child(0)->child(0);
+  shared_ptr<AST> id = ast->child(0)->child(0);
   assert(id->isFnxn());
   bool isHeader = (flags & TOC_HEADER_MODE);
   
@@ -753,9 +754,9 @@ emit_fnxn_label(std::ostream& errStream,
       << endl;	    
   out.more();
   
-  GCPtr<AST> lam = ast->child(1);
-  GCPtr<AST> body = lam->child(1);
-  GCPtr<AST> ret= GC_NULL;
+  shared_ptr<AST> lam = ast->child(1);
+  shared_ptr<AST> body = lam->child(1);
+  shared_ptr<AST> ret= GC_NULL;
   
   /* While emitting the function parameters, we omitted any parameters
    * of unit type, because there is no point passing those or letting
@@ -772,12 +773,12 @@ emit_fnxn_label(std::ostream& errStream,
    * unreachable.
    */
 
-  GCPtr<AST> argvec = lam->child(0);
+  shared_ptr<AST> argvec = lam->child(0);
   for(size_t i= 0; i < argvec->children.size(); i++) {
-    GCPtr<AST> pat = argvec->child(i);
+    shared_ptr<AST> pat = argvec->child(i);
 
     assert(pat->astType == at_identPattern);
-    GCPtr<AST> arg = pat->child(0);
+    shared_ptr<AST> arg = pat->child(0);
 
     if (isUnitType(arg)) {
       /* Note that even if the formal paramter is by-ref, we aren't
@@ -831,13 +832,13 @@ emit_fnxn_label(std::ostream& errStream,
 	<< endl;	    
     out.more();
     
-    GCPtr<AST> argvec = lam->child(0);    
+    shared_ptr<AST> argvec = lam->child(0);    
     if (! isUnitType(ret))
       out << "return ";
     out << CMangle(id) << "(currentClosurePtr";
     for(size_t i=1; i < argvec->children.size(); i++) {
-      GCPtr<AST> pat = argvec->child(i);
-      GCPtr<AST> arg = pat->child(0);
+      shared_ptr<AST> pat = argvec->child(i);
+      shared_ptr<AST> arg = pat->child(0);
       if(!isUnitType(arg))
 	out << ", " << CMangle(arg);
     }
@@ -852,7 +853,7 @@ emit_fnxn_label(std::ostream& errStream,
 }
 
 bool 
-typeIsUnmangled(GCPtr<Type> typ)
+typeIsUnmangled(shared_ptr<Type> typ)
 {
   typ = typ->getBareType();
   switch(typ->kind) {
@@ -916,16 +917,16 @@ asciiPrintableCharacter(uint32_t c)
 
 bool
 toc(std::ostream& errStream, 
-    GCPtr<UocInfo> uoc,
-    GCPtr<AST> ast, 
+    shared_ptr<UocInfo> uoc,
+    shared_ptr<AST> ast, 
     INOstream &out,
     const string &IDname,
-    GCPtr<AST> parent, 
+    shared_ptr<AST> parent, 
     const size_t chno,
     unsigned long flags)
 {
   bool errorFree = true, answer = false;
-  // GCPtr<AST> res = NULL;
+  // shared_ptr<AST> res = NULL;
   
   //cout << "---- " << ast->astTypeName() << " flags = " << flags << endl;
   
@@ -1038,8 +1039,8 @@ toc(std::ostream& errStream,
 
   case at_mkClosure:
     {
-      GCPtr<AST> fn = ast->child(1);
-      GCPtr<AST> env = ast->child(0);
+      shared_ptr<AST> fn = ast->child(1);
+      shared_ptr<AST> env = ast->child(0);
       assert(IDname.size());
       assert(fn->astType == at_ident);
       
@@ -1062,17 +1063,17 @@ toc(std::ostream& errStream,
 
   case at_ident:
     {
-      GCPtr<AST> id;
+      shared_ptr<AST> id;
       if(ast->symbolDef)
 	id = ast->symbolDef;
       else
 	id = ast;
       
       if(id->Flags & ID_IS_CTOR) {
-	GCPtr<Type> t = id->symType->getBareType(); 
+	shared_ptr<Type> t = id->symType->getBareType(); 
 	if(t->kind == ty_uvalv || t->kind == ty_uvalr ||
 	   t->kind == ty_exn) {
-	  GCPtr<AST> dummy = AST::make(at_ucon_apply, ast->loc, ast);
+	  shared_ptr<AST> dummy = AST::make(at_ucon_apply, ast->loc, ast);
 	  dummy->symType = ast->symType;
 	  TOC(errStream, uoc, dummy, out, IDname, 
 	      GC_NULL, 0, flags);	  
@@ -1201,8 +1202,8 @@ toc(std::ostream& errStream,
     
   case at_defstruct:
     {
-      GCPtr<AST> ident = ast->child(0);
-      GCPtr<AST> fields = ast->child(4);
+      shared_ptr<AST> ident = ast->child(0);
+      shared_ptr<AST> fields = ast->child(4);
       out << "struct " << TY_PFX << CMangle(ident) << "{" << endl;
       out.more();
       TOC(errStream, uoc, fields, out, IDname, ast, 4, flags);      
@@ -1283,7 +1284,7 @@ toc(std::ostream& errStream,
   case at_ucon_apply:     
   case at_struct_apply:
     {
-      GCPtr<AST> ctr = ast->child(0)->getCtr();
+      shared_ptr<AST> ctr = ast->child(0)->getCtr();
       
       if(ctr->symType->isException() && 
 	 (ast->children.size() == 1)) {
@@ -1314,7 +1315,7 @@ toc(std::ostream& errStream,
 
   case at_sel_ctr:
     {
-      GCPtr<Type> t = ast->child(0)->symType->getBareType();
+      shared_ptr<Type> t = ast->child(0)->symType->getBareType();
       out << "(" <<  "TAG_" << CMangle(t->myContainer) << "(";	
 
       if (!ast->child(0)->symType->isRefType())
@@ -1341,8 +1342,8 @@ toc(std::ostream& errStream,
 
   case at_defunion:
     {
-      GCPtr<AST> ident = ast->child(0);
-      GCPtr<AST> ctrs = ast->child(4);
+      shared_ptr<AST> ident = ast->child(0);
+      shared_ptr<AST> ctrs = ast->child(4);
 
       bool repr = ast->Flags2 & UNION_IS_REPR;
       out << "/*** Tag Enumerations ***/" << endl;
@@ -1355,7 +1356,7 @@ toc(std::ostream& errStream,
 	// Nullable is a special case, and we fake the
 	// tag values.
 	for(size_t c=0; c < ctrs->children.size(); c++) {
-	  GCPtr<AST> ctr = ctrs->child(c);
+	  shared_ptr<AST> ctr = ctrs->child(c);
 	  if(ctr->children.size() > 1) {
 	    out << ENUM_PFX << CMangle(ctr->child(0))
 		<< " = 1," << endl;	
@@ -1370,7 +1371,7 @@ toc(std::ostream& errStream,
 	assert(!repr);
 	// Nullable is handled as special case.
 	for(size_t c=0; c < ctrs->children.size(); c++) {
-	  GCPtr<AST> ctr = ctrs->child(c);
+	  shared_ptr<AST> ctr = ctrs->child(c);
 	  if(ctr->children.size() > 1) {
 	    out << ENUM_PFX << CMangle(ctr->child(0))
 		<< " = 0," << endl;	
@@ -1385,7 +1386,7 @@ toc(std::ostream& errStream,
       }
       else {
 	for(size_t c=0; c < ctrs->children.size(); c++) {
-	  GCPtr<AST> ctr = ctrs->child(c);
+	  shared_ptr<AST> ctr = ctrs->child(c);
 	  out << ENUM_PFX << CMangle(ctr->child(0))
 	      << " = " << c
 	      << "," << endl;
@@ -1399,8 +1400,8 @@ toc(std::ostream& errStream,
       
       out << "/*** Structures for constructor legs ***/" << endl;
       for(size_t c = 0; c < ctrs->children.size(); c++) {
-	GCPtr<AST> ctr = ctrs->child(c);
-	GCPtr<AST> ctrID = ctr->child(0);
+	shared_ptr<AST> ctr = ctrs->child(c);
+	shared_ptr<AST> ctrID = ctr->child(0);
 	
 	if(ctrID->stCtr == ctrID) {	
 	  out << "typedef struct {" << endl;
@@ -1416,7 +1417,7 @@ toc(std::ostream& errStream,
 	      }
 	  
 	  for(size_t i = 1; i < ctr->children.size(); i++) {
-	    GCPtr<AST> field = ctr->child(i);
+	    shared_ptr<AST> field = ctr->child(i);
 	    TOC(errStream, uoc, field, out, IDname, ctr, i, flags);      
 	  }
 	  
@@ -1440,7 +1441,7 @@ toc(std::ostream& errStream,
 	out << TAG_PFX << CMangle(ident) << " tag;" << endl;
       
       for(size_t c = 0; c < ctrs->children.size(); c++) {
-	GCPtr<AST> ctr = ctrs->child(c);
+	shared_ptr<AST> ctr = ctrs->child(c);
 	out << TY_PFX << CMangle(ctr->child(0)) << " "
 	    << "leg_" << CMangle(ctr->child(0)) << ";" << endl;	
       }
@@ -1466,11 +1467,11 @@ toc(std::ostream& errStream,
       
       if(repr) {
 	for(size_t c = 0; c < ctrs->children.size(); c++) {
-	  GCPtr<AST> ctr = ctrs->child(c);
+	  shared_ptr<AST> ctr = ctrs->child(c);
 	  out << "if (";
 	  bool emitted1=false;
 	  for(size_t i = 1; i < ctr->children.size(); i++) {
-	    GCPtr<AST> field = ctr->child(i);
+	    shared_ptr<AST> field = ctr->child(i);
 	    if(field->Flags2 & FLD_IS_DISCM) {
 	      if(emitted1)
 		out << " && ";
@@ -1542,8 +1543,8 @@ toc(std::ostream& errStream,
       }
 
       for(size_t c = 0; c < ctrs->children.size(); c++) {
-	GCPtr<AST> ctr = ctrs->child(c);	
-	GCPtr<AST> ctrID = ctr->child(0);
+	shared_ptr<AST> ctr = ctrs->child(c);	
+	shared_ptr<AST> ctrID = ctr->child(0);
 	out << "INLINE " << toCtype(ident->symType) << endl
 	    << CTOR_PFX << CMangle(ctrID) << " ";
 
@@ -1597,7 +1598,7 @@ toc(std::ostream& errStream,
 
   case at_defexception:
     {
-      GCPtr<AST> ident = ast->child(0);
+      shared_ptr<AST> ident = ast->child(0);
 
       if(flags & TOC_HEADER_MODE) {
 	out << "extern const char " << TAG_PFX << CMangle(ident) << "[]; " 
@@ -1613,7 +1614,7 @@ toc(std::ostream& errStream,
 	out.more();
 	out << "const char* __name;" << endl;
 	for(size_t c = 1; c < ast->children.size(); c++) {
-	  GCPtr<AST> field = ast->child(c);
+	  shared_ptr<AST> field = ast->child(c);
 	  if(field->astType == at_fill)
 	    continue;
 
@@ -1665,7 +1666,7 @@ toc(std::ostream& errStream,
   case at_declstruct:
   case at_declrepr:
     {
-      GCPtr<AST> ident = ast->child(0);      
+      shared_ptr<AST> ident = ast->child(0);      
       if(ident->defn)
 	ident = ident->defn;
       if(ident->Flags & DEF_DECLARED) {	
@@ -1685,7 +1686,7 @@ toc(std::ostream& errStream,
 
   case at_proclaim:
     {
-      GCPtr<AST> id = ast->getID();
+      shared_ptr<AST> id = ast->getID();
       bool hasDefn = false;
 
       if(id->defn) {
@@ -1696,7 +1697,7 @@ toc(std::ostream& errStream,
       out << "extern ";
       id->Flags |= DEF_DECLARED;      
       
-      //GCPtr<Type> t = id->symType->getType();      
+      //shared_ptr<Type> t = id->symType->getType();      
       //if (hasDefn && t->isSimpleTypeForC() && (t->kind != ty_mutable))
       // out << "const ";
             
@@ -1713,9 +1714,9 @@ toc(std::ostream& errStream,
 	 emit typedefs of names relative to the external name so that
 	 they can easily be accessed */
       if(id->symType->isFnxn() && id->externalName.size()) {       
-	GCPtr<Type> fnType = id->symType->getBareType();
-	GCPtr<Type> ret = fnType->Ret();
-	GCPtr<Type> args = fnType->Args();
+	shared_ptr<Type> fnType = id->symType->getBareType();
+	shared_ptr<Type> ret = fnType->Ret();
+	shared_ptr<Type> args = fnType->Args();
 	
 	if(!typeIsUnmangled(ret)) {
 	  out << "typedef "
@@ -1724,7 +1725,7 @@ toc(std::ostream& errStream,
 	}
 	
 	for(size_t i=0; i < args->components.size(); i++) {
-	  GCPtr<Type> arg = args->CompType(i);
+	  shared_ptr<Type> arg = args->CompType(i);
 	  
 	  if(!typeIsUnmangled(arg)) {
 	    stringstream as;
@@ -1743,7 +1744,7 @@ toc(std::ostream& errStream,
   case at_recdef:
   case at_define:
     {
-      GCPtr<AST> id = ast->child(0)->child(0);
+      shared_ptr<AST> id = ast->child(0)->child(0);
 
       // If this name is file-local, emit it as a static.
       // However, if there was a previous declaration, 
@@ -1774,8 +1775,8 @@ toc(std::ostream& errStream,
       }
       else {
 	// Non-function
-	GCPtr<AST> e = ast->child(1);
-	GCPtr<AST> p = ast;
+	shared_ptr<AST> e = ast->child(1);
+	shared_ptr<AST> p = ast;
 	size_t c = 1;
 	
 	while(e->astType == at_tqexpr) {
@@ -1838,22 +1839,22 @@ toc(std::ostream& errStream,
     
   case at_do:
     {
-      GCPtr<AST> dbs = ast->child(0);
+      shared_ptr<AST> dbs = ast->child(0);
       
       for (size_t c = 0; c < dbs->children.size(); c++) {
-	GCPtr<AST> db = dbs->child(c);
-	GCPtr<AST> init = db->child(1);
+	shared_ptr<AST> db = dbs->child(c);
+	shared_ptr<AST> init = db->child(1);
 	TOC(errStream, uoc, init, out, IDname, db, 1, flags);      
       }
 
       out << "loop_" << ast->ID << ":" << endl;
       out.indent(2);
 
-      GCPtr<AST> dotest = ast->child(1);
-      GCPtr<AST> cond = dotest->child(0);
-      GCPtr<AST> res = dotest->child(1);
-      GCPtr<AST> body = ast->child(2);
-      GCPtr<AST> theCond;
+      shared_ptr<AST> dotest = ast->child(1);
+      shared_ptr<AST> cond = dotest->child(0);
+      shared_ptr<AST> res = dotest->child(1);
+      shared_ptr<AST> body = ast->child(2);
+      shared_ptr<AST> theCond;
 
       if(cond->astType == at_letStar) {
 	TOC(errStream, uoc, cond, out, IDname, 
@@ -1884,8 +1885,8 @@ toc(std::ostream& errStream,
 	out << ";" << endl;
 
       for (size_t c = 0; c < dbs->children.size(); c++) {
-	GCPtr<AST> db = dbs->child(c);
-	GCPtr<AST> step = db->child(2);
+	shared_ptr<AST> db = dbs->child(c);
+	shared_ptr<AST> step = db->child(2);
 	TOC(errStream, uoc, step, out, IDname, db, 2, flags);      
       }
       
@@ -1930,16 +1931,16 @@ toc(std::ostream& errStream,
       // self-recursion within LETREC bodies...
 
       if (ast->child(0)->astType == at_ident) {
-	GCPtr<AST> id = ast->child(0);
+	shared_ptr<AST> id = ast->child(0);
 	assert(id->symbolDef);
 
 	if(id->Flags & SELF_TAIL) {
-	  GCPtr<AST> lbps = id->symbolDef->defbps;
+	  shared_ptr<AST> lbps = id->symbolDef->defbps;
 	  assert(lbps);
 	  assert(ast->children.size() == lbps->children.size() + 1);
 	  out << "/* Tail recursive application: */ " << endl;
 	  for(size_t c = 0; c < lbps->children.size(); c++) {
-	    GCPtr<AST> ident = lbps->child(c)->child(0);
+	    shared_ptr<AST> ident = lbps->child(c)->child(0);
 	    TOC(errStream, uoc, ident, out, IDname, 
 		lbps->child(c), 0, flags);
 	    out << " = ";
@@ -1952,10 +1953,10 @@ toc(std::ostream& errStream,
 	}
       }
       
-      GCPtr<Type> clType = ast->child(0)->symType->getBareType();
+      shared_ptr<Type> clType = ast->child(0)->symType->getBareType();
       assert(clType->kind == ty_fn);
-      GCPtr<Type> retType = clType->Ret()->getType();
-      GCPtr<Type> argsType = clType->Args()->getType();
+      shared_ptr<Type> retType = clType->Ret()->getType();
+      shared_ptr<Type> argsType = clType->Args()->getType();
 
       /* If function returns unit type, we emit it to C as returning
        * void. This is necessary in order to be able to declare
@@ -2023,7 +2024,7 @@ toc(std::ostream& errStream,
 	assert(1);
       }
       assert(IDname.size());
-      GCPtr<Type> t = ast->symType->getBareType();
+      shared_ptr<Type> t = ast->symType->getBareType();
       out << IDname << " = (" << toCtype(t) << ") " 
 	  << "GC_ALLOC(sizeof("
 	  << CMangle(t->mangledString(true)) << ") + " 
@@ -2051,7 +2052,7 @@ toc(std::ostream& errStream,
   case at_makevectorL:
     {      
       assert(IDname.size());
-      GCPtr<Type> t = ast->symType->getBareType();
+      shared_ptr<Type> t = ast->symType->getBareType();
       out << IDname << " = (" << toCtype(ast->symType) << ") " 
 	  << "GC_ALLOC(sizeof("
 	  << CMangle(t->mangledString(true)) << ") + " 
@@ -2084,11 +2085,11 @@ toc(std::ostream& errStream,
       out << IDname << "->elem[__bitc_temp_mvec] = ";
       /* This is actually an application, get at_apply case to do the
 	 work :) */
-      GCPtr<AST> hackIdent = AST::make(at_ident, ast->loc);
+      shared_ptr<AST> hackIdent = AST::make(at_ident, ast->loc);
       hackIdent->s = "__bitc_temp_mvec";
       hackIdent->Flags |= ID_IS_GENSYM; // don't add extra astID after name
       hackIdent->symType = Type::make(ty_word);
-      GCPtr<AST> apply = AST::make(at_apply, ast->loc, 
+      shared_ptr<AST> apply = AST::make(at_apply, ast->loc, 
 			   ast->child(1), hackIdent);
       TOC(errStream, uoc, apply, out, IDname, ast, 1, flags);
       out << ";" << endl;
@@ -2133,11 +2134,11 @@ toc(std::ostream& errStream,
 
   case at_switch:
     {
-      GCPtr<AST> topExp = ast->child(1);
-      GCPtr<AST> cases = ast->child(2);
-      GCPtr<AST> ow = ast->child(3);
+      shared_ptr<AST> topExp = ast->child(1);
+      shared_ptr<AST> cases = ast->child(2);
+      shared_ptr<AST> ow = ast->child(3);
 
-      GCPtr<Type> t = topExp->symType->getBareType();
+      shared_ptr<Type> t = topExp->symType->getBareType();
       
       out << "switch(";
       
@@ -2155,12 +2156,12 @@ toc(std::ostream& errStream,
       
       for(size_t c=0; c < cases->children.size(); c++) {
 	
-	GCPtr<AST> theCase = cases->child(c);
-	GCPtr<AST> expr = theCase->child(1);
-	GCPtr<AST> legIdent = theCase->child(0);
+	shared_ptr<AST> theCase = cases->child(c);
+	shared_ptr<AST> expr = theCase->child(1);
+	shared_ptr<AST> legIdent = theCase->child(0);
 
 	for(size_t n=2; n < theCase->children.size(); n++) {
-	  GCPtr<AST> ctr = theCase->child(n)->getCtr();
+	  shared_ptr<AST> ctr = theCase->child(n)->getCtr();
 	  
 	  std::string leg = CMangle(ctr);	  
 	  out << "case " << ENUM_PFX << leg << " :" << endl;
@@ -2220,9 +2221,9 @@ toc(std::ostream& errStream,
 
   case at_try:
     {
-      GCPtr<AST> topExpr = ast->child(0);
-      GCPtr<AST> cases = ast->child(2);
-      GCPtr<AST> ow = ast->child(3);
+      shared_ptr<AST> topExpr = ast->child(0);
+      shared_ptr<AST> cases = ast->child(2);
+      shared_ptr<AST> ow = ast->child(3);
       out << "{" << endl;
       out.more();
       out << "jmp_buf jb;" << endl;
@@ -2243,16 +2244,16 @@ toc(std::ostream& errStream,
 
       // Too bad I cannot use a switch ... 
       for(size_t c = 0; c < cases->children.size(); c++) {	
-	GCPtr<AST> theCase = cases->child(c);
-	GCPtr<AST> expr = theCase->child(1);
-	GCPtr<AST> legIdent = theCase->child(0);
+	shared_ptr<AST> theCase = cases->child(c);
+	shared_ptr<AST> expr = theCase->child(1);
+	shared_ptr<AST> legIdent = theCase->child(0);
 
 	if(c > 0) 
 	  out << "else " << endl;
 	 
 	out << "if(";
 	for(size_t n=2; n < theCase->children.size(); n++) {
-	  GCPtr<AST> exn = theCase->child(n);
+	  shared_ptr<AST> exn = theCase->child(n);
 	  
 	  if(n > 2)
 	    out << " || ";
@@ -2321,7 +2322,7 @@ toc(std::ostream& errStream,
   case at_dup:
     {
       assert(IDname.size());      
-      GCPtr<AST> arg = ast->child(0);      
+      shared_ptr<AST> arg = ast->child(0);      
       out << IDname << " = "
 	  << "(("
 	  << toCtype(ast->symType)
@@ -2364,9 +2365,9 @@ toc(std::ostream& errStream,
     
   case at_if:
     {
-      GCPtr<AST> testAst = ast->child(0);
-      GCPtr<AST> thenAst = ast->child(1);
-      GCPtr<AST> elseAst = ast->child(2);
+      shared_ptr<AST> testAst = ast->child(0);
+      shared_ptr<AST> thenAst = ast->child(1);
+      shared_ptr<AST> elseAst = ast->child(2);
       out << "if(";
       TOC(errStream, uoc, testAst, out, IDname, 
 	  ast, 0, flags);      
@@ -2393,8 +2394,8 @@ toc(std::ostream& errStream,
     
   case at_when:
     {
-      GCPtr<AST> testAst = ast->child(0);
-      GCPtr<AST> thenAst = ast->child(1);
+      shared_ptr<AST> testAst = ast->child(0);
+      shared_ptr<AST> thenAst = ast->child(1);
 
       out << "if(";
       TOC(errStream, uoc, testAst, out, IDname, 
@@ -2419,7 +2420,7 @@ toc(std::ostream& errStream,
       TOC(errStream, uoc, ast->child(0), out, IDname, 
 	  ast, 0, flags);
 
-      GCPtr<AST> lExpr = ast->child(1);
+      shared_ptr<AST> lExpr = ast->child(1);
       if(lExpr->astType == at_tqexpr)
 	lExpr = lExpr->child(0);
 
@@ -2454,7 +2455,7 @@ toc(std::ostream& errStream,
   case at_letbinding:
     {
       assert(ast->child(0)->astType == at_identPattern);
-      GCPtr<AST> ident = ast->child(0)->child(0);
+      shared_ptr<AST> ident = ast->child(0)->child(0);
       if((ast->Flags & LB_IS_DUMMY) == 0) {	
 	if ((ast->Flags & LB_POSTPONED) == 0)
 	  out << CMangle(ident) << " = ";
@@ -2472,7 +2473,7 @@ toc(std::ostream& errStream,
 }
 
 static bool
-alreadyEmitted(GCPtr<Type> t, 
+alreadyEmitted(shared_ptr<Type> t, 
 	       const set<string>& theSet)
 {
   std::string nm = CMangle(t->mangledString(true));
@@ -2480,13 +2481,13 @@ alreadyEmitted(GCPtr<Type> t,
 }
 
 static void
-emit_arr_vec_fn_types(GCPtr<Type> candidate, 
+emit_arr_vec_fn_types(shared_ptr<Type> candidate, 
 		      INOstream &out,
 		      set<string>& arrSet,
 		      set<string>& vecSet,
 		      set<string>& fnSet)
 {
-  GCPtr<Type> t = candidate->getBareType();
+  shared_ptr<Type> t = candidate->getBareType();
   if(t->mark & MARK13)
     return;
 
@@ -2516,7 +2517,7 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
       //	  << " for " << t->asString()
       // 	  << std::endl;
       
-      GCPtr<Type> et = t->Base()->getBareType(); 
+      shared_ptr<Type> et = t->Base()->getBareType(); 
       out << "/* Typedef in anticipation of the array type:"
 	  << endl
 	  << t->asString()
@@ -2539,7 +2540,7 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
 
       vecSet.insert(CMangle(t->mangledString(true)));
       
-      GCPtr<Type> et = t->Base()->getBareType(); 
+      shared_ptr<Type> et = t->Base()->getBareType(); 
       out << "/* Typedef in anticipation of the vector type:"
 	  << endl
 	  << t->asString()
@@ -2584,7 +2585,7 @@ emit_arr_vec_fn_types(GCPtr<Type> candidate,
 
   
 static void
-emit_arr_vec_fn_types(GCPtr<AST> ast, 
+emit_arr_vec_fn_types(shared_ptr<AST> ast, 
 		      INOstream &out,
 		      set<string>& arrSet,
 		      set<string>& vecSet,
@@ -2603,18 +2604,18 @@ emit_arr_vec_fn_types(GCPtr<AST> ast,
 
 static bool
 TypesTOC(std::ostream& errStream, 
-	 GCPtr<UocInfo> uoc,
+	 shared_ptr<UocInfo> uoc,
 	 INOstream &out,
 	 unsigned long flags)
 {
   bool errFree = true;
-  GCPtr<AST> mod = uoc->uocAst;
+  shared_ptr<AST> mod = uoc->uocAst;
   set<string> arrSet;
   set<string> vecSet;
   set<string> fnSet;
   
   for(size_t c=0; (c < mod->children.size()); c++) {
-    GCPtr<AST> ast = mod->child(c);
+    shared_ptr<AST> ast = mod->child(c);
 
     switch(ast->astType) {
     case at_declstruct:
@@ -2650,7 +2651,7 @@ TypesTOC(std::ostream& errStream,
 	    << "   " << ast->loc << endl
 	    << "   " << ast->asString() << endl
 	    << "***************************************/" << endl;
-	GCPtr<AST> ident = ast->child(0);
+	shared_ptr<AST> ident = ast->child(0);
 	if((ident->Flags & DEF_DECLARED) == 0) 
 	  {
 	    ident->Flags |= DEF_DECLARED;
@@ -2710,7 +2711,7 @@ TypesTOC(std::ostream& errStream,
 }
 
 static bool
-emitInitProc(std::ostream& errStream, GCPtr<AST> ast, GCPtr<UocInfo> uoc,
+emitInitProc(std::ostream& errStream, shared_ptr<AST> ast, shared_ptr<UocInfo> uoc,
 	     INOstream &out, INOstream &initStream, 
 	     unsigned long flags)
 {
@@ -2724,9 +2725,9 @@ emitInitProc(std::ostream& errStream, GCPtr<AST> ast, GCPtr<UocInfo> uoc,
       << "{" << endl;
   out.more();    
 
-  GCPtr<AST> id = ast->child(0)->child(0);
-  GCPtr<AST> body = ast->child(1);
-  GCPtr<AST> ret;
+  shared_ptr<AST> id = ast->child(0)->child(0);
+  shared_ptr<AST> body = ast->child(1);
+  shared_ptr<AST> ret;
   assert(body->astType == at_container);
   if(body->child(1)->astType == at_letStar) {
     TOC(errStream, uoc, body, out, CMangle(id), ast, 1, flags);
@@ -2751,7 +2752,7 @@ emitInitProc(std::ostream& errStream, GCPtr<AST> ast, GCPtr<UocInfo> uoc,
 
 static bool
 EmitGlobalInitializers(std::ostream& errStream, 
-		       GCPtr<UocInfo> uoc,
+		       shared_ptr<UocInfo> uoc,
 		       INOstream &out,
 		       unsigned long flags)
 {
@@ -2761,9 +2762,9 @@ EmitGlobalInitializers(std::ostream& errStream,
 
   initStream.more();
   
-  GCPtr<AST> mod = uoc->uocAst;
+  shared_ptr<AST> mod = uoc->uocAst;
   for(size_t c = 0; c < mod->children.size(); c++) {
-    GCPtr<AST> ast = mod->child(c);
+    shared_ptr<AST> ast = mod->child(c);
 
     switch(ast->astType) {
     case at_define:
@@ -2779,8 +2780,8 @@ EmitGlobalInitializers(std::ostream& errStream,
 	    << "   " << ast->asString() << endl
 	    << "***************************************/" << endl;    
 	
-	GCPtr<AST> id = ast->getID();
-	GCPtr<AST> label = GC_NULL;
+	shared_ptr<AST> id = ast->getID();
+	shared_ptr<AST> label = GC_NULL;
 	bool wrapperNeeded = false;
 
 	// Case 0: Immutable functions that are not of the form
@@ -2816,7 +2817,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 	  // declaration for the (mutable) pointer, then the label
 	  // (full function), and finally, initialize the pointer.
 	  
-	  GCPtr<AST> ptr = AST::make(id);
+	  shared_ptr<AST> ptr = AST::make(id);
 	  id->s = MFN_PFX + id->s;
 	  out << "extern " << decl(ptr) << ";" << endl;
 	  CHKERR(errFree, toc(errStream, uoc, ast, out, "", 
@@ -2838,9 +2839,9 @@ EmitGlobalInitializers(std::ostream& errStream,
 	}
 	
 	if (wrapperNeeded) {
-	  GCPtr<Type> fnType = id->symType->getBareType();
-	  GCPtr<Type> ret = fnType->Ret();
-	  GCPtr<Type> args = fnType->Args()->getBareType();
+	  shared_ptr<Type> fnType = id->symType->getBareType();
+	  shared_ptr<Type> ret = fnType->Ret();
+	  shared_ptr<Type> args = fnType->Args()->getBareType();
 	  
 	  emit_fnxn_type(out, label->s, id->symType);
 	  out << endl;
@@ -2853,7 +2854,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 	  out << CMangle(id);
 	  out << "(";
 	  for(size_t i=0; i < args->components.size(); i++) {
-	    GCPtr<Type> arg = args->CompType(i);
+	    shared_ptr<Type> arg = args->CompType(i);
 	    if (isUnitType(arg))
 	      continue;
 
@@ -2985,15 +2986,15 @@ EmitMain(INOstream &out)
 
 static bool
 ValuesTOH(std::ostream& errStream, 
-	  GCPtr<UocInfo> uoc,
+	  shared_ptr<UocInfo> uoc,
 	  INOstream &out,
 	  unsigned long flags)
 {
   bool errFree = true;
   
-  GCPtr<AST> mod = uoc->uocAst;
+  shared_ptr<AST> mod = uoc->uocAst;
   for(size_t c = 0; c < mod->children.size(); c++) {
-    GCPtr<AST> ast = mod->child(c);
+    shared_ptr<AST> ast = mod->child(c);
     switch(ast->astType) {
     case at_proclaim:
       {
@@ -3019,7 +3020,7 @@ ValuesTOH(std::ostream& errStream,
 
 bool
 GenerateCoutput(std::ostream &errStream, INOstream &out,
-		unsigned long flags, GCPtr<UocInfo> uoc)
+		unsigned long flags, shared_ptr<UocInfo> uoc)
 {
   bool errFree = true;
   
@@ -3083,7 +3084,7 @@ GenerateCoutput(std::ostream &errStream, INOstream &out,
 
 bool
 EmitHeader(std::ostream &optStream, std::ostream &errStream,
-	   GCPtr<UocInfo> uoc)
+	   shared_ptr<UocInfo> uoc)
 {
   std::ofstream out(Options::outputFileName.c_str(),
 		    std::ios_base::out|std::ios_base::trunc);
@@ -3104,7 +3105,7 @@ EmitHeader(std::ostream &optStream, std::ostream &errStream,
 
 bool
 EmitC(std::ostream &optStream, std::ostream &errStream,
-      GCPtr<UocInfo> uoc)
+      shared_ptr<UocInfo> uoc)
 {  
   std::ofstream out(Options::outputFileName.c_str(),
 		    std::ios_base::out|std::ios_base::trunc);
@@ -3123,7 +3124,7 @@ EmitC(std::ostream &optStream, std::ostream &errStream,
 
 bool
 EmitExe(std::ostream &optStream, std::ostream &errStream,
-	GCPtr<UocInfo> uoc)
+	shared_ptr<UocInfo> uoc)
 {
   std::ofstream csrc("bitc.out.c",
 		     std::ios_base::out|std::ios_base::trunc);

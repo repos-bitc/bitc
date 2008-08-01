@@ -51,6 +51,7 @@
 #include "TypeInfer.hxx"
 #include "TypeInferUtil.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
@@ -58,14 +59,14 @@ using namespace std;
 /*                     Some Helper Functions                  */
 /**************************************************************/
 
-GCPtr<Type> 
-obtainFullUnionType(GCPtr<Type> t)
+shared_ptr<Type> 
+obtainFullUnionType(shared_ptr<Type> t)
 {  
   t = t->getBareType();  
   assert(t->isUType());
-  GCPtr<AST> unin = t->myContainer;  
-  GCPtr<TypeScheme> uScheme = unin->scheme;
-  GCPtr<Type> uType = uScheme->type_instance_copy()->getType();
+  shared_ptr<AST> unin = t->myContainer;  
+  shared_ptr<TypeScheme> uScheme = unin->scheme;
+  shared_ptr<Type> uType = uScheme->type_instance_copy()->getType();
 
   assert(uType->kind == ty_unionv || uType->kind == ty_unionr);
   assert(uType->typeArgs.size() == t->typeArgs.size());
@@ -77,7 +78,7 @@ obtainFullUnionType(GCPtr<Type> t)
 }
 
 size_t
-nCtArgs(GCPtr<Type> t)
+nCtArgs(shared_ptr<Type> t)
 {
   assert(t->isUType() || t->isException());
   t = t->getBareType();
@@ -99,18 +100,18 @@ nCtArgs(GCPtr<Type> t)
 /* Use all bindings in the some other environment */
 void
 useIFGamma(const std::string& idName,
-	   GCPtr<TSEnvironment > fromEnv, 
-	   GCPtr<TSEnvironment > toEnv)
+	   shared_ptr<TSEnvironment > fromEnv, 
+	   shared_ptr<TSEnvironment > toEnv)
 {
   for(TSEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
-    GCPtr<Binding<TypeScheme> > bdng = itr->second;
+    shared_ptr<Binding<TypeScheme> > bdng = itr->second;
 
     if (bdng->flags & BF_PRIVATE)
       continue;
 
     std::string s = bdng->nm;
-    GCPtr<TypeScheme> ts = bdng->val;
+    shared_ptr<TypeScheme> ts = bdng->val;
 
     if (idName.size())
       s = idName + "." + s;
@@ -123,18 +124,18 @@ useIFGamma(const std::string& idName,
 
 void
 useIFInsts(const std::string& idName,
-	   GCPtr<InstEnvironment >fromEnv, 
-	   GCPtr<InstEnvironment >toEnv)
+	   shared_ptr<InstEnvironment >fromEnv, 
+	   shared_ptr<InstEnvironment >toEnv)
 {
   for(InstEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
-    GCPtr<Binding<set<GCPtr<Instance> > > > bdng = itr->second;
+    shared_ptr<Binding<set<shared_ptr<Instance> > > > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE)
       continue;
     
     std::string s = bdng->nm;
-    GCPtr<set<GCPtr<Instance> > > insts = bdng->val;
+    shared_ptr<set<shared_ptr<Instance> > > insts = bdng->val;
     
     if (idName.size())
       s = idName + "." + s;
@@ -147,9 +148,9 @@ useIFInsts(const std::string& idName,
 /* Initialize my environment */
 bool
 initGamma(std::ostream& errStream, 
-	  GCPtr<TSEnvironment > gamma,
-	  GCPtr<InstEnvironment > instEnv,
-	  const GCPtr<AST> topAst, unsigned long uflags)
+	  shared_ptr<TSEnvironment > gamma,
+	  shared_ptr<InstEnvironment > instEnv,
+	  const shared_ptr<AST> topAst, unsigned long uflags)
 {
   bool errFree = true;
   // Make sure I am not processing the prelude itself
@@ -162,8 +163,8 @@ initGamma(std::ostream& errStream,
   }
   
   // "use" everything in the prelude
-  GCPtr<TSEnvironment > preenv = GC_NULL;
-  GCPtr<InstEnvironment > preInsts = GC_NULL;
+  shared_ptr<TSEnvironment > preenv = GC_NULL;
+  shared_ptr<InstEnvironment > preInsts = GC_NULL;
   
   size_t i;
 

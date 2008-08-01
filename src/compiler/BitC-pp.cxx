@@ -51,6 +51,7 @@
 #include "inter-pass.hxx"
 #include "TypeScheme.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
@@ -58,9 +59,9 @@ using namespace std;
 
 // At the moment, the "pretty" part of the pretty printing is broken.
 static void
-print_type(INOstream& out, GCPtr <const AST> ast)
+print_type(INOstream& out, shared_ptr <const AST> ast)
 {
-  GCPtr<Type> ty = ast->symType;
+  shared_ptr<Type> ty = ast->symType;
 
   if(ty)
     out << " {" << ty->asString() << "}";
@@ -70,10 +71,10 @@ print_type(INOstream& out, GCPtr <const AST> ast)
 }  
 
 static void
-BitcP(INOstream& out, GCPtr <const AST> ast, bool);
+BitcP(INOstream& out, shared_ptr <const AST> ast, bool);
 
 static void
-doChildren(INOstream& out, GCPtr <const AST> ast, size_t from, 
+doChildren(INOstream& out, shared_ptr <const AST> ast, size_t from, 
 	   bool firstPad,
 	   bool showTypes)
 {
@@ -93,8 +94,8 @@ doChildren(INOstream& out, GCPtr <const AST> ast, size_t from,
 }
 
 static void
-show_qual_name(INOstream &out,  GCPtr <const AST> ident, 
-	       GCPtr <const AST> tvlist, GCPtr <const AST> constraints,
+show_qual_name(INOstream &out,  shared_ptr <const AST> ident, 
+	       shared_ptr <const AST> tvlist, shared_ptr <const AST> constraints,
 	       const bool showTypes) 
 { 
   bool constraintsPresent = constraints && (constraints->children.size() > 0);
@@ -121,8 +122,8 @@ show_qual_name(INOstream &out,  GCPtr <const AST> ident,
 }
 
 static void
-show_qual_name(INOstream &out,  GCPtr <const AST> tapp, 
-	       GCPtr <const AST> constraints, bool showTypes) 
+show_qual_name(INOstream &out,  shared_ptr <const AST> tapp, 
+	       shared_ptr <const AST> constraints, bool showTypes) 
 { 
   bool constraintsPresent = (constraints->children.size() > 0);
   if(constraintsPresent) {
@@ -138,7 +139,7 @@ show_qual_name(INOstream &out,  GCPtr <const AST> tapp,
 }
 
 static void
-BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
+BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 {
   size_t startIndent = out.indentToHere();
 
@@ -233,7 +234,7 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
       BitcP(out, ast->child(0), showTypes);
       
       // Procedure arguments:
-      GCPtr<AST> iLambda = ast->child(1);
+      shared_ptr<AST> iLambda = ast->child(1);
       doChildren(out, iLambda->child(0), 0, true, showTypes);
       
       out << ")";
@@ -448,7 +449,7 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
   case at_letrec:
   case at_let:
     {
-      GCPtr<AST> constraints = ast->child(2);
+      shared_ptr<AST> constraints = ast->child(2);
       if (constraints->children.size()) {
 	out << "(constrain ";
 	out.indentToHere();
@@ -542,8 +543,8 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
 
   case at_importAs:
     {
-      GCPtr<AST> ifAst = ast->child(0); 
-      GCPtr<AST> idAst = ast->child(1);
+      shared_ptr<AST> ifAst = ast->child(0); 
+      shared_ptr<AST> idAst = ast->child(1);
 
       out << "(" << ast->atKwd();
       BitcP(out, ifAst, showTypes);
@@ -578,8 +579,8 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
     
   case at_proclaim:
     {
-      GCPtr<AST> ident = ast->child(0);
-      GCPtr<AST> proc_type = ast->child(1);
+      shared_ptr<AST> ident = ast->child(0);
+      shared_ptr<AST> proc_type = ast->child(1);
       out << "(" << ast->atKwd() << " ";
       BitcP(out, ident, showTypes);
       out << " : ";
@@ -597,11 +598,11 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
  
   case at_deftypeclass:
     {
-      GCPtr<AST> ident = ast->child(0);
-      GCPtr<AST> tvlist = ast->child(1);
-      GCPtr<AST> tcdecls = ast->child(2);
-      GCPtr<AST> methods = ast->child(3);
-      GCPtr<AST> constraints = ast->child(4);
+      shared_ptr<AST> ident = ast->child(0);
+      shared_ptr<AST> tvlist = ast->child(1);
+      shared_ptr<AST> tcdecls = ast->child(2);
+      shared_ptr<AST> methods = ast->child(3);
+      shared_ptr<AST> constraints = ast->child(4);
 
       out << "(" << ast->atKwd() << " ";
       show_qual_name(out, ident, tvlist, constraints, showTypes);
@@ -615,9 +616,9 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
 
   case at_definstance:
     {
-      GCPtr<AST> tapp = ast->child(0);
-      GCPtr<AST> methods = ast->child(1);
-      GCPtr<AST> constraints = ast->child(2);
+      shared_ptr<AST> tapp = ast->child(0);
+      shared_ptr<AST> methods = ast->child(1);
+      shared_ptr<AST> constraints = ast->child(2);
       out << "(" << ast->atKwd() << " ";
       show_qual_name(out, tapp, constraints, showTypes);
       BitcP(out, methods, showTypes);
@@ -657,10 +658,10 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
             
   case at_defrepr:
     {
-      GCPtr<AST> ident = ast->child(0);
-      GCPtr<AST> category = ast->child(1);
-      GCPtr<AST> declares = ast->child(2);
-      GCPtr<AST> body = ast->child(3);
+      shared_ptr<AST> ident = ast->child(0);
+      shared_ptr<AST> category = ast->child(1);
+      shared_ptr<AST> declares = ast->child(2);
+      shared_ptr<AST> body = ast->child(3);
 
       out << "(" << ast->atKwd() << " ";
       BitcP(out, ident, showTypes);
@@ -684,7 +685,7 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
 
     //case at_reprcaselegR:
     //     {
-    //       GCPtr<AST> body = ast->child(0);
+    //       shared_ptr<AST> body = ast->child(0);
     //       out << "(";
     //       if (ast->children.size() > 2)
     // 	out << "(";
@@ -708,12 +709,12 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
   case at_defunion:
   case at_defstruct:
     {
-      GCPtr<AST> ident = ast->child(0);
-      GCPtr<AST> tvlist = ast->child(1);
-      GCPtr<AST> category = ast->child(2);
-      GCPtr<AST> declares = ast->child(3);
-      GCPtr<AST> fc = ast->child(4);
-      GCPtr<AST> constraints = ast->child(5);
+      shared_ptr<AST> ident = ast->child(0);
+      shared_ptr<AST> tvlist = ast->child(1);
+      shared_ptr<AST> category = ast->child(2);
+      shared_ptr<AST> declares = ast->child(3);
+      shared_ptr<AST> fc = ast->child(4);
+      shared_ptr<AST> constraints = ast->child(5);
 
       out << "(" << ast->atKwd() << " ";
       out.indentToHere();
@@ -731,10 +732,10 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
   case at_declstruct:
   case at_declrepr:
     {
-      GCPtr<AST> ident = ast->child(0);
-      GCPtr<AST> tvlist = ast->child(1);
-      GCPtr<AST> category = ast->child(2);
-      GCPtr<AST> constraints = ast->child(3);
+      shared_ptr<AST> ident = ast->child(0);
+      shared_ptr<AST> tvlist = ast->child(1);
+      shared_ptr<AST> category = ast->child(2);
+      shared_ptr<AST> constraints = ast->child(3);
       
 
       out << "(" << ast->atKwd() << " ";
@@ -974,11 +975,11 @@ BitcP(INOstream& out, GCPtr <const AST> ast, bool showTypes)
 }
 
 static void 
-doShowTypes(std::ostream& out, GCPtr<AST> ast, 
-	    GCPtr<TSEnvironment > gamma,
+doShowTypes(std::ostream& out, shared_ptr<AST> ast, 
+	    shared_ptr<TSEnvironment > gamma,
 	    bool showMangName,
 	    bool raw = false,
-	    GCPtr<TvPrinter> tvP=GC_NULL)
+	    shared_ptr<TvPrinter> tvP=GC_NULL)
 {
   switch(ast->astType) {
   case at_ident:

@@ -13,6 +13,7 @@
 #include "Special.hxx"
 #include "UocInfo.hxx"
 
+using namespace boost;
 using namespace sherpa;
 unsigned long long AST::astCount = 0;
 

@@ -55,6 +55,7 @@
 #include "inter-pass.hxx"
 
 using namespace std;
+using namespace boost;
 using namespace sherpa;
 
 bool 
@@ -130,25 +131,25 @@ UocInfo::unwrapEnvs()
 
 bool
 resolve(std::ostream& errStream, 
-	GCPtr<AST> ast, 
-	GCPtr<ASTEnvironment > env,
-	GCPtr<ASTEnvironment > lamLevel,
+	shared_ptr<AST> ast, 
+	shared_ptr<ASTEnvironment > env,
+	shared_ptr<ASTEnvironment > lamLevel,
 	int mode, 
 	IdentType identType,
-	GCPtr<AST> currLB,
+	shared_ptr<AST> currLB,
 	unsigned long flags);
 
 bool 
 UocInfo::RandTexpr(std::ostream& errStream,
-		   GCPtr<AST> expr,
+		   shared_ptr<AST> expr,
 		   unsigned long rflags,
 		   unsigned long tflags,
 		   std::string mesg,
 		   bool keepResults,
-		   GCPtr<EnvSet> altEnvSet)
+		   shared_ptr<EnvSet> altEnvSet)
 {
   bool errFree = true;
-  GCPtr<UocInfo> myUoc = UocInfo::make(shared_from_this());
+  shared_ptr<UocInfo> myUoc = UocInfo::make(shared_from_this());
   myUoc->uocAst = expr;
   
   if(altEnvSet) {
@@ -188,7 +189,7 @@ UocInfo::RandTexpr(std::ostream& errStream,
  *
  * See the explanation in AST.ast*/
 void
-UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
+UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST> top)
 {
   bool processChildren = true; 
 
@@ -213,7 +214,7 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
   case at_letbinding:
     {
       MARKDEF(ast, local);
-      GCPtr<AST> id = ast->child(0)->child(0);
+      shared_ptr<AST> id = ast->child(0)->child(0);
       MARKDEF(id, ast);
       break;
     }
@@ -221,7 +222,7 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
   case at_define:
   case at_recdef:
     {
-      GCPtr<AST> id = ast->child(0)->child(0);
+      shared_ptr<AST> id = ast->child(0)->child(0);
       MARKDEF(id, ast);
       top = ast;
       local = ast;
@@ -234,7 +235,7 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
   case at_defstruct:
   case at_defexception:
     {
-      GCPtr<AST> id = ast->child(0);
+      shared_ptr<AST> id = ast->child(0);
       MARKDEF(id, ast);
       processChildren = false;
       break;
@@ -242,12 +243,12 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
 
   case at_defunion:
     {
-      GCPtr<AST> id = ast->child(0);
+      shared_ptr<AST> id = ast->child(0);
       MARKDEF(id, ast);
-      GCPtr<AST> ctrs = ast->child(4);
+      shared_ptr<AST> ctrs = ast->child(4);
       for(size_t i=0; i < ctrs->children.size(); i++) {
-	GCPtr<AST> ctr = ctrs->child(i);
-	GCPtr<AST> ctrID = ctr->child(0);
+	shared_ptr<AST> ctr = ctrs->child(i);
+	shared_ptr<AST> ctrID = ctr->child(0);
 	MARKDEF(ctrID, ast);
       }
       processChildren = false;
@@ -256,13 +257,13 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
 
   case at_deftypeclass:
     {
-      GCPtr<AST> id = ast->child(0);
+      shared_ptr<AST> id = ast->child(0);
       MARKDEF(id, ast);
 	
-      GCPtr<AST> methods = ast->child(3);
+      shared_ptr<AST> methods = ast->child(3);
       for(size_t i = 0; i < methods->children.size(); i++) {
-	GCPtr<AST> method = methods->child(i);
-	GCPtr<AST> mID = method->child(0);
+	shared_ptr<AST> method = methods->child(i);
+	shared_ptr<AST> mID = method->child(0);
 	MARKDEF(mID, ast);
       }
       processChildren = false;
@@ -286,7 +287,7 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
   case at_dobinding:
     {
       MARKDEF(ast, local);
-      GCPtr<AST> id = ast->child(0)->child(0);
+      shared_ptr<AST> id = ast->child(0)->child(0);
       MARKDEF(id, ast);
       break;
     }
@@ -309,23 +310,23 @@ UocInfo::findAllDefForms()
 {
   for(UocMap::iterator itr = UocInfo::srcList.begin();
       itr != UocInfo::srcList.end(); ++itr) {
-    GCPtr<UocInfo> puoci = itr->second;
+    shared_ptr<UocInfo> puoci = itr->second;
     puoci->findDefForms(puoci->uocAst);
   }
 
   for(UocMap::iterator itr = UocInfo::ifList.begin();
       itr != UocInfo::ifList.end(); ++itr) {
-    GCPtr<UocInfo> puoci = itr->second;
+    shared_ptr<UocInfo> puoci = itr->second;
     puoci->findDefForms(puoci->uocAst);
   }
 }
 
 static void
-addCandidates(GCPtr<AST> mod)
+addCandidates(shared_ptr<AST> mod)
 {
   for(size_t c = 0; c < mod->children.size(); c++) {
-    GCPtr<AST> ast = mod->child(c);
-    GCPtr<AST> id = ast->getID();
+    shared_ptr<AST> ast = mod->child(c);
+    shared_ptr<AST> id = ast->getID();
     switch(ast->astType) {
     case at_proclaim: // proclaims needed to keep externalNames
     case at_define:
@@ -348,13 +349,13 @@ UocInfo::addAllCandidateEPs()
 {
   for(UocMap::iterator itr = UocInfo::ifList.begin();
       itr != UocInfo::ifList.end(); ++itr) {
-    GCPtr<UocInfo> puoci = itr->second;
+    shared_ptr<UocInfo> puoci = itr->second;
     addCandidates(puoci->uocAst);
   }  
 
   for(UocMap::iterator itr = UocInfo::srcList.begin();
       itr != UocInfo::srcList.end(); ++itr) {
-    GCPtr<UocInfo> puoci = itr->second;
+    shared_ptr<UocInfo> puoci = itr->second;
     addCandidates(puoci->uocAst);
   }
 

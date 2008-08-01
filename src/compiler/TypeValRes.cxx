@@ -56,6 +56,7 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
@@ -81,8 +82,8 @@ if(ans == true) \
 
 bool
 isExpansive(std::ostream& errStream, 
-	    GCPtr<const TSEnvironment > gamma,
-	    GCPtr<const AST> ast) 
+	    shared_ptr<const TSEnvironment > gamma,
+	    shared_ptr<const AST> ast) 
 {
   bool itsExpansive = false;
   
@@ -456,11 +457,11 @@ isExpansive(std::ostream& errStream,
 
 bool
 isExpansive(std::ostream& errStream, 
-	    GCPtr<const TSEnvironment > gamma,
-	    GCPtr<Type> typ) 
+	    shared_ptr<const TSEnvironment > gamma,
+	    shared_ptr<Type> typ) 
 {
   bool itsExpansive = false;
-  GCPtr<Type> t = typ->getType();
+  shared_ptr<Type> t = typ->getType();
   
   if(t->mark & MARK4)
     return itsExpansive;

@@ -57,25 +57,26 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
-TypeScheme::TypeScheme(GCPtr<Type> _tau, GCPtr<AST> _ast, GCPtr<TCConstraints> _tcc)
+TypeScheme::TypeScheme(shared_ptr<Type> _tau, shared_ptr<AST> _ast, shared_ptr<TCConstraints> _tcc)
 {
   tau = _tau;
   ast = _ast;
   tcc = _tcc;
 }
 
-GCPtr<Type> 
+shared_ptr<Type> 
 TypeScheme::type_instance_copy()
 {
   normalize();
 
   //std::cout << "Instantiating by copy " << this->asString();
 
-  vector<GCPtr<Type> > cnftvs;
-  vector<GCPtr<Type> > cftvs;
+  vector<shared_ptr<Type> > cnftvs;
+  vector<shared_ptr<Type> > cftvs;
   
   for(TypeSet::iterator itr_i = ftvs.begin(); 
       itr_i != ftvs.end(); ++itr_i) {
@@ -83,20 +84,20 @@ TypeScheme::type_instance_copy()
     cnftvs.push_back(newTvar());
   }
   
-  GCPtr<Type> t = tau->TypeSpecialize(cftvs, cnftvs); 
+  shared_ptr<Type> t = tau->TypeSpecialize(cftvs, cnftvs); 
   //std::cout << " to " << t->asString() << std::endl;
 
   return t;
 }
 
 
-GCPtr<Type> 
+shared_ptr<Type> 
 TypeScheme::type_instance()
 {
   normalize();
   //std::cout << "Instantiating " << this->asString();
 
-  GCPtr<Type> t;
+  shared_ptr<Type> t;
   if(ftvs.empty())
     t = tau;
   else
@@ -108,20 +109,20 @@ TypeScheme::type_instance()
 }
 
 
-GCPtr<TypeScheme> 
+shared_ptr<TypeScheme> 
 TypeScheme::ts_instance(bool fullCopy)
 {
   normalize();
 
-  GCPtr<TypeScheme> ts = TypeScheme::make(tau, ast);
+  shared_ptr<TypeScheme> ts = TypeScheme::make(tau, ast);
   ts->tau = GC_NULL;
 
-  vector<GCPtr<Type> > cnftvs;
-  vector<GCPtr<Type> > cftvs;
+  vector<shared_ptr<Type> > cnftvs;
+  vector<shared_ptr<Type> > cftvs;
   
   for(TypeSet::iterator itr_i = ftvs.begin(); 
       itr_i != ftvs.end(); ++itr_i) {
-    GCPtr<Type> tv = newTvar();
+    shared_ptr<Type> tv = newTvar();
     ts->ftvs.insert(tv);
     cftvs.push_back(*itr_i);
     cnftvs.push_back(tv);
@@ -133,13 +134,13 @@ TypeScheme::ts_instance(bool fullCopy)
     ts->tau = tau;
  
   if(tcc) {
-    GCPtr<TCConstraints> _tcc = TCConstraints::make();
+    shared_ptr<TCConstraints> _tcc = TCConstraints::make();
     addConstraints(_tcc);
     
     ts->tcc = TCConstraints::make();
     for(TypeSet::iterator itr = _tcc->begin();
 	itr != _tcc->end(); ++itr) {
-      GCPtr<Typeclass> pred;
+      shared_ptr<Typeclass> pred;
       
       if(fullCopy || ftvs.size())
 	pred = (*itr)->TypeSpecializeReal(cftvs, cnftvs);
@@ -160,14 +161,14 @@ TypeScheme::ts_instance(bool fullCopy)
   return ts;
 }
 
-GCPtr<TypeScheme> 
+shared_ptr<TypeScheme> 
 TypeScheme::ts_instance_copy() 
 {
   return ts_instance(true);
 }
 
 void
-TypeScheme::addConstraints(GCPtr<TCConstraints> _tcc) const
+TypeScheme::addConstraints(shared_ptr<TCConstraints> _tcc) const
 {
   if(!tcc)
     return;
@@ -212,7 +213,7 @@ TypeScheme::normalize()
   TypeSet newTvs;
   for(TypeSet::iterator itr_c = ftvs.begin();
       itr_c != ftvs.end(); ++itr_c) {
-    GCPtr<Type> ftv = (*itr_c)->getType();
+    shared_ptr<Type> ftv = (*itr_c)->getType();
     
     if(ftv->kind == ty_tvar)
       newTvs.insert(ftv);
@@ -222,19 +223,19 @@ TypeScheme::normalize()
   ftvs = newTvs;
   
   if(tcc) {
-    set< GCPtr<Constraint> > allPreds = tcc->pred;
+    set< shared_ptr<Constraint> > allPreds = tcc->pred;
     tcc->pred.clear();
     
     for(TypeSet::iterator itr = allPreds.begin();
 	itr != allPreds.end(); ++itr) {
-      GCPtr<Constraint> ct = (*itr)->getType();
+      shared_ptr<Constraint> ct = (*itr)->getType();
       if(!ct->isPcst()) {
 	tcc->addPred(ct);
 	continue;
       }
       
-      GCPtr<Type> k = ct->CompType(0)->getType();
-      GCPtr<Type> tg = ct->CompType(1)->getType();
+      shared_ptr<Type> k = ct->CompType(0)->getType();
+      shared_ptr<Type> tg = ct->CompType(1)->getType();
 
       /* If k = M, the solver must have handled this case
 	 and unified tg = ti

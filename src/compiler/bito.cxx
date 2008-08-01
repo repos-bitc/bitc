@@ -57,6 +57,7 @@
 #include "UocInfo.hxx"
 #include "AST.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 bool
@@ -77,7 +78,7 @@ EmitBitO(std::ostream &optStream, std::ostream &errStream)
 
   for(UocMap::iterator itr = UocInfo::srcList.begin();
       itr != UocInfo::srcList.end(); ++itr) {
-    GCPtr<UocInfo> uoc = itr->second;
+    shared_ptr<UocInfo> uoc = itr->second;
 
     uoc->PrettyPrint(out, false);
   }

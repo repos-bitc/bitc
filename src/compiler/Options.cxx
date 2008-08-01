@@ -39,6 +39,7 @@
 
 using namespace std;
 using namespace boost;
+using namespace boost;
 using namespace sherpa;
 
 namespace Options {
@@ -71,7 +72,7 @@ namespace Options {
   bool Wall = false;
   bool noGC = false;
   bool noAlloc = false;
-  GCPtr<TvPrinter> debugTvP = TvPrinter::make();
+  shared_ptr<TvPrinter> debugTvP = TvPrinter::make();
   bool heuristicInference = false;
 
   vector<string> LinkPreOptionsGCC;

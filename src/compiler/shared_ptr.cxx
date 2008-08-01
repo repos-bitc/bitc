@@ -1,9 +1,6 @@
-#ifndef TYPEMUT_HXX
-#define TYPEMUT_HXX
-
 /**************************************************************************
  *
- * Copyright (C) 2008, Johns Hopkins University.
+ * Copyright (C) 2008, The EROS Group, LLC.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -38,41 +35,8 @@
  *
  **************************************************************************/
 
-#include <stdlib.h>
-#include <dirent.h>
-#include <fstream>
-#include <iostream>
-#include <string>
-#include "AST.hxx"
-#include "Type.hxx"
- 
-/* Different options for creating type records. Thsese helper
-   functions are in place so that all maybe-records are created at one
-   place. Some functions exist so that we cah flip copy behavious in
-   some cases easily */
+#include "shared_ptr.hxx"
 
- 
-/* All type-variables are maybe-types by default, 
-   We use bare tvars in some cases (ex: when the sole purpose of
-   creating the type variable is unification of the types across all
-   legs of a datastructure or expression.*/
-
-static inline boost::shared_ptr<Type> 
-newTvar()
-{
-  return Type::make(ty_tvar);
+namespace boost {
+  GC_Null_tag GC_NULL;
 }
-
-static inline boost::shared_ptr<Type> 
-MBF(boost::shared_ptr<Type> t)
-{
-  return Type::make(ty_mbFull, newTvar(), t->minimizeMutability());
-}
-
-static inline boost::shared_ptr<Type> 
-MBT(boost::shared_ptr<Type> t)
-{
-  return Type::make(ty_mbTop, newTvar(), t->getBareType());
-}
-
-#endif /* TYPEMUT_HXX */

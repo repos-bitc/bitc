@@ -56,6 +56,7 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
@@ -323,7 +324,7 @@ Type::toString()
 
   case ty_kfix:
     {
-      GCPtr<Type> t = shared_from_this(); // To satisfy libsherpa
+      shared_ptr<Type> t = shared_from_this(); // To satisfy libsherpa
       if(t == Type::Kmono)
 	ss << "m";
       else if(t == Type::Kpoly)

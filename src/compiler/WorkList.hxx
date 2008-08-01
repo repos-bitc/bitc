@@ -43,7 +43,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <libsherpa/GCPtr.hxx>
+#include "shared_ptr.hxx"
 
 // This is intentionally not a subclass of Donelist. 
 // There should be no compatibility.
@@ -98,19 +98,19 @@ struct BaseWorkList {
 
 template <class T>
 struct WorkList : public BaseWorkList<T, false> {
-  static inline sherpa::GCPtr<WorkList<T> >
+  static inline boost::shared_ptr<WorkList<T> >
   make() {
     WorkList<T> *tmp = new WorkList<T>();
-    return sherpa::GCPtr<WorkList<T> >(tmp);
+    return boost::shared_ptr<WorkList<T> >(tmp);
   }
 };
 
 template <class T>
 struct DoneList : public BaseWorkList<T, true> {
-  static inline sherpa::GCPtr<DoneList<T> >
+  static inline boost::shared_ptr<DoneList<T> >
   make() {
     DoneList<T> *tmp = new DoneList<T>();
-    return sherpa::GCPtr<DoneList<T> >(tmp);
+    return boost::shared_ptr<DoneList<T> >(tmp);
   }
 };
 

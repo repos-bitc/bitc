@@ -55,10 +55,11 @@
 #include "inter-pass.hxx"
 
 using namespace std;
+using namespace boost;
 using namespace sherpa;
 
 bool 
-TCConstraints::contains(GCPtr<Typeclass> tc) 
+TCConstraints::contains(shared_ptr<Typeclass> tc) 
 {
   for(iterator itr = begin(); itr != end(); ++itr)
     if((*itr)->strictlyEquals(tc, false, true))
@@ -68,7 +69,7 @@ TCConstraints::contains(GCPtr<Typeclass> tc)
 }
  
 void 
-TCConstraints::addPred(GCPtr<Typeclass> tc) 
+TCConstraints::addPred(shared_ptr<Typeclass> tc) 
 {
   for(iterator itr = begin(); itr != end(); ++itr) {
     if((*itr)->strictlyEquals(tc, false, true)) {
@@ -82,11 +83,11 @@ TCConstraints::addPred(GCPtr<Typeclass> tc)
 }
 
 void 
-TCConstraints::clearPred(GCPtr<Constraint> ct) 
+TCConstraints::clearPred(shared_ptr<Constraint> ct) 
 {
   ct =  ct->getType();
   for(iterator itr = begin(); itr != end(); ++itr) {
-    GCPtr<Constraint> pr = (*itr)->getType();
+    shared_ptr<Constraint> pr = (*itr)->getType();
     if(pr == ct) {
       pred.erase(itr);
       return;

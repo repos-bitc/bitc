@@ -51,6 +51,7 @@
 #include "inter-pass.hxx"
 #include "backend.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 /**********************************************************************
@@ -88,13 +89,13 @@ For all constructors Ctrx, Ctry, Ctrz ...:
 
 ***************************************************************/
 
-GCPtr<AST> 
-reprXform(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
+shared_ptr<AST> 
+reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 {
   switch(ast->astType) {
   case at_defrepr:
     {
-      GCPtr<AST> unin = AST::make(ast, false); 
+      shared_ptr<AST> unin = AST::make(ast, false); 
       
       unin->astType = at_defunion;
       unin->Flags2 |= UNION_IS_REPR;
@@ -112,7 +113,7 @@ reprXform(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
     
   case at_reprctrs:
     {
-      GCPtr<AST> ctrs = AST::make(at_constructors, ast->loc);
+      shared_ptr<AST> ctrs = AST::make(at_constructors, ast->loc);
       for(size_t c=0; c < ast->children.size(); c++)
 	ctrs->addChild(reprXform(ast->child(c), errStream, errFree));
       ast = ctrs;
@@ -121,14 +122,14 @@ reprXform(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
     
   case at_reprctr:
     {
-      GCPtr<AST> ctr = ast->child(0);      
+      shared_ptr<AST> ctr = ast->child(0);      
 
       for(size_t i=1; i < ast->children.size(); i++) {
-	GCPtr<AST> where = ast->child(i);
+	shared_ptr<AST> where = ast->child(i);
 	bool found = false;
 
 	for(size_t j=1; j < ctr->children.size(); j++) {
-	  GCPtr<AST> fld = ctr->child(j);
+	  shared_ptr<AST> fld = ctr->child(j);
 		  
 	  if(where->child(0)->s == fld->child(0)->s) {
 	    found = true;
@@ -164,7 +165,7 @@ reprXform(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
     
   case at_declrepr:
     {
-      GCPtr<AST> unin = AST::make(ast, false);
+      shared_ptr<AST> unin = AST::make(ast, false);
       
       unin->astType = at_declunion;
       unin->Flags2 |= UNION_IS_REPR;

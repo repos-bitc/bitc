@@ -57,6 +57,7 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
@@ -64,7 +65,7 @@ using namespace std;
 //#define DEBUG_SHOW_RIGIDITY
 
 static string
-printName(GCPtr<AST> ast)
+printName(shared_ptr<AST> ast)
 {
   if(!ast)
     return "NULL";
@@ -73,13 +74,13 @@ printName(GCPtr<AST> ast)
 }
 
 string
-Type::asString(GCPtr<TvPrinter> tvP, bool traverse) 
+Type::asString(shared_ptr<TvPrinter> tvP, bool traverse) 
 { 
 
   if(Options::rawTvars)
     tvP = GC_NULL;
 
-  GCPtr<Type> t;
+  shared_ptr<Type> t;
   if(traverse)
     t = getType();
   else
@@ -94,7 +95,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   
 #ifdef DEBUG_SHOW_ALL_LINKS  
   if(traverse) {
-    GCPtr<Type> t1 = this;
+    shared_ptr<Type> t1 = this;
     ss << "[";
     while(t1->link) {
       ss << "'a" << t1->uniqueID;
@@ -370,7 +371,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
 
 std::string
-TypeScheme::asString(GCPtr<TvPrinter> tvP, bool norm)
+TypeScheme::asString(shared_ptr<TvPrinter> tvP, bool norm)
 {
   std::stringstream ss; 
   bool forall = false;
@@ -399,7 +400,7 @@ TypeScheme::asString(GCPtr<TvPrinter> tvP, bool norm)
 	ss << " (";
 	for(TypeSet::iterator itr = tcc->begin();
 	    itr != tcc->end(); ++itr) {
-	  GCPtr<Typeclass> pred = (*itr)->getType();
+	  shared_ptr<Typeclass> pred = (*itr)->getType();
 	  ss << pred->asString(tvP) << " ";
 	  
 	  for(TypeSet::iterator itr_j = pred->fnDeps.begin();
@@ -410,9 +411,9 @@ TypeScheme::asString(GCPtr<TvPrinter> tvP, bool norm)
       }
     }
     else { 
-      //GCPtr<TCConstraints> _tcc = new TCConstraints;
+      //shared_ptr<TCConstraints> _tcc = new TCConstraints;
       //addConstraints(_tcc);
-      GCPtr<TCConstraints> _tcc = tcc;
+      shared_ptr<TCConstraints> _tcc = tcc;
 
       if(_tcc->size()) {
 	for(TypeSet::iterator itr = _tcc->begin();

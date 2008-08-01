@@ -43,9 +43,9 @@
 #include "Environment.hxx"
 #include "debug.hxx"
 
-#include <libsherpa/GCPtr.hxx>
-#define AST_SMART_PTR sherpa::GCPtr
-#define AST_SUPERCLASS sherpa::enable_shared_from_this<AST>
+#include "shared_ptr.hxx"
+#define AST_SMART_PTR boost::shared_ptr
+#define AST_SUPERCLASS boost::enable_shared_from_this<AST>
 
 }
 
@@ -245,19 +245,19 @@ enum primOp {
 
 struct AST;
 struct EnvSet {
-  sherpa::GCPtr<ASTEnvironment> env;
-  sherpa::GCPtr<TSEnvironment> gamma;
-  sherpa::GCPtr<InstEnvironment> instEnv;
+  boost::shared_ptr<ASTEnvironment> env;
+  boost::shared_ptr<TSEnvironment> gamma;
+  boost::shared_ptr<InstEnvironment> instEnv;
   
   EnvSet()
   {
-    env = sherpa::GC_NULL;
-    gamma = sherpa::GC_NULL;
-    instEnv = sherpa::GC_NULL;
+    env = boost::GC_NULL;
+    gamma = boost::GC_NULL;
+    instEnv = boost::GC_NULL;
   }
 
-  EnvSet(sherpa::GCPtr<ASTEnvironment > _env, sherpa::GCPtr<TSEnvironment >_gamma,
-	 sherpa::GCPtr<InstEnvironment > _instEnv)
+  EnvSet(boost::shared_ptr<ASTEnvironment > _env, boost::shared_ptr<TSEnvironment >_gamma,
+	 boost::shared_ptr<InstEnvironment > _instEnv)
   {
     env = _env;
     gamma = _gamma;
@@ -279,27 +279,27 @@ struct EnvSet {
   }
 
   /* Quasi-constructors: */
-  static inline sherpa::GCPtr<EnvSet>
+  static inline boost::shared_ptr<EnvSet>
   make()
   {
     EnvSet *tmp = new EnvSet();
-    return sherpa::GCPtr<EnvSet>(tmp);
+    return boost::shared_ptr<EnvSet>(tmp);
   }
 
-  static inline sherpa::GCPtr<EnvSet>
-  make(sherpa::GCPtr<ASTEnvironment> _env, 
-       sherpa::GCPtr<TSEnvironment>_gamma,
-       sherpa::GCPtr<InstEnvironment> _instEnv)
+  static inline boost::shared_ptr<EnvSet>
+  make(boost::shared_ptr<ASTEnvironment> _env, 
+       boost::shared_ptr<TSEnvironment>_gamma,
+       boost::shared_ptr<InstEnvironment> _instEnv)
   {
     EnvSet *tmp = new EnvSet(_env, _gamma, _instEnv);
-    return sherpa::GCPtr<EnvSet>(tmp);
+    return boost::shared_ptr<EnvSet>(tmp);
   }
 
-  static inline sherpa::GCPtr<EnvSet>
+  static inline boost::shared_ptr<EnvSet>
   make(EnvSet &envs)
   {
     EnvSet *tmp = new EnvSet(envs);
-    return sherpa::GCPtr<EnvSet>(tmp);
+    return boost::shared_ptr<EnvSet>(tmp);
   }
 };
 
@@ -321,9 +321,9 @@ struct EnvSet {
 
   unsigned printVariant;	// which syntax to use for pretty printing
 
-  sherpa::GCPtr<TypeScheme> scheme;		// defining occurrences only
-  sherpa::GCPtr<Type> symType;		// the (pre-unified) type
-  sherpa::GCPtr<AST> symbolDef;
+  boost::shared_ptr<TypeScheme> scheme;		// defining occurrences only
+  boost::shared_ptr<Type> symType;		// the (pre-unified) type
+  boost::shared_ptr<AST> symbolDef;
 
   bool isDecl;                  // is This a declaration or definition?
 
@@ -343,8 +343,8 @@ struct EnvSet {
  
   // If this is a declaration, and a definition for it has been
   // seen, then defn points to the definition.
-  sherpa::GCPtr<AST> defn;  // Pointer to the definition, on a declaration AST 
-  sherpa::GCPtr<AST> decl;  // Pointer to the definitive declaration (the first
+  boost::shared_ptr<AST> defn;  // Pointer to the definition, on a declaration AST 
+  boost::shared_ptr<AST> decl;  // Pointer to the definitive declaration (the first
               // one), on a definition AST.   
 
   // If this is a global identifier, fqn is its canonical fully
@@ -374,7 +374,7 @@ struct EnvSet {
   bool polyinst; // Polyinstantiation Marker (donelist) to avoid 
                  // infinite recursion.
   bool reached; 
-  sherpa::GCPtr<AST> defForm; // defIdent->defining form pointer .
+  boost::shared_ptr<AST> defForm; // defIdent->defining form pointer .
   // defForm has context sensitive meaning. 
   // This is basically a hack in the absence of parent pointers, where
   // I must reach back into the definition and get the defining form,
@@ -413,9 +413,9 @@ struct EnvSet {
   //
   //
 
-  sherpa::GCPtr<AST> defbps; // used in the case of loop, tail-recursion
+  boost::shared_ptr<AST> defbps; // used in the case of loop, tail-recursion
   
-  sherpa::GCPtr<Type> tagType;   // Type of the tag in case of unions
+  boost::shared_ptr<Type> tagType;   // Type of the tag in case of unions
   size_t field_bits; // No. of bits in a bitfield type
   // Also propagated updards onto: 
   //   at_field, at_fill, at_reserved, tagtype (declare) at_declares,
@@ -427,24 +427,24 @@ struct EnvSet {
                      // contains total number of fill bits
                      // that is not a reported by the type record.
 
-  sherpa::GCPtr<TypeScheme> stSigma; // Union constructors only
+  boost::shared_ptr<TypeScheme> stSigma; // Union constructors only
                        // TypeSchemes for the corresponding
                        // Structure definitions.                          
-  sherpa::GCPtr<AST> stCtr;    // Pointer to the constructor that
+  boost::shared_ptr<AST> stCtr;    // Pointer to the constructor that
                        // holds such a structure.
 
   // Tracking scope of type-variables.
-  sherpa::GCPtr<AST> tvarLB;         // LB at which this tvar is scoped
-  sherpa::GCPtr<AST> parentLB;       // LB within which this at_letbindings is
+  boost::shared_ptr<AST> tvarLB;         // LB at which this tvar is scoped
+  boost::shared_ptr<AST> parentLB;       // LB within which this at_letbindings is
   // contained, everything is contained within the top-level
   // definition. The resolver marks the above two markers. No need to
   // worry about them in copy-operations.
 
-  static sherpa::GCPtr<AST> makeBoolLit(const sherpa::LToken &tok);
-  static sherpa::GCPtr<AST> makeIntLit(const sherpa::LToken &tok);
-  static sherpa::GCPtr<AST> makeStringLit(const sherpa::LToken &tok);
-  static sherpa::GCPtr<AST> makeCharLit(const sherpa::LToken &tok);
-  static sherpa::GCPtr<AST> makeFloatLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeBoolLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeIntLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeStringLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeCharLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeFloatLit(const sherpa::LToken &tok);
 
   // Disengage a children[]  AST
   void disown(size_t s);
@@ -453,11 +453,11 @@ struct EnvSet {
   // This will not have any particular type assigned to it, and is
   // intended to be used in the front end passes before the type
   // checker is involved.
-  static sherpa::GCPtr<AST> genIdent(const char *pfx = "tmp", const bool isTV = false);
+  static boost::shared_ptr<AST> genIdent(const char *pfx = "tmp", const bool isTV = false);
 
   // Generate an at_ident AST providing a temporary symbol that is
   // type-compatible with the type of the passed AST /lhs/.
-  static sherpa::GCPtr<AST> genSym(sherpa::GCPtr<AST> lhs, 
+  static boost::shared_ptr<AST> genSym(boost::shared_ptr<AST> lhs, 
 		     const char *pfx="tmp",
 		     const bool isTV = false);
 
@@ -467,45 +467,45 @@ struct EnvSet {
   // if getPattern is true, it adds the identPattern ASTs
   // instead of ident ASTs
   void getIds(std::ostream &errStream, 
-	      std::vector<sherpa::GCPtr<AST> >& ids,
+	      std::vector<boost::shared_ptr<AST> >& ids,
 	      bool getPattern = false);  
-  sherpa::GCPtr<Type> getType(); 
-  sherpa::GCPtr<const Type> getType() const;
+  boost::shared_ptr<Type> getType(); 
+  boost::shared_ptr<const Type> getType() const;
   
-  sherpa::GCPtr<AST> getCtr(); // Union constructors may be written as Ctr or
+  boost::shared_ptr<AST> getCtr(); // Union constructors may be written as Ctr or
   // union.Ctr, this function returns the pure constructor.
 
   // Given a defining occurrence, return an AST for the use occurrence.
-  sherpa::GCPtr<AST> Use();
+  boost::shared_ptr<AST> Use();
 
   // The copy constructor -- make an exact (except ID) shallow copy.
-  AST(sherpa::GCPtr<AST> ast, bool shallowCopyChildren=true);
+  AST(boost::shared_ptr<AST> ast, bool shallowCopyChildren=true);
 
-  static inline sherpa::GCPtr<AST>
-  make(sherpa::GCPtr<AST> ast, bool shallowCopyChildren=true) {
+  static inline boost::shared_ptr<AST>
+  make(boost::shared_ptr<AST> ast, bool shallowCopyChildren=true) {
     AST *tmp = new AST(ast,shallowCopyChildren);
-    return sherpa::GCPtr<AST>(tmp);
+    return boost::shared_ptr<AST>(tmp);
   }
 
   // Makes an exact copy, deep, including symbolDef, type, etc.
-  sherpa::GCPtr<AST> getTrueCopy();
+  boost::shared_ptr<AST> getTrueCopy();
 
   // Makes an exact copy, deep, but clear symbolDef, type, etc.
-  sherpa::GCPtr<AST> getDCopy();
+  boost::shared_ptr<AST> getDCopy();
 
   // Set myself to another, mutator (probably a bad idea).
-  void set(sherpa::GCPtr<AST> ast);
+  void set(boost::shared_ptr<AST> ast);
 
   // Rename identifier `from' to `to' within `this' AST
   // Rename is based on symbolDef. `from' must be a defining form. If
   // (and only if) `from' is found within `this' AST, 
   // it is also renamed.  
-  void rename(sherpa::GCPtr<AST> from, std::string newName);
+  void rename(boost::shared_ptr<AST> from, std::string newName);
 
   std::string asString() const;
   std::string mangledString() const;
 
-  sherpa::GCPtr<AST> getID();
+  boost::shared_ptr<AST> getID();
   bool isUnionLeg();
   bool isMethod();
 
@@ -521,6 +521,7 @@ struct EnvSet {
 #include "Special.hxx"
 #include "UocInfo.hxx"
 
+using namespace boost;
 using namespace sherpa;
 unsigned long long AST::astCount = 0;
 }

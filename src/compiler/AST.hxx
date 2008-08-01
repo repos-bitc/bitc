@@ -14,9 +14,9 @@
 #include "Environment.hxx"
 #include "debug.hxx"
 
-#include <libsherpa/GCPtr.hxx>
-#define AST_SMART_PTR sherpa::GCPtr
-#define AST_SUPERCLASS sherpa::enable_shared_from_this<AST>
+#include "shared_ptr.hxx"
+#define AST_SMART_PTR boost::shared_ptr
+#define AST_SUPERCLASS boost::enable_shared_from_this<AST>
 
 
  
@@ -214,19 +214,19 @@ enum primOp {
 
 struct AST;
 struct EnvSet {
-  sherpa::GCPtr<ASTEnvironment> env;
-  sherpa::GCPtr<TSEnvironment> gamma;
-  sherpa::GCPtr<InstEnvironment> instEnv;
+  boost::shared_ptr<ASTEnvironment> env;
+  boost::shared_ptr<TSEnvironment> gamma;
+  boost::shared_ptr<InstEnvironment> instEnv;
   
   EnvSet()
   {
-    env = sherpa::GC_NULL;
-    gamma = sherpa::GC_NULL;
-    instEnv = sherpa::GC_NULL;
+    env = boost::GC_NULL;
+    gamma = boost::GC_NULL;
+    instEnv = boost::GC_NULL;
   }
 
-  EnvSet(sherpa::GCPtr<ASTEnvironment > _env, sherpa::GCPtr<TSEnvironment >_gamma,
-	 sherpa::GCPtr<InstEnvironment > _instEnv)
+  EnvSet(boost::shared_ptr<ASTEnvironment > _env, boost::shared_ptr<TSEnvironment >_gamma,
+	 boost::shared_ptr<InstEnvironment > _instEnv)
   {
     env = _env;
     gamma = _gamma;
@@ -248,27 +248,27 @@ struct EnvSet {
   }
 
   
-  static inline sherpa::GCPtr<EnvSet>
+  static inline boost::shared_ptr<EnvSet>
   make()
   {
     EnvSet *tmp = new EnvSet();
-    return sherpa::GCPtr<EnvSet>(tmp);
+    return boost::shared_ptr<EnvSet>(tmp);
   }
 
-  static inline sherpa::GCPtr<EnvSet>
-  make(sherpa::GCPtr<ASTEnvironment> _env, 
-       sherpa::GCPtr<TSEnvironment>_gamma,
-       sherpa::GCPtr<InstEnvironment> _instEnv)
+  static inline boost::shared_ptr<EnvSet>
+  make(boost::shared_ptr<ASTEnvironment> _env, 
+       boost::shared_ptr<TSEnvironment>_gamma,
+       boost::shared_ptr<InstEnvironment> _instEnv)
   {
     EnvSet *tmp = new EnvSet(_env, _gamma, _instEnv);
-    return sherpa::GCPtr<EnvSet>(tmp);
+    return boost::shared_ptr<EnvSet>(tmp);
   }
 
-  static inline sherpa::GCPtr<EnvSet>
+  static inline boost::shared_ptr<EnvSet>
   make(EnvSet &envs)
   {
     EnvSet *tmp = new EnvSet(envs);
-    return sherpa::GCPtr<EnvSet>(tmp);
+    return boost::shared_ptr<EnvSet>(tmp);
   }
 };
 
@@ -461,9 +461,9 @@ public:
 
   unsigned printVariant;	
 
-  sherpa::GCPtr<TypeScheme> scheme;		
-  sherpa::GCPtr<Type> symType;		
-  sherpa::GCPtr<AST> symbolDef;
+  boost::shared_ptr<TypeScheme> scheme;		
+  boost::shared_ptr<Type> symType;		
+  boost::shared_ptr<AST> symbolDef;
 
   bool isDecl;                  
 
@@ -483,8 +483,8 @@ public:
  
   
   
-  sherpa::GCPtr<AST> defn;  
-  sherpa::GCPtr<AST> decl;  
+  boost::shared_ptr<AST> defn;  
+  boost::shared_ptr<AST> decl;  
               
 
   
@@ -514,7 +514,7 @@ public:
   bool polyinst; 
                  
   bool reached; 
-  sherpa::GCPtr<AST> defForm; 
+  boost::shared_ptr<AST> defForm; 
   
   
   
@@ -553,9 +553,9 @@ public:
   
   
 
-  sherpa::GCPtr<AST> defbps; 
+  boost::shared_ptr<AST> defbps; 
   
-  sherpa::GCPtr<Type> tagType;   
+  boost::shared_ptr<Type> tagType;   
   size_t field_bits; 
   
   
@@ -567,24 +567,24 @@ public:
                      
                      
 
-  sherpa::GCPtr<TypeScheme> stSigma; 
+  boost::shared_ptr<TypeScheme> stSigma; 
                        
                        
-  sherpa::GCPtr<AST> stCtr;    
+  boost::shared_ptr<AST> stCtr;    
                        
 
   
-  sherpa::GCPtr<AST> tvarLB;         
-  sherpa::GCPtr<AST> parentLB;       
+  boost::shared_ptr<AST> tvarLB;         
+  boost::shared_ptr<AST> parentLB;       
   
   
   
 
-  static sherpa::GCPtr<AST> makeBoolLit(const sherpa::LToken &tok);
-  static sherpa::GCPtr<AST> makeIntLit(const sherpa::LToken &tok);
-  static sherpa::GCPtr<AST> makeStringLit(const sherpa::LToken &tok);
-  static sherpa::GCPtr<AST> makeCharLit(const sherpa::LToken &tok);
-  static sherpa::GCPtr<AST> makeFloatLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeBoolLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeIntLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeStringLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeCharLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeFloatLit(const sherpa::LToken &tok);
 
   
   void disown(size_t s);
@@ -593,11 +593,11 @@ public:
   
   
   
-  static sherpa::GCPtr<AST> genIdent(const char *pfx = "tmp", const bool isTV = false);
+  static boost::shared_ptr<AST> genIdent(const char *pfx = "tmp", const bool isTV = false);
 
   
   
-  static sherpa::GCPtr<AST> genSym(sherpa::GCPtr<AST> lhs, 
+  static boost::shared_ptr<AST> genSym(boost::shared_ptr<AST> lhs, 
 		     const char *pfx="tmp",
 		     const bool isTV = false);
 
@@ -607,45 +607,45 @@ public:
   
   
   void getIds(std::ostream &errStream, 
-	      std::vector<sherpa::GCPtr<AST> >& ids,
+	      std::vector<boost::shared_ptr<AST> >& ids,
 	      bool getPattern = false);  
-  sherpa::GCPtr<Type> getType(); 
-  sherpa::GCPtr<const Type> getType() const;
+  boost::shared_ptr<Type> getType(); 
+  boost::shared_ptr<const Type> getType() const;
   
-  sherpa::GCPtr<AST> getCtr(); 
+  boost::shared_ptr<AST> getCtr(); 
   
 
   
-  sherpa::GCPtr<AST> Use();
+  boost::shared_ptr<AST> Use();
 
   
-  AST(sherpa::GCPtr<AST> ast, bool shallowCopyChildren=true);
+  AST(boost::shared_ptr<AST> ast, bool shallowCopyChildren=true);
 
-  static inline sherpa::GCPtr<AST>
-  make(sherpa::GCPtr<AST> ast, bool shallowCopyChildren=true) {
+  static inline boost::shared_ptr<AST>
+  make(boost::shared_ptr<AST> ast, bool shallowCopyChildren=true) {
     AST *tmp = new AST(ast,shallowCopyChildren);
-    return sherpa::GCPtr<AST>(tmp);
+    return boost::shared_ptr<AST>(tmp);
   }
 
   
-  sherpa::GCPtr<AST> getTrueCopy();
+  boost::shared_ptr<AST> getTrueCopy();
 
   
-  sherpa::GCPtr<AST> getDCopy();
+  boost::shared_ptr<AST> getDCopy();
 
   
-  void set(sherpa::GCPtr<AST> ast);
+  void set(boost::shared_ptr<AST> ast);
 
   
   
   
   
-  void rename(sherpa::GCPtr<AST> from, std::string newName);
+  void rename(boost::shared_ptr<AST> from, std::string newName);
 
   std::string asString() const;
   std::string mangledString() const;
 
-  sherpa::GCPtr<AST> getID();
+  boost::shared_ptr<AST> getID();
   bool isUnionLeg();
   bool isMethod();
 

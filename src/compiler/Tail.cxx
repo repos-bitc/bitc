@@ -52,12 +52,13 @@
 #include "TypeInfer.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
 
 void
-markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
+markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTail)
 {
   //std::cout << ast->astTypeName() << ": " << isTail << std::endl;
 
@@ -339,9 +340,9 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_letrec:
   case at_letStar:
     {
-      //       GCPtr<AST> lbs = ast->child(0);
+      //       shared_ptr<AST> lbs = ast->child(0);
       //       for(size_t c = 0; c < lbs->children.size(); c++) {
-      // 	GCPtr<AST> lb = lbs->child(c);
+      // 	shared_ptr<AST> lb = lbs->child(c);
       // 	markTail(lb->child(1), fn, bps, false);
       //       }
       markTail(ast->child(1), fn, bps, isTail);
@@ -357,7 +358,7 @@ UocInfo::be_tail(std::ostream& errStream,
 {
   bool errFree = true;
 
-  GCPtr<UocInfo> uoc = shared_from_this();
+  shared_ptr<UocInfo> uoc = shared_from_this();
   
   markTail(uoc->uocAst, GC_NULL, GC_NULL, true);
   return errFree;

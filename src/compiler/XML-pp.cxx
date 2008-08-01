@@ -45,10 +45,11 @@
 #include "backend.hxx"
 
 using namespace std;
+using namespace boost;
 using namespace sherpa;
 
 static void
-XMLp(std::ostream& out, GCPtr<AST> ast, std::string pad, bool showLoc)
+XMLp(std::ostream& out, shared_ptr<AST> ast, std::string pad, bool showLoc)
 {
   out << pad 
       << "<"
@@ -99,7 +100,7 @@ XMLp(std::ostream& out, GCPtr<AST> ast, std::string pad, bool showLoc)
 }
 
 static void
-XMLd(std::ostream& out, GCPtr<AST> ast, bool showLoc)
+XMLd(std::ostream& out, shared_ptr<AST> ast, bool showLoc)
 {
   out << "<"
       << AST::tagName(ast->astType)
@@ -150,14 +151,14 @@ XMLd(std::ostream& out, GCPtr<AST> ast, bool showLoc)
 }
 
 bool
-XMLpp(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc)
+XMLpp(std::ostream& out, std::ostream& err, shared_ptr<UocInfo> uoc)
 {
   XMLp(out, uoc->uocAst, "", false);
   return true;
 }
 
 bool
-XMLdump(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc)
+XMLdump(std::ostream& out, std::ostream& err, shared_ptr<UocInfo> uoc)
 {
   XMLd(out, uoc->uocAst, false);
   out << std::endl;
@@ -191,10 +192,10 @@ xmlMangle(std::string idName)
 }
 
 static void
-emitXMLType(INOstream &out, std::string name, GCPtr<TypeScheme> ts,
+emitXMLType(INOstream &out, std::string name, shared_ptr<TypeScheme> ts,
 	    bool raw=false)
 {
-  GCPtr<TvPrinter> tvP = GC_NULL;
+  shared_ptr<TvPrinter> tvP = GC_NULL;
   if(!raw)
     tvP = TvPrinter::make();
   
@@ -213,7 +214,7 @@ emitXMLType(INOstream &out, std::string name, GCPtr<TypeScheme> ts,
 }
 
 static void 
-XMLtypes(INOstream &out, GCPtr<AST> ast, bool raw=false)
+XMLtypes(INOstream &out, shared_ptr<AST> ast, bool raw=false)
 {
   switch(ast->astType) {
   case at_ident:
@@ -279,7 +280,7 @@ XMLtypes(INOstream &out, GCPtr<AST> ast, bool raw=false)
 }
 
 void 
-XML_types_PP(std::ostream &out, GCPtr<AST> ast, bool raw=false)
+XML_types_PP(std::ostream &out, shared_ptr<AST> ast, bool raw=false)
 {
   INOstream ino(out);
   XMLtypes(ino, ast, raw);
@@ -287,7 +288,7 @@ XML_types_PP(std::ostream &out, GCPtr<AST> ast, bool raw=false)
 
 
 bool
-XMLtypesPP(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc)
+XMLtypesPP(std::ostream& out, std::ostream& err, shared_ptr<UocInfo> uoc)
 {
   XML_types_PP(out, uoc->uocAst, false);
   return true;

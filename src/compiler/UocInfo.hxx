@@ -98,13 +98,13 @@ struct OnePassInfo {
 
 
 class UocInfo;
-typedef std::map<std::string, sherpa::GCPtr<UocInfo> > UocMap;
+typedef std::map<std::string, boost::shared_ptr<UocInfo> > UocMap;
 
 // Unit Of Compilation Info. One of these is constructed for each
 // unit of compilation (source or interface). In the source case, the
 // /name/ field will be the file name. In the interface case, the
 // /name/ will be the "ifname" reported in the import statement.
-class UocInfo : public sherpa::enable_shared_from_this<UocInfo> {
+class UocInfo : public boost::enable_shared_from_this<UocInfo> {
   static boost::filesystem::path resolveInterfacePath(std::string ifName);
 
 public:
@@ -115,9 +115,9 @@ public:
   Pass lastCompletedPass;
 
   bool fromCommandLine;
-  sherpa::GCPtr<AST> uocAst;
-  sherpa::GCPtr<ASTEnvironment > env;
-  sherpa::GCPtr<TSEnvironment > gamma;
+  boost::shared_ptr<AST> uocAst;
+  boost::shared_ptr<ASTEnvironment > env;
+  boost::shared_ptr<TSEnvironment > gamma;
 
   inline bool isSourceUoc() {
     return (uocAst->astType == at_module);
@@ -145,29 +145,29 @@ public:
   // to jump and make this change unless I know that this
   // implementation of instances works. 
    
-  sherpa::GCPtr<InstEnvironment > instEnv;
+  boost::shared_ptr<InstEnvironment > instEnv;
   
   UocInfo(const std::string& _uocName, const std::string& _origin, 
-	  sherpa::GCPtr<AST> _uocAst);
-  UocInfo(sherpa::GCPtr<UocInfo> uoc);
+	  boost::shared_ptr<AST> _uocAst);
+  UocInfo(boost::shared_ptr<UocInfo> uoc);
 
-  static inline sherpa::GCPtr<UocInfo>
+  static inline boost::shared_ptr<UocInfo>
   make(const std::string& _uocName, const std::string& _origin, 
-	  sherpa::GCPtr<AST> _uocAst) {
+	  boost::shared_ptr<AST> _uocAst) {
     UocInfo *tmp = new UocInfo(_uocName, _origin, _uocAst);
-    return sherpa::GCPtr<UocInfo>(tmp);
+    return boost::shared_ptr<UocInfo>(tmp);
   }
 
-  static inline sherpa::GCPtr<UocInfo>
-  make(sherpa::GCPtr<UocInfo> uoc) {
+  static inline boost::shared_ptr<UocInfo>
+  make(boost::shared_ptr<UocInfo> uoc) {
     UocInfo *tmp = new UocInfo(uoc);
-    return sherpa::GCPtr<UocInfo>(tmp);
+    return boost::shared_ptr<UocInfo>(tmp);
   }
 
   /* Create a fresh, empty UOC that is set up to become the unified
    * output UoC module, initializing all environments by hand.
    */
-  static sherpa::GCPtr<UocInfo> CreateUnifiedUoC();
+  static boost::shared_ptr<UocInfo> CreateUnifiedUoC();
 
   static std::vector<boost::filesystem::path> searchPath;
 
@@ -178,12 +178,12 @@ public:
   // is non-null, the parse has been completed.
   static UocMap ifList;
   static UocMap srcList;
-  //  static sherpa::GCPtr<UocInfo> linkedUoc;  // grand Uoc after linkage
+  //  static boost::shared_ptr<UocInfo> linkedUoc;  // grand Uoc after linkage
 
-  static sherpa::GCPtr<UocInfo> 
+  static boost::shared_ptr<UocInfo> 
   findInterface(const std::string& ifName);
 
-  static sherpa::GCPtr<UocInfo> 
+  static boost::shared_ptr<UocInfo> 
   importInterface(std::ostream&, const sherpa::LexLoc& loc, 
 		  const std::string& ifName);
 
@@ -224,9 +224,9 @@ public:
   // FOLLOWING ARE IN inter-pass.cxx
   //
   //////////////////////////////////////////////////////
-  void findDefForms(sherpa::GCPtr<AST> start, 
-		    sherpa::GCPtr<AST> local=sherpa::GC_NULL, 
-		    sherpa::GCPtr<AST> top=sherpa::GC_NULL);
+  void findDefForms(boost::shared_ptr<AST> start, 
+		    boost::shared_ptr<AST> local=boost::GC_NULL, 
+		    boost::shared_ptr<AST> top=boost::GC_NULL);
   static void findAllDefForms();
   
   // Add all candidate Entry-points to the entry-point vectror
@@ -272,37 +272,37 @@ public:
 	     std::string pre = "Internal Compiler error :");
 
   bool RandTexpr(std::ostream& errStream,
-		 sherpa::GCPtr<AST> ast,
+		 boost::shared_ptr<AST> ast,
 		 unsigned long rflags=0,
 		 unsigned long tflags=0,
 		 std::string pre = "Internal Compiler error :",
 		 bool keepResults = true,
-		 sherpa::GCPtr<EnvSet> altEnvSet=sherpa::GC_NULL);
+		 boost::shared_ptr<EnvSet> altEnvSet=boost::GC_NULL);
 
   //////////////////////////////////////////////////////
   //
   // New instantiation logic:
   //
   //////////////////////////////////////////////////////
-  static sherpa::GCPtr<AST> lookupByFqn(const std::string& s, 
-			  sherpa::GCPtr<UocInfo> &targetUoc);
+  static boost::shared_ptr<AST> lookupByFqn(const std::string& s, 
+			  boost::shared_ptr<UocInfo> &targetUoc);
   
 
 private:
-  void addTopLevelForm(sherpa::GCPtr<AST> ast); // Add a new Top-level form
+  void addTopLevelForm(boost::shared_ptr<AST> ast); // Add a new Top-level form
 
   bool instantiateFQN(std::ostream &errStream, 
 			 const std::string& fqn);
 
   // The main AST specializer/ instantiator
-  sherpa::GCPtr<AST> doInstantiate(std::ostream &errStream, 
-		     sherpa::GCPtr<AST> defAST, 
-		     sherpa::GCPtr<Type> typ,
+  boost::shared_ptr<AST> doInstantiate(std::ostream &errStream, 
+		     boost::shared_ptr<AST> defAST, 
+		     boost::shared_ptr<Type> typ,
 		     bool &errFree,
 		     WorkList<std::string>& worklist);
 
-  sherpa::GCPtr<AST> recInstantiate(std::ostream &errStream, 
-		      sherpa::GCPtr<AST> ast,
+  boost::shared_ptr<AST> recInstantiate(std::ostream &errStream, 
+		      boost::shared_ptr<AST> ast,
 		      bool &errFree,
 		      WorkList<std::string>& worklist); // Recursively walk the
                      // specialized AST, and specialize the body.

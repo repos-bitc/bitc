@@ -55,6 +55,7 @@
 #include "inter-pass.hxx"
 
 using namespace std;
+using namespace boost;
 using namespace sherpa;
 
 #define NULL_MODE  0x0u
@@ -62,10 +63,10 @@ using namespace sherpa;
 #define USE_MODE   0x3u
 #define TYPE_MODE  0x4u
  
-typedef set<GCPtr<AST> > AstSet;
+typedef set<shared_ptr<AST> > AstSet;
 
 static void
-markRecBound(GCPtr<AST> ast)
+markRecBound(shared_ptr<AST> ast)
 {
   for(size_t c=0; c < ast->children.size(); c++)
     markRecBound(ast->child(c));
@@ -78,7 +79,7 @@ markRecBound(GCPtr<AST> ast)
  * we can later rewrite them.
  */
 static void
-clearusedef(GCPtr<AST> ast)
+clearusedef(shared_ptr<AST> ast)
 {
   ast->Flags2 &= ~(ID_IS_DEF|ID_IS_USE|ID_IS_CLOSED|ID_IS_CAPTURED|ID_NEEDS_HEAPIFY|ID_IS_RECBOUND);
 
@@ -89,7 +90,7 @@ clearusedef(GCPtr<AST> ast)
 // See if The identifier `id' is used in the ast `ast'
 // id must be a defining form.
 static bool
-used(GCPtr<AST> id, GCPtr<AST> ast)
+used(shared_ptr<AST> id, shared_ptr<AST> ast)
 {  
   if(ast->astType == at_ident && ast->symbolDef == id) {
     assert(ast != id);
@@ -111,7 +112,7 @@ used(GCPtr<AST> id, GCPtr<AST> ast)
  */
 static bool
 findusedef(std::ostream &errStream,
-	   GCPtr<AST> topAst, GCPtr<AST> ast, const int mode,
+	   shared_ptr<AST> topAst, shared_ptr<AST> ast, const int mode,
 	   // list of vars that are bound within the lambda at the
 	   // current point:
 	   AstSet& boundVars,
@@ -526,24 +527,24 @@ findusedef(std::ostream &errStream,
     
   case at_do:
     {
-      GCPtr<AST> dbs = ast->child(0);      
+      shared_ptr<AST> dbs = ast->child(0);      
       // Initializers
       for (size_t c = 0; c < dbs->children.size(); c++) {
-	GCPtr<AST> db = dbs->child(c);
+	shared_ptr<AST> db = dbs->child(c);
 	CHKERR(errFree, findusedef(errStream, topAst, db->child(1), 
 				   USE_MODE, boundVars, freeVars));
       }
       
       // Binding
       for (size_t c = 0; c < dbs->children.size(); c++) {
-	GCPtr<AST> db = dbs->child(c);
+	shared_ptr<AST> db = dbs->child(c);
 	CHKERR(errFree, findusedef(errStream, topAst, db->child(0), 
 				   LOCAL_MODE, boundVars, freeVars));
       }
       
       //Step-wise update
       for (size_t c = 0; c < dbs->children.size(); c++) {
-	GCPtr<AST> db = dbs->child(c);
+	shared_ptr<AST> db = dbs->child(c);
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(2), 
 				   USE_MODE, boundVars, freeVars));
       }
@@ -570,11 +571,11 @@ findusedef(std::ostream &errStream,
   case at_let:
   case at_letrec:
     {
-      GCPtr<AST> lbs = ast->child(0);
+      shared_ptr<AST> lbs = ast->child(0);
 
       // For each individual binding // match at_letbinding+
       for (size_t c = 0; c < lbs->children.size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
+	shared_ptr<AST> lb = lbs->child(c);
 
 	CHKERR(errFree, findusedef(errStream, topAst, lb->child(1), 
 				   USE_MODE, boundVars, freeVars));
@@ -593,8 +594,8 @@ findusedef(std::ostream &errStream,
   return errFree;
 }
 
-GCPtr<AST> 
-cl_rewrite_captured_idents(GCPtr<AST> ast, GCPtr<AST> clenvName)
+shared_ptr<AST> 
+cl_rewrite_captured_idents(shared_ptr<AST> ast, shared_ptr<AST> clenvName)
 {
   for (size_t c = 0; c < ast->children.size(); c++)
     ast->child(c) = 
@@ -604,7 +605,7 @@ cl_rewrite_captured_idents(GCPtr<AST> ast, GCPtr<AST> clenvName)
   case at_ident:
     {
       if (ast->Flags2 & ID_IS_CLOSED) {
-	GCPtr<AST> clUse = AST::make(at_select, ast->loc);
+	shared_ptr<AST> clUse = AST::make(at_select, ast->loc);
 	clUse->addChild(clenvName->getDCopy());
 	clUse->addChild(ast);
 
@@ -621,17 +622,17 @@ cl_rewrite_captured_idents(GCPtr<AST> ast, GCPtr<AST> clenvName)
 }
 
 
-static GCPtr<AST>
-getClenvUse(GCPtr<AST> ast, GCPtr<AST> clenvName, 
+static shared_ptr<AST>
+getClenvUse(shared_ptr<AST> ast, shared_ptr<AST> clenvName, 
 	    std::vector<std::string>& tvs)
 {
-  GCPtr<AST> clType;
+  shared_ptr<AST> clType;
   if(tvs.size()) {
-    GCPtr<AST> typeApp = AST::make(at_typeapp, ast->loc);
+    shared_ptr<AST> typeApp = AST::make(at_typeapp, ast->loc);
     typeApp->addChild(clenvName->Use());
     
     for(size_t i=0; i<tvs.size(); i++) {
-      GCPtr<AST> tv = AST::make(at_ident, ast->loc);
+      shared_ptr<AST> tv = AST::make(at_ident, ast->loc);
       tv->Flags |= ID_IS_TVAR;
       tv->s = tv->fqn.ident = tvs[i];
       typeApp->addChild(tv);
@@ -648,10 +649,10 @@ getClenvUse(GCPtr<AST> ast, GCPtr<AST> clenvName,
 
 #if 0
 static void
-rewriteMyCapture(GCPtr<AST> ast, GCPtr<AST> me, GCPtr<AST> him) 
+rewriteMyCapture(shared_ptr<AST> ast, shared_ptr<AST> me, shared_ptr<AST> him) 
 {
   if(ast->astType == at_set_closure) {
-    GCPtr<AST> envApp = ast->child(1);
+    shared_ptr<AST> envApp = ast->child(1);
     for(size_t c=1; c < envApp->children.size(); c++)
       if(envApp->child(c)->symbolDef == me)
 	envApp->child(c) = him->Use();
@@ -667,9 +668,9 @@ rewriteMyCapture(GCPtr<AST> ast, GCPtr<AST> me, GCPtr<AST> him)
 // Walk an AST. If it contains a lambda form that is going 
 // to require a closure record, fabricate the closure record 
 // and append it to outASTs
-static GCPtr<AST> 
-cl_convert_ast(GCPtr<AST> ast, 
-	       std::vector<GCPtr<AST> >& outAsts, 
+static shared_ptr<AST> 
+cl_convert_ast(shared_ptr<AST> ast, 
+	       std::vector<shared_ptr<AST> >& outAsts, 
 	       bool shouldHoist)
 {
   bool hoistChildren = true;
@@ -678,9 +679,9 @@ cl_convert_ast(GCPtr<AST> ast,
   if(ast->astType == at_define || ast->astType == at_recdef) {
     hoistChildren = false;
 
-    GCPtr<AST> ident = ast->getID();
+    shared_ptr<AST> ident = ast->getID();
     if(!ident->decl) {
-      GCPtr<AST> proclaim = AST::make(at_proclaim, ast->loc,
+      shared_ptr<AST> proclaim = AST::make(at_proclaim, ast->loc,
 			      ident->getDCopy(),
 			      cl_convert_ast(ident->symType->asAST(ast->loc),
 					     outAsts, hoistChildren),
@@ -703,28 +704,28 @@ cl_convert_ast(GCPtr<AST> ast,
   switch(ast->astType) {
   case at_letrec:
     {
-      GCPtr<AST> lbs = ast->child(0);
-      GCPtr<AST> expr = ast->child(1);
+      shared_ptr<AST> lbs = ast->child(0);
+      shared_ptr<AST> expr = ast->child(1);
       
       // A list of copyclosures to append in the end.
-      GCPtr<AST> ccs = AST::make(at_begin, expr->loc);
+      shared_ptr<AST> ccs = AST::make(at_begin, expr->loc);
 
       for(size_t c=0; c < lbs->children.size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
-	GCPtr<AST> id = lb->child(0)->child(0);
+	shared_ptr<AST> lb = lbs->child(c);
+	shared_ptr<AST> id = lb->child(0)->child(0);
 	
-	GCPtr<AST> rhs = lb->child(1);
+	shared_ptr<AST> rhs = lb->child(1);
 	
 	// If this identifier may be used in *any* let-binding
 	// within the current letrec, we must use the alloc-ref /
 	// copy-ref scheme for closure conversion.
 	if(used(id, lbs)) {
 	  assert(id->Flags2 & ID_IS_CAPTURED);
-	  GCPtr<AST> qual = 
+	  shared_ptr<AST> qual = 
 	    id->symType->getBareType()->asAST(rhs->loc); 
 	  qual = cl_convert_ast(qual, outAsts, hoistChildren);
-	  GCPtr<AST> ac = AST::make(at_allocREF, rhs->loc, qual);
-	  GCPtr<AST> cc = AST::make(at_copyREF, rhs->loc, id->Use(), rhs);
+	  shared_ptr<AST> ac = AST::make(at_allocREF, rhs->loc, qual);
+	  shared_ptr<AST> cc = AST::make(at_copyREF, rhs->loc, id->Use(), rhs);
 	  ccs->children.push_back(cc);
 	  lb->child(1) = ac;
 	}
@@ -751,8 +752,8 @@ cl_convert_ast(GCPtr<AST> ast,
       AstSet freeVars;
       AstSet boundVars;
       
-      GCPtr<AST> clenvName = GC_NULL;
-      GCPtr<TvPrinter> tvP = TvPrinter::make();
+      shared_ptr<AST> clenvName = GC_NULL;
+      shared_ptr<TvPrinter> tvP = TvPrinter::make();
 
       CLCONV_DEBUG std::cerr << "Processing lambda. " << std::endl;
 
@@ -773,7 +774,7 @@ cl_convert_ast(GCPtr<AST> ast,
 
 	//////// Build the Environment Structure //////////////
 	// defstruct = ident tvlist category declares fields constraints;
-	GCPtr<AST> defStruct = AST::make(at_defstruct, ast->loc);
+	shared_ptr<AST> defStruct = AST::make(at_defstruct, ast->loc);
       
 	// Note defstruct does not use an identPattern
 	clenvName = AST::genSym(ast, "clenv");
@@ -782,14 +783,14 @@ cl_convert_ast(GCPtr<AST> ast,
 	defStruct->addChild(clenvName);
       
 	// tvList: to be fixed-up later.
-	GCPtr<AST> tvlist = AST::make(at_tvlist, ast->loc);
+	shared_ptr<AST> tvlist = AST::make(at_tvlist, ast->loc);
 	defStruct->addChild(tvlist);      
 	// env records are ref types
 	defStruct->addChild(AST::make(at_refCat));
 	// no declares
 	defStruct->addChild(AST::make(at_declares));
 	// Parent AST for fields:
-	GCPtr<AST> fields = AST::make(at_fields, ast->loc);
+	shared_ptr<AST> fields = AST::make(at_fields, ast->loc);
 	defStruct->addChild(fields);      
 	// Add empty constraints subtree
 	defStruct->addChild(AST::make(at_constraints, ast->loc));
@@ -797,12 +798,12 @@ cl_convert_ast(GCPtr<AST> ast,
 	for(AstSet::iterator fv = freeVars.begin();
 	    fv != freeVars.end(); ++fv) {
 	  assert((*fv)->astType == at_ident);
-	  GCPtr<AST> field = AST::make(at_field, ast->loc);
-	  GCPtr<AST> ident = AST::make(at_ident, ast->loc);
+	  shared_ptr<AST> field = AST::make(at_field, ast->loc);
+	  shared_ptr<AST> ident = AST::make(at_ident, ast->loc);
 	  ident->s = ident->fqn.ident = (*fv)->s;
 	  
 	  field->addChild(ident);
-	  GCPtr<AST> fvType = (*fv)->symType->asAST(ast->loc, tvP);
+	  shared_ptr<AST> fvType = (*fv)->symType->asAST(ast->loc, tvP);
 	  fvType = cl_convert_ast(fvType, outAsts, hoistChildren);
 	  field->addChild(fvType);
 	  
@@ -816,7 +817,7 @@ cl_convert_ast(GCPtr<AST> ast,
 	tvs = tvP->getAllTvarStrings();
 
 	for(size_t i=0; i < tvs.size(); i++) {
-	  GCPtr<AST> tv = AST::make(at_ident, tvlist->loc);
+	  shared_ptr<AST> tv = AST::make(at_ident, tvlist->loc);
 	  tv->Flags |= ID_IS_TVAR;
 	  tv->s = tv->fqn.ident = tvs[i];
 	  tvlist->children.push_back(tv);
@@ -836,18 +837,18 @@ cl_convert_ast(GCPtr<AST> ast,
 	// AST define = bindingPattern expr;
 	// This can be done as a recdef since we don't allow top-level
 	// names to be shadowed.
-	GCPtr<AST> newDef = AST::make(at_recdef, ast->loc);
+	shared_ptr<AST> newDef = AST::make(at_recdef, ast->loc);
       
-	GCPtr<AST> lamName = AST::genSym(ast, "lam");
+	shared_ptr<AST> lamName = AST::genSym(ast, "lam");
 	lamName->identType = id_value;
 	lamName->Flags |= ID_IS_GLOBAL;
 	
-	GCPtr<AST> lamType = ast->symType->asAST(ast->loc);
+	shared_ptr<AST> lamType = ast->symType->asAST(ast->loc);
 	// Once we removed closure types, this conversion 
 	// operation is redundant. Of historic interest, 
 	// placeholder reminder in case we switch back.
 	lamType = cl_convert_ast(lamType, outAsts, hoistChildren);
-	GCPtr<AST> lamPat = AST::make(at_identPattern, ast->loc,
+	shared_ptr<AST> lamPat = AST::make(at_identPattern, ast->loc,
 				    lamName, lamType);	
 	newDef->addChild(lamPat);
 	newDef->addChild(ast);
@@ -858,14 +859,14 @@ cl_convert_ast(GCPtr<AST> ast,
 
 	  // Insert the extra closure argument and prepend the type to
 	  // the attached function type signature      
-	  GCPtr<AST> argVec = ast->child(0);
-	  GCPtr<AST> body = ast->child(1);
-	  GCPtr<AST> clArgName = AST::make(at_ident, ast->loc);
+	  shared_ptr<AST> argVec = ast->child(0);
+	  shared_ptr<AST> body = ast->child(1);
+	  shared_ptr<AST> clArgName = AST::make(at_ident, ast->loc);
 	  clArgName->s = clArgName->fqn.ident = "__clArg";
-	  GCPtr<AST> clArgPat = AST::make(at_identPattern, ast->loc, clArgName);      
+	  shared_ptr<AST> clArgPat = AST::make(at_identPattern, ast->loc, clArgName);      
 	  // Note: tvs was populated in the if(needsClosure) above
 	  // if(shouldHoist).
-	  GCPtr<AST> clType = getClenvUse(ast, clenvName, tvs);
+	  shared_ptr<AST> clType = getClenvUse(ast, clenvName, tvs);
 	  
 	  lamType->child(0)->children.insert(lamType->child(0)->children.begin(),
 					     clType);
@@ -882,15 +883,15 @@ cl_convert_ast(GCPtr<AST> ast,
       
 	// If the lambda requires a closure, emit a make-closure, else
 	// emit an identifier reference in place of the lambda:
-	GCPtr<AST> lamUse = lamName->Use();
+	shared_ptr<AST> lamUse = lamName->Use();
 	if(freeVars.size()) {	  
-	  GCPtr<AST> mkEnv = AST::make(at_struct_apply, ast->loc);
+	  shared_ptr<AST> mkEnv = AST::make(at_struct_apply, ast->loc);
 	  mkEnv->addChild(clenvName->Use());	  
 	  for (AstSet::iterator fv = freeVars.begin();
 	       fv != freeVars.end(); ++fv)
 	    mkEnv->addChild((*fv)->Use());
 	
-	  GCPtr<AST> mkClo = AST::make(at_mkClosure, ast->loc, mkEnv, lamUse);
+	  shared_ptr<AST> mkClo = AST::make(at_mkClosure, ast->loc, mkEnv, lamUse);
 	  ast = mkClo;
 	}
 	else {
@@ -910,14 +911,14 @@ cl_convert_ast(GCPtr<AST> ast,
 }
 
 void
-cl_convert(GCPtr<UocInfo> uoc)
+cl_convert(shared_ptr<UocInfo> uoc)
 {
-  std::vector<GCPtr<AST> > outAsts;
+  std::vector<shared_ptr<AST> > outAsts;
 
-  GCPtr<AST> modOrIf = uoc->uocAst;
+  shared_ptr<AST> modOrIf = uoc->uocAst;
 
   for (size_t c = 0;c < modOrIf->children.size(); c++) {
-    GCPtr<AST> child = modOrIf->child(c);
+    shared_ptr<AST> child = modOrIf->child(c);
    
     child = cl_convert_ast(child, outAsts, true);
     outAsts.push_back(child);
@@ -945,8 +946,8 @@ cl_convert(GCPtr<UocInfo> uoc)
 // And then in the use-occurrences we simply need (at this stage) to
 // wrap the use-occurrences with (__clmember id)
 //
-GCPtr<AST> 
-cl_heapify(GCPtr<AST> ast)
+shared_ptr<AST> 
+cl_heapify(shared_ptr<AST> ast)
 {
   switch(ast->astType) {
   case at_lambda:
@@ -954,10 +955,10 @@ cl_heapify(GCPtr<AST> ast)
       // Proceed through the arguments. For each argument that is
       // captured, rewrite the body to be surrounded by a dup'ing LET
       // form.
-      GCPtr<AST> args = ast->child(0);
-      GCPtr<AST> body = ast->child(1);
+      shared_ptr<AST> args = ast->child(0);
+      shared_ptr<AST> body = ast->child(1);
       
-      GCPtr<AST> bindings = AST::make(at_letbindings, body->loc);
+      shared_ptr<AST> bindings = AST::make(at_letbindings, body->loc);
       
       // Wrap the existing body in a LET binding:
       body = AST::make(at_let, body->loc, bindings, body);
@@ -968,7 +969,7 @@ cl_heapify(GCPtr<AST> ast)
       // The RHS is not yet dup'd here. This will happen when this let
       // is processed in the at_letbinding handler.
       for (size_t i = 0; i < args->children.size(); i++) {
-	GCPtr<AST> arg = args->child(i)->child(0);
+	shared_ptr<AST> arg = args->child(i)->child(0);
 	if((arg->Flags2 & ID_NEEDS_HEAPIFY) == 0)
 	  continue;
 	
@@ -976,17 +977,17 @@ cl_heapify(GCPtr<AST> ast)
 	// Exchange the arg to a new Identifier with the same name
 	// Te reason for the exchange is that the use cases in the
 	// body will be pointing to the *OLD* ident AST.
-	GCPtr<AST> newArg = AST::make(at_ident, arg->loc);
+	shared_ptr<AST> newArg = AST::make(at_ident, arg->loc);
 	newArg->s = newArg->fqn.ident = arg->s;
 	args->child(i)->child(0) = newArg;
 	
  	// We have moved the point of capture into the let, 
 	// which was the point:
-	GCPtr<AST> letIdent = arg;
-	GCPtr<AST> letExpr = newArg->Use();
-	GCPtr<AST> identPattern = AST::make(at_identPattern, arg->loc, letIdent);
+	shared_ptr<AST> letIdent = arg;
+	shared_ptr<AST> letExpr = newArg->Use();
+	shared_ptr<AST> identPattern = AST::make(at_identPattern, arg->loc, letIdent);
 	
-	GCPtr<AST> theBinding = AST::make(at_letbinding, arg->loc,
+	shared_ptr<AST> theBinding = AST::make(at_letbinding, arg->loc,
 				  identPattern, letExpr); 
 	bindings->addChild(theBinding);
       }
@@ -1001,11 +1002,11 @@ cl_heapify(GCPtr<AST> ast)
 
   case at_letbinding:
     {
-      GCPtr<AST> bpattern = ast->child(0);
-      GCPtr<AST> expr = ast->child(1);
+      shared_ptr<AST> bpattern = ast->child(0);
+      shared_ptr<AST> expr = ast->child(1);
 
       assert(bpattern->astType == at_identPattern);
-      GCPtr<AST> ident = bpattern->child(0);
+      shared_ptr<AST> ident = bpattern->child(0);
 
       CLCONV_DEBUG std::cerr << "Let binding for " << ident->s << std::endl;
 
@@ -1049,7 +1050,7 @@ cl_heapify(GCPtr<AST> ast)
 	 Thhe first use case within the set! will not be heapified if
 	 this is not done.  */
 
-      GCPtr<AST> def = (ast->symbolDef) ? ast->symbolDef : ast;
+      shared_ptr<AST> def = (ast->symbolDef) ? ast->symbolDef : ast;
 
       CLCONV_DEBUG if (def->Flags2 & ID_NEEDS_HEAPIFY)
 	std::cerr << "  needs heapify" << std::endl;

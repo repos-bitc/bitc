@@ -43,7 +43,7 @@
 #include <string>
 #include <set>
 
-#include <libsherpa/GCPtr.hxx>
+#include "shared_ptr.hxx"
 
 // Type of (sub) environment, if any.
 // Universal, In module scope, or in record scope
@@ -66,38 +66,38 @@
 template <class T>
 struct Binding {
   std::string nm;
-  sherpa::GCPtr<T> val;
+  boost::shared_ptr<T> val;
   unsigned flags;
 
-  Binding(const std::string& _nm, sherpa::GCPtr<T> _val)
+  Binding(const std::string& _nm, boost::shared_ptr<T> _val)
   {
     nm = _nm;
     val = _val;
     flags = 0;
   }
 
-  static inline sherpa::GCPtr<Binding>
-  make (const std::string& _nm, sherpa::GCPtr<T> _val) {
+  static inline boost::shared_ptr<Binding>
+  make (const std::string& _nm, boost::shared_ptr<T> _val) {
     Binding *tmp = new Binding(_nm, _val);
-    return sherpa::GCPtr<Binding>(tmp);
+    return boost::shared_ptr<Binding>(tmp);
   }
 };
 
 template <class T>
 struct Environment 
-  : public sherpa::enable_shared_from_this<Environment<T> > {
+  : public boost::enable_shared_from_this<Environment<T> > {
   std::string uocName;
-  sherpa::GCPtr<Environment<T> > parent; // in the chain of environments
-  sherpa::GCPtr<Environment<T> > defEnv; // definition level env
+  boost::shared_ptr<Environment<T> > parent; // in the chain of environments
+  boost::shared_ptr<Environment<T> > defEnv; // definition level env
 
-  typedef typename std::map<std::string, sherpa::GCPtr<Binding<T> > >::iterator iterator;
-  typedef typename std::map<std::string, sherpa::GCPtr<Binding<T> > >::const_iterator const_iterator;
-  std::map<std::string, sherpa::GCPtr<Binding<T> > > bindings;
+  typedef typename std::map<std::string, boost::shared_ptr<Binding<T> > >::iterator iterator;
+  typedef typename std::map<std::string, boost::shared_ptr<Binding<T> > >::const_iterator const_iterator;
+  std::map<std::string, boost::shared_ptr<Binding<T> > > bindings;
 
 private:
-  sherpa::GCPtr<Binding<T> > latest;
+  boost::shared_ptr<Binding<T> > latest;
 public:
-  sherpa::GCPtr<Binding<T> > getLatest() {
+  boost::shared_ptr<Binding<T> > getLatest() {
     return latest;
   }
 
@@ -124,31 +124,31 @@ public:
   }
 
 
-  sherpa::GCPtr< Binding<T> >
+  boost::shared_ptr< Binding<T> >
   doGetBinding(const std::string& nm) const;
 
-  sherpa::GCPtr< Binding<T> >
+  boost::shared_ptr< Binding<T> >
   getLocalBinding(const std::string& nm) const;
 
   Environment(std::string _uocName)
   {
     uocName = _uocName;
-    parent = sherpa::GC_NULL;
-    defEnv = sherpa::GC_NULL;
+    parent = boost::GC_NULL;
+    defEnv = boost::GC_NULL;
   }
 
-  static inline sherpa::GCPtr<Environment>
+  static inline boost::shared_ptr<Environment>
   make(std::string _uocName) {
     Environment *tmp = new Environment(_uocName);
-    return sherpa::GCPtr<Environment>(tmp);
+    return boost::shared_ptr<Environment>(tmp);
   }
 
   ~Environment();
 
-  void addBinding(const std::string& name, sherpa::GCPtr<T> val, 
+  void addBinding(const std::string& name, boost::shared_ptr<T> val, 
 		  bool rebind = false);
   void
-  addDefBinding(const std::string& name, sherpa::GCPtr<T> val)
+  addDefBinding(const std::string& name, boost::shared_ptr<T> val)
   {
     defEnv->addBinding(name, val);
   }
@@ -158,36 +158,36 @@ public:
   // Updates the most-current binding.
   void updateKey(const std::string& from, const std::string& to);
 
-  inline sherpa::GCPtr<T>
+  inline boost::shared_ptr<T>
   getBinding(const std::string& nm) const
   {
-    sherpa::GCPtr<const Binding<T> > binding = doGetBinding(nm);
+    boost::shared_ptr<const Binding<T> > binding = doGetBinding(nm);
     if (binding) return binding->val;
-    return sherpa::GC_NULL;
+    return boost::GC_NULL;
   }
 
   inline unsigned
   getFlags(const std::string& nm)
   {
-    sherpa::GCPtr<const Binding<T> > binding = doGetBinding(nm);
+    boost::shared_ptr<const Binding<T> > binding = doGetBinding(nm);
     return (binding ? binding->flags : 0);
   }
 
   inline void
   setFlags(const std::string& nm, unsigned long flags)
   {
-    sherpa::GCPtr<Binding<T> > binding = doGetBinding(nm);
+    boost::shared_ptr<Binding<T> > binding = doGetBinding(nm);
     if (binding) binding->flags |= flags;
   }
 
-  void mergeBindingsFrom(sherpa::GCPtr<Environment<T> > from, bool complete=true);
+  void mergeBindingsFrom(boost::shared_ptr<Environment<T> > from, bool complete=true);
   
-  sherpa::GCPtr<Environment<T> > newScope();
+  boost::shared_ptr<Environment<T> > newScope();
 
-  sherpa::GCPtr<Environment<T> > newDefScope();
+  boost::shared_ptr<Environment<T> > newDefScope();
 
   // Is env my ancestor?
-  bool isAncestor(sherpa::GCPtr<Environment<T> > env);
+  bool isAncestor(boost::shared_ptr<Environment<T> > env);
 
   std::string asString() const;
 };
@@ -200,7 +200,7 @@ public:
 // to change this or we will need to make use of lexically nested
 // instance environments.
 struct Instance;
-typedef std::set<sherpa::GCPtr<Instance> > InstanceSet;
+typedef std::set<boost::shared_ptr<Instance> > InstanceSet;
 typedef Environment<InstanceSet> InstEnvironment;
 
 struct AST;

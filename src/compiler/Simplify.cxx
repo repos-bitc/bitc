@@ -50,6 +50,7 @@
 #include "Type.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 // This pass exists to support GC. The idea is to ensure that every
@@ -98,18 +99,18 @@ using namespace sherpa;
 
 static unsigned long ltmpCounter = 0;
 
-static GCPtr<AST> 
-LetWrap(GCPtr<AST> ast)
+static shared_ptr<AST> 
+LetWrap(shared_ptr<AST> ast)
 {
   std::stringstream ss;
   ss << "_ltmp" << ltmpCounter++;
 
-  GCPtr<AST> let = AST::make(at_let, ast->loc);
-  GCPtr<AST> letBindings = AST::make(at_letbindings, ast->loc);
-  GCPtr<AST> binding = AST::make(at_letbinding, ast->loc);
-  GCPtr<AST> idPattern = AST::make(at_identPattern, ast->loc);
-  GCPtr<AST> id = AST::make(at_ident, ast->loc);
-  GCPtr<AST> useid = AST::make(at_ident, ast->loc);
+  shared_ptr<AST> let = AST::make(at_let, ast->loc);
+  shared_ptr<AST> letBindings = AST::make(at_letbindings, ast->loc);
+  shared_ptr<AST> binding = AST::make(at_letbinding, ast->loc);
+  shared_ptr<AST> idPattern = AST::make(at_identPattern, ast->loc);
+  shared_ptr<AST> id = AST::make(at_ident, ast->loc);
+  shared_ptr<AST> useid = AST::make(at_ident, ast->loc);
 
   let->addChild(letBindings);
   let->addChild(useid);
@@ -139,7 +140,7 @@ LetWrap(GCPtr<AST> ast)
 // locals into a call frame structure, and rewrite the LET using
 // BEGIN and SET!.
 void
-MakeFrame(GCPtr<AST> ast, GCPtr<AST> frameBindings)
+MakeFrame(shared_ptr<AST> ast, shared_ptr<AST> frameBindings)
 {
   switch(ast->astType) {
   case at_let:
@@ -170,7 +171,7 @@ MakeFrame(GCPtr<AST> ast, GCPtr<AST> frameBindings)
 
 
 void
-LetInsert(GCPtr<AST> ast, bool skip = false)
+LetInsert(shared_ptr<AST> ast, bool skip = false)
 {
   switch(ast->astType) {
   case at_apply:
@@ -181,7 +182,7 @@ LetInsert(GCPtr<AST> ast, bool skip = false)
 
       // First, figure out if we require a rewrite:
       for (size_t c = 0; c < ast->children.size(); c++) {
-	GCPtr<AST> child = ast->child(c);
+	shared_ptr<AST> child = ast->child(c);
 	LetInsert(child);
       }
 

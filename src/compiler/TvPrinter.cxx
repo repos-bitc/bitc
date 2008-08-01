@@ -48,6 +48,7 @@
 #include <sstream>
 
 using namespace std;
+using namespace boost;
 using namespace sherpa;
 
 TvPrinter::TvPrinter(const bool pp, const std::string& _pfx)
@@ -75,7 +76,7 @@ TvPrinter::newTvName()
 }
   
 string
-TvPrinter::tvName(GCPtr<const Type> tvar)
+TvPrinter::tvName(shared_ptr<const Type> tvar)
 {
   if(!prettyPrint) {
     stringstream ss;

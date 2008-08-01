@@ -56,45 +56,46 @@
 #include "TypeInfer.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 static void
-cl_HoistInstLam(GCPtr<UocInfo> uoc)
+cl_HoistInstLam(shared_ptr<UocInfo> uoc)
 {
-  std::vector<GCPtr<AST> > outAsts;
+  std::vector<shared_ptr<AST> > outAsts;
 
-  GCPtr<AST> modOrIf = uoc->uocAst;
+  shared_ptr<AST> modOrIf = uoc->uocAst;
 
   for (size_t c = 0;c < modOrIf->children.size(); c++) {
-    GCPtr<AST> child = modOrIf->child(c);
+    shared_ptr<AST> child = modOrIf->child(c);
 
     if (child->astType == at_definstance) {
-      GCPtr<AST> methods = child->child(1);
+      shared_ptr<AST> methods = child->child(1);
 
       // FIX: This is **utterly failing** to hoist the constraints, so
       // any constraint that is not on an instantiated variable will
       // not do the right thing.
       for (size_t m = 0; m < methods->children.size(); m++) {
-	GCPtr<AST> meth = methods->child(m);
+	shared_ptr<AST> meth = methods->child(m);
 	if (meth->astType != at_ident) {
 	  // It's an expression. Need to hoist it into a new binding.
 
 	  // FIX: redef or define?
-	  GCPtr<AST> newDef = AST::make(at_define, meth->loc);
+	  shared_ptr<AST> newDef = AST::make(at_define, meth->loc);
 
-	  GCPtr<AST> lamName = AST::genSym(meth, "lam");
+	  shared_ptr<AST> lamName = AST::genSym(meth, "lam");
 	  lamName->identType = id_value;
 	  lamName->Flags |= ID_IS_GLOBAL;
 
-	  GCPtr<AST> lamPat = AST::make(at_identPattern, meth->loc, lamName);
+	  shared_ptr<AST> lamPat = AST::make(at_identPattern, meth->loc, lamName);
 	  newDef->addChild(lamPat);
 	  newDef->addChild(meth);
 	  newDef->addChild(AST::make(at_constraints));
 
 	  outAsts.push_back(newDef);
 
-	  GCPtr<AST> instName = lamName->Use();
-	  GCPtr<AST> the = AST::make(at_tqexpr);
+	  shared_ptr<AST> instName = lamName->Use();
+	  shared_ptr<AST> the = AST::make(at_tqexpr);
 	  the->addChild(instName);
 	  the->addChild(meth->symType->asAST(meth->loc));
 
@@ -117,7 +118,7 @@ UocInfo::be_HoistInstLam(std::ostream& errStream,
 { 
   bool errFree = true;
 
-  GCPtr<AST> &ast = UocInfo::linkedUoc.ast;
+  shared_ptr<AST> &ast = UocInfo::linkedUoc.ast;
 
   ILH_DEBUG if (isSourceUoc)
     BitcPP(errStream, &UocInfo::linkedUoc);

@@ -43,10 +43,11 @@
 #include "Type.hxx"
 #include "Trail.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 void
-Trail::link(GCPtr<Type> from, GCPtr<Type> to)
+Trail::link(shared_ptr<Type> from, shared_ptr<Type> to)
 {  
   from = from->getType();
   to = to->getType();
@@ -72,7 +73,7 @@ Trail::link(GCPtr<Type> from, GCPtr<Type> to)
 } 
 
 void
-Trail::subst(GCPtr<Type> from, GCPtr<Type> to)
+Trail::subst(shared_ptr<Type> from, shared_ptr<Type> to)
 { 
   from = from->getType();
   to = to->getType();
@@ -117,7 +118,7 @@ Trail::rollBack(size_t upto)
 }
 
 void
-Trail::release(const size_t n, GCPtr<Type> rel)
+Trail::release(const size_t n, shared_ptr<Type> rel)
 {
   assert(vec[n] == rel); // not getType()
   

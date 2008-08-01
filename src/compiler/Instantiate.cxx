@@ -53,6 +53,7 @@
 #include "Instantiate.hxx"
 
 using namespace std;
+using namespace boost;
 using namespace sherpa;
 
 #if #INST_DEBUG == #DEBUG_ON
@@ -61,7 +62,7 @@ using namespace sherpa;
 #define STRICTLYEQUALS(x) strictlyEqualsA(x)
 #endif
 
-typedef map<GCPtr<AST>, GCPtr<AST> > AstMap;
+typedef map<shared_ptr<AST>, shared_ptr<AST> > AstMap;
 
 
 /*******************************************************************
@@ -207,12 +208,12 @@ typedef map<GCPtr<AST>, GCPtr<AST> > AstMap;
 
 
 static void 
-importSymBindings(GCPtr<ASTEnvironment > fromEnv, 
-		  GCPtr<ASTEnvironment > toEnv)
+importSymBindings(shared_ptr<ASTEnvironment > fromEnv, 
+		  shared_ptr<ASTEnvironment > toEnv)
 {
   for(ASTEnvironment::iterator itr = fromEnv->begin(); 
       itr != fromEnv->end(); ++ itr) {
-    GCPtr<Binding<AST> > bdng = itr->second;
+    shared_ptr<Binding<AST> > bdng = itr->second;
 
     if ((bdng->flags & BF_PRIVATE) == 0) {
       toEnv->addBinding(bdng->val->fqn.asString(), bdng->val,
@@ -226,12 +227,12 @@ importSymBindings(GCPtr<ASTEnvironment > fromEnv,
 }
 
 static void 
-importTSBindings(GCPtr<TSEnvironment > fromEnv, 
-		 GCPtr<TSEnvironment > toEnv)
+importTSBindings(shared_ptr<TSEnvironment > fromEnv, 
+		 shared_ptr<TSEnvironment > toEnv)
 {
   for(TSEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++ itr) {
-    GCPtr<Binding<TypeScheme> > bdng = itr->second;
+    shared_ptr<Binding<TypeScheme> > bdng = itr->second;
 
     if ((bdng->flags & BF_PRIVATE) == 0) {
       toEnv->addBinding(bdng->val->ast->fqn.asString(),
@@ -247,18 +248,18 @@ importTSBindings(GCPtr<TSEnvironment > fromEnv,
 }
 
 static void 
-importInstBindings(GCPtr<InstEnvironment > fromEnv,
-		   GCPtr<InstEnvironment > toEnv)
+importInstBindings(shared_ptr<InstEnvironment > fromEnv,
+		   shared_ptr<InstEnvironment > toEnv)
 {
   for(InstEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++ itr) {
-    GCPtr<Binding<set<GCPtr<Instance> > > > bdng = 
+    shared_ptr<Binding<set<shared_ptr<Instance> > > > bdng = 
       itr->second;
 
     if (bdng->flags & BF_PRIVATE)
       continue;    
 
-    GCPtr<set<GCPtr<Instance> > > fromInsts = bdng->val;      
+    shared_ptr<set<shared_ptr<Instance> > > fromInsts = bdng->val;      
     if(fromInsts->size() == 0)
       continue;
     
@@ -266,17 +267,17 @@ importInstBindings(GCPtr<InstEnvironment > fromEnv,
     // the instance set, reach into that instance's definition's AST,
     // the get the AST of the Typeclass being defined and then its
     // FQN.
-    set<GCPtr<Instance> >::iterator itr = fromInsts->begin();
+    set<shared_ptr<Instance> >::iterator itr = fromInsts->begin();
 
-    GCPtr<AST> instAST = (*itr)->ast;
-    GCPtr<AST> tcAST = instAST->child(0)->child(0)->symbolDef;
+    shared_ptr<AST> instAST = (*itr)->ast;
+    shared_ptr<AST> tcAST = instAST->child(0)->child(0)->symbolDef;
     string tcFQN = tcAST->fqn.asString();
 
-    GCPtr<set<GCPtr<Instance> > > toInsts = toEnv->getBinding(tcFQN); 
+    shared_ptr<set<shared_ptr<Instance> > > toInsts = toEnv->getBinding(tcFQN); 
     if(toInsts) {
       cerr << "Available non-private instance for "
 	   << tcFQN << ": ";
-      for (set<GCPtr<Instance> >::iterator itr_j = toInsts->begin();
+      for (set<shared_ptr<Instance> >::iterator itr_j = toInsts->begin();
 	   itr_j != toInsts->end(); ++itr_j)
 	cerr << (*itr_j)->asString() << "     ";
       cerr << endl;
@@ -290,14 +291,14 @@ importInstBindings(GCPtr<InstEnvironment > fromEnv,
 }
 
 void
-UpdateMegaEnvs(GCPtr<UocInfo> uoc)
+UpdateMegaEnvs(shared_ptr<UocInfo> uoc)
 {
   // The input uoc is the unifiedUOC, So, get the megaENVs
   // from the current uoc by fetching the parents of the
   // current envs.
-  GCPtr<ASTEnvironment > megaEnv = uoc->env->parent;
-  GCPtr<TSEnvironment > megaGamma = uoc->gamma->parent;
-  GCPtr<InstEnvironment > megaInstEnv =
+  shared_ptr<ASTEnvironment > megaEnv = uoc->env->parent;
+  shared_ptr<TSEnvironment > megaGamma = uoc->gamma->parent;
+  shared_ptr<InstEnvironment > megaInstEnv =
     uoc->instEnv->parent;
   
   INST_ENV_DEBUG
@@ -310,7 +311,7 @@ UpdateMegaEnvs(GCPtr<UocInfo> uoc)
 
   for(UocMap::iterator itr = UocInfo::ifList.begin();
       itr != UocInfo::ifList.end(); ++itr) {
-    GCPtr<UocInfo> puoci = itr->second;
+    shared_ptr<UocInfo> puoci = itr->second;
     if((puoci->flags & UOC_IS_MUTABLE) ||
        ((puoci->flags & UOC_SEEN_BY_INST) == 0)) {
       INST_ENV_DEBUG
@@ -327,7 +328,7 @@ UpdateMegaEnvs(GCPtr<UocInfo> uoc)
 
   for(UocMap::iterator itr = UocInfo::srcList.begin();
       itr != UocInfo::srcList.end(); ++itr) {
-    GCPtr<UocInfo> puoci = itr->second;
+    shared_ptr<UocInfo> puoci = itr->second;
     if((puoci->flags & UOC_IS_MUTABLE) ||
        ((puoci->flags &UOC_SEEN_BY_INST) == 0)) {
       INST_ENV_DEBUG
@@ -348,8 +349,8 @@ UpdateMegaEnvs(GCPtr<UocInfo> uoc)
                         NAME HANDLING
 *******************************************************************/
 
-GCPtr<AST> 
-UocInfo::lookupByFqn(const string& fqn, GCPtr<UocInfo> &targetUoc)
+shared_ptr<AST> 
+UocInfo::lookupByFqn(const string& fqn, shared_ptr<UocInfo> &targetUoc)
 {
   string::size_type lastDot = fqn.rfind('.');
   string ifName = fqn.substr(0, lastDot);
@@ -372,10 +373,10 @@ UocInfo::lookupByFqn(const string& fqn, GCPtr<UocInfo> &targetUoc)
     UocMap::iterator itr = UocInfo::ifList.find(ifName);
 
     if (itr != UocInfo::ifList.end()) {
-      GCPtr<UocInfo> uoc = itr->second;
+      shared_ptr<UocInfo> uoc = itr->second;
 
       targetUoc = uoc;
-      GCPtr<AST> def = uoc->env->getBinding(idName);
+      shared_ptr<AST> def = uoc->env->getBinding(idName);
       assert(def->fqn.asString() == fqn);
 
       // If this is a declaration, then try to get the definition if
@@ -390,13 +391,13 @@ UocInfo::lookupByFqn(const string& fqn, GCPtr<UocInfo> &targetUoc)
   // Next all source modules
   for(UocMap::iterator itr = UocInfo::srcList.begin();
       itr != UocInfo::srcList.end(); ++itr) {
-    GCPtr<UocInfo> uoc = itr->second;
+    shared_ptr<UocInfo> uoc = itr->second;
 
     if (uoc->uocName != ifName) 
       continue;    
 
     targetUoc = uoc;
-    GCPtr<AST> def = uoc->env->getBinding(idName);
+    shared_ptr<AST> def = uoc->env->getBinding(idName);
     assert(def->fqn.asString() == fqn);
 
     if(def->defn)
@@ -422,10 +423,10 @@ UocInfo::lookupByFqn(const string& fqn, GCPtr<UocInfo> &targetUoc)
 // will get instantiated to a different type ...
 
 static string
-getInstName(GCPtr<const AST> def, GCPtr<Type> typ)
+getInstName(shared_ptr<const AST> def, shared_ptr<Type> typ)
 {
   stringstream ss;
-  GCPtr<Type> uAdjTyp = typ;
+  shared_ptr<Type> uAdjTyp = typ;
   
   if(typ->isUcon() || typ->isUval())
     uAdjTyp = typ->getUnionType();
@@ -451,7 +452,7 @@ getInstName(GCPtr<const AST> def, GCPtr<Type> typ)
 
 // Rename an AST with its instantiated name
 void 
-InstMangle(GCPtr<AST> def)
+InstMangle(shared_ptr<AST> def)
 {
   NAMKARAN(def, getInstName(def, def->symType));
 }
@@ -461,7 +462,7 @@ InstMangle(GCPtr<AST> def)
 // unique name based on the uniqueID of the AST, and
 // the mangled_string of the obtained by getInstName()
 static string
-uniqName(const string name, const GCPtr<AST> def)
+uniqName(const string name, const shared_ptr<AST> def)
 {
   stringstream ss;
   ss << name;
@@ -472,7 +473,7 @@ uniqName(const string name, const GCPtr<AST> def)
 // Fix the usage of any global definition to instead refer to its FQN
 // because that is what is in megaENVs
 static void
-name2fqn(GCPtr<AST> ast) 
+name2fqn(shared_ptr<AST> ast) 
 {
   switch(ast->astType) {
   case at_ident:
@@ -556,10 +557,10 @@ name2fqn(GCPtr<AST> ast)
 // Many a time, we will have to explicitely write (or re-write)
 // a type-qualification. This is a helper function to do that. 
 // It gets type in AST form, and prepares it in the current context.
-static GCPtr<AST>
-typeAsAst(GCPtr<Type> t, const LexLoc& loc)
+static shared_ptr<AST>
+typeAsAst(shared_ptr<Type> t, const LexLoc& loc)
 {
-  GCPtr<AST> tAst = t->asAST(loc);
+  shared_ptr<AST> tAst = t->asAST(loc);
   name2fqn(tAst);
   return tAst;
 } 
@@ -567,7 +568,7 @@ typeAsAst(GCPtr<Type> t, const LexLoc& loc)
 // No constraints should survive after Polyinstantiation
 
 static void
-clearConstraints(GCPtr<AST> ast)
+clearConstraints(shared_ptr<AST> ast)
 {
   switch(ast->astType) {
   case at_define:
@@ -616,8 +617,8 @@ clearConstraints(GCPtr<AST> ast)
 // currently specialized type _must_ be removed before it can be R&Ted
 // in the original environment.
 
-static GCPtr<AST>
-substitute(GCPtr<AST> ast, GCPtr<AST> from, GCPtr<AST> to)
+static shared_ptr<AST>
+substitute(shared_ptr<AST> ast, shared_ptr<AST> from, shared_ptr<AST> to)
 { 
   switch(ast->astType) {
   case at_ident:    
@@ -654,8 +655,8 @@ substitute(GCPtr<AST> ast, GCPtr<AST> from, GCPtr<AST> to)
 
 // Replace type variable usage with concrete types in the
 // instantiation
-static GCPtr<AST> 
-tvarSub(GCPtr<AST> ast, GCPtr<AST> tv, GCPtr<Type> typ)
+static shared_ptr<AST> 
+tvarSub(shared_ptr<AST> ast, shared_ptr<AST> tv, shared_ptr<Type> typ)
 {
   switch(ast->astType) {
   case at_ident:
@@ -674,8 +675,8 @@ tvarSub(GCPtr<AST> ast, GCPtr<AST> tv, GCPtr<Type> typ)
 
 // ``Instantiate'' type variables scoped at 
 //   the current letbinging to new type variables.
-static GCPtr<AST> 
-tvarInst(GCPtr<AST> ast, GCPtr<AST> scope, AstMap &newBinds)
+static shared_ptr<AST> 
+tvarInst(shared_ptr<AST> ast, shared_ptr<AST> scope, AstMap &newBinds)
 {
   switch(ast->astType) {
   case at_ident:
@@ -685,7 +686,7 @@ tvarInst(GCPtr<AST> ast, GCPtr<AST> scope, AstMap &newBinds)
       if((ast->Flags & ID_IS_TVAR) == 0)
 	return ast;
      
-      GCPtr<AST> def = ast->symbolDef;
+      shared_ptr<AST> def = ast->symbolDef;
 
       if(def->tvarLB != scope)
 	return ast;
@@ -694,8 +695,8 @@ tvarInst(GCPtr<AST> ast, GCPtr<AST> scope, AstMap &newBinds)
       if (itr != newBinds.end())
 	return itr->second->Use();
       
-      GCPtr<Type> newTV = Type::make(ty_tvar);
-      GCPtr<AST> newTvAst = newTV->asAST(ast->loc, 
+      shared_ptr<Type> newTV = Type::make(ty_tvar);
+      shared_ptr<AST> newTvAst = newTV->asAST(ast->loc, 
 				   TvPrinter::make(false));
       newTvAst->symbolDef = newTvAst;
       newTvAst->Flags2 |= TVAR_IS_DEF | TVAR_POLY_SPECIAL;
@@ -728,10 +729,10 @@ tvarInst(GCPtr<AST> ast, GCPtr<AST> scope, AstMap &newBinds)
 // In the case of a value declaration, use typ to produce the type to
 // declare. In the case of struct/union declaration, build an empty
 // declaration where tvlist is empty. No constraints are ever emitted 
-static GCPtr<AST> 
-buildNewDeclaration(GCPtr<AST> def, GCPtr<Type> typ)
+static shared_ptr<AST> 
+buildNewDeclaration(shared_ptr<AST> def, shared_ptr<Type> typ)
 {
-  GCPtr<AST> ident = def->getID()->getDCopy();
+  shared_ptr<AST> ident = def->getID()->getDCopy();
 
   if(ident->externalName.size())
     ident->Flags |= DEF_IS_EXTERNAL;
@@ -740,7 +741,7 @@ buildNewDeclaration(GCPtr<AST> def, GCPtr<Type> typ)
   assert(ident->isGlobal());
 
   NAMKARAN(ident, getInstName(ident, typ));
-  GCPtr<AST> decl = GC_NULL;
+  shared_ptr<AST> decl = GC_NULL;
   
   switch(def->astType) {
   case at_define:
@@ -778,17 +779,17 @@ buildNewDeclaration(GCPtr<AST> def, GCPtr<Type> typ)
   return decl;
 }
 
-static GCPtr<AST> 
-getIDFromInstantiation(GCPtr<AST> oldDefID, GCPtr<AST> newDef)
+static shared_ptr<AST> 
+getIDFromInstantiation(shared_ptr<AST> oldDefID, shared_ptr<AST> newDef)
 {
-  GCPtr<AST> oldDef = oldDefID->defForm;
+  shared_ptr<AST> oldDef = oldDefID->defForm;
   
   // If we are looking for a constructor, find it and return 
   if(oldDefID->isUnionLeg()) {
     oldDef->children[4] = oldDef->children[4];
-    GCPtr<AST> oldCtrs = oldDef->child(4);
-    GCPtr<AST> newCtrs = newDef->child(4);
-    GCPtr<AST> newCtr = GC_NULL;
+    shared_ptr<AST> oldCtrs = oldDef->child(4);
+    shared_ptr<AST> newCtrs = newDef->child(4);
+    shared_ptr<AST> newCtr = GC_NULL;
     for(size_t c=0; c < oldCtrs->children.size(); c++)
       if(oldCtrs->child(c)->child(0) == oldDefID)
 	newCtr = newCtrs->child(c)->child(0);
@@ -806,10 +807,10 @@ getIDFromInstantiation(GCPtr<AST> oldDefID, GCPtr<AST> newDef)
 // Take in an identifier and return the symbol environment in which
 // that identifier is defined
 
-static GCPtr<AST> 
-getOuterLet(GCPtr<AST> ast)
+static shared_ptr<AST> 
+getOuterLet(shared_ptr<AST> ast)
 {
-  GCPtr<AST> outerLet = GC_NULL;
+  shared_ptr<AST> outerLet = GC_NULL;
   switch(ast->astType) {
   case at_ident:
     assert(!ast->symbolDef);
@@ -839,11 +840,11 @@ getOuterLet(GCPtr<AST> ast)
   return outerLet;
 }
 
-static GCPtr<AST> 
-getInnerLet(GCPtr<AST> ast)
+static shared_ptr<AST> 
+getInnerLet(shared_ptr<AST> ast)
 {
-  GCPtr<AST> outerLet = getOuterLet(ast);
-  GCPtr<AST> innerLet = outerLet->child(1);
+  shared_ptr<AST> outerLet = getOuterLet(ast);
+  shared_ptr<AST> innerLet = outerLet->child(1);
   assert(innerLet->astType == at_let || 
 	 innerLet->astType == at_letrec);
   return innerLet;      
@@ -900,9 +901,9 @@ getInnerLet(GCPtr<AST> ast)
 //         Dealing with Type-classes and Constructors              //
 /////////////////////////////////////////////////////////////////////
 
-static GCPtr<AST> 
-getDefToInstantiate(ostream &errStream, GCPtr<UocInfo> unifiedUOC,
-		    GCPtr<AST> def, GCPtr<Type> typ)
+static shared_ptr<AST> 
+getDefToInstantiate(ostream &errStream, shared_ptr<UocInfo> unifiedUOC,
+		    shared_ptr<AST> def, shared_ptr<Type> typ)
 {
   // In the case of union constructors, we need to instantiate the
   // entire union type, the defForm field of all constructors point to
@@ -922,15 +923,15 @@ getDefToInstantiate(ostream &errStream, GCPtr<UocInfo> unifiedUOC,
 
   while (def->isMethod()) {
     // First look at the typeclass, get a copy of its type.
-    GCPtr<AST> typClass = def->defForm;
-    GCPtr<AST> tcID = typClass->child(0);
-    GCPtr<Typeclass> pred = tcID->scheme->type_instance_copy();
+    shared_ptr<AST> typClass = def->defForm;
+    shared_ptr<AST> tcID = typClass->child(0);
+    shared_ptr<Typeclass> pred = tcID->scheme->type_instance_copy();
 
     // Then find out which method we are concerned about.
     size_t nthMethod = 0;
     bool found = false;
     for(size_t i = 0; i < pred->components.size(); i++) {
-      GCPtr<Type> ithMethod = pred->components[i]->typ->getType();
+      shared_ptr<Type> ithMethod = pred->components[i]->typ->getType();
       if(ithMethod->defAst == def) {
 	nthMethod = i;
 	found = true;
@@ -949,14 +950,14 @@ getDefToInstantiate(ostream &errStream, GCPtr<UocInfo> unifiedUOC,
     // instance among all the instances we have for the 
     // current typeclass.
     
-    GCPtr<set<GCPtr<Instance> > > insts = 
+    shared_ptr<set<shared_ptr<Instance> > > insts = 
       unifiedUOC->instEnv->getBinding(tcID->fqn.asString());
 
-    set<GCPtr<Instance> >::iterator matchingInstance;
+    set<shared_ptr<Instance> >::iterator matchingInstance;
 
     for(matchingInstance = insts->begin();
 	matchingInstance != insts->end(); ++matchingInstance) {
-      GCPtr<Instance> currInst = (*matchingInstance);
+      shared_ptr<Instance> currInst = (*matchingInstance);
       if(currInst->satisfies(pred, unifiedUOC->instEnv))
 	break;
     }
@@ -964,8 +965,8 @@ getDefToInstantiate(ostream &errStream, GCPtr<UocInfo> unifiedUOC,
     found = (matchingInstance != insts->end());
     assert(found);
     
-    GCPtr<AST> instAST = (*matchingInstance)->ast;
-    GCPtr<AST> theMethod = instAST->child(1)->child(nthMethod);
+    shared_ptr<AST> instAST = (*matchingInstance)->ast;
+    shared_ptr<AST> theMethod = instAST->child(1)->child(nthMethod);
 
     // If an immediate lambda was present, then InstLamHoist hoisted
     // it and left us with an ID wrapped by a THE.
@@ -994,9 +995,9 @@ getDefToInstantiate(ostream &errStream, GCPtr<UocInfo> unifiedUOC,
 // the body of instantiated forms. This function must
 // *only* operate on the copied forms, and never the original
 
-GCPtr<AST>  
+shared_ptr<AST>  
 UocInfo::recInstantiate(ostream &errStream, 
-			GCPtr<AST> ast,
+			shared_ptr<AST> ast,
 			bool &errFree,
 			WorkList<string>& worklist)
 {
@@ -1028,7 +1029,7 @@ UocInfo::recInstantiate(ostream &errStream,
       // Defining occurences are handled by their respective container
       // ASTs -- local definitions here, and global definitions in
       // doInstantiate() function. 
-      GCPtr<AST> def = ast->symbolDef;
+      shared_ptr<AST> def = ast->symbolDef;
       assert(def);
 
       // If this is a local defined at a non-let variable, whose name
@@ -1168,7 +1169,7 @@ UocInfo::recInstantiate(ostream &errStream,
       // Therefore, need to preserve by-ref AST qualifications as is.
 
       if(ast->children.size() > 1) {
-	GCPtr<AST> typeAST = typeAsAst(ast->child(0)->symType,
+	shared_ptr<AST> typeAST = typeAsAst(ast->child(0)->symType,
 				       ast->child(1)->loc);
 	if(ast->child(1)->astType == at_byrefType)
 	  ast->child(1) = AST::make(at_byrefType, 
@@ -1256,18 +1257,18 @@ UocInfo::recInstantiate(ostream &errStream,
       // are automatiocally dropped when we finally declare the inner
       // let expression as "the" AST, and drop the outer wrapper.
 
-      GCPtr<AST> originalLbs = ast->child(0);
-      GCPtr<AST> originalExpr = ast->child(1);
+      shared_ptr<AST> originalLbs = ast->child(0);
+      shared_ptr<AST> originalExpr = ast->child(1);
 
-      GCPtr<AST> newLet = AST::make(ast->astType, ast->loc,
+      shared_ptr<AST> newLet = AST::make(ast->astType, ast->loc,
 			    AST::make(at_letbindings, 
 				    originalLbs->loc),
 			    originalExpr,
 			    AST::make(at_constraints,
 				    ast->child(2)->loc)); 
       
-      GCPtr<AST> newLbs = newLet->child(0);
-      GCPtr<AST> newExpr = newLet->child(1);
+      shared_ptr<AST> newLbs = newLet->child(0);
+      shared_ptr<AST> newExpr = newLet->child(1);
  
       // Actually rewrite the current expression
       ast->child(1) = newLet;
@@ -1292,8 +1293,8 @@ UocInfo::recInstantiate(ostream &errStream,
       // Since no non-value can be polymorphic, this check will ensure
       // that we do not drop any state change.
       for(size_t i=0; i < originalLbs->children.size(); i++) {
-	GCPtr<AST> lb = originalLbs->child(i);
-	GCPtr<AST> ident = lb->child(0)->child(0);
+	shared_ptr<AST> lb = originalLbs->child(i);
+	shared_ptr<AST> ident = lb->child(0)->child(0);
 	if(((lb->Flags2 & LB_INSTANTIATED) == 0) &&
 	   ident->symType->isConcrete()) {
 	  // Instantiate this definition, it will automatically get
@@ -1355,11 +1356,11 @@ UocInfo::recInstantiate(ostream &errStream,
 
   case at_lambda:
     {
-      GCPtr<AST> args = ast->child(0);
-      GCPtr<AST> body = ast->child(1);
+      shared_ptr<AST> args = ast->child(0);
+      shared_ptr<AST> body = ast->child(1);
       for(size_t c=0; c < args->children.size(); c++) {
-	GCPtr<AST> argPat = args->child(c);
-	GCPtr<AST> arg = argPat->child(0);
+	shared_ptr<AST> argPat = args->child(c);
+	shared_ptr<AST> arg = argPat->child(0);
 	string oldName = arg->s;
 
 	arg->Flags2 |= LOCAL_NOGEN_VAR;
@@ -1388,13 +1389,13 @@ UocInfo::recInstantiate(ostream &errStream,
 
   case at_do:
     {      
-      GCPtr<AST> doBds = ast->child(0);
-      GCPtr<AST> doTest = ast->child(1);
-      GCPtr<AST> doExprs = ast->child(2);      
+      shared_ptr<AST> doBds = ast->child(0);
+      shared_ptr<AST> doTest = ast->child(1);
+      shared_ptr<AST> doExprs = ast->child(2);      
 
       for (size_t c = 0; c < doBds->children.size(); c++) {
-	GCPtr<AST> doBd = doBds->child(c);
-	GCPtr<AST> local = doBd->child(0)->child(0);
+	shared_ptr<AST> doBd = doBds->child(c);
+	shared_ptr<AST> local = doBd->child(0)->child(0);
 
 	string oldName = local->s;
 	local->Flags2 |= LOCAL_NOGEN_VAR;
@@ -1402,7 +1403,7 @@ UocInfo::recInstantiate(ostream &errStream,
 	ast->envs.updateKey(oldName, local->s);
 
 	for (size_t d = 0; d < doBds->children.size(); d++) {
-	  GCPtr<AST> update = doBds->child(d)->child(2);
+	  shared_ptr<AST> update = doBds->child(d)->child(2);
 	  substitute(update, local, local); 
 	}
 	substitute(doTest, local, local); 
@@ -1419,8 +1420,8 @@ UocInfo::recInstantiate(ostream &errStream,
 
   case at_sw_leg:
     {
-      GCPtr<AST> local = ast->child(0);
-      GCPtr<AST> expr = ast->child(1);
+      shared_ptr<AST> local = ast->child(0);
+      shared_ptr<AST> expr = ast->child(1);
       string oldName = local->s;
       local->Flags2 |= LOCAL_NOGEN_VAR;
       NAMKARAN(local, getInstName(local, local->symType));
@@ -1471,10 +1472,10 @@ UocInfo::recInstantiate(ostream &errStream,
 
 // Specialize the input AST /def/ according to the supplied concrete
 // type /typ/ and emit the resulting, renamed AST to outUOC.
-GCPtr<AST> 
+shared_ptr<AST> 
 UocInfo::doInstantiate(ostream &errStream, 
-		       GCPtr<AST> ast,
-		       GCPtr<Type> typ,
+		       shared_ptr<AST> ast,
+		       shared_ptr<Type> typ,
 		       bool &errFree,
 		       WorkList<string>& worklist)
 {  
@@ -1492,7 +1493,7 @@ UocInfo::doInstantiate(ostream &errStream,
   // definition to instantiate. ex: In the case of
   // constructors, entire union must be instantiated. Special
   // handling is necessary for methods, etc.
-  GCPtr<AST> def = getDefToInstantiate(errStream, shared_from_this(), ast, typ);
+  shared_ptr<AST> def = getDefToInstantiate(errStream, shared_from_this(), ast, typ);
   
   assert((def->astType != at_deftypeclass) || 
 	 (def->astType == at_definstance));
@@ -1529,7 +1530,7 @@ UocInfo::doInstantiate(ostream &errStream,
   assert(typ->isConcrete());
 
   // We can only specialize defining forms
-  GCPtr<AST> defIdent = def->getID();
+  shared_ptr<AST> defIdent = def->getID();
   assert(defIdent);
 
   // Make sure we don't mangle any identifier twice. We should never
@@ -1601,14 +1602,14 @@ UocInfo::doInstantiate(ostream &errStream,
   //          R&Ted independent of the let-wrapper. There is no
   //          environment there.
   
-  GCPtr<AST> alreadyInstantiated = GC_NULL;
+  shared_ptr<AST> alreadyInstantiated = GC_NULL;
   if(globalInst)
     alreadyInstantiated = env->getBinding(newName);
   else {
-    GCPtr<AST> innerLet = getInnerLet(defIdent);
-    GCPtr<AST> innerLbs = innerLet->child(0);
+    shared_ptr<AST> innerLet = getInnerLet(defIdent);
+    shared_ptr<AST> innerLbs = innerLet->child(0);
     for(size_t c=0; c < innerLbs->children.size(); c++) {
-      GCPtr<AST> id = innerLbs->child(c)->getID();
+      shared_ptr<AST> id = innerLbs->child(c)->getID();
       if(id->s == newName)
 	alreadyInstantiated = id;
     }
@@ -1643,7 +1644,7 @@ UocInfo::doInstantiate(ostream &errStream,
     // out when the corresponding let-binding will get instantiated
     // some day.
     if(!globalInst) {
-      GCPtr<AST> res = ast->getDCopy();
+      shared_ptr<AST> res = ast->getDCopy();
       res->symbolDef = GC_NULL;
       NAMKARAN(res, newName);
 
@@ -1662,7 +1663,7 @@ UocInfo::doInstantiate(ostream &errStream,
     assert(!ast->isUnionLeg());
 
     // Get the proclaimation / declType
-    GCPtr<AST> newDecl = buildNewDeclaration(def, typ);
+    shared_ptr<AST> newDecl = buildNewDeclaration(def, typ);
     
     // Marking done wrt my UOC.
     findDefForms(newDecl);
@@ -1702,8 +1703,8 @@ UocInfo::doInstantiate(ostream &errStream,
   // Make a copy of the definition, make a true-copy, we need the
   // symbolDefs to still point to the old ones so that substitute
   // works correctly.
-  GCPtr<AST> copy = def->getTrueCopy();  
-  GCPtr<AST> copyIdent = copy->getID();
+  shared_ptr<AST> copy = def->getTrueCopy();  
+  shared_ptr<AST> copyIdent = copy->getID();
   NAMKARAN(copyIdent, newName);
 
   // Then, within the current definition, replace all references to the
@@ -1720,7 +1721,7 @@ UocInfo::doInstantiate(ostream &errStream,
   else {    
     // In the case of local-instantiation, it is safe to 
     // traverse defForm upwards
-    GCPtr<AST> copyTopExpr = ((globalInst) ? copy : 
+    shared_ptr<AST> copyTopExpr = ((globalInst) ? copy : 
 			copy->defForm->defForm->defForm);
     //lb    lbs      let      define        
 
@@ -1742,9 +1743,9 @@ UocInfo::doInstantiate(ostream &errStream,
       // one, overwrite it. The type obtained from the type record is
       // at least as precise what the user wrote
       
-      GCPtr<AST> ip = copy->child(0);
+      shared_ptr<AST> ip = copy->child(0);
       assert(ip->astType == at_identPattern);      
-      GCPtr<AST> typAST = typeAsAst(typ, copy->loc); 
+      shared_ptr<AST> typAST = typeAsAst(typ, copy->loc); 
       if(ip->children.size() > 1)
 	ip->child(1) = typAST;	
       else 
@@ -1758,8 +1759,8 @@ UocInfo::doInstantiate(ostream &errStream,
 	//      (let ((id (lambda (x) x)))
 	//        (let ((id#fn_bool_bool (lambda (x) x))) ...)))
 	assert(copy->astType == at_letbinding);
-	GCPtr<AST> innerLet = getInnerLet(copy);
-	GCPtr<AST> innerLbs = innerLet->child(0);
+	shared_ptr<AST> innerLet = getInnerLet(copy);
+	shared_ptr<AST> innerLbs = innerLet->child(0);
 	innerLbs->children.push_back(copy);
 
 	// We also need to fixup any references to 
@@ -1814,14 +1815,14 @@ UocInfo::doInstantiate(ostream &errStream,
       // fields, and old tvars must now refer to concrete types. So,
       // fix that before recursing over the fields.
       
-      GCPtr<AST> defTvList = def->child(1);
+      shared_ptr<AST> defTvList = def->child(1);
       assert(typ->typeArgs.size() == defTvList->children.size());
-      GCPtr<AST> copyFields = copy->child(4);
+      shared_ptr<AST> copyFields = copy->child(4);
       for(size_t i=0; i < defTvList->children.size(); i++) {
-	GCPtr<AST> defTv = defTvList->child(i);
-	GCPtr<Type> arg = typ->TypeArg(i);
+	shared_ptr<AST> defTv = defTvList->child(i);
+	shared_ptr<Type> arg = typ->TypeArg(i);
 	for(size_t j=0; j < copyFields->children.size(); j++) {
-	  GCPtr<AST> copyField = copyFields->child(j);
+	  shared_ptr<AST> copyField = copyFields->child(j);
 	  if(copyField->astType == at_fill)
 	    continue; 
 	  copyField->child(1) =  tvarSub(copyField->child(1), 
@@ -1835,26 +1836,26 @@ UocInfo::doInstantiate(ostream &errStream,
     {
       copy->child(1)->children.clear();
 
-      GCPtr<AST> defTvList = def->child(1);
+      shared_ptr<AST> defTvList = def->child(1);
       assert(typ->typeArgs.size() == defTvList->children.size());
 
-      GCPtr<AST> copyCtrs = copy->child(4);
+      shared_ptr<AST> copyCtrs = copy->child(4);
       for(size_t j=0; j < copyCtrs->children.size(); j++) {	  
-	GCPtr<AST> copyCtr = copyCtrs->child(j);
+	shared_ptr<AST> copyCtr = copyCtrs->child(j);
 	  
 	// Unions are a little more complicated. We must:
 	// i)  Fix the name of the constructor with the new name
 	//     according to the new union we created
 	// ii) Fix tvars of the fields of the constructor
-	GCPtr<AST> copyCtrID = copyCtr->child(0);
+	shared_ptr<AST> copyCtrID = copyCtr->child(0);
 	NAMKARAN(copyCtrID, getInstName(copyCtrID, typ));
 
 	for(size_t i=0; i < defTvList->children.size(); i++) {
-	  GCPtr<AST> defTv = defTvList->child(i);
-	  GCPtr<Type> arg = typ->TypeArg(i);
+	  shared_ptr<AST> defTv = defTvList->child(i);
+	  shared_ptr<Type> arg = typ->TypeArg(i);
 
 	  for(size_t k=1; k < copyCtr->children.size(); k++) {
-	    GCPtr<AST> copyField = copyCtr->child(k);
+	    shared_ptr<AST> copyField = copyCtr->child(k);
 	    if(copyField->astType == at_fill)
 	      continue; 
 	    
@@ -1887,7 +1888,7 @@ UocInfo::doInstantiate(ostream &errStream,
   INST_DEBUG
     cerr << "Copy after name fixup: " << copy->asString() << endl;  
   
-  GCPtr<EnvSet> envset = (globalInst ? UNIFIED_ENVS 
+  shared_ptr<EnvSet> envset = (globalInst ? UNIFIED_ENVS 
 			  : (EnvSet::make(getOuterLet(copy)->envs)));
   RANDT_DROP(copy, "[[Inst: R&T-1: ]]", envset);
   
@@ -1900,7 +1901,7 @@ UocInfo::doInstantiate(ostream &errStream,
   case at_letbinding:
     {
       // Instantiate any types in the qualification we just emitted
-      GCPtr<AST> ip = copy->child(0);
+      shared_ptr<AST> ip = copy->child(0);
       ip->child(1) = recInstantiate(errStream, 
 				    ip->child(1),
 				    errFree, worklist);
@@ -1933,7 +1934,7 @@ UocInfo::doInstantiate(ostream &errStream,
   case at_defunion:
   case at_defstruct:
     {
-      GCPtr<AST> copyFieldsCtr = copy->child(4);
+      shared_ptr<AST> copyFieldsCtr = copy->child(4);
       copy->child(4) = recInstantiate(errStream, 
 				      copyFieldsCtr,
 				      errFree, worklist);
@@ -2037,8 +2038,8 @@ UocInfo::instantiateFQN(ostream &errStream,
 			   const string& epName)
 {
   bool errFree = true;
-  GCPtr<UocInfo> targetUoc = GC_NULL;
-  GCPtr<AST> def = UocInfo::lookupByFqn(epName, targetUoc);
+  shared_ptr<UocInfo> targetUoc = GC_NULL;
+  shared_ptr<AST> def = UocInfo::lookupByFqn(epName, targetUoc);
 
   if (!def) {
     errStream << "bitcc: Entry point \"" << epName 
@@ -2053,7 +2054,7 @@ UocInfo::instantiateFQN(ostream &errStream,
     return false;
   }
 
-  GCPtr<AST> defIdent = def->getID();
+  shared_ptr<AST> defIdent = def->getID();
   
   INST_DEBUG {
     INOstream ino(cerr);

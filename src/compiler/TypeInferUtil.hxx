@@ -44,32 +44,32 @@
 #include "TypeScheme.hxx"
 #include "Typeclass.hxx"
 
-sherpa::GCPtr<Type>
-obtainFullUnionType(sherpa::GCPtr<Type> t);
+boost::shared_ptr<Type>
+obtainFullUnionType(boost::shared_ptr<Type> t);
 
 bool
 initGamma(std::ostream& errStream, 
-	  sherpa::GCPtr<TSEnvironment > gamma,
-	  sherpa::GCPtr<InstEnvironment > instEnv,
-	  const sherpa::GCPtr<AST> ast, unsigned long uflags);
+	  boost::shared_ptr<TSEnvironment > gamma,
+	  boost::shared_ptr<InstEnvironment > instEnv,
+	  const boost::shared_ptr<AST> ast, unsigned long uflags);
 
 void
 useIFGamma(const std::string& idName,
-	   sherpa::GCPtr<TSEnvironment > fromEnv, 
-	   sherpa::GCPtr<TSEnvironment > toEnv);
+	   boost::shared_ptr<TSEnvironment > fromEnv, 
+	   boost::shared_ptr<TSEnvironment > toEnv);
 
 void
 useIFInsts(const std::string& idName,
-	   sherpa::GCPtr<InstEnvironment >fromEnv, 
-	   sherpa::GCPtr<InstEnvironment >toEnv);
+	   boost::shared_ptr<InstEnvironment >fromEnv, 
+	   boost::shared_ptr<InstEnvironment >toEnv);
 
 bool
 initGamma(std::ostream& errStream, 
-	  sherpa::GCPtr<TSEnvironment > gamma,
-	  sherpa::GCPtr<InstEnvironment > instEnv,
-	  const sherpa::GCPtr<AST> ast, unsigned long uflags);
+	  boost::shared_ptr<TSEnvironment > gamma,
+	  boost::shared_ptr<InstEnvironment > instEnv,
+	  const boost::shared_ptr<AST> ast, unsigned long uflags);
 
 size_t
-nCtArgs(sherpa::GCPtr<Type> t);
+nCtArgs(boost::shared_ptr<Type> t);
 
 #endif /* TYPEINFERUTIL_HXX */

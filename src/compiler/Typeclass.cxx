@@ -56,15 +56,16 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
 bool 
-Instance::equals(GCPtr<Instance> ins, 
-		 GCPtr<const InstEnvironment > instEnv) const
+Instance::equals(shared_ptr<Instance> ins, 
+		 shared_ptr<const InstEnvironment > instEnv) const
 {
-  GCPtr<TypeScheme> mySigma = ts->ts_instance_copy();
-  GCPtr<TypeScheme> hisSigma = ins->ts->ts_instance_copy();
+  shared_ptr<TypeScheme> mySigma = ts->ts_instance_copy();
+  shared_ptr<TypeScheme> hisSigma = ins->ts->ts_instance_copy();
 
   //std::cerr << mySigma->asString() << " vs " 
   //	    << hisSigma->asString() 
@@ -83,7 +84,7 @@ Instance::equals(GCPtr<Instance> ins,
   // This will also add self constraints.
   for (TypeSet::iterator itr = hisSigma->tcc->begin(); 
        itr != hisSigma->tcc->end(); ++itr) {
-    GCPtr<Typeclass> hisPred = (*itr);
+    shared_ptr<Typeclass> hisPred = (*itr);
     mySigma->tcc->addPred(hisPred);
   }
   
@@ -124,19 +125,19 @@ Instance::equals(GCPtr<Instance> ins,
 // solving fails for an instance. 
 
 bool 
-Instance::overlaps(sherpa::GCPtr<Instance> ins) const
+Instance::overlaps(boost::shared_ptr<Instance> ins) const
 {
   return ts->tau->equals(ins->ts->tau); 
 }
 
 
 bool 
-Instance::satisfies(GCPtr<Typeclass> pred, 		    
-		    GCPtr<const InstEnvironment >
+Instance::satisfies(shared_ptr<Typeclass> pred, 		    
+		    shared_ptr<const InstEnvironment >
 		    instEnv) const
 {
   bool unifies = true;
-  GCPtr<TypeScheme> sigma = ts->ts_instance_copy();
+  shared_ptr<TypeScheme> sigma = ts->ts_instance_copy();
 
   CHKERR(unifies, sigma->tau->unifyWith(pred));   
   
@@ -161,7 +162,7 @@ Instance::satisfies(GCPtr<Typeclass> pred,
 }
 
 bool 
-Typeclass::addFnDep(GCPtr<Type> dep) 
+Typeclass::addFnDep(shared_ptr<Type> dep) 
 {
   if(getType() != shared_from_this())
     return getType()->addFnDep(dep); // getType() OK
@@ -188,14 +189,14 @@ Typeclass::addFnDep(GCPtr<Type> dep)
 }
 
 void
-TCConstraints::collectAllFnDeps(set<GCPtr<Type> >& fnDeps)
+TCConstraints::collectAllFnDeps(set<shared_ptr<Type> >& fnDeps)
 {
   for(iterator itr = begin(); itr != end(); ++itr) {
-    GCPtr<Typeclass> pr = (*itr)->getType();    
+    shared_ptr<Typeclass> pr = (*itr)->getType();    
 
     for(TypeSet::iterator itr_j=pr->fnDeps.begin();
 	itr_j != pr->fnDeps.end(); ++itr_j) {
-      GCPtr<Type> fnDep = (*itr_j)->getType();
+      shared_ptr<Type> fnDep = (*itr_j)->getType();
       assert(fnDep->kind == ty_tyfn);
       fnDeps.insert(fnDep);
     }
@@ -219,16 +220,16 @@ TCConstraints::close(TypeSet& closure,
     oldSize = newSize;    
     for(TypeSet::iterator itr = fnDeps.begin();
 	itr != fnDeps.end(); ++itr) {
-      GCPtr<Type> fnDep = (*itr)->getType();
-      GCPtr<Type> fnDepArgs = fnDep->Args()->getType();
-      GCPtr<Type> fnDepRet = fnDep->Ret()->getType();      
+      shared_ptr<Type> fnDep = (*itr)->getType();
+      shared_ptr<Type> fnDepArgs = fnDep->Args()->getType();
+      shared_ptr<Type> fnDepRet = fnDep->Ret()->getType();      
       TypeSet argTvs;
       TypeSet retTvs;
       fnDepArgs->collectAllftvs(argTvs);      
       bool foundAll = true;
       for(TypeSet::iterator itr_j = argTvs.begin();
 	  itr_j != argTvs.end(); ++itr_j) {
-	GCPtr<Type> argTv = (*itr_j);
+	shared_ptr<Type> argTv = (*itr_j);
 	if(closure.find(argTv) == closure.end()) {
 	  foundAll = false;
 	  break;
@@ -239,7 +240,7 @@ TCConstraints::close(TypeSet& closure,
 	fnDepRet->collectAllftvs(retTvs);	
 	for(TypeSet::iterator itr_j = retTvs.begin();
 	    itr_j != retTvs.end(); ++itr_j) {
-	  GCPtr<Type> retTv = (*itr_j);
+	  shared_ptr<Type> retTv = (*itr_j);
 	  if(closure.find(retTv) == closure.end())
 	    closure.insert(retTv);
 	}

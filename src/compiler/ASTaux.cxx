@@ -51,24 +51,25 @@
 #include "inter-pass.hxx"
 #include "FQName.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
-GCPtr<Type> 
+shared_ptr<Type> 
 AST::getType()
 {
   return symType->getType();
 }
 
-GCPtr <const Type> 
+shared_ptr <const Type> 
 AST::getType() const
 {
   return symType->getType();
 }
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::genIdent(const char *label, const bool isTV)
 {
-  GCPtr<AST> id = AST::make(at_ident);
+  shared_ptr<AST> id = AST::make(at_ident);
 
   std::stringstream ss;
   if(isTV)
@@ -82,10 +83,10 @@ AST::genIdent(const char *label, const bool isTV)
   return id;
 }
 
-GCPtr<AST> 
-AST::genSym(GCPtr<AST> ast, const char *label, const bool isTV)
+shared_ptr<AST> 
+AST::genSym(shared_ptr<AST> ast, const char *label, const bool isTV)
 {
-  GCPtr<AST> id = genIdent(label, isTV);
+  shared_ptr<AST> id = genIdent(label, isTV);
   // FQN to be set by the next call to the ersolver 
 
   id->identType = ast->identType;
@@ -131,12 +132,12 @@ AST::nBits()
 }
 
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::Use()
 {
   assert(astType == at_ident);
   assert(!symbolDef || (Flags & ID_IS_TVAR));
-  GCPtr<AST> idUse = getDCopy();
+  shared_ptr<AST> idUse = getDCopy();
   idUse->Flags  &= ~MASK_FLAGS_FROM_USE;
   idUse->Flags2 &= ~MASK_FLAGS2_FROM_USE;    
   idUse->symbolDef = shared_from_this();
@@ -146,7 +147,7 @@ AST::Use()
 }
 
 
-AST::AST(GCPtr<AST> ast, bool shallowCopyChildren)
+AST::AST(shared_ptr<AST> ast, bool shallowCopyChildren)
 {
   astType = ast->astType;
   ID = ++(AST::astCount);  
@@ -182,10 +183,10 @@ AST::AST(GCPtr<AST> ast, bool shallowCopyChildren)
 }
 
  
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::getTrueCopy()
 {  
-  GCPtr<AST> to = AST::make(shared_from_this(), false);
+  shared_ptr<AST> to = AST::make(shared_from_this(), false);
   
   for(size_t i=0; i < children.size(); i++)
     to->children.push_back(child(i)->getTrueCopy());
@@ -193,10 +194,10 @@ AST::getTrueCopy()
   return to;
 }
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::getDCopy()
 {  
-  GCPtr<AST> to = AST::make(shared_from_this(), false);
+  shared_ptr<AST> to = AST::make(shared_from_this(), false);
   to->symbolDef = GC_NULL;
   to->defn = GC_NULL;
   to->decl = GC_NULL;
@@ -216,7 +217,7 @@ AST::getDCopy()
 /* */
 
 void
-AST::set(GCPtr<AST> ast)
+AST::set(shared_ptr<AST> ast)
 {  
   astType = ast->astType;
   s = ast->s;

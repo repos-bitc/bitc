@@ -47,16 +47,16 @@ struct ParseType {
 				 * tokenizer. Used for strings,
 				 * characters, numerical values. */
 
-  sherpa::GCPtr<AST> ast;
+  boost::shared_ptr<AST> ast;
 
   ParseType()
   {
-    ast = sherpa::GC_NULL;
+    ast = boost::GC_NULL;
   }
 
   ~ParseType()
   {
-    ast = sherpa::GC_NULL;
+    ast = boost::GC_NULL;
   }
 };
 

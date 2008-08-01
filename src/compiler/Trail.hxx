@@ -45,27 +45,27 @@
 struct Type;
 
 struct Trail {
-  std::vector<sherpa::GCPtr<Type> > vec;
+  std::vector<boost::shared_ptr<Type> > vec;
   
   Trail() 
   {
   }
   
-  static inline sherpa::GCPtr<Trail>
+  static inline boost::shared_ptr<Trail>
   make() {
     Trail *tmp = new Trail;
-    return sherpa::GCPtr<Trail>(tmp);
+    return boost::shared_ptr<Trail>(tmp);
   }
 
   size_t snapshot() const { return vec.size(); }
   
   // Substitution works on Type Variables only
-  void subst(sherpa::GCPtr<Type> from, sherpa::GCPtr<Type> to);
+  void subst(boost::shared_ptr<Type> from, boost::shared_ptr<Type> to);
   // Generic Link
-  void link(sherpa::GCPtr<Type> from, sherpa::GCPtr<Type> to);
+  void link(boost::shared_ptr<Type> from, boost::shared_ptr<Type> to);
   void rollBack(const size_t upto=0);
   
-  void release(const size_t n, sherpa::GCPtr<Type> rel);  
+  void release(const size_t n, boost::shared_ptr<Type> rel);  
 };
 
 #endif /* TRAIL_HXX */

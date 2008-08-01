@@ -50,11 +50,12 @@
 #include "Type.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 // Return whether the expression returns a location or not.
 static bool
-LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
+LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
 {
   switch (ast->astType) {
   case at_ident:

@@ -56,16 +56,17 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
 
-GCPtr<AST> 
+shared_ptr<AST> 
 Type::asAST(const sherpa::LexLoc &loc,
-	    GCPtr<TvPrinter> tvP)
+	    shared_ptr<TvPrinter> tvP)
 { 
-  GCPtr<AST> ast = GC_NULL;
-  GCPtr<Type> t = getType();  
+  shared_ptr<AST> ast = GC_NULL;
+  shared_ptr<Type> t = getType();  
 
   if(t->pMark >= 1) {
     ast = AST::make(at_ident, loc);
@@ -199,8 +200,8 @@ Type::asAST(const sherpa::LexLoc &loc,
 #ifdef KEEP_BF
   case  ty_bitfield:
     {
-      GCPtr<AST> typ = t->CompType(0)->asAST(loc, tvP);
-      GCPtr<AST> intLit = AST::make(at_intLiteral, loc);
+      shared_ptr<AST> typ = t->CompType(0)->asAST(loc, tvP);
+      shared_ptr<AST> intLit = AST::make(at_intLiteral, loc);
       mpz_init_set_ui(intLit->litValue.i, t->Isize);
       intLit->litBase = 10;
       ast = AST::make(at_bitfield, loc, typ, intLit);
@@ -211,8 +212,8 @@ Type::asAST(const sherpa::LexLoc &loc,
   case ty_fn:
     {
       assert(t->components.size() == 2);
-      GCPtr<AST> arg = t->Args()->asAST(loc, tvP);
-      GCPtr<AST> ret = t->Ret()->asAST(loc, tvP);
+      shared_ptr<AST> arg = t->Args()->asAST(loc, tvP);
+      shared_ptr<AST> ret = t->Ret()->asAST(loc, tvP);
       ast = AST::make(at_fn, loc, arg, ret);
       break;
     }
@@ -221,7 +222,7 @@ Type::asAST(const sherpa::LexLoc &loc,
     {
       ast = AST::make(at_fnargVec, loc);
       for(size_t i=0; i < t->components.size(); i++) {
-	GCPtr<AST> arg = t->CompType(i)->asAST(loc, tvP);
+	shared_ptr<AST> arg = t->CompType(i)->asAST(loc, tvP);
 	if(t->CompFlags(i) & COMP_BYREF)
 	  arg = AST::make(at_byrefType, arg->loc, arg);
 	
@@ -276,8 +277,8 @@ Type::asAST(const sherpa::LexLoc &loc,
 
   case ty_array:
     {
-      GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
-      GCPtr<AST> intLit = AST::make(at_intLiteral, loc);
+      shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
+      shared_ptr<AST> intLit = AST::make(at_intLiteral, loc);
       intLit->litValue.i = t->arrlen->len;
       intLit->litBase = 10;
       intLit->s = intLit->litValue.i.asString(10);
@@ -286,28 +287,28 @@ Type::asAST(const sherpa::LexLoc &loc,
     }
   case ty_vector:
     {
-      GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
+      shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = AST::make(at_vectorType, loc, typ);
       break;
     }
   case ty_ref:
     {
       assert(t->components.size() == 1);
-      GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
+      shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = AST::make(at_refType, loc, typ);
       break;
     }
   case ty_byref:
     {
       assert(t->components.size() == 1);
-      GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
+      shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = AST::make(at_byrefType, loc, typ);
       break;
     }
   case ty_mutable:
     {
       assert(t->components.size() == 1);
-      GCPtr<AST> typ = t->Base()->asAST(loc, tvP);
+      shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = AST::make(at_mutableType, loc, typ);
       break;
     }

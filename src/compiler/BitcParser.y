@@ -53,6 +53,7 @@
 #include "UocInfo.hxx"
 #include "Options.hxx"
   
+using namespace boost;
 using namespace sherpa;
 using namespace std;  
 
@@ -85,7 +86,7 @@ inline int bitclex(YYSTYPE *lvalp, SexprLexer *lexer)
 // If the passed exprSeq has a documentation string at the front,
 // remove it. Note that if the exprSeq has length 1 then the string is
 // the expression value and not a documentation comment.
-GCPtr<AST> stripDocString(GCPtr<AST> exprSeq)
+shared_ptr<AST> stripDocString(shared_ptr<AST> exprSeq)
 {
   if (exprSeq->children.size() > 1 &&
       exprSeq->child(0)->astType == at_stringLiteral)
@@ -355,7 +356,7 @@ interface: '(' tk_INTERFACE ifident {
   }
   optdocstring if_definitions ')' {
   SHOWPARSE("interface -> INTERFACE ifident optdocstring if_definitions");  
-  GCPtr<AST> ifIdent = AST::make(at_ident, $3);
+  shared_ptr<AST> ifIdent = AST::make(at_ident, $3);
   $$ = AST::make(at_interface, $2.loc, ifIdent);
   $$->addChildrenFrom($6);
 
@@ -367,13 +368,13 @@ interface: '(' tk_INTERFACE ifident {
   }
 
   std::string uocName = ifIdent->s;
-  GCPtr<UocInfo> uoc = 
+  shared_ptr<UocInfo> uoc = 
     UocInfo::make(uocName, lexer->here.origin, $$);
 
   if(uocName == "bitc.prelude")
     uoc->flags |= (UOC_IS_BUILTIN | UOC_IS_PRELUDE);
 
-  GCPtr<UocInfo> existingUoc = UocInfo::findInterface(uocName);
+  shared_ptr<UocInfo> existingUoc = UocInfo::findInterface(uocName);
 
   if (existingUoc) {
     std::string s = "Error: This interface has already been loaded from "
@@ -416,7 +417,7 @@ implicit_module: mod_definitions  {
  string uocName = 
    UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
 
- GCPtr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
+ shared_ptr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
  lexer->nModules++;
 
  uoc->Compile();
@@ -432,7 +433,7 @@ module: '(' tk_MODULE optdocstring mod_definitions ')' {
    UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
 
  // Construct, compile, and admit the parsed UoC:
- GCPtr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
+ shared_ptr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
  lexer->nModules++;
  uoc->Compile();
  UocInfo::srcList[uocName] = uoc;
@@ -449,7 +450,7 @@ module: '(' tk_MODULE ifident optdocstring mod_definitions ')' {
  string uocName = 
    UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
 
- GCPtr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
+ shared_ptr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
  lexer->nModules++;
  uoc->Compile();
  UocInfo::srcList[uocName] = uoc;
@@ -491,7 +492,7 @@ constrained_definition: '(' tk_FORALL constraints type_val_definition ')' {
 
   uint32_t nChildren = $4->children.size();
 
-  GCPtr<AST> tvConstraints= $4->child(nChildren-1);
+  shared_ptr<AST> tvConstraints= $4->child(nChildren-1);
   tvConstraints->addChildrenFrom($3);
   $$ = $4;
 };
@@ -600,20 +601,20 @@ constraint: useident {
 // FIX: This should probably get its own AST type.
 ptype_name: defident {
   SHOWPARSE("ptype_name -> defident");
-  GCPtr<AST> tvlist = AST::make(at_tvlist, $1->loc);
-  GCPtr<AST> constraints = AST::make(at_constraints, $1->loc);
+  shared_ptr<AST> tvlist = AST::make(at_tvlist, $1->loc);
+  shared_ptr<AST> constraints = AST::make(at_constraints, $1->loc);
   $$ = AST::make(at_Null, $1->loc, $1, tvlist, constraints);  
 };
 
 ptype_name: '(' defident tvlist ')' {
   SHOWPARSE("ptype_name -> '(' defident tvlist ')'");
-  GCPtr<AST> constraints = AST::make(at_constraints, $2->loc);
+  shared_ptr<AST> constraints = AST::make(at_constraints, $2->loc);
   $$ = AST::make(at_Null, $2->loc, $2, $3, constraints);
 };
 
 ptype_name: '(' tk_FORALL constraints defident ')' {
   SHOWPARSE("ptype_name -> '(' FORALL constraints '(' defident tvlist ')' ')' ");
-  GCPtr<AST> tvlist = AST::make(at_tvlist, $4->loc);
+  shared_ptr<AST> tvlist = AST::make(at_tvlist, $4->loc);
   $$ = AST::make(at_Null, $2.loc, $4, tvlist, $3);
 };
 
@@ -906,10 +907,10 @@ value_definition: '(' tk_DEFINE defpattern docstring expr ')'  {
 value_definition: '(' tk_DEFINE '(' defident ')' expr_seq ')'  {
   SHOWPARSE("value_definition -> ( DEFINE  ( defident ) [docstring] expr_seq )");
   $6 = stripDocString($6);
-  GCPtr<AST> iLambda =
+  shared_ptr<AST> iLambda =
     AST::make(at_lambda, $2.loc, AST::make(at_argVec, $5.loc), $6);
   iLambda->printVariant = 1;
-  GCPtr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
+  shared_ptr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
   $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
   $$->addChild(AST::make(at_constraints));
 };
@@ -921,9 +922,9 @@ value_definition: '(' tk_DEFINE '(' defident lambdapatterns ')'
   SHOWPARSE("value_definition -> ( DEFINE  ( defident lambdapatterns ) "
 	    "[docstring] expr_seq )");
   $7 = stripDocString($7);
-  GCPtr<AST> iLambda = AST::make(at_lambda, $2.loc, $5, $7);
+  shared_ptr<AST> iLambda = AST::make(at_lambda, $2.loc, $5, $7);
   iLambda->printVariant = 1;
-  GCPtr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
+  shared_ptr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
   $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
   $$->addChild(AST::make(at_constraints));
 };
@@ -945,28 +946,28 @@ proclaim_definition: '(' tk_PROCLAIM defident ':' qual_type optdocstring externa
 
 //import_definition: '(' tk_IMPORT ident ifident ')' {
 //  SHOWPARSE("import_definition -> ( IMPORT ident ifident )");
-//  GCPtr<AST> ifIdent = AST::make(at_ifident, $4);
+//  shared_ptr<AST> ifIdent = AST::make(at_ifident, $4);
 //  ifIdent->uoc = UocInfo::importInterface(lexer->errStream, $4.loc, $4.str);
 //  $$ = AST::make(at_import, $2.loc, $3, ifIdent); 
 //};
 
 import_definition: '(' tk_IMPORT ifident tk_AS ident ')' {
   SHOWPARSE("import_definition -> ( IMPORT ident ifident )");
-  GCPtr<AST> ifIdent = AST::make(at_ifident, $3);
+  shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = AST::make(at_importAs, $2.loc, ifIdent, $5); 
 };
 
 import_definition: '(' tk_IMPORT ifident ')' {
   SHOWPARSE("import_definition -> (FROM ifident)");
-  GCPtr<AST> ifIdent = AST::make(at_ifident, $3);
+  shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = AST::make(at_import, $2.loc, ifIdent);
 };
 
 import_definition: '(' tk_IMPORT ifident importList ')' {
   SHOWPARSE("import_definition -> (FROM ifident IMPORT importList)");
-  GCPtr<AST> ifIdent = AST::make(at_ifident, $3);
+  shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = AST::make(at_import, $2.loc, ifIdent);
   $$->addChildrenFrom($4);
@@ -975,7 +976,7 @@ import_definition: '(' tk_IMPORT ifident importList ')' {
 // PROVIDE DEFINITION [8.3]
 provide_definition: '(' tk_PROVIDE ifident provideList ')' {
   SHOWPARSE("provide_definition -> (PROVIDE ident ifident)");
-  GCPtr<AST> ifIdent = AST::make(at_ifident, $3);
+  shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = AST::make(at_provide, $2.loc, ifIdent); 
   $$->addChildrenFrom($4);
@@ -1105,7 +1106,7 @@ repr_constructors: repr_constructors repr_constructor {
 repr_constructor: '(' ident fields '('tk_WHERE repr_reprs')' ')' {  /* compound constructor */ 
   SHOWPARSE("repr_constructor ->  ( ident fields ( WHERE repr_reprs ) )");
   $2->Flags |= (ID_IS_GLOBAL);
-  GCPtr<AST> ctr = AST::make(at_constructor, $2->loc, $2);
+  shared_ptr<AST> ctr = AST::make(at_constructor, $2->loc, $2);
   ctr->addChildrenFrom($3);
   $$ = AST::make(at_reprctr, $2->loc, ctr);
   $$->addChildrenFrom($6);
@@ -1318,7 +1319,7 @@ type: fntype {
 }
 fntype: '(' tk_FN '(' ')' type ')' {
   SHOWPARSE("fntype -> ( FN () type )");
-  GCPtr<AST> fnargVec = AST::make(at_fnargVec, $3.loc);
+  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $3.loc);
   $$ = AST::make(at_fn, $2.loc, fnargVec, $5);
 };
 
@@ -1436,7 +1437,7 @@ qual_type: '(' tk_FORALL constraints type ')' {
 
 qual_constraint: constraint {
   SHOWPARSE("qual_typeapp -> constraint");
-  GCPtr<AST> constrs = AST::make(at_constraints, $1->loc);
+  shared_ptr<AST> constrs = AST::make(at_constraints, $1->loc);
   $$ = AST::make(at_qualType, $1->loc, constrs, $1);
 }; 
 qual_constraint: '(' tk_FORALL constraints constraint ')' {
@@ -1447,7 +1448,7 @@ qual_constraint: '(' tk_FORALL constraints constraint ')' {
 // METHOD TYPES [3.9]
 /* type: '(' tk_METHOD tvapp fntype')' { */
 /*   SHOWPARSE("METHOD tcapp fntype )"); */
-/*   GCPtr<AST> tcreqs = AST::make(at_tcreqs, $3->loc, $3); */
+/*   shared_ptr<AST> tcreqs = AST::make(at_tcreqs, $3->loc, $3); */
 /*   $$ = AST::make(at_methodType, $2.loc, tcreqs, $4); */
 /* }; */
 
@@ -1553,7 +1554,7 @@ expr_seq: expr_seq value_definition {
 //expr_seq: value_definition expr_seq {
 //  // AST define = identPattern expr constraints;
 //  SHOWPARSE("expr_seq -> value_definition expr_seq");
-//  GCPtr<AST> letBinding = AST::make(at_letbinding, $1->loc, 
+//  shared_ptr<AST> letBinding = AST::make(at_letbinding, $1->loc, 
 //			    $1->child(0), $1->child(1));
 //  $$ = AST::make(at_letrec, $1->loc, 
 //	       AST::make(at_letbindings, $1->loc, letBinding),
@@ -1776,7 +1777,7 @@ eform: '(' tk_LAMBDA '(' ')' expr_seq ')'  {
   SHOWPARSE("lambda -> ( LAMBDA lambdapatterns expr_seq )");
   if ($5->children.size() == 1 && $5->child(0)->astType == at_begin)
     $5 = $5->child(0);
-  GCPtr<AST> argVec = AST::make(at_argVec, $3.loc);
+  shared_ptr<AST> argVec = AST::make(at_argVec, $3.loc);
   $$ = AST::make(at_lambda, $2.loc, argVec, $5);
 };
 
@@ -1879,7 +1880,7 @@ eform: '(' tk_SWITCH ident expr sw_legs ow ')' {
   SHOWPARSE("eform -> ( SWITCH ident expr sw_legs ow)");
   $$ = AST::make(at_switch, $2.loc, $3, $4, $5, $6);
   for(size_t c =0; c < $5->children.size(); c++) {
-    GCPtr<AST> sw_leg = $5->child(c);
+    shared_ptr<AST> sw_leg = $5->child(c);
     sw_leg->children.insert(sw_leg->children.begin(), $3->getDCopy());
   }
 };
@@ -1937,7 +1938,7 @@ switch_match: ident '.' ident {
 
 switch_match: ident '.' ident '.' ident {
   SHOWPARSE("switch_match -> useident '.' useident");
-  GCPtr<AST> usesel = AST::make(at_usesel, $1->loc, $1, $3);  
+  shared_ptr<AST> usesel = AST::make(at_usesel, $1->loc, $1, $3);  
   $$ = AST::make(at_select, $1->loc, usesel, $5);
 };
 
@@ -1982,7 +1983,7 @@ eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
   SHOWPARSE("eform -> ( TRY expr ( CATCH ( ident sw_legs ) ) )");
   $$ = AST::make(at_try, $2.loc, $3, $6, $7, $8);
   for(size_t c =0; c < $7->children.size(); c++) {
-    GCPtr<AST> sw_leg = $7->child(c);
+    shared_ptr<AST> sw_leg = $7->child(c);
     sw_leg->children.insert(sw_leg->children.begin(), $6->getDCopy());
   }
 };
@@ -2027,7 +2028,7 @@ let_eform: '(' tk_LETREC '(' letbindings ')' expr_seq ')' {
   SHOWPARSE("eform -> (LETREC (letbindings) expr_seq)");
   $6->astType = at_begin;
   $6->printVariant = 1;
-  GCPtr<AST> lbs = $4;
+  shared_ptr<AST> lbs = $4;
   for(size_t c=0; c < lbs->children.size(); c++)
     lbs->child(c)->Flags |= LB_REC_BIND;
   
@@ -2041,9 +2042,9 @@ eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
 #if 1
   $$ = AST::make(at_do, $2.loc, $4, $6, $7);
 #else
-  GCPtr<AST> doBindings = $4;
+  shared_ptr<AST> doBindings = $4;
 
-  GCPtr<AST> theIdent = AST::genIdent("do");
+  shared_ptr<AST> theIdent = AST::genIdent("do");
   theIdent->Flags |= ID_IS_DO;
 
   // The body proper of the DO is going to turn into a BEGIN
@@ -2051,53 +2052,53 @@ eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
   // call.
 
   // Formulate the recursive call
-  GCPtr<AST> recCall = AST::make(at_apply, $4->loc);
+  shared_ptr<AST> recCall = AST::make(at_apply, $4->loc);
   recCall->addChild(theIdent->Use());
 
   for (size_t b = 0; b < doBindings->children.size(); b++) {
-    GCPtr<AST> binding = doBindings->child(b);
+    shared_ptr<AST> binding = doBindings->child(b);
     recCall->addChild(binding->child(2));
   }
 
   // Make up the begin:
-  GCPtr<AST> doBody = AST::make(at_begin, $7->loc);
+  shared_ptr<AST> doBody = AST::make(at_begin, $7->loc);
   doBody->addChild($7);		// add the existing body
   doBody->addChild(recCall);	// add the recursive call
 
   // The lambda args are the left-most elements of the DO bindings
-  GCPtr<AST> lamArgs = AST::make(at_argVec, $4->loc);
+  shared_ptr<AST> lamArgs = AST::make(at_argVec, $4->loc);
   for (size_t b = 0; b < doBindings->children.size(); b++) {
-    GCPtr<AST> binding = doBindings->child(b);
+    shared_ptr<AST> binding = doBindings->child(b);
     lamArgs->addChild(binding->child(0));
   }
 
   // The lambda body is going to be an IF testing termination and
   // conditionally performing the initial call.
-  GCPtr<AST> lamBody = AST::make(at_if, $6->loc);
+  shared_ptr<AST> lamBody = AST::make(at_if, $6->loc);
   {
     lamBody->addChildrenFrom($6); /* adds IF-TEST and THEN expr */
     lamBody->addChild(doBody);	/* adds ELSE expr */
   }
 
-  GCPtr<AST> theLambda = AST::make(at_lambda, $7->loc, lamArgs, lamBody);
+  shared_ptr<AST> theLambda = AST::make(at_lambda, $7->loc, lamArgs, lamBody);
   
   // The letrec body proper consists entirely of an APPLY form that
   // makes the initial lambda call:
-  GCPtr<AST> letBody = AST::make(at_apply, $1.loc, theIdent->Use());
+  shared_ptr<AST> letBody = AST::make(at_apply, $1.loc, theIdent->Use());
   for (size_t b = 0; b < doBindings->children.size(); b++) {
-    GCPtr<AST> binding = doBindings->child(b);
+    shared_ptr<AST> binding = doBindings->child(b);
     letBody->addChild(binding->child(1));
   }
 
-  GCPtr<AST> theBinding = AST::make(at_letbinding, $1.loc);
+  shared_ptr<AST> theBinding = AST::make(at_letbinding, $1.loc);
   theBinding->Flags |= LB_REC_BIND;
   
   theBinding->addChild(AST::make(at_identPattern, $1.loc, theIdent));
   theBinding->addChild(theLambda);
 
-  GCPtr<AST> letBindings = AST::make(at_letbindings, $1.loc, theBinding);
+  shared_ptr<AST> letBindings = AST::make(at_letbindings, $1.loc, theBinding);
 
-  GCPtr<AST> letRec = AST::make(at_letrec, $1.loc, letBindings, letBody, 
+  shared_ptr<AST> letRec = AST::make(at_letrec, $1.loc, letBindings, letBody, 
 			AST::make(at_constraints));
   letRec->printVariant = 1;
 

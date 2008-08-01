@@ -50,6 +50,7 @@
 #include "inter-pass.hxx"
 
 using namespace std;
+using namespace boost;
 using namespace sherpa;
  
 #if 0
@@ -59,14 +60,14 @@ using namespace sherpa;
 
 static bool
 warnUnresRef(std::ostream& errStream, 
-	     GCPtr<AST> mod,
-	     GCPtr<ASTEnvironment > env)
+	     shared_ptr<AST> mod,
+	     shared_ptr<ASTEnvironment > env)
 {
   bool errorFree = true;
   
   assert(mod->astType == at_module);
   for(size_t c=0; c < mod->children.size(); c++) {
-    GCPtr<AST> ast = mod->child(c);
+    shared_ptr<AST> ast = mod->child(c);
     switch(ast->astType) {
     case at_declunion:
     case at_declstruct:
@@ -75,7 +76,7 @@ warnUnresRef(std::ostream& errStream,
 	if(ast->Flags2 & PROCLAIM_IS_INTERNAL)
 	  break;
 	
-	GCPtr<AST> def = env->getBinding(ast->child(0)->s);
+	shared_ptr<AST> def = env->getBinding(ast->child(0)->s);
 	if(((ast->Flags & DEF_IS_EXTERNAL) == 0) && (def == NULL)) {
 
 	  errStream << ast->loc << ": WARNING: " 
@@ -100,14 +101,14 @@ warnUnresRef(std::ostream& errStream,
 }
 #endif
 
-static GCPtr<UocInfo>
-findInterface(std::ostream& errStream, GCPtr<AST> ifAst)
+static shared_ptr<UocInfo>
+findInterface(std::ostream& errStream, shared_ptr<AST> ifAst)
 {
-  GCPtr<UocInfo> iface=GC_NULL;
+  shared_ptr<UocInfo> iface=GC_NULL;
 
   UocMap::iterator itr = UocInfo::ifList.find(ifAst->s);
   if (itr != UocInfo::ifList.end()) {
-    GCPtr<UocInfo> thisIface = itr->second;
+    shared_ptr<UocInfo> thisIface = itr->second;
     iface = thisIface;
   }
       
@@ -138,19 +139,19 @@ findInterface(std::ostream& errStream, GCPtr<AST> ifAst)
 	      
 static void
 aliasPublicBindings(const std::string& idName,
-		    GCPtr<ASTEnvironment > aliasEnv, 
-		    GCPtr<ASTEnvironment > fromEnv, 
-		    GCPtr<ASTEnvironment > toEnv)
+		    shared_ptr<ASTEnvironment > aliasEnv, 
+		    shared_ptr<ASTEnvironment > fromEnv, 
+		    shared_ptr<ASTEnvironment > toEnv)
 {
   for(ASTEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
-    GCPtr<Binding<AST> > bdng = itr->second;
+    shared_ptr<Binding<AST> > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE)
       continue;
 
     std::string s = bdng->nm;
-    GCPtr<AST> ast = bdng->val;
+    shared_ptr<AST> ast = bdng->val;
 
     if (aliasEnv && 
 	aliasEnv->getBinding(ast->fqn.asString("::")))
@@ -187,14 +188,14 @@ aliasPublicBindings(const std::string& idName,
 
 static void
 importIfBinding(std::ostream& errStream, 
-		GCPtr<ASTEnvironment > aliasEnv,
-		GCPtr<AST> ifName)
+		shared_ptr<ASTEnvironment > aliasEnv,
+		shared_ptr<AST> ifName)
 {
   findInterface(errStream, ifName);
   std::string canonicalIfName = ifName->s;
 
   // If we have seen this interface before, use the original import:
-  GCPtr<AST> ifAst = aliasEnv->getBinding(canonicalIfName);
+  shared_ptr<AST> ifAst = aliasEnv->getBinding(canonicalIfName);
   if (ifAst) {
     // Override the environments populated by findInterface with the
     // canonical duplicates.
@@ -207,19 +208,19 @@ importIfBinding(std::ostream& errStream,
 
   // Need to form the canonical duplicate environment in the current
   // importing UoC for this interface.
-  GCPtr<ASTEnvironment > dupEnv = 
+  shared_ptr<ASTEnvironment > dupEnv = 
     ASTEnvironment::make(ifName->envs.env->uocName);
 
   for(ASTEnvironment::iterator itr = ifName->envs.env->begin();
       itr != ifName->envs.env->end(); ++itr) {
-    GCPtr<Binding<AST> > bdng = itr->second;
+    shared_ptr<Binding<AST> > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE) {
       continue;
     }
       
     std::string s = bdng->nm;
-    GCPtr<AST> ast = bdng->val;
+    shared_ptr<AST> ast = bdng->val;
 
     dupEnv->addBinding(s, ast);
     dupEnv->setFlags(s, bdng->flags);
@@ -229,10 +230,10 @@ importIfBinding(std::ostream& errStream,
 }
 
 static bool
-providing(GCPtr<ASTEnvironment > aliasEnv, const FQName& fqn)
+providing(shared_ptr<ASTEnvironment > aliasEnv, const FQName& fqn)
 {
   // Retrieve the thinned public environment for this fqn:
-  GCPtr<AST> ifName = aliasEnv->getBinding(fqn.iface);
+  shared_ptr<AST> ifName = aliasEnv->getBinding(fqn.iface);
 
   // If there is no binding for the canonical interface name, then we
   // areb processing the grand output AST, and providing has already
@@ -240,10 +241,10 @@ providing(GCPtr<ASTEnvironment > aliasEnv, const FQName& fqn)
   if (!ifName)
     return true;
 
-  GCPtr<ASTEnvironment > pubEnv = ifName->envs.env;
+  shared_ptr<ASTEnvironment > pubEnv = ifName->envs.env;
 
   // Retrieve the binding (if any) for fqn.ident:
-  GCPtr<Binding<AST> > bdng = pubEnv->doGetBinding(fqn.ident);
+  shared_ptr<Binding<AST> > bdng = pubEnv->doGetBinding(fqn.ident);
 
   assert(bdng);
 
@@ -252,18 +253,18 @@ providing(GCPtr<ASTEnvironment > aliasEnv, const FQName& fqn)
 }
 
 bool
-makeLocalAlias(GCPtr<ASTEnvironment > fromEnv,
+makeLocalAlias(shared_ptr<ASTEnvironment > fromEnv,
 	       std::string fromName,
-	       GCPtr<ASTEnvironment > toEnv, 
+	       shared_ptr<ASTEnvironment > toEnv, 
 	       const std::string& toPfx,
-	       GCPtr<AST> toIdent)
+	       shared_ptr<AST> toIdent)
 {
-  GCPtr<Binding<AST> > bndg = fromEnv->doGetBinding(fromName);
+  shared_ptr<Binding<AST> > bndg = fromEnv->doGetBinding(fromName);
 
   if (bndg->flags & BF_PRIVATE)
     return false;
       
-  GCPtr<AST> ast = bndg->val;
+  shared_ptr<AST> ast = bndg->val;
 
   std::string s = toIdent->s;
   if (toPfx.size())
@@ -276,8 +277,8 @@ makeLocalAlias(GCPtr<ASTEnvironment > fromEnv,
 }
 
 static void
-bindIdentDef(GCPtr<AST> ast, GCPtr<ASTEnvironment > env, 
-	     IdentType identType, GCPtr<AST> currLB,
+bindIdentDef(shared_ptr<AST> ast, shared_ptr<ASTEnvironment > env, 
+	     IdentType identType, shared_ptr<AST> currLB,
 	     unsigned flags)
 {  
   if (ast->Flags & ID_IS_TVAR) {
@@ -307,7 +308,7 @@ bindIdentDef(GCPtr<AST> ast, GCPtr<ASTEnvironment > env,
 
 
 static void
-markComplete(GCPtr<ASTEnvironment > env)
+markComplete(shared_ptr<ASTEnvironment > env)
 {
   for(ASTEnvironment::iterator itr = env->begin();
       itr != env->end(); ++itr)
@@ -336,13 +337,13 @@ markComplete(GCPtr<ASTEnvironment > env)
 
 bool
 resolve(std::ostream& errStream, 
-	GCPtr<AST> ast, 
-	GCPtr<ASTEnvironment > aliasEnv,
-	GCPtr<ASTEnvironment > env,
-	GCPtr<ASTEnvironment > lamLevel,
+	shared_ptr<AST> ast, 
+	shared_ptr<ASTEnvironment > aliasEnv,
+	shared_ptr<ASTEnvironment > env,
+	shared_ptr<ASTEnvironment > lamLevel,
 	int mode, 
 	IdentType identType,
-	GCPtr<AST> currLB,
+	shared_ptr<AST> currLB,
 	unsigned long flags)
 {
   bool errorFree = true, answer = false;
@@ -444,7 +445,7 @@ resolve(std::ostream& errStream,
 	  assert(env);
 	  assert(identType != id_unresolved);
 		
-	  GCPtr<AST> sym = env->getBinding(ast->s);
+	  shared_ptr<AST> sym = env->getBinding(ast->s);
 	
 	  if(sym) {
 	    if(sym->isDecl) {
@@ -504,7 +505,7 @@ resolve(std::ostream& errStream,
 	  assert(identType != id_unresolved);
 	  ast->isDecl = true;
 
-	  GCPtr<AST> sym = env->getBinding(ast->s);
+	  shared_ptr<AST> sym = env->getBinding(ast->s);
 	  
 	  if(sym) {	    
 	    if(!sym->isDecl) {
@@ -617,7 +618,7 @@ resolve(std::ostream& errStream,
 	  }
 	  
 	  assert(ast->symbolDef);
-	  GCPtr<AST> def = ast->symbolDef;
+	  shared_ptr<AST> def = ast->symbolDef;
 
 	  if((flags & USE_ONLY_PUBLIC) && 
 	     ((env->getFlags(ast->s) & BF_PRIVATE))) {
@@ -718,7 +719,7 @@ resolve(std::ostream& errStream,
 	  if(def->Flags & ID_IS_TVAR) {	    	    
 	    assert(currLB);
 	    
-	    GCPtr<AST> thisLB = GC_NULL;
+	    shared_ptr<AST> thisLB = GC_NULL;
 	    if(def->tvarLB->envs.env->isAncestor(currLB->envs.env))
 	      thisLB = currLB;
 	    else
@@ -793,7 +794,7 @@ resolve(std::ostream& errStream,
       /// can be bound by a local definition. I do wonder if perhaps
       /// we should not catch this case syntactically in the parser.
 
-      GCPtr<AST> iface = ast->child(0);
+      shared_ptr<AST> iface = ast->child(0);
       
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, id_interface, 
 	      GC_NULL, flags);
@@ -802,7 +803,7 @@ resolve(std::ostream& errStream,
 
       assert(ast->child(0)->symbolDef->ifName != "");
       
-      GCPtr<ASTEnvironment > ifenv = iface->symbolDef->envs.env;
+      shared_ptr<ASTEnvironment > ifenv = iface->symbolDef->envs.env;
       
       if(!ifenv) {
 	errStream << ast->loc << ": "
@@ -864,10 +865,10 @@ resolve(std::ostream& errStream,
 
   case at_defunion:
     {
-      GCPtr<ASTEnvironment > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
-      GCPtr<AST> category = ast->child(2);
+      shared_ptr<AST> category = ast->child(2);
 
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
@@ -905,10 +906,10 @@ resolve(std::ostream& errStream,
 
   case at_defstruct:
     {
-      GCPtr<ASTEnvironment > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
-      GCPtr<AST> category = ast->child(2);
+      shared_ptr<AST> category = ast->child(2);
 
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
@@ -949,7 +950,7 @@ resolve(std::ostream& errStream,
   case at_declstruct:
   case at_declrepr:
     {
-      GCPtr<ASTEnvironment > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
       // match at_ident
@@ -976,7 +977,7 @@ resolve(std::ostream& errStream,
 
   case at_proclaim:
     {
-      GCPtr<ASTEnvironment > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
       // match at_ident
@@ -1001,7 +1002,7 @@ resolve(std::ostream& errStream,
 
   case at_defexception:
     {
-      GCPtr<ASTEnvironment > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
       IdentType it = ((ast->children.size() > 1) ? 
@@ -1018,7 +1019,7 @@ resolve(std::ostream& errStream,
       set<string> names;
       names.insert(ast->child(0)->s);
       for (size_t c = 1; c < ast->children.size(); c++) {
-	GCPtr<AST> field = ast->child(c);
+	shared_ptr<AST> field = ast->child(c);
 	RESOLVE(field, tmpEnv, lamLevel, USE_MODE, 
 		id_type, ast, 
 		flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
@@ -1046,7 +1047,7 @@ resolve(std::ostream& errStream,
       /// recdef forms into at_let and at_letrec, respectively, so if
       /// we see at_define or at_refdef here, it is a top-level form.
 
-      GCPtr<ASTEnvironment > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
       /* Mark the present identifier "not mutable yet". If we see a
@@ -1094,7 +1095,7 @@ resolve(std::ostream& errStream,
 
   case at_deftypeclass:
     {
-      GCPtr<ASTEnvironment > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
       // match at_ident
@@ -1192,7 +1193,7 @@ resolve(std::ostream& errStream,
 
   case at_definstance:
     {      
-      GCPtr<ASTEnvironment > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
       // match at at_tcapp
@@ -1224,14 +1225,14 @@ resolve(std::ostream& errStream,
     
   case at_provide:
     {
-      GCPtr<AST> ifAst = ast->child(0);
+      shared_ptr<AST> ifAst = ast->child(0);
       importIfBinding(errStream, aliasEnv, ifAst);
 
-      GCPtr<ASTEnvironment > ifEnv = ifAst->envs.env;
+      shared_ptr<ASTEnvironment > ifEnv = ifAst->envs.env;
 
       for (size_t i = 1; i < ast->children.size(); i++) {
-	GCPtr<AST> provideName=ast->child(i);
-	GCPtr<Binding<AST> > bndg = ifEnv->doGetBinding(provideName->s);
+	shared_ptr<AST> provideName=ast->child(i);
+	shared_ptr<Binding<AST> > bndg = ifEnv->doGetBinding(provideName->s);
         if (!bndg) {
 	  errStream << ast->loc << ": "
 		    << provideName->s
@@ -1263,13 +1264,13 @@ resolve(std::ostream& errStream,
 
   case at_importAs:
     {
-      GCPtr<AST> ifAst = ast->child(0); 
-      GCPtr<AST> idAst = ast->child(1);
+      shared_ptr<AST> ifAst = ast->child(0); 
+      shared_ptr<AST> idAst = ast->child(1);
 
       importIfBinding(errStream, aliasEnv, ifAst);
 
       // import ident ifname
-      GCPtr<ASTEnvironment > tmpEnv = env->newScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newScope();
 	//	new ASTEnvironment(ifAst->envs.env->uocName);
 
       ast->envs.env = tmpEnv;
@@ -1303,10 +1304,10 @@ resolve(std::ostream& errStream,
   case at_import:
     {
       // from ifName alias+
-      GCPtr<ASTEnvironment > tmpEnv = env->newScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newScope();
       ast->envs.env = tmpEnv;
      
-      GCPtr<AST> ifAst = ast->child(0);
+      shared_ptr<AST> ifAst = ast->child(0);
 
       if (ifAst->s == env->uocName) {
 	errStream << ast->loc << ": "
@@ -1326,9 +1327,9 @@ resolve(std::ostream& errStream,
       else {
 	// Need to import only certain bindings
 	for (size_t c = 1; c < ast->children.size(); c++) {
-	  GCPtr<AST> alias = ast->child(c);
-	  GCPtr<AST> localName = alias->child(0);
-	  GCPtr<AST> pubName = alias->child(1);
+	  shared_ptr<AST> alias = ast->child(c);
+	  shared_ptr<AST> localName = alias->child(0);
+	  shared_ptr<AST> pubName = alias->child(1);
 	
 	  RESOLVE(pubName, ifAst->envs.env, lamLevel, USE_MODE,
 		  id_usebinding, currLB, 
@@ -1338,12 +1339,12 @@ resolve(std::ostream& errStream,
 	    break;
 
 	  // Enforce the "one alias" rule.
-	  GCPtr<Binding<AST> > bndg = 
+	  shared_ptr<Binding<AST> > bndg = 
 	    ifAst->envs.env->doGetBinding(pubName->s);
 
 	  std::string pubFQN = bndg->val->fqn.asString("::");
 
-	  GCPtr<AST> oldAlias = aliasEnv->getBinding(pubFQN);
+	  shared_ptr<AST> oldAlias = aliasEnv->getBinding(pubFQN);
 	  if (oldAlias) {
 	    errStream << alias->loc << ": The public identifier "
 		      << pubFQN
@@ -1360,7 +1361,7 @@ resolve(std::ostream& errStream,
 	    
 	  aliasEnv->addBinding(pubFQN, localName);
 
-	  GCPtr<AST> oldDef = env->getBinding(localName->s);
+	  shared_ptr<AST> oldDef = env->getBinding(localName->s);
 	  if(oldDef) {
 	    errStream << alias->loc << ": Conflict for alias definition"
 		      << localName->s
@@ -1497,7 +1498,7 @@ resolve(std::ostream& errStream,
       ast->child(0)->Flags |= ID_IS_CTOR;
             
       for (size_t c = 1; c < ast->children.size(); c++) {
-	GCPtr<AST> fldc = ast->child(c);
+	shared_ptr<AST> fldc = ast->child(c);
 	RESOLVE(fldc, env, lamLevel, USE_MODE, identType,
 		currLB, flags); 
 
@@ -1505,7 +1506,7 @@ resolve(std::ostream& errStream,
 	  continue;
 	
 	for (size_t d = 1; d < c; d++) {
-	  GCPtr<AST> fldd = ast->child(d);
+	  shared_ptr<AST> fldd = ast->child(d);
 	  if(fldd->astType != at_field)
 	    continue;
 	  
@@ -1525,7 +1526,7 @@ resolve(std::ostream& errStream,
     {
       // match at_field*
       for (size_t c = 0; c < ast->children.size(); c++) {
-	GCPtr<AST> fldc = ast->child(c);
+	shared_ptr<AST> fldc = ast->child(c);
 	RESOLVE(fldc, env, lamLevel, USE_MODE, identType,
 		currLB, flags); 
 
@@ -1533,7 +1534,7 @@ resolve(std::ostream& errStream,
 	  continue;
 	
 	for (size_t d = 1; d < c; d++) {
-	  GCPtr<AST> fldd = ast->child(d);
+	  shared_ptr<AST> fldd = ast->child(d);
 	  if(fldd->astType != at_field)
 	    continue;
 	  
@@ -1752,8 +1753,8 @@ resolve(std::ostream& errStream,
       if(ast->Flags & AST_IS_VALPAT) {
 	// AST_IS_VALPAT ONLY for the ROOT of a case leg
 	assert(mode == DEF_MODE);
-	GCPtr<AST> var = ast->child(0);
-	GCPtr<AST> def = env->getBinding(var->s);
+	shared_ptr<AST> var = ast->child(0);
+	shared_ptr<AST> def = env->getBinding(var->s);
 
 	if((def) && def->isUnionLeg()) {
 	  RESOLVE(var, env, lamLevel, USE_MODE, id_value, currLB, 
@@ -1974,11 +1975,11 @@ resolve(std::ostream& errStream,
 
   case at_lambda:
     {
-      GCPtr<ASTEnvironment > lamEnv = env->newScope();
+      shared_ptr<ASTEnvironment > lamEnv = env->newScope();
       ast->envs.env = lamEnv;
 
       // match agt_bindingPatterns
-      GCPtr<AST> argVec = ast->child(0);
+      shared_ptr<AST> argVec = ast->child(0);
       for (size_t c = 0; c < argVec->children.size(); c++)
 	RESOLVE(argVec->child(c), lamEnv, lamEnv, DEF_MODE, 
 		id_value, currLB, flags);
@@ -2097,8 +2098,8 @@ resolve(std::ostream& errStream,
 
   case at_setbang:
     {
-      GCPtr<AST> lhs = ast->child(0);
-      GCPtr<AST> rhs = ast->child(1);
+      shared_ptr<AST> lhs = ast->child(0);
+      shared_ptr<AST> rhs = ast->child(1);
 
       // match agt_expr
       RESOLVE(lhs, env, lamLevel, USE_MODE, id_value, currLB, flags); 
@@ -2180,7 +2181,7 @@ resolve(std::ostream& errStream,
 
   case at_sw_leg:
     {
-      GCPtr<ASTEnvironment > legEnv = env->newScope();
+      shared_ptr<ASTEnvironment > legEnv = env->newScope();
       ast->envs.env = legEnv;
 
       /* match at_ident -- the contents after cracking the constructor */
@@ -2253,25 +2254,25 @@ resolve(std::ostream& errStream,
   case at_do:
     {
       // NOTE: Do is re-written in the parser
-      GCPtr<ASTEnvironment > doEnv = env->newScope();
+      shared_ptr<ASTEnvironment > doEnv = env->newScope();
       ast->envs.env = doEnv;
 
-      GCPtr<AST> dbs = ast->child(0);
+      shared_ptr<AST> dbs = ast->child(0);
       
       // match at_dobindings
       // First process the initializers.
       for (size_t c = 0; c < dbs->children.size(); c++) {
-	GCPtr<AST> db = dbs->child(c);	
-	GCPtr<AST> init = db->child(1);
+	shared_ptr<AST> db = dbs->child(c);	
+	shared_ptr<AST> init = db->child(1);
 	RESOLVE(init, doEnv, lamLevel, USE_MODE, id_value, 
 		currLB, flags);
       }
             
       // First add the definitions.
       for (size_t c = 0; c < dbs->children.size(); c++) {
-	GCPtr<AST> db = dbs->child(c);	
-	GCPtr<AST> localDef = db->child(0);
-	//GCPtr<AST> init = db->child(1);
+	shared_ptr<AST> db = dbs->child(c);	
+	shared_ptr<AST> localDef = db->child(0);
+	//shared_ptr<AST> init = db->child(1);
 	RESOLVE(localDef, doEnv, lamLevel, DEF_MODE, 
 		id_value, currLB, flags);	
       }
@@ -2281,8 +2282,8 @@ resolve(std::ostream& errStream,
       
       // Then process all the next step initializers
       for (size_t c = 0; c < dbs->children.size(); c++) {
-	GCPtr<AST> db = dbs->child(c);	
-	GCPtr<AST> step = db->child(2);
+	shared_ptr<AST> db = dbs->child(c);	
+	shared_ptr<AST> step = db->child(2);
 	RESOLVE(step, doEnv, lamLevel, USE_MODE, 
 		id_value, currLB, flags);	
       }
@@ -2315,8 +2316,8 @@ resolve(std::ostream& errStream,
       //         identType, currLB,  flags);
       // Handle let bindings with care.
 
-      GCPtr<ASTEnvironment > letEnv = env->newScope();
-      GCPtr<AST> lbs = ast->child(0);
+      shared_ptr<ASTEnvironment > letEnv = env->newScope();
+      shared_ptr<AST> lbs = ast->child(0);
       lbs->parentLB = currLB;
 
       ast->envs.env = letEnv;
@@ -2329,7 +2330,7 @@ resolve(std::ostream& errStream,
       // match agt_expr
       // For each individual binding // match at_letbinding+
       for (size_t c = 0; c < lbs->children.size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
+	shared_ptr<AST> lb = lbs->child(c);
 	
 	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
 		id_value, lbs, flags);
@@ -2338,7 +2339,7 @@ resolve(std::ostream& errStream,
       // match agt_bindingPattern
       // For each individual binding // match at_letbinding+
       for (size_t c = 0; c < lbs->children.size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
+	shared_ptr<AST> lb = lbs->child(c);
 	
 	// match agt_bindingPattern
 	RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
@@ -2368,8 +2369,8 @@ resolve(std::ostream& errStream,
       // match at_letbindings
 
       // Handle let bindings with care.
-      GCPtr<ASTEnvironment > letEnv = env->newScope();
-      GCPtr<AST> lbs = ast->child(0);
+      shared_ptr<ASTEnvironment > letEnv = env->newScope();
+      shared_ptr<AST> lbs = ast->child(0);
       lbs->parentLB = currLB;
 
       ast->envs.env = letEnv;
@@ -2384,7 +2385,7 @@ resolve(std::ostream& errStream,
       // match agt_expr
       // For each individual binding // match at_letbinding+
       for (size_t c = 0; c < lbs->children.size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
+	shared_ptr<AST> lb = lbs->child(c);
 	
 	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
 		id_value, lbs, flags);
@@ -2420,8 +2421,8 @@ resolve(std::ostream& errStream,
 
       // First bind, then evaluate.
       
-      GCPtr<ASTEnvironment > letEnv = env->newScope();
-      GCPtr<AST> lbs = ast->child(0);
+      shared_ptr<ASTEnvironment > letEnv = env->newScope();
+      shared_ptr<AST> lbs = ast->child(0);
       lbs->parentLB = currLB;
 
       ast->envs.env = letEnv;
@@ -2432,7 +2433,7 @@ resolve(std::ostream& errStream,
 
       // For each individual binding // match at_letbinding+
       for (size_t c = 0; c < lbs->children.size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
+	shared_ptr<AST> lb = lbs->child(c);
       
 	// match agt_bindingPattern
 	RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
@@ -2443,7 +2444,7 @@ resolve(std::ostream& errStream,
     
       // For each individual binding // match at_letbinding+
       for (size_t c = 0; c < lbs->children.size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
+	shared_ptr<AST> lb = lbs->child(c);
 
 	// match agt_expr
 	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
@@ -2503,9 +2504,9 @@ resolve(std::ostream& errStream,
 
 static bool
 initEnv(std::ostream& errStream,
-	GCPtr<AST> ast,
-	GCPtr<ASTEnvironment > aliasEnv,
-	GCPtr<ASTEnvironment > env)
+	shared_ptr<AST> ast,
+	shared_ptr<ASTEnvironment > aliasEnv,
+	shared_ptr<ASTEnvironment > env)
 {
   // See if I am processing the prelude or some other file.
   if(ast->astType == at_interface &&
@@ -2517,7 +2518,7 @@ initEnv(std::ostream& errStream,
   
   //  cout << "Processing " << ast->child(0)->s << std::endl;
   // "use" everything in the prelude
-  GCPtr<ASTEnvironment > preenv = GC_NULL;
+  shared_ptr<ASTEnvironment > preenv = GC_NULL;
   size_t i;
 
   {
@@ -2558,7 +2559,7 @@ UocInfo::fe_symresolve(std::ostream& errStream,
   if(Options::noPrelude)
     flags |= SYM_NO_PRELUDE;
   
-  GCPtr<ASTEnvironment > aliasEnv = ASTEnvironment::make("*aliases*");
+  shared_ptr<ASTEnvironment > aliasEnv = ASTEnvironment::make("*aliases*");
 
   if(init) {    
     if(flags & SYM_REINIT) {

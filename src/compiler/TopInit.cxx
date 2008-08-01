@@ -48,6 +48,7 @@
 #include "Symtab.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
  
 /* 
@@ -111,7 +112,7 @@ enum pop_type {
   }while(0)
 
 static pop_type
-primOp(GCPtr<AST> ast)
+primOp(shared_ptr<AST> ast)
 {
   if((ast->astType != at_ident) || 
      (!ast->symbolDef->isGlobal()))
@@ -138,7 +139,7 @@ primOp(GCPtr<AST> ast)
 
 bool
 TopInit(std::ostream& errStream, 
-	GCPtr<AST> ast, 
+	shared_ptr<AST> ast, 
 	unsigned long flags)
 {
   bool errFree = true;
@@ -263,7 +264,7 @@ TopInit(std::ostream& errStream,
       if (ast->isMethod())
 	break;
       
-      GCPtr<AST> def = ast->symbolDef;
+      shared_ptr<AST> def = ast->symbolDef;
       if(!def) {
 	// Defining Occurence.
 	// This loop MUST only enter the ident case ONLY for 

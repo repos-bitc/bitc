@@ -40,6 +40,7 @@
 
 #include "Special.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 SpecialNames SpecialNames::spNames;
@@ -85,7 +86,7 @@ SpecialNames::getSpName(unsigned name) {
 // In front-end passes, the passed UOC will be the prelude. In the
 // backend we will be called with the UOC of the bigAST
 void 
-SpecialNames::fixUpSpNames(GCPtr<UocInfo> theUoc)
+SpecialNames::fixUpSpNames(shared_ptr<UocInfo> theUoc)
 {
   sp_integral = theUoc->env->getBinding(sp_integral)->s;
   sp_fp = theUoc->env->getBinding(sp_fp)->s;

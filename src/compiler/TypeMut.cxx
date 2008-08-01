@@ -56,6 +56,7 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
@@ -176,28 +177,28 @@ p: (CL (maybe-1 'a)) => (fn ('a) ())
 /********************************************************************/  
 
 bool 
-Type::copy_compatible(GCPtr<Type> t, bool verbose, std::ostream &errStream)
+Type::copy_compatible(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
   return MBF(shared_from_this())->equals(MBF(t), verbose, errStream);
 }
 
 bool 
-Type::copy_compatibleA(GCPtr<Type> t, bool verbose, std::ostream &errStream)
+Type::copy_compatibleA(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
   return MBF(shared_from_this())->equalsA(MBF(t), verbose, errStream);
 }
 
-static inline GCPtr<Type> 
-addMutable(GCPtr<Type> t)
+static inline shared_ptr<Type> 
+addMutable(shared_ptr<Type> t)
 {
   return Type::make(ty_mutable, t->getBareType());
 }
 
-GCPtr<Type> 
-Type::maximizeTopMutability(GCPtr<Trail> trail)
+shared_ptr<Type> 
+Type::maximizeTopMutability(shared_ptr<Trail> trail)
 {
-  GCPtr<Type> t = getType();
-  GCPtr<Type> rt = GC_NULL;
+  shared_ptr<Type> t = getType();
+  shared_ptr<Type> rt = GC_NULL;
   
   switch(t->kind) {
     
@@ -229,11 +230,11 @@ Type::maximizeTopMutability(GCPtr<Trail> trail)
   return rt;
 }
 
-GCPtr<Type> 
-Type::minimizeTopMutability(GCPtr<Trail> trail)
+shared_ptr<Type> 
+Type::minimizeTopMutability(shared_ptr<Trail> trail)
 {
-  GCPtr<Type> t = getType();
-  GCPtr<Type> rt = GC_NULL;
+  shared_ptr<Type> t = getType();
+  shared_ptr<Type> rt = GC_NULL;
   
   switch(t->kind) {
     
@@ -266,11 +267,11 @@ Type::minimizeTopMutability(GCPtr<Trail> trail)
   return rt;
 }
 
-GCPtr<Type> 
-Type::maximizeMutability(GCPtr<Trail> trail)
+shared_ptr<Type> 
+Type::maximizeMutability(shared_ptr<Trail> trail)
 {
-  GCPtr<Type> t = getType();
-  GCPtr<Type> rt = GC_NULL;
+  shared_ptr<Type> t = getType();
+  shared_ptr<Type> rt = GC_NULL;
 
   if(t->mark & MARK17)
     return t;
@@ -308,10 +309,10 @@ Type::maximizeMutability(GCPtr<Trail> trail)
     {
       rt = t->getDCopy();
       for(size_t i=0; i < rt->typeArgs.size(); i++) {
-	GCPtr<Type> arg = rt->TypeArg(i)->getType();
+	shared_ptr<Type> arg = rt->TypeArg(i)->getType();
 
 	if(rt->argCCOK(i)) {
-	  GCPtr<Type> argMax =
+	  shared_ptr<Type> argMax =
 	    arg->maximizeMutability(trail)->getType(); 
 	  if(arg != argMax)
 	    trail->link(arg, argMax);
@@ -341,11 +342,11 @@ Type::maximizeMutability(GCPtr<Trail> trail)
   return rt;
 }
 
-GCPtr<Type> 
-Type::minimizeMutability(GCPtr<Trail> trail)
+shared_ptr<Type> 
+Type::minimizeMutability(shared_ptr<Trail> trail)
 {
-  GCPtr<Type> t = getType();
-  GCPtr<Type> rt = GC_NULL;
+  shared_ptr<Type> t = getType();
+  shared_ptr<Type> rt = GC_NULL;
   
   if(t->mark & MARK19)
     return t;
@@ -382,9 +383,9 @@ Type::minimizeMutability(GCPtr<Trail> trail)
     {
       rt = t->getDCopy();
       for(size_t i=0; i < rt->typeArgs.size(); i++) {
-	GCPtr<Type> arg = rt->TypeArg(i)->getType();
+	shared_ptr<Type> arg = rt->TypeArg(i)->getType();
 	if(rt->argCCOK(i)) {
-	  GCPtr<Type> argMin =
+	  shared_ptr<Type> argMin =
 	    arg->minimizeMutability(trail)->getType(); 
 	  if(arg != argMin)
 	    trail->link(arg, argMin);
@@ -412,11 +413,11 @@ Type::minimizeMutability(GCPtr<Trail> trail)
   return rt;
 }
 
-GCPtr<Type> 
-Type::minimizeDeepMutability(GCPtr<Trail> trail)
+shared_ptr<Type> 
+Type::minimizeDeepMutability(shared_ptr<Trail> trail)
 {
-  GCPtr<Type> t = getType();
-  GCPtr<Type> rt = GC_NULL;
+  shared_ptr<Type> t = getType();
+  shared_ptr<Type> rt = GC_NULL;
   
   if(t->mark & MARK24)
     return t;
@@ -460,8 +461,8 @@ Type::minimizeDeepMutability(GCPtr<Trail> trail)
     {
       rt = t->getDCopy();
       for(size_t i=0; i < rt->typeArgs.size(); i++) {
-	GCPtr<Type> arg = rt->TypeArg(i)->getType();
-	GCPtr<Type> argMin =
+	shared_ptr<Type> arg = rt->TypeArg(i)->getType();
+	shared_ptr<Type> argMin =
 	  arg->minimizeDeepMutability(trail)->getType(); 
 	
 	if(arg != argMin)
@@ -500,7 +501,7 @@ Type::isMaxMutable()
   return strictlyEquals(maximizeMutability());
 }
 
-extern GCPtr<TvPrinter> debugTvp;
+extern shared_ptr<TvPrinter> debugTvp;
 bool
 Type::isMinMutable()
 {
@@ -509,16 +510,16 @@ Type::isMinMutable()
 
 
 static void 
-coerceMaybe(GCPtr<Type> t, GCPtr<Trail> trail, bool minimize)
+coerceMaybe(shared_ptr<Type> t, shared_ptr<Trail> trail, bool minimize)
 {
   //std::cerr << "Coercing: " << t->asString(Options::debugTvP)
   //	    << " to ";
   
-  GCPtr<Type> core = t->Core()->getType();
+  shared_ptr<Type> core = t->Core()->getType();
   if(minimize)
     core = core->minimizeTopMutability()->getType();
   
-  GCPtr<Type> var = t->Var()->getType();
+  shared_ptr<Type> var = t->Var()->getType();
   if(core->kind != ty_tvar)
     trail->subst(var, core);
   else
@@ -529,10 +530,10 @@ coerceMaybe(GCPtr<Type> t, GCPtr<Trail> trail, bool minimize)
 }
 
 void
-Type::adjMaybe(GCPtr<Trail> trail, bool markedOnly, 
+Type::adjMaybe(shared_ptr<Trail> trail, bool markedOnly, 
 	       bool minimize, bool adjFn) 
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   
   if(t->mark & MARK15)
     return;
@@ -587,14 +588,14 @@ Type::adjMaybe(GCPtr<Trail> trail, bool markedOnly,
 bool
 Type::argCCOK(size_t argN)
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   assert(t->isValType());
   assert(argN < t->typeArgs.size());
   assert(t->defAst);
 
   // Be REALLY careful about bt. It is the type in the scheme.
   // NEVER unify it with anyhing.
-  GCPtr<Type> bt = t->defAst->symType;  
+  shared_ptr<Type> bt = t->defAst->symType;  
   if(bt->TypeArg(argN)->getType()->flags & TY_CCC)
     return true;
   else
@@ -606,7 +607,7 @@ Type::argCCOK(size_t argN)
    argument is a composite-type that is searched to determine ccc-ness */ 
 
 bool
-Type::determineCCC(GCPtr<Type> t, bool inRefType)
+Type::determineCCC(shared_ptr<Type> t, bool inRefType)
 { 
   if (shared_from_this() != getType())
     return getType()->determineCCC(t);
@@ -667,7 +668,7 @@ Type::determineCCC(GCPtr<Type> t, bool inRefType)
 void 
 Type::markSignMbs(bool cppos)
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   
   if(t->mark & MARK25)
     return;
@@ -735,7 +736,7 @@ Type::markSignMbs(bool cppos)
   case ty_reprv:
     {
       for(size_t i=0; i < t->typeArgs.size(); i++) {
-	GCPtr<Type> arg = t->TypeArg(i)->getType();
+	shared_ptr<Type> arg = t->TypeArg(i)->getType();
 	if(t->argCCOK(i))
 	  arg->markSignMbs(cppos);
 	else
@@ -750,7 +751,7 @@ Type::markSignMbs(bool cppos)
   case ty_reprr:
     {
       for(size_t i=0; i < t->typeArgs.size(); i++) {
-	GCPtr<Type> arg = t->TypeArg(i)->getType();
+	shared_ptr<Type> arg = t->TypeArg(i)->getType();
 	arg->markSignMbs(false);
       }
       break;
@@ -781,7 +782,7 @@ Type::markSignMbs(bool cppos)
 void
 Type::fixupFnTypes()
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   
   if(t->mark & MARK26)
     return;
@@ -811,7 +812,7 @@ Type::fixupFnTypes()
     {
       t->Args()->fixupFnTypes();
       t->Ret()->fixupFnTypes();
-      GCPtr<Type> ret = t->Ret()->getType();
+      shared_ptr<Type> ret = t->Ret()->getType();
       if(ret->kind != ty_mbFull)
 	t->Ret() = MBF(ret);
       break;
@@ -821,7 +822,7 @@ Type::fixupFnTypes()
     {
       for(size_t i=0; i < t->components.size(); i++) {
 	t->CompType(i)->fixupFnTypes();
-	GCPtr<Type> arg = t->CompType(i)->getType();
+	shared_ptr<Type> arg = t->CompType(i)->getType();
 	if((t->CompFlags(i) & COMP_BYREF) == 0) {
 	  if(arg->kind != ty_mbFull)
 	    t->CompType(i) = MBF(arg);

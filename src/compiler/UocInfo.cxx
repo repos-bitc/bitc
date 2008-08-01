@@ -56,6 +56,7 @@
 
 using namespace std;
 using namespace boost;
+using namespace boost;
 using namespace sherpa;
 
 vector<filesystem::path> UocInfo::searchPath;
@@ -84,7 +85,7 @@ UocInfo::UocNameFromSrcName(const std::string& srcFileName, unsigned ndx)
 }
 
 UocInfo::UocInfo(const std::string& _uocName, const std::string& _origin,
-		 GCPtr<AST> _uocAst)
+		 shared_ptr<AST> _uocAst)
 {
   lastCompletedPass = pn_none;
   uocAst = _uocAst;
@@ -100,7 +101,7 @@ UocInfo::UocInfo(const std::string& _uocName, const std::string& _origin,
 // I'm concerned because it isn't doing deep copy, I don't understand
 // whether it *needs* to do deep copy (or not), and there is no
 // comment here answering my question.
-UocInfo::UocInfo(GCPtr<UocInfo> uoc)
+UocInfo::UocInfo(shared_ptr<UocInfo> uoc)
 {
   uocName = uoc->uocName;
   origin = uoc->origin;
@@ -112,14 +113,14 @@ UocInfo::UocInfo(GCPtr<UocInfo> uoc)
   flags = 0;
 }
 
-GCPtr<UocInfo>
+shared_ptr<UocInfo>
 UocInfo::CreateUnifiedUoC()
 {
   LexLoc loc;
-  GCPtr<AST> ast = AST::make(at_module, loc);
+  shared_ptr<AST> ast = AST::make(at_module, loc);
 
   std::string uocName = "*emit*";
-  GCPtr<UocInfo> uoc = UocInfo::make(uocName, "*internal*", ast);
+  shared_ptr<UocInfo> uoc = UocInfo::make(uocName, "*internal*", ast);
 
   uoc->env = ASTEnvironment::make(uocName);
   uoc->gamma = TSEnvironment::make(uocName);
@@ -166,7 +167,7 @@ UocInfo::resolveInterfacePath(std::string ifName)
 
 
 void 
-UocInfo::addTopLevelForm(GCPtr<AST> def)
+UocInfo::addTopLevelForm(shared_ptr<AST> def)
 {
   assert(uocAst->astType == at_module);
   uocAst->children.push_back(def);  
@@ -208,7 +209,7 @@ bool
   return true;
 }
 
-GCPtr<UocInfo> 
+shared_ptr<UocInfo> 
 UocInfo::findInterface(const std::string& ifName)
 {
   UocMap::iterator itr = UocInfo::ifList.find(ifName);
@@ -218,13 +219,13 @@ UocInfo::findInterface(const std::string& ifName)
   return itr->second;
 }
 
-GCPtr<UocInfo> 
+shared_ptr<UocInfo> 
 UocInfo::importInterface(std::ostream& errStream,
 			 const LexLoc& loc, const std::string& ifName)
 {
   // First check to see if we already have it. Yes, this
   // IS a gratuitously stupid way to do it.
-  GCPtr<UocInfo> puoci = findInterface(ifName);
+  shared_ptr<UocInfo> puoci = findInterface(ifName);
 
   if (puoci && puoci->uocAst)
     return puoci;

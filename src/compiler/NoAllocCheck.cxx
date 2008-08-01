@@ -51,11 +51,12 @@
 #include "Type.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 // Return whether the expression returns a location or not.
 static bool
-AllocCheck(std::ostream &errStream, GCPtr<AST> ast)
+AllocCheck(std::ostream &errStream, shared_ptr<AST> ast)
 {
   bool errFree = true;
 

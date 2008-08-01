@@ -58,11 +58,12 @@
 #include "WorkList.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 static bool
 typeError(std::ostream& errStream, const LexLoc &errLoc,
-	  GCPtr<Type> t1, GCPtr<Type> t2)
+	  shared_ptr<Type> t1, shared_ptr<Type> t2)
 {
   errStream << errLoc << ": Type Error."
 	    << "Expected " << t1->asString(GC_NULL) 
@@ -79,29 +80,29 @@ typeError(std::ostream& errStream, const LexLoc &errLoc,
 // Get an instance of a primary type defined in the Prelude.
 bool
 unifyPrim(std::ostream& errStream,
-	  GCPtr<Trail> trail, const LexLoc &errLoc,
-	  GCPtr<Type> tau, const std::string ptype) 
+	  shared_ptr<Trail> trail, const LexLoc &errLoc,
+	  shared_ptr<Type> tau, const std::string ptype) 
 {
   bool errFree = true;
 
-  GCPtr<Type> primType = Type::make(Type::LookupKind(ptype));
+  shared_ptr<Type> primType = Type::make(Type::LookupKind(ptype));
   CHKERR(errFree, unify(errStream, trail, errLoc, primType, tau, 0));
   return errFree;
 }
 
 static bool
 Unify(std::ostream& errStream,
-      GCPtr<Trail> trail, 
+      shared_ptr<Trail> trail, 
       const LexLoc &errLoc,
-      GCPtr<Type> ft, GCPtr<Type> st, 
+      shared_ptr<Type> ft, shared_ptr<Type> st, 
       unsigned long flags);
 
 // Handle unification of struct/union decl+decl or decl+def
 static bool 
 UnifyDecl(std::ostream& errStream,
-	  GCPtr<Trail> trail,
+	  shared_ptr<Trail> trail,
 	  const LexLoc &errLoc,
-	  GCPtr<Type> t1, GCPtr<Type> t2,
+	  shared_ptr<Type> t1, shared_ptr<Type> t2,
 	  unsigned long flags) 
 {
   bool errFree = true;
@@ -129,9 +130,9 @@ UnifyDecl(std::ostream& errStream,
 
 static bool 
 UnifyStructUnion(std::ostream& errStream,
-		 GCPtr<Trail> trail,
+		 shared_ptr<Trail> trail,
 		 const LexLoc &errLoc,
-		 GCPtr<Type> t1, GCPtr<Type> t2,
+		 shared_ptr<Type> t1, shared_ptr<Type> t2,
 		 unsigned long flags) 
 {
   bool errFree = true;
@@ -178,13 +179,13 @@ UnifyStructUnion(std::ostream& errStream,
   }while(0) 
 
 static bool 
-UnifyMbCt(std::ostream& errStream, GCPtr<Trail> trail,
-	  GCPtr<Type> mb, GCPtr<Type> ct)
+UnifyMbCt(std::ostream& errStream, shared_ptr<Trail> trail,
+	  shared_ptr<Type> mb, shared_ptr<Type> ct)
 {
   mb = mb->getType();
   ct = ct->getType();
-  GCPtr<Type> var = mb->Var()->getType();
-  GCPtr<Type> core = mb->Core()->getType();
+  shared_ptr<Type> var = mb->Var()->getType();
+  shared_ptr<Type> core = mb->Core()->getType();
   
   if(ct->boundInType(var)) {
     std::cerr << mb->asString(Options::debugTvP)
@@ -207,10 +208,10 @@ UnifyMbCt(std::ostream& errStream, GCPtr<Trail> trail,
 // types are the full function types) and the
 // ty_fnarg case )in thich case errt1 = t1 and errt2=t2)
 static bool 
-UnifyFnArgs(std::ostream& errStream, GCPtr<Trail> trail,
+UnifyFnArgs(std::ostream& errStream, shared_ptr<Trail> trail,
 	    const LexLoc &errLoc,
- 	    GCPtr<Type> errt1, GCPtr<Type> errt2,
-	    GCPtr<Type> t1, GCPtr<Type> t2,
+ 	    shared_ptr<Type> errt1, shared_ptr<Type> errt2,
+	    shared_ptr<Type> t1, shared_ptr<Type> t2,
 	    unsigned long flags)
 {
   bool errFree = true;
@@ -250,13 +251,13 @@ UnifyFnArgs(std::ostream& errStream, GCPtr<Trail> trail,
 
 static bool
 Unify(std::ostream& errStream,
-      GCPtr<Trail> trail, 
+      shared_ptr<Trail> trail, 
       const LexLoc &errLoc,
-      GCPtr<Type> ft, GCPtr<Type> st, 
+      shared_ptr<Type> ft, shared_ptr<Type> st, 
       unsigned long flags) 
 {
-  GCPtr<Type> t1 = ft->getType();
-  GCPtr<Type> t2 = st->getType();
+  shared_ptr<Type> t1 = ft->getType();
+  shared_ptr<Type> t2 = st->getType();
   bool errFree = true;
 
   UNIFY_DEBUG std::cerr << "Unifier: " 
@@ -416,8 +417,8 @@ Unify(std::ostream& errStream,
       assert(t1->components.size() == 2);
       assert(t2->components.size() == 2);
 
-      GCPtr<Type> t1Args = t1->Args();
-      GCPtr<Type> t2Args = t2->Args();
+      shared_ptr<Type> t1Args = t1->Args();
+      shared_ptr<Type> t2Args = t2->Args();
       CHKERR(errFree, UnifyFnArgs(errStream, trail, errLoc, 
 				  t1, t2, t1Args, t2Args, flags));
       
@@ -615,14 +616,14 @@ Unify(std::ostream& errStream,
 bool
 acyclic(std::ostream& errStream,
 	const LexLoc &errLoc,
-	GCPtr<Type> typ, 
-	WorkList<GCPtr<Type> >& worklist, // Types currently visiting
- 	DoneList<GCPtr<Type> >& donelist, // Types Known to be OK 
+	shared_ptr<Type> typ, 
+	WorkList<shared_ptr<Type> >& worklist, // Types currently visiting
+ 	DoneList<shared_ptr<Type> >& donelist, // Types Known to be OK 
 	bool inref=false)
 {
   assert(typ);
 
-  GCPtr<Type> t = typ->getType();
+  shared_ptr<Type> t = typ->getType();
   bool errFree = true;
 
   //std::cout << "Acyclic: Processing: " << t->asString(Options::debugTvP)
@@ -650,7 +651,7 @@ acyclic(std::ostream& errStream,
     // in the worklist
     std::cerr << t->asString(GC_NULL, false) 
     	      << std::endl;
-    for(WorkList<GCPtr<Type> >::iterator itr = worklist.begin();
+    for(WorkList<shared_ptr<Type> >::iterator itr = worklist.begin();
 	itr != worklist.end(); ++itr)
       std::cerr << (*itr)->asString(GC_NULL, false)
 		<< std::endl;
@@ -684,14 +685,14 @@ acyclic(std::ostream& errStream,
 
 bool
 unify(std::ostream& errStream,
-      GCPtr<Trail> trail,
+      shared_ptr<Trail> trail,
       const LexLoc &errLoc,
-      GCPtr<Type> ft, GCPtr<Type> st, 
+      shared_ptr<Type> ft, shared_ptr<Type> st, 
       unsigned long flags) 
 {
   bool errFree = true;
-  WorkList<GCPtr<Type> > worklist;
-  DoneList<GCPtr<Type> > donelist;
+  WorkList<shared_ptr<Type> > worklist;
+  DoneList<shared_ptr<Type> > donelist;
   CHKERR(errFree, Unify(errStream, trail, errLoc, ft, st, flags));
   CHKERR(errFree, acyclic(errStream, errLoc, ft, worklist, donelist));
 

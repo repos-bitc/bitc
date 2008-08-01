@@ -50,14 +50,15 @@
 #include "Type.hxx"
 #include "machine-dep.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 static size_t
-calc_struct_size(const GCPtr<Type> t)
+calc_struct_size(const shared_ptr<Type> t)
 {
   size_t start=0;
   size_t sz = 0;
-  GCPtr<AST> base = GC_NULL;
+  shared_ptr<AST> base = GC_NULL;
 
   if(t->kind == ty_structv) {
     start = 0;
@@ -75,7 +76,7 @@ calc_struct_size(const GCPtr<Type> t)
   // So, we need a separate count for the type components.
   size_t compCnt=0;
   for(size_t i=start; i < base->children.size(); i++) {
-    GCPtr<AST> fld = base->child(i);
+    shared_ptr<AST> fld = base->child(i);
     
     switch(fld->astType) {
     case at_fill:
@@ -113,14 +114,14 @@ calc_struct_size(const GCPtr<Type> t)
 
 
 static size_t
-calc_unin_size(const GCPtr<Type> t)
+calc_unin_size(const shared_ptr<Type> t)
 {
   assert(t->kind == ty_unionv);
-  GCPtr<AST> base = t->defAst->defForm;
+  shared_ptr<AST> base = t->defAst->defForm;
   
   size_t max=0;
   for(size_t i=0; i < base->children.size(); i++) {
-    GCPtr<AST> ctr = base->child(i);
+    shared_ptr<AST> ctr = base->child(i);
 
     // Constructors like `nil' having no arguments do not count.
     if(ctr->symType->isUval())

@@ -46,7 +46,7 @@
 #include <sstream>
 #include <string>
 
-#include <libsherpa/GCPtr.hxx>
+#include "shared_ptr.hxx"
 
 #include "AST.hxx"
 #include "Environment.hxx"
@@ -55,13 +55,13 @@
 #include "backend.hxx"
 
 bool unify(std::ostream& errStream,
-	   sherpa::GCPtr<Trail> trail,
+	   boost::shared_ptr<Trail> trail,
 	   const sherpa::LexLoc &errLoc,
-	   sherpa::GCPtr<Type> ft, sherpa::GCPtr<Type> st, 
+	   boost::shared_ptr<Type> ft, boost::shared_ptr<Type> st, 
 	   unsigned long uflags);
 
 bool unifyPrim(std::ostream& errStream,
-	       sherpa::GCPtr<Trail> trail, const sherpa::LexLoc &errLoc, 
-	       sherpa::GCPtr<Type> tau, std::string ptype);
+	       boost::shared_ptr<Trail> trail, const sherpa::LexLoc &errLoc, 
+	       boost::shared_ptr<Type> tau, std::string ptype);
 
 #endif /* UNIFY_HXX */

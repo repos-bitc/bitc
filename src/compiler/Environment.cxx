@@ -48,10 +48,11 @@
 #include "inter-pass.hxx"
 
 using namespace std;
+using namespace boost;
 using namespace sherpa;
 
 template<class T>
-GCPtr<Binding<T> > 
+shared_ptr<Binding<T> > 
 Environment<T>::getLocalBinding(const std::string& nm) const
 {
   const_iterator itr = bindings.find(nm);
@@ -62,10 +63,10 @@ Environment<T>::getLocalBinding(const std::string& nm) const
 }
 
 template<class T>
-GCPtr<Binding<T> > 
+shared_ptr<Binding<T> > 
 Environment<T>::doGetBinding(const std::string& nm) const
 {
-  GCPtr<Binding<T> > binding = getLocalBinding(nm);
+  shared_ptr<Binding<T> > binding = getLocalBinding(nm);
   
   if (binding)
     return binding;
@@ -112,7 +113,7 @@ Environment<T>::removeBinding(const std::string& nm)
 template<class T>
 void
 Environment<T>::addBinding(const std::string& nm, 
-			   GCPtr<T> val, 
+			   shared_ptr<T> val, 
 			   bool rebind)
 {
   if (rebind) {
@@ -135,7 +136,7 @@ Environment<T>::updateKey(const std::string& from,
 {
   iterator itr = bindings.find(from);
   if (itr != bindings.end()) {
-    sherpa::GCPtr<Binding<T> > b = itr->second;
+    boost::shared_ptr<Binding<T> > b = itr->second;
     bindings.erase(itr);
     bindings[to] = b;
     return;
@@ -146,10 +147,10 @@ Environment<T>::updateKey(const std::string& from,
 }
 
 template<class T>
-GCPtr<Environment<T> > 
+shared_ptr<Environment<T> > 
 Environment<T>::newScope()
 {
-  GCPtr<Environment<T> > nEnv = Environment<T>::make(uocName);
+  shared_ptr<Environment<T> > nEnv = Environment<T>::make(uocName);
   nEnv->parent = this->shared_from_this();
   nEnv->defEnv = defEnv;
 
@@ -157,10 +158,10 @@ Environment<T>::newScope()
 }
 
 template<class T>
-GCPtr<Environment<T> > 
+shared_ptr<Environment<T> > 
 Environment<T>::newDefScope()
 {
-  GCPtr<Environment<T> > nEnv = newScope();
+  shared_ptr<Environment<T> > nEnv = newScope();
   nEnv->defEnv = nEnv;
   
   return nEnv;
@@ -169,7 +170,7 @@ Environment<T>::newDefScope()
 
 template<class T>
 bool 
-Environment<T>::isAncestor(GCPtr<Environment<T> > env)
+Environment<T>::isAncestor(shared_ptr<Environment<T> > env)
 {
   if(parent == env)
     return true;
@@ -181,12 +182,12 @@ Environment<T>::isAncestor(GCPtr<Environment<T> > env)
 
 template<class T>
 void
-Environment<T>::mergeBindingsFrom(GCPtr<Environment<T> > from, bool complete)
+Environment<T>::mergeBindingsFrom(shared_ptr<Environment<T> > from, bool complete)
 {
   for(iterator itr = from->begin();
       itr != from->end(); ++itr ) {
     const std::string& nm = itr->second->nm;
-    GCPtr<T> val = itr->second->val;
+    shared_ptr<T> val = itr->second->val;
     unsigned long flags = itr->second->flags;
 
     if (flags & BF_NO_MERGE)
@@ -211,32 +212,32 @@ Environment<T>::~Environment()
 
 // EXPLICIT INSTANTIATIONS:
 
-template GCPtr<Binding<AST> > 
+template shared_ptr<Binding<AST> > 
 Environment<AST>::getLocalBinding(const std::string& nm) const;
-template GCPtr<Binding<TypeScheme> > 
+template shared_ptr<Binding<TypeScheme> > 
 Environment<TypeScheme>::getLocalBinding(const std::string& nm) const;
-template GCPtr<Binding<set<GCPtr<Instance> > > >
+template shared_ptr<Binding<set<shared_ptr<Instance> > > >
 InstEnvironment::getLocalBinding
 (const std::string& nm) const;
 
-template GCPtr<Binding<AST> > 
+template shared_ptr<Binding<AST> > 
 Environment<AST>::doGetBinding(const std::string& nm) const;
-template GCPtr<Binding<TypeScheme> > 
+template shared_ptr<Binding<TypeScheme> > 
 Environment<TypeScheme>::doGetBinding(const std::string& nm) const;
-template GCPtr<Binding<set<GCPtr<Instance> > > >
+template shared_ptr<Binding<set<shared_ptr<Instance> > > >
 InstEnvironment::doGetBinding
 (const std::string& nm) const;
 
 template void
-Environment<AST>::addBinding(const std::string& nm, GCPtr<AST> val,
+Environment<AST>::addBinding(const std::string& nm, shared_ptr<AST> val,
 			     bool rebind);
 template void
 Environment<TypeScheme>::addBinding(const std::string& nm, 
-				    GCPtr<TypeScheme> val,
+				    shared_ptr<TypeScheme> val,
 				    bool rebind);
 template void
 InstEnvironment::addBinding
-(const std::string& nm, GCPtr<set<GCPtr<Instance> > > val, bool rebind);
+(const std::string& nm, shared_ptr<set<shared_ptr<Instance> > > val, bool rebind);
 
 
 template void
@@ -258,40 +259,40 @@ InstEnvironment::updateKey
 (const std::string& from, const std::string& to);
 
 
-template GCPtr<Environment<AST> > 
+template shared_ptr<Environment<AST> > 
 Environment<AST>::newScope();
-template GCPtr<Environment<TypeScheme> > 
+template shared_ptr<Environment<TypeScheme> > 
 Environment<TypeScheme>::newScope();
-template GCPtr<InstEnvironment > 
+template shared_ptr<InstEnvironment > 
 InstEnvironment::newScope();
 
 
-template GCPtr<Environment<AST> > 
+template shared_ptr<Environment<AST> > 
 Environment<AST>::newDefScope();
-template GCPtr<Environment<TypeScheme> > 
+template shared_ptr<Environment<TypeScheme> > 
 Environment<TypeScheme>::newDefScope();
-template GCPtr<InstEnvironment > 
+template shared_ptr<InstEnvironment > 
 InstEnvironment::newDefScope();
 
 template bool 
-Environment<AST>::isAncestor(GCPtr<Environment<AST> > env);
+Environment<AST>::isAncestor(shared_ptr<Environment<AST> > env);
 template bool 
-Environment<TypeScheme>::isAncestor(GCPtr<Environment<TypeScheme> > env);
+Environment<TypeScheme>::isAncestor(shared_ptr<Environment<TypeScheme> > env);
 template bool 
 InstEnvironment::isAncestor
-(GCPtr<InstEnvironment > env);
+(shared_ptr<InstEnvironment > env);
 
 template void
 Environment<AST>::mergeBindingsFrom
-(GCPtr<Environment<AST> >  from,
+(shared_ptr<Environment<AST> >  from,
  bool complete);
 template void
 Environment<TypeScheme>::mergeBindingsFrom
-(GCPtr<Environment<TypeScheme> > from,
+(shared_ptr<Environment<TypeScheme> > from,
  bool complete);
 template void
 InstEnvironment::mergeBindingsFrom
-(GCPtr<InstEnvironment >  from,
+(shared_ptr<InstEnvironment >  from,
  bool complete);
 
 template std::string

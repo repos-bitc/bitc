@@ -100,31 +100,31 @@ struct TCConstraints;
 
 struct comp {
   std::string name;
-  sherpa::GCPtr<Type> typ;
+  boost::shared_ptr<Type> typ;
   unsigned long flags;
 
   comp() {flags=0;} 
-  comp(sherpa::GCPtr<Type> t, unsigned long _flags=0);
-  comp(const std::string s, sherpa::GCPtr<Type> t, unsigned long _flags=0);
+  comp(boost::shared_ptr<Type> t, unsigned long _flags=0);
+  comp(const std::string s, boost::shared_ptr<Type> t, unsigned long _flags=0);
 
   // Quasi-constructors
-  static inline sherpa::GCPtr<comp>
+  static inline boost::shared_ptr<comp>
   make() {
     comp *tmp = new comp();
-    return sherpa::GCPtr<comp>(tmp);
+    return boost::shared_ptr<comp>(tmp);
   }
 
-  static inline sherpa::GCPtr<comp>
-  make(sherpa::GCPtr<Type> t, unsigned long _flags=0) {
+  static inline boost::shared_ptr<comp>
+  make(boost::shared_ptr<Type> t, unsigned long _flags=0) {
     comp *tmp = new comp(t, _flags);
-    return sherpa::GCPtr<comp>(tmp);
+    return boost::shared_ptr<comp>(tmp);
   }
 
-  static inline sherpa::GCPtr<comp>
+  static inline boost::shared_ptr<comp>
   make(const std::string& s, 
-       sherpa::GCPtr<Type> t, unsigned long _flags=0) {
+       boost::shared_ptr<Type> t, unsigned long _flags=0) {
     comp *tmp = new comp(s, t, _flags);
-    return sherpa::GCPtr<comp>(tmp);
+    return boost::shared_ptr<comp>(tmp);
   }
   //comp(const comp &c);
 };  
@@ -132,17 +132,17 @@ struct comp {
 // GCFIX: This constraint no longer applies.
 
 // The only reason for this class is that we need
-// Countable to use sherpa::GCPtr for an indirection 
+// Countable to use boost::shared_ptr for an indirection 
 // over array length
 struct ArrLen {
   uint64_t  len;
   ArrLen(uint64_t _len) {len = _len;}
 
   // Quasi-constructor
-  static inline sherpa::GCPtr<ArrLen>
+  static inline boost::shared_ptr<ArrLen>
   make(uint64_t _len) {
     ArrLen *tmp = new ArrLen(_len);
-    return sherpa::GCPtr<ArrLen>(tmp);
+    return boost::shared_ptr<ArrLen>(tmp);
   }
 };
 
@@ -191,9 +191,9 @@ struct TypeScheme;
 #define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | TY_CLOS | TY_COERCE) 
 
 struct Type;
-typedef std::set<sherpa::GCPtr<Type > > TypeSet;
+typedef std::set<boost::shared_ptr<Type > > TypeSet;
 
-struct Type : public sherpa::enable_shared_from_this<Type> {
+struct Type : public boost::enable_shared_from_this<Type> {
   
   friend struct TypeScheme;
 
@@ -211,7 +211,7 @@ struct Type : public sherpa::enable_shared_from_this<Type> {
 public:
   Kind kind;
   
-  sherpa::GCPtr<Type> link; // Linked into a chain of types 
+  boost::shared_ptr<Type> link; // Linked into a chain of types 
                             // constrained by equality
   
   /* If this is the type node that is authoritative
@@ -232,12 +232,12 @@ public:
 
   // defAST points to the AST of the defining occurrence. This field
   // is set for ty_struct*, ty_union*, tu_ucon, ty_exn
-  sherpa::GCPtr<AST> defAst;			// Defining occurrence (or declare)
+  boost::shared_ptr<AST> defAst;			// Defining occurrence (or declare)
 
   // If type is a union constructor, points to identifier AST of the
   // defining occurrence of the defunion.  If type is a type class
   // method type, points to the identifier AST of the typeclass.
-  sherpa::GCPtr<AST> myContainer;
+  boost::shared_ptr<AST> myContainer;
 
   // Note that we use two different kinds, ty_int/ty_impint,
   // ty_float/ty_impfloat, to deal with whether the concrete type of a
@@ -266,59 +266,59 @@ public:
   // variable. Copy constructor and TypeSpecialize DO NOT copy this
   // variable deeply.  This "variable" is not subject to
   // generalization.  
-  sherpa::GCPtr<ArrLen> arrlen;	// Length in the case of an array type
+  boost::shared_ptr<ArrLen> arrlen;	// Length in the case of an array type
   
   size_t    Isize;		// size in fixint
   TypeSet   fnDeps;		// Functional Dependencies (for 
 				//   Type classes only).
   
-  std::vector<sherpa::GCPtr<comp> > components;
-  std::vector<sherpa::GCPtr<Type> > typeArgs;  
+  std::vector<boost::shared_ptr<comp> > components;
+  std::vector<boost::shared_ptr<Type> > typeArgs;  
     
   // Mark Flags:  used for Traversal
   // Used to prevent infinite recursion
   // while printing infinitely recursivetypes.
   unsigned mark;                // General traversal
   unsigned pMark;               // Type printer
-  sherpa::GCPtr<Type> sp;			// Type specializer.
+  boost::shared_ptr<Type> sp;			// Type specializer.
   unsigned flags;               
 
   // Main (Base) Constructor
   Type(const Kind k);
   // Copy Constructor.
-  Type(sherpa::GCPtr<Type> t); 
-  Type(const Kind k, sherpa::GCPtr<Type> child);
-  Type(const Kind k, sherpa::GCPtr<Type> child1, sherpa::GCPtr<Type> child2);
+  Type(boost::shared_ptr<Type> t); 
+  Type(const Kind k, boost::shared_ptr<Type> child);
+  Type(const Kind k, boost::shared_ptr<Type> child1, boost::shared_ptr<Type> child2);
 
   // Quasi-constructors
-  static inline sherpa::GCPtr<Type>
+  static inline boost::shared_ptr<Type>
   make(const Kind k)
   {
     Type *tmp = new Type(k);
-    return sherpa::GCPtr<Type>(tmp);
+    return boost::shared_ptr<Type>(tmp);
   }
 
-  static inline sherpa::GCPtr<Type>
-  make(sherpa::GCPtr<Type> t)
+  static inline boost::shared_ptr<Type>
+  make(boost::shared_ptr<Type> t)
   {
     Type *tmp = new Type(t);
-    return sherpa::GCPtr<Type>(tmp);
+    return boost::shared_ptr<Type>(tmp);
   }
 
-  static inline sherpa::GCPtr<Type>
-  make(const Kind k, sherpa::GCPtr<Type> child)
+  static inline boost::shared_ptr<Type>
+  make(const Kind k, boost::shared_ptr<Type> child)
   {
     Type *tmp = new Type(k, child);
-    return sherpa::GCPtr<Type>(tmp);
+    return boost::shared_ptr<Type>(tmp);
   }
 
-  static inline sherpa::GCPtr<Type>
+  static inline boost::shared_ptr<Type>
   make(const Kind k,
-       sherpa::GCPtr<Type> child1, 
-       sherpa::GCPtr<Type> child2)
+       boost::shared_ptr<Type> child1, 
+       boost::shared_ptr<Type> child2)
   {
     Type *tmp = new Type(k, child1, child2);
-    return sherpa::GCPtr<Type>(tmp);
+    return boost::shared_ptr<Type>(tmp);
   }
 
   // Makes a deep copy , but ** LINKS TVARS TO ORIGINAL ONES ** 
@@ -327,20 +327,20 @@ public:
   // This is different from the type_instance() in 
   // the typeScheme class in that this function makes a copy
   // of non-tvars, while type_instance() returns the original type.
-  sherpa::GCPtr<Type> getDCopy();
+  boost::shared_ptr<Type> getDCopy();
 
 private:
-  sherpa::GCPtr<const Type> getTypePrim() const;
-  sherpa::GCPtr<Type> getTypePrim();
+  boost::shared_ptr<const Type> getTypePrim() const;
+  boost::shared_ptr<Type> getTypePrim();
 
 public:
-  sherpa::GCPtr<Type> getType();  
-  sherpa::GCPtr <const Type> getType() const;
+  boost::shared_ptr<Type> getType();  
+  boost::shared_ptr <const Type> getType() const;
   
   // Get the type without mutability / fix / maybe
-  sherpa::GCPtr<Type> getBareType();  
+  boost::shared_ptr<Type> getBareType();  
   // Get the type without some combinations of the above
-  sherpa::GCPtr<Type> getTheType(bool mutableOK=false, bool maybeOK=false);   
+  boost::shared_ptr<Type> getTheType(bool mutableOK=false, bool maybeOK=false);   
 
   // The only reason the following unctions are not marked const is
   // that they call getType(), which uses the mark flag. 
@@ -360,7 +360,7 @@ public:
   bool isValType();
   bool isByrefType();
   bool isNullableType();
-  bool isConstrainedToRefType(sherpa::GCPtr<TCConstraints> tcc);
+  bool isConstrainedToRefType(boost::shared_ptr<TCConstraints> tcc);
   bool isFnxn();
   bool isBaseConstType(); // Integers, floats, string, bool, unit, dummy.
 // #if 0
@@ -374,7 +374,7 @@ public:
   bool isPrimaryType();
   bool isPrimInt();
   bool isPrimFloat();
-  void SetTvarsTo(sherpa::GCPtr<Type> t);
+  void SetTvarsTo(boost::shared_ptr<Type> t);
   void SetTvarsToUnit();
   bool isInteger();
   bool isIntegral();
@@ -416,7 +416,7 @@ public:
 
   /* Produce Type ty_union[rv] from ty_ucon[rv] or ty_uval[rv]
      ONLY typeArgs are polylated */
-  sherpa::GCPtr<Type> getUnionType();
+  boost::shared_ptr<Type> getUnionType();
     
   size_t size();
 
@@ -433,26 +433,26 @@ public:
      comparisons between two types */
 
 private:  
-  bool eql(sherpa::GCPtr<Type> t, bool verbose, std::ostream &errStream,
+  bool eql(boost::shared_ptr<Type> t, bool verbose, std::ostream &errStream,
 	   unsigned long uflags, bool keepSub,
-	   sherpa::GCPtr<Trail> trail=Trail::make());
+	   boost::shared_ptr<Trail> trail=Trail::make());
 public:
   // Returns true of the type `t' is structurally equal to `this'
   // under alpha renaming (and declarations unify with definitions)
   // 
   // The next function strictlyEquals removes the above two
   // restrictions. 
-  bool equals(sherpa::GCPtr<Type> t, bool verbose=false,
+  bool equals(boost::shared_ptr<Type> t, bool verbose=false,
 	      std::ostream &errStream=std::cerr);
-  bool strictlyEquals(sherpa::GCPtr<Type> t, bool verbose=false,
+  bool strictlyEquals(boost::shared_ptr<Type> t, bool verbose=false,
 		      bool noAlphaRename=false,
 		      std::ostream &errStream=std::cerr);  
-  bool unifyWith(sherpa::GCPtr<Type> t, bool verbose=false,
-		 sherpa::GCPtr<Trail> trail=Trail::make(),
+  bool unifyWith(boost::shared_ptr<Type> t, bool verbose=false,
+		 boost::shared_ptr<Trail> trail=Trail::make(),
 		 std::ostream &errStream=std::cerr);
 
   // Unify Ignoring rigidity
-  bool forcedUnify(sherpa::GCPtr<Type> t, bool verbose=false,
+  bool forcedUnify(boost::shared_ptr<Type> t, bool verbose=false,
 		   std::ostream &errStream=std::cerr);
   
   // All Tvars are rigid?
@@ -461,26 +461,26 @@ public:
   // Equality under alpha renaming of all (including rigid)
   // variables. The following functions are the same as equals and
   // strictlyEquals except for the fact that they ignore rigidity.
-  bool equalsA(sherpa::GCPtr<Type> t, bool verbose=false,
+  bool equalsA(boost::shared_ptr<Type> t, bool verbose=false,
 	       std::ostream &errStream=std::cerr);
-  bool strictlyEqualsA(sherpa::GCPtr<Type> t, bool verbose=false,
+  bool strictlyEqualsA(boost::shared_ptr<Type> t, bool verbose=false,
 		       std::ostream &errStream=std::cerr);
   
   /* Test for copy compatibility 
      two versions based on inner function equal or equalsA? */
-  bool copy_compatible(sherpa::GCPtr<Type> t, bool verbose=false,
+  bool copy_compatible(boost::shared_ptr<Type> t, bool verbose=false,
 			   std::ostream &errStream=std::cerr);
-  bool copy_compatibleA(sherpa::GCPtr<Type> t, bool verbose=false,
+  bool copy_compatibleA(boost::shared_ptr<Type> t, bool verbose=false,
 			      std::ostream &errStream=std::cerr);
  
   /* Methods to support polymorphism */
   /* Is that Type variable contained in my type somewhere (deeply)? */
-  bool boundInType(sherpa::GCPtr<Type> tv);
+  bool boundInType(boost::shared_ptr<Type> tv);
   
   /* Is my type bound in the environment? Usually only used in the
      case of type variables to determine if it must be 
      generalized, or not */
-  bool boundInGamma(sherpa::GCPtr<const TSEnvironment > gamma);
+  bool boundInGamma(boost::shared_ptr<const TSEnvironment > gamma);
   
   // Collect ALL ftvs regardless of gamma
   // This APPENDS TO the vector `tvs'. 
@@ -489,47 +489,47 @@ public:
   // Collect the Free Type Variables in a type
   // that are unbound in gamma
   void collectftvsWrtGamma(/* OUT */ TypeSet& tvs,
-			   sherpa::GCPtr<const TSEnvironment > gamma);
+			   boost::shared_ptr<const TSEnvironment > gamma);
 
   // Meta-polymorphism
-  static sherpa::GCPtr<Type> Kmono;
-  static sherpa::GCPtr<Type> Kpoly;
+  static boost::shared_ptr<Type> Kmono;
+  static boost::shared_ptr<Type> Kpoly;
   
 private:
-  sherpa::GCPtr<Type> 
-  TypeSpecializeReal(const std::vector<sherpa::GCPtr<Type> >& ftvs,
-		     std::vector<sherpa::GCPtr<Type> >& nftvs);
+  boost::shared_ptr<Type> 
+  TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
+		     std::vector<boost::shared_ptr<Type> >& nftvs);
   
   // Clear the sp (specialization) field of type records recursively.
   void clear_sp();
   
 public:
-  sherpa::GCPtr<Type> 
-  TypeSpecialize(const std::vector<sherpa::GCPtr<Type> >& ftvs,
-		 std::vector<sherpa::GCPtr<Type> >& nftvs);
+  boost::shared_ptr<Type> 
+  TypeSpecialize(const std::vector<boost::shared_ptr<Type> >& ftvs,
+		 std::vector<boost::shared_ptr<Type> >& nftvs);
 
   /* Methods to deal with mutability issues */
   // Fix all Maybe types surrounding type records containing a
   // polymorphic type variables, except in the case of those maybes
   // directly surrounding type variables, unless clearall is
   // mentioned. 
-  bool fixMaybes(const TypeSet& ftvs, sherpa::GCPtr<Trail> trail,
+  bool fixMaybes(const TypeSet& ftvs, boost::shared_ptr<Trail> trail,
 		 bool clearAll);
 
   // Wrapper for the above function with the clearAll flag set.
   void clearAllMaybes();
   
 public:
-  void adjMaybe(sherpa::GCPtr<Trail> trail, bool markedOnly=false,
+  void adjMaybe(boost::shared_ptr<Trail> trail, bool markedOnly=false,
 		bool minimize=false, bool adjFn=false);
   
   // Get the maximally-mutable, but copy-compatible type.
-  sherpa::GCPtr<Type> maximizeMutability(sherpa::GCPtr<Trail> trail=Trail::make());
+  boost::shared_ptr<Type> maximizeMutability(boost::shared_ptr<Trail> trail=Trail::make());
   // Get the minimally-mutable, but copy-compatible type.
-  sherpa::GCPtr<Type> minimizeMutability(sherpa::GCPtr<Trail> trail=Trail::make());
-  sherpa::GCPtr<Type> maximizeTopMutability(sherpa::GCPtr<Trail> trail=Trail::make());
-  sherpa::GCPtr<Type> minimizeTopMutability(sherpa::GCPtr<Trail> trail=Trail::make());
-  sherpa::GCPtr<Type> minimizeDeepMutability(sherpa::GCPtr<Trail> trail=Trail::make());
+  boost::shared_ptr<Type> minimizeMutability(boost::shared_ptr<Trail> trail=Trail::make());
+  boost::shared_ptr<Type> maximizeTopMutability(boost::shared_ptr<Trail> trail=Trail::make());
+  boost::shared_ptr<Type> minimizeTopMutability(boost::shared_ptr<Trail> trail=Trail::make());
+  boost::shared_ptr<Type> minimizeDeepMutability(boost::shared_ptr<Trail> trail=Trail::make());
 
   // Check if maximally / minimally mutable
   bool isMaxMutable();
@@ -538,7 +538,7 @@ public:
   /* Determine Candidacy for Copy-Compatibility for type variables
      only, argument is a composite-type that is searched 
      to determine ccc-ness */  
-  bool determineCCC(sherpa::GCPtr<Type> comp, bool inRefType=false);
+  bool determineCCC(boost::shared_ptr<Type> comp, bool inRefType=false);
   
   // See if nth typeArg is a CCC based on the TY_CCC flag markings
   bool argCCOK(size_t argN);  
@@ -549,15 +549,15 @@ public:
   std::string toString();  
   // Use Output
   std::string 
-  asString(sherpa::GCPtr<TvPrinter> tvP = TvPrinter::make(), 
+  asString(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make(), 
 	   bool traverse = true);
 
-  void asXML(sherpa::GCPtr<TvPrinter> tvP, sherpa::INOstream &out);
-  std::string asXML(sherpa::GCPtr<TvPrinter> tvP = TvPrinter::make());
+  void asXML(boost::shared_ptr<TvPrinter> tvP, sherpa::INOstream &out);
+  std::string asXML(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make());
   
-  sherpa::GCPtr<AST> 
+  boost::shared_ptr<AST> 
   asAST(const sherpa::LexLoc &loc,
-	sherpa::GCPtr<TvPrinter> tvP = TvPrinter::make());
+	boost::shared_ptr<TvPrinter> tvP = TvPrinter::make());
   // Ignore mutability, Ignore Top-level Mutability, or
   // Maximize mutability of type-args
   std::string mangledString(bool igMut=false, bool igTlMut=false,
@@ -570,27 +570,27 @@ public:
   static Kind getRefKind(Kind valKind);
 
   /* Typeclass special */
-  bool addFnDep(sherpa::GCPtr<Type> tc);
+  bool addFnDep(boost::shared_ptr<Type> tc);
 
   /* PUBLIC Accessors (Conveniecnce Forms) */
   //Accessing Type Arguments and Components
-  const sherpa::GCPtr<Type> & TypeArg(size_t i) const
+  const boost::shared_ptr<Type> & TypeArg(size_t i) const
   {
     return typeArgs[i];
   }
-  const sherpa::GCPtr<comp> & Component(size_t i) const
+  const boost::shared_ptr<comp> & Component(size_t i) const
   {
     return components[i];
   }
-  sherpa::GCPtr<Type> & TypeArg(size_t i)
+  boost::shared_ptr<Type> & TypeArg(size_t i)
   {
     return typeArgs[i];
   }
-  sherpa::GCPtr<comp> & Component(size_t i)
+  boost::shared_ptr<comp> & Component(size_t i)
   {
     return components[i];
   }
-  sherpa::GCPtr<Type> & CompType(size_t i) const
+  boost::shared_ptr<Type> & CompType(size_t i) const
   {
     return components[i]->typ;
   }
@@ -603,29 +603,29 @@ public:
     return components[i]->flags;
   }
   //Argument and return types of function-types
-  sherpa::GCPtr<Type> & Args() const
+  boost::shared_ptr<Type> & Args() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn);
     return CompType(0);
   }  
-  sherpa::GCPtr<Type> & Ret() const
+  boost::shared_ptr<Type> & Ret() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn);
     return CompType(1);
   }  
   //The Inner type of Maybe-types
-  sherpa::GCPtr<Type> &Var() const
+  boost::shared_ptr<Type> &Var() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
     return CompType(0);
   }  
-  sherpa::GCPtr<Type> & Core() const
+  boost::shared_ptr<Type> & Core() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
     return CompType(1);
   }
   // The first component of an array/vector/mutable/ref type
-  sherpa::GCPtr<Type> & Base() const
+  boost::shared_ptr<Type> & Base() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_mutable || 
  			  kind == ty_byref || 

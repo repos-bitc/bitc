@@ -52,12 +52,13 @@
 #include "FQName.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::makeBoolLit(const sherpa::LToken &tok)
 {
-  GCPtr<AST> ast = AST::make(at_boolLiteral, tok);
+  shared_ptr<AST> ast = AST::make(at_boolLiteral, tok);
   if(tok.str == "#t")
     ast->litValue.b = true;
   else
@@ -66,23 +67,23 @@ AST::makeBoolLit(const sherpa::LToken &tok)
   return ast;
 }
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::makeCharLit(const sherpa::LToken &tok)
 {
   // FIX: (shap) This needs to convert to ordinal representation
   // and use a more appropriate element type.
 
-  GCPtr<AST> ast = AST::make(at_charLiteral, tok);
+  shared_ptr<AST> ast = AST::make(at_charLiteral, tok);
   //  mpz_init_set_str(ast->litValue.i, tok.is.c_str(), 0);
 
   ast->litValue.c = LitValue::DecodeCharacter(tok.str);
   return ast;
 }
 
-GCPtr<AST>  
+shared_ptr<AST>  
 AST::makeIntLit(const sherpa::LToken &tok) 
 {
-  GCPtr<AST> ast = AST::make(at_intLiteral, tok);
+  shared_ptr<AST> ast = AST::make(at_intLiteral, tok);
   std::string num = "";
   bool negative = false;
 
@@ -119,10 +120,10 @@ AST::makeIntLit(const sherpa::LToken &tok)
 
 /// @bug This is not doing the correct conversion. It completely
 /// ignores the radix encoding and the exponent encoding.
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::makeFloatLit(const sherpa::LToken &tok) 
 { 
-  GCPtr<AST> ast = AST::make(at_floatLiteral, tok);
+  shared_ptr<AST> ast = AST::make(at_floatLiteral, tok);
   ast->litBase = 10;  
   ast->litValue.d = strtod(tok.str.c_str(), 0);
 #if 0
@@ -200,10 +201,10 @@ AST::makeFloatLit(const sherpa::LToken &tok)
   return ast;
 }
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::makeStringLit(const sherpa::LToken &tok)
 {
-  GCPtr<AST> ast = AST::make(at_stringLiteral, tok);
+  shared_ptr<AST> ast = AST::make(at_stringLiteral, tok);
   ast->litValue.s = tok.str;
   
   return ast;
@@ -695,7 +696,7 @@ AST::clearTypes() {
 
 void 
 AST::getIds(std::ostream &errStream,
-	    std::vector<GCPtr<AST> >& ids,
+	    std::vector<shared_ptr<AST> >& ids,
 	    bool getPattern)
 {
   switch(astType) {
@@ -714,7 +715,7 @@ AST::getIds(std::ostream &errStream,
   }
 }
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::getID()
 {
   switch(astType) {
@@ -759,7 +760,7 @@ AST::isMethod()
   return false;
 }
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::getCtr()
 {
   if(astType == at_ident)
@@ -774,9 +775,9 @@ AST::getCtr()
 
 /* Rename identifier `from' to `to' in `ast' */ 
 void
-AST::rename(GCPtr<AST> from, std::string newName)
+AST::rename(shared_ptr<AST> from, std::string newName)
 { 
-  GCPtr<AST> me = shared_from_this();
+  shared_ptr<AST> me = shared_from_this();
   switch(astType) {
   case at_ident:    
     if(me == from || symbolDef == from)

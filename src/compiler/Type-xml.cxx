@@ -56,11 +56,12 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
 static string
-printName(GCPtr<AST> ast)
+printName(shared_ptr<AST> ast)
 {
   if(!ast)
     return "NULL";
@@ -69,12 +70,12 @@ printName(GCPtr<AST> ast)
 }
 
 void
-Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out) 
+Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out) 
 { 
   if(Options::rawTvars)
     tvP = GC_NULL;
 
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
 
   if(t->pMark >= 2) {
     out << "<infinity/>" << endl;
@@ -388,7 +389,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 
 
 string
-Type::asXML(GCPtr<TvPrinter> tvP) 
+Type::asXML(shared_ptr<TvPrinter> tvP) 
 {
   std::stringstream ss;      
   INOstream out(ss);
@@ -397,7 +398,7 @@ Type::asXML(GCPtr<TvPrinter> tvP)
 }
 
 static inline bool
-mustShowPred(GCPtr<Typeclass> pred)
+mustShowPred(shared_ptr<Typeclass> pred)
 {
   if((Options::showAllTccs) ||
      (((pred->flags & TY_CT_SUBSUMED) == 0) && 
@@ -408,10 +409,10 @@ mustShowPred(GCPtr<Typeclass> pred)
 }
 
 void
-TypeScheme::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
+TypeScheme::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
 {
   normalize();
-  GCPtr<TCConstraints> _tcc = TCConstraints::make();
+  shared_ptr<TCConstraints> _tcc = TCConstraints::make();
   out << "<TS>" << endl;
   out.more();
   
@@ -443,7 +444,7 @@ TypeScheme::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 }
 
 std::string
-TypeScheme::asXML(GCPtr<TvPrinter> tvP)
+TypeScheme::asXML(shared_ptr<TvPrinter> tvP)
 {
   normalize();
   std::stringstream ss; 

@@ -53,11 +53,12 @@
 #include "AST.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 // Remove any wrapping BEGIN that has just one child.
-static GCPtr<AST> 
-beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
+static shared_ptr<AST> 
+beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 {
   for (size_t c = 0; c < ast->children.size(); c++)
     ast->child(c) = beginSimp(ast->child(c), errStream, errFree);
@@ -67,7 +68,7 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
       if (ast->child(c)->astType == at_define ||
 	  ast->child(c)->astType == at_recdef) {
 	bool rec = (ast->child(c)->astType == at_recdef);
-	GCPtr<AST> def = ast->child(c);
+	shared_ptr<AST> def = ast->child(c);
 
 	// at_usesel is not allowed to appear in a defining occurrence
 	// of a local at_define or at_recdef.
@@ -80,7 +81,7 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
 	  errFree = false;
 	}
 
-	GCPtr<AST> letBinding = 
+	shared_ptr<AST> letBinding = 
 	  AST::make(at_letbinding,
 		  def->loc, def->child(0), def->child(1));
 	if(rec)
@@ -88,7 +89,7 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
 	
 	// The definition is not a global
 	def->child(0)->child(0)->Flags &= ~ID_IS_GLOBAL;
-	GCPtr<AST> body = AST::make(at_begin, ast->child(c)->loc);
+	shared_ptr<AST> body = AST::make(at_begin, ast->child(c)->loc);
 	
 	for (size_t bc = c+1; bc < ast->children.size(); bc++)
 	  body->addChild(ast->child(bc));
@@ -104,13 +105,13 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
 	// Trim the remaining children of this begin:
 	// while (ast->children.size() > c+1)
 	//   ast->children->Remove(ast->children.size()-1);
-	std::vector<GCPtr<AST> > newChildren;
+	std::vector<shared_ptr<AST> > newChildren;
 	for(size_t i=0; i <= c; i++)
 	  newChildren.push_back(ast->child(i));
 	ast->children = newChildren;
 	
 	// Insert the new letrec:
-	GCPtr<AST> theLetRec = 
+	shared_ptr<AST> theLetRec = 
 	  AST::make((rec ? at_letrec : at_let), def->loc, 
 		  AST::make(at_letbindings, def->loc, letBinding),
 		  body, def->child(2));

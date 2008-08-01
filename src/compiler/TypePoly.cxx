@@ -57,15 +57,16 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
 bool isExpansive(std::ostream& errStream, 
-		GCPtr<const TSEnvironment > gamma,
-		GCPtr<const AST> ast);
+		shared_ptr<const TSEnvironment > gamma,
+		shared_ptr<const AST> ast);
 bool isExpansive(std::ostream& errStream, 
-		 GCPtr<const TSEnvironment > gamma,
-		 GCPtr<Type> typ);
+		 shared_ptr<const TSEnvironment > gamma,
+		 shared_ptr<Type> typ);
 
 /**********************************************************
  **********************************************************
@@ -78,9 +79,9 @@ bool isExpansive(std::ostream& errStream,
 
 
 bool
-Type::boundInType(GCPtr<Type> tv)
+Type::boundInType(shared_ptr<Type> tv)
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   
   if(t == tv->getType())
     return true;
@@ -108,13 +109,13 @@ Type::boundInType(GCPtr<Type> tv)
 }
 
 bool
-Type::boundInGamma(GCPtr<const TSEnvironment > gamma)
+Type::boundInGamma(shared_ptr<const TSEnvironment > gamma)
 {
-  GCPtr<Type> tvar = getType();
+  shared_ptr<Type> tvar = getType();
   while (gamma) {
     for(TSEnvironment::const_iterator itr = gamma->begin();
 	itr != gamma->end(); ++itr) {
-      GCPtr<TypeScheme> sigma = itr->second->val;
+      shared_ptr<TypeScheme> sigma = itr->second->val;
 
       for (TypeSet::iterator tv = sigma->ftvs.begin();
 	   tv != sigma->ftvs.end(); ++tv) {
@@ -138,7 +139,7 @@ Type::boundInGamma(GCPtr<const TSEnvironment > gamma)
 void
 Type::collectAllftvs(TypeSet& tvs)
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   
   if(t->mark & MARK3)
     return;
@@ -179,9 +180,9 @@ TypeScheme::collectAllFtvs()
 // that are unbound in gamma
 void
 Type::collectftvsWrtGamma(TypeSet& tvs,
-			  GCPtr<const TSEnvironment > gamma)
+			  shared_ptr<const TSEnvironment > gamma)
 {   
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
 
   if(t->mark & MARK2)
     return;
@@ -215,19 +216,19 @@ Type::collectftvsWrtGamma(TypeSet& tvs,
 static void
 remftvsWrtFnDeps(TypeSet &ftvs,
 		 TypeSet fnDeps,
-		 GCPtr<const TSEnvironment > gamma)
+		 shared_ptr<const TSEnvironment > gamma)
 {
   // closure wrt tvs in fnDeps influenced by Gamma.
   TypeSet closure;
 
   for(TypeSet::iterator itr = fnDeps.begin();
       itr != fnDeps.end(); ++itr) {
-    GCPtr<Type> fnDep = (*itr);
+    shared_ptr<Type> fnDep = (*itr);
     TypeSet tvs;
     fnDep->collectAllftvs(tvs);
     for(TypeSet::iterator itr_j = tvs.begin();
 	itr_j != tvs.end(); ++itr_j) {
-      GCPtr<Type> tv = (*itr_j);
+      shared_ptr<Type> tv = (*itr_j);
       if(tv->boundInGamma(gamma))
 	closure.insert(tv);
     }
@@ -237,7 +238,7 @@ remftvsWrtFnDeps(TypeSet &ftvs,
   
   TypeSet newFtvs;
   for(TypeSet::iterator itr = ftvs.begin(); itr != ftvs.end(); ++itr) {
-    GCPtr<Type> ftv = (*itr)->getType();
+    shared_ptr<Type> ftv = (*itr)->getType();
     if(closure.find(ftv) == closure.end())
       newFtvs.insert(ftv);
   }
@@ -251,13 +252,13 @@ remftvsWrtFnDeps(TypeSet &ftvs,
 // Collect the Free Type Variables in a type
 // that are unbound in gamma
 void
-TypeScheme::collectftvs(GCPtr<const TSEnvironment > gamma)
+TypeScheme::collectftvs(shared_ptr<const TSEnvironment > gamma)
 {
   tau->collectftvsWrtGamma(ftvs, gamma);  
   if(tcc) {    
     for(TypeSet::iterator itr = tcc->begin();
 	itr != tcc->end(); ++itr) {
-      GCPtr<Typeclass> pred = (*itr);
+      shared_ptr<Typeclass> pred = (*itr);
       pred->collectftvsWrtGamma(ftvs, gamma);  
     }
  
@@ -279,19 +280,19 @@ TypeScheme::removeUnInstFtvs()
 
   for(TypeSet::iterator itr_c = ftvs.begin();
       itr_c != ftvs.end(); ++itr_c) {
-    GCPtr<Type> ftv = (*itr_c)->getType();
+    shared_ptr<Type> ftv = (*itr_c)->getType();
     if(tau->boundInType(ftv))
       ftv->flags |= TY_CLOS;
   }
 
   for(TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
-    GCPtr<Constraint> ct = (*itr)->getType();
+    shared_ptr<Constraint> ct = (*itr)->getType();
 
     bool mustAdd=false;
     for(TypeSet::iterator itr_c = ftvs.begin();
 	itr_c != ftvs.end(); ++itr_c) {
-      GCPtr<Type> ftv = (*itr_c)->getType();
+      shared_ptr<Type> ftv = (*itr_c)->getType();
       if(ct->boundInType(ftv) && (ftv->flags & TY_CLOS)) {
 	mustAdd = true;
 	break;
@@ -301,7 +302,7 @@ TypeScheme::removeUnInstFtvs()
     if(mustAdd) {
       for(TypeSet::iterator itr_c = ftvs.begin();
 	  itr_c != ftvs.end(); ++itr_c) {
-	GCPtr<Type> ftv = (*itr_c)->getType();
+	shared_ptr<Type> ftv = (*itr_c)->getType();
 	
 	if(ct->boundInType(ftv))
 	  ftv->flags |= TY_CLOS;
@@ -312,7 +313,7 @@ TypeScheme::removeUnInstFtvs()
   TypeSet newTvs;
   for(TypeSet::iterator itr_c = ftvs.begin();
       itr_c != ftvs.end(); ++itr_c) {
-    GCPtr<Type> ftv = (*itr_c)->getType();
+    shared_ptr<Type> ftv = (*itr_c)->getType();
     if(ftv->flags & TY_CLOS) {
       newTvs.insert(ftv);
       ftv->flags &= ~TY_CLOS;
@@ -328,13 +329,13 @@ TypeScheme::removeUnInstFtvs()
 // Remove *generalizable* Ftvs that appear only at copy-positions of
 // function types or Typeclass Predicates.
 bool
-TypeScheme::normalizeConstruction(GCPtr<Trail> trail)
+TypeScheme::normalizeConstruction(shared_ptr<Trail> trail)
 {
   bool removed = false;
 
   for(TypeSet::iterator itr_c = ftvs.begin();
       itr_c != ftvs.end(); ++itr_c) {
-    GCPtr<Type> ftv = (*itr_c)->getType();
+    shared_ptr<Type> ftv = (*itr_c)->getType();
     ftv->flags |= TY_COERCE;
   }
   
@@ -342,14 +343,14 @@ TypeScheme::normalizeConstruction(GCPtr<Trail> trail)
   
   for(TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
-    GCPtr<Constraint> ct = (*itr)->getType();
+    shared_ptr<Constraint> ct = (*itr)->getType();
     ct->markSignMbs(true);
   }
 
   TypeSet newTvs;
   for(TypeSet::iterator itr_c = ftvs.begin();
       itr_c != ftvs.end(); ++itr_c) {
-    GCPtr<Type> ftv = (*itr_c)->getType();
+    shared_ptr<Type> ftv = (*itr_c)->getType();
     if((ftv->flags & TY_COERCE) == 0)
       newTvs.insert(ftv);
     else
@@ -362,7 +363,7 @@ TypeScheme::normalizeConstruction(GCPtr<Trail> trail)
   tau->adjMaybe(trail, true, false, true);
   for(TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
-    GCPtr<Constraint> ct = (*itr)->getType();
+    shared_ptr<Constraint> ct = (*itr)->getType();
     ct->adjMaybe(trail, true, false, true);
   }
   
@@ -484,12 +485,12 @@ static bool genSteps[6][11] = {
 bool
 TypeScheme::generalize(std::ostream& errStream, 
 		       const LexLoc &errLoc,
-		       GCPtr<const TSEnvironment > gamma,
-		       GCPtr<const InstEnvironment >
+		       shared_ptr<const TSEnvironment > gamma,
+		       shared_ptr<const InstEnvironment >
 		       instEnv, 
-		       GCPtr<const AST> expr, 
-		       GCPtr<TCConstraints> parentTCC,
-		       GCPtr<Trail> trail,
+		       shared_ptr<const AST> expr, 
+		       shared_ptr<TCConstraints> parentTCC,
+		       shared_ptr<Trail> trail,
 		       GeneralizeMode mode)
 {
   bool errFree = true;  
@@ -547,7 +548,7 @@ TypeScheme::generalize(std::ostream& errStream,
   // Step 2
   GEN_STEP(mode, gs_pcst) {
     if(!tau->isDeepMut() && !tau->isDeepImmut()) {
-      GCPtr<Type> pcst = Constraint::make(ty_pcst); 
+      shared_ptr<Type> pcst = Constraint::make(ty_pcst); 
       pcst->components.push_back(comp::make(Type::make(ty_kvar)));
       pcst->components.push_back(comp::make(tau)); // General Type
       pcst->components.push_back(comp::make(tau)); // Instantiation Type
@@ -567,14 +568,14 @@ TypeScheme::generalize(std::ostream& errStream,
     bool cleared = false;
     for(TypeSet::iterator itr = tcc->begin();
 	itr != tcc->end(); ++itr) {
-      GCPtr<Type> pred = (*itr);
+      shared_ptr<Type> pred = (*itr);
       if(!pred->isPcst())
 	continue;
 
       cleared = true;
-      GCPtr<Type> k = pred->CompType(0)->getType();
-      GCPtr<Type> gen = pred->CompType(1)->getType();
-      GCPtr<Type> ins = pred->CompType(2)->getType();
+      shared_ptr<Type> k = pred->CompType(0)->getType();
+      shared_ptr<Type> gen = pred->CompType(1)->getType();
+      shared_ptr<Type> ins = pred->CompType(2)->getType();
       
       assert(k != Type::Kmono);
       if(k->kind == ty_kvar) {
@@ -583,19 +584,19 @@ TypeScheme::generalize(std::ostream& errStream,
       }
       assert(k == Type::Kpoly);
       
-      GCPtr<Type> tgg = gen->minimizeDeepMutability();
-      GCPtr<Type> tii = ins->minimizeDeepMutability();
+      shared_ptr<Type> tgg = gen->minimizeDeepMutability();
+      shared_ptr<Type> tii = ins->minimizeDeepMutability();
       assert(gen->unifyWith(tgg, false, trail, errStream));
       assert(ins->unifyWith(tii, false, trail, errStream));
     }
 
     if(cleared) {
-      set< GCPtr<Typeclass> > oldPreds = tcc->pred;
+      set< shared_ptr<Typeclass> > oldPreds = tcc->pred;
       tcc->pred.clear();
       
       for(TypeSet::iterator itr = oldPreds.begin();
 	  itr != oldPreds.end(); ++itr) {
-	GCPtr<Type> pred = (*itr);
+	shared_ptr<Type> pred = (*itr);
 	if(!pred->isPcst())
 	  tcc->addPred(pred);
       }
@@ -670,7 +671,7 @@ TypeScheme::generalize(std::ostream& errStream,
 	
 	for(TypeSet::iterator itr = dummys.begin();
 	    itr != dummys.end(); ++itr) {
-	  GCPtr<Type> ftv = (*itr)->getType();
+	  shared_ptr<Type> ftv = (*itr)->getType();
 	  ftv->link = Type::make(ty_dummy);
 	}
 	
@@ -714,16 +715,16 @@ TypeScheme::generalize(std::ostream& errStream,
 
 /* Helper routines to generalize a pattern */
 static void
-updateSigmas(GCPtr<const AST> bp, const TypeSet& ftvs,
-	     GCPtr<TCConstraints> tcc)
+updateSigmas(shared_ptr<const AST> bp, const TypeSet& ftvs,
+	     shared_ptr<TCConstraints> tcc)
 {
   switch(bp->astType) {
   case at_identPattern:
     {
-      GCPtr<AST> ident = bp->child(0);
-      GCPtr<TypeScheme> sigma = ident->scheme;
+      shared_ptr<AST> ident = bp->child(0);
+      shared_ptr<TypeScheme> sigma = ident->scheme;
       assert(ident->scheme);
-      GCPtr<Type> tau = sigma->tau;;
+      shared_ptr<Type> tau = sigma->tau;;
       
       for(TypeSet::iterator itr_i = ftvs.begin();
 	  itr_i != ftvs.end(); ++itr_i) {
@@ -735,7 +736,7 @@ updateSigmas(GCPtr<const AST> bp, const TypeSet& ftvs,
 	if(tcc)
 	  for(TypeSet::iterator itr = tcc->begin();
 	      itr != tcc->end(); ++itr) {
-	    GCPtr<Constraint> pred = (*itr);
+	    shared_ptr<Constraint> pred = (*itr);
 	    if(pred->boundInType(*itr_i)) {
 	      sigma->ftvs.insert(*itr_i);
 	      break;
@@ -765,19 +766,19 @@ updateSigmas(GCPtr<const AST> bp, const TypeSet& ftvs,
 bool
 generalizePat(std::ostream& errStream,
 	      const LexLoc &errLoc,
-	      GCPtr<TSEnvironment > gamma,
-	      GCPtr<const InstEnvironment > instEnv,
-	      GCPtr<AST> bp, GCPtr<AST> expr,
-	      GCPtr<TCConstraints> tcc,
-	      GCPtr<TCConstraints> parentTCC,
-	      GCPtr<Trail> trail)
+	      shared_ptr<TSEnvironment > gamma,
+	      shared_ptr<const InstEnvironment > instEnv,
+	      shared_ptr<AST> bp, shared_ptr<AST> expr,
+	      shared_ptr<TCConstraints> tcc,
+	      shared_ptr<TCConstraints> parentTCC,
+	      shared_ptr<Trail> trail)
 {
   bool errFree = true;
 
   // Make a temporary typeScheme for the pattern.
   // Individual identifiers' TypeScheme will be updated after the 
   // pattern is generalized as a whole.
-  GCPtr<TypeScheme> sigma = TypeScheme::make(bp->symType, bp, tcc);
+  shared_ptr<TypeScheme> sigma = TypeScheme::make(bp->symType, bp, tcc);
   
   CHKERR(errFree, 
 	 sigma->generalize(errStream, errLoc, 
@@ -817,7 +818,7 @@ generalizePat(std::ostream& errStream,
 
 
 bool
-TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
+TypeScheme::migratePredicates(shared_ptr<TCConstraints> parentTCC)
 {
   if(!parentTCC)
     return false;
@@ -827,7 +828,7 @@ TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
   
   for(TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
-    GCPtr<Typeclass> pred = (*itr)->getType();
+    shared_ptr<Typeclass> pred = (*itr)->getType();
     TypeSet allFtvs;
     pred->collectAllftvs(allFtvs);
     
@@ -836,7 +837,7 @@ TypeScheme::migratePredicates(GCPtr<TCConstraints> parentTCC)
     bool hasFtv = false;
     for(TypeSet::iterator itr_j = allFtvs.begin();
 	itr_j != allFtvs.end(); ++itr_j) {
-      GCPtr<Type> ftv = (*itr_j)->getType();
+      shared_ptr<Type> ftv = (*itr_j)->getType();
       
       if(ftvs.find(ftv) != ftvs.end()) {
 	hasFtv = true;
@@ -927,13 +928,13 @@ TypeScheme::checkAmbiguity(std::ostream &errStream, const LexLoc &errLoc)
 #if 0
   bool errFree =true;
   for(size_t j=0; j < ftvs->size(); j++) {
-    GCPtr<Type> ftv = ftvs->elem(j);
+    shared_ptr<Type> ftv = ftvs->elem(j);
     
     if(!tau->boundInType(ftv)) {
       // ftv must be bound in some predicate.
 
       for(size_t c=0; c < tcc->size(); c++) {
-	GCPtr<Typeclass> pred = tcc->Pred(c);
+	shared_ptr<Typeclass> pred = tcc->Pred(c);
 	if(pred->isPcst())
 	  continue;
 	
@@ -979,16 +980,16 @@ TypeScheme::checkAmbiguity(std::ostream &errStream, const LexLoc &errLoc)
                   THE Type Specializer 
 ***********************************************************/
 
-GCPtr<Type> 
-Type::TypeSpecializeReal(const std::vector<sherpa::GCPtr<Type> >& ftvs,
-			 std::vector<sherpa::GCPtr<Type> >& nftvs)
+shared_ptr<Type> 
+Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
+			 std::vector<boost::shared_ptr<Type> >& nftvs)
 {
-  GCPtr<Type> t = getType();
-  GCPtr<Type> theType = Type::make(t);
+  shared_ptr<Type> t = getType();
+  shared_ptr<Type> theType = Type::make(t);
   theType->flags &= ~TY_SP_MASK;
   theType->typeArgs.clear();
   theType->components.clear();
-  GCPtr<Type> retType = theType;
+  shared_ptr<Type> retType = theType;
   
   INS_DEBUG std::cout << "To Specialize " 
 		      << this->asString()  
@@ -1011,7 +1012,7 @@ Type::TypeSpecializeReal(const std::vector<sherpa::GCPtr<Type> >& ftvs,
 	theType->components.push_back(comp::make(t->CompType(0)));
 	theType->components.push_back(comp::make(t->CompType(1)));
 	// The instance of the constraint is specialized.
-	GCPtr<Type> ins = t->CompType(2)->TypeSpecializeReal(ftvs, nftvs);
+	shared_ptr<Type> ins = t->CompType(2)->TypeSpecializeReal(ftvs, nftvs);
 	theType->components.push_back(comp::make(ins));
 	break;
       }
@@ -1019,7 +1020,7 @@ Type::TypeSpecializeReal(const std::vector<sherpa::GCPtr<Type> >& ftvs,
       {
 	size_t i=0;
 	for(i=0; i<ftvs.size(); i++) {
-	  GCPtr<Type> ftv = ftvs[i]->getType();	  
+	  shared_ptr<Type> ftv = ftvs[i]->getType();	  
 	  if(ftv->kind == ty_tvar && t->uniqueID == ftv->uniqueID) {
 	    theType->link = nftvs[i]; 
 	    break;
@@ -1038,15 +1039,15 @@ Type::TypeSpecializeReal(const std::vector<sherpa::GCPtr<Type> >& ftvs,
       {      
 	/* Deal with Type-args */
 	for(size_t i=0; i<t->typeArgs.size(); i++) {
-	  GCPtr<Type> arg = t->TypeArg(i)->getType();
-	  GCPtr<Type> newArg = arg->TypeSpecializeReal(ftvs, nftvs);
+	  shared_ptr<Type> arg = t->TypeArg(i)->getType();
+	  shared_ptr<Type> newArg = arg->TypeSpecializeReal(ftvs, nftvs);
 	  
 	  theType->typeArgs.push_back(newArg);
 	}
             
 	/* Deal with Components */
 	for(size_t i=0; i<t->components.size(); i++) {
-	  GCPtr<comp> nComp = 
+	  shared_ptr<comp> nComp = 
 	    comp::make(t->CompName(i),
 		       t->CompType(i)->TypeSpecializeReal(ftvs, nftvs),
 		       t->CompFlags(i));
@@ -1066,7 +1067,7 @@ Type::TypeSpecializeReal(const std::vector<sherpa::GCPtr<Type> >& ftvs,
 
 	  for(TypeSet::iterator itr = t->fnDeps.begin();
 	      itr != t->fnDeps.end(); ++itr) {
-	    GCPtr<Type> fnDep = (*itr)->TypeSpecializeReal(ftvs, nftvs);
+	    shared_ptr<Type> fnDep = (*itr)->TypeSpecializeReal(ftvs, nftvs);
 	    theType->addFnDep(fnDep);
 	  }
 	}
@@ -1089,7 +1090,7 @@ Type::TypeSpecializeReal(const std::vector<sherpa::GCPtr<Type> >& ftvs,
 void
 Type::clear_sp()
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   if(!t->sp)
     return;
 
@@ -1110,11 +1111,11 @@ Type::clear_sp()
                   The Specizlizer interface 
 ***********************************************************/
 
-GCPtr<Type> 
-Type::TypeSpecialize(const std::vector<sherpa::GCPtr<Type> >& ftvs,
-		     std::vector<sherpa::GCPtr<Type> >& nftvs)
+shared_ptr<Type> 
+Type::TypeSpecialize(const std::vector<boost::shared_ptr<Type> >& ftvs,
+		     std::vector<boost::shared_ptr<Type> >& nftvs)
 {
-  GCPtr<Type> specializedType = TypeSpecializeReal(ftvs, nftvs);
+  shared_ptr<Type> specializedType = TypeSpecializeReal(ftvs, nftvs);
   clear_sp();
   return specializedType;
 }
