@@ -115,14 +115,14 @@ struct comp {
   }
 
   static inline sherpa::GCPtr<comp>
-  make(const sherpa::GCPtr<Type>& t, unsigned long _flags=0) {
+  make(sherpa::GCPtr<Type> t, unsigned long _flags=0) {
     comp *tmp = new comp(t, _flags);
     return sherpa::GCPtr<comp>(tmp);
   }
 
   static inline sherpa::GCPtr<comp>
   make(const std::string& s, 
-       const sherpa::GCPtr<Type>& t, unsigned long _flags=0) {
+       sherpa::GCPtr<Type> t, unsigned long _flags=0) {
     comp *tmp = new comp(s, t, _flags);
     return sherpa::GCPtr<comp>(tmp);
   }
@@ -299,14 +299,14 @@ public:
   }
 
   static inline sherpa::GCPtr<Type>
-  make(const sherpa::GCPtr<Type>& t)
+  make(sherpa::GCPtr<Type> t)
   {
     Type *tmp = new Type(t);
     return sherpa::GCPtr<Type>(tmp);
   }
 
   static inline sherpa::GCPtr<Type>
-  make(const Kind k, const sherpa::GCPtr<Type>& child)
+  make(const Kind k, sherpa::GCPtr<Type> child)
   {
     Type *tmp = new Type(k, child);
     return sherpa::GCPtr<Type>(tmp);
@@ -314,8 +314,8 @@ public:
 
   static inline sherpa::GCPtr<Type>
   make(const Kind k,
-       const sherpa::GCPtr<Type>& child1, 
-       const sherpa::GCPtr<Type>& child2)
+       sherpa::GCPtr<Type> child1, 
+       sherpa::GCPtr<Type> child2)
   {
     Type *tmp = new Type(k, child1, child2);
     return sherpa::GCPtr<Type>(tmp);

@@ -46,6 +46,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <libsherpa/UExcept.hxx>
 
 #define GCPTR_SUPPORT_RAW
 //#define GCPTR_DEBUG
@@ -308,6 +309,8 @@ namespace sherpa {
 	rc->incCount();
       }
       else {
+	THROW(excpt::BadValue, "Expired weak pointer");
+
 	// Weak pointer is deceased. Result is NULL pointer.
 	pObject = 0;
 	rc = &GCRefCounter::NullPtrCounter;

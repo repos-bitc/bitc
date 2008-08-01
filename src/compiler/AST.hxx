@@ -713,8 +713,8 @@ public:
 
   static inline AST_SMART_PTR<AST>
   make(const AstType at, const AST_LOCATION_TYPE &loc,
-       const AST_SMART_PTR<AST>& child1,
-       const AST_SMART_PTR<AST>& child2)
+       const AST_SMART_PTR<AST> child1,
+       const AST_SMART_PTR<AST> child2)
   {
     AST *ast = new AST(at, loc, child1, child2);
     return AST_SMART_PTR<AST>(ast);
@@ -722,9 +722,9 @@ public:
 
   static inline AST_SMART_PTR<AST>
   make(const AstType at, const AST_LOCATION_TYPE &loc,
-       const AST_SMART_PTR<AST>& child1,
-       const AST_SMART_PTR<AST>& child2,
-       const AST_SMART_PTR<AST>& child3)
+       const AST_SMART_PTR<AST> child1,
+       const AST_SMART_PTR<AST> child2,
+       const AST_SMART_PTR<AST> child3)
   {
     AST *ast = new AST(at, loc, child1, child2,
                        child3);
@@ -733,10 +733,10 @@ public:
 
   static inline AST_SMART_PTR<AST>
   make(const AstType at, const AST_LOCATION_TYPE &loc,
-       const AST_SMART_PTR<AST>& child1,
-       const AST_SMART_PTR<AST>& child2,
-       const AST_SMART_PTR<AST>& child3,
-       const AST_SMART_PTR<AST>& child4)
+       const AST_SMART_PTR<AST> child1,
+       const AST_SMART_PTR<AST> child2,
+       const AST_SMART_PTR<AST> child3,
+       const AST_SMART_PTR<AST> child4)
   {
     AST *ast = new AST(at, loc, child1, child2,
                        child3, child4);
@@ -745,11 +745,11 @@ public:
 
   static inline AST_SMART_PTR<AST>
   make(const AstType at, const AST_LOCATION_TYPE &loc,
-       const AST_SMART_PTR<AST>& child1,
-       const AST_SMART_PTR<AST>& child2,
-       const AST_SMART_PTR<AST>& child3,
-       const AST_SMART_PTR<AST>& child4,
-       const AST_SMART_PTR<AST>& child5)
+       const AST_SMART_PTR<AST> child1,
+       const AST_SMART_PTR<AST> child2,
+       const AST_SMART_PTR<AST> child3,
+       const AST_SMART_PTR<AST> child4,
+       const AST_SMART_PTR<AST> child5)
   {
     AST *ast = new AST(at, loc, child1, child2,
                        child3, child4, child5);
@@ -763,7 +763,7 @@ public:
     return children[i];
   }
 
-  AST_SMART_PTR<AST>&
+  AST_SMART_PTR<AST>
   child(size_t i)
   {
     return children[i];

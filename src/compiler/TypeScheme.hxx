@@ -69,9 +69,9 @@ struct TypeScheme {
 	     sherpa::GCPtr<TCConstraints> _tcc = sherpa::GC_NULL);
   
   static inline sherpa::GCPtr<TypeScheme>
-  make(const sherpa::GCPtr<Type>& _tau, 
-       const sherpa::GCPtr<AST>& _ast,
-       const sherpa::GCPtr<TCConstraints> &_tcc = 
+  make(sherpa::GCPtr<Type> _tau, 
+       sherpa::GCPtr<AST> _ast,
+       sherpa::GCPtr<TCConstraints> _tcc = 
        sherpa::GC_NULL) {
     TypeScheme *tmp = new TypeScheme(_tau, _ast, _tcc);
     return sherpa::GCPtr<TypeScheme>(tmp);
