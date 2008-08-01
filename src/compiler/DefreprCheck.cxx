@@ -41,6 +41,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <map>
 #include <sstream>
 #include <errno.h>
 #include "Version.hxx"
@@ -50,8 +51,8 @@
 #include "Symtab.hxx"
 #include "inter-pass.hxx"
 #include "backend.hxx"
-#include "Pair.hxx"
 
+using namespace std;
 using namespace sherpa;
 
 /**********************************************************************
@@ -230,15 +231,15 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
       for(size_t c=0; c < ctrs->children.size(); c++) {
 	GCPtr<AST> ctrc = ctrs->child(c);
 	
-	GCPtr< CVector< GCPtr< Pair<std::string, size_t> > > > when = 
-	  CVector< GCPtr< Pair< std::string, size_t> > >::make();
+	typedef map<string, size_t> WhenMap;
+	WhenMap when;
 	
 	for(size_t i=1; i < ctrc->children.size(); i++) {
 	  GCPtr<AST> fldi = ctrc->child(i);
 	  if(fldi->Flags2 & FLD_IS_DISCM) {
 	    assert(fldi->astType == at_field);
 
-	    when->append(Pair<std::string, size_t>::make(fldi->child(0)->s, fldi->unin_discm));
+	    when[fldi->child(0)->s] = fldi->unin_discm;
 	  }
 	}
 	
@@ -252,12 +253,14 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
 	    if(fldj->Flags2 & FLD_IS_DISCM) {
 	      assert(fldj->astType == at_field);
 	      
-	      for(size_t k=0; k < when->size(); k++)
-		if(((*when)[k]->fst == fldj->child(0)->s) &&
-		   ((*when)[k]->snd != fldj->unin_discm)) {
-		  differ=true;
-		  break;
-		}
+	      WhenMap::iterator itr_k = when.find(fldj->child(0)->s);
+	      if (itr_k == when.end())
+		continue;
+
+	      if (itr_k->second != fldj->unin_discm) {
+		differ=true;
+		break;
+	      }
 	    }
 	  }
 	  
@@ -268,10 +271,11 @@ reprCheck(std::ostream& errStream, GCPtr<AST> ast)
 		      << ctrd->child(0)->s << ". Ambiguous case is: "
 		      << std::endl;
 	    
-	    for(size_t k=0; k < when->size(); k++) {
-	      if(k > 0) 
+	    for(WhenMap::iterator itr_k = when.begin();
+		itr_k != when.end(); ++itr_k) {
+	      if(itr_k != when.begin())
 		errStream << ", ";	      
-	      errStream << (*when)[k]->fst << " = " << (*when)[k]->snd;	      
+	      errStream << itr_k->first << " = " << itr_k->second;
 	    }
 	    
 	    errStream << "." << std::endl;	  
