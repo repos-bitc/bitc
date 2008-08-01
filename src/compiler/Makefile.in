@@ -88,15 +88,11 @@ destdir = $(if $(DESTDIR),$(DESTDIR)/,)
 mkinstalldirs = $(top_srcdir)/mkinstalldirs
 
 #### End of system configuration section. ####
-GC_INC=
-GC_LIB=-lgccpp -lgc
-
 CXXFLAGS += @BOOST_CPPFLAGS@
 LDFLAGS += @BOOST_LDFLAGS@
 LIBS += @BOOST_FILESYSTEM_LIB@
-LIBS+=$(GC_LIB)
 
-INC+=-I. $(GC_INC)
+INC+=-I.
 
 TARGETS=bitcc
 
