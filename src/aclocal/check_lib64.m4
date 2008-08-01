@@ -21,8 +21,8 @@ dnl A surprising number of autoconf macros check/use/fiddle that.
 
 AC_DEFUN([CHECK_LIB64], [
   AC_CHECK_SIZEOF([void *])
-  AC_MSG_CHECKING([For 64-bit native build])
   if test "$cross_compiling" = "no"; then
+    AC_MSG_CHECKING([For 64-bit native build])
     if test "${ac_cv_sizeof_void_p}" = "8"; then
       AC_MSG_RESULT(yes)
       AC_MSG_CHECKING([  whether /usr/lib64 is present])
@@ -36,7 +36,11 @@ AC_DEFUN([CHECK_LIB64], [
         AC_MSG_RESULT(no)
       fi
     else
-      AC_MSG_RESULT(no)
+      AC_MSG_RESULT([no])
+    fi
+  else
+    if test "${ac_cv_sizeof_void_p}" = "8"; then
+      AC_MSG_WARN([On some machines, it may be necessary to run configure with --libdir=/usr/lib64])
     fi
   fi
 ])dnl

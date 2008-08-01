@@ -3864,9 +3864,9 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-  { echo "$as_me:$LINENO: checking For 64-bit native build" >&5
-echo $ECHO_N "checking For 64-bit native build... $ECHO_C" >&6; }
   if test "$cross_compiling" = "no"; then
+    { echo "$as_me:$LINENO: checking For 64-bit native build" >&5
+echo $ECHO_N "checking For 64-bit native build... $ECHO_C" >&6; }
     if test "${ac_cv_sizeof_void_p}" = "8"; then
       { echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6; }
@@ -3887,6 +3887,11 @@ echo "${ECHO_T}no" >&6; }
     else
       { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
+    fi
+  else
+    if test "${ac_cv_sizeof_void_p}" = "8"; then
+      { echo "$as_me:$LINENO: WARNING: On some machines, it may be necessary to run configure with --libdir=/usr/lib64" >&5
+echo "$as_me: WARNING: On some machines, it may be necessary to run configure with --libdir=/usr/lib64" >&2;}
     fi
   fi
 
