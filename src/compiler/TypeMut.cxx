@@ -608,7 +608,7 @@ Type::argCCOK(size_t argN)
 bool
 Type::determineCCC(GCPtr<Type> t, bool inRefType)
 { 
-  if (GCPtr<Type>(this) != getType())
+  if (shared_from_this() != getType())
     return getType()->determineCCC(t);
   
   t = t->getType();
