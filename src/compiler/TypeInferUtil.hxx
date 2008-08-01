@@ -40,7 +40,6 @@
 #include "UocInfo.hxx"
 #include "Options.hxx"
 #include "AST.hxx"
-#include "Pair.hxx"
 #include "Type.hxx"
 #include "TypeScheme.hxx"
 #include "Typeclass.hxx"
@@ -53,11 +52,7 @@ initGamma(std::ostream& errStream,
 	  sherpa::GCPtr<TSEnvironment > gamma,
 	  sherpa::GCPtr<InstEnvironment > instEnv,
 	  const sherpa::GCPtr<AST> ast, unsigned long uflags);
-bool
-checkImpreciseTypes(std::ostream& errStream, 
-		    const sherpa::GCPtr<TSEnvironment > gamma,
-		    sherpa::GCPtr<sherpa::CVector<sherpa::GCPtr<Pair<sherpa::GCPtr<Type>, 
-		                             sherpa::GCPtr<AST> > > > > impTypes);
+
 void
 useIFGamma(const std::string& idName,
 	   sherpa::GCPtr<TSEnvironment > fromEnv, 

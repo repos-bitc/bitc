@@ -926,24 +926,6 @@ cl_convert(GCPtr<UocInfo> uoc)
   modOrIf->children = outAsts;
 }
 
-#if 0
-// Collect all of the at_ident ASTs that are defined in this argument
-// binding pattern and are marked as captured.
-static void
-collectHeapifiedArgs(GCPtr<AST> ast, 
-		     GCPtr< CVector<GCPtr<AST> > > capturedArgs)
-{
-  if (ast->astType == at_ident && (ast->Flags2 & ID_NEEDS_HEAPIFY)) {
-    assert (ast->Flags2 & ID_IS_CAPTURED);
-
-    capturedArgs->append(ast);
-  }
-
-  for(size_t i=0; i < ast->children.size(); i++)
-    collectHeapifiedArgs(ast->child(i), capturedArgs);
-}
-#endif
-
 // Simple re-writing pass. Takes all of the identifiers that were 
 // identfied above as being closed over and re-writes them in such a
 // way as to push them into the heap. In the following examples, the
