@@ -43,6 +43,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <set>
 
 #include <libsherpa/UExcept.hxx>
 
@@ -53,6 +54,7 @@
 #include "TypeInfer.hxx"
 #include "inter-pass.hxx"
 
+using namespace std;
 using namespace sherpa;
 
 #define NULL_MODE  0x0u
@@ -60,6 +62,8 @@ using namespace sherpa;
 #define USE_MODE   0x3u
 #define TYPE_MODE  0x4u
  
+typedef set<GCPtr<AST> > AstSet;
+
 static void
 markRecBound(GCPtr<AST> ast)
 {
@@ -110,10 +114,10 @@ findusedef(std::ostream &errStream,
 	   GCPtr<AST> topAst, GCPtr<AST> ast, const int mode,
 	   // list of vars that are bound within the lambda at the
 	   // current point:
-	   GCPtr<CVector<GCPtr<AST> > > boundVars,
+	   AstSet& boundVars,
 	   // list of vars that lambda uses, but are not in
 	   // boundVars. Globals are not entered into this.
-	   GCPtr<CVector<GCPtr<AST> > > freeVars)
+	   AstSet& freeVars)
 {
   bool errFree = true;
   switch(ast->astType) {
@@ -197,7 +201,7 @@ findusedef(std::ostream &errStream,
 	break;
 	
       case LOCAL_MODE:
-	boundVars->append(ast);
+	boundVars.insert(ast);
 	ast->Flags2 |= ID_IS_DEF;
 	break;
 	
@@ -214,7 +218,7 @@ findusedef(std::ostream &errStream,
 	  if(ast->symbolDef->isGlobal()) 
 	    break;
 	  
-	  if(boundVars->contains(ast->symbolDef)) 
+	  if(boundVars.find(ast->symbolDef) != boundVars.end()) 
 	    break;
 	  
 	  if(Options::noAlloc) {
@@ -237,8 +241,7 @@ findusedef(std::ostream &errStream,
 	  CLCONV_DEBUG std::cerr << "Append " << ast->symbolDef->fqn
 				 << " to freeVars" << std::endl;
 	  
-	  if (!freeVars->contains(ast->symbolDef))
-	    freeVars->append(ast->symbolDef);
+	  freeVars.insert(ast->symbolDef);
 	  break;
 	}      
       case NULL_MODE:
@@ -352,8 +355,8 @@ findusedef(std::ostream &errStream,
 				   USE_MODE, boundVars, freeVars));
       }
       else {
-	GCPtr<CVector<GCPtr<AST> > > freeVars = CVector<GCPtr<AST> >::make();
-	GCPtr<CVector<GCPtr<AST> > > boundVars = CVector<GCPtr<AST> >::make();
+	AstSet freeVars;
+	AstSet boundVars;
 
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(0), 
 				   LOCAL_MODE, boundVars, freeVars));
@@ -745,8 +748,8 @@ cl_convert_ast(GCPtr<AST> ast,
     
   case at_lambda:
     {
-      GCPtr<CVector<GCPtr<AST> > > freeVars = CVector<GCPtr<AST> >::make();
-      GCPtr<CVector<GCPtr<AST> > > boundVars = CVector<GCPtr<AST> >::make();
+      AstSet freeVars;
+      AstSet boundVars;
       
       GCPtr<AST> clenvName = GC_NULL;
       GCPtr<TvPrinter> tvP = TvPrinter::make();
@@ -762,7 +765,7 @@ cl_convert_ast(GCPtr<AST> ast,
 
       // Closure object is only generated if we actually have some
       // free variables.
-      bool needsClosure = (freeVars->size() > 0);
+      bool needsClosure = !freeVars.empty();
       if(needsClosure) {
 
 	CLCONV_DEBUG std::cerr << "Need to generate closure struct. " 
@@ -791,14 +794,15 @@ cl_convert_ast(GCPtr<AST> ast,
 	// Add empty constraints subtree
 	defStruct->addChild(AST::make(at_constraints, ast->loc));
       
-	for(size_t fv = 0; fv < freeVars->size(); fv++) {
-	  assert(freeVars->elem(fv)->astType == at_ident);
+	for(AstSet::iterator fv = freeVars.begin();
+	    fv != freeVars.end(); ++fv) {
+	  assert((*fv)->astType == at_ident);
 	  GCPtr<AST> field = AST::make(at_field, ast->loc);
 	  GCPtr<AST> ident = AST::make(at_ident, ast->loc);
-	  ident->s = ident->fqn.ident = freeVars->elem(fv)->s;
+	  ident->s = ident->fqn.ident = (*fv)->s;
 	  
 	  field->addChild(ident);
-	  GCPtr<AST> fvType = freeVars->elem(fv)->symType->asAST(ast->loc, tvP);
+	  GCPtr<AST> fvType = (*fv)->symType->asAST(ast->loc, tvP);
 	  fvType = cl_convert_ast(fvType, outAsts, hoistChildren);
 	  field->addChild(fvType);
 	  
@@ -879,11 +883,12 @@ cl_convert_ast(GCPtr<AST> ast,
 	// If the lambda requires a closure, emit a make-closure, else
 	// emit an identifier reference in place of the lambda:
 	GCPtr<AST> lamUse = lamName->Use();
-	if(freeVars->size() > 0) {	  
+	if(freeVars.size()) {	  
 	  GCPtr<AST> mkEnv = AST::make(at_struct_apply, ast->loc);
 	  mkEnv->addChild(clenvName->Use());	  
-	  for (size_t fv = 0; fv < freeVars->size(); fv++)
-	    mkEnv->addChild(freeVars->elem(fv)->Use());
+	  for (AstSet::iterator fv = freeVars.begin();
+	       fv != freeVars.end(); ++fv)
+	    mkEnv->addChild((*fv)->Use());
 	
 	  GCPtr<AST> mkClo = AST::make(at_mkClosure, ast->loc, mkEnv, lamUse);
 	  ast = mkClo;
@@ -921,6 +926,7 @@ cl_convert(GCPtr<UocInfo> uoc)
   modOrIf->children = outAsts;
 }
 
+#if 0
 // Collect all of the at_ident ASTs that are defined in this argument
 // binding pattern and are marked as captured.
 static void
@@ -936,6 +942,7 @@ collectHeapifiedArgs(GCPtr<AST> ast,
   for(size_t i=0; i < ast->children.size(); i++)
     collectHeapifiedArgs(ast->child(i), capturedArgs);
 }
+#endif
 
 // Simple re-writing pass. Takes all of the identifiers that were 
 // identfied above as being closed over and re-writes them in such a
@@ -1100,8 +1107,8 @@ UocInfo::be_clconv(std::ostream& errStream,
 { 
   bool errFree = true;
   
-  GCPtr<CVector<GCPtr<AST> > > freeVars = CVector<GCPtr<AST> >::make();
-  GCPtr<CVector<GCPtr<AST> > > boundVars = CVector<GCPtr<AST> >::make();
+  AstSet freeVars;
+  AstSet boundVars;
   
   CLCONV_DEBUG std::cerr << "findusedef 1" << std::endl;
 

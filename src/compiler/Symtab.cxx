@@ -49,6 +49,7 @@
 #include "Symtab.hxx"
 #include "inter-pass.hxx"
 
+using namespace std;
 using namespace sherpa;
  
 #if 0
@@ -898,30 +899,6 @@ resolve(std::ostream& errStream,
 	      id_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       
-#if 0
-      if(ast->astType == at_defunion) {
-	GCPtr<AST> ctrs = ast->child(4);
-	GCPtr< CVector<std::string> > names = new CVector<std::string> ;
-	for(size_t c=0; c < ctrs->children.size(); c++) {
-	  GCPtr<AST> ctr = ctrs->child(c);
-	  names.append(ctr->child(0)->s);
-	  for(size_t d=1; d < ctr->children.size(); d++) {
-	    GCPtr<AST> field = ctr->child(d);
-	    if(names.contains(field->child(0)->s)) {
-	      errStream << field->child(0)->loc << ": "
-			<< "field name `" << field->child(0)->s
-			<< "' conflicts with another field / "		
-			<< "constructor definition in union "
-			<< ast->child(0)->s
-			<< std::endl;
-	      errorFree = false;
-	    }
-	    else
-	      names.append(field->child(0)->s);
-	  }
-	}
-      }
-#endif
       env->mergeBindingsFrom(tmpEnv);
       break;
     }
@@ -1038,14 +1015,14 @@ resolve(std::ostream& errStream,
       // The exception value is defined and is complete
       
       // match at_fields+
-      GCPtr< CVector<std::string> > names = CVector<std::string>::make();
-      names->append(ast->child(0)->s);
+      set<string> names;
+      names.insert(ast->child(0)->s);
       for (size_t c = 1; c < ast->children.size(); c++) {
 	GCPtr<AST> field = ast->child(c);
 	RESOLVE(field, tmpEnv, lamLevel, USE_MODE, 
 		id_type, ast, 
 		flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
-	if(names->contains(field->child(0)->s)) {
+	if(names.find(field->child(0)->s) != names.end()) {
 	  errStream << field->child(0)->loc << ": "
 		    << "field name `" << field->child(0)->s
 		    << "' conflicts with another field / "		
@@ -1055,7 +1032,7 @@ resolve(std::ostream& errStream,
 	  errorFree = false;
 	}	      
 	else
-	  names->append(field->child(0)->s);		
+	  names.insert(field->child(0)->s);
       }
 
       env->mergeBindingsFrom(tmpEnv);
