@@ -2942,6 +2942,8 @@ EmitMain(INOstream &out)
   out << "#endif" << endl;
   out.more();
 
+  out << "GC_INIT();" << endl;
+  out << endl;
   out << "result = setjmp(firstJB);" << endl
       << "if(!result) {" << endl;
   out.more();
