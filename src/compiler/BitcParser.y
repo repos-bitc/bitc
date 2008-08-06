@@ -105,6 +105,7 @@ shared_ptr<AST> stripDocString(shared_ptr<AST> exprSeq)
 /* Categorical terminals: */
 %token <tok> tk_Ident
 %token <tok> tk_TypeVar
+%token <tok> tk_EffectVar
 %token <tok> tk_Int
 %token <tok> tk_Float
 %token <tok> tk_Char
@@ -140,6 +141,10 @@ shared_ptr<AST> stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_WHERE
   
 %token <tok> tk_BITC_VERSION
+
+%token <tok> tk_PURE
+%token <tok> tk_IMPURE
+%token <tok> tk_CONST
 
 %token <tok> tk_THE
 %token <tok> tk_IF
@@ -257,6 +262,7 @@ shared_ptr<AST> stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> exident
 %type <ast> docstring optdocstring
 %type <ast> condcases condcase fntype
+%type <ast> fneffect
  //%type <ast> reprbody reprbodyitems reprbodyitem reprtags reprcase reprcaseleg
 //%type <ast> typecase_leg typecase_legs 
 %type <ast> sw_legs sw_leg otherwise
@@ -1317,15 +1323,36 @@ type: fntype {
   SHOWPARSE("type -> fntype");
   $$ = $1;
 }
-fntype: '(' tk_FN '(' ')' type ')' {
-  SHOWPARSE("fntype -> ( FN () type )");
-  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $3.loc);
-  $$ = AST::make(at_fn, $2.loc, fnargVec, $5);
+
+fneffect: {
+  SHOWPARSE("fneffect -> <empty>");
+  $$ = AST::make(at_ident, LToken("impure"));
 };
 
-fntype: '(' tk_FN '(' types_pl_byref ')' type ')'  {
-  SHOWPARSE("fntype -> ( FN ( types_pl_byref ) type )");
-  $$ = AST::make(at_fn, $2.loc, $4, $6);
+fneffect: tk_PURE {
+  SHOWPARSE("fneffect -> PURE");
+  $$ = AST::make(at_ident, $1);
+};
+
+fneffect: tk_IMPURE {
+  SHOWPARSE("fneffect -> IMPURE");
+  $$ = AST::make(at_ident, $1);
+};
+
+fneffect: tk_EffectVar {
+  SHOWPARSE("fneffect -> <EffectVar=" + $1.str + ">");
+  $$ = AST::make(at_ident, $1);
+};
+
+fntype: '(' fneffect tk_FN '(' ')' type ')' {
+  SHOWPARSE("fntype -> ( fneffect FN () type )");
+  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $4.loc);
+  $$ = AST::make(at_fn, $1.loc, fnargVec, $6);
+};
+
+fntype: '(' fneffect tk_FN '(' types_pl_byref ')' type ')'  {
+  SHOWPARSE("fntype -> ( fneffect FN ( types_pl_byref ) type )");
+  $$ = AST::make(at_fn, $1.loc, $5, $7);
 };
 
 type_cpair: type ',' type {
@@ -1375,6 +1402,14 @@ typapp: '(' useident types ')' {
 type: '(' tk_MUTABLE type ')' {
   SHOWPARSE("type -> ( MUTABLE type )");
   $$ = AST::make(at_mutableType, $2.loc, $3);
+};
+
+type: '(' tk_CONST type ')' {
+  SHOWPARSE("type -> ( CONST type )");
+  // Should be:
+  // $$ = AST::make(at_constType, $2.loc, $3);
+  // but for now:
+  $$ = $3;
 };
 
 // BITFIELD TYPE

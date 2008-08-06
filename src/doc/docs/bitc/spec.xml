@@ -317,9 +317,11 @@
 	  with any ``identifier character'' (Unicode 4.1.0 <cite
 	  ref="unicode410"/> character class XID_Start), followed by
 	  any number of optional ``identifier continue characters''
-	  (Unicode 4.1.0 character class XID_Continue). The following
-	  ``extended alphabetic characters'' may also appear in
-	  <em>any</em> position of an identifier.
+	  (Unicode 4.1.0 character class XID_Continue). In type
+	  variable identifiers, an underscore may appear in any
+	  position (``_''). In other identifiers, the following
+	  ``extended alphabetic characters'' may appear in any
+	  position:
 	</p>
 	<literallayout>
 ! $ % &amp; * + - / \ &lt; = &gt; ? @ _ ~</literallayout>
@@ -390,21 +392,22 @@ apply         array         array-length
 array-nth     begin         bitc-version
 as            bitfield      bool          
 by-ref        case          catch         
-char          cond          declare       
-defaxiom      defexception  define        
-definvariant  defrepr       defstruct     
-deftheory     defthm        defunion      
-deref         disable       do            
-double        dup           enable        
-exception     extends       external      
-fill          fixint        float         
-if            import        int8          
-int16         int32         int64         
-interface     fn            lambda        
-let           letrec        member        
-mutable       not           opaque        
-or            otherwise     pair          
-proclaim      provide       quad          
+char          cond          const
+declare       defaxiom      defexception  
+define        definvariant  defrepr       
+defstruct     deftheory     defthm        
+defunion      deref         disable       
+do            double        dup           
+enable        exception     extends       
+external      fill          fixint        
+float         if            import        
+impure        int8          int16         
+int32         int64         interface     
+fn            lambda        let           
+letrec        member        mutable       
+not           opaque        or            
+otherwise     pair          proclaim      
+provide       pure          quad          
 ref           set!          string        
 suspend       switch        tag           
 the           throw         try           
@@ -419,16 +422,16 @@ vector-nth    word          </literallayout>
 	<literallayout indent="no">
 assert        block         break         
 check         coindset      constrain     
-continue      defequiv      defobject     
-defrefine     deftype       defvariant    
-do*           import!       indset        
-inner-ref     int           label         
-let*          list          literal       
-location      module        namespace     
-nth           read-only     require       
-return        return-from   sensory       
-sizeof        super         tycon         
-using         value-at</literallayout>
+continue      deep-const    defequiv      
+defobject     defrefine     deftype       
+defvariant    do*           import!       
+indset        inner-ref     int           
+label         let*          list          
+literal       location      module        
+namespace     nth           read-only     
+require       return        return-from   
+sensory       sizeof        super         
+tycon         using         value-at</literallayout>
 	<p>
           In addition to the reserved words identified above, all
 	  definitions provided in the standard prelude are implicitly
@@ -995,13 +998,14 @@ use</literallayout>
       <sect2>
 	<title>Type Variables</title>
         <p>
-          A type variable is an identifier preceded by a single quote,
-          as in <progident>'a</progident>. Type variables may appear
-          in any position where a type can appear. Type variables are
-          most commonly used as type constructor arguments for named
-          constructed types (see below). They can also be used to
-          annotate expressions, for example to require that two
-          expressions must have the same type. The expression:
+          A type variable is a type variable identifier preceded by a
+          single quote, as in <progident>'a</progident>. Type
+          variables may appear in any position where a type can
+          appear. Type variables are most commonly used as type
+          constructor arguments for named constructed types (see
+          below). They can also be used to annotate expressions, for
+          example to require that two expressions must have the same
+          type. The expression:
         </p>
         <literallayout>
 (myfun x y:'a):'a</literallayout>

@@ -97,6 +97,19 @@ valid_ifident_continue(uint32_t ucs4)
 }
 
 static bool
+valid_tv_ident_start(uint32_t ucs4)
+{
+  return (u_hasBinaryProperty(ucs4,UCHAR_XID_START) || 
+	  ucs4 == '_');
+}
+
+static bool
+valid_tv_ident_continue(uint32_t ucs4)
+{
+  return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE) ||
+	  ucs4 == '_');
+}
+static bool
 valid_charpoint(uint32_t ucs4)
 {
   if (valid_char_printable(ucs4))
@@ -192,9 +205,11 @@ struct KeyWord {
   { "check",            tk_Reserved },
   { "coindset",         tk_Reserved },
   { "cond",             tk_COND },
+  { "const",            tk_CONST },
   { "constrain",        tk_Reserved },
   { "continue",         tk_Reserved },
   { "declare",          tk_DECLARE },
+  { "deep-const",       tk_Reserved },
   { "defequiv",         tk_Reserved },
   { "defexception",     tk_DEFEXCEPTION },
   { "define",           tk_DEFINE },
@@ -226,6 +241,7 @@ struct KeyWord {
   { "if",               tk_IF },
   { "import",           tk_IMPORT },
   { "import!",          tk_Reserved },
+  { "impure",           tk_IMPURE },
   { "indset",           tk_Reserved },
   { "inner-ref",        tk_INNER_REF },
   { "int16",            tk_INT16 },
@@ -255,6 +271,7 @@ struct KeyWord {
   { "proclaim",         tk_PROCLAIM },
   { "provide",          tk_PROVIDE },
   { "provide!",         tk_Reserved },
+  { "pure",             tk_PURE },
   { "quad",             tk_QUAD },
   { "read-only",        tk_Reserved },
   { "ref",              tk_REF },
@@ -647,8 +664,16 @@ SexprLexer::lex(ParseType *lvalp)
 
   case '\'':			// Type variables
     {
+      int tokType = tk_TypeVar;
+
       c = getChar();
-      if (!valid_ident_start(c)) {
+
+      if (c == '%') {
+	tokType = tk_EffectVar;
+	c = getChar();
+      }
+
+      if (!valid_tv_ident_start(c)) {
 	// FIX: this is bad input
 	ungetChar(c);
 	return EOF;
@@ -656,12 +681,12 @@ SexprLexer::lex(ParseType *lvalp)
 
       do {
 	c = getChar();
-      } while (valid_ident_continue(c));
+      } while (valid_tv_ident_continue(c));
       ungetChar(c);
 
       here.updateWith(thisToken);
       lvalp->tok = LToken(here, thisToken);
-      return tk_TypeVar;
+      return tokType;
     }
 
     // Hyphen requires special handling. If it is followed by a digit
