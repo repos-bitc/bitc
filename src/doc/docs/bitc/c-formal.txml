@@ -32,6 +32,9 @@
       	<address>3400 N.Charles Street. 224 NEB. Baltimore, MD 21218.</address>
       </affiliation>
     </authorgroup>
+    <categories>
+      <category>bitc/formal</category>
+    </categories>
     <pubdate/>
     <!--     <copyright> -->
     <!--       <year/><holder/> -->
@@ -41,6 +44,10 @@
     <!--   </categories> -->
     <synopsis>
       <p>
+        Detailed proofs for the type system described in <doctitle>Sound and
+          Complete Type Inference for a Systems Programming
+          Language</doctitle>. The HTML version of this paper is not
+        able to represent all of the mathematical notation correctly.
       </p>
     </synopsis>
   </docinfo>  

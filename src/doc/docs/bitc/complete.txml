@@ -42,9 +42,14 @@
     <!-- <categories>
     <category>dev/bitc</category>
   </categories> -->
+    <categories>
+      <category>bitc/formal</category>
+    </categories>
     <synopsis>
       <p>
         A Theory of BitC mutability model and type inference.
+	The HTML version of this paper is not
+        able to represent all of the mathematical notation correctly.
       </p>
     </synopsis>
   </docinfo> 
