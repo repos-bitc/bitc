@@ -105,17 +105,6 @@ AST::asString() const
   return ss.str();
 }
 
-std::string
-AST::mangledString() const
-{
-  std::stringstream ss;
-  if(astType == at_ident)
-    ss << "_" << s.size() << s;
-  else
-    ss << "_##" << astTypeName() << "##";
-  return ss.str();
-}
-
 bool
 AST::isFnxn()
 {
@@ -164,8 +153,6 @@ AST::AST(shared_ptr<AST> ast, bool shallowCopyChildren)
   symType = ast->symType;
   scheme = ast->scheme;
   envs = ast->envs;
-  polyinst = ast->polyinst;
-  reached = ast->reached;
   defForm = ast->defForm;
   defbps = ast->defbps;
   litValue = ast->litValue;
@@ -204,46 +191,10 @@ AST::getDCopy()
   to->symType = GC_NULL;
   to->scheme = GC_NULL;
   to->envs = envs;
-  to->polyinst = false;
-  to->reached = false;
   to->defForm = GC_NULL;
   to->defbps = GC_NULL;
 
   for(size_t i=0; i<children.size(); i++)
     to->children.push_back(child(i)->getDCopy());
   return to;
-}
-
-/* */
-
-void
-AST::set(shared_ptr<AST> ast)
-{  
-  astType = ast->astType;
-  s = ast->s;
-  loc = ast->loc;
-  identType = ast->identType;
-  Flags = ast->Flags;
-  Flags2 = ast->Flags2;
-  externalName = ast->externalName;
-  symbolDef = ast->symbolDef;
-  defn = ast->defn;
-  decl = ast->decl;
-  symType = ast->symType;
-  scheme = ast->scheme;
-  envs = ast->envs;
-  polyinst = ast->polyinst;
-  reached = ast->reached;
-  defForm = ast->defForm;
-  defbps = ast->defbps;
-  litValue = ast->litValue;
-  litBase = ast->litBase;
-  isDecl = ast->isDecl;
-  fqn = ast->fqn;
-  ifName = ast->ifName;
-  field_bits = ast->field_bits;
-  unin_discm = ast->unin_discm;
-  total_fill = ast->total_fill;
-
-  children = ast->children;
 }

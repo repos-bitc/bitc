@@ -2,7 +2,40 @@
 #define AST_HXX
 
 
-
+/*
+ * Copyright (C) 2008, The EROS Group, LLC.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ *   - Redistributions of source code must contain the above 
+ *     copyright notice, this list of conditions, and the following
+ *     disclaimer. 
+ *
+ *   - Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions, and the following
+ *     disclaimer in the documentation and/or other materials 
+ *     provided with the distribution.
+ *
+ *   - Neither the names of the copyright holders nor the names of any
+ *     of any contributors may be used to endorse or promote products
+ *     derived from this software without specific prior written
+ *     permission. 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include <string>
 #include <vector>
@@ -21,10 +54,10 @@
 
  
 
+//template <class T> typedef struct environment;
 
-
-
-
+// Index into a pointer of an array or any object that implements the
+// [] operator.
 
 struct Type; 
 struct TypeScheme; 
@@ -32,20 +65,58 @@ struct spStruct;
 struct UocInfo;
 struct Instance;
  
+/** @brief Different classifications of identifiers that we might
+    encounter. */
 enum IdentType {
+  /** @brief An identifier whose classification is not yet decided. 
+   *
+   * These should no longer exist after the symbol resolution pass,
+   * except in temporary ASTs that are introduced for expediency in
+   * various later passes and then resolved. */
   id_unresolved,
-  id_type,			
+  /** @brief Type name or type variable.
+   *
+   * Flagged ID_IS_CTOR if this is a type constructor name.
+   *
+   * @bug The previous comment here read "possibly ID_IS_CTOR". I do
+   * not understand why such a case should arise, given that we have a
+   * separate classification for id_constructor. When is it
+   * appropriate for an identifier to be id_type and simultaneously be
+   * flagged ID_IS_CTOR?
+   */
+  id_type,
+  /** @bug needs documentation */
   id_value,
-  id_constructor,		
-  id_field,			
+  /** Constructor names. Implies ID_IS_CTOR
+   *
+   * @bug I hope this is wrong. If it implies ID_IS_CTOR, then
+   * ID_IS_CTOR should always be set. Is that what is meant here? */
+  id_constructor,
+  /** @brief Structure or union field name. */
+  id_field,			// field name
+  /** @brief Identifier is an exception name.
+   *
+   * @bug It does not appear that this classification is ever actually
+   * given. Is it obsolete? */
   id_exn,
+  /** @brief Identifier is a type class name. */
   id_typeclass,
-  
+  //  id_module,
+  /** @brief Identifier is an interface name. */
   id_interface,
-  id_usebinding,		
+  /** @brief Identifier aliases an imported identifier.
+   *
+   * @bug The @em only place this gets used is in imports that do
+   * selective binding. It is @em not getting used in
+   * aliasPublicBindings. This inconsistency leads me to suspect that
+   * either (a) this is obsolete and should be dropped, or (b) the
+   * implementation of aliasPublicBindings() is incorrect and should
+   * be enhanced.
+   */
+  id_usebinding,		// bound by use form
 };
 
-enum primOp {
+enum PrimOp {
   op_equals,
   op_plus,
   op_minus,
@@ -56,163 +127,405 @@ enum primOp {
 
  std::string identTypeToString(IdentType id);
 
-
+/* Declarations for AST FLAGS */
+/** @brief Identifier is a type variable.
+ *
+ * @bug Why is this not an identifier category?
+ */
 #define ID_IS_TVAR       0x00000001u
+/** @brief Identifier is a constructor.
+ *
+ * @bug Why is this not an identifier category?
+ */
 #define ID_IS_CTOR       0x00000002u
-#define AST_IS_VALPAT    0x00000010u  
+/** @brief Identifier is a value pattern.
+ *
+ * @bug After reading the comment inside the at_identPattern case in
+ * Symtab.cxx, I don't believe it. This case is purely structural,
+ * and I see no reason why the identifier should not be categorized
+ * right up in the parser. In fact, this flag does not appear to be
+ * set anywhere, and I think that it is obsolete.
+ */
+#define AST_IS_VALPAT    0x00000010u  // ONLY for the ROOT of a case leg
+/** @brief Identifier is bound in type-level scope. */
 #define ID_IS_GLOBAL     0x00000020u
-#define ID_IS_GENSYM     0x00000040u  
-#define ID_IS_REFIZED    0x00000080u  
-#define LB_IS_ART        0x00000100u  
-                                      
-                                      
-                                      
+/** @brief Identifier was internally generated by the compiler. */
+#define ID_IS_GENSYM     0x00000040u
+ // -- available: 0x00000080u -- //
+/** Identifier is a let binding that was introduced by the compiler to
+ * facilitate  temp introduction in the SSA transformation phase.
+ *
+ * @bug Why "ART"?
+ *
+ * @bug This is set, but never checked. Can it be removed? */
+#define LB_IS_ART        0x00000100u
 
-#define STRUCT_IS_CLSTR  0x00000200u  
-                                      
+/** Structure introduced by virtue of closure construction.
+ *
+ * @bug This is unused. Can it be removed?
+ */
+#define STRUCT_IS_CLSTR  0x00000200u
+/** This was presumably for definitions introduced in the prelude.
+ *
+ * @bug Unused. Can it be removed?
+ */
 #define DEF_IN_PRELUDE   0x00000400u
-#define DEF_DECLARED     0x00000800u  
-                                      
-#define ID_IS_DO         0x00001000u  
-				      
-				      
-				      
-				      
-				      
-				      
+/** Set in the code generator to record the fact that a declaration has
+ * already been emitted for this definition.
+ *
+ * @issue I am not convinced that this belongs here. I would have
+ * naively expected this to be dealt with in a set<string> that was
+ * private to the code generator.
+ */
+#define DEF_DECLARED     0x00000800u
+/** ID is an identifier introduced by re-writing a DO loop. This
+ * identifier cannot be captured, except by a recursive call.
+ *
+ * @bug Set in BitcParser.y, but never checked. Can this be dropped?
+ */
+#define ID_IS_DO         0x00001000u
  
+/** Marked for type constructors and value constructors defined by
+ * defstruct, defunion, and defexception. The type-scheme for such
+ * definitions must be copied even if there are no free type variables
+ * within them.
+ */
 #define ID_ENV_COPY       0x00002000u 
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
 
- 
+ // -- available 0x4000u - 0x10000u  -- //    
+/** @bug Never used. Can it be removed? */
 #define LOOP_APP         0x00020000u
+/** Set in the tail recursion analysis pass to indicate that a
+ * use-occurrence of an identifier is a reference to the function
+ * currently being defined. Consulted in the SSA pass to add an
+ * LB_IS_DUMMY marker to the emitted let binding. Consulted in the
+ * gen-c pass to determine when looping rather than recursion should
+ * be used.
+ *
+ * @bug I am not clear why SSA should construct a dummy let binding in
+ * this case in the first place. Some explanation would be appropriate
+ * below on the documentation of LB_IS_DUMMY.
+ */
 #define SELF_TAIL        0x00040000u
 
-#define LB_IS_DUMMY      0x00080000u  
-  	 		  	      
-#define TVAR_IS_DEF      0x00100000u  
-			 	      
-			 	      
-#define ID_IS_PRIVATE    0x00200000u  
-			 	      
-			 	      
-#define ID_IS_METHOD     0x00400000u  
-#define LB_POSTPONED     0x00800000u  
-                                      
+/** The SSA pass constructs some dummy let bindings. This is used to
+ * mark them so that no assignment for them will later be emitted in
+ * the code generator.
+ *
+ * @bug Need to say something about @em why these are dummy let
+ * bindings! It is not clear to me why they are needed at all. Is this
+ * to fool the resolver?
+ */
+#define LB_IS_DUMMY      0x00080000u
+/** Indicates a type variable that appears in a use occurrence, but
+ * acts like a definition.
+ *
+ * @bug This is set in various places, and masked in others, but it
+ * isn't tested anywhere. Can it be dropped?
+ */
+#define TVAR_IS_DEF      0x00100000u  // This is a type-variable that
+			 	      // appears in a use-position, but
+			 	      // acts like a definition. 
+/** Indicates a global identifier that is not exported from its
+ * defining unit of compilation. These are emitted by the back end
+ * with a static marker to enable later optimization by the C
+ * compiler.
+ */
+#define ID_IS_PRIVATE    0x00200000u
+/** Identifier is a typeclass method name.
+ *
+ * @bug I remain horribly confused about which things are identifier
+ * categories and which things are identifier flags. I would have
+ * expected this one to be an identifier category.
+ */
+#define ID_IS_METHOD     0x00400000u  // Typeclass method definitions
+/** Do not emit an assignment for this let binding. This is set in the
+ * SSA pass for SET!, and also for some other odd cases. It is treated
+ * like LB_DUMMY in the back end.
+ *
+ * @bug Which raises the question of whether this shouldn't just be:
+ *
+ *   #define LB_POSTPONED LB_DUMMY
+ *
+ * @bug and also, once again, why dummy let bindings are getting
+ * generated at all.
+ */
+#define LB_POSTPONED     0x00800000u
+/** @bug Set in parser, never consulted. Can this be removed? If not,
+ * shouldn't this be done with id_field, above?
+ */
 #define ID_IS_FIELD      0x01000000u
-#define DEF_IS_ENTRYPT   0x02000000u  
+/** Marks a definition that is an external program entry point, and
+ * therefore a seed for polyinstantiation.
+ */
+#define DEF_IS_ENTRYPT   0x02000000u
 
-#define LB_REC_BIND      0x04000000u  
+/** Marks a let binding as a member of a letrec. This is consulted in
+ * Symtab.cxx and TypeInfer.cxx to determine whether the bound
+ * identifier should be bound early or late. If it were someday
+ * useful, this could be eliminated by introducing a distinct
+ * at_letrecbinding.
+ */
+#define LB_REC_BIND      0x04000000u
 
+/** Marks a BitC identifier as already having an external name, which
+ * should be used during code generation in place of the BitC name.
+ *
+ * @bug Looking at the use cases, this appears to be wholly redudant,
+ * because all of the associated ASTs will have an externalName field
+ * of non-zero size. Can this be eliminated?
+ */
 #define DEF_IS_EXTERNAL  0x08000000u 
+/**Used to mark a union consisting exclusively of constant
+ * legs, which is really an enum declaration. Marking is performed in
+ * TypeInfer, and is consulted in Type-size.cxx.
+ *
+ * @bug Regrettably our current handling of enumerations is
+ * inadequate, because it doesn't allow us to specify the actual
+ * enumeration values. We are therefore going to have to introduce a
+ * defenum at some point.
+ */
 #define ENUM_UN          0x10000000u
+/** Marks a union having only a single leg.
+ * 
+ * @bug It seems to me that a union having only one leg should be
+ * syntactically rejected, in which case this flag should never
+ * arise. Is there some USEFUL counter-example?
+ *
+ * @bug Conversely, if we are going to treat this as a union on the
+ * theory that the developer isn't done yet and it will eventually
+ * have more legs, why the hell bother to optimize it?
+ */
+
 #define SINGLE_LEG_UN    0x20000000u
+
+/** Marks a union that is subject to one of the required Cardelli
+ * optimizations. */
 #define CARDELLI_UN      0x40000000u
 
-#define NULLABLE_UN      0x80000000u  
+/** Marks the NULLABLE union, which has a special representation known
+ * to the code generator. */
+#define NULLABLE_UN      0x80000000u  // Special handling for nullable 'a
 
+///////////////// SECOND ROUND OF FLAGS  /////////////////////
 
+/** Marks the place-holder identifier that is introduced in the
+ * at_sw_leg AST to replicate the (switch ...) temporary identifier.
+ *
+ * @bug The only place this is used is to ensure that the ID is being
+ * used on the LHS of a dot, unless SWITCHED_ID_OK is set (which it
+ * always is by at_select) or to catch mis-use of the switch symbol in
+ * CATCH blocks that catch multiple cases. I'm wondering if we should
+ * not resolve both of these cases by requiring that the thing on the
+ * RHS of a swith pattern or a catch pattern be a LAMBDA form taking a
+ * single argument by value. Would that perhaps be cleaner? It would
+ * resolve the "multiple matched exceptions" issue nicely.
+ *
+ * @bug Or is the problem here that we @em require the dot, because we
+ * don't want it to be possible for this identifier to escape, thereby
+ * revealing a leg structure type?  If this is the issue, it might be
+ * a lot cleaner to just ensure that (SWITCH ...) is defined to be of
+ * unit type.
+ */
+#define ID_FOR_SWITCH    0x00000001u
+/** Expression is a location expression
+ *
+ * @bug This does not appear to be used anywhere, except for
+ * self-propagation in the parser. Can it be dropped?
+ */
+#define AST_IS_LOCATION  0x00000002u
+ /** Identifier is closed over by something. */
+#define ID_IS_CAPTURED   0x00000004u 
 
-#define ID_FOR_SWITCH    0x00000001u  
-                                      
-                                      
-#define AST_IS_LOCATION  0x00000002u  
-#define ID_IS_CAPTURED   0x00000004u  
+ ////////////////////////////////////////////////////////////////////
+ // The following Identifier-markers are applicable only to value
+ // identifiers, not to type identifiers. They are used in closure
+ // conversion to mark the various identifier nodes.
+ //
+ // @bug I wonder if ID_IS_DEF and ID_IS_USE shouldn't be marked for
+ // type identifiers too. We can use (flags2&(ID_IS_DEF|ID_IS_CLOSED))
+ ////////////////////////////////////////////////////////////////////
 
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-#define ID_IS_DEF        0x00000008u  
-				      
-#define ID_IS_USE        0x00000010u  
-                                      
-#define ID_IS_CLOSED     0x00000020u  
-                                      
-#define ID_NEEDS_HEAPIFY 0x00000040u  
-				      
-#define ID_IS_RECBOUND   0x00000080u  
-                                      
-#define ID_IS_MUTATED    0x00000100u  
-#define APP_IS_VALUE     0x00000200u  
-                                      
-                                      
-                                      
-#define APP_NATIVE_FNXN  0x00000400u  
-#define ID_MUT_CLOSED    0x00000800u  
-                                      
-#define PROCLAIM_IS_INTERNAL 0x00001000u 
-                                      
-                                      
-                                      
-                                      
-                                      
+/** ID is a defining occurrence.
+ *
+ * @issue Shap thinks this should only occur in a DEFINE or
+ * LET-BINDING or ARGUMENT position, yes?
+ */
+#define ID_IS_DEF        0x00000008u
+/** ID is a use occurrence. */
+#define ID_IS_USE        0x00000010u
+/** ID is a use occurrence of a closed-over ID
+ *
+ * @bug I copied the existing comment here, but it seems to me that
+ * this might also arise on a defining occurrence, no? In any case, it
+ * seems to me that the distinction is already covered by ID_IS_USE,
+ * and this flag should not encode that redundantly. */
+#define ID_IS_CLOSED     0x00000020u
+/** ID must be moved to the heap due to capture. */
+#define ID_NEEDS_HEAPIFY 0x00000040u
+/** ID is bound in a recursive context.
+ *
+ * @bug Can you add something here to clarify why ID_IS_RECBOUND and
+ * LB_REC_BIND are not redundant?
+ */
+#define ID_IS_RECBOUND   0x00000080u  // ID is bound in recursive
+                                      // context 
+/** @bug This seems to be a hold-over from our earliest fixing
+ * hack. It is et once and carefully cleared in many places, but
+ * never tested. Can it be dropped?
+ */
+#define ID_IS_MUTATED    0x00000100u  // ID is target of SET!
+/** Original comment: This application is internally generated by the
+ * backend, and is this safe for value-restriction binding.
+ *
+ * @bug This is never set. Can it be dropped? */
+#define APP_IS_VALUE     0x00000200u  // -- deprecated --
+                                      // This application is internally
+                                      // generated by the backend, and
+                                      // is this safe for value-restriction  
+/** @bug Unused. Drop? */
+#define APP_NATIVE_FNXN  0x00000400u  // -- depricated --
+/** @bug This exists only to set ID_IS_MUTATED, which doesn't appear
+ *to be in use anymore. Can we drop it? */
+#define ID_MUT_CLOSED    0x00000800u
+/** This proclaim was introduced by the compiler. So, we can skip the
+ * def/decl match. This is necessary only until we have a way to
+ * input dummy types.
+ *
+ * @bug Can you sent me a note reminding me what a "dummy type" is in
+ * this context, and what, if anything, we ought to do about inputting
+ * them? Alternatively, can you explain why it is appropriate for this
+ * to use a dummy type? I see that this has something to do with the
+ * construction of closure records, but I don't understand the issue.
+ */
+#define PROCLAIM_IS_INTERNAL 0x00001000u
+/** Set in the SSA pass to identify trivial initializers so that the
+ * code generator can avoid adding code in the per-UoC init procedure.
+ */
 #define DEF_IS_TRIVIAL_INIT  0x00002000u 
-#define IDENT_MANGLED        0x00004000u 
-                                      
-                                      
-                                      
+/** Used in the instantiator to indicate identifiers that have already
+ * been mangled and should not be mangled a second time.
+ *
+ * @issue I don't understand why this is needed. The assignment of a
+ * mangled name is, in effect, the assignment of an externalName. I
+ * would think that it would make sense to place the mangled name into
+ * the externalName field and check that, removing this flag. That
+ * works equally well when a pre-existing external name has been
+ * assigned, because we must not mangle those. Is this merely a
+ * different choice of implemenation approach? Would the approach that
+ * I am outlining work? */
+#define IDENT_MANGLED        0x00004000u
+/** Original: For variables defined at non-generalizable
+ * boundaries. ex: Lambda parameters, identifiers defined at switch /
+ * catch, etc.
+ *
+ * @bug Okay, but I have no idea why these variables are handled
+ * differently in the instantiator, and it would be really useful to
+ * know that.
+ */
 #define LOCAL_NOGEN_VAR  0x00008000u  
-                                      
-                                      
-                                      
-                                      
-                                      
+/** Original: Unreferenced, unspecialized polymorphic functions must
+ * not survive at letbindings. Mark those.
+ *
+ * @bug Not used anywhere. Drop?
+ */
 #define LB_MUST_GO       0x00010000u  
-                                      
-                                      
-                                      
-#define DUPED_BY_CLCONV  0x00020000u  
-                                      
-                                      
-                                      
-                                      
+/** Original: The dup()s introduced by ClConv impact further typing because,
+ * copy-compatibility must be handled beyond this ref at binding
+ * instances.
+ *
+ * @bug Set but never used. Drop?
+ */
+#define DUPED_BY_CLCONV  0x00020000u 
+/** Used to track the highest level of tvar-usage. If we see a tvar
+ * use, and if LBS_PROCESSED is set for tvar->tvarLB, then we have
+ * seen the use at a higer LB, and the tvarLB of tvar must point to
+ * the current lbs.
+ *
+ * @bug This comment doesn't say what we are tracking. It appears to
+ * me that we are tracking the outermost let-binding in which a type
+ * variable appears. If so, we need to say here (a) that we need to
+ * keep track of that, and (b) why.
+ *
+ * @issue I am not sure this comment is correct. If we have set
+ * LBS_PROCESSED, then shouldn't tvar->tvarLB point to the outermost
+ * let binding in which we saw a use?
+ */
 #define LBS_PROCESSED    0x00040000u  
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-#define LB_INSTANTIATED  0x00080000u  
-                                      
-                                      
-#define ID_OBSERV_DEF    0x00100000u  
-                                      
+ /** The current let-binding has been instantiated (used by the
+  * polyinstantiator)
+  *
+  * @bug Checked, but never set. Drop?
+  */
+#define LB_INSTANTIATED  0x00080000u
+ /** The Identifier is observably defined
+  *
+  * @bug Unused. Drop?
+  */
+#define ID_OBSERV_DEF    0x00100000u
+ /** Indicates a type variable that was temporarily created by the
+  * polyinstantiator. Definition is OK.
+  *
+  * @bug What does it mean that the definition is OK?
+  */
 #define TVAR_POLY_SPECIAL 0x00200000u 
-                                      
-                                      
-                                      
-#define UNION_IS_REPR    0x00400000u  
-#define FLD_IS_DISCM     0x00800000u  
-#define LAM_NEEDS_TRANS  0x01000000u  
-                                      
-                                      
-                                      
-                                      
-#define INNER_REF_NDX    0x02000000u  
-                                      
-                                      
-#define ARG_BYREF        0x04000000u  
+ /** Indicates that this DEFUNION is actually a DEFREPR that was
+  * converted to a union by the reprSimp pass.
+  *
+  * @bug This flag is later used in TypeInfer to perform various sanity
+  * checks, some of which indicate fatal compiler errors and should
+  * exit rather than continue (line 1006) or which I think should not
+  * be possible (line 4236). Having that sort of code is good, but it
+  * should be clearly identified as an internal sanity check.
+  */
+#define UNION_IS_REPR    0x00400000u  // Defrepr
+ /** Indicates a field that is a discriminator field.
+  *
+  * @bug Looking at gen-c.cxx, I'm not entirely convinced that we are
+  * handling this correctly in the defrepr case. */
+#define FLD_IS_DISCM     0x00800000u
+ /** Marked on an at_define. Indicates that this is a hoisted lambda
+  * for a function that has a captured closure, and we therefore need
+  * to emit a transition function.
+  *
+  * @bug Please add a comment at gen-c.cxx:821 that explains what the
+  * heck a transition function is!
+  */
+#define LAM_NEEDS_TRANS  0x01000000u
+ /** inner_ref is an indexing-ref when clear, indicated inner-ref is a
+  * selection-ref
+  *
+  * @bug I cannot parse this comment. The words "when set" need to
+  * appear somewhere here.
+  *
+  * @bug And when that is fixed, my follow-up question is "why do we
+  * care?"
+  */
+#define INNER_REF_NDX    0x02000000u
+ /** Set in the parser to indicate that a parameter identifier is
+  * by-reference. Consulted in gen-c.cxx to determine how the
+  * corresponding C parameter should be emitted.
+  *
+  * @bug It seems to me that this is not the right way to go about
+  * this. The two uses in gen-c.cxx should be consulting the type to
+  * determine whether the identifier is by-ref. Having made that
+  * change, I think that this flag should be dropped.
+  */
+#define ARG_BYREF        0x04000000u  // Function parameter is By-Reference
 
-
+/* Add All **AST Flags** that must be masked from definition before
+   setting onto the use cases */
 
 #define MASK_FLAGS_FROM_USE    (TVAR_IS_DEF | ID_IS_CTOR | ID_ENV_COPY |\
 				DEF_IS_ENTRYPT | ID_OBSERV_DEF)
 #define MASK_FLAGS2_FROM_USE   (ID_IS_CAPTURED)
 
 struct AST;
+
+/** @brief Set of environments associated with a given AST node.
+ *
+ * See the comment at the envSet field of the AST class.
+ */
 struct EnvSet {
   boost::shared_ptr<ASTEnvironment> env;
   boost::shared_ptr<TSEnvironment> gamma;
@@ -247,7 +560,7 @@ struct EnvSet {
     gamma->updateKey(from, to);
   }
 
-  
+  /* Quasi-constructors: */
   static inline boost::shared_ptr<EnvSet>
   make()
   {
@@ -450,7 +763,7 @@ public:
   static unsigned long long astCount;
   
  public:
-  unsigned long long ID; 
+  unsigned long long ID; // Unique ID of this AST
 
   LitValue litValue;
   unsigned long litBase;
@@ -459,126 +772,181 @@ public:
   unsigned long Flags;
   unsigned long Flags2;
 
-  unsigned printVariant;	
+  unsigned printVariant;	// which syntax to use for pretty printing
 
-  boost::shared_ptr<TypeScheme> scheme;		
-  boost::shared_ptr<Type> symType;		
+  boost::shared_ptr<TypeScheme> scheme;		// defining occurrences only
+  boost::shared_ptr<Type> symType;		// the (pre-unified) type
   boost::shared_ptr<AST> symbolDef;
 
-  bool isDecl;                  
+  bool isDecl;                  // is This a declaration or definition?
 
   bool isGlobal() { return (Flags & ID_IS_GLOBAL); }
-  bool isFnxn(); 
+  bool isFnxn(); // Function
   size_t nBits();
   bool isLocation();
   bool isLiteral();
   bool isTopLevelForm();
   bool leadsToTopLevelForm();
-  void clearTypes(); 
-                     
-                     
-                     
-                     
-                     
+  void clearTypes(); // Clear the sumType and scheme fields 
+                     // of this AST and ALL children RECURSIVELY.
+                     // This needs to be done before re-typing an
+                     // expression, for example post-clconv
+                     // otherwise, old types will infulence
+                     // new type records.
  
-  
-  
-  boost::shared_ptr<AST> defn;  
-  boost::shared_ptr<AST> decl;  
-              
+  /** On a declaration AST only: if a definition for it has been seen,
+   * then defn points to the definition.
+   */
+  boost::shared_ptr<AST> defn;
+  /** On a definition AST: pointer to the definitive declaration (the
+   * first one). */
+  boost::shared_ptr<AST> decl;
 
-  
-  
-  
-  
-  
-  
-  
-  
-  FQName fqn;                 
-  std::string externalName;	
+  /** If this is a global identifier, fqn is its canonical fully
+   * qualified name. The interface component of an fqn is the IFNAME
+   * of the interface in which the symbol was defined.  the ident
+   * component is the identifier under which the symbol was defined at
+   * the point of its original definition, which may or may not be the
+   * name that was bound in an importing environment (because USE may
+   * have aliased it under a different name).
+   */
+  FQName fqn;
 
-  
+  /** If this identifier is proclaimed with "external IDENT", this field
+   * holds the external identifier string, otherwise it is empty.
+   */
+  std::string externalName;
+
+  // The IFNAME of an interface in the case of import and provide
+  //
+  // @bug This should probably be retired. It's main surviving purpose
+  // seems to be error diagnostics in most places, and recovering the
+  // interface name of an imported interface. The recovery purpose can
+  // be accomplished equally well by adding a distinguished entry
+  // ":name:" to the aliasEnv of every interface and looking that
+  // up. The advantage to that approach is that we won't need to
+  // carry around a redundant string here in every AST.
   std::string ifName;
 
-  
-  
-  
-  
-  
-  
+  /** A set of environments associated with this ast. 
+   * - If this is a local name for an imported interface, these are
+   *   pointers to the environments of the imported interface.
+   * - In at_let, at_letrec, at_letStar, at_define ... these are the
+   *   environments in effect at that binding.
+   */
   EnvSet envs;
 
-  
-  
-  bool polyinst; 
-                 
-  bool reached; 
-  boost::shared_ptr<AST> defForm; 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  /** @brief Pointer to defining form
+   *
+   * defForm has context sensitive meaning. 
+   * This is basically a hack in the absence of parent pointers, where
+   * I must reach back into the definition and get the defining form,
+   * or some form of a containing datastructure.
+   * 
+   * In the case of top-level expressions, we use it to get the 
+   * entire defining form from the identifier being defined
+   * 
+   * (def  defIdent ... )
+   * ^        |
+   * |________|
+   *   defForm
+   * 
+   * In the case of let-expressions:
+   * (The quoted phrases are just ast-types not syntax.)
+   *
+   *  _______________      __________________
+   * |   defForm     |     |   defForm       |  
+   * v               |     v                 |
+   * (define   ... (let .. ("letbindings" ("letbinding" ident ... ))))
+   *               ^             |        ^               | 
+   *               |_____________|        |_______________|
+   *                  defForm                 defForm
+   * 
+   *     ___________
+   *    |           |
+   *    v           | 
+   *  (switch ... ("sw_leg" id ...) ...)
+   *                  ^    |
+   *                  |____|
+   *     _____      __________
+   *    |     |    |          |
+   *    v     |    v          | 
+   *  (do ("dobindings"  ("dobinding" id ...) ...)
+   *                             ^     |
+   *                             |_____|
+   */
 
-  boost::shared_ptr<AST> defbps; 
-  
-  boost::shared_ptr<Type> tagType;   
-  size_t field_bits; 
-  
-  
-  
-  
-  size_t unin_discm; 
-                     
-  size_t total_fill; 
-                     
-                     
+  boost::shared_ptr<AST> defForm;
 
-  boost::shared_ptr<TypeScheme> stSigma; 
-                       
-                       
-  boost::shared_ptr<AST> stCtr;    
-                       
+  /** Used in the case of loop, tail-recursion
+   *
+   * @bug OK, but for *what*?
+   */
+  boost::shared_ptr<AST> defbps;
+  
+  /** If this is a union, tagType is the type of the tag. */
+  boost::shared_ptr<Type> tagType;
 
+  /** Number of bits in a bitfield type. */
+  size_t field_bits;
+
+  /** @bug WHAT is propagated upwards into these? */
+  // Also propagated updards onto: 
+  //   at_field, at_fill, at_reserved, tagtype (declare) at_declares,
+  //   Identifier of at_defunion 
   
-  boost::shared_ptr<AST> tvarLB;         
-  boost::shared_ptr<AST> parentLB;       
-  
-  
-  
+  /** on at_field only when the field is a part of a union
+   * discriminator (FLD_IS_DISCM)
+   *
+   * @bug OK, but when it is on one of these, what does it mean?
+   *
+   * @bug Or does this mean "set when the field is part of a union
+   * discriminator (FLD_IS_DISCM), and appear on at_field only", in
+   * which case, why should this be redundantly encoded?
+   */
+  size_t unin_discm;
+
+  /** Total number of fill bits that are not reported by the type
+   * record.
+   *
+   * Appears on a at_defstruct or at_constructor only.
+   */
+  size_t total_fill;
+
+  /** TypeSchemes for the corresponding Structure definitions.
+   *
+   * Appears on Union constructors only.
+   *
+   * @bug The comment says TypeSchemes plural, but I only see a single
+   * type scheme here. How is this actually being used?
+   */
+
+  boost::shared_ptr<TypeScheme> stSigma;
+
+  /** Pointer to the constructor that holds such a structure.
+   *
+   * @bug I have no @em idea what this means or is for.
+   */
+  boost::shared_ptr<AST> stCtr;
+
+  // Tracking scope of type-variables:
+
+  /** Let binding at which this type variable is scoped. */
+  boost::shared_ptr<AST> tvarLB;
+  /**LB within which this at_letbindings is contained, everything is
+   * contained within the top-level definition. 
+   */
+  boost::shared_ptr<AST> parentLB;
+
+  /** The resolver marks the above two markers. No need to worry about
+   * them in copy-operations.
+   *
+   * @bug I believe that the resolver marks them, but I have no idea
+   * which "markers" we are referring to here. I think you mean that
+   * both of these fields are reliably set whenever the resolver is
+   * called, so there is no need to worry about them when cloning the
+   * AST?
+   */
 
   static boost::shared_ptr<AST> makeBoolLit(const sherpa::LToken &tok);
   static boost::shared_ptr<AST> makeIntLit(const sherpa::LToken &tok);
@@ -586,39 +954,70 @@ public:
   static boost::shared_ptr<AST> makeCharLit(const sherpa::LToken &tok);
   static boost::shared_ptr<AST> makeFloatLit(const sherpa::LToken &tok);
 
-  
+  /** Remove child @p n from this AST.
+   *
+   * @brief The only place this is called is in the parser, and there
+   * only to strip documentation strings. That is actually a bad thing
+   * to do, since we want to preserve them in the AST, and a literal
+   * value really ought to be a perfectly legal (if useless)
+   * expression. We should attempt to comment out the body of
+   * stripDocString() and see if everything still works. If so, both
+   * this and stripDocString() should be removed. */
   void disown(size_t s);
   
-  
-  
-  
-  
+  /** Generate an identifier AST with a newly generated internal name.
+   * This will not have any particular type assigned to it, and is
+   * intended to be used in the front end passes before the type
+   * checker is involved.
+   */
   static boost::shared_ptr<AST> genIdent(const char *pfx = "tmp", const bool isTV = false);
 
-  
-  
+  /** Generate an at_ident AST providing a temporary symbol that is
+   * type-compatible with the type of the passed AST @p lhs.
+   */
   static boost::shared_ptr<AST> genSym(boost::shared_ptr<AST> lhs, 
 		     const char *pfx="tmp",
 		     const bool isTV = false);
 
+  /** For each AST type, return an associated keyword name.
+   *
+   * @issue In most cases, the keyword name is simply the ast name. Later
+   * versions of astmaker actually emit a string translator, and names
+   * can now be assigned in the .ast file. We should consider using
+   * that instead of this. That is something for shap to look at.
+   */
   std::string atKwd() const;
 
-  
-  
-  
+  /** @brief Append all ident ASTs from a Binding-pattern to the ids vector. 
+   *
+   * if getPattern is true, it adds the identPattern ASTs
+   * instead of ident ASTs
+   */
   void getIds(std::ostream &errStream, 
 	      std::vector<boost::shared_ptr<AST> >& ids,
 	      bool getPattern = false);  
+
+  /** @brief Utility function to call symType->getType() */
   boost::shared_ptr<Type> getType(); 
+  /** @brief Utility function to call symType->getType() */
   boost::shared_ptr<const Type> getType() const;
   
+  /** Union constructors may be written as Ctr or
+   * union.Ctr, this function returns the pure constructor.
+   *
+   * @bug I do not understand what "pure" means in this context. I am
+   * looking for a comment that says something of the form: "given an
+   * AST of some kind X, obtain the AST Y s.t. SOMETHING is true".
+   */
   boost::shared_ptr<AST> getCtr(); 
-  
 
-  
+
+  /** @brief Given a defining occurrence, return a new AST for a use
+   * occurrence. */
   boost::shared_ptr<AST> Use();
 
-  
+  /** @brief Copy constructor -- make an exact (except ID) shallow
+   * copy. */
   AST(boost::shared_ptr<AST> ast, bool shallowCopyChildren=true);
 
   static inline boost::shared_ptr<AST>
@@ -627,32 +1026,47 @@ public:
     return boost::shared_ptr<AST>(tmp);
   }
 
-  
+  /** @brief  Make an exact copy, deep, including symbolDef, type,
+   * etc. */
   boost::shared_ptr<AST> getTrueCopy();
 
-  
+  /** @brief  Make an exact copy, deep, but clear symbolDef, type,
+   * etc. */
   boost::shared_ptr<AST> getDCopy();
 
-  
-  void set(boost::shared_ptr<AST> ast);
-
-  
-  
-  
-  
+  /** @briefRename identifier @p from to @p to within AST named by @p
+   * this.
+   *
+   * Rename is based on symbolDef. @p from must be a defining form. If
+   * (and only if) @p from is found within @p this AST, it is also
+   * renamed.
+   */
   void rename(boost::shared_ptr<AST> from, std::string newName);
 
+  /** @brief Return pretty-printed representation of this AST in the
+   * form of a string. */
   std::string asString() const;
-  std::string mangledString() const;
 
+  /** @brief Get the unique identifier for this AST */
   boost::shared_ptr<AST> getID();
+
+  /** @brief Return true IFF this is a AST corresponds to a union leg.
+   *
+   * @bug I'm still not clear why values can be union legs. */
   bool isUnionLeg();
+  /** @brief Return true IFF this AST is a method name identifier.
+   *
+   * @bug I'm still not clear why this doesn't use an id_method
+   * category. */
   bool isMethod();
 
-  void PrettyPrint(std::ostream& out, bool decorated = false, 
+  /** @brief Pretty print this AST to @p out, annotating each with its
+   * type if @p showTypes is true, and appending a final end of line
+   * of @p endline is true. */
+  void PrettyPrint(std::ostream& out, bool showTypes = false, 
 		   bool endline=true) const;
 
-  
+  // For use in GDB:
   void PrettyPrint(bool decorated) const;
 
   AST(const AstType at = at_Null);

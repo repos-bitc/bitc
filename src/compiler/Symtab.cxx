@@ -695,7 +695,7 @@ resolve(std::ostream& errStream,
 	  if(def->Flags2 & ID_FOR_SWITCH) {
 	    if((flags & SWITCHED_ID_OK) == 0) {
 	      errStream << ast->loc << ": The identifier `"
-			<< ast->s << "' can only appear behind a `.'" 
+			<< ast->s << "' can only appear to the left of a `.'" 
 			<< std::endl;
 	      errorFree = false;
 	    }
@@ -796,12 +796,12 @@ resolve(std::ostream& errStream,
 
       shared_ptr<AST> iface = ast->child(0);
       
-      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, id_interface, 
+      RESOLVE(iface, env, lamLevel, USE_MODE, id_interface, 
 	      GC_NULL, flags);
       if(!errorFree)
 	break;
 
-      assert(ast->child(0)->symbolDef->ifName != "");
+      assert(iface->symbolDef->ifName != "");
       
       shared_ptr<ASTEnvironment > ifenv = iface->symbolDef->envs.env;
       
@@ -815,7 +815,7 @@ resolve(std::ostream& errStream,
 	break;
       }
       
-      FQName importedFQN = FQName(ast->child(0)->symbolDef->ifName,
+      FQName importedFQN = FQName(iface->symbolDef->ifName,
 				  ast->child(1)->s);
 
       ast->s = ast->child(0)->s + "." + ast->child(1)->s;
@@ -2467,11 +2467,13 @@ resolve(std::ostream& errStream,
     }
 
     // CAREFUL: CAREFUL:    
+    //
     // This is *NOT* dead code, though, it appears to be so, from the
-    // way the above let-cases are written. 
-    // this case is used by the (new) polyinstantiator to R&T
-    // let-binding instantiations. It is OK to use it ther because we
-    // don't have any more polymorphism at that stage.
+    // way the above let-cases are written.  this case is used by the
+    // (new) polyinstantiator to R&T let-binding instantiations. It is
+    // OK to use it there because we don't have any more polymorphism
+    // at that stage.
+    //
     // THIS CASE MUST NOT BE USED BY OTHER LET FORMS
   case at_letbinding:
     {

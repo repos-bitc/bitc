@@ -4662,11 +4662,13 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     }
 
     // CAREFUL: CAREFUL:
+    //
     // This is *NOT* dead code, though, it appears to be so, from the
     // way the above let-cases are written. 
     // this case is used by the (new) polyinstantiator to R&T
     // let-binding instantiations. It is OK to use it ther because we
     // don't have any more polymorphism at that stage.
+    //
     // THIS CASE MUST NOT BE USED BY OTHER LET FORMS
   case at_letbinding:
     {
