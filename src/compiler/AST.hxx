@@ -1031,7 +1031,10 @@ public:
   boost::shared_ptr<AST> getTrueCopy();
 
   /** @brief  Make an exact copy, deep, but clear symbolDef, type,
-   * etc. */
+   * etc.
+   *
+   * @bug This needs an explation of why those fields should be
+   * cleared. It also needs a better procedure name. */
   boost::shared_ptr<AST> getDCopy();
 
   /** @briefRename identifier @p from to @p to within AST named by @p

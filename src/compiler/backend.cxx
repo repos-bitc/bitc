@@ -43,6 +43,7 @@
 #include "backend.hxx"
 #include "UocInfo.hxx"
 
+/** @brief Targets known to the compiler. */
 BackEnd BackEnd::backends[] = {
   // The first one is the default.
   { "exe", pn_npass, op_ssaTrans, 0, 0, EmitExe, BK_LINKING },
