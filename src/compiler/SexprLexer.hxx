@@ -44,62 +44,160 @@
 
 typedef long ucs4_t;
 
+/** @brief Hand-crafted S-expression lexer.
+ *
+ * SexprLexer is yet another variant of shap's generic hand-crafted
+ * lexer. The main job of SexprLexer is to generate tokens (instances
+ * of LToken) and keep track of input positions in the input stream
+ * (via LexLoc). In addition, SexprLexer serves as a holding box for
+ * some meta-information about the current unit of compilation.
+ *
+ * Note that the @p inStream and @p errStream slots are by-reference,
+ * which means that a SexprLexer should not survive the streams that
+ * it is processing.
+ */
 struct SexprLexer {
+  /** @brief Start position of current token. */
   sherpa::LexLoc here;
+  /** @brief Number of parse errors incurred.
+   *
+   * The current parser is not particularly good at context recovery,
+   * and I don't really see much point to improving the error handling
+   * when we are likely to abandon the LISP-style surface syntax
+   * entirely. In a hypothetical future parser, we would want to check
+   * num_errors before admitting a unit of compilation into the
+   * compile phase.*/
   int num_errors;
+  /** @brief Whether lexer debugging output is enabled.
+   *
+   * If @p debug is true, then the lexer will dump each token that it
+   * sees to the error stream. */
   bool debug;
+  /** @brief True @em iff the current unit of compilation is part of
+   * the BitC runtime.
+   *
+   * This alters the criteria for identifier admission. If the unit is
+   * part of the BitC runtime, it is entitled to admit symbols
+   * starting with double underscore. This is set from the parser.
+   */
   bool isRuntimeUoc;
+  /** @brief Whether we are presently looking for identifiers that
+   * satisfy the interface identifier name restrictions.
+   *
+   * Initially false. Toggled from the parser. */
   bool ifIdentMode;
+  /** @brief Whether we are looking at a unit of compilation that was
+   * admitted from the command line, as opposed to one that we
+   * imported.
+   *
+   * @bug This is misnamed, since input from stdin in an interactive
+   * implementation should have this true as well. It should probably
+   * be called isImportInput instead (sense invert).
+   */
   bool isCommandLineInput;
+  /** @brief The input stream that we are processing */
   std::istream& inStream;
+  /** @brief The error stream to which errors should be reported */
   std::ostream& errStream;
 
+  /** @brief Number of modules that we have seen in the current
+   * parse.
+   *
+   * Initialized to zero. This is parser state that is placed here for
+   * convenience. It is used to give every source module a unique name
+   * when multiple modules appear in a single source unit of compilation.
+   */
   unsigned nModules;
 
-  int nDigits;
-  int radix;
-
+  /** @brief Collected characters for current token.
+   *
+   * These are accumulated by getChar() and released (if appropriate)
+   * by ungetChar() */
   std::string thisToken;
 
+  /** @brief Up to one UCS4 character of push-back, -1 if none. */
   ucs4_t putbackChar;		// -1 or UCS4
 
-  long digitValue(ucs4_t);
+  /** @brief If @p c is a digit character in radix @p radix, return
+   * its decimal value */
+  long digitValue(ucs4_t c, unsigned radix);
 
+  /** @brief Fetch next character from input stream. */
   ucs4_t getChar();
+  /** @brief Push a lookahead character back onto the input stream. */
   void ungetChar(ucs4_t);
 
-  SexprLexer(std::ostream& _err, std::istream& _in, 
+  /** @brief Constructor
+   *
+   * Instantiate a new SexprLexer drawing input from @p inStream and
+   * reporting errors to @p errStream. Use @p origin as the name of
+   * the containing "file" for any errors. Set @p commandLineInput to
+   * false if this unit of compilation was imported rather than
+   * processed from the command line or the user */
+  SexprLexer(std::ostream& errStream, std::istream& inStream, 
 	     const std::string& origin,
 	     bool commandLineInput);
 
-  void ReportParseError(const sherpa::LexLoc& where, std::string  /* msg */);
-  void ReportParseWarning(const sherpa::LexLoc& where, std::string  /* msg */);
+  /** @brief Report parse error @p msg attributed to a particular
+   * location @p loc. */
+  void ReportParseError(const sherpa::LexLoc& loc, std::string  msg);
+  /** @brief Report parse warning @p msg attributed to a particular
+   * location @p loc. */
+  void ReportParseWarning(const sherpa::LexLoc& loc, std::string msg);
 
+  /** @brief Report generic syntax error attributed to current input location. */
   void ReportParseError();
+  /** @brief Report parse error @p msg attributed to current input location. */
   void ReportParseError(std::string msg)
   {
     ReportParseError(here, msg);
   }
+  /** @brief Report parse warning @p msg attributed to current input location. */
   inline void ReportParseWarning(std::string msg)
   {
     ReportParseWarning(here, msg);
   }
 
+  /** @brief Issue debugging output on iff @p showlex is true */
   inline void setDebug(bool showlex)
   {
     debug = (showlex ? true : false);
   }
 
+  /** @brief Restrict identifiers to interface identifiers iff @p arg
+      is true. */
   inline void setIfIdentMode(bool arg)
   {
     ifIdentMode = arg;
   }
 
+  /** @brief Fetch next token, return result via @p yylvalp. */
   int lex(ParseType *yylvalp);
 
-  int kwCheck(const char *s);
-
+  /** @brief Destructor */
   ~SexprLexer() {}
+
+  /** @brief Structure type for keyword table.
+   *
+   * Public so that it can be accessed from the comparison function
+   * within SexprLexer.cxx.  */
+  struct KeyWord {
+    const char *nm;
+    int tokValue;
+  };
+
+private:
+  /** @brief Sorted List of keywords and their token numbers. */
+  static KeyWord keywords[];
+
+  /** @brief Return appropriate token number for argument string @p s.
+   *
+   * If @p s is a keyword, this will return the appropriate keyword
+   * token number by consulting @p keywords. If the string does not
+   * appear in @p keywords, return the token number meaning
+   * identifier.
+   */
+  int kwCheck(const char *s);
 };
 
 #endif /* SEXPRLEXER_HXX */

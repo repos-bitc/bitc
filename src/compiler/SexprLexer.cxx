@@ -181,10 +181,7 @@ validate_string(const char *s)
   return 0;
 }
 
-struct KeyWord {
-  const char *nm;
-  int  tokValue;
-} keywords[] = {
+struct SexprLexer::KeyWord SexprLexer::keywords[] = {
   { "and",              tk_AND },
   { "apply",            tk_APPLY },
   { "array",            tk_ARRAY },
@@ -317,11 +314,11 @@ struct KeyWord {
 
 };
 
-static int
+int
 kwstrcmp(const void *vKey, const void *vCandidate)
 {
-  const char *key = ((const KeyWord *) vKey)->nm;
-  const char *candidate = ((const KeyWord *) vCandidate)->nm;
+  const char *key = ((const SexprLexer::KeyWord *) vKey)->nm;
+  const char *candidate = ((const SexprLexer::KeyWord *) vCandidate)->nm;
 
   return strcmp(key, candidate);
 }
@@ -409,11 +406,10 @@ SexprLexer::SexprLexer(std::ostream& _err, std::istream& _in,
   debug = false;
   putbackChar = -1;
   nModules = 0;
-  radix = 10;			// until otherwise noted
 }
 
 long 
-SexprLexer::digitValue(ucs4_t ucs4)
+SexprLexer::digitValue(ucs4_t ucs4, unsigned radix)
 {
   long l = -1;
 
@@ -490,9 +486,6 @@ SexprLexer::getChar()
  checkDigit:
   thisToken += utf;
 
-  if (digitValue(ucs4) >= 0 && digitValue(ucs4) < radix)
-    nDigits++;
-
   return ucs4;
 }
 
@@ -529,8 +522,6 @@ SexprLexer::lex(ParseType *lvalp)
 
  startOver:
   thisToken.erase();
-  nDigits = 0;			// until otherwise proven
-  radix = 10;			// until otherwise proven
 
   c = getChar();
 
@@ -615,10 +606,9 @@ SexprLexer::lex(ParseType *lvalp)
 	  else if (c == 'U') {
 	    c = getChar();
 	    if (c == '+') {
-	      radix = 16;
 	      do {
 		c = getChar();
-	      } while(digitValue(c) >= 0);
+	      } while(digitValue(c, 16) >= 0);
 	      
 	      if (!isCharDelimiter(c)) {
 		ungetChar(c);
@@ -694,7 +684,7 @@ SexprLexer::lex(ParseType *lvalp)
     // of an identifier.
   case '-':
     c = getChar();
-    if (digitValue(c) < 0) {
+    if (digitValue(c, 10) < 0) {
       ungetChar(c);
       goto identifier;
     }
@@ -711,9 +701,11 @@ SexprLexer::lex(ParseType *lvalp)
   case '8':
   case '9':
     {
+      int radix = 10;
+
       do {
 	c = getChar();
-      } while (digitValue(c) >= 0);
+      } while (digitValue(c, 10) >= 0);
 
       /* At this point we could either discover a radix marker 'r', or
 	 a decimal point (indicating a floating poing literal). If it
@@ -727,7 +719,7 @@ SexprLexer::lex(ParseType *lvalp)
 	do {
 	  c = getChar();
 	  count++;
-	} while (digitValue(c) >= 0);
+	} while (digitValue(c, radix) >= 0);
 	count--;
 	/* FIX: if count is 0, number is malformed */
       }
@@ -749,7 +741,7 @@ SexprLexer::lex(ParseType *lvalp)
 	do {
 	  c = getChar();
 	  count++;
-	} while (digitValue(c) >= 0);
+	} while (digitValue(c, radix) >= 0);
 	count--;
 	/* FIX: if count is 0, number is malformed */
       }
@@ -765,16 +757,16 @@ SexprLexer::lex(ParseType *lvalp)
 
       /* Need to collect the exponent. Revert to radix 10 until
 	 otherwise proven. */
-      radix = 10;
       c = getChar();
+      radix = 10;
 
-      if (c != '-' && digitValue(c) < 0) {
+      if (c != '-' && digitValue(c, radix) < 0) {
 	// FIX: Malformed token
       }
 
       do {
 	c = getChar();
-      } while (digitValue(c) >= 0);
+      } while (digitValue(c, 10) >= 0);
 
       /* Check for radix marker on exponent */
       if (c == 'r') {
@@ -785,7 +777,7 @@ SexprLexer::lex(ParseType *lvalp)
 	do {
 	  c = getChar();
 	  count++;
-	} while (digitValue(c) >= 0);
+	} while (digitValue(c, radix) >= 0);
 	count--;
 	/* FIX: if count is 0, number is malformed */
       }
