@@ -2893,29 +2893,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
   case at_identPattern:
     {
+      // match agt_var
+      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  mode, TI_COMP2);
       
-      if(ast->Flags & AST_IS_VALPAT) {
-	// AST_IS_VALPAT ONLY for the ROOT of a case leg
-	assert(mode == REDEF_MODE);
-
-	shared_ptr<AST> var = ast->child(0);
-	shared_ptr<AST> def = var->symbolDef;
-
-	if((def) && def->isUnionLeg()) {
-	  TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
-		    uflags, trail, USE_MODE, TI_COMP2);
-	}
-	else {
-	  // match agt_var
-	  TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
-		    uflags, trail, REDEF_MODE, TI_COMP2);
-	}      
-      }
-      else {
-	// match agt_var
-	TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
-		  uflags, trail,  mode, TI_COMP2);
-      }
       
       // Type Qualifications ONLY in Binding Patterns
       // match agt_type?
@@ -4208,7 +4189,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	 ** In the case of unions, all union legs must have
 	 the same field structure. 
 	 **In  the case of reprs, we have more
-	 constraints on field layour -- identically names fields must
+	 constraints on field layout -- identically named fields must
 	 be at the same bit-offset and be of the same type. Therefore,
 	 we can allow different constructors such that only common
 	 fields are efective within the switch-leg.

@@ -620,8 +620,6 @@ identTypeToString(IdentType id)
     return "Constructor";
   case id_field:
     return "Field";
-  case id_exn:
-    return "Exception";
   case id_typeclass:
     return "Type-class";
     //  case id_module:

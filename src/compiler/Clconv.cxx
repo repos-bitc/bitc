@@ -1020,7 +1020,8 @@ cl_heapify(shared_ptr<AST> ast)
 	
 	assert (ident->Flags2 & ID_IS_CAPTURED);
 	expr = AST::make(at_dup, expr->loc, expr);
-	expr->Flags2 |= DUPED_BY_CLCONV;
+	// Previously: Clconv was marking Dup-ed variables specially 
+	// at this point expr->Flags2 |= DUPED_BY_CLCONV;
  
 	// if the binding pattern was qualified by a type qualification,
 	// wrap that in a REF:

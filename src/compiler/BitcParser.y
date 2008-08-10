@@ -1153,13 +1153,11 @@ fields: fields field {
 
 field: ident ':' type_pl_bf  {
   SHOWPARSE("field -> ident : type_pl_bf");
-  $1->Flags |= ID_IS_FIELD;
   $$ = AST::make(at_field, $1->loc, $1, $3);
 };
 
 field: '(' tk_THE type_pl_bf ident ')'  {
   SHOWPARSE("field -> '(' THE type_pl_bf ident ')'");
-  $4->Flags |= ID_IS_FIELD;
   $$ = AST::make(at_field, $1.loc, $4, $3);
 };
 
@@ -2080,7 +2078,6 @@ eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
   shared_ptr<AST> doBindings = $4;
 
   shared_ptr<AST> theIdent = AST::genIdent("do");
-  theIdent->Flags |= ID_IS_DO;
 
   // The body proper of the DO is going to turn into a BEGIN
   // consisting of the provided DO body and ending with a recursive

@@ -98,10 +98,7 @@ isExpansive(std::ostream& errStream,
 
   case at_apply:
     {
-      if(ast->Flags2 & APP_IS_VALUE)
-	itsExpansive = false;
-      else 
-	itsExpansive = true;
+      itsExpansive = true;
       break;
     }
   case at_setbang:

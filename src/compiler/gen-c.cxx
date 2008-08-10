@@ -817,7 +817,19 @@ emit_fnxn_label(std::ostream& errStream,
   out << "}" << endl;
 
   /* Need to emit a transition function if this is a hoisted 
-     function that is a part of closure conversion operation */
+     function that is a part of closure conversion operation
+    
+     Transition function is a function label that internally calls the
+     actual closure object with the extra environment argument 
+     (communicated through the global currentClosurePtr.
+     The code generated for a function f is:
+
+     retType 
+     xfn_f(args)
+     {
+       return f(currentClosurePtr, args);
+     }
+  */
   if(ast->Flags2 & LAM_NEEDS_TRANS) {
 
     // Top level mutable function pointers are not cl-lambdas

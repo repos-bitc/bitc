@@ -444,7 +444,7 @@ resolve(std::ostream& errStream,
 	{
 	  assert(env);
 	  assert(identType != id_unresolved);
-		
+	  
 	  shared_ptr<AST> sym = env->getBinding(ast->s);
 	
 	  if(sym) {
@@ -503,6 +503,7 @@ resolve(std::ostream& errStream,
 	{
 	  assert(env);
 	  assert(identType != id_unresolved);
+
 	  ast->isDecl = true;
 
 	  shared_ptr<AST> sym = env->getBinding(ast->s);
@@ -564,7 +565,8 @@ resolve(std::ostream& errStream,
       case USE_MODE:
 	{
 	  assert(env);
-	  assert(identType != id_unresolved);
+	  assert((flags & NO_CHK_USE_TYPE) || 
+		 (identType != id_unresolved));
 
 	  ast->symbolDef = env->getBinding(ast->s);
 	  // 	if(ast->symbolDef == NULL) 
@@ -584,7 +586,7 @@ resolve(std::ostream& errStream,
 	    //
 	    //   (lambda x:'a (lambda y:'a 0))
 	    //
-	    // That is, a type-variabloe in this slot should be treated
+	    // That is, a type-variable in this slot should be treated
 	    // as a defining occurance ONLY if it is NOT ALREADY bound
 	    // in the current scope.  Also, it should only be done in
 	    // some cases -- the cases where NEW_TV_OK is set in
@@ -1332,7 +1334,7 @@ resolve(std::ostream& errStream,
 	  shared_ptr<AST> pubName = alias->child(1);
 	
 	  RESOLVE(pubName, ifAst->envs.env, lamLevel, USE_MODE,
-		  id_usebinding, currLB, 
+		  id_unresolved, currLB, 
 		  ((flags & (~NEW_TV_OK))) | NO_CHK_USE_TYPE);
 	
 	  if(!errorFree)
@@ -1741,33 +1743,6 @@ resolve(std::ostream& errStream,
     
   case at_identPattern:
     {
-      // This special condition is introduced by the fact that when a
-      // expression like the following is encountered, (Value Patterns
-      // only):
-      //
-      //   (case x (Nil ... )  ... )
-      //
-      // There is no way to tell if Nil is a Constructor that is being
-      // matched or a fresh variable. Therefore the check is needed.
-
-      if(ast->Flags & AST_IS_VALPAT) {
-	// AST_IS_VALPAT ONLY for the ROOT of a case leg
-	assert(mode == DEF_MODE);
-	shared_ptr<AST> var = ast->child(0);
-	shared_ptr<AST> def = env->getBinding(var->s);
-
-	if((def) && def->isUnionLeg()) {
-	  RESOLVE(var, env, lamLevel, USE_MODE, id_value, currLB, 
-		  flags | RES_APP_PAT_MODE);	
-	}
-	else {
-	  // match agt_var
-	  RESOLVE(ast->child(0), env, lamLevel, DEF_MODE,
-		  identType, currLB, flags); 
-	}
-	break;
-      }
-    
       // match agt_var
       RESOLVE(ast->child(0), env, lamLevel, mode, identType,
 	      currLB, flags); 

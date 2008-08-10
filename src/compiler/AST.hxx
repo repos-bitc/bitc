@@ -51,7 +51,6 @@
 #define AST_SMART_PTR boost::shared_ptr
 #define AST_SUPERCLASS boost::enable_shared_from_this<AST>
 
-
  
 
 //template <class T> typedef struct environment;
@@ -66,7 +65,32 @@ struct UocInfo;
 struct Instance;
  
 /** @brief Different classifications of identifiers that we might
-    encounter. */
+ *  encounter. 
+ *  
+ *  > This enumeration performs a dual role:
+ *  > 1) As as AST field, it stores the classification of the
+ *  >    (identifier) AST
+ *  >    
+ *  > 2) As an argument to the symbol resolver, it notes the
+ *  >    correct kind of identifier expected in a context.
+ *  >    
+ *  > Certain identifiers have multiple types or roles. 
+ *  > For example:   
+ *  > a) Structure type name: type and value constructor    
+ *  > b) Union constructor with zero arguments: value and constructor   
+ *  >    
+ *  > That is, a union constructor such as nil can be used in a 
+ *  > context that identifies either id_value or id_constructor.   
+ *  > Therefore, some AST flags are used in tandem with identType   
+ *  > in such cases. It is possible to remove identType field   
+ *  > completely from ASTs and just use flag markings on ASTs.
+ *  > We can then switch over the resolver's identType and check for
+ *  > appropiate flags in the symbol resolver. This approach of using
+ *  > both identType and flags is used since it simplifies the
+ *  > checking in the common case to
+ *  > argument-identType == ast->identType 
+ * 
+ */
 enum IdentType {
   /** @brief An identifier whose classification is not yet decided. 
    *
@@ -75,6 +99,8 @@ enum IdentType {
    * various later passes and then resolved. */
   id_unresolved,
   /** @brief Type name or type variable.
+   * > That is, this identifier can be legally used in a type
+   * > context.
    *
    * Flagged ID_IS_CTOR if this is a type constructor name.
    *
@@ -83,37 +109,35 @@ enum IdentType {
    * separate classification for id_constructor. When is it
    * appropriate for an identifier to be id_type and simultaneously be
    * flagged ID_IS_CTOR?
+   * > Structure names -- case (a) above.
+   * > ID_IS_CTOR is not marked in the case of union name, type variables.
    */
   id_type,
-  /** @bug needs documentation */
+  /** @bug needs documentation 
+   * > 
+   * > For all identifiers that denote value definitions. That is,
+   * > identifiers that are either defined using define, recdef, let,
+   * > letrec, or do or proclaimed use proclaim.
+   * > These identifiers can be used in value contexts.
+   */
   id_value,
   /** Constructor names. Implies ID_IS_CTOR
    *
    * @bug I hope this is wrong. If it implies ID_IS_CTOR, then
-   * ID_IS_CTOR should always be set. Is that what is meant here? */
+   * ID_IS_CTOR should always be set. Is that what is meant here? 
+   * 
+   * > ID_IS_CTOR is always set when an identifier is id_constructor
+   * > but it is not true the other way. That is, ID_IS_CONSTRUCTOR
+   * > is set in other cases (ex: for id_type on structure names).
+   */
   id_constructor,
   /** @brief Structure or union field name. */
   id_field,			// field name
-  /** @brief Identifier is an exception name.
-   *
-   * @bug It does not appear that this classification is ever actually
-   * given. Is it obsolete? */
-  id_exn,
   /** @brief Identifier is a type class name. */
   id_typeclass,
   //  id_module,
   /** @brief Identifier is an interface name. */
   id_interface,
-  /** @brief Identifier aliases an imported identifier.
-   *
-   * @bug The @em only place this gets used is in imports that do
-   * selective binding. It is @em not getting used in
-   * aliasPublicBindings. This inconsistency leads me to suspect that
-   * either (a) this is obsolete and should be dropped, or (b) the
-   * implementation of aliasPublicBindings() is incorrect and should
-   * be enhanced.
-   */
-  id_usebinding,		// bound by use form
 };
 
 enum PrimOp {
@@ -131,59 +155,37 @@ enum PrimOp {
 /** @brief Identifier is a type variable.
  *
  * @bug Why is this not an identifier category?
+ * 
+ * > Type variables have identType id_type, since type variables can
+ * > be used in type contexts. The ID_IS_TVAR conveys additional
+ * > information.
  */
 #define ID_IS_TVAR       0x00000001u
 /** @brief Identifier is a constructor.
  *
  * @bug Why is this not an identifier category?
+ * > There is id_constructor category. This flag identifies
+ * > identifiers that are type-names, that can also function as
+ * > constructors (ex: structure names). Please see comment above
+ * > the identtype enumeration definition.
  */
 #define ID_IS_CTOR       0x00000002u
-/** @brief Identifier is a value pattern.
- *
- * @bug After reading the comment inside the at_identPattern case in
- * Symtab.cxx, I don't believe it. This case is purely structural,
- * and I see no reason why the identifier should not be categorized
- * right up in the parser. In fact, this flag does not appear to be
- * set anywhere, and I think that it is obsolete.
- */
-#define AST_IS_VALPAT    0x00000010u  // ONLY for the ROOT of a case leg
 /** @brief Identifier is bound in type-level scope. */
 #define ID_IS_GLOBAL     0x00000020u
 /** @brief Identifier was internally generated by the compiler. */
 #define ID_IS_GENSYM     0x00000040u
- // -- available: 0x00000080u -- //
-/** Identifier is a let binding that was introduced by the compiler to
- * facilitate  temp introduction in the SSA transformation phase.
- *
- * @bug Why "ART"?
- *
- * @bug This is set, but never checked. Can it be removed? */
-#define LB_IS_ART        0x00000100u
-
-/** Structure introduced by virtue of closure construction.
- *
- * @bug This is unused. Can it be removed?
- */
-#define STRUCT_IS_CLSTR  0x00000200u
-/** This was presumably for definitions introduced in the prelude.
- *
- * @bug Unused. Can it be removed?
- */
-#define DEF_IN_PRELUDE   0x00000400u
 /** Set in the code generator to record the fact that a declaration has
  * already been emitted for this definition.
  *
  * @issue I am not convinced that this belongs here. I would have
  * naively expected this to be dealt with in a set<string> that was
  * private to the code generator.
+ * > This can definitely be changed to use a set<string>
+ * > implemmentation. This seemed like a easy and efficient
+ * > implementation, especially since we were not using interned
+ * > strings. 
  */
 #define DEF_DECLARED     0x00000800u
-/** ID is an identifier introduced by re-writing a DO loop. This
- * identifier cannot be captured, except by a recursive call.
- *
- * @bug Set in BitcParser.y, but never checked. Can this be dropped?
- */
-#define ID_IS_DO         0x00001000u
  
 /** Marked for type constructors and value constructors defined by
  * defstruct, defunion, and defexception. The type-scheme for such
@@ -192,9 +194,6 @@ enum PrimOp {
  */
 #define ID_ENV_COPY       0x00002000u 
 
- // -- available 0x4000u - 0x10000u  -- //    
-/** @bug Never used. Can it be removed? */
-#define LOOP_APP         0x00020000u
 /** Set in the tail recursion analysis pass to indicate that a
  * use-occurrence of an identifier is a reference to the function
  * currently being defined. Consulted in the SSA pass to add an
@@ -207,6 +206,7 @@ enum PrimOp {
  * below on the documentation of LB_IS_DUMMY.
  */
 #define SELF_TAIL        0x00040000u
+
 
 /** The SSA pass constructs some dummy let bindings. This is used to
  * mark them so that no assignment for them will later be emitted in
@@ -237,6 +237,10 @@ enum PrimOp {
  * @bug I remain horribly confused about which things are identifier
  * categories and which things are identifier flags. I would have
  * expected this one to be an identifier category.
+ * > Type classe methods require some special treatement at certain
+ * > times, but in general can be used in contests where a value is
+ * > required. So, the identType is id_value, but this flag conveys
+ * > extra information.
  */
 #define ID_IS_METHOD     0x00400000u  // Typeclass method definitions
 /** Do not emit an assignment for this let binding. This is set in the
@@ -251,10 +255,6 @@ enum PrimOp {
  * generated at all.
  */
 #define LB_POSTPONED     0x00800000u
-/** @bug Set in parser, never consulted. Can this be removed? If not,
- * shouldn't this be done with id_field, above?
- */
-#define ID_IS_FIELD      0x01000000u
 /** Marks a definition that is an external program entry point, and
  * therefore a seed for polyinstantiation.
  */
@@ -274,6 +274,12 @@ enum PrimOp {
  * @bug Looking at the use cases, this appears to be wholly redudant,
  * because all of the associated ASTs will have an externalName field
  * of non-zero size. Can this be eliminated?
+ * 
+ * > This flag is not redundant. DEF_IS_EXTERNAL is marked for all
+ * > external definitions, whether it has an external name or not
+ * > only some external definitions have a external-name. For example,
+ * > the check at gen-c.cxx:3003 ValuesTOH() cannot be replaced with 
+ * > ast->getID()->externalName.size()
  */
 #define DEF_IS_EXTERNAL  0x08000000u 
 /**Used to mark a union consisting exclusively of constant
@@ -295,6 +301,11 @@ enum PrimOp {
  * @bug Conversely, if we are going to treat this as a union on the
  * theory that the developer isn't done yet and it will eventually
  * have more legs, why the hell bother to optimize it?
+ *
+ * > The programmer cannot provide any more legs after the union
+ * > definition is complete. So, bug(2) cannot arise.
+ * > bug(1) is maintained for completeness. If we reject single legged 
+ * > unions, this goes away.
  */
 
 #define SINGLE_LEG_UN    0x20000000u
@@ -371,20 +382,10 @@ enum PrimOp {
 #define ID_IS_RECBOUND   0x00000080u  // ID is bound in recursive
                                       // context 
 /** @bug This seems to be a hold-over from our earliest fixing
- * hack. It is et once and carefully cleared in many places, but
+ * hack. It is set once and carefully cleared in many places, but
  * never tested. Can it be dropped?
  */
 #define ID_IS_MUTATED    0x00000100u  // ID is target of SET!
-/** Original comment: This application is internally generated by the
- * backend, and is this safe for value-restriction binding.
- *
- * @bug This is never set. Can it be dropped? */
-#define APP_IS_VALUE     0x00000200u  // -- deprecated --
-                                      // This application is internally
-                                      // generated by the backend, and
-                                      // is this safe for value-restriction  
-/** @bug Unused. Drop? */
-#define APP_NATIVE_FNXN  0x00000400u  // -- depricated --
 /** @bug This exists only to set ID_IS_MUTATED, which doesn't appear
  *to be in use anymore. Can we drop it? */
 #define ID_MUT_CLOSED    0x00000800u
@@ -397,6 +398,9 @@ enum PrimOp {
  * them? Alternatively, can you explain why it is appropriate for this
  * to use a dummy type? I see that this has something to do with the
  * construction of closure records, but I don't understand the issue.
+ *
+ * >
+ * >
  */
 #define PROCLAIM_IS_INTERNAL 0x00001000u
 /** Set in the SSA pass to identify trivial initializers so that the
@@ -413,7 +417,10 @@ enum PrimOp {
  * works equally well when a pre-existing external name has been
  * assigned, because we must not mangle those. Is this merely a
  * different choice of implemenation approach? Would the approach that
- * I am outlining work? */
+ * I am outlining work? 
+ *
+ * > Yes. This flag can be removed by using the externalname field.
+ */
 #define IDENT_MANGLED        0x00004000u
 /** Original: For variables defined at non-generalizable
  * boundaries. ex: Lambda parameters, identifiers defined at switch /
@@ -424,19 +431,6 @@ enum PrimOp {
  * know that.
  */
 #define LOCAL_NOGEN_VAR  0x00008000u  
-/** Original: Unreferenced, unspecialized polymorphic functions must
- * not survive at letbindings. Mark those.
- *
- * @bug Not used anywhere. Drop?
- */
-#define LB_MUST_GO       0x00010000u  
-/** Original: The dup()s introduced by ClConv impact further typing because,
- * copy-compatibility must be handled beyond this ref at binding
- * instances.
- *
- * @bug Set but never used. Drop?
- */
-#define DUPED_BY_CLCONV  0x00020000u 
 /** Used to track the highest level of tvar-usage. If we see a tvar
  * use, and if LBS_PROCESSED is set for tvar->tvarLB, then we have
  * seen the use at a higer LB, and the tvarLB of tvar must point to
@@ -452,21 +446,32 @@ enum PrimOp {
  * let binding in which we saw a use?
  */
 #define LBS_PROCESSED    0x00040000u  
+
  /** The current let-binding has been instantiated (used by the
   * polyinstantiator)
   *
   * @bug Checked, but never set. Drop?
   */
 #define LB_INSTANTIATED  0x00080000u
+
  /** The Identifier is observably defined
-  *
-  * @bug Unused. Drop?
   */
 #define ID_OBSERV_DEF    0x00100000u
+
  /** Indicates a type variable that was temporarily created by the
   * polyinstantiator. Definition is OK.
   *
   * @bug What does it mean that the definition is OK?
+  *
+  * > The symbol resolver accepts type variables as defining
+  * > occurences within expressions only at certain positions (when
+  * > called with NEW_TV_OK). For example, this is legal within value
+  * > definitions, but type variables not identified as arguments to 
+  * > type definitions are legal within the type definition itself. 
+  * > This flag marks type variables created by the polyinstantiator
+  * > that must not be subject to the NEW_TV_OK check by the resolver,
+  * > since the Instantiator makes some quasi RandTs in which this
+  * > restriction might temporaroly not hold.
   */
 #define TVAR_POLY_SPECIAL 0x00200000u 
  /** Indicates that this DEFUNION is actually a DEFREPR that was
@@ -477,12 +482,24 @@ enum PrimOp {
   * exit rather than continue (line 1006) or which I think should not
   * be possible (line 4236). Having that sort of code is good, but it
   * should be clearly identified as an internal sanity check.
+  * 
+  * > Both of these are actually programmer errors.
+  * > Line 1006 line ensures that the progrmmer cannot provide
+  * > representation constraints using both tagtype as well as the when
+  * > clause. Line 4217 enforces different semantics for constructor
+  * > matching for unions and reprs (as explained in the comment at
+  * > line 4186.
   */
 #define UNION_IS_REPR    0x00400000u  // Defrepr
  /** Indicates a field that is a discriminator field.
   *
   * @bug Looking at gen-c.cxx, I'm not entirely convinced that we are
-  * handling this correctly in the defrepr case. */
+  * handling this correctly in the defrepr case.
+  *
+  * > I think it is handled correctly in gen-c.cxx:1468
+  * > I am not sure why you felt that the handling is wrong. can you
+  * > please explain?
+ */
 #define FLD_IS_DISCM     0x00800000u
  /** Marked on an at_define. Indicates that this is a hoisted lambda
   * for a function that has a captured closure, and we therefore need
@@ -490,6 +507,8 @@ enum PrimOp {
   *
   * @bug Please add a comment at gen-c.cxx:821 that explains what the
   * heck a transition function is!
+  * 
+  * > Added a comment.
   */
 #define LAM_NEEDS_TRANS  0x01000000u
  /** inner_ref is an indexing-ref when clear, indicated inner-ref is a
@@ -500,6 +519,17 @@ enum PrimOp {
   *
   * @bug And when that is fixed, my follow-up question is "why do we
   * care?"
+  *
+  * > The semantics of this flag is:
+  * > When set, it is an indexing inner_ref that is of the form
+  * > (inner_ref (dup (array ..))) or (inner_ref (vector ... ))
+  * >
+  * > When clear, it is a selecting inner_ref that is of the form
+  * > (inner_ref (dup (structv ... ))) or (inner_red (structr ... ))
+  * > 
+  * > These two types of inner-ref must be handled differently in most
+  * > passes. For example, the index argument must be independently
+  * > resolved and type checked but the field argumet must not.
   */
 #define INNER_REF_NDX    0x02000000u
  /** Set in the parser to indicate that a parameter identifier is
@@ -510,6 +540,13 @@ enum PrimOp {
   * this. The two uses in gen-c.cxx should be consulting the type to
   * determine whether the identifier is by-ref. Having made that
   * change, I think that this flag should be dropped.
+  * 
+  * > The by-ref-ness is actually marked on the enclosing function
+  * > type, and is not marked on the type of the individual
+  * > arguments. For most purposes, the by-ref-ness of the
+  * > identifier itself must be ignored. Since all by-ref parameters
+  * > must all identifer ASTs, it is marked on the AST itself, 
+  * > and similarly handled by set! case and gen-c.
   */
 #define ARG_BYREF        0x04000000u  // Function parameter is By-Reference
 
@@ -517,7 +554,7 @@ enum PrimOp {
    setting onto the use cases */
 
 #define MASK_FLAGS_FROM_USE    (TVAR_IS_DEF | ID_IS_CTOR | ID_ENV_COPY |\
-				DEF_IS_ENTRYPT | ID_OBSERV_DEF)
+				DEF_IS_ENTRYPT )
 #define MASK_FLAGS2_FROM_USE   (ID_IS_CAPTURED)
 
 struct AST;
@@ -887,13 +924,15 @@ public:
   /** If this is a union, tagType is the type of the tag. */
   boost::shared_ptr<Type> tagType;
 
-  /** Number of bits in a bitfield type. */
+  /** Number of bits in a bitfield type. 
+   *  Also propagated updards onto: 
+   *  at_field, at_fill, at_reserved, tagtype (declare) at_declares,
+   *   Identifier of at_defunion 
+   *   
+   * @bug WHAT is propagated upwards into these? 
+   * > The value of field_bits is propagated.
+   */
   size_t field_bits;
-
-  /** @bug WHAT is propagated upwards into these? */
-  // Also propagated updards onto: 
-  //   at_field, at_fill, at_reserved, tagtype (declare) at_declares,
-  //   Identifier of at_defunion 
   
   /** on at_field only when the field is a part of a union
    * discriminator (FLD_IS_DISCM)
@@ -903,6 +942,11 @@ public:
    * @bug Or does this mean "set when the field is part of a union
    * discriminator (FLD_IS_DISCM), and appear on at_field only", in
    * which case, why should this be redundantly encoded?
+   *
+   * > On defreppr unions, this field is resent on fields that
+   * > participate in union discrimination. This field stores the
+   * > value (not just a true/false setting) that the field must have
+   * > as indicated by the when clause. 
    */
   size_t unin_discm;
 
@@ -913,12 +957,15 @@ public:
    */
   size_t total_fill;
 
-  /** TypeSchemes for the corresponding Structure definitions.
+  /** TypeScheme for the corresponding Structure definitions.
    *
    * Appears on Union constructors only.
    *
    * @bug The comment says TypeSchemes plural, but I only see a single
    * type scheme here. How is this actually being used?
+   *
+   * > Fixed the comment to be singular. There is only one structure
+   * > defintion for any constructor
    */
 
   boost::shared_ptr<TypeScheme> stSigma;
@@ -926,15 +973,29 @@ public:
   /** Pointer to the constructor that holds such a structure.
    *
    * @bug I have no @em idea what this means or is for.
+   *
+   * > Constructors with identical layout must share the same
+   * > structure type since they can be used in the same switch leg.
+   * > Structures equality is nominal in BitC (structures are
+   * > identified by name, not by identical components). Therefore, if
+   * > at a second constructor, a previously typed structure  with
+   * > identical structure is found, the new constructor uses the
+   * > structure defined at the old structure and stores a pointer to
+   * > that constructor in stCtr.
    */
   boost::shared_ptr<AST> stCtr;
 
   // Tracking scope of type-variables:
 
-  /** Let binding at which this type variable is scoped. */
+  /** Let binding at which this type variable is scoped. 
+   * This flag is set reliably set whenever the resolver is
+   * called, so there is no need to worry while cloning the AST?
+   */
   boost::shared_ptr<AST> tvarLB;
   /**LB within which this at_letbindings is contained, everything is
    * contained within the top-level definition. 
+   * This flag is set reliably set whenever the resolver is
+   * called, so there is no need to worry while cloning the AST?
    */
   boost::shared_ptr<AST> parentLB;
 
@@ -946,6 +1007,10 @@ public:
    * both of these fields are reliably set whenever the resolver is
    * called, so there is no need to worry about them when cloning the
    * AST?
+   *
+   * > Yes, I have changed the comment for the above two fields with 
+   * > your wording. I have duplicated the comments so that we don't
+   * > have positional dependency of fields. 
    */
 
   static boost::shared_ptr<AST> makeBoolLit(const sherpa::LToken &tok);
@@ -1008,6 +1073,10 @@ public:
    * @bug I do not understand what "pure" means in this context. I am
    * looking for a comment that says something of the form: "given an
    * AST of some kind X, obtain the AST Y s.t. SOMETHING is true".
+   *
+   * > pure is the wrong word here. It returns the bare constructor.
+   * > That is, given a constructor of the form Ctr or union-name.Ctr, 
+   * > returns Ctr.
    */
   boost::shared_ptr<AST> getCtr(); 
 
@@ -1055,12 +1124,17 @@ public:
 
   /** @brief Return true IFF this is a AST corresponds to a union leg.
    *
-   * @bug I'm still not clear why values can be union legs. */
+   * @bug I'm still not clear why values can be union legs. 
+   * > Constructors like Nil which have no arguments also represent
+   * > constructed values 
+   */
   bool isUnionLeg();
   /** @brief Return true IFF this AST is a method name identifier.
    *
    * @bug I'm still not clear why this doesn't use an id_method
-   * category. */
+   * category.
+   * > Methods are legal values and can be used in id_value contexts.
+   */
   bool isMethod();
 
   /** @brief Pretty print this AST to @p out, annotating each with its

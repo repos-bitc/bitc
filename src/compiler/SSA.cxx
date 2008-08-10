@@ -102,7 +102,9 @@ addLB(shared_ptr<AST> grandLet, shared_ptr<AST> identList,
   id->symType = ast->symType;
   shared_ptr<AST> ip = AST::make(at_identPattern, id->loc, id);
   shared_ptr<AST> lb = AST::make(at_letbinding, ip->loc, ip, ast);
-  lb->Flags |= (LB_IS_ART | lbFlags);
+  // "Artificial" SSA introduced LBs were previously marked here
+  // as: lb->Flags |= (LB_IS_ART | lbFlags);
+  lb->Flags |= lbFlags;
   grandLet->child(0)->children.push_back(lb);
   if(addToIL)
     addIL(identList, id);  
