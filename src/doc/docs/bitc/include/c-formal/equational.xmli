@@ -444,13 +444,76 @@
   </theorem>
   <proof>
     <p>
-      By induction on the derivation of
+      By straightforward induction on the derivation of
       <btypes:TYPE>
 	<unf>
 	  <aCtset/>
 	</unf>
-      </btypes:TYPE>.
+      </btypes:TYPE>. <!-- We only need to consider the cases which deal
+      with constraints of the form
+      <btypes:TYPE>
+	<eq>
+	  <type num="1"/>
+	  <type num="2"/>
+	</eq>
+    </btypes:TYPE>. -->
     </p>
+    <!-- <ol>
+      <li>
+	<p>
+	  Cases U-Empty, U-Refl and U-Sym are trivial.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case U-Var: Here, we have
+	</p>
+	<btypes:TYPE>
+	  <VEqns>
+	    <equation>
+	      <lhs>
+		<unf>
+		  <unin excl="yes">
+		    <set>
+		      <eq>
+			<type num="1"/>
+			<type num="2"/>
+		      </eq>
+		    </set>
+		    <aCtset dash="'"/>
+		  </unin>
+		</unf>
+	      </lhs>
+	      <rhs>
+		<unf>
+		  <unin>
+		    <set>
+		      <eq>
+			<type num="2"/>
+			<type num="1"/>
+		      </eq>
+		    </set>
+		    <aCtset dash="'"/>
+		  </unin>
+		</unf>
+	      </rhs>
+	    </equation>
+	  </VEqns>
+	</btypes:TYPE>
+	<p>
+	  By induction hypothesis, we have
+	  <btypes:TYPE>
+	    <Sjudge name="sol">
+	      <aSubMap/>
+	      <leadsto>
+		<aCtset dash="'"/>
+		<dCtset dash="'"/>
+	      </leadsto>
+	    </Sjudge>
+	  </btypes:TYPE>.	  
+	</p>
+      </li>
+    </ol> -->
   </proof>
   <lemma id="unify-consistent">
     <title>Consistency of Unification</title>

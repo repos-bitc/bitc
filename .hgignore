@@ -75,6 +75,7 @@ src/doc/docs/bitc/complete.xml
 src/doc/docs/bitc/h-formal.xml
 src/doc/docs/bitc/c-formal.xml
 src/doc/docs/bitc/e-formal.xml
+src/doc/docs/bitc/new-formal.xml
 src/doc/docs/bitc/mut-formal.xml
 src/doc/docs/bitc/mutinfer.xml
 src/doc/docs/bitc/sys-infer.xml
