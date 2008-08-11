@@ -1614,9 +1614,6 @@ the_expr: '(' tk_THE type eform ')' {
   SHOWPARSE("the_expr -> ( THE type eform )");
   // Note: argument order swapped for historical reasons.
   $$ = AST::make(at_tqexpr, $2.loc, $4, $3);
-
-  if($4->Flags2 & AST_IS_LOCATION)
-    $$->Flags2 |= AST_IS_LOCATION;  
 };
 
 // SUSPENDED EXPRESSIONS
@@ -1651,7 +1648,6 @@ So, the burden is now passed to further stages */
 eform: ident {
   SHOWPARSE("eform -> ident");
   $$ = $1;
-  $$->Flags2 |= AST_IS_LOCATION;
 };
 
 // MEMBER [7.7]
@@ -1682,19 +1678,16 @@ eform: ident {
 eform: eform '.' ident {
   SHOWPARSE("eform -> eform . ident");
   $$ = AST::make(at_select, $1->loc, $1, $3);
-  $$->Flags2 |= AST_IS_LOCATION;
 };
 
 eform: the_expr '.' ident {
   SHOWPARSE("eform -> the_expr . ident");
   $$ = AST::make(at_select, $1->loc, $1, $3);
-  $$->Flags2 |= AST_IS_LOCATION;
 };
 
 eform: '(' tk_MEMBER expr ident ')' {
   SHOWPARSE("eform -> ( member expr ident )");
   $$ = AST::make(at_select, $2.loc, $3, $4);
-  $$->Flags2 |= AST_IS_LOCATION;
 };
 
 // NTH-REF [7.8.2]          
@@ -1706,12 +1699,10 @@ eform: expr '[' expr ']' {
 eform: '(' tk_ARRAY_NTH expr expr ')' {
   SHOWPARSE("eform -> ( ARRAY-NTH expr expr )");
   $$ = AST::make(at_array_nth, $2.loc, $3, $4);
-  $$->Flags2 |= AST_IS_LOCATION;
 };
 eform: '(' tk_VECTOR_NTH expr expr ')' {
   SHOWPARSE("eform -> ( VECTOR-NTH expr expr )");
   $$ = AST::make(at_vector_nth, $2.loc, $3, $4);
-  $$->Flags2 |= AST_IS_LOCATION;
 };
 
 // DEREF [7.13.2]                
@@ -1719,12 +1710,10 @@ eform: expr '^' {
   SHOWPARSE("eform -> expr ^");
   $$ = AST::make(at_deref, $1->loc, $1); 
   $$->printVariant = 1;
-  $$->Flags2 |= AST_IS_LOCATION;
 };
 eform: '(' tk_DEREF expr ')' {
   SHOWPARSE("eform -> ( DEREF expr )");
   $$ = AST::make(at_deref, $2.loc, $3);
-  $$->Flags2 |= AST_IS_LOCATION;
 };
 
 // INNER-REF

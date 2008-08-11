@@ -699,7 +699,7 @@ tvarInst(shared_ptr<AST> ast, shared_ptr<AST> scope, AstMap &newBinds)
       shared_ptr<AST> newTvAst = newTV->asAST(ast->loc, 
 				   TvPrinter::make(false));
       newTvAst->symbolDef = newTvAst;
-      newTvAst->Flags2 |= TVAR_IS_DEF | TVAR_POLY_SPECIAL;
+      newTvAst->Flags2 |= TVAR_POLY_SPECIAL;
 
       newBinds[def] = newTvAst;
       return newTvAst;
@@ -1295,8 +1295,7 @@ UocInfo::recInstantiate(ostream &errStream,
       for(size_t i=0; i < originalLbs->children.size(); i++) {
 	shared_ptr<AST> lb = originalLbs->child(i);
 	shared_ptr<AST> ident = lb->child(0)->child(0);
-	if(((lb->Flags2 & LB_INSTANTIATED) == 0) &&
-	   ident->symType->isConcrete()) {
+	if(ident->symType->isConcrete()) {
 	  // Instantiate this definition, it will automatically get
 	  // added to the inner let, so we just drop the use
 	  // case identifier returned by doInstantiate().

@@ -191,20 +191,14 @@ enum PrimOp {
  */
 #define ID_ENV_COPY       0x00002000u 
 
-/** Set in the tail recursion analysis pass to indicate that a
+ /** Set in the tail recursion analysis pass to indicate that a
  * use-occurrence of an identifier is a reference to the function
  * currently being defined. Consulted in the SSA pass to add an
  * LB_IS_DUMMY marker to the emitted let binding. Consulted in the
  * gen-c pass to determine when looping rather than recursion should
  * be used.
- *
- * @bug I am not clear why SSA should construct a dummy let binding in
- * this case in the first place. Some explanation would be appropriate
- * below on the documentation of LB_IS_DUMMY.
  */
 #define SELF_TAIL        0x00040000u
-
-
 /** The SSA pass constructs some dummy let bindings. This is used to
  * mark them so that no assignment for them will later be emitted in
  * the code generator.
@@ -212,17 +206,41 @@ enum PrimOp {
  * @bug Need to say something about @em why these are dummy let
  * bindings! It is not clear to me why they are needed at all. Is this
  * to fool the resolver?
+ * 
+ * > The SSA pass uses a trick to convert expression style code
+ * > into statement style code. For example, in the expression
+ * > (if e1 e2 e3), if E1, E2 and E3 are SSA converted forms of 
+ * > e1, e2 and e3 respectively, the SSA converter will produce
+ * >
+ * > (let* ((temp ((if E1 
+ * >                   (let* ((temp  E2)) temp)
+ * >                   (let* ((temp E3)) temp)))))
+ * >      ... rest of the code will use temp as the value of if-expr ... 
+ * >
+ * > Here, for the BitC resolver's point of view, the inner temp is
+ * > different from the outer temp. So, it will resolve and type check
+ * > corectly. The outer temp will have the result of the appropriate
+ * > inner temp. 
+ *
+ * > From the C code generator's point of view, we will ignore the
+ * > outer let* binding, since we cannot bind the result of
+ * > if-statements. This outer let* binding is therefore marked
+ * > LB_IS_DUMMY. The code generator will only declare one local
+ * > variable temp, and assign the result of the correct brach to
+ * > it. The rest of the code after the if statement is fine since it
+ * > just knows to use the name temp, which now stores the correct value. 
  */
 #define LB_IS_DUMMY      0x00080000u
-/** Indicates a type variable that appears in a use occurrence, but
- * acts like a definition.
+/** Do not emit an assignment for this let binding. This is set in the
+ * SSA pass for SET!, and also for some other odd cases. It is treated
+ * like LB_DUMMY in the back end.
  *
- * @bug This is set in various places, and masked in others, but it
- * isn't tested anywhere. Can it be dropped?
+ * > This is a special case similar to LB_IS_DUMMY. It is generated for
+ * > bindings like array/vector etc., which should be ignored by the
+ * > code generator, as the initialization will follow in a loop.
  */
-#define TVAR_IS_DEF      0x00100000u  // This is a type-variable that
-			 	      // appears in a use-position, but
-			 	      // acts like a definition. 
+#define LB_POSTPONED     LB_IS_DUMMY
+
 /** Indicates a global identifier that is not exported from its
  * defining unit of compilation. These are emitted by the back end
  * with a static marker to enable later optimization by the C
@@ -234,24 +252,13 @@ enum PrimOp {
  * @bug I remain horribly confused about which things are identifier
  * categories and which things are identifier flags. I would have
  * expected this one to be an identifier category.
+ *
  * > Type classe methods require some special treatement at certain
  * > times, but in general can be used in contests where a value is
  * > required. So, the identType is id_value, but this flag conveys
  * > extra information.
  */
 #define ID_IS_METHOD     0x00400000u  // Typeclass method definitions
-/** Do not emit an assignment for this let binding. This is set in the
- * SSA pass for SET!, and also for some other odd cases. It is treated
- * like LB_DUMMY in the back end.
- *
- * @bug Which raises the question of whether this shouldn't just be:
- *
- *   #define LB_POSTPONED LB_DUMMY
- *
- * @bug and also, once again, why dummy let bindings are getting
- * generated at all.
- */
-#define LB_POSTPONED     0x00800000u
 /** Marks a definition that is an external program entry point, and
  * therefore a seed for polyinstantiation.
  */
@@ -334,14 +341,14 @@ enum PrimOp {
  * revealing a leg structure type?  If this is the issue, it might be
  * a lot cleaner to just ensure that (SWITCH ...) is defined to be of
  * unit type.
+ * 
+ * > Yes, the flag is required for the second issue identified here. 
+ * > We require that the identifier not be used as a whole, but always
+ * > be dereferenced. Making switch return unit type is insufficient
+ * > to ensure this property since the identifier can escape by
+ * > assignment.  
  */
 #define ID_FOR_SWITCH    0x00000001u
-/** Expression is a location expression
- *
- * @bug This does not appear to be used anywhere, except for
- * self-propagation in the parser. Can it be dropped?
- */
-#define AST_IS_LOCATION  0x00000002u
  /** Identifier is closed over by something. */
 #define ID_IS_CAPTURED   0x00000004u 
 
@@ -358,6 +365,7 @@ enum PrimOp {
  *
  * @issue Shap thinks this should only occur in a DEFINE or
  * LET-BINDING or ARGUMENT position, yes?
+ * > It can also occur at switch/case.
  */
 #define ID_IS_DEF        0x00000008u
 /** ID is a use occurrence. */
@@ -367,24 +375,30 @@ enum PrimOp {
  * @bug I copied the existing comment here, but it seems to me that
  * this might also arise on a defining occurrence, no? In any case, it
  * seems to me that the distinction is already covered by ID_IS_USE,
- * and this flag should not encode that redundantly. */
+ * and this flag should not encode that redundantly. 
+ *
+ * > This flag is only marked on use occurences. Its job is not to
+ * > encode the use vs def information. We can change the comment
+ * > to Marks (use-cases of) closed over identifiers.
+ */
 #define ID_IS_CLOSED     0x00000020u
 /** ID must be moved to the heap due to capture. */
 #define ID_NEEDS_HEAPIFY 0x00000040u
-/** ID is bound in a recursive context.
- *
- * @bug Can you add something here to clarify why ID_IS_RECBOUND and
- * LB_REC_BIND are not redundant?
- */
-#define ID_IS_RECBOUND   0x00000080u  // ID is bound in recursive
-                                      // context 
 /** @bug This seems to be a hold-over from our earliest fixing
  * hack. It is set once and carefully cleared in many places, but
  * never tested. Can it be dropped?
+ *
+ * > This is useful for the heuristic algorithm which can be invoked
+ * > through the --heuristic-inference option to the compiler.
+ * > Fixed the implementation of the heuristic algorithm to consult
+ * > this flag correctly.
  */
 #define ID_IS_MUTATED    0x00000100u  // ID is target of SET!
 /** @bug This exists only to set ID_IS_MUTATED, which doesn't appear
- *to be in use anymore. Can we drop it? */
+ *to be in use anymore. Can we drop it? 
+ *
+ * > Necessary because of the above.
+ */
 #define ID_MUT_CLOSED    0x00000800u
 /** This proclaim was introduced by the compiler. So, we can skip the
  * def/decl match. This is necessary only until we have a way to
@@ -396,8 +410,19 @@ enum PrimOp {
  * to use a dummy type? I see that this has something to do with the
  * construction of closure records, but I don't understand the issue.
  *
- * >
- * >
+ * > In the case of non-generalizable expressions at the top-level
+ * > (define), any monomorphic variables are forced to a dummy type
+ * > that cannot unify with any other type. I do not expect that the
+ * > user will ever input this type. In fact, the whole point of this
+ * > type is to not be compatible with any type that the user can
+ * > input (so, the comment is really wrong). 
+ * > 
+ * > This flag has now got nothing to do with the dummy type. It used
+ * > to be a concern when every dummy type was different.
+ * > This flag is now being used by unreachable code in Symtab.cxx
+ * > that warns about local proclaimations without definitions. The
+ * > flag indicates that such warnings must not be generated for
+ * > compiler generated proclaimations.
  */
 #define PROCLAIM_IS_INTERNAL 0x00001000u
 /** Set in the SSA pass to identify trivial initializers so that the
@@ -416,7 +441,8 @@ enum PrimOp {
  * different choice of implemenation approach? Would the approach that
  * I am outlining work? 
  *
- * > Yes. This flag can be removed by using the externalname field.
+ * > Yes. I think that this flag can be removed by using the
+ * > externalname field. 
  */
 #define IDENT_MANGLED        0x00004000u
 /** Original: For variables defined at non-generalizable
@@ -426,6 +452,12 @@ enum PrimOp {
  * @bug Okay, but I have no idea why these variables are handled
  * differently in the instantiator, and it would be really useful to
  * know that.
+ * > 
+ * > Local generalizable variables must be handled by creating a new
+ * > let-binding with all concrete instantiations. Non-generalizable
+ * > locals like lambda-parameters, identifier at switch, catch, 
+ * > do, etc. can be trivially handled by performing a name change to
+ * > a canonical one. Please refer Instantiate.cxx:1035 
  */
 #define LOCAL_NOGEN_VAR  0x00008000u  
 /** Used to track the highest level of tvar-usage. If we see a tvar
@@ -438,19 +470,21 @@ enum PrimOp {
  * variable appears. If so, we need to say here (a) that we need to
  * keep track of that, and (b) why.
  *
+ * > Yes. This flag is used to keep track of the let-binding at
+ * > which a type variable used within a definition is scoped.
+ * > The actual pointer to the let-binding is preset in tvarLB field.
+ * 
  * @issue I am not sure this comment is correct. If we have set
  * LBS_PROCESSED, then shouldn't tvar->tvarLB point to the outermost
  * let binding in which we saw a use?
+ * 
+ * > This flag is actually used to track the outermost let-binding in
+ * > which the type variable is used. When we encounter the use of a
+ * > type variable, if we have finished processing the original
+ * > let-binding, then we know that the scope of the variable is
+ * > actually bigger, and thus update it.
  */
 #define LBS_PROCESSED    0x00040000u  
-
- /** The current let-binding has been instantiated (used by the
-  * polyinstantiator)
-  *
-  * @bug Checked, but never set. Drop?
-  */
-#define LB_INSTANTIATED  0x00080000u
-
  /** The Identifier is observably defined
   */
 #define ID_OBSERV_DEF    0x00100000u
@@ -501,11 +535,6 @@ enum PrimOp {
  /** Marked on an at_define. Indicates that this is a hoisted lambda
   * for a function that has a captured closure, and we therefore need
   * to emit a transition function.
-  *
-  * @bug Please add a comment at gen-c.cxx:821 that explains what the
-  * heck a transition function is!
-  * 
-  * > Added a comment.
   */
 #define LAM_NEEDS_TRANS  0x01000000u
  /** inner_ref is an indexing-ref when clear, indicated inner-ref is a
@@ -550,7 +579,7 @@ enum PrimOp {
 /* Add All **AST Flags** that must be masked from definition before
    setting onto the use cases */
 
-#define MASK_FLAGS_FROM_USE    (TVAR_IS_DEF | ID_IS_CTOR | ID_ENV_COPY |\
+#define MASK_FLAGS_FROM_USE    (ID_IS_CTOR | ID_ENV_COPY |\
 				DEF_IS_ENTRYPT )
 #define MASK_FLAGS2_FROM_USE   (ID_IS_CAPTURED)
 
@@ -741,9 +770,9 @@ struct EnvSet {
 
   boost::shared_ptr<AST> defForm;
 
-  /** Used in the case of loop, tail-recursion
-   *
-   * @bug OK, but for *what*?
+  /** Used in the case of tail-recursion to in-place update the
+   *  function-arguments with new values before jumping to the start
+   *  of the function.
    */
   boost::shared_ptr<AST> defbps;
   
@@ -929,7 +958,14 @@ struct EnvSet {
    * etc.
    *
    * @bug This needs an explation of why those fields should be
-   * cleared. It also needs a better procedure name. */
+   * cleared. It also needs a better procedure name.
+   *
+   * > The flags are cleared because (1) we don't need them since new
+   * > ASTs are almost immediately subject to resolver and type check.
+   * > (2) We sometimes start from a copy of an AST and use it in a
+   * > way that the original symbolDef/type are no longer valid, so
+   * > clearing immediately.
+   */
   boost::shared_ptr<AST> getDCopy();
 
   /** @briefRename identifier @p from to @p to within AST named by @p

@@ -599,7 +599,6 @@ resolve(std::ostream& errStream,
 	       (ast->Flags & ID_IS_TVAR)) {
 	      bindIdentDef(ast, env, identType, currLB, flags);
 	      ast->symbolDef = ast;
-	      ast->Flags |= TVAR_IS_DEF;
 	      //errStream << "Created new ident for " << ast->s
 	      //	      << " identType = " 
 	      //              << identTypeToString(ast->identType)

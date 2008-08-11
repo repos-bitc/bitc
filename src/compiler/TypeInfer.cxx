@@ -309,7 +309,25 @@ UnifyLetBinds(std::ostream& errStream, shared_ptr<AST> lbs,
     // always.
     CHKERR(errFree, unify(errStream, trail, id->loc, expr->symType,
 			  MBF(id->symType), uflags));
+
     lb->symType = id->symType;
+
+    // In the case of heuristic inference, fix the top-most level
+    // mutability based on the lexical usage analysis of the
+    // identifier. This must be done in the case of local variables
+    // only. So, the code is within unifyletbinds
+    if(Options::heuristicInference) {
+      shared_ptr<Type> idType = id->symType->getType();
+
+      if((id->Flags2 & ID_IS_MUTATED) && !idType->isMutable()) {
+	std::stringstream ss;  
+	shared_ptr<Type> mTv = Type::make(ty_mutable, newTvar());
+	
+	// Not reporting an error here, since it will be reported
+	// later when the identifier is actually used.
+	unify(ss, trail, id->loc, idType, mTv, uflags);
+      }
+    }
   }
   return errFree;
 }
@@ -1539,7 +1557,8 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
 
   return errFree;
 }
-  
+
+#if 0  
 static bool
 CheckLetrecFnxnRestriction(std::ostream &errStream, shared_ptr<AST> ast)
 {
@@ -1583,6 +1602,7 @@ CheckLetrecFnxnRestriction(std::ostream &errStream, shared_ptr<AST> ast)
   }
   return errFree;
 }
+#endif
 
 static bool
 typeInfer(std::ostream& errStream, shared_ptr<AST> ast, 
@@ -3186,7 +3206,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       if(t1->isUType()) {
 	ast->astType = at_sel_ctr;
-	ast->Flags2 &= ~AST_IS_LOCATION;	
 	TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail, USE_MODE, TI_COMP2);
 	break;

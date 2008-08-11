@@ -779,7 +779,7 @@ generalizePat(std::ostream& errStream,
   // Individual identifiers' TypeScheme will be updated after the 
   // pattern is generalized as a whole.
   shared_ptr<TypeScheme> sigma = TypeScheme::make(bp->symType, bp, tcc);
-  
+
   CHKERR(errFree, 
 	 sigma->generalize(errStream, errLoc, 
 			   gamma, instEnv, expr, parentTCC,

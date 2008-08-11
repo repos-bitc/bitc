@@ -121,7 +121,6 @@ warnTmp(std::ostream &errStream, shared_ptr<AST> ast)
   case at_array_nth:
   case at_vector_nth:
   case at_deref:
-    // AST_IS_LOCATION
     return true;
     
   case at_tqexpr:

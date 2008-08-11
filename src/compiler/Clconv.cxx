@@ -65,15 +65,6 @@ using namespace sherpa;
  
 typedef set<shared_ptr<AST> > AstSet;
 
-static void
-markRecBound(shared_ptr<AST> ast)
-{
-  for(size_t c=0; c < ast->children.size(); c++)
-    markRecBound(ast->child(c));
-  if (ast->astType == at_ident)
-    ast->Flags2 |= ID_IS_RECBOUND;
-}
-
 /**
  * @brief Mark all defining occurrences that are closed over so that
  * we can later rewrite them.
@@ -81,7 +72,7 @@ markRecBound(shared_ptr<AST> ast)
 static void
 clearusedef(shared_ptr<AST> ast)
 {
-  ast->Flags2 &= ~(ID_IS_DEF|ID_IS_USE|ID_IS_CLOSED|ID_IS_CAPTURED|ID_NEEDS_HEAPIFY|ID_IS_RECBOUND);
+  ast->Flags2 &= ~(ID_IS_DEF|ID_IS_USE|ID_IS_CLOSED|ID_IS_CAPTURED|ID_NEEDS_HEAPIFY);
 
   for(size_t c=0; c < ast->children.size(); c++)
     clearusedef(ast->child(c));
@@ -581,8 +572,6 @@ findusedef(std::ostream &errStream,
 				   USE_MODE, boundVars, freeVars));
 	CHKERR(errFree, findusedef(errStream, topAst, lb->child(0), 
 				   LOCAL_MODE, boundVars, freeVars));
-	if (ast->astType == at_letrec)
-	  markRecBound(lb->child(0));
       }
       
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(1), 
