@@ -654,6 +654,14 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
   return strm;
 }
 
+/** @bug shap does not understand several issues here. First, what
+ * does each of these marks mean? Second, why on earth should we
+ * believe that 26 marks is a magic number. If so, then each of these
+ * marks must have some specific associated case, and should be named
+ * accordingly.
+ *
+ * The current mark naming seems very bad.
+ */
 // Markers used for type traversal
 #define MARK1   0x0000001u
 #define MARK2   0x0000002u
