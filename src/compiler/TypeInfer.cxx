@@ -140,7 +140,7 @@ bindIdentDef(shared_ptr<AST> ast,
 	     unsigned long flags)
 {
   if(!ast->symType) {
-    if(ast->Flags & ID_IS_TVAR)
+    if(ast->isIdentType(Id_tvar))
       ast->symType = newTvar();
     else
       ast->symType = MBF(newTvar()); 
@@ -149,7 +149,7 @@ bindIdentDef(shared_ptr<AST> ast,
   shared_ptr<TypeScheme> sigma = TypeScheme::make(ast->symType, ast);
   ast->scheme = sigma;
   
-  if (ast->Flags & ID_IS_TVAR) {
+  if (ast->isIdentType(Id_tvar)) {
     assert(flags & TI_TYP_EXP);
     bindFlags |= BF_NO_MERGE;
     ast->tvarLB->envs.gamma->addBinding(ast->s, sigma);
@@ -168,13 +168,8 @@ Instantiate(shared_ptr<AST> ast, shared_ptr<TypeScheme> sigma)
   if(ast->symbolDef)
     ast = ast->symbolDef;
   
-  // Need to copy structure/union definitions at all times even though
-  // there might not be any type variables. 
-  // The ID_IS_CTOR test alone does not capture union type
-  // definitions. It is only set for the structre constructor, each
-  // constructor of a union definition and excception constructors.
   shared_ptr<TypeScheme> ins = GC_NULL;
-  if(ast->Flags & ID_ENV_COPY) 
+  if(ast->isIdentType(Idc_ctor) || ast->isIdentType(Id_union))
     ins = sigma->ts_instance_copy();
   else
     ins = sigma->ts_instance();
@@ -763,11 +758,6 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
   // Add Ftvs so that they get generalized in future uses
   addTvsToSigma(errStream, tvList, sigma, trail); 
   
-  // Mark that the structure must always be copied.
-  // It is important that this step be done late so that the recursive
-  // uses do not prompt copy.
-  sIdent->Flags |= ID_ENV_COPY;
-
   // In case of value type definitions, mark all those  
   // type arguments that are candidiates for copy-compatibility.
   markCCC(st);
@@ -928,7 +918,6 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
   // It is important that this step be done late so that the recursive
   // uses do not prompt copy.
   addTvsToSigma(errStream, tvList, sigma, trail);
-  uIdent->Flags |= ID_ENV_COPY;
   
   // In case of value type definitions, mark all those  
   // type arguments that are candidiates for copy-compatibility.
@@ -944,7 +933,6 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
     shared_ptr<AST> ctrId = ctr->child(0);   
     addTvsToSigma(errStream, tvList, ctrId->scheme, trail);
     gamma->addBinding(ctrId->s, ctrId->scheme);
-    ctrId->Flags |= ID_ENV_COPY;   
     
     // Solve current Predicates.
     // Since we all share the same constraints, automatically solved.
@@ -1838,7 +1826,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	    // taken care of by the symbol resolver.  So, it is safe
 	    // to add this type to Gamma now.
 
-	    if((ast->identType == id_type) && (ast->Flags & ID_IS_TVAR)) {
+	    if(ast->isIdentType(Id_tvar)) {
 	      sigma = bindIdentDef(ast, gamma, 0, flags);	      
 	    }
 	    else {  
@@ -2205,7 +2193,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_defexception:
     {
       shared_ptr<AST> ctr = ast->child(0);
-      ctr->Flags |= ID_ENV_COPY;   
 
       // Maybe, we have a prior declaration?
       shared_ptr<TypeScheme> declTS = gamma->getBinding(ctr->s);
@@ -3559,11 +3546,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<AST> ctr = ast->child(0);
 
       if((ctr->astType == at_ident) &&
-	 (ctr->symbolDef->Flags & ID_IS_CTOR)) {
+	 (ctr->symbolDef->isIdentType(Idc_uctor))) {
 	// Constructor direct usage
       }
       else if ((ctr->astType == at_fqCtr) &&
-	       (ctr->child(1)->symbolDef->Flags & ID_IS_CTOR)) {
+	       (ctr->child(1)->symbolDef->isIdentType(Idc_uctor))) {
 	// Constructor qualified usage 
       }
       else {
@@ -3658,8 +3645,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       // Structure constructor cannot be a mutable or maybe type.
       shared_ptr<Type> t = ctr->symType->getType();
       if((ctr->astType != at_ident) ||
-	 ((ctr->symbolDef->Flags & ID_IS_CTOR) == 0) ||
-	 (!t->isStruct())) {
+	 (!ctr->symbolDef->isIdentType(Id_struct))) {
 	errStream << ctr->loc
 		  << ": Expected structure"
 		  << " constructor taking at least one argument."

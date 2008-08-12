@@ -84,7 +84,7 @@ cl_HoistInstLam(shared_ptr<UocInfo> uoc)
 	  shared_ptr<AST> newDef = AST::make(at_define, meth->loc);
 
 	  shared_ptr<AST> lamName = AST::genSym(meth, "lam");
-	  lamName->identType = id_value;
+	  lamName->identType = Id_value;
 	  lamName->Flags |= ID_IS_GLOBAL;
 
 	  shared_ptr<AST> lamPat = AST::make(at_identPattern, meth->loc, lamName);

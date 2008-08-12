@@ -67,29 +67,20 @@ struct Instance;
 /** @brief Different classifications of identifiers that we might
  *  encounter. 
  *  
- *  > This enumeration performs a dual role:
- *  > 1) As as AST field, it stores the classification of the
- *  >    (identifier) AST
- *  >    
- *  > 2) As an argument to the symbol resolver, it notes the
- *  >    correct kind of identifier expected in a context.
- *  >    
- *  > Certain identifiers have multiple types or roles. 
- *  > For example:   
- *  > a) Structure type name: type and value constructor    
- *  > b) Union constructor with zero arguments: value and constructor   
- *  >    
- *  > That is, a union constructor such as nil can be used in a 
- *  > context that identifies either id_value or id_constructor.   
- *  > Therefore, some AST flags are used in tandem with identType   
- *  > in such cases. It is possible to remove identType field   
- *  > completely from ASTs and just use flag markings on ASTs.
- *  > We can then switch over the resolver's identType and check for
- *  > appropiate flags in the symbol resolver. This approach of using
- *  > both identType and flags is used since it simplifies the
- *  > checking in the common case to
- *  > argument-identType == ast->identType 
- * 
+ *  This enumeration performs a dual role:
+ *  1) As as AST field, it stores the classification of the
+ *    (identifier) AST
+ *      
+ *  2) As an argument to the symbol resolver, it notes the
+ *     correct kind of identifier expected in a context.
+ *      
+ *  Certain identifiers have multiple roles. For example:   
+ *  a) Structure type name: type and value constructor    
+ *  b) Union constructor with zero arguments: value and constructor   
+ *  
+ *  Therefore, we define certain group classifications after the
+ *  individual identTypes, and implement a is-a relationship that maps
+ *  identGroups to identTypes.
  */
 enum IdentType {
   /** @brief An identifier whose classification is not yet decided. 
@@ -97,49 +88,60 @@ enum IdentType {
    * These should no longer exist after the symbol resolution pass,
    * except in temporary ASTs that are introduced for expediency in
    * various later passes and then resolved. */
-  id_unresolved,
-  /** @brief Type name or type variable.
-   * > That is, this identifier can be legally used in a type
-   * > context.
-   *
-   * Flagged ID_IS_CTOR if this is a type constructor name.
-   *
-   * @bug The previous comment here read "possibly ID_IS_CTOR". I do
-   * not understand why such a case should arise, given that we have a
-   * separate classification for id_constructor. When is it
-   * appropriate for an identifier to be id_type and simultaneously be
-   * flagged ID_IS_CTOR?
-   * > Structure names -- case (a) above.
-   * > ID_IS_CTOR is not marked in the case of union name, type variables.
-   */
-  id_type,
-  /** @bug needs documentation 
-   * > 
-   * > For all identifiers that denote value definitions. That is,
-   * > identifiers that are either defined using define, recdef, let,
-   * > letrec, or do or proclaimed use proclaim.
-   * > These identifiers can be used in value contexts.
-   */
-  id_value,
-  /** Constructor names. Implies ID_IS_CTOR
-   *
-   * @bug I hope this is wrong. If it implies ID_IS_CTOR, then
-   * ID_IS_CTOR should always be set. Is that what is meant here? 
-   * 
-   * > ID_IS_CTOR is always set when an identifier is id_constructor
-   * > but it is not true the other way. That is, ID_IS_CONSTRUCTOR
-   * > is set in other cases (ex: for id_type on structure names).
-   */
-  id_constructor,
-  /** @brief Structure or union field name. */
-  id_field,			// field name
-  /** @brief Identifier is a type class name. */
-  id_typeclass,
-  //  id_module,
-  /** @brief Identifier is an interface name. */
-  id_interface,
-};
+  Id_unresolved,
+  
+  /** @brief Type variables */
+  Id_tvar,
 
+  /** @brief Union/repr name */
+  Id_union,
+
+  /** @brief Structure type name */
+  Id_struct,
+
+  /** @brief Type class name */
+  Id_typeclass,
+
+  /** @brief Type class method name */
+  Id_method,
+
+  /** @brief Structure or union constructor field name */
+  Id_field,
+
+  /** @brief Interface name -- this is the local name defined in this
+   *  module, not the fully qualified name  */
+  Id_interface,
+
+  /** @brief Any identifier defined at define, let, lambda,
+   *  do, switch, case */
+  Id_value,
+
+  /** @brief Union constructor having >=1 argument */
+  Id_ucon,
+
+  /** @brief Union constructor taking no arguments */
+  Id_ucon0,
+  
+  /** @brief Anything below here is a category that is some union of
+   *  IdentTypes above */
+  Idc_FIRST_CATEGORY,
+  
+  /** @brief Type = id_tvar || id_union || id_struct */
+  Idc_type = Idc_FIRST_CATEGORY,
+  
+  /** @brief Value = id_value || id_ucon0 || id_method */
+  Idc_value,
+
+  /** @brief union Constructor =  id_ucon || id_ucon0 */
+  Idc_uctor,
+  
+  /** @brief Constructor =  id_struct || id_ucon || id_ucon0 */
+  Idc_ctor,
+
+  /** @brief Applicable value/constructor =  idc_value || id_ctor */
+  Idc_apply,
+};
+ 
 enum PrimOp {
   op_equals,
   op_plus,
@@ -152,24 +154,6 @@ enum PrimOp {
  std::string identTypeToString(IdentType id);
 
 /* Declarations for AST FLAGS */
-/** @brief Identifier is a type variable.
- *
- * @bug Why is this not an identifier category?
- * 
- * > Type variables have identType id_type, since type variables can
- * > be used in type contexts. The ID_IS_TVAR conveys additional
- * > information.
- */
-#define ID_IS_TVAR       0x00000001u
-/** @brief Identifier is a constructor.
- *
- * @bug Why is this not an identifier category?
- * > There is id_constructor category. This flag identifies
- * > identifiers that are type-names, that can also function as
- * > constructors (ex: structure names). Please see comment above
- * > the identtype enumeration definition.
- */
-#define ID_IS_CTOR       0x00000002u
 /** @brief Identifier is bound in type-level scope. */
 #define ID_IS_GLOBAL     0x00000020u
 /** @brief Identifier was internally generated by the compiler. */
@@ -186,14 +170,6 @@ enum PrimOp {
  * > strings. 
  */
 #define DEF_DECLARED     0x00000800u
- 
-/** Marked for type constructors and value constructors defined by
- * defstruct, defunion, and defexception. The type-scheme for such
- * definitions must be copied even if there are no free type variables
- * within them.
- */
-#define ID_ENV_COPY       0x00002000u 
-
  /** Set in the tail recursion analysis pass to indicate that a
  * use-occurrence of an identifier is a reference to the function
  * currently being defined. Consulted in the SSA pass to add an
@@ -250,18 +226,6 @@ enum PrimOp {
  * compiler.
  */
 #define ID_IS_PRIVATE    0x00200000u
-/** Identifier is a typeclass method name.
- *
- * @bug I remain horribly confused about which things are identifier
- * categories and which things are identifier flags. I would have
- * expected this one to be an identifier category.
- *
- * > Type classe methods require some special treatement at certain
- * > times, but in general can be used in contests where a value is
- * > required. So, the identType is id_value, but this flag conveys
- * > extra information.
- */
-#define ID_IS_METHOD     0x00400000u  // Typeclass method definitions
 /** Marks a definition that is an external program entry point, and
  * therefore a seed for polyinstantiation.
  */
@@ -582,8 +546,7 @@ enum PrimOp {
 /* Add All **AST Flags** that must be masked from definition before
    setting onto the use cases */
 
-#define MASK_FLAGS_FROM_USE    (ID_IS_CTOR | ID_ENV_COPY |\
-				DEF_IS_ENTRYPT )
+#define MASK_FLAGS_FROM_USE    (DEF_IS_ENTRYPT)
 #define MASK_FLAGS2_FROM_USE   (ID_IS_CAPTURED)
 
 struct AST;
@@ -852,6 +815,7 @@ public:
   bool isLocation();
   bool isLiteral();
   bool isTopLevelForm();
+  bool isIdentType(IdentType idt);
   bool leadsToTopLevelForm();
   void clearTypes(); // Clear the sumType and scheme fields 
                      // of this AST and ALL children RECURSIVELY.

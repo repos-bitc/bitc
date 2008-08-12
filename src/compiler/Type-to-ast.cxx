@@ -71,7 +71,7 @@ Type::asAST(const sherpa::LexLoc &loc,
   if(t->pMark >= 1) {
     ast = AST::make(at_ident, loc);
     ast->s = tvP->tvName(t);
-    ast->Flags |= (ID_IS_TVAR);
+    ast->identType = Id_tvar;
     
     return ast;
   }
@@ -180,7 +180,7 @@ Type::asAST(const sherpa::LexLoc &loc,
     {
       ast = AST::make(at_ident, loc);
       ast->s = tvP->tvName(t);
-      ast->Flags |= (ID_IS_TVAR);
+      ast->identType = Id_tvar;
       break;
     }
 

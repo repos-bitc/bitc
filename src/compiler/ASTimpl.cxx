@@ -610,24 +610,38 @@ std::string
 identTypeToString(IdentType id) 
 {
   switch (id) {
-  case id_unresolved:
-    return "Unresolved";
-  case id_value:
-    return "Value";
-  case id_type:
+  case Id_unresolved:
+    return "unresolved";
+  case Id_tvar:
+    return "type-variable";
+  case Id_union:
+    return "union";
+  case Id_struct:
+    return "struct";
+  case Id_typeclass:
+    return "typeclass";
+  case Id_method:
+    return "method";
+  case Id_field:
+    return "field";
+  case Id_interface:
+    return "interface";
+  case Id_value:
+    return "value";
+  case Id_ucon:
+    return "union-ctr";
+  case Id_ucon0:
+    return "union-ctr0";
+  case Idc_type:
     return "Type";
-  case id_constructor:
+  case Idc_value:
+    return "Value";
+  case Idc_ctor:
     return "Constructor";
-  case id_field:
-    return "Field";
-  case id_typeclass:
-    return "Type-class";
-    //  case id_module:
-    //    return "module";
-  case id_interface:
-    return "Interface";
-  default:
-    return "IMPOSSIBLE";
+  case Idc_uctor:
+    return "Union-ctor";
+  case Idc_apply:
+    return "Applicable-value";
   }
 }
 
@@ -741,21 +755,16 @@ bool
 AST::isUnionLeg()
 {
   assert(astType == at_ident);
-  if(((identType == id_constructor) || 
-      (identType == id_value && (Flags & ID_IS_CTOR))) &&
-     symType->isUType())
-    return true;
-  else
-    return false;     
+  return isIdentType(Idc_uctor);
 }
 
 bool
 AST::isMethod()
 {  
-  if((astType == at_ident) && (Flags & ID_IS_METHOD))
+  if((astType == at_ident) && isIdentType(Id_method))
     return true;
-  
-  return false;
+  else
+    return false;
 }
 
 shared_ptr<AST> 
@@ -828,4 +837,23 @@ AST::isLiteral()
   default:
     return false;
   }
+}
+
+bool 
+AST::isIdentType(IdentType t)
+{
+  return ((identType == t) ||
+	  ((t == Idc_type) && ((identType == Id_tvar) ||
+			       (identType == Id_union) || 
+			       (identType == Id_struct))) ||
+	  ((t == Idc_value) && ((identType == Id_value) || 
+				(identType == Id_ucon0) || 
+				(identType == Id_method))) ||
+	  ((t == Idc_ctor)  && ((identType == Id_struct) || 
+				(identType == Id_ucon) || 
+				(identType == Id_ucon0))) ||
+	  ((t == Idc_uctor) && ((identType == Id_ucon) || 
+				(identType == Id_ucon0))) ||
+	  ((t == Idc_apply) && (isIdentType(Idc_value) ||
+				isIdentType(Idc_ctor))));
 }

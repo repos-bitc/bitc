@@ -255,11 +255,7 @@ TopInit(std::ostream& errStream,
   case at_ident:
     {
       // We must only deal with value definitions.
-      assert(ast->identType == id_value);
-      // We assume that type variable scoping issues
-      // are handled by the resolver.
-      if (ast->Flags & ID_IS_TVAR)
-	break;
+      assert(ast->isIdentType(Id_value));
       
       if (ast->isMethod())
 	break;

@@ -683,7 +683,7 @@ tvarInst(shared_ptr<AST> ast, shared_ptr<AST> scope, AstMap &newBinds)
     {
       // We are only concerned with type variables
       // that are scoped at ``scope''
-      if((ast->Flags & ID_IS_TVAR) == 0)
+      if(!ast->isIdentType(Id_tvar))
 	return ast;
      
       shared_ptr<AST> def = ast->symbolDef;
@@ -785,8 +785,7 @@ getIDFromInstantiation(shared_ptr<AST> oldDefID, shared_ptr<AST> newDef)
   shared_ptr<AST> oldDef = oldDefID->defForm;
   
   // If we are looking for a constructor, find it and return 
-  if(oldDefID->isUnionLeg()) {
-    oldDef->children[4] = oldDef->children[4];
+  if((oldDef->astType == at_defunion) && oldDefID->isUnionLeg()) {
     shared_ptr<AST> oldCtrs = oldDef->child(4);
     shared_ptr<AST> newCtrs = newDef->child(4);
     shared_ptr<AST> newCtr = GC_NULL;
@@ -1023,7 +1022,7 @@ UocInfo::recInstantiate(ostream &errStream,
       // ii) In the case of type-qualifications in the case of value
       //    definitions, rec-instantiate is never called on the
       //    type-part. We alyays emit the type-AST by hand.
-      assert((ast->Flags & ID_IS_TVAR) == 0);
+      assert(!ast->isIdentType(Id_tvar));
 
       // We should only be handling use-occurences.
       // Defining occurences are handled by their respective container
@@ -2018,7 +2017,7 @@ UocInfo::doInstantiate(ostream &errStream,
    arbitrarily choosen as the defining occurence. But, it must
    also be considered as a use occurence.
    if(ast == def)
-   assert(def->Flags & ID_IS_TVAR);
+   assert(def->isIdentType(id_tvar));
    Type variables could have been present at defining occuernces in
    this case.
 

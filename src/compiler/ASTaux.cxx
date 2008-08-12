@@ -125,7 +125,7 @@ shared_ptr<AST>
 AST::Use()
 {
   assert(astType == at_ident);
-  assert(!symbolDef || (Flags & ID_IS_TVAR));
+  assert(!symbolDef || isIdentType(Id_tvar));
   shared_ptr<AST> idUse = getDCopy();
   idUse->Flags  &= ~MASK_FLAGS_FROM_USE;
   idUse->Flags2 &= ~MASK_FLAGS2_FROM_USE;    

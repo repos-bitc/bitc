@@ -304,7 +304,7 @@ ssa(std::ostream& errStream,
   case at_identPattern:
     {
       if((ast->child(0)->symbolDef) &&
-	 (ast->child(0)->symbolDef->Flags & ID_IS_CTOR))
+	 (ast->child(0)->isIdentType(Idc_ctor)))
 	break;
 
       addIL(identList, ast->child(0));
