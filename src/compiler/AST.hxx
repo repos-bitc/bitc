@@ -924,6 +924,7 @@ public:
    *   
    * @bug WHAT is propagated upwards into these? 
    * > The value of field_bits is propagated.
+   * @bug FROM WHERE?
    */
   size_t field_bits;
   
@@ -959,8 +960,10 @@ public:
    *
    * > Fixed the comment to be singular. There is only one structure
    * > defintion for any constructor
+   *
+   * @bug No you didn't. "Definitions" is still plural, so I still
+   * don't know what the heck this means.
    */
-
   boost::shared_ptr<TypeScheme> stSigma;
 
   /** Pointer to the constructor that holds such a structure.
