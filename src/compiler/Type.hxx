@@ -661,6 +661,17 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
  * accordingly.
  *
  * The current mark naming seems very bad.
+ *
+ * > The following marks are present on types to ensure that
+ * > procedures that recurse over the structure of equi-recursive
+ * > types (example, list type that contains a pointer to itself) do
+ * > not recurse infinitely. We only need to use differernt markers
+ * > for procedures that are mutually recursive, or are just used
+ * > simultaneously. Here, we just use different markers for each
+ * > procedure that is recursive over type-structure. 
+ * > We can name each marker based on the procedure that uses it, but
+ * > we should remember that the marker does not really have anything
+ * > to do with the semantics of those procedures.
  */
 // Markers used for type traversal
 #define MARK1   0x0000001u
