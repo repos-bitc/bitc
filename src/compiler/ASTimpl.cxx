@@ -610,27 +610,27 @@ std::string
 identTypeToString(IdentType id) 
 {
   switch (id) {
-  case Id_unresolved:
+  case id_unresolved:
     return "unresolved";
-  case Id_tvar:
+  case id_tvar:
     return "type-variable";
-  case Id_union:
+  case id_union:
     return "union";
-  case Id_struct:
+  case id_struct:
     return "struct";
-  case Id_typeclass:
+  case id_typeclass:
     return "typeclass";
-  case Id_method:
+  case id_method:
     return "method";
-  case Id_field:
+  case id_field:
     return "field";
-  case Id_interface:
+  case id_interface:
     return "interface";
-  case Id_value:
+  case id_value:
     return "value";
-  case Id_ucon:
+  case id_ucon:
     return "union-ctr";
-  case Id_ucon0:
+  case id_ucon0:
     return "union-ctr0";
   case Idc_type:
     return "Type";
@@ -761,7 +761,7 @@ AST::isUnionLeg()
 bool
 AST::isMethod()
 {  
-  if((astType == at_ident) && isIdentType(Id_method))
+  if((astType == at_ident) && isIdentType(id_method))
     return true;
   else
     return false;
@@ -843,17 +843,17 @@ bool
 AST::isIdentType(IdentType t)
 {
   return ((identType == t) ||
-	  ((t == Idc_type) && ((identType == Id_tvar) ||
-			       (identType == Id_union) || 
-			       (identType == Id_struct))) ||
-	  ((t == Idc_value) && ((identType == Id_value) || 
-				(identType == Id_ucon0) || 
-				(identType == Id_method))) ||
-	  ((t == Idc_ctor)  && ((identType == Id_struct) || 
-				(identType == Id_ucon) || 
-				(identType == Id_ucon0))) ||
-	  ((t == Idc_uctor) && ((identType == Id_ucon) || 
-				(identType == Id_ucon0))) ||
+	  ((t == Idc_type) && ((identType == id_tvar) ||
+			       (identType == id_union) || 
+			       (identType == id_struct))) ||
+	  ((t == Idc_value) && ((identType == id_value) || 
+				(identType == id_ucon0) || 
+				(identType == id_method))) ||
+	  ((t == Idc_ctor)  && ((identType == id_struct) || 
+				(identType == id_ucon) || 
+				(identType == id_ucon0))) ||
+	  ((t == Idc_uctor) && ((identType == id_ucon) || 
+				(identType == id_ucon0))) ||
 	  ((t == Idc_apply) && (isIdentType(Idc_value) ||
 				isIdentType(Idc_ctor))));
 }

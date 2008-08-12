@@ -1081,7 +1081,7 @@ toc(std::ostream& errStream,
       else
 	id = ast;
       
-      if(id->isIdentType(Id_ucon0)) {
+      if(id->isIdentType(id_ucon0)) {
 	shared_ptr<Type> t = id->symType->getBareType(); 
 	if(t->kind == ty_uvalv || t->kind == ty_uvalr ||
 	   t->kind == ty_exn) {

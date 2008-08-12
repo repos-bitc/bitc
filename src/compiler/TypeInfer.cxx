@@ -140,7 +140,7 @@ bindIdentDef(shared_ptr<AST> ast,
 	     unsigned long flags)
 {
   if(!ast->symType) {
-    if(ast->isIdentType(Id_tvar))
+    if(ast->isIdentType(id_tvar))
       ast->symType = newTvar();
     else
       ast->symType = MBF(newTvar()); 
@@ -149,7 +149,7 @@ bindIdentDef(shared_ptr<AST> ast,
   shared_ptr<TypeScheme> sigma = TypeScheme::make(ast->symType, ast);
   ast->scheme = sigma;
   
-  if (ast->isIdentType(Id_tvar)) {
+  if (ast->isIdentType(id_tvar)) {
     assert(flags & TI_TYP_EXP);
     bindFlags |= BF_NO_MERGE;
     ast->tvarLB->envs.gamma->addBinding(ast->s, sigma);
@@ -169,7 +169,7 @@ Instantiate(shared_ptr<AST> ast, shared_ptr<TypeScheme> sigma)
     ast = ast->symbolDef;
   
   shared_ptr<TypeScheme> ins = GC_NULL;
-  if(ast->isIdentType(Idc_ctor) || ast->isIdentType(Id_union))
+  if(ast->isIdentType(Idc_ctor) || ast->isIdentType(id_union))
     ins = sigma->ts_instance_copy();
   else
     ins = sigma->ts_instance();
@@ -1826,7 +1826,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	    // taken care of by the symbol resolver.  So, it is safe
 	    // to add this type to Gamma now.
 
-	    if(ast->isIdentType(Id_tvar)) {
+	    if(ast->isIdentType(id_tvar)) {
 	      sigma = bindIdentDef(ast, gamma, 0, flags);	      
 	    }
 	    else {  
@@ -3645,7 +3645,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       // Structure constructor cannot be a mutable or maybe type.
       shared_ptr<Type> t = ctr->symType->getType();
       if((ctr->astType != at_ident) ||
-	 (!ctr->symbolDef->isIdentType(Id_struct))) {
+	 (!ctr->symbolDef->isIdentType(id_struct))) {
 	errStream << ctr->loc
 		  << ": Expected structure"
 		  << " constructor taking at least one argument."

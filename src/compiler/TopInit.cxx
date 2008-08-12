@@ -255,7 +255,7 @@ TopInit(std::ostream& errStream,
   case at_ident:
     {
       // We must only deal with value definitions.
-      assert(ast->isIdentType(Id_value));
+      assert(ast->isIdentType(id_value));
       
       if (ast->isMethod())
 	break;

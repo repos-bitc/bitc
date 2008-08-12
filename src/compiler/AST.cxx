@@ -60,7 +60,7 @@ AST::AST(const AstType at)
   astType = at;
 
   ID = ++(AST::astCount);
-  identType = Id_unresolved;
+  identType = id_unresolved;
   Flags = 0x0u;
   Flags2 = 0x0;
   isDecl = false;
@@ -87,7 +87,7 @@ AST::AST(const AstType at, const AST_TOKEN_TYPE& tok)
   s = tok.str;
 
   ID = ++(AST::astCount);
-  identType = Id_unresolved;
+  identType = id_unresolved;
   Flags = 0x0u;
   Flags2 = 0x0;
   isDecl = false;
@@ -113,7 +113,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc)
   loc = _loc;
 
   ID = ++(AST::astCount);
-  identType = Id_unresolved;
+  identType = id_unresolved;
   Flags = 0x0u;
   Flags2 = 0x0;
   isDecl = false;
@@ -141,7 +141,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   addChild(child1);
 
   ID = ++(AST::astCount);
-  identType = Id_unresolved;
+  identType = id_unresolved;
   Flags = 0x0u;
   Flags2 = 0x0;
   isDecl = false;
@@ -171,7 +171,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   addChild(child2);
 
   ID = ++(AST::astCount);
-  identType = Id_unresolved;
+  identType = id_unresolved;
   Flags = 0x0u;
   Flags2 = 0x0;
   isDecl = false;
@@ -203,7 +203,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   addChild(child3);
 
   ID = ++(AST::astCount);
-  identType = Id_unresolved;
+  identType = id_unresolved;
   Flags = 0x0u;
   Flags2 = 0x0;
   isDecl = false;
@@ -237,7 +237,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   addChild(child4);
 
   ID = ++(AST::astCount);
-  identType = Id_unresolved;
+  identType = id_unresolved;
   Flags = 0x0u;
   Flags2 = 0x0;
   isDecl = false;
@@ -273,7 +273,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   addChild(child5);
 
   ID = ++(AST::astCount);
-  identType = Id_unresolved;
+  identType = id_unresolved;
   Flags = 0x0u;
   Flags2 = 0x0;
   isDecl = false;

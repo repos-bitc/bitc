@@ -871,7 +871,7 @@ method_decls: method_decls method_decl {
 method_decl: ident ':' fntype {
   SHOWPARSE("method_decl -> ident : fntype");
   $1->Flags |= ID_IS_GLOBAL;
-  $1->identType = Id_method;
+  $1->identType = id_method;
   $$ = AST::make(at_method_decl, $1->loc, $1, $3);
 };
 
@@ -2232,7 +2232,7 @@ defident: useident {
 typevar: tk_TypeVar {
   SHOWPARSE("typevar -> <TypeVar=" + $1.str + ">");
   $$ = AST::make(at_ident, $1);
-  $$->identType = Id_tvar;
+  $$->identType = id_tvar;
 }; 
 
 // /* Literal Value Representations */

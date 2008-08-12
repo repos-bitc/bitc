@@ -88,39 +88,39 @@ enum IdentType {
    * These should no longer exist after the symbol resolution pass,
    * except in temporary ASTs that are introduced for expediency in
    * various later passes and then resolved. */
-  Id_unresolved,
+  id_unresolved,
   
   /** @brief Type variables */
-  Id_tvar,
+  id_tvar,
 
   /** @brief Union/repr name */
-  Id_union,
+  id_union,
 
   /** @brief Structure type name */
-  Id_struct,
+  id_struct,
 
   /** @brief Type class name */
-  Id_typeclass,
+  id_typeclass,
 
   /** @brief Type class method name */
-  Id_method,
+  id_method,
 
   /** @brief Structure or union constructor field name */
-  Id_field,
+  id_field,
 
   /** @brief Interface name -- this is the local name defined in this
    *  module, not the fully qualified name  */
-  Id_interface,
+  id_interface,
 
   /** @brief Any identifier defined at define, let, lambda,
    *  do, switch, case */
-  Id_value,
+  id_value,
 
   /** @brief Union constructor having >=1 argument */
-  Id_ucon,
+  id_ucon,
 
   /** @brief Union constructor taking no arguments */
-  Id_ucon0,
+  id_ucon0,
   
   /** @brief Anything below here is a category that is some union of
    *  IdentTypes above */

@@ -683,7 +683,7 @@ tvarInst(shared_ptr<AST> ast, shared_ptr<AST> scope, AstMap &newBinds)
     {
       // We are only concerned with type variables
       // that are scoped at ``scope''
-      if(!ast->isIdentType(Id_tvar))
+      if(!ast->isIdentType(id_tvar))
 	return ast;
      
       shared_ptr<AST> def = ast->symbolDef;
@@ -1022,7 +1022,7 @@ UocInfo::recInstantiate(ostream &errStream,
       // ii) In the case of type-qualifications in the case of value
       //    definitions, rec-instantiate is never called on the
       //    type-part. We alyays emit the type-AST by hand.
-      assert(!ast->isIdentType(Id_tvar));
+      assert(!ast->isIdentType(id_tvar));
 
       // We should only be handling use-occurences.
       // Defining occurences are handled by their respective container

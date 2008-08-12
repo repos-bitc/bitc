@@ -622,7 +622,7 @@ getClenvUse(shared_ptr<AST> ast, shared_ptr<AST> clenvName,
     
     for(size_t i=0; i<tvs.size(); i++) {
       shared_ptr<AST> tv = AST::make(at_ident, ast->loc);
-      tv->identType = Id_tvar;
+      tv->identType = id_tvar;
       tv->s = tv->fqn.ident = tvs[i];
       typeApp->addChild(tv);
     }
@@ -767,7 +767,7 @@ cl_convert_ast(shared_ptr<AST> ast,
       
 	// Note defstruct does not use an identPattern
 	clenvName = AST::genSym(ast, "clenv");
-	clenvName->identType = Id_struct;
+	clenvName->identType = id_struct;
 	clenvName->Flags |= (ID_IS_GLOBAL);
 	defStruct->addChild(clenvName);
       
@@ -807,7 +807,7 @@ cl_convert_ast(shared_ptr<AST> ast,
 
 	for(size_t i=0; i < tvs.size(); i++) {
 	  shared_ptr<AST> tv = AST::make(at_ident, tvlist->loc);
-	  tv->identType = Id_tvar;
+	  tv->identType = id_tvar;
 	  tv->s = tv->fqn.ident = tvs[i];
 	  tvlist->children.push_back(tv);
 	}
@@ -829,7 +829,7 @@ cl_convert_ast(shared_ptr<AST> ast,
 	shared_ptr<AST> newDef = AST::make(at_recdef, ast->loc);
       
 	shared_ptr<AST> lamName = AST::genSym(ast, "lam");
-	lamName->identType = Id_value;
+	lamName->identType = id_value;
 	lamName->Flags |= ID_IS_GLOBAL;
 	
 	shared_ptr<AST> lamType = ast->symType->asAST(ast->loc);
