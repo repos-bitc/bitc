@@ -554,6 +554,22 @@
       </xsl:element>
     </xsl:element>
   </xsl:template>  
+
+  <!-- constOp -->
+  <xsl:template match="constOp" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>lfloor;</xsl:text>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rfloor;</xsl:text>
+  </xsl:template>
+  <!-- const -->
+  <xsl:template match="const" mode="formula">
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>lfloor;</xsl:text>
+    <xsl:apply-templates mode="formula"/>
+    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+    <xsl:text>rfloor;</xsl:text>
+  </xsl:template>
   
   <!-- floorOp -->
   <xsl:template match="floorOp" mode="formula">
@@ -2642,10 +2658,11 @@
     <xsl:apply-templates select="*[1]" mode="formula"/>
     <xsl:choose>
       <xsl:when test = "@optional">	      
-	<xsl:text>[</xsl:text>	  
-	<xsl:call-template name="print.op.qual.bare"/>
-	<xsl:apply-templates select="*[2]" mode="formula"/>
-	<xsl:text>]</xsl:text>    
+	<xsl:element name="font">
+	  <xsl:attribute name="color">blue</xsl:attribute>
+	  <xsl:call-template name="print.op.qual.bare"/>
+	  <xsl:apply-templates select="*[2]" mode="formula"/>
+	</xsl:element>
       </xsl:when>
       <xsl:when test = "@nosp">	      
 	<xsl:call-template name="print.op.qual"/>
@@ -2721,6 +2738,13 @@
     <xsl:if test="*[1]">
       <xsl:call-template name="print.space"/>        
       <xsl:apply-templates select="*[1]" mode="formula"/>
+      <xsl:if test = "@optQual">	      
+	<xsl:element name="font">
+	  <xsl:attribute name="color">blue</xsl:attribute>
+	  <xsl:call-template name="print.op.qual.bare"/>
+	  <xsl:call-template name="print.type"/>
+	</xsl:element>
+      </xsl:if>
       <xsl:call-template name="print.op.eq"/>
       <xsl:if test="@br1">
 	<xsl:element name="br"/>

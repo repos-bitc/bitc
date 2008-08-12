@@ -483,6 +483,7 @@
                                | array
                                | vector
                                | mutable
+                               | const
                                | maybe
                                | struct
                                | union
@@ -640,8 +641,10 @@
 <!ELEMENT ref                  (%anytype.group;)>
 <!ELEMENT array                (%anytype.group;)>
 <!ELEMENT vector               (%anytype.group;)>
+<!ELEMENT constOp              EMPTY>
+<!ELEMENT const                (%anytype.group;)>
 <!ELEMENT mutableOp            EMPTY>
-<!ELEMENT mutable              (%anytype.group;)>
+<!ELEMENT mutable              (%anytype.group;)
 <!ELEMENT maybeOp              EMPTY>
 <!ELEMENT maybe                (%anytype.group;)>
 <!ELEMENT exception            EMPTY>
@@ -1097,11 +1100,11 @@
                                br1     CDATA     #IMPLIED
                                br2     CDATA     #IMPLIED
 >
-
 <!ATTLIST let
                                kind    CDATA     #IMPLIED
                                br1     CDATA     #IMPLIED
                                br2     CDATA     #IMPLIED
+                               optQual (yes|no)  #IMPLIED
 >
 
 <!-- let Kinds -->

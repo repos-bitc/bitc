@@ -117,6 +117,10 @@
               <vExp/>
               <vExp/>
             </Pair>
+            <tqExpr>
+              <vExp/>
+              <type/>
+            </tqExpr>
           </alternatives>
         </bnf>
         <bnf desc="Left Expr">
@@ -126,11 +130,14 @@
             <sLoc/>
             <deref>
               <aExpr/>
-            </deref>
-            
+            </deref>            
             <ith>
               <lExp/>
             </ith>
+            <tqExpr>
+              <lExp/>
+              <type/>
+            </tqExpr>
           </alternatives>
         </bnf>
         <bnf desc="Expressions">
@@ -167,11 +174,15 @@
             <ith>
               <aExpr/>
             </ith>
+            <tqExpr>
+              <aExpr/>
+              <type/>
+            </tqExpr>
           </alternatives>
         </bnfc>
         <bnfc desc="">
           <alternatives>
-            <let kind="x">
+            <let kind="x" optQual="yes">
               <id/>
               <aExpr/>
               <aExpr/>
@@ -259,6 +270,9 @@
               <stype/>
               <ptype/>
             </mbFull>
+            <const>
+              <type/>
+            </const>
           </alternatives>
         </bnf>
         <bnf desc="Type Scheme">          
@@ -362,6 +376,10 @@
               </deref>
               <path/>
             </select>
+            <tqExpr>
+              <lVal/>
+              <type/>
+            </tqExpr>
           </alternatives>
         </bnf>
         <bnf desc="Redex">
@@ -400,7 +418,7 @@
               <aExpr/>
             </Pair>
           </alternatives>
-        </bnfc>	  
+        </bnfc>
         <bnfc desc="">
           <alternatives>
             <Pair>
@@ -410,7 +428,7 @@
             <ith>
               <redex/>
             </ith>
-            <let kind="x">
+            <let kind="x" optQual="yes">
               <id/>
               <redex/>
               <aExpr/>

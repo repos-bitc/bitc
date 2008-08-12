@@ -63,6 +63,46 @@
 	  </eval>
 	</opConc>
       </opRule>
+      <opRule name="E-EraseL">
+	<opPre/>
+	<opConc>
+	  <leval>
+	    <opState>
+	      <stack/>
+	      <heap/>
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>
+	    </opState>
+	    <opState>
+	      <stack/>
+	      <heap/>
+	      <aExpr/>
+	    </opState>
+	  </leval>
+	</opConc>
+      </opRule>
+      <opRule name="E-EraseR">
+	<opPre/>
+	<opConc>
+	  <eval>
+	    <opState>
+	      <stack/>
+	      <heap/>
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>
+	    </opState>
+	    <opState>
+	      <stack/>
+	      <heap/>
+	      <aExpr/>
+	    </opState>
+	  </eval>
+	</opConc>
+      </opRule>
       <opRule name="E-App">
 	<opPre>
 	  <notin>
@@ -547,7 +587,7 @@
 	    <opState>
 	      <stack/>
 	      <heap/>
-	      <let kind="m">              
+	      <let kind="m" optQual="yes">              
 		<id/>
 		<aVal num="1"/>
 		<aExpr num="2"/>
@@ -578,7 +618,7 @@
 	    <opState>
 	      <stack/>
 	      <heap/>
-	      <let kind="p">              
+	      <let kind="p" optQual="yes">              
 		<id/>
 		<aVal num="1"/>
 		<aExpr num="2"/>
