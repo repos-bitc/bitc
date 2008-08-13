@@ -158,7 +158,6 @@ AST::AST(shared_ptr<AST> ast, bool shallowCopyChildren)
   litValue = ast->litValue;
   litBase = ast->litBase;
   isDecl = ast->isDecl;
-  ifName = ast->ifName;
   printVariant = ast->printVariant;
   tagType = ast->tagType;
   field_bits = ast->field_bits;

@@ -796,26 +796,32 @@ resolve(std::ostream& errStream,
       
       RESOLVE(iface, env, lamLevel, USE_MODE, id_interface, 
 	      GC_NULL, flags);
+
       if(!errorFree)
 	break;
 
-      assert(iface->symbolDef->ifName != "");
+      
+      stringstream lookupStream;
+      lookupStream << ":" << iface->s << ":";
+      std::string lookupName = lookupStream.str();
+      shared_ptr<AST> ifNameAst= aliasEnv->getBinding(lookupName);
+      std::string ifName = ifNameAst->s;
+      assert(ifName != "");
       
       shared_ptr<ASTEnvironment > ifenv = iface->symbolDef->envs.env;
       
       if(!ifenv) {
 	errStream << ast->loc << ": "
 		  << "Internal Compiler Error. "
-		  << "Interface " << iface->symbolDef->ifName
+		  << "Interface " << ifName
 		  << " needed by "<< iface->s << " has a NULL environment"
 		  << std::endl;
 	errorFree = false;
 	break;
       }
       
-      FQName importedFQN = FQName(iface->symbolDef->ifName,
-				  ast->child(1)->s);
-
+      FQName importedFQN = FQName(ifName, ast->child(1)->s);
+      
       ast->s = ast->child(0)->s + "." + ast->child(1)->s;
       ast->astType = at_ident;
       ast->identType = ast->child(1)->identType;
@@ -1283,7 +1289,22 @@ resolve(std::ostream& errStream,
       
       RESOLVE(idAst, tmpEnv, lamLevel, DEF_MODE,
 	      id_interface, GC_NULL, flags);
-      idAst->ifName = ifAst->s;
+
+      // For every (importAs local global) add to the alias
+      // environment, the mapping :local: -> ifAst which 
+      // holds the interface name. This is consulted from the
+      // at_usesel case in order to obtain the real name of the
+      // interface for purposes of error diagnostics, and setting the
+      // FQN correctly.
+      // This handling is in liu of using the now retired ifName field
+      // on the idAst AST.
+      stringstream ifNameMap;
+      ifNameMap << ":" << idAst->s << ":";
+      std::string ifNameMapStr = ifNameMap.str();
+
+      aliasEnv->addBinding(ifNameMapStr, ifAst);
+      aliasEnv->setFlags(ifNameMapStr, BF_PRIVATE);
+
       // The interface name must not be exported
       env->setFlags(idAst->s,
 		    ((env->getFlags(idAst->s)) |

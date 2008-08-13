@@ -390,9 +390,8 @@ enum PrimOp {
   * @bug Looking at gen-c.cxx, I'm not entirely convinced that we are
   * handling this correctly in the defrepr case.
   *
-  * > I think it is handled correctly in gen-c.cxx:1468
-  * > I am not sure why you felt that the handling is wrong. can you
-  * > please explain?
+  * @note I think it is handled correctly in gen-c.cxx:1468 I am not
+  * sure why you felt that the handling is wrong. can you please explain?
  */
 #define FLD_IS_DISCM     0x00800000u
  /** Marked on an at_define. Indicates that this is a hoisted lambda
@@ -400,25 +399,17 @@ enum PrimOp {
   * to emit a transition function.
   */
 #define LAM_NEEDS_TRANS  0x01000000u
- /** inner_ref is an indexing-ref when clear, indicated inner-ref is a
-  * selection-ref
+ /** Marks whether the inner_ref is indexing or selecting.
   *
-  * @bug I cannot parse this comment. The words "when set" need to
-  * appear somewhere here.
-  *
-  * @bug And when that is fixed, my follow-up question is "why do we
-  * care?"
-  *
-  * > The semantics of this flag is:
-  * > When set, it is an indexing inner_ref that is of the form
-  * > (inner_ref (dup (array ..))) or (inner_ref (vector ... ))
-  * >
-  * > When clear, it is a selecting inner_ref that is of the form
-  * > (inner_ref (dup (structv ... ))) or (inner_red (structr ... ))
-  * > 
-  * > These two types of inner-ref must be handled differently in most
-  * > passes. For example, the index argument must be independently
-  * > resolved and type checked but the field argumet must not.
+  * When set, it is an indexing inner_ref that is of the form
+  * (inner_ref (dup (array ..))) or (inner_ref (vector ... ))
+  * 
+  * When clear, it is a selecting inner_ref that is of the form
+  * (inner_ref (dup (structv ... ))) or (inner_red (structr ... ))
+  *  
+  * These two types of inner-ref must be handled differently in most
+  * passes. For example, the index argument must be independently
+  * resolved and type checked but the field argumet must not.
   */
 #define INNER_REF_NDX    0x02000000u
  /** Set in the parser to indicate that a parameter identifier is
@@ -571,17 +562,6 @@ struct EnvSet {
    * holds the external identifier string, otherwise it is empty.
    */
   std::string externalName;
-
-  // The IFNAME of an interface in the case of import and provide
-  //
-  // @bug This should probably be retired. It's main surviving purpose
-  // seems to be error diagnostics in most places, and recovering the
-  // interface name of an imported interface. The recovery purpose can
-  // be accomplished equally well by adding a distinguished entry
-  // ":name:" to the aliasEnv of every interface and looking that
-  // up. The advantage to that approach is that we won't need to
-  // carry around a redundant string here in every AST.
-  std::string ifName;
 
   /** A set of environments associated with this ast. 
    * - If this is a local name for an imported interface, these are
