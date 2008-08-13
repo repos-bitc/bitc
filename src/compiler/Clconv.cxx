@@ -592,7 +592,7 @@ cl_rewrite_captured_idents(shared_ptr<AST> ast, shared_ptr<AST> clenvName)
     {
       if (ast->Flags2 & ID_IS_CLOSED) {
 	shared_ptr<AST> clUse = AST::make(at_select, ast->loc);
-	clUse->addChild(clenvName->getDCopy());
+	clUse->addChild(clenvName->getDeepCopy());
 	clUse->addChild(ast);
 
 	ast = clUse;
@@ -668,7 +668,7 @@ cl_convert_ast(shared_ptr<AST> ast,
     shared_ptr<AST> ident = ast->getID();
     if(!ident->decl) {
       shared_ptr<AST> proclaim = AST::make(at_proclaim, ast->loc,
-			      ident->getDCopy(),
+			      ident->getDeepCopy(),
 			      cl_convert_ast(ident->symType->asAST(ast->loc),
 					     outAsts, hoistChildren),
 			      AST::make(at_constraints, ast->loc));
@@ -856,7 +856,7 @@ cl_convert_ast(shared_ptr<AST> ast,
 	  
 	  lamType->child(0)->children.insert(lamType->child(0)->children.begin(),
 					     clType);
-	  clArgPat->addChild(clType->getDCopy());
+	  clArgPat->addChild(clType->getDeepCopy());
 	  argVec->children.insert(argVec->children.begin(), clArgPat);
       
 	  ast->child(1) = cl_rewrite_captured_idents(body, clArgName);

@@ -732,7 +732,7 @@ tvarInst(shared_ptr<AST> ast, shared_ptr<AST> scope, AstMap &newBinds)
 static shared_ptr<AST> 
 buildNewDeclaration(shared_ptr<AST> def, shared_ptr<Type> typ)
 {
-  shared_ptr<AST> ident = def->getID()->getDCopy();
+  shared_ptr<AST> ident = def->getID()->getDeepCopy();
 
   if(ident->externalName.size())
     ident->Flags |= DEF_IS_EXTERNAL;
@@ -1642,7 +1642,7 @@ UocInfo::doInstantiate(ostream &errStream,
     // out when the corresponding let-binding will get instantiated
     // some day.
     if(!globalInst) {
-      shared_ptr<AST> res = ast->getDCopy();
+      shared_ptr<AST> res = ast->getDeepCopy();
       res->symbolDef = GC_NULL;
       NAMKARAN(res, newName);
 

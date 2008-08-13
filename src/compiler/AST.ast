@@ -309,8 +309,18 @@ enum PrimOp {
  * different choice of implemenation approach? Would the approach that
  * I am outlining work? 
  *
- * > Yes. I think that this flag can be removed by using the
- * > externalname field. 
+ * @note The instantiator can be made to work by using the approach
+ * you are suggesting. However, using this flag keeps the name
+ * mangling on the 's' field more regular. This is because, the 
+ * 's' field of all definitions are mangled with a canonical encoding
+ * of their type. If we employ the rule that having an external name
+ * singifies that the identifier has already been mangled, the 
+ * 's' field of definitions for which the programmer provided an
+ * external name will not be mangled at all. However, this still does
+ * not lead to an error because of name collision. We currently
+ * have a rule that definitions with programmer specified external
+ * names cannot be polymorphic, and will therefore be instantiated at
+ * most once.  
  */
 #define IDENT_MANGLED        0x00004000u
 /** Marked for variables defined at non-generalizable
@@ -323,29 +333,16 @@ enum PrimOp {
  * do, etc. can be trivially handled by performing a name change to
  * a canonical one. */
 #define LOCAL_NOGEN_VAR  0x00008000u  
-/** Used to track the highest level of tvar-usage. If we see a tvar
- * use, and if LBS_PROCESSED is set for tvar->tvarLB, then we have
- * seen the use at a higer LB, and the tvarLB of tvar must point to
- * the current lbs.
- *
- * @bug This comment doesn't say what we are tracking. It appears to
- * me that we are tracking the outermost let-binding in which a type
- * variable appears. If so, we need to say here (a) that we need to
- * keep track of that, and (b) why.
- *
- * > Yes. This flag is used to keep track of the let-binding at
- * > which a type variable used within a definition is scoped.
- * > The actual pointer to the let-binding is preset in tvarLB field.
+/** This flag is used to track type variable scoping.  It is used in
+ * determining the outermost let-binding at which a type variable used
+ * (scoped). The actual pointer to the let-binding is preset in tvarLB
+ * field. 
  * 
- * @issue I am not sure this comment is correct. If we have set
- * LBS_PROCESSED, then shouldn't tvar->tvarLB point to the outermost
- * let binding in which we saw a use?
- * 
- * > This flag is actually used to track the outermost let-binding in
- * > which the type variable is used. When we encounter the use of a
- * > type variable, if we have finished processing the original
- * > let-binding, then we know that the scope of the variable is
- * > actually bigger, and thus update it.
+ * This flag is set on at_letbinding once we are done processing it in
+ * the symbol resolver. When we encounter the use of a type variable,
+ * if we have finished processing the let-binding named by its tvarLB
+ * field, then we know that the scope of the variable is actually 
+ * bigger, and thus update it. 
  */
 #define LBS_PROCESSED    0x00040000u  
  /** The Identifier is observably defined
@@ -353,36 +350,21 @@ enum PrimOp {
 #define ID_OBSERV_DEF    0x00100000u
 
  /** Indicates a type variable that was temporarily created by the
-  * polyinstantiator. Definition is OK.
+  * polyinstantiator. 
   *
-  * @bug What does it mean that the definition is OK?
-  *
-  * > The symbol resolver accepts type variables as defining
-  * > occurences within expressions only at certain positions (when
-  * > called with NEW_TV_OK). For example, this is legal within value
-  * > definitions, but type variables not identified as arguments to 
-  * > type definitions are legal within the type definition itself. 
-  * > This flag marks type variables created by the polyinstantiator
-  * > that must not be subject to the NEW_TV_OK check by the resolver,
-  * > since the Instantiator makes some quasi RandTs in which this
-  * > restriction might temporaroly not hold.
+  * The symbol resolver accepts type variables as defining
+  * occurences within expressions only at certain positions (when
+  * called with NEW_TV_OK). For example, this is legal within value
+  * definitions, but type variables not identified as arguments to 
+  * type definitions are legal within the type definition itself. 
+  * This flag marks type variables created by the polyinstantiator
+  * that must not be subject to the NEW_TV_OK check by the resolver,
+  * since the Instantiator makes some quasi RandTs in which this
+  * restriction might temporaroly not hold.
   */
 #define TVAR_POLY_SPECIAL 0x00200000u 
  /** Indicates that this DEFUNION is actually a DEFREPR that was
   * converted to a union by the reprSimp pass.
-  *
-  * @bug This flag is later used in TypeInfer to perform various sanity
-  * checks, some of which indicate fatal compiler errors and should
-  * exit rather than continue (line 1006) or which I think should not
-  * be possible (line 4236). Having that sort of code is good, but it
-  * should be clearly identified as an internal sanity check.
-  * 
-  * > Both of these are actually programmer errors.
-  * > Line 1006 line ensures that the progrmmer cannot provide
-  * > representation constraints using both tagtype as well as the when
-  * > clause. Line 4217 enforces different semantics for constructor
-  * > matching for unions and reprs (as explained in the comment at
-  * > line 4186.
   */
 #define UNION_IS_REPR    0x00400000u  // Defrepr
  /** Indicates a field that is a discriminator field.
@@ -391,7 +373,8 @@ enum PrimOp {
   * handling this correctly in the defrepr case.
   *
   * @note I think it is handled correctly in gen-c.cxx:1468 I am not
-  * sure why you felt that the handling is wrong. can you please explain?
+  * sure why you felt that the handling is wrong. 
+  * Can you please explain?
  */
 #define FLD_IS_DISCM     0x00800000u
  /** Marked on an at_define. Indicates that this is a hoisted lambda
@@ -416,17 +399,17 @@ enum PrimOp {
   * by-reference. Consulted in gen-c.cxx to determine how the
   * corresponding C parameter should be emitted.
   *
-  * @bug It seems to me that this is not the right way to go about
-  * this. The two uses in gen-c.cxx should be consulting the type to
-  * determine whether the identifier is by-ref. Having made that
-  * change, I think that this flag should be dropped.
-  * 
-  * > The by-ref-ness is actually marked on the enclosing function
-  * > type, and is not marked on the type of the individual
-  * > arguments. For most purposes, the by-ref-ness of the
-  * > identifier itself must be ignored. Since all by-ref parameters
-  * > must all identifer ASTs, it is marked on the AST itself, 
-  * > and similarly handled by set! case and gen-c.
+  * In theory, the by-ref-ness is a part of the type, and must
+  * be obtainable from the identifier's type. However, the
+  * implementation does not encode by-ref this way. The by-ref is
+  * noted 
+  *
+  * a) On the components of a function type 
+  * b) As an AST flag on the identifier AST.
+  *
+  * Encoding by-ref in this way lends itself to cleaner implementation.
+  * If by-ref were to be a type constructor, we must look beyond the
+  * by-ref constructor at every r-value usage of the identifier. 
   */
 #define ARG_BYREF        0x04000000u  // Function parameter is By-Reference
 
@@ -623,29 +606,18 @@ struct EnvSet {
   boost::shared_ptr<Type> tagType;
 
   /** Number of bits in a bitfield type. 
-   *  Also propagated updards onto: 
+   * On following ASTs, this fiield  store the total accumulated
+   * field_bits in all component ASTs.
+   * 
    *  at_field, at_fill, at_reserved, tagtype (declare) at_declares,
-   *   Identifier of at_defunion 
-   *   
-   * @bug WHAT is propagated upwards into these? 
-   * > The value of field_bits is propagated.
-   * @bug FROM WHERE?
+   *  Identifier of at_defunion 
    */
   size_t field_bits;
   
-  /** on at_field only when the field is a part of a union
-   * discriminator (FLD_IS_DISCM)
-   *
-   * @bug OK, but when it is on one of these, what does it mean?
-   *
-   * @bug Or does this mean "set when the field is part of a union
-   * discriminator (FLD_IS_DISCM), and appear on at_field only", in
-   * which case, why should this be redundantly encoded?
-   *
-   * > On defreppr unions, this field is resent on fields that
-   * > participate in union discrimination. This field stores the
-   * > value (not just a true/false setting) that the field must have
-   * > as indicated by the when clause. 
+  /** On defreppr unions, this field is present on fields that
+   * participate in union discrimination. This field stores the
+   * value (not just a true/false setting) that the field must have
+   * as indicated by the when clause. 
    */
   size_t unin_discm;
 
@@ -656,33 +628,19 @@ struct EnvSet {
    */
   size_t total_fill;
 
-  /** TypeScheme for the corresponding Structure definitions.
-   *
-   * Appears on Union constructors only.
-   *
-   * @bug The comment says TypeSchemes plural, but I only see a single
-   * type scheme here. How is this actually being used?
-   *
-   * > Fixed the comment to be singular. There is only one structure
-   * > defintion for any constructor
-   *
-   * @bug No you didn't. "Definitions" is still plural, so I still
-   * don't know what the heck this means.
+  /** TypeScheme for the Structure definition corresponding to a union
+   * constructor. 
    */
   boost::shared_ptr<TypeScheme> stSigma;
 
-  /** Pointer to the constructor that holds such a structure.
-   *
-   * @bug I have no @em idea what this means or is for.
-   *
-   * > Constructors with identical layout must share the same
-   * > structure type since they can be used in the same switch leg.
-   * > Structures equality is nominal in BitC (structures are
-   * > identified by name, not by identical components). Therefore, if
-   * > at a second constructor, a previously typed structure  with
-   * > identical structure is found, the new constructor uses the
-   * > structure defined at the old structure and stores a pointer to
-   * > that constructor in stCtr.
+  /** Union Constructors with identical layout must share the same
+   * structure type since they can be used in the same switch leg.
+   * Structures equality is nominal in BitC (structures are
+   * identified by name, not by identical components). Therefore, if
+   * at a second constructor, a previously typed structure  with
+   * identical structure is found, the new constructor uses the
+   * structure defined at the old structure and stores a pointer to
+   * that constructor in stCtr.
    */
   boost::shared_ptr<AST> stCtr;
 
@@ -699,20 +657,6 @@ struct EnvSet {
    * called, so there is no need to worry while cloning the AST?
    */
   boost::shared_ptr<AST> parentLB;
-
-  /** The resolver marks the above two markers. No need to worry about
-   * them in copy-operations.
-   *
-   * @bug I believe that the resolver marks them, but I have no idea
-   * which "markers" we are referring to here. I think you mean that
-   * both of these fields are reliably set whenever the resolver is
-   * called, so there is no need to worry about them when cloning the
-   * AST?
-   *
-   * > Yes, I have changed the comment for the above two fields with 
-   * > your wording. I have duplicated the comments so that we don't
-   * > have positional dependency of fields. 
-   */
 
   static boost::shared_ptr<AST> makeBoolLit(const sherpa::LToken &tok);
   static boost::shared_ptr<AST> makeIntLit(const sherpa::LToken &tok);
@@ -768,16 +712,8 @@ struct EnvSet {
   /** @brief Utility function to call symType->getType() */
   boost::shared_ptr<const Type> getType() const;
   
-  /** Union constructors may be written as Ctr or
-   * union.Ctr, this function returns the pure constructor.
-   *
-   * @bug I do not understand what "pure" means in this context. I am
-   * looking for a comment that says something of the form: "given an
-   * AST of some kind X, obtain the AST Y s.t. SOMETHING is true".
-   *
-   * > pure is the wrong word here. It returns the bare constructor.
-   * > That is, given a constructor of the form Ctr or union-name.Ctr, 
-   * > returns Ctr.
+  /** Given a union constructor of the form Ctr or union-name.Ctr, 
+   * returns Ctr.
    */
   boost::shared_ptr<AST> getCtr(); 
 
@@ -800,20 +736,17 @@ struct EnvSet {
    * etc. */
   boost::shared_ptr<AST> getTrueCopy();
 
-  /** @brief  Make an exact copy, deep, but clear symbolDef, type,
-   * etc.
-   *
-   * @bug This needs an explation of why those fields should be
-   * cleared. It also needs a better procedure name.
-   *
-   * > The flags are cleared because (1) we don't need them since new
-   * > ASTs are almost immediately subject to resolver and type check.
-   * > (2) We sometimes start from a copy of an AST and use it in a
-   * > way that the original symbolDef/type are no longer valid, so
-   * > clearing immediately.
+  /** @brief  Make an exact deep copy.
+   * 
+   * This function clears fields such as symbolDef, type, etc. 
+   * This is because (1) we don't need them since new ASTs are almost
+   * immediately subject to resolver and type check. (2) We sometimes
+   * start from a copy of an AST and use it in a way that the original
+   * symbolDef/type are no longer valid, so we clear these fields
+   * preemptively. 
    */
-  boost::shared_ptr<AST> getDCopy();
-
+  boost::shared_ptr<AST> getDeepCopy();
+  
   /** @briefRename identifier @p from to @p to within AST named by @p
    * this.
    *
@@ -831,17 +764,9 @@ struct EnvSet {
   boost::shared_ptr<AST> getID();
 
   /** @brief Return true IFF this is a AST corresponds to a union leg.
-   *
-   * @bug I'm still not clear why values can be union legs. 
-   * > Constructors like Nil which have no arguments also represent
-   * > constructed values 
    */
   bool isUnionLeg();
   /** @brief Return true IFF this AST is a method name identifier.
-   *
-   * @bug I'm still not clear why this doesn't use an id_method
-   * category.
-   * > Methods are legal values and can be used in id_value contexts.
    */
   bool isMethod();
 

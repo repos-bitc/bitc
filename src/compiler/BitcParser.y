@@ -1014,7 +1014,7 @@ alias: ident {
   SHOWPARSE("alias -> ident");
   // The two identifiers in this case are textually the same, but the
   // need to end up with distinct AST nodes, thus getDCopy().
-  $$ = AST::make(at_ifsel, $1->loc, $1, $1->getDCopy());
+  $$ = AST::make(at_ifsel, $1->loc, $1, $1->getDeepCopy());
 };
 alias: '(' ident tk_AS ident ')' {
   SHOWPARSE("alias -> ( ident AS ident )");
@@ -1904,7 +1904,8 @@ eform: '(' tk_SWITCH ident expr sw_legs ow ')' {
   $$ = AST::make(at_switch, $2.loc, $3, $4, $5, $6);
   for(size_t c =0; c < $5->children.size(); c++) {
     shared_ptr<AST> sw_leg = $5->child(c);
-    sw_leg->children.insert(sw_leg->children.begin(), $3->getDCopy());
+    sw_leg->children.insert(sw_leg->children.begin(), 
+			    $3->getDeepCopy());
   }
 };
 
@@ -2007,7 +2008,8 @@ eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
   $$ = AST::make(at_try, $2.loc, $3, $6, $7, $8);
   for(size_t c =0; c < $7->children.size(); c++) {
     shared_ptr<AST> sw_leg = $7->child(c);
-    sw_leg->children.insert(sw_leg->children.begin(), $6->getDCopy());
+    sw_leg->children.insert(sw_leg->children.begin(), 
+			    $6->getDeepCopy());
   }
 };
 

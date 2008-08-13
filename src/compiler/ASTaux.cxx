@@ -126,7 +126,7 @@ AST::Use()
 {
   assert(astType == at_ident);
   assert(!symbolDef || isIdentType(id_tvar));
-  shared_ptr<AST> idUse = getDCopy();
+  shared_ptr<AST> idUse = getDeepCopy();
   idUse->Flags  &= ~MASK_FLAGS_FROM_USE;
   idUse->Flags2 &= ~MASK_FLAGS2_FROM_USE;    
   idUse->symbolDef = shared_from_this();
@@ -181,7 +181,7 @@ AST::getTrueCopy()
 }
 
 shared_ptr<AST> 
-AST::getDCopy()
+AST::getDeepCopy()
 {  
   shared_ptr<AST> to = AST::make(shared_from_this(), false);
   to->symbolDef = GC_NULL;
@@ -194,6 +194,6 @@ AST::getDCopy()
   to->defbps = GC_NULL;
 
   for(size_t i=0; i<children.size(); i++)
-    to->children.push_back(child(i)->getDCopy());
+    to->children.push_back(child(i)->getDeepCopy());
   return to;
 }
