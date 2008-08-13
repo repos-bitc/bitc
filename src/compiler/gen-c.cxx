@@ -324,7 +324,9 @@ CMangle(shared_ptr<AST> ast, unsigned long flags = 0)
 bool
 toc(std::ostream& errStream, shared_ptr<UocInfo> uoc,
     shared_ptr<AST> ast, INOstream &out, const string &IDname,
-    shared_ptr<AST> parent, const size_t chno, unsigned long flags);
+    set<string> &decls,
+    shared_ptr<AST> parent, 
+    const size_t chno, unsigned long flags);
 
 #define CTYP_EMIT_BF      0x01u	// bitfield
 #define CTYP_BYREF        0x02u // Used to declare by-ref 
@@ -732,6 +734,7 @@ emit_fnxn_label(std::ostream& errStream,
 		shared_ptr<UocInfo> uoc,
 		shared_ptr<AST> ast,
 		INOstream &out,
+		set<string> &decls,
 		shared_ptr<AST> parent, 
 		const size_t chno,
 		unsigned long flags)
@@ -792,7 +795,7 @@ emit_fnxn_label(std::ostream& errStream,
   assert(body->astType == at_container);
   if(body->child(1)->astType == at_letStar) {
     CHKERR(errFree, toc(errStream, uoc, body, out, CMangle(id), 
-			lam, 1, flags));
+			decls, lam, 1, flags));
     out << ";" << endl; 
 	  
     ret = FEXPR(body->child(1));	
@@ -807,7 +810,7 @@ emit_fnxn_label(std::ostream& errStream,
   if (! isUnitType(ret))
     out << "return ";
   CHKERR(errFree, toc(errStream, uoc, ret, out, CMangle(id), 
-		      lam, 1, flags));	
+		      decls, lam, 1, flags));	
   out << ";" << endl;
 
   if (isUnitType(ret))
@@ -919,10 +922,10 @@ asciiPrintableCharacter(uint32_t c)
 
 //WARNING: **REQUIRES** answer and errorFree.
 #define TOC(errStream, uoc, ast, out, IDname,			\
-	    parent, chno,  flags)				\
+	    decla, parent, chno,  flags)			\
   do {								\
     answer = toc((errStream), (uoc), (ast), (out), (IDname), 	\
-		 (parent), (chno), (flags));			\
+		 (decla), (parent), (chno), (flags));		\
     if(answer == false)						\
       errorFree = false;					\
   }while(0)
@@ -933,6 +936,7 @@ toc(std::ostream& errStream,
     shared_ptr<AST> ast, 
     INOstream &out,
     const string &IDname,
+    set<string> &decls,
     shared_ptr<AST> parent, 
     const size_t chno,
     unsigned long flags)
@@ -1041,10 +1045,12 @@ toc(std::ostream& errStream,
   case at_copyREF:
     {
       out << "*";
-      TOC(errStream, uoc, ast->child(0), out, IDname, ast, 0, flags);     
+      TOC(errStream, uoc, ast->child(0), out, 
+	  IDname, decls, ast, 0, flags);
       out << " = ";
       out << "*";
-      TOC(errStream, uoc, ast->child(1), out, IDname, ast, 1, flags);     
+      TOC(errStream, uoc, ast->child(1), out, 
+	  IDname, decls, ast, 1, flags);     
       out << ";" << endl;	  
       break;
     }
@@ -1061,7 +1067,7 @@ toc(std::ostream& errStream,
 	  << "bitc_emit_closure_object("
 	  << XFN_PFX << CMangle(fn)
 	  << ", ";
-      TOC(errStream, uoc, env, out, IDname, ast, 0, flags);
+      TOC(errStream, uoc, env, out, IDname, decls, ast, 0, flags);
       out << ");" << endl;
       break;
     }
@@ -1088,7 +1094,7 @@ toc(std::ostream& errStream,
 	  shared_ptr<AST> dummy = AST::make(at_ucon_apply, ast->loc, ast);
 	  dummy->symType = ast->symType;
 	  TOC(errStream, uoc, dummy, out, IDname, 
-	      GC_NULL, 0, flags);	  
+	      decls, GC_NULL, 0, flags);	  
 	}
 	break;
       }
@@ -1107,7 +1113,7 @@ toc(std::ostream& errStream,
     
   case at_identPattern:
     {
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);
       break;
     }
@@ -1218,7 +1224,7 @@ toc(std::ostream& errStream,
       shared_ptr<AST> fields = ast->child(4);
       out << "struct " << TY_PFX << CMangle(ident) << "{" << endl;
       out.more();
-      TOC(errStream, uoc, fields, out, IDname, ast, 4, flags);      
+      TOC(errStream, uoc, fields, out, IDname, decls, ast, 4, flags);      
       out.less();
       out << "};" << endl
 	  << endl;
@@ -1256,7 +1262,7 @@ toc(std::ostream& errStream,
   case at_fields:
     {
       for(size_t c=0; c < ast->children.size(); c++) {
-	TOC(errStream, uoc, ast->child(c), out, IDname, 
+	TOC(errStream, uoc, ast->child(c), out, IDname, decls, 
 	    ast, c, flags);	
       }
       break;
@@ -1310,7 +1316,7 @@ toc(std::ostream& errStream,
 	if(c > 1)
 	  out << ", ";
 	
-	TOC(errStream, uoc, ast->child(c), out, IDname, 
+	TOC(errStream, uoc, ast->child(c), out, IDname, decls, 
 	    ast, c, flags);
       }
       out << ")";
@@ -1320,7 +1326,7 @@ toc(std::ostream& errStream,
 
   case at_fqCtr:
     {
-      TOC(errStream, uoc, ast->child(1), out, IDname, 
+      TOC(errStream, uoc, ast->child(1), out, IDname, decls, 
 	  ast, 1, flags);
       break;
     }
@@ -1333,7 +1339,7 @@ toc(std::ostream& errStream,
       if (!ast->child(0)->symType->isRefType())
 	out << "&";
 
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);
 	
       out << ") == ";	
@@ -1344,7 +1350,7 @@ toc(std::ostream& errStream,
 
   case at_select:
     {
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);
       
       out << ((ast->child(0)->symType->isRefType()) ? "->" : "." );
@@ -1430,7 +1436,7 @@ toc(std::ostream& errStream,
 	  
 	  for(size_t i = 1; i < ctr->children.size(); i++) {
 	    shared_ptr<AST> field = ctr->child(i);
-	    TOC(errStream, uoc, field, out, IDname, ctr, i, flags);      
+	    TOC(errStream, uoc, field, out, IDname, decls, ctr, i, flags);      
 	  }
 	  
 	  out.less();
@@ -1681,18 +1687,19 @@ toc(std::ostream& errStream,
       shared_ptr<AST> ident = ast->child(0);      
       if(ident->defn)
 	ident = ident->defn;
-      if(ident->Flags & DEF_DECLARED) {	
+
+      string nm = TY_PFX + CMangle(ident);
+      if(decls.find(nm) != decls.end())
 	break;
-      }
       
-      ident->Flags |= DEF_DECLARED;
+      decls.insert(nm);
+
       out << "typedef ";
       if (ast->astType == at_declunion || ast->astType == at_declrepr)
 	out << "union ";
       else
 	out << "struct ";
-      out << TY_PFX << CMangle(ident) << " " 
-	  << TY_PFX << CMangle(ident) << ";" << endl;
+      out << nm << " " << nm << ";" << endl;
       break;
     }
 
@@ -1707,12 +1714,13 @@ toc(std::ostream& errStream,
       }
 
       out << "extern ";
-      id->Flags |= DEF_DECLARED;      
+
+      decls.insert(CMangle(id));
       
       //shared_ptr<Type> t = id->symType->getType();      
       //if (hasDefn && t->isSimpleTypeForC() && (t->kind != ty_mutable))
       // out << "const ";
-            
+      
       if(id->symType->isFnxn() && !id->symType->isMutable()) {
 	std::string name = (id->externalName.size())?id->externalName:id->s;
 	emit_fnxn_type(out, name, id->symType);
@@ -1763,7 +1771,7 @@ toc(std::ostream& errStream,
       // that would have been declared as extern, don't emit
       // it as static, unless it is a function
       
-      if((id->Flags & DEF_DECLARED) == 0)
+      if(decls.find(CMangle(id)) == decls.end())
 	if (id->Flags & ID_IS_PRIVATE)	  
 	  out << "static ";
       
@@ -1773,7 +1781,7 @@ toc(std::ostream& errStream,
 	// case and name adjustment is taken care of by
 	// emitGlobalInitializers() function.
 	CHKERR(errorFree, emit_fnxn_label(errStream, uoc, ast, out,
-					  parent, chno, flags));
+					  decls, parent, chno, flags));
       }
       else if(flags & TOC_HEADER_MODE) {
 	// Header Mode
@@ -1801,7 +1809,7 @@ toc(std::ostream& errStream,
 	// out << "const ";
 	
 	out << decl(id) << " = ";
-	TOC(errStream, uoc, e, out, IDname, p, c, flags);	  
+	TOC(errStream, uoc, e, out, IDname, decls, p, c, flags);	  
 	out << ";" << endl;	  
       }
       break;
@@ -1811,15 +1819,15 @@ toc(std::ostream& errStream,
     {
       if(ast->child(0)->children.size() != 0) {
 	//out++;
-	TOC(errStream, uoc, ast->child(0), out, IDname, 
+	TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	    ast, 0, flags);      
 	out << "_" << IDname << ":" << endl;
-	TOC(errStream, uoc, ast->child(1), out, IDname, 
+	TOC(errStream, uoc, ast->child(1), out, IDname, decls, 
 	    ast, 1, flags);      
 	//out--;
       }
       else {
-	TOC(errStream, uoc, ast->child(1), out, IDname, 
+	TOC(errStream, uoc, ast->child(1), out, IDname, decls, 
 	    ast, 1, flags);      
       }
       break;
@@ -1834,7 +1842,7 @@ toc(std::ostream& errStream,
 
   case at_suspend:
     {
-      TOC(errStream, uoc, ast->child(1), out, IDname, 
+      TOC(errStream, uoc, ast->child(1), out, IDname, decls, 
 	  ast, 1, flags);      
       
       break;
@@ -1843,7 +1851,7 @@ toc(std::ostream& errStream,
   case at_tqexpr:
     {
       // match agt_eform
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);      
       
       break;
@@ -1856,7 +1864,7 @@ toc(std::ostream& errStream,
       for (size_t c = 0; c < dbs->children.size(); c++) {
 	shared_ptr<AST> db = dbs->child(c);
 	shared_ptr<AST> init = db->child(1);
-	TOC(errStream, uoc, init, out, IDname, db, 1, flags);      
+	TOC(errStream, uoc, init, out, IDname, decls, db, 1, flags);      
       }
 
       out << "loop_" << ast->ID << ":" << endl;
@@ -1869,7 +1877,7 @@ toc(std::ostream& errStream,
       shared_ptr<AST> theCond;
 
       if(cond->astType == at_letStar) {
-	TOC(errStream, uoc, cond, out, IDname, 
+	TOC(errStream, uoc, cond, out, IDname, decls, 
 	    dotest, 0, flags);      
 	theCond = FEXPR(cond);
       }
@@ -1878,11 +1886,11 @@ toc(std::ostream& errStream,
       }
 	
       out << "if(";
-      TOC(errStream, uoc, theCond, out, IDname, 
+      TOC(errStream, uoc, theCond, out, IDname, decls, 
 	  GC_NULL, 0, flags);      
       out << ") {" << endl;
       out.more();
-      TOC(errStream, uoc, res, out, IDname, 
+      TOC(errStream, uoc, res, out, IDname, decls, 
 	  dotest, 1, flags);
       out << endl;
       out.less();
@@ -1890,7 +1898,7 @@ toc(std::ostream& errStream,
 
       out << "else {" << endl;
       out.more();
-      TOC(errStream, uoc, body, out, IDname, 
+      TOC(errStream, uoc, body, out, IDname, decls, 
 	  ast, 1, flags);
 
       if(body->astType != at_letStar)
@@ -1899,7 +1907,7 @@ toc(std::ostream& errStream,
       for (size_t c = 0; c < dbs->children.size(); c++) {
 	shared_ptr<AST> db = dbs->child(c);
 	shared_ptr<AST> step = db->child(2);
-	TOC(errStream, uoc, step, out, IDname, db, 2, flags);      
+	TOC(errStream, uoc, step, out, IDname, decls, db, 2, flags);      
       }
       
       out << "goto " << "loop_" << ast->ID << ";" << endl;
@@ -1914,7 +1922,7 @@ toc(std::ostream& errStream,
     {
       // out++;
       for (size_t c = 0; c < ast->children.size(); c++) {
-	TOC(errStream, uoc, ast->child(c), out, IDname, 
+	TOC(errStream, uoc, ast->child(c), out, IDname, decls, 
 	    ast, c, flags);      
 	
 	out << ";" << endl;
@@ -1927,7 +1935,7 @@ toc(std::ostream& errStream,
   case at_not:
     {
       out << "(! ";
-      TOC(errStream, uoc, ast->child(0), out, IDname, ast, 0, flags);
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, ast, 0, flags);
       out << ")";
       break;
     }
@@ -1953,10 +1961,10 @@ toc(std::ostream& errStream,
 	  out << "/* Tail recursive application: */ " << endl;
 	  for(size_t c = 0; c < lbps->children.size(); c++) {
 	    shared_ptr<AST> ident = lbps->child(c)->child(0);
-	    TOC(errStream, uoc, ident, out, IDname, 
+	    TOC(errStream, uoc, ident, out, IDname, decls, 
 		lbps->child(c), 0, flags);
 	    out << " = ";
-	    TOC(errStream, uoc, ast->child(c+1), out, IDname, 
+	    TOC(errStream, uoc, ast->child(c+1), out, IDname, decls, 
 		ast, c+1, flags);
 	    out << ";" << endl;
 	  }
@@ -1982,7 +1990,7 @@ toc(std::ostream& errStream,
       if (isUnitType(retType))
 	out << "(";
 
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);
       
       out << "(";
@@ -2005,7 +2013,7 @@ toc(std::ostream& errStream,
 	  out << "&";
 	}
 	
-	TOC(errStream, uoc, ast->child(c), out, IDname, 
+	TOC(errStream, uoc, ast->child(c), out, IDname, decls, 
 	    ast, c, flags);
 	count++;
       }
@@ -2022,7 +2030,7 @@ toc(std::ostream& errStream,
       assert(IDname.size());
       for (size_t c = 0; c < ast->children.size(); c++) {
 	out << IDname << ".elem[" << c << "] = ";
- 	TOC(errStream, uoc, ast->child(c), out, IDname, 
+ 	TOC(errStream, uoc, ast->child(c), out, IDname, decls, 
 	    ast, c, flags);
 	out << ";" << endl;
       }
@@ -2053,7 +2061,7 @@ toc(std::ostream& errStream,
 	  << endl;
       for (size_t c = 0; c < ast->children.size(); c++) {
 	out << IDname << "->elem[" << c << "] = ";
- 	TOC(errStream, uoc, ast->child(c), out, IDname, 
+ 	TOC(errStream, uoc, ast->child(c), out, IDname, decls,
 	    ast, c, flags);
 	out << ";" << endl;
       }
@@ -2069,14 +2077,14 @@ toc(std::ostream& errStream,
 	  << "GC_ALLOC(sizeof("
 	  << CMangle(t->mangledString(true)) << ") + " 
 	  << "("; 
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);      
       out << " * sizeof("
 	  << toCtype(t->Base()) << ")));"
 	  << endl;
 
       out << IDname << "->len = ";
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);            
       out << ";" << endl;
 
@@ -2090,7 +2098,7 @@ toc(std::ostream& errStream,
       out.more();
       out << "bitc_word_t __bitc_temp_mvec;" << endl;
       out << "for (__bitc_temp_mvec = 0; __bitc_temp_mvec < ";
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);      
       out << "; __bitc_temp_mvec++)" << endl;
       out.more();	
@@ -2103,7 +2111,7 @@ toc(std::ostream& errStream,
       hackIdent->symType = Type::make(ty_word);
       shared_ptr<AST> apply = AST::make(at_apply, ast->loc, 
 			   ast->child(1), hackIdent);
-      TOC(errStream, uoc, apply, out, IDname, ast, 1, flags);
+      TOC(errStream, uoc, apply, out, IDname, decls, ast, 1, flags);
       out << ";" << endl;
       out.less();
       out.less();
@@ -2120,7 +2128,7 @@ toc(std::ostream& errStream,
 
   case at_vector_length:
     { 
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);
       out << "->len";
       break;
@@ -2129,7 +2137,7 @@ toc(std::ostream& errStream,
   case at_array_nth:
   case at_vector_nth:
     {
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);
 
       if(ast->astType == at_array_nth)
@@ -2138,7 +2146,7 @@ toc(std::ostream& errStream,
 	out << "->";
 
       out << "elem[";
-      TOC(errStream, uoc, ast->child(1), out, IDname, 
+      TOC(errStream, uoc, ast->child(1), out, IDname, decls, 
 	  ast, 1, flags);      
       out << "]";
       break;
@@ -2161,7 +2169,7 @@ toc(std::ostream& errStream,
       out << "TAG_" << CMangle(t->myContainer) << "(";
       if (!topExp->symType->isRefType())
 	out << "&";
-      TOC(errStream, uoc, topExp, out, IDname, ast, 0, flags);
+      TOC(errStream, uoc, topExp, out, IDname, decls, ast, 0, flags);
       out << ")";	        
       out << ") {" << endl;;
       out.more();
@@ -2183,10 +2191,10 @@ toc(std::ostream& errStream,
 	out << "{" << endl;
 	out.more();
 
-	TOC(errStream, uoc, legIdent, out, IDname, theCase, 0, flags);
+	TOC(errStream, uoc, legIdent, out, IDname, decls, theCase, 0, flags);
 	out << " = ";
 	
-	TOC(errStream, uoc, topExp, out, IDname, ast, 0, flags);	
+	TOC(errStream, uoc, topExp, out, IDname, decls, ast, 0, flags);	
 	if(t->isValType()) 
 	  out << ".";
 	else
@@ -2195,7 +2203,7 @@ toc(std::ostream& errStream,
 	out << "leg_" << CMangle(theCase->child(2)->getCtr());
 	out << ";" << endl;
 		
-	TOC(errStream, uoc, expr, out, IDname, theCase, 1, flags);
+	TOC(errStream, uoc, expr, out, IDname, decls, theCase, 1, flags);
 	out << "break;";
 	out << endl;
 	out.less();
@@ -2209,7 +2217,7 @@ toc(std::ostream& errStream,
 	out.more();
 	out << "{" << endl;
 	out.more();
-	TOC(errStream, uoc, ow->child(0), out, IDname, ow, 2, flags);
+	TOC(errStream, uoc, ow->child(0), out, IDname, decls, ow, 2, flags);
 	out << "break;";
 	out << endl;
 	out.less();
@@ -2245,7 +2253,7 @@ toc(std::ostream& errStream,
       out << "int result = setjmp(jb);" << endl;
       out << "if(!result) {" << endl;
       out.more();
-      TOC(errStream, uoc, topExpr, out, IDname, 
+      TOC(errStream, uoc, topExpr, out, IDname, decls, 
 	  ast, 0, flags);
       out << "curCatchBlock = lastJB;" << endl;
       out.less();
@@ -2274,12 +2282,12 @@ toc(std::ostream& errStream,
 	}
 	out << ") {" << endl;
 	out.more();
-	TOC(errStream, uoc, legIdent, out, IDname, theCase, 0, flags);
+	TOC(errStream, uoc, legIdent, out, IDname, decls, theCase, 0, flags);
 	out << " = "
 	    << "*((" << toCtype(legIdent->symType, legIdent->s) <<  " *)" 
 	    << "curException);" << endl;
 
-	TOC(errStream, uoc, expr, out, IDname, theCase, 1, flags);
+	TOC(errStream, uoc, expr, out, IDname, decls, theCase, 1, flags);
 	out.less();
 	out << "}" << endl;
       } /* for each case */
@@ -2287,7 +2295,7 @@ toc(std::ostream& errStream,
       if(ow->astType != at_Null) {
 	out << "else {" << endl;
 	out.more();
-	TOC(errStream, uoc, ow->child(0), out, IDname, ow, 0, flags);
+	TOC(errStream, uoc, ow->child(0), out, IDname, decls, ow, 0, flags);
 	out.less();
 	out << "}" << endl;
 	out << endl;
@@ -2310,7 +2318,7 @@ toc(std::ostream& errStream,
   case at_throw:    
     {
       out << "bitc_throw(";
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);
       out <<");" << endl;
       break;
@@ -2320,10 +2328,10 @@ toc(std::ostream& errStream,
     {
       assert(IDname.size());
 
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);
       out << " = ";
-      TOC(errStream, uoc, ast->child(1), out, IDname, 
+      TOC(errStream, uoc, ast->child(1), out, IDname, decls, 
 	  ast, 1, flags);
       out << ";" << endl;
       
@@ -2342,7 +2350,7 @@ toc(std::ostream& errStream,
 	  << toCtype(arg->symType)
 	  << ")));" << endl;
       out << "*" << IDname << " = ";
-      TOC(errStream, uoc, arg, out, IDname, ast, 0, flags);
+      TOC(errStream, uoc, arg, out, IDname, decls, ast, 0, flags);
       out << ";" << endl;
       break;
     }
@@ -2350,7 +2358,7 @@ toc(std::ostream& errStream,
   case at_deref:
     {
       out << "(* ";
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);            
       out << ")";
       break;
@@ -2359,13 +2367,13 @@ toc(std::ostream& errStream,
   case at_inner_ref:
     {      
       out << "&";
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);
       out << "->";
       
       if(ast->Flags2 & INNER_REF_NDX) {
 	out << "elem[";
-	TOC(errStream, uoc, ast->child(1), out, IDname, 
+	TOC(errStream, uoc, ast->child(1), out, IDname, decls, 
 	    ast, 1, flags);      
 	out << "]";
       }
@@ -2381,11 +2389,11 @@ toc(std::ostream& errStream,
       shared_ptr<AST> thenAst = ast->child(1);
       shared_ptr<AST> elseAst = ast->child(2);
       out << "if(";
-      TOC(errStream, uoc, testAst, out, IDname, 
+      TOC(errStream, uoc, testAst, out, IDname, decls, 
 	  ast, 0, flags);      
       out << ") {" << endl;
       out.more();
-      TOC(errStream, uoc, thenAst, out, IDname, 
+      TOC(errStream, uoc, thenAst, out, IDname, decls, 
 	  ast, 1, flags);
       if(thenAst->astType != at_letStar)
 	out << ";";
@@ -2394,7 +2402,7 @@ toc(std::ostream& errStream,
       out << "}" << endl;
       out << "else {" << endl;
       out.more();
-      TOC(errStream, uoc, elseAst, out, IDname, 
+      TOC(errStream, uoc, elseAst, out, IDname, decls, 
 	  ast, 2, flags);
       if(elseAst->astType != at_letStar)
 	out << ";";
@@ -2410,11 +2418,11 @@ toc(std::ostream& errStream,
       shared_ptr<AST> thenAst = ast->child(1);
 
       out << "if(";
-      TOC(errStream, uoc, testAst, out, IDname, 
+      TOC(errStream, uoc, testAst, out, IDname, decls, 
 	  ast, 0, flags);      
       out << ") {" << endl;
       out.more();
-      TOC(errStream, uoc, thenAst, out, IDname, 
+      TOC(errStream, uoc, thenAst, out, IDname, decls, 
 	  ast, 1, flags);
       if(thenAst->astType != at_letStar)
 	out << ";";
@@ -2429,7 +2437,7 @@ toc(std::ostream& errStream,
   case at_let:
     {
       //++out;
-      TOC(errStream, uoc, ast->child(0), out, IDname, 
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls, 
 	  ast, 0, flags);
 
       shared_ptr<AST> lExpr = ast->child(1);
@@ -2447,7 +2455,7 @@ toc(std::ostream& errStream,
 	
       default:
 	// The only thing I expect here is due to a GrandLet	
-	TOC(errStream, uoc, ast->child(1), out, IDname, 
+	TOC(errStream, uoc, ast->child(1), out, IDname, decls, 
 	    ast, 1, flags);      
 	out << ";" << endl;	
 	break;
@@ -2459,7 +2467,7 @@ toc(std::ostream& errStream,
   case at_letbindings:
     {
       for(size_t i=0; i < ast->children.size(); i++)
-	TOC(errStream, uoc, ast->child(i), out, IDname, 
+	TOC(errStream, uoc, ast->child(i), out, IDname, decls, 
 	    ast, i, flags);      
       break;
     }
@@ -2474,7 +2482,7 @@ toc(std::ostream& errStream,
       }
 
       TOC(errStream, uoc, ast->child(1), out, CMangle(ident), 
-	  ast, 1, flags);
+	  decls, ast, 1, flags);
       if(((ast->Flags & LB_IS_DUMMY) == 0) &&
 	 ((ast->Flags & LB_POSTPONED) == 0))
 	out << ";" << endl;       
@@ -2618,6 +2626,7 @@ static bool
 TypesTOC(std::ostream& errStream, 
 	 shared_ptr<UocInfo> uoc,
 	 INOstream &out,
+	 set<string> &decls,
 	 unsigned long flags)
 {
   bool errFree = true;
@@ -2642,7 +2651,7 @@ TypesTOC(std::ostream& errStream,
 	    << "   " << ast->loc << endl
 	    << "   " << ast->asString() << endl
 	    << "***************************************/" << endl;
-	CHKERR(errFree, toc(errStream, uoc, ast, out, "", 
+	CHKERR(errFree, toc(errStream, uoc, ast, out, "", decls,
 			    mod, c, flags));
 	out << endl;	
 	break;
@@ -2664,19 +2673,18 @@ TypesTOC(std::ostream& errStream,
 	    << "   " << ast->asString() << endl
 	    << "***************************************/" << endl;
 	shared_ptr<AST> ident = ast->child(0);
-	if((ident->Flags & DEF_DECLARED) == 0) 
-	  {
-	    ident->Flags |= DEF_DECLARED;
-
-	    out << "/* Forward declaration */" << endl;
-	    out << "typedef ";
-	    out << ((ast->astType == at_defstruct) ? "struct " : "union ");
-	    out << TY_PFX << CMangle(ident) << " " 
-		<< TY_PFX << CMangle(ident) << ";" << endl;
-	    out << endl;
-	  }
- 
-	CHKERR(errFree, toc(errStream, uoc, ast, out, "", 
+	if(decls.find(CMangle(ident)) == decls.end()) {
+	  decls.insert(CMangle(ident));
+	  
+	  out << "/* Forward declaration */" << endl;
+	  out << "typedef ";
+	  out << ((ast->astType == at_defstruct) ? "struct " : "union ");
+	  out << TY_PFX << CMangle(ident) << " " 
+	      << TY_PFX << CMangle(ident) << ";" << endl;
+	  out << endl;
+	}
+	
+	CHKERR(errFree, toc(errStream, uoc, ast, out, "", decls,
 			    mod, c, flags));
 	out << endl << endl;
 	break;
@@ -2696,7 +2704,7 @@ TypesTOC(std::ostream& errStream,
 	    << "   " << ast->loc << endl
 	    << "   " << ast->asString() << endl
 	    << "***************************************/" << endl;
-	CHKERR(errFree, toc(errStream, uoc, ast, out, "", 
+	CHKERR(errFree, toc(errStream, uoc, ast, out, "", decls, 
 			    mod, c, flags));
 	out << endl << endl;
 
@@ -2723,8 +2731,10 @@ TypesTOC(std::ostream& errStream,
 }
 
 static bool
-emitInitProc(std::ostream& errStream, shared_ptr<AST> ast, shared_ptr<UocInfo> uoc,
+emitInitProc(std::ostream& errStream, shared_ptr<AST> ast,
+	     shared_ptr<UocInfo> uoc, 
 	     INOstream &out, INOstream &initStream, 
+	     set<string> &decls, 
 	     unsigned long flags)
 {
   bool answer = true;
@@ -2742,7 +2752,7 @@ emitInitProc(std::ostream& errStream, shared_ptr<AST> ast, shared_ptr<UocInfo> u
   shared_ptr<AST> ret;
   assert(body->astType == at_container);
   if(body->child(1)->astType == at_letStar) {
-    TOC(errStream, uoc, body, out, CMangle(id), ast, 1, flags);
+    TOC(errStream, uoc, body, out, CMangle(id), decls, ast, 1, flags);
     out << ";" << endl; 
     
     ret = FEXPR(body->child(1));	
@@ -2752,11 +2762,11 @@ emitInitProc(std::ostream& errStream, shared_ptr<AST> ast, shared_ptr<UocInfo> u
   }
   assert(ret);
   out <<  "return ";
-  TOC(errStream, uoc, ret, out, CMangle(id), ast, 1, flags);	
+  TOC(errStream, uoc, ret, out, CMangle(id), decls, ast, 1, flags);	
   out << ";" << endl;
   out.less();
   out << "}" << endl;
-	
+  
   initStream << CMangle(ast->getID()) << " = "; 
   initStream << "__init" << ast->ID << "();" << endl;	    
   return errorFree;
@@ -2766,6 +2776,7 @@ static bool
 EmitGlobalInitializers(std::ostream& errStream, 
 		       shared_ptr<UocInfo> uoc,
 		       INOstream &out,
+		       set<string> &decls,
 		       unsigned long flags)
 {
   bool errFree = true;
@@ -2817,7 +2828,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 	  //         including immutable functions that are of the form
 	  //         (define f (lambda (...) ... ))
 	  // Header-Mode is taken care of by TOC()
-	  CHKERR(errFree, toc(errStream, uoc, ast, out, "", 
+	  CHKERR(errFree, toc(errStream, uoc, ast, out, "", decls,
 			      mod, c, flags));
 	}
 	else if(ast->child(1)->astType == at_lambda) {	  
@@ -2832,7 +2843,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 	  shared_ptr<AST> ptr = AST::make(id);
 	  id->s = MFN_PFX + id->s;
 	  out << "extern " << decl(ptr) << ";" << endl;
-	  CHKERR(errFree, toc(errStream, uoc, ast, out, "", 
+	  CHKERR(errFree, toc(errStream, uoc, ast, out, "", decls,
 			      mod, c, flags));	  
 	  out << decl(ptr) << " = " << CMangle(id) 
 	      << ";" << endl << endl;
@@ -2847,7 +2858,8 @@ EmitGlobalInitializers(std::ostream& errStream,
 	  declare(out, ast->getID());
 	  
 	  // Emit a procedure that will initialize this value
-	  CHKERR(errFree, emitInitProc(errStream, ast, uoc, out, initStream, flags));
+	  CHKERR(errFree, emitInitProc(errStream, ast, uoc, out,
+				       initStream, decls, flags));
 	}
 	
 	if (wrapperNeeded) {
@@ -2896,7 +2908,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 	    << "   " << ast->asString() << endl
 	    << "***************************************/" << endl;    
 	
-	CHKERR(errFree, toc(errStream, uoc, ast, out, "", 
+	CHKERR(errFree, toc(errStream, uoc, ast, out, "", decls,
 			    mod, c, flags));
 	break;
       }
@@ -3002,6 +3014,7 @@ static bool
 ValuesTOH(std::ostream& errStream, 
 	  shared_ptr<UocInfo> uoc,
 	  INOstream &out,
+	  set<string> &decls,
 	  unsigned long flags)
 {
   bool errFree = true;
@@ -3017,7 +3030,7 @@ ValuesTOH(std::ostream& errStream,
 	      << "   " << ast->loc << endl
 	      << "   " << ast->asString() 
 	      << "***************************************/" << endl;      
-	  CHKERR(errFree, toc(errStream, uoc, ast, out, "", 
+	  CHKERR(errFree, toc(errStream, uoc, ast, out, "", decls,
 			      mod, c, flags));
 	  out << endl;
 	}
@@ -3039,6 +3052,7 @@ GenerateCoutput(std::ostream &errStream, INOstream &out,
   bool errFree = true;
   
   assert(uoc);
+  set<string> decls;
 
   out << "/********************************************" << endl
       << "   This code was automatically generated by "  << endl
@@ -3075,16 +3089,17 @@ GenerateCoutput(std::ostream &errStream, INOstream &out,
     out << "bitc_exception_t *curException;" << endl << endl;
   }
 
-  CHKERR(errFree, TypesTOC(errStream, uoc, out, flags));
+  CHKERR(errFree, TypesTOC(errStream, uoc, out, decls, flags));
 
   if(flags & TOC_HEADER_MODE) {
-    CHKERR(errFree, ValuesTOH(errStream, uoc, out, flags));
+    CHKERR(errFree, ValuesTOH(errStream, uoc, out, decls, flags));
   }
   else {
     // If there are *any* entry points, emit the procedure that
     // handles global initialization so that it can be called:
     if (!Options::entryPts.empty())
-      CHKERR(errFree, EmitGlobalInitializers(errStream, uoc, out, flags));    
+      CHKERR(errFree, EmitGlobalInitializers(errStream, uoc, out,
+					     decls, flags));    
 
     // If bitc.main.main is an entry point, emit the wrapping main
     // procedure that calls the global initializers and processes the
