@@ -72,7 +72,7 @@ typedef set<shared_ptr<AST> > AstSet;
 static void
 clearusedef(shared_ptr<AST> ast)
 {
-  ast->Flags2 &= ~(ID_IS_DEF|ID_IS_USE|ID_IS_CLOSED|ID_IS_CAPTURED|ID_NEEDS_HEAPIFY);
+  ast->Flags2 &= ~(ID_IS_CLOSED|ID_IS_CAPTURED|ID_NEEDS_HEAPIFY);
 
   for(size_t c=0; c < ast->children.size(); c++)
     clearusedef(ast->child(c));
@@ -194,7 +194,6 @@ findusedef(std::ostream &errStream,
 	
       case LOCAL_MODE:
 	boundVars.insert(ast);
-	ast->Flags2 |= ID_IS_DEF;
 	break;
 	
       case USE_MODE:
@@ -203,8 +202,6 @@ findusedef(std::ostream &errStream,
 	    std::cerr << "Warning: No definition for "
 		      << ast->fqn << std::endl;
 
-	  ast->Flags2 |= ID_IS_USE;
-	  
 	  // could check ast->symbolDef->symType->isMutable()
 	  
 	  if(ast->symbolDef->isGlobal()) 

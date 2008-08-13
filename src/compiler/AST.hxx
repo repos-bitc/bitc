@@ -182,32 +182,28 @@ enum PrimOp {
  * mark them so that no assignment for them will later be emitted in
  * the code generator.
  *
- * @bug Need to say something about @em why these are dummy let
- * bindings! It is not clear to me why they are needed at all. Is this
- * to fool the resolver?
+ * The SSA pass uses a trick to convert expression style code
+ * into statement style code. For example, in the expression
+ * (if e1 e2 e3), if E1, E2 and E3 are SSA converted forms of 
+ * e1, e2 and e3 respectively, the SSA converter will produce
  * 
- * > The SSA pass uses a trick to convert expression style code
- * > into statement style code. For example, in the expression
- * > (if e1 e2 e3), if E1, E2 and E3 are SSA converted forms of 
- * > e1, e2 and e3 respectively, the SSA converter will produce
- * >
- * > (let* ((temp ((if E1 
- * >                   (let* ((temp  E2)) temp)
- * >                   (let* ((temp E3)) temp)))))
- * >      ... rest of the code will use temp as the value of if-expr ... 
- * >
- * > Here, for the BitC resolver's point of view, the inner temp is
- * > different from the outer temp. So, it will resolve and type check
- * > corectly. The outer temp will have the result of the appropriate
- * > inner temp. 
+ * (let* ((temp ((if E1 
+ *                   (let* ((temp  E2)) temp)
+ *                   (let* ((temp E3)) temp)))))
+ *      ... rest of the code will use temp as the value of if-expr ... 
+ * 
+ * Here, for the BitC resolver's point of view, the inner temp is
+ * different from the outer temp. So, it will resolve and type check
+ * corectly. The outer temp will have the result of the appropriate
+ * inner temp. 
  *
- * > From the C code generator's point of view, we will ignore the
- * > outer let* binding, since we cannot bind the result of
- * > if-statements. This outer let* binding is therefore marked
- * > LB_IS_DUMMY. The code generator will only declare one local
- * > variable temp, and assign the result of the correct brach to
- * > it. The rest of the code after the if statement is fine since it
- * > just knows to use the name temp, which now stores the correct value. 
+ * From the C code generator's point of view, we will ignore the
+ * outer let* binding, since we cannot bind the result of
+ * if-statements. This outer let* binding is therefore marked
+ * LB_IS_DUMMY. The code generator will only declare one local
+ * variable temp, and assign the result of the correct brach to
+ * it. The rest of the code after the if statement is fine since it
+ * just knows to use the name temp, which now stores the correct value. 
  */
 #define LB_IS_DUMMY      0x00080000u
 /** Do not emit an assignment for this let binding. This is set in the
@@ -241,16 +237,11 @@ enum PrimOp {
 
 /** Marks a BitC identifier as already having an external name, which
  * should be used during code generation in place of the BitC name.
- *
- * @bug Looking at the use cases, this appears to be wholly redudant,
- * because all of the associated ASTs will have an externalName field
- * of non-zero size. Can this be eliminated?
  * 
- * > This flag is not redundant. DEF_IS_EXTERNAL is marked for all
- * > external definitions, whether it has an external name or not
- * > only some external definitions have a external-name. For example,
- * > the check at gen-c.cxx:3003 ValuesTOH() cannot be replaced with 
- * > ast->getID()->externalName.size()
+ * This flag is not redundant in light of the externalName
+ * field. DEF_IS_EXTERNAL is marked for all external definitions,
+ * whether it has an external name or not only some external
+ * definitions have a external-name.
  */
 #define DEF_IS_EXTERNAL  0x08000000u 
 /**Used to mark a union consisting exclusively of constant
@@ -269,16 +260,9 @@ enum PrimOp {
  * syntactically rejected, in which case this flag should never
  * arise. Is there some USEFUL counter-example?
  *
- * @bug Conversely, if we are going to treat this as a union on the
- * theory that the developer isn't done yet and it will eventually
- * have more legs, why the hell bother to optimize it?
- *
- * > The programmer cannot provide any more legs after the union
- * > definition is complete. So, bug(2) cannot arise.
- * > bug(1) is maintained for completeness. If we reject single legged 
- * > unions, this goes away.
+ * @note If we reject single legged unions, this goes away, it is just
+ * maintained for completeness.
  */
-
 #define SINGLE_LEG_UN    0x20000000u
 
 /** Marks a union that is subject to one of the required Cardelli
@@ -294,102 +278,37 @@ enum PrimOp {
 /** Marks the place-holder identifier that is introduced in the
  * at_sw_leg AST to replicate the (switch ...) temporary identifier.
  *
- * @bug The only place this is used is to ensure that the ID is being
- * used on the LHS of a dot, unless SWITCHED_ID_OK is set (which it
- * always is by at_select) or to catch mis-use of the switch symbol in
- * CATCH blocks that catch multiple cases. I'm wondering if we should
- * not resolve both of these cases by requiring that the thing on the
- * RHS of a swith pattern or a catch pattern be a LAMBDA form taking a
- * single argument by value. Would that perhaps be cleaner? It would
- * resolve the "multiple matched exceptions" issue nicely.
- *
- * @bug Or is the problem here that we @em require the dot, because we
- * don't want it to be possible for this identifier to escape, thereby
- * revealing a leg structure type?  If this is the issue, it might be
- * a lot cleaner to just ensure that (SWITCH ...) is defined to be of
- * unit type.
- * 
- * > Yes, the flag is required for the second issue identified here. 
- * > We require that the identifier not be used as a whole, but always
- * > be dereferenced. Making switch return unit type is insufficient
- * > to ensure this property since the identifier can escape by
- * > assignment.  
+ * This flag ensures that an identifier that stores a de-constructed
+ * value in a switch statement can only appear on the left of 
+ * a select (.) operator. The specification enforces this rule so that
+ * the de-constructed value does not escape as a whole (as a return
+ * value, by assignment or closure). 
  */
 #define ID_FOR_SWITCH    0x00000001u
  /** Identifier is closed over by something. */
 #define ID_IS_CAPTURED   0x00000004u 
-
- ////////////////////////////////////////////////////////////////////
- // The following Identifier-markers are applicable only to value
- // identifiers, not to type identifiers. They are used in closure
- // conversion to mark the various identifier nodes.
- //
- // @bug I wonder if ID_IS_DEF and ID_IS_USE shouldn't be marked for
- // type identifiers too. We can use (flags2&(ID_IS_DEF|ID_IS_CLOSED))
- ////////////////////////////////////////////////////////////////////
-
-/** ID is a defining occurrence.
- *
- * @issue Shap thinks this should only occur in a DEFINE or
- * LET-BINDING or ARGUMENT position, yes?
- * > It can also occur at switch/case.
- */
-#define ID_IS_DEF        0x00000008u
-/** ID is a use occurrence. */
-#define ID_IS_USE        0x00000010u
-/** ID is a use occurrence of a closed-over ID
- *
- * @bug I copied the existing comment here, but it seems to me that
- * this might also arise on a defining occurrence, no? In any case, it
- * seems to me that the distinction is already covered by ID_IS_USE,
- * and this flag should not encode that redundantly. 
- *
- * > This flag is only marked on use occurences. Its job is not to
- * > encode the use vs def information. We can change the comment
- * > to Marks (use-cases of) closed over identifiers.
- */
+/** Marks identifiers that are closed over by some lambda.
+ *  Only use occurences that actually lie within an enclosing lambda
+ *  marked with this flag. */
 #define ID_IS_CLOSED     0x00000020u
 /** ID must be moved to the heap due to capture. */
 #define ID_NEEDS_HEAPIFY 0x00000040u
-/** @bug This seems to be a hold-over from our earliest fixing
- * hack. It is set once and carefully cleared in many places, but
- * never tested. Can it be dropped?
- *
- * > This is useful for the heuristic algorithm which can be invoked
- * > through the --heuristic-inference option to the compiler.
- * > Fixed the implementation of the heuristic algorithm to consult
- * > this flag correctly.
- */
-#define ID_IS_MUTATED    0x00000100u  // ID is target of SET!
-/** @bug This exists only to set ID_IS_MUTATED, which doesn't appear
- *to be in use anymore. Can we drop it? 
- *
- * > Necessary because of the above.
+/** Mark if an identifier is shalowly mutated in the local
+ * context. That is, the flag is set if the identifier is a target of
+ * a set!. This information is used in heuristic type inference. */
+#define ID_IS_MUTATED    0x00000100u  
+/** Mark if the identifier's ID_IS_MUTATED flag can still be updated. 
+ * This flag ensures the global identifiers' mutability is not
+ * affected by usage beyond its definition. In the case of global
+ * definitions, the identifier's mutability is marked closed, at the
+ * end of its definition. 
  */
 #define ID_MUT_CLOSED    0x00000800u
-/** This proclaim was introduced by the compiler. So, we can skip the
- * def/decl match. This is necessary only until we have a way to
- * input dummy types.
- *
- * @bug Can you sent me a note reminding me what a "dummy type" is in
- * this context, and what, if anything, we ought to do about inputting
- * them? Alternatively, can you explain why it is appropriate for this
- * to use a dummy type? I see that this has something to do with the
- * construction of closure records, but I don't understand the issue.
- *
- * > In the case of non-generalizable expressions at the top-level
- * > (define), any monomorphic variables are forced to a dummy type
- * > that cannot unify with any other type. I do not expect that the
- * > user will ever input this type. In fact, the whole point of this
- * > type is to not be compatible with any type that the user can
- * > input (so, the comment is really wrong). 
- * > 
- * > This flag has now got nothing to do with the dummy type. It used
- * > to be a concern when every dummy type was different.
- * > This flag is now being used by unreachable code in Symtab.cxx
- * > that warns about local proclaimations without definitions. The
- * > flag indicates that such warnings must not be generated for
- * > compiler generated proclaimations.
+/** @note This flag is now being used by unreachable (#if 0ed) code in
+ * Symtab.cxx that warns about local proclaimations without
+ * definitions. The flag indicates that such warnings must not be
+ * generated for compiler generated proclaimations. It can be removed
+ * if we think that warnUnresRef() can be permanently retired.
  */
 #define PROCLAIM_IS_INTERNAL 0x00001000u
 /** Set in the SSA pass to identify trivial initializers so that the
@@ -412,20 +331,15 @@ enum PrimOp {
  * > externalname field. 
  */
 #define IDENT_MANGLED        0x00004000u
-/** Original: For variables defined at non-generalizable
+/** Marked for variables defined at non-generalizable
  * boundaries. ex: Lambda parameters, identifiers defined at switch /
  * catch, etc.
  *
- * @bug Okay, but I have no idea why these variables are handled
- * differently in the instantiator, and it would be really useful to
- * know that.
- * > 
- * > Local generalizable variables must be handled by creating a new
- * > let-binding with all concrete instantiations. Non-generalizable
- * > locals like lambda-parameters, identifier at switch, catch, 
- * > do, etc. can be trivially handled by performing a name change to
- * > a canonical one. Please refer Instantiate.cxx:1035 
- */
+ * Local generalizable variables must be handled by creating a new
+ * let-binding with all concrete instantiations. Non-generalizable
+ * locals like lambda-parameters, identifier at switch, catch, 
+ * do, etc. can be trivially handled by performing a name change to
+ * a canonical one. */
 #define LOCAL_NOGEN_VAR  0x00008000u  
 /** Used to track the highest level of tvar-usage. If we see a tvar
  * use, and if LBS_PROCESSED is set for tvar->tvarLB, then we have
