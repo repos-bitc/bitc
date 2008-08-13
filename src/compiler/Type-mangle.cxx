@@ -74,12 +74,12 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
   if(getType() != shared_from_this())
     return getType()->mangledString(igMut, igTlMut, maxArgMut);
 
-  if(mark & MARK5) {
+  if(mark & MARK_MANGLED_STRING) {
     // Encountered Infinite Type
     assert(false);
   }
 
-  mark |= MARK5;
+  mark |= MARK_MANGLED_STRING;
 
   switch(kind) {
   case ty_tvar:
@@ -270,6 +270,6 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     }
   }
   
-  mark &= ~MARK5;
+  mark &= ~MARK_MANGLED_STRING;
   return ss.str();
 }

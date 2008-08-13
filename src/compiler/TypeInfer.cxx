@@ -429,7 +429,7 @@ checkConstraints(std::ostream& errStream,
   
   shared_ptr<TCConstraints> defTcc = TCConstraints::make();
   shared_ptr<TCConstraints> declTcc = TCConstraints::make();
-  unsigned long unmatched = MARK20;
+  unsigned long unmatched = MARK_CHECK_CONSTRAINTS;
 
   defSigma->addConstraints(defTcc);
   declSigma->addConstraints(declTcc);

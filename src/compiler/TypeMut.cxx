@@ -273,10 +273,10 @@ Type::maximizeMutability(shared_ptr<Trail> trail)
   shared_ptr<Type> t = getType();
   shared_ptr<Type> rt = GC_NULL;
 
-  if(t->mark & MARK17)
+  if(t->mark & MARK_MAXIMIZE_MUTABILITY)
     return t;
   
-  t->mark |= MARK17;  
+  t->mark |= MARK_MAXIMIZE_MUTABILITY;  
   
   switch(t->kind) {
     
@@ -338,7 +338,7 @@ Type::maximizeMutability(shared_ptr<Trail> trail)
     }
   }
   
-  t->mark &= ~MARK17;
+  t->mark &= ~MARK_MAXIMIZE_MUTABILITY;
   return rt;
 }
 
@@ -348,10 +348,10 @@ Type::minimizeMutability(shared_ptr<Trail> trail)
   shared_ptr<Type> t = getType();
   shared_ptr<Type> rt = GC_NULL;
   
-  if(t->mark & MARK19)
+  if(t->mark & MARK_MINIMIZE_MUTABILITY)
     return t;
   
-  t->mark |= MARK19;  
+  t->mark |= MARK_MINIMIZE_MUTABILITY;  
   
   switch(t->kind) {
     
@@ -409,7 +409,7 @@ Type::minimizeMutability(shared_ptr<Trail> trail)
     }
   }
   
-  t->mark &= ~MARK19;
+  t->mark &= ~MARK_MINIMIZE_MUTABILITY;
   return rt;
 }
 
@@ -419,10 +419,10 @@ Type::minimizeDeepMutability(shared_ptr<Trail> trail)
   shared_ptr<Type> t = getType();
   shared_ptr<Type> rt = GC_NULL;
   
-  if(t->mark & MARK24)
+  if(t->mark & MARK_MINIMIZE_DEEP_MUTABILITY)
     return t;
   
-  t->mark |= MARK24;  
+  t->mark |= MARK_MINIMIZE_DEEP_MUTABILITY;  
   
   switch(t->kind) {
     
@@ -489,7 +489,7 @@ Type::minimizeDeepMutability(shared_ptr<Trail> trail)
     }
   }
   
-  t->mark &= ~MARK24;
+  t->mark &= ~MARK_MINIMIZE_DEEP_MUTABILITY;
   return rt;
 }
 
@@ -535,10 +535,10 @@ Type::adjMaybe(shared_ptr<Trail> trail, bool markedOnly,
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK15)
+  if(t->mark & MARK_ADJ_MAYBE)
     return;
   
-  t->mark |= MARK15;
+  t->mark |= MARK_ADJ_MAYBE;
     
   switch(t->kind) {
   case ty_mbFull:
@@ -580,7 +580,7 @@ Type::adjMaybe(shared_ptr<Trail> trail, bool markedOnly,
     }
   }
   
-  t->mark &= ~MARK15;
+  t->mark &= ~MARK_ADJ_MAYBE;
 }
 
 
@@ -614,10 +614,10 @@ Type::determineCCC(shared_ptr<Type> t, bool inRefType)
   
   t = t->getType();
 
-  if(t->mark & MARK18)
+  if(t->mark & MARK_DETERMINE_CCC)
     return true;
   
-  t->mark |= MARK18;  
+  t->mark |= MARK_DETERMINE_CCC;  
   bool cccOK = true;
   
   switch(t->kind) {
@@ -650,7 +650,7 @@ Type::determineCCC(shared_ptr<Type> t, bool inRefType)
     }
   }
 
-  t->mark &= ~MARK18;
+  t->mark &= ~MARK_DETERMINE_CCC;
   return cccOK;
 }
 
@@ -670,10 +670,10 @@ Type::markSignMbs(bool cppos)
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK25)
+  if(t->mark & MARK_SIGN_MBS)
     return;
   
-  t->mark |= MARK25;  
+  t->mark |= MARK_SIGN_MBS;  
   
   switch(t->kind) {
     
@@ -763,7 +763,7 @@ Type::markSignMbs(bool cppos)
     }
   }
   
-  t->mark &= ~MARK25;
+  t->mark &= ~MARK_SIGN_MBS;
   return;
 }
 
@@ -784,10 +784,10 @@ Type::fixupFnTypes()
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK26)
+  if(t->mark & MARK_FIXUP_FN_TYPES)
     return;
   
-  t->mark |= MARK26;
+  t->mark |= MARK_FIXUP_FN_TYPES;
   
   switch(t->kind) {
     
@@ -862,5 +862,5 @@ Type::fixupFnTypes()
     }
   }
   
-  t->mark &= ~MARK26;
+  t->mark &= ~MARK_FIXUP_FN_TYPES;
 }

@@ -2508,10 +2508,10 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
 		      set<string>& fnSet)
 {
   shared_ptr<Type> t = candidate->getBareType();
-  if(t->mark & MARK13)
+  if(t->mark & MARK_EMIT_ARR_VEC_FN_TYPES)
     return;
 
-  t->mark |= MARK13;
+  t->mark |= MARK_EMIT_ARR_VEC_FN_TYPES;
 
   for(size_t i=0; i<t->typeArgs.size(); i++)
     emit_arr_vec_fn_types(t->TypeArg(i), out, 
@@ -2600,7 +2600,7 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
     }
   }
   
-  t->mark &= ~MARK13;
+  t->mark &= ~MARK_EMIT_ARR_VEC_FN_TYPES;
 } 
 
   

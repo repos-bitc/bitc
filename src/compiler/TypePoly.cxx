@@ -86,10 +86,10 @@ Type::boundInType(shared_ptr<Type> tv)
   if(t == tv->getType())
     return true;
    
-  if(t->mark & MARK1)
+  if(t->mark & MARK_BOUND_IN_TYPE)
     return false;
   
-  t->mark |= MARK1;
+  t->mark |= MARK_BOUND_IN_TYPE;
   bool bound = false;
   
   for(size_t i=0; (!bound) && (i < t->components.size()); i++) 
@@ -104,7 +104,7 @@ Type::boundInType(shared_ptr<Type> tv)
       (!bound) && itr != t->fnDeps.end(); ++itr)
     bound = (*itr)->boundInType(tv);
   
-  t->mark &= ~MARK1;
+  t->mark &= ~MARK_BOUND_IN_TYPE;
   return bound;
 }
 
@@ -141,10 +141,10 @@ Type::collectAllftvs(TypeSet& tvs)
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK3)
+  if(t->mark & MARK_COLLECT_ALL_FTVS)
     return;
 
-  t->mark |= MARK3;
+  t->mark |= MARK_COLLECT_ALL_FTVS;
   
   if(t->kind == ty_tvar) {
     tvs.insert(t);
@@ -161,7 +161,7 @@ Type::collectAllftvs(TypeSet& tvs)
       (*itr)->collectAllftvs(tvs);
   }
 
-  t->mark &= ~MARK3;
+  t->mark &= ~MARK_COLLECT_ALL_FTVS;
 }
  
 // Collects ftvs wrt the basic type and TC predicates 
@@ -184,10 +184,10 @@ Type::collectftvsWrtGamma(TypeSet& tvs,
 {   
   shared_ptr<Type> t = getType();
 
-  if(t->mark & MARK2)
+  if(t->mark & MARK_COLLECT_FTVS_WRT_GAMMA)
     return;
 
-  t->mark |= MARK2;
+  t->mark |= MARK_COLLECT_FTVS_WRT_GAMMA;
 
   if(t->kind == ty_tvar) {
     assert(t->components.size() == 0);
@@ -206,7 +206,7 @@ Type::collectftvsWrtGamma(TypeSet& tvs,
       (*itr)->collectftvsWrtGamma(tvs, gamma);
   }
 
-  t->mark &= ~MARK2;
+  t->mark &= ~MARK_COLLECT_FTVS_WRT_GAMMA;
 }
  
 

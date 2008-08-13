@@ -151,10 +151,10 @@ Type::size()
   if(getType() != shared_from_this())
     return link->getType()->size();
 
-  if(mark & MARK21)
+  if(mark & MARK_SIZE)
     assert(false);
 
-  mark |= MARK21;
+  mark |= MARK_SIZE;
 
   size_t theSize=0;
   
@@ -270,7 +270,7 @@ Type::size()
     }
   }
   
-  mark &= ~MARK21;
+  mark &= ~MARK_SIZE;
   return theSize;
 }
 

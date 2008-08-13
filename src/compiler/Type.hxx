@@ -654,52 +654,35 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
   return strm;
 }
 
-/** @bug shap does not understand several issues here. First, what
- * does each of these marks mean? Second, why on earth should we
- * believe that 26 marks is a magic number. If so, then each of these
- * marks must have some specific associated case, and should be named
- * accordingly.
- *
- * The current mark naming seems very bad.
- *
- * > The following marks are present on types to ensure that
- * > procedures that recurse over the structure of equi-recursive
- * > types (example, list type that contains a pointer to itself) do
- * > not recurse infinitely. We only need to use differernt markers
- * > for procedures that are mutually recursive, or are just used
- * > simultaneously. Here, we just use different markers for each
- * > procedure that is recursive over type-structure. 
- * > We can name each marker based on the procedure that uses it, but
- * > we should remember that the marker does not really have anything
- * > to do with the semantics of those procedures.
+/** The following marks are present on types to ensure that
+ *  procedures that recurse over the structure of equi-recursive
+ *  types do not recurse infinitely. We need to use differernt markers
+ *  for procedures that are mutually recursive, or are otherwise used
+ *  simultaneously. Here, we actually use different markers for each
+ *  procedure that is recursive over type-structure. 
  */
 // Markers used for type traversal
-#define MARK1   0x0000001u
-#define MARK2   0x0000002u
-#define MARK3   0x0000004u
-#define MARK4   0x0000008u
-#define MARK5   0x0000010u
-#define MARK6   0x0000020u
-#define MARK7   0x0000040u
-#define MARK8   0x0000080u
-#define MARK9   0x0000100u
-#define MARK10  0x0000200u
-#define MARK11  0x0000400u
-#define MARK12  0x0000800u
-#define MARK13  0x0001000u
-#define MARK14  0x0002000u
-#define MARK15  0x0004000u
-#define MARK16  0x0008000u
-#define MARK17  0x0010000u
-#define MARK18  0x0020000u
-#define MARK19  0x0040000u
-#define MARK20  0x0080000u
-#define MARK21  0x0100000u
-#define MARK22  0x0200000u
-#define MARK23  0x0400000u
-#define MARK24  0x0800000u
-#define MARK25  0x1000000u
-#define MARK26  0x2000000u
+#define MARK_BOUND_IN_TYPE            0x0000001u
+#define MARK_COLLECT_FTVS_WRT_GAMMA   0x0000002u
+#define MARK_COLLECT_ALL_FTVS         0x0000004u
+#define MARK_IS_EXPANSIVE             0x0000008u
+#define MARK_MANGLED_STRING           0x0000010u
+#define MARK_IS_OF_INFINITE_TYPE      0x0000020u
+#define MARK_IS_CONCRETIZABLE         0x0000040u
+#define MARK_GET_BARE_TYPE            0x0000080u
+#define MARK_GET_THE_TYPE             0x0000100u
+#define MARK_EMIT_ARR_VEC_FN_TYPES    0x0000200u
+#define MARK_ADJ_MAYBE                0x0000400u
+#define MARK_MAXIMIZE_MUTABILITY      0x0000800u
+#define MARK_MINIMIZE_MUTABILITY      0x0001000u
+#define MARK_DETERMINE_CCC            0x0002000u
+#define MARK_CHECK_CONSTRAINTS        0x0004000u
+#define MARK_SIZE                     0x0008000u
+#define MARK_IS_DEEP_MUT              0x0010000u
+#define MARK_IS_DEEP_IMMUT            0x0020000u
+#define MARK_MINIMIZE_DEEP_MUTABILITY 0x0040000u
+#define MARK_SIGN_MBS                 0x0080000u
+#define MARK_FIXUP_FN_TYPES           0x0100000u
 
 /* Flags used by Type-inference engine. 
    These flags are different from the Unifier's flags */

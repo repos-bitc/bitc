@@ -241,10 +241,10 @@ Type::getBareType()
 { 
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK10)
+  if(t->mark & MARK_GET_BARE_TYPE)
     return t;
   
-  t->mark |= MARK10;
+  t->mark |= MARK_GET_BARE_TYPE;
 
   shared_ptr<Type> retType = t;
 
@@ -254,7 +254,7 @@ Type::getBareType()
   if(t->isMutable())
     retType = t->Base()->getBareType();  
 
-  t->mark &= ~MARK10;
+  t->mark &= ~MARK_GET_BARE_TYPE;
   return retType;
 }
 
@@ -263,10 +263,10 @@ Type::getTheType(bool mutableOK, bool maybeOK)
 { 
   shared_ptr<Type> t = getType();  
 
-  if(t->mark & MARK11)
+  if(t->mark & MARK_GET_THE_TYPE)
     return t;
   
-  t->mark |= MARK11;
+  t->mark |= MARK_GET_THE_TYPE;
 
   shared_ptr<Type> retType = t;
   
@@ -275,7 +275,7 @@ Type::getTheType(bool mutableOK, bool maybeOK)
   else if(t->isMaybe() && !maybeOK)
     retType = t->Core()->getTheType(mutableOK, maybeOK);
   
-  t->mark &= ~MARK11;
+  t->mark &= ~MARK_GET_THE_TYPE;
   return retType;
 }
 
@@ -647,10 +647,10 @@ Type::isDeepMut()
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK22)
+  if(t->mark & MARK_IS_DEEP_MUT)
     return true;
   
-  t->mark |= MARK22;
+  t->mark |= MARK_IS_DEEP_MUT;
   
   bool mut = false;
   
@@ -675,7 +675,7 @@ Type::isDeepMut()
     break;
   }
   
-  t->mark &= ~MARK22;
+  t->mark &= ~MARK_IS_DEEP_MUT;
   return mut;
 }
   
@@ -684,10 +684,10 @@ Type::isDeepImmut()
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK23)
+  if(t->mark & MARK_IS_DEEP_IMMUT)
     return true;
   
-  t->mark |= MARK23;
+  t->mark |= MARK_IS_DEEP_IMMUT;
   
   bool immut = true;
   
@@ -714,7 +714,7 @@ Type::isDeepImmut()
     break;
   }
 
-  t->mark &= ~MARK23;
+  t->mark &= ~MARK_IS_DEEP_IMMUT;
   return immut;  
 }
 
@@ -723,10 +723,10 @@ Type::isConcretizable()
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK7)
+  if(t->mark & MARK_IS_CONCRETIZABLE)
     return true;
   
-  t->mark |= MARK7;
+  t->mark |= MARK_IS_CONCRETIZABLE;
   
   bool concretizable = true;
   
@@ -755,7 +755,7 @@ Type::isConcretizable()
     break;
   }
   
-  t->mark &= ~MARK7;
+  t->mark &= ~MARK_IS_CONCRETIZABLE;
   return concretizable;  
 }
 
@@ -817,10 +817,10 @@ Type::isOfInfiniteType()
   if(getType() != shared_from_this())
     return getType()->isOfInfiniteType();
 
-  if(mark & MARK6) 
+  if(mark & MARK_IS_OF_INFINITE_TYPE) 
     return true;
 
-  mark |= MARK6;
+  mark |= MARK_IS_OF_INFINITE_TYPE;
 
   switch(kind) {
   case ty_tvar:
@@ -890,7 +890,7 @@ Type::isOfInfiniteType()
     }
   }
   
- mark &= ~MARK6;
+ mark &= ~MARK_IS_OF_INFINITE_TYPE;
  return infType;
 }
 
