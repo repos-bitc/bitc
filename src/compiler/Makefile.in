@@ -162,7 +162,12 @@ AST.hxx: AST.ast
 endif
 
 clean:
-	-rm -rf BUILD
+	-rm -rf BUILD doxygen
+
+.PHONY: doxygen
+
+doxygen: AST.hxx AST.cxx
+	doxygen doxygen.html.cfg
 
 # Following is a dummy dependency. It ensures that the header file
 # containing token numbers gets generated before we try to compile
