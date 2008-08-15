@@ -914,6 +914,55 @@
 	    </constrain>
 	  </TEjudge>
 	</tyConc>
+      </tyRule>
+      <tyRule name="I-Qual"> 
+	<tyPre>
+	  <TEjudge name="i">
+	    <assume>
+	      <gamma/>
+	      <store/>
+	    </assume>
+	    <conclude>
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>
+	    </conclude>
+	    <constrain>
+	      <aCtset/>                  
+	    </constrain>
+	  </TEjudge>
+	</tyPre>
+	<tyConc>
+	  <TEjudge name="i">
+	    <assume>
+	      <gamma/>
+	      <store/>
+	    </assume>
+	    <conclude>
+	      <tqExpr>
+		<paren>
+		  <tqExpr>
+		    <aExpr/>
+		    <type dash="'"/>
+		  </tqExpr>
+		</paren>
+		<type/>
+	      </tqExpr>
+	    </conclude>
+	    <constrain>
+	      <unin>
+		<aCtset/>
+		<set>
+		  <eq>
+		    <type/>
+		    <type dash="'"/>
+		  </eq>
+		</set>
+	      </unin>
+	    </constrain>
+	  </TEjudge>
+	</tyConc>
       </tyRule>        
     </Hrules>
     <Hrules  rowsep="4pt" colsep="2">

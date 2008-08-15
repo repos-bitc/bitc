@@ -75,16 +75,14 @@
 	  </Msub>
 	</tyConc>
       </tyRule>  
-    </Hrules>
-    <Hrules rowsep="4pt" colsep="2">
       <tyRule name="S-MT1">
 	<tyPre>
-	  <eq>
+	  <Msub>
 	    <minzT>
 	      <ptype/>
 	    </minzT>
 	    <type/>
-	  </eq>
+	  </Msub>
 	</tyPre>
 	<tyConc>
 	  <Msub>
@@ -98,12 +96,12 @@
       </tyRule>
       <tyRule name="S-MT2">
 	<tyPre>
-	  <eq>
+	  <Msub>
+	    <type/>
 	    <maxzT>
 	      <ptype/>
 	    </maxzT>
-	    <type/>
-	  </eq>
+	  </Msub>
 	</tyPre>
 	<tyConc>
 	  <Msub>
@@ -115,14 +113,16 @@
 	  </Msub>
 	</tyConc>
       </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="2">
       <tyRule name="S-MF1">
 	<tyPre>
-	  <eq>
+	  <Msub>
 	    <minz>
 	      <ptype/>
 	    </minz>
 	    <type/>
-	  </eq>
+	  </Msub>
 	</tyPre>
 	<tyConc>
 	  <Msub>
@@ -160,12 +160,12 @@
       </tyRule>
       <tyRule name="S-MF3">
 	<tyPre>
-	  <eq>
+	  <Msub>
+	    <type/>
 	    <maxz>
 	      <ptype/>
 	    </maxz>
-	    <type/>
-	  </eq>
+	  </Msub>
 	</tyPre>
 	<tyConc>
 	  <Msub>
@@ -174,6 +174,42 @@
 	      <stype/>
 	      <ptype/>
 	    </mbFull>
+	  </Msub>
+	</tyConc>
+      </tyRule>
+      <tyRule name="S-Const1">
+	<tyPre>
+	  <Msub>
+	    <type/>
+	    <minz>
+	      <type dash="'"/>
+	    </minz>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <Msub>
+	    <type/>
+	    <const>
+	      <type dash="'"/>
+	    </const>
+	  </Msub>
+	</tyConc>
+      </tyRule>
+      <tyRule name="S-Const2">
+	<tyPre>
+	  <Msub>
+	    <minz>
+	      <type/>
+	    </minz>
+	    <type dash="'"/>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <Msub>
+	    <const>
+	      <type/>
+	    </const>
+	    <type dash="'"/>
 	  </Msub>
 	</tyConc>
       </tyRule>

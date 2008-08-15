@@ -250,6 +250,9 @@
             <ref><type/></ref>
             <mutable><ptype/></mutable>
             <pair><type/><type/></pair>
+            <const>
+              <type/>
+            </const>
           </alternatives>
         </bnfc>
         <bnf desc="Types.2">
@@ -270,9 +273,6 @@
               <stype/>
               <ptype/>
             </mbFull>
-            <const>
-              <type/>
-            </const>
           </alternatives>
         </bnf>
         <bnf desc="Type Scheme">          

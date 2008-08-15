@@ -267,6 +267,27 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
+      <tyRule name="T-Qual">
+	<tyPre>
+	  <TDjudge>
+	    <aExpr/>
+	    <type/>
+	    <dCtset/>
+	  </TDjudge>
+	</tyPre>
+	<tyConc>
+	  <TDjudge>
+	    <paren>
+	      <tqExpr>
+		<aExpr/>
+		<type/>
+	      </tqExpr>
+	    </paren>
+	    <type/>
+	    <dCtset/>
+	  </TDjudge>
+	</tyConc>
+      </tyRule>
     </Hrules>
     <Hrules rowsep="4pt" colsep="1">
       <tyRule name="T-Pair">
