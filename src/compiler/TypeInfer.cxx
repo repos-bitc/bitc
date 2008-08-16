@@ -169,7 +169,7 @@ Instantiate(shared_ptr<AST> ast, shared_ptr<TypeScheme> sigma)
     ast = ast->symbolDef;
   
   shared_ptr<TypeScheme> ins = GC_NULL;
-  if(ast->isIdentType(Idc_ctor) || ast->isIdentType(id_union))
+  if(ast->isIdentType(idc_ctor) || ast->isIdentType(id_union))
     ins = sigma->ts_instance_copy();
   else
     ins = sigma->ts_instance();
@@ -314,7 +314,7 @@ UnifyLetBinds(std::ostream& errStream, shared_ptr<AST> lbs,
     if(Options::heuristicInference) {
       shared_ptr<Type> idType = id->symType->getType();
 
-      if((id->Flags2 & ID_IS_MUTATED) && !idType->isMutable()) {
+      if((id->Flags & ID_IS_MUTATED) && !idType->isMutable()) {
 	std::stringstream ss;  
 	shared_ptr<Type> mTv = Type::make(ty_mutable, newTvar());
 	
@@ -872,7 +872,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	{
 	  shared_ptr<comp> nComp = comp::make(field->child(0)->s,
 				       field->child(1)->symType);
-	  if(field->Flags2 & FLD_IS_DISCM)
+	  if(field->Flags & FLD_IS_DISCM)
 	    nComp->flags |= COMP_UNIN_DISCM;
 	  
 	  ctrId->symType->components.push_back(nComp);
@@ -1009,7 +1009,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 
   /* If we are dealing with defrepr, don't perform any
      optimization */ 
-  if(ast->Flags2 & UNION_IS_REPR) {
+  if(ast->Flags & UNION_IS_REPR) {
     if(declares->tagType) {
       errStream << ast->loc << ": "
 		<< "tag-type declarations cannot be "
@@ -3273,7 +3273,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       ast->child(1)->symbolDef = fct->defAst;	  
       ast->child(1)->Flags |= fct->defAst->Flags;
-      ast->child(1)->Flags2 |= fct->defAst->Flags2;
+      ast->child(1)->Flags |= fct->defAst->Flags;
       ast->child(1)->symType = fct;
       ast->symType = ast->child(1)->symType;
       break;
@@ -3312,7 +3312,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       ast->child(1)->symbolDef = fct->defAst;	  
       ast->child(1)->Flags |= fct->defAst->Flags;
-      ast->child(1)->Flags2 |= fct->defAst->Flags2;
+      ast->child(1)->Flags |= fct->defAst->Flags;
       ast->child(1)->symType = fct;
       break;
     }
@@ -3546,11 +3546,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<AST> ctr = ast->child(0);
 
       if((ctr->astType == at_ident) &&
-	 (ctr->symbolDef->isIdentType(Idc_uctor))) {
+	 (ctr->symbolDef->isIdentType(idc_uctor))) {
 	// Constructor direct usage
       }
       else if ((ctr->astType == at_fqCtr) &&
-	       (ctr->child(1)->symbolDef->isIdentType(Idc_uctor))) {
+	       (ctr->child(1)->symbolDef->isIdentType(idc_uctor))) {
 	// Constructor qualified usage 
       }
       else {
@@ -3999,7 +3999,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       }
       
       if(process_ndx) {
-	ast->Flags2 |= INNER_REF_NDX;
+	ast->Flags |= INNER_REF_NDX;
 	// match agt_expr
 	TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
@@ -4206,7 +4206,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	 intersection of all constructors as invalid. This flag (on
 	 the component) is ONLY checked in at_select.  */
       shared_ptr<AST> uninID = aCtr->symType->myContainer;
-      bool isRepr = (uninID->Flags2 & UNION_IS_REPR);
+      bool isRepr = (uninID->Flags & UNION_IS_REPR);
 
 
       for(size_t c=2; c < ast->children.size(); c++) {

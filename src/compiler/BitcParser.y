@@ -1543,7 +1543,7 @@ lambdapattern: ident ':' type_pl_byref {
   SHOWPARSE("lambdapattern -> ident : type_pl_byref");
   $$ = AST::make(at_identPattern, $1->loc, $1, $3);
   if($3->astType == at_byrefType)
-    $1->Flags2 |= ARG_BYREF;
+    $1->Flags |= ARG_BYREF;
 };
 
 lambdapattern: '(' tk_THE type ident ')' {
@@ -1554,7 +1554,7 @@ lambdapattern: '(' tk_THE type ident ')' {
 lambdapattern: '(' tk_THE '(' tk_BY_REF type ')' ident ')' {
   SHOWPARSE("lambdapattern -> ( the ( by-ref type ) ident )");
   $$ = AST::make(at_identPattern, $1.loc, $7, $5);
-  $5->Flags2 |= ARG_BYREF;
+  $5->Flags |= ARG_BYREF;
 };
 
 // EXPRESSIONS [7]

@@ -96,7 +96,7 @@ calc_struct_size(const shared_ptr<Type> t)
 	  sz+= t->CompType(compCnt)->size();
 	}
 
-	if((fld->Flags2 & FLD_IS_DISCM) == 0)
+	if((fld->Flags & FLD_IS_DISCM) == 0)
 	  compCnt++;
 	break;
       }
@@ -135,8 +135,8 @@ calc_unin_size(const shared_ptr<Type> t)
   }
    
   size_t tag=0;
-  if((base->Flags2 & ENUM_UN) || (base->Flags2 & SINGLE_LEG_UN) || 
-     (base->Flags2 & CARDELLI_UN) || (base->Flags2 & UNION_IS_REPR))
+  if((base->Flags & ENUM_UN) || (base->Flags & SINGLE_LEG_UN) || 
+     (base->Flags & CARDELLI_UN) || (base->Flags & UNION_IS_REPR))
     tag=0;
   else 
     tag = base->tagType->size();

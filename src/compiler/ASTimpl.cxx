@@ -632,15 +632,15 @@ identTypeToString(IdentType id)
     return "union-ctr";
   case id_ucon0:
     return "union-ctr0";
-  case Idc_type:
+  case idc_type:
     return "Type";
-  case Idc_value:
+  case idc_value:
     return "Value";
-  case Idc_ctor:
+  case idc_ctor:
     return "Constructor";
-  case Idc_uctor:
+  case idc_uctor:
     return "Union-ctor";
-  case Idc_apply:
+  case idc_apply:
     return "Applicable-value";
   }
 }
@@ -755,7 +755,7 @@ bool
 AST::isUnionLeg()
 {
   assert(astType == at_ident);
-  return isIdentType(Idc_uctor);
+  return isIdentType(idc_uctor);
 }
 
 bool
@@ -843,17 +843,21 @@ bool
 AST::isIdentType(IdentType t)
 {
   return ((identType == t) ||
-	  ((t == Idc_type) && ((identType == id_tvar) ||
+	  ((t == idc_type) && ((identType == id_tvar) ||
 			       (identType == id_union) || 
 			       (identType == id_struct))) ||
-	  ((t == Idc_value) && ((identType == id_value) || 
+	  ((t == idc_value) && ((identType == id_value) || 
 				(identType == id_ucon0) || 
 				(identType == id_method))) ||
-	  ((t == Idc_ctor)  && ((identType == id_struct) || 
+	  ((t == idc_ctor)  && ((identType == id_struct) || 
 				(identType == id_ucon) || 
 				(identType == id_ucon0))) ||
-	  ((t == Idc_uctor) && ((identType == id_ucon) || 
+	  ((t == idc_uctor) && ((identType == id_ucon) || 
 				(identType == id_ucon0))) ||
-	  ((t == Idc_apply) && (isIdentType(Idc_value) ||
-				isIdentType(Idc_ctor))));
+	  // The idc_apply case is written as a recursive call and not
+	  // as disjunction of various id_* cases since in the case
+	  // where we are applying a valye that was proclaimed, the
+	  // identType would still be idc_value, and not id_value.
+	  ((t == idc_apply) && (isIdentType(idc_value) ||
+				isIdentType(idc_ctor))));
 }

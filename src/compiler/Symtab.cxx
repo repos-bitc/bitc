@@ -53,7 +53,6 @@ using namespace std;
 using namespace boost;
 using namespace sherpa;
  
-#if 0
 // Shap isn't convinced that the spec required this. Having said that,
 // this is similar to the unresolved forward static declaration
 // warning in C, and it is similarly useful.
@@ -73,7 +72,7 @@ warnUnresRef(std::ostream& errStream,
     case at_declstruct:
     case at_proclaim:
       {
-	if(ast->Flags2 & PROCLAIM_IS_INTERNAL)
+	if(ast->Flags & PROCLAIM_IS_INTERNAL)
 	  break;
 	
 	shared_ptr<AST> def = env->getBinding(ast->child(0)->s);
@@ -99,7 +98,6 @@ warnUnresRef(std::ostream& errStream,
   }
   return errorFree;
 }
-#endif
 
 static shared_ptr<UocInfo>
 findInterface(std::ostream& errStream, shared_ptr<AST> ifAst)
@@ -605,7 +603,7 @@ resolve(std::ostream& errStream,
 	
  	    if(ast->isIdentType(id_tvar) &&
 	       ((flags & NEW_TV_OK) || 
-		(ast->Flags2 & TVAR_POLY_SPECIAL))) {
+		(ast->Flags & TVAR_POLY_SPECIAL))) {
 	      bindIdentDef(ast, env, identType, currLB, flags);
 	      ast->symbolDef = ast;
 	      //errStream << "Created new ident for " << ast->s
@@ -690,7 +688,7 @@ resolve(std::ostream& errStream,
 	    errorFree = false;
 	  }
       
-	  if(def->Flags2 & ID_FOR_SWITCH) {
+	  if(def->Flags & ID_FOR_SWITCH) {
 	    if((flags & SWITCHED_ID_OK) == 0) {
 	      errStream << ast->loc << ": The identifier `"
 			<< ast->s << "' can only appear to the left of a `.'" 
@@ -708,9 +706,8 @@ resolve(std::ostream& errStream,
 
 	  ast->identType = def->identType;
 	  ast->Flags  |= def->Flags;
-	  ast->Flags2 |= def->Flags2;
+	  ast->Flags |= def->Flags;
 	  ast->Flags  &= ~MASK_FLAGS_FROM_USE;
-	  ast->Flags2 &= ~MASK_FLAGS2_FROM_USE;
 	  ast->externalName = def->externalName;
 
 	  /* Make sure tvars are scoped properly */
@@ -723,7 +720,7 @@ resolve(std::ostream& errStream,
 	    else
 	      thisLB = def->tvarLB;
 	    
-	    while(thisLB->Flags2 & LBS_PROCESSED) {
+	    while(thisLB->Flags & LBS_PROCESSED) {
 	      thisLB = thisLB->parentLB;
 	      assert(thisLB);
 	    }
@@ -859,10 +856,8 @@ resolve(std::ostream& errStream,
 	RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
 		GC_NULL, flags);
 
-#if 0
       if((flags & NO_RESOLVE_DECL) == 0)	
 	CHKERR(errorFree, warnUnresRef(errStream, ast, env));
-#endif
 
       break;
     }
@@ -896,12 +891,12 @@ resolve(std::ostream& errStream,
     
       // match at_constructors
       RESOLVE(ast->child(4), tmpEnv, lamLevel, DEF_MODE,
-	      Idc_uctor, ast, 	      
+	      idc_uctor, ast, 	      
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
 
       // match at_constraints
       RESOLVE(ast->child(5), tmpEnv, lamLevel, USE_MODE, 
-	      Idc_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
@@ -941,7 +936,7 @@ resolve(std::ostream& errStream,
  
       // match at_constraints
       RESOLVE(ast->child(5), tmpEnv, lamLevel, USE_MODE, 
-	      Idc_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
@@ -973,7 +968,7 @@ resolve(std::ostream& errStream,
       
       // match at_constraints
       RESOLVE(ast->child(3), tmpEnv, lamLevel, USE_MODE, 
-	      Idc_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
@@ -987,18 +982,18 @@ resolve(std::ostream& errStream,
 
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DECL_MODE, 
-	      Idc_value, ast, 
+	      idc_value, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
 	      | BIND_PUBLIC);
    
       // match at_type
       RESOLVE(ast->child(1), tmpEnv, lamLevel, USE_MODE, 
-	      Idc_type, ast, 
+	      idc_type, ast, 
 	      flags | (NEW_TV_OK) & (~INCOMPLETE_OK));
       
       // match at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
-	      Idc_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
@@ -1024,7 +1019,7 @@ resolve(std::ostream& errStream,
       for (size_t c = 1; c < ast->children.size(); c++) {
 	shared_ptr<AST> field = ast->child(c);
 	RESOLVE(field, tmpEnv, lamLevel, USE_MODE, 
-		Idc_type, ast, 
+		idc_type, ast, 
 		flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
 	if(names.find(field->child(0)->s) != names.end()) {
 	  errStream << field->child(0)->loc << ": "
@@ -1060,7 +1055,7 @@ resolve(std::ostream& errStream,
       longer mutable. It is the thing that is pointed to, that is
       mutable.  */
       assert(ast->child(0)->astType == at_identPattern);
-      ast->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
+      ast->child(0)->child(0)->Flags &= ~ID_IS_MUTATED;
       
       if (ast->astType == at_recdef) {
 	// Binding patterns must be in scope.
@@ -1072,7 +1067,7 @@ resolve(std::ostream& errStream,
 
       // match agt_expr
       RESOLVE(ast->child(1), tmpEnv, lamLevel, USE_MODE, 
-	      Idc_value, ast, 
+	      idc_value, ast, 
 	      flags | (NEW_TV_OK) & (~INCOMPLETE_OK));
       
       if (ast->astType == at_define) {
@@ -1086,11 +1081,11 @@ resolve(std::ostream& errStream,
 
       // match at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
-	      Idc_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));    
       
       /* Mark the present identifier closed wrt mutability */
-      ast->child(0)->child(0)->Flags2 |= ID_MUT_CLOSED;
+      ast->child(0)->child(0)->Flags |= ID_MUT_CLOSED;
 
       env->mergeBindingsFrom(tmpEnv);
       break;
@@ -1109,23 +1104,23 @@ resolve(std::ostream& errStream,
       
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
-	      Idc_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
 
 
       // match at_tc_decls
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
-	      Idc_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       
       // match at method_decls
       RESOLVE(ast->child(3), tmpEnv, lamLevel, USE_MODE, 
-	      Idc_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));      
 
       // match at constraints
       RESOLVE(ast->child(4), tmpEnv, lamLevel, USE_MODE, 
-	      Idc_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));      
 
       tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
@@ -1147,11 +1142,11 @@ resolve(std::ostream& errStream,
     {
       // match at_tvlist
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, flags);
+	      idc_type, currLB, flags);
       
       // match agt_tvar
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, flags);  
+	      idc_type, currLB, flags);  
       break;
     }
 
@@ -1164,7 +1159,7 @@ resolve(std::ostream& errStream,
       // match at agt_type+
       for (size_t c = 1; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		Idc_type, currLB, flags);
+		idc_type, currLB, flags);
 
       break;
     }
@@ -1189,7 +1184,7 @@ resolve(std::ostream& errStream,
       
       // match at at_fn
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, flags);
+	      idc_type, currLB, flags);
       
       break;
     }
@@ -1201,15 +1196,15 @@ resolve(std::ostream& errStream,
 
       // match at at_tcapp
       RESOLVE(ast->child(0), tmpEnv, lamLevel, 
-	      USE_MODE, Idc_type, ast, flags | NEW_TV_OK);
+	      USE_MODE, idc_type, ast, flags | NEW_TV_OK);
 
       // match at at_methods
       RESOLVE(ast->child(1), tmpEnv, lamLevel, 
-	      USE_MODE, Idc_value, ast, flags);
+	      USE_MODE, idc_value, ast, flags);
       
       // match at at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, 
-	      USE_MODE, Idc_type, ast, flags | NEW_TV_OK);
+	      USE_MODE, idc_type, ast, flags | NEW_TV_OK);
       break;
     }
 
@@ -1218,7 +1213,7 @@ resolve(std::ostream& errStream,
       // match at expr+
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, 
-		USE_MODE, Idc_value, currLB, flags);
+		USE_MODE, idc_value, currLB, flags);
       
       break;
     }
@@ -1442,7 +1437,7 @@ resolve(std::ostream& errStream,
       // match agt_type?
       if (ast->children.size() > 1) {
 	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		Idc_type, currLB, flags);
+		idc_type, currLB, flags);
       }
 
       break;
@@ -1570,7 +1565,7 @@ resolve(std::ostream& errStream,
       // match agt_type?
       if (ast->children.size() > 1) {
 	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		Idc_type, currLB, 
+		idc_type, currLB, 
 		flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       }
 
@@ -1581,7 +1576,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_type?
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, 
+	      idc_type, currLB, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
 
       break;
@@ -1591,11 +1586,11 @@ resolve(std::ostream& errStream,
     {
       // match agt_type?
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, 
+	      idc_type, currLB, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
 
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, 
+	      idc_type, currLB, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       
       break;
@@ -1605,7 +1600,7 @@ resolve(std::ostream& errStream,
     {
       // match at_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, flags);
+	      idc_type, currLB, flags);
 
       // match at_intLiteral
       RESOLVE(ast->child(1), env, lamLevel, NULL_MODE, 
@@ -1618,7 +1613,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, 
+	      idc_type, currLB, 
 	      flags | (INCOMPLETE_OK));
       break;
     }
@@ -1627,7 +1622,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, 
+	      idc_type, currLB, 
 	      flags | (INCOMPLETE_OK));
       break;
     }
@@ -1636,7 +1631,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, 
+	      idc_type, currLB, 
 	      flags & (~INCOMPLETE_OK));
 
       break;
@@ -1646,11 +1641,11 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, flags);
+	      idc_type, currLB, flags);
 
       // match agt_type
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, flags);
+	      idc_type, currLB, flags);
     
       break;
     }
@@ -1660,7 +1655,7 @@ resolve(std::ostream& errStream,
       // match agt_type*
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		Idc_type, currLB, flags);
+		idc_type, currLB, flags);
 
       break;
     }
@@ -1675,7 +1670,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, flags);
+	      idc_type, currLB, flags);
 
       // match at_intLiteral
       RESOLVE(ast->child(1), env, lamLevel, NULL_MODE, identType,
@@ -1694,7 +1689,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, flags);
+	      idc_type, currLB, flags);
 
       // match at_intLiteral?
       if (ast->children.size() > 1) {
@@ -1719,7 +1714,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, flags);
+	      idc_type, currLB, flags);
 
       break;
     }
@@ -1729,7 +1724,7 @@ resolve(std::ostream& errStream,
       // match agt_var agt_tvar+
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		Idc_type, currLB, flags);
+		idc_type, currLB, flags);
 
       break;
     }
@@ -1737,9 +1732,9 @@ resolve(std::ostream& errStream,
   case at_qualType:
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, flags);      
+	      idc_type, currLB, flags);      
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, flags);      
+	      idc_type, currLB, flags);      
       break;
     }
 
@@ -1747,7 +1742,7 @@ resolve(std::ostream& errStream,
     {
       for(size_t c=0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		Idc_type, currLB, flags);
+		idc_type, currLB, flags);
       break;
     }    
     
@@ -1760,7 +1755,7 @@ resolve(std::ostream& errStream,
       // Type Qualifications ONLY in Binding Patterns
       // match agt_type?
       if (ast->children.size() > 1) {
-	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, Idc_type,
+	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, idc_type,
 		currLB, flags); 
       }
     
@@ -1771,10 +1766,10 @@ resolve(std::ostream& errStream,
     {
       // match agt_eform
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, flags);
+	      idc_type, currLB, flags);
     
       break;
     }
@@ -1783,10 +1778,10 @@ resolve(std::ostream& errStream,
     {
       // match agt_var
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
       // match agt_eform
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
       break;
     }
 
@@ -1800,7 +1795,7 @@ resolve(std::ostream& errStream,
       // match at_type, at_fn+
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		Idc_type, currLB, flags);
+		idc_type, currLB, flags);
       break;
     }
 
@@ -1809,7 +1804,7 @@ resolve(std::ostream& errStream,
       // match at_type, at_fn+
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		Idc_value, currLB, 
+		idc_value, currLB, 
 		flags | INCOMPLETE_OK);
       break;
     }
@@ -1829,11 +1824,11 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       // match agt_expr
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       break;
     }
@@ -1843,7 +1838,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, Idc_value,
+	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, idc_value,
 		currLB, flags); 
 
       break;
@@ -1853,7 +1848,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, Idc_value,
+	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, idc_value,
 		currLB, flags);
 
       break;
@@ -1863,7 +1858,7 @@ resolve(std::ostream& errStream,
   case at_fqCtr:
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_type, currLB, flags);
+	      idc_type, currLB, flags);
      
       // Second Component handled by the type checker
       break;
@@ -1872,7 +1867,7 @@ resolve(std::ostream& errStream,
   case at_sel_ctr:
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags );
+	      idc_value, currLB, flags );
 
       // Second Component handled by the type checker
       break;
@@ -1897,11 +1892,11 @@ resolve(std::ostream& errStream,
 	  // at_usesel
 	  RESOLVE(ast, env, lamLevel, USE_MODE, identType, currLB, flags);
 	} 
-	else if(lhs->isIdentType(Idc_type)) {
+	else if(lhs->isIdentType(idc_type)) {
 	  // This must be a case where we are qualifying a constructor
 	  // with its union name.
 	  ast->astType = at_fqCtr;
-	  RESOLVE(ast, env, lamLevel, USE_MODE, Idc_type, currLB, flags);
+	  RESOLVE(ast, env, lamLevel, USE_MODE, idc_type, currLB, flags);
 	}
 	else if(!lhs->isIdentType(id_value)) {
 	  errStream << lhs->loc 
@@ -1916,7 +1911,7 @@ resolve(std::ostream& errStream,
 	}
       }
       else {
-	RESOLVE(lhs, env, lamLevel, USE_MODE, Idc_value, currLB, flags);
+	RESOLVE(lhs, env, lamLevel, USE_MODE, idc_value, currLB, flags);
       }
       
       // match at_ident
@@ -1964,7 +1959,7 @@ resolve(std::ostream& errStream,
 
       // match agt_expr
       RESOLVE(ast->child(1), lamEnv, lamEnv, USE_MODE, 
-	      Idc_value, currLB, 
+	      idc_value, currLB, 
 	      flags | (INCOMPLETE_OK));
       break;
     }
@@ -1980,11 +1975,11 @@ resolve(std::ostream& errStream,
   case at_apply:
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_apply, currLB, flags);	
+	      idc_apply, currLB, flags);	
       
       for (size_t c = 1; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		Idc_value, currLB, flags);
+		idc_value, currLB, flags);
 
       break;
     }
@@ -1993,15 +1988,15 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       // match agt_expr
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       // match agt_expr
       RESOLVE(ast->child(2), env, lamLevel, USE_MODE,
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       break;
     }
@@ -2014,7 +2009,7 @@ resolve(std::ostream& errStream,
       // match agt_expr+
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		Idc_value, currLB, flags);
+		idc_value, currLB, flags);
 
       break;
     }
@@ -2023,11 +2018,11 @@ resolve(std::ostream& errStream,
     {
       // match at_cond_legs
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       //match at_otherwise
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
       break;
     }
 
@@ -2036,7 +2031,7 @@ resolve(std::ostream& errStream,
       // match at_cond_leg+
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		Idc_value, currLB, flags);
+		idc_value, currLB, flags);
 
       break;
     }
@@ -2045,11 +2040,11 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
   
       // match agt_expr
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       break;
     }
@@ -2063,11 +2058,11 @@ resolve(std::ostream& errStream,
       RESOLVE(lhs, env, lamLevel, USE_MODE, id_value, currLB, flags); 
 
       // match agt_expr
-      RESOLVE(rhs, env, lamLevel, USE_MODE, Idc_value, currLB, flags);
+      RESOLVE(rhs, env, lamLevel, USE_MODE, idc_value, currLB, flags);
 
       if (lhs->astType == at_ident)
-	if((lhs->symbolDef->Flags2 & ID_MUT_CLOSED) == 0)
-	  lhs->symbolDef->Flags2 |= ID_IS_MUTATED;
+	if((lhs->symbolDef->Flags & ID_MUT_CLOSED) == 0)
+	  lhs->symbolDef->Flags |= ID_IS_MUTATED;
 
       break;
     }
@@ -2076,7 +2071,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
       break;      
     }    
 
@@ -2093,9 +2088,9 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
 
-      if(((ast->Flags2 & INNER_REF_NDX) == 0) &&
+      if(((ast->Flags & INNER_REF_NDX) == 0) &&
 	 ast->child(1)->astType == at_ident) {
 	// Could be a field-select
       }
@@ -2113,16 +2108,16 @@ resolve(std::ostream& errStream,
 
       // match at agt_expr
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);    
+	      idc_value, currLB, flags);    
       
       // match at_case_legs or at_sw_legs
       RESOLVE(ast->child(2), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       // match at_otherwise (agt_ow)
       if(ast->child(3)->astType != at_Null) 
 	RESOLVE(ast->child(3), env, lamLevel, USE_MODE, 
-		Idc_value, currLB, flags);
+		idc_value, currLB, flags);
 
       break;
     }
@@ -2132,7 +2127,7 @@ resolve(std::ostream& errStream,
       // match at_case_leg+ or at_sw_leg+
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		Idc_value, currLB, flags);
+		idc_value, currLB, flags);
 
       break;
     }
@@ -2148,19 +2143,19 @@ resolve(std::ostream& errStream,
       ASTEnvironment::iterator itr = legEnv->find(ast->child(0)->s);
       assert(itr != legEnv->end());
       itr->second->flags |= BF_COMPLETE;
-      ast->child(0)->Flags2 |= ID_FOR_SWITCH;
+      ast->child(0)->Flags |= ID_FOR_SWITCH;
 
       /* match at_expr */
       if((flags & WITHIN_CATCH) && (ast->children.size() > 3))
 	flags |= WITHIN_CATCH_MC;
 	
       RESOLVE(ast->child(1), legEnv, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       /* match at_ident -- the constructors*/
       for(size_t c=2; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), legEnv, lamLevel, USE_MODE, 
-		Idc_uctor, currLB, flags);      
+		idc_uctor, currLB, flags);      
       
       break;
     }
@@ -2169,7 +2164,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
       break;
     }
 
@@ -2183,12 +2178,12 @@ resolve(std::ostream& errStream,
 
       // match at_case_legs
       RESOLVE(ast->child(2), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags | WITHIN_CATCH);
+	      idc_value, currLB, flags | WITHIN_CATCH);
 
       // match at_otherwise
       if(ast->child(3)->astType != at_Null) 
 	RESOLVE(ast->child(3), env, lamLevel, USE_MODE, 
-		Idc_value, currLB, flags | WITHIN_CATCH);
+		idc_value, currLB, flags | WITHIN_CATCH);
       break;
     }
 
@@ -2196,7 +2191,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, 
+	      idc_value, currLB, 
 	      flags);
       break;
     }
@@ -2204,7 +2199,7 @@ resolve(std::ostream& errStream,
   case at_container:
     {
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      Idc_value, currLB, 
+	      idc_value, currLB, 
 	      flags);      
       break;
     }
@@ -2222,7 +2217,7 @@ resolve(std::ostream& errStream,
       for (size_t c = 0; c < dbs->children.size(); c++) {
 	shared_ptr<AST> db = dbs->child(c);	
 	shared_ptr<AST> init = db->child(1);
-	RESOLVE(init, doEnv, lamLevel, USE_MODE, Idc_value, 
+	RESOLVE(init, doEnv, lamLevel, USE_MODE, idc_value, 
 		currLB, flags);
       }
             
@@ -2243,18 +2238,18 @@ resolve(std::ostream& errStream,
 	shared_ptr<AST> db = dbs->child(c);	
 	shared_ptr<AST> step = db->child(2);
 	RESOLVE(step, doEnv, lamLevel, USE_MODE, 
-		Idc_value, currLB, flags);	
+		idc_value, currLB, flags);	
       }
       
       // Process the condition/result
       // match at_dotest
       RESOLVE(ast->child(1), doEnv, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);      
+	      idc_value, currLB, flags);      
       
       // And finally process the body with a rich environment
       // match agt_expr, with my Parent's Incompleteness restrictions
       RESOLVE(ast->child(2), doEnv, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);    
+	      idc_value, currLB, flags);    
       break;
     }
     
@@ -2262,7 +2257,7 @@ resolve(std::ostream& errStream,
     {
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		Idc_value, currLB, flags);
+		idc_value, currLB, flags);
       break;
     }
 
@@ -2282,7 +2277,7 @@ resolve(std::ostream& errStream,
       lbs->envs.env = letEnv;
 
       // Begin processing let-bindings
-      lbs->Flags2 &= ~LBS_PROCESSED;
+      lbs->Flags &= ~LBS_PROCESSED;
 
       // First Evaluate ALL the Expressions, then bind the values
       // match agt_expr
@@ -2291,7 +2286,7 @@ resolve(std::ostream& errStream,
 	shared_ptr<AST> lb = lbs->child(c);
 	
 	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
-		Idc_value, lbs, flags);
+		idc_value, lbs, flags);
       }      
       
       // match agt_bindingPattern
@@ -2304,21 +2299,21 @@ resolve(std::ostream& errStream,
 		id_value, lbs, flags);
 
 	assert(lb->child(0)->astType == at_identPattern);
-	lb->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
+	lb->child(0)->child(0)->Flags &= ~ID_IS_MUTATED;
       }
 
       // Now we are done with all let-bindings
-      lbs->Flags2 |= LBS_PROCESSED;
+      lbs->Flags |= LBS_PROCESSED;
        
       // Evaluate the final Expression with a rich environment
       // match agt_expr, with my Parent's Incompleteness restrictions
       markComplete(letEnv);
       RESOLVE(ast->child(1), letEnv, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
     
       // match at_constraints
       RESOLVE(ast->child(2), letEnv, lamLevel, USE_MODE, 
-	      Idc_type, currLB,  flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      idc_type, currLB,  flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       break;
     }
 
@@ -2336,7 +2331,7 @@ resolve(std::ostream& errStream,
 
       
       // Begin processing let-bindings
-      lbs->Flags2 &= ~LBS_PROCESSED;
+      lbs->Flags &= ~LBS_PROCESSED;
 
       // First Evaluate the Expressions, then bind the values
       // individually
@@ -2346,12 +2341,12 @@ resolve(std::ostream& errStream,
 	shared_ptr<AST> lb = lbs->child(c);
 	
 	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
-		Idc_value, lbs, flags);
+		idc_value, lbs, flags);
 	
 	RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
 		id_value, lbs, flags);
 	assert(lb->child(0)->astType == at_identPattern);
-	lb->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
+	lb->child(0)->child(0)->Flags &= ~ID_IS_MUTATED;
 
 	ASTEnvironment::iterator itr = 
 	  letEnv->find(lb->child(0)->child(0)->s);
@@ -2359,11 +2354,11 @@ resolve(std::ostream& errStream,
       }
 
       // Now we are done with all let-bindings
-      lbs->Flags2 |= LBS_PROCESSED;
+      lbs->Flags |= LBS_PROCESSED;
       
       // Evaluate the final Expression with a rich environment
       RESOLVE(ast->child(1), letEnv, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
       
       break;
     }
@@ -2387,7 +2382,7 @@ resolve(std::ostream& errStream,
       lbs->envs.env = letEnv;      
 
       // Begin processing let-bindings
-      lbs->Flags2 &= ~LBS_PROCESSED;
+      lbs->Flags &= ~LBS_PROCESSED;
 
       // For each individual binding // match at_letbinding+
       for (size_t c = 0; c < lbs->children.size(); c++) {
@@ -2397,7 +2392,7 @@ resolve(std::ostream& errStream,
 	RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
 		id_value, lbs, flags);	
 	assert(lb->child(0)->astType == at_identPattern);
-	lb->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
+	lb->child(0)->child(0)->Flags &= ~ID_IS_MUTATED;
       }      
     
       // For each individual binding // match at_letbinding+
@@ -2406,12 +2401,12 @@ resolve(std::ostream& errStream,
 
 	// match agt_expr
 	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
-		Idc_value, lbs, flags);
+		idc_value, lbs, flags);
 	
       }
 
       // Now we are done with all let-bindings
-      lbs->Flags2 |= LBS_PROCESSED;
+      lbs->Flags |= LBS_PROCESSED;
 
 
       // Evaluate the final Expression with a rich environment, 
@@ -2419,7 +2414,7 @@ resolve(std::ostream& errStream,
       // match agt_expr
       markComplete(letEnv);
       RESOLVE(ast->child(1), letEnv, lamLevel, USE_MODE, 
-	      Idc_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       break;
     }
@@ -2444,18 +2439,18 @@ resolve(std::ostream& errStream,
 		id_value, ast, flags);
 
 	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		Idc_value, ast, flags);	
+		idc_value, ast, flags);	
       }	
       else {
 	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		Idc_value, ast, flags);
+		idc_value, ast, flags);
 	
 	RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
-		Idc_value, ast, flags);
+		idc_value, ast, flags);
       }
 
       assert(ast->child(0)->astType == at_identPattern);
-      ast->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
+      ast->child(0)->child(0)->Flags &= ~ID_IS_MUTATED;
       break;
     }
   }
@@ -2534,7 +2529,7 @@ UocInfo::fe_symresolve(std::ostream& errStream,
   }
   
   CHKERR(errFree, resolve(errStream, uocAst, aliasEnv, env, GC_NULL, 
-			  USE_MODE, Idc_type, GC_NULL, flags));
+			  USE_MODE, idc_type, GC_NULL, flags));
 
   return errFree;
 }

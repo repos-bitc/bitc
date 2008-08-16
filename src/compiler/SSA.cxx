@@ -304,7 +304,7 @@ ssa(std::ostream& errStream,
   case at_identPattern:
     {
       if((ast->child(0)->symbolDef) &&
-	 (ast->child(0)->isIdentType(Idc_ctor)))
+	 (ast->child(0)->isIdentType(idc_ctor)))
 	break;
 
       addIL(identList, ast->child(0));
@@ -379,10 +379,10 @@ ssa(std::ostream& errStream,
       if(ast->child(1)->astType == at_lambda) {
 	SSA(errStream, uoc, ast->child(1), grandLet, identList, 
 	       ast, 1, flags);
-	ast->Flags2 |= DEF_IS_TRIVIAL_INIT;	
+	ast->Flags |= DEF_IS_TRIVIAL_INIT;	
       }      
       else if(isTrivialInit(ast)) {
-	ast->Flags2 |= DEF_IS_TRIVIAL_INIT;
+	ast->Flags |= DEF_IS_TRIVIAL_INIT;
       }
       else {
 	shared_ptr<AST> gl = newGrandLet(ast);
@@ -534,7 +534,7 @@ ssa(std::ostream& errStream,
 	  ast, 0, flags);      
       ast->child(0) = FEXPR(grandLet);
 
-      if(ast->Flags2 & INNER_REF_NDX) {
+      if(ast->Flags & INNER_REF_NDX) {
 	shared_ptr<AST> ndx = ast->child(1);
 	SSA(errStream, uoc, ndx, grandLet, identList, 
 	    ast, 1, flags);      

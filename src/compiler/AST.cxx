@@ -62,7 +62,6 @@ AST::AST(const AstType at)
   ID = ++(AST::astCount);
   identType = id_unresolved;
   Flags = 0x0u;
-  Flags2 = 0x0;
   isDecl = false;
   scheme = GC_NULL;
   symType = GC_NULL;
@@ -89,7 +88,6 @@ AST::AST(const AstType at, const AST_TOKEN_TYPE& tok)
   ID = ++(AST::astCount);
   identType = id_unresolved;
   Flags = 0x0u;
-  Flags2 = 0x0;
   isDecl = false;
   scheme = GC_NULL;
   symType = GC_NULL;
@@ -115,7 +113,6 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc)
   ID = ++(AST::astCount);
   identType = id_unresolved;
   Flags = 0x0u;
-  Flags2 = 0x0;
   isDecl = false;
   scheme = GC_NULL;
   symType = GC_NULL;
@@ -143,7 +140,6 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   ID = ++(AST::astCount);
   identType = id_unresolved;
   Flags = 0x0u;
-  Flags2 = 0x0;
   isDecl = false;
   scheme = GC_NULL;
   symType = GC_NULL;
@@ -173,7 +169,6 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   ID = ++(AST::astCount);
   identType = id_unresolved;
   Flags = 0x0u;
-  Flags2 = 0x0;
   isDecl = false;
   scheme = GC_NULL;
   symType = GC_NULL;
@@ -205,7 +200,6 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   ID = ++(AST::astCount);
   identType = id_unresolved;
   Flags = 0x0u;
-  Flags2 = 0x0;
   isDecl = false;
   scheme = GC_NULL;
   symType = GC_NULL;
@@ -239,7 +233,6 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   ID = ++(AST::astCount);
   identType = id_unresolved;
   Flags = 0x0u;
-  Flags2 = 0x0;
   isDecl = false;
   scheme = GC_NULL;
   symType = GC_NULL;
@@ -275,7 +268,6 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   ID = ++(AST::astCount);
   identType = id_unresolved;
   Flags = 0x0u;
-  Flags2 = 0x0;
   isDecl = false;
   scheme = GC_NULL;
   symType = GC_NULL;

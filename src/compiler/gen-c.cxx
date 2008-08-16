@@ -588,7 +588,7 @@ emit_ct_args(INOstream &out, shared_ptr<AST> fields, size_t start=0)
     
     if(field->astType == at_fill || 
        field->astType == at_reserved || 
-       (field->Flags2 & FLD_IS_DISCM))
+       (field->Flags & FLD_IS_DISCM))
       continue;
 
     if(emitted1)
@@ -620,7 +620,7 @@ emit_ct_inits(INOstream &out, shared_ptr<AST> fields,
     }
 
     string fMang = CMangle(field->child(0), CMGL_ID_FLD);
-    if(field->Flags2 & FLD_IS_DISCM) {
+    if(field->Flags & FLD_IS_DISCM) {
       out << pre << fMang << " = "
 	  << field->unin_discm
 	  << ";" << endl;
@@ -833,7 +833,7 @@ emit_fnxn_label(std::ostream& errStream,
        return f(currentClosurePtr, args);
      }
   */
-  if(ast->Flags2 & LAM_NEEDS_TRANS) {
+  if(ast->Flags & LAM_NEEDS_TRANS) {
 
     // Top level mutable function pointers are not cl-lambdas
     // There are converted into function+init in the fix4C pass.
@@ -1100,12 +1100,12 @@ toc(std::ostream& errStream,
       }
 
 
-      if(id->Flags2 & ARG_BYREF)
+      if(id->Flags & ARG_BYREF)
 	out << "(*";      
       
       out << CMangle(ast);
 
-      if(id->Flags2 & ARG_BYREF)
+      if(id->Flags & ARG_BYREF)
 	out << ")";      
 
       break;
@@ -1363,7 +1363,7 @@ toc(std::ostream& errStream,
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> ctrs = ast->child(4);
 
-      bool repr = ast->Flags2 & UNION_IS_REPR;
+      bool repr = ast->Flags & UNION_IS_REPR;
       out << "/*** Tag Enumerations ***/" << endl;
       out << "typedef enum {" << endl;
       out.more(); 
@@ -1490,7 +1490,7 @@ toc(std::ostream& errStream,
 	  bool emitted1=false;
 	  for(size_t i = 1; i < ctr->children.size(); i++) {
 	    shared_ptr<AST> field = ctr->child(i);
-	    if(field->Flags2 & FLD_IS_DISCM) {
+	    if(field->Flags & FLD_IS_DISCM) {
 	      if(emitted1)
 		out << " && ";
 	      out << "("
@@ -2371,7 +2371,7 @@ toc(std::ostream& errStream,
 	  ast, 0, flags);
       out << "->";
       
-      if(ast->Flags2 & INNER_REF_NDX) {
+      if(ast->Flags & INNER_REF_NDX) {
 	out << "elem[";
 	TOC(errStream, uoc, ast->child(1), out, IDname, decls, 
 	    ast, 1, flags);      
@@ -2823,7 +2823,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 	  ast->rename(id, WFN_PFX + id->s);
 	}
 	
-	if(ast->Flags2 & DEF_IS_TRIVIAL_INIT) {
+	if(ast->Flags & DEF_IS_TRIVIAL_INIT) {
 	  // Case 1: marked trivial initializer, 
 	  //         including immutable functions that are of the form
 	  //         (define f (lambda (...) ... ))

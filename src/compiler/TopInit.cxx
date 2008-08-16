@@ -266,14 +266,14 @@ TopInit(std::ostream& errStream,
 	// This loop MUST only enter the ident case ONLY for 
 	//  definitions that are _observably defined_.
 	assert(!ast->isDecl);
-	ast->Flags2 |= ID_OBSERV_DEF;
+	ast->Flags |= ID_OBSERV_DEF;
       }
       else {
 	// Constructors like `nil'.
 	if(def->isUnionLeg())
 	  break;
 
-	if((def->Flags2 & ID_OBSERV_DEF) == 0) {
+	if((def->Flags & ID_OBSERV_DEF) == 0) {
 	  errStream << ast->loc << ": "
 		    << "Identifier " << ast->s
 		    << " is not observably defined, "

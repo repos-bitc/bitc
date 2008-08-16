@@ -72,7 +72,7 @@ typedef set<shared_ptr<AST> > AstSet;
 static void
 clearusedef(shared_ptr<AST> ast)
 {
-  ast->Flags2 &= ~(ID_IS_CLOSED|ID_IS_CAPTURED|ID_NEEDS_HEAPIFY);
+  ast->Flags &= ~(ID_IS_CLOSED|ID_IS_CAPTURED|ID_NEEDS_HEAPIFY);
 
   for(size_t c=0; c < ast->children.size(); c++)
     clearusedef(ast->child(c));
@@ -219,12 +219,12 @@ findusedef(std::ostream &errStream,
 	    errFree = false;
 	  }
 
-	  ast->Flags2 |= ID_IS_CLOSED;
-	  ast->symbolDef->Flags2 |= ID_IS_CAPTURED;
+	  ast->Flags |= ID_IS_CLOSED;
+	  ast->symbolDef->Flags |= ID_IS_CAPTURED;
 
 	  if (ast->symbolDef->getType()->needsCaptureConversion()) {
-	    ast->Flags2 |= ID_NEEDS_HEAPIFY;
-	    ast->symbolDef->Flags2 |= ID_NEEDS_HEAPIFY;
+	    ast->Flags |= ID_NEEDS_HEAPIFY;
+	    ast->symbolDef->Flags |= ID_NEEDS_HEAPIFY;
 	  }
 
 	  CLCONV_DEBUG std::cerr << "Append " << ast->symbolDef->fqn
@@ -469,7 +469,7 @@ findusedef(std::ostream &errStream,
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(0), 
 				 USE_MODE, boundVars, freeVars));
 
-      if(ast->Flags2 & INNER_REF_NDX) 
+      if(ast->Flags & INNER_REF_NDX) 
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(1), 
 				   USE_MODE, boundVars, freeVars));      
       
@@ -590,7 +590,7 @@ cl_rewrite_captured_idents(shared_ptr<AST> ast, shared_ptr<AST> clenvName)
   switch(ast->astType) {
   case at_ident:
     {
-      if (ast->Flags2 & ID_IS_CLOSED) {
+      if (ast->Flags & ID_IS_CLOSED) {
 	shared_ptr<AST> clUse = AST::make(at_select, ast->loc);
 	clUse->addChild(clenvName->getDeepCopy());
 	clUse->addChild(ast);
@@ -676,7 +676,7 @@ cl_convert_ast(shared_ptr<AST> ast,
       if(ident->externalName.size())
 	proclaim->child(0)->Flags |= DEF_IS_EXTERNAL;
       
-      ast->Flags2 |= PROCLAIM_IS_INTERNAL;
+      ast->Flags |= PROCLAIM_IS_INTERNAL;
       outAsts.push_back(proclaim);      
     }
   }
@@ -706,7 +706,7 @@ cl_convert_ast(shared_ptr<AST> ast,
 	// within the current letrec, we must use the alloc-ref /
 	// copy-ref scheme for closure conversion.
 	if(used(id, lbs)) {
-	  assert(id->Flags2 & ID_IS_CAPTURED);
+	  assert(id->Flags & ID_IS_CAPTURED);
 	  shared_ptr<AST> qual = 
 	    id->symType->getBareType()->asAST(rhs->loc); 
 	  qual = cl_convert_ast(qual, outAsts, hoistChildren);
@@ -841,7 +841,7 @@ cl_convert_ast(shared_ptr<AST> ast,
 	newDef->addChild(AST::make(at_constraints));
       
 	if(needsClosure) {
-	  newDef->Flags2 |= LAM_NEEDS_TRANS;
+	  newDef->Flags |= LAM_NEEDS_TRANS;
 
 	  // Insert the extra closure argument and prepend the type to
 	  // the attached function type signature      
@@ -956,7 +956,7 @@ cl_heapify(shared_ptr<AST> ast)
       // is processed in the at_letbinding handler.
       for (size_t i = 0; i < args->children.size(); i++) {
 	shared_ptr<AST> arg = args->child(i)->child(0);
-	if((arg->Flags2 & ID_NEEDS_HEAPIFY) == 0)
+	if((arg->Flags & ID_NEEDS_HEAPIFY) == 0)
 	  continue;
 	
 	atleastOneHeapified = true;
@@ -999,12 +999,12 @@ cl_heapify(shared_ptr<AST> ast)
       /* Must heapify EXPR unconditionally */
       expr = cl_heapify(expr);
 
-      if (ident->Flags2 & ID_NEEDS_HEAPIFY) {
+      if (ident->Flags & ID_NEEDS_HEAPIFY) {
 	// Process the RHS:
 
 	CLCONV_DEBUG std::cerr << "  Needs dup " << ident->s << std::endl;
 	
-	assert (ident->Flags2 & ID_IS_CAPTURED);
+	assert (ident->Flags & ID_IS_CAPTURED);
 	expr = AST::make(at_dup, expr->loc, expr);
 	// Previously: Clconv was marking Dup-ed variables specially 
 	// at this point expr->Flags2 |= DUPED_BY_CLCONV;
@@ -1039,12 +1039,12 @@ cl_heapify(shared_ptr<AST> ast)
 
       shared_ptr<AST> def = (ast->symbolDef) ? ast->symbolDef : ast;
 
-      CLCONV_DEBUG if (def->Flags2 & ID_NEEDS_HEAPIFY)
+      CLCONV_DEBUG if (def->Flags & ID_NEEDS_HEAPIFY)
 	std::cerr << "  needs heapify" << std::endl;
-      CLCONV_DEBUG if (def->Flags2 & ID_IS_CAPTURED)
+      CLCONV_DEBUG if (def->Flags & ID_IS_CAPTURED)
 	std::cerr << "  closed" << std::endl;
       
-      if (def->Flags2 & ID_NEEDS_HEAPIFY) {
+      if (def->Flags & ID_NEEDS_HEAPIFY) {
 	CLCONV_DEBUG std::cerr << "Needs deref " << ast->s << std::endl;
 	ast = AST::make(at_deref, ast->loc, ast);
       }

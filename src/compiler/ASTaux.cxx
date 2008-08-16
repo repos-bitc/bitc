@@ -128,7 +128,6 @@ AST::Use()
   assert(!symbolDef || isIdentType(id_tvar));
   shared_ptr<AST> idUse = getDeepCopy();
   idUse->Flags  &= ~MASK_FLAGS_FROM_USE;
-  idUse->Flags2 &= ~MASK_FLAGS2_FROM_USE;    
   idUse->symbolDef = shared_from_this();
   if(symType)
     idUse->symType = symType->getDCopy();
@@ -145,7 +144,6 @@ AST::AST(shared_ptr<AST> ast, bool shallowCopyChildren)
   loc = ast->loc;
   fqn = ast->fqn;
   Flags = ast->Flags;
-  Flags2 = ast->Flags2;
   externalName = ast->externalName;
   symbolDef = ast->symbolDef;
   defn = ast->defn;
