@@ -71,8 +71,17 @@ namespace sherpa {
     // Ensure that this class will only instantiate over enumeration
     // types.
     //
-    // It is possible to make it work over other types, but it
-    // requires more sophisticated overloading controls below.
+    // If this is being instantiated over an enumeration type, the
+    // following enable_if_c does the right thing by selecting the
+    // underlying unsigned type.
+    //
+    // If this is being instantiated over a non-enumeral type, then we
+    // need a construct that will select the repr type
+    // conditionally. There are template metaprogramming techniques
+    // for that, but I haven't had a chance to brush up on them. In
+    // non-enumeration cases, it is imperative to disable the
+    // top-level overloads on const T& at botom, which I am already
+    // doing. See comments there.
     typename boost::enable_if_c<boost::is_enum<T>::value, unsigned long>::type repr;
 
     struct BoolConversionSupport {
@@ -237,7 +246,13 @@ namespace sherpa {
     return (rhs ^ EnumSet<T>(lhs));
   }
 
-  // Combining operators when both sides are of underlying type.
+  // Combining operators when both sides are of underlying enumeral
+  // type.
+  //
+  // These MUST NOT be expanded if the underlying type is some form of
+  // integer type, because that will lead to a recursive expansion
+  // error (or at least, it will when I fix the use of enable_if_c
+  // properly above).
   template <class T>
   inline
   typename boost::enable_if_c<boost::is_enum<T>::value, EnumSet<T> >::type
