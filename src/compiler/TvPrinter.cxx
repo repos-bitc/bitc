@@ -68,7 +68,7 @@ TvPrinter::newTvName()
   ss << pfx << c;
 
   unsigned long long ndx = count / nchars;
-  if(ndx > 0)
+  if (ndx > 0)
     ss << ndx;
   
   count++;
@@ -78,7 +78,7 @@ TvPrinter::newTvName()
 string
 TvPrinter::tvName(shared_ptr<const Type> tvar)
 {
-  if(!prettyPrint) {
+  if (!prettyPrint) {
     stringstream ss;
     ss << pfx << "a" << tvar->uniqueID;
     return ss.str();
@@ -100,7 +100,7 @@ TvPrinter::getAllTvarStrings()
 {
   std::vector<std::string> vec;
 
-  for(TvMap::iterator itr = tvMap.begin();
+  for (TvMap::iterator itr = tvMap.begin();
       itr != tvMap.end(); ++itr)
     vec.push_back(itr->second);
 

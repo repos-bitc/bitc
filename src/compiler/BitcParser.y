@@ -68,12 +68,12 @@ using namespace std;
   do { \
     if (Options::showParse) \
       lexer->errStream << (s) << std::endl;		\
-  } while(false);
+  } while (false);
 #define SHOWPARSE1(s,x) \
   do { \
     if (Options::showParse) \
       lexer->errStream << (s) << " " << (x) << std::endl;	\
-  } while(false);
+  } while (false);
 
 
 int num_errors = 0;  /* hold the number of syntax errors encountered. */
@@ -315,7 +315,7 @@ uoc_body: module_seq {
 // We cannot do optversion, because that would require two token look-ahead.
 version: '(' tk_BITC_VERSION strLit ')' {
   SHOWPARSE("version -> ( BITC-VERSION strLit )");
-  if(!CheckVersionCompatibility($3->s)) {
+  if (!CheckVersionCompatibility($3->s)) {
     std::string s = ": Warning: BitC version conflict " + $3->s + " vs " + Version();
     lexer->ReportParseWarning($3->loc, s);
   }
@@ -327,7 +327,7 @@ version: '(' tk_BITC_VERSION strLit ')' {
 // energy to implement that today.
 // version: '(' tk_BITC_VERSION intLit '.' intLit ')' {
 //   SHOWPARSE("version -> ( BITC-VERSION intLit '.' intLit )");
-//   if(!CheckVersionCompatibility($3->litValue.i, $5->litValue.i)) {
+//   if (!CheckVersionCompatibility($3->litValue.i, $5->litValue.i)) {
 //     std::string s = ": Warning: BitC version conflict " + $3->s + " vs " + Version();
 //     lexer->ReportParseWarning($3->loc, s);
 //   }
@@ -377,7 +377,7 @@ interface: '(' tk_INTERFACE ifident {
   shared_ptr<UocInfo> uoc = 
     UocInfo::make(uocName, lexer->here.origin, $$);
 
-  if(uocName == "bitc.prelude")
+  if (uocName == "bitc.prelude")
     uoc->flags |= (UOC_IS_BUILTIN | UOC_IS_PRELUDE);
 
   shared_ptr<UocInfo> existingUoc = UocInfo::findInterface(uocName);
@@ -1131,7 +1131,7 @@ repr_reprs: repr_reprs repr_repr {
 repr_repr: '(' ident ident intLit')' {
   SHOWPARSE("repr_repr ->  ( = ident intLit )");
 
-  if($2->s != "==") {
+  if ($2->s != "==") {
     cerr << $2->loc << ": Syntax error, expecting `=='.\n";
     lexer->num_errors++;
   }
@@ -1542,7 +1542,7 @@ lambdapattern: ident {
 lambdapattern: ident ':' type_pl_byref {
   SHOWPARSE("lambdapattern -> ident : type_pl_byref");
   $$ = AST::make(at_identPattern, $1->loc, $1, $3);
-  if($3->astType == at_byrefType)
+  if ($3->astType == at_byrefType)
     $1->flags |= ARG_BYREF;
 };
 
@@ -1902,7 +1902,7 @@ eform: '(' tk_DUP expr ')' {
 eform: '(' tk_SWITCH ident expr sw_legs ow ')' {
   SHOWPARSE("eform -> ( SWITCH ident expr sw_legs ow)");
   $$ = AST::make(at_switch, $2.loc, $3, $4, $5, $6);
-  for(size_t c =0; c < $5->children.size(); c++) {
+  for (size_t c =0; c < $5->children.size(); c++) {
     shared_ptr<AST> sw_leg = $5->child(c);
     sw_leg->children.insert(sw_leg->children.begin(), 
 			    $3->getDeepCopy());
@@ -2006,7 +2006,7 @@ typecase_leg: '(' bindingpattern expr ')'  {
 eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
   SHOWPARSE("eform -> ( TRY expr ( CATCH ( ident sw_legs ) ) )");
   $$ = AST::make(at_try, $2.loc, $3, $6, $7, $8);
-  for(size_t c =0; c < $7->children.size(); c++) {
+  for (size_t c =0; c < $7->children.size(); c++) {
     shared_ptr<AST> sw_leg = $7->child(c);
     sw_leg->children.insert(sw_leg->children.begin(), 
 			    $6->getDeepCopy());
@@ -2054,7 +2054,7 @@ let_eform: '(' tk_LETREC '(' letbindings ')' expr_seq ')' {
   $6->astType = at_begin;
   $6->printVariant = 1;
   shared_ptr<AST> lbs = $4;
-  for(size_t c=0; c < lbs->children.size(); c++)
+  for (size_t c=0; c < lbs->children.size(); c++)
     lbs->child(c)->flags |= LB_REC_BIND;
   
   $$ = AST::make(at_letrec, $2.loc, $4, $6);

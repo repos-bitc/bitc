@@ -83,24 +83,24 @@ Type::boundInType(shared_ptr<Type> tv)
 {
   shared_ptr<Type> t = getType();
   
-  if(t == tv->getType())
+  if (t == tv->getType())
     return true;
    
-  if(t->mark & MARK_BOUND_IN_TYPE)
+  if (t->mark & MARK_BOUND_IN_TYPE)
     return false;
   
   t->mark |= MARK_BOUND_IN_TYPE;
   bool bound = false;
   
-  for(size_t i=0; (!bound) && (i < t->components.size()); i++) 
+  for (size_t i=0; (!bound) && (i < t->components.size()); i++) 
     bound = t->CompType(i)->boundInType(tv);
 
   // To consider cases like (define aNil nil)
-  for(size_t i=0; (!bound) && (i < t->typeArgs.size()); i++) 
+  for (size_t i=0; (!bound) && (i < t->typeArgs.size()); i++) 
     bound = t->TypeArg(i)->boundInType(tv);
 
   // Deal with fnDeps if present
-  for(TypeSet::iterator itr = t->fnDeps.begin();
+  for (TypeSet::iterator itr = t->fnDeps.begin();
       (!bound) && itr != t->fnDeps.end(); ++itr)
     bound = (*itr)->boundInType(tv);
   
@@ -113,7 +113,7 @@ Type::boundInGamma(shared_ptr<const TSEnvironment > gamma)
 {
   shared_ptr<Type> tvar = getType();
   while (gamma) {
-    for(TSEnvironment::const_iterator itr = gamma->begin();
+    for (TSEnvironment::const_iterator itr = gamma->begin();
 	itr != gamma->end(); ++itr) {
       shared_ptr<TypeScheme> sigma = itr->second->val;
 
@@ -123,7 +123,7 @@ Type::boundInGamma(shared_ptr<const TSEnvironment > gamma)
 	  return true;
       }
       
-      if(sigma->tau->boundInType(tvar))
+      if (sigma->tau->boundInType(tvar))
 	return true;
     }
     
@@ -141,22 +141,22 @@ Type::collectAllftvs(TypeSet& tvs)
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK_COLLECT_ALL_FTVS)
+  if (t->mark & MARK_COLLECT_ALL_FTVS)
     return;
 
   t->mark |= MARK_COLLECT_ALL_FTVS;
   
-  if(t->kind == ty_tvar) {
+  if (t->kind == ty_tvar) {
     tvs.insert(t);
   }      
   else {
-    for(size_t i=0; i < t->components.size(); i++)
+    for (size_t i=0; i < t->components.size(); i++)
       t->CompType(i)->collectAllftvs(tvs);
 
-    for(size_t i=0; i < t->typeArgs.size(); i++)
+    for (size_t i=0; i < t->typeArgs.size(); i++)
       t->TypeArg(i)->collectAllftvs(tvs);
 
-    for(TypeSet::iterator itr = t->fnDeps.begin();
+    for (TypeSet::iterator itr = t->fnDeps.begin();
 	itr != t->fnDeps.end(); ++itr)
       (*itr)->collectAllftvs(tvs);
   }
@@ -169,8 +169,8 @@ void
 TypeScheme::collectAllFtvs()
 {
   tau->collectAllftvs(ftvs);  
-  if(tcc) {
-    for(TypeSet::iterator itr = tcc->begin();
+  if (tcc) {
+    for (TypeSet::iterator itr = tcc->begin();
 	itr != tcc->end(); ++itr)
       (*itr)->collectAllftvs(ftvs);      
   }  
@@ -184,24 +184,24 @@ Type::collectftvsWrtGamma(TypeSet& tvs,
 {   
   shared_ptr<Type> t = getType();
 
-  if(t->mark & MARK_COLLECT_FTVS_WRT_GAMMA)
+  if (t->mark & MARK_COLLECT_FTVS_WRT_GAMMA)
     return;
 
   t->mark |= MARK_COLLECT_FTVS_WRT_GAMMA;
 
-  if(t->kind == ty_tvar) {
+  if (t->kind == ty_tvar) {
     assert(t->components.size() == 0);
-    if(!t->boundInGamma(gamma))
+    if (!t->boundInGamma(gamma))
       tvs.insert(t);
   }
   else {
-    for(size_t i=0; i < t->components.size(); i++)      
+    for (size_t i=0; i < t->components.size(); i++)      
       t->CompType(i)->collectftvsWrtGamma(tvs, gamma);
     
-    for(size_t i=0; i < t->typeArgs.size(); i++)
+    for (size_t i=0; i < t->typeArgs.size(); i++)
       t->TypeArg(i)->collectftvsWrtGamma(tvs, gamma);
 
-    for(TypeSet::iterator itr = t->fnDeps.begin();
+    for (TypeSet::iterator itr = t->fnDeps.begin();
 	itr != t->fnDeps.end(); ++itr)
       (*itr)->collectftvsWrtGamma(tvs, gamma);
   }
@@ -221,15 +221,15 @@ remftvsWrtFnDeps(TypeSet &ftvs,
   // closure wrt tvs in fnDeps influenced by Gamma.
   TypeSet closure;
 
-  for(TypeSet::iterator itr = fnDeps.begin();
+  for (TypeSet::iterator itr = fnDeps.begin();
       itr != fnDeps.end(); ++itr) {
     shared_ptr<Type> fnDep = (*itr);
     TypeSet tvs;
     fnDep->collectAllftvs(tvs);
-    for(TypeSet::iterator itr_j = tvs.begin();
+    for (TypeSet::iterator itr_j = tvs.begin();
 	itr_j != tvs.end(); ++itr_j) {
       shared_ptr<Type> tv = (*itr_j);
-      if(tv->boundInGamma(gamma))
+      if (tv->boundInGamma(gamma))
 	closure.insert(tv);
     }
   }
@@ -237,9 +237,9 @@ remftvsWrtFnDeps(TypeSet &ftvs,
   TCConstraints::close(closure, fnDeps);
   
   TypeSet newFtvs;
-  for(TypeSet::iterator itr = ftvs.begin(); itr != ftvs.end(); ++itr) {
+  for (TypeSet::iterator itr = ftvs.begin(); itr != ftvs.end(); ++itr) {
     shared_ptr<Type> ftv = (*itr)->getType();
-    if(closure.find(ftv) == closure.end())
+    if (closure.find(ftv) == closure.end())
       newFtvs.insert(ftv);
   }
 
@@ -255,8 +255,8 @@ void
 TypeScheme::collectftvs(shared_ptr<const TSEnvironment > gamma)
 {
   tau->collectftvsWrtGamma(ftvs, gamma);  
-  if(tcc) {    
-    for(TypeSet::iterator itr = tcc->begin();
+  if (tcc) {    
+    for (TypeSet::iterator itr = tcc->begin();
 	itr != tcc->end(); ++itr) {
       shared_ptr<Typeclass> pred = (*itr);
       pred->collectftvsWrtGamma(ftvs, gamma);  
@@ -278,43 +278,43 @@ TypeScheme::removeUnInstFtvs()
 {
   bool removed = false;
 
-  for(TypeSet::iterator itr_c = ftvs.begin();
+  for (TypeSet::iterator itr_c = ftvs.begin();
       itr_c != ftvs.end(); ++itr_c) {
     shared_ptr<Type> ftv = (*itr_c)->getType();
-    if(tau->boundInType(ftv))
+    if (tau->boundInType(ftv))
       ftv->flags |= TY_CLOS;
   }
 
-  for(TypeSet::iterator itr = tcc->begin();
+  for (TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     shared_ptr<Constraint> ct = (*itr)->getType();
 
     bool mustAdd=false;
-    for(TypeSet::iterator itr_c = ftvs.begin();
+    for (TypeSet::iterator itr_c = ftvs.begin();
 	itr_c != ftvs.end(); ++itr_c) {
       shared_ptr<Type> ftv = (*itr_c)->getType();
-      if(ct->boundInType(ftv) && (ftv->flags & TY_CLOS)) {
+      if (ct->boundInType(ftv) && (ftv->flags & TY_CLOS)) {
 	mustAdd = true;
 	break;
       }
     }
 
-    if(mustAdd) {
-      for(TypeSet::iterator itr_c = ftvs.begin();
+    if (mustAdd) {
+      for (TypeSet::iterator itr_c = ftvs.begin();
 	  itr_c != ftvs.end(); ++itr_c) {
 	shared_ptr<Type> ftv = (*itr_c)->getType();
 	
-	if(ct->boundInType(ftv))
+	if (ct->boundInType(ftv))
 	  ftv->flags |= TY_CLOS;
       }
     }
   }
 
   TypeSet newTvs;
-  for(TypeSet::iterator itr_c = ftvs.begin();
+  for (TypeSet::iterator itr_c = ftvs.begin();
       itr_c != ftvs.end(); ++itr_c) {
     shared_ptr<Type> ftv = (*itr_c)->getType();
-    if(ftv->flags & TY_CLOS) {
+    if (ftv->flags & TY_CLOS) {
       newTvs.insert(ftv);
       ftv->flags &= ~TY_CLOS;
     }
@@ -333,7 +333,7 @@ TypeScheme::normalizeConstruction(shared_ptr<Trail> trail)
 {
   bool removed = false;
 
-  for(TypeSet::iterator itr_c = ftvs.begin();
+  for (TypeSet::iterator itr_c = ftvs.begin();
       itr_c != ftvs.end(); ++itr_c) {
     shared_ptr<Type> ftv = (*itr_c)->getType();
     ftv->flags |= TY_COERCE;
@@ -341,17 +341,17 @@ TypeScheme::normalizeConstruction(shared_ptr<Trail> trail)
   
   tau->markSignMbs(false);
   
-  for(TypeSet::iterator itr = tcc->begin();
+  for (TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     shared_ptr<Constraint> ct = (*itr)->getType();
     ct->markSignMbs(true);
   }
 
   TypeSet newTvs;
-  for(TypeSet::iterator itr_c = ftvs.begin();
+  for (TypeSet::iterator itr_c = ftvs.begin();
       itr_c != ftvs.end(); ++itr_c) {
     shared_ptr<Type> ftv = (*itr_c)->getType();
-    if((ftv->flags & TY_COERCE) == 0)
+    if ((ftv->flags & TY_COERCE) == 0)
       newTvs.insert(ftv);
     else
       removed = true;
@@ -361,7 +361,7 @@ TypeScheme::normalizeConstruction(shared_ptr<Trail> trail)
   // TY_COERCE flag is not cleared, but it does not matter, because
   // all of these types are substituted within the next adjMaybe call.
   tau->adjMaybe(trail, true, false, true);
-  for(TypeSet::iterator itr = tcc->begin();
+  for (TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     shared_ptr<Constraint> ct = (*itr)->getType();
     ct->adjMaybe(trail, true, false, true);
@@ -479,8 +479,8 @@ static bool genSteps[6][11] = {
   {true, true,  false, false, true, true, true,  false,  false, true, true},
 };
 
-#define GEN_STEP(m,s) if(genSteps[m][s])
-#define GEN_STEP2(m,s1,s2) if(genSteps[m][s1] || genSteps[m][s2])
+#define GEN_STEP(m,s) if (genSteps[m][s])
+#define GEN_STEP2(m,s1,s2) if (genSteps[m][s1] || genSteps[m][s2])
 
 bool
 TypeScheme::generalize(std::ostream& errStream, 
@@ -506,10 +506,10 @@ TypeScheme::generalize(std::ostream& errStream,
 		      << expr->asString() 
 		      << std::endl;
   
-  GEN_DEBUG_TL if(mode == gen_top)
+  GEN_DEBUG_TL if (mode == gen_top)
     mode = gen_local;
   
-  if(Options::heuristicInference) {
+  if (Options::heuristicInference) {
     switch(mode) {
     case gen_instance:
       mode = gen_Hinstance;
@@ -547,7 +547,7 @@ TypeScheme::generalize(std::ostream& errStream,
 
   // Step 2
   GEN_STEP(mode, gs_pcst) {
-    if(!tau->isDeepMut() && !tau->isDeepImmut()) {
+    if (!tau->isDeepMut() && !tau->isDeepImmut()) {
       shared_ptr<Type> pcst = Constraint::make(ty_pcst); 
       pcst->components.push_back(comp::make(Type::make(ty_kvar)));
       pcst->components.push_back(comp::make(tau)); // General Type
@@ -566,10 +566,10 @@ TypeScheme::generalize(std::ostream& errStream,
     tau->adjMaybe(trail, false, true);
 
     bool cleared = false;
-    for(TypeSet::iterator itr = tcc->begin();
+    for (TypeSet::iterator itr = tcc->begin();
 	itr != tcc->end(); ++itr) {
       shared_ptr<Type> pred = (*itr);
-      if(!pred->isPcst())
+      if (!pred->isPcst())
 	continue;
 
       cleared = true;
@@ -578,7 +578,7 @@ TypeScheme::generalize(std::ostream& errStream,
       shared_ptr<Type> ins = pred->CompType(2)->getType();
       
       assert(k != Type::Kmono);
-      if(k->kind == ty_kvar) {
+      if (k->kind == ty_kvar) {
 	trail->subst(k, Type::Kpoly);
 	k = k->getType();
       }
@@ -590,14 +590,14 @@ TypeScheme::generalize(std::ostream& errStream,
       assert(ins->unifyWith(tii, false, trail, errStream));
     }
 
-    if(cleared) {
+    if (cleared) {
       set< shared_ptr<Typeclass> > oldPreds = tcc->pred;
       tcc->pred.clear();
       
-      for(TypeSet::iterator itr = oldPreds.begin();
+      for (TypeSet::iterator itr = oldPreds.begin();
 	  itr != oldPreds.end(); ++itr) {
 	shared_ptr<Type> pred = (*itr);
-	if(!pred->isPcst())
+	if (!pred->isPcst())
 	  tcc->addPred(pred);
       }
       
@@ -619,7 +619,7 @@ TypeScheme::generalize(std::ostream& errStream,
 
   // Step 5
   GEN_STEP(mode, gs_genFtvs) {
-    if(!expansive)
+    if (!expansive)
       collectftvs(gamma);
     
     GEN_DEBUG errStream << "[5] Generalize: " 
@@ -630,7 +630,7 @@ TypeScheme::generalize(std::ostream& errStream,
   
   // Step 6
   GEN_STEP(mode, gs_ctrNorm) {
-    if(!expansive) {
+    if (!expansive) {
       rem1 = removeUnInstFtvs();
     
       GEN_DEBUG errStream << "[6] Remove Uninst-Ftvs: " 
@@ -641,7 +641,7 @@ TypeScheme::generalize(std::ostream& errStream,
   
   // Step 7
   GEN_STEP(mode, gs_fnNorm) {
-    if(!expansive) {
+    if (!expansive) {
       rem2 = normalizeConstruction(trail);
       
       GEN_DEBUG errStream << "[7] Construction Normalization: " 
@@ -651,7 +651,7 @@ TypeScheme::generalize(std::ostream& errStream,
   }
   
   GEN_STEP2(mode, gs_ctrNorm, gs_fnNorm) {
-    if(rem1 || rem2)
+    if (rem1 || rem2)
       CHKERR(errFree, solvePredicates(errStream, errLoc, 
 				      instEnv, trail)); 
     
@@ -665,11 +665,11 @@ TypeScheme::generalize(std::ostream& errStream,
     if (expansive) {
       collectftvs(gamma);
 
-      if(ftvs.size()) {
+      if (ftvs.size()) {
 	TypeSet dummys = ftvs;
 	ftvs.clear();
 	
-	for(TypeSet::iterator itr = dummys.begin();
+	for (TypeSet::iterator itr = dummys.begin();
 	    itr != dummys.end(); ++itr) {
 	  shared_ptr<Type> ftv = (*itr)->getType();
 	  ftv->link = Type::make(ty_dummy);
@@ -726,18 +726,18 @@ updateSigmas(shared_ptr<const AST> bp, const TypeSet& ftvs,
       assert(ident->scheme);
       shared_ptr<Type> tau = sigma->tau;;
       
-      for(TypeSet::iterator itr_i = ftvs.begin();
+      for (TypeSet::iterator itr_i = ftvs.begin();
 	  itr_i != ftvs.end(); ++itr_i) {
-	if(tau->boundInType(*itr_i)) {
+	if (tau->boundInType(*itr_i)) {
 	  sigma->ftvs.insert(*itr_i);
 	  continue;
 	}
 	
-	if(tcc)
-	  for(TypeSet::iterator itr = tcc->begin();
+	if (tcc)
+	  for (TypeSet::iterator itr = tcc->begin();
 	      itr != tcc->end(); ++itr) {
 	    shared_ptr<Constraint> pred = (*itr);
-	    if(pred->boundInType(*itr_i)) {
+	    if (pred->boundInType(*itr_i)) {
 	      sigma->ftvs.insert(*itr_i);
 	      break;
 	    }
@@ -820,13 +820,13 @@ generalizePat(std::ostream& errStream,
 bool
 TypeScheme::migratePredicates(shared_ptr<TCConstraints> parentTCC)
 {
-  if(!parentTCC)
+  if (!parentTCC)
     return false;
   
   bool migrated = false;
   TypeSet newPred;
   
-  for(TypeSet::iterator itr = tcc->begin();
+  for (TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     shared_ptr<Typeclass> pred = (*itr)->getType();
     TypeSet allFtvs;
@@ -835,17 +835,17 @@ TypeScheme::migratePredicates(shared_ptr<TCConstraints> parentTCC)
     assert(allFtvs.size());
     
     bool hasFtv = false;
-    for(TypeSet::iterator itr_j = allFtvs.begin();
+    for (TypeSet::iterator itr_j = allFtvs.begin();
 	itr_j != allFtvs.end(); ++itr_j) {
       shared_ptr<Type> ftv = (*itr_j)->getType();
       
-      if(ftvs.find(ftv) != ftvs.end()) {
+      if (ftvs.find(ftv) != ftvs.end()) {
 	hasFtv = true;
 	break;
       }
     }
     
-    if(hasFtv) {
+    if (hasFtv) {
       newPred.insert(pred);
     }
     else {
@@ -927,19 +927,19 @@ TypeScheme::checkAmbiguity(std::ostream &errStream, const LexLoc &errLoc)
 {
 #if 0
   bool errFree =true;
-  for(size_t j=0; j < ftvs->size(); j++) {
+  for (size_t j=0; j < ftvs->size(); j++) {
     shared_ptr<Type> ftv = ftvs->elem(j);
     
-    if(!tau->boundInType(ftv)) {
+    if (!tau->boundInType(ftv)) {
       // ftv must be bound in some predicate.
 
-      for(size_t c=0; c < tcc->size(); c++) {
+      for (size_t c=0; c < tcc->size(); c++) {
 	shared_ptr<Typeclass> pred = tcc->Pred(c);
-	if(pred->isPcst())
+	if (pred->isPcst())
 	  continue;
 	
 	// The ftv is bound in a type-class predicate.
-	if(pred->boundInType(ftv)) {
+	if (pred->boundInType(ftv)) {
 	  errStream << errLoc << ": "
 		    << "Type variable "
 		    << ftv->asString(Options::debugTvP)
@@ -956,7 +956,7 @@ TypeScheme::checkAmbiguity(std::ostream &errStream, const LexLoc &errLoc)
     }
   }
 
-  if(!errFree)
+  if (!errFree)
     errStream << errLoc << ": "
 	      << "Ambiguous type definition:"
 	      << asString()
@@ -995,7 +995,7 @@ Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
 		      << this->asString()  
 		      << std::endl;  
 
-  if(t->sp)
+  if (t->sp)
     retType = t->sp;
   else {    
     t->sp = retType;
@@ -1019,9 +1019,9 @@ Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
     case ty_tvar:
       {
 	size_t i=0;
-	for(i=0; i<ftvs.size(); i++) {
+	for (i=0; i<ftvs.size(); i++) {
 	  shared_ptr<Type> ftv = ftvs[i]->getType();	  
-	  if(ftv->kind == ty_tvar && t->uniqueID == ftv->uniqueID) {
+	  if (ftv->kind == ty_tvar && t->uniqueID == ftv->uniqueID) {
 	    theType->link = nftvs[i]; 
 	    break;
 	  }
@@ -1030,7 +1030,7 @@ Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
 	// If the variable was NOT in ftv list, then 
 	// we should link it to the original, in order to honor
 	// variable capture
-	if(i == ftvs.size())
+	if (i == ftvs.size())
 	  theType->link = t;
       	break;
       }
@@ -1038,7 +1038,7 @@ Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
     default:
       {      
 	/* Deal with Type-args */
-	for(size_t i=0; i<t->typeArgs.size(); i++) {
+	for (size_t i=0; i<t->typeArgs.size(); i++) {
 	  shared_ptr<Type> arg = t->TypeArg(i)->getType();
 	  shared_ptr<Type> newArg = arg->TypeSpecializeReal(ftvs, nftvs);
 	  
@@ -1046,7 +1046,7 @@ Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
 	}
             
 	/* Deal with Components */
-	for(size_t i=0; i<t->components.size(); i++) {
+	for (size_t i=0; i<t->components.size(); i++) {
 	  shared_ptr<comp> nComp = 
 	    comp::make(t->CompName(i),
 		       t->CompType(i)->TypeSpecializeReal(ftvs, nftvs),
@@ -1058,7 +1058,7 @@ Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
 	if (t->fnDeps.size()) {
 	  theType->fnDeps.clear();
 
-	  for(TypeSet::iterator itr = t->fnDeps.begin();
+	  for (TypeSet::iterator itr = t->fnDeps.begin();
 	      itr != t->fnDeps.end(); ++itr) {
 	    shared_ptr<Type> fnDep = (*itr)->TypeSpecializeReal(ftvs, nftvs);
 	    theType->addFnDep(fnDep);
@@ -1084,18 +1084,18 @@ void
 Type::clear_sp()
 {
   shared_ptr<Type> t = getType();
-  if(!t->sp)
+  if (!t->sp)
     return;
 
   t->sp = GC_NULL;
 
-  for(size_t i=0; i<t->typeArgs.size(); i++)
+  for (size_t i=0; i<t->typeArgs.size(); i++)
     t->TypeArg(i)->clear_sp();
 
-  for(size_t i=0; i<t->components.size(); i++)
+  for (size_t i=0; i<t->components.size(); i++)
     t->CompType(i)->clear_sp();
 
-  for(TypeSet::iterator itr = t->fnDeps.begin();
+  for (TypeSet::iterator itr = t->fnDeps.begin();
       itr != t->fnDeps.end(); ++itr)
     (*itr)->clear_sp();
 }

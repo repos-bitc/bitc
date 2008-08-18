@@ -63,7 +63,7 @@ using namespace std;
 static string
 printName(shared_ptr<AST> ast)
 {
-  if(!ast)
+  if (!ast)
     return "NULL";
   
   return ast->s;
@@ -72,12 +72,12 @@ printName(shared_ptr<AST> ast)
 void
 Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out) 
 { 
-  if(Options::rawTvars)
+  if (Options::rawTvars)
     tvP = GC_NULL;
 
   shared_ptr<Type> t = getType();
 
-  if(t->pMark >= 2) {
+  if (t->pMark >= 2) {
     out << "<infinity/>" << endl;
     return;
   }
@@ -147,16 +147,16 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
   case ty_tvar:
     {
       string name;
-      if(tvP)
+      if (tvP)
 	name = tvP->tvName(t);
       
-      if(name == "'a")
+      if (name == "'a")
 	out << "<tvar name='alpha'/>" << endl; 
-      else if(name == "'b")
+      else if (name == "'b")
 	out << "<tvar name='beta'/>" << endl; 
-      else if(name == "'c")
+      else if (name == "'c")
 	out << "<tvar name='gamma'/>" << endl; 
-      else if(name == "'d")
+      else if (name == "'d")
 	out << "<tvar name='delta'/>" << endl; 
       else
 	out << "<tvar name='alpha' num='"<< t->uniqueID << "'/>" << endl; 
@@ -201,8 +201,8 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
 
   case ty_fnarg:
     {
-      for(size_t i=0; i < t->components.size(); i++) {
-	if(t->CompFlags(i) & COMP_BYREF) {
+      for (size_t i=0; i < t->components.size(); i++) {
+	if (t->CompFlags(i) & COMP_BYREF) {
 	  out << " <byref> ";
 	  t->CompType(i)->asXML(tvP, out);
 	  out << "<byref> ";
@@ -241,7 +241,7 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
     {
       out << "<struct inline='yes' name='" << printName(t->defAst) <<"'>" << endl; 
       out.more();
-      for(size_t i=0; i < t->typeArgs.size(); i++)
+      for (size_t i=0; i < t->typeArgs.size(); i++)
 	t->TypeArg(i)->asXML(tvP, out);
       out.less();
       out << "</struct>" << endl;
@@ -264,7 +264,7 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
     {
       out << "<union inline='yes' name='" << printName(t->myContainer) <<"'>" << endl; 
       out.more();
-      for(size_t i=0; i < t->typeArgs.size(); i++)
+      for (size_t i=0; i < t->typeArgs.size(); i++)
 	t->TypeArg(i)->asXML(tvP, out);
       out.less();
       out << "</union>" << endl;
@@ -275,7 +275,7 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
     {
       out << "<typeclass name='" << printName(t->defAst) <<"'>" << endl; 
       out.more();
-      for(size_t i=0; i < t->typeArgs.size(); i++)
+      for (size_t i=0; i < t->typeArgs.size(); i++)
 	t->TypeArg(i)->asXML(tvP, out);
       out.less();
       out << "</typeclass>" << endl;
@@ -362,16 +362,16 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
       t->CompType(0)->asXML(tvP, out);
       t->CompType(1)->asXML(tvP, out);
       out << "</pcst>" << endl; 
-      for(size_t i=0; i<t->components.size(); i++)
+      for (size_t i=0; i<t->components.size(); i++)
 	t->CompType(i)->asXML(tvP, out);
       break;
     }
 
   case ty_kfix:
     {
-      if(t == Type::Kmono)
+      if (t == Type::Kmono)
 	out << "<lKind k='mono'/>" << endl; 
-      else if(t == Type::Kpoly)
+      else if (t == Type::Kpoly)
 	out << "<lKind k='poly'/>" << endl; 
       else
 	assert(false);
@@ -400,7 +400,7 @@ Type::asXML(shared_ptr<TvPrinter> tvP)
 static inline bool
 mustShowPred(shared_ptr<Typeclass> pred)
 {
-  if((Options::showAllTccs) ||
+  if ((Options::showAllTccs) ||
      (((pred->flags & TY_CT_SUBSUMED) == 0) && 
       ((pred->flags & TY_CT_SELF) == 0)))
     return true;
@@ -416,12 +416,12 @@ TypeScheme::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
   out << "<TS>" << endl;
   out.more();
   
-  for(TypeSet::iterator itr_i = ftvs.begin();
+  for (TypeSet::iterator itr_i = ftvs.begin();
       itr_i != ftvs.end(); ++itr_i)
     out << (*itr_i)->asXML(tvP);      
   
-  if(tcc) {    
-    if(Options::showAllTccs)
+  if (tcc) {    
+    if (Options::showAllTccs)
       _tcc = tcc;
     else
       addConstraints(_tcc);      
@@ -429,10 +429,10 @@ TypeScheme::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
 
   out << "<CType>" << endl;
   out.more();
-  if(_tcc->size()) {
-    for(TypeSet::iterator itr = _tcc->begin();
+  if (_tcc->size()) {
+    for (TypeSet::iterator itr = _tcc->begin();
 	itr != _tcc->end(); ++itr)
-      if(mustShowPred((*itr)))
+      if (mustShowPred((*itr)))
 	(*itr)->asXML(tvP);
   }
   

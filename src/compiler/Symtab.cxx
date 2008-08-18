@@ -65,18 +65,18 @@ warnUnresRef(std::ostream& errStream,
   bool errorFree = true;
   
   assert(mod->astType == at_module);
-  for(size_t c=0; c < mod->children.size(); c++) {
+  for (size_t c=0; c < mod->children.size(); c++) {
     shared_ptr<AST> ast = mod->child(c);
     switch(ast->astType) {
     case at_declunion:
     case at_declstruct:
     case at_proclaim:
       {
-	if(ast->flags & PROCLAIM_IS_INTERNAL)
+	if (ast->flags & PROCLAIM_IS_INTERNAL)
 	  break;
 	
 	shared_ptr<AST> def = env->getBinding(ast->child(0)->s);
-	if(((ast->flags & DEF_IS_EXTERNAL) == 0) && (def == NULL)) {
+	if (((ast->flags & DEF_IS_EXTERNAL) == 0) && (def == NULL)) {
 
 	  errStream << ast->loc << ": WARNING: " 
 		    << "Local declaration of " << ast->child(0)->s 
@@ -84,12 +84,12 @@ warnUnresRef(std::ostream& errStream,
 	  
 	  errStream << std::endl;
 	  
-	  if(Options::Wall)
+	  if (Options::Wall)
 	    errorFree = false;
 	  break;
 	}
 
-	if(def != NULL)
+	if (def != NULL)
 	  assert(!def->isDecl);
       }
     default:
@@ -110,7 +110,7 @@ findInterface(std::ostream& errStream, shared_ptr<AST> ifAst)
     iface = thisIface;
   }
       
-  if(!iface) {
+  if (!iface) {
     errStream << ifAst->loc << ": "
 	      << "Internal Compiler Error. "
 	      << "Interface " << ifAst->s
@@ -119,7 +119,7 @@ findInterface(std::ostream& errStream, shared_ptr<AST> ifAst)
     return GC_NULL;
   }
   
-  if(!iface->env || !iface->gamma || !iface->instEnv) { 
+  if (!iface->env || !iface->gamma || !iface->instEnv) { 
     errStream << ifAst->loc << ": "
 	      << "Internal Compiler Error. "
 	      << "Interface " << ifAst->s
@@ -141,7 +141,7 @@ aliasPublicBindings(const std::string& idName,
 		    shared_ptr<ASTEnvironment > fromEnv, 
 		    shared_ptr<ASTEnvironment > toEnv)
 {
-  for(ASTEnvironment::iterator itr = fromEnv->begin();
+  for (ASTEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
     shared_ptr<Binding<AST> > bdng = itr->second;
     
@@ -209,7 +209,7 @@ importIfBinding(std::ostream& errStream,
   shared_ptr<ASTEnvironment > dupEnv = 
     ASTEnvironment::make(ifName->envs.env->uocName);
 
-  for(ASTEnvironment::iterator itr = ifName->envs.env->begin();
+  for (ASTEnvironment::iterator itr = ifName->envs.env->begin();
       itr != ifName->envs.env->end(); ++itr) {
     shared_ptr<Binding<AST> > bdng = itr->second;
     
@@ -295,7 +295,7 @@ bindIdentDef(shared_ptr<AST> ast, shared_ptr<ASTEnvironment > env,
   // bool addToIncomplete parameter, or at the caller, add them to a
   // dummy list.
   
-  if(ast->identType != id_unresolved) 
+  if (ast->identType != id_unresolved) 
     assert(ast->isIdentType(identType));
   else 
     ast->identType = identType;
@@ -312,7 +312,7 @@ bindIdentDef(shared_ptr<AST> ast, shared_ptr<ASTEnvironment > env,
 static void
 markComplete(shared_ptr<ASTEnvironment > env)
 {
-  for(ASTEnvironment::iterator itr = env->begin();
+  for (ASTEnvironment::iterator itr = env->begin();
       itr != env->end(); ++itr)
     itr->second->flags |= BF_COMPLETE;
 }
@@ -323,9 +323,9 @@ markComplete(shared_ptr<ASTEnvironment > env)
   do {								\
     answer = resolve(errStream, (ast), aliasEnv, (env), (lamLevel), \
 		     (mode), (identType), (currLB), (flags));	\
-    if(answer == false)						\
+    if (answer == false)						\
       errorFree = false;					\
-  }while(0)
+  }while (0)
 
 
 // The Symbol Resolver: 
@@ -424,7 +424,7 @@ resolve(std::ostream& errStream,
     {
 	// If you change the way this works, see the comment in the
 	// at_usesel case first!
-      if(!ast->fqn.isInitialized()) {
+      if (!ast->fqn.isInitialized()) {
 	if (ast->isGlobal()) {
 	  ast->fqn = FQName(env->uocName, ast->s);
 	  ast->flags |= ID_IS_PRIVATE;
@@ -449,8 +449,8 @@ resolve(std::ostream& errStream,
 	  
 	  shared_ptr<AST> sym = env->getBinding(ast->s);
 	
-	  if(sym) {
-	    if(sym->isDecl) {
+	  if (sym) {
+	    if (sym->isDecl) {
 	      if ((sym->fqn.iface != ast->fqn.iface) &&
 		  !providing(aliasEnv, sym->fqn)) {
 		// We are defining an ident that has an existing
@@ -468,7 +468,7 @@ resolve(std::ostream& errStream,
 	      }
 
 	      ast->identType = identType;
-	      if(!ast->isIdentType(sym->identType)) {
+	      if (!ast->isIdentType(sym->identType)) {
 		errStream << sym->loc << ": " 
 			  << ast->s << " is declared here as "
 			  << identTypeToString(sym->identType)
@@ -486,7 +486,7 @@ resolve(std::ostream& errStream,
 	      ast->decl = sym;
 	      env->removeBinding(ast->s);
 	      
-	      if(sym->externalName.size()) {
+	      if (sym->externalName.size()) {
 		ast->externalName = sym->externalName;
 	      }
 	    }
@@ -513,10 +513,10 @@ resolve(std::ostream& errStream,
 
 	  shared_ptr<AST> sym = env->getBinding(ast->s);
 	  
-	  if(sym) {	    
-	    if(!sym->isDecl) {
+	  if (sym) {	    
+	    if (!sym->isDecl) {
 	      // Will not be necessary in the new Polyinstantiator
-	      if((flags & NO_RESOLVE_DECL) == 0) {
+	      if ((flags & NO_RESOLVE_DECL) == 0) {
 		errStream << ast->loc << ": Symbol " 
 			  << ast->s << " already defined at " 
 			  << sym->loc << "." << std::endl;
@@ -525,7 +525,7 @@ resolve(std::ostream& errStream,
 	      }
 	    }
 	    
-	    if(!sym->isIdentType(identType)) {
+	    if (!sym->isIdentType(identType)) {
 	      errStream << sym->loc << ": " 
 			<< ast->s << " is declared/defined here as "
 			<< identTypeToString(sym->identType)
@@ -539,10 +539,10 @@ resolve(std::ostream& errStream,
 	    }
 	    ast->identType = sym->identType;
 
-	    if(ast->externalName.size()) {
+	    if (ast->externalName.size()) {
 	      assert(ast->flags & DEF_IS_EXTERNAL);
-	      if(sym->externalName.size()) {
-		if(sym->externalName != ast->externalName) {
+	      if (sym->externalName.size()) {
+		if (sym->externalName != ast->externalName) {
 		  errStream << ast->loc << ": " 
 			    << ast->s << " Identifier was previously "
 			    << " declared with a different external name. "
@@ -558,7 +558,7 @@ resolve(std::ostream& errStream,
 	      }
 	    }
 	    else {
-	      if(sym->externalName.size()) {
+	      if (sym->externalName.size()) {
 		ast->externalName = sym->externalName;
 	      }
 	    }
@@ -577,10 +577,10 @@ resolve(std::ostream& errStream,
 		 (identType != id_unresolved));
 	  
 	  ast->symbolDef = env->getBinding(ast->s);
-	  // 	if(ast->symbolDef == NULL) 
+	  // 	if (ast->symbolDef == NULL) 
 	  // 	  cout << " Symdef is NULL for " << ast->s << endl;
 	  
-	  if(!ast->symbolDef) {
+	  if (!ast->symbolDef) {
 	    // If there is a type-variable, it must be treated as though
 	    // it is a defining occurrence in order to support things
 	    // like:
@@ -601,7 +601,7 @@ resolve(std::ostream& errStream,
 	    // flags. Otherwise, things like: (defunion list:ref (Next
 	    // 'a)) will also resolve.
 	
- 	    if(ast->isIdentType(id_tvar) &&
+ 	    if (ast->isIdentType(id_tvar) &&
 	       ((flags & NEW_TV_OK) || 
 		(ast->flags & TVAR_POLY_SPECIAL))) {
 	      bindIdentDef(ast, env, identType, currLB, flags);
@@ -628,7 +628,7 @@ resolve(std::ostream& errStream,
 	  assert(ast->symbolDef);
 	  shared_ptr<AST> def = ast->symbolDef;
 
-	  if((flags & USE_ONLY_PUBLIC) && 
+	  if ((flags & USE_ONLY_PUBLIC) && 
 	     ((env->getFlags(ast->s) & BF_PRIVATE))) {
 	    errStream << ast->loc << ": Identifier `"
 		      << ast->s << "' used here, But NO public definition "
@@ -637,7 +637,7 @@ resolve(std::ostream& errStream,
 	    break;
 	  }
 	
-	  if(((flags & NO_CHK_USE_TYPE) == 0) && 
+	  if (((flags & NO_CHK_USE_TYPE) == 0) && 
 	     (!def->isIdentType(identType))) {
 	    errStream << ast->loc << ": " << identTypeToString(identType) 
 		      << " `" << ast->s << "' Undefined"
@@ -648,16 +648,16 @@ resolve(std::ostream& errStream,
 	  }
 	
 	  bool ICRviolation = false;
-	  if((env->getFlags(ast->s) & BF_COMPLETE) == 0) {	  
+	  if ((env->getFlags(ast->s) & BF_COMPLETE) == 0) {	  
 	    // We are using an incomplete definition ... 
-	    if(flags & INCOMPLETE_OK_PROC == 0) {
-	      if((flags & INCOMPLETE_OK) == 0) {
+	    if (flags & INCOMPLETE_OK_PROC == 0) {
+	      if ((flags & INCOMPLETE_OK) == 0) {
 		// If usage of an Incomplete variable is NOT OK, 
 		// there is a violation, and we are done.
 		ICRviolation = true;
 	      }
 	      else {		
-		if(def->isIdentType(id_value)) {
+		if (def->isIdentType(id_value)) {
 		  assert(lamLevel);
 		
 		  // This is a little subtle.
@@ -674,28 +674,28 @@ resolve(std::ostream& errStream,
 		  // we still check that the identifier is defined at 
 		  // the right LAMBDA LEVEL. 	   
 
-		  if(!lamLevel->getBinding(ast->s))
+		  if (!lamLevel->getBinding(ast->s))
 		    ICRviolation = true;
 		}
 	      }
 	    }
 	  }
 	  
-	  if(ICRviolation) {
+	  if (ICRviolation) {
 	    errStream << ast->loc << ": Usage of Identifier `"
 		      << ast->s << "' Violates Incompleteness Restriction." 
 		      << std::endl;
 	    errorFree = false;
 	  }
       
-	  if(def->flags & ID_FOR_SWITCH) {
-	    if((flags & SWITCHED_ID_OK) == 0) {
+	  if (def->flags & ID_FOR_SWITCH) {
+	    if ((flags & SWITCHED_ID_OK) == 0) {
 	      errStream << ast->loc << ": The identifier `"
 			<< ast->s << "' can only appear to the left of a `.'" 
 			<< std::endl;
 	      errorFree = false;
 	    }
-	    else if(flags & WITHIN_CATCH_MC) {
+	    else if (flags & WITHIN_CATCH_MC) {
 	      errStream << ast->loc << ": The identifier `"
 			<< ast->s << "' cannot be used while"
 			<< " catching multiple exceptions."
@@ -711,16 +711,16 @@ resolve(std::ostream& errStream,
 	  ast->externalName = def->externalName;
 
 	  /* Make sure tvars are scoped properly */
-	  if(def->isIdentType(id_tvar)) {	    	    
+	  if (def->isIdentType(id_tvar)) {	    	    
 	    assert(currLB);
 	    
 	    shared_ptr<AST> thisLB = GC_NULL;
-	    if(def->tvarLB->envs.env->isAncestor(currLB->envs.env))
+	    if (def->tvarLB->envs.env->isAncestor(currLB->envs.env))
 	      thisLB = currLB;
 	    else
 	      thisLB = def->tvarLB;
 	    
-	    while(thisLB->flags & LBS_PROCESSED) {
+	    while (thisLB->flags & LBS_PROCESSED) {
 	      thisLB = thisLB->parentLB;
 	      assert(thisLB);
 	    }
@@ -794,7 +794,7 @@ resolve(std::ostream& errStream,
       RESOLVE(iface, env, lamLevel, USE_MODE, id_interface, 
 	      GC_NULL, flags);
 
-      if(!errorFree)
+      if (!errorFree)
 	break;
 
       
@@ -807,7 +807,7 @@ resolve(std::ostream& errStream,
       
       shared_ptr<ASTEnvironment > ifenv = iface->symbolDef->envs.env;
       
-      if(!ifenv) {
+      if (!ifenv) {
 	errStream << ast->loc << ": "
 		  << "Internal Compiler Error. "
 		  << "Interface " << ifName
@@ -856,7 +856,7 @@ resolve(std::ostream& errStream,
 	RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
 		GC_NULL, flags);
 
-      if((flags & NO_RESOLVE_DECL) == 0)	
+      if ((flags & NO_RESOLVE_DECL) == 0)	
 	CHKERR(errorFree, warnUnresRef(errStream, ast, env));
 
       break;
@@ -914,7 +914,7 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
 	      id_struct, ast,
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK) | BIND_PUBLIC);
-      if(category->astType == at_refCat)
+      if (category->astType == at_refCat)
 	tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
 
       // match at_tvlist
@@ -1021,7 +1021,7 @@ resolve(std::ostream& errStream,
 	RESOLVE(field, tmpEnv, lamLevel, USE_MODE, 
 		idc_type, ast, 
 		flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
-	if(names.find(field->child(0)->s) != names.end()) {
+	if (names.find(field->child(0)->s) != names.end()) {
 	  errStream << field->child(0)->loc << ": "
 		    << "field name `" << field->child(0)->s
 		    << "' conflicts with another field / "		
@@ -1333,7 +1333,7 @@ resolve(std::ostream& errStream,
 
       importIfBinding(errStream, aliasEnv, ifAst);
 
-      if(ast->children.size() == 1) {
+      if (ast->children.size() == 1) {
 	// This is an import-all form
 	aliasPublicBindings(std::string(), aliasEnv, ifAst->envs.env, tmpEnv);
       }
@@ -1348,7 +1348,7 @@ resolve(std::ostream& errStream,
 		  id_unresolved, currLB, 
 		  ((flags & (~NEW_TV_OK))) | NO_CHK_USE_TYPE);
 	
-	  if(!errorFree)
+	  if (!errorFree)
 	    break;
 
 	  // Enforce the "one alias" rule.
@@ -1375,7 +1375,7 @@ resolve(std::ostream& errStream,
 	  aliasEnv->addBinding(pubFQN, localName);
 
 	  shared_ptr<AST> oldDef = env->getBinding(localName->s);
-	  if(oldDef) {
+	  if (oldDef) {
 	    errStream << alias->loc << ": Conflict for alias definition"
 		      << localName->s
 		      << ". Previously defined at "
@@ -1416,8 +1416,8 @@ resolve(std::ostream& errStream,
       // The first identifier has special meaning, and must be 
       // dealt with by hand.
 
-      if(ast->child(0)->s == "stateful") {
-	if(!(flags & IS_INTERFACE)) {
+      if (ast->child(0)->s == "stateful") {
+	if (!(flags & IS_INTERFACE)) {
 	  errStream << ast->child(0)->loc 
 		    << ": Only Interfaces can be declared to be stateful"
 		    << std::endl;
@@ -1425,8 +1425,8 @@ resolve(std::ostream& errStream,
 	}
       }
 
-      if(ast->child(0)->s == "tag-type") {
-	if(!(flags & WITHIN_DEFUNION)) {
+      if (ast->child(0)->s == "tag-type") {
+	if (!(flags & WITHIN_DEFUNION)) {
 	  errStream << ast->child(0)->loc 
 		    << ": tag-type can only occur within a defunion"
 		    << std::endl;
@@ -1461,7 +1461,7 @@ resolve(std::ostream& errStream,
       
       // No problem with usesel here. select cannot appear in
       // this context.
-      if(ast->child(0)->child(0)->astType == at_usesel) {
+      if (ast->child(0)->child(0)->astType == at_usesel) {
 	ifName = ast->child(0)->child(0)->child(0)->s;
 	varConst = true;
       }
@@ -1469,8 +1469,8 @@ resolve(std::ostream& errStream,
       // FIX: Isn't this stale now? Aren't constructor names
       // now constrained to unqualified idents?
       for (size_t c = 0; c < ast->children.size(); c++) {
-	if(varConst) {
-	  if(ast->child(c)->child(0)->astType != at_usesel ||
+	if (varConst) {
+	  if (ast->child(c)->child(0)->astType != at_usesel ||
 	     ast->child(c)->child(0)->child(0)->s != ifName) {
 	    errStream << ast->child(c)->child(0)->loc << ": "
 		      << " All Constructors of a Union declaration must "
@@ -1480,7 +1480,7 @@ resolve(std::ostream& errStream,
 	  }
 	}
 	else {
-	  if(ast->child(c)->child(0)->astType == at_usesel) {
+	  if (ast->child(c)->child(0)->astType == at_usesel) {
 	    errStream << ast->child(c)->child(0)->loc << ": "
 		      << " All Constructors of a Union declaration must "
 		      << "belong to the same compilation Unit "
@@ -1509,15 +1509,15 @@ resolve(std::ostream& errStream,
 	RESOLVE(fldc, env, lamLevel, USE_MODE, identType,
 		currLB, flags); 
 
-	if(fldc->astType != at_field)
+	if (fldc->astType != at_field)
 	  continue;
 	
 	for (size_t d = 1; d < c; d++) {
 	  shared_ptr<AST> fldd = ast->child(d);
-	  if(fldd->astType != at_field)
+	  if (fldd->astType != at_field)
 	    continue;
 	  
-	  if(fldc->child(0)->s == fldd->child(0)->s) {
+	  if (fldc->child(0)->s == fldd->child(0)->s) {
 	    errStream << ast->loc << ": "
 		      << "Duplicate field label: "
 		      << fldc->child(0)->s
@@ -1537,15 +1537,15 @@ resolve(std::ostream& errStream,
 	RESOLVE(fldc, env, lamLevel, USE_MODE, identType,
 		currLB, flags); 
 
-	if(fldc->astType != at_field)
+	if (fldc->astType != at_field)
 	  continue;
 	
 	for (size_t d = 1; d < c; d++) {
 	  shared_ptr<AST> fldd = ast->child(d);
-	  if(fldd->astType != at_field)
+	  if (fldd->astType != at_field)
 	    continue;
 	  
-	  if(fldc->child(0)->s == fldd->child(0)->s) {
+	  if (fldc->child(0)->s == fldd->child(0)->s) {
 	    errStream << ast->loc << ": "
 		      << "Duplicate field label: "
 		      << fldc->child(0)->s
@@ -1675,7 +1675,7 @@ resolve(std::ostream& errStream,
       // match at_intLiteral
       RESOLVE(ast->child(1), env, lamLevel, NULL_MODE, identType,
 	      currLB, flags); 
-      if(ast->child(1)->litValue.i < 0) {
+      if (ast->child(1)->litValue.i < 0) {
 	errStream << ast->child(1)->loc << ": "
 		  << "Array index cannot be negative." 
 		  << std::endl;
@@ -1740,7 +1740,7 @@ resolve(std::ostream& errStream,
 
   case at_constraints:
     {
-      for(size_t c=0; c < ast->children.size(); c++)
+      for (size_t c=0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		idc_type, currLB, flags);
       break;
@@ -1879,26 +1879,26 @@ resolve(std::ostream& errStream,
       shared_ptr<AST> lhs = ast->child(0);
       
       // CAREFUL: this might be a usesel
-      if(lhs->astType == at_ident || lhs->astType == at_usesel) {
+      if (lhs->astType == at_ident || lhs->astType == at_usesel) {
 	
 	RESOLVE(lhs, env, lamLevel, USE_MODE, identType, currLB, 
 		flags | NO_CHK_USE_TYPE | SWITCHED_ID_OK);
 	
 	// If ast->child(0) was a at_usesel, now it would have
 	// turned into at_ident.
-	if(lhs->isIdentType(id_interface)) {
+	if (lhs->isIdentType(id_interface)) {
 	  ast->astType = at_usesel;
 	  // Recursively call RESOLVE on ourselves to process the
 	  // at_usesel
 	  RESOLVE(ast, env, lamLevel, USE_MODE, identType, currLB, flags);
 	} 
-	else if(lhs->isIdentType(idc_type)) {
+	else if (lhs->isIdentType(idc_type)) {
 	  // This must be a case where we are qualifying a constructor
 	  // with its union name.
 	  ast->astType = at_fqCtr;
 	  RESOLVE(ast, env, lamLevel, USE_MODE, idc_type, currLB, flags);
 	}
-	else if(!lhs->isIdentType(id_value)) {
+	else if (!lhs->isIdentType(id_value)) {
 	  errStream << lhs->loc 
 		    << ": At selection, Identifier "
 		    << " `" << lhs->s << "'" 
@@ -2061,7 +2061,7 @@ resolve(std::ostream& errStream,
       RESOLVE(rhs, env, lamLevel, USE_MODE, idc_value, currLB, flags);
 
       if (lhs->astType == at_ident)
-	if((lhs->symbolDef->flags & ID_MUT_CLOSED) == 0)
+	if ((lhs->symbolDef->flags & ID_MUT_CLOSED) == 0)
 	  lhs->symbolDef->flags |= ID_IS_MUTATED;
 
       break;
@@ -2090,7 +2090,7 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      idc_value, currLB, flags);
 
-      if(((ast->flags & INNER_REF_NDX) == 0) &&
+      if (((ast->flags & INNER_REF_NDX) == 0) &&
 	 ast->child(1)->astType == at_ident) {
 	// Could be a field-select
       }
@@ -2115,7 +2115,7 @@ resolve(std::ostream& errStream,
 	      idc_value, currLB, flags);
 
       // match at_otherwise (agt_ow)
-      if(ast->child(3)->astType != at_Null) 
+      if (ast->child(3)->astType != at_Null) 
 	RESOLVE(ast->child(3), env, lamLevel, USE_MODE, 
 		idc_value, currLB, flags);
 
@@ -2146,14 +2146,14 @@ resolve(std::ostream& errStream,
       ast->child(0)->flags |= ID_FOR_SWITCH;
 
       /* match at_expr */
-      if((flags & WITHIN_CATCH) && (ast->children.size() > 3))
+      if ((flags & WITHIN_CATCH) && (ast->children.size() > 3))
 	flags |= WITHIN_CATCH_MC;
 	
       RESOLVE(ast->child(1), legEnv, lamLevel, USE_MODE, 
 	      idc_value, currLB, flags);
 
       /* match at_ident -- the constructors*/
-      for(size_t c=2; c < ast->children.size(); c++)
+      for (size_t c=2; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), legEnv, lamLevel, USE_MODE, 
 		idc_uctor, currLB, flags);      
       
@@ -2181,7 +2181,7 @@ resolve(std::ostream& errStream,
 	      idc_value, currLB, flags | WITHIN_CATCH);
 
       // match at_otherwise
-      if(ast->child(3)->astType != at_Null) 
+      if (ast->child(3)->astType != at_Null) 
 	RESOLVE(ast->child(3), env, lamLevel, USE_MODE, 
 		idc_value, currLB, flags | WITHIN_CATCH);
       break;
@@ -2434,7 +2434,7 @@ resolve(std::ostream& errStream,
 
       // The lamLevel is bogus here, but OK only for
       // the sake of polyinstantiation.      
-      if(ast->flags & LB_REC_BIND) {
+      if (ast->flags & LB_REC_BIND) {
 	RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
 		id_value, ast, flags);
 
@@ -2464,7 +2464,7 @@ initEnv(std::ostream& errStream,
 	shared_ptr<ASTEnvironment > env)
 {
   // See if I am processing the prelude or some other file.
-  if(ast->astType == at_interface &&
+  if (ast->astType == at_interface &&
      ast->child(0)->s == "bitc.prelude") {
     //    cout << "Processing Prelude " << std::endl;   
 
@@ -2488,7 +2488,7 @@ initEnv(std::ostream& errStream,
     preenv = itr->second->env;
   }
   
-  if(!preenv) {
+  if (!preenv) {
     // GCFIX: Why does this return on error instead of exiting? This
     // is a FATAL compiler errors!
     errStream << ast->loc << ": "
@@ -2509,13 +2509,13 @@ UocInfo::fe_symresolve(std::ostream& errStream,
 {
   bool errFree = true;
 
-  if(Options::noPrelude)
+  if (Options::noPrelude)
     flags |= SYM_NO_PRELUDE;
   
   shared_ptr<ASTEnvironment > aliasEnv = ASTEnvironment::make("*aliases*");
 
-  if(init) {    
-    if(flags & SYM_REINIT) {
+  if (init) {    
+    if (flags & SYM_REINIT) {
       assert(env);      
       assert(env->parent);
       env = env->parent->newDefScope();
@@ -2524,7 +2524,7 @@ UocInfo::fe_symresolve(std::ostream& errStream,
       env = ASTEnvironment::make(uocName);
     }      
 
-    if((flags & SYM_NO_PRELUDE) == 0)
+    if ((flags & SYM_NO_PRELUDE) == 0)
       initEnv(std::cerr, uocAst, aliasEnv, env);
   }
   

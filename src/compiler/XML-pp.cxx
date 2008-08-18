@@ -66,13 +66,13 @@ XMLp(std::ostream& out, shared_ptr<AST> ast, std::string pad, bool showLoc)
   if (showLoc)
     out << " loc=\"" + ast->loc.asString() + "\"";
 
-  if(ast->astType == at_ident) {
+  if (ast->astType == at_ident) {
     out << " idType=\""
         << identTypeToString(ast->identType)
         << "\"";
 
     out << " Sym=\"";
-    if(!ast->symbolDef) {
+    if (!ast->symbolDef) {
       out << "DEF"
 	  << "\"";
     }
@@ -87,7 +87,7 @@ XMLp(std::ostream& out, shared_ptr<AST> ast, std::string pad, bool showLoc)
  
   if (ast->children.size()) {
     out << ">\n";
-    for(unsigned i = 0; i < ast->children.size(); i++)
+    for (unsigned i = 0; i < ast->children.size(); i++)
       XMLp(out, ast->child(i), pad + "   ", showLoc);
     out << pad
 	<< "</" 
@@ -117,14 +117,14 @@ XMLd(std::ostream& out, shared_ptr<AST> ast, bool showLoc)
   if (showLoc)
     out << " loc=\"" + ast->loc.asString() + "\"";
 
-  if(ast->astType == at_ident) {
+  if (ast->astType == at_ident) {
 
     out << " idType=\""
         << identTypeToString(ast->identType)
         << "\"";
 
     out << " Sym=\"";
-    if(!ast->symbolDef) {
+    if (!ast->symbolDef) {
       out << "DEF"
 	  << "\"";
     }
@@ -139,7 +139,7 @@ XMLd(std::ostream& out, shared_ptr<AST> ast, bool showLoc)
 
   if (ast->children.size()) {
     out << ">";
-    for(unsigned i = 0; i < ast->children.size(); i++)
+    for (unsigned i = 0; i < ast->children.size(); i++)
       XMLd(out, ast->child(i), showLoc);
     out << "</" 
 	<< AST::tagName(ast->astType)
@@ -196,7 +196,7 @@ emitXMLType(INOstream &out, std::string name, shared_ptr<TypeScheme> ts,
 	    bool raw=false)
 {
   shared_ptr<TvPrinter> tvP = GC_NULL;
-  if(!raw)
+  if (!raw)
     tvP = TvPrinter::make();
   
   out << "<tqExpr>" << endl;
@@ -204,7 +204,7 @@ emitXMLType(INOstream &out, std::string name, shared_ptr<TypeScheme> ts,
 
   out << "<id name='" << xmlMangle(name) << "'/>" << endl;
   
-  if(!ts)
+  if (!ts)
     out <<  "<unknown/>" << endl;
   else
     ts->asXML(tvP, out);
@@ -232,7 +232,7 @@ XMLtypes(INOstream &out, shared_ptr<AST> ast, bool raw=false)
       out << "<btypes:TYPE>" << endl;
       out.more();
       out << "<text content='";
-      if(ast->astType == at_interface) {
+      if (ast->astType == at_interface) {
 	i=1;
 	out << "*** Interface: " << ast->child(0)->s << " ***";
       }
@@ -241,7 +241,7 @@ XMLtypes(INOstream &out, shared_ptr<AST> ast, bool raw=false)
       }
       out << "'/>" << endl;
       out << "<br/>" << endl;
-      for(; i<ast->children.size(); i++) {
+      for (; i<ast->children.size(); i++) {
 	XMLtypes(out, ast->child(i), raw);
 	out << "<br/>" << endl;
       }      

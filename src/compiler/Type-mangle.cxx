@@ -71,10 +71,10 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
   stringstream ss;
   
-  if(getType() != shared_from_this())
+  if (getType() != shared_from_this())
     return getType()->mangledString(igMut, igTlMut, maxArgMut);
 
-  if(mark & MARK_MANGLED_STRING) {
+  if (mark & MARK_MANGLED_STRING) {
     // Encountered Infinite Type
     assert(false);
   }
@@ -139,8 +139,8 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
   case ty_fnarg:
     ss << components.size();
-    for(size_t i=0; i<components.size(); i++) {
-      if(CompFlags(i) & COMP_BYREF)
+    for (size_t i=0; i<components.size(); i++) {
+      if (CompFlags(i) & COMP_BYREF)
 	ss << "Z";
       ss << CompType(i)->mangledString(igMut, true, 
 				       maxArgMut);
@@ -149,7 +149,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
   case ty_letGather:
     ss << "LG";
-    for(size_t i=0; i<components.size(); i++) {
+    for (size_t i=0; i<components.size(); i++) {
       ss << CompType(i)->mangledString(igMut, igTlMut, 
 					      maxArgMut);
     }
@@ -164,7 +164,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 	 << typeArgs.size() 
 	 << "_" << defAst->s.size() << defAst->s;
 
-      for(size_t i=0; i < typeArgs.size(); i++)
+      for (size_t i=0; i < typeArgs.size(); i++)
 	ss << TypeArg(i)->mangledString(igMut, false, 
 					 maxArgMut);
       break;
@@ -174,7 +174,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     {
       ss << "TC"
 	 << "_" << defAst->s.size() << defAst->s;
-      for(size_t i=0; i < typeArgs.size(); i++)
+      for (size_t i=0; i < typeArgs.size(); i++)
 	ss << TypeArg(i)->mangledString(igMut, false, 
 					 maxArgMut);
       
@@ -193,7 +193,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 	 << typeArgs.size() 
 	 << "_" << myContainer->s.size() << myContainer->s;
 
-      for(size_t i=0; i < typeArgs.size(); i++)
+      for (size_t i=0; i < typeArgs.size(); i++)
 	ss << TypeArg(i)->mangledString(igMut, false, maxArgMut);
     }
     break;
@@ -206,7 +206,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 	 << typeArgs.size() 
 	 << "_" << myContainer->s.size() << myContainer->s;
 
-      for(size_t i=0; i < typeArgs.size(); i++)
+      for (size_t i=0; i < typeArgs.size(); i++)
 	ss << TypeArg(i)->mangledString(igMut, false, maxArgMut);
     }
     break;
@@ -238,7 +238,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
   case ty_mutable:
     assert(components.size() == 1);
-    if(!igMut && !igTlMut)
+    if (!igMut && !igTlMut)
       ss << "M";
     ss << Base()->mangledString(igMut, false, maxArgMut);
     break;

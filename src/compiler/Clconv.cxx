@@ -74,7 +74,7 @@ clearusedef(shared_ptr<AST> ast)
 {
   ast->flags &= ~(ID_IS_CLOSED|ID_IS_CAPTURED|ID_NEEDS_HEAPIFY);
 
-  for(size_t c=0; c < ast->children.size(); c++)
+  for (size_t c=0; c < ast->children.size(); c++)
     clearusedef(ast->child(c));
 }
 
@@ -83,14 +83,14 @@ clearusedef(shared_ptr<AST> ast)
 static bool
 used(shared_ptr<AST> id, shared_ptr<AST> ast)
 {  
-  if(ast->astType == at_ident && ast->symbolDef == id) {
+  if (ast->astType == at_ident && ast->symbolDef == id) {
     assert(ast != id);
     assert(!id->symbolDef);
     return true;
   }
   
-  for(size_t i=0; i < ast->children.size(); i++) 
-    if(used(id, ast->child(i)))
+  for (size_t i=0; i < ast->children.size(); i++) 
+    if (used(id, ast->child(i)))
       return true;
   
   return false;
@@ -204,13 +204,13 @@ findusedef(std::ostream &errStream,
 
 	  // could check ast->symbolDef->symType->isMutable()
 	  
-	  if(ast->symbolDef->isGlobal()) 
+	  if (ast->symbolDef->isGlobal()) 
 	    break;
 	  
-	  if(boundVars.find(ast->symbolDef) != boundVars.end()) 
+	  if (boundVars.find(ast->symbolDef) != boundVars.end()) 
 	    break;
 	  
-	  if(Options::noAlloc) {
+	  if (Options::noAlloc) {
 	    errStream << ast->loc << ": "
 		      << "Usage of identifier " << ast->s
 		      << " mandates closure conversion -- "
@@ -359,14 +359,14 @@ findusedef(std::ostream &errStream,
   case at_interface:
   case at_module:
     {
-      for(size_t c=0; c < ast->children.size(); c++)
+      for (size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   NULL_MODE, boundVars, freeVars));
       break;
     }
   case at_methods:
     {
-      for(size_t c=0; c < ast->children.size(); c++)
+      for (size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -392,7 +392,7 @@ findusedef(std::ostream &errStream,
   case at_fill:
   case at_reserved:
     {
-      for(size_t c=0; c < ast->children.size(); c++)
+      for (size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   TYPE_MODE, boundVars, freeVars));
       break;
@@ -402,7 +402,7 @@ findusedef(std::ostream &errStream,
   case at_field:
   case at_defexception:
     {
-      for(size_t c=1; c<ast->children.size();c++)
+      for (size_t c=1; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   TYPE_MODE, boundVars, freeVars));
       break;
@@ -410,7 +410,7 @@ findusedef(std::ostream &errStream,
 
   case at_argVec:
     {
-      for(size_t c=0; c<ast->children.size();c++)
+      for (size_t c=0; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   LOCAL_MODE, boundVars, freeVars));
       break;
@@ -418,7 +418,7 @@ findusedef(std::ostream &errStream,
 
   case at_setbang:
     {
-      for(size_t c=0; c<ast->children.size();c++)
+      for (size_t c=0; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -448,7 +448,7 @@ findusedef(std::ostream &errStream,
   case at_makevectorL:    
   case at_apply:
     {
-      for(size_t c=0; c<ast->children.size();c++)
+      for (size_t c=0; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -457,8 +457,8 @@ findusedef(std::ostream &errStream,
   case at_switch:
   case at_try:
     {
-      for(size_t c=0; c<ast->children.size();c++)
-	if(c != IGNORE(ast))
+      for (size_t c=0; c<ast->children.size();c++)
+	if (c != IGNORE(ast))
 	  CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				     USE_MODE, boundVars, freeVars));
       break;
@@ -469,7 +469,7 @@ findusedef(std::ostream &errStream,
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(0), 
 				 USE_MODE, boundVars, freeVars));
 
-      if(ast->flags & INNER_REF_NDX) 
+      if (ast->flags & INNER_REF_NDX) 
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(1), 
 				   USE_MODE, boundVars, freeVars));      
       
@@ -479,7 +479,7 @@ findusedef(std::ostream &errStream,
   case at_ucon_apply:
   case at_struct_apply:
     {
-      for(size_t c=1; c<ast->children.size();c++)
+      for (size_t c=1; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -488,7 +488,7 @@ findusedef(std::ostream &errStream,
   case at_if:
   case at_when:
     {
-      for(size_t c=0; c<ast->children.size();c++)
+      for (size_t c=0; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -507,7 +507,7 @@ findusedef(std::ostream &errStream,
     {
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(0), 
 				 LOCAL_MODE, boundVars, freeVars));
-      for(size_t c=1; c<ast->children.size();c++)
+      for (size_t c=1; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -613,11 +613,11 @@ getClenvUse(shared_ptr<AST> ast, shared_ptr<AST> clenvName,
 	    std::vector<std::string>& tvs)
 {
   shared_ptr<AST> clType;
-  if(tvs.size()) {
+  if (tvs.size()) {
     shared_ptr<AST> typeApp = AST::make(at_typeapp, ast->loc);
     typeApp->addChild(clenvName->Use());
     
-    for(size_t i=0; i<tvs.size(); i++) {
+    for (size_t i=0; i<tvs.size(); i++) {
       shared_ptr<AST> tv = AST::make(at_ident, ast->loc);
       tv->identType = id_tvar;
       tv->s = tv->fqn.ident = tvs[i];
@@ -637,15 +637,15 @@ getClenvUse(shared_ptr<AST> ast, shared_ptr<AST> clenvName,
 static void
 rewriteMyCapture(shared_ptr<AST> ast, shared_ptr<AST> me, shared_ptr<AST> him) 
 {
-  if(ast->astType == at_set_closure) {
+  if (ast->astType == at_set_closure) {
     shared_ptr<AST> envApp = ast->child(1);
-    for(size_t c=1; c < envApp->children.size(); c++)
-      if(envApp->child(c)->symbolDef == me)
+    for (size_t c=1; c < envApp->children.size(); c++)
+      if (envApp->child(c)->symbolDef == me)
 	envApp->child(c) = him->Use();
     return;
   }
   
-  for(size_t c=0; c < ast->children.size(); c++)
+  for (size_t c=0; c < ast->children.size(); c++)
     rewriteMyCapture(ast->child(c), me, him);
 } 
 #endif
@@ -662,18 +662,18 @@ cl_convert_ast(shared_ptr<AST> ast,
   bool hoistChildren = true;
 
   /* Pre Processing */  
-  if(ast->astType == at_define || ast->astType == at_recdef) {
+  if (ast->astType == at_define || ast->astType == at_recdef) {
     hoistChildren = false;
 
     shared_ptr<AST> ident = ast->getID();
-    if(!ident->decl) {
+    if (!ident->decl) {
       shared_ptr<AST> proclaim = AST::make(at_proclaim, ast->loc,
 			      ident->getDeepCopy(),
 			      cl_convert_ast(ident->symType->asAST(ast->loc),
 					     outAsts, hoistChildren),
 			      AST::make(at_constraints, ast->loc));
       
-      if(ident->externalName.size())
+      if (ident->externalName.size())
 	proclaim->child(0)->flags |= DEF_IS_EXTERNAL;
       
       ast->flags |= PROCLAIM_IS_INTERNAL;
@@ -696,7 +696,7 @@ cl_convert_ast(shared_ptr<AST> ast,
       // A list of copyclosures to append in the end.
       shared_ptr<AST> ccs = AST::make(at_begin, expr->loc);
 
-      for(size_t c=0; c < lbs->children.size(); c++) {
+      for (size_t c=0; c < lbs->children.size(); c++) {
 	shared_ptr<AST> lb = lbs->child(c);
 	shared_ptr<AST> id = lb->child(0)->child(0);
 	
@@ -705,7 +705,7 @@ cl_convert_ast(shared_ptr<AST> ast,
 	// If this identifier may be used in *any* let-binding
 	// within the current letrec, we must use the alloc-ref /
 	// copy-ref scheme for closure conversion.
-	if(used(id, lbs)) {
+	if (used(id, lbs)) {
 	  assert(id->flags & ID_IS_CAPTURED);
 	  shared_ptr<AST> qual = 
 	    id->symType->getBareType()->asAST(rhs->loc); 
@@ -717,7 +717,7 @@ cl_convert_ast(shared_ptr<AST> ast,
 	}
       }
 
-      if(expr->astType == at_begin)
+      if (expr->astType == at_begin)
 	ccs->addChildrenFrom(expr);
       else
 	ccs->addChild(expr);
@@ -753,7 +753,7 @@ cl_convert_ast(shared_ptr<AST> ast,
       // Closure object is only generated if we actually have some
       // free variables.
       bool needsClosure = !freeVars.empty();
-      if(needsClosure) {
+      if (needsClosure) {
 
 	CLCONV_DEBUG std::cerr << "Need to generate closure struct. " 
 			       << std::endl;
@@ -781,7 +781,7 @@ cl_convert_ast(shared_ptr<AST> ast,
 	// Add empty constraints subtree
 	defStruct->addChild(AST::make(at_constraints, ast->loc));
       
-	for(AstSet::iterator fv = freeVars.begin();
+	for (AstSet::iterator fv = freeVars.begin();
 	    fv != freeVars.end(); ++fv) {
 	  assert((*fv)->astType == at_ident);
 	  shared_ptr<AST> field = AST::make(at_field, ast->loc);
@@ -802,7 +802,7 @@ cl_convert_ast(shared_ptr<AST> ast,
 	// after polyinstantiation.      
 	tvs = tvP->getAllTvarStrings();
 
-	for(size_t i=0; i < tvs.size(); i++) {
+	for (size_t i=0; i < tvs.size(); i++) {
 	  shared_ptr<AST> tv = AST::make(at_ident, tvlist->loc);
 	  tv->identType = id_tvar;
 	  tv->s = tv->fqn.ident = tvs[i];
@@ -815,7 +815,7 @@ cl_convert_ast(shared_ptr<AST> ast,
       }            
 
       //////////// Hoist the inner Lambda ///////////////
-      if(shouldHoist) {
+      if (shouldHoist) {
 	CLCONV_DEBUG std::cerr << "Need to hoist this lambda. " 
 			       << std::endl;      
 	CLCONV_DEBUG ast->PrettyPrint(std::cerr);
@@ -840,7 +840,7 @@ cl_convert_ast(shared_ptr<AST> ast,
 	newDef->addChild(ast);
 	newDef->addChild(AST::make(at_constraints));
       
-	if(needsClosure) {
+	if (needsClosure) {
 	  newDef->flags |= LAM_NEEDS_TRANS;
 
 	  // Insert the extra closure argument and prepend the type to
@@ -850,8 +850,8 @@ cl_convert_ast(shared_ptr<AST> ast,
 	  shared_ptr<AST> clArgName = AST::make(at_ident, ast->loc);
 	  clArgName->s = clArgName->fqn.ident = "__clArg";
 	  shared_ptr<AST> clArgPat = AST::make(at_identPattern, ast->loc, clArgName);      
-	  // Note: tvs was populated in the if(needsClosure) above
-	  // if(shouldHoist).
+	  // Note: tvs was populated in the if (needsClosure) above
+	  // if (shouldHoist).
 	  shared_ptr<AST> clType = getClenvUse(ast, clenvName, tvs);
 	  
 	  lamType->child(0)->children.insert(lamType->child(0)->children.begin(),
@@ -870,7 +870,7 @@ cl_convert_ast(shared_ptr<AST> ast,
 	// If the lambda requires a closure, emit a make-closure, else
 	// emit an identifier reference in place of the lambda:
 	shared_ptr<AST> lamUse = lamName->Use();
-	if(freeVars.size()) {	  
+	if (freeVars.size()) {	  
 	  shared_ptr<AST> mkEnv = AST::make(at_struct_apply, ast->loc);
 	  mkEnv->addChild(clenvName->Use());	  
 	  for (AstSet::iterator fv = freeVars.begin();
@@ -956,7 +956,7 @@ cl_heapify(shared_ptr<AST> ast)
       // is processed in the at_letbinding handler.
       for (size_t i = 0; i < args->children.size(); i++) {
 	shared_ptr<AST> arg = args->child(i)->child(0);
-	if((arg->flags & ID_NEEDS_HEAPIFY) == 0)
+	if ((arg->flags & ID_NEEDS_HEAPIFY) == 0)
 	  continue;
 	
 	atleastOneHeapified = true;
@@ -978,7 +978,7 @@ cl_heapify(shared_ptr<AST> ast)
 	bindings->addChild(theBinding);
       }
       
-      if(atleastOneHeapified)
+      if (atleastOneHeapified)
 	ast->child(1) = body;
       
       // Process the body.
@@ -1055,7 +1055,7 @@ cl_heapify(shared_ptr<AST> ast)
   case at_try:
     {
       for (size_t c = 0; c < ast->children.size(); c++)
-	if(c != IGNORE(ast))
+	if (c != IGNORE(ast))
 	  ast->child(c) = cl_heapify(ast->child(c));
       break;
     }
@@ -1085,7 +1085,7 @@ UocInfo::be_clconv(std::ostream& errStream,
   CHKERR(errFree, findusedef(errStream, uocAst, uocAst,
 			     NULL_MODE, boundVars, freeVars));
   
-  if(!errFree)
+  if (!errFree)
     return false;
 
   CLCONV_DEBUG PrettyPrint(errStream, true);
@@ -1120,7 +1120,7 @@ UocInfo::be_clconv(std::ostream& errStream,
   CHKERR(errFree, 
 	 RandT(errStream, true, CL_SYM_FLAGS, CL_TYP_FLAGS));
   
-  if(!errFree)
+  if (!errFree)
     std::cerr << uocAst->asString();
   assert(errFree);
 

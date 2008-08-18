@@ -351,7 +351,7 @@ SexprLexer::kwCheck(const char *s)
 
   // Things starting with "__":
   if (s[0] == '_' && s[1] == '_') {
-    if(!isRuntimeUoc)
+    if (!isRuntimeUoc)
       return tk_Reserved;
   }
 
@@ -608,7 +608,7 @@ SexprLexer::lex(ParseType *lvalp)
 	    if (c == '+') {
 	      do {
 		c = getChar();
-	      } while(digitValue(c, 16) >= 0);
+	      } while (digitValue(c, 16) >= 0);
 	      
 	      if (!isCharDelimiter(c)) {
 		ungetChar(c);

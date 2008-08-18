@@ -273,7 +273,7 @@ Type::maximizeMutability(shared_ptr<Trail> trail)
   shared_ptr<Type> t = getType();
   shared_ptr<Type> rt = GC_NULL;
 
-  if(t->mark & MARK_MAXIMIZE_MUTABILITY)
+  if (t->mark & MARK_MAXIMIZE_MUTABILITY)
     return t;
   
   t->mark |= MARK_MAXIMIZE_MUTABILITY;  
@@ -308,13 +308,13 @@ Type::maximizeMutability(shared_ptr<Trail> trail)
   case ty_reprv:
     {
       rt = t->getDCopy();
-      for(size_t i=0; i < rt->typeArgs.size(); i++) {
+      for (size_t i=0; i < rt->typeArgs.size(); i++) {
 	shared_ptr<Type> arg = rt->TypeArg(i)->getType();
 
-	if(rt->argCCOK(i)) {
+	if (rt->argCCOK(i)) {
 	  shared_ptr<Type> argMax =
 	    arg->maximizeMutability(trail)->getType(); 
-	  if(arg != argMax)
+	  if (arg != argMax)
 	    trail->link(arg, argMax);
 	}
       }
@@ -326,7 +326,7 @@ Type::maximizeMutability(shared_ptr<Trail> trail)
   case ty_letGather:
     {
       rt = t->getDCopy();
-      for(size_t i=0; i < t->components.size(); i++)
+      for (size_t i=0; i < t->components.size(); i++)
 	rt->CompType(i) = t->CompType(i)->maximizeMutability(trail); 
       break;
     }
@@ -348,7 +348,7 @@ Type::minimizeMutability(shared_ptr<Trail> trail)
   shared_ptr<Type> t = getType();
   shared_ptr<Type> rt = GC_NULL;
   
-  if(t->mark & MARK_MINIMIZE_MUTABILITY)
+  if (t->mark & MARK_MINIMIZE_MUTABILITY)
     return t;
   
   t->mark |= MARK_MINIMIZE_MUTABILITY;  
@@ -382,12 +382,12 @@ Type::minimizeMutability(shared_ptr<Trail> trail)
   case ty_reprv:
     {
       rt = t->getDCopy();
-      for(size_t i=0; i < rt->typeArgs.size(); i++) {
+      for (size_t i=0; i < rt->typeArgs.size(); i++) {
 	shared_ptr<Type> arg = rt->TypeArg(i)->getType();
-	if(rt->argCCOK(i)) {
+	if (rt->argCCOK(i)) {
 	  shared_ptr<Type> argMin =
 	    arg->minimizeMutability(trail)->getType(); 
-	  if(arg != argMin)
+	  if (arg != argMin)
 	    trail->link(arg, argMin);
 	}
       }
@@ -397,7 +397,7 @@ Type::minimizeMutability(shared_ptr<Trail> trail)
   case ty_letGather:
     {
       rt = t->getDCopy();
-      for(size_t i=0; i < t->components.size(); i++) 
+      for (size_t i=0; i < t->components.size(); i++) 
 	rt->CompType(i) = t->CompType(i)->minimizeMutability(trail);
       break;
     }
@@ -419,7 +419,7 @@ Type::minimizeDeepMutability(shared_ptr<Trail> trail)
   shared_ptr<Type> t = getType();
   shared_ptr<Type> rt = GC_NULL;
   
-  if(t->mark & MARK_MINIMIZE_DEEP_MUTABILITY)
+  if (t->mark & MARK_MINIMIZE_DEEP_MUTABILITY)
     return t;
   
   t->mark |= MARK_MINIMIZE_DEEP_MUTABILITY;  
@@ -460,12 +460,12 @@ Type::minimizeDeepMutability(shared_ptr<Trail> trail)
   case ty_reprr:
     {
       rt = t->getDCopy();
-      for(size_t i=0; i < rt->typeArgs.size(); i++) {
+      for (size_t i=0; i < rt->typeArgs.size(); i++) {
 	shared_ptr<Type> arg = rt->TypeArg(i)->getType();
 	shared_ptr<Type> argMin =
 	  arg->minimizeDeepMutability(trail)->getType(); 
 	
-	if(arg != argMin)
+	if (arg != argMin)
 	  trail->link(arg, argMin);
       }
       break;
@@ -474,7 +474,7 @@ Type::minimizeDeepMutability(shared_ptr<Trail> trail)
   case ty_letGather:
     {
       rt = t->getDCopy();
-      for(size_t i=0; i < t->components.size(); i++) {
+      for (size_t i=0; i < t->components.size(); i++) {
 	rt->CompType(i) =
 	  t->CompType(i)->minimizeDeepMutability(trail);
       }
@@ -516,11 +516,11 @@ coerceMaybe(shared_ptr<Type> t, shared_ptr<Trail> trail, bool minimize)
   //	    << " to ";
   
   shared_ptr<Type> core = t->Core()->getType();
-  if(minimize)
+  if (minimize)
     core = core->minimizeTopMutability()->getType();
   
   shared_ptr<Type> var = t->Var()->getType();
-  if(core->kind != ty_tvar)
+  if (core->kind != ty_tvar)
     trail->subst(var, core);
   else
     trail->link(t, core);
@@ -535,7 +535,7 @@ Type::adjMaybe(shared_ptr<Trail> trail, bool markedOnly,
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK_ADJ_MAYBE)
+  if (t->mark & MARK_ADJ_MAYBE)
     return;
   
   t->mark |= MARK_ADJ_MAYBE;
@@ -544,7 +544,7 @@ Type::adjMaybe(shared_ptr<Trail> trail, bool markedOnly,
   case ty_mbFull:
     {
       t->Core()->adjMaybe(trail, markedOnly, minimize, adjFn);
-      if(!markedOnly || (t->Var()->getType()->flags & TY_COERCE))
+      if (!markedOnly || (t->Var()->getType()->flags & TY_COERCE))
 	coerceMaybe(t, trail, minimize);
       break;
     }
@@ -552,27 +552,27 @@ Type::adjMaybe(shared_ptr<Trail> trail, bool markedOnly,
   case ty_mbTop:
     {
       t->Core()->adjMaybe(trail, markedOnly, minimize, adjFn);
-      if(!markedOnly || (t->Var()->getType()->flags & TY_COERCE))
+      if (!markedOnly || (t->Var()->getType()->flags & TY_COERCE))
 	coerceMaybe(t, trail, minimize);
       break;
     }
 
   case ty_fn:
     {
-      if(!adjFn)
+      if (!adjFn)
 	break;
       // otherwise, fall through
     }
 
   default:
     {
-      for(size_t i=0; i < t->typeArgs.size(); i++) 
+      for (size_t i=0; i < t->typeArgs.size(); i++) 
 	t->TypeArg(i)->adjMaybe(trail, markedOnly, minimize, adjFn);
       
-      for(size_t i=0; i<t->components.size(); i++)
+      for (size_t i=0; i<t->components.size(); i++)
 	t->CompType(i)->adjMaybe(trail, markedOnly, minimize, adjFn);
       
-      for(TypeSet::iterator itr = t->fnDeps.begin();
+      for (TypeSet::iterator itr = t->fnDeps.begin();
 	  itr != t->fnDeps.end(); ++itr)
 	(*itr)->adjMaybe(trail, markedOnly, minimize, adjFn);
       
@@ -596,7 +596,7 @@ Type::argCCOK(size_t argN)
   // Be REALLY careful about bt. It is the type in the scheme.
   // NEVER unify it with anyhing.
   shared_ptr<Type> bt = t->defAst->symType;  
-  if(bt->TypeArg(argN)->getType()->flags & TY_CCC)
+  if (bt->TypeArg(argN)->getType()->flags & TY_CCC)
     return true;
   else
     return false;
@@ -614,7 +614,7 @@ Type::determineCCC(shared_ptr<Type> t, bool inRefType)
   
   t = t->getType();
 
-  if(t->mark & MARK_DETERMINE_CCC)
+  if (t->mark & MARK_DETERMINE_CCC)
     return true;
   
   t->mark |= MARK_DETERMINE_CCC;  
@@ -623,7 +623,7 @@ Type::determineCCC(shared_ptr<Type> t, bool inRefType)
   switch(t->kind) {
   case ty_tvar:				       
     {
-      if((t == shared_from_this()) && (inRefType))
+      if ((t == shared_from_this()) && (inRefType))
 	cccOK = false;
       break;
     }
@@ -637,12 +637,12 @@ Type::determineCCC(shared_ptr<Type> t, bool inRefType)
 
   default:
     {
-      for(size_t i=0; cccOK && (i<t->typeArgs.size()); i++) 
+      for (size_t i=0; cccOK && (i<t->typeArgs.size()); i++) 
 	cccOK = determineCCC(t->TypeArg(i), 
 			     inRefType || t->isRefType() || 
 			     (!t->argCCOK(i)));
       
-      for(size_t i=0; cccOK && (i<t->components.size()); i++)
+      for (size_t i=0; cccOK && (i<t->components.size()); i++)
 	cccOK = determineCCC(t->CompType(i), t->isRefType());
       
       // I think no need to process fnDeps here.
@@ -670,7 +670,7 @@ Type::markSignMbs(bool cppos)
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK_SIGN_MBS)
+  if (t->mark & MARK_SIGN_MBS)
     return;
   
   t->mark |= MARK_SIGN_MBS;  
@@ -686,7 +686,7 @@ Type::markSignMbs(bool cppos)
   case ty_mbFull:    
   case ty_mbTop:    
     {
-      if(!cppos)
+      if (!cppos)
 	t->Var()->markSignMbs(cppos);
       
       t->Core()->markSignMbs(cppos);
@@ -717,14 +717,14 @@ Type::markSignMbs(bool cppos)
     
   case ty_fnarg:
     {
-      for(size_t i=0; i < t->components.size(); i++)
+      for (size_t i=0; i < t->components.size(); i++)
 	t->CompType(i)->markSignMbs(true);
       break;
     }
     
   case ty_letGather:
     {
-      for(size_t i=0; i < t->components.size(); i++)
+      for (size_t i=0; i < t->components.size(); i++)
 	t->CompType(i)->markSignMbs(cppos);
       break;
     }
@@ -735,9 +735,9 @@ Type::markSignMbs(bool cppos)
   case ty_uconv: 
   case ty_reprv:
     {
-      for(size_t i=0; i < t->typeArgs.size(); i++) {
+      for (size_t i=0; i < t->typeArgs.size(); i++) {
 	shared_ptr<Type> arg = t->TypeArg(i)->getType();
-	if(t->argCCOK(i))
+	if (t->argCCOK(i))
 	  arg->markSignMbs(cppos);
 	else
 	  arg->markSignMbs(false);
@@ -750,7 +750,7 @@ Type::markSignMbs(bool cppos)
   case ty_uconr: 
   case ty_reprr:
     {
-      for(size_t i=0; i < t->typeArgs.size(); i++) {
+      for (size_t i=0; i < t->typeArgs.size(); i++) {
 	shared_ptr<Type> arg = t->TypeArg(i)->getType();
 	arg->markSignMbs(false);
       }
@@ -784,7 +784,7 @@ Type::fixupFnTypes()
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK_FIXUP_FN_TYPES)
+  if (t->mark & MARK_FIXUP_FN_TYPES)
     return;
   
   t->mark |= MARK_FIXUP_FN_TYPES;
@@ -813,18 +813,18 @@ Type::fixupFnTypes()
       t->Args()->fixupFnTypes();
       t->Ret()->fixupFnTypes();
       shared_ptr<Type> ret = t->Ret()->getType();
-      if(ret->kind != ty_mbFull)
+      if (ret->kind != ty_mbFull)
 	t->Ret() = MBF(ret);
       break;
     }
 
   case ty_fnarg:
     {
-      for(size_t i=0; i < t->components.size(); i++) {
+      for (size_t i=0; i < t->components.size(); i++) {
 	t->CompType(i)->fixupFnTypes();
 	shared_ptr<Type> arg = t->CompType(i)->getType();
-	if((t->CompFlags(i) & COMP_BYREF) == 0) {
-	  if(arg->kind != ty_mbFull)
+	if ((t->CompFlags(i) & COMP_BYREF) == 0) {
+	  if (arg->kind != ty_mbFull)
 	    t->CompType(i) = MBF(arg);
 	}
       }
@@ -843,7 +843,7 @@ Type::fixupFnTypes()
   case ty_uconr: 
   case ty_reprr:
     {
-      for(size_t i=0; i < t->typeArgs.size(); i++)
+      for (size_t i=0; i < t->typeArgs.size(); i++)
 	t->TypeArg(i)->fixupFnTypes();
       
       break;
@@ -851,7 +851,7 @@ Type::fixupFnTypes()
 
   case ty_letGather:
     {
-      for(size_t i=0; i < t->components.size(); i++) 
+      for (size_t i=0; i < t->components.size(); i++) 
 	t->CompType(i)->fixupFnTypes();
       break;
     }

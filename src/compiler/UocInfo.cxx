@@ -311,7 +311,7 @@ UocInfo::Compile()
     
     bool showTypes = false;
     
-    if(Options::showTypesUocs.find(uocName) != Options::showTypesUocs.end())
+    if (Options::showTypesUocs.find(uocName) != Options::showTypesUocs.end())
       showTypes = true;
     
     if (! (this->*passInfo[i].fn)(std::cerr, true, 0) ) {
@@ -321,7 +321,7 @@ UocInfo::Compile()
       exit(1);
     }
 
-    if(!uocAst->isValid()) {
+    if (!uocAst->isValid()) {
       std::cerr << "PANIC: Invalid AST built for file \""	
 		<< origin
 		<< "\"."
@@ -364,19 +364,19 @@ UocInfo::Compile()
 void
 UocInfo::DoBackend() 
 {
-  for(size_t i = op_none+1; (OnePass)i <= Options::backEnd->oPass ; i++) {
+  for (size_t i = op_none+1; (OnePass)i <= Options::backEnd->oPass ; i++) {
     
     if (Options::showPasses)
       std::cerr << "PASS " << onePassInfo[i].name << std::endl;
 
-    if(! (this->*onePassInfo[i].fn)(std::cerr, true, 0)) {
+    if (! (this->*onePassInfo[i].fn)(std::cerr, true, 0)) {
       std::cerr << "Exiting due to errors during "
 		<< onePassInfo[i].descrip
 		<< std::endl;
       exit(1);
     }
 
-    if(!uocAst->isValid()) {
+    if (!uocAst->isValid()) {
       std::cerr << "PANIC: Invalid AST built for file \""
 		<< origin
 		<< "\"."

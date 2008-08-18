@@ -78,7 +78,7 @@ TypeScheme::type_instance_copy()
   vector<shared_ptr<Type> > cnftvs;
   vector<shared_ptr<Type> > cftvs;
   
-  for(TypeSet::iterator itr_i = ftvs.begin(); 
+  for (TypeSet::iterator itr_i = ftvs.begin(); 
       itr_i != ftvs.end(); ++itr_i) {
     cftvs.push_back(*itr_i);
     cnftvs.push_back(newTvar());
@@ -98,7 +98,7 @@ TypeScheme::type_instance()
   //std::cout << "Instantiating " << this->asString();
 
   shared_ptr<Type> t;
-  if(ftvs.empty())
+  if (ftvs.empty())
     t = tau;
   else
     t = type_instance_copy();
@@ -120,7 +120,7 @@ TypeScheme::ts_instance(bool fullCopy)
   vector<shared_ptr<Type> > cnftvs;
   vector<shared_ptr<Type> > cftvs;
   
-  for(TypeSet::iterator itr_i = ftvs.begin(); 
+  for (TypeSet::iterator itr_i = ftvs.begin(); 
       itr_i != ftvs.end(); ++itr_i) {
     shared_ptr<Type> tv = newTvar();
     ts->ftvs.insert(tv);
@@ -128,21 +128,21 @@ TypeScheme::ts_instance(bool fullCopy)
     cnftvs.push_back(tv);
   }
   
-  if(fullCopy || ftvs.size())
+  if (fullCopy || ftvs.size())
     ts->tau = tau->TypeSpecializeReal(cftvs, cnftvs);  
   else 
     ts->tau = tau;
  
-  if(tcc) {
+  if (tcc) {
     shared_ptr<TCConstraints> _tcc = TCConstraints::make();
     addConstraints(_tcc);
     
     ts->tcc = TCConstraints::make();
-    for(TypeSet::iterator itr = _tcc->begin();
+    for (TypeSet::iterator itr = _tcc->begin();
 	itr != _tcc->end(); ++itr) {
       shared_ptr<Typeclass> pred;
       
-      if(fullCopy || ftvs.size())
+      if (fullCopy || ftvs.size())
 	pred = (*itr)->TypeSpecializeReal(cftvs, cnftvs);
       else
 	pred = (*itr);
@@ -153,8 +153,8 @@ TypeScheme::ts_instance(bool fullCopy)
 
   tau->clear_sp();
 
-  if(tcc)
-    for(TypeSet::iterator itr = tcc->begin();
+  if (tcc)
+    for (TypeSet::iterator itr = tcc->begin();
 	itr != tcc->end(); ++itr)
       (*itr)->clear_sp();
   
@@ -170,29 +170,29 @@ TypeScheme::ts_instance_copy()
 void
 TypeScheme::addConstraints(shared_ptr<TCConstraints> _tcc) const
 {
-  if(!tcc)
+  if (!tcc)
     return;
   
   TypeSet allFtvs;
   tau->collectAllftvs(allFtvs);
   
-  for(TypeSet::iterator itr = tcc->begin();
+  for (TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
-    for(TypeSet::iterator itr_j = allFtvs.begin();
+    for (TypeSet::iterator itr_j = allFtvs.begin();
 	itr_j != allFtvs.end(); ++itr_j)
-      if((*itr)->boundInType(*itr_j)) {
+      if ((*itr)->boundInType(*itr_j)) {
 	_tcc->addPred(*itr);
 	break;
       }
   }
   
-  //if(tcc->pred.size()) {
+  //if (tcc->pred.size()) {
   // std::cout << tau->ast->loc << "AddConstraints("
   //	      << tau->asString() << ", ";    
-  // for(size_t i = 0; i < tcc->pred.size(); i++)
+  // for (size_t i = 0; i < tcc->pred.size(); i++)
   //   std::cout << tcc->pred[i]->asString() << ", ";
   // std::cout << ") = ";
-  // for(size_t i = 0; i < _tcc->pred.size(); i++)
+  // for (size_t i = 0; i < _tcc->pred.size(); i++)
   //   std::cout << _tcc->pred[i]->asString() << ", ";       
   // std::cout << "."
   //	      << std::endl;
@@ -211,25 +211,25 @@ TypeScheme::normalize()
   
   
   TypeSet newTvs;
-  for(TypeSet::iterator itr_c = ftvs.begin();
+  for (TypeSet::iterator itr_c = ftvs.begin();
       itr_c != ftvs.end(); ++itr_c) {
     shared_ptr<Type> ftv = (*itr_c)->getType();
     
-    if(ftv->kind == ty_tvar)
+    if (ftv->kind == ty_tvar)
       newTvs.insert(ftv);
     else
       changed = true;
   }
   ftvs = newTvs;
   
-  if(tcc) {
+  if (tcc) {
     set< shared_ptr<Constraint> > allPreds = tcc->pred;
     tcc->pred.clear();
     
-    for(TypeSet::iterator itr = allPreds.begin();
+    for (TypeSet::iterator itr = allPreds.begin();
 	itr != allPreds.end(); ++itr) {
       shared_ptr<Constraint> ct = (*itr)->getType();
-      if(!ct->isPcst()) {
+      if (!ct->isPcst()) {
 	tcc->addPred(ct);
 	continue;
       }
@@ -248,7 +248,7 @@ TypeScheme::normalize()
 	 In either case, drop this predicate. 
 	 Otherwise, add it to newPred.                  */
       
-      if((k == Type::Kmono) ||
+      if ((k == Type::Kmono) ||
 	 ((k == Type::Kpoly) && tg->isConcretizable())) {
 	changed = true;
       }
@@ -259,7 +259,7 @@ TypeScheme::normalize()
   }
   
   TS_NORM_DEBUG
-    if(changed)
+    if (changed)
       std::cerr << "\t\tNormalized to "
 		<< asString(Options::debugTvP, false)
 		<< std::endl;

@@ -60,7 +60,7 @@ calc_struct_size(const shared_ptr<Type> t)
   size_t sz = 0;
   shared_ptr<AST> base = GC_NULL;
 
-  if(t->kind == ty_structv) {
+  if (t->kind == ty_structv) {
     start = 0;
     base = t->defAst->defForm->child(4);
   }
@@ -75,7 +75,7 @@ calc_struct_size(const shared_ptr<Type> t)
   // Fill elements and repr discriminators are not a part of the type.
   // So, we need a separate count for the type components.
   size_t compCnt=0;
-  for(size_t i=start; i < base->children.size(); i++) {
+  for (size_t i=start; i < base->children.size(); i++) {
     shared_ptr<AST> fld = base->child(i);
     
     switch(fld->astType) {
@@ -88,7 +88,7 @@ calc_struct_size(const shared_ptr<Type> t)
       
     case at_field:
       {
-	if(fld->field_bits != 0) {
+	if (fld->field_bits != 0) {
 	  assert(fld->symType->isIntegral());
 	  sz += fld->field_bits;
 	}
@@ -96,7 +96,7 @@ calc_struct_size(const shared_ptr<Type> t)
 	  sz+= t->CompType(compCnt)->size();
 	}
 
-	if((fld->flags & FLD_IS_DISCM) == 0)
+	if ((fld->flags & FLD_IS_DISCM) == 0)
 	  compCnt++;
 	break;
       }
@@ -120,22 +120,22 @@ calc_unin_size(const shared_ptr<Type> t)
   shared_ptr<AST> base = t->defAst->defForm;
   
   size_t max=0;
-  for(size_t i=0; i < base->children.size(); i++) {
+  for (size_t i=0; i < base->children.size(); i++) {
     shared_ptr<AST> ctr = base->child(i);
 
     // Constructors like `nil' having no arguments do not count.
-    if(ctr->symType->isUval())
+    if (ctr->symType->isUval())
       continue;
     
     assert(ctr->symType->isUcon());
     size_t sz = calc_struct_size(ctr->symType);
     
-    if(max < sz)
+    if (max < sz)
       max = sz;
   }
    
   size_t tag=0;
-  if((base->flags & ENUM_UN) || (base->flags & SINGLE_LEG_UN) || 
+  if ((base->flags & ENUM_UN) || (base->flags & SINGLE_LEG_UN) || 
      (base->flags & CARDELLI_UN) || (base->flags & UNION_IS_REPR))
     tag=0;
   else 
@@ -148,10 +148,10 @@ calc_unin_size(const shared_ptr<Type> t)
 size_t
 Type::size() 
 { 
-  if(getType() != shared_from_this())
+  if (getType() != shared_from_this())
     return link->getType()->size();
 
-  if(mark & MARK_SIZE)
+  if (mark & MARK_SIZE)
     assert(false);
 
   mark |= MARK_SIZE;
@@ -229,7 +229,7 @@ Type::size()
   case ty_structv:
     {
       //       // Fix: inner bit-fields
-      //       for(size_t i=0; i < components->size(); i++)
+      //       for (size_t i=0; i < components->size(); i++)
       // 	theSize += CompType(i)->size();
       //       theSize += defAst->total_fill;
       //       break;

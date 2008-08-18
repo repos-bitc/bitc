@@ -40,8 +40,8 @@
 
 #include <assert.h>
 
-#define DEBUG_ON  if(1)
-#define DEBUG_OFF if(0)
+#define DEBUG_ON  if (1)
+#define DEBUG_OFF if (0)
 #define DEBUG_VERBOSE true
 
 #define BEG_SIMP_DEBUG    DEBUG_OFF

@@ -156,7 +156,7 @@ shared_ptr<const Type>
 Type::getTypePrim() const
 { 
   shared_ptr<const Type> curr = shared_from_this();
-  while(curr->link)
+  while (curr->link)
     curr = curr->link;
   
   return curr;
@@ -166,7 +166,7 @@ shared_ptr<Type>
 Type::getTypePrim()
 { 
   shared_ptr<Type> curr = shared_from_this();
-  while(curr->link)
+  while (curr->link)
     curr = curr->link;
   
   return curr;
@@ -183,9 +183,9 @@ Type::getType()
   // We cannot avoid this type of linkage because of a structure
   // getting parametrized over a mutable type while having a mutable
   // wrapper at the field level.  
-  if(t->kind == ty_mutable) {    
+  if (t->kind == ty_mutable) {    
     shared_ptr<Type> in = t->Base()->getTypePrim();
-    while(in->kind == ty_mutable) {
+    while (in->kind == ty_mutable) {
       t = in;
       in = t->Base()->getTypePrim();
     }
@@ -193,23 +193,23 @@ Type::getType()
   
   // Maybe types may not be recursively nested, But a MbFull
   // might contain an MbTop.
-  if(t->kind == ty_mbFull || t->kind == ty_mbTop) {
+  if (t->kind == ty_mbFull || t->kind == ty_mbTop) {
     shared_ptr<Type> in = t->Var()->getTypePrim();
 
     assert(in->kind != ty_mbFull);
     
-    if(in->kind == ty_mbTop) {
+    if (in->kind == ty_mbTop) {
       t = in;
       in = in->Var()->getTypePrim();
     }
     
     assert(in->kind != ty_mbFull && in->kind != ty_mbTop);
     
-    if(in->kind != ty_tvar)
+    if (in->kind != ty_tvar)
       t = in;
   }
 
-  if(t->kind == ty_mbFull || t->kind == ty_mbTop) {
+  if (t->kind == ty_mbFull || t->kind == ty_mbTop) {
     shared_ptr<Type> var = t->Var()->getTypePrim();
     shared_ptr<Type> core = t->Core()->getTypePrim();
     
@@ -225,9 +225,9 @@ Type::getType() const
 { 
   shared_ptr<const Type> t = getTypePrim();
   
-  if(t->kind == ty_mutable) {    
+  if (t->kind == ty_mutable) {    
     shared_ptr<Type> in = t->components[0]->typ->getTypePrim();
-    while(in->kind == ty_mutable) {
+    while (in->kind == ty_mutable) {
       t = in;
       in = t->components[0]->typ->getTypePrim();
     }
@@ -241,17 +241,17 @@ Type::getBareType()
 { 
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK_GET_BARE_TYPE)
+  if (t->mark & MARK_GET_BARE_TYPE)
     return t;
   
   t->mark |= MARK_GET_BARE_TYPE;
 
   shared_ptr<Type> retType = t;
 
-  if(t->isMaybe())
+  if (t->isMaybe())
     retType = t->Core()->getBareType();  
   
-  if(t->isMutable())
+  if (t->isMutable())
     retType = t->Base()->getBareType();  
 
   t->mark &= ~MARK_GET_BARE_TYPE;
@@ -263,16 +263,16 @@ Type::getTheType(bool mutableOK, bool maybeOK)
 { 
   shared_ptr<Type> t = getType();  
 
-  if(t->mark & MARK_GET_THE_TYPE)
+  if (t->mark & MARK_GET_THE_TYPE)
     return t;
   
   t->mark |= MARK_GET_THE_TYPE;
 
   shared_ptr<Type> retType = t;
   
-  if((t->kind == ty_mutable) && !mutableOK)
+  if ((t->kind == ty_mutable) && !mutableOK)
     retType = t->Base()->getTheType(mutableOK, maybeOK);
-  else if(t->isMaybe() && !maybeOK)
+  else if (t->isMaybe() && !maybeOK)
     retType = t->Core()->getTheType(mutableOK, maybeOK);
   
   t->mark &= ~MARK_GET_THE_TYPE;
@@ -290,13 +290,13 @@ bool
 Type::isUnifiableTvar(size_t flags)
 {
   shared_ptr<Type> t = getType();
-  if(t->kind != ty_tvar)
+  if (t->kind != ty_tvar)
     return false;
   
-  if(flags & UN_IGN_RIGIDITY)
+  if (flags & UN_IGN_RIGIDITY)
     return true;
   
-  if((t->flags & TY_RIGID) == 0)
+  if ((t->flags & TY_RIGID) == 0)
     return true;
 
   return false;
@@ -306,7 +306,7 @@ bool
 Type::isUnifiableMbTop(size_t flags)
 {
   shared_ptr<Type> t = getType();
-  if(t->kind != ty_mbTop)
+  if (t->kind != ty_mbTop)
     return false;
   
   return t->Var()->isUnifiableTvar(flags);
@@ -316,7 +316,7 @@ bool
 Type::isUnifiableMbFull(size_t flags)
 {
   shared_ptr<Type> t = getType();
-  if(t->kind != ty_mbFull)
+  if (t->kind != ty_mbFull)
     return false;
   
   return t->Var()->isUnifiableTvar(flags);
@@ -379,14 +379,14 @@ Type::isConstrainedToRefType(boost::shared_ptr<TCConstraints> tcc)
 {
   shared_ptr<Type> t = getType();
   
-  for(TypeSet::iterator itr = tcc->begin(); itr != tcc->end(); ++itr) {
+  for (TypeSet::iterator itr = tcc->begin(); itr != tcc->end(); ++itr) {
     shared_ptr<Typeclass> pred = (*itr);
     
     const std::string &ref_types = SpecialNames::spNames.sp_ref_types; 
     
-    if(pred->defAst->s == ref_types) {
+    if (pred->defAst->s == ref_types) {
       shared_ptr<Type> arg = pred->TypeArg(0)->getType();
-      if(strictlyEquals(arg, false, true))
+      if (strictlyEquals(arg, false, true))
 	return true;
     }
   }
@@ -460,7 +460,7 @@ Type::isMbVar()
   TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
   shared_ptr<Type> v = t->Var();
   TYPE_ACC_DEBUG 
-    if(t->kind == ty_mbFull)
+    if (t->kind == ty_mbFull)
       assert(v->kind != ty_mbFull);
     else
       assert(v->kind != ty_mbFull && v->kind != ty_mbTop);
@@ -647,7 +647,7 @@ Type::isDeepMut()
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK_IS_DEEP_MUT)
+  if (t->mark & MARK_IS_DEEP_MUT)
     return true;
   
   t->mark |= MARK_IS_DEEP_MUT;
@@ -663,10 +663,10 @@ Type::isDeepMut()
     break;
 
   default:
-    for(size_t i=0;!mut &&  i < t->components.size(); i++)
+    for (size_t i=0;!mut &&  i < t->components.size(); i++)
       mut = t->CompType(i)->isDeepMut();
    
-    for(size_t i=0; !mut && i < t->typeArgs.size(); i++)
+    for (size_t i=0; !mut && i < t->typeArgs.size(); i++)
       mut = t->TypeArg(i)->isDeepMut();
 
     // No need to check functional dependencies
@@ -684,7 +684,7 @@ Type::isDeepImmut()
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK_IS_DEEP_IMMUT)
+  if (t->mark & MARK_IS_DEEP_IMMUT)
     return true;
   
   t->mark |= MARK_IS_DEEP_IMMUT;
@@ -701,10 +701,10 @@ Type::isDeepImmut()
     break;
     
   default:
-    for(size_t i=0; immut && i < t->components.size(); i++)
+    for (size_t i=0; immut && i < t->components.size(); i++)
       immut = t->CompType(i)->isDeepImmut();
     
-    for(size_t i=0; immut && i < t->typeArgs.size(); i++)
+    for (size_t i=0; immut && i < t->typeArgs.size(); i++)
       immut = t->TypeArg(i)->isDeepImmut();
 
     // No need to check functional dependencies
@@ -723,7 +723,7 @@ Type::isConcretizable()
 {
   shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK_IS_CONCRETIZABLE)
+  if (t->mark & MARK_IS_CONCRETIZABLE)
     return true;
   
   t->mark |= MARK_IS_CONCRETIZABLE;
@@ -743,10 +743,10 @@ Type::isConcretizable()
     break;
     
   default:
-    for(size_t i=0; concretizable && i < t->components.size(); i++)
+    for (size_t i=0; concretizable && i < t->components.size(); i++)
       concretizable = t->CompType(i)->isConcretizable();
     
-    for(size_t i=0; concretizable && i < t->typeArgs.size(); i++)
+    for (size_t i=0; concretizable && i < t->typeArgs.size(); i++)
       concretizable = t->TypeArg(i)->isConcretizable();
     
     // No need to check functional dependencies
@@ -814,10 +814,10 @@ Type::isOfInfiniteType()
 {
   bool infType = false;
 
-  if(getType() != shared_from_this())
+  if (getType() != shared_from_this())
     return getType()->isOfInfiniteType();
 
-  if(mark & MARK_IS_OF_INFINITE_TYPE) 
+  if (mark & MARK_IS_OF_INFINITE_TYPE) 
     return true;
 
   mark |= MARK_IS_OF_INFINITE_TYPE;
@@ -882,8 +882,8 @@ Type::isOfInfiniteType()
   case ty_subtype:
   case ty_pcst:
     {      
-      for(size_t i=0; !infType && (i < typeArgs.size()); i++)
-      	if(TypeArg(i)->isOfInfiniteType())
+      for (size_t i=0; !infType && (i < typeArgs.size()); i++)
+      	if (TypeArg(i)->isOfInfiniteType())
       	  infType = true;
 
       break;
@@ -943,7 +943,7 @@ Type::SetTvarsTo(shared_ptr<Type> t)
   TypeSet tvs;
   collectAllftvs(tvs);
   
-  for(TypeSet::iterator itr = tvs.begin(); itr != tvs.end(); ++itr)
+  for (TypeSet::iterator itr = tvs.begin(); itr != tvs.end(); ++itr)
     (*itr)->getType()->link = t;
 }
 
@@ -953,7 +953,7 @@ Type::SetTvarsToUnit()
   TypeSet tvs;
   collectAllftvs(tvs);
   
-  for(TypeSet::iterator itr = tvs.begin(); itr != tvs.end(); ++itr) {
+  for (TypeSet::iterator itr = tvs.begin(); itr != tvs.end(); ++itr) {
     shared_ptr<Type> ftv = (*itr)->getType();
     shared_ptr<Type> unit = Type::make(ty_unit);
     ftv->link = unit;
@@ -994,7 +994,7 @@ comp::comp(const std::string s, shared_ptr<Type> t, unsigned long _flags)
     myContainer = GC_NULL;		\
     link = GC_NULL;			\
     flags = 0;					\
-  } while(0);
+  } while (0);
 
 
 Type::Type(const Kind k)
@@ -1035,7 +1035,7 @@ Type::Type(shared_ptr<Type>  t)
   typeArgs = t->typeArgs;
   fnDeps = t->fnDeps;
     
-  for(size_t i=0; i<t->components.size(); i++)
+  for (size_t i=0; i<t->components.size(); i++)
     components.push_back(comp::make(t->CompName(i), t->CompType(i), t->CompFlags(i)));
 
 
@@ -1080,11 +1080,11 @@ Type::eql(shared_ptr<Type> t, bool verbose, std::ostream &errStream,
   bool errFree = unify(ss, trail, internalLocation, 
 		       shared_from_this(), t, uflags);
   
-  if(!keepSub)
+  if (!keepSub)
     trail->rollBack();
 
-  if(verbose) {
-    if(errFree)
+  if (verbose) {
+    if (errFree)
       errStream << asString() << " === " << t->asString()
 		<< std::endl;
     else
@@ -1108,7 +1108,7 @@ Type::strictlyEquals(shared_ptr<Type> t, bool verbose,
 		     std::ostream &errStream)
 {
   unsigned long uflags = UNIFY_TRY | UNIFY_STRICT;
-  if(noAlphaRename)
+  if (noAlphaRename)
     uflags |= UNIFY_STRICT_TVAR;
   return eql(t, verbose, errStream, uflags, false);
 }
@@ -1147,8 +1147,8 @@ Type::allTvarsRigid()
 {
   TypeSet ftvs;
   getType()->collectAllftvs(ftvs);
-  for(TypeSet::iterator itr = ftvs.begin(); itr != ftvs.end(); ++itr) {
-    if(((*itr)->flags & TY_RIGID) == 0)
+  for (TypeSet::iterator itr = ftvs.begin(); itr != ftvs.end(); ++itr) {
+    if (((*itr)->flags & TY_RIGID) == 0)
       return false;
   }
   return true;

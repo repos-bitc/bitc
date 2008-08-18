@@ -172,7 +172,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
 
   case at_ident:
     {
-      if(ast->symbolDef == fn && isTail) {
+      if (ast->symbolDef == fn && isTail) {
 	//std::cout << "Marked " << ast->s << " at " << ast->loc << endl; 
 	ast->flags |= (SELF_TAIL);
       }
@@ -190,7 +190,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_module:
     {
       size_t c = (ast->astType == at_module)?0:1;
-      for(; c < ast->children.size(); c++)
+      for (; c < ast->children.size(); c++)
 	markTail(ast->child(c), fn, bps, isTail); 
 
       break;
@@ -199,7 +199,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_define:
   case at_recdef:
     {
-      if(ast->child(1)->astType == at_lambda) {
+      if (ast->child(1)->astType == at_lambda) {
 	ast->child(0)->child(0)->defbps = ast->child(1)->child(0);
 	markTail(ast->child(1)->child(1), 
 		 ast->child(0)->child(0), 
@@ -275,7 +275,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_ucon_apply:
   case at_struct_apply:
     {
-      //       for(size_t c = 1; c < ast->children.size(); c++)
+      //       for (size_t c = 1; c < ast->children.size(); c++)
       // 	markTail(ast->child(i), fn, bps, false);
       
       break;
@@ -309,7 +309,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_setClosure:
   case at_copyREF:
     {
-      for(size_t c = 0; c < ast->children.size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	markTail(ast->child(c), fn, bps, isTail);
       break;
     }
@@ -317,8 +317,8 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_switch:
   case at_try:
     {
-      for(size_t c = 0; c < ast->children.size(); c++)
-	if(c != IGNORE(ast))
+      for (size_t c = 0; c < ast->children.size(); c++)
+	if (c != IGNORE(ast))
 	  markTail(ast->child(c), fn, bps, isTail);
       break;
     }
@@ -341,7 +341,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_letStar:
     {
       //       shared_ptr<AST> lbs = ast->child(0);
-      //       for(size_t c = 0; c < lbs->children.size(); c++) {
+      //       for (size_t c = 0; c < lbs->children.size(); c++) {
       // 	shared_ptr<AST> lb = lbs->child(c);
       // 	markTail(lb->child(1), fn, bps, false);
       //       }

@@ -75,7 +75,7 @@ Instance::equals(shared_ptr<Instance> ins,
   
   CHKERR(unifies, mySigma->tau->unifyWith(hisSigma->tau)); 
   
-  if(!unifies)
+  if (!unifies)
     return false;
     
   assert(mySigma->tcc);
@@ -92,7 +92,7 @@ Instance::equals(shared_ptr<Instance> ins,
   CHKERR(unifies, mySigma->solvePredicates(ss, ast->loc, 
 					   instEnv, Trail::make())); 
   
-  if(!unifies)
+  if (!unifies)
     return false;
   
   if (mySigma->tcc->empty())
@@ -141,10 +141,10 @@ Instance::satisfies(shared_ptr<Typeclass> pred,
 
   CHKERR(unifies, sigma->tau->unifyWith(pred));   
   
-  if(!unifies)
+  if (!unifies)
     return false;
     
-  if(!sigma->tcc)
+  if (!sigma->tcc)
     return true;
 
   std::stringstream ss;
@@ -152,7 +152,7 @@ Instance::satisfies(shared_ptr<Typeclass> pred,
   CHKERR(unifies, sigma->solvePredicates(ss, internalLocation, 
 					 instEnv, Trail::make()));
   
-  if(!unifies)
+  if (!unifies)
     return false;
   
   if (sigma->tcc->empty())
@@ -164,20 +164,20 @@ Instance::satisfies(shared_ptr<Typeclass> pred,
 bool 
 Typeclass::addFnDep(shared_ptr<Type> dep) 
 {
-  if(getType() != shared_from_this())
+  if (getType() != shared_from_this())
     return getType()->addFnDep(dep); // getType() OK
   
   size_t c;
   
-  if(kind != ty_typeclass)
+  if (kind != ty_typeclass)
     assert(false);
 
-  if(dep->kind != ty_tyfn)
+  if (dep->kind != ty_tyfn)
     assert(false);
   
-  for(TypeSet::iterator itr = fnDeps.begin(); 
+  for (TypeSet::iterator itr = fnDeps.begin(); 
       itr != fnDeps.end(); ++itr) {
-    if((*itr)->strictlyEquals(dep, false, true))
+    if ((*itr)->strictlyEquals(dep, false, true))
       return false;
   }
 
@@ -191,10 +191,10 @@ Typeclass::addFnDep(shared_ptr<Type> dep)
 void
 TCConstraints::collectAllFnDeps(set<shared_ptr<Type> >& fnDeps)
 {
-  for(iterator itr = begin(); itr != end(); ++itr) {
+  for (iterator itr = begin(); itr != end(); ++itr) {
     shared_ptr<Typeclass> pr = (*itr)->getType();    
 
-    for(TypeSet::iterator itr_j=pr->fnDeps.begin();
+    for (TypeSet::iterator itr_j=pr->fnDeps.begin();
 	itr_j != pr->fnDeps.end(); ++itr_j) {
       shared_ptr<Type> fnDep = (*itr_j)->getType();
       assert(fnDep->kind == ty_tyfn);
@@ -218,7 +218,7 @@ TCConstraints::close(TypeSet& closure,
   
   do {
     oldSize = newSize;    
-    for(TypeSet::iterator itr = fnDeps.begin();
+    for (TypeSet::iterator itr = fnDeps.begin();
 	itr != fnDeps.end(); ++itr) {
       shared_ptr<Type> fnDep = (*itr)->getType();
       shared_ptr<Type> fnDepArgs = fnDep->Args()->getType();
@@ -227,25 +227,25 @@ TCConstraints::close(TypeSet& closure,
       TypeSet retTvs;
       fnDepArgs->collectAllftvs(argTvs);      
       bool foundAll = true;
-      for(TypeSet::iterator itr_j = argTvs.begin();
+      for (TypeSet::iterator itr_j = argTvs.begin();
 	  itr_j != argTvs.end(); ++itr_j) {
 	shared_ptr<Type> argTv = (*itr_j);
-	if(closure.find(argTv) == closure.end()) {
+	if (closure.find(argTv) == closure.end()) {
 	  foundAll = false;
 	  break;
 	}
       }
 
-      if(foundAll) {	
+      if (foundAll) {	
 	fnDepRet->collectAllftvs(retTvs);	
-	for(TypeSet::iterator itr_j = retTvs.begin();
+	for (TypeSet::iterator itr_j = retTvs.begin();
 	    itr_j != retTvs.end(); ++itr_j) {
 	  shared_ptr<Type> retTv = (*itr_j);
-	  if(closure.find(retTv) == closure.end())
+	  if (closure.find(retTv) == closure.end())
 	    closure.insert(retTv);
 	}
       }	
     }
     newSize = closure.size();
-  } while(newSize > oldSize);
+  } while (newSize > oldSize);
 }

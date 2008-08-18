@@ -172,9 +172,9 @@ template<class T>
 bool 
 Environment<T>::isAncestor(shared_ptr<Environment<T> > env)
 {
-  if(parent == env)
+  if (parent == env)
     return true;
-  else if(!parent)
+  else if (!parent)
     return false;
   else
     return parent->isAncestor(env);
@@ -184,7 +184,7 @@ template<class T>
 void
 Environment<T>::mergeBindingsFrom(shared_ptr<Environment<T> > from, bool complete)
 {
-  for(iterator itr = from->begin();
+  for (iterator itr = from->begin();
       itr != from->end(); ++itr ) {
     const std::string& nm = itr->second->nm;
     shared_ptr<T> val = itr->second->val;
@@ -193,7 +193,7 @@ Environment<T>::mergeBindingsFrom(shared_ptr<Environment<T> > from, bool complet
     if (flags & BF_NO_MERGE)
       continue;
 
-    if(complete)
+    if (complete)
       flags |= BF_COMPLETE;
     
     bool rebind = (flags & BF_REBIND) ? true : false;

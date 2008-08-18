@@ -112,10 +112,10 @@ static size_t
 bitOffset(shared_ptr<AST> leg, size_t n)
 {
   size_t off = 0;
-  for(size_t c=1; c < n; c++) {
+  for (size_t c=1; c < n; c++) {
     shared_ptr<AST> fld = leg->child(c);
     shared_ptr<AST> fldType = getTypeAst(fld);    
-    if(fldType->astType == at_bitfield)
+    if (fldType->astType == at_bitfield)
       off += fldType->field_bits;
     else
       off += fldType->symType->size();
@@ -133,7 +133,7 @@ TypesAgree(shared_ptr<AST> fld1, shared_ptr<AST> fld2)
   shared_ptr<AST> fT1 = getTypeAst(fld1);    
   shared_ptr<AST> fT2 = getTypeAst(fld2);
 
-  if((fT1->symType->strictlyEquals(fT2->symType)) &&
+  if ((fT1->symType->strictlyEquals(fT2->symType)) &&
      (fT1->field_bits == fT2->field_bits))
     return true;
   else
@@ -155,22 +155,22 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
   
   case at_defunion:
     {
-      if((ast->flags & UNION_IS_REPR) == 0)
+      if ((ast->flags & UNION_IS_REPR) == 0)
 	break;
 
       shared_ptr<AST> ctrs = ast->child(4);
 
       /* The fields in the when cluses must be of integer-type
          This may be relaxed later. */
-      for(size_t c=0; c < ctrs->children.size(); c++) {
+      for (size_t c=0; c < ctrs->children.size(); c++) {
 	shared_ptr<AST> ctrc = ctrs->child(c);
 	
-	for(size_t i=1; i < ctrc->children.size(); i++) {
+	for (size_t i=1; i < ctrc->children.size(); i++) {
 	  shared_ptr<AST> fldi = ctrc->child(i);
 
-	  if(fldi->astType == at_field)
-	    if(fldi->flags & FLD_IS_DISCM)
-	      if(!fldi->symType->isInteger()) {
+	  if (fldi->astType == at_field)
+	    if (fldi->flags & FLD_IS_DISCM)
+	      if (!fldi->symType->isInteger()) {
 		errStream << fldi->loc << ": "
 			  << " The discriminating field "
 			  << fldi->child(0)->s 
@@ -183,25 +183,25 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
       
       /* Ascertain that common fields are at the same bit-offset
          and have the same type */
-      for(size_t c=0; c < ctrs->children.size(); c++) {
+      for (size_t c=0; c < ctrs->children.size(); c++) {
 	shared_ptr<AST> ctrc = ctrs->child(c);
 
-	for(size_t i=1; i < ctrc->children.size(); i++) {
+	for (size_t i=1; i < ctrc->children.size(); i++) {
 	  shared_ptr<AST> fldi = ctrc->child(i);
-	  if(fldi->astType != at_field)
+	  if (fldi->astType != at_field)
 	    continue;
 	  
  	  size_t offc = bitOffset(ctrc, i);	  	  
-	  for(size_t d=c+1; d < ctrs->children.size(); d++) {
+	  for (size_t d=c+1; d < ctrs->children.size(); d++) {
 	    shared_ptr<AST> ctrd = ctrs->child(d);
 	    
-	    for(size_t j=1; j < ctrd->children.size(); j++) {
+	    for (size_t j=1; j < ctrd->children.size(); j++) {
 	      shared_ptr<AST> fldj = ctrd->child(j);
-	      if(fldj->astType != at_field)
+	      if (fldj->astType != at_field)
 		continue;
 	      
-	      if(fldi->child(0)->s == fldj->child(0)->s) {
-		if(offc != bitOffset(ctrd, j)) {
+	      if (fldi->child(0)->s == fldj->child(0)->s) {
+		if (offc != bitOffset(ctrd, j)) {
 		  errStream << ctrd->loc << ": "
 			    << " The constructors "
 			    << ctrc->child(0)->s << " and "
@@ -212,7 +212,7 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
 		  errFree = false;
 		}
 		
-		if(!TypesAgree(fldi, fldj)) {
+		if (!TypesAgree(fldi, fldj)) {
 		  errStream << ctrd->loc << ": "
 			    << " The constructors "
 			    << ctrc->child(0)->s << " and "
@@ -229,29 +229,29 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
       }
       
       /* Ascertain that ``where'' fields are decisive */      
-      for(size_t c=0; c < ctrs->children.size(); c++) {
+      for (size_t c=0; c < ctrs->children.size(); c++) {
 	shared_ptr<AST> ctrc = ctrs->child(c);
 	
 	typedef map<string, size_t> WhenMap;
 	WhenMap when;
 	
-	for(size_t i=1; i < ctrc->children.size(); i++) {
+	for (size_t i=1; i < ctrc->children.size(); i++) {
 	  shared_ptr<AST> fldi = ctrc->child(i);
-	  if(fldi->flags & FLD_IS_DISCM) {
+	  if (fldi->flags & FLD_IS_DISCM) {
 	    assert(fldi->astType == at_field);
 
 	    when[fldi->child(0)->s] = fldi->unin_discm;
 	  }
 	}
 	
-	for(size_t d=c+1; d < ctrs->children.size(); d++) {
+	for (size_t d=c+1; d < ctrs->children.size(); d++) {
 	  shared_ptr<AST> ctrd = ctrs->child(d);
 	  bool differ=false;
 
-	  for(size_t j=1; (!differ) && (j < ctrd->children.size()); j++) {
+	  for (size_t j=1; (!differ) && (j < ctrd->children.size()); j++) {
 	    shared_ptr<AST> fldj = ctrd->child(j);
 
-	    if(fldj->flags & FLD_IS_DISCM) {
+	    if (fldj->flags & FLD_IS_DISCM) {
 	      assert(fldj->astType == at_field);
 	      
 	      WhenMap::iterator itr_k = when.find(fldj->child(0)->s);
@@ -265,16 +265,16 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
 	    }
 	  }
 	  
-	  if(!differ) {
+	  if (!differ) {
 	    errStream << ctrc->loc << ": "
 		      << "Ambiguous defrepr constructors: "
 		      << ctrc->child(0)->s << " and "
 		      << ctrd->child(0)->s << ". Ambiguous case is: "
 		      << std::endl;
 	    
-	    for(WhenMap::iterator itr_k = when.begin();
+	    for (WhenMap::iterator itr_k = when.begin();
 		itr_k != when.end(); ++itr_k) {
-	      if(itr_k != when.begin())
+	      if (itr_k != when.begin())
 		errStream << ", ";	      
 	      errStream << itr_k->first << " = " << itr_k->second;
 	    }
@@ -289,7 +289,7 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
   default:
     {
       // only defunion clause has meaning
-      for(size_t c=0; c < ast->children.size(); c++)
+      for (size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, reprCheck(errStream, ast->child(c)));
       break;
     }

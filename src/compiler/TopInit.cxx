@@ -107,14 +107,14 @@ enum pop_type {
 };
 
 #define CHOOSE(a, b) do { \
-    if(ast->s == #a)	  \
+    if (ast->s == #a)	  \
       return b;		  \
-  }while(0)
+  }while (0)
 
 static pop_type
 primOp(shared_ptr<AST> ast)
 {
-  if((ast->astType != at_ident) || 
+  if ((ast->astType != at_ident) || 
      (!ast->symbolDef->isGlobal()))
     return pop_none;
 
@@ -261,7 +261,7 @@ TopInit(std::ostream& errStream,
 	break;
       
       shared_ptr<AST> def = ast->symbolDef;
-      if(!def) {
+      if (!def) {
 	// Defining Occurence.
 	// This loop MUST only enter the ident case ONLY for 
 	//  definitions that are _observably defined_.
@@ -270,10 +270,10 @@ TopInit(std::ostream& errStream,
       }
       else {
 	// Constructors like `nil'.
-	if(def->isUnionLeg())
+	if (def->isUnionLeg())
 	  break;
 
-	if((def->flags & ID_OBSERV_DEF) == 0) {
+	if ((def->flags & ID_OBSERV_DEF) == 0) {
 	  errStream << ast->loc << ": "
 		    << "Identifier " << ast->s
 		    << " is not observably defined, "
@@ -308,7 +308,7 @@ TopInit(std::ostream& errStream,
     {
       TOPINIT(ast->child(1), flags);      
 
-      if(errFree)
+      if (errFree)
 	TOPINIT(ast->child(0), flags);
       
       break;
@@ -367,7 +367,7 @@ TopInit(std::ostream& errStream,
   case at_switch:
     {
       for (size_t c = 0; c < ast->children.size(); c++)
-	if(c != IGNORE(ast))
+	if (c != IGNORE(ast))
 	  TOPINIT(ast->child(c), flags);
       break;
     }
@@ -387,16 +387,16 @@ TopInit(std::ostream& errStream,
       pop_type pop = primOp(ast->child(0));
       switch(pop) {
       case pop_sclar:
-	for(size_t i=1; i < ast->children.size(); i++)
-	  if(!ast->child(0)->symType->isScalar()) {
+	for (size_t i=1; i < ast->children.size(); i++)
+	  if (!ast->child(0)->symType->isScalar()) {
 	    errFree = false;
 	    break;
 	  }
 	break;
 
       case pop_intFl:
-	for(size_t i=1; i < ast->children.size(); i++)
-	  if(!ast->child(0)->symType->isPrimInt() &&
+	for (size_t i=1; i < ast->children.size(); i++)
+	  if (!ast->child(0)->symType->isPrimInt() &&
 	     !ast->child(0)->symType->isPrimFloat()) {
 	    errFree = false;
 	    break;
@@ -404,8 +404,8 @@ TopInit(std::ostream& errStream,
 	break;
 
       case pop_int:
-	for(size_t i=1; i < ast->children.size(); i++)
-	  if(!ast->child(0)->symType->isPrimInt()) {
+	for (size_t i=1; i < ast->children.size(); i++)
+	  if (!ast->child(0)->symType->isPrimInt()) {
 	    errFree = false;
 	    break;
 	  }
@@ -416,7 +416,7 @@ TopInit(std::ostream& errStream,
 	break;
       }
 
-      if(!errFree)
+      if (!errFree)
 	errStream << ast->loc << ": "
 		  << "This kind of application is not "
 		  << " a valid Initializer." 
@@ -443,7 +443,7 @@ TopInit(std::ostream& errStream,
   case at_letbinding:
     {
       TOPINIT(ast->child(1), flags);
-      if(errFree)
+      if (errFree)
 	TOPINIT(ast->child(0), flags);
       break;
     }

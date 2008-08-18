@@ -54,17 +54,17 @@
 #define CHKERR(noerr, exp) \
   do {			   \
     bool ans = (exp);	   \
-    if(ans == false)	   \
+    if (ans == false)	   \
       (noerr) = false;	   \
-  }while(0)
+  }while (0)
 
 #define BE_CHKERR(noerr, exp)	 \
   do {				 \
     bool ans = (exp);		 \
     assert(ans);		 \
-    if(ans == false)		 \
+    if (ans == false)		 \
       (noerr) = false;		 \
-  }while(0)
+  }while (0)
 
 // Final expression of a let
 #define FEXPR(let) (let)->child(1)

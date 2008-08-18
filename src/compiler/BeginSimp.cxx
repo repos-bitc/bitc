@@ -84,7 +84,7 @@ beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 	shared_ptr<AST> letBinding = 
 	  AST::make(at_letbinding,
 		  def->loc, def->child(0), def->child(1));
-	if(rec)
+	if (rec)
 	  letBinding->flags |= LB_REC_BIND;
 	
 	// The definition is not a global
@@ -106,7 +106,7 @@ beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 	// while (ast->children.size() > c+1)
 	//   ast->children->Remove(ast->children.size()-1);
 	std::vector<shared_ptr<AST> > newChildren;
-	for(size_t i=0; i <= c; i++)
+	for (size_t i=0; i <= c; i++)
 	  newChildren.push_back(ast->child(i));
 	ast->children = newChildren;
 	

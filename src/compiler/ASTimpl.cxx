@@ -59,7 +59,7 @@ shared_ptr<AST>
 AST::makeBoolLit(const sherpa::LToken &tok)
 {
   shared_ptr<AST> ast = AST::make(at_boolLiteral, tok);
-  if(tok.str == "#t")
+  if (tok.str == "#t")
     ast->litValue.b = true;
   else
     ast->litValue.b = false;
@@ -99,7 +99,7 @@ AST::makeIntLit(const sherpa::LToken &tok)
   }
 
   std::string::size_type pos = num.find ('r');
-  if(pos != std::string::npos) {
+  if (pos != std::string::npos) {
     std::string rad = num.substr(0, pos);
     num = num.substr(pos+1, num.size());
     char *end;
@@ -112,7 +112,7 @@ AST::makeIntLit(const sherpa::LToken &tok)
   ast->litValue.i = BigNum(num, ast->litBase);  
   
   // Sign is not being considered by bignum implementation
-  if(negative)
+  if (negative)
     ast->litValue.i = -ast->litValue.i;
   
   return ast;
@@ -133,7 +133,7 @@ AST::makeFloatLit(const sherpa::LToken &tok)
  
   std::string::size_type epos = litString.find ('^');
 
-  if(epos != std::string::npos) {
+  if (epos != std::string::npos) {
     expString = litString.substr(epos+1, litString.size());
     mantissaString = litString.substr(0, epos);
   }
@@ -145,9 +145,9 @@ AST::makeFloatLit(const sherpa::LToken &tok)
   /* Handle the mantissa */
   
   std::string::size_type pos = mantissaString.find ('r');
-  if(pos != std::string::npos) {
+  if (pos != std::string::npos) {
     std::string rad;
-    if(mantissaString[0] == '-') {
+    if (mantissaString[0] == '-') {
       rad = mantissaString.substr(1, pos); 
       mantissaString =
         "-" + mantissaString.substr(pos+1, mantissaString.size());
@@ -163,13 +163,13 @@ AST::makeFloatLit(const sherpa::LToken &tok)
    
   /* Handle the exponent part */
   std::string exponent = "";//ss.str();
-  if(epos != std::string::npos) {
+  if (epos != std::string::npos) {
     size_t expBase = 10;
     
     std::string::size_type pos = expString.find ('r');
-    if(pos != std::string::npos) {
+    if (pos != std::string::npos) {
       std::string rad;
-      if(expString[0] == '-') {
+      if (expString[0] == '-') {
 	rad = expString.substr(1, pos); 
 	expString = "-" + expString.substr(pos+1, expString.size());
       }
@@ -701,7 +701,7 @@ void
 AST::clearTypes() {
   symType = GC_NULL;
   scheme = GC_NULL;
-  for(size_t i=0; i<children.size(); i++)
+  for (size_t i=0; i<children.size(); i++)
     child(i)->clearTypes();
 }
 
@@ -713,7 +713,7 @@ AST::getIds(std::ostream &errStream,
 {
   switch(astType) {
   case at_identPattern:
-    if(getPattern)
+    if (getPattern)
       ids.push_back(shared_from_this());
     else
       ids.push_back(child(0));
@@ -761,7 +761,7 @@ AST::isUnionLeg()
 bool
 AST::isMethod()
 {  
-  if((astType == at_ident) && isIdentType(id_method))
+  if ((astType == at_ident) && isIdentType(id_method))
     return true;
   else
     return false;
@@ -770,7 +770,7 @@ AST::isMethod()
 shared_ptr<AST> 
 AST::getCtr()
 {
-  if(astType == at_ident)
+  if (astType == at_ident)
     return shared_from_this();
   
   if (astType == at_fqCtr)
@@ -787,7 +787,7 @@ AST::rename(shared_ptr<AST> from, std::string newName)
   shared_ptr<AST> me = shared_from_this();
   switch(astType) {
   case at_ident:    
-    if(me == from || symbolDef == from)
+    if (me == from || symbolDef == from)
       s = newName;
     break;
   
@@ -795,7 +795,7 @@ AST::rename(shared_ptr<AST> from, std::string newName)
     // the encoded at_switch and at_try positions here
     
   default:
-    for(size_t c = 0; c < children.size(); c++)
+    for (size_t c = 0; c < children.size(); c++)
       child(c)->rename(from, newName);
     break;
   }

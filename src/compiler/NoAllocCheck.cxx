@@ -72,7 +72,7 @@ AllocCheck(std::ostream &errStream, shared_ptr<AST> ast)
 
   case at_struct_apply:
   case at_ucon_apply:
-    if(ast->child(0)->symType->isRefType()) {
+    if (ast->child(0)->symType->isRefType()) {
       errStream << ast->loc << ": "
 		<< "Expression requires dynamic allocation. "
 		<< "Disallowed in NO-GC mode"
@@ -101,7 +101,7 @@ UocInfo::fe_noAllocCheck(std::ostream& errStream,
 
   bool errFree=true;
 
-  if(Options::noAlloc)
+  if (Options::noAlloc)
     CHKERR(errFree, AllocCheck(errStream, uocAst));  
   return errFree;
 }

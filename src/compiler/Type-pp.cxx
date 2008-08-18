@@ -67,7 +67,7 @@ using namespace std;
 static string
 printName(shared_ptr<AST> ast)
 {
-  if(!ast)
+  if (!ast)
     return "NULL";
   
   return ast->s;
@@ -77,16 +77,16 @@ string
 Type::asString(shared_ptr<TvPrinter> tvP, bool traverse) 
 { 
 
-  if(Options::rawTvars)
+  if (Options::rawTvars)
     tvP = GC_NULL;
 
   shared_ptr<Type> t;
-  if(traverse)
+  if (traverse)
     t = getType();
   else
     t = shared_from_this();
   
-  if(t->pMark >= 2)
+  if (t->pMark >= 2)
     return " ... ";
   else 
     t->pMark++;
@@ -94,10 +94,10 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
   stringstream ss;
   
 #ifdef DEBUG_SHOW_ALL_LINKS  
-  if(traverse) {
+  if (traverse) {
     shared_ptr<Type> t1 = this;
     ss << "[";
-    while(t1->link) {
+    while (t1->link) {
       ss << "'a" << t1->uniqueID;
       ss << "->";
       t1 = t1->link;
@@ -136,9 +136,9 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
 
   case ty_tvar:
     {
-      if(!tvP) {
+      if (!tvP) {
 	ss << "'a" << t->uniqueID;
-	if(t->flags & TY_RIGID) 
+	if (t->flags & TY_RIGID) 
 	  ss << 'R';
       }
       else {
@@ -188,10 +188,10 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
   case ty_fnarg:
     {
       ss <<  "(";
-      for(size_t i=0; i < t->components.size(); i++) {
+      for (size_t i=0; i < t->components.size(); i++) {
 	if (i > 0) 
 	  ss << " ";
-	if(t->CompFlags(i) & COMP_BYREF)
+	if (t->CompFlags(i) & COMP_BYREF)
 	  ss << "(by-ref " 
 	     << t->CompType(i)->asString(tvP, traverse)
 	     << ")";
@@ -217,7 +217,7 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
   case ty_letGather:
     {
       ss <<  "(__letGather ";
-      for(size_t i=0; i < t->components.size(); i++) {
+      for (size_t i=0; i < t->components.size(); i++) {
 	if (i > 0) ss << " ";
 	ss << t->CompType(i)->asString(tvP, traverse);
       }
@@ -228,11 +228,11 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
   case ty_structv:
   case ty_structr:
     {
-      if(t->typeArgs.size() == 0)
+      if (t->typeArgs.size() == 0)
 	ss << printName(t->defAst);
       else {
 	ss << "(" << printName(t->defAst);
-	for(size_t i=0; i < t->typeArgs.size(); i++)
+	for (size_t i=0; i < t->typeArgs.size(); i++)
 	  ss << " " << t->TypeArg(i)->asString(tvP, traverse);
 	ss << ")";
       }
@@ -249,11 +249,11 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
   case ty_uconv: 
   case ty_uconr:
     {
-      if(t->typeArgs.size() == 0)
+      if (t->typeArgs.size() == 0)
 	ss << printName(t->myContainer);
       else {
 	ss << "(" << printName(t->myContainer);
-	for(size_t i=0; i < t->typeArgs.size(); i++)
+	for (size_t i=0; i < t->typeArgs.size(); i++)
 	  ss << " " << t->TypeArg(i)->asString(tvP, traverse);
 	ss << ")";
       }
@@ -262,11 +262,11 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
     }
 
   case ty_typeclass:    
-    if(t->typeArgs.size() == 0)
+    if (t->typeArgs.size() == 0)
       ss << printName(t->defAst);
     else {
       ss << "(" << printName(t->defAst);
-	for(size_t i=0; i < t->typeArgs.size(); i++)
+	for (size_t i=0; i < t->typeArgs.size(); i++)
 	  ss << " " << t->TypeArg(i)->asString(tvP, traverse);
 	ss << ")";
     }
@@ -338,8 +338,8 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
   case ty_pcst:
     {
       ss << "*(";
-      for(size_t i=0; i<t->components.size(); i++) {
-	if(i > 0)
+      for (size_t i=0; i<t->components.size(); i++) {
+	if (i > 0)
 	  ss << ", ";
 	ss << t->CompType(i)->asString(tvP, traverse);
       }
@@ -349,9 +349,9 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
 
   case ty_kfix:
     {
-      if(t == Type::Kmono)
+      if (t == Type::Kmono)
 	ss << "m";
-      else if(t == Type::Kpoly)
+      else if (t == Type::Kpoly)
 	ss << "P";
       else
 	assert(false);
@@ -376,34 +376,34 @@ TypeScheme::asString(shared_ptr<TvPrinter> tvP, bool norm)
   std::stringstream ss; 
   bool forall = false;
 
-  if(norm)
+  if (norm)
     normalize();
   
-  if(Options::FQtypes)
-    if(ftvs.size()) {
+  if (Options::FQtypes)
+    if (ftvs.size()) {
       ss << "(forall";
       forall = true;
-      for(TypeSet::iterator itr_i = ftvs.begin(); 
+      for (TypeSet::iterator itr_i = ftvs.begin(); 
 	  itr_i != ftvs.end(); ++itr_i)
 	ss << " " << (*itr_i)->asString(tvP);      
       ss << " ";
     }
 
-  if(tcc) {
-    if(Options::showAllTccs) {
-      if(tcc->size()) {
-	if(!forall) {
+  if (tcc) {
+    if (Options::showAllTccs) {
+      if (tcc->size()) {
+	if (!forall) {
 	  ss << "(forall";
 	  forall = true;
 	}
 
 	ss << " (";
-	for(TypeSet::iterator itr = tcc->begin();
+	for (TypeSet::iterator itr = tcc->begin();
 	    itr != tcc->end(); ++itr) {
 	  shared_ptr<Typeclass> pred = (*itr)->getType();
 	  ss << pred->asString(tvP) << " ";
 	  
-	  for(TypeSet::iterator itr_j = pred->fnDeps.begin();
+	  for (TypeSet::iterator itr_j = pred->fnDeps.begin();
 	      itr_j != pred->fnDeps.end(); ++itr_j)
 	    ss << (*itr_j)->asString(tvP) << " ";
 	}
@@ -415,12 +415,12 @@ TypeScheme::asString(shared_ptr<TvPrinter> tvP, bool norm)
       //addConstraints(_tcc);
       shared_ptr<TCConstraints> _tcc = tcc;
 
-      if(_tcc->size()) {
-	for(TypeSet::iterator itr = _tcc->begin();
+      if (_tcc->size()) {
+	for (TypeSet::iterator itr = _tcc->begin();
 	    itr != _tcc->end(); ++itr) {
-	  if((((*itr)->flags & TY_CT_SUBSUMED) == 0) && 
+	  if ((((*itr)->flags & TY_CT_SUBSUMED) == 0) && 
 	     (((*itr)->flags & TY_CT_SELF) == 0)) {
-	    if(!forall) {
+	    if (!forall) {
 	      ss << "(forall (";
 	      forall = true;
 	    }
@@ -428,14 +428,14 @@ TypeScheme::asString(shared_ptr<TvPrinter> tvP, bool norm)
 	  }
 	}
 
-	if(forall)
+	if (forall)
 	  ss << ") ";
       }
     }
   }
   
   ss << tau->asString(tvP);
-  if(forall)
+  if (forall)
     ss << ")";
   
   return ss.str();

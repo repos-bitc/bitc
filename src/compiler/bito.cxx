@@ -76,7 +76,7 @@ EmitBitO(std::ostream &optStream, std::ostream &errStream)
 
   out << "(bitc-version \"" << BITC_VERSION << "\")" << std::endl;
 
-  for(UocMap::iterator itr = UocInfo::srcList.begin();
+  for (UocMap::iterator itr = UocInfo::srcList.begin();
       itr != UocInfo::srcList.end(); ++itr) {
     shared_ptr<UocInfo> uoc = itr->second;
 

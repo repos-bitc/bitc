@@ -114,7 +114,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
   case at_reprctrs:
     {
       shared_ptr<AST> ctrs = AST::make(at_constructors, ast->loc);
-      for(size_t c=0; c < ast->children.size(); c++)
+      for (size_t c=0; c < ast->children.size(); c++)
 	ctrs->addChild(reprXform(ast->child(c), errStream, errFree));
       ast = ctrs;
       break;
@@ -124,17 +124,17 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
     {
       shared_ptr<AST> ctr = ast->child(0);      
 
-      for(size_t i=1; i < ast->children.size(); i++) {
+      for (size_t i=1; i < ast->children.size(); i++) {
 	shared_ptr<AST> where = ast->child(i);
 	bool found = false;
 
-	for(size_t j=1; j < ctr->children.size(); j++) {
+	for (size_t j=1; j < ctr->children.size(); j++) {
 	  shared_ptr<AST> fld = ctr->child(j);
 		  
-	  if(where->child(0)->s == fld->child(0)->s) {
+	  if (where->child(0)->s == fld->child(0)->s) {
 	    found = true;
 	    
-	    if(fld->flags & FLD_IS_DISCM) {
+	    if (fld->flags & FLD_IS_DISCM) {
 	      errStream << where->loc << ": "
 			<< " Duplicate `where' label for "
 			<< where->child(0)->s
@@ -149,7 +149,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 	  }
 	}
 
-	if(!found) {
+	if (!found) {
 	  errStream << where->loc << ": "
 		    << " Unknown Field: "
 		    << where->child(0)->s
@@ -180,7 +180,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
   default:
     {
       // value definitions are ignored
-      for(size_t c=0; c < ast->children.size(); c++)
+      for (size_t c=0; c < ast->children.size(); c++)
 	ast->child(c) = reprXform(ast->child(c), errStream, errFree);
       break;
     }

@@ -68,7 +68,7 @@ Type::asAST(const sherpa::LexLoc &loc,
   shared_ptr<AST> ast = GC_NULL;
   shared_ptr<Type> t = getType();  
 
-  if(t->pMark >= 1) {
+  if (t->pMark >= 1) {
     ast = AST::make(at_ident, loc);
     ast->s = tvP->tvName(t);
     ast->identType = id_tvar;
@@ -221,9 +221,9 @@ Type::asAST(const sherpa::LexLoc &loc,
   case ty_fnarg:
     {
       ast = AST::make(at_fnargVec, loc);
-      for(size_t i=0; i < t->components.size(); i++) {
+      for (size_t i=0; i < t->components.size(); i++) {
 	shared_ptr<AST> arg = t->CompType(i)->asAST(loc, tvP);
-	if(t->CompFlags(i) & COMP_BYREF)
+	if (t->CompFlags(i) & COMP_BYREF)
 	  arg = AST::make(at_byrefType, arg->loc, arg);
 	
 	ast->children.push_back(arg);
@@ -248,9 +248,9 @@ Type::asAST(const sherpa::LexLoc &loc,
       //ast = AST::make(at_ident, loc);
       //ast->s = t->defAst->s;
       //ast->symbolDef = t->defAst;
-      if(t->typeArgs.size() > 0) {
+      if (t->typeArgs.size() > 0) {
 	ast = AST::make(at_typeapp, loc, ast);
-	for(size_t i=0; i < t->typeArgs.size(); i++)
+	for (size_t i=0; i < t->typeArgs.size(); i++)
 	  ast->children.push_back(t->TypeArg(i)->asAST(loc, tvP));
       }
       break;
@@ -264,9 +264,9 @@ Type::asAST(const sherpa::LexLoc &loc,
       ast = t->myContainer->Use();
       //ast = AST::make(at_ident, loc);
       //ast->s = t->myContainer->s;
-      if(t->typeArgs.size()) {
+      if (t->typeArgs.size()) {
 	ast = AST::make(at_typeapp, loc, ast);
-	for(size_t i=0; i < t->typeArgs.size(); i++)
+	for (size_t i=0; i < t->typeArgs.size(); i++)
 	  ast->children.push_back(t->TypeArg(i)->asAST(loc, tvP));
       }
       break;

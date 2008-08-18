@@ -72,7 +72,7 @@ AST::genIdent(const char *label, const bool isTV)
   shared_ptr<AST> id = AST::make(at_ident);
 
   std::stringstream ss;
-  if(isTV)
+  if (isTV)
     ss << "'__";
   else
     ss << "__";
@@ -114,7 +114,7 @@ AST::isFnxn()
 size_t
 AST::nBits()
 {
-  if(field_bits != 0)
+  if (field_bits != 0)
     return field_bits;
   else    
     return tagType->nBits();
@@ -129,7 +129,7 @@ AST::Use()
   shared_ptr<AST> idUse = getDeepCopy();
   idUse->flags  &= ~MASK_FLAGS_FROM_USE;
   idUse->symbolDef = shared_from_this();
-  if(symType)
+  if (symType)
     idUse->symType = symType->getDCopy();
   return idUse;
 }
@@ -162,7 +162,7 @@ AST::AST(shared_ptr<AST> ast, bool shallowCopyChildren)
   unin_discm = ast->unin_discm;
   total_fill = ast->total_fill;
 
-  if(shallowCopyChildren)
+  if (shallowCopyChildren)
     children = ast->children;
 }
 
@@ -172,7 +172,7 @@ AST::getTrueCopy()
 {  
   shared_ptr<AST> to = AST::make(shared_from_this(), false);
   
-  for(size_t i=0; i < children.size(); i++)
+  for (size_t i=0; i < children.size(); i++)
     to->children.push_back(child(i)->getTrueCopy());
   
   return to;
@@ -191,7 +191,7 @@ AST::getDeepCopy()
   to->defForm = GC_NULL;
   to->defbps = GC_NULL;
 
-  for(size_t i=0; i<children.size(); i++)
+  for (size_t i=0; i<children.size(); i++)
     to->children.push_back(child(i)->getDeepCopy());
   return to;
 }

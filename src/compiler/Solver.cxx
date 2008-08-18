@@ -66,18 +66,18 @@ getDomain(shared_ptr<Typeclass> t)
 {
   TypeSet dom;
   
-  for(size_t i=0; i < t->typeArgs.size(); i++)
+  for (size_t i=0; i < t->typeArgs.size(); i++)
     dom.insert(t->TypeArg(i));
   
-  for(TypeSet::iterator itr = t->fnDeps.begin(); 
+  for (TypeSet::iterator itr = t->fnDeps.begin(); 
       itr != t->fnDeps.end(); ++itr) {
     shared_ptr<Type> fdep = (*itr);
     shared_ptr<Type> ret = fdep->Ret();
       
     TypeSet newDom;
       
-    for(TypeSet::iterator itr_d = dom.begin(); itr_d != dom.end(); ++itr_d)
-      if((*itr_d)->getType() != ret->getType())
+    for (TypeSet::iterator itr_d = dom.begin(); itr_d != dom.end(); ++itr_d)
+      if ((*itr_d)->getType() != ret->getType())
 	newDom.insert(*itr_d);
       
     dom = newDom;
@@ -91,7 +91,7 @@ getDomVars(const TypeSet& dom)
 {
   TypeSet vars;
   
-  for(TypeSet::iterator itr = dom.begin(); itr != dom.end(); ++itr) {
+  for (TypeSet::iterator itr = dom.begin(); itr != dom.end(); ++itr) {
     shared_ptr<Type> arg = (*itr)->getType();
     arg->collectAllftvs(vars);
   }
@@ -102,9 +102,9 @@ getDomVars(const TypeSet& dom)
 static bool
 mustSolve(const TypeSet& dom)
 {
-  for(TypeSet::iterator itr = dom.begin(); itr != dom.end(); ++itr) {
+  for (TypeSet::iterator itr = dom.begin(); itr != dom.end(); ++itr) {
     shared_ptr<Type> arg = (*itr)->getType();
-    if(arg->isTvar())
+    if (arg->isTvar())
       return false;
   }
   
@@ -114,7 +114,7 @@ mustSolve(const TypeSet& dom)
 static void
 rigidify(TypeSet& vars)
 {  
-  for(TypeSet::iterator itr = vars.begin(); itr != vars.end(); ++itr) {
+  for (TypeSet::iterator itr = vars.begin(); itr != vars.end(); ++itr) {
     shared_ptr<Type> arg = (*itr)->getType();
     assert(arg->kind == ty_tvar);
     arg->flags |= TY_RIGID;
@@ -124,7 +124,7 @@ rigidify(TypeSet& vars)
 static void
 unrigidify(TypeSet& vars)
 {  
-  for(TypeSet::iterator itr = vars.begin(); itr != vars.end(); ++itr) {
+  for (TypeSet::iterator itr = vars.begin(); itr != vars.end(); ++itr) {
     shared_ptr<Type> arg = (*itr)->getType();
     assert(arg->kind == ty_tvar);
     arg->flags &= ~TY_RIGID;
@@ -137,7 +137,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
 	   shared_ptr<Constraint> ct, shared_ptr<Constraints> cset, 
 	   bool &handled, bool &handlable)
 {
-  if(ct->isPcst()) {
+  if (ct->isPcst()) {
     handlable = true;
   }
   else {
@@ -155,7 +155,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
   shared_ptr<Type> ins = ct->CompType(2)->getType();
   
   // *(m, tg, ti)
-  if(k == Type::Kmono) {
+  if (k == Type::Kmono) {
     PCST_DEBUG errStream << "\t\tCase *(m, tg, ti), CLEAR." 
 			 << std::endl;
     cset->clearPred(ct);
@@ -167,7 +167,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
   if (k == Type::Kpoly) {
     //                _
     // *(p, tg, ti), |_|(tg)
-    if(gen->isConcretizable()) {
+    if (gen->isConcretizable()) {
       PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), [](tg), CLEAR."
 			   << std::endl;
       cset->clearPred(ct);
@@ -201,7 +201,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
   assert(k->kind == ty_kvar);
   
   // *(k, tg, ti), Mut(ti)
-  if(ins->isDeepMut()) {
+  if (ins->isDeepMut()) {
     PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), " 
 			 << "Mut(ti) [k |-> m]." 
 			 << std::endl;
@@ -211,7 +211,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
   }
 
   // *(k, tg, ti), Immut(tg)
-  if(gen->isDeepImmut()) {
+  if (gen->isDeepImmut()) {
     PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), Immut(tg)" 
 			 << "Immut(tg) [k |-> p]." 
 			 << std::endl;
@@ -224,17 +224,17 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
   for (TypeSet::iterator itr = cset->begin(); 
        itr != cset->end(); ++itr) {
     shared_ptr<Constraint> newCt = (*itr)->getType();
-    if(newCt == ct)
+    if (newCt == ct)
       continue;
 
-    if(!newCt->isPcst())
+    if (!newCt->isPcst())
       continue;
     
     shared_ptr<Type> newK = newCt->CompType(0)->getType();
     shared_ptr<Type> newGen = newCt->CompType(1)->getType();
     shared_ptr<Type> newIns = newCt->CompType(2)->getType();
     
-    if(newK == k && !ins->equals(newIns)) {
+    if (newK == k && !ins->equals(newIns)) {
       PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), *(k, tg, tj)" 
 			   << " ti !~~ tj, [k |-> p]." 
 			   << std::endl;
@@ -258,7 +258,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
 		  bool &handled, bool &handlable)
 {
   pred = pred->getType();
-  if(pred->kind != ty_typeclass) {
+  if (pred->kind != ty_typeclass) {
     // This must be a pcst constraint;
     handlable = false;
     handled = false;
@@ -268,7 +268,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
   // Special handling for ref-types
   // Safe to do name comparison, everyone includes the prelude.
   const std::string &ref_types = SpecialNames::spNames.sp_ref_types; 
-  if(pred->defAst->s == ref_types) {
+  if (pred->defAst->s == ref_types) {
     handlable = true;
     assert(pred->typeArgs.size() == 1);
     shared_ptr<Type> it = pred->TypeArg(0)->getType();
@@ -277,7 +277,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
 			  << pred->asString(Options::debugTvP)
 			  << std::endl;
     
-    if(it->isRefType()) {
+    if (it->isRefType()) {
       SPSOL_DEBUG errStream << "\t\t ... Satisfied, CLEAR"
 			    << pred->asString(Options::debugTvP)
 			    << std::endl;
@@ -286,7 +286,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
       return true;
     }
     
-    if(it->isTvar()) { // checks beyond mutability, maybe-ness
+    if (it->isTvar()) { // checks beyond mutability, maybe-ness
       SPSOL_DEBUG errStream << "\t\t ... Variable, KEEP"
 			    << pred->asString(Options::debugTvP)
 			    << std::endl;
@@ -322,10 +322,10 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
   shared_ptr<set<shared_ptr<Instance> > > insts = 
     instEnv->getBinding(pred->defAst->fqn.asString());
   
-  if(!insts) {
+  if (!insts) {
     TCSOL_DEBUG errStream << "\t\t ... No Instances in Environment"
 			  << std::endl;
-    if(must_solve) {
+    if (must_solve) {
       tcc->clearPred(pred);
       handled = true;
       return false;
@@ -337,7 +337,7 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
   }
 
   shared_ptr<TypeScheme> instScheme = GC_NULL;  
-  for(set<shared_ptr<Instance> >::iterator itr_j = insts->begin();
+  for (set<shared_ptr<Instance> >::iterator itr_j = insts->begin();
       itr_j != insts->end(); ++itr_j) {
     shared_ptr<TypeScheme> ts = (*itr_j)->ts->ts_instance_copy();
     shared_ptr<Type> inst = ts->tau;
@@ -348,19 +348,19 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
     // positions. That is, if an argument is used in a 
     // method within a reference, this step must be 
     // skipped on that argument. 
-    for(size_t c=0; c < inst->typeArgs.size(); c++)
+    for (size_t c=0; c < inst->typeArgs.size(); c++)
       inst->TypeArg(c) = MBF(inst->TypeArg(c));
     
-    if(pred->equals(inst)) {
+    if (pred->equals(inst)) {
       instScheme = ts;
       break;
     }
   }
 
-  if(!instScheme) {
+  if (!instScheme) {
     TCSOL_DEBUG errStream << "\t\t ... No Suitable Instance found"
 			  << std::endl;
-    if(must_solve) {
+    if (must_solve) {
       tcc->clearPred(pred);
       handled = true;
       return false;
@@ -371,7 +371,7 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
     }
   }
   
-  if(trial_mode) {
+  if (trial_mode) {
     handled = false;
     return true;
   }
@@ -386,7 +386,7 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
   assert(errFree);  
   tcc->clearPred(pred);
   
-  if(instScheme->tcc)
+  if (instScheme->tcc)
     for (TypeSet::iterator itr = instScheme->tcc->begin(); 
 	 itr != instScheme->tcc->end(); ++itr) {
       shared_ptr<Typeclass> instPred = (*itr);
@@ -394,7 +394,7 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
       // Add all preconditions, except for the self-condition
       // added to all instances. Remember that the 
       // type specializer clears the TY_SELF flag.
-      if(!pred->equals(instPred)) {
+      if (!pred->equals(instPred)) {
 	tcc->addPred(instPred);
 	TCSOL_DEBUG errStream << "\t\t .. Adding pre-condition: "
 			      << instPred->asString(Options::debugTvP)
@@ -420,10 +420,10 @@ handleEquPreds(std::ostream &errStream, shared_ptr<Trail> trail,
   for (TypeSet::iterator itr = tcc->begin(); 
        itr != tcc->end(); ++itr) {
     shared_ptr<Constraint> newCt = (*itr)->getType();
-    if(newCt == pred)
+    if (newCt == pred)
       continue;
     
-    if(pred->equals(newCt)) {
+    if (pred->equals(newCt)) {
       TCSOL_DEBUG errStream << "\t\t EquPreds: "
 			    << pred->asString(Options::debugTvP)
 			    << " === "
@@ -542,9 +542,9 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 			  << (!errFreeNow ? " [ERROR]" : "")
 			  << std::endl;
       
-      if(handled)
+      if (handled)
 	break;
-      if(handlable)
+      if (handlable)
 	continue;
 
       // Step 2
@@ -558,15 +558,15 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 			  << (!errFreeNow ? " [ERROR]" : "")
 			  << std::endl;
 
-      if(handled)
+      if (handled)
 	break;
-      if(handlable)
+      if (handlable)
 	continue;
       
       TypeSet dom = getDomain(pred);
       TypeSet vars = getDomVars(dom);
       bool ms = mustSolve(dom);
-      if(ms) {
+      if (ms) {
  	// Step 3.a
 	CHKERR(errFreeNow, handleTCPred(errStream, trail, pred, tcc,
 					instEnv, ms, false, handled));
@@ -577,7 +577,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 			    << (!errFreeNow ? " [ERROR]" : "")
 			    << std::endl;
 
-	if(handled)
+	if (handled)
 	  break;
       }
       
@@ -592,7 +592,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 			  << (handlable ? " [HANDLABLE]" : "")
 			  << (!errFreeNow ? " [ERROR]" : "")
 			  << std::endl;
-      if(handled)
+      if (handled)
 	break;
       
       // Step 3.b.ii
@@ -604,7 +604,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 			  << (handlable ? " [HANDLABLE]" : "")
 			  << (!errFreeNow ? " [ERROR]" : "")
 			  << std::endl;
-      if(handled)
+      if (handled)
 	break;
       
       // Step 4
@@ -616,14 +616,14 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 			  << (handlable ? " [HANDLABLE]" : "")
 			  << (!errFreeNow ? " [ERROR]" : "")
 			  << std::endl;      
-      if(handled)
+      if (handled)
 	break;
       
-      if(!errFreeNow)
+      if (!errFreeNow)
 	assert(false);
     }
     
-    if(!errFreeNow) {
+    if (!errFreeNow) {
       assert(handled);
       assert(errPred);
       errStream << errLoc << ": "
@@ -634,7 +634,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
     
     CHKERR(errFree, errFreeNow);
     
-  } while(handled);
+  } while (handled);
   
   return errFree;
 }

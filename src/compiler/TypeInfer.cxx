@@ -76,7 +76,7 @@ typedef map<shared_ptr<Type>, shared_ptr<AST> > TypeAstMap;
 	   (typeInfer(errStream, (ast), (gamma), (instEnv),	\
 		      (impTypes), (isVP), (tcc), (uflags),	\
 		      (trail), (mode), (flags))));		\
-  }while(0)
+  }while (0)
 
 static bool
 typeInfer(std::ostream& errStream, shared_ptr<AST> ast, 
@@ -139,8 +139,8 @@ bindIdentDef(shared_ptr<AST> ast,
 	     unsigned long bindFlags,
 	     unsigned long flags)
 {
-  if(!ast->symType) {
-    if(ast->isIdentType(id_tvar))
+  if (!ast->symType) {
+    if (ast->isIdentType(id_tvar))
       ast->symType = newTvar();
     else
       ast->symType = MBF(newTvar()); 
@@ -165,11 +165,11 @@ bindIdentDef(shared_ptr<AST> ast,
 static shared_ptr<TypeScheme> 
 Instantiate(shared_ptr<AST> ast, shared_ptr<TypeScheme> sigma)
 {	      
-  if(ast->symbolDef)
+  if (ast->symbolDef)
     ast = ast->symbolDef;
   
   shared_ptr<TypeScheme> ins = GC_NULL;
-  if(ast->isIdentType(idc_ctor) || ast->isIdentType(id_union))
+  if (ast->isIdentType(idc_ctor) || ast->isIdentType(id_union))
     ins = sigma->ts_instance_copy();
   else
     ins = sigma->ts_instance();
@@ -183,8 +183,8 @@ findField(std::ostream& errStream,
 	  shared_ptr<Type> t, shared_ptr<AST> fld, shared_ptr<Type> &fType)
 {
   t = t->getBareType();
-  for(size_t i=0; i < t->components.size(); i++)
-    if(t->CompName(i) == fld->s) {
+  for (size_t i=0; i < t->components.size(); i++)
+    if (t->CompName(i) == fld->s) {
       fType = t->CompType(i);
       return true;
     }
@@ -209,10 +209,10 @@ findComponent(std::ostream& errStream,
 	 ast->astType == at_fqCtr);
   fct = GC_NULL;
 
-  if(sut->isUType())
+  if (sut->isUType())
     sut = obtainFullUnionType(sut)->getType();
   
-  if(sut->components.empty()) {
+  if (sut->components.empty()) {
     errStream << ast->loc << ": "
 	      << "cannot dereference fields as only "
 	      << "an opaque declaration is available."
@@ -221,14 +221,14 @@ findComponent(std::ostream& errStream,
   }
   
   bool valid=false;
-  for(size_t i=0; i < sut->components.size(); i++)
-    if(sut->CompName(i) == ast->child(1)->s) {
+  for (size_t i=0; i < sut->components.size(); i++)
+    if (sut->CompName(i) == ast->child(1)->s) {
       fct = sut->CompType(i)->getType();	  
       valid = ((sut->CompFlags(i) & COMP_INVALID) == 0);
       break;
     }
       
-  if(!fct) {
+  if (!fct) {
     errStream << ast->loc << ": "
 	      << " In the expression " << ast->asString() << ", "
 	      << " structure/constructor " << sut->defAst->s 
@@ -237,7 +237,7 @@ findComponent(std::ostream& errStream,
     return false;
   } 
 
-  if(!valid) {
+  if (!valid) {
     errStream << ast->child(0)->loc << ": "
 	      << " The expression " << ast->asString()
 	      << " has no field " 
@@ -311,10 +311,10 @@ UnifyLetBinds(std::ostream& errStream, shared_ptr<AST> lbs,
     // mutability based on the lexical usage analysis of the
     // identifier. This must be done in the case of local variables
     // only. So, the code is within unifyletbinds
-    if(Options::heuristicInference) {
+    if (Options::heuristicInference) {
       shared_ptr<Type> idType = id->symType->getType();
 
-      if((id->flags & ID_IS_MUTATED) && !idType->isMutable()) {
+      if ((id->flags & ID_IS_MUTATED) && !idType->isMutable()) {
 	std::stringstream ss;  
 	shared_ptr<Type> mTv = Type::make(ty_mutable, newTvar());
 	
@@ -371,7 +371,7 @@ checkImpreciseTypes(std::ostream& errStream,
     switch(t->kind) {
     case ty_array:
       {
-	if(t->arrLen->len == 0) {
+	if (t->arrLen->len == 0) {
 	  errStream << ast->loc << ": "
 		    << "Type " << t->asString() 
 		    << " is not precise enough "
@@ -434,33 +434,33 @@ checkConstraints(std::ostream& errStream,
   defSigma->addConstraints(defTcc);
   declSigma->addConstraints(declTcc);
 
-  if(defTcc->size() != declTcc->size()) 
+  if (defTcc->size() != declTcc->size()) 
     errFree = false;
   
-  for(TypeSet::iterator itr = defTcc->begin();
+  for (TypeSet::iterator itr = defTcc->begin();
       errFree && itr != defTcc->end(); ++itr)
     (*itr)->mark |= unmatched;
-  for(TypeSet::iterator itr_j = declTcc->begin();
+  for (TypeSet::iterator itr_j = declTcc->begin();
       errFree && itr_j != declTcc->end(); ++itr_j)
     (*itr_j)->mark |= unmatched;
 
-  for(TypeSet::iterator itr = defTcc->begin();
+  for (TypeSet::iterator itr = defTcc->begin();
       errFree && itr != defTcc->end(); ++itr) {
     shared_ptr<Typeclass> defct = (*itr);
       
-    if((defct->mark & unmatched) == 0)
+    if ((defct->mark & unmatched) == 0)
       continue;
       
     bool unified = false;
       
-    for(TypeSet::iterator itr_j = declTcc->begin();
+    for (TypeSet::iterator itr_j = declTcc->begin();
 	errFree && itr_j != declTcc->end(); ++itr_j) {
       shared_ptr<Typeclass> declct = (*itr_j);
 
-      if((defct->mark & unmatched) == 0)
+      if ((defct->mark & unmatched) == 0)
 	continue;
       
-      if(defct->strictlyEquals(declct)) {
+      if (defct->strictlyEquals(declct)) {
 	defct->mark &= ~unmatched;
 	declct->mark &= ~unmatched;
 	unified = true;
@@ -468,20 +468,20 @@ checkConstraints(std::ostream& errStream,
       }
     }
     	
-    if(!unified)
+    if (!unified)
       errFree = false;
   }
 
-  for(TypeSet::iterator itr = defTcc->begin();
+  for (TypeSet::iterator itr = defTcc->begin();
       errFree && itr != defTcc->end(); ++itr)
-    if((*itr)->mark & unmatched)
+    if ((*itr)->mark & unmatched)
       errFree = false;
-  for(TypeSet::iterator itr_j = declTcc->begin();
+  for (TypeSet::iterator itr_j = declTcc->begin();
       errFree && itr_j != declTcc->end(); ++itr_j)
-    if((*itr_j)->mark & unmatched)
+    if ((*itr_j)->mark & unmatched)
       errFree = false;  
 
-  if(!errFree) {
+  if (!errFree) {
     errStream << declAst->loc << ": For the declaration of `" 
 	      << declAst->s << "', the constraints "
 	      << "on the declaration here, do not match "
@@ -517,10 +517,10 @@ matchDefDecl(std::ostream& errStream,
   DEF_DECL_DEBUG 
     verbose = true;
   
-  if(flags & DEF_DECL_NO_MATCH)
+  if (flags & DEF_DECL_NO_MATCH)
     return true;  
   
-  if(declSigma->ftvs.size() != defSigma->ftvs.size()) {
+  if (declSigma->ftvs.size() != defSigma->ftvs.size()) {
     errorFree = false;
   }
   else {
@@ -530,14 +530,14 @@ matchDefDecl(std::ostream& errStream,
     shared_ptr<Type> declT = declTS->tau->getType();
     shared_ptr<Type> defT  = defTS->tau->getType();
     
-    if(fnCopyCompatibility && declT->isFnxn() && defT->isFnxn()) {
+    if (fnCopyCompatibility && declT->isFnxn() && defT->isFnxn()) {
       declTS = declSigma->ts_instance_copy();
       declT = declTS->tau->getType();      
       
       shared_ptr<Type> argsDecl = declT->getBareType()->Args();
       shared_ptr<Type> argsDef = defT->getBareType()->Args();
-      if(argsDecl->components.size() == argsDef->components.size()) {
-	for(size_t c=0; c < argsDecl->components.size(); c++) {	    
+      if (argsDecl->components.size() == argsDef->components.size()) {
+	for (size_t c=0; c < argsDecl->components.size(); c++) {	    
 	  shared_ptr<Type> argDecl = argsDecl->CompType(c)->minimizeMutability();
 	  shared_ptr<Type> argDef = argsDef->CompType(c)->minimizeMutability();
 	  CHKERR(errorFree, argDecl->strictlyEquals(argDef, verbose));
@@ -555,7 +555,7 @@ matchDefDecl(std::ostream& errStream,
       CHKERR(errorFree, declT->strictlyEquals(defT, verbose));
     }
 
-    if(errorFree)
+    if (errorFree)
       CHKERR(errorFree, checkConstraints(errStream, defTS, declTS, decl));
 
     // Rigidness preservation:
@@ -572,7 +572,7 @@ matchDefDecl(std::ostream& errStream,
     {
       TypeSet gottenTypes;
 
-      for(TypeSet::iterator itr = defTS->ftvs.begin(); 
+      for (TypeSet::iterator itr = defTS->ftvs.begin(); 
 	  errorFree && itr != defTS->ftvs.end(); ++itr) {
 	shared_ptr<Type> ftv = (*itr)->getType();
 	gottenTypes.insert(ftv);
@@ -583,7 +583,7 @@ matchDefDecl(std::ostream& errStream,
     }
   }
 
-  if(!errorFree)
+  if (!errorFree)
     errStream << def->loc <<": The type of " << def->s 
 	      << " at definition/declaration "  << defSigma->asString()
 	      << " does not match that of "
@@ -613,7 +613,7 @@ InferTvList(std::ostream& errStream, shared_ptr<AST> tvList,
 	    shared_ptr<Type> container)  
 {  
   bool errFree = true;
-  for(size_t i = 0; i < tvList->children.size(); i++) {
+  for (size_t i = 0; i < tvList->children.size(); i++) {
     shared_ptr<AST> tv = tvList->child(i);
     TYPEINFER(tv, gamma, instEnv, impTypes, isVP, 
 	      tcc, uflags, trail, DEF_MODE, TI_TYP_EXP);
@@ -635,7 +635,7 @@ static void
 addTvsToSigma(std::ostream& errStream, shared_ptr<AST> tvList, 
 	      shared_ptr<TypeScheme> sigma, shared_ptr<Trail> trail)  
 {  
-  for(size_t i = 0; i < tvList->children.size(); i++) {
+  for (size_t i = 0; i < tvList->children.size(); i++) {
     shared_ptr<AST> tv = tvList->child(i);
     shared_ptr<Type> tvType = tv->symType->getType();
     assert(tvType->kind == ty_tvar);
@@ -648,20 +648,20 @@ addTvsToSigma(std::ostream& errStream, shared_ptr<AST> tvList,
 static void
 markCCC(shared_ptr<Type> ct)
 {
-  if(!ct->isValType())
+  if (!ct->isValType())
     return;
 
   // We first need to mark all arguments CCCOK, and then remove
   // those that are not OK so that determoneCCC can get recursive
   // type definitions right.
-  for(size_t i = 0; i < ct->typeArgs.size(); i++) {
+  for (size_t i = 0; i < ct->typeArgs.size(); i++) {
     shared_ptr<Type> arg = ct->TypeArg(i)->getType();
     arg->flags |= TY_CCC;
   }
   
-  for(size_t i = 0; i < ct->typeArgs.size(); i++) {
+  for (size_t i = 0; i < ct->typeArgs.size(); i++) {
     shared_ptr<Type> arg = ct->TypeArg(i)->getType();      
-    if(!arg->determineCCC(ct))
+    if (!arg->determineCCC(ct))
       arg->flags &= ~TY_CCC;
   }
 }
@@ -711,7 +711,7 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
   
   shared_ptr<TypeScheme> declTS = gamma->getBinding(sIdent->s);
   unsigned long bindFlags = 0;
-  if(declTS) {
+  if (declTS) {
     declTS->tau->getBareType()->defAst = sIdent;
     bindFlags = BF_REBIND;
   }
@@ -726,7 +726,7 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
     
   // match at_fields
   shared_ptr<AST> fields = ast->child(4);
-  for(c = 0; c < fields->children.size(); c++) {
+  for (c = 0; c < fields->children.size(); c++) {
     // match at_ident
     // match agt_type
     shared_ptr<AST> field = fields->child(c);
@@ -770,7 +770,7 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
 					 instEnv, trail)); 
 
   // Ensure that the definition matches the declarations
-  if(declTS)
+  if (declTS)
     CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
 				 declTS, sigma, uflags, false));
   
@@ -824,7 +824,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
   shared_ptr<TypeScheme> declTS = gamma->getBinding(uIdent->s);
   unsigned long bindFlags = 0;
   
-  if(declTS) {
+  if (declTS) {
     declTS->tau->getType()->defAst = uIdent;
     bindFlags = BF_REBIND;
   }
@@ -841,7 +841,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
   
   // match at_constructors
   shared_ptr<AST> ctrs = ast->child(4);
-  for(c = 0; c < ctrs->children.size(); c++) {
+  for (c = 0; c < ctrs->children.size(); c++) {
     // match at_ident
     // match agt_type
     shared_ptr<AST> ctr = ctrs->child(c);
@@ -851,7 +851,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
     // and those without any are typed uval.
     Kind ctrKind;
 
-    if(ctr->children.size() > 1)
+    if (ctr->children.size() > 1)
       ctrKind = (isReference) ? ty_uconr : ty_uconv;
     else
       ctrKind = (isReference) ? ty_uvalr : ty_uvalv;
@@ -861,7 +861,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
     ctrId->symType->myContainer = uIdent;
     ctr->symType = ctrId->symType;
     
-    for(size_t i = 1; i < ctr->children.size(); i++) {
+    for (size_t i = 1; i < ctr->children.size(); i++) {
       shared_ptr<AST> field = ctr->child(i);
       TYPEINFER(field, gamma, instEnv, impTypes, isVP, 
 		sigma->tcc, uflags, trail,  USE_MODE, TI_TYP_EXP);
@@ -872,7 +872,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	{
 	  shared_ptr<comp> nComp = comp::make(field->child(0)->s,
 				       field->child(1)->symType);
-	  if(field->flags & FLD_IS_DISCM)
+	  if (field->flags & FLD_IS_DISCM)
 	    nComp->flags |= COMP_UNIN_DISCM;
 	  
 	  ctrId->symType->components.push_back(nComp);
@@ -901,7 +901,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
     // This may feel wierd -- that All constructors point to the same
     // type arguments rather than a copy. But since every instance is 
     // newly obtained, this is OK.
-    for(size_t i = 0; i < tvList->children.size(); i++) {
+    for (size_t i = 0; i < tvList->children.size(); i++) {
       ctrId->symType->typeArgs.push_back(tvList->child(i)->symType);
     }
     
@@ -928,7 +928,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 					 instEnv, trail)); 
   
   //Now add all constructor bindings to the environment.
-  for(c = 0; c < ctrs->children.size(); c++) {
+  for (c = 0; c < ctrs->children.size(); c++) {
     shared_ptr<AST> ctr = ctrs->child(c);
     shared_ptr<AST> ctrId = ctr->child(0);   
     addTvsToSigma(errStream, tvList, ctrId->scheme, trail);
@@ -939,18 +939,18 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
   }
 
   //Build structure types for all constructors.
-  for(c = 0; c < ctrs->children.size(); c++) {
+  for (c = 0; c < ctrs->children.size(); c++) {
     shared_ptr<AST> ctr = ctrs->child(c)->child(0);
     shared_ptr<Type> ctrType = ctr->symType->getType();
     shared_ptr<TypeScheme> ctrSigma = ctr->scheme;
     shared_ptr<Type> sType = GC_NULL;
     shared_ptr<TypeScheme> stSigma = GC_NULL;
     
-    for(size_t i=0; i < c; i++) {
+    for (size_t i=0; i < c; i++) {
       shared_ptr<AST> thatCtr = ctrs->child(i)->child(0);
       shared_ptr<Type> thatCtrType = thatCtr->symType->getType();
       
-      if(ctrType->components.size() != 
+      if (ctrType->components.size() != 
 	 thatCtrType->components.size())
 	continue;
       
@@ -958,18 +958,18 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       // and no field names are repeated, it is sufficient
       // to check types regardless of fills.
       bool same = true;
-      for(size_t j=0; j < ctrType->components.size(); j++) {	
+      for (size_t j=0; j < ctrType->components.size(); j++) {	
 	shared_ptr<comp> thisComp = ctrType->Component(j);
 	shared_ptr<comp> thatComp = thatCtrType->Component(j);
 	
-	if((thisComp->name != thatComp->name) ||
+	if ((thisComp->name != thatComp->name) ||
 	   !thisComp->typ->strictlyEquals(thatComp->typ)) {
 	  same = false;
 	  break;
 	}
       }
 	 
-      if(same) {
+      if (same) {
 	assert(thatCtr->stSigma);
 	stSigma = thatCtr->stSigma;
 	ctr->stSigma = thatCtr->stSigma;
@@ -978,16 +978,16 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       }
     }
     
-    if(!stSigma) {
+    if (!stSigma) {
       sType = Type::make(ty_structv);
       sType->defAst = ctr; // structures have names like (cons 'a)
-      for(size_t i=0; i < ctrType->components.size(); i++)
+      for (size_t i=0; i < ctrType->components.size(); i++)
 	sType->components.push_back(comp::make(ctrType->CompName(i),
 					  ctrType->CompType(i)));
       // Comp's Flags are not necesary here ?
  
       
-      for(size_t i=0; i < ctrType->typeArgs.size(); i++)
+      for (size_t i=0; i < ctrType->typeArgs.size(); i++)
 	sType->typeArgs.push_back(ctrType->TypeArg(i));
       
       stSigma = TypeScheme::make(sType, ctr, sigma->tcc); 
@@ -1009,8 +1009,8 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 
   /* If we are dealing with defrepr, don't perform any
      optimization */ 
-  if(ast->flags & UNION_IS_REPR) {
-    if(declares->tagType) {
+  if (ast->flags & UNION_IS_REPR) {
+    if (declares->tagType) {
       errStream << ast->loc << ": "
 		<< "tag-type declarations cannot be "
 		<< "given with defreprs."
@@ -1018,7 +1018,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       errFree = false;      
     }
   }
-  else if(errFree) {  
+  else if (errFree) {  
 
     //Check if we can do Cardelli Optimization:
     
@@ -1026,10 +1026,10 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
     size_t lastTagValue = (ctrs->children.size() - 1);
     size_t lastTagValueCardelli = lastTagValue;
 
-    if(declares->tagType) {
+    if (declares->tagType) {
       maxCtrs = (((unsigned long long)1) << declares->nBits());
 
-      if(lastTagValue > (maxCtrs - 1)) {
+      if (lastTagValue > (maxCtrs - 1)) {
 	errStream << ast->loc << ": "
 		  << "Not enough bits in the tag-type to represent "
 		  << "all Constructors. Use a bigger tag-type. "
@@ -1039,7 +1039,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	errFree = false;
       }      
     }
-    else if(ctrs->children.size() == 1) {
+    else if (ctrs->children.size() == 1) {
       declares->tagType = Type::make(ty_word);
       assert(declares->field_bits == 0);
       uIdent->flags |= SINGLE_LEG_UN;
@@ -1054,7 +1054,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       bool seenRef = false;
       bool isEnum = true;
       
-      for(size_t c = 0; 
+      for (size_t c = 0; 
 	  cardelli && (c < ctrs->children.size()); 
 	  c++) {
 	shared_ptr<AST> ctr = ctrs->child(c);
@@ -1070,12 +1070,12 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	case 2:
 	  isEnum = false;
 
-	  if(seenRef) {
+	  if (seenRef) {
 	    cardelli = false;
 	    break;
 	  }
 	  
-	  if(ctr->child(1)->symType->isRefType() || 
+	  if (ctr->child(1)->symType->isRefType() || 
 	     ctr->child(1)->symType->isConstrainedToRefType(sigma->tcc) ||
 	     ctr->child(1)->symType->isNullableType())
 	    seenRef = true;
@@ -1095,12 +1095,12 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       // requires special handling for tag numbering.
       bool isNullable = (cardelli && uIdent->s == "nullable");
 
-      if(isEnum) {
+      if (isEnum) {
 	assert(!seenRef);
 	cardelli = false;
 	uIdent->flags |= ENUM_UN;
       }
-      else if(cardelli) {	
+      else if (cardelli) {	
 	assert(!isEnum);
 	uIdent->flags |= CARDELLI_UN;
 	if (isNullable)
@@ -1135,7 +1135,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
   ast->symType = uIdent->symType;
 
   // Ensure that the definition matches the declarations
-  if(declTS)
+  if (declTS)
     CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
 				 declTS, sigma, uflags, false));
   
@@ -1145,20 +1145,20 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 bool
 superDAG(shared_ptr<AST> super, shared_ptr<AST> curr)
 {
-  if(super ==  curr)
+  if (super ==  curr)
     return false;
   
   assert(super->scheme);
   shared_ptr<TCConstraints> tcc = super->scheme->tcc;
   assert(tcc);
 
-  for(TypeSet::iterator itr = tcc->begin();
+  for (TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     shared_ptr<Typeclass> pred = (*itr);
-    if(pred->flags & TY_CT_SELF)
+    if (pred->flags & TY_CT_SELF)
       continue;
 
-    if(superDAG(pred->defAst, curr) == false)
+    if (superDAG(pred->defAst, curr) == false)
       return false;
   }
   return true;
@@ -1199,7 +1199,7 @@ InferTypeClass(std::ostream& errStream, shared_ptr<AST> ast,
 
   // Typeclass Declarations
   shared_ptr<AST> tcdecls = ast->child(2);
-  for(size_t c = 0; c < tcdecls->children.size(); c++) {
+  for (size_t c = 0; c < tcdecls->children.size(); c++) {
     shared_ptr<AST> tcdecl = tcdecls->child(c);
     assert(tcdecl->astType == at_tyfn);
     shared_ptr<AST> domain = tcdecl->child(0);	       
@@ -1226,7 +1226,7 @@ InferTypeClass(std::ostream& errStream, shared_ptr<AST> ast,
   }
 
   shared_ptr<AST> methods = ast->child(3);
-  for(size_t c = 0; c < methods->children.size(); c++) {
+  for (size_t c = 0; c < methods->children.size(); c++) {
     shared_ptr<AST> method = methods->child(c);
     shared_ptr<AST> mID = method->child(0);
     shared_ptr<AST> mtType = method->child(1);
@@ -1241,17 +1241,17 @@ InferTypeClass(std::ostream& errStream, shared_ptr<AST> ast,
     
     shared_ptr<TypeScheme> mSigma = TypeScheme::make(mType, mID, 
 					      TCConstraints::make());
-    for(TypeSet::iterator itr = sigma->tcc->begin();
+    for (TypeSet::iterator itr = sigma->tcc->begin();
 	itr != sigma->tcc->end(); ++itr)
       mSigma->tcc->addPred((*itr));
  
     do { // Dummy loop
-      if(!mType) {
+      if (!mType) {
 	assert(!errFree); 
 	break;
       }
 	
-      if(mType->kind != ty_fn) {
+      if (mType->kind != ty_fn) {
 	errStream << ast->loc << ": " 
 		  << "The type of \"method\" " << mID->s
 		  << "was infered as " << mType->asString()
@@ -1271,14 +1271,14 @@ InferTypeClass(std::ostream& errStream, shared_ptr<AST> ast,
       mID->scheme = mSigma;      
       shared_ptr<comp> nComp = comp::make(mID->s,mType); 
       ident->symType->components.push_back(nComp);      
-    } while(0);				   
+    } while (0);				   
   }
 
-  if(!errFree)
+  if (!errFree)
     return false;
   
   gamma->addBinding(ident->s, ident->scheme);
-  for(size_t c = 0; c < methods->children.size(); c++) {
+  for (size_t c = 0; c < methods->children.size(); c++) {
     shared_ptr<AST> method = methods->child(c);
     shared_ptr<AST> mID = method->child(0);
     gamma->addBinding(mID->s, mID->scheme);
@@ -1313,7 +1313,7 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
   shared_ptr<AST> constraints = ast->child(2);
   
   shared_ptr<AST> TCident = tcapp;
-  if(tcapp->children.size())
+  if (tcapp->children.size())
     TCident = tcapp->child(0);
   
   shared_ptr<TSEnvironment > defGamma = gamma->newDefScope();
@@ -1326,14 +1326,14 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
 	    myTcc, uflags, trail, USE_MODE, TI_CONSTR);
 
   // Mark myself
-  for(TypeSet::iterator itr = myTcc->begin();
+  for (TypeSet::iterator itr = myTcc->begin();
       itr != myTcc->end(); ++itr) {
     shared_ptr<Typeclass> pred = (*itr);
-    if(pred->defAst == TCident->symbolDef)
+    if (pred->defAst == TCident->symbolDef)
       pred->flags |= TY_CT_SELF;
   }
   
-  if(!errFree) 
+  if (!errFree) 
     return false;
   
   // Type all constraints
@@ -1341,7 +1341,7 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
 	    myTcc, uflags, trail, USE_MODE, TI_CONSTR);
 
   
-  if(!errFree) 
+  if (!errFree) 
     return false;
       
   shared_ptr<Typeclass> tc = tcapp->symType->getType();
@@ -1351,20 +1351,20 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
     instEnv->getBinding(tc->defAst->fqn.asString());
 
   
-  if((uflags & ALL_INSTS_OK) == 0) {
+  if ((uflags & ALL_INSTS_OK) == 0) {
     
     // Make sure that the instance definition is consistent
     // with the known functional dependencies.
     
     //errStream << ast->loc << ": #Preds = " << myTcc->pred->size()
     //		<< std::endl;
-    for(TypeSet::iterator itr = myTcc->begin();
+    for (TypeSet::iterator itr = myTcc->begin();
 	itr != myTcc->end(); ++itr) {
       shared_ptr<Typeclass> pred = (*itr)->getType();
       //errStream << "Processing : " << pred->asString()
       //	  << std::endl;
 
-      for(TypeSet::iterator itr_d = pred->fnDeps.begin(); 
+      for (TypeSet::iterator itr_d = pred->fnDeps.begin(); 
 	  itr_d != pred->fnDeps.end(); ++itr_d) {
 	shared_ptr<Typeclass> fnDep =  (*itr_d);
 	TypeSet domain;
@@ -1375,9 +1375,9 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
 	//errStream << "  Processing : " << fnDep->asString()
 	//	      << std::endl;
 	  
-	for(TypeSet::iterator itr_j = range.begin();
+	for (TypeSet::iterator itr_j = range.begin();
 	    itr_j != range.end(); ++itr_j) {
-	  if(domain.find(*itr_j) == domain.end()) {
+	  if (domain.find(*itr_j) == domain.end()) {
 	    errStream << ast->loc << ": "
 		      << "Invalid Instance. Definition contradicts"
 		      << " with the functional dependency "
@@ -1393,7 +1393,7 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
       }
     }
 
-    if(!errFree) 
+    if (!errFree) 
       return false;
 
     // Make sure that the instance definition does not contradict
@@ -1407,28 +1407,28 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
     // functional dependencies. The other two loops occur because
     // fnDeps are stored inside predicates. 
     // Is there a better algorithm?
-    for(InstanceSet::iterator itr = currInsts->begin();
+    for (InstanceSet::iterator itr = currInsts->begin();
 	itr != currInsts->end(); ++itr) {
       shared_ptr<Instance> inst = (*itr);
       // Since Equals will not unify any variables in place,
       // I don't have to do a ts_instance_copy() here.
       shared_ptr<TCConstraints> theirTcc = inst->ast->scheme->tcc;
 
-      for(TypeSet::iterator itr = myTcc->begin();
+      for (TypeSet::iterator itr = myTcc->begin();
 	  itr != myTcc->end(); ++itr) {
 	shared_ptr<Typeclass> myPred = (*itr)->getType();
-	for(TypeSet::iterator itr_m = theirTcc->begin();
+	for (TypeSet::iterator itr_m = theirTcc->begin();
 	    itr_m != theirTcc->end(); ++itr_m) {
 	  shared_ptr<Typeclass> theirPred = (*itr_m)->getType();
 
-	  if((myPred->defAst == theirPred->defAst) &&  
+	  if ((myPred->defAst == theirPred->defAst) &&  
 	     (myPred->fnDeps.size() && theirPred->fnDeps.size()))
-	    for(TypeSet::iterator itr_j = myPred->fnDeps.begin();
+	    for (TypeSet::iterator itr_j = myPred->fnDeps.begin();
 		itr_j != myPred->fnDeps.end(); ++itr_j) {
 	      shared_ptr<Type> myFnDep =  (*itr_j)->getType();
 	      shared_ptr<Type> myDomain = myFnDep->Args();
 		  
-	      for(TypeSet::iterator itr_k = 
+	      for (TypeSet::iterator itr_k = 
 		    theirPred->fnDeps.begin();
 		  itr_k != theirPred->fnDeps.end(); ++itr_k) {
 		shared_ptr<Type> theirFnDep =  (*itr_k)->getType();
@@ -1436,7 +1436,7 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
 		    
 		assert(myFnDep->defAst == theirFnDep->defAst);
 		    
-		if( myDomain->equals(theirDomain) && 
+		if ( myDomain->equals(theirDomain) && 
 		    !myFnDep->equals(theirFnDep)) {
 		  errStream << ast->loc << ": "
 			    << "The following is a contradiction: \n"
@@ -1464,7 +1464,7 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
       }	
     }
            
-    if(!errFree) 
+    if (!errFree) 
       return false;
 
   }
@@ -1472,8 +1472,8 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
   tcapp->scheme = TypeScheme::make(tc, tcapp, myTcc);
       
   size_t nMethods = tc->components.size();
-  if(methods->children.size() == nMethods) {
-    for(size_t i = 0; i < nMethods; i++) {
+  if (methods->children.size() == nMethods) {
+    for (size_t i = 0; i < nMethods; i++) {
       shared_ptr<Type> mtType = tc->CompType(i);
       shared_ptr<AST> method = methods->child(i);
       TYPEINFER(method, defGamma, instEnv, impTypes, isVP, myTcc,
@@ -1495,7 +1495,7 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
 	      << std::endl;
   }
 
-  if(!errFree) 
+  if (!errFree) 
     return false;
 
   shared_ptr<TypeScheme> sigma = tcapp->scheme;
@@ -1504,20 +1504,20 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
   sigma->generalize(errStream, ast->loc, gamma, instEnv, tcapp, 
 		    GC_NULL, trail, gen_instance);      
   
-  if(!errFree)
+  if (!errFree)
     return false;
   
   shared_ptr<Instance> myInstance = Instance::make(sigma, ast);
   
-  if((uflags & ALL_INSTS_OK) == 0) {
+  if ((uflags & ALL_INSTS_OK) == 0) {
     // Make sure there are no absolute conflicts 
     // with existing instances
     assert(currInsts);
   
-    for(InstanceSet::iterator itr = currInsts->begin();
+    for (InstanceSet::iterator itr = currInsts->begin();
 	itr != currInsts->end(); ++itr) {
       shared_ptr<Instance> inst = (*itr);
-      if(inst->overlaps(myInstance)) {
+      if (inst->overlaps(myInstance)) {
 	errStream << tcapp->loc << ": "
 		  << "Instance declaration "
 		  << sigma->asString() << " conflicts with "
@@ -1530,7 +1530,7 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
       }
     } 
 
-    if(!errFree)
+    if (!errFree)
       return false; 
   }
   
@@ -1554,7 +1554,7 @@ CheckLetrecFnxnRestriction(std::ostream &errStream, shared_ptr<AST> ast)
   switch(ast->astType) {
   case at_ident:
     {
-      if(!ast->symType->isFnxn() && !ast->symType->isClosure()) {
+      if (!ast->symType->isFnxn() && !ast->symType->isClosure()) {
 	errStream << ast->loc << ": Identifier " << ast->s
 		  << " bound in a letrec, has non-function type "
 		  << ast->symType->asString();
@@ -1573,8 +1573,8 @@ CheckLetrecFnxnRestriction(std::ostream &errStream, shared_ptr<AST> ast)
   case at_switch:
   case at_try:
     {
-      for(size_t c=0; c < ast->children.size(); c++)
-	if(c != IGNORE(ast))
+      for (size_t c=0; c < ast->children.size(); c++)
+	if (c != IGNORE(ast))
 	  CHKERR(errFree, CheckLetrecFnxnRestriction(errStream, 
 						     ast->child(c)));
       break;
@@ -1582,7 +1582,7 @@ CheckLetrecFnxnRestriction(std::ostream &errStream, shared_ptr<AST> ast)
 
   default:
     {
-      for(size_t c=0; c < ast->children.size(); c++)
+      for (size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, CheckLetrecFnxnRestriction(errStream, 
 						   ast->child(c)));
       break;
@@ -1695,12 +1695,12 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
                  A |- INT_LITEREAL: 'a \ IntLit('a)
 	------------------------------------------------*/
       
-      if(Options::noPrelude) {
+      if (Options::noPrelude) {
 	ast->symType = Type::make(ty_word);
 	break;
       }
 
-      if(uflags & NO_MORE_TC) {
+      if (uflags & NO_MORE_TC) {
 	ast->symType = Type::make(ty_tvar);
 	break;
       }
@@ -1723,12 +1723,12 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
                  A |- FLOAT_LITERAL: 'a \ FloarLit('a)
 	------------------------------------------------*/
 
-      if(Options::noPrelude) {
+      if (Options::noPrelude) {
 	ast->symType = Type::make(ty_float);
 	break;
       }
 
-      if(uflags & NO_MORE_TC) {
+      if (uflags & NO_MORE_TC) {
 	ast->symType = Type::make(ty_tvar);
 	break;
       }
@@ -1784,7 +1784,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  unsigned long bindFlags = 0;
 	  shared_ptr<TypeScheme> sigma = gamma->getBinding(ast->s);
 
-	  if(sigma) {	    
+	  if (sigma) {	    
 	    // NOTE: none of the declaration forms make this 
 	    // recursive call. 
 	    assert(!ast->isDecl);
@@ -1815,7 +1815,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
 	  shared_ptr<TypeScheme> sigma = gamma->getBinding(ast->s);
 
-	  if(!sigma) {
+	  if (!sigma) {
 
 	    // If this is a type variable that is used as in
 	    //
@@ -1826,7 +1826,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	    // taken care of by the symbol resolver.  So, it is safe
 	    // to add this type to Gamma now.
 
-	    if(ast->isIdentType(id_tvar)) {
+	    if (ast->isIdentType(id_tvar)) {
 	      sigma = bindIdentDef(ast, gamma, 0, flags);	      
 	    }
 	    else {  
@@ -1855,7 +1855,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	      
 	  ins = ins->getBareType();
 
-	  if((flags & TI_TYP_EXP) && 
+	  if ((flags & TI_TYP_EXP) && 
 	     ((flags & TI_TYP_APP) == 0) && 
 	     (ins->typeArgs.size() > 0)) {
 	    errStream << ast->loc << ": "
@@ -1867,11 +1867,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	    return false;
 	  }
 	  
-	  if(tsIns->tcc) {
-	    for(TypeSet::iterator itr = tsIns->tcc->begin();
+	  if (tsIns->tcc) {
+	    for (TypeSet::iterator itr = tsIns->tcc->begin();
 		itr != tsIns->tcc->end(); ++itr) {
 	      shared_ptr<Typeclass> pred = (*itr)->getType();	      
-	      if(flags & TI_TCC_SUB)
+	      if (flags & TI_TCC_SUB)
 		pred->flags |= TY_CT_SUBSUMED;
 	      tcc->addPred(pred);
 	    }
@@ -1884,7 +1884,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
   case at_module:
     {
-      for(size_t c = 0; c < ast->children.size(); c++) {
+      for (size_t c = 0; c < ast->children.size(); c++) {
 	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  mode, TI_NONE);
 	// errStream << " - - - - - - - - - - - - - - - - - - - - - - - - - "
@@ -1901,7 +1901,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     
       // match agt_definition*
 
-      for(size_t c = 1; c < ast->children.size(); c++)
+      for (size_t c = 1; c < ast->children.size(); c++)
 	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  mode, TI_NONE);
       break;
@@ -2007,7 +2007,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       }
     
       shared_ptr<TypeScheme> ts = gamma->getBinding(ident->s);
-      if(ts) {
+      if (ts) {
 	ident->symType->defAst = ts->tau->getType()->defAst;
 
 	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
@@ -2065,7 +2065,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       TYPEINFER(constraints, defGamma, instEnv, impTypes, isVP, 
 		newTcc, uflags, trail,  mode, TI_CONSTR);
       
-      if(!errFree)
+      if (!errFree)
 	break;
       
       sigma->tcc = newTcc;
@@ -2073,7 +2073,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 					instEnv, ident, GC_NULL, trail,
 					gen_top)); 
       
-      if(!errFree) {
+      if (!errFree) {
 	errStream << ast->loc << ": Invalid Proclaimation"
 		  << " The type specified could not be"
 		  << " properly generalized."
@@ -2088,7 +2088,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       }
 
       shared_ptr<TypeScheme> ts = gamma->getBinding(ident->s);
-      if(ts) {
+      if (ts) {
 	ident->symType->defAst = ts->tau->getType()->defAst;
 	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
 				     ts, sigma, uflags, false));      
@@ -2132,14 +2132,14 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		flags | TI_TYP_EXP | TI_TYP_APP);
       shared_ptr<Typeclass> tc = tcIdent->symType->getType();      
 
-      if(tc->kind != ty_typeclass) {
+      if (tc->kind != ty_typeclass) {
 	// This is the result of some other error
 	errFree = false;
 	break;
       }
 
-      if(tc->typeArgs.size() == (ast->children.size() - 1)) {
-	for(size_t i = 1; i < ast->children.size(); i++) {
+      if (tc->typeArgs.size() == (ast->children.size() - 1)) {
+	for (size_t i = 1; i < ast->children.size(); i++) {
 	  TYPEINFER(ast->child(i), gamma, instEnv, impTypes, isVP, tcc,
 		    uflags, trail, USE_MODE, TI_COMP1);
 	  CHKERR(errFree, unify(errStream, trail,
@@ -2165,7 +2165,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
          is immediately eliminated as solved. */ 
       const std::string& copy_compat =
 	SpecialNames::spNames.sp_copy_compat;
-      if(tc->defAst->s == copy_compat) {
+      if (tc->defAst->s == copy_compat) {
 	shared_ptr<Type> tv = newTvar();
 	CHKERR(errFree, unify(errStream, trail,
 			      ast->child(1)->loc,
@@ -2214,7 +2214,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> t = ctr->symType->getType();
       for (size_t c = 1; c < ast->children.size(); c++) {
 	shared_ptr<AST> field = ast->child(c);	
-	if(field->astType == at_fill)
+	if (field->astType == at_fill)
 	  continue;
 
 	TYPEINFER(field, defGamma, instEnv, impTypes, 
@@ -2227,7 +2227,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       // Build the structure type for the component structure.
       shared_ptr<Type> sType = Type::make(ty_structv);
       sType->defAst = ctr;
-      for(size_t i=0; i < t->components.size(); i++)
+      for (size_t i=0; i < t->components.size(); i++)
 	sType->components.push_back(comp::make(t->CompName(i),
 					  t->CompType(i)));
       
@@ -2242,7 +2242,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       gamma->mergeBindingsFrom(defGamma);
 
-      if(declTS)
+      if (declTS)
 	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
 				     declTS, sigma, uflags, false));	
       break;
@@ -2326,7 +2326,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       gamma->mergeBindingsFrom(defGamma);
       
-      if(declTS) 
+      if (declTS) 
 	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
 				     declTS, ident->scheme, uflags, true));	
       
@@ -2372,7 +2372,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       assert(ifName->envs.gamma);
       assert(ifName->envs.instEnv);
       
-      if(ast->children.size() == 1) {
+      if (ast->children.size() == 1) {
 	// This is an import-all form
 	useIFGamma(std::string(), ifName->envs.gamma, tmpGamma);
 	useIFInsts(std::string(), ifName->envs.instEnv, instEnv);
@@ -2385,7 +2385,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	
 	  shared_ptr<TypeScheme> sigma = ifName->envs.gamma->getBinding(thatName->s);
 	
-	  if(!sigma) {
+	  if (!sigma) {
 	    errStream << ast->loc << ": "
 		      << " attempt to use " << thatName->s 
 		      << ", which has an unknown, or buggy type"
@@ -2414,12 +2414,12 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ast->tagType = GC_NULL;
       
       // match at_declare*
-      for(size_t c = 0; c < ast->children.size(); c++) {
+      for (size_t c = 0; c < ast->children.size(); c++) {
  	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  mode, TI_NONE);
 	
-	if(ast->child(c)->tagType) {
-	  if(!ast->tagType) {
+	if (ast->child(c)->tagType) {
+	  if (!ast->tagType) {
 	    ast->tagType = ast->child(c)->tagType;
 	    ast->field_bits = ast->child(c)->field_bits;
 	  }
@@ -2448,23 +2448,23 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	TYPEINFER(typ, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_NONE);
 
-      if(!typ->symType)
+      if (!typ->symType)
 	typ->symType = Type::make(ty_tvar);
       }
 
       // These names are never mangled.
-      if(ident->s == "tag-type") {
+      if (ident->s == "tag-type") {
 	// compatible type
 	
 	shared_ptr<Type> realType = ast->child(1)->symType->getType();
 	shared_ptr<Type> t = realType->getBareType();	
-	if(t->kind == ty_mutable) {
+	if (t->kind == ty_mutable) {
 	  errStream << ast->child(1)->loc << ": "
 		    << "Tag type cannot be mutable"
 		    << std::endl;
 	  errFree = false;
 	}
-	else if(!t->isInteger()) {
+	else if (!t->isInteger()) {
 	  errStream << ast->child(1)->loc << ": "
 		    << "Tag type must be an integral type"
 		    << std::endl;
@@ -2533,7 +2533,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       uint64_t val = fillVal->litValue.i.as_uint64();
       uint64_t maxVal = (((uint64_t)1) << fillType->nBits()) - 1;
       
-      if(val > maxVal) {
+      if (val > maxVal) {
 	errStream << ast->loc << ": "
 		  << "Not enough bits to store the reserved value"
 		  << std::endl;
@@ -2555,10 +2555,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ast->symType = ast->child(0)->symType;
       ast->field_bits = len->litValue.i.as_uint32();
 
-      if(!errFree)
+      if (!errFree)
 	break;
 
-      if(ast->field_bits > ast->symType->nBits()) {
+      if (ast->field_bits > ast->symType->nBits()) {
 	errStream << ast->loc << ": Invalid bitfield specification"
 		  << "No. of bits requested = " << ast->field_bits
 		  << ", Max available for type = "
@@ -2736,7 +2736,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	shared_ptr<Type> argType = ast->child(c)->symType->getType();
 
 	shared_ptr<comp> nComp = comp::make(argType);	
-	if(argType->isByrefType()) {
+	if (argType->isByrefType()) {
 	  nComp = comp::make(argType->Base());
 	  nComp->flags |= COMP_BYREF;
 	}
@@ -2795,11 +2795,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     
       shared_ptr<Type> t = ast->child(0)->symType->getType();
       
-      if(t->kind == ty_mutable) {
+      if (t->kind == ty_mutable) {
 	//The Type is already mutable
 	ast->symType = t;
       }
-      if(t->isMaybe()) {
+      if (t->isMaybe()) {
 	assert(false);
       }
       else {
@@ -2823,10 +2823,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> realType = t;
       t = t->getBareType(); 
       
-      if(t->kind != ty_structv && t->kind != ty_structr &&
+      if (t->kind != ty_structv && t->kind != ty_structr &&
 	 t->kind != ty_unionv && t->kind != ty_unionr) {
 	
-	if(t->kind == ty_uconv || t->kind == ty_uconr || 
+	if (t->kind == ty_uconv || t->kind == ty_uconr || 
 	   t->kind == ty_uvalv || t->kind == ty_uvalr) {
 	  
 	  errStream << ast->loc << ": "
@@ -2854,7 +2854,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       shared_ptr<Type> sut = t;
       
-      if((ast->children.size()-1) != sut->typeArgs.size()) {
+      if ((ast->children.size()-1) != sut->typeArgs.size()) {
 	errStream << ast->child(0)->loc << ": "
 		  << ast->child(0)->s << " - Type cannot be" 
 		  << " partially/over instantiated" 
@@ -2866,7 +2866,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	errFree = false;
       }
       else { 
-	for(size_t i=0; i < sut->typeArgs.size(); i++) {
+	for (size_t i=0; i < sut->typeArgs.size(); i++) {
 	  TYPEINFER(ast->child(i+1), gamma, instEnv, impTypes, isVP, tcc,
 		    uflags, trail,  USE_MODE, TI_COMP1);
 	  
@@ -2891,7 +2891,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
   case at_constraints:
     {
-      for(size_t c=0; c < ast->children.size(); c++)      
+      for (size_t c=0; c < ast->children.size(); c++)      
 	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  mode, TI_CONSTR);
       ast->symType = Type::make(ty_tvar);
@@ -2911,7 +2911,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP1);
       
-	if(ast->child(1)->symType->isByrefType()) {
+	if (ast->child(1)->symType->isByrefType()) {
 	  CHKERR(errFree, unify(errStream, trail, ast->child(0)->loc, 
 				ast->child(0)->symType, 
 				ast->child(1)->getType()->Base(), 
@@ -2993,7 +2993,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ast->symType = Type::make(ty_letGather);
       shared_ptr<Type> gatherType = ast->symType->getBareType();
 
-      for(size_t c=0; c < ast->children.size(); c++) {
+      for (size_t c=0; c < ast->children.size(); c++) {
 	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  mode, TI_COMP2);
       
@@ -3096,7 +3096,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		uflags, trail,  USE_MODE, TI_COMP2);
       
       shared_ptr<Type> av = MBF(Type::make(k, newTvar()));
-      if(ast->astType == at_array_length)
+      if (ast->astType == at_array_length)
 	impTypes[av] = ast->child(0);
 
       CHKERR(errFree, unify(errStream, trail, ast->child(0)->loc, 
@@ -3127,7 +3127,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       shared_ptr<Type> av = GC_NULL;
       shared_ptr<Type> cmp = GC_NULL;
-      if(ast->astType == at_array_nth) {
+      if (ast->astType == at_array_nth) {
 	cmp = MBF(newTvar());
 	av = MBT(Type::make(ty_array, cmp));
 	impTypes[av] = ast->child(0);
@@ -3161,7 +3161,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
        ------------------------------------------------*/
       // match agt_expr+
-      for(size_t c = 0; c < ast->children.size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
       
@@ -3191,14 +3191,14 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> t = ast->child(0)->symType->getType();
       shared_ptr<Type> t1 = t->getBareType();
 
-      if(t1->isUType()) {
+      if (t1->isUType()) {
 	ast->astType = at_sel_ctr;
 	TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail, USE_MODE, TI_COMP2);
 	break;
       }
       
-      if(t1->kind != ty_structv && t1->kind != ty_structr) {
+      if (t1->kind != ty_structv && t1->kind != ty_structr) {
 	errStream << ast->child(0)->loc << ": "
 		  << ast->child(0)->s << " cannot be resolved" 
 		  << " to a structure, union, or exception type." 
@@ -3209,7 +3209,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       }
       
       shared_ptr<TypeScheme> stScheme;
-      if(t1->defAst->symType->isULeg() ||
+      if (t1->defAst->symType->isULeg() ||
 	 t1->defAst->symType->isException()) 
 	stScheme = t1->defAst->stSigma;
       else
@@ -3217,10 +3217,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       shared_ptr<Type> tr = stScheme->type_instance_copy();
 
-      if(tr->isValType())
-	for(size_t i=0; i < tr->typeArgs.size(); i++) {
+      if (tr->isValType())
+	for (size_t i=0; i < tr->typeArgs.size(); i++) {
 	  shared_ptr<Type> arg = tr->TypeArg(i)->getType();
-	  if(tr->argCCOK(i))
+	  if (tr->argCCOK(i))
 	    trail->subst(arg, MBF(newTvar()));
 	}
       
@@ -3232,7 +3232,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> fld;
       CHKERR(errFree, findComponent(errStream, tr, ast, fld));
 
-      if(errFree)
+      if (errFree)
 	ast->symType = fld;
       else
 	ast->symType = Type::make(ty_tvar); 
@@ -3253,7 +3253,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		uflags, trail,  USE_MODE, TI_COMP2);
       
       shared_ptr<Type> t1 = ast->child(0)->symType->getBareType();
-      if(!t1->isUType()) {
+      if (!t1->isUType()) {
 	errStream << ast->child(0)->loc << ": "
 		  << ast->child(0)->s << " cannot be resolved" 
 		  << " to a union, or exception type." 
@@ -3266,7 +3266,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> fct;
       CHKERR(errFree, findComponent(errStream, t1, ast, fct));
       
-      if(!errFree) {
+      if (!errFree) {
 	ast->symType = Type::make(ty_tvar); 
 	break;
       }
@@ -3293,7 +3293,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		uflags, trail,  USE_MODE, TI_COMP2);
 
       shared_ptr<Type> t1 = ast->child(0)->symType->getBareType();
-      if(!t1->isUType()) {
+      if (!t1->isUType()) {
 	errStream << ast->child(0)->loc << ": "
 		  << ast->child(0)->s << " cannot be resolved" 
 		  << " to a union, or exception type." 
@@ -3307,7 +3307,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       shared_ptr<Type> fct;
       CHKERR(errFree, findComponent(errStream, t1, ast, fct));
-      if(!errFree)
+      if (!errFree)
 	break;
       
       ast->child(1)->symbolDef = fct->defAst;	  
@@ -3345,7 +3345,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
 	shared_ptr<Type> argType = argVec->child(c)->getType();
 	shared_ptr<comp> nComp = GC_NULL;
-	if(argType->isByrefType()) {
+	if (argType->isByrefType()) {
 	  nComp = comp::make(argType->Base());
 	  nComp->flags |= COMP_BYREF;
 	}
@@ -3483,13 +3483,13 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		uflags, trail, USE_MODE, TI_COMP2);
       shared_ptr<Type> fType = ast->child(0)->getType();
 
-      if(fType->isStruct()) {
+      if (fType->isStruct()) {
 	ast->astType = at_struct_apply;
 	TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
 	break;
       }
-      if(fType->isUType() || fType->isException()) {
+      if (fType->isUType() || fType->isException()) {
 	ast->astType = at_ucon_apply;
 	TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
@@ -3502,7 +3502,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       CHKERR(errFree, unify(errStream, trail, ast->child(0)->loc, 
 			    fType, expectFn, uflags));
       
-      if(!errFree) {
+      if (!errFree) {
 	ast->symType = newTvar(); 
 	break;
       }
@@ -3516,7 +3516,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	
 	// by-ref arguments need strict compatibality.
 	// by-value arguments can have copy-compatibility.
-	if(fnArgs->CompFlags(i) & COMP_BYREF)
+	if (fnArgs->CompFlags(i) & COMP_BYREF)
 	  CHKERR(errFree, unify(errStream, trail, ast->child(i+1)->loc, 
 				fnArg, arg->symType, uflags));
 	else
@@ -3545,7 +3545,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ast->symType = newTvar();
       shared_ptr<AST> ctr = ast->child(0);
 
-      if((ctr->astType == at_ident) &&
+      if ((ctr->astType == at_ident) &&
 	 (ctr->symbolDef->isIdentType(idc_uctor))) {
 	// Constructor direct usage
       }
@@ -3562,14 +3562,14 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	break;
       }
       
-      if(!ctr->symType) {
+      if (!ctr->symType) {
 	TYPEINFER(ctr, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
       }
       
       // The constructor type cannot be a mutable or a maybe type
       shared_ptr<Type> t = ctr->symType->getType();
-      if(t->kind != ty_uconv && t->kind != ty_uconr && 
+      if (t->kind != ty_uconv && t->kind != ty_uconr && 
 	 t->kind != ty_exn) {
 	
 	errStream << ast->child(0)->loc << ": "
@@ -3581,7 +3581,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
      }
     
       size_t cnt = nCtArgs(t);
-      if(cnt != (ast->children.size() - 1)) {
+      if (cnt != (ast->children.size() - 1)) {
 	  errStream << ast->child(0)->loc << ": "
 		    << "Constructor " << ast->child(0)->s << " needs "
 		    << cnt << " arguments, but obtained"
@@ -3591,9 +3591,9 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  break;
       }
 
-      for(size_t i=0, j=1; i < t->components.size(); i++) {
+      for (size_t i=0, j=1; i < t->components.size(); i++) {
 	shared_ptr<comp> ctrComp = t->components[i];
-	if(ctrComp->flags & COMP_UNIN_DISCM)
+	if (ctrComp->flags & COMP_UNIN_DISCM)
 	  continue;
 	
 	shared_ptr<AST> arg = ast->child(j);	
@@ -3609,10 +3609,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	j++;
       }
       
-      if(!errFree)
+      if (!errFree)
 	break;
 
-      if(t->isUType()) {
+      if (t->isUType()) {
 	// A uval type was being returned here.
 	ast->symType = obtainFullUnionType(t);
       }
@@ -3638,13 +3638,13 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       ast->symType = newTvar();
       shared_ptr<AST> ctr = ast->child(0);
-      if(!ctr->symType)
+      if (!ctr->symType)
 	TYPEINFER(ctr, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
       
       // Structure constructor cannot be a mutable or maybe type.
       shared_ptr<Type> t = ctr->symType->getType();
-      if((ctr->astType != at_ident) ||
+      if ((ctr->astType != at_ident) ||
 	 (!ctr->symbolDef->isIdentType(id_struct))) {
 	errStream << ctr->loc
 		  << ": Expected structure"
@@ -3653,7 +3653,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	errFree = false;
 	break;
       }
-      if(t->components.size() == 0) {
+      if (t->components.size() == 0) {
 	errStream << ast->child(0)->loc << ": "
 		  << ast->child(0)->s << " cannot instantiate without "
 		  << "definition in scope."
@@ -3661,7 +3661,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	errFree = false;
 	break;
       }
-      if((ast->children.size()-1) != t->components.size()) {
+      if ((ast->children.size()-1) != t->components.size()) {
 	errStream << ast->child(0)->loc << ": "
 		  << "Structure " << ast->child(0)->s << " cannot be" 
 		  << " partially/over instantiated."	
@@ -3671,7 +3671,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	break;
       }
 
-      for(size_t i=0; i < t->components.size(); i++) {
+      for (size_t i=0; i < t->components.size(); i++) {
 	shared_ptr<AST> arg = ast->child(i+1);
 	TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
@@ -3771,7 +3771,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       ast->symType = Type::make(ty_bool);
       
-      for(size_t c = 0; c < ast->children.size(); c++) {
+      for (size_t c = 0; c < ast->children.size(); c++) {
 	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  mode, TI_COMP2);
 	
@@ -3794,7 +3794,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
      shared_ptr<Type> tv = newTvar();
      // match at_cond_legs
      shared_ptr<AST> conds = ast->child(0);
-     for(size_t c = 0; c < conds->children.size(); c++) {
+     for (size_t c = 0; c < conds->children.size(); c++) {
        shared_ptr<AST> cond = conds->child(c);
        TYPEINFER(cond, gamma, instEnv, impTypes, isVP, tcc,
 		 uflags, trail, USE_MODE, TI_COMP2);
@@ -3955,7 +3955,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       case ty_ref:
 	{		  
 	  shared_ptr<Type> drType = t->Base()->getBareType();
-	  if(drType->kind == ty_array) {
+	  if (drType->kind == ty_array) {
 	    ast->symType = Type::make(ty_ref, drType->Base());
 	    process_ndx = true;
 	  }
@@ -3963,7 +3963,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	    shared_ptr<Type> fType = GC_NULL;
 	    CHKERR(errFree, findField(errStream, drType, 
 				      ast->child(1), fType));
-	    if(errFree)
+	    if (errFree)
 	      ast->symType = Type::make(ty_ref, fType);
 	  }
 	  
@@ -3975,7 +3975,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  shared_ptr<Type> fType = GC_NULL;
 	  CHKERR(errFree, findField(errStream, t, 
 				     ast->child(1), fType));
-	  if(errFree)
+	  if (errFree)
 	    ast->symType = Type::make(ty_ref, fType);
 	  
 	  break;
@@ -3998,7 +3998,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	}
       }
       
-      if(process_ndx) {
+      if (process_ndx) {
 	ast->flags |= INNER_REF_NDX;
 	// match agt_expr
 	TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
@@ -4039,9 +4039,9 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> tv = newTvar();
       // match at_case_legs
       shared_ptr<AST> cases = ast->child(2);
-      for(size_t c = 0; c < cases->children.size(); c++) {
+      for (size_t c = 0; c < cases->children.size(); c++) {
 	shared_ptr<AST> thecase = cases->child(c);
-	for(size_t j=2; j < thecase->children.size(); j++) {
+	for (size_t j=2; j < thecase->children.size(); j++) {
 	  shared_ptr<AST> aCtr = thecase->child(j);
 	  
 	  TYPEINFER(aCtr, gamma, instEnv, impTypes, isVP, 
@@ -4055,7 +4055,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	TYPEINFER(thecase, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
 	
-	if(!errFree)
+	if (!errFree)
 	  continue;
 	
 	CHKERR(errFree, unify(errStream, trail, thecase->loc, 
@@ -4065,7 +4065,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       // match at_otherwise
       shared_ptr<AST> otherwise = ast->child(3);
-      if(otherwise->astType != at_Null) {
+      if (otherwise->astType != at_Null) {
 	TYPEINFER(otherwise, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
 	
@@ -4075,7 +4075,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ast->symType = MBF(tv);
       
       /* Check consistency and coverage of the switch */
-      if(!topExpr->symType->isUType()) {
+      if (!topExpr->symType->isUType()) {
 	errStream << topExpr->loc << ": "
 		  << "Only unions are permitted for switching"
 		  << " but obtained "
@@ -4089,25 +4089,25 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> ut = topExpr->symType->getBareType();
       shared_ptr<Type> uType = obtainFullUnionType(ut);
       
-      for(size_t c = 0; c < cases->children.size(); c++) {
+      for (size_t c = 0; c < cases->children.size(); c++) {
 	shared_ptr<AST> thecase = cases->child(c);
-	for(size_t i=2; i < thecase->children.size(); i++) {
+	for (size_t i=2; i < thecase->children.size(); i++) {
 	  shared_ptr<AST> ctr = thecase->child(i)->getCtr();	  
 	  bool found=false;
 	  
-	  for(size_t j=0; j < uType->components.size(); j++) {
-	    if(!uType->CompType(j))
+	  for (size_t j=0; j < uType->components.size(); j++) {
+	    if (!uType->CompType(j))
 	      continue;
 	    
 	    shared_ptr<Type> cTyp = uType->CompType(j)->getType();
-	    if(cTyp->defAst == ctr->symbolDef) {
+	    if (cTyp->defAst == ctr->symbolDef) {
 	      found = true;
 	      uType->CompType(j) = GC_NULL;
 	      break;
 	    }
 	  }
 	  
-	  if(!found) {
+	  if (!found) {
 	    errStream << ctr->loc << ": "
 		      << "Duplicate case label"
 		      << ctr->asString()
@@ -4119,19 +4119,19 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
 
       bool moreCases = false;
-      for(size_t j=0; j < uType->components.size(); j++) 
-	if(uType->CompType(j)) {
+      for (size_t j=0; j < uType->components.size(); j++) 
+	if (uType->CompType(j)) {
 	  moreCases = true;
 	  break;
 	}
       
-      if(moreCases) {
-	if(otherwise->astType == at_Null) {
+      if (moreCases) {
+	if (otherwise->astType == at_Null) {
 	  errStream << ast->loc << ": The following cases"
 		    << "are not covered: ";
-	  for(size_t j=0; j < uType->components.size(); j++) {
+	  for (size_t j=0; j < uType->components.size(); j++) {
 	    shared_ptr<Type> cTyp = uType->CompType(j)->getType();
-	    if(j > 0)
+	    if (j > 0)
 	      errStream << ", ";
 	    errStream << cTyp->defAst->s;
 	  }
@@ -4140,7 +4140,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	}
       }
       else {
-	if(otherwise->astType != at_Null) {
+	if (otherwise->astType != at_Null) {
 	  errStream << otherwise->loc << ": "
 		    << "Otherwise is present even after all cases"
 		    << "are covered."
@@ -4182,7 +4182,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       /* If we decide to alow the unification of the structure
 	 type with the union type, this must be done there */
       assert(stType->typeArgs.size() == aCtrType->typeArgs.size());      
-      for(size_t m=0; m < stType->typeArgs.size(); m++) {
+      for (size_t m=0; m < stType->typeArgs.size(); m++) {
 	CHKERR(errFree, unify(errStream, trail, ast->loc, 
 			      stType->TypeArg(m), 
 			      aCtrType->TypeArg(m), uflags));	
@@ -4209,9 +4209,9 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       bool isRepr = (uninID->flags & UNION_IS_REPR);
 
 
-      for(size_t c=2; c < ast->children.size(); c++) {
+      for (size_t c=2; c < ast->children.size(); c++) {
  	shared_ptr<AST> ctr = ast->child(c)->getCtr()->symbolDef;
-	if(!ctr->stSigma) {
+	if (!ctr->stSigma) {
 	  errStream << ctr->loc << ": Use of constructor "
 		    << ctr->s << " whose definition had an error"
 		    << std::endl;
@@ -4219,8 +4219,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  break;
 	}
 
-	if(!isRepr) {
-	  if(ctr->stSigma != stSigma) {
+	if (!isRepr) {
+	  if (ctr->stSigma != stSigma) {
 	    errStream << ctr->loc << ": Use of constructor " 
 		      << ctr->s << " whose components are "
 		      << "incompatible with other constructors used "
@@ -4231,30 +4231,30 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  }
 	}
 	else {
-	  if(aCtr == ctr)
+	  if (aCtr == ctr)
 	    continue;
 	  
 	  const shared_ptr<const Type> ctType = ctr->stSigma->tau;
-	  for(size_t ac=0; ac < stType->components.size(); ac++) {
+	  for (size_t ac=0; ac < stType->components.size(); ac++) {
 	    shared_ptr<comp> stComp = stType->Component(ac);
 	    bool found=false;	    
 	    
-	    for(size_t tc=0; tc < ctType->components.size(); tc++) {
+	    for (size_t tc=0; tc < ctType->components.size(); tc++) {
 	      const shared_ptr<const comp> ctComp = ctType->Component(tc);
 	      
-	      if(ctComp->name == stComp->name) {
+	      if (ctComp->name == stComp->name) {
 		found = true;
 		break;
 	      }
 	    }
 	    
-	    if(!found) 
+	    if (!found) 
 	      stComp->flags |= COMP_INVALID;	    
 	  }
 	}
       }
       
-      if(!errFree) {
+      if (!errFree) {
 	ast->symType = newTvar();
 	break;
       }
@@ -4302,7 +4302,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       ast->symType = MBF(tv);
       
-      if(!errFree)
+      if (!errFree)
 	break;
 
       // match at_ident: ignore
@@ -4313,13 +4313,13 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       for (size_t c = 0; c < cases->children.size(); c++) {
 	shared_ptr<AST> theCase = cases->child(c);
 	
-	for(size_t j=2; j < theCase->children.size(); j++) {
+	for (size_t j=2; j < theCase->children.size(); j++) {
 	  shared_ptr<AST> aCtr = theCase->child(j);
 	  
 	  TYPEINFER(aCtr, gamma, instEnv, impTypes, isVP, 
 		    tcc, uflags, trail, USE_MODE, TI_COMP2);      
 	  
-	  if(aCtr->symType->getType()->kind != ty_exn) {
+	  if (aCtr->symType->getType()->kind != ty_exn) {
 	    errStream << aCtr->loc << ": "
 		      << " Only Exceptions can be caught"
 		      << " Obtained type " 
@@ -4330,7 +4330,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	}	
 	
 	shared_ptr<TSEnvironment > legGamma = gamma;
-	if(theCase->children.size() == 3) {
+	if (theCase->children.size() == 3) {
 	  legGamma = gamma->newScope();
 	  theCase->envs.gamma = legGamma;
 
@@ -4360,7 +4360,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       // match agt_ow
       shared_ptr<AST> ow = ast->child(3);
-      if(ow->astType != at_Null) {
+      if (ow->astType != at_Null) {
 	TYPEINFER(ow->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
 	CHKERR(errFree, unify(errStream, trail, ow->child(0)->loc,
@@ -4542,7 +4542,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       lbs->envs.instEnv = instEnv;
 
          
-      if(ast->astType == at_let) {
+      if (ast->astType == at_let) {
 	CHKERR(errFree, 
 	       ProcessLetExprs(errStream, lbs, letGamma, instEnv,
 			       impTypes, isVP, letTcc, uflags, trail,
@@ -4564,7 +4564,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       }
       CHKERR(errFree, UnifyLetBinds(errStream, lbs, uflags, trail));
 
-      if(!errFree) {
+      if (!errFree) {
 	ast->symType = newTvar();
 	break;
       }
@@ -4587,7 +4587,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       TYPEINFER(ast->child(1), letGamma, instEnv, impTypes, 
 		isVP, tcc, uflags, trail, USE_MODE, TI_COMP2);
       
-      //if((ast->astType == at_letrec) && ((uflags & POST_REFIZE) == 0))
+      //if ((ast->astType == at_letrec) && ((uflags & POST_REFIZE) == 0))
       //CHKERR(errFree, CheckLetrecFnxnRestriction(errStream, bAst));
       
       ast->symType = ast->child(1)->symType;
@@ -4661,7 +4661,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<AST> id = ast->getID();
       shared_ptr<AST> ip = ast->child(0);
       shared_ptr<AST> expr = ast->child(1);
-      if(ast->flags & LB_REC_BIND) {
+      if (ast->flags & LB_REC_BIND) {
 	TYPEINFER(ip, gamma, instEnv, impTypes, 
 		  isVP, tcc, uflags, trail, REDEF_MODE, TI_COMP2);
 
@@ -4683,7 +4683,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     
   } /* switch */
   
-//   if(ast->symType)
+//   if (ast->symType)
 //     errStream << ast->loc << " [" << ast->atKwd() << "] " 
 // 	      << ast->asString() << ": "
 // 	      << ast->symType->asString() 
@@ -4712,12 +4712,12 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
   shared_ptr<Trail> trail = Trail::make();
   bool errFree = true;
 
-  if(Options::noPrelude)
+  if (Options::noPrelude)
     flags |= TYP_NO_PRELUDE;
   
-  if(init) {
+  if (init) {
     
-    if(flags & INF_REINIT) {
+    if (flags & INF_REINIT) {
       assert(gamma);      
       assert(gamma->parent);
       gamma = gamma->parent->newDefScope();
@@ -4730,10 +4730,10 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
       gamma = TSEnvironment::make(uocName);
       instEnv = InstEnvironment::make(uocName);
     }
-    if((flags & TYP_NO_PRELUDE) == 0)
+    if ((flags & TYP_NO_PRELUDE) == 0)
       CHKERR(errFree, initGamma(std::cerr, gamma, instEnv, uocAst, flags));
     
-    if(!errFree)
+    if (!errFree)
       return false;
   }
 
@@ -4748,10 +4748,10 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
 	      << endl;
     
     shared_ptr<AST> mod = uocAst;
-    for(size_t i=0; i < mod->children.size(); i++) {
+    for (size_t i=0; i < mod->children.size(); i++) {
       shared_ptr<AST> ast = mod->child(i);
       errStream << ast->atKwd() << std::endl;
-      if(ast->astType == at_define || ast->astType == at_recdef) {
+      if (ast->astType == at_define || ast->astType == at_recdef) {
 	shared_ptr<AST> id = ast->child(0)->child(0);
 	errStream << id->asString() << ": "	
 		  << id->scheme->asString(Options::debugTvP, true)

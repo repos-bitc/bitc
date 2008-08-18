@@ -64,7 +64,7 @@ UocInfo::Resolve(std::ostream& errStream, bool init,
 {
   bool errFree = true;
   errFree = fe_symresolve(errStream, init, rflags);
-  if(!errFree)
+  if (!errFree)
     errStream << mesg
 	      << std::endl;
   return errFree;
@@ -83,7 +83,7 @@ UocInfo::TypeCheck(std::ostream& errStream, bool init,
   uocAst->clearTypes();  
 
   errFree = fe_typeCheck(errStream, init, tflags);    
-  if(!errFree) 
+  if (!errFree) 
     errStream << mesg
 	      << std::endl;
   return errFree;
@@ -100,10 +100,10 @@ UocInfo::RandT(std::ostream& errStream,
 
   CHKERR(errFree, Resolve(errStream, init, rflags, mesg));
   
-  if(errFree)
+  if (errFree)
     CHKERR(errFree, TypeCheck(errStream, init, tflags, mesg));
   
-  if(!errFree)
+  if (!errFree)
     errStream << "WHILE R&Ting:" << std::endl
 	      << uocAst->asString() << std::endl;
   
@@ -152,23 +152,23 @@ UocInfo::RandTexpr(std::ostream& errStream,
   shared_ptr<UocInfo> myUoc = UocInfo::make(shared_from_this());
   myUoc->uocAst = expr;
   
-  if(altEnvSet) {
+  if (altEnvSet) {
     myUoc->env = altEnvSet->env;
     myUoc->gamma = altEnvSet->gamma;
     myUoc->instEnv = altEnvSet->instEnv;    
   }
   
-  if(!keepResults) 
+  if (!keepResults) 
     myUoc->wrapEnvs();
   
   CHKERR(errFree, myUoc->Resolve(errStream, false, rflags, mesg));
-  if(errFree)
+  if (errFree)
     CHKERR(errFree, myUoc->TypeCheck(errStream, false, tflags, mesg));
   
-  if(!keepResults)
+  if (!keepResults)
     myUoc->unwrapEnvs();
   
-  if(!errFree)
+  if (!errFree)
     errStream << "WHILE R&Ting:" << std::endl
 	      << expr->asString() << std::endl;
 
@@ -179,7 +179,7 @@ UocInfo::RandTexpr(std::ostream& errStream,
 #define MARKDEF(ast, def) do {\
     assert(def);	      \
     ast->defForm = def;	      \
-  } while(0);
+  } while (0);
 //std::cout << "Marked " << ast->asString() << "->defForm = "
 //	<< def->asString() << std::endl;
 
@@ -246,7 +246,7 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
       shared_ptr<AST> id = ast->child(0);
       MARKDEF(id, ast);
       shared_ptr<AST> ctrs = ast->child(4);
-      for(size_t i=0; i < ctrs->children.size(); i++) {
+      for (size_t i=0; i < ctrs->children.size(); i++) {
 	shared_ptr<AST> ctr = ctrs->child(i);
 	shared_ptr<AST> ctrID = ctr->child(0);
 	MARKDEF(ctrID, ast);
@@ -261,7 +261,7 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
       MARKDEF(id, ast);
 	
       shared_ptr<AST> methods = ast->child(3);
-      for(size_t i = 0; i < methods->children.size(); i++) {
+      for (size_t i = 0; i < methods->children.size(); i++) {
 	shared_ptr<AST> method = methods->child(i);
 	shared_ptr<AST> mID = method->child(0);
 	MARKDEF(mID, ast);
@@ -298,8 +298,8 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
     }
   }
   
-  if(processChildren)
-    for(size_t c=0; c < ast->children.size(); c++)
+  if (processChildren)
+    for (size_t c=0; c < ast->children.size(); c++)
       findDefForms(ast->child(c), local, top);	  
 }
 
@@ -308,13 +308,13 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
 void
 UocInfo::findAllDefForms()
 {
-  for(UocMap::iterator itr = UocInfo::srcList.begin();
+  for (UocMap::iterator itr = UocInfo::srcList.begin();
       itr != UocInfo::srcList.end(); ++itr) {
     shared_ptr<UocInfo> puoci = itr->second;
     puoci->findDefForms(puoci->uocAst);
   }
 
-  for(UocMap::iterator itr = UocInfo::ifList.begin();
+  for (UocMap::iterator itr = UocInfo::ifList.begin();
       itr != UocInfo::ifList.end(); ++itr) {
     shared_ptr<UocInfo> puoci = itr->second;
     puoci->findDefForms(puoci->uocAst);
@@ -324,7 +324,7 @@ UocInfo::findAllDefForms()
 static void
 addCandidates(shared_ptr<AST> mod)
 {
-  for(size_t c = 0; c < mod->children.size(); c++) {
+  for (size_t c = 0; c < mod->children.size(); c++) {
     shared_ptr<AST> ast = mod->child(c);
     shared_ptr<AST> id = ast->getID();
     switch(ast->astType) {
@@ -332,7 +332,7 @@ addCandidates(shared_ptr<AST> mod)
     case at_define:
     case at_recdef:
     case at_defexception:
-      if(id->symType->isConcrete())
+      if (id->symType->isConcrete())
 	Options::entryPts.insert(id->fqn.asString());
       
       break;
@@ -347,19 +347,19 @@ addCandidates(shared_ptr<AST> mod)
 void  
 UocInfo::addAllCandidateEPs()
 {
-  for(UocMap::iterator itr = UocInfo::ifList.begin();
+  for (UocMap::iterator itr = UocInfo::ifList.begin();
       itr != UocInfo::ifList.end(); ++itr) {
     shared_ptr<UocInfo> puoci = itr->second;
     addCandidates(puoci->uocAst);
   }  
 
-  for(UocMap::iterator itr = UocInfo::srcList.begin();
+  for (UocMap::iterator itr = UocInfo::srcList.begin();
       itr != UocInfo::srcList.end(); ++itr) {
     shared_ptr<UocInfo> puoci = itr->second;
     addCandidates(puoci->uocAst);
   }
 
-  //for(size_t c=0; c < Options::entryPts.size(); c++)
+  //for (size_t c=0; c < Options::entryPts.size(); c++)
   //  std::cerr << "Entry Point: " << Options::entryPts[c] << std::endl;
 }
 

@@ -61,8 +61,8 @@ using namespace sherpa;
 bool 
 TCConstraints::contains(shared_ptr<Typeclass> tc) 
 {
-  for(iterator itr = begin(); itr != end(); ++itr)
-    if((*itr)->strictlyEquals(tc, false, true))
+  for (iterator itr = begin(); itr != end(); ++itr)
+    if ((*itr)->strictlyEquals(tc, false, true))
       return true;
 
   return false;
@@ -71,9 +71,9 @@ TCConstraints::contains(shared_ptr<Typeclass> tc)
 void 
 TCConstraints::addPred(shared_ptr<Typeclass> tc) 
 {
-  for(iterator itr = begin(); itr != end(); ++itr) {
-    if((*itr)->strictlyEquals(tc, false, true)) {
-      if(tc->flags & TY_CT_SUBSUMED)
+  for (iterator itr = begin(); itr != end(); ++itr) {
+    if ((*itr)->strictlyEquals(tc, false, true)) {
+      if (tc->flags & TY_CT_SUBSUMED)
 	(*itr)->flags |= TY_CT_SUBSUMED;
       return;
     }  
@@ -86,9 +86,9 @@ void
 TCConstraints::clearPred(shared_ptr<Constraint> ct) 
 {
   ct =  ct->getType();
-  for(iterator itr = begin(); itr != end(); ++itr) {
+  for (iterator itr = begin(); itr != end(); ++itr) {
     shared_ptr<Constraint> pr = (*itr)->getType();
-    if(pr == ct) {
+    if (pr == ct) {
       pred.erase(itr);
       return;
     }
@@ -101,7 +101,7 @@ TCConstraints::normalize()
   TypeSet allPreds = pred;
   pred.clear();
   
-  for(iterator itr = allPreds.begin(); itr != allPreds.end(); ++itr)
+  for (iterator itr = allPreds.begin(); itr != allPreds.end(); ++itr)
     addPred((*itr));
 }
 

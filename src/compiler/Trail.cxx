@@ -52,7 +52,7 @@ Trail::link(shared_ptr<Type> from, shared_ptr<Type> to)
   from = from->getType();
   to = to->getType();
   
-  if(to->boundInType(from)) {
+  if (to->boundInType(from)) {
     std::cerr << "CYCLIC SUBSTITUTION "
 	      << from->asString(Options::debugTvP)
 	      << " |-> "
@@ -80,7 +80,7 @@ Trail::subst(shared_ptr<Type> from, shared_ptr<Type> to)
 
   assert(from->kind == ty_tvar || from->kind == ty_kvar);
   
-  if(to->boundInType(from)) {
+  if (to->boundInType(from)) {
     std::cerr << "CYCLIC SUBSTITUTION "
 	      << from->asString(Options::debugTvP)
 	      << " |-> "
@@ -106,7 +106,7 @@ Trail::rollBack(size_t upto)
 {
   assert(upto <= vec.size());
   
-  for(size_t i = upto; i < vec.size(); i++) {
+  for (size_t i = upto; i < vec.size(); i++) {
     vec[i]->link = GC_NULL;
     TRAIL_DEBUG 
       std::cerr << "[RB] Releasing: "

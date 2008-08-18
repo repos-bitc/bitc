@@ -685,7 +685,7 @@ main(int argc, char *argv[])
   }
   
   // Select default backend if none chosen otherwise.
-  if(Options::backEnd == 0)
+  if (Options::backEnd == 0)
     Options::backEnd = &BackEnd::backends[0];
 
   for (size_t i = 0; i < Options::SystemDirs.size(); i++) {
@@ -733,20 +733,20 @@ main(int argc, char *argv[])
   // Process the Prelude:
 
   // FIX: TEMPORARY
-  if(!Options::noPrelude) {
+  if (!Options::noPrelude) {
     sherpa::LexLoc loc = LexLoc();
     (void) UocInfo::importInterface(std::cerr, loc, "bitc.prelude");
   }
   
   // Compile everything
-  for(size_t i = 0; i < Options::inputs.size(); i++)
+  for (size_t i = 0; i < Options::inputs.size(); i++)
     UocInfo::CompileFromFile(Options::inputs[i], true);
 
   /* Per-file backend output after processing frontend, if any */
   bool doFinal = true;
 
   /* Output for interfaces */
-  for(UocMap::iterator itr = UocInfo::ifList.begin();
+  for (UocMap::iterator itr = UocInfo::ifList.begin();
       itr != UocInfo::ifList.end(); ++itr) {
     shared_ptr<UocInfo> puoci = itr->second;
     
@@ -759,7 +759,7 @@ main(int argc, char *argv[])
   } 
 
   /* Output for Source modules */
-  for(UocMap::iterator itr = UocInfo::srcList.begin();
+  for (UocMap::iterator itr = UocInfo::srcList.begin();
       itr != UocInfo::srcList.end(); ++itr) {
     shared_ptr<UocInfo> puoci = itr->second;
 
@@ -801,7 +801,7 @@ main(int argc, char *argv[])
   /// Header mode is a bit different. In that mode we are converting
   /// interfaces into header files, and there is no particular entry
   /// point to emit.
-  if(Options::entryPts.empty() &&
+  if (Options::entryPts.empty() &&
      ((Options::backEnd->flags & BK_HDR_MODE) == 0))
     Options::entryPts.insert("bitc.main.main");
 
@@ -845,7 +845,7 @@ main(int argc, char *argv[])
     std::cerr <<std::endl << std::endl;
   }
   
-  if(!midPassOK) {
+  if (!midPassOK) {
     std::cerr << "Exiting due to errors during Instantiation."
 	      << std::endl;
     exit(1);    
@@ -859,10 +859,10 @@ main(int argc, char *argv[])
   unifiedUOC->DoBackend();
   
   // If there is any post-gather output, it should be done now.
-  if(Options::backEnd->plfn) {
+  if (Options::backEnd->plfn) {
     bool done = Options::backEnd->plfn(std::cout, std::cerr, 
 				       unifiedUOC);
-    if(!done)
+    if (!done)
       exit(1);
   }
   

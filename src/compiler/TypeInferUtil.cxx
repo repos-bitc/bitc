@@ -71,7 +71,7 @@ obtainFullUnionType(shared_ptr<Type> t)
   assert(uType->kind == ty_unionv || uType->kind == ty_unionr);
   assert(uType->typeArgs.size() == t->typeArgs.size());
 
-  for(size_t c=0; c < uType->typeArgs.size(); c++)
+  for (size_t c=0; c < uType->typeArgs.size(); c++)
     t->TypeArg(c)->unifyWith(uType->TypeArg(c));
   
   return uType;
@@ -84,8 +84,8 @@ nCtArgs(shared_ptr<Type> t)
   t = t->getBareType();
   
   size_t cnt=0;
-  for(size_t i=0; i < t->components.size(); i++)
-    if((t->CompFlags(i) & COMP_UNIN_DISCM) ==0)
+  for (size_t i=0; i < t->components.size(); i++)
+    if ((t->CompFlags(i) & COMP_UNIN_DISCM) ==0)
       cnt++;
 
   return cnt;
@@ -103,7 +103,7 @@ useIFGamma(const std::string& idName,
 	   shared_ptr<TSEnvironment > fromEnv, 
 	   shared_ptr<TSEnvironment > toEnv)
 {
-  for(TSEnvironment::iterator itr = fromEnv->begin();
+  for (TSEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
     shared_ptr<Binding<TypeScheme> > bdng = itr->second;
 
@@ -127,7 +127,7 @@ useIFInsts(const std::string& idName,
 	   shared_ptr<InstEnvironment >fromEnv, 
 	   shared_ptr<InstEnvironment >toEnv)
 {
-  for(InstEnvironment::iterator itr = fromEnv->begin();
+  for (InstEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
     shared_ptr<Binding<set<shared_ptr<Instance> > > > bdng = itr->second;
     
@@ -156,7 +156,7 @@ initGamma(std::ostream& errStream,
   // Make sure I am not processing the prelude itself
   // cout << "Processing " << ast->child(1)->child(0)->s 
   //      << std::endl;
-  if(topAst->astType == at_interface &&
+  if (topAst->astType == at_interface &&
      topAst->child(0)->s == "bitc.prelude") {
     // cout << "Processing Prelude " << std::endl;
     return true;
@@ -183,7 +183,7 @@ initGamma(std::ostream& errStream,
     preInsts = itr->second->instEnv;
   }
 
-  if(!preenv || !preInsts) {
+  if (!preenv || !preInsts) {
     errStream << topAst->loc << ": "
 	      << "Internal Compiler Error. "
 	      << "Prelude's Gamma is NULL "

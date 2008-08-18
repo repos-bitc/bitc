@@ -79,7 +79,7 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
       bool isLoc = LocChk(errStream, errFree, ast->child(0), true);
       LocChk(errStream, errFree, ast->child(1), inSET);
 
-      if(!isLoc) {
+      if (!isLoc) {
 	errStream << ast->child(0)->loc << ": "
 		  << "Non-location in set! context"
 		  << std::endl;
@@ -92,7 +92,7 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
   case at_array_nth:
     {
       bool isLoc = LocChk(errStream, errFree, ast->child(0), inSET);
-      if(inSET && !isLoc) {
+      if (inSET && !isLoc) {
 	errStream << ast->child(0)->loc << ": "
 		  << "Non-location in set! context"
 		  << std::endl;
@@ -111,7 +111,7 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
     {
       bool isLoc = LocChk(errStream, errFree, ast->child(0), inSET);
       
-      if(inSET && !isLoc && !ast->child(0)->symType->isRefType()) {
+      if (inSET && !isLoc && !ast->child(0)->symType->isRefType()) {
 	errStream << ast->child(0)->loc << ": "
 		  << "Non-location in set! context"
 		  << std::endl;
@@ -131,7 +131,7 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
   case at_try:
     {
       for (size_t c = 0; c < ast->children.size(); c++)
-	if(c != IGNORE(ast))
+	if (c != IGNORE(ast))
 	  LocChk(errStream, errFree, ast->child(c), inSET);
       
       return false;
