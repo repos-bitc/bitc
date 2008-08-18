@@ -447,7 +447,7 @@ getInstName(shared_ptr<const AST> def, shared_ptr<Type> typ)
 // Namakaranam -- the ritual of giving a name
 #define NAMKARAN(ast, name) do {		\
     ast->s = name;				\
-    ast->Flags |= IDENT_MANGLED;		\
+    ast->flags |= IDENT_MANGLED;		\
   } while(0);
 
 // Rename an AST with its instantiated name
@@ -478,7 +478,7 @@ name2fqn(shared_ptr<AST> ast)
   switch(ast->astType) {
   case at_ident:
     {
-      if(ast->Flags & IDENT_MANGLED)
+      if(ast->flags & IDENT_MANGLED)
 	break;
 
       if(!ast->symbolDef)
@@ -624,7 +624,7 @@ substitute(shared_ptr<AST> ast, shared_ptr<AST> from, shared_ptr<AST> to)
   case at_ident:    
     {
       if(ast->symbolDef == from) {
-	assert((ast->Flags & IDENT_MANGLED) == 0);
+	assert((ast->flags & IDENT_MANGLED) == 0);
 	
 	NAMKARAN(ast, to->s);
 	ast->symbolDef = to;      
@@ -699,7 +699,7 @@ tvarInst(shared_ptr<AST> ast, shared_ptr<AST> scope, AstMap &newBinds)
       shared_ptr<AST> newTvAst = newTV->asAST(ast->loc, 
 				   TvPrinter::make(false));
       newTvAst->symbolDef = newTvAst;
-      newTvAst->Flags |= TVAR_POLY_SPECIAL;
+      newTvAst->flags |= TVAR_POLY_SPECIAL;
 
       newBinds[def] = newTvAst;
       return newTvAst;
@@ -735,7 +735,7 @@ buildNewDeclaration(shared_ptr<AST> def, shared_ptr<Type> typ)
   shared_ptr<AST> ident = def->getID()->getDeepCopy();
 
   if(ident->externalName.size())
-    ident->Flags |= DEF_IS_EXTERNAL;
+    ident->flags |= DEF_IS_EXTERNAL;
 
   // We must only proclaim globals
   assert(ident->isGlobal());
@@ -1013,7 +1013,7 @@ UocInfo::recInstantiate(ostream &errStream,
   case at_ident:
     {
       // If Instantiate has already fixed this identifier, do nothing
-      if(ast->Flags & IDENT_MANGLED)
+      if(ast->flags & IDENT_MANGLED)
 	break;
       
       // We should never be dealing with tvars because:
@@ -1033,8 +1033,8 @@ UocInfo::recInstantiate(ostream &errStream,
 
       // If this is a local defined at a non-let variable, whose name
       // I just fixed, fix the name of the use case, and do nothing.
-      if(def->Flags & LOCAL_NOGEN_VAR) {
-	assert(def->Flags & IDENT_MANGLED);
+      if(def->flags & LOCAL_NOGEN_VAR) {
+	assert(def->flags & IDENT_MANGLED);
 	NAMKARAN(ast, def->s);
 	break;
       }
@@ -1121,7 +1121,7 @@ UocInfo::recInstantiate(ostream &errStream,
 				     ast->child(0),
 				     errFree, worklist);
       
-      if(ast->Flags & INNER_REF_NDX)
+      if(ast->flags & INNER_REF_NDX)
 	ast->child(1) = recInstantiate(errStream, 
 				       ast->child(1),
 				       errFree, worklist);
@@ -1361,7 +1361,7 @@ UocInfo::recInstantiate(ostream &errStream,
 	shared_ptr<AST> arg = argPat->child(0);
 	string oldName = arg->s;
 
-	arg->Flags |= LOCAL_NOGEN_VAR;
+	arg->flags |= LOCAL_NOGEN_VAR;
 	NAMKARAN(arg, getInstName(arg, arg->symType));
 	ast->envs.updateKey(oldName, arg->s);
 
@@ -1396,7 +1396,7 @@ UocInfo::recInstantiate(ostream &errStream,
 	shared_ptr<AST> local = doBd->child(0)->child(0);
 
 	string oldName = local->s;
-	local->Flags |= LOCAL_NOGEN_VAR;
+	local->flags |= LOCAL_NOGEN_VAR;
 	NAMKARAN(local, getInstName(local, local->symType));
 	ast->envs.updateKey(oldName, local->s);
 
@@ -1421,7 +1421,7 @@ UocInfo::recInstantiate(ostream &errStream,
       shared_ptr<AST> local = ast->child(0);
       shared_ptr<AST> expr = ast->child(1);
       string oldName = local->s;
-      local->Flags |= LOCAL_NOGEN_VAR;
+      local->flags |= LOCAL_NOGEN_VAR;
       NAMKARAN(local, getInstName(local, local->symType));
       ast->envs.updateKey(oldName, local->s);
       substitute(expr, local, local); //!!      
@@ -1533,7 +1533,7 @@ UocInfo::doInstantiate(ostream &errStream,
 
   // Make sure we don't mangle any identifier twice. We should never
   // be called for the use of an identifier we have already processed
-  assert((defIdent->Flags & IDENT_MANGLED) == 0);
+  assert((defIdent->flags & IDENT_MANGLED) == 0);
 
   // Are we instantiating a local, or a global?
   // There is ont thing we must remember about the difference between

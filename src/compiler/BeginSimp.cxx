@@ -85,10 +85,10 @@ beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 	  AST::make(at_letbinding,
 		  def->loc, def->child(0), def->child(1));
 	if(rec)
-	  letBinding->Flags |= LB_REC_BIND;
+	  letBinding->flags |= LB_REC_BIND;
 	
 	// The definition is not a global
-	def->child(0)->child(0)->Flags &= ~ID_IS_GLOBAL;
+	def->child(0)->child(0)->flags &= ~ID_IS_GLOBAL;
 	shared_ptr<AST> body = AST::make(at_begin, ast->child(c)->loc);
 	
 	for (size_t bc = c+1; bc < ast->children.size(); bc++)

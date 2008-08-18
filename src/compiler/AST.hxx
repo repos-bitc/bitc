@@ -696,7 +696,7 @@ public:
   unsigned long litBase;
   
   IdentType identType;
-  sherpa::EnumSet<AstFlags> Flags;
+  sherpa::EnumSet<AstFlags> flags;
 
   unsigned printVariant;	// which syntax to use for pretty printing
 
@@ -706,7 +706,7 @@ public:
 
   bool isDecl;                  // is This a declaration or definition?
 
-  bool isGlobal() { return (Flags & ID_IS_GLOBAL); }
+  bool isGlobal() { return (flags & ID_IS_GLOBAL); }
   bool isFnxn(); // Function
   size_t nBits();
   bool isLocation();

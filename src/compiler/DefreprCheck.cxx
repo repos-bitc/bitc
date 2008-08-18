@@ -155,7 +155,7 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
   
   case at_defunion:
     {
-      if((ast->Flags & UNION_IS_REPR) == 0)
+      if((ast->flags & UNION_IS_REPR) == 0)
 	break;
 
       shared_ptr<AST> ctrs = ast->child(4);
@@ -169,7 +169,7 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
 	  shared_ptr<AST> fldi = ctrc->child(i);
 
 	  if(fldi->astType == at_field)
-	    if(fldi->Flags & FLD_IS_DISCM)
+	    if(fldi->flags & FLD_IS_DISCM)
 	      if(!fldi->symType->isInteger()) {
 		errStream << fldi->loc << ": "
 			  << " The discriminating field "
@@ -237,7 +237,7 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
 	
 	for(size_t i=1; i < ctrc->children.size(); i++) {
 	  shared_ptr<AST> fldi = ctrc->child(i);
-	  if(fldi->Flags & FLD_IS_DISCM) {
+	  if(fldi->flags & FLD_IS_DISCM) {
 	    assert(fldi->astType == at_field);
 
 	    when[fldi->child(0)->s] = fldi->unin_discm;
@@ -251,7 +251,7 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
 	  for(size_t j=1; (!differ) && (j < ctrd->children.size()); j++) {
 	    shared_ptr<AST> fldj = ctrd->child(j);
 
-	    if(fldj->Flags & FLD_IS_DISCM) {
+	    if(fldj->flags & FLD_IS_DISCM) {
 	      assert(fldj->astType == at_field);
 	      
 	      WhenMap::iterator itr_k = when.find(fldj->child(0)->s);

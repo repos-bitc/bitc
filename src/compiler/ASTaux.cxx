@@ -90,7 +90,7 @@ AST::genSym(shared_ptr<AST> ast, const char *label, const bool isTV)
   // FQN to be set by the next call to the ersolver 
 
   id->identType = ast->identType;
-  id->Flags = ast->Flags | ID_IS_GENSYM;
+  id->flags = ast->flags | ID_IS_GENSYM;
   id->symType = ast->symType;
   id->scheme = ast->scheme;
 
@@ -127,7 +127,7 @@ AST::Use()
   assert(astType == at_ident);
   assert(!symbolDef || isIdentType(id_tvar));
   shared_ptr<AST> idUse = getDeepCopy();
-  idUse->Flags  &= ~MASK_FLAGS_FROM_USE;
+  idUse->flags  &= ~MASK_FLAGS_FROM_USE;
   idUse->symbolDef = shared_from_this();
   if(symType)
     idUse->symType = symType->getDCopy();
@@ -143,7 +143,7 @@ AST::AST(shared_ptr<AST> ast, bool shallowCopyChildren)
   s = ast->s;
   loc = ast->loc;
   fqn = ast->fqn;
-  Flags = ast->Flags;
+  flags = ast->flags;
   externalName = ast->externalName;
   symbolDef = ast->symbolDef;
   defn = ast->defn;

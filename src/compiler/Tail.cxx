@@ -174,7 +174,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
     {
       if(ast->symbolDef == fn && isTail) {
 	//std::cout << "Marked " << ast->s << " at " << ast->loc << endl; 
-	ast->Flags |= (SELF_TAIL);
+	ast->flags |= (SELF_TAIL);
       }
       
       break;

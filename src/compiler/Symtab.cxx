@@ -72,11 +72,11 @@ warnUnresRef(std::ostream& errStream,
     case at_declstruct:
     case at_proclaim:
       {
-	if(ast->Flags & PROCLAIM_IS_INTERNAL)
+	if(ast->flags & PROCLAIM_IS_INTERNAL)
 	  break;
 	
 	shared_ptr<AST> def = env->getBinding(ast->child(0)->s);
-	if(((ast->Flags & DEF_IS_EXTERNAL) == 0) && (def == NULL)) {
+	if(((ast->flags & DEF_IS_EXTERNAL) == 0) && (def == NULL)) {
 
 	  errStream << ast->loc << ": WARNING: " 
 		    << "Local declaration of " << ast->child(0)->s 
@@ -427,7 +427,7 @@ resolve(std::ostream& errStream,
       if(!ast->fqn.isInitialized()) {
 	if (ast->isGlobal()) {
 	  ast->fqn = FQName(env->uocName, ast->s);
-	  ast->Flags |= ID_IS_PRIVATE;
+	  ast->flags |= ID_IS_PRIVATE;
 	}
 	else
 	  ast->fqn = FQName(FQ_NOIF, ast->s);
@@ -540,7 +540,7 @@ resolve(std::ostream& errStream,
 	    ast->identType = sym->identType;
 
 	    if(ast->externalName.size()) {
-	      assert(ast->Flags & DEF_IS_EXTERNAL);
+	      assert(ast->flags & DEF_IS_EXTERNAL);
 	      if(sym->externalName.size()) {
 		if(sym->externalName != ast->externalName) {
 		  errStream << ast->loc << ": " 
@@ -603,7 +603,7 @@ resolve(std::ostream& errStream,
 	
  	    if(ast->isIdentType(id_tvar) &&
 	       ((flags & NEW_TV_OK) || 
-		(ast->Flags & TVAR_POLY_SPECIAL))) {
+		(ast->flags & TVAR_POLY_SPECIAL))) {
 	      bindIdentDef(ast, env, identType, currLB, flags);
 	      ast->symbolDef = ast;
 	      //errStream << "Created new ident for " << ast->s
@@ -688,7 +688,7 @@ resolve(std::ostream& errStream,
 	    errorFree = false;
 	  }
       
-	  if(def->Flags & ID_FOR_SWITCH) {
+	  if(def->flags & ID_FOR_SWITCH) {
 	    if((flags & SWITCHED_ID_OK) == 0) {
 	      errStream << ast->loc << ": The identifier `"
 			<< ast->s << "' can only appear to the left of a `.'" 
@@ -705,9 +705,9 @@ resolve(std::ostream& errStream,
 	  }
 
 	  ast->identType = def->identType;
-	  ast->Flags  |= def->Flags;
-	  ast->Flags |= def->Flags;
-	  ast->Flags  &= ~MASK_FLAGS_FROM_USE;
+	  ast->flags  |= def->flags;
+	  ast->flags |= def->flags;
+	  ast->flags  &= ~MASK_FLAGS_FROM_USE;
 	  ast->externalName = def->externalName;
 
 	  /* Make sure tvars are scoped properly */
@@ -720,7 +720,7 @@ resolve(std::ostream& errStream,
 	    else
 	      thisLB = def->tvarLB;
 	    
-	    while(thisLB->Flags & LBS_PROCESSED) {
+	    while(thisLB->flags & LBS_PROCESSED) {
 	      thisLB = thisLB->parentLB;
 	      assert(thisLB);
 	    }
@@ -822,8 +822,8 @@ resolve(std::ostream& errStream,
       ast->s = ast->child(0)->s + "." + ast->child(1)->s;
       ast->astType = at_ident;
       ast->identType = ast->child(1)->identType;
-      ast->Flags = ast->child(1)->Flags;
-      ast->Flags |= ID_IS_GLOBAL;
+      ast->flags = ast->child(1)->flags;
+      ast->flags |= ID_IS_GLOBAL;
 
       ast->children.clear();
 
@@ -1055,7 +1055,7 @@ resolve(std::ostream& errStream,
       longer mutable. It is the thing that is pointed to, that is
       mutable.  */
       assert(ast->child(0)->astType == at_identPattern);
-      ast->child(0)->child(0)->Flags &= ~ID_IS_MUTATED;
+      ast->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
       
       if (ast->astType == at_recdef) {
 	// Binding patterns must be in scope.
@@ -1085,7 +1085,7 @@ resolve(std::ostream& errStream,
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));    
       
       /* Mark the present identifier closed wrt mutability */
-      ast->child(0)->child(0)->Flags |= ID_MUT_CLOSED;
+      ast->child(0)->child(0)->flags |= ID_MUT_CLOSED;
 
       env->mergeBindingsFrom(tmpEnv);
       break;
@@ -2061,8 +2061,8 @@ resolve(std::ostream& errStream,
       RESOLVE(rhs, env, lamLevel, USE_MODE, idc_value, currLB, flags);
 
       if (lhs->astType == at_ident)
-	if((lhs->symbolDef->Flags & ID_MUT_CLOSED) == 0)
-	  lhs->symbolDef->Flags |= ID_IS_MUTATED;
+	if((lhs->symbolDef->flags & ID_MUT_CLOSED) == 0)
+	  lhs->symbolDef->flags |= ID_IS_MUTATED;
 
       break;
     }
@@ -2090,7 +2090,7 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      idc_value, currLB, flags);
 
-      if(((ast->Flags & INNER_REF_NDX) == 0) &&
+      if(((ast->flags & INNER_REF_NDX) == 0) &&
 	 ast->child(1)->astType == at_ident) {
 	// Could be a field-select
       }
@@ -2143,7 +2143,7 @@ resolve(std::ostream& errStream,
       ASTEnvironment::iterator itr = legEnv->find(ast->child(0)->s);
       assert(itr != legEnv->end());
       itr->second->flags |= BF_COMPLETE;
-      ast->child(0)->Flags |= ID_FOR_SWITCH;
+      ast->child(0)->flags |= ID_FOR_SWITCH;
 
       /* match at_expr */
       if((flags & WITHIN_CATCH) && (ast->children.size() > 3))
@@ -2277,7 +2277,7 @@ resolve(std::ostream& errStream,
       lbs->envs.env = letEnv;
 
       // Begin processing let-bindings
-      lbs->Flags &= ~LBS_PROCESSED;
+      lbs->flags &= ~LBS_PROCESSED;
 
       // First Evaluate ALL the Expressions, then bind the values
       // match agt_expr
@@ -2299,11 +2299,11 @@ resolve(std::ostream& errStream,
 		id_value, lbs, flags);
 
 	assert(lb->child(0)->astType == at_identPattern);
-	lb->child(0)->child(0)->Flags &= ~ID_IS_MUTATED;
+	lb->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
       }
 
       // Now we are done with all let-bindings
-      lbs->Flags |= LBS_PROCESSED;
+      lbs->flags |= LBS_PROCESSED;
        
       // Evaluate the final Expression with a rich environment
       // match agt_expr, with my Parent's Incompleteness restrictions
@@ -2331,7 +2331,7 @@ resolve(std::ostream& errStream,
 
       
       // Begin processing let-bindings
-      lbs->Flags &= ~LBS_PROCESSED;
+      lbs->flags &= ~LBS_PROCESSED;
 
       // First Evaluate the Expressions, then bind the values
       // individually
@@ -2346,7 +2346,7 @@ resolve(std::ostream& errStream,
 	RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
 		id_value, lbs, flags);
 	assert(lb->child(0)->astType == at_identPattern);
-	lb->child(0)->child(0)->Flags &= ~ID_IS_MUTATED;
+	lb->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
 
 	ASTEnvironment::iterator itr = 
 	  letEnv->find(lb->child(0)->child(0)->s);
@@ -2354,7 +2354,7 @@ resolve(std::ostream& errStream,
       }
 
       // Now we are done with all let-bindings
-      lbs->Flags |= LBS_PROCESSED;
+      lbs->flags |= LBS_PROCESSED;
       
       // Evaluate the final Expression with a rich environment
       RESOLVE(ast->child(1), letEnv, lamLevel, USE_MODE, 
@@ -2382,7 +2382,7 @@ resolve(std::ostream& errStream,
       lbs->envs.env = letEnv;      
 
       // Begin processing let-bindings
-      lbs->Flags &= ~LBS_PROCESSED;
+      lbs->flags &= ~LBS_PROCESSED;
 
       // For each individual binding // match at_letbinding+
       for (size_t c = 0; c < lbs->children.size(); c++) {
@@ -2392,7 +2392,7 @@ resolve(std::ostream& errStream,
 	RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
 		id_value, lbs, flags);	
 	assert(lb->child(0)->astType == at_identPattern);
-	lb->child(0)->child(0)->Flags &= ~ID_IS_MUTATED;
+	lb->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
       }      
     
       // For each individual binding // match at_letbinding+
@@ -2406,7 +2406,7 @@ resolve(std::ostream& errStream,
       }
 
       // Now we are done with all let-bindings
-      lbs->Flags |= LBS_PROCESSED;
+      lbs->flags |= LBS_PROCESSED;
 
 
       // Evaluate the final Expression with a rich environment, 
@@ -2434,7 +2434,7 @@ resolve(std::ostream& errStream,
 
       // The lamLevel is bogus here, but OK only for
       // the sake of polyinstantiation.      
-      if(ast->Flags & LB_REC_BIND) {
+      if(ast->flags & LB_REC_BIND) {
 	RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
 		id_value, ast, flags);
 
@@ -2450,7 +2450,7 @@ resolve(std::ostream& errStream,
       }
 
       assert(ast->child(0)->astType == at_identPattern);
-      ast->child(0)->child(0)->Flags &= ~ID_IS_MUTATED;
+      ast->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
       break;
     }
   }

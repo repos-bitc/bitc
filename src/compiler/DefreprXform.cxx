@@ -98,9 +98,9 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       shared_ptr<AST> unin = AST::make(ast, false); 
       
       unin->astType = at_defunion;
-      unin->Flags |= UNION_IS_REPR;
+      unin->flags |= UNION_IS_REPR;
       unin->addChild(ast->child(0)); // identifier
-      unin->child(0)->Flags |= UNION_IS_REPR;
+      unin->child(0)->flags |= UNION_IS_REPR;
       unin->addChild(AST::make(at_tvlist, ast->loc)); // empty tvlist
       unin->addChild(ast->child(1));  // category
       unin->addChild(reprXform(ast->child(2), errStream, errFree));  // declares
@@ -134,7 +134,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 	  if(where->child(0)->s == fld->child(0)->s) {
 	    found = true;
 	    
-	    if(fld->Flags & FLD_IS_DISCM) {
+	    if(fld->flags & FLD_IS_DISCM) {
 	      errStream << where->loc << ": "
 			<< " Duplicate `where' label for "
 			<< where->child(0)->s
@@ -144,7 +144,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 	      break;
 	    }
 	    
-	    fld->Flags |= FLD_IS_DISCM;	    
+	    fld->flags |= FLD_IS_DISCM;	    
 	    fld->unin_discm = (size_t)(where->child(1)->litValue.i.as_uint64());
 	  }
 	}
@@ -168,7 +168,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       shared_ptr<AST> unin = AST::make(ast, false);
       
       unin->astType = at_declunion;
-      unin->Flags |= UNION_IS_REPR;
+      unin->flags |= UNION_IS_REPR;
       unin->addChild(ast->child(0)); // identifier
       unin->addChild(AST::make(at_tvlist)); // empty tvlist
       unin->addChild(ast->child(1));  // category

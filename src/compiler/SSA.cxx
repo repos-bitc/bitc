@@ -104,7 +104,7 @@ addLB(shared_ptr<AST> grandLet, shared_ptr<AST> identList,
   shared_ptr<AST> lb = AST::make(at_letbinding, ip->loc, ip, ast);
   // "Artificial" SSA introduced LBs were previously marked here
   // as: lb->Flags |= (LB_IS_ART | lbFlags);
-  lb->Flags |= lbFlags;
+  lb->flags |= lbFlags;
   grandLet->child(0)->children.push_back(lb);
   if(addToIL)
     addIL(identList, id);  
@@ -379,10 +379,10 @@ ssa(std::ostream& errStream,
       if(ast->child(1)->astType == at_lambda) {
 	SSA(errStream, uoc, ast->child(1), grandLet, identList, 
 	       ast, 1, flags);
-	ast->Flags |= DEF_IS_TRIVIAL_INIT;	
+	ast->flags |= DEF_IS_TRIVIAL_INIT;	
       }      
       else if(isTrivialInit(ast)) {
-	ast->Flags |= DEF_IS_TRIVIAL_INIT;
+	ast->flags |= DEF_IS_TRIVIAL_INIT;
       }
       else {
 	shared_ptr<AST> gl = newGrandLet(ast);
@@ -534,7 +534,7 @@ ssa(std::ostream& errStream,
 	  ast, 0, flags);      
       ast->child(0) = FEXPR(grandLet);
 
-      if(ast->Flags & INNER_REF_NDX) {
+      if(ast->flags & INNER_REF_NDX) {
 	shared_ptr<AST> ndx = ast->child(1);
 	SSA(errStream, uoc, ndx, grandLet, identList, 
 	    ast, 1, flags);      
@@ -669,7 +669,7 @@ ssa(std::ostream& errStream,
 	ast->child(c) = FEXPR(grandLet);	
       }
 
-      if(id->Flags & SELF_TAIL) {
+      if(id->flags & SELF_TAIL) {
 	assert(id == ast->child(0)); // we did not change the identifier
 	FEXPR(grandLet) = addLB(grandLet, identList, ast, LB_IS_DUMMY);
       }
@@ -948,7 +948,7 @@ ssa(std::ostream& errStream,
 	FEXPR(gl) = addLB(gl, identList, FEXPR(gl),
 			  NO_FLAGS, theIdent, false);
 	SETGL(db->child(1), gl);
-	db->Flags |= LB_IS_DUMMY; 
+	db->flags |= LB_IS_DUMMY; 
  	
 	shared_ptr<AST> step = db->child(2);
 	gl = newGrandLet(ast);      
@@ -1008,7 +1008,7 @@ ssa(std::ostream& errStream,
 	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 
 			  NO_FLAGS, theIdent, false);
 	SETGL(lb->child(1), gl);
-	lb->Flags |= LB_IS_DUMMY; 
+	lb->flags |= LB_IS_DUMMY; 
       }
             
       // The real Final expression of the real let

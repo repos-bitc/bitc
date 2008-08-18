@@ -522,7 +522,7 @@ struct EnvSet {
   unsigned long litBase;
   
   IdentType identType;
-  sherpa::EnumSet<AstFlags> Flags;
+  sherpa::EnumSet<AstFlags> flags;
 
   unsigned printVariant;	// which syntax to use for pretty printing
 
@@ -532,7 +532,7 @@ struct EnvSet {
 
   bool isDecl;                  // is This a declaration or definition?
 
-  bool isGlobal() { return (Flags & ID_IS_GLOBAL); }
+  bool isGlobal() { return (flags & ID_IS_GLOBAL); }
   bool isFnxn(); // Function
   size_t nBits();
   bool isLocation();
@@ -803,7 +803,7 @@ unsigned long long AST::astCount = 0;
 %construct {
   ID = ++(AST::astCount);
   identType = id_unresolved;
-  Flags = NO_FLAGS;
+  flags = NO_FLAGS;
   isDecl = false;
   scheme = GC_NULL;
   symType = GC_NULL;

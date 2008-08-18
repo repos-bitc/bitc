@@ -309,8 +309,8 @@ CMangle(shared_ptr<AST> ast, unsigned long flags = 0)
     return id->externalName;
 
   std::stringstream ss;      
-  if((id->Flags & ID_IS_GLOBAL) ||
-     (id->Flags & ID_IS_GENSYM) ||
+  if((id->flags & ID_IS_GLOBAL) ||
+     (id->flags & ID_IS_GENSYM) ||
      (flags & CMGL_ID_FLD))
     ss << id->s;
   else 
@@ -588,7 +588,7 @@ emit_ct_args(INOstream &out, shared_ptr<AST> fields, size_t start=0)
     
     if(field->astType == at_fill || 
        field->astType == at_reserved || 
-       (field->Flags & FLD_IS_DISCM))
+       (field->flags & FLD_IS_DISCM))
       continue;
 
     if(emitted1)
@@ -620,7 +620,7 @@ emit_ct_inits(INOstream &out, shared_ptr<AST> fields,
     }
 
     string fMang = CMangle(field->child(0), CMGL_ID_FLD);
-    if(field->Flags & FLD_IS_DISCM) {
+    if(field->flags & FLD_IS_DISCM) {
       out << pre << fMang << " = "
 	  << field->unin_discm
 	  << ";" << endl;
@@ -833,7 +833,7 @@ emit_fnxn_label(std::ostream& errStream,
        return f(currentClosurePtr, args);
      }
   */
-  if(ast->Flags & LAM_NEEDS_TRANS) {
+  if(ast->flags & LAM_NEEDS_TRANS) {
 
     // Top level mutable function pointers are not cl-lambdas
     // There are converted into function+init in the fix4C pass.
@@ -1100,12 +1100,12 @@ toc(std::ostream& errStream,
       }
 
 
-      if(id->Flags & ARG_BYREF)
+      if(id->flags & ARG_BYREF)
 	out << "(*";      
       
       out << CMangle(ast);
 
-      if(id->Flags & ARG_BYREF)
+      if(id->flags & ARG_BYREF)
 	out << ")";      
 
       break;
@@ -1363,12 +1363,12 @@ toc(std::ostream& errStream,
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> ctrs = ast->child(4);
 
-      bool repr = ast->Flags & UNION_IS_REPR;
+      bool repr = ast->flags & UNION_IS_REPR;
       out << "/*** Tag Enumerations ***/" << endl;
       out << "typedef enum {" << endl;
       out.more(); 
 	
-      if (ident->Flags & NULLABLE_UN) {
+      if (ident->flags & NULLABLE_UN) {
 	assert(!repr);
 
 	// Nullable is a special case, and we fake the
@@ -1385,7 +1385,7 @@ toc(std::ostream& errStream,
 	  }
 	}
       }
-      else if (ident->Flags & CARDELLI_UN) {
+      else if (ident->flags & CARDELLI_UN) {
 	assert(!repr);
 	// Nullable is handled as special case.
 	for(size_t c=0; c < ctrs->children.size(); c++) {
@@ -1426,9 +1426,9 @@ toc(std::ostream& errStream,
 	  out.more();
 	  
 	  if (!repr)
-	    if ((ident->Flags & SINGLE_LEG_UN) == 0)
-	      if((((ident->Flags & CARDELLI_UN) == 0) &&
-		  ((ident->Flags & NULLABLE_UN) == 0)) || 
+	    if ((ident->flags & SINGLE_LEG_UN) == 0)
+	      if((((ident->flags & CARDELLI_UN) == 0) &&
+		  ((ident->flags & NULLABLE_UN) == 0)) || 
 		 (ctr->children.size() == 1)) {
 		out << decl(ident->tagType, "tag", CTYP_EMIT_BF,
 			    ident->field_bits)<< ";" << endl;
@@ -1490,7 +1490,7 @@ toc(std::ostream& errStream,
 	  bool emitted1=false;
 	  for(size_t i = 1; i < ctr->children.size(); i++) {
 	    shared_ptr<AST> field = ctr->child(i);
-	    if(field->Flags & FLD_IS_DISCM) {
+	    if(field->flags & FLD_IS_DISCM) {
 	      if(emitted1)
 		out << " && ";
 	      out << "("
@@ -1514,10 +1514,10 @@ toc(std::ostream& errStream,
 	out << " assert(false);" << endl;
 	out << " return 0;" << endl;	
       }
-      else if (ident->Flags & SINGLE_LEG_UN) {
+      else if (ident->flags & SINGLE_LEG_UN) {
 	out << "return 0;" << endl;
       }
-      else if (ident->Flags & NULLABLE_UN) {
+      else if (ident->flags & NULLABLE_UN) {
 	out << "if (" << accessor << ")" << endl;
 	out.more();
 	out << "return 1;" << endl;
@@ -1527,7 +1527,7 @@ toc(std::ostream& errStream,
 	out << "return 0;" << endl;
 	out.less();
       }
-      else if (ident->Flags & CARDELLI_UN) {
+      else if (ident->flags & CARDELLI_UN) {
 	out << "if (" << accessor << " & 0x1u)" << endl;
 	out.more();
 	out << "return " << accessor << ";" << endl;
@@ -1574,8 +1574,8 @@ toc(std::ostream& errStream,
 	out << TY_PFX << CMangle(ctrID) << " leg;" << endl;
 	
 	if(!repr)
-	  if ((ident->Flags & SINGLE_LEG_UN) == 0)
-	    if(((ident->Flags & CARDELLI_UN) == 0) || 
+	  if ((ident->flags & SINGLE_LEG_UN) == 0)
+	    if(((ident->flags & CARDELLI_UN) == 0) || 
 	       (ctr->children.size() == 1)) {
 	      out << "leg.tag = " << ENUM_PFX << CMangle(ctrID) 
 		  << ";" << endl;
@@ -1772,7 +1772,7 @@ toc(std::ostream& errStream,
       // it as static, unless it is a function
       
       if(decls.find(CMangle(id)) == decls.end())
-	if (id->Flags & ID_IS_PRIVATE)	  
+	if (id->flags & ID_IS_PRIVATE)	  
 	  out << "static ";
       
       if(ast->child(1)->astType == at_lambda) {
@@ -1954,7 +1954,7 @@ toc(std::ostream& errStream,
 	shared_ptr<AST> id = ast->child(0);
 	assert(id->symbolDef);
 
-	if(id->Flags & SELF_TAIL) {
+	if(id->flags & SELF_TAIL) {
 	  shared_ptr<AST> lbps = id->symbolDef->defbps;
 	  assert(lbps);
 	  assert(ast->children.size() == lbps->children.size() + 1);
@@ -2107,7 +2107,7 @@ toc(std::ostream& errStream,
 	 work :) */
       shared_ptr<AST> hackIdent = AST::make(at_ident, ast->loc);
       hackIdent->s = "__bitc_temp_mvec";
-      hackIdent->Flags |= ID_IS_GENSYM; // don't add extra astID after name
+      hackIdent->flags |= ID_IS_GENSYM; // don't add extra astID after name
       hackIdent->symType = Type::make(ty_word);
       shared_ptr<AST> apply = AST::make(at_apply, ast->loc, 
 			   ast->child(1), hackIdent);
@@ -2371,7 +2371,7 @@ toc(std::ostream& errStream,
 	  ast, 0, flags);
       out << "->";
       
-      if(ast->Flags & INNER_REF_NDX) {
+      if(ast->flags & INNER_REF_NDX) {
 	out << "elem[";
 	TOC(errStream, uoc, ast->child(1), out, IDname, decls, 
 	    ast, 1, flags);      
@@ -2476,15 +2476,15 @@ toc(std::ostream& errStream,
     {
       assert(ast->child(0)->astType == at_identPattern);
       shared_ptr<AST> ident = ast->child(0)->child(0);
-      if((ast->Flags & LB_IS_DUMMY) == 0) {	
-	if ((ast->Flags & LB_POSTPONED) == 0)
+      if((ast->flags & LB_IS_DUMMY) == 0) {	
+	if ((ast->flags & LB_POSTPONED) == 0)
 	  out << CMangle(ident) << " = ";
       }
 
       TOC(errStream, uoc, ast->child(1), out, CMangle(ident), 
 	  decls, ast, 1, flags);
-      if(((ast->Flags & LB_IS_DUMMY) == 0) &&
-	 ((ast->Flags & LB_POSTPONED) == 0))
+      if(((ast->flags & LB_IS_DUMMY) == 0) &&
+	 ((ast->flags & LB_POSTPONED) == 0))
 	out << ";" << endl;       
       break;
     }
@@ -2823,7 +2823,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 	  ast->rename(id, WFN_PFX + id->s);
 	}
 	
-	if(ast->Flags & DEF_IS_TRIVIAL_INIT) {
+	if(ast->flags & DEF_IS_TRIVIAL_INIT) {
 	  // Case 1: marked trivial initializer, 
 	  //         including immutable functions that are of the form
 	  //         (define f (lambda (...) ... ))
@@ -3025,7 +3025,7 @@ ValuesTOH(std::ostream& errStream,
     switch(ast->astType) {
     case at_proclaim:
       {
-	if(ast->getID()->Flags & DEF_IS_EXTERNAL) {
+	if(ast->getID()->flags & DEF_IS_EXTERNAL) {
 	  out << "/***************************************" << endl
 	      << "   " << ast->loc << endl
 	      << "   " << ast->asString() 

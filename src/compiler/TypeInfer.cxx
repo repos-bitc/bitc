@@ -314,7 +314,7 @@ UnifyLetBinds(std::ostream& errStream, shared_ptr<AST> lbs,
     if(Options::heuristicInference) {
       shared_ptr<Type> idType = id->symType->getType();
 
-      if((id->Flags & ID_IS_MUTATED) && !idType->isMutable()) {
+      if((id->flags & ID_IS_MUTATED) && !idType->isMutable()) {
 	std::stringstream ss;  
 	shared_ptr<Type> mTv = Type::make(ty_mutable, newTvar());
 	
@@ -872,7 +872,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	{
 	  shared_ptr<comp> nComp = comp::make(field->child(0)->s,
 				       field->child(1)->symType);
-	  if(field->Flags & FLD_IS_DISCM)
+	  if(field->flags & FLD_IS_DISCM)
 	    nComp->flags |= COMP_UNIN_DISCM;
 	  
 	  ctrId->symType->components.push_back(nComp);
@@ -1009,7 +1009,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 
   /* If we are dealing with defrepr, don't perform any
      optimization */ 
-  if(ast->Flags & UNION_IS_REPR) {
+  if(ast->flags & UNION_IS_REPR) {
     if(declares->tagType) {
       errStream << ast->loc << ": "
 		<< "tag-type declarations cannot be "
@@ -1042,7 +1042,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
     else if(ctrs->children.size() == 1) {
       declares->tagType = Type::make(ty_word);
       assert(declares->field_bits == 0);
-      uIdent->Flags |= SINGLE_LEG_UN;
+      uIdent->flags |= SINGLE_LEG_UN;
     }
     else {      
       declares->tagType = Type::make(ty_word);     
@@ -1098,13 +1098,13 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       if(isEnum) {
 	assert(!seenRef);
 	cardelli = false;
-	uIdent->Flags |= ENUM_UN;
+	uIdent->flags |= ENUM_UN;
       }
       else if(cardelli) {	
 	assert(!isEnum);
-	uIdent->Flags |= CARDELLI_UN;
+	uIdent->flags |= CARDELLI_UN;
 	if (isNullable)
-	  uIdent->Flags |= NULLABLE_UN;
+	  uIdent->flags |= NULLABLE_UN;
 	lastTagValueCardelli = (2 * lastTagValue) - 1;
       }
       
@@ -3272,8 +3272,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       }
       
       ast->child(1)->symbolDef = fct->defAst;	  
-      ast->child(1)->Flags |= fct->defAst->Flags;
-      ast->child(1)->Flags |= fct->defAst->Flags;
+      ast->child(1)->flags |= fct->defAst->flags;
+      ast->child(1)->flags |= fct->defAst->flags;
       ast->child(1)->symType = fct;
       ast->symType = ast->child(1)->symType;
       break;
@@ -3311,8 +3311,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	break;
       
       ast->child(1)->symbolDef = fct->defAst;	  
-      ast->child(1)->Flags |= fct->defAst->Flags;
-      ast->child(1)->Flags |= fct->defAst->Flags;
+      ast->child(1)->flags |= fct->defAst->flags;
+      ast->child(1)->flags |= fct->defAst->flags;
       ast->child(1)->symType = fct;
       break;
     }
@@ -3999,7 +3999,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       }
       
       if(process_ndx) {
-	ast->Flags |= INNER_REF_NDX;
+	ast->flags |= INNER_REF_NDX;
 	// match agt_expr
 	TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
@@ -4206,7 +4206,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	 intersection of all constructors as invalid. This flag (on
 	 the component) is ONLY checked in at_select.  */
       shared_ptr<AST> uninID = aCtr->symType->myContainer;
-      bool isRepr = (uninID->Flags & UNION_IS_REPR);
+      bool isRepr = (uninID->flags & UNION_IS_REPR);
 
 
       for(size_t c=2; c < ast->children.size(); c++) {
@@ -4661,7 +4661,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<AST> id = ast->getID();
       shared_ptr<AST> ip = ast->child(0);
       shared_ptr<AST> expr = ast->child(1);
-      if(ast->Flags & LB_REC_BIND) {
+      if(ast->flags & LB_REC_BIND) {
 	TYPEINFER(ip, gamma, instEnv, impTypes, 
 		  isVP, tcc, uflags, trail, REDEF_MODE, TI_COMP2);
 

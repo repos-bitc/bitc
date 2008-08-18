@@ -585,7 +585,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       BitcP(out, ident, showTypes);
       out << " : ";
       BitcP(out, proc_type, showTypes);
-      if(ident->Flags & DEF_IS_EXTERNAL) {
+      if(ident->flags & DEF_IS_EXTERNAL) {
 	out << " external";
 	if(ident->externalName.size())
 	  out << " " << ident->externalName;	
@@ -742,7 +742,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       show_qual_name(out, ident, tvlist, constraints, showTypes);
       BitcP(out, category, showTypes);
       
-      if(ident->Flags & DEF_IS_EXTERNAL) {
+      if(ident->flags & DEF_IS_EXTERNAL) {
 	out << " external";
 	if(ident->externalName.size())
 	  out << " " << ident->externalName;	

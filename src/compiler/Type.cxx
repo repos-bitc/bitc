@@ -368,7 +368,7 @@ Type::isNullableType()
 {
   shared_ptr<Type> t = getBareType();
   return (t->kind == ty_unionv &&
-	  (t->defAst->Flags & NULLABLE_UN));
+	  (t->defAst->flags & NULLABLE_UN));
 }
 
 

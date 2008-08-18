@@ -739,19 +739,19 @@ type_definition: '(' tk_DEFREPR defident val optdocstring declares repr_construc
 externals: /* nothing */ {
   SHOWPARSE("externals -> ");
   $$ = AST::make(at_Null);
-  $$->Flags = NO_FLAGS;
+  $$->flags = NO_FLAGS;
 };
 
 externals: tk_EXTERNAL {
   SHOWPARSE("externals -> EXTERNAL");
   $$ = AST::make(at_Null, $1.loc);
-  $$->Flags = DEF_IS_EXTERNAL;
+  $$->flags = DEF_IS_EXTERNAL;
 };
 
 externals: tk_EXTERNAL exident {
   SHOWPARSE("externals -> EXTERNAL exident");
   $$ = AST::make(at_Null, $1.loc);
-  $$->Flags = DEF_IS_EXTERNAL;  
+  $$->flags = DEF_IS_EXTERNAL;  
   $$->externalName = $2->s;
 };
 
@@ -762,8 +762,8 @@ type_decl: '(' tk_DEFSTRUCT ptype_name val externals ')' {
   $$ = AST::make(at_declstruct, $2.loc, $3->child(0), $3->child(1), $4,
 	       $3->child(2));
   $$->child(0)->defForm = $$;
-  $$->Flags |= $5->Flags;
-  $$->getID()->Flags |= $5->Flags;
+  $$->flags |= $5->flags;
+  $$->getID()->flags |= $5->flags;
   $$->getID()->externalName = $5->externalName;
 };
 
@@ -773,8 +773,8 @@ type_decl: '(' tk_DEFUNION ptype_name val externals ')' {
   $$ = AST::make(at_declunion, $2.loc, $3->child(0), $3->child(1), $4,
 	       $3->child(2));
   $$->child(0)->defForm = $$;
-  $$->Flags |= $5->Flags;
-  $$->getID()->Flags |= $5->Flags;
+  $$->flags |= $5->flags;
+  $$->getID()->flags |= $5->flags;
   $$->getID()->externalName = $5->externalName;
 };
 
@@ -783,8 +783,8 @@ type_decl: '(' tk_DEFREPR defident val externals ')' {
   SHOWPARSE("type_decl -> ( DEFREPR defident val externals )");
   $$ = AST::make(at_declrepr, $2.loc, $3, $4);
   $$->child(0)->defForm = $$;
-  $$->Flags |= $5->Flags;
-  $$->getID()->Flags |= $5->Flags;
+  $$->flags |= $5->flags;
+  $$->getID()->flags |= $5->flags;
   $$->getID()->externalName = $5->externalName;
 };
 
@@ -813,14 +813,14 @@ val: ':' tk_REF {
 // EXCEPTION DEFINITION [3.10]
 type_definition: '(' tk_DEFEXCEPTION ident optdocstring ')' {
   SHOWPARSE("type_definition -> ( defexception ident )");
-  $3->Flags |= ID_IS_GLOBAL;
+  $3->flags |= ID_IS_GLOBAL;
   $$ = AST::make(at_defexception, $2.loc, $3);
   $$->child(0)->defForm = $$;
 };
 
 type_definition: '(' tk_DEFEXCEPTION ident optdocstring fields ')' {
   SHOWPARSE("type_definition -> ( defexception ident fields )");
-  $3->Flags |= ID_IS_GLOBAL;
+  $3->flags |= ID_IS_GLOBAL;
   $$ = AST::make(at_defexception, $2.loc, $3);
   $$->child(0)->defForm = $$;
   $$->addChildrenFrom($5);
@@ -870,7 +870,7 @@ method_decls: method_decls method_decl {
 
 method_decl: ident ':' fntype {
   SHOWPARSE("method_decl -> ident : fntype");
-  $1->Flags |= ID_IS_GLOBAL;
+  $1->flags |= ID_IS_GLOBAL;
   $1->identType = id_method;
   $$ = AST::make(at_method_decl, $1->loc, $1, $3);
 };
@@ -940,8 +940,8 @@ value_definition: '(' tk_DEFINE '(' defident lambdapatterns ')'
 proclaim_definition: '(' tk_PROCLAIM defident ':' qual_type optdocstring externals ')' {
   SHOWPARSE("if_definition -> ( PROCLAIM ident : qual_type externals optdocstring )");
   $$ = AST::make(at_proclaim, $2.loc, $3, $5);
-  $$->Flags |= $7->Flags;
-  $$->getID()->Flags |= $7->Flags;
+  $$->flags |= $7->flags;
+  $$->getID()->flags |= $7->flags;
   $$->getID()->externalName = $7->externalName;
   $$->addChild(AST::make(at_constraints));
 };
@@ -1085,12 +1085,12 @@ constructors: constructors constructor {
 };
 constructor: ident { 	       	  /* simple constructor */ 
   SHOWPARSE("constructor -> defident");
-  $1->Flags |= (ID_IS_GLOBAL);
+  $1->flags |= (ID_IS_GLOBAL);
   $$ = AST::make(at_constructor, $1->loc, $1);
 };
 constructor: '(' ident fields ')' {  /* compound constructor */ 
   SHOWPARSE("constructor ->  ( ident fields )");
-  $2->Flags |= (ID_IS_GLOBAL);
+  $2->flags |= (ID_IS_GLOBAL);
   $$ = AST::make(at_constructor, $2->loc, $2);
   $$->addChildrenFrom($3);
 };
@@ -1107,12 +1107,12 @@ repr_constructors: repr_constructors repr_constructor {
 };
 /* repr_constructor: ident repr_reprs { 	       	  /\* simple constructor *\/  */
 /*   SHOWPARSE("repr_constructor -> defident"); */
-/*   $1->Flags |= (ID_IS_GLOBAL); */
+/*   $1->flags |= (ID_IS_GLOBAL); */
 /*   $$ = AST::make(at_reprctr, $1->loc, $1); */
 /* }; */
 repr_constructor: '(' ident fields '('tk_WHERE repr_reprs')' ')' {  /* compound constructor */ 
   SHOWPARSE("repr_constructor ->  ( ident fields ( WHERE repr_reprs ) )");
-  $2->Flags |= (ID_IS_GLOBAL);
+  $2->flags |= (ID_IS_GLOBAL);
   shared_ptr<AST> ctr = AST::make(at_constructor, $2->loc, $2);
   ctr->addChildrenFrom($3);
   $$ = AST::make(at_reprctr, $2->loc, ctr);
@@ -1543,7 +1543,7 @@ lambdapattern: ident ':' type_pl_byref {
   SHOWPARSE("lambdapattern -> ident : type_pl_byref");
   $$ = AST::make(at_identPattern, $1->loc, $1, $3);
   if($3->astType == at_byrefType)
-    $1->Flags |= ARG_BYREF;
+    $1->flags |= ARG_BYREF;
 };
 
 lambdapattern: '(' tk_THE type ident ')' {
@@ -1554,7 +1554,7 @@ lambdapattern: '(' tk_THE type ident ')' {
 lambdapattern: '(' tk_THE '(' tk_BY_REF type ')' ident ')' {
   SHOWPARSE("lambdapattern -> ( the ( by-ref type ) ident )");
   $$ = AST::make(at_identPattern, $1.loc, $7, $5);
-  $5->Flags |= ARG_BYREF;
+  $5->flags |= ARG_BYREF;
 };
 
 // EXPRESSIONS [7]
@@ -2055,7 +2055,7 @@ let_eform: '(' tk_LETREC '(' letbindings ')' expr_seq ')' {
   $6->printVariant = 1;
   shared_ptr<AST> lbs = $4;
   for(size_t c=0; c < lbs->children.size(); c++)
-    lbs->child(c)->Flags |= LB_REC_BIND;
+    lbs->child(c)->flags |= LB_REC_BIND;
   
   $$ = AST::make(at_letrec, $2.loc, $4, $6);
   $$->addChild(AST::make(at_constraints));
@@ -2115,7 +2115,7 @@ eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
   }
 
   shared_ptr<AST> theBinding = AST::make(at_letbinding, $1.loc);
-  theBinding->Flags |= LB_REC_BIND;
+  theBinding->flags |= LB_REC_BIND;
   
   theBinding->addChild(AST::make(at_identPattern, $1.loc, theIdent));
   theBinding->addChild(theLambda);
@@ -2220,13 +2220,13 @@ useident: ident '.' ident {
 
 //defident: ident {
 //  SHOWPARSE("defident -> ident");
-//  $1->Flags |= (ID_IS_GLOBAL);
+//  $1->flags |= (ID_IS_GLOBAL);
 //  $$ = $1;
 //};
 
 defident: useident {
   SHOWPARSE("defident -> useident");
-  $1->Flags |= (ID_IS_GLOBAL);
+  $1->flags |= (ID_IS_GLOBAL);
   $$ = $1;
 };
 

@@ -124,8 +124,8 @@ LetWrap(shared_ptr<AST> ast)
   idPattern->addChild(id);
 
   useid->s = id->s = ss.str();
-  useid->Flags |=  ID_IS_GENSYM;
-  id->Flags |= ID_IS_GENSYM;
+  useid->flags |=  ID_IS_GENSYM;
+  id->flags |= ID_IS_GENSYM;
   useid->identType = id->identType = id_value;
   assert(!ast->scheme);
   //  useid->scheme = id->scheme = ast->scheme;
