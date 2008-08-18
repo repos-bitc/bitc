@@ -739,7 +739,7 @@ type_definition: '(' tk_DEFREPR defident val optdocstring declares repr_construc
 externals: /* nothing */ {
   SHOWPARSE("externals -> ");
   $$ = AST::make(at_Null);
-  $$->Flags = 0;
+  $$->Flags = NO_FLAGS;
 };
 
 externals: tk_EXTERNAL {

@@ -94,7 +94,7 @@ UseCase(shared_ptr<AST> ast)
 
 static shared_ptr<AST> 
 addLB(shared_ptr<AST> grandLet, shared_ptr<AST> identList, 
-      shared_ptr<AST> ast, unsigned long lbFlags=0,
+      shared_ptr<AST> ast, EnumSet<AstFlags> lbFlags = NO_FLAGS,
       shared_ptr<AST> id=GC_NULL, bool addToIL=true)
 {
   if(!id)
@@ -441,7 +441,7 @@ ssa(std::ostream& errStream,
       SSA(errStream, uoc, ast->child(1), gl, identList, 
 	  ast, 1, flags);
       FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 
-			1, res, true);
+			ID_IS_GLOBAL, res, true);
 
       SETGL(ast->child(1), gl);
       shared_ptr<AST> topres = UseCase(res);
@@ -744,9 +744,9 @@ ssa(std::ostream& errStream,
 	     ast, 2, flags);
 
       FEXPR(gl1) = addLB(gl1, identList, FEXPR(gl1), 
-			 0, res, true);
+			 NO_FLAGS, res, true);
       FEXPR(gl2) = addLB(gl2, identList, FEXPR(gl2), 
-			 0, res, false);
+			 NO_FLAGS, res, false);
       SETGL(ast->child(1), gl1);
       SETGL(ast->child(2), gl2);
 
@@ -768,7 +768,7 @@ ssa(std::ostream& errStream,
 	     ast, 1, flags);
 
       FEXPR(gl1) = addLB(gl1, identList, FEXPR(gl1), 
-			 0, res, true);
+			 NO_FLAGS, res, true);
       SETGL(ast->child(1), gl1);
 
       shared_ptr<AST> topres = UseCase(res);
@@ -884,7 +884,7 @@ ssa(std::ostream& errStream,
 	shared_ptr<AST> gl = newGrandLet(ast);
 	SSA(errStream, uoc, ast->child(0), gl, identList, 
 	    ast, 0, flags);	
-	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 0, res, false);
+	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), NO_FLAGS, res, false);
 	SETGL(ast->child(0), gl);
       }
       else {
@@ -904,7 +904,7 @@ ssa(std::ostream& errStream,
 	SSA(errStream, uoc, theCase->child(1), gl, 
 	    identList, theCase, 1, flags);
 
-	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 0, res, false);
+	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), NO_FLAGS, res, false);
 	SETGL(theCase->child(1), gl);
       }
 
@@ -914,7 +914,7 @@ ssa(std::ostream& errStream,
 	shared_ptr<AST> owExpr = ow->child(0);
 	shared_ptr<AST> gl = newGrandLet(owExpr);
 	SSA(errStream, uoc, owExpr, gl, identList, ast, 2, flags);
-	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 0, res, false);
+	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), NO_FLAGS, res, false);
 	SETGL(ow->child(0), gl);
       }
       shared_ptr<AST> topres = UseCase(res);
@@ -946,7 +946,7 @@ ssa(std::ostream& errStream,
 	SSA(errStream, uoc, init, gl, identList, db, 1, flags);
 	theIdent = UseCase(ident);
 	FEXPR(gl) = addLB(gl, identList, FEXPR(gl),
-			  0, theIdent, false);
+			  NO_FLAGS, theIdent, false);
 	SETGL(db->child(1), gl);
 	db->Flags |= LB_IS_DUMMY; 
  	
@@ -955,7 +955,7 @@ ssa(std::ostream& errStream,
 	SSA(errStream, uoc, step, gl, identList, db, 2, flags);
 	theIdent = UseCase(ident);
 	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 
-			  0, theIdent, false);
+			  NO_FLAGS, theIdent, false);
 	SETGL(db->child(2), gl);
       }
 
@@ -972,7 +972,7 @@ ssa(std::ostream& errStream,
       SSA(errStream, uoc, dotest->child(1), gl, identList, 
 	     dotest, 1, flags);
       FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 
-			0, res, true);
+			NO_FLAGS, res, true);
       SETGL(dotest->child(1), gl);
       
       
@@ -1006,7 +1006,7 @@ ssa(std::ostream& errStream,
 	addIL(identList, theIdent);
 	//theIdent->markFlags(ID_IS_LETBOUND);
 	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 
-			  0, theIdent, false);
+			  NO_FLAGS, theIdent, false);
 	SETGL(lb->child(1), gl);
 	lb->Flags |= LB_IS_DUMMY; 
       }
@@ -1016,7 +1016,7 @@ ssa(std::ostream& errStream,
       SSA(errStream, uoc, ast->child(1), gl, identList, 
 	     ast, 1, flags);      
       FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 
-			0, res, true);
+			NO_FLAGS, res, true);
       SETGL(ast->child(1), gl);
       
       shared_ptr<AST> topres = UseCase(res);
