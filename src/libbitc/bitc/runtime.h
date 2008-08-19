@@ -978,7 +978,7 @@ DEFCAST(bitc_word_t,  _4word,  bitc_double_t, _6double);
 void *
 bitc_emit_procedure_object(void *stubP, void *envP) MAYBE_UNUSED;
 
-#ifdef __i386__
+#if defined(__i386__)
 
 typedef union {
   uint8_t code[13];
@@ -992,7 +992,23 @@ typedef union {
   void *nm; \
   __asm__ __volatile__("movl %%eax,%0" : "=g" (nm))
 
-#endif /* __i386__ */
+#elif defined(__x86_64__)
+
+typedef union {
+  uint8_t code[25];
+  struct {
+    uint8_t pad[16];
+    void *ptr;
+  } env;
+} bitc_Procedure;
+
+#define BITC_GET_CLOSURE_ENV(nm) \
+  void *nm; \
+  __asm__ __volatile__("movl %%rax,%0" : "=g" (nm))
+
+#else
+#  error "Target architecture not (yet) supported"
+#endif
 
 
 /***************************************************************
