@@ -988,8 +988,9 @@ typedef union {
   } env;
 } bitc_Procedure;
 
-extern void *currentClosureEnvPtr;
-#define BITC_GET_CLOSURE_ENV(nm) void *nm = currentClosureEnvPtr;
+#define BITC_GET_CLOSURE_ENV(nm) \
+  void *nm; \
+  __asm__ __volatile__("movl %%eax,%0" : "=g" (nm))
 
 #endif /* __i386__ */
 

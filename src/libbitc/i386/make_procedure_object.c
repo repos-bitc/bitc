@@ -39,13 +39,10 @@
 #include <inttypes.h>
 #include "../BUILD/bitc-runtime.h"
 
-void *currentClosureEnvPtr;
-
 void *
 bitc_emit_procedure_object(void *stubP, void *envP)
 {
 #if 1
-  uint32_t closureEnvPtrW = (uint32_t) &currentClosureEnvPtr;
   uint32_t envW = (uint32_t) envP;
   uint32_t stubW = (uint32_t) stubP;
 
@@ -55,30 +52,21 @@ bitc_emit_procedure_object(void *stubP, void *envP)
   proc->code[1] = 0x90;
   proc->code[2] = 0x90;
 
-  /* push $envP */
-  proc->code[3] = 0x68u;	/* PUSH imm */
+  /* movl $envP,%eax */
+  proc->code[3] = 0xb8u;	/* MOV imm,%eax */
   proc->code[4] = 0x0;		/* fill */
   proc->code[5] = 0x0;		/* fill */
   proc->code[6] = 0x0;		/* fill */
   proc->code[7] = 0x0;		/* fill */
 
-  /* pop currentClosureEnvPtr */
-
-  proc->code[8] = 0x8fu;	/* POP */
-  proc->code[9] = 0x05u;	/* modrm = 00 000 101 */
-  proc->code[10] = closureEnvPtrW;
-  proc->code[11] = (closureEnvPtrW >> 8);
-  proc->code[12] = (closureEnvPtrW >> 16);
-  proc->code[13] = (closureEnvPtrW >> 24);
-
   /* jmp rel32 */
-  stubW -= (uint32_t)&proc->code[19];
+  stubW -= (uint32_t)&proc->code[13];
 
-  proc->code[14] = 0xe9u;
-  proc->code[15] = stubW;
-  proc->code[16] = (stubW >> 8);
-  proc->code[17] = (stubW >> 16);
-  proc->code[18] = (stubW >> 24);
+  proc->code[8] = 0xe9u;
+  proc->code[9] = stubW;
+  proc->code[10] = (stubW >> 8);
+  proc->code[11] = (stubW >> 16);
+  proc->code[12] = (stubW >> 24);
 
   proc->env.ptr = envP;
 
