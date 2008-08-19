@@ -830,7 +830,8 @@ emit_fnxn_label(std::ostream& errStream,
      retType 
      xfn_f(args)
      {
-       return f(currentClosurePtr, args);
+       BITC_GET_CLOSURE_ENV(__bitc_closure_env);
+       return f(__bitc_closure_env, args);
      }
   */
   if (ast->flags & LAM_NEEDS_TRANS) {
@@ -847,10 +848,12 @@ emit_fnxn_label(std::ostream& errStream,
 	<< endl;	    
     out.more();
     
+    out << "BITC_GET_CLOSURE_ENV(__bitc_closure_env);" << endl;
+
     shared_ptr<AST> argvec = lam->child(0);    
     if (! isUnitType(ret))
       out << "return ";
-    out << CMangle(id) << "(currentClosurePtr";
+    out << CMangle(id) << "(__bitc_closure_env";
     for (size_t i=1; i < argvec->children.size(); i++) {
       shared_ptr<AST> pat = argvec->child(i);
       shared_ptr<AST> arg = pat->child(0);
@@ -1064,7 +1067,7 @@ toc(std::ostream& errStream,
       
       out << IDname << " = " 
 	  << "(" << toCtype(ast->symType) << ")"
-	  << "bitc_emit_closure_object("
+	  << "bitc_emit_procedure_object("
 	  << XFN_PFX << CMangle(fn)
 	  << ", ";
       TOC(errStream, uoc, env, out, IDname, decls, ast, 0, flags);
@@ -3228,3 +3231,185 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
   return WEXITSTATUS(status) ? false : true;
 }
 
+/// @page ProcObjects Implementation of Procedure Objects
+///
+/// In any language implementing closures, there are two types of
+/// procedures:
+///
+/// - procedure <em>labels</em>, which are procedures that <em>do
+///   not</em> require an explicit closure environment. These include
+///   procedures in which the closure environment pointer has been
+///   converted into an explicit parameter.
+/// - procedure <em>objects</em>, which are procedures that <em>do</em>
+///   require an explicit closure object.
+///
+/// In abstract, these can be unified by emitting <em>every</em>
+/// procedure with a closure pointer argument, and nullifying that
+/// argument when it is not used. In practice, this is inefficient,
+/// because most procedure calls are statically resolvable, and in
+/// that case the decision (not) to pass a closure pointer can be made
+/// at compile time.
+///
+/// Complicating matters somewhat, we want procedure objects to be
+/// callable from C. This constrains the form of a procedure object in
+/// two ways:
+///
+/// -# A procedure object may not be relocated during its lifetime.
+/// -# A procedure object must begin with code, so that a call to a
+///    procedure object that is initiated from C will have the desired
+///    effect. That is: procedure objects are executable, and they
+///    execute between frames. 
+///
+/// The first requirement above means that in compacting
+/// implementations, procedure objects must be allocated from a
+/// non-compated heap. Type-based partitioning of procedure objects is
+/// probably indicated in this situation.
+///
+/// <h1>Types of Procedures</h1>
+///
+/// BitC constructs closures in such a way that globals are not
+/// incorporated into the closure and self-recursion is not
+/// incorporated into the closure. This results in two types of
+/// procedures: those requiring an explicit closure environment
+/// pointer and those that do not. If a procedure does <em>not</em>
+/// require an explicit closure environment pointer, then the
+/// procedure is implemented directly as a procedure label (i.e. a
+/// C-style function).
+///
+/// <h1>Procedure Objects and Stub Functions</h1>
+///
+/// When a procedure requires a closure environment pointer, four
+/// objects are generated:
+///
+/// - A procedure object <code>f</code>. This is heap-allocated
+///   trampoline code that expects to be called <em>without</em> any
+///   closure environment pointer. The job of this trampoline is to
+///   insert the required closure environment pointer into a suitable
+///   well-known location to be sourced from <code>f_stub</code>
+/// - A stub function <code>f_stub</code>. The purpose of
+///   <code>f_stub</code> is to fetch the closure environment pointer
+///   from the well-known location written by the trampoline, and
+///   invoke <code>f_closed</code>, supplying the required closure
+///   environment pointer and forwarding any passed arguments.
+/// - A function implementation <code>f_closed</code>, which takes an
+///   explicit closure environment pointer.
+///
+/// In this case, the procedure object must not be relocated by the
+/// garbage collector (because there might be non-relocatable pointers
+/// in the C heap to them). The address of the procedure object serves
+/// as the procedure label.  It is critical that the stack frame
+/// fabricated in any call to <code>f_stub</code> be compatible with
+/// the stack frame required for a call to <code>f</code>, and that
+/// the code of <code>f</code> (i.e. the code of the procedure object)
+/// not modify the stack frame in any way that would violate the
+/// calling convention.
+///
+/// If an <code>f_stub()</code> procedure is required, it will look
+/// (at the C level)
+/// something like:
+///
+/// <pre>
+/// ReturnType f_stub(T1 arg1, ... Tn argn)
+/// {
+///   theClosedEnv = someplace_magical;
+///   return f_closed(theClosedEnv, arg1, ... argn);
+/// }
+/// </pre>
+///
+/// The choice of <em>someplace_magical</em> is (highly)
+/// architecture-dependent. Prefered choices are (in declining order
+/// of preference) are:
+///
+/// - Any register that is call-clobbered but not used for arguments,
+///   e.g. %%eax on IA-32, any local register on SPARC.
+/// - A push onto the stack if the calling convention is purely stack
+///   based (feasible on IA-32).
+/// - A <code>mov</code> to the thread-local global variable
+///   <code>bitc_currentEnvPtr</code>.
+///
+/// The job of the procedure object trampoline is to store the
+/// required closure environment pointer into one of these locations
+/// in a way that is compatible with the calling convention of the
+/// target architecture and transfer control to <code>f_stub</code>.
+///
+/// <h1>BitC Implementation</h1>
+///
+/// In the BitC implementation, the closure object consists of
+/// trampoline code that is interspersed with the environment
+/// pointer. This can be described by the C structure:
+///
+/// <pre>
+/// union ProcedureObject {
+///   uint8_t code[?];      // length is arch-dependent
+///   struct {
+///     uint8_t prefix[?];  // size is arch-dependent
+///     void *ptr;          // pointer to closure environment
+///   } env;
+/// };
+/// </pre>
+///
+/// with the intended meaning that <tt>env.ptr</tt> is a naturally
+/// aligned overlay onto the code block.
+///
+/// <h1>Sample Implementations</h1>
+///
+/// On IA-32, the trampoline code sequence looks like:
+///
+/// <pre>
+/// +-----------------+
+/// | code  (4 bytes) |
+/// +-----------------+
+/// |   env pointer   |
+/// +-----------------+
+/// |    more code    |
+/// +-----------------+
+/// union ProcedureObject {
+///   uint8_t code[13];      // length is arch-dependent
+///   struct {
+///     uint8_t prefix[4];  // size is arch-dependent
+///     void *ptr;          // pointer to closure environment
+///   } env;
+/// };
+/// </pre>
+/// <pre>
+/// NOP  ;; three NOPs for alignment
+/// NOP
+/// NOP
+/// MOVL  envP,%eax
+/// J     dest
+/// </pre>
+///
+/// On SPARC, the trampoline code sequence looks like:
+///
+/// <pre>
+/// +------------------+
+/// | code  (12 bytes) |
+/// +------------------+
+/// |    env pointer   |
+/// +------------------+
+/// </pre>
+/// union ProcedureObject {
+///   uint8_t code[12];      // length is arch-dependent
+///   struct {
+///     uint8_t prefix[12];  // size is arch-dependent
+///     void *ptr;          // pointer to closure environment
+///   } env;
+/// };
+/// <pre>
+/// SETHI %r16 := destProc[31:10]
+/// JMPL  %r16 := %r16 + destProc[9:0]
+/// ;; trick: r16 now points to address of LD instr:
+/// LD    %r16 := %r16 + 4
+/// </pre>
+///
+/// <h1>Incidental Optimizations</h1>
+///
+/// There is an important op further optimization possible; most
+/// procedure calls are intra-file, and in these cases, or when
+/// whole-program optimization is possible, it is possible for the
+/// code emitter to emit calls to procedure objects in such a way as
+/// to call the <code>f_closed</code> version of the procedure
+/// directly. This is possible when the procedure can be statically
+/// resolved.  The key point here is that there exists some
+/// heap-allocated stub strategy that is feasible on all target
+/// architectures.

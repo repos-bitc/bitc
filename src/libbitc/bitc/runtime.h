@@ -927,7 +927,6 @@ DEFCAST(bitc_word_t,  _4word,  bitc_double_t, _6double);
 
 /* Current-Closure-pointer must be in thread-local storage. However,
    there is only one thread for now. */
-void *currentClosurePtr;
 
 /*********  The following is highly machine dependent       ****/
 /***************************************************************** 
@@ -976,71 +975,15 @@ void *currentClosurePtr;
       value.
 ******************************************************************/
 
-#define ARCH_IA32
+void *
+bitc_emit_procedure_object(void *stubP, void *envP) MAYBE_UNUSED;
 
-#ifdef ARCH_IA32
-static void *
-bitc_emit_closure_object(void *trans, void *env) MAYBE_UNUSED;
+#ifdef __i386__
 
-static void *
-bitc_emit_closure_object(void *trans, void *env)
-{
-  /* mov CurrentClosurePointer <- $ProperClosureValue
-     is realized on IA32 as:
-     push $ProperClosureValue
-     pop CurrentClosurePointer     */
-  
-  /* Not sure if C99 allows structure within structure definition */
-  
-  struct __ia32_push {
-    unsigned char op; 
-    void *imm;
-  }__attribute__((packed));;
-  struct __ia32_pop {
-    unsigned char op;
-    unsigned char modrm;
-    void *addr;
-  }__attribute__((packed));;
-  struct __ia32_jmp {
-    unsigned char op;
-    void *addr;
-  }__attribute__((packed));;
-  
-  typedef struct __cl_code __cl_code;  
-  struct __cl_code {
-    struct __ia32_push push; /* 5 bytes */
-    struct __ia32_pop  pop;  /* 6 bytes */
-    struct __ia32_jmp  jmp;  /* 5 bytes */
-    /* No Padding necessary */
-  }__attribute__((packed));
-  
-  typedef void* __cl_ptr;
-  
-  typedef struct closure closure;  
-  struct closure {
-    __cl_code code;
-    __cl_ptr  env;
-  }__attribute__((packed));;
-  
-  struct closure* cl = GC_ALLOC(sizeof(closure));
-  
-  /* push $env :: 68 imm32*/
-  cl->code.push.op = 0x68u;
-  cl->code.push.imm = env;
+extern void *currentClosureEnvPtr;
+#define BITC_GET_CLOSURE_ENV(nm) void *nm = currentClosureEnvPtr;
 
-  /* pop $currentClosurePtr :: 8F /0 r/m32 */
-  cl->code.pop.op = 0x8Fu;
-  cl->code.pop.modrm = 0x05u; /* 00 000 101 */
-  cl->code.pop.addr = &currentClosurePtr;
-
-  /* jmp $trans :: E9 rel32 */
-  cl->code.jmp.op = 0xE9u;
-  cl->code.jmp.addr = (void *)((unsigned long)trans -
-			       ((unsigned long)&(cl->code.jmp.addr) + 4));  
-  cl->env = env;
-  return cl;
-}
-#endif
+#endif /* __i386__ */
 
 
 /***************************************************************
