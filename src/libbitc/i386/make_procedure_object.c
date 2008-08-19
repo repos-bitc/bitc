@@ -42,7 +42,6 @@
 void *
 bitc_emit_procedure_object(void *stubP, void *envP)
 {
-#if 1
   uint32_t envW = (uint32_t) envP;
   uint32_t stubW = (uint32_t) stubP;
 
@@ -54,10 +53,8 @@ bitc_emit_procedure_object(void *stubP, void *envP)
 
   /* movl $envP,%eax */
   proc->code[3] = 0xb8u;	/* MOV imm,%eax */
-  proc->code[4] = 0x0;		/* fill */
-  proc->code[5] = 0x0;		/* fill */
-  proc->code[6] = 0x0;		/* fill */
-  proc->code[7] = 0x0;		/* fill */
+
+  /* [4..7] will be filled in via env.ptr */
 
   /* jmp rel32 */
   stubW -= (uint32_t)&proc->code[13];
@@ -75,69 +72,5 @@ bitc_emit_procedure_object(void *stubP, void *envP)
   /* On this architecture, no explicit iCache flush is required as
    * long as a branch appears. Return suffices for a branch, which is why
    * this must not be an inline procedure. */
-
-#else
-  /* mov CurrentClosurePointer <- $ProperClosureValue
-     is realized on IA32 as:
-     push $ProperClosureValue
-     pop CurrentClosurePointer     */
-  
-  /* Not sure if C99 allows structure within structure definition */
-  
-  struct __ia32_nops {
-    unsigned char op[3];
-  }__attribute__((packed));
-  struct __ia32_push {
-    unsigned char op; 
-    void *imm;
-  }__attribute__((packed));
-  struct __ia32_pop {
-    unsigned char op;
-    unsigned char modrm;
-    void *addr;
-  }__attribute__((packed));
-  struct __ia32_jmp {
-    unsigned char op;
-    void *addr;
-  }__attribute__((packed));
-  
-  typedef struct __cl_code __cl_code;  
-  struct __cl_code {
-    struct __ia32_nops nops; /* 3 bytes */
-    struct __ia32_push push; /* 5 bytes */
-    struct __ia32_pop  pop;  /* 6 bytes */
-    struct __ia32_jmp  jmp;  /* 5 bytes */
-    /* No Padding necessary */
-  }__attribute__((packed));
-  
-  typedef void* __cl_ptr;
-  
-  typedef struct closure closure;  
-  struct closure {
-    __cl_code code;
-    __cl_ptr  env;
-  }__attribute__((packed));;
-  
-  struct closure* cl = GC_ALLOC(sizeof(closure));
-  
-  cl->code.nops.op[0] = 0x90;
-  cl->code.nops.op[1] = 0x90;
-  cl->code.nops.op[2] = 0x90;
-
-  /* push $env :: 68 imm32*/
-  cl->code.push.op = 0x68u;
-  cl->code.push.imm = envP;
-
-  /* pop $currentClosurePtr :: 8F /0 r/m32 */
-  cl->code.pop.op = 0x8Fu;
-  cl->code.pop.modrm = 0x05u; /* 00 000 101 */
-  cl->code.pop.addr = &currentClosureEnvPtr;
-
-  /* jmp $transP :: E9 rel32 */
-  cl->code.jmp.op = 0xE9u;
-  cl->code.jmp.addr = (void *)((unsigned long)stubP -
-			       ((unsigned long)&(cl->code.jmp.addr) + 4));  
-  cl->env = envP;
-  return cl;
-#endif
 }
+
