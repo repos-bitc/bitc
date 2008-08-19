@@ -269,6 +269,8 @@
 <!ELEMENT canonical            (%anything.group;)>
 <!ELEMENT relevant             (%anything.group;,%anything.group;)>
 <!ELEMENT normalize            (%anything.group;)>
+<!ATTLIST normalize            name    CDATA   #IMPLIED
+>
  
 <!-- Substitition -->
 <!ENTITY % subst.group "

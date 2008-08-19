@@ -765,8 +765,16 @@
 
   <!-- Normalize -->
   <xsl:template match="normalize" mode="formula">
-    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>Ngr;</xsl:text>
+    <xsl:choose>
+      <xsl:when test="@name='M'">
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>Mgr;</xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>Ngr;</xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:call-template name="print.params"/>
   </xsl:template>
 
@@ -1126,6 +1134,13 @@
       <xsl:when test="@meta">
 	<xsl:call-template name="print.mathcal">
 	  <xsl:with-param name="print.mathcal.letter">
+	    <xsl:value-of select="@name"/>
+	  </xsl:with-param> 
+	</xsl:call-template>
+      </xsl:when>
+      <xsl:when test="@mbb">
+	<xsl:call-template name="print.mathbb">
+	  <xsl:with-param name="print.mathbb.letter">
 	    <xsl:value-of select="@name"/>
 	  </xsl:with-param> 
 	</xsl:call-template>

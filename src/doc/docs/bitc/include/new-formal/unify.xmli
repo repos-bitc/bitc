@@ -204,6 +204,27 @@
 	</rhs>
       </equation>	
       <!-- Mp1 = Mp2 -->
+      <!-- Mutability propagation is handled at the mutability
+      unification rule, which i the only place where new mutability
+      can be generated. 
+      
+      It is sufficient to handle this propagation at the U-Mut rule
+      since all types that share sub-substructure are changed
+      automatically (due to substitutions created by M-function), and
+      mutability only needs to be propagated inwards.
+
+      Completeness: It is the responsibility of the inference
+      algorithm (and the programmer in the case of type annotations)
+      to produce inner types that are either mutable or accept
+      mutability. Otherwise, this will lead to unification failure due
+      to the M-function returnin _|_
+
+      Decidability: The M-function introduces new type variables,
+      which is uncharestetistic of unification. However, this is okay
+      because: (1) M-function does not call unification recursively.
+      (2) The total number of type variables after the call to
+      M-function is non-increasing - it only substitutes types to
+      variables, or new variables to old variables. -->
       <equation name="U-Mut">
 	<lhs>
 	  <unf>
@@ -223,19 +244,52 @@
 	  </unf>
 	</lhs>
 	<rhs>
-	  <unf>
-	    <unin>
-	      <aCtset/>
-	      <set>
-		<eq>
-		  <ptype num="1"/>
-		  <ptype num="2"/>
-		</eq>
-	      </set>
-	    </unin>
-	  </unf>
+	  <grouping>
+	    <Pair>
+	      <dCtset/>
+	      <compose>
+		<aSubMap num="u"/>
+		<aSubMap num="m"/>
+	      </compose>
+	    </Pair>
+	    <text content=" where "/>
+	    <eq>
+	      <pred mbb="yes" name="M">
+		<Subst>
+		  <aSubMap num="u"/>
+		  <type num="1"/>
+		</Subst>
+	      </pred>
+	      <aSubMap num="m"/>
+	    </eq>
+	    <text content=" and "/>
+	  </grouping>
 	</rhs>
-      </equation>	
+      </equation>
+      <eqn-cnt name="">
+	<lhs/>
+	<rhs>
+	  <grouping>
+	    <eq>
+	      <unf>
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <eq>
+		      <ptype num="1"/>
+		      <ptype num="2"/>
+		    </eq>
+		  </set>
+		</unin>
+	      </unf>
+	      <Pair>
+		<dCtset/>
+		<aSubMap num="u"/>
+	      </Pair>
+	    </eq>
+	  </grouping>
+	</rhs>
+      </eqn-cnt>
       <!-- t1xt2 <= t1'xt2' -->
       <equation name="U-Pair">
 	<lhs>

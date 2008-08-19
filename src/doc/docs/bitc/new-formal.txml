@@ -578,14 +578,14 @@
             <lhs>
               <normalize>
                 <mutable>
-                  <type/>
+                  <ptype/>
                 </mutable>
               </normalize>
             </lhs>
             <rhs>
               <mutable>
                 <normalize>
-                  <type/>
+                  <ptype/>
                 </normalize>
               </mutable>
             </rhs>
@@ -628,7 +628,7 @@
               </mbTop>
             </rhs>
           </equation>
-          <equation>
+          <equation sep="4pt">
             <lhs>
               <normalize>
                 <mbFull>
@@ -727,7 +727,7 @@
               <normalize>
                 <const>
                   <mutable>
-                    <type/>
+                    <ptype/>
                   </mutable>
                 </const>
               </normalize>
@@ -735,7 +735,7 @@
             <rhs>
               <normalize>
                 <const>
-                  <type/>
+                  <ptype/>
                 </const>
               </normalize>
             </rhs>
@@ -806,6 +806,185 @@
                   </mbFull>
                 </normalize>
               </const>
+            </rhs>
+          </equation>
+        </VEqns>
+      </btypes:TYPE>
+    </definition>
+    <definition>
+      <title>Mutability Normalization in Composite Types</title>
+      <btypes:TYPE>
+        <VEqns>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <type/>
+              </pred>
+              <pred name="Immut">
+                <type/>
+              </pred>
+            </lhs>
+            <rhs>
+              <error/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <tvar/>
+              </pred>
+            </lhs>
+            <rhs>
+              <error/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mutable>
+                  <tvar/>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <error/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mutable>
+                  <bool/>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mutable>
+                  <unit/>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mutable>
+                  <fn>
+                    <type num="1"/>
+                    <type num="2"/>
+                  </fn>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mutable>
+                  <ref>
+                    <type/>
+                  </ref>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mutable>
+                  <pair>
+                    <type num="1"/>
+                    <type num="2"/>
+                  </pair>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <compose>
+                <pred mbb="yes" name="M">
+                  <type num="1"/>
+                </pred>
+                <pred mbb="yes" name="M">
+                  <type num="2"/>
+                </pred>
+              </compose>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mbTop>
+                  <tvar/>
+                  <ptype/>
+                </mbTop>
+              </pred>
+            </lhs>
+            <rhs>
+              <compose>
+                <SubMap>
+                  <tvar/>
+                  <mutable>
+                    <ptype/>
+                  </mutable>
+                </SubMap>
+                <pred mbb="yes" name="M">
+                  <mutable>
+                    <ptype/>
+                  </mutable>
+                </pred>
+              </compose>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mbFull>
+                  <mutable>
+                    <tvar/>
+                  </mutable>
+                  <ptype/>
+                </mbFull>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mbFull>
+                  <tvar/>
+                  <ptype/>
+                </mbFull>
+              </pred>
+            </lhs>
+            <rhs>
+              <SubMap>
+                <tvar/>
+                <mutable>
+                  <tvar name="beta"/>
+                </mutable>
+              </SubMap>
+              <models name="new">
+                <assume/>
+                <tvar name="beta"/>
+              </models>
             </rhs>
           </equation>
         </VEqns>
