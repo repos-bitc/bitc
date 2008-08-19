@@ -118,7 +118,7 @@ NOGC_SOURCES=\
 
 C_SOURCES=\
 	$(filter-out $(NOGC_SOURCES),$(wildcard *.c)) \
-	mkclosure.c
+	make_procedure_object.c
 
 C_HDR=\
 	$(filter-out BUILD/bitc-runtime.h,$(wildcard */*.h))
