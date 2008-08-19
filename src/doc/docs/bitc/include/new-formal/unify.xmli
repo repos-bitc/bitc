@@ -205,7 +205,7 @@
       </equation>	
       <!-- Mp1 = Mp2 -->
       <!-- Mutability propagation is handled at the mutability
-      unification rule, which i the only place where new mutability
+      unification rule, which is the only place where new mutability
       can be generated. 
       
       It is sufficient to handle this propagation at the U-Mut rule
@@ -217,7 +217,7 @@
       algorithm (and the programmer in the case of type annotations)
       to produce inner types that are either mutable or accept
       mutability. Otherwise, this will lead to unification failure due
-      to the M-function returnin _|_
+      to the M-function returning _|_
 
       Decidability: The M-function introduces new type variables,
       which is uncharestetistic of unification. However, this is okay
