@@ -315,7 +315,7 @@
 	      <stack dash="'"/>
 	      <heap dash="'"/>
 	      <assign>
-		<lExp/>
+		<lExp dash="'"/>
 		<aExpr/>
 	      </assign>
 	    </opState>

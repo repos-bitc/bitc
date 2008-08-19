@@ -502,8 +502,8 @@
     </p>
     <p>
       Copy compatibility must not extend past a reference
-      boundary in order ensure that every location has a unique type.
-      We define copy compatibility for 
+      boundary in order to ensure that every location has a unique
+      type. We define copy compatibility for 
       <btypes:TYPE>
 	<language/>
       </btypes:TYPE> as:
@@ -597,7 +597,7 @@
     </font>
     <br/>
     <p>
-      Copy compatibility is allowed all positions where a copy is
+      Copy compatibility is allowed at all positions where a copy is
       performed: at argument passing, new
       variable binding, assignment, and basically in all expressions
       where a left-expression is not expected or returned.
@@ -768,8 +768,8 @@
 	systems with subtyping, where 
 	<br/>
 	&nbsp;&nbsp;&nbsp;
-	the inferred principal type is
-	presented a set of equations and inequations.
+	the inferred principal type is presented as a set of 
+	equations and inequations. 
       </p>
       <p>
 	In order to address the above requirements, we propose a
@@ -1240,9 +1240,9 @@
 	the shallow mutability of the argument and return types. 
 	Therefore, we follow a convention of writing all function
 	types with immutable types at copy compatible positions. The
-	intuition here is that type of a function must be described in
-	the interface form, and must hide the ``internal'' mutability
-	information. For example, the function  
+	intuition here is that the type of a function must be
+	described in the interface form, and must hide the
+	``internal'' mutability information. For example, the function
 	<btypes:TYPE> 
 	  <lambda>
 	    <id name="x"/>
@@ -1781,10 +1781,10 @@
 	      <td>
 		<p>
 		  <btypes:TYPE> 
-		    <apply>
+		    <Pair>
 		      <id name="id"/>
 		      <id name="id"/>
-		    </apply>
+		    </Pair>
 		  </btypes:TYPE>
 		</p>
 	      </td>
@@ -2727,7 +2727,7 @@
 	    <in>
 	      <grouping>
 		<pcst>
-		  <id name="y"/>
+		  <id/>
 		  <lKind k="mono"/>
 		  <type num="1"/>
 		</pcst>
@@ -3632,7 +3632,7 @@
       with their kinds and all expressions annotated with their
       types.
       The type inference algorithm is shown in
-      Fig.&nbsp;<xref ref="hy_infer"/>. The 
+      Fig.&nbsp;<xref ref="hy_infer"/>.
       The inference judgment  
       <btypes:TYPE>
 	<TEjudge name="i">
@@ -3738,10 +3738,10 @@
     </p>
     <p>
       The U-Ct* rules perform unification of constrained
-      types with other constrained/unconstrained types. First, an
-      immutable version of the two types  
-      are unified to establish compatibility 
-      (through constraints involving <btypes:TYPE>
+      types with other constrained/unconstrained types. First,
+      immutable versions of the two types are unified to establish
+      compatibility (through constraints involving 
+      <btypes:TYPE>
 	<eqOp under="minzT"/>
       </btypes:TYPE> and 
       <btypes:TYPE>
