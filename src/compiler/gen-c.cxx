@@ -2890,7 +2890,7 @@ EmitGlobalInitializers(std::ostream& errStream,
 	    
 	    out << "arg" << i;
 	  }
-	  out << ");";
+	  out << ");" << endl;
 
 	  out.less();
 	  out << "}" << endl << endl;	  
