@@ -35,9 +35,9 @@
 	  </unf>
 	</lhs>
 	<rhs>
-	  <unf><normalize>
+	  <unf> 
 	    <aCtset/>
-	  </normalize></unf>
+	  </unf>
 	</rhs>
       </equation>
       <!-- Commutativity: t1 = t2 -->
@@ -56,7 +56,7 @@
 	  </unf>
 	</lhs>
 	<rhs>
-	  <unf><normalize>
+	  <unf>
 	    <unin>
 	      <set>
 		<eq>
@@ -66,7 +66,7 @@
 	      </set>
 	      <aCtset/>
 	    </unin>
-	  </normalize></unf>
+	  </unf>
 	</rhs>
       </equation>
       <!-- a = t | a notin t -->
@@ -115,12 +115,14 @@
 	  <grouping>
 	    <!-- <space n="2"/> -->
 	    <eq>
-	      <unf><normalize>
-		<Subst>
-		  <aSubMap num="a"/>
-		  <aCtset/>
-		</Subst>
-	      </normalize></unf>
+	      <unf>
+		<normalize>
+		  <Subst>
+		    <aSubMap num="a"/>
+		    <aCtset/>
+		  </Subst>
+		</normalize>
+	      </unf>
 	      <Pair>
 		<dCtset/>
 		<aSubMap num="u"/>
@@ -151,7 +153,7 @@
 	  </unf>
 	</lhs>
 	<rhs>
-	  <unf><normalize>
+	  <unf>
 	    <unin>
 	      <aCtset/>
 	      <set>
@@ -165,7 +167,7 @@
 		</eq>
 	      </set>
 	    </unin>
-	  </normalize></unf>
+	  </unf>
 	</rhs>
       </equation>	
       <!-- ^t1 = ^t2 -->
@@ -188,7 +190,7 @@
 	  </unf>
 	</lhs>
 	<rhs>
-	  <unf><normalize>
+	  <unf>
 	    <unin>
 	      <aCtset/>
 	      <set>
@@ -198,7 +200,7 @@
 		</eq>
 	      </set>
 	    </unin>
-	  </normalize></unf>
+	  </unf>
 	</rhs>
       </equation>	
       <!-- Mp1 = Mp2 -->
@@ -221,7 +223,7 @@
 	  </unf>
 	</lhs>
 	<rhs>
-	  <unf><normalize>
+	  <unf>
 	    <unin>
 	      <aCtset/>
 	      <set>
@@ -231,7 +233,7 @@
 		</eq>
 	      </set>
 	    </unin>
-	  </normalize></unf>
+	  </unf>
 	</rhs>
       </equation>	
       <!-- t1xt2 <= t1'xt2' -->
@@ -256,7 +258,7 @@
 	  </unf>
 	</lhs>
 	<rhs>
-	  <unf><normalize>
+	  <unf>
 	    <unin>
 	      <aCtset/>
 	      <set>
@@ -270,7 +272,7 @@
 		</eq>
 	      </set>
 	    </unin>
-	  </normalize></unf>
+	  </unf>
 	</rhs>
       </equation>	
       <!-- |_t1_| = |_t2_| -->
@@ -293,7 +295,7 @@
 	  </unf>
 	</lhs>
 	<rhs>
-	  <unf><normalize>
+	  <unf>
 	    <unin>
 	      <aCtset/>
 	      <set>
@@ -303,7 +305,7 @@
 		</eq>
 	      </set>
 	    </unin>
-	  </normalize></unf>
+	  </unf>
 	</rhs>
       </equation>	
       <!-- 'a!p1 = 'b!p2 -->
@@ -328,7 +330,7 @@
 	  </unf>
 	</lhs>
 	<rhs>
-	  <unf><normalize>
+	  <unf>
 	    <unin>
 	      <aCtset/>
 	      <set>
@@ -342,7 +344,7 @@
 		</eq>
 	      </set>
 	    </unin>
-	  </normalize></unf>
+	  </unf>
 	</rhs>
       </equation>	  
       <!-- a!p1 = p2 -->
@@ -364,7 +366,7 @@
 	  </unf>
 	</lhs>
 	<rhs>
-	  <unf><normalize>
+	  <unf>
 	    <unin>
 	      <aCtset/>
 	      <set>
@@ -378,7 +380,7 @@
 		</eq>
 	      </set>
 	    </unin>
-	  </normalize></unf>
+	  </unf>
 	</rhs>
       </equation>
       <!-- s1|p1 = s2|p2 -->
@@ -403,7 +405,7 @@
 	  </unf>
 	</lhs>
 	<rhs>
-	  <unf><normalize>
+	  <unf>
 	    <unin>
 	      <aCtset/>
 	      <set>
@@ -417,7 +419,7 @@
 		</eq>
 	      </set>
 	    </unin>
-	  </normalize></unf>
+	  </unf>
 	</rhs>
       </equation>
       <!-- s|p = P -->
@@ -439,7 +441,7 @@
 	  </unf>
 	</lhs>
 	<rhs>
-	  <unf><normalize>
+	  <unf>
 	    <unin>
 	      <aCtset/>
 	      <set>
@@ -453,7 +455,7 @@
 		</eq>
 	      </set>
 	    </unin>
-	  </normalize></unf>
+	  </unf>
 	</rhs>
       </equation>
       <!-- k = K -->
@@ -502,12 +504,12 @@
 	  <grouping>
 	    <!-- <space n="2"/> -->
 	    <eq>
-	      <unf><normalize>
+	      <unf>
 		<Subst>
 		  <aSubMap num="k"/>
 		  <aCtset/>
 		</Subst>
-	      </normalize></unf>
+	      </unf>
 	      <Pair>
 		<dCtset/>
 		<aSubMap num="u"/>
@@ -570,7 +572,7 @@
 	  <grouping>
 	    <!-- <space n="2"/> -->
 	    <eq>
-	      <unf><normalize>
+	      <unf>
 		<unin>
 		  <aCtset/>
 		  <set>
@@ -580,7 +582,7 @@
 		    </eq>
 		  </set>
 		</unin>
-	      </normalize></unf>
+	      </unf>
 	      <Pair>
 		<dCtset/>
 		<aSubMap/>
@@ -636,7 +638,7 @@
 	  <grouping>
 	    <apace n="2"/>
 	    <eq>
-	      <unf><normalize>
+	      <unf>
 		<unin>
 		  <aCtset/>
 		  <set>
@@ -648,7 +650,7 @@
 		    </eq>
 		  </set>
 		</unin>
-	      </normalize></unf>
+	      </unf>
 	      <Pair>
 		<dCtset/>
 		<aSubMap/>
@@ -703,7 +705,7 @@
 	  <grouping>
 	    <!-- <space n="2"/> -->
 	    <eq>
-	      <unf><normalize>
+	      <unf>
 		<Subst>
 		  <aSubMap num="k"/>
 		  <unin>
@@ -717,7 +719,7 @@
 		    <aCtset/>
 		  </unin>
 		</Subst>
-	      </normalize></unf>
+	      </unf>
 	      <Pair>
 		<dCtset/>
 		<aSubMap num="u"/>
@@ -775,7 +777,7 @@
 	  <grouping>
 	    <text content=" where "/>
 	    <eq>
-	      <unf><normalize>
+	      <unf>
 		<unin>
 		  <set>
 		    <eq>		    
@@ -785,7 +787,7 @@
 		  </set>
 		  <aCtset/>
 		</unin>
-	      </normalize></unf>
+	      </unf>
 	      <error/>
 	    </eq>
 	  </grouping>
@@ -794,7 +796,7 @@
 	  <grouping>
 	    <!-- <space n="2"/> -->
 	    <eq>
-	      <unf><normalize>
+	      <unf>
 		<Subst>
 		  <aSubMap num="k"/>
 		  <unin>
@@ -813,7 +815,7 @@
 		    <aCtset/>
 		  </unin>
 		</Subst>
-	      </normalize></unf>
+	      </unf>
 	      <Pair>
 		<dCtset/>
 		<aSubMap num="u"/>

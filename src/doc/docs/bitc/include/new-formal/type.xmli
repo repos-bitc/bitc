@@ -431,7 +431,7 @@
 	<tyConc>
 	  <TDjudge>
 	    <paren>
-	      <let kind="m">
+	      <let kind="m" optQual="yes">
 		<id/>
 		<aExpr num="1"/>
 		<aExpr num="2"/>
@@ -526,7 +526,7 @@
 	<tyConc>
 	  <TDjudge>
 	    <paren>
-	      <let kind="x">
+	      <let kind="x" optQual="yes">
 		<id/>
 		<vExp/>
 		<aExpr/>

@@ -1127,6 +1127,7 @@
 
 <!-- optional parts of syntax -->
 <!ELEMENT opt                  %anything.group;>
+<!ELEMENT colorOpt             %anything.group;>
 
 
  <!-- ======================================================================

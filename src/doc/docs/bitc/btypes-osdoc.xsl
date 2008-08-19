@@ -2894,6 +2894,14 @@
     <xsl:apply-templates mode="formula"/>	
     <xsl:text>]</xsl:text>	  
   </xsl:template>    
+
+  <!-- colorOpt: Optional differentiated in color -->
+  <xsl:template match="colorOpt" mode="formula">
+    <xsl:element name="font">
+      <xsl:attribute name="color">blue</xsl:attribute>
+      <xsl:apply-templates mode="formula"/>
+    </xsl:element>
+  </xsl:template>    
   
   <!-- ======================================================================
   ======================================================================

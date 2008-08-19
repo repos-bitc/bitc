@@ -377,7 +377,9 @@
 	  <p>
 	    <btypes:TYPE>
 	      <ref>
-		<type/>
+		<minzD>
+		  <type/>
+		</minzD>
 	      </ref>
 	    </btypes:TYPE>
 	  </p>
