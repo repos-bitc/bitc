@@ -327,7 +327,7 @@ enum IdentType {
    /// Used in the instantiator to indicate identifiers that have already
    /// been mangled and should not be mangled a second time.
    ///
-   /// @issue I don't understand why this is needed. The assignment of a
+   /// @bug I don't understand why this is needed. The assignment of a
    /// mangled name is, in effect, the assignment of an externalName. I
    /// would think that it would make sense to place the mangled name into
    /// the externalName field and check that, removing this flag. That
