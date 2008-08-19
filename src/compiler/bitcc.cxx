@@ -351,7 +351,7 @@ main(int argc, char *argv[])
   /// order-preserving way.
 
   while ((c = getopt_long(argc, argv, 
-			  "-e:o:O::l:VvchI:L:",
+			  "-e:o:O::l:VvcghI:L:",
 			  longopts, 0
 		     )) != -1) {
     switch(c) {
@@ -665,6 +665,13 @@ main(int argc, char *argv[])
 
       Options::libDirs.push_back(optarg);
       break;
+
+    case 'g':
+      {
+	AddCompileArgumentForGCC("-g");
+	AddLinkArgumentForGCC("-g");
+	break;
+      }
 
     case 'O':			// a.k.a. -O2
       {
