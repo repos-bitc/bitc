@@ -42,7 +42,9 @@
 #include "UocInfo.hxx"
 #include "AST.hxx"
 
-/** @file Interface for defining back-ends.
+/** @file
+ *
+ * @brief Interface for defining back-ends.
  *
  * This is actually misnamed, since what it describes is an emission
  * target.
