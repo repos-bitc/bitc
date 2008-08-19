@@ -44,6 +44,51 @@ void *currentClosureEnvPtr;
 void *
 bitc_emit_procedure_object(void *stubP, void *envP)
 {
+#if 1
+  uint32_t closureEnvPtrW = (uint32_t) &currentClosureEnvPtr;
+  uint32_t envW = (uint32_t) envP;
+  uint32_t stubW = (uint32_t) stubP;
+
+  bitc_Procedure* proc = GC_ALLOC(sizeof(bitc_Procedure));
+
+  proc->code[0] = 0x90;		/* padding */
+  proc->code[1] = 0x90;
+  proc->code[2] = 0x90;
+
+  /* push $envP */
+  proc->code[3] = 0x68u;	/* PUSH imm */
+  proc->code[4] = 0x0;		/* fill */
+  proc->code[5] = 0x0;		/* fill */
+  proc->code[6] = 0x0;		/* fill */
+  proc->code[7] = 0x0;		/* fill */
+
+  /* pop currentClosureEnvPtr */
+
+  proc->code[8] = 0x8fu;	/* POP */
+  proc->code[9] = 0x05u;	/* modrm = 00 000 101 */
+  proc->code[10] = closureEnvPtrW;
+  proc->code[11] = (closureEnvPtrW >> 8);
+  proc->code[12] = (closureEnvPtrW >> 16);
+  proc->code[13] = (closureEnvPtrW >> 24);
+
+  /* jmp rel32 */
+  stubW -= (uint32_t)&proc->code[19];
+
+  proc->code[14] = 0xe9u;
+  proc->code[15] = stubW;
+  proc->code[16] = (stubW >> 8);
+  proc->code[17] = (stubW >> 16);
+  proc->code[18] = (stubW >> 24);
+
+  proc->env.ptr = envP;
+
+  return proc;
+
+  /* On this architecture, no explicit iCache flush is required as
+   * long as a branch appears. Return suffices for a branch, which is why
+   * this must not be an inline procedure. */
+
+#else
   /* mov CurrentClosurePointer <- $ProperClosureValue
      is realized on IA32 as:
      push $ProperClosureValue
@@ -106,4 +151,5 @@ bitc_emit_procedure_object(void *stubP, void *envP)
 			       ((unsigned long)&(cl->code.jmp.addr) + 4));  
   cl->env = envP;
   return cl;
+#endif
 }

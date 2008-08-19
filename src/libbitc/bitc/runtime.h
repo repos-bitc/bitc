@@ -980,6 +980,14 @@ bitc_emit_procedure_object(void *stubP, void *envP) MAYBE_UNUSED;
 
 #ifdef __i386__
 
+typedef union {
+  uint8_t code[13];
+  struct {
+    uint8_t pad[4];
+    void *ptr;
+  } env;
+} bitc_Procedure;
+
 extern void *currentClosureEnvPtr;
 #define BITC_GET_CLOSURE_ENV(nm) void *nm = currentClosureEnvPtr;
 
