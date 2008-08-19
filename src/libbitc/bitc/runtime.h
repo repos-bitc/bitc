@@ -1004,7 +1004,7 @@ typedef union {
 
 #define BITC_GET_CLOSURE_ENV(nm) \
   void *nm; \
-  __asm__ __volatile__("movl %%rax,%0" : "=g" (nm))
+  __asm__ __volatile__("movq %%rax,%0" : "=g" (nm))
 
 #else
 #  error "Target architecture not (yet) supported"

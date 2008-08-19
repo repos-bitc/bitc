@@ -42,8 +42,8 @@
 void *
 bitc_emit_procedure_object(void *stubP, void *envP)
 {
-  uint64_t envW = (uint32_t) envP;
-  uint6_t stubW = (uint32_t) stubP;
+  uint64_t envW = (uint64_t) envP;
+  uint64_t stubW = (uint64_t) stubP;
 
   bitc_Procedure* proc = GC_ALLOC(sizeof(bitc_Procedure));
 
