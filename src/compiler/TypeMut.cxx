@@ -493,6 +493,102 @@ Type::minimizeDeepMutability(shared_ptr<Trail> trail)
   return rt;
 }
 
+bool
+Type::propagateMutability(boost::shared_ptr<Trail> trail, 
+			  const bool inMutable)
+{
+  bool errFree = true;
+  shared_ptr<Type> t = getType();
+  
+  if (t->mark & MARK_PROPAGATE_MUTABILITY)
+    return errFree;
+  
+  t->mark |= MARK_PROPAGATE_MUTABILITY;  
+  
+  switch(t->kind) {
+    
+  case ty_tvar:
+    {
+      errFree = false;
+      break;
+    }
+    
+  case ty_mbTop:    
+    {
+      shared_ptr<Type> var = t->Var()->getType();
+      shared_ptr<Type> inner = t->Core()->getType();
+      if(!inner->isMutable())
+	inner = Type::make(ty_mutable, inner);
+      
+      CHKERR(errFree, inner->propagateMutability(trail, false));
+
+      if(errFree)
+	trail->subst(var, inner);
+
+      break;
+    }
+    
+  case ty_mbFull:    
+    {
+      shared_ptr<Type> var = t->Var()->getType();
+      shared_ptr<Type> inner = t->Core()->getType();
+      
+      if(!var->isMutable())
+	trail->subst(var, Type::make(ty_mutable, newTvar()));
+      
+      break;
+    }
+    
+  case ty_mutable:
+    {
+      CHKERR(errFree, t->Base()->propagateMutability(trail, true));
+      break;
+    }
+
+  case ty_array:
+    {
+      CHKERR(errFree, inMutable);
+      CHKERR(errFree, t->Base()->propagateMutability(trail, false)); 
+      break;
+    }
+    
+  case ty_structv:
+    {
+      CHKERR(errFree, inMutable);
+      for (size_t i=0; i < t->components.size(); i++) {
+	shared_ptr<Type> component = t->CompType(i);
+	CHKERR(errFree, component->propagateMutability(trail, false)); 
+      }
+      break;
+    } 
+    
+  case ty_unionv: 
+  case ty_uvalv: 
+  case ty_uconv: 
+  case ty_reprv:
+    {
+      CHKERR(errFree, inMutable);
+      break;
+    }
+    
+  case ty_letGather:
+    {
+      assert(false);
+      break;
+    }
+    
+    
+    // concrete types, function type and reference types.
+  default:
+    {
+      CHKERR(errFree, inMutable);
+      break;
+    }
+  }
+  
+  t->mark &= ~MARK_PROPAGATE_MUTABILITY;
+  return errFree;
+}
 
 
 bool 
@@ -524,9 +620,6 @@ coerceMaybe(shared_ptr<Type> t, shared_ptr<Trail> trail, bool minimize)
     trail->subst(var, core);
   else
     trail->link(t, core);
-
-  //  std::cerr << t->asString(Options::debugTvP)
-  //    << std::endl;
 }
 
 void
