@@ -198,19 +198,6 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     }
     break;
 
-  case ty_reprv:
-  case ty_reprr:
-    {
-      ss << "D"
-	 << (isRefType() ? "R" : "V")
-	 << typeArgs.size() 
-	 << "_" << myContainer->s.size() << myContainer->s;
-
-      for (size_t i=0; i < typeArgs.size(); i++)
-	ss << TypeArg(i)->mangledString(igMut, false, maxArgMut);
-    }
-    break;
-
   case ty_array:
     {
       assert(components.size() == 1);
@@ -260,7 +247,6 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     }
 
   case ty_tyfn:
-  case ty_subtype:
   case ty_pcst:
   case ty_kvar:
   case ty_kfix:

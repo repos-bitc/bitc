@@ -241,8 +241,6 @@ Type::asAST(const sherpa::LexLoc &loc,
   case ty_structr:
   case ty_unionv: 
   case ty_unionr:
-  case ty_reprr:
-  case ty_reprv:
     {
       ast = t->defAst->Use();
       //ast = AST::make(at_ident, loc);
@@ -319,7 +317,6 @@ Type::asAST(const sherpa::LexLoc &loc,
     }
    
   case ty_letGather:
-  case ty_subtype:
   case ty_pcst:
   case ty_kvar:
   case ty_kfix:

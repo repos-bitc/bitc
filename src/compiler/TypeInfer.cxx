@@ -1948,9 +1948,15 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
+  case at_declrepr:
+    {
+      // reprSimp pass should have trnsformed this into a at_declunion
+      assert(false);
+      break;
+    }
+
   case at_declunion:
   case at_declstruct:
-  case at_declrepr:
     {
       shared_ptr<TSEnvironment > defGamma = gamma->newDefScope();
       ast->envs.gamma = defGamma;
@@ -1966,10 +1972,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       case at_declstruct:
 	decl_ty = 
 	  (ast->child(2)->astType == at_refCat) ?  ty_structr : ty_structv;
-	break;
-      case at_declrepr:
-	decl_ty = 
-	  (ast->child(2)->astType == at_refCat) ?  ty_reprr : ty_reprv;
 	break;
       default:
 	die();

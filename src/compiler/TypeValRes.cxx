@@ -518,11 +518,8 @@ isExpansive(std::ostream& errStream,
   case ty_uconr:
   case ty_uvalv:
   case ty_uvalr:
-  case ty_reprv:
-  case ty_reprr:
   case ty_mbFull:
   case ty_mbTop:
-  case ty_subtype:
   case ty_pcst:
     {    
       for (size_t i=0; i<t->typeArgs.size(); i++) 

@@ -437,8 +437,6 @@ Unify(std::ostream& errStream,
 
   case ty_structv:
   case ty_structr:
-  case ty_reprv:
-  case ty_reprr:
   case ty_unionv:
   case ty_unionr:
   case ty_uconr:
@@ -579,7 +577,6 @@ Unify(std::ostream& errStream,
       
     // The following cases are filled in so that strictlyEquals()
     // function works correctly.
-  case ty_subtype:
   case ty_pcst:
     {
       assert(t1->components.size() == t2->components.size());

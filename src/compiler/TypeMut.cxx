@@ -305,7 +305,6 @@ Type::maximizeMutability(shared_ptr<Trail> trail)
   case ty_unionv: 
   case ty_uvalv: 
   case ty_uconv: 
-  case ty_reprv:
     {
       rt = t->getDCopy();
       for (size_t i=0; i < rt->typeArgs.size(); i++) {
@@ -379,7 +378,6 @@ Type::minimizeMutability(shared_ptr<Trail> trail)
   case ty_unionv: 
   case ty_uvalv: 
   case ty_uconv: 
-  case ty_reprv:
     {
       rt = t->getDCopy();
       for (size_t i=0; i < rt->typeArgs.size(); i++) {
@@ -452,12 +450,10 @@ Type::minimizeDeepMutability(shared_ptr<Trail> trail)
   case ty_unionv: 
   case ty_uvalv: 
   case ty_uconv: 
-  case ty_reprv:
   case ty_structr:
   case ty_unionr: 
   case ty_uvalr: 
   case ty_uconr: 
-  case ty_reprr:
     {
       rt = t->getDCopy();
       for (size_t i=0; i < rt->typeArgs.size(); i++) {
@@ -565,7 +561,6 @@ Type::propagateMutability(boost::shared_ptr<Trail> trail,
   case ty_unionv: 
   case ty_uvalv: 
   case ty_uconv: 
-  case ty_reprv:
     {
       CHKERR(errFree, inMutable);
       break;
@@ -826,7 +821,6 @@ Type::markSignMbs(bool cppos)
   case ty_unionv: 
   case ty_uvalv: 
   case ty_uconv: 
-  case ty_reprv:
     {
       for (size_t i=0; i < t->typeArgs.size(); i++) {
 	shared_ptr<Type> arg = t->TypeArg(i)->getType();
@@ -841,7 +835,6 @@ Type::markSignMbs(bool cppos)
   case ty_unionr: 
   case ty_uvalr: 
   case ty_uconr: 
-  case ty_reprr:
     {
       for (size_t i=0; i < t->typeArgs.size(); i++) {
 	shared_ptr<Type> arg = t->TypeArg(i)->getType();
@@ -929,12 +922,10 @@ Type::fixupFnTypes()
   case ty_unionv: 
   case ty_uvalv: 
   case ty_uconv: 
-  case ty_reprv:
   case ty_structr:
   case ty_unionr: 
   case ty_uvalr: 
   case ty_uconr: 
-  case ty_reprr:
     {
       for (size_t i=0; i < t->typeArgs.size(); i++)
 	t->TypeArg(i)->fixupFnTypes();
