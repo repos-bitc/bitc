@@ -916,64 +916,23 @@ DEFCAST(bitc_word_t,  _4word,  bitc_float_t,  _5float);
 DEFCAST(bitc_word_t,  _4word,  bitc_double_t, _6double);
 
 /**************************************************************
- **             End of Script generatede code                **
+ **             End of Script generated code                 **
  **************************************************************/
 
 /**************************************************************
-              Support for Closure Conversion
+ **                  Procedure Objects                       **
  **************************************************************/
 
-/**** Support for run-time generation of closure objects   ****/
-
-/* Current-Closure-pointer must be in thread-local storage. However,
-   there is only one thread for now. */
-
-/*********  The following is highly machine dependent       ****/
-/***************************************************************** 
-  For a procedure that has a closure, we emit the following things:
-
-   A. The "real" procedure:
-
-      ret-type __real_procname(Closure *clp, Arg1 a1, ..., Argn an) {
-        ... real procedure body ...
-      }
-
-      This is the procedure that will do all of the work.
-
-   B. A "transition" procedure:
-
-      ret-type __transition_procname(Arg1 a1, ..., Argn an) {
-        return __real_procname(CurrentClosurePointer, a1, ... an);
-      }
-
-      The only reason we are emitting this procedure is because it lets
-      us use the C compiler to re-arrange the stack frame, and the C
-      compiler already knows the rules for doing that. The variable
-      CurrentClosurePointer is a thread-local global variable that
-      is provided by the run time layer.
-
-   C. Finally, we will hand-emit a machine-dependent code sequence
-      that does the following:
-
-         mov CurrentClosurePointer <- $ProperClosureValue
-         jmp $procname-transition
-
-      This is the actual closure object. The closure object will get
-      emitted in a data structure that is organized as follows:
-
-         +-----------------------+
-         |  code bytes for the   |
-         |  instructions above   |
-         | NOPS to word boundary |
-         +-----------------------+
-         |   ProperClosureValue  |   ( a pointer )
-         +-----------------------+
-
-      The value of ProperClosureValue is redundantly stored so that it
-      can be found easily by the garbage collector. On machines that
-      have PC-relative load, it is possible to actually *use* this
-      value.
-******************************************************************/
+/*****************************************************************
+ * Every procedure object is an overlay structure consisting
+ * of a raw code block that contains the location of the closure
+ * record as a literal constant and a data overlay that allows
+ * the garbage collector to relocate the closure record at need.
+ *
+ * On machines having a PC-relative load (or which can contrive
+ * to simulate one efficiently), that addressing mode is probably
+ * the best one to use.
+ *****************************************************************/
 
 void *
 bitc_emit_procedure_object(void *stubP, void *envP) MAYBE_UNUSED;
