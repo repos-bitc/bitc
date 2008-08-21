@@ -37,7 +37,7 @@
 
 #include <gc/gc.h>
 #include <inttypes.h>
-#include "../BUILD/bitc-runtime.h"
+#include "BUILD/bitc-runtime.h"
 
 void *
 bitc_emit_procedure_object(void *stubP, void *envP)

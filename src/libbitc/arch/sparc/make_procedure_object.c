@@ -37,47 +37,22 @@
 
 #include <gc/gc.h>
 #include <inttypes.h>
-#include "../BUILD/bitc-runtime.h"
+#include "BUILD/bitc-runtime.h"
 
 void *
 bitc_emit_procedure_object(void *stubP, void *envP)
 {
-  uint64_t envW = (uint64_t) envP;
-  uint64_t stubW = (uint64_t) stubP;
+  uint32_t envW = (uint32_t) envP;
+  uint32_t stubW = (uint32_t) stubP;
 
   bitc_Procedure* proc = GC_ALLOC(sizeof(bitc_Procedure));
 
-  /* MOVQ $stubW, %eax */
-  proc->code[0] = 0x48;
-  proc->code[1] = 0xb8;
-  proc->code[2] = stubW;
-  proc->code[3] = (stubW >> 8);
-  proc->code[4] = (stubW >> 16);
-  proc->code[5] = (stubW >> 24);
-  proc->code[6] = (stubW >> 32);
-  proc->code[7] = (stubW >> 40);
-  proc->code[8] = (stubW >> 48);
-  proc->code[9] = (stubW >> 56);
-
-  /* PUSH %rax */
-  proc->code[10] = 0x50;
-
-  /* NOP, NOP, NOP */
-  proc->code[11] = 0x90;
-  proc->code[12] = 0x90;
-  proc->code[13] = 0x90;
-
-  /* movq $envP,%eax */
-  proc->code[14] = 0x48u;
-  proc->code[15] = 0xb8u;
-
-  /* [16..23] will be filled in via env.ptr */
-
-  /* jmp rel32 */
-  stubW -= (uint32_t)&proc->code[13];
-
-  /* RETQ */
-  proc->code[24] = 0xc3u;
+  /* SETHI %hi(stubW),%g1 */
+  proc->code[0] = 0x03000000u | (stubW >> 10);
+  /* JMPL %g1 + %lo(stubW), %g1 */
+  proc->code[1] = 0x83c06000 | (stubW & 0x3ffu);
+  /* LD   [%g1 + 0x8], %g1 */
+  proc->code[2] = 0xc2006008;
 
   proc->env.ptr = envP;
 
@@ -87,3 +62,4 @@ bitc_emit_procedure_object(void *stubP, void *envP)
    * long as a branch appears. Return suffices for a branch, which is why
    * this must not be an inline procedure. */
 }
+

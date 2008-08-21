@@ -965,6 +965,36 @@ typedef union {
   void *nm; \
   __asm__ __volatile__("movq %%rax,%0" : "=g" (nm))
 
+#elif defined(__sparc__)
+
+typedef union {
+  uint32_t code[3];
+  struct {
+    uint32_t pad[3];
+    void *ptr;
+  } env;
+} bitc_Procedure;
+
+#define BITC_GET_CLOSURE_ENV(nm) \
+  void *nm; \
+  __asm__ __volatile__("mov %0,%%g0" : "=g" (nm))
+
+#elif defined(__sparc64__)
+
+typedef union {
+  uint32_t code[7];
+  struct {
+    /* Note extra pad word to make ptr be naturally aligned, pending
+       confirm from JWA about whether this is required. */
+    uint32_t pad[8];
+    void *ptr;
+  } env;
+} bitc_Procedure;
+
+#define BITC_GET_CLOSURE_ENV(nm) \
+  void *nm; \
+  __asm__ __volatile__("mov %0,%%g0" : "=g" (nm))
+
 #else
 #  error "Target architecture not (yet) supported"
 #endif
