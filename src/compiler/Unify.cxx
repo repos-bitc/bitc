@@ -437,8 +437,6 @@ Unify(std::ostream& errStream,
 
   case ty_structv:
   case ty_structr:
-  case ty_reprv:
-  case ty_reprr:
   case ty_unionv:
   case ty_unionr:
   case ty_uconr:
@@ -579,7 +577,6 @@ Unify(std::ostream& errStream,
       
     // The following cases are filled in so that strictlyEquals()
     // function works correctly.
-  case ty_subtype:
   case ty_pcst:
     {
       assert(t1->components.size() == t2->components.size());
@@ -699,29 +696,3 @@ unify(std::ostream& errStream,
   return errFree;
 }
 
-
-// Old TY_RIGID handling in ty_tvat case of the Unifier.
-// 	   RIGID and RESTRICTED flags:
-// 	   RIGID happens past generalization, and 
-// 	   RESTRICTED occurs before generalization
-// 	   These should never be present concurrently */
-
-// 	if ((t1->flags & TY_RIGID) && (t1->flags & TY_RESTRICTED))
-// 	  assert(false);
-	
-// 	if ((t2->flags & TY_RIGID) && (t2->flags & TY_RESTRICTED))
-// 	  assert(false);
- 	
-// 	if ((t1->flags & TY_RIGID) && (t2->flags & TY_RESTRICTED))
-// 	  assert(false);
- 	
-// 	if ((t2->flags & TY_RIGID) && (t1->flags & TY_RESTRICTED))
-// 	  assert(false);
-
-// 	if (t1->flags & TY_RIGID)
-// 	  trail->subst(t2, t1);
-// 	else if (t1->flags & TY_RESTRICTED)
-// 	  trail->subst(t2, t1);
-// 	else
-// 	  trail->subst(t1, t2);
-	

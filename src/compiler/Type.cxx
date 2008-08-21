@@ -870,8 +870,6 @@ Type::isOfInfiniteType()
   case ty_uvalr:
   case ty_unionv:
   case ty_unionr:
-  case ty_reprr:
-  case ty_reprv:
   case ty_typeclass:
   case ty_array:
   case ty_vector:
@@ -879,7 +877,6 @@ Type::isOfInfiniteType()
   case ty_byref:
   case ty_mutable:
   case ty_exn:
-  case ty_subtype:
   case ty_pcst:
     {      
       for (size_t i=0; !infType && (i < typeArgs.size()); i++)
@@ -983,16 +980,16 @@ comp::comp(const std::string s, shared_ptr<Type> t, unsigned long _flags)
 
 #define TYPE_CTR_INIT(k) do {			\
     kind = k;					\
-    defAst = GC_NULL;			\
+    defAst = GC_NULL;				\
     arrLen = ArrLen::make(0);			\
     Isize = 0;					\
     minSignedRep = 0;				\
     minUnsignedRep = 0;				\
     mark = 0;					\
     pMark = 0;					\
-    sp = GC_NULL;			\
-    myContainer = GC_NULL;		\
-    link = GC_NULL;			\
+    sp = GC_NULL;				\
+    myContainer = GC_NULL;			\
+    link = GC_NULL;				\
     flags = 0;					\
   } while (0);
 

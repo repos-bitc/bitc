@@ -451,7 +451,6 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
 
   case ty_structv:
   case ty_unionv:
-  case ty_reprv:
     {
       out << TY_PFX << CMangle(t->defAst);
       break;
@@ -459,7 +458,6 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
 
   case ty_structr:
   case ty_unionr:
-  case ty_reprr:
     {
       out << TY_PFX << CMangle(t->defAst) << "*";
       break;      
@@ -509,7 +507,6 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
     }
 
   case ty_typeclass:
-  case ty_subtype:
   case ty_pcst:
   case ty_kvar:
   case ty_kfix:

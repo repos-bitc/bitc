@@ -240,8 +240,6 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
       break;
     }
 
-  case ty_reprv:
-  case ty_reprr:
   case ty_unionv: 
   case ty_unionr:
   case ty_uvalv: 
@@ -327,14 +325,6 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
       break;  
     }
 
-  case ty_subtype:
-    {
-      ss << t->CompType(0)->asString(tvP, traverse) 
-	 << " < "
-	 << t->CompType(1)->asString(tvP, traverse);
-      break;
-    }
-    
   case ty_pcst:
     {
       ss << "*(";

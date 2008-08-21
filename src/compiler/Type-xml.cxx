@@ -248,13 +248,6 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
 	break;
     }
 
-  case ty_reprv:
-  case ty_reprr:
-    {
-      assert(false);
-      break;     
-    }
-    
   case ty_unionv: 
   case ty_unionr:
   case ty_uvalv: 
@@ -345,16 +338,6 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
       break;  
     }
 
-  case ty_subtype:
-    {
-      out << "<Tsub>" << endl;
-      out.more();
-      t->CompType(0)->asXML(tvP, out);
-      t->CompType(1)->asXML(tvP, out);
-      out << "</Tsub>" << endl; 
-      break;
-    }
-    
   case ty_pcst:
     {
       out << "<pcst>" << endl;

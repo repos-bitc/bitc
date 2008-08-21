@@ -158,17 +158,6 @@ struct TypeScheme;
 #define TY_CT_SELF      0x02u // Typeclass constraint is due to 
                               // self definition.
 #define TY_RIGID        0x04u
-//#define TY_RESTRICTED   0x08u // Depricated 
-                              // All restricted variables are not
-			      // marked. Only variables which are
-			      // restricted due to restrictions on
-			      // integer or floating point literals,
-			      // which do not occur within another
-			      // wrapper are marked, This marking is
-			      // not binding. Type variables are
-			      // always generalized within
-			      // non-expansive expressions. 
-
 #define TY_CCC          0x10u // Candidate for Copy-Compatibility
                               // This flag is for type variables that
                               // are in type argument position for
@@ -178,18 +167,16 @@ struct TypeScheme;
                               // reference type constructor, and the
                               // composite type is free to be 
                               // copy-compatible at this position.
-
-#define TY_CLOS          0x20u // A temporary flag used in closure
-                               // computation of FTVs in a TypeScheme.
-#define TY_COERCE        0x40u // A flag used by adjMaybe to coerce
-			       // only certain maybe-types. This flag
-			       // must be marked on maybe-Var()s.
-			       // This flag is NOT cleared by the 
-			       // adjMaybe function. 
-                               
+#define TY_CLOS         0x20u // A temporary flag used in closure
+                              // computation of FTVs in a TypeScheme.
+#define TY_COERCE       0x40u // A flag used by adjMaybe to coerce
+			      // only certain maybe-types. This flag
+			      // must be marked on maybe-Var()s.
+			      // This flag is NOT cleared by the 
+			      // adjMaybe function. 
 
 // Specialization mask -- those flags which should NOT survive
-// specialization. ((TY_RESTRICTED was here too.))
+// specialization. 
 #define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | TY_CLOS | TY_COERCE) 
 
 struct Type;
@@ -269,10 +256,9 @@ public:
   // variable deeply.  This "variable" is not subject to
   // generalization.  
   //
-  // Shap adds (based on explanation from Swaroop): the use case here
-  // arises from copy compatibility. In particular, given a copy
-  // between
-  //       (mutable (array T n))  <->  (array T n)
+  // The use case here arises from copy compatibility. In particular,
+  // given a copy between
+  //       (array (mutable T) n)  ==~  (array T n)
   //
   // we need to unify the T and the n, but we cannot unify the overall
   // types, because they differ w.r.t. mutability.
@@ -374,9 +360,7 @@ public:
   bool isConstrainedToRefType(boost::shared_ptr<TCConstraints> tcc);
   bool isFnxn();
   bool isBaseConstType(); // Integers, floats, string, bool, unit, dummy.
-// #if 0
   bool isClosure();
-// #endif
   bool isImmutableRefType();
   bool isMutable();
   bool isMaybe();
@@ -535,13 +519,25 @@ public:
 		bool minimize=false, bool adjFn=false);
   
   // Get the maximally-mutable, but copy-compatible type.
-  boost::shared_ptr<Type> maximizeMutability(boost::shared_ptr<Trail> trail=Trail::make());
+  boost::shared_ptr<Type> maximizeMutability(boost::shared_ptr<Trail>
+					     trail=Trail::make()); 
   // Get the minimally-mutable, but copy-compatible type.
-  boost::shared_ptr<Type> minimizeMutability(boost::shared_ptr<Trail> trail=Trail::make());
-  boost::shared_ptr<Type> maximizeTopMutability(boost::shared_ptr<Trail> trail=Trail::make());
-  boost::shared_ptr<Type> minimizeTopMutability(boost::shared_ptr<Trail> trail=Trail::make());
-  boost::shared_ptr<Type> minimizeDeepMutability(boost::shared_ptr<Trail> trail=Trail::make());
+  boost::shared_ptr<Type> minimizeMutability(boost::shared_ptr<Trail>
+					     trail=Trail::make()); 
+  boost::shared_ptr<Type>
+  maximizeTopMutability(boost::shared_ptr<Trail> trail=Trail::make()); 
+  boost::shared_ptr<Type>
+  minimizeTopMutability(boost::shared_ptr<Trail> trail=Trail::make()); 
+  boost::shared_ptr<Type>
+  minimizeDeepMutability(boost::shared_ptr<Trail> trail=Trail::make());
 
+  // Propagate Mutability inwards for unboxed composite types.
+  // This case might fail with an error if there is an inner immutable
+  // type, for example (mutable (pair (int32 bool)))
+  bool
+  propagateMutability(boost::shared_ptr<Trail> trail, 
+		      const bool inMutable); 
+  
   // Check if maximally / minimally mutable
   bool isMaxMutable();
   bool isMinMutable();
@@ -643,7 +639,7 @@ public:
  			  kind == ty_ref || 
 			  kind == ty_array || 
 			  kind == ty_vector);
-    return components[0]->typ;
+    return CompType(0);
   }
 };
 
@@ -661,7 +657,6 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
  *  simultaneously. Here, we actually use different markers for each
  *  procedure that is recursive over type-structure. 
  */
-// Markers used for type traversal
 #define MARK_BOUND_IN_TYPE            0x0000001u
 #define MARK_COLLECT_FTVS_WRT_GAMMA   0x0000002u
 #define MARK_COLLECT_ALL_FTVS         0x0000004u
@@ -683,6 +678,7 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
 #define MARK_MINIMIZE_DEEP_MUTABILITY 0x0040000u
 #define MARK_SIGN_MBS                 0x0080000u
 #define MARK_FIXUP_FN_TYPES           0x0100000u
+#define MARK_PROPAGATE_MUTABILITY     0x0200000u
 
 /* Flags used by Type-inference engine. 
    These flags are different from the Unifier's flags */

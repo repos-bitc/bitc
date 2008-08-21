@@ -81,8 +81,6 @@ DEFKIND(unionv,    false,  false,  false, false, false, false,  false)
 DEFKIND(unionr,    false,  true,   false, false, true,  false,  false)
 DEFKIND(uvalv,     false,  false,  false, false, false, false,  false)
 DEFKIND(uvalr,     false,  true,   false, false, true,  false,  false)
-DEFKIND(reprv,     false,  false,  false, false, false, false,  false)
-DEFKIND(reprr,     false,  true,   false, false, true,  false,  false)
 DEFKIND(array,     false,  false,  false, false, false, false,  false)
 DEFKIND(vector,    false,  false,  false, false, true,  false,  false)
 DEFKIND(ref,       false,  true,   false, false, true,  false,  false)
@@ -101,8 +99,6 @@ DEFKIND(dummy,     false,  false,  false, false, false, false,  false)
 // The following are constraints, stricttly speaking, but are types at
 // the next level.
 DEFKIND(typeclass, false,  false,  false, false, false, false,  false)
-// Copy coersion constraint
-DEFKIND(subtype, false,  false,  false, false, false, false,  false)
 // Meta polymorphic constraint (MPC)
 DEFKIND(pcst, false,  false,  false, false, false, false,  false)
 // Kind variable for the MPC
@@ -117,32 +113,3 @@ DEFKIND(letGather, false,  false,  false, false, false, false,  false)
 
 #undef DEFKIND
 
-/* Notes:
-
-The representation of maybe types is an optimized version of the
-one described in: 
-http://coyotos.org/docs/bitc/formal.html.
-
-Here is the transformation:
-
-Theory:
-'a\t1\t2\t3\t4\ti.
-
-Practice:
-      component
-ty_maybe------------->ti
- |                    ^
- |           comp     |
- |------->t1-----------
-   hint   |           ^
-          |       comp|
-	  ----->t2----
-          |hint
-          |   ...
-
-For two reasons:
-i) The innermost type need not be fetched everytime, it is
-   available.
-ii) Constraints only matter until type variables are unified with
-    something compatible. 
-*/

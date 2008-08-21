@@ -234,28 +234,6 @@ Type::toString()
     ss << "]";
     break;
 
-  case ty_reprv:
-    ss << "(repr " << defAst->s;
-    for (size_t i=0; i<typeArgs.size(); i++)
-      ss << TypeArg(i)->getType()->toString();
-    ss << ")";
-    //    ss << " [";
-    //    for (size_t i=0; i<components.size(); i++)
-    //      ss << CompType(i)->getType()->toString();
-    //    ss << "]";
-    break;
-
-  case ty_reprr:
-    ss << "(reprR " << defAst->s ;
-    for (size_t i=0; i<typeArgs.size(); i++)
-      ss << TypeArg(i)->getType()->toString();
-    ss << ")";
-    //    ss << " [";
-    //    for (size_t i=0; i<components.size(); i++)
-    //      ss << CompType(i)->getType()->toString();
-    //    ss << "]";
-    break;
-    
   case ty_typeclass:    
     ss << "(Typeclass " << defAst->s;
     for (size_t i=0; i < typeArgs.size(); i++)
@@ -305,15 +283,6 @@ Type::toString()
        << ((Core()->kind == ty_fn)?"(":"");
     break;
 
-  case ty_subtype:
-    {
-      assert(false);
-      ss << CompType(0)->toString() 
-	 << " < "
-	 << CompType(1)->toString();
-      break;
-    }
-    
   case ty_pcst:
     {
       ss << "(*";
