@@ -46,11 +46,11 @@
 
 #define BEG_SIMP_DEBUG    DEBUG_OFF
 #define ILH_DEBUG         DEBUG_OFF   // Inst-Lambda-Hoist
-#define INST_DEBUG        DEBUG_OFF
-#define INST_ENV_DEBUG    DEBUG_OFF
+#define INST_DEBUG        DEBUG_OFF   // Debug Polyinstantiation
+#define INST_ENV_DEBUG    DEBUG_OFF   // Debug Polyinstantiator's env-handling
 #define REPR_SIMP_DEBUG   DEBUG_OFF
 #define UNION_INF_DEBUG   DEBUG_OFF   
-#define DEF_INF_DEBUG     DEBUG_OFF   
+#define DEF_INF_DEBUG     DEBUG_OFF 
 #define TI_TOP_DEBUG      DEBUG_OFF   // Inference Top-Loop
 #define CLCONV_DEBUG      DEBUG_OFF
 #define GEN_DEBUG_TL      DEBUG_OFF   // Treat all generalization as local

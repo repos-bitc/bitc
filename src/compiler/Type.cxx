@@ -171,47 +171,64 @@ Type::getTypePrim()
   
   return curr;
 }
- 
 
+
+// Normalize Mutability Constructor Idempotence
+// Deal with the fact that 
+// (mutable (mutable t)) == (mutable t)
+// We cannot avoid this type of linkage because of a structure
+// getting parametrized over a mutable type while having a mutable
+// wrapper at the field level.  
+shared_ptr<Type> 
+Type::normalize_mut()
+{ 
+  shared_ptr<Type> t = getTypePrim();
+  shared_ptr<Type> in = t;
+  
+  while (in->kind == ty_mutable) {
+    t = in;
+    in = in->Base()->getTypePrim();
+  }
+  
+  return t;
+}
+ 
 shared_ptr<Type> 
 Type::getType()
 { 
-  shared_ptr<Type> t = getTypePrim();
+  shared_ptr<Type> t = normalize_mut();
   
-  // Deal with the fact that 
-  // (mutable (mutable t)) == (mutable t)
-  // We cannot avoid this type of linkage because of a structure
-  // getting parametrized over a mutable type while having a mutable
-  // wrapper at the field level.  
-  if (t->kind == ty_mutable) {    
-    shared_ptr<Type> in = t->Base()->getTypePrim();
-    while (in->kind == ty_mutable) {
-      t = in;
-      in = t->Base()->getTypePrim();
-    }
-  }
-  
-  // Maybe types may not be recursively nested, But a MbFull
-  // might contain an MbTop.
-  if (t->kind == ty_mbFull || t->kind == ty_mbTop) {
-    shared_ptr<Type> in = t->Var()->getTypePrim();
+  // Maybe-types must be handled with special care:
+  // mbTop can only be of the form 'a!t where the Var() part is a
+  // type variable. If the Var() part of this mbTop type is not a
+  // type variable, then, it has unified with some other type,
+  // and we must follow that link.
+  // mbFull can be of the form 'a!t or M'a|t. Otherwise, we follow
+  // the link to whatever type the Var() part has unified with.
+  // Maybe types may not be recursively nested.
+  // The Var() part of an mbTop must only be linked to 
+  // (be substituted by) an unconstrained type./
+  // The Var() part of an mbFull can be linked to an mbTop type or an
+  // unconstrained type.
 
-    assert(in->kind != ty_mbFull);
+  if (t->kind == ty_mbFull) {
+    shared_ptr<Type> in = t->Var()->normalize_mut();
+    shared_ptr<Type> within = ((in->kind == ty_mutable) ?
+			       in->Base()->getTypePrim(): in);
     
-    if (in->kind == ty_mbTop) {
+    if(within->kind != ty_tvar)
       t = in;
-      in = in->Var()->getTypePrim();
-    }
-    
-    assert(in->kind != ty_mbFull && in->kind != ty_mbTop);
-    
-    if (in->kind != ty_tvar)
+  }
+
+  if(t->kind == ty_mbTop) {
+    shared_ptr<Type> in = t->Var()->normalize_mut();
+    if(in->kind != ty_tvar)
       t = in;
   }
 
   if (t->kind == ty_mbFull || t->kind == ty_mbTop) {
-    shared_ptr<Type> var = t->Var()->getTypePrim();
-    shared_ptr<Type> core = t->Core()->getTypePrim();
+    shared_ptr<Type> var = t->Var()->normalize_mut();
+    shared_ptr<Type> core = t->Core()->normalize_mut();
     
     if (var == core)
       t = core;
@@ -319,7 +336,12 @@ Type::isUnifiableMbFull(size_t flags)
   if (t->kind != ty_mbFull)
     return false;
   
-  return t->Var()->isUnifiableTvar(flags);
+  shared_ptr<Type> var = t->Var()->getType();
+  
+  if(var->isMutable())
+    var = var->Base()->getType();
+  
+  return var->isUnifiableTvar(flags);
 }
 
 bool 

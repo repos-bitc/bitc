@@ -185,9 +185,17 @@ Type::asAST(const sherpa::LexLoc &loc,
     }
 
   case ty_mbTop:
-  case ty_mbFull:
     {
       ast = t->Core()->asAST(loc, tvP);
+      break;
+    }
+  case ty_mbFull:
+    {
+      if(t->Var()->isMutable())
+	ast = t->Core()->maximizeMutability()->asAST(loc, tvP);
+      else
+	ast = t->Core()->asAST(loc, tvP);
+	
       break;
     }
 

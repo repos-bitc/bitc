@@ -3167,6 +3167,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_COMP2);
       
+      
       ast->symType = ast->child(ast->children.size()-1)->symType;
       break;
     }
@@ -3851,8 +3852,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_setbang:
     {
      /*------------------------------------------------
-       A |- e1: t1    A |- e2: t2    U(t1 = (mutable 'a))
-          U(t1 = 'b|'c)    U(t2 = 'd|'c) |-lval e1
+            A |- e1: t1    A |- e2: t2    |-lval e1
+             U(t1 = (mutable 'a)|'b   U(t1 = 'c|'b)  
        __________________________________________________
                     A |- (set! e1 e2): ()
 
@@ -3867,17 +3868,16 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
       
+      shared_ptr<Type> base = newTvar();
       shared_ptr<Type> mTv = Type::make(ty_mutable, newTvar());
+      shared_ptr<Type> mb = Type::make(ty_mbFull, mTv, base);
+      
       CHKERR(errFree, unify(errStream, trail, ast->child(0)->loc,
-			    ast->child(0)->symType, mTv, uflags));
-      shared_ptr<Type> tv = newTvar();
-      CHKERR(errFree, unify(errStream, trail, ast->child(0)->loc,
-			    ast->child(0)->symType,
-			    MBF(tv), uflags));
-
+			    ast->child(0)->symType, mb, uflags));
+      
       CHKERR(errFree, unify(errStream, trail, ast->child(1)->loc,
 			    ast->child(1)->symType,
-			    MBF(tv), uflags));
+			    MBF(base), uflags));
       break;
     }
 
@@ -4684,7 +4684,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     }
     
   } /* switch */
-  
+
 //   if (ast->symType)
 //     errStream << ast->loc << " [" << ast->atKwd() << "] " 
 // 	      << ast->asString() << ": "

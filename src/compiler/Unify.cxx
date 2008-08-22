@@ -70,8 +70,8 @@ typeError(std::ostream& errStream, const LexLoc &errLoc,
 	    << ", Obtained " << t2->asString(GC_NULL)
 	    << std::endl;
   
-  //   if (errStream == std::cerr)
-  //     errStream << "Real Error!" << std::endl;
+    if (errStream == std::cerr)
+      errStream << "Real Error!" << std::endl;
   
   // MUST always return false.
   return false;
@@ -187,14 +187,6 @@ UnifyMbCt(std::ostream& errStream, shared_ptr<Trail> trail,
   shared_ptr<Type> var = mb->Var()->getType();
   shared_ptr<Type> core = mb->Core()->getType();
   
-  if (ct->boundInType(var)) {
-    std::cerr << mb->asString(Options::debugTvP)
-	      << "'s VAR() bound in "
-	      << ct->asString(Options::debugTvP)
-	      << std::endl;
-    assert(false);
-  }
-  
   trail->subst(var, ct);
   
   return true;
@@ -286,15 +278,15 @@ Unify(std::ostream& errStream,
 	trail->subst(t2, t1);
 	RET_UNIFY;
       }
-      
+
       /* Handle the Maybe Types unifying with another type */
       if (t1->isUnifiableMbFull(flags)) {
 	CHKERR(errFree, Unify(errStream, trail, errLoc, 
 			      t1->minimizeMutability(), 
 			      t2->minimizeMutability(), flags));
 
-	if (errFree)
-	  CHKERR(errFree, UnifyMbCt(errStream, trail, t1, t2));
+	CHKERR(errFree, Unify(errStream, trail, errLoc, 
+			      t1->Var(), t2, flags));
 	
 	return errFree;
       }
@@ -303,9 +295,10 @@ Unify(std::ostream& errStream,
 	CHKERR(errFree, Unify(errStream, trail, errLoc, 
 			      t1->minimizeMutability(), 
 			      t2->minimizeMutability(), flags));
-	if (errFree)
-	  CHKERR(errFree, UnifyMbCt(errStream, trail, t2, t1));
 	
+	CHKERR(errFree, Unify(errStream, trail, errLoc, 
+			      t2->Var(), t1, flags));
+
 	return errFree;
       }
 
@@ -314,8 +307,8 @@ Unify(std::ostream& errStream,
 			      t1->minimizeTopMutability(), 
 			      t2->minimizeTopMutability(), flags));
 	
-	if (errFree)
-	  CHKERR(errFree, UnifyMbCt(errStream, trail, t1, t2));
+	CHKERR(errFree, Unify(errStream, trail, errLoc, 
+			      t1->Var(), t2, flags));
 	
 	return errFree;
       }
@@ -324,9 +317,8 @@ Unify(std::ostream& errStream,
 			      t1->minimizeTopMutability(), 
 			      t2->minimizeTopMutability(), flags));
 	
-	if (errFree)
-	  CHKERR(errFree, UnifyMbCt(errStream, trail, t2, t1));
-	
+	CHKERR(errFree, Unify(errStream, trail, errLoc, 
+			      t2->Var(), t1, flags));
 	return errFree;
       }
     }
@@ -379,15 +371,9 @@ Unify(std::ostream& errStream,
 
   case ty_dummy:
     {
-      // FIX?: For NOW, all dummy types are co-equal
-      // I have done this so that instantiation is simple
-      // And, it does not matter in practice.
-      // Once we have an input mechanism for dummy types, 
-      // we *may* want to treat dummy types like tvars by comparing
-      // their  uniqueIDs
       break;
     }
-
+    
 #ifdef KEEP_BF
   case ty_bitfield:
     {	

@@ -1458,7 +1458,9 @@ UocInfo::recInstantiate(ostream &errStream,
 
   INST_DEBUG
     cerr << "##" << "[" << ast->atKwd() << "]"
-	 << " RecInstantiated to: " << ast->asString() << endl;
+	 << " RecInstantiated to: " << ast->asString()
+	 << " with type " 
+	 << ((ast->symType != NULL)?ast->symType->asString(Options::debugTvP):"??") << endl;
 
   return ast;
 }
