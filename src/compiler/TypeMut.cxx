@@ -601,16 +601,27 @@ Type::isMinMutable()
 
 
 static void 
-coerceMaybe(shared_ptr<Type> t, shared_ptr<Trail> trail, bool minimize)
+coerceMaybe(shared_ptr<Type> t, shared_ptr<Trail> trail, 
+	    bool minimize)
 {
   //std::cerr << "Coercing: " << t->asString(Options::debugTvP)
   //	    << " to ";
   
   shared_ptr<Type> core = t->Core()->getType();
-  if (minimize)
-    core = core->minimizeTopMutability()->getType();
-  
   shared_ptr<Type> var = t->Var()->getType();
+
+  if((t->kind == ty_mbFull) && var->isMutable()) {
+    var = var->Base()->getType();
+    core = core->maximizeMutability()->getType();
+  }
+  else {
+    if (minimize)
+      if(t->kind == ty_mbFull)
+	core = core->minimizeMutability()->getType();
+      else
+	core = core->minimizeTopMutability()->getType();
+  }
+  
   if (core->kind != ty_tvar)
     trail->subst(var, core);
   else
@@ -806,7 +817,11 @@ Type::markSignMbs(bool cppos)
   case ty_fnarg:
     {
       for (size_t i=0; i < t->components.size(); i++)
-	t->CompType(i)->markSignMbs(true);
+	if(t->CompFlags(i) & COMP_BYREF)
+	  t->CompType(i)->markSignMbs(false);
+	else
+	  t->CompType(i)->markSignMbs(true);
+
       break;
     }
     

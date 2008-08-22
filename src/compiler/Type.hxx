@@ -329,6 +329,9 @@ public:
 private:
   boost::shared_ptr<const Type> getTypePrim() const;
   boost::shared_ptr<Type> getTypePrim();
+  // Normalize Mutability Constructor Idempotence
+  // (mutable (mutable t)) == (mutable t)
+  boost::shared_ptr<Type> normalize_mut();
 
 public:
   boost::shared_ptr<Type> getType();  
