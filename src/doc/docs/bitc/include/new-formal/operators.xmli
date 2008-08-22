@@ -782,7 +782,7 @@
     </tbody>
   </table>
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <table latex.colspec="c||c|c|c|c">
+  <table latex.colspec="c||c|c|c|c|c">
     <tbody>
       <!-- Row: Title -->
       <tr lineafter="yes" valign="top">
@@ -823,6 +823,15 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
+	      <concrete sp="yes">
+		<type/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <Subst>
 		<aSubMap/>
 		<type/>
@@ -837,6 +846,13 @@
 	  <p>
 	    <btypes:TYPE>
 	      <tvar/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -915,6 +931,13 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <unit/>
 	    </btypes:TYPE>
 	  </p>
@@ -940,6 +963,13 @@
 	  <p>
 	    <btypes:TYPE>
 	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -981,6 +1011,13 @@
 	  <p>
 	    <btypes:TYPE>
 	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -1049,6 +1086,13 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <ref>
 		<Subst>
 		  <aSubMap/>
@@ -1088,6 +1132,15 @@
 	  <p>
 	    <btypes:TYPE>
 	      <concrete>
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp="yes">
 		<ptype/>
 	      </concrete>
 	    </btypes:TYPE>
@@ -1163,6 +1216,20 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
+	      <AND>
+		<concrete sp="yes">
+		  <type num="1"/>
+		</concrete>
+		<concrete sp="yes">
+		  <type num="2"/>
+		</concrete>
+	      </AND>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <pair>
 		<Subst>
 		  <aSubMap/>
@@ -1219,6 +1286,15 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
+	      <concrete sp="yes">
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <mbTop>
 		<tvar dash="'"/>
 		<Subst>
@@ -1240,6 +1316,7 @@
 	</td>
       </tr>
       <tr>
+	<td/>
 	<td/>
 	<td/>
 	<td/>
@@ -1311,6 +1388,15 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
+	      <concrete sp="yes">
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <mbFull>
 		<stype dash="'"/>
 		<Subst>
@@ -1336,6 +1422,7 @@
 	<td/>
 	<td/>
 	<td/>
+	<td/>
 	<td>
 	  <p>
 	    <btypes:TYPE>
@@ -1356,7 +1443,7 @@
 	  </p>
 	</td>
       </tr>
-      <!-- Row: MbFull -->
+      <!-- Row: const -->
       <tr lineafter="yes">
 	<td>
 	  <p>
@@ -1369,7 +1456,7 @@
 	</td>
 	<td>
 	  <p>
-	    <btypes:TYPE>
+	    <btypes:TYPE>\
 	      <TRUE/>
 	    </btypes:TYPE>
 	  </p>
@@ -1385,6 +1472,15 @@
 	  <p>
 	    <btypes:TYPE>
 	      <concrete>
+		<type/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp="yes">
 		<type/>
 	      </concrete>
 	    </btypes:TYPE>

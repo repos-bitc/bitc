@@ -1,5 +1,5 @@
 /**************************************************************************
-" *
+ *
  * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
@@ -765,21 +765,63 @@ Type::isConcretizable()
     break;
     
   default:
-    for (size_t i=0; concretizable && i < t->components.size(); i++)
-      concretizable = t->CompType(i)->isConcretizable();
-    
     for (size_t i=0; concretizable && i < t->typeArgs.size(); i++)
       concretizable = t->TypeArg(i)->isConcretizable();
-    
-    // No need to check functional dependencies
-    // May lead to error if checked because functional dependencies
-    // might be on types that are used within a function constructor
     break;
   }
   
   t->mark &= ~MARK_IS_CONCRETIZABLE;
   return concretizable;  
 }
+
+bool 
+Type::isShallowConcretizable()
+{
+  shared_ptr<Type> t = getType();
+  
+  if (t->mark & MARK_IS_SHALLOW_CONCRETIZABLE)
+    return true;
+  
+  t->mark |= MARK_IS_SHALLOW_CONCRETIZABLE;
+  
+  bool concretizable = true;
+  
+  switch(t->kind) {
+  case ty_tvar:
+    concretizable = false;
+    break;
+
+  case ty_mbTop:
+  case ty_mbFull:
+    concretizable = t->Core()->isShallowConcretizable();
+    
+  case ty_mutable:
+  case ty_array:
+    concretizable = t->Base()->isShallowConcretizable();
+    break;
+    
+  case ty_structv:
+  case ty_unionv:
+  case ty_uvalv:
+  case ty_uconv:
+    for (size_t i=0; concretizable && i < t->typeArgs.size(); i++)
+      concretizable = t->TypeArg(i)->isShallowConcretizable();
+    break;
+
+  default:
+    break;
+  }
+  
+  t->mark &= ~MARK_IS_SHALLOW_CONCRETIZABLE;
+  return concretizable;  
+}
+
+void 
+Type::normalize(boost::shared_ptr<Trail> trail)
+{
+  normalize_mbFull(trail);
+}
+
 
 /* Produce Type ty_union[rv] from ty_ucon[rv] or ty_uval[rv]
    ONLY typeArgs are populated */

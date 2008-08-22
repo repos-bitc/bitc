@@ -990,8 +990,220 @@
         </VEqns>
       </btypes:TYPE>
     </definition>
+    <definition>
+      <title>Normalization of <btypes:TYPE><mbFull><stype/><ptype/></mbFull></btypes:TYPE></title>
+      <btypes:TYPE>
+        <VEqns>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <tvar/>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <bool/>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <unit/>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <fn>
+                  <type num="1"/>
+                  <type num="2"/>
+                </fn>
+              </pred>
+            </lhs>
+            <rhs>
+              <compose>
+                <pred mfrc="yes" name="M">
+                  <type num="1"/>
+                </pred>
+                <pred mfrc="yes" name="M">
+                  <type num="2"/>
+                </pred>
+              </compose>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <ref>
+                  <type/>
+                </ref>
+              </pred>
+            </lhs>
+            <rhs>
+              <pred mfrc="yes" name="M">
+                <type/>
+              </pred>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <mutable>
+                  <ptype/>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <pred mfrc="yes" name="M">
+                <ptype/>
+              </pred>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <pair>
+                  <type num="1"/>
+                  <type num="2"/>
+                </pair>
+              </pred>
+            </lhs>
+            <rhs>
+              <compose>
+                <pred mfrc="yes" name="M">
+                  <type num="1"/>
+                </pred>
+                <pred mfrc="yes" name="M">
+                  <type num="2"/>
+                </pred>
+              </compose>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <mbTop>
+                  <tvar/>
+                  <ptype/>
+                </mbTop>
+              </pred>
+            </lhs>
+            <rhs>
+              <pred mfrc="yes" name="M">
+                <ptype/>
+              </pred>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <mbFull>
+                  <tvar/>
+                  <ptype/>
+                </mbFull>
+              </pred>
+            </lhs>
+            <rhs>
+              <grouping>
+                <pred mfrc="yes" name="M">
+                  <ptype/>
+                </pred>
+              </grouping>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <mbFull>
+                  <mutable>
+                    <tvar/>
+                  </mutable>
+                  <ptype/>
+                </mbFull>
+              </pred>
+            </lhs>
+            <rhs>
+              <grouping>
+                <compose>
+                  <aSubMap/>
+                  <aSubMap dash="'"/>
+                </compose>
+                <text content=", where "/>
+                <eq>
+                  <aSubMap/>
+                  <pred mfrc="yes" name="M">
+                    <ptype/>
+                  </pred>
+                </eq>
+              </grouping>
+            </rhs>
+          </equation>
+          <eqn-cnt>
+            <lhs/>
+            <rhs>
+              <grouping>
+                <text content=" and "/>
+                <eq>
+                  <aSubMap dash="'"/>
+                  <SubMap>
+                    <tvar/>
+                    <maxz>
+                      <ptype/>
+                    </maxz>
+                  </SubMap>
+                </eq>
+                <text content=" if "/>
+                <concrete sp="yes">
+                  <ptype/>
+                </concrete>
+              </grouping>
+            </rhs>
+          </eqn-cnt>
+          <eqn-cnt>
+            <lhs/>
+            <rhs>
+              <grouping>
+                <space n="7"/>
+                <eq>
+                  <aSubMap dash="'"/>
+                  <EmptySubst/>
+                </eq>
+                <text content=" otherwise."/>
+              </grouping>
+            </rhs>
+          </eqn-cnt>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <const>
+                  <type/>
+                </const>
+              </pred>
+            </lhs>
+            <rhs>
+              <pred mfrc="yes" name="M">
+                <type/>
+              </pred>
+            </rhs>
+          </equation>
+        </VEqns>
+      </btypes:TYPE>
+    </definition>
   </sect1>
- <xi:include href="include/new-formal/opsem.xmli"/>
+  <xi:include href="include/new-formal/opsem.xmli"/>
   <xi:include href="include/new-formal/operators.xmli"/>
   <xi:include href="include/new-formal/subtype.xmli"/>
   <xi:include href="include/new-formal/type.xmli"/>

@@ -31,6 +31,7 @@ $pcstSp="($pcst)$em\\{\\^($br)\\}";
 $bigcup="\\\\textbf\\{$em\\{\\\\cup\\}\\}";
 $bigcap="\\\\textbf\\{$em\\{\\\\cap\\}\\}";
 $exclcup="\\\\emph\\{$em\\{\\\\cup\\}\\}";
+$spSquare="\\\\emph\\{$em\\{\\\\Box\\}\\}";
 $emset="$em($br)";
 $plural1="$emset$em\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}";
 $plural2="$em\\{($br)\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}\\}";
@@ -54,16 +55,18 @@ while(!eof(F)) {
 	#Bold-Ops - Big-Ops
 	$l =~ s/$bigcup/$EM\{\\bigcup\}/g;
 	$l =~ s/$bigcap/$EM\{\\bigcap\}/g;
-	$l =~ s/$exclcup/$EM\{\\mathaccent\\cdot\\cup\}/g;
-	
-	#FIX: TEMP: vprop -> bullet (Need bullet / big dot symbol
-	$l =~ s/\\propto/\\bullet/g;
 
+	#Disjoint union: Dotted union
+	$l =~ s/$exclcup/$EM\{\\mathaccent\\cdot\\cup\}/g;
+
+	#Special Box: Dotted box
+	$l =~ s/$spSquare/$EM\{\\mathaccent\\cdot\\Box\}/g;
+	
         #{| to {\!| and |} to |\!}
 	# Note that this is *not* paranthesizing replacement
 	$l =~ s/\{\\\{\}\{\\textbar\}/$EM\{\\\{\\!\|\}/g;
 	$l =~ s/\{\\textbar\}\{\\\}\}/$EM\{\|\\!\\\}\}/g;
-
+	
 	# \textbf{*}letter\textbf{*} to \mathbb{letter}
 	$l =~ s/$b\{\*\}([A-Za-z])\\textbf\{\*\}/$EM\{\\mathbb{$1}\}/g;
 	
@@ -90,7 +93,7 @@ while(!eof(F)) {
 	#Transitive Right execution
 	$l =~ s/$transR/$EM\{\\stackrel\{\*\}\{\\Rightarrow\}\}/g;
 
-	#Equality onder another operator
+	#Equality under another operator
 	$l =~ s/$EqSp1/$EM\{\\stackrel\{\\blacktriangledown\}\{=\}\}/g;
 	$l =~ s/$EqSp2/$EM\{\\stackrel\{\\triangledown\}\{=\}\}/g;
 	#$l =~ s/$EqSp1/\\mbox\{=\\hskip -1.2ex\\lower 0.1ex\\hbox\{$EM\{\_\{\_\{\\blacktriangledown\}\}\}\}\}/g;
@@ -120,20 +123,16 @@ while(!eof(F)) {
 	# hack in some vspaces
 	$l =~ s/\.\.([\-0-9a-z]+)\\\\/\\vspace\{$1\}/g;
 	
-	
 	#\emph{?}Y\emph{?} -> \checkmark
 	$l =~ s/\\emph\{\?\}Y\\emph\{\?\}/$EM\{\\checkmark\}/g;
 	
 	#Remove unnecessary copyright
 	$l =~ s/\\typesetcopyright\{\}//g;
-
+	
 	#FIX until osdoc section emission is fixed for LLNCS
 	$l =~ s/\\newcommand\{\\mySection\}\[1\]\{\\section\*\{#1\}\}/\\newcommand\{\\mySection\}\[1\]\{\\section\{#1\}\}/g;
 	$l =~ s/\\newcommand\{\\mySubsection\}\[1\]\{\\subsection\*\{#1\}\}/\\newcommand\{\\mySubsection\}\[1\]\{\\subsection\{#1\}\}/g;
 	$l =~ s/\\newcommand\{\\mySubsubsection\}\[1\]\{\\subsubsection\*\{#1\}\}/\\newcommand\{\\mySubsubsection\}\[1\]\{\\subsubsection\{#1\}\}/g;
-
-	
-	
     } while($ol ne $l);
     
     #This pass may not really be desirable

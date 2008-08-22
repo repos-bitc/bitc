@@ -332,7 +332,12 @@ private:
   // Normalize Mutability Constructor Idempotence
   // (mutable (mutable t)) == (mutable t)
   boost::shared_ptr<Type> normalize_mut();
-
+  
+  // Normalize trivial forms of mbFull such as 
+  // (copy-compat (mutable 'a) bool) to (mutable bool)
+  // This normalization is done in-place.
+  void normalize_mbFull(boost::shared_ptr<Trail> trail=Trail::make());
+  
 public:
   boost::shared_ptr<Type> getType();  
   boost::shared_ptr <const Type> getType() const;
@@ -426,6 +431,14 @@ public:
   // Does this type contain variables only within functions or on the
   // lhs of a matybe type?
   bool isConcretizable();
+  // Does this type contain variables only within functions,
+  // references or on the lhs of a matybe type?
+  bool isShallowConcretizable();
+
+  // Normalize a type in-place. The following normalizations are
+  // currently performed: 
+  // 1) Normalization of mbFull.
+  void normalize(boost::shared_ptr<Trail> trail=Trail::make());
 
   /* Methods that can be used for various kinds of 
      comparisons between two types */
@@ -666,7 +679,7 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
 #define MARK_IS_EXPANSIVE             0x0000008u
 #define MARK_MANGLED_STRING           0x0000010u
 #define MARK_IS_OF_INFINITE_TYPE      0x0000020u
-#define MARK_IS_CONCRETIZABLE         0x0000040u
+#define MARK_PROPAGATE_MUTABILITY     0x0000040u
 #define MARK_GET_BARE_TYPE            0x0000080u
 #define MARK_GET_THE_TYPE             0x0000100u
 #define MARK_EMIT_ARR_VEC_FN_TYPES    0x0000200u
@@ -681,7 +694,9 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
 #define MARK_MINIMIZE_DEEP_MUTABILITY 0x0040000u
 #define MARK_SIGN_MBS                 0x0080000u
 #define MARK_FIXUP_FN_TYPES           0x0100000u
-#define MARK_PROPAGATE_MUTABILITY     0x0200000u
+#define MARK_IS_CONCRETIZABLE         0x0200000u
+#define MARK_IS_SHALLOW_CONCRETIZABLE 0x0400000u
+#define MARK_NORMALIZE_MBFULL         0x0800000u
 
 /* Flags used by Type-inference engine. 
    These flags are different from the Unifier's flags */

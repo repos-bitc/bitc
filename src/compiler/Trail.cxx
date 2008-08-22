@@ -77,7 +77,7 @@ Trail::subst(shared_ptr<Type> from, shared_ptr<Type> to)
 { 
   from = from->getType();
   to = to->getType();
-
+  
   assert(from->kind == ty_tvar || from->kind == ty_kvar);
   
   if (to->boundInType(from)) {

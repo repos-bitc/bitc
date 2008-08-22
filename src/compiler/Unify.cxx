@@ -298,7 +298,7 @@ Unify(std::ostream& errStream,
 	
 	CHKERR(errFree, Unify(errStream, trail, errLoc, 
 			      t2->Var(), t1, flags));
-
+	
 	return errFree;
       }
 
@@ -678,7 +678,9 @@ unify(std::ostream& errStream,
   DoneList<shared_ptr<Type> > donelist;
   CHKERR(errFree, Unify(errStream, trail, errLoc, ft, st, flags));
   CHKERR(errFree, acyclic(errStream, errLoc, ft, worklist, donelist));
-
+  if(errFree)
+    ft->normalize(trail);
+  
   return errFree;
 }
 
