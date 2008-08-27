@@ -585,6 +585,51 @@ Type::propagateMutability(boost::shared_ptr<Trail> trail,
   return errFree;
 }
 
+void
+Type::normalize_mbFull(boost::shared_ptr<Trail> trail)
+{
+  bool errFree = true;
+  shared_ptr<Type> t = getType();
+  
+  if (t->mark & MARK_NORMALIZE_MBFULL)
+    return;
+  
+  t->mark |= MARK_NORMALIZE_MBFULL;  
+  
+  switch(t->kind) {
+  case ty_mbFull:    
+    {
+      shared_ptr<Type> var = t->Var()->getType();
+      shared_ptr<Type> inner = t->Core()->getType();
+      
+      inner->normalize_mbFull(trail);
+      
+      if(var->isMutable() && inner->isShallowConcretizable())
+	trail->subst(var->Base(), inner->maximizeMutability(trail));
+      
+      break;
+    }
+    
+  default:
+    {
+      for (size_t i=0; i < t->components.size(); i++)
+	t->CompType(i)->normalize_mbFull(trail);
+      
+      for (size_t i=0; i < t->typeArgs.size(); i++)
+	t->TypeArg(i)->normalize_mbFull(trail);
+      
+      for (TypeSet::iterator itr = t->fnDeps.begin();
+	   itr != t->fnDeps.end(); ++itr)
+	(*itr)->normalize_mbFull(trail);
+      
+      break;
+    }
+  }
+  
+  t->mark &= ~MARK_NORMALIZE_MBFULL;
+  return;
+}
+
 
 bool 
 Type::isMaxMutable()

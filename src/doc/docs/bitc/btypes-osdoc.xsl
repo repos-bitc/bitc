@@ -703,8 +703,18 @@
 
   <!-- concrete -->
   <xsl:template match="concrete" mode="formula">
-    <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
-    <xsl:text>square;</xsl:text>
+    <xsl:choose>
+      <xsl:when test="@sp">
+	<xsl:element name="em">
+	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	  <xsl:text>square;</xsl:text>
+	</xsl:element>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	<xsl:text>square;</xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:call-template name="print.params"/>
   </xsl:template>
   
@@ -1141,6 +1151,13 @@
       <xsl:when test="@mbb">
 	<xsl:call-template name="print.mathbb">
 	  <xsl:with-param name="print.mathbb.letter">
+	    <xsl:value-of select="@name"/>
+	  </xsl:with-param> 
+	</xsl:call-template>
+      </xsl:when>
+      <xsl:when test="@mfrc">
+	<xsl:call-template name="print.mathfrac">
+	  <xsl:with-param name="print.mathfrac.letter">
 	    <xsl:value-of select="@name"/>
 	  </xsl:with-param> 
 	</xsl:call-template>
