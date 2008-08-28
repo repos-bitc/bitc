@@ -28,7 +28,7 @@
 	<address>Johns Hopkins University</address>
       </affiliation>
     </authorgroup>
-    <pubdate>July 17, 2008</pubdate>
+    <pubdate>August 27, 2008</pubdate>
     <copyright>
       <year>2008</year> 
       <holder>Jonathan S. Shapiro</holder>
@@ -996,33 +996,6 @@ use</literallayout>
 <!--          </p> -->
       </sect2>
       <sect2>
-	<title>Type Variables</title>
-        <p>
-          A type variable is a type variable identifier preceded by a
-          single quote, as in <progident>'a</progident>. Type
-          variables may appear in any position where a type can
-          appear. Type variables are most commonly used as type
-          constructor arguments for named constructed types (see
-          below). They can also be used to annotate expressions, for
-          example to require that two expressions must have the same
-          type. The expression:
-        </p>
-        <literallayout>
-(myfun x y:'a):'a</literallayout>
-        <p indent="no">
-          says that the type of <progident>x</progident> is
-          unspecified by the program author (and should therefore be
-          inferred), the return type is also unspecified (and should
-          be inferred), but the program author is stating that the
-          return type and the last argument type are the same. This
-          type of annotation is sometimes useful to assist the
-          inference engine.
-        </p>
-        <p>
-          The scope of a type variable is its outermost defining form.
-        </p>
-      </sect2>
-      <sect2>
 	<title>Simple Constructed Types</title>
 	<p>
           Constructed types compose existing types into new
@@ -1082,7 +1055,7 @@ use</literallayout>
           BitC provides fixed-length (<progident>array</progident>)
           and variable-length (<progident>vector</progident>) types.
         </p>
-        <sect3>
+        <sect3 id="type:array">
 	  <title>Arrays</title>
 	  <p>
             An array is a value type whose value is a fixed
@@ -1138,7 +1111,7 @@ use</literallayout>
           Unless otherwise qualified, a named constructed type
           declaration declares a reference type.
         </p>
-	<sect3>
+	<sect3 id="type:structure">
 	  <title>Structures</title>
 	  <p>
 	    The structure declaration defines a named type whose
@@ -1657,140 +1630,93 @@ use</literallayout>
 	</sect3>
       </sect2>
       <sect2>
-        <title>Mutability</title>
+        <title>Const</title>
+        <p>
+          The <progident>const</progident> keyword is a type
+          <em>metaconstructor</em>. If
+          <progident><em>T</em></progident> is a type, then the type
+          <progident>(const&nbsp;<em>T</em>)</progident> is a type
+          that is copy-compatible (<xref ref="type:copy-compatible"/>)
+          with <progident><em>T</em></progident>, but has had all
+          mutability stripped (recursively) at all shallow constituent
+          fields. This enables a local, shallowly constant copy to be
+          made of a structure containing mutable constituents.
+        </p>
+        <p>
+          The <progident>const</progident> construct is considered a
+          meta-constructor because of its ``sticky'' behavior under
+          unification. The type
+          <progident>(const&nbsp;<em>'a</em>)</progident> does not
+          unify with any type (shallowly) containing a mutable
+          constituent field.
+        </p>
+      </sect2>
+      <sect2>
+        <title>Mutable</title>
         <p>
           Unless modified by the <progident>mutable</progident>
           keyword, the preceding types yield immutable
-          instantiations. If <progident><em>T</em></progident> is a
-          type, the type
-        </p>
-        <literallayout>
-(mutable <em>T</em>)</literallayout>
-        <p indent="no">
+          instantiations.  If <progident><em>T</em></progident> is a
+          type, then the type
+          <progident>(mutable&nbsp;<em>T</em>)</progident>
           is the type of mutable instances of
           <progident><em>T</em></progident>. If the type
-          <progident><em>T</em></progident> is a reference type, then
-          the type <progident>(mutable&nbsp;<em>T</em>)</progident>
-          describes a mutable reference to a memory location in the
-          heap. 
-        </p>
-        <p>
-          The combination of mutability and value types in the BitC
-          type system raises the need to specify what happens at
-          ``copy boundaries.'' Given a value of type
-          <progident>'a</progident> and a location or formal parameter
-          (the receiver) of type <progident>'b</progident>, when is
-          the value compatible with the receiver for purposes of
-          argument passing and assignment?  We refer to this as
-          <term>copy compatibility</term>.
+          <progident><em>T</em></progident> is a reference type
+          (including by-reference structure types), then the type
+          <progident>(mutable&nbsp;<em>T</em>)</progident> describes a
+          mutable reference to a memory location in the heap.
         </p>
         <sect3>
-          <title>Trivial Copy Compatibility</title>
+          <title>Mutability of Aggregates</title>
           <p>
-            The types <progident>'a</progident> and
-            <progident>(mutable&nbsp;'a)</progident> are trivially copy
-            compatible, because they differ only in top-level
-            mutability. A location of type
-            <progident>(mutable&nbsp;'a)</progident> may be assigned a
-            value of either type, and a parameter of type
-            <progident>'a</progident> may be passed a value of either
-            type.
+            Array types and by-value structure types are aggregate
+            types. While all fields of an array are of like type,
+            structures may contain a combination of mutable and
+            immutable constituent fields. An instance of aggregate
+            type is mutable as a whole exactly if all of its contained
+            constituent fields are mutable:
+          </p>
+          <literallayout indent="no">
+(define p (pair (mutable #\c) 3:int32))
+...
+;; legal, field is mutable:
+(set! p.first #\d)
+;; illegal
+(set! p.second 5)
+
+(define mp (pair (mutable #\c)
+           3:(mutable int32)))
+;; legal, all fields mutable:
+(set! mp (pair #\d 4))</literallayout>
+          <p indent="no">
+            The test of constituent mutability does not extend across
+            reference boundaries.
           </p>
           <p>
-            The intrinsic type class
-            <progident>(top-copy-compat&nbsp;'a&nbsp;'b)</progident>
-            describes a relation between all pairs of types
-            <progident>'a</progident> and <progident>'b</progident>
-            that are trivially copy compatible.  This type class is
-            rarely the right thing to use in input programs, but may
-            sometimes be seen in the type checker output.
-          </p>
-        </sect3>
-        <sect3>
-          <title>Structural Copy Compatibility</title>
-          <p>
-            Two structured types <progident>'a</progident> and
-            <progident>'b</progident> are structurally copy compatible
-            if (a) they are trivially copy compatible or (b) they are
-            value types that are fieldwise structurally copy
-            compatible. Note that this definition explicitly does
-            <em>not</em> descend recursively across reference
-            types. The conceptual intuition is this: any element that
-            will actually be copied by assignment or argument passing
-            must be compatible ignoring mutability, but any object
-            that is <em>pointed to</em> must have exactly matching
-            type in both the value and its receiver.
-          </p>
-          <p>
-            The intrinsic type class
-            <progident>(copy-compat&nbsp;'a&nbsp;'b)</progident>
-            describes a relation between all pairs of types
-            <progident>'a</progident> and <progident>'b</progident>
-            that are structually copy compatible. If you are trying to
-            abstract over mutability, this type class is usually the
-            one that you want. Note that
-            <progident>(top-copy-compat&nbsp;'a)</progident> implies
-            <progident>(copy-compat&nbsp;'a)</progident>, but the
-            reverse is not true.
+            If <progident><em>T</em></progident> is an aggregate type,
+            then <progident>(mutable&nbsp;<em>T</em>)</progident> is a
+            valid type exactly if <em>T</em> is mutable at all
+            constituents.
           </p>
         </sect3>
         <sect3>
           <title>Shallow vs. Deep Mutability</title>
           <p>
-            If <progident>'a</progident> is an immutable type, and if
-            all of its unboxed fields (recursively) are of immutable
-            type up to <progident>ref</progident> boundaries, then
-            <progident>'a</progident> is set to be <term>shallow
-            immutable</term>. If any of those elements are mutable,
-            then <progident>'a</progident> is said to be <term>shallow
-            mutable</term>.  We use the term <term>deep mutable</term>
-            to refer to mutable types that appear <em>behind</em> a
-            <progident>ref</progident> boundary.
+            If <progident><em>T</em></progident> is an immutable type,
+            and if all of its unboxed fields (recursively) are of
+            immutable type up to <progident>ref</progident>
+            boundaries, then <progident><em>T</em></progident> is said
+            to be <term>shallow immutable</term>. If any of those
+            elements are mutable, then <progident><em>T</em></progident> is
+            said to be <term>shallow mutable</term>.  We use the term
+            <term>deep mutable</term> to refer to mutable types that
+            appear <em>behind</em> a <progident>ref</progident>
+            boundary.
           </p>
           <p>
             The type
             <progident>(ref&nbsp;(mutable&nbsp;'a))</progident> is
             shallow immutable but deep mutable.
-          </p>
-        </sect3>
-        <sect3>
-          <title>Inner and Outer Procedure Types</title>
-          <p>
-            A curious consequence of copy compatibility is that
-            functions have two types. Consider the function:
-          </p>
-          <literallayout>
-(define (inc x:(mutable int32))
-  (set! x (+ x 1))
-  x)</literallayout>
-          <p indent="no">
-            From the inside, <progident>x</progident> is a mutable
-            location, and since <progident>x</progident> is returned,
-            the return type of this function is
-            <progident>(mutable&nbsp;int32)</progident>. From this, we
-            would conclude that the type of <progident>inc</progident>
-            should be:
-          </p>
-<literallayout>
-inc: (fn ((mutable int32)) (mutable int32))</literallayout>
-          <p indent="no">
-            Given the copy compatibility rules, however, the 
-            fact that <progident>inc</progident> internally mutates
-            its argument is not something that the caller needs to
-            know in order to call <progident>inc</progident>
-            directly. The externally observable type reported for
-            <progident>inc</progident> therefore strips trivial
-            mutability, giving:
-          </p>
-<literallayout>
-inc: (fn (int32) int32)</literallayout>
-          <p>
-            In addition to preserving abstraction, reducing type
-            incompatibilities at function reference types, and
-            providing some degree of separation of concerns, copy
-            compatibility can also be exploited by polyinstantiating
-            implementations to significantly reduce the amount of
-            redundant instantiation that would otherwise be required.
           </p>
         </sect3>
       </sect2>
@@ -1837,6 +1763,139 @@ inc: (fn (int32) int32)</literallayout>
           The arguments to this procedure are the values of the fields
           associated with the exception.
         </p>
+      </sect2>
+      <sect2>
+	<title>Type Variables</title>
+        <p>
+          A type variable is a type variable identifier preceded by a
+          single quote, as in <progident>'a</progident>. Type
+          variables may appear in any position where a type can
+          appear. Type variables are most commonly used as type
+          constructor arguments for named constructed types (see
+          below). They can also be used to annotate expressions, for
+          example to require that two expressions must have the same
+          type. The expression:
+        </p>
+        <literallayout>
+(myfun x y:'a):'a</literallayout>
+        <p indent="no">
+          says that the type of <progident>x</progident> is
+          unspecified by the program author (and should therefore be
+          inferred), the return type is also unspecified (and should
+          be inferred), but the program author is stating that the
+          return type and the last argument type are the same. This
+          type of annotation is sometimes useful to assist the
+          inference engine.
+        </p>
+        <p>
+          The scope of a type variable is its outermost defining form.
+        </p>
+      </sect2>
+      <sect2 id="type:copy-compatible">
+        <title>Copy Compatibility</title>
+        <p>
+          The combination of mutability and value types in the BitC
+          type system raises the need to specify what happens at
+          ``copy boundaries.'' Given a value of type
+          <progident>'a</progident> and a location or formal parameter
+          (the receiver) of type <progident>'b</progident>, when is
+          the value compatible with the receiver for purposes of
+          argument passing and assignment?  We refer to this as
+          <term>copy compatibility</term>.
+        </p>
+        <sect3>
+          <title>Trivial Copy Compatibility</title>
+          <p>
+            The types <progident><em>T</em></progident> and
+            <progident>(mutable&nbsp;<em>T</em>)</progident> are
+            trivially copy compatible, because they differ only in
+            top-level mutability. A location of type
+            <progident>(mutable&nbsp;<em>T</em>)</progident> may be
+            assigned a value of either type, and a parameter of type
+            <progident><em>T</em></progident> may be passed a value of
+            either type.
+          </p>
+          <p>
+            The intrinsic type class
+            <progident>(top-copy-compat&nbsp;<em>T<sub>1</sub></em>&nbsp;<em>T<sub>2</sub></em>)</progident>
+            describes a relation between all pairs of types
+            <progident><em>T<sub>1</sub></em></progident> and <progident><em>T<sub>2</sub></em></progident>
+            that are trivially copy compatible.  This type class is
+            rarely the right thing to use in input programs, but may
+            sometimes be seen in the type checker output.
+          </p>
+        </sect3>
+        <sect3>
+          <title>Structural Copy Compatibility</title>
+          <p>
+            Two structured types
+            <progident><em>T<sub>1</sub></em></progident> and
+            <progident><em>T<sub>2</sub></em></progident> are
+            structurally copy compatible if (a) they are trivially
+            copy compatible or (b) they are value types that are
+            fieldwise structurally copy compatible. Note that this
+            definition explicitly does <em>not</em> descend
+            recursively across reference types. The conceptual
+            intuition is this: any element that will actually be
+            copied by assignment or argument passing must be
+            compatible ignoring mutability, but any object that is
+            <em>pointed to</em> must have exactly matching type in
+            both the value and its receiver.
+          </p>
+          <p>
+            The intrinsic type class
+            <progident>(copy-compat&nbsp;<em>T<sub>1</sub></em>&nbsp;<em>T<sub>2</sub></em>)</progident>
+            describes a relation between all pairs of types
+            <progident><em>T<sub>1</sub></em></progident> and <progident><em>T<sub>2</sub></em></progident>
+            that are structually copy compatible. If you are trying to
+            abstract over mutability, this type class is usually the
+            one that you want. Note that
+            <progident>(top-copy-compat&nbsp;<em>T<sub>1</sub></em>&nbsp;<em>T<sub>2</sub></em>)</progident> implies
+            <progident>(copy-compat&nbsp;<em>T<sub>1</sub></em> <em>T<sub>2</sub></em>)</progident>, but the
+            reverse is not true.
+          </p>
+        </sect3>
+        <sect3>
+          <title>Inner and Outer Procedure Types</title>
+          <p>
+            A curious consequence of copy compatibility is that
+            functions have two types. Consider the function:
+          </p>
+          <literallayout>
+(define (inc x:(mutable int32))
+  (set! x (+ x 1))
+  x)</literallayout>
+          <p indent="no">
+            From the perspective of the function's implementation,
+            <progident>x</progident> is a mutable location having type
+            <progident>(mutable&nbsp;int32)</progident>, and since
+            <progident>x</progident> is returned, the return type of
+            this function is also
+            <progident>(mutable&nbsp;int32)</progident>. From this, we
+            would conclude that the type of <progident>inc</progident>
+            should be:
+          </p>
+<literallayout indent="no">
+inc: (fn ((mutable int32)) (mutable int32))</literallayout>
+          <p indent="no">
+            Given the copy compatibility rules, however, the fact that
+            <progident>inc</progident> internally mutates its argument
+            is not something that the caller needs to know in order to
+            call <progident>inc</progident> directly. The externally
+            observable type reported for <progident>inc</progident>
+            therefore strips shallow mutability, giving:
+          </p>
+<literallayout>
+inc: (fn (int32) int32)</literallayout>
+          <p>
+            In addition to preserving abstraction, reducing type
+            incompatibilities at function reference types, and
+            providing some degree of separation of concerns, copy
+            compatibility can also be exploited by polyinstantiating
+            implementations to significantly reduce the amount of
+            redundant instantiation that would otherwise be required.
+          </p>
+        </sect3>
       </sect2>
       <sect2>
         <title>Restrictions</title>
