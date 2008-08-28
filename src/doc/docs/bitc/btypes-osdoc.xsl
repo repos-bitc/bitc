@@ -2771,6 +2771,12 @@
       <xsl:call-template name="print.space"/>        
       <xsl:apply-templates select="*[1]" mode="formula"/>
       <xsl:if test = "@optQual">	      
+	<xsl:text>[</xsl:text>	  
+	<xsl:call-template name="print.op.qual.bare"/>
+	<xsl:call-template name="print.type"/>
+	<xsl:text>]</xsl:text>	  
+      </xsl:if>
+      <xsl:if test = "@colorOptQual">	      
 	<xsl:element name="font">
 	  <xsl:attribute name="color">blue</xsl:attribute>
 	  <xsl:call-template name="print.op.qual.bare"/>

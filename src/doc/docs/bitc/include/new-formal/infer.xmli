@@ -885,7 +885,7 @@
 	    </assume>
 	    <conclude>
 	      <tqExpr>
-		<let kind="k" optQual="yes">
+		<let kind="k" coloroptQual="yes">
 		  <id/>
 		  <aExpr num="1"/>
 		  <aExpr num="2"/>
@@ -1115,7 +1115,7 @@
 	    </assume>
 	    <conclude>
 	      <tqExpr>
-		<let kind="k" optQual="yes">
+		<let kind="k" colorOptQual="yes">
 		  <id/>
 		  <vExp/>
 		  <aExpr/>

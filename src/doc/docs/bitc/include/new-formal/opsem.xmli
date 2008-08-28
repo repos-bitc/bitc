@@ -587,7 +587,7 @@
 	    <opState>
 	      <stack/>
 	      <heap/>
-	      <let kind="m" optQual="yes">              
+	      <let kind="m" colorOptQual="yes">              
 		<id/>
 		<aVal num="1"/>
 		<aExpr num="2"/>
@@ -618,7 +618,7 @@
 	    <opState>
 	      <stack/>
 	      <heap/>
-	      <let kind="p" optQual="yes">              
+	      <let kind="p" colorOptQual="yes">              
 		<id/>
 		<aVal num="1"/>
 		<aExpr num="2"/>

@@ -240,11 +240,12 @@
       expressions across a copy boundary (ex: arguments copied at a
       function call) can differ in their
       mutability. We refer to this notion of mutability compatibility
-      of types as <em>copy compatibility</em>. Copy compatibility
-      creates a situation where type and mutability inference cannot 
-      be purely syntax-directed. Type inference is further complicated
-      due to well known problems with the interaction of mutability
-      and polymorphism&nbsp;<cite ref="wrightValRes1995"/>. This has
+      of types as <em>copy compatibility</em>. 
+      <font color="blue">Copy compatibility creates ramifications for
+      syntax-directed type and mutability inference.</font> Type
+      inference is further complicated due to well known problems with
+      the interaction of mutability and 
+      polymorphism&nbsp;<cite ref="wrightValRes1995"/>. This has
       forced a second-class treatment of mutability in ML-like
       languages and a lack of inferred polymorphism in others.
     </p>
@@ -350,13 +351,14 @@
       The <progident>let</progident> construct can be used for
       allocating (possibly mutable) stack variables and to create
       let-polymorphic bindings.
-      <progident>let</progident>&nbsp;<btypes:TYPE>
-	<tqExpr optional="yes">
+      <btypes:TYPE>
+	<let optQual="yes">
 	  <id/>
-	  <type/>
-	</tqExpr>
-      </btypes:TYPE> represents optional type qualification of
-      let-bound variables.     </p>
+	  <aExpr/>
+	</let>
+      </btypes:TYPE>
+      represents optional type qualification of let-bound variables.
+    </p>
     <p>
       <leadin>The Mutability Model</leadin>
       <btypes:TYPE>
@@ -448,7 +450,7 @@
 	      </assign>
 	    </paren>
 	  </lambda>
-	  <let>	    
+	  <let>
 	    <tqExpr>
 	      <id name="y"/>
 	      <bool/>
@@ -676,11 +678,15 @@
 	  <mutable>
 	    <bool/>
 	  </mutable>
-	</btypes:TYPE>. Therefore, unlike ML, type inference is not
-	purely syntax directed in 
-	<btypes:TYPE>
-	  <language/>
-	</btypes:TYPE>.
+	</btypes:TYPE>. 
+	<font color="blue">
+	  Therefore, unlike ML, we cannot use a 
+	  straightforward syntax-directed type inference algorithm
+	  in 
+	  <btypes:TYPE>
+	    <language/>
+	  </btypes:TYPE>.
+	</font> 
       </p>
       <p>
 	It is natural to ask why mutability should be inferred at all.
@@ -1132,9 +1138,13 @@
       </font>
       <br/>
       <p>
-	By embedding constraints within types, we obtain an elegant
-	representation of constrained types that can be intuitively 
-	presented to the user. For example, the expression
+	<font color="blue">
+	  By embedding constraints within types, we obtain an elegant
+	  representation of constrained types that are self contained. 
+	  The programmer is just presented a type, rather than a type
+	  associated with a set of unsolved inequations.  
+	</font>
+	<!-- For example, the expression
 	<btypes:TYPE>
 	  <lambda>
 	    <id/>
@@ -1196,7 +1206,7 @@
 	      </ceq>
 	    </set>
 	  </ctype>
-	</btypes:TYPE>. 
+	</btypes:TYPE>. -->
 	Every type of the form
 	<btypes:TYPE>
 	  <mbFull>
@@ -2042,10 +2052,41 @@
 	Since all function types are  immutable, the mutability of the
 	argument type need not be fixed, thus preserving mutability
 	polymorphism. 
+	<font color="blue">
+	  In order to ensure that type inference is modular, the
+	  <btypes:TYPE> 
+	    <pcst>
+	      <id/>
+	      <lKind k="var"/>
+	      <type/>
+	    </pcst>
+	  </btypes:TYPE> constraints must not be exposed across a module
+	  boundary. For every top-level definition in a module, an
+	  arbitrary choice of
+	  <btypes:TYPE> 
+	    <eq>
+	      <lKind k="var"/>
+	      <lKind k="mono"/>
+	    </eq>
+	  </btypes:TYPE> or
+	  <btypes:TYPE> 
+	    <eq>
+	      <lKind k="var"/>
+	      <lKind k="poly"/>
+	    </eq>
+	  </btypes:TYPE> must be made for every survivng 
+	  <btypes:TYPE> 
+	    <pcst>
+	      <id/>
+	      <lKind k="var"/>
+	      <type/>
+	    </pcst>
+	  </btypes:TYPE> constraint.
+	</font>
       </p>
       <p>
 	In summary, we have used a system of constrained types to
-	design a principle polymorphic type inference system that meets
+	design a polymorphic type inference system that meets
 	all of the design goals set at the beginning of this section. In
 	the next section, we present a formal description of our type
 	system and inference algorithm. 
@@ -2199,6 +2240,61 @@
       the core semantics, as they can later be reified
       independently.
     </p>
+    <p>
+      <font color="blue">
+	The execution semantics do not perform a copy operation in all
+	cases where copy compatibility is permitted.
+	For example, suppose
+	<btypes:TYPE>
+	  <eq>
+	    <aExpr/>
+	    <if>
+	      <true/>
+	      <aExpr num="1"/>
+	      <aExpr num="2"/>
+	    </if>
+	  </eq>
+	</btypes:TYPE>, and
+	<btypes:TYPE>
+	  <aExpr num="1"/>
+	</btypes:TYPE> evaluates to 
+	<btypes:TYPE>
+	  <aVal num="1"/>
+	</btypes:TYPE>.
+	The type of 
+	<btypes:TYPE>
+	  <aExpr/>
+	</btypes:TYPE>
+	only needs to be copy compatible with 
+	<btypes:TYPE>
+	  <aExpr num="1"/>
+	</btypes:TYPE> and 
+	<btypes:TYPE>
+	  <aExpr num="2"/>
+	</btypes:TYPE>. However, no copy is performed in rule E-If, since 
+	<btypes:TYPE>
+	  <aVal num="1"/>
+	</btypes:TYPE> itself can be used in all cases where a 
+	copy of it can be.
+	This proposition is obviously true if 
+	<btypes:TYPE>
+	  <aExpr num="1"/>
+	</btypes:TYPE> is mutable and
+	<btypes:TYPE>
+	  <aExpr/>
+	</btypes:TYPE> not. It is also true if
+	<btypes:TYPE>
+	  <aExpr num="1"/>
+	</btypes:TYPE> is immutable but
+	<btypes:TYPE>
+	  <aExpr/>
+	</btypes:TYPE> is mutable, since 
+	<btypes:TYPE>
+	  <aExpr/>
+	</btypes:TYPE> is not an lvalue, and cannot
+	be the target of an assignment. 
+      </font>
+    </p>
     <xi:include href="include/complete/operators.xmli"/>
     <p>
       <leadin>Static Semantics</leadin>
@@ -2272,6 +2368,46 @@
 	  </mutable>
 	</equiv>
       </btypes:TYPE>).
+      <font color="blue">
+      We also define the equivalences:
+	<btypes:TYPE>
+	  <equiv>
+	    <mbTop>
+	      <tvar/>
+	      <ptype/>
+	    </mbTop>
+	    <mbTop>
+	      <tvar/>
+	      <ptype dash="'"/>
+	    </mbTop>
+	  </equiv>
+	</btypes:TYPE>, where
+	<btypes:TYPE>
+	  <eq under="minzT">
+	    <ptype/>
+	    <ptype dash="'"/>
+	  </eq>
+	</btypes:TYPE>
+	and
+	<btypes:TYPE>
+	  <equiv>
+	    <mbTop>
+	      <stype/>
+	      <ptype/>
+	    </mbTop>
+	    <mbTop>
+	      <stype/>
+	      <ptype dash="'"/>
+	    </mbTop>
+	  </equiv>
+	</btypes:TYPE>, where
+	<btypes:TYPE>
+	  <eq under="minz">
+	    <ptype/>
+	    <ptype dash="'"/>
+	  </eq>
+	</btypes:TYPE>.
+      </font>
       The predicates 
       <btypes:TYPE>
 	<pred name="Immut"/>

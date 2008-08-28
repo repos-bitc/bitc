@@ -428,7 +428,7 @@
             <ith>
               <redex/>
             </ith>
-            <let kind="x" optQual="yes">
+            <let kind="x" colorOptQual="yes">
               <id/>
               <redex/>
               <aExpr/>

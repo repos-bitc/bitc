@@ -6,7 +6,7 @@
     latex.placement="tbh"
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-  <font size="small">
+  <font size="scriptsize">
   <table>
     <tbody>
       <tr valign="top">
@@ -20,7 +20,7 @@
 		  <hLoc/>
 		</alternatives>
 	      </bnf>
-	      <bnf desc="Stack Loc"> 
+	      <bnf desc="Stack Loc">
 		<sLoc/>
 		<alternatives etc="yes">
 		  <sLoc num="1"/>
