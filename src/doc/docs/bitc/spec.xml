@@ -1797,11 +1797,12 @@ use</literallayout>
           The combination of mutability and value types in the BitC
           type system raises the need to specify what happens at
           ``copy boundaries.'' Given a value of type
-          <progident>'a</progident> and a location or formal parameter
-          (the receiver) of type <progident>'b</progident>, when is
-          the value compatible with the receiver for purposes of
-          argument passing and assignment?  We refer to this as
-          <term>copy compatibility</term>.
+          <progident><em>T<sub>1</sub></em></progident> and a location
+          or formal parameter (the receiver) of type
+          <progident><em>T<sub>2</sub></em></progident>, when is the
+          value compatible with the receiver for purposes of argument
+          passing and assignment?  We refer to this as <term>copy
+          compatibility</term>.
         </p>
         <sect3>
           <title>Trivial Copy Compatibility</title>
