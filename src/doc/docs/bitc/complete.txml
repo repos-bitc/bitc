@@ -241,8 +241,8 @@
       function call) can differ in their
       mutability. We refer to this notion of mutability compatibility
       of types as <em>copy compatibility</em>. 
-      <font color="blue">Copy compatibility creates ramifications for
-      syntax-directed type and mutability inference.</font> Type
+      Copy compatibility creates ramifications for
+      syntax-directed type and mutability inference. Type
       inference is further complicated due to well known problems with
       the interaction of mutability and 
       polymorphism&nbsp;<cite ref="wrightValRes1995"/>. This has
@@ -634,8 +634,7 @@
 	    </mutable>
 	  </tqExpr>
 	</if>
-      </btypes:TYPE>, since the semantics are unchanged if 
-      temporary bindings are introduced in each branch.
+      </btypes:TYPE> .
     </p>
     <btypes:TYPE>
       <vspace ptsz="-4pt"/>
@@ -679,14 +678,12 @@
 	    <bool/>
 	  </mutable>
 	</btypes:TYPE>. 
-	<font color="blue">
-	  Therefore, unlike ML, we cannot use a 
-	  straightforward syntax-directed type inference algorithm
-	  in 
-	  <btypes:TYPE>
-	    <language/>
-	  </btypes:TYPE>.
-	</font> 
+	Therefore, unlike ML, we cannot use a 
+	straightforward syntax-directed type inference algorithm
+	in 
+	<btypes:TYPE>
+	  <language/>
+	</btypes:TYPE>.
       </p>
       <p>
 	It is natural to ask why mutability should be inferred at all.
@@ -803,7 +800,20 @@
 	      <ptype/>
 	    </mutable>
 	  </Tceq>
-	</btypes:TYPE>. We write:
+	</btypes:TYPE>.
+	Let 
+	<btypes:TYPE>
+	  <ctype>
+	    <type/>
+	    <operator symbol="eta"/>
+	  </ctype>
+	</btypes:TYPE> denote a constrained type where
+	<btypes:TYPE>
+	  <type/>
+	</btypes:TYPE> is constrained by the set of (in)equations
+	<btypes:TYPE>
+	  <operator symbol="eta"/>
+	</btypes:TYPE>. We write :
 	<br/>
 	<btypes:TYPE>
 	  <equiv>
@@ -1138,12 +1148,10 @@
       </font>
       <br/>
       <p>
-	<font color="blue">
-	  By embedding constraints within types, we obtain an elegant
-	  representation of constrained types that are self contained. 
-	  The programmer is just presented a type, rather than a type
-	  associated with a set of unsolved inequations.  
-	</font>
+	By embedding constraints within types, we obtain an elegant
+	representation of constrained types that are self contained. 
+	The programmer is just presented a type, rather than a type
+	associated with a set of unsolved inequations.  
 	<!-- For example, the expression
 	<btypes:TYPE>
 	  <lambda>
@@ -1322,8 +1330,8 @@
 	<btypes:TYPE>
 	<language/>
       </btypes:TYPE>. -->
-	Due to the presence of unboxed mutability, we must add the
-	immutable qualifier to the syntactic value clause.
+	<!-- Due to the presence of unboxed mutability, we must add the
+	immutable qualifier to the syntactic value clause. -->
 	For example, in the expression
 	<btypes:TYPE>
 	  <let>
@@ -1912,14 +1920,14 @@
 	  </pcst>
 	</btypes:TYPE> as a 
 	type class&nbsp;<cite ref="jones1995qualtypes"/> constraint that
-	has exactly one possible mutable instance
+	has exactly one possibly mutable instance
 	<btypes:TYPE> 
 	  <pcst>
 	    <id/>
 	    <lKind k="mono"/>
 	    <type num="m"/>
 	  </pcst>
-	</btypes:TYPE>, or an infinite number of
+	</btypes:TYPE>, and an infinite number of
 	<btypes:TYPE> 
 	  <pcst>
 	    <id/>
@@ -2052,37 +2060,35 @@
 	Since all function types are  immutable, the mutability of the
 	argument type need not be fixed, thus preserving mutability
 	polymorphism. 
-	<font color="blue">
-	  In order to ensure that type inference is modular, the
-	  <btypes:TYPE> 
-	    <pcst>
-	      <id/>
-	      <lKind k="var"/>
-	      <type/>
-	    </pcst>
-	  </btypes:TYPE> constraints must not be exposed across a module
-	  boundary. For every top-level definition in a module, an
-	  arbitrary choice of
-	  <btypes:TYPE> 
-	    <eq>
-	      <lKind k="var"/>
-	      <lKind k="mono"/>
-	    </eq>
-	  </btypes:TYPE> or
-	  <btypes:TYPE> 
-	    <eq>
-	      <lKind k="var"/>
-	      <lKind k="poly"/>
-	    </eq>
-	  </btypes:TYPE> must be made for every survivng 
-	  <btypes:TYPE> 
-	    <pcst>
-	      <id/>
-	      <lKind k="var"/>
-	      <type/>
-	    </pcst>
-	  </btypes:TYPE> constraint.
-	</font>
+	In order to ensure that type inference is modular, the
+	<btypes:TYPE> 
+	  <pcst>
+	    <id/>
+	    <lKind k="var"/>
+	    <type/>
+	  </pcst>
+	</btypes:TYPE> constraints must not be exposed across a module
+	boundary. For every top-level definition in a module, an
+	arbitrary choice of
+	<btypes:TYPE> 
+	  <eq>
+	    <lKind k="var"/>
+	    <lKind k="mono"/>
+	  </eq>
+	</btypes:TYPE> or
+	<btypes:TYPE> 
+	  <eq>
+	    <lKind k="var"/>
+	    <lKind k="poly"/>
+	  </eq>
+	</btypes:TYPE> must be made for every surviving 
+	<btypes:TYPE> 
+	  <pcst>
+	    <id/>
+	    <lKind k="var"/>
+	    <type/>
+	  </pcst>
+	</btypes:TYPE> constraint.
       </p>
       <p>
 	In summary, we have used a system of constrained types to
@@ -2241,59 +2247,13 @@
       independently.
     </p>
     <p>
-      <font color="blue">
-	The execution semantics do not perform a copy operation in all
-	cases where copy compatibility is permitted.
-	For example, suppose
-	<btypes:TYPE>
-	  <eq>
-	    <aExpr/>
-	    <if>
-	      <true/>
-	      <aExpr num="1"/>
-	      <aExpr num="2"/>
-	    </if>
-	  </eq>
-	</btypes:TYPE>, and
-	<btypes:TYPE>
-	  <aExpr num="1"/>
-	</btypes:TYPE> evaluates to 
-	<btypes:TYPE>
-	  <aVal num="1"/>
-	</btypes:TYPE>.
-	The type of 
-	<btypes:TYPE>
-	  <aExpr/>
-	</btypes:TYPE>
-	only needs to be copy compatible with 
-	<btypes:TYPE>
-	  <aExpr num="1"/>
-	</btypes:TYPE> and 
-	<btypes:TYPE>
-	  <aExpr num="2"/>
-	</btypes:TYPE>. However, no copy is performed in rule E-If, since 
-	<btypes:TYPE>
-	  <aVal num="1"/>
-	</btypes:TYPE> itself can be used in all cases where a 
-	copy of it can be.
-	This proposition is obviously true if 
-	<btypes:TYPE>
-	  <aExpr num="1"/>
-	</btypes:TYPE> is mutable and
-	<btypes:TYPE>
-	  <aExpr/>
-	</btypes:TYPE> not. It is also true if
-	<btypes:TYPE>
-	  <aExpr num="1"/>
-	</btypes:TYPE> is immutable but
-	<btypes:TYPE>
-	  <aExpr/>
-	</btypes:TYPE> is mutable, since 
-	<btypes:TYPE>
-	  <aExpr/>
-	</btypes:TYPE> is not an lvalue, and cannot
-	be the target of an assignment. 
-      </font>
+      The execution semantics do not perform a copy operation in all
+      cases where copy compatibility is permitted.
+      For example, the E-If rule does not introduce a copy step in the
+      branching expression. Since <progident>if</progident>-expressions
+      are not lvalues, they cannot be the target of an assignment. 
+      Therefore, the value that either branch evaluates to, can
+      itself be used in all cases where a copy of that value can be.
     </p>
     <xi:include href="include/complete/operators.xmli"/>
     <p>
@@ -2368,46 +2328,44 @@
 	  </mutable>
 	</equiv>
       </btypes:TYPE>).
-      <font color="blue">
       We also define the equivalences:
-	<btypes:TYPE>
-	  <equiv>
-	    <mbTop>
-	      <tvar/>
-	      <ptype/>
-	    </mbTop>
-	    <mbTop>
-	      <tvar/>
-	      <ptype dash="'"/>
-	    </mbTop>
-	  </equiv>
-	</btypes:TYPE>, where
-	<btypes:TYPE>
-	  <eq under="minzT">
+      <btypes:TYPE>
+	<equiv>
+	  <mbTop>
+	    <tvar/>
 	    <ptype/>
+	  </mbTop>
+	  <mbTop>
+	    <tvar/>
 	    <ptype dash="'"/>
-	  </eq>
-	</btypes:TYPE>
-	and
-	<btypes:TYPE>
-	  <equiv>
-	    <mbTop>
-	      <stype/>
-	      <ptype/>
-	    </mbTop>
-	    <mbTop>
-	      <stype/>
-	      <ptype dash="'"/>
-	    </mbTop>
-	  </equiv>
-	</btypes:TYPE>, where
-	<btypes:TYPE>
-	  <eq under="minz">
+	  </mbTop>
+	</equiv>
+      </btypes:TYPE>, where
+      <btypes:TYPE>
+	<eq under="minzT">
+	  <ptype/>
+	  <ptype dash="'"/>
+	</eq>
+      </btypes:TYPE>
+      and
+      <btypes:TYPE>
+	<equiv>
+	  <mbTop>
+	    <stype/>
 	    <ptype/>
+	  </mbTop>
+	  <mbTop>
+	    <stype/>
 	    <ptype dash="'"/>
-	  </eq>
-	</btypes:TYPE>.
-      </font>
+	  </mbTop>
+	</equiv>
+      </btypes:TYPE>, where
+      <btypes:TYPE>
+	<eq under="minz">
+	  <ptype/>
+	  <ptype dash="'"/>
+	</eq>
+      </btypes:TYPE>.
       The predicates 
       <btypes:TYPE>
 	<pred name="Immut"/>
@@ -2984,7 +2942,7 @@
 	  <aExpr/>                  
 	  <type/>                  
 	</Msub>
-      </btypes:TYPE> as a shorthand for:
+      </btypes:TYPE> as a shorthand for
       <btypes:TYPE>
 	<tqExpr>
 	  <aExpr/>                  
@@ -3804,8 +3762,7 @@
       </btypes:TYPE>. 
     </p>
     <p>
-      The inference algorithm infers most general types by
-      introducing constrained types of the form
+      The inference algorithm introduces constrained types of the form
       <btypes:TYPE>
 	<mbFull>
 	  <stype/>
@@ -3874,7 +3831,7 @@
     </p>
     <p>
       The U-Ct* rules perform unification of constrained
-      types with other constrained/unconstrained types. First,
+      types with other constrained or unconstrained types. First,
       immutable versions of the two types are unified to establish
       compatibility (through constraints involving 
       <btypes:TYPE>
