@@ -67,6 +67,9 @@ install: all
 $(MY_TYPE_XML:%=%.xml): %.xml : %.txml $(XSL_BTYPE) include/%/$(wildcard *.xmli)
 	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
+#No inclusions for mutinfer file
+include/mutinfer:
+
 $(MY_TYPE_XML:%=%.ltx): %.ltx : %.xml.ltx
 	$(FIX_LTX) $< |\
 	awk '$$1 ~ /\\begin{alltt}/ {if(pre != ""){print pre;} pre = $$0;}\
