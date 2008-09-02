@@ -1,0 +1,287 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <article id="asplas" 
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <docinfo ptsz='default' latex.documentclass="llncs">
+    <title>Sound and Complete Type Inference for a Systems Programming Language</title>
+    <authorgroup>
+      <author>
+      	<firstname>Swaroop</firstname>
+      	<surname>Sridhar</surname>
+      	<email>swaroop@cs.jhu.edu</email>
+      </author>
+      <author>
+      	<firstname>Jonathan</firstname>
+        <othername>S.</othername>
+      	<surname>Shapiro</surname>
+      	<email>shap@eros-os.org</email>
+      </author>
+      <author>
+      	<firstname>Scott</firstname>
+        <othername>F.</othername>
+      	<surname>Smith</surname>
+      	<email>scott@cs.jhu.edu</email>
+      </author>
+      <affiliation>
+	<address>
+	  Department of Computer Science,
+	  The Johns Hopkins University</address> 
+      	<email>
+	  swaroop@cs.jhu.edu, shap@cs.jhu.edu, scott@cs.jhu.edu
+	</email>
+      	<!-- <orgname>Department of Computer Science</orgname>
+	<address>The Johns Hopkins University</address> 
+	<address>3400 N. Charles Street, 224 NEB, 
+	Baltimore, MD 21218</address> -->
+      </affiliation>
+    </authorgroup>
+    <pubdate></pubdate>
+    <categories>
+      <category>papers</category>
+    </categories>
+    <synopsis>
+      <p>
+        APLAS 2008 paper describing the theory of BitC mutability
+	model and type inference. 
+	The HTML version of this paper is not
+        able to represent all of the mathematical notation correctly.
+      </p>
+    </synopsis>
+  </docinfo> 
+  <xi:include href="include/APLAS2008/abstract.xmli"/>
+  <xi:include href="include/APLAS2008/introduction.xmli"/>
+  <xi:include href="include/APLAS2008/overview.xmli"/>
+  <xi:include href="include/APLAS2008/formal.xmli"/>
+  <xi:include href="include/APLAS2008/related_work.xmli"/>
+  <xi:include href="include/APLAS2008/conclusion.xmli"/>
+  <xi:include href="include/APLAS2008/bibliography.xmli"/>
+</article>
+
+<!--       <btypes:TYPE> -->
+<!-- 	<grammar notitle="yes"> -->
+<!-- 	  <bnf2> -->
+<!-- 	    <bnf desc="Identifiers"> -->
+<!-- 	      <id/> -->
+<!-- 	      <alternatives etc="yes"> -->
+<!-- 		<id name="y"/> -->
+<!-- 		<id name="z"/> -->
+<!-- 	      </alternatives> -->
+<!-- 	    </bnf> -->
+<!-- 	    <bnf desc="Stack Locations"> -->
+<!-- 	      <sLoc/> -->
+<!-- 	      <alternatives etc="yes"> -->
+<!-- 		<sLoc num="1"/> -->
+<!-- 		<sLoc num="2"/> -->
+<!-- 	      </alternatives> -->
+<!-- 	    </bnf> -->
+<!-- 	    <bnf desc="Heap Locations"> -->
+<!-- 	      <hLoc/> -->
+<!-- 	      <alternatives etc="yes"> -->
+<!-- 		<hLoc num="1"/> -->
+<!-- 		<hLoc num="2"/> -->
+<!-- 	      </alternatives> -->
+<!-- 	    </bnf> -->
+<!-- 	  </bnf2> -->
+<!-- 	  <bnf2>	     -->
+<!-- 	    <bnf desc="lvalues"> -->
+<!-- 	      <lVal/> -->
+<!-- 	      <alternatives> -->
+<!-- 		<sLoc/> -->
+<!-- 		<deref> -->
+<!-- 		  <hLoc/> -->
+<!-- 		</deref> -->
+<!-- 	      </alternatives> -->
+<!-- 	    </bnf> -->
+<!-- 	    <bnf desc="Values"> -->
+<!-- 	      <aVal/> -->
+<!-- 	      <alternatives> -->
+<!-- 		<Unit/> -->
+<!-- 		<true/> -->
+<!-- 		<false/> -->
+<!-- 		<hLoc/> -->
+<!-- 		<lambda> -->
+<!-- 		  <id/> -->
+<!-- 		  <aExpr/> -->
+<!-- 		</lambda> -->
+<!-- 	      </alternatives> -->
+<!-- 	    </bnf> -->
+<!-- 	  </bnf2> -->
+<!-- 	  <bnf2 colspan="3"> -->
+<!-- 	    <bnf desc="Expressions"> -->
+<!-- 	      <aExpr/> -->
+<!-- 	      <alternatives> -->
+<!-- 		<aVal/> -->
+<!-- 		<sLoc/> -->
+<!-- 		<apply> -->
+<!-- 		  <aExpr/> -->
+<!-- 		  <aExpr/> -->
+<!-- 		</apply> -->
+<!-- 		<tqExpr> -->
+<!-- 		  <aExpr/> -->
+<!-- 		  <type/> -->
+<!-- 		</tqExpr> -->
+<!-- 		<assign> -->
+<!-- 		  <aExpr/> -->
+<!-- 		  <aExpr/> -->
+<!-- 		</assign>  -->
+<!-- 		<dup> -->
+<!-- 		  <aExpr/> -->
+<!-- 		</dup> -->
+<!-- 		<deref> -->
+<!-- 		  <aExpr/> -->
+<!-- 		</deref> -->
+<!-- 		<if> -->
+<!-- 		  <aExpr/> -->
+<!-- 		  <aExpr/> -->
+<!-- 		  <aExpr/> -->
+<!-- 		</if> -->
+<!-- 		<let kind="k"> -->
+<!-- 		  <tqExpr optional="yes"> -->
+<!-- 		    <id/> -->
+<!-- 		    <type/> -->
+<!-- 		  </tqExpr> -->
+<!-- 		  <aExpr/> -->
+<!-- 		  <aExpr/> -->
+<!-- 		</let> -->
+<!-- 	      </alternatives> -->
+<!-- 	    </bnf> -->
+<!-- 	  </bnf2> -->
+<!-- 	  <bnf2 colspan="3"> -->
+<!-- 	    <bnf desc="Let-kinds"> -->
+<!-- 	      <symbol name="kappa"/> -->
+<!-- 	      <alternatives> -->
+<!-- 		<text content="-"/> -->
+<!-- 		<symbol name="alpha"/> -->
+<!-- 		<symbol name="psi"/> -->
+<!-- 		<symbol name="forall"/> -->
+<!-- 	      </alternatives> -->
+<!-- 	    </bnf> -->
+<!-- 	  </bnf2> -->
+<!-- 	</grammar> -->
+<!--       </btypes:TYPE> -->
+
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->
+
+<!--  LocalWords:  sysinfer twocolumn ptsz documentclass sigplanconf firstname
+ -->
+<!--  LocalWords:  authorgroup orgname mdash Coyotos shapiro coyotos ACL acl se
+ -->
+<!--  LocalWords:  kaufmann milner peytonjones haskellrevisedreport Kernighan
+ -->
+<!--  LocalWords:  CCured necula Condit cycloneManual Grossman qtypes Volpano
+ -->
+<!--  LocalWords:  SmithVolpanoPTVR const cpi cong ncong foreignphrase hoc mb
+ -->
+<!--  LocalWords:  sridharmutinfer boolPair sem dup bnf desc sLoc hLoc aVal ARG
+ -->
+<!--  LocalWords:  aExpr lvalues lVal tqExpr bnfc opsem opState eval levalOp et
+ -->
+<!--  LocalWords:  evalOp floatingtable fullwidth Hrules opRule RVAL opPre dom
+ -->
+<!--  LocalWords:  mapsto opConc leval notin subst Diatchki defrepr monad Cqual
+ -->
+<!--  LocalWords:  SysObjC balogh sysobjc IEC Aacute aacute Zolt ouml rnyei ACM
+ -->
+<!--  LocalWords:  Proc ECOOP Kluwer auml hndrich SIGPLAN PLDI ndash Sriram MLC
+ -->
+<!--  LocalWords:  Rajamani SIGACT McCloskey Zhou HotOS USENIX dependentMut th
+ -->
+<!--  LocalWords:  IEEE Verlag Mads Tofte MacQueen Iavor hallgren Tolmach ICFP
+ -->
+<!--  LocalWords:  Sep shap fastcapsystem Farber Kiawah Mcpeak Weimer Harren Ph
+ -->
+<!--  LocalWords:  Morrisett PolymorphismTypeAnalysis Symp Shao Zhong DeLine im
+ -->
+<!--  LocalWords:  Deline Fahndrich LeroyOcaml Caml fahndrich Hawblitzel Hodson
+ -->
+<!--  LocalWords:  Lauris EUROSYS Leuven aiken MSR sridhar PLOS Hindley uint gg
+ -->
+<!--  LocalWords:  Worshop Northup online bitfield Arith dereferencing mVal dyn
+ -->
+<!--  LocalWords:  bPtr polyinstantiated updatable rvalues lval TypEvalPred aTS
+ -->
+<!--  LocalWords:  pred Csubst Pari ocaml anonymization ML's twelf Nipkow inria
+ -->
+<!--  LocalWords:  coq ppabs dereferences HaskellonProcessor mtverify jones TCL
+ -->
+<!--  LocalWords:  qualtypes texttt mtd lang xmli horz maxzOp minzOp eq maxz na
+ -->
+<!--  LocalWords:  minz covariant arg ret ceil Tsub locsem decl specsharp CADE
+ -->
+<!--  LocalWords:  Monads Carsten LNAI Paulson Wenzel HOL LNCS Millstein eiffel
+ -->
+<!--  LocalWords:  DeLineVault Schoeller Bernd Zhiming Liu FACS Rustan Leino ve
+ -->
+<!--  LocalWords:  Schulte CASSIS specsharpreleasenotes Smans Piessens tschantz
+ -->
+<!--  LocalWords:  javari leadin isZthTrue Pfenning mVec mLst backend ShaoRep
+ -->
+<!--  LocalWords:  leroyUBobj harperPoly RTTI polyinst letvar letarr defpure ol
+ -->
+<!--  LocalWords:  GHC VFiasco hohmuth BitC's releasenotes uuml ghcManual Tews
+ -->
+<!--  LocalWords:  plos iuml analyses TDjudge judgeOp Sjudge unin supeq TIjudge
+ -->
+<!--  LocalWords:  aSubMap corUp corUpOp solvability rmann unifications revalOp
+ -->
+<!--  LocalWords:  reval epsiv TypesBook leroy polymorphicC Launchbury monads
+ -->
+<!--  LocalWords:  stateinHaskell Wadler ceqOp neq FirstName LastName liveness
+ -->
+<!--  LocalWords:  Tarditi javaSpec csharpSpec DeLineMSRVault schemeSpec thinsp
+ -->
+<!--  LocalWords:  pythonSpec runtime marshall unmarshall FoxNet TCP IP SubMap
+ -->
+<!--  LocalWords:  Biagioni Volpano's unkinded mbpair OTH Edoardo Larus Abadi
+ -->
+<!--  LocalWords:  amd Barha Steensgaard Wobber Zill Gilad Bracha ECMA Rossum
+ -->
+<!--  LocalWords:  Cheng tyRule tyPre tyConc isEntity REFL CQual xml DOCTYPE fn
+ -->
+<!--  LocalWords:  OSDoc xmlns btypes docinfo pubdate dev bitc BitC incolumn al
+ -->
+<!--  LocalWords:  unboxed nbsp shapBitcSpec mut compat SparkAdaBook SML OCaml
+ -->
+<!--  LocalWords:  progident Foxnet literallayout forall IntLit defstruct fst
+ -->
+<!--  LocalWords:  snd defunion cdr inlined Diatchi Sys Usr typ bool stateful
+ -->
+<!--  LocalWords:  xyz dereferenced deref constness ndx ident ul li lvalue tvar
+ -->
+<!--  LocalWords:  behaviour ceq sz accessor wrightValRes monomorphic tradeoffs
+ -->
+<!--  LocalWords:  ness vec lst abc deftypeclass definstance num href LHS RHS
+ -->
+<!--  LocalWords:  aCtset br subtyping iff contravariant tvars Xform Commut CMU
+ -->
+<!--  LocalWords:  polyinstantiation microkernel datatypes bibentry doctitle cp
+ -->
+<!--  LocalWords:  SparkAda Doerrie Swaroop Multithreaded Multithreading useF
+ -->
+<!--  LocalWords:  Kodumal fPtr polymorphically asplas llncs notitle copyList
+ -->
+<!--  LocalWords:  optionalElse dereference mutLst nospace listCopy bp textit
+ -->
+<!--  LocalWords:  allTrue rvalue reified HaskellGlobals SRL colspan benefacts
+ -->
+	
+<!--  LocalWords:  ctype fnxn paren initsep colsep globals tbody valign td Loc
+ -->
+<!--  LocalWords:  Exprs TypeScheme Env Rval Oth cst Prog mutinfer de facto SHA
+ -->
+<!--  LocalWords:  scriptsize FDIS Keromytis Gunder SwitchWare inequations NEB
+ -->
+<!--  LocalWords:  Arbaugh Kakkar polymorphism TIL HM Refl contravariance co pp
+ -->
+<!--  LocalWords:  decidably Chekability Trans Int Std ISBN Comp Mf Sel Mct App
+ -->
+<!--  LocalWords:  monomorphically concretizable Checkability maxima MP Ct Om
+ -->
+<!--  LocalWords:  Op Sym
+ -->

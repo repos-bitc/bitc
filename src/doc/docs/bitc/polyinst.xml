@@ -10,15 +10,11 @@
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
   <docinfo>
     <title>Polymorphism by Polyinstantiation</title>
-    <!-- <pubdate/> -->
+    <subtitle>Preliminary Implementation Note</subtitle>
     <pubdate>September 6<sup>th</sup>, 2006</pubdate>
-    <copyright>
-      <year>2006</year>
-      <holder>Swaroop Sridhar</holder>
-    </copyright>
-    <!-- <categories>
+    <categories>
       <category>dev/bitc</category>
-    </categories> -->
+    </categories>
     <synopsis>
       <p>
         Discussion about the implementation level details of
@@ -26,13 +22,11 @@
       </p>
     </synopsis>
   </docinfo>
-
   <!-- <abstract latex.incolumn="yes">
   <p>
     </p>
   </abstract> -->
   <!-- <toc/> -->
-
   <sect1>
     <title>Options for Implementing Polymorphism</title> 
     <p>

@@ -2690,6 +2690,12 @@
     <xsl:apply-templates select="*[1]" mode="formula"/>
     <xsl:choose>
       <xsl:when test = "@optional">	      
+	<xsl:text>[</xsl:text>	  
+	<xsl:call-template name="print.op.qual.bare"/>
+	<xsl:apply-templates select="*[2]" mode="formula"/>
+	<xsl:text>]</xsl:text>	  
+      </xsl:when>
+      <xsl:when test = "@colorOpt">	      
 	<xsl:element name="font">
 	  <xsl:attribute name="color">blue</xsl:attribute>
 	  <xsl:call-template name="print.op.qual.bare"/>

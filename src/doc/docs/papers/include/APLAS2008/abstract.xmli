@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+     <!ENTITY TSZ "scriptsize">
+]>
+  <abstract latex.incolumn="yes">
+  <p>
+    This paper introduces a new type system designed for
+    safe systems programming. The type system features
+    a new mutability model that combines unboxed types
+    with a consistent typing of mutability. The type system is
+    provably sound, supports polymorphism, and eliminates the need
+    for alias analysis to determine the immutability of a location. 
+    A sound and complete type inference algorithm for this system is
+    presented.
+  </p>
+  </abstract>

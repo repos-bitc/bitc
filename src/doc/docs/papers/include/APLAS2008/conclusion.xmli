@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <sect1 id="conclusion"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <title>Conclusions</title>
+  <p>
+    In this paper, we have defined a language and type system 
+    for systems programming which integrates all of unboxed
+    representation, consistent complete mutability support, and
+    polymorphism. The mutability model is expressive enough to 
+    permit mutation of unboxed/stack locations, and at the same time
+    guarantees that types are definitive about the mutability of
+    every location across all aliases. 
+  </p>
+  <p>
+    Complete support for mutability introduces challenges for type
+    inference at copy boundaries. We have developed a novel algorithm
+    that infers principal types using a system of constrained
+    types. To our knowledge, this is the first sound and complete
+    algorithm that infers both mutability and polymorphism in a
+    systems programming language with copy compatibility.
+  </p>
+  <p>    
+    The type inference algorithm is implemented as part of the
+    BitC&nbsp;<cite ref="shapBitcSpec2006"/> language compiler.
+    The core of the compiler involves 22,433 lines of C++ code, of
+    which implementation of the type system accounts for about
+    7,816 lines.
+    The source code can be obtained from
+    <link href="http://bitc-lang.org">
+      <progident>http://bitc-lang.org</progident>.  
+    </link>
+  </p>
+  </sect1>

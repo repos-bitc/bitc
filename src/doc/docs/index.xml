@@ -9,12 +9,12 @@
     <dir-expand-entries category="dev/bitc"/>
   </dirgroup>
   <dirgroup>
-    <title>Formal Results</title>
-    <dir-expand-entries category="bitc/formal"/>
-  </dirgroup>
-  <dirgroup>
     <title>Published Papers</title>
     <p>Papers about Coyotos or BitC.</p>
     <dir-expand-entries category="papers"/>
+  </dirgroup>
+  <dirgroup>
+    <title>Technical Reports</title>
+    <dir-expand-entries category="report"/>
   </dirgroup>
 </directory>

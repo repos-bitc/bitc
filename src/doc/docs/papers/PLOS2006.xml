@@ -24,18 +24,19 @@
       </affiliation>
     </authorgroup>
     <pubdate>October 22, 2006</pubdate>
-<!--     <copyright> -->
-<!--       <year>2006</year> -->
-<!--       <holder>Swaroop Sridhar</holder> -->
-<!--       <holder>Jonathan S. Shapiro</holder> -->
-<!--     </copyright> -->
-<!--     <categories> -->
-<!--       <category>dev/bitc</category> -->
-<!--     </categories> -->
+    <!--     <copyright> -->
+    <!--       <year>2006</year> -->
+    <!--       <holder>Swaroop Sridhar</holder> -->
+    <!--       <holder>Jonathan S. Shapiro</holder> -->
+    <!--     </copyright> -->
+    <categories>
+      <category>papers</category>
+    </categories>
     <synopsis>
       <p>
-        Discussion about Challenges involved in polymorphic type
-        inference in the presence of unboxed mutability.
+        PLOS 2006 workshop paper informally describing a heuristic
+        approach to polymorphic type inference in the presence of
+        unboxed mutability.
       </p>
     </synopsis>
   </docinfo>  

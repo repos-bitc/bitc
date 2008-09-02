@@ -1,0 +1,4084 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <appendix id="static_semantics"    
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <title>Properties of <btypes:TYPE><language/></btypes:TYPE> Type Algebra</title>
+  <!-- Can we have just one kind of type instead of restricting
+  mutable and maybe types to only contain unconstrained types? 
+
+  This means that we will permit types such as:
+  'a!'b|'d|'e!bool and M'a|'b.
+
+  Further, with this setup, can we elide the M'a|t type, and
+  instead use the typing M('a|t) ?
+
+  While there is nothing wrong with these types themselves, they
+  complicate the unification algorithm. For example, suppose
+  p: bool x bool, and consider the expression
+  
+  \x. x:= p. 
+
+  The unification algorithm will initially assign x: 'a|'b, and at
+  the set rule, generate constraints
+  { 'a|'b = M('c|'d), bool x bool = 'e|'d }
+
+  This will reduce to { 'a|'b = M('c|boolxbool) }
+  Now, we will need a rule that unifies mutable vs maybe types
+  correctly ... -->
+  <btypes:TYPE>       
+    <grammar>
+      <bnf desc="Cmp. Constraints">
+	<constraint name="c"/>
+	<alternatives>
+	  <unct>
+	    <tvar/>
+	  </unct>
+	  <Tceq>
+	    <tvar/>
+	    <ptype/>
+	  </Tceq>
+	  <ceq>
+	    <tvar/>
+	    <ptype/>
+	  </ceq>
+	</alternatives>
+      </bnf>
+      <bnf desc="Cmp. Constraint Sets">
+      	<bCtset/>
+      	<alternatives>
+      	  <Empty/>
+      	  <set>
+      	    <plural>
+      	      <constraint name="c"/>
+      	    </plural>
+      	  </set>
+      	  <unin>
+      	    <bCtset/>
+      	    <bCtset/>
+      	  </unin>
+      	</alternatives>
+      </bnf>
+      <bnf desc="Poly. Constraints">
+	<constraint name="d"/>
+	<alternatives>
+	  <pcst>
+	    <id/>
+	    <lKind/>
+	    <type/>
+	  </pcst>
+	</alternatives>
+      </bnf>
+      <bnf desc="Poly. Constraint Sets">
+      	<dCtset/>
+      	<alternatives>
+      	  <Empty/>
+      	  <set>
+      	    <plural>
+      	      <constraint name="d"/>
+      	    </plural>
+      	  </set>
+      	  <unin>
+      	    <dCtset/>
+      	    <dCtset/>
+      	  </unin>
+      	</alternatives>
+      </bnf>
+      <bnf desc="Unf. Constraints">
+	<constraint name="u"/>
+	<alternatives>
+	  <eq>
+	    <type/>
+	    <type/>
+	  </eq>
+	  <eq>
+	    <lKind k="var"/>
+	    <lKind/>
+	  </eq>
+	  <constraint name="d"/>
+	</alternatives>
+      </bnf>
+      <bnf desc="Unf. Constraint Sets">
+      	<aCtset/>
+      	<alternatives>
+	  <Empty/>
+      	  <set>
+      	    <plural>
+      	      <constraint name="u"/>
+      	    </plural>
+      	  </set>
+      	  <unin>
+      	    <aCtset/>
+      	    <aCtset/>
+      	  </unin>
+      	  <unin excl="yes">
+      	    <aCtset/>
+      	    <aCtset/>
+      	  </unin>
+      	</alternatives>
+      </bnf>
+      <bnf desc="Solvable Entities">
+	<solvable/>
+	<alternatives>
+	  <type/>
+	  <aCtset/>
+	  <aTS/>
+	  <gamma/>
+	  <store/>
+	</alternatives>
+      </bnf>
+    </grammar>
+  </btypes:TYPE>
+  <p>
+    We represent mathematical properties as: 
+    <btypes:TYPE>
+      <models name="property">
+	<text content="assumption"/>
+	<text content="subject"/>
+      </models>
+    </btypes:TYPE>.
+    As a matter of notational convenience in the case of
+    substitutions, we write: 
+    <btypes:TYPE>
+      <aSubMap num="a.b"/> 
+    </btypes:TYPE> to mean
+    <btypes:TYPE>
+      <compose>
+	<aSubMap num="a"/> 
+	<aSubMap num="b"/> 
+      </compose>
+    </btypes:TYPE>. 
+    We also abbreviate substitution over sets
+    <btypes:TYPE>
+      <Subst sp="yes">
+	<aSubMap/>
+	<set>
+	  <unspecified/>
+	</set>
+      </Subst>
+    </btypes:TYPE> as
+    <btypes:TYPE>
+      <Subst>
+	<aSubMap/>
+	<set>
+	  <unspecified/>
+	</set>
+      </Subst>
+    </btypes:TYPE>.
+    The operator
+    <btypes:TYPE>
+      <uninOp excl="yes"/>
+    </btypes:TYPE> represents the disjoint union of sets.
+    The 
+    <btypes:TYPE>
+      <mutexOp/>
+    </btypes:TYPE> operator denotes mutual exclusion of sets. 
+    That is,
+    <btypes:TYPE>
+      <mutex>
+	<aSet num="1"/>
+	<aSet num="2"/>
+      </mutex>
+    </btypes:TYPE> iff
+    <btypes:TYPE>
+      <eq>
+	<inter>
+	  <aSet num="1"/>
+	  <aSet num="2"/>
+	</inter>
+	<Empty/>
+      </eq>
+    </btypes:TYPE>.
+    As is customary, we write 
+    <btypes:TYPE>
+      <mutex>
+	<aSet num="1"/>
+	<aSet num="2"/>
+	<aSet num="3"/>
+      </mutex>
+    </btypes:TYPE> iff
+    <btypes:TYPE>
+      <mutex>
+	<aSet num="1"/>
+	<aSet num="2"/>
+      </mutex>
+    </btypes:TYPE> and
+    <btypes:TYPE>
+      <mutex>
+	<aSet num="2"/>
+	<aSet num="3"/>
+      </mutex>
+    </btypes:TYPE>.
+  </p>
+  <definition id="aleq">      
+    <title>Algebraic equivalences</title>
+    <p>
+      In our algebra of types, we define the following equivalence:
+      <btypes:TYPE>
+	<eq>
+	  <mutable>
+	    <mutable>
+	      <ptype/>
+	    </mutable>
+	  </mutable>
+	  <mutable>
+	    <ptype/>
+	  </mutable>
+	</eq>
+      </btypes:TYPE>.
+      That is, the mutable type constructor is idempotent. 
+    </p>
+  </definition>
+  <definition id="structural_containment">
+    <title>Structural Containment</title>
+    <p>
+      We define a structural containment relation 
+      <btypes:TYPE>
+	<in>
+	  <type/>
+	  <solvable/>
+	</in>
+      </btypes:TYPE> as follows:
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <type dash="'"/>
+	    </in>
+	  </btypes:TYPE> if
+	  <btypes:TYPE>
+	    <type/>
+	  </btypes:TYPE> is structurally present as a part of 
+	  <btypes:TYPE>
+	    <type dash="'"/>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <forall>
+		<tvars/>
+		<type dash="'"/>
+	      </forall>
+	    </in>
+	  </btypes:TYPE> if
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <set>
+		<tvars/>
+	      </set>
+	    </in>
+	  </btypes:TYPE> or
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <type dash="'"/>
+	    </in>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <gamma/>
+	    </in>
+	  </btypes:TYPE> if
+	  <btypes:TYPE>
+	    <Exists>
+	      <in>
+		<mapping>
+		  <id/>
+		  <aTS/>
+		</mapping>
+		<gamma/>
+	      </in>
+	    </Exists>          
+	  </btypes:TYPE> such that 
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <aTS/>
+	    </in>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <store/>
+	    </in>
+	  </btypes:TYPE> if
+	  <btypes:TYPE>
+	    <Exists>
+	      <in>
+		<mapping>
+		  <loc/>
+		  <type dash="'"/>
+		</mapping>
+		<store/>
+	      </in>
+	    </Exists>          
+	  </btypes:TYPE> such that 
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <type dash="'"/>
+	    </in>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <solvables/>
+	    </in>
+	  </btypes:TYPE> if
+	  <btypes:TYPE>
+	    <in>
+	      <type/>
+	      <solvable/>
+	    </in>
+	  </btypes:TYPE>, for any
+	  <btypes:TYPE>
+	    <in>       
+	      <solvable/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </in>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
+  </definition>
+  <definition id="wf-subst">
+    <title>Well-formed Substitutions</title>
+    <p>
+      A substitution
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE> is said to be well-formed with respect to
+      a sentence
+      <btypes:TYPE>
+	<textmath content="X"/> 
+      </btypes:TYPE> in the above grammar if:
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <aSubMap/>
+	  </btypes:TYPE> is idempotent.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Subst>
+	      <aSubMap/>
+	      <textmath content="X"/> 
+	    </Subst>
+	  </btypes:TYPE> is still a valid sentence in the same language.
+	</p>
+      </li>
+    </ol>
+  </definition>
+  <p>
+    The first condition requires that for any 
+    <btypes:TYPE>
+      <textmath content="X"/> 
+    </btypes:TYPE>,
+    <btypes:TYPE>
+      <eq>
+	<Subst>
+	  <aSubMap/>
+	  <textmath content="X"/> 
+	</Subst>
+	<Subst>
+	  <aSubMap/>
+	  <Subst>
+	    <aSubMap/>
+	    <textmath content="X"/> 
+	  </Subst>
+	</Subst>
+      </eq>
+    </btypes:TYPE>. The actual condition we require here is that the
+    substitution 
+    <btypes:TYPE>
+      <aSubMap/>
+    </btypes:TYPE> satisfies the occurs check. Since any substitution
+    that satisfies the occurs check can be written equivalently as an
+    idempotent substitution, we require this stronger property without
+    loss of generality. This means that substitutions such as
+    <btypes:TYPE>
+      <compose>
+	<SubMap>
+	  <tvar name="alpha"/> 
+	  <tvar name="beta"/> 
+	</SubMap>
+	<SubMap>
+	  <tvar name="beta"/> 
+	  <unit/> 
+	</SubMap>
+      </compose>
+    </btypes:TYPE> are not well formed, and must instead be written
+    (equivalently) as: 
+    <btypes:TYPE>
+      <compose>
+	<SubMap>
+	  <tvar name="alpha"/> 
+	  <unit/> 
+	</SubMap>
+	<SubMap>
+	  <tvar name="beta"/> 
+	  <unit/> 
+	</SubMap>
+      </compose>
+    </btypes:TYPE>. An implication of idempotence is that
+    <btypes:TYPE>
+      <mutex>
+	<dom>
+	  <aSubMap/>
+	</dom>
+	<range>
+	  <aSubMap/>
+	</range>
+      </mutex>
+    </btypes:TYPE>.
+  </p>
+  <p>
+    The second condidtion requires that the substitution 
+    <btypes:TYPE>
+      <aSubMap/>
+    </btypes:TYPE> does not violate the syntax of the 
+    language. For example, the substitution
+    <btypes:TYPE>
+      <SubMap>
+	<tvar/>
+	<mbTop>
+	  <tvar name="beta"/>
+	  <type/>
+	</mbTop>
+      </SubMap>
+    </btypes:TYPE> is not a well formed substitution on 
+    <btypes:TYPE>
+      <mutable>
+	<tvar/>
+      </mutable>
+    </btypes:TYPE>. In the rest of the document, we say substitutions
+    to mean well-formed substitutions unless otherwise specified.
+  </p>
+  <definition id="special">
+    <title>Specialization</title>
+    <p>
+      We write
+      <btypes:TYPE>
+	<spEq>
+	  <type num="1"/>
+	  <type num="2"/>
+	</spEq>
+      </btypes:TYPE>, that is,
+      <btypes:TYPE>
+	<type num="1"/>
+      </btypes:TYPE> is a specialization of (or less general than)
+      <btypes:TYPE>
+	<type num="2"/>
+      </btypes:TYPE>
+      iff
+      <btypes:TYPE>
+	<Exists>
+	  <aSubMap/>
+	</Exists>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<eq>
+	  <type num="1"/>
+	  <Subst>
+	    <aSubMap/>
+	    <type num="2"/>
+	  </Subst>
+	</eq>
+      </btypes:TYPE>.
+      We write
+      <btypes:TYPE>
+	<genEq>
+	  <type num="1"/>
+	  <type num="2"/>
+	</genEq>
+      </btypes:TYPE>, that is,
+      <btypes:TYPE>
+	<type num="1"/>
+      </btypes:TYPE> is more general than
+      <btypes:TYPE>
+	<type num="2"/>
+      </btypes:TYPE>
+      iff
+      <btypes:TYPE>
+	<spEq>
+	  <type num="2"/>
+	  <type num="1"/>
+	</spEq>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      We write
+      <btypes:TYPE>
+	<spEq>
+	  <aSubMap num="1"/>
+	  <aSubMap num="2"/>
+	</spEq>
+      </btypes:TYPE>
+      iff
+      <btypes:TYPE>
+	<Exists>
+	  <aSubMap/>
+	</Exists>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<eq>
+	  <aSubMap num="1"/>
+	  <compose>
+	    <aSubMap/>
+	    <aSubMap num="2"/>
+	  </compose>
+	</eq>
+      </btypes:TYPE>.
+      We write
+      <btypes:TYPE>
+	<genEq>
+	  <aSubMap num="1"/>
+	  <aSubMap num="2"/>
+	</genEq>
+      </btypes:TYPE>
+      iff
+      <btypes:TYPE>
+	<spEq>
+	  <aSubMap num="2"/>
+	  <aSubMap num="1"/>
+	</spEq>
+      </btypes:TYPE>.
+    </p>
+  </definition>
+  <definition id="constraint-sol">      
+    <title>Constraint Satisfaction</title>
+    <p>
+      We write
+      <btypes:TYPE>
+	<models name="sol">
+	  <aSubMap/>
+	  <aCtset/>
+	</models>
+      </btypes:TYPE> 
+      to denote the fact that the substitution 
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE> satisfies the set of constraints
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE> as defined below:
+    </p>
+    <btypes:TYPE>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<grouping>
+		  <pcst>
+		    <id/>
+		    <lKind k="mono"/>
+		    <type num="1"/>
+		  </pcst>
+		  <text content=" ... "/>
+		  <pcst>
+		    <id/>
+		    <lKind k="mono"/>
+		    <type num="n"/>
+		  </pcst>
+		</grouping>
+		<dCtset/>
+	      </in>
+	      <text content=", "/>
+	      <eq>
+		<type num="1"/>
+		<text content=" ... "/>
+		<type num="n"/>
+	      </eq>
+	    </grouping>
+	  </tyPre>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<pcst>
+		  <id name="y"/>
+		  <lKind k="poly"/>
+		  <type/>
+		</pcst>
+		<dCtset/>
+	      </in>
+	      <text content=", "/>
+	      <pred name="Immut">
+		<type/>
+	      </pred>
+	    </grouping>
+	  </tyPre>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<pcst>
+		  <id name="x"/>
+		  <lKind num="1"/>
+		  <type num="1"/>
+		</pcst>
+		<dCtset/>
+	      </in>
+	      <text content=" and "/>
+	      <in>
+		<pcst>
+		  <id name="y"/>
+		  <lKind num="2"/>
+		  <type num="2"/>
+		</pcst>
+		<dCtset/>
+	      </in>
+	      <text content=", "/>
+	      <neq>
+		<lKind num="1"/>
+		<lKind num="2"/>
+	      </neq>
+	      <text content=" implies "/>
+	      <neq>
+		<id/>
+		<id name="y"/>
+	      </neq>
+	    </grouping>
+	  </tyPre>
+	  <tyConc>
+	    <models>
+	      <assume/>
+	      <dCtset/>
+	    </models>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<paren>
+		  <eq>
+		    <type num="1"/>
+		    <type num="2"/>
+		  </eq>
+		</paren>
+		<aCtset/>
+	      </in>
+	      <text content=", "/>
+	      <eq>
+		<Subst>
+		  <aSubMap/>
+		  <type num="1"/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <type num="2"/>
+		</Subst>
+	      </eq>
+	    </grouping>
+	  </tyPre>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<paren>
+		  <eq>
+		    <lKind k="var"/>
+		    <lKind/>
+		  </eq>
+		</paren>
+		<aCtset/>
+	      </in>
+	      <text content=", "/>
+	      <eq>
+		<Subst>
+		  <aSubMap/>
+		  <lKind k="var"/>
+		</Subst>
+		<Subst>
+		  <aSubMap/>
+		  <lKind/>
+		</Subst>
+	      </eq>
+	    </grouping>
+	  </tyPre>
+	  <tyPre>
+	    <eq>
+	      <dCtset/>
+	      <set>
+		<grouping>
+		  <Forall/>
+		  <Subst>
+		    <aSubMap/>
+		    <pcst>
+		      <id/>
+		      <lKind/>
+		      <type/>
+		    </pcst>
+		  </Subst>
+		  <ST/>
+		  <in>
+		    <pcst>
+		      <id/>
+		      <lKind/>
+		      <type/>
+		    </pcst>
+		    <aCtset/>
+		  </in>
+		</grouping>
+	      </set>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="sol">
+	      <aSubMap/>
+	      <leadsto>
+		<aCtset/>
+		<dCtset/>
+	      </leadsto>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <Sjudge name="sol">
+	      <aSubMap/>
+	      <leadsto>
+		<aCtset/>
+		<dCtset/>
+	      </leadsto>
+	    </Sjudge>
+	    <models>
+	      <assume/>
+	      <dCtset/>
+	    </models>
+	  </tyPre>
+	  <tyConc>
+	    <Sjudge name="sat">
+	      <aSubMap/>
+	      <leadsto>
+		<aCtset/>
+		<dCtset/>
+	      </leadsto>
+	    </Sjudge>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+  </definition>
+  <definition id="ExtToSol">
+    <title>Application to Solvable Entities</title>
+    <p>
+      If <btypes:TYPE><pred name="F"/></btypes:TYPE>
+      is a function from <btypes:TYPE><type/></btypes:TYPE>
+      to <btypes:TYPE><set><type/></set></btypes:TYPE>, we extend the
+      definition of the function to all solvable entities 
+      (that is, <btypes:TYPE><solvable/></btypes:TYPE> to 
+      <btypes:TYPE><set><type/></set></btypes:TYPE>) as follows:
+    </p>
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <forall>
+		<tvars/>
+		<ctype>
+		  <type/>
+		  <dCtset/>
+		</ctype>
+	      </forall>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <diff>
+	      <unin>
+		<pred name="F">
+		  <type/>
+		</pred>
+		<pred name="F">
+		  <dCtset/>
+		</pred>
+	      </unin>
+	      <set>
+		<tvars/>
+	      </set>
+	    </diff>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <gamma/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<pred name="F">
+		  <aTS num="j"/>
+		</pred>
+	      </Unin>
+	      <text content=", "/>
+	      <Forall/>
+	      <in>
+		<mapping>
+		  <id num="j"/>
+		  <aTS num="j"/>
+		</mapping>
+		<gamma/>
+	      </in>
+	    </grouping>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <store/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<pred name="F">
+		  <type num="j"/>
+		</pred>
+	      </Unin>
+	      <text content=", "/>
+	      <Forall/>
+	      <in>
+		<mapping>
+		  <loc num="j"/>
+		  <type num="j"/>
+		</mapping>
+		<store/>
+	      </in>
+	    </grouping>
+	  </rhs>
+	</equation>
+      </VEqns>
+    </btypes:TYPE>
+    <p>
+      We also write
+    </p>
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <solvables/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <Unin>
+	      <pred name="F">
+		<solvable/>
+	      </pred>
+	    </Unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <set>
+		<solvables/>
+	      </set>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <Unin>
+	      <pred name="F">
+		<solvable/>
+	      </pred>
+	    </Unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <aSubMap/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <pred name="F">
+		<dom>
+		  <aSubMap/>
+		</dom>
+	      </pred>
+	      <pred name="F">
+		<range>
+		  <aSubMap/>
+		</range>
+	      </pred>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <unct>
+		<tvar/>
+	      </unct>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <pred name="F">
+	      <tvar/>
+	    </pred>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <Tceq>
+		<tvar/>
+		<type/>
+	      </Tceq>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <pred name="F">
+		<tvar/>
+	      </pred>
+	      <pred name="F">
+		<type/>
+	      </pred>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <ceq>
+		<tvar/>
+		<type/>
+	      </ceq>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <pred name="F">
+		<tvar/>
+	      </pred>
+	      <pred name="F">
+		<type/>
+	      </pred>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <eq>
+		<type num="1"/>
+		<type num="2"/>
+	      </eq>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <pred name="F">
+		<type num="1"/>
+	      </pred>
+	      <pred name="F">
+		<type num="2"/>
+	      </pred>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <pcst>
+		<id/>
+		<lKind/>
+		<type/>
+	      </pcst>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <pred name="F">
+	      <type/>
+	    </pred>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <aCtset/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<pred name="F">
+		  <constraint name="u" num="j"/>
+		</pred>
+	      </Unin>
+	      <text content=", "/>
+	      <Forall/>
+	      <in>
+		<constraint name="u" num="j"/>
+		<aCtset/>
+	      </in>
+	    </grouping>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <pred name="F">
+	      <bCtset/>
+	    </pred>
+	  </lhs>
+	  <rhs>
+	    <grouping>
+	      <Unin>
+		<pred name="F">
+		  <constraint name="c" num="j"/>
+		</pred>
+	      </Unin>
+	      <text content=", "/>
+	      <Forall/>
+	      <in>
+		<constraint name="c" num="j"/>
+		<bCtset/>
+	      </in>
+	    </grouping>
+	  </rhs>
+	</equation>
+      </VEqns>
+    </btypes:TYPE>.
+  </definition>
+  <definition id="constraint-colection">
+    <title>Constraint Collection</title>
+    <p>
+      <btypes:TYPE>
+	<spset>
+	  <type/>
+	</spset>
+      </btypes:TYPE>
+      denotes the set of all constrained types and unconcstrained
+      type variables structurally present in 
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE>, as defined in Fig.&nbsp;<xref ref="operators"/>.
+    </p>
+    <p>
+      The 
+      <btypes:TYPE>
+	<spset>
+	  <type/>
+	</spset>
+      </btypes:TYPE> relation, is extended to
+      <btypes:TYPE>
+	<spset>
+	  <solvable/>
+	</spset>
+      </btypes:TYPE> through the 
+      <btypes:TYPE>
+	<pred name="F"/>
+      </btypes:TYPE> operator 
+      (<btypes:TYPE>
+	<defn tag="ExtToSol"/>
+      </btypes:TYPE>), except in the case of 
+      type schemes
+      (<btypes:TYPE>
+	<aTS/>
+      </btypes:TYPE>).
+      Here, we take a monomorphic view of constraints embedded in type
+      schemes and define
+      <btypes:TYPE>
+	<spset>
+	  <aTS/>
+	</spset>
+      </btypes:TYPE> as:
+    </p>
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
+	    <spset>
+	      <TS>
+		<tvars/>
+		<type/>
+		<dCtset/>
+	      </TS>
+	    </spset>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <spset>
+		<type/>
+	      </spset>
+	      <spset>
+		<dCtset/>
+	      </spset>
+	    </unin>
+	  </rhs>
+	</equation>
+      </VEqns>
+    </btypes:TYPE>
+    <p>
+      The collected constraints can be understood to be working in a
+      flat overlay type system, which operates above the
+      tree-structured underlying type system that respects variable
+      quantification.
+    </p>
+  </definition>
+  <definition id="ftvs">
+    <title>Free Type Variables</title>
+    <p>
+      We denote the set of free type variables in a type
+      <btypes:TYPE><type/></btypes:TYPE> as
+      <btypes:TYPE><ftvs><type/></ftvs></btypes:TYPE>. 
+    </p>
+    <btypes:TYPE>
+      <VEqns>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <tvar/>
+	    </ftvs>
+	  </lhs>
+	  <rhs>
+	    <set>
+	      <tvar/>
+	    </set>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <unit/>
+	    </ftvs>
+	  </lhs>
+	  <rhs>
+	    <empty/>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <bool/>
+	    </ftvs>
+	  </lhs>
+	  <rhs>
+	    <empty/>                
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <ref>
+		<type/>
+	      </ref>
+	    </ftvs>
+	  </lhs>
+	  <rhs>
+	    <ftvs>                  
+	      <type/>                  
+	    </ftvs>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <mutable>
+		<ptype/>
+	      </mutable>
+	    </ftvs>
+	  </lhs>
+	  <rhs>
+	    <ftvs>                  
+	      <type/>                  
+	    </ftvs>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	    </ftvs>
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>                    
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>                    
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	    </ftvs>                                  
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>                    
+	      <ftvs>
+		<type num="2"/>
+	      </ftvs>
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	    </ftvs>                                  
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <ftvs>
+		<tvar/>
+	      </ftvs>                    
+	      <ftvs>
+		<ptype/>
+	      </ftvs>                    
+	    </unin>
+	  </rhs>
+	</equation>
+	<equation>
+	  <lhs>
+	    <ftvs>
+	      <mbFull>
+		<stype/>
+		<ptype/>
+	      </mbFull>
+	    </ftvs>                                  
+	  </lhs>
+	  <rhs>
+	    <unin>
+	      <ftvs>
+		<stype/>
+	      </ftvs>
+	      <ftvs>
+		<ptype/>
+	      </ftvs>
+	    </unin>
+	  </rhs>
+	</equation>
+      </VEqns>
+    </btypes:TYPE>.
+  </definition>
+  <definition id="MNTVs">
+    <title>mtvs, Mtvs, Ntvs</title>
+    <p>
+      <btypes:TYPE>
+	<pred name="mtv">
+	  <solvable/>
+	</pred>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<pred name="Mtv">
+	  <solvable/>
+	</pred>
+      </btypes:TYPE>, and
+      <btypes:TYPE>
+	<pred name="ntv">
+	  <solvable/>
+	</pred>
+      </btypes:TYPE> denote the set of all type variables appearing in 
+      <btypes:TYPE>
+	<solvable/>
+      </btypes:TYPE> constrained by
+      <btypes:TYPE>
+	<mbTop>
+	  <tvar/>
+	  <ptype/>
+	</mbTop>
+      </btypes:TYPE>, by
+      <btypes:TYPE>
+	<mbFull>
+	  <stype/>
+	  <ptype/>
+	</mbFull>
+      </btypes:TYPE> and unconstrained
+      respectively.
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <pred name="mtv">
+		<types/>
+	      </pred>
+	      <set>
+		<grouping>
+		  <tvar/>
+		  <ST/>
+		  <in>
+		    <mbTop>
+		      <tvar/>
+		      <ptype/>
+		    </mbTop>
+		    <spset>
+		      <types/>
+		    </spset>
+		  </in>
+		</grouping>
+	      </set>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <pred name="Mtv">
+		<types/>
+	      </pred>
+	      <set>
+		<grouping>
+		  <tvar/>
+		  <ST/>
+		  <in>
+		    <mbFull>
+		      <tvar/>
+		      <ptype/>
+		    </mbFull>
+		    <spset>
+		      <types/>
+		    </spset>
+		  </in>
+		  <text content=" or "/>
+		  <in>
+		    <mbFull>
+		      <mutable>
+			<tvar/>
+		      </mutable>
+		      <ptype/>
+		    </mbFull>
+		    <spset>
+		      <types/>
+		    </spset>
+		  </in>
+		</grouping>
+	      </set>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <pred name="ntv">
+		<types/>
+	      </pred>
+	      <set>
+		<grouping>
+		  <tvar/>
+		  <ST/>
+		  <in>
+		    <tvar/>
+		    <spset>
+		      <types/>
+		    </spset>
+		  </in>
+		</grouping>
+	      </set>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </definition>
+  <definition id="compat-ctset">
+    <title>Compatibility Constraint Set</title>
+    <p>
+      We write
+      <btypes:TYPE>
+	<meta>
+	  <bCtset/>
+	</meta>
+      </btypes:TYPE> if the constraint set
+      <btypes:TYPE>
+	<bCtset/>
+      </btypes:TYPE>
+    </p>
+    <ol>
+      <li>
+	<p>
+	  A type variable 
+	  <btypes:TYPE>
+	    <tvar/>
+	  </btypes:TYPE> appears at most once in 
+	  <btypes:TYPE>
+	    <bCtset/>
+	  </btypes:TYPE> in only one of the positions:
+	  <btypes:TYPE>
+	    <collection or="yes">
+	      <unct>
+		<tvar/>
+	      </unct>
+	      <Tceq>
+		<tvar/>
+		<ptype/>
+	      </Tceq>
+	      <ceq>
+		<tvar/>
+		<ptype/>
+	      </ceq>
+	    </collection>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Forall/>
+	    <in>
+	      <Tceq>
+		<tvar/>
+		<ptype/>
+	      </Tceq>
+	      <bCtset/>
+	    </in>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <eq>
+	      <ptype/>
+	      <minzT>
+		<ptype/>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Forall/>
+	    <in>
+	      <ceq>
+		<tvar/>
+		<ptype/>
+	      </ceq>
+	      <bCtset/>
+	    </in>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <eq>
+	      <ptype/>
+	      <minz>
+		<ptype/>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
+    <p>
+      We write
+      <btypes:TYPE>
+	<eq>
+	  <dom>
+	    <bCtset/>
+	  </dom>
+	  <set>
+	    <grouping>
+	      <tvars/>
+	      <ST/>
+	      <collection or="yes">
+		<in>
+		  <unct>
+		    <tvar/>
+		  </unct>
+		  <bCtset/>
+		</in>
+ 		<in>
+		  <Tceq>
+		    <tvar/>
+		    <ptype/>
+		  </Tceq>
+		  <bCtset/>
+		</in>
+ 		<in>
+		  <ceq>
+		    <tvar/>
+		    <ptype/>
+		  </ceq>
+		  <bCtset/>
+		</in>
+	      </collection>
+	    </grouping>
+	  </set>
+	</eq>
+      </btypes:TYPE>. We write
+      <btypes:TYPE>
+	<eq>
+	  <range>
+	    <bCtset/>
+	  </range>
+	  <set>
+	    <grouping>
+	      <plural>
+		<ptype/>
+	      </plural>
+	      <ST/>
+	      <collection or="yes">
+ 		<in>
+		  <Tceq>
+		    <tvar/>
+		    <ptype/>
+		  </Tceq>
+		  <bCtset/>
+		</in>
+ 		<in>
+		  <ceq>
+		    <tvar/>
+		    <ptype/>
+		  </ceq>
+		  <bCtset/>
+		</in>
+	      </collection>
+	    </grouping>
+	  </set>
+	</eq>
+      </btypes:TYPE>.
+    </p>
+  </definition>
+  <definition id="maybe-consistent">
+    <title>Consistency of Maybe types</title>
+    <p>
+      For any constraint set 
+      <btypes:TYPE>
+	<bCtset/>
+      </btypes:TYPE> such that
+      <btypes:TYPE>
+	<meta>
+	  <bCtset/>
+	</meta>
+      </btypes:TYPE>, we write
+      <btypes:TYPE>
+	<Sat>
+	  <bCtset/>
+	  <type/>
+	</Sat>
+      </btypes:TYPE> to denote that fact that the constraints 
+      embedded in 
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> are consistent with
+      <btypes:TYPE>
+	<bCtset/>
+      </btypes:TYPE>. Similarly for
+      <btypes:TYPE>
+	<Sat>
+	  <bCtset/>
+	  <set>
+	    <solvables/>
+	  </set>
+	</Sat>
+      </btypes:TYPE>.
+    </p>
+    <btypes:TYPE>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <in>
+	      <unct>
+		<tvar/>
+	      </unct>
+	      <bCtset/>
+	    </in>
+	  </tyPre>
+	  <tyConc>
+	    <Sat>
+	      <bCtset/>
+	      <tvar/>
+	    </Sat>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <in>
+	      <Tceq>
+		<tvar/>
+		<ptype/>
+	      </Tceq>
+	      <bCtset/>
+	    </in>
+	    <eq under="minzT">
+	      <ptype/>
+	      <ptype dash="'"/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Sat>
+	      <bCtset/>
+	      <mbTop>
+		<tvar/>
+		<ptype dash="'"/>
+	      </mbTop>
+	    </Sat>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <in>
+	      <ceq>
+		<tvar/>
+		<ptype/>
+	      </ceq>
+	      <bCtset/>
+	    </in>
+	    <eq under="minzT">
+	      <stype/>
+	      <tvar/>
+	    </eq>
+	    <eq under="minz">
+	      <ptype/>
+	      <ptype dash="'"/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Sat>
+	      <bCtset/>
+	      <mbFull>
+		<stype/>
+		<ptype dash="'"/>
+	      </mbFull>
+	    </Sat>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <Sat>
+	      <bCtset/>
+	      <spset>
+		<solvables/>
+	      </spset>
+	    </Sat>
+	  </tyPre>
+	  <tyConc>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <eq>
+	      <set>
+		<types/>
+	      </set>
+	      <spset>
+		<types/>
+	      </spset>
+	    </eq>
+	    <grouping>
+	      <Forall>
+		<in>
+		  <type/>
+		  <set>
+		    <types/>
+		  </set>
+		</in>
+	      </Forall>
+	      <text content=", "/>
+	      <Sat>
+		<bCtset/>
+		<type/>
+	      </Sat>
+	    </grouping>
+	  </tyPre>
+	  <tyConc>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<types/>
+	      </set>
+	    </Sat>
+	  </tyConc>
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <grouping>
+	      <Exists/>
+	      <bCtset/>
+	      <ST/>
+	      <Sat>
+		<bCtset/>
+		<set>
+		  <solvables/>
+		</set>
+	      </Sat>
+	    </grouping>
+	  </tyPre>
+	  <tyConc>
+	    <Cst>
+	      <assume/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Cst>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+  </definition>
+  <definition id="subst-consistent">
+    <title>Consistency of substitutions</title>
+    <p>
+      A consistent substitution is a well formed substitution that
+      does not violate the constraints embedded as maybe types.
+    </p>
+    <btypes:TYPE>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<mbTop>
+		  <tvar/>
+		  <ptype/>
+		</mbTop>
+		<spset>
+		  <solvables/>
+		</spset>
+	      </in>
+	      <text content=", "/>
+	      <eq>
+		<Subst>
+		  <aSubMap/>
+		  <tvar/>
+		</Subst>
+		<tvar name="beta"/>
+	      </eq>
+	      <text content=" or "/>
+	      <eq>
+		<Subst>
+		  <aSubMap/>
+		  <tvar/>
+		</Subst>
+		<ptype dash="'"/>
+	      </eq>
+	      <ST/>
+	      <eq under="minzT">
+		<ptype dash="'"/>
+		<Subst>
+		  <aSubMap/>
+		  <ptype/>
+		</Subst>
+	      </eq>
+	    </grouping>
+	  </tyPre>
+	  <tyPre>
+	    <grouping>
+	      <Forall/>
+	      <in>
+		<mbFull>
+		  <stype/>
+		  <ptype/>
+		</mbFull>
+		<spset>
+		  <solvables/>
+		</spset>
+	      </in>
+	      <text content=", "/>
+	      <eq>
+		<Subst>
+		  <aSubMap/>
+		  <stype/>
+		</Subst>
+		<stype dash="'"/>
+	      </eq>
+	      <text content=" or "/>
+	      <eq>
+		<Subst>
+		  <aSubMap/>
+		  <stype/>
+		</Subst>
+		<Ptype/>
+	      </eq>
+	      <ST/>
+	      <eq under="minz">
+		<Ptype/>
+		<Subst>
+		  <aSubMap/>
+		  <ptype/>
+		</Subst>
+	      </eq>
+	    </grouping>
+	  </tyPre>
+	  <tyConc>
+	    <models name="cst">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <set>
+		<solvables/>
+	      </set>
+	    </models>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules>
+	<tyRule>
+	  <tyPre>
+	    <models name="cst">
+	      <assume>
+		<aSubMap/>
+	      </assume>
+	      <set>
+		<solvables/>
+	      </set>
+	    </models>
+	    <Cst>
+	      <assume/>
+	      <Subst>
+		<aSubMap/>
+		<spset>
+		  <solvables/>
+		</spset>
+	      </Subst>
+	    </Cst>
+	  </tyPre>
+	  <tyConc>
+	    <Cst>
+	      <aSubMap/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Cst>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+<!--     <p> -->
+<!--       Again, we write -->
+<!--       <btypes:TYPE> -->
+<!-- 	<models name="cst"> -->
+<!-- 	  <assume> -->
+<!-- 	    <aSubMap/> -->
+<!-- 	  </assume> -->
+<!-- 	  <solvable/> -->
+<!-- 	</models> -->
+<!--       </btypes:TYPE> as a shorthand for  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<models name="cst"> -->
+<!-- 	  <assume> -->
+<!-- 	    <aSubMap/> -->
+<!-- 	  </assume> -->
+<!-- 	  <set> -->
+<!-- 	    <solvable/> -->
+<!-- 	  </set> -->
+<!-- 	</models> -->
+<!--       </btypes:TYPE>, and  -->
+<!--       <btypes:TYPE> -->
+<!-- 	<Cst> -->
+<!-- 	  <aSubMap/> -->
+<!-- 	  <solvable/> -->
+<!-- 	</Cst> -->
+<!--       </btypes:TYPE> for -->
+<!--       <btypes:TYPE> -->
+<!-- 	<Cst> -->
+<!-- 	  <aSubMap/> -->
+<!-- 	  <set> -->
+<!-- 	    <solvable/> -->
+<!-- 	  </set> -->
+<!-- 	</Cst> -->
+<!--       </btypes:TYPE>. -->
+<!--     </p> -->
+  </definition>
+  <lemma id="maybe-cst-properties">
+    <title>Properties of consistent types</title>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables/>
+	    </CST>
+	  </btypes:TYPE>
+	  iff
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<Forall/>
+		<subeq>
+		  <set>
+		    <mbTop>
+		      <tvar/>
+		      <ptype/>
+		    </mbTop>
+		    <mbTop>
+		      <tvar/>
+		      <ptype dash="'"/>
+		    </mbTop>
+		  </set>
+		  <spset>
+		    <solvables/>
+		  </spset>
+		</subeq>
+	      </btypes:TYPE>, we have
+	      <btypes:TYPE>
+		<eq under="minzT">
+		  <ptype/>
+		  <ptype dash="'"/>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<Forall/>
+		<subeq>
+		  <set>
+		    <mbFull>
+		      <stype/>
+		      <ptype/>
+		    </mbFull>
+		    <mbFull>
+		      <stype dash="'"/>
+		      <ptype dash="'"/>
+		    </mbFull>
+		  </set>
+		  <spset>
+		    <solvables/>
+		  </spset>
+		</subeq>
+	      </btypes:TYPE> such that 
+	      <btypes:TYPE>
+		<eq under="minzT">
+		  <stype/>
+		  <stype dash="'"/>
+		</eq>
+	      </btypes:TYPE>, we have 
+	      <btypes:TYPE>
+		<eq under="minz">
+		  <ptype/>
+		  <ptype dash="'"/>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      <btypes:TYPE>
+		<mutex>
+		  <pred name="mtv">
+		    <solvables/>
+		  </pred>
+		  <pred name="Mtv">
+		    <solvables/>
+		  </pred>
+		  <pred name="ntv">
+		    <solvables/>
+		  </pred>
+		</mutex>
+	      </btypes:TYPE>
+	    </p>
+	  </li>
+	</ol>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables/>
+	    </CST>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables/>
+	    </CST>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <Exists/>
+	    <bCtset/>
+	  </btypes:TYPE>
+	  such that
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables num="b"/>
+	    </CST>
+	  </btypes:TYPE>, 
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables num="s"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <subeq>
+	      <set>
+		<solvables num="s"/>
+	      </set>
+	      <set>
+		<solvables num="b"/>
+	      </set>
+	    </subeq>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <Exists/>
+	    <supeq>
+	      <bCtset dash="'"/>
+	      <bCtset/>
+	    </supeq>
+	  </btypes:TYPE>
+	  such that
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables num="b"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables/>
+	    </CST>
+	  </btypes:TYPE>
+	  iff
+	  <btypes:TYPE>
+	    <CST sp="yes">
+	      <solvables/>
+	    </CST>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>
+	  iff
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <spset>
+		<solvables/>
+	      </spset>
+	    </Sat>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <subeq>
+	      <ftvs>
+		<set>
+		  <solvables/>
+		</set>
+	      </ftvs>
+	      <dom>
+		<bCtset/>
+	      </dom>
+	    </subeq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <eq>
+	      <dom>
+		<bCtset/>
+	      </dom>
+	      <ftvs>
+		<set>
+		  <solvables/>
+		</set>
+	      </ftvs>
+	    </eq>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <subeq>
+	      <ftvs>
+		<range>
+		  <bCtset/>
+		</range>
+	      </ftvs>
+	      <ftvs>
+		<set>
+		  <solvables/>
+		</set>
+	      </ftvs>
+	    </subeq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
+  </lemma>
+  <proof>
+    <p>
+      Evident from 
+      <btypes:TYPE>
+	<defn tag="maybe-consistent"/>
+      </btypes:TYPE>.
+    </p>
+  </proof>
+  <lemma id="Cst-Weakening">
+    <title>Weakening of Consistency</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<subeq>
+	  <set>
+	    <solvables num="2"/>
+	  </set>
+	  <set>
+	    <solvables num="1"/>
+	  </set>
+	</subeq>
+      </btypes:TYPE>, then,      
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables num="1"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>
+	  implies
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables num="2"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables num="1"/>
+	    </CST>
+	  </btypes:TYPE>
+	  implies
+	  <btypes:TYPE>
+	    <CST>
+	      <solvables num="2"/>
+	    </CST>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<solvables num="1"/>
+	      </set>
+	    </models>
+	  </btypes:TYPE>
+	  implies
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<solvables num="2"/>
+	      </set>
+	    </models>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Cst>
+	      <aSubMap/>
+	      <set>
+		<solvables num="1"/>
+	      </set>
+	    </Cst>
+	  </btypes:TYPE>
+	  implies
+	  <btypes:TYPE>
+	    <Cst>
+	      <aSubMap/>
+	      <set>
+		<solvables num="2"/>
+	      </set>
+	    </Cst>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>, then 
+	  <btypes:TYPE>
+	    <Forall/>
+	    <supeq>
+	      <bCtset dash="'"/>
+	      <bCtset/>
+	    </supeq>
+	  </btypes:TYPE> such that
+	  <btypes:TYPE>
+	    <meta>
+	      <bCtset dash="'"/>
+	    </meta>
+	  </btypes:TYPE>, 
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset dash="'"/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Cst>
+	      <aSubMap/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Cst>
+	  </btypes:TYPE>, then 
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </models>
+	  </btypes:TYPE>
+	</p>
+      </li>      
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Cst>
+	      <aSubMap/>
+	      <set>
+		<solvables/>
+	      </set>
+	    </Cst>
+	  </btypes:TYPE>, then 
+	  <btypes:TYPE>
+	    <Cst>
+	      <assume/>
+	      <Subst>
+		<aSubMap/>
+		<spset>
+		  <solvables/>
+		</spset>
+	      </Subst>
+	    </Cst>
+	  </btypes:TYPE>.
+	</p>
+      </li>      
+    </ol>
+  </lemma>
+  <proof>
+    <p>
+      Evident from 
+      <btypes:TYPE>
+	<defn tag="maybe-consistent"/>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+	<defn tag="subst-consistent"/>
+      </btypes:TYPE>.
+    </p>
+  </proof>
+  <lemma id="T-msm_eq_ms">
+    <title>Substitution Canonicalization</title>
+    <p>
+      For any type 
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE> and substitution
+      <btypes:TYPE>
+	<aSubMap/>
+      </btypes:TYPE>, such that
+      <btypes:TYPE>
+	<models name="cst">
+	  <aSubMap/>
+	  <set>
+	    <type/>
+	  </set>
+	</models>
+      </btypes:TYPE>, we have:
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <minzT>
+		    <type/>
+		  </minzT>
+		</Subst>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <maxzT>
+		    <type/>
+		  </maxzT>
+		</Subst>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <maxzT>
+		<Subst>
+		  <aSubMap/>
+		  <maxzT>
+		    <type/>
+		  </maxzT>
+		</Subst>
+	      </maxzT>
+	      <maxzT>
+		<Subst>
+		  <aSubMap/>
+		  <minzT>
+		    <type/>
+		  </minzT>
+		</Subst>
+	      </maxzT>
+	      <maxzT>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </maxzT>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <minz>
+		    <type/>
+		  </minz>
+		</Subst>
+	      </minz>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <maxz>
+		    <type/>
+		  </maxz>
+		</Subst>
+	      </minz>
+	      <minz>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </minz>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <maxz>
+		<Subst>
+		  <aSubMap/>
+		  <maxz>
+		    <type/>
+		  </maxz>
+		</Subst>
+	      </maxz>
+	      <maxz>
+		<Subst>
+		  <aSubMap/>
+		  <minz>
+		    <type/>
+		  </minz>
+		</Subst>
+	      </maxz>
+	      <maxz>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </maxz>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </lemma>
+  <proof>
+    <p>
+      By straightforward induction on the structure of
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE>.
+    </p>
+  </proof>
+  <lemma id="T-sub-min">
+    <title>Substitution over mutability Minimization</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<models name="cst">
+	  <aSubMap/>
+	  <set>
+	    <type num="1"/>
+	    <type num="2"/>
+	  </set>
+	</models>
+      </btypes:TYPE>, then
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq under="minzT">
+	      <type num="1"/>
+	      <type num="2"/>
+	    </eq>
+	  </btypes:TYPE> implies
+	  <btypes:TYPE>
+	    <eq under="minzT">
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>	
+		<type num="2"/>
+	      </Subst>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq under="minz">
+	      <type num="1"/>
+	      <type num="2"/>
+	    </eq>
+	  </btypes:TYPE> implies
+	  <btypes:TYPE>
+	    <eq under="minz">
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>	
+		<type num="2"/>
+	      </Subst>
+	    </eq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+  </lemma>
+  <proof>
+    <ol>
+      <li>
+	<p>
+	  Property 1: We have
+	  <btypes:TYPE>
+	    <eq under="minzT">
+	      <type num="1"/>
+	      <type num="2"/>
+	    </eq>
+	  </btypes:TYPE>. That is,
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<type num="1"/>
+	      </minzT>
+	      <minzT>
+		<type num="2"/>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>.
+	  Therefore, we must have
+	  <btypes:TYPE>
+	    <eq>
+	      <Subst>
+		<aSubMap/>
+		<minzT>
+		  <type num="1"/>
+		</minzT>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<minzT>
+		  <type num="2"/>
+		</minzT>
+	      </Subst>
+	    </eq>
+	  </btypes:TYPE>, and further,
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <minzT>
+		    <type num="1"/>
+		  </minzT>
+		</Subst>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <minzT>
+		    <type num="2"/>
+		  </minzT>
+		</Subst>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  From
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<type num="1"/>
+		<type num="2"/>
+	      </set>
+	    </models>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <lem tag="Cst-Weakening"/>
+	  </btypes:TYPE> (weakening), we have       
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <type num="1"/>
+	    </models>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Now using case&nbsp;(2) and
+	  <btypes:TYPE>
+	    <lem tag="T-msm_eq_ms"/>
+	  </btypes:TYPE>, we obtain
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <minzT>
+		    <type num="1"/>
+		  </minzT>
+		</Subst>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <type num="1"/>
+		</Subst>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>. Similarly, we obtain
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <minzT>
+		    <type num="2"/>
+		  </minzT>
+		</Subst>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <type num="2"/>
+		</Subst>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Substituting the results of case&nbsp;(3)
+	  in case&nbsp;(1), we obtain
+	  <btypes:TYPE>
+	    <eq>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <type num="1"/>
+		</Subst>
+	      </minzT>
+	      <minzT>
+		<Subst>
+		  <aSubMap/>
+		  <type num="2"/>
+		</Subst>
+	      </minzT>
+	    </eq>
+	  </btypes:TYPE>.
+	  That is,
+	  <btypes:TYPE>
+	    <eq under="minzT">
+	      <Subst>
+		<aSubMap/>
+		<type num="1"/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<type num="2"/>
+	      </Subst>
+	    </eq>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Property 2: Similar to Property 1.
+	</p>
+      </li>
+    </ol>
+  </proof>
+  <lemma id="Cst-additive">
+    <title>Aggregation of Consistency</title>
+    <ol>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<solvables num="1"/>
+	      </set>
+	    </models>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<solvables num="2"/>
+	      </set>
+	    </models>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<solvables num="1"/>
+		<solvables num="2"/>
+	      </set>
+	    </models>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables num="1"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables num="2"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>, then
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<solvables num="1"/>
+		<solvables num="2"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
+  </lemma>
+  <proof>
+    <p>
+      Evident from 
+      <btypes:TYPE>
+	<defn tag="subst-consistent"/>
+      </btypes:TYPE> (consistent substitution) and
+      <btypes:TYPE>
+	<defn tag="maybe-consistent"/>
+      </btypes:TYPE> (consistent types).
+    </p>
+  </proof>
+  <lemma id="cst-streangthening">
+    <title>Strengthening of Consistency</title>
+    <p>
+      If
+    </p>
+    <ol>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<type num="1"/>
+		<type num="2"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+ 	  <btypes:TYPE>
+	    <models name="cst">
+	      <aSubMap/>
+	      <set>
+		<type num="1"/>
+		<type num="2"/>
+	      </set>
+	    </models>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <Sat>
+	      <Subst>
+		<aSubMap/>
+		<bCtset/>
+	      </Subst>
+	      <Subst>
+		<aSubMap/>
+		<spset>
+		  <type num="1"/>
+		</spset>
+	      </Subst>
+	    </Sat>
+	  </btypes:TYPE>
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <subeq>
+	      <inter>
+		<dom>
+		  <aSubMap/>
+		</dom>
+		<ftvs>
+		  <type num="2"/>
+		</ftvs>
+	      </inter>
+	      <ftvs>
+		<type num="1"/>
+	      </ftvs>
+	    </subeq>
+	  </btypes:TYPE>
+	</p>
+      </li>
+    </ol>
+    <p>
+      Then, 
+      <btypes:TYPE>
+	<Sat>
+	  <Subst>
+	    <aSubMap/>
+	    <bCtset/>
+	  </Subst>
+	  <Subst>
+	    <aSubMap/>
+	    <spset>
+	      <type num="2"/>
+	    </spset>
+	  </Subst>
+	</Sat>
+      </btypes:TYPE>
+    </p>
+  </lemma>
+  <proof>
+    <p>
+      Let
+      <btypes:TYPE>
+	<eq>
+	  <bCtset num="s"/>
+	  <Subst>
+	    <aSubMap/>
+	    <bCtset/>
+	  </Subst>
+	</eq>
+      </btypes:TYPE>. 
+      The proof is by induction on the structure of
+      <btypes:TYPE>
+	<type num="2"/>
+      </btypes:TYPE>. We proceed by case analysis on the final step.
+    </p>
+    <ol>
+      <li>
+	<p>
+	  From premise&nbsp;(1) and 
+	  <btypes:TYPE>
+	    <lem tag="maybe-cst-properties"/>
+	  </btypes:TYPE> (property-3), we obtain
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <spset>
+		<type num="1"/>
+		<type num="2"/>
+	      </spset>
+	    </Sat>
+	  </btypes:TYPE>.
+	  Using
+	  <btypes:TYPE>
+	    <lem tag="Cst-Weakening"/>
+	  </btypes:TYPE> (weakening), we obtain
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<type num="1"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <spset>
+		<type num="1"/>
+	      </spset>
+	    </Sat>
+	  </btypes:TYPE>,
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <set>
+		<type num="2"/>
+	      </set>
+	    </Sat>
+	  </btypes:TYPE>, and
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <spset>
+		<type num="2"/>
+	      </spset>
+	    </Sat>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Case: 
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <tvar/>
+	    </eq>
+	  </btypes:TYPE>.
+	  Due to 
+	  <btypes:TYPE>
+	    <Sat>
+	      <bCtset/>
+	      <spset>
+		<type num="2"/>
+	      </spset>
+	    </Sat>
+	  </btypes:TYPE>, we have
+	  <btypes:TYPE>
+	    <in>
+	      <unct>
+		<tvar/>
+	      </unct>
+	      <bCtset/>
+	    </in>
+	  </btypes:TYPE>.
+	  We proceed by further case analysis.
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      Case
+	      <btypes:TYPE>
+		<notin>
+		  <SubMap>
+		    <tvar/>
+		    <type/>
+		  </SubMap>
+		  <aSubMap/>
+		</notin>
+	      </btypes:TYPE>:
+	      Here,
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <type num="2"/>
+		  </Subst>
+		  <type num="2"/>
+		  <tvar/>
+		</eq>
+	      </btypes:TYPE>.
+	      Since 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <unct>
+		      <tvar/>
+		    </unct>
+		  </Subst>
+		  <unct>
+		    <tvar/>
+		  </unct>
+		</eq>
+	      </btypes:TYPE>,
+	      <btypes:TYPE>
+		<in>
+		  <unct>
+		    <tvar/>
+		  </unct>
+		  <bCtset num="s"/>
+		</in>
+	      </btypes:TYPE>. 
+	      Further,
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <spset>
+		      <type num="2"/>
+		    </spset>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <spset>
+		      <tvar/>
+		    </spset>
+		  </Subst>
+		  <Subst>
+		    <aSubMap/>
+		    <set>
+		      <tvar/>
+		    </set>
+		  </Subst>
+		  <set>
+		    <tvar/>
+		  </set>
+		</eq>
+	      </btypes:TYPE>. 
+	      Now, it is evident that 
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <Subst>
+		    <aSubMap/>
+		    <spset>
+		      <type num="2"/>
+		    </spset>
+		  </Subst>
+		</Sat>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Case
+	      <btypes:TYPE>
+		<notin>
+		  <SubMap>
+		    <tvar/>
+		    <type/>
+		  </SubMap>
+		  <aSubMap/>
+		</notin>
+	      </btypes:TYPE>:
+	      Here,
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <type num="2"/>
+		  </Subst>
+		  <type/>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  Since 
+		  <btypes:TYPE>
+		    <in>
+		      <tvar/>
+		      <dom>
+			<aSubMap/>
+		      </dom>
+		    </in>
+		  </btypes:TYPE>, due to premise&nbsp;(3), we have
+		  <btypes:TYPE>
+		    <in>
+		      <tvar/>
+		      <ftvs>
+			<type num="1"/>
+		      </ftvs>
+		    </in>
+		  </btypes:TYPE>, and due to premise&nbsp;(1)
+		  <btypes:TYPE>
+		    <subeq>
+		      <set>
+			<tvar/>
+		      </set>
+		      <spset>
+			<type num="1"/>
+		      </spset>
+		    </subeq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  Therefore,
+		  <btypes:TYPE>
+		    <subeq>
+		      <Subst>
+			<aSubMap/>
+			<set>
+			  <tvar/>
+			</set>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<spset>
+			  <type num="1"/>
+			</spset>
+		      </Subst>
+		    </subeq>
+		  </btypes:TYPE>. That is, 
+		  <btypes:TYPE>
+		    <subeq>
+		      <set>
+			<type/>
+		      </set>
+		      <Subst>
+			<aSubMap/>
+			<spset>
+			  <type num="1"/>
+			</spset>
+		      </Subst>
+		    </subeq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From case&nbsp;(3.b.ii), premise&nbsp;(3), and
+		  <btypes:TYPE>
+		    <lem tag="Cst-Weakening"/>
+		  </btypes:TYPE> (weakening), we obtain
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>
+		      <set>
+			<type/>
+		      </set>
+		    </Sat>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  We know that
+		  <btypes:TYPE>
+		    <eq>
+		      <spset>
+			<type num="2"/>
+		      </spset>
+		      <spset>
+			<tvar/>
+		      </spset>
+		      <set>
+			<tvar/>
+		      </set>
+		    </eq>
+		  </btypes:TYPE>.
+		  Therefore, 
+		  <btypes:TYPE>
+		    <eq>
+		      <Subst>
+			<aSubMap/>
+			<spset>
+			  <type num="2"/>
+			</spset>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<set>
+			  <tvar/>
+			</set>
+		      </Subst>
+		      <set>
+			<type/>
+		      </set>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From cases&nbsp;(3.c and 3.d), we conclude that
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>
+		    </Sat>
+		    <Subst>
+		      <aSubMap/>
+		      <spset>
+			<type num="2"/>
+		      </spset>
+		    </Subst>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	</ol>
+      </li>
+      <li>
+	<p>
+	  Case 
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	    </eq>
+	  </btypes:TYPE>:	
+	</p>
+	<ol>
+	  <li>
+	    <p>
+	      Due to premise&nbsp;(1), we have
+	      <btypes:TYPE>
+		<in>
+		  <Tceq>
+		    <tvar/>
+		    <ptype num="c"/>
+		  </Tceq>
+		  <bCtset/>
+		</in>
+	      </btypes:TYPE>, for some
+	      <btypes:TYPE>
+		<eq under="minzT">
+		  <ptype num="c"/>
+		  <ptype/>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      By induction hypothesis, we have
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <Subst>
+		    <aSubMap/>
+		    <spset>
+		      <ptype/>
+		    </spset>
+		  </Subst>
+		</Sat>
+	      </btypes:TYPE>.
+	      Note that we do not apply induction hypothesis on
+	      <btypes:TYPE>
+		<tvar/>
+	      </btypes:TYPE> since it is not an independent first-class
+	      component of the type 
+	      <btypes:TYPE>
+		<mbTop>
+		  <tvar/>
+		  <ptype/>
+		</mbTop>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+	  <li>
+	    <p>
+	      Since
+	      <btypes:TYPE>
+		<eq>
+		  <spset>
+		    <type num="2"/>
+		  </spset>
+		  <unin>
+		    <spset>
+		      <ptype/>
+		    </spset>
+		    <set>
+		      <mbTop>
+			<tvar/>
+			<ptype/>
+		      </mbTop>
+		    </set>
+		  </unin>
+		</eq>
+	      </btypes:TYPE>, 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <spset>
+		      <type num="2"/>
+		    </spset>
+		  </Subst>
+		  <unin>
+		    <Subst>
+		      <aSubMap/>
+		      <spset>
+			<ptype/>
+		      </spset>
+		    </Subst>
+		    <Subst>
+		      <aSubMap/>
+		      <set>
+			<mbTop>
+			  <tvar/>
+			  <ptype/>
+			</mbTop>
+		      </set>
+		    </Subst>
+		  </unin>
+		</eq>
+	      </btypes:TYPE>.
+	      Given the hypothesis in case&nbsp;(3.b), 
+	      if we have
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <Subst>
+		    <aSubMap/>
+		    <set>
+		      <mbTop>
+			<tvar/>
+			<ptype/>
+		      </mbTop>
+		    </set>
+		  </Subst>
+		</Sat>
+	      </btypes:TYPE>, we can prove
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <Subst>
+		    <aSubMap/>
+		    <set>
+		      <mbTop>
+			<tvar/>
+			<ptype/>
+		      </mbTop>
+		    </set>
+		  </Subst>
+		</Sat>
+	      </btypes:TYPE>
+	      using 
+	      <btypes:TYPE>
+		<lem tag="Cst-additive"/>
+	      </btypes:TYPE>.	      
+	    </p>
+	    <p>
+	      Now, we proceed by further case analysis to prove
+	      <btypes:TYPE>
+		<Sat>
+		  <bCtset num="s"/>
+		  <Subst>
+		    <aSubMap/>
+		    <set>
+		      <mbTop>
+			<tvar/>
+			<ptype/>
+		      </mbTop>
+		    </set>
+		  </Subst>
+		</Sat>
+	      </btypes:TYPE>.
+	    </p>
+	  </li>
+ 	  <li>
+	    <p>
+	      Case 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <tvar/>
+		  </Subst>
+		  <tvar/>
+		</eq>
+	      </btypes:TYPE>: That is,
+	      <btypes:TYPE>
+		<notin>
+		  <tvar/>
+		  <dom>
+		    <aSubMap/>
+		  </dom>
+		</notin>
+	      </btypes:TYPE>.
+	      Here, 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <mbTop>
+		      <tvar/>
+		      <ptype/>
+		    </mbTop>
+		  </Subst>
+		  <mbTop>
+		    <tvar/>
+		    <Subst>
+		      <aSubMap/>
+		      <ptype/>
+		    </Subst>
+		  </mbTop>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  Since
+		  <btypes:TYPE>
+		    <in>
+		      <Tceq>
+			<tvar/>
+			<ptype num="c"/>
+		      </Tceq>
+		      <bCtset/>
+		    </in>
+		  </btypes:TYPE>, we have
+		  <btypes:TYPE>
+		    <in>
+		      <Tceq>
+			<tvar/>
+			<Subst>
+			  <aSubMap/>
+			  <ptype num="c"/>
+			</Subst>
+		      </Tceq>
+		      <bCtset num="s"/>
+		    </in>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From 
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <ptype num="c"/>
+		      <ptype/>
+		    </eq>
+		  </btypes:TYPE>, 
+		  premise&nbsp;(2), and
+		  <btypes:TYPE>
+		    <lem tag="T-sub-min"/>
+		  </btypes:TYPE>, we obtain
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <Subst>
+			<aSubMap/>
+			<ptype num="c"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<ptype/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>. 
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From cases&nbsp;(3.d.i and 3.d.ii) and
+		  <btypes:TYPE>
+		    <defn tag="maybe-consistent"/>
+		  </btypes:TYPE>, we obtain
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>
+		      <mbTop>
+			<tvar/>
+			<Subst>
+			  <aSubMap/>
+			  <ptype/>
+			</Subst>
+		      </mbTop>
+		    </Sat>
+		  </btypes:TYPE>. That is,
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>
+		      <Subst>
+			<aSubMap/>
+			<mbTop>
+			  <tvar/>
+			  <ptype/>
+			</mbTop>
+		      </Subst>
+		    </Sat>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	  <li>
+	    <p>
+	      Case 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <tvar/>
+		  </Subst>
+		  <tvar name="beta"/>
+		</eq>
+	      </btypes:TYPE>:
+	      Here, 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <mbTop>
+		      <tvar/>
+		      <ptype/>
+		    </mbTop>
+		  </Subst>
+		  <mbTop>
+		    <tvar name="beta"/>
+		    <Subst>
+		      <aSubMap/>
+		      <ptype/>
+		    </Subst>
+		  </mbTop>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  Since 
+		  <btypes:TYPE>
+		    <in>
+		      <tvar/>
+		      <dom>
+			<aSubMap/>
+		      </dom>
+		    </in>
+		  </btypes:TYPE>, due to premise&nbsp;(3), we have
+		  <btypes:TYPE>
+		    <in>
+		      <tvar/>
+		      <ftvs>
+			<type num="1"/>
+		      </ftvs>
+		    </in>
+		  </btypes:TYPE>.
+		  Due to premise&nbsp;(1), 
+		  <btypes:TYPE>
+		    <defn tag="maybe-consistent"/>
+		  </btypes:TYPE>, and
+		  <btypes:TYPE>
+		    <lem tag="maybe-cst-properties"/>
+		  </btypes:TYPE> (property-1), 
+		  it must be true that
+		  <btypes:TYPE>
+		    <subeq>
+		      <set>
+			<mbTop>
+			  <tvar/>
+			  <ptype num="1"/>
+			</mbTop>
+		      </set>
+		      <spset>
+			<type num="1"/>
+		      </spset>
+		    </subeq>
+		  </btypes:TYPE>, for some 
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <ptype num="1"/>
+		      <ptype/>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  Therefore,
+		  <btypes:TYPE>
+		    <subeq>
+		      <set>
+			<mbTop>
+			  <tvar name="beta"/>
+			  <Subst>
+			    <aSubMap/>
+			    <ptype num="1"/>
+			  </Subst>
+			</mbTop>
+		      </set>
+		      <Subst>
+			<aSubMap/>
+			<spset>
+			  <type num="1"/>
+			</spset>
+		      </Subst>
+		    </subeq>
+		  </btypes:TYPE>
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From premise&nbsp;(3), case&nbsp;(3.e.ii) and 
+		  <btypes:TYPE>
+		    <lem tag="Cst-Weakening"/>
+		  </btypes:TYPE> (weakening), we obtain
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>	
+		      <mbTop>
+			<tvar name="beta"/>
+			<Subst>
+			  <aSubMap/>
+			  <ptype num="1"/>
+			</Subst>
+		      </mbTop>
+		    </Sat>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From case&nbsp;(3.e.iii) and
+		  <btypes:TYPE>
+		    <defn tag="maybe-consistent"/>
+		  </btypes:TYPE>, we conclude that 
+		  <btypes:TYPE>
+		    <in>
+		      <Tceq>
+			<tvar name="beta"/>
+			<ptype num="c"/>
+		      </Tceq>
+		      <bCtset num="s"/>	
+		    </in>
+		  </btypes:TYPE> such that 
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <ptype num="c"/>
+		      <Subst>
+			<aSubMap/>
+			<ptype num="1"/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From case&nbsp;(3.e.i), premise&nbsp;(2), and
+		  <btypes:TYPE>
+		    <lem tag="T-sub-min"/>
+		  </btypes:TYPE>, we obtain
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <Subst>
+			<aSubMap/>
+			<ptype num="1"/>
+		      </Subst>
+		      <Subst>
+			<aSubMap/>
+			<ptype/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>. 
+		  Using this with case&nbsp;(3.e.iv), we conclude
+		  that
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <ptype num="c"/>
+		      <Subst>
+			<aSubMap/>
+			<ptype/>
+		      </Subst>
+		    </eq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From cases&nbsp;(3.e.iv and 3.e.v), and
+		  <btypes:TYPE>
+		    <defn tag="maybe-consistent"/>
+		  </btypes:TYPE>, we obtain
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>	
+		      <mbTop>
+			<tvar name="beta"/>
+			<Subst>
+			  <aSubMap/>
+			  <ptype/>
+			</Subst>
+		      </mbTop>
+		    </Sat>
+		  </btypes:TYPE>.
+		  That is,
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>	
+		      <Subst>
+			<aSubMap/>
+			<mbTop>
+			  <tvar/>
+			  <ptype/>
+			</mbTop>
+		      </Subst>
+		    </Sat>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	  <li>
+	    <p>
+	      Case 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <tvar/>
+		  </Subst>
+		  <ptype dash="'"/>
+		</eq>
+	      </btypes:TYPE>:
+	      Here, 
+	      <btypes:TYPE>
+		<eq>
+		  <Subst>
+		    <aSubMap/>
+		    <mbTop>
+		      <tvar/>
+		      <ptype/>
+		    </mbTop>
+		  </Subst>
+		  <ptype dash="'"/>
+		</eq>
+	      </btypes:TYPE>.
+	    </p>
+	    <ol>
+	      <li>
+		<p>
+		  Similar to case&nbsp;(3.d.i), we have
+		  <btypes:TYPE>
+		    <subeq>
+		      <set>
+			<mbTop>
+			  <tvar/>
+			  <ptype num="1"/>
+			</mbTop>
+		      </set>
+		      <spset>
+			<type num="1"/>
+		      </spset>
+		    </subeq>
+		  </btypes:TYPE>, for some 
+		  <btypes:TYPE>
+		    <eq under="minzT">
+		      <ptype num="1"/>
+		      <ptype/>
+		    </eq>
+		  </btypes:TYPE>.
+		  Therefore,
+		  <btypes:TYPE>
+		    <subeq>
+		      <set>
+			<ptype dash="'"/>
+		      </set>
+		      <Subst>
+			<aSubMap/>
+			<spset>
+			  <type num="1"/>
+			</spset>
+		      </Subst>
+		    </subeq>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	      <li>
+		<p>
+		  From premise&nbsp;(3), case&nbsp;(3.f.i) and 
+		  <btypes:TYPE>
+		    <lem tag="Cst-Weakening"/>
+		  </btypes:TYPE> (weakening), we obtain
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>	
+		      <set>
+			<ptype dash="'"/>
+		      </set>
+		    </Sat>
+		  </btypes:TYPE>.
+		  That is,
+		  <btypes:TYPE>
+		    <Sat>
+		      <bCtset num="s"/>	
+		      <Subst>
+			<aSubMap/>
+			<mbTop>
+			  <tvar/>
+			  <ptype/>
+			</mbTop>
+		      </Subst>
+		    </Sat>
+		  </btypes:TYPE>.
+		</p>
+	      </li>
+	    </ol>
+	  </li>
+	</ol>
+      </li>
+      <li>
+	<p>
+	  Case 
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <mbFull>
+		<tvar/>
+		<ptype/>
+	      </mbFull>
+	    </eq>
+	  </btypes:TYPE>: Similar to case&nbsp;(2).
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <mbFull>
+		<tvar/>
+		<ptype/>
+	      </mbFull>
+	    </eq>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <mbFull>
+		<tvar/>
+		<ptype/>
+	      </mbFull>
+	    </eq>
+	  </btypes:TYPE> are trivial.	  
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <mutable>
+		<ptype/>
+	      </mutable>
+	    </eq>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <ref>
+		<type num="2" dash="'"/>
+	      </ref>
+	    </eq>
+	  </btypes:TYPE> follow from induction hypothesis.
+	</p>
+      </li>
+      <li>
+	<p>
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <fn>
+		<type num="2" dash="'"/>
+		<type num="2" dash="''"/>
+	      </fn>
+	    </eq>
+	  </btypes:TYPE> and
+	  <btypes:TYPE>
+	    <eq>
+	      <type num="2"/>
+	      <pair>
+		<type num="2" dash="'"/>
+		<type num="2" dash="''"/>
+	      </pair>
+	    </eq>
+	  </btypes:TYPE> follow from induction hypothesis and
+	  <btypes:TYPE>
+	    <lem tag="Cst-additive"/>
+	  </btypes:TYPE>.
+	</p>
+      </li>
+    </ol>
+  </proof>
+  <lemma id="cst-streangthening-cor">
+    <title>Corollary to Strengthening of Consistency</title>
+    <p>
+      If
+      <btypes:TYPE>
+	<Sat>
+	  <bCtset/>
+	  <set>
+	    <solvables num="b"/>
+	  </set>
+	</Sat>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<models name="cst">
+	  <aSubMap/>
+	  <set>
+	    <solvables num="b"/>
+	  </set>
+	</models>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<subeq>
+	  <set>
+	    <solvables num="s"/>
+	  </set>
+	  <set>
+	    <solvables num="b"/>
+	  </set>
+	</subeq>
+      </btypes:TYPE>,
+      <btypes:TYPE>
+	<Sat>
+	  <Subst>
+	    <aSubMap/>
+	    <bCtset/>
+	  </Subst>
+	  <Subst>
+	    <aSubMap/>
+	    <spset>
+	      <solvables num="s"/>
+	    </spset>
+	  </Subst>
+	</Sat>
+      </btypes:TYPE>, and
+      <btypes:TYPE>
+	<subeq>
+	  <inter>
+	    <dom>
+	      <aSubMap/>
+	    </dom>
+	    <ftvs>
+	      <solvables num="b"/>
+	    </ftvs>
+	  </inter>
+	  <ftvs>
+	    <solvables num="s"/>
+	  </ftvs>
+	</subeq>
+      </btypes:TYPE>
+      then, 
+      <btypes:TYPE>
+	<Sat>
+	  <Subst>
+	    <aSubMap/>
+	    <bCtset/>
+	  </Subst>
+	  <Subst>
+	    <aSubMap/>
+	    <spset>
+	      <solvables num="b"/>
+	    </spset>
+	  </Subst>
+	</Sat>
+      </btypes:TYPE>.
+    </p>
+  </lemma>
+  <proof>
+    <p>
+      By repeated application of 
+      <btypes:TYPE>
+	<lem tag="cst-streangthening"/>
+      </btypes:TYPE>, and using
+      <btypes:TYPE>
+	<lem tag="Cst-additive"/>
+      </btypes:TYPE>.	      
+    </p>
+  </proof>
+  </appendix>

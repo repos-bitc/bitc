@@ -23,12 +23,11 @@
     </authorgroup>
     <pubdate>October 22, 2006</pubdate>
     <categories>
-      <category>dev/misc</category>
+      <category>papers</category>
     </categories>
     <synopsis>
       <p>
-        Discussion about Challenges involved in polymorphic type
-        inference in the presence of unboxed mutability.
+        Dr. Shapiro's invited talk in PLOS 2006 workshop.
       </p>
     </synopsis>
   </docinfo>  

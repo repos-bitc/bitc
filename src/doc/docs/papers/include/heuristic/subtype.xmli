@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <figure id="subtype_rules" fullwidth='yes' 
+    latex.placement="tbp">
+  <font size="small">
+    <btypes:TYPE
+      xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+      <Hrules rowsep="4pt" colsep="2">
+	<tyRule name="S-Mut1">
+	  <tyPre/>
+	  <tyConc>
+	    <Tsub>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <type/>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="S-Mut2">
+	  <tyPre>
+	    <Tsub>
+	      <type/>
+	      <type dash="'"/>
+	    </Tsub>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <mutable>
+		<type/>
+	      </mutable>
+	      <mutable>
+		<type dash="'"/>
+	      </mutable>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="S-Ref">
+	  <tyPre>
+	    <eq>
+	      <type/>
+	      <type dash="'"/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <ref>
+		<type/>
+	      </ref>
+	      <ref>
+		<type dash="'"/>
+	      </ref>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="S-Fn">
+	  <tyPre>
+	    <eq>
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </eq>
+	    <eq>
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </eq>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	      <fn>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </fn>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+      </Hrules>
+      <Hrules rowsep="4pt" colsep="1">
+	<tyRule name="S-Refl">
+	  <tyPre/>
+	  <tyConc>
+	    <Tsub>
+	      <type/>
+	      <type/>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>
+	<tyRule name="S-Trans">
+	  <tyPre>
+	    <Tsub>
+	      <type num="0"/>
+	      <type num="1"/>
+	    </Tsub>
+	    <Tsub>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </Tsub>
+	  </tyPre>
+	  <tyConc>
+	    <Tsub>
+	      <type num="0"/>
+	      <type num="2"/>
+	    </Tsub>
+	  </tyConc>
+	</tyRule>  
+      </Hrules>
+    </btypes:TYPE>
+  </font>
+  <caption><font size="small">Copy Coercion  Rules</font></caption>
+</figure>
