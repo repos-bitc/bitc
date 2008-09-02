@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+
+<!ENTITY fontsize "small">
+]>
+  <article id="complete-formal" 
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <docinfo ptsz='default'>
+    <title>Sound and Complete Type Inference in BitC</title>
+    <subtitle>SRL Technical Report SRL2008-02</subtitle>
+    <authorgroup>
+      <author>
+      	<firstname>Swaroop</firstname>
+      	<surname>Sridhar</surname>
+      	<email>swaroop@cs.jhu.edu</email>
+      </author>
+      <author>
+      	<firstname>Jonathan</firstname>
+        <othername>S.</othername>
+      	<surname>Shapiro</surname>
+      	<email>shap@eros-os.org</email>
+      </author>
+      <author>
+      	<firstname>Scott</firstname>
+        <othername>F.</othername>
+      	<surname>Smith</surname>
+      	<email>scott@cs.jhu.edu</email>
+      </author>
+      <affiliation>
+      	<orgname>Department of Computer Science</orgname>
+      	<address>The Johns Hopkins University</address>
+      	<address>3400 N.Charles Street. 224 NEB. Baltimore, MD 21218.</address>
+      </affiliation>
+    </authorgroup>
+    <categories>
+      <category>report</category>
+    </categories>
+    <pubdate/>
+    <!--     <copyright> -->
+    <!--       <year/><holder/> -->
+    <!--     </copyright> -->
+    <synopsis>
+      <p>
+        A longer version of the APLAS 2008 paper (describing sound and
+        complete type inference in BitC) along with detailed
+        proofs. The HTML version of this paper is not able to
+        represent all of the mathematical notation correctly. 
+      </p>
+    </synopsis>
+  </docinfo>  
+  <!--<abstract latex.incolumn="yes">
+    <p>
+    </p>
+  </abstract> -->
+  <!-- <toc/> -->
+  <xi:include href="include/APLAS2008/abstract.xmli"/>
+  <xi:include href="include/APLAS2008/introduction.xmli"/>
+  <xi:include href="include/APLAS2008/overview.xmli"/>
+  <xi:include href="include/complete/formal.xmli"/>
+  <xi:include href="include/APLAS2008/related_work.xmli"/>
+  <xi:include href="include/APLAS2008/conclusion.xmli"/>
+  <xi:include href="include/complete/bibliography.xmli"/>
+  <xi:include href="include/complete/subst.xmli"/>
+  <xi:include href="include/complete/static_sem.xmli"/>
+  <xi:include href="include/complete/declarative.xmli"/>
+  <xi:include href="include/complete/equational.xmli"/>
+</article>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->
+
+
+<!--  LocalWords:  ptsz authorgroup firstname orgname sridharmutinfer bnf desc
+ -->
+<!--  LocalWords:  sLoc hLoc aVal aExpr lvalues lVal tqExpr bnfc dup opsem eval
+ -->
+<!--  LocalWords:  opState dyn sem Grossman qtypes levalOp evalOp RVAL aTS pred
+ -->
+<!--  LocalWords:  subst Csubst ceqOp maxzOp minzOp eq maxz neq minz metaCT ol
+ -->
+<!--  LocalWords:  covariant arg ret ceil Tsub TDjudge Hrules tyRule TW tyPre
+ -->
+<!--  LocalWords:  tyConc lval decl judgeOp Garriage's spEqOp notin spEq unin
+ -->
+<!--  LocalWords:  uninOp Sjudge dom mapsto rexec leadin leval supeq aSubMap Ph
+ -->
+<!--  LocalWords:  VSubstitution LSubstitution SubMap TEjudge UNF unf subeq ACM
+ -->
+<!--  LocalWords:  mbpair TIjudge vaughanHM Hindley Milner mdash epsiv corUp HL
+ -->
+<!--  LocalWords:  TypesBook corUpOp carrys epsi ASET SRL unkinded pagebreak SL
+ -->
+<!--  LocalWords:  Garriague's vspace CTX MTVs FTVs NTVs cst commut sust ok su
+ -->
+<!--  LocalWords:  canonicalized ndash si uf ua vf rh va sa subeqOp supeqOp eqi
+ -->
+ 
+<!--  LocalWords:  nceq documentclass sigplanconf FirstName LastName notitle ih
+ -->
+
+<!--  LocalWords:  horz idemp Acyclicity otheroptions nocopyrightspace FTV NTV
+ -->
+<!--  LocalWords:  explicitely tvs asm mtvs lem nosp req defn scomp subnum sep
+ -->
+<!--  LocalWords:  fnize cong sm ecomp subEq BitC Swaroop Sridhar dev bitc LHS
+ -->
+
+
+<!--  LocalWords:  unboxed RHS lvalue Hloc Sloc Rval lhs rhs Deref Tq iff wrt
+ -->
+<!--  LocalWords:  canonicalization unifications Tqexpr Tvar Oth Composability
+ -->
+<!--  LocalWords:  Doerrie Proc ECOOP PLOS
+ -->

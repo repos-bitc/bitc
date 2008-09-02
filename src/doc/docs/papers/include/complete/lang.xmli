@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <font size="small"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <table>
+    <tbody>
+      <tr valign="top">
+	<td>
+	  <btypes:TYPE>        
+	    <grammar notitle="yes">
+	      <bnf desc="Identifiers">
+		<id/>
+		<alternatives etc="yes">
+		  <id name="y"/>
+		  <id name="z"/>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Booleans">
+		<bVal/>
+		<alternatives>
+		  <true/>
+		  <false/>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Indices">
+		<collection>
+		  <ndx/>
+		</collection>
+		<alternatives>
+		  <texttt content="1"/>
+		  <texttt content="2"/>
+		  <other>
+		    <ndx/>
+		  </other>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Values">
+		<aVal/>
+		<alternatives>
+		  <Unit/>
+		  <bVal/>
+		  <lambda>
+		    <id/>
+		    <aExpr/>
+		  </lambda>
+		  <Pair>
+		    <aVal/>
+		    <aVal/>
+		  </Pair>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Left Expr">
+		<lExp/>
+		<alternatives>
+		  <id/>
+		  <deref>
+		    <aExpr/>
+		  </deref>
+		  <ith>
+		    <lExp/>
+		  </ith>
+		  <tqExpr>
+		    <lExp/>
+		    <type/>
+		  </tqExpr>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Expressions">
+		<aExpr/>
+		<alternatives>
+		  <aVal/>
+		  <id/>
+		  <apply>
+		    <aExpr/>
+		    <aExpr/>
+		  </apply>
+		  <assign>
+		    <lExp/>
+		    <aExpr/>
+		  </assign> 
+		</alternatives>
+	      </bnf>
+	      <bnfc compact="yes" desc="">
+		<alternatives>
+		  <if>
+		    <aExpr/>
+		    <aExpr/>
+		    <aExpr/>
+		  </if>
+		  <tqExpr>
+		    <aExpr/>
+		    <type/>
+		  </tqExpr>
+		</alternatives>
+	      </bnfc>
+	      <bnfc compact="yes" desc="">
+		<alternatives>
+		  <dup>
+		    <aExpr/>
+		  </dup>
+		  <deref>
+		    <aExpr/>
+		  </deref>
+		  <Pair>
+		    <aExpr/>
+		    <aExpr/>
+		  </Pair>
+		  <ith>
+		    <aExpr/>
+		  </ith>
+		</alternatives>
+	      </bnfc>
+	      <bnfc compact="yes" desc="">
+		<alternatives>
+		  <grouping>
+		    <let>
+		      <tqExpr optional="yes">
+			<id/>
+			<type/>
+		      </tqExpr>
+		      <aExpr/>
+		      <aExpr/>
+		    </let>
+		    <space n="15"/>
+		  </grouping>
+		</alternatives>
+	      </bnfc>
+	    </grammar>
+	  </btypes:TYPE>
+	</td>
+	<td valign="right" align="right">
+	  <btypes:TYPE>        
+	    <grammar notitle="yes">
+	      <bnf desc="Vars">
+		<tvar/>
+		<alternatives etc="yes">
+		  <tvar name="alpha"/>
+		  <tvar name="beta"/>
+		  <tvar name="gamma"/>
+		  <tvar name="delta"/>
+		  <tvar name="epsiv"/>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="">
+		<stype/>
+		<alternatives>
+		  <tvar/>
+		  <mutable>
+		    <tvar/>
+		  </mutable>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Types">
+		<ptype/>
+		<alternatives>
+		  <tvar/>
+		  <unit/>
+		  <bool/>
+		  <fn><type/><type/></fn>                  
+		</alternatives>
+	      </bnf>
+	      <bnfc desc="">
+		<alternatives>
+		  <pair><type/><type/></pair>
+		  <ref><type/></ref>
+		  <mutable><ptype/></mutable>
+		</alternatives>
+	      </bnfc>
+	      <bnf>
+		<Ptype/>
+		<alternatives>
+		  <ptype/>
+		  <mbTop>
+		    <tvar/>
+		    <ptype/>
+		  </mbTop>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="">
+		<type/>
+		<alternatives>
+		  <Ptype/>
+		  <mbFull>
+		    <stype/>
+		    <ptype/>
+		  </mbFull>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Scheme">          
+		<aTS/>
+		<alternatives>
+		  <type/>
+		  <TS>
+		    <tvars/>
+		    <type/>
+		    <dCtset/>
+		  </TS>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Ct. Set">
+		<dCtset/>
+		<alternatives>
+		  <Empty/>
+		  <set>
+		    <pcst>
+		      <id/>
+		      <lKind/>
+		      <type/>
+		    </pcst>
+		  </set>
+		  <unin>
+		    <dCtset/>
+		    <dCtset/>
+		  </unin>
+		</alternatives>
+	      </bnf>
+	      <bnf desc="Kinds">
+		<lKind/>
+		<alternatives>
+		  <lKind k="var"/>
+		  <lKind k="mono"/>
+		  <lKind k="poly"/>
+		</alternatives>
+	      </bnf>
+	    </grammar>
+	  </btypes:TYPE>
+	</td>
+      </tr>
+    </tbody>
+  </table>
+  <br/>
+  </font>
+  

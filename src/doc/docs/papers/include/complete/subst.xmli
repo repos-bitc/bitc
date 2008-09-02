@@ -3,6 +3,7 @@
                "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
 ]>
   <figure id="subst_rules" fullwidth='yes' latex.placement="tb">
+  <font size="scriptsize">
   <btypes:TYPE
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
     <Hrules rowsep="8pt" colsep="2">
@@ -412,5 +413,6 @@
       </tyRule>
     </Hrules>
   </btypes:TYPE>
+  </font>
   <caption>Substitution Rules</caption>
   </figure>
