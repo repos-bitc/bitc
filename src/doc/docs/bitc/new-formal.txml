@@ -5,8 +5,10 @@
   <article id="formal" 
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-  <docinfo ptsz='default' latex.otheroptions="nocopyrightspace" latex.documentclass="sigplanconf">
-    <title>Mutable types: A meta theory</title>
+  <docinfo ptsz='default' twocolumn="yes"
+    latex.otheroptions="nocopyrightspace" latex.documentclass="sigplanconf">
+    <title>Mutable types: A Meta-theory</title>
+    <subtitle>SRL Technical Report SRL2008-03</subtitle>
     <authorgroup>
       <author>
       	<firstname>Swaroop</firstname>
@@ -31,9 +33,9 @@
       	<address>3400 N.Charles Street. 224 NEB. Baltimore, MD 21218.</address>
       </affiliation>
     </authorgroup>
-    <!-- <categories>
-      <category>bitc/formal</category>
-    </categories> -->
+    <categories>
+      <category>report</category>
+    </categories>
     <pubdate/>
     <!--     <copyright> -->
     <!--       <year/><holder/> -->
@@ -51,11 +53,23 @@
       </p>
     </synopsis>
   </docinfo>  
-  <!--<abstract latex.incolumn="yes">
+  <abstract latex.incolumn="yes">
     <p>
+      Subsequent to the work presented in <link
+      href="http://www.bitc-lang.org/docs/papers/complete.pdf">Sound
+      and Complete Type Inference in BitC</link>, we introduced
+      by-reference parameters and discovered that the definition of
+      mutability described in that report was insufficient. The
+      language specification was updated to have a path-wise notion of
+      mutability. At the same time, a <progident>const</progident>
+      meta-constructor was introduced into the language to strip
+      shallow mutability (up to the ref boundary) from existing types.
     </p>
-  </abstract> -->
-  <!-- <toc/> -->
+    <p>
+      The following type rules reflect the modifications to the
+      language associated with that change.
+    </p>
+  </abstract>
   <sect1 numbered="no" id="Grammar">
     <title></title>
     <p>
