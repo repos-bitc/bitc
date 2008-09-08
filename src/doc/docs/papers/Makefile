@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2004, Jonathan S. Shapiro.
+# Copyright (C) 2008, Jonathan S. Shapiro.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or
