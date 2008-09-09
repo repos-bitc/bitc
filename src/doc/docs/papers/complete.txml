@@ -45,7 +45,10 @@
       <p>
         A longer version of the APLAS 2008 paper (describing sound and
         complete type inference in BitC) along with detailed
-        proofs. The HTML version of this paper is not able to
+        proofs. 
+      </p>
+      <p>
+        The HTML version of this paper is not able to
         represent all of the mathematical notation correctly. 
       </p>
     </synopsis>

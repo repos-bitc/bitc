@@ -70,10 +70,9 @@
 	    <opState>
 	      <stack/>
 	      <heap/>
-	      <tqExpr>
+	      <const>
 		<aExpr/>
-		<type/>
-	      </tqExpr>
+	      </const>
 	    </opState>
 	    <opState>
 	      <stack/>
@@ -90,10 +89,9 @@
 	    <opState>
 	      <stack/>
 	      <heap/>
-	      <tqExpr>
+	      <const>
 		<aExpr/>
-		<type/>
-	      </tqExpr>
+	      </const>
 	    </opState>
 	    <opState>
 	      <stack/>
@@ -587,7 +585,7 @@
 	    <opState>
 	      <stack/>
 	      <heap/>
-	      <let kind="m" colorOptQual="yes">              
+	      <let kind="m">
 		<id/>
 		<aVal num="1"/>
 		<aExpr num="2"/>
@@ -618,7 +616,7 @@
 	    <opState>
 	      <stack/>
 	      <heap/>
-	      <let kind="p" colorOptQual="yes">              
+	      <let kind="p">              
 		<id/>
 		<aVal num="1"/>
 		<aExpr num="2"/>

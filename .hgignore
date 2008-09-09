@@ -70,7 +70,7 @@ src/doc/docs/dir.dev.gxml
 #dir.dev.xml
 
 # Some hand-built documents:
-src/doc/docs/bitc/new-formal.xml
+src/doc/docs/papers/new-formal.xml
 src/doc/docs/papers/heuristic.xml
 src/doc/docs/papers/APLAS2008.xml
 src/doc/docs/papers/complete.xml

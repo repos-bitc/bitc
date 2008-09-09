@@ -46,6 +46,8 @@
       <p>
         APLAS 2008 paper describing the theory of BitC mutability
 	model and type inference. 
+      </p>
+      <p>
 	The HTML version of this paper is not
         able to represent all of the mathematical notation correctly.
       </p>
@@ -165,7 +167,6 @@
  -->
 <!--  LocalWords:  allTrue rvalue reified HaskellGlobals SRL colspan benefacts
  -->
-	
 <!--  LocalWords:  ctype fnxn paren initsep colsep globals tbody valign td Loc
  -->
 <!--  LocalWords:  Exprs TypeScheme Env Rval Oth cst Prog mutinfer de facto SHA
@@ -178,5 +179,5 @@
  -->
 <!--  LocalWords:  monomorphically concretizable Checkability maxima MP Ct Om
  -->
-<!--  LocalWords:  Op Sym
+<!--  LocalWords:  Op Sym APLAS
  -->

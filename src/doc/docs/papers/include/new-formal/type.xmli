@@ -267,23 +267,26 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="T-Qual">
+      <tyRule name="T-Const">
 	<tyPre>
-	  <TDjudge>
+	  <TDjudge Msub="yes">
 	    <aExpr/>
 	    <type/>
 	    <dCtset/>
 	  </TDjudge>
+	  <Msub>
+	    <type dash="'"/>
+	    <type/>
+	  </Msub>
 	</tyPre>
 	<tyConc>
 	  <TDjudge>
-	    <paren>
-	      <tqExpr>
-		<aExpr/>
-		<type/>
-	      </tqExpr>
-	    </paren>
-	    <type/>
+	    <const>
+	      <aExpr/>
+	    </const>
+	    <const>
+	      <type dash="'"/>
+	    </const>
 	    <dCtset/>
 	  </TDjudge>
 	</tyConc>
@@ -431,7 +434,7 @@
 	<tyConc>
 	  <TDjudge>
 	    <paren>
-	      <let kind="m" colotOptQual="yes">
+	      <let kind="m">
 		<id/>
 		<aExpr num="1"/>
 		<aExpr num="2"/>

@@ -885,7 +885,7 @@
 	    </assume>
 	    <conclude>
 	      <tqExpr>
-		<let kind="k" coloroptQual="yes">
+		<let kind="k">
 		  <id/>
 		  <aExpr num="1"/>
 		  <aExpr num="2"/>
@@ -904,15 +904,6 @@
 		      <tvar name="beta"/>
 		    </mbFull>
 		  </eq>
-		  <colorOpt>
-		    <eq>
-		      <type/>
-		      <mbFull>
-			<tvar name="alpha"/>
-			<tvar name="beta"/>
-		      </mbFull>
-		    </eq>
-		  </colorOpt>
 		  <eq>
 		    <lKind k="var"/>
 		    <lKind k="mono"/>
@@ -924,7 +915,7 @@
 	  </TEjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="I-Qual"> 
+      <tyRule name="I-Const"> 
 	<tyPre>
 	  <TEjudge name="i">
 	    <assume>
@@ -941,6 +932,15 @@
 	      <aCtset/>                  
 	    </constrain>
 	  </TEjudge>
+	  <models name="new">
+	    <assume/>
+	    <grouping>
+	      <tvar name="alpha"/>
+	      <tvar name="beta"/>
+	      <tvar name="gamma"/>
+	      <lKind k="var"/>
+	    </grouping>
+	  </models>
 	</tyPre>
 	<tyConc>
 	  <TEjudge name="i">
@@ -950,13 +950,15 @@
 	    </assume>
 	    <conclude>
 	      <tqExpr>
-		<paren>
-		  <tqExpr>
-		    <aExpr/>
-		    <type dash="'"/>
-		  </tqExpr>
-		</paren>
-		<type/>
+		<const>
+		  <aExpr/>
+		</const>
+		<const>
+		  <mbFull>
+		    <tvar name="alpha"/>
+		    <tvar name="beta"/>
+		  </mbFull>
+		</const>
 	      </tqExpr>
 	    </conclude>
 	    <constrain>
@@ -965,7 +967,10 @@
 		<set>
 		  <eq>
 		    <type/>
-		    <type dash="'"/>
+		    <mbFull>
+		      <tvar name="gamma"/>
+		      <tvar name="beta"/>
+		    </mbFull>
 		  </eq>
 		</set>
 	      </unin>
@@ -1004,15 +1009,6 @@
 		    <tvar name="beta"/>
 		  </mbFull>
 		</eq>
-		<colorOpt>
-		  <eq>
-		    <type/>
-		    <mbFull>
-		      <tvar name="alpha"/>
-		      <tvar name="beta"/>
-		    </mbFull>
-		  </eq>
-		</colorOpt>
 	      </set>
 	    </unin>
 	  </eq>
@@ -1115,7 +1111,7 @@
 	    </assume>
 	    <conclude>
 	      <tqExpr>
-		<let kind="k" colorOptQual="yes">
+		<let kind="k">
 		  <id/>
 		  <vExp/>
 		  <aExpr/>

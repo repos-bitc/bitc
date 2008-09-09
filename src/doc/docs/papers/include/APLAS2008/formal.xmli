@@ -1692,6 +1692,8 @@
     <btypes:TYPE>
       <uninOp excl="yes"/>
     </btypes:TYPE> represents disjoint union of sets.
+    <!--
+    The unification rules are applied in the order specified. -->
   </p>
   <p>
     The U-Ct* rules perform unification of constrained

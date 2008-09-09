@@ -437,7 +437,7 @@
 	  </unf>
 	</rhs>
       </equation>
-      <!-- s1|p1 = s2|p2 -->
+      <!-- 'a|p1 = s|p2 -->
       <equation name="U-Ct3">
 	<lhs>
 	  <unf>
@@ -445,11 +445,11 @@
 	      <set>
 		<eq>
 		  <mbFull>
-		    <stype num="1"/>
+		    <tvar/>
 		    <ptype num="1"/>
 		  </mbFull>
 		  <mbFull>
-		    <stype num="2"/>
+		    <stype/>
 		    <ptype num="2"/>
 		  </mbFull>
 		</eq>
@@ -468,8 +468,51 @@
 		  <ptype num="2"/>
 		</eq>
 		<eq>
-		  <stype num="1"/>
-		  <stype num="2"/>
+		  <tvar/>
+		  <stype/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- s1|p1 = s2|p2 -->
+      <equation name="U-Ct4">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <mbFull>
+		    <mutable>
+		      <tvar name="alpha"/>
+		    </mutable>
+		    <ptype num="1"/>
+		  </mbFull>
+		  <mbFull>
+		    <mutable>
+		      <tvar name="beta"/>
+		    </mutable>
+		    <ptype num="2"/>
+		  </mbFull>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq under="minz">
+		  <ptype num="1"/>
+		  <ptype num="2"/>
+		</eq>
+		<eq>
+		  <tvar name="alpha"/>
+		  <tvar name="beta"/>
 		</eq>
 	      </set>
 	    </unin>
@@ -477,7 +520,7 @@
 	</rhs>
       </equation>
       <!-- s|p = P -->
-      <equation name="U-Ct4" sep="4pt">
+      <equation name="U-Ct5" sep="4pt">
 	<lhs>
 	  <unf>
 	    <unin excl="yes">

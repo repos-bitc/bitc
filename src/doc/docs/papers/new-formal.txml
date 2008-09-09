@@ -36,16 +36,17 @@
     <categories>
       <category>report</category>
     </categories>
-    <pubdate/>
+    <pubdate>
+      Sept. 9<sup>th</sup> 2008.
+    </pubdate>
     <!--     <copyright> -->
     <!--       <year/><holder/> -->
     <!--     </copyright> -->
-    <!--   <categories> -->
-    <!--     <category>dev/bitc</category> -->
-    <!--   </categories> -->
     <synopsis>
       <p>
-        BitC semantics enhanced with by-ref and const.
+        BitC semantics enhanced with <progident>const</progident> and
+        correct handling of  mutability such that sound, in-place
+        references within unboxed structures can be supported.
       </p>
       <p>
         The HTML version of this paper is not
@@ -131,10 +132,9 @@
               <vExp/>
               <vExp/>
             </Pair>
-            <tqExpr>
-              <vExp/>
-              <type/>
-            </tqExpr>
+            <const>
+              <aExpr/>
+            </const>
           </alternatives>
         </bnf>
         <bnf desc="Left Expr">
@@ -148,10 +148,9 @@
             <ith>
               <lExp/>
             </ith>
-            <tqExpr>
+            <const>
               <lExp/>
-              <type/>
-            </tqExpr>
+            </const>
           </alternatives>
         </bnf>
         <bnf desc="Expressions">
@@ -188,15 +187,14 @@
             <ith>
               <aExpr/>
             </ith>
-            <tqExpr>
+            <const>
               <aExpr/>
-              <type/>
-            </tqExpr>
+            </const>
           </alternatives>
         </bnfc>
         <bnfc desc="">
           <alternatives>
-            <let kind="x" optQual="yes">
+            <let kind="x">
               <id/>
               <aExpr/>
               <aExpr/>
@@ -221,9 +219,6 @@
         </bnf>
       </grammar>
     </btypes:TYPE> 
-    <btypes:TYPE>        
-      <vspace ptsz="4ex"/>
-    </btypes:TYPE>
     <p>
       <b>
         Types grammar:
@@ -257,13 +252,21 @@
             <unit/>
             <bool/>
             <fn><type/><type/></fn>                  
+            <pair><type/><type/></pair>
           </alternatives>
         </bnf>
-        <bnfc desc="">
+        <bnfc desc="Ref/Pointer">
           <alternatives>
             <ref><type/></ref>
+          </alternatives>
+        </bnfc>
+        <bnfc desc="Mutable">
+          <alternatives>
             <mutable><ptype/></mutable>
-            <pair><type/><type/></pair>
+          </alternatives>
+        </bnfc>
+        <bnfc desc="const">
+          <alternatives>
             <const>
               <type/>
             </const>
@@ -327,12 +330,9 @@
         </bnf>
       </grammar>
     </btypes:TYPE>
-    <btypes:TYPE>        
-      <vspace ptsz="4ex"/>
-    </btypes:TYPE>
     <p>
       <b>
-        Grammar for semantic entities:
+        Grammar for Dynamic Semantics:
       </b>
     </p>
     <btypes:TYPE>        
@@ -390,10 +390,9 @@
               </deref>
               <path/>
             </select>
-            <tqExpr>
+            <const>
               <lVal/>
-              <type/>
-            </tqExpr>
+            </const>
           </alternatives>
         </bnf>
         <bnf desc="Redex">
@@ -442,13 +441,22 @@
             <ith>
               <redex/>
             </ith>
-            <let kind="x" colorOptQual="yes">
+            <let kind="x">
               <id/>
               <redex/>
               <aExpr/>
             </let>
           </alternatives>
         </bnfc>
+      </grammar>
+    </btypes:TYPE>
+    <p>
+      <b>
+        Grammar for Static Semantics:
+      </b>
+    </p>
+    <btypes:TYPE>        
+      <grammar notitle="yes">
         <bnf desc="Unf. Constraints">
           <constraint name="u"/>
           <alternatives>
