@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <sect2 id="opsem"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <title>Dynamic Semantics of <btypes:TYPE><language/></btypes:TYPE></title>
+  <btypes:TYPE>        
+    <grammar>
+      <bnf desc="Stack">
+	<stack/>
+	<alternatives>
+	  <Empty/>
+	  <extend>
+	    <stack/>
+	    <mapping>
+	      <sLoc/>
+	      <aVal/>
+	    </mapping>
+	  </extend>
+	</alternatives>
+      </bnf>
+      <bnf desc="Heap">
+	<heap/>
+	<alternatives>
+	  <Empty/>
+	  <extend>
+	    <heap/>
+	    <mapping>
+	      <hLoc/>
+	      <aVal/>
+	    </mapping>
+	  </extend>
+	</alternatives>
+      </bnf>
+    </grammar>
+  </btypes:TYPE>
+  <p>
+    The system state is represented by the triple 
+    <btypes:TYPE>
+      <opState>
+	<stack/>
+	<heap/>
+	<aExpr/>
+      </opState>
+    </btypes:TYPE>
+    consisting of the stack
+    <btypes:TYPE>
+      <stack/>
+    </btypes:TYPE>, the heap
+    <btypes:TYPE>
+      <heap/>
+    </btypes:TYPE>, and the expression
+    <btypes:TYPE>
+      <aExpr/>
+    </btypes:TYPE> to be
+    evaluated. Evaluation itself is a two place relationship   
+    <btypes:TYPE>
+      <eval>
+	<opState>
+	  <stack/>
+	  <heap/>
+	  <aExpr/>
+	</opState>
+	<opState>
+	  <stack dash="'"/>
+	  <heap dash="'"/>
+	  <aExpr dash="'"/>
+	</opState>
+      </eval>
+    </btypes:TYPE>
+    that denotes transformation in the system state due to a single
+    step of execution.
+    Figure&nbsp;<xref ref="dyn_sem_horz"/> shows the evaluation
+    rules for our core language. We assume that the program is
+    alpha-converted so that there are no name collisions due to
+    inner bindings.  Following the theoretical
+    development in&nbsp;<cite ref="Grossman2006qtypes"/>, we give separate execution
+    semantics for left and right execution (evaluation of
+    expressions that appear on the LHS and RHS of an assignment 
+    <btypes:TYPE>
+      <assign>
+	<aExpr num="l"/>
+	<aExpr num="r"/>
+      </assign>
+    </btypes:TYPE>) denoted by 
+    <btypes:TYPE><levalOp/></btypes:TYPE> and 
+    <btypes:TYPE><evalOp/></btypes:TYPE> respectively. 
+  </p>
+  <p>
+    Since the E-Dup and E-^ rules work only on the heap, we can only
+    capture references to heap cells. Stack locations cannot escape
+    beyond their scope since E-Rval rule performs implicit value
+    extraction from stack locations in rvalue contexts. State
+    updates can be performed either on the stack or on the heap &nbsp;
+    (E-:=Stack and E-:=Heap). The stack is modeled as a pseudo-heap.
+    This enables us to abstract away details such as
+    closure-construction and garbage collection while illustrating
+    the core semantics (they can later be reified
+    independently).
+  </p>
+  </sect2>

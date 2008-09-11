@@ -49,12 +49,6 @@
 (definstance (forall ((IntLit 'a)) (ABC 'a))
   FUN)
 
-(definstance (forall ((FloatLit 'a)) (ABC 'a))
-  FUN)
-
-(definstance  (ABC char)
-  FUN)
-
 ;; must not work
 ;;(definstance  (ABC int32)
 ;; FUN)

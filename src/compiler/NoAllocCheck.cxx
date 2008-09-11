@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,6 +35,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -42,20 +43,20 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+
 #include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
+
+#include "Options.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "inter-pass.hxx"
-#include "Options.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 // Return whether the expression returns a location or not.
 static bool
-AllocCheck(std::ostream &errStream, GCPtr<AST> ast)
+AllocCheck(std::ostream &errStream, shared_ptr<AST> ast)
 {
   bool errFree = true;
 
@@ -71,7 +72,7 @@ AllocCheck(std::ostream &errStream, GCPtr<AST> ast)
 
   case at_struct_apply:
   case at_ucon_apply:
-    if(ast->child(0)->symType->isRefType()) {
+    if (ast->child(0)->symType->isRefType()) {
       errStream << ast->loc << ": "
 		<< "Expression requires dynamic allocation. "
 		<< "Disallowed in NO-GC mode"
@@ -84,7 +85,7 @@ AllocCheck(std::ostream &errStream, GCPtr<AST> ast)
     break;
   }
   
-  for (size_t c = 0; c < ast->children->size(); c++)
+  for (size_t c = 0; c < ast->children.size(); c++)
     CHKERR(errFree, AllocCheck(errStream, ast->child(c)));
   
   return errFree;	   
@@ -100,7 +101,7 @@ UocInfo::fe_noAllocCheck(std::ostream& errStream,
 
   bool errFree=true;
 
-  if(Options::noAlloc)
+  if (Options::noAlloc)
     CHKERR(errFree, AllocCheck(errStream, uocAst));  
   return errFree;
 }

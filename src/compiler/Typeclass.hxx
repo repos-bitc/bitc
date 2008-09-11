@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -43,11 +43,10 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/avl.hxx>
+#include <set>
+
 #include "AST.hxx"
 #include "Type.hxx"
-#include "INOstream.hxx"
 
 struct TypeScheme;
 struct TCConstraints;
@@ -56,61 +55,80 @@ typedef Type Typeclass;
 typedef Typeclass Constraint; 
 typedef TCConstraints Constraints; 
 
-struct Instance : public Countable {
-  GCPtr<TypeScheme> ts;
-  GCPtr<AST> ast;
+struct Instance {
+  boost::shared_ptr<TypeScheme> ts;
+  boost::shared_ptr<AST> ast;
   
-  Instance(GCPtr<TypeScheme> _ts, GCPtr<AST>_ins)
+  Instance(boost::shared_ptr<TypeScheme> _ts, boost::shared_ptr<AST>_ins)
   {
     ts = _ts;
     ast = _ins;
   }
   
-  bool equals(std::ostream &errStream, GCPtr<Instance> ins, 
-	      GCPtr<const Environment< CVector<GCPtr<Instance> > > >
-	      instEnv) const;
-  bool satisfies(std::ostream &errStream, GCPtr<Typeclass> pred, 
-		 GCPtr<const Environment< CVector<GCPtr<Instance> > > >
-		 instEnv) const;
+  static inline boost::shared_ptr<Instance>
+  make(boost::shared_ptr<TypeScheme> _ts, boost::shared_ptr<AST>_ins) {
+    Instance *tmp = new Instance(_ts, _ins);
+    return boost::shared_ptr<Instance>(tmp);
+  }
+
+  bool equals(boost::shared_ptr<Instance> ins, 
+	      boost::shared_ptr<const InstEnvironment > instEnv) const;
+  bool overlaps(boost::shared_ptr<Instance> ins) const;
+  bool satisfies(boost::shared_ptr<Typeclass> pred, 
+		 boost::shared_ptr<const InstEnvironment > instEnv) const;
   std::string asString();
+
   std::string asXML();
-  void asXML(INOstream &out);
+  void asXML(sherpa::INOstream &out);
 };
 
 
 /* Type class constraints */
  
-struct TCConstraints : public Countable {
-  // Type class predicates
-  GCPtr<CVector<GCPtr<Typeclass> > > pred;
+struct TCConstraints {
+  // Type class predicates (which are, in turn, instances of Type
+  TypeSet pred;
+  typedef TypeSet::iterator iterator;
   
   TCConstraints()
   {
-    pred = new CVector<GCPtr<Typeclass> >;
   }
 
-  size_t size() { return pred->size(); }
+  bool empty() const {
+    return pred.empty();
+  }
 
-  void addPred(GCPtr<Typeclass> tc);
-  void clearPred(size_t n);
-  void clearPred(GCPtr<Constraint> ct);
+  size_t size() const {
+    return pred.size();
+  }
+
+  void addPred(boost::shared_ptr<Typeclass> tc);
+  void clearPred(boost::shared_ptr<Constraint> ct);
 
   void normalize();
   
-  bool contains(GCPtr<Typeclass> tc);
-  void collectAllFnDeps(GCPtr<CVector<GCPtr<Type> > > fnDeps);
+  bool contains(boost::shared_ptr<Typeclass> tc);
+
+  void collectAllFnDeps(TypeSet& fnDeps);
   
   // Compute the closure of all functional dependencies 
   // supplied in the vector
-  static void close(GCPtr<CVector<GCPtr<Type> > > closure,
-		    GCPtr<const CVector<GCPtr<Type> > > fnDeps);
-  void clearHintsOnPreds(GCPtr<Trail> trail);  
+  static void close(TypeSet& closure,
+		    const TypeSet& fnDeps);
+  void clearHintsOnPreds(boost::shared_ptr<Trail> trail);  
 
-  /* PUBLIC Accessors (Conveniecnce Forms) */
-  GCPtr<Type> & Pred(size_t i)
-  {
-    return (*pred)[i];
-  }  
+  iterator begin() {
+    return pred.begin();
+  }
+  iterator end() {
+    return pred.end();
+  }
+
+  static inline boost::shared_ptr<TCConstraints>
+  make() {
+    TCConstraints *tmp = new TCConstraints();
+    return boost::shared_ptr<TCConstraints>(tmp);
+  }
 };
 
 

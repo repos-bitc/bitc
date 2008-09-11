@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,6 +35,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -42,19 +43,19 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+
 #include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
+
 #include "AST.hxx"
 #include "Type.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 // Return whether the expression returns a location or not.
 static bool
-LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
+LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
 {
   switch (ast->astType) {
   case at_ident:
@@ -67,7 +68,7 @@ LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
   case at_vector_nth:
   case at_deref:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	LocChk(errStream, errFree, ast->child(c), false);
        
       return true;
@@ -78,7 +79,7 @@ LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
       bool isLoc = LocChk(errStream, errFree, ast->child(0), true);
       LocChk(errStream, errFree, ast->child(1), inSET);
 
-      if(!isLoc) {
+      if (!isLoc) {
 	errStream << ast->child(0)->loc << ": "
 		  << "Non-location in set! context"
 		  << std::endl;
@@ -91,7 +92,7 @@ LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
   case at_array_nth:
     {
       bool isLoc = LocChk(errStream, errFree, ast->child(0), inSET);
-      if(inSET && !isLoc) {
+      if (inSET && !isLoc) {
 	errStream << ast->child(0)->loc << ": "
 		  << "Non-location in set! context"
 		  << std::endl;
@@ -110,7 +111,7 @@ LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
     {
       bool isLoc = LocChk(errStream, errFree, ast->child(0), inSET);
       
-      if(inSET && !isLoc && !ast->child(0)->symType->isRefType()) {
+      if (inSET && !isLoc && !ast->child(0)->symType->isRefType()) {
 	errStream << ast->child(0)->loc << ": "
 		  << "Non-location in set! context"
 		  << std::endl;
@@ -129,8 +130,8 @@ LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
   case at_switch:
   case at_try:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
-	if(c != IGNORE(ast))
+      for (size_t c = 0; c < ast->children.size(); c++)
+	if (c != IGNORE(ast))
 	  LocChk(errStream, errFree, ast->child(c), inSET);
       
       return false;
@@ -138,7 +139,7 @@ LocChk(std::ostream &errStream, bool &errFree, GCPtr<AST> ast, bool inSET)
     
   default:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	LocChk(errStream, errFree, ast->child(c), inSET);
 
       return false;

@@ -35,6 +35,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -42,13 +43,10 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+
 #include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
 
 #include "UocInfo.hxx"
-#include "Options.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
@@ -58,15 +56,16 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
 
 #define CHKEXP(itsExpansive, exp) do {\
 bool ans = (exp);\
-if(ans == true) \
+if (ans == true) \
  (itsExpansive) = true; \
-}while(0)
+}while (0)
 	   
 // FIX: Not sure whether mkclosure should be 
 // considered expansive or not.
@@ -83,8 +82,8 @@ if(ans == true) \
 
 bool
 isExpansive(std::ostream& errStream, 
-	    GCPtr<const Environment<TypeScheme> > gamma,
-	    GCPtr<const AST> ast) 
+	    shared_ptr<const TSEnvironment > gamma,
+	    shared_ptr<const AST> ast) 
 {
   bool itsExpansive = false;
   
@@ -99,10 +98,7 @@ isExpansive(std::ostream& errStream,
 
   case at_apply:
     {
-      if(ast->Flags2 & APP_IS_VALUE)
-	itsExpansive = false;
-      else 
-	itsExpansive = true;
+      itsExpansive = true;
       break;
     }
   case at_setbang:
@@ -144,7 +140,7 @@ isExpansive(std::ostream& errStream,
   case at_letbindings:
   case at_dobindings:
     {
-      for(size_t i=0; !itsExpansive && i < ast->children->size(); i++)
+      for (size_t i=0; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;
@@ -170,7 +166,7 @@ isExpansive(std::ostream& errStream,
   case at_dotest:
   case at_begin:
     {
-      for(size_t i=0; !itsExpansive && i < ast->children->size(); i++)
+      for (size_t i=0; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;
@@ -220,7 +216,7 @@ isExpansive(std::ostream& errStream,
 
   case at_cond_legs:
     {
-      for(size_t i=0; !itsExpansive && i < ast->children->size(); i++)
+      for (size_t i=0; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;
@@ -252,7 +248,7 @@ isExpansive(std::ostream& errStream,
     {
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 				       ast->child(2)));
-      if(ast->child(3)->astType != at_Null)
+      if (ast->child(3)->astType != at_Null)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(3)));
       break;
@@ -260,7 +256,7 @@ isExpansive(std::ostream& errStream,
 
   case at_sw_legs:
     {
-      for(size_t i=0; !itsExpansive && i < ast->children->size(); i++)
+      for (size_t i=0; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;
@@ -290,7 +286,7 @@ isExpansive(std::ostream& errStream,
   case at_vector:
   case at_array:
     {
-      for(size_t i=0; !itsExpansive && i < ast->children->size(); i++)
+      for (size_t i=0; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;
@@ -323,7 +319,7 @@ isExpansive(std::ostream& errStream,
   case at_inner_ref:
   case at_deref:
     {    
-      for(size_t i=0; !itsExpansive && i < ast->children->size(); i++)
+      for (size_t i=0; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;
@@ -332,7 +328,7 @@ isExpansive(std::ostream& errStream,
   case at_struct_apply:
   case at_ucon_apply:
     {
-      for(size_t i=1; !itsExpansive && i < ast->children->size(); i++)
+      for (size_t i=1; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(i)));
       break;
@@ -458,16 +454,16 @@ isExpansive(std::ostream& errStream,
 
 bool
 isExpansive(std::ostream& errStream, 
-	    GCPtr<const Environment<TypeScheme> > gamma,
-	    GCPtr<Type> typ) 
+	    shared_ptr<const TSEnvironment > gamma,
+	    shared_ptr<Type> typ) 
 {
   bool itsExpansive = false;
-  GCPtr<Type> t = typ->getType();
+  shared_ptr<Type> t = typ->getType();
   
-  if(t->mark & MARK4)
+  if (t->mark & MARK_IS_EXPANSIVE)
     return itsExpansive;
 
-  t->mark |= MARK4;
+  t->mark |= MARK_IS_EXPANSIVE;
 
   switch(t->kind) {
   case ty_unit:
@@ -509,7 +505,7 @@ isExpansive(std::ostream& errStream,
   case ty_letGather:
   case ty_array:
   case ty_vector:
-    for(size_t i=0; i<t->components->size(); i++) 
+    for (size_t i=0; i<t->components.size(); i++) 
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 				       t->CompType(i)));
     break;
@@ -522,18 +518,15 @@ isExpansive(std::ostream& errStream,
   case ty_uconr:
   case ty_uvalv:
   case ty_uvalr:
-  case ty_reprv:
-  case ty_reprr:
   case ty_mbFull:
   case ty_mbTop:
-  case ty_subtype:
   case ty_pcst:
     {    
-      for(size_t i=0; i<t->typeArgs->size(); i++) 
+      for (size_t i=0; i<t->typeArgs.size(); i++) 
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 t->TypeArg(i)));
     
-      for(size_t i=0; i<t->components->size(); i++) 
+      for (size_t i=0; i<t->components.size(); i++) 
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 t->CompType(i)));
       break;
@@ -547,6 +540,6 @@ isExpansive(std::ostream& errStream,
     }
   }
   
-  t->mark &= ~MARK4;
+  t->mark &= ~MARK_IS_EXPANSIVE;
   return itsExpansive;
 }

@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,20 +35,19 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
 #include <sstream>
 
-#include "UocInfo.hxx"
+#include <libsherpa/UExcept.hxx>
+
 #include "Options.hxx"
+#include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
@@ -58,6 +57,7 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
@@ -65,28 +65,28 @@ using namespace std;
 //#define DEBUG_SHOW_RIGIDITY
 
 static string
-printName(GCPtr<AST> ast)
+printName(shared_ptr<AST> ast)
 {
-  if(!ast)
+  if (!ast)
     return "NULL";
   
   return ast->s;
 }
 
 string
-Type::asString(GCPtr<TvPrinter> tvP, bool traverse) 
+Type::asString(shared_ptr<TvPrinter> tvP, bool traverse) 
 { 
 
-  if(Options::rawTvars)
-    tvP = 0;
+  if (Options::rawTvars)
+    tvP = GC_NULL;
 
-  GCPtr<Type> t;
-  if(traverse)
+  shared_ptr<Type> t;
+  if (traverse)
     t = getType();
   else
-    t = this;
+    t = shared_from_this();
   
-  if(t->pMark >= 2)
+  if (t->pMark >= 2)
     return " ... ";
   else 
     t->pMark++;
@@ -94,10 +94,10 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   stringstream ss;
   
 #ifdef DEBUG_SHOW_ALL_LINKS  
-  if(traverse) {
-    GCPtr<Type> t1 = this;
+  if (traverse) {
+    shared_ptr<Type> t1 = this;
     ss << "[";
-    while(t1->link) {
+    while (t1->link) {
       ss << "'a" << t1->uniqueID;
       ss << "->";
       t1 = t1->link;
@@ -136,9 +136,9 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
   case ty_tvar:
     {
-      if(!tvP) {
+      if (!tvP) {
 	ss << "'a" << t->uniqueID;
-	if(t->flags & TY_RIGID) 
+	if (t->flags & TY_RIGID) 
 	  ss << 'R';
       }
       else {
@@ -176,7 +176,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
   case ty_fn:
     {
-      assert(t->components->size() == 2);
+      assert(t->components.size() == 2);
       ss << "(fn " 
 	 << t->Args()->asString(tvP, traverse) 
 	 << " " 
@@ -188,10 +188,10 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   case ty_fnarg:
     {
       ss <<  "(";
-      for(size_t i=0; i < t->components->size(); i++) {
+      for (size_t i=0; i < t->components.size(); i++) {
 	if (i > 0) 
 	  ss << " ";
-	if(t->CompFlags(i) & COMP_BYREF)
+	if (t->CompFlags(i) & COMP_BYREF)
 	  ss << "(by-ref " 
 	     << t->CompType(i)->asString(tvP, traverse)
 	     << ")";
@@ -205,7 +205,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
   case ty_tyfn:
     {
-      assert(t->components->size() == 2);
+      assert(t->components.size() == 2);
       ss << "(tyfn " 
 	 <<  t->Args()->asString(tvP, traverse) 
 	 << " " 
@@ -217,7 +217,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   case ty_letGather:
     {
       ss <<  "(__letGather ";
-      for(size_t i=0; i < t->components->size(); i++) {
+      for (size_t i=0; i < t->components.size(); i++) {
 	if (i > 0) ss << " ";
 	ss << t->CompType(i)->asString(tvP, traverse);
       }
@@ -228,11 +228,11 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   case ty_structv:
   case ty_structr:
     {
-      if(t->typeArgs->size() == 0)
+      if (t->typeArgs.size() == 0)
 	ss << printName(t->defAst);
       else {
 	ss << "(" << printName(t->defAst);
-	for(size_t i=0; i < t->typeArgs->size(); i++)
+	for (size_t i=0; i < t->typeArgs.size(); i++)
 	  ss << " " << t->TypeArg(i)->asString(tvP, traverse);
 	ss << ")";
       }
@@ -240,8 +240,6 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
       break;
     }
 
-  case ty_reprv:
-  case ty_reprr:
   case ty_unionv: 
   case ty_unionr:
   case ty_uvalv: 
@@ -249,11 +247,11 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
   case ty_uconv: 
   case ty_uconr:
     {
-      if(t->typeArgs->size() == 0)
+      if (t->typeArgs.size() == 0)
 	ss << printName(t->myContainer);
       else {
 	ss << "(" << printName(t->myContainer);
-	for(size_t i=0; i < t->typeArgs->size(); i++)
+	for (size_t i=0; i < t->typeArgs.size(); i++)
 	  ss << " " << t->TypeArg(i)->asString(tvP, traverse);
 	ss << ")";
       }
@@ -262,11 +260,11 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
     }
 
   case ty_typeclass:    
-    if(t->typeArgs->size() == 0)
+    if (t->typeArgs.size() == 0)
       ss << printName(t->defAst);
     else {
       ss << "(" << printName(t->defAst);
-	for(size_t i=0; i < t->typeArgs->size(); i++)
+	for (size_t i=0; i < t->typeArgs.size(); i++)
 	  ss << " " << t->TypeArg(i)->asString(tvP, traverse);
 	ss << ")";
     }
@@ -277,7 +275,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
       ss << "(array "
 	 << t->Base()->asString(tvP, traverse)
 	 << " "
-	 << t->arrlen->len
+	 << t->arrLen->len
 	 << ")";
       break;
     }
@@ -292,7 +290,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
     
   case ty_ref:
     {
-      assert(t->components->size() == 1);
+      assert(t->components.size() == 1);
       ss << "(ref "
 	 << t->Base()->asString(tvP, traverse) 
 	 << ")";
@@ -301,7 +299,7 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
   case ty_byref:
     {
-      assert(t->components->size() == 1);
+      assert(t->components.size() == 1);
       ss << "(by-ref "
 	 << t->Base()->asString(tvP, traverse) 
 	 << ")";
@@ -327,19 +325,11 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
       break;  
     }
 
-  case ty_subtype:
-    {
-      ss << t->CompType(0)->asString(tvP, traverse) 
-	 << " < "
-	 << t->CompType(1)->asString(tvP, traverse);
-      break;
-    }
-    
   case ty_pcst:
     {
       ss << "*(";
-      for(size_t i=0; i<t->components->size(); i++) {
-	if(i > 0)
+      for (size_t i=0; i<t->components.size(); i++) {
+	if (i > 0)
 	  ss << ", ";
 	ss << t->CompType(i)->asString(tvP, traverse);
       }
@@ -349,9 +339,9 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
   case ty_kfix:
     {
-      if(t == Type::Kmono)
+      if (t == Type::Kmono)
 	ss << "m";
-      else if(t == Type::Kpoly)
+      else if (t == Type::Kpoly)
 	ss << "P";
       else
 	assert(false);
@@ -371,69 +361,71 @@ Type::asString(GCPtr<TvPrinter> tvP, bool traverse)
 
 
 std::string
-TypeScheme::asString(GCPtr<TvPrinter> tvP, bool norm)
+TypeScheme::asString(shared_ptr<TvPrinter> tvP, bool norm)
 {
   std::stringstream ss; 
   bool forall = false;
 
-  if(norm)
+  if (norm)
     normalize();
   
-  if(Options::FQtypes)
-    if(ftvs->size()) {
+  if (Options::FQtypes)
+    if (ftvs.size()) {
       ss << "(forall";
       forall = true;
-      for(size_t i=0; i < ftvs->size(); i++)      
-	ss << " " << Ftv(i)->asString(tvP);      
+      for (TypeSet::iterator itr_i = ftvs.begin(); 
+	  itr_i != ftvs.end(); ++itr_i)
+	ss << " " << (*itr_i)->asString(tvP);      
       ss << " ";
     }
 
-  if(tcc) {
-    if(Options::showAllTccs) {
-      if(tcc->pred->size()) {
-	if(!forall) {
+  if (tcc) {
+    if (Options::showAllTccs) {
+      if (tcc->size()) {
+	if (!forall) {
 	  ss << "(forall";
 	  forall = true;
 	}
 
 	ss << " (";
-	for(size_t i=0; i < tcc->pred->size(); i++) {
-	  GCPtr<Typeclass> pred = tcc->Pred(i)->getType();
+	for (TypeSet::iterator itr = tcc->begin();
+	    itr != tcc->end(); ++itr) {
+	  shared_ptr<Typeclass> pred = (*itr)->getType();
 	  ss << pred->asString(tvP) << " ";
 	  
-	  if(pred->fnDeps)	  
-	    for(size_t j=0; j < pred->fnDeps->size(); j++) {
-	      ss << pred->FnDep(j)->asString(tvP) << " ";
-	    }
+	  for (TypeSet::iterator itr_j = pred->fnDeps.begin();
+	      itr_j != pred->fnDeps.end(); ++itr_j)
+	    ss << (*itr_j)->asString(tvP) << " ";
 	}
 	ss << ") ";
       }
     }
     else { 
-      //GCPtr<TCConstraints> _tcc = new TCConstraints;
+      //shared_ptr<TCConstraints> _tcc = new TCConstraints;
       //addConstraints(_tcc);
-      GCPtr<TCConstraints> _tcc = tcc;
+      shared_ptr<TCConstraints> _tcc = tcc;
 
-      if(_tcc->pred->size()) {
- 	for(size_t i=0; i < _tcc->pred->size(); i++) {
-	  if(((_tcc->Pred(i)->flags & TY_CT_SUBSUMED) == 0) && 
-	     ((_tcc->Pred(i)->flags & TY_CT_SELF) == 0)) {
-	    if(!forall) {
+      if (_tcc->size()) {
+	for (TypeSet::iterator itr = _tcc->begin();
+	    itr != _tcc->end(); ++itr) {
+	  if ((((*itr)->flags & TY_CT_SUBSUMED) == 0) && 
+	     (((*itr)->flags & TY_CT_SELF) == 0)) {
+	    if (!forall) {
 	      ss << "(forall (";
 	      forall = true;
 	    }
-	    ss << _tcc->Pred(i)->asString(tvP) << " ";	  
+	    ss << (*itr)->asString(tvP) << " ";	  
 	  }
 	}
 
-	if(forall)
+	if (forall)
 	  ss << ") ";
       }
     }
   }
   
   ss << tau->asString(tvP);
-  if(forall)
+  if (forall)
     ss << ")";
   
   return ss.str();

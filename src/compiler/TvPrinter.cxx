@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,6 +35,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -42,15 +43,13 @@
 #include <iostream>
 #include <string>
 #include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
 #include "AST.hxx"
 #include "Type.hxx"
 #include <sstream>
 
-using namespace sherpa;
 using namespace std;
+using namespace boost;
+using namespace sherpa;
 
 TvPrinter::TvPrinter(const bool pp, const std::string& _pfx)
 {
@@ -69,7 +68,7 @@ TvPrinter::newTvName()
   ss << pfx << c;
 
   unsigned long long ndx = count / nchars;
-  if(ndx > 0)
+  if (ndx > 0)
     ss << ndx;
   
   count++;
@@ -77,41 +76,33 @@ TvPrinter::newTvName()
 }
   
 string
-TvPrinter::tvName(GCPtr<const Type> tvar)
+TvPrinter::tvName(shared_ptr<const Type> tvar)
 {
-  if(!prettyPrint) {
+  if (!prettyPrint) {
     stringstream ss;
     ss << pfx << "a" << tvar->uniqueID;
     return ss.str();
   }
   
-  GCPtr< AvlMapNode<unsigned long long, string> > tvMapNode;
-  tvMapNode = tvMap.lookup(tvar->uniqueID);
+  TvMap::iterator itr = tvMap.find(tvar->uniqueID);
 
-  if(!tvMapNode) {
+  if (itr == tvMap.end()) {
     string s = newTvName();
-    tvMap.insert(tvar->uniqueID, s);
+    tvMap[tvar->uniqueID] = s;
     return s;
   }
   else
-    return tvMapNode->value;      
-};
-
-
-bool
-iterateOverTvMapS(GCPtr<AvlMapNode<unsigned long long, string> >node,
-		  const void *aux)
-{ 
-  CVector<std::string> *vec = (CVector<std::string> *) aux;
-  vec->append(node->value);  
-  return true;
+    return itr->second;
 }
 
-GCPtr<CVector<std::string> >
+std::vector<std::string>
 TvPrinter::getAllTvarStrings()
 {
-  CVector<std::string> *vec = new CVector<std::string>;
-  GCPtr<CVector<std::string> > gcVec = vec;
-  tvMap.iterate(iterateOverTvMapS, vec);
-  return gcVec;
+  std::vector<std::string> vec;
+
+  for (TvMap::iterator itr = tvMap.begin();
+      itr != tvMap.end(); ++itr)
+    vec.push_back(itr->second);
+
+  return vec;
 }

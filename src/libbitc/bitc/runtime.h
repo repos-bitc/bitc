@@ -916,130 +916,87 @@ DEFCAST(bitc_word_t,  _4word,  bitc_float_t,  _5float);
 DEFCAST(bitc_word_t,  _4word,  bitc_double_t, _6double);
 
 /**************************************************************
- **             End of Script generatede code                **
+ **             End of Script generated code                 **
  **************************************************************/
 
 /**************************************************************
-              Support for Closure Conversion
+ **                  Procedure Objects                       **
  **************************************************************/
 
-/**** Support for run-time generation of closure objects   ****/
+/*****************************************************************
+ * Every procedure object is an overlay structure consisting
+ * of a raw code block that contains the location of the closure
+ * record as a literal constant and a data overlay that allows
+ * the garbage collector to relocate the closure record at need.
+ *
+ * On machines having a PC-relative load (or which can contrive
+ * to simulate one efficiently), that addressing mode is probably
+ * the best one to use.
+ *****************************************************************/
 
-/* Current-Closure-pointer must be in thread-local storage. However,
-   there is only one thread for now. */
-void *currentClosurePtr;
+void *
+bitc_emit_procedure_object(void *stubP, void *envP) MAYBE_UNUSED;
 
-/*********  The following is highly machine dependent       ****/
-/***************************************************************** 
-  For a procedure that has a closure, we emit the following things:
+#if defined(__i386__)
 
-   A. The "real" procedure:
+typedef union {
+  uint8_t code[13];
+  struct {
+    uint8_t pad[4];
+    void *ptr;
+  } env;
+} bitc_Procedure;
 
-      ret-type __real_procname(Closure *clp, Arg1 a1, ..., Argn an) {
-        ... real procedure body ...
-      }
+#define BITC_GET_CLOSURE_ENV(nm) \
+  void *nm; \
+  __asm__ __volatile__("movl %%eax,%0" : "=g" (nm))
 
-      This is the procedure that will do all of the work.
+#elif defined(__x86_64__)
 
-   B. A "transition" procedure:
+typedef union {
+  uint8_t code[25];
+  struct {
+    uint8_t pad[16];
+    void *ptr;
+  } env;
+} bitc_Procedure;
 
-      ret-type __transition_procname(Arg1 a1, ..., Argn an) {
-        return __real_procname(CurrentClosurePointer, a1, ... an);
-      }
+#define BITC_GET_CLOSURE_ENV(nm) \
+  void *nm; \
+  __asm__ __volatile__("movq %%rax,%0" : "=g" (nm))
 
-      The only reason we are emitting this procedure is because it lets
-      us use the C compiler to re-arrange the stack frame, and the C
-      compiler already knows the rules for doing that. The variable
-      CurrentClosurePointer is a thread-local global variable that
-      is provided by the run time layer.
+#elif defined(__sparc__)
 
-   C. Finally, we will hand-emit a machine-dependent code sequence
-      that does the following:
+typedef union {
+  uint32_t code[3];
+  struct {
+    uint32_t pad[3];
+    void *ptr;
+  } env;
+} bitc_Procedure;
 
-         mov CurrentClosurePointer <- $ProperClosureValue
-         jmp $procname-transition
+#define BITC_GET_CLOSURE_ENV(nm) \
+  void *nm; \
+  __asm__ __volatile__("mov %0,%%g0" : "=g" (nm))
 
-      This is the actual closure object. The closure object will get
-      emitted in a data structure that is organized as follows:
+#elif defined(__sparc64__)
 
-         +-----------------------+
-         |  code bytes for the   |
-         |  instructions above   |
-         | NOPS to word boundary |
-         +-----------------------+
-         |   ProperClosureValue  |   ( a pointer )
-         +-----------------------+
+typedef union {
+  uint32_t code[7];
+  struct {
+    /* Note extra pad word to make ptr be naturally aligned, pending
+       confirm from JWA about whether this is required. */
+    uint32_t pad[8];
+    void *ptr;
+  } env;
+} bitc_Procedure;
 
-      The value of ProperClosureValue is redundantly stored so that it
-      can be found easily by the garbage collector. On machines that
-      have PC-relative load, it is possible to actually *use* this
-      value.
-******************************************************************/
+#define BITC_GET_CLOSURE_ENV(nm) \
+  void *nm; \
+  __asm__ __volatile__("mov %0,%%g0" : "=g" (nm))
 
-#define ARCH_IA32
-
-#ifdef ARCH_IA32
-static void *
-bitc_emit_closure_object(void *trans, void *env) MAYBE_UNUSED;
-
-static void *
-bitc_emit_closure_object(void *trans, void *env)
-{
-  /* mov CurrentClosurePointer <- $ProperClosureValue
-     is realized on IA32 as:
-     push $ProperClosureValue
-     pop CurrentClosurePointer     */
-  
-  /* Not sure if C99 allows structure within structure definition */
-  
-  struct __ia32_push {
-    unsigned char op; 
-    void *imm;
-  }__attribute__((packed));;
-  struct __ia32_pop {
-    unsigned char op;
-    unsigned char modrm;
-    void *addr;
-  }__attribute__((packed));;
-  struct __ia32_jmp {
-    unsigned char op;
-    void *addr;
-  }__attribute__((packed));;
-  
-  typedef struct __cl_code __cl_code;  
-  struct __cl_code {
-    struct __ia32_push push; /* 5 bytes */
-    struct __ia32_pop  pop;  /* 6 bytes */
-    struct __ia32_jmp  jmp;  /* 5 bytes */
-    /* No Padding necessary */
-  }__attribute__((packed));
-  
-  typedef void* __cl_ptr;
-  
-  typedef struct closure closure;  
-  struct closure {
-    __cl_code code;
-    __cl_ptr  env;
-  }__attribute__((packed));;
-  
-  struct closure* cl = GC_ALLOC(sizeof(closure));
-  
-  /* push $env :: 68 imm32*/
-  cl->code.push.op = 0x68u;
-  cl->code.push.imm = env;
-
-  /* pop $currentClosurePtr :: 8F /0 r/m32 */
-  cl->code.pop.op = 0x8Fu;
-  cl->code.pop.modrm = 0x05u; /* 00 000 101 */
-  cl->code.pop.addr = &currentClosurePtr;
-
-  /* jmp $trans :: E9 rel32 */
-  cl->code.jmp.op = 0xE9u;
-  cl->code.jmp.addr = (void *)((unsigned long)trans -
-			       ((unsigned long)&(cl->code.jmp.addr) + 4));  
-  cl->env = env;
-  return cl;
-}
+#else
+#  error "Target architecture not (yet) supported"
 #endif
 
 

@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,20 +35,18 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
 #include <sstream>
 
+#include <libsherpa/UExcept.hxx>
+
 #include "UocInfo.hxx"
-#include "Options.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
@@ -58,6 +56,7 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
@@ -66,10 +65,10 @@ Type::toString()
 {
   stringstream ss;
   
-  if(getType() != this)
+  if (getType() != shared_from_this())
     return getType()->toString();
 
-  if(pMark >= 2)
+  if (pMark >= 2)
     return " ... ";
   else 
     pMark++;
@@ -124,16 +123,16 @@ Type::toString()
 #endif
     
   case ty_fn:
-    assert(components->size() == 2);
+    assert(components.size() == 2);
     ss << "(fn " << Args()->toString() 
        <<  " " << Ret()->toString() << ")";
     break;
 
   case ty_fnarg:
     ss << "(";
-    for(size_t i=0; i<components->size(); i++) {
+    for (size_t i=0; i<components.size(); i++) {
       if (i > 0) ss << " ";
-      if(CompFlags(i) & COMP_BYREF)
+      if (CompFlags(i) & COMP_BYREF)
 	ss << "(by-ref " << CompType(i)->toString() << ")";
       else
 	ss << CompType(i)->toString();      
@@ -143,7 +142,7 @@ Type::toString()
 
   case ty_letGather:
     ss << "(__letGather ";
-    for(size_t i=0; i<components->size(); i++) {
+    for (size_t i=0; i<components.size(); i++) {
       if (i > 0) ss << " ";
       ss << CompType(i)->toString();
     }
@@ -153,7 +152,7 @@ Type::toString()
 
   case ty_structv:
     ss << "(struct " <<defAst->s << " - ";
-    for(size_t i=0; i<components->size(); i++)
+    for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
 	 << CompType(i)->toString() << " ";
     ss << ")";
@@ -161,7 +160,7 @@ Type::toString()
     
   case ty_structr:
     ss <<  "(structR " << defAst->s << " - ";
-    for(size_t i=0; i<components->size(); i++)
+    for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
 	 << CompType(i)->toString() << " ";
     ss << ")";
@@ -169,10 +168,10 @@ Type::toString()
     
   case ty_unionv:
     ss << "(union " << defAst->s;
-    for(size_t i=0; i<typeArgs->size(); i++)
+    for (size_t i=0; i<typeArgs.size(); i++)
       ss << TypeArg(i)->getType()->toString();
     ss << ") [";
-    for(size_t i=0; i<components->size(); i++)
+    for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
 	 << CompType(i)->getType()->toString();
     ss << "]";
@@ -180,10 +179,10 @@ Type::toString()
 
   case ty_unionr:
     ss << "(unionR " << defAst->s;
-    for(size_t i=0; i<typeArgs->size(); i++)
+    for (size_t i=0; i<typeArgs.size(); i++)
       ss << TypeArg(i)->getType()->toString();
     ss << ") [";
-    for(size_t i=0; i<components->size(); i++)
+    for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
 	 << CompType(i)->getType()->toString();
     ss << "]";
@@ -191,11 +190,11 @@ Type::toString()
 
   case ty_uconv:
     ss << "(union-con " << defAst->s;
-    for(size_t i=0; i<typeArgs->size(); i++)
+    for (size_t i=0; i<typeArgs.size(); i++)
       ss << TypeArg(i)->getType()->toString();
     ss << ") ["; 
       
-    for(size_t i=0; i<components->size(); i++)
+    for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
 	 << CompType(i)->getType()->toString();
     ss << "]";
@@ -203,11 +202,11 @@ Type::toString()
 
   case ty_uconr:
     ss << "(unionR-con " << defAst->s;
-    for(size_t i=0; i<typeArgs->size(); i++)
+    for (size_t i=0; i<typeArgs.size(); i++)
       ss << TypeArg(i)->getType()->toString();
     ss << ") ["; 
       
-    for(size_t i=0; i<components->size(); i++)
+    for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
 	 << CompType(i)->getType()->toString();
     ss << "]";
@@ -215,10 +214,10 @@ Type::toString()
 
   case ty_uvalv:
     ss << "(union-val " << defAst->s;
-    for(size_t i=0; i<typeArgs->size(); i++)
+    for (size_t i=0; i<typeArgs.size(); i++)
       ss << TypeArg(i)->getType()->toString();
     ss << ") [";
-    for(size_t i=0; i<components->size(); i++)
+    for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
 	 << CompType(i)->getType()->toString();
     ss << "]";
@@ -226,47 +225,25 @@ Type::toString()
 
   case ty_uvalr:
     ss << "(unionR-val " << defAst->s;
-    for(size_t i=0; i<typeArgs->size(); i++)
+    for (size_t i=0; i<typeArgs.size(); i++)
       ss << TypeArg(i)->getType()->toString();
     ss << ") [";
-    for(size_t i=0; i<components->size(); i++)
+    for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
 	 << CompType(i)->getType()->toString();
     ss << "]";
     break;
 
-  case ty_reprv:
-    ss << "(repr " << defAst->s;
-    for(size_t i=0; i<typeArgs->size(); i++)
-      ss << TypeArg(i)->getType()->toString();
-    ss << ")";
-    //    ss << " [";
-    //    for(size_t i=0; i<components->size(); i++)
-    //      ss << CompType(i)->getType()->toString();
-    //    ss << "]";
-    break;
-
-  case ty_reprr:
-    ss << "(reprR " << defAst->s ;
-    for(size_t i=0; i<typeArgs->size(); i++)
-      ss << TypeArg(i)->getType()->toString();
-    ss << ")";
-    //    ss << " [";
-    //    for(size_t i=0; i<components->size(); i++)
-    //      ss << CompType(i)->getType()->toString();
-    //    ss << "]";
-    break;
-    
   case ty_typeclass:    
     ss << "(Typeclass " << defAst->s;
-    for(size_t i=0; i < typeArgs->size(); i++)
+    for (size_t i=0; i < typeArgs.size(); i++)
       ss << " " << TypeArg(i)->toString();
     ss << ")";
     break;
 
   case ty_array:
     ss <<  "(array " << Base()->toString() 
-       << " " << arrlen->len << ")";
+       << " " << arrLen->len << ")";
     break;
     
   case ty_vector:
@@ -291,7 +268,7 @@ Type::toString()
     break;
 
   case ty_tyfn:
-    assert(components->size() == 2);
+    assert(components.size() == 2);
     ss << "(tyfn (" << Args()->toString() 
        <<  ") " << Ret()->toString() << ")";
     break;
@@ -306,29 +283,20 @@ Type::toString()
        << ((Core()->kind == ty_fn)?"(":"");
     break;
 
-  case ty_subtype:
-    {
-      assert(false);
-      ss << CompType(0)->toString() 
-	 << " < "
-	 << CompType(1)->toString();
-      break;
-    }
-    
   case ty_pcst:
     {
       ss << "(*";
-      for(size_t i=0; i<components->size(); i++)
+      for (size_t i=0; i<components.size(); i++)
 	ss << CompType(i)->toString();
       break;
     }
 
   case ty_kfix:
     {
-      GCPtr<Type> t = this; // To satisfy libsherpa
-      if(t == Type::Kmono)
+      shared_ptr<Type> t = shared_from_this(); // To satisfy libsherpa
+      if (t == Type::Kmono)
 	ss << "m";
-      else if(t == Type::Kpoly)
+      else if (t == Type::Kpoly)
 	ss << "P";
       else
 	assert(false);

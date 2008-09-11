@@ -1,0 +1,886 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <article id="PLOS2006" 
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <docinfo twocolumn="yes" ptsz='default' latex.documentclass="acm_proc_article-sp">
+    <title>Type Inference for Unboxed Types and First Class Mutability</title>
+    <authorgroup>
+      <author>
+	<firstname>Swaroop</firstname>
+	<surname>Sridhar</surname>
+      </author>
+      <author>
+	<firstname>Jonathan</firstname>
+	<surname>Shapiro</surname>
+	<degree>Ph.D.</degree>
+      </author>
+      <affiliation>
+	<orgname>Systems Research Laboratory</orgname>
+	<address>Dept. of Computer Science</address>
+	<address>Johns Hopkins University</address>
+      </affiliation>
+    </authorgroup>
+    <pubdate>October 22, 2006</pubdate>
+    <!--     <copyright> -->
+    <!--       <year>2006</year> -->
+    <!--       <holder>Swaroop Sridhar</holder> -->
+    <!--       <holder>Jonathan S. Shapiro</holder> -->
+    <!--     </copyright> -->
+    <categories>
+      <category>papers</category>
+    </categories>
+    <synopsis>
+      <p>
+        PLOS 2006 workshop paper informally describing a heuristic
+        approach to polymorphic type inference in the presence of
+        unboxed mutability.
+      </p>
+    </synopsis>
+  </docinfo>  
+  <abstract latex.incolumn="yes">
+    <p>
+      Systems programs rely on fine-grain control of data
+      representation and use of state to achieve performance,
+      conformance to hardware specification, and temporal
+      predictability. The robustness and checkability of these
+      programs could be greatly improved if modern type systems and
+      programming language ideas, such as polymorphism and type
+      inference, could be applied to these programs. 
+    </p>
+    <p>
+      BitC is a higher-order programming language in the tradition of
+      ML and Haskell, extended to incorporate both state and the
+      expression of unboxed and low-level datatypes. State and unboxed
+      value types interact in subtle ways with polymorphic
+      type-inference. Unless handled with care in the language design,
+      interactions of these features can lead to unsoundness or
+      results that are counter-intuitive to the programmer. Because
+      instances of value types may have mutable components, a decision
+      must be made concerning their compatibility at copy boundaries:
+      should structurally equivalent types that differ only in their
+      mutability be considered compatible. The choice impacts both the
+      amount of polymorphism that the language can preserve and the
+      burden of type annotation imposed on the programmer. 
+    </p>
+    <p>
+      This paper presents some of these challenges and our design for
+      how to address these issues.
+    </p>
+  </abstract>
+  <!-- <toc/> -->
+  <sect1>
+    <title>Introduction</title>
+    <p>
+      Modern programming languages such as ML&nbsp;<cite
+      ref="milner97definition"/> or Haskell&nbsp;<cite
+      ref="peytonjones2003haskellrevisedreport"/> provide newer,
+      stronger, and more expressive type systems than 
+      systems programming languages such as C&nbsp;<cites>
+	<cite ref="Kernighan1988C"/>
+	<cite ref="ISO1999ANSI-C"/>
+      </cites>
+      or Ada&nbsp;<cite ref="ISO1995Ada"/>.  These features improve
+      the robustness and safety of programs, and it is highly
+      desirable to incorporate them into languages that can be used
+      for high-performance ``systems'' codes. The key missing features
+      for this are state (mutability) and low-level
+      representation. C# supports state and
+      representation, but does not support type inference, higher-order
+      types, or mathematically well-founded mechanisms for
+      abstraction.
+    </p>
+    <p>
+      A key feature of the newer languages is <term>type
+        inference</term>, a mechanism by which the compiler
+      automatically assigns types to variables with minimal
+        programmer annotation. Type inference preserves the
+        consistency advantages of static typing, but lowers the burden
+        on the programmer, facilitating more rapid prototyping
+        and development.
+    </p>
+<!--     <p> -->
+<!--       While there have been recent efforts to integrate low-level -->
+<!--       representation features into Haskell&nbsp;<cite -->
+<!--       ref="Diatchki2005Representation"/>, modern languages do not -->
+<!--       provide effective support for low-level representation -->
+<!--       management, or value types, and explicitly seek to discourage -->
+<!--       the use of ``state'' (mutable locations). As a result, these -->
+<!--       languages are ill-suited to the development of operating systems -->
+<!--       and high-performance ``systems'' codes.  BitC is an attempt to -->
+<!--       unify all of these features into a single, consistent language -->
+<!--       framework. -->
+<!--     </p> -->
+    <p>
+      BitC&nbsp;<cite ref="shapBitcSpec2006"/> is a higher order
+      programming language for low-level systems programming. It is
+      type safe, and supports polymorphic type inference. It exposes
+      machine-level representation of types, and provides precise
+      programmer control over data layout.  It supports first class
+      polymorphism over all types (including unboxed types). It also
+      supports ``first class'' mutability in the sense value of any
+      type can be mutable &mdash; mutable values need not be wrapped
+      by a ``ref cell'' as in ML.
+    </p>
+    <!--    <p>
+      Since BitC is an expression language, having unboxed mutability
+      means that we need to introduce a notion of ``lvalue-ness'' in
+      order to preserve the programmer's intuition of what if getting
+      mutated. We define certain rules for location semantics in
+      order to preserve ``correctness'' of C-style mutation.   
+    </p> -->
+    <p>
+      Since BitC is a call-by-value language, support for unboxed
+      mutability means that we can allow some freedom in the
+      compatibility of types with respect to their mutability at copy
+      boundaries.  However, this kind of compatibility interacts with
+      type inference in surprising ways, because there is no longer a
+      unique way to type an expression. This document explores these
+      issues, and their implications as a matter of theory and
+      practice.  
+    </p>
+    <p>
+<!--       The rest of the paper is organized as follows. In -->
+<!--       Section&nbsp;<xref ref="loc_sem"/>, we talk about the need for -->
+<!--       location semantics checking in BitC. In Section&nbsp;<xref -->
+<!--         ref="copy_compat"/>, we precisely define the amount of -->
+<!--       compatibility we can allow at a copy-boundary, and describes the -->
+<!--       associated ramifications for type inference in -->
+<!--       Section&nbsp;<xref -->
+<!--         ref="infer"/>. In Section&nbsp;<xref ref="proposal"/> we -->
+<!--       present our solution to some of these problems, and conclude in -->
+<!--       Section&nbsp;<xref ref="conclusion"/>.  -->
+
+      Program examples in this
+      document are written in the programming language BitC. Readers
+      may find it helpful to refer to the <link
+        href="http://coyotos.org/docs/bitc/spec.html">BitC language
+        specification</link>&nbsp;<cite ref="shapBitcSpec2006"/>.
+    </p>
+  </sect1>  
+  <sect1 id="loc_sem">
+    <title>Location Semantics</title>
+    <p>
+      BitC is a stateful language. Variables and fields may be given
+      explicitly mutable type by the programmer, or may be assigned a
+      mutable type by the type inference mechanism.  The following
+      syntactic forms in BitC accept locations (addresses of cells) at
+      positions indicated as <progident><em>loc</em></progident>, and
+      return locations as their result (except
+      <progident>set!</progident>, which returns
+      <progident>unit</progident>):
+    </p>
+    <literallayout>
+id
+(array-nth <em>loc</em> ndx)
+(vector-nth e ndx)
+(member <em>loc</em> ident)
+(deref e)
+(set! <em>loc</em> e)</literallayout>
+    <p>
+      These forms may also be used as expressions. In expression
+      context, the location is implicitly dereferenced to obtain the
+      appropriate value.
+    </p>
+    <p>
+      In systems programming languages, the programmer depends
+      critically on a mental model of the relationship between
+      locations and storage. An assignment is an update to the content
+      of a particular memory cell. The <em>identity</em> of that cell
+      &mdash; not just its denotation &mdash; is semantically
+      significant. In consequence, mutable identifiers must not be
+      multiply instantiated, and therefore cannot be given polymorphic
+      type.
+    </p>
+    <p>
+      Mutable value types have implications for type compatibility. In
+      C, it is legal to write:
+    </p>
+    <literallayout>
+const int *cpi = ...;
+int *pi = cpi;
+*pi = 5;</literallayout>
+    <p>
+      Because of this, the compiler cannot rely on the alleged
+      const-ness of aliased identifiers and structures. In BitC,
+      mutability is part of the field type, and the language design takes
+      care to ensure that a location never has more than one type.
+      This is enforced in the type system.
+    </p>
+<!--     <p> -->
+<!--       Expression languages like ML do not make a distinction between -->
+<!--       lvalues and rvalues as in statement languages -->
+<!--       like C. In the case of ML, the fact that every mutable value is -->
+<!--       boxed is sufficient to guarantee correctness. But, in the -->
+<!--       presence of unboxed mutability, the lack of lvalue restrictions -->
+<!--       will result in code that will truly violate programmer -->
+<!--       intuitions. For example, in the following expression:  -->
+<!--     </p> -->
+<!--     <literallayout> -->
+<!-- (define (my-zeroth x) (array-nth x 0)) -->
+
+<!-- (let ((arr:(mutable 'a) (array #t #f))) -->
+<!--   (set! (my-zeroth arr) #f) -->
+<!--   (array-nth arr 0))</literallayout>     -->
+<!--     <p indent="no"> -->
+<!--       The <progident>set!</progident> actually sets the value of a -->
+<!--       copy of the first element of -->
+<!--       <progident>arr</progident>, and not the first element -->
+<!--       itself. Therefore, the value of the above expression is -->
+<!--       <progident>#t</progident>, which is not what the user seems to -->
+<!--       intend here. Therefore, we need a precise notion of what -->
+<!--       expressions can be treated as lvalues and can thus be safely -->
+<!--       <progident>set!</progident>ed.  -->
+<!--     </p>     -->
+<!--     <p> -->
+<!--       In BitC, the following expressions accept locations -->
+<!--       (addresses of cells) at positions indicated as -->
+<!--       <progident><em>loc</em></progident>, and return locations  -->
+<!--       as their result (except <progident>set!</progident>, which returns -->
+<!--       <progident>unit</progident>):    -->
+<!--     </p> -->
+<!--     <literallayout> -->
+<!-- id -->
+<!-- (array-nth <em>loc</em> ndx) -->
+<!-- (vector-nth e ndx) -->
+<!-- (member <em>loc</em> ident) -->
+<!-- (deref e) -->
+<!-- (set! <em>loc</em> e)</literallayout> -->
+<!--     <p> -->
+<!--       Location semantics rule requires that there can (deeply) be no -->
+<!--       non-location as the first argument of a -->
+<!--       <progident>set!</progident>. This not only ensures that the code -->
+<!--       directly reflects programmer's expectation of what is getting -->
+<!--       <progident>set!</progident>ed, but also guarantees that -->
+<!--       compiler transformations &mdash; like the introduction of temporaries -->
+<!--       due to transformation into an SSA form &mdash; do not alter the -->
+<!--       meaning of the program. -->
+<!--     </p> -->
+  </sect1>
+  <sect1 id="copy_compat">
+    <title>Copy Compatibility</title> 
+    <p>
+      Since BitC is a call-by-value language, it is desirable that we
+      allow some freedom in the compatibility of types with respect to
+      their mutability at argument passing, assignment, and binding
+      boundaries.  We will refer to this as <term>copy
+      compatibility</term>, denoted by &cong;. For example:
+    </p>
+    <literallayout>
+(define (plus1 x:(mutable int32)) 
+  (set! x (+ x 1)) x)       
+plus1: (fn (mutable int32) int32)
+
+(define v1 (plus1 10:int32))
+v1: int32</literallayout>
+    <p indent="no">
+      In the application <progident>(plus1 10:int32)</progident>
+      above, the type of the actual parameter
+      <progident>10</progident> is <progident>int32</progident> and
+      that of the formal parameter <progident>x</progident> is
+      <progident>(mutable&nbsp;int32)</progident>. Here,
+      <progident>int32</progident>&nbsp;&cong;&nbsp;<progident>(mutable&nbsp;int32)</progident>.
+    </p>
+    <p>
+      Copy compatibility need not be restricted to the shallow case,
+      but must not extend past a reference boundary, because the
+      target of the reference is not copied. The required invariant is
+      that every location must have exactly one type at all times, and
+      allowing copy compatibility to extend past a reference boundary
+      creates aliasing opportunities that violate the ``one location,
+      one type'' constraint.
+
+<!--       Otherwise, the -->
+<!--       compiler will not be entitled to believe that a value (or a -->
+<!--       field) is constant even if so declared! The ``constness'' of a -->
+<!--       value will then merely be a local aberration rather than a -->
+<!--       statement of true immutability in the mathematical notion.  -->
+
+      In
+      this sense, mutability is actually an attribute of the location
+      in question, rather than the type associated with that location.
+      </p>
+    <p>
+      Therefore, we can define copy compatibility as follows:
+    </p>
+    <ul>
+      <li>
+        <p>
+          &tau;&nbsp;&cong;&nbsp;(mutable&nbsp;&tau;) &mdash; <term>direct
+          compatibility</term> (&tau; denotes any type).
+        </p>
+      </li>
+      <li>
+        <p>
+          (array&nbsp;&tau;)&nbsp;&cong;&nbsp;(array&nbsp;(mutable&nbsp;&tau;))
+          &mdash; <term>array element compatibility</term>. Arrays are
+          value types, and the entire array is copied by value.
+        </p>
+      </li>
+      <li>
+        <p>
+          <term>Compatibility of composites</term>.
+          Composite types are copy compatible if and only if their
+          fields are copy compatible.
+
+          To achieve this, a restriction must be imposed for
+          parametric types: any type variable in the composite type
+          definition that appears within a reference type is required
+          to match exactly at all positions where it appears.  Because
+          of this rule, instantiations of <progident>'a</progident>
+          are subject to copy compatibility but instantiations of
+          <progident>'b</progident> must match exactly in:
+        </p>
+<!--         <p> -->
+<!--           However, we -->
+<!--           do have some freedom with the compatibility of the -->
+<!--           type-arguments of unboxed composite types. -->
+<!--           Two values whose types are parametrized over a composite -->
+<!--           type, are copy compatible if and only if all of the -->
+<!--           arguments used deeply within another reference type -->
+<!--           constructor are strictly compatible, and the rest of the -->
+<!--           arguments are copy compatible.  -->
+<!--           For example: -->
+<!--         </p> -->
+        <literallayout indent="no">
+(defstruct (St 'a 'b):val 
+      f1:'a f2:(ref 'b))
+(St char char) &cong; (St (mutable char) char)
+(St char char) &ncong; (St char (mutable char))</literallayout>
+<!--         <p indent="no"> -->
+<!--           Two values whose types are parametrized over the structure -->
+<!--           <progident>St</progident> are copy compatible if and only if -->
+<!--           their first type-arguments (that satisfy -->
+<!--           <progident>'a</progident> above) are copy compatible and the -->
+<!--           second type-arguments (that satisfy -->
+<!--           <progident>'b</progident> above) are strictly compatible. -->
+<!--         </p>   -->
+      </li>
+    </ul>
+    <p>
+      In addition to argument passing, assignment, and binding, there
+      is a wide range of language design choices about where to permit
+      copy compatibility. For example, we might also consider the
+      return type of expressions that do not expect or return
+      locations. We might also weaken the compatibility requirements
+      of <progident>if</progident> expressions to say that the
+      <em>then</em> and <em>else</em> clauses need only have
+      copy-compatible return types. Each of these decisions &mdash;
+      but especially the ones entailing control flow constructs
+      &mdash; has impact on the effectiveness of type inference.
+    </p>
+  </sect1>
+  <sect1 id="infer">
+    <title>Impact on Type Inference</title>
+    <p>
+      When an exact type compatibility requirement is replaced in the
+      language design by copy compatibility, it is no longer possible
+      to infer a unique type for the expression. For example, in the
+      following expression:
+    </p>
+    <literallayout>
+(let ((p 10:int32)) ... )</literallayout>
+    <p indent="no">
+      we know that the type of the literal <progident>10</progident>
+      is <progident>int32</progident>, but the type of
+      <progident>p</progident> could either be
+      <progident>int32</progident>, or
+      <progident>(mutable&nbsp;int32)</progident>. When we cannot
+      ascertain the mutability status of a bound identifier, we give
+      it the so-called ``maybe'' type <progident>(?mutable?
+        int32)</progident>, which means that it is undecided as to
+      whether the actual type is <progident>int32</progident>, or
+      <progident>(mutable&nbsp;int32)</progident>. The choice may be
+      resolved by later unification. If it is not, a choice must
+      eventually be fixed by the language definition.
+    </p>
+    <p>
+      For example, the <progident>let</progident> form:
+    </p>
+    <literallayout>
+(let ((p (pair 1:int32 #t))) ... )</literallayout>
+    <p indent="no">
+      introduces copy compatibility at both the
+      <progident>pair</progident> constructor application, and the
+      formation of a new binding for <progident>p</progident>. The
+      types assigned by the compiler are:
+    </p>
+    <literallayout>
+p:(?mutable? (pair (?mutable? int32) 
+                   (?mutable? bool))</literallayout>
+    <sect2>
+      <title>Principality of Inferred Types</title>
+      <p>
+        The key idea of maybe types is to defer commitments about the
+        mutability status of types, and thus infer most-general (or
+        principal) types wherever possible. BitC is a let-polymorphic
+        language. This means that maybe type decisions for universally
+        quantified types cannot be deferred past their bindings
+        because of the so-called ``value restriction'' <cite
+        ref="wrightValRes1995"/>.  For example, in the case of the
+        expression:
+      </p>
+      <literallayout>
+(let ((p nil)) ... )</literallayout>
+      <p indent="no">
+        we cannot give <progident>p</progident> the type
+      </p>
+      <literallayout>
+(forall ('a) (?mutable? (list 'a)))</literallayout>
+      <p>
+        We must instead choose one of:
+      </p>
+      <literallayout>
+(forall ('a) (list 'a)) ; polymorphic
+(?mutable? (list 'a))   ; monomorphic</literallayout>
+      <p indent="no">
+        That is, in this system, there is no principal type that we
+        can infer for <progident>p</progident>. Given this, we must
+        fix these maybe types to either mutable or immutable at a
+        let-boundary. In the next section, we will identify various
+        choices for how to fix these maybe types, and discuss their
+        merits and limitations.
+      </p>
+      <p>
+        In contrast, ML infers principal types<footnote>
+          <p>Except in some cases of operator overloading in SML.</p>
+        </footnote> although it does not infer principal typings&nbsp;<cite
+          ref="JimPrincipalTypings1996"/>. In order to achieve
+        principality of inferred types, ML imposes the restriction
+        that only references can be mutated, and all
+        references must be mutable. This leaves the inference engine
+        with exactly one choice of inference for every expression. In
+        BitC, we trade principality of inferred types for
+        a more expressive language (and type system).
+        Section&nbsp;<xref ref="tradeoffs"/> deals with the
+        issues that arise due to this non-principality of
+        inferred types.   
+      </p>
+    </sect2>
+    <sect2 id="tradeoffs">
+      <title>Inference Trade Offs</title>
+      <p>
+        The previous section argued that we ``lose'' precision of
+        inferred types (with respect to mutability) by the
+        introduction of copy compatibility. In this section we will
+        consider the various issues in the trade-off between freedom
+        and precision of inferred types. An ideal inference scheme
+        should be sound and complete (it should be possible to infer
+        all sound types, albeit with qualifications). It must not
+        require excessive programmer annotations in the ``common
+        case.''
+      </p>
+      <p>
+        The problem with programmer annotations is pragmatic
+        rather than ideological: we do not view programmer
+        specification of types as bad <foreignphrase>per
+          se</foreignphrase> (indeed, in certain places BitC
+        requires annotations), but ease of prototyping
+        requires that these annotations be minimized. As a matter of
+        good programming ideology and interfacing with other static
+        analysis or verification tools, the inferred types must not be
+        promiscuous with respect to mutability.
+      </p>
+      <sect3>
+        <title>Resolving Maybe Types at Let Boundaries</title>
+        <p>
+          One possibility is to fix all types to immutable. For
+          example:
+        </p>
+        <literallayout>
+(let ((p (pair n:(mutable int32) 
+               (lambda (x) x)))) ...)
+p: (pair int32 (fn ('a) 'a))</literallayout>
+        <p indent="no">
+          This scheme will preserve all polymorphism possible, but
+          will mandate a programmer annotation for every mutable
+          location. The alternative would be to fix everything to
+          mutable, in which case we will effectively have no
+          polymorphism (by default). In the case of local
+          definitions, we can collect more usage information and fix
+          maybe-ness accordingly.
+        </p>
+      </sect3>
+      <sect3>
+        <title>Where to Apply Copy Compatibility</title> 
+        <p>
+          We can choose whether to introduce copy compatibility at
+          various constructs like new bindings, function
+          application/return, constructors, conditional expressions,
+          etc. If we introduce copy compatibility promiscuously, the
+          inferred types are sometimes very surprising. For example:
+        </p>
+        <literallayout>
+(import ls bitc.list)
+(define (list->vector lst)
+  (make-vector (length lst) 
+    (lambda (n) (ls.list-nth lst n))))</literallayout> 
+        <p indent="no">
+          The type of <progident>list->vector</progident> appears to
+          be:
+        </p>
+      <literallayout>
+(fn ((list 'a)) (vector 'a))</literallayout>
+        <p indent="no">
+          but is actually:<footnote>
+            <p><progident>copy-compat</progident> 
+              is a special type class that relates two copy
+              compatible types.
+            </p>
+          </footnote>
+        </p>
+        <literallayout>
+(forall ((copy-compat 'a 'b)) 
+        (fn ((list 'a)) (vector 'b)))</literallayout>
+        <p indent="no">
+          If we default maybe types that are ultimately unresolved
+          to immutable, in the following definition we obtain:
+        </p>
+        <literallayout>
+(define (lvm lst:(list (mutable bool))) 
+            (list->vector lst))
+lvm: (fn ((list (mutable bool))) 
+         (vector bool))  ;; !!!</literallayout>
+        <p>
+          which is a correct typing, but is counter-intuitive.
+        </p>
+      </sect3>
+      <sect3>
+          <title>How Much of Copy Compatibility to Use?</title>
+        <p>
+          Should we use copy compatibility to the maximum permissible
+          limit (as defined in Section&nbsp;<xref
+          ref="copy_compat"/>), or should we restrict it to top-level
+          shallow mutability compatibility only? Here again, we will
+          be trading expressiveness for preciseness of mutability
+          information.
+        </p>
+      </sect3>
+      <sect3>
+        <title>What expressions Can be Polymorphic?</title> 
+        <p>
+          Should we allow every possible use of polymorphism, or
+          should we restrict it to functions only? For example, in
+          Cyclone only function definitions are polymorphic&nbsp;<cite
+            ref="GrossmanCyclone2006"/>. This is a reasonable thing to
+          do in Cyclone, where there is a distinction between
+          functions (code) and function pointers (data); but in doing
+          so, Cyclone loses the ``first class'' notion of function
+          values.<footnote>
+            <p>The formalization in <cite
+                ref="GrossmanCyclone2006"/> uses a generalization of
+              this rule that preserves first class notion of
+              functions, but nevertheless requires explicit annotation
+              of every polymorphic expression.</p></footnote> Another
+          option is to require that all polymorphism be contained
+          within function types, since we can make function types
+          polymorphic even if they abstract over mutable or maybe
+          types.
+        </p>
+      </sect3>
+    </sect2>
+  </sect1>
+  <sect1 id="proposal">
+    <title>Design Choices in BitC</title>
+    <p>
+      Having identified the various trade-offs in the previous
+      section, we shall now describe the particular design choices
+      made in BitC for handling copy compatibility. This is by no
+      means ``the'' solution to the problem, but reflects our
+      aesthetic judgment of the best way to capture the programmer's
+      intuition about the flow of types in the language. It has been
+      driven in part by our experience writing BitC programmers. If,
+      as the designers of the language, <em>we</em> are surprised at
+      the behavior of the compiler, it seems reasonable to expect that
+      others will be too.<footnote>
+        <p>
+          We have politely ignored one user's proposal that we host an
+          annual obfuscated BitC typings contest.
+        </p>
+      </footnote>
+    </p>
+    <ul>
+      <li>
+        <p>
+          We allow copy compatibility to the full extent, up to a
+          reference boundary.
+        </p> 
+      </li>      
+      <li>
+        <p>
+          We allow copy compatibility to be invoked at arguments and
+          return positions of all expressions that do not expect a
+          location. 
+        </p> 
+      </li>      
+      <li>
+        <p>
+          If a locally defined identifier is used as the target of a
+          <progident>set!</progident>, it is given a shallowly mutable
+          type. This is an <foreignphrase>ad hoc</foreignphrase> rule
+          that tries to reduce the need for explicit type
+          qualifications by the programmer in the common case (ex:
+          iterators). However, this rule must not be invoked for
+          top-level (global) definitions. Otherwise, inferred types
+          will no longer be deterministic, as the top level
+          definitions have unlimited scope.
+        </p>
+      </li>
+      <li>
+        <p>
+          Every time we form a maybe type due to a copy operation, we
+          remember ``hints'' to resolve this maybe-ness in the type.
+          At a let boundary, we resolve any maybe-ness in the inferred
+          type by unifying with (a simplified form of) this hint.
+          Intuitively, this means that we will default maybe types to
+          the types of their original copies, unless overridden by an
+          explicit annotation. Here, we are approximating the user's
+          intent to the lexical ``flow'' of type information.
+        </p>
+        <p>
+          Hints must be accumulated at the merge of branching
+          expressions and we pick the most immutable of all
+          hints to resolve the maybe type. This ensures that
+          inferred types are deterministic. If there are any
+          residual unresolved maybe types even after unifying with
+          hints, we fix them to immutable.
+        </p>
+      </li>        
+      <li>
+        <p>
+          We allow all values and not just functions to be
+          polymorphic. In BitC, we enforce a modified form of Jacques
+          Garrigue's Relaxed Value restriction&nbsp;<cite
+            ref="garrigueValRes2004"/>,, with some extra restrictions
+          to deal with unboxed polymorphic types. 
+        </p> 
+      </li>      
+      <li>        
+        <p>
+          All function types <progident>(fn&nbsp;...)</progident>
+          must declare immutable types at copy compatible
+          positions.<footnote>
+            <p>
+              This is a syntactic restriction that does not yet appear
+              in the specification.
+            </p>
+          </footnote>
+          That is, </p>
+        <literallayout>
+(define abc:(fn ((mutable bool)) 'a) 
+   (lambda (x) x)) ;;ERROR!</literallayout>
+        <p indent="no">
+          The intuition is that type of a function must be described
+          from the caller's perspective (the external type), and must
+          hide the mutability information.<footnote>
+            <p>
+              However, any type-qualifications on the arguments of a
+              function within its body correspond to the internal
+              types, and may contain any mutable qualification.</p>
+          </footnote> By construction, this means that all functions
+          that are copy compatible at function argument and return
+          positions are equal.
+        </p>
+      </li>
+      <li>
+        <p>
+          No two instances of a type class that cause the external
+          type of any method to have indistinguishable external type
+          must co-exist at any point.
+        </p>
+      </li>
+    </ul>
+    <p>
+      A detailed explanation of these design choices can be found in
+      our accompanying technical report&nbsp;<cite
+        ref="sridharmutinfer2006"/>.
+    </p>
+    <sect2>
+      <title>Examples</title>
+      <literallayout>
+(define mb:(mutable bool) #t))
+mb: (mutable bool)
+
+(define p (vector mb))
+p: (vector (mutable bool))
+
+(define q:(vector bool) (vector mb))
+q: (vector bool)</literallayout>
+      <p>
+        The type of <progident>p</progident> shows how maybe types are
+        defaulted based on hint information, and the type of
+        <progident>q</progident> shows how this can be overridden by
+        programmer annotation. 
+      </p>
+      <p>Moreover, the <progident>list->vector</progident> example
+        described in Section&nbsp;<xref ref="tradeoffs"/>now gets
+        ``expected'' type:
+      </p>
+      <literallayout>
+(fn ((list 'a)) (vector 'a))</literallayout>
+      <p>
+        In the case of conflicting hints, we pick the most-immutable type by
+        default. For example:
+      </p>
+      
+      <literallayout indent="no">
+(define boolPair 
+  (if #t 
+    (pair #t #f):((mutable bool), bool) 
+    (pair #f #t):(bool, (mutable bool))))
+val p: (bool, bool)</literallayout>
+      <p>
+        Since we restrict copy compatibility at a ref-boundary, type
+        safety cannot be circumvented by aliasing as in the C code
+        shown in Section&nbsp;<xref ref="loc_sem"/>. For example,
+        the following expression will fail due to a type error.
+      </p>
+      <literallayout>
+(let ((x:(ref (mutable int)) (dup 10)))
+   (let ((y:(ref int) x))  ;; ERROR !!
+      (set! (deref y) 200)))</literallayout>
+    </sect2>
+  </sect1>
+  <sect1 id="related">
+    <title>Related Work</title>
+    <p>
+      Diatchki <foreignphrase>et al</foreignphrase>
+      have implemented support for bit-level word types in
+      Haskell <cite ref="Diatchki2005Representation"/>. Their solution
+      could be extended to the full <progident>defrepr</progident>
+      mechanism of BitC, but preserves the Haskell idiom of
+      restricting all use of state to the IO monad.
+    </p>
+    <p>
+      SysObjC <cite ref="balogh2006sysobjc"/> extends the C
+      programming language with object-like value types, but does
+      address type safety in the face of polymorphism.
+    </p>
+    <p>
+      Cqual <cite ref="foster1999theory"/> infers
+      <progident>const</progident> types in C programs, but does not
+      handle polymorphism.
+    </p>
+  </sect1>
+  <sect1 id="conclusion">
+    <title>Conclusions</title>
+    <p>
+      There is a fundamental conflict of goals between the ability to
+      infer principal types and to allow freedom of
+      mutability-compatibility at copy boundaries. We have identified
+      various trade-offs and some design choices in this regard, along
+      with their pros and cons. We have also selected a strategy based
+      on our aesthetic judgment of the best way to capture the
+      programmer's intuition about the flow of types. By default, our
+      strategy infers types based on the ``natural'' flow of type
+      information in an expression, but preserves the possibility of
+      obtaining other permissible types through explicit qualification
+      in most cases. 
+    </p>
+  </sect1>
+  <sect1 id="acknowledgments">
+    <title>Acknowledgments</title>
+    <p>
+      We are grateful for the assistance of Scott Smith, who provided
+      extensive ongoing comments, advice, and guidance in the course
+      of this work. Mark Jones was kind enough to educate us on type
+      classes, which provided an essential basis for integrating these
+      ideas.
+    </p>
+  </sect1>  
+  <bibliography>
+    <bibentry label="balogh2006sysobjc">
+      &Aacute;d&aacute;m Balogh and Zolt&aacute;n Cs&ouml;rnyei. ``SysObjC: C
+      Extension for Development of Object-Oriented Operating
+      Systems.'' <doctitle>Proc. Third ECOOP Workshop on Programming Languages
+        and Operating Systems</doctitle>. San Jose, CA. October 2006.
+    </bibentry>
+    <bibentry label="foster1999theory">
+      Jeffrey S. Foster, Manuel F&auml;hndrich, and Alexander Aiken. ``A
+      Theory of Type Qualifiers.'' <doctitle>Proc. SIGPLAN Conference
+      on Programming Language Design and
+      Implementation</doctitle> (PLDI'99). pp. 192&ndash;203. 1999.
+    </bibentry>
+    <bibentry label="garrigueValRes2004">
+      J. Garrigue, ``Relaxing the Value Restriction'' <doctitle>
+      International Symposium on Functional and Logic
+      Programming</doctitle> 2004.
+    </bibentry>
+    <bibentry label="GrossmanCyclone2006">
+      D. Grossman, ``Quantified Types in an Imperative Language''
+      <doctitle>ACM Transactions on Programming Languages and
+        Systems</doctitle> 
+      2006.
+    </bibentry> 
+    <bibentry label="ISO1995Ada">
+      ISO,
+      <doctitle>International Standard ISO/IEC 8652:1995 (Information
+      Technology &mdash; Programming
+      Languages &mdash; Ada)</doctitle>
+      International Standards Organization (ISO). 1995.
+    </bibentry>
+    <bibentry label="ISO1999ANSI-C">
+      ISO,
+      <doctitle>International Standard ISO/IEC 9899:1999 (Programming
+      Languages - C)</doctitle>
+      International Standards Organization (ISO). 1999.
+    </bibentry>
+    <bibentry label="JimPrincipalTypings1996">
+      Trevor Jim, ``What are principal typings and what are they good for?''
+      <doctitle> ACM Symposium on Principles of Programming
+        Languages</doctitle> 
+      1996.
+    </bibentry>
+    <bibentry label="Kernighan1988C">
+      Brian W. Kernighan and Dennis M. Ritchie. <doctitle>The C Programming
+	Language</doctitle>. Prentice Hall, 1988
+    </bibentry>
+    <bibentry label="milner97definition">
+      Robin Milner, Mads Tofte, Robert Harper, and David
+      MacQueen. <doctitle>The Definition of Standard ML -
+      Revised</doctitle>
+      The MIT Press, May 1997.
+    </bibentry>
+    <bibentry label="peytonjones2003haskellrevisedreport">
+      Simon Peyton Jones (ed.). <doctitle>Haskell 98 Language and
+	Libraries: The Revised report</doctitle>. Cambridge University
+	Press. 2003.
+    </bibentry>
+    <bibentry label="Diatchki2005Representation">
+      Iavor S. Diatchki, Mark P. Jones, and Rebekah Leslie.
+      ``High- level Views on Low-level Representations.''
+      <doctitle>Proc. 10th ACM Conference on Functional
+        Programming</doctitle> pp. 168&ndash;179.
+      September 2005.
+    </bibentry>
+    <bibentry label="shapBitcSpec2006">
+      J. S. Shapiro, S. Sridhar, M. S. Doerrie, ``BitC Language
+      Specification'' 
+      <link
+        href="http://coyotos.org/docs/bitc/spec.html">
+        <progident>http://www.coyotos.org/ docs/bitc/spec.html</progident>
+      </link>
+    </bibentry>
+    <bibentry label="wrightValRes1995">
+      A. K. Wright, ``Simple Imperative Polymorphism'' 
+      <doctitle> Lisp and Symbolic Computation</doctitle>
+      8(4):343--355, 1995.
+    </bibentry>
+    <bibentry label="sridharmutinfer2006">
+      S. Sridhar, J. S. Shapiro ``Design of Type and Mutability
+      Inference in BitC'' 
+      <doctitle>Systems Research Laboratory
+        Technical Report SRL2006-01</doctitle> 
+      Johns Hopkins University, 2006.
+      <progident>http://www.coyotos.org/docs/ bitc/mutinfer.html</progident>
+    </bibentry>
+  </bibliography>
+</article>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->
+
+ 

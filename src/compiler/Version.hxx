@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -38,15 +38,13 @@
  *
  **************************************************************************/
 
-#define BITC_MAJOR 0
-#define BITC_MINOR 10
-#define BITC_VERSION "0.10"
+#include "config.h"
 
 inline bool CheckVersionCompatibility(std::string ver) {
   return (ver == BITC_VERSION);
 }
 
-//inline bool CheckVersionCompatibility(BigNum major, BigNum minor) {
+//inline bool CheckVersionCompatibility(sherpa::BigNum major, sherpa::BigNum minor) {
 //  return ((major == BITC_MAJOR) && (minor == BITC_MINOR));
 //}
 

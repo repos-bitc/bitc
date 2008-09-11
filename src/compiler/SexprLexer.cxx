@@ -36,6 +36,7 @@
  **************************************************************************/
 
 #include <assert.h>
+#include <string.h>
 #include <string>
 
 #include <unicode/uchar.h>
@@ -95,6 +96,19 @@ valid_ifident_continue(uint32_t ucs4)
   //valid_ifident_punct(ucs4));
 }
 
+static bool
+valid_tv_ident_start(uint32_t ucs4)
+{
+  return (u_hasBinaryProperty(ucs4,UCHAR_XID_START) || 
+	  ucs4 == '_');
+}
+
+static bool
+valid_tv_ident_continue(uint32_t ucs4)
+{
+  return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE) ||
+	  ucs4 == '_');
+}
 static bool
 valid_charpoint(uint32_t ucs4)
 {
@@ -167,10 +181,7 @@ validate_string(const char *s)
   return 0;
 }
 
-struct KeyWord {
-  const char *nm;
-  int  tokValue;
-} keywords[] = {
+struct SexprLexer::KeyWord SexprLexer::keywords[] = {
   { "and",              tk_AND },
   { "apply",            tk_APPLY },
   { "array",            tk_ARRAY },
@@ -191,9 +202,11 @@ struct KeyWord {
   { "check",            tk_Reserved },
   { "coindset",         tk_Reserved },
   { "cond",             tk_COND },
+  { "const",            tk_CONST },
   { "constrain",        tk_Reserved },
   { "continue",         tk_Reserved },
   { "declare",          tk_DECLARE },
+  { "deep-const",       tk_Reserved },
   { "defequiv",         tk_Reserved },
   { "defexception",     tk_DEFEXCEPTION },
   { "define",           tk_DEFINE },
@@ -225,6 +238,7 @@ struct KeyWord {
   { "if",               tk_IF },
   { "import",           tk_IMPORT },
   { "import!",          tk_Reserved },
+  { "impure",           tk_IMPURE },
   { "indset",           tk_Reserved },
   { "inner-ref",        tk_INNER_REF },
   { "int16",            tk_INT16 },
@@ -254,6 +268,7 @@ struct KeyWord {
   { "proclaim",         tk_PROCLAIM },
   { "provide",          tk_PROVIDE },
   { "provide!",         tk_Reserved },
+  { "pure",             tk_PURE },
   { "quad",             tk_QUAD },
   { "read-only",        tk_Reserved },
   { "ref",              tk_REF },
@@ -299,11 +314,11 @@ struct KeyWord {
 
 };
 
-static int
+int
 kwstrcmp(const void *vKey, const void *vCandidate)
 {
-  const char *key = ((const KeyWord *) vKey)->nm;
-  const char *candidate = ((const KeyWord *) vCandidate)->nm;
+  const char *key = ((const SexprLexer::KeyWord *) vKey)->nm;
+  const char *candidate = ((const SexprLexer::KeyWord *) vCandidate)->nm;
 
   return strcmp(key, candidate);
 }
@@ -336,7 +351,7 @@ SexprLexer::kwCheck(const char *s)
 
   // Things starting with "__":
   if (s[0] == '_' && s[1] == '_') {
-    if(!isRuntimeUoc)
+    if (!isRuntimeUoc)
       return tk_Reserved;
   }
 
@@ -394,7 +409,7 @@ SexprLexer::SexprLexer(std::ostream& _err, std::istream& _in,
 }
 
 long 
-SexprLexer::digitValue(ucs4_t ucs4)
+SexprLexer::digitValue(ucs4_t ucs4, unsigned radix)
 {
   long l = -1;
 
@@ -471,9 +486,6 @@ SexprLexer::getChar()
  checkDigit:
   thisToken += utf;
 
-  if (digitValue(c) < radix)
-    nDigits++;
-
   return ucs4;
 }
 
@@ -510,8 +522,6 @@ SexprLexer::lex(ParseType *lvalp)
 
  startOver:
   thisToken.erase();
-  nDigits = 0;			// until otherwise proven
-  radix = 10;			// until otherwise proven
 
   c = getChar();
 
@@ -596,10 +606,9 @@ SexprLexer::lex(ParseType *lvalp)
 	  else if (c == 'U') {
 	    c = getChar();
 	    if (c == '+') {
-	      radix = 16;
 	      do {
 		c = getChar();
-	      } while(digitValue(c) >= 0);
+	      } while (digitValue(c, 16) >= 0);
 	      
 	      if (!isCharDelimiter(c)) {
 		ungetChar(c);
@@ -645,8 +654,16 @@ SexprLexer::lex(ParseType *lvalp)
 
   case '\'':			// Type variables
     {
+      int tokType = tk_TypeVar;
+
       c = getChar();
-      if (!valid_ident_start(c)) {
+
+      if (c == '%') {
+	tokType = tk_EffectVar;
+	c = getChar();
+      }
+
+      if (!valid_tv_ident_start(c)) {
 	// FIX: this is bad input
 	ungetChar(c);
 	return EOF;
@@ -654,12 +671,12 @@ SexprLexer::lex(ParseType *lvalp)
 
       do {
 	c = getChar();
-      } while (valid_ident_continue(c));
+      } while (valid_tv_ident_continue(c));
       ungetChar(c);
 
       here.updateWith(thisToken);
       lvalp->tok = LToken(here, thisToken);
-      return tk_TypeVar;
+      return tokType;
     }
 
     // Hyphen requires special handling. If it is followed by a digit
@@ -667,7 +684,7 @@ SexprLexer::lex(ParseType *lvalp)
     // of an identifier.
   case '-':
     c = getChar();
-    if (digitValue(c) < 0) {
+    if (digitValue(c, 10) < 0) {
       ungetChar(c);
       goto identifier;
     }
@@ -684,9 +701,11 @@ SexprLexer::lex(ParseType *lvalp)
   case '8':
   case '9':
     {
+      int radix = 10;
+
       do {
 	c = getChar();
-      } while (digitValue(c) >= 0);
+      } while (digitValue(c, 10) >= 0);
 
       /* At this point we could either discover a radix marker 'r', or
 	 a decimal point (indicating a floating poing literal). If it
@@ -700,7 +719,7 @@ SexprLexer::lex(ParseType *lvalp)
 	do {
 	  c = getChar();
 	  count++;
-	} while (digitValue(c) >= 0);
+	} while (digitValue(c, radix) >= 0);
 	count--;
 	/* FIX: if count is 0, number is malformed */
       }
@@ -722,7 +741,7 @@ SexprLexer::lex(ParseType *lvalp)
 	do {
 	  c = getChar();
 	  count++;
-	} while (digitValue(c) >= 0);
+	} while (digitValue(c, radix) >= 0);
 	count--;
 	/* FIX: if count is 0, number is malformed */
       }
@@ -738,16 +757,16 @@ SexprLexer::lex(ParseType *lvalp)
 
       /* Need to collect the exponent. Revert to radix 10 until
 	 otherwise proven. */
-      radix = 10;
       c = getChar();
+      radix = 10;
 
-      if (c != '-' && digitValue(c) < 0) {
+      if (c != '-' && digitValue(c, radix) < 0) {
 	// FIX: Malformed token
       }
 
       do {
 	c = getChar();
-      } while (digitValue(c) >= 0);
+      } while (digitValue(c, 10) >= 0);
 
       /* Check for radix marker on exponent */
       if (c == 'r') {
@@ -758,7 +777,7 @@ SexprLexer::lex(ParseType *lvalp)
 	do {
 	  c = getChar();
 	  count++;
-	} while (digitValue(c) >= 0);
+	} while (digitValue(c, radix) >= 0);
 	count--;
 	/* FIX: if count is 0, number is malformed */
       }

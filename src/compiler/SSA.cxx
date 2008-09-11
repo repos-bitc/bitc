@@ -47,43 +47,43 @@
 #include "Unify.hxx"
 #include "inter-pass.hxx"
 #include "Special.hxx"
-#include "Options.hxx"
 #include "Instantiate.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
-static inline GCPtr<AST> 
-newGrandLet(GCPtr<AST> ref)
+static inline shared_ptr<AST> 
+newGrandLet(shared_ptr<AST> ref)
 {
-  GCPtr<AST> lbs = new AST(at_letbindings, ref->loc);
-  GCPtr<AST> res = new AST(at_ident, ref->loc);
+  shared_ptr<AST> lbs = AST::make(at_letbindings, ref->loc);
+  shared_ptr<AST> res = AST::make(at_ident, ref->loc);
   res->s = res->fqn.ident = "NULL";
-  GCPtr<AST> grandLet = new AST(at_letStar, ref->loc, lbs, res);
+  shared_ptr<AST> grandLet = AST::make(at_letStar, ref->loc, lbs, res);
   return grandLet;
 }
 
 
-static inline GCPtr<AST> 
-getLastLB(GCPtr<AST> grandLet)
+static inline shared_ptr<AST> 
+getLastLB(shared_ptr<AST> grandLet)
 {
-  GCPtr<AST> lbs = grandLet->child(0);
-  return lbs->child(lbs->children->size() - 1);
+  shared_ptr<AST> lbs = grandLet->child(0);
+  return lbs->child(lbs->children.size() - 1);
 }
 
 static void
-addIL(GCPtr<AST> identList, GCPtr<AST> id)
+addIL(shared_ptr<AST> identList, shared_ptr<AST> id)
 {
-  identList->children->append(id);
+  identList->children.push_back(id);
 }
 
 
 // This is the use case, but input might be a definition,
 // or another use. Non-ident input is returned as is.
-static inline GCPtr<AST> 
-UseCase(GCPtr<AST> ast)
+static inline shared_ptr<AST> 
+UseCase(shared_ptr<AST> ast)
 {
-  if(ast->astType == at_ident) {
-    if(!ast->symbolDef)
+  if (ast->astType == at_ident) {
+    if (!ast->symbolDef)
       return ast->Use();
     else
       return ast->getTrueCopy();  
@@ -92,26 +92,28 @@ UseCase(GCPtr<AST> ast)
     return ast;
 }
 
-static GCPtr<AST> 
-addLB(GCPtr<AST> grandLet, GCPtr<AST> identList, 
-      GCPtr<AST> ast, unsigned long lbFlags=0,
-      GCPtr<AST> id=NULL, bool addToIL=true)
+static shared_ptr<AST> 
+addLB(shared_ptr<AST> grandLet, shared_ptr<AST> identList, 
+      shared_ptr<AST> ast, EnumSet<AstFlags> lbFlags = NO_FLAGS,
+      shared_ptr<AST> id=GC_NULL, bool addToIL=true)
 {
-  if(!id)
+  if (!id)
     id = AST::genSym(ast, "t");
   id->symType = ast->symType;
-  GCPtr<AST> ip = new AST(at_identPattern, id->loc, id);
-  GCPtr<AST> lb = new AST(at_letbinding, ip->loc, ip, ast);
-  lb->Flags |= (LB_IS_ART | lbFlags);
-  grandLet->child(0)->children->append(lb);
-  if(addToIL)
+  shared_ptr<AST> ip = AST::make(at_identPattern, id->loc, id);
+  shared_ptr<AST> lb = AST::make(at_letbinding, ip->loc, ip, ast);
+  // "Artificial" SSA introduced LBs were previously marked here
+  // as: lb->Flags |= (LB_IS_ART | lbFlags);
+  lb->flags |= lbFlags;
+  grandLet->child(0)->children.push_back(lb);
+  if (addToIL)
     addIL(identList, id);  
   return UseCase(id);
 }
 
 #if 0
 static bool
-warnTmp(std::ostream &errStream, GCPtr<AST> ast)
+warnTmp(std::ostream &errStream, shared_ptr<AST> ast)
 {
   switch(ast->astType) {
   case at_ident:
@@ -119,14 +121,13 @@ warnTmp(std::ostream &errStream, GCPtr<AST> ast)
   case at_array_nth:
   case at_vector_nth:
   case at_deref:
-    // AST_IS_LOCATION
     return true;
     
   case at_tqexpr:
     return warnTmp(errStream, ast->child(0));
     
   default:
-    if(!ast->symType->isRefType()) {
+    if (!ast->symType->isRefType()) {
       errStream << ast->loc << ": WARNING:"
 		<< " expression causing a temporary value copy"
 		<< " appears in location context"
@@ -144,11 +145,11 @@ warnTmp(std::ostream &errStream, GCPtr<AST> ast)
 
 #define SETGL(exp, gl)			   \
   do {					   \
-    if((gl)->child(0)->children->size()) \
+    if ((gl)->child(0)->children.size()) \
       (exp) = (gl);			   \
     else				   \
       (exp) = FEXPR(gl);		   \
-  }while(0)
+  }while (0)
  
 //WARNING: **REQUIRES** answer and errorFree.
 #define SSA(errStream, uoc, ast, grandLet, identList,	\
@@ -156,13 +157,13 @@ warnTmp(std::ostream &errStream, GCPtr<AST> ast)
   do {								\
     answer = ssa((errStream), (uoc), (ast), (grandLet),	\
 		    (identList), (parent), (chno), (flags));	\
-    if(answer == false)						\
+    if (answer == false)						\
       errorFree = false;					\
-  }while(0)
+  }while (0)
 
 
 bool
-isTrivialInit(GCPtr<AST> ast)
+isTrivialInit(shared_ptr<AST> ast)
 {
   switch(ast->astType) {
     
@@ -189,8 +190,8 @@ isTrivialInit(GCPtr<AST> ast)
     
   case at_begin:
     {
-      for(size_t c = 0; c < ast->children->size(); c++)
-	if(!isTrivialInit(ast->child(c)))
+      for (size_t c = 0; c < ast->children.size(); c++)
+	if (!isTrivialInit(ast->child(c)))
 	  return false;
       return true;
     }
@@ -203,11 +204,11 @@ isTrivialInit(GCPtr<AST> ast)
 
 bool
 ssa(std::ostream& errStream, 
-    GCPtr<UocInfo> uoc,
-    GCPtr<AST> ast, 
-    GCPtr<AST> grandLet,
-    GCPtr<AST> identList,
-    GCPtr<AST> parent, 
+    shared_ptr<UocInfo> uoc,
+    shared_ptr<AST> ast, 
+    shared_ptr<AST> grandLet,
+    shared_ptr<AST> identList,
+    shared_ptr<AST> parent, 
     const size_t chno,
     unsigned long flags)
 {
@@ -295,15 +296,15 @@ ssa(std::ostream& errStream,
 		<< ast->astTypeName()
 		<< std::endl;
       
-      FEXPR(grandLet) = NULL;
+      FEXPR(grandLet) = GC_NULL;
       errorFree = false;
       break;
     }
 
   case at_identPattern:
     {
-      if((ast->child(0)->symbolDef) &&
-	 (ast->child(0)->symbolDef->Flags & ID_IS_CTOR))
+      if ((ast->child(0)->symbolDef) &&
+	 (ast->child(0)->isIdentType(idc_ctor)))
 	break;
 
       addIL(identList, ast->child(0));
@@ -315,9 +316,9 @@ ssa(std::ostream& errStream,
     {            
       // match agt_definition*
       for (c = (ast->astType == at_interface)?1:0;
-	   c < ast->children->size(); 
+	   c < ast->children.size(); 
 	   c++) {
-	GCPtr<AST> defn = ast->child(c);
+	shared_ptr<AST> defn = ast->child(c);
 	SSA(errStream, uoc, defn, grandLet, 
 	       identList, ast, c, flags);
       }
@@ -365,7 +366,7 @@ ssa(std::ostream& errStream,
 
   case at_ident:
     {
-      //       if((ast->symbolDef == NULL) && 
+      //       if ((ast->symbolDef == NULL) && 
       // 	 (!identList->contains(ast)))
       // 	identList->append(ast);
       FEXPR(grandLet) = ast;
@@ -375,43 +376,43 @@ ssa(std::ostream& errStream,
   case at_define:
   case at_recdef:
     {
-      if(ast->child(1)->astType == at_lambda) {
+      if (ast->child(1)->astType == at_lambda) {
 	SSA(errStream, uoc, ast->child(1), grandLet, identList, 
 	       ast, 1, flags);
-	ast->Flags2 |= DEF_IS_TRIVIAL_INIT;	
+	ast->flags |= DEF_IS_TRIVIAL_INIT;	
       }      
-      else if(isTrivialInit(ast)) {
-	ast->Flags2 |= DEF_IS_TRIVIAL_INIT;
+      else if (isTrivialInit(ast)) {
+	ast->flags |= DEF_IS_TRIVIAL_INIT;
       }
       else {
-	GCPtr<AST> gl = newGrandLet(ast);
-	identList = new AST(at_identList, ast->loc);
+	shared_ptr<AST> gl = newGrandLet(ast);
+	identList = AST::make(at_identList, ast->loc);
 	
 	SSA(errStream, uoc, ast->child(1), gl, identList, 
 	    ast, 1, flags);
 	
-	GCPtr<AST> body=0;
+	shared_ptr<AST> body = GC_NULL;
 	SETGL(body, gl);
 	assert(body);
-	ast->child(1) = new AST(at_container, ast->loc, identList, body);	
+	ast->child(1) = AST::make(at_container, ast->loc, identList, body);	
       }
       break;
     }
 
   case at_lambda:
     {
-      GCPtr<AST> gl = newGrandLet(ast);
-      identList = new AST(at_identList, ast->loc);
+      shared_ptr<AST> gl = newGrandLet(ast);
+      identList = AST::make(at_identList, ast->loc);
       
       SSA(errStream, uoc, ast->child(0), gl, identList, 
 	     ast, 0, flags);
       SSA(errStream, uoc, ast->child(1), gl, identList, 
 	     ast, 1, flags);
       
-      GCPtr<AST> body = 0;
+      shared_ptr<AST> body = GC_NULL;
       SETGL(body, gl);
       assert(body);
-      ast->child(1) = new AST(at_container, ast->loc, identList, body);
+      ast->child(1) = AST::make(at_container, ast->loc, identList, body);
 	
       // FEXPR carry over
       break;
@@ -435,15 +436,15 @@ ssa(std::ostream& errStream,
 
   case at_suspend:
     {
-      GCPtr<AST> gl = newGrandLet(ast);
-      GCPtr<AST> res = AST::genSym(ast, "t");
+      shared_ptr<AST> gl = newGrandLet(ast);
+      shared_ptr<AST> res = AST::genSym(ast, "t");
       SSA(errStream, uoc, ast->child(1), gl, identList, 
 	  ast, 1, flags);
       FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 
-			1, res, true);
+			ID_IS_GLOBAL, res, true);
 
       SETGL(ast->child(1), gl);
-      GCPtr<AST> topres = UseCase(res);
+      shared_ptr<AST> topres = UseCase(res);
       FEXPR(grandLet) = addLB(grandLet, identList, ast, 
 			      LB_IS_DUMMY, topres, false);
       break;
@@ -458,7 +459,7 @@ ssa(std::ostream& errStream,
   case at_copyREF:
   case at_setClosure:
     {      
-      for(c=0; c < ast->children->size(); c++) {
+      for (c=0; c < ast->children.size(); c++) {
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 
 	    ast, c, flags);
 	ast->child(c) = FEXPR(grandLet);
@@ -473,7 +474,7 @@ ssa(std::ostream& errStream,
   case at_struct_apply:
   case at_ucon_apply: 
     {
-      for(c=0; c < ast->children->size(); c++) {
+      for (c=0; c < ast->children.size(); c++) {
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 
 	    ast, c, flags);
 	ast->child(c) = FEXPR(grandLet);
@@ -489,7 +490,7 @@ ssa(std::ostream& errStream,
   case at_throw:
   case at_mkClosure:
     {
-      for(c=0; c < ast->children->size(); c++) {
+      for (c=0; c < ast->children.size(); c++) {
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 
 	    ast, c, flags);
  	ast->child(c) = FEXPR(grandLet);
@@ -527,14 +528,14 @@ ssa(std::ostream& errStream,
 
   case at_inner_ref:
     {
-      GCPtr<AST> expr = ast->child(0);
+      shared_ptr<AST> expr = ast->child(0);
       
       SSA(errStream, uoc, expr, grandLet, identList, 
 	  ast, 0, flags);      
       ast->child(0) = FEXPR(grandLet);
 
-      if(ast->Flags2 & INNER_REF_NDX) {
-	GCPtr<AST> ndx = ast->child(1);
+      if (ast->flags & INNER_REF_NDX) {
+	shared_ptr<AST> ndx = ast->child(1);
 	SSA(errStream, uoc, ndx, grandLet, identList, 
 	    ast, 1, flags);      
 	ast->child(1) = FEXPR(grandLet);
@@ -545,18 +546,18 @@ ssa(std::ostream& errStream,
 	// change the resultant value to 
 	// inner-ref.
 	
-	GCPtr<AST> tempAst = NULL;
-	if(expr->symType->getBareType()->kind == ty_vector) {
+	shared_ptr<AST> tempAst = GC_NULL;
+	if (expr->symType->getBareType()->kind == ty_vector) {
 	  // Vector-Index
-	  tempAst = new AST(at_vector_nth, expr->loc, 
+	  tempAst = AST::make(at_vector_nth, expr->loc, 
 			    expr, ndx);
 	  
 	}
 	else {
 	  // ref(Array)-Index
 	  assert(expr->symType->getBareType()->kind == ty_ref);
-	  tempAst = new AST(at_array_nth, expr->loc, 
-			    new AST(at_deref, expr->loc, expr), ndx);	  
+	  tempAst = AST::make(at_array_nth, expr->loc, 
+			    AST::make(at_deref, expr->loc, expr), ndx);	  
 	}
 	
 	// Careful: tempAst has no real parent. 
@@ -566,7 +567,7 @@ ssa(std::ostream& errStream,
 	// further cases as the sub-expression have already been
 	// SSAed in the previous steps. 
 	SSA(errStream, uoc, tempAst, grandLet, identList, 
-	    NULL, 0, flags);      
+	    GC_NULL, 0, flags);      
 	
       }
 
@@ -577,8 +578,8 @@ ssa(std::ostream& errStream,
   case at_array_nth:
   case at_vector_nth:
     {
-      GCPtr<AST> expr = ast->child(0);
-      GCPtr<AST> ndx = ast->child(1);
+      shared_ptr<AST> expr = ast->child(0);
+      shared_ptr<AST> ndx = ast->child(1);
 
       SSA(errStream, uoc, expr, grandLet, identList, 
 	  ast, 0, flags);      
@@ -592,34 +593,34 @@ ssa(std::ostream& errStream,
       ndx = ast->child(1);
 
       
-      GCPtr<AST> lt = new AST(at_ident, ast->loc);
-      GCPtr<AST> unit = new AST(at_unit, ast->loc);
-      GCPtr<AST> IOB = new AST(at_ident, ast->loc);
+      shared_ptr<AST> lt = AST::make(at_ident, ast->loc);
+      shared_ptr<AST> unit = AST::make(at_unit, ast->loc);
+      shared_ptr<AST> IOB = AST::make(at_ident, ast->loc);
 
       lt->s = "__index_lt";
       lt->fqn = FQName("bitc.prelude", "__index_lt");
-      lt->symType = new Type(ty_fn, 
-			     new Type(ty_fnarg, 
-				      new Type(ty_word),
-				      new Type(ty_word)),
-			     new Type(ty_bool));
+      lt->symType = Type::make(ty_fn, 
+			     Type::make(ty_fnarg, 
+				      Type::make(ty_word),
+				      Type::make(ty_word)),
+			     Type::make(ty_bool));
       InstMangle(lt);
 
       IOB->s = "IndexBoundsError";
       IOB->fqn = FQName("bitc.prelude", "IndexBoundsError");
-      IOB->symType = new Type(ty_exn);
+      IOB->symType = Type::make(ty_exn);
       InstMangle(IOB);
 
-      GCPtr<AST> len;
-      if(ast->astType == at_array_nth)
-	len = new AST(at_array_length, ast->loc, UseCase(expr));
+      shared_ptr<AST> len;
+      if (ast->astType == at_array_nth)
+	len = AST::make(at_array_length, ast->loc, UseCase(expr));
       else
-	len = new AST(at_vector_length, ast->loc, UseCase(expr));
+	len = AST::make(at_vector_length, ast->loc, UseCase(expr));
       
-      GCPtr<AST> ltApp = new AST(at_apply, ast->loc, lt, UseCase(ndx), len);
+      shared_ptr<AST> ltApp = AST::make(at_apply, ast->loc, lt, UseCase(ndx), len);
       
-      GCPtr<AST> throwAst = new AST(at_throw, ast->loc, IOB);
-      GCPtr<AST> ifAst = new AST(at_if, ast->loc, ltApp, unit, throwAst);
+      shared_ptr<AST> throwAst = AST::make(at_throw, ast->loc, IOB);
+      shared_ptr<AST> ifAst = AST::make(at_if, ast->loc, ltApp, unit, throwAst);
       addLB(grandLet, identList, ifAst, LB_IS_DUMMY);      
       
       FEXPR(grandLet) = ast;
@@ -628,17 +629,17 @@ ssa(std::ostream& errStream,
 
   case at_apply:
     {
-      GCPtr<AST> id = ast->child(0);      
+      shared_ptr<AST> id = ast->child(0);      
 
-      GCPtr<Type> fn = id->symType->getBareType();
+      shared_ptr<Type> fn = id->symType->getBareType();
       assert(fn->isFnxn());
-      GCPtr<Type> argsType = fn->Args()->getType();
+      shared_ptr<Type> argsType = fn->Args()->getType();
 
       SSA(errStream, uoc, ast->child(0), grandLet, identList, 
 	  ast, 0, flags);
       ast->child(0) = FEXPR(grandLet);
       
-      for(c=1; c < ast->children->size(); c++) {
+      for (c=1; c < ast->children.size(); c++) {
 	
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 
 	    ast, c, flags);
@@ -650,7 +651,7 @@ ssa(std::ostream& errStream,
 	   (fnxn:(fn ((by-ref bool)) ()) #t)
 	*/
 	
-	if((argsType->CompFlags(c-1) & COMP_BYREF) && 
+	if ((argsType->CompFlags(c-1) & COMP_BYREF) && 
 	   (!ast->child(c)->isLocation())) {
 	  
 	  assert(ast->child(c)->isLiteral());
@@ -668,7 +669,7 @@ ssa(std::ostream& errStream,
 	ast->child(c) = FEXPR(grandLet);	
       }
 
-      if(id->Flags & SELF_TAIL) {
+      if (id->flags & SELF_TAIL) {
 	assert(id == ast->child(0)); // we did not change the identifier
 	FEXPR(grandLet) = addLB(grandLet, identList, ast, LB_IS_DUMMY);
       }
@@ -680,14 +681,14 @@ ssa(std::ostream& errStream,
 
   case at_setbang:
     {
-      GCPtr<AST> lhs = ast->child(0);
+      shared_ptr<AST> lhs = ast->child(0);
       SSA(errStream, uoc, lhs, grandLet, identList, 
 	  ast, 0, flags);
       ast->child(0) = FEXPR(grandLet);
       //warnTmp(errStream, lhs);
       lhs = ast->child(0);
 
-      GCPtr<AST> rhs = ast->child(1);
+      shared_ptr<AST> rhs = ast->child(1);
       SSA(errStream, uoc, rhs, grandLet, identList, 
 	  ast, 1, flags);      
       ast->child(1) = FEXPR(grandLet);
@@ -706,7 +707,7 @@ ssa(std::ostream& errStream,
 
   case at_begin:
     {
-      for(c=0; c < ast->children->size(); c++) {
+      for (c=0; c < ast->children.size(); c++) {
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 
 	       ast, c, flags);
 	ast->child(c) = FEXPR(grandLet);
@@ -717,7 +718,7 @@ ssa(std::ostream& errStream,
 
   case at_not:
     {
-      for(c=0; c < ast->children->size(); c++) {
+      for (c=0; c < ast->children.size(); c++) {
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 
 	       ast, c, flags);
 	ast->child(c) = FEXPR(grandLet);
@@ -733,9 +734,9 @@ ssa(std::ostream& errStream,
 	     ast, 0, flags);
       ast->child(0) = FEXPR(grandLet);
 
-      GCPtr<AST> res = AST::genSym(ast, "t");
-      GCPtr<AST> gl1 = newGrandLet(ast);
-      GCPtr<AST> gl2 = newGrandLet(ast);
+      shared_ptr<AST> res = AST::genSym(ast, "t");
+      shared_ptr<AST> gl1 = newGrandLet(ast);
+      shared_ptr<AST> gl2 = newGrandLet(ast);
 
       SSA(errStream, uoc, ast->child(1), gl1, identList, 
 	     ast, 1, flags);
@@ -743,13 +744,13 @@ ssa(std::ostream& errStream,
 	     ast, 2, flags);
 
       FEXPR(gl1) = addLB(gl1, identList, FEXPR(gl1), 
-			 0, res, true);
+			 NO_FLAGS, res, true);
       FEXPR(gl2) = addLB(gl2, identList, FEXPR(gl2), 
-			 0, res, false);
+			 NO_FLAGS, res, false);
       SETGL(ast->child(1), gl1);
       SETGL(ast->child(2), gl2);
 
-      GCPtr<AST> topres = UseCase(res);
+      shared_ptr<AST> topres = UseCase(res);
       FEXPR(grandLet) = addLB(grandLet, identList, ast, LB_IS_DUMMY, topres, false);
       break;
     }
@@ -760,45 +761,45 @@ ssa(std::ostream& errStream,
 	     ast, 0, flags);
       ast->child(0) = FEXPR(grandLet);
 
-      GCPtr<AST> res = AST::genSym(ast, "t");
-      GCPtr<AST> gl1 = newGrandLet(ast);
+      shared_ptr<AST> res = AST::genSym(ast, "t");
+      shared_ptr<AST> gl1 = newGrandLet(ast);
 
       SSA(errStream, uoc, ast->child(1), gl1, identList, 
 	     ast, 1, flags);
 
       FEXPR(gl1) = addLB(gl1, identList, FEXPR(gl1), 
-			 0, res, true);
+			 NO_FLAGS, res, true);
       SETGL(ast->child(1), gl1);
 
-      GCPtr<AST> topres = UseCase(res);
+      shared_ptr<AST> topres = UseCase(res);
       FEXPR(grandLet) = addLB(grandLet, identList, ast, LB_IS_DUMMY, topres, false);
       break;
     }
     
   case at_and:
     {
-      GCPtr<AST> ifizedAST = new AST(at_if, ast->child(0)->loc);
-      GCPtr<AST> ifAst = ifizedAST;
-      GCPtr<AST> prev = NULL;
-      for(c = 0; c < ast->children->size() - 1; c++) {
-	GCPtr<AST> falseAst =  new AST(at_boolLiteral, ast->child(c)->loc);
+      shared_ptr<AST> ifizedAST = AST::make(at_if, ast->child(0)->loc);
+      shared_ptr<AST> ifAst = ifizedAST;
+      shared_ptr<AST> prev = GC_NULL;
+      for (c = 0; c < ast->children.size() - 1; c++) {
+	shared_ptr<AST> falseAst =  AST::make(at_boolLiteral, ast->child(c)->loc);
 	falseAst->litValue.b = false;
 	falseAst->s = "#f";
-	falseAst->symType = new Type(ty_bool);
+	falseAst->symType = Type::make(ty_bool);
 
 	ifAst->symType = ast->child(c)->symType;
-	ifAst->children->append(ast->child(c));
-	ifAst->children->append(new AST(at_if, ast->child(c+1)->loc));
-	ifAst->children->append(falseAst);
+	ifAst->children.push_back(ast->child(c));
+	ifAst->children.push_back(AST::make(at_if, ast->child(c+1)->loc));
+	ifAst->children.push_back(falseAst);
 	prev = ifAst;
 	ifAst = ifAst->child(1);
       }
       
-      if(prev)
+      if (prev)
 	prev->child(1) = ifAst = 
-	  ast->child(ast->children->size() -1);
+	  ast->child(ast->children.size() -1);
       else
-	ifAst = ast->child(ast->children->size() -1);
+	ifAst = ast->child(ast->children.size() -1);
 	
       parent->child(chno) = ifizedAST;
       SSA(errStream, uoc, ifizedAST, grandLet, identList, 
@@ -807,28 +808,28 @@ ssa(std::ostream& errStream,
     }
   case at_or:
     {
-      GCPtr<AST> ifizedAST = new AST(at_if, ast->child(0)->loc);
-      GCPtr<AST> ifAst = ifizedAST;
-      GCPtr<AST> prev = NULL;
-      for(c = 0; c < ast->children->size() - 1; c++) {
-	GCPtr<AST> trueAst =  new AST(at_boolLiteral, ast->child(c)->loc);
+      shared_ptr<AST> ifizedAST = AST::make(at_if, ast->child(0)->loc);
+      shared_ptr<AST> ifAst = ifizedAST;
+      shared_ptr<AST> prev = GC_NULL;
+      for (c = 0; c < ast->children.size() - 1; c++) {
+	shared_ptr<AST> trueAst =  AST::make(at_boolLiteral, ast->child(c)->loc);
 	trueAst->litValue.b = true;
 	trueAst->s = "#t";
-	trueAst->symType = new Type(ty_bool);
+	trueAst->symType = Type::make(ty_bool);
 
 	ifAst->symType = ast->child(c)->symType;
-	ifAst->children->append(ast->child(c));
-	ifAst->children->append(trueAst);
-	ifAst->children->append(new AST(at_if, ast->child(c+1)->loc));
+	ifAst->children.push_back(ast->child(c));
+	ifAst->children.push_back(trueAst);
+	ifAst->children.push_back(AST::make(at_if, ast->child(c+1)->loc));
 	prev = ifAst;
 	ifAst = ifAst->child(2);
       }      
 
-      if(prev)
+      if (prev)
 	prev->child(2) = ifAst = 
-	  ast->child(ast->children->size() -1);
+	  ast->child(ast->children.size() -1);
       else
-	ifAst = ast->child(ast->children->size() -1);
+	ifAst = ast->child(ast->children.size() -1);
 	
       parent->child(chno) = ifizedAST;
       SSA(errStream, uoc, ifizedAST, grandLet, identList, 
@@ -838,25 +839,25 @@ ssa(std::ostream& errStream,
 
   case at_cond:
     {
-      GCPtr<AST> caselegs = ast->child(0);
-      GCPtr<AST> ow = ast->child(1)->child(0);
-      GCPtr<AST> ifizedAST = new AST(at_if, caselegs->loc);
-      GCPtr<AST> ifAst = ifizedAST;
-      GCPtr<AST> prev = NULL;
-      for(c = 0; c < caselegs->children->size(); c++) {
-	GCPtr<AST> caseleg = caselegs->child(c);	
+      shared_ptr<AST> caselegs = ast->child(0);
+      shared_ptr<AST> ow = ast->child(1)->child(0);
+      shared_ptr<AST> ifizedAST = AST::make(at_if, caselegs->loc);
+      shared_ptr<AST> ifAst = ifizedAST;
+      shared_ptr<AST> prev = GC_NULL;
+      for (c = 0; c < caselegs->children.size(); c++) {
+	shared_ptr<AST> caseleg = caselegs->child(c);	
 	ifAst->loc = caseleg->loc;
 	ifAst->symType = caseleg->symType;
-	ifAst->children->append(caseleg->child(0));
-	ifAst->children->append(caseleg->child(1));
+	ifAst->children.push_back(caseleg->child(0));
+	ifAst->children.push_back(caseleg->child(1));
 
-	ifAst->children->append(new AST(at_if,
+	ifAst->children.push_back(AST::make(at_if,
 				       caselegs->child(c)->loc));
 	prev = ifAst;
 	ifAst = ifAst->child(2);	
       }
 
-      if(prev) {	
+      if (prev) {	
 	prev->child(2) = ifAst = ow;
       }
       else {
@@ -873,17 +874,17 @@ ssa(std::ostream& errStream,
   case at_switch:
   case at_try:
     {           
-      GCPtr<AST> res = AST::genSym(ast, "t");
+      shared_ptr<AST> res = AST::genSym(ast, "t");
       addIL(identList, res);
       
       // The result of the top-expression is a return value	
       // only in the case of a try block
       // Top-expression is at position 1 for switch ans position 0 for try
-      if(ast->astType == at_try) {
-	GCPtr<AST> gl = newGrandLet(ast);
+      if (ast->astType == at_try) {
+	shared_ptr<AST> gl = newGrandLet(ast);
 	SSA(errStream, uoc, ast->child(0), gl, identList, 
 	    ast, 0, flags);	
-	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 0, res, false);
+	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), NO_FLAGS, res, false);
 	SETGL(ast->child(0), gl);
       }
       else {
@@ -892,31 +893,31 @@ ssa(std::ostream& errStream,
 	ast->child(1) = FEXPR(grandLet);	
       }
       
-      GCPtr<AST> cases = ast->child(2);      
+      shared_ptr<AST> cases = ast->child(2);      
       // the cases
-      for(c=0; c < cases->children->size(); c++) {
-	GCPtr<AST> theCase = cases->child(c);
-	GCPtr<AST> gl = newGrandLet(theCase);
+      for (c=0; c < cases->children.size(); c++) {
+	shared_ptr<AST> theCase = cases->child(c);
+	shared_ptr<AST> gl = newGrandLet(theCase);
 
 	addIL(identList, theCase->child(0));
 
 	SSA(errStream, uoc, theCase->child(1), gl, 
 	    identList, theCase, 1, flags);
 
-	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 0, res, false);
+	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), NO_FLAGS, res, false);
 	SETGL(theCase->child(1), gl);
       }
 
       // otherwise
-      GCPtr<AST> ow = ast->child(3);
-      if(ow->astType == at_otherwise) {
-	GCPtr<AST> owExpr = ow->child(0);
-	GCPtr<AST> gl = newGrandLet(owExpr);
+      shared_ptr<AST> ow = ast->child(3);
+      if (ow->astType == at_otherwise) {
+	shared_ptr<AST> owExpr = ow->child(0);
+	shared_ptr<AST> gl = newGrandLet(owExpr);
 	SSA(errStream, uoc, owExpr, gl, identList, ast, 2, flags);
-	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 0, res, false);
+	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), NO_FLAGS, res, false);
 	SETGL(ow->child(0), gl);
       }
-      GCPtr<AST> topres = UseCase(res);
+      shared_ptr<AST> topres = UseCase(res);
       FEXPR(grandLet) = addLB(grandLet, identList, ast, LB_IS_DUMMY, topres, false);
       break;
     }
@@ -929,38 +930,38 @@ ssa(std::ostream& errStream,
  
   case at_do:
     {
-      GCPtr<AST> res = AST::genSym(ast, "t");
-      GCPtr<AST> gl;
-      GCPtr<AST> theIdent;
+      shared_ptr<AST> res = AST::genSym(ast, "t");
+      shared_ptr<AST> gl;
+      shared_ptr<AST> theIdent;
 
-      GCPtr<AST> dbs = ast->child(0);     
-      for (size_t c = 0; c < dbs->children->size(); c++) {
-	GCPtr<AST> db = dbs->child(c);
+      shared_ptr<AST> dbs = ast->child(0);     
+      for (size_t c = 0; c < dbs->children.size(); c++) {
+	shared_ptr<AST> db = dbs->child(c);
 	assert(db->child(0)->astType == at_identPattern);	
-	GCPtr<AST> ident = db->child(0)->child(0);
+	shared_ptr<AST> ident = db->child(0)->child(0);
 	addIL(identList, ident);
  	
-	GCPtr<AST> init = db->child(1);
+	shared_ptr<AST> init = db->child(1);
 	gl = newGrandLet(ast);      
 	SSA(errStream, uoc, init, gl, identList, db, 1, flags);
 	theIdent = UseCase(ident);
 	FEXPR(gl) = addLB(gl, identList, FEXPR(gl),
-			  0, theIdent, false);
+			  NO_FLAGS, theIdent, false);
 	SETGL(db->child(1), gl);
-	db->Flags |= LB_IS_DUMMY; 
+	db->flags |= LB_IS_DUMMY; 
  	
-	GCPtr<AST> step = db->child(2);
+	shared_ptr<AST> step = db->child(2);
 	gl = newGrandLet(ast);      
 	SSA(errStream, uoc, step, gl, identList, db, 2, flags);
 	theIdent = UseCase(ident);
 	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 
-			  0, theIdent, false);
+			  NO_FLAGS, theIdent, false);
 	SETGL(db->child(2), gl);
       }
 
       // The test
       // test
-      GCPtr<AST> dotest = ast->child(1);
+      shared_ptr<AST> dotest = ast->child(1);
       gl = newGrandLet(ast);
       SSA(errStream, uoc, dotest->child(0), gl, identList, 
 	     dotest, 0, flags);
@@ -971,7 +972,7 @@ ssa(std::ostream& errStream,
       SSA(errStream, uoc, dotest->child(1), gl, identList, 
 	     dotest, 1, flags);
       FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 
-			0, res, true);
+			NO_FLAGS, res, true);
       SETGL(dotest->child(1), gl);
       
       
@@ -981,7 +982,7 @@ ssa(std::ostream& errStream,
 	  ast, 2, flags);      
       SETGL(ast->child(2), gl);
       
-      GCPtr<AST> topres = UseCase(res);
+      shared_ptr<AST> topres = UseCase(res);
       FEXPR(grandLet) = addLB(grandLet, identList, ast, 
 			      LB_IS_DUMMY, topres, false);
       break;
@@ -990,35 +991,35 @@ ssa(std::ostream& errStream,
   case at_let:
   case at_letrec:
     {
-      GCPtr<AST> res = AST::genSym(ast, "t");
+      shared_ptr<AST> res = AST::genSym(ast, "t");
 
       // Let bindings
-      GCPtr<AST> lbs = ast->child(0);     
-      for (size_t c = 0; c < lbs->children->size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
+      shared_ptr<AST> lbs = ast->child(0);     
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+	shared_ptr<AST> lb = lbs->child(c);
 	assert(lb->child(0)->astType == at_identPattern);	
-	GCPtr<AST> ident = lb->child(0)->child(0);
-	GCPtr<AST> gl = newGrandLet(ast);      
+	shared_ptr<AST> ident = lb->child(0)->child(0);
+	shared_ptr<AST> gl = newGrandLet(ast);      
 	SSA(errStream, uoc, lb->child(1), gl, identList, 
 	       lb, 1, flags);
-	GCPtr<AST> theIdent = ident;
+	shared_ptr<AST> theIdent = ident;
 	addIL(identList, theIdent);
 	//theIdent->markFlags(ID_IS_LETBOUND);
 	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 
-			  0, theIdent, false);
+			  NO_FLAGS, theIdent, false);
 	SETGL(lb->child(1), gl);
-	lb->Flags |= LB_IS_DUMMY; 
+	lb->flags |= LB_IS_DUMMY; 
       }
             
       // The real Final expression of the real let
-      GCPtr<AST> gl = newGrandLet(ast);      
+      shared_ptr<AST> gl = newGrandLet(ast);      
       SSA(errStream, uoc, ast->child(1), gl, identList, 
 	     ast, 1, flags);      
       FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 
-			0, res, true);
+			NO_FLAGS, res, true);
       SETGL(ast->child(1), gl);
       
-      GCPtr<AST> topres = UseCase(res);
+      shared_ptr<AST> topres = UseCase(res);
       FEXPR(grandLet) = addLB(grandLet, identList, ast, 
 			      LB_IS_DUMMY, topres, false);
       break;
@@ -1037,10 +1038,10 @@ UocInfo::be_ssaTrans(std::ostream& errStream,
 {  
   bool errFree = true;
 
-  GCPtr<UocInfo> uoc = this;
+  shared_ptr<UocInfo> uoc = shared_from_this();
   
-  CHKERR(errFree, ssa(errStream, uoc, uoc->uocAst, NULL, 
-			 NULL, uoc->uocAst, 0, flags));
+  CHKERR(errFree, ssa(errStream, uoc, uoc->uocAst, GC_NULL, 
+		      GC_NULL, uoc->uocAst, 0, flags));
   
   //errStream << "ATransed AST = " << std::endl 
   //	    << uoc->ast->asString() << std::endl;

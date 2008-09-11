@@ -35,6 +35,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -42,19 +43,19 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
+#include <set>
 
+#include <libsherpa/UExcept.hxx>
+
+#include "Options.hxx"
 #include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
 #include "inter-pass.hxx"
-#include "Clconv.hxx"
-#include "Options.hxx"
 
+using namespace std;
+using namespace boost;
 using namespace sherpa;
 
 #define NULL_MODE  0x0u
@@ -62,41 +63,34 @@ using namespace sherpa;
 #define USE_MODE   0x3u
 #define TYPE_MODE  0x4u
  
-static void
-markRecBound(GCPtr<AST> ast)
-{
-  for(size_t c=0; c < ast->children->size(); c++)
-    markRecBound(ast->child(c));
-  if (ast->astType == at_ident)
-    ast->Flags2 |= ID_IS_RECBOUND;
-}
+typedef set<shared_ptr<AST> > AstSet;
 
 /**
  * @brief Mark all defining occurrences that are closed over so that
  * we can later rewrite them.
  */
 static void
-clearusedef(GCPtr<AST> ast)
+clearusedef(shared_ptr<AST> ast)
 {
-  ast->Flags2 &= ~(ID_IS_DEF|ID_IS_USE|ID_IS_CLOSED|ID_IS_CAPTURED|ID_NEEDS_HEAPIFY|ID_IS_RECBOUND);
+  ast->flags &= ~(ID_IS_CLOSED|ID_IS_CAPTURED|ID_NEEDS_HEAPIFY);
 
-  for(size_t c=0; c < ast->children->size(); c++)
+  for (size_t c=0; c < ast->children.size(); c++)
     clearusedef(ast->child(c));
 }
 
 // See if The identifier `id' is used in the ast `ast'
 // id must be a defining form.
 static bool
-used(GCPtr<AST> id, GCPtr<AST> ast)
+used(shared_ptr<AST> id, shared_ptr<AST> ast)
 {  
-  if(ast->astType == at_ident && ast->symbolDef == id) {
+  if (ast->astType == at_ident && ast->symbolDef == id) {
     assert(ast != id);
     assert(!id->symbolDef);
     return true;
   }
   
-  for(size_t i=0; i < ast->children->size(); i++) 
-    if(used(id, ast->child(i)))
+  for (size_t i=0; i < ast->children.size(); i++) 
+    if (used(id, ast->child(i)))
       return true;
   
   return false;
@@ -109,13 +103,13 @@ used(GCPtr<AST> id, GCPtr<AST> ast)
  */
 static bool
 findusedef(std::ostream &errStream,
-	   GCPtr<AST> topAst, GCPtr<AST> ast, const int mode,
+	   shared_ptr<AST> topAst, shared_ptr<AST> ast, const int mode,
 	   // list of vars that are bound within the lambda at the
 	   // current point:
-	   GCPtr<CVector<GCPtr<AST> > > boundVars,
+	   AstSet& boundVars,
 	   // list of vars that lambda uses, but are not in
 	   // boundVars. Globals are not entered into this.
-	   GCPtr<CVector<GCPtr<AST> > > freeVars)
+	   AstSet& freeVars)
 {
   bool errFree = true;
   switch(ast->astType) {
@@ -199,8 +193,7 @@ findusedef(std::ostream &errStream,
 	break;
 	
       case LOCAL_MODE:
-	boundVars->append(ast);
-	ast->Flags2 |= ID_IS_DEF;
+	boundVars.insert(ast);
 	break;
 	
       case USE_MODE:
@@ -209,17 +202,15 @@ findusedef(std::ostream &errStream,
 	    std::cerr << "Warning: No definition for "
 		      << ast->fqn << std::endl;
 
-	  ast->Flags2 |= ID_IS_USE;
-	  
 	  // could check ast->symbolDef->symType->isMutable()
 	  
-	  if(ast->symbolDef->isGlobal()) 
+	  if (ast->symbolDef->isGlobal()) 
 	    break;
 	  
-	  if(boundVars->contains(ast->symbolDef)) 
+	  if (boundVars.find(ast->symbolDef) != boundVars.end()) 
 	    break;
 	  
-	  if(Options::noAlloc) {
+	  if (Options::noAlloc) {
 	    errStream << ast->loc << ": "
 		      << "Usage of identifier " << ast->s
 		      << " mandates closure conversion -- "
@@ -228,19 +219,18 @@ findusedef(std::ostream &errStream,
 	    errFree = false;
 	  }
 
-	  ast->Flags2 |= ID_IS_CLOSED;
-	  ast->symbolDef->Flags2 |= ID_IS_CAPTURED;
+	  ast->flags |= ID_IS_CLOSED;
+	  ast->symbolDef->flags |= ID_IS_CAPTURED;
 
 	  if (ast->symbolDef->getType()->needsCaptureConversion()) {
-	    ast->Flags2 |= ID_NEEDS_HEAPIFY;
-	    ast->symbolDef->Flags2 |= ID_NEEDS_HEAPIFY;
+	    ast->flags |= ID_NEEDS_HEAPIFY;
+	    ast->symbolDef->flags |= ID_NEEDS_HEAPIFY;
 	  }
 
 	  CLCONV_DEBUG std::cerr << "Append " << ast->symbolDef->fqn
 				 << " to freeVars" << std::endl;
 	  
-	  if (!freeVars->contains(ast->symbolDef))
-	    freeVars->append(ast->symbolDef);
+	  freeVars.insert(ast->symbolDef);
 	  break;
 	}      
       case NULL_MODE:
@@ -354,8 +344,8 @@ findusedef(std::ostream &errStream,
 				   USE_MODE, boundVars, freeVars));
       }
       else {
-	GCPtr<CVector<GCPtr<AST> > > freeVars = new CVector<GCPtr<AST> >;
-	GCPtr<CVector<GCPtr<AST> > > boundVars = new CVector<GCPtr<AST> >;
+	AstSet freeVars;
+	AstSet boundVars;
 
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(0), 
 				   LOCAL_MODE, boundVars, freeVars));
@@ -369,14 +359,14 @@ findusedef(std::ostream &errStream,
   case at_interface:
   case at_module:
     {
-      for(size_t c=0; c < ast->children->size(); c++)
+      for (size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   NULL_MODE, boundVars, freeVars));
       break;
     }
   case at_methods:
     {
-      for(size_t c=0; c < ast->children->size(); c++)
+      for (size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -402,7 +392,7 @@ findusedef(std::ostream &errStream,
   case at_fill:
   case at_reserved:
     {
-      for(size_t c=0; c < ast->children->size(); c++)
+      for (size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   TYPE_MODE, boundVars, freeVars));
       break;
@@ -412,7 +402,7 @@ findusedef(std::ostream &errStream,
   case at_field:
   case at_defexception:
     {
-      for(size_t c=1; c<ast->children->size();c++)
+      for (size_t c=1; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   TYPE_MODE, boundVars, freeVars));
       break;
@@ -420,7 +410,7 @@ findusedef(std::ostream &errStream,
 
   case at_argVec:
     {
-      for(size_t c=0; c<ast->children->size();c++)
+      for (size_t c=0; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   LOCAL_MODE, boundVars, freeVars));
       break;
@@ -428,7 +418,7 @@ findusedef(std::ostream &errStream,
 
   case at_setbang:
     {
-      for(size_t c=0; c<ast->children->size();c++)
+      for (size_t c=0; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -458,7 +448,7 @@ findusedef(std::ostream &errStream,
   case at_makevectorL:    
   case at_apply:
     {
-      for(size_t c=0; c<ast->children->size();c++)
+      for (size_t c=0; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -467,8 +457,8 @@ findusedef(std::ostream &errStream,
   case at_switch:
   case at_try:
     {
-      for(size_t c=0; c<ast->children->size();c++)
-	if(c != IGNORE(ast))
+      for (size_t c=0; c<ast->children.size();c++)
+	if (c != IGNORE(ast))
 	  CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				     USE_MODE, boundVars, freeVars));
       break;
@@ -479,7 +469,7 @@ findusedef(std::ostream &errStream,
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(0), 
 				 USE_MODE, boundVars, freeVars));
 
-      if(ast->Flags2 & INNER_REF_NDX) 
+      if (ast->flags & INNER_REF_NDX) 
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(1), 
 				   USE_MODE, boundVars, freeVars));      
       
@@ -489,7 +479,7 @@ findusedef(std::ostream &errStream,
   case at_ucon_apply:
   case at_struct_apply:
     {
-      for(size_t c=1; c<ast->children->size();c++)
+      for (size_t c=1; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -498,7 +488,7 @@ findusedef(std::ostream &errStream,
   case at_if:
   case at_when:
     {
-      for(size_t c=0; c<ast->children->size();c++)
+      for (size_t c=0; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -517,7 +507,7 @@ findusedef(std::ostream &errStream,
     {
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(0), 
 				 LOCAL_MODE, boundVars, freeVars));
-      for(size_t c=1; c<ast->children->size();c++)
+      for (size_t c=1; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
       break;
@@ -525,24 +515,24 @@ findusedef(std::ostream &errStream,
     
   case at_do:
     {
-      GCPtr<AST> dbs = ast->child(0);      
+      shared_ptr<AST> dbs = ast->child(0);      
       // Initializers
-      for (size_t c = 0; c < dbs->children->size(); c++) {
-	GCPtr<AST> db = dbs->child(c);
+      for (size_t c = 0; c < dbs->children.size(); c++) {
+	shared_ptr<AST> db = dbs->child(c);
 	CHKERR(errFree, findusedef(errStream, topAst, db->child(1), 
 				   USE_MODE, boundVars, freeVars));
       }
       
       // Binding
-      for (size_t c = 0; c < dbs->children->size(); c++) {
-	GCPtr<AST> db = dbs->child(c);
+      for (size_t c = 0; c < dbs->children.size(); c++) {
+	shared_ptr<AST> db = dbs->child(c);
 	CHKERR(errFree, findusedef(errStream, topAst, db->child(0), 
 				   LOCAL_MODE, boundVars, freeVars));
       }
       
       //Step-wise update
-      for (size_t c = 0; c < dbs->children->size(); c++) {
-	GCPtr<AST> db = dbs->child(c);
+      for (size_t c = 0; c < dbs->children.size(); c++) {
+	shared_ptr<AST> db = dbs->child(c);
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(2), 
 				   USE_MODE, boundVars, freeVars));
       }
@@ -569,18 +559,16 @@ findusedef(std::ostream &errStream,
   case at_let:
   case at_letrec:
     {
-      GCPtr<AST> lbs = ast->child(0);
+      shared_ptr<AST> lbs = ast->child(0);
 
       // For each individual binding // match at_letbinding+
-      for (size_t c = 0; c < lbs->children->size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+	shared_ptr<AST> lb = lbs->child(c);
 
 	CHKERR(errFree, findusedef(errStream, topAst, lb->child(1), 
 				   USE_MODE, boundVars, freeVars));
 	CHKERR(errFree, findusedef(errStream, topAst, lb->child(0), 
 				   LOCAL_MODE, boundVars, freeVars));
-	if (ast->astType == at_letrec)
-	  markRecBound(lb->child(0));
       }
       
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(1), 
@@ -592,19 +580,19 @@ findusedef(std::ostream &errStream,
   return errFree;
 }
 
-GCPtr<AST> 
-cl_rewrite_captured_idents(GCPtr<AST> ast, GCPtr<AST> clenvName)
+shared_ptr<AST> 
+cl_rewrite_captured_idents(shared_ptr<AST> ast, shared_ptr<AST> clenvName)
 {
-  for (size_t c = 0; c < ast->children->size(); c++)
+  for (size_t c = 0; c < ast->children.size(); c++)
     ast->child(c) = 
       cl_rewrite_captured_idents(ast->child(c), clenvName);
 
   switch(ast->astType) {
   case at_ident:
     {
-      if (ast->Flags2 & ID_IS_CLOSED) {
-	GCPtr<AST> clUse = new AST(at_select, ast->loc);
-	clUse->addChild(clenvName->getDCopy());
+      if (ast->flags & ID_IS_CLOSED) {
+	shared_ptr<AST> clUse = AST::make(at_select, ast->loc);
+	clUse->addChild(clenvName->getDeepCopy());
 	clUse->addChild(ast);
 
 	ast = clUse;
@@ -620,19 +608,19 @@ cl_rewrite_captured_idents(GCPtr<AST> ast, GCPtr<AST> clenvName)
 }
 
 
-static GCPtr<AST>
-getClenvUse(GCPtr<AST> ast, GCPtr<AST> clenvName, 
-	    GCPtr<CVector<std::string> > tvs)
+static shared_ptr<AST>
+getClenvUse(shared_ptr<AST> ast, shared_ptr<AST> clenvName, 
+	    std::vector<std::string>& tvs)
 {
-  GCPtr<AST> clType;
-  if(tvs->size()) {
-    GCPtr<AST> typeApp = new AST(at_typeapp, ast->loc);
+  shared_ptr<AST> clType;
+  if (tvs.size()) {
+    shared_ptr<AST> typeApp = AST::make(at_typeapp, ast->loc);
     typeApp->addChild(clenvName->Use());
     
-    for(size_t i=0; i<tvs->size(); i++) {
-      GCPtr<AST> tv = new AST(at_ident, ast->loc);
-      tv->Flags |= ID_IS_TVAR;
-      tv->s = tv->fqn.ident = tvs->elem(i);
+    for (size_t i=0; i<tvs.size(); i++) {
+      shared_ptr<AST> tv = AST::make(at_ident, ast->loc);
+      tv->identType = id_tvar;
+      tv->s = tv->fqn.ident = tvs[i];
       typeApp->addChild(tv);
     }
     
@@ -647,17 +635,17 @@ getClenvUse(GCPtr<AST> ast, GCPtr<AST> clenvName,
 
 #if 0
 static void
-rewriteMyCapture(GCPtr<AST> ast, GCPtr<AST> me, GCPtr<AST> him) 
+rewriteMyCapture(shared_ptr<AST> ast, shared_ptr<AST> me, shared_ptr<AST> him) 
 {
-  if(ast->astType == at_set_closure) {
-    GCPtr<AST> envApp = ast->child(1);
-    for(size_t c=1; c < envApp->children->size(); c++)
-      if(envApp->child(c)->symbolDef == me)
+  if (ast->astType == at_set_closure) {
+    shared_ptr<AST> envApp = ast->child(1);
+    for (size_t c=1; c < envApp->children.size(); c++)
+      if (envApp->child(c)->symbolDef == me)
 	envApp->child(c) = him->Use();
     return;
   }
   
-  for(size_t c=0; c < ast->children->size(); c++)
+  for (size_t c=0; c < ast->children.size(); c++)
     rewriteMyCapture(ast->child(c), me, him);
 } 
 #endif
@@ -666,35 +654,35 @@ rewriteMyCapture(GCPtr<AST> ast, GCPtr<AST> me, GCPtr<AST> him)
 // Walk an AST. If it contains a lambda form that is going 
 // to require a closure record, fabricate the closure record 
 // and append it to outASTs
-GCPtr<AST> 
-cl_convert_ast(GCPtr<AST> ast, 
-	       GCPtr< CVector<GCPtr<AST> > > outAsts, 
+static shared_ptr<AST> 
+cl_convert_ast(shared_ptr<AST> ast, 
+	       std::vector<shared_ptr<AST> >& outAsts, 
 	       bool shouldHoist)
 {
   bool hoistChildren = true;
 
   /* Pre Processing */  
-  if(ast->astType == at_define || ast->astType == at_recdef) {
+  if (ast->astType == at_define || ast->astType == at_recdef) {
     hoistChildren = false;
 
-    GCPtr<AST> ident = ast->getID();
-    if(!ident->decl) {
-      GCPtr<AST> proclaim = new AST(at_proclaim, ast->loc,
-			      ident->getDCopy(),
+    shared_ptr<AST> ident = ast->getID();
+    if (!ident->decl) {
+      shared_ptr<AST> proclaim = AST::make(at_proclaim, ast->loc,
+			      ident->getDeepCopy(),
 			      cl_convert_ast(ident->symType->asAST(ast->loc),
 					     outAsts, hoistChildren),
-			      new AST(at_constraints, ast->loc));
+			      AST::make(at_constraints, ast->loc));
       
-      if(ident->externalName.size())
-	proclaim->child(0)->Flags |= DEF_IS_EXTERNAL;
+      if (ident->externalName.size())
+	proclaim->child(0)->flags |= DEF_IS_EXTERNAL;
       
-      ast->Flags2 |= PROCLAIM_IS_INTERNAL;
-      outAsts->append(proclaim);      
+      ast->flags |= PROCLAIM_IS_INTERNAL;
+      outAsts.push_back(proclaim);      
     }
   }
 
   /* Process children (inside-out) */
-  for (size_t c = 0; c < ast->children->size(); c++)
+  for (size_t c = 0; c < ast->children.size(); c++)
     ast->child(c) = 
       cl_convert_ast(ast->child(c), outAsts, hoistChildren);
   
@@ -702,34 +690,34 @@ cl_convert_ast(GCPtr<AST> ast,
   switch(ast->astType) {
   case at_letrec:
     {
-      GCPtr<AST> lbs = ast->child(0);
-      GCPtr<AST> expr = ast->child(1);
+      shared_ptr<AST> lbs = ast->child(0);
+      shared_ptr<AST> expr = ast->child(1);
       
       // A list of copyclosures to append in the end.
-      GCPtr<AST> ccs = new AST(at_begin, expr->loc);
+      shared_ptr<AST> ccs = AST::make(at_begin, expr->loc);
 
-      for(size_t c=0; c < lbs->children->size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
-	GCPtr<AST> id = lb->child(0)->child(0);
+      for (size_t c=0; c < lbs->children.size(); c++) {
+	shared_ptr<AST> lb = lbs->child(c);
+	shared_ptr<AST> id = lb->child(0)->child(0);
 	
-	GCPtr<AST> rhs = lb->child(1);
+	shared_ptr<AST> rhs = lb->child(1);
 	
 	// If this identifier may be used in *any* let-binding
 	// within the current letrec, we must use the alloc-ref /
 	// copy-ref scheme for closure conversion.
-	if(used(id, lbs)) {
-	  assert(id->Flags2 & ID_IS_CAPTURED);
-	  GCPtr<AST> qual = 
+	if (used(id, lbs)) {
+	  assert(id->flags & ID_IS_CAPTURED);
+	  shared_ptr<AST> qual = 
 	    id->symType->getBareType()->asAST(rhs->loc); 
 	  qual = cl_convert_ast(qual, outAsts, hoistChildren);
-	  GCPtr<AST> ac = new AST(at_allocREF, rhs->loc, qual);
-	  GCPtr<AST> cc = new AST(at_copyREF, rhs->loc, id->Use(), rhs);
-	  ccs->children->append(cc);
+	  shared_ptr<AST> ac = AST::make(at_allocREF, rhs->loc, qual);
+	  shared_ptr<AST> cc = AST::make(at_copyREF, rhs->loc, id->Use(), rhs);
+	  ccs->children.push_back(cc);
 	  lb->child(1) = ac;
 	}
       }
 
-      if(expr->astType == at_begin)
+      if (expr->astType == at_begin)
 	ccs->addChildrenFrom(expr);
       else
 	ccs->addChild(expr);
@@ -741,18 +729,17 @@ cl_convert_ast(GCPtr<AST> ast,
 
   case at_fn:
     {
-      // ast = new AST(at_closureType, ast->loc, ast);
+      // ast = AST::make(at_closureType, ast->loc, ast);
       break;
     }
     
   case at_lambda:
     {
-      GCPtr<CVector<GCPtr<AST> > > freeVars = new CVector<GCPtr<AST> >;
-      GCPtr<CVector<GCPtr<AST> > > boundVars = new CVector<GCPtr<AST> >;
+      AstSet freeVars;
+      AstSet boundVars;
       
-      GCPtr<AST> clenvName = 0;
-      GCPtr<TvPrinter> tvP = new TvPrinter;
-      GCPtr<CVector<std::string> > tvs = new CVector<std::string>;
+      shared_ptr<AST> clenvName = GC_NULL;
+      shared_ptr<TvPrinter> tvP = TvPrinter::make();
 
       CLCONV_DEBUG std::cerr << "Processing lambda. " << std::endl;
 
@@ -761,45 +748,48 @@ cl_convert_ast(GCPtr<AST> ast,
       // have introduced new identifiers.
       findusedef(std::cerr, ast, ast, NULL_MODE, boundVars, freeVars);
 
+      std::vector<std::string> tvs;
+
       // Closure object is only generated if we actually have some
       // free variables.
-      bool needsClosure = (freeVars->size() > 0);
-      if(needsClosure) {
+      bool needsClosure = !freeVars.empty();
+      if (needsClosure) {
 
 	CLCONV_DEBUG std::cerr << "Need to generate closure struct. " 
 			       << std::endl;
 
 	//////// Build the Environment Structure //////////////
 	// defstruct = ident tvlist category declares fields constraints;
-	GCPtr<AST> defStruct = new AST(at_defstruct, ast->loc);
+	shared_ptr<AST> defStruct = AST::make(at_defstruct, ast->loc);
       
 	// Note defstruct does not use an identPattern
 	clenvName = AST::genSym(ast, "clenv");
-	clenvName->identType = id_type;
-	clenvName->Flags |= (ID_IS_GLOBAL | ID_IS_CTOR);
+	clenvName->identType = id_struct;
+	clenvName->flags |= (ID_IS_GLOBAL);
 	defStruct->addChild(clenvName);
       
 	// tvList: to be fixed-up later.
-	GCPtr<AST> tvlist = new AST(at_tvlist, ast->loc);
+	shared_ptr<AST> tvlist = AST::make(at_tvlist, ast->loc);
 	defStruct->addChild(tvlist);      
 	// env records are ref types
-	defStruct->addChild(new AST(at_refCat));
+	defStruct->addChild(AST::make(at_refCat));
 	// no declares
-	defStruct->addChild(new AST(at_declares));
+	defStruct->addChild(AST::make(at_declares));
 	// Parent AST for fields:
-	GCPtr<AST> fields = new AST(at_fields, ast->loc);
+	shared_ptr<AST> fields = AST::make(at_fields, ast->loc);
 	defStruct->addChild(fields);      
 	// Add empty constraints subtree
-	defStruct->addChild(new AST(at_constraints, ast->loc));
+	defStruct->addChild(AST::make(at_constraints, ast->loc));
       
-	for(size_t fv = 0; fv < freeVars->size(); fv++) {
-	  assert(freeVars->elem(fv)->astType == at_ident);
-	  GCPtr<AST> field = new AST(at_field, ast->loc);
-	  GCPtr<AST> ident = new AST(at_ident, ast->loc);
-	  ident->s = ident->fqn.ident = freeVars->elem(fv)->s;
+	for (AstSet::iterator fv = freeVars.begin();
+	    fv != freeVars.end(); ++fv) {
+	  assert((*fv)->astType == at_ident);
+	  shared_ptr<AST> field = AST::make(at_field, ast->loc);
+	  shared_ptr<AST> ident = AST::make(at_ident, ast->loc);
+	  ident->s = ident->fqn.ident = (*fv)->s;
 	  
 	  field->addChild(ident);
-	  GCPtr<AST> fvType = freeVars->elem(fv)->symType->asAST(ast->loc, tvP);
+	  shared_ptr<AST> fvType = (*fv)->symType->asAST(ast->loc, tvP);
 	  fvType = cl_convert_ast(fvType, outAsts, hoistChildren);
 	  field->addChild(fvType);
 	  
@@ -808,23 +798,24 @@ cl_convert_ast(GCPtr<AST> ast,
       
 	// If the Type of arg contains a type variable,	  
 	// then add to the tvlist.
-	// This case is impossible if closure conversion happens
+	// No type variables can appear if closure conversion happens
 	// after polyinstantiation.      
 	tvs = tvP->getAllTvarStrings();
-	for(size_t i=0; i<tvs->size(); i++) {
-	  GCPtr<AST> tv = new AST(at_ident, tvlist->loc);
-	  tv->Flags |= ID_IS_TVAR;
-	  tv->s = tv->fqn.ident = tvs->elem(i);
-	  tvlist->children->append(tv);
+
+	for (size_t i=0; i < tvs.size(); i++) {
+	  shared_ptr<AST> tv = AST::make(at_ident, tvlist->loc);
+	  tv->identType = id_tvar;
+	  tv->s = tv->fqn.ident = tvs[i];
+	  tvlist->children.push_back(tv);
 	}
       
 	// Okay. We have built the type declaration for the closure
 	// record. Append it to outAsts
-	outAsts->append(defStruct);
+	outAsts.push_back(defStruct);
       }            
 
       //////////// Hoist the inner Lambda ///////////////
-      if(shouldHoist) {
+      if (shouldHoist) {
 	CLCONV_DEBUG std::cerr << "Need to hoist this lambda. " 
 			       << std::endl;      
 	CLCONV_DEBUG ast->PrettyPrint(std::cerr);
@@ -832,57 +823,61 @@ cl_convert_ast(GCPtr<AST> ast,
 	// AST define = bindingPattern expr;
 	// This can be done as a recdef since we don't allow top-level
 	// names to be shadowed.
-	GCPtr<AST> newDef = new AST(at_recdef, ast->loc);
+	shared_ptr<AST> newDef = AST::make(at_recdef, ast->loc);
       
-	GCPtr<AST> lamName = AST::genSym(ast, "lam");
+	shared_ptr<AST> lamName = AST::genSym(ast, "lam");
 	lamName->identType = id_value;
-	lamName->Flags |= ID_IS_GLOBAL;
+	lamName->flags |= ID_IS_GLOBAL;
 	
-	GCPtr<AST> lamType = ast->symType->asAST(ast->loc);
+	shared_ptr<AST> lamType = ast->symType->asAST(ast->loc);
 	// Once we removed closure types, this conversion 
 	// operation is redundant. Of historic interest, 
 	// placeholder reminder in case we switch back.
 	lamType = cl_convert_ast(lamType, outAsts, hoistChildren);
-	GCPtr<AST> lamPat = new AST(at_identPattern, ast->loc,
+	shared_ptr<AST> lamPat = AST::make(at_identPattern, ast->loc,
 				    lamName, lamType);	
 	newDef->addChild(lamPat);
 	newDef->addChild(ast);
-	newDef->addChild(new AST(at_constraints));
+	newDef->addChild(AST::make(at_constraints));
       
-	if(needsClosure) {
-	  newDef->Flags2 |= LAM_NEEDS_TRANS;
+	if (needsClosure) {
+	  newDef->flags |= LAM_NEEDS_TRANS;
 
 	  // Insert the extra closure argument and prepend the type to
 	  // the attached function type signature      
-	  GCPtr<AST> argVec = ast->child(0);
-	  GCPtr<AST> body = ast->child(1);
-	  GCPtr<AST> clArgName = new AST(at_ident, ast->loc);
+	  shared_ptr<AST> argVec = ast->child(0);
+	  shared_ptr<AST> body = ast->child(1);
+	  shared_ptr<AST> clArgName = AST::make(at_ident, ast->loc);
 	  clArgName->s = clArgName->fqn.ident = "__clArg";
-	  GCPtr<AST> clArgPat = new AST(at_identPattern, ast->loc, clArgName);      
-	  GCPtr<AST> clType = getClenvUse(ast, clenvName, tvs);
+	  shared_ptr<AST> clArgPat = AST::make(at_identPattern, ast->loc, clArgName);      
+	  // Note: tvs was populated in the if (needsClosure) above
+	  // if (shouldHoist).
+	  shared_ptr<AST> clType = getClenvUse(ast, clenvName, tvs);
 	  
-	  lamType->child(0)->children->insert(0, clType);
-	  clArgPat->addChild(clType->getDCopy());
-	  argVec->children->insert(0, clArgPat);
+	  lamType->child(0)->children.insert(lamType->child(0)->children.begin(),
+					     clType);
+	  clArgPat->addChild(clType->getDeepCopy());
+	  argVec->children.insert(argVec->children.begin(), clArgPat);
       
 	  ast->child(1) = cl_rewrite_captured_idents(body, clArgName);
 	}
 	
 	// We have built the hoisted procedure. Emit that:
-	outAsts->append(newDef);
+	outAsts.push_back(newDef);
       
 	CLCONV_DEBUG ast->PrettyPrint(newDef);      
       
 	// If the lambda requires a closure, emit a make-closure, else
 	// emit an identifier reference in place of the lambda:
-	GCPtr<AST> lamUse = lamName->Use();
-	if(freeVars->size() > 0) {	  
-	  GCPtr<AST> mkEnv = new AST(at_struct_apply, ast->loc);
+	shared_ptr<AST> lamUse = lamName->Use();
+	if (freeVars.size()) {	  
+	  shared_ptr<AST> mkEnv = AST::make(at_struct_apply, ast->loc);
 	  mkEnv->addChild(clenvName->Use());	  
-	  for (size_t fv = 0; fv < freeVars->size(); fv++)
-	    mkEnv->addChild(freeVars->elem(fv)->Use());
+	  for (AstSet::iterator fv = freeVars.begin();
+	       fv != freeVars.end(); ++fv)
+	    mkEnv->addChild((*fv)->Use());
 	
-	  GCPtr<AST> mkClo = new AST(at_mkClosure, ast->loc, mkEnv, lamUse);
+	  shared_ptr<AST> mkClo = AST::make(at_mkClosure, ast->loc, mkEnv, lamUse);
 	  ast = mkClo;
 	}
 	else {
@@ -902,36 +897,20 @@ cl_convert_ast(GCPtr<AST> ast,
 }
 
 void
-cl_convert(GCPtr<UocInfo> uoc)
+cl_convert(shared_ptr<UocInfo> uoc)
 {
-  GCPtr< CVector<GCPtr<AST> > > outAsts = new CVector<GCPtr<AST> >;
+  std::vector<shared_ptr<AST> > outAsts;
 
-  GCPtr<AST> modOrIf = uoc->uocAst;
+  shared_ptr<AST> modOrIf = uoc->uocAst;
 
-  for (size_t c = 0;c < modOrIf->children->size(); c++) {
-    GCPtr<AST> child = modOrIf->child(c);
+  for (size_t c = 0;c < modOrIf->children.size(); c++) {
+    shared_ptr<AST> child = modOrIf->child(c);
    
     child = cl_convert_ast(child, outAsts, true);
-    outAsts->append(child);
+    outAsts.push_back(child);
   }
 
   modOrIf->children = outAsts;
-}
-
-// Collect all of the at_ident ASTs that are defined in this argument
-// binding pattern and are marked as captured.
-static void
-collectHeapifiedArgs(GCPtr<AST> ast, 
-		     GCPtr< CVector<GCPtr<AST> > > capturedArgs)
-{
-  if (ast->astType == at_ident && (ast->Flags2 & ID_NEEDS_HEAPIFY)) {
-    assert (ast->Flags2 & ID_IS_CAPTURED);
-
-    capturedArgs->append(ast);
-  }
-
-  for(size_t i=0; i < ast->children->size(); i++)
-    collectHeapifiedArgs(ast->child(i), capturedArgs);
 }
 
 // Simple re-writing pass. Takes all of the identifiers that were 
@@ -953,8 +932,8 @@ collectHeapifiedArgs(GCPtr<AST> ast,
 // And then in the use-occurrences we simply need (at this stage) to
 // wrap the use-occurrences with (__clmember id)
 //
-GCPtr<AST> 
-cl_heapify(GCPtr<AST> ast)
+shared_ptr<AST> 
+cl_heapify(shared_ptr<AST> ast)
 {
   switch(ast->astType) {
   case at_lambda:
@@ -962,44 +941,44 @@ cl_heapify(GCPtr<AST> ast)
       // Proceed through the arguments. For each argument that is
       // captured, rewrite the body to be surrounded by a dup'ing LET
       // form.
-      GCPtr<AST> args = ast->child(0);
-      GCPtr<AST> body = ast->child(1);
+      shared_ptr<AST> args = ast->child(0);
+      shared_ptr<AST> body = ast->child(1);
       
-      GCPtr<AST> bindings = new AST(at_letbindings, body->loc);
+      shared_ptr<AST> bindings = AST::make(at_letbindings, body->loc);
       
       // Wrap the existing body in a LET binding:
-      body = new AST(at_let, body->loc, bindings, body);
-      body->addChild(new AST(at_constraints));
+      body = AST::make(at_let, body->loc, bindings, body);
+      body->addChild(AST::make(at_constraints));
       
       bool atleastOneHeapified = false;
       
       // The RHS is not yet dup'd here. This will happen when this let
       // is processed in the at_letbinding handler.
-      for (size_t i = 0; i < args->children->size(); i++) {
-	GCPtr<AST> arg = args->child(i)->child(0);
-	if((arg->Flags2 & ID_NEEDS_HEAPIFY) == 0)
+      for (size_t i = 0; i < args->children.size(); i++) {
+	shared_ptr<AST> arg = args->child(i)->child(0);
+	if ((arg->flags & ID_NEEDS_HEAPIFY) == 0)
 	  continue;
 	
 	atleastOneHeapified = true;
 	// Exchange the arg to a new Identifier with the same name
 	// Te reason for the exchange is that the use cases in the
 	// body will be pointing to the *OLD* ident AST.
-	GCPtr<AST> newArg = new AST(at_ident, arg->loc);
+	shared_ptr<AST> newArg = AST::make(at_ident, arg->loc);
 	newArg->s = newArg->fqn.ident = arg->s;
 	args->child(i)->child(0) = newArg;
 	
  	// We have moved the point of capture into the let, 
 	// which was the point:
-	GCPtr<AST> letIdent = arg;
-	GCPtr<AST> letExpr = newArg->Use();
-	GCPtr<AST> identPattern = new AST(at_identPattern, arg->loc, letIdent);
+	shared_ptr<AST> letIdent = arg;
+	shared_ptr<AST> letExpr = newArg->Use();
+	shared_ptr<AST> identPattern = AST::make(at_identPattern, arg->loc, letIdent);
 	
-	GCPtr<AST> theBinding = new AST(at_letbinding, arg->loc,
+	shared_ptr<AST> theBinding = AST::make(at_letbinding, arg->loc,
 				  identPattern, letExpr); 
 	bindings->addChild(theBinding);
       }
       
-      if(atleastOneHeapified)
+      if (atleastOneHeapified)
 	ast->child(1) = body;
       
       // Process the body.
@@ -1009,31 +988,32 @@ cl_heapify(GCPtr<AST> ast)
 
   case at_letbinding:
     {
-      GCPtr<AST> bpattern = ast->child(0);
-      GCPtr<AST> expr = ast->child(1);
+      shared_ptr<AST> bpattern = ast->child(0);
+      shared_ptr<AST> expr = ast->child(1);
 
       assert(bpattern->astType == at_identPattern);
-      GCPtr<AST> ident = bpattern->child(0);
+      shared_ptr<AST> ident = bpattern->child(0);
 
       CLCONV_DEBUG std::cerr << "Let binding for " << ident->s << std::endl;
 
       /* Must heapify EXPR unconditionally */
       expr = cl_heapify(expr);
 
-      if (ident->Flags2 & ID_NEEDS_HEAPIFY) {
+      if (ident->flags & ID_NEEDS_HEAPIFY) {
 	// Process the RHS:
 
 	CLCONV_DEBUG std::cerr << "  Needs dup " << ident->s << std::endl;
 	
-	assert (ident->Flags2 & ID_IS_CAPTURED);
-	expr = new AST(at_dup, expr->loc, expr);
-	expr->Flags2 |= DUPED_BY_CLCONV;
+	assert (ident->flags & ID_IS_CAPTURED);
+	expr = AST::make(at_dup, expr->loc, expr);
+	// Previously: Clconv was marking Dup-ed variables specially 
+	// at this point expr->flags2 |= DUPED_BY_CLCONV;
  
 	// if the binding pattern was qualified by a type qualification,
 	// wrap that in a REF:
-	if (bpattern->children->size() == 2)
+	if (bpattern->children.size() == 2)
 	  bpattern->child(1) = 
-	    new AST(at_refType, bpattern->loc, bpattern->child(1));
+	    AST::make(at_refType, bpattern->loc, bpattern->child(1));
       }
 
       ast->child(1) = expr;
@@ -1057,16 +1037,16 @@ cl_heapify(GCPtr<AST> ast)
 	 Thhe first use case within the set! will not be heapified if
 	 this is not done.  */
 
-      GCPtr<AST> def = (ast->symbolDef) ? ast->symbolDef : ast;
+      shared_ptr<AST> def = (ast->symbolDef) ? ast->symbolDef : ast;
 
-      CLCONV_DEBUG if (def->Flags2 & ID_NEEDS_HEAPIFY)
+      CLCONV_DEBUG if (def->flags & ID_NEEDS_HEAPIFY)
 	std::cerr << "  needs heapify" << std::endl;
-      CLCONV_DEBUG if (def->Flags2 & ID_IS_CAPTURED)
+      CLCONV_DEBUG if (def->flags & ID_IS_CAPTURED)
 	std::cerr << "  closed" << std::endl;
       
-      if (def->Flags2 & ID_NEEDS_HEAPIFY) {
+      if (def->flags & ID_NEEDS_HEAPIFY) {
 	CLCONV_DEBUG std::cerr << "Needs deref " << ast->s << std::endl;
-	ast = new AST(at_deref, ast->loc, ast);
+	ast = AST::make(at_deref, ast->loc, ast);
       }
       break;
     }
@@ -1074,15 +1054,15 @@ cl_heapify(GCPtr<AST> ast)
   case at_switch:
   case at_try:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
-	if(c != IGNORE(ast))
+      for (size_t c = 0; c < ast->children.size(); c++)
+	if (c != IGNORE(ast))
 	  ast->child(c) = cl_heapify(ast->child(c));
       break;
     }
     
   default:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	ast->child(c) = cl_heapify(ast->child(c));
       break;
     }
@@ -1097,15 +1077,15 @@ UocInfo::be_clconv(std::ostream& errStream,
 { 
   bool errFree = true;
   
-  GCPtr<CVector<GCPtr<AST> > > freeVars = new CVector<GCPtr<AST> >;
-  GCPtr<CVector<GCPtr<AST> > > boundVars = new CVector<GCPtr<AST> >;
+  AstSet freeVars;
+  AstSet boundVars;
   
   CLCONV_DEBUG std::cerr << "findusedef 1" << std::endl;
 
   CHKERR(errFree, findusedef(errStream, uocAst, uocAst,
 			     NULL_MODE, boundVars, freeVars));
   
-  if(!errFree)
+  if (!errFree)
     return false;
 
   CLCONV_DEBUG PrettyPrint(errStream, true);
@@ -1131,7 +1111,7 @@ UocInfo::be_clconv(std::ostream& errStream,
   CLCONV_DEBUG PrettyPrint(errStream);
 
   CLCONV_DEBUG std::cerr << "cl_convert" << std::endl;
-  cl_convert(this);
+  cl_convert(shared_from_this());
 
   CLCONV_DEBUG PrettyPrint(errStream);
 
@@ -1140,7 +1120,7 @@ UocInfo::be_clconv(std::ostream& errStream,
   CHKERR(errFree, 
 	 RandT(errStream, true, CL_SYM_FLAGS, CL_TYP_FLAGS));
   
-  if(!errFree)
+  if (!errFree)
     std::cerr << uocAst->asString();
   assert(errFree);
 

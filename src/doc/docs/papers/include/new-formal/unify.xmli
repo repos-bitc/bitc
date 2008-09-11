@@ -1,0 +1,1119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE floatingtable PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" >
+<figure id="hy_unify" fullwidth='yes' latex.placement="tb">
+  <btypes:TYPE
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+    <VEqns>
+      <!-- Empty -->
+      <equation name="U-Empty">
+	<lhs>
+	  <unf>
+	    <Empty/>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <Pair>
+	    <Empty/>
+	    <EmptySubst/>
+	  </Pair>
+	</rhs>
+      </equation>
+      <!-- t = t -->
+      <equation name="U-Refl">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <type/>
+		  <type/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf> 
+	    <aCtset/>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- Commutativity: t1 = t2 -->
+      <equation name="U-Sym">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <type num="1"/>
+		  <type num="2"/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <set>
+		<eq>
+		  <type num="2"/>
+		  <type num="1"/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- a = t | a notin t -->
+      <equation name="U-Var">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <tvar name="alpha"/>
+		  <type/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <notin>
+	    <tvar name="alpha"/>
+	    <type/>
+	  </notin>
+	</lhs>
+	<rhs>
+	  <grouping>
+	    <Pair>
+	      <dCtset/>
+	      <compose>
+		<aSubMap num="a"/>
+		<aSubMap num="u"/>
+	      </compose>	    
+	    </Pair>	 
+	    <text content=" where "/>
+	    <eq>
+	      <aSubMap num="a"/>
+	      <SubMap>
+		<tvar name="alpha"/>
+		<type/>
+	      </SubMap>
+	    </eq>
+	    <text content=" and "/>
+	  </grouping>
+	</rhs>
+      </equation>
+      <eqn-cnt name="" sep="4pt">
+	<lhs/>
+	<rhs>
+	  <grouping>
+	    <!-- <space n="2"/> -->
+	    <eq>
+	      <unf>
+		<normalize>
+		  <Subst>
+		    <aSubMap num="a"/>
+		    <aCtset/>
+		  </Subst>
+		</normalize>
+	      </unf>
+	      <Pair>
+		<dCtset/>
+		<aSubMap num="u"/>
+	      </Pair>
+	    </eq>
+	  </grouping>
+	</rhs>
+      </eqn-cnt>
+      <!-- t1->t2 = t1' -> t2' -->
+      <equation name="U-Fn">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <fn>		    
+		    <type num="a"/>		    		    
+		    <type num="r"/>		    
+		  </fn>
+		  <fn>		    
+		    <type num="a" dash="'"/>		    		    
+		    <type num="r" dash="'"/>
+		  </fn>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="a"/>
+		  <type num="a" dash="'"/>
+		</eq>
+		<eq>
+		  <type num="r"/>
+		  <type num="r" dash="'"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- ^t1 = ^t2 -->
+      <equation name="U-Ref">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <ref>
+		    <type num="1"/>
+		  </ref>
+		  <ref>
+		    <type num="2"/>
+		  </ref>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="1"/>
+		  <type num="2"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- Mp1 = Mp2 -->
+      <!-- Mutability propagation is handled at the mutability
+      unification rule, which is the only place where new mutability
+      can be generated. 
+      
+      It is sufficient to handle this propagation at the U-Mut rule
+      since all types that share sub-substructure are changed
+      automatically (due to substitutions created by M-function), and
+      mutability only needs to be propagated inwards.
+
+      Completeness: It is the responsibility of the inference
+      algorithm (and the programmer in the case of type annotations)
+      to produce inner types that are either mutable or accept
+      mutability. Otherwise, this will lead to unification failure due
+      to the M-function returning _|_
+
+      Decidability: The M-function introduces new type variables,
+      which is uncharestetistic of unification. However, this is okay
+      because: (1) M-function does not call unification recursively.
+      (2) The total number of type variables after the call to
+      M-function is non-increasing - it only substitutes types to
+      variables, or new variables to old variables. -->
+      <equation name="U-Mut">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <mutable>
+		    <ptype num="1"/>
+		  </mutable>
+		  <mutable>
+		    <ptype num="2"/>
+		  </mutable>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <grouping>
+	    <Pair>
+	      <dCtset/>
+	      <compose>
+		<aSubMap num="u"/>
+		<aSubMap num="m"/>
+	      </compose>
+	    </Pair>
+	    <text content=" where "/>
+	    <eq>
+	      <pred mbb="yes" name="M">
+		<Subst>
+		  <aSubMap num="u"/>
+		  <type num="1"/>
+		</Subst>
+	      </pred>
+	      <aSubMap num="m"/>
+	    </eq>
+	    <text content=" and "/>
+	  </grouping>
+	</rhs>
+      </equation>
+      <eqn-cnt name="">
+	<lhs/>
+	<rhs>
+	  <grouping>
+	    <eq>
+	      <unf>
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <eq>
+		      <ptype num="1"/>
+		      <ptype num="2"/>
+		    </eq>
+		  </set>
+		</unin>
+	      </unf>
+	      <Pair>
+		<dCtset/>
+		<aSubMap num="u"/>
+	      </Pair>
+	    </eq>
+	  </grouping>
+	</rhs>
+      </eqn-cnt>
+      <!-- t1xt2 <= t1'xt2' -->
+      <equation name="U-Pair">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <pair>
+		    <type num="1"/>
+		    <type num="2"/>
+		  </pair>
+		  <pair>
+		    <type num="1" dash="'"/>
+		    <type num="2" dash="'"/>
+		  </pair>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <type num="1"/>
+		  <type num="1" dash="'"/>
+		</eq>
+		<eq>
+		  <type num="2"/>
+		  <type num="2" dash="'"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- |_t1_| = |_t2_| -->
+      <equation name="U-const" sep="4pt">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <const>
+		    <type num="1"/>
+		  </const>
+		  <const>
+		    <type num="2"/>
+		  </const>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq under="minz">
+		  <type num="1"/>
+		  <type num="2"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	
+      <!-- 'a!p1 = 'b!p2 -->
+      <equation name="U-Ct1">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <mbTop>
+		    <tvar name="alpha"/>
+		    <ptype num="1"/>
+		  </mbTop>
+		  <mbTop>
+		    <tvar name="beta"/>
+		    <ptype num="2"/>
+		  </mbTop>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq under="minzT">
+		  <ptype num="1"/>
+		  <ptype num="2"/>
+		</eq>
+		<eq>
+		  <tvar name="alpha"/>
+		  <tvar name="beta"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>	  
+      <!-- a!p1 = p2 -->
+      <equation name="U-Ct2">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <mbTop>
+		    <tvar/>
+		    <ptype/>
+		  </mbTop>
+		  <ptype dash="'"/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq under="minzT">
+		  <ptype/>
+		  <ptype dash="'"/>
+		</eq>
+		<eq>
+		  <tvar/>
+		  <ptype dash="'"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- 'a|p1 = s|p2 -->
+      <equation name="U-Ct3">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <mbFull>
+		    <tvar/>
+		    <ptype num="1"/>
+		  </mbFull>
+		  <mbFull>
+		    <stype/>
+		    <ptype num="2"/>
+		  </mbFull>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq under="minz">
+		  <ptype num="1"/>
+		  <ptype num="2"/>
+		</eq>
+		<eq>
+		  <tvar/>
+		  <stype/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- s1|p1 = s2|p2 -->
+      <equation name="U-Ct4">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <mbFull>
+		    <mutable>
+		      <tvar name="alpha"/>
+		    </mutable>
+		    <ptype num="1"/>
+		  </mbFull>
+		  <mbFull>
+		    <mutable>
+		      <tvar name="beta"/>
+		    </mutable>
+		    <ptype num="2"/>
+		  </mbFull>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq under="minz">
+		  <ptype num="1"/>
+		  <ptype num="2"/>
+		</eq>
+		<eq>
+		  <tvar name="alpha"/>
+		  <tvar name="beta"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- s|p = P -->
+      <equation name="U-Ct5" sep="4pt">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <mbFull>
+		    <stype/>
+		    <ptype/>
+		  </mbFull>
+		  <Ptype/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq under="minz">
+		  <ptype/>
+		  <Ptype/>
+		</eq>
+		<eq>
+		  <stype/>
+		  <Ptype/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <!-- k = K -->
+      <!-- There is no K = K rule because it is not necessary. 
+      These constraints are not generated independently.
+      They only arise as a consequence of adding them from
+      substitutions in the I-Let rule -->
+      <equation name="U-K">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <lKind k="var"/>
+		  <lKind/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <grouping>
+	    <Pair>
+	      <dCtset/>
+	      <compose>
+		<aSubMap num="k"/>
+		<aSubMap num="u"/>
+	      </compose>	    
+	    </Pair>	
+	    <text content=" where "/>
+	    <eq>
+	      <aSubMap num="k"/>
+	      <SubMap>
+		<lKind k="var"/>
+		<lKind/>
+	      </SubMap>
+	    </eq>
+	    <text content=" and "/>
+	  </grouping>
+	</rhs>
+      </equation>
+      <eqn-cnt name="">
+	<lhs/>
+	<rhs>
+	  <grouping>
+	    <!-- <space n="2"/> -->
+	    <eq>
+	      <unf>
+		<Subst>
+		  <aSubMap num="k"/>
+		  <aCtset/>
+		</Subst>
+	      </unf>
+	      <Pair>
+		<dCtset/>
+		<aSubMap num="u"/>
+	      </Pair>
+	    </eq>
+	  </grouping>
+	</rhs>
+      </eqn-cnt>
+      <!-- *mx(t1), *mx(t2) --> 
+      <equation name="U-Om1">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<pcst>
+		  <id/>
+		  <lKind k="mono"/>
+		  <type num="1"/>
+		</pcst>
+		<pcst>
+		  <id/>
+		  <lKind k="mono"/>
+		  <type num="2"/>
+		</pcst>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <grouping>
+	    <Pair>
+	      <unin>
+		<dCtset/>
+		<Subst>
+		  <aSubMap/>
+		  <set>
+		    <pcst>
+		      <id/>
+		      <lKind k="mono"/>
+		      <type num="1"/>
+		    </pcst>
+		    <pcst>
+		      <id/>
+		      <lKind k="mono"/>
+		      <type num="2"/>
+		    </pcst>
+		  </set>
+		</Subst>	
+	      </unin>	
+	      <aSubMap/>
+	    </Pair>
+	    <text content=" where "/>
+	  </grouping>
+	</rhs>
+      </equation>
+      <eqn-cnt name="">
+	<lhs/>
+	<rhs>
+	  <grouping>
+	    <!-- <space n="2"/> -->
+	    <eq>
+	      <unf>
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <eq>
+		      <type num="1"/>
+		      <type num="2"/>
+		    </eq>
+		  </set>
+		</unin>
+	      </unf>
+	      <Pair>
+		<dCtset/>
+		<aSubMap/>
+	      </Pair>
+	    </eq>
+	  </grouping>
+	</rhs>
+      </eqn-cnt>
+      <!-- *Px(t) [](t)  --> 
+      <equation name="U-Op1">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<pcst>
+		  <id/>
+		  <lKind k="poly"/>
+		  <type/>
+		</pcst>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <concrete>
+	    <type/>
+	  </concrete>
+	</lhs>
+	<rhs>
+	  <grouping>
+	    <Pair>
+	      <unin>
+		<dCtset/>
+		<Subst>
+		  <aSubMap/>
+		  <set>
+		    <pcst>
+		      <id/>
+		      <lKind k="poly"/>
+		      <type/>
+		    </pcst>
+		  </set>
+		</Subst>	
+	      </unin>	
+	      <aSubMap/>
+	    </Pair>
+	    <text content=" where "/>
+	  </grouping>
+	</rhs>
+      </equation>
+      <eqn-cnt name="">
+	<lhs/>
+	<rhs>
+	  <grouping>
+	    <apace n="2"/>
+	    <eq>
+	      <unf>
+		<unin>
+		  <aCtset/>
+		  <set>
+		    <eq>
+		      <type/>
+		      <minzD>
+			<type/>
+		      </minzD>
+		    </eq>
+		  </set>
+		</unin>
+	      </unf>
+	      <Pair>
+		<dCtset/>
+		<aSubMap/>
+	      </Pair>
+	    </eq>
+	  </grouping>
+	</rhs>
+      </eqn-cnt>
+      <!-- *kx(Mt) --> 
+      <equation name="U-Om2">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<pcst>
+		  <id/>
+		  <lKind k="var"/>
+		  <type/>
+		</pcst>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <pred name="Mut">
+	    <type/>
+	  </pred>
+	</lhs>
+	<rhs>
+	  <grouping>
+	    <Pair>
+	      <dCtset/>
+	      <compose>
+		<aSubMap num="k"/>
+		<aSubMap num="u"/>
+	      </compose>
+	    </Pair>
+	    <text content=" where "/>
+	    <eq>
+	      <aSubMap num="k"/>
+	      <SubMap>
+		<lKind k="var"/>
+		<lKind k="mono"/>
+	      </SubMap>
+	    </eq>
+	    <text content=" and "/>
+	  </grouping>
+	</rhs>
+      </equation>
+      <eqn-cnt name="">
+	<lhs/>
+	<rhs>
+	  <grouping>
+	    <!-- <space n="2"/> -->
+	    <eq>
+	      <unf>
+		<Subst>
+		  <aSubMap num="k"/>
+		  <unin>
+		    <set>
+		      <pcst>
+			<id/>
+			<lKind k="var"/>
+			<type/>
+		      </pcst>
+		    </set>
+		    <aCtset/>
+		  </unin>
+		</Subst>
+	      </unf>
+	      <Pair>
+		<dCtset/>
+		<aSubMap num="u"/>
+	      </Pair>
+	    </eq>
+	  </grouping>
+	</rhs>
+      </eqn-cnt>
+      <!-- *kx(t1), *kx(t2)  t1 !~ t2 -->
+      <equation name="U-Op2">
+	<lhs>
+	  <grouping>
+	    <unf>
+	      <unin excl="yes">
+		<set>
+		  <pcst>
+		    <id/>
+		    <lKind k="var"/>
+		    <type num="1"/>
+		  </pcst>
+		  <pcst>
+		    <id/>
+		    <lKind k="var"/>
+		    <type num="2"/>
+		  </pcst>
+		</set>
+		<aCtset/>
+	      </unin>
+	    </unf>
+	  </grouping>
+	</lhs>
+	<rhs>
+	  <grouping>
+	    <Pair>
+	      <dCtset/>
+	      <compose>
+		<aSubMap num="k"/>
+		<aSubMap num="u"/>
+	      </compose>
+	    </Pair>
+	    <text content=" where "/>
+	    <eq>
+	      <aSubMap num="k"/>
+	      <SubMap>
+		<lKind k="var"/>
+		<lKind k="poly"/>
+	      </SubMap>
+	    </eq>
+	    <text content=" and "/>
+	  </grouping>
+	</rhs>
+      </equation>
+      <eqn-cnt name="" sep="4pt">
+	<lhs>
+	  <grouping>
+	    <text content=" where "/>
+	    <eq>
+	      <unf>
+		<unin>
+		  <set>
+		    <eq>		    
+		      <type num="1"/>
+		      <type num="2"/>
+		    </eq>
+		  </set>
+		  <aCtset/>
+		</unin>
+	      </unf>
+	      <error/>
+	    </eq>
+	  </grouping>
+	</lhs>
+	<rhs>
+	  <grouping>
+	    <!-- <space n="2"/> -->
+	    <eq>
+	      <unf>
+		<Subst>
+		  <aSubMap num="k"/>
+		  <unin>
+		    <set>
+		      <pcst>
+			<id/>
+			<lKind k="var"/>
+			<type num="1"/>
+		      </pcst>
+		      <pcst>
+			<id/>
+			<lKind k="var"/>
+			<type num="2"/>
+		      </pcst>
+		    </set>
+		    <aCtset/>
+		  </unin>
+		</Subst>
+	      </unf>
+	      <Pair>
+		<dCtset/>
+		<aSubMap num="u"/>
+	      </Pair>
+	    </eq>
+	  </grouping>
+	</rhs>
+      </eqn-cnt>	
+      <!-- Error (unhandled, un-unifiable) -->
+      <equation name="U-Error">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <constraint/>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	  <notin>
+	    <constraint/>
+	    <unin>
+	      <aCtset num="v"/>
+	      <aCtset num="s"/>
+	      <aCtset num="p"/>
+	    </unin>
+	  </notin>
+	</lhs>
+	<rhs>
+	  <error/>
+	</rhs>
+      </equation>
+    </VEqns>
+    <Hrules>
+      <eq>
+	<aCtset num="v"/>
+	<grouping>
+	  <Forall>
+	    <collection>
+	      <tvar/>
+	      <stype/>
+	      <ptype/>
+	      <type/>
+	      <type dash="'"/>
+	    </collection>
+	  </Forall>
+	  <ST/>
+	  <notin>
+	    <tvar name="alpha"/>
+	    <type dash="'"/>
+	  </notin>
+	  <space/>
+	  <text content="."/>
+	  <space/>	      
+	  <set>
+	    <eq>
+	      <type/>
+	      <type/>
+	    </eq>
+	    <eq>
+	      <tvar/>
+	      <type dash="'"/>
+	    </eq>
+	    <eq>
+	      <type dash="'"/>
+	      <tvar/>
+	    </eq>
+	    <eq>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	      <type/>
+	    </eq>
+	    <eq>
+	      <type/>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	    </eq>
+	    <eq>
+	      <mbFull>
+		<stype/>
+		<ptype/>
+	      </mbFull>
+	      <type/>
+	    </eq>
+	    <eq>
+	      <type/>
+	      <mbFull>
+		<stype/>
+		<ptype/>
+	      </mbFull>
+	    </eq>
+	  </set>
+	</grouping>
+      </eq>
+    </Hrules>
+    <Hrules>
+      <eq>
+	<aCtset num="s"/>
+	<grouping>
+	  <Forall>
+	    <collection>
+	      <ptype/>
+	      <ptype dash="'"/>
+	      <type/>
+	      <type dash="'"/>
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </collection>
+	  </Forall>
+	  <space/>	      
+	  <text content="."/>
+	  <space/>	      
+	  <set>
+	    <eq>
+	      <fn>
+		<type/>
+		<type num="1"/>
+	      </fn>
+	      <fn>
+		<type dash="'"/>
+		<type num="1" dash="'"/>
+	      </fn>
+	    </eq>
+	    <eq>
+	      <ref>
+		<type/>
+	      </ref>
+	      <ref>
+		<type dash="'"/>
+	      </ref>
+	    </eq>
+	    <eq>
+	      <mutable>
+		<ptype/>
+	      </mutable>
+	      <mutable>
+		<ptype dash="'"/>
+	      </mutable>
+	    </eq>
+	    <eq>
+	      <const>
+		<type/>
+	      </const>
+	      <const>
+		<type dash="'"/>
+	      </const>
+	    </eq>
+	  </set>
+	</grouping>
+      </eq>
+    </Hrules>
+    <Hrules>
+      <eq>
+	<aCtset num="p"/>
+	<grouping>
+	  <Forall>
+	    <collection>
+	      <id/>
+	      <lKind k="var"/>
+	      <lKind/>
+	      <type/>
+	      <type dash="'"/>
+	    </collection>
+	  </Forall>
+	  <ST/>
+	  <NOT>
+	    <pred name="Mut">
+	      <type dash="'"/>
+	    </pred>
+	  </NOT>
+	  <space/>
+	  <textit content="."/>
+	  <space/>
+	  <set>
+	    <eq>
+	      <lKind k="var"/>
+	      <lKind/>
+	    </eq>
+	    <pcst>
+	      <id/>
+	      <lKind k="mono"/>
+	      <type/>
+	    </pcst>
+	    <pcst>
+	      <id/>
+	      <lKind k="poly"/>
+	      <type dash="'"/>
+	    </pcst>
+	    <pcst>
+	      <id/>
+	      <lKind k="var"/>
+	      <type/>
+	    </pcst>
+	  </set>
+	</grouping>
+      </eq>
+    </Hrules>
+  </btypes:TYPE>
+  <caption>Unification Algorithm</caption>
+</figure>
+  
+  

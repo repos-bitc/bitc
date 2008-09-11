@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -43,13 +43,16 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <libsherpa/UExcept.hxx>
+#include <set>
+#include <vector>
+
+#include <libsherpa/INOstream.hxx>
+
 #include "AST.hxx"
 #include "debug.hxx"
 #include "TvPrinter.hxx"
 #include "Environment.hxx"
 #include "Trail.hxx"
-#include "INOstream.hxx"
 
 // Elements of the Kind enumeration have moved to kind.def
 
@@ -63,6 +66,7 @@ const char *KindName(Kind k);
 typedef long long TargetSWord;
 
 struct Type;
+struct TCConstraints;
 
 #define COMP_UNIN_DISCM 0x1u // Union discriminator of defrepr
 #define COMP_INVALID    0x2u // Field (component) in a defrepr leg is
@@ -94,23 +98,54 @@ struct Type;
                              // (extected) functions that we build
                              // with the actual functions.
 
-struct comp : public Countable {
+struct comp {
   std::string name;
-  GCPtr<Type> typ;
+  boost::shared_ptr<Type> typ;
   unsigned long flags;
 
   comp() {flags=0;} 
-  comp(GCPtr<Type> t, unsigned long _flags=0);
-  comp(const std::string s, GCPtr<Type> t, unsigned long _flags=0);
+  comp(boost::shared_ptr<Type> t, unsigned long _flags=0);
+  comp(const std::string s, boost::shared_ptr<Type> t, unsigned long _flags=0);
+
+  // Quasi-constructors
+  static inline boost::shared_ptr<comp>
+  make() {
+    comp *tmp = new comp();
+    return boost::shared_ptr<comp>(tmp);
+  }
+
+  static inline boost::shared_ptr<comp>
+  make(boost::shared_ptr<Type> t, unsigned long _flags=0) {
+    comp *tmp = new comp(t, _flags);
+    return boost::shared_ptr<comp>(tmp);
+  }
+
+  static inline boost::shared_ptr<comp>
+  make(const std::string& s, 
+       boost::shared_ptr<Type> t, unsigned long _flags=0) {
+    comp *tmp = new comp(s, t, _flags);
+    return boost::shared_ptr<comp>(tmp);
+  }
   //comp(const comp &c);
 };  
 
-// The only reason for this class is that we need
-// Countable to use GCPtr for an indirection 
-// over array length
-struct ArrLen : public Countable {
+// Array lengths can in some cases get unified even when their
+// containing type cannot. See the comment on the arrLen field in
+// class Type.
+//
+// This wrapper class was necessary for the early GCPtr
+// implementation. We could remove it now, but having a wrapper to
+// provide the make() function is useful.
+struct ArrLen {
   uint64_t  len;
   ArrLen(uint64_t _len) {len = _len;}
+
+  // Quasi-constructor
+  static inline boost::shared_ptr<ArrLen>
+  make(uint64_t _len) {
+    ArrLen *tmp = new ArrLen(_len);
+    return boost::shared_ptr<ArrLen>(tmp);
+  }
 };
 
 
@@ -123,17 +158,6 @@ struct TypeScheme;
 #define TY_CT_SELF      0x02u // Typeclass constraint is due to 
                               // self definition.
 #define TY_RIGID        0x04u
-//#define TY_RESTRICTED   0x08u // Depricated 
-                              // All restricted variables are not
-			      // marked. Only variables which are
-			      // restricted due to restrictions on
-			      // integer or floating point literals,
-			      // which do not occur within another
-			      // wrapper are marked, This marking is
-			      // not binding. Type variables are
-			      // always generalized within
-			      // non-expansive expressions. 
-
 #define TY_CCC          0x10u // Candidate for Copy-Compatibility
                               // This flag is for type variables that
                               // are in type argument position for
@@ -143,21 +167,22 @@ struct TypeScheme;
                               // reference type constructor, and the
                               // composite type is free to be 
                               // copy-compatible at this position.
-
-#define TY_CLOS          0x20u // A temporary flag used in closure
-                               // computation of FTVs in a TypeScheme.
-#define TY_COERCE        0x40u // A flag used by adjMaybe to coerce
-			       // only certain maybe-types. This flag
-			       // must be marked on maybe-Var()s.
-			       // This flag is NOT cleared by the 
-			       // adjMaybe function. 
-                               
+#define TY_CLOS         0x20u // A temporary flag used in closure
+                              // computation of FTVs in a TypeScheme.
+#define TY_COERCE       0x40u // A flag used by adjMaybe to coerce
+			      // only certain maybe-types. This flag
+			      // must be marked on maybe-Var()s.
+			      // This flag is NOT cleared by the 
+			      // adjMaybe function. 
 
 // Specialization mask -- those flags which should NOT survive
-// specialization. ((TY_RESTRICTED was here too.))
+// specialization. 
 #define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | TY_CLOS | TY_COERCE) 
 
-struct Type : public Countable {
+struct Type;
+typedef std::set<boost::shared_ptr<Type > > TypeSet;
+
+struct Type : public boost::enable_shared_from_this<Type> {
   
   friend struct TypeScheme;
 
@@ -175,7 +200,7 @@ struct Type : public Countable {
 public:
   Kind kind;
   
-  GCPtr<Type> link; // Linked into a chain of types 
+  boost::shared_ptr<Type> link; // Linked into a chain of types 
                             // constrained by equality
   
   /* If this is the type node that is authoritative
@@ -196,12 +221,12 @@ public:
 
   // defAST points to the AST of the defining occurrence. This field
   // is set for ty_struct*, ty_union*, tu_ucon, ty_exn
-  GCPtr<AST> defAst;			// Defining occurrence (or declare)
+  boost::shared_ptr<AST> defAst;			// Defining occurrence (or declare)
 
   // If type is a union constructor, points to identifier AST of the
   // defining occurrence of the defunion.  If type is a type class
   // method type, points to the identifier AST of the typeclass.
-  GCPtr<AST> myContainer;
+  boost::shared_ptr<AST> myContainer;
 
   // Note that we use two different kinds, ty_int/ty_impint,
   // ty_float/ty_impfloat, to deal with whether the concrete type of a
@@ -230,29 +255,68 @@ public:
   // variable. Copy constructor and TypeSpecialize DO NOT copy this
   // variable deeply.  This "variable" is not subject to
   // generalization.  
-  GCPtr<ArrLen> arrlen;	// Length in the case of an array type
+  //
+  // The use case here arises from copy compatibility. In particular,
+  // given a copy between
+  //       (array (mutable T) n)  ==~  (array T n)
+  //
+  // we need to unify the T and the n, but we cannot unify the overall
+  // types, because they differ w.r.t. mutability.
+
+  boost::shared_ptr<ArrLen> arrLen;	// Length in the case of an array type
   
   size_t    Isize;		// size in fixint
-  GCPtr<CVector<GCPtr<Type> > > fnDeps; // Functional Dependencies (for 
-                                   //   Type classes only).
+  TypeSet   fnDeps;		// Functional Dependencies (for 
+				//   Type classes only).
   
-  GCPtr<CVector<GCPtr<comp> > > components;
-  GCPtr<CVector<GCPtr<Type> > > typeArgs;  
+  std::vector<boost::shared_ptr<comp> > components;
+  std::vector<boost::shared_ptr<Type> > typeArgs;  
     
   // Mark Flags:  used for Traversal
   // Used to prevent infinite recursion
   // while printing infinitely recursivetypes.
   unsigned mark;                // General traversal
   unsigned pMark;               // Type printer
-  GCPtr<Type> sp;			// Type specializer.
+  boost::shared_ptr<Type> sp;			// Type specializer.
   unsigned flags;               
 
   // Main (Base) Constructor
   Type(const Kind k);
   // Copy Constructor.
-  Type(GCPtr<Type> t); 
-  Type(const Kind k, GCPtr<Type> child);
-  Type(const Kind k, GCPtr<Type> child1, GCPtr<Type> child2);
+  Type(boost::shared_ptr<Type> t); 
+  Type(const Kind k, boost::shared_ptr<Type> child);
+  Type(const Kind k, boost::shared_ptr<Type> child1, boost::shared_ptr<Type> child2);
+
+  // Quasi-constructors
+  static inline boost::shared_ptr<Type>
+  make(const Kind k)
+  {
+    Type *tmp = new Type(k);
+    return boost::shared_ptr<Type>(tmp);
+  }
+
+  static inline boost::shared_ptr<Type>
+  make(boost::shared_ptr<Type> t)
+  {
+    Type *tmp = new Type(t);
+    return boost::shared_ptr<Type>(tmp);
+  }
+
+  static inline boost::shared_ptr<Type>
+  make(const Kind k, boost::shared_ptr<Type> child)
+  {
+    Type *tmp = new Type(k, child);
+    return boost::shared_ptr<Type>(tmp);
+  }
+
+  static inline boost::shared_ptr<Type>
+  make(const Kind k,
+       boost::shared_ptr<Type> child1, 
+       boost::shared_ptr<Type> child2)
+  {
+    Type *tmp = new Type(k, child1, child2);
+    return boost::shared_ptr<Type>(tmp);
+  }
 
   // Makes a deep copy , but ** LINKS TVARS TO ORIGINAL ONES ** 
   // This function calls TypeSpecialize on a typeScheme with
@@ -260,20 +324,28 @@ public:
   // This is different from the type_instance() in 
   // the typeScheme class in that this function makes a copy
   // of non-tvars, while type_instance() returns the original type.
-  GCPtr<Type> getDCopy();
+  boost::shared_ptr<Type> getDCopy();
 
 private:
-  GCPtr<const Type> getTypePrim() const;
-  GCPtr<Type> getTypePrim();
-
+  boost::shared_ptr<const Type> getTypePrim() const;
+  boost::shared_ptr<Type> getTypePrim();
+  // Normalize Mutability Constructor Idempotence
+  // (mutable (mutable t)) == (mutable t)
+  boost::shared_ptr<Type> normalize_mut();
+  
+  // Normalize trivial forms of mbFull such as 
+  // (copy-compat (mutable 'a) bool) to (mutable bool)
+  // This normalization is done in-place.
+  void normalize_mbFull(boost::shared_ptr<Trail> trail=Trail::make());
+  
 public:
-  GCPtr<Type> getType();  
-  GCPtr <const Type> getType() const;
+  boost::shared_ptr<Type> getType();  
+  boost::shared_ptr <const Type> getType() const;
   
   // Get the type without mutability / fix / maybe
-  GCPtr<Type> getBareType();  
+  boost::shared_ptr<Type> getBareType();  
   // Get the type without some combinations of the above
-  GCPtr<Type> getTheType(bool mutableOK=false, bool maybeOK=false);   
+  boost::shared_ptr<Type> getTheType(bool mutableOK=false, bool maybeOK=false);   
 
   // The only reason the following unctions are not marked const is
   // that they call getType(), which uses the mark flag. 
@@ -292,11 +364,11 @@ public:
   bool isRefType();
   bool isValType();
   bool isByrefType();
+  bool isNullableType();
+  bool isConstrainedToRefType(boost::shared_ptr<TCConstraints> tcc);
   bool isFnxn();
   bool isBaseConstType(); // Integers, floats, string, bool, unit, dummy.
-// #if 0
   bool isClosure();
-// #endif
   bool isImmutableRefType();
   bool isMutable();
   bool isMaybe();
@@ -305,7 +377,7 @@ public:
   bool isPrimaryType();
   bool isPrimInt();
   bool isPrimFloat();
-  void SetTvarsTo(GCPtr<Type> t);
+  void SetTvarsTo(boost::shared_ptr<Type> t);
   void SetTvarsToUnit();
   bool isInteger();
   bool isIntegral();
@@ -347,7 +419,7 @@ public:
 
   /* Produce Type ty_union[rv] from ty_ucon[rv] or ty_uval[rv]
      ONLY typeArgs are polylated */
-  GCPtr<Type> getUnionType();
+  boost::shared_ptr<Type> getUnionType();
     
   size_t size();
 
@@ -359,31 +431,39 @@ public:
   // Does this type contain variables only within functions or on the
   // lhs of a matybe type?
   bool isConcretizable();
+  // Does this type contain variables only within functions,
+  // references or on the lhs of a matybe type?
+  bool isShallowConcretizable();
+
+  // Normalize a type in-place. The following normalizations are
+  // currently performed: 
+  // 1) Normalization of mbFull.
+  void normalize(boost::shared_ptr<Trail> trail=Trail::make());
 
   /* Methods that can be used for various kinds of 
      comparisons between two types */
 
 private:  
-  bool eql(GCPtr<Type> t, bool verbose, std::ostream &errStream,
+  bool eql(boost::shared_ptr<Type> t, bool verbose, std::ostream &errStream,
 	   unsigned long uflags, bool keepSub,
-	   GCPtr<Trail> trail=new Trail);
+	   boost::shared_ptr<Trail> trail=Trail::make());
 public:
   // Returns true of the type `t' is structurally equal to `this'
   // under alpha renaming (and declarations unify with definitions)
   // 
   // The next function strictlyEquals removes the above two
   // restrictions. 
-  bool equals(GCPtr<Type> t, bool verbose=false,
+  bool equals(boost::shared_ptr<Type> t, bool verbose=false,
 	      std::ostream &errStream=std::cerr);
-  bool strictlyEquals(GCPtr<Type> t, bool verbose=false,
+  bool strictlyEquals(boost::shared_ptr<Type> t, bool verbose=false,
 		      bool noAlphaRename=false,
 		      std::ostream &errStream=std::cerr);  
-  bool unifyWith(GCPtr<Type> t, bool verbose=false,
-		 GCPtr<Trail> trail=new Trail,
+  bool unifyWith(boost::shared_ptr<Type> t, bool verbose=false,
+		 boost::shared_ptr<Trail> trail=Trail::make(),
 		 std::ostream &errStream=std::cerr);
 
   // Unify Ignoring rigidity
-  bool forcedUnify(GCPtr<Type> t, bool verbose=false,
+  bool forcedUnify(boost::shared_ptr<Type> t, bool verbose=false,
 		   std::ostream &errStream=std::cerr);
   
   // All Tvars are rigid?
@@ -392,77 +472,88 @@ public:
   // Equality under alpha renaming of all (including rigid)
   // variables. The following functions are the same as equals and
   // strictlyEquals except for the fact that they ignore rigidity.
-  bool equalsA(GCPtr<Type> t, bool verbose=false,
+  bool equalsA(boost::shared_ptr<Type> t, bool verbose=false,
 	       std::ostream &errStream=std::cerr);
-  bool strictlyEqualsA(GCPtr<Type> t, bool verbose=false,
+  bool strictlyEqualsA(boost::shared_ptr<Type> t, bool verbose=false,
 		       std::ostream &errStream=std::cerr);
   
   /* Test for copy compatibility 
      two versions based on inner function equal or equalsA? */
-  bool copy_compatible(GCPtr<Type> t, bool verbose=false,
+  bool copy_compatible(boost::shared_ptr<Type> t, bool verbose=false,
 			   std::ostream &errStream=std::cerr);
-  bool copy_compatibleA(GCPtr<Type> t, bool verbose=false,
+  bool copy_compatibleA(boost::shared_ptr<Type> t, bool verbose=false,
 			      std::ostream &errStream=std::cerr);
  
   /* Methods to support polymorphism */
   /* Is that Type variable contained in my type somewhere (deeply)? */
-  bool boundInType(GCPtr<Type> tv);
+  bool boundInType(boost::shared_ptr<Type> tv);
   
   /* Is my type bound in the environment? Usually only used in the
      case of type variables to determine if it must be 
      generalized, or not */
-  bool boundInGamma(GCPtr<const Environment<TypeScheme> > gamma);
+  bool boundInGamma(boost::shared_ptr<const TSEnvironment > gamma);
   
   // Collect ALL ftvs regardless of gamma
   // This APPENDS TO the vector `tvs'. 
-  void collectAllftvs(GCPtr<CVector<GCPtr<Type> > > tvs);
+  void collectAllftvs(/* OUT */ TypeSet &tvs);
 
   // Collect the Free Type Variables in a type
   // that are unbound in gamma
-  void collectftvsWrtGamma(GCPtr<CVector<GCPtr<Type> > > tvs,
-			   GCPtr<const Environment<TypeScheme> > gamma);
+  void collectftvsWrtGamma(/* OUT */ TypeSet& tvs,
+			   boost::shared_ptr<const TSEnvironment > gamma);
 
   // Meta-polymorphism
-  static GCPtr<Type> Kmono;
-  static GCPtr<Type> Kpoly;
+  static boost::shared_ptr<Type> Kmono;
+  static boost::shared_ptr<Type> Kpoly;
   
 private:
-  GCPtr<Type> 
-  TypeSpecializeReal(GCPtr<CVector<GCPtr<Type> > > ftvs,
-		     GCPtr<CVector<GCPtr<Type> > > nftvs);
+  boost::shared_ptr<Type> 
+  TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
+		     std::vector<boost::shared_ptr<Type> >& nftvs);
   
   // Clear the sp (specialization) field of type records recursively.
   void clear_sp();
   
 public:
-  GCPtr<Type> 
-  TypeSpecialize(GCPtr<CVector<GCPtr<Type> > > ftvs,
-		 GCPtr<CVector<GCPtr<Type> > > nftvs);
+  boost::shared_ptr<Type> 
+  TypeSpecialize(const std::vector<boost::shared_ptr<Type> >& ftvs,
+		 std::vector<boost::shared_ptr<Type> >& nftvs);
 
   /* Methods to deal with mutability issues */
   // Fix all Maybe types surrounding type records containing a
   // polymorphic type variables, except in the case of those maybes
   // directly surrounding type variables, unless clearall is
   // mentioned. 
-  bool fixMaybes(GCPtr<CVector<GCPtr<Type> > > ftvs, 
-		 GCPtr<Trail> trail,
+  bool fixMaybes(const TypeSet& ftvs, boost::shared_ptr<Trail> trail,
 		 bool clearAll);
 
   // Wrapper for the above function with the clearAll flag set.
   void clearAllMaybes();
   
 public:
-  void adjMaybe(GCPtr<Trail> trail, bool markedOnly=false,
+  void adjMaybe(boost::shared_ptr<Trail> trail, bool markedOnly=false,
 		bool minimize=false, bool adjFn=false);
   
   // Get the maximally-mutable, but copy-compatible type.
-  GCPtr<Type> maximizeMutability(GCPtr<Trail> trail=new Trail);
+  boost::shared_ptr<Type> maximizeMutability(boost::shared_ptr<Trail>
+					     trail=Trail::make()); 
   // Get the minimally-mutable, but copy-compatible type.
-  GCPtr<Type> minimizeMutability(GCPtr<Trail> trail=new Trail);
-  GCPtr<Type> maximizeTopMutability(GCPtr<Trail> trail=new Trail);
-  GCPtr<Type> minimizeTopMutability(GCPtr<Trail> trail=new Trail);
-  GCPtr<Type> minimizeDeepMutability(GCPtr<Trail> trail=new Trail);
+  boost::shared_ptr<Type> minimizeMutability(boost::shared_ptr<Trail>
+					     trail=Trail::make()); 
+  boost::shared_ptr<Type>
+  maximizeTopMutability(boost::shared_ptr<Trail> trail=Trail::make()); 
+  boost::shared_ptr<Type>
+  minimizeTopMutability(boost::shared_ptr<Trail> trail=Trail::make()); 
+  boost::shared_ptr<Type>
+  minimizeDeepMutability(boost::shared_ptr<Trail> trail=Trail::make());
 
+  // Propagate Mutability inwards for unboxed composite types.
+  // This case might fail with an error if there is an inner immutable
+  // type, for example (mutable (pair (int32 bool)))
+  bool
+  propagateMutability(boost::shared_ptr<Trail> trail, 
+		      const bool inMutable); 
+  
   // Check if maximally / minimally mutable
   bool isMaxMutable();
   bool isMinMutable();
@@ -470,7 +561,7 @@ public:
   /* Determine Candidacy for Copy-Compatibility for type variables
      only, argument is a composite-type that is searched 
      to determine ccc-ness */  
-  bool determineCCC(GCPtr<Type> comp, bool inRefType=false);
+  bool determineCCC(boost::shared_ptr<Type> comp, bool inRefType=false);
   
   // See if nth typeArg is a CCC based on the TY_CCC flag markings
   bool argCCOK(size_t argN);  
@@ -481,15 +572,15 @@ public:
   std::string toString();  
   // Use Output
   std::string 
-  asString(GCPtr<TvPrinter> tvP = new TvPrinter(), 
+  asString(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make(), 
 	   bool traverse = true);
 
-  void asXML(GCPtr<TvPrinter> tvP, INOstream &out);
-  std::string asXML(GCPtr<TvPrinter> tvP = new TvPrinter());
+  void asXML(boost::shared_ptr<TvPrinter> tvP, sherpa::INOstream &out);
+  std::string asXML(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make());
   
-  GCPtr<AST> 
-  asAST(const LexLoc &loc,
-	GCPtr<TvPrinter> tvP = new TvPrinter());
+  boost::shared_ptr<AST> 
+  asAST(const sherpa::LexLoc &loc,
+	boost::shared_ptr<TvPrinter> tvP = TvPrinter::make());
   // Ignore mutability, Ignore Top-level Mutability, or
   // Maximize mutability of type-args
   std::string mangledString(bool igMut=false, bool igTlMut=false,
@@ -502,66 +593,69 @@ public:
   static Kind getRefKind(Kind valKind);
 
   /* Typeclass special */
-  bool addFnDep(GCPtr<Type> tc);
+  bool addFnDep(boost::shared_ptr<Type> tc);
 
   /* PUBLIC Accessors (Conveniecnce Forms) */
   //Accessing Type Arguments and Components
-  GCPtr<Type> & TypeArg(size_t i) const
+  const boost::shared_ptr<Type> & TypeArg(size_t i) const
   {
-    return (*typeArgs)[i];
+    return typeArgs[i];
   }
-  GCPtr<comp> & Component(size_t i) const
+  const boost::shared_ptr<comp> & Component(size_t i) const
   {
-    return (*components)[i];
+    return components[i];
   }
-  GCPtr<Type> & CompType(size_t i) const
+  boost::shared_ptr<Type> & TypeArg(size_t i)
   {
-    return (*components)[i]->typ;
+    return typeArgs[i];
+  }
+  boost::shared_ptr<comp> & Component(size_t i)
+  {
+    return components[i];
+  }
+  boost::shared_ptr<Type> & CompType(size_t i) const
+  {
+    return components[i]->typ;
   }
   std::string& CompName(size_t i) const
   {
-    return (*components)[i]->name;
+    return components[i]->name;
   }
   unsigned long& CompFlags(size_t i) const
   {
-    return (*components)[i]->flags;
-  }
-  //Functional Dependencies
-  GCPtr<Type> & FnDep(size_t i) const
-  {
-    return (*fnDeps)[i];
+    return components[i]->flags;
   }
   //Argument and return types of function-types
-  GCPtr<Type> & Args() const
+  boost::shared_ptr<Type> & Args() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn);
     return CompType(0);
   }  
-  GCPtr<Type> & Ret() const
+  boost::shared_ptr<Type> & Ret() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn);
     return CompType(1);
   }  
   //The Inner type of Maybe-types
-  GCPtr<Type> &Var() const
+  boost::shared_ptr<Type> &Var() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
     return CompType(0);
   }  
-  GCPtr<Type> & Core() const
+  boost::shared_ptr<Type> & Core() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
     return CompType(1);
   }
   // The first component of an array/vector/mutable/ref type
-  GCPtr<Type> & Base() const
+  boost::shared_ptr<Type> & Base() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_mutable || 
  			  kind == ty_byref || 
  			  kind == ty_ref || 
 			  kind == ty_array || 
 			  kind == ty_vector);
-    return (*components)[0]->typ;
+    return CompType(0);
   }
 };
 
@@ -572,33 +666,37 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
   return strm;
 }
 
-// Markers used for type traversal
-#define MARK1   0x0000001u
-#define MARK2   0x0000002u
-#define MARK3   0x0000004u
-#define MARK4   0x0000008u
-#define MARK5   0x0000010u
-#define MARK6   0x0000020u
-#define MARK7   0x0000040u
-#define MARK8   0x0000080u
-#define MARK9   0x0000100u
-#define MARK10  0x0000200u
-#define MARK11  0x0000400u
-#define MARK12  0x0000800u
-#define MARK13  0x0001000u
-#define MARK14  0x0002000u
-#define MARK15  0x0004000u
-#define MARK16  0x0008000u
-#define MARK17  0x0010000u
-#define MARK18  0x0020000u
-#define MARK19  0x0040000u
-#define MARK20  0x0080000u
-#define MARK21  0x0100000u
-#define MARK22  0x0200000u
-#define MARK23  0x0400000u
-#define MARK24  0x0800000u
-#define MARK25  0x1000000u
-#define MARK26  0x2000000u
+/** The following marks are present on types to ensure that
+ *  procedures that recurse over the structure of equi-recursive
+ *  types do not recurse infinitely. We need to use differernt markers
+ *  for procedures that are mutually recursive, or are otherwise used
+ *  simultaneously. Here, we actually use different markers for each
+ *  procedure that is recursive over type-structure. 
+ */
+#define MARK_BOUND_IN_TYPE            0x0000001u
+#define MARK_COLLECT_FTVS_WRT_GAMMA   0x0000002u
+#define MARK_COLLECT_ALL_FTVS         0x0000004u
+#define MARK_IS_EXPANSIVE             0x0000008u
+#define MARK_MANGLED_STRING           0x0000010u
+#define MARK_IS_OF_INFINITE_TYPE      0x0000020u
+#define MARK_PROPAGATE_MUTABILITY     0x0000040u
+#define MARK_GET_BARE_TYPE            0x0000080u
+#define MARK_GET_THE_TYPE             0x0000100u
+#define MARK_EMIT_ARR_VEC_FN_TYPES    0x0000200u
+#define MARK_ADJ_MAYBE                0x0000400u
+#define MARK_MAXIMIZE_MUTABILITY      0x0000800u
+#define MARK_MINIMIZE_MUTABILITY      0x0001000u
+#define MARK_DETERMINE_CCC            0x0002000u
+#define MARK_CHECK_CONSTRAINTS        0x0004000u
+#define MARK_SIZE                     0x0008000u
+#define MARK_IS_DEEP_MUT              0x0010000u
+#define MARK_IS_DEEP_IMMUT            0x0020000u
+#define MARK_MINIMIZE_DEEP_MUTABILITY 0x0040000u
+#define MARK_SIGN_MBS                 0x0080000u
+#define MARK_FIXUP_FN_TYPES           0x0100000u
+#define MARK_IS_CONCRETIZABLE         0x0200000u
+#define MARK_IS_SHALLOW_CONCRETIZABLE 0x0400000u
+#define MARK_NORMALIZE_MBFULL         0x0800000u
 
 /* Flags used by Type-inference engine. 
    These flags are different from the Unifier's flags */

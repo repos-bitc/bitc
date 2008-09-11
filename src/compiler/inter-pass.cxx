@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,6 +35,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -42,18 +43,19 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <assert.h>
+#include <map>
 
-#include "UocInfo.hxx"
+#include <libsherpa/UExcept.hxx>
+
 #include "Options.hxx"
+#include "UocInfo.hxx"
 #include "AST.hxx"
-#include "Pair.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
 #include "inter-pass.hxx"
 
+using namespace std;
+using namespace boost;
 using namespace sherpa;
 
 bool 
@@ -62,7 +64,7 @@ UocInfo::Resolve(std::ostream& errStream, bool init,
 {
   bool errFree = true;
   errFree = fe_symresolve(errStream, init, rflags);
-  if(!errFree)
+  if (!errFree)
     errStream << mesg
 	      << std::endl;
   return errFree;
@@ -81,7 +83,7 @@ UocInfo::TypeCheck(std::ostream& errStream, bool init,
   uocAst->clearTypes();  
 
   errFree = fe_typeCheck(errStream, init, tflags);    
-  if(!errFree) 
+  if (!errFree) 
     errStream << mesg
 	      << std::endl;
   return errFree;
@@ -98,10 +100,10 @@ UocInfo::RandT(std::ostream& errStream,
 
   CHKERR(errFree, Resolve(errStream, init, rflags, mesg));
   
-  if(errFree)
+  if (errFree)
     CHKERR(errFree, TypeCheck(errStream, init, tflags, mesg));
   
-  if(!errFree)
+  if (!errFree)
     errStream << "WHILE R&Ting:" << std::endl
 	      << uocAst->asString() << std::endl;
   
@@ -129,57 +131,44 @@ UocInfo::unwrapEnvs()
 
 bool
 resolve(std::ostream& errStream, 
-	GCPtr<AST> ast, 
-	GCPtr<Environment<AST> > env,
-	GCPtr<Environment<AST> > lamLevel,
+	shared_ptr<AST> ast, 
+	shared_ptr<ASTEnvironment > env,
+	shared_ptr<ASTEnvironment > lamLevel,
 	int mode, 
 	IdentType identType,
-	GCPtr<AST> currLB,
+	shared_ptr<AST> currLB,
 	unsigned long flags);
-
-bool
-typeInfer(std::ostream& errStream, GCPtr<AST> ast, 
-	  GCPtr<Environment<TypeScheme> > gamma,
-	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	  GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-                                   GCPtr<AST> > > > > impTypes,
-	  bool isVP, 
-	  GCPtr<TCConstraints> tcc,
-	  unsigned long uflags,
-	  GCPtr<Trail> trail,
-	  int mode,
-	  unsigned flags);
 
 bool 
 UocInfo::RandTexpr(std::ostream& errStream,
-		   GCPtr<AST> expr,
+		   shared_ptr<AST> expr,
 		   unsigned long rflags,
 		   unsigned long tflags,
 		   std::string mesg,
 		   bool keepResults,
-		   GCPtr<envSet> altEnvSet)
+		   shared_ptr<EnvSet> altEnvSet)
 {
   bool errFree = true;
-  GCPtr<UocInfo> myUoc = new UocInfo(this);
+  shared_ptr<UocInfo> myUoc = UocInfo::make(shared_from_this());
   myUoc->uocAst = expr;
   
-  if(altEnvSet) {
+  if (altEnvSet) {
     myUoc->env = altEnvSet->env;
     myUoc->gamma = altEnvSet->gamma;
     myUoc->instEnv = altEnvSet->instEnv;    
   }
   
-  if(!keepResults) 
+  if (!keepResults) 
     myUoc->wrapEnvs();
   
   CHKERR(errFree, myUoc->Resolve(errStream, false, rflags, mesg));
-  if(errFree)
+  if (errFree)
     CHKERR(errFree, myUoc->TypeCheck(errStream, false, tflags, mesg));
   
-  if(!keepResults)
+  if (!keepResults)
     myUoc->unwrapEnvs();
   
-  if(!errFree)
+  if (!errFree)
     errStream << "WHILE R&Ting:" << std::endl
 	      << expr->asString() << std::endl;
 
@@ -190,7 +179,7 @@ UocInfo::RandTexpr(std::ostream& errStream,
 #define MARKDEF(ast, def) do {\
     assert(def);	      \
     ast->defForm = def;	      \
-  } while(0);
+  } while (0);
 //std::cout << "Marked " << ast->asString() << "->defForm = "
 //	<< def->asString() << std::endl;
 
@@ -200,9 +189,8 @@ UocInfo::RandTexpr(std::ostream& errStream,
  *
  * See the explanation in AST.ast*/
 void
-UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
+UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST> top)
 {
-  ast->uoc = this;
   bool processChildren = true; 
 
   switch(ast->astType) {        
@@ -226,7 +214,7 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
   case at_letbinding:
     {
       MARKDEF(ast, local);
-      GCPtr<AST> id = ast->child(0)->child(0);
+      shared_ptr<AST> id = ast->child(0)->child(0);
       MARKDEF(id, ast);
       break;
     }
@@ -234,7 +222,7 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
   case at_define:
   case at_recdef:
     {
-      GCPtr<AST> id = ast->child(0)->child(0);
+      shared_ptr<AST> id = ast->child(0)->child(0);
       MARKDEF(id, ast);
       top = ast;
       local = ast;
@@ -247,7 +235,7 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
   case at_defstruct:
   case at_defexception:
     {
-      GCPtr<AST> id = ast->child(0);
+      shared_ptr<AST> id = ast->child(0);
       MARKDEF(id, ast);
       processChildren = false;
       break;
@@ -255,12 +243,12 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
 
   case at_defunion:
     {
-      GCPtr<AST> id = ast->child(0);
+      shared_ptr<AST> id = ast->child(0);
       MARKDEF(id, ast);
-      GCPtr<AST> ctrs = ast->child(4);
-      for(size_t i=0; i < ctrs->children->size(); i++) {
-	GCPtr<AST> ctr = ctrs->child(i);
-	GCPtr<AST> ctrID = ctr->child(0);
+      shared_ptr<AST> ctrs = ast->child(4);
+      for (size_t i=0; i < ctrs->children.size(); i++) {
+	shared_ptr<AST> ctr = ctrs->child(i);
+	shared_ptr<AST> ctrID = ctr->child(0);
 	MARKDEF(ctrID, ast);
       }
       processChildren = false;
@@ -269,13 +257,13 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
 
   case at_deftypeclass:
     {
-      GCPtr<AST> id = ast->child(0);
+      shared_ptr<AST> id = ast->child(0);
       MARKDEF(id, ast);
 	
-      GCPtr<AST> methods = ast->child(3);
-      for(size_t i = 0; i < methods->children->size(); i++) {
-	GCPtr<AST> method = methods->child(i);
-	GCPtr<AST> mID = method->child(0);
+      shared_ptr<AST> methods = ast->child(3);
+      for (size_t i = 0; i < methods->children.size(); i++) {
+	shared_ptr<AST> method = methods->child(i);
+	shared_ptr<AST> mID = method->child(0);
 	MARKDEF(mID, ast);
       }
       processChildren = false;
@@ -299,7 +287,7 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
   case at_dobinding:
     {
       MARKDEF(ast, local);
-      GCPtr<AST> id = ast->child(0)->child(0);
+      shared_ptr<AST> id = ast->child(0)->child(0);
       MARKDEF(id, ast);
       break;
     }
@@ -310,8 +298,8 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
     }
   }
   
-  if(processChildren)
-    for(size_t c=0; c < ast->children->size(); c++)
+  if (processChildren)
+    for (size_t c=0; c < ast->children.size(); c++)
       findDefForms(ast->child(c), local, top);	  
 }
 
@@ -320,30 +308,32 @@ UocInfo::findDefForms(GCPtr<AST> ast, GCPtr<AST> local, GCPtr<AST> top)
 void
 UocInfo::findAllDefForms()
 {
-  for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::srcList->elem(i);
+  for (UocMap::iterator itr = UocInfo::srcList.begin();
+      itr != UocInfo::srcList.end(); ++itr) {
+    shared_ptr<UocInfo> puoci = itr->second;
     puoci->findDefForms(puoci->uocAst);
   }
 
-  for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::ifList->elem(i);
+  for (UocMap::iterator itr = UocInfo::ifList.begin();
+      itr != UocInfo::ifList.end(); ++itr) {
+    shared_ptr<UocInfo> puoci = itr->second;
     puoci->findDefForms(puoci->uocAst);
   }
 }
 
 static void
-addCandidates(GCPtr<AST> mod)
+addCandidates(shared_ptr<AST> mod)
 {
-  for(size_t c = 0; c < mod->children->size(); c++) {
-    GCPtr<AST> ast = mod->child(c);
-    GCPtr<AST> id = ast->getID();
+  for (size_t c = 0; c < mod->children.size(); c++) {
+    shared_ptr<AST> ast = mod->child(c);
+    shared_ptr<AST> id = ast->getID();
     switch(ast->astType) {
     case at_proclaim: // proclaims needed to keep externalNames
     case at_define:
     case at_recdef:
     case at_defexception:
-      if(id->symType->isConcrete())
-	Options::entryPts->append(id->fqn.asString());
+      if (id->symType->isConcrete())
+	Options::entryPts.insert(id->fqn.asString());
       
       break;
       
@@ -357,17 +347,19 @@ addCandidates(GCPtr<AST> mod)
 void  
 UocInfo::addAllCandidateEPs()
 {
-  for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::ifList->elem(i);
+  for (UocMap::iterator itr = UocInfo::ifList.begin();
+      itr != UocInfo::ifList.end(); ++itr) {
+    shared_ptr<UocInfo> puoci = itr->second;
     addCandidates(puoci->uocAst);
   }  
 
-  for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::srcList->elem(i);
+  for (UocMap::iterator itr = UocInfo::srcList.begin();
+      itr != UocInfo::srcList.end(); ++itr) {
+    shared_ptr<UocInfo> puoci = itr->second;
     addCandidates(puoci->uocAst);
   }
 
-  //for(size_t c=0; c < Options::entryPts.size(); c++)
+  //for (size_t c=0; c < Options::entryPts.size(); c++)
   //  std::cerr << "Entry Point: " << Options::entryPts[c] << std::endl;
 }
 

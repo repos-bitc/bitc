@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,20 +35,18 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
 #include <sstream>
+#include <libsherpa/UExcept.hxx>
 
-#include "UocInfo.hxx"
 #include "Options.hxx"
+#include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
@@ -58,27 +56,28 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
 static string
-printName(GCPtr<AST> ast)
+printName(shared_ptr<AST> ast)
 {
-  if(!ast)
+  if (!ast)
     return "NULL";
   
   return ast->s;
 }
 
 void
-Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out) 
+Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out) 
 { 
-  if(Options::rawTvars)
-    tvP = 0;
+  if (Options::rawTvars)
+    tvP = GC_NULL;
 
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
 
-  if(t->pMark >= 2) {
+  if (t->pMark >= 2) {
     out << "<infinity/>" << endl;
     return;
   }
@@ -148,16 +147,16 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
   case ty_tvar:
     {
       string name;
-      if(tvP)
+      if (tvP)
 	name = tvP->tvName(t);
       
-      if(name == "'a")
+      if (name == "'a")
 	out << "<tvar name='alpha'/>" << endl; 
-      else if(name == "'b")
+      else if (name == "'b")
 	out << "<tvar name='beta'/>" << endl; 
-      else if(name == "'c")
+      else if (name == "'c")
 	out << "<tvar name='gamma'/>" << endl; 
-      else if(name == "'d")
+      else if (name == "'d")
 	out << "<tvar name='delta'/>" << endl; 
       else
 	out << "<tvar name='alpha' num='"<< t->uniqueID << "'/>" << endl; 
@@ -186,7 +185,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 
   case ty_fn:
     {
-      assert(t->components->size() == 2);
+      assert(t->components.size() == 2);
       out << "<fn>" << endl;
       out.more();
       out << "<tuple>" << endl;
@@ -202,8 +201,8 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 
   case ty_fnarg:
     {
-      for(size_t i=0; i < t->components->size(); i++) {
-	if(t->CompFlags(i) & COMP_BYREF) {
+      for (size_t i=0; i < t->components.size(); i++) {
+	if (t->CompFlags(i) & COMP_BYREF) {
 	  out << " <byref> ";
 	  t->CompType(i)->asXML(tvP, out);
 	  out << "<byref> ";
@@ -217,7 +216,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
     
   case ty_tyfn:
     {
-      assert(t->components->size() == 2);
+      assert(t->components.size() == 2);
       out << "<tyfn>" << endl;
       out.more();
       out << "<tuple>" << endl;
@@ -242,20 +241,13 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
     {
       out << "<struct inline='yes' name='" << printName(t->defAst) <<"'>" << endl; 
       out.more();
-      for(size_t i=0; i < t->typeArgs->size(); i++)
+      for (size_t i=0; i < t->typeArgs.size(); i++)
 	t->TypeArg(i)->asXML(tvP, out);
       out.less();
       out << "</struct>" << endl;
 	break;
     }
 
-  case ty_reprv:
-  case ty_reprr:
-    {
-      assert(false);
-      break;     
-    }
-    
   case ty_unionv: 
   case ty_unionr:
   case ty_uvalv: 
@@ -265,7 +257,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
     {
       out << "<union inline='yes' name='" << printName(t->myContainer) <<"'>" << endl; 
       out.more();
-      for(size_t i=0; i < t->typeArgs->size(); i++)
+      for (size_t i=0; i < t->typeArgs.size(); i++)
 	t->TypeArg(i)->asXML(tvP, out);
       out.less();
       out << "</union>" << endl;
@@ -276,7 +268,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
     {
       out << "<typeclass name='" << printName(t->defAst) <<"'>" << endl; 
       out.more();
-      for(size_t i=0; i < t->typeArgs->size(); i++)
+      for (size_t i=0; i < t->typeArgs.size(); i++)
 	t->TypeArg(i)->asXML(tvP, out);
       out.less();
       out << "</typeclass>" << endl;
@@ -285,7 +277,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 
   case ty_array:
     {
-      out << "<array sz='" << t->arrlen->len  <<"'>" << endl;
+      out << "<array sz='" << t->arrLen->len  <<"'>" << endl;
       out.more();
       t->Base()->asXML(tvP, out);
       out.less();
@@ -346,16 +338,6 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
       break;  
     }
 
-  case ty_subtype:
-    {
-      out << "<Tsub>" << endl;
-      out.more();
-      t->CompType(0)->asXML(tvP, out);
-      t->CompType(1)->asXML(tvP, out);
-      out << "</Tsub>" << endl; 
-      break;
-    }
-    
   case ty_pcst:
     {
       out << "<pcst>" << endl;
@@ -363,16 +345,16 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
       t->CompType(0)->asXML(tvP, out);
       t->CompType(1)->asXML(tvP, out);
       out << "</pcst>" << endl; 
-      for(size_t i=0; i<t->components->size(); i++)
+      for (size_t i=0; i<t->components.size(); i++)
 	t->CompType(i)->asXML(tvP, out);
       break;
     }
 
   case ty_kfix:
     {
-      if(t == Type::Kmono)
+      if (t == Type::Kmono)
 	out << "<lKind k='mono'/>" << endl; 
-      else if(t == Type::Kpoly)
+      else if (t == Type::Kpoly)
 	out << "<lKind k='poly'/>" << endl; 
       else
 	assert(false);
@@ -390,7 +372,7 @@ Type::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 
 
 string
-Type::asXML(GCPtr<TvPrinter> tvP) 
+Type::asXML(shared_ptr<TvPrinter> tvP) 
 {
   std::stringstream ss;      
   INOstream out(ss);
@@ -399,9 +381,9 @@ Type::asXML(GCPtr<TvPrinter> tvP)
 }
 
 static inline bool
-mustShowPred(GCPtr<Typeclass> pred)
+mustShowPred(shared_ptr<Typeclass> pred)
 {
-  if((Options::showAllTccs) ||
+  if ((Options::showAllTccs) ||
      (((pred->flags & TY_CT_SUBSUMED) == 0) && 
       ((pred->flags & TY_CT_SELF) == 0)))
     return true;
@@ -410,18 +392,19 @@ mustShowPred(GCPtr<Typeclass> pred)
 }
 
 void
-TypeScheme::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
+TypeScheme::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
 {
   normalize();
-  GCPtr<TCConstraints> _tcc = new TCConstraints;
+  shared_ptr<TCConstraints> _tcc = TCConstraints::make();
   out << "<TS>" << endl;
   out.more();
   
-  for(size_t i=0; i < ftvs->size(); i++)      
-    out << Ftv(i)->asXML(tvP);      
+  for (TypeSet::iterator itr_i = ftvs.begin();
+      itr_i != ftvs.end(); ++itr_i)
+    out << (*itr_i)->asXML(tvP);      
   
-  if(tcc) {    
-    if(Options::showAllTccs)
+  if (tcc) {    
+    if (Options::showAllTccs)
       _tcc = tcc;
     else
       addConstraints(_tcc);      
@@ -429,11 +412,11 @@ TypeScheme::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 
   out << "<CType>" << endl;
   out.more();
-  if(_tcc->pred->size()) {
-    
-    for(size_t i=0; i < _tcc->pred->size(); i++)
-      if(mustShowPred(_tcc->Pred(i)))
-	_tcc->Pred(i)->asXML(tvP);
+  if (_tcc->size()) {
+    for (TypeSet::iterator itr = _tcc->begin();
+	itr != _tcc->end(); ++itr)
+      if (mustShowPred((*itr)))
+	(*itr)->asXML(tvP);
   }
   
   tau->asXML(tvP, out);
@@ -444,7 +427,7 @@ TypeScheme::asXML(GCPtr<TvPrinter> tvP, INOstream &out)
 }
 
 std::string
-TypeScheme::asXML(GCPtr<TvPrinter> tvP)
+TypeScheme::asXML(shared_ptr<TvPrinter> tvP)
 {
   normalize();
   std::stringstream ss; 
@@ -456,7 +439,7 @@ TypeScheme::asXML(GCPtr<TvPrinter> tvP)
 void 
 Instance::asXML(INOstream &out)
 {
-  ts->asXML(NULL, out);
+  ts->asXML(GC_NULL, out);
 }
 
 std::string 

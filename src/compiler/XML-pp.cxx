@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -43,14 +43,13 @@
 #include <iostream>
 #include "AST.hxx"
 #include "backend.hxx"
-#include "INOstream.hxx"
-#include "Options.hxx"
 
 using namespace std;
+using namespace boost;
 using namespace sherpa;
 
 static void
-XMLp(std::ostream& out, GCPtr<AST> ast, std::string pad, bool showLoc)
+XMLp(std::ostream& out, shared_ptr<AST> ast, std::string pad, bool showLoc)
 {
   out << pad 
       << "<"
@@ -67,13 +66,13 @@ XMLp(std::ostream& out, GCPtr<AST> ast, std::string pad, bool showLoc)
   if (showLoc)
     out << " loc=\"" + ast->loc.asString() + "\"";
 
-  if(ast->astType == at_ident) {
+  if (ast->astType == at_ident) {
     out << " idType=\""
         << identTypeToString(ast->identType)
         << "\"";
 
     out << " Sym=\"";
-    if(!ast->symbolDef) {
+    if (!ast->symbolDef) {
       out << "DEF"
 	  << "\"";
     }
@@ -86,9 +85,9 @@ XMLp(std::ostream& out, GCPtr<AST> ast, std::string pad, bool showLoc)
     }
   }
  
-  if (ast->children->size()) {
+  if (ast->children.size()) {
     out << ">\n";
-    for(unsigned i = 0; i < ast->children->size(); i++)
+    for (unsigned i = 0; i < ast->children.size(); i++)
       XMLp(out, ast->child(i), pad + "   ", showLoc);
     out << pad
 	<< "</" 
@@ -101,7 +100,7 @@ XMLp(std::ostream& out, GCPtr<AST> ast, std::string pad, bool showLoc)
 }
 
 static void
-XMLd(std::ostream& out, GCPtr<AST> ast, bool showLoc)
+XMLd(std::ostream& out, shared_ptr<AST> ast, bool showLoc)
 {
   out << "<"
       << AST::tagName(ast->astType)
@@ -118,14 +117,14 @@ XMLd(std::ostream& out, GCPtr<AST> ast, bool showLoc)
   if (showLoc)
     out << " loc=\"" + ast->loc.asString() + "\"";
 
-  if(ast->astType == at_ident) {
+  if (ast->astType == at_ident) {
 
     out << " idType=\""
         << identTypeToString(ast->identType)
         << "\"";
 
     out << " Sym=\"";
-    if(!ast->symbolDef) {
+    if (!ast->symbolDef) {
       out << "DEF"
 	  << "\"";
     }
@@ -138,9 +137,9 @@ XMLd(std::ostream& out, GCPtr<AST> ast, bool showLoc)
     }
   }
 
-  if (ast->children->size()) {
+  if (ast->children.size()) {
     out << ">";
-    for(unsigned i = 0; i < ast->children->size(); i++)
+    for (unsigned i = 0; i < ast->children.size(); i++)
       XMLd(out, ast->child(i), showLoc);
     out << "</" 
 	<< AST::tagName(ast->astType)
@@ -152,14 +151,14 @@ XMLd(std::ostream& out, GCPtr<AST> ast, bool showLoc)
 }
 
 bool
-XMLpp(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc)
+XMLpp(std::ostream& out, std::ostream& err, shared_ptr<UocInfo> uoc)
 {
   XMLp(out, uoc->uocAst, "", false);
   return true;
 }
 
 bool
-XMLdump(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc)
+XMLdump(std::ostream& out, std::ostream& err, shared_ptr<UocInfo> uoc)
 {
   XMLd(out, uoc->uocAst, false);
   out << std::endl;
@@ -193,19 +192,19 @@ xmlMangle(std::string idName)
 }
 
 static void
-emitXMLType(INOstream &out, std::string name, GCPtr<TypeScheme> ts,
+emitXMLType(INOstream &out, std::string name, shared_ptr<TypeScheme> ts,
 	    bool raw=false)
 {
-  TvPrinter *tvP=NULL;
-  if(!raw)
-    tvP = new TvPrinter;
+  shared_ptr<TvPrinter> tvP = GC_NULL;
+  if (!raw)
+    tvP = TvPrinter::make();
   
   out << "<tqExpr>" << endl;
   out.more();
 
   out << "<id name='" << xmlMangle(name) << "'/>" << endl;
   
-  if(!ts)
+  if (!ts)
     out <<  "<unknown/>" << endl;
   else
     ts->asXML(tvP, out);
@@ -215,7 +214,7 @@ emitXMLType(INOstream &out, std::string name, GCPtr<TypeScheme> ts,
 }
 
 static void 
-XMLtypes(INOstream &out, GCPtr<AST> ast, bool raw=false)
+XMLtypes(INOstream &out, shared_ptr<AST> ast, bool raw=false)
 {
   switch(ast->astType) {
   case at_ident:
@@ -233,7 +232,7 @@ XMLtypes(INOstream &out, GCPtr<AST> ast, bool raw=false)
       out << "<btypes:TYPE>" << endl;
       out.more();
       out << "<text content='";
-      if(ast->astType == at_interface) {
+      if (ast->astType == at_interface) {
 	i=1;
 	out << "*** Interface: " << ast->child(0)->s << " ***";
       }
@@ -242,7 +241,7 @@ XMLtypes(INOstream &out, GCPtr<AST> ast, bool raw=false)
       }
       out << "'/>" << endl;
       out << "<br/>" << endl;
-      for(; i<ast->children->size(); i++) {
+      for (; i<ast->children.size(); i++) {
 	XMLtypes(out, ast->child(i), raw);
 	out << "<br/>" << endl;
       }      
@@ -281,7 +280,7 @@ XMLtypes(INOstream &out, GCPtr<AST> ast, bool raw=false)
 }
 
 void 
-XML_types_PP(std::ostream &out, GCPtr<AST> ast, bool raw=false)
+XML_types_PP(std::ostream &out, shared_ptr<AST> ast, bool raw=false)
 {
   INOstream ino(out);
   XMLtypes(ino, ast, raw);
@@ -289,9 +288,8 @@ XML_types_PP(std::ostream &out, GCPtr<AST> ast, bool raw=false)
 
 
 bool
-XMLtypesPP(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc)
+XMLtypesPP(std::ostream& out, std::ostream& err, shared_ptr<UocInfo> uoc)
 {
   XML_types_PP(out, uoc->uocAst, false);
   return true;
 }
-

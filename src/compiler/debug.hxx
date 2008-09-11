@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -40,17 +40,17 @@
 
 #include <assert.h>
 
-#define DEBUG_ON  if(1)
-#define DEBUG_OFF if(0)
+#define DEBUG_ON  if (1)
+#define DEBUG_OFF if (0)
 #define DEBUG_VERBOSE true
 
 #define BEG_SIMP_DEBUG    DEBUG_OFF
 #define ILH_DEBUG         DEBUG_OFF   // Inst-Lambda-Hoist
-#define INST_DEBUG        DEBUG_OFF
-#define INST_ENV_DEBUG    DEBUG_OFF
+#define INST_DEBUG        DEBUG_OFF   // Debug Polyinstantiation
+#define INST_ENV_DEBUG    DEBUG_OFF   // Debug Polyinstantiator's env-handling
 #define REPR_SIMP_DEBUG   DEBUG_OFF
 #define UNION_INF_DEBUG   DEBUG_OFF   
-#define DEF_INF_DEBUG     DEBUG_OFF   
+#define DEF_INF_DEBUG     DEBUG_OFF 
 #define TI_TOP_DEBUG      DEBUG_OFF   // Inference Top-Loop
 #define CLCONV_DEBUG      DEBUG_OFF
 #define GEN_DEBUG_TL      DEBUG_OFF   // Treat all generalization as local
@@ -66,5 +66,6 @@
 #define TRAIL_DEBUG       DEBUG_OFF   // Debug Type Linking
 #define TS_NORM_DEBUG     DEBUG_OFF   // Debug TypeScheme Normalization
 #define TYPE_ACC_DEBUG    DEBUG_OFF
-
+#define DEF_DECL_DEBUG    DEBUG_OFF   // Debug Definition-Declaration consistency checking
+                          
 #endif /* DEBUG_HXX */

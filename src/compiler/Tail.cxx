@@ -52,12 +52,13 @@
 #include "TypeInfer.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
 
 void
-markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
+markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTail)
 {
   //std::cout << ast->astTypeName() << ": " << isTail << std::endl;
 
@@ -171,9 +172,9 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
 
   case at_ident:
     {
-      if(ast->symbolDef == fn && isTail) {
+      if (ast->symbolDef == fn && isTail) {
 	//std::cout << "Marked " << ast->s << " at " << ast->loc << endl; 
-	ast->Flags |= (SELF_TAIL);
+	ast->flags |= (SELF_TAIL);
       }
       
       break;
@@ -189,7 +190,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_module:
     {
       size_t c = (ast->astType == at_module)?0:1;
-      for(; c < ast->children->size(); c++)
+      for (; c < ast->children.size(); c++)
 	markTail(ast->child(c), fn, bps, isTail); 
 
       break;
@@ -198,7 +199,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_define:
   case at_recdef:
     {
-      if(ast->child(1)->astType == at_lambda) {
+      if (ast->child(1)->astType == at_lambda) {
 	ast->child(0)->child(0)->defbps = ast->child(1)->child(0);
 	markTail(ast->child(1)->child(1), 
 		 ast->child(0)->child(0), 
@@ -221,9 +222,9 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
     
   case at_begin:
     {
-      //     for (size_t i = 0; i < ast->children->size() - 1; i++)
+      //     for (size_t i = 0; i < ast->children.size() - 1; i++)
       //       markTail(ast->child(i), fn, bps, false);
-      markTail(ast->child(ast->children->size() - 1), fn, bps, isTail);
+      markTail(ast->child(ast->children.size() - 1), fn, bps, isTail);
       break;
     }
     
@@ -265,7 +266,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_apply:
     {
       markTail(ast->child(0), fn, bps, isTail);
-      //       for (size_t i = 1; i < ast->children->size(); i++)
+      //       for (size_t i = 1; i < ast->children.size(); i++)
       // 	markTail(ast->child(i), fn, bps, false);
 	
       break;
@@ -274,7 +275,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_ucon_apply:
   case at_struct_apply:
     {
-      //       for(size_t c = 1; c < ast->children->size(); c++)
+      //       for (size_t c = 1; c < ast->children.size(); c++)
       // 	markTail(ast->child(i), fn, bps, false);
       
       break;
@@ -308,7 +309,7 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_setClosure:
   case at_copyREF:
     {
-      for(size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	markTail(ast->child(c), fn, bps, isTail);
       break;
     }
@@ -316,8 +317,8 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_switch:
   case at_try:
     {
-      for(size_t c = 0; c < ast->children->size(); c++)
-	if(c != IGNORE(ast))
+      for (size_t c = 0; c < ast->children.size(); c++)
+	if (c != IGNORE(ast))
 	  markTail(ast->child(c), fn, bps, isTail);
       break;
     }
@@ -339,9 +340,9 @@ markTail(GCPtr<AST> ast, GCPtr<AST> fn, GCPtr<AST> bps, bool isTail)
   case at_letrec:
   case at_letStar:
     {
-      //       GCPtr<AST> lbs = ast->child(0);
-      //       for(size_t c = 0; c < lbs->children->size(); c++) {
-      // 	GCPtr<AST> lb = lbs->child(c);
+      //       shared_ptr<AST> lbs = ast->child(0);
+      //       for (size_t c = 0; c < lbs->children.size(); c++) {
+      // 	shared_ptr<AST> lb = lbs->child(c);
       // 	markTail(lb->child(1), fn, bps, false);
       //       }
       markTail(ast->child(1), fn, bps, isTail);
@@ -357,8 +358,8 @@ UocInfo::be_tail(std::ostream& errStream,
 {
   bool errFree = true;
 
-  GCPtr<UocInfo> uoc = this;
+  shared_ptr<UocInfo> uoc = shared_from_this();
   
-  markTail(uoc->uocAst, NULL, NULL, true);
+  markTail(uoc->uocAst, GC_NULL, GC_NULL, true);
   return errFree;
 }

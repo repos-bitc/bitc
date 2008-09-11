@@ -1,6 +1,6 @@
 /**************************************************************************
-" *
- * Copyright (C) 2006, Johns Hopkins University.
+ *
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,6 +35,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -42,13 +43,11 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
 
-#include "UocInfo.hxx"
+#include <libsherpa/UExcept.hxx>
+
 #include "Options.hxx"
+#include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
@@ -60,12 +59,13 @@
 #include "Typeclass.hxx"
 #include "machine-dep.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
 unsigned long long Type::typeCount=0;
-GCPtr<Type> Type::Kmono = new Type(ty_kfix);
-GCPtr<Type> Type::Kpoly = new Type(ty_kfix);
+shared_ptr<Type> Type::Kmono = Type::make(ty_kfix);
+shared_ptr<Type> Type::Kpoly = Type::make(ty_kfix);
 
 static struct {
   const char *nm;
@@ -152,66 +152,83 @@ Type::getRefKind(const Kind valKind)
 }
 
 
-GCPtr<const Type> 
+shared_ptr<const Type> 
 Type::getTypePrim() const
 { 
-  GCPtr<const Type> curr = this;
-  while(curr->link)
+  shared_ptr<const Type> curr = shared_from_this();
+  while (curr->link)
     curr = curr->link;
   
   return curr;
 }
 
-GCPtr<Type> 
+shared_ptr<Type> 
 Type::getTypePrim()
 { 
-  GCPtr<Type> curr = this;
-  while(curr->link)
+  shared_ptr<Type> curr = shared_from_this();
+  while (curr->link)
     curr = curr->link;
   
   return curr;
 }
- 
 
-GCPtr<Type> 
-Type::getType()
+
+// Normalize Mutability Constructor Idempotence
+// Deal with the fact that 
+// (mutable (mutable t)) == (mutable t)
+// We cannot avoid this type of linkage because of a structure
+// getting parametrized over a mutable type while having a mutable
+// wrapper at the field level.  
+shared_ptr<Type> 
+Type::normalize_mut()
 { 
-  GCPtr<Type> t = getTypePrim();
+  shared_ptr<Type> t = getTypePrim();
+  shared_ptr<Type> in = t;
   
-  // Deal with the fact that 
-  // (mutable (mutable t)) == (mutable t)
-  // We cannot avoid this type of linkage because of a structure
-  // getting parametrized over a mutable type while having a mutable
-  // wrapper at the field level.  
-  if(t->kind == ty_mutable) {    
-    GCPtr<Type> in = t->Base()->getTypePrim();
-    while(in->kind == ty_mutable) {
-      t = in;
-      in = t->Base()->getTypePrim();
-    }
+  while (in->kind == ty_mutable) {
+    t = in;
+    in = in->Base()->getTypePrim();
   }
   
-  // Maybe types may not be recursively nested, But a MbFull
-  // might contain an MbTop.
-  if(t->kind == ty_mbFull || t->kind == ty_mbTop) {
-    GCPtr<Type> in = t->Var()->getTypePrim();
+  return t;
+}
+ 
+shared_ptr<Type> 
+Type::getType()
+{ 
+  shared_ptr<Type> t = normalize_mut();
+  
+  // Maybe-types must be handled with special care:
+  // mbTop can only be of the form 'a!t where the Var() part is a
+  // type variable. If the Var() part of this mbTop type is not a
+  // type variable, then, it has unified with some other type,
+  // and we must follow that link.
+  // mbFull can be of the form 'a!t or M'a|t. Otherwise, we follow
+  // the link to whatever type the Var() part has unified with.
+  // Maybe types may not be recursively nested.
+  // The Var() part of an mbTop must only be linked to 
+  // (be substituted by) an unconstrained type./
+  // The Var() part of an mbFull can be linked to an mbTop type or an
+  // unconstrained type.
 
-    assert(in->kind != ty_mbFull);
+  if (t->kind == ty_mbFull) {
+    shared_ptr<Type> in = t->Var()->normalize_mut();
+    shared_ptr<Type> within = ((in->kind == ty_mutable) ?
+			       in->Base()->getTypePrim(): in);
     
-    if(in->kind == ty_mbTop) {
+    if(within->kind != ty_tvar)
       t = in;
-      in = in->Var()->getTypePrim();
-    }
-    
-    assert(in->kind != ty_mbFull && in->kind != ty_mbTop);
-    
+  }
+
+  if(t->kind == ty_mbTop) {
+    shared_ptr<Type> in = t->Var()->normalize_mut();
     if(in->kind != ty_tvar)
       t = in;
   }
 
-  if(t->kind == ty_mbFull || t->kind == ty_mbTop) {
-    GCPtr<Type> var = t->Var()->getTypePrim();
-    GCPtr<Type> core = t->Core()->getTypePrim();
+  if (t->kind == ty_mbFull || t->kind == ty_mbTop) {
+    shared_ptr<Type> var = t->Var()->normalize_mut();
+    shared_ptr<Type> core = t->Core()->normalize_mut();
     
     if (var == core)
       t = core;
@@ -220,83 +237,83 @@ Type::getType()
   return t;
 }
 
-GCPtr<const Type> 
+shared_ptr<const Type> 
 Type::getType() const
 { 
-  GCPtr<const Type> t = getTypePrim();
+  shared_ptr<const Type> t = getTypePrim();
   
-  if(t->kind == ty_mutable) {    
-    GCPtr<Type> in = t->components->elem(0)->typ->getTypePrim();
-    while(in->kind == ty_mutable) {
+  if (t->kind == ty_mutable) {    
+    shared_ptr<Type> in = t->components[0]->typ->getTypePrim();
+    while (in->kind == ty_mutable) {
       t = in;
-      in = t->components->elem(0)->typ->getTypePrim();
+      in = t->components[0]->typ->getTypePrim();
     }
   }
   
   return t;
 }
 
-GCPtr<Type> 
+shared_ptr<Type> 
 Type::getBareType()
 { 
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK10)
+  if (t->mark & MARK_GET_BARE_TYPE)
     return t;
   
-  t->mark |= MARK10;
+  t->mark |= MARK_GET_BARE_TYPE;
 
-  GCPtr<Type> retType = t;
+  shared_ptr<Type> retType = t;
 
-  if(t->isMaybe())
+  if (t->isMaybe())
     retType = t->Core()->getBareType();  
   
-  if(t->isMutable())
+  if (t->isMutable())
     retType = t->Base()->getBareType();  
 
-  t->mark &= ~MARK10;
+  t->mark &= ~MARK_GET_BARE_TYPE;
   return retType;
 }
 
-GCPtr<Type> 
+shared_ptr<Type> 
 Type::getTheType(bool mutableOK, bool maybeOK)
 { 
-  GCPtr<Type> t = getType();  
+  shared_ptr<Type> t = getType();  
 
-  if(t->mark & MARK11)
+  if (t->mark & MARK_GET_THE_TYPE)
     return t;
   
-  t->mark |= MARK11;
+  t->mark |= MARK_GET_THE_TYPE;
 
-  GCPtr<Type> retType = t;
+  shared_ptr<Type> retType = t;
   
-  if((t->kind == ty_mutable) && !mutableOK)
+  if ((t->kind == ty_mutable) && !mutableOK)
     retType = t->Base()->getTheType(mutableOK, maybeOK);
-  else if(t->isMaybe() && !maybeOK)
+  else if (t->isMaybe() && !maybeOK)
     retType = t->Core()->getTheType(mutableOK, maybeOK);
   
-  t->mark &= ~MARK11;
+  t->mark &= ~MARK_GET_THE_TYPE;
   return retType;
 }
 
 bool
 Type::isTvar()
 {
-  GCPtr<Type> t = getBareType();  
+  shared_ptr<Type> t = getBareType();  
   return (t->kind == ty_tvar);
 }
 
 bool
 Type::isUnifiableTvar(size_t flags)
 {
-  GCPtr<Type> t = getType();
-  if(t->kind != ty_tvar)
+  shared_ptr<Type> t = getType();
+  if (t->kind != ty_tvar)
     return false;
   
-  if(flags & UN_IGN_RIGIDITY)
+  if (flags & UN_IGN_RIGIDITY)
     return true;
   
-  if((t->flags & TY_RIGID) == 0)
+  if ((t->flags & TY_RIGID) == 0)
     return true;
 
   return false;
@@ -305,8 +322,8 @@ Type::isUnifiableTvar(size_t flags)
 bool
 Type::isUnifiableMbTop(size_t flags)
 {
-  GCPtr<Type> t = getType();
-  if(t->kind != ty_mbTop)
+  shared_ptr<Type> t = getType();
+  if (t->kind != ty_mbTop)
     return false;
   
   return t->Var()->isUnifiableTvar(flags);
@@ -315,38 +332,43 @@ Type::isUnifiableMbTop(size_t flags)
 bool
 Type::isUnifiableMbFull(size_t flags)
 {
-  GCPtr<Type> t = getType();
-  if(t->kind != ty_mbFull)
+  shared_ptr<Type> t = getType();
+  if (t->kind != ty_mbFull)
     return false;
   
-  return t->Var()->isUnifiableTvar(flags);
+  shared_ptr<Type> var = t->Var()->getType();
+  
+  if(var->isMutable())
+    var = var->Base()->getType();
+  
+  return var->isUnifiableTvar(flags);
 }
 
 bool 
 Type::isAtomic()
 {
-  GCPtr<Type> t = getBareType();  
+  shared_ptr<Type> t = getBareType();  
   return kindInfo[t->kind].isAtomic;
 }
 
 bool 
 Type::isSimpleTypeForC()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   return kindInfo[t->kind].isSimpleTypeForC;
 }
 
 bool 
 Type::isScalar()
 {
-  GCPtr<Type> t = getBareType();  
+  shared_ptr<Type> t = getBareType();  
   return kindInfo[t->kind].isScalarType;
 }
 
 bool 
 Type::isRefType()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   return kindInfo[t->kind].isRefType;
 }
 
@@ -359,14 +381,46 @@ Type::isValType()
 bool 
 Type::isByrefType()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   return (t->kind == ty_byref);
 }
 
 bool 
+Type::isNullableType()
+{
+  shared_ptr<Type> t = getBareType();
+  return (t->kind == ty_unionv &&
+	  (t->defAst->flags & NULLABLE_UN));
+}
+
+
+// Is the current type constrained by (ref-types t) 
+// within the constraint set tcc?
+bool 
+Type::isConstrainedToRefType(boost::shared_ptr<TCConstraints> tcc)
+{
+  shared_ptr<Type> t = getType();
+  
+  for (TypeSet::iterator itr = tcc->begin(); itr != tcc->end(); ++itr) {
+    shared_ptr<Typeclass> pred = (*itr);
+    
+    const std::string &ref_types = SpecialNames::spNames.sp_ref_types; 
+    
+    if (pred->defAst->s == ref_types) {
+      shared_ptr<Type> arg = pred->TypeArg(0)->getType();
+      if (strictlyEquals(arg, false, true))
+	return true;
+    }
+  }
+
+  return false;
+}
+
+
+bool 
 Type::isFnxn()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   return (t->kind == ty_fn);
 }
 
@@ -402,7 +456,7 @@ Type::isBaseConstType()
 bool 
 Type::isClosure()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   return (t->kind == ty_fn);
 }
 //#endif
@@ -410,25 +464,25 @@ Type::isClosure()
 bool 
 Type::isMutable()
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   return t->kind == ty_mutable;
 }
 
 bool 
 Type::isMaybe()
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   return (t->kind == ty_mbTop || t->kind == ty_mbFull);
 }
  
 bool 
 Type::isMbVar()
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
-  GCPtr<Type> v = t->Var();
+  shared_ptr<Type> v = t->Var();
   TYPE_ACC_DEBUG 
-    if(t->kind == ty_mbFull)
+    if (t->kind == ty_mbFull)
       assert(v->kind != ty_mbFull);
     else
       assert(v->kind != ty_mbFull && v->kind != ty_mbTop);
@@ -439,27 +493,27 @@ Type::isMbVar()
 bool 
 Type::isPrimInt()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   return kindInfo[t->kind].isPrimInt;
 }
 
 bool 
 Type::isPrimFloat()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   return kindInfo[t->kind].isPrimFloat;
 }
 
 bool 
 Type::isPrimaryType()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   return (kindInfo[t->kind].isPrimary);
 }
 bool 
 Type::isInteger()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   switch(t->kind) {
   case ty_int8:
   case ty_int16:
@@ -481,14 +535,14 @@ Type::isInteger()
 bool 
 Type::isbool()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   return (t->kind == ty_bool);
 }
 
 bool 
 Type::isIntegral()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   switch(t->kind) {
   case ty_int8:
   case ty_int16:
@@ -512,7 +566,7 @@ Type::isIntegral()
 size_t 
 Type::nBits()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   switch(t->kind) {
   case ty_bool:
     return 1;
@@ -549,7 +603,7 @@ Type::nBits()
 bool 
 Type::isFloat()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   switch(t->kind) {
   case ty_float:
   case ty_double:
@@ -563,14 +617,14 @@ Type::isFloat()
 bool
 Type::isTypeClass()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   return (t->kind == ty_typeclass);    
 }
 
 bool
 Type::isPcst()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   return (t->kind == ty_pcst);    
 }
 
@@ -579,22 +633,22 @@ Type::isPcst()
 bool 
 Type::isUnion(bool ignMut) 
 {
-  GCPtr<Type> t = ((ignMut) ? getBareType() : getType());
+  shared_ptr<Type> t = ((ignMut) ? getBareType() : getType());
   return (((t->kind == ty_unionv) || (t->kind == ty_unionr)) &&
-	  (t->components->size() != 0));
+	  (t->components.size()));
 }
 
 bool 
 Type::isUcon(bool ignMut) 
 {
-  GCPtr<Type> t = ((ignMut) ? getBareType() : getType());
+  shared_ptr<Type> t = ((ignMut) ? getBareType() : getType());
   return ((t->kind == ty_uconv) || (t->kind == ty_uconr));
 }
 
 bool 
 Type::isUval(bool ignMut) 
 {
-  GCPtr<Type> t =  ((ignMut) ? getBareType() : getType());
+  shared_ptr<Type> t =  ((ignMut) ? getBareType() : getType());
   return ((t->kind == ty_uvalv) || (t->kind == ty_uvalr));
 }
 
@@ -613,12 +667,12 @@ Type::isUType(bool ignMut)
 bool
 Type::isDeepMut()
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK22)
+  if (t->mark & MARK_IS_DEEP_MUT)
     return true;
   
-  t->mark |= MARK22;
+  t->mark |= MARK_IS_DEEP_MUT;
   
   bool mut = false;
   
@@ -631,10 +685,10 @@ Type::isDeepMut()
     break;
 
   default:
-    for(size_t i=0;!mut &&  i < t->components->size(); i++)
+    for (size_t i=0;!mut &&  i < t->components.size(); i++)
       mut = t->CompType(i)->isDeepMut();
    
-    for(size_t i=0; !mut && i < t->typeArgs->size(); i++)
+    for (size_t i=0; !mut && i < t->typeArgs.size(); i++)
       mut = t->TypeArg(i)->isDeepMut();
 
     // No need to check functional dependencies
@@ -643,19 +697,19 @@ Type::isDeepMut()
     break;
   }
   
-  t->mark &= ~MARK22;
+  t->mark &= ~MARK_IS_DEEP_MUT;
   return mut;
 }
   
 bool 
 Type::isDeepImmut()
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK23)
+  if (t->mark & MARK_IS_DEEP_IMMUT)
     return true;
   
-  t->mark |= MARK23;
+  t->mark |= MARK_IS_DEEP_IMMUT;
   
   bool immut = true;
   
@@ -669,10 +723,10 @@ Type::isDeepImmut()
     break;
     
   default:
-    for(size_t i=0; immut && i < t->components->size(); i++)
+    for (size_t i=0; immut && i < t->components.size(); i++)
       immut = t->CompType(i)->isDeepImmut();
     
-    for(size_t i=0; immut && i < t->typeArgs->size(); i++)
+    for (size_t i=0; immut && i < t->typeArgs.size(); i++)
       immut = t->TypeArg(i)->isDeepImmut();
 
     // No need to check functional dependencies
@@ -682,19 +736,19 @@ Type::isDeepImmut()
     break;
   }
 
-  t->mark &= ~MARK23;
+  t->mark &= ~MARK_IS_DEEP_IMMUT;
   return immut;  
 }
 
 bool 
 Type::isConcretizable()
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   
-  if(t->mark & MARK7)
+  if (t->mark & MARK_IS_CONCRETIZABLE)
     return true;
   
-  t->mark |= MARK7;
+  t->mark |= MARK_IS_CONCRETIZABLE;
   
   bool concretizable = true;
   
@@ -711,48 +765,90 @@ Type::isConcretizable()
     break;
     
   default:
-    for(size_t i=0; concretizable && i < t->components->size(); i++)
-      concretizable = t->CompType(i)->isConcretizable();
-    
-    for(size_t i=0; concretizable && i < t->typeArgs->size(); i++)
+    for (size_t i=0; concretizable && i < t->typeArgs.size(); i++)
       concretizable = t->TypeArg(i)->isConcretizable();
-    
-    // No need to check functional dependencies
-    // May lead to error if checked because functional dependencies
-    // might be on types that are used within a function constructor
     break;
   }
   
-  t->mark &= ~MARK7;
+  t->mark &= ~MARK_IS_CONCRETIZABLE;
   return concretizable;  
 }
 
+bool 
+Type::isShallowConcretizable()
+{
+  shared_ptr<Type> t = getType();
+  
+  if (t->mark & MARK_IS_SHALLOW_CONCRETIZABLE)
+    return true;
+  
+  t->mark |= MARK_IS_SHALLOW_CONCRETIZABLE;
+  
+  bool concretizable = true;
+  
+  switch(t->kind) {
+  case ty_tvar:
+    concretizable = false;
+    break;
+
+  case ty_mbTop:
+  case ty_mbFull:
+    concretizable = t->Core()->isShallowConcretizable();
+    
+  case ty_mutable:
+  case ty_array:
+    concretizable = t->Base()->isShallowConcretizable();
+    break;
+    
+  case ty_structv:
+  case ty_unionv:
+  case ty_uvalv:
+  case ty_uconv:
+    for (size_t i=0; concretizable && i < t->typeArgs.size(); i++)
+      concretizable = t->TypeArg(i)->isShallowConcretizable();
+    break;
+
+  default:
+    break;
+  }
+  
+  t->mark &= ~MARK_IS_SHALLOW_CONCRETIZABLE;
+  return concretizable;  
+}
+
+void 
+Type::normalize(boost::shared_ptr<Trail> trail)
+{
+  normalize_mbFull(trail);
+}
+
+
 /* Produce Type ty_union[rv] from ty_ucon[rv] or ty_uval[rv]
    ONLY typeArgs are populated */
-GCPtr<Type> 
+shared_ptr<Type> 
 Type::getUnionType()
 {
-  GCPtr<Type> uType = getType();
+  shared_ptr<Type> uType = getType();
   assert(uType->isUType());
-  GCPtr<Type> uCopy = uType->getType()->getDCopy();
-  GCPtr<Type> t = uCopy->getBareType();
+  shared_ptr<Type> uCopy = uType->getType()->getDCopy();
+  shared_ptr<Type> t = uCopy->getBareType();
   t->kind = (uType->isRefType() ? ty_unionr : ty_unionv);
   t->defAst = t->myContainer;
-  t->components->erase();
+  t->components.clear();
   return uCopy;
 }
 
 bool 
 Type::isException() 
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   return (t->kind == ty_exn);
 }
 
 bool 
 Type::isStruct()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
 
   // WAS  return (((t->kind == ty_structv) || 
   //               (t->kind == ty_structr)) &&
@@ -764,13 +860,13 @@ Type::isStruct()
 bool 
 Type::isDecl()
 {
-  GCPtr<Type> t = getBareType();
+  shared_ptr<Type> t = getBareType();
   switch(t->kind) {
   case ty_unionv:
   case ty_unionr:
   case ty_structv:
   case ty_structr:
-    return (t->components->size() == 0);
+    return (t->components.empty());
 
   default:
     return false;
@@ -782,13 +878,13 @@ Type::isOfInfiniteType()
 {
   bool infType = false;
 
-  if(getType() != this)
+  if (getType() != shared_from_this())
     return getType()->isOfInfiniteType();
 
-  if(mark & MARK6) 
+  if (mark & MARK_IS_OF_INFINITE_TYPE) 
     return true;
 
-  mark |= MARK6;
+  mark |= MARK_IS_OF_INFINITE_TYPE;
 
   switch(kind) {
   case ty_tvar:
@@ -838,8 +934,6 @@ Type::isOfInfiniteType()
   case ty_uvalr:
   case ty_unionv:
   case ty_unionr:
-  case ty_reprr:
-  case ty_reprv:
   case ty_typeclass:
   case ty_array:
   case ty_vector:
@@ -847,18 +941,17 @@ Type::isOfInfiniteType()
   case ty_byref:
   case ty_mutable:
   case ty_exn:
-  case ty_subtype:
   case ty_pcst:
     {      
-      for(size_t i=0; !infType && (i < typeArgs->size()); i++)
-      	if(TypeArg(i)->isOfInfiniteType())
+      for (size_t i=0; !infType && (i < typeArgs.size()); i++)
+      	if (TypeArg(i)->isOfInfiniteType())
       	  infType = true;
 
       break;
     }
   }
   
- mark &= ~MARK6;
+ mark &= ~MARK_IS_OF_INFINITE_TYPE;
  return infType;
 }
 
@@ -881,7 +974,7 @@ Type::isOfInfiniteType()
 bool
 Type::needsCaptureConversion()
 {
-  GCPtr<Type> t = getType();
+  shared_ptr<Type> t = getType();
   if (t->isMutable())
     return true;
   if (t->isFnxn())
@@ -900,42 +993,42 @@ Type::needsCaptureConversion()
 bool 
 Type::isConcrete()
 {
-  GCPtr< CVector<GCPtr<Type> > > tvs = new CVector<GCPtr<Type> >;
+  TypeSet tvs;
   collectAllftvs(tvs);
-  return (tvs->size() == 0);
+  return (tvs.empty());
 }
 
 void 
-Type::SetTvarsTo(GCPtr<Type> t)
+Type::SetTvarsTo(shared_ptr<Type> t)
 {
-  GCPtr< CVector<GCPtr<Type> > > tvs = new CVector<GCPtr<Type> >;
+  TypeSet tvs;
   collectAllftvs(tvs);
   
-  for(size_t i=0; i < tvs->size(); i++)
-    (*tvs)[i]->getType()->link = t;
+  for (TypeSet::iterator itr = tvs.begin(); itr != tvs.end(); ++itr)
+    (*itr)->getType()->link = t;
 }
 
 void 
 Type::SetTvarsToUnit()
 {
-  GCPtr< CVector<GCPtr<Type> > > tvs = new CVector<GCPtr<Type> >;
+  TypeSet tvs;
   collectAllftvs(tvs);
   
-  for(size_t i=0; i < tvs->size(); i++) {
-    GCPtr<Type> ftv = (*tvs)[i]->getType();
-    GCPtr<Type> unit = new Type(ty_unit);
+  for (TypeSet::iterator itr = tvs.begin(); itr != tvs.end(); ++itr) {
+    shared_ptr<Type> ftv = (*itr)->getType();
+    shared_ptr<Type> unit = Type::make(ty_unit);
     ftv->link = unit;
   }
 }
   
-comp::comp(GCPtr<Type> t, unsigned long _flags) 
+comp::comp(shared_ptr<Type> t, unsigned long _flags) 
 {
   name = "";
-  typ = (GCPtr<Type> )t;
+  typ = (shared_ptr<Type> )t;
   flags=_flags;
 }
   
-comp::comp(const std::string s, GCPtr<Type> t, unsigned long _flags) 
+comp::comp(const std::string s, shared_ptr<Type> t, unsigned long _flags) 
 {
   name = s;
   typ = t;
@@ -951,20 +1044,18 @@ comp::comp(const std::string s, GCPtr<Type> t, unsigned long _flags)
 
 #define TYPE_CTR_INIT(k) do {			\
     kind = k;					\
-    defAst = GCPtr<AST>(0);			\
-    arrlen = new ArrLen(0);			\
+    defAst = GC_NULL;				\
+    arrLen = ArrLen::make(0);			\
     Isize = 0;					\
     minSignedRep = 0;				\
     minUnsignedRep = 0;				\
     mark = 0;					\
     pMark = 0;					\
-    sp = NULL;					\
-    myContainer = NULL;				\
-    link = 0;					\
+    sp = GC_NULL;				\
+    myContainer = GC_NULL;			\
+    link = GC_NULL;				\
     flags = 0;					\
-    components = new CVector<GCPtr<comp> >;     \
-    typeArgs = new CVector<GCPtr<Type> >;       \
-  } while(0);
+  } while (0);
 
 
 Type::Type(const Kind k)
@@ -973,23 +1064,23 @@ Type::Type(const Kind k)
   TYPE_CTR_INIT(k);
 }
 
-Type::Type(const Kind k, GCPtr<Type> child)
+Type::Type(const Kind k, shared_ptr<Type> child)
   : uniqueID(genTypeID())
 {
   TYPE_CTR_INIT(k);
-  components->append(new comp(child));
+  components.push_back(comp::make(child));
 }
 
-Type::Type(const Kind k, GCPtr<Type> child1, GCPtr<Type> child2)
+Type::Type(const Kind k, shared_ptr<Type> child1, shared_ptr<Type> child2)
   : uniqueID(genTypeID())
 {
   TYPE_CTR_INIT(k);
-  components->append(new comp(child1));
-  components->append(new comp(child2));
+  components.push_back(comp::make(child1));
+  components.push_back(comp::make(child2));
 }
 
 // Copy constructor, except distinct uniqueID
-Type::Type(GCPtr<Type>  t)
+Type::Type(shared_ptr<Type>  t)
   : uniqueID(genTypeID())
 {
   assert(t);
@@ -997,42 +1088,33 @@ Type::Type(GCPtr<Type>  t)
   defAst = t->defAst;
   myContainer = t->myContainer;
   link = t->link;    
-  arrlen = t->arrlen; // Copies the indirection
+  arrLen = t->arrLen; // Copies the indirection
   Isize = t->Isize;
   minSignedRep = t->minSignedRep;
   minUnsignedRep = t->minUnsignedRep;
 
-  components = new CVector<GCPtr<comp> >;
-  typeArgs = new CVector<GCPtr<Type> >;
-
-  for(size_t i=0; i<t->typeArgs->size(); i++)
-    typeArgs->append(t->TypeArg(i));
-  
+  typeArgs = t->typeArgs;
+  fnDeps = t->fnDeps;
     
-  for(size_t i=0; i<t->components->size(); i++)
-    components->append(new comp(t->CompName(i), t->CompType(i), t->CompFlags(i)));
+  for (size_t i=0; i<t->components.size(); i++)
+    components.push_back(comp::make(t->CompName(i), t->CompType(i), t->CompFlags(i)));
 
-  if(t->fnDeps) {
-    fnDeps = new CVector<GCPtr<Type> >;
-    for(size_t i=0; i<t->fnDeps->size(); i++)
-      fnDeps->append(t->FnDep(i));
-  }
 
   mark = 0;
   pMark = 0;  
-  sp = NULL;
+  sp = GC_NULL;
   flags = t->flags;
 }
 
 // Makes a deep copy , but ** LINKS TVARS TO ORIGINAL ONES ** 
-GCPtr<Type> 
+shared_ptr<Type> 
 Type::getDCopy()
 {
-  GCPtr<Type> t = getType();
-  GCPtr<TypeScheme> sigma = new TypeScheme(t, NULL);
+  shared_ptr<Type> t = getType();
+  shared_ptr<TypeScheme> sigma = TypeScheme::make(t, GC_NULL);
   // sigma's ftvs are empty, therefore, TypeSpecialize will link
   // all type-variables to the original ones
-  GCPtr<Type> newTyp = sigma->type_instance_copy();
+  shared_ptr<Type> newTyp = sigma->type_instance_copy();
   newTyp->flags = flags;
   return newTyp;
 }
@@ -1050,19 +1132,20 @@ Type::getDCopy()
 // If one is still not satisfied, he can use the next function
 // strictlyEquals which removes the above two restrictions.
 bool
-Type::eql(GCPtr<Type> t, bool verbose, std::ostream &errStream,
+Type::eql(shared_ptr<Type> t, bool verbose, std::ostream &errStream,
 	  unsigned long uflags, bool keepSub,
-	  GCPtr<Trail> trail)
+	  shared_ptr<Trail> trail)
 {
   std::stringstream ss;  
   LexLoc internalLocation;
-  bool errFree = unify(ss, trail, internalLocation, this, t, uflags);
+  bool errFree = unify(ss, trail, internalLocation, 
+		       shared_from_this(), t, uflags);
   
-  if(!keepSub)
+  if (!keepSub)
     trail->rollBack();
 
-  if(verbose) {
-    if(errFree)
+  if (verbose) {
+    if (errFree)
       errStream << asString() << " === " << t->asString()
 		<< std::endl;
     else
@@ -1075,45 +1158,45 @@ Type::eql(GCPtr<Type> t, bool verbose, std::ostream &errStream,
 }
 
 bool
-Type::equals(GCPtr<Type> t, bool verbose, std::ostream &errStream)
+Type::equals(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
   return eql(t, verbose, errStream, UNIFY_TRY, false);
 }
 
 bool 
-Type::strictlyEquals(GCPtr<Type> t, bool verbose,
+Type::strictlyEquals(shared_ptr<Type> t, bool verbose,
 		     bool noAlphaRename,
 		     std::ostream &errStream)
 {
   unsigned long uflags = UNIFY_TRY | UNIFY_STRICT;
-  if(noAlphaRename)
+  if (noAlphaRename)
     uflags |= UNIFY_STRICT_TVAR;
   return eql(t, verbose, errStream, uflags, false);
 }
 
 bool
-Type::unifyWith(GCPtr<Type> t, bool verbose, 
-		GCPtr<Trail> trail, ostream &errStream)
+Type::unifyWith(shared_ptr<Type> t, bool verbose, 
+		shared_ptr<Trail> trail, ostream &errStream)
 {
   return eql(t, verbose, errStream, 0, true, trail);
 }
 
 bool 
-Type::forcedUnify(GCPtr<Type> t, bool verbose, std::ostream &errStream)
+Type::forcedUnify(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
   return eql(t, verbose, errStream, 
 	     UN_IGN_RIGIDITY, true);
 }
 
 bool
-Type::equalsA(GCPtr<Type> t, bool verbose, std::ostream &errStream)
+Type::equalsA(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
   return eql(t, verbose, errStream, 
 	     UNIFY_TRY | UN_IGN_RIGIDITY, false);
 }
 
 bool 
-Type::strictlyEqualsA(GCPtr<Type> t, bool verbose,
+Type::strictlyEqualsA(shared_ptr<Type> t, bool verbose,
 		      std::ostream &errStream)
 {
   return eql(t, verbose, errStream, 
@@ -1123,10 +1206,11 @@ Type::strictlyEqualsA(GCPtr<Type> t, bool verbose,
 bool
 Type::allTvarsRigid()
 {
-  GCPtr< CVector<GCPtr<Type> > > ftvs = new CVector<GCPtr<Type> >;
+  TypeSet ftvs;
   getType()->collectAllftvs(ftvs);
-  for(size_t i=0; i < ftvs->size(); i++) 
-    if((ftvs->elem(i)->flags & TY_RIGID) == 0)
+  for (TypeSet::iterator itr = ftvs.begin(); itr != ftvs.end(); ++itr) {
+    if (((*itr)->flags & TY_RIGID) == 0)
       return false;
+  }
   return true;
 }

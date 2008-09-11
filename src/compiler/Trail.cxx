@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -36,22 +36,23 @@
  **************************************************************************/
 
 #include <stdlib.h>
+#include <assert.h>
+
+
+#include "Options.hxx"
 #include "Type.hxx"
 #include "Trail.hxx"
-#include "Options.hxx"
-#include <assert.h>
-#include <libsherpa/CVector.hxx>
-#include "Eliminate.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 void
-Trail::link(GCPtr<Type> from, GCPtr<Type> to)
+Trail::link(shared_ptr<Type> from, shared_ptr<Type> to)
 {  
   from = from->getType();
   to = to->getType();
   
-  if(to->boundInType(from)) {
+  if (to->boundInType(from)) {
     std::cerr << "CYCLIC SUBSTITUTION "
 	      << from->asString(Options::debugTvP)
 	      << " |-> "
@@ -67,19 +68,19 @@ Trail::link(GCPtr<Type> from, GCPtr<Type> to)
 	      << to->asString(Options::debugTvP)
 	      << std::endl;
   
-  vec->append(from);   
+  vec.push_back(from);   
   from->link = to; 
 } 
 
 void
-Trail::subst(GCPtr<Type> from, GCPtr<Type> to)
+Trail::subst(shared_ptr<Type> from, shared_ptr<Type> to)
 { 
   from = from->getType();
   to = to->getType();
-
+  
   assert(from->kind == ty_tvar || from->kind == ty_kvar);
   
-  if(to->boundInType(from)) {
+  if (to->boundInType(from)) {
     std::cerr << "CYCLIC SUBSTITUTION "
 	      << from->asString(Options::debugTvP)
 	      << " |-> "
@@ -96,41 +97,37 @@ Trail::subst(GCPtr<Type> from, GCPtr<Type> to)
 	      << std::endl;
 
   
-  vec->append(from);   
+  vec.push_back(from);   
   from->link = to; 
 }
 
 void
 Trail::rollBack(size_t upto)
 {
-  assert(upto <= vec->size());
-  GCPtr< CVector<GCPtr<Type> > > newVec = new CVector<GCPtr<Type> >;
+  assert(upto <= vec.size());
   
-  for(size_t i = 0; i < upto; i++)
-    newVec->append(vec->elem(i));
-
-  for(size_t i = upto; i < vec->size(); i++) {
-    vec->elem(i)->link = NULL;
+  for (size_t i = upto; i < vec.size(); i++) {
+    vec[i]->link = GC_NULL;
     TRAIL_DEBUG 
       std::cerr << "[RB] Releasing: "
-		<< vec->elem(i)->asString(Options::debugTvP)
+		<< vec[i]->asString(Options::debugTvP)
 		<< std::endl;
   }
 
-  vec = newVec;
+  vec.erase(vec.begin() + upto, vec.end());
 }
 
 void
-Trail::release(const size_t n, GCPtr<Type> rel)
+Trail::release(const size_t n, shared_ptr<Type> rel)
 {
-  assert(vec->elem(n) == rel); // not getType()
+  assert(vec[n] == rel); // not getType()
   
-  rel->link = NULL;
+  rel->link = GC_NULL;
   
   TRAIL_DEBUG 
     std::cerr << "[RB] Releasing: "
 	      << rel->asString(Options::debugTvP)
 	      << std::endl;
 
-  vec = eliminate(vec, n);
+  vec.erase(vec.begin() + n);
 }

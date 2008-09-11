@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -38,7 +38,6 @@
  *
  **************************************************************************/
 
-#include <libsherpa/Path.hxx>
 #include <libsherpa/LToken.hxx>
 #include "AST.hxx"
 
@@ -48,16 +47,16 @@ struct ParseType {
 				 * tokenizer. Used for strings,
 				 * characters, numerical values. */
 
-  GCPtr<AST> ast;
+  boost::shared_ptr<AST> ast;
 
   ParseType()
   {
-    ast = 0;
+    ast = boost::GC_NULL;
   }
 
   ~ParseType()
   {
-    ast = 0;
+    ast = boost::GC_NULL;
   }
 };
 

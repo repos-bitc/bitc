@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -39,21 +39,19 @@
  **************************************************************************/
 
 #include <string>
-#include <libsherpa/LToken.hxx>
-#include <libsherpa/CVector.hxx>
+#include "shared_ptr.hxx"
 
-#include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "UocInfo.hxx"
 
-/* Structure that isused by the specializer */
+/* Structure that is used by the specializer */
 struct spStruct {  
-  GCPtr<AST> ast; 
-  GCPtr<Type> typ;
+  boost::shared_ptr<AST> ast; 
+  boost::shared_ptr<Type> typ;
   bool lifted;
 
-  spStruct(GCPtr<AST> _ast, GCPtr<Type> _typ)
+  spStruct(boost::shared_ptr<AST> _ast, boost::shared_ptr<Type> _typ)
   {
     typ = _typ;
     ast = _ast;
@@ -86,7 +84,7 @@ struct SpecialNames {
 
   SpecialNames();
   std::string getSpName(unsigned name);
-  void fixUpSpNames(GCPtr<UocInfo> prelude);
+  void fixUpSpNames(boost::shared_ptr<UocInfo> prelude);
   static SpecialNames spNames;
 };
 

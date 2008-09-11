@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -57,22 +57,22 @@
    creating the type variable is unification of the types across all
    legs of a datastructure or expression.*/
 
-static inline GCPtr<Type> 
+static inline boost::shared_ptr<Type> 
 newTvar()
 {
-  return new Type(ty_tvar);
+  return Type::make(ty_tvar);
 }
 
-static inline GCPtr<Type> 
-MBF(GCPtr<Type> t)
+static inline boost::shared_ptr<Type> 
+MBF(boost::shared_ptr<Type> t)
 {
-  return new Type(ty_mbFull, newTvar(), t->minimizeMutability());
+  return Type::make(ty_mbFull, newTvar(), t->minimizeMutability());
 }
 
-static inline GCPtr<Type> 
-MBT(GCPtr<Type> t)
+static inline boost::shared_ptr<Type> 
+MBT(boost::shared_ptr<Type> t)
 {
-  return new Type(ty_mbTop, newTvar(), t->getBareType());
+  return Type::make(ty_mbTop, newTvar(), t->getBareType());
 }
 
 #endif /* TYPEMUT_HXX */

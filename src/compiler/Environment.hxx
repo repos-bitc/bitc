@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -38,10 +38,12 @@
  *
  **************************************************************************/
 
-#include <libsherpa/CVector.hxx>
 #include <iostream>
+#include <map>
+#include <string>
+#include <set>
 
-using namespace sherpa;
+#include "shared_ptr.hxx"
 
 // Type of (sub) environment, if any.
 // Universal, In module scope, or in record scope
@@ -62,87 +64,149 @@ using namespace sherpa;
 			      providing. */
 
 template <class T>
-struct Binding : public Countable {
+struct Binding {
   std::string nm;
-  GCPtr<T> val;
+  boost::shared_ptr<T> val;
   unsigned flags;
 
-  Binding(const std::string& _nm, GCPtr<T> _val)
+  Binding(const std::string& _nm, boost::shared_ptr<T> _val)
   {
     nm = _nm;
     val = _val;
     flags = 0;
   }
+
+  static inline boost::shared_ptr<Binding>
+  make (const std::string& _nm, boost::shared_ptr<T> _val) {
+    Binding *tmp = new Binding(_nm, _val);
+    return boost::shared_ptr<Binding>(tmp);
+  }
 };
 
 template <class T>
-struct Environment : public Countable {
+struct Environment 
+  : public boost::enable_shared_from_this<Environment<T> > {
   std::string uocName;
-  GCPtr<Environment<T> > parent; // in the chain of environments
-  GCPtr<Environment<T> > defEnv; // definition level env
+  boost::shared_ptr<Environment<T> > parent; // in the chain of environments
+  boost::shared_ptr<Environment<T> > defEnv; // definition level env
 
-  GCPtr< CVector<GCPtr<Binding<T> > > > bindings;
+  typedef typename std::map<std::string, boost::shared_ptr<Binding<T> > >::iterator iterator;
+  typedef typename std::map<std::string, boost::shared_ptr<Binding<T> > >::const_iterator const_iterator;
+  std::map<std::string, boost::shared_ptr<Binding<T> > > bindings;
 
-  GCPtr< Binding<T> >
+private:
+  boost::shared_ptr<Binding<T> > latest;
+public:
+  boost::shared_ptr<Binding<T> > getLatest() {
+    return latest;
+  }
+
+  iterator begin() {
+    return bindings.begin();
+  }
+  iterator end() {
+    return bindings.end();
+  }
+  iterator find(std::string s) {
+    return bindings.find(s);
+  }
+  const_iterator find(std::string s) const {
+    return bindings.find(s);
+  }
+  const_iterator begin() const {
+    return bindings.begin();
+  }
+  const_iterator end() const {
+    return bindings.end();
+  }
+  size_t size() const {
+    return bindings.size();
+  }
+
+
+  boost::shared_ptr< Binding<T> >
   doGetBinding(const std::string& nm) const;
 
-  GCPtr< Binding<T> >
+  boost::shared_ptr< Binding<T> >
   getLocalBinding(const std::string& nm) const;
 
   Environment(std::string _uocName)
   {
-    bindings = new CVector<GCPtr< Binding<T> > >;
     uocName = _uocName;
-    parent = 0;
-    defEnv = 0;
+    parent = boost::GC_NULL;
+    defEnv = boost::GC_NULL;
+  }
+
+  static inline boost::shared_ptr<Environment>
+  make(std::string _uocName) {
+    Environment *tmp = new Environment(_uocName);
+    return boost::shared_ptr<Environment>(tmp);
   }
 
   ~Environment();
 
-  void addBinding(const std::string& name, GCPtr<T> val, 
+  void addBinding(const std::string& name, boost::shared_ptr<T> val, 
 		  bool rebind = false);
   void
-  addDefBinding(const std::string& name, GCPtr<T> val)
+  addDefBinding(const std::string& name, boost::shared_ptr<T> val)
   {
     defEnv->addBinding(name, val);
   }
 
-  void unbind(size_t n);
   void removeBinding(const std::string& name);
 
   // Updates the most-current binding.
   void updateKey(const std::string& from, const std::string& to);
 
-  inline GCPtr<T>
+  inline boost::shared_ptr<T>
   getBinding(const std::string& nm) const
   {
-    GCPtr<const Binding<T> > binding = doGetBinding(nm);
-    return (binding ? binding->val : NULL);
+    boost::shared_ptr<const Binding<T> > binding = doGetBinding(nm);
+    if (binding) return binding->val;
+    return boost::GC_NULL;
   }
 
   inline unsigned
   getFlags(const std::string& nm)
   {
-    GCPtr<const Binding<T> > binding = doGetBinding(nm);
+    boost::shared_ptr<const Binding<T> > binding = doGetBinding(nm);
     return (binding ? binding->flags : 0);
   }
 
   inline void
   setFlags(const std::string& nm, unsigned long flags)
   {
-    GCPtr<Binding<T> > binding = doGetBinding(nm);
+    boost::shared_ptr<Binding<T> > binding = doGetBinding(nm);
     if (binding) binding->flags |= flags;
   }
 
-  void mergeBindingsFrom(GCPtr<Environment<T> > from, bool complete=true);
+  void mergeBindingsFrom(boost::shared_ptr<Environment<T> > from, bool complete=true);
   
-  GCPtr<Environment<T> > newScope();
+  boost::shared_ptr<Environment<T> > newScope();
 
-  GCPtr<Environment<T> > newDefScope();
+  boost::shared_ptr<Environment<T> > newDefScope();
 
   // Is env my ancestor?
-  bool isAncestor(GCPtr<Environment<T> > env);
+  bool isAncestor(boost::shared_ptr<Environment<T> > env);
 
   std::string asString() const;
 };
+
+// A couple of kinds of environments that we will be defining
+// elsewhere.
+
+// In abstract, an InstEnvironment is a set. In future, we may use
+// lexical resolution for instances, in which case we will either need
+// to change this or we will need to make use of lexically nested
+// instance environments.
+struct Instance;
+typedef std::set<boost::shared_ptr<Instance> > InstanceSet;
+typedef Environment<InstanceSet> InstEnvironment;
+
+struct AST;
+typedef Environment<AST> ASTEnvironment;
+
+struct TypeScheme;
+typedef Environment<TypeScheme> TSEnvironment;
+
 #endif /* ENVIRONMENT_HXX */

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <figure id="Msubtype_rules" fullwidth='yes' latex.placement="tbp">
+  <btypes:TYPE
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+    <Hrules rowsep="4pt" colsep="2">
+      <tyRule name="S-Refl">
+	<tyPre/>
+	<tyConc>
+	  <Msub>
+	    <type/>
+	    <type/>
+	  </Msub>
+	</tyConc>
+      </tyRule>
+      <tyRule name="S-Trans">
+	<tyPre>
+	  <Msub>
+	    <type num="0"/>
+	    <type num="1"/>
+	  </Msub>
+	  <Msub>
+	    <type num="1"/>
+	    <type num="2"/>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <Msub>
+	    <type num="0"/>
+	    <type num="2"/>
+	  </Msub>
+	</tyConc>
+      </tyRule>
+      <tyRule name="S-Mut">
+	<tyPre>
+	  <Msub>
+	    <ptype/>
+	    <ptype dash="'"/>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <Msub>
+	    <mutable>
+	      <ptype/>
+	    </mutable>
+	    <mutable>
+	      <ptype dash="'"/>
+	    </mutable>
+	  </Msub>
+	</tyConc>
+      </tyRule>
+      <tyRule name="S-Pair">
+	<tyPre>
+	  <Msub>
+	    <type num="1"/>
+	    <type num="1" dash="'"/>
+	  </Msub>
+	  <Msub>
+	    <type num="2"/>
+	    <type num="2" dash="'"/>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <Msub>
+	    <pair>
+	      <type num="1"/>
+	      <type num="2"/>
+	    </pair>
+	    <pair>
+	      <type num="1" dash="'"/>
+	      <type num="2" dash="'"/>
+	    </pair>
+	  </Msub>
+	</tyConc>
+      </tyRule>  
+      <tyRule name="S-MT1">
+	<tyPre>
+	  <Msub>
+	    <minzT>
+	      <ptype/>
+	    </minzT>
+	    <type/>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <Msub>
+	    <mbTop>
+	      <tvar/>
+	      <ptype/>
+	    </mbTop>
+	    <type/>
+	  </Msub>
+	</tyConc>
+      </tyRule>
+      <tyRule name="S-MT2">
+	<tyPre>
+	  <Msub>
+	    <type/>
+	    <maxzT>
+	      <ptype/>
+	    </maxzT>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <Msub>
+	    <type/>
+	    <mbTop>
+	      <tvar/>
+	      <ptype/>
+	    </mbTop>
+	  </Msub>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+    <Hrules rowsep="4pt" colsep="2">
+      <tyRule name="S-MF1">
+	<tyPre>
+	  <Msub>
+	    <minz>
+	      <ptype/>
+	    </minz>
+	    <type/>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <Msub>
+	    <mbFull>
+	      <tvar/>
+	      <ptype/>
+	    </mbFull>
+	    <type/>
+	  </Msub>
+	</tyConc>
+      </tyRule>
+      <tyRule name="S-MF2">
+	<tyPre>
+	  <Msub>
+	    <mbFull>
+	      <tvar/>
+	      <ptype/>
+	    </mbFull>
+	    <ptype dash="'"/>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <Msub>
+	    <mbFull>
+	      <mutable>
+		<tvar/>
+	      </mutable>
+	      <ptype/>
+	    </mbFull>
+	    <mutable>
+	      <ptype dash="'"/>
+	    </mutable>
+	  </Msub>
+	</tyConc>
+      </tyRule>
+      <tyRule name="S-MF3">
+	<tyPre>
+	  <Msub>
+	    <type/>
+	    <maxz>
+	      <ptype/>
+	    </maxz>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <Msub>
+	    <type/>
+	    <mbFull>
+	      <stype/>
+	      <ptype/>
+	    </mbFull>
+	  </Msub>
+	</tyConc>
+      </tyRule>
+      <tyRule name="S-Const1">
+	<tyPre>
+	  <Msub>
+	    <type/>
+	    <minz>
+	      <type dash="'"/>
+	    </minz>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <Msub>
+	    <type/>
+	    <const>
+	      <type dash="'"/>
+	    </const>
+	  </Msub>
+	</tyConc>
+      </tyRule>
+      <tyRule name="S-Const2">
+	<tyPre>
+	  <Msub>
+	    <minz>
+	      <type/>
+	    </minz>
+	    <type dash="'"/>
+	  </Msub>
+	</tyPre>
+	<tyConc>
+	  <Msub>
+	    <const>
+	      <type/>
+	    </const>
+	    <type dash="'"/>
+	  </Msub>
+	</tyConc>
+      </tyRule>
+    </Hrules>
+  </btypes:TYPE>
+  <caption>Copy Coercion Rules</caption>
+  </figure>

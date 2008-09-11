@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -39,6 +39,7 @@
    immediate lambdas, we need to hoist them and give them proper
    names so that the polyinstantiator has something to mangle. */
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -46,42 +47,54 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+
 #include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
+
 #include "AST.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 // Remove any wrapping BEGIN that has just one child.
-static GCPtr<AST> 
-beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
+static shared_ptr<AST> 
+beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 {
-  for (size_t c = 0; c < ast->children->size(); c++)
+  for (size_t c = 0; c < ast->children.size(); c++)
     ast->child(c) = beginSimp(ast->child(c), errStream, errFree);
 
   if (ast->astType == at_begin) {
-    for (size_t c = 0; c < ast->children->size(); c++) {
+    for (size_t c = 0; c < ast->children.size(); c++) {
       if (ast->child(c)->astType == at_define ||
 	  ast->child(c)->astType == at_recdef) {
 	bool rec = (ast->child(c)->astType == at_recdef);
-	GCPtr<AST> def = ast->child(c);
-	GCPtr<AST> letBinding = 
-	  new AST(at_letbinding,
+	shared_ptr<AST> def = ast->child(c);
+
+	// at_usesel is not allowed to appear in a defining occurrence
+	// of a local at_define or at_recdef.
+	//
+ 	// It might be better to catch this in the parser.
+	if (def->child(0)->child(0)->astType == at_usesel) {
+	  errStream << def->loc << ": "
+		    << "Hygienically aliased names cannot be defined locally."
+		    << std::endl;
+	  errFree = false;
+	}
+
+	shared_ptr<AST> letBinding = 
+	  AST::make(at_letbinding,
 		  def->loc, def->child(0), def->child(1));
-	if(rec)
-	  letBinding->Flags |= LB_REC_BIND;
+	if (rec)
+	  letBinding->flags |= LB_REC_BIND;
 	
 	// The definition is not a global
-	def->child(0)->child(0)->Flags &= ~ID_IS_GLOBAL;
-	GCPtr<AST> body = new AST(at_begin, ast->child(c)->loc);
+	def->child(0)->child(0)->flags &= ~ID_IS_GLOBAL;
+	shared_ptr<AST> body = AST::make(at_begin, ast->child(c)->loc);
 	
-	for (size_t bc = c+1; bc < ast->children->size(); bc++)
+	for (size_t bc = c+1; bc < ast->children.size(); bc++)
 	  body->addChild(ast->child(bc));
 	
-	if (body->children->size() == 0) {
+	if (body->children.size() == 0) {
 	  errStream << def->loc << ": "
 		    << "definition not permitted as the "
 		    << "last expression in a sequece."
@@ -90,17 +103,17 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
 	}
 	
 	// Trim the remaining children of this begin:
-	// while (ast->children->size() > c+1)
-	//   ast->children->Remove(ast->children->size()-1);
-	GCPtr<CVector<GCPtr<AST> > > newChildren = new CVector<GCPtr<AST> >;
-	for(size_t i=0; i <= c; i++)
-	  newChildren->append(ast->child(i));
+	// while (ast->children.size() > c+1)
+	//   ast->children->Remove(ast->children.size()-1);
+	std::vector<shared_ptr<AST> > newChildren;
+	for (size_t i=0; i <= c; i++)
+	  newChildren.push_back(ast->child(i));
 	ast->children = newChildren;
 	
 	// Insert the new letrec:
-	GCPtr<AST> theLetRec = 
-	  new AST((rec ? at_letrec : at_let), def->loc, 
-		  new AST(at_letbindings, def->loc, letBinding),
+	shared_ptr<AST> theLetRec = 
+	  AST::make((rec ? at_letrec : at_let), def->loc, 
+		  AST::make(at_letbindings, def->loc, letBinding),
 		  body, def->child(2));
 	ast->child(c) = beginSimp(theLetRec, errStream, errFree);
 
@@ -110,7 +123,7 @@ beginSimp(GCPtr<AST> ast, std::ostream& errStream, bool &errFree)
     }
   }
 
-  if (ast->astType == at_begin && ast->children->size() == 1)
+  if (ast->astType == at_begin && ast->children.size() == 1)
     return ast->child(0);
 
   return ast;

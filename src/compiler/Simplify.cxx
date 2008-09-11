@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,6 +35,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -42,14 +43,14 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+
 #include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
+
 #include "AST.hxx"
 #include "Type.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 // This pass exists to support GC. The idea is to ensure that every
@@ -98,22 +99,22 @@ using namespace sherpa;
 
 static unsigned long ltmpCounter = 0;
 
-static GCPtr<AST> 
-LetWrap(GCPtr<AST> ast)
+static shared_ptr<AST> 
+LetWrap(shared_ptr<AST> ast)
 {
   std::stringstream ss;
   ss << "_ltmp" << ltmpCounter++;
 
-  GCPtr<AST> let = new AST(at_let, ast->loc);
-  GCPtr<AST> letBindings = new AST(at_letbindings, ast->loc);
-  GCPtr<AST> binding = new AST(at_letbinding, ast->loc);
-  GCPtr<AST> idPattern = new AST(at_identPattern, ast->loc);
-  GCPtr<AST> id = new AST(at_ident, ast->loc);
-  GCPtr<AST> useid = new AST(at_ident, ast->loc);
+  shared_ptr<AST> let = AST::make(at_let, ast->loc);
+  shared_ptr<AST> letBindings = AST::make(at_letbindings, ast->loc);
+  shared_ptr<AST> binding = AST::make(at_letbinding, ast->loc);
+  shared_ptr<AST> idPattern = AST::make(at_identPattern, ast->loc);
+  shared_ptr<AST> id = AST::make(at_ident, ast->loc);
+  shared_ptr<AST> useid = AST::make(at_ident, ast->loc);
 
   let->addChild(letBindings);
   let->addChild(useid);
-  let->addChild(new AST(at_constraints));
+  let->addChild(AST::make(at_constraints));
 
   letBindings->addChild(binding);
 
@@ -123,8 +124,8 @@ LetWrap(GCPtr<AST> ast)
   idPattern->addChild(id);
 
   useid->s = id->s = ss.str();
-  useid->Flags |=  ID_IS_GENSYM;
-  id->Flags |= ID_IS_GENSYM;
+  useid->flags |=  ID_IS_GENSYM;
+  id->flags |= ID_IS_GENSYM;
   useid->identType = id->identType = id_value;
   assert(!ast->scheme);
   //  useid->scheme = id->scheme = ast->scheme;
@@ -139,7 +140,7 @@ LetWrap(GCPtr<AST> ast)
 // locals into a call frame structure, and rewrite the LET using
 // BEGIN and SET!.
 void
-MakeFrame(GCPtr<AST> ast, GCPtr<AST> frameBindings)
+MakeFrame(shared_ptr<AST> ast, shared_ptr<AST> frameBindings)
 {
   switch(ast->astType) {
   case at_let:
@@ -163,14 +164,14 @@ MakeFrame(GCPtr<AST> ast, GCPtr<AST> frameBindings)
   }
 
   // Do the children recursively
-  for (size_t i = 0; i < ast->children->size(); i++) {
+  for (size_t i = 0; i < ast->children.size(); i++) {
     MakeFrame(ast->child(i), frameBindings);
   }
 }
 
 
 void
-LetInsert(GCPtr<AST> ast, bool skip = false)
+LetInsert(shared_ptr<AST> ast, bool skip = false)
 {
   switch(ast->astType) {
   case at_apply:
@@ -180,8 +181,8 @@ LetInsert(GCPtr<AST> ast, bool skip = false)
       //      bool needRewrite = false;
 
       // First, figure out if we require a rewrite:
-      for (size_t c = 0; c < ast->children->size(); c++) {
-	GCPtr<AST> child = ast->child(c);
+      for (size_t c = 0; c < ast->children.size(); c++) {
+	shared_ptr<AST> child = ast->child(c);
 	LetInsert(child);
       }
 
@@ -201,7 +202,7 @@ LetInsert(GCPtr<AST> ast, bool skip = false)
     break;
   }
 
-  for (size_t i = 0; i < ast->children->size(); i++) {
+  for (size_t i = 0; i < ast->children.size(); i++) {
     LetInsert(ast->child(i));
   }
 }

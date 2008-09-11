@@ -4,9 +4,23 @@ syntax: regexp
 
 syntax: glob
 
+src/config.h
+src/config.status
+src/compiler/config.h
+src/compiler/Makefile
+src/Makefile
+src/compiler/Makefile
+src/libbitc/Makefile
+src/man/Makefile
+src/tests/Makefile
+src/tests/unit/Makefile
+
 # Emacs turds:
 *~
 \#*
+
+# Automake/autoconf turds:
+autom4te.cache
 
 callgrind.out.*
 cachegrind.out.*
@@ -56,14 +70,12 @@ src/doc/docs/dir.dev.gxml
 #dir.dev.xml
 
 # Some hand-built documents:
-src/doc/docs/bitc/core.xml
-src/doc/docs/bitc/complete.xml
-src/doc/docs/bitc/h-formal.xml
-src/doc/docs/bitc/c-formal.xml
-src/doc/docs/bitc/e-formal.xml
-src/doc/docs/bitc/mut-formal.xml
-src/doc/docs/bitc/mutinfer.xml
-src/doc/docs/bitc/sys-infer.xml
+src/doc/docs/papers/new-formal.xml
+src/doc/docs/papers/heuristic.xml
+src/doc/docs/papers/APLAS2008.xml
+src/doc/docs/papers/complete.xml
+src/doc/docs/papers/mutinfer2006.xml
+src/doc/docs/papers/mutinfer2007.xml
 
 # ELC files generated for emacs mode
 src/emacs/*.elc

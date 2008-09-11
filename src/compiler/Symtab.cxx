@@ -35,47 +35,48 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <assert.h>
 
+#include "Options.hxx"
 #include "AST.hxx"
 #include "Environment.hxx"
-#include "Options.hxx"
 #include "Symtab.hxx"
 #include "inter-pass.hxx"
 
+using namespace std;
+using namespace boost;
 using namespace sherpa;
  
-#if 0
 // Shap isn't convinced that the spec required this. Having said that,
 // this is similar to the unresolved forward static declaration
 // warning in C, and it is similarly useful.
 
 static bool
 warnUnresRef(std::ostream& errStream, 
-	     GCPtr<AST> mod,
-	     GCPtr<Environment<AST> > env)
+	     shared_ptr<AST> mod,
+	     shared_ptr<ASTEnvironment > env)
 {
   bool errorFree = true;
   
   assert(mod->astType == at_module);
-  for(size_t c=0; c < mod->children->size(); c++) {
-    GCPtr<AST> ast = mod->child(c);
+  for (size_t c=0; c < mod->children.size(); c++) {
+    shared_ptr<AST> ast = mod->child(c);
     switch(ast->astType) {
     case at_declunion:
     case at_declstruct:
     case at_proclaim:
       {
-	if(ast->Flags2 & PROCLAIM_IS_INTERNAL)
+	if (ast->flags & PROCLAIM_IS_INTERNAL)
 	  break;
 	
-	GCPtr<AST> def = env->getBinding(ast->child(0)->s);
-	if(((ast->Flags & DEF_IS_EXTERNAL) == 0) && (def == NULL)) {
+	shared_ptr<AST> def = env->getBinding(ast->child(0)->s);
+	if (((ast->flags & DEF_IS_EXTERNAL) == 0) && (def == NULL)) {
 
 	  errStream << ast->loc << ": WARNING: " 
 		    << "Local declaration of " << ast->child(0)->s 
@@ -83,12 +84,12 @@ warnUnresRef(std::ostream& errStream,
 	  
 	  errStream << std::endl;
 	  
-	  if(Options::Wall)
+	  if (Options::Wall)
 	    errorFree = false;
 	  break;
 	}
 
-	if(def != NULL)
+	if (def != NULL)
 	  assert(!def->isDecl);
       }
     default:
@@ -97,37 +98,34 @@ warnUnresRef(std::ostream& errStream,
   }
   return errorFree;
 }
-#endif
 
-static GCPtr<UocInfo>
-findInterface(std::ostream& errStream, GCPtr<AST> ifAst)
+static shared_ptr<UocInfo>
+findInterface(std::ostream& errStream, shared_ptr<AST> ifAst)
 {
-  GCPtr<UocInfo> iface=NULL;
+  shared_ptr<UocInfo> iface=GC_NULL;
 
-  for(size_t i=0; i < UocInfo::ifList->size(); i++) {
-    GCPtr<UocInfo> thisIface = UocInfo::ifList->elem(i);
-    if(thisIface->uocName == ifAst->s) {
-      iface = thisIface;
-      break;
-    }
+  UocMap::iterator itr = UocInfo::ifList.find(ifAst->s);
+  if (itr != UocInfo::ifList.end()) {
+    shared_ptr<UocInfo> thisIface = itr->second;
+    iface = thisIface;
   }
       
-  if(!iface) {
+  if (!iface) {
     errStream << ifAst->loc << ": "
 	      << "Internal Compiler Error. "
 	      << "Interface " << ifAst->s
 	      << " has NOT been processed"
 	      << std::endl;
-    return NULL;
+    return GC_NULL;
   }
   
-  if(!iface->env || !iface->gamma || !iface->instEnv) { 
+  if (!iface->env || !iface->gamma || !iface->instEnv) { 
     errStream << ifAst->loc << ": "
 	      << "Internal Compiler Error. "
 	      << "Interface " << ifAst->s
 	      << " has at least one NULL environment"
 	      << std::endl;
-    return NULL;
+    return GC_NULL;
   }
   
   ifAst->envs.env = iface->env;
@@ -139,18 +137,19 @@ findInterface(std::ostream& errStream, GCPtr<AST> ifAst)
 	      
 static void
 aliasPublicBindings(const std::string& idName,
-		    GCPtr<Environment<AST> > aliasEnv, 
-		    GCPtr<Environment<AST> > fromEnv, 
-		    GCPtr<Environment<AST> > toEnv)
+		    shared_ptr<ASTEnvironment > aliasEnv, 
+		    shared_ptr<ASTEnvironment > fromEnv, 
+		    shared_ptr<ASTEnvironment > toEnv)
 {
-  for (size_t i = 0; i < fromEnv->bindings->size(); i++) {
-    GCPtr<Binding<AST> > bdng = fromEnv->bindings->elem(i);
+  for (ASTEnvironment::iterator itr = fromEnv->begin();
+      itr != fromEnv->end(); ++itr) {
+    shared_ptr<Binding<AST> > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE)
       continue;
 
     std::string s = bdng->nm;
-    GCPtr<AST> ast = bdng->val;
+    shared_ptr<AST> ast = bdng->val;
 
     if (aliasEnv && 
 	aliasEnv->getBinding(ast->fqn.asString("::")))
@@ -187,14 +186,14 @@ aliasPublicBindings(const std::string& idName,
 
 static void
 importIfBinding(std::ostream& errStream, 
-		GCPtr<Environment<AST> > aliasEnv,
-		GCPtr<AST> ifName)
+		shared_ptr<ASTEnvironment > aliasEnv,
+		shared_ptr<AST> ifName)
 {
   findInterface(errStream, ifName);
   std::string canonicalIfName = ifName->s;
 
   // If we have seen this interface before, use the original import:
-  GCPtr<AST> ifAst = aliasEnv->getBinding(canonicalIfName);
+  shared_ptr<AST> ifAst = aliasEnv->getBinding(canonicalIfName);
   if (ifAst) {
     // Override the environments populated by findInterface with the
     // canonical duplicates.
@@ -207,18 +206,19 @@ importIfBinding(std::ostream& errStream,
 
   // Need to form the canonical duplicate environment in the current
   // importing UoC for this interface.
-  GCPtr<Environment<AST> > dupEnv = 
-    new Environment<AST>(ifName->envs.env->uocName);
+  shared_ptr<ASTEnvironment > dupEnv = 
+    ASTEnvironment::make(ifName->envs.env->uocName);
 
-  for (size_t i = 0; i < ifName->envs.env->bindings->size(); i++) {
-    GCPtr<Binding<AST> > bdng = ifName->envs.env->bindings->elem(i);
+  for (ASTEnvironment::iterator itr = ifName->envs.env->begin();
+      itr != ifName->envs.env->end(); ++itr) {
+    shared_ptr<Binding<AST> > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE) {
       continue;
     }
       
     std::string s = bdng->nm;
-    GCPtr<AST> ast = bdng->val;
+    shared_ptr<AST> ast = bdng->val;
 
     dupEnv->addBinding(s, ast);
     dupEnv->setFlags(s, bdng->flags);
@@ -228,33 +228,41 @@ importIfBinding(std::ostream& errStream,
 }
 
 static bool
-providing(GCPtr<Environment<AST> > env, GCPtr<AST> sym)
+providing(shared_ptr<ASTEnvironment > aliasEnv, const FQName& fqn)
 {
-  std::string canonicalIfName = "::" + sym->fqn.iface;
-  GCPtr<Binding<AST> > bndg = env->doGetBinding(canonicalIfName);
+  // Retrieve the thinned public environment for this fqn:
+  shared_ptr<AST> ifName = aliasEnv->getBinding(fqn.iface);
 
-  // If there is no binding for the canonicalIfName, then we are
-  // processing the grand output AST, and providing has already been
-  // checked.  In all per-UoC cases there will necessarily be a
-  // binding, and we need to check the BF_PROVIDING flag.
-  if (!bndg) return true;
+  // If there is no binding for the canonical interface name, then we
+  // areb processing the grand output AST, and providing has already
+  // been checked.
+  if (!ifName)
+    return true;
 
-  return (bndg->flags & BF_PROVIDING);
+  shared_ptr<ASTEnvironment > pubEnv = ifName->envs.env;
+
+  // Retrieve the binding (if any) for fqn.ident:
+  shared_ptr<Binding<AST> > bdng = pubEnv->doGetBinding(fqn.ident);
+
+  assert(bdng);
+
+  // Check the BF_PROVIDING flag on the binding:
+  return (bdng->flags & BF_PROVIDING);
 }
 
 bool
-makeLocalAlias(GCPtr<Environment<AST> > fromEnv,
+makeLocalAlias(shared_ptr<ASTEnvironment > fromEnv,
 	       std::string fromName,
-	       GCPtr<Environment<AST> > toEnv, 
+	       shared_ptr<ASTEnvironment > toEnv, 
 	       const std::string& toPfx,
-	       GCPtr<AST> toIdent)
+	       shared_ptr<AST> toIdent)
 {
-  GCPtr<Binding<AST> > bndg = fromEnv->doGetBinding(fromName);
+  shared_ptr<Binding<AST> > bndg = fromEnv->doGetBinding(fromName);
 
   if (bndg->flags & BF_PRIVATE)
     return false;
       
-  GCPtr<AST> ast = bndg->val;
+  shared_ptr<AST> ast = bndg->val;
 
   std::string s = toIdent->s;
   if (toPfx.size())
@@ -267,11 +275,11 @@ makeLocalAlias(GCPtr<Environment<AST> > fromEnv,
 }
 
 static void
-bindIdentDef(GCPtr<AST> ast, GCPtr<Environment<AST> > env, 
-	     IdentType identType, GCPtr<AST> currLB,
+bindIdentDef(shared_ptr<AST> ast, shared_ptr<ASTEnvironment > env, 
+	     IdentType identType, shared_ptr<AST> currLB,
 	     unsigned flags)
 {  
-  if (ast->Flags & ID_IS_TVAR) {
+  if (ast->isIdentType(id_tvar)) {
     env->addDefBinding(ast->s, ast);
     env->setFlags(ast->s, BF_COMPLETE | BF_NO_MERGE);
 
@@ -287,7 +295,11 @@ bindIdentDef(GCPtr<AST> ast, GCPtr<Environment<AST> > env,
   // bool addToIncomplete parameter, or at the caller, add them to a
   // dummy list.
   
-  ast->identType = identType;
+  if (ast->identType != id_unresolved) 
+    assert(ast->isIdentType(identType));
+  else 
+    ast->identType = identType;
+  
 //   cout << "Added "<< ast->s << " at " << ast->loc 
 //        <<" with idType = " 
 //        << identTypeToString(identType)
@@ -298,17 +310,11 @@ bindIdentDef(GCPtr<AST> ast, GCPtr<Environment<AST> > env,
 
 
 static void
-markComplete(GCPtr<Environment<AST> > env)
+markComplete(shared_ptr<ASTEnvironment > env)
 {
-  for(size_t i = 0; i < env->bindings->size(); i++)
-    env->bindings->elem(i)->flags |= BF_COMPLETE;
-}
-
-static void
-markLatestComplete(GCPtr<Environment<AST> > env)
-{
-  if(env->bindings->size())
-    env->bindings->elem(env->bindings->size() - 1)->flags |= BF_COMPLETE;
+  for (ASTEnvironment::iterator itr = env->begin();
+      itr != env->end(); ++itr)
+    itr->second->flags |= BF_COMPLETE;
 }
 
 //WARNING: **REQUIRES** answer and errorFree.
@@ -317,9 +323,9 @@ markLatestComplete(GCPtr<Environment<AST> > env)
   do {								\
     answer = resolve(errStream, (ast), aliasEnv, (env), (lamLevel), \
 		     (mode), (identType), (currLB), (flags));	\
-    if(answer == false)						\
+    if (answer == false)						\
       errorFree = false;					\
-  }while(0)
+  }while (0)
 
 
 // The Symbol Resolver: 
@@ -333,13 +339,13 @@ markLatestComplete(GCPtr<Environment<AST> > env)
 
 bool
 resolve(std::ostream& errStream, 
-	GCPtr<AST> ast, 
-	GCPtr<Environment<AST> > aliasEnv,
-	GCPtr<Environment<AST> > env,
-	GCPtr<Environment<AST> > lamLevel,
+	shared_ptr<AST> ast, 
+	shared_ptr<ASTEnvironment > aliasEnv,
+	shared_ptr<ASTEnvironment > env,
+	shared_ptr<ASTEnvironment > lamLevel,
 	int mode, 
 	IdentType identType,
-	GCPtr<AST> currLB,
+	shared_ptr<AST> currLB,
 	unsigned long flags)
 {
   bool errorFree = true, answer = false;
@@ -348,13 +354,13 @@ resolve(std::ostream& errStream,
   // If we create a new environment, we will update it later.
   ast->envs.env = env;
 
-  //errStream << "RES: " << ast->loc << ": " 
-  //	    << ast->s << "[" << ast->astTypeName() << "]" 
-  //	    << "   mode = " << mode
-  //	    << " IncompleteOK = " 
-  //	    << ((flags & INCOMPLETE_OK)? "true" : "false")
-  //	    << std::endl;  
-
+  //     errStream << "RES: " << ast->loc << ": " 
+  //     	    << ast->s << "[" << ast->astTypeName() << "]" 
+  //     	    << "   identType = " << identTypeToString(identType)
+  //     	    << " IncompleteOK = " 
+  //     	    << ((flags & INCOMPLETE_OK)? "true" : "false")
+  //     	    << std::endl;  
+  
   switch(ast->astType) {
 
   case at_Null:
@@ -416,10 +422,12 @@ resolve(std::ostream& errStream,
     
   case at_ident:
     {
-      if(!ast->fqn.isInitialized()) {
+	// If you change the way this works, see the comment in the
+	// at_usesel case first!
+      if (!ast->fqn.isInitialized()) {
 	if (ast->isGlobal()) {
 	  ast->fqn = FQName(env->uocName, ast->s);
-	  ast->Flags |= ID_IS_PRIVATE;
+	  ast->flags |= ID_IS_PRIVATE;
 	}
 	else
 	  ast->fqn = FQName(FQ_NOIF, ast->s);
@@ -438,12 +446,13 @@ resolve(std::ostream& errStream,
 	{
 	  assert(env);
 	  assert(identType != id_unresolved);
-		
-	  GCPtr<AST> sym = env->getBinding(ast->s);
+	  
+	  shared_ptr<AST> sym = env->getBinding(ast->s);
 	
-	  if(sym) {
-	    if(sym->isDecl) {
-	      if (sym->uoc != ast->uoc && !providing(env, sym)) {
+	  if (sym) {
+	    if (sym->isDecl) {
+	      if ((sym->fqn.iface != ast->fqn.iface) &&
+		  !providing(aliasEnv, sym->fqn)) {
 		// We are defining an ident that has an existing
 		// binding that came about through import. Confirm
 		// that we also marked it as providable:
@@ -458,23 +467,26 @@ resolve(std::ostream& errStream,
 		
 	      }
 
-	      if(sym->identType != identType) {
-		errStream << ast->loc << ": " 
-			  << ast->s << " is declared/defined here as"
+	      ast->identType = identType;
+	      if (!ast->isIdentType(sym->identType)) {
+		errStream << sym->loc << ": " 
+			  << ast->s << " is declared here as "
 			  << identTypeToString(sym->identType)
-			  << " and here as " 
+			  << std::endl
+			  << ast->loc
+			  << " and defined here as " 
 			  << identTypeToString(identType)
 			  << std::endl;
 		errorFree = false;
 		break;
 	      }
 	      
-	      // FIX: This is a BUG!
+	      sym->identType = ast->identType;
 	      sym->defn = ast;
 	      ast->decl = sym;
 	      env->removeBinding(ast->s);
 	      
-	      if(sym->externalName.size()) {
+	      if (sym->externalName.size()) {
 		ast->externalName = sym->externalName;
 	      }
 	    }
@@ -496,14 +508,15 @@ resolve(std::ostream& errStream,
 	{
 	  assert(env);
 	  assert(identType != id_unresolved);
+
 	  ast->isDecl = true;
 
-	  GCPtr<AST> sym = env->getBinding(ast->s);
+	  shared_ptr<AST> sym = env->getBinding(ast->s);
 	  
-	  if(sym) {	    
-	    if(!sym->isDecl) {
+	  if (sym) {	    
+	    if (!sym->isDecl) {
 	      // Will not be necessary in the new Polyinstantiator
-	      if((flags & NO_RESOLVE_DECL) == 0) {
+	      if ((flags & NO_RESOLVE_DECL) == 0) {
 		errStream << ast->loc << ": Symbol " 
 			  << ast->s << " already defined at " 
 			  << sym->loc << "." << std::endl;
@@ -511,22 +524,25 @@ resolve(std::ostream& errStream,
 		break;
 	      }
 	    }
-
-	    if(sym->identType != identType) {
-	      errStream << ast->loc << ": " 
-			<< ast->s << " is declared here as"
+	    
+	    if (!sym->isIdentType(identType)) {
+	      errStream << sym->loc << ": " 
+			<< ast->s << " is declared/defined here as "
 			<< identTypeToString(sym->identType)
+			<< std::endl
+			<< ast->loc
 			<< " and here as " 
 			<< identTypeToString(identType)
 			<< std::endl;
 	      errorFree = false;
 	      break;
 	    }
-	    
-	    if(ast->externalName.size()) {
-	      assert(ast->Flags & DEF_IS_EXTERNAL);
-	      if(sym->externalName.size()) {
-		if(sym->externalName != ast->externalName) {
+	    ast->identType = sym->identType;
+
+	    if (ast->externalName.size()) {
+	      assert(ast->flags & DEF_IS_EXTERNAL);
+	      if (sym->externalName.size()) {
+		if (sym->externalName != ast->externalName) {
 		  errStream << ast->loc << ": " 
 			    << ast->s << " Identifier was previously "
 			    << " declared with a different external name. "
@@ -542,7 +558,7 @@ resolve(std::ostream& errStream,
 	      }
 	    }
 	    else {
-	      if(sym->externalName.size()) {
+	      if (sym->externalName.size()) {
 		ast->externalName = sym->externalName;
 	      }
 	    }
@@ -557,13 +573,14 @@ resolve(std::ostream& errStream,
       case USE_MODE:
 	{
 	  assert(env);
-	  assert(identType != id_unresolved);
-
+	  assert((flags & NO_CHK_USE_TYPE) || 
+		 (identType != id_unresolved));
+	  
 	  ast->symbolDef = env->getBinding(ast->s);
-	  // 	if(ast->symbolDef == NULL) 
+	  // 	if (ast->symbolDef == NULL) 
 	  // 	  cout << " Symdef is NULL for " << ast->s << endl;
 	  
-	  if(!ast->symbolDef) {
+	  if (!ast->symbolDef) {
 	    // If there is a type-variable, it must be treated as though
 	    // it is a defining occurrence in order to support things
 	    // like:
@@ -577,20 +594,18 @@ resolve(std::ostream& errStream,
 	    //
 	    //   (lambda x:'a (lambda y:'a 0))
 	    //
-	    // That is, a type-variabloe in this slot should be treated
+	    // That is, a type-variable in this slot should be treated
 	    // as a defining occurance ONLY if it is NOT ALREADY bound
 	    // in the current scope.  Also, it should only be done in
 	    // some cases -- the cases where NEW_TV_OK is set in
 	    // flags. Otherwise, things like: (defunion list:ref (Next
 	    // 'a)) will also resolve.
 	
- 	    if(((flags & NEW_TV_OK) || 
-		(ast->Flags2 & TVAR_POLY_SPECIAL)) && 
-	       identType == id_type && 
-	       (ast->Flags & ID_IS_TVAR)) {
+ 	    if (ast->isIdentType(id_tvar) &&
+	       ((flags & NEW_TV_OK) || 
+		(ast->flags & TVAR_POLY_SPECIAL))) {
 	      bindIdentDef(ast, env, identType, currLB, flags);
 	      ast->symbolDef = ast;
-	      ast->Flags |= TVAR_IS_DEF;
 	      //errStream << "Created new ident for " << ast->s
 	      //	      << " identType = " 
 	      //              << identTypeToString(ast->identType)
@@ -611,9 +626,9 @@ resolve(std::ostream& errStream,
 	  }
 	  
 	  assert(ast->symbolDef);
-	  GCPtr<AST> def = ast->symbolDef;
+	  shared_ptr<AST> def = ast->symbolDef;
 
-	  if((flags & USE_ONLY_PUBLIC) && 
+	  if ((flags & USE_ONLY_PUBLIC) && 
 	     ((env->getFlags(ast->s) & BF_PRIVATE))) {
 	    errStream << ast->loc << ": Identifier `"
 		      << ast->s << "' used here, But NO public definition "
@@ -622,39 +637,27 @@ resolve(std::ostream& errStream,
 	    break;
 	  }
 	
-	  if((!(flags & NO_CHK_USE_TYPE)) 
-	     && (def->identType != identType)) {
-	    
-	    if((flags & RESOLVE_APPLY_MODE) && 
-	       (def->Flags & ID_IS_CTOR)) {
-	      // We are OK
-	    }
- 	    else if((flags & RES_APP_PAT_MODE) &&
-		    def->identType == id_constructor) {
-	      // We are OK
-	    }
-	    else {
-	      errStream << ast->loc << ": " << identTypeToString(identType) 
-			<< " `" << ast->s << "' Undefined"
-			<< " [But there is a " 
-			<< identTypeToString(def->identType) 
-			<< " defined]" << std::endl;
-	      errorFree = false;
-	    }
+	  if (((flags & NO_CHK_USE_TYPE) == 0) && 
+	     (!def->isIdentType(identType))) {
+	    errStream << ast->loc << ": " << identTypeToString(identType) 
+		      << " `" << ast->s << "' Undefined"
+		      << " [But there is a " 
+		      << identTypeToString(def->identType) 
+		      << " defined]" << std::endl;
+	    errorFree = false;
 	  }
 	
 	  bool ICRviolation = false;
-	  if((env->getFlags(ast->s) & BF_COMPLETE) == 0) {	  
+	  if ((env->getFlags(ast->s) & BF_COMPLETE) == 0) {	  
 	    // We are using an incomplete definition ... 
-	    if(flags & INCOMPLETE_OK_PROC == 0) {
-	      if((flags & INCOMPLETE_OK) == 0) {
+	    if (flags & INCOMPLETE_OK_PROC == 0) {
+	      if ((flags & INCOMPLETE_OK) == 0) {
 		// If usage of an Incomplete variable is NOT OK, 
 		// there is a violation, and we are done.
 		ICRviolation = true;
 	      }
 	      else {		
-		if(def->identType == id_value &&
-		   ((def->Flags & ID_IS_CTOR)==0)) {
+		if (def->isIdentType(id_value)) {
 		  assert(lamLevel);
 		
 		  // This is a little subtle.
@@ -671,28 +674,28 @@ resolve(std::ostream& errStream,
 		  // we still check that the identifier is defined at 
 		  // the right LAMBDA LEVEL. 	   
 
-		  if(!lamLevel->getBinding(ast->s))
+		  if (!lamLevel->getBinding(ast->s))
 		    ICRviolation = true;
 		}
 	      }
 	    }
 	  }
 	  
-	  if(ICRviolation) {
+	  if (ICRviolation) {
 	    errStream << ast->loc << ": Usage of Identifier `"
 		      << ast->s << "' Violates Incompleteness Restriction." 
 		      << std::endl;
 	    errorFree = false;
 	  }
       
-	  if(def->Flags2 & ID_FOR_SWITCH) {
-	    if((flags & SWITCHED_ID_OK) == 0) {
+	  if (def->flags & ID_FOR_SWITCH) {
+	    if ((flags & SWITCHED_ID_OK) == 0) {
 	      errStream << ast->loc << ": The identifier `"
-			<< ast->s << "' can only appear behind a `.'" 
+			<< ast->s << "' can only appear to the left of a `.'" 
 			<< std::endl;
 	      errorFree = false;
 	    }
-	    else if(flags & WITHIN_CATCH_MC) {
+	    else if (flags & WITHIN_CATCH_MC) {
 	      errStream << ast->loc << ": The identifier `"
 			<< ast->s << "' cannot be used while"
 			<< " catching multiple exceptions."
@@ -702,23 +705,22 @@ resolve(std::ostream& errStream,
 	  }
 
 	  ast->identType = def->identType;
-	  ast->Flags  |= def->Flags;
-	  ast->Flags2 |= def->Flags2;
-	  ast->Flags  &= ~MASK_FLAGS_FROM_USE;
-	  ast->Flags2 &= ~MASK_FLAGS2_FROM_USE;
+	  ast->flags  |= def->flags;
+	  ast->flags |= def->flags;
+	  ast->flags  &= ~MASK_FLAGS_FROM_USE;
 	  ast->externalName = def->externalName;
 
 	  /* Make sure tvars are scoped properly */
-	  if(def->Flags & ID_IS_TVAR) {	    	    
+	  if (def->isIdentType(id_tvar)) {	    	    
 	    assert(currLB);
 	    
-	    GCPtr<AST> thisLB = NULL;
-	    if(def->tvarLB->envs.env->isAncestor(currLB->envs.env))
+	    shared_ptr<AST> thisLB = GC_NULL;
+	    if (def->tvarLB->envs.env->isAncestor(currLB->envs.env))
 	      thisLB = currLB;
 	    else
 	      thisLB = def->tvarLB;
 	    
-	    while(thisLB->Flags2 & LBS_PROCESSED) {
+	    while (thisLB->flags & LBS_PROCESSED) {
 	      thisLB = thisLB->parentLB;
 	      assert(thisLB);
 	    }
@@ -747,42 +749,89 @@ resolve(std::ostream& errStream,
     
   case at_usesel:
     {
-      GCPtr<AST> iface = ast->child(0);
+      /// @paragraph hygienic-symbols Hygienic Symbol Strategy
+      ///
+      /// Hygienic symbols are decidedly odd. Syntactically they look
+      /// like structure references, but the LHS is actually a local
+      /// identifier that names an <em>environment</em>. More
+      /// precisely, it names a local copy of the imported interface's
+      /// environment that contains only the public symbols of that
+      /// interface.
+      ///
+      /// We handle this through an outright kludge. At the point of
+      /// hygienic import, we bind both the ifalias (for uniqueness)
+      /// and all of the imported identifiers. The imported
+      /// identifiers get bound in the local namespace using
+      /// "ifalias.ifident" (note that '.' is not a legal identifier
+      /// character, so this cannot be matched otherwise).
+      ///
+      /// At defining and use occurrences, we recognize the selector
+      /// pattern in the parser and generate an at_usesel AST node for
+      /// it. We then arrive here, where we re-write the at_usesel
+      /// node IN PLACE, rewriting it into an at_ident node whose name
+      /// is "ifalias.ident", where "ifalias" is our local name for
+      /// the interface's public environment. We then recurse by hand
+      /// **on the same node** (the one that we just re-wrote) to get
+      /// the symbol resolved.
+      ///
+      /// The only problem with that is that the recursive resolution
+      /// is going to give us an FQN whose @p iface component is the
+      /// current UoC and whose @p ident component is our forged
+      /// "ifalias.ident". Ultimately, the at_usesel is actually an
+      /// <em>alias</em> of the other symbol, so its FQN needs to be
+      /// the FQN of the external symbol. We ensure this by whacking
+      /// it back to the right thing <em>after</em> the hand-recursing
+      /// resolution returns.
+      ///
+      /// Finally, note that BeginSimp has done a rewrite of all local
+      /// at_define and at_recdef forms into at_let and at_letrec
+      /// forms, respectively. That pass has checked that no at_usesel
+      /// can be bound by a local definition. I do wonder if perhaps
+      /// we should not catch this case syntactically in the parser.
+
+      shared_ptr<AST> iface = ast->child(0);
       
-      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, id_interface, 
-	      NULL, flags);
-      if(!errorFree)
+      RESOLVE(iface, env, lamLevel, USE_MODE, id_interface, 
+	      GC_NULL, flags);
+
+      if (!errorFree)
 	break;
 
-      assert(ast->child(0)->symbolDef->ifName != "");
       
-      GCPtr<Environment<AST> > ifenv = iface->symbolDef->envs.env;
+      stringstream lookupStream;
+      lookupStream << ":" << iface->s << ":";
+      std::string lookupName = lookupStream.str();
+      shared_ptr<AST> ifNameAst= aliasEnv->getBinding(lookupName);
+      std::string ifName = ifNameAst->s;
+      assert(ifName != "");
       
-      if(!ifenv) {
+      shared_ptr<ASTEnvironment > ifenv = iface->symbolDef->envs.env;
+      
+      if (!ifenv) {
 	errStream << ast->loc << ": "
 		  << "Internal Compiler Error. "
-		  << "Interface " << iface->symbolDef->ifName
+		  << "Interface " << ifName
 		  << " needed by "<< iface->s << " has a NULL environment"
 		  << std::endl;
 	errorFree = false;
 	break;
       }
       
-      ast->fqn = FQName(ast->child(0)->symbolDef->ifName,
-			ast->child(1)->s);
-
+      FQName importedFQN = FQName(ifName, ast->child(1)->s);
+      
       ast->s = ast->child(0)->s + "." + ast->child(1)->s;
       ast->astType = at_ident;
       ast->identType = ast->child(1)->identType;
-      ast->Flags = ast->child(1)->Flags;
-      ast->Flags |= ID_IS_GLOBAL;
-      ast->uoc = ast->child(0)->symbolDef->uoc;
+      ast->flags = ast->child(1)->flags;
+      ast->flags |= ID_IS_GLOBAL;
 
-      ast->children->erase();
+      ast->children.clear();
 
       // SHOULD THE PUBLIC FLAG BE TAKEN OFF HERE ??
       RESOLVE(ast, env, lamLevel, mode, identType, currLB,  
 	      (flags & (~BIND_PUBLIC)));
+
+      ast->fqn = importedFQN;
 
       break;
     }
@@ -792,9 +841,9 @@ resolve(std::ostream& errStream,
       flags |= IS_INTERFACE;
 
       // match agt_definition*
-      for (size_t c = 1; c < ast->children->size(); c++)
+      for (size_t c = 1; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
-		NULL, flags);
+		GC_NULL, flags);
 
       break;
     }
@@ -803,35 +852,33 @@ resolve(std::ostream& errStream,
     {
       flags |= IS_MODULE;
       // match agt_definition*
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
-		NULL, flags);
+		GC_NULL, flags);
 
-#if 0
-      if((flags & NO_RESOLVE_DECL) == 0)	
+      if ((flags & NO_RESOLVE_DECL) == 0)	
 	CHKERR(errorFree, warnUnresRef(errStream, ast, env));
-#endif
 
       break;
     }
 
   case at_defunion:
     {
-      GCPtr<Environment<AST> > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
-      GCPtr<AST> category = ast->child(2);
+      shared_ptr<AST> category = ast->child(2);
 
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
-	      id_type, ast, 
+	      id_union, ast, 
 	      (flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)) | BIND_PUBLIC);
       if (category->astType == at_refCat)
 	tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
 
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
-	      id_type, ast,
+	      id_tvar, ast,
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
 
       // category keyword at child(2)
@@ -844,61 +891,35 @@ resolve(std::ostream& errStream,
     
       // match at_constructors
       RESOLVE(ast->child(4), tmpEnv, lamLevel, DEF_MODE,
-	      id_constructor, ast, 	      
+	      idc_uctor, ast, 	      
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
 
       // match at_constraints
       RESOLVE(ast->child(5), tmpEnv, lamLevel, USE_MODE, 
-	      id_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       
-#if 0
-      if(ast->astType == at_defunion) {
-	GCPtr<AST> ctrs = ast->child(4);
-	GCPtr< CVector<std::string> > names = new CVector<std::string> ;
-	for(size_t c=0; c < ctrs->children->size(); c++) {
-	  GCPtr<AST> ctr = ctrs->child(c);
-	  names.append(ctr->child(0)->s);
-	  for(size_t d=1; d < ctr->children->size(); d++) {
-	    GCPtr<AST> field = ctr->child(d);
-	    if(names.contains(field->child(0)->s)) {
-	      errStream << field->child(0)->loc << ": "
-			<< "field name `" << field->child(0)->s
-			<< "' conflicts with another field / "		
-			<< "constructor definition in union "
-			<< ast->child(0)->s
-			<< std::endl;
-	      errorFree = false;
-	    }
-	    else
-	      names.append(field->child(0)->s);
-	  }
-	}
-      }
-#endif
       env->mergeBindingsFrom(tmpEnv);
       break;
     }
 
   case at_defstruct:
     {
-      GCPtr<Environment<AST> > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
-      GCPtr<AST> category = ast->child(2);
+      shared_ptr<AST> category = ast->child(2);
 
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
-	      id_type, ast,
+	      id_struct, ast,
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK) | BIND_PUBLIC);
-      if(category->astType == at_refCat)
+      if (category->astType == at_refCat)
 	tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
-
-      ast->child(0)->Flags |= ID_IS_CTOR;
 
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
-	      id_type, ast, 
+	      id_tvar, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
     
       // category keyword at child(2)
@@ -915,7 +936,7 @@ resolve(std::ostream& errStream,
  
       // match at_constraints
       RESOLVE(ast->child(5), tmpEnv, lamLevel, USE_MODE, 
-	      id_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
@@ -926,25 +947,28 @@ resolve(std::ostream& errStream,
   case at_declstruct:
   case at_declrepr:
     {
-      GCPtr<Environment<AST> > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
+      IdentType it = ((ast->astType == at_declstruct) ?
+		      id_struct : id_union);
+      
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DECL_MODE, 
-	      id_type, ast, 
+	      it, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
 	      | BIND_PUBLIC);
     
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
-	      id_type, ast, 
+	      id_tvar, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
 
       // category keyword at child(2)
       
       // match at_constraints
       RESOLVE(ast->child(3), tmpEnv, lamLevel, USE_MODE, 
-	      id_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
@@ -953,23 +977,23 @@ resolve(std::ostream& errStream,
 
   case at_proclaim:
     {
-      GCPtr<Environment<AST> > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DECL_MODE, 
-	      id_value, ast, 
+	      idc_value, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
 	      | BIND_PUBLIC);
    
       // match at_type
       RESOLVE(ast->child(1), tmpEnv, lamLevel, USE_MODE, 
-	      id_type, ast, 
+	      idc_type, ast, 
 	      flags | (NEW_TV_OK) & (~INCOMPLETE_OK));
       
       // match at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
-	      id_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
@@ -978,28 +1002,26 @@ resolve(std::ostream& errStream,
 
   case at_defexception:
     {
-      GCPtr<Environment<AST> > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
-      IdentType it = ((ast->children->size() > 1) ? 
-		      id_constructor : id_value);
+      IdentType it = ((ast->children.size() > 1) ? id_ucon : id_ucon0);
       
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
 	      it, ast,
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
 	      | BIND_PUBLIC);
-      ast->child(0)->Flags |= ID_IS_CTOR;
       // The exception value is defined and is complete
       
       // match at_fields+
-      GCPtr< CVector<std::string> > names = new CVector<std::string>;
-      names->append(ast->child(0)->s);
-      for (size_t c = 1; c < ast->children->size(); c++) {
-	GCPtr<AST> field = ast->child(c);
+      set<string> names;
+      names.insert(ast->child(0)->s);
+      for (size_t c = 1; c < ast->children.size(); c++) {
+	shared_ptr<AST> field = ast->child(c);
 	RESOLVE(field, tmpEnv, lamLevel, USE_MODE, 
-		id_type, ast, 
+		idc_type, ast, 
 		flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
-	if(names->contains(field->child(0)->s)) {
+	if (names.find(field->child(0)->s) != names.end()) {
 	  errStream << field->child(0)->loc << ": "
 		    << "field name `" << field->child(0)->s
 		    << "' conflicts with another field / "		
@@ -1009,7 +1031,7 @@ resolve(std::ostream& errStream,
 	  errorFree = false;
 	}	      
 	else
-	  names->append(field->child(0)->s);		
+	  names.insert(field->child(0)->s);
       }
 
       env->mergeBindingsFrom(tmpEnv);
@@ -1019,7 +1041,11 @@ resolve(std::ostream& errStream,
   case at_recdef:
   case at_define:
     {
-      GCPtr<Environment<AST> > tmpEnv = env->newDefScope();
+      /// Note that BeginSimp has re-written all local define and
+      /// recdef forms into at_let and at_letrec, respectively, so if
+      /// we see at_define or at_refdef here, it is a top-level form.
+
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
       /* Mark the present identifier "not mutable yet". If we see a
@@ -1029,7 +1055,7 @@ resolve(std::ostream& errStream,
       longer mutable. It is the thing that is pointed to, that is
       mutable.  */
       assert(ast->child(0)->astType == at_identPattern);
-      ast->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
+      ast->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
       
       if (ast->astType == at_recdef) {
 	// Binding patterns must be in scope.
@@ -1041,7 +1067,7 @@ resolve(std::ostream& errStream,
 
       // match agt_expr
       RESOLVE(ast->child(1), tmpEnv, lamLevel, USE_MODE, 
-	      id_value, ast, 
+	      idc_value, ast, 
 	      flags | (NEW_TV_OK) & (~INCOMPLETE_OK));
       
       if (ast->astType == at_define) {
@@ -1055,11 +1081,11 @@ resolve(std::ostream& errStream,
 
       // match at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
-	      id_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));    
       
       /* Mark the present identifier closed wrt mutability */
-      ast->child(0)->child(0)->Flags2 |= ID_MUT_CLOSED;
+      ast->child(0)->child(0)->flags |= ID_MUT_CLOSED;
 
       env->mergeBindingsFrom(tmpEnv);
       break;
@@ -1067,7 +1093,7 @@ resolve(std::ostream& errStream,
 
   case at_deftypeclass:
     {
-      GCPtr<Environment<AST> > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
       // match at_ident
@@ -1078,23 +1104,23 @@ resolve(std::ostream& errStream,
       
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
-	      id_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
 
 
       // match at_tc_decls
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
-	      id_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       
       // match at method_decls
       RESOLVE(ast->child(3), tmpEnv, lamLevel, USE_MODE, 
-	      id_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));      
 
       // match at constraints
       RESOLVE(ast->child(4), tmpEnv, lamLevel, USE_MODE, 
-	      id_type, ast, 
+	      idc_type, ast, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));      
 
       tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
@@ -1105,7 +1131,7 @@ resolve(std::ostream& errStream,
   case at_tcdecls:
     {
       // match at agt_tcdecl+ 
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, 
 		USE_MODE, identType, currLB,  flags);
       
@@ -1116,11 +1142,11 @@ resolve(std::ostream& errStream,
     {
       // match at_tvlist
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_type, currLB, flags);
+	      idc_type, currLB, flags);
       
       // match agt_tvar
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_type, currLB, flags);  
+	      idc_type, currLB, flags);  
       break;
     }
 
@@ -1131,9 +1157,9 @@ resolve(std::ostream& errStream,
 	      id_typeclass, currLB, flags);
 
       // match at agt_type+
-      for (size_t c = 1; c < ast->children->size(); c++)
+      for (size_t c = 1; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		id_type, currLB, flags);
+		idc_type, currLB, flags);
 
       break;
     }
@@ -1141,9 +1167,9 @@ resolve(std::ostream& errStream,
   case at_method_decls:
     {
       // match at at_method_decl+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, 
-		DEF_MODE, id_value, currLB, flags);
+		DEF_MODE, id_method, currLB, flags);
       
       break;
     }
@@ -1152,42 +1178,42 @@ resolve(std::ostream& errStream,
     {
       // match at at_ident
       RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
-	      id_value, currLB,
+	      id_method, currLB,
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
 	      | BIND_PUBLIC);
       
       // match at at_fn
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_type, currLB, flags);
+	      idc_type, currLB, flags);
       
       break;
     }
 
   case at_definstance:
     {      
-      GCPtr<Environment<AST> > tmpEnv = env->newDefScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
       // match at at_tcapp
       RESOLVE(ast->child(0), tmpEnv, lamLevel, 
-	      USE_MODE, id_type, ast, flags | NEW_TV_OK);
+	      USE_MODE, idc_type, ast, flags | NEW_TV_OK);
 
       // match at at_methods
       RESOLVE(ast->child(1), tmpEnv, lamLevel, 
-	      USE_MODE, id_value, ast, flags);
+	      USE_MODE, idc_value, ast, flags);
       
       // match at at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, 
-	      USE_MODE, id_type, ast, flags | NEW_TV_OK);
+	      USE_MODE, idc_type, ast, flags | NEW_TV_OK);
       break;
     }
 
   case at_methods:
     { 
       // match at expr+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, 
-		USE_MODE, id_value, currLB, flags);
+		USE_MODE, idc_value, currLB, flags);
       
       break;
     }
@@ -1197,14 +1223,14 @@ resolve(std::ostream& errStream,
     
   case at_provide:
     {
-      GCPtr<AST> ifAst = ast->child(0);
+      shared_ptr<AST> ifAst = ast->child(0);
       importIfBinding(errStream, aliasEnv, ifAst);
 
-      GCPtr<Environment<AST> > ifEnv = ifAst->envs.env;
+      shared_ptr<ASTEnvironment > ifEnv = ifAst->envs.env;
 
-      for (size_t i = 1; i < ast->children->size(); i++) {
-	GCPtr<AST> provideName=ast->child(i);
-	GCPtr<Binding<AST> > bndg = ifEnv->doGetBinding(provideName->s);
+      for (size_t i = 1; i < ast->children.size(); i++) {
+	shared_ptr<AST> provideName=ast->child(i);
+	shared_ptr<Binding<AST> > bndg = ifEnv->doGetBinding(provideName->s);
         if (!bndg) {
 	  errStream << ast->loc << ": "
 		    << provideName->s
@@ -1236,14 +1262,14 @@ resolve(std::ostream& errStream,
 
   case at_importAs:
     {
-      GCPtr<AST> ifAst = ast->child(0); 
-      GCPtr<AST> idAst = ast->child(1);
+      shared_ptr<AST> ifAst = ast->child(0); 
+      shared_ptr<AST> idAst = ast->child(1);
 
       importIfBinding(errStream, aliasEnv, ifAst);
 
       // import ident ifname
-      GCPtr<Environment<AST> > tmpEnv = env->newScope();
-	//	new Environment<AST>(ifAst->envs.env->uocName);
+      shared_ptr<ASTEnvironment > tmpEnv = env->newScope();
+	//	new ASTEnvironment(ifAst->envs.env->uocName);
 
       ast->envs.env = tmpEnv;
       
@@ -1257,8 +1283,23 @@ resolve(std::ostream& errStream,
       }
       
       RESOLVE(idAst, tmpEnv, lamLevel, DEF_MODE,
-	      id_interface, NULL, flags);
-      idAst->ifName = ifAst->s;
+	      id_interface, GC_NULL, flags);
+
+      // For every (importAs local global) add to the alias
+      // environment, the mapping :local: -> ifAst which 
+      // holds the interface name. This is consulted from the
+      // at_usesel case in order to obtain the real name of the
+      // interface for purposes of error diagnostics, and setting the
+      // FQN correctly.
+      // This handling is in liu of using the now retired ifName field
+      // on the idAst AST.
+      stringstream ifNameMap;
+      ifNameMap << ":" << idAst->s << ":";
+      std::string ifNameMapStr = ifNameMap.str();
+
+      aliasEnv->addBinding(ifNameMapStr, ifAst);
+      aliasEnv->setFlags(ifNameMapStr, BF_PRIVATE);
+
       // The interface name must not be exported
       env->setFlags(idAst->s,
 		    ((env->getFlags(idAst->s)) |
@@ -1268,7 +1309,7 @@ resolve(std::ostream& errStream,
       idAst->envs.gamma = ifAst->envs.gamma;
       idAst->envs.instEnv = ifAst->envs.instEnv;
 
-      aliasPublicBindings(idAst->s, NULL, idAst->envs.env, tmpEnv);
+      aliasPublicBindings(idAst->s, GC_NULL, idAst->envs.env, tmpEnv);
       env->mergeBindingsFrom(tmpEnv);
       break;
     }
@@ -1276,12 +1317,12 @@ resolve(std::ostream& errStream,
   case at_import:
     {
       // from ifName alias+
-      GCPtr<Environment<AST> > tmpEnv = env->newScope();
+      shared_ptr<ASTEnvironment > tmpEnv = env->newScope();
       ast->envs.env = tmpEnv;
      
-      GCPtr<AST> ifName = ast->child(0);
+      shared_ptr<AST> ifAst = ast->child(0);
 
-      if (ifName->s == env->uocName) {
+      if (ifAst->s == env->uocName) {
 	errStream << ast->loc << ": "
 		  << "Cannot import an undefined interface. "
 		  << std::endl;
@@ -1290,38 +1331,33 @@ resolve(std::ostream& errStream,
 	break;
       }
 
-      GCPtr<UocInfo> iface = findInterface(errStream, ifName);
-      if(!iface) {
-	// Error message printed in findInterface() function
-	errorFree = false;
-	break;
-      }
+      importIfBinding(errStream, aliasEnv, ifAst);
 
-      if(ast->children->size() == 1) {
+      if (ast->children.size() == 1) {
 	// This is an import-all form
-	aliasPublicBindings(std::string(), aliasEnv, iface->env, tmpEnv);
+	aliasPublicBindings(std::string(), aliasEnv, ifAst->envs.env, tmpEnv);
       }
       else {
 	// Need to import only certain bindings
-	for (size_t c = 1; c < ast->children->size(); c++) {
-	  GCPtr<AST> alias = ast->child(c);
-	  GCPtr<AST> localName = alias->child(0);
-	  GCPtr<AST> pubName = alias->child(1);
+	for (size_t c = 1; c < ast->children.size(); c++) {
+	  shared_ptr<AST> alias = ast->child(c);
+	  shared_ptr<AST> localName = alias->child(0);
+	  shared_ptr<AST> pubName = alias->child(1);
 	
-	  RESOLVE(pubName, iface->env, lamLevel, USE_MODE,
-		  id_usebinding, currLB, 
+	  RESOLVE(pubName, ifAst->envs.env, lamLevel, USE_MODE,
+		  id_unresolved, currLB, 
 		  ((flags & (~NEW_TV_OK))) | NO_CHK_USE_TYPE);
 	
-	  if(!errorFree)
+	  if (!errorFree)
 	    break;
 
 	  // Enforce the "one alias" rule.
-	  GCPtr<Binding<AST> > bndg = 
-	    ifName->envs.env->doGetBinding(pubName->s);
+	  shared_ptr<Binding<AST> > bndg = 
+	    ifAst->envs.env->doGetBinding(pubName->s);
 
 	  std::string pubFQN = bndg->val->fqn.asString("::");
 
-	  GCPtr<AST> oldAlias = aliasEnv->getBinding(pubFQN);
+	  shared_ptr<AST> oldAlias = aliasEnv->getBinding(pubFQN);
 	  if (oldAlias) {
 	    errStream << alias->loc << ": The public identifier "
 		      << pubFQN
@@ -1338,8 +1374,8 @@ resolve(std::ostream& errStream,
 	    
 	  aliasEnv->addBinding(pubFQN, localName);
 
-	  GCPtr<AST> oldDef = env->getBinding(localName->s);
-	  if(oldDef) {
+	  shared_ptr<AST> oldDef = env->getBinding(localName->s);
+	  if (oldDef) {
 	    errStream << alias->loc << ": Conflict for alias definition"
 		      << localName->s
 		      << ". Previously defined at "
@@ -1367,7 +1403,7 @@ resolve(std::ostream& errStream,
   case at_declares:
     {
       // match at_declare*
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, NULL_MODE, identType,  
 		currLB,  flags);
 
@@ -1380,8 +1416,8 @@ resolve(std::ostream& errStream,
       // The first identifier has special meaning, and must be 
       // dealt with by hand.
 
-      if(ast->child(0)->s == "stateful") {
-	if(!(flags & IS_INTERFACE)) {
+      if (ast->child(0)->s == "stateful") {
+	if (!(flags & IS_INTERFACE)) {
 	  errStream << ast->child(0)->loc 
 		    << ": Only Interfaces can be declared to be stateful"
 		    << std::endl;
@@ -1389,8 +1425,8 @@ resolve(std::ostream& errStream,
 	}
       }
 
-      if(ast->child(0)->s == "tag-type") {
-	if(!(flags & WITHIN_DEFUNION)) {
+      if (ast->child(0)->s == "tag-type") {
+	if (!(flags & WITHIN_DEFUNION)) {
 	  errStream << ast->child(0)->loc 
 		    << ": tag-type can only occur within a defunion"
 		    << std::endl;
@@ -1399,9 +1435,9 @@ resolve(std::ostream& errStream,
       }	
 	    
       // match agt_type?
-      if (ast->children->size() > 1) {
+      if (ast->children.size() > 1) {
 	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		id_type, currLB, flags);
+		idc_type, currLB, flags);
       }
 
       break;
@@ -1410,7 +1446,7 @@ resolve(std::ostream& errStream,
   case at_tvlist:
     {
       // match agt_tvar*
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, mode, identType, 
 		currLB, flags);
 
@@ -1425,16 +1461,16 @@ resolve(std::ostream& errStream,
       
       // No problem with usesel here. select cannot appear in
       // this context.
-      if(ast->child(0)->child(0)->astType == at_usesel) {
+      if (ast->child(0)->child(0)->astType == at_usesel) {
 	ifName = ast->child(0)->child(0)->child(0)->s;
 	varConst = true;
       }
       
       // FIX: Isn't this stale now? Aren't constructor names
       // now constrained to unqualified idents?
-      for (size_t c = 0; c < ast->children->size(); c++) {
-	if(varConst) {
-	  if(ast->child(c)->child(0)->astType != at_usesel ||
+      for (size_t c = 0; c < ast->children.size(); c++) {
+	if (varConst) {
+	  if (ast->child(c)->child(0)->astType != at_usesel ||
 	     ast->child(c)->child(0)->child(0)->s != ifName) {
 	    errStream << ast->child(c)->child(0)->loc << ": "
 		      << " All Constructors of a Union declaration must "
@@ -1444,7 +1480,7 @@ resolve(std::ostream& errStream,
 	  }
 	}
 	else {
-	  if(ast->child(c)->child(0)->astType == at_usesel) {
+	  if (ast->child(c)->child(0)->astType == at_usesel) {
 	    errStream << ast->child(c)->child(0)->loc << ": "
 		      << " All Constructors of a Union declaration must "
 		      << "belong to the same compilation Unit "
@@ -1462,32 +1498,26 @@ resolve(std::ostream& errStream,
   case at_constructor:
     {
       // match at_ident
-      // careful: Constructors taking no arguments are treated as values.
-      if(ast->children->size() > 1)
-	RESOLVE(ast->child(0), env, lamLevel, DEF_MODE,
-		id_constructor,  currLB, 
-		flags | BIND_PUBLIC);
-      else
-	RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
-		id_value, currLB, 
-		flags | BIND_PUBLIC);
+      IdentType it = ((ast->children.size() > 1) ? 
+		      id_ucon : id_ucon0);
       
-      ast->child(0)->Flags |= ID_IS_CTOR;
+      RESOLVE(ast->child(0), env, lamLevel, DEF_MODE,
+	      it, currLB, flags | BIND_PUBLIC);
             
-      for (size_t c = 1; c < ast->children->size(); c++) {
-	GCPtr<AST> fldc = ast->child(c);
+      for (size_t c = 1; c < ast->children.size(); c++) {
+	shared_ptr<AST> fldc = ast->child(c);
 	RESOLVE(fldc, env, lamLevel, USE_MODE, identType,
 		currLB, flags); 
 
-	if(fldc->astType != at_field)
+	if (fldc->astType != at_field)
 	  continue;
 	
 	for (size_t d = 1; d < c; d++) {
-	  GCPtr<AST> fldd = ast->child(d);
-	  if(fldd->astType != at_field)
+	  shared_ptr<AST> fldd = ast->child(d);
+	  if (fldd->astType != at_field)
 	    continue;
 	  
-	  if(fldc->child(0)->s == fldd->child(0)->s) {
+	  if (fldc->child(0)->s == fldd->child(0)->s) {
 	    errStream << ast->loc << ": "
 		      << "Duplicate field label: "
 		      << fldc->child(0)->s
@@ -1502,20 +1532,20 @@ resolve(std::ostream& errStream,
   case at_fields:
     {
       // match at_field*
-      for (size_t c = 0; c < ast->children->size(); c++) {
-	GCPtr<AST> fldc = ast->child(c);
+      for (size_t c = 0; c < ast->children.size(); c++) {
+	shared_ptr<AST> fldc = ast->child(c);
 	RESOLVE(fldc, env, lamLevel, USE_MODE, identType,
 		currLB, flags); 
 
-	if(fldc->astType != at_field)
+	if (fldc->astType != at_field)
 	  continue;
 	
 	for (size_t d = 1; d < c; d++) {
-	  GCPtr<AST> fldd = ast->child(d);
-	  if(fldd->astType != at_field)
+	  shared_ptr<AST> fldd = ast->child(d);
+	  if (fldd->astType != at_field)
 	    continue;
 	  
-	  if(fldc->child(0)->s == fldd->child(0)->s) {
+	  if (fldc->child(0)->s == fldd->child(0)->s) {
 	    errStream << ast->loc << ": "
 		      << "Duplicate field label: "
 		      << fldc->child(0)->s
@@ -1533,9 +1563,9 @@ resolve(std::ostream& errStream,
       ast->child(0)->fqn = FQName(FQ_NOIF, ast->child(0)->s);
 
       // match agt_type?
-      if (ast->children->size() > 1) {
+      if (ast->children.size() > 1) {
 	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		id_type, currLB, 
+		idc_type, currLB, 
 		flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       }
 
@@ -1546,7 +1576,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_type?
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_type, currLB, 
+	      idc_type, currLB, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
 
       break;
@@ -1556,11 +1586,11 @@ resolve(std::ostream& errStream,
     {
       // match agt_type?
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_type, currLB, 
+	      idc_type, currLB, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
 
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_type, currLB, 
+	      idc_type, currLB, 
 	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       
       break;
@@ -1570,7 +1600,7 @@ resolve(std::ostream& errStream,
     {
       // match at_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_type, currLB, flags);
+	      idc_type, currLB, flags);
 
       // match at_intLiteral
       RESOLVE(ast->child(1), env, lamLevel, NULL_MODE, 
@@ -1583,7 +1613,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_type, currLB, 
+	      idc_type, currLB, 
 	      flags | (INCOMPLETE_OK));
       break;
     }
@@ -1592,7 +1622,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_type, currLB, 
+	      idc_type, currLB, 
 	      flags | (INCOMPLETE_OK));
       break;
     }
@@ -1601,7 +1631,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_type, currLB, 
+	      idc_type, currLB, 
 	      flags & (~INCOMPLETE_OK));
 
       break;
@@ -1611,11 +1641,11 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_type, currLB, flags);
+	      idc_type, currLB, flags);
 
       // match agt_type
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_type, currLB, flags);
+	      idc_type, currLB, flags);
     
       break;
     }
@@ -1623,9 +1653,9 @@ resolve(std::ostream& errStream,
   case at_fnargVec:
     {
       // match agt_type*
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		id_type, currLB, flags);
+		idc_type, currLB, flags);
 
       break;
     }
@@ -1640,12 +1670,12 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_type, currLB, flags);
+	      idc_type, currLB, flags);
 
       // match at_intLiteral
       RESOLVE(ast->child(1), env, lamLevel, NULL_MODE, identType,
 	      currLB, flags); 
-      if(ast->child(1)->litValue.i < 0) {
+      if (ast->child(1)->litValue.i < 0) {
 	errStream << ast->child(1)->loc << ": "
 		  << "Array index cannot be negative." 
 		  << std::endl;
@@ -1659,10 +1689,10 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_type, currLB, flags);
+	      idc_type, currLB, flags);
 
       // match at_intLiteral?
-      if (ast->children->size() > 1) {
+      if (ast->children.size() > 1) {
 	RESOLVE(ast->child(1), env, lamLevel, NULL_MODE, identType,
 		currLB, flags); 
       }
@@ -1684,7 +1714,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_type, currLB, flags);
+	      idc_type, currLB, flags);
 
       break;
     }
@@ -1692,9 +1722,9 @@ resolve(std::ostream& errStream,
   case at_typeapp:
     {
       // match agt_var agt_tvar+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		id_type, currLB, flags);
+		idc_type, currLB, flags);
 
       break;
     }
@@ -1702,57 +1732,30 @@ resolve(std::ostream& errStream,
   case at_qualType:
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_type, currLB, flags);      
+	      idc_type, currLB, flags);      
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_type, currLB, flags);      
+	      idc_type, currLB, flags);      
       break;
     }
 
   case at_constraints:
     {
-      for(size_t c=0; c < ast->children->size(); c++)
+      for (size_t c=0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		id_type, currLB, flags);
+		idc_type, currLB, flags);
       break;
     }    
     
   case at_identPattern:
     {
-      // This special condition is introduced by the fact that when a
-      // expression like the following is encountered, (Value Patterns
-      // only):
-      //
-      //   (case x (Nil ... )  ... )
-      //
-      // There is no way to tell if Nil is a Constructor that is being
-      // matched or a fresh variable. Therefore the check is needed.
-
-      if(ast->Flags & AST_IS_VALPAT) {
-	// AST_IS_VALPAT ONLY for the ROOT of a case leg
-	assert(mode == DEF_MODE);
-	GCPtr<AST> var = ast->child(0);
-	GCPtr<AST> def = env->getBinding(var->s);
-
-	if((def) && def->isUnionLeg()) {
-	  RESOLVE(var, env, lamLevel, USE_MODE, id_value, currLB, 
-		  flags | RES_APP_PAT_MODE);	
-	}
-	else {
-	  // match agt_var
-	  RESOLVE(ast->child(0), env, lamLevel, DEF_MODE,
-		  identType, currLB, flags); 
-	}
-	break;
-      }
-    
       // match agt_var
       RESOLVE(ast->child(0), env, lamLevel, mode, identType,
 	      currLB, flags); 
       
       // Type Qualifications ONLY in Binding Patterns
       // match agt_type?
-      if (ast->children->size() > 1) {
-	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, id_type,
+      if (ast->children.size() > 1) {
+	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, idc_type,
 		currLB, flags); 
       }
     
@@ -1763,10 +1766,10 @@ resolve(std::ostream& errStream,
     {
       // match agt_eform
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_type, currLB, flags);
+	      idc_type, currLB, flags);
     
       break;
     }
@@ -1775,10 +1778,10 @@ resolve(std::ostream& errStream,
     {
       // match agt_var
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
       // match agt_eform
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
       break;
     }
 
@@ -1790,17 +1793,18 @@ resolve(std::ostream& errStream,
   case at_allocREF:
     {
       // match at_type, at_fn+
-      for (size_t c = 0; c < ast->children->size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, id_type, currLB, flags);
+      for (size_t c = 0; c < ast->children.size(); c++)
+	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
+		idc_type, currLB, flags);
       break;
     }
 
   case at_mkClosure:
     {
       // match at_type, at_fn+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		id_value, currLB, 
+		idc_value, currLB, 
 		flags | INCOMPLETE_OK);
       break;
     }
@@ -1809,7 +1813,7 @@ resolve(std::ostream& errStream,
   case at_setClosure:
     {
       // match at_type, at_fn+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		id_value, currLB, flags);
       break;
@@ -1820,11 +1824,11 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       // match agt_expr
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       break;
     }
@@ -1833,8 +1837,8 @@ resolve(std::ostream& errStream,
   case at_vector:
     {
       // match agt_expr+
-      for (size_t c = 0; c < ast->children->size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, id_value,
+      for (size_t c = 0; c < ast->children.size(); c++)
+	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, idc_value,
 		currLB, flags); 
 
       break;
@@ -1843,8 +1847,8 @@ resolve(std::ostream& errStream,
   case at_begin:
     {
       // match agt_expr+
-      for (size_t c = 0; c < ast->children->size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, id_value,
+      for (size_t c = 0; c < ast->children.size(); c++)
+	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, idc_value,
 		currLB, flags);
 
       break;
@@ -1854,7 +1858,7 @@ resolve(std::ostream& errStream,
   case at_fqCtr:
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_type, currLB, flags);
+	      idc_type, currLB, flags);
      
       // Second Component handled by the type checker
       break;
@@ -1863,7 +1867,7 @@ resolve(std::ostream& errStream,
   case at_sel_ctr:
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags );
+	      idc_value, currLB, flags );
 
       // Second Component handled by the type checker
       break;
@@ -1872,50 +1876,42 @@ resolve(std::ostream& errStream,
   case at_select:
     {
       // match agt_expr
+      shared_ptr<AST> lhs = ast->child(0);
       
       // CAREFUL: this might be a usesel
-      if(ast->child(0)->astType == at_ident || 
-	 ast->child(0)->astType == at_usesel) {
-	RESOLVE(ast->child(0), env, lamLevel, USE_MODE, id_value, currLB, 
+      if (lhs->astType == at_ident || lhs->astType == at_usesel) {
+	
+	RESOLVE(lhs, env, lamLevel, USE_MODE, identType, currLB, 
 		flags | NO_CHK_USE_TYPE | SWITCHED_ID_OK);
 	
 	// If ast->child(0) was a at_usesel, now it would have
 	// turned into at_ident.
-	
-	switch(ast->child(0)->identType) {
-	case id_interface:
+	if (lhs->isIdentType(id_interface)) {
 	  ast->astType = at_usesel;
 	  // Recursively call RESOLVE on ourselves to process the
 	  // at_usesel
-	  RESOLVE(ast, env, lamLevel, USE_MODE, id_value, currLB, flags);
-	  break;
-	  
-	case id_value:
-	  // Already resolved.	  
-	  break;
-	  
-	case id_type:
+	  RESOLVE(ast, env, lamLevel, USE_MODE, identType, currLB, flags);
+	} 
+	else if (lhs->isIdentType(idc_type)) {
 	  // This must be a case where we are qualifying a constructor
 	  // with its union name.
 	  ast->astType = at_fqCtr;
-	  RESOLVE(ast, env, lamLevel, USE_MODE, id_type, currLB, flags);
-	  break;
-	  
-	default:
-	  errStream << ast->child(0)->loc 
+	  RESOLVE(ast, env, lamLevel, USE_MODE, idc_type, currLB, flags);
+	}
+	else if (!lhs->isIdentType(id_value)) {
+	  errStream << lhs->loc 
 		    << ": At selection, Identifier "
-		    << " `" << ast->child(0)->s << "'" 
+		    << " `" << lhs->s << "'" 
 		    << " is not an imported interface"
 		    << " or a value, but a " 
-		    << identTypeToString(ast->child(0)->identType) 
+		    << identTypeToString(lhs->identType) 
 		    << "." << std::endl;
 	  errorFree = false;
 	  break;
-	}	
+	}
       }
       else {
-	RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-		id_value, currLB, flags );
+	RESOLVE(lhs, env, lamLevel, USE_MODE, idc_value, currLB, flags);
       }
       
       // match at_ident
@@ -1952,18 +1948,18 @@ resolve(std::ostream& errStream,
 
   case at_lambda:
     {
-      GCPtr<Environment<AST> > lamEnv = env->newScope();
+      shared_ptr<ASTEnvironment > lamEnv = env->newScope();
       ast->envs.env = lamEnv;
 
       // match agt_bindingPatterns
-      GCPtr<AST> argVec = ast->child(0);
-      for (size_t c = 0; c < argVec->children->size(); c++)
+      shared_ptr<AST> argVec = ast->child(0);
+      for (size_t c = 0; c < argVec->children.size(); c++)
 	RESOLVE(argVec->child(c), lamEnv, lamEnv, DEF_MODE, 
 		id_value, currLB, flags);
 
       // match agt_expr
       RESOLVE(ast->child(1), lamEnv, lamEnv, USE_MODE, 
-	      id_value, currLB, 
+	      idc_value, currLB, 
 	      flags | (INCOMPLETE_OK));
       break;
     }
@@ -1978,32 +1974,12 @@ resolve(std::ostream& errStream,
   case at_ucon_apply: 
   case at_apply:
     {
-      // at_struct_apply and  at_ucon_apply should 
-      // not be encountered in the first pass.
-      // This case handling is necessary because
-      // clconv calls symResolve().
+      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
+	      idc_apply, currLB, flags);	
       
-      // match agt_expr+
-      if(ast->child(0)->astType == at_ident || 
-	 ast->child(0)->astType == at_select) {
-	// During the first time of symbol resolution, 
-	// selection from an interface appears as a at_select
-	// This check is OK. If the child is really an at_select, then
-	// we will not try to resolve the selection (rhs) and we are OK.
-	RESOLVE(ast->child(0), env, lamLevel, USE_MODE, id_value, currLB, 
-		flags | RESOLVE_APPLY_MODE);	
-      }
-      else {
-	RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-		id_value, currLB, flags);
-      }
- 
-      unsigned long clFlags = 0;      
-      
-      for (size_t c = 1; c < ast->children->size(); c++)
+      for (size_t c = 1; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		id_value, currLB, 
-		flags | clFlags);
+		idc_value, currLB, flags);
 
       break;
     }
@@ -2012,15 +1988,15 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       // match agt_expr
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       // match agt_expr
       RESOLVE(ast->child(2), env, lamLevel, USE_MODE,
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       break;
     }
@@ -2031,9 +2007,9 @@ resolve(std::ostream& errStream,
   case at_not:
     {
       // match agt_expr+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		id_value, currLB, flags);
+		idc_value, currLB, flags);
 
       break;
     }
@@ -2042,20 +2018,20 @@ resolve(std::ostream& errStream,
     {
       // match at_cond_legs
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       //match at_otherwise
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
       break;
     }
 
   case at_cond_legs:
     {
       // match at_cond_leg+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		id_value, currLB, flags);
+		idc_value, currLB, flags);
 
       break;
     }
@@ -2064,29 +2040,29 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
   
       // match agt_expr
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       break;
     }
 
   case at_setbang:
     {
-      GCPtr<AST> lhs = ast->child(0);
-      GCPtr<AST> rhs = ast->child(1);
+      shared_ptr<AST> lhs = ast->child(0);
+      shared_ptr<AST> rhs = ast->child(1);
 
       // match agt_expr
       RESOLVE(lhs, env, lamLevel, USE_MODE, id_value, currLB, flags); 
 
       // match agt_expr
-      RESOLVE(rhs, env, lamLevel, USE_MODE, id_value, currLB, flags);
+      RESOLVE(rhs, env, lamLevel, USE_MODE, idc_value, currLB, flags);
 
       if (lhs->astType == at_ident)
-	if((lhs->symbolDef->Flags2 & ID_MUT_CLOSED) == 0)
-	  lhs->symbolDef->Flags2 |= ID_IS_MUTATED;
+	if ((lhs->symbolDef->flags & ID_MUT_CLOSED) == 0)
+	  lhs->symbolDef->flags |= ID_IS_MUTATED;
 
       break;
     }
@@ -2095,7 +2071,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
       break;      
     }    
 
@@ -2112,9 +2088,9 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
 
-      if(((ast->Flags2 & INNER_REF_NDX) == 0) &&
+      if (((ast->flags & INNER_REF_NDX) == 0) &&
 	 ast->child(1)->astType == at_ident) {
 	// Could be a field-select
       }
@@ -2132,16 +2108,16 @@ resolve(std::ostream& errStream,
 
       // match at agt_expr
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);    
-
+	      idc_value, currLB, flags);    
+      
       // match at_case_legs or at_sw_legs
       RESOLVE(ast->child(2), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       // match at_otherwise (agt_ow)
-      if(ast->child(3)->astType != at_Null) 
+      if (ast->child(3)->astType != at_Null) 
 	RESOLVE(ast->child(3), env, lamLevel, USE_MODE, 
-		id_value, currLB, flags);
+		idc_value, currLB, flags);
 
       break;
     }
@@ -2149,36 +2125,37 @@ resolve(std::ostream& errStream,
   case at_sw_legs:
     {
       // match at_case_leg+ or at_sw_leg+
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		id_value, currLB, flags);
+		idc_value, currLB, flags);
 
       break;
     }
 
   case at_sw_leg:
     {
-      GCPtr<Environment<AST> > legEnv = env->newScope();
+      shared_ptr<ASTEnvironment > legEnv = env->newScope();
       ast->envs.env = legEnv;
 
       /* match at_ident -- the contents after cracking the constructor */
       RESOLVE(ast->child(0), legEnv, lamLevel, DEF_MODE, 
 	      id_value, currLB, flags);
-      assert(legEnv->bindings->elem(0)->val = ast->child(0));
-      legEnv->bindings->elem(0)->flags |= BF_COMPLETE;
-      ast->child(0)->Flags2 |= ID_FOR_SWITCH;
+      ASTEnvironment::iterator itr = legEnv->find(ast->child(0)->s);
+      assert(itr != legEnv->end());
+      itr->second->flags |= BF_COMPLETE;
+      ast->child(0)->flags |= ID_FOR_SWITCH;
 
       /* match at_expr */
-      if((flags & WITHIN_CATCH) && (ast->children->size() > 3))
+      if ((flags & WITHIN_CATCH) && (ast->children.size() > 3))
 	flags |= WITHIN_CATCH_MC;
 	
       RESOLVE(ast->child(1), legEnv, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       /* match at_ident -- the constructors*/
-      for(size_t c=2; c < ast->children->size(); c++)
+      for (size_t c=2; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), legEnv, lamLevel, USE_MODE, 
-		id_value, currLB, (flags | RESOLVE_APPLY_MODE));      
+		idc_uctor, currLB, flags);      
       
       break;
     }
@@ -2187,7 +2164,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
       break;
     }
 
@@ -2201,12 +2178,12 @@ resolve(std::ostream& errStream,
 
       // match at_case_legs
       RESOLVE(ast->child(2), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags | WITHIN_CATCH);
+	      idc_value, currLB, flags | WITHIN_CATCH);
 
       // match at_otherwise
-      if(ast->child(3)->astType != at_Null) 
+      if (ast->child(3)->astType != at_Null) 
 	RESOLVE(ast->child(3), env, lamLevel, USE_MODE, 
-		id_value, currLB, flags | WITHIN_CATCH);
+		idc_value, currLB, flags | WITHIN_CATCH);
       break;
     }
 
@@ -2214,7 +2191,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, 
+	      idc_value, currLB, 
 	      flags);
       break;
     }
@@ -2222,7 +2199,7 @@ resolve(std::ostream& errStream,
   case at_container:
     {
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_value, currLB, 
+	      idc_value, currLB, 
 	      flags);      
       break;
     }
@@ -2230,25 +2207,25 @@ resolve(std::ostream& errStream,
   case at_do:
     {
       // NOTE: Do is re-written in the parser
-      GCPtr<Environment<AST> > doEnv = env->newScope();
+      shared_ptr<ASTEnvironment > doEnv = env->newScope();
       ast->envs.env = doEnv;
 
-      GCPtr<AST> dbs = ast->child(0);
+      shared_ptr<AST> dbs = ast->child(0);
       
       // match at_dobindings
       // First process the initializers.
-      for (size_t c = 0; c < dbs->children->size(); c++) {
-	GCPtr<AST> db = dbs->child(c);	
-	GCPtr<AST> init = db->child(1);
-	RESOLVE(init, doEnv, lamLevel, USE_MODE, id_value, 
+      for (size_t c = 0; c < dbs->children.size(); c++) {
+	shared_ptr<AST> db = dbs->child(c);	
+	shared_ptr<AST> init = db->child(1);
+	RESOLVE(init, doEnv, lamLevel, USE_MODE, idc_value, 
 		currLB, flags);
       }
             
       // First add the definitions.
-      for (size_t c = 0; c < dbs->children->size(); c++) {
-	GCPtr<AST> db = dbs->child(c);	
-	GCPtr<AST> localDef = db->child(0);
-	//GCPtr<AST> init = db->child(1);
+      for (size_t c = 0; c < dbs->children.size(); c++) {
+	shared_ptr<AST> db = dbs->child(c);	
+	shared_ptr<AST> localDef = db->child(0);
+	//shared_ptr<AST> init = db->child(1);
 	RESOLVE(localDef, doEnv, lamLevel, DEF_MODE, 
 		id_value, currLB, flags);	
       }
@@ -2257,30 +2234,30 @@ resolve(std::ostream& errStream,
       markComplete(doEnv);
       
       // Then process all the next step initializers
-      for (size_t c = 0; c < dbs->children->size(); c++) {
-	GCPtr<AST> db = dbs->child(c);	
-	GCPtr<AST> step = db->child(2);
+      for (size_t c = 0; c < dbs->children.size(); c++) {
+	shared_ptr<AST> db = dbs->child(c);	
+	shared_ptr<AST> step = db->child(2);
 	RESOLVE(step, doEnv, lamLevel, USE_MODE, 
-		id_value, currLB, flags);	
+		idc_value, currLB, flags);	
       }
       
       // Process the condition/result
       // match at_dotest
       RESOLVE(ast->child(1), doEnv, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);      
+	      idc_value, currLB, flags);      
       
       // And finally process the body with a rich environment
       // match agt_expr, with my Parent's Incompleteness restrictions
       RESOLVE(ast->child(2), doEnv, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);    
+	      idc_value, currLB, flags);    
       break;
     }
     
   case at_dotest:
     {
-      for (size_t c = 0; c < ast->children->size(); c++)
+      for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		id_value, currLB, flags);
+		idc_value, currLB, flags);
       break;
     }
 
@@ -2292,51 +2269,51 @@ resolve(std::ostream& errStream,
       //         identType, currLB,  flags);
       // Handle let bindings with care.
 
-      GCPtr<Environment<AST> > letEnv = env->newScope();
-      GCPtr<AST> lbs = ast->child(0);
+      shared_ptr<ASTEnvironment > letEnv = env->newScope();
+      shared_ptr<AST> lbs = ast->child(0);
       lbs->parentLB = currLB;
 
       ast->envs.env = letEnv;
       lbs->envs.env = letEnv;
 
       // Begin processing let-bindings
-      lbs->Flags2 &= ~LBS_PROCESSED;
+      lbs->flags &= ~LBS_PROCESSED;
 
       // First Evaluate ALL the Expressions, then bind the values
       // match agt_expr
       // For each individual binding // match at_letbinding+
-      for (size_t c = 0; c < lbs->children->size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+	shared_ptr<AST> lb = lbs->child(c);
 	
 	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
-		id_value, lbs, flags);
+		idc_value, lbs, flags);
       }      
       
       // match agt_bindingPattern
       // For each individual binding // match at_letbinding+
-      for (size_t c = 0; c < lbs->children->size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+	shared_ptr<AST> lb = lbs->child(c);
 	
 	// match agt_bindingPattern
 	RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
 		id_value, lbs, flags);
 
 	assert(lb->child(0)->astType == at_identPattern);
-	lb->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
+	lb->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
       }
 
       // Now we are done with all let-bindings
-      lbs->Flags2 |= LBS_PROCESSED;
+      lbs->flags |= LBS_PROCESSED;
        
       // Evaluate the final Expression with a rich environment
       // match agt_expr, with my Parent's Incompleteness restrictions
       markComplete(letEnv);
       RESOLVE(ast->child(1), letEnv, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
     
       // match at_constraints
       RESOLVE(ast->child(2), letEnv, lamLevel, USE_MODE, 
-	      id_type, currLB,  flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      idc_type, currLB,  flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
       break;
     }
 
@@ -2345,8 +2322,8 @@ resolve(std::ostream& errStream,
       // match at_letbindings
 
       // Handle let bindings with care.
-      GCPtr<Environment<AST> > letEnv = env->newScope();
-      GCPtr<AST> lbs = ast->child(0);
+      shared_ptr<ASTEnvironment > letEnv = env->newScope();
+      shared_ptr<AST> lbs = ast->child(0);
       lbs->parentLB = currLB;
 
       ast->envs.env = letEnv;
@@ -2354,32 +2331,34 @@ resolve(std::ostream& errStream,
 
       
       // Begin processing let-bindings
-      lbs->Flags2 &= ~LBS_PROCESSED;
+      lbs->flags &= ~LBS_PROCESSED;
 
       // First Evaluate the Expressions, then bind the values
       // individually
       // match agt_expr
       // For each individual binding // match at_letbinding+
-      for (size_t c = 0; c < lbs->children->size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+	shared_ptr<AST> lb = lbs->child(c);
 	
 	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
-		id_value, lbs, flags);
+		idc_value, lbs, flags);
 	
 	RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
 		id_value, lbs, flags);
 	assert(lb->child(0)->astType == at_identPattern);
-	lb->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
+	lb->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
 
-	markLatestComplete(letEnv);
+	ASTEnvironment::iterator itr = 
+	  letEnv->find(lb->child(0)->child(0)->s);
+	itr->second->flags |= BF_COMPLETE;
       }
 
       // Now we are done with all let-bindings
-      lbs->Flags2 |= LBS_PROCESSED;
+      lbs->flags |= LBS_PROCESSED;
       
       // Evaluate the final Expression with a rich environment
       RESOLVE(ast->child(1), letEnv, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
       
       break;
     }
@@ -2395,39 +2374,39 @@ resolve(std::ostream& errStream,
 
       // First bind, then evaluate.
       
-      GCPtr<Environment<AST> > letEnv = env->newScope();
-      GCPtr<AST> lbs = ast->child(0);
+      shared_ptr<ASTEnvironment > letEnv = env->newScope();
+      shared_ptr<AST> lbs = ast->child(0);
       lbs->parentLB = currLB;
 
       ast->envs.env = letEnv;
       lbs->envs.env = letEnv;      
 
       // Begin processing let-bindings
-      lbs->Flags2 &= ~LBS_PROCESSED;
+      lbs->flags &= ~LBS_PROCESSED;
 
       // For each individual binding // match at_letbinding+
-      for (size_t c = 0; c < lbs->children->size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+	shared_ptr<AST> lb = lbs->child(c);
       
 	// match agt_bindingPattern
 	RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
 		id_value, lbs, flags);	
 	assert(lb->child(0)->astType == at_identPattern);
-	lb->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
+	lb->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
       }      
     
       // For each individual binding // match at_letbinding+
-      for (size_t c = 0; c < lbs->children->size(); c++) {
-	GCPtr<AST> lb = lbs->child(c);
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+	shared_ptr<AST> lb = lbs->child(c);
 
 	// match agt_expr
 	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
-		id_value, lbs, flags);
+		idc_value, lbs, flags);
 	
       }
 
       // Now we are done with all let-bindings
-      lbs->Flags2 |= LBS_PROCESSED;
+      lbs->flags |= LBS_PROCESSED;
 
 
       // Evaluate the final Expression with a rich environment, 
@@ -2435,17 +2414,19 @@ resolve(std::ostream& errStream,
       // match agt_expr
       markComplete(letEnv);
       RESOLVE(ast->child(1), letEnv, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+	      idc_value, currLB, flags);
 
       break;
     }
 
     // CAREFUL: CAREFUL:    
+    //
     // This is *NOT* dead code, though, it appears to be so, from the
-    // way the above let-cases are written. 
-    // this case is used by the (new) polyinstantiator to R&T
-    // let-binding instantiations. It is OK to use it ther because we
-    // don't have any more polymorphism at that stage.
+    // way the above let-cases are written.  this case is used by the
+    // (new) polyinstantiator to R&T let-binding instantiations. It is
+    // OK to use it there because we don't have any more polymorphism
+    // at that stage.
+    //
     // THIS CASE MUST NOT BE USED BY OTHER LET FORMS
   case at_letbinding:
     {
@@ -2453,23 +2434,23 @@ resolve(std::ostream& errStream,
 
       // The lamLevel is bogus here, but OK only for
       // the sake of polyinstantiation.      
-      if(ast->Flags & LB_REC_BIND) {
+      if (ast->flags & LB_REC_BIND) {
 	RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
 		id_value, ast, flags);
 
 	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		id_value, ast, flags);	
+		idc_value, ast, flags);	
       }	
       else {
 	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		id_value, ast, flags);
+		idc_value, ast, flags);
 	
 	RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
-		id_value, ast, flags);
+		idc_value, ast, flags);
       }
 
       assert(ast->child(0)->astType == at_identPattern);
-      ast->child(0)->child(0)->Flags2 &= ~ID_IS_MUTATED;
+      ast->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
       break;
     }
   }
@@ -2478,12 +2459,12 @@ resolve(std::ostream& errStream,
 
 static bool
 initEnv(std::ostream& errStream,
-	GCPtr<AST> ast,
-	GCPtr<Environment<AST> > aliasEnv,
-	GCPtr<Environment<AST> > env)
+	shared_ptr<AST> ast,
+	shared_ptr<ASTEnvironment > aliasEnv,
+	shared_ptr<ASTEnvironment > env)
 {
   // See if I am processing the prelude or some other file.
-  if(ast->astType == at_interface &&
+  if (ast->astType == at_interface &&
      ast->child(0)->s == "bitc.prelude") {
     //    cout << "Processing Prelude " << std::endl;   
 
@@ -2492,32 +2473,29 @@ initEnv(std::ostream& errStream,
   
   //  cout << "Processing " << ast->child(0)->s << std::endl;
   // "use" everything in the prelude
-  GCPtr<Environment<AST> > preenv = 0;
+  shared_ptr<ASTEnvironment > preenv = GC_NULL;
   size_t i;
 
-  for(i=0; i < UocInfo::ifList->size(); i++) {
-    if(UocInfo::ifList->elem(i)->uocName == "bitc.prelude") {
-      preenv = UocInfo::ifList->elem(i)->env;
-      break;
+  {
+    UocMap::iterator itr = UocInfo::ifList.find("bitc.prelude");
+    if (itr == UocInfo::ifList.end()) {
+      errStream << ast->loc << ": "
+		<< "Internal Compiler Error. "
+		<< " Prelude has NOT been processed."
+		<< std::endl;
+      ::exit(1);
     }
+    preenv = itr->second->env;
   }
   
-  assert(preenv);
-  
-  if(i == UocInfo::ifList->size()) {
-    errStream << ast->loc << ": "
-	      << "Internal Compiler Error. "
-	      << " Prelude has NOT been processed."
-	      << std::endl;
-    return false;
-  }
-  
-  if(!preenv) {
+  if (!preenv) {
+    // GCFIX: Why does this return on error instead of exiting? This
+    // is a FATAL compiler errors!
     errStream << ast->loc << ": "
 	      << "Internal Compiler Error. "
 	      << " Prelude's environment is NULL "
 	      << std::endl;
-    return false;
+    ::exit(1);
   }
   
   aliasPublicBindings(std::string(), aliasEnv, preenv, env);
@@ -2531,27 +2509,27 @@ UocInfo::fe_symresolve(std::ostream& errStream,
 {
   bool errFree = true;
 
-  if(Options::noPrelude)
+  if (Options::noPrelude)
     flags |= SYM_NO_PRELUDE;
   
-  GCPtr<Environment<AST> > aliasEnv = new Environment<AST>("*aliases*");
+  shared_ptr<ASTEnvironment > aliasEnv = ASTEnvironment::make("*aliases*");
 
-  if(init) {    
-    if(flags & SYM_REINIT) {
+  if (init) {    
+    if (flags & SYM_REINIT) {
       assert(env);      
       assert(env->parent);
       env = env->parent->newDefScope();
     }
     else {
-      env = new Environment<AST>(this->uocName);
+      env = ASTEnvironment::make(uocName);
     }      
 
-    if((flags & SYM_NO_PRELUDE) == 0)
+    if ((flags & SYM_NO_PRELUDE) == 0)
       initEnv(std::cerr, uocAst, aliasEnv, env);
   }
   
-  CHKERR(errFree, resolve(errStream, uocAst, aliasEnv, env, NULL, 
-			  USE_MODE, id_type, NULL, flags));
+  CHKERR(errFree, resolve(errStream, uocAst, aliasEnv, env, GC_NULL, 
+			  USE_MODE, idc_type, GC_NULL, flags));
 
   return errFree;
 }

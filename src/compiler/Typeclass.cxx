@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,6 +35,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -42,13 +43,10 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+
 #include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
 
 #include "UocInfo.hxx"
-#include "Options.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
@@ -58,16 +56,16 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
 bool 
-Instance::equals(std::ostream &errStream, GCPtr<Instance> ins, 
-		 GCPtr<const Environment< sherpa::CVector<GCPtr<Instance> > > >
-		 instEnv) const
+Instance::equals(shared_ptr<Instance> ins, 
+		 shared_ptr<const InstEnvironment > instEnv) const
 {
-  GCPtr<TypeScheme> mySigma = ts->ts_instance_copy();
-  GCPtr<TypeScheme> hisSigma = ins->ts->ts_instance_copy();
+  shared_ptr<TypeScheme> mySigma = ts->ts_instance_copy();
+  shared_ptr<TypeScheme> hisSigma = ins->ts->ts_instance_copy();
 
   //std::cerr << mySigma->asString() << " vs " 
   //	    << hisSigma->asString() 
@@ -77,101 +75,131 @@ Instance::equals(std::ostream &errStream, GCPtr<Instance> ins,
   
   CHKERR(unifies, mySigma->tau->unifyWith(hisSigma->tau)); 
   
-  if(!unifies)
+  if (!unifies)
     return false;
     
   assert(mySigma->tcc);
   assert(hisSigma->tcc);
   
   // This will also add self constraints.
-  for(size_t j=0; j < hisSigma->tcc->pred->size(); j++) {
-    GCPtr<Typeclass> hisPred = hisSigma->tcc->Pred(j);      
+  for (TypeSet::iterator itr = hisSigma->tcc->begin(); 
+       itr != hisSigma->tcc->end(); ++itr) {
+    shared_ptr<Typeclass> hisPred = (*itr);
     mySigma->tcc->addPred(hisPred);
   }
   
   std::stringstream ss;
   CHKERR(unifies, mySigma->solvePredicates(ss, ast->loc, 
-					   instEnv, new Trail)); 
+					   instEnv, Trail::make())); 
   
-  if(!unifies)
+  if (!unifies)
     return false;
   
-  if (mySigma->tcc->pred->size() == 0)
+  if (mySigma->tcc->empty())
     return true;
   else
     return false;
 }
 
+// Check Instance overlapping:
+// Currently, all instances must be absolurely non-overlapping --
+// that is, non-unifiable.
+//
+// The operlapping check is different from equality check
+// For example, consider a class ABC wherein, we have instances
+//
+// (definstance (forall ((IntLit 'a)) (ABC 'a))  ... )
+// (definstance (forall ((FloatLit 'a)) (ABC 'a)) ...)
+//
+// The two instances are not equal, both have type (ABC 'a), and
+// therefore are overlapping. 
+//
+// If we declare these instances as non-overlapping, in the constraint
+// solver, if we have a constraint (ABC int32) The solver can 
+// 1) First come across the (((FloatLit 'a)) (ABC 'a)) instance
+// 2) Deem 'a unifiable with int32, assuming non-overlap
+// 3) Add pre-condition (FloatLit int32) which is unsatisfiable.
+//
+// The solver unifies with the first unifiable instance. It is not a
+// backtracking solver which tries other instances if the overall
+// solving fails for an instance. 
+
 bool 
-Instance::satisfies(std::ostream &errStream,
-		    GCPtr<Typeclass> pred, 		    
-		    GCPtr<const Environment< sherpa::CVector<GCPtr<Instance> > > >
+Instance::overlaps(boost::shared_ptr<Instance> ins) const
+{
+  return ts->tau->equals(ins->ts->tau); 
+}
+
+
+bool 
+Instance::satisfies(shared_ptr<Typeclass> pred, 		    
+		    shared_ptr<const InstEnvironment >
 		    instEnv) const
 {
   bool unifies = true;
-  GCPtr<TypeScheme> sigma = ts->ts_instance_copy();
+  shared_ptr<TypeScheme> sigma = ts->ts_instance_copy();
 
   CHKERR(unifies, sigma->tau->unifyWith(pred));   
   
-  if(!unifies)
+  if (!unifies)
     return false;
     
-  if(!sigma->tcc)
+  if (!sigma->tcc)
     return true;
 
   std::stringstream ss;
   LexLoc internalLocation;
   CHKERR(unifies, sigma->solvePredicates(ss, internalLocation, 
-					 instEnv, new Trail));
+					 instEnv, Trail::make()));
   
-  if(!unifies)
+  if (!unifies)
     return false;
   
-  if (sigma->tcc->pred->size() == 0)
+  if (sigma->tcc->empty())
     return true;
   else
     return false;
 }
 
 bool 
-Typeclass::addFnDep(GCPtr<Type> dep) 
+Typeclass::addFnDep(shared_ptr<Type> dep) 
 {
-  if(getType() != this)
+  if (getType() != shared_from_this())
     return getType()->addFnDep(dep); // getType() OK
   
   size_t c;
   
-  if(kind != ty_typeclass)
+  if (kind != ty_typeclass)
     assert(false);
 
-  if(dep->kind != ty_tyfn)
+  if (dep->kind != ty_tyfn)
     assert(false);
   
-  if(!fnDeps)
-    fnDeps = new CVector<GCPtr<Type> >;
-
-  for(c = 0; c < fnDeps->size(); c++)
-    if(FnDep(c)->strictlyEquals(dep, false, true))
+  for (TypeSet::iterator itr = fnDeps.begin(); 
+      itr != fnDeps.end(); ++itr) {
+    if ((*itr)->strictlyEquals(dep, false, true))
       return false;
+  }
 
   //   std::cout << "Adding fnDep " << dep->asString(NULL) 
   //   	    << " to " << this->asString(NULL) << "."
   //   	    << std::endl;
-  fnDeps->append(dep);
+  fnDeps.insert(dep);
   return true;
 }
 
 void
-TCConstraints::collectAllFnDeps(GCPtr<CVector<GCPtr<Type> > > fnDeps)
+TCConstraints::collectAllFnDeps(set<shared_ptr<Type> >& fnDeps)
 {
-  for(size_t i=0; i < pred->size(); i++) {
-    GCPtr<Typeclass> pr = Pred(i)->getType();    
-    if(pr->fnDeps)
-      for(size_t j=0; j < pr->fnDeps->size(); j++) {
-	GCPtr<Type> fnDep = pr->FnDep(j)->getType();
-	assert(fnDep->kind == ty_tyfn);
-	fnDeps->append(fnDep);
-      }
+  for (iterator itr = begin(); itr != end(); ++itr) {
+    shared_ptr<Typeclass> pr = (*itr)->getType();    
+
+    for (TypeSet::iterator itr_j=pr->fnDeps.begin();
+	itr_j != pr->fnDeps.end(); ++itr_j) {
+      shared_ptr<Type> fnDep = (*itr_j)->getType();
+      assert(fnDep->kind == ty_tyfn);
+      fnDeps.insert(fnDep);
+    }
   }  
 }
 
@@ -182,39 +210,42 @@ TCConstraints::collectAllFnDeps(GCPtr<CVector<GCPtr<Type> > > fnDeps)
 // must be used.
 
 void 
-TCConstraints::close(GCPtr<CVector<GCPtr<Type> > > closure,
-		     GCPtr<const CVector<GCPtr<Type> > > fnDeps)
+TCConstraints::close(TypeSet& closure,
+		     const TypeSet& fnDeps)
 {
   size_t newSize = 0; 
   size_t oldSize = 0;
   
   do {
     oldSize = newSize;    
-    for(size_t i=0; i < fnDeps->size(); i++) {
-      GCPtr<Type> fnDep = fnDeps->elem(i)->getType();
-      GCPtr<Type> fnDepArgs = fnDep->Args()->getType();
-      GCPtr<Type> fnDepRet = fnDep->Ret()->getType();      
-      GCPtr< CVector <GCPtr<Type> > > argTvs = new CVector <GCPtr<Type> >;
-      GCPtr< CVector <GCPtr<Type> > > retTvs = new CVector <GCPtr<Type> >;
+    for (TypeSet::iterator itr = fnDeps.begin();
+	itr != fnDeps.end(); ++itr) {
+      shared_ptr<Type> fnDep = (*itr)->getType();
+      shared_ptr<Type> fnDepArgs = fnDep->Args()->getType();
+      shared_ptr<Type> fnDepRet = fnDep->Ret()->getType();      
+      TypeSet argTvs;
+      TypeSet retTvs;
       fnDepArgs->collectAllftvs(argTvs);      
       bool foundAll = true;
-      for(size_t j=0; j < argTvs->size(); j++) {
-	GCPtr<Type> argTv = argTvs->elem(j);
-	if(!closure->contains(argTv)) {
+      for (TypeSet::iterator itr_j = argTvs.begin();
+	  itr_j != argTvs.end(); ++itr_j) {
+	shared_ptr<Type> argTv = (*itr_j);
+	if (closure.find(argTv) == closure.end()) {
 	  foundAll = false;
 	  break;
 	}
       }
 
-      if(foundAll) {	
+      if (foundAll) {	
 	fnDepRet->collectAllftvs(retTvs);	
-	for(size_t j=0; j < retTvs->size(); j++) {
-	  GCPtr<Type> retTv = retTvs->elem(j);
-	  if(!closure->contains(retTv))
-	    closure->append(retTv);
+	for (TypeSet::iterator itr_j = retTvs.begin();
+	    itr_j != retTvs.end(); ++itr_j) {
+	  shared_ptr<Type> retTv = (*itr_j);
+	  if (closure.find(retTv) == closure.end())
+	    closure.insert(retTv);
 	}
       }	
     }
-    newSize = closure->size();
-  } while(newSize > oldSize);
+    newSize = closure.size();
+  } while (newSize > oldSize);
 }

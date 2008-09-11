@@ -51,22 +51,14 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+
 #include "Version.hxx"
+#include "Options.hxx"
 #include "UocInfo.hxx"
 #include "AST.hxx"
-#include "Options.hxx"
-#if 0
-#include "Environment.hxx"
-#include "Symtab.hxx"
-#include "inter-pass.hxx"
-#include <errno.h>
-#include "backend.hxx"
-#include "INOstream.hxx"
-#include "Clconv.hxx"
-#include "gen-c.hxx"
-#include <libsherpa/utf8.hxx>
-#include <cctype>
-#endif
+
+using namespace boost;
+using namespace sherpa;
 
 bool
 EmitBitO(std::ostream &optStream, std::ostream &errStream)
@@ -79,13 +71,14 @@ EmitBitO(std::ostream &optStream, std::ostream &errStream)
 	      << Options::outputFileName
 	      << "\" -- "
 	      << strerror(errno)
-	      << endl;
+	      << std::endl;
 
 
-  out << "(bitc-version \"" << BITC_VERSION << "\")" << endl;
+  out << "(bitc-version \"" << BITC_VERSION << "\")" << std::endl;
 
-  for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
-    GCPtr<UocInfo> uoc = UocInfo::srcList->elem(i);
+  for (UocMap::iterator itr = UocInfo::srcList.begin();
+      itr != UocInfo::srcList.end(); ++itr) {
+    shared_ptr<UocInfo> uoc = itr->second;
 
     uoc->PrettyPrint(out, false);
   }

@@ -42,35 +42,107 @@
 #include "UocInfo.hxx"
 #include "AST.hxx"
 
+/** @file
+ *
+ * @brief Interface for defining back-ends.
+ *
+ * This is actually misnamed, since what it describes is an emission
+ * target.
+ */
+
 typedef bool (*BackEndFn) (std::ostream& out, std::ostream& err,
-			   GCPtr<UocInfo> uoc);
+			   boost::shared_ptr<UocInfo> uoc);
 
 typedef bool (*MidEndFn) (std::ostream& out, std::ostream& err);
 
-bool XMLpp(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
-bool XMLdump(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
-bool XMLtypesPP(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
+
+/* @brief Emit output in XML pretty-printed form.
+ *
+ * This target has not been maintained in a long time, and should
+ * probably be dropped.
+ */
+bool XMLpp(std::ostream& out, std::ostream& err, boost::shared_ptr<UocInfo> uoc);
+/* Dump output in not-so-pretty XML form.
+ *
+ * This target has not been maintained in a long time, and should
+ * probably be dropped.
+ */
+bool XMLdump(std::ostream& out, std::ostream& err, boost::shared_ptr<UocInfo> uoc);
+
+/* @brief Emit output in XML pretty-printed form, including types */
+bool XMLtypesPP(std::ostream& out, std::ostream& err, boost::shared_ptr<UocInfo> uoc);
+
+/* @brief Emit a C header file containing the externalizable
+ * declarations from every interface that was referenced by the input
+ * units of compilation.
+ */
 bool EmitHeader(std::ostream& out, std::ostream& err, 
-		GCPtr<UocInfo> uoc);
-bool EmitC(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
-bool EmitExe(std::ostream& out, std::ostream& err, GCPtr<UocInfo> uoc);
+		boost::shared_ptr<UocInfo> uoc);
 
+/* @brief Emit a C source file that is the whole-program compilation
+ * result for all input source files.
+ *
+ * The C file will include only those procedures that are reachable
+ * from the entry points.
+ */
+bool EmitC(std::ostream& out, std::ostream& err, boost::shared_ptr<UocInfo> uoc);
 
+/* @brief Emit a C source file as in EmitC, and compile the result to
+ * an execuitable.
+ */
+bool EmitExe(std::ostream& out, std::ostream& err, boost::shared_ptr<UocInfo> uoc);
+
+/* @brief Gather all of ths source units of compilation mentioned on
+ * the command line into a quasi-archive file.
+ */
 bool EmitBitO(std::ostream& out, std::ostream& err);
 
 struct BackEnd {
+  /** @brief Name of this target */
   std::string name;
+  /** @brief Name of last front-end pass that is required before
+   * proceeding to the mid-end */
   Pass needPass;
+  /** @brief Name of last mid-end pass that must be run before
+   * proceeding to the back end.
+   */
   OnePass oPass;
-  BackEndFn fn;			// per-file backend-fn
-  MidEndFn  midfn;		// pre-GrandUOC pass
-  BackEndFn plfn;		// one-pass, post-link backend-fn
-  static size_t nBackEnd;
-  static BackEnd backends[];
+  /** @brief For targets that enit on a per-UoC basis, procedure to
+   * run on each input unit of compilation. */
+  BackEndFn fn;
+  /** @brief For targets that require the grand UoC to be built,
+   * procedure to run just before building the grand UoC. */
+  MidEndFn  midfn;
+  /** @brief For targets that emit from the Grand UoC, procedure to
+   * call on the Grand UoC after it has been built. */
+  BackEndFn plfn;
+
+  /** @brief Flags directing the front end. See below. */
   unsigned long flags;
+
+  /** @brief Total number of targets known to the compiler. */
+  static size_t nBackEnd;
+  /** @brief Vector of targets known to the compiler (first is
+   * default). */
+  static BackEnd backends[];
 };
 
+/** @brief Set in BackEnd.flags if this target only produces header
+ * files.
+ *
+ * @bug This may be reduntant, since it may be implied by which
+ * backend pass functions are set. Shap needs to check. */
 #define BK_HDR_MODE 0x001u
+/** @brief Set if we will not be running any passes that require the
+ * mid-end or back-end to be run.
+ *
+ * @bug This may be reduntant, since it may be implied by which
+ * backend pass functions are set. Shap needs to check. */
 #define BK_UOC_MODE 0x002u
+/** @brief Set if the target will be attempting to produce a binary,
+ * and therfore requires archive libraries mentioned on the command
+ * line to actually resolve to something.
+ */
+#define BK_LINKING  0x004u
 
 #endif /* BACKEND_HXX */

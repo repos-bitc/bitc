@@ -52,13 +52,14 @@
 #include "FQName.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::makeBoolLit(const sherpa::LToken &tok)
 {
-  GCPtr<AST> ast = new AST(at_boolLiteral, tok);
-  if(tok.str == "#t")
+  shared_ptr<AST> ast = AST::make(at_boolLiteral, tok);
+  if (tok.str == "#t")
     ast->litValue.b = true;
   else
     ast->litValue.b = false;
@@ -66,23 +67,23 @@ AST::makeBoolLit(const sherpa::LToken &tok)
   return ast;
 }
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::makeCharLit(const sherpa::LToken &tok)
 {
   // FIX: (shap) This needs to convert to ordinal representation
   // and use a more appropriate element type.
 
-  GCPtr<AST> ast = new AST(at_charLiteral, tok);
+  shared_ptr<AST> ast = AST::make(at_charLiteral, tok);
   //  mpz_init_set_str(ast->litValue.i, tok.is.c_str(), 0);
 
   ast->litValue.c = LitValue::DecodeCharacter(tok.str);
   return ast;
 }
 
-GCPtr<AST>  
+shared_ptr<AST>  
 AST::makeIntLit(const sherpa::LToken &tok) 
 {
-  GCPtr<AST> ast = new AST(at_intLiteral, tok);
+  shared_ptr<AST> ast = AST::make(at_intLiteral, tok);
   std::string num = "";
   bool negative = false;
 
@@ -98,7 +99,7 @@ AST::makeIntLit(const sherpa::LToken &tok)
   }
 
   std::string::size_type pos = num.find ('r');
-  if(pos != std::string::npos) {
+  if (pos != std::string::npos) {
     std::string rad = num.substr(0, pos);
     num = num.substr(pos+1, num.size());
     char *end;
@@ -111,7 +112,7 @@ AST::makeIntLit(const sherpa::LToken &tok)
   ast->litValue.i = BigNum(num, ast->litBase);  
   
   // Sign is not being considered by bignum implementation
-  if(negative)
+  if (negative)
     ast->litValue.i = -ast->litValue.i;
   
   return ast;
@@ -119,10 +120,10 @@ AST::makeIntLit(const sherpa::LToken &tok)
 
 /// @bug This is not doing the correct conversion. It completely
 /// ignores the radix encoding and the exponent encoding.
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::makeFloatLit(const sherpa::LToken &tok) 
 { 
-  GCPtr<AST> ast = new AST(at_floatLiteral, tok);
+  shared_ptr<AST> ast = AST::make(at_floatLiteral, tok);
   ast->litBase = 10;  
   ast->litValue.d = strtod(tok.str.c_str(), 0);
 #if 0
@@ -132,7 +133,7 @@ AST::makeFloatLit(const sherpa::LToken &tok)
  
   std::string::size_type epos = litString.find ('^');
 
-  if(epos != std::string::npos) {
+  if (epos != std::string::npos) {
     expString = litString.substr(epos+1, litString.size());
     mantissaString = litString.substr(0, epos);
   }
@@ -144,9 +145,9 @@ AST::makeFloatLit(const sherpa::LToken &tok)
   /* Handle the mantissa */
   
   std::string::size_type pos = mantissaString.find ('r');
-  if(pos != std::string::npos) {
+  if (pos != std::string::npos) {
     std::string rad;
-    if(mantissaString[0] == '-') {
+    if (mantissaString[0] == '-') {
       rad = mantissaString.substr(1, pos); 
       mantissaString =
         "-" + mantissaString.substr(pos+1, mantissaString.size());
@@ -162,13 +163,13 @@ AST::makeFloatLit(const sherpa::LToken &tok)
    
   /* Handle the exponent part */
   std::string exponent = "";//ss.str();
-  if(epos != std::string::npos) {
+  if (epos != std::string::npos) {
     size_t expBase = 10;
     
     std::string::size_type pos = expString.find ('r');
-    if(pos != std::string::npos) {
+    if (pos != std::string::npos) {
       std::string rad;
-      if(expString[0] == '-') {
+      if (expString[0] == '-') {
 	rad = expString.substr(1, pos); 
 	expString = "-" + expString.substr(pos+1, expString.size());
       }
@@ -200,10 +201,10 @@ AST::makeFloatLit(const sherpa::LToken &tok)
   return ast;
 }
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::makeStringLit(const sherpa::LToken &tok)
 {
-  GCPtr<AST> ast = new AST(at_stringLiteral, tok);
+  shared_ptr<AST> ast = AST::make(at_stringLiteral, tok);
   ast->litValue.s = tok.str;
   
   return ast;
@@ -610,32 +611,44 @@ identTypeToString(IdentType id)
 {
   switch (id) {
   case id_unresolved:
-    return "Unresolved";
-  case id_value:
-    return "Value";
-  case id_type:
-    return "Type";
-  case id_constructor:
-    return "Constructor";
-  case id_field:
-    return "Field";
-  case id_exn:
-    return "Exception";
+    return "unresolved";
+  case id_tvar:
+    return "type-variable";
+  case id_union:
+    return "union";
+  case id_struct:
+    return "struct";
   case id_typeclass:
-    return "Type-class";
-    //  case id_module:
-    //    return "module";
+    return "typeclass";
+  case id_method:
+    return "method";
+  case id_field:
+    return "field";
   case id_interface:
-    return "Interface";
-  default:
-    return "IMPOSSIBLE";
+    return "interface";
+  case id_value:
+    return "value";
+  case id_ucon:
+    return "union-ctr";
+  case id_ucon0:
+    return "union-ctr0";
+  case idc_type:
+    return "Type";
+  case idc_value:
+    return "Value";
+  case idc_ctor:
+    return "Constructor";
+  case idc_uctor:
+    return "Union-ctor";
+  case idc_apply:
+    return "Applicable-value";
   }
 }
 
 void
 AST::disown(size_t s)
 {
-  children = eliminate<GCPtr<AST> >(children, s);
+  children.erase(children.begin() + s);
 }
 
 bool 
@@ -686,24 +699,24 @@ AST::leadsToTopLevelForm()
 
 void
 AST::clearTypes() {
-  symType = NULL;
-  scheme = NULL;
-  for(size_t i=0; i<children->size(); i++)
+  symType = GC_NULL;
+  scheme = GC_NULL;
+  for (size_t i=0; i<children.size(); i++)
     child(i)->clearTypes();
 }
 
 
 void 
 AST::getIds(std::ostream &errStream,
-	    GCPtr< CVector<GCPtr<AST> > > ids,
+	    std::vector<shared_ptr<AST> >& ids,
 	    bool getPattern)
 {
   switch(astType) {
   case at_identPattern:
-    if(getPattern)
-      ids->append(this);
+    if (getPattern)
+      ids.push_back(shared_from_this());
     else
-      ids->append(child(0));
+      ids.push_back(child(0));
     break;
     
   default:
@@ -714,7 +727,7 @@ AST::getIds(std::ostream &errStream,
   }
 }
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::getID()
 {
   switch(astType) {
@@ -734,7 +747,7 @@ AST::getID()
     return child(0);
     
   default:
-    return NULL;
+    return GC_NULL;
   }
 }
 
@@ -742,44 +755,39 @@ bool
 AST::isUnionLeg()
 {
   assert(astType == at_ident);
-  if(((identType == id_constructor) || 
-      (identType == id_value && (Flags & ID_IS_CTOR))) &&
-     symType->isUType())
-    return true;
-  else
-    return false;     
+  return isIdentType(idc_uctor);
 }
 
 bool
 AST::isMethod()
 {  
-  if((astType == at_ident) && (Flags & ID_IS_METHOD))
+  if ((astType == at_ident) && isIdentType(id_method))
     return true;
-  
-  return false;
+  else
+    return false;
 }
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::getCtr()
 {
-  if(astType == at_ident)
-    return this;
+  if (astType == at_ident)
+    return shared_from_this();
   
   if (astType == at_fqCtr)
     return child(1);
 
   assert(false);
-  return NULL;
+  return GC_NULL;
 }
 
 /* Rename identifier `from' to `to' in `ast' */ 
 void
-AST::rename(GCPtr<AST> from, std::string newName)
+AST::rename(shared_ptr<AST> from, std::string newName)
 { 
-  GCPtr<AST> me = this;
+  shared_ptr<AST> me = shared_from_this();
   switch(astType) {
   case at_ident:    
-    if(me == from || symbolDef == from)
+    if (me == from || symbolDef == from)
       s = newName;
     break;
   
@@ -787,7 +795,7 @@ AST::rename(GCPtr<AST> from, std::string newName)
     // the encoded at_switch and at_try positions here
     
   default:
-    for(size_t c = 0; c < children->size(); c++)
+    for (size_t c = 0; c < children.size(); c++)
       child(c)->rename(from, newName);
     break;
   }
@@ -829,4 +837,27 @@ AST::isLiteral()
   default:
     return false;
   }
+}
+
+bool 
+AST::isIdentType(IdentType t)
+{
+  return ((identType == t) ||
+	  ((t == idc_type) && ((identType == id_tvar) ||
+			       (identType == id_union) || 
+			       (identType == id_struct))) ||
+	  ((t == idc_value) && ((identType == id_value) || 
+				(identType == id_ucon0) || 
+				(identType == id_method))) ||
+	  ((t == idc_ctor)  && ((identType == id_struct) || 
+				(identType == id_ucon) || 
+				(identType == id_ucon0))) ||
+	  ((t == idc_uctor) && ((identType == id_ucon) || 
+				(identType == id_ucon0))) ||
+	  // The idc_apply case is written as a recursive call and not
+	  // as disjunction of various id_* cases since in the case
+	  // where we are applying a valye that was proclaimed, the
+	  // identType would still be idc_value, and not id_value.
+	  ((t == idc_apply) && (isIdentType(idc_value) ||
+				isIdentType(idc_ctor))));
 }

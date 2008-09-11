@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,6 +35,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -42,12 +43,10 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+
 #include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <assert.h>
 
 #include "UocInfo.hxx"
-#include "Options.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
@@ -55,56 +54,54 @@
 #include "Typeclass.hxx"
 #include "inter-pass.hxx"
 
+using namespace std;
+using namespace boost;
+using namespace sherpa;
+
 bool 
-TCConstraints::contains(GCPtr<Typeclass> tc) 
+TCConstraints::contains(shared_ptr<Typeclass> tc) 
 {
-  for(size_t c = 0; c < pred->size(); c++) 
-    if(Pred(c)->strictlyEquals(tc, false, true))
+  for (iterator itr = begin(); itr != end(); ++itr)
+    if ((*itr)->strictlyEquals(tc, false, true))
       return true;
 
   return false;
 }
  
 void 
-TCConstraints::addPred(GCPtr<Typeclass> tc) 
+TCConstraints::addPred(shared_ptr<Typeclass> tc) 
 {
-  size_t c;
-  for(c = 0; c < pred->size(); c++) 
-    if(Pred(c)->strictlyEquals(tc, false, true)) {
-      if(tc->flags & TY_CT_SUBSUMED)
-	Pred(c)->flags |= TY_CT_SUBSUMED;
-      break;
+  for (iterator itr = begin(); itr != end(); ++itr) {
+    if ((*itr)->strictlyEquals(tc, false, true)) {
+      if (tc->flags & TY_CT_SUBSUMED)
+	(*itr)->flags |= TY_CT_SUBSUMED;
+      return;
     }  
-
-  if(c == pred->size()) {
-    pred->append(tc);
   }
+
+  pred.insert(tc);
 }
 
 void 
-TCConstraints::clearPred(size_t n) 
-{
-  pred = eliminate<GCPtr<Typeclass> >(pred, n);
-} 
-
-void 
-TCConstraints::clearPred(GCPtr<Constraint> ct) 
+TCConstraints::clearPred(shared_ptr<Constraint> ct) 
 {
   ct =  ct->getType();
-  for(size_t c = 0; c < pred->size(); c++) {
-    GCPtr<Constraint> pr = Pred(c)->getType();
-    if(pr == ct)
-      return clearPred(c);
+  for (iterator itr = begin(); itr != end(); ++itr) {
+    shared_ptr<Constraint> pr = (*itr)->getType();
+    if (pr == ct) {
+      pred.erase(itr);
+      return;
+    }
   }
 }
 
 void 
 TCConstraints::normalize() 
 {
-  GCPtr<CVector<GCPtr<Typeclass> > > allPreds = pred;
-  pred = new CVector<GCPtr<Typeclass> >;
+  TypeSet allPreds = pred;
+  pred.clear();
   
-  for(size_t c=0; c < allPreds->size(); c++)
-    addPred((*allPreds)[c]);
+  for (iterator itr = allPreds.begin(); itr != allPreds.end(); ++itr)
+    addPred((*itr));
 }
 

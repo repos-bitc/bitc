@@ -41,28 +41,20 @@ BITC_SRC=../../..
 #OSDOC_XML_SRC=$(patsubst %.xml,%,$(wildcard *.xml)) \
 #              $(patsubst %.txml,%,$(wildcard *.txml)) 
 
-MY_XML=changes closures PLOS2006-shap PLOS2006 polyinst 
-MY_XML+=relnotes-0.10 relnotes-0.9 spec
-MY_TYPE_XML=c-formal e-formal h-formal mut-formal 
-MY_TYPE_XML+=complete core mutinfer sys-infer 
+TEXINPUTS=":../latex_classes::"
+export TEXINPUTS
+
+XSL_BTYPE=../txml_proc/btypes-osdoc.xsl
+FIX_LTX='../txml_proc/fixup.pl'
+
+MY_XML=$(patsubst %.xml,%,$(wildcard *.xml))
+MY_TYPE_XML=$(patsubst %.txml,%,$(wildcard *.txml))
 
 OSDOC_XML_SRC=$(MY_XML) $(MY_TYPE_XML)
 OSDOC_SBOX_SRC=$(wildcard *.sbox)
 
-CLEANLIST=bitc-grammar.c mutinfer.xml sys-infer.xml 
-CLEANLIST+=c-formal.xml h-formal.xml e-formal.xml mut-formal.xml
-CLEANLIST+=core.xml complete.xml
-XSL_BTYPE=btypes-osdoc.xsl
-FIX_LTX='./fixup.pl'
-
-#Do not add these .xmli files into clean list
-SYSINFER_INCLUDE=include/sys-infer/$(wildcard *.xmli)
-COMPLETE_INCLUDE=include/complete/$(wildcard *.xmli)
-CORE_INCLUDE=include/core/$(wildcard *.xmli)
-H_FORMAL_INCLUDE=include/h-formal/$(wildcard *.xmli)
-C_FORMAL_INCLUDE=include/c-formal/$(wildcard *.xmli)
-E_FORMAL_INCLUDE=include/e-formal/$(wildcard *.xmli)
-MUT_FORMAL_INCLUDE=include/mut-formal/$(wildcard *.xmli)
+CLEANLIST=bitc-grammar.c
+CLEANLIST+=$(MY_TYPE_XML:%=%.xml)
 
 include $(BITC_SRC)/build/make/makerules.mk
 OSDOC_TARGETS+=%.ps
@@ -71,31 +63,8 @@ all:
 
 install: all
 
-#%.xmli: %.btype $(XSL_BTYPE)
-#	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
-mutinfer.xml: mutinfer.txml $(XSL_BTYPE)
-	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
-
-h-formal.xml: h-formal.txml $(XSL_BTYPE) $(H_FORMAL_INCLUDE)
-	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
-
-c-formal.xml: c-formal.txml $(XSL_BTYPE) $(C_FORMAL_INCLUDE)
-	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
-
-e-formal.xml: e-formal.txml $(XSL_BTYPE) $(E_FORMAL_INCLUDE)
-	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
-
-mut-formal.xml: mut-formal.txml $(XSL_BTYPE) $(MUT_FORMAL_INCLUDE)
-	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
-
-sys-infer.xml: sys-infer.txml $(XSL_BTYPE) $(SYSINFER_INCLUDE)
-	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
-
-core.xml: core.txml $(XSL_BTYPE) $(CORE_INCLUDE)
-	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
-
-complete.xml: complete.txml $(XSL_BTYPE) $(COMPLETE_INCLUDE)
+$(MY_TYPE_XML:%=%.xml): %.xml : %.txml $(XSL_BTYPE) include/%/$(wildcard *.xmli)
 	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
 $(MY_TYPE_XML:%=%.ltx): %.ltx : %.xml.ltx

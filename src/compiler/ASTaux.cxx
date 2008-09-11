@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,10 +35,10 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
-#include <assert.h>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -51,27 +51,28 @@
 #include "inter-pass.hxx"
 #include "FQName.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
-GCPtr<Type> 
+shared_ptr<Type> 
 AST::getType()
 {
   return symType->getType();
 }
 
-GCPtr <const Type> 
+shared_ptr <const Type> 
 AST::getType() const
 {
   return symType->getType();
 }
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::genIdent(const char *label, const bool isTV)
 {
-  GCPtr<AST> id = new AST(at_ident);
+  shared_ptr<AST> id = AST::make(at_ident);
 
   std::stringstream ss;
-  if(isTV)
+  if (isTV)
     ss << "'__";
   else
     ss << "__";
@@ -82,14 +83,14 @@ AST::genIdent(const char *label, const bool isTV)
   return id;
 }
 
-GCPtr<AST> 
-AST::genSym(GCPtr<AST> ast, const char *label, const bool isTV)
+shared_ptr<AST> 
+AST::genSym(shared_ptr<AST> ast, const char *label, const bool isTV)
 {
-  GCPtr<AST> id = genIdent(label, isTV);
+  shared_ptr<AST> id = genIdent(label, isTV);
   // FQN to be set by the next call to the ersolver 
 
   id->identType = ast->identType;
-  id->Flags = ast->Flags | ID_IS_GENSYM;
+  id->flags = ast->flags | ID_IS_GENSYM;
   id->symType = ast->symType;
   id->scheme = ast->scheme;
 
@@ -104,17 +105,6 @@ AST::asString() const
   return ss.str();
 }
 
-std::string
-AST::mangledString() const
-{
-  std::stringstream ss;
-  if(astType == at_ident)
-    ss << "_" << s.size() << s;
-  else
-    ss << "_##" << astTypeName() << "##";
-  return ss.str();
-}
-
 bool
 AST::isFnxn()
 {
@@ -124,29 +114,28 @@ AST::isFnxn()
 size_t
 AST::nBits()
 {
-  if(field_bits != 0)
+  if (field_bits != 0)
     return field_bits;
   else    
     return tagType->nBits();
 }
 
 
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::Use()
 {
   assert(astType == at_ident);
-  assert(!symbolDef || (Flags & ID_IS_TVAR));
-  GCPtr<AST> idUse = getDCopy();
-  idUse->Flags  &= ~MASK_FLAGS_FROM_USE;
-  idUse->Flags2 &= ~MASK_FLAGS2_FROM_USE;    
-  idUse->symbolDef = this;
-  if(symType)
+  assert(!symbolDef || isIdentType(id_tvar));
+  shared_ptr<AST> idUse = getDeepCopy();
+  idUse->flags  &= ~MASK_FLAGS_FROM_USE;
+  idUse->symbolDef = shared_from_this();
+  if (symType)
     idUse->symType = symType->getDCopy();
   return idUse;
 }
 
 
-AST::AST(GCPtr<AST> ast, bool shallowCopyChildren)
+AST::AST(shared_ptr<AST> ast, bool shallowCopyChildren)
 {
   astType = ast->astType;
   ID = ++(AST::astCount);  
@@ -154,104 +143,55 @@ AST::AST(GCPtr<AST> ast, bool shallowCopyChildren)
   s = ast->s;
   loc = ast->loc;
   fqn = ast->fqn;
-  Flags = ast->Flags;
-  Flags2 = ast->Flags2;
+  flags = ast->flags;
   externalName = ast->externalName;
   symbolDef = ast->symbolDef;
   defn = ast->defn;
   decl = ast->decl;
   symType = ast->symType;
   scheme = ast->scheme;
-  uoc = ast->uoc;
   envs = ast->envs;
-  special = ast->special;
-  polyinst = ast->polyinst;
-  reached = ast->reached;
   defForm = ast->defForm;
   defbps = ast->defbps;
   litValue = ast->litValue;
   litBase = ast->litBase;
   isDecl = ast->isDecl;
-  ifName = ast->ifName;
   printVariant = ast->printVariant;
   tagType = ast->tagType;
   field_bits = ast->field_bits;
   unin_discm = ast->unin_discm;
   total_fill = ast->total_fill;
 
-  children = new CVector<GCPtr<AST> >;  
-  if(shallowCopyChildren)
-    for(size_t i=0; i<ast->children->size(); i++)
-      children->append(ast->child(i));  
+  if (shallowCopyChildren)
+    children = ast->children;
 }
 
  
-GCPtr<AST> 
+shared_ptr<AST> 
 AST::getTrueCopy()
 {  
-  GCPtr<AST> to = new AST(this, false);
+  shared_ptr<AST> to = AST::make(shared_from_this(), false);
   
-  for(size_t i=0; i < children->size(); i++)
-    to->children->append(child(i)->getTrueCopy());
+  for (size_t i=0; i < children.size(); i++)
+    to->children.push_back(child(i)->getTrueCopy());
   
   return to;
 }
 
-GCPtr<AST> 
-AST::getDCopy()
+shared_ptr<AST> 
+AST::getDeepCopy()
 {  
-  GCPtr<AST> to = new AST(this, false);
-  to->symbolDef = NULL;
-  to->defn = NULL;
-  to->decl = NULL;
-  to->symType = NULL;
-  to->scheme = NULL;
+  shared_ptr<AST> to = AST::make(shared_from_this(), false);
+  to->symbolDef = GC_NULL;
+  to->defn = GC_NULL;
+  to->decl = GC_NULL;
+  to->symType = GC_NULL;
+  to->scheme = GC_NULL;
   to->envs = envs;
-  to->special = NULL;
-  to->polyinst = false;
-  to->reached = false;
-  to->defForm = NULL;
-  to->defbps = NULL;
+  to->defForm = GC_NULL;
+  to->defbps = GC_NULL;
 
-  for(size_t i=0; i<children->size(); i++)
-    to->children->append(child(i)->getDCopy());
+  for (size_t i=0; i<children.size(); i++)
+    to->children.push_back(child(i)->getDeepCopy());
   return to;
-}
-
-/* */
-
-void
-AST::set(GCPtr<AST> ast)
-{  
-  astType = ast->astType;
-  s = ast->s;
-  loc = ast->loc;
-  identType = ast->identType;
-  Flags = ast->Flags;
-  Flags2 = ast->Flags2;
-  externalName = ast->externalName;
-  symbolDef = ast->symbolDef;
-  defn = ast->defn;
-  decl = ast->decl;
-  symType = ast->symType;
-  scheme = ast->scheme;
-  uoc = ast->uoc;
-  envs = ast->envs;
-  special = ast->special;
-  polyinst = ast->polyinst;
-  reached = ast->reached;
-  defForm = ast->defForm;
-  defbps = ast->defbps;
-  litValue = ast->litValue;
-  litBase = ast->litBase;
-  isDecl = ast->isDecl;
-  fqn = ast->fqn;
-  ifName = ast->ifName;
-  field_bits = ast->field_bits;
-  unin_discm = ast->unin_discm;
-  total_fill = ast->total_fill;
-
-  this->children->erase();
-  for(size_t i=0; i<ast->children->size(); i++)
-    children->append(ast->child(i));
 }

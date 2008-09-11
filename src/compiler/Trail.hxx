@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -41,27 +41,31 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
-#include <libsherpa/CVector.hxx>
 
 struct Type;
 
-struct Trail : public Countable {
-  GCPtr<CVector<GCPtr<Type> > > vec;
+struct Trail {
+  std::vector<boost::shared_ptr<Type> > vec;
   
   Trail() 
   {
-    vec = new sherpa::CVector<GCPtr<Type> >;
   }
   
-  size_t snapshot() const { return vec->size(); }
+  static inline boost::shared_ptr<Trail>
+  make() {
+    Trail *tmp = new Trail;
+    return boost::shared_ptr<Trail>(tmp);
+  }
+
+  size_t snapshot() const { return vec.size(); }
   
   // Substitution works on Type Variables only
-  void subst(GCPtr<Type> from, GCPtr<Type> to);
+  void subst(boost::shared_ptr<Type> from, boost::shared_ptr<Type> to);
   // Generic Link
-  void link(GCPtr<Type> from, GCPtr<Type> to);
+  void link(boost::shared_ptr<Type> from, boost::shared_ptr<Type> to);
   void rollBack(const size_t upto=0);
   
-  void release(const size_t n, GCPtr<Type> rel);  
+  void release(const size_t n, boost::shared_ptr<Type> rel);  
 };
 
 #endif /* TRAIL_HXX */

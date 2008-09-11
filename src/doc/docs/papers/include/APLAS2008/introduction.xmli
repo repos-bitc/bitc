@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <sect1 id="intro"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <title>Introduction</title>
+  <p>
+    Recent advances in the theory and practice of programming
+    languages have resulted in modern languages and tools that
+    provide certain correctness guarantees regarding the execution
+    of programs. However, these advances have not been effectively
+    applied to the construction of <em>systems programs</em>, the
+    core components of a computer system. One of the primary causes
+    of this problem is the fact that existing languages do not
+    simultaneously support modern language features &mdash; such as
+    static type safety, type inference, higher order functions and
+    polymorphism &mdash; as well as features
+    that are critical to the correctness and performance of systems
+    programs such as prescriptive data structure
+    representation and mutability. In this paper, we endeavor to
+    bridge this gap between modern language design and systems
+    programming. We first discuss the support for these features in
+    existing languages, identify the challenges in combining these
+    feature sets and then describe our approach toward 
+    solving this problem.  
+  </p> 
+  <p>
+    <leadin>Representation Control</leadin> A systems programming
+    language must be expressive enough to specify details of
+    representation including boxed/unboxed data-structure layout and 
+    stack/heap allocation.  For systems programs,
+    this is both a correctness as well as a performance
+    requirement. Systems programs interact with the hardware through
+    data structures such as page tables whose representation is
+    dictated by the hardware. Conformance to these representation
+    specifications is necessary for correctness. 
+    Languages like ML&nbsp;<cite ref="milner97definition"/>
+    intentionally omit
+    details of representation from the language definition, since
+    this greatly simplifies the mathematical description of the
+    language. Compilers like TIL&nbsp;<cite ref="Tarditi1996TIL"/> 
+    implement unboxed representation as a discretionary
+    optimization. However, in systems programs, statements about
+    representation are 
+    <em>prescriptive</em>, not <em>descriptive</em>.  
+    Formal treatment of representation is required in 
+    systems programming languages.
+  </p>
+  <p>
+    Systems programs also rely on representation control
+    for performance since it affects cache locality
+    and paging behavior. This expressiveness is also crucial for
+    interfacing with external C&nbsp;<cite ref="ISO1999ANSI-C"/> or
+    assembly code and data. For 
+    example, a careful implementation of the TCP/IP
+    protocol stack in Standard ML incurred a substantial overhead of
+    up to 10x increase in system load and a 40x slowdown in
+    accessing external memory relative to the equivalent C
+    implementation&nbsp;<cites>  
+      <cite ref="Biagioni2001FoxNet"/>
+      <cite ref="Derby1999Foxnet"/>
+    </cites>.
+    This shows that representation control is as important as, or even
+    more important than, high level algorithms for the performance of
+    systems tasks. 
+  </p>
+  <p>
+    <leadin>Complete Mutability</leadin> One of the key features
+    essential for systems programming is support for mutability. The
+    support for mutability must be `complete' in the sense that any
+    location &mdash; whether on the stack, heap, or within other
+    unboxed structures &mdash; can be mutated. 
+    Allocation of mutable cells on the stack boosts performance
+    because (1) the top of the stack is typically accessible from
+    the data cache (2) stack locations are directly addressable
+    and therefore do not require the extra dereferencing involved in
+    the case of heap locations (3) stack allocation does
+    not involve  garbage collection overhead. This is particularly
+    important for high confidence and/or embedded kernels as they
+    cannot tolerate unpredictable variance in overhead caused by
+    heap allocation and collection. ML-like languages require
+    all mutable (<progident>ref</progident>) cells to reside on the
+    heap. In pure languages like 
+    Haskell&nbsp;<cite ref="peytonjones2003haskellrevisedreport"/>,
+    the support for mutability is even more restrictive than ML. 
+    These restricted models of mutability are
+    insufficiently expressive from a systems programming perspective.
+  </p>
+  <p>
+    <leadin>Consistent Mutability</leadin>
+    The mutability support in a language is said to be
+    `consistent' if the (im)mutability
+    of every location  is invariant across all aliases over program
+    execution. In this model, there is a sound notion of
+    immutability of locations. This benefits tools that perform
+    static analysis or model checking because conclusions drawn
+    about the immutability of a location need never be
+    conservative. It also increases the amount of optimization that
+    a compiler can safely perform without complex alias
+    analysis. Polymorphic type inference systems such as
+    Hindley-Milner algorithm&nbsp;<cite ref="Milner1978W"/> also 
+    rely on a sound notion of immutability. ML supports consistent
+    mutability since types are definitive about the (im)mutability
+    of every location. In contrast, C does not support this
+    feature. For example, in C it is legal to write:   
+    <br/>
+    <progident>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      const bool *cp = ...;   
+      bool *p = cp;
+      *p = false;  // OK!
+    </progident>
+    <br/>
+    The alleged ``constness'' of the location pointed to by
+    <progident>cp</progident> is a local property (only) with
+    respect to the alias <progident>cp</progident> and not a
+    statement of true immutability of the target location.
+    The analysis and optimization of critical
+    systems programs can be improved by using a language 
+    with a consistent mutability model. 
+  </p>
+  <p>
+    <leadin>Type Inference and Polymorphism</leadin> Type
+    inference achieves the advantages of static typing
+    with a lower burden on the programmer, facilitating rapid
+    prototyping and development. Polymorphic type inference 
+    (c.f. ML or Haskell) combines the advantages of static type
+    safety with much of the convenience provided by dynamically
+    typed languages like Python&nbsp;<cite ref="pythonSpec"/>. 
+    Automatic inference of polymorphism simplifies generic
+    programming, and therefore increases the reuse and reliability
+    of code. Safe languages like Java&nbsp;<cite ref="javaSpec"/>, 
+    C#&nbsp;<cite ref="csharpSpec"/>, 
+    or Vault&nbsp;<cite ref="DeLineMSRVault"/> do not support type
+    inference. Cyclone&nbsp;<cite ref="Jim2002Cyclone"/> features
+    partial type inference and supports polymorphism only for
+    functions with explicit type annotations.
+  </p>
+  <p>
+    The following table summarizes the support available in 
+    existing languages for the above features and static
+    type safety:
+  </p>
+  <xi:include href="lang-comp.xmli"/>
+  <br/>
+  <br/>
+  <p>
+    In this paper, we present a new type system and formal
+    foundations for a safe systems programming language that
+    supports all of the above features.
+  </p>
+  <!-- <p>
+  While several of the existing safe
+  languages support two of the three features  &mdash; unboxed
+  representation, mutability and polymorphic type inference
+  &mdash; none combine all of them elegantly. 
+  Further, none of the existing languages support a mutability
+  model that is both complete and consistent.
+  Therefore,
+  systems programmers either continue to use languages such as
+  Ada&nbsp;<cite ref="ISO1995Ada"/>, 
+  C&nbsp;<cite ref="ISO1999ANSI-C"/>, and
+  C++&nbsp;<cite ref="ISO1998C++"/>, or follow a ``two
+  language'' discipline where they use a
+  combination of safe and unsafe languages. For example, the
+  SwitchWare&nbsp;<cite ref="Alexander98"/>
+  active network architecture is largely written in
+  Ocaml&nbsp;<cite ref="LeroyOcaml"/>, but 
+  performance critical components such as SHA-1 hash computation
+  are implemented in C.
+  </p> -->
+  <p>
+    The combination of mutability and unboxed
+    representation presents several challenges for type
+    inference. Mutability is an attribute of the <em>location</em>
+    storing a value and not the value itself. Therefore, two
+    expressions across a copy boundary (ex: arguments copied at a
+    function call) can differ in their
+    mutability. We refer to this notion of mutability compatibility
+    of types as <em>copy compatibility</em>. 
+    Copy compatibility creates ramifications for
+    syntax-directed type and mutability inference. Type
+    inference is further complicated due to well known problems with
+    the interaction of mutability and 
+    polymorphism&nbsp;<cite ref="wrightValRes1995"/>. This has
+    forced a second-class treatment of mutability in ML-like
+    languages and a lack of inferred polymorphism in others.
+  </p>
+  <p>
+    We present a sound and complete polymorphic type
+    inference algorithm for a language that supports consistent and
+    complete mutability. In order to overcome the challenges
+    posed by copy compatibility, the underlying type system uses a
+    system of constrained types that range over mutability and
+    polymorphism. Safety of the type system as well as the soundness
+    and completeness of the type inference algorithm have been
+    proved.
+  </p>
+  </sect1>

@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -39,6 +39,7 @@
    immediate lambdas, we need to hoist them and give them proper
    names so that the polyinstantiator has something to mangle. */
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -46,10 +47,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+
 #include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
 
 #include "UocInfo.hxx"
 #include "AST.hxx"
@@ -57,45 +56,46 @@
 #include "TypeInfer.hxx"
 #include "inter-pass.hxx"
 
+using namespace boost;
 using namespace sherpa;
 
 static void
-cl_HoistInstLam(GCPtr<UocInfo> uoc)
+cl_HoistInstLam(shared_ptr<UocInfo> uoc)
 {
-  GCPtr<CVector<GCPtr<AST> > > outAsts = new CVector<GCPtr<AST> >;
+  std::vector<shared_ptr<AST> > outAsts;
 
-  GCPtr<AST> modOrIf = uoc->uocAst;
+  shared_ptr<AST> modOrIf = uoc->uocAst;
 
-  for (size_t c = 0;c < modOrIf->children->size(); c++) {
-    GCPtr<AST> child = modOrIf->child(c);
+  for (size_t c = 0;c < modOrIf->children.size(); c++) {
+    shared_ptr<AST> child = modOrIf->child(c);
 
     if (child->astType == at_definstance) {
-      GCPtr<AST> methods = child->child(1);
+      shared_ptr<AST> methods = child->child(1);
 
       // FIX: This is **utterly failing** to hoist the constraints, so
       // any constraint that is not on an instantiated variable will
       // not do the right thing.
-      for (size_t m = 0; m < methods->children->size(); m++) {
-	GCPtr<AST> meth = methods->child(m);
+      for (size_t m = 0; m < methods->children.size(); m++) {
+	shared_ptr<AST> meth = methods->child(m);
 	if (meth->astType != at_ident) {
 	  // It's an expression. Need to hoist it into a new binding.
 
 	  // FIX: redef or define?
-	  GCPtr<AST> newDef = new AST(at_define, meth->loc);
+	  shared_ptr<AST> newDef = AST::make(at_define, meth->loc);
 
-	  GCPtr<AST> lamName = AST::genSym(meth, "lam");
+	  shared_ptr<AST> lamName = AST::genSym(meth, "lam");
 	  lamName->identType = id_value;
-	  lamName->Flags |= ID_IS_GLOBAL;
+	  lamName->flags |= ID_IS_GLOBAL;
 
-	  GCPtr<AST> lamPat = new AST(at_identPattern, meth->loc, lamName);
+	  shared_ptr<AST> lamPat = AST::make(at_identPattern, meth->loc, lamName);
 	  newDef->addChild(lamPat);
 	  newDef->addChild(meth);
-	  newDef->addChild(new AST(at_constraints));
+	  newDef->addChild(AST::make(at_constraints));
 
-	  outAsts->append(newDef);
+	  outAsts.push_back(newDef);
 
-	  GCPtr<AST> instName = lamName->Use();
-	  GCPtr<AST> the = new AST(at_tqexpr);
+	  shared_ptr<AST> instName = lamName->Use();
+	  shared_ptr<AST> the = AST::make(at_tqexpr);
 	  the->addChild(instName);
 	  the->addChild(meth->symType->asAST(meth->loc));
 
@@ -105,7 +105,7 @@ cl_HoistInstLam(GCPtr<UocInfo> uoc)
       }
     }
 
-    outAsts->append(child);
+    outAsts.push_back(child);
   }
   
   modOrIf->children = outAsts;
@@ -118,7 +118,7 @@ UocInfo::be_HoistInstLam(std::ostream& errStream,
 { 
   bool errFree = true;
 
-  GCPtr<AST> &ast = UocInfo::linkedUoc.ast;
+  shared_ptr<AST> &ast = UocInfo::linkedUoc.ast;
 
   ILH_DEBUG if (isSourceUoc)
     BitcPP(errStream, &UocInfo::linkedUoc);
@@ -147,7 +147,7 @@ UocInfo::fe_HoistInstLam(std::ostream& errStream,
     PrettyPrint(errStream);
 
   ILH_DEBUG std::cerr << "cl_HoistInstLam" << std::endl;
-  cl_HoistInstLam(this);
+  cl_HoistInstLam(shared_from_this());
 
   ILH_DEBUG if (isSourceUoc())
     PrettyPrint(errStream);

@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,6 +35,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -42,13 +43,11 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
 
-#include "UocInfo.hxx"
+#include <libsherpa/UExcept.hxx>
+
 #include "Options.hxx"
+#include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
@@ -58,42 +57,42 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
-using namespace sherpa;
 using namespace std;
+using namespace boost;
+using namespace sherpa;
 
-static GCPtr< CVector< GCPtr<Type> > > 
-getDomain(GCPtr<Typeclass> t)
+static TypeSet
+getDomain(shared_ptr<Typeclass> t)
 {
-  GCPtr< CVector< GCPtr<Type> > > dom = new CVector< GCPtr<Type> >;
+  TypeSet dom;
   
-  for(size_t i=0; i < t->typeArgs->size(); i++)
-    dom->append(t->TypeArg(i));
+  for (size_t i=0; i < t->typeArgs.size(); i++)
+    dom.insert(t->TypeArg(i));
   
-  if(t->fnDeps)
-    for(size_t fd = 0; fd < t->fnDeps->size(); fd++) {
-      GCPtr<Type> fdep = t->FnDep(fd);
-      GCPtr<Type> ret = fdep->Ret();
+  for (TypeSet::iterator itr = t->fnDeps.begin(); 
+      itr != t->fnDeps.end(); ++itr) {
+    shared_ptr<Type> fdep = (*itr);
+    shared_ptr<Type> ret = fdep->Ret();
       
-      GCPtr< CVector< GCPtr<Type> > > newDom = 
-	new CVector< GCPtr<Type> >;
+    TypeSet newDom;
       
-      for(size_t i=0; i < dom->size(); i++)
-	if(dom->elem(i)->getType() != ret->getType())
-	  newDom->append(dom->elem(i));
+    for (TypeSet::iterator itr_d = dom.begin(); itr_d != dom.end(); ++itr_d)
+      if ((*itr_d)->getType() != ret->getType())
+	newDom.insert(*itr_d);
       
-      dom = newDom;
-    }
+    dom = newDom;
+  }
   
   return dom;
 }
 
-static GCPtr< CVector< GCPtr<Type> > >
-getDomVars(GCPtr< CVector< GCPtr<Type> > > dom)
+static TypeSet
+getDomVars(const TypeSet& dom)
 {
-  GCPtr< CVector< GCPtr<Type> > > vars = new CVector< GCPtr<Type> >;
+  TypeSet vars;
   
-  for(size_t i=0; i < dom->size(); i++) {
-    GCPtr<Type> arg = dom->elem(i)->getType();
+  for (TypeSet::iterator itr = dom.begin(); itr != dom.end(); ++itr) {
+    shared_ptr<Type> arg = (*itr)->getType();
     arg->collectAllftvs(vars);
   }
   
@@ -101,11 +100,11 @@ getDomVars(GCPtr< CVector< GCPtr<Type> > > dom)
 }
 
 static bool
-mustSolve(GCPtr< CVector< GCPtr<Type> > > dom)
+mustSolve(const TypeSet& dom)
 {
-  for(size_t i=0; i < dom->size(); i++) {
-    GCPtr<Type> arg = dom->elem(i)->getType();
-    if(arg->isTvar())
+  for (TypeSet::iterator itr = dom.begin(); itr != dom.end(); ++itr) {
+    shared_ptr<Type> arg = (*itr)->getType();
+    if (arg->isTvar())
       return false;
   }
   
@@ -113,20 +112,20 @@ mustSolve(GCPtr< CVector< GCPtr<Type> > > dom)
 }
 
 static void
-rigidify(GCPtr< CVector< GCPtr<Type> > > vars)
+rigidify(TypeSet& vars)
 {  
-  for(size_t i=0; i < vars->size(); i++) {
-    GCPtr<Type> arg = vars->elem(i)->getType();
+  for (TypeSet::iterator itr = vars.begin(); itr != vars.end(); ++itr) {
+    shared_ptr<Type> arg = (*itr)->getType();
     assert(arg->kind == ty_tvar);
     arg->flags |= TY_RIGID;
   }
 }
 
 static void
-unrigidify(GCPtr< CVector< GCPtr<Type> > > vars)
+unrigidify(TypeSet& vars)
 {  
-  for(size_t i=0; i < vars->size(); i++) {
-    GCPtr<Type> arg = vars->elem(i)->getType();
+  for (TypeSet::iterator itr = vars.begin(); itr != vars.end(); ++itr) {
+    shared_ptr<Type> arg = (*itr)->getType();
     assert(arg->kind == ty_tvar);
     arg->flags &= ~TY_RIGID;
   }
@@ -134,11 +133,11 @@ unrigidify(GCPtr< CVector< GCPtr<Type> > > vars)
 
 
 bool
-handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
-	   GCPtr<Constraint> ct, GCPtr<Constraints> cset, 
+handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
+	   shared_ptr<Constraint> ct, shared_ptr<Constraints> cset, 
 	   bool &handled, bool &handlable)
 {
-  if(ct->isPcst()) {
+  if (ct->isPcst()) {
     handlable = true;
   }
   else {
@@ -151,12 +150,12 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
 		       << ct->asString(Options::debugTvP)
 		       << std::endl;
   
-  GCPtr<Type> k = ct->CompType(0)->getType();
-  GCPtr<Type> gen = ct->CompType(1)->getType();
-  GCPtr<Type> ins = ct->CompType(2)->getType();
+  shared_ptr<Type> k = ct->CompType(0)->getType();
+  shared_ptr<Type> gen = ct->CompType(1)->getType();
+  shared_ptr<Type> ins = ct->CompType(2)->getType();
   
   // *(m, tg, ti)
-  if(k == Type::Kmono) {
+  if (k == Type::Kmono) {
     PCST_DEBUG errStream << "\t\tCase *(m, tg, ti), CLEAR." 
 			 << std::endl;
     cset->clearPred(ct);
@@ -168,13 +167,13 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
   if (k == Type::Kpoly) {
     //                _
     // *(p, tg, ti), |_|(tg)
-    if(gen->isConcretizable()) {
+    if (gen->isConcretizable()) {
       PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), [](tg), CLEAR."
 			   << std::endl;
       cset->clearPred(ct);
       handled = true;
-      GCPtr<Type> tgg = gen->minimizeDeepMutability();
-      GCPtr<Type> tii = ins->minimizeDeepMutability();
+      shared_ptr<Type> tgg = gen->minimizeDeepMutability();
+      shared_ptr<Type> tii = ins->minimizeDeepMutability();
       bool errFree = true;
       CHKERR(errFree, gen->unifyWith(tgg, false, trail, errStream));
       CHKERR(errFree, ins->unifyWith(tii, false, trail, errStream));
@@ -202,7 +201,7 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
   assert(k->kind == ty_kvar);
   
   // *(k, tg, ti), Mut(ti)
-  if(ins->isDeepMut()) {
+  if (ins->isDeepMut()) {
     PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), " 
 			 << "Mut(ti) [k |-> m]." 
 			 << std::endl;
@@ -212,7 +211,7 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
   }
 
   // *(k, tg, ti), Immut(tg)
-  if(gen->isDeepImmut()) {
+  if (gen->isDeepImmut()) {
     PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), Immut(tg)" 
 			 << "Immut(tg) [k |-> p]." 
 			 << std::endl;
@@ -222,19 +221,20 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
   }
 
   /* U(*(k, tg, ti), *(k, tg, ti')), ti !=~= ti' */
-  for(size_t c=0; c < cset->size(); c++) {
-    GCPtr<Constraint> newCt = cset->Pred(c)->getType();
-    if(newCt == ct)
+  for (TypeSet::iterator itr = cset->begin(); 
+       itr != cset->end(); ++itr) {
+    shared_ptr<Constraint> newCt = (*itr)->getType();
+    if (newCt == ct)
       continue;
 
-    if(!newCt->isPcst())
+    if (!newCt->isPcst())
       continue;
     
-    GCPtr<Type> newK = newCt->CompType(0)->getType();
-    GCPtr<Type> newGen = newCt->CompType(1)->getType();
-    GCPtr<Type> newIns = newCt->CompType(2)->getType();
+    shared_ptr<Type> newK = newCt->CompType(0)->getType();
+    shared_ptr<Type> newGen = newCt->CompType(1)->getType();
+    shared_ptr<Type> newIns = newCt->CompType(2)->getType();
     
-    if(newK == k && !ins->equals(newIns)) {
+    if (newK == k && !ins->equals(newIns)) {
       PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), *(k, tg, tj)" 
 			   << " ti !~~ tj, [k |-> p]." 
 			   << std::endl;
@@ -253,12 +253,12 @@ handlePcst(std::ostream &errStream, GCPtr<Trail> trail,
 }
 
 bool
-handleSpecialPred(std::ostream &errStream, GCPtr<Trail> trail,
-		  GCPtr<Constraint> pred, GCPtr<Constraints> cset, 
+handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
+		  shared_ptr<Constraint> pred, shared_ptr<Constraints> cset, 
 		  bool &handled, bool &handlable)
 {
   pred = pred->getType();
-  if(pred->kind != ty_typeclass) {
+  if (pred->kind != ty_typeclass) {
     // This must be a pcst constraint;
     handlable = false;
     handled = false;
@@ -268,16 +268,16 @@ handleSpecialPred(std::ostream &errStream, GCPtr<Trail> trail,
   // Special handling for ref-types
   // Safe to do name comparison, everyone includes the prelude.
   const std::string &ref_types = SpecialNames::spNames.sp_ref_types; 
-  if(pred->defAst->s == ref_types) {
+  if (pred->defAst->s == ref_types) {
     handlable = true;
-    assert(pred->typeArgs->size() == 1);
-    GCPtr<Type> it = pred->TypeArg(0)->getType();
+    assert(pred->typeArgs.size() == 1);
+    shared_ptr<Type> it = pred->TypeArg(0)->getType();
 
     SPSOL_DEBUG errStream << "\t\tCase RefTypes for "
 			  << pred->asString(Options::debugTvP)
 			  << std::endl;
     
-    if(it->isRefType()) {
+    if (it->isRefType()) {
       SPSOL_DEBUG errStream << "\t\t ... Satisfied, CLEAR"
 			    << pred->asString(Options::debugTvP)
 			    << std::endl;
@@ -286,7 +286,7 @@ handleSpecialPred(std::ostream &errStream, GCPtr<Trail> trail,
       return true;
     }
     
-    if(it->isTvar()) { // checks beyond mutability, maybe-ness
+    if (it->isTvar()) { // checks beyond mutability, maybe-ness
       SPSOL_DEBUG errStream << "\t\t ... Variable, KEEP"
 			    << pred->asString(Options::debugTvP)
 			    << std::endl;
@@ -309,9 +309,9 @@ handleSpecialPred(std::ostream &errStream, GCPtr<Trail> trail,
 }
 
 bool
-handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
-	     GCPtr<Typeclass> pred, GCPtr<TCConstraints> tcc, 
-	     GCPtr<const Environment< CVector<GCPtr<Instance> > > > instEnv,
+handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
+	     shared_ptr<Typeclass> pred, shared_ptr<TCConstraints> tcc, 
+	     shared_ptr<const InstEnvironment > instEnv,
 	     bool must_solve, bool trial_mode, bool &handled)
 {
   TCSOL_DEBUG errStream << "\t\tInstance Solver for: "
@@ -319,13 +319,13 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
 			<< (trial_mode ? " [TRIAL]" : "")
 			<< std::endl;
 
-  GCPtr<CVector<GCPtr<Instance> > > insts = 
+  shared_ptr<set<shared_ptr<Instance> > > insts = 
     instEnv->getBinding(pred->defAst->fqn.asString());
   
-  if(!insts) {
+  if (!insts) {
     TCSOL_DEBUG errStream << "\t\t ... No Instances in Environment"
 			  << std::endl;
-    if(must_solve) {
+    if (must_solve) {
       tcc->clearPred(pred);
       handled = true;
       return false;
@@ -336,10 +336,11 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
     }
   }
 
-  GCPtr<TypeScheme> instScheme = NULL;  
-  for(size_t j=0; j < insts->size(); j++) {
-    GCPtr<TypeScheme> ts = (insts->elem(j))->ts->ts_instance_copy();
-    GCPtr<Type> inst = ts->tau;
+  shared_ptr<TypeScheme> instScheme = GC_NULL;  
+  for (set<shared_ptr<Instance> >::iterator itr_j = insts->begin();
+      itr_j != insts->end(); ++itr_j) {
+    shared_ptr<TypeScheme> ts = (*itr_j)->ts->ts_instance_copy();
+    shared_ptr<Type> inst = ts->tau;
 
     
     // FIX: This step must be performed ONLY for those
@@ -347,19 +348,19 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
     // positions. That is, if an argument is used in a 
     // method within a reference, this step must be 
     // skipped on that argument. 
-    for(size_t c=0; c < inst->typeArgs->size(); c++)
+    for (size_t c=0; c < inst->typeArgs.size(); c++)
       inst->TypeArg(c) = MBF(inst->TypeArg(c));
     
-    if(pred->equals(inst)) {
+    if (pred->equals(inst)) {
       instScheme = ts;
       break;
     }
   }
 
-  if(!instScheme) {
+  if (!instScheme) {
     TCSOL_DEBUG errStream << "\t\t ... No Suitable Instance found"
 			  << std::endl;
-    if(must_solve) {
+    if (must_solve) {
       tcc->clearPred(pred);
       handled = true;
       return false;
@@ -370,7 +371,7 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
     }
   }
   
-  if(trial_mode) {
+  if (trial_mode) {
     handled = false;
     return true;
   }
@@ -385,14 +386,15 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
   assert(errFree);  
   tcc->clearPred(pred);
   
-  if(instScheme->tcc)
-    for(size_t c=0; c < instScheme->tcc->pred->size(); c++) {
-      GCPtr<Typeclass> instPred = instScheme->tcc->Pred(c);
+  if (instScheme->tcc)
+    for (TypeSet::iterator itr = instScheme->tcc->begin(); 
+	 itr != instScheme->tcc->end(); ++itr) {
+      shared_ptr<Typeclass> instPred = (*itr);
 
       // Add all preconditions, except for the self-condition
       // added to all instances. Remember that the 
       // type specializer clears the TY_SELF flag.
-      if(!pred->equals(instPred)) {
+      if (!pred->equals(instPred)) {
 	tcc->addPred(instPred);
 	TCSOL_DEBUG errStream << "\t\t .. Adding pre-condition: "
 			      << instPred->asString(Options::debugTvP)
@@ -404,10 +406,10 @@ handleTCPred(std::ostream &errStream, GCPtr<Trail> trail,
   return true;
 }
 
-bool
-handleEquPreds(std::ostream &errStream, GCPtr<Trail> trail,
-	       GCPtr<Typeclass> pred, GCPtr<TCConstraints> tcc, 
-	       GCPtr< CVector< GCPtr<Type> > > vars,
+static bool
+handleEquPreds(std::ostream &errStream, shared_ptr<Trail> trail,
+	       shared_ptr<Typeclass> pred, shared_ptr<TCConstraints> tcc, 
+	       TypeSet& vars,
 	       bool &handled)
 {
   // Equality of domain types in two type class predicated is achieved
@@ -415,12 +417,13 @@ handleEquPreds(std::ostream &errStream, GCPtr<Trail> trail,
   // domain are held rigid.
   handled = false;
   rigidify(vars);
-  for(size_t c=0; c < tcc->size(); c++) {
-    GCPtr<Constraint> newCt = tcc->Pred(c)->getType();
-    if(newCt == pred)
+  for (TypeSet::iterator itr = tcc->begin(); 
+       itr != tcc->end(); ++itr) {
+    shared_ptr<Constraint> newCt = (*itr)->getType();
+    if (newCt == pred)
       continue;
     
-    if(pred->equals(newCt)) {
+    if (pred->equals(newCt)) {
       TCSOL_DEBUG errStream << "\t\t EquPreds: "
 			    << pred->asString(Options::debugTvP)
 			    << " === "
@@ -499,8 +502,8 @@ handleEquPreds(std::ostream &errStream, GCPtr<Trail> trail,
 
 bool
 TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
-			    GCPtr< const Environment< CVector<GCPtr<Instance> > > > instEnv,
-			    GCPtr<Trail> trail)
+			    shared_ptr< const InstEnvironment > instEnv,
+			    shared_ptr<Trail> trail)
 {
 /* handled: Signifies any changes to the tcc individual handler
    functions might have performed.
@@ -518,11 +521,12 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
   
   do {
     handled = false;
-    GCPtr<Typeclass> errPred = NULL;
+    shared_ptr<Typeclass> errPred = GC_NULL;
     bool errFreeNow = true;
     
-    for(size_t i=0; i < tcc->pred->size(); i++) {
-      GCPtr<Typeclass> pred = tcc->Pred(i);
+    for (TypeSet::iterator itr = tcc->begin(); 
+	 itr != tcc->end(); ++itr) {
+      shared_ptr<Typeclass> pred = (*itr);
       errPred = pred;
       bool handlable = false;
       
@@ -538,9 +542,9 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 			  << (!errFreeNow ? " [ERROR]" : "")
 			  << std::endl;
       
-      if(handled)
+      if (handled)
 	break;
-      if(handlable)
+      if (handlable)
 	continue;
 
       // Step 2
@@ -554,15 +558,15 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 			  << (!errFreeNow ? " [ERROR]" : "")
 			  << std::endl;
 
-      if(handled)
+      if (handled)
 	break;
-      if(handlable)
+      if (handlable)
 	continue;
       
-      GCPtr< CVector< GCPtr<Type> > > dom = getDomain(pred);
-      GCPtr< CVector< GCPtr<Type> > > vars = getDomVars(dom);
+      TypeSet dom = getDomain(pred);
+      TypeSet vars = getDomVars(dom);
       bool ms = mustSolve(dom);
-      if(ms) {
+      if (ms) {
  	// Step 3.a
 	CHKERR(errFreeNow, handleTCPred(errStream, trail, pred, tcc,
 					instEnv, ms, false, handled));
@@ -573,7 +577,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 			    << (!errFreeNow ? " [ERROR]" : "")
 			    << std::endl;
 
-	if(handled)
+	if (handled)
 	  break;
       }
       
@@ -588,7 +592,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 			  << (handlable ? " [HANDLABLE]" : "")
 			  << (!errFreeNow ? " [ERROR]" : "")
 			  << std::endl;
-      if(handled)
+      if (handled)
 	break;
       
       // Step 3.b.ii
@@ -600,7 +604,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 			  << (handlable ? " [HANDLABLE]" : "")
 			  << (!errFreeNow ? " [ERROR]" : "")
 			  << std::endl;
-      if(handled)
+      if (handled)
 	break;
       
       // Step 4
@@ -612,14 +616,14 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 			  << (handlable ? " [HANDLABLE]" : "")
 			  << (!errFreeNow ? " [ERROR]" : "")
 			  << std::endl;      
-      if(handled)
+      if (handled)
 	break;
       
-      if(!errFreeNow)
+      if (!errFreeNow)
 	assert(false);
     }
     
-    if(!errFreeNow) {
+    if (!errFreeNow) {
       assert(handled);
       assert(errPred);
       errStream << errLoc << ": "
@@ -630,7 +634,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
     
     CHKERR(errFree, errFreeNow);
     
-  } while(handled);
+  } while (handled);
   
   return errFree;
 }

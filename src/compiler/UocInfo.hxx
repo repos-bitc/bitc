@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -38,9 +38,12 @@
  *
  **************************************************************************/
 
-#include <libsherpa/Path.hxx>
+#include <set>
+#include <string>
+#include <ostream>
+
+#include <boost/filesystem/path.hpp>
 #include <libsherpa/LexLoc.hxx>
-#include <libsherpa/CVector.hxx>
 
 #include "Environment.hxx"
 #include "AST.hxx"
@@ -94,12 +97,15 @@ struct OnePassInfo {
 };
 
 
+class UocInfo;
+typedef std::map<std::string, boost::shared_ptr<UocInfo> > UocMap;
+
 // Unit Of Compilation Info. One of these is constructed for each
 // unit of compilation (source or interface). In the source case, the
 // /name/ field will be the file name. In the interface case, the
 // /name/ will be the "ifname" reported in the import statement.
-class UocInfo : public Countable {
-  static GCPtr<Path> resolveInterfacePath(std::string ifName);
+class UocInfo : public boost::enable_shared_from_this<UocInfo> {
+  static boost::filesystem::path resolveInterfacePath(std::string ifName);
 
 public:
   std::string uocName;		// either ifName or simulated
@@ -109,9 +115,9 @@ public:
   Pass lastCompletedPass;
 
   bool fromCommandLine;
-  GCPtr<AST> uocAst;
-  GCPtr<Environment<AST> > env;
-  GCPtr<Environment<TypeScheme> > gamma;
+  boost::shared_ptr<AST> uocAst;
+  boost::shared_ptr<ASTEnvironment > env;
+  boost::shared_ptr<TSEnvironment > gamma;
 
   inline bool isSourceUoc() {
     return (uocAst->astType == at_module);
@@ -139,33 +145,46 @@ public:
   // to jump and make this change unless I know that this
   // implementation of instances works. 
    
-  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv;
+  boost::shared_ptr<InstEnvironment > instEnv;
   
   UocInfo(const std::string& _uocName, const std::string& _origin, 
-	  GCPtr<AST> _uocAst);
-  UocInfo(GCPtr<UocInfo> uoc);
+	  boost::shared_ptr<AST> _uocAst);
+  UocInfo(boost::shared_ptr<UocInfo> uoc);
+
+  static inline boost::shared_ptr<UocInfo>
+  make(const std::string& _uocName, const std::string& _origin, 
+	  boost::shared_ptr<AST> _uocAst) {
+    UocInfo *tmp = new UocInfo(_uocName, _origin, _uocAst);
+    return boost::shared_ptr<UocInfo>(tmp);
+  }
+
+  static inline boost::shared_ptr<UocInfo>
+  make(boost::shared_ptr<UocInfo> uoc) {
+    UocInfo *tmp = new UocInfo(uoc);
+    return boost::shared_ptr<UocInfo>(tmp);
+  }
 
   /* Create a fresh, empty UOC that is set up to become the unified
    * output UoC module, initializing all environments by hand.
    */
-  static GCPtr<UocInfo> CreateUnifiedUoC();
+  static boost::shared_ptr<UocInfo> CreateUnifiedUoC();
 
-  static GCPtr<CVector<GCPtr<Path> > > searchPath;
+  static std::vector<boost::filesystem::path> searchPath;
 
   // FIX -- All of these should be locals
 
   // The presence of a UocInfo record in the ifList indicates that
   // parsing of an interface has at least started. If the /ast/ pointer
   // is non-null, the parse has been completed.
-  static GCPtr<CVector<GCPtr<UocInfo> > > ifList;
-  static GCPtr<CVector<GCPtr<UocInfo> > > srcList;
-  //  static GCPtr<UocInfo> linkedUoc;  // grand Uoc after linkage
+  static UocMap ifList;
+  static UocMap srcList;
+  //  static boost::shared_ptr<UocInfo> linkedUoc;  // grand Uoc after linkage
 
-  static GCPtr<UocInfo> 
+  static boost::shared_ptr<UocInfo> 
   findInterface(const std::string& ifName);
 
-  static GCPtr<UocInfo> 
-  importInterface(std::ostream&, const LexLoc& loc, 
+  static boost::shared_ptr<UocInfo> 
+  importInterface(std::ostream&, const sherpa::LexLoc& loc, 
 		  const std::string& ifName);
 
   // This is only used within the parser, and perhaps should not be
@@ -176,7 +195,7 @@ public:
   // Parse a file, admitting source and/or interface units of
   // compilation into the ifList or the srcList as a side effect.
   static bool 
-  CompileFromFile(const std::string& srcFileName, bool fromCmdLine);
+  CompileFromFile(const boost::filesystem::path& src, bool fromCmdLine);
 
   // Individual passes:
 #define PASS(nm,short,descrip)				  \
@@ -205,7 +224,9 @@ public:
   // FOLLOWING ARE IN inter-pass.cxx
   //
   //////////////////////////////////////////////////////
-  void findDefForms(GCPtr<AST> start, GCPtr<AST> local=NULL, GCPtr<AST> top=NULL);
+  void findDefForms(boost::shared_ptr<AST> start, 
+		    boost::shared_ptr<AST> local=boost::GC_NULL, 
+		    boost::shared_ptr<AST> top=boost::GC_NULL);
   static void findAllDefForms();
   
   // Add all candidate Entry-points to the entry-point vectror
@@ -251,39 +272,39 @@ public:
 	     std::string pre = "Internal Compiler error :");
 
   bool RandTexpr(std::ostream& errStream,
-		 GCPtr<AST> ast,
+		 boost::shared_ptr<AST> ast,
 		 unsigned long rflags=0,
 		 unsigned long tflags=0,
 		 std::string pre = "Internal Compiler error :",
 		 bool keepResults = true,
-		 GCPtr<envSet> altEnvSet=NULL);
+		 boost::shared_ptr<EnvSet> altEnvSet=boost::GC_NULL);
 
   //////////////////////////////////////////////////////
   //
   // New instantiation logic:
   //
   //////////////////////////////////////////////////////
-  static GCPtr<AST> lookupByFqn(const std::string& s, 
-			  GCPtr<UocInfo> &targetUoc);
+  static boost::shared_ptr<AST> lookupByFqn(const std::string& s, 
+			  boost::shared_ptr<UocInfo> &targetUoc);
   
 
 private:
-  void addTopLevelForm(GCPtr<AST> ast); // Add a new Top-level form
+  void addTopLevelForm(boost::shared_ptr<AST> ast); // Add a new Top-level form
 
   bool instantiateFQN(std::ostream &errStream, 
 			 const std::string& fqn);
 
   // The main AST specializer/ instantiator
-  GCPtr<AST> doInstantiate(std::ostream &errStream, 
-		     GCPtr<AST> defAST, 
-		     GCPtr<Type> typ,
+  boost::shared_ptr<AST> doInstantiate(std::ostream &errStream, 
+		     boost::shared_ptr<AST> defAST, 
+		     boost::shared_ptr<Type> typ,
 		     bool &errFree,
-		     GCPtr<WorkList<std::string> > worklist);
+		     WorkList<std::string>& worklist);
 
-  GCPtr<AST> recInstantiate(std::ostream &errStream, 
-		      GCPtr<AST> ast,
+  boost::shared_ptr<AST> recInstantiate(std::ostream &errStream, 
+		      boost::shared_ptr<AST> ast,
 		      bool &errFree,
-		      GCPtr<WorkList<std::string> > worklist); // Recursively walk the
+		      WorkList<std::string>& worklist); // Recursively walk the
                      // specialized AST, and specialize the body.
 
 public:
@@ -291,7 +312,7 @@ public:
 		   const std::string& fqn);
   
   bool instantiateBatch(std::ostream &errStream, 
-			GCPtr<const CVector<std::string> > fqns);
+			std::set<std::string>& fqns);
 
 };
 

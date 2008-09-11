@@ -2,7 +2,7 @@
 #define TYPEINFERUTIL_HXX
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -40,41 +40,36 @@
 #include "UocInfo.hxx"
 #include "Options.hxx"
 #include "AST.hxx"
-#include "Pair.hxx"
 #include "Type.hxx"
 #include "TypeScheme.hxx"
 #include "Typeclass.hxx"
 
-GCPtr<Type>
-obtainFullUnionType(GCPtr<Type> t);
+boost::shared_ptr<Type>
+obtainFullUnionType(boost::shared_ptr<Type> t);
 
 bool
 initGamma(std::ostream& errStream, 
-	  GCPtr<Environment<TypeScheme> > gamma,
-	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	  const GCPtr<AST> ast, unsigned long uflags);
-bool
-checkImpreciseTypes(std::ostream& errStream, 
-		    const GCPtr<Environment<TypeScheme> > gamma,
-		    GCPtr<CVector<GCPtr<Pair<GCPtr<Type>, 
-		                             GCPtr<AST> > > > > impTypes);
+	  boost::shared_ptr<TSEnvironment > gamma,
+	  boost::shared_ptr<InstEnvironment > instEnv,
+	  const boost::shared_ptr<AST> ast, unsigned long uflags);
+
 void
 useIFGamma(const std::string& idName,
-	   GCPtr<Environment<TypeScheme> > fromEnv, 
-	   GCPtr<Environment<TypeScheme> > toEnv);
+	   boost::shared_ptr<TSEnvironment > fromEnv, 
+	   boost::shared_ptr<TSEnvironment > toEnv);
 
 void
 useIFInsts(const std::string& idName,
-	   GCPtr<Environment< CVector<GCPtr<Instance> > > >fromEnv, 
-	   GCPtr<Environment< CVector<GCPtr<Instance> > > >toEnv);
+	   boost::shared_ptr<InstEnvironment >fromEnv, 
+	   boost::shared_ptr<InstEnvironment >toEnv);
 
 bool
 initGamma(std::ostream& errStream, 
-	  GCPtr<Environment<TypeScheme> > gamma,
-	  GCPtr<Environment< CVector<GCPtr<Instance> > > > instEnv,
-	  const GCPtr<AST> ast, unsigned long uflags);
+	  boost::shared_ptr<TSEnvironment > gamma,
+	  boost::shared_ptr<InstEnvironment > instEnv,
+	  const boost::shared_ptr<AST> ast, unsigned long uflags);
 
 size_t
-nCtArgs(GCPtr<Type> t);
+nCtArgs(boost::shared_ptr<Type> t);
 
 #endif /* TYPEINFERUTIL_HXX */

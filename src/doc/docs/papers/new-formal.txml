@@ -1,0 +1,1282 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <article id="formal" 
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <docinfo ptsz='default' twocolumn="yes"
+    latex.otheroptions="nocopyrightspace" latex.documentclass="sigplanconf">
+    <title>Mutable types: A Meta-theory</title>
+    <subtitle>SRL Technical Report SRL2008-03</subtitle>
+    <authorgroup>
+      <author>
+      	<firstname>Swaroop</firstname>
+      	<surname>Sridhar</surname>
+      	<email>swaroop@cs.jhu.edu</email>
+      </author>
+      <author>
+      	<firstname>Jonathan</firstname>
+        <othername>S.</othername>
+      	<surname>Shapiro</surname>
+      	<email>shap@eros-os.org</email>
+      </author>
+      <author>
+      	<firstname>Scott</firstname>
+        <othername>F.</othername>
+      	<surname>Smith</surname>
+      	<email>scott@cs.jhu.edu</email>
+      </author>
+      <affiliation>
+      	<orgname>Department of Computer Science</orgname>
+      	<address>The Johns Hopkins University</address>
+      	<address>3400 N.Charles Street. 224 NEB. Baltimore, MD 21218.</address>
+      </affiliation>
+    </authorgroup>
+    <categories>
+      <category>report</category>
+    </categories>
+    <pubdate>
+      Sept. 9<sup>th</sup> 2008.
+    </pubdate>
+    <!--     <copyright> -->
+    <!--       <year/><holder/> -->
+    <!--     </copyright> -->
+    <synopsis>
+      <p>
+        BitC semantics enhanced with <progident>const</progident> and
+        correct handling of  mutability such that sound, in-place
+        references within unboxed structures can be supported.
+      </p>
+      <p>
+        The HTML version of this paper is not
+        able to represent all of the mathematical notation correctly.
+      </p>
+    </synopsis>
+  </docinfo>  
+  <abstract latex.incolumn="yes">
+    <p>
+      Subsequent to the work presented in <link
+      href="http://www.bitc-lang.org/docs/papers/complete.pdf">Sound
+      and Complete Type Inference in BitC</link>, we introduced
+      by-reference parameters and discovered that the definition of
+      mutability described in that report was insufficient. The
+      language specification was updated to have a path-wise notion of
+      mutability. At the same time, a <progident>const</progident>
+      meta-constructor was introduced into the language to strip
+      shallow mutability (up to the ref boundary) from existing types.
+    </p>
+    <p>
+      The following type rules reflect the modifications to the
+      language associated with that change.
+    </p>
+  </abstract>
+  <sect1 numbered="no" id="Grammar">
+    <title></title>
+    <p>
+      <b>
+        <btypes:TYPE><language/></btypes:TYPE> Language grammar:
+      </b>
+    </p>
+    <btypes:TYPE>
+      <grammar notitle="yes">
+        <bnf desc="Identifiers">
+          <id/>
+          <alternatives etc="yes">
+            <id name="y"/>
+            <id name="z"/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Booleans">
+          <bVal/>
+          <alternatives>
+            <true/>
+            <false/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Indices">
+          <collection>
+            <ndx/>
+          </collection>
+          <alternatives>
+            <texttt content="1"/>
+            <texttt content="2"/>
+            <other>
+              <ndx/>
+            </other>
+          </alternatives>
+        </bnf>
+        <bnf desc="Values">
+          <aVal/>
+          <alternatives>
+            <Unit/>
+            <bVal/>
+            <lambda>
+              <id/>
+              <aExpr/>
+            </lambda>
+            <Pair>
+              <aVal/>
+              <aVal/>
+            </Pair>
+            <hLoc/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Syn. Value">
+          <vExp/>
+          <alternatives>
+            <aVal/>
+            <id/>
+            <sLoc/>
+            <Pair>
+              <vExp/>
+              <vExp/>
+            </Pair>
+            <const>
+              <aExpr/>
+            </const>
+          </alternatives>
+        </bnf>
+        <bnf desc="Left Expr">
+          <lExp/>
+          <alternatives>
+            <id/>
+            <sLoc/>
+            <deref>
+              <aExpr/>
+            </deref>            
+            <ith>
+              <lExp/>
+            </ith>
+            <const>
+              <lExp/>
+            </const>
+          </alternatives>
+        </bnf>
+        <bnf desc="Expressions">
+          <aExpr/>
+          <alternatives>
+            <vExp/>
+            <apply>
+              <aExpr/>
+              <aExpr/>
+            </apply>
+            <assign>
+              <lExp/>
+              <aExpr/>
+            </assign> 
+            <if>
+              <aExpr/>
+              <aExpr/>
+              <aExpr/>
+            </if>
+          </alternatives>
+        </bnf>
+        <bnfc desc="">
+          <alternatives>
+            <dup>
+              <aExpr/>
+            </dup>
+            <deref>
+              <aExpr/>
+            </deref>
+            <Pair>
+              <aExpr/>
+              <aExpr/>
+            </Pair>
+            <ith>
+              <aExpr/>
+            </ith>
+            <const>
+              <aExpr/>
+            </const>
+          </alternatives>
+        </bnfc>
+        <bnfc desc="">
+          <alternatives>
+            <let kind="x">
+              <id/>
+              <aExpr/>
+              <aExpr/>
+            </let>
+          </alternatives>
+        </bnfc>
+        <bnf desc="Let-kinds">
+          <lKind/>
+          <alternatives>
+            <hole/>
+            <lKind k="var"/>
+            <lKind k="mono"/>
+            <lKind k="poly"/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Locations">
+          <loc/>
+          <alternatives>
+            <sLoc/>
+            <hLoc/>
+          </alternatives>
+        </bnf>
+      </grammar>
+    </btypes:TYPE> 
+    <p>
+      <b>
+        Types grammar:
+      </b>
+    </p>
+    <btypes:TYPE>        
+      <grammar notitle="yes">
+        <bnf desc="Type Variables">
+          <tvar/>
+          <alternatives etc="yes">
+            <tvar name="alpha"/>
+            <tvar name="beta"/>
+            <tvar name="gamma"/>
+            <tvar name="delta"/>
+            <tvar name="epsiv"/>
+          </alternatives>
+        </bnf>
+        <bnf desc="M-Vars">
+          <stype/>
+          <alternatives>
+            <tvar/>
+            <mutable>
+              <tvar/>
+            </mutable>
+          </alternatives>
+        </bnf>
+        <bnf desc="Types.1">
+          <ptype/>
+          <alternatives>
+            <tvar/>
+            <unit/>
+            <bool/>
+            <fn><type/><type/></fn>                  
+            <pair><type/><type/></pair>
+          </alternatives>
+        </bnf>
+        <bnfc desc="Ref/Pointer">
+          <alternatives>
+            <ref><type/></ref>
+          </alternatives>
+        </bnfc>
+        <bnfc desc="Mutable">
+          <alternatives>
+            <mutable><ptype/></mutable>
+          </alternatives>
+        </bnfc>
+        <bnfc desc="const">
+          <alternatives>
+            <const>
+              <type/>
+            </const>
+          </alternatives>
+        </bnfc>
+        <bnf desc="Types.2">
+          <Ptype/>
+          <alternatives>
+            <ptype/>
+            <mbTop>
+              <tvar/>
+              <ptype/>
+            </mbTop>
+          </alternatives>
+        </bnf>
+        <bnf desc="Types">
+          <type/>
+          <alternatives>
+            <Ptype/>
+            <mbFull>
+              <stype/>
+              <ptype/>
+            </mbFull>
+          </alternatives>
+        </bnf>
+        <bnf desc="Type Scheme">          
+          <aTS/>
+          <alternatives>
+            <type/>
+            <TS>
+              <tvars/>
+              <type/>
+              <dCtset/>
+            </TS>
+          </alternatives>
+        </bnf>
+        <bnf desc="Poly. Constraints">
+          <constraint name="d"/>
+          <alternatives>
+            <pcst>
+              <id/>
+              <lKind/>
+              <type/>
+            </pcst>
+          </alternatives>
+        </bnf>
+        <bnf desc="Poly. Constraint Sets">
+          <dCtset/>
+          <alternatives>
+            <Empty/>
+            <set>
+              <plural>
+                <constraint name="d"/>
+              </plural>
+            </set>
+            <unin>
+              <dCtset/>
+              <dCtset/>
+            </unin>
+          </alternatives>
+        </bnf>
+      </grammar>
+    </btypes:TYPE>
+    <p>
+      <b>
+        Grammar for Dynamic Semantics:
+      </b>
+    </p>
+    <btypes:TYPE>        
+      <grammar notitle="yes">
+        <bnf desc="Stack">
+          <stack/>
+          <alternatives>
+            <Empty/>
+            <extend>
+              <stack/>
+              <mapping>
+                <sLoc/>
+                <aVal/>
+              </mapping>
+            </extend>
+          </alternatives>
+        </bnf>
+        <bnf desc="Heap">
+          <heap/>
+          <alternatives>
+            <Empty/>
+            <extend>
+              <heap/>
+              <mapping>
+                <hLoc/>
+                <aVal/>
+              </mapping>
+            </extend>
+          </alternatives>
+        </bnf>
+        <bnf desc="Selection Path">
+          <path/>
+          <alternatives>
+            <ndx/>
+            <select>
+              <path/>
+              <path/>
+            </select>
+          </alternatives>
+        </bnf>
+        <bnf desc="lvalues">
+          <lVal/>
+          <alternatives>
+            <sLoc/>
+            <deref>
+              <hLoc/>
+            </deref>
+            <select>
+              <sLoc/>
+              <path/>
+            </select>
+            <select>
+              <deref>
+                <hLoc/>
+              </deref>
+              <path/>
+            </select>
+            <const>
+              <lVal/>
+            </const>
+          </alternatives>
+        </bnf>
+        <bnf desc="Redex">
+          <redex/>
+          <alternatives>
+            <hole/>
+            <apply>
+              <redex/>
+              <aExpr/>
+            </apply>
+            <apply>
+              <aVal/>
+              <redex/>
+            </apply>
+            <assign>
+              <lVal/>
+              <redex/>
+            </assign> 
+            <dup>
+              <redex/>
+            </dup>
+            <deref>
+              <redex/>
+            </deref>
+          </alternatives>
+        </bnf>
+        <bnfc desc="">
+          <alternatives>
+            <if>
+              <redex/>
+              <aExpr/>
+              <aExpr/>
+            </if>	  
+            <Pair>
+              <redex/>
+              <aExpr/>
+            </Pair>
+          </alternatives>
+        </bnfc>
+        <bnfc desc="">
+          <alternatives>
+            <Pair>
+              <aVal/>
+              <redex/>
+            </Pair>
+            <ith>
+              <redex/>
+            </ith>
+            <let kind="x">
+              <id/>
+              <redex/>
+              <aExpr/>
+            </let>
+          </alternatives>
+        </bnfc>
+      </grammar>
+    </btypes:TYPE>
+    <p>
+      <b>
+        Grammar for Static Semantics:
+      </b>
+    </p>
+    <btypes:TYPE>        
+      <grammar notitle="yes">
+        <bnf desc="Unf. Constraints">
+          <constraint name="u"/>
+          <alternatives>
+            <eq>
+              <type/>
+              <type/>
+            </eq>
+            <eq>
+              <lKind k="var"/>
+              <lKind/>
+            </eq>
+            <constraint name="d"/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Unf. Constraint Sets">
+          <aCtset/>
+          <alternatives>
+            <Empty/>
+            <set>
+              <plural>
+                <constraint name="u"/>
+              </plural>
+            </set>
+            <unin>
+              <aCtset/>
+              <aCtset/>
+            </unin>
+            <unin excl="yes">
+              <aCtset/>
+              <aCtset/>
+            </unin>
+          </alternatives>
+        </bnf>
+        <bnf desc="Substitutions">            
+          <aSubMap/>            
+          <alternatives>
+            <EmptySubst/>
+            <SubMap>
+              <tvar/>
+              <type/>
+            </SubMap>
+            <SubMap>
+              <lKind k="var"/>
+              <lKind/>
+            </SubMap>
+            <compose>
+              <aSubMap/>
+              <aSubMap/>
+            </compose>
+          </alternatives>
+        </bnf>
+        <bnf desc="Binding Environment">
+          <gamma/>
+          <alternatives>
+            <Empty/>
+            <extend>
+              <gamma/>
+              <mapping>
+                <id/>
+                <aTS/>
+              </mapping>
+            </extend>
+          </alternatives>
+        </bnf>
+        <bnf desc="Store Typing">
+          <store/>
+          <alternatives>
+            <Empty/>
+            <extend>
+              <store/>
+              <mapping>
+                <loc/>
+                <type/>
+              </mapping>
+            </extend>
+          </alternatives>
+        </bnf>
+      </grammar>
+    </btypes:TYPE>    
+    <definition>
+      <title>Type Normalization / const reduction</title>
+      <btypes:TYPE>        
+        <VEqns>
+          <equation>
+            <lhs>
+              <normalize>
+                <tvar/>
+              </normalize>
+            </lhs>
+            <rhs>
+              <tvar/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <unit/>
+              </normalize>
+            </lhs>
+            <rhs>
+              <unit/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <fn>
+                  <type num="1"/>
+                  <type num="2"/>
+                </fn>
+              </normalize>
+            </lhs>
+            <rhs>
+              <fn>
+                <normalize>
+                  <type num="1"/>
+                </normalize>
+                <normalize>
+                  <type num="2"/>
+                </normalize>
+              </fn>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <ref>
+                  <type/>
+                </ref>
+              </normalize>
+            </lhs>
+            <rhs>
+              <ref>
+                <normalize>
+                  <type/>
+                </normalize>
+              </ref>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <mutable>
+                  <ptype/>
+                </mutable>
+              </normalize>
+            </lhs>
+            <rhs>
+              <mutable>
+                <normalize>
+                  <ptype/>
+                </normalize>
+              </mutable>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <pair>
+                  <type num="1"/>
+                  <type num="2"/>
+                </pair>
+              </normalize>
+            </lhs>
+            <rhs>
+              <pair>
+                <normalize>
+                  <type num="1"/>
+                </normalize>
+                <normalize>
+                  <type num="2"/>
+                </normalize>
+              </pair>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <mbTop>
+                  <tvar/>
+                  <ptype/>
+                </mbTop>
+              </normalize>
+            </lhs>
+            <rhs>
+              <mbTop>
+                <tvar/>
+                <normalize>
+                  <ptype/>
+                </normalize>
+              </mbTop>
+            </rhs>
+          </equation>
+          <equation sep="4pt">
+            <lhs>
+              <normalize>
+                <mbFull>
+                  <stype/>
+                  <ptype/>
+                </mbFull>
+              </normalize>
+            </lhs>
+            <rhs>
+              <mbFull>
+                <stype/>
+                <normalize>
+                  <ptype/>
+                </normalize>
+              </mbFull>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <const>
+                  <tvar/>
+                </const>
+              </normalize>
+            </lhs>
+            <rhs>
+              <const>
+                <tvar/>
+              </const>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <const>
+                  <unit/>
+                </const>
+              </normalize>
+            </lhs>
+            <rhs>
+              <unit/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <const>
+                  <bool/>
+                </const>
+              </normalize>
+            </lhs>
+            <rhs>
+              <bool/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <const>
+                  <fn>
+                    <type num="1"/>
+                    <type num="2"/>
+                  </fn>
+                </const>
+              </normalize>
+            </lhs>
+            <rhs>
+              <normalize>
+                <fn>
+                  <type num="1"/>
+                  <type num="2"/>
+                </fn>
+              </normalize>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <const>
+                  <ref>
+                    <type/>
+                  </ref>
+                </const>
+              </normalize>
+            </lhs>
+            <rhs>
+              <normalize>
+                <ref>
+                  <type/>
+                </ref>
+              </normalize>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <const>
+                  <mutable>
+                    <ptype/>
+                  </mutable>
+                </const>
+              </normalize>
+            </lhs>
+            <rhs>
+              <normalize>
+                <const>
+                  <ptype/>
+                </const>
+              </normalize>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <const>
+                  <pair>
+                    <type num="1"/>
+                    <type num="2"/>
+                  </pair>
+                </const>
+              </normalize>
+            </lhs>
+            <rhs>
+              <normalize>
+                <pair>
+                  <const>
+                    <type num="1"/>
+                  </const>
+                  <const>
+                    <type num="2"/>
+                  </const>
+                </pair>
+              </normalize>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <const>
+                  <mbTop>
+                    <tvar/>
+                    <ptype/>
+                  </mbTop>
+                </const>
+              </normalize>
+            </lhs>
+            <rhs>
+              <const>
+                <normalize>
+                  <mbTop>
+                    <tvar/>
+                    <ptype/>
+                  </mbTop>
+                </normalize>
+              </const>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <normalize>
+                <const>
+                  <mbFull>
+                    <stype/>
+                    <ptype/>
+                  </mbFull>
+                </const>
+              </normalize>
+            </lhs>
+            <rhs>
+              <const>
+                <normalize>
+                  <mbFull>
+                    <stype/>
+                    <ptype/>
+                  </mbFull>
+                </normalize>
+              </const>
+            </rhs>
+          </equation>
+        </VEqns>
+      </btypes:TYPE>
+    </definition>
+    <definition>
+      <title>Mutability Normalization in Composite Types</title>
+      <btypes:TYPE>
+        <VEqns>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <type/>
+              </pred>
+              <pred name="Immut">
+                <type/>
+              </pred>
+            </lhs>
+            <rhs>
+              <error/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <tvar/>
+              </pred>
+            </lhs>
+            <rhs>
+              <error/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mutable>
+                  <tvar/>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <error/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mutable>
+                  <bool/>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mutable>
+                  <unit/>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mutable>
+                  <fn>
+                    <type num="1"/>
+                    <type num="2"/>
+                  </fn>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mutable>
+                  <ref>
+                    <type/>
+                  </ref>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mutable>
+                  <pair>
+                    <type num="1"/>
+                    <type num="2"/>
+                  </pair>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <compose>
+                <pred mbb="yes" name="M">
+                  <type num="1"/>
+                </pred>
+                <pred mbb="yes" name="M">
+                  <type num="2"/>
+                </pred>
+              </compose>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mbTop>
+                  <tvar/>
+                  <ptype/>
+                </mbTop>
+              </pred>
+            </lhs>
+            <rhs>
+              <compose>
+                <SubMap>
+                  <tvar/>
+                  <mutable>
+                    <ptype/>
+                  </mutable>
+                </SubMap>
+                <pred mbb="yes" name="M">
+                  <mutable>
+                    <ptype/>
+                  </mutable>
+                </pred>
+              </compose>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mbFull>
+                  <mutable>
+                    <tvar/>
+                  </mutable>
+                  <ptype/>
+                </mbFull>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="M">
+                <mbFull>
+                  <tvar/>
+                  <ptype/>
+                </mbFull>
+              </pred>
+            </lhs>
+            <rhs>
+              <SubMap>
+                <tvar/>
+                <mutable>
+                  <tvar name="beta"/>
+                </mutable>
+              </SubMap>
+              <models name="new">
+                <assume/>
+                <tvar name="beta"/>
+              </models>
+            </rhs>
+          </equation>
+        </VEqns>
+      </btypes:TYPE>
+    </definition>
+    <definition>
+      <title>Normalization of <btypes:TYPE><mbFull><stype/><ptype/></mbFull></btypes:TYPE></title>
+      <btypes:TYPE>
+        <VEqns>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <tvar/>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <bool/>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <unit/>
+              </pred>
+            </lhs>
+            <rhs>
+              <EmptySubst/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <fn>
+                  <type num="1"/>
+                  <type num="2"/>
+                </fn>
+              </pred>
+            </lhs>
+            <rhs>
+              <compose>
+                <pred mfrc="yes" name="M">
+                  <type num="1"/>
+                </pred>
+                <pred mfrc="yes" name="M">
+                  <type num="2"/>
+                </pred>
+              </compose>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <ref>
+                  <type/>
+                </ref>
+              </pred>
+            </lhs>
+            <rhs>
+              <pred mfrc="yes" name="M">
+                <type/>
+              </pred>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <mutable>
+                  <ptype/>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <pred mfrc="yes" name="M">
+                <ptype/>
+              </pred>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <pair>
+                  <type num="1"/>
+                  <type num="2"/>
+                </pair>
+              </pred>
+            </lhs>
+            <rhs>
+              <compose>
+                <pred mfrc="yes" name="M">
+                  <type num="1"/>
+                </pred>
+                <pred mfrc="yes" name="M">
+                  <type num="2"/>
+                </pred>
+              </compose>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <mbTop>
+                  <tvar/>
+                  <ptype/>
+                </mbTop>
+              </pred>
+            </lhs>
+            <rhs>
+              <pred mfrc="yes" name="M">
+                <ptype/>
+              </pred>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <mbFull>
+                  <tvar/>
+                  <ptype/>
+                </mbFull>
+              </pred>
+            </lhs>
+            <rhs>
+              <grouping>
+                <pred mfrc="yes" name="M">
+                  <ptype/>
+                </pred>
+              </grouping>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <mbFull>
+                  <mutable>
+                    <tvar/>
+                  </mutable>
+                  <ptype/>
+                </mbFull>
+              </pred>
+            </lhs>
+            <rhs>
+              <grouping>
+                <compose>
+                  <aSubMap/>
+                  <aSubMap dash="'"/>
+                </compose>
+                <text content=", where "/>
+                <eq>
+                  <aSubMap/>
+                  <pred mfrc="yes" name="M">
+                    <ptype/>
+                  </pred>
+                </eq>
+              </grouping>
+            </rhs>
+          </equation>
+          <eqn-cnt>
+            <lhs/>
+            <rhs>
+              <grouping>
+                <text content=" and "/>
+                <eq>
+                  <aSubMap dash="'"/>
+                  <SubMap>
+                    <tvar/>
+                    <maxz>
+                      <ptype/>
+                    </maxz>
+                  </SubMap>
+                </eq>
+                <text content=" if "/>
+                <concrete sp="yes">
+                  <ptype/>
+                </concrete>
+              </grouping>
+            </rhs>
+          </eqn-cnt>
+          <eqn-cnt>
+            <lhs/>
+            <rhs>
+              <grouping>
+                <space n="7"/>
+                <eq>
+                  <aSubMap dash="'"/>
+                  <EmptySubst/>
+                </eq>
+                <text content=" otherwise."/>
+              </grouping>
+            </rhs>
+          </eqn-cnt>
+          <equation>
+            <lhs>
+              <pred mfrc="yes" name="M">
+                <const>
+                  <type/>
+                </const>
+              </pred>
+            </lhs>
+            <rhs>
+              <pred mfrc="yes" name="M">
+                <type/>
+              </pred>
+            </rhs>
+          </equation>
+        </VEqns>
+      </btypes:TYPE>
+    </definition>
+  </sect1>
+  <xi:include href="include/new-formal/opsem.xmli"/>
+  <xi:include href="include/new-formal/operators.xmli"/>
+  <xi:include href="include/new-formal/subtype.xmli"/>
+  <xi:include href="include/new-formal/type.xmli"/>
+  <xi:include href="include/new-formal/infer.xmli"/>
+  <xi:include href="include/new-formal/unify.xmli"/>
+</article>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->
+
+
+<!--  LocalWords:  ptsz authorgroup firstname orgname sridharmutinfer bnf desc
+ -->
+<!--  LocalWords:  sLoc hLoc aVal aExpr lvalues lVal tqExpr bnfc dup opsem eval
+ -->
+<!--  LocalWords:  opState dyn sem Grossman qtypes levalOp evalOp RVAL aTS pred
+ -->
+<!--  LocalWords:  subst Csubst ceqOp maxzOp minzOp eq maxz neq minz metaCT ol
+ -->
+<!--  LocalWords:  covariant arg ret ceil Tsub TDjudge Hrules tyRule TW tyPre
+ -->
+<!--  LocalWords:  tyConc lval decl judgeOp Garriage's spEqOp notin spEq unin
+ -->
+<!--  LocalWords:  uninOp Sjudge dom mapsto rexec leadin leval supeq aSubMap Ph
+ -->
+<!--  LocalWords:  VSubstitution LSubstitution SubMap TEjudge UNF unf subeq ACM
+ -->
+<!--  LocalWords:  mbpair TIjudge vaughanHM Hindley Milner mdash epsiv corUp HL
+ -->
+<!--  LocalWords:  TypesBook corUpOp carrys epsi ASET SRL unkinded pagebreak SL
+ -->
+<!--  LocalWords:  Garriague's vspace CTX MTVs FTVs NTVs cst commut sust ok su
+ -->
+<!--  LocalWords:  canonicalized ndash si uf ua vf rh va sa subeqOp supeqOp eqi
+ -->
+ 
+<!--  LocalWords:  nceq documentclass sigplanconf FirstName LastName notitle ih
+ -->
+
+<!--  LocalWords:  horz idemp Acyclicity otheroptions nocopyrightspace FTV NTV
+ -->
+<!--  LocalWords:  explicitely tvs asm mtvs lem nosp req defn scomp subnum sep
+ -->
+<!--  LocalWords:  fnize cong sm ecomp subEq BitC Swaroop Sridhar dev bitc LHS
+ -->
+
+
+<!--  LocalWords:  unboxed RHS lvalue Hloc Sloc Rval lhs rhs Deref Tq iff wrt
+ -->
+<!--  LocalWords:  canonicalization unifications Tqexpr Tvar Oth Composability
+ -->
+<!--  LocalWords:  Doerrie Proc ECOOP PLOS
+ -->

@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -35,20 +35,18 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
 #include <sstream>
 
+#include <libsherpa/UExcept.hxx>
+
 #include "UocInfo.hxx"
-#include "Options.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
 #include "TypeInfer.hxx"
@@ -58,6 +56,7 @@
 #include "inter-pass.hxx"
 #include "Unify.hxx"
 
+using namespace boost;
 using namespace sherpa;
 using namespace std;
 
@@ -72,15 +71,15 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
   stringstream ss;
   
-  if(getType() != this)
+  if (getType() != shared_from_this())
     return getType()->mangledString(igMut, igTlMut, maxArgMut);
 
-  if(mark & MARK5) {
+  if (mark & MARK_MANGLED_STRING) {
     // Encountered Infinite Type
     assert(false);
   }
 
-  mark |= MARK5;
+  mark |= MARK_MANGLED_STRING;
 
   switch(kind) {
   case ty_tvar:
@@ -130,7 +129,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 #endif
 
   case ty_fn:
-    assert(components->size() == 2);
+    assert(components.size() == 2);
     
     ss << "FN" 
        << Args()->mangledString(igMut, true,maxArgMut)
@@ -139,9 +138,9 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     break;
 
   case ty_fnarg:
-    ss << components->size();
-    for(size_t i=0; i<components->size(); i++) {
-      if(CompFlags(i) & COMP_BYREF)
+    ss << components.size();
+    for (size_t i=0; i<components.size(); i++) {
+      if (CompFlags(i) & COMP_BYREF)
 	ss << "Z";
       ss << CompType(i)->mangledString(igMut, true, 
 				       maxArgMut);
@@ -150,7 +149,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
   case ty_letGather:
     ss << "LG";
-    for(size_t i=0; i<components->size(); i++) {
+    for (size_t i=0; i<components.size(); i++) {
       ss << CompType(i)->mangledString(igMut, igTlMut, 
 					      maxArgMut);
     }
@@ -162,10 +161,10 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     {
       ss << "S"
 	 << ((kind == ty_structv) ? "V" : "R")
-	 << typeArgs->size() 
+	 << typeArgs.size() 
 	 << "_" << defAst->s.size() << defAst->s;
 
-      for(size_t i=0; i < typeArgs->size(); i++)
+      for (size_t i=0; i < typeArgs.size(); i++)
 	ss << TypeArg(i)->mangledString(igMut, false, 
 					 maxArgMut);
       break;
@@ -175,7 +174,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     {
       ss << "TC"
 	 << "_" << defAst->s.size() << defAst->s;
-      for(size_t i=0; i < typeArgs->size(); i++)
+      for (size_t i=0; i < typeArgs.size(); i++)
 	ss << TypeArg(i)->mangledString(igMut, false, 
 					 maxArgMut);
       
@@ -191,55 +190,42 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     {
       ss << "U"
 	 << (isRefType() ? "R" : "V")
-	 << typeArgs->size() 
+	 << typeArgs.size() 
 	 << "_" << myContainer->s.size() << myContainer->s;
 
-      for(size_t i=0; i < typeArgs->size(); i++)
-	ss << TypeArg(i)->mangledString(igMut, false, maxArgMut);
-    }
-    break;
-
-  case ty_reprv:
-  case ty_reprr:
-    {
-      ss << "D"
-	 << (isRefType() ? "R" : "V")
-	 << typeArgs->size() 
-	 << "_" << myContainer->s.size() << myContainer->s;
-
-      for(size_t i=0; i < typeArgs->size(); i++)
+      for (size_t i=0; i < typeArgs.size(); i++)
 	ss << TypeArg(i)->mangledString(igMut, false, maxArgMut);
     }
     break;
 
   case ty_array:
     {
-      assert(components->size() == 1);
+      assert(components.size() == 1);
       ss << "J" << Base()->mangledString(igMut, false, maxArgMut)
-	 << "__" << arrlen->len;
+	 << "__" << arrLen->len;
       break;
     }
     
   case ty_vector:
     {
-      assert(components->size() == 1);
+      assert(components.size() == 1);
       ss << "K" << Base()->mangledString(igMut, false, maxArgMut);
       break;
     }
 
   case ty_ref:
-    assert(components->size() == 1);
+    assert(components.size() == 1);
     ss << "R" << Base()->mangledString(igMut, false, maxArgMut);
     break;
 
   case ty_byref:
-    assert(components->size() == 1);
+    assert(components.size() == 1);
     ss << "Z" << Base()->mangledString(igMut, false, maxArgMut);
     break;
 
   case ty_mutable:
-    assert(components->size() == 1);
-    if(!igMut && !igTlMut)
+    assert(components.size() == 1);
+    if (!igMut && !igTlMut)
       ss << "M";
     ss << Base()->mangledString(igMut, false, maxArgMut);
     break;
@@ -261,7 +247,6 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     }
 
   case ty_tyfn:
-  case ty_subtype:
   case ty_pcst:
   case ty_kvar:
   case ty_kfix:
@@ -271,6 +256,6 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     }
   }
   
-  mark &= ~MARK5;
+  mark &= ~MARK_MANGLED_STRING;
   return ss.str();
 }

@@ -37,7 +37,7 @@ default: package
 BITC_SRC=../..
 
 CLEANLIST=dir.dev.gxml
-DIRS=bitc osverify-2004
+DIRS=bitc osverify-2004 papers
 OSDOC_XML_SRC=index
 # Only build the HTML targets in this directory...
 OSDOC_NAVCONTEXT="Docs"

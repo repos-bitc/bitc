@@ -90,7 +90,8 @@
 #include <getopt.h>
 #include <langinfo.h>
 
-#include <libsherpa/Path.hxx>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/convenience.hpp>
 #include <libsherpa/util.hxx>
 
 #include "Version.hxx"
@@ -98,52 +99,17 @@
 #include "Options.hxx"
 #include "AST.hxx"
 #include "backend.hxx"
-#include "INOstream.hxx"
 #include "Instantiate.hxx"
 #include "TvPrinter.hxx"
-using namespace sherpa;
+
 using namespace std;
+using namespace boost;
+using namespace boost;
+using namespace sherpa;
 
 #define BITC_COMPILER_MODE        0x1u
 #define BITC_INTERPRETER_MODE     0x2u
 #define BITC_CURRENT_MODE BITC_COMPILER_MODE
-
-bool Options::showParse = false;
-bool Options::showTypes = false;
-bool Options::xmlTypes = false;
-bool Options::showLex = false;
-bool Options::useStdInc = true;
-bool Options::useStdLib = true;
-bool Options::advisory = false;
-bool Options::rawTvars = false;
-bool Options::showMaybes = false;
-bool Options::FQtypes = true;
-bool Options::showAllTccs = false;
-bool Options::showPasses = false;
-bool Options::noPrelude = false; 
-bool Options::dumpAfterMidEnd = false;
-bool Options::dumpTypesAfterMidEnd = false;
-GCPtr<CVector<std::string> > Options::showTypesUocs;
-GCPtr<CVector<std::string> > Options::xmlTypesUocs;
-bool Options::ppFQNS = false;
-bool Options::ppDecorate = false;
-unsigned Options::verbose = 0;
-GCPtr<CVector<std::string> > Options::entryPts;
-BackEnd *Options::backEnd = 0;
-std::string Options::outputFileName;
-GCPtr<CVector<GCPtr<Path> > > Options::libDirs;
-GCPtr<CVector<std::string> > Options::inputs;
-bool Options::Wall = false;
-bool Options::noGC = false;
-bool Options::noAlloc = false;
-GCPtr<TvPrinter> Options::debugTvP = new TvPrinter;
-bool Options::heuristicInference = false;
-
-GCPtr<CVector<std::string> > Options::LinkPreOptionsGCC;
-GCPtr<CVector<std::string> > Options::CompilePreOptionsGCC;
-GCPtr<CVector<std::string> > Options::LinkPostOptionsGCC;
-
-GCPtr<CVector<std::string> > Options::SystemDirs;
 
 #define LOPT_SHOWLEX      257   /* Show tokens */
 #define LOPT_SHOWPARSE    258   /* Show parse */
@@ -265,9 +231,9 @@ void
 AddLinkArgumentForGCC(const std::string& s)
 {
   if (SawFirstBitcInput)
-    Options::LinkPostOptionsGCC->append(s);
+    Options::LinkPostOptionsGCC.push_back(s);
   else {
-    Options::LinkPreOptionsGCC->append(s);
+    Options::LinkPreOptionsGCC.push_back(s);
   }
 }
 
@@ -275,7 +241,7 @@ void
 AddCompileArgumentForGCC(const std::string& s)
 {
   if (!SawFirstBitcInput)
-    Options::CompilePreOptionsGCC->append(s);    
+    Options::CompilePreOptionsGCC.push_back(s);    
 }
 
 BackEnd *
@@ -298,8 +264,8 @@ handle_sigsegv(int param)
   exit(1);
 }
 
-bool
-ResolveLibPath(std::string name, std::string& resolvedName)
+filesystem::path
+ResolveLibPath(std::string name)
 {
   // We either saw -lname or -l name. What we need to do here is
   // check the currently known library paths for a resolution. If we
@@ -314,17 +280,25 @@ ResolveLibPath(std::string name, std::string& resolvedName)
   // Unfortunately, this means that the @em absence of
   // .../libmumble.bita does not reliably indicate an error.
 
-  Path nmPath = Path("lib" + name + ".bita");
+  string fullNm = "lib" + name + ".bita";
 
-  for (size_t i = 0; i < Options::libDirs->size(); i++) {
-    Path testPath = *Options::libDirs->elem(i) + nmPath;
-    if (testPath.exists()) {
-      resolvedName = testPath.asString();
-      return true;
+  for (size_t i = 0; i < Options::libDirs.size(); i++) {
+    filesystem::path testPath = Options::libDirs[i] / fullNm;
+    if (filesystem::exists(testPath)) {
+      if (!filesystem::is_regular(testPath)) {
+	std::cerr << "bitcc: error: \"-l" << name 
+		  << "\" resolves to \""
+		  << testPath
+		  << "\", which is not a regular file."
+		  << endl;
+	exit(1);
+      }
+
+      return testPath;
     }
   }
 
-  return false;    
+  return filesystem::path();    
 }
 
 int
@@ -333,21 +307,6 @@ main(int argc, char *argv[])
   int c;
   //  extern int optind;
   int opterr = 0;
-  bool userAddedEntryPts = false;
-
-  // Allocate memory for some static members
-  Options::showTypesUocs = new CVector<std::string>;
-  Options::xmlTypesUocs = new CVector<std::string>;
-  Options::entryPts = new CVector<std::string>;
-  Options::libDirs = new CVector<GCPtr<Path> >;
-  Options::inputs = new CVector<std::string>;
-  Options::CompilePreOptionsGCC = new CVector<std::string>;
-  Options::LinkPreOptionsGCC = new CVector<std::string>;
-  Options::LinkPostOptionsGCC = new CVector<std::string>;
-  Options::SystemDirs = new CVector<std::string>;
-  UocInfo::searchPath = new CVector<GCPtr<Path> >;
-  UocInfo::ifList = new CVector<GCPtr<UocInfo> >;
-  UocInfo::srcList = new CVector<GCPtr<UocInfo> >;
 
   signal(SIGSEGV, handle_sigsegv);
 
@@ -392,14 +351,13 @@ main(int argc, char *argv[])
   /// order-preserving way.
 
   while ((c = getopt_long(argc, argv, 
-			  "-e:o:O::l:VvchI:L:",
+			  "-e:o:O::l:VvcghI:L:",
 			  longopts, 0
 		     )) != -1) {
     switch(c) {
     case 1:
       {
-	Path p(optarg);
-	std::string sfx = p.suffix();
+	std::string sfx = filesystem::extension(optarg);
 
 	if (
 	    // Interface files. Probably should not appear on the
@@ -414,7 +372,7 @@ main(int argc, char *argv[])
 	    || (sfx == ".bita")) {
 
 	  SawFirstBitcInput = true;
-	  Options::inputs->append(optarg);
+	  Options::inputs.push_back(optarg);
 	}
 	else
 	  // Else it is something to be passed through to GCC:
@@ -596,15 +554,13 @@ main(int argc, char *argv[])
 
     case LOPT_SHOW_TYPES:
       {
-	if(!Options::showTypesUocs->contains(optarg))
-	  Options::showTypesUocs->append(optarg);
+	Options::showTypesUocs.insert(optarg);
 	break;
       }
 
     case LOPT_XML_TYPES:
       {
-	if(!Options::xmlTypesUocs->contains(optarg))
-	  Options::xmlTypesUocs->append(optarg);
+	Options::xmlTypesUocs.insert(optarg);
 	break;
       }
 
@@ -662,8 +618,7 @@ main(int argc, char *argv[])
 
     case 'e':
       {	
-	userAddedEntryPts = true;
-	Options::entryPts->append(optarg);
+	Options::entryPts.insert(optarg);
 	break;
       }
 
@@ -686,11 +641,11 @@ main(int argc, char *argv[])
       AddCompileArgumentForGCC(optarg);
       AddLinkArgumentForGCC("-I");
       AddLinkArgumentForGCC(optarg);
-      UocInfo::searchPath->append(new Path(optarg));
+      UocInfo::searchPath.push_back(optarg);
       break;
 
     case LOPT_SYSTEM:
-      Options::SystemDirs->append(optarg);
+      Options::SystemDirs.push_back(optarg);
       break;
 
     case 'l':
@@ -698,9 +653,9 @@ main(int argc, char *argv[])
 	AddLinkArgumentForGCC("-l");
 	AddLinkArgumentForGCC(optarg);
 
-	std::string resolvedName;
-	if (ResolveLibPath(optarg, resolvedName))
-	    Options::inputs->append(resolvedName);
+	filesystem::path path = ResolveLibPath(optarg);
+	if (!path.empty())
+	  Options::inputs.push_back(path.string());
 	break;
       }
 
@@ -708,8 +663,15 @@ main(int argc, char *argv[])
       AddLinkArgumentForGCC("-L");
       AddLinkArgumentForGCC(optarg);
 
-      Options::libDirs->append(new Path(optarg));
+      Options::libDirs.push_back(optarg);
       break;
+
+    case 'g':
+      {
+	AddCompileArgumentForGCC("-g");
+	AddLinkArgumentForGCC("-g");
+	break;
+      }
 
     case 'O':			// a.k.a. -O2
       {
@@ -729,79 +691,44 @@ main(int argc, char *argv[])
     }
   }
   
-  for (size_t i = 0; i < Options::SystemDirs->size(); i++) {
-    stringstream incpath;
-    incpath << Options::SystemDirs->elem(i) << "/include";
-    
-    UocInfo::searchPath->append(new Path(incpath.str()));
-    Options::CompilePreOptionsGCC->append("-I");
-    Options::CompilePreOptionsGCC->append(incpath.str());
+  // Select default backend if none chosen otherwise.
+  if (Options::backEnd == 0)
+    Options::backEnd = &BackEnd::backends[0];
 
-    stringstream libpath;
-    libpath << Options::SystemDirs->elem(i) << "/lib";
-    Options::libDirs->append(new Path(libpath.str()));
-    Options::LinkPostOptionsGCC->append("-L");
-    Options::LinkPostOptionsGCC->append(libpath.str());
+  for (size_t i = 0; i < Options::SystemDirs.size(); i++) {
+    filesystem::path incPath = Options::SystemDirs[i] / "include";
+    
+    UocInfo::searchPath.push_back(incPath);
+    Options::CompilePreOptionsGCC.push_back("-I");
+    Options::CompilePreOptionsGCC.push_back(incPath.string());
+
+    /// @bug: What about lib64?
+    std::string lib_leaf_name = filesystem::path(AUTOCONF_LIBDIR).leaf();
+    filesystem::path libPath = Options::SystemDirs[i] / lib_leaf_name;
+    Options::libDirs.push_back(libPath);
+    Options::LinkPostOptionsGCC.push_back("-L");
+    Options::LinkPostOptionsGCC.push_back(libPath.string());
   }
 
   if (Options::useStdLib) {
-    std::string resolvedName;
-    if (ResolveLibPath("bitc", resolvedName))
-      Options::inputs->append(resolvedName);
-  }
-
-#if 0
-  const char *root_dir = getenv("COYOTOS_ROOT");
-  const char *xenv_dir = getenv("COYOTOS_XENV");
-
-  if (root_dir) {
-    stringstream incpath;
-    stringstream libpath;
-    incpath << root_dir << "/host/include";
-    libpath << root_dir << "/host/lib";
-
-    if (Options::useStdInc)
-      UocInfo::searchPath->append(new Path(incpath.str()));
-
-    // Thankfully, this is not actually what --nostdlib means. What it
-    // means is that we should not automatically add -lbitc to the
-    // link line.
-    if (Options::useStdLib) {
-      AddLinkArgumentForGCC("-L");
-      AddLinkArgumentForGCC(libpath.str());
-      Options::libDirs->append(new Path(libpath.str()));
+    filesystem::path path = ResolveLibPath("bitc");
+    if (path.empty() && (Options::backEnd->flags & BK_LINKING)) {
+      cerr << "Cannot find bitc standard library, which is needed"
+	   << endl;
+      exit(1);
     }
+    if (!path.empty())
+      Options::inputs.push_back(path.string());
   }
-
-  if (xenv_dir) {
-    stringstream incpath;
-    stringstream libpath;
-    incpath << xenv_dir << "/host/include";
-    libpath << xenv_dir << "/host/lib";
-
-    if (Options::useStdInc)
-      UocInfo::searchPath->append(new Path(incpath.str()));
-
-    if (Options::useStdLib) {
-      AddLinkArgumentForGCC("-L");
-      AddLinkArgumentForGCC(libpath.str());
-      Options::libDirs->append(new Path(libpath.str()));
-    }
-  }
-#endif
 
   /* From this point on, argc and argv should no longer be consulted. */
 
-  if (Options::inputs->size() == 0)
+  if (Options::inputs.empty())
     opterr++;
 
   if (opterr) {
     std::cerr << "Usage: Try bitcc --help" << std::endl;
     exit(0);
-  }
-
-  if(Options::backEnd == 0) {
-    Options::backEnd = &BackEnd::backends[0];
   }
 
   if (Options::outputFileName.size() == 0)
@@ -813,21 +740,22 @@ main(int argc, char *argv[])
   // Process the Prelude:
 
   // FIX: TEMPORARY
-  if(!Options::noPrelude) {
+  if (!Options::noPrelude) {
     sherpa::LexLoc loc = LexLoc();
     (void) UocInfo::importInterface(std::cerr, loc, "bitc.prelude");
   }
   
   // Compile everything
-  for(size_t i = 0; i < Options::inputs->size(); i++)
-    UocInfo::CompileFromFile(Options::inputs->elem(i), true);
+  for (size_t i = 0; i < Options::inputs.size(); i++)
+    UocInfo::CompileFromFile(Options::inputs[i], true);
 
   /* Per-file backend output after processing frontend, if any */
   bool doFinal = true;
 
   /* Output for interfaces */
-  for(size_t i = 0; i < UocInfo::ifList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::ifList->elem(i);
+  for (UocMap::iterator itr = UocInfo::ifList.begin();
+      itr != UocInfo::ifList.end(); ++itr) {
+    shared_ptr<UocInfo> puoci = itr->second;
     
     if (puoci->lastCompletedPass >= Options::backEnd->needPass) {
       if (Options::backEnd->fn)
@@ -838,8 +766,9 @@ main(int argc, char *argv[])
   } 
 
   /* Output for Source modules */
-  for(size_t i = 0; i < UocInfo::srcList->size(); i++) {
-    GCPtr<UocInfo> puoci = UocInfo::srcList->elem(i);
+  for (UocMap::iterator itr = UocInfo::srcList.begin();
+      itr != UocInfo::srcList.end(); ++itr) {
+    shared_ptr<UocInfo> puoci = itr->second;
 
     if (puoci->lastCompletedPass >= Options::backEnd->needPass){
       if (Options::backEnd->fn)
@@ -870,27 +799,18 @@ main(int argc, char *argv[])
 #if (BITC_CURRENT_MODE == BITC_COMPILER_MODE)
   /* Build the list of things to be instantiated */
 
-  /** The following symbols are introduced by code that is added in the
-   * SSA pass. This code is added @em after polyinstantiation, and
-   * consequently cannot be discovered by the demand-driven incremental
-   * instantiation process. Add them to the emission list by hand here
-   * to ensure that they get emitted.
-   */
-  Options::entryPts->append("bitc.prelude.__index_lt");
-  Options::entryPts->append("bitc.prelude.IndexBoundsError");  
-
-  /** If we are not compiling in header mode, we also need to emit
-   * code for the primary entry point, which is generally
-   * bitc.main.main. All else will follow from that as
-   * polyinstantiation proceeds.
-   *
-   * Header mode is a bit different. In that mode we are converting
-   * interfaces into header files, and there is no particular entry
-   * point to emit.
-   */
-  if(!userAddedEntryPts &&
+  /// If we are not compiling in header mode, we need to emit code for
+  /// the primary entry point. In the absence of some other
+  /// specification by the user, that entry point is
+  /// bitc.main.main. All else will follow from that as
+  /// polyinstantiation proceeds.
+  ///
+  /// Header mode is a bit different. In that mode we are converting
+  /// interfaces into header files, and there is no particular entry
+  /// point to emit.
+  if (Options::entryPts.empty() &&
      ((Options::backEnd->flags & BK_HDR_MODE) == 0))
-    Options::entryPts->append("bitc.main.main");
+    Options::entryPts.insert("bitc.main.main");
 
   /** Add all other top level forms that might cause
    * side-effects. These are the top-level initializers. This is a
@@ -902,7 +822,7 @@ main(int argc, char *argv[])
 
   /* Create a new unit of compilation that will become the grand,
      unified UoC */
-  GCPtr<UocInfo> unifiedUOC = UocInfo::CreateUnifiedUoC();
+  shared_ptr<UocInfo> unifiedUOC = UocInfo::CreateUnifiedUoC();
 
   // Update all of the defForm pointers so that we can find things:
   UocInfo::findAllDefForms();
@@ -932,7 +852,7 @@ main(int argc, char *argv[])
     std::cerr <<std::endl << std::endl;
   }
   
-  if(!midPassOK) {
+  if (!midPassOK) {
     std::cerr << "Exiting due to errors during Instantiation."
 	      << std::endl;
     exit(1);    
@@ -946,10 +866,10 @@ main(int argc, char *argv[])
   unifiedUOC->DoBackend();
   
   // If there is any post-gather output, it should be done now.
-  if(Options::backEnd->plfn) {
+  if (Options::backEnd->plfn) {
     bool done = Options::backEnd->plfn(std::cout, std::cerr, 
 				       unifiedUOC);
-    if(!done)
+    if (!done)
       exit(1);
   }
   

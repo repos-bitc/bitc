@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <bibliography>
+  <!-- <bibentry label="Alexander98"> 
+  <key>Alexander98</key>
+  D. S. Alexander, W. A. Arbaugh, M. W. Hicks, P. Kakkar,
+  A. D. Keromytis, J. T. Moore, C. A. Gunder, S. M. Nettles,
+  and J. M. Smith. 
+  ``The SwitchWare active network architecture''
+  <doctitle>
+  IEEE Network
+  </doctitle>
+  May/June 1998.
+  </bibentry> -->
+  <bibentry label="Biagioni2001FoxNet"> 
+    <!-- <key>Biagioni01</key> -->
+    E. Biagioni, R. Harper, and P. Lee
+    ``A network protocol stack in Standard ML''
+    <doctitle>
+      Higher Order and Symbolic Computation, Vol.14, No.4
+    </doctitle>,
+    2001.
+  </bibentry>
+  <bibentry label="DeLineMSRVault">
+    <!-- <key>DeLine01</key> -->
+    R. Deline and M. F&auml;hndrich,
+    ``VAULT: a programming language for reliable systems''
+    <link href="http://research.microsoft.com/vault">
+      <progident>http://research.microsoft.com/vault</progident>
+    </link>, 2001
+  </bibentry>
+  <bibentry label="Derby1999Foxnet">
+    <!-- <key>Derby99</key> -->
+    H. Derby,
+    ``The performance of FoxNet 2.0''
+    <doctitle>
+      Technical Report CMU-CS-99-137
+    </doctitle>
+    School of Computer Science, Carnegie Mellon University, 
+    June 1999. 
+  </bibentry> 
+  <bibentry label="csharpSpec"> 
+    <!-- <key>ECMA06</key> -->
+    ECMA International
+    ``Standard ECMA-334 C# Language Specification''
+    <link href="http://www.ecma-international.org/publications/standards/Ecma-334.htm">
+      <progident>http://www.ecma-international.org/publications/standards/Ecma-334.htm</progident>
+    </link><!--,2006.-->
+  </bibentry>
+  <bibentry label="foster2006Cqual">
+    <!-- <key>Foster06</key> -->
+    J. S. Foster, R. Johnson, J. Kodumal, and A. Aiken
+    ``Flow-Insensitive Type Qualifiers''
+    <doctitle>
+      Trans. on Programming Languages and Systems. 
+    </doctitle>
+    28(6):1035-1087, Nov. 2006.  
+  </bibentry>
+  <bibentry label="Grossman2006qtypes">
+    <!-- <key>Grossman06</key> -->
+    D. Grossman, ``Quantified Types in an Imperative Language''
+    <doctitle>ACM Transactions on Programming Languages and Systems
+    </doctitle>, 
+    2006.
+  </bibentry>
+  <bibentry label="Hughes2004HaskellGlobals">
+    <!-- <key>Hughes04</key> -->
+    J. Hughes 	 
+    ``Global variables in Haskell''
+    <doctitle>
+      Journal of Functional Programming archive
+    </doctitle>
+    Volume 14,  Issue 5, Sept. 2004.
+  </bibentry>
+  <bibentry label="Diatchki2005Representation">
+    <!-- <key>Diatchki05</key> -->
+    I. S. Diatchki, M. P. Jones, and R. Leslie.
+    ``High- level Views on Low-level Representations.''
+    <doctitle>Proc. ACM Int. Conference on Functional
+      Programming</doctitle> pp. 168&ndash;179, 
+    2005.
+  </bibentry>
+  <!-- <bibentry label="ISO1995Ada">
+  <key>ISO95</key>
+  International Std. Organization
+  <doctitle>ISO/IEC 8652:1995 (Information
+  Technology &mdash; Prog.
+  Languages &mdash; Ada)</doctitle>, 1995.
+  </bibentry> -->
+  <!-- <bibentry label="ISO1998C++">
+  <key>ISO98</key>
+  International Std. Organization
+  <doctitle>ISO/IEC FDIS 14882:1998(E) (Prog.
+  Lang. - C++)</doctitle>, 1998.
+  </bibentry> -->
+  <bibentry label="ISO1999ANSI-C">
+    <!-- <key>ISO99</key> -->
+    International Std. Organization
+    <doctitle>ISO/IEC 9899:1999 (Prog.
+      Languages - C)</doctitle>, 1999.
+  </bibentry>
+  <bibentry label="Jim2002Cyclone">
+    <!-- <key>Jim02</key> -->
+    T. Jim, G. Morrisett, D. Grossman, M. Hicks, J. Cheney, and
+    Y. Wang  
+    ``Cyclone: A safe dialect of C.'' 
+    <doctitle>
+      Proc. of USENIX Annual Technical Conference 
+    </doctitle>
+    pp 275­288, 2002. 
+  </bibentry>
+  <bibentry label="jones1995qualtypes">
+    <!-- <key>Jones95</key> -->
+    M. P. Jones
+    ``Qualified types: theory and practice.''
+    <doctitle>
+      Cambridge Distinguished Dissertations In Computer Science
+    </doctitle>
+    ISBN:0-521-47253-9, 1995
+  </bibentry>
+  <bibentry label="peytonjones1991unboxed">
+    <!-- <key>Jones91</key> -->
+    S. L. Peyton Jones and J. Launchbury
+    ``Unboxed values as first class citizens in a non-strict
+    functional language.''
+    <doctitle>
+      Functional Programming Languages and Computer Architecture
+    </doctitle>,
+    1991
+  </bibentry>
+  <bibentry label="peytonjones1993monads">
+    <!-- <key>Jones93</key> -->
+    S. L. Peyton Jones and P. Wadler
+    ``Imperative functional programming.''
+    <doctitle>
+      Proc. ACM SIGPLAN Principles of Programming Languages.
+    </doctitle>,
+    1993
+  </bibentry>  
+  <bibentry label="peytonjones2003haskellrevisedreport">
+    <!-- <key>Jones03</key> -->
+    S. L. Peyton Jones (ed.). <doctitle>Haskell 98 Language and
+      Libraries: The Revised report</doctitle>. Cambridge University
+    Press, 2003.
+  </bibentry>
+  <!-- <bibentry label="LeroyOcaml">
+  <key>Leroy05</key>
+  Xavier Leroy,  
+  ``The Objective Caml System Release 3.09, Documentation and
+  User's Manual.''
+  <link
+  href="http://caml.inria.fr/pub/docs/manual-ocaml/index.html">
+  <progident>http://caml.inria.fr/pub/docs/ manual-ocaml/index.html</progident>
+  </link> 
+  </bibentry> -->
+  <bibentry label="Milner1978W">
+    <!-- <key>Milner78</key> -->
+    R. Milner 
+    ``A theory of type polymorphism in programming.''
+    <doctitle>
+      Journal of Computer and System Sciences
+    </doctitle>
+    pp 348-375, 1978.
+  </bibentry>
+  <bibentry label="milner97definition">
+    <!-- <key>Milner97</key> -->
+    R. Milner, M. Tofte, R. Harper, and D.MacQueen. 
+    <doctitle>The Definition of Standard ML - Revised</doctitle>
+    The MIT Press, May 1997.
+  </bibentry>
+  <!--     <bibentry label="necula2002CCured"> -->
+  <!--       <key>Necula02</key> -->
+  <!--       G. Necula, S. Mcpeak, and W. Weimer  -->
+  <!--       ``CCured: Type-safe retrofitting of legacy code.'' -->
+  <!--       <doctitle> -->
+  <!--         Proc. of Symposium on Principles of Programming Languages -->
+  <!--       </doctitle>  -->
+  <!--       pp 128­139, 2002. -->
+  <!--     </bibentry> -->
+  <!--     <bibentry label="pierce2002TypesBook"> -->
+  <!--       <key>Pierce02</key> -->
+  <!--       B. C. Pierce -->
+  <!--       ``Types and Programming Languages'' -->
+  <!--       <doctitle> -->
+  <!-- 	The MIT Press, Massachusetts Institute of Technology -->
+  <!--       </doctitle> -->
+  <!--       ISBN 0-262-16209-1, 2002.       -->
+  <!--     </bibentry> -->
+  <bibentry label="javaSpec">
+    <!-- <key>Gosling05</key> -->
+    J. Gosling, B. Joy, G. Steele, and G. Bracha
+    ``The Java Language Specification,'' Third Edition
+    <link href="http://java.sun.com/docs/books/jls">
+      <progident>http://java.sun.com/docs/books/jls</progident>
+    </link>
+  </bibentry>
+  <bibentry label="pythonSpec"> 
+    <!-- <key>Rossum06</key> -->
+    G. van Rossum, ``Python Reference Manual''
+    F. L. Drake, Jr. (ed.)
+    <link href="http://docs.python.org/ref/ref.html">
+      <progident>http://docs.python.org/ref/ref.html</progident>
+    </link>, 2006.
+  </bibentry>
+  <bibentry label="shapiro1999EROS">
+    <!-- <key>Shapiro99</key> -->
+    J. S. Shapiro, J. M. Smith, and D. J. Farber. 
+    ``EROS: a fast capability system''
+    <doctitle>
+      ACM Symposium on Operating Systems Principles
+    </doctitle>,
+    Dec. 1999.
+  </bibentry>
+  <bibentry label="shapBitcSpec2006">
+    <!-- <key>U1</key> -->
+    J. S. Shapiro, S. Sridhar, M. S. Doerrie, ``BitC Language
+    Specification''
+    <link
+      href="http://bitc-lang.org/docs/bitc/spec.html">
+      <progident>http://www.bitc-lang.org/docs/bitc/spec.html</progident>
+    </link>
+  </bibentry>
+  <bibentry label="Smith1998polymorphicC">
+    <!-- <key>Smith98</key> -->
+    G. Smith and D. Volpano. 
+    ``A sound polymorphic type system for a dialect of C.''
+    <progident>
+      Science of Computer Programming
+    </progident>
+    <b>32</b>(2--3):49--72, 1998. 
+  </bibentry>
+  <bibentry label="sridhar2006plos">
+    <!--  <key>Sridhar06</key> -->
+    S. Sridhar and J. S. Shapiro. ``Type Inference for Unboxed Types
+    and First Class Mutability'' 
+    <doctitle>Proc. 3rd Workshop on Prog. Languages and
+      Operating Systems</doctitle>, 2006. 
+  </bibentry>
+  <bibentry label="Tarditi1996TIL"> 
+    <!-- <key>Tarditi96</key> -->
+    D. Tarditi, G. Morrisett, P. Cheng, C. Stone, R. Harper, and
+    P. Lee. 
+    ``TIL: A type-directed optimizing compiler
+    for ML''
+    <doctitle>
+      Proc. ACM SIGPLAN PLDI
+    </doctitle>, 1996. 
+  </bibentry>
+  <bibentry label="tschantz2005javari">
+    <!-- <key>Tschantz05</key> -->
+    M. S. Tschantz and M. D. Ernst,     
+    ``Javari: Adding reference immutability to Java''
+    <doctitle>
+      Object-Oriented Programming Systems, Languages, and
+      Applications
+    </doctitle>,
+    Oct 2005.
+  </bibentry>
+  <bibentry label="wrightValRes1995">
+    <!-- <key>Wright95</key> -->
+    A. Wright, ``Simple Imperative Polymorphism'' 
+    <doctitle> Lisp and Symbolic Comp.</doctitle>
+    8(4):343-355, 1995.
+  </bibentry>
+  </bibliography>

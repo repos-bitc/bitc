@@ -13,4 +13,8 @@
     <p>Papers about Coyotos or BitC.</p>
     <dir-expand-entries category="papers"/>
   </dirgroup>
+  <dirgroup>
+    <title>Technical Reports</title>
+    <dir-expand-entries category="report"/>
+  </dirgroup>
 </directory>

@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -42,22 +42,26 @@
 #include <iostream>
 #include <sstream>
 
+#include "Options.hxx"
 #include "Version.hxx"
 #include "UocInfo.hxx"
 #include "Symtab.hxx"
 #include "Type.hxx"
 #include "backend.hxx"
-#include "Options.hxx"
 #include "inter-pass.hxx"
 #include "SexprLexer.hxx"
-#include <libsherpa/CVector.hxx>
+
+#include <boost/filesystem/operations.hpp>
 #include <libsherpa/util.hxx>
 
+using namespace std;
+using namespace boost;
+using namespace boost;
 using namespace sherpa;
 
-GCPtr<CVector<GCPtr<Path> > > UocInfo::searchPath;
-GCPtr<CVector<GCPtr<UocInfo> > > UocInfo::ifList;
-GCPtr<CVector<GCPtr<UocInfo> > > UocInfo::srcList;
+vector<filesystem::path> UocInfo::searchPath;
+UocMap UocInfo::ifList;
+UocMap UocInfo::srcList;
 
 bool UocInfo::mainIsDefined = false;
 
@@ -81,22 +85,23 @@ UocInfo::UocNameFromSrcName(const std::string& srcFileName, unsigned ndx)
 }
 
 UocInfo::UocInfo(const std::string& _uocName, const std::string& _origin,
-		 GCPtr<AST> _uocAst)
+		 shared_ptr<AST> _uocAst)
 {
   lastCompletedPass = pn_none;
   uocAst = _uocAst;
-  env = 0;
-  gamma = 0;
+  env = GC_NULL;
+  gamma = GC_NULL;
 
   uocName = _uocName;
   origin = _origin;
+  flags = 0;
 }
 
 // Why does this exist? Are we actually using it anywhere?
 // I'm concerned because it isn't doing deep copy, I don't understand
 // whether it *needs* to do deep copy (or not), and there is no
 // comment here answering my question.
-UocInfo::UocInfo(GCPtr<UocInfo> uoc)
+UocInfo::UocInfo(shared_ptr<UocInfo> uoc)
 {
   uocName = uoc->uocName;
   origin = uoc->origin;
@@ -105,20 +110,21 @@ UocInfo::UocInfo(GCPtr<UocInfo> uoc)
   env = uoc->env;
   gamma = uoc->gamma;
   instEnv = uoc->instEnv;
+  flags = 0;
 }
 
-GCPtr<UocInfo>
+shared_ptr<UocInfo>
 UocInfo::CreateUnifiedUoC()
 {
   LexLoc loc;
-  GCPtr<AST> ast = new AST(at_module, loc);
+  shared_ptr<AST> ast = AST::make(at_module, loc);
 
   std::string uocName = "*emit*";
-  GCPtr<UocInfo> uoc = new UocInfo(uocName, "*internal*", ast);
+  shared_ptr<UocInfo> uoc = UocInfo::make(uocName, "*internal*", ast);
 
-  uoc->env = new Environment<AST>(uocName);
-  uoc->gamma = new Environment<TypeScheme>(uocName);
-  uoc->instEnv = new Environment< CVector<GCPtr<Instance> > >(uocName);
+  uoc->env = ASTEnvironment::make(uocName);
+  uoc->gamma = TSEnvironment::make(uocName);
+  uoc->instEnv = InstEnvironment::make(uocName);
 
   uoc->env = uoc->env->newDefScope();
   uoc->gamma = uoc->gamma->newDefScope();
@@ -128,7 +134,7 @@ UocInfo::CreateUnifiedUoC()
 }
 
 
-GCPtr<Path> 
+filesystem::path
 UocInfo::resolveInterfacePath(std::string ifName)
 {
   std::string tmp = ifName;
@@ -136,41 +142,52 @@ UocInfo::resolveInterfacePath(std::string ifName)
     if (tmp[i] == '.')
       tmp[i] = '/';
   }
-  Path ifPath(tmp);
+  
+  std::string leafName = tmp + ".bitc";
 
-  for (size_t i = 0; i < UocInfo::searchPath->size(); i++) {
-    Path testPath = *UocInfo::searchPath->elem(i) + ifPath << ".bitc";
+  for (size_t i = 0; i < UocInfo::searchPath.size(); i++) {
+    filesystem::path testPath = UocInfo::searchPath[i] / leafName;
     
-    if (testPath.exists() && testPath.isFile())
-      return new Path(testPath);
+    if (filesystem::exists(testPath)) {
+      if (!filesystem::is_regular(testPath)) {
+	std::cerr << "bitcc: source path \""
+		  << testPath << "\" for interface \""
+		  << ifName << "\" is not "
+		  << "a regular file." << std::endl;
+	exit(1);
+      }
+      return testPath;
+    }
   }
 
-  return NULL;
+  std::cerr << "bitcc: error: no source path found for interface \""
+	    << ifName << "\"." << std::endl;
+  exit(0);
 }
 
 
 void 
-UocInfo::addTopLevelForm(GCPtr<AST> def)
+UocInfo::addTopLevelForm(shared_ptr<AST> def)
 {
   assert(uocAst->astType == at_module);
-  uocAst->children->append(def);  
+  uocAst->children.push_back(def);  
 }
 
 bool
-UocInfo::CompileFromFile(const std::string& srcFileName, bool fromCmdLine)
+  UocInfo::CompileFromFile(const filesystem::path& src, bool fromCmdLine)
 {
   // Use binary mode so that newline conversion and character set
   // conversion is not done by the stdio library.
-  std::ifstream fin(srcFileName.c_str(), std::ios_base::binary);
+  std::ifstream fin(src.string().c_str(), std::ios_base::binary);
 
   if (!fin.is_open()) {
     std::cerr << "Couldn't open input file \""
-	      << srcFileName
-	      << std::flush;
+	      << src
+	      << "\"" << std::endl;
     return false;
   }
 
-  SexprLexer lexer(std::cerr, fin, srcFileName, fromCmdLine);
+  SexprLexer lexer(std::cerr, fin, src.string(), fromCmdLine);
 
   // This is no longer necessary, because the parser now handles it
   // for all interfaces whose name starts with "bitc.xxx"
@@ -192,24 +209,23 @@ UocInfo::CompileFromFile(const std::string& srcFileName, bool fromCmdLine)
   return true;
 }
 
-GCPtr<UocInfo> 
+shared_ptr<UocInfo> 
 UocInfo::findInterface(const std::string& ifName)
 {
-  for (size_t i = 0; i < ifList->size(); i++) {
-    if (ifList->elem(i)->uocName == ifName)
-      return ifList->elem(i);
-  }
+  UocMap::iterator itr = UocInfo::ifList.find(ifName);
+  if (itr == UocInfo::ifList.end())
+    return GC_NULL;
 
-  return NULL;
+  return itr->second;
 }
 
-GCPtr<UocInfo> 
+shared_ptr<UocInfo> 
 UocInfo::importInterface(std::ostream& errStream,
 			 const LexLoc& loc, const std::string& ifName)
 {
   // First check to see if we already have it. Yes, this
   // IS a gratuitously stupid way to do it.
-  GCPtr<UocInfo> puoci = findInterface(ifName);
+  shared_ptr<UocInfo> puoci = findInterface(ifName);
 
   if (puoci && puoci->uocAst)
     return puoci;
@@ -224,8 +240,8 @@ UocInfo::importInterface(std::ostream& errStream,
     exit(1);
   }
 
-  GCPtr<Path> path = resolveInterfacePath(ifName);
-  if (!path) {
+  filesystem::path path = resolveInterfacePath(ifName);
+  if (path.empty()) {
     errStream
       << loc.asString() << ": "
       << "Import failed for interface \"" << ifName << "\".\n"
@@ -233,7 +249,7 @@ UocInfo::importInterface(std::ostream& errStream,
     exit(1);
   }
 
-  CompileFromFile(path->asString(), false);
+  CompileFromFile(path, false);
 
   // If we survived the compile, the interface is now in the ifList
   // and can be found.
@@ -295,7 +311,7 @@ UocInfo::Compile()
     
     bool showTypes = false;
     
-    if(Options::showTypesUocs->contains(uocName))
+    if (Options::showTypesUocs.find(uocName) != Options::showTypesUocs.end())
       showTypes = true;
     
     if (! (this->*passInfo[i].fn)(std::cerr, true, 0) ) {
@@ -305,7 +321,7 @@ UocInfo::Compile()
       exit(1);
     }
 
-    if(!uocAst->isValid()) {
+    if (!uocAst->isValid()) {
       std::cerr << "PANIC: Invalid AST built for file \""	
 		<< origin
 		<< "\"."
@@ -348,19 +364,19 @@ UocInfo::Compile()
 void
 UocInfo::DoBackend() 
 {
-  for(size_t i = op_none+1; (OnePass)i <= Options::backEnd->oPass ; i++) {
+  for (size_t i = op_none+1; (OnePass)i <= Options::backEnd->oPass ; i++) {
     
     if (Options::showPasses)
       std::cerr << "PASS " << onePassInfo[i].name << std::endl;
 
-    if(! (this->*onePassInfo[i].fn)(std::cerr, true, 0)) {
+    if (! (this->*onePassInfo[i].fn)(std::cerr, true, 0)) {
       std::cerr << "Exiting due to errors during "
 		<< onePassInfo[i].descrip
 		<< std::endl;
       exit(1);
     }
 
-    if(!uocAst->isValid()) {
+    if (!uocAst->isValid()) {
       std::cerr << "PANIC: Invalid AST built for file \""
 		<< origin
 		<< "\"."

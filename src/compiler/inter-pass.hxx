@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -42,7 +42,6 @@
 #include "AST.hxx"
 #include "Type.hxx"
 #include "die.hxx"
-#include "Eliminate.hxx"
 
 /* Definitions of mode used in Symbol Resolution 
    and Type-inference */
@@ -55,17 +54,17 @@
 #define CHKERR(noerr, exp) \
   do {			   \
     bool ans = (exp);	   \
-    if(ans == false)	   \
+    if (ans == false)	   \
       (noerr) = false;	   \
-  }while(0)
+  }while (0)
 
 #define BE_CHKERR(noerr, exp)	 \
   do {				 \
     bool ans = (exp);		 \
     assert(ans);		 \
-    if(ans == false)		 \
+    if (ans == false)		 \
       (noerr) = false;		 \
-  }while(0)
+  }while (0)
 
 // Final expression of a let
 #define FEXPR(let) (let)->child(1)
@@ -78,10 +77,10 @@
 #define IGNORE(ast) ((size_t)(((ast)->astType == at_switch)?0:1))
 
 void BitcP(std::ostream& out, 
-	   const GCPtr<AST> ast, 
+	   const boost::shared_ptr<AST> ast, 
 	   bool showTypes);
 
-void addDecl(GCPtr<AST> decl);
+void addDecl(boost::shared_ptr<AST> decl);
 extern void fatal();
 
 #endif /* INTER_PASS_HXX */

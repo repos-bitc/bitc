@@ -1,0 +1,1442 @@
+<!--
+     Schema for (mathematically) describing BitC types.
+     Note: This schema is under active development, and is subject
+           to change without notice.
+
+     Formal Public Identifier: "-//Johns Hopkins University//DTD BitC Types XML V0.1//EN"
+
+     * TEMPORARY WORKING VERSION *
+
+     Please direct all questions, bug reports, or suggestions for
+     changes to <swaroop@cs.jhu.edu>.
+
+     If your document's top-level element is "type", and you are using
+     BitC Types directly, use the FPI in the DOCTYPE declaration:
+
+     <!DOCTYPE type  PUBLIC 
+                    "-//Johns Hopkins University//DTD Formal Types XML V0.1//EN"
+                    "http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd"
+                    [...]>
+-->
+
+ <!-- ======================================================================
+      ======================================================================
+                           COMMON 
+      ======================================================================
+      ====================================================================== -->
+
+<!-- ======================================================================
+                              ATTRIBUTE GROUPS
+     ====================================================================== -->
+<!ENTITY % common.atts "
+                               id        ID        #IMPLIED
+                               class     CDATA     #IMPLIED
+">
+
+<!-- ======================================================================
+                              ELEMENT GROUPS (Common)
+     ====================================================================== -->
+
+
+<!ENTITY % anyset.group "
+                                 %ct_set.group              
+                               | %ln_set.group              
+                               | %h_set.group              
+                               | %ty_set.group
+                               | %context.group;
+                               | %setop.group;
+">
+
+<!ENTITY % empty.group "
+                               | empty
+                               | Empty
+">
+
+<!ENTITY % setop.group "
+                               | set
+                               | in
+                               | notin
+                               | sup
+                               | supeq
+                               | sub
+                               | subeq
+                               | dom
+                               | range
+                               | %empty.group;
+">
+
+
+<!ENTITY % op.group "
+                                 operator
+                               | eq
+                               | neq
+                               | equiv
+                               | copyEq
+                               | MadjOp
+                               | link
+                               | approx
+                               | %setop.group;
+">
+
+<!ENTITY % anything.group "
+                                 %anytype.group;              
+                               | %constraint.group;              
+                               | %op.group; 
+                               | %anyexpr.group;
+                               | nothing
+                               | unknown
+                               | symbol
+                               | text
+                               | texttt
+                               | textbf
+                               | textit
+                               | textu
+                               | space
+">
+
+<!-- ======================================================================
+               Common Operations
+     ====================================================================== -->
+
+<!-- Infinity -->
+<!ELEMENT infinity            EMPTY>
+
+<!-- Base operations -->
+<!ELEMENT operator              EMPTY>
+<!ATTLIST operator
+                                name       CDATA   #IMPLIED
+                                symbol     CDATA   #IMPLIED
+>
+
+<!ELEMENT error                 EMPTY>
+
+<!-- Logical Operations -->
+<!ELEMENT eqOp                  EMPTY>
+<!ELEMENT eq                    (%anything.group;, %anything.group;+)>
+<!ATTLIST eq
+                                br      CDATA    #IMPLIED
+                                nosp    CDATA    #IMPLIED
+                                under   CDATA    #IMPLIED
+>
+<!ELEMENT neqOp                 EMPTY>
+<!ELEMENT neq                   (%anything.group;, %anything.group;+)>
+<!ELEMENT equivOp               EMPTY>
+<!ELEMENT equiv                 (%anything.group;, %anything.group;+)>
+<!ELEMENT gg                    (%anything.group;, %anything.group;+)>
+<!ELEMENT ll                    (%anything.group;, %anything.group;+)>
+<!ELEMENT approxOp              EMPTY>
+<!ELEMENT approx                (%anything.group;, %anything.group;+)>
+
+
+<!-- Arithmetic Operations -->
+<!ELEMENT plusOp                EMPTY>
+<!ELEMENT plus                  (%anything.group;, %anything.group;+)>
+<!ATTLIST plus
+                                br      CDATA    #IMPLIED
+                                nosp    CDATA    #IMPLIED
+>
+<!ELEMENT minusOp               EMPTY>
+<!ELEMENT minus                 (%anything.group;, %anything.group;+)>
+<!ATTLIST minus
+                                br      CDATA    #IMPLIED
+                                nosp    CDATA    #IMPLIED
+>
+<!ELEMENT abs                   (%anything.group;)>
+<!ELEMENT power                 (%anything.group;)>
+
+<!-- Set Opeartions -->
+<!ELEMENT empty                 EMPTY> <-- {} -->
+<!ELEMENT Empty                 EMPTY> <-- \emptyset -->
+<!ELEMENT EmptySubst            EMPTY> <-- <> -->
+<!ELEMENT set                   %anything.group;*> <!-- construct a set -->
+<!ELEMENT aSet                  EMPTY> <!-- construct a set -->
+<!ELEMENT inOp                  EMPTY>
+<!ELEMENT in                    (%anything.group;*, %anyset.group;)>
+<!ELEMENT notinOp               EMPTY>
+<!ELEMENT notin                 (%anything.group;*, %anyset.group;)>
+<!ELEMENT supOp                 EMPTY>
+<!ELEMENT sup                   (%anything.group;*, %anyset.group;)>
+<!ELEMENT supeqOp               EMPTY>
+<!ELEMENT supeq                 (%anything.group;*, %anyset.group;)>
+<!ELEMENT subOp                 EMPTY>
+<!ELEMENT sub                   (%anything.group;*, %anyset.group;)>
+<!ELEMENT subeqOp               EMPTY>
+<!ELEMENT subeq                 (%anything.group;*, %anyset.group;)>
+<!ELEMENT uninOp                EMPTY>
+<!ELEMENT unin                  (%anyset.group;*, %anyset.group;)>
+<!ELEMENT UninOp                EMPTY> <!-- Aggregate Union -->
+<!ELEMENT Unin                  (%anyset.group;*, %anyset.group;)>
+<!ELEMENT interOp               EMPTY>
+<!ELEMENT inter                 (%anyset.group;*, %anyset.group;)>
+<!ELEMENT InterOp               EMPTY>
+<!ELEMENT Inter                 (%anyset.group;*, %anyset.group;)>
+<!ELEMENT diffOp                EMPTY>
+<!ELEMENT diff                  (%anyset.group;*, %anyset.group;)>
+<!ELEMENT mutexOp                EMPTY>
+<!ELEMENT mutex                 (%anyset.group;*, %anyset.group;)>
+<!ELEMENT map                   (%anything.group;%anyset.group;)>
+<!ELEMENT dom                   (%anyset.group;*)>
+<!ELEMENT range                 (%anyset.group;*)>
+<!ELEMENT mapsto                (%anything.group;, %anything.group;, %anything.group;?)>
+<!-- 1st(2nd) = 3rd -->
+
+<!ATTLIST aSet
+                               num        CDATA       #IMPLIED
+                               dash       CDATA       #IMPLIED
+>
+
+<!ATTLIST uninOp
+                                excl    CDATA    #IMPLIED
+>
+<!ATTLIST unin
+                                br      CDATA    #IMPLIED
+                                excl    CDATA    #IMPLIED
+                                nosp    CDATA    #IMPLIED
+>
+<!ATTLIST inter
+                                br      CDATA    #IMPLIED
+                                nosp    CDATA    #IMPLIED
+>
+
+
+<!-- Miscellaneous Operations -->
+<!ELEMENT asOp                  EMPTY>
+<!ELEMENT as                    %anything.group;, %anything.group;>
+
+<!ELEMENT plural                (%anything.group;)>
+<!ELEMENT Paren                 %anything.group;>
+<!ELEMENT DBrac                 %anything.group;>
+<!ELEMENT spset                 %anything.group;*>
+
+<!ELEMENT mapping               (%anything.group;, %anything.group;)>
+<!ELEMENT fnxn                  (%anything.group;, %anything.group;)>
+<!ATTLIST fnxn
+                                name      CDATA    #REQUIRED
+                                num       CDATA    #IMPLIED
+                                dash      CDATA    #IMPLIED
+>
+<!ELEMENT Xform                (%anything.group;+)>
+<!ATTLIST Xform
+                                name       CDATA   #REQUIRED
+                                isEntity   CDATA   #IMPLIED
+>
+<!ELEMENT op                    (%anything.group;+)>
+<!ATTLIST op
+                                symbol       CDATA   #REQUIRED
+>
+<!ELEMENT leadsto               (%anything.group;+)>
+<!ELEMENT TransClose            (%anything.group;)>
+
+<!ELEMENT floorOp                 EMPTY>
+<!ELEMENT floor                   %anything.group;>
+<!ELEMENT ceilOp                  EMPTY>
+<!ELEMENT ceil                    %anything.group;>
+
+<!-- Increase, Decrease, Maximize and minimize -->
+<!ELEMENT incMB                   EMPTY>
+<!ELEMENT incMB                   %anything.group;>
+<!ELEMENT incrOp                  EMPTY>
+<!ELEMENT incr                    %anything.group;>
+<!ELEMENT decrOp                  EMPTY>
+<!ELEMENT decr                    %anything.group;>
+<!ELEMENT maxzOp                  EMPTY>
+<!ELEMENT maxz                    %anything.group;>
+<!ELEMENT minzOp                  EMPTY>
+<!ELEMENT minz                    %anything.group;>
+<!ELEMENT minTOp                  EMPTY>
+<!ELEMENT minT                    %anything.group;>
+<!ELEMENT minTOp                  EMPTY>
+<!ELEMENT minT                    %anything.group;>
+<!ELEMENT minDOp                  EMPTY>
+<!ELEMENT minD                    %anything.group;>
+<!ELEMENT minDOp                  EMPTY>
+<!ELEMENT minD                    %anything.group;>
+<!ELEMENT concrete                %anything.group;>
+<!ATTLIST concrete                sp    CDATA   #IMPLIED
+>
+
+<!-- More or less generality -->
+<!ELEMENT spOp                    EMPTY>
+<!ELEMENT sp                      %anything.group;, %anything.group;>
+<!ELEMENT spEqOp                  EMPTY>
+<!ELEMENT spEq                    %anything.group;, %anything.group;>
+<!ELEMENT genOp                   EMPTY>
+<!ELEMENT gen                     %anything.group;, %anything.group;>
+<!ELEMENT genEqOp                 EMPTY>
+<!ELEMENT genEq                   %anything.group;, %anything.group;>
+
+
+<!-- Canonical forms -->
+<!ELEMENT canonical            (%anything.group;)>
+<!ELEMENT canonical            (%anything.group;)>
+<!ELEMENT relevant             (%anything.group;,%anything.group;)>
+<!ELEMENT normalize            (%anything.group;)>
+<!ATTLIST normalize            name    CDATA   #IMPLIED
+>
+ 
+<!-- Substitition -->
+<!ENTITY % subst.group "
+                                 %aSubst;
+                               | EMPTY
+                               | aSubMap;
+                               | SubMap;
+                               | compose;
+">
+<!ELEMENT aSubMap              EMPTY>
+<!ATTLIST aSubMap
+                               num      CDATA    #IMPLIED
+                               subnum   CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT aKmap                EMPTY>
+<!ATTLIST aKmap
+                               num      CDATA    #IMPLIED
+                               subnum   CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT SubMap               lnk*>
+<!ELEMENT compose              (%anything.group;*)>
+<!-- Special type of composition for substitutions only -->
+<!ELEMENT scomp                (%anything.group;*)>
+
+<!-- Apply a substitution -->
+<!-- S<e> -->
+<!ELEMENT Subst                (%subst.group;, %anything.group;)>
+<!ATTLIST Subst
+                               sp          yes    #IMPLIED
+>
+<!-- e[a/b] -->
+<!ELEMENT subst                (%anything.group;, %anything.group;, %anything.group;)>
+<!ATTLIST subst
+                               special      yes    #IMPLIED
+>
+<!-- constrained substitution bold[a/b]bold -->
+<!ELEMENT Csubst               (%anything.group;, %anything.group;, %anything.group;)>
+ 
+<!-- Tape -->
+<!ENTITY % tape.group "
+                                 tape;
+                               | roll;
+">
+<!ELEMENT tape                 EMPTY>
+<!ATTLIST tape  
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT roll                 (%tape.group; %anything.group;*)>
+
+
+<!-- ======================================================================
+                              Generic Collections
+     ====================================================================== -->
+
+<!ELEMENT grouping              (%anything.group;*)>
+
+<!ELEMENT collection            (%anything.group;*)>
+<!ATTLIST collection
+                                etc       yes   #IMPLIED
+                                paren     yes   #IMPLIED
+                                and       yes   #IMPLIED
+                                or        yes   #IMPLIED
+                                sep       CDATA #IMPLIED
+>
+
+<!ELEMENT alternatives          (%anything.group;*)>
+<!ATTLIST alternatives
+                                etc       yes #IMPLIED
+>
+
+<!-- ======================================================================
+                              Predicates
+     ====================================================================== -->
+<!ENTITY % predicates.group "
+                                 in
+                               | notin
+                               | mapsto
+                               | eq
+                               | neq
+                               | ceq
+                               | nceq
+                               | Tceq
+                               | Tnceq
+                               | Tsub <!-- Copy coersion -->
+                               | tsub <!-- SubType -->
+                               | Msub <!-- Intermediate-coersion -->
+                               | forall
+                               | exists
+                               | iff
+                               | pred
+">
+
+<!ELEMENT LOGIC                EMPTY>
+<!ATTLIST LOGIC
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+<!ELEMENT TRUE                 EMPTY>
+<!ELEMENT FALSE                EMPTY>
+<!ELEMENT AND                  %predicates.group;*>
+<!ELEMENT OR                   %predicates.group;*>
+<!ELEMENT NOT                  %anything.group;>
+<!ELEMENT IMPLIES              %anything.group;*>
+
+<!-- forall/exists a, b, ... [.] n -->
+<!ELEMENT forall               %anything.group;*>
+<!ELEMENT exists               %anything.group;*>
+
+<!-- Forall/Exists a, b, ... -->
+<!ELEMENT Forall               %anything.group;*>
+<!ELEMENT Exists               %anything.group;*>
+
+<!ELEMENT ST                   >
+
+<!ELEMENT iff                  %anything.group;*>
+<!ELEMENT pred                 %anything.group;*>
+<!ATTLIST pred
+                               name      CDATA    #REQUIRED
+                               name      (YES|NO) #REQUIRED
+                               num       CDATA    #IMPLIED
+                               dash      CDATA    #IMPLIED
+>
+
+<!-- Constrained Entities -->
+<!ELEMENT constrained         (%anything.group; %anything.group;*) >
+
+<!-- Special Symbols -->
+<!ELEMENT TypEvalPred          EMPTY>
+<!ELEMENT solvable             EMPTY>
+<!ATTLIST solvable
+                               num       CDATA    #IMPLIED
+                               dash      CDATA    #IMPLIED
+>
+<!ELEMENT solvables            EMPTY>
+<!ATTLIST solvables
+                               num       CDATA    #IMPLIED
+                               dash      CDATA    #IMPLIED
+>
+
+<!-- ======================================================================
+                        Text  
+     ====================================================================== -->
+<!ELEMENT space                EMPTY>
+<!ATTLIST space
+                               n           CDATA  #IMPLIED
+>
+
+<!ELEMENT text                 EMPTY>
+<!ATTLIST text
+                               content      CDATA  #REQUIRED
+>
+<!ELEMENT texttt               EMPTY>
+<!ATTLIST texttt
+                               content      CDATA  #REQUIRED
+>
+<!ELEMENT textit               EMPTY>
+<!ATTLIST textit
+                               content      CDATA  #REQUIRED
+>
+<!ELEMENT textbf               EMPTY>
+<!ATTLIST textbf
+                               content      CDATA  #REQUIRED
+>
+<!ELEMENT textu                EMPTY>
+<!ATTLIST textu
+                               content      CDATA  #REQUIRED
+>
+<!ELEMENT textmath             EMPTY>
+<!ATTLIST textmath
+                               content      CDATA  #REQUIRED
+>
+<!ELEMENT nothing               EMPTY>
+<!ELEMENT unknown               EMPTY>
+<!ELEMENT unspecified           EMPTY>
+<!ELEMENT symbol                EMPTY>
+<!ATTLIST symbol
+                                name      CDATA    #REQUIRED
+                                num       CDATA    #IMPLIED
+                                dash      CDATA    #IMPLIED
+<!ELEMENT b                     %anything.group;*>
+<!ELEMENT em                    %anything.group;*>
+<!ELEMENT u                     %anything.group;*>
+
+>
+
+ <!-- ======================================================================
+       ======================================================================
+                                TYPES
+       ======================================================================
+     ====================================================================== -->
+
+<!-- ======================================================================
+                              ELEMENT GROUPS (Types)
+     ====================================================================== -->
+<!ENTITY % anytype.group "
+                                 type
+                               | tvar
+                               | dummy
+                               | unit
+                               | int
+                               | float
+                               | char
+                               | string
+                               | bool
+                               | word
+                               | ref
+                               | fn
+                               | array
+                               | vector
+                               | mutable
+                               | const
+                               | maybe
+                               | struct
+                               | union
+                               | comp
+                               | aCtype
+                               | stype
+                               | ptype
+                               | Ptype
+                               | ctype
+                               | CType
+                               | MBpair
+                               | mbpair
+                               | mbTop
+                               | mbFull
+                               | aggregate
+                               | paren              
+                               | meta              
+                               | as       
+                               | Qtype
+                               <!-- Transformations --> 
+                               | Xform
+                               | subst
+                               | Subst
+                               | TheType
+                               | Madj
+                               | inner
+                               | UnifiedType
+                               | unfto
+                               | TypeOfCopy
+                               | typeWithoutHint
+                               | canonical
+                               | normalized
+                               | relevant
+                               | join
+                               | meet
+                               <!-- convenience forms --> 
+                               | types
+                               | tvars
+                               | Spair
+                               | pair 
+                               | tuple 
+                               | list
+                               | infinity
+                               | unknown
+">
+
+<!ENTITY % constraint.group "
+                                 %predicates.group;
+                               | Tclass 
+                               | pcst
+                               | Pcst
+">
+
+<!ENTITY % ct_set.group "
+                                 aCtset              
+                                 bCtset              
+                               | %setop.group;
+">
+
+<!ENTITY % ln_set.group "
+                                 aLnset              
+                               | unify             
+                               | %setop.group;
+">
+ 
+<!ENTITY % ty_set.group "
+                                %setop.group;
+                               | ftvs             
+                               | V_             
+                               | V__
+">
+
+<!ENTITY % h_set.group "
+                               | aHset              
+                               | %setop.group;
+">
+
+<!ENTITY % tv_set.group "
+                               | aTVset              
+                               | %setop.group;
+">
+
+<!ENTITY % tqual.group "
+                               | aQual              
+                               | Qlocal              
+                               | Qglobal
+">
+
+<!-- ======================================================================
+                              HIERARCHICAL ELEMENTS
+     ====================================================================== -->
+
+<!-- ======================================================================
+                                   Core Types 
+     ====================================================================== -->
+
+<!ELEMENT type                 EMPTY>
+<!ATTLIST type
+                               num       CDATA   #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+<!-- Special Types -->
+<!-- As \sigmav -->
+<!ATTLIST stype
+                               num        CDATA       #IMPLIED
+                               dash       DATA        #IMPLIED
+>
+<!-- As \rho>
+<!ATTLIST ptype
+                               num        CDATA       #IMPLIED
+                               dash       DATA        #IMPLIED
+>
+<!-- As \rhov>
+<!ATTLIST Ptype
+                               num        CDATA       #IMPLIED
+                               dash       DATA        #IMPLIED
+>
+ 
+<!ELEMENT tvar                 EMPTY>
+<!ATTLIST tvar
+                               name      (alpha|beta|gamma)  #REQUIRED
+>
+<!ELEMENT dummy                EMPTY>
+<!ATTLIST tvar
+                               num       CDATA   #REQUIRED
+                               dash     CDATA    #IMPLIED
+>
+
+
+<!ELEMENT unit                 EMPTY>
+<!ELEMENT bool                 EMPTY>
+<!ELEMENT char                 EMPTY>
+<!ELEMENT string               EMPTY>
+<!ELEMENT word                 EMPTY>
+<!ELEMENT int                  EMPTY>
+<!ATTLIST int
+                               sz      (8|16|32|64)  #REQUIRED
+>
+<!ELEMENT uint                 EMPTY>
+<!ATTLIST uint
+                               sz      (8|16|32|64)  #REQUIRED
+>
+<!ELEMENT float                EMPTY>
+<!ELEMENT double               EMPTY>
+<!ELEMENT quad                 EMPTY>
+
+
+<!ELEMENT fnOp                 EMPTY>
+<!ELEMENT fn                   (%anytype.group;, %anytype.group;)>
+<!ATTLIST fn
+                               M       yes           #IMPLIED <!-- with meta constructors -->
+>
+<!ELEMENT refOp                EMPTY>
+<!ELEMENT ref                  (%anytype.group;)>
+<!ELEMENT array                (%anytype.group;)>
+<!ELEMENT vector               (%anytype.group;)>
+<!ELEMENT constOp              EMPTY>
+<!ELEMENT const                (%anytype.group;)>
+<!ELEMENT mutableOp            EMPTY>
+<!ELEMENT mutable              (%anytype.group;)
+<!ELEMENT maybeOp              EMPTY>
+<!ELEMENT maybe                (%anytype.group;)>
+<!ELEMENT exception            EMPTY>
+
+<!ATTLIST array
+                               len      CDATA       #IMPLIED
+>
+
+<!ELEMENT struct               (%anytype.group;*)>
+<!ATTLIST struct
+                               kind      (ref|val)   #IMPLIED
+                               name      CDATA       #IMPLIED
+>
+<!ELEMENT union                (%anytype.group;*)>
+<!ATTLIST union
+                               kind      (ref|val)   #IMPLIED
+                               name      CDATA       #IMPLIED
+                               inline    (yes|no)    #IMPLIED
+>
+<!ELEMENT comp                 (%anytype.group;*)>
+<!ATTLIST comp
+                               kind      (ref|val)   #IMPLIED
+                               name      CDATA       #IMPLIED
+                               inline      (yes|no)    #IMPLIED
+>
+<!-- Constrained type notation -->
+<!ELEMENT ctype                (%anytype.group;, %constraint.group;)>
+<!ELEMENT aCtype                (%anytype.group;, %constraint.group;)>
+<!ATTLIST aCtype
+                               num        CDATA       #IMPLIED
+                               dash       CDATA       #IMPLIED
+>
+
+<!-- Typeclass Constraint Notation -->
+<!ELEMENT CType                (typeclass*, %anytype.group;)>
+<!ELEMENT MBpair               (%anytype.group;, %h_set.group;)>
+<!-- The attribute specifies that there should be a break before the
+     hint, with the specified abount spaces in the next line
+     for the purpose of indentation --> 
+
+<!ATTLIST MBpair
+                              break       CDATA   #IMPLIED
+>
+<!ELEMENT mbpair             (%anytype.group;, %h_set.group;)>
+<!ATTLIST mbpair
+                              break       CDATA   #IMPLIED
+>
+<!ELEMENT mbTop              (%anytype.group;%anytype.group;)>
+<!ATTLIST mbTop
+                              break       CDATA   #IMPLIED
+>
+<!ELEMENT mbFull             (%anytype.group;, %anytype.group;)>
+<!ATTLIST mbFull
+                              break       CDATA   #IMPLIED
+>
+
+<!-- Maybe hints -->
+<!ELEMENT hset                %anytype.group;*>
+
+<!-- inner of the maybe types -->
+<!ELEMENT inner               (%anytype.group;)>
+
+<!ELEMENT join                (%anytype.group;*)>
+<!ELEMENT meet                (%anytype.group;*)>
+
+<!ELEMENT Qtype               (%tqual.group;%anytype.group;)>
+
+<!ELEMENT aQual               EMPTY>
+<!ATTLIST aQual
+                               num      CDATA       #IMPLIED
+                               dash     CDATA       #IMPLIED
+>
+<!ELEMENT Qlocal              EMPTY>
+<!ELEMENT Qglobal             EMPTY>
+
+<!-- ======================================================================
+              Notational  Forms 
+     ====================================================================== -->
+
+<!-- paren is a type, as different from Paren, a general expression -->
+<!ELEMENT paren                %anytype.group;>
+<!ELEMENT aggregate            %anytype.group;>
+
+
+<!-- meta syntax for mutable | immutable -->
+<!ELEMENT meta                 %anytype.group;>
+<!ATTLIST meta
+                              num       CDATA   #IMPLIED
+                              dash     CDATA    #IMPLIED
+>
+
+<!-- ======================================================================
+              Constraints and Constraint-sets 
+     ====================================================================== -->
+
+<!ELEMENT Tclass               (%anytype.group;*)>
+<!ATTLIST Tclass
+                                name       CDATA   #REQUIRED
+>
+
+<!ELEMENT constraint           EMPTY>
+<!ATTLIST constraint
+                               name     CDATA   #IMPLIED
+                               num      CDATA   #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!-- Polymorphic constraint -->
+<!ELEMENT pcstOp               >
+<!ELEMENT pcst                 (%anything.group;*)>
+<!ELEMENT PcstOp               >
+<!ELEMENT Pcst                 (%anything.group;*)>
+
+<!-- infinite constraint -- unconstrained -->
+<!ELEMENT unct                 type>
+
+<!ELEMENT aCtset               EMPTY>
+<!ATTLIST aCtset
+                               num       CDATA   #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+<!ELEMENT bCtset               EMPTY>
+<!ATTLIST bCtset
+                               num       CDATA   #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT dCtset               EMPTY>
+<!ATTLIST dCtset
+                               num       CDATA   #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+<!-- ======================================================================
+                TypeScheme  
+     ====================================================================== -->
+
+<!ENTITY % typescheme.group "
+                                 %anytype.group
+                               | aTS
+                               | TS
+">
+
+<!ELEMENT aTS                  EMPTY>
+<!ATTLIST aTS
+                               num      CDATA       #IMPLIED
+                               dash     CDATA       #IMPLIED
+>
+<!ELEMENT sTS                  EMPTY>
+<!ATTLIST sTS
+                               num      CDATA       #IMPLIED
+                               dash     CDATA       #IMPLIED
+>
+<!ELEMENT TS                  ((tvar|tvars)*, %anytype.group;)>
+
+<!-- ======================================================================
+                                   Type classes 
+     ====================================================================== -->
+<!-- Typeclass -->
+<!ELEMENT typeclass           (%anytype.group;*)>
+
+<!-- Functional Dependencies -->
+<!ELEMENT tyfn                (%anytype.group;,%anytype.group;)>
+
+<!-- ======================================================================
+               Type only operations
+     ====================================================================== -->
+<!ELEMENT ceqOp                EMPTY>
+<!ELEMENT nceqOp               EMPTY>
+<!ELEMENT TceqOp                EMPTY>
+<!ELEMENT TnceqOp               EMPTY>
+<!ELEMENT TsubOp               EMPTY>
+<!ELEMENT tsubOp               EMPTY>
+<!ELEMENT MsubOp               EMPTY>
+<!ELEMENT ceq                  (%anytype.group;, %anytype.group;+)>
+<!ELEMENT nceq                 (%anytype.group;, %anytype.group;+)>
+<!ELEMENT Tceq                  (%anytype.group;, %anytype.group;+)>
+<!ELEMENT Tnceq                 (%anytype.group;, %anytype.group;+)>
+<!ELEMENT Tsub                 ((%anytype.group;|%anyexpr.group;), %anytype.group;+)>
+<!ELEMENT tsub                 ((%anytype.group;|%anyexpr.group;), %anytype.group;+)>
+<!ELEMENT MadjOp               EMPTY>
+<!ELEMENT corUpOp              EMPTY>
+<!ELEMENT corDownOp            EMPTY>
+
+<!ATTLIST ceq
+                               via       CDATA   #IMPLIED
+>
+
+<!-- ======================================================================
+              Unification     
+     ====================================================================== -->
+<!ELEMENT lnkOp                 EMPTY>
+<!ELEMENT lnk                   (%anytype.group;, %anytype.group;+)>
+<!ELEMENT aLnset                EMPTY>
+<!ATTLIST aLnset
+                                num       CDATA    #IMPLIED
+                                dash      CDATA    #IMPLIED
+>
+<!-- unify two types to get link sets -->
+<!ELEMENT unify                (%anytype.group;, %anytype.group;)>
+<!-- unify to get a set of substitutions -->
+<!ELEMENT UNIFY                (%anytype.group;, %anytpe.group;, (%subst.group;|error))>
+<!-- Unify Function -->
+<!ELEMENT unf                  %constraint.group;>
+<!ATTLIST unf
+                               name      CDATA      #IMPLIED
+                               ac        (yes|no)   #IMPLIED
+                               cl        (yes|no)   #IMPLIED
+>
+
+
+<!-- ======================================================================
+              Generalization
+     ====================================================================== -->
+
+<!ENTITY % ftvs.group "
+                                 %empty.group;              
+                               | %anytype.group;
+                               | gamma
+                               | store
+                               | %ty_set.group;
+">
+
+<!ELEMENT ftvs                 %ftvs.group;*>
+<!ELEMENT V_                   (%anytype.group;)>
+<!ELEMENT V__                  (%anytype.group;, V__mode)>
+<!ELEMENT V__mode              EMPTY>
+<!ATTLIST V__mode
+                               mode      (keep|remove|mode)  #REQUIRED
+>
+<!ELEMENT GEN                 (%anytype.group;, %typescheme.group;)>
+
+<!-- ======================================================================
+              Convenience Forms 
+     ====================================================================== -->
+<!ELEMENT types                EMPTY>
+<!ATTLIST types
+                               num       CDATA   #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT tvars                EMPTY>
+<!ATTLIST tvars
+                               name      (alpha|beta)  #REQUIRED
+>
+
+<!ELEMENT pair                (%anytype.group;, %anytype.group;)>
+<!ELEMENT Spair               (%anytype.group;, %anytype.group;)>
+<!ELEMENT list                (%anytype.group;)>
+<!ELEMENT Ulist               (%anytype.group;)>
+<!ELEMENT optional            (%anytype.group;)>
+
+<!ELEMENT Madj                (%anytype.group;)>
+<!ELEMENT UnifiedType         (%anytype.group;, %anytype.group;)>
+<!ELEMENT TypeOfCopy          (%anytype.group;)>
+<!ELEMENT typeWithoutHin      (%anytype.group;)>
+<!ELEMENT TheType             (%anytype.group;, %ln_set.group;)>
+<!ELEMENT corUp               (%anytype.group;, %anytype.group;)
+<!ELEMENT corDown             (%anytype.group;, %anytype.group;)>
+
+ <!-- ======================================================================
+       ======================================================================
+              Grammar Description 
+       ======================================================================
+     ====================================================================== -->
+
+<!-- Name of the language, by default emits star --> 
+<!-- NOTE: name overrides symb --> 
+<!ELEMENT language             >
+<!ATTLIST language
+                               symb    CDATA     #IMPLIED
+                               name    CDATA     #IMPLIED
+>
+
+
+<!ELEMENT grammar              (bnf|bnf2, (bnf|bnfc|bnf2)*>
+<!ATTLIST grammar
+                               notitle   CDATA    #IMPLIED
+                               placement CDATA    #IMPLIED
+                               break    CDATA    #IMPLIED
+>
+<!ELEMENT bnf                  (%anything.group;, alternatives)>
+<!ATTLIST bnf
+                               desc      CDATA    #REQUIRED
+>
+<!ELEMENT bnfc                 alternatives>
+<!ATTLIST bnfc
+                               desc      CDATA    #IMPLIED
+>
+<!ELEMENT bnf2                 (bnf*)>
+
+
+ <!-- ======================================================================
+       ======================================================================
+              Expressions 
+       ======================================================================
+     ====================================================================== -->
+
+<!-- ======================================================================
+                              ELEMENT GROUPS (Expressions)
+     ====================================================================== -->
+
+<!ENTITY % anyval.group "
+                                  aVla
+                                | true
+                                | false
+                                | Unit
+                                | id
+                                | lambda
+                                | Pair
+
+">
+
+<!ENTITY % anyexpr.group "
+                                  aExpr
+                                | %anyval.group;
+                                | apply
+                                | lVal
+                                | tqExpr
+                                | dup
+                                | deref
+                                | let
+                                | set
+                                | aSet
+                                | Paren
+                                | DBrac
+                                | Pair
+                                | fst
+                                | snd
+                                | ith
+                                | match
+                                | const
+                                | unspecified
+">
+                                 
+
+<!-- ======================================================================
+                              ELEMENTS (Expressions)
+     ====================================================================== -->
+<!ENTITY % location.group "
+                                 sloc
+                               | hloc
+">
+
+<!ELEMENT aVal                 EMPTY>
+<!ATTLIST aVal
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT lVal                 EMPTY>
+<!ATTLIST lVal
+                               stack    yes      #IMPLIED
+                               heap     yes      #IMPLIED
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT aExpr                EMPTY>
+<!ATTLIST aExpr
+                               num      CDATA   #IMPLIED
+                               dash     CDATA   #IMPLIED
+                               hat      CDATA   #IMPLIED
+>
+<!ELEMENT vExp                EMPTY>
+<!ATTLIST vExp
+                               num      CDATA   #IMPLIED
+                               dash     CDATA   #IMPLIED
+>
+<!ELEMENT lExp                EMPTY>
+<!ATTLIST lExp
+                               num      CDATA   #IMPLIED
+                               dash     CDATA   #IMPLIED
+>
+<!ELEMENT Unit                 EMPTY> 
+<!-- ``Unit'' the expression is different from ``unit'' the type -->
+<!ELEMENT bVal                 EMPTY>
+<!ELEMENT true                 EMPTY>
+<!ELEMENT false                EMPTY>
+
+<!ELEMENT id                   EMPTY>
+<!ATTLIST id
+                               name      CDATA   #IMPLIED
+                               num       CDATA    #IMPLIED
+                               dash      CDATA    #IMPLIED
+>
+<!ELEMENT sloc                  EMPTY>
+<!ATTLIST sloc
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT hloc                  EMPTY>
+<!ATTLIST hloc
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT loc                  EMPTY>
+<!ATTLIST loc
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+
+<!ELEMENT lambda               (id, %anyexpr.group;)>
+<!ELEMENT Pair                 (%anyexpr.group;, %anyexpr.group;)>
+<!ELEMENT fst                  %anyexpr.group;>
+<!ELEMENT snd                  %anyexpr.group;>
+<!ELEMENT select               %anyexpr.group;%anything.group;>
+<!ATTLIST select
+                               opt      CDATA    #IMPLIED
+>
+<!ELEMENT ith                  %anyexpr.group;>
+<!ATTLIST ith
+                               etc      CDATA    #IMPLIED
+>
+<!ELEMENT ndx                  %anyexpr.group;>
+<!ATTLIST ndx
+                               name      CDATA    #IMPLIED
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT other                ndx>
+
+<!ELEMENT path                 >
+<!ATTLIST path
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT List                 (%anyexpr.group;*)>
+<!ELEMENT Cons                 (%anyexpr.group;*)>
+<!ELEMENT match                (%anyexpr.group;, %anyexpr.group;, %anyexpr.group;?)>
+<!ATTLIST match
+                               optionalElse  CDATA    #IMPLIED
+                               br1     CDATA     #IMPLIED
+                               br2     CDATA     #IMPLIED
+>
+<!ELEMENT pattern              EMPTY>
+<!ATTLIST pattern
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+<!ELEMENT apply                (%anyexpr.group;, %anyexpr.group;)>
+<!ELEMENT tqExpr               (%anyexpr.group;, %typescheme.group;)>
+<!ATTLIST tqExpr
+                               sub      yes     #IMPLIED
+                               Msub     yes     #IMPLIED
+                               optional yes     #IMPLIED
+                               nosp     yes     #IMPLIED
+>
+<!ELEMENT dup                  %anyexpr.group;>
+<!ELEMENT deref                %anyexpr.group;>
+<!ELEMENT let                  (%anyexpr.group;, %anyexpr.group;, %anyexpr.group;)>
+<!ELEMENT letrec               (%anyexpr.group;, %anyexpr.group;, %anyexpr.group;)>
+<!ELEMENT assign               (%anyexpr.group;, %anyexpr.group;)>
+<!ELEMENT if                   (%anyexpr.group;, %anyexpr.group; %anyexpr.group;)>
+<!ATTLIST if
+                               br1     CDATA     #IMPLIED
+                               br2     CDATA     #IMPLIED
+>
+<!ATTLIST let
+                               kind    CDATA     #IMPLIED
+                               br1     CDATA     #IMPLIED
+                               br2     CDATA     #IMPLIED
+                               optQual (yes|no)  #IMPLIED
+>
+
+<!-- let Kinds -->
+<!ELEMENT lKind                  %anyexpr.group;>
+<!ATTLIST lKind
+                               k        CDATA    #IMPLIED
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+
+<!-- Program -->
+<!ELEMENT aProgram             EMPTY>
+<!ATTLIST aProgram
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+<!ELEMENT define               (%anyexpr.group;, %anyexpr.group;, %anyexpr.group;)>
+<!ELEMENT proclaim             (tqExpr, %anyexpr.group;)>
+
+<!-- optional parts of syntax -->
+<!ELEMENT opt                  %anything.group;>
+<!ELEMENT colorOpt             %anything.group;>
+
+
+ <!-- ======================================================================
+       ======================================================================
+                   Semantics 
+       ======================================================================
+     ====================================================================== -->
+
+
+<!-- ======================================================================
+                              Contexts
+     ====================================================================== -->
+
+<!ENTITY % ctxop.group "
+                                 Empty
+                               | extend
+                               | Subst
+">
+
+<!ENTITY % stack.group "
+                                 stack
+                               | %ctxop.group;
+">
+<!ENTITY % heap.group "
+                                 heap
+                               | %ctxop.group;
+">
+
+<!ENTITY % gamma.group "
+                                 gamma
+                               | %ctxop.group;
+">
+<!ENTITY % store.group "
+                                 store
+                               | %ctxop.group;
+">
+
+<!ENTITY % context.group "
+                                 %stack.group;
+                               | %heap.group;
+                               | %gamma.group;
+                               | %store.group;
+">
+
+<!ELEMENT extend             %context.group;, %anything.group;*>
+
+<!ELEMENT stack                EMPTY>
+<!ATTLIST stack
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+<!ELEMENT heap                 EMPTY>
+<!ATTLIST heap
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+<!ELEMENT gamma                EMPTY>
+<!ATTLIST gamma
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+<!ELEMENT store                EMPTY>
+<!ATTLIST store
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+<!ELEMENT ctEnv                EMPTY>
+<!ATTLIST ctEnv
+                               num      CDATA    #IMPLIED
+                               dash     CDATA    #IMPLIED
+>
+
+
+<!-- ======================================================================
+                              Operational Semantics
+     ====================================================================== -->
+
+<!ELEMENT opState              (%stack.group;, %heap.group, %anyexpr.group;)>
+
+<!ELEMENT redex                %anyexpr.group;?>
+<!ATTLIST redex
+                               name       CDATA   #IMPLIED
+>
+<!ELEMENT hole                 >
+
+<!ELEMENT evalOp               EMPTY>
+<!ATTLIST evalOp
+                               many       (yes|no)   #IMPLIED
+>
+<!ELEMENT levalOp              EMPTY>
+<!ATTLIST levalOp
+                               many       (yes|no)   #IMPLIED
+>
+<!ELEMENT revalOp              EMPTY>
+<!ATTLIST revalOp
+                               many       (yes|no)   #IMPLIED
+>
+<!ELEMENT eval                 (opState, opState)>
+<!ATTLIST eval
+                               many       (yes|no)   #IMPLIED
+>
+<!ELEMENT leval                (opState, opState)>
+<!ATTLIST leval
+                               many       (yes|no)   #IMPLIED
+>
+<!ELEMENT reval                (opState, opState)>
+<!ATTLIST reval
+                               many       (yes|no)   #IMPLIED
+>
+
+<!ENTITY % evalable.group "
+                                 eval
+                               | leval
+                               | %predicates.group;
+                               | nothing
+">
+
+<!-- OpSem Premises and Conclusion -->
+<!ELEMENT opPre                %evalable.group;*>
+<!ELEMENT opConc               %evalable.group;>
+
+
+<!ELEMENT opRule               opPre*, opConc> 
+<!ATTLIST opRule
+                               name      CDATA   #IMPLIED
+>
+
+<!-- ======================================================================
+                        Modelling / Satisfaction 
+     ====================================================================== -->
+
+<!ELEMENT model               (%anything.group; %anything.group;)>
+<!ATTLIST model
+                               name      CDATA   #IMPLIED
+                               br        CDATA   #IMPLIED
+>
+<!ELEMENT Cst                 %anything.group;%anything.group;)>
+<!ATTLIST Cst
+                               name      CDATA   #IMPLIED
+                               br        CDATA   #IMPLIED
+>
+<!ELEMENT CST                 %anything.group;*)>
+<!ATTLIST CST
+                               name      CDATA   #IMPLIED
+                               br        CDATA   #IMPLIED
+                               sp        CDATA   #IMPLIED
+>
+<!ELEMENT Sat                 %anything.group;%anything.group;)>
+<!ATTLIST Sat
+                               name      CDATA   #IMPLIED
+                               br        CDATA   #IMPLIED
+>
+
+<!-- ======================================================================
+                        Type Judgements 
+     ====================================================================== -->
+
+<!ELEMENT assume               %context.group;*>
+<!ELEMENT conclude             %anything.group;>
+<!ELEMENT constrain            %constraint.group;>
+<!ELEMENT precond              %anything.group;*>
+<!ELEMENT propagate            %anything.group;*>
+
+<!ELEMENT judgeOp              EMPTY>
+<!ATTLIST judgeOp
+                               name      CDATA   #IMPLIED
+                               sym       CDATA   #IMPLIED
+>
+
+<!ELEMENT judge                (assume, conclude, constrain?, propagate?)>
+<!ATTLIST judge
+                               name      CDATA   #IMPLIED
+>
+
+<!-- Convenience form (Inference and declarative judgements) -->
+<!ELEMENT Sjudge              (assume, %anything.group;)>
+<!ATTLIST Sjudge
+                               sup       CDATA   #IMPLIED
+                               name      CDATA   #IMPLIED
+                               br        CDATA   #IMPLIED
+>
+
+<!-- Convenience form constrained declarative derivation -->
+<!ELEMENT Cjudge              %anything.group;%anything.group;%anything.group;%anything.group;%anything.group;)>
+
+<!-- Convenience form substituted canonicalized declarative derivation -->
+<!ELEMENT Djudge              %anything.group;%anything.group;%anything.group;%anything.group;%anything.group;)>
+<!ATTLIST Djudge
+                               br        CDATA   #IMPLIED
+>
+
+<!ELEMENT TDjudge             (%anyexpr.group;, %anytype.group;)>
+<!ATTLIST TDjudge
+                               name     CDATA    #IMPLIED
+                               sub      yes      #IMPLIED
+                               Msub     yes      #IMPLIED
+                               cst      yes      #IMPLIED
+                               D        yes      #IMPLIED
+                               sup      yes      #IMPLIED
+>
+
+<!ELEMENT TIjudge             (assume?, conclude, propagate?)>
+<!ELEMENT TEjudge             (assume?, conclude, constrain
+, propagate?)>
+
+<!ENTITY % judgements.group "
+                                 judge
+                               | TDjudge
+                               | TIjudge
+                               | %predicates.group;
+                               | nothing
+">
+
+<!-- Type Rules Premises and Conclusion -->
+<!ELEMENT tyPre                %judgements.group;*>
+<!ELEMENT tyConc               %judgements.group;>
+
+<!ELEMENT tyRule               tyPre, tyConc> 
+<!ATTLIST tyRule
+                               name      CDATA   #IMPLIED
+                               titleszo   CDATA   #IMPLIED
+>
+
+<!-- ======================================================================
+              Common to all Logical rules 
+     ====================================================================== -->
+
+<!ENTITY % rules.group "
+                                 opRule
+                               | tyRule
+                               | nothing
+">
+
+<!-- Rules to be placed horizontally -->
+<!ELEMENT Hrules               %rules.group;*>
+<!ATTLIST Hrules
+                               vspace      yes      #IMPLIED
+                               placement   CDATA    #IMPLIED
+                               align       CDATA    #IMPLIED
+                               initsep     CDATA    #IMPLIED
+                               colsep      CDATA    #IMPLIED
+                               rowsep      CDATA    #IMPLIED>
+<!ELEMENT opHorzRules          opRule*>
+
+<!ELEMENT equation             lhs, rhs>
+<!ATTLIST equation
+                               sep         CDATA      #IMPLIED>
+<!ELEMENT eqn-cnt              rhs>
+<!ELEMENT statement            %anything.group;>
+
+<!--  0-thing, where 1, 2, ..., and n --> 
+<!ELEMENT lhs                  %anything.group;*>
+<!ELEMENT rhs                  %anything.group;*>
+<!ELEMENT VEqns                equation*>
+
+
+<!-- ======================================================================
+              Theorems and Proofs 
+     ====================================================================== -->
+
+<!-- Definitions -->
+
+<!-- Citations -->
+<!ELEMENT defn            EMPTY>
+<!ATTLIST defn
+                          tag      yes      #REQUIRED
+>
+<!ELEMENT lem             EMPTY>
+<!ATTLIST lem
+                          tag      yes      #REQUIRED
+>
+<!ELEMENT thm             EMPTY>
+<!ATTLIST thm
+                          tag      yes      #REQUIRED
+>
+<!ELEMENT asm             EMPTY>
+<!ATTLIST oasm 
+                          tag      yes      #REQUIRED
+>
+<!ELEMENT asms             EMPTY>
+<!ELEMENT conc            EMPTY>
+<!ATTLIST conc
+                          tag      yes      #REQUIRED
+>
+<!ELEMENT case            EMPTY>
+<!ATTLIST case
+                          tag      yes      #REQUIRED
+
+>
+<!ELEMENT cases            EMPTY>
+<!-- ======================================================================
+              WRAPPER TYPE 
+     ====================================================================== -->
+
+<!-- Note that 'TYPE' is NOT part of %anytype.group;. It exists to
+     serve as an outer wrapper! -->
+<!ELEMENT TYPE                 (%anytype.group;)>
+
+
+<!-- ======================================================================
+                                END OF FILE
+     ====================================================================== -->
+

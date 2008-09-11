@@ -1,0 +1,2590 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <article id="heuristic" 
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <docinfo ptsz='default'>
+    <title>Heuristic Type Inference in BitC</title>
+    <subtitle>SRL Technical Report SRL2008-01</subtitle>
+    <authorgroup>
+      <author>
+      	<firstname>Swaroop</firstname>
+      	<surname>Sridhar</surname>
+      	<email>swarop@cs.jhu.edu</email>
+      </author>
+      <author>
+      	<firstname>Jonathan</firstname>
+        <othername>S.</othername>
+      	<surname>Shapiro</surname>
+      	<email>shap@eros-os.org</email>
+      </author>
+      <author>
+      	<firstname>Scott</firstname>
+        <othername>F.</othername>
+      	<surname>Smith</surname>
+      	<email>scott@cs.jhu.edu</email>
+      </author>
+      <affiliation>
+      	<orgname>Department of Computer Science</orgname>
+	<address>The Johns Hopkins University</address> 
+	<address>3400 N. Charles Street, 224 NEB, 
+	  Baltimore, MD 21218</address>
+      	<email>
+	  swaroop@cs.jhu.edu, shap@cs.jhu.edu, scott@cs.jhu.edu
+	</email>
+      </affiliation>
+    </authorgroup>
+    <pubdate></pubdate>
+    <categories>
+      <category>report</category>
+    </categories>
+    <synopsis>
+      <p>
+        A Theory of BitC mutability model and heuristic type inference
+	algorithm. 
+      </p>
+      <p>
+	The HTML version of this paper is not
+        able to represent all of the mathematical notation correctly.
+      </p>
+    </synopsis>
+  </docinfo> 
+  <abstract latex.incolumn="yes">
+    <p>
+      This paper introduces a new type system that is designed for
+      safe systems programming. A key feature of the type system is
+      a new mutability model that combines explicitly unboxed types
+      with a consistent typing of mutability. The type system is
+      provably sound, supports polymorphism and eliminates the need
+      for alias analysis to determine the immutability of a
+      location. The paper identifies the chalenges posed by this type
+      system for type inference, and proposes a heuristic approach to
+      solving this problem.
+    </p>
+  </abstract>
+  <sect1>
+    <title>Introduction</title>
+    <p>
+      Systems programs rely on fine-grain control of data
+      representation and use of state to achieve performance,
+      conformance to hardware specification, and temporal
+      predictability. Robustness and reuse of systems codes can be
+      greatly improved by leveraging modern programming language
+      features &mdash; such as static type safety, type inference,
+      higher order functions, and polymorphism &mdash; but only if
+      these features can be provided without sacrificing the above
+      mentioned requirements. No existing language supports both of
+      these feature sets simultaneously. Therefore, systems
+      programmers continue to use Ada&nbsp;<cite ref="ISO1995Ada"/>,
+      C&nbsp;<cite ref="ISO1999ANSI-C"/>, 
+      C++&nbsp;<cite ref="ISO1998C++"/> or
+      resort to domain specific and assembly level languages. We first
+      discuss the support for these features in existing languages,
+      identify the challenges in combining these feature sets and
+      describe our approach toward solving this problem. 
+    </p>
+    <p>
+      <leadin>Type Inference and Polymorphism:</leadin> Type
+      inference achieves the advantages of static typing
+      with a lower burden on the programmer, facilitating rapid
+      prototyping and development. Polymorphic type inference 
+      (c.f. ML&nbsp;<cite ref="milner97definition"/> or 
+      Haskell&nbsp;<cite ref="peytonjones2003haskellrevisedreport"/>)
+      combines the advantages of static type safety with much of the
+      convenience provided by dynamically typed languages like
+      Python&nbsp;<cite ref="pythonSpec"/>. 
+      Automatic inference of polymorphism simplifies generic programming, and
+	therefore increases the reuse and reliability of code.
+      Safe languages like Java&nbsp;<cite ref="javaSpec"/>, 
+      C#&nbsp;<cite ref="csharpSpec"/>, 
+      or Vault&nbsp;<cite ref="DeLineMSRVault"/> do not support type
+      inference. Cyclone&nbsp;<cite ref="Jim2002Cyclone"/> supports
+      polymorphism only for functions that are explicitly
+      annotated with a polymorphic type.  
+    </p>
+    <p>
+      <leadin>Representation Control:</leadin> A systems programming
+      language must be expressive enough to specify details of
+      data-structure layout (boxed or unboxed), alignment and
+      allocation (stack or heap). This feature is essential for
+      systems programming for reasons of performance (ex: to control
+      cache and paging behavior), conformance to hardware
+      specification (ex: page table entries), and interfacing with
+      external C or assembly  code and data. A careful
+      implementation of the standard TCP/IP protocol stack in Standard
+      ML incurs a substantial overhead of up to 10x increase in system
+      load and a 40x slowdown in accessing external memory relative to
+      the equivalent C implementation&nbsp;<cites> 
+	<cite ref="Biagioni2001FoxNet"/>
+	<cite ref="Derby1999Foxnet"/>
+      </cites>.  This shows that in systems programs, data structure
+      representation is as important as, or even more important than
+      high level algorithms.
+    </p>
+    <p>
+      The philosophy of ML-like languages is that programs specify
+      semantics and not realization (implementation). However, in
+      systems programs, statements about representation and location
+      are <em>prescriptive</em>, not <em>descriptive</em>.       
+      Compilers like TIL&nbsp;<cite ref="Tarditi1996TIL"/> 
+      implement unboxed representation as a discretionary
+      optimization. Prescriptive requirements are not discretionary.  
+      First class treatment of representation is required in systems
+      programming languages.
+    </p>
+    <p>
+      <leadin>Mutability Support:</leadin>
+      One of the key features essential for systems
+      programming is support for first class mutability (c.f. C). The
+      support for mutability must be first class in the sense that any
+      location (stack or heap) can be mutable, and we should
+      be able to specify mutability at field level granularity. Many
+      modern programming languages &mdash; particularly those that
+      support type inference &mdash; do not support this first class
+      notion of mutability.  ML does not support first class
+      mutability; all mutable cells must reside in the heap. In
+      Haskell, all state must be encapsulated within Monads&nbsp;<cite
+	ref="peytonjones1993monads"/>. 
+      In contrast to the C-like languages, these functional
+      languages <em>do</em> have a mathematically sound notion of
+      immutability.
+    </p>
+    <p>
+      We have identified three features &mdash; unboxed
+      representation, mutability and polymorphic type inference &mdash;
+      that are desirable in a systems programming language.  
+      While several existing languages support two of these features,
+      none combine all three of them elegantly. In
+      this paper, we endeavor to bridge this gap between
+      systems programming and modern language designs through the
+      BitC&nbsp;<cite ref="shapBitcSpec2006"/> programming language. BitC is a
+      direct expression of typed lambda calculus with side effects,
+      extended to be able to reflect the semantics of explicit
+      representation. It supports polymorphic type inference and a
+      new model of mutability which is expressive and has sound
+      semantics.
+    </p>
+    <p>
+      BitC is a call-by-value expression language. BitC's support for
+      unboxed mutability makes it desirable to allow some freedom in
+      the compatibility of types with respect to their mutability at
+      copy boundaries. This kind of compatibility has ramifications
+      for type inference since there is no longer a unique way to type
+      an expression. However, usability constraints require that we
+      minimize the amount of type annotations required from the
+      programmer. In this paper, we discuss some of these issues, and
+      present a solution based on a simple extension to the
+      Hindley-Milner inference algorithm&nbsp;<cite
+	ref="Milner1978W"/> that applies certain
+      heuristics to subjectively infer the <em>appropriate</em> type
+      for all expressions.   
+    </p>
+  </sect1>
+  <sect1 id="language\">
+    <title>The Language</title>
+    <p>
+      BitC is a safe, systems programming language. A detailed
+      description of the language and its support for systems
+      programming (including a rich set of primitive data types and
+      bit-fields, type classes&nbsp;<cite ref="jones1995qualtypes"/>
+      for overloading, representation of explicitly boxed and unboxed
+      data-structures, discriminated unions, tagged-unions with
+      inlined discriminators, <foreignphrase>etc.</foreignphrase>) can
+      be found in the language definition&nbsp;<cite
+      ref="shapBitcSpec2006"/>. In this paper, we limit our
+      presentation to a core calculus of BitC called 
+     <btypes:TYPE>
+	<language/>
+      </btypes:TYPE> in the interest of brevity. The user
+      visible part of <btypes:TYPE>
+	<language/>
+      </btypes:TYPE> is defined below:
+    </p>
+    <btypes:TYPE>
+      <grammar notitle="yes">
+	<bnf desc="Patterns">
+	  <pattern/>
+	  <alternatives>
+	    <id/>	      
+	    <tqExpr>
+	      <pattern/>
+	      <type/>
+	    </tqExpr>
+	    <Pair>
+	      <pattern/>
+	      <pattern/>
+	    </Pair>
+	    <List>
+	      <plural>
+		<pattern num=";"/>
+	      </plural>
+	    </List>
+	    <Cons>		
+	      <id/>	      
+	      <pattern/>
+	    </Cons>
+	  </alternatives>
+	</bnf>
+	<bnf desc="Values">
+	  <aVal/>
+	  <alternatives>
+	    <Unit/>
+	    <true/>
+	    <false/>
+	    <lambda>
+	      <pattern/>
+	      <aExpr/>
+	    </lambda>
+	    <Pair>
+	      <aVal/>
+	      <aVal/>
+	    </Pair>
+	    <List>
+	      <plural>
+		<aVal num=";"/>
+	      </plural>
+	    </List>
+	  </alternatives>
+	</bnf>
+	<bnf desc="Expressions">
+	  <aExpr/>
+	  <alternatives>
+	    <id/>
+	    <Unit/>
+	    <true/>
+	    <false/>
+	    <lambda>
+	      <pattern/>
+	      <aExpr/>
+	    </lambda>
+	    <apply>
+	      <aExpr/>
+	      <aExpr/>
+	    </apply>
+	    <tqExpr>
+	      <aExpr/>
+	      <type/>
+	    </tqExpr>
+	    <assign>
+	      <aExpr/>
+	      <aExpr/>
+	    </assign> 
+	    <dup>
+	      <aExpr/>
+	    </dup>
+	    <deref>
+	      <aExpr/>
+	    </deref>
+	  </alternatives>
+	</bnf>
+	<bnfc desc="">
+	  <alternatives>	      
+	    <Pair>
+	      <aExpr/>
+	      <aExpr/>
+	    </Pair>
+	    <fst>
+	      <aExpr/>
+	    </fst>
+	    <snd>
+	      <aExpr/>
+	    </snd>
+	    <List>	      
+	      <plural>
+		<aExpr num=";"/>
+	      </plural>
+	    </List>
+	    <Cons>
+	      <aExpr/>
+	      <aExpr/>
+	    </Cons>	    
+	    <match optionalElse="yes">
+	      <aExpr/>
+	      <pattern/>
+	      <aExpr/>		
+	      <aExpr/>
+	    </match>	    
+	  </alternatives>
+	</bnfc>
+	<bnfc desc="">
+	  <alternatives>
+	    <if>
+	      <aExpr/>
+	      <aExpr/>
+	      <aExpr/>
+	    </if>
+	    <let>
+	      <tqExpr optional="yes">
+		<id/>
+		<aTS/>
+	      </tqExpr>
+	      <aExpr/>
+	      <aExpr/>
+	    </let>
+	  </alternatives>
+	</bnfc>
+	<bnf desc="Types">
+	  <type/>
+	  <alternatives>
+	    <tvar name="alpha"/>
+	    <unit/>
+	    <bool/>
+	    <fn><type/><type/></fn>                  
+	    <ref><type/></ref>
+	    <mutable><type/></mutable>
+	    <pair><type/><type/></pair>
+	    <list><type/></list>
+	    <ctype><type/><aCtset/></ctype>
+	  </alternatives>
+	</bnf>
+	<bnf desc="Type Scheme">
+	  <aTS/>
+	  <alternatives>
+	    <type/>
+	    <forall>                    
+	      <tvars name="alpha"/>
+	      <aTS/>
+	    </forall>
+	  </alternatives>
+	</bnf>
+	<bnf desc="Constraints">
+	  <aCtset/>
+	  <alternatives>
+	    <Empty/>
+	    <set>
+	      <alternatives>                      
+		<eq>
+		  <type/>
+		  <type/>
+		</eq>
+		<ceq>
+		  <type/>
+		  <type/> 
+		</ceq>
+	      </alternatives>            
+	    </set>
+	  </alternatives>
+	</bnf>	  
+      </grammar>
+    </btypes:TYPE>
+    <br/>
+    <p>
+      Program variables are denoted by 
+      <btypes:TYPE>
+	<id name="x"/>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<id name="y"/>
+      </btypes:TYPE>,
+      <foreignphrase>etc.</foreignphrase>
+      and type variables by 
+      <btypes:TYPE>
+	<tvar name="alpha"/>
+      </btypes:TYPE>, 
+      <btypes:TYPE>
+	<tvar name="beta"/>
+      </btypes:TYPE>,
+      <foreignphrase>etc.</foreignphrase>
+      <btypes:TYPE>
+	<plural>
+	  <id name="X" num=";"/>
+	</plural>
+      </btypes:TYPE> denotes zero or more 
+      <btypes:TYPE>
+	<id name="X"/>
+      </btypes:TYPE>s separated by a semicolon.
+      The <em>[]</em> brackets denote optional parts of
+      syntax. 
+      <btypes:TYPE>
+	<ref>
+	  <type/>
+	</ref>
+      </btypes:TYPE> represents a reference (pointer) type and 
+      <btypes:TYPE>
+	<mutable>
+	  <type/>
+	</mutable>
+      </btypes:TYPE> represents a mutable type. 
+      The type 
+      <btypes:TYPE>
+	<ctype>
+	  <type/>
+	  <aCtset/>
+	</ctype>
+      </btypes:TYPE> is a constrained type with the set of constraints 
+      <btypes:TYPE>
+	<aCtset/>
+      </btypes:TYPE>. 	  
+	The relation 
+      <btypes:TYPE>
+	<ceqOp/>
+      </btypes:TYPE> will be defined in 
+      section&nbsp;<xref ref="copy_compat"/>. 
+      The <progident>let</progident> construct can be used for
+      allocating (possibly mutable) stack variables and to create
+      let-polymorphic bindings. The expression
+      <btypes:TYPE>
+	<dup>
+	  <aExpr/>
+	</dup>
+      </btypes:TYPE>,
+      where e is of type
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE>,
+      returns a reference 
+      of type
+      <btypes:TYPE>
+	<ref>
+	  <type/>
+	</ref>
+      </btypes:TYPE> to a heap-allocated <em>copy</em>
+      of the value of 
+      <btypes:TYPE>
+	<aExpr/>
+      </btypes:TYPE>. 
+      The <progident>^</progident> operator is used to
+      dereference heap cells. The <progident>:=</progident> operator  
+      updates (mutates) both stack and heap locations. Unlike ML,
+      <progident>:=</progident> does not dereference its target. 
+      Pairs <progident>(,)</progident>
+      are <em>unboxed</em> structures whose
+      constituent elements contiguously allocated on the
+      stack, or in their containing data-structure. 
+      <btypes:TYPE>
+	<fst>
+	  <aExpr/>
+	</fst>
+	<text content=" and "/>
+	<snd>
+	  <aExpr/>
+	</snd>
+      </btypes:TYPE> perform selection from pair values.
+      Lists <progident>[...]</progident> 
+      have a <em>boxed</em> representation.
+    </p>
+  </sect1>
+  <sect1 id="mut_model">
+    <title>The Mutability Model</title>
+    <p>
+      Traditionally, there are two models of mutability studied in the
+      case of imperative languages. One of them is the ML model, where
+      there is a clear separation between name bindings and updatable
+      locations. All updatable (mutable) locations live in the heap
+      within ``ref cells''. Fetching the value inside a ref cell
+      requires an explicit dereferencing operation. The major
+      advantage of this approach is that types are definitive about the
+      mutability of every location, across all aliases. In this sense,
+      we can say that the support for mutability is mathematically
+      ``well-founded.'' This model benefits tools
+      that perform static analysis or model checking because
+      conclusions drawn about location immutability need never be
+      conservative. This model of mutability also increases the amount
+      of optimization the compiler can safely perform without complex
+      alias analysis.
+    </p>
+    <p>
+      The other well known model of mutability is the C model, wherein
+      the support for mutability is ``first-class'' in the sense that
+      <em>locations</em> with mutable type can be passed as arguments
+      and stored in data-structures. This model permits mutation of
+      stack variables and unboxed values. There is a notion of
+      <em>lvalues</em> which are expressions that can be the target of
+      an assignment, and <em>rvalues</em>, that are otherwise used in
+      computations. The extraction of the value from a (mutable)
+      location is implicit, and does not require dereferencing.
+      However, in this model, types cannot distinguish mutable values
+      from immutable ones. For example, in C it is legal to write: 
+      <br/>
+      <progident>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	const bool *cp = ...;   
+	bool *p = cp;
+	*p = false;  // OK!
+      </progident>
+    </p>
+    <p>
+      The alleged ``constness'' of the location pointed to by
+      <progident>cp</progident> is a local property (only) with
+      respect to the alias <progident>cp</progident> and not a
+      statement of true immutability of the target location. 
+      The compiler or other analytical engines are not entitled to
+      believe that certain locations or fields are constant even if so
+      declared.
+    </p>
+    <p>
+      <btypes:TYPE>
+	<language/>
+      </btypes:TYPE>
+      supports well-founded first class mutability. Similar to
+      ML, we impose the ``one location, one type'' rule.
+      <br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <btypes:TYPE>
+	<let>
+	  <tqExpr>
+	    <id name="cp"/>
+	    <ref>
+	      <bool/>
+	    </ref>
+	  </tqExpr>
+	  <dup>
+	    <true/>
+	  </dup>
+	  <let>
+	    <tqExpr>
+	      <id name="p"/>
+	      <ref>
+		<mutable>
+		  <bool/>
+		</mutable>
+	      </ref>
+	    </tqExpr>
+	    <id name="cp"/>
+	  </let>
+	</let>
+      </btypes:TYPE>
+      &nbsp;&nbsp;
+      <progident>
+	(* Error *)
+      </progident>
+      <br/>
+      We see that
+      <btypes:TYPE>
+	<id name="cp"/>
+      </btypes:TYPE> has the type reference to bool
+      (<btypes:TYPE>
+	<ref>
+	  <bool/>
+	</ref>
+      </btypes:TYPE>). This type is incompatible with that of 
+       <btypes:TYPE>
+	<id name="p"/>
+      </btypes:TYPE>, reference to mutable-bool
+      (<btypes:TYPE>
+	<ref>
+	  <mutable>
+	    <bool/>
+	  </mutable>
+	</ref>
+      </btypes:TYPE>).
+      In order to support unboxed mutability, we still need to have a
+      notion of lvalues. This not only preserves the programmer's
+      mental model of the relationship between locations storage, but
+      also ensures that compiler transformations are semantics
+      preserving. In  
+      <btypes:TYPE>
+	<language/>
+      </btypes:TYPE>, the legal lvalues are defined by:
+      <btypes:TYPE>      
+	<id name="L" num="v"/>
+	<text content=" ::= "/>
+	<alternatives>
+	  <id name="x"/>
+	  <fst>
+	    <id name="L" num="v"/>
+	  </fst>
+	  <snd>
+	    <id name="L" num="v"/>
+	  </snd>
+	  <deref>
+	    <id name="L" num="v"/>
+	  </deref>	  
+	  <tqExpr>
+	    <id name="L" num="v"/>
+	    <type/>
+	  </tqExpr>	  
+	</alternatives>
+      </btypes:TYPE>
+    </p>
+  </sect1>
+  <sect1 id="copy_compat">
+    <title>Copy Compatibility</title> 
+    <p>
+      Since <btypes:TYPE> <language/> </btypes:TYPE> is a
+      call-by-value language, it is desirable that we allow some
+      freedom in the compatibility of types with respect to their
+      mutability at a copy boundary. For example, in the
+      following expression: 
+      <br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <btypes:TYPE>
+	<let br2="9">
+	  <id name="fnxn"/>
+	  <lambda>
+	    <id name="x"/>
+	    <paren>
+	      <let>
+		<id name="_"/>
+		<assign>
+		  <id name="x"/>
+		  <apply>
+		    <id name="some-fnxn"/>
+		    <id name="x"/>
+		  </apply>
+		</assign>
+		<apply>
+		  <id name="fnxn-returning-unit"/>
+		  <id name="x"/>
+		</apply>
+	      </let>
+	    </paren>
+	  </lambda>
+	  <let>	    
+	    <tqExpr>
+	      <id name="y"/>
+	      <bool/>
+	    </tqExpr>
+	    <true/>
+	    <apply>
+	      <id name="fnxn"/>
+	      <id name="y"/>
+	    </apply>
+	  </let>
+	</let>
+      </btypes:TYPE>
+      <br/>
+      the type of
+      <btypes:TYPE>
+	<id name="fnxn"/>
+      </btypes:TYPE> is
+      <btypes:TYPE>
+	<fn>
+	  <paren>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	  </paren>
+	  <unit/>
+	</fn>
+      </btypes:TYPE>, whereas that of the actual argument
+      <btypes:TYPE>
+	<id name="y"/>
+      </btypes:TYPE> is
+      <btypes:TYPE>
+	<bool/>
+      </btypes:TYPE>.
+      Since the formal argument
+      <btypes:TYPE>
+	<id name="x"/>
+      </btypes:TYPE> is a <em>copy</em> of 
+      <btypes:TYPE>
+	<id name="y"/>
+      </btypes:TYPE> and occupies a different location, 
+      this expression is type safe. We refer to this notion
+      of compatibility of types as <term>copy compatibility</term>,
+      denoted by &cong;. In this example,
+      <btypes:TYPE>
+	<ceq>
+	  <bool/>
+	  <mutable>
+	    <bool/>
+	  </mutable>
+	</ceq>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      Copy compatibility need not be restricted to the outermost
+      mutability compatibility, but must not extend past a reference
+      boundary in order ensure that every location has unique type.
+      We define copy compatibility for 
+      <btypes:TYPE>
+	<language/>
+      </btypes:TYPE> as:
+    </p>    
+    <btypes:TYPE>
+      <Hrules initsep="15" colsep="3">
+	<tyRule>
+	  <tyPre/>
+	  <tyConc>
+	    <ceq>                
+	      <type/>
+	      <type/>
+	    </ceq>
+	  </tyConc>                
+	</tyRule>   
+	<tyRule>
+	  <tyPre>
+	    <ceq>                
+	      <type/>
+	      <type dash="'"/>
+	    </ceq>	    
+	  </tyPre>
+	  <tyConc>
+	    <ceq>                
+	      <type/>
+	      <mutable>
+		<type dash="'"/>
+	      </mutable>
+	    </ceq>
+	  </tyConc>                
+	</tyRule>   
+	<tyRule>
+	  <tyPre>
+	    <ceq>                
+	      <type/>
+	      <type dash="'"/>
+	    </ceq>	    
+	  </tyPre>
+	  <tyConc>
+	    <ceq>                
+	      <type dash="'"/>
+	      <type/>
+	    </ceq>
+	  </tyConc>                
+	</tyRule>
+	<tyRule>
+	  <tyPre>
+	    <ceq>                
+	      <type num="1"/>
+	      <type num="1" dash="'"/>
+	    </ceq>	    
+	    <ceq>                
+	      <type num="2"/>
+	      <type num="2" dash="'"/>
+	    </ceq>	    
+	  </tyPre>
+	  <tyConc>
+	    <ceq>         
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	      <pair>
+		<type num="1" dash="'"/>
+		<type num="2" dash="'"/>
+	      </pair>
+	    </ceq>
+	  </tyConc>                
+	</tyRule>
+      </Hrules>
+    </btypes:TYPE>
+    <p>
+      Copy compatibility can be permitted at argument passing, new
+      variable binding, assignment, and basically at argument/return
+      positions of all expressions, except where an lvalue is expected
+      or returned. For example, the expression
+      <btypes:TYPE>
+	<tqExpr>
+	  <paren>
+	    <tqExpr>
+	      <id name="x"/>
+	      <type/>
+	    </tqExpr>
+	  </paren>
+	  <mutable>
+	    <type/>
+	  </mutable>
+	</tqExpr>
+      </btypes:TYPE> is illegal since identifiers are lvalues, but 
+      the branches of a conditional can have
+      different but copy compatible types, as in:
+      <btypes:TYPE>
+	<if>
+	  <true/>
+	  <tqExpr>
+	    <id name="a"/>
+	    <type/>
+	  </tqExpr>
+	  <tqExpr>
+	    <id name="b"/>
+	    <mutable>
+	      <type/>
+	    </mutable>
+	  </tqExpr>
+	</if>
+      </btypes:TYPE>.
+    </p>
+  </sect1>
+  <sect1 id="infer">
+    <title>Type Inference</title>
+    <p>
+      We would like to employ an inference algorithm with the
+      following properties:  
+    </p>
+    <ol>
+      <li>
+	<p>
+	  The inference algorithm must be decidable without 
+	  programmer annotations. The problem with programmer
+	  annotations is pragmatic rather than ideological: ease of
+	  prototyping requires that these annotations be minimized.    
+	</p>
+      </li>
+      <li>
+	<p>
+	  The inference algorithm must ideally be complete. In the
+	  absence of principal types, it must minimize programmer
+	  annotations in the common case, and must be capable of
+	  inferring all sound types at least when guided by explicit
+	  annotation. This requirement is orthogonal to
+	  requirement&nbsp;(1).
+	</p>
+      </li>
+      <li>
+	<p>
+	  The inference algorithm must automatically infer
+	  polymorphism (without programmer annotations) in order to
+	  maximize code reuse and encourage good software engineering.
+	</p>
+      </li>
+      <li>
+	<p>
+	  The inference algorithm must not require whole program
+	  analysis. Whole program inference precludes
+	  separate compilation, poses scalability problems for large
+	  projects, and can result in surprising behaviour if the
+	  inferred types for a program change due to modifications in
+	  a distant part of the code base.
+	</p>
+      </li>
+    </ol>
+    <p>
+      With these considerations in mind, we chose a
+      variation of the Hindley-Milner algorithm&nbsp;<cite
+	ref="Milner1978W"/> in <btypes:TYPE> 
+	<language/>
+      </btypes:TYPE>. We now describe challenges for type inference
+      due to copy compatibility, explore the design choices, and
+      finally present our solution. 
+    </p>
+    <p>
+      <leadin>Challenges Due to Copy Compatibility:</leadin>
+      When an exact type compatibility requirement is replaced in the
+      language design by copy compatibility, it is no longer possible
+      to infer a unique (simple) type for the expression. For example,
+      in the expression
+      <btypes:TYPE>
+	<let>
+	  <id name="p"/>
+	  <true/>
+	</let>
+      </btypes:TYPE>, 
+      we know that the type of the literal
+      <btypes:TYPE>
+	<true/>
+      </btypes:TYPE> is
+      <btypes:TYPE>
+	<bool/>
+      </btypes:TYPE>, but the type of
+      <btypes:TYPE>
+	<id name="p"/>
+      </btypes:TYPE>
+      could either be
+      <btypes:TYPE>
+	<bool/>
+      </btypes:TYPE> or
+      <btypes:TYPE>
+	<mutable>
+	  <bool/>
+	</mutable>
+      </btypes:TYPE>. Therefore, we give
+      <btypes:TYPE>
+	<id name="p"/>
+      </btypes:TYPE>  the so-called ``maybe'' type
+      <btypes:TYPE>
+	<mbpair>
+	  <tvar name="alpha"/> 	  
+	  <bool/>
+	</mbpair>
+      </btypes:TYPE>, which is a shorthand for the
+      constrained type 
+      <btypes:TYPE> 
+	  <ctype> 
+	  <tvar name="alpha"/> 
+	  <set>
+	    <ceq> 
+	      <tvar name="alpha"/> 
+	      <bool/>
+	    </ceq> 
+	  </set>
+	</ctype> 
+      </btypes:TYPE>.
+      The actual type will later get resolved to either
+      <btypes:TYPE>
+	<bool/>
+      </btypes:TYPE> or
+      <btypes:TYPE>
+	<mutable>
+	  <bool/>
+	</mutable>
+      </btypes:TYPE>.
+      Similarly, in the expression 
+      (inferred types are shown beside
+      <btypes:TYPE>
+	<symbol name="par"/>
+      </btypes:TYPE>). 
+      <br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <btypes:TYPE> 
+	<let>
+	  <id name="pr"/>
+	  <Pair>
+	    <true/>
+	    <false/>
+	  </Pair>
+	  <unspecified/>
+	</let>
+	<text content="      "/>
+	<symbol name="par"/>
+	<text content="      "/>
+	<tqExpr>	  
+	  <id name="pr"/>
+	  <mbpair>
+	    <tvar name="alpha"/>
+	    <paren>
+	      <pair>
+		<mbpair>
+		  <tvar name="beta"/>
+		  <bool/>
+		</mbpair>
+		<mbpair>
+		  <tvar name="gamma"/>
+		  <bool/>
+		</mbpair>
+	      </pair>
+	    </paren>
+	  </mbpair>
+	</tqExpr>
+      </btypes:TYPE>
+      <br/>
+      copy compatibility is introduced at both the pair construction
+      (arguments passed to the pair constructor), and the 
+      formation of a new binding. 
+    </p>
+    <p>
+      <leadin>Why Should We Infer Mutability?</leadin>
+      It is natural to ask why mutability should be inferred at all.
+      That is: why not require explicit annotation for all mutable
+      values, and infer immutable types by default? In a language with
+      copy compatibility, this will result in a proliferation of type 
+      annotations. Constructor applications, 
+      (polymorphic) type instantiations, accessor functions,
+      <foreignphrase>etc.</foreignphrase> 
+      will have to be explicitly annotated with their types. For
+      example, if
+      <btypes:TYPE> 
+	<id name="fst"/>
+      </btypes:TYPE>
+      is an accessor function that returns the first element of a
+      pair, and  
+      <btypes:TYPE> 
+	<id name="m"/>
+      </btypes:TYPE>
+      is a variable of type
+      <btypes:TYPE> 
+	<mutable>
+	  <bool/>
+	</mutable>
+      </btypes:TYPE>, we will have to write: 
+      <br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <btypes:TYPE> 
+	<let>
+	  <id name="xyz"/>
+	  <tqExpr>
+	    <List>
+	      <paren>
+		<apply>
+		  <id name="fst"/>
+		  <tqExpr nosp="yes">
+		    <Pair>
+		      <id name="m"/>
+		      <false/>
+		    </Pair>
+		    <pair>
+		      <mutable>
+			<bool/>
+		      </mutable>
+		      <bool/>
+		    </pair>
+		  </tqExpr>
+		</apply>
+	      </paren>
+	    </List>
+	    <List>
+	      <mutable>
+		<bool/>
+	      </mutable>
+	    </List>
+	  </tqExpr>
+	  <unspecified/>
+	</let>
+      </btypes:TYPE>
+      <br/>
+      Therefore, if mutability is not inferred, it results in a
+      substantial increase in the number of programmer annotations,
+      and type inference becomes ineffective.
+    </p>
+    <p>
+      <leadin>Incompleteness of Inference</leadin>
+      The key idea of maybe types 
+      <btypes:TYPE>
+	<mbpair>
+	  <tvar name="alpha"/>
+	  <type/>
+	</mbpair>
+      </btypes:TYPE> is to defer commitments about the
+      mutability status of types, and thus infer most-general types
+      wherever possible. 
+      <btypes:TYPE>
+	<language/>
+      </btypes:TYPE> is a let-polymorphic language and enforces the
+      value restriction&nbsp;<cite ref="wrightValRes1995"/>. This
+      means that the decision about the mutability of types cannot
+      &mdash; in general &mdash; be deferred past their let
+      bindings. For example, in the case of the expression:
+      <btypes:TYPE>
+	<let>
+	  <id name="p"/>
+	  <List/>
+	  <unspecified/>
+	</let>
+      </btypes:TYPE>, 
+      we cannot give
+      <btypes:TYPE>
+	<id name="p"/>
+      </btypes:TYPE> the type
+      <btypes:TYPE>
+	<Forall>
+	  <tvar name="alpha"/>
+	  <tvar name="beta"/>
+	</Forall>
+	<text content="."/>
+	<mbpair>
+	  <tvar name="beta"/>
+	  <list>	    
+	    <tvar name="alpha"/>
+	  </list>
+	</mbpair>	  
+      </btypes:TYPE>
+      (or 
+      <btypes:TYPE>
+	<forall>
+	  <tvar name="alpha"/>
+	  <mutable>
+	    <list>	    
+	      <tvar name="alpha"/>
+	    </list>
+	  </mutable>	  
+	</forall>	
+      </btypes:TYPE>
+      or 
+      <btypes:TYPE>
+	<forall>
+	  <tvar name="alpha"/>
+	  <mbpair>
+	    <tvar name="beta"/>
+	    <list>	    
+	      <tvar name="alpha"/>
+	    </list>
+	  </mbpair>	  
+	</forall>	
+      </btypes:TYPE>).
+      We must instead choose one of the polymorphic type
+      <btypes:TYPE>
+	<forall>
+	  <tvar name="alpha"/>
+	  <list>	    
+	    <tvar name="alpha"/>
+	  </list>
+	</forall>
+      </btypes:TYPE> or the monomorphic type
+      <btypes:TYPE>
+	<mbpair>
+	  <tvar name="beta"/>
+	  <list>	    
+	    <tvar name="alpha"/>
+	  </list>
+	</mbpair>	  
+      </btypes:TYPE>
+      That is, there is no principal type that can be inferred for
+      <btypes:TYPE>
+	<id name="p"/>
+      </btypes:TYPE>. Given this, we must fix these maybe
+      types to be either mutable or immutable at a let-boundary. 
+      That is, the language definition must  pick some solution for
+      unsolved copy compatibility constraints <em>before</em> type
+      generalization. 
+      In <btypes:TYPE> 
+	<language/>
+      </btypes:TYPE>, we trade
+      completeness of inference to obtain a more expressive language
+      without making major changes to the core type system.
+    </p>
+    <p>
+      <leadin>Inference Considerations</leadin>
+      First, we consider how to resolve copy compatibility
+      constraints at a let boundary. One possibility is
+      to fix all unresolved maybe types to immutable
+      versions. For example: 
+      <br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <btypes:TYPE> 
+	<let>
+	  <id name="pf"/>
+	  <Pair>
+	    <tqExpr>
+	      <id name="n"/>
+	      <mutable>
+		<bool/>
+	      </mutable>
+	    </tqExpr>
+	    <lambda>
+	      <id name="x"/>
+	      <id name="x"/>
+	    </lambda>
+	  </Pair>
+	  <unspecified/>
+	</let>
+	<text content="      "/>
+	<symbol name="par"/>
+	<text content="      "/>
+	<tqExpr>
+	  <id name="pf"/>
+	  <forall>
+	    <tvar name="alpha"/>
+	    <pair>
+	      <bool/>
+	      <paren>
+		<fn>
+		  <tvar name="alpha"/>
+		  <tvar name="alpha"/>
+		</fn>
+	      </paren>
+	    </pair>
+	  </forall>
+	</tqExpr>
+      </btypes:TYPE>
+      <br/>
+      This scheme will preserve all polymorphism possible, but will
+      mandate a programmer annotation for every mutable value.
+      If mutable variants are chosen instead, no polymorphism can be
+      inferred by default. Therefore, neither of these 
+      solutions are satisfactory. Further, from the standpoint of good
+      programming ideology and static analysis, the inferred
+      types must not be promiscuous with respect to mutability.  
+    </p>  
+    <p>
+      The previous section argued that we ``lose'' precision of
+      inferred types (with respect to mutability) by the
+      introduction of copy compatibility. Therefore, we can choose
+      whether (or not) to introduce copy compatibility at various
+      constructs like new bindings, function application/return,
+      constructors, conditional expressions,
+      <foreignphrase>etc</foreignphrase>. Another dimension of
+      trade-off is whether to permit copy compatibility to the maximum
+      permissible limit (as defined in section&nbsp;<xref
+	ref="copy_compat"/>), or restrict it to top-level shallow
+      mutability compatibility only. A further option is to require
+      that all polymorphism be contained within function types,
+      since function types can be polymorphic even if they
+      abstract over mutable or maybe types.
+    </p>
+    <p>
+      Unless handled with care, full use of copy compatibility can
+      result in the inferred types that are counter-intuitive to the
+      programmer. For example:
+      <br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <btypes:TYPE> 
+	<let>
+	  <id name="copyList"/>
+	  <lambda>
+	    <id name="lst"/>
+	    <match br2="36">
+	      <id name="lst"/>		  
+	      <List/>
+	      <List/>
+	      <match>
+		<id name="lst"/>		  
+		<Cons>
+		  <id name="x"/>
+		  <id name="rest"/>
+		</Cons>
+		<Cons>
+		  <id name="x"/>
+		  <apply>
+		    <id name="copyList"/>
+		    <id name="rest"/>
+		  </apply>
+		</Cons>
+	      </match>
+	    </match>
+	  </lambda>
+	  <unspecified/>
+	</let>
+      </btypes:TYPE>
+      <br/>
+      For a na&iuml;ve reader, the type of
+      <btypes:TYPE> 
+	<id name="copyList"/>
+      </btypes:TYPE> appears to be
+      <btypes:TYPE> 
+	<forall>
+	  <tvar name="alpha"/>
+	  <fn>
+	    <list>
+	      <tvar name="alpha"/>
+	    </list>
+	    <list>
+	      <tvar name="alpha"/>
+	    </list>
+	  </fn>
+	</forall>
+      </btypes:TYPE>
+      but is actually the more general type:
+      <btypes:TYPE>
+      	<Forall>
+      	  <tvar name="alpha"/>
+      	  <tvar name="beta"/>
+      	</Forall>
+	<text content=". "/>
+	<ctype>
+	  <fn>
+	    <list>
+	      <tvar name="alpha"/>
+	    </list>
+	    <list>
+	      <tvar name="beta"/>
+	    </list>
+	  </fn>
+	  <set>
+	    <ceq>
+	      <tvar name="alpha"/>
+	      <tvar name="beta"/>	      
+	    </ceq>
+	  </set>
+	</ctype>
+      </btypes:TYPE>.
+      <!--       <btypes:TYPE>  -->
+      <!-- 	<Forall> -->
+      <!-- 	  <tvar name="alpha"/> -->
+      <!-- 	  <tvar name="beta"/> -->
+      <!-- 	  <tvar name="gamma"/> -->
+      <!-- 	</Forall> -->
+      <!-- 	<fn> -->
+      <!-- 	  <list> -->
+      <!-- 	    <mbpair> -->
+      <!-- 	      <tvar name="beta"/> -->
+      <!-- 	      <tvar name="alpha"/> -->
+      <!-- 	    </mbpair> -->
+      <!-- 	  </list> -->
+      <!-- 	  <list> -->
+      <!-- 	    <mbpair> -->
+      <!-- 	      <tvar name="gamma"/> -->
+      <!-- 	      <tvar name="alpha"/> -->
+      <!-- 	    </mbpair> -->
+      <!-- 	  </list> -->
+      <!-- 	</fn> -->
+      <!--       </btypes:TYPE>. --> 
+      Even though both the argument and return types of
+      <btypes:TYPE> 
+	<id name="copyList"/>
+      </btypes:TYPE> are of (boxed) list type, they are
+      only required to be copy compatible because
+      <btypes:TYPE> 
+	<id name="copyList"/>
+      </btypes:TYPE> copies the constituent elements, thereby using
+      new locations. 
+      Now, if we default maybe types that are ultimately unresolved to
+      immutable, in the following definition we obtain:
+      <br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <btypes:TYPE>
+	<let>
+	  <id name="mutLst2"/>
+	  <apply>
+	    <id name="copyList"/>
+	    <tqExpr nospace="yes">
+	      <id name="mutLst"/>
+	      <list>
+		<mutable>
+		  <bool/>
+		</mutable>
+	      </list>
+	    </tqExpr>
+	  </apply>
+	  <unspecified/>
+	</let>
+	<text content="      "/>
+	<symbol name="par"/>
+	<text content="      "/>
+	<tqExpr>
+	  <id name="mutLst"/>
+	  <list>	    
+	    <bool/>	    
+	  </list>
+	</tqExpr>
+	<text content="   !!"/>
+      </btypes:TYPE>
+      <br/>
+      which is a correct typing, but is most likely not what the
+      programmer expects.
+    </p>
+  </sect1>
+  <sect1 id="proposal">
+    <title>Type Inference in <btypes:TYPE><language/></btypes:TYPE></title>
+    <p>
+      Having identified the various issues and trade-offs involved in
+      type inference, we now describe the particular design choices
+      made in BitC/<btypes:TYPE><language/></btypes:TYPE> for handling
+      copy compatibility. They have been driven in part by our
+      experience writing BitC programs. In <btypes:TYPE> <language/>
+      </btypes:TYPE>, we allow copy compatibility to the full extent,
+      up to a reference boundary. We allow copy compatibility to be
+      invoked at arguments and return positions of all expressions
+      that do not expect a location (lvalue). 
+    </p>
+    <p>
+      At a let boundary, an unresolved maybe type
+      <btypes:TYPE>
+	<mbpair>
+	  <tvar name="alpha"/>
+	  <type/>
+	</mbpair>
+      </btypes:TYPE>      
+      is resolved to 
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE>.
+      Intuitively, this means that we will default maybe types to the
+      types of their original copies unless a better type is inferred
+      or specified. The type 
+      <btypes:TYPE>
+	<type/>
+      </btypes:TYPE>
+      of the original value is remembered as a ``hint'' to fix
+      unresolved maybe types at a let boundary. Here, we are
+      approximating the user's intent to the lexical ``flow'' of type
+      information. For example, in the following expression,
+      <br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <btypes:TYPE>
+	<let>
+	  <tqExpr>
+	    <id name="mb"/>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	  </tqExpr>
+	  <true/>	  
+	  <let>
+	    <id name="l1"/>
+	    <List>
+	      <id name="mb"/>
+	    </List>
+	    <let>
+	      <tqExpr>
+		<id name="l2"/>
+		<mutable>
+		  <list>
+		    <bool/>
+		  </list>
+		</mutable>
+	      </tqExpr>
+	      <List>
+		<id name="mb"/>
+	      </List>
+	    </let>
+	  </let>
+	  <unspecified/>
+	</let>	
+      </btypes:TYPE>
+      <br/>
+      the type 
+      <btypes:TYPE>
+	<mbpair>
+	  <tvar name="beta"/>
+	  <list>	  
+	    <mbpair>
+	      <tvar name="alpha"/>
+	      <mutable>
+		<bool/>
+	      </mutable>
+	    </mbpair>
+	  </list>
+	</mbpair>
+      </btypes:TYPE>
+      is first inferred for both 
+      <btypes:TYPE>
+	<id name="l1"/>
+	<text content=" and "/>
+	<id name="l2"/>	
+      </btypes:TYPE> (due to copies at list construction and
+	binding). In the case of 
+      <btypes:TYPE>
+	<id name="l1"/>
+      </btypes:TYPE>, the final type is resolved to
+      <btypes:TYPE>
+	<list>	  
+	  <mutable>
+	    <bool/>
+	  </mutable>
+	</list>
+      </btypes:TYPE> in accordance to the hints since we have no
+      further information. The type of
+      <btypes:TYPE>
+	<id name="l2"/>
+      </btypes:TYPE>
+      is
+      <btypes:TYPE>
+	<mutable>
+	  <list>
+	    <bool/>
+	  </list>
+	</mutable>
+      </btypes:TYPE>, since we have a (consistent) annotation -- 
+      there are no unresolved maybe types. Further, under this
+      scheme, the  
+      <btypes:TYPE>
+	<id name="listCopy"/>
+      </btypes:TYPE> example described in the previous section gets
+      the more intuitive type
+      <btypes:TYPE> 
+	<forall>
+	  <tvar name="alpha"/>
+	  <fn>
+	    <list>
+	      <tvar name="alpha"/>
+	    </list>
+	    <list>
+	      <tvar name="alpha"/>
+	    </list>
+	  </fn>
+	</forall>
+      </btypes:TYPE>.
+      In the case of conflicting hints, we pick the most immutable
+      type obtainable from all hints. This ensures that inferred types
+      are always deterministic. For example:
+      <br/>
+      <btypes:TYPE> 
+	<let>
+	  <id name="bp"/>
+	  <if br2="24">
+	    <true/>
+	    <tqExpr>
+	      <Pair>
+		<true/>
+		<false/>
+	      </Pair>
+	      <pair>
+		<mutable>
+		  <bool/>
+		</mutable>
+		<bool/>
+	      </pair>
+	    </tqExpr>
+	    <tqExpr>
+	      <Pair>
+		<false/>
+		<true/>
+	      </Pair>
+	      <pair>
+		<bool/>
+		<mutable>
+		  <bool/>
+		</mutable>
+	      </pair>
+	    </tqExpr>
+	  </if>
+	  <unspecified/>
+	</let>
+	<text content="      "/>
+	<symbol name="par"/>
+	<text content="      "/>
+	<tqExpr>
+	  <id name="bp"/>
+	  <pair>
+	    <bool/>
+	    <bool/>
+	  </pair>
+	</tqExpr>
+      </btypes:TYPE>
+      <br/>
+      Here, the hints provided by the two branches
+      of the <progident>if</progident> do not agree, and we
+      resolve the conflict by picking 
+      <btypes:TYPE> 
+	<pair>
+	  <bool/>
+	  <bool/>
+	</pair>
+      </btypes:TYPE> as the effective hint.
+    </p>
+    <p>
+      In the case of locally defined identifiers, the top-most
+      mutability is inferred by studying the syntactic usage of the
+      identifier. That is, if the identifier is used as the target of
+      an assignment (<progident>:=</progident>), it is given a
+      shallowly mutable type. This is an <foreignphrase>ad
+	hoc</foreignphrase> rule that reduces the need for
+      explicit programmer annotations in the common
+      case like iterators. 
+      In a full language like BitC, this rule
+      must not be used for globals in order to keep inference
+      deterministic. Further, this ``infer mutability first'' rule
+      cannot, in general, be extended beyond shallow mutability. For
+      example, in the expression
+      <btypes:TYPE> 
+	<let>
+	  <id name="fPtr"/>
+	  <dup>
+	    <lambda>
+	      <id name="x"/>
+	      <id name="x"/>
+	    </lambda>
+	  </dup>
+	  <Pair>
+	    <apply>
+	      <id name="useF1"/>
+	      <id name="fPtr"/>
+	    </apply>
+	    <apply>
+	      <id name="useF2"/>
+	      <id name="fPtr"/>
+	    </apply>
+	  </Pair>
+	</let>
+      </btypes:TYPE>,      
+      we do not have enough local information
+      <em>before</em> type inference to determine whether
+      <btypes:TYPE> 
+	<id name="useF1"/>
+      </btypes:TYPE>
+      and
+      <btypes:TYPE> 
+	<id name="useF2"/>
+      </btypes:TYPE>
+      set the contents of the cell pointed to by
+      <btypes:TYPE> 
+	<id name="fPtr"/>
+      </btypes:TYPE>, or use it polymorphically.
+    </p>
+    <p>
+      Due to copy compatibility, two function types are <em>equal</em>
+      regardless of the shallow mutability of the argument and return
+      types. Therefore, we enforce a syntactic restriction that all
+      function types must be written with immutable types at copy
+      compatible positions. The intuition here is that type of a
+      function must be described in the interface form, and must hide
+      the ``internal'' mutability information. For example, for the
+      function definition 
+      <btypes:TYPE> 
+	<let>
+	  <id name="f"/>
+	  <lambda>
+	    <id name="x"/>
+	    <assign>
+	      <id name="x"/>
+	      <true/>
+	    </assign>
+	  </lambda>
+	  <unspecified/>
+	</let>
+      </btypes:TYPE>, the external type is
+      <btypes:TYPE> 
+	<tqExpr>
+	  <id name="f"/>
+	  <fn>
+	    <bool/>
+	    <unit/>
+	  </fn>
+	</tqExpr>
+      </btypes:TYPE>, and the internal type is
+      <btypes:TYPE> 
+	<tqExpr>
+	  <id name="f"/>
+	  <fn>
+	    <mutable>
+	      <bool/>
+	    </mutable>
+	    <unit/>
+	  </fn>
+	</tqExpr>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      We must ensure that the internal types of a function
+      do not influence the result type of applications, but the effect
+      of arguments on the return types must be preserved. This ensures
+      that the implementation of an abstraction can be changed (ex:
+      from a pure recursive computation to loop involving mutation)
+      unbeknownst to its callers. For example:
+    </p>
+    <table>
+      <tbody>
+	<tr valign="top">
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<let>
+		  <tqExpr>
+		    <id name="p"/>
+		    <mutable>
+		      <bool/>
+		    </mutable>
+		  </tqExpr>
+		  <true/>
+		  <nothing/>
+		</let>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>	    
+	      <btypes:TYPE>
+		<group>
+		  <text content="      "/>
+		  <symbol name="par"/>
+		  <text content="      "/>
+		  <tqExpr>
+		    <id name="p"/>
+		    <mutable>
+		      <bool/>
+		    </mutable>
+		  </tqExpr>
+		</group>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	</tr>
+	<tr valign="top">	
+	  <td>
+	    <p>
+	      &nbsp;&nbsp;&nbsp;
+	      <btypes:TYPE>
+		<let>
+		  <id name="f"/>
+		  <lambda>
+		    <id name="x"/>
+		    <id name="p"/>
+		  </lambda>
+		  <let>
+		    <id name="g"/>
+		    <lambda>
+		      <id name="x"/>
+		      <id name="x"/>
+		    </lambda>
+		    <nothing/>
+		  </let>
+		</let>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<group>
+		  <text content="      "/>
+		  <symbol name="par"/>
+		  <text content="      "/>
+		  <tqExpr>
+		    <id name="f"/>
+		    <forall>
+		      <tvar name="alpha"/>
+		      <fn>
+			<tvar name="alpha"/>
+			<bool/>
+		      </fn>
+		    </forall>
+		  </tqExpr>
+		  <text content=" ; "/>
+		  <tqExpr>
+		    <id name="g"/>
+		    <forall>
+		      <tvar name="alpha"/>
+		      <fn>
+			<tvar name="alpha"/>
+			<tvar name="alpha"/>
+		      </fn>
+		    </forall>
+		  </tqExpr>
+		</group>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	</tr>
+	<tr valign="top">
+	  <td>
+	    <p>
+	      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	      <btypes:TYPE>
+		<let>
+		  <id name="ff"/>
+		  <apply>
+		    <id name="f"/>
+		    <id name="p"/>
+		  </apply>
+		  <let>		  
+		    <id name="gg"/>
+		    <apply>
+		      <id name="g"/>
+		      <id name="p"/>
+		    </apply>
+		    <unspecified/>
+		  </let>
+		</let>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	  <td>
+	    <p>
+	      <btypes:TYPE>
+		<group>
+		  <text content="      "/>
+		  <symbol name="par"/>
+		  <text content="      "/>
+		  <tqExpr>
+		    <id name="ff"/>
+		    <bool/>
+		  </tqExpr>
+		  <text content=" ; "/>
+		  <tqExpr>
+		    <id name="gg"/>
+		    <mutable>
+		      <bool/>
+		    </mutable>
+		  </tqExpr>
+		</group>
+	      </btypes:TYPE>
+	    </p>
+	  </td>
+	</tr>
+      </tbody>
+    </table>
+    <p>
+      The function
+      <btypes:TYPE>
+	<id name="f"/> 
+      </btypes:TYPE>
+      returns 
+      <btypes:TYPE>
+	<tqExpr>
+	  <id name="p"/> 
+	  <mutable>
+	    <bool/>
+	  </mutable>
+	</tqExpr>
+      </btypes:TYPE>, regardless of its input.
+      The external type of 
+      <btypes:TYPE>
+	<id name="f"/> 
+      </btypes:TYPE> abstracts away the mutability of 
+      <btypes:TYPE>
+	<id name="p"/> 
+      </btypes:TYPE>, and thus,
+      <btypes:TYPE>
+	<id name="ff"/> 
+      </btypes:TYPE> gets the type
+      <btypes:TYPE>
+	<bool/>
+      </btypes:TYPE>. 
+      <btypes:TYPE>
+	<id name="g"/> 
+      </btypes:TYPE>
+      is an identity function which returns its argument. 
+      The external type of 
+      <btypes:TYPE>
+	<id name="g"/> 
+      </btypes:TYPE> preserves the mutability of the actual argument
+      <btypes:TYPE>
+	<id name="p"/> 
+      </btypes:TYPE>, and thus
+      <btypes:TYPE>
+	<id name="gg"/> 
+      </btypes:TYPE> gets the type 
+      <btypes:TYPE>
+	<mutable>
+	  <bool/>
+	</mutable>
+      </btypes:TYPE>.
+    </p>
+    <p>
+      <em>Mutability Polymorphism:</em>
+      A type is said to be mutability-polymorphic if it ranges over
+      all [im]mutability variants of a particular type. 
+      For example, 
+      <btypes:TYPE>
+	<forall>
+	  <tvar name="alpha"/>
+	  <mbpair>
+	    <tvar name="alpha"/>
+	    <bool/>
+	  </mbpair>
+	</forall>
+      </btypes:TYPE> is mutability polymorphic over 
+      <btypes:TYPE>
+	<bool/>
+      </btypes:TYPE>. 
+      By far the most useful case of this feature is to
+      define functions that are mutability-polymorphic over concrete
+      types, since functions with a polymorphic type such as 
+      <btypes:TYPE>
+	<forall>
+	  <tvar name="alpha"/>
+	  <fn>
+	    <tvar name="alpha"/>
+	    <tvar name="alpha"/>
+	  </fn>
+	</forall>
+      </btypes:TYPE> are polymorphic over all
+      types, mutable or immutable.
+      The above inference algorithm tries to heuristically fix the
+      mutability of all expressions (including functions). However,
+      this behavior can be overridden by explicit annotation. For
+      example, the definition: 
+      <br/>
+      <btypes:TYPE>
+	<let>
+	  <tqExpr>
+	    <id name="allTrue"/>
+	    <forall>
+	      <tvar name="alpha"/>
+	      <fn>
+		<List>
+		  <mbpair>
+		    <tvar name="alpha"/>
+		    <bool/>
+		  </mbpair>
+		</List>
+		<bool/>
+	      </fn>
+	    </forall>
+	  </tqExpr>
+	  <unspecified/>
+	  <unspecified/>
+	</let>
+      </btypes:TYPE>
+      <btypes:TYPE>
+	<symbol name="par"/>
+	<text content="      "/>
+	<tqExpr>
+	  <id name="allTrue"/>
+	  <forall>
+	    <tvar name="alpha"/>
+	    <fn>
+	      <List>
+		<mbpair>
+		  <tvar name="alpha"/>
+		  <bool/>
+		</mbpair>
+	      </List>
+	      <bool/>
+	    </fn>
+	  </forall>
+	</tqExpr>
+      </btypes:TYPE>
+      <br/>
+      defines
+      <btypes:TYPE>
+	<id name="allTrue"/>
+      </btypes:TYPE>,
+      a function whose argument is mutability-polymorphic over 
+      <btypes:TYPE>
+	<List>
+	  <bool/>
+	</List>
+      </btypes:TYPE>.
+    </p>
+  </sect1>
+  <sect1 id="formal">
+    <title>Formalization</title>
+    <p>
+      We now formalize our type system and inference
+      algorithm. Due to space limitations, we will limit our
+      presentation to the following subset of 
+      <btypes:TYPE>
+	<language/>
+      </btypes:TYPE>, called
+      <btypes:TYPE>
+	<language dash="'"/>
+      </btypes:TYPE>.
+    </p>
+    <btypes:TYPE>        
+      <grammar>
+        <bnf desc="Identifiers">
+          <id/>
+          <alternatives etc="yes">
+            <id name="y"/>
+            <id name="z"/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Stack Locations"> 
+          <sLoc/>
+          <alternatives etc="yes">
+            <sLoc num="1"/>
+            <sLoc num="2"/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Heap Locations">
+          <hLoc/>
+          <alternatives etc="yes">
+            <hLoc num="1"/>
+            <hLoc num="2"/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Locations">
+          <loc/>
+          <alternatives>
+            <sLoc/>
+            <hLoc/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Values">
+          <aVal/>
+          <alternatives>
+            <Unit/>
+            <true/> 
+
+            <false/>
+            <hLoc/>
+            <lambda>
+              <id/>
+              <aExpr/>
+            </lambda>
+          </alternatives>
+        </bnf>
+        <bnf desc="lvalues">
+          <lVal/>
+          <alternatives>
+            <sLoc/>
+            <deref>
+              <hLoc/>
+            </deref>
+          </alternatives>
+        </bnf>
+        <bnf desc="Expressions">
+          <aExpr/>
+          <alternatives>
+            <aVal/>
+            <sLoc/>
+            <apply>
+              <aExpr/>
+              <aExpr/>
+            </apply>
+            <tqExpr>
+              <aExpr/>
+              <type/>
+            </tqExpr>
+            <assign>
+              <aExpr/>
+              <aExpr/>
+            </assign> 
+          </alternatives>
+        </bnf>
+        <bnfc desc="">
+          <alternatives>
+            <dup>
+              <aExpr/>
+            </dup>
+            <deref>
+              <aExpr/>
+            </deref>
+          </alternatives>
+        </bnfc>
+        <bnfc desc="">
+          <alternatives>
+            <if>
+              <aExpr/>
+              <aExpr/>
+              <aExpr/>
+            </if>
+          </alternatives>
+        </bnfc>
+        <bnfc desc="">
+          <alternatives>
+            <let kind="k">
+              <tqExpr optional="yes">
+                <id/>
+                <type/>
+              </tqExpr>
+              <aExpr/>
+              <aExpr/>
+            </let>
+          </alternatives>
+        </bnfc>
+        <bnf desc="Let-kinds">
+          <lKind/>
+          <alternatives>
+            <text content="-"/>
+            <lKind k="var"/>
+            <lKind k="mono"/>
+            <lKind k="poly"/>
+          </alternatives>
+        </bnf>
+        <bnf desc="Types">
+          <type/>
+          <alternatives>
+            <tvar name="alpha"/>
+            <unit/>
+            <bool/>
+            <fn><type/><type/></fn>                  
+          </alternatives>                
+        </bnf>
+        <bnfc desc="ref / pointer">
+          <alternatives>
+            <ref><type/></ref>
+          </alternatives> 
+        </bnfc>
+        <bnfc desc="Mutable type">
+          <alternatives>
+            <mutable><type/></mutable>
+          </alternatives>
+        </bnfc>
+        <bnf desc="Type Scheme">
+          <aTS/>
+          <alternatives>
+            <type/>
+            <forall>                    
+              <tvar name="alpha"/>
+              <aTS/>
+            </forall>
+          </alternatives>
+        </bnf>
+      </grammar>
+    </btypes:TYPE>
+    <br/>
+    <p>
+      All the above syntactic forms can be parenthesized without
+      change in meaning. The let-kind ``-'' is a placeholder for the
+      unkinded (input) <progident>let</progident> form.
+      A substitution is of Z for Y in X is written using the standard
+      notation:
+      <btypes:TYPE>
+	<subst>
+	  <text content="X"/>
+	  <text content="Y"/>
+	  <text content="Z"/>          
+	</subst>
+      </btypes:TYPE>.
+    </p>
+    <p>      
+      The calculus of 
+      <btypes:TYPE>
+	<language dash="'"/>
+      </btypes:TYPE> defines two kinds of
+      locations: stack locations holding unboxed values, and heap
+      locations holding boxed values. Heap locations are first class
+      values, but stack locations are not. This distinction
+      is sufficient to illustrate the two cases that must be handled
+      by the type system: the types of values passed / copied by
+      value (only) need to be copy compatible, but the types of values passed by
+      reference must be strictly equal. More complex rules can be
+      constructed based on these primitive cases.
+    </p>
+    <p>
+      In this calculus, we make a distinction between two ``kinds'' of 
+      <progident>let</progident> expressions &mdash;      
+      <btypes:TYPE>
+        <let kind="m"/>
+      </btypes:TYPE>: monomorphic, possibly mutable
+      definition, and
+      <btypes:TYPE>
+        <let kind="p"/>
+      </btypes:TYPE>: polymorphic definitions.
+      The two kinds of <progident>let</progident> expressions have
+      different execution semantics. This distinction is
+      similar to Smith and Volpano's Polymorphic-C&nbsp;<cite
+        ref="Smith1998polymorphicC"/>. However, unlike 
+      Polymorphic-C, let-kind is <em>meta syntax</em>, and is not a
+      part of the input program.
+      The correct kind of <progident>let</progident> is
+      inferred from the static type information.
+      The kind ``-'' is a placeholder for the unkinded input
+      <progident>let</progident> expression.
+      We write 
+      <btypes:TYPE>
+        <let kind="a"/>
+      </btypes:TYPE> to range over 
+      <btypes:TYPE>
+        <let kind="m"/>
+      </btypes:TYPE> and
+      <btypes:TYPE>
+        <let kind="p"/>
+      </btypes:TYPE>.      
+    </p>
+    <xi:include href="include/heuristic/opsem.xmli"/>
+    <xi:include href="include/heuristic/semantics.xmli"/>
+    <xi:include href="include/heuristic/locsem.xmli"/>
+    <xi:include href="include/heuristic/decl.xmli"/>
+    <xi:include href="include/heuristic/subtype.xmli"/>
+    <xi:include href="include/heuristic/type_system.xmli"/>
+    <xi:include href="include/heuristic/intermediate.xmli"/>
+    <xi:include href="include/heuristic/infer.xmli"/>
+    <xi:include href="include/heuristic/unify.xmli"/>
+    <xi:include href="include/heuristic/solve.xmli"/>
+    <xi:include href="include/heuristic/heuristic.xmli"/>
+  </sect1>
+  <sect1 id="related">
+    <title>Related Work</title>
+    <p>
+      Grossman&nbsp;<cite ref="Grossman2006qtypes"/> provides a theory
+      of using quantified types with imperative C style mutation and
+      <progident>&amp;</progident> operator for Cyclone. However, his
+      formalization requires explicit annotation for all polymorphic
+      definitions and instantiations. Since C (and Cyclone) have no
+      notion of immutability, both languages require explicit
+      annotation of polymorphism. In contrast, we believe that the
+      best way to integrate polymorphism into the systems programming
+      paradigm is by automatic &mdash; albeit incomplete &mdash;
+      inference. A further contribution of our work (in comparison
+      to&nbsp;<cite ref="Grossman2006qtypes"/>) is that we give a
+      formal specification and proof of correctness of the inference
+      algorithm, not just the type system.
+    </p>
+    <p>
+      C's <progident>const</progident> notion of immutability-by-alias
+      offers localized checking of immutability properties, and
+      encourages good programming practice by serving as documentation
+      of programmers intentions.  Other systems have proposed
+      immutability-by-name&nbsp;<cite ref="DeLineMSRVault"/>,
+      referential immutability&nbsp;<cites>
+	<cite ref="shapiro1999EROS"/>
+	<cite ref="tschantz2005javari"/>
+      </cites>
+      (transitive immutability-by-reference),
+      <foreignphrase>etc.</foreignphrase> These techniques are
+      orthogonal and complementary to the immutability-by-location
+      property in BitC/<btypes:TYPE><language/></btypes:TYPE>. For
+      example, we could have types like
+      <btypes:TYPE>
+	<paren>
+	  <text content="const "/>
+	  <mutable>
+	    <type/>
+	  </mutable>
+	</paren>
+      </btypes:TYPE> that can express
+      both global and local usage properties of a location.
+    </p>
+    <p>
+      A monadic model&nbsp;<cite ref="peytonjones1993monads"/>
+      of mutability is used in pure functional languages like
+      Haskell&nbsp;<cite ref="peytonjones2003haskellrevisedreport"/>.
+      In this model, the type system distinguishes side-effecting
+      computations from pure ones (and not just mutable locations
+      from immutable ones). Even though this model is beneficial for
+      integration with verification systems, it is considerably
+      different from the normal programming idioms used by systems
+      programmers. For example,  Hughes argues that there is no
+      satisfactory way of creating and using global mutable variables
+      using monads&nbsp;<cite ref="Hughes2004HaskellGlobals"/>. 
+      There have been proposals for adding unboxed representation
+      control to Haskell&nbsp;<cites>
+	<cite ref="peytonjones1991unboxed"/>
+	<cite ref="Diatchki2005Representation"/>
+      </cites>. However, these systems are pure and therefore and do
+      not consider the effects of mutability.
+    </p>
+    <p>
+      Cqual&nbsp;<cite ref="foster2006Cqual"/> provides a framework
+      of type qualifiers, which can be used to infer maximal
+      <progident>const</progident> qualifications for C
+      programs. However, CQual does not deal with polymorphism
+      of types. In a monomorphic language, we can infer types and
+      qualifiers independently. Adding polymorphism to CQual
+      would introduce substantial challenges, particularly if
+      polymorphism should be automatically inferred. The inference of
+      types and qualifiers (mutability) becomes co-dependent: we need
+      base types to infer qualifiers; but, we also need the qualifiers
+      to infer base types due to the value
+      restriction. BitC/<btypes:TYPE><language/></btypes:TYPE> supports
+      a polymorphic language and performs simultaneous
+      inference of base types and mutability.
+    </p>
+  </sect1>
+  <sect1 id="conclusion">
+    <title>Conclusions</title>
+    <p>
+      In this paper, we have proposed a type system that integrates
+      all of unboxed representation, well-founded first-class
+      mutability, and polymorphism. The mutability model is expressive
+      enough to permit mutation of unboxed/stack locations, and at the
+      same time guarantees that types are definitive about the
+      mutability of every location across all aliases. 
+      This type system meets the requirements for systems programming
+      languages. 
+    </p>
+    <p>
+      First class mutability introduces challenges for type inference
+      at copy boundaries. There is a fundamental conflict of goals
+      between the inference of principal types and copy
+      compatibility. We have proposed an inference algorithm that
+      resolves this conflict through a combination of hinting
+      mechanisms and selective heuristics. This algorithm is
+      deterministic, does not require whole program analysis, and
+      minimizes programmer annotations in the common case. We have
+      provided a formal framework for this type system, and
+      implemented it as part of the BitC compiler. The source code can
+      be obtained from <progident>http://bitc-lang.org</progident>.
+    </p>
+    <p>            
+      The bootstrap compiler for BitC has been implemented in
+      C++. Currently, the backend emits portable C code. The
+      core of the compiler involves 28,686 lines of C++ code, of
+      which implementation of the type system accounts for about 6,894
+      lines. An informal description of the inference algorithm
+      for full BitC can be found in&nbsp;<cite ref="sridhar2006plos"/>.            
+    </p>
+  </sect1>
+  <!--   <sect1 id="acknowledgments" numbered="no"> -->
+  <!--     <title>Acknowledgments</title> -->
+  <!--     <p> -->
+  <!--       <em>Undisclosed for anonymization.</em> -->
+  <!--       Mark Jones was kind enough to educate us on type -->
+  <!--       classes, which provided an essential basis for integrating these -->
+  <!--       ideas. Foster, Iavor, Pari, bitc-dev... -->
+  <!--     </p> -->
+  <!--   </sect1> -->
+  <bibliography>
+    <bibentry label="Biagioni2001FoxNet"> 
+      <!-- <key>Biagioni01</key> -->
+      E. Biagioni, R. Harper, and P. Lee
+      ``A network protocol stack in Standard ML''
+      <doctitle>
+        Higher Order and Symbolic Computation, Vol.14, No.4
+      </doctitle>,
+      2001.
+    </bibentry>
+    <bibentry label="DeLineMSRVault">
+      <!-- <key>DeLine01</key> -->
+      R. Deline and M. F&auml;hndrich,
+      ``VAULT: a programming language for reliable systems''
+      <link href="http://research.microsoft.com/vault">
+        <progident>http://research.microsoft.com/vault</progident>
+      </link>, 2001
+    </bibentry>
+    <bibentry label="Derby1999Foxnet">
+      <!-- <key>Derby99</key> -->
+      H. Derby,
+      ``The performance of FoxNet 2.0''
+      <doctitle>
+	Technical Report CMU-CS-99-137
+      </doctitle>
+      School of Computer Science, Carnegie Mellon University, 
+      June 1999. 
+    </bibentry> 
+    <bibentry label="foster2006Cqual">
+      <!-- <key>Foster06</key> -->
+      J. S. Foster, R. Johnson, J. Kodumal, and A. Aiken
+      ``Flow-Insensitive Type Qualifiers''
+      <doctitle>
+	Trans. on Programming Languages and Systems. 
+      </doctitle>
+      28(6):1035-1087, Nov. 2006.  
+    </bibentry>
+    <bibentry label="Grossman2006qtypes">
+      <!-- <key>Grossman06</key> -->
+      D. Grossman, ``Quantified Types in an Imperative Language''
+      <doctitle>ACM Transactions on Programming Languages and Systems
+      </doctitle>, 
+      2006.
+    </bibentry>
+    <bibentry label="Hughes2004HaskellGlobals">
+      <!-- <key>Hughes04</key> -->
+      J. Hughes 	 
+      ``Global variables in Haskell''
+      <doctitle>
+	Journal of Functional Programming archive
+      </doctitle>
+      Volume 14,  Issue 5, Sept. 2004.
+    </bibentry>
+    <bibentry label="Diatchki2005Representation">
+      <!-- <key>Diatchki05</key> -->
+      I. S. Diatchki, M. P. Jones, and R. Leslie.
+      ``High- level Views on Low-level Representations.''
+      <doctitle>Proc. ACM Int. Conference on Functional
+        Programming</doctitle> pp. 168&ndash;179, 
+      2005.
+    </bibentry>
+    <bibentry label="ISO1995Ada">
+      <!-- <key>ISO95</key> -->
+      International Std. Organization
+      <doctitle>ISO/IEC 8652:1995 (Information
+      Technology &mdash; Prog.
+      Languages &mdash; Ada)</doctitle>, 1995.
+    </bibentry>
+    <bibentry label="ISO1998C++">
+      <!-- <key>ISO98</key> -->
+      International Std. Organization
+      <doctitle>ISO/IEC FDIS 14882:1998(E) (Prog.
+	Languages - C++)</doctitle>, 1998.
+    </bibentry>
+    <bibentry label="ISO1999ANSI-C">
+      <!-- <key>ISO99</key> -->
+      International Std. Organization
+      <doctitle>ISO/IEC 9899:1999 (Prog.
+	Languages - C)</doctitle>, 1999.
+    </bibentry>
+    <bibentry label="Jim2002Cyclone">
+      <!-- <key>Jim02</key> -->
+      T. Jim, G. Morrisett, D. Grossman, M. Hicks, J. Cheney, and
+      Y. Wang  
+      ``Cyclone: A safe dialect of C.'' 
+      <doctitle>
+        Proc. of USENIX Annual Technical Conference 
+      </doctitle>
+      pp 275­288, 2002. 
+    </bibentry>
+    <bibentry label="jones1995qualtypes">
+      <!-- <key>Jones95</key> -->
+      M. P. Jones
+      ``Qualified types: theory and practice.''
+      <doctitle>
+	Cambridge Distinguished Dissertations In Computer Science
+      </doctitle>
+      ISBN:0-521-47253-9, 1995
+    </bibentry>
+    <bibentry label="peytonjones1991unboxed">
+      <!-- <key>Jones91</key> -->
+      S. L. Peyton Jones and J. Launchbury
+      ``Unboxed values as first class citizens in a non-strict
+      functional language.''
+      <doctitle>
+	Functional Programming Languages and Computer Architecture
+      </doctitle>,
+      1991
+    </bibentry>
+    <bibentry label="peytonjones1993monads">
+      <!-- <key>Jones93</key> -->
+      S. L. Peyton Jones and P. Wadler
+      ``Imperative functional programming.''
+      <doctitle>
+	Proc. ACM SIGPLAN Principles of Programming Languages.
+      </doctitle>,
+      1993
+    </bibentry>  
+    <bibentry label="peytonjones2003haskellrevisedreport">
+      <!-- <key>Jones03</key> -->
+      S. L. Peyton Jones (ed.). <doctitle>Haskell 98 Language and
+	Libraries: The Revised report</doctitle>. Cambridge University
+	Press, 2003.
+    </bibentry>
+    <bibentry label="csharpSpec"> 
+      <!-- <key>ECMA06</key> -->
+      ECMA International
+      ``Standard ECMA-334 C# Language Specification''
+      <link href="http://www.ecma-international.org/publications/standards/Ecma-334.htm">
+        <progident>http://www.ecma-international.org/publications/standards/Ecma-334.htm</progident>
+      </link><!--,2006.-->
+    </bibentry>
+    <bibentry label="Milner1978W">
+      <!-- <key>Milner78</key> -->
+      R. Milner 
+      ``A theory of type polymorphism in programming.''
+      <doctitle>
+        Journal of Computer and System Sciences
+      </doctitle>
+      pp 348-375, 1978.
+    </bibentry>
+    <bibentry label="milner97definition">
+      <!-- <key>Milner97</key> -->
+      R. Milner, M. Tofte, R. Harper, and D.MacQueen. 
+      <doctitle>The Definition of Standard ML - Revised</doctitle>
+      The MIT Press, May 1997.
+    </bibentry>
+<!--     <bibentry label="necula2002CCured"> -->
+<!--       <key>Necula02</key> -->
+<!--       G. Necula, S. Mcpeak, and W. Weimer  -->
+<!--       ``CCured: Type-safe retrofitting of legacy code.'' -->
+<!--       <doctitle> -->
+<!--         Proc. of Symposium on Principles of Programming Languages -->
+<!--       </doctitle>  -->
+<!--       pp 128­139, 2002. -->
+<!--     </bibentry> -->
+    <bibentry label="javaSpec">
+      <!-- <key>Gosling05</key> -->
+      J. Gosling, B. Joy, G. Steele, and G. Bracha
+      ``The Java Language Specification,'' Third Edition
+      <link href="http://java.sun.com/docs/books/jls">
+        <progident>http://java.sun.com/docs/books/jls</progident>
+      </link>
+    </bibentry>
+    <bibentry label="pythonSpec"> 
+      <!-- <key>Rossum06</key> -->
+      G. van Rossum, ``Python Reference Manual''
+      F. L. Drake, Jr. (ed.)
+      <link href="http://docs.python.org/ref/ref.html">
+        <progident>http://docs.python.org/ref/ref.html</progident>
+      </link>, 2006.
+    </bibentry>
+    <bibentry label="shapiro1999EROS">
+      <!-- <key>Shapiro99</key> -->
+      J. S. Shapiro, J. M. Smith, and D. J. Farber. 
+      ``EROS: a fast capability system''
+      <doctitle>
+	ACM Symposium on Operating Systems Principles
+      </doctitle>,
+      Dec. 1999.
+    </bibentry>
+    <bibentry label="shapBitcSpec2006">
+      <!-- <key>U1</key> -->
+      J. S. Shapiro, S. Sridhar, M. S. Doerrie, ``BitC Language
+      Specification''
+      <link
+      href="http://bitc-lang.org/docs/bitc/spec.html">
+      <progident>http://www.bitc-lang.org/docs/bitc/spec.html</progident>
+      </link>
+    </bibentry>
+    <bibentry label="Smith1998polymorphicC">
+      <!-- <key>Smith98</key> -->
+      G. Smith and D. Volpano. 
+      ``A sound polymorphic type system for a dialect of C.''
+      <progident>
+	Science of Computer Programming
+      </progident>
+      <b>32</b>(2--3):49--72, 1998. 
+    </bibentry>
+    <bibentry label="sridhar2006plos">
+      <!--  <key>Sridhar06</key> -->
+      S. Sridhar and J. S. Shapiro. ``Type Inference for Unboxed Types
+      and First Class Mutability'' 
+      <doctitle>Proc. 3rd Workshop on Prog. Languages and
+	Operating Systems</doctitle>, 2006. 
+    </bibentry>
+    <bibentry label="Tarditi1996TIL"> 
+      <!-- <key>Tarditi96</key> -->
+      D. Tarditi, G. Morrisett, P. Cheng, C. Stone, R. Harper, and
+      P. Lee. 
+      ``TIL: A type-directed optimizing compiler
+      for ML''
+      <doctitle>
+        Proc. ACM SIGPLAN PLDI
+      </doctitle>, 1996. 
+    </bibentry>
+    <bibentry label="tschantz2005javari">
+      <!-- <key>Tschantz05</key> -->
+      M. S. Tschantz and M. D. Ernst,     
+      ``Javari: Adding reference immutability to Java''
+      <doctitle>
+	Object-Oriented Programming Systems, Languages, and
+	Applications
+      </doctitle>,
+      Oct 2005.
+    </bibentry>
+    <bibentry label="wrightValRes1995">
+      <!-- <key>Wright95</key> -->
+      A. Wright, ``Simple Imperative Polymorphism'' 
+      <doctitle> Lisp and Symbolic Comp.</doctitle>
+      8(4):343-355, 1995.
+    </bibentry>
+  </bibliography>
+</article>
+
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->
+
+<!--  LocalWords:  sysinfer twocolumn ptsz documentclass sigplanconf firstname
+ -->
+<!--  LocalWords:  authorgroup orgname mdash Coyotos shapiro coyotos ACL acl se
+ -->
+<!--  LocalWords:  kaufmann milner peytonjones haskellrevisedreport Kernighan
+ -->
+<!--  LocalWords:  CCured necula Condit cycloneManual Grossman qtypes Volpano
+ -->
+<!--  LocalWords:  SmithVolpanoPTVR const cpi cong ncong foreignphrase hoc mb
+ -->
+<!--  LocalWords:  sridharmutinfer boolPair sem dup bnf desc sLoc hLoc aVal ARG
+ -->
+<!--  LocalWords:  aExpr lvalues lVal tqExpr bnfc opsem opState eval levalOp et
+ -->
+<!--  LocalWords:  evalOp floatingtable fullwidth Hrules opRule RVAL opPre dom
+ -->
+<!--  LocalWords:  mapsto opConc leval notin subst Diatchki defrepr monad Cqual
+ -->
+<!--  LocalWords:  SysObjC balogh sysobjc IEC Aacute aacute Zolt ouml rnyei ACM
+ -->
+<!--  LocalWords:  Proc ECOOP Kluwer auml hndrich SIGPLAN PLDI ndash Sriram MLC
+ -->
+<!--  LocalWords:  Rajamani SIGACT McCloskey Zhou HotOS USENIX dependentMut th
+ -->
+<!--  LocalWords:  IEEE Verlag Mads Tofte MacQueen Iavor hallgren Tolmach ICFP
+ -->
+<!--  LocalWords:  Sep shap fastcapsystem Farber Kiawah Mcpeak Weimer Harren Ph
+ -->
+<!--  LocalWords:  Morrisett PolymorphismTypeAnalysis Symp Shao Zhong DeLine im
+ -->
+<!--  LocalWords:  Deline Fahndrich LeroyOcaml Caml fahndrich Hawblitzel Hodson
+ -->
+<!--  LocalWords:  Lauris EUROSYS Leuven aiken MSR sridhar PLOS Hindley uint gg
+ -->
+<!--  LocalWords:  Worshop Northup online bitfield Arith dereferencing mVal dyn
+ -->
+<!--  LocalWords:  bPtr polyinstantiated updatable rvalues lval TypEvalPred aTS
+ -->
+<!--  LocalWords:  pred Csubst Pari ocaml anonymization ML's twelf Nipkow inria
+ -->
+<!--  LocalWords:  coq ppabs dereferences HaskellonProcessor mtverify jones TCL
+ -->
+<!--  LocalWords:  qualtypes texttt mtd lang xmli horz maxzOp minzOp eq maxz na
+ -->
+<!--  LocalWords:  minz covariant arg ret ceil Tsub locsem decl specsharp CADE
+ -->
+<!--  LocalWords:  Monads Carsten LNAI Paulson Wenzel HOL LNCS Millstein eiffel
+ -->
+<!--  LocalWords:  DeLineVault Schoeller Bernd Zhiming Liu FACS Rustan Leino ve
+ -->
+<!--  LocalWords:  Schulte CASSIS specsharpreleasenotes Smans Piessens tschantz
+ -->
+<!--  LocalWords:  javari leadin isZthTrue Pfenning mVec mLst backend ShaoRep
+ -->
+<!--  LocalWords:  leroyUBobj harperPoly RTTI polyinst letvar letarr defpure ol
+ -->
+<!--  LocalWords:  GHC VFiasco hohmuth BitC's releasenotes uuml ghcManual Tews
+ -->
+<!--  LocalWords:  plos iuml analyses TDjudge judgeOp Sjudge unin supeq TIjudge
+ -->
+<!--  LocalWords:  aSubMap corUp corUpOp solvability rmann unifications revalOp
+ -->
+<!--  LocalWords:  reval epsiv TypesBook leroy polymorphicC Launchbury monads
+ -->
+<!--  LocalWords:  stateinHaskell Wadler ceqOp neq FirstName LastName liveness
+ -->
+<!--  LocalWords:  Tarditi javaSpec csharpSpec DeLineMSRVault schemeSpec thinsp
+ -->
+<!--  LocalWords:  pythonSpec runtime marshall unmarshall FoxNet TCP IP SubMap
+ -->
+<!--  LocalWords:  Biagioni Volpano's unkinded mbpair OTH Edoardo Larus Abadi
+ -->
+<!--  LocalWords:  amd Barha Steensgaard Wobber Zill Gilad Bracha ECMA Rossum
+ -->
+<!--  LocalWords:  Cheng tyRule tyPre tyConc isEntity REFL CQual xml DOCTYPE fn
+ -->
+<!--  LocalWords:  OSDoc xmlns btypes docinfo pubdate dev bitc BitC incolumn al
+ -->
+<!--  LocalWords:  unboxed nbsp shapBitcSpec mut compat SparkAdaBook SML OCaml
+ -->
+<!--  LocalWords:  progident Foxnet literallayout forall IntLit defstruct fst
+ -->
+<!--  LocalWords:  snd defunion cdr inlined Diatchi Sys Usr typ bool stateful
+ -->
+<!--  LocalWords:  xyz dereferenced deref constness ndx ident ul li lvalue tvar
+ -->
+<!--  LocalWords:  behaviour ceq sz accessor wrightValRes monomorphic tradeoffs
+ -->
+<!--  LocalWords:  ness vec lst abc deftypeclass definstance num href LHS RHS
+ -->
+<!--  LocalWords:  aCtset br subtyping iff contravariant tvars Xform Commut CMU
+ -->
+<!--  LocalWords:  polyinstantiation microkernel datatypes bibentry doctitle cp
+ -->
+<!--  LocalWords:  SparkAda Doerrie Swaroop Multithreaded Multithreading useF
+ -->
+<!--  LocalWords:  Kodumal fPtr polymorphically asplas llncs notitle copyList
+ -->
+<!--  LocalWords:  optionalElse dereference mutLst nospace listCopy bp textit
+ -->
+<!--  LocalWords:  allTrue rvalue reified HaskellGlobals SRL colspan benefacts
+ -->
+	
+<!--  LocalWords:  ctype fnxn paren initsep colsep globals tbody valign td Loc
+ -->
+<!--  LocalWords:  Exprs TypeScheme Env Rval Oth cst Prog mutinfer de facto
+ -->
+<!--  LocalWords:  scriptsize FDIS
+ -->

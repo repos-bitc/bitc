@@ -42,16 +42,14 @@
 #include "LitValue.hxx"
 #include "Environment.hxx"
 #include "debug.hxx"
+#include <libsherpa/EnumSet.hxx>
+
+#include "shared_ptr.hxx"
+#define AST_SMART_PTR boost::shared_ptr
+#define AST_SUPERCLASS boost::enable_shared_from_this<AST>
 }
 
 %header { 
-
-using namespace sherpa;
-
-//template <class T> typedef struct environment;
-
-// Index into a pointer of an array or any object that implements the
-// [] operator.
 
 struct Type; 
 struct TypeScheme; 
@@ -59,209 +57,420 @@ struct spStruct;
 struct UocInfo;
 struct Instance;
  
+/// @brief Different classifications of identifiers that we might
+/// encounter. 
+///
+/// An IdentType is assigned by the resolver to each identifier AST
+/// node.  There are two types of constants in this
+/// enumeration. Constants whose names are of the form
+/// <code>id_<em>name</em></code> are identifier classifications. Each
+/// of these describes a particular type of identifier. All identifier
+/// AST nodes wll be assigned such a concrete classification.
+///
+/// Constants whose names are of the form
+/// <code>idc_<em>name</em></code> are identifier
+/// <em>categories</em>. These describe sets of classifications that
+/// are legal in a given occurrence context. For example, a normal use
+/// occurrence of an identifier in an expression might validly resolve
+/// to <code>id_value</code> (normal values), <code>id_ucon0</code>
+/// (union constructors having no elements, which are enumerands), or
+/// <code>id_method</code> (use-references to method identifiers). The
+/// identifier categories are primarily used in the resolver's
+/// recursive descent pass, where they specify what identifiers are
+/// legal in what positions.
+
 enum IdentType {
+  /// @brief An identifier whose classification is not yet decided. 
+  ///
+  ///This is the constructor-time default value that is assigned to
+  ///the identType field of the AST. It should not occur on any
+  ///identifier AST after the symbol resolution pass, except in
+  ///temporary ASTs that are introduced for expediency in various
+  ///later passes and then resolved.
   id_unresolved,
-  id_type,			// type name or type var, possibly ID_IS_CTOR
-  id_value,
-  id_constructor,		// constructor name, implies ID_IS_CTOR
-  id_field,			// field name
-  id_exn,
+  
+  /// @brief %Type variables.
+  id_tvar,
+
+  /// @brief Union/repr name.
+  id_union,
+
+  /// @brief Structure type name.
+  id_struct,
+
+  /// @brief %Type class name.
   id_typeclass,
-  //  id_module,
+
+  /// @brief %Type class method name.
+  id_method,
+
+  /// @brief Structure or union constructor field name.
+  id_field,
+  
+  /// @brief Locally bound name that references the exported subset of
+  /// an imported interface.
+  ///
+  /// This is the local name defined in this module, not the fully
+  /// qualified name.
   id_interface,
-  id_usebinding,		// bound by use form
-};
 
-enum primOp {
-  op_equals,
-  op_plus,
-  op_minus,
-  op_mul,
-  op_div,
-  op_mod   
-};
+  /// @brief An identifier defined at define, let, lambda,
+  /// do, switch, case.
+  id_value,
 
+  /// @brief Union constructor having one or more argument.
+  id_ucon,
+
+  /// @brief Union constructor taking no arguments.
+  id_ucon0,
+  
+  ///////////////////////////////////////////////////////////////////
+  //
+  // Anything below here is a category that is some union of
+  // IdentTypes above
+  //
+  ///////////////////////////////////////////////////////////////////
+  idc_FIRST_CATEGORY,
+  
+  /// @brief %Type, which is one of <code>id_tvar</code>,
+  /// <code>id_union</code>, or <code>id_struct</code>.
+  idc_type = idc_FIRST_CATEGORY,
+  
+  /// @brief Value, which is one of <code>id_value</code>,
+  /// <code>id_ucon0</code>, or <code>id_method</code>.
+  idc_value,
+
+  /// @brief Union constructor, which is one of <code>id_ucon</ucode>
+  /// or <code>id_ucon0</code>.
+  idc_uctor,
+  
+  /// @brief Constructor, which is one of <code>id_struct</code>,
+  /// <code>id_ucon</code>, or <code>id_ucon0</code>.
+  idc_ctor,
+
+  /// @brief An entity (value or constructor) that can be applied,
+  /// which is one of <code>id_value</code>, <code>id_method</code>,
+  /// <code>id_struct</code> or <code>id_ucon</code>.
+  idc_apply,
+};
+ 
+/// @brief Produces a printable string corresponding to the values in
+/// the above enumeration. 
  std::string identTypeToString(IdentType id);
 
+
 /* Declarations for AST FLAGS */
-#define ID_IS_TVAR       0x00000001u
-#define ID_IS_CTOR       0x00000002u
-#define AST_IS_VALPAT    0x00000010u  // ONLY for the ROOT of a case leg
-#define ID_IS_GLOBAL     0x00000020u
-#define ID_IS_GENSYM     0x00000040u  // internally generated name
-#define ID_IS_REFIZED    0x00000080u  
-#define LB_IS_ART        0x00000100u  // Let-binding  is 
-                                      // artificially introduced
-                                      // to facilitate temp introduction
-                                      // in SSA transformation phase.
 
-#define STRUCT_IS_CLSTR  0x00000200u  // This is a structure introduced
-                                      // by virtue of closure conversion.
-#define DEF_IN_PRELUDE   0x00000400u
-#define DEF_DECLARED     0x00000800u  // Used by the code-generator
-                                      // to prevent redundant declarations
-#define ID_IS_DO         0x00001000u  // ID is an identifier
-				      // introduced (as a letrec
-				      // bound identifier) by
-				      // re-writing a `do' loop. This
-				      // identifier is never
-				      // captured, except for the
-				      // recursive call.
- 
-#define ID_ENV_COPY       0x00002000u // Marked for type constructors
-                                      // and value constructors
-                                      // defined through
-                                      // (defstruct, defunion, and
-                                      // defexception). The
-                                      // type-scheme for these
-                                      // definitions must be copied
-                                      // even if there are no FTVs.
+ enum AstFlags {
 
- // -- available 0x4000u - 0x10000u  -- //    
-#define LOOP_APP         0x00020000u
-#define SELF_TAIL        0x00040000u
+   // @brief Useful to have an empty set initializer:
+   NO_FLAGS = 0,
 
-#define LB_IS_DUMMY      0x00080000u  // This let-binding is dummy,
-  	 		  	      // do not emit assignment.
-#define TVAR_IS_DEF      0x00100000u  // This is a type-variable that
-			 	      // appears in a use-position, but
-			 	      // acts like a definition. 
-#define ID_IS_PRIVATE    0x00200000u  // Global ID in source module with
-			 	      // no interface decl, so does not
-			 	      // escape file.
-#define ID_IS_METHOD     0x00400000u  // Typeclass method definitions
-#define LB_POSTPONED     0x00800000u  // Don't emit this letbinding
-                                      // at the let.
-#define ID_IS_FIELD      0x01000000u
-#define DEF_IS_ENTRYPT   0x02000000u  // ID is an entry point
+   /// @brief Identifier is bound in type-level scope.
+   ID_IS_GLOBAL = 0x00000001u,
+   /// @brief Identifier was internally generated by the compiler.
+   ID_IS_GENSYM = 0x00000002u,
 
-#define LB_REC_BIND      0x04000000u  // Is this let-binding a rec-binding?
+   /// Set in the tail recursion analysis pass to indicate that a
+   /// use-occurrence of an identifier is a reference to the function
+   /// currently being defined. Consulted in the SSA pass to add an
+   /// LB_IS_DUMMY marker to the emitted let binding. Consulted in the
+   /// gen-c pass to determine when looping rather than recursion should
+   /// be used.
+   SELF_TAIL = 0x00000004u,
 
-#define DEF_IS_EXTERNAL  0x08000000u 
-#define ENUM_UN          0x10000000u
-#define SINGLE_LEG_UN    0x20000000u
-#define CARDELLI_UN      0x40000000u
+   /// The SSA pass constructs some dummy let bindings. This is used to
+   /// mark them so that no assignment for them will later be emitted in
+   /// the code generator.
+   ///
+   /// The SSA pass uses a trick to convert expression style code
+   /// into statement style code. For example, in the expression
+   /// (if e1 e2 e3), if E1, E2 and E3 are SSA converted forms of 
+   /// e1, e2 and e3 respectively, the SSA converter will produce
+   /// 
+   /// (let* ((temp ((if E1 
+   ///                   (let* ((temp  E2)) temp)
+   ///                   (let* ((temp E3)) temp)))))
+   ///      ... rest of the code will use temp as the value of if-expr ... 
+   /// 
+   /// Here, for the BitC resolver's point of view, the inner temp is
+   /// different from the outer temp. So, it will resolve and type check
+   /// corectly. The outer temp will have the result of the appropriate
+   /// inner temp. 
+   ///
+   /// From the C code generator's point of view, we will ignore the
+   /// outer let* binding, since we cannot bind the result of
+   /// if-statements. This outer let* binding is therefore marked
+   /// LB_IS_DUMMY. The code generator will only declare one local
+   /// variable temp, and assign the result of the correct brach to
+   /// it. The rest of the code after the if statement is fine since it
+   /// just knows to use the name temp, which now stores the correct value. 
+   LB_IS_DUMMY = 0x00000008u,
 
-#define NULLABLE_UN      0x80000000u  // Special handling for nullable 'a
+   /// Do not emit an assignment for this let binding. This is a special
+   /// case similar to LB_IS_DUMMY. It is generated for like array, vector,
+   /// etc., which should be ignored by the code generator, as the
+   /// initialization will follow in a loop. 
+   LB_POSTPONED = LB_IS_DUMMY,
 
-///////////////// SECOND ROUND OF FLAGS  /////////////////////
+   /// Indicates a global identifier that is not exported from its
+   /// defining unit of compilation. These are emitted by the back end
+   /// with a static marker to enable later optimization by the C
+   /// compiler.
+   ID_IS_PRIVATE = 0x00000010u,
 
-#define ID_FOR_SWITCH    0x00000001u  // Identifier thhat is introduced
-                                      // because of switch -- can only
-                                      // appear in a dotted context
-#define AST_IS_LOCATION  0x00000002u  // Expr is a location
-#define ID_IS_CAPTURED   0x00000004u  // ID is closed over by something
+   /// Marks a definition that is an external program entry point, and
+   /// therefore a seed for polyinstantiation.
+   DEF_IS_ENTRYPT = 0x00000020u,
 
-                                      // The following
-                                      // Identifier-markers are
-                                      // applicable only to value
-                                      // identifiers, not to type
-                                      // identifiers. They are used
-                                      // in closure conversion to
-                                      // mark the various identifier
-                                      // nodes. 
-#define ID_IS_DEF        0x00000008u  // ID is a defining occurrence of
-				      // a binding
-#define ID_IS_USE        0x00000010u  // ID is a use occurrence of a
-                                      // binding 
-#define ID_IS_CLOSED     0x00000020u  // Use occurrence of a
-                                      // closed-over ID 
-#define ID_NEEDS_HEAPIFY 0x00000040u  // ID must be moved to heap due
-				      // to capture
-#define ID_IS_RECBOUND   0x00000080u  // ID is bound in recursive
-                                      // context 
-#define ID_IS_MUTATED    0x00000100u  // ID is target of SET!
-#define APP_IS_VALUE     0x00000200u  // -- depricated --
-                                      // This application is internally
-                                      // generated by the backend, and
-                                      // is this safe for value-restriction  
-#define APP_NATIVE_FNXN  0x00000400u  // -- depricated --
-#define ID_MUT_CLOSED    0x00000800u  // ID_IS_MUTATED flag is being
-                                      // set but not used anymore.
-#define PROCLAIM_IS_INTERNAL 0x00001000u // This proclaim was
-                                      // introduced by the
-                                      // compiler. So, we can skip the
-                                      // def/decl match. This is
-                                      // necessary only until we have
-                                      // a way to input dummy types.
-#define DEF_IS_TRIVIAL_INIT  0x00002000u 
-#define IDENT_MANGLED        0x00004000u // This identifier has
-                                      // already been mangled for
-                                      // instantiation. Don't process
-                                      // it twice.
-#define LOCAL_NOGEN_VAR  0x00008000u  // For variables defined at
-                                      // non-generalizable
-                                      // boundaries. ex: Lambda
-                                      // parameters, identifiers
-                                      // defined at switch / catch,
-                                      // etc.
-#define LB_MUST_GO       0x00010000u  // Unreferenced, unspecialized
-                                      // polymorphic functions must
-                                      // not survive at
-                                      // letbindings. Mark those.
-#define DUPED_BY_CLCONV  0x00020000u  // The dup()s introduced by
-                                      // ClConv impact further typing
-                                      // because, copy-compatibility
-                                      // must be handled beyond this
-                                      // ref at binding instances. 
-#define LBS_PROCESSED    0x00040000u  // used to track the highest
-                                      // level of tvar-usage. If we
-                                      // see a tvar use, and if
-                                      // LBS_PROCESSED is set for
-                                      // tvar->tvarLB, then we have
-                                      // seen the use at a higer LB,
-                                      // and the tvatLB of tvar must
-                                      // point to the current lbs.  
-#define LB_INSTANTIATED  0x00080000u  // The current let-binding has
-                                      // been instantiated (used by
-                                      // the polyinstantiator) 
-#define ID_OBSERV_DEF    0x00100000u  // The Identifier is observably
-                                      // defined 
-#define TVAR_POLY_SPECIAL 0x00200000u // This type variable was
-                                      // temporarily created by the
-                                      // polyinstantiator. Definition
-                                      // is OK.
-#define UNION_IS_REPR    0x00400000u  // Defrepr
-#define FLD_IS_DISCM     0x00800000u  // Discriminator field
-#define LAM_NEEDS_TRANS  0x01000000u  // On at_define, this is a
-                                      // hoisted lambda for a function
-                                      // that has a captured closure,
-                                      // need to emit a transition
-                                      // function. 
-#define INNER_REF_NDX    0x02000000u  // inner_ref is an indexing-ref
-                                      // when clear, indicated
-                                      // inner-ref is a selection-ref
-#define ARG_BYREF        0x04000000u  // Function parameter is By-Reference
+   /// Marks a let binding as a member of a letrec. This is consulted in
+   /// Symtab.cxx and TypeInfer.cxx to determine whether the bound
+   /// identifier should be bound early or late. If it were someday
+   /// useful, this could be eliminated by introducing a distinct
+   /// at_letrecbinding.
+   LB_REC_BIND = 0x00000040u,
 
-/* Add All **AST Flags** that must be masked from definition before
-   setting onto the use cases */
+   /// Marks a BitC identifier as already having an external name, which
+   /// should be used during code generation in place of the BitC name.
+   /// 
+   /// This flag is not redundant in light of the externalName
+   /// field. DEF_IS_EXTERNAL is marked for all external definitions,
+   /// whether it has an external name or not only some external
+   /// definitions have a external-name.
+   DEF_IS_EXTERNAL = 0x00000080u,
 
-#define MASK_FLAGS_FROM_USE    (TVAR_IS_DEF | ID_IS_CTOR | ID_ENV_COPY |\
-				DEF_IS_ENTRYPT | ID_OBSERV_DEF)
-#define MASK_FLAGS2_FROM_USE   (ID_IS_CAPTURED)
+   /// Used to mark a union consisting exclusively of constant
+   /// legs, which is really an enum declaration. Marking is performed in
+   /// TypeInfer, and is consulted in Type-size.cxx.
+   ///
+   /// @bug Regrettably our current handling of enumerations is
+   /// inadequate, because it doesn't allow us to specify the actual
+   /// enumeration values. We are therefore going to have to introduce a
+   /// defenum at some point.
+   ENUM_UN = 0x00000100u,
+
+   /// Marks a union having only a single leg.
+   /// 
+   /// @bug It seems to me that a union having only one leg should be
+   /// syntactically rejected, in which case this flag should never
+   /// arise. Is there some USEFUL counter-example?
+   ///
+   /// @note If we reject single legged unions, this goes away, it is just
+   /// maintained for completeness.
+   SINGLE_LEG_UN = 0x00000200u,
+
+   /// Marks a union that is subject to one of the required Cardelli
+   /// optimizations.
+   CARDELLI_UN = 0x00000400u,
+
+   /// Marks the NULLABLE union, which has a special representation known
+   /// to the code generator.
+   NULLABLE_UN = 0x00000800u,
+
+   ///////////////// SECOND ROUND OF FLAGS  /////////////////////
+
+   /// Marks the place-holder identifier that is introduced in the
+   /// at_sw_leg AST to replicate the (switch ...) temporary identifier.
+   ///
+   /// This flag ensures that an identifier that stores a de-constructed
+   /// value in a switch statement can only appear on the left of 
+   /// a select (.) operator. The specification enforces this rule so that
+   /// the de-constructed value does not escape as a whole (as a return
+   /// value, by assignment or closure). 
+   ID_FOR_SWITCH = 0x00001000u,
+
+   /// Identifier is closed over by something.
+   ID_IS_CAPTURED = 0x00002000u,
+
+   /// Marks identifiers that are closed over by some lambda.
+   ///
+   /// Only use occurences that actually lie within an enclosing lambda
+   /// are marked with this flag.
+   ID_IS_CLOSED = 0x00004000u,
+
+   /// ID must be moved to the heap due to capture.
+   ID_NEEDS_HEAPIFY = 0x00008000u,
+
+   /// @brief Mark if an identifier is shalowly mutated in the local
+   /// context.
+   ///
+   /// The flag is set if the identifier is a target of
+   /// a set!. This information is used in heuristic type inference.
+   ID_IS_MUTATED = 0x00010000u,
+
+   /// @brief Mark if the identifier's ID_IS_MUTATED flag can still be
+   /// updated.
+   ///
+   /// This flag ensures the global identifiers' mutability is not
+   /// affected by usage beyond its definition. In the case of global
+   /// definitions, the identifier's mutability is marked closed, at the
+   /// end of its definition. 
+   ID_MUT_CLOSED = 0x00020000u,
+
+   /// Marked on proclaimations generated by the compiler (ex: during
+   /// closure conversion). 
+   /// The symbol resolver warns about local proclaimations in source
+   /// modules withoutdefinitions. The flag indicates that such warnings
+   /// must not be produced for compiler generated proclaimations. 
+   PROCLAIM_IS_INTERNAL = 0x00040000u,
+
+   /// @brief Initialization for this def can be implemented directly by
+   /// the C compiler.
+   ///
+   /// Set in the SSA pass to identify trivial initializers so
+   /// that the code generator can avoid adding code in the per-UoC init
+   /// procedure.
+   DEF_IS_TRIVIAL_INIT = 0x00080000u,
+
+   /// @brief Identifier has already been mangled.
+   ///
+   /// Used in the instantiator to indicate identifiers that have already
+   /// been mangled and should not be mangled a second time.
+   ///
+   /// @bug I don't understand why this is needed. The assignment of a
+   /// mangled name is, in effect, the assignment of an externalName. I
+   /// would think that it would make sense to place the mangled name into
+   /// the externalName field and check that, removing this flag. That
+   /// works equally well when a pre-existing external name has been
+   /// assigned, because we must not mangle those. Is this merely a
+   /// different choice of implemenation approach? Would the approach that
+   /// I am outlining work? 
+   ///
+   /// @note The instantiator can be made to work by using the approach
+   /// you are suggesting. However, using this flag keeps the name
+   /// mangling on the 's' field more regular. This is because, the 
+   /// 's' field of all definitions are mangled with a canonical encoding
+   /// of their type. If we employ the rule that having an external name
+   /// singifies that the identifier has already been mangled, the 
+   /// 's' field of definitions for which the programmer provided an
+   /// external name will not be mangled at all. However, this still does
+   /// not lead to an error because of name collision. We currently
+   /// have a rule that definitions with programmer specified external
+   /// names cannot be polymorphic, and will therefore be instantiated at
+   /// most once.  
+   IDENT_MANGLED = 0x00100000u,
+
+   /// @brief Local, non-generalizable variable.
+   ///
+   /// Marked for variables defined at non-generalizable boundaries. ex:
+   /// Lambda parameters, identifiers defined at switch/catch, etc.
+   ///
+   /// Local generalizable variables must be handled by creating a new
+   /// let-binding with all concrete instantiations. Non-generalizable
+   /// locals like lambda-parameters, identifier at switch, catch, 
+   /// do, etc. can be trivially handled by performing a name change to
+   /// a canonical one.
+   LOCAL_NOGEN_VAR = 0x00200000u,
+
+   /// @brief Used internally to track variable scoping.
+   ///
+   /// This flag is used in determining the outermost let-binding at
+   /// which a type variable used (scoped). The actual pointer to the
+   /// let-binding is preset in tvarLB field.
+   /// 
+   /// This flag is set on at_letbinding once we are done processing it in
+   /// the symbol resolver. When we encounter the use of a type variable,
+   /// if we have finished processing the let-binding named by its tvarLB
+   /// field, then we know that the scope of the variable is actually 
+   /// bigger, and thus update it. 
+   LBS_PROCESSED = 0x00400000u,
+
+   /// @brief Identifier is observably defined
+   ID_OBSERV_DEF = 0x00800000u,
+
+   /// @brief Type variable that was temporarily created by the
+   /// polyinstantiator.
+   ///
+   /// The symbol resolver accepts type variables as defining
+   /// occurences within expressions only at certain positions (when
+   /// called with NEW_TV_OK). For example, this is legal within value
+   /// definitions, but type variables not identified as arguments to 
+   /// type definitions are legal within the type definition itself. 
+   /// This flag marks type variables created by the polyinstantiator
+   /// that must not be subject to the NEW_TV_OK check by the resolver,
+   /// since the Instantiator makes some quasi RandTs in which this
+   /// restriction might temporaroly not hold.
+   TVAR_POLY_SPECIAL = 0x01000000u,
+
+   /// @brief Indicates that this DEFUNION is actually a DEFREPR that was
+   /// converted to a union by the reprSimp pass.
+   UNION_IS_REPR = 0x02000000u,
+
+   /// @brief Indicates a field that is a union discriminator (tag)
+   /// field.
+   FLD_IS_DISCM = 0x04000000u,
+
+   /// @brief Marked on top-level at_define.
+   ///
+   /// Indicates that this is a hoisted lambda
+   /// for a function that has a captured closure, and we therefore need
+   /// to emit a transition function.
+   LAM_NEEDS_TRANS = 0x08000000u,
+
+   /// @brief Marks whether the inner_ref is indexing or selecting.
+   ///
+   /// When set, it is an indexing inner_ref that is of the form
+   /// (inner_ref (dup (array ..))) or (inner_ref (vector ... ))
+   /// 
+   /// When clear, it is a selecting inner_ref that is of the form
+   /// (inner_ref (dup (structv ... ))) or (inner_red (structr ... ))
+   ///  
+   /// These two types of inner-ref must be handled differently in most
+   /// passes. For example, the index argument must be independently
+   /// resolved and type checked but the field argumet must not.
+   INNER_REF_NDX = 0x10000000u,
+
+   /// @brief Parameter is by-reference.
+   ///
+   /// Set in the parser to indicate that a parameter identifier is
+   /// by-reference. Consulted in gen-c.cxx to determine how the
+   /// corresponding C parameter should be emitted.
+   ///
+   /// In theory, the by-ref-ness is a part of the type, and must
+   /// be obtainable from the identifier's type. However, the
+   /// implementation does not encode by-ref this way. The by-ref is
+   /// noted 
+
+   /// - On the components of a function type 
+   /// - As an AST flag on the identifier AST.
+   ///
+   /// Encoding by-ref in this way lends itself to cleaner implementation.
+   /// If by-ref were to be a type constructor, we must look beyond the
+   /// by-ref constructor at every r-value usage of the identifier. 
+   ARG_BYREF = 0x20000000u,
+
+   /// Set of ast flag values that must be masked from definitions when
+   /// copying to use cases.
+   MASK_FLAGS_FROM_USE = (DEF_IS_ENTRYPT|ID_IS_CAPTURED)
+
+ } /* AstFlags */;
 
 struct AST;
-struct envSet : public Countable{
-  GCPtr<Environment<AST> > env;
-  GCPtr<Environment<TypeScheme> > gamma;
-  GCPtr<Environment< sherpa::CVector<GCPtr<Instance> > > > instEnv;
+
+/// @brief Set of environments associated with a given AST node.
+///
+/// See the comment at the envSet field of the AST class.
+struct EnvSet {
+  boost::shared_ptr<ASTEnvironment> env;
+  boost::shared_ptr<TSEnvironment> gamma;
+  boost::shared_ptr<InstEnvironment> instEnv;
   
-  envSet()
+  EnvSet()
   {
-    env = NULL;
-    gamma = NULL;
-    instEnv = NULL;
+    env = boost::GC_NULL;
+    gamma = boost::GC_NULL;
+    instEnv = boost::GC_NULL;
   }
 
-  envSet(GCPtr<Environment<AST> > _env, GCPtr<Environment<TypeScheme> >_gamma,
-	 GCPtr<Environment< sherpa::CVector<GCPtr<Instance> > > > _instEnv)
+  EnvSet(boost::shared_ptr<ASTEnvironment > _env, boost::shared_ptr<TSEnvironment >_gamma,
+	 boost::shared_ptr<InstEnvironment > _instEnv)
   {
     env = _env;
     gamma = _gamma;
     instEnv = _instEnv;
   }
 
-  envSet(envSet &envs)
+  EnvSet(EnvSet &envs)
   {
     env = envs.env;
     gamma = envs.gamma;
@@ -273,6 +482,30 @@ struct envSet : public Countable{
   {
     env->updateKey(from, to);
     gamma->updateKey(from, to);
+  }
+
+  // Quasi-constructors:
+  static inline boost::shared_ptr<EnvSet>
+  make()
+  {
+    EnvSet *tmp = new EnvSet();
+    return boost::shared_ptr<EnvSet>(tmp);
+  }
+
+  static inline boost::shared_ptr<EnvSet>
+  make(boost::shared_ptr<ASTEnvironment> _env, 
+       boost::shared_ptr<TSEnvironment>_gamma,
+       boost::shared_ptr<InstEnvironment> _instEnv)
+  {
+    EnvSet *tmp = new EnvSet(_env, _gamma, _instEnv);
+    return boost::shared_ptr<EnvSet>(tmp);
+  }
+
+  static inline boost::shared_ptr<EnvSet>
+  make(EnvSet &envs)
+  {
+    EnvSet *tmp = new EnvSet(envs);
+    return boost::shared_ptr<EnvSet>(tmp);
   }
 };
 
@@ -289,24 +522,23 @@ struct envSet : public Countable{
   unsigned long litBase;
   
   IdentType identType;
-  unsigned long Flags;
-  unsigned long Flags2;
+  sherpa::EnumSet<AstFlags> flags;
 
   unsigned printVariant;	// which syntax to use for pretty printing
 
-  GCPtr<TypeScheme> scheme;		// defining occurrences only
-  GCPtr<Type> symType;		// the (pre-unified) type
-  GCPtr<AST> symbolDef;
-  NoGCPtr <UocInfo> uoc;  
+  boost::shared_ptr<TypeScheme> scheme;		// defining occurrences only
+  boost::shared_ptr<Type> symType;		// the (pre-unified) type
+  boost::shared_ptr<AST> symbolDef;
 
   bool isDecl;                  // is This a declaration or definition?
 
-  bool isGlobal() { return (Flags & ID_IS_GLOBAL); }
+  bool isGlobal() { return (flags & ID_IS_GLOBAL); }
   bool isFnxn(); // Function
   size_t nBits();
   bool isLocation();
   bool isLiteral();
   bool isTopLevelForm();
+  bool isIdentType(IdentType idt);
   bool leadsToTopLevelForm();
   void clearTypes(); // Clear the sumType and scheme fields 
                      // of this AST and ALL children RECURSIVELY.
@@ -315,171 +547,240 @@ struct envSet : public Countable{
                      // otherwise, old types will infulence
                      // new type records.
  
-  // If this is a declaration, and a definition for it has been
-  // seen, then defn points to the definition.
-  GCPtr<AST> defn;  // Pointer to the definition, on a declaration AST 
-  GCPtr<AST> decl;  // Pointer to the definitive declaration (the first
-              // one), on a definition AST.   
+  /// On a declaration AST only: if a definition for it has been seen,
+  /// then defn points to the definition.
+  boost::shared_ptr<AST> defn;
 
-  // If this is a global identifier, fqn is its canonical fully
-  // qualified name. The interface component of an fqn is the
-  // IFNAME of the interface in which the symbol was defined.
-  // the ident component is the identifier under which the
-  // symbol was defined at the point of its original definition,
-  // which may or may not be the name that it has in any other
-  // environment (because USE may have aliased it under a different
-  // name).
-  FQName fqn;                 // CANONICAL fully qualified name
-  std::string externalName;	// non-empty if 'external IDENT'
+  /// On a definition AST: pointer to the definitive declaration (the
+  /// first one).
+  boost::shared_ptr<AST> decl;
 
-  // The IFNAME of an interface in the case of import and provide
-  std::string ifName;
+  /// If this is a global identifier, fqn is its canonical fully
+  /// qualified name. The interface component of an fqn is the IFNAME
+  /// of the interface in which the symbol was defined.  the ident
+  /// component is the identifier under which the symbol was defined at
+  /// the point of its original definition, which may or may not be the
+  /// name that was bound in an importing environment (because USE may
+  /// have aliased it under a different name).
+  FQName fqn;
 
-  // A set of environments associated with this ast. 
-  // The content depend on the context. 
-  // In the case of at_import/atr_provide:
-  //   Environments of imported interface
-  // In the case of at_let, at_letrec, at_letStar, at_define ...
-  //   Environments at that point 
-  envSet envs;
+  /// If this identifier is proclaimed with "external IDENT", this field
+  /// holds the external identifier string, otherwise it is empty.
+  std::string externalName;
 
-  // For Polyinstantiation:. // CHANGED THIS TO GCPTR
-  GCPtr< sherpa::CVector<spStruct *> > special;
-  // If this is the root of a polymorphic expression, stores a 
-  // pointer to all specializations.
-  bool polyinst; // Polyinstantiation Marker (donelist) to avoid 
-                 // infinite recursion.
-  bool reached; 
-  GCPtr<AST> defForm; // defIdent->defining form pointer .
-  // defForm has context sensitive meaning. 
-  // This is basically a hack in the absence of parent pointers, where
-  // I must reach back into the definition and get the defining form,
-  // or some form of a containing datastructure.
-  // 
-  // In the case of top-level expressions, we use it to get the 
-  // entire defining form from the identifier being defined
-  // 
-  // (def  defIdent ... )
-  // ^        |
-  // |________|
-  //   defForm
-  // 
-  // In the case of let-expressions:
-  // (The quoted phrases are just ast-types not syntax.)
-  //  _______________      __________________
-  // |   defForm     |     |   defForm       |  
-  // v               |     v                 |
-  // (define   ... (let .. ("letbindings" ("letbinding" ident ... ))))
-  //               ^             |        ^               | 
-  //               |_____________|        |_______________|
-  //                  defForm                 defForm
-  //
-  //     ___________
-  //    |           |
-  //    v           | 
-  //  (switch ... ("sw_leg" id ...) ...)
-  //                  ^    |
-  //                  |____|
-  //     _____      __________
-  //    |     |    |          |
-  //    v     |    v          | 
-  //  (do ("dobindings"  ("dobinding" id ...) ...)
-  //                             ^     |
-  //                             |_____|
-  //
-  //
+  /// A set of environments associated with this ast. 
+  /// - If this is a local name for an imported interface, these are
+  ///   pointers to the environments of the imported interface.
+  /// - In at_let, at_letrec, at_letStar, at_define ... these are the
+  ///   environments in effect at that binding.
+  EnvSet envs;
 
-  GCPtr<AST> defbps; // used in the case of loop, tail-recursion
+  /// @brief Pointer to defining form
+  ///
+  /// defForm has context sensitive meaning. 
+  /// This is basically a hack in the absence of parent pointers, where
+  /// I must reach back into the definition and get the defining form,
+  /// or some form of a containing datastructure.
+  /// 
+  /// In the case of top-level expressions, we use it to get the 
+  /// entire defining form from the identifier being defined
+  /// 
+  /// (def  defIdent ... )
+  /// ^        |
+  /// |________|
+  ///   defForm
+  /// 
+  /// In the case of let-expressions:
+  /// (The quoted phrases are just ast-types not syntax.)
+  ///
+  ///  _______________      __________________
+  /// |   defForm     |     |   defForm       |  
+  /// v               |     v                 |
+  /// (define   ... (let .. ("letbindings" ("letbinding" ident ... ))))
+  ///               ^             |        ^               | 
+  ///               |_____________|        |_______________|
+  ///                  defForm                 defForm
+  /// 
+  ///     ___________
+  ///    |           |
+  ///    v           | 
+  ///  (switch ... ("sw_leg" id ...) ...)
+  ///                  ^    |
+  ///                  |____|
+  ///     _____      __________
+  ///    |     |    |          |
+  ///    v     |    v          | 
+  ///  (do ("dobindings"  ("dobinding" id ...) ...)
+  ///                             ^     |
+  ///                             |_____|
+
+  boost::shared_ptr<AST> defForm;
+
+  /// Used in the case of tail-recursion to in-place update the
+  ///  function-arguments with new values before jumping to the start
+  ///  of the function.
+  boost::shared_ptr<AST> defbps;
   
-  GCPtr<Type> tagType;   // Type of the tag in case of unions
-  size_t field_bits; // No. of bits in a bitfield type
-  // Also propagated updards onto: 
-  //   at_field, at_fill, at_reserved, tagtype (declare) at_declares,
-  //   Identifier of at_defunion 
+  /// If this is a union, tagType is the type of the tag.
+  boost::shared_ptr<Type> tagType;
+
+  /// Number of bits in a bitfield type. 
+  /// On following ASTs, this fiield  store the total accumulated
+  /// field_bits in all component ASTs.
+  /// 
+  ///  at_field, at_fill, at_reserved, tagtype (declare) at_declares,
+  ///  Identifier of at_defunion 
+  size_t field_bits;
   
-  size_t unin_discm; // on at_field only when the field is a part
-                     // of a union discriminator (FLD_IS_DISCM)
-  size_t total_fill; // on a at_defstruct or at_constructor only
-                     // contains total number of fill bits
-                     // that is not a reported by the type record.
+  /// On defreppr unions, this field is present on fields that
+  /// participate in union discrimination. This field stores the
+  /// value (not just a true/false setting) that the field must have
+  /// as indicated by the when clause. 
+  size_t unin_discm;
 
-  GCPtr<TypeScheme> stSigma; // Union constructors only
-                       // TypeSchemes for the corresponding
-                       // Structure definitions.                          
-  GCPtr<AST> stCtr;    // Pointer to the constructor that
-                       // holds such a structure.
+  /// Total number of fill bits that are not reported by the type
+  /// record.  Appears on a at_defstruct or at_constructor only.
+  size_t total_fill;
 
-  // Tracking scope of type-variables.
-  GCPtr<AST> tvarLB;         // LB at which this tvar is scoped
-  GCPtr<AST> parentLB;       // LB within which this at_letbindings is
-  // contained, everything is contained within the top-level
-  // definition. The resolver marks the above two markers. No need to
-  // worry about them in copy-operations.
+  /// TypeScheme for the Structure definition corresponding to a union
+  /// constructor. 
+  boost::shared_ptr<TypeScheme> stSigma;
 
-  static GCPtr<AST> makeBoolLit(const sherpa::LToken &tok);
-  static GCPtr<AST> makeIntLit(const sherpa::LToken &tok);
-  static GCPtr<AST> makeStringLit(const sherpa::LToken &tok);
-  static GCPtr<AST> makeCharLit(const sherpa::LToken &tok);
-  static GCPtr<AST> makeFloatLit(const sherpa::LToken &tok);
+  /// Union Constructors with identical layout must share the same
+  /// structure type since they can be used in the same switch leg.
+  /// Structures equality is nominal in BitC (structures are
+  /// identified by name, not by identical components). Therefore, if
+  /// at a second constructor, a previously typed structure  with
+  /// identical structure is found, the new constructor uses the
+  /// structure defined at the old structure and stores a pointer to
+  /// that constructor in stCtr.
+  boost::shared_ptr<AST> stCtr;
 
-  // Disengage a children[]  AST
+  // Tracking scope of type-variables:
+
+  /// Let binding at which this type variable is scoped. 
+  /// This flag is set reliably set whenever the resolver is
+  /// called, so there is no need to worry while cloning the AST?
+  boost::shared_ptr<AST> tvarLB;
+
+  /// Let-Binding within which this at_letbindings is contained. In
+  /// the case of the outer-most let-bindings, this field points to
+  /// the top-level define/recdef. 
+  /// This flag is set everytime the resolver is called, so there is
+  /// no need to worry while cloning an AST. 
+  boost::shared_ptr<AST> parentLB;
+
+  static boost::shared_ptr<AST> makeBoolLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeIntLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeStringLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeCharLit(const sherpa::LToken &tok);
+  static boost::shared_ptr<AST> makeFloatLit(const sherpa::LToken &tok);
+
+  /// Remove child @p n from this AST.
+  ///
+  /// @brief The only place this is called is in the parser, and there
+  /// only to strip documentation strings. That is actually a bad thing
+  /// to do, since we want to preserve them in the AST, and a literal
+  /// value really ought to be a perfectly legal (if useless)
+  /// expression. We should attempt to comment out the body of
+  /// stripDocString() and see if everything still works. If so, both
+  /// this and stripDocString() should be removed.
+  ///
+  /// @bug Shap needs to review this.
   void disown(size_t s);
   
-  // Generate an identifier AST with a newly generated internal name.
-  // This will not have any particular type assigned to it, and is
-  // intended to be used in the front end passes before the type
-  // checker is involved.
-  static GCPtr<AST> genIdent(const char *pfx = "tmp", const bool isTV = false);
+  /// Generate an identifier AST with a newly generated internal name.
+  /// This will not have any particular type assigned to it, and is
+  /// intended to be used in the front end passes before the type
+  /// checker is involved.
+  static boost::shared_ptr<AST> 
+    genIdent(const char *pfx = "tmp", const bool isTV = false);
 
-  // Generate an at_ident AST providing a temporary symbol that is
-  // type-compatible with the type of the passed AST /lhs/.
-  static GCPtr<AST> genSym(GCPtr<AST> lhs, 
+  /// Generate an at_ident AST providing a temporary symbol that is
+  /// type-compatible with the type of the passed AST @p lhs.
+  static boost::shared_ptr<AST> genSym(boost::shared_ptr<AST> lhs, 
 		     const char *pfx="tmp",
 		     const bool isTV = false);
 
+  /// For each AST type, return an associated keyword name.
+  ///
+  /// @issue In most cases, the keyword name is simply the ast name. Later
+  /// versions of astmaker actually emit a string translator, and names
+  /// can now be assigned in the .ast file. We should consider using
+  /// that instead of this. That is something for shap to look at.
   std::string atKwd() const;
 
-  // *Append* all ident ASTs from a Binding-pattern to the ids vector. 
-  // if getPattern is true, it adds the identPattern ASTs
-  // instead of ident ASTs
+  /// @brief Append all ident ASTs from a Binding-pattern to the ids
+  /// vector.
+  ///
+  /// if getPattern is true, it adds the identPattern ASTs
+  /// instead of ident ASTs
   void getIds(std::ostream &errStream, 
-	      GCPtr<sherpa::CVector<GCPtr<AST> > > ids,
+	      std::vector<boost::shared_ptr<AST> >& ids,
 	      bool getPattern = false);  
-  GCPtr<Type> getType(); 
-  GCPtr<const Type> getType() const;
+
+  /// @brief Utility function to call symType->getType()
+  boost::shared_ptr<Type> getType(); 
+  /// @brief Utility function to call symType->getType()
+  boost::shared_ptr<const Type> getType() const;
   
-  GCPtr<AST> getCtr(); // Union constructors may be written as Ctr or
-  // union.Ctr, this function returns the pure constructor.
+  /// Given a union constructor of the form Ctr or union-name.Ctr, 
+  /// returns Ctr.
+  boost::shared_ptr<AST> getCtr(); 
 
-  // Given a defining occurrence, return an AST for the use occurrence.
-  GCPtr<AST> Use();
 
-  // The copy constructor -- make an exact (except ID) shallow copy.
-  AST(GCPtr<AST> ast, bool shallowCopyChildren=true);
+  /// @brief Given a defining occurrence, return a new AST for a use
+  /// occurrence.
+  boost::shared_ptr<AST> Use();
 
-  // Makes an exact copy, deep, including symbolDef, type, etc.
-  GCPtr<AST> getTrueCopy();
+  /// @brief Copy constructor -- make an exact (except ID) shallow
+  /// copy.
+  AST(boost::shared_ptr<AST> ast, bool shallowCopyChildren=true);
 
-  // Makes an exact copy, deep, but clear symbolDef, type, etc.
-  GCPtr<AST> getDCopy();
+  static inline boost::shared_ptr<AST>
+  make(boost::shared_ptr<AST> ast, bool shallowCopyChildren=true) {
+    AST *tmp = new AST(ast,shallowCopyChildren);
+    return boost::shared_ptr<AST>(tmp);
+  }
 
-  // Set myself to another, mutator (probably a bad idea).
-  void set(GCPtr<AST> ast);
+  /// @brief  Make an exact copy, deep, including symbolDef, type,
+  /// etc.
+  boost::shared_ptr<AST> getTrueCopy();
 
-  // Rename identifier `from' to `to' within `this' AST
-  // Rename is based on symbolDef. `from' must be a defining form. If
-  // (and only if) `from' is found within `this' AST, 
-  // it is also renamed.  
-  void rename(GCPtr<AST> from, std::string newName);
+  /// @brief  Make an exact deep copy.
+  /// 
+  /// This function clears fields such as symbolDef, type, etc. 
+  /// This is because (1) we don't need them since new ASTs are almost
+  /// immediately subject to resolver and type check. (2) We sometimes
+  /// start from a copy of an AST and use it in a way that the original
+  /// symbolDef/type are no longer valid, so we clear these fields
+  /// preemptively. 
+  boost::shared_ptr<AST> getDeepCopy();
+  
+  /// @briefRename identifier @p from to @p to within AST named by @p
+  /// this.
+  ///
+  /// Rename is based on symbolDef. @p from must be a defining form. If
+  /// (and only if) @p from is found within @p this AST, it is also
+  /// renamed.
+  void rename(boost::shared_ptr<AST> from, std::string newName);
 
+  /// @brief Return pretty-printed representation of this AST in the
+  /// form of a string.
   std::string asString() const;
-  std::string mangledString() const;
 
-  GCPtr<AST> getID();
+  /// @brief Get the unique identifier for this AST
+  boost::shared_ptr<AST> getID();
+
+  /// @brief Return true IFF this is a AST corresponds to a union leg.
   bool isUnionLeg();
+  /// @brief Return true IFF this AST is a method name identifier.
   bool isMethod();
 
-  void PrettyPrint(std::ostream& out, bool decorated = false, 
+  /// @brief Pretty print this AST to @p out, annotating each with its
+  /// type if @p showTypes is true, and appending a final end of line
+  /// of @p endline is true.
+  void PrettyPrint(std::ostream& out, bool showTypes = false, 
 		   bool endline=true) const;
 
   // For use in GDB:
@@ -491,7 +792,8 @@ struct envSet : public Countable{
 #include "Special.hxx"
 #include "UocInfo.hxx"
 
-using namespace sherpa ;
+using namespace boost;
+using namespace sherpa;
 unsigned long long AST::astCount = 0;
 }
 
@@ -501,27 +803,22 @@ unsigned long long AST::astCount = 0;
 %construct {
   ID = ++(AST::astCount);
   identType = id_unresolved;
-  Flags = 0x0u;
-  Flags2 = 0x0;
+  flags = NO_FLAGS;
   isDecl = false;
-  polyinst = false;
-  reached = false;
-  scheme = 0;
-  symType = 0;
-  symbolDef = 0;
-  // uoc = 0;
-  defn = 0;
-  special = 0;
-  defForm = 0;
-  defbps = 0;
-  decl = 0;
+  scheme = GC_NULL;
+  symType = GC_NULL;
+  symbolDef = GC_NULL;
+  defn = GC_NULL;
+  defForm = GC_NULL;
+  defbps = GC_NULL;
+  decl = GC_NULL;
   printVariant = 0;		// until otherwise stated
-  tagType = 0;
+  tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
   total_fill = 0;
-  tvarLB = 0;
-  parentLB = 0;
+  tvarLB = GC_NULL;
+  parentLB = GC_NULL;
 }
 
 // AST built for version 0.9

@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -38,16 +38,16 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <libsherpa/UExcept.hxx>
-#include <libsherpa/CVector.hxx>
-#include <libsherpa/avl.hxx>
-#include <assert.h>
+
+#include "shared_ptr.hxx"
+
 #include "AST.hxx"
 #include "Environment.hxx"
 #include "Type.hxx"
@@ -55,13 +55,13 @@
 #include "backend.hxx"
 
 bool unify(std::ostream& errStream,
-	   GCPtr<Trail> trail,
-	   const LexLoc &errLoc,
-	   GCPtr<Type> ft, GCPtr<Type> st, 
+	   boost::shared_ptr<Trail> trail,
+	   const sherpa::LexLoc &errLoc,
+	   boost::shared_ptr<Type> ft, boost::shared_ptr<Type> st, 
 	   unsigned long uflags);
 
 bool unifyPrim(std::ostream& errStream,
-	       GCPtr<Trail> trail, const LexLoc &errLoc, 
-	       GCPtr<Type> tau, std::string ptype);
+	       boost::shared_ptr<Trail> trail, const sherpa::LexLoc &errLoc, 
+	       boost::shared_ptr<Type> tau, std::string ptype);
 
 #endif /* UNIFY_HXX */

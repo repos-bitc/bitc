@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE figure PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+]>
+  <sect1 id="related"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
+  <title>Related Work</title>
+  <p>
+    Grossman&nbsp;<cite ref="Grossman2006qtypes"/> provides a theory
+    of using quantified types with imperative C style mutation for
+    Cyclone. However, his formalization requires explicit annotation
+    for all polymorphic definitions and instantiations. In contrast,
+    we believe that the best way to integrate polymorphism into the
+    systems programming paradigm is by automatic inference. A
+    further contribution of our work (in comparison to&nbsp;<cite
+      ref="Grossman2006qtypes"/>) is that we 
+    give a formal specification and proof of correctness of the
+    inference algorithm, not just the type system.
+    Cyclone&nbsp;<cite ref="Jim2002Cyclone"/> uses region analysis
+    to provide safe support for the address
+    <progident>&amp;</progident> operator. This technique is
+    complementary to our work, and can be used to incorporate
+    <progident>&amp;</progident> operator in 
+    <btypes:TYPE>
+      <language/>
+    </btypes:TYPE>.
+  </p>
+  <p>
+    C's <progident>const</progident> notion of immutability-by-alias
+    offers localized checking of immutability properties, and
+    encourages good programming practice by serving as documentation
+    of programmers' intentions.  Other systems have proposed
+    immutability-by-name&nbsp;<cite ref="DeLineMSRVault"/>,
+    referential immutability&nbsp;<cites>
+      <cite ref="shapiro1999EROS"/>
+      <cite ref="tschantz2005javari"/>
+    </cites>
+    (transitive immutability-by-reference),
+    <foreignphrase>etc.</foreignphrase> These techniques are
+    orthogonal and complementary to the immutability-by-location
+    property in <btypes:TYPE><language/></btypes:TYPE>. For
+    example, we could have types like
+    (<progident>const</progident>
+    <btypes:TYPE>
+      <mutable>
+	<type/>
+      </mutable>
+    </btypes:TYPE>) that can express
+    both global and local usage properties of a location.
+  </p>
+  <p>
+    A monadic model&nbsp;<cite ref="peytonjones1993monads"/>
+    of mutability is used in pure functional languages like
+    Haskell&nbsp;<cite ref="peytonjones2003haskellrevisedreport"/>.
+    In this model, the type system distinguishes side-effecting
+    computations from pure ones (and not just mutable locations
+    from immutable ones). Even though this model is beneficial for
+    integration with verification systems, it is considerably
+    removed from the idioms needed by systems
+    programmers. For example,  Hughes argues that there is no
+    satisfactory way of creating and using global mutable variables
+    using monads&nbsp;<cite ref="Hughes2004HaskellGlobals"/>. 
+    There have been proposals for adding unboxed representation
+    control to Haskell&nbsp;<cites>
+      <cite ref="peytonjones1991unboxed"/>
+      <cite ref="Diatchki2005Representation"/>
+    </cites>. However, these systems are pure and therefore and do
+    not consider the effects of mutability.
+  </p>
+  <p>
+    Cqual&nbsp;<cite ref="foster2006Cqual"/> provides a framework
+    of type qualifiers, which can be used to infer maximal
+    <progident>const</progident> qualifications for C
+    programs. However, CQual does not deal with polymorphism
+    of types. In a monomorphic language, we can infer types and
+    qualifiers independently. Adding polymorphism to CQual
+    would introduce substantial challenges, particularly if
+    polymorphism should be automatically inferred. The inference of
+    types and qualifiers (mutability) becomes co-dependent: we need
+    base types to infer qualifiers; but, we also need the qualifiers
+    to infer base types due to the value
+    restriction. 
+    <btypes:TYPE>
+      <language/>
+    </btypes:TYPE> supports
+    a polymorphic language and performs simultaneous
+    inference of base types and mutability.
+  </p>
+  </sect1>

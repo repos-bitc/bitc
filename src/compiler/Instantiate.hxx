@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2006, Johns Hopkins University.
+ * Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -52,6 +52,6 @@
 #include "Type.hxx"
 
 /* Rename an AST with its instantiated name */
-void InstMangle(GCPtr<AST> def);
-void initUnifiedUoc(GCPtr<UocInfo> uoc);
+void InstMangle(boost::shared_ptr<AST> def);
+void initUnifiedUoc(boost::shared_ptr<UocInfo> uoc);
 #endif /* INSTANTIATE_HXX */
