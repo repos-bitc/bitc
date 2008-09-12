@@ -86,6 +86,9 @@ const char *WFN_PFX  = "wfn_"; // If a immutable function-pointer is
 			       // name. This prifix is for the inner
 			       // function (that actually does all the
 			       // word).
+const char *LBL_PFX   = "__escape___"; // Name of the C-label at
+				       // labeled-return 
+
 #if 0
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // As of now, ALL identifiers that the use has input will be mangled
@@ -1927,7 +1930,7 @@ toc(std::ostream& errStream,
 
       shared_ptr<AST> labelDef = ast->child(0);
       std::stringstream ss;
-      ss << "__escape__" << labelDef->s << labelDef->ID;
+      ss << LBL_PFX << CMangle(labelDef->s) << labelDef->ID;
 
       out.indent(-1);
       out << ss.str() << ":" << endl;
@@ -1946,7 +1949,7 @@ toc(std::ostream& errStream,
 
       shared_ptr<AST> labelDef = ast->child(0)->symbolDef;
       std::stringstream ss;
-      ss << "__escape__" << labelDef->s << labelDef->ID;
+      ss << LBL_PFX << CMangle(labelDef->s) << labelDef->ID;
 
       out << "goto " << ss.str() << ";" << endl;
 

@@ -425,8 +425,6 @@ findusedef(std::ostream &errStream,
     }
 
   case at_begin:
-  case at_label:
-  case at_return_from:
   case at_allocREF:
   case at_setClosure:
   case at_copyREF:
@@ -453,6 +451,14 @@ findusedef(std::ostream &errStream,
       for (size_t c=0; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c), 
 				   USE_MODE, boundVars, freeVars));
+      break;
+    }
+
+  case at_label:
+  case at_return_from:
+    {
+      CHKERR(errFree, findusedef(errStream, topAst, ast->child(1), 
+				 USE_MODE, boundVars, freeVars));
       break;
     }
 
@@ -729,12 +735,6 @@ cl_convert_ast(shared_ptr<AST> ast,
       break;
     }
 
-  case at_fn:
-    {
-      // ast = AST::make(at_closureType, ast->loc, ast);
-      break;
-    }
-    
   case at_lambda:
     {
       AstSet freeVars;

@@ -1087,6 +1087,8 @@ UocInfo::recInstantiate(ostream &errStream,
       break;
     }
     
+  case at_label:
+  case at_return_from:
   case at_field:
     {
       ast->child(1) = recInstantiate(errStream, 

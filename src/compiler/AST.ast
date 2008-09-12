@@ -1025,7 +1025,7 @@ GROUP eform = literal | var | unit
 	    | try | throw | let | letStar | letrec 
  	    | container | do 
 	    | mkClosure | allocREF | copyREF | setClosure
-	    | label
+  	    | label | return_from
             // | loop | typecase | casebang 
             ; 
 // *select* is record selection.

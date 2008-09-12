@@ -888,7 +888,6 @@ ssa(std::ostream& errStream,
       res->identType = id_value;
       res->symType = ast->symType;
       res->scheme = ast->scheme;
-
       addIL(identList, res);
 
       shared_ptr<AST> gl = newGrandLet(ast);
@@ -896,7 +895,8 @@ ssa(std::ostream& errStream,
 	  ast, 1, flags);	
       FEXPR(gl) = addLB(gl, identList, FEXPR(gl), NO_FLAGS, res, false);
       SETGL(ast->child(1), gl);
-
+      FEXPR(grandLet) = addLB(grandLet, identList, ast, LB_IS_DUMMY,
+			      res, false); 
       break;
     }
 
@@ -925,7 +925,6 @@ ssa(std::ostream& errStream,
 
       FEXPR(grandLet) = addLB(grandLet, identList, ast, 
 			      LB_POSTPONED);
-
       break;
     }
 
