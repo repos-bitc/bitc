@@ -162,6 +162,16 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
+  case at_try:
+  case at_throw:
+  case at_label:
+  case at_return_from:
+#if 0
+    {
+      itsExpansive = true;
+      break;
+    }
+#endif
   case at_do:
   case at_dotest:
   case at_begin:
@@ -334,13 +344,6 @@ isExpansive(std::ostream& errStream,
       break;
     }
    
-  case at_try:
-  case at_throw:
-    {
-      itsExpansive = true;
-      break;
-    }
-
   case at_container:
     {
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,

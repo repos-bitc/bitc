@@ -425,6 +425,8 @@ findusedef(std::ostream &errStream,
     }
 
   case at_begin:
+  case at_label:
+  case at_return_from:
   case at_allocREF:
   case at_setClosure:
   case at_copyREF:

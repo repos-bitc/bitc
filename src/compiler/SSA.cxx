@@ -70,6 +70,10 @@ getLastLB(shared_ptr<AST> grandLet)
   return lbs->child(lbs->children.size() - 1);
 }
 
+/// @brief Add identifier to per-proc identifier list.
+///
+/// This is used so that we can later declare all local identifiers at
+/// top of procedure, C-style.
 static void
 addIL(shared_ptr<AST> identList, shared_ptr<AST> id)
 {
@@ -870,6 +874,60 @@ ssa(std::ostream& errStream,
       break;
     }
 
+
+  case at_label:
+    {
+      // This needs gensym-like behavior, but with a known resulting name.
+      std::stringstream ss;
+      ss << "__" << ast->child(0)->s << ast->child(0)->ID;
+      std::string resultName = ss.str();
+
+      shared_ptr<AST> res = 
+	AST::make(at_ident, LToken(resultName));
+      res->flags = ast->flags | ID_IS_GENSYM;
+      res->identType = id_value;
+      res->symType = ast->symType;
+      res->scheme = ast->scheme;
+
+      addIL(identList, res);
+
+      shared_ptr<AST> gl = newGrandLet(ast);
+      SSA(errStream, uoc, ast->child(1), gl, identList, 
+	  ast, 1, flags);	
+      FEXPR(gl) = addLB(gl, identList, FEXPR(gl), NO_FLAGS, res, false);
+      SETGL(ast->child(1), gl);
+
+      break;
+    }
+
+  case at_return_from:
+    {
+      shared_ptr<AST> labelDef = ast->child(0)->symbolDef;
+
+      std::stringstream ss;
+      ss << "__" << labelDef->s << labelDef->ID;
+      std::string resultName = ss.str();
+
+      shared_ptr<AST> res = 
+	AST::make(at_ident, LToken(resultName));
+      res->flags = ast->flags | ID_IS_GENSYM;
+      res->identType = id_value;
+      res->symType = ast->symType;
+      res->scheme = ast->scheme;
+
+      SSA(errStream, uoc, ast->child(1), grandLet, identList, 
+	  ast, 1, flags);
+
+      FEXPR(grandLet) = addLB(grandLet, identList, FEXPR(grandLet), 
+			      NO_FLAGS, res, false);
+
+      ast->child(1) = FEXPR(grandLet);
+
+      FEXPR(grandLet) = addLB(grandLet, identList, ast, 
+			      LB_POSTPONED);
+
+      break;
+    }
 
   case at_switch:
   case at_try:

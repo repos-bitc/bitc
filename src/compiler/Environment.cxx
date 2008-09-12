@@ -64,15 +64,16 @@ Environment<T>::getLocalBinding(const std::string& nm) const
 
 template<class T>
 shared_ptr<Binding<T> > 
-Environment<T>::doGetBinding(const std::string& nm) const
+Environment<T>::doGetBinding(const std::string& nm,
+			     shared_ptr<Environment<T> > outerLimit) const
 {
   shared_ptr<Binding<T> > binding = getLocalBinding(nm);
   
   if (binding)
     return binding;
 
-  if (parent)
-    return parent->doGetBinding(nm);
+  if (parent && parent != outerLimit)
+    return parent->doGetBinding(nm, outerLimit);
 
   return GC_NULL;
 }
@@ -221,12 +222,14 @@ InstEnvironment::getLocalBinding
 (const std::string& nm) const;
 
 template shared_ptr<Binding<AST> > 
-Environment<AST>::doGetBinding(const std::string& nm) const;
+Environment<AST>::doGetBinding(const std::string& nm, 
+			       shared_ptr<Environment<AST> >) const;
 template shared_ptr<Binding<TypeScheme> > 
-Environment<TypeScheme>::doGetBinding(const std::string& nm) const;
+Environment<TypeScheme>::doGetBinding(const std::string& nm,
+			       shared_ptr<Environment<TypeScheme> >) const;
 template shared_ptr<Binding<set<shared_ptr<Instance> > > >
 InstEnvironment::doGetBinding
-(const std::string& nm) const;
+(const std::string& nm, shared_ptr<InstEnvironment>) const;
 
 template void
 Environment<AST>::addBinding(const std::string& nm, shared_ptr<AST> val,

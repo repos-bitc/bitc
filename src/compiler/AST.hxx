@@ -127,6 +127,9 @@ enum IdentType {
   /// @brief Union constructor taking no arguments.
   id_ucon0,
   
+  /// @brief Label used in labeled escape.
+  id_label,
+  
   ///////////////////////////////////////////////////////////////////
   //
   // Anything below here is a category that is some union of
@@ -615,6 +618,8 @@ enum AstType {
   at_copyREF,
   at_mkClosure,
   at_setClosure,
+  at_label,
+  at_return_from,
   at_switch,
   at_sw_legs,
   at_sw_leg,

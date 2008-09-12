@@ -221,13 +221,15 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
     }
     
   case at_begin:
+  case at_label:
+  case at_return_from:
     {
       //     for (size_t i = 0; i < ast->children.size() - 1; i++)
       //       markTail(ast->child(i), fn, bps, false);
       markTail(ast->child(ast->children.size() - 1), fn, bps, isTail);
       break;
     }
-    
+
   case at_do:
     {
       markTail(ast->child(1), fn, bps, isTail);

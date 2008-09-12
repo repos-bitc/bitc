@@ -1918,6 +1918,41 @@ toc(std::ostream& errStream,
       break;
     }
 
+  case at_label:
+    {
+      // Emit the expression to be evaluated followed by the escape label:
+      TOC(errStream, uoc, ast->child(1), out, IDname, decls, 
+	  ast, 1, flags);      
+      out << ";" << endl;
+
+      shared_ptr<AST> labelDef = ast->child(0);
+      std::stringstream ss;
+      ss << "__escape__" << labelDef->s << labelDef->ID;
+
+      out.indent(-1);
+      out << ss.str() << ":" << endl;
+      out.indent(1);
+
+      break;
+    }
+
+  case at_return_from:
+    {
+      // Emit the expression to be returned followed by a goto to the
+      // escape label:
+      TOC(errStream, uoc, ast->child(1), out, IDname, decls, 
+	  ast, 1, flags);      
+      out << ";" << endl;
+
+      shared_ptr<AST> labelDef = ast->child(0)->symbolDef;
+      std::stringstream ss;
+      ss << "__escape__" << labelDef->s << labelDef->ID;
+
+      out << "goto " << ss.str() << ";" << endl;
+
+      break;
+    }
+
   case at_begin:
     {
       // out++;

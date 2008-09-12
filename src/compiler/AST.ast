@@ -124,6 +124,9 @@ enum IdentType {
   /// @brief Union constructor taking no arguments.
   id_ucon0,
   
+  /// @brief Label used in labeled escape.
+  id_label,
+  
   ///////////////////////////////////////////////////////////////////
   //
   // Anything below here is a category that is some union of
@@ -1022,6 +1025,7 @@ GROUP eform = literal | var | unit
 	    | try | throw | let | letStar | letrec 
  	    | container | do 
 	    | mkClosure | allocREF | copyREF | setClosure
+	    | label
             // | loop | typecase | casebang 
             ; 
 // *select* is record selection.
@@ -1112,6 +1116,10 @@ AST allocREF = type;
 AST copyREF = expr expr;
 AST mkClosure = expr ident;
 AST setClosure = ident expr expr+;
+
+// LABEL and LABELED EXIT
+AST label = ident expr;
+AST return_from = ident expr;
 
 // SWITCH
 AST switch = ident expr sw_legs ow;

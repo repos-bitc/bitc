@@ -123,9 +123,12 @@ public:
     return bindings.size();
   }
 
-
+  /// @brief Search recursively upwards for a binding, but not beyond
+  /// the environment specified by outerLimit.
   boost::shared_ptr< Binding<T> >
-  doGetBinding(const std::string& nm) const;
+  doGetBinding(const std::string& nm,
+	       boost::shared_ptr<Environment<T> > outerLimit 
+	       = boost::GC_NULL) const;
 
   boost::shared_ptr< Binding<T> >
   getLocalBinding(const std::string& nm) const;
@@ -159,9 +162,11 @@ public:
   void updateKey(const std::string& from, const std::string& to);
 
   inline boost::shared_ptr<T>
-  getBinding(const std::string& nm) const
+  getBinding(const std::string& nm,
+	       boost::shared_ptr<Environment<T> > outerLimit 
+	       = boost::GC_NULL) const
   {
-    boost::shared_ptr<const Binding<T> > binding = doGetBinding(nm);
+    boost::shared_ptr<const Binding<T> > binding = doGetBinding(nm, outerLimit);
     if (binding) return binding->val;
     return boost::GC_NULL;
   }

@@ -330,12 +330,18 @@ markComplete(shared_ptr<ASTEnvironment > env)
 
 // The Symbol Resolver: 
 // The parameters need some explanation. 
-// ast: The ast that is recurssively analyzed
+// ast: The ast that is recursively analyzed
 // env: The current environment bindings 
+// lamLevel: The environment that was in effect at the time we saw
+//           the most recently enclosing lambda.
 // mode: Defining / Usage mode. Based on this mode, when an identifier 
 //       is encountered, it is either added to, or looked up in the 
 //       current environment. Only if the mode is Redefinable, a 
 //       variable binding can be shadowed.
+// identType: In DEF_MODE, the identifier class of identifier that we 
+//                are defining. 
+//            In USE_MODE, the identifier class that we require
+// flags: Other context-dependent constraints on resolution.
 
 bool
 resolve(std::ostream& errStream, 
@@ -576,7 +582,10 @@ resolve(std::ostream& errStream,
 	  assert((flags & NO_CHK_USE_TYPE) || 
 		 (identType != id_unresolved));
 	  
+	  // When resolving a label, must find it within current
+	  // lambda body or no joy.
 	  ast->symbolDef = env->getBinding(ast->s);
+
 	  // 	if (ast->symbolDef == NULL) 
 	  // 	  cout << " Symdef is NULL for " << ast->s << endl;
 	  
@@ -626,6 +635,19 @@ resolve(std::ostream& errStream,
 	  }
 	  
 	  assert(ast->symbolDef);
+
+	  // If we are resolving a use occurrence of a label for
+	  // labeled escape, check that we did not cross a lambda
+	  // boundary.
+	  if ((identType == id_label) &&
+	      !env->getBinding(ast->s, lamLevel)) {
+	    errStream << ast->loc << ": Escape to "
+		      << ast->s << "' must not cross lambda boundary."
+		      << std::endl;
+	    errorFree = false;
+	    break;
+	  }
+
 	  shared_ptr<AST> def = ast->symbolDef;
 
 	  if ((flags & USE_ONLY_PUBLIC) && 
@@ -1854,6 +1876,26 @@ resolve(std::ostream& errStream,
       break;
     }
     
+  case at_label:
+    {
+      RESOLVE(ast->child(0), env, lamLevel, DEF_MODE,
+	      id_label, currLB, flags);
+      // I suspect that LABEL needs to be treated as a let boundary,
+      // in the sense that definitions within label must not float 
+      // outside it. Given this, is currLB correct?
+      RESOLVE(ast->child(1), env, lamLevel, USE_MODE,
+	      idc_value, currLB, flags);
+      break;
+    }
+
+  case at_return_from:
+    {
+      RESOLVE(ast->child(0), env, lamLevel, USE_MODE,
+	      id_label, currLB, flags);
+      RESOLVE(ast->child(1), env, lamLevel, USE_MODE,
+	      idc_value, currLB, flags);
+      break;
+    }
 
   case at_fqCtr:
     {

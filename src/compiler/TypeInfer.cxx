@@ -3154,6 +3154,41 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
+  case at_label:
+    {
+      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  DEF_MODE, TI_NONE);
+      TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+
+      CHKERR(errFree, unify(errStream, trail, ast->child(0)->loc,
+			    ast->child(0)->symType,
+			    ast->child(1)->symType, 
+			    uflags));  
+
+      ast->symType = ast->child(1)->symType;
+      break;
+    }
+
+  case at_return_from:
+    {
+      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+      TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP2);
+
+      CHKERR(errFree, unify(errStream, trail, ast->child(0)->loc,
+			    ast->child(0)->symType, 
+			    MBF(ast->child(1)->symType), 
+			    uflags));  
+      
+      // Not returning, so don't really care about return type, but it
+      // needs to unify compatibly in various other situations, so
+      // generate a new tyep variable.
+      ast->symType = newTvar();    
+      break;
+    }
+
   case at_begin:
     {
     /*------------------------------------------------
