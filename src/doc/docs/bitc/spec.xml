@@ -3037,7 +3037,7 @@ id : T
           begin block.
         </p>
       </sect2>
-      <sect2>
+      <sect2 id="labelled-blocks">
         <title>Labelled Sequences and Escape</title>
         <p>
           The expression:
@@ -3357,7 +3357,7 @@ id : T
           </p>
         </sect3>
       </sect2>
-      <sect2>
+      <sect2 id="explicit-return">
         <title>Explicit Procedure Return</title>
         <p>
           <em>Derived form</em>
