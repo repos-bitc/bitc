@@ -639,7 +639,7 @@ resolve(std::ostream& errStream,
 	  // If we are resolving a use occurrence of a label for
 	  // labeled escape, check that we did not cross a lambda
 	  // boundary.
-	  if ((identType == id_label) &&
+	  if ((identType == id_block) &&
 	      !env->getBinding(ast->s, lamLevel)) {
 	    errStream << ast->loc << ": Escape to "
 		      << ast->s << "' must not cross lambda boundary."
@@ -1876,10 +1876,10 @@ resolve(std::ostream& errStream,
       break;
     }
     
-  case at_label:
+  case at_block:
     {
       RESOLVE(ast->child(0), env, lamLevel, DEF_MODE,
-	      id_label, currLB, flags);
+	      id_block, currLB, flags);
       // I suspect that LABEL needs to be treated as a let boundary,
       // in the sense that definitions within label must not float 
       // outside it. Given this, is currLB correct?
@@ -1891,7 +1891,7 @@ resolve(std::ostream& errStream,
   case at_return_from:
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE,
-	      id_label, currLB, flags);
+	      id_block, currLB, flags);
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE,
 	      idc_value, currLB, flags);
       break;

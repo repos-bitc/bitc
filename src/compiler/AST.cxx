@@ -503,8 +503,8 @@ AST::tagName(const AstType at)
     return "at_mkClosure";
   case at_setClosure:
     return "at_setClosure";
-  case at_label:
-    return "at_label";
+  case at_block:
+    return "at_block";
   case at_return_from:
     return "at_return_from";
   case at_switch:
@@ -800,8 +800,8 @@ AST::astName() const
     return "mkClosure";
   case at_setClosure:
     return "setClosure";
-  case at_label:
-    return "label";
+  case at_block:
+    return "block";
   case at_return_from:
     return "return_from";
   case at_switch:
@@ -1009,7 +1009,7 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00", // at_copyREF
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00", // at_mkClosure
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00", // at_setClosure
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00", // at_label
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00", // at_block
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00", // at_return_from
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00", // at_switch
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00", // at_sw_legs
@@ -3687,7 +3687,7 @@ AST::isValid() const
     }
     break;
 
-  case at_label: // normal AST:
+  case at_block: // normal AST:
     // match at_ident
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());

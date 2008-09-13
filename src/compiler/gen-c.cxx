@@ -1918,7 +1918,7 @@ toc(std::ostream& errStream,
       break;
     }
 
-  case at_label:
+  case at_block:
     {
       // Emit the expression to be evaluated followed by the escape label:
       TOC(errStream, uoc, ast->child(1), out, IDname, decls, 

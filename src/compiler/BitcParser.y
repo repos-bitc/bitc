@@ -157,7 +157,7 @@ shared_ptr<AST> stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_CASE
 %token <tok> tk_OTHERWISE
 
-%token <tok> tk_LABEL tk_RETURN_FROM
+%token <tok> tk_BLOCK tk_RETURN_FROM
 
 %token <tok> tk_PAIR
 %token <tok> tk_VECTOR
@@ -1626,9 +1626,9 @@ expr: '(' tk_SUSPEND useident expr ')' {
 };
 
 // LABELS and LABELED EXIT
-eform: '(' tk_LABEL ident expr ')' {
-  SHOWPARSE("eform -> (LABEL defident expr)");
-  $$ = AST::make(at_label, $2.loc, $3, $4);
+eform: '(' tk_BLOCK ident expr ')' {
+  SHOWPARSE("eform -> (BLOCK defident expr)");
+  $$ = AST::make(at_block, $2.loc, $3, $4);
 }
 
 eform: '(' tk_RETURN_FROM useident expr ')' {
