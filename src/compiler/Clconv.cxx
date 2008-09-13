@@ -454,7 +454,7 @@ findusedef(std::ostream &errStream,
       break;
     }
 
-  case at_label:
+  case at_block:
   case at_return_from:
     {
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(1), 

@@ -41,5 +41,5 @@
 
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec)
-    (label L
+    (block L
 	   (if #t (return-from L 0:int32) 25:int32))))

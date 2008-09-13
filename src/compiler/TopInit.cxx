@@ -327,7 +327,7 @@ TopInit(std::ostream& errStream,
     }
 
   case at_array:
-  case at_label:
+  case at_block:
   case at_return_from:
   case at_vector:
   case at_makevectorL:

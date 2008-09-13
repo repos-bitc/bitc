@@ -394,8 +394,8 @@ AST::atKwd() const
   case at_begin:
     return "begin";
 
-  case at_label:
-    return "label";
+  case at_block:
+    return "block";
 
   case at_return_from:
     return "return-from";

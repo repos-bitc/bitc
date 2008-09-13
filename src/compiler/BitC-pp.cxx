@@ -379,7 +379,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     }
 
   case at_begin:
-  case at_label:
+  case at_block:
   case at_return_from:
   case at_if:
   case at_and:

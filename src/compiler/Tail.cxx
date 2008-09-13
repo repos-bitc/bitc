@@ -221,7 +221,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
     }
     
   case at_begin:
-  case at_label:
+  case at_block:
   case at_return_from:
     {
       //     for (size_t i = 0; i < ast->children.size() - 1; i++)

@@ -127,8 +127,8 @@ enum IdentType {
   /// @brief Union constructor taking no arguments.
   id_ucon0,
   
-  /// @brief Label used in labeled escape.
-  id_label,
+  /// @brief Label used in block/labeled escape.
+  id_block,
   
   ///////////////////////////////////////////////////////////////////
   //
@@ -618,7 +618,7 @@ enum AstType {
   at_copyREF,
   at_mkClosure,
   at_setClosure,
-  at_label,
+  at_block,
   at_return_from,
   at_switch,
   at_sw_legs,

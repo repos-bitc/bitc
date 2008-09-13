@@ -875,7 +875,7 @@ ssa(std::ostream& errStream,
     }
 
 
-  case at_label:
+  case at_block:
     {
       // This needs gensym-like behavior, but with a known resulting name.
       std::stringstream ss;
