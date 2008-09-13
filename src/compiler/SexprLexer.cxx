@@ -204,7 +204,7 @@ struct SexprLexer::KeyWord SexprLexer::keywords[] = {
   { "cond",             tk_COND },
   { "const",            tk_CONST },
   { "constrain",        tk_Reserved },
-  { "continue",         tk_Reserved },
+  { "continue",         tk_CONTINUE },
   { "declare",          tk_DECLARE },
   { "deep-const",       tk_Reserved },
   { "defequiv",         tk_Reserved },

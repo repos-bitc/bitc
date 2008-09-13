@@ -402,6 +402,21 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
 	break;
       }
+      else if (ident == "__continue") {
+	if (ast->astType == at_block) {
+	  // This is the (block __return <body>) that implicitly wraps
+	  // every loop body. Simply pretty print the <body>.
+	  BitcP(out, ast->child(1), showTypes);
+	  break;
+	}
+	else {
+	  // (CONTINUE) is encoded as (RETURN-FROM __continue ()).
+	  // Print it in the form that the user gave:
+	  out << "(continue)";
+	}
+
+	break;
+      }
 
       /* else fall through */
     }

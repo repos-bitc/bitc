@@ -157,7 +157,8 @@ shared_ptr<AST> stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_CASE
 %token <tok> tk_OTHERWISE
 
-%token <tok> tk_BLOCK tk_RETURN tk_RETURN_FROM
+%token <tok> tk_BLOCK tk_RETURN_FROM
+%token <tok> tk_RETURN tk_CONTINUE
 
 %token <tok> tk_PAIR
 %token <tok> tk_VECTOR
@@ -1790,7 +1791,7 @@ eform: '(' tk_BEGIN expr_seq ')' {
 };
 
 // LABELS and LABELED EXIT [7.6]
-eform: '(' tk_BLOCK ident expr ')' {
+eform: '(' tk_BLOCK ident expr_seq ')' {
   SHOWPARSE("eform -> (BLOCK defident expr)");
   $$ = AST::make(at_block, $2.loc, $3, $4);
 }
@@ -2086,70 +2087,18 @@ let_eform: '(' tk_LETREC '(' letbindings ')' expr_seq ')' {
 eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
   SHOWPARSE("eform -> (DO (dobindings) dotest expr_seq)");
 
-#if 1
-  $$ = AST::make(at_do, $2.loc, $4, $6, $7);
-#else
-  shared_ptr<AST> doBindings = $4;
+  // The body is executed for side effects. We need to know its result
+  // type so that the CONTINUE block will be properly typed. Since we
+  // are only running the body for side effects, force the result type
+  // to be unit by appending a unit constructor at the end of the
+  // expression sequence:
+  $7->addChild(AST::make(at_unit, $7->loc));
 
-  shared_ptr<AST> theIdent = AST::genIdent("do");
-
-  // The body proper of the DO is going to turn into a BEGIN
-  // consisting of the provided DO body and ending with a recursive
-  // call.
-
-  // Formulate the recursive call
-  shared_ptr<AST> recCall = AST::make(at_apply, $4->loc);
-  recCall->addChild(theIdent->Use());
-
-  for (size_t b = 0; b < doBindings->children.size(); b++) {
-    shared_ptr<AST> binding = doBindings->child(b);
-    recCall->addChild(binding->child(2));
-  }
-
-  // Make up the begin:
-  shared_ptr<AST> doBody = AST::make(at_begin, $7->loc);
-  doBody->addChild($7);		// add the existing body
-  doBody->addChild(recCall);	// add the recursive call
-
-  // The lambda args are the left-most elements of the DO bindings
-  shared_ptr<AST> lamArgs = AST::make(at_argVec, $4->loc);
-  for (size_t b = 0; b < doBindings->children.size(); b++) {
-    shared_ptr<AST> binding = doBindings->child(b);
-    lamArgs->addChild(binding->child(0));
-  }
-
-  // The lambda body is going to be an IF testing termination and
-  // conditionally performing the initial call.
-  shared_ptr<AST> lamBody = AST::make(at_if, $6->loc);
-  {
-    lamBody->addChildrenFrom($6); /* adds IF-TEST and THEN expr */
-    lamBody->addChild(doBody);	/* adds ELSE expr */
-  }
-
-  shared_ptr<AST> theLambda = AST::make(at_lambda, $7->loc, lamArgs, lamBody);
-  
-  // The letrec body proper consists entirely of an APPLY form that
-  // makes the initial lambda call:
-  shared_ptr<AST> letBody = AST::make(at_apply, $1.loc, theIdent->Use());
-  for (size_t b = 0; b < doBindings->children.size(); b++) {
-    shared_ptr<AST> binding = doBindings->child(b);
-    letBody->addChild(binding->child(1));
-  }
-
-  shared_ptr<AST> theBinding = AST::make(at_letbinding, $1.loc);
-  theBinding->flags |= LB_REC_BIND;
-  
-  theBinding->addChild(AST::make(at_identPattern, $1.loc, theIdent));
-  theBinding->addChild(theLambda);
-
-  shared_ptr<AST> letBindings = AST::make(at_letbindings, $1.loc, theBinding);
-
-  shared_ptr<AST> letRec = AST::make(at_letrec, $1.loc, letBindings, letBody, 
-			AST::make(at_constraints));
-  letRec->printVariant = 1;
-
-  $$ = letRec;
-#endif
+  shared_ptr<AST> iContinueBlock = 
+    AST::make(at_block, $2.loc, 
+	      AST::make(at_ident, LToken("__continue")), 
+	      $7);
+  $$ = AST::make(at_do, $2.loc, $4, $6, iContinueBlock);
 };
 
 
@@ -2178,6 +2127,13 @@ dotest: '(' expr expr ')' {
   SHOWPARSE("dobinding -> ( expr expr )");
   $$ = AST::make(at_dotest, $2->loc, $2, $3);  
 };
+
+eform: '(' tk_CONTINUE ')' {
+  SHOWPARSE("eform -> (CONTINUE)");
+  $$ = AST::make(at_return_from, $2.loc, 
+		 AST::make(at_ident, LToken("__continue")),
+		 AST::make(at_unit, $2.loc));
+}
 
 /* Literals and Variables */
 // INTEGER LITERALS [2.4.1]
