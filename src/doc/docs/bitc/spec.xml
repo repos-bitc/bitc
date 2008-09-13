@@ -391,24 +391,25 @@
 apply         array         array-length
 array-nth     begin         bitc-version
 as            bitfield      bool          
-by-ref        case          catch         
-char          cond          const
-declare       defaxiom      defexception  
-define        definvariant  defrepr       
-defstruct     deftheory     defthm        
-defunion      deref         disable       
-do            double        dup           
-enable        exception     extends       
-external      fill          fixint        
-float         if            import        
-impure        int8          int16         
-int32         int64         interface     
-fn            lambda        let           
-letrec        member        mutable       
-not           opaque        or            
-otherwise     pair          proclaim      
-provide       pure          quad          
-ref           set!          string        
+block         by-ref        case          
+catch         char          cond          
+const         declare       defaxiom      
+defexception  define        definvariant  
+defrepr       defstruct     deftheory     
+defthm        defunion      deref         
+disable       do            double        
+dup           enable        exception     
+extends       external      fill          
+fixint        float         if            
+import        impure        int8          
+int16         int32         int64         
+interface     fn            lambda        
+let           letrec        member        
+mutable       not           opaque        
+or            otherwise     pair          
+proclaim      provide       pure          
+quad          ref           return        
+return-from   set!          string        
 suspend       switch        tag           
 the           throw         try           
 tyfn          uint8         uint16        
@@ -420,18 +421,17 @@ vector-nth    word          </literallayout>
 	  keywords:
 	</p>
 	<literallayout indent="no">
-assert        block         break         
-check         coindset      constrain     
-continue      deep-const    defequiv      
-defobject     defrefine     deftype       
-defvariant    do*           import!       
-indset        inner-ref     int           
-label         let*          list          
-literal       location      module        
-namespace     nth           read-only     
-require       return        return-from   
-sensory       sizeof        super         
-tycon         using         value-at</literallayout>
+assert        break         check         
+coindset      constrain     continue      
+deep-const    defequiv      defobject     
+defrefine     deftype       defvariant    
+do*           import!       indset        
+inner-ref     int           let*          
+list          literal       location      
+module        namespace     nth           
+read-only     require       sensory       
+sizeof        super         tycon         
+using         value-at</literallayout>
 	<p>
           In addition to the reserved words identified above, all
 	  definitions provided in the standard prelude are implicitly
@@ -3038,6 +3038,46 @@ id : T
         </p>
       </sect2>
       <sect2>
+        <title>Labelled Sequences and Escape</title>
+        <p>
+          The expression:
+        </p>
+        <literallayout>
+(block <em>ident</em> <em>e<sub>1</sub></em> ... <em>e<sub>n</sub></em>)</literallayout>
+        <p indent="no">
+          executes the forms
+          <progident><em>e<sub>1</sub></em></progident> through
+          <progident><em>e<sub>n</sub></em></progident> in sequence,
+          where each form is an expression. The value of a
+          <progident>block</progident> expression is the value
+          produced by the last <em>expression</em> executed within the
+          block.
+        </p>
+        <p>
+          Within the body of the <progident>block</progident> form,
+          the identifier <progident><em>ident</em></progident> is
+          lexically bound as an escape label, and the expression
+        </p>
+        <literallayout>
+(return-from <em>ident</em> <em>e</em>)</literallayout>
+        <p>
+          Causes an immediate return from the
+          <progident>block</progident> with the value computed by the
+          expression <progident><em>e</em></progident>.  Control does
+          not continue past the end of this form.
+        </p>
+        <p>
+          The identifier
+          <em>ident</em> must be in scope as an escape label, and the
+          <progident>block</progident> and its associated
+          <progident>return-from</progident> must appear within the
+          body of the same lambda form. That is: the
+          <progident>return-from</progident> may <em>not</em> appear
+          within a <progident>lambda</progident> that is in turn
+          nested within a <progident>block</progident>.
+        </p>
+      </sect2>
+      <sect2>
         <title>Iteration</title>
         <p>
           <em>Derived form</em>
@@ -3316,6 +3356,36 @@ id : T
             [Here, &tau; &ne; (mutable &tau;<sup>&prime;</sup>)].
           </p>
         </sect3>
+      </sect2>
+      <sect2>
+        <title>Explicit Procedure Return</title>
+        <p>
+          <em>Derived form</em>
+        </p>
+	<p>
+	  The expression:
+	</p>
+	<literallayout>
+(return <em>e</em>)</literallayout>
+        <p>
+          causes the nearest enclosing <progident>lambda</progident>
+          form to immediately return the value computed by the
+          expression <progident><em>e</em></progident>. This form
+          executes a form of labelled break. Control does not continue
+          past the end of this form.
+        </p>
+        <p>
+          <leadin>Derivation</leadin> The canonical rewriting of
+          <progident>return</progident> requires that the containing
+          <progident>lambda</progident> also be rewritten:
+        </p>
+        <literallayout>
+(lambda (<em>args</em>) <em>body</em>) =&gt;
+(lambda (<em>args</em>) 
+  (block __return <em>body</em>))
+
+(return <em>e</em>) =&gt;
+(return-from __return <em>e</em>)</literallayout>
       </sect2>
       <sect2>
 	<title>Function Application</title>

@@ -1629,23 +1629,6 @@ expr: '(' tk_SUSPEND useident expr ')' {
   $$ = AST::make(at_suspend, $2.loc, $3, $4);
 };
 
-// LABELS and LABELED EXIT
-eform: '(' tk_BLOCK ident expr ')' {
-  SHOWPARSE("eform -> (BLOCK defident expr)");
-  $$ = AST::make(at_block, $2.loc, $3, $4);
-}
-
-eform: '(' tk_RETURN_FROM useident expr ')' {
-  SHOWPARSE("eform -> (RETURN-FROM useident expr)");
-  $$ = AST::make(at_return_from, $2.loc, $3, $4);
-}
-
-eform: '(' tk_RETURN expr ')' {
-  SHOWPARSE("eform -> (RETURN-FROM useident expr)");
-  $$ = AST::make(at_return_from, $2.loc, 
-		 AST::make(at_ident, LToken("__return")), $3);
-}
-
 // LITERALS  [7.1]
 eform: literal {
   SHOWPARSE("eform -> Literal");
@@ -1674,7 +1657,7 @@ eform: ident {
   $$ = $1;
 };
 
-// MEMBER [7.7]
+// MEMBER [7.9]
 // In principle, we would like to accept expr.ident here, but that
 // creates a parse conflict with expr:type, because the sequence
 //
@@ -1714,7 +1697,7 @@ eform: '(' tk_MEMBER expr ident ')' {
   $$ = AST::make(at_select, $2.loc, $3, $4);
 };
 
-// NTH-REF [7.8.2]          
+// NTH-REF [7.11.2]          
 eform: expr '[' expr ']' {
   SHOWPARSE("eform -> expr [ expr ]");
   $$ = AST::make(at_vector_nth, $1->loc, $1, $3);
@@ -1729,7 +1712,13 @@ eform: '(' tk_VECTOR_NTH expr expr ')' {
   $$ = AST::make(at_vector_nth, $2.loc, $3, $4);
 };
 
-// DEREF [7.13.2]                
+// DUP [7.17.1]
+eform: '(' tk_DUP expr ')' {
+  SHOWPARSE("eform -> ( DUP expr )");
+  $$ = AST::make(at_dup, $2.loc, $3);
+};
+
+// DEREF [7.17.2]                
 eform: expr '^' {
   SHOWPARSE("eform -> expr ^");
   $$ = AST::make(at_deref, $1->loc, $1); 
@@ -1800,18 +1789,29 @@ eform: '(' tk_BEGIN expr_seq ')' {
   $$->astType = at_begin;
 };
 
-// ARRAY-LENGTH [7.8.1]
+// LABELS and LABELED EXIT [7.6]
+eform: '(' tk_BLOCK ident expr ')' {
+  SHOWPARSE("eform -> (BLOCK defident expr)");
+  $$ = AST::make(at_block, $2.loc, $3, $4);
+}
+
+eform: '(' tk_RETURN_FROM useident expr ')' {
+  SHOWPARSE("eform -> (RETURN-FROM useident expr)");
+  $$ = AST::make(at_return_from, $2.loc, $3, $4);
+}
+
+// ARRAY-LENGTH [7.11.1]
 eform: '(' tk_ARRAY_LENGTH expr ')' {
   SHOWPARSE("eform -> ( ARRAY-LENGTH expr expr )");
   $$ = AST::make(at_array_length, $2.loc, $3);
 };
-// VECTOR-LENGTH [7.8.1]
+// VECTOR-LENGTH [7.11.1]
 eform: '(' tk_VECTOR_LENGTH expr ')' {
   SHOWPARSE("eform -> ( VECTOR-LENGTH expr expr )");
   $$ = AST::make(at_vector_length, $2.loc, $3);
 };
 
-// LAMBDA [7.9]
+// LAMBDA [7.12]
 // handles unit argument
 //eform: '(' tk_LAMBDA lambdapattern expr_seq ')'  {
 //  SHOWPARSE("lambda -> ( LAMBDA lambdapattern expr_seq )");
@@ -1838,7 +1838,14 @@ eform: '(' tk_LAMBDA '(' lambdapatterns ')' expr_seq ')'  {
   $$ = AST::make(at_lambda, $2.loc, $4, iRetBlock);
 };
 
-// APPLICATION [7.10]          
+// RETURN [7.13]          
+eform: '(' tk_RETURN expr ')' {
+  SHOWPARSE("eform -> (RETURN-FROM useident expr)");
+  $$ = AST::make(at_return_from, $2.loc, 
+		 AST::make(at_ident, LToken("__return")), $3);
+}
+
+// APPLICATION [7.14]          
 eform: '(' expr ')' { /* apply to zero args */ 
   SHOWPARSE("eform -> ( expr )");
   $$ = AST::make(at_apply, $2->loc, $2);
@@ -1849,13 +1856,13 @@ eform: '(' expr expr_seq ')' { /* apply to one or more args */
   $$->addChildrenFrom($3);
 };
  
-// IF [7.11.1]
+// IF [7.15.1]
 eform: '(' tk_IF expr expr expr ')' {
   SHOWPARSE("eform -> (IF expr expr expr )");
   $$ = AST::make(at_if, $2.loc, $3, $4, $5);
 };
 
-// WHEN [7.11.2]
+// WHEN [7.15.2]
 eform: '(' tk_WHEN expr expr_seq ')' {
   SHOWPARSE("eform -> (WHEN expr_seq )");
   $4->astType = at_begin;
@@ -1863,13 +1870,13 @@ eform: '(' tk_WHEN expr expr_seq ')' {
   $$ = AST::make(at_when, $2.loc, $3, $4);
 };
 
-// NOT [7.11.3]
+// NOT [7.15.3]
 eform: '(' tk_NOT expr ')'  {
   SHOWPARSE("eform -> ( NOT expr )");
   $$ = AST::make(at_not, $2.loc, $3);
 };
 
-// AND [7.11.4]                  
+// AND [7.15.4]                  
 eform: '(' tk_AND expr_seq ')'  {
   SHOWPARSE("eform -> ( AND expr_seq )");
   $$ = $3;
@@ -1877,7 +1884,7 @@ eform: '(' tk_AND expr_seq ')'  {
   $$->astType = at_and;
 };
 
-// OR [7.11.5]
+// OR [7.15.5]
 eform: '(' tk_OR expr_seq ')'  {
   SHOWPARSE("eform -> ( OR expr_seq )");
   $$ = $3;
@@ -1885,7 +1892,7 @@ eform: '(' tk_OR expr_seq ')'  {
   $$->astType = at_or;
 };
 
-// COND [7.11.6]           
+// COND [7.15.6]           
 eform: '(' tk_COND  condcases  otherwise ')'  {
   SHOWPARSE("eform -> (COND  ( condcases ) ) ");
   $$ = AST::make(at_cond, $2.loc, $3, $4);
@@ -1907,22 +1914,10 @@ condcase: '(' expr expr_seq ')'  {
   $$ = AST::make(at_cond_leg, $1.loc, $2, $3);
 };
 
-// SET! [7.12.1]                 
+// SET! [7.16]                 
 eform: '(' tk_SET expr expr ')' {
   SHOWPARSE("eform -> ( SET! expr expr )");
   $$ = AST::make(at_setbang, $2.loc, $3, $4);
-};
-
-// READ-ONLY [7.12.2]
-//eform: '(' tk_READ_ONLY expr ')' {
-//  SHOWPARSE("eform -> ( MUTABLE expr )");
-//  $$ = AST::make(at_read_only, $2.loc, $3);
-//};
-
-// DUP
-eform: '(' tk_DUP expr ')' {
-  SHOWPARSE("eform -> ( DUP expr )");
-  $$ = AST::make(at_dup, $2.loc, $3);
 };
 
 // SWITCH
@@ -2029,7 +2024,7 @@ typecase_leg: '(' bindingpattern expr ')'  {
   $$ = AST::make(at_typecase_leg, $1.loc, $2, $3);
   }; */
 
-// TRY/CATCH [7.15.1]
+// TRY/CATCH [7.19.1]
 eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
   SHOWPARSE("eform -> ( TRY expr ( CATCH ( ident sw_legs ) ) )");
   $$ = AST::make(at_try, $2.loc, $3, $6, $7, $8);
@@ -2040,7 +2035,7 @@ eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
   }
 };
 
-// THROW  [7.15.2]               
+// THROW  [7.19.2]               
 eform: '(' tk_THROW expr ')' {
   SHOWPARSE("eform -> ( THROW expr )");
   $$ = AST::make(at_throw, $2.loc, $3);
@@ -2053,7 +2048,7 @@ eform: let_eform {
   $$ = $1;
 };
 
-// LET [7.16.1]                  
+// LET [5.3.1]                  
 let_eform: '(' tk_LET '(' letbindings ')' expr_seq ')' {
   SHOWPARSE("eform -> (LET (letbindings) expr_seq)");
   $6->astType = at_begin;
@@ -2075,7 +2070,7 @@ letbinding: '(' bindingpattern expr ')' {
   $$ = AST::make(at_letbinding, $2->loc, $2, $3);
 };
 
-// LETREC [7.16.2]               
+// LETREC [5.3.2]               
 let_eform: '(' tk_LETREC '(' letbindings ')' expr_seq ')' {
   SHOWPARSE("eform -> (LETREC (letbindings) expr_seq)");
   $6->astType = at_begin;
