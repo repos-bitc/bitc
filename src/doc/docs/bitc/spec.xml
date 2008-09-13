@@ -3037,8 +3037,8 @@ id : T
           begin block.
         </p>
       </sect2>
-      <sect2 id="labelled-blocks">
-        <title>Labelled Sequences and Escape</title>
+      <sect2 id="labeled-blocks">
+        <title>Labeled Sequences and Escape</title>
         <p>
           The expression:
         </p>
@@ -3371,7 +3371,7 @@ id : T
           causes the nearest enclosing <progident>lambda</progident>
           form to immediately return the value computed by the
           expression <progident><em>e</em></progident>. This form
-          executes a form of labelled break. Control does not continue
+          executes a form of labeled break. Control does not continue
           past the end of this form.
         </p>
         <p>
