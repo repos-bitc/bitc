@@ -378,9 +378,36 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
-  case at_begin:
   case at_block:
   case at_return_from:
+    {
+      // Some blocks are implicitly introduced in the parser. These
+      // require special handling 
+      string ident = ast->child(0)->s;
+      if (ident == "__return") {
+	if (ast->astType == at_block) {
+	  // This is the (block __return <body>) that implicitly wraps
+	  // every user-introduced lambda body. Simply pretty print the
+	  // <body>.
+	  BitcP(out, ast->child(1), showTypes);
+	  break;
+	}
+	else {
+	  // (RETURN expr) is encoded as (RETURN-FROM __return expr).
+	  // Print it in the form that the user gave:
+	  out << "(return ";
+	  BitcP(out, ast->child(1), showTypes);
+	  out << ")";
+	}
+
+	break;
+      }
+
+      /* else fall through */
+    }
+
+
+  case at_begin:
   case at_if:
   case at_and:
   case at_or:

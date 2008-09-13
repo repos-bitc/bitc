@@ -273,7 +273,7 @@ struct SexprLexer::KeyWord SexprLexer::keywords[] = {
   { "ref",              tk_REF },
   { "require",          tk_Reserved },
   { "reserved",         tk_RESERVED },
-  { "return",           tk_Reserved },
+  { "return",           tk_RETURN },
   { "return-from",      tk_RETURN_FROM },
   { "sensory",          tk_Reserved },
   { "set!",             tk_SET },

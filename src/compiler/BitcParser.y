@@ -157,7 +157,7 @@ shared_ptr<AST> stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_CASE
 %token <tok> tk_OTHERWISE
 
-%token <tok> tk_BLOCK tk_RETURN_FROM
+%token <tok> tk_BLOCK tk_RETURN tk_RETURN_FROM
 
 %token <tok> tk_PAIR
 %token <tok> tk_VECTOR
@@ -916,8 +916,10 @@ value_definition: '(' tk_DEFINE defpattern docstring expr ')'  {
 value_definition: '(' tk_DEFINE '(' defident ')' expr_seq ')'  {
   SHOWPARSE("value_definition -> ( DEFINE  ( defident ) [docstring] expr_seq )");
   $6 = stripDocString($6);
+  shared_ptr<AST> iRetBlock = 
+    AST::make(at_block, $2.loc, AST::make(at_ident, LToken("__return")), $6);
   shared_ptr<AST> iLambda =
-    AST::make(at_lambda, $2.loc, AST::make(at_argVec, $5.loc), $6);
+    AST::make(at_lambda, $2.loc, AST::make(at_argVec, $5.loc), iRetBlock);
   iLambda->printVariant = 1;
   shared_ptr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
   $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
@@ -931,7 +933,9 @@ value_definition: '(' tk_DEFINE '(' defident lambdapatterns ')'
   SHOWPARSE("value_definition -> ( DEFINE  ( defident lambdapatterns ) "
 	    "[docstring] expr_seq )");
   $7 = stripDocString($7);
-  shared_ptr<AST> iLambda = AST::make(at_lambda, $2.loc, $5, $7);
+  shared_ptr<AST> iRetBlock = 
+    AST::make(at_block, $2.loc, AST::make(at_ident, LToken("__return")), $7);
+  shared_ptr<AST> iLambda = AST::make(at_lambda, $2.loc, $5, iRetBlock);
   iLambda->printVariant = 1;
   shared_ptr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
   $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
@@ -1636,6 +1640,12 @@ eform: '(' tk_RETURN_FROM useident expr ')' {
   $$ = AST::make(at_return_from, $2.loc, $3, $4);
 }
 
+eform: '(' tk_RETURN expr ')' {
+  SHOWPARSE("eform -> (RETURN-FROM useident expr)");
+  $$ = AST::make(at_return_from, $2.loc, 
+		 AST::make(at_ident, LToken("__return")), $3);
+}
+
 // LITERALS  [7.1]
 eform: literal {
   SHOWPARSE("eform -> Literal");
@@ -1814,14 +1824,18 @@ eform: '(' tk_LAMBDA '(' ')' expr_seq ')'  {
   if ($5->children.size() == 1 && $5->child(0)->astType == at_begin)
     $5 = $5->child(0);
   shared_ptr<AST> argVec = AST::make(at_argVec, $3.loc);
-  $$ = AST::make(at_lambda, $2.loc, argVec, $5);
+  shared_ptr<AST> iRetBlock = 
+    AST::make(at_block, $2.loc, AST::make(at_ident, LToken("__return")), $5);
+  $$ = AST::make(at_lambda, $2.loc, argVec, iRetBlock);
 };
 
 eform: '(' tk_LAMBDA '(' lambdapatterns ')' expr_seq ')'  {
   SHOWPARSE("lambda -> ( LAMBDA lambdapatterns expr_seq )");
   if ($6->children.size() == 1 && $6->child(0)->astType == at_begin)
     $6 = $6->child(0);
-  $$ = AST::make(at_lambda, $2.loc, $4, $6);
+  shared_ptr<AST> iRetBlock = 
+    AST::make(at_block, $2.loc, AST::make(at_ident, LToken("__return")), $6);
+  $$ = AST::make(at_lambda, $2.loc, $4, iRetBlock);
 };
 
 // APPLICATION [7.10]          
