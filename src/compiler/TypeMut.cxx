@@ -177,24 +177,14 @@ p: (CL (maybe-1 'a)) => (fn ('a) ())
                                                                     */
 /********************************************************************/  
 
-bool 
-Type::copy_compatible(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
-{
-  return MBF(shared_from_this())->equals(MBF(t), verbose, errStream);
-}
+/********************************************************************
+         Operators for Minimizing/Maximizing Mutability
+  [ Name of the operator in formalization document written in braces]
 
-bool 
-Type::copy_compatibleA(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
-{
-  return MBF(shared_from_this())->equalsA(MBF(t), verbose, errStream);
-}
+ *******************************************************************/
 
-static inline shared_ptr<Type> 
-addMutable(shared_ptr<Type> t)
-{
-  return Type::make(ty_mutable, t->getBareType());
-}
 
+/* Maximize Mutability at the top-most level [\blacktriangle] */
 shared_ptr<Type> 
 Type::maximizeTopMutability(shared_ptr<Trail> trail)
 {
@@ -223,7 +213,7 @@ Type::maximizeTopMutability(shared_ptr<Trail> trail)
     
   default:
     {
-      rt = addMutable(t->getDCopy());
+      rt = Mutable(t->getDCopy());
       break;
     }
   }
@@ -231,6 +221,7 @@ Type::maximizeTopMutability(shared_ptr<Trail> trail)
   return rt;
 }
 
+/* Minimize Mutability at the top-most level [\blacktriangledown] */
 shared_ptr<Type> 
 Type::minimizeTopMutability(shared_ptr<Trail> trail)
 {
@@ -268,6 +259,7 @@ Type::minimizeTopMutability(shared_ptr<Trail> trail)
   return rt;
 }
 
+/* Maximize Mutability up to copy boundary [\triangle] */
 shared_ptr<Type> 
 Type::maximizeMutability(shared_ptr<Trail> trail)
 {
@@ -298,7 +290,7 @@ Type::maximizeMutability(shared_ptr<Trail> trail)
     {
       rt = Type::make(t);
       rt->Base() = t->Base()->maximizeMutability(trail);
-      rt = addMutable(t);      
+      rt = Mutable(t);      
       break;
     }
 
@@ -319,7 +311,7 @@ Type::maximizeMutability(shared_ptr<Trail> trail)
 	}
       }
       
-      rt = addMutable(rt);
+      rt = Mutable(rt);
       break;
     } 
     
@@ -333,7 +325,7 @@ Type::maximizeMutability(shared_ptr<Trail> trail)
     
   default:
     {
-      rt = addMutable(t->getDCopy());
+      rt = Mutable(t->getDCopy());
       break;
     }
   }
@@ -342,6 +334,7 @@ Type::maximizeMutability(shared_ptr<Trail> trail)
   return rt;
 }
 
+/* Minimize Mutability up to copy boundary [\triangledown] */
 shared_ptr<Type> 
 Type::minimizeMutability(shared_ptr<Trail> trail)
 {
@@ -412,6 +405,7 @@ Type::minimizeMutability(shared_ptr<Trail> trail)
   return rt;
 }
 
+/* Minimize Mutability up to function boundary [\mathfrak{I}] */
 shared_ptr<Type> 
 Type::minimizeDeepMutability(shared_ptr<Trail> trail)
 {
@@ -490,65 +484,10 @@ Type::minimizeDeepMutability(shared_ptr<Trail> trail)
   return rt;
 }
 
-#if 0
-// Assumes `this' is (shallowly) maximally mutable
-// ensures that there are no structure fields that are fixed to
-// immutable at the definition, so that mutability propagation is
-// later possible.
-bool
-Type::checkCopyMutProp()
-{
-  bool errFree = true;
-  shared_ptr<Type> t = getType();
-  
-  if (t->mark & MARK_CHECK_COPY_MUT_PROP)
-    return errFree;
-  
-  t->mark |= MARK_CHECK_COPY_MUT_PROP;  
-  
-  switch(t->kind) {
-  case ty_structv:
-    {
-      for (size_t i=0; i < t->components.size(); i++) {
-	shared_ptr<Type> component = t->CompType(i);
-	CHKERR(errFree, component->isMutable());
-	CHKERR(errFree, component->checkCopyMutProp()); 
-      }
-      break;
-    }
-
-  case ty_array:
-  case ty_mutable:
-    {
-      CHKERR(errFree, t->Base()->checkCopyMutProp());
-      break;
-    }
-    
-    // Assuming maximizeMutability(), there cannot be any 
-    // maybe types. 
-  case ty_mbTop:
-  case ty_mbFull:
-  case ty_letGather:
-    {
-      assert(false);
-      break;
-    }
-    
-    // type variables, concrete types, function type and reference
-    // types and unions.
-    // Union case can always break since the tag field is what is
-    // getting mutated. The inner structures, if any, can only be
-    // overwritten as a whole within a match.
-    // Also, match ensures that there cannot be any &-like references
-    // due to by-ref within the original union.
-  default:
-    break;
-  }
-  
-  t->mark &= ~MARK_CHECK_COPY_MUT_PROP;
-  return errFree;
-}
-#endif
+/********************************************************************
+      Mutability Propagation inwards for unboxed structures 
+             and mutability consistency checking
+ *******************************************************************/
 
 bool
 Type::checkMutConsistency(bool inMut, bool seenMut)
@@ -634,6 +573,7 @@ Type::checkMutConsistency(bool inMut, bool seenMut)
   return errFree;
 }
 
+/* Mutability Propagation [\mathbb{M}] */
 bool
 Type::propagateMutability(boost::shared_ptr<Trail> trail, 
 			  const bool inMutable)
@@ -732,6 +672,12 @@ Type::propagateMutability(boost::shared_ptr<Trail> trail,
   return errFree;
 }
 
+/********************************************************************
+                      Maybe normalization
+ *******************************************************************/
+
+/* Normalize types such as 
+   ((mutable 'a)|bool) to (mutable bool) [\mathfrac{M}] */
 void
 Type::normalize_mbFull(boost::shared_ptr<Trail> trail)
 {
@@ -777,20 +723,84 @@ Type::normalize_mbFull(boost::shared_ptr<Trail> trail)
   return;
 }
 
+/********************************************************************
+          Determining Copy Compatibility of unboxed structures
+ *******************************************************************/
 
-bool 
-Type::isMaxMutable()
-{
-  return strictlyEquals(maximizeMutability());
-}
-
-extern shared_ptr<TvPrinter> debugTvp;
+// See if nth typeArg is a CCC based on the TY_CCC flag markings
 bool
-Type::isMinMutable()
+Type::argCCOK(size_t argN)
 {
-  return strictlyEquals(minimizeMutability());
+  shared_ptr<Type> t = getType();
+  assert(t->isValType());
+  assert(argN < t->typeArgs.size());
+  assert(t->defAst);
+
+  // Be REALLY careful about bt. It is the type in the scheme.
+  // NEVER unify it with anyhing.
+  shared_ptr<Type> bt = t->defAst->symType;  
+  if (bt->TypeArg(argN)->getType()->flags & TY_CCC)
+    return true;
+  else
+    return false;
 }
 
+
+/* Determine Candidacy for Copy-Compatibility For type variables only,
+   argument is a composite-type that is searched to determine ccc-ness */ 
+
+bool
+Type::determineCCC(shared_ptr<Type> t, bool inRefType)
+{ 
+  if (shared_from_this() != getType())
+    return getType()->determineCCC(t);
+  
+  t = t->getType();
+
+  if (t->mark & MARK_DETERMINE_CCC)
+    return true;
+  
+  t->mark |= MARK_DETERMINE_CCC;  
+  bool cccOK = true;
+  
+  switch(t->kind) {
+  case ty_tvar:				       
+    {
+      if ((t == shared_from_this()) && (inRefType))
+	cccOK = false;
+      break;
+    }
+
+  case ty_typeclass:
+  case ty_tyfn:
+    {
+      assert(false);
+      break;
+    }
+
+  default:
+    {
+      for (size_t i=0; cccOK && (i<t->typeArgs.size()); i++) 
+	cccOK = determineCCC(t->TypeArg(i), 
+			     inRefType || t->isRefType() || 
+			     (!t->argCCOK(i)));
+      
+      for (size_t i=0; cccOK && (i<t->components.size()); i++)
+	cccOK = determineCCC(t->CompType(i), t->isRefType());
+      
+      // I think no need to process fnDeps here.
+      break;
+    }
+  }
+
+  t->mark &= ~MARK_DETERMINE_CCC;
+  return cccOK;
+}
+
+
+/********************************************************************
+                      Maybe Type coercion
+ *******************************************************************/
 
 static void 
 coerceMaybe(shared_ptr<Type> t, shared_ptr<Trail> trail, 
@@ -872,77 +882,6 @@ Type::adjMaybe(shared_ptr<Trail> trail, bool markedOnly,
   }
   
   t->mark &= ~MARK_ADJ_MAYBE;
-}
-
-
-// See if nth typeArg is a CCC based on the TY_CCC flag markings
-bool
-Type::argCCOK(size_t argN)
-{
-  shared_ptr<Type> t = getType();
-  assert(t->isValType());
-  assert(argN < t->typeArgs.size());
-  assert(t->defAst);
-
-  // Be REALLY careful about bt. It is the type in the scheme.
-  // NEVER unify it with anyhing.
-  shared_ptr<Type> bt = t->defAst->symType;  
-  if (bt->TypeArg(argN)->getType()->flags & TY_CCC)
-    return true;
-  else
-    return false;
-}
-
-
-/* Determine Candidacy for Copy-Compatibility For type variables only,
-   argument is a composite-type that is searched to determine ccc-ness */ 
-
-bool
-Type::determineCCC(shared_ptr<Type> t, bool inRefType)
-{ 
-  if (shared_from_this() != getType())
-    return getType()->determineCCC(t);
-  
-  t = t->getType();
-
-  if (t->mark & MARK_DETERMINE_CCC)
-    return true;
-  
-  t->mark |= MARK_DETERMINE_CCC;  
-  bool cccOK = true;
-  
-  switch(t->kind) {
-  case ty_tvar:				       
-    {
-      if ((t == shared_from_this()) && (inRefType))
-	cccOK = false;
-      break;
-    }
-
-  case ty_typeclass:
-  case ty_tyfn:
-    {
-      assert(false);
-      break;
-    }
-
-  default:
-    {
-      for (size_t i=0; cccOK && (i<t->typeArgs.size()); i++) 
-	cccOK = determineCCC(t->TypeArg(i), 
-			     inRefType || t->isRefType() || 
-			     (!t->argCCOK(i)));
-      
-      for (size_t i=0; cccOK && (i<t->components.size()); i++)
-	cccOK = determineCCC(t->CompType(i), t->isRefType());
-      
-      // I think no need to process fnDeps here.
-      break;
-    }
-  }
-
-  t->mark &= ~MARK_DETERMINE_CCC;
-  return cccOK;
 }
 
 
@@ -1059,18 +998,6 @@ Type::markSignMbs(bool cppos)
   t->mark &= ~MARK_SIGN_MBS;
   return;
 }
-
-
-// Mark significant MB-tvars.
-// Mb-Tvars that need not be preserved semantically are:
-//  (1) at a copy position of a function argument or return type.
-//  (2) at a copy-argument-position of typeclass argument.
-// (1) is detected automatically, for (2) pass cppos-true at start.
-// Actually what this does is an "unmark" on the TY_COERCE flag, not
-// a new mark. The idea is that only generalizable FTVs should be
-// marked this way. So, mark all generalizable TVs with TY_COERCE,
-// and this routine will unmark all those coercions that will alter
-// semantic meaning.
 
 void
 Type::fixupFnTypes()

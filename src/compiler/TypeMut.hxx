@@ -75,4 +75,10 @@ MBT(boost::shared_ptr<Type> t)
   return Type::make(ty_mbTop, newTvar(), t->getBareType());
 }
 
+static inline boost::shared_ptr<Type> 
+Mutable(boost::shared_ptr<Type> t)
+{
+  return Type::make(ty_mutable, t->getBareType());
+}
+
 #endif /* TYPEMUT_HXX */

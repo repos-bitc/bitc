@@ -371,11 +371,11 @@ public:
   bool isBaseConstType(); // Integers, floats, string, bool, unit, dummy.
   bool isClosure();
   bool isImmutableRefType();
-  bool isMutable();
+  bool isMutable();  // (mutable T)
+  bool isMutType();  // (mutable T) or (mutable 'a)|T
   bool isMaybe();
   bool isMbFull();
   bool isMbTop();
-  bool isMbVar();
   bool isConcrete();
   bool isPrimaryType();
   bool isPrimInt();
@@ -547,18 +547,6 @@ public:
   minimizeTopMutability(boost::shared_ptr<Trail> trail=Trail::make()); 
   boost::shared_ptr<Type>
   minimizeDeepMutability(boost::shared_ptr<Trail> trail=Trail::make());
-
-private:
-  // Check if Mutability can be propagated (see next function) to 
-  // some type that is Copy-compatible with this type
-  // This is a helper function used by the propagateMutability()
-  // function's mbFull case. It ensures that the mbFull case with a
-  // mutable Var() part does not have in its Core() part, a structure
-  // whose fields are fixed to immutable at definition.
-  // NOTE: This function must only be called on a type that is 
-  //       (shallowly) maximally mutable.
-  bool
-  checkCopyMutProp(); 
 
 public:
   bool checkMutConsistency(bool inMut=false, bool inMbFull=false);

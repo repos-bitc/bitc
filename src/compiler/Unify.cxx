@@ -400,7 +400,32 @@ Unify(std::ostream& errStream,
 			    mb->Var(), other, flags));
       break;
     }
+
+    /* Certain types have multiple equivalent representations. 
+       For example,
+        1) (array (mutable int32)) == (mutable (array (mutable int32)))
+	2) An unboxed structure is mutable as a whole if all of its
+           components are mutable.  
+       
+       Therefore, (array T) must potentially unify with 
+       (mutable T) and (mutable 'a)|t.  The following rule
+       checks to see if such a match is possible */
     
+    if(t1->isMutType() || t2->isMutType()) {
+      shared_ptr<Type> mut = t1->isMutType() ? t1 : t2;
+      shared_ptr<Type> other = t1->isMutType() ? t2 : t1;
+      
+      assert(!other->isMutType() &&  // Otherwise, it would be 
+	     !other->isMaybe());     // handled already.  
+      
+      if(other->kind == ty_array || other->kind == ty_structv) {
+	CHKERR(errFree, Unify(errStream, trail, errLoc, 
+			      mut, Mutable(other), flags));
+	break;
+      }
+    }
+
+
     errFree = typeError(errStream, errLoc, t1, t2);
     break;
 

@@ -467,6 +467,14 @@ Type::isMutable()
 }
 
 bool 
+Type::isMutType()
+{
+  shared_ptr<Type> t = getType();
+  return(t->isMutable() ||
+	 (t->isMbFull() && t->Var()->isMutable()));
+}
+
+bool 
 Type::isMaybe()
 {
   shared_ptr<Type> t = getType();
@@ -488,18 +496,16 @@ Type::isMbTop()
 }
  
 bool 
-Type::isMbVar()
+Type::isMaxMutable()
 {
-  shared_ptr<Type> t = getType();
-  TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
-  shared_ptr<Type> v = t->Var();
-  TYPE_ACC_DEBUG 
-    if (t->kind == ty_mbFull)
-      assert(v->kind != ty_mbFull);
-    else
-      assert(v->kind != ty_mbFull && v->kind != ty_mbTop);
-  
-  return (v->kind == ty_tvar);
+  return strictlyEquals(maximizeMutability());
+}
+
+extern shared_ptr<TvPrinter> debugTvp;
+bool
+Type::isMinMutable()
+{
+  return strictlyEquals(minimizeMutability());
 }
 
 bool 
@@ -1213,6 +1219,18 @@ Type::strictlyEqualsA(shared_ptr<Type> t, bool verbose,
 {
   return eql(t, verbose, errStream, 
 	     UNIFY_TRY | UNIFY_STRICT | UN_IGN_RIGIDITY, false);
+}
+
+bool 
+Type::copy_compatible(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
+{
+  return MBF(shared_from_this())->equals(MBF(t), verbose, errStream);
+}
+
+bool 
+Type::copy_compatibleA(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
+{
+  return MBF(shared_from_this())->equalsA(MBF(t), verbose, errStream);
 }
 
 bool

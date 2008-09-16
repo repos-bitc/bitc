@@ -311,7 +311,19 @@ UocInfo::Compile()
     
     bool showTypes = false;
     
-    if (Options::showTypesUocs.find(uocName) != Options::showTypesUocs.end())
+    // We now find the `bare' name of a UOC. Source modules are named
+    // as uocName#index_number. But, for showing the types for a 
+    // UOC whose name specified as the input argument, we must compare 
+    // only the bare UOC name.
+    // In effect, this will display the types for all UOCs whose name
+    // matches the command line argument.
+    std::string bareName = uocName;
+    std::string::size_type pos = uocName.find ('#');
+    if (pos != std::string::npos)
+      bareName = uocName.substr(0, pos);
+
+    if (Options::showTypesUocs.find(bareName) !=
+	Options::showTypesUocs.end())
       showTypes = true;
     
     if (! (this->*passInfo[i].fn)(std::cerr, true, 0) ) {
