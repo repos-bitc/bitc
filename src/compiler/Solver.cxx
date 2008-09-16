@@ -104,7 +104,7 @@ mustSolve(const TypeSet& dom)
 {
   for (TypeSet::iterator itr = dom.begin(); itr != dom.end(); ++itr) {
     shared_ptr<Type> arg = (*itr)->getType();
-    if (arg->isTvar())
+    if (arg->isVariable())
       return false;
   }
   
@@ -286,7 +286,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
       return true;
     }
     
-    if (it->isTvar()) { // checks beyond mutability, maybe-ness
+    if (it->isVariable()) { // checks beyond mutability, maybe-ness
       SPSOL_DEBUG errStream << "\t\t ... Variable, KEEP"
 			    << pred->asString(Options::debugTvP)
 			    << std::endl;

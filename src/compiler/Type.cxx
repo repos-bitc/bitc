@@ -299,49 +299,47 @@ Type::getTheType(bool mutableOK, bool maybeOK)
 bool
 Type::isTvar()
 {
+  shared_ptr<Type> t = getType();  
+  return (t->kind == ty_tvar);
+}
+
+bool
+Type::isVariable()
+{
   shared_ptr<Type> t = getBareType();  
   return (t->kind == ty_tvar);
 }
 
 bool
-Type::isUnifiableTvar(size_t flags)
+Type::isUnifiableVar(size_t flags)
 {
   shared_ptr<Type> t = getType();
-  if (t->kind != ty_tvar)
-    return false;
+  shared_ptr<Type> var = t;
   
+  switch(t->kind) {
+  case ty_tvar:
+    var = t;
+    break;
+
+  case ty_mbTop:
+    var = t->Var()->getType();
+    break;
+
+  case ty_mbFull:
+    var = t->Var()->getType();
+  
+    if(var->isMutable())
+      var = var->Base()->getType();
+    break;
+    
+  default:
+    return false;
+  }
+
   if (flags & UN_IGN_RIGIDITY)
     return true;
   
-  if ((t->flags & TY_RIGID) == 0)
-    return true;
-
-  return false;
-}
-
-bool
-Type::isUnifiableMbTop(size_t flags)
-{
-  shared_ptr<Type> t = getType();
-  if (t->kind != ty_mbTop)
-    return false;
-  
-  return t->Var()->isUnifiableTvar(flags);
-}
-
-bool
-Type::isUnifiableMbFull(size_t flags)
-{
-  shared_ptr<Type> t = getType();
-  if (t->kind != ty_mbFull)
-    return false;
-  
-  shared_ptr<Type> var = t->Var()->getType();
-  
-  if(var->isMutable())
-    var = var->Base()->getType();
-  
-  return var->isUnifiableTvar(flags);
+  return ((var->flags & TY_RIGID) == 0);
 }
 
 bool 
@@ -473,6 +471,20 @@ Type::isMaybe()
 {
   shared_ptr<Type> t = getType();
   return (t->kind == ty_mbTop || t->kind == ty_mbFull);
+}
+
+bool 
+Type::isMbFull()
+{
+  shared_ptr<Type> t = getType();
+  return (t->kind == ty_mbFull);
+}
+
+bool 
+Type::isMbTop()
+{
+  shared_ptr<Type> t = getType();
+  return (t->kind == ty_mbTop);
 }
  
 bool 

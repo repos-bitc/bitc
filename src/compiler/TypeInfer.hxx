@@ -59,5 +59,8 @@
         // take closures or refs to functions / closures.
 
 #define INF_REINIT          0x00200u 
+#define UN_MBFULL_VAR       0x00400u // Unifying the Var() part 
+        // of an mbFull type. Here, the propagateMutability() check
+        // must not be performed.
 
 #endif /* TYPEINFER_HXX */

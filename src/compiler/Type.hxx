@@ -358,6 +358,7 @@ public:
   bool isException();
   bool isStruct();
   bool isTvar();
+  bool isVariable(); // Checks beyond mutability maybe-ness
   bool isAtomic();
   bool isSimpleTypeForC();
   bool isScalar();
@@ -372,6 +373,8 @@ public:
   bool isImmutableRefType();
   bool isMutable();
   bool isMaybe();
+  bool isMbFull();
+  bool isMbTop();
   bool isMbVar();
   bool isConcrete();
   bool isPrimaryType();
@@ -393,10 +396,8 @@ public:
   // wherein the variable (possible within Var() component) is 
   // not marked RIGID, unless, fllags indicate that rigidity 
   // must be ignored.  
-  bool isUnifiableTvar(size_t flags=0);
-  bool isUnifiableMbFull(size_t flags=0);
-  bool isUnifiableMbTop(size_t flags=0);
-
+  bool isUnifiableVar(size_t flags=0);
+  
   // Mark significant MB-tvars.
   // Mb-Tvars that need not be preserved semantically are:
   //  (1) at a copy position of a function argument or return type.
@@ -547,12 +548,28 @@ public:
   boost::shared_ptr<Type>
   minimizeDeepMutability(boost::shared_ptr<Trail> trail=Trail::make());
 
+private:
+  // Check if Mutability can be propagated (see next function) to 
+  // some type that is Copy-compatible with this type
+  // This is a helper function used by the propagateMutability()
+  // function's mbFull case. It ensures that the mbFull case with a
+  // mutable Var() part does not have in its Core() part, a structure
+  // whose fields are fixed to immutable at definition.
+  // NOTE: This function must only be called on a type that is 
+  //       (shallowly) maximally mutable.
+  bool
+  checkCopyMutProp(); 
+
+public:
+  bool checkMutConsistency(bool inMut=false, bool inMbFull=false);
+
   // Propagate Mutability inwards for unboxed composite types.
   // This case might fail with an error if there is an inner immutable
   // type, for example (mutable (pair (int32 bool)))
   bool
   propagateMutability(boost::shared_ptr<Trail> trail, 
-		      const bool inMutable); 
+		      const bool inMutable=false); 
+  
   
   // Check if maximally / minimally mutable
   bool isMaxMutable();
@@ -697,6 +714,8 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
 #define MARK_IS_CONCRETIZABLE         0x0200000u
 #define MARK_IS_SHALLOW_CONCRETIZABLE 0x0400000u
 #define MARK_NORMALIZE_MBFULL         0x0800000u
+//#define MARK_CHECK_COPY_MUT_PROP      0x1000000u
+#define MARK_CHECK_MUT_CONSISTENCY    0x1000000u
 
 /* Flags used by Type-inference engine. 
    These flags are different from the Unifier's flags */

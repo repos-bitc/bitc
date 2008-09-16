@@ -39,12 +39,15 @@
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defstruct St:val f1:(mutable int32) f2:bool)
+;; MUST NOT WORK
+;;(defstruct St:val f1:(mutable int32) f2:bool)
+;; since second field is immutable, giving `p' below
+;; the type (mutable St) should lead to an error.
+
+(defstruct St:val f1:(mutable int32) f2:(mutable bool))
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec)
     (let ((p (St 10 #t)))
       (set! p.f1 25)
-      ;; MUST not work
-      ;; (set! p.f2 #f)
       (set! p (St p.f1 p.f2)))
     0))

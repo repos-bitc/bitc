@@ -55,6 +55,7 @@
 #include "Typeclass.hxx"
 #include "inter-pass.hxx"
 #include "Unify.hxx"
+#include "Options.hxx"
 
 using namespace boost;
 using namespace sherpa;
@@ -489,6 +490,150 @@ Type::minimizeDeepMutability(shared_ptr<Trail> trail)
   return rt;
 }
 
+#if 0
+// Assumes `this' is (shallowly) maximally mutable
+// ensures that there are no structure fields that are fixed to
+// immutable at the definition, so that mutability propagation is
+// later possible.
+bool
+Type::checkCopyMutProp()
+{
+  bool errFree = true;
+  shared_ptr<Type> t = getType();
+  
+  if (t->mark & MARK_CHECK_COPY_MUT_PROP)
+    return errFree;
+  
+  t->mark |= MARK_CHECK_COPY_MUT_PROP;  
+  
+  switch(t->kind) {
+  case ty_structv:
+    {
+      for (size_t i=0; i < t->components.size(); i++) {
+	shared_ptr<Type> component = t->CompType(i);
+	CHKERR(errFree, component->isMutable());
+	CHKERR(errFree, component->checkCopyMutProp()); 
+      }
+      break;
+    }
+
+  case ty_array:
+  case ty_mutable:
+    {
+      CHKERR(errFree, t->Base()->checkCopyMutProp());
+      break;
+    }
+    
+    // Assuming maximizeMutability(), there cannot be any 
+    // maybe types. 
+  case ty_mbTop:
+  case ty_mbFull:
+  case ty_letGather:
+    {
+      assert(false);
+      break;
+    }
+    
+    // type variables, concrete types, function type and reference
+    // types and unions.
+    // Union case can always break since the tag field is what is
+    // getting mutated. The inner structures, if any, can only be
+    // overwritten as a whole within a match.
+    // Also, match ensures that there cannot be any &-like references
+    // due to by-ref within the original union.
+  default:
+    break;
+  }
+  
+  t->mark &= ~MARK_CHECK_COPY_MUT_PROP;
+  return errFree;
+}
+#endif
+
+bool
+Type::checkMutConsistency(bool inMut, bool seenMut)
+{
+  bool errFree = true;
+  shared_ptr<Type> t = getType();
+  
+  if (t->mark & MARK_CHECK_MUT_CONSISTENCY)
+    return errFree;
+  
+  t->mark |= MARK_CHECK_MUT_CONSISTENCY;
+  
+  switch(t->kind) {
+  case ty_tvar:
+    {
+      // Should we enforce:  
+      //CHKERR(errFree, !inMut || seenMut); ??
+      break;
+    }
+
+  case ty_mbTop:
+    {
+      CHKERR(errFree, !inMut);
+      CHKERR(errFree, t->Core()->checkMutConsistency(inMut, false));
+      break;
+    }
+    
+  case ty_mbFull:
+    {
+      shared_ptr<Type> var = t->Var()->getType();
+      shared_ptr<Type> inner = t->Core()->getType();
+    
+      bool varMutable = var->isMutable();
+    
+      CHKERR(errFree, !inMut || varMutable);
+    
+      if(varMutable) {
+	shared_ptr<Type> innerMax = inner->maximizeMutability();
+	CHKERR(errFree, innerMax->checkMutConsistency(false, false));
+      }
+      else {
+	CHKERR(errFree, inner->checkMutConsistency(false, false));
+      }
+      
+      break;
+    }
+    
+  case ty_mutable:
+    {
+      CHKERR(errFree, t->Base()->checkMutConsistency(true, true));
+      break;
+    }
+    
+  case ty_array:
+    {
+      CHKERR(errFree, !inMut || seenMut);
+      CHKERR(errFree, t->Base()->checkMutConsistency(inMut, false)); 
+      break;
+    }
+    
+  case ty_structv:
+    {
+      CHKERR(errFree, !inMut || seenMut);
+      for (size_t i=0; i < t->components.size(); i++) {
+	shared_ptr<Type> component = t->CompType(i);
+	CHKERR(errFree, component->checkMutConsistency(inMut, false));
+      }
+      break;
+    }
+
+  default:
+    {
+      CHKERR(errFree, !inMut || seenMut);
+      for (size_t i=0; i < t->components.size(); i++) {
+	shared_ptr<Type> component = t->CompType(i);
+	CHKERR(errFree, component->checkMutConsistency(false, false));
+      }
+      break;
+    }
+  }
+  
+  t->mark &= ~MARK_CHECK_MUT_CONSISTENCY;
+  return errFree;
+}
+
 bool
 Type::propagateMutability(boost::shared_ptr<Trail> trail, 
 			  const bool inMutable)
@@ -531,6 +676,8 @@ Type::propagateMutability(boost::shared_ptr<Trail> trail,
       
       if(!var->isMutable())
 	trail->subst(var, Type::make(ty_mutable, newTvar()));
+
+      CHKERR(errFree, t->checkMutConsistency());
       
       break;
     }

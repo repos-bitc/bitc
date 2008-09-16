@@ -51,7 +51,8 @@
 #define REPR_SIMP_DEBUG   DEBUG_OFF
 #define UNION_INF_DEBUG   DEBUG_OFF   
 #define DEF_INF_DEBUG     DEBUG_OFF 
-#define TI_TOP_DEBUG      DEBUG_OFF   // Inference Top-Loop
+#define TI_TOP_DEBUG      DEBUG_OFF  // Inference Top-Loop
+#define TI_AST_DEBUG      DEBUG_OFF  // Inference AST-wise output
 #define CLCONV_DEBUG      DEBUG_OFF
 #define GEN_DEBUG_TL      DEBUG_OFF   // Treat all generalization as local
 #define GEN_DEBUG         DEBUG_OFF   // Debug Type Generalization
@@ -62,7 +63,7 @@
 #define PCST_DEBUG        DEBUG_OFF   // Debug Solving Polymorhic * constaints
 #define TCSOL_DEBUG       DEBUG_OFF   // Debug Solving Type-class constaints
 #define UNIFY_DEBUG       DEBUG_OFF   // Debug Unification
-#define UNF_RES_DEBUG     DEBUG_OFF   // Debug Unification by showing Results
+#define UNF_RES_DEBUG     DEBUG_OFF  // Debug Unification by showing Results
 #define TRAIL_DEBUG       DEBUG_OFF   // Debug Type Linking
 #define TS_NORM_DEBUG     DEBUG_OFF   // Debug TypeScheme Normalization
 #define TYPE_ACC_DEBUG    DEBUG_OFF

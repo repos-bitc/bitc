@@ -41,7 +41,7 @@
 ;; behaviour wrt deep maybe-introduction for value types
 
 ;; Structure with RefType Wrapper
-(defstruct (St 'a 'b):val f1:(vector 'a) f2:'b)
+(defstruct (St 'a 'b):val f1:(mutable (vector 'a)) f2:'b)
 
 (define q1 (St (vector #t) #f))
 (define q2:(mutable 'a) (St (vector #t) #f))

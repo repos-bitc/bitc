@@ -596,6 +596,73 @@ matchDefDecl(std::ostream& errStream,
 }
 
 
+/* Wrapper around Type's checkMutConsistency function that prints an 
+   error message. This function is used wherever the programmer writes
+   an explicit type annotation, to check that the annotated type is
+   consistent wrt mutability (that is, it does not include types such
+   as (mutable (pair bool int32)) */
+static bool
+CheckMutConsistency(std::ostream& errStream, 
+		    const sherpa::LexLoc &errLoc,
+		    shared_ptr<Type> t)
+{
+  bool errFree = t->checkMutConsistency();
+  if(!errFree) 
+    errStream << errLoc << ": Type Annotation "
+	      << " is inconsistent wrt mutability."
+	      << std::endl;
+  return errFree;
+}
+
+/* Due to the presence of explicit programmer annotations, the unifier
+   alone cannot sufficiently check the consistency of mutability at
+   all AST positions. For example, consider:
+   
+   (defstruct St f:bool)
+
+   (lambda (x)                  x: 'a|'b
+     (let ((p x))               p: 'c|'b
+        (set! p p)              p:  M'd|'b
+        x:St))                  x:St, p:M'd|St  ;; ERROR 
+
+  The uniffier cannot detect this error since it is due to non-local 
+  propagation --  the type of p is not involved in the unification at 
+  the expression x:St. Therefore, we introduce an extra consistency 
+  checking pass that traverses all ASTs and reports an error if an 
+  inconsistent type is found.
+
+  This does not affect inferred types since a failure at this step 
+  can only lead to a type error. This pass is only necessary if we 
+  have explicit type annotation (albeit in the form of structure 
+  definitions) where we control the type of all instantiations 
+  and copies at one place. */
+
+static bool
+CheckMutConsistency(std::ostream& errStream, 
+		    shared_ptr<AST> ast)
+{
+  bool errFree = true;
+
+  if(ast->symType &&
+     // error is better reported on the identifier than the
+     // let-binding, which will have a ty_letgather type
+     ast->astType != at_letbindings && ast->astType != at_letbinding)
+    CHKERR(errFree, ast->symType->checkMutConsistency());
+  
+  if(!errFree) { 
+    errStream << ast->loc << ": Unsound Mutable Type "
+	      << ast->symType->asString()
+	      << std::endl;
+    return false;
+  }
+
+  for (size_t i = 0; errFree && i < ast->children.size(); i++) 
+    CHKERR(errFree, CheckMutConsistency(errStream, ast->child(i)));
+  
+  return errFree;
+}
+
+
 /**************************************************************/
 /****                   MAIN INFERENCE ROUTINES            ****/
 /**************************************************************/
@@ -733,6 +800,9 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
     TYPEINFER(field, gamma, instEnv, impTypes, isVP, 
 	      sigma->tcc, uflags, trail,  USE_MODE, TI_COMP1);
     
+    CHKERR(errFree, CheckMutConsistency(errStream,
+					field->loc, field->symType));
+    
     switch(field->astType) {
     case at_field:
       {
@@ -866,7 +936,9 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       TYPEINFER(field, gamma, instEnv, impTypes, isVP, 
 		sigma->tcc, uflags, trail,  USE_MODE, TI_TYP_EXP);
       
-
+      CHKERR(errFree, CheckMutConsistency(errStream,
+					  field->loc, field->symType));
+      
       switch(field->astType) {
       case at_field:
 	{
@@ -1234,6 +1306,8 @@ InferTypeClass(std::ostream& errStream, shared_ptr<AST> ast,
     TYPEINFER(mtType, gamma, instEnv, impTypes, isVP, sigma->tcc,
 	      uflags, trail,  USE_MODE, TI_TYP_EXP);
     mID->symType = mtType->symType;
+    CHKERR(errFree, CheckMutConsistency(errStream,
+					mtType->loc, mtType->symType));
     
     shared_ptr<Type> mType = mID->symType->getType();
     mType->defAst = mID;
@@ -1611,11 +1685,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   ast->envs.gamma = gamma;
   ast->envs.instEnv = instEnv;  
 
-  //    errStream << "INF: " //<< ast->loc << ": " 
-  //   	    << ast->s << "[" << ast->astTypeName() << "]" 
-  //   	    << "   mode = " << mode
-  // 	     << "   isInTypapp = " << ((isInTypapp)?"true":"false")
-  //   	    << std::endl;
+  TI_AST_DEBUG
+    errStream << "INF: " << ast->loc << ": " 
+	      << ast->s << " [" << ast->astTypeName() << "]" 
+	      << "   mode = " << mode
+	      << std::endl;
   
   switch(ast->astType) {
   case agt_expr:
@@ -2317,7 +2391,12 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		  << " LHS = " << idType->asString()
 		  << " RHS = " << rhsType->asString()
 		  << std::endl;            
-      
+
+      // Check the consistency of types wrt mutability at ALL asts
+      // in this definition.
+      if(errFree)
+	CHKERR(errFree, CheckMutConsistency(errStream, ast));
+
       CHKERR(errFree, sigma->generalize(errStream, ast->loc, gamma,
 					instEnv,  ast->child(1), GC_NULL, 
 					trail, gen_top));
@@ -2330,8 +2409,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       if (declTS) 
 	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
-				     declTS, ident->scheme, uflags, true));	
-      
+				     declTS, ident->scheme, uflags, true));
+
       ast->symType = ast->child(0)->symType;
       break;
     }
@@ -2515,7 +2594,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       // match agt_type 
       shared_ptr<AST> fillType = ast->child(0);
       TYPEINFER(fillType, gamma, instEnv, impTypes, isVP, 
-		tcc, uflags, trail,  USE_MODE, TI_TYP_EXP);     
+		tcc, uflags, trail,  USE_MODE, TI_TYP_EXP);
+      ast->symType = ast->child(0)->symType;
       ast->field_bits = fillType->field_bits;
       break;
     }
@@ -2527,7 +2607,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       TYPEINFER(fillType, gamma, instEnv, impTypes, isVP, 
 		tcc, uflags, trail,  USE_MODE, TI_TYP_EXP);     
       ast->field_bits = fillType->field_bits;
-
+      
       shared_ptr<AST> fillVal = ast->child(0);
       TYPEINFER(fillVal, gamma, instEnv, impTypes, isVP, 
 		tcc, uflags, trail,  USE_MODE, TI_TYP_EXP);     
@@ -2542,6 +2622,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	errFree = false;
       }
 
+      ast->symType = ast->child(0)->symType;
       break;
     }
 
@@ -2951,6 +3032,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP1);
 
+      CHKERR(errFree, CheckMutConsistency(errStream,
+					  ast->child(1)->loc,
+					  ast->child(1)->symType));
+      
       // tqExpr: U(t1 == t2)
       CHKERR(errFree, unify(errStream, trail, ast->child(1)->loc, 
 			    ast->child(0)->symType, 
@@ -3082,12 +3167,12 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_vector_length:
     {
     /*------------------------------------------------
-             A |- e: t   U(t = 'a|array('b, ?len))
+             A |- e: t   U(t = 'a|array('c|'b, ?len))
           _________________________________________
              A |- (array-length e): word
 
 
-             A |- e: t   U(t = 'a|vector('b))
+             A |- e: t   U(t = 'a|vector('c|'b))
           _________________________________________
              A |- (vector-length e): word
        ------------------------------------------------*/
@@ -3097,7 +3182,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
       
-      shared_ptr<Type> av = MBF(Type::make(k, newTvar()));
+      shared_ptr<Type> av = MBF(Type::make(k, MBF(newTvar())));
       if (ast->astType == at_array_length)
 	impTypes[av] = ast->child(0);
 
@@ -3119,23 +3204,21 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
              A |- (array-nth e): 'b|'c
 
 
-             A |- e: t   U(t = 'a|vector('b))
+             A |- e: t   U(t = 'a|vector('b|'c))
              A |- en: tn  U(tn = 'd|word)
           _________________________________________
-             A |- (vector-nth e en): 'b
+             A |- (vector-nth e en): 'b|'c
        ------------------------------------------------*/
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
 
       shared_ptr<Type> av = GC_NULL;
-      shared_ptr<Type> cmp = GC_NULL;
+      shared_ptr<Type> cmp = MBF(newTvar());
       if (ast->astType == at_array_nth) {
-	cmp = MBF(newTvar());
 	av = MBT(Type::make(ty_array, cmp));
 	impTypes[av] = ast->child(0);
       }
       else {
-	cmp = newTvar();
 	av = MBF(Type::make(ty_vector, cmp));
       }
       
@@ -4720,11 +4803,13 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     
   } /* switch */
 
-//   if (ast->symType)
-//     errStream << ast->loc << " [" << ast->atKwd() << "] " 
-// 	      << ast->asString() << ": "
-// 	      << ast->symType->asString() 
-// 	      << endl << endl; 
+  TI_AST_DEBUG
+    if (ast->symType)
+      errStream << "\t Obtained [" << ast->atKwd() << "] " 
+		<< ast->asString() << ": "
+		<< ast->symType->asString(Options::debugTvP) 
+		<< "{" << (errFree?"OK":"ERR") << "}"
+		<< endl;
   
   return errFree;
 }
