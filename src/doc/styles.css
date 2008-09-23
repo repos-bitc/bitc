@@ -390,9 +390,20 @@ div.example {
    text-align: left;
 }
 
-div.author {
+div.authorblock {
    margin-top: 0.2ex;
    margin-bottom: 0.2ex;
+}
+
+div.authorblock table {
+   margin-left: auto;
+   margin-right: auto;
+}
+
+div.authorblock table td {
+   padding-left:  0.1in;
+   padding-right: 0.1in;
+   text-align: center;
 }
 
 div.titlepage h1 {
