@@ -47,6 +47,7 @@
 #include <vector>
 
 #include <libsherpa/INOstream.hxx>
+#include <libsherpa/EnumSet.hxx>
 
 #include "AST.hxx"
 #include "debug.hxx"
@@ -68,44 +69,53 @@ typedef long long TargetSWord;
 struct Type;
 struct TCConstraints;
 
-#define COMP_UNIN_DISCM 0x1u // Union discriminator of defrepr
-#define COMP_INVALID    0x2u // Field (component) in a defrepr leg is
-                             // marked invalid within switch statement
-                             // when used in conjuction with other
-                             // constructors (only the common fields
-                             // must be valid) The switced value is
-                             // only valid within select operations,
-                             // and is therefore only checked there.   
-#define COMP_BYREF      0x4u // Valid on ty_argvec only.
-                             // The Flag is not marked on the
-                             // Component types themselves becaluse
-                             // this will cause problems with flag
-                             // propagation during unification
-                             // (especially since the component type
-                             // may be a type variable. We do not have
-                             // a (by-ref 'a) type itself because that
-                             // will result in types such as 
-                             // (mutable (byref 'a)) during inference,
-                             // and we will need normalization.
-                             // Therefore, by-ref is marked on
-                             // ty_argvec components. Two argVecs can
-                             // unify only if all of their components
-                             // and flags match. 
-#define COMP_BYREF_P    0x8u // Valid on ty_argvec only.
-                             // This flag indicates that this 
-                             // component is open to be either ByREF
-                             // or ByVALUE. We need this to unify the
-                             // (extected) functions that we build
-                             // with the actual functions.
+enum CompValues {
+  COMP_NO_FLAGS = 0u,
+
+  /// @brief Union discriminator of defrepr
+  COMP_UNIN_DISCM = 0x1u,
+
+  /// Field (component) in a defrepr leg is
+  /// marked invalid within switch statement
+  /// when used in conjuction with other
+  /// constructors (only the common fields
+  /// must be valid) The switced value is
+  /// only valid within select operations,
+  /// and is therefore only checked there.   
+  COMP_INVALID    = 0x2u,
+
+  /// The Flag is not marked on the Component types themselves
+  /// becaluse this will cause problems with flag propagation during
+  /// unification (especially since the component type may be a type
+  /// variable. We do not have a (by-ref 'a) type itself because that
+  /// will result in types such as (mutable (byref 'a)) during
+  /// inference, and we will need normalization.  Therefore, by-ref is
+  /// marked on ty_argvec components. Two argVecs can unify only if
+  /// all of their components and flags match.
+  ///
+  /// Valid on ty_argvec only.
+  COMP_BYREF      = 0x4u,
+
+  /// Valid on ty_argvec only.
+  /// This flag indicates that this 
+  /// component is open to be either ByREF
+  /// or ByVALUE. We need this to unify the
+  /// (extected) functions that we build
+  /// with the actual functions.
+  COMP_BYREF_P    = 0x8u,
+};
+typedef sherpa::EnumSet<CompValues> CompSet;
 
 struct comp {
   std::string name;
   boost::shared_ptr<Type> typ;
-  unsigned long flags;
+  CompSet flags;
 
-  comp() {flags=0;} 
-  comp(boost::shared_ptr<Type> t, unsigned long _flags=0);
-  comp(const std::string s, boost::shared_ptr<Type> t, unsigned long _flags=0);
+  comp() {flags = COMP_NO_FLAGS;} 
+  comp(boost::shared_ptr<Type> t, 
+       CompSet _flags = COMP_NO_FLAGS);
+  comp(const std::string s, boost::shared_ptr<Type> t, 
+       CompSet _flags = COMP_NO_FLAGS);
 
   // Quasi-constructors
   static inline boost::shared_ptr<comp>
@@ -115,14 +125,14 @@ struct comp {
   }
 
   static inline boost::shared_ptr<comp>
-  make(boost::shared_ptr<Type> t, unsigned long _flags=0) {
+  make(boost::shared_ptr<Type> t, CompSet _flags = COMP_NO_FLAGS) {
     comp *tmp = new comp(t, _flags);
     return boost::shared_ptr<comp>(tmp);
   }
 
   static inline boost::shared_ptr<comp>
   make(const std::string& s, 
-       boost::shared_ptr<Type> t, unsigned long _flags=0) {
+       boost::shared_ptr<Type> t, CompSet _flags = COMP_NO_FLAGS) {
     comp *tmp = new comp(s, t, _flags);
     return boost::shared_ptr<comp>(tmp);
   }
@@ -626,7 +636,7 @@ public:
   {
     return components[i]->name;
   }
-  unsigned long& CompFlags(size_t i) const
+  CompSet& CompFlags(size_t i) const
   {
     return components[i]->flags;
   }

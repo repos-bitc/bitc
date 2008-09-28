@@ -4369,7 +4369,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	    }
 	    
 	    if (!found) 
-	      stComp->flags |= COMP_INVALID;	    
+	      stComp->flags |= COMP_INVALID;
 	  }
 	}
       }

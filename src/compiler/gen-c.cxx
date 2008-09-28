@@ -702,8 +702,8 @@ emit_fnxn_decl(INOstream &out, shared_ptr<AST> ast,
     shared_ptr<AST> pat = argvec->child(i);
     assert(pat->astType == at_identPattern);
     shared_ptr<AST> arg = pat->child(0);
-    unsigned long flags = ((fnargvec->CompFlags(i) &
-			    COMP_BYREF)?CTYP_BYREF:0);
+    unsigned long flags = ((fnargvec->CompFlags(i) & COMP_BYREF)
+			   ? CTYP_BYREF : 0);
 
     /* Do not emit parameters of type unit, since there is no point
      * passing them. Even if they are mutable, the
@@ -2046,7 +2046,7 @@ toc(std::ostream& errStream,
 	if (count > 0)
 	  out << ", ";	    
 	
-	if (argsType->CompFlags(c-1) & COMP_BYREF) {	  
+	if (argsType->CompFlags(c-1) & COMP_BYREF) {
 	  assert(ast->child(c)->isLocation());
 	  out << "&";
 	}
