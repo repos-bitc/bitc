@@ -481,7 +481,7 @@
       started to get in our way quickly.
     </p>
     <p>
-      Like LISP, ACL2 dynamically typed. While preconditions can
+      Like LISP, ACL2 is dynamically typed. While preconditions can
       be expressed that describe argument type constraints, the prover
       requires that all functions be complete over their domains, not
       merely complete when inputs satisfy preconditions. This leads to
