@@ -1905,7 +1905,9 @@ map: ('%e fn (('%e fn ('a) 'b) (list 'a))
         used directly), locking and chaining constructs (where the
         address is being taken mainly because neither subtyping nor
         abstraction is available), or by-reference parameter passing
-        (which BitC supports directly).
+        (which BitC supports directly). In fact, the only pointer
+        idioms that BitC truly restricts are pointers to
+        stack-allocated objects.
       </p>
       <p>
         Some readers may object that our statement here is inaccurate,
