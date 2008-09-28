@@ -78,7 +78,7 @@ using namespace std;
 
 int num_errors = 0;  /* hold the number of syntax errors encountered. */
 
-inline int bitclex(YYSTYPE *lvalp, SexprLexer *lexer)
+inline int sexpr_lex(YYSTYPE *lvalp, SexprLexer *lexer)
 {
   return lexer->lex(lvalp);
 }

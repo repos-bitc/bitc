@@ -197,8 +197,8 @@ bool
 
   lexer.setDebug(Options::showLex);
 
-  extern int bitcparse(SexprLexer *lexer);
-  bitcparse(&lexer);  
+  extern int sexpr_parse(SexprLexer *lexer);
+  sexpr_parse(&lexer);  
   // On exit, ast is a pointer to the AST tree root.
   
   fin.close();

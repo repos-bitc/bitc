@@ -45,7 +45,7 @@
 #include <libsherpa/LexLoc.hxx>
 #include <libsherpa/utf8.hxx>
 
-#include "BUILD/BitcParser.hxx"
+#include "BUILD/SexprParser.hxx"
 
 using namespace sherpa;
 
