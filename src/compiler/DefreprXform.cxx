@@ -35,6 +35,13 @@
  *
  **************************************************************************/
 
+/// @file REPR simplification pass.
+///
+/// For almost all purposes in the compiler, a DEFREPR form can be
+/// treated as a discriminated union form. This pass converts a
+/// DEFREPR into a closely corresponding DEFUNION, leaving a marker
+/// behind to indicate that it was really a DEFREPR.
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -53,41 +60,6 @@
 
 using namespace boost;
 using namespace sherpa;
-
-/**********************************************************************
-Consider the defrepr:
-
-(defrepr name
-    (Ctr1 f11:type f21:type ... fn1:type
-       (where fp1=val11 fq1=val21 ... fm1=valm1))
-
-    (Ctr2 f12:type f22:type ... fn2:type
-       (where fp2=val12 fq2=val22 ... fm2=valm2))
-
-    ... )
-
-The following restrictions apply:
-
-For all constructors Ctrx, Ctry, Ctrz ...:
-
-*  All fields fpx, fqx...fmx appearing in the `when' clause of a
-   constructor form Ctrx must be described within the body of
-   Ctrx. That is, {fpx, fqx...fmx} <= {f1x ... fnx}
-
-*  If the same field name appears in multiple legs of a DEFREPR, that
-   field must appear at the same bit offset in all legs where it
-   appears.  That is, fpx = fpy implies 
-   bitOffset(fpx) = bitOffset(fpy). 
-
-*  The fields within the when clauses of all constructor forms must
-   uniquely distinguish all constructible values of the union. The
-   compiler will not introduce any more tag bits for any defrepr 
-   value. 
-
-*  The defrepr form will not accept type arguments over
-   which it can be instantiated. 
-
-***************************************************************/
 
 shared_ptr<AST> 
 reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)

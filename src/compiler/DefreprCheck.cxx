@@ -35,6 +35,44 @@
  *
  **************************************************************************/
 
+/// @file Requirements checking pass for DEFREPR declarations.
+///
+///
+/// Consider the defrepr:
+///
+/// <pre>
+/// (defrepr name
+///   (Ctr1 f11:type f21:type ... fn1:type
+///     (where fp1=val11 fq1=val21 ... fm1=valm1))
+///   (Ctr2 f12:type f22:type ... fn2:type
+///     (where fp2=val12 fq2=val22 ... fm2=valm2))
+///  ... )
+/// </ped>
+///
+/// The following restrictions apply:
+///
+/// For all constructors Ctrx, Ctry, Ctrz ...:
+///
+/// - All fields fpx, fqx...fmx appearing in the `when' clause of a
+///   constructor form Ctrx must be described within the body of
+///   Ctrx. That is, {fpx, fqx...fmx} <= {f1x ... fnx}
+///
+/// - If the same field name appears in multiple legs of a DEFREPR, that
+///   field must appear at the same bit offset in all legs where it
+///   appears.  That is, fpx = fpy implies 
+///   bitOffset(fpx) = bitOffset(fpy). 
+///
+/// - The fields within the when clauses of all constructor forms must
+///   uniquely distinguish all constructible values of the union. The
+///   compiler will not introduce any more tag bits for any defrepr 
+///   value. 
+///
+/// - The defrepr form will not accept type arguments over
+///   which it can be instantiated. 
+///
+/// This pass tests that all of these requirements are satisfied.
+
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -56,41 +94,8 @@ using namespace std;
 using namespace boost;
 using namespace sherpa;
 
-/**********************************************************************
-Consider the defrepr:
-
-(defrepr name
-    (Ctr1 f11:type f21:type ... fn1:type
-       (where fp1=val11 fq1=val21 ... fm1=valm1))
-
-    (Ctr2 f12:type f22:type ... fn2:type
-       (where fp2=val12 fq2=val22 ... fm2=valm2))
-
-    ... )
-
-The following restrictions apply:
-
-For all constructors Ctrx, Ctry, Ctrz ...:
-
-*  All fields fpx, fqx...fmx appearing in the `when' clause of a
-   constructor form Ctrx must be described within the body of
-   Ctrx. That is, {fpx, fqx...fmx} <= {f1x ... fnx}
-
-*  If the same field name appears in multiple legs of a DEFREPR, that
-   field must appear at the same bit offset in all legs where it
-   appears.  That is, fpx = fpy implies 
-   bitOffset(fpx) = bitOffset(fpy). 
-
-*  The fields within the when clauses of all constructor forms must
-   uniquely distinguish all constructible values of the union. The
-   compiler will not introduce any more tag bits for any defrepr 
-   value. 
-
-*  The defrepr form will not accept type arguments over
-   which it can be instantiated. 
-
-***************************************************************/
-
+/// @brief Given a sub-form describing a field, return the AST
+/// describing its type.
 static shared_ptr<AST> 
 getTypeAst(shared_ptr<AST> fld)
 {
@@ -108,6 +113,10 @@ getTypeAst(shared_ptr<AST> fld)
   }
 }
 
+/// @brief Compute the bit offset of a field within its containing union.
+/// 
+/// Note that this computation is target dependent if the Word type is
+/// being used.
 static size_t 
 bitOffset(shared_ptr<AST> leg, size_t n)
 {
@@ -124,9 +133,16 @@ bitOffset(shared_ptr<AST> leg, size_t n)
   return off;
 }
 
-/* For BitFields, the type does not encode the bits. 
-   Therefore, extra checking is necessary. */
-
+/// @brief Compare types of two fields
+///
+/// If a field appears in multiple legs of a DEFREPR, it must have the
+/// same type in all legs. If it is of bitfield type, it must also
+/// have the same number of bits in all occurrences.
+///
+/// @bug I am not sure what the "extra checking" was in the original
+/// description:  "For BitFields, the type does not encode the bits.
+/// Therefore, extra checking is necessary." Where is this extra
+/// checking performed?
 static bool 
 TypesAgree(shared_ptr<AST> fld1, shared_ptr<AST> fld2)
 {
@@ -140,7 +156,7 @@ TypesAgree(shared_ptr<AST> fld1, shared_ptr<AST> fld2)
     return false;
 }
 
-
+/// @brief Enforce the sanity requirements on REPR declarations.
 bool
 reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
 {

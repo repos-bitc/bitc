@@ -38,6 +38,12 @@
 #include <assert.h>
 #include <iostream>
 
+/// @brief Dump core for debugging.
+///
+/// @bug The only call to this appears in TypeInfer, and I think that
+/// call should be replaced by an exception throw. Debugging can be
+/// done by placing a breakpoint event on exception throw rather then
+/// on dumping core.
 void
 die()
 {

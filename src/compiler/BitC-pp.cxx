@@ -35,6 +35,10 @@
  *
  **************************************************************************/
 
+/// @file
+///
+/// @brief Pretty printer for BitC ASTs, optionally with type information.
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -73,6 +77,10 @@ print_type(INOstream& out, shared_ptr <const AST> ast)
 static void
 BitcP(INOstream& out, shared_ptr <const AST> ast, bool);
 
+/// @brief Wrapper to iterate across all children of @p ast starting
+/// at @p from, optionally padding the first element with leading
+/// white space if @p firstPad is true and optionally printing types
+/// according to @p showTypes.
 static void
 doChildren(INOstream& out, shared_ptr <const AST> ast, size_t from, 
 	   bool firstPad,
@@ -138,6 +146,7 @@ show_qual_name(INOstream &out,  shared_ptr <const AST> tapp,
     out << ")"; 
 }
 
+/// @brief Core of the pretty printer.
 static void
 BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 {
@@ -1018,6 +1027,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   out.setIndent(startIndent);
 }
 
+/// @brief Display the type associated with a form.
 static void 
 doShowTypes(std::ostream& out, shared_ptr<AST> ast, 
 	    shared_ptr<TSEnvironment > gamma,
@@ -1171,6 +1181,7 @@ doShowTypes(std::ostream& out, shared_ptr<AST> ast,
   }
 }
 
+/// @brief top-level wrapper for the pretty printer
 void
 AST::PrettyPrint(std::ostream& strm, bool decorated, 
 		 bool endline) const
@@ -1181,6 +1192,7 @@ AST::PrettyPrint(std::ostream& strm, bool decorated,
     out << std::endl;
 }
 
+/// @brief top-level wrapper for the pretty printer
 void
 AST::PrettyPrint(bool decorated) const
 {
@@ -1189,6 +1201,7 @@ AST::PrettyPrint(bool decorated) const
   std::cerr << endl;
 }
 
+/// @brief top-level wrapper for the pretty printer
 void
 UocInfo::PrettyPrint(std::ostream& out, bool decorated)
 {

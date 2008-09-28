@@ -35,14 +35,12 @@
  *
  **************************************************************************/
 
-/** @file
- *
- * @brief Back end to emit BitC "object" files.
- *
- * Calling this a back end is moderately laughable. All it does is
- * pretty-print the original UoC.
- */
-
+/// @file
+///
+/// @brief Back end to emit BitC "object" files.
+///
+/// Calling this a back end is moderately laughable. All it does is
+/// pretty-print the original UoC.
 
 #include <stdint.h>
 #include <stdlib.h>

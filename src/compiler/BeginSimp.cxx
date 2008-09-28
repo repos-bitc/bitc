@@ -56,7 +56,27 @@
 using namespace boost;
 using namespace sherpa;
 
-// Remove any wrapping BEGIN that has just one child.
+/// @brief Remove redundant BEGIN expressions.
+///
+/// This simplification pass was originally intended to locate all
+/// cases where a BEGIN wraps a single expression and replaces this
+/// with the single expression. The transform has no semantic effect,
+/// but improves the readability of dumped ASTs.
+///
+/// Later, functionality was added by which local DEFINE forms are
+/// converted to the corresponding LET and LETREC forms. After this
+/// pass, the only remaining occurrences of DEFINE and RECDEF appear at
+/// top level. The implementations of most later passes, notably the
+/// resolver and symbol checker, rely on this.
+///
+/// All of the syntactic constructs that wrap implicit BEGIN blocks
+/// are converted by the parser to wrap a single expression with an
+/// inserted BEGIN block that is marked as compiler inserted. In
+/// consequence, the transforms performed here apply to those
+/// constructs as well.
+///
+/// This pass may now be misnamed, but all of the simplifications that
+/// it performs are vaguely related to begin blocks.
 static shared_ptr<AST> 
 beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 {
@@ -64,6 +84,8 @@ beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
     ast->child(c) = beginSimp(ast->child(c), errStream, errFree);
 
   if (ast->astType == at_begin) {
+    // Note that the execution of this loop can have the effect of
+    // shortening ast->children.size()!
     for (size_t c = 0; c < ast->children.size(); c++) {
       if (ast->child(c)->astType == at_define ||
 	  ast->child(c)->astType == at_recdef) {

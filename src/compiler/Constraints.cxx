@@ -35,6 +35,10 @@
  *
  **************************************************************************/
 
+/// @file
+///
+/// @brief Support functions for type class constraints.
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -58,6 +62,8 @@ using namespace std;
 using namespace boost;
 using namespace sherpa;
 
+/// @brief Return true if the current constraint set already includes
+/// @p tc.
 bool 
 TCConstraints::contains(shared_ptr<Typeclass> tc) 
 {
@@ -68,6 +74,14 @@ TCConstraints::contains(shared_ptr<Typeclass> tc)
   return false;
 }
  
+/// @brief Add a new predicate (constraint?) @p tc to an existing
+/// collection of type class constraints.
+///
+/// FIX: What is going on here with TY_CT_SUBSUMED?
+///
+/// FIX: The comments on equals(), strictlyEquals() in Type.hxx are
+/// completely unedifying, and seem to be contradicted by the defaults
+/// on the parameters.
 void 
 TCConstraints::addPred(shared_ptr<Typeclass> tc) 
 {
@@ -82,6 +96,8 @@ TCConstraints::addPred(shared_ptr<Typeclass> tc)
   pred.insert(tc);
 }
 
+/// @brief Remove a predicate (constraint?) from a type class
+/// constraint set.
 void 
 TCConstraints::clearPred(shared_ptr<Constraint> ct) 
 {
@@ -95,6 +111,8 @@ TCConstraints::clearPred(shared_ptr<Constraint> ct)
   }
 }
 
+/// @brief Re-build a type class constrain set from scratch, with the
+/// side effect that subsumption relations are re-checked.
 void 
 TCConstraints::normalize() 
 {

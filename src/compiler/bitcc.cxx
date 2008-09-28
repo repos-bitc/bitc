@@ -35,42 +35,47 @@
  *
  **************************************************************************/
 
-/** @file
- *
- * @brief Command line driver for the static, whole-program BitC
- * compiler.
- *
- * There are three input file extensions:
- *
- *   .bitc  - bitc interface files
- *   .bits  - bitc source files
- *   .bito  - bitc "object" files.
- *
- * This compiler basically operates in three modes:
- *
- *  1. source->object mode, in which X.bits is checked and re-emitted
- *     as X.bito, which is a legal BitC file. We pretend that such
- *     files are object files for command line handling purposes.
- *
- *     This mode can be identified by the presence of the -c option on
- *     the command line. If -c is specified, no output will be emitted.
- *
- *  2. As a header file synthesizer, in which an interface file is
- *     re-emitted as a C header file, allowing portions of the
- *     low-level runtime to be implemented in C.
- *
- *     This usage can be identified by the presence of the -h option
- *     on the command line, but has no effect if -c is also specified.
- *
- *     Note that -h is a convenience shorthand for --lang h.
- *
- *  3. As a linker, in which some number of .bits and .bito files are
- *     combined to form an executable. This is actually the
- *     whole-program compiler mode.
- *
- *     This mode can be identified by the @em absence of either the -c
- *     or the -h options on the command line.
- */
+/// @file
+///
+/// @brief Command line driver for the static, whole-program BitC
+/// compiler.
+///
+/// There are three input file extensions:
+///
+///   .bitc  - bitc interface files
+///   .bits  - bitc source files
+///   .bito  - bitc "object" files.
+///
+/// This compiler basically operates in three modes:
+///
+/// <ol>
+/// <li>
+///     source->object mode, in which X.bits is checked and re-emitted
+///     as X.bito, which is a legal BitC file. We pretend that such
+///     files are object files for command line handling purposes.
+///
+///     This mode can be identified by the presence of the -c option on
+///     the command line. If -c is specified, no output will be emitted.
+/// </li>
+/// <li>
+///     As a header file synthesizer, in which an interface file is
+///     re-emitted as a C header file, allowing portions of the
+///     low-level runtime to be implemented in C.
+///
+///     This usage can be identified by the presence of the -h option
+///     on the command line, but has no effect if -c is also specified.
+///
+///     Note that -h is a convenience shorthand for --lang h.
+/// </li>
+/// <li>
+///     As a linker, in which some number of .bits and .bito files are
+///     combined to form an executable. This is actually the
+///     whole-program compiler mode.
+///
+///     This mode can be identified by the @em absence of either the -c
+///     or the -h options on the command line.
+/// </li>
+/// </ol>
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -142,36 +147,58 @@ using namespace sherpa;
 #define LOPT_NOALLOC      283   /* Statically reject heap-allocating
 				   operations and constructs */
 
+// FIX: Every one of these needs a comment above it explaining what it
+// does. This should NOT be a doxygen comment.
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
   { "debug-tvars",          0,  0, LOPT_DBG_TVARS },
   { "decorate",             0,  0, LOPT_PPDECORATE },
+  // Dump the AST after the named pass
   { "dumpafter",            1,  0, LOPT_DUMPAFTER },
+  // Dump symbol types after the named pass
   { "dumptypes",            1,  0, LOPT_DUMPTYPES },
   { "emit",                 1,  0, LOPT_EMIT },
   { "eqinfer",              0,  0, LOPT_EQ_INFER },
   { "free-advice",          0,  0, LOPT_ADVISORY },
   { "full-qual-types",      0,  0, LOPT_FQ_TYPES },
+  // Print command line help and exit
   { "help",                 0,  0, LOPT_HELP },
   { "heuristic-inf",        0,  0, LOPT_HEURISTIC },
+  // Disallow any construct that would cause heap allocation at runtime.
   { "no-alloc",             0,  0, LOPT_NOALLOC },
+  // Do not link the garbage collector.
   { "no-gc",                0,  0, LOPT_NOGC },
+  // Do not load the standard BitC prelude.
   { "no-prelude",           0,  0, LOPT_NOPRELUDE },
+  // Do not add standard include locations to the include search path.
   { "nostdinc",             0,  0, LOPT_NOSTDINC },
+  // Do not add standard library locations to the library/module search path.
   { "nostdlib",             0,  0, LOPT_NOSTDLIB },
   { "ppfqns",               0,  0, LOPT_PPFQNS },
   { "raw-tvars",            0,  0, LOPT_RAW_TVARS },
   { "show-all-tccs",        0,  0, LOPT_SA_TCC },
   { "show-maybes",          0,  0, LOPT_SHOW_MAYBES },
+  // Print tokens as they are accepted. Primarily useful for debugging
+  // parse errors.
   { "showlex",              0,  0, LOPT_SHOWLEX },
+  // Print parse reductions as they occur.
   { "showparse",            0,  0, LOPT_SHOWPARSE },
+  // Print the names of all passes as they are executed
   { "showpasses",           0,  0, LOPT_SHOWPASSES },
+  // Print the names of all passes
   { "showpassnames",        0,  0, LOPT_SHOWPASSNMS },
+  // Show types as they appear after the named path
   { "showtypes",            1,  0, LOPT_SHOW_TYPES },
+  // Stop processing after the named pass
   { "stopafter",            1,  0, LOPT_STOPAFTER },
+  // Change the standard search prefix directory, similar to gcc --system
   { "system",               1,  0, LOPT_SYSTEM },
+  // Run verbosely. Not clear that this is actually being used anyware.
   { "verbose",              0,  0, 'v' },
+  // Print compiler version and exit
   { "version",              0,  0, 'V' },
+  // Dump symbol types in XML form after the named pass. This should
+  // probably be obsoleted.
   { "xmltypes",             1,  0, LOPT_XML_TYPES },
 #if 0
   /* Options that have short-form equivalents: */
@@ -190,6 +217,7 @@ struct option longopts[] = {
   {0,                       0,  0, 0}
 };
 
+/// @brief Print usage information and exit.
 void
 help()
 {
@@ -217,6 +245,7 @@ help()
     << flush;
 }
  
+/// @brief Cease processing after fatal error
 void
 fatal()
 {
@@ -226,7 +255,15 @@ fatal()
 }
 
 
+/// @brief Record whether we have seen any BitC input file yet.
+///
+/// This determines whether a command line link argument should be
+/// presented to the linker before or after the object file comprising
+/// the BitC portion of the program.
 static bool SawFirstBitcInput = false;
+
+/// @brief Add an argument to be passed to the linker either before or
+/// after the generated BitC object file.
 void
 AddLinkArgumentForGCC(const std::string& s)
 {
@@ -237,13 +274,21 @@ AddLinkArgumentForGCC(const std::string& s)
   }
 }
 
+/// @brief Add an argument to be passed to the compiler before or
+/// after the generated BitC C file.
 void
 AddCompileArgumentForGCC(const std::string& s)
 {
-  if (!SawFirstBitcInput)
-    Options::CompilePreOptionsGCC.push_back(s);    
+  if (SawFirstBitcInput) {
+    cerr << "Compiler options must appear before the first BitC input file."
+	 << endl;
+    exit(1);
+  }
+
+  Options::CompilePreOptionsGCC.push_back(s);    
 }
 
+/// @brief Find the backend corresponding to the specified target type.
 BackEnd *
 FindBackEnd(const char *nm)
 {
@@ -255,6 +300,11 @@ FindBackEnd(const char *nm)
   return NULL;
 }
 
+/// @brief Catch certain memory errors that plagued us for a while in
+/// GCPtr.
+///
+/// These were subsequently resolved, but reporting borkage is not a
+/// bad thing.
 void 
 handle_sigsegv(int param)
 {
@@ -264,22 +314,25 @@ handle_sigsegv(int param)
   exit(1);
 }
 
+/// @brief Resolve a library name to a path.
+///
+/// This is called when we see <code>-lname</code> or <code>-l
+/// name</code> on the command line. The @em name will be passed as an
+/// argument here. What we need to do here is
+/// check the currently known library paths for a resolution. If we
+/// find a file matching "libname.bita" on the search path, we add it
+/// to the list of inputs.
+///
+/// In some cases, -lmumble will indicate simultaneously a need to
+/// add an input file named ..../libmumble.bita and also an archive
+/// library named .../libmumble.a. This arises in libbitc, for
+/// example, where some of the library is implemented in C.
+///
+/// Unfortunately, this means that the @em absence of
+/// .../libmumble.bita does not reliably indicate an error.
 filesystem::path
 ResolveLibPath(std::string name)
 {
-  // We either saw -lname or -l name. What we need to do here is
-  // check the currently known library paths for a resolution. If we
-  // find a file matching "libname.bita" on the search path, we add it
-  // to the list of inputs.
-  //
-  // In some cases, -lmumble will indicate simultaneously a need to
-  // add an input file named ..../libmumble.bita and also an archive
-  // library named .../libmumble.a. This arises in libbitc, for
-  // example, where some of the library is implemented in C.
-  //
-  // Unfortunately, this means that the @em absence of
-  // .../libmumble.bita does not reliably indicate an error.
-
   string fullNm = "lib" + name + ".bita";
 
   for (size_t i = 0; i < Options::libDirs.size(); i++) {
@@ -309,23 +362,6 @@ main(int argc, char *argv[])
   int opterr = 0;
 
   signal(SIGSEGV, handle_sigsegv);
-
-#if 0
-  // Shap thinks this is no longer necessary now that he gave up and
-  // pulled in libicu.
-
-  // Make sure that we are running in a UNICODE locale:
-  setlocale(LC_ALL, "");
-  if (strcmp("UTF-8", nl_langinfo(CODESET)) != 0) {
-    std::cerr
-      << "We appear to be running in the non-unicode locale "
-      << nl_langinfo(CODESET)
-      << ".\n"
-      << "The BitC compiler will only operate correctly "
-      << "in a unicode locale.\n";
-    exit(1);
-  }
-#endif
 
   /// Note the "-" at the start of the getopt_long option string. In
   /// order to generate behavior that is compatible with other
