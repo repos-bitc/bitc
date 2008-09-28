@@ -799,9 +799,9 @@
       this decision.
     </p>
     <p>
-      Recursive data defintions are by BitC's symbol resolution rules.
-      BitC is strongly typed, let-polymorphic, and implements
-      Haskell-style type classes <cite
+      Recursive data defintions are disallowed by BitC's symbol
+      resolution rules.  BitC is strongly typed, let-polymorphic, and
+      implements Haskell-style type classes <cite
       ref="jones2000tcfndepend"/>. The type of
       <progident>make-adder</progident>, above, is:
     </p>
@@ -999,8 +999,8 @@ map: ('%e fn (('%e fn ('a) 'b) (list 'a))
       <p>
         Sridhar's first approach was to introduce something he called
         a ``maybe type.'' The concept is simple enough: when we see
-        something like <progident>i</progident> introduced, assign it a
-        form of union type. Since it has to be compatible with the
+        something like <progident>i</progident> introduced, assign it
+        a form of union type. Since it has to be compatible with the
         integer literal 1 it must be constrained by
         <progident>(IntType&nbsp;'a)</progident>. Beyond that, we will
         simply declare that it is either an immutable polymorphic
@@ -1009,15 +1009,15 @@ map: ('%e fn (('%e fn ('a) 'b) (list 'a))
         <progident>set!</progident> is discovered within the
         <progident>let</progident> body that modifies an object of a
         given maybe type, the maybe type is resolved to mutable.  If
-        we get to the end of the <progident>let</progident> form
-        without coming to any definitive conclusion that
-        <progident>i</progident> must be mutable, then no assignment
-        can have occurred while <progident>i</progident> is in scope,
-        and we will ``fix'' the type to the polymorphic immutable
-        choice, on the grounds that maximizing abstractness (therefore
-        generality) is the right choice. This approach avoids the
-        pitfalls of the <progident>pair</progident> example (and some
-        other examples).
+        we get to the end of the <progident>let</progident> binding
+        form (that is: before the body is considered) without coming
+        to any definitive conclusion that <progident>i</progident>
+        must be mutable, then no assignment can have occurred while
+        <progident>i</progident> is in scope, and we will ``fix'' the
+        type to the polymorphic immutable choice, on the grounds that
+        maximizing abstractness (therefore generality) is the right
+        choice. This approach avoids the pitfalls of the
+        <progident>pair</progident> example (and some other examples).
       </p>
       <p>
         This approach is also incomplete. Given:
@@ -1103,8 +1103,10 @@ map: ('%e fn (('%e fn ('a) 'b) (list 'a))
       </p>
       <p>
         The mutability inference scheme in BitC today is both sound
-        and complete, and this will eventually make formal reasoning
-        about the type system much simpler.
+        and complete. A side effect of our struggle to achieve this is
+        a proper formalization of the core BitC type system. This will
+        eventually make formal reasoning about the full type system
+        much simpler.
       </p>
     </sect2>
     <sect2>
