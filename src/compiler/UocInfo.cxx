@@ -45,7 +45,6 @@
 #include "Options.hxx"
 #include "Version.hxx"
 #include "UocInfo.hxx"
-#include "Symtab.hxx"
 #include "Type.hxx"
 #include "backend.hxx"
 #include "inter-pass.hxx"

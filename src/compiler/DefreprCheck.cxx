@@ -86,7 +86,6 @@
 #include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Environment.hxx"
-#include "Symtab.hxx"
 #include "inter-pass.hxx"
 #include "backend.hxx"
 

@@ -43,7 +43,6 @@
 #include <string>
 #include "AST.hxx"
 #include "Environment.hxx"
-#include "Symtab.hxx"
 #include "Unify.hxx"
 #include "inter-pass.hxx"
 #include "Special.hxx"
