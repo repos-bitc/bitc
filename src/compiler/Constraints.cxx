@@ -74,19 +74,24 @@ TCConstraints::contains(shared_ptr<Typeclass> tc)
   return false;
 }
  
-/// @brief Add a new predicate (constraint?) @p tc to an existing
+/// @brief Add a new predicate (constraint) @p tc to an existing
 /// collection of type class constraints.
 ///
-/// FIX: What is going on here with TY_CT_SUBSUMED?
-///
-/// FIX: The comments on equals(), strictlyEquals() in Type.hxx are
-/// completely unedifying, and seem to be contradicted by the defaults
-/// on the parameters.
+/// The new constraint is added only if it is not already present in
+/// the constraint set. If the constraint being added contains more
+/// information (for example, indicated that it is now subsumed
+/// throught the TY_CT_SUBSUMED by another, probably lately added,
+/// constraint) it is copied on to the constraint already present in
+/// the TCconstraints set.
+
 void 
 TCConstraints::addPred(shared_ptr<Typeclass> tc) 
 {
   for (iterator itr = begin(); itr != end(); ++itr) {
     if ((*itr)->strictlyEquals(tc, false, true)) {
+      // Compare the two constraints for strict-equality. That is,
+      // alpha-renaming is not allowed here. Addition of predcates is
+      // not a unifying operation.
       if (tc->flags & TY_CT_SUBSUMED)
 	(*itr)->flags |= TY_CT_SUBSUMED;
       return;
@@ -96,7 +101,7 @@ TCConstraints::addPred(shared_ptr<Typeclass> tc)
   pred.insert(tc);
 }
 
-/// @brief Remove a predicate (constraint?) from a type class
+/// @brief Remove a predicate (constraint) from a type class
 /// constraint set.
 void 
 TCConstraints::clearPred(shared_ptr<Constraint> ct) 

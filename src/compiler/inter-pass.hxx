@@ -41,7 +41,6 @@
 #include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
-#include "die.hxx"
 
 /* Definitions of mode used in Symbol Resolution 
    and Type-inference */
