@@ -134,6 +134,30 @@ findInterface(std::ostream& errStream, shared_ptr<AST> ifAst)
 
   return iface;
 }
+
+#if 0
+// Debugging function used for displaying the environment
+// along with status of completeness
+static void
+showEnv(std::ostream& errStream, 
+	shared_ptr<ASTEnvironment > env)
+{
+  for (ASTEnvironment::iterator itr = env->begin(); 
+       itr != env->end(); ++ itr) {
+    std::string name = itr->first;
+    shared_ptr<Binding<AST> > bdng = itr->second;
+    
+    errStream << name << ": "
+	      << ((bdng->flags & BF_COMPLETE)? "Complete" : "Incomplete")
+	      << std::endl;
+  }
+  
+  if(env->parent) {
+    errStream << " -- " << std::endl;
+    showEnv(errStream, env->parent);
+  }
+}
+#endif
 	      
 static void
 aliasPublicBindings(const std::string& idName,
@@ -143,12 +167,12 @@ aliasPublicBindings(const std::string& idName,
 {
   for (ASTEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
+    std::string s = itr->first;
     shared_ptr<Binding<AST> > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE)
       continue;
 
-    std::string s = bdng->nm;
     shared_ptr<AST> ast = bdng->val;
 
     if (aliasEnv && 
@@ -211,13 +235,13 @@ importIfBinding(std::ostream& errStream,
 
   for (ASTEnvironment::iterator itr = ifName->envs.env->begin();
       itr != ifName->envs.env->end(); ++itr) {
+    std::string s = itr->first;
     shared_ptr<Binding<AST> > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE) {
       continue;
     }
       
-    std::string s = bdng->nm;
     shared_ptr<AST> ast = bdng->val;
 
     dupEnv->addBinding(s, ast);
@@ -428,8 +452,8 @@ resolve(std::ostream& errStream,
     
   case at_ident:
     {
-	// If you change the way this works, see the comment in the
-	// at_usesel case first!
+      // If you change the way this works, see the comment in the
+      // at_usesel case first!
       if (!ast->fqn.isInitialized()) {
 	if (ast->isGlobal()) {
 	  ast->fqn = FQName(env->uocName, ast->s);
@@ -584,8 +608,9 @@ resolve(std::ostream& errStream,
 	  
 	  // When resolving a label, must find it within current
 	  // lambda body or no joy.
+	  
 	  ast->symbolDef = env->getBinding(ast->s);
-
+	  
 	  // 	if (ast->symbolDef == NULL) 
 	  // 	  cout << " Symdef is NULL for " << ast->s << endl;
 	  
@@ -670,41 +695,43 @@ resolve(std::ostream& errStream,
 	  }
 	
 	  bool ICRviolation = false;
-	  if ((env->getFlags(ast->s) & BF_COMPLETE) == 0) {	  
-	    // We are using an incomplete definition ... 
-	    /// @bug This was (flags & RSLV_INCOMPLETE_OK_PROC == 0)
-	    // Change below is temporary workaround
-	    if (false) {
-	      if ((flags & RSLV_INCOMPLETE_OK) == 0) {
-		// If usage of an Incomplete variable is NOT OK, 
-		// there is a violation, and we are done.
-		ICRviolation = true;
-	      }
-	      else {		
-		if (def->isIdentType(id_value)) {
-		  assert(lamLevel);
-		
-		  // This is a little subtle.
-		  // In cases like:
-		  // (define main3 (lambda () 
-		  //                       (letrec ((x x))
-		  //                          x))
-		  // Usage of x in the letrec should not be allowed
-		  // even though we are in a lambda.
-		  // However, letrec cannot disable RSLV_INCOMPLETE_OK 
-		  // because, it is still OK to use main3 inside
-		  // the letrec expression
-		  // So, here, if the RSLV_INCOMPLETE_OK is true,
-		  // we still check that the identifier is defined at 
-		  // the right LAMBDA LEVEL. 	   
-
-		  if (!lamLevel->getBinding(ast->s))
-		    ICRviolation = true;
-		}
+	  // The closure-conversion pass introduces some carefully 
+	  // crafted code using internal constructors that appear
+	  // incomplete the following restrictions. Since there cannot
+	  // be any incompleteness errors at that point,
+	  // incompleteness checking is disabled. otherwise,
+	  // incompleteness checking proceeds as usual.
+	  if (((flags & RSLV_INCOMPLETE_NO_CHK) == 0) &&
+	      ((env->getFlags(ast->s) & BF_COMPLETE) == 0)) {
+	    if ((flags & RSLV_INCOMPLETE_OK) == 0) {
+	      // If usage of an Incomplete variable is NOT OK, 
+	      // there is a violation, and we are done.
+	      ICRviolation = true;
+	    }
+	    else {		
+	      if (def->isIdentType(id_value)) {
+		assert(lamLevel);
+		  
+		// This is a little subtle.
+		// In cases like:
+		// (define main3 (lambda () 
+		//                       (letrec ((x x))
+		//                          x))
+		// Usage of x in the letrec should not be allowed
+		// even though we are in a lambda.
+		// However, letrec cannot disable RSLV_INCOMPLETE_OK 
+		// because, it is still OK to use main3 inside
+		// the letrec expression
+		// So, here, if the RSLV_INCOMPLETE_OK is true,
+		// we still check that the identifier is defined at 
+		// the right LAMBDA LEVEL. 	   
+		  
+		if (!lamLevel->getBinding(ast->s))
+		  ICRviolation = true;
 	      }
 	    }
 	  }
-	  
+
 	  if (ICRviolation) {
 	    errStream << ast->loc << ": Usage of Identifier `"
 		      << ast->s << "' Violates Incompleteness Restriction." 
@@ -940,7 +967,7 @@ resolve(std::ostream& errStream,
 	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK) | RSLV_BIND_PUBLIC);
       if (category->astType == at_refCat)
 	tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
-
+      
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
 	      id_tvar, ast, 
@@ -1997,10 +2024,13 @@ resolve(std::ostream& errStream,
 
       // match agt_bindingPatterns
       shared_ptr<AST> argVec = ast->child(0);
-      for (size_t c = 0; c < argVec->children.size(); c++)
+      for (size_t c = 0; c < argVec->children.size(); c++) {
 	RESOLVE(argVec->child(c), lamEnv, lamEnv, DEF_MODE, 
 		id_value, currLB, flags);
-
+	shared_ptr<AST> id = argVec->child(c)->child(0);
+	lamEnv->setFlags(id->s, BF_COMPLETE);
+      }
+      
       // match agt_expr
       RESOLVE(ast->child(1), lamEnv, lamEnv, USE_MODE, 
 	      idc_value, currLB, 
@@ -2391,7 +2421,7 @@ resolve(std::ostream& errStream,
 		id_value, lbs, flags);
 	assert(lb->child(0)->astType == at_identPattern);
 	lb->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
-
+	
 	ASTEnvironment::iterator itr = 
 	  letEnv->find(lb->child(0)->child(0)->s);
 	itr->second->flags |= BF_COMPLETE;

@@ -64,7 +64,6 @@ using namespace sherpa;
 
 typedef map<shared_ptr<AST>, shared_ptr<AST> > AstMap;
 
-
 /*******************************************************************
                         ENVIRONMENT HANDLING
 *******************************************************************/
@@ -216,8 +215,10 @@ importSymBindings(shared_ptr<ASTEnvironment > fromEnv,
     shared_ptr<Binding<AST> > bdng = itr->second;
 
     if ((bdng->flags & BF_PRIVATE) == 0) {
-      toEnv->addBinding(bdng->val->fqn.asString(), bdng->val,
-			BF_REBIND | BF_COMPLETE);
+      std::string nm = bdng->val->fqn.asString();
+      toEnv->addBinding(nm, bdng->val);
+      toEnv->setFlags(nm, BF_REBIND | BF_COMPLETE);
+
       INST_ENV_DEBUG
 	cerr << "Added to env:" 
 	     << bdng->val->fqn.asString()
@@ -235,8 +236,10 @@ importTSBindings(shared_ptr<TSEnvironment > fromEnv,
     shared_ptr<Binding<TypeScheme> > bdng = itr->second;
 
     if ((bdng->flags & BF_PRIVATE) == 0) {
-      toEnv->addBinding(bdng->val->ast->fqn.asString(),
-			bdng->val, BF_REBIND | BF_COMPLETE);
+      std::string nm = bdng->val->ast->fqn.asString();
+      toEnv->addBinding(nm, bdng->val);
+      toEnv->setFlags(nm, BF_REBIND | BF_COMPLETE);
+      
       INST_ENV_DEBUG
 	cerr << "Added to Gamma:" 
 	     << bdng->val->ast->fqn.asString()
@@ -1366,10 +1369,10 @@ UocInfo::recInstantiate(ostream &errStream,
 	arg->flags |= LOCAL_NOGEN_VAR;
 	NAMKARAN(arg, getInstName(arg, arg->symType));
 	ast->envs.updateKey(oldName, arg->s);
-
+	
 	substitute(body, arg, arg); //!!
       }
-
+      
       ast->child(0) = recInstantiate(errStream, args,
 				     errFree, worklist);      
       ast->child(1) = recInstantiate(errStream, body,
@@ -1891,7 +1894,9 @@ UocInfo::doInstantiate(ostream &errStream,
     cerr << "Copy after name fixup: " << copy->asString() << endl;  
   
   shared_ptr<EnvSet> envset = (globalInst ? UNIFIED_ENVS 
-			  : (EnvSet::make(getOuterLet(copy)->envs)));
+			       :
+			       (EnvSet::make(getOuterLet(copy)->envs)));
+  
   RANDT_DROP(copy, "[[Inst: R&T-1: ]]", envset);
   
   // Now that the expression is typed, recurse over the body and

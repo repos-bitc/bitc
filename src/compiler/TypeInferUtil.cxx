@@ -105,12 +105,12 @@ useIFGamma(const std::string& idName,
 {
   for (TSEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
+    std::string s = itr->first;
     shared_ptr<Binding<TypeScheme> > bdng = itr->second;
 
     if (bdng->flags & BF_PRIVATE)
       continue;
 
-    std::string s = bdng->nm;
     shared_ptr<TypeScheme> ts = bdng->val;
 
     if (idName.size())
@@ -129,12 +129,12 @@ useIFInsts(const std::string& idName,
 {
   for (InstEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
+    std::string s = itr->first;
     shared_ptr<Binding<set<shared_ptr<Instance> > > > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE)
       continue;
     
-    std::string s = bdng->nm;
     shared_ptr<set<shared_ptr<Instance> > > insts = bdng->val;
     
     if (idName.size())

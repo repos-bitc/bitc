@@ -69,12 +69,12 @@ Environment<T>::doGetBinding(const std::string& nm,
 {
   shared_ptr<Binding<T> > binding = getLocalBinding(nm);
   
-  if (binding)
+  if (binding) 
     return binding;
 
   if (parent && parent != outerLimit)
     return parent->doGetBinding(nm, outerLimit);
-
+  
   return GC_NULL;
 }
 
@@ -88,7 +88,7 @@ Environment<T>::asString() const
     ss << parent->asString();
   
   for (const_iterator itr = begin(); itr != end(); ++itr)
-    ss << itr->second->nm << ": "
+    ss << itr->first << ": "
        << itr->second->val
        << std::endl;
   
@@ -187,7 +187,7 @@ Environment<T>::mergeBindingsFrom(shared_ptr<Environment<T> > from, bool complet
 {
   for (iterator itr = from->begin();
       itr != from->end(); ++itr ) {
-    const std::string& nm = itr->second->nm;
+    const std::string& nm = itr->first;
     shared_ptr<T> val = itr->second->val;
     unsigned long flags = itr->second->flags;
 

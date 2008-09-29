@@ -263,7 +263,7 @@ public:
 #define POLY_TYP_FLAGS (OP_TYP_FLAGS | UFLG_NO_MORE_TC | UFLG_DEF_DECL_NO_MATCH)
 
 // RandT flags used by passes Refization pass of Closure-conversion.
-#define REF_SYM_FLAGS (POLY_SYM_FLAGS)
+#define REF_SYM_FLAGS (POLY_SYM_FLAGS | RSLV_INCOMPLETE_NO_CHK)
 #define REF_TYP_FLAGS (POLY_TYP_FLAGS | UFLG_POST_REFIZE)
 
 // RandT flags used by passes past Closure-conversion. 
