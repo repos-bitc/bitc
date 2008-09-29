@@ -76,8 +76,6 @@ using namespace std;
   } while (false);
 
 
-int num_errors = 0;  /* hold the number of syntax errors encountered. */
-
 inline int sexpr_lex(YYSTYPE *lvalp, SexprLexer *lexer)
 {
   return lexer->lex(lvalp);
@@ -86,7 +84,8 @@ inline int sexpr_lex(YYSTYPE *lvalp, SexprLexer *lexer)
 // If the passed exprSeq has a documentation string at the front,
 // remove it. Note that if the exprSeq has length 1 then the string is
 // the expression value and not a documentation comment.
-shared_ptr<AST> stripDocString(shared_ptr<AST> exprSeq)
+static shared_ptr<AST> 
+stripDocString(shared_ptr<AST> exprSeq)
 {
   if (exprSeq->children.size() > 1 &&
       exprSeq->child(0)->astType == at_stringLiteral)
@@ -170,6 +169,10 @@ shared_ptr<AST> stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_ARRAY_NTH
 %token <tok> tk_VECTOR_NTH
 
+%token <tok> ntk_STRUCT
+%token <tok> ntk_UNION
+%token <tok> ntk_REPR
+
 %token <tok> tk_DEFSTRUCT
 %token <tok> tk_DEFUNION
 %token <tok> tk_DEFREPR
@@ -212,25 +215,15 @@ shared_ptr<AST> stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_MODULE
 // token tk_USESEL historic significance only 
 // %token <tok> tk_USESEL
-%token <tok> tk_PACKAGE
 %token <tok> tk_IMPORT
 %token <tok> tk_PROVIDE
 
 %token <tok> tk_TYFN
 //%token <tok> tk_SUPER
 %token <tok> tk_SUSPEND
-%token <tok> tk_HIDE
 %type <tok>  ifident
 
-//%token <tok> tk_MODULE
 //%token <tok> tk_EXPORT
-//%token <tok> tk_NAT
-//%token <tok> tk_IMMUTABLE
-//%token <tok> tk_RESTRICTEDREF
-//%token <tok> tk_MUTUAL_RECURSION
-//%token <tok> tk_SEQUENCE
-//%token <tok> tk_SEQUENCEREF
-//%token <tok> tk_SEQUENCELENGTH
    
 %type <ast> module implicit_module module_seq
 %type <ast> interface
@@ -1033,11 +1026,6 @@ alias: '(' ident tk_AS ident ')' {
 // definition: '(' tk_DEFTHM ident expr ')'  {
 //    SHOWPARSE("definition -> ( DEFTHM ident expr )");
 //    $$ = AST::make(at_defthm, $2.loc, $3, $4);
-// };
-// definition: '(' tk_MUTUAL_RECURSION definitions ')'  {
-//    SHOWPARSE("definition -> ( MUTUAL-RECURSION Defs )");
-//    $$ = AST::make(at_mutual_recursion, $2.loc);   
-//    $$->addChildrenFrom($3);
 // };
 
 declares: {

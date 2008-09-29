@@ -45,11 +45,11 @@
 #include <libsherpa/LexLoc.hxx>
 #include <libsherpa/utf8.hxx>
 
-#include "BUILD/SexprParser.hxx"
+#include "BUILD/BlockParser.hxx"
 
 using namespace sherpa;
 
-#include "SexprLexer.hxx"
+#include "BlockLexer.hxx"
 
 static bool
 valid_char_printable(uint32_t ucs4)
@@ -181,65 +181,36 @@ validate_string(const char *s)
   return 0;
 }
 
-struct SexprLexer::KeyWord SexprLexer::keywords[] = {
-  { "and",              tk_AND },
-  { "apply",            tk_APPLY },
+struct BlockLexer::KeyWord BlockLexer::keywords[] = {
   { "array",            tk_ARRAY },
-  { "array-length",     tk_ARRAY_LENGTH },
-  { "array-nth",        tk_ARRAY_NTH },
-  { "as",               tk_AS },
-  { "assert",           tk_Reserved },
-  { "begin",            tk_BEGIN },
   { "bitc-version",     tk_BITC_VERSION },
   { "bitfield",         tk_BITFIELD },
-  { "block",            tk_BLOCK },
   { "bool",             tk_BOOL },
   { "break",            tk_Reserved },
-  { "by-ref",           tk_BY_REF },
   { "case",             tk_CASE },
   { "catch",            tk_CATCH },
   { "char",             tk_CHAR },
-  { "check",            tk_Reserved },
-  { "coindset",         tk_Reserved },
-  { "cond",             tk_COND },
   { "const",            tk_CONST },
-  { "constrain",        tk_Reserved },
   { "continue",         tk_CONTINUE },
-  { "declare",          tk_DECLARE },
-  { "deep-const",       tk_Reserved },
-  { "defequiv",         tk_Reserved },
-  { "defexception",     tk_DEFEXCEPTION },
-  { "define",           tk_DEFINE },
-  { "definstance",      tk_DEFINSTANCE },
-  { "definvariant",     tk_Reserved },
-  { "defobject",        tk_Reserved },
-  { "defrefine",        tk_Reserved },
-  { "defrepr",          tk_DEFREPR },
-  { "defstruct",        tk_DEFSTRUCT },
-  { "deftheory",        tk_Reserved },
-  { "defthm",           tk_DEFTHM },
-  { "deftypeclass",     tk_DEFTYPECLASS },
-  { "defunion",         tk_DEFUNION },
-  { "defvariant",       tk_Reserved },
+  { "exception",        tk_EXCEPTION },
+  { "instance",         tk_INSTANCE },
+  { "repr",             tk_REPR },
+  { "struct",           tk_STRUCT },
+  { "union",            tk_UNION },
   { "deref",            tk_DEREF },
-  { "disable",          tk_Reserved },
   { "do",               tk_DO },
-  { "do*",              tk_Reserved },
   { "double",           tk_DOUBLE },
   { "dup",              tk_DUP },
-  { "enable",           tk_Reserved },
   { "exception",        tk_EXCEPTION },
   { "external",         tk_EXTERNAL },
+  { "typeclass",        tk_TYPECLASS },
+  { "false",            tk_FALSE },
   { "fill",             tk_FILL },
   { "float",            tk_FLOAT },
-  { "fn",               tk_FN },
   { "forall",           tk_FORALL },
   { "if",               tk_IF },
   { "import",           tk_IMPORT },
-  { "import!",          tk_Reserved },
   { "impure",           tk_IMPURE },
-  { "indset",           tk_Reserved },
-  { "inner-ref",        tk_INNER_REF },
   { "int16",            tk_INT16 },
   { "int32",            tk_INT32 },
   { "int64",            tk_INT64 },
@@ -247,56 +218,36 @@ struct SexprLexer::KeyWord SexprLexer::keywords[] = {
   { "interface",        tk_INTERFACE },
   { "lambda",           tk_LAMBDA },
   { "let",              tk_LET },
-  { "let*",             tk_Reserved },
   { "letrec",           tk_LETREC },
-  { "literal",          tk_Reserved },
-  { "location",         tk_Reserved },
-  //  { "make-vector",      tk_MAKE_VECTOR },
-  { "make-vector",      tk_MAKE_VECTORL },
-  { "member",           tk_MEMBER },   /* REDUNDANT */
-  { "method",           tk_METHOD },
   { "module",           tk_MODULE },
   { "mutable",          tk_MUTABLE },
-  { "namespace",        tk_Reserved },
   { "not",              tk_NOT },
-  { "nth",              tk_Reserved },
   { "opaque",           tk_OPAQUE },
   { "or",               tk_OR },
   { "otherwise",        tk_OTHERWISE },
+  { "pair",             tk_PAIR },
   { "proclaim",         tk_PROCLAIM },
   { "provide",          tk_PROVIDE },
-  { "provide!",         tk_Reserved },
   { "pure",             tk_PURE },
-  { "quad",             tk_QUAD },
-  { "read-only",        tk_Reserved },
   { "ref",              tk_REF },
-  { "require",          tk_Reserved },
-  { "reserved",         tk_RESERVED },
   { "return",           tk_RETURN },
   { "return-from",      tk_RETURN_FROM },
-  { "sensory",          tk_Reserved },
   { "set!",             tk_SET },
-  { "size-of",          tk_Reserved },
   { "string",           tk_STRING },
-  { "super",            tk_Reserved },
   { "suspend",          tk_SUSPEND },  
   { "switch",           tk_SWITCH },
   { "tag",              tk_TAG },
   { "the",              tk_THE },
   { "throw",            tk_THROW },
+  { "true",             tk_TRUE },
   { "try",              tk_TRY },
-  { "tycon",            tk_Reserved },
   { "tyfn",             tk_TYFN },
   { "uint16",           tk_UINT16 },
   { "uint32",           tk_UINT32 },
   { "uint64",           tk_UINT64 },
   { "uint8",            tk_UINT8 },
-  { "using",            tk_Reserved },
   { "val",              tk_VAL },
-  { "value-at",         tk_Reserved },
   { "vector",           tk_VECTOR },
-  { "vector-length",    tk_VECTOR_LENGTH },
-  { "vector-nth",       tk_VECTOR_NTH },
   { "when",             tk_WHEN },
   { "where",            tk_WHERE },
   { "word",             tk_WORD }
@@ -305,14 +256,14 @@ struct SexprLexer::KeyWord SexprLexer::keywords[] = {
 static int
 kwstrcmp(const void *vKey, const void *vCandidate)
 {
-  const char *key = ((const SexprLexer::KeyWord *) vKey)->nm;
-  const char *candidate = ((const SexprLexer::KeyWord *) vCandidate)->nm;
+  const char *key = ((const BlockLexer::KeyWord *) vKey)->nm;
+  const char *candidate = ((const BlockLexer::KeyWord *) vCandidate)->nm;
 
   return strcmp(key, candidate);
 }
 
 int
-SexprLexer::kwCheck(const char *s)
+BlockLexer::kwCheck(const char *s)
 {
   if (ifIdentMode) {
     if (!valid_ifident_start(*s))
@@ -355,7 +306,7 @@ SexprLexer::kwCheck(const char *s)
 }
 
 void
-SexprLexer::ReportParseError()
+BlockLexer::ReportParseError()
 {
   errStream << here
 	    << ": syntax error (via yyerror)" << '\n';
@@ -363,7 +314,7 @@ SexprLexer::ReportParseError()
 }
  
 void
-SexprLexer::ReportParseError(const LexLoc& where, std::string msg)
+BlockLexer::ReportParseError(const LexLoc& where, std::string msg)
 {
   errStream << where
 	    << ": "
@@ -373,14 +324,14 @@ SexprLexer::ReportParseError(const LexLoc& where, std::string msg)
 }
 
 void
-SexprLexer::ReportParseWarning(const LexLoc& where, std::string msg)
+BlockLexer::ReportParseWarning(const LexLoc& where, std::string msg)
 {
   errStream << where
 	    << ": "
 	    << msg << std::endl;
 }
 
-SexprLexer::SexprLexer(std::ostream& _err, std::istream& _in, 
+BlockLexer::BlockLexer(std::ostream& _err, std::istream& _in, 
 		       const std::string& origin,
 		       bool commandLineInput)
   :here(origin, 1, 0), inStream(_in), errStream(_err)
@@ -397,7 +348,7 @@ SexprLexer::SexprLexer(std::ostream& _err, std::istream& _in,
 }
 
 long 
-SexprLexer::digitValue(ucs4_t ucs4, unsigned radix)
+BlockLexer::digitValue(ucs4_t ucs4, unsigned radix)
 {
   long l = -1;
 
@@ -414,7 +365,7 @@ SexprLexer::digitValue(ucs4_t ucs4, unsigned radix)
 }
 
 ucs4_t
-SexprLexer::getChar()
+BlockLexer::getChar()
 {
   char utf[8];
   unsigned char c;
@@ -478,7 +429,7 @@ SexprLexer::getChar()
 }
 
 void
-SexprLexer::ungetChar(ucs4_t c)
+BlockLexer::ungetChar(ucs4_t c)
 {
   char utf[8];
   assert(putbackChar == -1);
@@ -504,7 +455,7 @@ isCharDelimiter(ucs4_t c)
 }
 
 int
-SexprLexer::lex(ParseType *lvalp)
+BlockLexer::lex(ParseType *lvalp)
 {
   ucs4_t c;
 
