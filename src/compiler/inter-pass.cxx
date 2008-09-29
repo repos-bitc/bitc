@@ -59,41 +59,10 @@ using namespace boost;
 using namespace sherpa;
 
 bool 
-UocInfo::Resolve(std::ostream& errStream, bool init, 
-		 unsigned long rflags, std::string mesg)
-{
-  bool errFree = true;
-  errFree = fe_symresolve(errStream, init, rflags);
-  if (!errFree)
-    errStream << mesg
-	      << std::endl;
-  return errFree;
-}
-
-bool 
-UocInfo::TypeCheck(std::ostream& errStream, bool init, 
-		   unsigned long tflags, std::string mesg)
-{
-  bool errFree = true;
-
-  // If one considers removing this clear clause,
-  // be careful about old types. Pay attention to
-  // bindIdentDef() function which preserves types
-  // if a type already exists.
-  uocAst->clearTypes();  
-
-  errFree = fe_typeCheck(errStream, init, tflags);    
-  if (!errFree) 
-    errStream << mesg
-	      << std::endl;
-  return errFree;
-}
-
-bool 
 UocInfo::RandT(std::ostream& errStream,
 	       bool init, 
-	       unsigned long rflags,
-	       unsigned long tflags,
+	       ResolverFlags rflags,
+	       UnifyFlags uflags,
 	       std::string mesg)
 {
   bool errFree = true;
@@ -101,7 +70,7 @@ UocInfo::RandT(std::ostream& errStream,
   CHKERR(errFree, Resolve(errStream, init, rflags, mesg));
   
   if (errFree)
-    CHKERR(errFree, TypeCheck(errStream, init, tflags, mesg));
+    CHKERR(errFree, TypeCheck(errStream, init, uflags, mesg));
   
   if (!errFree)
     errStream << "WHILE R&Ting:" << std::endl
@@ -142,8 +111,8 @@ resolve(std::ostream& errStream,
 bool 
 UocInfo::RandTexpr(std::ostream& errStream,
 		   shared_ptr<AST> expr,
-		   unsigned long rflags,
-		   unsigned long tflags,
+		   ResolverFlags rflags,
+		   UnifyFlags uflags,
 		   std::string mesg,
 		   bool keepResults,
 		   shared_ptr<EnvSet> altEnvSet)
@@ -163,7 +132,7 @@ UocInfo::RandTexpr(std::ostream& errStream,
   
   CHKERR(errFree, myUoc->Resolve(errStream, false, rflags, mesg));
   if (errFree)
-    CHKERR(errFree, myUoc->TypeCheck(errStream, false, tflags, mesg));
+    CHKERR(errFree, myUoc->TypeCheck(errStream, false, uflags, mesg));
   
   if (!keepResults)
     myUoc->unwrapEnvs();

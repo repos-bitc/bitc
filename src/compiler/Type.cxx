@@ -336,7 +336,7 @@ Type::isUnifiableVar(size_t flags)
     return false;
   }
 
-  if (flags & UN_IGN_RIGIDITY)
+  if (flags & UFLG_UN_IGN_RIGIDITY)
     return true;
   
   return ((var->flags & TY_RIGID) == 0);
@@ -1151,7 +1151,7 @@ Type::getDCopy()
 // strictlyEquals which removes the above two restrictions.
 bool
 Type::eql(shared_ptr<Type> t, bool verbose, std::ostream &errStream,
-	  unsigned long uflags, bool keepSub,
+	  UnifyFlags uflags, bool keepSub,
 	  shared_ptr<Trail> trail)
 {
   std::stringstream ss;  
@@ -1178,7 +1178,7 @@ Type::eql(shared_ptr<Type> t, bool verbose, std::ostream &errStream,
 bool
 Type::equals(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
-  return eql(t, verbose, errStream, UNIFY_TRY, false);
+  return eql(t, verbose, errStream, UFLG_UNIFY_TRY, false);
 }
 
 bool 
@@ -1186,9 +1186,9 @@ Type::strictlyEquals(shared_ptr<Type> t, bool verbose,
 		     bool noAlphaRename,
 		     std::ostream &errStream)
 {
-  unsigned long uflags = UNIFY_TRY | UNIFY_STRICT;
+  UnifyFlags uflags = UFLG_UNIFY_TRY | UFLG_UNIFY_STRICT;
   if (noAlphaRename)
-    uflags |= UNIFY_STRICT_TVAR;
+    uflags |= UFLG_UNIFY_STRICT_TVAR;
   return eql(t, verbose, errStream, uflags, false);
 }
 
@@ -1196,21 +1196,21 @@ bool
 Type::unifyWith(shared_ptr<Type> t, bool verbose, 
 		shared_ptr<Trail> trail, ostream &errStream)
 {
-  return eql(t, verbose, errStream, 0, true, trail);
+  return eql(t, verbose, errStream, UFLG_NO_FLAGS, true, trail);
 }
 
 bool 
 Type::forcedUnify(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
   return eql(t, verbose, errStream, 
-	     UN_IGN_RIGIDITY, true);
+	     UFLG_UN_IGN_RIGIDITY, true);
 }
 
 bool
 Type::equalsA(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
   return eql(t, verbose, errStream, 
-	     UNIFY_TRY | UN_IGN_RIGIDITY, false);
+	     UFLG_UNIFY_TRY | UFLG_UN_IGN_RIGIDITY, false);
 }
 
 bool 
@@ -1218,7 +1218,7 @@ Type::strictlyEqualsA(shared_ptr<Type> t, bool verbose,
 		      std::ostream &errStream)
 {
   return eql(t, verbose, errStream, 
-	     UNIFY_TRY | UNIFY_STRICT | UN_IGN_RIGIDITY, false);
+	     UFLG_UNIFY_TRY | UFLG_UNIFY_STRICT | UFLG_UN_IGN_RIGIDITY, false);
 }
 
 bool 

@@ -277,7 +277,7 @@ makeLocalAlias(shared_ptr<ASTEnvironment > fromEnv,
 static void
 bindIdentDef(shared_ptr<AST> ast, shared_ptr<ASTEnvironment > env, 
 	     IdentType identType, shared_ptr<AST> currLB,
-	     unsigned flags)
+	     ResolverFlags rflags)
 {  
   if (ast->isIdentType(id_tvar)) {
     env->addDefBinding(ast->s, ast);
@@ -352,7 +352,7 @@ resolve(std::ostream& errStream,
 	int mode, 
 	IdentType identType,
 	shared_ptr<AST> currLB,
-	unsigned long flags)
+	ResolverFlags flags)
 {
   bool errorFree = true, answer = false;
 
@@ -364,7 +364,7 @@ resolve(std::ostream& errStream,
   //     	    << ast->s << "[" << ast->astTypeName() << "]" 
   //     	    << "   identType = " << identTypeToString(identType)
   //     	    << " IncompleteOK = " 
-  //     	    << ((flags & INCOMPLETE_OK)? "true" : "false")
+  //     	    << ((flags & RSLV_INCOMPLETE_OK)? "true" : "false")
   //     	    << std::endl;  
   
   switch(ast->astType) {
@@ -522,7 +522,7 @@ resolve(std::ostream& errStream,
 	  if (sym) {	    
 	    if (!sym->isDecl) {
 	      // Will not be necessary in the new Polyinstantiator
-	      if ((flags & NO_RESOLVE_DECL) == 0) {
+	      if ((flags & RSLV_NO_RESOLVE_DECL) == 0) {
 		errStream << ast->loc << ": Symbol " 
 			  << ast->s << " already defined at " 
 			  << sym->loc << "." << std::endl;
@@ -579,7 +579,7 @@ resolve(std::ostream& errStream,
       case USE_MODE:
 	{
 	  assert(env);
-	  assert((flags & NO_CHK_USE_TYPE) || 
+	  assert((flags & RSLV_NO_CHK_USE_TYPE) || 
 		 (identType != id_unresolved));
 	  
 	  // When resolving a label, must find it within current
@@ -606,12 +606,12 @@ resolve(std::ostream& errStream,
 	    // That is, a type-variable in this slot should be treated
 	    // as a defining occurance ONLY if it is NOT ALREADY bound
 	    // in the current scope.  Also, it should only be done in
-	    // some cases -- the cases where NEW_TV_OK is set in
+	    // some cases -- the cases where RSLV_NEW_TV_OK is set in
 	    // flags. Otherwise, things like: (defunion list:ref (Next
 	    // 'a)) will also resolve.
 	
  	    if (ast->isIdentType(id_tvar) &&
-	       ((flags & NEW_TV_OK) || 
+	       ((flags & RSLV_NEW_TV_OK) || 
 		(ast->flags & TVAR_POLY_SPECIAL))) {
 	      bindIdentDef(ast, env, identType, currLB, flags);
 	      ast->symbolDef = ast;
@@ -650,7 +650,7 @@ resolve(std::ostream& errStream,
 
 	  shared_ptr<AST> def = ast->symbolDef;
 
-	  if ((flags & USE_ONLY_PUBLIC) && 
+	  if ((flags & RSLV_USE_ONLY_PUBLIC) && 
 	     ((env->getFlags(ast->s) & BF_PRIVATE))) {
 	    errStream << ast->loc << ": Identifier `"
 		      << ast->s << "' used here, But NO public definition "
@@ -659,7 +659,7 @@ resolve(std::ostream& errStream,
 	    break;
 	  }
 	
-	  if (((flags & NO_CHK_USE_TYPE) == 0) && 
+	  if (((flags & RSLV_NO_CHK_USE_TYPE) == 0) && 
 	     (!def->isIdentType(identType))) {
 	    errStream << ast->loc << ": " << identTypeToString(identType) 
 		      << " `" << ast->s << "' Undefined"
@@ -672,8 +672,10 @@ resolve(std::ostream& errStream,
 	  bool ICRviolation = false;
 	  if ((env->getFlags(ast->s) & BF_COMPLETE) == 0) {	  
 	    // We are using an incomplete definition ... 
-	    if (flags & INCOMPLETE_OK_PROC == 0) {
-	      if ((flags & INCOMPLETE_OK) == 0) {
+	    /// @bug This was (flags & RSLV_INCOMPLETE_OK_PROC == 0)
+	    // Change below is temporary workaround
+	    if (false) {
+	      if ((flags & RSLV_INCOMPLETE_OK) == 0) {
 		// If usage of an Incomplete variable is NOT OK, 
 		// there is a violation, and we are done.
 		ICRviolation = true;
@@ -689,10 +691,10 @@ resolve(std::ostream& errStream,
 		  //                          x))
 		  // Usage of x in the letrec should not be allowed
 		  // even though we are in a lambda.
-		  // However, letrec cannot disable INCOMPLETE_OK 
+		  // However, letrec cannot disable RSLV_INCOMPLETE_OK 
 		  // because, it is still OK to use main3 inside
 		  // the letrec expression
-		  // So, here, if the INCOMPLETE_OK is true,
+		  // So, here, if the RSLV_INCOMPLETE_OK is true,
 		  // we still check that the identifier is defined at 
 		  // the right LAMBDA LEVEL. 	   
 
@@ -711,13 +713,13 @@ resolve(std::ostream& errStream,
 	  }
       
 	  if (def->flags & ID_FOR_SWITCH) {
-	    if ((flags & SWITCHED_ID_OK) == 0) {
+	    if ((flags & RSLV_SWITCHED_ID_OK) == 0) {
 	      errStream << ast->loc << ": The identifier `"
 			<< ast->s << "' can only appear to the left of a `.'" 
 			<< std::endl;
 	      errorFree = false;
 	    }
-	    else if (flags & WITHIN_CATCH_MC) {
+	    else if (flags & RSLV_WITHIN_CATCH_MC) {
 	      errStream << ast->loc << ": The identifier `"
 			<< ast->s << "' cannot be used while"
 			<< " catching multiple exceptions."
@@ -851,7 +853,7 @@ resolve(std::ostream& errStream,
 
       // SHOULD THE PUBLIC FLAG BE TAKEN OFF HERE ??
       RESOLVE(ast, env, lamLevel, mode, identType, currLB,  
-	      (flags & (~BIND_PUBLIC)));
+	      (flags & (~RSLV_BIND_PUBLIC)));
 
       ast->fqn = importedFQN;
 
@@ -860,7 +862,7 @@ resolve(std::ostream& errStream,
 
   case at_interface:
     {
-      flags |= IS_INTERFACE;
+      flags |= RSLV_IS_INTERFACE;
 
       // match agt_definition*
       for (size_t c = 1; c < ast->children.size(); c++)
@@ -872,13 +874,13 @@ resolve(std::ostream& errStream,
 
   case at_module:
     {
-      flags |= IS_MODULE;
+      flags |= RSLV_IS_MODULE;
       // match agt_definition*
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
 		GC_NULL, flags);
 
-      if ((flags & NO_RESOLVE_DECL) == 0)	
+      if ((flags & RSLV_NO_RESOLVE_DECL) == 0)	
 	CHKERR(errorFree, warnUnresRef(errStream, ast, env));
 
       break;
@@ -894,32 +896,32 @@ resolve(std::ostream& errStream,
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
 	      id_union, ast, 
-	      (flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)) | BIND_PUBLIC);
+	      (flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)) | RSLV_BIND_PUBLIC);
       if (category->astType == at_refCat)
 	tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
 
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
 	      id_tvar, ast,
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
       // category keyword at child(2)
 
       // match at_declares
       RESOLVE(ast->child(3), tmpEnv, lamLevel, NULL_MODE,
 	      id_unresolved, ast,	      
-	      ((flags & (~NEW_TV_OK)) & (~INCOMPLETE_OK)) | WITHIN_DEFUNION);
+	      ((flags & (~RSLV_NEW_TV_OK)) & (~RSLV_INCOMPLETE_OK)) | RSLV_WITHIN_DEFUNION);
 
     
       // match at_constructors
       RESOLVE(ast->child(4), tmpEnv, lamLevel, DEF_MODE,
 	      idc_uctor, ast, 	      
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
       // match at_constraints
       RESOLVE(ast->child(5), tmpEnv, lamLevel, USE_MODE, 
 	      idc_type, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
       break;
@@ -935,31 +937,31 @@ resolve(std::ostream& errStream,
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
 	      id_struct, ast,
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK) | BIND_PUBLIC);
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK) | RSLV_BIND_PUBLIC);
       if (category->astType == at_refCat)
 	tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
 
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
 	      id_tvar, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
     
       // category keyword at child(2)
 
       // match at_declares
       RESOLVE(ast->child(3), tmpEnv, lamLevel, NULL_MODE, 
 	      id_unresolved, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       // match at at_fields
       RESOLVE(ast->child(4), tmpEnv, lamLevel, DEF_MODE, 
 	      id_field, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
  
       // match at_constraints
       RESOLVE(ast->child(5), tmpEnv, lamLevel, USE_MODE, 
 	      idc_type, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
       break;
@@ -978,20 +980,20 @@ resolve(std::ostream& errStream,
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DECL_MODE, 
 	      it, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
-	      | BIND_PUBLIC);
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
+	      | RSLV_BIND_PUBLIC);
     
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
 	      id_tvar, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
       // category keyword at child(2)
       
       // match at_constraints
       RESOLVE(ast->child(3), tmpEnv, lamLevel, USE_MODE, 
 	      idc_type, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
       break;
@@ -1005,18 +1007,18 @@ resolve(std::ostream& errStream,
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DECL_MODE, 
 	      idc_value, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
-	      | BIND_PUBLIC);
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
+	      | RSLV_BIND_PUBLIC);
    
       // match at_type
       RESOLVE(ast->child(1), tmpEnv, lamLevel, USE_MODE, 
 	      idc_type, ast, 
-	      flags | (NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags | (RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       // match at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
 	      idc_type, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
       break;
@@ -1031,8 +1033,8 @@ resolve(std::ostream& errStream,
       
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
 	      it, ast,
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
-	      | BIND_PUBLIC);
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
+	      | RSLV_BIND_PUBLIC);
       // The exception value is defined and is complete
       
       // match at_fields+
@@ -1042,7 +1044,7 @@ resolve(std::ostream& errStream,
 	shared_ptr<AST> field = ast->child(c);
 	RESOLVE(field, tmpEnv, lamLevel, USE_MODE, 
 		idc_type, ast, 
-		flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+		flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 	if (names.find(field->child(0)->s) != names.end()) {
 	  errStream << field->child(0)->loc << ": "
 		    << "field name `" << field->child(0)->s
@@ -1084,13 +1086,13 @@ resolve(std::ostream& errStream,
 	// match agt_bindingPattern
 	RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
 		id_value, ast, 
-		flags | (NEW_TV_OK) | BIND_PUBLIC);
+		flags | (RSLV_NEW_TV_OK) | RSLV_BIND_PUBLIC);
       }
 
       // match agt_expr
       RESOLVE(ast->child(1), tmpEnv, lamLevel, USE_MODE, 
 	      idc_value, ast, 
-	      flags | (NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags | (RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       if (ast->astType == at_define) {
 	// Binding patterns not in scope within expr, so handle them
@@ -1098,13 +1100,13 @@ resolve(std::ostream& errStream,
 	// match agt_bindingPattern
 	RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
 		id_value, ast, 
-		flags | (NEW_TV_OK) | BIND_PUBLIC);
+		flags | (RSLV_NEW_TV_OK) | RSLV_BIND_PUBLIC);
       }
 
       // match at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
 	      idc_type, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));    
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));    
       
       /* Mark the present identifier closed wrt mutability */
       ast->child(0)->child(0)->flags |= ID_MUT_CLOSED;
@@ -1121,29 +1123,29 @@ resolve(std::ostream& errStream,
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
 	      id_typeclass, ast,
-	      (flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
-	       | BIND_PUBLIC));
+	      (flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
+	       | RSLV_BIND_PUBLIC));
       
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
 	      idc_type, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
 
       // match at_tc_decls
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
 	      idc_type, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       // match at method_decls
       RESOLVE(ast->child(3), tmpEnv, lamLevel, USE_MODE, 
 	      idc_type, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));      
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));      
 
       // match at constraints
       RESOLVE(ast->child(4), tmpEnv, lamLevel, USE_MODE, 
 	      idc_type, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));      
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));      
 
       tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
       env->mergeBindingsFrom(tmpEnv);
@@ -1201,8 +1203,8 @@ resolve(std::ostream& errStream,
       // match at at_ident
       RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
 	      id_method, currLB,
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
-	      | BIND_PUBLIC);
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
+	      | RSLV_BIND_PUBLIC);
       
       // match at at_fn
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
@@ -1218,7 +1220,7 @@ resolve(std::ostream& errStream,
 
       // match at at_tcapp
       RESOLVE(ast->child(0), tmpEnv, lamLevel, 
-	      USE_MODE, idc_type, ast, flags | NEW_TV_OK);
+	      USE_MODE, idc_type, ast, flags | RSLV_NEW_TV_OK);
 
       // match at at_methods
       RESOLVE(ast->child(1), tmpEnv, lamLevel, 
@@ -1226,7 +1228,7 @@ resolve(std::ostream& errStream,
       
       // match at at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, 
-	      USE_MODE, idc_type, ast, flags | NEW_TV_OK);
+	      USE_MODE, idc_type, ast, flags | RSLV_NEW_TV_OK);
       break;
     }
 
@@ -1368,7 +1370,7 @@ resolve(std::ostream& errStream,
 	
 	  RESOLVE(pubName, ifAst->envs.env, lamLevel, USE_MODE,
 		  id_unresolved, currLB, 
-		  ((flags & (~NEW_TV_OK))) | NO_CHK_USE_TYPE);
+		  ((flags & (~RSLV_NEW_TV_OK))) | RSLV_NO_CHK_USE_TYPE);
 	
 	  if (!errorFree)
 	    break;
@@ -1439,7 +1441,7 @@ resolve(std::ostream& errStream,
       // dealt with by hand.
 
       if (ast->child(0)->s == "stateful") {
-	if (!(flags & IS_INTERFACE)) {
+	if (!(flags & RSLV_IS_INTERFACE)) {
 	  errStream << ast->child(0)->loc 
 		    << ": Only Interfaces can be declared to be stateful"
 		    << std::endl;
@@ -1448,7 +1450,7 @@ resolve(std::ostream& errStream,
       }
 
       if (ast->child(0)->s == "tag-type") {
-	if (!(flags & WITHIN_DEFUNION)) {
+	if (!(flags & RSLV_WITHIN_DEFUNION)) {
 	  errStream << ast->child(0)->loc 
 		    << ": tag-type can only occur within a defunion"
 		    << std::endl;
@@ -1524,7 +1526,7 @@ resolve(std::ostream& errStream,
 		      id_ucon : id_ucon0);
       
       RESOLVE(ast->child(0), env, lamLevel, DEF_MODE,
-	      it, currLB, flags | BIND_PUBLIC);
+	      it, currLB, flags | RSLV_BIND_PUBLIC);
             
       for (size_t c = 1; c < ast->children.size(); c++) {
 	shared_ptr<AST> fldc = ast->child(c);
@@ -1588,7 +1590,7 @@ resolve(std::ostream& errStream,
       if (ast->children.size() > 1) {
 	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
 		idc_type, currLB, 
-		flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+		flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       }
 
       break;
@@ -1599,7 +1601,7 @@ resolve(std::ostream& errStream,
       // match agt_type?
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      idc_type, currLB, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
       break;
     }
@@ -1609,11 +1611,11 @@ resolve(std::ostream& errStream,
       // match agt_type?
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      idc_type, currLB, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
 	      idc_type, currLB, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       break;
     }
@@ -1627,7 +1629,7 @@ resolve(std::ostream& errStream,
       // match at_intLiteral
       RESOLVE(ast->child(1), env, lamLevel, NULL_MODE, 
 	      identType, currLB,  
-	      flags & (~INCOMPLETE_OK));
+	      flags & (~RSLV_INCOMPLETE_OK));
       break;
     }
 
@@ -1636,7 +1638,7 @@ resolve(std::ostream& errStream,
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      idc_type, currLB, 
-	      flags | (INCOMPLETE_OK));
+	      flags | (RSLV_INCOMPLETE_OK));
       break;
     }
 
@@ -1645,7 +1647,7 @@ resolve(std::ostream& errStream,
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      idc_type, currLB, 
-	      flags | (INCOMPLETE_OK));
+	      flags | (RSLV_INCOMPLETE_OK));
       break;
     }
 
@@ -1654,7 +1656,7 @@ resolve(std::ostream& errStream,
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      idc_type, currLB, 
-	      flags & (~INCOMPLETE_OK));
+	      flags & (~RSLV_INCOMPLETE_OK));
 
       break;
     }
@@ -1827,7 +1829,7 @@ resolve(std::ostream& errStream,
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
 		idc_value, currLB, 
-		flags | INCOMPLETE_OK);
+		flags | RSLV_INCOMPLETE_OK);
       break;
     }
 
@@ -1924,7 +1926,7 @@ resolve(std::ostream& errStream,
       if (lhs->astType == at_ident || lhs->astType == at_usesel) {
 	
 	RESOLVE(lhs, env, lamLevel, USE_MODE, identType, currLB, 
-		flags | NO_CHK_USE_TYPE | SWITCHED_ID_OK);
+		flags | RSLV_NO_CHK_USE_TYPE | RSLV_SWITCHED_ID_OK);
 	
 	// If ast->child(0) was a at_usesel, now it would have
 	// turned into at_ident.
@@ -2002,7 +2004,7 @@ resolve(std::ostream& errStream,
       // match agt_expr
       RESOLVE(ast->child(1), lamEnv, lamEnv, USE_MODE, 
 	      idc_value, currLB, 
-	      flags | (INCOMPLETE_OK));
+	      flags | (RSLV_INCOMPLETE_OK));
       break;
     }
 
@@ -2188,8 +2190,8 @@ resolve(std::ostream& errStream,
       ast->child(0)->flags |= ID_FOR_SWITCH;
 
       /* match at_expr */
-      if ((flags & WITHIN_CATCH) && (ast->children.size() > 3))
-	flags |= WITHIN_CATCH_MC;
+      if ((flags & RSLV_WITHIN_CATCH) && (ast->children.size() > 3))
+	flags |= RSLV_WITHIN_CATCH_MC;
 	
       RESOLVE(ast->child(1), legEnv, lamLevel, USE_MODE, 
 	      idc_value, currLB, flags);
@@ -2220,12 +2222,12 @@ resolve(std::ostream& errStream,
 
       // match at_case_legs
       RESOLVE(ast->child(2), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags | WITHIN_CATCH);
+	      idc_value, currLB, flags | RSLV_WITHIN_CATCH);
 
       // match at_otherwise
       if (ast->child(3)->astType != at_Null) 
 	RESOLVE(ast->child(3), env, lamLevel, USE_MODE, 
-		idc_value, currLB, flags | WITHIN_CATCH);
+		idc_value, currLB, flags | RSLV_WITHIN_CATCH);
       break;
     }
 
@@ -2355,7 +2357,7 @@ resolve(std::ostream& errStream,
     
       // match at_constraints
       RESOLVE(ast->child(2), letEnv, lamLevel, USE_MODE, 
-	      idc_type, currLB,  flags & (~NEW_TV_OK) & (~INCOMPLETE_OK));
+	      idc_type, currLB,  flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       break;
     }
 
@@ -2472,7 +2474,7 @@ resolve(std::ostream& errStream,
     // THIS CASE MUST NOT BE USED BY OTHER LET FORMS
   case at_letbinding:
     {
-      assert(flags & SYM_POST_POLY);
+      assert(flags & RSLV_SYM_POST_POLY);
 
       // The lamLevel is bogus here, but OK only for
       // the sake of polyinstantiation.      
@@ -2545,19 +2547,19 @@ initEnv(std::ostream& errStream,
 }
 
 
-bool
-UocInfo::fe_symresolve(std::ostream& errStream,
-		       bool init, unsigned long flags)
+bool 
+UocInfo::DoResolve(std::ostream& errStream, bool init, 
+		   ResolverFlags rflags)
 {
   bool errFree = true;
 
   if (Options::noPrelude)
-    flags |= SYM_NO_PRELUDE;
+    rflags |= RSLV_SYM_NO_PRELUDE;
   
   shared_ptr<ASTEnvironment > aliasEnv = ASTEnvironment::make("*aliases*");
 
   if (init) {    
-    if (flags & SYM_REINIT) {
+    if (rflags & RSLV_SYM_REINIT) {
       assert(env);      
       assert(env->parent);
       env = env->parent->newDefScope();
@@ -2566,14 +2568,33 @@ UocInfo::fe_symresolve(std::ostream& errStream,
       env = ASTEnvironment::make(uocName);
     }      
 
-    if ((flags & SYM_NO_PRELUDE) == 0)
+    if ((rflags & RSLV_SYM_NO_PRELUDE) == 0)
       initEnv(std::cerr, uocAst, aliasEnv, env);
   }
   
   CHKERR(errFree, resolve(errStream, uocAst, aliasEnv, env, GC_NULL, 
-			  USE_MODE, idc_type, GC_NULL, flags));
+			  USE_MODE, idc_type, GC_NULL, rflags));
 
   return errFree;
+}
+
+bool 
+UocInfo::Resolve(std::ostream& errStream, bool init, 
+		 ResolverFlags rflags, std::string mesg)
+{
+  bool errFree = true;
+  errFree = DoResolve(errStream, init, rflags);
+  if (!errFree)
+    errStream << mesg
+	      << std::endl;
+  return errFree;
+}
+
+bool
+UocInfo::fe_symresolve(std::ostream& errStream,
+		       bool init, unsigned long flags)
+{
+  return DoResolve(errStream, init, RSLV_NO_FLAGS);
 }
 
  

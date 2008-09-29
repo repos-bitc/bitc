@@ -86,7 +86,7 @@ unifyPrim(std::ostream& errStream,
   bool errFree = true;
 
   shared_ptr<Type> primType = Type::make(Type::LookupKind(ptype));
-  CHKERR(errFree, unify(errStream, trail, errLoc, primType, tau, 0));
+  CHKERR(errFree, unify(errStream, trail, errLoc, primType, tau, UFLG_NO_FLAGS));
   return errFree;
 }
 
@@ -95,7 +95,7 @@ Unify(std::ostream& errStream,
       shared_ptr<Trail> trail, 
       const LexLoc &errLoc,
       shared_ptr<Type> ft, shared_ptr<Type> st, 
-      unsigned long flags);
+      UnifyFlags flags);
 
 // Handle unification of struct/union decl+decl or decl+def
 static bool 
@@ -103,7 +103,7 @@ UnifyDecl(std::ostream& errStream,
 	  shared_ptr<Trail> trail,
 	  const LexLoc &errLoc,
 	  shared_ptr<Type> t1, shared_ptr<Type> t2,
-	  unsigned long flags) 
+	  UnifyFlags flags) 
 {
   bool errFree = true;
 
@@ -133,7 +133,7 @@ UnifyStructUnion(std::ostream& errStream,
 		 shared_ptr<Trail> trail,
 		 const LexLoc &errLoc,
 		 shared_ptr<Type> t1, shared_ptr<Type> t2,
-		 unsigned long flags) 
+		 UnifyFlags flags) 
 {
   bool errFree = true;
 
@@ -195,7 +195,7 @@ UnifyFnArgs(std::ostream& errStream, shared_ptr<Trail> trail,
 	    const LexLoc &errLoc,
  	    shared_ptr<Type> errt1, shared_ptr<Type> errt2,
 	    shared_ptr<Type> t1, shared_ptr<Type> t2,
-	    unsigned long flags)
+	    UnifyFlags flags)
 {
   bool errFree = true;
   t1 = t1->getType();
@@ -258,7 +258,7 @@ Unify(std::ostream& errStream,
       shared_ptr<Trail> trail, 
       const LexLoc &errLoc,
       shared_ptr<Type> ft, shared_ptr<Type> st, 
-      unsigned long flags) 
+      UnifyFlags flags) 
 {
   shared_ptr<Type> t1 = ft->getType();
   shared_ptr<Type> t2 = st->getType();
@@ -284,7 +284,7 @@ Unify(std::ostream& errStream,
       break;
     }
     
-    if (flags & UNIFY_STRICT) {
+    if (flags & UFLG_UNIFY_STRICT) {
       errFree = typeError(errStream, errLoc, t1, t2);
       break;
     }
@@ -451,13 +451,13 @@ Unify(std::ostream& errStream,
 
     case ty_tvar:
       {		
-	if (flags & UNIFY_STRICT_TVAR) {
+	if (flags & UFLG_UNIFY_STRICT_TVAR) {
 	  errFree = typeError(errStream, errLoc, t1, t2);
 	  break;
 	}
 
 	if ((t1->flags & TY_RIGID) && (t2->flags & TY_RIGID) &&
-	    ((flags & UN_IGN_RIGIDITY) == 0)) {
+	    ((flags & UFLG_UN_IGN_RIGIDITY) == 0)) {
 	  errFree = typeError(errStream, errLoc, t1, t2);
 	  break;
 	}
@@ -792,11 +792,11 @@ unify(std::ostream& errStream,
       shared_ptr<Trail> trail,
       const LexLoc &errLoc,
       shared_ptr<Type> ft, shared_ptr<Type> st, 
-      unsigned long flags) 
+      UnifyFlags flags) 
 {
   bool errFree = true;
 
-  assert((flags & UN_MBFULL_VAR) == 0);
+  assert((flags & UFLG_UN_MBFULL_VAR) == 0);
   CHKERR(errFree, Unify(errStream, trail, errLoc, ft, st, flags));
   
   WorkList<shared_ptr<Type> > worklist;

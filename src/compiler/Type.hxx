@@ -53,6 +53,7 @@
 #include "debug.hxx"
 #include "TvPrinter.hxx"
 #include "Environment.hxx"
+#include "TypeInfer.hxx"
 #include "Trail.hxx"
 
 // Elements of the Kind enumeration have moved to kind.def
@@ -456,7 +457,7 @@ public:
 
 private:  
   bool eql(boost::shared_ptr<Type> t, bool verbose, std::ostream &errStream,
-	   unsigned long uflags, bool keepSub,
+	   UnifyFlags uflags, bool keepSub,
 	   boost::shared_ptr<Trail> trail=Trail::make());
 public:
   // Returns true of the type `t' is structurally equal to `this'

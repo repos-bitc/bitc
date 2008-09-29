@@ -43,24 +43,31 @@
    communication/processing within Type-methods annd inference
    routines. */
 
-#define UNIFY_STRICT        0x00001u // Overrides everything else.
-#define UNIFY_STRICT_TVAR   0x00002u // No-alpha-renaming.
-#define UNIFY_TRY           0x00004u // Trial mode.
-#define DEF_DECL_NO_MATCH   0x00008u
-#define TYP_NO_PRELUDE      0x00010u
-#define NO_MORE_TC          0x00020u // No more type classes 
-                                     // beyond polyinstantiation
-#define UN_IGN_RIGIDITY     0x00040u
-#define ALL_INSTS_OK        0x00080u // All instances are OK.
+enum UnifyFlagValues {
+  UFLG_NO_FLAGS            = 0x0,
 
-#define POST_REFIZE         0x00100u // We have passedrefization pass  
-        // of Closure conversion. The (temporary?) restriction that
-        // letrecs must define only define lambdas must be prepared to
-        // take closures or refs to functions / closures.
+  UFLG_UNIFY_STRICT        = 0x00001u, // Overrides everything else.
+  UFLG_UNIFY_STRICT_TVAR   = 0x00002u, // No-alpha-renaming.
+  UFLG_UNIFY_TRY           = 0x00004u, // Trial mode.
+  UFLG_DEF_DECL_NO_MATCH   = 0x00008u,
+  UFLG_TYP_NO_PRELUDE      = 0x00010u,
+  // No more type classes beyond polyinstantiation
+  UFLG_NO_MORE_TC          = 0x00020u,
+  UFLG_UN_IGN_RIGIDITY     = 0x00040u,
+  UFLG_ALL_INSTS_OK        = 0x00080u, // All instances are OK.
 
-#define INF_REINIT          0x00200u 
-#define UN_MBFULL_VAR       0x00400u // Unifying the Var() part 
-        // of an mbFull type. Here, the propagateMutability() check
-        // must not be performed.
+  // We have passedrefization pass of Closure conversion. The
+  // (temporary?) restriction that letrecs must define only define
+  // lambdas must be prepared to take closures or refs to functions /
+  // closures.
+  UFLG_POST_REFIZE         = 0x00100u,
+
+  UFLG_INF_REINIT          = 0x00200u,
+  // Unifying the Var() part of an mbFull type. Here, the
+  // propagateMutability() check must not be performed.
+  UFLG_UN_MBFULL_VAR       = 0x00400u
+};
+
+typedef sherpa::EnumSet<UnifyFlagValues> UnifyFlags;
 
 #endif /* TYPEINFER_HXX */

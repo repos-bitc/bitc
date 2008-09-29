@@ -85,7 +85,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  TypeAstMap& impTypes,
 	  bool isVP, 
 	  shared_ptr<TCConstraints> tcc,
-	  unsigned long uflags,
+	  UnifyFlags uflags,
 	  shared_ptr<Trail> trail,
 	  int mode,
 	  unsigned flags);
@@ -117,7 +117,7 @@ generalizePat(std::ostream& errStream,
    inference routines due to the use/non-use of maybe types */
 
 static shared_ptr<Type> 
-buildFnFromApp(shared_ptr<AST> ast, unsigned long uflags)
+buildFnFromApp(shared_ptr<AST> ast, UnifyFlags uflags)
 {
   assert(ast->astType == at_apply);
   shared_ptr<Type> targ = Type::make(ty_fnarg);
@@ -256,7 +256,7 @@ ProcessLetExprs(std::ostream& errStream, shared_ptr<AST> lbs,
 		shared_ptr<InstEnvironment > instEnv,
 		TypeAstMap& impTypes,
 		bool isVP, shared_ptr<TCConstraints> tcc,
-		unsigned long uflags, shared_ptr<Trail> trail,
+		UnifyFlags uflags, shared_ptr<Trail> trail,
 		int mode, unsigned flags)
 {
   bool errFree = true;
@@ -275,7 +275,7 @@ ProcessLetBinds(std::ostream& errStream, shared_ptr<AST> lbs,
 		shared_ptr<InstEnvironment > instEnv,
 		TypeAstMap& impTypes,
 		bool isVP, shared_ptr<TCConstraints> tcc,
-		unsigned long uflags, shared_ptr<Trail> trail,
+		UnifyFlags uflags, shared_ptr<Trail> trail,
 		int mode, unsigned flags)
 {
   bool errFree = true;
@@ -291,7 +291,7 @@ ProcessLetBinds(std::ostream& errStream, shared_ptr<AST> lbs,
 
 static bool
 UnifyLetBinds(std::ostream& errStream, shared_ptr<AST> lbs,
-	      unsigned long uflags, shared_ptr<Trail> trail)
+	      UnifyFlags uflags, shared_ptr<Trail> trail)
 {
   bool errFree = true;
   for (size_t c = 0; c < lbs->children.size(); c++) {
@@ -507,7 +507,7 @@ matchDefDecl(std::ostream& errStream,
 	     shared_ptr<InstEnvironment > instEnv,
 	     shared_ptr<TypeScheme> declSigma,
 	     shared_ptr<TypeScheme> defSigma,
-	     unsigned long flags,
+	     UnifyFlags uflags,
 	     bool fnCopyCompatibility)
 {
   bool errorFree = true;   
@@ -517,7 +517,7 @@ matchDefDecl(std::ostream& errStream,
   DEF_DECL_DEBUG 
     verbose = true;
   
-  if (flags & DEF_DECL_NO_MATCH)
+  if (uflags & UFLG_DEF_DECL_NO_MATCH)
     return true;  
   
   if (declSigma->ftvs.size() != defSigma->ftvs.size()) {
@@ -674,7 +674,7 @@ InferTvList(std::ostream& errStream, shared_ptr<AST> tvList,
 	    TypeAstMap& impTypes,
 	    bool isVP, 
 	    shared_ptr<TCConstraints> tcc,
-	    unsigned long uflags,
+	    UnifyFlags uflags,
 	    shared_ptr<Trail> trail,
 	    int mode, unsigned flags,
 	    shared_ptr<Type> container)  
@@ -742,7 +742,7 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
 	    TypeAstMap& impTypes,
 	    bool isVP, 
 	    shared_ptr<TCConstraints> tcc,
-	    unsigned long uflags,
+	    UnifyFlags uflags,
 	    shared_ptr<Trail> trail,
 	    int mode,
 	    bool isReference,
@@ -856,7 +856,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	   TypeAstMap& impTypes,
 	   bool isVP, 
 	   shared_ptr<TCConstraints> tcc,
-	   unsigned long uflags,
+	   UnifyFlags uflags,
 	   shared_ptr<Trail> trail,
 	   int mode,
 	   bool isReference,
@@ -1243,7 +1243,7 @@ InferTypeClass(std::ostream& errStream, shared_ptr<AST> ast,
 	       TypeAstMap& impTypes,
 	       bool isVP, 
 	       shared_ptr<TCConstraints> tcc,
-	       unsigned long uflags,
+	       UnifyFlags uflags,
 	       shared_ptr<Trail> trail,
 	       int mode,
 	       unsigned flags)
@@ -1375,7 +1375,7 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
 	      TypeAstMap& impTypes,
 	      bool isVP, 
 	      shared_ptr<TCConstraints> tcc,
-	      unsigned long uflags,
+	      UnifyFlags uflags,
 	      shared_ptr<Trail> trail,
 	      int mode,
 	      unsigned flags)
@@ -1425,7 +1425,7 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
     instEnv->getBinding(tc->defAst->fqn.asString());
 
   
-  if ((uflags & ALL_INSTS_OK) == 0) {
+  if ((uflags & UFLG_ALL_INSTS_OK) == 0) {
     
     // Make sure that the instance definition is consistent
     // with the known functional dependencies.
@@ -1583,7 +1583,7 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
   
   shared_ptr<Instance> myInstance = Instance::make(sigma, ast);
   
-  if ((uflags & ALL_INSTS_OK) == 0) {
+  if ((uflags & UFLG_ALL_INSTS_OK) == 0) {
     // Make sure there are no absolute conflicts 
     // with existing instances
     assert(currInsts);
@@ -1673,7 +1673,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  TypeAstMap& impTypes,
 	  bool isVP, 
 	  shared_ptr<TCConstraints> tcc,
-	  unsigned long uflags,
+	  UnifyFlags uflags,
 	  shared_ptr<Trail> trail,
 	  int mode,
 	  unsigned flags)
@@ -1774,7 +1774,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	break;
       }
 
-      if (uflags & NO_MORE_TC) {
+      if (uflags & UFLG_NO_MORE_TC) {
 	ast->symType = Type::make(ty_tvar);
 	break;
       }
@@ -1802,7 +1802,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	break;
       }
 
-      if (uflags & NO_MORE_TC) {
+      if (uflags & UFLG_NO_MORE_TC) {
 	ast->symType = Type::make(ty_tvar);
 	break;
       }
@@ -4707,7 +4707,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       TYPEINFER(ast->child(1), letGamma, instEnv, impTypes, 
 		isVP, tcc, uflags, trail, USE_MODE, TI_COMP2);
       
-      //if ((ast->astType == at_letrec) && ((uflags & POST_REFIZE) == 0))
+      //if ((ast->astType == at_letrec) && ((uflags & UFLG_POST_REFIZE) == 0))
       //CHKERR(errFree, CheckLetrecFnxnRestriction(errStream, bAst));
       
       ast->symType = ast->child(1)->symType;
@@ -4818,13 +4818,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 /*              Interface to the outside world                */
 /**************************************************************/
 
-bool
-UocInfo::fe_typeCheck(std::ostream& errStream,
-		      bool init, unsigned long flags)
+bool 
+UocInfo::DoTypeCheck(std::ostream& errStream, bool init, 
+		     UnifyFlags uflags)
 {
-  // Careful: the input flags are interface flags `uflags,'
-  // and not the internal flags `flags.' 
-  
   TI_TOP_DEBUG
     errStream << "Now Processing " << uocName
 	      << " ast = " << uocAst->astTypeName()
@@ -4835,11 +4832,11 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
   bool errFree = true;
 
   if (Options::noPrelude)
-    flags |= TYP_NO_PRELUDE;
+    uflags |= UFLG_TYP_NO_PRELUDE;
   
   if (init) {
     
-    if (flags & INF_REINIT) {
+    if (uflags & UFLG_INF_REINIT) {
       assert(gamma);      
       assert(gamma->parent);
       gamma = gamma->parent->newDefScope();
@@ -4852,8 +4849,8 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
       gamma = TSEnvironment::make(uocName);
       instEnv = InstEnvironment::make(uocName);
     }
-    if ((flags & TYP_NO_PRELUDE) == 0)
-      CHKERR(errFree, initGamma(std::cerr, gamma, instEnv, uocAst, flags));
+    if ((uflags & UFLG_TYP_NO_PRELUDE) == 0)
+      CHKERR(errFree, initGamma(std::cerr, gamma, instEnv, uocAst, uflags));
     
     if (!errFree)
       return false;
@@ -4861,7 +4858,7 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
 
   CHKERR(errFree, typeInfer(errStream, uocAst, gamma, instEnv, 
 			    impTypes, false, 
-			    TCConstraints::make(), flags, trail, 
+			    TCConstraints::make(), uflags, trail, 
 			    USE_MODE, TI_NONE));
   CHKERR(errFree, checkImpreciseTypes(errStream, gamma, impTypes));
 
@@ -4887,4 +4884,33 @@ UocInfo::fe_typeCheck(std::ostream& errStream,
 
   
   return errFree;
+}
+
+bool 
+UocInfo::TypeCheck(std::ostream& errStream, bool init, 
+		   UnifyFlags uflags, std::string mesg)
+{
+  bool errFree = true;
+
+  // If one considers removing this clear clause,
+  // be careful about old types. Pay attention to
+  // bindIdentDef() function which preserves types
+  // if a type already exists.
+  uocAst->clearTypes();  
+
+  errFree = DoTypeCheck(errStream, init, uflags);
+  if (!errFree) 
+    errStream << mesg
+	      << std::endl;
+  return errFree;
+}
+
+bool
+UocInfo::fe_typeCheck(std::ostream& errStream,
+		      bool init, unsigned long flags)
+{
+  // Careful: the input flags are interface flags `uflags,'
+  // and not the internal flags `flags.' 
+  
+  return DoTypeCheck(errStream, init, UFLG_NO_FLAGS);    
 }

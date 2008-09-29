@@ -150,7 +150,7 @@ bool
 initGamma(std::ostream& errStream, 
 	  shared_ptr<TSEnvironment > gamma,
 	  shared_ptr<InstEnvironment > instEnv,
-	  const shared_ptr<AST> topAst, unsigned long uflags)
+	  const shared_ptr<AST> topAst, UnifyFlags uflags)
 {
   bool errFree = true;
   // Make sure I am not processing the prelude itself
