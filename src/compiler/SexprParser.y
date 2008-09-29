@@ -250,7 +250,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> expr the_expr eform method_decls method_decl method_seq
 %type <ast> constraints constraint_seq constraint 
 %type <ast> types type bitfieldtype bool_type 
-%type <ast> type_pl_bf type_pl_byref types_pl_byref
+%type <ast> type_or_bitfield type_pl_byref types_pl_byref
 %type <ast> int_type uint_type any_int_type float_type
 %type <ast> tvlist fields field 
 %type <ast> literal typevar //mod_ident
@@ -287,12 +287,6 @@ start: uoc_body {
   SHOWPARSE("start -> uoc_body");
   return 0;
 };
-
-//start: interface {
-//  SHOWPARSE("start -> interface");
-//
-//  return 0;
-//};
 
 uoc_body: interface {
   SHOWPARSE("uocbody -> interface");
@@ -520,7 +514,7 @@ mod_definition: common_definition {
 };
 
 common_definition: import_definition {
-  SHOWPARSE("type_val_definition -> import_definition");
+  SHOWPARSE("common_definition -> import_definition");
   $$ = $1;
 };
 
@@ -682,7 +676,7 @@ type_definition: '(' tk_DEFUNION ptype_name val optdocstring declares constructo
 /*   $$->loc = $2.loc; */
 /* }; */
 
-/* reprbodyitem: '(' tk_THE type_pl_bf '(' tk_TAG reprtags ')' ')' { */
+/* reprbodyitem: '(' tk_THE type_or_bitfield '(' tk_TAG reprtags ')' ')' { */
 /*   SHOWPARSE("reprbodyitem -> '(' TAG reprtags ')' "); */
 /*   $$ = $6; */
 /*   $$->loc = $5.loc; */
@@ -966,14 +960,14 @@ import_definition: '(' tk_IMPORT ifident tk_AS ident ')' {
 };
 
 import_definition: '(' tk_IMPORT ifident ')' {
-  SHOWPARSE("import_definition -> (FROM ifident)");
+  SHOWPARSE("import_definition -> (IMPORT ifident)");
   shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = AST::make(at_import, $2.loc, ifIdent);
 };
 
 import_definition: '(' tk_IMPORT ifident importList ')' {
-  SHOWPARSE("import_definition -> (FROM ifident IMPORT importList)");
+  SHOWPARSE("import_definition -> (IMPORT ifident importList)");
   shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
   $$ = AST::make(at_import, $2.loc, ifIdent);
@@ -1054,8 +1048,8 @@ decls: decls decl {
   $$->addChild($2);
 };
 
-decl: '(' ident type_pl_bf ')' {
-  SHOWPARSE("decl -> ( ident type_pl_bf )");
+decl: '(' ident type_or_bitfield ')' {
+  SHOWPARSE("decl -> ( ident type_or_bitfield )");
   $$ = AST::make(at_declare, $2->loc, $2, $3);
 };
 //decl: '(' ident ')' {
@@ -1147,13 +1141,13 @@ fields: fields field {
   $$->addChild($2);
 };
 
-field: ident ':' type_pl_bf  {
-  SHOWPARSE("field -> ident : type_pl_bf");
+field: ident ':' type_or_bitfield  {
+  SHOWPARSE("field -> ident : type_or_bitfield");
   $$ = AST::make(at_field, $1->loc, $1, $3);
 };
 
-field: '(' tk_THE type_pl_bf ident ')'  {
-  SHOWPARSE("field -> '(' THE type_pl_bf ident ')'");
+field: '(' tk_THE type_or_bitfield ident ')'  {
+  SHOWPARSE("field -> '(' THE type_or_bitfield ident ')'");
   $$ = AST::make(at_field, $1.loc, $4, $3);
 };
 
@@ -1417,13 +1411,13 @@ bitfieldtype: '(' tk_BITFIELD bool_type intLit ')' {
 };
 
 // Any-type, including bitfield type
-type_pl_bf: bitfieldtype {
-  SHOWPARSE("type_pl_bf -> bitfieldtype");
+type_or_bitfield: bitfieldtype {
+  SHOWPARSE("type_or_bitfield -> bitfieldtype");
   $$ = $1;
 };
 
-type_pl_bf: type {
-  SHOWPARSE("type_pl_bf -> type");
+type_or_bitfield: type {
+  SHOWPARSE("type_or_bitfield -> type");
   $$ = $1;
 };
 
@@ -2203,7 +2197,7 @@ typevar: tk_TypeVar {
   $$->identType = id_tvar;
 }; 
 
-// /* Literal Value Representations */
+// Literal Value Representations
 
 boolLit: tk_TRUE {
   SHOWPARSE("boolLit -> <Bool=" + $1.str +">");
