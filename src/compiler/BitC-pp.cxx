@@ -1050,13 +1050,12 @@ doShowTypes(std::ostream& out, shared_ptr<AST> ast,
 	    ? "??" 
 	    : ast->scheme->asString(tvP, true));
 
-    if (showMangName) {
+    if (showMangName)
       if (ast->symType->isOfInfiniteType())
 	out << "[Infinite Type]";
       else
 	out << " [" << ast->symType->mangledString() << "]";
-    }
-
+    
     break;
     
   case at_usesel:

@@ -352,7 +352,7 @@ UocInfo::Compile()
       this->PrettyPrint(std::cerr, Options::ppDecorate);
     }
     if (passInfo[i].typesAfter || 
-	(showTypes && passInfo[i].name == string("typecheck"))) {
+	(showTypes && passInfo[i].name == "typecheck")) {
       std::cerr << "==== TYPES "
 		<< uocName
 		<< " AFTER " << passInfo[i].name 

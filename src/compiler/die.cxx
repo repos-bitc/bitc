@@ -1,6 +1,3 @@
-#ifndef INTER_PASS_HXX
-#define INTER_PASS_HXX
-
 /**************************************************************************
  *
  * Copyright (C) 2008, Johns Hopkins University.
@@ -38,49 +35,18 @@
  *
  **************************************************************************/
 
-#include "UocInfo.hxx"
-#include "AST.hxx"
-#include "Type.hxx"
-#include "die.hxx"
+#include <assert.h>
+#include <iostream>
 
-/* Definitions of mode used in Symbol Resolution 
-   and Type-inference */
-#define NULL_MODE   0x0u
-#define DEF_MODE    0x1u
-#define REDEF_MODE  0x2u
-#define USE_MODE    0x3u
-#define DECL_MODE   0x4u
-
-#define CHKERR(noerr, exp) \
-  do {			   \
-    bool ans = (exp);	   \
-    if (ans == false)	   \
-      (noerr) = false;	   \
-  }while (0)
-
-#define BE_CHKERR(noerr, exp)	 \
-  do {				 \
-    bool ans = (exp);		 \
-    assert(ans);		 \
-    if (ans == false)		 \
-      (noerr) = false;		 \
-  }while (0)
-
-// Final expression of a let
-#define FEXPR(let) (let)->child(1)
-// Identifier in a identPattern let
-#define IDENT(let) (let)->child(0)->child(0)
-
-// Ignore identifier at the following positions:
-// at_switch *ident* expr sw_legs ow
-// at_try expr *ident* sw_legs ow
-#define IGNORE(ast) ((size_t)(((ast)->astType == at_switch)?0:1))
-
-void BitcP(std::ostream& out, 
-	   const boost::shared_ptr<AST> ast, 
-	   bool showTypes);
-
-void addDecl(boost::shared_ptr<AST> decl);
-extern void fatal();
-
-#endif /* INTER_PASS_HXX */
+/// @brief Dump core for debugging.
+///
+/// @bug The only call to this appears in TypeInfer, and I think that
+/// call should be replaced by an exception throw. Debugging can be
+/// done by placing a breakpoint event on exception throw rather then
+/// on dumping core.
+void
+die()
+{
+  std::cerr << "bitcc dumps core for debugging." << std::endl;
+  assert(0);
+}

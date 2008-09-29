@@ -167,6 +167,8 @@ Typeclass::addFnDep(shared_ptr<Type> dep)
   if (getType() != shared_from_this())
     return getType()->addFnDep(dep); // getType() OK
   
+  size_t c;
+  
   if (kind != ty_typeclass)
     assert(false);
 

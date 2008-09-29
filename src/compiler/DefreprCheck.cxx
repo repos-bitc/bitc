@@ -137,6 +137,11 @@ bitOffset(shared_ptr<AST> leg, size_t n)
 /// If a field appears in multiple legs of a DEFREPR, it must have the
 /// same type in all legs. If it is of bitfield type, it must also
 /// have the same number of bits in all occurrences.
+///
+/// @bug I am not sure what the "extra checking" was in the original
+/// description:  "For BitFields, the type does not encode the bits.
+/// Therefore, extra checking is necessary." Where is this extra
+/// checking performed?
 static bool 
 TypesAgree(shared_ptr<AST> fld1, shared_ptr<AST> fld2)
 {
