@@ -323,7 +323,7 @@ interface: tk_INTERFACE ifident {
     UocInfo::make(uocName, lexer->here.origin, $$);
 
   if (uocName == "bitc.prelude")
-    uoc->flags |= (UOC_IS_BUILTIN | UOC_IS_PRELUDE);
+    uoc->flags |= UOC_IS_PRELUDE;
 
   shared_ptr<UocInfo> existingUoc = UocInfo::findInterface(uocName);
 

@@ -1039,14 +1039,14 @@ Type::SetTvarsToUnit()
   }
 }
   
-comp::comp(shared_ptr<Type> t, CompSet _flags) 
+comp::comp(shared_ptr<Type> t, CompFlagSet _flags) 
 {
   name = "";
   typ = (shared_ptr<Type> )t;
   flags=_flags;
 }
   
-comp::comp(const std::string s, shared_ptr<Type> t, CompSet _flags) 
+comp::comp(const std::string s, shared_ptr<Type> t, CompFlagSet _flags) 
 {
   name = s;
   typ = t;

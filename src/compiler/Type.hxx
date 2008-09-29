@@ -69,7 +69,7 @@ typedef long long TargetSWord;
 struct Type;
 struct TCConstraints;
 
-enum CompValues {
+enum CompFlagValues {
   COMP_NO_FLAGS = 0u,
 
   /// @brief Union discriminator of defrepr
@@ -104,18 +104,18 @@ enum CompValues {
   /// with the actual functions.
   COMP_BYREF_P    = 0x8u,
 };
-typedef sherpa::EnumSet<CompValues> CompSet;
+typedef sherpa::EnumSet<CompFlagValues> CompFlagSet;
 
 struct comp {
   std::string name;
   boost::shared_ptr<Type> typ;
-  CompSet flags;
+  CompFlagSet flags;
 
   comp() {flags = COMP_NO_FLAGS;} 
   comp(boost::shared_ptr<Type> t, 
-       CompSet _flags = COMP_NO_FLAGS);
+       CompFlagSet _flags = COMP_NO_FLAGS);
   comp(const std::string s, boost::shared_ptr<Type> t, 
-       CompSet _flags = COMP_NO_FLAGS);
+       CompFlagSet _flags = COMP_NO_FLAGS);
 
   // Quasi-constructors
   static inline boost::shared_ptr<comp>
@@ -125,14 +125,14 @@ struct comp {
   }
 
   static inline boost::shared_ptr<comp>
-  make(boost::shared_ptr<Type> t, CompSet _flags = COMP_NO_FLAGS) {
+  make(boost::shared_ptr<Type> t, CompFlagSet _flags = COMP_NO_FLAGS) {
     comp *tmp = new comp(t, _flags);
     return boost::shared_ptr<comp>(tmp);
   }
 
   static inline boost::shared_ptr<comp>
   make(const std::string& s, 
-       boost::shared_ptr<Type> t, CompSet _flags = COMP_NO_FLAGS) {
+       boost::shared_ptr<Type> t, CompFlagSet _flags = COMP_NO_FLAGS) {
     comp *tmp = new comp(s, t, _flags);
     return boost::shared_ptr<comp>(tmp);
   }
@@ -636,7 +636,7 @@ public:
   {
     return components[i]->name;
   }
-  CompSet& CompFlags(size_t i) const
+  CompFlagSet& CompFlags(size_t i) const
   {
     return components[i]->flags;
   }

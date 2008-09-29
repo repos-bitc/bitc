@@ -93,7 +93,7 @@ UocInfo::UocInfo(const std::string& _uocName, const std::string& _origin,
 
   uocName = _uocName;
   origin = _origin;
-  flags = 0;
+  flags = UOC_NO_FLAGS;
 }
 
 // Why does this exist? Are we actually using it anywhere?
@@ -109,7 +109,7 @@ UocInfo::UocInfo(shared_ptr<UocInfo> uoc)
   env = uoc->env;
   gamma = uoc->gamma;
   instEnv = uoc->instEnv;
-  flags = 0;
+  flags = UOC_NO_FLAGS;
 }
 
 shared_ptr<UocInfo>

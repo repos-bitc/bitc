@@ -104,7 +104,7 @@ TARGETS=bitcc
 LDFLAGS += @BOOST_LDFLAGS@
 
 OBJECTS=\
-	$(patsubst %.cxx,BUILD/%.o,$(filter-out BitcParser.cxx,$(wildcard *.cxx))) \
+	$(patsubst %.cxx,BUILD/%.o,$(filter-out SexprParser.cxx BlockParser.cxx,$(wildcard *.cxx))) \
 	$(patsubst %.y,BUILD/%.o,$(wildcard *.y)) \
         $(patsubst %.cxx,BUILD/%.o,$(notdir $(wildcard libsherpa/*.cxx)))
 
@@ -137,14 +137,21 @@ BUILD/%.o: %.cxx | BUILD
 	@$(CXX_DEP)
 	$(CXX_BUILD)
 
-#$(BUILDDIR)/BitcParser.o: $(BUILDDIR)/BitcParser.cxx
+#$(BUILDDIR)/SexprParser.o: $(BUILDDIR)/SexprParser.cxx
 #	$(CXX_DEP)
 #	$(CXX_BUILD) 
 
-BUILD/BitcParser.cxx BUILD/BitcParser.hxx: BitcParser.y
-	$(BISON) -t -p bitc -v -d -o BUILD/BitcParser.cxx -y BitcParser.y
+BUILD/SexprParser.cxx BUILD/SexprParser.hxx: SexprParser.y
+	$(BISON) -t -p sexpr_ -v -d -o BUILD/SexprParser.cxx -y SexprParser.y
 
-BUILD/BitcParser.o: BUILD/BitcParser.cxx | BUILD
+BUILD/SexprParser.o: BUILD/SexprParser.cxx | BUILD
+	@$(CXX_DEP)
+	$(CXX_BUILD)
+
+BUILD/BlockParser.cxx BUILD/BlockParser.hxx: BlockParser.y
+	$(BISON) -t -p block_ -v -d -o BUILD/BlockParser.cxx -y BlockParser.y
+
+BUILD/BlockParser.o: BUILD/BlockParser.cxx | BUILD
 	@$(CXX_DEP)
 	$(CXX_BUILD)
 
@@ -162,7 +169,7 @@ AST.hxx: AST.ast
 endif
 
 clean:
-	-rm -rf BUILD doxygen
+	-rm -rf BUILD doxygen *~
 
 .PHONY: doxygen
 
@@ -172,7 +179,9 @@ doxygen: AST.hxx AST.cxx
 # Following is a dummy dependency. It ensures that the header file
 # containing token numbers gets generated before we try to compile
 # SexprLexer.cxx
-SexprLexer.cxx: BUILD/BitcParser.hxx
+SexprLexer.cxx: BUILD/SexprParser.hxx
+
+BlockLexer.cxx: BUILD/BlockParser.hxx
 
 -include BUILD/*.m
 

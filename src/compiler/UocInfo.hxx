@@ -52,13 +52,26 @@
 #include "TypeInfer.hxx"
 #include "WorkList.hxx"
 
-#define UOC_IS_PRELUDE    0x001u
-#define UOC_IS_BUILTIN    0x002u
-#define UOC_IS_MUTABLE    0x004u // New definitions can be added to
-  // this UOC after the frontend has seen it once, ex. in the case of
-  // an interactive environment.
-#define UOC_SEEN_BY_INST  0x008u // UOC already seen by Instantiator.
- 
+enum UocFlagValues {
+  UOC_NO_FLAGS = 0,
+
+  /// @brief Indicates that this UOC is the prelude UOC.
+  ///
+  /// This does not appear to be consulted anywhere.
+  UOC_IS_PRELUDE   = 0x1u,
+
+  /// @brief Indicates that definitions in this UOC may be changed.
+  ///
+  /// This is (in theory) used in the instantiator.
+  ///
+  /// @bug This flag is not set anywhere. What is it for?
+  UOC_IS_MUTABLE   = 0x2u,
+
+  /// @brief Indicates that this UOC has been visited by the instantiator.
+  UOC_SEEN_BY_INST = 0x4u,
+};
+
+typedef sherpa::EnumSet<UocFlagValues> UocFlags;
 
 // Passes consist of transforms on the AST. The parse pass is included in 
 // the list for debugging annotation purposes, but is handled as a special
@@ -110,7 +123,7 @@ class UocInfo : public boost::enable_shared_from_this<UocInfo> {
 public:
   std::string uocName;		// either ifName or simulated
   std::string origin;		// typically the file name
-  unsigned long flags;
+  UocFlags flags;
   
   Pass lastCompletedPass;
 

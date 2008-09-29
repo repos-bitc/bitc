@@ -330,7 +330,7 @@ UpdateMegaEnvs(shared_ptr<UocInfo> uoc)
       itr != UocInfo::srcList.end(); ++itr) {
     shared_ptr<UocInfo> puoci = itr->second;
     if ((puoci->flags & UOC_IS_MUTABLE) ||
-       ((puoci->flags &UOC_SEEN_BY_INST) == 0)) {
+       ((puoci->flags & UOC_SEEN_BY_INST) == 0)) {
       INST_ENV_DEBUG
 	cerr << "Importing Symbols from Module: "
 	     << puoci->uocName << "."
