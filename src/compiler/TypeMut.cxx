@@ -681,7 +681,6 @@ Type::propagateMutability(boost::shared_ptr<Trail> trail,
 void
 Type::normalize_mbFull(boost::shared_ptr<Trail> trail)
 {
-  bool errFree = true;
   shared_ptr<Type> t = getType();
   
   if (t->mark & MARK_NORMALIZE_MBFULL)
@@ -817,11 +816,12 @@ coerceMaybe(shared_ptr<Type> t, shared_ptr<Trail> trail,
     core = core->maximizeMutability()->getType();
   }
   else {
-    if (minimize)
+    if (minimize) {
       if(t->kind == ty_mbFull)
 	core = core->minimizeMutability()->getType();
       else
 	core = core->minimizeTopMutability()->getType();
+    }
   }
   
   if (core->kind != ty_tvar)

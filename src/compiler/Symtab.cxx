@@ -672,7 +672,7 @@ resolve(std::ostream& errStream,
 	  bool ICRviolation = false;
 	  if ((env->getFlags(ast->s) & BF_COMPLETE) == 0) {	  
 	    // We are using an incomplete definition ... 
-	    if (flags & INCOMPLETE_OK_PROC == 0) {
+	    if ((flags & INCOMPLETE_OK_PROC) == 0) {
 	      if ((flags & INCOMPLETE_OK) == 0) {
 		// If usage of an Incomplete variable is NOT OK, 
 		// there is a violation, and we are done.
@@ -935,7 +935,7 @@ resolve(std::ostream& errStream,
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
 	      id_struct, ast,
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK) | BIND_PUBLIC);
+	      (flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)) | BIND_PUBLIC);
       if (category->astType == at_refCat)
 	tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
 
@@ -978,7 +978,7 @@ resolve(std::ostream& errStream,
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DECL_MODE, 
 	      it, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
+	      (flags & (~NEW_TV_OK) & (~INCOMPLETE_OK))
 	      | BIND_PUBLIC);
     
       // match at_tvlist
@@ -1005,13 +1005,13 @@ resolve(std::ostream& errStream,
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DECL_MODE, 
 	      idc_value, ast, 
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
+	      (flags & (~NEW_TV_OK) & (~INCOMPLETE_OK))
 	      | BIND_PUBLIC);
    
       // match at_type
       RESOLVE(ast->child(1), tmpEnv, lamLevel, USE_MODE, 
 	      idc_type, ast, 
-	      flags | (NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags | ((NEW_TV_OK) & (~INCOMPLETE_OK)));
       
       // match at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
@@ -1031,7 +1031,7 @@ resolve(std::ostream& errStream,
       
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
 	      it, ast,
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
+	      (flags & (~NEW_TV_OK) & (~INCOMPLETE_OK))
 	      | BIND_PUBLIC);
       // The exception value is defined and is complete
       
@@ -1090,7 +1090,7 @@ resolve(std::ostream& errStream,
       // match agt_expr
       RESOLVE(ast->child(1), tmpEnv, lamLevel, USE_MODE, 
 	      idc_value, ast, 
-	      flags | (NEW_TV_OK) & (~INCOMPLETE_OK));
+	      flags | ((NEW_TV_OK) & (~INCOMPLETE_OK)));
       
       if (ast->astType == at_define) {
 	// Binding patterns not in scope within expr, so handle them
@@ -1121,7 +1121,7 @@ resolve(std::ostream& errStream,
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
 	      id_typeclass, ast,
-	      (flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
+	      ((flags & (~NEW_TV_OK) & (~INCOMPLETE_OK))
 	       | BIND_PUBLIC));
       
       // match at_tvlist
@@ -1201,7 +1201,7 @@ resolve(std::ostream& errStream,
       // match at at_ident
       RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
 	      id_method, currLB,
-	      flags & (~NEW_TV_OK) & (~INCOMPLETE_OK)
+	      (flags & (~NEW_TV_OK) & (~INCOMPLETE_OK))
 	      | BIND_PUBLIC);
       
       // match at at_fn
@@ -2516,19 +2516,16 @@ initEnv(std::ostream& errStream,
   //  cout << "Processing " << ast->child(0)->s << std::endl;
   // "use" everything in the prelude
   shared_ptr<ASTEnvironment > preenv = GC_NULL;
-  size_t i;
 
-  {
-    UocMap::iterator itr = UocInfo::ifList.find("bitc.prelude");
-    if (itr == UocInfo::ifList.end()) {
-      errStream << ast->loc << ": "
-		<< "Internal Compiler Error. "
-		<< " Prelude has NOT been processed."
-		<< std::endl;
-      ::exit(1);
-    }
-    preenv = itr->second->env;
+  UocMap::iterator itr = UocInfo::ifList.find("bitc.prelude");
+  if (itr == UocInfo::ifList.end()) {
+    errStream << ast->loc << ": "
+	      << "Internal Compiler Error. "
+	      << " Prelude has NOT been processed."
+	      << std::endl;
+    ::exit(1);
   }
+  preenv = itr->second->env;
   
   if (!preenv) {
     // GCFIX: Why does this return on error instead of exiting? This

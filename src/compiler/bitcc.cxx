@@ -122,47 +122,41 @@ using namespace sherpa;
 #define LOPT_SHOWPASSNMS  260   /* Show all pass names */
 #define LOPT_NOSTDINC     261   /* Do not append std search paths */
 #define LOPT_NOSTDLIB     262   /* Do not append std lib paths */
-#define LOPT_ADVISORY     263   /* Show advisory information */
-#define LOPT_RAW_TVARS    264   /* Show tvars as is */
-#define LOPT_FQ_TYPES     265   /* Show fully qualified types */
-#define LOPT_SA_TCC       266   /* Show all Type class constraints */
-#define LOPT_SHOWPASSES   267   /* Show passes as they are run */
-#define LOPT_PPFQNS       268   /* Show FQNs when pretty printing */
-#define LOPT_DUMPTYPES    269   /* Show types after this pass */
-#define LOPT_STOPAFTER    270   /* Stop after this pass */
-#define LOPT_PPDECORATE   271   /* Decorate pretty printing with types */
-#define LOPT_SHOW_MAYBES  272   /* Show all maybe wrapper types, hints */
-#define LOPT_SHOW_TYPES   273   /* Dump types a particular uoc only */
-#define LOPT_EQ_INFER     274   /* Equational (Complete) Type Inference */
-#define LOPT_XML_TYPES    275   /* Dump XML types */
-#define LOPT_NOGC         276   /* NO GC mode */
-#define LOPT_NOPRELUDE    277   /* Don't process prelude */
-#define LOPT_DBG_TVARS    278   /* Show globally unqiue tvar naming */
-#define LOPT_HEURISTIC    279   /* Use Heuristic Inference */
-#define LOPT_HELP         280   /* Display usage information. */
-#define LOPT_EMIT         281   /* Specify the desired output
+#define LOPT_RAW_TVARS    263   /* Show tvars as is */
+#define LOPT_FQ_TYPES     264   /* Show fully quantified types */
+#define LOPT_SA_TCC       265   /* Show all Type class constraints */
+#define LOPT_SHOWPASSES   266   /* Show passes as they are run */
+#define LOPT_PPFQNS       267   /* Show FQNs when pretty printing */
+#define LOPT_DUMPTYPES    268   /* Show types after this pass */
+#define LOPT_STOPAFTER    269   /* Stop after this pass */
+#define LOPT_PPDECORATE   270   /* Decorate pretty printing with types */
+#define LOPT_SHOW_TYPES   271   /* Dump types a particular uoc only */
+#define LOPT_XML_TYPES    272   /* Dump XML types */
+#define LOPT_NOGC         273   /* NO GC mode */
+#define LOPT_NOPRELUDE    274   /* Don't process prelude */
+#define LOPT_HEURISTIC    275   /* Use Heuristic Inference */
+#define LOPT_HELP         276   /* Display usage information. */
+#define LOPT_EMIT         277   /* Specify the desired output language. */
+#define LOPT_SYSTEM       278   /* Specify the desired output
 				   language. */
-#define LOPT_SYSTEM       282   /* Specify the desired output
-				   language. */
-#define LOPT_NOALLOC      283   /* Statically reject heap-allocating
+#define LOPT_NOALLOC      279   /* Statically reject heap-allocating
 				   operations and constructs */
 
-// FIX: Every one of these needs a comment above it explaining what it
-// does. This should NOT be a doxygen comment.
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
-  { "debug-tvars",          0,  0, LOPT_DBG_TVARS },
+  // Decorate pretty printing with types */
   { "decorate",             0,  0, LOPT_PPDECORATE },
   // Dump the AST after the named pass
   { "dumpafter",            1,  0, LOPT_DUMPAFTER },
   // Dump symbol types after the named pass
   { "dumptypes",            1,  0, LOPT_DUMPTYPES },
+  // Specify the desired output language.
   { "emit",                 1,  0, LOPT_EMIT },
-  { "eqinfer",              0,  0, LOPT_EQ_INFER },
-  { "free-advice",          0,  0, LOPT_ADVISORY },
+  // Show fully quantified types in output
   { "full-qual-types",      0,  0, LOPT_FQ_TYPES },
   // Print command line help and exit
   { "help",                 0,  0, LOPT_HELP },
+  // Use heuristic inference instead of complete inference
   { "heuristic-inf",        0,  0, LOPT_HEURISTIC },
   // Disallow any construct that would cause heap allocation at runtime.
   { "no-alloc",             0,  0, LOPT_NOALLOC },
@@ -174,10 +168,12 @@ struct option longopts[] = {
   { "nostdinc",             0,  0, LOPT_NOSTDINC },
   // Do not add standard library locations to the library/module search path.
   { "nostdlib",             0,  0, LOPT_NOSTDLIB },
+  // Show FQNs when pretty printing
   { "ppfqns",               0,  0, LOPT_PPFQNS },
+  // Show tvars without pretty-printing: useful for Debugging
   { "raw-tvars",            0,  0, LOPT_RAW_TVARS },
+  // Show all Type class constraints, including subsumed ones
   { "show-all-tccs",        0,  0, LOPT_SA_TCC },
-  { "show-maybes",          0,  0, LOPT_SHOW_MAYBES },
   // Print tokens as they are accepted. Primarily useful for debugging
   // parse errors.
   { "showlex",              0,  0, LOPT_SHOWLEX },
@@ -469,12 +465,6 @@ main(int argc, char *argv[])
       Options::heuristicInference=true;
       break;
 
-    case LOPT_EQ_INFER:
-      //Options::inferenceAlgorithm = inf_eq;
-      // FIX: TEMPORARY
-      //UocInfo::passInfo[pn_typeCheck].stopAfter = true;
-      break;
-
     case LOPT_SHOWPASSNMS:
       {
 	std::cerr.width(15);
@@ -488,7 +478,11 @@ main(int argc, char *argv[])
 		    << UocInfo::passInfo[i].name
 		    << UocInfo::passInfo[i].descrip << std::endl;
 	}
-
+	
+	std::cerr << left 
+		  << "Polyinst"
+		  << "Template-like instantiation of polymorphic definitions" << std::endl;
+	
 	for (size_t i = (size_t)op_none+1; i < (size_t) op_npass; i++) {
 	  std::cerr.width(15);
 	  std::cerr << left 
@@ -496,7 +490,6 @@ main(int argc, char *argv[])
 		    << UocInfo::onePassInfo[i].descrip << std::endl;
 	}
 
-	// FIX: What about the onepass passes? 
 	exit(0);
       }
 
@@ -559,23 +552,12 @@ main(int argc, char *argv[])
 	break;
       }
 
-    case LOPT_ADVISORY:
-      {
-	Options::advisory = true;
-      }      
-
     case LOPT_RAW_TVARS:
       {
 	Options::rawTvars = true;
 	break;
       }
 
-    case LOPT_SHOW_MAYBES:
-      {
-	Options::showMaybes = true;
-	break;
-      }
-      
     case LOPT_FQ_TYPES:
       {
 	Options::FQtypes = true;
@@ -775,7 +757,6 @@ main(int argc, char *argv[])
   /************************************************************/
   // Process the Prelude:
 
-  // FIX: TEMPORARY
   if (!Options::noPrelude) {
     sherpa::LexLoc loc = LexLoc();
     (void) UocInfo::importInterface(std::cerr, loc, "bitc.prelude");

@@ -648,7 +648,13 @@ identTypeToString(IdentType id)
     return "Union-ctor";
   case idc_apply:
     return "Applicable-value";
+  case id_block:
+    return "block";
   }
+  
+  // Satisfy the compiler.
+  assert(false);
+  return "";
 }
 
 void

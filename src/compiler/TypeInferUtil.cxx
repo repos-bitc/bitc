@@ -166,22 +166,18 @@ initGamma(std::ostream& errStream,
   shared_ptr<TSEnvironment > preenv = GC_NULL;
   shared_ptr<InstEnvironment > preInsts = GC_NULL;
   
-  size_t i;
-
-  {
-    UocMap::iterator itr = UocInfo::ifList.find("bitc.prelude");
-    if (itr == UocInfo::ifList.end()) {
-      errStream << topAst->loc << ": "
-		<< "Internal Compiler Error. "
-		<< "Prelude has NOT been processed till " 
-		<< "type inference."
-		<< std::endl;
-      ::exit(1);
-    }
-
-    preenv = itr->second->gamma;
-    preInsts = itr->second->instEnv;
+  UocMap::iterator itr = UocInfo::ifList.find("bitc.prelude");
+  if (itr == UocInfo::ifList.end()) {
+    errStream << topAst->loc << ": "
+	      << "Internal Compiler Error. "
+	      << "Prelude has NOT been processed till " 
+	      << "type inference."
+	      << std::endl;
+    ::exit(1);
   }
+  
+  preenv = itr->second->gamma;
+  preInsts = itr->second->instEnv;
 
   if (!preenv || !preInsts) {
     errStream << topAst->loc << ": "

@@ -53,9 +53,7 @@ namespace Options {
   extern bool showPP;
   extern bool useStdInc;
   extern bool useStdLib;
-  extern bool advisory;
   extern bool rawTvars;
-  extern bool showMaybes;
   extern bool FQtypes;
   extern bool showAllTccs;
   extern bool showPasses;

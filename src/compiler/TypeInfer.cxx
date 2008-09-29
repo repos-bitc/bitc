@@ -353,6 +353,14 @@ makeLetGather(shared_ptr<AST> lbs, shared_ptr<AST> &bAst, shared_ptr<AST> &vAst)
   vAst->symType = vType;
 }
 
+
+/// @brief Abort on unrecoverable error
+void
+die()
+{
+  std::cerr << "Internal Compiler Error, Aborting." << std::endl;
+  throw 0;
+}
 	
 /**************************************************************/
 /*                Type consistency checkng                   */

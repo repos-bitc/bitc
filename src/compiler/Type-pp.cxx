@@ -374,11 +374,11 @@ TypeScheme::asString(shared_ptr<TvPrinter> tvP, bool norm)
       ss << "(forall";
       forall = true;
       for (TypeSet::iterator itr_i = ftvs.begin(); 
-	  itr_i != ftvs.end(); ++itr_i)
+	   itr_i != ftvs.end(); ++itr_i)
 	ss << " " << (*itr_i)->asString(tvP);      
       ss << " ";
     }
-
+  
   if (tcc) {
     if (Options::showAllTccs) {
       if (tcc->size()) {
