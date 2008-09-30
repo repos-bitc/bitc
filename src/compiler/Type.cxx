@@ -311,7 +311,7 @@ Type::isVariable()
 }
 
 bool
-Type::isUnifiableVar(size_t flags)
+Type::isUnifiableVar(UnifyFlags uflags)
 {
   shared_ptr<Type> t = getType();
   shared_ptr<Type> var = t;
@@ -336,7 +336,7 @@ Type::isUnifiableVar(size_t flags)
     return false;
   }
 
-  if (flags & UFLG_UN_IGN_RIGIDITY)
+  if (uflags & UFLG_UN_IGN_RIGIDITY)
     return true;
   
   return ((var->flags & TY_RIGID) == 0);
@@ -1067,12 +1067,12 @@ comp::comp(const std::string s, shared_ptr<Type> t, CompFlagSet _flags)
     Isize = 0;					\
     minSignedRep = 0;				\
     minUnsignedRep = 0;				\
-    mark = 0;					\
+    mark = MARK_NONE;				\
     pMark = 0;					\
     sp = GC_NULL;				\
     myContainer = GC_NULL;			\
     link = GC_NULL;				\
-    flags = 0;					\
+    flags = TY_NO_FLAGS;			\
   } while (0);
 
 
@@ -1118,7 +1118,7 @@ Type::Type(shared_ptr<Type>  t)
     components.push_back(comp::make(t->CompName(i), t->CompType(i), t->CompFlags(i)));
 
 
-  mark = 0;
+  mark = MARK_NONE;
   pMark = 0;  
   sp = GC_NULL;
   flags = t->flags;

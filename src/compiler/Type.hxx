@@ -163,32 +163,95 @@ struct ArrLen {
 struct tvPrinter;
 struct TypeScheme;
 
-// Definition for Type flags
-#define TY_CT_SUBSUMED  0x01u // Typeclass constraint is subsumed by 
-                              // another (ex: by a derived class)
-#define TY_CT_SELF      0x02u // Typeclass constraint is due to 
-                              // self definition.
-#define TY_RIGID        0x04u
-#define TY_CCC          0x10u // Candidate for Copy-Compatibility
-                              // This flag is for type variables that
-                              // are in type argument position for
-                              // structure or union types only. If
-                              // set, it means that this type variable
-                              // has not been captured within another
-                              // reference type constructor, and the
-                              // composite type is free to be 
-                              // copy-compatible at this position.
-#define TY_CLOS         0x20u // A temporary flag used in closure
-                              // computation of FTVs in a TypeScheme.
-#define TY_COERCE       0x40u // A flag used by adjMaybe to coerce
-			      // only certain maybe-types. This flag
-			      // must be marked on maybe-Var()s.
-			      // This flag is NOT cleared by the 
-			      // adjMaybe function. 
+/// @brief Flags used by Type-inference engine.
+///
+/// These flags are different from the Unifier's flags.
+enum TI_FlagValues {
+  TI_NO_FLAGS     = 0x00u,
+  TI_TYP_EXP      = 0x01u,
+  TI_TYP_APP      = 0x02u,
+  TI_TCC_SUB      = 0x04u 
+};
+typedef sherpa::EnumSet<TI_FlagValues> TI_Flags;
+
+#define TI_COMP1        ((ti_flags | TI_TYP_EXP) & (~TI_TYP_APP))
+#define TI_COMP2        (ti_flags & (~(TI_TYP_EXP | TI_TYP_APP)))
+#define TI_CONSTR       (TI_COMP1)
+
+/// @brief Mark values for types.
+///
+/// The following marks are present on types to ensure that
+/// procedures that recurse over the structure of equi-recursive
+/// types do not recurse infinitely. We need to use differernt markers
+/// for procedures that are mutually recursive, or are otherwise used
+/// simultaneously. Here, we actually use different markers for each
+/// procedure that is recursive over type-structure. 
+enum MarkFlagValues {
+  MARK_NONE                     = 0x0,
+  MARK_BOUND_IN_TYPE            = 0x0000001u,
+  MARK_COLLECT_FTVS_WRT_GAMMA   = 0x0000002u,
+  MARK_COLLECT_ALL_FTVS         = 0x0000004u,
+  MARK_IS_EXPANSIVE             = 0x0000008u,
+  MARK_MANGLED_STRING           = 0x0000010u,
+  MARK_IS_OF_INFINITE_TYPE      = 0x0000020u,
+  MARK_PROPAGATE_MUTABILITY     = 0x0000040u,
+  MARK_GET_BARE_TYPE            = 0x0000080u,
+  MARK_GET_THE_TYPE             = 0x0000100u,
+  MARK_EMIT_ARR_VEC_FN_TYPES    = 0x0000200u,
+  MARK_ADJ_MAYBE                = 0x0000400u,
+  MARK_MAXIMIZE_MUTABILITY      = 0x0000800u,
+  MARK_MINIMIZE_MUTABILITY      = 0x0001000u,
+  MARK_DETERMINE_CCC            = 0x0002000u,
+  MARK_CHECK_CONSTRAINTS        = 0x0004000u,
+  MARK_SIZE                     = 0x0008000u,
+  MARK_IS_DEEP_MUT              = 0x0010000u,
+  MARK_IS_DEEP_IMMUT            = 0x0020000u,
+  MARK_MINIMIZE_DEEP_MUTABILITY = 0x0040000u,
+  MARK_SIGN_MBS                 = 0x0080000u,
+  MARK_FIXUP_FN_TYPES           = 0x0100000u,
+  MARK_IS_CONCRETIZABLE         = 0x0200000u,
+  MARK_IS_SHALLOW_CONCRETIZABLE = 0x0400000u,
+  MARK_NORMALIZE_MBFULL         = 0x0800000u,
+//MARK_CHECK_COPY_MUT_PROP      = 0x1000000u,
+  MARK_CHECK_MUT_CONSISTENCY    = 0x1000000u
+};
+typedef sherpa::EnumSet<MarkFlagValues> MarkFlags;
+
+
+/// @brief Definition for Type flags
+enum TypeFlagValues {
+  TY_NO_FLAGS     = 0x0,
+
+  /// @brief Typeclass constraint is subsumed by another (ex: by a
+  /// derived class).
+  TY_CT_SUBSUMED  = 0x01u,
+  /// @brief Typeclass constraint is due to self definition.
+  TY_CT_SELF      = 0x02u,
+  TY_RIGID        = 0x04u,
+  /// @brief Candidate for Copy-Compatibility.
+  ///
+  /// This flag is for type variables that are in type argument
+  /// position for structure or union types only. If set, it means
+  /// that this type variable has not been captured within another
+  /// reference type constructor, and the composite type is free to be
+  /// copy-compatible at this position.
+  TY_CCC          = 0x10u,
+  /// @brief A temporary flag used in closure computation of FTVs in a
+  /// TypeScheme.
+  TY_CLOS         = 0x20u,
+  /// @brief Flag used by adjMaybe to coerce only certain maybe-types.
+  ///
+  /// This flag must be marked on maybe-Var()s.  This flag is NOT
+  /// cleared by the adjMaybe function.
+  TY_COERCE       = 0x40u
+};
+
+typedef sherpa::EnumSet<TypeFlagValues> TypeFlags;
 
 // Specialization mask -- those flags which should NOT survive
 // specialization. 
-#define TY_SP_MASK    (TY_CT_SELF | TY_RIGID | TY_CCC | TY_CLOS | TY_COERCE) 
+const TypeFlags TY_SP_MASK  =
+  (TypeFlags(TY_CT_SELF) | TY_RIGID | TY_CCC | TY_CLOS | TY_COERCE);
 
 struct Type;
 typedef std::set<boost::shared_ptr<Type > > TypeSet;
@@ -286,10 +349,10 @@ public:
   // Mark Flags:  used for Traversal
   // Used to prevent infinite recursion
   // while printing infinitely recursivetypes.
-  unsigned mark;                // General traversal
+  MarkFlags mark;                // General traversal
   unsigned pMark;               // Type printer
   boost::shared_ptr<Type> sp;			// Type specializer.
-  unsigned flags;               
+  TypeFlags flags;               
 
   // Main (Base) Constructor
   Type(const Kind k);
@@ -407,7 +470,7 @@ public:
   // wherein the variable (possible within Var() component) is 
   // not marked RIGID, unless, fllags indicate that rigidity 
   // must be ignored.  
-  bool isUnifiableVar(size_t flags=0);
+  bool isUnifiableVar(UnifyFlags uflags=UFLG_NO_FLAGS);
   
   // Mark significant MB-tvars.
   // Mb-Tvars that need not be preserved semantically are:
@@ -681,55 +744,6 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
   strm << t.asString();
   return strm;
 }
-
-/** The following marks are present on types to ensure that
- *  procedures that recurse over the structure of equi-recursive
- *  types do not recurse infinitely. We need to use differernt markers
- *  for procedures that are mutually recursive, or are otherwise used
- *  simultaneously. Here, we actually use different markers for each
- *  procedure that is recursive over type-structure. 
- */
-#define MARK_BOUND_IN_TYPE            0x0000001u
-#define MARK_COLLECT_FTVS_WRT_GAMMA   0x0000002u
-#define MARK_COLLECT_ALL_FTVS         0x0000004u
-#define MARK_IS_EXPANSIVE             0x0000008u
-#define MARK_MANGLED_STRING           0x0000010u
-#define MARK_IS_OF_INFINITE_TYPE      0x0000020u
-#define MARK_PROPAGATE_MUTABILITY     0x0000040u
-#define MARK_GET_BARE_TYPE            0x0000080u
-#define MARK_GET_THE_TYPE             0x0000100u
-#define MARK_EMIT_ARR_VEC_FN_TYPES    0x0000200u
-#define MARK_ADJ_MAYBE                0x0000400u
-#define MARK_MAXIMIZE_MUTABILITY      0x0000800u
-#define MARK_MINIMIZE_MUTABILITY      0x0001000u
-#define MARK_DETERMINE_CCC            0x0002000u
-#define MARK_CHECK_CONSTRAINTS        0x0004000u
-#define MARK_SIZE                     0x0008000u
-#define MARK_IS_DEEP_MUT              0x0010000u
-#define MARK_IS_DEEP_IMMUT            0x0020000u
-#define MARK_MINIMIZE_DEEP_MUTABILITY 0x0040000u
-#define MARK_SIGN_MBS                 0x0080000u
-#define MARK_FIXUP_FN_TYPES           0x0100000u
-#define MARK_IS_CONCRETIZABLE         0x0200000u
-#define MARK_IS_SHALLOW_CONCRETIZABLE 0x0400000u
-#define MARK_NORMALIZE_MBFULL         0x0800000u
-//#define MARK_CHECK_COPY_MUT_PROP      0x1000000u
-#define MARK_CHECK_MUT_CONSISTENCY    0x1000000u
-
-/* Flags used by Type-inference engine. 
-   These flags are different from the Unifier's flags */
-enum TI_FlagValues {
-  TI_NO_FLAGS     = 0x00u,
-  TI_TYP_EXP      = 0x01u,
-  TI_TYP_APP      = 0x02u,
-  TI_TCC_SUB      = 0x04u 
-};
-typedef sherpa::EnumSet<TI_FlagValues> TI_Flags;
-
- 
-#define TI_COMP1        ((ti_flags | TI_TYP_EXP) & (~TI_TYP_APP))
-#define TI_COMP2        (ti_flags & (~(TI_TYP_EXP | TI_TYP_APP)))
-#define TI_CONSTR       (TI_COMP1)
 
 #endif /* TYPE_HXX */
 
