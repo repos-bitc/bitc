@@ -608,17 +608,16 @@ ptype_name: '(' defident tvlist ')' {
   $$ = AST::make(at_Null, $2->loc, $2, $3, constraints);
 };
 
-ptype_name: '(' tk_FORALL constraints defident ')' {
-  SHOWPARSE("ptype_name -> '(' FORALL constraints '(' defident tvlist ')' ')' ");
-  shared_ptr<AST> tvlist = AST::make(at_tvlist, $4->loc);
-  $$ = AST::make(at_Null, $2.loc, $4, tvlist, $3);
-};
-
-ptype_name: '(' tk_FORALL constraints '(' defident tvlist ')' ')' {
-  SHOWPARSE("ptype_name -> '(' FORALL constraints '(' defident tvlist ')' ')' ");
-  $$ = AST::make(at_Null, $2.loc, $5, $6, $3);
-};
-
+//ptype_name: '(' tk_FORALL constraints defident ')' {
+//  SHOWPARSE("ptype_name -> '(' FORALL constraints '(' defident tvlist ')' ')' ");
+//  shared_ptr<AST> tvlist = AST::make(at_tvlist, $4->loc);
+//  $$ = AST::make(at_Null, $2.loc, $4, tvlist, $3);
+//};
+//
+//ptype_name: '(' tk_FORALL constraints '(' defident tvlist ')' ')' {
+//  SHOWPARSE("ptype_name -> '(' FORALL constraints '(' defident tvlist ')' ')' ");
+//  $$ = AST::make(at_Null, $2.loc, $5, $6, $3);
+//};
 
 // STRUCTURE TYPES [3.6.1]           
 type_definition: '(' tk_DEFSTRUCT ptype_name val optdocstring declares fields ')'  {

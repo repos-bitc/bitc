@@ -45,15 +45,18 @@
  @: (fn ('a 'b) bool)
  )
 
-(defstruct (forall ((TC2 'a 'b)) (S2 'a 'b)) f1:'a f2:'b)
-(defunion (forall ((TC2 'a 'b)) (U2 'a 'b))
-  u1
-  (u2 a:'a b:'b)
-  (u3 r:(U2 'a 'b)))
+(forall ((TC2 'a 'b))
+  (defstruct (S2 'a 'b) f1:'a f2:'b))
+(forall ((TC2 'a 'b)) 
+  (defunion (U2 'a 'b)
+    u1
+    (u2 a:'a b:'b)
+    (u3 r:(U2 'a 'b))))
 
-(deftypeclass (forall ((TC2 'a 'b)) (TC3 'a 'b 'c))
-  $: (fn ('a 'b) 'c)
-  )
+(forall ((TC2 'a 'b)) 
+  (deftypeclass (TC3 'a 'b 'c)
+    $: (fn ('a 'b) 'c)
+    ))
 
 (definstance (TC2 'a 'a) (lambda (x y) #t))
 

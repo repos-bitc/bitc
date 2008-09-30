@@ -2082,11 +2082,11 @@ nm : <em>function-type</em></literallayout>
             syntax for such a type class definition is:
           </p>
           <literallayout>
-(deftypeclass 
-  (forall (<em>constraint ... constraint</em>)
+(forall (<em>constraint ... constraint</em>)
+  (deftypeclass 
      (<em>nm</em> <em>tv</em> ... <em>tv</em>))
-  [<em>tyfn-declarations</em>]
-  <em>method-definitions</em>)</literallayout>
+     [<em>tyfn-declarations</em>]
+     <em>method-definitions</em>)</literallayout>
           <p indent="no">
             where each constraint takes the form:
           </p>
@@ -2098,9 +2098,9 @@ nm : <em>function-type</em></literallayout>
             type class:
           </p>
           <literallayout>
-(deftypeclass 
-  (forall ((Eql 'a)) (Ord 'a))
-  &lt; : (fn ('a 'a) 'a))</literallayout>
+(forall ((Eql 'a))
+  (deftypeclass (Ord 'a)
+    &lt; : (fn ('a 'a) 'a)))</literallayout>
           <p indent="no">
             This type class states that <progident>Ord</progident> is
             the single element type relation over all types
@@ -2223,10 +2223,9 @@ nm : <em>function-type</em></literallayout>
         <literallayout>
 (definstance <em>tc-instance</em>
   <em>function ... function</em>)
-(definstance
-  (forall (<em>constraint ... constraint</em>)
-          <em>tc-instance</em>)
-  <em>function ... function</em>)</literallayout>
+(forall (<em>constraint ... constraint</em>)
+  (definstance <em>tc-instance</em>)
+    <em>function ... function</em>)</literallayout>
         <p indent="no">
           where <em>tc-instance</em> takes the form:
         </p>
@@ -2335,14 +2334,12 @@ nm : <em>function-type</em></literallayout>
           declarations, with the abstract syntax:
         </p>
 <literallayout>
-(defstruct
-  (forall (<em>constraints</em>)
-          (<em>struct-name</em> <em>tvars</em>) [<b>:val</b>])
-   <em>nm<sub>1</sub></em>[<b>:</b><em>t<sub>1</sub></em>] ... <em>nm<sub>n</sub></em>[<b>:</b><em>t<sub>n</sub></em>])
-(defunion
-  (forall (<em>constraints</em>)
-          (<em>struct-name</em> <em>tvars</em>) [<b>:val</b>])
-   <em>C<sub>1</sub> ... C<sub>n</sub></em>)
+(forall (<em>constraints</em>)
+  (defstruct (<em>struct-name</em> <em>tvars</em>) [<b>:val</b>])
+    <em>nm<sub>1</sub></em>[<b>:</b><em>t<sub>1</sub></em>] ... <em>nm<sub>n</sub></em>[<b>:</b><em>t<sub>n</sub></em>])
+(forall (<em>constraints</em>)
+  (defunion (<em>union-name</em> <em>tvars</em>) [<b>:val</b>])
+    <em>C<sub>1</sub> ... C<sub>n</sub></em>)
 </literallayout>
         <p>
           Qualifications may similarly appear in the binding patterns
@@ -4767,8 +4764,8 @@ For example:
   none (some value:'a))
 
 ; Nullable pointers:
-(defunion
-  (forall (ref-types 'a)
+(forall ((ref-types 'a))
+  (defunion
     (nullable 'a):val 
      Null (non-null ptr:(ref 'a))))
 
@@ -4805,40 +4802,36 @@ For example:
   != : (fn ('a 'a) bool))
 
 ; Magnitude comparison
-(deftypeclass 
-  (forall ((EqualityComparison 'a))
-          (Ord 'a))
+(forall ((EqualityComparison 'a))
+  (deftypeclass (Ord 'a)
   &lt;  : (fn ('a 'a) bool)
-  &lt;= : (fn ('a 'a) bool))
+  &lt;= : (fn ('a 'a) bool)))
 
 ; Checked arithmetic
-(deftypeclass 
-  (forall ((Ord 'a))
-          (Arith 'a))
-  +: (fn ('a 'a) 'a)
-  -: (fn ('a 'a) 'a)
-  *: (fn ('a 'a) 'a)
-  /: (fn ('a 'a) 'a)
-  &lt;&lt;:(fn ('a word) 'a)
-  &gt;&gt;:(fn ('a word) 'a))
+(forall ((Ord 'a))
+  (deftypeclass (Arith 'a)
+    +: (fn ('a 'a) 'a)
+    -: (fn ('a 'a) 'a)
+    *: (fn ('a 'a) 'a)
+    /: (fn ('a 'a) 'a)
+    &lt;&lt;:(fn ('a word) 'a)
+    &gt;&gt;:(fn ('a word) 'a)))
 
 ; Ring arithmetic
-(deftypeclass
-  (forall ((Ord 'a))
-          (Ring 'a))
-  R+: (fn ('a 'a) 'a)
-  R-: (fn ('a 'a) 'a)
-  R*: (fn ('a 'a) 'a)
-  R/: (fn ('a 'a) 'a)
-  R&lt;&lt;:(fn ('a word) 'a)
-  R&gt;&gt;:(fn ('a word) 'a))
+(forall ((Ord 'a))
+  (deftypeclass (Ring 'a)
+    R+: (fn ('a 'a) 'a)
+    R-: (fn ('a 'a) 'a)
+    R*: (fn ('a 'a) 'a)
+    R/: (fn ('a 'a) 'a)
+    R&lt;&lt;:(fn ('a word) 'a)
+    R&gt;&gt;:(fn ('a word) 'a)))
 
 ; Sign transformations
-(deftypeclass
-  (forall ((Ord 'a))
-          (Signed 'a))
-  negate: (fn ('a) 'a)
-  abs:    (fn ('a) 'a))</literallayout>
+(forall ((Ord 'a))
+  (deftypeclass (Signed 'a)
+    negate: (fn ('a) 'a)
+    abs:    (fn ('a) 'a))</literallayout>
     </sect1>
   </subpart>
   <subpart>

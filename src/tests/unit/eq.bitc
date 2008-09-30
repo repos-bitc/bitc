@@ -43,9 +43,10 @@
   ===: (fn ('a 'a) bool)
   )
 
-(deftypeclass (forall ((EQL 'a)) (ORD 'a))  
-  <<==: (fn ('a 'a) bool)
-  )
+(forall ((EQL 'a)) 
+  (deftypeclass (ORD 'a)
+    <<==: (fn ('a 'a) bool)
+  ))
 
 ;(definstance (EQL 'a) ==)
 (definstance (EQL bool) ==)

@@ -62,9 +62,10 @@
     none
     (some value:'a))
   
-  (defunion (forall ((ref-types 'a)) (nullable 'a)):val
-    Null
-    (non-null ptr:'a))
+  (forall ((ref-types 'a))
+    (defunion  (nullable 'a):val
+      Null
+      (non-null ptr:'a)))
   
   (defunion (list 'a):ref
     nil
@@ -171,38 +172,42 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPES ADMITTING ORDERING
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (deftypeclass (forall ((Eq 'a)) (Ord 'a))
-    <  : (fn ('a 'a) bool)
-    >  : (fn ('a 'a) bool)
-    <= : (fn ('a 'a) bool)
-    >= : (fn ('a 'a) bool))
+  (forall ((Eq 'a))
+    (deftypeclass (Ord 'a)
+      <  : (fn ('a 'a) bool)
+      >  : (fn ('a 'a) bool)
+      <= : (fn ('a 'a) bool)
+      >= : (fn ('a 'a) bool)))
   
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPES ADMITTING (FOUR-FUNCTION) ARITHMETIC
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (deftypeclass (forall ((Ord 'a)) (Arith 'a))
-    + : (fn ('a 'a) 'a)
-    - : (fn ('a 'a) 'a)
-    * : (fn ('a 'a) 'a)
-    / : (fn ('a 'a) 'a))
+  (forall ((Ord 'a))
+    (deftypeclass (Arith 'a)
+      + : (fn ('a 'a) 'a)
+      - : (fn ('a 'a) 'a)
+      * : (fn ('a 'a) 'a)
+      / : (fn ('a 'a) 'a)))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPES ADMITTING INTEGER MODULUS ARITHMETIC
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (deftypeclass (forall ((Arith 'a) (IntLit 'a)) (IntArith 'a)) 
-    % : (fn ('a 'a) 'a))
+  (forall ((Arith 'a) (IntLit 'a)) 
+    (deftypeclass (IntArith 'a)
+      % : (fn ('a 'a) 'a)))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPES ADMITTING BITWISE ARITHMETIC
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (deftypeclass (forall ((IntLit 'a)) (Bitwise 'a)) 
-    bit-and  : (fn ('a 'a) 'a)   ;; Bitwise AND
-    bit-or   : (fn ('a 'a) 'a)   ;; Bitwise OR
-    bit-not  : (fn ('a) 'a)      ;; One's Complement
-    bit-xor  : (fn ('a 'a) 'a)   ;; Bitwise XOR
-    <<  : (fn ('a word) 'a)      ;; Left Shift
-    >>  : (fn ('a word) 'a)      ;; Right Shift
-    )
+  (forall ((IntLit 'a)) 
+    (deftypeclass (Bitwise 'a)
+      bit-and  : (fn ('a 'a) 'a)   ;; Bitwise AND
+      bit-or   : (fn ('a 'a) 'a)   ;; Bitwise OR
+      bit-not  : (fn ('a) 'a)      ;; One's Complement
+      bit-xor  : (fn ('a 'a) 'a)   ;; Bitwise XOR
+      <<  : (fn ('a word) 'a)      ;; Left Shift
+      >>  : (fn ('a word) 'a)      ;; Right Shift
+      ))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Instance Definitions
