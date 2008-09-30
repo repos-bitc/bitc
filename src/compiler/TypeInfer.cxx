@@ -88,7 +88,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  UnifyFlags uflags,
 	  shared_ptr<Trail> trail,
 	  int mode,
-	  unsigned flags);
+	  TI_Flags ti_flags);
 
 bool isExpansive(std::ostream& errStream, 
 		 shared_ptr<const TSEnvironment > gamma,
@@ -137,7 +137,7 @@ static shared_ptr<TypeScheme>
 bindIdentDef(shared_ptr<AST> ast, 
 	     shared_ptr<TSEnvironment > gamma,
 	     unsigned long bindFlags,
-	     unsigned long flags)
+	     TI_Flags ti_flags)
 {
   if (!ast->symType) {
     if (ast->isIdentType(id_tvar))
@@ -150,7 +150,7 @@ bindIdentDef(shared_ptr<AST> ast,
   ast->scheme = sigma;
   
   if (ast->isIdentType(id_tvar)) {
-    assert(flags & TI_TYP_EXP);
+    assert(ti_flags & TI_TYP_EXP);
     bindFlags |= BF_NO_MERGE;
     ast->tvarLB->envs.gamma->addBinding(ast->s, sigma);
   }
@@ -257,7 +257,7 @@ ProcessLetExprs(std::ostream& errStream, shared_ptr<AST> lbs,
 		TypeAstMap& impTypes,
 		bool isVP, shared_ptr<TCConstraints> tcc,
 		UnifyFlags uflags, shared_ptr<Trail> trail,
-		int mode, unsigned flags)
+		int mode, TI_Flags ti_flags)
 {
   bool errFree = true;
   for (size_t c = 0; c < lbs->children.size(); c++) {
@@ -276,7 +276,7 @@ ProcessLetBinds(std::ostream& errStream, shared_ptr<AST> lbs,
 		TypeAstMap& impTypes,
 		bool isVP, shared_ptr<TCConstraints> tcc,
 		UnifyFlags uflags, shared_ptr<Trail> trail,
-		int mode, unsigned flags)
+		int mode, TI_Flags ti_flags)
 {
   bool errFree = true;
   for (size_t c = 0; c < lbs->children.size(); c++) {
@@ -755,7 +755,7 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
 	    bool isReference,
 	    bool mustDefine,
 	    bool mustEvalBody,
-	    unsigned flags)
+	    TI_Flags ti_flags)
 {
   bool errFree = true;
   size_t c;
@@ -796,7 +796,7 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
 
   // match at_declares
   TYPEINFER(ast->child(3), gamma, instEnv, impTypes, isVP, sigma->tcc,
-	    uflags, trail,  mode, TI_NONE);
+	    uflags, trail,  mode, TI_NO_FLAGS);
     
   // match at_fields
   shared_ptr<AST> fields = ast->child(4);
@@ -869,7 +869,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	   bool isReference,
 	   bool mustDefine,
 	   bool mustEvalBody,
-	   unsigned flags)
+	   TI_Flags ti_flags)
 {
 
   bool errFree = true;
@@ -913,7 +913,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
   // match at_declares
   shared_ptr<AST> declares = ast->child(3);
   TYPEINFER(declares, gamma, instEnv, impTypes, isVP, sigma->tcc,
-	    uflags, trail,  mode, TI_NONE);
+	    uflags, trail,  mode, TI_NO_FLAGS);
   
   
   // match at_constructors
@@ -1253,7 +1253,7 @@ InferTypeClass(std::ostream& errStream, shared_ptr<AST> ast,
 	       UnifyFlags uflags,
 	       shared_ptr<Trail> trail,
 	       int mode,
-	       unsigned flags)
+	       TI_Flags ti_flags)
 {
   bool errFree = true;
   shared_ptr<AST> ident = ast->child(0);
@@ -1385,7 +1385,7 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
 	      UnifyFlags uflags,
 	      shared_ptr<Trail> trail,
 	      int mode,
-	      unsigned flags)
+	      TI_Flags ti_flags)
 {
   bool errFree = true;
   
@@ -1558,7 +1558,7 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> mtType = tc->CompType(i);
       shared_ptr<AST> method = methods->child(i);
       TYPEINFER(method, defGamma, instEnv, impTypes, isVP, myTcc,
-		uflags, trail, USE_MODE, TI_NONE);
+		uflags, trail, USE_MODE, TI_NO_FLAGS);
       shared_ptr<Type> methodType = method->symType->getType();
 
       // Methods are functions, remove top mutability.
@@ -1683,7 +1683,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  UnifyFlags uflags,
 	  shared_ptr<Trail> trail,
 	  int mode,
-	  unsigned flags)
+	  TI_Flags ti_flags)
 {
   bool errFree = true;
 
@@ -1832,7 +1832,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ast->symType = Type::make(ty_string);
 
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
-		uflags, trail,  mode, TI_NONE);
+		uflags, trail,  mode, TI_NO_FLAGS);
       break;
     }
 
@@ -1875,18 +1875,18 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	    // a definition for which we have already seen a 
 	    // declaration.
 	    bindFlags = BF_REBIND;
-	    sigma = bindIdentDef(ast, gamma, bindFlags, flags);
+	    sigma = bindIdentDef(ast, gamma, bindFlags, ti_flags);
 	    ast->symType->defAst = sigma->tau->getType()->defAst = ast;
 	  }
 	  else {
-	    sigma = bindIdentDef(ast, gamma, bindFlags, flags);	  
+	    sigma = bindIdentDef(ast, gamma, bindFlags, ti_flags);
 	  }
 	  break;
 	}
 	
       case REDEF_MODE:
 	{
-	  bindIdentDef(ast, gamma, BF_REBIND, flags);
+	  bindIdentDef(ast, gamma, BF_REBIND, ti_flags);
 	  break;
 	}
 
@@ -1908,7 +1908,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	    // to add this type to Gamma now.
 
 	    if (ast->isIdentType(id_tvar)) {
-	      sigma = bindIdentDef(ast, gamma, 0, flags);	      
+	      sigma = bindIdentDef(ast, gamma, 0, ti_flags);	      
 	    }
 	    else {  
 	      errStream << ast->loc << ": "
@@ -1936,8 +1936,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	      
 	  ins = ins->getBareType();
 
-	  if ((flags & TI_TYP_EXP) && 
-	     ((flags & TI_TYP_APP) == 0) && 
+	  if ((ti_flags & TI_TYP_EXP) && 
+	     ((ti_flags & TI_TYP_APP) == 0) && 
 	     (ins->typeArgs.size() > 0)) {
 	    errStream << ast->loc << ": "
 		      << ast->s << " cannot be instantiated without " 
@@ -1952,7 +1952,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	    for (TypeSet::iterator itr = tsIns->tcc->begin();
 		itr != tsIns->tcc->end(); ++itr) {
 	      shared_ptr<Typeclass> pred = (*itr)->getType();	      
-	      if (flags & TI_TCC_SUB)
+	      if (ti_flags & TI_TCC_SUB)
 		pred->flags |= TY_CT_SUBSUMED;
 	      tcc->addPred(pred);
 	    }
@@ -1967,7 +1967,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     {
       for (size_t c = 0; c < ast->children.size(); c++) {
 	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
-		  uflags, trail,  mode, TI_NONE);
+		  uflags, trail,  mode, TI_NO_FLAGS);
 	// errStream << " - - - - - - - - - - - - - - - - - - - - - - - - - "
 	// 	     << std::endl;
       }
@@ -1984,7 +1984,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       for (size_t c = 1; c < ast->children.size(); c++)
 	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
-		  uflags, trail,  mode, TI_NONE);
+		  uflags, trail,  mode, TI_NO_FLAGS);
       break;
     }
 
@@ -2006,7 +2006,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       CHKERR(errFree, InferUnion(errStream, ast, defGamma, instEnv,
 				 impTypes, isVP, tcc,
 				 uflags, trail,  mode, isRefType, 
-				 true, true, TI_NONE));
+				 true, true, TI_NO_FLAGS));
       
       gamma->mergeBindingsFrom(defGamma);      
       break;
@@ -2023,7 +2023,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       CHKERR(errFree, InferStruct(errStream, ast, defGamma, instEnv,
 				  impTypes, isVP, tcc,
 				  uflags, trail,  mode, isRefType, 
-				  true, true, TI_NONE));
+				  true, true, TI_NO_FLAGS));
 
       gamma->mergeBindingsFrom(defGamma);      
       break;
@@ -2192,7 +2192,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       CHKERR(errFree, InferTypeClass(errStream, ast, defGamma, instEnv,
 				     impTypes, isVP, tcc, uflags, 
-				     trail, DEF_MODE, TI_NONE));
+				     trail, DEF_MODE, TI_NO_FLAGS));
       
       gamma->mergeBindingsFrom(defGamma);
       break;
@@ -2212,7 +2212,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<AST> tcIdent = ast->child(0);
       TYPEINFER(tcIdent, gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail, USE_MODE, 
-		flags | TI_TYP_EXP | TI_TYP_APP);
+		ti_flags | TI_TYP_EXP | TI_TYP_APP);
       shared_ptr<Typeclass> tc = tcIdent->symType->getType();      
 
       if (tc->kind != ty_typeclass) {
@@ -2269,7 +2269,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     {
       CHKERR(errFree, InferInstance(errStream, ast, gamma, instEnv,
 				    impTypes, isVP, tcc, uflags, trail, 
-				    DEF_MODE, TI_NONE));				    
+				    DEF_MODE, TI_NO_FLAGS));				    
       break;
     }
 
@@ -2361,17 +2361,17 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	// match agt_bindingPattern
 	// match agt_expr
 	TYPEINFER(ast->child(0), defGamma, instEnv, impTypes, isVP, 
-		  currTcc, uflags, trail, DEF_MODE, TI_NONE);
+		  currTcc, uflags, trail, DEF_MODE, TI_NO_FLAGS);
       }
 
       TYPEINFER(ast->child(1), defGamma, instEnv, impTypes, isVP, 
-		currTcc, uflags, trail, USE_MODE, TI_NONE);
+		currTcc, uflags, trail, USE_MODE, TI_NO_FLAGS);
       
       if (ast->astType == at_define) {
 	// match agt_bindingPattern
 	// match agt_expr
 	TYPEINFER(ast->child(0), defGamma, instEnv, impTypes, isVP, 
-		  currTcc, uflags, trail, DEF_MODE, TI_NONE);
+		  currTcc, uflags, trail, DEF_MODE, TI_NO_FLAGS);
       }
 
       TYPEINFER(ast->child(2), defGamma, instEnv, impTypes, isVP, 
@@ -2504,7 +2504,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       // match at_declare*
       for (size_t c = 0; c < ast->children.size(); c++) {
  	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
-		  uflags, trail,  mode, TI_NONE);
+		  uflags, trail,  mode, TI_NO_FLAGS);
 	
 	if (ast->child(c)->tagType) {
 	  if (!ast->tagType) {
@@ -2534,7 +2534,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       // match agt_type?
       if (ast->children.size() > 1) {
 	TYPEINFER(typ, gamma, instEnv, impTypes, isVP, tcc,
-		  uflags, trail,  USE_MODE, TI_NONE);
+		  uflags, trail,  USE_MODE, TI_NO_FLAGS);
 
       if (!typ->symType)
 	typ->symType = Type::make(ty_tvar);
@@ -2906,7 +2906,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ast->symType = Type::make(ty_tvar);
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, 		
-		(flags | TI_TYP_EXP | TI_TYP_APP));
+		ti_flags | TI_TYP_EXP | TI_TYP_APP);
     
       // Constructor cannot return a mutable type by default
       shared_ptr<Type> t = ast->child(0)->getType(); 
@@ -3247,7 +3247,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_block:
     {
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
-		uflags, trail,  DEF_MODE, TI_NONE);
+		uflags, trail,  DEF_MODE, TI_NO_FLAGS);
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
 
@@ -4866,7 +4866,7 @@ UocInfo::DoTypeCheck(std::ostream& errStream, bool init,
   CHKERR(errFree, typeInfer(errStream, uocAst, gamma, instEnv, 
 			    impTypes, false, 
 			    TCConstraints::make(), uflags, trail, 
-			    USE_MODE, TI_NONE));
+			    USE_MODE, TI_NO_FLAGS));
   CHKERR(errFree, checkImpreciseTypes(errStream, gamma, impTypes));
 
   TI_TOP_DEBUG {

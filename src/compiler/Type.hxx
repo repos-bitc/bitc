@@ -718,13 +718,17 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
 
 /* Flags used by Type-inference engine. 
    These flags are different from the Unifier's flags */
-#define TI_NONE         0x00u
-#define TI_TYP_EXP      0x01u
-#define TI_TYP_APP      0x02u
-#define TI_TCC_SUB      0x04u   
+enum TI_FlagValues {
+  TI_NO_FLAGS     = 0x00u,
+  TI_TYP_EXP      = 0x01u,
+  TI_TYP_APP      = 0x02u,
+  TI_TCC_SUB      = 0x04u 
+};
+typedef sherpa::EnumSet<TI_FlagValues> TI_Flags;
+
  
-#define TI_COMP1        ((flags | TI_TYP_EXP) & (~TI_TYP_APP))
-#define TI_COMP2        (flags & (~(TI_TYP_EXP | TI_TYP_APP)))
+#define TI_COMP1        ((ti_flags | TI_TYP_EXP) & (~TI_TYP_APP))
+#define TI_COMP2        (ti_flags & (~(TI_TYP_EXP | TI_TYP_APP)))
 #define TI_CONSTR       (TI_COMP1)
 
 #endif /* TYPE_HXX */
