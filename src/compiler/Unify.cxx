@@ -95,7 +95,7 @@ Unify(std::ostream& errStream,
       shared_ptr<Trail> trail, 
       const LexLoc &errLoc,
       shared_ptr<Type> ft, shared_ptr<Type> st, 
-      UnifyFlags flags);
+      UnifyFlags uflags);
 
 // Handle unification of struct/union decl+decl or decl+def
 static bool 
@@ -103,7 +103,7 @@ UnifyDecl(std::ostream& errStream,
 	  shared_ptr<Trail> trail,
 	  const LexLoc &errLoc,
 	  shared_ptr<Type> t1, shared_ptr<Type> t2,
-	  UnifyFlags flags) 
+	  UnifyFlags uflags) 
 {
   bool errFree = true;
 
@@ -122,7 +122,7 @@ UnifyDecl(std::ostream& errStream,
     
   for (size_t i=0; i<t1->typeArgs.size(); i++)
     CHKERR(errFree, Unify(errStream, trail, errLoc, t1->TypeArg(i), 
-			  t2->TypeArg(i), flags)); 
+			  t2->TypeArg(i), uflags)); 
     
   return errFree;
 }
@@ -133,7 +133,7 @@ UnifyStructUnion(std::ostream& errStream,
 		 shared_ptr<Trail> trail,
 		 const LexLoc &errLoc,
 		 shared_ptr<Type> t1, shared_ptr<Type> t2,
-		 UnifyFlags flags) 
+		 UnifyFlags uflags) 
 {
   bool errFree = true;
 
@@ -152,7 +152,7 @@ UnifyStructUnion(std::ostream& errStream,
       return typeError(errStream, errLoc, t1, t2);
 
     if (t1->components.size() == 0 || t2->components.size() == 0) 
-      return UnifyDecl(errStream, trail, errLoc, t1, t2, flags);
+      return UnifyDecl(errStream, trail, errLoc, t1, t2, uflags);
   }
   
   size_t n = trail->snapshot();
@@ -161,7 +161,7 @@ UnifyStructUnion(std::ostream& errStream,
   assert(t1->typeArgs.size() == t2->typeArgs.size());  
   for (size_t i=0; i<t1->typeArgs.size(); i++) 
     CHKERR(errFree, Unify(errStream, trail, errLoc, t1->TypeArg(i), 
-			  t2->TypeArg(i), flags));
+			  t2->TypeArg(i), uflags));
   
   if (!errFree)
     trail->rollBack(n);
@@ -195,7 +195,7 @@ UnifyFnArgs(std::ostream& errStream, shared_ptr<Trail> trail,
 	    const LexLoc &errLoc,
  	    shared_ptr<Type> errt1, shared_ptr<Type> errt2,
 	    shared_ptr<Type> t1, shared_ptr<Type> t2,
-	    UnifyFlags flags)
+	    UnifyFlags uflags)
 {
   bool errFree = true;
   t1 = t1->getType();
@@ -203,9 +203,8 @@ UnifyFnArgs(std::ostream& errStream, shared_ptr<Trail> trail,
   assert(t1->kind == ty_fnarg);
   assert(t2->kind == ty_fnarg);
   
-  if (t1->components.size() != t2->components.size()) {
+  if (t1->components.size() != t2->components.size())
     return typeError(errStream, errLoc, errt1, errt2);
-  }
   
   for (size_t i=0; i< t1->components.size(); i++) {
     
@@ -226,7 +225,7 @@ UnifyFnArgs(std::ostream& errStream, shared_ptr<Trail> trail,
     
     CHKERR(errFree, Unify(errStream, trail, errLoc,
 			  t1->CompType(i), 
-			  t2->CompType(i), flags));
+			  t2->CompType(i), uflags));
   }
 
   return errFree;
@@ -258,7 +257,7 @@ Unify(std::ostream& errStream,
       shared_ptr<Trail> trail, 
       const LexLoc &errLoc,
       shared_ptr<Type> ft, shared_ptr<Type> st, 
-      UnifyFlags flags) 
+      UnifyFlags uflags) 
 {
   shared_ptr<Type> t1 = ft->getType();
   shared_ptr<Type> t2 = st->getType();
@@ -280,11 +279,11 @@ Unify(std::ostream& errStream,
     if (t1->isUType(false) && t2->isUType(false) && 
 	t1->isRefType() == t2->isRefType()) {
       CHKERR(errFree, UnifyStructUnion(errStream, trail, errLoc, 
-				       t1, t2, flags));
+				       t1, t2, uflags));
       break;
     }
     
-    if (flags & UFLG_UNIFY_STRICT) {
+    if (uflags & UFLG_UNIFY_STRICT) {
       errFree = typeError(errStream, errLoc, t1, t2);
       break;
     }
@@ -359,17 +358,17 @@ Unify(std::ostream& errStream,
 
       if(t2->isMutable() && t2->Base()->isTvar()) {
 	CHKERR(errFree, Unify(errStream, trail, errLoc, mb->Var(),
-			      Type::make(ty_mutable, newTvar()), flags));
+			      Type::make(ty_mutable, newTvar()), uflags));
 	
 	trail->link(other, mb);
       }
       else {
 	CHKERR(errFree, Unify(errStream, trail, errLoc, 
 			      mb->minimizeMutability(), 
-			      other->minimizeMutability(), flags));
+			      other->minimizeMutability(), uflags));
 	
 	CHKERR(errFree, Unify(errStream, trail, errLoc, 
-			      mb->Var(), other, flags));
+			      mb->Var(), other, uflags));
       }
       
       
@@ -394,10 +393,10 @@ Unify(std::ostream& errStream,
       
       CHKERR(errFree, Unify(errStream, trail, errLoc, 
 			    mb->minimizeTopMutability(), 
-			    other->minimizeTopMutability(), flags));
+			    other->minimizeTopMutability(), uflags));
       
       CHKERR(errFree, Unify(errStream, trail, errLoc, 
-			    mb->Var(), other, flags));
+			    mb->Var(), other, uflags));
       break;
     }
 
@@ -420,7 +419,7 @@ Unify(std::ostream& errStream,
       
       if(other->kind == ty_array || other->kind == ty_structv) {
 	CHKERR(errFree, Unify(errStream, trail, errLoc, 
-			      mut, Mutable(other), flags));
+			      mut, Mutable(other), uflags));
 	break;
       }
     }
@@ -451,13 +450,13 @@ Unify(std::ostream& errStream,
 
     case ty_tvar:
       {		
-	if (flags & UFLG_UNIFY_STRICT_TVAR) {
+	if (uflags & UFLG_UNIFY_STRICT_TVAR) {
 	  errFree = typeError(errStream, errLoc, t1, t2);
 	  break;
 	}
 
 	if ((t1->flags & TY_RIGID) && (t2->flags & TY_RIGID) &&
-	    ((flags & UFLG_UN_IGN_RIGIDITY) == 0)) {
+	    ((uflags & UFLG_UN_IGN_RIGIDITY) == 0)) {
 	  errFree = typeError(errStream, errLoc, t1, t2);
 	  break;
 	}
@@ -481,7 +480,7 @@ Unify(std::ostream& errStream,
       {	
 	CHKERR(errFree, Unify(errStream, trail, errLoc,
 			      t1->CompType(0), 
-			      t2->CompType(0), flags));
+			      t2->CompType(0), uflags));
 	
 	if (!errFree)
 	  break;
@@ -505,18 +504,18 @@ Unify(std::ostream& errStream,
 	shared_ptr<Type> t1Args = t1->Args();
 	shared_ptr<Type> t2Args = t2->Args();
 	CHKERR(errFree, UnifyFnArgs(errStream, trail, errLoc, 
-				    t1, t2, t1Args, t2Args, flags));
+				    t1, t2, t1Args, t2Args, uflags));
       
 	CHKERR(errFree, 
 	       Unify(errStream, trail, errLoc, t1->Ret(), 
-		     t2->Ret(), flags));
+		     t2->Ret(), uflags));
 	break;
       }
 
     case ty_fnarg:
       {
 	CHKERR(errFree, UnifyFnArgs(errStream, trail, errLoc, 
-				    t1, t2, t1, t2, flags));
+				    t1, t2, t1, t2, uflags));
 	break;
       }
 
@@ -530,7 +529,7 @@ Unify(std::ostream& errStream,
     case ty_uvalv:
       {
 	CHKERR(errFree,
-	       UnifyStructUnion(errStream, trail, errLoc, t1, t2, flags));
+	       UnifyStructUnion(errStream, trail, errLoc, t1, t2, uflags));
 	break;
       }
 
@@ -544,7 +543,7 @@ Unify(std::ostream& errStream,
 	for (size_t i=0; i<t1->components.size(); i++) 
 	  CHKERR(errFree, 
 		 Unify(errStream, trail, errLoc, t1->CompType(i), 
-		       t2->CompType(i), flags));
+		       t2->CompType(i), uflags));
 	
 	break;
       }
@@ -553,7 +552,7 @@ Unify(std::ostream& errStream,
       {
 	CHKERR(errFree, 
 	       Unify(errStream, trail, errLoc, t1->Base(), 
-		     t2->Base(), flags));
+		     t2->Base(), uflags));
 
 	if (t1->arrLen->len == t2->arrLen->len)
 	  break;
@@ -584,7 +583,7 @@ Unify(std::ostream& errStream,
       {
 	CHKERR(errFree, 
 	       Unify(errStream, trail, errLoc, t1->Base(), 
-		     t2->Base(), flags));
+		     t2->Base(), uflags));
 	break;
       }
     
@@ -594,13 +593,13 @@ Unify(std::ostream& errStream,
 	       Unify(errStream, trail, errLoc, 
 		     t1->Core()->minimizeTopMutability(), 
 		     t2->Core()->minimizeTopMutability(), 
-		     flags));
+		     uflags));
       
 	if (!errFree)
 	  break;
       
 	CHKERR(errFree, Unify(errStream, trail, errLoc, 
-			      t1->Var(), t2->Var(), flags));
+			      t1->Var(), t2->Var(), uflags));
 	break;
       }
     
@@ -610,7 +609,7 @@ Unify(std::ostream& errStream,
 	       Unify(errStream, trail, errLoc, 
 		     t1->Core()->minimizeMutability(), 
 		     t2->Core()->minimizeMutability(), 
-		     flags));
+		     uflags));
       
 	if (!errFree)
 	  break;
@@ -620,10 +619,10 @@ Unify(std::ostream& errStream,
       
 	if(var1->isMutable() && var2->isMutable())
 	  CHKERR(errFree, Unify(errStream, trail, errLoc, 
-				var1->Base(), var2->Base(), flags));
+				var1->Base(), var2->Base(), uflags));
 	else
 	  CHKERR(errFree, Unify(errStream, trail, errLoc, 
-				var1, var2, flags));
+				var1, var2, uflags));
       
 	if(errFree && t1->Var()->isMutable())
 	  CHKERR(errFree, PropagateMutability(errStream, trail, 
@@ -636,7 +635,7 @@ Unify(std::ostream& errStream,
       {
 	CHKERR(errFree,
 	       Unify(errStream, trail, errLoc, t1->Base(), 
-		     t2->Base(), flags));
+		     t2->Base(), uflags));
 
 	if(!errFree)
 	  break;
@@ -651,7 +650,7 @@ Unify(std::ostream& errStream,
       {
 	CHKERR(errFree,
 	       Unify(errStream, trail, errLoc, t1->Base(), 
-		     t2->Base(), flags));
+		     t2->Base(), uflags));
 	break;
       }
 
@@ -677,7 +676,7 @@ Unify(std::ostream& errStream,
 	  
 	  CHKERR(errFree, Unify(errStream, trail, errLoc, 
 				t1->TypeArg(i), t2->TypeArg(i),
-				flags));
+				uflags));
 	}
 	
 	break;
@@ -691,7 +690,7 @@ Unify(std::ostream& errStream,
 	for (size_t i=0; i < t1->components.size(); i++) 
 	  CHKERR(errFree,
 		 Unify(errStream, trail, errLoc, t1->CompType(i), 
-		       t2->CompType(i), flags));
+		       t2->CompType(i), uflags));
 	break;
       }
       
@@ -792,12 +791,12 @@ unify(std::ostream& errStream,
       shared_ptr<Trail> trail,
       const LexLoc &errLoc,
       shared_ptr<Type> ft, shared_ptr<Type> st, 
-      UnifyFlags flags) 
+      UnifyFlags uflags) 
 {
   bool errFree = true;
 
-  assert((flags & UFLG_UN_MBFULL_VAR) == 0);
-  CHKERR(errFree, Unify(errStream, trail, errLoc, ft, st, flags));
+  assert((uflags & UFLG_UN_MBFULL_VAR) == 0);
+  CHKERR(errFree, Unify(errStream, trail, errLoc, ft, st, uflags));
   
   WorkList<shared_ptr<Type> > worklist;
   DoneList<shared_ptr<Type> > donelist;
