@@ -42,13 +42,33 @@
 #include "AST.hxx"
 #include "Type.hxx"
 
-/* Definitions of mode used in Symbol Resolution
-   and Type-inference */
-#define NULL_MODE   0x0u
-#define DEF_MODE    0x1u
-#define REDEF_MODE  0x2u
-#define USE_MODE    0x3u
-#define DECL_MODE   0x4u
+/// @bug EVERYTHING IN THIS FILE APPEARS TO BE UTILITY FUNCTIONS. WHY
+/// IS IT CALLED INTER-PASS?
+
+/// @brief Mode of operation used in Symbol Resolution and Type-inference.
+enum ResolutionMode {
+  NULL_MODE   = 0x0u,
+  /// @brief Introducing a newly defined symbol into the environment.
+  ///
+  /// This mode is used when recursing into a defining occurrence. It
+  /// is currently used as the default at top-level in most cases.
+  DEF_MODE    = 0x1u,
+  /// @bug Shap does not know how to document this.
+  ///
+  /// This mode is used only in the type inference pass; it is not
+  /// used by the resolver.
+  REDEF_MODE  = 0x2u,
+  /// @brief Checking a use-occurrence of a symbol
+  ///
+  /// This mode is used when recursing into a use occurrence
+  /// context.
+  USE_MODE    = 0x3u,
+  /// @brief Introducing a newly declared symbol into the environment.
+  ///
+  /// This mode is used when recursing into a @em declaring
+  /// occurrence.
+  DECL_MODE   = 0x4u
+};
 
 #define CHKERR(noerr, exp) \
   do {			   \

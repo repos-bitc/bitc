@@ -87,7 +87,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  shared_ptr<TCConstraints> tcc,
 	  UnifyFlags uflags,
 	  shared_ptr<Trail> trail,
-	  int mode,
+	  ResolutionMode mode,
 	  TI_Flags ti_flags);
 
 bool isExpansive(std::ostream& errStream, 
@@ -257,7 +257,7 @@ ProcessLetExprs(std::ostream& errStream, shared_ptr<AST> lbs,
 		TypeAstMap& impTypes,
 		bool isVP, shared_ptr<TCConstraints> tcc,
 		UnifyFlags uflags, shared_ptr<Trail> trail,
-		int mode, TI_Flags ti_flags)
+		ResolutionMode mode, TI_Flags ti_flags)
 {
   bool errFree = true;
   for (size_t c = 0; c < lbs->children.size(); c++) {
@@ -276,7 +276,7 @@ ProcessLetBinds(std::ostream& errStream, shared_ptr<AST> lbs,
 		TypeAstMap& impTypes,
 		bool isVP, shared_ptr<TCConstraints> tcc,
 		UnifyFlags uflags, shared_ptr<Trail> trail,
-		int mode, TI_Flags ti_flags)
+		ResolutionMode mode, TI_Flags ti_flags)
 {
   bool errFree = true;
   for (size_t c = 0; c < lbs->children.size(); c++) {
@@ -683,7 +683,7 @@ InferTvList(std::ostream& errStream, shared_ptr<AST> tvList,
 	    shared_ptr<TCConstraints> tcc,
 	    UnifyFlags uflags,
 	    shared_ptr<Trail> trail,
-	    int mode, unsigned flags,
+	    ResolutionMode mode, TI_Flags ti_flags,
 	    shared_ptr<Type> container)  
 {  
   bool errFree = true;
@@ -751,7 +751,7 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
 	    shared_ptr<TCConstraints> tcc,
 	    UnifyFlags uflags,
 	    shared_ptr<Trail> trail,
-	    int mode,
+	    ResolutionMode mode,
 	    bool isReference,
 	    bool mustDefine,
 	    bool mustEvalBody,
@@ -865,7 +865,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	   shared_ptr<TCConstraints> tcc,
 	   UnifyFlags uflags,
 	   shared_ptr<Trail> trail,
-	   int mode,
+	   ResolutionMode mode,
 	   bool isReference,
 	   bool mustDefine,
 	   bool mustEvalBody,
@@ -1252,7 +1252,7 @@ InferTypeClass(std::ostream& errStream, shared_ptr<AST> ast,
 	       shared_ptr<TCConstraints> tcc,
 	       UnifyFlags uflags,
 	       shared_ptr<Trail> trail,
-	       int mode,
+	       ResolutionMode mode,
 	       TI_Flags ti_flags)
 {
   bool errFree = true;
@@ -1384,7 +1384,7 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
 	      shared_ptr<TCConstraints> tcc,
 	      UnifyFlags uflags,
 	      shared_ptr<Trail> trail,
-	      int mode,
+	      ResolutionMode mode,
 	      TI_Flags ti_flags)
 {
   bool errFree = true;
@@ -1682,7 +1682,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  shared_ptr<TCConstraints> tcc,
 	  UnifyFlags uflags,
 	  shared_ptr<Trail> trail,
-	  int mode,
+	  ResolutionMode mode,
 	  TI_Flags ti_flags)
 {
   bool errFree = true;
