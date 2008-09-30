@@ -529,7 +529,7 @@
 	<tyConc>
 	  <TDjudge>
 	    <paren>
-	      <let kind="x" colorOptQual="yes">
+	      <let kind="x">
 		<id/>
 		<vExp/>
 		<aExpr/>
