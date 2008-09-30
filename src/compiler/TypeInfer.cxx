@@ -284,7 +284,7 @@ ProcessLetBinds(std::ostream& errStream, shared_ptr<AST> lbs,
     shared_ptr<AST> idPat = lb->child(0);
     
     TYPEINFER(idPat, gamma, instEnv, impTypes, isVP, tcc,
-	      uflags, trail, REDEF_MODE, TI_COMP2);
+	      uflags, trail, DEF_MODE, TI_COMP2);
   }
   return errFree;
 }
@@ -1865,15 +1865,15 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  unsigned long bindFlags = 0;
 	  shared_ptr<TypeScheme> sigma = gamma->getBinding(ast->s);
 
-	  if (sigma) {	    
+	  if (sigma && ast->isGlobal()) {	    
 	    // NOTE: none of the declaration forms make this 
 	    // recursive call. 
-	    assert(!ast->isDecl);
-
-	    // All rebinding forms (lambda, let, etc) make calls
-	    // through REDEF_MODE. Threfore, this case MUST be
+	    // Therefore, this case MUST be
 	    // a definition for which we have already seen a 
 	    // declaration.
+
+	    assert(!ast->isDecl);
+
 	    bindFlags = BF_REBIND;
 	    sigma = bindIdentDef(ast, gamma, bindFlags, ti_flags);
 	    ast->symType->defAst = sigma->tau->getType()->defAst = ast;
@@ -1884,12 +1884,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  break;
 	}
 	
-      case REDEF_MODE:
-	{
-	  bindIdentDef(ast, gamma, BF_REBIND, ti_flags);
-	  break;
-	}
-
       case USE_MODE:
 	{
 	  assert(tcc);
@@ -3469,7 +3463,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       for (size_t c = 0; c < argVec->children.size(); c++) {
 	TYPEINFER(argVec->child(c), lamGamma, instEnv, impTypes, 
-		  isVP, tcc, uflags, trail,  REDEF_MODE, TI_COMP2);
+		  isVP, tcc, uflags, trail,  DEF_MODE, TI_COMP2);
 
 	shared_ptr<Type> argType = argVec->child(c)->getType();
 	shared_ptr<comp> nComp = GC_NULL;
@@ -4388,7 +4382,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       shared_ptr<AST> stIdent = ast->child(0); 
       TYPEINFER(stIdent, legGamma, instEnv, impTypes, isVP, 
-		tcc, uflags, trail,  REDEF_MODE, TI_COMP2);
+		tcc, uflags, trail,  DEF_MODE, TI_COMP2);
       stIdent->symType = stType;
       stIdent->scheme->tau = stType;
       assert(stIdent->scheme->ftvs.empty());
@@ -4464,7 +4458,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  shared_ptr<AST> stIdent = theCase->child(0);
 	  // Add sIdent to the legGamma environment.
 	  TYPEINFER(stIdent, legGamma, instEnv, impTypes, isVP, 
-		    tcc, uflags, trail,  REDEF_MODE, TI_COMP2);
+		    tcc, uflags, trail,  DEF_MODE, TI_COMP2);
 
 	  // Make sIdent's type the correct type.
 	  shared_ptr<AST> onlyCtr = theCase->child(2)->getCtr();
@@ -4574,7 +4568,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	
 	localDef->symType = MBF(init->symType);
 	TYPEINFER(localDefPat, doGamma, instEnv, impTypes, isVP, doTcc,
-		  uflags, trail, REDEF_MODE, TI_COMP2);
+		  uflags, trail, DEF_MODE, TI_COMP2);
       }
 
       // Next step initializers
@@ -4677,13 +4671,13 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	CHKERR(errFree, 
 	       ProcessLetBinds(errStream, lbs, letGamma, instEnv,
 			       impTypes, isVP, letTcc, uflags, trail,
-			       REDEF_MODE, TI_COMP2)); 
+			       DEF_MODE, TI_COMP2)); 
       }
       else {
 	CHKERR(errFree, 
 	       ProcessLetBinds(errStream, lbs, letGamma, instEnv,
 			       impTypes, isVP, letTcc, uflags, trail,
-			       REDEF_MODE, TI_COMP2)); 
+			       DEF_MODE, TI_COMP2)); 
 	CHKERR(errFree, 
 	       ProcessLetExprs(errStream, lbs, letGamma, instEnv,
 			       impTypes, isVP, letTcc, uflags, trail, 
@@ -4760,7 +4754,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		  isVP, tcc, uflags, trail, USE_MODE, TI_COMP2);
 	
 	TYPEINFER(ip, letGamma, instEnv, impTypes, 
-		  isVP, tcc, uflags, trail, REDEF_MODE, TI_COMP2);
+		  isVP, tcc, uflags, trail, DEF_MODE, TI_COMP2);
 	
 	CHKERR(errFree, unify(errStream, trail, lb->getID()->loc,
 			      expr->symType, 
@@ -4790,7 +4784,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<AST> expr = ast->child(1);
       if (ast->flags & LB_REC_BIND) {
 	TYPEINFER(ip, gamma, instEnv, impTypes, 
-		  isVP, tcc, uflags, trail, REDEF_MODE, TI_COMP2);
+		  isVP, tcc, uflags, trail, DEF_MODE, TI_COMP2);
 
 	TYPEINFER(expr, gamma, instEnv, impTypes, 
 		  isVP, tcc, uflags, trail, USE_MODE, TI_COMP2);	
@@ -4800,7 +4794,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		  isVP, tcc, uflags, trail, USE_MODE, TI_COMP2);
 	
 	TYPEINFER(ip, gamma, instEnv, impTypes, 
-		  isVP, tcc, uflags, trail, REDEF_MODE, TI_COMP2);
+		  isVP, tcc, uflags, trail, DEF_MODE, TI_COMP2);
       }
       
       CHKERR(errFree, unify(errStream, trail, ast->getID()->loc,

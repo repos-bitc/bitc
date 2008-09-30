@@ -58,11 +58,6 @@ using namespace std;
 using namespace boost;
 using namespace sherpa;
 
-#define NULL_MODE  0x0u
-#define LOCAL_MODE 0x2u  // Parameters
-#define USE_MODE   0x3u
-#define TYPE_MODE  0x4u
-
 typedef set<shared_ptr<AST> > AstSet;
 
 /**

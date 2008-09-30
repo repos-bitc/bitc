@@ -42,13 +42,14 @@
 #include "AST.hxx"
 #include "Type.hxx"
 
-/* Definitions of mode used in Symbol Resolution
-   and Type-inference */
-#define NULL_MODE   0x0u
-#define DEF_MODE    0x1u
-#define REDEF_MODE  0x2u
-#define USE_MODE    0x3u
-#define DECL_MODE   0x4u
+/* Definitions of mode used in Symbol Resolution, 
+   Type-inference, and closure conversion */
+#define NULL_MODE   0x0u // Don't care / error case
+#define DEF_MODE    0x1u // Defining occurences 
+#define USE_MODE    0x2u // Identifier Use occurences
+#define DECL_MODE   0x3u // Declarations, used in symbol resulution only
+#define LOCAL_MODE  0x4u // Local definitions, differentiated in clconv
+#define TYPE_MODE   0x5u // Type definitions, differentiated in clconv
 
 #define CHKERR(noerr, exp) \
   do {			   \
