@@ -1,7 +1,7 @@
 /**************************************************************************
  *
  * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, The EROS
- *   Group, LLC. 
+ *   Group, LLC.
  * Copyright (C) 2004, 2005, 2006, Johns Hopkins University.
  * All rights reserved.
  *
@@ -9,19 +9,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -85,7 +85,7 @@ namespace sherpa {
    * rely on the availability of mallocable memory. It should not be
    * called by anyone else! */
 #define BUFSZ 20 /* 19 for digits + 1 for null */
- 
+
   static char *
   unsigned64_to_buffer(uint64_t ul, char *buf)
   {
@@ -164,14 +164,14 @@ namespace sherpa {
     char buf[20];
     char *p, *pend;
     size_t output_count = 0;
-  
+
     va_list ap;
 
     if (xprintf_outfile == 0)
       xprintf_outfile = stdout;
 
     va_start(ap, fmt);
-    
+
     for( ; *fmt; fmt++) {
       if (*fmt != '%') {
 	xputchar(*fmt);
@@ -181,7 +181,7 @@ namespace sherpa {
 
       /* largest thing we might convert fits in 20 digits (unsigned long
        * long as decimal */
-    
+
       pend = &buf[20];
       p = pend;
 
@@ -193,9 +193,9 @@ namespace sherpa {
 	rightAdjust = false;
 	fmt++;
       }
-      
+
       fillchar = ' ';
-    
+
       /* we just saw a format character.  See if what follows
        * is a width specifier:
        */
@@ -209,11 +209,11 @@ namespace sherpa {
 	width += (*fmt - '0');
 	fmt++;
       }
-    
+
       assert (*fmt);		/* check bogus fmt */
 
       sign = false;
-    
+
       switch (*fmt) {
       case '%':
 	{
@@ -224,13 +224,13 @@ namespace sherpa {
       case 's':
 	{
 	  p = pend = va_arg(ap, char *);
-      
+
 	  if (pend == 0)
 	    p = pend = "<null>";
 
 	  while (*pend)
 	    pend++;
-	  
+	
 	  break;
 	}
       case 'c':
@@ -239,14 +239,14 @@ namespace sherpa {
 	  c = va_arg(ap, long);
 	  *(--p) = (char) c;
 	  break;
-	}	    
+	}	
       case 'd':
 	{
 	  long l;
 	  unsigned long ul;
 
 	  l = va_arg(ap, long);
-	      
+	
 	  if (l == 0) {
 	    *(--p) = '0';
 	  }
@@ -271,7 +271,7 @@ namespace sherpa {
 	  unsigned long ul;
 
 	  ul = va_arg(ap, unsigned long);
-	      
+	
 	  if (ul == 0) {
 	    *(--p) = '0';
 	  }
@@ -289,7 +289,7 @@ namespace sherpa {
 	  static char *hex_digits = "0123456789abcdef";
 
 	  ul = va_arg(ap, unsigned long);
-	      
+	
 	  if (ul == 0) {
 	    *(--p) = '0';
 	  }
@@ -306,7 +306,7 @@ namespace sherpa {
 	  assert(false);
 	}
       }
-  
+
       len = pend - p;
       if (sign)
 	len++;
@@ -328,7 +328,7 @@ namespace sherpa {
 	xputchar(*p++);
 	output_count ++;
       }
-    
+
       /* do padding with trailing spaces for left justification: */
       if (width && rightAdjust == false && len < width) {
 	while (len < width) {
@@ -338,7 +338,7 @@ namespace sherpa {
 	}
       }
     }
-    
+
     va_end(ap);
 
     return output_count;
@@ -349,7 +349,7 @@ namespace sherpa {
      NULL. Normally this should work anyway, but it seems Solaris has 'issues'
      with this -- thus, this wrapper function.
   */
-  void* 
+  void*
   xbsearch(const void *key, const void *base, size_t nmemb,
 	   size_t size, int (*compar)(const void *, const void *))
   {

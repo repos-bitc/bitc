@@ -4,7 +4,7 @@
 /**************************************************************************
  *
  * Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, The EROS
- *   Group, LLC. 
+ *   Group, LLC.
  * Copyright (C) 2004, 2005, 2006, Johns Hopkins University.
  * All rights reserved.
  *
@@ -12,19 +12,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -63,7 +63,7 @@ namespace sherpa {
     const char *file;
     uint32_t line;
 
-    UExceptionBase(const UExceptionType *et, const char *file, int line, 
+    UExceptionBase(const UExceptionType *et, const char *file, int line,
 		   const std::string& msg);
     UExceptionBase(const UExceptionBase& cme);
     virtual ~UExceptionBase();
@@ -72,7 +72,7 @@ namespace sherpa {
 
   /// @brief Exception type template.
   ///
-  /// The UException template exists purely to allow us to differentiate 
+  /// The UException template exists purely to allow us to differentiate
   /// exception type codes.
   template<UExceptionType *eType>
   class UException : public UExceptionBase {
@@ -96,13 +96,13 @@ namespace sherpa {
     extern UExceptionType Assert;
     // Out of memory
     extern UExceptionType OutOfMemory;
-    // Object integrity has failed 
+    // Object integrity has failed
     extern UExceptionType IntegrityFail;
-    // Object violates its schema 
+    // Object violates its schema
     extern UExceptionType Malformed;
     // Inappropriate value for operation
     extern UExceptionType BadValue;
-    // Non-null argument required 
+    // Non-null argument required
     extern UExceptionType NullArg;
     // Access violation
     extern UExceptionType NoAccess;
@@ -112,34 +112,34 @@ namespace sherpa {
     extern UExceptionType ObjectExists;
     // I/O Operation was truncated
     extern UExceptionType Truncated;
-    // I/O proceeded past end of object 
+    // I/O proceeded past end of object
     extern UExceptionType Overrun;
     // Some error occurred while running a subprocess.
-    // FIX: This is too general. It needs at least an 
+    // FIX: This is too general. It needs at least an
     // error code and perhaps something better than that.
     extern UExceptionType Subprocess;
-    // Could not acquire lock 
+    // Could not acquire lock
     extern UExceptionType LockFail;
-    // Lock race failed 
+    // Lock race failed
     extern UExceptionType LostLock;
     // Heat death of universe has occurred (a cryptographic hash
     // collision has occurred
     extern UExceptionType UniverseDied;
-    // Network connect/session setup failed 
+    // Network connect/session setup failed
     extern UExceptionType NoConnect;
-    // Unable to authenticate 
+    // Unable to authenticate
     extern UExceptionType NoAuth;
-    // Missing something from environment 
+    // Missing something from environment
     extern UExceptionType Environ;
-    // Unknown object version 
+    // Unknown object version
     extern UExceptionType VersionError;
-    // Network connection lost 
+    // Network connection lost
     extern UExceptionType ConnLost;
     // Unspecified error during I/O
     extern UExceptionType IoError;
-    // Unknown protocol operation 
+    // Unknown protocol operation
     extern UExceptionType BadOpcode;
-    // Some problem with the pseudo-random number generator 
+    // Some problem with the pseudo-random number generator
     extern UExceptionType PrngError;
     // Array bounds violation
     extern UExceptionType BoundsError;

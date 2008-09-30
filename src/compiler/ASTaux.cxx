@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -54,19 +54,19 @@
 using namespace boost;
 using namespace sherpa;
 
-shared_ptr<Type> 
+shared_ptr<Type>
 AST::getType()
 {
   return symType->getType();
 }
 
-shared_ptr <const Type> 
+shared_ptr <const Type>
 AST::getType() const
 {
   return symType->getType();
 }
 
-shared_ptr<AST> 
+shared_ptr<AST>
 AST::genIdent(const char *label, const bool isTV)
 {
   shared_ptr<AST> id = AST::make(at_ident);
@@ -83,11 +83,11 @@ AST::genIdent(const char *label, const bool isTV)
   return id;
 }
 
-shared_ptr<AST> 
+shared_ptr<AST>
 AST::genSym(shared_ptr<AST> ast, const char *label, const bool isTV)
 {
   shared_ptr<AST> id = genIdent(label, isTV);
-  // FQN to be set by the next call to the ersolver 
+  // FQN to be set by the next call to the ersolver
 
   id->identType = ast->identType;
   id->flags = ast->flags | ID_IS_GENSYM;
@@ -116,12 +116,12 @@ AST::nBits()
 {
   if (field_bits != 0)
     return field_bits;
-  else    
+  else
     return tagType->nBits();
 }
 
 
-shared_ptr<AST> 
+shared_ptr<AST>
 AST::Use()
 {
   assert(astType == at_ident);
@@ -138,7 +138,7 @@ AST::Use()
 AST::AST(shared_ptr<AST> ast, bool shallowCopyChildren)
 {
   astType = ast->astType;
-  ID = ++(AST::astCount);  
+  ID = ++(AST::astCount);
   identType = ast->identType;
   s = ast->s;
   loc = ast->loc;
@@ -166,21 +166,21 @@ AST::AST(shared_ptr<AST> ast, bool shallowCopyChildren)
     children = ast->children;
 }
 
- 
-shared_ptr<AST> 
+
+shared_ptr<AST>
 AST::getTrueCopy()
-{  
+{
   shared_ptr<AST> to = AST::make(shared_from_this(), false);
-  
+
   for (size_t i=0; i < children.size(); i++)
     to->children.push_back(child(i)->getTrueCopy());
-  
+
   return to;
 }
 
-shared_ptr<AST> 
+shared_ptr<AST>
 AST::getDeepCopy()
-{  
+{
   shared_ptr<AST> to = AST::make(shared_from_this(), false);
   to->symbolDef = GC_NULL;
   to->defn = GC_NULL;

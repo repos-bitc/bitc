@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -70,7 +70,7 @@ valid_ident_punct(uint32_t ucs4)
 static bool
 valid_ident_start(uint32_t ucs4)
 {
-  return (u_hasBinaryProperty(ucs4,UCHAR_XID_START) || 
+  return (u_hasBinaryProperty(ucs4,UCHAR_XID_START) ||
 	  valid_ident_punct(ucs4));
 }
 
@@ -99,7 +99,7 @@ valid_ifident_continue(uint32_t ucs4)
 static bool
 valid_tv_ident_start(uint32_t ucs4)
 {
-  return (u_hasBinaryProperty(ucs4,UCHAR_XID_START) || 
+  return (u_hasBinaryProperty(ucs4,UCHAR_XID_START) ||
 	  ucs4 == '_');
 }
 
@@ -233,7 +233,7 @@ struct BlockLexer::KeyWord BlockLexer::keywords[] = {
   { "set!",             tk_SET },
   { "string",           tk_STRING },
   { "struct",           tk_STRUCT },
-  { "suspend",          tk_SUSPEND },  
+  { "suspend",          tk_SUSPEND },
   { "switch",           tk_SWITCH },
   { "tag",              tk_TAG },
   { "the",              tk_THE },
@@ -279,9 +279,9 @@ BlockLexer::kwCheck(const char *s)
   }
 
   KeyWord key = { s, 0 };
-  KeyWord *entry = 
+  KeyWord *entry =
     (KeyWord *)bsearch(&key, keywords, // &OK
-		       sizeof(keywords)/sizeof(keywords[0]), 
+		       sizeof(keywords)/sizeof(keywords[0]),
 		       sizeof(keywords[0]), kwstrcmp);
 
   // If it is in the token table, return the indicated token type:
@@ -314,7 +314,7 @@ BlockLexer::ReportParseError()
 	    << ": syntax error (via yyerror)" << '\n';
   num_errors++;
 }
- 
+
 void
 BlockLexer::ReportParseError(const LexLoc& where, std::string msg)
 {
@@ -333,7 +333,7 @@ BlockLexer::ReportParseWarning(const LexLoc& where, std::string msg)
 	    << msg << std::endl;
 }
 
-BlockLexer::BlockLexer(std::ostream& _err, std::istream& _in, 
+BlockLexer::BlockLexer(std::ostream& _err, std::istream& _in,
 		       const std::string& origin,
 		       bool commandLineInput)
   :here(origin, 1, 0), inStream(_in), errStream(_err)
@@ -349,7 +349,7 @@ BlockLexer::BlockLexer(std::ostream& _err, std::istream& _in,
   nModules = 0;
 }
 
-long 
+long
 BlockLexer::digitValue(ucs4_t ucs4, unsigned radix)
 {
   long l = -1;
@@ -410,7 +410,7 @@ BlockLexer::getChar()
 
   if (c <= 247)
     goto done;
- 
+
   utf[4] = inStream.get();
   if (utf[4] == EOF)
     return EOF;
@@ -472,7 +472,7 @@ BlockLexer::lex(ParseType *lvalp)
       c = getChar();
     } while (c != '\n' && c != '\r');
     ungetChar(c);
-    // FALL THROUGH 
+    // FALL THROUGH
 
   case ' ':			// White space
   case '\t':
@@ -504,7 +504,7 @@ BlockLexer::lex(ParseType *lvalp)
 	  (void) getChar();	// just ignore it -- will validate later
 	}
       }	while (c != '"');
-      
+
       unsigned badpos = validate_string(thisToken.c_str());
 
       if (badpos) {
@@ -550,7 +550,7 @@ BlockLexer::lex(ParseType *lvalp)
 	      do {
 		c = getChar();
 	      } while (digitValue(c, 16) >= 0);
-	      
+	
 	      if (!isCharDelimiter(c)) {
 		ungetChar(c);
 		return EOF;

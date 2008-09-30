@@ -7,19 +7,19 @@
    * without modification, are permitted provided that the following
    * conditions are met:
    *
-   *   - Redistributions of source code must contain the above 
+   *   - Redistributions of source code must contain the above
    *     copyright notice, this list of conditions, and the following
-   *     disclaimer. 
+   *     disclaimer.
    *
    *   - Redistributions in binary form must reproduce the above
    *     copyright notice, this list of conditions, and the following
-   *     disclaimer in the documentation and/or other materials 
+   *     disclaimer in the documentation and/or other materials
    *     provided with the distribution.
    *
    *   - Neither the names of the copyright holders nor the names of any
    *     of any contributors may be used to endorse or promote products
    *     derived from this software without specific prior written
-   *     permission. 
+   *     permission.
    *
    * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -52,10 +52,10 @@
 #include "ParseType.hxx"
 #include "UocInfo.hxx"
 #include "Options.hxx"
-  
+
 using namespace boost;
 using namespace sherpa;
-using namespace std;  
+using namespace std;
 
 #define YYSTYPE ParseType
 #define YYLEX_PARAM (BlockLexer *)lexer
@@ -84,7 +84,7 @@ inline int block_lex(YYSTYPE *lvalp, BlockLexer *lexer)
 // If the passed exprSeq has a documentation string at the front,
 // remove it. Note that if the exprSeq has length 1 then the string is
 // the expression value and not a documentation comment.
-static shared_ptr<AST> 
+static shared_ptr<AST>
 stripDocString(shared_ptr<AST> exprSeq)
 {
   if (exprSeq->children.size() > 1 &&
@@ -138,7 +138,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_FILL
 %token <tok> tk_RESERVED // not to be confused with tk_Reserved
 %token <tok> tk_WHERE
-  
+
 %token <tok> tk_BITC_VERSION
 
 %token <tok> tk_PURE
@@ -206,7 +206,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_EXTERNAL
 %token <tok> tk_INTERFACE
 %token <tok> tk_MODULE
-// token tk_USESEL historic significance only 
+// token tk_USESEL historic significance only
 // %token <tok> tk_USESEL
 %token <tok> tk_PACKAGE
 %token <tok> tk_IMPORT
@@ -223,7 +223,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> import_definition importList
  //%type <ast> provide_definition provideList
 %type <ast> type_definition
-%type <ast> types type  bool_type 
+%type <ast> types type  bool_type
  //%type <ast> bitfieldtype
 %type <ast> literal
 %type <ast> typevar
@@ -236,11 +236,11 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> ident defident useident
 %type <ast> exident
 %type <tok> ifident
-%type <ast> intLit floatLit charlit strLit boolLit  
+%type <ast> intLit floatLit charlit strLit boolLit
 %type <ast> docstring optdocstring
 %type <ast> ptype_name val
 %type <ast> tvlist
-%type <ast> fields field 
+%type <ast> fields field
 
 %%
 
@@ -270,7 +270,7 @@ version: tk_BITC_VERSION strLit ';' {
     std::string s = ": Warning: BitC version conflict " + $2->s + " vs " + Version();
     lexer->ReportParseWarning($2->loc, s);
   }
-}; 
+};
 
 // Documentation comments. These are added only in productions where
 // they do NOT appear before expr_seq. If a string literal appears as
@@ -306,7 +306,7 @@ interface: tk_INTERFACE ifident {
       lexer->isRuntimeUoc = true;
   }
   optdocstring if_definitions tk_END {
-  SHOWPARSE("interface -> INTERFACE ifident optdocstring if_definitions END");  
+  SHOWPARSE("interface -> INTERFACE ifident optdocstring if_definitions END");
   shared_ptr<AST> ifIdent = AST::make(at_ident, $2);
   $$ = AST::make(at_interface, $1.loc, ifIdent);
   $$->addChildrenFrom($5);
@@ -319,7 +319,7 @@ interface: tk_INTERFACE ifident {
   }
 
   std::string uocName = ifIdent->s;
-  shared_ptr<UocInfo> uoc = 
+  shared_ptr<UocInfo> uoc =
     UocInfo::make(uocName, lexer->here.origin, $$);
 
   if (uocName == "bitc.prelude")
@@ -338,7 +338,7 @@ interface: tk_INTERFACE ifident {
        import. */
     UocInfo::ifList[uocName] = uoc;
   }
-    
+
   // Regardless, compile the new interface to check for further
   // warnings and/or errors:
   uoc->Compile();
@@ -366,7 +366,7 @@ if_definitions: if_definition {
 if_definitions: if_definitions if_definition {
   SHOWPARSE("if_definitions -> if_definitions if_definition");
   $$ = $1;
-  $$->addChild($2);   
+  $$->addChild($2);
 };
 
 if_definition: common_definition {
@@ -388,7 +388,7 @@ import_definition: tk_IMPORT ifident tk_AS ident ';' {
   SHOWPARSE("import_definition -> IMPORT ident ifident ;");
   shared_ptr<AST> ifIdent = AST::make(at_ifident, $2);
   UocInfo::importInterface(lexer->errStream, $2.loc, $2.str);
-  $$ = AST::make(at_importAs, $1.loc, ifIdent, $4); 
+  $$ = AST::make(at_importAs, $1.loc, ifIdent, $4);
 };
 
 import_definition: tk_IMPORT ifident ';' {
@@ -424,7 +424,7 @@ alias: ident {
 };
 alias: '(' ident tk_AS ident ')' {
   SHOWPARSE("alias -> ( ident AS ident )");
-  
+
   $$ = AST::make(at_ifsel, $2->loc, $4, $2);
 };
 
@@ -470,7 +470,7 @@ ptype_name: defident {
   SHOWPARSE("ptype_name -> defident");
   shared_ptr<AST> tvlist = AST::make(at_tvlist, $1->loc);
   shared_ptr<AST> constraints = AST::make(at_constraints, $1->loc);
-  $$ = AST::make(at_Null, $1->loc, $1, tvlist, constraints);  
+  $$ = AST::make(at_Null, $1->loc, $1, tvlist, constraints);
 };
 
 ptype_name: defident '(' tvlist ')' {
@@ -479,7 +479,7 @@ ptype_name: defident '(' tvlist ')' {
   $$ = AST::make(at_Null, $1->loc, $1, $3, constraints);
 };
 
-// STRUCTURE TYPES [3.6.1]           
+// STRUCTURE TYPES [3.6.1]
 type_definition: tk_STRUCT ptype_name val optdocstring declares fields tk_END  {
   SHOWPARSE("type_definition -> STRUCT ptype_name val "
 	    "optdocstring declares fields END");
@@ -495,7 +495,7 @@ declares: {
 
 // CATEGORIES
 
-val: { 
+val: {
   SHOWPARSE("val -> <empty>");
   $$ = AST::make(at_refCat);
   $$->printVariant = 1;
@@ -514,7 +514,7 @@ val: ':' tk_REF {
   SHOWPARSE("val -> ':' REF");
   $$ = AST::make(at_refCat, $2);
 };
- 
+
 /* defstruct / constructor / exception fields */
 fields: field  {
   SHOWPARSE("fields -> field");
@@ -563,19 +563,19 @@ types: type  {
   SHOWPARSE("types -> type");
   $$ = AST::make(at_Null);
   $$->addChild($1);
-}; 
+};
 types: types type {
   SHOWPARSE("types -> types type");
   $$ = $1;
   $1->addChild($2);
 };
 
-type: useident  { 			/* previously defined type */ 
+type: useident  { 			/* previously defined type */
   SHOWPARSE("type -> useident");
   $$ = $1;
 };
 
-// PRIMARY TYPES [3.2]             
+// PRIMARY TYPES [3.2]
 type: tk_UNIT {
   SHOWPARSE("type -> UNIT");
   $$ = AST::make(at_primaryType, $1.loc);
@@ -671,13 +671,13 @@ type: tk_EXCEPTION {
   $$ = AST::make(at_exceptionType, $1.loc);
 };
 
-// TYPE VARIABLES [3.3]            
+// TYPE VARIABLES [3.3]
 type: typevar  { 		
   SHOWPARSE("type -> typevar");
   $$ = $1;
 };
 
-// REF TYPES [3.4.1]               
+// REF TYPES [3.4.1]
 type: tk_REF '(' type ')' {
   SHOWPARSE("type -> REF ( type )");
   $$ = AST::make(at_refType, $1.loc, $3);
@@ -746,12 +746,12 @@ type: '(' type_cpair ')' {
   $$ = $2;
 };
 
-// ARRAY TYPE [3.5.1]                 
+// ARRAY TYPE [3.5.1]
 type: tk_ARRAY type '[' intLit ']' {
   SHOWPARSE("type -> type '[' intLit ']'");
   $$ = AST::make(at_arrayType, $1.loc, $2, $4);
 };
-// VECTOR TYPE [3.5.2]               
+// VECTOR TYPE [3.5.2]
 type: type '[' ']' {
   SHOWPARSE("type -> type []");
   $$ = AST::make(at_vectorType, $1->loc, $1);
@@ -769,7 +769,7 @@ typapp: useident '(' types ')' {
   $$->addChildrenFrom($3);
 };
 
-// MUTABLE TYPE [3.7]              
+// MUTABLE TYPE [3.7]
 type: tk_MUTABLE '(' type ')' {
   SHOWPARSE("type -> MUTABLE ( type )");
   $$ = AST::make(at_mutableType, $1.loc, $3);
@@ -805,9 +805,9 @@ type_or_bitfield: type {
 };
 
 
-// by-ref types are not a part of general `type' rule. 
-// They are gramatiocally restricted to apprae only on 
-// formal function arguments and function types. 
+// by-ref types are not a part of general `type' rule.
+// They are gramatiocally restricted to apprae only on
+// formal function arguments and function types.
 type_pl_byref: type {
   SHOWPARSE("type_pl_byref -> type");
   $$ = $1;
@@ -822,7 +822,7 @@ types_pl_byref: type_pl_byref {
   SHOWPARSE("types_pl_byref -> type_pl_byref");
   $$ = AST::make(at_fnargVec);
   $$->addChild($1);
-}; 
+};
 types_pl_byref: types_pl_byref type_pl_byref {
   SHOWPARSE("types_pl_byref -> types_pl_byref type_pl_byref");
   $$ = $1;
@@ -838,7 +838,7 @@ ident: tk_Ident {
 
 ident: tk_Reserved {
   SHOWPARSE("ident -> <RESERVED=" + $1.str + ">");
-  cerr << $1.loc.asString() << ": The token \"" << $1.str 
+  cerr << $1.loc.asString() << ": The token \"" << $1.str
        << "\" is reserved for future use.\n";
   lexer->num_errors++;
   $$ = AST::make(at_ident, $1);
@@ -849,7 +849,7 @@ useident: ident {
   $$ = $1;
 };
 
-useident: ident '.' ident { 
+useident: ident '.' ident {
   SHOWPARSE("useident -> ident . ident");
   $$ = AST::make(at_usesel, $1->loc, $1, $3);
 };
@@ -871,7 +871,7 @@ typevar: tk_TypeVar {
   SHOWPARSE("typevar -> <TypeVar=" + $1.str + ">");
   $$ = AST::make(at_ident, $1);
   $$->identType = id_tvar;
-}; 
+};
 
 // Literal Value Representations
 

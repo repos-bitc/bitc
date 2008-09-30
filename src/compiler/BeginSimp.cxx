@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -77,7 +77,7 @@ using namespace sherpa;
 ///
 /// This pass may now be misnamed, but all of the simplifications that
 /// it performs are vaguely related to begin blocks.
-static shared_ptr<AST> 
+static shared_ptr<AST>
 beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 {
   for (size_t c = 0; c < ast->children.size(); c++)
@@ -103,7 +103,7 @@ beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 	  errFree = false;
 	}
 
-	shared_ptr<AST> letBinding = 
+	shared_ptr<AST> letBinding =
 	  AST::make(at_letbinding,
 		  def->loc, def->child(0), def->child(1));
 	if (rec)
@@ -133,8 +133,8 @@ beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 	ast->children = newChildren;
 	
 	// Insert the new letrec:
-	shared_ptr<AST> theLetRec = 
-	  AST::make((rec ? at_letrec : at_let), def->loc, 
+	shared_ptr<AST> theLetRec =
+	  AST::make((rec ? at_letrec : at_let), def->loc,
 		  AST::make(at_letbindings, def->loc, letBinding),
 		  body, def->child(2));
 	ast->child(c) = beginSimp(theLetRec, errStream, errFree);
@@ -154,10 +154,10 @@ beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 bool
 UocInfo::fe_beginSimp(std::ostream& errStream,
 		      bool init, unsigned long flags)
-{ 
+{
   BEG_SIMP_DEBUG if (isSourceUoc())
     PrettyPrint(errStream);
-  
+
   BEG_SIMP_DEBUG std::cerr << "fe_beginSimp" << std::endl;
   bool errFree = true;
   uocAst = beginSimp(uocAst, errStream, errFree);

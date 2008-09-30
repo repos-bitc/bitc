@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -60,14 +60,14 @@
 using namespace boost;
 using namespace sherpa;
 
-shared_ptr<AST> 
+shared_ptr<AST>
 reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 {
   switch(ast->astType) {
   case at_defrepr:
     {
-      shared_ptr<AST> unin = AST::make(ast, false); 
-      
+      shared_ptr<AST> unin = AST::make(ast, false);
+
       unin->astType = at_defunion;
       unin->flags |= UNION_IS_REPR;
       unin->addChild(ast->child(0)); // identifier
@@ -81,7 +81,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 
       break;
     }
-    
+
   case at_reprctrs:
     {
       shared_ptr<AST> ctrs = AST::make(at_constructors, ast->loc);
@@ -90,10 +90,10 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       ast = ctrs;
       break;
     }
-    
+
   case at_reprctr:
     {
-      shared_ptr<AST> ctr = ast->child(0);      
+      shared_ptr<AST> ctr = ast->child(0);
 
       for (size_t i=1; i < ast->children.size(); i++) {
 	shared_ptr<AST> where = ast->child(i);
@@ -101,21 +101,21 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 
 	for (size_t j=1; j < ctr->children.size(); j++) {
 	  shared_ptr<AST> fld = ctr->child(j);
-		  
+		
 	  if (where->child(0)->s == fld->child(0)->s) {
 	    found = true;
-	    
+	
 	    if (fld->flags & FLD_IS_DISCM) {
 	      errStream << where->loc << ": "
 			<< " Duplicate `where' label for "
 			<< where->child(0)->s
 			<< std::endl;
-	      
+	
 	      errFree = false;
 	      break;
 	    }
-	    
-	    fld->flags |= FLD_IS_DISCM;	    
+	
+	    fld->flags |= FLD_IS_DISCM;	
 	    fld->unin_discm = (size_t)(where->child(1)->litValue.i.as_uint64());
 	  }
 	}
@@ -125,7 +125,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 		    << " Unknown Field: "
 		    << where->child(0)->s
 		    << std::endl;
-	  
+	
 	  errFree = false;
 	}
       }
@@ -133,11 +133,11 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       ast = ctr;
       break;
     }
-    
+
   case at_declrepr:
     {
       shared_ptr<AST> unin = AST::make(ast, false);
-      
+
       unin->astType = at_declunion;
       unin->flags |= UNION_IS_REPR;
       unin->addChild(ast->child(0)); // identifier
@@ -147,7 +147,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       ast = unin;
       break;
     }
-    
+
   default:
     {
       // value definitions are ignored
@@ -160,7 +160,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 }
 
 bool
-UocInfo::fe_reprSimp(std::ostream& errStream, 
+UocInfo::fe_reprSimp(std::ostream& errStream,
 		     bool init, unsigned long flags)
 {
   bool errFree = true;

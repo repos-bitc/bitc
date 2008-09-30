@@ -8,19 +8,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -49,16 +49,16 @@
 #define AST_SUPERCLASS boost::enable_shared_from_this<AST>
 }
 
-%header { 
+%header {
 
-struct Type; 
-struct TypeScheme; 
+struct Type;
+struct TypeScheme;
 struct spStruct;
 struct UocInfo;
 struct Instance;
- 
+
 /// @brief Different classifications of identifiers that we might
-/// encounter. 
+/// encounter.
 ///
 /// An IdentType is assigned by the resolver to each identifier AST
 /// node.  There are two types of constants in this
@@ -80,7 +80,7 @@ struct Instance;
 /// legal in what positions.
 
 enum IdentType {
-  /// @brief An identifier whose classification is not yet decided. 
+  /// @brief An identifier whose classification is not yet decided.
   ///
   ///This is the constructor-time default value that is assigned to
   ///the identType field of the AST. It should not occur on any
@@ -88,7 +88,7 @@ enum IdentType {
   ///temporary ASTs that are introduced for expediency in various
   ///later passes and then resolved.
   id_unresolved,
-  
+
   /// @brief %Type variables.
   id_tvar,
 
@@ -106,7 +106,7 @@ enum IdentType {
 
   /// @brief Structure or union constructor field name.
   id_field,
-  
+
   /// @brief Locally bound name that references the exported subset of
   /// an imported interface.
   ///
@@ -123,10 +123,10 @@ enum IdentType {
 
   /// @brief Union constructor taking no arguments.
   id_ucon0,
-  
+
   /// @brief Label used in block/labeled escape.
   id_block,
-  
+
   ///////////////////////////////////////////////////////////////////
   //
   // Anything below here is a category that is some union of
@@ -134,11 +134,11 @@ enum IdentType {
   //
   ///////////////////////////////////////////////////////////////////
   idc_FIRST_CATEGORY,
-  
+
   /// @brief %Type, which is one of <code>id_tvar</code>,
   /// <code>id_union</code>, or <code>id_struct</code>.
   idc_type = idc_FIRST_CATEGORY,
-  
+
   /// @brief Value, which is one of <code>id_value</code>,
   /// <code>id_ucon0</code>, or <code>id_method</code>.
   idc_value,
@@ -146,7 +146,7 @@ enum IdentType {
   /// @brief Union constructor, which is one of <code>id_ucon</ucode>
   /// or <code>id_ucon0</code>.
   idc_uctor,
-  
+
   /// @brief Constructor, which is one of <code>id_struct</code>,
   /// <code>id_ucon</code>, or <code>id_ucon0</code>.
   idc_ctor,
@@ -156,9 +156,9 @@ enum IdentType {
   /// <code>id_struct</code> or <code>id_ucon</code>.
   idc_apply,
 };
- 
+
 /// @brief Produces a printable string corresponding to the values in
-/// the above enumeration. 
+/// the above enumeration.
  std::string identTypeToString(IdentType id);
 
 
@@ -188,18 +188,18 @@ enum IdentType {
    ///
    /// The SSA pass uses a trick to convert expression style code
    /// into statement style code. For example, in the expression
-   /// (if e1 e2 e3), if E1, E2 and E3 are SSA converted forms of 
+   /// (if e1 e2 e3), if E1, E2 and E3 are SSA converted forms of
    /// e1, e2 and e3 respectively, the SSA converter will produce
-   /// 
-   /// (let* ((temp ((if E1 
+   ///
+   /// (let* ((temp ((if E1
    ///                   (let* ((temp  E2)) temp)
    ///                   (let* ((temp E3)) temp)))))
-   ///      ... rest of the code will use temp as the value of if-expr ... 
-   /// 
+   ///      ... rest of the code will use temp as the value of if-expr ...
+   ///
    /// Here, for the BitC resolver's point of view, the inner temp is
    /// different from the outer temp. So, it will resolve and type check
    /// corectly. The outer temp will have the result of the appropriate
-   /// inner temp. 
+   /// inner temp.
    ///
    /// From the C code generator's point of view, we will ignore the
    /// outer let* binding, since we cannot bind the result of
@@ -207,13 +207,13 @@ enum IdentType {
    /// LB_IS_DUMMY. The code generator will only declare one local
    /// variable temp, and assign the result of the correct brach to
    /// it. The rest of the code after the if statement is fine since it
-   /// just knows to use the name temp, which now stores the correct value. 
+   /// just knows to use the name temp, which now stores the correct value.
    LB_IS_DUMMY = 0x00000008u,
 
    /// Do not emit an assignment for this let binding. This is a special
    /// case similar to LB_IS_DUMMY. It is generated for like array, vector,
    /// etc., which should be ignored by the code generator, as the
-   /// initialization will follow in a loop. 
+   /// initialization will follow in a loop.
    LB_POSTPONED = LB_IS_DUMMY,
 
    /// Indicates a global identifier that is not exported from its
@@ -235,7 +235,7 @@ enum IdentType {
 
    /// Marks a BitC identifier as already having an external name, which
    /// should be used during code generation in place of the BitC name.
-   /// 
+   ///
    /// This flag is not redundant in light of the externalName
    /// field. DEF_IS_EXTERNAL is marked for all external definitions,
    /// whether it has an external name or not only some external
@@ -253,7 +253,7 @@ enum IdentType {
    ENUM_UN = 0x00000100u,
 
    /// Marks a union having only a single leg.
-   /// 
+   ///
    /// @bug It seems to me that a union having only one leg should be
    /// syntactically rejected, in which case this flag should never
    /// arise. Is there some USEFUL counter-example?
@@ -276,10 +276,10 @@ enum IdentType {
    /// at_sw_leg AST to replicate the (switch ...) temporary identifier.
    ///
    /// This flag ensures that an identifier that stores a de-constructed
-   /// value in a switch statement can only appear on the left of 
+   /// value in a switch statement can only appear on the left of
    /// a select (.) operator. The specification enforces this rule so that
    /// the de-constructed value does not escape as a whole (as a return
-   /// value, by assignment or closure). 
+   /// value, by assignment or closure).
    ID_FOR_SWITCH = 0x00001000u,
 
    /// Identifier is closed over by something.
@@ -307,14 +307,14 @@ enum IdentType {
    /// This flag ensures the global identifiers' mutability is not
    /// affected by usage beyond its definition. In the case of global
    /// definitions, the identifier's mutability is marked closed, at the
-   /// end of its definition. 
+   /// end of its definition.
    ID_MUT_CLOSED = 0x00020000u,
 
    /// Marked on proclaimations generated by the compiler (ex: during
-   /// closure conversion). 
+   /// closure conversion).
    /// The symbol resolver warns about local proclaimations in source
    /// modules withoutdefinitions. The flag indicates that such warnings
-   /// must not be produced for compiler generated proclaimations. 
+   /// must not be produced for compiler generated proclaimations.
    PROCLAIM_IS_INTERNAL = 0x00040000u,
 
    /// @brief Initialization for this def can be implemented directly by
@@ -337,20 +337,20 @@ enum IdentType {
    /// works equally well when a pre-existing external name has been
    /// assigned, because we must not mangle those. Is this merely a
    /// different choice of implemenation approach? Would the approach that
-   /// I am outlining work? 
+   /// I am outlining work?
    ///
    /// @note The instantiator can be made to work by using the approach
    /// you are suggesting. However, using this flag keeps the name
-   /// mangling on the 's' field more regular. This is because, the 
+   /// mangling on the 's' field more regular. This is because, the
    /// 's' field of all definitions are mangled with a canonical encoding
    /// of their type. If we employ the rule that having an external name
-   /// singifies that the identifier has already been mangled, the 
+   /// singifies that the identifier has already been mangled, the
    /// 's' field of definitions for which the programmer provided an
    /// external name will not be mangled at all. However, this still does
    /// not lead to an error because of name collision. We currently
    /// have a rule that definitions with programmer specified external
    /// names cannot be polymorphic, and will therefore be instantiated at
-   /// most once.  
+   /// most once.
    IDENT_MANGLED = 0x00100000u,
 
    /// @brief Local, non-generalizable variable.
@@ -360,7 +360,7 @@ enum IdentType {
    ///
    /// Local generalizable variables must be handled by creating a new
    /// let-binding with all concrete instantiations. Non-generalizable
-   /// locals like lambda-parameters, identifier at switch, catch, 
+   /// locals like lambda-parameters, identifier at switch, catch,
    /// do, etc. can be trivially handled by performing a name change to
    /// a canonical one.
    LOCAL_NOGEN_VAR = 0x00200000u,
@@ -370,12 +370,12 @@ enum IdentType {
    /// This flag is used in determining the outermost let-binding at
    /// which a type variable used (scoped). The actual pointer to the
    /// let-binding is preset in tvarLB field.
-   /// 
+   ///
    /// This flag is set on at_letbinding once we are done processing it in
    /// the symbol resolver. When we encounter the use of a type variable,
    /// if we have finished processing the let-binding named by its tvarLB
-   /// field, then we know that the scope of the variable is actually 
-   /// bigger, and thus update it. 
+   /// field, then we know that the scope of the variable is actually
+   /// bigger, and thus update it.
    LBS_PROCESSED = 0x00400000u,
 
    /// @brief Identifier is observably defined
@@ -387,8 +387,8 @@ enum IdentType {
    /// The symbol resolver accepts type variables as defining
    /// occurences within expressions only at certain positions (when
    /// called with NEW_TV_OK). For example, this is legal within value
-   /// definitions, but type variables not identified as arguments to 
-   /// type definitions are legal within the type definition itself. 
+   /// definitions, but type variables not identified as arguments to
+   /// type definitions are legal within the type definition itself.
    /// This flag marks type variables created by the polyinstantiator
    /// that must not be subject to the NEW_TV_OK check by the resolver,
    /// since the Instantiator makes some quasi RandTs in which this
@@ -414,10 +414,10 @@ enum IdentType {
    ///
    /// When set, it is an indexing inner_ref that is of the form
    /// (inner_ref (dup (array ..))) or (inner_ref (vector ... ))
-   /// 
+   ///
    /// When clear, it is a selecting inner_ref that is of the form
    /// (inner_ref (dup (structv ... ))) or (inner_red (structr ... ))
-   ///  
+   ///
    /// These two types of inner-ref must be handled differently in most
    /// passes. For example, the index argument must be independently
    /// resolved and type checked but the field argumet must not.
@@ -432,14 +432,14 @@ enum IdentType {
    /// In theory, the by-ref-ness is a part of the type, and must
    /// be obtainable from the identifier's type. However, the
    /// implementation does not encode by-ref this way. The by-ref is
-   /// noted 
+   /// noted
 
-   /// - On the components of a function type 
+   /// - On the components of a function type
    /// - As an AST flag on the identifier AST.
    ///
    /// Encoding by-ref in this way lends itself to cleaner implementation.
    /// If by-ref were to be a type constructor, we must look beyond the
-   /// by-ref constructor at every r-value usage of the identifier. 
+   /// by-ref constructor at every r-value usage of the identifier.
    ARG_BYREF = 0x20000000u,
 
    /// Set of ast flag values that must be masked from definitions when
@@ -457,7 +457,7 @@ struct EnvSet {
   boost::shared_ptr<ASTEnvironment> env;
   boost::shared_ptr<TSEnvironment> gamma;
   boost::shared_ptr<InstEnvironment> instEnv;
-  
+
   EnvSet()
   {
     env = boost::GC_NULL;
@@ -496,7 +496,7 @@ struct EnvSet {
   }
 
   static inline boost::shared_ptr<EnvSet>
-  make(boost::shared_ptr<ASTEnvironment> _env, 
+  make(boost::shared_ptr<ASTEnvironment> _env,
        boost::shared_ptr<TSEnvironment>_gamma,
        boost::shared_ptr<InstEnvironment> _instEnv)
   {
@@ -515,15 +515,15 @@ struct EnvSet {
 }
 
 %members {
- private:  
+ private:
   static unsigned long long astCount;
-  
+
  public:
   unsigned long long ID; // Unique ID of this AST
 
   LitValue litValue;
   unsigned long litBase;
-  
+
   IdentType identType;
   sherpa::EnumSet<AstFlags> flags;
 
@@ -543,13 +543,13 @@ struct EnvSet {
   bool isTopLevelForm();
   bool isIdentType(IdentType idt);
   bool leadsToTopLevelForm();
-  void clearTypes(); // Clear the sumType and scheme fields 
+  void clearTypes(); // Clear the sumType and scheme fields
                      // of this AST and ALL children RECURSIVELY.
                      // This needs to be done before re-typing an
                      // expression, for example post-clconv
                      // otherwise, old types will infulence
                      // new type records.
- 
+
   /// On a declaration AST only: if a definition for it has been seen,
   /// then defn points to the definition.
   boost::shared_ptr<AST> defn;
@@ -571,7 +571,7 @@ struct EnvSet {
   /// holds the external identifier string, otherwise it is empty.
   std::string externalName;
 
-  /// A set of environments associated with this ast. 
+  /// A set of environments associated with this ast.
   /// - If this is a local name for an imported interface, these are
   ///   pointers to the environments of the imported interface.
   /// - In at_let, at_letrec, at_letStar, at_define ... these are the
@@ -580,39 +580,39 @@ struct EnvSet {
 
   /// @brief Pointer to defining form
   ///
-  /// defForm has context sensitive meaning. 
+  /// defForm has context sensitive meaning.
   /// This is basically a hack in the absence of parent pointers, where
   /// I must reach back into the definition and get the defining form,
   /// or some form of a containing datastructure.
-  /// 
-  /// In the case of top-level expressions, we use it to get the 
+  ///
+  /// In the case of top-level expressions, we use it to get the
   /// entire defining form from the identifier being defined
-  /// 
+  ///
   /// (def  defIdent ... )
   /// ^        |
   /// |________|
   ///   defForm
-  /// 
+  ///
   /// In the case of let-expressions:
   /// (The quoted phrases are just ast-types not syntax.)
   ///
   ///  _______________      __________________
-  /// |   defForm     |     |   defForm       |  
+  /// |   defForm     |     |   defForm       |
   /// v               |     v                 |
   /// (define   ... (let .. ("letbindings" ("letbinding" ident ... ))))
-  ///               ^             |        ^               | 
+  ///               ^             |        ^               |
   ///               |_____________|        |_______________|
   ///                  defForm                 defForm
-  /// 
+  ///
   ///     ___________
   ///    |           |
-  ///    v           | 
+  ///    v           |
   ///  (switch ... ("sw_leg" id ...) ...)
   ///                  ^    |
   ///                  |____|
   ///     _____      __________
   ///    |     |    |          |
-  ///    v     |    v          | 
+  ///    v     |    v          |
   ///  (do ("dobindings"  ("dobinding" id ...) ...)
   ///                             ^     |
   ///                             |_____|
@@ -623,22 +623,22 @@ struct EnvSet {
   ///  function-arguments with new values before jumping to the start
   ///  of the function.
   boost::shared_ptr<AST> defbps;
-  
+
   /// If this is a union, tagType is the type of the tag.
   boost::shared_ptr<Type> tagType;
 
-  /// Number of bits in a bitfield type. 
+  /// Number of bits in a bitfield type.
   /// On following ASTs, this fiield  store the total accumulated
   /// field_bits in all component ASTs.
-  /// 
+  ///
   ///  at_field, at_fill, at_reserved, tagtype (declare) at_declares,
-  ///  Identifier of at_defunion 
+  ///  Identifier of at_defunion
   size_t field_bits;
-  
+
   /// On defreppr unions, this field is present on fields that
   /// participate in union discrimination. This field stores the
   /// value (not just a true/false setting) that the field must have
-  /// as indicated by the when clause. 
+  /// as indicated by the when clause.
   size_t unin_discm;
 
   /// Total number of fill bits that are not reported by the type
@@ -646,7 +646,7 @@ struct EnvSet {
   size_t total_fill;
 
   /// TypeScheme for the Structure definition corresponding to a union
-  /// constructor. 
+  /// constructor.
   boost::shared_ptr<TypeScheme> stSigma;
 
   /// Union Constructors with identical layout must share the same
@@ -661,16 +661,16 @@ struct EnvSet {
 
   // Tracking scope of type-variables:
 
-  /// Let binding at which this type variable is scoped. 
+  /// Let binding at which this type variable is scoped.
   /// This flag is set reliably set whenever the resolver is
   /// called, so there is no need to worry while cloning the AST?
   boost::shared_ptr<AST> tvarLB;
 
   /// Let-Binding within which this at_letbindings is contained. In
   /// the case of the outer-most let-bindings, this field points to
-  /// the top-level define/recdef. 
+  /// the top-level define/recdef.
   /// This flag is set everytime the resolver is called, so there is
-  /// no need to worry while cloning an AST. 
+  /// no need to worry while cloning an AST.
   boost::shared_ptr<AST> parentLB;
 
   static boost::shared_ptr<AST> makeBoolLit(const sherpa::LToken &tok);
@@ -691,17 +691,17 @@ struct EnvSet {
   ///
   /// @bug Shap needs to review this.
   void disown(size_t s);
-  
+
   /// Generate an identifier AST with a newly generated internal name.
   /// This will not have any particular type assigned to it, and is
   /// intended to be used in the front end passes before the type
   /// checker is involved.
-  static boost::shared_ptr<AST> 
+  static boost::shared_ptr<AST>
     genIdent(const char *pfx = "tmp", const bool isTV = false);
 
   /// Generate an at_ident AST providing a temporary symbol that is
   /// type-compatible with the type of the passed AST @p lhs.
-  static boost::shared_ptr<AST> genSym(boost::shared_ptr<AST> lhs, 
+  static boost::shared_ptr<AST> genSym(boost::shared_ptr<AST> lhs,
 		     const char *pfx="tmp",
 		     const bool isTV = false);
 
@@ -718,18 +718,18 @@ struct EnvSet {
   ///
   /// if getPattern is true, it adds the identPattern ASTs
   /// instead of ident ASTs
-  void getIds(std::ostream &errStream, 
+  void getIds(std::ostream &errStream,
 	      std::vector<boost::shared_ptr<AST> >& ids,
-	      bool getPattern = false);  
+	      bool getPattern = false);
 
   /// @brief Utility function to call symType->getType()
-  boost::shared_ptr<Type> getType(); 
+  boost::shared_ptr<Type> getType();
   /// @brief Utility function to call symType->getType()
   boost::shared_ptr<const Type> getType() const;
-  
-  /// Given a union constructor of the form Ctr or union-name.Ctr, 
+
+  /// Given a union constructor of the form Ctr or union-name.Ctr,
   /// returns Ctr.
-  boost::shared_ptr<AST> getCtr(); 
+  boost::shared_ptr<AST> getCtr();
 
 
   /// @brief Given a defining occurrence, return a new AST for a use
@@ -751,15 +751,15 @@ struct EnvSet {
   boost::shared_ptr<AST> getTrueCopy();
 
   /// @brief  Make an exact deep copy.
-  /// 
-  /// This function clears fields such as symbolDef, type, etc. 
+  ///
+  /// This function clears fields such as symbolDef, type, etc.
   /// This is because (1) we don't need them since new ASTs are almost
   /// immediately subject to resolver and type check. (2) We sometimes
   /// start from a copy of an AST and use it in a way that the original
   /// symbolDef/type are no longer valid, so we clear these fields
-  /// preemptively. 
+  /// preemptively.
   boost::shared_ptr<AST> getDeepCopy();
-  
+
   /// @briefRename identifier @p from to @p to within AST named by @p
   /// this.
   ///
@@ -783,12 +783,12 @@ struct EnvSet {
   /// @brief Pretty print this AST to @p out, annotating each with its
   /// type if @p showTypes is true, and appending a final end of line
   /// of @p endline is true.
-  void PrettyPrint(std::ostream& out, bool showTypes = false, 
+  void PrettyPrint(std::ostream& out, bool showTypes = false,
 		   bool endline=true) const;
 
   // For use in GDB:
   void PrettyPrint(bool decorated) const;
-} 
+}
 
 %sourcetop {
 #include "Type.hxx"
@@ -802,7 +802,7 @@ unsigned long long AST::astCount = 0;
 
 
 // If this section changes, please update the
-// copy-constructor. ASTMaker does not automatically do it. 
+// copy-constructor. ASTMaker does not automatically do it.
 %construct {
   ID = ++(AST::astCount);
   identType = id_unresolved;
@@ -839,8 +839,8 @@ GROUP var = ident | usesel;
 AST usesel = ident ident;
 
 // LITERALS [2.4]
-GROUP literal = charLiteral | boolLiteral 
-              | intLiteral  | floatLiteral 
+GROUP literal = charLiteral | boolLiteral
+              | intLiteral  | floatLiteral
               | stringLiteral;
 
 //BOOLEAN LITERALS ???
@@ -875,7 +875,7 @@ GROUP definition = type_definition | value_definition | if_definition
                    | tc_definition;
 
 GROUP type_definition = defunion | defstruct
-                      | declunion | declstruct 
+                      | declunion | declstruct
                       | declrepr | defrepr
                    /*  | deftype  */
                       | defexception;
@@ -885,15 +885,15 @@ GROUP if_definition = proclaim | import
                     | importAs | provide
                     | declare;
 
-// NEWUNION TYPES [3.6.2]                
+// NEWUNION TYPES [3.6.2]
 AST defunion = ident tvlist category declares constructors constraints;
 AST declunion = ident tvlist category constraints;
 
-// STRUCTURE TYPES [3.6.1]           
+// STRUCTURE TYPES [3.6.1]
 AST defstruct = ident tvlist category declares fields constraints;
 AST declstruct = ident tvlist category constraints;
 
-// REPR TYPES [3.6.1]           
+// REPR TYPES [3.6.1]
 //AST defrepr = ident tvlist category declares reprbody constraints;
 //#AST declrepr = ident tvlist category constraints;
 //GROUP reprbodyitem = reprtag | field | fill | reprcase;
@@ -930,7 +930,7 @@ AST qualType = constraints type;
 AST constraints = tcapp*;
 
 // TYPE CLASS INSTANTIATIONS [4.2]
-AST definstance = tcapp methods constraints; 
+AST definstance = tcapp methods constraints;
 AST methods = expr*;
 
 // PROCLAIM DEFINITION -- VALUES [6.2]
@@ -943,12 +943,12 @@ AST recdef = identPattern expr constraints;
 // IMPORT DEFINITIONS [8.2]
 AST importAs = ifident ident;
 AST provide = ifident ident+;
- 
+
 AST import = ifident ifsel*;
 AST ifsel = ident ident;
 
 // DECLARES cannot be empty from the input, but we do insert
-// empty DECLARES nodes in the parser for the sake of positional 
+// empty DECLARES nodes in the parser for the sake of positional
 // regularity.
 AST declares = declare*;
 AST declare = ident type?;
@@ -968,16 +968,16 @@ AST reserved = type intLiteral;
 GROUP qtype = qualType | type;
 
 // argVec is not able to appear in a "type" position.
-GROUP type = var | tvar | bitfield | refType | valType 
+GROUP type = var | tvar | bitfield | refType | valType
            | fn | byrefType | primaryType | dummyType
-           | arrayType | vectorType | typeapp 
+           | arrayType | vectorType | typeapp
            // | closureType;
            | mutableType | exceptionType;
 
-// PRIMARY TYPES [3.2]             
+// PRIMARY TYPES [3.2]
 AST bitfield = primaryType intLiteral;
 
-// REF TYPES [3.4.1]               
+// REF TYPES [3.4.1]
 AST refType = type;
 AST byrefType = type;
 
@@ -989,11 +989,11 @@ AST fn = fnargVec type;
 LEAF primaryType;
 // vectors of argument type (for FN)
 AST fnargVec = type*;
-// ARRAY TYPE [3.5.1]                 
+// ARRAY TYPE [3.5.1]
 AST arrayType = type intLiteral;
-// VECTOR TYPE [3.5.2]               
+// VECTOR TYPE [3.5.2]
 AST vectorType = type intLiteral?;
-// MUTABLE TYPE [3.7]              
+// MUTABLE TYPE [3.7]
 AST mutableType = type;
 // TYPE CONSTRUCTORS (typapp)
 AST typeapp = var type+;
@@ -1002,7 +1002,7 @@ LEAF exceptionType;
 
 // Dumy types
 LEAF dummyType;
- 
+
 AST identPattern = var qtype?;
 
 
@@ -1013,21 +1013,21 @@ AST tqexpr = eform type;
 
 // EXPRESSIONS [7]
 GROUP eform = literal | var | unit
-            | array | vector | makevectorL 
+            | array | vector | makevectorL
             | begin | select
             | fqCtr | sel_ctr
             | array_nth | vector_nth
-            | array_length | vector_length 
+            | array_length | vector_length
             | lambda | suspend
             | apply | struct_apply | ucon_apply
             | if | when | and | or | not | cond | switch
             | setbang | dup | deref | inner_ref
-	    | try | throw | let | letStar | letrec 
- 	    | container | do 
+	    | try | throw | let | letStar | letrec
+ 	    | container | do
 	    | mkClosure | allocREF | copyREF | setClosure
 	    | block | return_from
-            // | loop | typecase | casebang 
-            ; 
+            // | loop | typecase | casebang
+            ;
 // *select* is record selection.
 // *fqCtr* is a union name qualified constructor. Marked in cases like
 // list.cons, which can be used interchangably with cons. This
@@ -1036,7 +1036,7 @@ GROUP eform = literal | var | unit
 // for true/false test. Marked in cases like
 // u.cons, where `u' is a value of list (union) type, where
 // we want to find out if u is currently tagged as cons.
-// This expression has type bool. 
+// This expression has type bool.
 
 // Union constructors
 GROUP ucon = var | select | fqCtr;
@@ -1047,7 +1047,7 @@ LEAF unit;
 // SUSPENDED EXPRESSIONS
 AST suspend = var expr;
 
-// MAKE-VECTOR [7.4.2] 
+// MAKE-VECTOR [7.4.2]
 AST makevectorL = expr expr;
 
 // VECTORS [7.4.3]
@@ -1056,7 +1056,7 @@ AST vector = expr+;
 // ARRAYS [7.4.3]
 AST array = expr+;
 
-// BEGIN [7.5] 
+// BEGIN [7.5]
 AST begin = expr_or_define+;
 
 // MEMBER [7.7]
@@ -1064,9 +1064,9 @@ AST select = expr ident;
 AST fqCtr = ident ident;
 AST sel_ctr = expr ident;
 
-// ARRAY-NTH [7.8.2]          
+// ARRAY-NTH [7.8.2]
 AST array_nth = expr expr;
-// VECTOR-NTH [7.8.2]          
+// VECTOR-NTH [7.8.2]
 AST vector_nth = expr expr;
 // ARRAY-LENGTH [7.8.1]
 AST array_length = expr;
@@ -1077,7 +1077,7 @@ AST vector_length = expr;
 AST lambda = argVec expr;
 // vectors of argument bindings (for LAMBDA)
 AST argVec = identPattern*;
-// APPLICATION [7.10]          
+// APPLICATION [7.10]
 AST apply = expr expr*;
 AST struct_apply = var expr+;
 AST ucon_apply = ucon expr+;
@@ -1086,24 +1086,24 @@ AST ucon_apply = ucon expr+;
 AST if = expr expr expr;
 // IF [7.11.2]
 AST when = expr expr;
-// AND [7.11.3]                  
+// AND [7.11.3]
 AST and = expr+;
 // OR [7.11.4]
 AST or = expr+;
-// NOT [7.11.5]                  
+// NOT [7.11.5]
 AST not = expr;
-// COND [7.11.6]           
+// COND [7.11.6]
 AST cond = cond_legs otherwise;
 AST cond_legs = cond_leg*;
 AST cond_leg = expr expr;
 AST otherwise = expr;
 
-// SET! [7.12.1]                 
+// SET! [7.12.1]
 AST setbang = expr expr;
 
 // READ-ONLY [7.12.2]
-// DEREF [7.13.2]                
-AST deref = expr; 
+// DEREF [7.13.2]
+AST deref = expr;
 // DUP
 AST dup = expr;
 // INNER-REF
@@ -1112,7 +1112,7 @@ AST inner_ref = expr expr;
 // CLOSURE TYPE (compiler-internal)
 //AST closureType = fn+;
 // Alloc, initialize closures (compiler-internal)
-AST allocREF = type; 
+AST allocREF = type;
 AST copyREF = expr expr;
 AST mkClosure = expr ident;
 AST setClosure = ident expr expr+;
@@ -1127,20 +1127,20 @@ AST sw_legs = sw_leg+;
 AST sw_leg = ident expr ucon+;
 GROUP ow = otherwise | Null;
 
-/* // TYPECASE  [11]            
+/* // TYPECASE  [11]
 AST typecase = typecase_leg+;
 AST typecase_leg = identPattern expr;*/
 
 // TRY/CATCH [7.15.1]
 AST try = expr ident sw_legs ow;
-// THROW  [7.15.2]               
+// THROW  [7.15.2]
 AST throw = expr;
 
-// LET [7.16.1]                  
+// LET [7.16.1]
 AST let = letbindings expr constraints;
 AST letbindings = letbinding+;
 AST letbinding = identPattern expr;
-// LETREC [7.16.2]               
+// LETREC [7.16.2]
 AST letrec = letbindings expr constraints;
 
 // DO [7.6]

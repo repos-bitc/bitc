@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -217,7 +217,7 @@ struct option longopts[] = {
 void
 help()
 {
-  std::cerr 
+  std::cerr
     << "Common Usage:" << endl
     //    << "  bitcc [-I include] -c file1.bits ...\n"
     << "  bitcc [-I include] [-o outfile.bito] -c file.bits\n"
@@ -237,10 +237,10 @@ help()
     << "  --raw-tvars --show-maybes --show-all-tccs \n"
     << "\n"
     << "Languages: xmlpp, xmldump, xmltypes, bitcpp, showtypes, bito,\n"
-    << "           c, h, obj\n" 
+    << "           c, h, obj\n"
     << flush;
 }
- 
+
 /// @brief Cease processing after fatal error
 void
 fatal()
@@ -281,7 +281,7 @@ AddCompileArgumentForGCC(const std::string& s)
     exit(1);
   }
 
-  Options::CompilePreOptionsGCC.push_back(s);    
+  Options::CompilePreOptionsGCC.push_back(s);
 }
 
 /// @brief Find the backend corresponding to the specified target type.
@@ -301,7 +301,7 @@ FindBackEnd(const char *nm)
 ///
 /// These were subsequently resolved, but reporting borkage is not a
 /// bad thing.
-void 
+void
 handle_sigsegv(int param)
 {
   cerr << "Internal Compiler error: SIGSEGV. "
@@ -335,7 +335,7 @@ ResolveLibPath(std::string name)
     filesystem::path testPath = Options::libDirs[i] / fullNm;
     if (filesystem::exists(testPath)) {
       if (!filesystem::is_regular(testPath)) {
-	std::cerr << "bitcc: error: \"-l" << name 
+	std::cerr << "bitcc: error: \"-l" << name
 		  << "\" resolves to \""
 		  << testPath
 		  << "\", which is not a regular file."
@@ -347,11 +347,11 @@ ResolveLibPath(std::string name)
     }
   }
 
-  return filesystem::path();    
+  return filesystem::path();
 }
 
 int
-main(int argc, char *argv[]) 
+main(int argc, char *argv[])
 {
   int c;
   //  extern int optind;
@@ -382,7 +382,7 @@ main(int argc, char *argv[])
   /// along to gcc, and given the interspersal we need to do so in an
   /// order-preserving way.
 
-  while ((c = getopt_long(argc, argv, 
+  while ((c = getopt_long(argc, argv,
 			  "-e:o:O::l:VvcghI:L:",
 			  longopts, 0
 		     )) != -1) {
@@ -468,24 +468,24 @@ main(int argc, char *argv[])
     case LOPT_SHOWPASSNMS:
       {
 	std::cerr.width(15);
-	std::cerr << left 
+	std::cerr << left
 		  << "PASS"
 		  << "PURPOSE" << std::endl << std::endl;
 
 	for (size_t i = (size_t)pn_none+1; i < (size_t) pn_npass; i++) {
 	  std::cerr.width(15);
-	  std::cerr << left 
+	  std::cerr << left
 		    << UocInfo::passInfo[i].name
 		    << UocInfo::passInfo[i].descrip << std::endl;
 	}
 
-	std::cerr << left 
+	std::cerr << left
 		  << "Polyinst"
 		  << "Template-like instantiation of polymorphic definitions" << std::endl;
 
 	for (size_t i = (size_t)op_none+1; i < (size_t) op_npass; i++) {
 	  std::cerr.width(15);
-	  std::cerr << left 
+	  std::cerr << left
 		    << UocInfo::onePassInfo[i].name
 		    << UocInfo::onePassInfo[i].descrip << std::endl;
 	}
@@ -508,9 +508,9 @@ main(int argc, char *argv[])
 	}
 	
 	if (strcmp("midend", optarg) == 0 ||
-	    strcmp("ALL", optarg) == 0) 
+	    strcmp("ALL", optarg) == 0)
 	  Options::dumpAfterMidEnd = true;
- 
+
 	break;
       }
 
@@ -529,7 +529,7 @@ main(int argc, char *argv[])
 	}
 	
 	if (strcmp("midend", optarg) == 0 ||
-	    strcmp("ALL", optarg) == 0) 
+	    strcmp("ALL", optarg) == 0)
 	  Options::dumpTypesAfterMidEnd = true;
 
 	break;
@@ -640,7 +640,7 @@ main(int argc, char *argv[])
 	break;
       }
 
-    case LOPT_HELP: 
+    case LOPT_HELP:
       {
 	help();
 	exit(0);
@@ -708,14 +708,14 @@ main(int argc, char *argv[])
       break;
     }
   }
-  
+
   // Select default backend if none chosen otherwise.
   if (Options::backEnd == 0)
     Options::backEnd = &BackEnd::backends[0];
 
   for (size_t i = 0; i < Options::SystemDirs.size(); i++) {
     filesystem::path incPath = Options::SystemDirs[i] / "include";
-    
+
     UocInfo::searchPath.push_back(incPath);
     Options::CompilePreOptionsGCC.push_back("-I");
     Options::CompilePreOptionsGCC.push_back(incPath.string());
@@ -751,7 +751,7 @@ main(int argc, char *argv[])
 
   if (Options::outputFileName.size() == 0)
     Options::outputFileName = "bitc.out";
-  
+
   /************************************************************/
   /*                UOC Parse and Validate                    */
   /************************************************************/
@@ -762,7 +762,7 @@ main(int argc, char *argv[])
     sherpa::LexLoc loc = LexLoc();
     (void) UocInfo::importInterface(std::cerr, loc, "bitc.prelude");
   }
-  
+
   // Compile everything
   for (size_t i = 0; i < Options::inputs.size(); i++)
     UocInfo::CompileFromFile(Options::inputs[i], true);
@@ -774,14 +774,14 @@ main(int argc, char *argv[])
   for (UocMap::iterator itr = UocInfo::ifList.begin();
       itr != UocInfo::ifList.end(); ++itr) {
     shared_ptr<UocInfo> puoci = itr->second;
-    
+
     if (puoci->lastCompletedPass >= Options::backEnd->needPass) {
       if (Options::backEnd->fn)
 	Options::backEnd->fn(std::cout, std::cerr, puoci);
     }
     else
       doFinal = false;
-  } 
+  }
 
   /* Output for Source modules */
   for (UocMap::iterator itr = UocInfo::srcList.begin();
@@ -794,7 +794,7 @@ main(int argc, char *argv[])
     }
     else
       doFinal = false;
-  } 
+  }
 
   /* We have completed all of the per-UOC passes. Assuming that we did
    * so successfully, run any required mid-end function:
@@ -835,7 +835,7 @@ main(int argc, char *argv[])
    * temporary expedient. We need to re-examine the rules for legal
    * top-level initialization.
    */
-  UocInfo::addAllCandidateEPs(); 
+  UocInfo::addAllCandidateEPs();
 #endif
 
   /* Create a new unit of compilation that will become the grand,
@@ -844,7 +844,7 @@ main(int argc, char *argv[])
 
   // Update all of the defForm pointers so that we can find things:
   UocInfo::findAllDefForms();
-    
+
   // Build the master back-end AST. This is done in a way that can be
   // extended incrementally.
   // The batch version is similar to the unbatched instantiator as
@@ -855,7 +855,7 @@ main(int argc, char *argv[])
   // one entry point, one might as well use instantiate instead of
   // instantiateBatch call.
   bool midPassOK = unifiedUOC->instantiateBatch(std::cerr, Options::entryPts);
-    
+
   if (Options::dumpAfterMidEnd) {
     std::cerr << "==== DUMPING *unified UOC*"
 	      << " AFTER mid-end"
@@ -869,28 +869,28 @@ main(int argc, char *argv[])
     unifiedUOC->ShowTypes(std::cerr);
     std::cerr <<std::endl << std::endl;
   }
-  
+
   if (!midPassOK) {
     std::cerr << "Exiting due to errors during Instantiation."
 	      << std::endl;
-    exit(1);    
+    exit(1);
   }
-  
+
   /************************************************************/
   /*                        The backend                       */
   /************************************************************/
 
   // Finally perform one-pass backend Functions.
   unifiedUOC->DoBackend();
-  
+
   // If there is any post-gather output, it should be done now.
   if (Options::backEnd->plfn) {
-    bool done = Options::backEnd->plfn(std::cout, std::cerr, 
+    bool done = Options::backEnd->plfn(std::cout, std::cerr,
 				       unifiedUOC);
     if (!done)
       exit(1);
   }
-  
+
   exit(0);
 }
 

@@ -3,26 +3,26 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2008, The EROS Group, LLC. 
+ * Copyright (C) 2008, The EROS Group, LLC.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -219,7 +219,7 @@ namespace sherpa {
     }
 #endif
 
-    // Sleazy support for if(EnumSet): 
+    // Sleazy support for if(EnumSet):
     inline operator int BoolConversionSupport::*() const
     {
       return (repr == 0) ? 0 : &BoolConversionSupport::dummy;
@@ -258,7 +258,7 @@ namespace sherpa {
   typename boost::enable_if_c<boost::is_enum<T>::value, EnumSet<T> >::type
   operator | (const T& lhs, const T& rhs)
   {
-    return (EnumSet<T>(lhs) | EnumSet<T>(rhs)); 
+    return (EnumSet<T>(lhs) | EnumSet<T>(rhs));
   }
 
   template <class T>
@@ -266,7 +266,7 @@ namespace sherpa {
   typename boost::enable_if_c<boost::is_enum<T>::value, EnumSet<T> >::type
   operator & (const T& lhs, const T& rhs)
   {
-    return (EnumSet<T>(lhs) & EnumSet<T>(rhs)); 
+    return (EnumSet<T>(lhs) & EnumSet<T>(rhs));
   }
 
   template <class T>
@@ -274,7 +274,7 @@ namespace sherpa {
   typename boost::enable_if_c<boost::is_enum<T>::value, EnumSet<T> >::type
   operator ^ (const T& lhs, const T& rhs)
   {
-    return (EnumSet<T>(lhs) ^ EnumSet<T>(rhs)); 
+    return (EnumSet<T>(lhs) ^ EnumSet<T>(rhs));
   }
 
   // Unary bitwise negate on underlying type:

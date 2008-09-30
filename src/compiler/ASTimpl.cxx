@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -55,7 +55,7 @@
 using namespace boost;
 using namespace sherpa;
 
-shared_ptr<AST> 
+shared_ptr<AST>
 AST::makeBoolLit(const sherpa::LToken &tok)
 {
   shared_ptr<AST> ast = AST::make(at_boolLiteral, tok);
@@ -63,11 +63,11 @@ AST::makeBoolLit(const sherpa::LToken &tok)
     ast->litValue.b = true;
   else
     ast->litValue.b = false;
-  
+
   return ast;
 }
 
-shared_ptr<AST> 
+shared_ptr<AST>
 AST::makeCharLit(const sherpa::LToken &tok)
 {
   // FIX: (shap) This needs to convert to ordinal representation
@@ -80,8 +80,8 @@ AST::makeCharLit(const sherpa::LToken &tok)
   return ast;
 }
 
-shared_ptr<AST>  
-AST::makeIntLit(const sherpa::LToken &tok) 
+shared_ptr<AST>
+AST::makeIntLit(const sherpa::LToken &tok)
 {
   shared_ptr<AST> ast = AST::make(at_intLiteral, tok);
   std::string num = "";
@@ -89,7 +89,7 @@ AST::makeIntLit(const sherpa::LToken &tok)
 
   /* Forgetting the sign, base information in the lexer, and
      rediscovering it here is a little stupid. */
-  
+
   if (tok.str[0] == '-') {
     num = tok.str.substr(1, tok.str.size());
     negative = true;
@@ -108,29 +108,29 @@ AST::makeIntLit(const sherpa::LToken &tok)
   else {
     ast->litBase = 10;
   }
-  
-  ast->litValue.i = BigNum(num, ast->litBase);  
-  
+
+  ast->litValue.i = BigNum(num, ast->litBase);
+
   // Sign is not being considered by bignum implementation
   if (negative)
     ast->litValue.i = -ast->litValue.i;
-  
+
   return ast;
 }
 
 /// @bug This is not doing the correct conversion. It completely
 /// ignores the radix encoding and the exponent encoding.
-shared_ptr<AST> 
-AST::makeFloatLit(const sherpa::LToken &tok) 
-{ 
+shared_ptr<AST>
+AST::makeFloatLit(const sherpa::LToken &tok)
+{
   shared_ptr<AST> ast = AST::make(at_floatLiteral, tok);
-  ast->litBase = 10;  
+  ast->litBase = 10;
   ast->litValue.d = strtod(tok.str.c_str(), 0);
 #if 0
   std::string litString = tok.str;
   std::string expString;
   std::string mantissaString;
- 
+
   std::string::size_type epos = litString.find ('^');
 
   if (epos != std::string::npos) {
@@ -141,14 +141,14 @@ AST::makeFloatLit(const sherpa::LToken &tok)
     expString = "";
     mantissaString = litString;
   }
-   
+
   /* Handle the mantissa */
-  
+
   std::string::size_type pos = mantissaString.find ('r');
   if (pos != std::string::npos) {
     std::string rad;
     if (mantissaString[0] == '-') {
-      rad = mantissaString.substr(1, pos); 
+      rad = mantissaString.substr(1, pos);
       mantissaString =
         "-" + mantissaString.substr(pos+1, mantissaString.size());
     }
@@ -156,28 +156,28 @@ AST::makeFloatLit(const sherpa::LToken &tok)
       rad = mantissaString.substr(0, pos);
       mantissaString = mantissaString.substr(pos+1, mantissaString.size());
     }
-    
+
     char *end;
     ast->litBase = strtoul(rad.c_str(), &end, 10); // &OK
   }
-   
+
   /* Handle the exponent part */
   std::string exponent = "";//ss.str();
   if (epos != std::string::npos) {
     size_t expBase = 10;
-    
+
     std::string::size_type pos = expString.find ('r');
     if (pos != std::string::npos) {
       std::string rad;
       if (expString[0] == '-') {
-	rad = expString.substr(1, pos); 
+	rad = expString.substr(1, pos);
 	expString = "-" + expString.substr(pos+1, expString.size());
       }
       else {
 	rad = expString.substr(0, pos);
 	expString = expString.substr(pos+1, expString.size());
       }
-      
+
       char *end;
       expBase = strtoul(rad.c_str(), &end, 10); //&OK
     }
@@ -185,28 +185,28 @@ AST::makeFloatLit(const sherpa::LToken &tok)
     mpz_init_set_str(expmpz, expString.c_str(), expBase);
     exponent = "@" + std::string(mpz_get_str (NULL, ast->litBase, expmpz));
   }
-  else 
+  else
     exponent = "@0";
-  
-  //std::cout << " Mantissa = " << mantissaString << " Exponent = " 
-  //	    << exponent 
+
+  //std::cout << " Mantissa = " << mantissaString << " Exponent = "
+  //	    << exponent
   //	    << " Base = " << ast->litBase;
-  
+
   /* Finish off */
   mpf_init_set_str(ast->litValue.d, (mantissaString + exponent).c_str(),
 		   ast->litBase);
   //gmp_printf(" %Ff\n", ast->litValue.d);
-  
+
 #endif
   return ast;
 }
 
-shared_ptr<AST> 
+shared_ptr<AST>
 AST::makeStringLit(const sherpa::LToken &tok)
 {
   shared_ptr<AST> ast = AST::make(at_stringLiteral, tok);
   ast->litValue.s = tok.str;
-  
+
   return ast;
 }
 
@@ -263,7 +263,7 @@ AST::atKwd() const
     //     return "<reprcaseleg>";
     //   case at_reprtag:
     //     return "<reprtag>";
-    
+
 
   case at_defstruct:
   case at_declstruct:
@@ -321,10 +321,10 @@ AST::atKwd() const
   case at_valType:
     return "val";
 
-  case at_fn: 
+  case at_fn:
     return "fn";
 
-//   case at_closureType: 
+//   case at_closureType:
 //     return "closure";
 
   case at_primaryType:
@@ -453,7 +453,7 @@ AST::atKwd() const
 
   case at_switch:
     return "switch";
-    
+
   case at_sw_legs:
     return "<sw_legs>";
 
@@ -551,7 +551,7 @@ AST::atKwd() const
     return "<tcapp>";
 
   case at_refCat:
-    return "ref";    
+    return "ref";
 
   case at_valCat:
     return "val";
@@ -612,8 +612,8 @@ AST::atKwd() const
   return "<IMPOSSIBLE>";
 }
 
-std::string 
-identTypeToString(IdentType id) 
+std::string
+identTypeToString(IdentType id)
 {
   switch (id) {
   case id_unresolved:
@@ -657,7 +657,7 @@ AST::disown(size_t s)
   children.erase(children.begin() + s);
 }
 
-bool 
+bool
 AST::isTopLevelForm()
 {
   switch(astType) {
@@ -671,15 +671,15 @@ AST::isTopLevelForm()
   case at_declare:
   case at_importAs:
   case at_provide:
-  case at_defexception:    
+  case at_defexception:
     return true;
-    
+
   default:
     return false;
   }
 }
 
-bool 
+bool
 AST::leadsToTopLevelForm()
 {
   switch(astType) {
@@ -695,9 +695,9 @@ AST::leadsToTopLevelForm()
   case at_declare:
   case at_importAs:
   case at_provide:
-  case at_defexception:    
+  case at_defexception:
     return true;
-    
+
   default:
     return false;
   }
@@ -712,7 +712,7 @@ AST::clearTypes() {
 }
 
 
-void 
+void
 AST::getIds(std::ostream &errStream,
 	    std::vector<shared_ptr<AST> >& ids,
 	    bool getPattern)
@@ -724,7 +724,7 @@ AST::getIds(std::ostream &errStream,
     else
       ids.push_back(child(0));
     break;
-    
+
   default:
     errStream << loc << ": Internal Compiler Error,"
 	      << " getIds routine obtained the wrong "
@@ -733,7 +733,7 @@ AST::getIds(std::ostream &errStream,
   }
 }
 
-shared_ptr<AST> 
+shared_ptr<AST>
 AST::getID()
 {
   switch(astType) {
@@ -742,7 +742,7 @@ AST::getID()
   case at_letbinding:
   case at_dobinding:
     return child(0)->child(0);
-    
+
   case at_defstruct:
   case at_defunion:
   case at_proclaim:
@@ -751,13 +751,13 @@ AST::getID()
   case at_defexception:
   case at_deftypeclass:
     return child(0);
-    
+
   default:
     return GC_NULL;
   }
 }
 
-bool 
+bool
 AST::isUnionLeg()
 {
   assert(astType == at_ident);
@@ -766,19 +766,19 @@ AST::isUnionLeg()
 
 bool
 AST::isMethod()
-{  
+{
   if ((astType == at_ident) && isIdentType(id_method))
     return true;
   else
     return false;
 }
 
-shared_ptr<AST> 
+shared_ptr<AST>
 AST::getCtr()
 {
   if (astType == at_ident)
     return shared_from_this();
-  
+
   if (astType == at_fqCtr)
     return child(1);
 
@@ -786,20 +786,20 @@ AST::getCtr()
   return GC_NULL;
 }
 
-/* Rename identifier `from' to `to' in `ast' */ 
+/* Rename identifier `from' to `to' in `ast' */
 void
 AST::rename(shared_ptr<AST> from, std::string newName)
-{ 
+{
   shared_ptr<AST> me = shared_from_this();
   switch(astType) {
-  case at_ident:    
+  case at_ident:
     if (me == from || symbolDef == from)
       s = newName;
     break;
-  
-    // switched identifier also gets renamed in 
+
+    // switched identifier also gets renamed in
     // the encoded at_switch and at_try positions here
-    
+
   default:
     for (size_t c = 0; c < children.size(); c++)
       child(c)->rename(from, newName);
@@ -813,7 +813,7 @@ AST::isLocation()
   switch (astType) {
   case at_ident:
       return true;
-    
+
   case at_vector_nth:
   case at_deref:
       return true;
@@ -823,7 +823,7 @@ AST::isLocation()
 
   case at_select:
     return child(0)->isLocation();
-        
+
   default:
       return false;
   }
@@ -837,28 +837,28 @@ AST::isLiteral()
   case at_charLiteral:
   case at_intLiteral:
   case at_floatLiteral:
-  case at_stringLiteral:    
-    return true;    
-    
+  case at_stringLiteral:
+    return true;
+
   default:
     return false;
   }
 }
 
-bool 
+bool
 AST::isIdentType(IdentType t)
 {
   return ((identType == t) ||
 	  ((t == idc_type) && ((identType == id_tvar) ||
-			       (identType == id_union) || 
+			       (identType == id_union) ||
 			       (identType == id_struct))) ||
-	  ((t == idc_value) && ((identType == id_value) || 
-				(identType == id_ucon0) || 
+	  ((t == idc_value) && ((identType == id_value) ||
+				(identType == id_ucon0) ||
 				(identType == id_method))) ||
-	  ((t == idc_ctor)  && ((identType == id_struct) || 
-				(identType == id_ucon) || 
+	  ((t == idc_ctor)  && ((identType == id_struct) ||
+				(identType == id_ucon) ||
 				(identType == id_ucon0))) ||
-	  ((t == idc_uctor) && ((identType == id_ucon) || 
+	  ((t == idc_uctor) && ((identType == id_ucon) ||
 				(identType == id_ucon0))) ||
 	  // The idc_apply case is written as a recursive call and not
 	  // as disjunction of various id_* cases since in the case

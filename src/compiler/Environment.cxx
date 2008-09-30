@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -52,7 +52,7 @@ using namespace boost;
 using namespace sherpa;
 
 template<class T>
-shared_ptr<Binding<T> > 
+shared_ptr<Binding<T> >
 Environment<T>::getLocalBinding(const std::string& nm) const
 {
   const_iterator itr = bindings.find(nm);
@@ -63,18 +63,18 @@ Environment<T>::getLocalBinding(const std::string& nm) const
 }
 
 template<class T>
-shared_ptr<Binding<T> > 
+shared_ptr<Binding<T> >
 Environment<T>::doGetBinding(const std::string& nm,
 			     shared_ptr<Environment<T> > outerLimit) const
 {
   shared_ptr<Binding<T> > binding = getLocalBinding(nm);
-  
-  if (binding) 
+
+  if (binding)
     return binding;
 
   if (parent && parent != outerLimit)
     return parent->doGetBinding(nm, outerLimit);
-  
+
   return GC_NULL;
 }
 
@@ -86,12 +86,12 @@ Environment<T>::asString() const
 
   if (parent)
     ss << parent->asString();
-  
+
   for (const_iterator itr = begin(); itr != end(); ++itr)
     ss << itr->first << ": "
        << itr->second->val
        << std::endl;
-  
+
   ss << std::endl;
 
   return ss.str();
@@ -113,8 +113,8 @@ Environment<T>::removeBinding(const std::string& nm)
 
 template<class T>
 void
-Environment<T>::addBinding(const std::string& nm, 
-			   shared_ptr<T> val, 
+Environment<T>::addBinding(const std::string& nm,
+			   shared_ptr<T> val,
 			   bool rebind)
 {
   if (rebind) {
@@ -127,12 +127,12 @@ Environment<T>::addBinding(const std::string& nm,
   }
 
   bindings[nm] = Binding<T>::make(nm, val);
-  latest = bindings[nm]; 
+  latest = bindings[nm];
 }
 
 template<class T>
-void 
-Environment<T>::updateKey(const std::string& from, 
+void
+Environment<T>::updateKey(const std::string& from,
 			  const std::string& to)
 {
   iterator itr = bindings.find(from);
@@ -148,7 +148,7 @@ Environment<T>::updateKey(const std::string& from,
 }
 
 template<class T>
-shared_ptr<Environment<T> > 
+shared_ptr<Environment<T> >
 Environment<T>::newScope()
 {
   shared_ptr<Environment<T> > nEnv = Environment<T>::make(uocName);
@@ -159,18 +159,18 @@ Environment<T>::newScope()
 }
 
 template<class T>
-shared_ptr<Environment<T> > 
+shared_ptr<Environment<T> >
 Environment<T>::newDefScope()
 {
   shared_ptr<Environment<T> > nEnv = newScope();
   nEnv->defEnv = nEnv;
-  
+
   return nEnv;
 }
 
 
 template<class T>
-bool 
+bool
 Environment<T>::isAncestor(shared_ptr<Environment<T> > env)
 {
   if (parent == env)
@@ -196,10 +196,10 @@ Environment<T>::mergeBindingsFrom(shared_ptr<Environment<T> > from, bool complet
 
     if (complete)
       flags |= BF_COMPLETE;
-    
+
     bool rebind = (flags & BF_REBIND) ? true : false;
     flags &= ~BF_REBIND;
-    
+
     addBinding(nm, val, rebind);
     setFlags(nm, flags);
   }
@@ -213,18 +213,18 @@ Environment<T>::~Environment()
 
 // EXPLICIT INSTANTIATIONS:
 
-template shared_ptr<Binding<AST> > 
+template shared_ptr<Binding<AST> >
 Environment<AST>::getLocalBinding(const std::string& nm) const;
-template shared_ptr<Binding<TypeScheme> > 
+template shared_ptr<Binding<TypeScheme> >
 Environment<TypeScheme>::getLocalBinding(const std::string& nm) const;
 template shared_ptr<Binding<set<shared_ptr<Instance> > > >
 InstEnvironment::getLocalBinding
 (const std::string& nm) const;
 
-template shared_ptr<Binding<AST> > 
-Environment<AST>::doGetBinding(const std::string& nm, 
+template shared_ptr<Binding<AST> >
+Environment<AST>::doGetBinding(const std::string& nm,
 			       shared_ptr<Environment<AST> >) const;
-template shared_ptr<Binding<TypeScheme> > 
+template shared_ptr<Binding<TypeScheme> >
 Environment<TypeScheme>::doGetBinding(const std::string& nm,
 			       shared_ptr<Environment<TypeScheme> >) const;
 template shared_ptr<Binding<set<shared_ptr<Instance> > > >
@@ -235,7 +235,7 @@ template void
 Environment<AST>::addBinding(const std::string& nm, shared_ptr<AST> val,
 			     bool rebind);
 template void
-Environment<TypeScheme>::addBinding(const std::string& nm, 
+Environment<TypeScheme>::addBinding(const std::string& nm,
 				    shared_ptr<TypeScheme> val,
 				    bool rebind);
 template void
@@ -262,26 +262,26 @@ InstEnvironment::updateKey
 (const std::string& from, const std::string& to);
 
 
-template shared_ptr<Environment<AST> > 
+template shared_ptr<Environment<AST> >
 Environment<AST>::newScope();
-template shared_ptr<Environment<TypeScheme> > 
+template shared_ptr<Environment<TypeScheme> >
 Environment<TypeScheme>::newScope();
-template shared_ptr<InstEnvironment > 
+template shared_ptr<InstEnvironment >
 InstEnvironment::newScope();
 
 
-template shared_ptr<Environment<AST> > 
+template shared_ptr<Environment<AST> >
 Environment<AST>::newDefScope();
-template shared_ptr<Environment<TypeScheme> > 
+template shared_ptr<Environment<TypeScheme> >
 Environment<TypeScheme>::newDefScope();
-template shared_ptr<InstEnvironment > 
+template shared_ptr<InstEnvironment >
 InstEnvironment::newDefScope();
 
-template bool 
+template bool
 Environment<AST>::isAncestor(shared_ptr<Environment<AST> > env);
-template bool 
+template bool
 Environment<TypeScheme>::isAncestor(shared_ptr<Environment<TypeScheme> > env);
-template bool 
+template bool
 InstEnvironment::isAncestor
 (shared_ptr<InstEnvironment > env);
 
@@ -311,4 +311,4 @@ template
 Environment<TypeScheme>::~Environment();
 template
 InstEnvironment::~Environment();
- 
+

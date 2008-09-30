@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -59,16 +59,16 @@
 ///
 /// - If the same field name appears in multiple legs of a DEFREPR, that
 ///   field must appear at the same bit offset in all legs where it
-///   appears.  That is, fpx = fpy implies 
-///   bitOffset(fpx) = bitOffset(fpy). 
+///   appears.  That is, fpx = fpy implies
+///   bitOffset(fpx) = bitOffset(fpy).
 ///
 /// - The fields within the when clauses of all constructor forms must
 ///   uniquely distinguish all constructible values of the union. The
-///   compiler will not introduce any more tag bits for any defrepr 
-///   value. 
+///   compiler will not introduce any more tag bits for any defrepr
+///   value.
 ///
 /// - The defrepr form will not accept type arguments over
-///   which it can be instantiated. 
+///   which it can be instantiated.
 ///
 /// This pass tests that all of these requirements are satisfied.
 
@@ -95,13 +95,13 @@ using namespace sherpa;
 
 /// @brief Given a sub-form describing a field, return the AST
 /// describing its type.
-static shared_ptr<AST> 
+static shared_ptr<AST>
 getTypeAst(shared_ptr<AST> fld)
 {
   switch(fld->astType) {
   case at_field:
     return fld->child(1);
-    
+
   case at_fill:
   case at_reserved:
     return fld->child(0);
@@ -113,22 +113,22 @@ getTypeAst(shared_ptr<AST> fld)
 }
 
 /// @brief Compute the bit offset of a field within its containing union.
-/// 
+///
 /// Note that this computation is target dependent if the Word type is
 /// being used.
-static size_t 
+static size_t
 bitOffset(shared_ptr<AST> leg, size_t n)
 {
   size_t off = 0;
   for (size_t c=1; c < n; c++) {
     shared_ptr<AST> fld = leg->child(c);
-    shared_ptr<AST> fldType = getTypeAst(fld);    
+    shared_ptr<AST> fldType = getTypeAst(fld);
     if (fldType->astType == at_bitfield)
       off += fldType->field_bits;
     else
       off += fldType->symType->size();
   }
-  
+
   return off;
 }
 
@@ -137,10 +137,10 @@ bitOffset(shared_ptr<AST> leg, size_t n)
 /// If a field appears in multiple legs of a DEFREPR, it must have the
 /// same type in all legs. If it is of bitfield type, it must also
 /// have the same number of bits in all occurrences.
-static bool 
+static bool
 TypesAgree(shared_ptr<AST> fld1, shared_ptr<AST> fld2)
 {
-  shared_ptr<AST> fT1 = getTypeAst(fld1);    
+  shared_ptr<AST> fT1 = getTypeAst(fld1);
   shared_ptr<AST> fT2 = getTypeAst(fld2);
 
   if ((fT1->symType->strictlyEquals(fT2->symType)) &&
@@ -162,7 +162,7 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
   case at_declrepr:
     assert(false);
     break;
-  
+
   case at_defunion:
     {
       if ((ast->flags & UNION_IS_REPR) == 0)
@@ -183,14 +183,14 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
 	      if (!fldi->symType->isInteger()) {
 		errStream << fldi->loc << ": "
 			  << " The discriminating field "
-			  << fldi->child(0)->s 
+			  << fldi->child(0)->s
 			  << " has a non-integer/bitfield type."
 			  << std::endl;
 		errFree = false;
-	      }	  	  
+	      }	  	
 	}
       }
-      
+
       /* Ascertain that common fields are at the same bit-offset
          and have the same type */
       for (size_t c=0; c < ctrs->children.size(); c++) {
@@ -200,16 +200,16 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
 	  shared_ptr<AST> fldi = ctrc->child(i);
 	  if (fldi->astType != at_field)
 	    continue;
-	  
- 	  size_t offc = bitOffset(ctrc, i);	  	  
+	
+ 	  size_t offc = bitOffset(ctrc, i);	  	
 	  for (size_t d=c+1; d < ctrs->children.size(); d++) {
 	    shared_ptr<AST> ctrd = ctrs->child(d);
-	    
+	
 	    for (size_t j=1; j < ctrd->children.size(); j++) {
 	      shared_ptr<AST> fldj = ctrd->child(j);
 	      if (fldj->astType != at_field)
 		continue;
-	      
+	
 	      if (fldi->child(0)->s == fldj->child(0)->s) {
 		if (offc != bitOffset(ctrd, j)) {
 		  errStream << ctrd->loc << ": "
@@ -237,8 +237,8 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
 	  }
 	}
       }
-      
-      /* Ascertain that ``where'' fields are decisive */      
+
+      /* Ascertain that ``where'' fields are decisive */
       for (size_t c=0; c < ctrs->children.size(); c++) {
 	shared_ptr<AST> ctrc = ctrs->child(c);
 	
@@ -263,7 +263,7 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
 
 	    if (fldj->flags & FLD_IS_DISCM) {
 	      assert(fldj->astType == at_field);
-	      
+	
 	      WhenMap::iterator itr_k = when.find(fldj->child(0)->s);
 	      if (itr_k == when.end())
 		continue;
@@ -274,22 +274,22 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
 	      }
 	    }
 	  }
-	  
+	
 	  if (!differ) {
 	    errStream << ctrc->loc << ": "
 		      << "Ambiguous defrepr constructors: "
 		      << ctrc->child(0)->s << " and "
 		      << ctrd->child(0)->s << ". Ambiguous case is: "
 		      << std::endl;
-	    
+	
 	    for (WhenMap::iterator itr_k = when.begin();
 		itr_k != when.end(); ++itr_k) {
 	      if (itr_k != when.begin())
-		errStream << ", ";	      
+		errStream << ", ";	
 	      errStream << itr_k->first << " = " << itr_k->second;
 	    }
-	    
-	    errStream << "." << std::endl;	  
+	
+	    errStream << "." << std::endl;	
 	    errFree = false;
 	  }
 	}
@@ -304,12 +304,12 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
       break;
     }
   }
-  
+
   return errFree;
 }
 
 bool
-UocInfo::fe_reprCheck(std::ostream& errStream, 
+UocInfo::fe_reprCheck(std::ostream& errStream,
 		      bool init, unsigned long flags)
 {
   bool errFree = reprCheck(errStream, uocAst);
