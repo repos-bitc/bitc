@@ -578,6 +578,7 @@ enum AstType {
   at_arrayType,
   at_vectorType,
   at_mutableType,
+  at_constType,
   at_typeapp,
   at_exceptionType,
   at_dummyType,

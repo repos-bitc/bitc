@@ -91,6 +91,7 @@ DEFKIND(ref,       false,  true,   false, false, true,  false,  false)
 // discarded henceforth.
 DEFKIND(byref,     false,  true,   false, false, true,  false,  false)
 DEFKIND(mutable,   false,  false,  false, false, false, false,  false)
+DEFKIND(const,     false,  false,  false, false, false, false,  false)
 DEFKIND(mbTop,     false,  false,  false, false, false, false,  false)
 DEFKIND(mbFull,    false,  false,  false, false, false, false,  false)
 DEFKIND(exn,       false,  false,  false, false, true,  false,  false)

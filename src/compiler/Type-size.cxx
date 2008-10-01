@@ -261,6 +261,7 @@ Type::size()
     }
     
   case ty_mutable:
+  case ty_const:
     {
       theSize = Base()->size();      
       break;

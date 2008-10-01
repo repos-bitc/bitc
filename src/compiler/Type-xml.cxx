@@ -338,6 +338,16 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
       break;  
     }
 
+  case ty_const:
+    {
+      out << "<const>" << endl;
+      out.more();
+      t->Base()->asXML(tvP, out);
+      out.less();       
+      out << "</const>" << endl; 
+      break;  
+    }
+
   case ty_pcst:
     {
       out << "<pcst>" << endl;

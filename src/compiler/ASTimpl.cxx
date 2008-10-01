@@ -344,7 +344,10 @@ AST::atKwd() const
     return "";
 
   case at_mutableType:
-    return " mutable";
+    return "mutable";
+
+  case at_constType:
+    return "const";
 
   case at_identPattern:
     return "<identPattern>";

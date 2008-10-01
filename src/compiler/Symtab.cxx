@@ -1762,6 +1762,7 @@ resolve(std::ostream& errStream,
     }
 
   case at_mutableType:
+  case at_constType:
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
@@ -2548,19 +2549,15 @@ initEnv(std::ostream& errStream,
   //  cout << "Processing " << ast->child(0)->s << std::endl;
   // "use" everything in the prelude
   shared_ptr<ASTEnvironment > preenv = GC_NULL;
-  size_t i;
-
-  {
-    UocMap::iterator itr = UocInfo::ifList.find("bitc.prelude");
-    if (itr == UocInfo::ifList.end()) {
-      errStream << ast->loc << ": "
-		<< "Internal Compiler Error. "
-		<< " Prelude has NOT been processed."
-		<< std::endl;
-      ::exit(1);
-    }
-    preenv = itr->second->env;
+  UocMap::iterator itr = UocInfo::ifList.find("bitc.prelude");
+  if (itr == UocInfo::ifList.end()) {
+    errStream << ast->loc << ": "
+	      << "Internal Compiler Error. "
+	      << " Prelude has NOT been processed."
+	      << std::endl;
+    ::exit(1);
   }
+  preenv = itr->second->env;
   
   if (!preenv) {
     // GCFIX: Why does this return on error instead of exiting? This

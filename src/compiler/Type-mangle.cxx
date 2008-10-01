@@ -129,8 +129,6 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 #endif
 
   case ty_fn:
-    assert(components.size() == 2);
-    
     ss << "FN" 
        << Args()->mangledString(igMut, true,maxArgMut)
        << Ret()->mangledString(igMut, true, maxArgMut);
@@ -200,7 +198,6 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
   case ty_array:
     {
-      assert(components.size() == 1);
       ss << "J" << Base()->mangledString(igMut, false, maxArgMut)
 	 << "__" << arrLen->len;
       break;
@@ -208,25 +205,29 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     
   case ty_vector:
     {
-      assert(components.size() == 1);
       ss << "K" << Base()->mangledString(igMut, false, maxArgMut);
       break;
     }
 
   case ty_ref:
-    assert(components.size() == 1);
     ss << "R" << Base()->mangledString(igMut, false, maxArgMut);
     break;
 
   case ty_byref:
-    assert(components.size() == 1);
     ss << "Z" << Base()->mangledString(igMut, false, maxArgMut);
     break;
 
   case ty_mutable:
-    assert(components.size() == 1);
     if (!igMut && !igTlMut)
       ss << "M";
+    ss << Base()->mangledString(igMut, false, maxArgMut);
+    break;
+    
+    // mangleString is called by routines beyond polyinstantiation,
+    // at which point, the const-ness of normalized the type 
+    // does not matter (const is really only necessary to 
+    // constrain type variables.
+  case ty_const:
     ss << Base()->mangledString(igMut, false, maxArgMut);
     break;
     
@@ -238,7 +239,6 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
       break;
     }
     
-    /* MAYBE handling right? */
   case ty_mbFull:
   case ty_mbTop:
     {

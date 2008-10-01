@@ -364,7 +364,11 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
   case ty_mutable:
     out << toCtype(t->Base(), IDname, flags, arrsz);
     break;
-
+    
+  case ty_const:
+    out << toCtype(t->Base(), IDname, flags, arrsz);
+    break;
+    
   case ty_dummy:
     // Dummy types fixed to unit
   case ty_unit:
@@ -998,6 +1002,7 @@ toc(std::ostream& errStream,
   case at_arrayType:
   case at_vectorType:
   case at_mutableType:
+  case at_constType:
   case at_typeapp:
   case at_bitfield:
   case at_qualType:

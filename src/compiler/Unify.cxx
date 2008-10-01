@@ -424,10 +424,25 @@ Unify(std::ostream& errStream,
       }
     }
 
+    /* Const equivalent representation handling
+       For example: (const (bool, bool)) == (bool, bool) */
 
+    if(t1->isConst() || t2->isConst()) {
+      shared_ptr<Type> constType = t1->isConst() ? t1 : t2;
+      shared_ptr<Type> other = t1->isConst() ? t2 : t1;
+
+      if(other->isEffectivelyConst()) {
+	CHKERR(errFree,
+	       Unify(errStream, trail, errLoc, 
+		     t1->Base()->minimizeMutability(), 
+		     t2->Base()->minimizeMutability(), uflags));
+	break;
+      }
+    }
+    
     errFree = typeError(errStream, errLoc, t1, t2);
     break;
-
+    
   case true:
     switch(t1->kind) {
     case ty_unit:
@@ -642,6 +657,15 @@ Unify(std::ostream& errStream,
       
 	CHKERR(errFree, PropagateMutability(errStream, trail, 
 					    errLoc, t1));
+	break;
+      }
+
+    case ty_const:
+      {
+	CHKERR(errFree,
+	       Unify(errStream, trail, errLoc, 
+		     t1->Base()->minimizeMutability(), 
+		     t2->Base()->minimizeMutability(), uflags));
 	break;
       }
     

@@ -972,7 +972,7 @@ GROUP type = var | tvar | bitfield | refType | valType
            | fn | byrefType | primaryType | dummyType
            | arrayType | vectorType | typeapp
            // | closureType;
-           | mutableType | exceptionType;
+           | mutableType | constType | exceptionType;
 
 // PRIMARY TYPES [3.2]
 AST bitfield = primaryType intLiteral;
@@ -995,6 +995,8 @@ AST arrayType = type intLiteral;
 AST vectorType = type intLiteral?;
 // MUTABLE TYPE [3.7]
 AST mutableType = type;
+// CONST TYPE [3.6]
+AST constType = type;
 // TYPE CONSTRUCTORS (typapp)
 AST typeapp = var type+;
 // EXCEPTION TYPE

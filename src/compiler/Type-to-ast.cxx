@@ -189,6 +189,7 @@ Type::asAST(const sherpa::LexLoc &loc,
       ast = t->Core()->asAST(loc, tvP);
       break;
     }
+
   case ty_mbFull:
     {
       if(t->Var()->isMutable())
@@ -291,33 +292,42 @@ Type::asAST(const sherpa::LexLoc &loc,
       ast = AST::make(at_arrayType, loc, typ, intLit);
       break;
     }
+
   case ty_vector:
     {
       shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = AST::make(at_vectorType, loc, typ);
       break;
     }
+
   case ty_ref:
     {
-      assert(t->components.size() == 1);
       shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = AST::make(at_refType, loc, typ);
       break;
     }
+
   case ty_byref:
     {
-      assert(t->components.size() == 1);
       shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = AST::make(at_byrefType, loc, typ);
       break;
     }
+
   case ty_mutable:
     {
-      assert(t->components.size() == 1);
       shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
       ast = AST::make(at_mutableType, loc, typ);
       break;
     }
+
+  case ty_const:
+    {
+      shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
+      ast = AST::make(at_constType, loc, typ);
+      break;
+    }
+
   case ty_exn:
     {
       ast = AST::make(at_exceptionType, loc);

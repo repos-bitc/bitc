@@ -212,8 +212,10 @@ enum MarkFlagValues {
   MARK_IS_CONCRETIZABLE         = 0x0200000u,
   MARK_IS_SHALLOW_CONCRETIZABLE = 0x0400000u,
   MARK_NORMALIZE_MBFULL         = 0x0800000u,
-//MARK_CHECK_COPY_MUT_PROP      = 0x1000000u,
-  MARK_CHECK_MUT_CONSISTENCY    = 0x1000000u
+  MARK_NORMALIZE_CONST          = 0x1000000u,
+  MARK_CHECK_MUT_CONSISTENCY    = 0x2000000u,
+  MARK_IS_EFFECTIVELY_CONST     = 0x4000000u,
+  MARK_IS_CONST_REDUCIBLE       = 0x4000000u,
 };
 typedef sherpa::EnumSet<MarkFlagValues> MarkFlags;
 
@@ -411,6 +413,11 @@ private:
   // (copy-compat (mutable 'a) bool) to (mutable bool)
   // This normalization is done in-place.
   void normalize_mbFull(boost::shared_ptr<Trail> trail=Trail::make());
+
+  // Normalize types such as (const bool) to bool
+  // const reduction function
+  // This normalization is done in-place.
+  void normalize_const(boost::shared_ptr<Trail> trail=Trail::make());
   
 public:
   boost::shared_ptr<Type> getType();  
@@ -447,6 +454,8 @@ public:
   bool isImmutableRefType();
   bool isMutable();  // (mutable T)
   bool isMutType();  // (mutable T) or (mutable 'a)|T
+  bool isConst();    // (const T)
+  bool isEffectivelyConst(); // T such that allwrapped within consts
   bool isMaybe();
   bool isMbFull();
   bool isMbTop();
@@ -463,6 +472,7 @@ public:
   bool isTypeClass();
   bool isPcst();
   bool isOfInfiniteType();
+  bool isConstReducible(); // (const T) is equivalent to minimizeMutability(T)
   size_t nBits();
   bool needsCaptureConversion();
   // Test if the type is a variable that can be substituted with

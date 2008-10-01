@@ -139,6 +139,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_primaryType:
   case at_fnargVec:
   case at_mutableType: 
+  case at_constType:
   case at_defunion:
   case at_defstruct:
   case at_constructors:

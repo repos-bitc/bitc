@@ -475,6 +475,13 @@ Type::isMutType()
 }
 
 bool 
+Type::isConst()
+{
+  shared_ptr<Type> t = getType();
+  return t->kind == ty_const;
+}
+
+bool 
 Type::isMaybe()
 {
   shared_ptr<Type> t = getType();
@@ -834,6 +841,78 @@ Type::isShallowConcretizable()
   return concretizable;  
 }
 
+bool 
+Type::isEffectivelyConst()
+{
+  shared_ptr<Type> t = getType();
+  
+  if (t->mark & MARK_IS_EFFECTIVELY_CONST)
+    return true;
+  
+  t->mark |= MARK_IS_EFFECTIVELY_CONST;
+  
+  bool effConst = true;
+  
+  switch(t->kind) {
+  case ty_tvar:
+  case ty_mbTop:
+  case ty_mbFull:
+  case ty_mutable:
+    effConst = false;
+    
+  case ty_array:
+  case ty_structv:
+  case ty_unionv:
+  case ty_uvalv:
+  case ty_uconv:
+    for (size_t i=0; effConst && i < t->components.size(); i++)
+      effConst = t->CompType(i)->isEffectivelyConst();
+    break;
+    
+  default:
+    break;
+  }
+  
+  t->mark &= ~MARK_IS_EFFECTIVELY_CONST;
+  return effConst;
+}
+
+bool 
+Type::isConstReducible()
+{
+  shared_ptr<Type> t = getType();
+  
+  if (t->mark & MARK_IS_CONST_REDUCIBLE)
+    return true;
+  
+  t->mark |= MARK_IS_CONST_REDUCIBLE;
+  
+  bool constred = true;
+  
+  switch(t->kind) {
+  case ty_tvar:
+  case ty_mbTop:
+  case ty_mbFull:
+    constred = false;
+    
+  case ty_mutable:
+  case ty_array:
+  case ty_structv:
+  case ty_unionv:
+  case ty_uvalv:
+  case ty_uconv:
+    for (size_t i=0; constred && i < t->components.size(); i++)
+      constred = t->CompType(i)->isConstReducible();
+    break;
+
+  default:
+    break;
+  }
+  
+  t->mark &= ~MARK_IS_CONST_REDUCIBLE;
+  return constred;
+}
+
 void 
 Type::normalize(boost::shared_ptr<Trail> trail)
 {
@@ -935,13 +1014,21 @@ Type::isOfInfiniteType()
 
   case ty_mbFull:
   case ty_mbTop:
+  case ty_array:
+  case ty_vector:
+  case ty_ref:
+  case ty_byref:
+  case ty_mutable:
+  case ty_const:
+  case ty_fn:
     {
-      return Core()->isOfInfiniteType();
+      for (size_t i=0; !infType && (i < components.size()); i++)
+      	if (CompType(i)->isOfInfiniteType())
+      	  infType = true;
       break;
     }
 
   case ty_letGather:
-  case ty_fn:
   case ty_tyfn:
   case ty_fnarg:
   case ty_structv:
@@ -953,11 +1040,6 @@ Type::isOfInfiniteType()
   case ty_unionv:
   case ty_unionr:
   case ty_typeclass:
-  case ty_array:
-  case ty_vector:
-  case ty_ref:
-  case ty_byref:
-  case ty_mutable:
   case ty_exn:
   case ty_pcst:
     {      

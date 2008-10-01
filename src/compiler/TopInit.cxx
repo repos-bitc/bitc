@@ -237,6 +237,7 @@ TopInit(std::ostream& errStream,
   case at_exceptionType:
   case at_dummyType:
   case at_mutableType:
+  case at_constType:
   case at_typeapp:
   case at_qualType:
   case at_constraints:

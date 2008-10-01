@@ -325,6 +325,13 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
       break;  
     }
 
+  case ty_const:
+    {
+      ss << "(const " 
+	 << t->Base()->asString(tvP, traverse) 
+	 << ")";
+    }
+
   case ty_pcst:
     {
       ss << "*(";

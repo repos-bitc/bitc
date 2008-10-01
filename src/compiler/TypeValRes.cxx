@@ -390,6 +390,7 @@ isExpansive(std::ostream& errStream,
   case at_arrayType:
   case at_vectorType:
   case at_mutableType:
+  case at_constType:
   case at_typeapp:
   case at_qualType:
   case at_constraints:
@@ -494,7 +495,6 @@ isExpansive(std::ostream& errStream,
 #ifdef KEEP_BF
   case ty_bitfield:
 #endif
-  case ty_ref:
   case ty_fn:
   case ty_typeclass:
     break;
@@ -524,6 +524,8 @@ isExpansive(std::ostream& errStream,
   case ty_mbFull:
   case ty_mbTop:
   case ty_pcst:
+  case ty_ref:
+  case ty_exn:
     {    
       for (size_t i=0; i<t->typeArgs.size(); i++) 
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
@@ -535,8 +537,14 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
+  case ty_const:
+    {
+      CHKEXP(itsExpansive, isExpansive(errStream, gamma,
+				       t->Base()->minimizeMutability()));
+      break;
+    }
+    
   case ty_mutable:
-  case ty_exn:
     {
       itsExpansive = true;
       break;

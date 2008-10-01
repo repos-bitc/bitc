@@ -659,7 +659,6 @@ Type::propagateMutability(boost::shared_ptr<Trail> trail,
       break;
     }
     
-    
     // concrete types, function type and reference types.
   default:
     {
@@ -681,7 +680,6 @@ Type::propagateMutability(boost::shared_ptr<Trail> trail,
 void
 Type::normalize_mbFull(boost::shared_ptr<Trail> trail)
 {
-  bool errFree = true;
   shared_ptr<Type> t = getType();
   
   if (t->mark & MARK_NORMALIZE_MBFULL)
@@ -722,6 +720,39 @@ Type::normalize_mbFull(boost::shared_ptr<Trail> trail)
   t->mark &= ~MARK_NORMALIZE_MBFULL;
   return;
 }
+
+/********************************************************************
+                      Const normalization
+ *******************************************************************/
+
+/* Normalize types such as (const bool) to bool*/
+
+void
+Type::normalize_const(boost::shared_ptr<Trail> trail)
+{
+  shared_ptr<Type> t = getType();
+  
+  if (t->mark & MARK_NORMALIZE_CONST)
+    return;
+  
+  t->mark |= MARK_NORMALIZE_CONST;  
+  
+  for (size_t i=0; i < t->components.size(); i++)
+    t->CompType(i)->normalize_const(trail);
+  
+  for (size_t i=0; i < t->typeArgs.size(); i++)
+    t->TypeArg(i)->normalize_const(trail);
+  
+  for (TypeSet::iterator itr = t->fnDeps.begin();
+       itr != t->fnDeps.end(); ++itr)
+    (*itr)->normalize_const(trail);
+
+  if((t->kind == ty_const) && t->Base()->isConstReducible())
+    trail->link(t, t->Base()->minimizeMutability());
+  
+  t->mark &= ~MARK_NORMALIZE_CONST;
+}
+
 
 /********************************************************************
           Determining Copy Compatibility of unboxed structures
@@ -817,11 +848,10 @@ coerceMaybe(shared_ptr<Type> t, shared_ptr<Trail> trail,
     core = core->maximizeMutability()->getType();
   }
   else {
-    if (minimize)
-      if(t->kind == ty_mbFull)
-	core = core->minimizeMutability()->getType();
-      else
-	core = core->minimizeTopMutability()->getType();
+    if (minimize && (t->kind == ty_mbFull))
+      core = core->minimizeMutability()->getType();
+    else
+      core = core->minimizeTopMutability()->getType();
   }
   
   if (core->kind != ty_tvar)

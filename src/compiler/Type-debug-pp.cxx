@@ -263,6 +263,10 @@ Type::toString()
     ss << "(mutable " << Base()->toString() << ")";
     break;
 
+  case ty_const:
+    ss << "(const " << Base()->toString() << ")";
+    break;
+
   case ty_exn:
     ss << "exception";     
     break;

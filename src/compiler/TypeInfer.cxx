@@ -2893,6 +2893,26 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
+
+  case at_constType:
+    {
+      // match agt_type
+      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
+		uflags, trail,  USE_MODE, TI_COMP1);
+      
+      shared_ptr<Type> t = ast->child(0)->symType->getType();
+      
+      if (t->kind == ty_const) {
+	//The Type is already mutable
+	ast->symType = t;
+      }
+      else {
+	ast->symType = Type::make(ty_const);
+	ast->symType->components.push_back(comp::make(MBF(t)));
+      }
+      break;
+    }
+
   case at_typeapp:
     {
       // match agt_var 

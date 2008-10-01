@@ -380,6 +380,7 @@ findusedef(std::ostream &errStream,
   case at_primaryType:
   case at_fnargVec:
   case at_mutableType:
+  case at_constType:
   case at_qualType:
   case at_constraints:
   case at_constructors:
