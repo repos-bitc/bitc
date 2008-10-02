@@ -185,37 +185,40 @@ typedef sherpa::EnumSet<TI_FlagValues> TI_Flags;
 /// types do not recurse infinitely. We need to use differernt markers
 /// for procedures that are mutually recursive, or are otherwise used
 /// simultaneously. Here, we actually use different markers for each
-/// procedure that is recursive over type-structure. 
+/// procedure that is recursive over type-structure, except for some
+/// simple self-recursive predicates which share the mark MARK_PREDICATE.
+
 enum MarkFlagValues {
+  // Base Mark
   MARK_NONE                     = 0x0,
-  MARK_BOUND_IN_TYPE            = 0x0000001u,
-  MARK_COLLECT_FTVS_WRT_GAMMA   = 0x0000002u,
-  MARK_COLLECT_ALL_FTVS         = 0x0000004u,
-  MARK_IS_EXPANSIVE             = 0x0000008u,
+
+  // Shared by many predicates over Types
+  MARK_PREDICATE                = 0x0000001u,
+
+  // Basic Functions: these functions are called by almost all
+  // routines, and must never share flags with anything.
+  MARK_GET_BARE_TYPE            = 0x0000002u,
+  MARK_GET_THE_TYPE             = 0x0000004u,
+  
+  // Functions that do not change type structure
+  MARK_SIZE                     = 0x0000008u,
   MARK_MANGLED_STRING           = 0x0000010u,
-  MARK_IS_OF_INFINITE_TYPE      = 0x0000020u,
-  MARK_PROPAGATE_MUTABILITY     = 0x0000040u,
-  MARK_GET_BARE_TYPE            = 0x0000080u,
-  MARK_GET_THE_TYPE             = 0x0000100u,
-  MARK_EMIT_ARR_VEC_FN_TYPES    = 0x0000200u,
-  MARK_ADJ_MAYBE                = 0x0000400u,
-  MARK_MAXIMIZE_MUTABILITY      = 0x0000800u,
-  MARK_MINIMIZE_MUTABILITY      = 0x0001000u,
-  MARK_DETERMINE_CCC            = 0x0002000u,
-  MARK_CHECK_CONSTRAINTS        = 0x0004000u,
-  MARK_SIZE                     = 0x0008000u,
-  MARK_IS_DEEP_MUT              = 0x0010000u,
-  MARK_IS_DEEP_IMMUT            = 0x0020000u,
-  MARK_MINIMIZE_DEEP_MUTABILITY = 0x0040000u,
-  MARK_SIGN_MBS                 = 0x0080000u,
-  MARK_FIXUP_FN_TYPES           = 0x0100000u,
-  MARK_IS_CONCRETIZABLE         = 0x0200000u,
-  MARK_IS_SHALLOW_CONCRETIZABLE = 0x0400000u,
-  MARK_NORMALIZE_MBFULL         = 0x0800000u,
-  MARK_NORMALIZE_CONST          = 0x1000000u,
-  MARK_CHECK_MUT_CONSISTENCY    = 0x2000000u,
-  MARK_IS_EFFECTIVELY_CONST     = 0x4000000u,
-  MARK_IS_CONST_REDUCIBLE       = 0x4000000u,
+  MARK_EMIT_ARR_VEC_FN_TYPES    = 0x0000020u,
+  MARK_CHECK_CONSTRAINTS        = 0x0000040u,
+  MARK_CHECK_MUT_CONSISTENCY    = 0x0000080u,
+  MARK_MAXIMIZE_MUTABILITY      = 0x0000100u,
+  MARK_COLLECT_FTVS_WRT_GAMMA   = 0x0000200u,
+  MARK_COLLECT_ALL_FTVS         = 0x0000400u,
+  MARK_MINIMIZE_MUTABILITY      = 0x0000800u,
+  MARK_MINIMIZE_DEEP_MUTABILITY = 0x0001000u,
+
+  // Functions that affect type structure/contents
+  MARK_SIGN_MBS                 = 0x0002000u,
+  MARK_ADJ_MAYBE                = 0x0004000u,
+  MARK_FIXUP_FN_TYPES           = 0x0008000u,
+  MARK_PROPAGATE_MUTABILITY     = 0x0010000u,
+  MARK_NORMALIZE_MBFULL         = 0x0020000u,
+  MARK_NORMALIZE_CONST          = 0x0040000u,
 };
 typedef sherpa::EnumSet<MarkFlagValues> MarkFlags;
 

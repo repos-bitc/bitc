@@ -694,10 +694,10 @@ Type::isDeepMut()
 {
   shared_ptr<Type> t = getType();
   
-  if (t->mark & MARK_IS_DEEP_MUT)
+  if (t->mark & MARK_PREDICATE)
     return true;
   
-  t->mark |= MARK_IS_DEEP_MUT;
+  t->mark |= MARK_PREDICATE;
   
   bool mut = false;
   
@@ -722,7 +722,7 @@ Type::isDeepMut()
     break;
   }
   
-  t->mark &= ~MARK_IS_DEEP_MUT;
+  t->mark &= ~MARK_PREDICATE;
   return mut;
 }
   
@@ -731,10 +731,10 @@ Type::isDeepImmut()
 {
   shared_ptr<Type> t = getType();
   
-  if (t->mark & MARK_IS_DEEP_IMMUT)
+  if (t->mark & MARK_PREDICATE)
     return true;
   
-  t->mark |= MARK_IS_DEEP_IMMUT;
+  t->mark |= MARK_PREDICATE;
   
   bool immut = true;
   
@@ -761,7 +761,7 @@ Type::isDeepImmut()
     break;
   }
 
-  t->mark &= ~MARK_IS_DEEP_IMMUT;
+  t->mark &= ~MARK_PREDICATE;
   return immut;  
 }
 
@@ -770,10 +770,10 @@ Type::isConcretizable()
 {
   shared_ptr<Type> t = getType();
   
-  if (t->mark & MARK_IS_CONCRETIZABLE)
+  if (t->mark & MARK_PREDICATE)
     return true;
   
-  t->mark |= MARK_IS_CONCRETIZABLE;
+  t->mark |= MARK_PREDICATE;
   
   bool concretizable = true;
   
@@ -795,7 +795,7 @@ Type::isConcretizable()
     break;
   }
   
-  t->mark &= ~MARK_IS_CONCRETIZABLE;
+  t->mark &= ~MARK_PREDICATE;
   return concretizable;  
 }
 
@@ -804,10 +804,10 @@ Type::isShallowConcretizable()
 {
   shared_ptr<Type> t = getType();
   
-  if (t->mark & MARK_IS_SHALLOW_CONCRETIZABLE)
+  if (t->mark & MARK_PREDICATE)
     return true;
   
-  t->mark |= MARK_IS_SHALLOW_CONCRETIZABLE;
+  t->mark |= MARK_PREDICATE;
   
   bool concretizable = true;
   
@@ -837,7 +837,7 @@ Type::isShallowConcretizable()
     break;
   }
   
-  t->mark &= ~MARK_IS_SHALLOW_CONCRETIZABLE;
+  t->mark &= ~MARK_PREDICATE;
   return concretizable;  
 }
 
@@ -846,10 +846,10 @@ Type::isEffectivelyConst()
 {
   shared_ptr<Type> t = getType();
   
-  if (t->mark & MARK_IS_EFFECTIVELY_CONST)
+  if (t->mark & MARK_PREDICATE)
     return true;
   
-  t->mark |= MARK_IS_EFFECTIVELY_CONST;
+  t->mark |= MARK_PREDICATE;
   
   bool effConst = true;
   
@@ -873,7 +873,7 @@ Type::isEffectivelyConst()
     break;
   }
   
-  t->mark &= ~MARK_IS_EFFECTIVELY_CONST;
+  t->mark &= ~MARK_PREDICATE;
   return effConst;
 }
 
@@ -882,10 +882,10 @@ Type::isConstReducible()
 {
   shared_ptr<Type> t = getType();
   
-  if (t->mark & MARK_IS_CONST_REDUCIBLE)
+  if (t->mark & MARK_PREDICATE)
     return true;
   
-  t->mark |= MARK_IS_CONST_REDUCIBLE;
+  t->mark |= MARK_PREDICATE;
   
   bool constred = true;
   
@@ -909,7 +909,7 @@ Type::isConstReducible()
     break;
   }
   
-  t->mark &= ~MARK_IS_CONST_REDUCIBLE;
+  t->mark &= ~MARK_PREDICATE;
   return constred;
 }
 
@@ -978,10 +978,10 @@ Type::isOfInfiniteType()
   if (getType() != shared_from_this())
     return getType()->isOfInfiniteType();
 
-  if (mark & MARK_IS_OF_INFINITE_TYPE) 
+  if (mark & MARK_PREDICATE) 
     return true;
 
-  mark |= MARK_IS_OF_INFINITE_TYPE;
+  mark |= MARK_PREDICATE;
 
   switch(kind) {
   case ty_tvar:
@@ -1051,7 +1051,7 @@ Type::isOfInfiniteType()
     }
   }
   
- mark &= ~MARK_IS_OF_INFINITE_TYPE;
+ mark &= ~MARK_PREDICATE;
  return infType;
 }
 

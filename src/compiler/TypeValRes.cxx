@@ -464,10 +464,10 @@ isExpansive(std::ostream& errStream,
   bool itsExpansive = false;
   shared_ptr<Type> t = typ->getType();
   
-  if (t->mark & MARK_IS_EXPANSIVE)
+  if (t->mark & MARK_PREDICATE)
     return itsExpansive;
 
-  t->mark |= MARK_IS_EXPANSIVE;
+  t->mark |= MARK_PREDICATE;
 
   switch(t->kind) {
   case ty_unit:
@@ -551,6 +551,6 @@ isExpansive(std::ostream& errStream,
     }
   }
   
-  t->mark &= ~MARK_IS_EXPANSIVE;
+  t->mark &= ~MARK_PREDICATE;
   return itsExpansive;
 }

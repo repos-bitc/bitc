@@ -86,10 +86,10 @@ Type::boundInType(shared_ptr<Type> tv)
   if (t == tv->getType())
     return true;
    
-  if (t->mark & MARK_BOUND_IN_TYPE)
+  if (t->mark & MARK_PREDICATE)
     return false;
   
-  t->mark |= MARK_BOUND_IN_TYPE;
+  t->mark |= MARK_PREDICATE;
   bool bound = false;
   
   for (size_t i=0; (!bound) && (i < t->components.size()); i++) 
@@ -104,7 +104,7 @@ Type::boundInType(shared_ptr<Type> tv)
       (!bound) && itr != t->fnDeps.end(); ++itr)
     bound = (*itr)->boundInType(tv);
   
-  t->mark &= ~MARK_BOUND_IN_TYPE;
+  t->mark &= ~MARK_PREDICATE;
   return bound;
 }
 

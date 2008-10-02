@@ -788,10 +788,10 @@ Type::determineCCC(shared_ptr<Type> t, bool inRefType)
   
   t = t->getType();
 
-  if (t->mark & MARK_DETERMINE_CCC)
+  if (t->mark & MARK_PREDICATE)
     return true;
   
-  t->mark |= MARK_DETERMINE_CCC;  
+  t->mark |= MARK_PREDICATE;  
   bool cccOK = true;
   
   switch(t->kind) {
@@ -824,7 +824,7 @@ Type::determineCCC(shared_ptr<Type> t, bool inRefType)
     }
   }
 
-  t->mark &= ~MARK_DETERMINE_CCC;
+  t->mark &= ~MARK_PREDICATE;
   return cccOK;
 }
 
