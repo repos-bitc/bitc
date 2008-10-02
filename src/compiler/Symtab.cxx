@@ -35,6 +35,34 @@
  *
  **************************************************************************/
 
+/// @brief Symbol resolver implementation.
+///
+/// This is the symbol resolution checker for BitC.
+///
+/// The resolver makes a recursive-descent pass over the AST. The
+/// resolution mechanism is not particularly unusual, except in the
+/// handling of import and export. A pointer to the top-level
+/// environment for each unit of compilation is stored into the
+/// corresponding UoC. A pointer to the environment currently in
+/// effect is stored into each AST as we traverse. In some cases this
+/// is later overridden (what are these cases?).
+///
+/// Resolution and type-checking is re-run after many passes as a
+/// sanity check. In post-SSA passes, there are some unusual cases
+/// that the resolver knows to ignore.
+///
+/// @issue those cases need to get described here.
+///
+/// @issue Need to talk about what environments are tracked (lamLevel)
+/// and what environment pointers are recorded into ASTs.
+///
+/// @issue Need to talk about handling of multiple defs/decls.
+///
+/// When an interface is imported, 
+///
+/// @issue This file is misnamed. It does not actually build a symbol
+/// table.
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -352,28 +380,35 @@ markComplete(shared_ptr<ASTEnvironment > env)
   }while (0)
 
 
-// The Symbol Resolver: 
-// The parameters need some explanation. 
-// ast: The ast that is recursively analyzed
-// env: The current environment bindings 
-// lamLevel: The environment that was in effect at the time we saw
-//           the most recently enclosing lambda.
-// mode: Defining / Usage mode. Based on this mode, when an identifier 
-//       is encountered, it is either added to, or looked up in the 
-//       current environment. Only if the mode is Redefinable, a 
-//       variable binding can be shadowed.
-// identType: In DEF_MODE, the identifier class of identifier that we 
-//                are defining. 
-//            In USE_MODE, the identifier class that we require
-// flags: Other context-dependent constraints on resolution.
-
+/// @brief The symbol resolver.
+///
+/// Traverses @p ast, keeping track of the current environment @p env,
+/// the alias environment @p aliasEnv, the environment @p lamLevel
+/// that was in effect at the most recently enclosing lambda form, and
+/// a pointer to the AST of the most recently enclosing let binding
+/// form.
+///
+/// The @p mode determines whether we are defining, declaring, or
+/// using identifiers at any given moment (see ResolutionMode). In
+/// DEF_MODE and DECL_MODE, identifiers will be added to the current
+/// environment. In USE_MODE, identifiers will be looked
+/// up. NEED TO DOCUMENT LOCAL_MODE AND TYPE_MODE HERE.
+///
+/// Various context-dependent constraints on the resolver are dictated
+/// by @p flags (see ResolverFlags).
+///
+/// The expected/required identifier classification is carried
+/// downward through @p identType. In DEF_MODE, @p identType specifies
+/// the identifier class to be defined. In USE_MODE, it specifies the
+/// type of identifier that may legally occur. WHAT ABOUT IN
+/// DECL_MODE?
 bool
 resolve(std::ostream& errStream, 
 	shared_ptr<AST> ast, 
 	shared_ptr<ASTEnvironment > aliasEnv,
 	shared_ptr<ASTEnvironment > env,
 	shared_ptr<ASTEnvironment > lamLevel,
-	int mode, 
+	ResolutionMode mode, 
 	IdentType identType,
 	shared_ptr<AST> currLB,
 	ResolverFlags flags)

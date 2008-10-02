@@ -42,14 +42,33 @@
 #include "AST.hxx"
 #include "Type.hxx"
 
-/* Definitions of mode used in Symbol Resolution, 
-   Type-inference, and closure conversion */
-#define NULL_MODE   0x0u // Don't care / error case
-#define DEF_MODE    0x1u // Defining occurences 
-#define USE_MODE    0x2u // Identifier Use occurences
-#define DECL_MODE   0x3u // Declarations, used in symbol resulution only
-#define LOCAL_MODE  0x4u // Local definitions, differentiated in clconv
-#define TYPE_MODE   0x5u // Type definitions, differentiated in clconv
+/// @bug EVERYTHING IN THIS FILE APPEARS TO BE UTILITY FUNCTIONS. WHY
+/// IS IT CALLED INTER-PASS?
+
+/// @brief Mode of operation used in Symbol Resolution and Type-inference.
+enum ResolutionMode {
+  /// @brief Don't care or error case.
+  NULL_MODE   = 0x0u,
+  /// @brief Introducing a newly defined symbol into the environment.
+  ///
+  /// This mode is used when recursing into a defining occurrence. It
+  /// is currently used as the default at top-level in most cases.
+  DEF_MODE    = 0x1u,
+  /// @brief Checking a use-occurrence of a symbol
+  ///
+  /// This mode is used when recursing into a use occurrence
+  /// context.
+  USE_MODE    = 0x2u,
+  /// @brief Introducing a newly declared symbol into the environment.
+  ///
+  /// This mode is used when recursing into a @em declaring
+  /// occurrence.
+  DECL_MODE   = 0x3u,
+  /// @brief Local definitions, used only in closure conversion.
+  LOCAL_MODE  = 0x4u,
+  /// @brief Type definitions, used only in closure conversion.
+  TYPE_MODE   = 0x5u
+};
 
 #define CHKERR(noerr, exp) \
   do {			   \
