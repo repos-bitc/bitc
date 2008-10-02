@@ -169,10 +169,6 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_ARRAY_NTH
 %token <tok> tk_VECTOR_NTH
 
-%token <tok> ntk_STRUCT
-%token <tok> ntk_UNION
-%token <tok> ntk_REPR
-
 %token <tok> tk_DEFSTRUCT
 %token <tok> tk_DEFUNION
 %token <tok> tk_DEFREPR
@@ -1098,7 +1094,7 @@ repr_constructors: repr_constructors repr_constructor {
 /*   $1->flags |= (ID_IS_GLOBAL); */
 /*   $$ = AST::make(at_reprctr, $1->loc, $1); */
 /* }; */
-repr_constructor: '(' ident fields '('tk_WHERE repr_reprs')' ')' {  /* compound constructor */ 
+repr_constructor: '(' ident fields '(' tk_WHERE repr_reprs ')' ')' {  /* compound constructor */ 
   SHOWPARSE("repr_constructor ->  ( ident fields ( WHERE repr_reprs ) )");
   $2->flags |= (ID_IS_GLOBAL);
   shared_ptr<AST> ctr = AST::make(at_constructor, $2->loc, $2);
