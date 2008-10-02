@@ -782,7 +782,7 @@
     </tbody>
   </table>
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <table latex.colspec="c||c|c|c|c|c">
+  <table latex.colspec="c||c|c|c|c">
     <tbody>
       <!-- Row: Title -->
       <tr lineafter="yes" valign="top">
@@ -790,15 +790,6 @@
 	  <p>
 	    <btypes:TYPE>
 	      <type/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
-	      <pred name="Immut">
-		<type/>
-	      </pred>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -814,18 +805,18 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete>
+	      <pred name="Immut">
 		<type/>
-	      </concrete>
+	      </pred>
 	    </btypes:TYPE>
 	  </p>
 	</td>
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete sp="yes">
+	      <pred name="Const">
 		<type/>
-	      </concrete>
+	      </pred>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -846,13 +837,6 @@
 	  <p>
 	    <btypes:TYPE>
 	      <tvar/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
-	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -910,13 +894,6 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <TRUE/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
 	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
@@ -949,13 +926,6 @@
 	  <p>
 	    <btypes:TYPE>
 	      <bool/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
-	      <TRUE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -997,13 +967,6 @@
 		<type num="1"/>
 		<type num="2"/>
 	      </fn>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
-	      <TRUE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -1059,15 +1022,6 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <pred name="Immut">
-		<type/>
-	      </pred>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
 	      <pred name="Mut">
 		<type/>
 	      </pred>
@@ -1077,9 +1031,9 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete>
+	      <pred name="Immut">
 		<type/>
-	      </concrete>
+	      </pred>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -1117,13 +1071,6 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <FALSE/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
 	      <TRUE/>
 	    </btypes:TYPE>
 	  </p>
@@ -1131,18 +1078,14 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete>
-		<ptype/>
-	      </concrete>
+	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete sp="yes">
-		<ptype/>
-	      </concrete>
+	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -1174,20 +1117,6 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <AND>
-		<pred name="Immut">
-		  <type num="1"/>
-		</pred>
-		<pred name="Immut">
-		  <type num="2"/>
-		</pred>
-	      </AND>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
 	      <OR>
 		<pred name="Mut">
 		  <type num="1"/>
@@ -1203,12 +1132,12 @@
 	  <p>
 	    <btypes:TYPE>
 	      <AND>
-		<concrete>
+		<pred name="Immut">
 		  <type num="1"/>
-		</concrete>
-		<concrete>
+		</pred>
+		<pred name="Immut">
 		  <type num="2"/>
-		</concrete>
+		</pred>
 	      </AND>
 	    </btypes:TYPE>
 	  </p>
@@ -1217,12 +1146,12 @@
 	  <p>
 	    <btypes:TYPE>
 	      <AND>
-		<concrete sp="yes">
+		<pred name="Const">
 		  <type num="1"/>
-		</concrete>
-		<concrete sp="yes">
+		</pred>
+		<pred name="Const">
 		  <type num="2"/>
-		</concrete>
+		</pred>
 	      </AND>
 	    </btypes:TYPE>
 	  </p>
@@ -1259,13 +1188,6 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <FALSE/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
 	      <pred name="Mut">
 		<minzT>
 		  <ptype/>
@@ -1277,18 +1199,14 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete>
-		<ptype/>
-	      </concrete>
+	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete sp="yes">
-		<ptype/>
-	      </concrete>
+	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -1316,7 +1234,6 @@
 	</td>
       </tr>
       <tr>
-	<td/>
 	<td/>
 	<td/>
 	<td/>
@@ -1356,13 +1273,6 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <FALSE/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
 	      <OR>
 		<pred name="Mut">
 		  <stype/>
@@ -1379,18 +1289,14 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete>
-		<ptype/>
-	      </concrete>
+	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete sp="yes">
-		<ptype/>
-	      </concrete>
+	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -1418,7 +1324,6 @@
 	</td>
       </tr>
       <tr>
-	<td/>
 	<td/>
 	<td/>
 	<td/>
@@ -1456,7 +1361,25 @@
 	</td>
 	<td>
 	  <p>
-	    <btypes:TYPE>\
+	    <btypes:TYPE>
+	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred name="Immut">
+		<minz>
+		  <type/>
+		</minz>
+	      </pred>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <TRUE/>
 	    </btypes:TYPE>
 	  </p>
@@ -1464,7 +1387,27 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <FALSE/>
+	      <const>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </const>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <table latex.colspec="c||c|c|c|c|c">
+    <tbody>
+      <!-- Row: Title -->
+      <tr lineafter="yes" valign="top">
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <type/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -1489,15 +1432,660 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <const>
-		<Subst>
-		  <aSubMap/>
+	      <concrete sp2="yes">
+		<type/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <normalize>
+		<type/>
+	      </normalize>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+              <pred mfrc="yes" name="M">
+		<type/>
+	      </pred>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Tvar -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <tvar/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <tvar/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <EmptySubst/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Unit -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <unit/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <unit/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <EmptySubst/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Bool -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <bool/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <bool/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <EmptySubst/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Function -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <fn>
+		<normalize>
+		  <type num="1"/>
+		</normalize>
+		<normalize>
+		  <type num="2"/>
+		</normalize>
+	      </fn>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <compose>
+		<pred mfrc="yes" name="M">
+		  <type num="1"/>
+		</pred>
+		<pred mfrc="yes" name="M">
+		  <type num="2"/>
+		</pred>
+	      </compose>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Ref -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <ref>
+		<type/>
+	      </ref>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete>
+		<type/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <ref>
+		<normalize>
 		  <type/>
-		</Subst>
+		</normalize>
+	      </ref>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred mfrc="yes" name="M">
+		<type/>
+	      </pred>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Mutable -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <mutable>
+		<ptype/>
+	      </mutable>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete>
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp="yes">
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp2="yes">
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <mutable>
+		<normalize>
+		  <ptype/>
+		</normalize>
+	      </mutable>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred mfrc="yes" name="M">
+		<ptype/>
+	      </pred>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Pair -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <AND>
+		<concrete>
+		  <type num="1"/>
+		</concrete>
+		<concrete>
+		  <type num="2"/>
+		</concrete>
+	      </AND>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <AND>
+		<concrete sp="yes">
+		  <type num="1"/>
+		</concrete>
+		<concrete sp="yes">
+		  <type num="2"/>
+		</concrete>
+	      </AND>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <AND>
+		<concrete sp2="yes">
+		  <type num="1"/>
+		</concrete>
+		<concrete sp2="yes">
+		  <type num="2"/>
+		</concrete>
+	      </AND>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pair>
+ 		<normalize>
+		  <type num="1"/>
+		</normalize>
+		<normalize>
+		  <type num="2"/>
+		</normalize>
+	      </pair>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <compose>
+		<pred mfrc="yes" name="M">
+		  <type num="1"/>
+		</pred>
+		<pred mfrc="yes" name="M">
+		  <type num="2"/>
+		</pred>
+	      </compose>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: MbTop -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete>
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp="yes">
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <mbTop>
+		<tvar/>
+		<normalize>
+		  <ptype/>
+		</normalize>
+	      </mbTop>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred mfrc="yes" name="M">
+		<ptype/>
+	      </pred>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: MbFull -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <mbFull>
+		<stype/>
+		<ptype/>
+	      </mbFull>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete>
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp="yes">
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <mbFull>
+		<stype/>
+		<normalize>
+		  <ptype/>
+		</normalize>
+	      </mbFull>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <compose>
+		<pred mfrc="yes" name="M">
+		  <ptype/>
+		</pred>
+		<SubMap>
+		  <tvar/>
+		  <maxz>
+		    <ptype/>
+		  </maxz>
+		</SubMap>
+	      </compose>
+	    </btypes:TYPE>
+	    if 
+	    <btypes:TYPE>
+	      <eq>
+		<stype/>
+		<mutable>
+		  <tvar/>
+		</mutable>
+	      </eq>
+	    </btypes:TYPE> 
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td/>
+	<td/>
+	<td/>
+	<td/>
+	<td/>
+	<td>
+	  <p>
+	    and
+	    <btypes:TYPE>
+	      <concrete sp="yes">
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>; 
+	    <btypes:TYPE>
+	      <pred mfrc="yes" name="M">
+		<ptype/>
+	      </pred>
+	    </btypes:TYPE>
+	    otherwise
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: const -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <const>
+		<type/>
 	      </const>
 	    </btypes:TYPE>
 	  </p>
 	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete>
+		<type/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp="yes">
+		<type/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <minz>
+		<type/>
+	      </minz>
+	    </btypes:TYPE>
+	    if
+	    <btypes:TYPE>
+	      <concrete sp2="yes">
+		<type/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred mfrc="yes" name="M">
+		<type/>
+	      </pred>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <tr lineafter="yes">
+	<td/>
+	<td/>
+	<td/>
+	<td/>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <const>
+		<type/>
+	      </const>
+	    </btypes:TYPE>
+	    otherwise
+	  </p>
+	</td>
+	<td/>
       </tr>
     </tbody>
   </table>

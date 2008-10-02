@@ -710,6 +710,12 @@
 	  <xsl:text>square;</xsl:text>
 	</xsl:element>
       </xsl:when>
+      <xsl:when test="@sp2">
+	<xsl:element name="b">
+	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	  <xsl:text>square;</xsl:text>
+	</xsl:element>
+      </xsl:when>
       <xsl:otherwise>
 	<xsl:text disable-output-escaping="yes">&amp;</xsl:text>
 	<xsl:text>square;</xsl:text>

@@ -32,6 +32,7 @@ $bigcup="\\\\textbf\\{$em\\{\\\\cup\\}\\}";
 $bigcap="\\\\textbf\\{$em\\{\\\\cap\\}\\}";
 $exclcup="\\\\emph\\{$em\\{\\\\cup\\}\\}";
 $spSquare="\\\\emph\\{$em\\{\\\\Box\\}\\}";
+$sp2Square="\\\\textbf\\{$em\\{\\\\Box\\}\\}";
 $emset="$em($br)";
 $plural1="$emset$em\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}";
 $plural2="$em\\{($br)\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}\\}";
@@ -61,6 +62,7 @@ while(!eof(F)) {
 
 	#Special Box: Dotted box
 	$l =~ s/$spSquare/$EM\{\\mathaccent\\cdot\\Box\}/g;
+	$l =~ s/$sp2Square/$EM\{\\mathaccent\\circ\\Box\}/g;
 	
         #{| to {\!| and |} to |\!}
 	# Note that this is *not* paranthesizing replacement

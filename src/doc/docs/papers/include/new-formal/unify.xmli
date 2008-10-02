@@ -329,8 +329,8 @@
 	  </unf>
 	</rhs>
       </equation>	
-      <!-- |_t1_| = |_t2_| -->
-      <equation name="U-const" sep="4pt">
+      <!-- |_t1_| = t2 | Const(t2) -->
+      <equation name="U-const">
 	<lhs>
 	  <unf>
 	    <unin excl="yes">
@@ -339,9 +339,7 @@
 		  <const>
 		    <type num="1"/>
 		  </const>
-		  <const>
-		    <type num="2"/>
-		  </const>
+		  <type num="2"/>
 		</eq>
 	      </set>
 	      <aCtset/>
@@ -361,7 +359,18 @@
 	    </unin>
 	  </unf>
 	</rhs>
-      </equation>	
+      </equation>
+      <eqn-cnt name="" sep="4pt">
+	<lhs>
+	  <grouping>
+	    <text content=" where "/>
+	    <pred name="Const">
+	      <type num="2"/>
+	    </pred>
+	  </grouping>
+	</lhs>
+	<rhs/>
+      </eqn-cnt>
       <!-- 'a!p1 = 'b!p2 -->
       <equation name="U-Ct1">
 	<lhs>
