@@ -1953,6 +1953,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  }
 	  break;
 	}
+      default:
+	{
+	  assert(false);
+	  break;
+	}
       }
       break;
     }
@@ -2892,7 +2897,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       }
       break;
     }
-
 
   case at_constType:
     {

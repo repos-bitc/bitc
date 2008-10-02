@@ -1389,11 +1389,8 @@ type: '(' tk_MUTABLE type ')' {
 
 type: '(' tk_CONST type ')' {
   SHOWPARSE("type -> ( CONST type )");
-  // Should be:
-  // $$ = AST::make(at_constType, $2.loc, $3);
-  // but for now:
-  $$ = $3;
-};
+  $$ = AST::make(at_constType, $2.loc, $3);
+  };
 
 // BITFIELD TYPE
 bitfieldtype: '(' tk_BITFIELD any_int_type intLit ')' {

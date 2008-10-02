@@ -434,8 +434,8 @@ Unify(std::ostream& errStream,
       if(other->isEffectivelyConst()) {
 	CHKERR(errFree,
 	       Unify(errStream, trail, errLoc, 
-		     t1->Base()->minimizeMutability(), 
-		     t2->Base()->minimizeMutability(), uflags));
+		     constType->Base()->minimizeMutability(), 
+		     other->minimizeMutability(), uflags));
 	break;
       }
     }

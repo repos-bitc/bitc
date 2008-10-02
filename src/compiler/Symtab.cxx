@@ -391,8 +391,9 @@ markComplete(shared_ptr<ASTEnvironment > env)
 /// The @p mode determines whether we are defining, declaring, or
 /// using identifiers at any given moment (see ResolutionMode). In
 /// DEF_MODE and DECL_MODE, identifiers will be added to the current
-/// environment. In USE_MODE, identifiers will be looked
-/// up. NEED TO DOCUMENT LOCAL_MODE AND TYPE_MODE HERE.
+/// environment. In USE_MODE, identifiers will be looked up. 
+/// 
+/// LOCAL_MODE AND TYPE_MODE are not used by the resolver.
 ///
 /// Various context-dependent constraints on the resolver are dictated
 /// by @p flags (see ResolverFlags).
@@ -821,12 +822,10 @@ resolve(std::ostream& errStream,
 	  break;
 	}
 
-      case NULL_MODE:
+      default:
 	{
-	  errStream << ": Internal Compiler Error:\n\t" 
-		    << ast->loc 
-		    << ": Encountered Symbol in NULL MODE" 
-		    << std::endl;	
+	  assert(false);
+	  break;
 	}
       }
 
