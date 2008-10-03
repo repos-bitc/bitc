@@ -37,7 +37,7 @@
       <category>report</category>
     </categories>
     <pubdate>
-      Oct. 2<sup>nd</sup> 2008.
+      Oct. 3<sup>rd</sup> 2008.
     </pubdate>
     <!--     <copyright> -->
     <!--       <year/><holder/> -->
@@ -769,6 +769,317 @@
         </btypes:TYPE> 
       </p>
     </definition>
+    <p>
+      <b>Meanings of Operators</b>
+    </p>
+    <table latex.colspec="c|l">
+      <tbody>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <maxzOp/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Add mutability up to the ref/function boundary. 
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <minzOp/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Remove mutability up to the ref/function boundary. 
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <maxzTOp/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Add top-most mutability. 
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <minzTOp/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Remove top-most mutability. 
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <minzCOp/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Remove mutability and const up to the ref/function 
+              boundary.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <minzDOp/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Remove mutability deeply up to the function boundary. 
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <spset>
+                  <nothing/>
+                </spset>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Constraint Collection
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <pred name="Mut"/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Is the type <em>observably</em> mutable?
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <pred name="Immut"/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Is the type <em>effectively</em> deeply immutable?
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <pred name="Const"/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Is the type <em>effectively</em> const?
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <Subst>
+                  <aSubMap/>
+                  <nothing/>
+                </Subst>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Substitution.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <concrete/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Is the type <em>concretizable</em>? (i.e. can be made
+              invariable
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            <p>
+              by a substitution <em>only</em> for mutability-variables?)
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <concrete sp="yes"/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Is the type <em>concretizable</em> up to a reference boundary?
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <concrete sp="yes"/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Is this type concrete enough to drop an enclosing const?
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <normalize/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Produce a substitution to normalize const types
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            <p>
+              (ex: 
+              <btypes:TYPE>
+                <equiv>
+                  <const>
+                    <bool/>
+                  </const>
+                  <bool/>
+                </equiv>
+              </btypes:TYPE>)
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <pred mfrc="yes" name="M"/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Produce a substitution to normalize 
+              <btypes:TYPE>
+                <mbFull>
+                  <stype/>
+                  <ptype/>
+                </mbFull>
+              </btypes:TYPE> types.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            <p>
+              (ex: 
+              <btypes:TYPE>
+                <equiv>
+                  <mbFull>
+                    <mutable>
+                      <tvar/>
+                    </mutable>
+                    <bool/>
+                  </mbFull>
+                  <mutable>
+                    <bool/>
+                  </mutable>
+                </equiv>
+              </btypes:TYPE>)
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>
+              <btypes:TYPE>
+                <pred mbb="yes" name="M"/>
+              </btypes:TYPE>
+            </p>
+          </td>
+          <td>
+            <p>
+              Produce a substitution to propagate mutability inwards into  
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td/>
+          <td>
+            <p>
+              composite types (or fail with an error).
+            </p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </sect1>
   <xi:include href="include/new-formal/opsem.xmli"/>
   <xi:include href="include/new-formal/operators.xmli"/>
