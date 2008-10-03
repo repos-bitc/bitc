@@ -3264,6 +3264,13 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
   case at_block:
     {
+    /*------------------------------------------------
+              A |- x: 'a|'b   A |- e: t
+                    U(t = 'c|'b)
+          _________________________________________
+                 A |- (block x e): 'd|'b
+       ------------------------------------------------*/
+
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  DEF_MODE, TI_NO_FLAGS);
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
@@ -3271,15 +3278,22 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       CHKERR(errFree, unify(errStream, trail, ast->child(0)->loc,
 			    ast->child(0)->symType,
-			    ast->child(1)->symType, 
+			    MBF(ast->child(1)->symType), 
 			    uflags));  
-
-      ast->symType = ast->child(1)->symType;
+      
+      ast->symType = MBF(ast->child(1)->symType);
       break;
     }
 
   case at_return_from:
     {
+    /*------------------------------------------------
+                A(x) = tx   A |- e: t
+              U(tx = 'a|'b)   U('c|'b)
+          _________________________________________
+                 A |- (return-from x e): 'd
+       ------------------------------------------------*/
+
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  USE_MODE, TI_COMP2);
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
