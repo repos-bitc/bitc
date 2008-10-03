@@ -975,7 +975,7 @@
           <td>
             <p>
               <btypes:TYPE>
-                <concrete sp="yes"/>
+                <concrete sp2="yes"/>
               </btypes:TYPE>
             </p>
           </td>
