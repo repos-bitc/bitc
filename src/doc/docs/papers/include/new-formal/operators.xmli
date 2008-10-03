@@ -5,7 +5,7 @@
   <figure id="operators" fullwidth='yes'
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-  <table latex.colspec="c||c|c|c|c|c|c">
+  <table latex.colspec="c||c|c|c|c|c|c|c">
     <tbody>
       <!-- Row: Title -->
       <tr lineafter="yes" valign="top">
@@ -49,6 +49,15 @@
 	      <minzT>
 		<type/>
 	      </minzT>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <minzC>
+		<type/>
+	      </minzC>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -102,6 +111,13 @@
 	      <mutable>
 		<tvar/>
 	      </mutable>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <tvar/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -180,6 +196,13 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
+	      <unit/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <Empty/>
 	    </btypes:TYPE>
 	  </p>
@@ -216,6 +239,13 @@
 	      <mutable>
 		<bool/>
 	      </mutable>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <bool/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -310,6 +340,16 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <unin>
 		<spset>
 		  <type num="1"/>
@@ -361,6 +401,15 @@
 		  <type/>
 		</ref>
 	      </mutable>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <ref>
+		<type/>
+	      </ref>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -438,6 +487,15 @@
 	      <minzT>
 		<ptype/>
 	      </minzT>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <minzC>
+		<ptype/>
+	      </minzC>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -528,6 +586,20 @@
 	  <p>
 	    <btypes:TYPE>
 	      <pair>
+		<minzC>
+		  <type num="1"/>	
+		</minzC>
+		<minzC>
+		  <type num="2"/>
+		</minzC>
+	      </pair>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pair>
 		<minzD>
 		  <type num="1"/>	
 		</minzD>
@@ -598,6 +670,15 @@
 	      <minzT>
 		<ptype/>
 	      </minzT>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <minzC>
+		<ptype/>
+	      </minzC>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -685,6 +766,15 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
+	      <minzC>
+		<ptype/>
+	      </minzC>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <minzD>
 		<ptype/>
 	      </minzD>
@@ -755,6 +845,15 @@
 	      <const>
 		<type/>
 	      </const>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <minzC>
+		<type/>
+	      </minzC>
 	    </btypes:TYPE>
 	  </p>
 	</td>

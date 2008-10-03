@@ -364,8 +364,8 @@ Unify(std::ostream& errStream,
       }
       else {
 	CHKERR(errFree, Unify(errStream, trail, errLoc, 
-			      mb->minimizeMutability(), 
-			      other->minimizeMutability(), uflags));
+			      mb->minMutConstless(), 
+			      other->minMutConstless(), uflags));
 	
 	CHKERR(errFree, Unify(errStream, trail, errLoc, 
 			      mb->Var(), other, uflags));
@@ -434,8 +434,8 @@ Unify(std::ostream& errStream,
       if(other->isEffectivelyConst()) {
 	CHKERR(errFree,
 	       Unify(errStream, trail, errLoc, 
-		     constType->Base()->minimizeMutability(), 
-		     other->minimizeMutability(), uflags));
+		     constType->Base()->minMutConstless(), 
+		     other->minMutConstless(), uflags));
 	break;
       }
     }
@@ -622,8 +622,8 @@ Unify(std::ostream& errStream,
       {
 	CHKERR(errFree,
 	       Unify(errStream, trail, errLoc, 
-		     t1->Core()->minimizeMutability(), 
-		     t2->Core()->minimizeMutability(), 
+		     t1->Core()->minMutConstless(), 
+		     t2->Core()->minMutConstless(), 
 		     uflags));
       
 	if (!errFree)
@@ -664,8 +664,8 @@ Unify(std::ostream& errStream,
       {
 	CHKERR(errFree,
 	       Unify(errStream, trail, errLoc, 
-		     t1->Base()->minimizeMutability(), 
-		     t2->Base()->minimizeMutability(), uflags));
+		     t1->Base()->minMutConstless(), 
+		     t2->Base()->minMutConstless(), uflags));
 	break;
       }
     

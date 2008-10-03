@@ -351,7 +351,7 @@
 	    <unin>
 	      <aCtset/>
 	      <set>
-		<eq under="minz">
+		<eq under="minzC">
 		  <type num="1"/>
 		  <type num="2"/>
 		</eq>
@@ -472,7 +472,7 @@
 	    <unin>
 	      <aCtset/>
 	      <set>
-		<eq under="minz">
+		<eq under="minzC">
 		  <ptype num="1"/>
 		  <ptype num="2"/>
 		</eq>
@@ -515,7 +515,7 @@
 	    <unin>
 	      <aCtset/>
 	      <set>
-		<eq under="minz">
+		<eq under="minzC">
 		  <ptype num="1"/>
 		  <ptype num="2"/>
 		</eq>
@@ -551,7 +551,7 @@
 	    <unin>
 	      <aCtset/>
 	      <set>
-		<eq under="minz">
+		<eq under="minzC">
 		  <ptype/>
 		  <Ptype/>
 		</eq>

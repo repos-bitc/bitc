@@ -715,6 +715,60 @@
         </VEqns>
       </btypes:TYPE>
     </definition>
+    <definition>
+      <title>Notational convenience</title>
+      <p>
+        We write
+        <btypes:TYPE>
+          <eq under="minzT">
+            <type num="1"/>
+            <type num="2"/>
+          </eq>
+        </btypes:TYPE> as shorthand for
+        <btypes:TYPE>
+          <eq>
+            <minzT>
+              <type num="1"/>
+            </minzT>
+            <minzT>
+              <type num="2"/>
+            </minzT>
+          </eq>
+        </btypes:TYPE>,
+        <btypes:TYPE>
+          <eq under="minz">
+            <type num="1"/>
+            <type num="2"/>
+          </eq>
+        </btypes:TYPE> for
+        <btypes:TYPE>
+          <eq>
+            <minz>
+              <type num="1"/>
+            </minz>
+            <minz>
+              <type num="2"/>
+            </minz>
+          </eq>
+        </btypes:TYPE>, and
+        <btypes:TYPE>
+          <eq under="minzC">
+            <type num="1"/>
+            <type num="2"/>
+          </eq>
+        </btypes:TYPE> for
+        <btypes:TYPE>
+          <eq>
+            <minzC>
+              <type num="1"/>
+            </minzC>
+            <minzC>
+              <type num="2"/>
+            </minzC>
+          </eq>
+        </btypes:TYPE> 
+      </p>
+    </definition>
   </sect1>
   <xi:include href="include/new-formal/opsem.xmli"/>
   <xi:include href="include/new-formal/operators.xmli"/>

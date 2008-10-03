@@ -129,11 +129,11 @@
 	      <type num="2"/>
 	    </tqExpr>
 	  </Sjudge>
-	  <eq under="minz">
+	  <eq under="minzC">
 	    <type num="1"/>
 	    <type num="1" dash="'"/>
 	  </eq>
-	  <eq under="minz">
+	  <eq under="minzC">
 	    <type num="2"/>
 	    <type num="2" dash="'"/>
 	  </eq>

@@ -484,6 +484,87 @@ Type::minimizeDeepMutability(shared_ptr<Trail> trail)
   return rt;
 }
 
+
+/* Get the minimally-mutable version of this type, but interpret
+   const-meta-constructors at this step. This function is useful to
+   construct a maybe(full) type, since in 'a|p, p need not  
+   preserve const-ness. 
+
+   This function is similar to [\triangledown], except for the
+   handling  of const  */
+shared_ptr<Type> 
+Type::minMutConstless(shared_ptr<Trail> trail)
+{
+  shared_ptr<Type> t = getType();
+  shared_ptr<Type> rt = GC_NULL;
+  
+  if (t->mark & MARK_MIN_MUT_CONSTLESS)
+    return t;
+  
+  t->mark |= MARK_MIN_MUT_CONSTLESS;  
+  
+  switch(t->kind) {
+    
+  case ty_mbFull:    
+  case ty_mbTop:    
+    {
+      rt = t->Core()->minMutConstless(trail);
+      break;
+    }
+
+  case ty_const:
+  case ty_mutable:
+    {
+      rt = t->Base()->minMutConstless(trail);
+      break;
+    }
+
+  case ty_array:
+    {
+      rt = Type::make(t);
+      rt->Base() = t->Base()->minMutConstless(trail);
+      break;
+    }
+
+  case ty_structv:
+  case ty_unionv: 
+  case ty_uvalv: 
+  case ty_uconv: 
+    {
+      rt = t->getDCopy();
+      for (size_t i=0; i < rt->typeArgs.size(); i++) {
+	shared_ptr<Type> arg = rt->TypeArg(i)->getType();
+	if (rt->argCCOK(i)) {
+	  shared_ptr<Type> argMin =
+	    arg->minMutConstless(trail)->getType(); 
+	  if (arg != argMin)
+	    trail->link(arg, argMin);
+	}
+      }
+      break;
+    }
+
+  case ty_letGather:
+    {
+      rt = t->getDCopy();
+      for (size_t i=0; i < t->components.size(); i++) 
+	rt->CompType(i) = t->CompType(i)->minMutConstless(trail);
+      break;
+    }
+    
+  default:
+    {
+      rt = t;
+      break;
+    }
+  }
+  
+  t->mark &= ~MARK_MIN_MUT_CONSTLESS;
+  return rt;
+}
+
+
+
 /********************************************************************
       Mutability Propagation inwards for unboxed structures 
              and mutability consistency checking

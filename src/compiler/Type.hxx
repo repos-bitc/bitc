@@ -206,19 +206,20 @@ enum MarkFlagValues {
   MARK_EMIT_ARR_VEC_FN_TYPES    = 0x0000020u,
   MARK_CHECK_CONSTRAINTS        = 0x0000040u,
   MARK_CHECK_MUT_CONSISTENCY    = 0x0000080u,
-  MARK_MAXIMIZE_MUTABILITY      = 0x0000100u,
-  MARK_COLLECT_FTVS_WRT_GAMMA   = 0x0000200u,
-  MARK_COLLECT_ALL_FTVS         = 0x0000400u,
+  MARK_COLLECT_FTVS_WRT_GAMMA   = 0x0000100u,
+  MARK_COLLECT_ALL_FTVS         = 0x0000200u,
+  MARK_MAXIMIZE_MUTABILITY      = 0x0000400u,
   MARK_MINIMIZE_MUTABILITY      = 0x0000800u,
   MARK_MINIMIZE_DEEP_MUTABILITY = 0x0001000u,
+  MARK_MIN_MUT_CONSTLESS        = 0x0002000u,
 
   // Functions that affect type structure/contents
-  MARK_SIGN_MBS                 = 0x0002000u,
-  MARK_ADJ_MAYBE                = 0x0004000u,
-  MARK_FIXUP_FN_TYPES           = 0x0008000u,
-  MARK_PROPAGATE_MUTABILITY     = 0x0010000u,
-  MARK_NORMALIZE_MBFULL         = 0x0020000u,
-  MARK_NORMALIZE_CONST          = 0x0040000u,
+  MARK_SIGN_MBS                 = 0x0004000u,
+  MARK_ADJ_MAYBE                = 0x0008000u,
+  MARK_FIXUP_FN_TYPES           = 0x0010000u,
+  MARK_PROPAGATE_MUTABILITY     = 0x0020000u,
+  MARK_NORMALIZE_MBFULL         = 0x0040000u,
+  MARK_NORMALIZE_CONST          = 0x0080000u,
 };
 typedef sherpa::EnumSet<MarkFlagValues> MarkFlags;
 
@@ -628,6 +629,14 @@ public:
   // Get the minimally-mutable, but copy-compatible type.
   boost::shared_ptr<Type> minimizeMutability(boost::shared_ptr<Trail>
 					     trail=Trail::make()); 
+
+  // Get the minimally-mutable version of this type, but interpret
+  // const-meta-constructors at this step. This function is useful to
+  // construct a maybe(full) type, since in 'a|p, p need not  
+  // preserve const-ness.
+  boost::shared_ptr<Type> minMutConstless(boost::shared_ptr<Trail>
+					  trail=Trail::make()); 
+
   boost::shared_ptr<Type>
   maximizeTopMutability(boost::shared_ptr<Trail> trail=Trail::make()); 
   boost::shared_ptr<Type>

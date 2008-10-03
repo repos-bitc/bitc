@@ -66,7 +66,7 @@ newTvar()
 static inline boost::shared_ptr<Type> 
 MBF(boost::shared_ptr<Type> t)
 {
-  return Type::make(ty_mbFull, newTvar(), t->minimizeMutability());
+  return Type::make(ty_mbFull, newTvar(), t->minMutConstless());
 }
 
 static inline boost::shared_ptr<Type> 
