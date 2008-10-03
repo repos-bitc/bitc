@@ -229,7 +229,8 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> type_definition type_decl externals
 %type <ast> value_definition
 %type <ast> defpattern
-%type <ast> expr eform
+%type <ast> expr_seq expr eform
+%type <ast> lambdapatterns lambdapattern
 %type <ast> types type
 %type <ast> bool_type
 %type <ast> fntype fneffect
@@ -502,9 +503,9 @@ ptype_name: defident '(' tvlist ')' {
 };
 
 // STRUCTURE TYPES [3.6.1]
-type_definition: tk_STRUCT ptype_name val '{' optdocstring declares fields '}' ';' {
-  SHOWPARSE("type_definition -> STRUCT ptype_name val '{' "
-	    "optdocstring declares fields '}' ';'");
+type_definition: tk_STRUCT ptype_name val optdocstring '{' declares fields '}' ';' {
+  SHOWPARSE("type_definition -> STRUCT ptype_name val "
+	    "optdocstring '{' declares fields '}' ';'");
   $$ = AST::make(at_defstruct, $1.loc, $2->child(0), $2->child(1), $3,
 	       $6, $7);
   $$->child(0)->defForm = $$;
@@ -512,9 +513,9 @@ type_definition: tk_STRUCT ptype_name val '{' optdocstring declares fields '}' '
 };
 
 // UNINON TYPES [3.6.2]
-type_definition: tk_UNION ptype_name val '{' optdocstring declares constructors '}' ';'  {
-  SHOWPARSE("type_definition -> STRUCT ptype_name val '{' "
-	    "optdocstring declares fields '}' ';'");
+type_definition: tk_UNION ptype_name val optdocstring '{' declares constructors '}' ';'  {
+  SHOWPARSE("type_definition -> STRUCT ptype_name val "
+	    "optdocstring '{' declares fields '}' ';'");
   $$ = AST::make(at_defunion, $1.loc, $2->child(0), $2->child(1), $3,
 		 $6, $7);
   $$->child(0)->defForm = $$;
@@ -544,9 +545,9 @@ constructor: ident '{' fields '}' ';' {  /* compound constructor */
 };
 
 // REPR TYPES
-type_definition: tk_REPR defident val '{' optdocstring declares repr_constructors '}' ';' {
-  SHOWPARSE("type_definition -> ( DEFREPR defident val '{' "
-	    "optdocstring declares repr_constructors '}' ';'");
+type_definition: tk_REPR defident val optdocstring '{' declares repr_constructors '}' ';' {
+  SHOWPARSE("type_definition -> REPR defident val optdocstring "
+	    "'{' declares repr_constructors '}' ';'");
   $$ = AST::make(at_defrepr, $1.loc, $2, $3, $6, $7);
   $$->child(0)->defForm = $$;
 };
@@ -736,30 +737,38 @@ defpattern: defident {
 
 // DEFINE  [5.1]
 value_definition: tk_DEF defpattern '=' expr ';'  {
-  SHOWPARSE("value_definition -> ( DEFINE  defpattern expr )");
+  SHOWPARSE("value_definition -> DEF defpattern = expr ;");
   $$ = AST::make(at_define, $1.loc, $2, $4);
   $$->addChild(AST::make(at_constraints));
 };
-//value_definition: '(' tk_DEFINE defpattern docstring expr ')'  {
-//  SHOWPARSE("value_definition -> ( DEFINE  defpattern docstring expr )");
-//  $$ = AST::make(at_define, $2.loc, $3, $5);
-//  $$->addChild(AST::make(at_constraints));
-//};
 
 // Define convenience syntax case 1: no arguments
 // No docstring here because of expr_seq
-//value_definition: '(' tk_DEFINE '(' defident ')' expr_seq ')'  {
-//  SHOWPARSE("value_definition -> ( DEFINE  ( defident ) [docstring] expr_seq )");
-//  $6 = stripDocString($6);
-//  shared_ptr<AST> iRetBlock = 
-//    AST::make(at_block, $2.loc, AST::make(at_ident, LToken("__return")), $6);
-//  shared_ptr<AST> iLambda =
-//    AST::make(at_lambda, $2.loc, AST::make(at_argVec, $5.loc), iRetBlock);
-//  iLambda->printVariant = 1;
-//  shared_ptr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
-//  $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
-//  $$->addChild(AST::make(at_constraints));
-//};
+// FIX: Issue with function types
+value_definition: tk_DEF defident '(' ')' optdocstring '{' expr_seq '}' ';'  {
+  SHOWPARSE("value_definition -> DEF defident () optdocstring { expr_seq }");
+  shared_ptr<AST> iRetBlock = 
+    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $7);
+  shared_ptr<AST> iLambda =
+    AST::make(at_lambda, $1.loc, AST::make(at_argVec, $4.loc), iRetBlock);
+  iLambda->printVariant = 1;
+  shared_ptr<AST> iP = AST::make(at_identPattern, $2->loc, $2);
+  $$ = AST::make(at_recdef, $1.loc, iP, iLambda);
+  $$->addChild(AST::make(at_constraints));
+};
+
+value_definition: tk_DEF defident '(' lambdapatterns ')' optdocstring
+                  '{' expr_seq '}'  {
+  SHOWPARSE("value_definition -> DEF defident ( lambdapatterns ) optdocstring "
+	    "{ expr_seq }");
+  shared_ptr<AST> iRetBlock = 
+    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $8);
+  shared_ptr<AST> iLambda = AST::make(at_lambda, $1.loc, $4, iRetBlock);
+  iLambda->printVariant = 1;
+  shared_ptr<AST> iP = AST::make(at_identPattern, $2->loc, $2);
+  $$ = AST::make(at_recdef, $1.loc, iP, iLambda);
+  $$->addChild(AST::make(at_constraints));
+};
 
 // Define convenience syntax case 3: one or more arguments
 // No docstring here because of expr_seq
@@ -776,6 +785,76 @@ value_definition: tk_DEF defpattern '=' expr ';'  {
 //  $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
 //  $$->addChild(AST::make(at_constraints));
 //};
+
+/* Lambda Patterns -- with an additional by-ref annotation */
+lambdapatterns: lambdapattern {
+  SHOWPARSE("lambdapatterns -> lambdapattern");
+  $$ = AST::make(at_argVec, $1->loc);
+  $$->addChild($1);
+};
+lambdapatterns: lambdapatterns ',' lambdapattern {
+  SHOWPARSE("lambdapatterns -> lambdapatterns , lambdapattern");
+  $$ = $1;
+  $$->addChild($3);
+};
+
+lambdapattern: ident {
+  SHOWPARSE("lambdapattern -> ident");
+  $$ = AST::make(at_identPattern, $1->loc, $1);
+};
+
+lambdapattern: type_pl_byref ident {
+  SHOWPARSE("lambdapattern -> type_pl_byref ident");
+  $$ = AST::make(at_identPattern, $1->loc, $2, $1);
+  if ($1->astType == at_byrefType)
+    $2->flags |= ARG_BYREF;
+};
+//lambdapattern: ident ':' type_pl_byref {
+//  SHOWPARSE("lambdapattern -> ident : type_pl_byref");
+//  $$ = AST::make(at_identPattern, $1->loc, $1, $3);
+//  if ($3->astType == at_byrefType)
+//    $1->flags |= ARG_BYREF;
+//};
+
+//lambdapattern: '(' tk_THE type ident ')' {
+//  SHOWPARSE("lambdapattern -> ( the type ident ) ");
+//  $$ = AST::make(at_identPattern, $1.loc, $4, $3);  
+//};
+
+//lambdapattern: '(' tk_THE '(' tk_BY_REF type ')' ident ')' {
+//  SHOWPARSE("lambdapattern -> ( the ( by-ref type ) ident )");
+//  $$ = AST::make(at_identPattern, $1.loc, $7, $5);
+//  $5->flags |= ARG_BYREF;
+//};
+
+// EXPRESSIONS [7]
+//
+// expr   -- an expression form with an optional type qualifier
+// eform  -- a naked expression form
+//
+// As a practical matter, every expression on the RHS of a production
+// should be an expr
+
+expr_seq: expr {
+  SHOWPARSE("expr_seq -> expr");
+  $$ = AST::make(at_begin, $1->loc, $1);
+  $$->printVariant = 1;
+};
+expr_seq: value_definition {
+  SHOWPARSE("expr_seq -> value_definition");
+  $$ = AST::make(at_begin, $1->loc, $1);
+  $$->printVariant = 1;
+};
+expr_seq: expr_seq ';' expr {
+  SHOWPARSE("expr_seq -> expr_seq ; expr");
+  $$ = $1;
+  $$->addChild($3);
+};
+expr_seq: expr_seq ';' value_definition {
+  SHOWPARSE("expr_seq -> expr_seq value_definition");
+  $$ = $1;
+  $$->addChild($3);
+};
 
 // TYPE QUALIFIED EXPRESSIONS  [7.3]
 expr: eform {
