@@ -46,8 +46,9 @@
 (deftypeclass (ABC 'a)
   FN: (fn ('a 'a) bool))
 
-(definstance (forall ((IntLit 'a)) (ABC 'a))
-  FUN)
+(forall ((IntLit 'a)) 
+  (definstance (ABC 'a)
+    FUN))
 
 ;; must not work
 ;;(definstance  (ABC int32)

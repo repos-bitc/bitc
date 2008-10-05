@@ -242,7 +242,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> repr_reprs repr_repr 
 %type <ast> bindingpattern lambdapatterns lambdapattern
 %type <ast> expr_seq 
-%type <ast> qual_type qual_constraint
+%type <ast> qual_type
 %type <ast> expr the_expr eform method_decls method_decl method_seq
 %type <ast> constraints constraint_seq constraint 
 %type <ast> types type bitfieldtype bool_type 
@@ -863,11 +863,11 @@ method_decl: ident ':' fntype {
 // TYPE CLASS INSTANTIATIONS [4.2]
 // No docstring here because method_seq is really a potentially empty
 // expr_seq
-ti_definition: '(' tk_DEFINSTANCE qual_constraint method_seq ')' {
-  SHOWPARSE("ti_definition -> ( DEFINSTANCE qual_constraint [docstring] method_seq)");
+ti_definition: '(' tk_DEFINSTANCE constraint method_seq ')' {
+  SHOWPARSE("ti_definition -> ( DEFINSTANCE constraint [docstring] method_seq)");
   $4 = stripDocString($4);
-  $$ = AST::make(at_definstance, $2.loc, $3->child(1), $4, 
-	       $3->child(0));  
+  $$ = AST::make(at_definstance, $2.loc, $3, $4, 
+		 AST::make(at_constraints, $3->loc));
 };
 
 method_seq: /* Nothing */ {
@@ -1449,16 +1449,6 @@ qual_type: '(' tk_FORALL constraints type ')' {
  SHOWPARSE("qual_type -> ( FORALL constraints type )");
  $$ = AST::make(at_qualType, $2.loc, $3, $4);
 };
-
-qual_constraint: constraint {
-  SHOWPARSE("qual_typeapp -> constraint");
-  shared_ptr<AST> constrs = AST::make(at_constraints, $1->loc);
-  $$ = AST::make(at_qualType, $1->loc, constrs, $1);
-}; 
-qual_constraint: '(' tk_FORALL constraints constraint ')' {
-  SHOWPARSE("qual_typeapp -> ( FORALL constraints constraint )");
-  $$ = AST::make(at_qualType, $2.loc, $3, $4);
-}; 
 
 // METHOD TYPES [3.9]
 /* type: '(' tk_METHOD tvapp fntype')' { */
