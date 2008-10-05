@@ -828,7 +828,7 @@ ti_definition: tk_INSTANCE constraint optdocstring ';' {
   // appropriate) from above in the constrained_definition case.
   shared_ptr<AST> constrs = AST::make(at_constraints, $2->loc);
   $$ = AST::make(at_definstance, $1.loc, $2,
-		 AST::make(at_methods, $4.loc),
+		 AST::make(at_methods, $1.loc),
 		 constrs);  
 };
 //ti_definition: '(' tk_DEFINSTANCE constraint optdocstring ')' {
