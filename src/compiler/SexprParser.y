@@ -227,7 +227,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> mod_definitions mod_definition
 %type <ast> if_definitions if_definition
 %type <ast> common_definition
-%type <ast> proclaim_definition
+%type <ast> value_declaration
 %type <ast> ptype_name val
 %type <ast> type_definition typapp
 %type <ast> type_decl externals alias
@@ -491,22 +491,22 @@ constrained_definition: '(' tk_FORALL constraints type_val_definition ')' {
 };
 
 mod_definitions: mod_definition {
-  SHOWPARSE("definitions -> definition");
+  SHOWPARSE("mod_definitions -> mod_definition");
   $$ = AST::make(at_Null, $1->loc, $1);
 };
 
 mod_definitions: mod_definitions mod_definition {
-  SHOWPARSE("definitions -> definitions definition");
+  SHOWPARSE("mod_definitions -> mod_definitions mod_definition");
   $$ = $1;
   $$->addChild($2);   
 };
 
 mod_definition: provide_definition {
-  SHOWPARSE("definition -> provide_definition");
+  SHOWPARSE("mod_definition -> provide_definition");
   $$ = $1;
 };
 mod_definition: common_definition {
-  SHOWPARSE("definition -> common_definition");
+  SHOWPARSE("mod_definition -> common_definition");
   $$ = $1;
 };
 
@@ -540,8 +540,8 @@ type_val_definition: value_definition {
   $$ = $1;
 };
 
-type_val_definition: proclaim_definition {
-  SHOWPARSE("type_val_definition -> proclaim_definition");
+type_val_definition: value_declaration {
+  SHOWPARSE("type_val_definition -> value_declaration");
   $$ = $1;
 };
 
@@ -942,8 +942,8 @@ value_definition: '(' tk_DEFINE '(' defident lambdapatterns ')'
 };
 
 // PROCLAIM DEFINITION -- VALUES [6.2]
-proclaim_definition: '(' tk_PROCLAIM defident ':' qual_type optdocstring externals ')' {
-  SHOWPARSE("if_definition -> ( PROCLAIM ident : qual_type externals optdocstring )");
+value_declaration: '(' tk_PROCLAIM defident ':' qual_type optdocstring externals ')' {
+  SHOWPARSE("if_definition -> ( PROCLAIM ident : qual_type optdocstring externals )");
   $$ = AST::make(at_proclaim, $2.loc, $3, $5);
   $$->flags |= $7->flags;
   $$->getID()->flags |= $7->flags;
@@ -985,26 +985,6 @@ import_definition: '(' tk_IMPORT ifident importList ')' {
   $$->addChildrenFrom($4);
 };
 
-// PROVIDE DEFINITION [8.3]
-provide_definition: '(' tk_PROVIDE ifident provideList ')' {
-  SHOWPARSE("provide_definition -> (PROVIDE ident ifident)");
-  shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
-  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
-  $$ = AST::make(at_provide, $2.loc, ifIdent); 
-  $$->addChildrenFrom($4);
-};
-
-provideList: ident {
-  SHOWPARSE("provideList -> ident");
-  $$ = AST::make(at_Null, $1->loc, $1);
-};
-
-provideList: provideList ident {
-  SHOWPARSE("provideList -> provideList ident");
-  $$ = $1;
-  $$->addChild($2);
-};
-
 importList: alias {
   SHOWPARSE("importList -> alias");
   $$ = AST::make(at_Null, $1->loc, $1);
@@ -1027,6 +1007,26 @@ alias: '(' ident tk_AS ident ')' {
   $$ = AST::make(at_ifsel, $2->loc, $4, $2);
 };
 
+
+// PROVIDE DEFINITION [8.3]
+provide_definition: '(' tk_PROVIDE ifident provideList ')' {
+  SHOWPARSE("provide_definition -> (PROVIDE ifident provideList)");
+  shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
+  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
+  $$ = AST::make(at_provide, $2.loc, ifIdent); 
+  $$->addChildrenFrom($4);
+};
+
+provideList: ident {
+  SHOWPARSE("provideList -> ident");
+  $$ = AST::make(at_Null, $1->loc, $1);
+};
+
+provideList: provideList ident {
+  SHOWPARSE("provideList -> provideList ident");
+  $$ = $1;
+  $$->addChild($2);
+};
 
 // definition: '(' tk_DEFTHM ident expr ')'  {
 //    SHOWPARSE("definition -> ( DEFTHM ident expr )");

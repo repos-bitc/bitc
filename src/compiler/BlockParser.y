@@ -97,7 +97,9 @@ stripDocString(shared_ptr<AST> exprSeq)
 %}
 
 %pure-parser
-%expect 5
+ // All of the expected errors are shift/reduce errors in which the
+ // lookahead token is '(' or '[' and the correct action is to shift.
+%expect 7
 %parse-param {BlockLexer *lexer}
 
 %token <tok> tk_Reserved	/* reserved words */
@@ -172,6 +174,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_ARRAY_NTH
 %token <tok> tk_VECTOR_NTH
 
+%token <tok> tk_BY_REF
 %token <tok> tk_REF
 %token <tok> tk_VAL
 
@@ -205,7 +208,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_LET
 %token <tok> tk_LETREC
 %token <tok> tk_OPAQUE
-%token <tok> tk_PROCLAIM
+%token <tok> tk_DECLARE
 %token <tok> tk_MUTABLE
 %token <tok> tk_EXTERNAL
 %token <tok> tk_INTERFACE
@@ -221,23 +224,31 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_SUSPEND
 
  //%type <ast> module
-%type <ast> interface
+%type <ast> interface module
 %type <ast> if_definitions if_definition
-%type <ast> common_definition
+%type <ast> mod_definitions mod_definition
+%type <ast> provide_definition provideList
+%type <ast> common_definition type_val_definition value_declaration
+%type <ast> constrained_definition
+%type <ast> constraints constraint
+%type <ast> tc_definition
+%type <ast> tc_decls tc_decl
+%type <ast> method_decls method_decl
+%type <ast> ti_definition
 %type <ast> import_definition importList
- //%type <ast> provide_definition provideList
 %type <ast> type_definition type_decl externals
 %type <ast> value_definition
 %type <ast> defpattern
 %type <ast> expr_seq expr eform
 %type <ast> lambdapatterns lambdapattern
-%type <ast> types type
+%type <ast> types type qual_type
 %type <ast> bool_type
 %type <ast> fntype fneffect
  //%type <ast> bitfieldtype
 %type <ast> literal
 %type <ast> typevar
-%type <ast> type_or_bitfield type_pl_byref types_pl_byref
+%type <ast> type_pl_byref types_pl_byref
+%type <ast> type_or_bitfield bitfieldtype
 %type <ast> type_cpair typapp
 %type <ast> int_type uint_type any_int_type float_type
 %type <ast> declares // declare
@@ -304,15 +315,13 @@ optdocstring: {
   $$ = AST::make(at_docString);
 };
 
-
-
 uoc_body: interface {
   SHOWPARSE("uocbody -> interface");
 }
 
-//uoc_body: module {
-//  SHOWPARSE("uocbody -> module");
-//}
+uoc_body: module_seq {
+  SHOWPARSE("uocbody -> module_seq");
+}
 
 interface: tk_INTERFACE ifident '{' {
     if ($2.str.find("bitc.") == 0)
@@ -370,6 +379,46 @@ ifident: ifident '.' {
   $$ = LToken($1.loc, $1.str + "." + $4.str);
 };
 
+module: tk_MODULE optdocstring '{' mod_definitions '}' {
+ SHOWPARSE("module -> tk_MODULE optdocstring { mod_definitions }");
+ $$ = $4;
+ $$->astType = at_module;
+
+ string uocName = 
+   UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
+
+ // Construct, compile, and admit the parsed UoC:
+ shared_ptr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
+ lexer->nModules++;
+ uoc->Compile();
+ UocInfo::srcList[uocName] = uoc;
+};
+
+module: tk_MODULE ifident optdocstring '{' mod_definitions '}' {
+ SHOWPARSE("module -> ( tk_MODULE ifident optdocstring { mod_definitions }");
+ $$ = $5;
+ $$->astType = at_module;
+
+ // Construct, compile, and admit the parsed UoC.
+ // Note that we do not even consider the user-provided module name
+ // for purposes of internal naming, because it is not significant.
+ string uocName = 
+   UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
+
+ shared_ptr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
+ lexer->nModules++;
+ uoc->Compile();
+ UocInfo::srcList[uocName] = uoc;
+};
+
+module_seq: module {
+ SHOWPARSE("module_seq -> module");
+}
+
+module_seq: module_seq module {
+ SHOWPARSE("module_seq -> module_seq module");
+}
+
 // INTERFACE TOP LEVEL DEFINITIONS
 if_definitions: if_definition {
   SHOWPARSE("if_definitions -> if_definition");
@@ -387,23 +436,85 @@ if_definition: common_definition {
   $$ = $1;
 };
 
+mod_definitions: mod_definition {
+  SHOWPARSE("mod_definitions -> mod_definition");
+  $$ = AST::make(at_Null, $1->loc, $1);
+};
+
+mod_definitions: mod_definitions mod_definition {
+  SHOWPARSE("mod_definitions -> mod_definitions mod_definition");
+  $$ = $1;
+  $$->addChild($2);   
+};
+
+mod_definition: provide_definition {
+  SHOWPARSE("mod_definition -> provide_definition");
+  $$ = $1;
+};
+mod_definition: common_definition {
+  SHOWPARSE("mod_definition -> common_definition");
+  $$ = $1;
+};
+
+// TOP LEVEL DEFINITIONS [2.5.1]
+constrained_definition: tk_FORALL constraints type_val_definition {
+  // HACK ALERT!!! For reasons of ancient history, there is no
+  // at_forall AST. Instead, all of the type_val_definition ASTs have
+  // their constraints tacked on at the end. This is rather badly
+  // glitched and we need to fix it, but the immediate goal was to
+  // move the (forall ...) syntax to the outside without doing major
+  // surgery on the compiler internals.
+
+  uint32_t nChildren = $3->children.size();
+
+  shared_ptr<AST> tvConstraints= $3->child(nChildren-1);
+  assert(tvConstraints->astType == at_constraints);
+  tvConstraints->addChildrenFrom($2);
+  $$ = $3;
+};
+
 common_definition: import_definition {
   SHOWPARSE("common_definition -> import_definition");
   $$ = $1;
 };
 
-common_definition: type_definition {
+common_definition: type_val_definition {
+  SHOWPARSE("common_definition -> type_val_definition");
+  $$ = $1;
+};
+
+common_definition: constrained_definition {
+  SHOWPARSE("common_definition -> constrained_definition");
+  $$ = $1;
+};
+
+type_val_definition: type_definition {
   SHOWPARSE("common_definition -> type_definition");
   $$ = $1;
 };
 
-common_definition: type_decl {
+type_val_definition: type_decl {
   SHOWPARSE("common_definition -> type_decl");
   $$ = $1;
 };
 
-common_definition: value_definition {
+type_val_definition: value_definition {
   SHOWPARSE("common_definition -> type_decl");
+  $$ = $1;
+};
+
+type_val_definition: value_declaration {
+  SHOWPARSE("type_val_definition -> value_declaration");
+  $$ = $1;
+};
+
+type_val_definition: tc_definition {
+  SHOWPARSE("type_val_definition -> tc_definition");
+  $$ = $1;
+};
+
+type_val_definition: ti_definition {
+  SHOWPARSE("type_val_definition -> ti_definition");
   $$ = $1;
 };
 
@@ -451,6 +562,26 @@ alias: '(' ident tk_AS ident ')' {
   $$ = AST::make(at_ifsel, $2->loc, $4, $2);
 };
 
+// PROVIDE DEFINITION [8.3]
+provide_definition: tk_PROVIDE ifident provideList ';' {
+  SHOWPARSE("provide_definition -> PROVIDE ifident provideList)");
+  shared_ptr<AST> ifIdent = AST::make(at_ifident, $2);
+  UocInfo::importInterface(lexer->errStream, $2.loc, $2.str);
+  $$ = AST::make(at_provide, $1.loc, ifIdent); 
+  $$->addChildrenFrom($3);
+};
+
+provideList: ident {
+  SHOWPARSE("provideList -> ident");
+  $$ = AST::make(at_Null, $1->loc, $1);
+};
+
+provideList: provideList ',' ident {
+  SHOWPARSE("provideList -> provideList , ident");
+  $$ = $1;
+  $$->addChild($3);
+};
+
 /* Literals and Variables */
 // INTEGER LITERALS [2.4.1]
 literal: boolLit {
@@ -486,6 +617,32 @@ exident: tk_Ident {
 exident: tk_Reserved {
   SHOWPARSE("exident -> <Reserved " + $1.str + ">");
   $$ = AST::make(at_ident, $1);
+};
+
+//Typeclass constraint declarations
+
+constraints: constraint {
+ SHOWPARSE("constraints -> constraint");  
+ $$ = AST::make(at_constraints, $1->loc, $1);
+};
+
+constraints: constraints ',' constraint {
+ SHOWPARSE("constraints -> constraints , constraint");  
+ $$ = $1;
+ $$->addChild($3);
+};
+
+constraint: typapp {
+ SHOWPARSE("constraint -> typapp");  
+ $1->astType = at_tcapp;
+ $$ = $1;
+};
+
+// Type classes can have zero type variables, and serve in that case
+// as enable/disable controls
+constraint: useident {
+ SHOWPARSE("constraint -> useident");  
+ $$ = AST::make(at_tcapp, $1->loc, $1); 
 };
 
 // FIX: This should probably get its own AST type.
@@ -567,7 +724,7 @@ repr_constructors: repr_constructors repr_constructor {
 /*   $1->flags |= (ID_IS_GLOBAL); */
 /*   $$ = AST::make(at_reprctr, $1->loc, $1); */
 /* }; */
-repr_constructor: ident '{' fields '}' tk_WHERE repr_reprs '}' ';' {  /* compound constructor */ 
+repr_constructor: ident '{' fields '}' tk_WHERE repr_reprs ';' {  /* compound constructor */ 
   SHOWPARSE("repr_constructor ->  ( ident fields ( WHERE repr_reprs ) )");
   $1->flags |= (ID_IS_GLOBAL);
   shared_ptr<AST> ctr = AST::make(at_constructor, $1->loc, $1);
@@ -610,6 +767,84 @@ type_definition: tk_EXCEPTION ident optdocstring '{' fields '}' ';' {
 declares: {
   $$ = GC_NULL;
 };
+
+// TYPE CLASSES [4]
+// TYPE CLASS DEFINITION [4.1]
+
+tc_definition: tk_TYPECLASS ptype_name optdocstring tc_decls '{' method_decls '}' ';' {
+  SHOWPARSE("tc_definition -> ( TYPECLASS ptype_name optdocstring tc_decls { method_decls } ;");
+  $$ = AST::make(at_deftypeclass, $1.loc, $2->child(0), 
+	       $2->child(1), $4, $6, $2->child(2));  
+  $$->child(0)->defForm = $$;
+};
+
+tc_decls: {
+  SHOWPARSE("tcdecls -> <empty>");
+  $$ = AST::make(at_tcdecls);
+};
+
+tc_decls: tc_decls ',' tc_decl {
+  SHOWPARSE("tcdecls -> tcdelcs , tcdecl");
+  $$ = $1;
+  $$->addChild($3);
+};
+
+tc_decl: '(' tvlist ')' tk_FNARROW typevar {
+  //         ^^^^^^
+  // I really mean tvlist here, arbitraty types
+  // are not accepptable.
+  SHOWPARSE("tc_decl -> ( tvlist ) -> typevar");
+  $2->astType = at_fnargVec;
+  $$ = AST::make(at_tyfn, $1.loc, $2, $5);  
+};
+
+method_decls: /* Nothing */ {
+  SHOWPARSE("method_decls -> ");
+  LexLoc loc;
+  $$ = AST::make(at_method_decls, loc);
+};
+
+method_decls: method_decls method_decl {
+  SHOWPARSE("method_decls -> method_decls method_decl");
+  $$ = $1;
+  $$->addChild($2);
+};
+
+method_decl: fntype ident ';' {
+  SHOWPARSE("method_decl -> fntype ident ;");
+  $2->flags |= ID_IS_GLOBAL;
+  $2->identType = id_method;
+  $$ = AST::make(at_method_decl, $2->loc, $2, $1);
+};
+
+// TYPE CLASS INSTANTIATIONS [4.2]
+// No docstring here because method_seq is really a potentially empty
+// expr_seq
+ti_definition: ';' {
+  $$ = GC_NULL;
+}
+
+//ti_definition: tk_INSTANCE constraint optdocstring method_seq ';' {
+//  SHOWPARSE("ti_definition -> INSTANCE constraint [docstring] method_sefq)");
+//
+//  // Constraints will be inserted under the empty constraints node (if
+//  // appropriate) from above in the constrained_definition case.
+//  shared_ptr<AST> constrs = AST::make(at_constraints, $2->loc);
+//  $$ = AST::make(at_definstance, $1.loc, $2, $4, 
+//		 constrs);  
+//};
+//
+//method_seq: /* Nothing */ {
+//  SHOWPARSE("method_seq -> ");
+//  LexLoc loc;
+//  $$ = AST::make(at_methods, loc);
+//};
+//
+//method_seq: expr_seq {
+//  SHOWPARSE("method_seq -> expr_seq");
+//  $$ = $1;
+//  $$->astType = at_methods;
+//};
 
 // Type Declarations
 // External declarations
@@ -677,20 +912,15 @@ fields: fields field {
   $$->addChild($2);
 };
 
-field: ident ':' type_or_bitfield  ';' {
-  SHOWPARSE("field -> ident : type_or_bitfield");
-  $$ = AST::make(at_field, $1->loc, $1, $3);
+field: type_or_bitfield ident ';' {
+  SHOWPARSE("field -> type_or_bitfield ident ;");
+  $$ = AST::make(at_field, $1->loc, $2, $1);
+}
+
+field: bitfieldtype tk_FILL ';' {
+  SHOWPARSE("field -> bitfieldtype FILL ;");
+  $$ = AST::make(at_fill, $1->loc, $1);
 };
-
-//field: '(' tk_THE type_pl_bf ident ')'  {
-//  SHOWPARSE("field -> '(' THE type_pl_bf ident ')'");
-//  $$ = AST::make(at_field, $1.loc, $4, $3);
-//};
-
-//field: '(' tk_FILL bitfieldtype ')'  {
-//  SHOWPARSE("field -> '(' FILL type ')'");
-//  $$ = AST::make(at_fill, $1.loc, $3);
-//};
 
 //field: '(' tk_RESERVED bitfieldtype intLit ')'  {
 //  SHOWPARSE("field -> '(' RESERVED bitfieldtype intLit ')'");
@@ -726,6 +956,11 @@ defpattern: defident {
   SHOWPARSE("defpattern -> defident");
   $$ = AST::make(at_identPattern, $1->loc, $1);
 };
+defpattern: qual_type defident {
+  SHOWPARSE("defpattern -> qual_type defident");
+  $$ = AST::make(at_identPattern, $1->loc, $2, $1);
+};
+
 //defpattern: defident ':' qual_type {
 //  SHOWPARSE("defpattern -> defident : qual_type");
 //  $$ = AST::make(at_identPattern, $1->loc, $1, $3);
@@ -770,21 +1005,15 @@ value_definition: tk_DEF defident '(' lambdapatterns ')' optdocstring
   $$->addChild(AST::make(at_constraints));
 };
 
-// Define convenience syntax case 3: one or more arguments
-// No docstring here because of expr_seq
-//value_definition: '(' tk_DEFINE '(' defident lambdapatterns ')' 
-//                  expr_seq ')'  {
-//  SHOWPARSE("value_definition -> ( DEFINE  ( defident lambdapatterns ) "
-//	    "[docstring] expr_seq )");
-//  $7 = stripDocString($7);
-//  shared_ptr<AST> iRetBlock = 
-//    AST::make(at_block, $2.loc, AST::make(at_ident, LToken("__return")), $7);
-//  shared_ptr<AST> iLambda = AST::make(at_lambda, $2.loc, $5, iRetBlock);
-//  iLambda->printVariant = 1;
-//  shared_ptr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
-//  $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
-//  $$->addChild(AST::make(at_constraints));
-//};
+// PROCLAIM DEFINITION -- VALUES [6.2]
+value_declaration: tk_DECLARE qual_type defident optdocstring externals ';' {
+  SHOWPARSE("if_definition -> DECLARE qual_type ident optdocstring externals ;");
+  $$ = AST::make(at_proclaim, $1.loc, $3, $2);
+  $$->flags |= $5->flags;
+  $$->getID()->flags |= $5->flags;
+  $$->getID()->externalName = $5->externalName;
+  $$->addChild(AST::make(at_constraints));
+};
 
 /* Lambda Patterns -- with an additional by-ref annotation */
 lambdapatterns: lambdapattern {
@@ -809,23 +1038,6 @@ lambdapattern: type_pl_byref ident {
   if ($1->astType == at_byrefType)
     $2->flags |= ARG_BYREF;
 };
-//lambdapattern: ident ':' type_pl_byref {
-//  SHOWPARSE("lambdapattern -> ident : type_pl_byref");
-//  $$ = AST::make(at_identPattern, $1->loc, $1, $3);
-//  if ($3->astType == at_byrefType)
-//    $1->flags |= ARG_BYREF;
-//};
-
-//lambdapattern: '(' tk_THE type ident ')' {
-//  SHOWPARSE("lambdapattern -> ( the type ident ) ");
-//  $$ = AST::make(at_identPattern, $1.loc, $4, $3);  
-//};
-
-//lambdapattern: '(' tk_THE '(' tk_BY_REF type ')' ident ')' {
-//  SHOWPARSE("lambdapattern -> ( the ( by-ref type ) ident )");
-//  $$ = AST::make(at_identPattern, $1.loc, $7, $5);
-//  $5->flags |= ARG_BYREF;
-//};
 
 // EXPRESSIONS [7]
 //
@@ -861,18 +1073,15 @@ expr: eform {
   SHOWPARSE("expr -> eform");
   $$ = $1;
 };
+
+// N.B. This is NOT cast! This is type-qualified expression!
+expr: '(' type ')' eform {
+  SHOWPARSE("expr -> ( type ) eform");
+  $$ = AST::make(at_tqexpr, $1.loc, $4, $2);
+};
 //expr: eform ':' type {
 //  SHOWPARSE("expr -> eform : type");
 //  $$ = AST::make(at_tqexpr, $1->loc, $1, $3);
-//};
-//expr: the_expr {
-//  SHOWPARSE("expr -> the_expr");
-//  $$ = $1;
-//};
-//the_expr: '(' tk_THE type eform ')' {
-//  SHOWPARSE("the_expr -> ( THE type eform )");
-//  // Note: argument order swapped for historical reasons.
-//  $$ = AST::make(at_tqexpr, $2.loc, $4, $3);
 //};
 
 eform: ident {
@@ -1061,14 +1270,9 @@ fntype: '(' ')' fneffect tk_FNARROW type {
 };
 
 fntype: '(' types_pl_byref ')' fneffect tk_FNARROW type {
-  SHOWPARSE("fntype -> ( types_pl_byref ) fneffect --> type");
+  SHOWPARSE("( types_pl_byref ) fneffect --> type");
   $$ = AST::make(at_fn, $1.loc, $2, $6);
 };
-
-//fntype: '(' fneffect tk_FN '(' types_pl_byref ')' type ')'  {
-//  SHOWPARSE("fntype -> ( fneffect FN ( types_pl_byref ) type )");
-//  $$ = AST::make(at_fn, $1.loc, $5, $7);
-//};
 
 type_cpair: type ',' type {
   SHOWPARSE("type_cpair -> type ',' type");
@@ -1128,20 +1332,24 @@ type: tk_CONST type {
 };
 
 // BITFIELD TYPE
-//bitfieldtype: '(' tk_BITFIELD any_int_type intLit ')' {
-//  SHOWPARSE("bitfieldtype -> ( BITFIELD any_int_type intLit )");
-//  $$ = AST::make(at_bitfield, $2.loc, $3, $4);
-//};
-//bitfieldtype: '(' tk_BITFIELD bool_type intLit ')' {
-//  SHOWPARSE("bitfieldtype -> ( BITFIELD bool_type intLit )");
-//  $$ = AST::make(at_bitfield, $2.loc, $3, $4);
-//};
 
-// Any-type, including bitfield type
-//type_or_bitfield: bitfieldtype {
-//  SHOWPARSE("type_or_bitfield -> bitfieldtype");
-//  $$ = $1;
-//};
+// Note that in contrast to C the field length is part of
+// the type!
+bitfieldtype: any_int_type ':' intLit {
+  SHOWPARSE("bitfieldtype -> any_int_type : intLit");
+  $$ = AST::make(at_bitfield, $1->loc, $1, $3);
+}
+
+bitfieldtype: bool_type ':' intLit {
+  SHOWPARSE("bitfieldtype -> bool_type : intLit");
+  $$ = AST::make(at_bitfield, $1->loc, $1, $3);
+}
+
+// Legal field types, including bitfield type
+type_or_bitfield: bitfieldtype {
+  SHOWPARSE("type_or_bitfield -> bitfieldtype");
+  $$ = $1;
+};
 
 type_or_bitfield: type {
   SHOWPARSE("type_or_bitfield -> type");
@@ -1157,10 +1365,10 @@ type_pl_byref: type {
   $$ = $1;
 };
 
-//type_pl_byref: '(' tk_BY_REF type ')' {
-//  SHOWPARSE("type_pl_byref -> ( BY-REF type )");
-//  $$ = AST::make(at_byrefType, $2.loc, $3);
-//};
+type_pl_byref: tk_BY_REF type {
+  SHOWPARSE("type_pl_byref -> BY-REF type");
+  $$ = AST::make(at_byrefType, $1.loc, $2);
+};
 
 types_pl_byref: type_pl_byref {
   SHOWPARSE("types_pl_byref -> type_pl_byref");
@@ -1173,6 +1381,23 @@ types_pl_byref: types_pl_byref type_pl_byref {
   $1->addChild($2);
 };
 
+// Qualified types:
+
+qual_type: type {
+  SHOWPARSE("qual_type -> type");
+  $$ = $1;  
+};
+
+// This syntax is just too horrible for words:
+//
+//  forall Eql('a) ('a)->bool
+//
+// so consider it a temporary solution. The problem is that there is
+// no explicit bracketing for the eye to follow.
+qual_type: tk_FORALL constraints type {
+ SHOWPARSE("qual_type -> FORALL constraints type");
+ $$ = AST::make(at_qualType, $1.loc, $2, $3);
+};
 
 // IDENTIFIERS [2.2]
 ident: tk_Ident {
