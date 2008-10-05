@@ -235,6 +235,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> tc_decls tc_decl
 %type <ast> method_decls method_decl
 %type <ast> ti_definition
+%type <ast> method_bindings method_binding
 %type <ast> import_definition importList
 %type <ast> type_definition type_decl externals
 %type <ast> value_definition
@@ -820,31 +821,53 @@ method_decl: fntype ident ';' {
 // TYPE CLASS INSTANTIATIONS [4.2]
 // No docstring here because method_seq is really a potentially empty
 // expr_seq
-ti_definition: ';' {
-  $$ = GC_NULL;
-}
+ti_definition: tk_INSTANCE constraint optdocstring ';' {
+  SHOWPARSE("ti_definition -> INSTANCE constraint [docstring] ;");
 
-//ti_definition: tk_INSTANCE constraint optdocstring method_seq ';' {
-//  SHOWPARSE("ti_definition -> INSTANCE constraint [docstring] method_sefq)");
-//
-//  // Constraints will be inserted under the empty constraints node (if
-//  // appropriate) from above in the constrained_definition case.
-//  shared_ptr<AST> constrs = AST::make(at_constraints, $2->loc);
-//  $$ = AST::make(at_definstance, $1.loc, $2, $4, 
-//		 constrs);  
+  // Constraints will be inserted under the empty constraints node (if
+  // appropriate) from above in the constrained_definition case.
+  shared_ptr<AST> constrs = AST::make(at_constraints, $2->loc);
+  $$ = AST::make(at_definstance, $1.loc, $2,
+		 AST::make(at_methods, $4.loc),
+		 constrs);  
+};
+//ti_definition: '(' tk_DEFINSTANCE constraint optdocstring ')' {
+//  SHOWPARSE("ti_definition -> ( DEFINSTANCE constraint [docstring])");
+//  $$ = AST::make(at_definstance, $2.loc, $3, 
+//		 AST::make(at_methods, $5.loc),
+//		 AST::make(at_constraints, $3->loc));
 //};
-//
-//method_seq: /* Nothing */ {
-//  SHOWPARSE("method_seq -> ");
-//  LexLoc loc;
-//  $$ = AST::make(at_methods, loc);
+ti_definition: tk_INSTANCE constraint optdocstring '{' method_bindings '}' ';' {
+  SHOWPARSE("ti_definition -> INSTANCE constraint [docstring] method_seq ;");
+
+  // Constraints will be inserted under the empty constraints node (if
+  // appropriate) from above in the constrained_definition case.
+  shared_ptr<AST> constrs = AST::make(at_constraints, $2->loc);
+  $$ = AST::make(at_definstance, $1.loc, $2, $5, 
+		 constrs);  
+};
+//ti_definition: '(' tk_DEFINSTANCE constraint optdocstring method_bindings ')' {
+//  SHOWPARSE("ti_definition -> ( DEFINSTANCE constraint [docstring] method_bindings)");
+//  $$ = AST::make(at_definstance, $2.loc, $3, $5, 
+//		 AST::make(at_constraints, $3->loc));
 //};
-//
-//method_seq: expr_seq {
-//  SHOWPARSE("method_seq -> expr_seq");
-//  $$ = $1;
-//  $$->astType = at_methods;
-//};
+
+method_bindings: method_binding {
+  SHOWPARSE("method_bindings -> method_binding");
+  $$ = AST::make(at_methods, $1->loc, $1);
+};
+
+method_bindings: method_bindings ',' method_binding {
+  SHOWPARSE("method_bindings -> method_bindings , method_binding");
+  $$ = $1;
+  $$->addChild($3);
+};
+
+method_binding: useident '=' expr {
+  SHOWPARSE("method_binding -> useident = expr");
+  
+  $$ = AST::make(at_method_binding, $1->loc, $1, $3);
+};
 
 // Type Declarations
 // External declarations
