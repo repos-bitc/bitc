@@ -217,6 +217,7 @@ TopInit(std::ostream& errStream,
   case at_method_decl:
   case at_definstance:
   case at_methods:
+  case at_method_binding:
   case at_ifident:
   case at_importAs:
   case at_provide:

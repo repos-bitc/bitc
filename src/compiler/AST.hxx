@@ -953,6 +953,10 @@ public:
   /// @brief Get the unique identifier for this AST
   boost::shared_ptr<AST> getID();
 
+  /// @brief From a definstance AST, get the definition corresponding
+  /// to the method `name'
+  boost::shared_ptr<AST> getMethod(std::string name);
+
   /// @brief Return true IFF this is a AST corresponds to a union leg.
   bool isUnionLeg();
   /// @brief Return true IFF this AST is a method name identifier.

@@ -968,7 +968,7 @@ getDefToInstantiate(ostream &errStream, shared_ptr<UocInfo> unifiedUOC,
     assert(found);
 
     shared_ptr<AST> instAST = (*matchingInstance)->ast;
-    shared_ptr<AST> theMethod = instAST->child(1)->child(nthMethod);
+    shared_ptr<AST> theMethod = instAST->getMethod(def->s);
 
     // If an immediate lambda was present, then InstLamHoist hoisted
     // it and left us with an ID wrapped by a THE.

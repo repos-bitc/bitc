@@ -42,8 +42,8 @@
 (defunion unin:val C1 (C2 c21:int32 c22:bool) C3) 
 
 (definstance (Eq unin) 
-  (lambda (x y) #t)
-  (lambda (x y) #f))
+  (== = (lambda (x y) #t))
+  (!= = (lambda (x y) #f)))
 
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec) 

@@ -118,6 +118,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_deftypeclass:
   case at_definstance:
   case at_methods:
+  case at_method_binding:
   case at_declunion:
   case at_declstruct:
   case at_declrepr:

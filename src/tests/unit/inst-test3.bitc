@@ -43,7 +43,9 @@
 (define (eeq x:unin y:unin) #t)
 (define (neq x:unin y:unin) #f)
 
-(definstance (Eq unin) (the (fn (unin unin) bool) eeq) neq)
+(definstance (Eq unin) 
+  (== = (the (fn (unin unin) bool) eeq)) 
+  (!= = neq))
 
 (define main.main:(fn ((vector string)) int32)
   (lambda (argvec) 

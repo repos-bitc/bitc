@@ -49,10 +49,10 @@
 (define (returnFalse x y) #f)
 
 (definstance (Eq (ref (pair bool bool)))
-  returnTrue returnTrue)
+  (== = returnTrue) (!= = returnTrue))
 
 (definstance (Eq (ref (pair (mutable bool) (mutable bool))))
-  returnFalse returnFalse)
+  (== = returnFalse) (!= = returnFalse))
 
 (define p (dup (#t, #f)))
 (define mp:(ref (pair (mutable bool) (mutable bool))) 

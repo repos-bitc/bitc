@@ -55,7 +55,7 @@
 			$: (fn ('a 'b) 'c)
 			))
 
-(definstance (TC2 'a 'a) (lambda (x y) #t))
+(definstance (TC2 'a 'a) (@ = (lambda (x y) #t)))
 
 (forall ((TC2 'a 'b)) (proclaim abc: (fn ('a 'b) bool)))
 

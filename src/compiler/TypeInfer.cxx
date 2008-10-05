@@ -1321,7 +1321,7 @@ InferTypeClass(std::ostream& errStream, shared_ptr<AST> ast,
     mType->myContainer = ident;
     
     shared_ptr<TypeScheme> mSigma = TypeScheme::make(mType, mID, 
-					      TCConstraints::make());
+						     TCConstraints::make());
     for (TypeSet::iterator itr = sigma->tcc->begin();
 	itr != sigma->tcc->end(); ++itr)
       mSigma->tcc->addPred((*itr));
@@ -1553,27 +1553,53 @@ InferInstance(std::ostream& errStream, shared_ptr<AST> ast,
   tcapp->scheme = TypeScheme::make(tc, tcapp, myTcc);
       
   size_t nMethods = tc->components.size();
-  if (methods->children.size() == nMethods) {
-    for (size_t i = 0; i < nMethods; i++) {
-      shared_ptr<Type> mtType = tc->CompType(i);
-      shared_ptr<AST> method = methods->child(i);
-      TYPEINFER(method, defGamma, instEnv, impTypes, isVP, myTcc,
-		uflags, trail, USE_MODE, TI_NO_FLAGS);
-      shared_ptr<Type> methodType = method->symType->getType();
 
-      // Methods are functions, remove top mutability.
-      CHKERR(errFree, unify(errStream, trail, method->loc, 
-			    mtType, methodType->minimizeMutability(),
-			    uflags));
-    }
-  }
-  else {
+  if (methods->children.size() != nMethods) {
     errStream << ast->loc << ": "
 	      << "Type class" << tcapp->child(0)->s
 	      << " needs " << nMethods << " methods for "
 	      << "instantiation, but here obtained "
 	      << methods->children.size() << "."
 	      << std::endl;
+    errFree = false;
+    return errFree;
+  }
+
+  for (size_t i = 0; i < tc->components.size(); i++) {
+    shared_ptr<Type> mtType = tc->CompType(i);
+    std::string mtName = tc->CompName(i);
+
+    bool found = false;
+    for (size_t j = 0; j < methods->children.size(); j++) {
+      shared_ptr<AST> method = methods->child(i);
+      shared_ptr<AST> method_name = method->child(0);
+      shared_ptr<AST> method_val = method->child(1);
+
+      if(mtName == method_name->s) {
+	found = true;
+
+	method_name->symType = mtType;
+	TYPEINFER(method_val, defGamma, instEnv, impTypes, isVP, myTcc,
+		  uflags, trail, USE_MODE, TI_NO_FLAGS);
+	shared_ptr<Type> methodType = method_val->symType->getType();
+      
+	// Methods are functions, remove top mutability.
+	CHKERR(errFree, unify(errStream, trail, method->loc, 
+			      mtType, methodType->minimizeMutability(),
+			      uflags));
+
+	// Symbol resolver guarantees that there cannot be duplicate
+	// method definitions.
+	break;
+      }
+    }
+    
+    if(!found) {
+      errStream << ast->loc << ": No definition for method "
+		<< mtName << " in this instance."
+		<< std::endl;
+      errFree = false;
+    }
   }
 
   if (!errFree) 
@@ -1707,6 +1733,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_valCat:
   case at_opaqueCat:
   case at_methods:
+  case at_method_binding:
   case agt_category:
   case at_AnyGroup:
   case agt_literal:

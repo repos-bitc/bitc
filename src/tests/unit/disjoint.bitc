@@ -48,7 +48,7 @@
 
 (forall ((IntLit 'a)) 
   (definstance (ABC 'a)
-    FUN))
+    (FN = FUN)))
 
 ;; must not work
 ;;(definstance  (ABC int32)

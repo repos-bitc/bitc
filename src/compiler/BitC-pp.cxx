@@ -686,6 +686,14 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
+  case at_method_binding:
+    {
+      out << "(= " << ast->child(0)->s
+	  << " " << ast->child(1)->s
+	  << ")";
+      break;
+    }
+ 
   case at_tyfn:
     out << "(" << ast->atKwd();
     out << "(";

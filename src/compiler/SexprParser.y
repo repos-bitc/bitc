@@ -887,9 +887,15 @@ method_bindings: method_bindings method_binding {
   $$->addChild($2);
 };
 
-method_binding: useident '=' expr {
-  SHOWPARSE("method_binding -> useident = expr");
-  $$ = AST::make(at_method_binding, $1->loc, $1, $3);
+method_binding: '(' useident ident expr ')' {
+  SHOWPARSE("method_binding -> ( useident = expr )");
+  
+  if ($3->s != "=") {
+    cerr << $2->loc << ": Syntax error, expecting `='.\n";
+    lexer->num_errors++;
+  }
+  
+  $$ = AST::make(at_method_binding, $1.loc, $2, $4);
 };
 
 // DEFINE  [5.1]

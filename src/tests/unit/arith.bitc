@@ -46,7 +46,7 @@
   )
 
 (definstance (arith int32 int32 int32)
-  + -)
+  (++ = +) (-- = -))
 
 (defexception LengthError)
 (define (list-sum x y)
@@ -86,14 +86,14 @@
 ;; lp lm)
 
 (definstance (arith (list 'a) (list 'b) (list 'a))
-  list-sum list-dif)
+  (++ = list-sum) (-- = list-dif))
 
 ;; Should not work
 ;;(definstance (arith int32 int32 int64)
 ;;  + -)
 
 (definstance (arith int64 int64 int64)
-  + -)
+  (++ = +) (-- = -))
 
 (define (f x y) (++ x y))
 

@@ -339,6 +339,7 @@ ssa(std::ostream& errStream,
   case at_deftypeclass:
   case at_definstance:
   case at_methods:
+  case at_method_binding:
   case at_importAs:
   case at_provide:
   case at_import:

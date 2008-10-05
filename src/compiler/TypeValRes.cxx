@@ -430,6 +430,7 @@ isExpansive(std::ostream& errStream,
   case at_method_decl:
   case at_definstance:
   case at_methods:
+  case at_method_binding:
   case agt_tc_definition:
   case agt_if_definition:
   case agt_ow:

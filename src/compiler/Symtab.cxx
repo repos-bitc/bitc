@@ -1300,6 +1300,45 @@ resolve(std::ostream& errStream,
 	RESOLVE(ast->child(c), env, lamLevel, 
 		USE_MODE, idc_value, currLB, flags);
       
+      // Make sure that each method is defined at most once (no
+      // duplicates). 
+      
+      //std::cerr << ast->loc << ": Processing :" 
+      //  	  << ast->asString() << std::endl;
+      
+      for (size_t i = 0; i < ast->children.size(); i++) {
+	shared_ptr<AST> ith_bind = ast->child(i);
+
+	for (size_t j = i+1; j < ast->children.size(); j++) {
+	  shared_ptr<AST> jth_bind = ast->child(j);
+
+	  if(ith_bind->child(0)->s == jth_bind->child(0)->s) {
+	    errStream << jth_bind->loc 
+		      << ": Duplicate method definition for "
+		      << ith_bind->child(0)->s
+		      << std::endl;
+	    errorFree = false;
+	    break;
+	  }
+	}
+      }
+      
+      // Checking that all methods are being defined, and that only
+      // those methods belonging to a particular type class are
+      // defined is done by the type system. We don't have access to
+      // the typeclass's definition AST (the identifier's symbolDef
+      // points to the typeclass identifier) here, and the type system
+      // already has a readily constructed structure to handle this.
+
+      break;
+    }
+    
+  case at_method_binding:
+    { 
+      // match at expr+
+      for (size_t c = 0; c < ast->children.size(); c++)
+	RESOLVE(ast->child(c), env, lamLevel, 
+		USE_MODE, idc_value, currLB, flags);
       break;
     }
 

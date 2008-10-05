@@ -547,6 +547,9 @@ AST::atKwd() const
   case at_methods:
     return "<methods>";
 
+  case at_method_binding:
+    return "<method_bindings>";
+
   case at_tyfn:
     return "tyfn";
 
@@ -759,6 +762,25 @@ AST::getID()
     return GC_NULL;
   }
 }
+
+shared_ptr<AST>
+AST::getMethod(std::string s)
+{
+  assert(astType == at_definstance);
+  shared_ptr<AST> methods = child(1);
+  
+  for(size_t c=0; c < methods->children.size(); c++) {
+    shared_ptr<AST> method = methods->child(c);
+    shared_ptr<AST> method_name = method->child(0);
+    shared_ptr<AST> method_val = method->child(1);
+
+    if(method_name->s == s) 
+      return method_val;
+  }
+
+  return GC_NULL;
+}
+
 
 bool
 AST::isUnionLeg()
