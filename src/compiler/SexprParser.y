@@ -555,10 +555,10 @@ type_val_definition: ti_definition {
 };
 
 // DECLARE [8.4.2]
-common_definition: declare {
-  SHOWPARSE("common_definition -> declare");
-  $$ = $1;
-};
+//common_definition: declare {
+//  SHOWPARSE("common_definition -> declare");
+//  $$ = $1;
+//};
 
 //Typeclass constraint declarations
 
