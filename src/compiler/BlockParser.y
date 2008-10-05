@@ -223,7 +223,13 @@ stripDocString(shared_ptr<AST> exprSeq)
  //%type <ast> module
 %type <ast> interface
 %type <ast> if_definitions if_definition
-%type <ast> common_definition
+%type <ast> common_definition type_val_definition
+%type <ast> constrained_definition
+%type <ast> constraints constraint
+%type <ast> tc_definition
+%type <ast> tc_decls tc_decl
+%type <ast> method_decls method_decl
+%type <ast> ti_definition
 %type <ast> import_definition importList
  //%type <ast> provide_definition provideList
 %type <ast> type_definition type_decl externals
@@ -387,23 +393,65 @@ if_definition: common_definition {
   $$ = $1;
 };
 
+// TOP LEVEL DEFINITIONS [2.5.1]
+constrained_definition: tk_FORALL constraints type_val_definition {
+  // HACK ALERT!!! For reasons of ancient history, there is no
+  // at_forall AST. Instead, all of the type_val_definition ASTs have
+  // their constraints tacked on at the end. This is rather badly
+  // glitched and we need to fix it, but the immediate goal was to
+  // move the (forall ...) syntax to the outside without doing major
+  // surgery on the compiler internals.
+
+  uint32_t nChildren = $3->children.size();
+
+  shared_ptr<AST> tvConstraints= $3->child(nChildren-1);
+  assert(tvConstraints->astType == at_constraints);
+  tvConstraints->addChildrenFrom($2);
+  $$ = $3;
+};
+
 common_definition: import_definition {
   SHOWPARSE("common_definition -> import_definition");
   $$ = $1;
 };
 
-common_definition: type_definition {
+common_definition: type_val_definition {
+  SHOWPARSE("common_definition -> type_val_definition");
+  $$ = $1;
+};
+
+common_definition: constrained_definition {
+  SHOWPARSE("common_definition -> constrained_definition");
+  $$ = $1;
+};
+
+type_val_definition: type_definition {
   SHOWPARSE("common_definition -> type_definition");
   $$ = $1;
 };
 
-common_definition: type_decl {
+type_val_definition: type_decl {
   SHOWPARSE("common_definition -> type_decl");
   $$ = $1;
 };
 
-common_definition: value_definition {
+type_val_definition: value_definition {
   SHOWPARSE("common_definition -> type_decl");
+  $$ = $1;
+};
+
+//type_val_definition: proclaim_definition {
+//  SHOWPARSE("type_val_definition -> proclaim_definition");
+//  $$ = $1;
+//};
+//
+type_val_definition: tc_definition {
+  SHOWPARSE("type_val_definition -> tc_definition");
+  $$ = $1;
+};
+
+type_val_definition: ti_definition {
+  SHOWPARSE("type_val_definition -> ti_definition");
   $$ = $1;
 };
 
@@ -487,6 +535,30 @@ exident: tk_Reserved {
   SHOWPARSE("exident -> <Reserved " + $1.str + ">");
   $$ = AST::make(at_ident, $1);
 };
+
+//Typeclass constraint declarations
+
+constraints: constraint {
+ SHOWPARSE("constraints -> constraint");  
+ $$ = AST::make(at_constraints, $1->loc, $1);
+};
+
+constraints: constraints ',' constraint {
+ SHOWPARSE("constraints -> constraints , constraint");  
+ $$ = $1;
+ $$->addChild($3);
+};
+
+constraint: typapp {
+ SHOWPARSE("constraint -> typapp");  
+ $1->astType = at_tcapp;
+ $$ = $1;
+};
+
+//constraint: useident {
+// SHOWPARSE("constraint -> useident");  
+// $$ = AST::make(at_tcapp, $1->loc, $1); 
+//};
 
 // FIX: This should probably get its own AST type.
 ptype_name: defident {
@@ -610,6 +682,84 @@ type_definition: tk_EXCEPTION ident optdocstring '{' fields '}' ';' {
 declares: {
   $$ = GC_NULL;
 };
+
+// TYPE CLASSES [4]
+// TYPE CLASS DEFINITION [4.1]
+
+tc_definition: tk_TYPECLASS ptype_name optdocstring tc_decls '{' method_decls '}' ';' {
+  SHOWPARSE("tc_definition -> ( TYPECLASS ptype_name optdocstring tc_decls { method_decls } ;");
+  $$ = AST::make(at_deftypeclass, $1.loc, $2->child(0), 
+	       $2->child(1), $4, $6, $2->child(2));  
+  $$->child(0)->defForm = $$;
+};
+
+tc_decls: {
+  SHOWPARSE("tcdecls -> <empty>");
+  $$ = AST::make(at_tcdecls);
+};
+
+tc_decls: tc_decls ',' tc_decl {
+  SHOWPARSE("tcdecls -> tcdelcs , tcdecl");
+  $$ = $1;
+  $$->addChild($3);
+};
+
+tc_decl: '(' tvlist ')' tk_FNARROW typevar {
+  //         ^^^^^^
+  // I really mean tvlist here, arbitraty types
+  // are not accepptable.
+  SHOWPARSE("tc_decl -> ( tvlist ) -> typevar");
+  $2->astType = at_fnargVec;
+  $$ = AST::make(at_tyfn, $1.loc, $2, $5);  
+};
+
+method_decls: /* Nothing */ {
+  SHOWPARSE("method_decls -> ");
+  LexLoc loc;
+  $$ = AST::make(at_method_decls, loc);
+};
+
+method_decls: method_decls method_decl {
+  SHOWPARSE("method_decls -> method_decls method_decl");
+  $$ = $1;
+  $$->addChild($2);
+};
+
+method_decl: fntype ident ';' {
+  SHOWPARSE("method_decl -> fntype ident ;");
+  $2->flags |= ID_IS_GLOBAL;
+  $2->identType = id_method;
+  $$ = AST::make(at_method_decl, $2->loc, $2, $1);
+};
+
+// TYPE CLASS INSTANTIATIONS [4.2]
+// No docstring here because method_seq is really a potentially empty
+// expr_seq
+ti_definition: ';' {
+  $$ = GC_NULL;
+}
+
+//ti_definition: tk_INSTANCE constraint optdocstring method_seq ';' {
+//  SHOWPARSE("ti_definition -> INSTANCE constraint [docstring] method_sefq)");
+//
+//  // Constraints will be inserted under the empty constraints node (if
+//  // appropriate) from above in the constrained_definition case.
+//  shared_ptr<AST> constrs = AST::make(at_constraints, $2->loc);
+//  $$ = AST::make(at_definstance, $1.loc, $2, $4, 
+//		 constrs);  
+//};
+//
+//method_seq: /* Nothing */ {
+//  SHOWPARSE("method_seq -> ");
+//  LexLoc loc;
+//  $$ = AST::make(at_methods, loc);
+//};
+//
+//method_seq: expr_seq {
+//  SHOWPARSE("method_seq -> expr_seq");
+//  $$ = $1;
+//  $$->astType = at_methods;
+//};
 
 // Type Declarations
 // External declarations
