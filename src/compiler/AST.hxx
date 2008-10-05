@@ -552,6 +552,7 @@ enum AstType {
   at_constraints,
   at_definstance,
   at_methods,
+  at_method_binding,
   at_proclaim,
   at_define,
   at_recdef,

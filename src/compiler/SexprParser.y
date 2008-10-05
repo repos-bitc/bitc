@@ -243,7 +243,8 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> bindingpattern lambdapatterns lambdapattern
 %type <ast> expr_seq 
 %type <ast> qual_type
-%type <ast> expr the_expr eform method_decls method_decl method_seq
+%type <ast> expr the_expr eform method_decls method_decl
+%type <ast> method_bindings method_binding
 %type <ast> constraints constraint_seq constraint 
 %type <ast> types type bitfieldtype bool_type 
 %type <ast> type_or_bitfield type_pl_byref types_pl_byref
@@ -863,23 +864,32 @@ method_decl: ident ':' fntype {
 // TYPE CLASS INSTANTIATIONS [4.2]
 // No docstring here because method_seq is really a potentially empty
 // expr_seq
-ti_definition: '(' tk_DEFINSTANCE constraint method_seq ')' {
-  SHOWPARSE("ti_definition -> ( DEFINSTANCE constraint [docstring] method_seq)");
-  $4 = stripDocString($4);
-  $$ = AST::make(at_definstance, $2.loc, $3, $4, 
+ti_definition: '(' tk_DEFINSTANCE constraint optdocstring ')' {
+  SHOWPARSE("ti_definition -> ( DEFINSTANCE constraint [docstring])");
+  $$ = AST::make(at_definstance, $2.loc, $3, 
+		 AST::make(at_methods, $5.loc),
+		 AST::make(at_constraints, $3->loc));
+};
+ti_definition: '(' tk_DEFINSTANCE constraint optdocstring method_bindings ')' {
+  SHOWPARSE("ti_definition -> ( DEFINSTANCE constraint [docstring] method_bindings)");
+  $$ = AST::make(at_definstance, $2.loc, $3, $5, 
 		 AST::make(at_constraints, $3->loc));
 };
 
-method_seq: /* Nothing */ {
-  SHOWPARSE("method_seq -> ");
-  LexLoc loc;
-  $$ = AST::make(at_methods, loc);
+method_bindings: method_binding {
+  SHOWPARSE("method_bindings -> method_binding");
+  $$ = AST::make(at_methods, $1->loc, $1);
 };
 
-method_seq: expr_seq {
-  SHOWPARSE("method_seq -> expr_seq");
+method_bindings: method_bindings method_binding {
+  SHOWPARSE("method_bindings -> method_bindings method_binding");
   $$ = $1;
-  $$->astType = at_methods;
+  $$->addChild($2);
+};
+
+method_binding: useident '=' expr {
+  SHOWPARSE("method_binding -> useident = expr");
+  $$ = AST::make(at_method_binding, $1->loc, $1, $3);
 };
 
 // DEFINE  [5.1]

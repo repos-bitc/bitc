@@ -931,7 +931,8 @@ AST constraints = tcapp*;
 
 // TYPE CLASS INSTANTIATIONS [4.2]
 AST definstance = tcapp methods constraints;
-AST methods = expr*;
+AST methods = method_binding*;
+AST method_binding = ident expr;
 
 // PROCLAIM DEFINITION -- VALUES [6.2]
 AST proclaim = ident qtype constraints;
