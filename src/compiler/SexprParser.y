@@ -1821,7 +1821,7 @@ eform: '(' tk_LAMBDA '(' lambdapatterns ')' expr_seq ')'  {
 
 // RETURN [7.13]          
 eform: '(' tk_RETURN expr ')' {
-  SHOWPARSE("eform -> (RETURN-FROM useident expr)");
+  SHOWPARSE("eform -> (RETURN expr)");
   $$ = AST::make(at_return_from, $2.loc, 
 		 AST::make(at_ident, LToken("__return")), $3);
 }
@@ -1846,8 +1846,6 @@ eform: '(' tk_IF expr expr expr ')' {
 // WHEN [7.15.2]
 eform: '(' tk_WHEN expr expr_seq ')' {
   SHOWPARSE("eform -> (WHEN expr_seq )");
-  $4->astType = at_begin;
-  $4->printVariant = 1;
   $$ = AST::make(at_when, $2.loc, $3, $4);
 };
 
