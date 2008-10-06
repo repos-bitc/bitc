@@ -49,6 +49,7 @@
 #include "backend.hxx"
 #include "inter-pass.hxx"
 #include "SexprLexer.hxx"
+#include "BlockLexer.hxx"
 
 #include <boost/filesystem/operations.hpp>
 #include <libsherpa/util.hxx>
@@ -173,7 +174,7 @@ UocInfo::addTopLevelForm(shared_ptr<AST> def)
 }
 
 bool
-  UocInfo::CompileFromFile(const filesystem::path& src, bool fromCmdLine)
+UocInfo::CompileFromSexprFile(const filesystem::path& src, bool fromCmdLine)
 {
   // Use binary mode so that newline conversion and character set
   // conversion is not done by the stdio library.
@@ -206,6 +207,49 @@ bool
     return false;
 
   return true;
+}
+
+bool
+UocInfo::CompileFromBlockFile(const filesystem::path& src, bool fromCmdLine)
+{
+  // Use binary mode so that newline conversion and character set
+  // conversion is not done by the stdio library.
+  std::ifstream fin(src.string().c_str(), std::ios_base::binary);
+
+  if (!fin.is_open()) {
+    std::cerr << "Couldn't open input file \""
+	      << src
+	      << "\"" << std::endl;
+    return false;
+  }
+
+  BlockLexer lexer(std::cerr, fin, src.string(), fromCmdLine);
+
+  // This is no longer necessary, because the parser now handles it
+  // for all interfaces whose name starts with "bitc.xxx"
+  //
+  // if (this->flags & UOC_IS_PRELUDE)
+  //   lexer.isRuntimeUoc = true;
+
+  lexer.setDebug(Options::showLex);
+
+  extern int block_parse(BlockLexer *lexer);
+  block_parse(&lexer);  
+  // On exit, ast is a pointer to the AST tree root.
+  
+  fin.close();
+
+  if (lexer.num_errors != 0u)
+    return false;
+
+  return true;
+}
+
+bool
+UocInfo::CompileFromFile(const filesystem::path& src, bool fromCmdLine)
+{
+  return (CompileFromSexprFile(src, fromCmdLine) ||
+	  CompileFromBlockFile(src, fromCmdLine));
 }
 
 shared_ptr<UocInfo> 

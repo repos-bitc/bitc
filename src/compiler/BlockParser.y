@@ -250,7 +250,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> typevar
 %type <ast> type_pl_byref types_pl_byref
 %type <ast> type_or_bitfield bitfieldtype
-%type <ast> type_cpair typapp
+%type <ast> type_cpair typeapp
 %type <ast> int_type uint_type any_int_type float_type
 %type <ast> declares // declare
  //%type <ast> decls decl
@@ -557,10 +557,10 @@ alias: ident {
   // need to end up with distinct AST nodes, thus getDCopy().
   $$ = AST::make(at_ifsel, $1->loc, $1, $1->getDeepCopy());
 };
-alias: '(' ident tk_AS ident ')' {
+alias: ident tk_AS ident {
   SHOWPARSE("alias -> ( ident AS ident )");
 
-  $$ = AST::make(at_ifsel, $2->loc, $4, $2);
+  $$ = AST::make(at_ifsel, $1->loc, $3, $1);
 };
 
 // PROVIDE DEFINITION [8.3]
@@ -620,7 +620,7 @@ exident: tk_Reserved {
   $$ = AST::make(at_ident, $1);
 };
 
-//Typeclass constraint declarations
+// Typeclass Constraint Declarations
 
 constraints: constraint {
  SHOWPARSE("constraints -> constraint");  
@@ -633,8 +633,8 @@ constraints: constraints ',' constraint {
  $$->addChild($3);
 };
 
-constraint: typapp {
- SHOWPARSE("constraint -> typapp");  
+constraint: typeapp {
+ SHOWPARSE("constraint -> typeapp");  
  $1->astType = at_tcapp;
  $$ = $1;
 };
@@ -661,21 +661,21 @@ ptype_name: defident '(' tvlist ')' {
 };
 
 // STRUCTURE TYPES [3.6.1]
-type_definition: tk_STRUCT ptype_name val optdocstring '{' declares fields '}' ';' {
+type_definition: tk_STRUCT ptype_name val optdocstring declares '{' fields '}' ';' {
   SHOWPARSE("type_definition -> STRUCT ptype_name val "
 	    "optdocstring '{' declares fields '}' ';'");
   $$ = AST::make(at_defstruct, $1.loc, $2->child(0), $2->child(1), $3,
-	       $6, $7);
+	       $5, $7);
   $$->child(0)->defForm = $$;
   $$->addChild($2->child(2));
 };
 
-// UNINON TYPES [3.6.2]
-type_definition: tk_UNION ptype_name val optdocstring '{' declares constructors '}' ';'  {
+// UNION TYPES [3.6.2]
+type_definition: tk_UNION ptype_name val optdocstring declares '{' constructors '}' ';'  {
   SHOWPARSE("type_definition -> STRUCT ptype_name val "
 	    "optdocstring '{' declares fields '}' ';'");
   $$ = AST::make(at_defunion, $1.loc, $2->child(0), $2->child(1), $3,
-		 $6, $7);
+		 $5, $7);
   $$->child(0)->defForm = $$;
   $$->addChild($2->child(2));
 };
@@ -703,10 +703,10 @@ constructor: ident '{' fields '}' ';' {  /* compound constructor */
 };
 
 // REPR TYPES
-type_definition: tk_REPR defident val optdocstring '{' declares repr_constructors '}' ';' {
+type_definition: tk_REPR defident val optdocstring declares '{' repr_constructors '}' ';' {
   SHOWPARSE("type_definition -> REPR defident val optdocstring "
 	    "'{' declares repr_constructors '}' ';'");
-  $$ = AST::make(at_defrepr, $1.loc, $2, $3, $6, $7);
+  $$ = AST::make(at_defrepr, $1.loc, $2, $3, $5, $7);
   $$->child(0)->defForm = $$;
 };
 
@@ -831,12 +831,6 @@ ti_definition: tk_INSTANCE constraint optdocstring ';' {
 		 AST::make(at_methods, $1.loc),
 		 constrs);  
 };
-//ti_definition: '(' tk_DEFINSTANCE constraint optdocstring ')' {
-//  SHOWPARSE("ti_definition -> ( DEFINSTANCE constraint [docstring])");
-//  $$ = AST::make(at_definstance, $2.loc, $3, 
-//		 AST::make(at_methods, $5.loc),
-//		 AST::make(at_constraints, $3->loc));
-//};
 ti_definition: tk_INSTANCE constraint optdocstring '{' method_bindings '}' ';' {
   SHOWPARSE("ti_definition -> INSTANCE constraint [docstring] method_seq ;");
 
@@ -846,11 +840,6 @@ ti_definition: tk_INSTANCE constraint optdocstring '{' method_bindings '}' ';' {
   $$ = AST::make(at_definstance, $1.loc, $2, $5, 
 		 constrs);  
 };
-//ti_definition: '(' tk_DEFINSTANCE constraint optdocstring method_bindings ')' {
-//  SHOWPARSE("ti_definition -> ( DEFINSTANCE constraint [docstring] method_bindings)");
-//  $$ = AST::make(at_definstance, $2.loc, $3, $5, 
-//		 AST::make(at_constraints, $3->loc));
-//};
 
 method_bindings: method_binding {
   SHOWPARSE("method_bindings -> method_binding");
@@ -984,15 +973,6 @@ defpattern: qual_type defident {
   $$ = AST::make(at_identPattern, $1->loc, $2, $1);
 };
 
-//defpattern: defident ':' qual_type {
-//  SHOWPARSE("defpattern -> defident : qual_type");
-//  $$ = AST::make(at_identPattern, $1->loc, $1, $3);
-//};
-//defpattern: '(' tk_THE qual_type defident ')' {
-//  SHOWPARSE("defpattern -> (THE qual_type defident)");
-//  $$ = AST::make(at_identPattern, $1.loc, $4, $3);
-//};
-
 // DEFINE  [5.1]
 value_definition: tk_DEF defpattern '=' expr ';'  {
   SHOWPARSE("value_definition -> DEF defpattern = expr ;");
@@ -1102,10 +1082,6 @@ expr: '(' type ')' eform {
   SHOWPARSE("expr -> ( type ) eform");
   $$ = AST::make(at_tqexpr, $1.loc, $4, $2);
 };
-//expr: eform ':' type {
-//  SHOWPARSE("expr -> eform : type");
-//  $$ = AST::make(at_tqexpr, $1->loc, $1, $3);
-//};
 
 eform: ident {
   SHOWPARSE("eform -> ident");
@@ -1122,12 +1098,11 @@ tvlist: typevar  {
   SHOWPARSE("tvlist -> typevar");
   $$ = AST::make(at_tvlist, $1->loc, $1);
 };
-tvlist: tvlist typevar {
+tvlist: tvlist ',' typevar {
   SHOWPARSE("tvlist -> tvlist typevar");
   $$ = $1;
-  $1->addChild($2);
+  $1->addChild($3);
 };
-
 
 // TYPES [3]
 types: type  {
@@ -1328,13 +1303,13 @@ type: type '[' ']' {
   $$ = AST::make(at_vectorType, $1->loc, $1);
 };
 
-// TYPE CONSTRUCTORS (typapp)
-type: typapp {
-  SHOWPARSE("type -> typapp");
+// TYPE CONSTRUCTORS (typeapp)
+type: typeapp {
+  SHOWPARSE("type -> typeapp");
   $$ = $1;
 };
 
-typapp: useident '(' types ')' {
+typeapp: useident '(' types ')' {
   SHOWPARSE("typeapp -> useident ( types )");
   $$ = AST::make(at_typeapp, $1->loc, $1);
   $$->addChildrenFrom($3);

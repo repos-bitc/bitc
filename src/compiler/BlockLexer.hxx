@@ -1,5 +1,5 @@
-#ifndef SEXPRLEXER_HXX
-#define SEXPRLEXER_HXX
+#ifndef BLOCKLEXER_HXX
+#define BLOCKLEXER_HXX
 
 /**************************************************************************
  *
@@ -200,5 +200,5 @@ private:
   int kwCheck(const char *s);
 };
 
-#endif /* SEXPRLEXER_HXX */
+#endif /* BLOCKLEXER_HXX */
 
