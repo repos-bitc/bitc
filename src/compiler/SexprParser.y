@@ -229,7 +229,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> common_definition
 %type <ast> value_declaration
 %type <ast> ptype_name val
-%type <ast> type_definition typapp
+%type <ast> type_definition typeapp
 %type <ast> type_decl externals alias
 %type <ast> importList provideList
 %type <ast> type_cpair eform_cpair
@@ -579,8 +579,8 @@ constraint_seq: constraint {
  $$ = AST::make(at_constraints, $1->loc, $1);
 };
 
-constraint: typapp {
- SHOWPARSE("constraint -> typapp");  
+constraint: typeapp {
+ SHOWPARSE("constraint -> typeapp");  
  $1->astType = at_tcapp;
  $$ = $1;
 };
@@ -1385,13 +1385,13 @@ type: '(' tk_VECTOR type ')' {
   $$ = AST::make(at_vectorType, $2.loc, $3);
 };
 
-// TYPE CONSTRUCTORS (typapp)
-type: typapp {
-  SHOWPARSE("type -> typapp");
+// TYPE CONSTRUCTORS (typeapp)
+type: typeapp {
+  SHOWPARSE("type -> typeapp");
   $$ = $1;
 };
 
-typapp: '(' useident types ')' {
+typeapp: '(' useident types ')' {
   SHOWPARSE("typeapp -> ( useident types )");
   $$ = AST::make(at_typeapp, $2->loc, $2);
   $$->addChildrenFrom($3);
