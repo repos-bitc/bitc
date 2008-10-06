@@ -1163,7 +1163,7 @@ field: '(' tk_THE type_or_bitfield ident ')'  {
 };
 
 field: '(' tk_FILL bitfieldtype ')'  {
-  SHOWPARSE("field -> '(' FILL type ')'");
+  SHOWPARSE("field -> '(' FILL bitfieldtype ')'");
   $$ = AST::make(at_fill, $1.loc, $3);
 };
 
@@ -1783,12 +1783,12 @@ eform: '(' tk_RETURN_FROM useident expr ')' {
 
 // ARRAY-LENGTH [7.11.1]
 eform: '(' tk_ARRAY_LENGTH expr ')' {
-  SHOWPARSE("eform -> ( ARRAY-LENGTH expr expr )");
+  SHOWPARSE("eform -> ( ARRAY-LENGTH expr )");
   $$ = AST::make(at_array_length, $2.loc, $3);
 };
 // VECTOR-LENGTH [7.11.1]
 eform: '(' tk_VECTOR_LENGTH expr ')' {
-  SHOWPARSE("eform -> ( VECTOR-LENGTH expr expr )");
+  SHOWPARSE("eform -> ( VECTOR-LENGTH expr )");
   $$ = AST::make(at_vector_length, $2.loc, $3);
 };
 
