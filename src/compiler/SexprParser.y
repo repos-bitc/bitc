@@ -1952,17 +1952,17 @@ switch_matches: switch_matches switch_match {
    found the useident.ctr version, otherwise, this is ambiguous, and
    leave the burden on the resolver to find out */
 switch_match: ident {
-  SHOWPARSE("switch_match -> useident");
+  SHOWPARSE("switch_match -> ident");
   $$ = $1;
 };
 
 switch_match: ident '.' ident {
-  SHOWPARSE("switch_match -> useident");  
+  SHOWPARSE("switch_match -> ident . ident");  
   $$ = AST::make(at_select, $1->loc, $1, $3);
 };
 
 switch_match: ident '.' ident '.' ident {
-  SHOWPARSE("switch_match -> useident '.' useident");
+  SHOWPARSE("switch_match -> ident '.' ident '.' ident");
   shared_ptr<AST> usesel = AST::make(at_usesel, $1->loc, $1, $3);  
   $$ = AST::make(at_select, $1->loc, usesel, $5);
 };
