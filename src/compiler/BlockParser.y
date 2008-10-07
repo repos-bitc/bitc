@@ -113,8 +113,12 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_Char
 %token <tok> tk_String
 
+%token <tok> tk_SIZEOF
 %token <tok> tk_EQUALS
+%token <tok> tk_NOTEQUALS
+%token <tok> tk_LE tk_GE '<' '>'
 %token <tok> tk_FNARROW
+%token <tok> tk_GETS
 
 /* Primary types and associated hand-recognized literals: */
 %token <tok> '(' ')' ','	/* unit */
@@ -240,7 +244,6 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> type_definition type_decl externals
 %type <ast> value_definition
 %type <ast> defpattern
-%type <ast> expr_seq expr eform
 %type <ast> lambdapatterns lambdapattern
 %type <ast> types type qual_type
 %type <ast> bool_type
@@ -266,6 +269,12 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> constructor constructors
 %type <ast> repr_constructor repr_constructors
 %type <ast> repr_reprs repr_repr
+%type <ast> expr_seq arg_exprs
+%type <ast> expr block
+%type <ast> primary_expr postfix_expr prefix_expr mul_expr add_expr
+%type <ast> shift_expr inequality_expr equality_expr
+%type <ast> bitand_expr bitxor_expr bitor_expr and_expr or_expr
+%type <ast> assign_expr
 
 %%
 
@@ -297,12 +306,6 @@ version: tk_BITC_VERSION strLit ';' {
   }
 };
 
-// Documentation comments. These are added only in productions where
-// they do NOT appear before expr_seq. If a string literal appears as
-// the first form of a multiform expr_seq, it won't hurt anything. If
-// it is the *only* form, then it is the value in any case, and that
-// is fine. We can figure out which case is which in the documentation
-// extractor.
 docstring: tk_String {
   SHOWPARSE("docstring -> STRING");
   $$ = AST::make(at_docString, $1.loc, AST::makeStringLit($1));
@@ -819,8 +822,6 @@ method_decl: fntype ident ';' {
 };
 
 // TYPE CLASS INSTANTIATIONS [4.2]
-// No docstring here because method_seq is really a potentially empty
-// expr_seq
 ti_definition: tk_INSTANCE constraint optdocstring ';' {
   SHOWPARSE("ti_definition -> INSTANCE constraint [docstring] ;");
 
@@ -852,8 +853,8 @@ method_bindings: method_bindings ',' method_binding {
   $$->addChild($3);
 };
 
-method_binding: useident '=' expr {
-  SHOWPARSE("method_binding -> useident = expr");
+method_binding: ident '=' expr {
+  SHOWPARSE("method_binding -> ident = expr");
   
   $$ = AST::make(at_method_binding, $1->loc, $1, $3);
 };
@@ -981,12 +982,11 @@ value_definition: tk_DEF defpattern '=' expr ';'  {
 };
 
 // Define convenience syntax case 1: no arguments
-// No docstring here because of expr_seq
 // FIX: Issue with function types
-value_definition: tk_DEF defident '(' ')' optdocstring '{' expr_seq '}' ';'  {
+value_definition: tk_DEF defident '(' ')' optdocstring block {
   SHOWPARSE("value_definition -> DEF defident () optdocstring { expr_seq }");
   shared_ptr<AST> iRetBlock = 
-    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $7);
+    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $6);
   shared_ptr<AST> iLambda =
     AST::make(at_lambda, $1.loc, AST::make(at_argVec, $4.loc), iRetBlock);
   iLambda->printVariant = 1;
@@ -996,11 +996,11 @@ value_definition: tk_DEF defident '(' ')' optdocstring '{' expr_seq '}' ';'  {
 };
 
 value_definition: tk_DEF defident '(' lambdapatterns ')' optdocstring
-                  '{' expr_seq '}'  {
+                  block {
   SHOWPARSE("value_definition -> DEF defident ( lambdapatterns ) optdocstring "
 	    "{ expr_seq }");
   shared_ptr<AST> iRetBlock = 
-    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $8);
+    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $7);
   shared_ptr<AST> iLambda = AST::make(at_lambda, $1.loc, $4, iRetBlock);
   iLambda->printVariant = 1;
   shared_ptr<AST> iP = AST::make(at_identPattern, $2->loc, $2);
@@ -1044,55 +1044,374 @@ lambdapattern: type_pl_byref ident {
 
 // EXPRESSIONS [7]
 //
-// expr   -- an expression form with an optional type qualifier
-// eform  -- a naked expression form
+// In the block syntax, the expression sub-grammar must deal with
+// operator precedence. This is a horrible mess, and I would really
+// like to replace it with something more flexible and extensible. In
+// Bison/Yacc, it appears that the only way to accomplish that would
+// be to accept expressions as a linear sequence of tokens, and then
+// do the precedence and associativity processing in the expression
+// reduce action (which is moderately icky). At the moment, I am *not*
+// actually doing this.
+//
+// Operator precedence rules for the C:
+//    HIGHEST                TOKEN           ASSOCIATION
+//    ----------------
+//    funcall                ()              left-to-right
+//    array ref              ([])
+//    field select           (.)
+//    [arrow field select]   (->)
+//    [post inc/dec]         (++,--)
+//    ----------------
+//    [pre inc/dec]          (++,--)         right-to-left
+//    unary +/-              (+,-)           
+//    bool/bit negate        (!,~)
+//    [cast]                 [parens]
+//    [dereference]          *
+//    ----------------
+//    (binary) mul/div/mod   (*,/,%)         left-to-right
+//    (binary) add/sub       (+, -)          left-to-right
+//    [bit shift]            (<<, >>)        left-to-right
+//    ne compare             (<, >, <=, >=)  left-to-right
+//    eql compare            (==, !=)        left-to-right
+//    bitwise AND            (&)             left-to-right
+//    bitwise XOR            (^)             left-to-right    [*]
+//    bitwise OR             (|)             left-to-right
+//    logical AND            (&&)            right-to-left
+//    logical OR             (||)            right-to-left
+//    [ternary conditional]
+//    ----------------
+//    assignment             (=)             left-to-right
+//    [updating ops]         (+=, friends)
+//    ----------------
+//    LOWEST
+//
+// Is that sufficiently horrible yet?
+//
+// In BitC, there is an issue that many of these operators are members
+// of type classes. To avoid recognizing them specially in the
+// applicable defining contexts, we treat the punctuation-style
+// operators as short-hands for corresponding procedures that have
+// conventional names.
+//
+// In BitC, the applicable operator precedence rules are:
+//
+//    HIGHEST                TOKEN           ASSOCIATION
+//    ----------------
+// postfix_expr:
+//    funcall                ()              left-to-right    SYNTAX
+//    array ref              ([])                             SYNTAX
+//    field select           (.)                              SYNTAX
+//    ----------------
+// prefix_expr:
+//    unary +/-              (+,-)           right-to-left    [neg]
+//    bool negate            (!)                              [not]
+//    bit negate             (~)                              [bit-negate]
+//    type qualification     [parens]                         SYNTAX
+//    [dereference]          *                                SYNTAX
+//    ----------------
+// mul_expr:
+//    (binary) mul/div/mod   (*,/,%)         left-to-right    [mul, div, mod]
+// add_expr:
+//    (binary) add/sub       (+, -)          left-to-right    [add, sub]
+// shift_expr:
+//    [bit shift]            (<<, >>)        left-to-right    [lshift,rshift]
+// inequality_expr:
+//    ne compare             (<, >, <=, >=)  left-to-right    [lt, gt, le, ge]
+// equality_expr:
+//    eql compare            (==, !=)        left-to-right    [equal, not-equal]
+// bitand_expr:
+//    bitwise AND            (&)             left-to-right    [bit-and]
+// bitxor_expr:
+//    bitwise XOR            (^)             left-to-right    [bit-xor]
+// bitor_expr:
+//    bitwise OR             (|)             left-to-right    [bit-and]
+// and_expr:
+//    logical AND            (&&)            right-to-left    SYNTAX
+// or_expr:
+//    logical OR             (||)            right-to-left    SYNTAX
+//    ----------------
+// assign_expr:
+//    assignment             (=)             left-to-right    SYNTAX
+//    ----------------
+//    LOWEST
+//
+// Rule: when dealing with precedence in a grammar, higher rules
+// appear "inside" lower rules
 //
 // As a practical matter, every expression on the RHS of a production
 // should be an expr
 
-expr_seq: expr {
-  SHOWPARSE("expr_seq -> expr");
-  $$ = AST::make(at_begin, $1->loc, $1);
-  $$->printVariant = 1;
+// QUASI-BLOCK
+block: '{' expr_seq '}' {
+  SHOWPARSE("block -> { expr_seq }");
+  $$ = $2;
 };
+expr_seq: expr ';' {
+  SHOWPARSE("expr_seq -> expr ;");
+  $$ = AST::make(at_begin, $1->loc, $1);
+}
 expr_seq: value_definition {
   SHOWPARSE("expr_seq -> value_definition");
   $$ = AST::make(at_begin, $1->loc, $1);
-  $$->printVariant = 1;
+  $$->printVariant;
 };
-expr_seq: expr_seq ';' expr {
-  SHOWPARSE("expr_seq -> expr_seq ; expr");
+expr_seq: expr_seq expr ';' {
+  SHOWPARSE("expr_seq -> expr_seq expr ;");
   $$ = $1;
-  $$->addChild($3);
-};
-expr_seq: expr_seq ';' value_definition {
+  $$->addChild($2);
+}
+expr_seq: expr_seq value_definition {
   SHOWPARSE("expr_seq -> expr_seq value_definition");
   $$ = $1;
-  $$->addChild($3);
-};
+  $$->addChild($2);
+}
 
-// TYPE QUALIFIED EXPRESSIONS  [7.3]
-expr: eform {
-  SHOWPARSE("expr -> eform");
-  $$ = $1;
-};
-
-// N.B. This is NOT cast! This is type-qualified expression!
-expr: '(' type ')' eform {
-  SHOWPARSE("expr -> ( type ) eform");
-  $$ = AST::make(at_tqexpr, $1.loc, $4, $2);
-};
-
-eform: ident {
-  SHOWPARSE("eform -> ident");
+// PRIMARY EXPRESSIONS
+primary_expr: ident {
+  SHOWPARSE("primary_expr -> ident");
   $$ = $1;
 };
 
 // LITERALS  [7.1]
-eform: literal {
-  SHOWPARSE("eform -> Literal");
+primary_expr: literal {
+  SHOWPARSE("primary_expr -> Literal");
   $$ = $1;
 };
+
+primary_expr: '(' expr ')' {
+  SHOWPARSE("primary_expr -> ( expr )");
+  $$ = $2;
+};
+
+primary_expr: block {
+  SHOWPARSE("primary_expr -> block");
+  $$ = $1;
+};
+
+arg_exprs: expr {
+  SHOWPARSE("arg_exprs -> expr");
+  $$ = AST::make(at_Null, $1->loc, $1);
+  $$->addChild($1);
+}
+arg_exprs: arg_exprs ',' expr {
+  SHOWPARSE("arg_exprs -> arg_exprs , expr");
+  $$ = $1;
+  $$->addChild($3);
+}
+
+postfix_expr: primary_expr {
+  SHOWPARSE("postfix_expr -> primary_expr");
+  $$ = $1;
+}
+// APPLICATION [7.14]          
+postfix_expr: postfix_expr '(' ')' {
+  SHOWPARSE("postfix_expr -> postfix_expr ( )");
+  $$ = AST::make(at_apply, $1->loc, $1);
+}
+postfix_expr: postfix_expr '(' arg_exprs ')' {
+  SHOWPARSE("postfix_expr -> postfix_expr ( )");
+  $$ = AST::make(at_apply, $1->loc, $1);
+  $$->addChildrenFrom($3);
+}
+// NTH-REF [7.11.2]          
+postfix_expr: postfix_expr '[' expr ']' {
+  SHOWPARSE("postfix_expr -> postfix_expr [ expr ]");
+  $$ = AST::make(at_vector_nth, $1->loc, $1, $3);
+};
+postfix_expr: tk_ARRAY_NTH '(' expr ',' expr ')' {
+  SHOWPARSE("eform -> ARRAY-NTH ( expr , expr )");
+  $$ = AST::make(at_array_nth, $1.loc, $3, $5);
+};
+postfix_expr: tk_VECTOR_NTH '(' expr ',' expr ')' {
+  SHOWPARSE("eform -> VECTOR-NTH ( expr , expr )");
+  $$ = AST::make(at_vector_nth, $1.loc, $3, $5);
+};
+// MEMBER [7.9]
+postfix_expr: postfix_expr '.' ident {
+  SHOWPARSE("postfix_expr -> postfix_expr . ident");
+  $$ = AST::make(at_select, $1->loc, $1, $3);
+};
+
+prefix_expr: postfix_expr {
+  SHOWPARSE("prefix_expr -> postfix_expr");
+  $$ = $1;
+};
+
+prefix_expr: '+' prefix_expr {
+  SHOWPARSE("prefix_expr -> '+' prefix_expr");
+  $$ = $2;
+};
+prefix_expr: '-' prefix_expr {
+  SHOWPARSE("prefix_expr -> '-' prefix_expr");
+  // FIX!
+  $$ = $2;
+};
+prefix_expr: tk_SIZEOF '(' expr ')' {
+  SHOWPARSE("prefix_expr -> sizeof ( expr )");
+  // FIX!
+  $$ = $3;
+};
+//prefix_expr: tk_SIZEOF '(' type ')' {
+//  SHOWPARSE("prefix_expr -> sizeof ( type )");
+//  // FIX!
+//  $$ = $2;
+//};
+
+mul_expr: prefix_expr { 
+  SHOWPARSE("mul_expr -> prefix_expr");
+  $$ = $1;
+};
+mul_expr: mul_expr '*' prefix_expr { 
+  SHOWPARSE("mul_expr -> mul_expr '*' prefix_expr");
+  // FIX!
+  $$ = $1;
+};
+mul_expr: mul_expr '/' prefix_expr { 
+  SHOWPARSE("mul_expr -> mul_expr '/' prefix_expr");
+  // FIX!
+  $$ = $1;
+};
+mul_expr: mul_expr '%' prefix_expr { 
+  SHOWPARSE("mul_expr -> mul_expr '%' prefix_expr");
+  // FIX!
+  $$ = $1;
+};
+add_expr: mul_expr { 
+  SHOWPARSE("add_expr -> mul_expr");
+  $$ = $1;
+};
+add_expr: add_expr '+' mul_expr { 
+  SHOWPARSE("add_expr -> add_expr '+' mful_expr");
+  // FIX!
+  $$ = $1;
+};
+add_expr: add_expr '-' mul_expr { 
+  SHOWPARSE("add_expr -> add_expr '-' mful_expr");
+  // FIX!
+  $$ = $1;
+};
+
+shift_expr: add_expr { 
+  SHOWPARSE("shift_expr -> add_expr");
+  $$ = $1;
+};
+inequality_expr: shift_expr { 
+  SHOWPARSE("inequality_expr -> shift_expr");
+  // FIX!
+  $$ = $1;
+};
+inequality_expr: inequality_expr '<' shift_expr { 
+  SHOWPARSE("inequality_expr -> inequality_expr < shift_expr");
+  // FIX!
+  $$ = $1;
+};
+inequality_expr: inequality_expr '>' shift_expr { 
+  SHOWPARSE("inequality_expr -> inequality_expr > shift_expr");
+  // FIX!
+  $$ = $1;
+};
+inequality_expr: inequality_expr tk_LE shift_expr { 
+  SHOWPARSE("inequality_expr -> inequality_expr <= shift_expr");
+  // FIX!
+  $$ = $1;
+};
+inequality_expr: inequality_expr tk_GE shift_expr { 
+  SHOWPARSE("inequality_expr -> inequality_expr >= shift_expr");
+  // FIX!
+  $$ = $1;
+};
+equality_expr: inequality_expr { 
+  SHOWPARSE("equality_expr -> inequality_expr");
+  $$ = $1;
+};
+equality_expr: equality_expr tk_EQUALS inequality_expr { 
+  SHOWPARSE("equality_expr -> equality_expr == inequality_expr");
+  // FIX!
+  $$ = $1;
+};
+equality_expr: equality_expr tk_NOTEQUALS inequality_expr { 
+  SHOWPARSE("equality_expr -> equality_expr != inequality_expr");
+  // FIX!
+  $$ = $1;
+};
+
+bitand_expr: equality_expr { 
+  SHOWPARSE("bitand_expr -> equality_expr");
+  $$ = $1;
+};
+bitand_expr: bitand_expr '&' equality_expr { 
+  SHOWPARSE("bitand_expr -> bitand_expr & equality_expr");
+  // FIX!
+  $$ = $1;
+};
+
+bitxor_expr: bitand_expr { 
+  SHOWPARSE("bitxor_expr -> bitand_expr");
+  $$ = $1;
+};
+bitxor_expr: bitxor_expr '^' bitand_expr { 
+  SHOWPARSE("bitxor_expr -> bitxor_expr ^ bitand_expr");
+  // FIX!
+  $$ = $1;
+};
+
+bitor_expr: bitxor_expr { 
+  SHOWPARSE("bitor_expr -> bitxor_expr");
+  $$ = $1;
+};
+bitor_expr: bitor_expr '|' bitxor_expr { 
+  SHOWPARSE("bitor_expr -> bitor_expr | bitxor_expr");
+  // FIX!
+  $$ = $1;
+};
+
+and_expr: bitor_expr { 
+  SHOWPARSE("and_expr -> bitor_expr");
+  $$ = $1;
+};
+and_expr: and_expr tk_AND bitor_expr { 
+  SHOWPARSE("and_expr -> and_expr && bitor_expr");
+  // FIX!
+  $$ = $1;
+};
+
+or_expr: and_expr { 
+  SHOWPARSE("or_expr -> and_expr");
+  $$ = $1;
+};
+or_expr: or_expr tk_OR and_expr { 
+  SHOWPARSE("or_expr -> or_expr || and_expr");
+  // FIX!
+  $$ = $1;
+};
+
+assign_expr: or_expr { 
+  SHOWPARSE("assign_expr -> or_expr");
+  $$ = $1;
+};
+assign_expr: prefix_expr tk_GETS assign_expr { 
+  // In C, the LHS can be a unary expresion, primarily to support LHS cast
+  SHOWPARSE("assign_expr -> or_expr = assign_expr");
+  // FIX!
+  $$ = $1;
+};
+
+expr: assign_expr {
+  SHOWPARSE("expr -> assign_expr");
+  $$ = $1;
+}
+
+// TYPE QUALIFIED EXPRESSIONS  [7.3]
+//expr: eform {
+//  SHOWPARSE("expr -> eform");
+//  $$ = $1;
+//};
+
+// N.B. This is NOT cast! This is type-qualified expression!
+//expr: '(' type ')' eform {
+//  SHOWPARSE("expr -> ( type ) eform");
+//  $$ = AST::make(at_tqexpr, $1.loc, $4, $2);
+//};
 
 tvlist: typevar  {
   SHOWPARSE("tvlist -> typevar");
