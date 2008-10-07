@@ -887,8 +887,8 @@ method_bindings: method_bindings method_binding {
   $$->addChild($2);
 };
 
-method_binding: '(' useident ident expr ')' {
-  SHOWPARSE("method_binding -> ( useident = expr )");
+method_binding: '(' ident ident expr ')' {
+  SHOWPARSE("method_binding -> ( ident = expr )");
   
   if ($3->s != "=") {
     cerr << $2->loc << ": Syntax error, expecting `='.\n";
@@ -1776,8 +1776,8 @@ eform: '(' tk_BLOCK ident expr_seq ')' {
   $$ = AST::make(at_block, $2.loc, $3, $4);
 }
 
-eform: '(' tk_RETURN_FROM useident expr ')' {
-  SHOWPARSE("eform -> (RETURN-FROM useident expr)");
+eform: '(' tk_RETURN_FROM ident expr ')' {
+  SHOWPARSE("eform -> (RETURN-FROM ident expr)");
   $$ = AST::make(at_return_from, $2.loc, $3, $4);
 }
 
