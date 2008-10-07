@@ -887,8 +887,8 @@ method_bindings: method_bindings method_binding {
   $$->addChild($2);
 };
 
-method_binding: '(' useident ident expr ')' {
-  SHOWPARSE("method_binding -> ( useident = expr )");
+method_binding: '(' ident ident expr ')' {
+  SHOWPARSE("method_binding -> ( ident = expr )");
   
   if ($3->s != "=") {
     cerr << $2->loc << ": Syntax error, expecting `='.\n";
@@ -1776,8 +1776,8 @@ eform: '(' tk_BLOCK ident expr_seq ')' {
   $$ = AST::make(at_block, $2.loc, $3, $4);
 }
 
-eform: '(' tk_RETURN_FROM useident expr ')' {
-  SHOWPARSE("eform -> (RETURN-FROM useident expr)");
+eform: '(' tk_RETURN_FROM ident expr ')' {
+  SHOWPARSE("eform -> (RETURN-FROM ident expr)");
   $$ = AST::make(at_return_from, $2.loc, $3, $4);
 }
 
@@ -1952,17 +1952,17 @@ switch_matches: switch_matches switch_match {
    found the useident.ctr version, otherwise, this is ambiguous, and
    leave the burden on the resolver to find out */
 switch_match: ident {
-  SHOWPARSE("switch_match -> useident");
+  SHOWPARSE("switch_match -> ident");
   $$ = $1;
 };
 
 switch_match: ident '.' ident {
-  SHOWPARSE("switch_match -> useident");  
+  SHOWPARSE("switch_match -> ident . ident");  
   $$ = AST::make(at_select, $1->loc, $1, $3);
 };
 
 switch_match: ident '.' ident '.' ident {
-  SHOWPARSE("switch_match -> useident '.' useident");
+  SHOWPARSE("switch_match -> ident '.' ident '.' ident");
   shared_ptr<AST> usesel = AST::make(at_usesel, $1->loc, $1, $3);  
   $$ = AST::make(at_select, $1->loc, usesel, $5);
 };
