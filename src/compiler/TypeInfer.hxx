@@ -38,10 +38,22 @@
  *
  **************************************************************************/
 
-/* The following flags are Type-Inference / Unification Flags.
-   The ones defined in Type.hxx are internal flags for
-   communication/processing within Type-methods annd inference
-   routines. */
+/// @brief Flags used by Type-inference engine.
+///
+/// They are internal flags for communication/processing within
+/// the different Type inference procedures.
+/// These flags are different from the Unifier's flags.
+enum TI_FlagValues {
+  TI_NO_FLAGS     = 0x00u,
+  TI_TYP_EXP      = 0x01u,
+  TI_TYP_APP      = 0x02u,
+  TI_TCC_SUB      = 0x04u,
+  TI_TYP_DEFN     = 0x08u 
+};
+typedef sherpa::EnumSet<TI_FlagValues> TI_Flags;
+
+
+/* The following flags are Unification Flags. */
 
 enum UnifyFlagValues {
   UFLG_NO_FLAGS            = 0x0,

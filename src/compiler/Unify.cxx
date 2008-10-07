@@ -311,6 +311,11 @@ Unify(std::ostream& errStream,
 		  << var->asString() << " cannot be unified with "
 		  << other->asString() << std::endl;
 	errFree = false;
+
+	if (errStream == std::cerr)
+	  errStream << "Real Error!" << std::endl;
+	
+
 	break;
       }
 

@@ -803,7 +803,7 @@ Type::normalize_mbFull(boost::shared_ptr<Trail> trail)
 }
 
 /********************************************************************
-                      Const normalization
+                      Const handling
  *******************************************************************/
 
 /* Normalize types such as (const bool) to bool*/
@@ -834,9 +834,112 @@ Type::normalize_const(boost::shared_ptr<Trail> trail)
   t->mark &= ~MARK_NORMALIZE_CONST;
 }
 
+/* Ensure that this type can be wrapped within a const type, that is,
+   all variables at copy-positions are in a mbFull, so that we do not
+   lose completeness when we permirm minimizeMutability()  
+
+   In the case of structure/union definitions,  we cannot unify
+   arguments with maybe types at the time of definition to ensure
+   wrapability by const. Therefore, we mark such arguments to be
+   instantiated to maybe types at the time of instantiation. This flag
+   is used by argInConst() predicate */
+
+void
+Type::ensureMinimizability(boost::shared_ptr<Trail> trail, 
+			   bool markOnly)
+{
+  shared_ptr<Type> t = getType();
+  
+  if (t->mark & MARK_ENSURE_MINIMIZABILITY)
+    return;
+  
+  t->mark |= MARK_ENSURE_MINIMIZABILITY;  
+  
+  switch(t->kind) {
+    
+  case ty_tvar:
+    if(markOnly)
+      t->flags |= TY_ARG_IN_CONST;
+    else
+      trail->subst(t, MBF(newTvar()));
+    break;
+    
+  case ty_mbTop:    
+    {
+      assert(!t->Core()->isTvar());
+      t->Core()->ensureMinimizability(trail, markOnly);
+      break;
+    }
+
+  case ty_mutable:
+    {
+      t->Base()->ensureMinimizability(trail, markOnly);
+      break;
+    }
+    
+  case ty_array:
+    {
+      t->Base()->ensureMinimizability(trail, markOnly);
+      break;
+    }
+
+  case ty_structv:
+  case ty_unionv: 
+  case ty_uvalv: 
+  case ty_uconv: 
+    {
+      for (size_t i=0; i < t->typeArgs.size(); i++) {
+	shared_ptr<Type> arg = t->TypeArg(i)->getType();
+	if (t->argCCOK(i)) 
+	  arg->ensureMinimizability(trail, markOnly);
+      }
+      break;
+    }
+
+  case ty_letGather:
+    {
+      for (size_t i=0; i < t->components.size(); i++) 
+	t->CompType(i)->ensureMinimizability(trail, markOnly);
+      break;
+    }
+    
+  case ty_const:
+  case ty_mbFull:    
+  default:
+    {
+      break;
+    }
+  }
+  
+  t->mark &= ~MARK_ENSURE_MINIMIZABILITY;
+}
+
+/* Instantiate all variables occuring at shallow-positions in a
+   composite data structure within a const meta-constructor 
+   to mbFull types.
+   
+   To ensure completeness of inference, bare type variables cannot
+   occur within a const meta-constructor. They must only occue
+   within mbFull types. However, this construction is not possible
+   during structure/union definitions since we cannot create extra
+   variables apart from those specified in the argument list. 
+   Therefore, at the time of instantiation, fix the above problem
+   with construction, and */
+
+void 
+Type::fixupConstArguments(boost::shared_ptr<Trail> trail)
+{
+  shared_ptr<Type> t = getType();
+  assert(t->isStruct() || t->isUType());
+  for (size_t i=0; i<t->typeArgs.size(); i++)
+    if(t->argInConst(i))
+      trail->subst(t->TypeArg(i), MBF(newTvar()));
+}
+
 
 /********************************************************************
-          Determining Copy Compatibility of unboxed structures
+  Structures special: determine whether type arguments occur purely
+  at copy-compatible position, whether they occur within const, etc.
  *******************************************************************/
 
 // See if nth typeArg is a CCC based on the TY_CCC flag markings
@@ -849,9 +952,27 @@ Type::argCCOK(size_t argN)
   assert(t->defAst);
 
   // Be REALLY careful about bt. It is the type in the scheme.
-  // NEVER unify it with anyhing.
+  // NEVER unify it with anything.
   shared_ptr<Type> bt = t->defAst->symType;  
   if (bt->TypeArg(argN)->getType()->flags & TY_CCC)
+    return true;
+  else
+    return false;
+}
+
+// See if nth typeArg is within a const type based on the
+// TY_ARG_IN_CONST flag markings 
+bool
+Type::argInConst(size_t argN)
+{
+  shared_ptr<Type> t = getType();
+  assert(argN < t->typeArgs.size());
+  assert(t->defAst);
+
+  // Be REALLY careful about bt. It is the type in the scheme.
+  // NEVER unify it with anything.
+  shared_ptr<Type> bt = t->defAst->symType;  
+  if (bt->TypeArg(argN)->getType()->flags & TY_ARG_IN_CONST)
     return true;
   else
     return false;

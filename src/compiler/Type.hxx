@@ -163,21 +163,6 @@ struct ArrLen {
 struct tvPrinter;
 struct TypeScheme;
 
-/// @brief Flags used by Type-inference engine.
-///
-/// These flags are different from the Unifier's flags.
-enum TI_FlagValues {
-  TI_NO_FLAGS     = 0x00u,
-  TI_TYP_EXP      = 0x01u,
-  TI_TYP_APP      = 0x02u,
-  TI_TCC_SUB      = 0x04u 
-};
-typedef sherpa::EnumSet<TI_FlagValues> TI_Flags;
-
-#define TI_COMP1        ((ti_flags | TI_TYP_EXP) & (~TI_TYP_APP))
-#define TI_COMP2        (ti_flags & (~(TI_TYP_EXP | TI_TYP_APP)))
-#define TI_CONSTR       (TI_COMP1)
-
 /// @brief Mark values for types.
 ///
 /// The following marks are present on types to ensure that
@@ -220,6 +205,7 @@ enum MarkFlagValues {
   MARK_PROPAGATE_MUTABILITY     = 0x0020000u,
   MARK_NORMALIZE_MBFULL         = 0x0040000u,
   MARK_NORMALIZE_CONST          = 0x0080000u,
+  MARK_ENSURE_MINIMIZABILITY    = 0x0100000u,
 };
 typedef sherpa::EnumSet<MarkFlagValues> MarkFlags;
 
@@ -249,7 +235,16 @@ enum TypeFlagValues {
   ///
   /// This flag must be marked on maybe-Var()s.  This flag is NOT
   /// cleared by the adjMaybe function.
-  TY_COERCE       = 0x40u
+  TY_COERCE       = 0x40u,
+  /// @brief Flag used to fixup const types within composite
+  /// data-structure definitons. 
+  ///
+  /// If an argument appears within a const type, it must be
+  /// instantiated to a mb_Full type to ensure completeness of
+  /// inference. This flag identifies all such type arguments to
+  /// structure/union definitions that appear somewhere within a 
+  /// const type. 
+  TY_ARG_IN_CONST = 0x80u
 };
 
 typedef sherpa::EnumSet<TypeFlagValues> TypeFlags;
@@ -257,7 +252,7 @@ typedef sherpa::EnumSet<TypeFlagValues> TypeFlags;
 // Specialization mask -- those flags which should NOT survive
 // specialization. 
 const TypeFlags TY_SP_MASK  =
-  (TypeFlags(TY_CT_SELF) | TY_RIGID | TY_CCC | TY_CLOS | TY_COERCE);
+  (TypeFlags(TY_CT_SELF) | TY_RIGID | TY_CCC | TY_CLOS | TY_COERCE | TY_ARG_IN_CONST);
 
 struct Type;
 typedef std::set<boost::shared_ptr<Type > > TypeSet;
@@ -422,7 +417,7 @@ private:
   // const reduction function
   // This normalization is done in-place.
   void normalize_const(boost::shared_ptr<Trail> trail=Trail::make());
-  
+
 public:
   boost::shared_ptr<Type> getType();  
   boost::shared_ptr <const Type> getType() const;
@@ -505,6 +500,16 @@ public:
   // are not affected by this fixup as they will not be removed due to
   // normalization in the first place,
   void fixupFnTypes();
+
+  // To ensure completeness of inference, bare type variables cannot
+  // occur within a const meta-constructor. They must only occur
+  // within mbFull types. However, this construction is not possible
+  // during structure/union definitions since we cannot create extra
+  // variables apart from those specified in the argument list. 
+  // Therefore, at the time of instantiation, fix the above problem
+  // with construction, and instantiate all variables occuring at
+  // shallow-positions within a const meta-constructor to mbFull types.
+  void fixupConstArguments(boost::shared_ptr<Trail> trail);
 
   /* Produce Type ty_union[rv] from ty_ucon[rv] or ty_uval[rv]
      ONLY typeArgs are polylated */
@@ -634,9 +639,19 @@ public:
   // const-meta-constructors at this step. This function is useful to
   // construct a maybe(full) type, since in 'a|p, p need not  
   // preserve const-ness.
-  boost::shared_ptr<Type> minMutConstless(boost::shared_ptr<Trail>
-					  trail=Trail::make()); 
-
+  boost::shared_ptr<Type> minMutConstless(boost::shared_ptr<Trail> 
+					  trail=Trail::make());
+  
+  // Ensure that this type can be wrapped within a const type, that
+  // is, all variables at shallow-positions are in a mbFull, so that
+  // we do not lose completeness when we perform minimizeMutability()
+  // If the markOnly flag is set, it only marks type variables that
+  // must be instantiated to mbFull types (which can be done later). 
+  // This marking is used to mark type arguments in structure/union
+  // definitions that appear at copy-position within const. 
+  void ensureMinimizability(boost::shared_ptr<Trail> trail, 
+			    bool markOnly);
+  
   boost::shared_ptr<Type>
   maximizeTopMutability(boost::shared_ptr<Trail> trail=Trail::make()); 
   boost::shared_ptr<Type>
@@ -667,6 +682,9 @@ public:
   // See if nth typeArg is a CCC based on the TY_CCC flag markings
   bool argCCOK(size_t argN);  
 
+  // See if nth typeArg is within a const type based on the
+  // TY_ARG_IN_CONST flag markings 
+  bool argInConst(size_t argN);  
   
   /* Various kinds of printing */
   // Internal debugging purposes only, do not use for user output.
@@ -752,6 +770,7 @@ public:
   boost::shared_ptr<Type> & Base() const
   {
     TYPE_ACC_DEBUG assert(kind == ty_mutable || 
+			  kind == ty_const || 
  			  kind == ty_byref || 
  			  kind == ty_ref || 
 			  kind == ty_array || 
