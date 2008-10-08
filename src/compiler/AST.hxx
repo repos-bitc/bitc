@@ -587,7 +587,6 @@ enum AstType {
   at_tqexpr,
   at_unit,
   at_suspend,
-  at_typeof,
   at_sizeof,
   at_bitsizeof,
   at_makevectorL,

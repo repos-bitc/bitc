@@ -96,7 +96,6 @@ isExpansive(std::ostream& errStream,
   case at_stringLiteral:
   case at_lambda:
   case at_sizeof:
-  case at_typeof:
     {
       itsExpansive = false;
       break;

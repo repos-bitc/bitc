@@ -1055,7 +1055,6 @@ LEAF unit;
 // SUSPENDED EXPRESSIONS
 AST suspend = var expr;
 
-AST typeof = expr;
 AST sizeof = type;
 AST bitsizeof = type;
 
