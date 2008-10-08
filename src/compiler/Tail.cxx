@@ -168,6 +168,8 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_reprctr:
   case at_reprrepr:
   case at_docString:
+  case at_sizeof:
+  case at_typeof:
     {
       break;
     }

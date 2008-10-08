@@ -322,6 +322,14 @@ findusedef(std::ostream &errStream,
       break;
     }
 
+  case at_sizeof:
+  case at_bitsizeof:
+    {
+      CHKERR(errFree, findusedef(errStream, topAst, ast->child(0),
+				 TYPE_MODE, boundVars, freeVars));
+      break;
+    }
+    
   case at_select:
   case at_sel_ctr:
     {

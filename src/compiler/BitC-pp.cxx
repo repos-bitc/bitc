@@ -482,6 +482,8 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_suspend:
   case at_fill:
   case at_reserved:
+  case at_sizeof:
+  case at_bitsizeof:
     //case at_reprbody:
     {
       out << "(" << ast->atKwd();

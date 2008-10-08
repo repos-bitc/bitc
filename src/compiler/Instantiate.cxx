@@ -727,6 +727,23 @@ tvarInst(shared_ptr<AST> ast, shared_ptr<AST> scope, AstMap &newBinds)
   }
 }
 
+// Coerce a non-concrete type to a more concrete type
+static void
+coerce(ostream &errStream, shared_ptr<Type> t, 
+       bool maybeOnly=false)
+{
+  INST_DEBUG
+    errStream << "COERCING "
+	      << t->asString(Options::debugTvP)
+	      << " to ";
+  t->adjMaybe(Trail::make(), false, false, true);
+  if(!maybeOnly)
+    t->SetTvarsToUnit();
+  INST_DEBUG
+    errStream << t->asString(Options::debugTvP)
+	      << endl;
+}
+
 
 // Build a new proclaimation for the new instantiation.
 // In the case of a value declaration, use typ to produce the type to
@@ -1058,17 +1075,8 @@ UocInfo::recInstantiate(ostream &errStream,
       //      thing so that the user can be shown a tvar, rather than the
       //      unit
 
-      if (!ast->symType->isConcrete()) {
-	INST_DEBUG
-	  errStream << "COERCING "
-		    << ast->symType->asString(Options::debugTvP)
-		    << " to ";
-	ast->symType->adjMaybe(Trail::make(), false, false, true);
-	ast->symType->SetTvarsToUnit();
-	INST_DEBUG
-	  errStream << ast->symType->asString(Options::debugTvP)
-		    << endl;
-      }
+      if (!ast->symType->isConcrete())
+	coerce(errStream, ast->symType);
 
       // Now that the identifier is a concrete instantiation,
       // (poly)instantiate it, and replace the use case with the
@@ -1216,6 +1224,19 @@ UocInfo::recInstantiate(ostream &errStream,
 				     errFree, worklist);
       break;
     }
+    
+  case at_sizeof:
+  case at_bitsizeof:
+    {
+      shared_ptr<AST> typAst = ast->child(0);
+      if (!typAst->symType->isConcrete()) 
+	coerce(errStream, typAst->symType);
+
+      ast->child(0) = typeAsAst(typAst->symType, typAst->loc);
+      ast->child(0) = recInstantiate(errStream, ast->child(0),
+				     errFree, worklist);
+      break;
+    }
 
   case at_floatLiteral:
   case at_intLiteral:
@@ -1223,17 +1244,9 @@ UocInfo::recInstantiate(ostream &errStream,
       // Integer literals must have their types explicitely clamped
       // with a qualifier, we no longer deal with type classes after
       // this pass
-      if (!ast->symType->isConcrete()) {
-	INST_DEBUG
-	  errStream << "Lit-COERCING "
-		    << ast->symType->asString(Options::debugTvP)
-		    << " to ";
-	ast->symType->adjMaybe(Trail::make(), false, false, true);
-	INST_DEBUG
-	  errStream << ast->symType->asString(Options::debugTvP)
-		    << endl;
-      }
-
+      if (!ast->symType->isConcrete()) 
+	coerce(errStream, ast->symType, true);
+      
       assert(ast->symType->isConcrete());
 
       ast = AST::make(at_tqexpr, ast->loc, ast,

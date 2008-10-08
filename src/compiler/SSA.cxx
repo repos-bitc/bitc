@@ -439,6 +439,13 @@ ssa(std::ostream& errStream,
       break;
     }
 
+  case at_sizeof:
+  case at_bitsizeof:
+    {
+      FEXPR(grandLet) = addLB(grandLet, identList, ast);
+      break;
+    }
+    
   case at_suspend:
     {
       shared_ptr<AST> gl = newGrandLet(ast);

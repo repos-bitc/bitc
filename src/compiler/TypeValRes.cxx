@@ -91,6 +91,12 @@ isExpansive(std::ostream& errStream,
   /* Typeclasses special for intLit and FloatLit !! */
   case at_intLiteral:
   case at_floatLiteral:
+  case at_boolLiteral:
+  case at_charLiteral:
+  case at_stringLiteral:
+  case at_lambda:
+  case at_sizeof:
+  case at_typeof:
     {
       itsExpansive = false;
       break;
@@ -113,10 +119,6 @@ isExpansive(std::ostream& errStream,
   case at_fill:
   case at_reserved:
   case at_usesel:
-  case at_boolLiteral:
-  case at_charLiteral:
-  case at_stringLiteral:
-  case at_lambda:
   case at_dup:
   case at_docString:
     {

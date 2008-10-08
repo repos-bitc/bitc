@@ -568,6 +568,12 @@ AST::atKwd() const
   case at_qualType:
     return "forall";
 
+  case at_sizeof:
+    return "sizeof";
+
+  case at_bitsizeof:
+    return "bitsizeof";
+
   case at_constraints:
     return "<constraints>";
 

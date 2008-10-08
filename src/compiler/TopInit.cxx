@@ -251,6 +251,8 @@ TopInit(std::ostream& errStream,
   case at_stringLiteral:
   case at_unit:
   case at_lambda:
+  case at_sizeof:
+  case at_typeof:
     break;
 
   case at_ident:

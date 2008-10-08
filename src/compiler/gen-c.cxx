@@ -2386,12 +2386,14 @@ toc(std::ostream& errStream,
     {
       shared_ptr<Type> ty = ast->child(0)->getType();
       out << " sizeof(" << toCtype(ty) << ") ";
+      break;
     }
 
   case at_bitsizeof:
     {
       shared_ptr<Type> ty = ast->child(0)->getType();
       out << " (8*sizeof(" << toCtype(ty) << ")) ";
+      break;
     }
 
   case at_dup:
