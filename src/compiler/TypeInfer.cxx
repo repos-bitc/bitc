@@ -1844,7 +1844,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     {
       /*------------------------------------------------
 	  ___________________________________________
-                 A |- FLOAT_LITERAL: 'a \ FloarLit('a)
+                 A |- FLOAT_LITERAL: 'a \ FloatLit('a)
 	------------------------------------------------*/
 
       if (Options::noPrelude) {
@@ -2723,7 +2723,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     }
 
     // The restriction that byref types can only appear on the
-    // arguemnts of a function is enforced in the parser.
+    // arguments of a function is enforced in the parser.
   case at_byrefType:
     {
       // match agt_type
@@ -4121,6 +4121,24 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 			    MBF(base), uflags));
       break;
     }
+
+  case at_sizeof:
+  case at_bitsizeof:
+    {
+      /*------------------------------------------------
+	  ___________________________________________
+                 A |- sizeof(t): word
+	------------------------------------------------*/
+
+      // match agt_type
+      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, 
+		tcc, uflags, trail,  USE_MODE, 
+		TI_NON_APP_TYPE);
+
+      ast->symType = Type::make(ty_word);
+
+      break;      
+    }    
 
   case at_dup:
     {

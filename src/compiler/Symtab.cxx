@@ -2215,6 +2215,19 @@ resolve(std::ostream& errStream,
       break;
     }
 
+  case at_sizeof:
+  case at_bitsizeof:
+    {
+      // match agt_type
+
+      // The type must be complete, because otherwise we can get
+      // cyclically self-referencing types.
+      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
+	      idc_type, currLB, 
+	      flags | (~RSLV_INCOMPLETE_OK));
+      break;      
+    }    
+
   case at_dup:
     {
       // match agt_expr

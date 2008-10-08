@@ -134,6 +134,9 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_UINT64
 %token <tok> tk_WORD
 
+%token <tok> tk_SIZEOF
+%token <tok> tk_BITSIZEOF
+
 %token <tok> tk_BITFIELD
 %token <tok> tk_FILL
 %token <tok> tk_RESERVED // not to be confused with tk_Reserved
@@ -1614,6 +1617,16 @@ expr: '(' tk_SUSPEND useident expr ')' {
 eform: literal {
   SHOWPARSE("eform -> Literal");
   $$ = $1;
+};
+
+eform: '(' tk_SIZEOF type ')' {
+  SHOWPARSE("eform -> (SIZEOF type)");
+  $$ = AST::make(at_sizeof, $2.loc, $3);
+};
+
+eform: '(' tk_BITSIZEOF type ')' {
+  SHOWPARSE("eform -> (BITSIZEOF type)");
+  $$ = AST::make(at_bitsizeof, $2.loc, $3);
 };
 
 // UNIT EXPRESSIONS   [7.4.1]

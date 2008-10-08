@@ -415,12 +415,13 @@ opaque        or            otherwise
 pair          proclaim      provide       
 pure          quad          ref           
 return        return-from   set!          
-string        suspend       switch        
-tag           the           throw         
-try           tyfn          uint8         
-uint16        uint32        uint64        
-use           val           vector        
-vector-length vector-nth    word          </literallayout>
+sizeof        string        suspend       
+switch        tag           the           
+throw         try           tyfn          
+uint8         uint16        uint32        
+uint64        use           val           
+vector        vector-length vector-nth    
+word          </literallayout>
 	<p>
 	  The following identifiers are reserved for use as future
 	  keywords:
@@ -434,9 +435,8 @@ import!       indset        inner-ref
 int           let*          list          
 literal       location      module        
 namespace     nth           read-only     
-require       sensory       sizeof        
-super         tycon         using         
-value-at</literallayout>
+require       sensory       super         
+tycon         using         value-at</literallayout>
 	<p>
           In addition to the reserved words identified above, all
 	  definitions provided in the standard prelude are implicitly
@@ -2868,6 +2868,27 @@ id : T
 	  is the type of the identifier and whose value is the value
 	  to which the identifier is bound.
 	</p>
+      </sect2>
+      <sect2>
+        <title><progident>sizeof</progident>,
+          <progident>bitsizeof</progident></title>
+        <p>
+          The <progident>sizeof</progident> and
+          <progident>bitsizeof</progident> forms report the size, in
+          bytes (respectively bits), of a type. When applied to
+          expressions, they report the size of the <em>type</em> of
+          that expression. The expression is typed by the compiler,
+          but it is not evaluated.
+        </p>
+        <literallayout>
+sizeof(<em>e</em>)
+sizeof(<em>T</em>)
+bitsizeof(<em>e</em>)
+bitsizeof(<em>T</em>)</literallayout>
+        <p indent="no">
+          The return type of <progident>sizeof</progident>,
+          <progident>bitsizeof</progident> is <progident>word</progident>.
+        </p>
       </sect2>
       <sect2>
 	<title>Type-Qualified Expressions</title>

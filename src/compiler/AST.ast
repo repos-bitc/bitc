@@ -1033,6 +1033,7 @@ GROUP eform = literal | var | unit
  	    | container | do
 	    | mkClosure | allocREF | copyREF | setClosure
 	    | block | return_from
+	    | sizeof | bitsizeof
             // | loop | typecase | casebang
             ;
 // *select* is record selection.
@@ -1053,6 +1054,10 @@ LEAF unit;
 
 // SUSPENDED EXPRESSIONS
 AST suspend = var expr;
+
+AST typeof = expr;
+AST sizeof = type;
+AST bitsizeof = type;
 
 // MAKE-VECTOR [7.4.2]
 AST makevectorL = expr expr;

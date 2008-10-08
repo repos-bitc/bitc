@@ -2382,6 +2382,18 @@ toc(std::ostream& errStream,
       break;
     }
 
+  case at_sizeof:
+    {
+      shared_ptr<Type> ty = ast->child(0)->getType();
+      out << " sizeof(" << toCtype(ty) << ") ";
+    }
+
+  case at_bitsizeof:
+    {
+      shared_ptr<Type> ty = ast->child(0)->getType();
+      out << " (8*sizeof(" << toCtype(ty) << ")) ";
+    }
+
   case at_dup:
     {
       assert(IDname.size());
