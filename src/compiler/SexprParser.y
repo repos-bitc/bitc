@@ -195,6 +195,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_LET
 %token <tok> tk_LETREC
 %token <tok> tk_FN
+%token <tok> tk_FNARROW
 %token <tok> tk_BEGIN
 %token <tok> tk_DO
 %token <tok> tk_APPLY
@@ -1346,16 +1347,27 @@ fneffect: tk_EffectVar {
   $$ = AST::make(at_ident, $1);
 };
 
-fntype: '(' fneffect tk_FN '(' ')' type ')' {
-  SHOWPARSE("fntype -> ( fneffect FN () type )");
+// Reworked by shap on 10/9/2008 to use arrow syntax
+fntype: '(' fneffect tk_FN tk_FNARROW type ')' {
+  SHOWPARSE("fntype -> ( fneffect FN -> type )");
   shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $4.loc);
-  $$ = AST::make(at_fn, $1.loc, fnargVec, $6);
+  $$ = AST::make(at_fn, $1.loc, fnargVec, $5);
 };
+//fntype: '(' fneffect tk_FN '(' ')' type ')' {
+//  SHOWPARSE("fntype -> ( fneffect FN () type )");
+//  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $4.loc);
+//  $$ = AST::make(at_fn, $1.loc, fnargVec, $6);
+//};
 
-fntype: '(' fneffect tk_FN '(' types_pl_byref ')' type ')'  {
-  SHOWPARSE("fntype -> ( fneffect FN ( types_pl_byref ) type )");
-  $$ = AST::make(at_fn, $1.loc, $5, $7);
+// Reworked by shap on 10/9/2008 to use arrow syntax
+fntype: '(' fneffect tk_FN types_pl_byref tk_FNARROW type ')'  {
+  SHOWPARSE("fntype -> ( fneffect FN ( types_pl_byref -> type )");
+  $$ = AST::make(at_fn, $1.loc, $4, $6);
 };
+//fntype: '(' fneffect tk_FN '(' types_pl_byref ')' type ')'  {
+//  SHOWPARSE("fntype -> ( fneffect FN ( types_pl_byref ) type )");
+//  $$ = AST::make(at_fn, $1.loc, $5, $7);
+//};
 
 type_cpair: type ',' type {
   SHOWPARSE("type_cpair -> type ',' type");

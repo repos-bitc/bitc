@@ -44,7 +44,7 @@
 (define i2 (the int32 2))
  
 (define plus +)
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (plus i0 i1)
     i0))

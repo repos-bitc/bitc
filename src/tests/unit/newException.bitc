@@ -43,7 +43,7 @@
 
 (defexception Xn2 f1:int32 f2:bool)
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)   
     (throw Xn)
     (throw (Xn2 10 #f))

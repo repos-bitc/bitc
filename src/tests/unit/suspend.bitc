@@ -41,7 +41,7 @@
 
 ; suspend cannot be tested until (if at all) we have definvariant
 ; definvariuant property
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
  ; (suspend property i0)
     0))

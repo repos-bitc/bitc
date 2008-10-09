@@ -43,5 +43,5 @@
 ;; only one word in the list, similar to (list (ref bool))
 
 (define ln (cons (non-null (dup #t)) nil))
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) ln 0))

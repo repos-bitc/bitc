@@ -58,7 +58,7 @@
 (defunion un-nul:val 
   en31 en32 (ptr3 p:(nullable (ref int32))))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (let ((n (dup 10)))
       (ptr1 n)

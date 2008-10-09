@@ -392,36 +392,36 @@
 	  be rebound:
 	</p>
 	<literallayout indent="no">
-#f            #t            and           
-apply         array         array-length
-array-nth     begin         bitc-version
-as            bitfield      bool          
-block         by-ref        case          
-catch         char          cond          
-const         continue      declare       
-defaxiom      defexception  define        
-definvariant  defrepr       defstruct     
-deftheory     defthm        defunion      
-deref         disable       do            
-double        dup           enable        
-exception     extends       external      
-fill          fixint        float         
-if            import        impure        
-int8          int16         int32         
-int64         interface     fn            
-lambda        let           letrec        
-member        mutable       not           
-opaque        or            otherwise     
-pair          proclaim      provide       
-pure          quad          ref           
-return        return-from   set!          
-sizeof        string        suspend       
-switch        tag           the           
-throw         try           tyfn          
-uint8         uint16        uint32        
-uint64        use           val           
-vector        vector-length vector-nth    
-word          </literallayout>
+#f            #t            -&gt;
+and           apply         array         
+array-length  array-nth     begin         
+bitc-version  as            bitfield      
+bool          block         by-ref        
+case          catch         char          
+cond          const         continue      
+declare       defaxiom      defexception  
+define        definvariant  defrepr       
+defstruct     deftheory     defthm        
+defunion      deref         disable       
+do            double        dup           
+enable        exception     extends       
+external      fill          fixint        
+float         if            import        
+impure        int8          int16         
+int32         int64         interface     
+fn            lambda        let           
+letrec        member        mutable       
+not           opaque        or            
+otherwise     pair          proclaim      
+provide       pure          quad          
+ref           return        return-from   
+set!          sizeof        string        
+suspend       switch        tag           
+the           throw         try           
+tyfn          uint8         uint16        
+uint32        uint64        use           
+val           vector        vector-length 
+vector-nth    word          </literallayout>
 	<p>
 	  The following identifiers are reserved for use as future
 	  keywords:
@@ -1034,7 +1034,7 @@ use</literallayout>
 	    types (including type variables), then:
 	  </p>
 	  <literallayout>
-(fn (<em>t<sub>arg_1</sub></em>...<em>t<sub>arg_n</sub></em>) <em>t<sub>result</sub></em>)</literallayout>
+(fn <em>t<sub>arg_1</sub></em>...<em>t<sub>arg_n</sub></em> -> <em>t<sub>result</sub></em>)</literallayout>
 	  <p indent="no">
 	    is the type of a function taking <em>n</em> arguments of
 	    types <em>t<sub>arg1</sub></em> through

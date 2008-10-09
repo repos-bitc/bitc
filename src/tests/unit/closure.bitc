@@ -41,6 +41,6 @@
 (define f
   (lambda (x) (lambda (y) (+ x y))))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argv)
     ((f 1:int32) 2)))

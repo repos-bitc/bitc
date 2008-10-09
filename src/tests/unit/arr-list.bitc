@@ -41,6 +41,6 @@
 (define (id x) x)
 
 (define arr:(array (list (mutable int32)) 2) (array nil nil))
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (id arr) 0))

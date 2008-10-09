@@ -182,6 +182,7 @@ validate_string(const char *s)
 }
 
 struct SexprLexer::KeyWord SexprLexer::keywords[] = {
+  { "->",               tk_FNARROW },
   { "and",              tk_AND },
   { "apply",            tk_APPLY },
   { "array",            tk_ARRAY },

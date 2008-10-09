@@ -41,7 +41,7 @@
 
 (defstruct St:val f:(mutable bool))
 (define x:St (St #t))
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (set! x.f #f)
     (set! x (St #t))

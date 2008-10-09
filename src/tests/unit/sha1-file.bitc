@@ -50,7 +50,7 @@
 
 (define (id x) (convert x))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (define start:(mutable uint64) 0)
     (define stop:(mutable uint64) 0)

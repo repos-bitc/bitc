@@ -44,10 +44,10 @@
 (define (neq x:unin y:unin) #f)
 
 (definstance (Eq unin) 
-  (== = (the (fn (unin unin) bool) eeq)) 
+  (== = (the (fn unin unin -> bool) eeq)) 
   (!= = neq))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (== C C) 0))
 

@@ -44,6 +44,6 @@
 (define i2 (the int32 2))
 
 (define (ret0 x) (if (== x i0) i0 (ret0 (- x 1))))
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (ret0 i2) i0))

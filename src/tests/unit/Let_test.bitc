@@ -43,7 +43,7 @@
 (define i1 (the int32 1))
 (define i2 (the int32 2))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (let ((i i0) (j (let ((i i2)) i))) (+ i j))
     i0))

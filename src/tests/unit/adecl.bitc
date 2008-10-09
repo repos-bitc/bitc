@@ -42,7 +42,7 @@
 (define a23 (array (array 1:int32 2 3)
 		   (array 4 5 6)))
 
-(define main.main:(fn ((vector string)) int32)  
+(define main.main:(fn (vector string) -> int32)  
   (lambda (argVec)
     (begin (array-length a23))
     0:int32))

@@ -105,11 +105,11 @@
     computed  : (mutable bool)
     corrupted : (mutable sha-Result))
   
-  (proclaim sha1Reset:(fn (sha1Context) sha-Result))
-  (proclaim sha1Input:(fn (sha1Context (vector (mutable uint8))) sha-Result))
-  (proclaim sha1Result:(fn (sha1Context 
-			    (by-ref (array (mutable uint8) 20)))
-			   sha-Result))
-  (proclaim shaResultAsString:(fn (sha-Result) string))
+  (proclaim sha1Reset:(fn sha1Context -> sha-Result))
+  (proclaim sha1Input:(fn sha1Context (vector (mutable uint8)) -> sha-Result))
+  (proclaim sha1Result:(fn sha1Context 
+			   (by-ref (array (mutable uint8) 20))
+			   -> sha-Result))
+  (proclaim shaResultAsString:(fn sha-Result -> string))
 )  
   

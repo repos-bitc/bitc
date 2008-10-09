@@ -53,5 +53,5 @@
 			     (Xn2 xyz.a)))
 		 (catch pqr (Xn3 1000))))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) (f) i0))

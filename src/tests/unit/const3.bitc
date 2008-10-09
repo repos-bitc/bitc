@@ -46,7 +46,7 @@
 (define y (St 10:int32))
 (define z (St (lambda (x) x)))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     x
     0))

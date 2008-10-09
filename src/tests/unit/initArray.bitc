@@ -39,7 +39,7 @@
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (let ((a:(array (mutable int32) 10) (array 0 0 0 0 0 0 0 0 0 0)))
       (do ((i:word 0 (+ i 1)))

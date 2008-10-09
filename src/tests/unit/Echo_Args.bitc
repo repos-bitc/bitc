@@ -41,7 +41,7 @@
 
 (import bitc.stdio as stdio)
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (do ((i:word 0 (+ i 1)))
 	((== i (vector-length argvec)) ())

@@ -44,5 +44,5 @@
 (defstruct (st 'a 'b) a: 'a)
 
 (define c (st #t))
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) c 0))

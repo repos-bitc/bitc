@@ -39,7 +39,7 @@
 (import bitc.main as main)
 (provide bitc.main main)
 
-(proclaim even : (forall ((Arith 'a) (IntLit 'a)) (fn ('a) bool)))
+(proclaim even : (forall ((Arith 'a) (IntLit 'a)) (fn 'a -> bool)))
 (define (odd x) (cond ((< x 0) (odd (- x 0)))
 		      ((== x 0) #f)
 		      (otherwise (even (- x 1)))))
@@ -48,7 +48,7 @@
 		      ((== x 0) #t)
 		      (otherwise (odd (- x 1)))))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (odd 10:int32) 0))
 

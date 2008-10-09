@@ -45,7 +45,7 @@
  
 (define (id x) x)
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (if (id #t) 
       (id (id i1))

@@ -63,7 +63,7 @@
 (define (l2v lst)
   (make-vector (length lst) 
 		(lambda (n) (ls.list-nth lst n))))
-(define l2vq:(fn ((list 'a)) (vector 'a))
+(define l2vq:(fn (list 'a) -> (vector 'a))
   (lambda (lst)
     (make-vector (length lst) 
 		  (lambda (n) (ls.list-nth lst n)))))
@@ -76,6 +76,6 @@
 
 (import bitc.main as main)
 (provide bitc.main main)
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 0))
 

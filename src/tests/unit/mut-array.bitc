@@ -41,7 +41,7 @@
 
 (define x:(array (mutable int32) 3) (array 10 20 30))
 (define y:(array int32 3) x)
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (set! x (array 0 0 0))
     ;; Must not work

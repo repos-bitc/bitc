@@ -39,8 +39,8 @@
 (import bitc.main as main)
 (provide bitc.main main)
  
-(proclaim id: (fn ('a) 'a))
-(proclaim id: (fn ('b) 'b))
+(proclaim id: (fn 'a -> 'a))
+(proclaim id: (fn 'b -> 'b))
 
 (define (id x) x)
 
@@ -48,7 +48,7 @@
 ;(proclaim id: (fn ('c) 'c))
 ;(proclaim id: (fn ('d) 'd))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (id 0))) 
 

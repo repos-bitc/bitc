@@ -58,24 +58,24 @@
   ;;
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  (proclaim eof?:(fn (stream) bool) external bitc_stdio_eofp)
+  (proclaim eof?:(fn stream -> bool) external bitc_stdio_eofp)
 
   ;; Open a file with given name and mode
-  (proclaim open:(fn (string string) stream) external bitc_stdio_open)
-  (proclaim close:(fn (stream) ()) external bitc_stdio_close)
+  (proclaim open:(fn string string -> stream) external bitc_stdio_open)
+  (proclaim close:(fn stream -> ()) external bitc_stdio_close)
 
   (proclaim stdin:stream external bitc_stdio_stdin)
   (proclaim stdout:stream external bitc_stdio_stdout)
   (proclaim stderr:stream external bitc_stdio_stderr)
 
   ;; Read a single character from an input stream.
-  (proclaim read-char:(fn (stream) char) external bitc_stdio_read_char)
+  (proclaim read-char:(fn stream -> char) external bitc_stdio_read_char)
   ;; Write a single character to an input stream.
-  (proclaim write-char:(fn (stream char) ()) external bitc_stdio_write_char)
+  (proclaim write-char:(fn stream char -> ()) external bitc_stdio_write_char)
   ;; Read a single byte from an input stream.
-  (proclaim read-byte:(fn (stream) uint8) external bitc_stdio_read_byte)
+  (proclaim read-byte:(fn stream -> uint8) external bitc_stdio_read_byte)
   ;; Write a single byte to an input stream.
-  (proclaim write-byte:(fn (stream uint8) ()) external bitc_stdio_write_byte)
+  (proclaim write-byte:(fn stream uint8 -> ()) external bitc_stdio_write_byte)
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;
@@ -85,7 +85,7 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   ;; String Output
-  ;;(proclaim write-string:(fn (stream string) word) external bitc_stdio_write_string)
+  ;;(proclaim write-string:(fn stream string -> word) external bitc_stdio_write_string)
 
   ;; This is quite horrible, but until we have closure conversion 
   ;; implemented it will have to suffice.
@@ -117,6 +117,6 @@
 				     (convert (/ x log))))))
   
   ;; Read a string from an input stream.
-  ;;(proclaim read-string:(fn (stream word) string) external)
+  ;;(proclaim read-string:(fn stream word -> string) external)
 
 )

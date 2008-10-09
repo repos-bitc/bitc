@@ -45,7 +45,7 @@
 ;; the type (mutable St) should lead to an error.
 
 (defstruct St:val f1:(mutable int32) f2:(mutable bool))
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (let ((p (St 10 #t)))
       (set! p.f1 25)

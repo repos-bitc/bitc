@@ -42,7 +42,7 @@
 (define p:(mutable bool) #t)
 (define (f x) p)
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (f 0:int32)
     (set! p #f)

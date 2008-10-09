@@ -44,7 +44,7 @@
 
 (import bitc.main as main)
 (provide bitc.main main)
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argv)
     (let ((vec:(vector (mutable int32)) 
 	       (make-vector 30 (lambda (x) (convert x)))))

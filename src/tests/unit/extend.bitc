@@ -44,7 +44,7 @@
 (define i2 (the int16 2))
 
 (define (fact x) (if (== x i0) i1 (* x (fact (- x 1)))))
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
   (begin 
    (let ((x:int32 (sign-extend (the int8 0))))

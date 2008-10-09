@@ -126,8 +126,8 @@
   (defexception Ret retVal:sha1.sha-Result)
 
   ;; Forward declarations
-  (proclaim sha1PadMessage:(fn (sha1.sha1Context) ()))
-  (proclaim sha1ProcessMessageBlock:(fn (sha1.sha1Context) ()))
+  (proclaim sha1PadMessage:(fn sha1.sha1Context -> ()))
+  (proclaim sha1ProcessMessageBlock:(fn sha1.sha1Context -> ()))
 
 
   ;; Strings for Sha-Result

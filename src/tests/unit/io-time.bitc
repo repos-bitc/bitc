@@ -49,7 +49,7 @@
 
 (define (zero x) 0)
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (define len:word 5000)
     (define first (stdlib.getTimeStamp))

@@ -48,6 +48,6 @@
   ;;(Ct4 i:int32 r:quad (where (== i 40) (== r 10))) 
   )
  
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (Ct1 #f) 0))

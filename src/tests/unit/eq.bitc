@@ -40,12 +40,12 @@
 (provide bitc.main main)
 
 (deftypeclass (EQL 'a)
-  ===: (fn ('a 'a) bool)
+  ===: (fn 'a 'a -> bool)
   )
 
 (forall ((EQL 'a)) 
   (deftypeclass (ORD 'a)
-    <<==: (fn ('a 'a) bool)
+    <<==: (fn 'a 'a -> bool)
   ))
 
 ;(definstance (EQL 'a) ==)
@@ -74,7 +74,7 @@
 (definstance (EQL (list 'a)) (=== = ==))
 (define (f x:(list 'a)) (=== x x))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (=== (the int32 10) 20)
     (=== #t #f)

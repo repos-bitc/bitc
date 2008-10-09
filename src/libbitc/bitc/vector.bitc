@@ -38,7 +38,7 @@
 (interface bitc.vector
   (import bitc.list as lst)
 
-  (define (vector-map vec :(vector 'a) f:(fn ('a) ()))
+  (define (vector-map vec :(vector 'a) f:(fn 'a -> ()))
     "Apply procedure f to each element of vector."
     (do ((pos 0 (+ 1 pos)))
 	((== pos (vector-length vec)) ())

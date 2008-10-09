@@ -43,6 +43,6 @@
 
 (define (idf) id)
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) idf 0))
 

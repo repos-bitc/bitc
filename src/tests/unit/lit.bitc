@@ -60,7 +60,7 @@
 ;    (let ((p 25))
 ;      p)))
   
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     XYZ ABC 0))
 

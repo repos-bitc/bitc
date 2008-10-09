@@ -48,7 +48,7 @@
 
 (define (id x) x)
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (define i:int32 0)
     (define l:(list bool) nil)
