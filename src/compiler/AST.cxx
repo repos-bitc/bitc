@@ -70,7 +70,7 @@ AST::AST(const AstType at)
   defForm = GC_NULL;
   defbps = GC_NULL;
   decl = GC_NULL;
-  printVariant = 0;		// until otherwise stated
+  printVariant = pf_NONE;		// until otherwise stated
   tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
@@ -96,7 +96,7 @@ AST::AST(const AstType at, const AST_TOKEN_TYPE& tok)
   defForm = GC_NULL;
   defbps = GC_NULL;
   decl = GC_NULL;
-  printVariant = 0;		// until otherwise stated
+  printVariant = pf_NONE;		// until otherwise stated
   tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
@@ -121,7 +121,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc)
   defForm = GC_NULL;
   defbps = GC_NULL;
   decl = GC_NULL;
-  printVariant = 0;		// until otherwise stated
+  printVariant = pf_NONE;		// until otherwise stated
   tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
@@ -148,7 +148,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   defForm = GC_NULL;
   defbps = GC_NULL;
   decl = GC_NULL;
-  printVariant = 0;		// until otherwise stated
+  printVariant = pf_NONE;		// until otherwise stated
   tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
@@ -177,7 +177,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   defForm = GC_NULL;
   defbps = GC_NULL;
   decl = GC_NULL;
-  printVariant = 0;		// until otherwise stated
+  printVariant = pf_NONE;		// until otherwise stated
   tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
@@ -208,7 +208,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   defForm = GC_NULL;
   defbps = GC_NULL;
   decl = GC_NULL;
-  printVariant = 0;		// until otherwise stated
+  printVariant = pf_NONE;		// until otherwise stated
   tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
@@ -241,7 +241,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   defForm = GC_NULL;
   defbps = GC_NULL;
   decl = GC_NULL;
-  printVariant = 0;		// until otherwise stated
+  printVariant = pf_NONE;		// until otherwise stated
   tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
@@ -276,7 +276,7 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   defForm = GC_NULL;
   defbps = GC_NULL;
   decl = GC_NULL;
-  printVariant = 0;		// until otherwise stated
+  printVariant = pf_NONE;		// until otherwise stated
   tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;

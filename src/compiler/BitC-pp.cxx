@@ -161,7 +161,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     break;
 
   case at_refCat:
-    if (ast->printVariant != 1)
+    if (!(ast->printVariant & pf_IMPLIED))
       out << ":ref";
     break;
   case at_valCat:
@@ -308,7 +308,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     break;
 
   case at_deref:
-    if (ast->printVariant == 1) {
+    if (ast->printVariant && pf_IMPLIED) {
       doChildren(out, ast, 0, true, showTypes);
       out << "^";
     }
@@ -323,7 +323,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_lambda:
     {
 #if 0
-      if (ast->printVariant == 1) {
+      if (ast->printVariant && pf_IMPLIED) {
       // While this test is true while printing whole top-level forms,
       // it is not true in the case of  individual expressions. Hence
       // I have disabled it. If the final version of the compiler has
@@ -587,7 +587,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_mkClosure:
   case at_setClosure:
     {
-      if (ast->printVariant == 1) {
+      if (ast->printVariant && pf_IMPLIED) {
 	out << "(";
 	BitcP(out, ast->child(0), showTypes);
 	out << ", ";
@@ -850,7 +850,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     //  case at_catchclause:
   case at_tcapp:
     {
-      if (ast->printVariant == 1) {
+      if (ast->printVariant && pf_IMPLIED) {
 	doChildren(out, ast, 1, false, showTypes);
       }
       else {

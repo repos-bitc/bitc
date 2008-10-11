@@ -945,7 +945,7 @@ field: bitfieldtype tk_FILL ';' {
 val: {
   SHOWPARSE("val -> <empty>");
   $$ = AST::make(at_refCat);
-  $$->printVariant = 1;
+  $$->printVariant = pf_IMPLIED;
 };
 
 val: ':' tk_VAL {
@@ -989,7 +989,7 @@ value_definition: tk_DEF defident '(' ')' optdocstring block {
     AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $6);
   shared_ptr<AST> iLambda =
     AST::make(at_lambda, $1.loc, AST::make(at_argVec, $4.loc), iRetBlock);
-  iLambda->printVariant = 1;
+  iLambda->printVariant = pf_IMPLIED;
   shared_ptr<AST> iP = AST::make(at_identPattern, $2->loc, $2);
   $$ = AST::make(at_recdef, $1.loc, iP, iLambda);
   $$->addChild(AST::make(at_constraints));
@@ -1002,7 +1002,7 @@ value_definition: tk_DEF defident '(' lambdapatterns ')' optdocstring
   shared_ptr<AST> iRetBlock = 
     AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $7);
   shared_ptr<AST> iLambda = AST::make(at_lambda, $1.loc, $4, iRetBlock);
-  iLambda->printVariant = 1;
+  iLambda->printVariant = pf_IMPLIED;
   shared_ptr<AST> iP = AST::make(at_identPattern, $2->loc, $2);
   $$ = AST::make(at_recdef, $1.loc, iP, iLambda);
   $$->addChild(AST::make(at_constraints));
@@ -1596,14 +1596,14 @@ type_cpair: type ',' type {
   $$ = AST::make(at_typeapp, $2.loc,
 	       AST::make(at_ident, LToken($2.loc, "pair")),
 	       $1, $3);
-  $$->printVariant = 1;
+  $$->printVariant = pf_IMPLIED;
 };
 type_cpair: type ',' type_cpair {
   SHOWPARSE("type_cpair -> type ',' type_cpair");
   $$ = AST::make(at_typeapp, $2.loc,
 	       AST::make(at_ident, LToken($2.loc, "pair")),
 	       $1, $3);
-  $$->printVariant = 1;
+  $$->printVariant = pf_IMPLIED;
 };
 
 type: '(' type_cpair ')' {

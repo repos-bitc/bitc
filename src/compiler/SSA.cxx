@@ -97,7 +97,7 @@ UseCase(shared_ptr<AST> ast)
 
 static shared_ptr<AST> 
 addLB(shared_ptr<AST> grandLet, shared_ptr<AST> identList, 
-      shared_ptr<AST> ast, EnumSet<AstFlags> lbFlags = NO_FLAGS,
+      shared_ptr<AST> ast, AstFlags lbFlags = NO_FLAGS,
       shared_ptr<AST> id=GC_NULL, bool addToIL=true)
 {
   if (!id)

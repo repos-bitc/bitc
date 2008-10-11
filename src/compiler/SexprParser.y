@@ -408,7 +408,7 @@ implicit_module: mod_definitions  {
  SHOWPARSE("implicit_module -> mod_definitions");
  $$ = $1;
  $$->astType = at_module;
- $$->printVariant = 1;
+ $$->printVariant = pf_IMPLIED;
 
  // Construct, compile, and admit the parsed UoC:
  string uocName = 
@@ -783,7 +783,7 @@ type_decl: '(' tk_DEFREPR defident val externals ')' {
 val: { 
   SHOWPARSE("val -> <empty>");
   $$ = AST::make(at_refCat);
-  $$->printVariant = 1;
+  $$->printVariant = pf_IMPLIED;
 };
 
 val: ':' tk_VAL {
@@ -923,7 +923,7 @@ value_definition: '(' tk_DEFINE '(' defident ')' expr_seq ')'  {
     AST::make(at_block, $2.loc, AST::make(at_ident, LToken("__return")), $6);
   shared_ptr<AST> iLambda =
     AST::make(at_lambda, $2.loc, AST::make(at_argVec, $5.loc), iRetBlock);
-  iLambda->printVariant = 1;
+  iLambda->printVariant = pf_IMPLIED;
   shared_ptr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
   $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
   $$->addChild(AST::make(at_constraints));
@@ -939,7 +939,7 @@ value_definition: '(' tk_DEFINE '(' defident lambdapatterns ')'
   shared_ptr<AST> iRetBlock = 
     AST::make(at_block, $2.loc, AST::make(at_ident, LToken("__return")), $7);
   shared_ptr<AST> iLambda = AST::make(at_lambda, $2.loc, $5, iRetBlock);
-  iLambda->printVariant = 1;
+  iLambda->printVariant = pf_IMPLIED;
   shared_ptr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
   $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
   $$->addChild(AST::make(at_constraints));
@@ -1374,14 +1374,14 @@ type_cpair: type ',' type {
   $$ = AST::make(at_typeapp, $2.loc,
 	       AST::make(at_ident, LToken($2.loc, "pair")),
 	       $1, $3);
-  $$->printVariant = 1;
+  $$->printVariant = pf_IMPLIED;
 };
 type_cpair: type ',' type_cpair {
   SHOWPARSE("type_cpair -> type ',' type_cpair");
   $$ = AST::make(at_typeapp, $2.loc,
 	       AST::make(at_ident, LToken($2.loc, "pair")),
 	       $1, $3);
-  $$->printVariant = 1;
+  $$->printVariant = pf_IMPLIED;
 };
 
 type: '(' type_cpair ')' {
@@ -1570,12 +1570,12 @@ lambdapattern: '(' tk_THE '(' tk_BY_REF type ')' ident ')' {
 expr_seq: expr {
   SHOWPARSE("expr_seq -> expr");
   $$ = AST::make(at_begin, $1->loc, $1);
-  $$->printVariant = 1;
+  $$->printVariant = pf_IMPLIED;
 };
 expr_seq: value_definition {
   SHOWPARSE("expr_seq -> value_definition");
   $$ = AST::make(at_begin, $1->loc, $1);
-  $$->printVariant = 1;
+  $$->printVariant = pf_IMPLIED;
 };
 expr_seq: expr_seq expr {
   SHOWPARSE("expr_seq -> expr_seq expr");
@@ -1728,7 +1728,7 @@ eform: '(' tk_DUP expr ')' {
 eform: expr '^' {
   SHOWPARSE("eform -> expr ^");
   $$ = AST::make(at_deref, $1->loc, $1); 
-  $$->printVariant = 1;
+  $$->printVariant = pf_IMPLIED;
 };
 eform: '(' tk_DEREF expr ')' {
   SHOWPARSE("eform -> ( DEREF expr )");
@@ -1752,14 +1752,14 @@ eform_cpair: expr ',' expr {
   $$ = AST::make(at_apply, $2.loc,
 	       AST::make(at_ident, LToken($2.loc, "pair")),
 	       $1, $3);
-  $$->printVariant = 1;
+  $$->printVariant = pf_IMPLIED;
 };
 eform_cpair: expr ',' eform_cpair {
   SHOWPARSE("eform_cpair -> expr ',' eform_cpair");
   $$ = AST::make(at_apply, $2.loc,
 	       AST::make(at_ident, LToken($2.loc, "pair")),
 	       $1, $3);
-  $$->printVariant = 1;
+  $$->printVariant = pf_IMPLIED;
 };
 eform: '(' eform_cpair ')' {
   SHOWPARSE("eform -> ( eform_cpair )");
@@ -2056,7 +2056,7 @@ eform: let_eform {
 let_eform: '(' tk_LET '(' letbindings ')' expr_seq ')' {
   SHOWPARSE("eform -> (LET (letbindings) expr_seq)");
   $6->astType = at_begin;
-  $6->printVariant = 1;
+  $6->printVariant = pf_IMPLIED;
   $$ = AST::make(at_let, $2.loc, $4, $6);
   $$->addChild(AST::make(at_constraints));
 };
@@ -2078,7 +2078,7 @@ letbinding: '(' bindingpattern expr ')' {
 let_eform: '(' tk_LETREC '(' letbindings ')' expr_seq ')' {
   SHOWPARSE("eform -> (LETREC (letbindings) expr_seq)");
   $6->astType = at_begin;
-  $6->printVariant = 1;
+  $6->printVariant = pf_IMPLIED;
   shared_ptr<AST> lbs = $4;
   for (size_t c=0; c < lbs->children.size(); c++)
     lbs->child(c)->flags |= LB_REC_BIND;
