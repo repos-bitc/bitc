@@ -4698,7 +4698,7 @@ For example:
           <progident>id</progident>.
         </p>
       </sect2>
-      <sect2>
+      <sect2 id="TailRecursion">
         <title>Tail Recursion</title>
         <p>
           BitC provides no syntactic form providing for non-recursive
