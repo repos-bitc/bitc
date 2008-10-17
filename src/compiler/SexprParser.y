@@ -251,7 +251,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> method_bindings method_binding
 %type <ast> constraints constraint_seq constraint 
 %type <ast> types type bitfieldtype bool_type 
-%type <ast> type_or_bitfield type_pl_byref types_pl_byref
+%type <ast> field_type type_pl_byref types_pl_byref
 %type <ast> int_type uint_type any_int_type float_type
 %type <ast> tvlist fields field 
 %type <ast> literal typevar //mod_ident
@@ -676,7 +676,7 @@ type_definition: '(' tk_DEFUNION ptype_name val optdocstring declares constructo
 /*   $$->loc = $2.loc; */
 /* }; */
 
-/* reprbodyitem: '(' tk_THE type_or_bitfield '(' tk_TAG reprtags ')' ')' { */
+/* reprbodyitem: '(' tk_THE field_type '(' tk_TAG reprtags ')' ')' { */
 /*   SHOWPARSE("reprbodyitem -> '(' TAG reprtags ')' "); */
 /*   $$ = $6; */
 /*   $$->loc = $5.loc; */
@@ -1063,8 +1063,8 @@ decls: decls decl {
   $$->addChild($2);
 };
 
-decl: '(' ident type_or_bitfield ')' {
-  SHOWPARSE("decl -> ( ident type_or_bitfield )");
+decl: '(' ident field_type ')' {
+  SHOWPARSE("decl -> ( ident field_type )");
   $$ = AST::make(at_declare, $2->loc, $2, $3);
 };
 //decl: '(' ident ')' {
@@ -1156,13 +1156,13 @@ fields: fields field {
   $$->addChild($2);
 };
 
-field: ident ':' type_or_bitfield  {
-  SHOWPARSE("field -> ident : type_or_bitfield");
+field: ident ':' field_type  {
+  SHOWPARSE("field -> ident : field_type");
   $$ = AST::make(at_field, $1->loc, $1, $3);
 };
 
-field: '(' tk_THE type_or_bitfield ident ')'  {
-  SHOWPARSE("field -> '(' THE type_or_bitfield ident ')'");
+field: '(' tk_THE field_type ident ')'  {
+  SHOWPARSE("field -> '(' THE field_type ident ')'");
   $$ = AST::make(at_field, $1.loc, $4, $3);
 };
 
@@ -1452,13 +1452,13 @@ bitfieldtype: '(' tk_BITFIELD bool_type intLit ')' {
 };
 
 // Any-type, including bitfield type
-type_or_bitfield: bitfieldtype {
-  SHOWPARSE("type_or_bitfield -> bitfieldtype");
+field_type: bitfieldtype {
+  SHOWPARSE("field_type -> bitfieldtype");
   $$ = $1;
 };
 
-type_or_bitfield: type {
-  SHOWPARSE("type_or_bitfield -> type");
+field_type: type {
+  SHOWPARSE("field_type -> type");
   $$ = $1;
 };
 
