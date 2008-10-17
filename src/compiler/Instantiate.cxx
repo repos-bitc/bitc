@@ -940,7 +940,7 @@ getDefToInstantiate(ostream &errStream, shared_ptr<UocInfo> unifiedUOC,
   // method (of the same or different type class). So, this process
   // must be repeated until we get an actual function.
 
-  while (def->isMethod()) {
+  while (def->isTcMethod()) {
     // First look at the typeclass, get a copy of its type.
     shared_ptr<AST> typClass = def->defForm;
     shared_ptr<AST> tcID = typClass->child(0);
@@ -985,7 +985,7 @@ getDefToInstantiate(ostream &errStream, shared_ptr<UocInfo> unifiedUOC,
     assert(found);
 
     shared_ptr<AST> instAST = (*matchingInstance)->ast;
-    shared_ptr<AST> theMethod = instAST->getMethod(def->s);
+    shared_ptr<AST> theMethod = instAST->getInstanceMethod(def->s);
 
     // If an immediate lambda was present, then InstLamHoist hoisted
     // it and left us with an ID wrapped by a THE.

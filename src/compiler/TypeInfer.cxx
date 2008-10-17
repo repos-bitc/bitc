@@ -1748,8 +1748,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_refCat:
   case at_valCat:
   case at_opaqueCat:
-  case at_methods:
-  case at_method_binding:
+  case at_tcmethods:
+  case at_tcmethod_binding:
   case agt_category:
   case at_AnyGroup:
   case agt_literal:
@@ -3758,7 +3758,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_EXPRESSION);
 	
-	// by-ref arguments need strict compatibality.
+	// by-ref arguments need strict compatibility.
 	// by-value arguments can have copy-compatibility.
 	if (fnArgs->CompFlags(i) & COMP_BYREF)
 	  CHKERR(errFree, unify(errStream, trail, ast->child(i+1)->loc, 

@@ -544,10 +544,10 @@ AST::atKwd() const
   case at_method_decl:
     return "<method_decl>";
 
-  case at_methods:
+  case at_tcmethods:
     return "<methods>";
 
-  case at_method_binding:
+  case at_tcmethod_binding:
     return "<method_bindings>";
 
   case at_tyfn:
@@ -638,7 +638,7 @@ identTypeToString(IdentType id)
     return "struct";
   case id_typeclass:
     return "typeclass";
-  case id_method:
+  case id_tcmethod:
     return "method";
   case id_field:
     return "field";
@@ -770,7 +770,7 @@ AST::getID()
 }
 
 shared_ptr<AST>
-AST::getMethod(std::string s)
+AST::getInstanceMethod(std::string s)
 {
   assert(astType == at_definstance);
   shared_ptr<AST> methods = child(1);
@@ -796,9 +796,9 @@ AST::isUnionLeg()
 }
 
 bool
-AST::isMethod()
+AST::isTcMethod()
 {
-  if ((astType == at_ident) && isIdentType(id_method))
+  if ((astType == at_ident) && isIdentType(id_tcmethod))
     return true;
   else
     return false;
@@ -885,7 +885,7 @@ AST::isIdentType(IdentType t)
 			       (identType == id_struct))) ||
 	  ((t == idc_value) && ((identType == id_value) ||
 				(identType == id_ucon0) ||
-				(identType == id_method))) ||
+				(identType == id_tcmethod))) ||
 	  ((t == idc_ctor)  && ((identType == id_struct) ||
 				(identType == id_ucon) ||
 				(identType == id_ucon0))) ||

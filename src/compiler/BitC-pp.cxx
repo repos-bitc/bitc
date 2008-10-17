@@ -691,13 +691,13 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
-  case at_methods:
+  case at_tcmethods:
     {
       doChildren(out, ast, 0, false, showTypes);
       break;
     }
 
-  case at_method_binding:
+  case at_tcmethod_binding:
     {
       out << "(= " << ast->child(0)->s
 	  << " " << ast->child(1)->s

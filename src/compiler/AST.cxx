@@ -369,10 +369,10 @@ AST::tagName(const AstType at)
     return "at_constraints";
   case at_definstance:
     return "at_definstance";
-  case at_methods:
-    return "at_methods";
-  case at_method_binding:
-    return "at_method_binding";
+  case at_tcmethods:
+    return "at_tcmethods";
+  case at_tcmethod_binding:
+    return "at_tcmethod_binding";
   case at_proclaim:
     return "at_proclaim";
   case at_define:
@@ -674,10 +674,10 @@ AST::astName() const
     return "constraints";
   case at_definstance:
     return "definstance";
-  case at_methods:
-    return "methods";
-  case at_method_binding:
-    return "method_binding";
+  case at_tcmethods:
+    return "tcmethods";
+  case at_tcmethod_binding:
+    return "tcmethod_binding";
   case at_proclaim:
     return "proclaim";
   case at_define:
@@ -958,8 +958,8 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_qualType
   (unsigned char *)"\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_constraints
   (unsigned char *)"\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_definstance
-  (unsigned char *)"\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_methods
-  (unsigned char *)"\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_method_binding
+  (unsigned char *)"\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_tcmethods
+  (unsigned char *)"\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_tcmethod_binding
   (unsigned char *)"\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_proclaim
   (unsigned char *)"\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_define
   (unsigned char *)"\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_recdef
@@ -1966,14 +1966,14 @@ AST::isValid() const
     }
     c++;
 
-    // match at_methods
+    // match at_tcmethods
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
-    if (!ISSET(astMembers[at_methods], child(c)->astType)) {
-      astChTypeError(*this, at_methods, child(c)->astType, c);
+    if (!ISSET(astMembers[at_tcmethods], child(c)->astType)) {
+      astChTypeError(*this, at_tcmethods, child(c)->astType, c);
       errorsPresent = true;
     }
     c++;
@@ -1996,11 +1996,11 @@ AST::isValid() const
     }
     break;
 
-  case at_methods: // normal AST:
-    // match at_method_binding*
+  case at_tcmethods: // normal AST:
+    // match at_tcmethod_binding*
     while (c < children.size()) {
-      if (!ISSET(astMembers[at_method_binding], child(c)->astType))
-        astChTypeError(*this, at_method_binding, child(c)->astType, c);
+      if (!ISSET(astMembers[at_tcmethod_binding], child(c)->astType))
+        astChTypeError(*this, at_tcmethod_binding, child(c)->astType, c);
       c++;
     }
 
@@ -2010,7 +2010,7 @@ AST::isValid() const
     }
     break;
 
-  case at_method_binding: // normal AST:
+  case at_tcmethod_binding: // normal AST:
     // match at_ident
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());

@@ -817,7 +817,7 @@ method_decls: method_decls method_decl {
 method_decl: fntype ident ';' {
   SHOWPARSE("method_decl -> fntype ident ;");
   $2->flags |= ID_IS_GLOBAL;
-  $2->identType = id_method;
+  $2->identType = id_tcmethod;
   $$ = AST::make(at_method_decl, $2->loc, $2, $1);
 };
 
@@ -829,7 +829,7 @@ ti_definition: tk_INSTANCE constraint optdocstring ';' {
   // appropriate) from above in the constrained_definition case.
   shared_ptr<AST> constrs = AST::make(at_constraints, $2->loc);
   $$ = AST::make(at_definstance, $1.loc, $2,
-		 AST::make(at_methods, $1.loc),
+		 AST::make(at_tcmethods, $1.loc),
 		 constrs);  
 };
 ti_definition: tk_INSTANCE constraint optdocstring '{' method_bindings '}' ';' {
@@ -844,7 +844,7 @@ ti_definition: tk_INSTANCE constraint optdocstring '{' method_bindings '}' ';' {
 
 method_bindings: method_binding {
   SHOWPARSE("method_bindings -> method_binding");
-  $$ = AST::make(at_methods, $1->loc, $1);
+  $$ = AST::make(at_tcmethods, $1->loc, $1);
 };
 
 method_bindings: method_bindings ',' method_binding {
@@ -856,7 +856,7 @@ method_bindings: method_bindings ',' method_binding {
 method_binding: ident '=' expr {
   SHOWPARSE("method_binding -> ident = expr");
   
-  $$ = AST::make(at_method_binding, $1->loc, $1, $3);
+  $$ = AST::make(at_tcmethod_binding, $1->loc, $1, $3);
 };
 
 // Type Declarations

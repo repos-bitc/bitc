@@ -77,10 +77,10 @@ struct Instance;
 /// occurrence of an identifier in an expression might validly resolve
 /// to <code>id_value</code> (normal values), <code>id_ucon0</code>
 /// (union constructors having no elements, which are enumerands), or
-/// <code>id_method</code> (use-references to method identifiers). The
-/// identifier categories are primarily used in the resolver's
-/// recursive descent pass, where they specify what identifiers are
-/// legal in what positions.
+/// <code>id_tcmethod</code> (use-references to type class method
+/// identifiers). The identifier categories are primarily used in the
+/// resolver's recursive descent pass, where they specify what
+/// identifiers are legal in what positions.
 
 enum IdentType {
   /// @brief An identifier whose classification is not yet decided.
@@ -105,7 +105,7 @@ enum IdentType {
   id_typeclass,
 
   /// @brief %Type class method name.
-  id_method,
+  id_tcmethod,
 
   /// @brief Structure or union constructor field name.
   id_field,
@@ -143,7 +143,7 @@ enum IdentType {
   idc_type = idc_FIRST_CATEGORY,
 
   /// @brief Value, which is one of <code>id_value</code>,
-  /// <code>id_ucon0</code>, or <code>id_method</code>.
+  /// <code>id_ucon0</code>, or <code>id_tcmethod</code>.
   idc_value,
 
   /// @brief Union constructor, which is one of <code>id_ucon</ucode>
@@ -155,7 +155,7 @@ enum IdentType {
   idc_ctor,
 
   /// @brief An entity (value or constructor) that can be applied,
-  /// which is one of <code>id_value</code>, <code>id_method</code>,
+  /// which is one of <code>id_value</code>, <code>id_tcmethod</code>,
   /// <code>id_struct</code> or <code>id_ucon</code>.
   idc_apply,
 };
@@ -563,8 +563,8 @@ enum AstType {
   at_qualType,
   at_constraints,
   at_definstance,
-  at_methods,
-  at_method_binding,
+  at_tcmethods,
+  at_tcmethod_binding,
   at_proclaim,
   at_define,
   at_recdef,
@@ -969,12 +969,12 @@ public:
 
   /// @brief From a definstance AST, get the definition corresponding
   /// to the method `name'
-  boost::shared_ptr<AST> getMethod(std::string name);
+  boost::shared_ptr<AST> getInstanceMethod(std::string name);
 
   /// @brief Return true IFF this is a AST corresponds to a union leg.
   bool isUnionLeg();
-  /// @brief Return true IFF this AST is a method name identifier.
-  bool isMethod();
+  /// @brief Return true IFF this AST is a type class method name identifier.
+  bool isTcMethod();
 
   /// @brief Pretty print this AST to @p out, annotating each with its
   /// type if @p showTypes is true, and appending a final end of line

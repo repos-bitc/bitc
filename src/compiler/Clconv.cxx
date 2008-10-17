@@ -367,8 +367,8 @@ findusedef(std::ostream &errStream,
 				   NULL_MODE, boundVars, freeVars));
       break;
     }
-  case at_methods: 
-  case at_method_binding:
+  case at_tcmethods: 
+  case at_tcmethod_binding:
     {
       for (size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c),

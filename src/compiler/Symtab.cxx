@@ -1254,7 +1254,7 @@ resolve(std::ostream& errStream,
       // match at at_method_decl+
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, 
-		DEF_MODE, id_method, currLB, flags);
+		DEF_MODE, id_tcmethod, currLB, flags);
       
       break;
     }
@@ -1263,7 +1263,7 @@ resolve(std::ostream& errStream,
     {
       // match at at_ident
       RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
-	      id_method, currLB,
+	      id_tcmethod, currLB,
 	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
 	      | RSLV_BIND_PUBLIC);
       
@@ -1283,7 +1283,7 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(0), tmpEnv, lamLevel, 
 	      USE_MODE, idc_type, ast, flags | RSLV_NEW_TV_OK);
 
-      // match at at_methods
+      // match at at_tcmethods
       RESOLVE(ast->child(1), tmpEnv, lamLevel, 
 	      USE_MODE, idc_value, ast, flags);
       
@@ -1293,7 +1293,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_methods:
+  case at_tcmethods:
     { 
       // match at expr+
       for (size_t c = 0; c < ast->children.size(); c++)
@@ -1333,7 +1333,7 @@ resolve(std::ostream& errStream,
       break;
     }
     
-  case at_method_binding:
+  case at_tcmethod_binding:
     { 
       // match at expr+
       for (size_t c = 0; c < ast->children.size(); c++)

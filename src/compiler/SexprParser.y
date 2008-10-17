@@ -861,7 +861,7 @@ method_decls: method_decls method_decl {
 method_decl: ident ':' fntype {
   SHOWPARSE("method_decl -> ident : fntype");
   $1->flags |= ID_IS_GLOBAL;
-  $1->identType = id_method;
+  $1->identType = id_tcmethod;
   $$ = AST::make(at_method_decl, $1->loc, $1, $3);
 };
 
@@ -871,7 +871,7 @@ method_decl: ident ':' fntype {
 ti_definition: '(' tk_DEFINSTANCE constraint optdocstring ')' {
   SHOWPARSE("ti_definition -> ( DEFINSTANCE constraint [docstring])");
   $$ = AST::make(at_definstance, $2.loc, $3, 
-		 AST::make(at_methods, $5.loc),
+		 AST::make(at_tcmethods, $5.loc),
 		 AST::make(at_constraints, $3->loc));
 };
 ti_definition: '(' tk_DEFINSTANCE constraint optdocstring method_bindings ')' {
@@ -882,7 +882,7 @@ ti_definition: '(' tk_DEFINSTANCE constraint optdocstring method_bindings ')' {
 
 method_bindings: method_binding {
   SHOWPARSE("method_bindings -> method_binding");
-  $$ = AST::make(at_methods, $1->loc, $1);
+  $$ = AST::make(at_tcmethods, $1->loc, $1);
 };
 
 method_bindings: method_bindings method_binding {
@@ -899,7 +899,7 @@ method_binding: '(' ident ident expr ')' {
     lexer->num_errors++;
   }
   
-  $$ = AST::make(at_method_binding, $1.loc, $2, $4);
+  $$ = AST::make(at_tcmethod_binding, $1.loc, $2, $4);
 };
 
 // DEFINE  [5.1]
@@ -1361,13 +1361,31 @@ fntype: '(' fneffect tk_FN tk_FNARROW type ')' {
 
 // Reworked by shap on 10/9/2008 to use arrow syntax
 fntype: '(' fneffect tk_FN types_pl_byref tk_FNARROW type ')'  {
-  SHOWPARSE("fntype -> ( fneffect FN ( types_pl_byref -> type )");
+  SHOWPARSE("fntype -> ( fneffect FN types_pl_byref -> type )");
   $$ = AST::make(at_fn, $1.loc, $4, $6);
 };
 //fntype: '(' fneffect tk_FN '(' types_pl_byref ')' type ')'  {
 //  SHOWPARSE("fntype -> ( fneffect FN ( types_pl_byref ) type )");
 //  $$ = AST::make(at_fn, $1.loc, $5, $7);
 //};
+
+// METHOD TYPES [3.9]
+// Note: not complete; need methods taking no arguments.
+//methodtype: '(' fneffect tk_METHOD types_bl_byref tk_FNARROW type ')' {
+//  SHOWPARSE("methodtype -> ( fneffect METHOD types_pl_byref -> type )");
+//  $$ = AST::make(at_method, $1.loc, $4, $6);
+//};
+
+/* type: '(' tk_METHOD tvapp fntype')' { */
+/*   SHOWPARSE("METHOD tcapp fntype )"); */
+/*   shared_ptr<AST> tcreqs = AST::make(at_tcreqs, $3->loc, $3); */
+/*   $$ = AST::make(at_methodType, $2.loc, tcreqs, $4); */
+/* }; */
+
+/* type: '(' tk_METHOD '(' tk_AND tcreqs ')' fntype')' { */
+/*   SHOWPARSE("tcreq -> ( var tvlist )"); */
+/*   $$ = AST::make(at_methodType, $2.loc, $5, $7); */
+/* }; */
 
 type_cpair: type ',' type {
   SHOWPARSE("type_cpair -> type ',' type");
@@ -1480,18 +1498,6 @@ qual_type: '(' tk_FORALL constraints type ')' {
  SHOWPARSE("qual_type -> ( FORALL constraints type )");
  $$ = AST::make(at_qualType, $2.loc, $3, $4);
 };
-
-// METHOD TYPES [3.9]
-/* type: '(' tk_METHOD tvapp fntype')' { */
-/*   SHOWPARSE("METHOD tcapp fntype )"); */
-/*   shared_ptr<AST> tcreqs = AST::make(at_tcreqs, $3->loc, $3); */
-/*   $$ = AST::make(at_methodType, $2.loc, tcreqs, $4); */
-/* }; */
-
-/* type: '(' tk_METHOD '(' tk_AND tcreqs ')' fntype')' { */
-/*   SHOWPARSE("tcreq -> ( var tvlist )"); */
-/*   $$ = AST::make(at_methodType, $2.loc, $5, $7); */
-/* }; */
 
 // BINDING PATTERNS [5.1]
 bindingpattern: ident {

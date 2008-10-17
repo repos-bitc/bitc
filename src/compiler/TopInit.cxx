@@ -216,8 +216,8 @@ TopInit(std::ostream& errStream,
   case at_method_decls:
   case at_method_decl:
   case at_definstance:
-  case at_methods:
-  case at_method_binding:
+  case at_tcmethods:
+  case at_tcmethod_binding:
   case at_ifident:
   case at_importAs:
   case at_provide:
@@ -259,7 +259,7 @@ TopInit(std::ostream& errStream,
       // We must only deal with value definitions.
       assert(ast->isIdentType(id_value));
       
-      if (ast->isMethod())
+      if (ast->isTcMethod())
 	break;
       
       shared_ptr<AST> def = ast->symbolDef;
