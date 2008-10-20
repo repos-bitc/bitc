@@ -7,7 +7,7 @@
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
   <docinfo ptsz='default' twocolumn="yes"
     latex.otheroptions="nocopyrightspace" latex.documentclass="sigplanconf">
-    <title>Mutable types: A Meta-theory</title>
+    <title>Sound Mutable and Const Types</title>
     <subtitle>SRL Technical Report SRL2008-03</subtitle>
     <authorgroup>
       <author>
@@ -106,13 +106,26 @@
             </other>
           </alternatives>
         </bnf>
+        <bnf desc="Opt. Const">
+          <canonical>
+            <aExpr/>
+          </canonical>
+          <alternatives>
+            <aExpr/>
+            <const>
+              <aExpr/>
+            </const>
+          </alternatives>
+        </bnf>
         <bnf desc="Values">
           <aVal/>
           <alternatives>
             <Unit/>
             <bVal/>
             <lambda>
-              <id/>
+              <canonical>
+                <id/>
+              </canonical>
               <aExpr/>
             </lambda>
             <Pair>
@@ -132,9 +145,6 @@
               <vExp/>
               <vExp/>
             </Pair>
-            <const>
-              <aExpr/>
-            </const>
           </alternatives>
         </bnf>
         <bnf desc="Left Expr">
@@ -148,9 +158,6 @@
             <ith>
               <lExp/>
             </ith>
-            <const>
-              <lExp/>
-            </const>
           </alternatives>
         </bnf>
         <bnf desc="Expressions">
@@ -175,7 +182,9 @@
         <bnfc desc="">
           <alternatives>
             <dup>
-              <aExpr/>
+              <canonical>
+                <aExpr/>
+              </canonical>
             </dup>
             <deref>
               <aExpr/>
@@ -187,15 +196,14 @@
             <ith>
               <aExpr/>
             </ith>
-            <const>
-              <aExpr/>
-            </const>
           </alternatives>
         </bnfc>
         <bnfc desc="">
           <alternatives>
             <let kind="x">
-              <id/>
+              <canonical>
+                <id/>
+              </canonical>
               <aExpr/>
               <aExpr/>
             </let>
@@ -260,13 +268,9 @@
             <ref><type/></ref>
           </alternatives>
         </bnfc>
-        <bnfc desc="Mutable">
+        <bnfc desc="Mutable, const">
           <alternatives>
             <mutable><ptype/></mutable>
-          </alternatives>
-        </bnfc>
-        <bnfc desc="const">
-          <alternatives>
             <const>
               <type/>
             </const>
@@ -390,9 +394,6 @@
               </deref>
               <path/>
             </select>
-            <const>
-              <lVal/>
-            </const>
           </alternatives>
         </bnf>
         <bnf desc="Redex">
@@ -411,12 +412,6 @@
               <lVal/>
               <redex/>
             </assign> 
-            <dup>
-              <redex/>
-            </dup>
-            <deref>
-              <redex/>
-            </deref>
           </alternatives>
         </bnf>
         <bnfc desc="">
@@ -426,6 +421,21 @@
               <aExpr/>
               <aExpr/>
             </if>	  
+            <deref>
+              <redex/>
+            </deref>
+          </alternatives>
+        </bnfc>
+        <bnfc>
+          <alternatives>
+            <dup>
+              <redex/>
+            </dup>
+            <dup>
+              <const>
+                <redex/>
+              </const>
+            </dup>
             <Pair>
               <redex/>
               <aExpr/>
@@ -442,7 +452,9 @@
               <redex/>
             </ith>
             <let kind="x">
-              <id/>
+              <canonical>
+                <id/>
+              </canonical>
               <redex/>
               <aExpr/>
             </let>
@@ -716,6 +728,323 @@
       </btypes:TYPE>
     </definition>
     <definition>
+      <title>Normalization of Const Types</title>
+      <btypes:TYPE>
+        <VEqns>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <tvar/>
+              </pred>
+            </lhs>
+            <rhs>
+              <tvar/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <const>
+                  <tvar/>
+                </const>
+              </pred>
+            </lhs>
+            <rhs>
+              <const>
+                <tvar/>
+              </const>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <bool/>
+              </pred>
+            </lhs>
+            <rhs>
+              <bool/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <const>
+                  <bool/>
+                </const>
+              </pred>
+            </lhs>
+            <rhs>
+              <bool/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <unit/>
+              </pred>
+            </lhs>
+            <rhs>
+              <unit/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <const>
+                  <unit/>
+                </const>
+              </pred>
+            </lhs>
+            <rhs>
+              <unit/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <fn>
+                  <type num="1"/>
+                  <type num="2"/>
+                </fn>
+              </pred>
+            </lhs>
+            <rhs>
+              <fn>
+                <pred mbb="yes" name="N">
+                  <type num="1"/>
+                </pred>
+                <pred mbb="yes" name="N">
+                  <type num="2"/>
+                </pred>
+              </fn>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <const>
+                  <fn>
+                    <type num="1"/>
+                    <type num="2"/>
+                  </fn>
+                </const>
+              </pred>
+            </lhs>
+            <rhs>
+              <fn>
+                <pred mbb="yes" name="N">
+                  <type num="1"/>
+                </pred>
+                <pred mbb="yes" name="N">
+                  <type num="2"/>
+                </pred>
+              </fn>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <ref>
+                  <type/>
+                </ref>
+              </pred>
+            </lhs>
+            <rhs>
+              <ref>
+                <pred mbb="yes" name="N">
+                  <type/>
+                </pred>
+              </ref>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <const>
+                  <ref>
+                    <type/>
+                  </ref>
+                </const>
+              </pred>
+            </lhs>
+            <rhs>
+              <ref>
+                <pred mbb="yes" name="N">
+                  <type/>
+                </pred>
+              </ref>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <mutable>
+                  <type/>
+                </mutable>
+              </pred>
+            </lhs>
+            <rhs>
+              <mutable>
+                <pred mbb="yes" name="N">
+                  <type/>
+                </pred>
+              </mutable>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <const>
+                  <mutable>
+                    <type/>
+                  </mutable>
+                </const>
+              </pred>
+            </lhs>
+            <rhs>
+              <ref>
+                <pred mbb="yes" name="N">
+                  <const>
+                    <type/>
+                  </const>
+                </pred>
+              </ref>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <pair>
+                  <type num="1"/>
+                  <type num="2"/>
+                </pair>
+              </pred>
+            </lhs>
+            <rhs>
+              <pair>
+                <pred mbb="yes" name="N">
+                  <type num="1"/>
+                </pred>
+                <pred mbb="yes" name="N">
+                  <type num="2"/>
+                </pred>
+              </pair>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <const>
+                  <pair>
+                    <type num="1"/>
+                    <type num="2"/>
+                  </pair>
+                </const>
+              </pred>
+            </lhs>
+            <rhs>
+              <pair>
+                <const>
+                  <pred mbb="yes" name="N">
+                    <type num="1"/>
+                  </pred>
+                </const>
+                <const>
+                  <pred mbb="yes" name="N">
+                    <type num="2"/>
+                  </pred>
+                </const>
+              </pair>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <mbTop>
+                  <tvar/>
+                  <ptype/>
+                </mbTop>
+              </pred>
+            </lhs>
+            <rhs>
+              <mbTop>
+                <tvar/>
+                <pred mbb="yes" name="N">
+                  <mutable>
+                    <ptype/>
+                  </mutable>
+                </pred>
+              </mbTop>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <const>
+                  <mbTop>
+                    <tvar/>
+                    <ptype/>
+                  </mbTop>
+                </const>
+              </pred>
+            </lhs>
+            <rhs>
+              <const>
+                <mbTop>
+                  <tvar/>
+                  <pred mbb="yes" name="N">
+                    <mutable>
+                      <ptype/>
+                    </mutable>
+                  </pred>
+                </mbTop>
+              </const>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <mbFull>
+                  <stype/>
+                  <ptype/>
+                </mbFull>
+              </pred>
+            </lhs>
+            <rhs>
+              <mbFull>
+                <stype/>
+                <pred mbb="yes" name="N">
+                  <ptype/>
+                </pred>
+              </mbFull>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="N">
+                <const>
+                  <mbFull>
+                    <stype/>
+                    <ptype/>
+                  </mbFull>
+                </const>
+              </pred>
+            </lhs>
+            <rhs>
+              <const>
+                <mbFull>
+                  <stype/>
+                  <pred mbb="yes" name="N">
+                    <ptype/>
+                  </pred>
+                </mbFull>
+              </const>
+            </rhs>
+          </equation>
+        </VEqns>
+      </btypes:TYPE>
+    </definition>
+    <definition>
       <title>Notational convenience</title>
       <p>
         We write
@@ -769,317 +1098,84 @@
         </btypes:TYPE> 
       </p>
     </definition>
-    <p>
-      <b>Meanings of Operators</b>
-    </p>
-    <table latex.colspec="c|l">
-      <tbody>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <maxzOp/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Add mutability up to the ref/function boundary. 
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <minzOp/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Remove mutability up to the ref/function boundary. 
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <maxzTOp/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Add top-most mutability. 
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <minzTOp/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Remove top-most mutability. 
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <minzCOp/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Remove mutability and const up to the ref/function 
-              boundary.
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <minzDOp/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Remove mutability deeply up to the function boundary. 
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <spset>
-                  <nothing/>
-                </spset>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Constraint Collection
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <pred name="Mut"/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Is the type <em>observably</em> mutable?
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <pred name="Immut"/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Is the type <em>effectively</em> deeply immutable?
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <pred name="Const"/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Is the type <em>effectively</em> const?
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <Subst>
-                  <aSubMap/>
-                  <nothing/>
-                </Subst>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Substitution.
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <concrete/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Is the type <em>concretizable</em>? (i.e. can be made
-              invariable
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td/>
-          <td>
-            <p>
-              by a substitution <em>only</em> for mutability-variables?)
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <concrete sp="yes"/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Is the type <em>concretizable</em> up to a reference boundary?
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <concrete sp2="yes"/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Is this type concrete enough to drop an enclosing const?
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <normalize/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Produce a substitution to normalize const types
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td/>
-          <td>
-            <p>
-              (ex: 
-              <btypes:TYPE>
-                <equiv>
+    <definition>
+      <title>Const-ness Requirement</title>
+      <btypes:TYPE>
+        <VEqns>
+          <equation>
+            <lhs>
+              <!-- Note that |_e_| is not a valid expression -->
+              <pred meta="yes" name="P">
+                <aExpr/>
+                <type/>
+              </pred>
+            </lhs>
+            <rhs>
+              <TRUE/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred meta="yes" name="P">
+                <const>
+                  <aExpr/>
+                </const>
+                <const>
+                  <type/>
+                </const>
+              </pred>
+            </lhs>
+            <rhs>
+              <TRUE/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <grouping>
+                <pred meta="yes" name="P">
+                  <canonical>
+                    <aExpr/>
+                  </canonical>
                   <const>
-                    <bool/>
+                    <type/>
                   </const>
-                  <bool/>
-                </equiv>
-              </btypes:TYPE>)
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <pred mfrc="yes" name="M"/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Produce a substitution to normalize 
-              <btypes:TYPE>
-                <mbFull>
-                  <stype/>
-                  <ptype/>
-                </mbFull>
-              </btypes:TYPE> types.
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td/>
-          <td>
-            <p>
-              (ex: 
-              <btypes:TYPE>
-                <equiv>
-                  <mbFull>
-                    <mutable>
-                      <tvar/>
-                    </mutable>
-                    <bool/>
-                  </mbFull>
-                  <mutable>
-                    <bool/>
-                  </mutable>
-                </equiv>
-              </btypes:TYPE>)
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>
-              <btypes:TYPE>
-                <pred mbb="yes" name="M"/>
-              </btypes:TYPE>
-            </p>
-          </td>
-          <td>
-            <p>
-              Produce a substitution to propagate mutability inwards into  
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td/>
-          <td>
-            <p>
-              composite types (or fail with an error).
-            </p>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+                </pred>
+                <text content=" (otherwise)"/>
+              </grouping>
+            </lhs>
+            <rhs>
+              <FALSE/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="P">
+                <aExpr/>
+                <type/>
+              </pred>
+            </lhs>
+            <rhs>
+              <type/>
+            </rhs>
+          </equation>
+          <equation>
+            <lhs>
+              <pred mbb="yes" name="P">
+                <const>
+                  <aExpr/>
+                </const>
+                <type/>
+              </pred>
+            </lhs>
+            <rhs>
+              <const>
+                <type/>
+              </const>
+            </rhs>
+          </equation>
+        </VEqns>
+      </btypes:TYPE>
+    </definition>
   </sect1>
   <xi:include href="include/new-formal/opsem.xmli"/>
   <xi:include href="include/new-formal/operators.xmli"/>

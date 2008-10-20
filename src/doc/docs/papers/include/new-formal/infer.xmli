@@ -158,10 +158,15 @@
 		<gamma/>
 		<mapping>
 		  <id/>
-		  <mbFull>
-		    <tvar name="beta"/>
-		    <tvar name="alpha"/>
-		  </mbFull>
+		  <pred mbb="yes" name="P">
+		    <canonical>
+		      <id/>
+		    </canonical>
+		    <mbFull>
+		      <tvar name="beta"/>
+		      <tvar name="alpha"/>
+		    </mbFull>
+		  </pred>
 		</mapping>
 	      </extend>
 	      <store/>
@@ -197,7 +202,9 @@
 	    <conclude>
 	      <tqExpr>
 		<lambda>
-		  <id/>
+		  <canonical>
+		    <id/>
+		  </canonical>
 		  <aExpr/>
 		</lambda>
 		<fn>		
@@ -602,6 +609,18 @@
 	      <aCtset/>
 	    </constrain>
 	  </TEjudge>
+	  <eq>
+	    <type dash="'"/>
+	    <pred mbb="yes" name="P">
+	      <canonical>
+		<aExpr/>
+	      </canonical>
+	      <mbFull>
+		<tvar name="alpha"/>
+		<tvar name="beta"/>
+	      </mbFull>
+	    </pred>
+	  </eq>
 	  <models name="new">
 	    <assume/>
 	    <grouping>
@@ -620,15 +639,12 @@
 	    <conclude>
 	      <tqExpr>
 		<dup>
-		  <aExpr/>
+		  <canonical>
+		    <aExpr/>
+		  </canonical>
 		</dup>  
 		<ref>
-		  <paren>
-		    <mbFull>
-		      <tvar name="alpha"/>
-		      <tvar name="beta"/>
-		    </mbFull>
-		  </paren>
+		  <type dash="'"/>
 		</ref>
 	      </tqExpr>
 	    </conclude>                  
@@ -849,10 +865,15 @@
 		<gamma/>
 		<mapping>
 		  <id/>
-		  <mbFull>
-		    <tvar name="alpha"/>
-		    <tvar name="beta"/>
-		  </mbFull>
+		  <pred mbb="yes" name="P">
+		    <canonical>
+		      <id/>
+		    </canonical>
+		    <mbFull>
+		      <tvar name="alpha"/>
+		      <tvar name="beta"/>
+		    </mbFull>
+		  </pred>
 		</mapping>
 	      </extend>
 	      <store/>
@@ -886,7 +907,9 @@
 	    <conclude>
 	      <tqExpr>
 		<let kind="k">
-		  <id/>
+		  <canonical>
+		    <id/>
+		  </canonical>
 		  <aExpr num="1"/>
 		  <aExpr num="2"/>
 		</let>
@@ -915,69 +938,6 @@
 	  </TEjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="I-Const"> 
-	<tyPre>
-	  <TEjudge name="i">
-	    <assume>
-	      <gamma/>
-	      <store/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<aExpr/>
-		<type/>
-	      </tqExpr>
-	    </conclude>
-	    <constrain>
-	      <aCtset/>                  
-	    </constrain>
-	  </TEjudge>
-	  <models name="new">
-	    <assume/>
-	    <grouping>
-	      <tvar name="alpha"/>
-	      <tvar name="beta"/>
-	      <tvar name="gamma"/>
-	      <lKind k="var"/>
-	    </grouping>
-	  </models>
-	</tyPre>
-	<tyConc>
-	  <TEjudge name="i">
-	    <assume>
-	      <gamma/>
-	      <store/>
-	    </assume>
-	    <conclude>
-	      <tqExpr>
-		<const>
-		  <aExpr/>
-		</const>
-		<const>
-		  <mbFull>
-		    <tvar name="alpha"/>
-		    <tvar name="beta"/>
-		  </mbFull>
-		</const>
-	      </tqExpr>
-	    </conclude>
-	    <constrain>
-	      <unin>
-		<aCtset/>
-		<set>
-		  <eq>
-		    <type/>
-		    <mbFull>
-		      <tvar name="gamma"/>
-		      <tvar name="beta"/>
-		    </mbFull>
-		  </eq>
-		</set>
-	      </unin>
-	    </constrain>
-	  </TEjudge>
-	</tyConc>
-      </tyRule>        
     </Hrules>
     <Hrules  rowsep="4pt" colsep="2">
       <tyRule name="I-Let-Val"> 
@@ -1038,13 +998,18 @@
 	<tyPre>
 	  <eq>
 	    <type/>
-	    <Subst>
-	      <aSubMap/>
-	      <mbFull>
-		<tvar name="delta"/>
-		<tvar name="beta"/>
-	      </mbFull>
-	    </Subst>
+	    <pred mbb="yes" name="P">
+	      <canonical>
+		<id/>
+	      </canonical>
+	      <Subst>
+		<aSubMap/>
+		<mbFull>
+		  <tvar name="delta"/>
+		  <tvar name="beta"/>
+		</mbFull>
+	      </Subst>
+	    </pred>
 	  </eq>
 	  <eq>
 	    <set>
@@ -1112,7 +1077,9 @@
 	    <conclude>
 	      <tqExpr>
 		<let kind="k">
-		  <id/>
+		  <canonical>
+		    <id/>
+		  </canonical>
 		  <vExp/>
 		  <aExpr/>
 		</let>
