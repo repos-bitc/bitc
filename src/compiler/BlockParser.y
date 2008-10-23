@@ -34,6 +34,13 @@
    * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    */
 
+/// @file
+///
+/// @brief Partial implementation of a parser for a provisional
+/// block-structured BitC syntax.
+/// 
+/// This is very incomplete, and very much in flux at the moment.
+
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <getopt.h>

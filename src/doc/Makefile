@@ -34,7 +34,7 @@
 
 default: package
 BITC_SRC=..
-CLEANLIST=index.html
+CLEANLIST=index.html doxygen.css tabs.css
 OSDOC_NAVCONTEXT="Home"
 OSDOC_SIDENAV="sidenav.html"
 OSDOC_XHTML_SRC=$(patsubst %.xhtml,%,$(wildcard *.xhtml))
@@ -46,12 +46,21 @@ DOCSTYLES= #docstyles.css
 
 include $(BITC_SRC)/build/make/makerules.mk
 
-all: index.html
+all: index.html browse
 
 install: all
 
 #docstyles.css: ../doctools/XSLT/styles.css
 #	cp ../doctools/XSLT/styles.css docstyles.css
+
+.PHONY: browse
+clean: clean.browse
+clean.browse:
+	rm -rf browse
+
+browse:
+	(cd ../compiler;make doxygen)
+	rsync --delete -avz ../compiler/doxygen/html/ $(BITC_SRC)/doc/browse/
 
 index.html: bitc.html
 	ln -s bitc.html index.html

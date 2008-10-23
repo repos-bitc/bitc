@@ -1,0 +1,44 @@
+/* -*- mode: c++ -*-  */
+
+/// @mainpage Source Code for the BitC Research Compiler
+///
+/// On these pages you can browse the source code for the BitC
+/// research compiler and examine its source documentation, which is
+/// still a work in progress. A few notes to help guide you into
+/// confusion as efficiently as possible:
+///
+/// <ol>
+/// <li>
+/// <p>
+///
+/// There are two parsers at present. The S-expression parser is in <a
+/// href="SexprParser_8y-source.html">SexprParser.y</a>, and matches
+/// the specification. If it doesn't, it is a bug, and please tell us!
+/// The parser found in <a
+/// href="BlockParser_8y-source.html">BlockParser.y</a> is an
+/// incomplete experiment toward a provisional block-structured
+/// syntax. That parser remains incomplete; work on it has been
+/// temporarily set aside until objects and effect types are done.
+///
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// The resolver and type checker are run after many passes, both as a
+/// sanity check and as a way to re-build information. The
+/// <em>first</em> pass through the type checker re-writes certain
+/// <code>at_apply</code> ASTs after types are established in order to
+/// simplify later processing.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// Yes, sadly, the type checker really <em>is</em> that complicated,
+/// and it is about to become more so as we add support for effect
+/// types. The good news, such as it is, is that we are then going to
+/// declare ourselves <em>done</em> with it and move on. New AST nodes
+/// will get added to extend type checking into the property language,
+/// but that will hopefully (famous last words) be it.
+/// </p>
+/// </li>
+/// </ol>

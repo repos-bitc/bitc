@@ -1,0 +1,74 @@
+/* -*- mode: c -*-  */
+
+/// @page ToDo To Do List for First Release
+///
+///
+/// Here are all of the open "to do" items before we can release R1 of
+/// the BitC Research Compiler, along with current status:
+///
+/// <ol>
+/// <li>
+/// Go through and document (doxygen comment) all of the source code.
+///
+/// <b>Status:</b> In progress, not yet complete.
+/// </li>
+/// <li>
+/// Define and enforce the rules for initializer ordering. The
+/// proposed rules are defined in 
+/// @ref InitializerRules.
+///
+/// <b>Status:</b> Defined. Effect types must be implemented before
+/// this can be completed.
+/// </li>
+/// <li>
+/// Implement and enforce purity of initializer expressions and the
+/// <code>(pure&nbsp;...)</code> form more generally.
+///
+/// <b>Status:</b> Depends on implementation of effect types.
+/// </li>
+/// <li>
+/// Specify syntax for function types expressing effects.
+///
+/// <b>Status:</b> Two proposals exist. We need to look at usability
+/// issues here.
+/// </li>
+/// <li>
+/// Implement the "constantness by path" rule, including the COST type
+/// metaconstructor.
+///
+/// <b>Status:</b> In final stage development as of 10/23. Needs to be
+/// documented in the specification.
+/// </li>
+/// <li>
+/// Implement typeclass instance resolution by lexical lookup rule.
+///
+/// <b>Status:</b> Straightforward, but not yet started.
+/// </li>
+/// <li>
+/// Implement literal instantiation.
+///
+/// <b>Status:</b> Straightforward, but not yet started.
+/// </li>
+/// <li>
+/// Implement subtyping on structures
+///
+/// <b>Status:</b> Abandoned in favor of using type classes.
+/// </li>
+/// <li>
+/// Implement existential types.
+///
+/// <b>Status:</b> Shap is currently (10/23) working on implementation
+/// of methods for structures. Objects and methods will follow
+/// directly.
+/// </li>
+/// <li>
+/// Implement record inference (a.k.a. <code>has-field</code>)
+///
+/// <b>Status:</b> Straightforward, but not yet started.
+/// </li>
+/// <li>
+/// Update spec to reflect all of the above.
+///
+/// <b>Status:</b> Not yet started.
+/// </li>
+/// </ol>

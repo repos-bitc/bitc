@@ -34,6 +34,14 @@
    * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    */
 
+
+/// @file
+///
+/// @brief The S-expression parser for BitC.
+///
+/// This is the reference parser for the language described in the
+/// specification.
+
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <getopt.h>
