@@ -1,0 +1,94 @@
+/* -*- mode: c -*-  */
+
+/// @page Methods How Methods Are (Will Be) Implemented
+///
+/// BitC ``methods'' are mostly syntactic sugar. This note describes
+/// how they are implemented.
+///
+/// <h1>Structure Methods</h1>
+///
+/// A structure method is declared by:
+///
+/// <pre>
+/// (defstruct S
+///    i: int32
+///    m: (method int32 -> bool))
+/// </pre>
+///
+/// When we process the structure during symbol resolution, we add a
+/// placeholder entry into the symbol environment for an identifier
+/// named "S.m". Since '.' is illegal in identifiers, this cannot
+/// collide. That entry will point to the AST node for
+/// <code>m:&nbsp;(method...)</code>, which is an
+/// <code>at_methdecl</code> node. In the type checker, this
+/// declaration will be given type <code>ty_smethod</code>. Note that
+/// the declaration in the structure does <em>not</em> declare the
+/// implicit <code>this</code> parameter, but the type checker will
+/// insert that parameter and type it as either
+/// <code>(by-ref&nbsp;S)</code> or <code>S</code> according to
+/// whether the structure S is a value or a reference type.
+///
+/// The method entry appearing within the structure is a declaration
+/// only. The method must be defined elsewhere by defining a
+/// <em>function</em> named <code>S.m</code>. This function must
+/// accept the initial <code>this</code> parameter explicitly.
+///
+/// If a method is called, then the first pass of the type checker
+/// will see an <code>at_apply</code> AST that looks like:
+///
+/// <pre>
+/// (s.m <em>args...</em>)
+/// </pre>
+///
+/// Because <code>S.m</code> is typed as <code>ty_smethod</code>, this
+/// AST will get rewritten to:
+///
+/// (S.m s <em>args...</em>)
+///
+/// which is a legal function call. Processing beyond that point will
+/// proceed exactly as if the <code>S.m</code> form had been given in
+/// the first place. That is: this structure methods are
+/// <em>purely</em> syntactic sugar.
+///
+/// <h1>Object Methods</h1>
+///
+/// Object methods are handled similarly to structure methods up to
+/// the back end. Given an object method
+///
+/// <pre>
+/// (defobject O
+///    i: int32
+///    m: (method int32 -> bool))
+/// </pre>
+///
+/// we similarly introduce a symbol <code>O.m</code> that points to
+/// the <code>at_methdecl</code> AST node. In the type checker, this
+/// declaration will be given type <code>ty_omethod</code> rather than
+/// <code>ty_smethod</code>. All of the ``magic'' happens in the
+/// back-end code generator, where we substitute a v-table indirect
+/// call and access the content reference pointer from the object,
+/// supplying that in place of the actual object pointer at the C
+/// level.
+///
+/// Also in contrast to structures, an object method should have no
+/// implementing procedure. There is an open issue about how to signal
+/// where the v-table should be emitted. This is a non-issue for the
+/// whole program compiler, but it is a potentially significant factor
+/// for any implementation that relies on dynamic linking.
+///
+/// <h1>Object Construction</h1>
+///
+/// The other difference between objects and structures concerns
+/// object construction. An object having methods
+/// <code><sub>m1</sub></code>...<code>m<sub>n</sub></code> may be
+/// instantiated from any structure having compatible methods
+/// <code><sub>m1</sub></code>...<code>m<sub>n</sub></code>. Compatibility
+/// is determined by type checking: the method type declared by the
+/// structure must subsume the method type declared in the
+/// object. That is: the object method must be instantiable at all
+/// points where it is declared.
+///
+/// However, no compatibility check is performed at the
+/// <code>this</code> pointer argument, because this compatibility
+/// requirement is satisfied structurally.
+
