@@ -7,6 +7,7 @@
   <article id="bitc-intro" xmlns:xi="http://www.w3.org/2001/XInclude">
   <docinfo twocolumn="yes">
     <title>The Origins of the BitC Programming Language</title>
+    <subtitle>SRL Technical Report 2008-04</subtitle>
     <subtitle><em>Warning: Work in Progress</em></subtitle>
     <authorgroup>
       <author>
