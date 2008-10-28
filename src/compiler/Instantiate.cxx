@@ -1162,6 +1162,7 @@ UocInfo::recInstantiate(ostream &errStream,
 
   case at_fill:
   case at_bitfield:
+  case at_reserved:
     {
       break;
     }

@@ -1179,9 +1179,11 @@ field: '(' tk_FILL bitfieldtype ')'  {
   $$ = AST::make(at_fill, $1.loc, $3);
 };
 
+// Some low level data structures have reserved bit positions that are
+// required to hold designated values.
 field: '(' tk_RESERVED bitfieldtype intLit ')'  {
   SHOWPARSE("field -> '(' RESERVED bitfieldtype intLit ')'");
-  $$ = AST::make(at_fill, $1.loc, $3);
+  $$ = AST::make(at_reserved, $1.loc, $3, $4);
 };
 
 tvlist: typevar  {
