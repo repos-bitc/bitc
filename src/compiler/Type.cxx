@@ -1171,6 +1171,8 @@ Type::Type(const Kind k)
   TYPE_CTR_INIT(k);
 }
 
+/// @bug There are LOTS of constructions of ty_byref floating around
+/// that should be updated to use this.
 Type::Type(const Kind k, shared_ptr<Type> child)
   : uniqueID(genTypeID())
 {
@@ -1229,7 +1231,7 @@ Type::getDCopy()
 
 // Returns true of the type `t' is structurally equal to `this'
 // under alpha renaming -- modulo:
-// i)   mutabality 
+// i)   mutability 
 // ii)  declarations unify with definitions
 // iii) Imprecise integer/floating point types unify with 
 //          compatible primitive/prelude typres

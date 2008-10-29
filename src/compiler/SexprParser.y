@@ -2041,6 +2041,7 @@ switch_match: ident '.' ident {
 switch_match: ident '.' ident '.' ident {
   SHOWPARSE("switch_match -> ident '.' ident '.' ident");
   shared_ptr<AST> usesel = AST::make(at_usesel, $1->loc, $1, $3);  
+  usesel->s = $1->s + "." + $3->s;
   $$ = AST::make(at_select, $1->loc, usesel, $5);
 };
 
@@ -2248,13 +2249,20 @@ useident: ident {
 
 useident: ident '.' ident { 
   SHOWPARSE("useident -> ident . ident");
-  $$ = AST::make(at_usesel, $1->loc, $1, $3);
+  shared_ptr<AST> usesel = AST::make(at_usesel, $2.loc, $1, $3);  
+  usesel->s = $1->s + "." + $3->s;
+  $$ = usesel;
 };
 
 useident: ident '.' ident '.' ident { 
   SHOWPARSE("useident -> ident . ident . ident");
+
   shared_ptr<AST> lhs = AST::make(at_usesel, $2.loc, $1, $3);
-  $$ = AST::make(at_usesel, $4.loc, lhs, $5);
+  lhs->s = $1->s + "." + $3->s;
+
+  shared_ptr<AST> usesel = AST::make(at_usesel, $4.loc, lhs, $5);  
+  usesel->s = lhs->s + "." + $5->s;
+  $$ = usesel;
 };
 
 //defident: ident {

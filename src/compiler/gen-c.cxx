@@ -245,6 +245,7 @@ const struct MangleMap {
   { '?',  "_QU" },
   { '@',  "_AT" },
   { '~',  "_TL" },
+  { ':',  "_CN" },
   { '_',  "_" },
   { '.',  "_DT"},
   { '\'', "_QT" }
@@ -589,7 +590,7 @@ emit_ct_args(INOstream &out, shared_ptr<AST> fields, size_t start=0)
   for (size_t c = start; c < fields->children.size(); c++) {
     shared_ptr<AST> field = fields->child(c);
 
-    if (field->astType == at_fill ||
+    if (field->astType != at_field ||
 	(field->flags & FLD_IS_DISCM))
       continue;
 
@@ -610,6 +611,10 @@ emit_ct_inits(INOstream &out, shared_ptr<AST> fields,
 {
   for (size_t i = start; i < fields->children.size(); i++) {
     shared_ptr<AST> field = fields->child(i);
+
+    if (field->astType == at_methdecl)
+      continue;
+
     if (field->astType == at_fill) {
       if(field->children.size() == 2) {
 	out << pre << "__reserved" << field->ID
@@ -3150,7 +3155,7 @@ GenerateCoutput(std::ostream &errStream, INOstream &out,
       CHKERR(errFree, EmitGlobalInitializers(errStream, uoc, out,
 					     decls, flags));
 
-    // If bitc.main.main is an entry point, emit the wrapping main
+    // If bitc.main:main is an entry point, emit the wrapping main
     // procedure that calls the global initializers and processes the
     // argument vector.
     if (UocInfo::mainIsDefined)

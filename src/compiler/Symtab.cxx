@@ -204,12 +204,12 @@ aliasPublicBindings(const std::string& idName,
     shared_ptr<AST> ast = bdng->val;
 
     if (aliasEnv && 
-	aliasEnv->getBinding(ast->fqn.asString("::")))
+	aliasEnv->getBinding(ast->fqn.asString(FQName::sep)))
       continue;
 
 
     if (idName.size())
-      s = idName + "." + s;
+      s = idName + FQName::sep + s;
 
     toEnv->addBinding(s, ast);
 
@@ -318,7 +318,7 @@ makeLocalAlias(shared_ptr<ASTEnvironment > fromEnv,
 
   std::string s = toIdent->s;
   if (toPfx.size())
-    s = toPfx + "." + s;
+    s = toPfx + FQName::sep + s;
 
   toEnv->addBinding(s, ast);
   toEnv->setFlags(s, BF_PRIVATE|BF_COMPLETE);
@@ -884,12 +884,12 @@ resolve(std::ostream& errStream,
 
       shared_ptr<AST> lhs = ast->child(0);
       {
-	// at_usesel can now have at_defsel as a left-hand element, in
+	// at_usesel can now have at_usesel as a left-hand element, in
 	// which case we have ifName.StructTypeName.methodName and we
 	// need to recurse on the LHS first.
 
 	if (lhs->astType == at_usesel) {
-	  RESOLVE(lhs, env, lamLevel, USE_MODE, identType, 
+	  RESOLVE(lhs, env, lamLevel, USE_MODE, id_interface, 
 		  GC_NULL, flags);
 
 	  if (!errorFree)
@@ -900,15 +900,14 @@ resolve(std::ostream& errStream,
 	}
       }
 
-      RESOLVE(lhs, env, lamLevel, USE_MODE, id_interface, 
+      RESOLVE(lhs, env, lamLevel, USE_MODE, idc_usesel_lhs, 
 	      GC_NULL, flags);
 
       if (!errorFree)
 	break;
 
       if (lhs->identType == id_interface) {
-	shared_ptr<AST> iface = ast->child(0);
-      
+	shared_ptr<AST> iface = lhs;
       
 	stringstream lookupStream;
 	lookupStream << ":" << iface->s << ":";
@@ -931,7 +930,7 @@ resolve(std::ostream& errStream,
       
 	FQName importedFQN = FQName(ifName, ast->child(1)->s);
       
-	ast->s = ast->child(0)->s + "." + ast->child(1)->s;
+	ast->s = lhs->s + FQName::sep + ast->child(1)->s;
 	ast->astType = at_ident;
 	ast->identType = ast->child(1)->identType;
 	ast->flags = ast->child(1)->flags;
@@ -946,10 +945,17 @@ resolve(std::ostream& errStream,
 	ast->fqn = importedFQN;
       }
       else if (lhs->identType == id_struct) {
-	errStream << ast->loc << ": "
-		  << "Fully qualified methods are not yet supported."
-		  << std::endl;
-	errorFree = false;
+	ast->s = lhs->s + "." + ast->child(1)->s;
+	ast->astType = at_ident;
+	ast->identType = ast->child(1)->identType;
+	ast->flags = ast->child(1)->flags;
+	ast->flags |= ID_IS_GLOBAL;
+
+	ast->children.clear();
+
+	RESOLVE(ast, env, lamLevel, mode, identType, currLB, 
+		flags);
+
 	break;
       }
       else {
@@ -1067,34 +1073,6 @@ resolve(std::ostream& errStream,
 	      idc_type, ast, 
 	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
-      /// If structure type name S is introduced in environment E,
-      /// then for each method m we need to introduce a
-      /// quasi-identifier declaration S.m in E having identifier type
-      /// id_method.
-      ///
-      /// We do this here rather than in at_methdecl because we don't
-      /// have the structure type name available there.
-      {
-	shared_ptr<AST> fields = ast->child(4);
-	for (size_t c = 0; c < fields->children.size(); c++) {
-	  shared_ptr<AST> fld = fields->child(c);
-
-	  if (fld->astType != at_methdecl)
-	    continue;
-
-	  string quasiname = ast->child(0)->s + "." + fld->child(0)->s;
-	  
-	  // Stick a duplicate identifier AST in under the quasiname.
-	  shared_ptr<AST> dupIdent = AST::make(fld->child(0));
-	  dupIdent->isDecl = true;
-	  dupIdent->s = quasiname;
-
-	  RESOLVE(dupIdent, tmpEnv, lamLevel, DECL_MODE,
-		  id_method, currLB, flags | RSLV_BIND_PUBLIC);
-	}
-      }
-
-
       env->mergeBindingsFrom(tmpEnv);
       break;
     }
@@ -1553,7 +1531,7 @@ resolve(std::ostream& errStream,
 	  shared_ptr<Binding<AST> > bndg = 
 	    ifAst->envs.env->doGetBinding(pubName->s);
 
-	  std::string pubFQN = bndg->val->fqn.asString("::");
+	  std::string pubFQN = bndg->val->fqn.asString(FQName::sep);
 
 	  shared_ptr<AST> oldAlias = aliasEnv->getBinding(pubFQN);
 	  if (oldAlias) {
@@ -1756,8 +1734,8 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_methdecl:
   case at_field:
+  case at_methdecl:
     {
       // match at_ident
       ast->child(0)->fqn = FQName(FQ_NOIF, ast->child(0)->s);

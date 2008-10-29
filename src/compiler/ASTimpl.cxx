@@ -324,6 +324,9 @@ AST::atKwd() const
   case at_fn:
     return "fn";
 
+  case at_methType:
+    return "method";
+
 //   case at_closureType:
 //     return "closure";
 

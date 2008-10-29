@@ -768,64 +768,6 @@ markCCC(shared_ptr<Type> ct)
   }
 }
 
-static shared_ptr<AST>
-SynthesizeMethodProclamation(std::ostream& errStream, 
-			     shared_ptr<AST> theStruct, 
-			     shared_ptr<AST> methDecl,
-			     shared_ptr<Trail> trail,
-			     shared_ptr<TSEnvironment > gamma)
-{
-  shared_ptr<AST> sIdent = theStruct->child(0);
-  shared_ptr<AST> methIdent = methDecl->child(0);
-  shared_ptr<AST> methTypeAst = methDecl->child(1);
-  shared_ptr<Type> methType = methTypeAst->symType;
-  string quasiname = sIdent->s + "." + methIdent->s;
-
-  shared_ptr<AST> methFnIdent = 
-    AST::make(at_ident, LToken(methIdent->loc, quasiname));
-
-  shared_ptr<Type> methFnType = Type::make(methTypeAst->symType);
-  shared_ptr<Type> methFnArgs = methFnType->Args();
-
-  /// @fix Does the structure symType need to be deep copied or copied
-  /// via copy constructor here?
-  methFnArgs->components.insert(methFnArgs->components.begin(), 
-				comp::make(sIdent->symType));
-
-  /// @fix I am not sure how to introduce a scheme for the
-  /// methFnIdent's type. It needs to be a duplicate of the scheme of
-  /// the structure.
-
-  methFnIdent->symType = methFnType;
-
-  /// @bug We can make it a decl here, but without re-running the
-  /// resolver we will not end up with defAst and declAst connected
-  /// properly.
-  methFnIdent->isDecl = true;
-
-  methFnIdent->scheme =
-    TypeScheme::make(methFnIdent->symType, methFnIdent, sIdent->scheme->tcc);
-
-#if 0
-  /// @bug It seems to me that we need to so something like the
-  // following, but we don't have a tvList handy. What to do?
-
-  // Add Ftvs so that they get generalized in future uses
-  addTvsToSigma(errStream, tvList, methFnIdent->scheme, trail); 
-#endif
-
-  /// @bug I'm not clear what sigma this should be, or where we should
-  /// copy it from.
-  ///
-  /// gamma->addBinding(quasiname, sigma);
-
-  errStream << methDecl->loc << ": " << quasiname 
-	    << " Requires method proc proclamation" 
-	    << std::endl;
-
-  return GC_NULL;
-}
-
 // Called only for definitions
 static bool
 InferStruct(std::ostream& errStream, shared_ptr<AST> ast, 
@@ -913,24 +855,6 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
 	st->methods.push_back(comp::make(field->child(0)->s,
 					 field->child(1)->symType));
 	field->child(1)->symType->myContainer = sIdent;
-
-	/// The method mechanism is a bit of a hack; it gets re-written into
-	/// a procedure call, and the methods themselves are defined exactly
-	/// like procedures. In fact, the @em method application per se is
-	/// never really type checked in at_apply at all; that is done after
-	/// the syntactic rewrite.
-	///
-	/// Given the mechanism, it is necessary to ensure that the
-	/// definition of the method's implementation matches the
-	/// (implied) declaration in the structure. We accomplish this
-	/// by synthetically binding a PROCLAIM here on the synthetic
-	/// identifier S.m (where S is the type name), and relying on
-	/// the declare/define compatibility check to ensure that the
-	/// implementation of the method is typed compatibly.
-
-	CHKERR(errFree, 
-	       SynthesizeMethodProclamation(errStream, ast, field, trail, gamma));
-
 	break;
       }
 
@@ -3834,6 +3758,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	break;
       }
       else if (fType->isMethod()) {
+	assert (ast->child(0)->astType == at_select);
 	// Need to re-write this AST as a normal application. Given
 	// "(s.M args...)", where s is an instance of type S, rewrite
 	// this as (S.M s args...):
@@ -3847,11 +3772,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	theMethod->s = quasiname;
 
 	ast->children[0] = theMethod;
-
-	errStream << ast->child(0)->loc << ": "
-		  << ast->child(0)->s 
-		  << " not handling method call to apply rewrite yet." 
-		  << std::endl;
 
 	ast->astType = at_apply;
 	TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,

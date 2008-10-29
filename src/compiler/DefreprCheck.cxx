@@ -35,7 +35,9 @@
  *
  **************************************************************************/
 
-/// @file Requirements checking pass for DEFREPR declarations.
+/// @file 
+///
+/// @brief Requirements checking pass for DEFREPR declarations.
 ///
 ///
 /// Consider the defrepr:

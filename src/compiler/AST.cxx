@@ -2052,14 +2052,14 @@ AST::isValid() const
     break;
 
   case at_proclaim: // normal AST:
-    // match at_ident
+    // match agt_var
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
-    if (!ISSET(astMembers[at_ident], child(c)->astType)) {
-      astChTypeError(*this, at_ident, child(c)->astType, c);
+    if (!ISSET(astMembers[agt_var], child(c)->astType)) {
+      astChTypeError(*this, agt_var, child(c)->astType, c);
       errorsPresent = true;
     }
     c++;

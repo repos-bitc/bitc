@@ -43,6 +43,8 @@
   i: int32;
   m: (method -> bool))
 
+(define (S.m s:S) #t)
+
 (define (main.main argv:(vector string))
   ((S 32).m)
   0:int32)

@@ -80,8 +80,8 @@ std::string
 UocInfo::UocNameFromSrcName(const std::string& srcFileName, unsigned ndx)
 {
   // Use the filename with the extension (if any) chopped off.
-  size_t lastDot = srcFileName.rfind(".");
-  return srcFileName.substr(0, lastDot) + "#" + unsigned_str(ndx);
+  size_t ifSepPos = srcFileName.rfind(FQName::sep);
+  return srcFileName.substr(0, ifSepPos) + "#" + unsigned_str(ndx);
 }
 
 UocInfo::UocInfo(const std::string& _uocName, const std::string& _origin,
