@@ -768,6 +768,63 @@ markCCC(shared_ptr<Type> ct)
   }
 }
 
+static shared_ptr<AST>
+SynthesizeMethodProclamation(std::ostream& errStream, 
+			     shared_ptr<AST> theStruct, 
+			     shared_ptr<AST> methDecl,
+			     shared_ptr<Trail> trail,
+			     shared_ptr<TSEnvironment > gamma)
+{
+  shared_ptr<AST> sIdent = theStruct->child(0);
+  shared_ptr<AST> methIdent = methDecl->child(0);
+  shared_ptr<AST> methTypeAst = methDecl->child(1);
+  shared_ptr<Type> methType = methTypeAst->symType;
+  string quasiname = sIdent->s + "." + methIdent->s;
+
+  shared_ptr<AST> methFnIdent = 
+    AST::make(at_ident, LToken(methIdent->loc, quasiname));
+
+  shared_ptr<Type> methFnType = Type::make(methTypeAst->symType);
+  shared_ptr<Type> methFnArgs = methFnType->Args();
+
+  /// @fix Does the structure symType need to be deep copied or copied
+  /// via copy constructor here?
+  methFnArgs->components.insert(methFnArgs->components.begin(), 
+				comp::make(sIdent->symType));
+
+  /// @fix I am not sure how to introduce a scheme for the
+  /// methFnIdent's type. It needs to be a duplicate of the scheme of
+  /// the structure.
+
+  methFnIdent->symType = methFnType;
+
+  /// @bug We can make it a decl here, but without re-running the
+  /// resolver we will not end up with defAst and declAst connected
+  /// properly.
+  methFnIdent->isDecl = true;
+
+  methFnIdent->scheme =
+    TypeScheme::make(methFnIdent->symType, methFnIdent, sIdent->scheme->tcc);
+
+#if 0
+  /// @bug It seems to me that we need to so something like the
+  // following, but we don't have a tvList handy. What to do?
+
+  // Add Ftvs so that they get generalized in future uses
+  addTvsToSigma(errStream, tvList, methFnIdent->scheme, trail); 
+#endif
+
+  /// @bug I'm not clear what sigma this should be, or where we should
+  /// copy it from.
+  ///
+  /// gamma->addBinding(quasiname, sigma);
+
+  errStream << methDecl->loc << ": " << quasiname 
+	    << " Requires method proc proclamation" 
+	    << std::endl;
+
+  return GC_NULL;
+}
 
 // Called only for definitions
 static bool
@@ -786,7 +843,6 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
 	    TI_Flags ti_flags)
 {
   bool errFree = true;
-  size_t c;
   Kind structKind;
   
   shared_ptr<AST> sIdent = ast->child(0);
@@ -828,7 +884,7 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
     
   // match at_fields
   shared_ptr<AST> fields = ast->child(4);
-  for (c = 0; c < fields->children.size(); c++) {
+  for (size_t c = 0; c < fields->children.size(); c++) {
     // match at_ident
     // match agt_type
     shared_ptr<AST> field = fields->child(c);
@@ -857,6 +913,24 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
 	st->methods.push_back(comp::make(field->child(0)->s,
 					 field->child(1)->symType));
 	field->child(1)->symType->myContainer = sIdent;
+
+	/// The method mechanism is a bit of a hack; it gets re-written into
+	/// a procedure call, and the methods themselves are defined exactly
+	/// like procedures. In fact, the @em method application per se is
+	/// never really type checked in at_apply at all; that is done after
+	/// the syntactic rewrite.
+	///
+	/// Given the mechanism, it is necessary to ensure that the
+	/// definition of the method's implementation matches the
+	/// (implied) declaration in the structure. We accomplish this
+	/// by synthetically binding a PROCLAIM here on the synthetic
+	/// identifier S.m (where S is the type name), and relying on
+	/// the declare/define compatibility check to ensure that the
+	/// implementation of the method is typed compatibly.
+
+	CHKERR(errFree, 
+	       SynthesizeMethodProclamation(errStream, ast, field, trail, gamma));
+
 	break;
       }
 
@@ -909,7 +983,6 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 {
 
   bool errFree = true;
-  size_t c;
   Kind unionKind;
   
   shared_ptr<AST> uIdent = ast->child(0);
@@ -954,7 +1027,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
   
   // match at_constructors
   shared_ptr<AST> ctrs = ast->child(4);
-  for (c = 0; c < ctrs->children.size(); c++) {
+  for (size_t c = 0; c < ctrs->children.size(); c++) {
     // match at_ident
     // match agt_type
     shared_ptr<AST> ctr = ctrs->child(c);
@@ -987,7 +1060,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       case at_field:
 	{
 	  shared_ptr<comp> nComp = comp::make(field->child(0)->s,
-				       field->child(1)->symType);
+					      field->child(1)->symType);
 	  if (field->flags & FLD_IS_DISCM)
 	    nComp->flags |= COMP_UNIN_DISCM;
 	  
@@ -1012,14 +1085,13 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
     // as the union. This rule -- unlike the one in Haskell -- 
     // requires that the tcc be absolutely enforced.
     shared_ptr<TypeScheme> ctrSigma = TypeScheme::make(ctrId->symType, 
-						ctrId, sigma->tcc);
+						       ctrId, sigma->tcc);
     
     // This may feel wierd -- that All constructors point to the same
     // type arguments rather than a copy. But since every instance is 
     // newly obtained, this is OK.
-    for (size_t i = 0; i < tvList->children.size(); i++) {
+    for (size_t i = 0; i < tvList->children.size(); i++)
       ctrId->symType->typeArgs.push_back(tvList->child(i)->symType);
-    }
     
     // Don't add ctrSigma to gamma yet. Constructors are 
     // bound at the end of the definition
@@ -1044,7 +1116,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 					 instEnv, trail)); 
   
   //Now add all constructor bindings to the environment.
-  for (c = 0; c < ctrs->children.size(); c++) {
+  for (size_t c = 0; c < ctrs->children.size(); c++) {
     shared_ptr<AST> ctr = ctrs->child(c);
     shared_ptr<AST> ctrId = ctr->child(0);   
     addTvsToSigma(errStream, tvList, ctrId->scheme, trail);
@@ -1055,7 +1127,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
   }
 
   //Build structure types for all constructors.
-  for (c = 0; c < ctrs->children.size(); c++) {
+  for (size_t c = 0; c < ctrs->children.size(); c++) {
     shared_ptr<AST> ctr = ctrs->child(c)->child(0);
     shared_ptr<Type> ctrType = ctr->symType->getType();
     shared_ptr<TypeScheme> ctrSigma = ctr->scheme;
@@ -1067,7 +1139,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> thatCtrType = thatCtr->symType->getType();
       
       if (ctrType->components.size() != 
-	 thatCtrType->components.size())
+	  thatCtrType->components.size())
 	continue;
       
       // Since there can be no constructors with only fills
@@ -1079,7 +1151,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	shared_ptr<comp> thatComp = thatCtrType->Component(j);
 	
 	if ((thisComp->name != thatComp->name) ||
-	   !thisComp->typ->strictlyEquals(thatComp->typ)) {
+	    !thisComp->typ->strictlyEquals(thatComp->typ)) {
 	  same = false;
 	  break;
 	}
@@ -1099,7 +1171,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       sType->defAst = ctr; // structures have names like (cons 'a)
       for (size_t i=0; i < ctrType->components.size(); i++)
 	sType->components.push_back(comp::make(ctrType->CompName(i),
-					  ctrType->CompType(i)));
+					       ctrType->CompType(i)));
       // Comp's Flags are not necesary here ?
  
       
@@ -1171,8 +1243,8 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       bool isEnum = true;
       
       for (size_t c = 0; 
-	  cardelli && (c < ctrs->children.size()); 
-	  c++) {
+	   cardelli && (c < ctrs->children.size()); 
+	   c++) {
 	shared_ptr<AST> ctr = ctrs->child(c);
 	
 	switch(ctr->children.size()) {
@@ -1192,8 +1264,8 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	  }
 	  
 	  if (ctr->child(1)->symType->isRefType() || 
-	     ctr->child(1)->symType->isConstrainedToRefType(sigma->tcc) ||
-	     ctr->child(1)->symType->isNullableType())
+	      ctr->child(1)->symType->isConstrainedToRefType(sigma->tcc) ||
+	      ctr->child(1)->symType->isNullableType())
 	    seenRef = true;
 	  else
 	    cardelli = false;
@@ -2643,23 +2715,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     break;
 
   case at_methdecl: 
-    {
-      // Same as at_field, but no field bits.
-
-      // match at_ident
-      shared_ptr<AST> fName = ast->child(0);
-      fName->symType = Type::make(ty_tvar);
-      
-      // match agt_type
-      shared_ptr<AST> fType = ast->child(1);
-      TYPEINFER(fType, gamma, instEnv, impTypes, isVP, 
-		tcc, uflags, trail,  USE_MODE, 
-		TI_TYP_EXP | TI_TYP_DEFN);
-      
-      ast->symType = fType->symType;
-      break;
-    }
-
+    // Handling for at_methdecl is basically the same as for at_field.
+    // However, note the a post-pass over structures  is made in
+    // InferStruct to synthesize declarations for the functions
+    // corresponding to each method.
   case at_field: 
     {
       // match at_ident
