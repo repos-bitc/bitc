@@ -301,7 +301,10 @@ AST::atKwd() const
     return "<fields>";
 
   case at_field:
-    return "field";
+    return "<field>";
+
+  case at_methdecl:
+    return "<method>";
 
   case at_fill:
     return "fill";
@@ -896,5 +899,8 @@ AST::isIdentType(IdentType t)
 	  // where we are applying a valye that was proclaimed, the
 	  // identType would still be idc_value, and not id_value.
 	  ((t == idc_apply) && (isIdentType(idc_value) ||
-				isIdentType(idc_ctor))));
+				isIdentType(idc_ctor) ||
+				isIdentType(id_method))) ||
+	  ((t == idc_usesel_lhs) && ((identType == id_interface) ||
+				     (identType == id_struct))));
 }

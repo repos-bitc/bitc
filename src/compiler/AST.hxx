@@ -110,6 +110,9 @@ enum IdentType {
   /// @brief Structure or union constructor field name.
   id_field,
 
+  /// @brief Structure or capsule method name.
+  id_method,
+
   /// @brief Locally bound name that references the exported subset of
   /// an imported interface.
   ///
@@ -156,8 +159,19 @@ enum IdentType {
 
   /// @brief An entity (value or constructor) that can be applied,
   /// which is one of <code>id_value</code>, <code>id_tcmethod</code>,
-  /// <code>id_struct</code> or <code>id_ucon</code>.
+  /// <code>id_method</code>, <code>id_struct</code>,
+  /// or <code>id_ucon</code>.
   idc_apply,
+
+  /// @brief Any identifier that can legally appear to the left of the
+  /// dot in an at_usesel ast.
+  ///
+  /// This can either be a local name denoting an interface
+  /// (id_interface) or a local name denoting a structure type
+  /// (id_struct).
+  ///
+  ///   id_interface id_struct id_method
+  idc_usesel_lhs,
 };
 
 /// @brief Produces a printable string corresponding to the values in
@@ -579,6 +593,7 @@ enum AstType {
   at_constructor,
   at_fields,
   at_field,
+  at_methdecl,
   at_fill,
   at_reserved,
   at_bitfield,
@@ -586,6 +601,7 @@ enum AstType {
   at_byrefType,
   at_valType,
   at_fn,
+  at_methType,
   at_primaryType,
   at_fnargVec,
   at_arrayType,
@@ -657,6 +673,7 @@ enum AstType {
   at_docString,
   at_letGather,
   agt_var,
+  agt_uselhs,
   agt_literal,
   agt_tvar,
   agt_CompilationUnit,
@@ -808,6 +825,10 @@ public:
   ///  (do ("dobindings"  ("dobinding" id ...) ...)
   ///                             ^     |
   ///                             |_____|
+  ///
+  /// @bug This should not be a shared_ptr, because that creates a
+  /// cycle that will booger the reference counting. It should be a
+  /// weak pointer.
 
   boost::shared_ptr<AST> defForm;
 

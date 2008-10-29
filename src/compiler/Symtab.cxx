@@ -874,49 +874,92 @@ resolve(std::ostream& errStream,
       /// can be bound by a local definition. I do wonder if perhaps
       /// we should not catch this case syntactically in the parser.
 
-      shared_ptr<AST> iface = ast->child(0);
-      
-      RESOLVE(iface, env, lamLevel, USE_MODE, id_interface, 
+      /// @bug There is a problem here that this syntax might now be:
+      ///
+      ///   StructTypeName.methodname
+      ///   ifname.StructTypeName.methodName
+      ///
+      /// neither case is currently handled, and both need to be.
+      /// It may turn out to be better to handle this case specially.
+
+      shared_ptr<AST> lhs = ast->child(0);
+      {
+	// at_usesel can now have at_defsel as a left-hand element, in
+	// which case we have ifName.StructTypeName.methodName and we
+	// need to recurse on the LHS first.
+
+	if (lhs->astType == at_usesel) {
+	  RESOLVE(lhs, env, lamLevel, USE_MODE, identType, 
+		  GC_NULL, flags);
+
+	  if (!errorFree)
+	    break;
+
+	  // ast->astType should now be at_ident.
+	  assert(lhs->astType == at_ident);
+	}
+      }
+
+      RESOLVE(lhs, env, lamLevel, USE_MODE, id_interface, 
 	      GC_NULL, flags);
 
       if (!errorFree)
 	break;
 
+      if (lhs->identType == id_interface) {
+	shared_ptr<AST> iface = ast->child(0);
       
-      stringstream lookupStream;
-      lookupStream << ":" << iface->s << ":";
-      std::string lookupName = lookupStream.str();
-      shared_ptr<AST> ifNameAst= aliasEnv->getBinding(lookupName);
-      std::string ifName = ifNameAst->s;
-      assert(ifName != "");
       
-      shared_ptr<ASTEnvironment > ifenv = iface->symbolDef->envs.env;
+	stringstream lookupStream;
+	lookupStream << ":" << iface->s << ":";
+	std::string lookupName = lookupStream.str();
+	shared_ptr<AST> ifNameAst= aliasEnv->getBinding(lookupName);
+	std::string ifName = ifNameAst->s;
+	assert(ifName != "");
       
-      if (!ifenv) {
+	shared_ptr<ASTEnvironment > ifenv = iface->symbolDef->envs.env;
+      
+	if (!ifenv) {
+	  errStream << ast->loc << ": "
+		    << "Internal Compiler Error. "
+		    << "Interface " << ifName
+		    << " needed by "<< iface->s << " has a NULL environment"
+		    << std::endl;
+	  errorFree = false;
+	  break;
+	}
+      
+	FQName importedFQN = FQName(ifName, ast->child(1)->s);
+      
+	ast->s = ast->child(0)->s + "." + ast->child(1)->s;
+	ast->astType = at_ident;
+	ast->identType = ast->child(1)->identType;
+	ast->flags = ast->child(1)->flags;
+	ast->flags |= ID_IS_GLOBAL;
+
+	ast->children.clear();
+
+	// SHOULD THE PUBLIC FLAG BE TAKEN OFF HERE ??
+	RESOLVE(ast, env, lamLevel, mode, identType, currLB,  
+		(flags & (~RSLV_BIND_PUBLIC)));
+
+	ast->fqn = importedFQN;
+      }
+      else if (lhs->identType == id_struct) {
 	errStream << ast->loc << ": "
-		  << "Internal Compiler Error. "
-		  << "Interface " << ifName
-		  << " needed by "<< iface->s << " has a NULL environment"
+		  << "Fully qualified methods are not yet supported."
 		  << std::endl;
 	errorFree = false;
 	break;
       }
-      
-      FQName importedFQN = FQName(ifName, ast->child(1)->s);
-      
-      ast->s = ast->child(0)->s + "." + ast->child(1)->s;
-      ast->astType = at_ident;
-      ast->identType = ast->child(1)->identType;
-      ast->flags = ast->child(1)->flags;
-      ast->flags |= ID_IS_GLOBAL;
-
-      ast->children.clear();
-
-      // SHOULD THE PUBLIC FLAG BE TAKEN OFF HERE ??
-      RESOLVE(ast, env, lamLevel, mode, identType, currLB,  
-	      (flags & (~RSLV_BIND_PUBLIC)));
-
-      ast->fqn = importedFQN;
+      else {
+	errStream << ast->loc << ": "
+		  << "Required struct name or interface name to"
+		  << " the left of this dot."
+		  << std::endl;
+	errorFree = false;
+	break;
+      }
 
       break;
     }
@@ -1024,6 +1067,34 @@ resolve(std::ostream& errStream,
 	      idc_type, ast, 
 	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
+      /// If structure type name S is introduced in environment E,
+      /// then for each method m we need to introduce a
+      /// quasi-identifier declaration S.m in E having identifier type
+      /// id_method.
+      ///
+      /// We do this here rather than in at_methdecl because we don't
+      /// have the structure type name available there.
+      {
+	shared_ptr<AST> fields = ast->child(4);
+	for (size_t c = 0; c < fields->children.size(); c++) {
+	  shared_ptr<AST> fld = fields->child(c);
+
+	  if (fld->astType != at_methdecl)
+	    continue;
+
+	  string quasiname = ast->child(0)->s + "." + fld->child(0)->s;
+	  
+	  // Stick a duplicate identifier AST in under the quasiname.
+	  shared_ptr<AST> dupIdent = AST::make(fld->child(0));
+	  dupIdent->isDecl = true;
+	  dupIdent->s = quasiname;
+
+	  RESOLVE(dupIdent, tmpEnv, lamLevel, DECL_MODE,
+		  id_method, currLB, flags | RSLV_BIND_PUBLIC);
+	}
+      }
+
+
       env->mergeBindingsFrom(tmpEnv);
       break;
     }
@@ -1099,14 +1170,19 @@ resolve(std::ostream& errStream,
       // The exception value is defined and is complete
       
       // match at_fields+
+      pair< set<string>::iterator, bool > pr;
       set<string> names;
+
       names.insert(ast->child(0)->s);
       for (size_t c = 1; c < ast->children.size(); c++) {
 	shared_ptr<AST> field = ast->child(c);
 	RESOLVE(field, tmpEnv, lamLevel, USE_MODE, 
 		idc_type, ast, 
 		flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
-	if (names.find(field->child(0)->s) != names.end()) {
+
+	pr = names.insert(field->child(0)->s);
+
+	if (!pr.second) {
 	  errStream << field->child(0)->loc << ": "
 		    << "field name `" << field->child(0)->s
 		    << "' conflicts with another field / "		
@@ -1115,8 +1191,6 @@ resolve(std::ostream& errStream,
 		    << std::endl;
 	  errorFree = false;
 	}	      
-	else
-	  names.insert(field->child(0)->s);
       }
 
       env->mergeBindingsFrom(tmpEnv);
@@ -1628,26 +1702,26 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(0), env, lamLevel, DEF_MODE,
 	      it, currLB, flags | RSLV_BIND_PUBLIC);
             
+      pair< set<string>::iterator, bool > pr;
+      set<string> names;
+
+      // Resolve each field name, test for collisions:
+
       for (size_t c = 1; c < ast->children.size(); c++) {
-	shared_ptr<AST> fldc = ast->child(c);
-	RESOLVE(fldc, env, lamLevel, USE_MODE, identType,
+	shared_ptr<AST> fld = ast->child(c);
+	RESOLVE(fld, env, lamLevel, USE_MODE, identType,
 		currLB, flags); 
 
-	if (fldc->astType != at_field)
+	if (fld->astType != at_field)
 	  continue;
 	
-	for (size_t d = 1; d < c; d++) {
-	  shared_ptr<AST> fldd = ast->child(d);
-	  if (fldd->astType != at_field)
-	    continue;
-	  
-	  if (fldc->child(0)->s == fldd->child(0)->s) {
-	    errStream << ast->loc << ": "
-		      << "Duplicate field label: "
-		      << fldc->child(0)->s
-		      << std::endl;
-	    errorFree = false;
-	  }
+	pr = names.insert(fld->child(0)->s);
+	if (!pr.second) {
+	  errStream << ast->loc << ": "
+		    << "Duplicate field label: "
+		    << fld->child(0)->s
+		    << std::endl;
+	  errorFree = false;
 	}
       }
       break;
@@ -1656,42 +1730,42 @@ resolve(std::ostream& errStream,
   case at_fields:
     {
       // match at_field*
+
+      // Resolve each field and method name, test for collisions:
+      pair< set<string>::iterator, bool > pr;
+      set<string> names;
+
       for (size_t c = 0; c < ast->children.size(); c++) {
-	shared_ptr<AST> fldc = ast->child(c);
-	RESOLVE(fldc, env, lamLevel, USE_MODE, identType,
+	shared_ptr<AST> fld = ast->child(c);
+	RESOLVE(fld, env, lamLevel, USE_MODE, identType,
 		currLB, flags); 
 
-	if (fldc->astType != at_field)
+	if (fld->astType == at_fill || fld->astType == at_reserved)
+	  // This entry has no name.
 	  continue;
 	
-	for (size_t d = 1; d < c; d++) {
-	  shared_ptr<AST> fldd = ast->child(d);
-	  if (fldd->astType != at_field)
-	    continue;
-	  
-	  if (fldc->child(0)->s == fldd->child(0)->s) {
-	    errStream << ast->loc << ": "
-		      << "Duplicate field label: "
-		      << fldc->child(0)->s
-		      << std::endl;
-	    errorFree = false;
-	  }
+	pr = names.insert(fld->child(0)->s);
+	if (!pr.second) {
+	  errStream << ast->loc << ": "
+		    << "Duplicate field/method name: "
+		    << fld->child(0)->s
+		    << std::endl;
+	  errorFree = false;
 	}
       }
       break;
     }
 
+  case at_methdecl:
   case at_field:
     {
       // match at_ident
       ast->child(0)->fqn = FQName(FQ_NOIF, ast->child(0)->s);
 
-      // match agt_type?
-      if (ast->children.size() > 1) {
-	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		idc_type, currLB, 
-		flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
-      }
+      // match agt_type:
+      RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
+	      idc_type, currLB, 
+	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
       break;
     }
@@ -1761,6 +1835,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
+  case at_methType:
   case at_fn:
     {
       // match agt_type
@@ -2037,9 +2112,8 @@ resolve(std::ostream& errStream,
 	  // at_usesel
 	  RESOLVE(ast, env, lamLevel, USE_MODE, identType, currLB, flags);
 	} 
-	else if (lhs->isIdentType(idc_type)) {
-	  // This must be a case where we are qualifying a constructor
-	  // with its union name.
+	else if (lhs->isIdentType(id_union)) {
+	  // This is UNIONNAME.LEGNAME.
 	  ast->astType = at_fqCtr;
 	  RESOLVE(ast, env, lamLevel, USE_MODE, idc_type, currLB, flags);
 	}

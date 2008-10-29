@@ -101,6 +101,10 @@ calc_struct_size(const shared_ptr<Type> t)
 	break;
       }
       
+    case at_methdecl:
+      // Legal, but no bits contributed.
+      break;
+
     default:
       {
 	assert(false);

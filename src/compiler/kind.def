@@ -69,6 +69,7 @@ DEFKIND(string,    true,   true,   false, true,  true,  false,  true)
 
 //DEFKIND(bitfield,  true,   false,  true,  false, false,  false)
 DEFKIND(fn,        true,   false,  true,  true,  false, false,  false)
+DEFKIND(method,    true,   false,  true,  true,  false, false,  false)
 DEFKIND(tyfn,      true,   false,  true,  false, false, false,  false)
 DEFKIND(uconv,     true,   false,  true,  false, false, false,  false)
 DEFKIND(uconr,     true,   false,  false, false, true,  false,  false)

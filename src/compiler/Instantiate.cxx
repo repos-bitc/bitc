@@ -495,6 +495,7 @@ name2fqn(shared_ptr<AST> ast)
     }
 
   case at_field:
+  case at_methdecl:
     {
       name2fqn(ast->child(1));
       break;
@@ -1098,6 +1099,8 @@ UocInfo::recInstantiate(ostream &errStream,
       break;
     }
 
+  case at_methdecl:
+    /// @bug ?? I think this should not be done here.
   case at_block:
   case at_return_from:
   case at_field:

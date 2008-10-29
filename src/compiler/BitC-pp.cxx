@@ -953,6 +953,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     }
 
   case at_field:
+  case at_methdecl:
     {
       BitcP(out, ast->child(0), showTypes);
       if (ast->children.size() > 1) {

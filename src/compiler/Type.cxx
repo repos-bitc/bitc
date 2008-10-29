@@ -423,6 +423,13 @@ Type::isFnxn()
 }
 
 bool 
+Type::isMethod()
+{
+  shared_ptr<Type> t = getBareType();
+  return (t->kind == ty_method);
+}
+
+bool 
 Type::isBaseConstType()
 {
   switch(getType()->kind) {
@@ -1198,7 +1205,8 @@ Type::Type(shared_ptr<Type>  t)
     
   for (size_t i=0; i<t->components.size(); i++)
     components.push_back(comp::make(t->CompName(i), t->CompType(i), t->CompFlags(i)));
-
+  for (size_t i=0; i<t->methods.size(); i++)
+    methods.push_back(comp::make(t->MethodName(i), t->MethodType(i), t->MethodFlags(i)));
 
   mark = MARK_NONE;
   pMark = 0;  

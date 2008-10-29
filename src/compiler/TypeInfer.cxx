@@ -215,7 +215,8 @@ findField(std::ostream& errStream,
 
 static bool
 findComponent(std::ostream& errStream, 
-	      shared_ptr<Type> sut, shared_ptr<AST> ast, shared_ptr<Type> &fct)
+	      shared_ptr<Type> sut, shared_ptr<AST> ast,
+	      shared_ptr<Type> &fct, bool orMethod = false)
 {
   sut = sut->getType();
   assert(ast->astType == at_select || 
@@ -235,18 +236,31 @@ findComponent(std::ostream& errStream,
   }
   
   bool valid=false;
-  for (size_t i=0; i < sut->components.size(); i++)
+  for (size_t i=0; i < sut->components.size(); i++) {
     if (sut->CompName(i) == ast->child(1)->s) {
       fct = sut->CompType(i)->getType();	  
       valid = ((sut->CompFlags(i) & COMP_INVALID) == 0);
       break;
     }
+  }
       
+  if (orMethod && !fct) {
+    for (size_t i=0; i < sut->methods.size(); i++) {
+      if (sut->MethodName(i) == ast->child(1)->s) {
+	fct = sut->MethodType(i)->getType();	  
+	valid = ((sut->MethodFlags(i) & COMP_INVALID) == 0);
+	break;
+      }
+    }
+  }
+
   if (!fct) {
     errStream << ast->loc << ": "
 	      << " In the expression " << ast->asString() << ", "
 	      << " structure/constructor " << sut->defAst->s 
-	      << " has no Field/Constructor named " 
+	      << " has no Field/Constructor"
+	      << (orMethod ? "/Method" : "")
+	      << " named " 
 	      << ast->child(1)->s << "." << std::endl;
     return false;
   } 
@@ -829,7 +843,7 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
     case at_field:
       {
 	st->components.push_back(comp::make(field->child(0)->s,
-					field->child(1)->symType));
+					    field->child(1)->symType));
 	break;
       }
       
@@ -839,6 +853,14 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
 	ast->total_fill += field->field_bits;
 	break;
       }
+    case at_methdecl:
+      {
+	st->methods.push_back(comp::make(field->child(0)->s,
+					 field->child(1)->symType));
+	field->child(1)->symType->myContainer = sIdent;
+	break;
+      }
+
     default:
       {
 	assert(false);
@@ -979,6 +1001,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	  ctr->total_fill += field->field_bits;
 	  break;
 	}
+	// Note: at_methdecl illegal here, so omission is intentional.
       default:
 	{
 	  assert(false);
@@ -2621,6 +2644,24 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     // match at_field*
     break;
 
+  case at_methdecl: 
+    {
+      // Same as at_field, but no field bits.
+
+      // match at_ident
+      shared_ptr<AST> fName = ast->child(0);
+      fName->symType = Type::make(ty_tvar);
+      
+      // match agt_type
+      shared_ptr<AST> fType = ast->child(1);
+      TYPEINFER(fType, gamma, instEnv, impTypes, isVP, 
+		tcc, uflags, trail,  USE_MODE, 
+		TI_TYP_EXP | TI_TYP_DEFN);
+      
+      ast->symType = fType->symType;
+      break;
+    }
+
   case at_field: 
     {
       // match at_ident
@@ -2848,6 +2889,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }    
 
+  case at_methType:
   case at_fn:
     {
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
@@ -2855,7 +2897,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  mode, TI_NON_APP_TYPE);
       
-      ast->symType = Type::make(ty_fn);
+      ast->symType = Type::make((ast->astType == at_fn) ? ty_fn : ty_method);
       shared_ptr<Type> fnarg = ast->child(0)->symType->getType();
       ast->symType->components.push_back(comp::make(fnarg));
       shared_ptr<comp> nComp = comp::make(ast->child(1)->getType());
@@ -3052,8 +3094,9 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		  << " partially/over instantiated" 
 		  << " For type " << sut->asString()
 		  << ", " << sut->typeArgs.size()
-		  << " arguments are needed. But obtained "
+		  << " arguments are needed. But "
 		  << ast->children.size() -1
+		  << " were provided."
 		  << std::endl;
 	errFree = false;
       }
@@ -3425,7 +3468,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       // match agt_expr 
       /* Selection is only permitted on 
-	 - structures: for selecting field
+	 - structures: for selecting field or method
 	 - union values: determining tag (need to convert it to at_sel_ctr)
 	 Note that selection for fqn-naming a union constructor
 	 is already handled by the symbol resolver pass  */
@@ -3474,7 +3517,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 			    t, trt, uflags));
       
       shared_ptr<Type> fld;
-      CHKERR(errFree, findComponent(errStream, tr, ast, fld));
+      CHKERR(errFree, findComponent(errStream, tr, ast, fld, ti_flags & TI_METHOD_OK));
 
       if (errFree)
 	ast->symType = fld;
@@ -3721,10 +3764,20 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  ______________________________________________
               A |- (ef e1 ... en): 'e|'br 
        ------------------------------------------------*/
+
+      TI_Flags appFlags = TI_EXPRESSION;
+
+      // A method selector is ONLY permitted in applicative position,
+      // and that will necessarily involve a select AST in that
+      // position. We refuse to accept that in any other context.
+      if (ast->child(0)->astType == at_select)
+	appFlags |= TI_METHOD_OK;
+
       // match agt_expr agt_expr
       //NOTE: One operation safe. (+)
+
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
-		uflags, trail, USE_MODE, TI_EXPRESSION);
+		uflags, trail, USE_MODE, appFlags);
       shared_ptr<Type> fType = ast->child(0)->getType();
 
       if (fType->isStruct()) {
@@ -3733,7 +3786,32 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		  uflags, trail,  USE_MODE, TI_EXPRESSION);
 	break;
       }
-      if (fType->isUType() || fType->isException()) {
+      else if (fType->isMethod()) {
+	// Need to re-write this AST as a normal application. Given
+	// "(s.M args...)", where s is an instance of type S, rewrite
+	// this as (S.M s args...):
+
+	shared_ptr<AST> theSelect = ast->child(0);
+	shared_ptr<AST> theMethod = theSelect->child(1);
+	shared_ptr<AST> theStructure = theSelect->child(0);
+
+	ast->children.insert(ast->children.begin() + 1, theStructure);
+	std::string quasiname = fType->myContainer->s + "." + theMethod->s;
+	theMethod->s = quasiname;
+
+	ast->children[0] = theMethod;
+
+	errStream << ast->child(0)->loc << ": "
+		  << ast->child(0)->s 
+		  << " not handling method call to apply rewrite yet." 
+		  << std::endl;
+
+	ast->astType = at_apply;
+	TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_EXPRESSION);
+	break;
+      }
+      else if (fType->isUType() || fType->isException()) {
 	ast->astType = at_ucon_apply;
 	TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_EXPRESSION);
@@ -3908,7 +3986,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       if ((ast->children.size()-1) != t->components.size()) {
 	errStream << ast->child(0)->loc << ": "
 		  << "Structure " << ast->child(0)->s << " cannot be" 
-		  << " partially/over instantiated."	
+		  << " partially/over instantiated." << '\n'
+		  << "Constructor call has " << (ast->children.size()-1)
+		  << " arguments but structure type has" 
+		  << t->components.size() << " components."
 		  << std::endl;
 	
 	errFree = false;

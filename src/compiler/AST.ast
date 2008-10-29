@@ -107,6 +107,9 @@ enum IdentType {
   /// @brief Structure or union constructor field name.
   id_field,
 
+  /// @brief Structure or capsule method name.
+  id_method,
+
   /// @brief Locally bound name that references the exported subset of
   /// an imported interface.
   ///
@@ -153,8 +156,19 @@ enum IdentType {
 
   /// @brief An entity (value or constructor) that can be applied,
   /// which is one of <code>id_value</code>, <code>id_tcmethod</code>,
-  /// <code>id_struct</code> or <code>id_ucon</code>.
+  /// <code>id_method</code>, <code>id_struct</code>,
+  /// or <code>id_ucon</code>.
   idc_apply,
+
+  /// @brief Any identifier that can legally appear to the left of the
+  /// dot in an at_usesel ast.
+  ///
+  /// This can either be a local name denoting an interface
+  /// (id_interface) or a local name denoting a structure type
+  /// (id_struct).
+  ///
+  ///   id_interface id_struct id_method
+  idc_usesel_lhs,
 };
 
 /// @brief Produces a printable string corresponding to the values in
@@ -628,6 +642,10 @@ struct EnvSet {
   ///  (do ("dobindings"  ("dobinding" id ...) ...)
   ///                             ^     |
   ///                             |_____|
+  ///
+  /// @bug This should not be a shared_ptr, because that creates a
+  /// cycle that will booger the reference counting. It should be a
+  /// weak pointer.
 
   boost::shared_ptr<AST> defForm;
 
@@ -851,8 +869,9 @@ unsigned long long AST::astCount = 0;
 // IDENTIFIERS [2.2]
 LEAF ident;
 LEAF ifident;
-GROUP var = ident | usesel;
-AST usesel = ident ident;
+GROUP var = usesel | ident;
+GROUP uselhs = usesel | ident;
+AST usesel = uselhs ident;
 
 // LITERALS [2.4]
 GROUP literal = charLiteral | boolLiteral
@@ -975,9 +994,10 @@ AST tvlist = tvar*;
 AST constructors = constructor+;
 AST constructor = ident fielditem*;
 
-GROUP fielditem = field | fill;
+GROUP fielditem = field | methdecl | fill;
 AST fields = fielditem*;
 AST field = ident type;
+AST methdecl = ident type;
 AST fill = type;
 AST reserved = type intLiteral;
 
@@ -986,7 +1006,7 @@ GROUP qtype = qualType | type;
 
 // argVec is not able to appear in a "type" position.
 GROUP type = var | tvar | bitfield | refType | valType
-           | fn | byrefType | primaryType | dummyType
+           | fn | methType | byrefType | primaryType | dummyType
            | arrayType | vectorType | typeapp
            // | closureType;
            | mutableType | constType | exceptionType;
@@ -1003,7 +1023,7 @@ AST valType = type;
 // FUNCTION TYPES [3.4.3]
 AST fn = fnargVec type;
 //// METHOD TYPES [3.4.3]
-//AST fn = fnargVec type;
+AST methType = fnargVec type;
 // PRIMARY TYPES [???]
 LEAF primaryType;
 // vectors of argument type (for FN)
