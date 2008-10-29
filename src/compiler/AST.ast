@@ -975,11 +975,10 @@ AST tvlist = tvar*;
 AST constructors = constructor+;
 AST constructor = ident fielditem*;
 
-GROUP fielditem = field | fill | reserved;
+GROUP fielditem = field | fill;
 AST fields = fielditem*;
 AST field = ident type;
-AST fill = type;
-AST reserved = type intLiteral;
+AST fill = type intLiteral?;
 
 // Qualified Type
 GROUP qtype = qualType | type;

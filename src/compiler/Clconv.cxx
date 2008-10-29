@@ -395,7 +395,6 @@ findusedef(std::ostream &errStream,
   case at_constructors:
   case at_fields:
   case at_fill:
-  case at_reserved:
     {
       for (size_t c=0; c < ast->children.size(); c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c),

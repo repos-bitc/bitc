@@ -1183,7 +1183,7 @@ field: '(' tk_FILL bitfieldtype ')'  {
 // required to hold designated values.
 field: '(' tk_RESERVED bitfieldtype intLit ')'  {
   SHOWPARSE("field -> '(' RESERVED bitfieldtype intLit ')'");
-  $$ = AST::make(at_reserved, $1.loc, $3, $4);
+  $$ = AST::make(at_fill, $1.loc, $3, $4);
 };
 
 tvlist: typevar  {

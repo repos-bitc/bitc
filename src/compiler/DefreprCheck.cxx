@@ -103,7 +103,6 @@ getTypeAst(shared_ptr<AST> fld)
     return fld->child(1);
 
   case at_fill:
-  case at_reserved:
     return fld->child(0);
 
   default:

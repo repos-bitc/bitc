@@ -306,9 +306,6 @@ AST::atKwd() const
   case at_fill:
     return "fill";
 
-  case at_reserved:
-    return "reserved";
-
   case at_bitfield:
     return "bitfield";
 

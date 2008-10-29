@@ -148,7 +148,6 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_constructor:
   case at_field:
   case at_fill:
-  case at_reserved:
   case at_defexception:
   case at_proclaim:
   case at_fn:
@@ -169,6 +168,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_reprrepr:
   case at_docString:
   case at_sizeof:
+  case at_bitsizeof:
     {
       break;
     }

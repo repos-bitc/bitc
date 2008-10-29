@@ -834,7 +834,6 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
       }
       
     case at_fill:
-    case at_reserved:
       {
 	ast->total_fill += field->field_bits;
 	break;
@@ -974,7 +973,6 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	  break;
 	}
       case at_fill:
-      case at_reserved:
 	{
 	  ctr->total_fill += field->field_bits;
 	  break;
@@ -2645,34 +2643,24 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<AST> fillType = ast->child(0);
       TYPEINFER(fillType, gamma, instEnv, impTypes, isVP, 
 		tcc, uflags, trail,  USE_MODE, 
-		TI_TYP_EXP | TI_TYP_DEFN);
-      ast->symType = ast->child(0)->symType;
-      ast->field_bits = fillType->field_bits;
-      break;
-    }
-
-  case at_reserved:
-    {      
-      // match agt_type 
-      shared_ptr<AST> fillType = ast->child(0);
-      TYPEINFER(fillType, gamma, instEnv, impTypes, isVP, 
-		tcc, uflags, trail,  USE_MODE, 
 		TI_TYP_EXP | TI_TYP_DEFN);     
       ast->field_bits = fillType->field_bits;
+  
+      if(ast->children.size() == 2) {
+	shared_ptr<AST> fillVal = ast->child(0);
+	TYPEINFER(fillVal, gamma, instEnv, impTypes, isVP, 
+		  tcc, uflags, trail,  USE_MODE, 
+		  TI_TYP_EXP | TI_TYP_DEFN);     
       
-      shared_ptr<AST> fillVal = ast->child(0);
-      TYPEINFER(fillVal, gamma, instEnv, impTypes, isVP, 
-		tcc, uflags, trail,  USE_MODE, 
-		TI_TYP_EXP | TI_TYP_DEFN);     
+	uint64_t val = fillVal->litValue.i.as_uint64();
+	uint64_t maxVal = (((uint64_t)1) << fillType->nBits()) - 1;
       
-      uint64_t val = fillVal->litValue.i.as_uint64();
-      uint64_t maxVal = (((uint64_t)1) << fillType->nBits()) - 1;
-      
-      if (val > maxVal) {
-	errStream << ast->loc << ": "
-		  << "Not enough bits to store the reserved value"
-		  << std::endl;
-	errFree = false;
+	if (val > maxVal) {
+	  errStream << ast->loc << ": "
+		    << "Not enough bits to store the reserved value"
+		    << std::endl;
+	  errFree = false;
+	}
       }
 
       ast->symType = ast->child(0)->symType;

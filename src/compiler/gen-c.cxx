@@ -590,8 +590,7 @@ emit_ct_args(INOstream &out, shared_ptr<AST> fields, size_t start=0)
     shared_ptr<AST> field = fields->child(c);
 
     if (field->astType == at_fill ||
-       field->astType == at_reserved ||
-       (field->flags & FLD_IS_DISCM))
+	(field->flags & FLD_IS_DISCM))
       continue;
 
     if (emitted1)
@@ -611,14 +610,13 @@ emit_ct_inits(INOstream &out, shared_ptr<AST> fields,
 {
   for (size_t i = start; i < fields->children.size(); i++) {
     shared_ptr<AST> field = fields->child(i);
-    if (field->astType == at_fill)
-      continue;
-	
-    if (field->astType == at_reserved) {
-      out << pre << "__reserved" << field->ID
-	  << " = "
-	  << field->child(1)->litValue.i;
-      out << ";" << endl;
+    if (field->astType == at_fill) {
+      if(field->children.size() == 2) {
+	out << pre << "__reserved" << field->ID
+	    << " = "
+	    << field->child(1)->litValue.i;
+	out << ";" << endl;
+      }
       continue;
     }
 
@@ -1287,20 +1285,14 @@ toc(std::ostream& errStream,
 
   case at_fill:
     {
-      out << decl(ast->child(0)->symType, "/* fill */",
-		  CTYP_EMIT_BF, ast->field_bits)
-	  << ";" << endl;
-      break;
-    }
+      string s = "/* fill */";
+      if(ast->children.size() == 2) {
+	stringstream ss;
+	ss << "__reserved" << ast->ID;
+	s = CMangle(ss.str());
+      }
 
-  case at_reserved:
-    {
-      stringstream ss;
-      ss << "__reserved" << ast->ID;
-      string s = ss.str();
-
-      out << decl(ast->child(0)->symType,
-		  CMangle(s),
+      out << decl(ast->child(0)->symType, s,
 		  CTYP_EMIT_BF, ast->field_bits)
 	  << ";" << endl;
 

@@ -1160,9 +1160,8 @@ UocInfo::recInstantiate(ostream &errStream,
       break;
     }
 
-  case at_fill:
   case at_bitfield:
-  case at_reserved:
+  case at_fill:
     {
       break;
     }
@@ -1829,7 +1828,7 @@ UocInfo::doInstantiate(ostream &errStream,
       // type-variables.
       copy->child(1)->children.clear();
 
-      // We happily replaced the use of old name wiith new name and
+      // We happily replaced the use of old name with new name and
       // removed type-variables. But there may be typeapps in the
       // fields, and old tvars must now refer to concrete types. So,
       // fix that before recursing over the fields.
