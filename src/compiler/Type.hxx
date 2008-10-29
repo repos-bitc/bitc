@@ -763,12 +763,12 @@ public:
   //Argument and return types of function-types
   boost::shared_ptr<Type> & Args() const
   {
-    TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn);
+    TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn || kind == ty_method);
     return CompType(0);
   }  
   boost::shared_ptr<Type> & Ret() const
   {
-    TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn);
+    TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn || kind == ty_method);
     return CompType(1);
   }  
   //The Inner type of Maybe-types
