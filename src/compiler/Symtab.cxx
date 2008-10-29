@@ -1740,7 +1740,7 @@ resolve(std::ostream& errStream,
 	RESOLVE(fld, env, lamLevel, USE_MODE, identType,
 		currLB, flags); 
 
-	if (fld->astType == at_fill || fld->astType == at_reserved)
+	if (fld->astType == at_fill)
 	  // This entry has no name.
 	  continue;
 	
@@ -1777,19 +1777,10 @@ resolve(std::ostream& errStream,
 	      idc_type, currLB, 
 	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
-      break;
-    }
-
-  case at_reserved:
-    {
-      // match agt_type?
-      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
-
-      RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+      if(ast->children.size() == 2)
+	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
+		idc_type, currLB, 
+		flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       break;
     }

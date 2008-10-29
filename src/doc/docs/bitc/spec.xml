@@ -1132,7 +1132,8 @@ use</literallayout>
 <literallayout>
 <em>nm</em>:<em>type</em>
 (the <em>type</em> <em>nm</em>)
-(fill <em>bitfield-type</em>)</literallayout>
+(fill <em>bitfield-type</em>)
+(reserved <em>bitfield-type</em> <em>value</em>)</literallayout>
           <p indent="no">
             All names <progident><em>nm</em></progident> are disjoint
 	    identifiers giving the names of the structure fields, and
@@ -1151,6 +1152,13 @@ use</literallayout>
             and storage layout of its base type, however a fill field
             has no name or defined value, and cannot be
             programatically referenced.
+          </p>
+          <p>
+            A <progident>reserved</progident> element may be used to
+            specify a reserved bit position in a low-level data
+            structure that is required to hold a known value. It is
+            otherwise identical to a <progident>field</progident>
+            element.
           </p>
           <p>
 	    An identifier that is bound to a structure type may be used

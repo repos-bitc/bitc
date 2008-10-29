@@ -997,9 +997,8 @@ AST constructor = ident fielditem*;
 GROUP fielditem = field | methdecl | fill;
 AST fields = fielditem*;
 AST field = ident type;
+AST fill = type intLiteral?;
 AST methdecl = ident type;
-AST fill = type;
-AST reserved = type intLiteral;
 
 // Qualified Type
 GROUP qtype = qualType | type;

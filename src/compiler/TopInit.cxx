@@ -207,7 +207,6 @@ TopInit(std::ostream& errStream,
   case at_field:
   case at_methdecl:
   case at_fill:
-  case at_reserved:
   case at_proclaim:
   case at_defexception:
   case at_deftypeclass:
@@ -253,6 +252,7 @@ TopInit(std::ostream& errStream,
   case at_unit:
   case at_lambda:
   case at_sizeof:
+  case at_bitsizeof:
     break;
 
   case at_ident:
