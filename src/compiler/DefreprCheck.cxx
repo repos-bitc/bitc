@@ -35,7 +35,9 @@
  *
  **************************************************************************/
 
-/// @file Requirements checking pass for DEFREPR declarations.
+/// @file 
+///
+/// @brief Requirements checking pass for DEFREPR declarations.
 ///
 ///
 /// Consider the defrepr:
@@ -100,6 +102,7 @@ getTypeAst(shared_ptr<AST> fld)
 {
   switch(fld->astType) {
   case at_field:
+  case at_methdecl:
     return fld->child(1);
 
   case at_fill:

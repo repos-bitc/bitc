@@ -48,7 +48,11 @@ enum TI_FlagValues {
   TI_TYP_EXP      = 0x01u,
   TI_TYP_APP      = 0x02u,
   TI_TCC_SUB      = 0x04u,
-  TI_TYP_DEFN     = 0x08u 
+  TI_TYP_DEFN     = 0x08u, 
+
+  /// @brief Passed downward from at_apply handler when the thing in
+  /// the applicative position is a select node.
+  TI_METHOD_OK    = 0x10u
 };
 typedef sherpa::EnumSet<TI_FlagValues> TI_Flags;
 

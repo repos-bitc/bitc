@@ -259,6 +259,7 @@ ssa(std::ostream& errStream,
   case at_constructor:
   case at_fields:
   case at_field:
+  case at_methdecl:
   case at_fill:
   case at_tcdecls:
   case at_tyfn:

@@ -215,7 +215,8 @@ findField(std::ostream& errStream,
 
 static bool
 findComponent(std::ostream& errStream, 
-	      shared_ptr<Type> sut, shared_ptr<AST> ast, shared_ptr<Type> &fct)
+	      shared_ptr<Type> sut, shared_ptr<AST> ast,
+	      shared_ptr<Type> &fct, bool orMethod = false)
 {
   sut = sut->getType();
   assert(ast->astType == at_select || 
@@ -235,18 +236,31 @@ findComponent(std::ostream& errStream,
   }
   
   bool valid=false;
-  for (size_t i=0; i < sut->components.size(); i++)
+  for (size_t i=0; i < sut->components.size(); i++) {
     if (sut->CompName(i) == ast->child(1)->s) {
       fct = sut->CompType(i)->getType();	  
       valid = ((sut->CompFlags(i) & COMP_INVALID) == 0);
       break;
     }
+  }
       
+  if (orMethod && !fct) {
+    for (size_t i=0; i < sut->methods.size(); i++) {
+      if (sut->MethodName(i) == ast->child(1)->s) {
+	fct = sut->MethodType(i)->getType();	  
+	valid = ((sut->MethodFlags(i) & COMP_INVALID) == 0);
+	break;
+      }
+    }
+  }
+
   if (!fct) {
     errStream << ast->loc << ": "
 	      << " In the expression " << ast->asString() << ", "
 	      << " structure/constructor " << sut->defAst->s 
-	      << " has no Field/Constructor named " 
+	      << " has no Field/Constructor"
+	      << (orMethod ? "/Method" : "")
+	      << " named " 
 	      << ast->child(1)->s << "." << std::endl;
     return false;
   } 
@@ -807,7 +821,6 @@ markCCC(shared_ptr<Type> ct)
   }
 }
 
-
 // Called only for definitions
 static bool
 InferStruct(std::ostream& errStream, shared_ptr<AST> ast, 
@@ -825,7 +838,6 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
 	    TI_Flags ti_flags)
 {
   bool errFree = true;
-  size_t c;
   Kind structKind;
   
   shared_ptr<AST> sIdent = ast->child(0);
@@ -867,7 +879,7 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
     
   // match at_fields
   shared_ptr<AST> fields = ast->child(4);
-  for (c = 0; c < fields->children.size(); c++) {
+  for (size_t c = 0; c < fields->children.size(); c++) {
     // match at_ident
     // match agt_type
     shared_ptr<AST> field = fields->child(c);
@@ -882,7 +894,7 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
     case at_field:
       {
 	st->components.push_back(comp::make(field->child(0)->s,
-					field->child(1)->symType));
+					    field->child(1)->symType));
 	break;
       }
       
@@ -891,6 +903,14 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
 	ast->total_fill += field->field_bits;
 	break;
       }
+    case at_methdecl:
+      {
+	st->methods.push_back(comp::make(field->child(0)->s,
+					 field->child(1)->symType));
+	field->child(1)->symType->myContainer = sIdent;
+	break;
+      }
+
     default:
       {
 	assert(false);
@@ -940,7 +960,6 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 {
 
   bool errFree = true;
-  size_t c;
   Kind unionKind;
   
   shared_ptr<AST> uIdent = ast->child(0);
@@ -985,7 +1004,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
   
   // match at_constructors
   shared_ptr<AST> ctrs = ast->child(4);
-  for (c = 0; c < ctrs->children.size(); c++) {
+  for (size_t c = 0; c < ctrs->children.size(); c++) {
     // match at_ident
     // match agt_type
     shared_ptr<AST> ctr = ctrs->child(c);
@@ -1018,7 +1037,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       case at_field:
 	{
 	  shared_ptr<comp> nComp = comp::make(field->child(0)->s,
-				       field->child(1)->symType);
+					      field->child(1)->symType);
 	  if (field->flags & FLD_IS_DISCM)
 	    nComp->flags |= COMP_UNIN_DISCM;
 	  
@@ -1030,6 +1049,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	  ctr->total_fill += field->field_bits;
 	  break;
 	}
+	// Note: at_methdecl illegal here, so omission is intentional.
       default:
 	{
 	  assert(false);
@@ -1042,14 +1062,13 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
     // as the union. This rule -- unlike the one in Haskell -- 
     // requires that the tcc be absolutely enforced.
     shared_ptr<TypeScheme> ctrSigma = TypeScheme::make(ctrId->symType, 
-						ctrId, sigma->tcc);
+						       ctrId, sigma->tcc);
     
     // This may feel wierd -- that All constructors point to the same
     // type arguments rather than a copy. But since every instance is 
     // newly obtained, this is OK.
-    for (size_t i = 0; i < tvList->children.size(); i++) {
+    for (size_t i = 0; i < tvList->children.size(); i++)
       ctrId->symType->typeArgs.push_back(tvList->child(i)->symType);
-    }
     
     // Don't add ctrSigma to gamma yet. Constructors are 
     // bound at the end of the definition
@@ -1074,7 +1093,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 					 instEnv, trail)); 
   
   //Now add all constructor bindings to the environment.
-  for (c = 0; c < ctrs->children.size(); c++) {
+  for (size_t c = 0; c < ctrs->children.size(); c++) {
     shared_ptr<AST> ctr = ctrs->child(c);
     shared_ptr<AST> ctrId = ctr->child(0);   
     addTvsToSigma(errStream, tvList, ctrId->scheme, trail);
@@ -1085,7 +1104,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
   }
 
   //Build structure types for all constructors.
-  for (c = 0; c < ctrs->children.size(); c++) {
+  for (size_t c = 0; c < ctrs->children.size(); c++) {
     shared_ptr<AST> ctr = ctrs->child(c)->child(0);
     shared_ptr<Type> ctrType = ctr->symType->getType();
     shared_ptr<TypeScheme> ctrSigma = ctr->scheme;
@@ -1097,7 +1116,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> thatCtrType = thatCtr->symType->getType();
       
       if (ctrType->components.size() != 
-	 thatCtrType->components.size())
+	  thatCtrType->components.size())
 	continue;
       
       // Since there can be no constructors with only fills
@@ -1109,7 +1128,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	shared_ptr<comp> thatComp = thatCtrType->Component(j);
 	
 	if ((thisComp->name != thatComp->name) ||
-	   !thisComp->typ->strictlyEquals(thatComp->typ)) {
+	    !thisComp->typ->strictlyEquals(thatComp->typ)) {
 	  same = false;
 	  break;
 	}
@@ -1129,7 +1148,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       sType->defAst = ctr; // structures have names like (cons 'a)
       for (size_t i=0; i < ctrType->components.size(); i++)
 	sType->components.push_back(comp::make(ctrType->CompName(i),
-					  ctrType->CompType(i)));
+					       ctrType->CompType(i)));
       // Comp's Flags are not necesary here ?
  
       
@@ -1201,8 +1220,8 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
       bool isEnum = true;
       
       for (size_t c = 0; 
-	  cardelli && (c < ctrs->children.size()); 
-	  c++) {
+	   cardelli && (c < ctrs->children.size()); 
+	   c++) {
 	shared_ptr<AST> ctr = ctrs->child(c);
 	
 	switch(ctr->children.size()) {
@@ -1222,8 +1241,8 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	  }
 	  
 	  if (ctr->child(1)->symType->isRefType() || 
-	     ctr->child(1)->symType->isConstrainedToRefType(sigma->tcc) ||
-	     ctr->child(1)->symType->isNullableType())
+	      ctr->child(1)->symType->isConstrainedToRefType(sigma->tcc) ||
+	      ctr->child(1)->symType->isNullableType())
 	    seenRef = true;
 	  else
 	    cardelli = false;
@@ -2672,6 +2691,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     // match at_field*
     break;
 
+  case at_methdecl: 
+    // Handling for at_methdecl is basically the same as for at_field.
+    // However, note the a post-pass over structures  is made in
+    // InferStruct to synthesize declarations for the functions
+    // corresponding to each method.
   case at_field: 
     {
       // match at_ident
@@ -2889,6 +2913,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }    
 
+  case at_methType:
   case at_fn:
     {
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
@@ -2896,7 +2921,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		uflags, trail,  mode, TI_NON_APP_TYPE);
       
-      ast->symType = Type::make(ty_fn);
+      ast->symType = Type::make((ast->astType == at_fn) ? ty_fn : ty_method);
       shared_ptr<Type> fnarg = ast->child(0)->symType->getType();
       ast->symType->components.push_back(comp::make(fnarg));
       shared_ptr<comp> nComp = comp::make(ast->child(1)->getType());
@@ -3093,8 +3118,9 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		  << " partially/over instantiated" 
 		  << " For type " << sut->asString()
 		  << ", " << sut->typeArgs.size()
-		  << " arguments are needed. But obtained "
+		  << " arguments are needed. But "
 		  << ast->children.size() -1
+		  << " were provided."
 		  << std::endl;
 	errFree = false;
       }
@@ -3466,7 +3492,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       // match agt_expr 
       /* Selection is only permitted on 
-	 - structures: for selecting field
+	 - structures: for selecting field or method
 	 - union values: determining tag (need to convert it to at_sel_ctr)
 	 Note that selection for fqn-naming a union constructor
 	 is already handled by the symbol resolver pass  */
@@ -3515,7 +3541,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 			    t, trt, uflags));
       
       shared_ptr<Type> fld;
-      CHKERR(errFree, findComponent(errStream, tr, ast, fld));
+      CHKERR(errFree, findComponent(errStream, tr, ast, fld, ti_flags & TI_METHOD_OK));
 
       if (errFree)
 	ast->symType = fld;
@@ -3762,10 +3788,20 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  ______________________________________________
               A |- (ef e1 ... en): 'e|'br 
        ------------------------------------------------*/
+
+      TI_Flags appFlags = TI_EXPRESSION;
+
+      // A method selector is ONLY permitted in applicative position,
+      // and that will necessarily involve a select AST in that
+      // position. We refuse to accept that in any other context.
+      if (ast->child(0)->astType == at_select)
+	appFlags |= TI_METHOD_OK;
+
       // match agt_expr agt_expr
       //NOTE: One operation safe. (+)
+
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
-		uflags, trail, USE_MODE, TI_EXPRESSION);
+		uflags, trail, USE_MODE, appFlags);
       shared_ptr<Type> fType = ast->child(0)->getType();
 
       if (fType->isStruct()) {
@@ -3774,7 +3810,28 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		  uflags, trail,  USE_MODE, TI_EXPRESSION);
 	break;
       }
-      if (fType->isUType() || fType->isException()) {
+      else if (fType->isMethod()) {
+	assert (ast->child(0)->astType == at_select);
+	// Need to re-write this AST as a normal application. Given
+	// "(s.M args...)", where s is an instance of type S, rewrite
+	// this as (S.M s args...):
+
+	shared_ptr<AST> theSelect = ast->child(0);
+	shared_ptr<AST> theMethod = theSelect->child(1);
+	shared_ptr<AST> theStructure = theSelect->child(0);
+
+	ast->children.insert(ast->children.begin() + 1, theStructure);
+	std::string quasiname = fType->myContainer->s + "." + theMethod->s;
+	theMethod->s = quasiname;
+
+	ast->children[0] = theMethod;
+
+	ast->astType = at_apply;
+	TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_EXPRESSION);
+	break;
+      }
+      else if (fType->isUType() || fType->isException()) {
 	ast->astType = at_ucon_apply;
 	TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,
 		  uflags, trail,  USE_MODE, TI_EXPRESSION);
@@ -3949,7 +4006,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       if ((ast->children.size()-1) != t->components.size()) {
 	errStream << ast->child(0)->loc << ": "
 		  << "Structure " << ast->child(0)->s << " cannot be" 
-		  << " partially/over instantiated."	
+		  << " partially/over instantiated." << '\n'
+		  << "Constructor call has " << (ast->children.size()-1)
+		  << " arguments but structure type has" 
+		  << t->components.size() << " components."
 		  << std::endl;
 	
 	errFree = false;

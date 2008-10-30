@@ -346,6 +346,9 @@ public:
   
   std::vector<boost::shared_ptr<comp> > components;
   std::vector<boost::shared_ptr<Type> > typeArgs;  
+
+  /// @brief Method names and their types for structures and objects
+  std::vector<boost::shared_ptr<comp> > methods;
     
   // Mark Flags:  used for Traversal
   // Used to prevent infinite recursion
@@ -434,6 +437,7 @@ public:
   bool isUval(bool ignMut=true);  // 3. Constructed union value (includes zero arity ctrs).
   bool isULeg(bool ignMut=true);  // 2 or 3.
   bool isUType(bool ignMut=true); // 1, 2, or 3.
+  bool isMethod(); // 1, 2, or 3.
   bool isDecl();
   bool isException();
   bool isStruct();
@@ -744,15 +748,27 @@ public:
   {
     return components[i]->flags;
   }
+  boost::shared_ptr<Type> & MethodType(size_t i) const
+  {
+    return methods[i]->typ;
+  }
+  std::string& MethodName(size_t i) const
+  {
+    return methods[i]->name;
+  }
+  CompFlagSet& MethodFlags(size_t i) const
+  {
+    return methods[i]->flags;
+  }
   //Argument and return types of function-types
   boost::shared_ptr<Type> & Args() const
   {
-    TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn);
+    TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn || kind == ty_method);
     return CompType(0);
   }  
   boost::shared_ptr<Type> & Ret() const
   {
-    TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn);
+    TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn || kind == ty_method);
     return CompType(1);
   }  
   //The Inner type of Maybe-types

@@ -122,6 +122,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 /* Primary types and associated hand-recognized literals: */
 %token <tok> '(' ')' ','	/* unit */
 %token <tok> '[' ']'	/* unit */
+%token <tok> '.'
 %token <tok> tk_AS
 %token <tok> tk_BOOL
 %token <tok> tk_TRUE   /* #t */
@@ -261,12 +262,14 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> types type bitfieldtype bool_type 
 %type <ast> field_type type_pl_byref types_pl_byref
 %type <ast> int_type uint_type any_int_type float_type
-%type <ast> tvlist fields field 
+%type <ast> tvlist
+%type <ast> fields field 
+%type <ast> fields_and_methods methdecl
 %type <ast> literal typevar //mod_ident
 %type <ast> ident defident useident switch_matches switch_match
 %type <ast> exident
 %type <ast> docstring optdocstring
-%type <ast> condcases condcase fntype
+%type <ast> condcases condcase fntype method_type
 %type <ast> fneffect
  //%type <ast> reprbody reprbodyitems reprbodyitem reprtags reprcase reprcaseleg
 //%type <ast> typecase_leg typecase_legs 
@@ -629,7 +632,7 @@ ptype_name: '(' defident tvlist ')' {
 //};
 
 // STRUCTURE TYPES [3.6.1]           
-type_definition: '(' tk_DEFSTRUCT ptype_name val optdocstring declares fields ')'  {
+type_definition: '(' tk_DEFSTRUCT ptype_name val optdocstring declares fields_and_methods ')'  {
   SHOWPARSE("type_definition -> ( DEFSTRUCT ptype_name val "
 	    "optdocstring declares fields )");
   $$ = AST::make(at_defstruct, $2.loc, $3->child(0), $3->child(1), $4,
@@ -1186,6 +1189,33 @@ field: '(' tk_RESERVED bitfieldtype intLit ')'  {
   $$ = AST::make(at_fill, $1.loc, $3, $4);
 };
 
+methdecl: ident ':' method_type  {
+  SHOWPARSE("field -> ident : method_type");
+  $$ = AST::make(at_methdecl, $1->loc, $1, $3);
+};
+
+fields_and_methods: methdecl  {
+  SHOWPARSE("fields_and_methods -> methdecl");
+  $$ = AST::make(at_fields, $1->loc, $1);
+};
+
+fields_and_methods: field  {
+  SHOWPARSE("fields_and_methods -> field");
+  $$ = AST::make(at_fields, $1->loc, $1);
+};
+
+fields_and_methods: fields_and_methods methdecl {
+  SHOWPARSE("fields_and_methods -> fields_and_methods methdecl ");
+  $$ = $1;
+  $$->addChild($2);
+};
+
+fields_and_methods: fields_and_methods field {
+  SHOWPARSE("fields_and_methods -> fields_and_methods field ");
+  $$ = $1;
+  $$->addChild($2);
+};
+
 tvlist: typevar  {
   SHOWPARSE("tvlist -> typevar");
   $$ = AST::make(at_tvlist, $1->loc, $1);
@@ -1381,10 +1411,16 @@ fntype: '(' fneffect tk_FN types_pl_byref tk_FNARROW type ')'  {
 
 // METHOD TYPES [3.9]
 // Note: not complete; need methods taking no arguments.
-//methodtype: '(' fneffect tk_METHOD types_bl_byref tk_FNARROW type ')' {
-//  SHOWPARSE("methodtype -> ( fneffect METHOD types_pl_byref -> type )");
-//  $$ = AST::make(at_method, $1.loc, $4, $6);
-//};
+method_type: '(' fneffect tk_METHOD tk_FNARROW type ')' {
+  SHOWPARSE("methodtype -> ( fneffect METHOD -> type )");
+  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $4.loc);
+  $$ = AST::make(at_methType, $1.loc, fnargVec, $5);
+};
+
+method_type: '(' fneffect tk_METHOD types_pl_byref tk_FNARROW type ')' {
+  SHOWPARSE("methodtype -> ( fneffect METHOD types_pl_byref -> type )");
+  $$ = AST::make(at_methType, $1.loc, $4, $6);
+};
 
 /* type: '(' tk_METHOD tvapp fntype')' { */
 /*   SHOWPARSE("METHOD tcapp fntype )"); */
@@ -2005,6 +2041,7 @@ switch_match: ident '.' ident {
 switch_match: ident '.' ident '.' ident {
   SHOWPARSE("switch_match -> ident '.' ident '.' ident");
   shared_ptr<AST> usesel = AST::make(at_usesel, $1->loc, $1, $3);  
+  usesel->s = $1->s + "." + $3->s;
   $$ = AST::make(at_select, $1->loc, usesel, $5);
 };
 
@@ -2212,7 +2249,20 @@ useident: ident {
 
 useident: ident '.' ident { 
   SHOWPARSE("useident -> ident . ident");
-  $$ = AST::make(at_usesel, $1->loc, $1, $3);
+  shared_ptr<AST> usesel = AST::make(at_usesel, $2.loc, $1, $3);  
+  usesel->s = $1->s + "." + $3->s;
+  $$ = usesel;
+};
+
+useident: ident '.' ident '.' ident { 
+  SHOWPARSE("useident -> ident . ident . ident");
+
+  shared_ptr<AST> lhs = AST::make(at_usesel, $2.loc, $1, $3);
+  lhs->s = $1->s + "." + $3->s;
+
+  shared_ptr<AST> usesel = AST::make(at_usesel, $4.loc, lhs, $5);  
+  usesel->s = lhs->s + "." + $5->s;
+  $$ = usesel;
 };
 
 //defident: ident {
