@@ -68,7 +68,7 @@ enum UnifyFlagValues {
   UFLG_UN_IGN_RIGIDITY     = 0x00040u,
   UFLG_ALL_INSTS_OK        = 0x00080u, // All instances are OK.
 
-  // We have passedrefization pass of Closure conversion. The
+  // We have passed refization pass of Closure conversion. The
   // (temporary?) restriction that letrecs must define only define
   // lambdas must be prepared to take closures or refs to functions /
   // closures.
