@@ -517,6 +517,60 @@ checkConstraints(std::ostream& errStream,
   return errFree;
 }
 
+/// @brief Return true if the type described by sigmaA is at least as general
+/// as the type described by sigmaB.
+///
+/// Returns false if the two types are not compatible.
+///
+/// Concept: If the result of unifying the two types sigmaA and sigmaB
+/// succeeds and does not reduce the number of free type variables in
+/// sigmaB, then unification with sigmaA did not cause a resolution of
+/// any type variable in sigmaB, and sigmaA must therefore be at least
+/// as general as sigmaB.
+static bool
+isAsGeneral(std::ostream& errStream,
+	    shared_ptr<Trail> trail,
+	    shared_ptr<const TSEnvironment > gamma,
+	    shared_ptr<InstEnvironment > instEnv,
+	    shared_ptr<TypeScheme> sigmaA,
+	    shared_ptr<TypeScheme> sigmaB,
+	    UnifyFlags uflags,
+	    bool fnCopyCompatibility)
+{
+  bool isAsGeneral = true;
+
+  shared_ptr<AST> astB = sigmaB->ast;
+
+  size_t num_B_tvs = sigmaB->ftvs.size();
+
+  // Fix: it is not clear to me what should be passed here in uflags.
+  {
+    shared_ptr<Trail> testTrail = Trail::make();
+    bool canUnify = unify(errStream, testTrail, LexLoc(),
+			  sigmaA->tau->getType(), sigmaB->tau->getType(),
+			  uflags);
+
+    CHKERR(isAsGeneral, canUnify);
+
+    TypeSet gottenTypes;
+    for(TypeSet::iterator itr = sigmaB->ftvs.begin();
+	isAsGeneral && itr != sigmaB->ftvs.end(); ++itr) {
+      shared_ptr<Type> ftv = (*itr)->getType();
+      gottenTypes.insert(ftv);
+      CHKERR(isAsGeneral, (ftv->kind == ty_tvar));
+    }
+
+    if (isAsGeneral)
+      CHKERR(isAsGeneral, checkConstraints(errStream, sigmaA, sigmaB, astB));
+
+    CHKERR(isAsGeneral, gottenTypes.size() == num_B_tvs);
+
+    testTrail->rollBack();
+  }
+
+  return isAsGeneral;
+}
+
 /* Checks the types of:
      - A definition vs Declaration
      - A declaration vs a previous declaration
@@ -531,6 +585,9 @@ matchDefDecl(std::ostream& errStream,
 	     UnifyFlags uflags,
 	     bool fnCopyCompatibility)
 {
+  if (uflags & UFLG_DEF_DECL_NO_MATCH)
+    return true;  
+  
   bool errorFree = true;   
   const shared_ptr<AST> decl = declSigma->ast;
   shared_ptr<const AST>  def = defSigma->ast;
@@ -538,14 +595,10 @@ matchDefDecl(std::ostream& errStream,
   DEF_DECL_DEBUG 
     verbose = true;
   
-  if (uflags & UFLG_DEF_DECL_NO_MATCH)
-    return true;  
-  
   if (declSigma->ftvs.size() != defSigma->ftvs.size()) {
     errorFree = false;
   }
   else {
-    
     shared_ptr<TypeScheme> declTS = declSigma;
     shared_ptr<TypeScheme> defTS = defSigma;
     shared_ptr<Type> declT = declTS->tau->getType();
