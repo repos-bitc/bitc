@@ -107,7 +107,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %pure-parser
 %parse-param {SexprLexer *lexer}
 
-%token <tok> tk_Reserved	/* reserved words */
+%token <tok> tk_ReservedWord	/* reserved words */
 
 /* Categorical terminals: */
 %token <tok> tk_Ident
@@ -147,7 +147,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 
 %token <tok> tk_BITFIELD
 %token <tok> tk_FILL
-%token <tok> tk_RESERVED // not to be confused with tk_Reserved
+%token <tok> tk_RESERVED
 %token <tok> tk_WHERE
   
 %token <tok> tk_BITC_VERSION
@@ -2186,7 +2186,7 @@ exident: tk_Ident {
   $$ = AST::make(at_ident, $1);
 };
 
-exident: tk_Reserved {
+exident: tk_ReservedWord {
   SHOWPARSE("exident -> <Reserved " + $1.str + ">");
   $$ = AST::make(at_ident, $1);
 };
@@ -2197,7 +2197,7 @@ ident: tk_Ident {
   $$ = AST::make(at_ident, $1);
 };
 
-ident: tk_Reserved {
+ident: tk_ReservedWord {
   SHOWPARSE("ident -> <RESERVED=" + $1.str + ">");
   cerr << $1.loc.asString() << ": The token \"" << $1.str 
        << "\" is reserved for future use.\n";
