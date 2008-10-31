@@ -1214,7 +1214,7 @@ Type::getDCopy()
   shared_ptr<TypeScheme> sigma = TypeScheme::make(t, GC_NULL);
   // sigma's ftvs are empty, therefore, TypeSpecialize will link
   // all type-variables to the original ones
-  shared_ptr<Type> newTyp = sigma->type_instance_copy();
+  shared_ptr<Type> newTyp = sigma->type_instance();
   newTyp->flags = flags;
   return newTyp;
 }
@@ -1260,7 +1260,7 @@ Type::eql(shared_ptr<Type> t, bool verbose, std::ostream &errStream,
 bool
 Type::equals(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
-  return eql(t, verbose, errStream, UFLG_UNIFY_TRY, false);
+  return eql(t, verbose, errStream, /*UFLG_UNIFY_TRY*/UFLG_NO_FLAGS, false);
 }
 
 bool 
@@ -1268,7 +1268,7 @@ Type::strictlyEquals(shared_ptr<Type> t, bool verbose,
 		     bool noAlphaRename,
 		     std::ostream &errStream)
 {
-  UnifyFlags uflags = UFLG_UNIFY_TRY | UFLG_UNIFY_STRICT;
+  UnifyFlags uflags = /*UFLG_UNIFY_TRY | */ UFLG_UNIFY_STRICT;
   if (noAlphaRename)
     uflags |= UFLG_UNIFY_STRICT_TVAR;
   return eql(t, verbose, errStream, uflags, false);
@@ -1292,7 +1292,7 @@ bool
 Type::equalsA(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
   return eql(t, verbose, errStream, 
-	     UFLG_UNIFY_TRY | UFLG_UN_IGN_RIGIDITY, false);
+	     /*UFLG_UNIFY_TRY | */ UFLG_UN_IGN_RIGIDITY, false);
 }
 
 bool 
@@ -1300,7 +1300,7 @@ Type::strictlyEqualsA(shared_ptr<Type> t, bool verbose,
 		      std::ostream &errStream)
 {
   return eql(t, verbose, errStream, 
-	     UFLG_UNIFY_TRY | UFLG_UNIFY_STRICT | UFLG_UN_IGN_RIGIDITY, false);
+	     /*UFLG_UNIFY_TRY |*/ UFLG_UNIFY_STRICT | UFLG_UN_IGN_RIGIDITY, false);
 }
 
 bool 

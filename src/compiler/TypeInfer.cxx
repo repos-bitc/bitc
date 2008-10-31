@@ -183,7 +183,7 @@ Instantiate(shared_ptr<AST> ast, shared_ptr<TypeScheme> sigma,
   bool suInst = (ast->isIdentType(idc_ctor) ||
 		 ast->isIdentType(id_union)); 
   
-  ins = suInst?sigma->ts_instance_copy():sigma->ts_instance();
+  ins = sigma->ts_instance();
   ins->tau->fixupFnTypes();
   
   if(suInst && !ins->tau->isException())
@@ -534,8 +534,7 @@ isAsGeneral(std::ostream& errStream,
 	    shared_ptr<InstEnvironment > instEnv,
 	    shared_ptr<TypeScheme> sigmaA,
 	    shared_ptr<TypeScheme> sigmaB,
-	    UnifyFlags uflags,
-	    bool fnCopyCompatibility)
+	    UnifyFlags uflags)
 {
   bool isAsGeneral = true;
 
@@ -582,8 +581,7 @@ matchDefDecl(std::ostream& errStream,
 	     shared_ptr<InstEnvironment > instEnv,
 	     shared_ptr<TypeScheme> declSigma,
 	     shared_ptr<TypeScheme> defSigma,
-	     UnifyFlags uflags,
-	     bool fnCopyCompatibility)
+	     UnifyFlags uflags)
 {
   if (uflags & UFLG_DEF_DECL_NO_MATCH)
     return true;  
@@ -604,34 +602,10 @@ matchDefDecl(std::ostream& errStream,
     shared_ptr<Type> declT = declTS->tau->getType();
     shared_ptr<Type> defT  = defTS->tau->getType();
     
-    if (fnCopyCompatibility && declT->isFnxn() && defT->isFnxn()) {
-      declTS = declSigma->ts_instance_copy();
-      declT = declTS->tau->getType();      
-      
-      shared_ptr<Type> argsDecl = declT->getBareType()->Args();
-      shared_ptr<Type> argsDef = defT->getBareType()->Args();
-      if (argsDecl->components.size() == argsDef->components.size()) {
-	for (size_t c=0; c < argsDecl->components.size(); c++) {	    
-	  shared_ptr<Type> argDecl = argsDecl->CompType(c)->minimizeMutability();
-	  shared_ptr<Type> argDef = argsDef->CompType(c)->minimizeMutability();
-	  CHKERR(errorFree, argDecl->strictlyEquals(argDef, verbose));
-	}
-      }
-      else {
-	errorFree = false;
-      }
-      
-      shared_ptr<Type> retDecl = declT->getBareType()->Ret()->minimizeMutability();
-      shared_ptr<Type> retDef = defT->getBareType()->Ret()->minimizeMutability();
-      CHKERR(errorFree, retDecl->strictlyEquals(retDef, verbose));
-    }
-    else {
-      CHKERR(errorFree, declT->strictlyEquals(defT, verbose));
-    }
-
+    CHKERR(errorFree, declT->strictlyEquals(defT, verbose));
     if (errorFree)
       CHKERR(errorFree, checkConstraints(errStream, defTS, declTS, decl));
-
+    
     // Rigidness preservation:
     // Make sure that after unification, the declaration/definition is
     // no less general than what was previously declared.
@@ -916,7 +890,7 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
   // Ensure that the definition matches the declarations
   if (declTS)
     CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
-				 declTS, sigma, uflags, false));
+				 declTS, sigma, uflags));
   
   return errFree;
 }
@@ -1283,7 +1257,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
   // Ensure that the definition matches the declarations
   if (declTS)
     CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
-				 declTS, sigma, uflags, false));
+				 declTS, sigma, uflags));
   
   return errFree;
 }
@@ -1884,7 +1858,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<TypeScheme> icSigma = gamma->getBinding(intLit);
       assert(icSigma);
       
-      shared_ptr<Typeclass> ic = icSigma->type_instance_copy();
+      shared_ptr<Typeclass> ic = icSigma->type_instance();
       assert(ic->typeArgs.size() == 1);
       ast->symType = ic->TypeArg(0)->getType();
       tcc->addPred(ic);
@@ -1912,7 +1886,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<TypeScheme> fcSigma = gamma->getBinding(floatLit);
       assert(fcSigma);
       
-      shared_ptr<Typeclass> fc = fcSigma->type_instance_copy();
+      shared_ptr<Typeclass> fc = fcSigma->type_instance();
       assert(fc->typeArgs.size() == 1);
       ast->symType = fc->TypeArg(0)->getType();
       tcc->addPred(fc);
@@ -2187,7 +2161,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	ident->symType->defAst = ts->tau->getType()->defAst;
 
 	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
-				     ts, sigma, uflags, false));
+				     ts, sigma, uflags));
       }
       else {
 	defGamma->addBinding(ident->s, sigma);
@@ -2267,7 +2241,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       if (ts) {
 	ident->symType->defAst = ts->tau->getType()->defAst;
 	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
-				     ts, sigma, uflags, false));      
+				     ts, sigma, uflags));      
       }
       else {
 	defGamma->addBinding(ident->s, sigma);
@@ -2420,7 +2394,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       if (declTS)
 	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
-				     declTS, sigma, uflags, false));	
+				     declTS, sigma, uflags));	
       break;
     }
 
@@ -2509,7 +2483,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       if (declTS) 
 	CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
-				     declTS, ident->scheme, uflags, true));
+				     declTS, ident->scheme, uflags));
 
       ast->symType = ast->child(0)->symType;
       break;
@@ -3500,7 +3474,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       else
 	stScheme = t1->defAst->scheme;
       
-      shared_ptr<Type> tr = stScheme->type_instance_copy();
+      shared_ptr<Type> tr = stScheme->type_instance();
 
       if (tr->isValType())
 	for (size_t i=0; i < tr->typeArgs.size(); i++) {
@@ -4480,7 +4454,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       /* Deal with the component structure identifier */
       shared_ptr<TypeScheme> stSigma = aCtr->symbolDef->stSigma;
-      shared_ptr<Type> stType = stSigma->type_instance_copy();
+      shared_ptr<Type> stType = stSigma->type_instance();
       /* If we decide to alow the unification of the structure
 	 type with the union type, this must be done there */
       assert(stType->typeArgs.size() == aCtrType->typeArgs.size());      
@@ -4644,7 +4618,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  // Make sIdent's type the correct type.
 	  shared_ptr<AST> onlyCtr = theCase->child(2)->getCtr();
 	  assert(onlyCtr->symbolDef->stSigma);
-	  shared_ptr<Type> stType = onlyCtr->symbolDef->stSigma->type_instance_copy();
+	  shared_ptr<Type> stType = onlyCtr->symbolDef->stSigma->type_instance();
 	  stIdent->symType = stType;
 	  stIdent->scheme->tau = stType;
 	  assert(stIdent->scheme->ftvs.empty());
@@ -5004,7 +4978,7 @@ bool
 UocInfo::DoTypeCheck(std::ostream& errStream, bool init, 
 		     UnifyFlags uflags)
 {
-  TI_TOP_DEBUG
+  TI_UNITWISE
     errStream << "Now Processing " << uocName
 	      << " ast = " << uocAst->astTypeName()
 	      << std::endl;
@@ -5044,14 +5018,14 @@ UocInfo::DoTypeCheck(std::ostream& errStream, bool init,
 			    USE_MODE, TI_NO_FLAGS));
   CHKERR(errFree, checkImpreciseTypes(errStream, gamma, impTypes));
 
-  TI_TOP_DEBUG {
+  TI_UNITWISE {
     errStream << "- - - - - - - - - - - - - - - - - - - - - - - " 
 	      << endl;
     
     shared_ptr<AST> mod = uocAst;
     for (size_t i=0; i < mod->children.size(); i++) {
       shared_ptr<AST> ast = mod->child(i);
-      errStream << ast->atKwd() << std::endl;
+      //errStream << ast->atKwd() << std::endl;
       if (ast->astType == at_define || ast->astType == at_recdef) {
 	shared_ptr<AST> id = ast->child(0)->child(0);
 	errStream << id->asString() << ": "	

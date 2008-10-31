@@ -69,11 +69,11 @@ TypeScheme::TypeScheme(shared_ptr<Type> _tau, shared_ptr<AST> _ast, shared_ptr<T
 }
 
 shared_ptr<Type> 
-TypeScheme::type_instance_copy()
+TypeScheme::type_instance()
 {
   normalize();
 
-  //std::cout << "Instantiating by copy " << this->asString();
+  //std::cout << "Instantiating " << this->asString();
 
   vector<shared_ptr<Type> > cnftvs;
   vector<shared_ptr<Type> > cftvs;
@@ -90,27 +90,8 @@ TypeScheme::type_instance_copy()
   return t;
 }
 
-
-shared_ptr<Type> 
-TypeScheme::type_instance()
-{
-  normalize();
-  //std::cout << "Instantiating " << this->asString();
-
-  shared_ptr<Type> t;
-  if (ftvs.empty())
-    t = tau;
-  else
-    t = type_instance_copy();
-
-  //std::cout << " to " << t->asString() << std::endl;
-
-  return t;
-}
-
-
 shared_ptr<TypeScheme> 
-TypeScheme::ts_instance(bool fullCopy)
+TypeScheme::ts_instance()
 {
   normalize();
 
@@ -128,11 +109,8 @@ TypeScheme::ts_instance(bool fullCopy)
     cnftvs.push_back(tv);
   }
   
-  if (fullCopy || ftvs.size())
-    ts->tau = tau->TypeSpecializeReal(cftvs, cnftvs);  
-  else 
-    ts->tau = tau;
- 
+  ts->tau = tau->TypeSpecializeReal(cftvs, cnftvs);  
+  
   if (tcc) {
     shared_ptr<TCConstraints> _tcc = TCConstraints::make();
     addConstraints(_tcc);
@@ -142,29 +120,19 @@ TypeScheme::ts_instance(bool fullCopy)
 	itr != _tcc->end(); ++itr) {
       shared_ptr<Typeclass> pred;
       
-      if (fullCopy || ftvs.size())
-	pred = (*itr)->TypeSpecializeReal(cftvs, cnftvs);
-      else
-	pred = (*itr);
-      
+      pred = (*itr)->TypeSpecializeReal(cftvs, cnftvs);
       ts->tcc->addPred(pred);
     }
   }
-
+  
   tau->clear_sp();
-
+  
   if (tcc)
     for (TypeSet::iterator itr = tcc->begin();
 	itr != tcc->end(); ++itr)
       (*itr)->clear_sp();
   
   return ts;
-}
-
-shared_ptr<TypeScheme> 
-TypeScheme::ts_instance_copy() 
-{
-  return ts_instance(true);
 }
 
 void
