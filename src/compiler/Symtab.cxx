@@ -935,7 +935,6 @@ resolve(std::ostream& errStream,
 
   case at_module:
     {
-      flags |= RSLV_IS_MODULE;
       // match agt_definition*
       for (size_t c = 0; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
@@ -2663,7 +2662,7 @@ UocInfo::DoResolve(std::ostream& errStream, bool init,
   shared_ptr<ASTEnvironment > aliasEnv = ASTEnvironment::make("*aliases*");
 
   if (init) {    
-    if (rflags & RSLV_SYM_REINIT) {
+    if (false) {
       assert(env);      
       assert(env->parent);
       env = env->parent->newDefScope();

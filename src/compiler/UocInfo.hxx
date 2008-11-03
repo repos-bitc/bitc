@@ -256,19 +256,19 @@ public:
   
 // Post inference Flags
 #define PI_SYM_FLAGS (RSLV_NO_RESOLVE_DECL)
-#define PI_TYP_FLAGS (UFLG_ALL_INSTS_OK)
+#define PI_TYP_FLAGS (TI_ALL_INSTS_OK)
 
 // RandTflags used by onePass definitions
 #define OP_SYM_FLAGS (PI_SYM_FLAGS | RSLV_SYM_NO_PRELUDE)
-#define OP_TYP_FLAGS (PI_TYP_FLAGS | UFLG_TYP_NO_PRELUDE)
+#define OP_TYP_FLAGS (PI_TYP_FLAGS | TI_NO_PRELUDE)
 
 // RandT flags used by passes past polyinstantiation. 
 #define POLY_SYM_FLAGS (OP_SYM_FLAGS | RSLV_SYM_POST_POLY)
-#define POLY_TYP_FLAGS (OP_TYP_FLAGS | UFLG_NO_MORE_TC | UFLG_DEF_DECL_NO_MATCH)
+#define POLY_TYP_FLAGS (OP_TYP_FLAGS | TI_NO_MORE_TC | TI_DEF_DECL_NO_MATCH)
 
 // RandT flags used by passes Refization pass of Closure-conversion.
 #define REF_SYM_FLAGS (POLY_SYM_FLAGS | RSLV_INCOMPLETE_NO_CHK)
-#define REF_TYP_FLAGS (POLY_TYP_FLAGS | UFLG_POST_REFIZE)
+#define REF_TYP_FLAGS (POLY_TYP_FLAGS)
 
 // RandT flags used by passes past Closure-conversion. 
 #define CL_SYM_FLAGS (REF_SYM_FLAGS)
@@ -283,22 +283,22 @@ public:
 
   bool 
   DoTypeCheck(std::ostream& errStream, bool init, 
-	    UnifyFlags uflags);
+	      TI_Flags ti_flags);
 
   bool 
   TypeCheck(std::ostream& errStream, bool init, 
-	    UnifyFlags uflags, std::string pre);
+	    TI_Flags ti_flags, std::string pre);
 
   bool RandT(std::ostream& errStream,
 	     bool init=false, 
 	     ResolverFlags rflags= RSLV_NO_FLAGS,
-	     UnifyFlags uflags=UFLG_NO_FLAGS,
+	     TI_Flags ti_flags=TI_NO_FLAGS,
 	     std::string pre = "Internal Compiler error :");
 
   bool RandTexpr(std::ostream& errStream,
 		 boost::shared_ptr<AST> ast,
 		 ResolverFlags rflags= RSLV_NO_FLAGS,
-		 UnifyFlags uflags=UFLG_NO_FLAGS,
+		 TI_Flags ti_flags=TI_NO_FLAGS,
 		 std::string pre = "Internal Compiler error :",
 		 bool keepResults = true,
 		 boost::shared_ptr<EnvSet> altEnvSet=boost::GC_NULL);

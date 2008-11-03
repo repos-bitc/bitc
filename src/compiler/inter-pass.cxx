@@ -62,7 +62,7 @@ bool
 UocInfo::RandT(std::ostream& errStream,
 	       bool init,
 	       ResolverFlags rflags,
-	       UnifyFlags uflags,
+	       TI_Flags uflags,
 	       std::string mesg)
 {
   bool errFree = true;
@@ -112,7 +112,7 @@ bool
 UocInfo::RandTexpr(std::ostream& errStream,
 		   shared_ptr<AST> expr,
 		   ResolverFlags rflags,
-		   UnifyFlags uflags,
+		   TI_Flags uflags,
 		   std::string mesg,
 		   bool keepResults,
 		   shared_ptr<EnvSet> altEnvSet)
