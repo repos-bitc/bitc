@@ -64,8 +64,8 @@ bool
 Instance::equals(shared_ptr<Instance> ins, 
 		 shared_ptr<const InstEnvironment > instEnv) const
 {
-  shared_ptr<TypeScheme> mySigma = ts->ts_instance_copy();
-  shared_ptr<TypeScheme> hisSigma = ins->ts->ts_instance_copy();
+  shared_ptr<TypeScheme> mySigma = ts->ts_instance();
+  shared_ptr<TypeScheme> hisSigma = ins->ts->ts_instance();
 
   //std::cerr << mySigma->asString() << " vs " 
   //	    << hisSigma->asString() 
@@ -137,7 +137,7 @@ Instance::satisfies(shared_ptr<Typeclass> pred,
 		    instEnv) const
 {
   bool unifies = true;
-  shared_ptr<TypeScheme> sigma = ts->ts_instance_copy();
+  shared_ptr<TypeScheme> sigma = ts->ts_instance();
 
   CHKERR(unifies, sigma->tau->unifyWith(pred));   
   

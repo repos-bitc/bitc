@@ -66,7 +66,7 @@ obtainFullUnionType(shared_ptr<Type> t)
   assert(t->isUType());
   shared_ptr<AST> unin = t->myContainer;  
   shared_ptr<TypeScheme> uScheme = unin->scheme;
-  shared_ptr<Type> uType = uScheme->type_instance_copy()->getType();
+  shared_ptr<Type> uType = uScheme->type_instance()->getType();
 
   assert(uType->kind == ty_unionv || uType->kind == ty_unionr);
   assert(uType->typeArgs.size() == t->typeArgs.size());
@@ -150,7 +150,7 @@ bool
 initGamma(std::ostream& errStream, 
 	  shared_ptr<TSEnvironment > gamma,
 	  shared_ptr<InstEnvironment > instEnv,
-	  const shared_ptr<AST> topAst, UnifyFlags uflags)
+	  const shared_ptr<AST> topAst)
 {
   bool errFree = true;
   // Make sure I am not processing the prelude itself

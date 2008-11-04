@@ -40,50 +40,63 @@
 
 /// @brief Flags used by Type-inference engine.
 ///
-/// They are internal flags for communication/processing within
-/// the different Type inference procedures.
-/// These flags are different from the Unifier's flags.
+/// They are used for communication/processing within
+/// the different Type inference procedures, and for driving the
+/// inference engine under certain special conditions.
+
 enum TI_FlagValues {
-  TI_NO_FLAGS     = 0x00u,
-  TI_TYP_EXP      = 0x01u,
-  TI_TYP_APP      = 0x02u,
-  TI_TCC_SUB      = 0x04u,
-  TI_TYP_DEFN     = 0x08u, 
+  TI_NO_FLAGS            = 0x000u,
+  /// The following flags are used for internal communication within
+  /// the type inference algorithm.
+
+  /// Inference engine is now within a type AST 
+  /// (ex: (fn int -> bool))
+  TI_TYP_EXP             = 0x001u,
+  /// Inference engine is within a type AST that is a type application 
+  /// (ex: (pair int bool)
+  TI_TYP_APP             = 0x002u,
+  /// Inference engine is processing a subsumed type class
+  /// (ex: Since Ord is a sub-class of Eq, the presence of Ord
+  /// constraint subsumes the presence of another Eq Constraint)
+  TI_TCC_SUB             = 0x004u,
+  /// Processing a Type definition
+  /// (ex: defstruct and defunion)
+  TI_TYP_DEFN            = 0x008u,
+
+  /// The following flags are used to drive the inference engine under
+  /// specific modes/conditions.
+  
+  /// No longer need to check Declaration/Definition matching
+  TI_DEF_DECL_NO_MATCH   = 0x010u,
+
+  /// Don't import prelude
+  TI_NO_PRELUDE          = 0x020u,
+
+  /// No more type classes: The inference system will not add default
+  /// constraints (ex: IntLit/FloatLit constraints on 
+  /// Integer/Float literals). This mode is used beyond the 
+  /// polyinstantiation pass.
+  TI_NO_MORE_TC          = 0x040u,
+
+  /// No longer need to check instance permissibility, since this
+  /// check is expensive, and only needs to be performed once.
+  TI_ALL_INSTS_OK        = 0x100u,
 
   /// @brief Passed downward from at_apply handler when the thing in
   /// the applicative position is a select node.
-  TI_METHOD_OK    = 0x10u
+  TI_METHOD_OK           = 0x200u
 };
 typedef sherpa::EnumSet<TI_FlagValues> TI_Flags;
 
-
 /* The following flags are Unification Flags. */
-
 enum UnifyFlagValues {
-  UFLG_NO_FLAGS            = 0x0,
-
-  UFLG_UNIFY_STRICT        = 0x00001u, // Overrides everything else.
-  UFLG_UNIFY_STRICT_TVAR   = 0x00002u, // No-alpha-renaming.
-  UFLG_UNIFY_TRY           = 0x00004u, // Trial mode.
-  UFLG_DEF_DECL_NO_MATCH   = 0x00008u,
-  UFLG_TYP_NO_PRELUDE      = 0x00010u,
-  // No more type classes beyond polyinstantiation
-  UFLG_NO_MORE_TC          = 0x00020u,
-  UFLG_UN_IGN_RIGIDITY     = 0x00040u,
-  UFLG_ALL_INSTS_OK        = 0x00080u, // All instances are OK.
-
-  // We have passed refization pass of Closure conversion. The
-  // (temporary?) restriction that letrecs must define only define
-  // lambdas must be prepared to take closures or refs to functions /
-  // closures.
-  UFLG_POST_REFIZE         = 0x00100u,
-
-  UFLG_INF_REINIT          = 0x00200u,
-  // Unifying the Var() part of an mbFull type. Here, the
-  // propagateMutability() check must not be performed.
-  UFLG_UN_MBFULL_VAR       = 0x00400u
+  UFLG_NO_FLAGS            = 0x00,
+  UFLG_UNIFY_STRICT        = 0x01u, // Overrides everything else.
+  UFLG_UNIFY_STRICT_TVAR   = 0x02u, // No-alpha-renaming.
+  UFLG_UN_IGN_RIGIDITY     = 0x04u,
 };
 
 typedef sherpa::EnumSet<UnifyFlagValues> UnifyFlags;
+
 
 #endif /* TYPEINFER_HXX */

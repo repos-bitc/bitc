@@ -52,8 +52,9 @@
 #define REPR_SIMP_DEBUG   DEBUG_OFF
 #define UNION_INF_DEBUG   DEBUG_OFF
 #define DEF_INF_DEBUG     DEBUG_OFF
-#define TI_TOP_DEBUG      DEBUG_OFF  // Inference Top-Loop
-#define TI_AST_DEBUG      DEBUG_OFF  // Inference AST-wise output
+#define TI_TOP_DEBUG      DEBUG_OFF   // Inference Top-Loop
+#define TI_UNITWISE       DEBUG_OFF   // Print Inferred interface/module info
+#define TI_AST_DEBUG      DEBUG_OFF   // Inference AST-wise output
 #define CLCONV_DEBUG      DEBUG_OFF
 #define GEN_DEBUG_TL      DEBUG_OFF   // Treat all generalization as local
 #define GEN_DEBUG         DEBUG_OFF   // Debug Type Generalization

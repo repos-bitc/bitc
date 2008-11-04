@@ -51,7 +51,7 @@ bool
 initGamma(std::ostream& errStream, 
 	  boost::shared_ptr<TSEnvironment > gamma,
 	  boost::shared_ptr<InstEnvironment > instEnv,
-	  const boost::shared_ptr<AST> ast, UnifyFlags uflags);
+	  const boost::shared_ptr<AST> ast);
 
 void
 useIFGamma(const std::string& idName,

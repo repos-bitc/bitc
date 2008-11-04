@@ -824,7 +824,6 @@ unify(std::ostream& errStream,
 {
   bool errFree = true;
 
-  assert((uflags & UFLG_UN_MBFULL_VAR) == 0);
   CHKERR(errFree, Unify(errStream, trail, errLoc, ft, st, uflags));
   
   WorkList<shared_ptr<Type> > worklist;

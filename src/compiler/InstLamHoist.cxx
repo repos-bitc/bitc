@@ -148,10 +148,10 @@ UocInfo::fe_HoistInstLam(std::ostream& errStream,
 
   ILH_DEBUG std::cerr << "cl_HoistInstLam" << std::endl;
   cl_HoistInstLam(shared_from_this());
-
+  
   ILH_DEBUG if (isSourceUoc())
     PrettyPrint(errStream);
-
+  
   ILH_DEBUG std::cerr << "RandT" << std::endl;
   // Re-run the type checker to propagate the changes:
   CHKERR(errFree, RandT(errStream, true, PI_SYM_FLAGS, PI_TYP_FLAGS));

@@ -339,7 +339,7 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
   shared_ptr<TypeScheme> instScheme = GC_NULL;  
   for (set<shared_ptr<Instance> >::iterator itr_j = insts->begin();
       itr_j != insts->end(); ++itr_j) {
-    shared_ptr<TypeScheme> ts = (*itr_j)->ts->ts_instance_copy();
+    shared_ptr<TypeScheme> ts = (*itr_j)->ts->ts_instance();
     shared_ptr<Type> inst = ts->tau;
 
     

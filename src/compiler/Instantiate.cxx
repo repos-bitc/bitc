@@ -945,7 +945,7 @@ getDefToInstantiate(ostream &errStream, shared_ptr<UocInfo> unifiedUOC,
     // First look at the typeclass, get a copy of its type.
     shared_ptr<AST> typClass = def->defForm;
     shared_ptr<AST> tcID = typClass->child(0);
-    shared_ptr<Typeclass> pred = tcID->scheme->type_instance_copy();
+    shared_ptr<Typeclass> pred = tcID->scheme->type_instance();
 
     // Then find out which method we are concerned about.
     size_t nthMethod = 0;
