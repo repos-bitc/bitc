@@ -138,10 +138,35 @@
   (proclaim __index_lt: (fn word word -> bool) external bitc_index_lt)
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; TYPE CLASS FOR TYPES THAT HAVE LITERALS
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  (deftypeclass (LiteralType 'a))
+
+  (definstance (LiteralType char))
+
+  (definstance (LiteralType word))
+  (definstance (LiteralType  int8))
+  (definstance (LiteralType uint8))
+  (definstance (LiteralType  int16))
+  (definstance (LiteralType uint16))
+  (definstance (LiteralType  int32))
+  (definstance (LiteralType uint32))
+  (definstance (LiteralType  int64))
+  (definstance (LiteralType uint64))
+
+  (definstance (LiteralType float))
+  (definstance (LiteralType double))
+  (definstance (LiteralType quad))
+
+  (definstance (LiteralType string))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPE CLASS FOR INTEGER LITERALS
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  (deftypeclass (IntLit 'a))
+  (forall ((LiteralType 'a))
+    (deftypeclass (IntLit 'a)))
 
   (definstance (IntLit word))
   (definstance (IntLit  int8))
@@ -156,7 +181,8 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPE CLASS FOR FLOATING POINT LITERALS
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (deftypeclass (FloatLit 'a))  	
+  (forall ((LiteralType 'a))
+    (deftypeclass (FloatLit 'a)))
 
   (definstance (FloatLit float))
   (definstance (FloatLit double))
