@@ -941,6 +941,107 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
   return errFree;
 }
 
+// Called only for definitions
+static bool
+InferObject(std::ostream& errStream, shared_ptr<AST> ast, 
+	    shared_ptr<TSEnvironment > gamma,
+	    shared_ptr<InstEnvironment > instEnv,
+	    TypeAstMap& impTypes,
+	    bool isVP, 
+	    shared_ptr<TCConstraints> tcc,
+	    UnifyFlags uflags,
+	    shared_ptr<Trail> trail,
+	    ResolutionMode mode,
+	    bool isReference,
+	    bool mustDefine,
+	    bool mustEvalBody,
+	    TI_Flags ti_flags)
+{
+  bool errFree = true;
+  Kind structKind;
+  
+  shared_ptr<AST> sIdent = ast->child(0);
+
+  // match at_ident
+  structKind = (isReference)? ty_objectr : ty_objectv;
+   
+  shared_ptr<Type> st = Type::make(structKind);
+  st->defAst = sIdent;
+  st->myContainer = sIdent;
+  sIdent->symType = st;
+  shared_ptr<TypeScheme> sigma = TypeScheme::make(st, sIdent, TCConstraints::make());
+
+  // match at_tvlist
+  shared_ptr<AST> tvList = ast->child(1);
+  CHKERR(errFree, InferTvList(errStream, tvList, gamma, instEnv, impTypes, 
+			      isVP, sigma->tcc, uflags, trail, DEF_MODE, 
+			      TI_TYP_EXP, st));
+  sIdent->scheme = sigma;
+
+  // Type all constraints
+  TYPEINFER(ast->child(5), gamma, instEnv, impTypes, isVP, 
+	    sigma->tcc, uflags, trail,  mode, TI_CONSTRAINT);
+  
+  shared_ptr<TypeScheme> declTS = gamma->getBinding(sIdent->s);
+  unsigned long bindFlags = 0;
+  if (declTS) {
+    declTS->tau->getBareType()->defAst = sIdent;
+    bindFlags = BF_REBIND;
+  }
+  gamma->addBinding(sIdent->s, sigma);
+  gamma->setFlags(sIdent->s, bindFlags);
+
+  // Ignore the category
+
+  // match at_declares
+  TYPEINFER(ast->child(3), gamma, instEnv, impTypes, isVP, sigma->tcc,
+	    uflags, trail,  mode, TI_NO_FLAGS);
+    
+  // match at_fields
+  shared_ptr<AST> fields = ast->child(4);
+  for (size_t c = 0; c < fields->children.size(); c++) {
+    // match at_ident
+    // match agt_type
+    shared_ptr<AST> field = fields->child(c);
+    TYPEINFER(field, gamma, instEnv, impTypes, isVP, 
+	      sigma->tcc, uflags, trail,  USE_MODE, 
+	      TI_TYP_EXP | TI_TYP_DEFN);
+    
+    CHKERR(errFree, CheckMutConsistency(errStream,
+					field->loc, field->symType));
+    
+    assert(field->astType == at_methdecl);
+
+    st->methods.push_back(comp::make(field->child(0)->s,
+				     field->child(1)->symType));
+    field->child(1)->symType->myContainer = sIdent;
+    break;
+  }
+  
+  // Add Ftvs so that they get generalized in future uses
+  addTvsToSigma(errStream, tvList, sigma, trail); 
+  
+  // In case of value type definitions, mark all those  
+  // type arguments that are candidiates for copy-compatibility.
+  markCCC(st);
+  
+  // Set the main AST's type.
+  ast->symType = sIdent->symType;
+   
+  // Solve current Predicates.
+  CHKERR(errFree, sigma->solvePredicates(errStream, ast->loc,
+					 instEnv, trail)); 
+
+#if 0
+  // Ensure that the definition matches the declarations
+  if (declTS)
+    CHKERR(errFree, matchDefDecl(errStream, trail, gamma, instEnv,
+				 declTS, sigma, uflags, false));
+#endif
+  
+  return errFree;
+}
+
 
 // Called only for definitions
 static bool
@@ -2133,6 +2234,23 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       bool isRefType = (category->astType == at_refCat);
 
       CHKERR(errFree, InferStruct(errStream, ast, defGamma, instEnv,
+				  impTypes, isVP, tcc,
+				  uflags, trail,  mode, isRefType, 
+				  true, true, TI_NO_FLAGS));
+
+      gamma->mergeBindingsFrom(defGamma);      
+      break;
+    }
+
+  case at_defobject:
+    {
+      shared_ptr<TSEnvironment > defGamma = gamma->newDefScope();
+      ast->envs.gamma = defGamma;
+
+      shared_ptr<AST> category = ast->child(2);
+      bool isRefType = (category->astType == at_refCat);
+
+      CHKERR(errFree, InferObject(errStream, ast, defGamma, instEnv,
 				  impTypes, isVP, tcc,
 				  uflags, trail,  mode, isRefType, 
 				  true, true, TI_NO_FLAGS));
@@ -3810,6 +3928,12 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		  uflags, trail,  USE_MODE, TI_EXPRESSION);
 	break;
       }
+      if (fType->isObject()) {
+	ast->astType = at_object_apply;
+	TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_EXPRESSION);
+	break;
+      }
       else if (fType->isMethod()) {
 	assert (ast->child(0)->astType == at_select);
 	// Need to re-write this AST as a normal application. Given
@@ -3987,7 +4111,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       // Structure constructor cannot be a mutable or maybe type.
       shared_ptr<Type> t = ctr->symType->getType();
       if ((ctr->astType != at_ident) ||
-	 (!ctr->symbolDef->isIdentType(id_struct))) {
+	  (!ctr->symbolDef->isIdentType(id_struct))) {
 	errStream << ctr->loc
 		  << ": Expected structure"
 		  << " constructor taking at least one argument."
@@ -4012,6 +4136,78 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 		  << t->components.size() << " components."
 		  << std::endl;
 	
+	errFree = false;
+	break;
+      }
+
+      for (size_t i=0; i < t->components.size(); i++) {
+	shared_ptr<AST> arg = ast->child(i+1);
+	TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_EXPRESSION);
+	
+	shared_ptr<Type> tv = newTvar();
+	CHKERR(errFree, unify(errStream, trail, arg->loc, 
+			      t->CompType(i), MBF(tv), uflags));
+	
+	CHKERR(errFree, unify(errStream, trail, arg->loc, 
+			      arg->symType, MBF(tv), uflags));
+      }
+
+      ast->symType = t;
+      break;
+    }
+
+  case at_object_apply:
+    // FIX!!
+    {
+       /*------------------------------------------------
+           A(r) = ['a1.. 'am] {f1:t1 ... fn:tn}
+      A |- ef:r(s1 ... sm)   A |- e1:t1' ... A |- en: tn'
+      
+               U(t1  = 'c1|'b1) ... U(tn  = 'cn|'bn)
+               U(t1' = 'd1|'b1) ... U(tn' = 'dn|'bn)
+      ______________________________________________________
+              A |- (r e1 ... en): r(s1 ... sm)
+       ------------------------------------------------*/
+      // match at_ident
+      
+      ast->symType = newTvar();
+      shared_ptr<AST> ctr = ast->child(0);
+      if (!ctr->symType)
+	TYPEINFER(ctr, gamma, instEnv, impTypes, isVP, tcc,
+		  uflags, trail,  USE_MODE, TI_EXPRESSION);
+      
+      // Object constructor cannot be a mutable or maybe type.
+      shared_ptr<Type> t = ctr->symType->getType();
+      if ((ctr->astType != at_ident) ||
+	  (!ctr->symbolDef->isIdentType(id_struct))) {
+	errStream << ctr->loc
+		  << ": Expected object"
+		  << " constructor taking at least one argument."
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+      if (t->components.size() == 0) {
+	errStream << ast->child(0)->loc << ": "
+		  << ast->child(0)->s << " cannot instantiate without "
+		  << "definition in scope."
+		  << std::endl;
+	errFree = false;
+	break;
+      }
+
+      // Object construction takes exactly one argument, which must be
+      // a compatible structure type:
+      if ((ast->children.size()-1) != 1) {
+	errStream << ast->child(0)->loc << ": "
+		  << "Object " << ast->child(0)->s
+		  << " should be instantiated with exactly one"
+		  << " argument of compatible structure type." 
+		  << std::endl;
+	
+	// FIX: Rest of checks here.
+
 	errFree = false;
 	break;
       }

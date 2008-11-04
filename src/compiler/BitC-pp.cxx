@@ -353,6 +353,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_letGather:
   case at_apply:
   case at_struct_apply:
+  case at_object_apply:
   case at_ucon_apply:
     {
       out << "(";

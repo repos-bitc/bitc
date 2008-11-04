@@ -98,6 +98,9 @@ enum IdentType {
   /// @brief Structure type name.
   id_struct,
 
+  /// @brief Object type name.
+  id_object,
+
   /// @brief %Type class name.
   id_typeclass,
 
@@ -911,6 +914,7 @@ GROUP definition = type_definition | value_definition | if_definition
                    | tc_definition;
 
 GROUP type_definition = defunion | defstruct
+                      | defobject
                       | declunion | declstruct
                       | declrepr | defrepr
                    /*  | deftype  */
@@ -928,6 +932,9 @@ AST declunion = ident tvlist category constraints;
 // STRUCTURE TYPES [3.6.1]
 AST defstruct = ident tvlist category declares fields constraints;
 AST declstruct = ident tvlist category constraints;
+
+// OBJECT TYPES [3.6.1]
+AST defobject = ident tvlist category declares fields constraints;
 
 // REPR TYPES [3.6.1]
 //AST defrepr = ident tvlist category declares reprbody constraints;
@@ -1060,7 +1067,7 @@ GROUP eform = literal | var | unit
             | array_nth | vector_nth
             | array_length | vector_length
             | lambda | suspend
-            | apply | struct_apply | ucon_apply
+            | apply | struct_apply | object_apply | ucon_apply
             | if | when | and | or | not | cond | switch
             | setbang | dup | deref | inner_ref
 	    | try | throw | let | letStar | letrec
@@ -1125,6 +1132,7 @@ AST argVec = identPattern*;
 // APPLICATION [7.10]
 AST apply = expr expr*;
 AST struct_apply = var expr+;
+AST object_apply = var expr;
 AST ucon_apply = ucon expr+;
 
 // IF [7.11.1]

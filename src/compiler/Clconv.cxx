@@ -492,6 +492,7 @@ findusedef(std::ostream &errStream,
 
   case at_ucon_apply:
   case at_struct_apply:
+  case at_object_apply:
     {
       for (size_t c=1; c<ast->children.size();c++)
 	CHKERR(errFree, findusedef(errStream, topAst, ast->child(c),

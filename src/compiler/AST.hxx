@@ -101,6 +101,9 @@ enum IdentType {
   /// @brief Structure type name.
   id_struct,
 
+  /// @brief Object type name.
+  id_object,
+
   /// @brief %Type class name.
   id_typeclass,
 
@@ -559,6 +562,7 @@ enum AstType {
   at_declunion,
   at_defstruct,
   at_declstruct,
+  at_defobject,
   at_defrepr,
   at_declrepr,
   at_reprctrs,
@@ -631,6 +635,7 @@ enum AstType {
   at_argVec,
   at_apply,
   at_struct_apply,
+  at_object_apply,
   at_ucon_apply,
   at_if,
   at_when,

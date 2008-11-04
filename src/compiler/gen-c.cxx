@@ -1304,6 +1304,12 @@ toc(std::ostream& errStream,
       break;
     }
 
+  case at_object_apply:
+    {
+      // FIX: This needs to be handled differently.
+      errStream << "Object apply not yet implemented in code generator" << endl;
+      break;
+    }
   case at_ucon_apply:
   case at_struct_apply:
     {

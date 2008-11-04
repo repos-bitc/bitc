@@ -954,11 +954,17 @@ Type::isStruct()
 {
   shared_ptr<Type> t = getBareType();
 
-  // WAS  return (((t->kind == ty_structv) || 
-  //               (t->kind == ty_structr)) &&
-  //           	  (t->components->size() != 0));
   return ((t->kind == ty_structv) || 
 	  (t->kind == ty_structr));
+}
+
+bool 
+Type::isObject()
+{
+  shared_ptr<Type> t = getBareType();
+
+  return ((t->kind == ty_objectv) || 
+	  (t->kind == ty_objectr));
 }
 
 bool 

@@ -944,7 +944,8 @@ resolve(std::ostream& errStream,
 
 	ast->fqn = importedFQN;
       }
-      else if (lhs->identType == id_struct) {
+      else if ((lhs->identType == id_struct) ||
+	       (lhs->identType == id_object)) {
 	ast->s = lhs->s + "." + ast->child(1)->s;
 	ast->astType = at_ident;
 	ast->identType = ast->child(1)->identType;
@@ -1038,15 +1039,19 @@ resolve(std::ostream& errStream,
     }
 
   case at_defstruct:
+  case at_defobject:
     {
       shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
       shared_ptr<AST> category = ast->child(2);
 
+      IdentType idendType = 
+	(ast->astType == at_defstruct) ? id_struct : id_object;
+
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
-	      id_struct, ast,
+	      identType, ast,
 	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK) | RSLV_BIND_PUBLIC);
       if (category->astType == at_refCat)
 	tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
@@ -2162,6 +2167,7 @@ resolve(std::ostream& errStream,
     }
     
   case at_struct_apply:
+  case at_object_apply:
   case at_ucon_apply: 
   case at_apply:
     {

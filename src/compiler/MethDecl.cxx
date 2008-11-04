@@ -79,7 +79,8 @@ insertMethDecls(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
     shared_ptr<AST> theTypeDefn = ast->child(c);
     newChildren.push_back(theTypeDefn);
 
-    if (theTypeDefn->astType != at_defstruct)
+    if ((theTypeDefn->astType != at_defstruct) &&
+	(theTypeDefn->astType != at_defobject))
       continue;
 
     // Typename might be an at_usesel here, but the parser has set

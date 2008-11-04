@@ -182,6 +182,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_VECTOR_NTH
 
 %token <tok> tk_DEFSTRUCT
+%token <tok> tk_DEFOBJECT
 %token <tok> tk_DEFUNION
 %token <tok> tk_DEFREPR
 %token <tok> tk_DEFTHM
@@ -264,7 +265,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> int_type uint_type any_int_type float_type
 %type <ast> tvlist
 %type <ast> fields field 
-%type <ast> fields_and_methods methdecl
+%type <ast> fields_and_methods methods_only methdecl
 %type <ast> literal typevar //mod_ident
 %type <ast> ident defident useident switch_matches switch_match
 %type <ast> exident
@@ -757,6 +758,22 @@ externals: tk_EXTERNAL exident {
 };
 
 
+// OBJECT TYPES [3.6.1]           
+type_definition: '(' tk_DEFOBJECT ptype_name optdocstring declares methods_only ')'  {
+  SHOWPARSE("type_definition -> ( DEFSTRUCT ptype_name val "
+	    "optdocstring declares fields )");
+
+  // For the moment, all objects are value types:
+  shared_ptr<AST> valCat = AST::make(at_valCat, LToken($2.loc, "val"));
+
+  $$ = AST::make(at_defobject, $2.loc, $3->child(0), $3->child(1), 
+		 valCat,
+		 $5, $6);
+  $$->child(0)->defForm = $$;
+  $$->addChild($3->child(2));
+};
+
+
 // STRUCTURE DECLARATIONS
 type_decl: '(' tk_DEFSTRUCT ptype_name val externals ')' {
   SHOWPARSE("type_decl -> ( DEFSTRUCT ptype_name val externals )");
@@ -1192,6 +1209,17 @@ field: '(' tk_RESERVED bitfieldtype intLit ')'  {
 methdecl: ident ':' method_type  {
   SHOWPARSE("field -> ident : method_type");
   $$ = AST::make(at_methdecl, $1->loc, $1, $3);
+};
+
+methods_only: methdecl  {
+  SHOWPARSE("methods_only -> methdecl");
+  $$ = AST::make(at_fields, $1->loc, $1);
+};
+
+methods_only: methods_only methdecl  {
+  SHOWPARSE("methods_only -> methods_only methdecl");
+  $$ = $1;
+  $$->addChild($2);
 };
 
 fields_and_methods: methdecl  {

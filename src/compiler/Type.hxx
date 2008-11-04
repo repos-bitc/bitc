@@ -441,6 +441,7 @@ public:
   bool isDecl();
   bool isException();
   bool isStruct();
+  bool isObject();
   bool isTvar();
   bool isVariable(); // Checks beyond mutability maybe-ness
   bool isAtomic();
