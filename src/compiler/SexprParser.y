@@ -1712,7 +1712,7 @@ eform: ident {
 //             type
 //
 // which creates a shift-reduce conflict. It's all fine as long as the
-// expr is fully bracket, so there is no problem accepting:
+// expr is fully bracketed, so there is no problem accepting:
 //
 //    (the type expr).ident
 //
