@@ -252,7 +252,6 @@ struct SexprLexer::KeyWord SexprLexer::keywords[] = {
   { "let",              tk_LET },
   { "let*",             tk_ReservedWord },
   { "letrec",           tk_LETREC },
-  { "literal",          tk_ReservedWord },
   { "location",         tk_ReservedWord },
   //  { "make-vector",      tk_MAKE_VECTOR },
   { "make-vector",      tk_MAKE_VECTORL },

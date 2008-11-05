@@ -433,10 +433,10 @@ defequiv      defobject     defrefine
 deftype       defvariant    do*           
 import!       indset        inner-ref     
 int           let*          list          
-literal       location      module        
-namespace     nth           read-only     
-require       sensory       super         
-tycon         using         value-at</literallayout>
+location      module        namespace     
+nth           read-only     require       
+sensory       super         tycon         
+using         value-at</literallayout>
 	<p>
           In addition to the reserved words identified above, all
 	  definitions provided in the standard prelude are implicitly

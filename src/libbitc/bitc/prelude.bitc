@@ -55,6 +55,7 @@
   (deftypeclass (copy-compat 'a 'b) :closed)
   (deftypeclass (copy-from-to 'a 'b) :closed)
   (deftypeclass (has-field 'a 'b 'c) :closed)
+  (deftypeclass (literal 'a 'b) :closed)
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;    Structure and union definitions 
