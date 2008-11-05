@@ -229,7 +229,7 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
       shared_ptr<AST> id = ast->child(0);
       MARKDEF(id, ast);
 	
-      shared_ptr<AST> methods = ast->child(3);
+      shared_ptr<AST> methods = ast->child(4);
       for (size_t i = 0; i < methods->children.size(); i++) {
 	shared_ptr<AST> method = methods->child(i);
 	shared_ptr<AST> mID = method->child(0);

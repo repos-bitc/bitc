@@ -1197,13 +1197,15 @@ resolve(std::ostream& errStream,
 	      idc_type, ast, 
 	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
+      // Skip the open/closed node.
+
       // match at method_decls
-      RESOLVE(ast->child(3), tmpEnv, lamLevel, USE_MODE, 
+      RESOLVE(ast->child(4), tmpEnv, lamLevel, USE_MODE, 
 	      idc_type, ast, 
 	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));      
 
       // match at constraints
-      RESOLVE(ast->child(4), tmpEnv, lamLevel, USE_MODE, 
+      RESOLVE(ast->child(5), tmpEnv, lamLevel, USE_MODE, 
 	      idc_type, ast, 
 	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));      
 
@@ -1281,6 +1283,31 @@ resolve(std::ostream& errStream,
       // match at at_tcapp
       RESOLVE(ast->child(0), tmpEnv, lamLevel, 
 	      USE_MODE, idc_type, ast, flags | RSLV_NEW_TV_OK);
+
+      /// If the type class is marked ":closed", then it is required
+      /// that all instance definitions appear in the same interface or
+      /// module as the type class definition. 
+      ///
+      /// The exception to this is that certain constraints that are
+      /// incestuously known to the compiler are defined in the
+      /// prelude as :closed but are extended at need by the
+      /// implementation. Examples of this include
+
+      if (errorFree) {
+	shared_ptr<AST> tcName = ast->child(0)->child(0);
+	shared_ptr<AST> tcSym = tcName->symbolDef;
+	shared_ptr<AST> tcDef = tcSym->defForm;
+	bool isClosed = (tcDef->child(3)->astType == at_closed);
+
+	if (isClosed && tcSym->fqn.iface != env->uocName) {
+	  errStream << ast->loc
+		    << ": Type class " << tcSym->fqn
+		    << " is closed. Instances may not be defined by other"
+		    << " modules or interfaces."
+		    << std::endl;
+	  errorFree = false;
+	}
+      }
 
       // match at at_tcmethods
       RESOLVE(ast->child(1), tmpEnv, lamLevel, 

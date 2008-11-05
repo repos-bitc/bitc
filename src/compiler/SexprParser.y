@@ -198,6 +198,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_INNER_REF
 %token <tok> tk_VAL
 %token <tok> tk_OPAQUE
+%token <tok> tk_CLOSED
 %token <tok> tk_MEMBER
 %token <tok> tk_LAMBDA
 %token <tok> tk_LET
@@ -240,7 +241,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> if_definitions if_definition
 %type <ast> common_definition
 %type <ast> value_declaration
-%type <ast> ptype_name val
+%type <ast> ptype_name val openclosed
 %type <ast> type_definition typeapp
 %type <ast> type_decl externals alias
 %type <ast> importList provideList
@@ -808,6 +809,17 @@ val: ':' tk_REF {
   $$ = AST::make(at_refCat, $2);
 };
  
+openclosed: { 
+  SHOWPARSE("closed -> <empty>");
+  $$ = AST::make(at_Null);
+  $$->printVariant = pf_IMPLIED;
+};
+
+openclosed: ':' tk_CLOSED {
+  SHOWPARSE("closed -> ':' CLOSED");
+  $$ = AST::make(at_closed, $2);
+};
+
 // EXCEPTION DEFINITION [3.10]
 type_definition: '(' tk_DEFEXCEPTION ident optdocstring ')' {
   SHOWPARSE("type_definition -> ( defexception ident )");
@@ -827,12 +839,20 @@ type_definition: '(' tk_DEFEXCEPTION ident optdocstring fields ')' {
 // TYPE CLASSES [4]
 // TYPE CLASS DEFINITION [4.1]
 
-tc_definition: '(' tk_DEFTYPECLASS ptype_name optdocstring tc_decls method_decls ')' {
-  SHOWPARSE("tc_definition -> ( DEFTYPECLASS ptype_name optdocstring tc_decls method_decls)");
+tc_definition: '(' tk_DEFTYPECLASS ptype_name optdocstring tc_decls openclosed method_decls ')' {
+  SHOWPARSE("tc_definition -> ( DEFTYPECLASS ptype_name optdocstring tc_decls openclosed method_decls)");
   $$ = AST::make(at_deftypeclass, $2.loc, $3->child(0), 
-	       $3->child(1), $5, $6, $3->child(2));  
+		 $3->child(1), $5, $6, $7);
+  $$->addChild($3->child(2));
   $$->child(0)->defForm = $$;
 };
+
+//tc_definition: '(' tk_DEFTYPECLASS ptype_name optdocstring tc_decls method_decls ')' {
+//  SHOWPARSE("tc_definition -> ( DEFTYPECLASS ptype_name optdocstring tc_decls openclosed method_decls)");
+//  $$ = AST::make(at_deftypeclass, $2.loc, $3->child(0), 
+//		 $3->child(1), $5, $6, $3->child(2));  
+//  $$->child(0)->defForm = $$;
+//};
 
 tc_decls: {
   SHOWPARSE("tcdecls -> <empty>");

@@ -51,8 +51,9 @@
   ;;    SPECIAL built-in  typeclasses (no instances needed)
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   
-  (deftypeclass (ref-types 'a))
-  (deftypeclass (copy-compat 'a 'b))
+  (deftypeclass (ref-types 'a) :closed)
+  (deftypeclass (copy-compat 'a 'b) :closed)
+  (deftypeclass (copy-from-to 'a 'b) :closed)
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;    Structure and union definitions 
@@ -141,7 +142,7 @@
   ;; TYPE CLASS FOR TYPES THAT HAVE LITERALS
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  (deftypeclass (LiteralType 'a))
+  (deftypeclass (LiteralType 'a) :closed)
 
   (definstance (LiteralType char))
 
@@ -166,7 +167,7 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   (forall ((LiteralType 'a))
-    (deftypeclass (IntLit 'a)))
+    (deftypeclass (IntLit 'a) :closed))
 
   (definstance (IntLit word))
   (definstance (IntLit  int8))
@@ -182,7 +183,7 @@
   ;; TYPE CLASS FOR FLOATING POINT LITERALS
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (forall ((LiteralType 'a))
-    (deftypeclass (FloatLit 'a)))
+    (deftypeclass (FloatLit 'a) :closed))
 
   (definstance (FloatLit float))
   (definstance (FloatLit double))

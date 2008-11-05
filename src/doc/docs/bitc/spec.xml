@@ -2017,6 +2017,7 @@ inc: (fn (int32) int32)</literallayout>
         <literallayout>
 (deftypeclass (<em>nm</em> <em>tv</em> ... <em>tv</em>)
   [<em>tyfn-declarations</em>]
+  [:closed]
   <em>method-definitions</em>)</literallayout>
         <p indent="no">
           where a <em>tyfn-declaration</em> is a statement of
@@ -2043,7 +2044,10 @@ nm : <em>function-type</em></literallayout>
           particular set of types, the programmer simultaneously
           proves (by example) that the set of types is a member of the
           class and defines (by example) how the operations of the
-          class are implemented for that type.
+          class are implemented for that type. If the type class has
+          been marked ``closed,'' the instance definition must appear
+          in the same interface or module that contains the type class
+          definition.
         </p>
         <p>
           Type functions, when present, indicate that there is a
@@ -2250,7 +2254,10 @@ nm : <em>function-type</em></literallayout>
           type relation <progident>Ord</progident> because there is an
           instance function <progident>int32.&lt;</progident> that
           provides an implementation of the ``less than'' operation
-          over arguments of type <progident>int32</progident>.
+          over arguments of type <progident>int32</progident>.  If the
+          type class definition is closed, all instance definitions
+          must occur in the same interface or module ad the type class
+          definition.
         </p>
         <p>
           In practice, this definition is insufficient, because we

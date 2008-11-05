@@ -665,8 +665,9 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> tvlist = ast->child(1);
       shared_ptr<AST> tcdecls = ast->child(2);
-      shared_ptr<AST> methods = ast->child(3);
-      shared_ptr<AST> constraints = ast->child(4);
+      shared_ptr<AST> openclosed = ast->child(3);
+      shared_ptr<AST> methods = ast->child(4);
+      shared_ptr<AST> constraints = ast->child(5);
 
       out << "(" << ast->atKwd() << " ";
       show_qual_name(out, ident, tvlist, constraints, showTypes);

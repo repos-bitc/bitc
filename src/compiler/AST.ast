@@ -929,6 +929,10 @@ LEAF valCat;
 LEAF opaqueCat;
 GROUP category = refCat | valCat | opaqueCat;
 
+// Typeclass open/closed market
+LEAF closed;
+GROUP openclosed = closed | Null;
+
 // EXCEPTION DEFINITION [3.10]
 AST defexception = ident field*;
 
@@ -936,7 +940,7 @@ AST defexception = ident field*;
 // AST deftype = ident tvlist type;
 
 // TYPE CLASS DEFINITION [4.1]
-AST deftypeclass = ident tvlist tcdecls method_decls constraints;
+AST deftypeclass = ident tvlist tcdecls openclosed method_decls constraints;
 AST tcdecls = tyfn*;
 AST tyfn = fnargVec tvar;
 AST tcapp = var type+;

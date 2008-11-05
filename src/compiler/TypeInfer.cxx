@@ -1312,7 +1312,7 @@ InferTypeClass(std::ostream& errStream, shared_ptr<AST> ast,
   ident->scheme = sigma;
   
   // Type all constraints
-  TYPEINFER(ast->child(4), gamma, instEnv, impTypes, isVP, 
+  TYPEINFER(ast->child(5), gamma, instEnv, impTypes, isVP, 
 	    sigma->tcc, trail, mode, 
 	    TI_CONSTRAINT | TI_TCC_SUB);
 
@@ -1344,7 +1344,7 @@ InferTypeClass(std::ostream& errStream, shared_ptr<AST> ast,
     tc->addFnDep(tyfn);
   }
 
-  shared_ptr<AST> methods = ast->child(3);
+  shared_ptr<AST> methods = ast->child(4);
   for (size_t c = 0; c < methods->children.size(); c++) {
     shared_ptr<AST> method = methods->child(c);
     shared_ptr<AST> mID = method->child(0);

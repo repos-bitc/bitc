@@ -202,6 +202,7 @@ struct SexprLexer::KeyWord SexprLexer::keywords[] = {
   { "catch",            tk_CATCH },
   { "char",             tk_CHAR },
   { "check",            tk_ReservedWord },
+  { "closed",           tk_CLOSED },
   { "coindset",         tk_ReservedWord },
   { "cond",             tk_COND },
   { "const",            tk_CONST },

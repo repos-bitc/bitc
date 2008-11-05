@@ -610,6 +610,7 @@ AST::atKwd() const
   case agt_expr_or_define:
   case agt_eform:
   case agt_ow:
+  case agt_openclosed:
     //case agt_reprbodyitem:
   case agt_ucon:
     return "<GROUP>";
