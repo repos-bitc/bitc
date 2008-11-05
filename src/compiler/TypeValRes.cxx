@@ -67,10 +67,6 @@ if (ans == true) \
  (itsExpansive) = true; \
 }while (0)
 	   
-// FIX: Not sure whether mkclosure should be 
-// considered expansive or not.
-// It should not be.
-
 // FIX: I am not clear why an identifier is intrinsically considered
 // expansive, since many identifiers are bound to compile-time deeply 
 // immutable values constants and these can be viewed as term
@@ -88,7 +84,6 @@ isExpansive(std::ostream& errStream,
   bool itsExpansive = false;
   
   switch (ast->astType) {
-  /* Typeclasses special for intLit and FloatLit !! */
   case at_intLiteral:
   case at_floatLiteral:
   case at_boolLiteral:
@@ -457,6 +452,41 @@ isExpansive(std::ostream& errStream,
   return itsExpansive;
 }
 
+
+// Is this AST a Syntactic value? 
+// Permitted cases are literals, functions, value constructors that
+// take no arguments, and the special case of array-length.
+// This function must only be passed an expresssion AST.
+// It returns false (rather than asserting false) if an unexpected AST
+// like type-AST, group AST or at_Null is passed.
+bool
+isAValue(shared_ptr<const AST> ast) 
+{
+  switch (ast->astType) {
+  case at_unit:
+  case at_boolLiteral:
+  case at_charLiteral:
+  case at_intLiteral:
+  case at_floatLiteral:
+  case at_stringLiteral:
+  case at_lambda:
+  case at_sizeof:
+  case at_bitsizeof:
+  case at_mkClosure:
+  case at_ident:
+  case at_usesel:
+    return true;
+    
+  case at_tqexpr:
+    return isAValue(ast->child(0));
+    
+  case at_array_length:
+    return isAValue(ast->child(0));
+    
+  default:
+    return false;
+  }
+}
 
 bool
 isExpansive(std::ostream& errStream, 
