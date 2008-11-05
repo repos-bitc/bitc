@@ -46,7 +46,7 @@
   (a aa:(bitfield uint32 2))
   (b bb:(bitfield uint32 30)))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (let ((s-instance (s 1 2))
 	  (u-instance (a 1)))

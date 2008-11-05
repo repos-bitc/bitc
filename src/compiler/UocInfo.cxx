@@ -45,11 +45,11 @@
 #include "Options.hxx"
 #include "Version.hxx"
 #include "UocInfo.hxx"
-#include "Symtab.hxx"
 #include "Type.hxx"
 #include "backend.hxx"
 #include "inter-pass.hxx"
 #include "SexprLexer.hxx"
+#include "BlockLexer.hxx"
 
 #include <boost/filesystem/operations.hpp>
 #include <libsherpa/util.hxx>
@@ -94,7 +94,7 @@ UocInfo::UocInfo(const std::string& _uocName, const std::string& _origin,
 
   uocName = _uocName;
   origin = _origin;
-  flags = 0;
+  flags = UOC_NO_FLAGS;
 }
 
 // Why does this exist? Are we actually using it anywhere?
@@ -110,7 +110,7 @@ UocInfo::UocInfo(shared_ptr<UocInfo> uoc)
   env = uoc->env;
   gamma = uoc->gamma;
   instEnv = uoc->instEnv;
-  flags = 0;
+  flags = UOC_NO_FLAGS;
 }
 
 shared_ptr<UocInfo>
@@ -174,7 +174,7 @@ UocInfo::addTopLevelForm(shared_ptr<AST> def)
 }
 
 bool
-  UocInfo::CompileFromFile(const filesystem::path& src, bool fromCmdLine)
+UocInfo::CompileFromSexprFile(const filesystem::path& src, bool fromCmdLine)
 {
   // Use binary mode so that newline conversion and character set
   // conversion is not done by the stdio library.
@@ -197,8 +197,8 @@ bool
 
   lexer.setDebug(Options::showLex);
 
-  extern int bitcparse(SexprLexer *lexer);
-  bitcparse(&lexer);  
+  extern int sexpr_parse(SexprLexer *lexer);
+  sexpr_parse(&lexer);  
   // On exit, ast is a pointer to the AST tree root.
   
   fin.close();
@@ -207,6 +207,49 @@ bool
     return false;
 
   return true;
+}
+
+bool
+UocInfo::CompileFromBlockFile(const filesystem::path& src, bool fromCmdLine)
+{
+  // Use binary mode so that newline conversion and character set
+  // conversion is not done by the stdio library.
+  std::ifstream fin(src.string().c_str(), std::ios_base::binary);
+
+  if (!fin.is_open()) {
+    std::cerr << "Couldn't open input file \""
+	      << src
+	      << "\"" << std::endl;
+    return false;
+  }
+
+  BlockLexer lexer(std::cerr, fin, src.string(), fromCmdLine);
+
+  // This is no longer necessary, because the parser now handles it
+  // for all interfaces whose name starts with "bitc.xxx"
+  //
+  // if (this->flags & UOC_IS_PRELUDE)
+  //   lexer.isRuntimeUoc = true;
+
+  lexer.setDebug(Options::showLex);
+
+  extern int block_parse(BlockLexer *lexer);
+  block_parse(&lexer);  
+  // On exit, ast is a pointer to the AST tree root.
+  
+  fin.close();
+
+  if (lexer.num_errors != 0u)
+    return false;
+
+  return true;
+}
+
+bool
+UocInfo::CompileFromFile(const filesystem::path& src, bool fromCmdLine)
+{
+  return (CompileFromSexprFile(src, fromCmdLine) ||
+	  CompileFromBlockFile(src, fromCmdLine));
 }
 
 shared_ptr<UocInfo> 
@@ -311,7 +354,19 @@ UocInfo::Compile()
     
     bool showTypes = false;
     
-    if (Options::showTypesUocs.find(uocName) != Options::showTypesUocs.end())
+    // We now find the `bare' name of a UOC. Source modules are named
+    // as uocName#index_number. But, for showing the types for a 
+    // UOC whose name specified as the input argument, we must compare 
+    // only the bare UOC name.
+    // In effect, this will display the types for all UOCs whose name
+    // matches the command line argument.
+    std::string bareName = uocName;
+    std::string::size_type pos = uocName.find ('#');
+    if (pos != std::string::npos)
+      bareName = uocName.substr(0, pos);
+
+    if (Options::showTypesUocs.find(bareName) !=
+	Options::showTypesUocs.end())
       showTypes = true;
     
     if (! (this->*passInfo[i].fn)(std::cerr, true, 0) ) {

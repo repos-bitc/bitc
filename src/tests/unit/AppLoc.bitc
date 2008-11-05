@@ -39,13 +39,13 @@
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defstruct sf f:(fn (int32) int32))
+(defstruct sf f:(fn int32 -> int32))
 
 (define (int32id x:int32) x)
 
 (define mysf1 (sf int32id))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (let ((mysf2 (sf int32id)))
       (mysf1.f 3))))

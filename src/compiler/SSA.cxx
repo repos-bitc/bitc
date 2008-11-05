@@ -43,7 +43,6 @@
 #include <string>
 #include "AST.hxx"
 #include "Environment.hxx"
-#include "Symtab.hxx"
 #include "Unify.hxx"
 #include "inter-pass.hxx"
 #include "Special.hxx"
@@ -70,6 +69,10 @@ getLastLB(shared_ptr<AST> grandLet)
   return lbs->child(lbs->children.size() - 1);
 }
 
+/// @brief Add identifier to per-proc identifier list.
+///
+/// This is used so that we can later declare all local identifiers at
+/// top of procedure, C-style.
 static void
 addIL(shared_ptr<AST> identList, shared_ptr<AST> id)
 {
@@ -94,7 +97,7 @@ UseCase(shared_ptr<AST> ast)
 
 static shared_ptr<AST> 
 addLB(shared_ptr<AST> grandLet, shared_ptr<AST> identList, 
-      shared_ptr<AST> ast, EnumSet<AstFlags> lbFlags = NO_FLAGS,
+      shared_ptr<AST> ast, AstFlags lbFlags = NO_FLAGS,
       shared_ptr<AST> id=GC_NULL, bool addToIL=true)
 {
   if (!id)
@@ -257,7 +260,6 @@ ssa(std::ostream& errStream,
   case at_fields:
   case at_field:
   case at_fill:
-  case at_reserved:
   case at_tcdecls:
   case at_tyfn:
   case at_tcapp:
@@ -279,6 +281,7 @@ ssa(std::ostream& errStream,
   case at_arrayType:
   case at_vectorType:
   case at_mutableType:
+  case at_constType:
   case at_typeapp:
   case at_bitfield:
   case at_qualType:    
@@ -334,7 +337,8 @@ ssa(std::ostream& errStream,
   case at_defexception:
   case at_deftypeclass:
   case at_definstance:
-  case at_methods:
+  case at_tcmethods:
+  case at_tcmethod_binding:
   case at_importAs:
   case at_provide:
   case at_import:
@@ -434,6 +438,13 @@ ssa(std::ostream& errStream,
       break;
     }
 
+  case at_sizeof:
+  case at_bitsizeof:
+    {
+      FEXPR(grandLet) = addLB(grandLet, identList, ast);
+      break;
+    }
+    
   case at_suspend:
     {
       shared_ptr<AST> gl = newGrandLet(ast);
@@ -870,6 +881,59 @@ ssa(std::ostream& errStream,
       break;
     }
 
+
+  case at_block:
+    {
+      // This needs gensym-like behavior, but with a known resulting name.
+      std::stringstream ss;
+      ss << "__" << ast->child(0)->s << ast->child(0)->ID;
+      std::string resultName = ss.str();
+
+      shared_ptr<AST> res = 
+	AST::make(at_ident, LToken(resultName));
+      res->flags = ast->flags | ID_IS_GENSYM;
+      res->identType = id_value;
+      res->symType = ast->symType;
+      res->scheme = ast->scheme;
+      addIL(identList, res);
+
+      shared_ptr<AST> gl = newGrandLet(ast);
+      SSA(errStream, uoc, ast->child(1), gl, identList, 
+	  ast, 1, flags);	
+      FEXPR(gl) = addLB(gl, identList, FEXPR(gl), NO_FLAGS, res, false);
+      SETGL(ast->child(1), gl);
+      FEXPR(grandLet) = addLB(grandLet, identList, ast, LB_IS_DUMMY,
+			      res, false); 
+      break;
+    }
+
+  case at_return_from:
+    {
+      shared_ptr<AST> labelDef = ast->child(0)->symbolDef;
+
+      std::stringstream ss;
+      ss << "__" << labelDef->s << labelDef->ID;
+      std::string resultName = ss.str();
+
+      shared_ptr<AST> res = 
+	AST::make(at_ident, LToken(resultName));
+      res->flags = ast->flags | ID_IS_GENSYM;
+      res->identType = id_value;
+      res->symType = ast->symType;
+      res->scheme = ast->scheme;
+
+      SSA(errStream, uoc, ast->child(1), grandLet, identList, 
+	  ast, 1, flags);
+
+      FEXPR(grandLet) = addLB(grandLet, identList, FEXPR(grandLet), 
+			      NO_FLAGS, res, false);
+
+      ast->child(1) = FEXPR(grandLet);
+
+      FEXPR(grandLet) = addLB(grandLet, identList, ast, 
+			      LB_POSTPONED);
+      break;
+    }
 
   case at_switch:
   case at_try:

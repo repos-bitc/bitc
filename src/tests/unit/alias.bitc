@@ -40,6 +40,6 @@
 (provide bitc.main main)
 (import bitc.stdio as stdio)
 
-(define main:(fn ((vector string)) int32)
+(define main:(fn (vector string) -> int32)
   (lambda (argvec)
     0))

@@ -48,6 +48,6 @@
 			(Xn1 1:int32)
 			(Xn2 xyz.a)
 			(otherwise 250))))
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (f) 0))

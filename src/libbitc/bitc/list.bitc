@@ -75,7 +75,8 @@
 	  (length-helper (cdr lst) (+ 1 count))))
     (length-helper lst 0:word))
   
-  (definstance (Length (list 'a)) list-length)
+  (definstance (Length (list 'a)) 
+    (length = list-length))
   
   (define (append l1 l2)
     "Append two lists."

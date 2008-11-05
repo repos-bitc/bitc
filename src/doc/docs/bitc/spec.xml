@@ -14,6 +14,11 @@
 	<surname>Shapiro</surname>
 	<degree>Ph.D.</degree>
       </author>
+      <affiliation>
+	<orgname>The EROS Group, LLC</orgname>
+      </affiliation>
+    </authorgroup>
+    <authorgroup>
       <author>
 	<firstname>Swaroop</firstname>
 	<surname>Sridhar</surname>
@@ -28,7 +33,7 @@
 	<address>Johns Hopkins University</address>
       </affiliation>
     </authorgroup>
-    <pubdate>August 27, 2008</pubdate>
+    <pubdate>September 28, 2008</pubdate>
     <copyright>
       <year>2008</year> 
       <holder>Jonathan S. Shapiro</holder>
@@ -387,12 +392,13 @@
 	  be rebound:
 	</p>
 	<literallayout indent="no">
-#f            #t            and           
-apply         array         array-length
-array-nth     begin         bitc-version
-as            bitfield      bool          
-by-ref        case          catch         
-char          cond          const
+#f            #t            -&gt;
+and           apply         array         
+array-length  array-nth     begin         
+bitc-version  as            bitfield      
+bool          block         by-ref        
+case          catch         char          
+cond          const         continue      
 declare       defaxiom      defexception  
 define        definvariant  defrepr       
 defstruct     deftheory     defthm        
@@ -408,7 +414,8 @@ letrec        member        mutable
 not           opaque        or            
 otherwise     pair          proclaim      
 provide       pure          quad          
-ref           set!          string        
+ref           return        return-from   
+set!          sizeof        string        
 suspend       switch        tag           
 the           throw         try           
 tyfn          uint8         uint16        
@@ -420,17 +427,15 @@ vector-nth    word          </literallayout>
 	  keywords:
 	</p>
 	<literallayout indent="no">
-assert        block         break         
-check         coindset      constrain     
-continue      deep-const    defequiv      
-defobject     defrefine     deftype       
-defvariant    do*           import!       
-indset        inner-ref     int           
-label         let*          list          
+assert        break         check         
+coindset      constrain     deep-const    
+defequiv      defobject     defrefine     
+deftype       defvariant    do*           
+import!       indset        inner-ref     
+int           let*          list          
 literal       location      module        
 namespace     nth           read-only     
-require       return        return-from   
-sensory       sizeof        super         
+require       sensory       super         
 tycon         using         value-at</literallayout>
 	<p>
           In addition to the reserved words identified above, all
@@ -1029,7 +1034,7 @@ use</literallayout>
 	    types (including type variables), then:
 	  </p>
 	  <literallayout>
-(fn (<em>t<sub>arg_1</sub></em>...<em>t<sub>arg_n</sub></em>) <em>t<sub>result</sub></em>)</literallayout>
+(fn <em>t<sub>arg_1</sub></em>...<em>t<sub>arg_n</sub></em> -> <em>t<sub>result</sub></em>)</literallayout>
 	  <p indent="no">
 	    is the type of a function taking <em>n</em> arguments of
 	    types <em>t<sub>arg1</sub></em> through
@@ -1127,7 +1132,8 @@ use</literallayout>
 <literallayout>
 <em>nm</em>:<em>type</em>
 (the <em>type</em> <em>nm</em>)
-(fill <em>bitfield-type</em>)</literallayout>
+(fill <em>bitfield-type</em>)
+(reserved <em>bitfield-type</em> <em>value</em>)</literallayout>
           <p indent="no">
             All names <progident><em>nm</em></progident> are disjoint
 	    identifiers giving the names of the structure fields, and
@@ -1146,6 +1152,13 @@ use</literallayout>
             and storage layout of its base type, however a fill field
             has no name or defined value, and cannot be
             programatically referenced.
+          </p>
+          <p>
+            A <progident>reserved</progident> element may be used to
+            specify a reserved bit position in a low-level data
+            structure that is required to hold a known value. It is
+            otherwise identical to a <progident>field</progident>
+            element.
           </p>
           <p>
 	    An identifier that is bound to a structure type may be used
@@ -2077,11 +2090,11 @@ nm : <em>function-type</em></literallayout>
             syntax for such a type class definition is:
           </p>
           <literallayout>
-(deftypeclass 
-  (forall (<em>constraint ... constraint</em>)
+(forall (<em>constraint ... constraint</em>)
+  (deftypeclass 
      (<em>nm</em> <em>tv</em> ... <em>tv</em>))
-  [<em>tyfn-declarations</em>]
-  <em>method-definitions</em>)</literallayout>
+     [<em>tyfn-declarations</em>]
+     <em>method-definitions</em>)</literallayout>
           <p indent="no">
             where each constraint takes the form:
           </p>
@@ -2093,9 +2106,9 @@ nm : <em>function-type</em></literallayout>
             type class:
           </p>
           <literallayout>
-(deftypeclass 
-  (forall ((Eql 'a)) (Ord 'a))
-  &lt; : (fn ('a 'a) 'a))</literallayout>
+(forall ((Eql 'a))
+  (deftypeclass (Ord 'a)
+    &lt; : (fn ('a 'a) 'a)))</literallayout>
           <p indent="no">
             This type class states that <progident>Ord</progident> is
             the single element type relation over all types
@@ -2218,10 +2231,9 @@ nm : <em>function-type</em></literallayout>
         <literallayout>
 (definstance <em>tc-instance</em>
   <em>function ... function</em>)
-(definstance
-  (forall (<em>constraint ... constraint</em>)
-          <em>tc-instance</em>)
-  <em>function ... function</em>)</literallayout>
+(forall (<em>constraint ... constraint</em>)
+  (definstance <em>tc-instance</em>)
+    <em>function ... function</em>)</literallayout>
         <p indent="no">
           where <em>tc-instance</em> takes the form:
         </p>
@@ -2330,14 +2342,12 @@ nm : <em>function-type</em></literallayout>
           declarations, with the abstract syntax:
         </p>
 <literallayout>
-(defstruct
-  (forall (<em>constraints</em>)
-          (<em>struct-name</em> <em>tvars</em>) [<b>:val</b>])
-   <em>nm<sub>1</sub></em>[<b>:</b><em>t<sub>1</sub></em>] ... <em>nm<sub>n</sub></em>[<b>:</b><em>t<sub>n</sub></em>])
-(defunion
-  (forall (<em>constraints</em>)
-          (<em>struct-name</em> <em>tvars</em>) [<b>:val</b>])
-   <em>C<sub>1</sub> ... C<sub>n</sub></em>)
+(forall (<em>constraints</em>)
+  (defstruct (<em>struct-name</em> <em>tvars</em>) [<b>:val</b>])
+    <em>nm<sub>1</sub></em>[<b>:</b><em>t<sub>1</sub></em>] ... <em>nm<sub>n</sub></em>[<b>:</b><em>t<sub>n</sub></em>])
+(forall (<em>constraints</em>)
+  (defunion (<em>union-name</em> <em>tvars</em>) [<b>:val</b>])
+    <em>C<sub>1</sub> ... C<sub>n</sub></em>)
 </literallayout>
         <p>
           Qualifications may similarly appear in the binding patterns
@@ -2868,6 +2878,27 @@ id : T
 	</p>
       </sect2>
       <sect2>
+        <title><progident>sizeof</progident>,
+          <progident>bitsizeof</progident></title>
+        <p>
+          The <progident>sizeof</progident> and
+          <progident>bitsizeof</progident> forms report the size, in
+          bytes (respectively bits), of a type. When applied to
+          expressions, they report the size of the <em>type</em> of
+          that expression. The expression is typed by the compiler,
+          but it is not evaluated.
+        </p>
+        <literallayout>
+sizeof(<em>e</em>)
+sizeof(<em>T</em>)
+bitsizeof(<em>e</em>)
+bitsizeof(<em>T</em>)</literallayout>
+        <p indent="no">
+          The return type of <progident>sizeof</progident>,
+          <progident>bitsizeof</progident> is <progident>word</progident>.
+        </p>
+      </sect2>
+      <sect2>
 	<title>Type-Qualified Expressions</title>
 	<p>
 	  Any expression <progident><em>e</em></progident> may be
@@ -3037,6 +3068,46 @@ id : T
           begin block.
         </p>
       </sect2>
+      <sect2 id="labeled-blocks">
+        <title>Labeled Sequences and Escape</title>
+        <p>
+          The expression:
+        </p>
+        <literallayout>
+(block <em>ident</em> <em>e<sub>1</sub></em> ... <em>e<sub>n</sub></em>)</literallayout>
+        <p indent="no">
+          executes the forms
+          <progident><em>e<sub>1</sub></em></progident> through
+          <progident><em>e<sub>n</sub></em></progident> in sequence,
+          where each form is an expression. The value of a
+          <progident>block</progident> expression is the value
+          produced by the last <em>expression</em> executed within the
+          block.
+        </p>
+        <p>
+          Within the body of the <progident>block</progident> form,
+          the identifier <progident><em>ident</em></progident> is
+          lexically bound as an escape label, and the expression
+        </p>
+        <literallayout>
+(return-from <em>ident</em> <em>e</em>)</literallayout>
+        <p>
+          Causes an immediate return from the
+          <progident>block</progident> with the value computed by the
+          expression <progident><em>e</em></progident>.  Control does
+          not continue past the end of this form.
+        </p>
+        <p>
+          The identifier
+          <em>ident</em> must be in scope as an escape label, and the
+          <progident>block</progident> and its associated
+          <progident>return-from</progident> must appear within the
+          body of the same lambda form. That is: the
+          <progident>return-from</progident> may <em>not</em> appear
+          within a <progident>lambda</progident> that is in turn
+          nested within a <progident>block</progident>.
+        </p>
+      </sect2>
       <sect2>
         <title>Iteration</title>
         <p>
@@ -3090,6 +3161,18 @@ id : T
           <progident>do</progident>-bound variables are bound to the
           newly computed results in parallel and a new pass is
           initiated over the loop body as previously described.
+        </p>
+        <p>
+          The execution of a given pass of the loop body can be
+          terminated immediately by the:
+        </p>
+        <literallayout>
+(continue)</literallayout>
+        <p indent="no">
+          form. This causes an immediate transfer of control to the
+          end of the nearest enclosing loop body. Note that the
+          initializer, step, test, and result expressions are
+          <em>not</em> part of the loop body.
         </p>
         <p>
           The <progident>do</progident> form is not
@@ -3316,6 +3399,36 @@ id : T
             [Here, &tau; &ne; (mutable &tau;<sup>&prime;</sup>)].
           </p>
         </sect3>
+      </sect2>
+      <sect2 id="explicit-return">
+        <title>Explicit Procedure Return</title>
+        <p>
+          <em>Derived form</em>
+        </p>
+	<p>
+	  The expression:
+	</p>
+	<literallayout>
+(return <em>e</em>)</literallayout>
+        <p>
+          causes the nearest enclosing <progident>lambda</progident>
+          form to immediately return the value computed by the
+          expression <progident><em>e</em></progident>. This form
+          executes a form of labeled break. Control does not continue
+          past the end of this form.
+        </p>
+        <p>
+          <leadin>Derivation</leadin> The canonical rewriting of
+          <progident>return</progident> requires that the containing
+          <progident>lambda</progident> also be rewritten:
+        </p>
+        <literallayout>
+(lambda (<em>args</em>) <em>body</em>) =&gt;
+(lambda (<em>args</em>) 
+  (block __return <em>body</em>))
+
+(return <em>e</em>) =&gt;
+(return-from __return <em>e</em>)</literallayout>
       </sect2>
       <sect2>
 	<title>Function Application</title>
@@ -4593,7 +4706,7 @@ For example:
           <progident>id</progident>.
         </p>
       </sect2>
-      <sect2>
+      <sect2 id="TailRecursion">
         <title>Tail Recursion</title>
         <p>
           BitC provides no syntactic form providing for non-recursive
@@ -4680,8 +4793,8 @@ For example:
   none (some value:'a))
 
 ; Nullable pointers:
-(defunion
-  (forall (ref-types 'a)
+(forall ((ref-types 'a))
+  (defunion
     (nullable 'a):val 
      Null (non-null ptr:(ref 'a))))
 
@@ -4718,40 +4831,36 @@ For example:
   != : (fn ('a 'a) bool))
 
 ; Magnitude comparison
-(deftypeclass 
-  (forall ((EqualityComparison 'a))
-          (Ord 'a))
+(forall ((EqualityComparison 'a))
+  (deftypeclass (Ord 'a)
   &lt;  : (fn ('a 'a) bool)
-  &lt;= : (fn ('a 'a) bool))
+  &lt;= : (fn ('a 'a) bool)))
 
 ; Checked arithmetic
-(deftypeclass 
-  (forall ((Ord 'a))
-          (Arith 'a))
-  +: (fn ('a 'a) 'a)
-  -: (fn ('a 'a) 'a)
-  *: (fn ('a 'a) 'a)
-  /: (fn ('a 'a) 'a)
-  &lt;&lt;:(fn ('a word) 'a)
-  &gt;&gt;:(fn ('a word) 'a))
+(forall ((Ord 'a))
+  (deftypeclass (Arith 'a)
+    +: (fn ('a 'a) 'a)
+    -: (fn ('a 'a) 'a)
+    *: (fn ('a 'a) 'a)
+    /: (fn ('a 'a) 'a)
+    &lt;&lt;:(fn ('a word) 'a)
+    &gt;&gt;:(fn ('a word) 'a)))
 
 ; Ring arithmetic
-(deftypeclass
-  (forall ((Ord 'a))
-          (Ring 'a))
-  R+: (fn ('a 'a) 'a)
-  R-: (fn ('a 'a) 'a)
-  R*: (fn ('a 'a) 'a)
-  R/: (fn ('a 'a) 'a)
-  R&lt;&lt;:(fn ('a word) 'a)
-  R&gt;&gt;:(fn ('a word) 'a))
+(forall ((Ord 'a))
+  (deftypeclass (Ring 'a)
+    R+: (fn ('a 'a) 'a)
+    R-: (fn ('a 'a) 'a)
+    R*: (fn ('a 'a) 'a)
+    R/: (fn ('a 'a) 'a)
+    R&lt;&lt;:(fn ('a word) 'a)
+    R&gt;&gt;:(fn ('a word) 'a)))
 
 ; Sign transformations
-(deftypeclass
-  (forall ((Ord 'a))
-          (Signed 'a))
-  negate: (fn ('a) 'a)
-  abs:    (fn ('a) 'a))</literallayout>
+(forall ((Ord 'a))
+  (deftypeclass (Signed 'a)
+    negate: (fn ('a) 'a)
+    abs:    (fn ('a) 'a))</literallayout>
     </sect1>
   </subpart>
   <subpart>

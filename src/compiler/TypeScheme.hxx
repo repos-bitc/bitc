@@ -88,17 +88,11 @@ struct TypeScheme {
 		  GeneralizeMode gen);
   
   // The function that actually makes a copy of the 
-  // contained type. This function calls TypeSpecialize.
-  // This function is called by type_instance()
-  // and getDCopy() function in Type class.
-  boost::shared_ptr<Type> type_instance_copy();
-  
-  // Type Instance, if there are no ftvs, returns the original tau  
+  // Produce a type, that is an instace of the current type scheme.
   boost::shared_ptr<Type> type_instance();
   
   // Type scheme's instance (including TC constraints)
-  boost::shared_ptr<TypeScheme> ts_instance(bool copy=false);
-  boost::shared_ptr<TypeScheme> ts_instance_copy();
+  boost::shared_ptr<TypeScheme> ts_instance();
   
   // Read carefully:
   // Appends constraints that corrrespond to at least one

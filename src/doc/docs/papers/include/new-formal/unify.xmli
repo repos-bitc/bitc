@@ -329,8 +329,8 @@
 	  </unf>
 	</rhs>
       </equation>	
-      <!-- |_t1_| = |_t2_| -->
-      <equation name="U-const" sep="4pt">
+      <!-- |_t1_| = |_ t2 _| -->
+      <equation name="U-Const1">
 	<lhs>
 	  <unf>
 	    <unin excl="yes">
@@ -353,7 +353,7 @@
 	    <unin>
 	      <aCtset/>
 	      <set>
-		<eq under="minz">
+		<eq under="minzC">
 		  <type num="1"/>
 		  <type num="2"/>
 		</eq>
@@ -361,7 +361,54 @@
 	    </unin>
 	  </unf>
 	</rhs>
-      </equation>	
+      </equation>
+      <!-- |_t1_| = t2 | N(t1) != t1 -->
+      <equation name="U-Const2">
+	<lhs>
+	  <unf>
+	    <unin excl="yes">
+	      <set>
+		<eq>
+		  <const>
+		    <type num="1"/>
+		  </const>
+		  <type num="2"/>
+		</eq>
+	      </set>
+	      <aCtset/>
+	    </unin>
+	  </unf>
+	</lhs>
+	<rhs>
+	  <unf>
+	    <unin>
+	      <aCtset/>
+	      <set>
+		<eq>
+		  <pred mbb="yes" name="N">
+		    <type num="1"/>
+		  </pred>
+		  <type num="2"/>
+		</eq>
+	      </set>
+	    </unin>
+	  </unf>
+	</rhs>
+      </equation>
+      <eqn-cnt name="" sep="4pt">
+	<lhs>
+	  <grouping>
+	    <text content=" where "/>
+	    <neq>
+	      <pred mbb="yes" name="N">
+		<type num="1"/>
+	      </pred>
+	      <type num="1"/>
+	    </neq>
+	  </grouping>
+	</lhs>
+	<rhs/>
+      </eqn-cnt>
       <!-- 'a!p1 = 'b!p2 -->
       <equation name="U-Ct1">
 	<lhs>
@@ -463,7 +510,7 @@
 	    <unin>
 	      <aCtset/>
 	      <set>
-		<eq under="minz">
+		<eq under="minzC">
 		  <ptype num="1"/>
 		  <ptype num="2"/>
 		</eq>
@@ -506,7 +553,7 @@
 	    <unin>
 	      <aCtset/>
 	      <set>
-		<eq under="minz">
+		<eq under="minzC">
 		  <ptype num="1"/>
 		  <ptype num="2"/>
 		</eq>
@@ -542,7 +589,7 @@
 	    <unin>
 	      <aCtset/>
 	      <set>
-		<eq under="minz">
+		<eq under="minzC">
 		  <ptype/>
 		  <Ptype/>
 		</eq>

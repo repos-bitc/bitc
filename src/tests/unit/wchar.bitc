@@ -40,7 +40,7 @@
 (provide bitc.main main)
 (import bitc.stdio as stdio)
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (stdio.write-char stdio.stdout #\a)
     (stdio.write-char stdio.stdout #\linefeed)

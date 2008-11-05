@@ -129,19 +129,27 @@
 	      <type num="2"/>
 	    </tqExpr>
 	  </Sjudge>
-	  <eq under="minz">
+	  <eq under="minzC">
 	    <type num="1"/>
 	    <type num="1" dash="'"/>
 	  </eq>
-	  <eq under="minz">
+	  <eq under="minzC">
 	    <type num="2"/>
 	    <type num="2" dash="'"/>
 	  </eq>
+	  <pred meta="yes" name="P">
+	    <canonical>
+	      <id/>
+	    </canonical>
+	    <type num="1"/>
+	  </pred>
 	</tyPre>
 	<tyConc>
 	  <TDjudge>
 	    <lambda>
-	      <id/>
+	      <canonical>
+		<id/>
+	      </canonical>
 	      <aExpr/>
 	    </lambda>
 	    <fn>
@@ -267,26 +275,22 @@
 	  </TDjudge>
 	</tyConc>
       </tyRule>
-      <tyRule name="T-Const">
+      <tyRule name="T-Deref">
 	<tyPre>
 	  <TDjudge Msub="yes">
 	    <aExpr/>
-	    <type/>
+	    <ref>
+	      <type/>
+	    </ref>
 	    <dCtset/>
 	  </TDjudge>
-	  <Msub>
-	    <type dash="'"/>
-	    <type/>
-	  </Msub>
 	</tyPre>
 	<tyConc>
 	  <TDjudge>
-	    <const>
+	    <deref>
 	      <aExpr/>
-	    </const>
-	    <const>
-	      <type dash="'"/>
-	    </const>
+	    </deref>
+	    <type/>
 	    <dCtset/>
 	  </TDjudge>
 	</tyConc>
@@ -339,7 +343,9 @@
 	    <dCtset/>
 	  </TDjudge>
 	  <eq under="minzT">
-	    <type/>
+	    <pred mbb="yes" name="N">
+	      <type/>
+	    </pred>
 	    <pair>
 	      <type num="1"/>
 	      <type num="2"/>
@@ -369,35 +375,23 @@
 	    <type dash="'"/>
 	    <type/>
 	  </Msub>
+	  <pred meta="yes" name="P">
+	    <canonical>
+	      <aExpr/>
+	    </canonical>
+	    <type dash="'"/>
+	  </pred>
 	</tyPre>
 	<tyConc>
 	  <TDjudge>
 	    <dup>
-	      <aExpr/>
+	      <canonical>
+		<aExpr/>
+	      </canonical>
 	    </dup>
 	    <ref>
 	      <type dash="'"/>
 	    </ref>
-	    <dCtset/>
-	  </TDjudge>
-	</tyConc>
-      </tyRule>
-      <tyRule name="T-Deref">
-	<tyPre>
-	  <TDjudge Msub="yes">
-	    <aExpr/>
-	    <ref>
-	      <type/>
-	    </ref>
-	    <dCtset/>
-	  </TDjudge>
-	</tyPre>
-	<tyConc>
-	  <TDjudge>
-	    <deref>
-	      <aExpr/>
-	    </deref>
-	    <type/>
 	    <dCtset/>
 	  </TDjudge>
 	</tyConc>
@@ -413,6 +407,12 @@
 	    <type/>
 	    <type num="1"/>
 	  </Msub>
+	  <pred meta="yes" name="P">
+	    <canonical>
+	      <id/>
+	    </canonical>
+	    <type num="1"/>
+	  </pred>
 	  <Sjudge>
 	    <assume>
 	      <dCtset num="2"/>
@@ -435,7 +435,9 @@
 	  <TDjudge>
 	    <paren>
 	      <let kind="m">
-		<id/>
+		<canonical>
+		  <id/>
+		</canonical>
 		<aExpr num="1"/>
 		<aExpr num="2"/>
 	      </let>
@@ -472,6 +474,12 @@
 	    <type/>
 	    <type num="1"/>
 	  </Msub>
+	  <pred meta="yes" name="P">
+	    <canonical>
+	      <id/>
+	    </canonical>
+	    <type num="1"/>
+	  </pred>
 	  <eq>
 	    <dCtset/>
 	    <unin>
@@ -500,6 +508,8 @@
 	      </ftvs>
 	    </diff>
 	  </eq>
+	</tyPre>
+	<tyPre>
 	  <Sjudge>
 	    <assume>
 	      <dCtset num="2"/>
@@ -529,8 +539,10 @@
 	<tyConc>
 	  <TDjudge>
 	    <paren>
-	      <let kind="x" colorOptQual="yes">
-		<id/>
+	      <let kind="x">
+		<canonical>
+		  <id/>
+		</canonical>
 		<vExp/>
 		<aExpr/>
 	      </let>

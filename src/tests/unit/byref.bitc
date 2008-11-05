@@ -41,7 +41,7 @@
 
 (define (add1 n:(by-ref 'a)) (set! n (+ n 1)) n)
 
-(define main.main:(fn ((vector string)) int32) 
+(define main.main:(fn (vector string) -> int32) 
   (lambda (argVec)
     (let ((m:(mutable int32) 0))
       (if (== (add1 m) (add1 m)) 1 0))))

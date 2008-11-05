@@ -49,16 +49,16 @@
 (define (returnFalse x y) #f)
 
 (definstance (Eq (ref (pair bool bool)))
-  returnTrue returnTrue)
+  (== = returnTrue) (!= = returnTrue))
 
 (definstance (Eq (ref (pair (mutable bool) (mutable bool))))
-  returnFalse returnFalse)
+  (== = returnFalse) (!= = returnFalse))
 
 (define p (dup (#t, #f)))
 (define mp:(ref (pair (mutable bool) (mutable bool))) 
   (dup (#t, #f)))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (if (== mp mp) 0:int32 1)
     (if (== p p) 0 1)

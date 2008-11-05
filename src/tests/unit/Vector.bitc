@@ -39,7 +39,7 @@
 (import bitc.main as main)
 (provide bitc.main main)
  
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)   
     (begin (vector-length (vector #t #f #t))
 	   (vector-nth (make-vector 25 (lambda (n) 0:int32)) 10))))

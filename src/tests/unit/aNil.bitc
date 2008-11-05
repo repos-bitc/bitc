@@ -42,6 +42,6 @@
 (define anil nil)
 (define anIntNil (cons 10:int32 anil))
 (define aBoolNil (cons #t anil))
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     anIntNil aBoolNil 0))

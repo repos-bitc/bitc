@@ -26,12 +26,15 @@ $deriveSp="($derive)$em\\{\\_($br)\\}";
 $modelSp="($models)$em\\{\\_($br)\\}";
 $EqSp1="(=)$em\\{\\_(\\{$em\\{\\\\blacktriangledown\\}\\})\\}";
 $EqSp2="(=)$em\\{\\_(\\{$em\\{\\\\bigtriangledown\\}\\})\\}";
+$EqSp3="(=)$em\\{\\_(\\{$em\\{\\\\circ\\}\\})\\}";
 $pcst="$em\\{\\\\hookrightarrow\\}";
 $pcstSp="($pcst)$em\\{\\^($br)\\}";
 $bigcup="\\\\textbf\\{$em\\{\\\\cup\\}\\}";
 $bigcap="\\\\textbf\\{$em\\{\\\\cap\\}\\}";
 $exclcup="\\\\emph\\{$em\\{\\\\cup\\}\\}";
 $spSquare="\\\\emph\\{$em\\{\\\\Box\\}\\}";
+$sp2Square="\\\\textbf\\{$em\\{\\\\Box\\}\\}";
+$sp2Dtri="\\\\textbf\\{$em\\{\\\\bigtriangledown\\}\\}";
 $emset="$em($br)";
 $plural1="$emset$em\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}";
 $plural2="$em\\{($br)\\{(\\_$br)?\\^\\{\\*\\}(\\_$br)?\\}\\}";
@@ -59,8 +62,10 @@ while(!eof(F)) {
 	#Disjoint union: Dotted union
 	$l =~ s/$exclcup/$EM\{\\mathaccent\\cdot\\cup\}/g;
 
-	#Special Box: Dotted box
+	#Special Box/Triangle: Dotted box/Triangle
 	$l =~ s/$spSquare/$EM\{\\mathaccent\\cdot\\Box\}/g;
+	$l =~ s/$sp2Square/$EM\{\\mathaccent\\circ\\Box\}/g;
+	$l =~ s/$sp2Dtri/$EM\{\\mathaccent\\circ\\bigtriangledown\}/g;
 	
         #{| to {\!| and |} to |\!}
 	# Note that this is *not* paranthesizing replacement
@@ -96,6 +101,7 @@ while(!eof(F)) {
 	#Equality under another operator
 	$l =~ s/$EqSp1/$EM\{\\stackrel\{\\blacktriangledown\}\{=\}\}/g;
 	$l =~ s/$EqSp2/$EM\{\\stackrel\{\\triangledown\}\{=\}\}/g;
+	$l =~ s/$EqSp3/$EM\{\\stackrel\{\\circ\}\{=\}\}/g;
 	#$l =~ s/$EqSp1/\\mbox\{=\\hskip -1.2ex\\lower 0.1ex\\hbox\{$EM\{\_\{\_\{\\blacktriangledown\}\}\}\}\}/g;
 	#$l =~ s/$EqSp2/\\mbox\{=\\hskip -1.2ex\\lower 0.3ex\\hbox\{$EM\{\_\{\{\\triangledown\}\}\}\}\}/g;
 	#$l =~ s/$EqSp1/$EM\{\{=\}\\atop\{\\blacktriangledown\}\}/g;

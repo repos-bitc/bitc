@@ -53,6 +53,6 @@
   (Ct1  p:(pr1 bool int32) i:int32 j:bool (where (== i 0)))
   (Ct2  q:(pr2 int32 bool)  i:int32 (where (== i 1))))
  
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (Ct1 (pr1 #t 10) #f) 0))

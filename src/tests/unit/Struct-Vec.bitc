@@ -46,7 +46,7 @@
   a : int32;
   b : (vector int32))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (let ((s-instance (s 1 (vector 1 2 3))))
       (begin (cons i0 (cons i1 nil))

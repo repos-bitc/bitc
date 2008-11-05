@@ -5,7 +5,7 @@
   <figure id="operators" fullwidth='yes'
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:btypes="http://www.bitc-lang.org/DTD/bitc/0.1/bitc-types.dtd">
-  <table latex.colspec="c||c|c|c|c|c|c">
+  <table latex.colspec="c||c|c|c|c|c|c|c">
     <tbody>
       <!-- Row: Title -->
       <tr lineafter="yes" valign="top">
@@ -49,6 +49,15 @@
 	      <minzT>
 		<type/>
 	      </minzT>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <minzC>
+		<type/>
+	      </minzC>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -102,6 +111,13 @@
 	      <mutable>
 		<tvar/>
 	      </mutable>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <tvar/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -180,6 +196,13 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
+	      <unit/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <Empty/>
 	    </btypes:TYPE>
 	  </p>
@@ -216,6 +239,13 @@
 	      <mutable>
 		<bool/>
 	      </mutable>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <bool/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -310,6 +340,16 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <unin>
 		<spset>
 		  <type num="1"/>
@@ -361,6 +401,15 @@
 		  <type/>
 		</ref>
 	      </mutable>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <ref>
+		<type/>
+	      </ref>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -438,6 +487,15 @@
 	      <minzT>
 		<ptype/>
 	      </minzT>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <minzC>
+		<ptype/>
+	      </minzC>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -528,6 +586,20 @@
 	  <p>
 	    <btypes:TYPE>
 	      <pair>
+		<minzC>
+		  <type num="1"/>	
+		</minzC>
+		<minzC>
+		  <type num="2"/>
+		</minzC>
+	      </pair>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pair>
 		<minzD>
 		  <type num="1"/>	
 		</minzD>
@@ -598,6 +670,15 @@
 	      <minzT>
 		<ptype/>
 	      </minzT>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <minzC>
+		<ptype/>
+	      </minzC>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -685,6 +766,15 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
+	      <minzC>
+		<ptype/>
+	      </minzC>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <minzD>
 		<ptype/>
 	      </minzD>
@@ -761,6 +851,15 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
+	      <minzC>
+		<type/>
+	      </minzC>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <const>
 		<minzD>
 		  <ptype/>
@@ -782,7 +881,7 @@
     </tbody>
   </table>
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <table latex.colspec="c||c|c|c|c|c">
+  <table latex.colspec="c||c|c|c|c">
     <tbody>
       <!-- Row: Title -->
       <tr lineafter="yes" valign="top">
@@ -790,15 +889,6 @@
 	  <p>
 	    <btypes:TYPE>
 	      <type/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
-	      <pred name="Immut">
-		<type/>
-	      </pred>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -814,18 +904,18 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete>
+	      <pred name="Immut">
 		<type/>
-	      </concrete>
+	      </pred>
 	    </btypes:TYPE>
 	  </p>
 	</td>
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete sp="yes">
+	      <pred name="Const">
 		<type/>
-	      </concrete>
+	      </pred>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -846,13 +936,6 @@
 	  <p>
 	    <btypes:TYPE>
 	      <tvar/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
-	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -910,13 +993,6 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <TRUE/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
 	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
@@ -949,13 +1025,6 @@
 	  <p>
 	    <btypes:TYPE>
 	      <bool/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
-	      <TRUE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -997,13 +1066,6 @@
 		<type num="1"/>
 		<type num="2"/>
 	      </fn>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
-	      <TRUE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -1059,15 +1121,6 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <pred name="Immut">
-		<type/>
-	      </pred>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
 	      <pred name="Mut">
 		<type/>
 	      </pred>
@@ -1077,9 +1130,9 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete>
+	      <pred name="Immut">
 		<type/>
-	      </concrete>
+	      </pred>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -1117,13 +1170,6 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <FALSE/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
 	      <TRUE/>
 	    </btypes:TYPE>
 	  </p>
@@ -1131,18 +1177,14 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete>
-		<ptype/>
-	      </concrete>
+	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete sp="yes">
-		<ptype/>
-	      </concrete>
+	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -1174,20 +1216,6 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <AND>
-		<pred name="Immut">
-		  <type num="1"/>
-		</pred>
-		<pred name="Immut">
-		  <type num="2"/>
-		</pred>
-	      </AND>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
 	      <OR>
 		<pred name="Mut">
 		  <type num="1"/>
@@ -1203,12 +1231,12 @@
 	  <p>
 	    <btypes:TYPE>
 	      <AND>
-		<concrete>
+		<pred name="Immut">
 		  <type num="1"/>
-		</concrete>
-		<concrete>
+		</pred>
+		<pred name="Immut">
 		  <type num="2"/>
-		</concrete>
+		</pred>
 	      </AND>
 	    </btypes:TYPE>
 	  </p>
@@ -1217,12 +1245,12 @@
 	  <p>
 	    <btypes:TYPE>
 	      <AND>
-		<concrete sp="yes">
+		<pred name="Const">
 		  <type num="1"/>
-		</concrete>
-		<concrete sp="yes">
+		</pred>
+		<pred name="Const">
 		  <type num="2"/>
-		</concrete>
+		</pred>
 	      </AND>
 	    </btypes:TYPE>
 	  </p>
@@ -1259,13 +1287,6 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <FALSE/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
 	      <pred name="Mut">
 		<minzT>
 		  <ptype/>
@@ -1277,18 +1298,14 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete>
-		<ptype/>
-	      </concrete>
+	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete sp="yes">
-		<ptype/>
-	      </concrete>
+	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -1316,7 +1333,6 @@
 	</td>
       </tr>
       <tr>
-	<td/>
 	<td/>
 	<td/>
 	<td/>
@@ -1356,13 +1372,6 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <FALSE/>
-	    </btypes:TYPE>
-	  </p>
-	</td>
-	<td>
-	  <p>
-	    <btypes:TYPE>
 	      <OR>
 		<pred name="Mut">
 		  <stype/>
@@ -1379,18 +1388,14 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete>
-		<ptype/>
-	      </concrete>
+	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <concrete sp="yes">
-		<ptype/>
-	      </concrete>
+	      <FALSE/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -1418,7 +1423,6 @@
 	</td>
       </tr>
       <tr>
-	<td/>
 	<td/>
 	<td/>
 	<td/>
@@ -1456,7 +1460,25 @@
 	</td>
 	<td>
 	  <p>
-	    <btypes:TYPE>\
+	    <btypes:TYPE>
+	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred name="Immut">
+		<minz>
+		  <type/>
+		</minz>
+	      </pred>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
 	      <TRUE/>
 	    </btypes:TYPE>
 	  </p>
@@ -1464,7 +1486,27 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <FALSE/>
+	      <const>
+		<Subst>
+		  <aSubMap/>
+		  <type/>
+		</Subst>
+	      </const>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <table latex.colspec="c||c|c|c|c|c">
+    <tbody>
+      <!-- Row: Title -->
+      <tr lineafter="yes" valign="top">
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <type/>
 	    </btypes:TYPE>
 	  </p>
 	</td>
@@ -1489,13 +1531,994 @@
 	<td>
 	  <p>
 	    <btypes:TYPE>
-	      <const>
-		<Subst>
-		  <aSubMap/>
+	      <concrete sp2="yes">
+		<type/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <normalize>
+		<type/>
+	      </normalize>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+              <pred mfrc="yes" name="M">
+		<type/>
+	      </pred>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Tvar -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <tvar/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <tvar/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <EmptySubst/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Unit -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <unit/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <unit/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <EmptySubst/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Bool -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <bool/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <bool/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <EmptySubst/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Function -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <fn>
+		<type num="1"/>
+		<type num="2"/>
+	      </fn>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <fn>
+		<normalize>
+		  <type num="1"/>
+		</normalize>
+		<normalize>
+		  <type num="2"/>
+		</normalize>
+	      </fn>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <compose>
+		<pred mfrc="yes" name="M">
+		  <type num="1"/>
+		</pred>
+		<pred mfrc="yes" name="M">
+		  <type num="2"/>
+		</pred>
+	      </compose>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Ref -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <ref>
+		<type/>
+	      </ref>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete>
+		<type/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <ref>
+		<normalize>
 		  <type/>
-		</Subst>
+		</normalize>
+	      </ref>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred mfrc="yes" name="M">
+		<type/>
+	      </pred>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Mutable -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <mutable>
+		<ptype/>
+	      </mutable>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete>
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp="yes">
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp2="yes">
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <mutable>
+		<normalize>
+		  <ptype/>
+		</normalize>
+	      </mutable>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred mfrc="yes" name="M">
+		<ptype/>
+	      </pred>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: Pair -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pair>
+		<type num="1"/>
+		<type num="2"/>
+	      </pair>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <AND>
+		<concrete>
+		  <type num="1"/>
+		</concrete>
+		<concrete>
+		  <type num="2"/>
+		</concrete>
+	      </AND>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <AND>
+		<concrete sp="yes">
+		  <type num="1"/>
+		</concrete>
+		<concrete sp="yes">
+		  <type num="2"/>
+		</concrete>
+	      </AND>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <AND>
+		<concrete sp2="yes">
+		  <type num="1"/>
+		</concrete>
+		<concrete sp2="yes">
+		  <type num="2"/>
+		</concrete>
+	      </AND>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pair>
+ 		<normalize>
+		  <type num="1"/>
+		</normalize>
+		<normalize>
+		  <type num="2"/>
+		</normalize>
+	      </pair>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <compose>
+		<pred mfrc="yes" name="M">
+		  <type num="1"/>
+		</pred>
+		<pred mfrc="yes" name="M">
+		  <type num="2"/>
+		</pred>
+	      </compose>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: MbTop -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <mbTop>
+		<tvar/>
+		<ptype/>
+	      </mbTop>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete>
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp="yes">
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <mbTop>
+		<tvar/>
+		<normalize>
+		  <ptype/>
+		</normalize>
+	      </mbTop>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred mfrc="yes" name="M">
+		<ptype/>
+	      </pred>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: MbFull -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <mbFull>
+		<stype/>
+		<ptype/>
+	      </mbFull>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete>
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp="yes">
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <FALSE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <mbFull>
+		<stype/>
+		<normalize>
+		  <ptype/>
+		</normalize>
+	      </mbFull>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <compose>
+		<pred mfrc="yes" name="M">
+		  <ptype/>
+		</pred>
+		<SubMap>
+		  <tvar/>
+		  <maxz>
+		    <ptype/>
+		  </maxz>
+		</SubMap>
+	      </compose>
+	    </btypes:TYPE>
+	    if 
+	    <btypes:TYPE>
+	      <eq>
+		<stype/>
+		<mutable>
+		  <tvar/>
+		</mutable>
+	      </eq>
+	    </btypes:TYPE> 
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td/>
+	<td/>
+	<td/>
+	<td/>
+	<td/>
+	<td>
+	  <p>
+	    and
+	    <btypes:TYPE>
+	      <concrete sp="yes">
+		<ptype/>
+	      </concrete>
+	    </btypes:TYPE>; 
+	    <btypes:TYPE>
+	      <pred mfrc="yes" name="M">
+		<ptype/>
+	      </pred>
+	    </btypes:TYPE>
+	    otherwise
+	  </p>
+	</td>
+      </tr>
+      <!-- Row: const -->
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <const>
+		<type/>
 	      </const>
 	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete>
+		<type/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp="yes">
+		<type/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <TRUE/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <minz>
+		<type/>
+	      </minz>
+	    </btypes:TYPE>
+	    if
+	    <btypes:TYPE>
+	      <concrete sp2="yes">
+		<type/>
+	      </concrete>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred mfrc="yes" name="M">
+		<type/>
+	      </pred>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+      </tr>
+      <tr lineafter="yes">
+	<td/>
+	<td/>
+	<td/>
+	<td/>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <const>
+		<type/>
+	      </const>
+	    </btypes:TYPE>
+	    otherwise
+	  </p>
+	</td>
+	<td/>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <b>Meanings of Operators</b>
+  </p>
+
+  <table latex.colspec="c|l">
+    <tbody>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <maxzOp/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Add mutability up to the ref/function boundary. 
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <minzOp/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Remove mutability up to the ref/function boundary. 
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <maxzTOp/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Add top-most mutability. 
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <minzTOp/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Remove top-most mutability. 
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <minzCOp/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Remove mutability and const up to the ref/function 
+	    boundary.
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <minzDOp/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Remove mutability deeply up to the function boundary. 
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <spset>
+		<nothing/>
+	      </spset>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Constraint Collection
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred name="Mut"/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Is the type <em>observably</em> mutable?
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred name="Immut"/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Is the type <em>effectively</em> deeply immutable?
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred name="Const"/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Is the type <em>effectively</em> const?
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <Subst>
+		<aSubMap/>
+		<nothing/>
+	      </Subst>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Substitution.
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Is the type <em>concretizable</em>? (i.e. can be made
+	    invariable
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td/>
+	<td>
+	  <p>
+	    by a substitution <em>only</em> for mutability-variables?)
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp="yes"/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Is the type <em>concretizable</em> up to a reference boundary?
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <concrete sp2="yes"/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Is this type concrete enough to drop an enclosing const?
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <normalize/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Partially normalized form of const types, when a const
+	    wrapper
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td/>
+	<td>
+	  <p>
+	    can be dropped (ex: 
+	    <btypes:TYPE>
+	      <equiv>
+		<const>
+		  <bool/>
+		</const>
+		<bool/>
+	      </equiv>
+	    </btypes:TYPE>)
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred mfrc="yes" name="M"/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Produce a substitution to normalize 
+	    <btypes:TYPE>
+	      <mbFull>
+		<stype/>
+		<ptype/>
+	      </mbFull>
+	    </btypes:TYPE> types.
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td/>
+	<td>
+	  <p>
+	    (ex: 
+	    <btypes:TYPE>
+	      <equiv>
+		<mbFull>
+		  <mutable>
+		    <tvar/>
+		  </mutable>
+		  <bool/>
+		</mbFull>
+		<mutable>
+		  <bool/>
+		</mutable>
+	      </equiv>
+	    </btypes:TYPE>)
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred mbb="yes" name="M"/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Produce a substitution to propagate mutability inwards into  
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td/>
+	<td>
+	  <p>
+	    composite types (or fail with an error).
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <p>
+	    <btypes:TYPE>
+	      <pred mbb="yes" name="N"/>
+	    </btypes:TYPE>
+	  </p>
+	</td>
+	<td>
+	  <p>
+	    Normalized form of const types, where const only appears
+	    around 
+	  </p>
+	</td>
+      </tr>
+      <tr>
+	<td/>
+	<td>
+	  <p>
+	    variable or constrained types.
 	  </p>
 	</td>
       </tr>

@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -35,6 +35,13 @@
  *
  **************************************************************************/
 
+/// @file REPR simplification pass.
+///
+/// For almost all purposes in the compiler, a DEFREPR form can be
+/// treated as a discriminated union form. This pass converts a
+/// DEFREPR into a closely corresponding DEFUNION, leaving a marker
+/// behind to indicate that it was really a DEFREPR.
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -47,56 +54,20 @@
 #include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Environment.hxx"
-#include "Symtab.hxx"
 #include "inter-pass.hxx"
 #include "backend.hxx"
 
 using namespace boost;
 using namespace sherpa;
 
-/**********************************************************************
-Consider the defrepr:
-
-(defrepr name
-    (Ctr1 f11:type f21:type ... fn1:type
-       (where fp1=val11 fq1=val21 ... fm1=valm1))
-
-    (Ctr2 f12:type f22:type ... fn2:type
-       (where fp2=val12 fq2=val22 ... fm2=valm2))
-
-    ... )
-
-The following restrictions apply:
-
-For all constructors Ctrx, Ctry, Ctrz ...:
-
-*  All fields fpx, fqx...fmx appearing in the `when' clause of a
-   constructor form Ctrx must be described within the body of
-   Ctrx. That is, {fpx, fqx...fmx} <= {f1x ... fnx}
-
-*  If the same field name appears in multiple legs of a DEFREPR, that
-   field must appear at the same bit offset in all legs where it
-   appears.  That is, fpx = fpy implies 
-   bitOffset(fpx) = bitOffset(fpy). 
-
-*  The fields within the when clauses of all constructor forms must
-   uniquely distinguish all constructible values of the union. The
-   compiler will not introduce any more tag bits for any defrepr 
-   value. 
-
-*  The defrepr form will not accept type arguments over
-   which it can be instantiated. 
-
-***************************************************************/
-
-shared_ptr<AST> 
+shared_ptr<AST>
 reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 {
   switch(ast->astType) {
   case at_defrepr:
     {
-      shared_ptr<AST> unin = AST::make(ast, false); 
-      
+      shared_ptr<AST> unin = AST::make(ast, false);
+
       unin->astType = at_defunion;
       unin->flags |= UNION_IS_REPR;
       unin->addChild(ast->child(0)); // identifier
@@ -110,7 +81,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 
       break;
     }
-    
+
   case at_reprctrs:
     {
       shared_ptr<AST> ctrs = AST::make(at_constructors, ast->loc);
@@ -119,10 +90,10 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       ast = ctrs;
       break;
     }
-    
+
   case at_reprctr:
     {
-      shared_ptr<AST> ctr = ast->child(0);      
+      shared_ptr<AST> ctr = ast->child(0);
 
       for (size_t i=1; i < ast->children.size(); i++) {
 	shared_ptr<AST> where = ast->child(i);
@@ -130,21 +101,21 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 
 	for (size_t j=1; j < ctr->children.size(); j++) {
 	  shared_ptr<AST> fld = ctr->child(j);
-		  
+		
 	  if (where->child(0)->s == fld->child(0)->s) {
 	    found = true;
-	    
+	
 	    if (fld->flags & FLD_IS_DISCM) {
 	      errStream << where->loc << ": "
 			<< " Duplicate `where' label for "
 			<< where->child(0)->s
 			<< std::endl;
-	      
+	
 	      errFree = false;
 	      break;
 	    }
-	    
-	    fld->flags |= FLD_IS_DISCM;	    
+	
+	    fld->flags |= FLD_IS_DISCM;	
 	    fld->unin_discm = (size_t)(where->child(1)->litValue.i.as_uint64());
 	  }
 	}
@@ -154,7 +125,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 		    << " Unknown Field: "
 		    << where->child(0)->s
 		    << std::endl;
-	  
+	
 	  errFree = false;
 	}
       }
@@ -162,11 +133,11 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       ast = ctr;
       break;
     }
-    
+
   case at_declrepr:
     {
       shared_ptr<AST> unin = AST::make(ast, false);
-      
+
       unin->astType = at_declunion;
       unin->flags |= UNION_IS_REPR;
       unin->addChild(ast->child(0)); // identifier
@@ -176,7 +147,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       ast = unin;
       break;
     }
-    
+
   default:
     {
       // value definitions are ignored
@@ -189,7 +160,7 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 }
 
 bool
-UocInfo::fe_reprSimp(std::ostream& errStream, 
+UocInfo::fe_reprSimp(std::ostream& errStream,
 		     bool init, unsigned long flags)
 {
   bool errFree = true;

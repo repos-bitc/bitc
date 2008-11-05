@@ -51,7 +51,7 @@ bool
 initGamma(std::ostream& errStream, 
 	  boost::shared_ptr<TSEnvironment > gamma,
 	  boost::shared_ptr<InstEnvironment > instEnv,
-	  const boost::shared_ptr<AST> ast, unsigned long uflags);
+	  const boost::shared_ptr<AST> ast);
 
 void
 useIFGamma(const std::string& idName,
@@ -62,12 +62,6 @@ void
 useIFInsts(const std::string& idName,
 	   boost::shared_ptr<InstEnvironment >fromEnv, 
 	   boost::shared_ptr<InstEnvironment >toEnv);
-
-bool
-initGamma(std::ostream& errStream, 
-	  boost::shared_ptr<TSEnvironment > gamma,
-	  boost::shared_ptr<InstEnvironment > instEnv,
-	  const boost::shared_ptr<AST> ast, unsigned long uflags);
 
 size_t
 nCtArgs(boost::shared_ptr<Type> t);

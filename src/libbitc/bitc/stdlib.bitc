@@ -37,6 +37,6 @@
 
 (bitc-version "0.10")
 (interface bitc.stdlib
-  (proclaim atoi: (fn (string) int32) external bitc_stdlib_atoi)
-  (proclaim getTimeStamp: (fn () uint64) external bitc_stdlib_rdtsc)
+  (proclaim atoi: (fn string -> int32) external bitc_stdlib_atoi)
+  (proclaim getTimeStamp: (fn -> uint64) external bitc_stdlib_rdtsc)
 )

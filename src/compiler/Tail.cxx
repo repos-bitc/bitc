@@ -117,7 +117,8 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_bitfield:
   case at_deftypeclass:
   case at_definstance:
-  case at_methods:
+  case at_tcmethods:
+  case at_tcmethod_binding:
   case at_declunion:
   case at_declstruct:
   case at_declrepr:
@@ -139,6 +140,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_primaryType:
   case at_fnargVec:
   case at_mutableType: 
+  case at_constType:
   case at_defunion:
   case at_defstruct:
   case at_constructors:
@@ -146,7 +148,6 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_constructor:
   case at_field:
   case at_fill:
-  case at_reserved:
   case at_defexception:
   case at_proclaim:
   case at_fn:
@@ -166,6 +167,8 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_reprctr:
   case at_reprrepr:
   case at_docString:
+  case at_sizeof:
+  case at_bitsizeof:
     {
       break;
     }
@@ -221,13 +224,15 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
     }
     
   case at_begin:
+  case at_block:
+  case at_return_from:
     {
       //     for (size_t i = 0; i < ast->children.size() - 1; i++)
       //       markTail(ast->child(i), fn, bps, false);
       markTail(ast->child(ast->children.size() - 1), fn, bps, isTail);
       break;
     }
-    
+
   case at_do:
     {
       markTail(ast->child(1), fn, bps, isTail);

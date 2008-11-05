@@ -44,7 +44,7 @@
 	  get them:</p>
 <pre>
 (define (add-one x) (+ 1 x))
-add-one: (forall (Arith 'a) (fn 'a 'a))
+add-one: (forall (Arith 'a) (fn 'a -> 'a))
 </pre>
       </li>
       <li>
@@ -65,9 +65,14 @@ add-one: (forall (Arith 'a) (fn 'a 'a))
     </p>
     <h2>Target Platforms</h2>
     <p>
-      The BitC bootstrap compiler compiles to portable ANSI&nbsp;C code. By
-      tweaking a single header file it is possible to port BitC
-      bootstrap output to essentially any target platform.
+      The BitC bootstrap compiler compiles to portable ANSI&nbsp;C
+      code. By tweaking a single header file and writing a
+      target-specific header file and writing a procedure object thunk
+      function it is possible to port the research compiler to
+      essentially any target platform. The current source tree is
+      known to work on IA32 and AMD64/X86-64 targets, and includes
+      untested ports to SPARC and SPARC64. Contributions for new
+      targets would be very welcome.
     </p>
     <h2>Mailing Lists</h2>
     <p>

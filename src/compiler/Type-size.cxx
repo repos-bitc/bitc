@@ -80,7 +80,6 @@ calc_struct_size(const shared_ptr<Type> t)
     
     switch(fld->astType) {
     case at_fill:
-    case at_reserved:
       {
 	sz += fld->field_bits;
 	break;
@@ -261,6 +260,7 @@ Type::size()
     }
     
   case ty_mutable:
+  case ty_const:
     {
       theSize = Base()->size();      
       break;

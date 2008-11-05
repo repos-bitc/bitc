@@ -45,7 +45,7 @@
 #include <libsherpa/LexLoc.hxx>
 #include <libsherpa/utf8.hxx>
 
-#include "BUILD/BitcParser.hxx"
+#include "BUILD/SexprParser.hxx"
 
 using namespace sherpa;
 
@@ -182,139 +182,129 @@ validate_string(const char *s)
 }
 
 struct SexprLexer::KeyWord SexprLexer::keywords[] = {
+  { "->",               tk_FNARROW },
   { "and",              tk_AND },
   { "apply",            tk_APPLY },
   { "array",            tk_ARRAY },
   { "array-length",     tk_ARRAY_LENGTH },
   { "array-nth",        tk_ARRAY_NTH },
   { "as",               tk_AS },
-  { "assert",           tk_Reserved },
+  { "assert",           tk_ReservedWord },
   { "begin",            tk_BEGIN },
   { "bitc-version",     tk_BITC_VERSION },
   { "bitfield",         tk_BITFIELD },
-  { "block",            tk_Reserved },
+  { "bitsizeof",        tk_BITSIZEOF },
+  { "block",            tk_BLOCK },
   { "bool",             tk_BOOL },
-  { "break",            tk_Reserved },
+  { "break",            tk_ReservedWord },
   { "by-ref",           tk_BY_REF },
   { "case",             tk_CASE },
   { "catch",            tk_CATCH },
   { "char",             tk_CHAR },
-  { "check",            tk_Reserved },
-  { "coindset",         tk_Reserved },
+  { "check",            tk_ReservedWord },
+  { "coindset",         tk_ReservedWord },
   { "cond",             tk_COND },
   { "const",            tk_CONST },
-  { "constrain",        tk_Reserved },
-  { "continue",         tk_Reserved },
+  { "constrain",        tk_ReservedWord },
+  { "continue",         tk_CONTINUE },
   { "declare",          tk_DECLARE },
-  { "deep-const",       tk_Reserved },
-  { "defequiv",         tk_Reserved },
+  { "deep-const",       tk_ReservedWord },
+  { "defequiv",         tk_ReservedWord },
   { "defexception",     tk_DEFEXCEPTION },
   { "define",           tk_DEFINE },
   { "definstance",      tk_DEFINSTANCE },
-  { "definvariant",     tk_Reserved },
-  { "defobject",        tk_Reserved },
-  { "defrefine",        tk_Reserved },
+  { "definvariant",     tk_ReservedWord },
+  { "defobject",        tk_ReservedWord },
+  { "defrefine",        tk_ReservedWord },
   { "defrepr",          tk_DEFREPR },
   { "defstruct",        tk_DEFSTRUCT },
-  { "deftheory",        tk_Reserved },
+  { "deftheory",        tk_ReservedWord },
   { "defthm",           tk_DEFTHM },
   { "deftypeclass",     tk_DEFTYPECLASS },
   { "defunion",         tk_DEFUNION },
-  { "defvariant",       tk_Reserved },
+  { "defvariant",       tk_ReservedWord },
   { "deref",            tk_DEREF },
-  { "disable",          tk_Reserved },
+  { "disable",          tk_ReservedWord },
   { "do",               tk_DO },
-  { "do*",              tk_Reserved },
+  { "do*",              tk_ReservedWord },
   { "double",           tk_DOUBLE },
   { "dup",              tk_DUP },
-  { "enable",           tk_Reserved },
+  { "enable",           tk_ReservedWord },
   { "exception",        tk_EXCEPTION },
   { "external",         tk_EXTERNAL },
   { "fill",             tk_FILL },
   { "float",            tk_FLOAT },
   { "fn",               tk_FN },
   { "forall",           tk_FORALL },
-  { "hide",             tk_HIDE },
   { "if",               tk_IF },
   { "import",           tk_IMPORT },
-  { "import!",          tk_Reserved },
+  { "import!",          tk_ReservedWord },
   { "impure",           tk_IMPURE },
-  { "indset",           tk_Reserved },
+  { "indset",           tk_ReservedWord },
   { "inner-ref",        tk_INNER_REF },
   { "int16",            tk_INT16 },
   { "int32",            tk_INT32 },
   { "int64",            tk_INT64 },
   { "int8",             tk_INT8 },
   { "interface",        tk_INTERFACE },
-  { "label",            tk_Reserved },
   { "lambda",           tk_LAMBDA },
   { "let",              tk_LET },
-  { "let*",             tk_Reserved },
+  { "let*",             tk_ReservedWord },
   { "letrec",           tk_LETREC },
-  { "literal",          tk_Reserved },
-  { "location",         tk_Reserved },
+  { "literal",          tk_ReservedWord },
+  { "location",         tk_ReservedWord },
   //  { "make-vector",      tk_MAKE_VECTOR },
   { "make-vector",      tk_MAKE_VECTORL },
   { "member",           tk_MEMBER },   /* REDUNDANT */
   { "method",           tk_METHOD },
   { "module",           tk_MODULE },
   { "mutable",          tk_MUTABLE },
-  { "namespace",        tk_Reserved },
+  { "namespace",        tk_ReservedWord },
   { "not",              tk_NOT },
-  { "nth",              tk_Reserved },
+  { "nth",              tk_ReservedWord },
   { "opaque",           tk_OPAQUE },
   { "or",               tk_OR },
   { "otherwise",        tk_OTHERWISE },
   { "proclaim",         tk_PROCLAIM },
   { "provide",          tk_PROVIDE },
-  { "provide!",         tk_Reserved },
+  { "provide!",         tk_ReservedWord },
   { "pure",             tk_PURE },
   { "quad",             tk_QUAD },
-  { "read-only",        tk_Reserved },
+  { "read-only",        tk_ReservedWord },
   { "ref",              tk_REF },
-  { "require",          tk_Reserved },
+  { "require",          tk_ReservedWord },
   { "reserved",         tk_RESERVED },
-  { "return",           tk_Reserved },
-  { "return-from",      tk_Reserved },
-  { "sensory",          tk_Reserved },
+  { "return",           tk_RETURN },
+  { "return-from",      tk_RETURN_FROM },
+  { "sensory",          tk_ReservedWord },
   { "set!",             tk_SET },
-  { "size-of",          tk_Reserved },
+  { "sizeof",           tk_SIZEOF },
   { "string",           tk_STRING },
-  { "super",            tk_Reserved },
+  { "super",            tk_ReservedWord },
   { "suspend",          tk_SUSPEND },  
   { "switch",           tk_SWITCH },
   { "tag",              tk_TAG },
   { "the",              tk_THE },
   { "throw",            tk_THROW },
   { "try",              tk_TRY },
-  { "tycon",            tk_Reserved },
+  { "tycon",            tk_ReservedWord },
   { "tyfn",             tk_TYFN },
   { "uint16",           tk_UINT16 },
   { "uint32",           tk_UINT32 },
   { "uint64",           tk_UINT64 },
   { "uint8",            tk_UINT8 },
-  { "using",            tk_Reserved },
+  { "using",            tk_ReservedWord },
   { "val",              tk_VAL },
-  { "value-at",         tk_Reserved },
+  { "value-at",         tk_ReservedWord },
   { "vector",           tk_VECTOR },
   { "vector-length",    tk_VECTOR_LENGTH },
   { "vector-nth",       tk_VECTOR_NTH },
   { "when",             tk_WHEN },
   { "where",            tk_WHERE },
   { "word",             tk_WORD }
-  
-  //{ "immutable",        tk_IMMUTABLE },
-  //{ "module",           tk_MODULE },
-  //{ "mutual-recursion", tk_MUTUAL_RECURSION },
-  //{ "nat",              tk_NAT },
-  //{ "package",          tk_PACKAGE }, 
-  //{ "restricted-ref",   tk_RESTRICTEDREF },
-  //{ "sequence-length",  tk_SEQUENCELENGTH },
-  //{ "sequence-ref",     tk_SEQUENCEREF }, /* REDUNDANT */
-
 };
 
-int
+static int
 kwstrcmp(const void *vKey, const void *vCandidate)
 {
   const char *key = ((const SexprLexer::KeyWord *) vKey)->nm;
@@ -328,11 +318,11 @@ SexprLexer::kwCheck(const char *s)
 {
   if (ifIdentMode) {
     if (!valid_ifident_start(*s))
-      return tk_Reserved;
+      return tk_ReservedWord;
 
     for (++s; *s; s++)
       if (!valid_ifident_continue(*s))
-	return tk_Reserved;
+	return tk_ReservedWord;
 
     return tk_Ident;
   }
@@ -352,16 +342,16 @@ SexprLexer::kwCheck(const char *s)
   // Things starting with "__":
   if (s[0] == '_' && s[1] == '_') {
     if (!isRuntimeUoc)
-      return tk_Reserved;
+      return tk_ReservedWord;
   }
 
   // Things starting with "def":
   if (s[0] == 'd' && s[1] == 'e' && s[2] == 'f')
-    return tk_Reserved;
+    return tk_ReservedWord;
 
   // Things starting with "#":
   if (s[0] == '#')
-    return tk_Reserved;
+    return tk_ReservedWord;
 
   return tk_Ident;
 }

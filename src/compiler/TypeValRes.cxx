@@ -91,6 +91,12 @@ isExpansive(std::ostream& errStream,
   /* Typeclasses special for intLit and FloatLit !! */
   case at_intLiteral:
   case at_floatLiteral:
+  case at_boolLiteral:
+  case at_charLiteral:
+  case at_stringLiteral:
+  case at_lambda:
+  case at_sizeof:
+  case at_bitsizeof:
     {
       itsExpansive = false;
       break;
@@ -111,12 +117,7 @@ isExpansive(std::ostream& errStream,
   case at_mkClosure:
   case at_ident:
   case at_fill:
-  case at_reserved:
   case at_usesel:
-  case at_boolLiteral:
-  case at_charLiteral:
-  case at_stringLiteral:
-  case at_lambda:
   case at_dup:
   case at_docString:
     {
@@ -162,6 +163,16 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
+  case at_try:
+  case at_throw:
+  case at_block:
+  case at_return_from:
+#if 0
+    {
+      itsExpansive = true;
+      break;
+    }
+#endif
   case at_do:
   case at_dotest:
   case at_begin:
@@ -334,13 +345,6 @@ isExpansive(std::ostream& errStream,
       break;
     }
    
-  case at_try:
-  case at_throw:
-    {
-      itsExpansive = true;
-      break;
-    }
-
   case at_container:
     {
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
@@ -387,6 +391,7 @@ isExpansive(std::ostream& errStream,
   case at_arrayType:
   case at_vectorType:
   case at_mutableType:
+  case at_constType:
   case at_typeapp:
   case at_qualType:
   case at_constraints:
@@ -425,7 +430,8 @@ isExpansive(std::ostream& errStream,
   case at_method_decls:
   case at_method_decl:
   case at_definstance:
-  case at_methods:
+  case at_tcmethods:
+  case at_tcmethod_binding:
   case agt_tc_definition:
   case agt_if_definition:
   case agt_ow:
@@ -460,10 +466,10 @@ isExpansive(std::ostream& errStream,
   bool itsExpansive = false;
   shared_ptr<Type> t = typ->getType();
   
-  if (t->mark & MARK_IS_EXPANSIVE)
+  if (t->mark & MARK_PREDICATE)
     return itsExpansive;
 
-  t->mark |= MARK_IS_EXPANSIVE;
+  t->mark |= MARK_PREDICATE;
 
   switch(t->kind) {
   case ty_unit:
@@ -491,7 +497,6 @@ isExpansive(std::ostream& errStream,
 #ifdef KEEP_BF
   case ty_bitfield:
 #endif
-  case ty_ref:
   case ty_fn:
   case ty_typeclass:
     break;
@@ -521,6 +526,8 @@ isExpansive(std::ostream& errStream,
   case ty_mbFull:
   case ty_mbTop:
   case ty_pcst:
+  case ty_ref:
+  case ty_exn:
     {    
       for (size_t i=0; i<t->typeArgs.size(); i++) 
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
@@ -532,14 +539,20 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
+  case ty_const:
+    {
+      CHKEXP(itsExpansive, isExpansive(errStream, gamma,
+				       t->Base()->minimizeMutability()));
+      break;
+    }
+    
   case ty_mutable:
-  case ty_exn:
     {
       itsExpansive = true;
       break;
     }
   }
   
-  t->mark &= ~MARK_IS_EXPANSIVE;
+  t->mark &= ~MARK_PREDICATE;
   return itsExpansive;
 }

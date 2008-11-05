@@ -41,7 +41,7 @@
 
 (define i:uint8 0)
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (bit-and i i)
     (bit-or i i)

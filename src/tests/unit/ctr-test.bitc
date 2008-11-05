@@ -44,7 +44,7 @@
 (define value (C2 0:int32)) 
   
 (define bVal value.C2)
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (if bVal value.C1 value.C2) 0))
 

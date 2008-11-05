@@ -41,12 +41,12 @@
 
 (deftypeclass (arith 'a 'b 'c)
   (tyfn ('a 'b) 'c)
-  ++: (fn ('a 'b) 'c)
-  --: (fn ('a 'b) 'c)
+  ++: (fn 'a 'b -> 'c)
+  --: (fn 'a 'b -> 'c)
   )
 
 (definstance (arith int32 int32 int32)
-  + -)
+  (++ = +) (-- = -))
 
 (defexception LengthError)
 (define (list-sum x y)
@@ -86,14 +86,14 @@
 ;; lp lm)
 
 (definstance (arith (list 'a) (list 'b) (list 'a))
-  list-sum list-dif)
+  (++ = list-sum) (-- = list-dif))
 
 ;; Should not work
 ;;(definstance (arith int32 int32 int64)
 ;;  + -)
 
 (definstance (arith int64 int64 int64)
-  + -)
+  (++ = +) (-- = -))
 
 (define (f x y) (++ x y))
 
@@ -109,7 +109,7 @@
 ;(define (lmn x y:bool) (ijk x y))
 
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (++ (cons 0:int32 nil) (cons 0:int32 nil))
     (++ 0:int32 1:int32) 

@@ -38,26 +38,61 @@
  *
  **************************************************************************/
 
-/* The following flags are Type-Inference / Unification Flags.
-   The ones defined in Type.hxx are internal flags for
-   communication/processing within Type-methods annd inference
-   routines. */
+/// @brief Flags used by Type-inference engine.
+///
+/// They are used for communication/processing within
+/// the different Type inference procedures, and for driving the
+/// inference engine under certain special conditions.
 
-#define UNIFY_STRICT        0x00001u // Overrides everything else.
-#define UNIFY_STRICT_TVAR   0x00002u // No-alpha-renaming.
-#define UNIFY_TRY           0x00004u // Trial mode.
-#define DEF_DECL_NO_MATCH   0x00008u
-#define TYP_NO_PRELUDE      0x00010u
-#define NO_MORE_TC          0x00020u // No more type classes 
-                                     // beyond polyinstantiation
-#define UN_IGN_RIGIDITY     0x00040u
-#define ALL_INSTS_OK        0x00080u // All instances are OK.
+enum TI_FlagValues {
+  TI_NO_FLAGS            = 0x000u,
+  /// The following flags are used for internal communication within
+  /// the type inference algorithm.
 
-#define POST_REFIZE         0x00100u // We have passedrefization pass  
-        // of Closure conversion. The (temporary?) restriction that
-        // letrecs must define only define lambdas must be prepared to
-        // take closures or refs to functions / closures.
+  /// Inference engine is now within a type AST 
+  /// (ex: (fn int -> bool))
+  TI_TYP_EXP             = 0x001u,
+  /// Inference engine is within a type AST that is a type application 
+  /// (ex: (pair int bool)
+  TI_TYP_APP             = 0x002u,
+  /// Inference engine is processing a subsumed type class
+  /// (ex: Since Ord is a sub-class of Eq, the presence of Ord
+  /// constraint subsumes the presence of another Eq Constraint)
+  TI_TCC_SUB             = 0x004u,
+  /// Processing a Type definition
+  /// (ex: defstruct and defunion)
+  TI_TYP_DEFN            = 0x008u,
 
-#define INF_REINIT          0x00200u 
+  /// The following flags are used to drive the inference engine under
+  /// specific modes/conditions.
+  
+  /// No longer need to check Declaration/Definition matching
+  TI_DEF_DECL_NO_MATCH   = 0x010u,
+
+  /// Don't import prelude
+  TI_NO_PRELUDE          = 0x020u,
+
+  /// No more type classes: The inference system will not add default
+  /// constraints (ex: IntLit/FloatLit constraints on 
+  /// Integer/Float literals). This mode is used beyond the 
+  /// polyinstantiation pass.
+  TI_NO_MORE_TC          = 0x040u,
+
+  /// No longer need to check instance permissibility, since this
+  /// check is expensive, and only needs to be performed once.
+  TI_ALL_INSTS_OK        = 0x100u,
+};
+typedef sherpa::EnumSet<TI_FlagValues> TI_Flags;
+
+/* The following flags are Unification Flags. */
+enum UnifyFlagValues {
+  UFLG_NO_FLAGS            = 0x00,
+  UFLG_UNIFY_STRICT        = 0x01u, // Overrides everything else.
+  UFLG_UNIFY_STRICT_TVAR   = 0x02u, // No-alpha-renaming.
+  UFLG_UN_IGN_RIGIDITY     = 0x04u,
+};
+
+typedef sherpa::EnumSet<UnifyFlagValues> UnifyFlags;
+
 
 #endif /* TYPEINFER_HXX */

@@ -1,25 +1,25 @@
 /**************************************************************************
  *
- * Copyright (C) 2007, The EROS Group, LLC. 
+ * Copyright (C) 2007, The EROS Group, LLC.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -47,7 +47,7 @@
 
 const uint64_t UINT32_T_MAX = 4294967295ull;
 
-/// @brief memset, but initializing from top to bottom. 
+/// @brief memset, but initializing from top to bottom.
 ///
 /// In large heap-allocated vectors a segv can occur if a reference
 /// occurs too far below bottom of stack. The easiest way to prevent
@@ -98,7 +98,7 @@ namespace sherpa {
       }
     }
 
-    inline nvec(size_t l, uint32_t *v) 
+    inline nvec(size_t l, uint32_t *v)
     {
       len = l, vec = v;
     }
@@ -117,7 +117,7 @@ namespace sherpa {
   /// @brief compare two digit vectors for relative magnitude. Return
   /// -1, 0, 1 according to whether v1 is less than, equal to, or
   /// greater than v2.
-  static int 
+  static int
   vu_cmp(const nvec n1, const nvec n2)
   {
     // Recall that the arguments may be denormalized:
@@ -138,7 +138,7 @@ namespace sherpa {
   /// @brief n2 = n1 / (radix^nShift)
   ///
   /// Requirement: n2 > 0
-  static void 
+  static void
   vu_rshift_digits(const nvec n1, size_t nShift, nvec n2)
   {
     if (nShift > n1.len) {
@@ -172,7 +172,7 @@ namespace sherpa {
   /// @brief n2 = n1 >> nShift
   ///
   /// Requirement: n2 > 0
-  static void 
+  static void
   vu_rshift_bits(const nvec n1, size_t nShift, nvec n2)
   {
     vu_rshift_digits(n1, nShift / 32, n2);
@@ -199,7 +199,7 @@ namespace sherpa {
 
     for (size_t i = 0; i < min(n1.len, n2.len - nShift); i++) {
       size_t pos = n2.len - i - 1;
-      
+
       uint32_t u = n2.getDigit(pos) << nShift;
       if (pos > 0)
 	u |= n2.getDigit(pos-1) >> (32 - nShift);
@@ -349,7 +349,7 @@ namespace sherpa {
 
   /// @brief Divide q = n1 / n2, r = (n1 - (n2 * q)).
   static void
-  vu_divqr(const nvec dividend, const nvec divisor, 
+  vu_divqr(const nvec dividend, const nvec divisor,
 	   nvec quotient, nvec remainder)
   {
     int cmp = vu_cmp(dividend, divisor);
@@ -375,7 +375,7 @@ namespace sherpa {
     nvec tmp;
     tmp.len = q.len + divisor.len;	// because of vu_mul requirement
     tmp.vec = (uint32_t *) alloca(tmp.len * sizeof(uint32_t));
-    
+
     size_t bits = q.len * 32;
 
     for (size_t i = 0; i < bits; i++) {
@@ -485,7 +485,7 @@ namespace sherpa {
 
   // This should be called *only* in return position, because it
   // potentially modifies an argument!!
-  inline 
+  inline
   BigNum::BigNum(size_t _nDigits, uint32_t* _digits, bool _negative)
   {
     negative = _negative;
@@ -563,7 +563,7 @@ namespace sherpa {
       negative = is_negative;
   }
 
-  BigNum BigNum::operator+(const BigNum& other) const 
+  BigNum BigNum::operator+(const BigNum& other) const
   {
     // Check if this is really addition:
     if (negative == other.negative) {
@@ -691,7 +691,7 @@ namespace sherpa {
     }
     else if (negative)
       return -1;
-    else 
+    else
       return 1;
   }
 
@@ -757,7 +757,7 @@ namespace sherpa {
 	  uint32_t nibble = sizeof(u)*2 - hd - 1;
 
 	  uint32_t digit = (u >> (nibble * 4)) & 0xFu;
-	  
+	
 	  if (digit == 0) {
 	    if (s.size())
 	      s.append(1, hexdigits[digit]);
@@ -786,7 +786,7 @@ namespace sherpa {
 
       while (place != BigNum(0)) {
 	BigNum thisDigit = me / place;
-      
+
 	if (thisDigit == 0) {
 	  if (s.size())
 	    s.append(1, hexdigits[thisDigit.oneDigit]);

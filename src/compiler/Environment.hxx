@@ -10,19 +10,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -47,7 +47,7 @@
 
 // Type of (sub) environment, if any.
 // Universal, In module scope, or in record scope
-//enum envType {universal, mod, rec, none}; 
+//enum envType {universal, mod, rec, none};
 //enum BindType {bind_type, bind_value};
 
 
@@ -84,7 +84,7 @@ struct Binding {
 };
 
 template <class T>
-struct Environment 
+struct Environment
   : public boost::enable_shared_from_this<Environment<T> > {
   std::string uocName;
   boost::shared_ptr<Environment<T> > parent; // in the chain of environments
@@ -123,9 +123,12 @@ public:
     return bindings.size();
   }
 
-
+  /// @brief Search recursively upwards for a binding, but not beyond
+  /// the environment specified by outerLimit.
   boost::shared_ptr< Binding<T> >
-  doGetBinding(const std::string& nm) const;
+  doGetBinding(const std::string& nm,
+	       boost::shared_ptr<Environment<T> > outerLimit
+	       = boost::GC_NULL) const;
 
   boost::shared_ptr< Binding<T> >
   getLocalBinding(const std::string& nm) const;
@@ -145,7 +148,7 @@ public:
 
   ~Environment();
 
-  void addBinding(const std::string& name, boost::shared_ptr<T> val, 
+  void addBinding(const std::string& name, boost::shared_ptr<T> val,
 		  bool rebind = false);
   void
   addDefBinding(const std::string& name, boost::shared_ptr<T> val)
@@ -159,9 +162,11 @@ public:
   void updateKey(const std::string& from, const std::string& to);
 
   inline boost::shared_ptr<T>
-  getBinding(const std::string& nm) const
+  getBinding(const std::string& nm,
+	       boost::shared_ptr<Environment<T> > outerLimit
+	       = boost::GC_NULL) const
   {
-    boost::shared_ptr<const Binding<T> > binding = doGetBinding(nm);
+    boost::shared_ptr<const Binding<T> > binding = doGetBinding(nm, outerLimit);
     if (binding) return binding->val;
     return boost::GC_NULL;
   }
@@ -181,7 +186,7 @@ public:
   }
 
   void mergeBindingsFrom(boost::shared_ptr<Environment<T> > from, bool complete=true);
-  
+
   boost::shared_ptr<Environment<T> > newScope();
 
   boost::shared_ptr<Environment<T> > newDefScope();

@@ -39,10 +39,10 @@
   (import bitc.list as lst)
   (import bitc.vector as vec)
 
-  (proclaim string-length : (fn (string) word) external bitc_string_length)
-  (proclaim string-nth :    (fn (string word) char) external bitc_string_nth)
+  (proclaim string-length : (fn string -> word) external bitc_string_length)
+  (proclaim string-nth :    (fn string word -> char) external bitc_string_nth)
 
-  (proclaim string-map : (fn (string (fn (char) ())) ()) external bitc_string_map)
+  (proclaim string-map : (fn string (fn char -> ()) -> ()) external bitc_string_map)
   (define (string->list s)
     (let ((lst : (mutable (list char)) nil))
 
@@ -50,14 +50,14 @@
 	  ((== pos 0) lst)
 	  (set! lst (cons (string-nth s (- pos 1)) lst)))))
 
-  (proclaim list->string : (fn ((list char)) string) external bitc_list_string)
+  (proclaim list->string : (fn (list char) -> string) external bitc_list_string)
 
-  (proclaim vector->string : (fn ((vector char)) string) 
+  (proclaim vector->string : (fn (vector char) -> string) 
     external bitc_vector_string)
   
   ;; This generates unfortunate intermediate garbage, but it lets me
   ;; do the C implementation more easily.
-  (define list->string:(fn ((list char)) string)
+  (define list->string:(fn (list char) -> string)
     (lambda (lst)
       (vector->string (vec.list->vector lst))))
   )

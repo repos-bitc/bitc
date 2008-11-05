@@ -42,6 +42,6 @@
 (defstruct (st 'a) f1:(bitfield int32 20) f2: 'a)
 (define st1 (st 10 #t))
 (define st2 (st 10 35:uint32))
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (- st1.f1 st2.f1)))

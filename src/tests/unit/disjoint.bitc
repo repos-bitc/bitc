@@ -44,16 +44,17 @@
 (define (FUN x:'a y:'a) #t)
 
 (deftypeclass (ABC 'a)
-  FN: (fn ('a 'a) bool))
+  FN: (fn 'a 'a -> bool))
 
-(definstance (forall ((IntLit 'a)) (ABC 'a))
-  FUN)
+(forall ((IntLit 'a)) 
+  (definstance (ABC 'a)
+    (FN = FUN)))
 
 ;; must not work
 ;;(definstance  (ABC int32)
 ;; FUN)
   
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (FN i0 i0) i0))
 

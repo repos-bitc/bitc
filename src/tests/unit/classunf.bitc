@@ -48,6 +48,6 @@
 
 (define (f2) (let ((p:(mutable 'a) 0)) p))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (fnxn 0:word) 0))

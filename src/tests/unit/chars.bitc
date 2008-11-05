@@ -45,6 +45,6 @@
 (define s #\space)
 (define d #\U+1ab)
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (id a) (id s) (id d) 0)) 

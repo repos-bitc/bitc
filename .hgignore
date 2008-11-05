@@ -1,5 +1,7 @@
 syntax: regexp
 
+# Doxygen output:
+^src/doc/browse/.*
 ^host/
 
 syntax: glob

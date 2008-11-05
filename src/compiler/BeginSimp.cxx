@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -56,14 +56,36 @@
 using namespace boost;
 using namespace sherpa;
 
-// Remove any wrapping BEGIN that has just one child.
-static shared_ptr<AST> 
+/// @brief Remove redundant BEGIN expressions.
+///
+/// This simplification pass was originally intended to locate all
+/// cases where a BEGIN wraps a single expression and replaces this
+/// with the single expression. The transform has no semantic effect,
+/// but improves the readability of dumped ASTs.
+///
+/// Later, functionality was added by which local DEFINE forms are
+/// converted to the corresponding LET and LETREC forms. After this
+/// pass, the only remaining occurrences of DEFINE and RECDEF appear at
+/// top level. The implementations of most later passes, notably the
+/// resolver and symbol checker, rely on this.
+///
+/// All of the syntactic constructs that wrap implicit BEGIN blocks
+/// are converted by the parser to wrap a single expression with an
+/// inserted BEGIN block that is marked as compiler inserted. In
+/// consequence, the transforms performed here apply to those
+/// constructs as well.
+///
+/// This pass may now be misnamed, but all of the simplifications that
+/// it performs are vaguely related to begin blocks.
+static shared_ptr<AST>
 beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 {
   for (size_t c = 0; c < ast->children.size(); c++)
     ast->child(c) = beginSimp(ast->child(c), errStream, errFree);
 
   if (ast->astType == at_begin) {
+    // Note that the execution of this loop can have the effect of
+    // shortening ast->children.size()!
     for (size_t c = 0; c < ast->children.size(); c++) {
       if (ast->child(c)->astType == at_define ||
 	  ast->child(c)->astType == at_recdef) {
@@ -81,7 +103,7 @@ beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 	  errFree = false;
 	}
 
-	shared_ptr<AST> letBinding = 
+	shared_ptr<AST> letBinding =
 	  AST::make(at_letbinding,
 		  def->loc, def->child(0), def->child(1));
 	if (rec)
@@ -111,8 +133,8 @@ beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 	ast->children = newChildren;
 	
 	// Insert the new letrec:
-	shared_ptr<AST> theLetRec = 
-	  AST::make((rec ? at_letrec : at_let), def->loc, 
+	shared_ptr<AST> theLetRec =
+	  AST::make((rec ? at_letrec : at_let), def->loc,
 		  AST::make(at_letbindings, def->loc, letBinding),
 		  body, def->child(2));
 	ast->child(c) = beginSimp(theLetRec, errStream, errFree);
@@ -132,10 +154,10 @@ beginSimp(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 bool
 UocInfo::fe_beginSimp(std::ostream& errStream,
 		      bool init, unsigned long flags)
-{ 
+{
   BEG_SIMP_DEBUG if (isSourceUoc())
     PrettyPrint(errStream);
-  
+
   BEG_SIMP_DEBUG std::cerr << "fe_beginSimp" << std::endl;
   bool errFree = true;
   uocAst = beginSimp(uocAst, errStream, errFree);

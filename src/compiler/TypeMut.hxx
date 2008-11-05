@@ -66,13 +66,19 @@ newTvar()
 static inline boost::shared_ptr<Type> 
 MBF(boost::shared_ptr<Type> t)
 {
-  return Type::make(ty_mbFull, newTvar(), t->minimizeMutability());
+  return Type::make(ty_mbFull, newTvar(), t->minMutConstless());
 }
 
 static inline boost::shared_ptr<Type> 
 MBT(boost::shared_ptr<Type> t)
 {
   return Type::make(ty_mbTop, newTvar(), t->getBareType());
+}
+
+static inline boost::shared_ptr<Type> 
+Mutable(boost::shared_ptr<Type> t)
+{
+  return Type::make(ty_mutable, t->getBareType());
 }
 
 #endif /* TYPEMUT_HXX */

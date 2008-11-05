@@ -66,7 +66,7 @@ obtainFullUnionType(shared_ptr<Type> t)
   assert(t->isUType());
   shared_ptr<AST> unin = t->myContainer;  
   shared_ptr<TypeScheme> uScheme = unin->scheme;
-  shared_ptr<Type> uType = uScheme->type_instance_copy()->getType();
+  shared_ptr<Type> uType = uScheme->type_instance()->getType();
 
   assert(uType->kind == ty_unionv || uType->kind == ty_unionr);
   assert(uType->typeArgs.size() == t->typeArgs.size());
@@ -85,7 +85,7 @@ nCtArgs(shared_ptr<Type> t)
   
   size_t cnt=0;
   for (size_t i=0; i < t->components.size(); i++)
-    if ((t->CompFlags(i) & COMP_UNIN_DISCM) ==0)
+    if ((t->CompFlags(i) & COMP_UNIN_DISCM) == 0)
       cnt++;
 
   return cnt;
@@ -105,17 +105,17 @@ useIFGamma(const std::string& idName,
 {
   for (TSEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
+    std::string s = itr->first;
     shared_ptr<Binding<TypeScheme> > bdng = itr->second;
 
     if (bdng->flags & BF_PRIVATE)
       continue;
 
-    std::string s = bdng->nm;
     shared_ptr<TypeScheme> ts = bdng->val;
 
     if (idName.size())
       s = idName + "." + s;
-
+    
     toEnv->addBinding(s, ts);
     toEnv->setFlags(s, BF_PRIVATE|BF_COMPLETE);
   }  
@@ -129,12 +129,12 @@ useIFInsts(const std::string& idName,
 {
   for (InstEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
+    std::string s = itr->first;
     shared_ptr<Binding<set<shared_ptr<Instance> > > > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE)
       continue;
     
-    std::string s = bdng->nm;
     shared_ptr<set<shared_ptr<Instance> > > insts = bdng->val;
     
     if (idName.size())
@@ -150,7 +150,7 @@ bool
 initGamma(std::ostream& errStream, 
 	  shared_ptr<TSEnvironment > gamma,
 	  shared_ptr<InstEnvironment > instEnv,
-	  const shared_ptr<AST> topAst, unsigned long uflags)
+	  const shared_ptr<AST> topAst)
 {
   bool errFree = true;
   // Make sure I am not processing the prelude itself
@@ -166,22 +166,18 @@ initGamma(std::ostream& errStream,
   shared_ptr<TSEnvironment > preenv = GC_NULL;
   shared_ptr<InstEnvironment > preInsts = GC_NULL;
   
-  size_t i;
-
-  {
-    UocMap::iterator itr = UocInfo::ifList.find("bitc.prelude");
-    if (itr == UocInfo::ifList.end()) {
-      errStream << topAst->loc << ": "
-		<< "Internal Compiler Error. "
-		<< "Prelude has NOT been processed till " 
-		<< "type inference."
-		<< std::endl;
-      ::exit(1);
-    }
-
-    preenv = itr->second->gamma;
-    preInsts = itr->second->instEnv;
+  UocMap::iterator itr = UocInfo::ifList.find("bitc.prelude");
+  if (itr == UocInfo::ifList.end()) {
+    errStream << topAst->loc << ": "
+	      << "Internal Compiler Error. "
+	      << "Prelude has NOT been processed till " 
+	      << "type inference."
+	      << std::endl;
+    ::exit(1);
   }
+
+  preenv = itr->second->gamma;
+  preInsts = itr->second->instEnv;
 
   if (!preenv || !preInsts) {
     errStream << topAst->loc << ": "

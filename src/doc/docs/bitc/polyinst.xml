@@ -11,6 +11,18 @@
   <docinfo>
     <title>Polymorphism by Polyinstantiation</title>
     <subtitle>Preliminary Implementation Note</subtitle>
+    <authorgroup>
+      <author>
+	<firstname>Jonathan</firstname>
+	<surname>Shapiro</surname>
+	<degree>Ph.D.</degree>
+      </author>
+      <affiliation>
+	<orgname>Systems Research Laboratory</orgname>
+	<address>Dept. of Computer Science</address>
+	<address>Johns Hopkins University</address>
+      </affiliation>
+    </authorgroup>
     <pubdate>September 6<sup>th</sup>, 2006</pubdate>
     <categories>
       <category>dev/bitc</category>
@@ -76,7 +88,7 @@
     
     <p>
       Depending on which point we pick in the continuum of choices,
-      there are different trade-offs wrt the amount of RTTI support
+      there are different trade-offs w.r.t. the amount of RTTI support
       needed, separate compilation, efficiency, code size, dealing
       with the var-args problem<cite ref="ShaoRep1997"/>, etc.
       Shao<cite ref="ShaoRep1997"/> discuss these trade-offs in detail

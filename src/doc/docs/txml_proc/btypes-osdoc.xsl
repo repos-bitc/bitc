@@ -662,7 +662,7 @@
     <xsl:text>xdtri;</xsl:text>
     <xsl:call-template name="print.params"/>
   </xsl:template>
-
+  
   <!-- maxzTOp -->
   <xsl:template match="maxzTOp" mode="formula">
     <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
@@ -701,11 +701,33 @@
     <xsl:call-template name="print.params"/>
   </xsl:template>
 
+  <!-- minzCOp -->
+  <xsl:template match="minzCOp" mode="formula">
+    <xsl:element name="b">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>xdtri;</xsl:text>
+    </xsl:element>
+  </xsl:template>
+  <!-- minzC -->
+  <xsl:template match="minzC" mode="formula">
+    <xsl:element name="b">
+      <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+      <xsl:text>xdtri;</xsl:text>
+    </xsl:element>
+    <xsl:call-template name="print.params"/>
+  </xsl:template>
+
   <!-- concrete -->
   <xsl:template match="concrete" mode="formula">
     <xsl:choose>
       <xsl:when test="@sp">
 	<xsl:element name="em">
+	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
+	  <xsl:text>square;</xsl:text>
+	</xsl:element>
+      </xsl:when>
+      <xsl:when test="@sp2">
+	<xsl:element name="b">
 	  <xsl:text disable-output-escaping="yes">&amp;</xsl:text>
 	  <xsl:text>square;</xsl:text>
 	</xsl:element>
@@ -4512,6 +4534,9 @@
 	  </xsl:when>
 	  <xsl:when test="@under='minz'">
 	    <xsl:text>xdtri;</xsl:text>
+	  </xsl:when>
+	  <xsl:when test="@under='minzC'">
+	    <xsl:text>compfn;</xsl:text>
 	  </xsl:when>
 	</xsl:choose>
       </xsl:with-param>

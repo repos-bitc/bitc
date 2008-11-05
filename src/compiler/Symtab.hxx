@@ -39,29 +39,67 @@
  **************************************************************************/
 
 /* Definitions of flags used in Symbol Resolution */
-#define NO_CHK_USE_TYPE     0x000001u
-#define INCOMPLETE_OK       0x000002u
-#define NEW_TV_OK           0x000004u
-#define IS_ESCAPING         0x000008u
-#define IS_MODULE           0x000010u
-#define IS_INTERFACE        0x000020u
-#define BIND_PUBLIC         0x000040u
-#define USE_ONLY_PUBLIC     0x000080u
+enum ResolverFlagValues {
+  RSLV_NO_FLAGS                 = 0,
+  
+  /// Don't check validity of identType in at_ident case. This is used
+  /// when the resolver does not have enough contextual information to
+  /// expect the correct identType (ex: for at_select)
+  RSLV_NO_CHK_USE_TYPE          = 0x0001u,
 
-#define RESOLVE_APPLY_MODE  0x000200u
-#define RES_APP_PAT_MODE    0x000400u
-#define INCOMPLETE_OK_PROC  0x000800u
-#define NO_RESOLVE_DECL     0x001000u
-#define WITHIN_DEFUNION     0x002000u
-#define SYM_NO_PRELUDE      0x004000u
-#define SWITCHED_ID_OK      0x008000u
-#define WITHIN_CATCH        0x010000u
-#define WITHIN_CATCH_MC     0x020000u // Catch block with 
-                                     // multiple exceptions
-#define SYM_REINIT          0x040000u
-#define SYM_POST_POLY       0x080000u // Resolution *during* 
-                                     // (and post) polyinstantiation
-                                     // ignore tvar-scoping.
-#define RESOLVE_INREF_MODE  0x100000u
+  /// Use of an incomplete identifier in this context is okay (ex:
+  /// within a lambda abstraction
+  RSLV_INCOMPLETE_OK            = 0x0002u,
+
+  /// No longer need to perform incompleteness checking
+  /// The closure-conversion pass introduces some carefully crafted
+  /// code using internal constructors that appear incomplete the
+  /// following restrictions. Since there cannot be any incompleteness
+  /// errors at that point, incompleteness checking is disabled.
+  RSLV_INCOMPLETE_NO_CHK        = 0x0004u,
+  
+  /// Use of new type variables is okay in this context. This is true
+  /// in the context of expressions, where annotation with new
+  /// variables is permitted. But, within structure/union definitions,
+  /// onlt variables bound in the parameter list should be used.
+  RSLV_NEW_TV_OK                = 0x0008u,
+
+  /// We are processing an interface unit of compilation
+  RSLV_IS_INTERFACE             = 0x0010u,
+
+  /// A name binding is public
+  RSLV_BIND_PUBLIC              = 0x0020u,
+
+  /// Only public bindings must be used for name resolution
+  RSLV_USE_ONLY_PUBLIC          = 0x0040u,
+
+  /// Don't warn about unused proclaimations in source module 
+  /// disabled in the unified UOC past polyinstantiation
+  RSLV_NO_RESOLVE_DECL          = 0x0080u,
+
+  /// Currently processing a defunion (used to check that tagtype
+  /// declarations onty occur on defunions.
+  RSLV_WITHIN_DEFUNION          = 0x0100u,
+
+  /// Dont' import prelude
+  RSLV_SYM_NO_PRELUDE           = 0x0200u,
+
+  /// Used to mark legal contexts (only on the left of a select) where
+  /// a identifier that represents a deconstructed (matched) value in
+  /// a switch statement can be used.
+  RSLV_SWITCHED_ID_OK           = 0x0400u,
+  
+  /// Processing a catch block
+  RSLV_WITHIN_CATCH             = 0x0800u,
+
+  /// Processing a Catch block with multiple exceptions
+  RSLV_WITHIN_CATCH_MC          = 0x1000u,
+  
+  /// Resolution *during* (and post) polyinstantiation. 
+  /// Here, we ignore tvar-scoping.
+  RSLV_SYM_POST_POLY            = 0x2000u,
+};
+
+typedef sherpa::EnumSet<ResolverFlagValues> ResolverFlags;
 
 #endif /* SYMTAB_HXX */

@@ -63,44 +63,6 @@
 	  </eval>
 	</opConc>
       </opRule>
-      <opRule name="E-EraseL">
-	<opPre/>
-	<opConc>
-	  <leval>
-	    <opState>
-	      <stack/>
-	      <heap/>
-	      <const>
-		<aExpr/>
-	      </const>
-	    </opState>
-	    <opState>
-	      <stack/>
-	      <heap/>
-	      <aExpr/>
-	    </opState>
-	  </leval>
-	</opConc>
-      </opRule>
-      <opRule name="E-EraseR">
-	<opPre/>
-	<opConc>
-	  <eval>
-	    <opState>
-	      <stack/>
-	      <heap/>
-	      <const>
-		<aExpr/>
-	      </const>
-	    </opState>
-	    <opState>
-	      <stack/>
-	      <heap/>
-	      <aExpr/>
-	    </opState>
-	  </eval>
-	</opConc>
-      </opRule>
       <opRule name="E-App">
 	<opPre>
 	  <notin>
@@ -117,7 +79,9 @@
 	      <heap/>
 	      <apply>
 		<lambda>
-		  <id/>
+		  <canonical>
+		    <id/>
+		  </canonical>
 		  <aExpr/>
 		</lambda>
 		<aVal/>
@@ -208,7 +172,9 @@
 	      <stack/>
 	      <heap/>
 	      <dup>
-		<aVal/>
+		<canonical>
+		  <aVal/>
+		</canonical>
 	      </dup>
 	    </opState>
 	    <opState>              
@@ -586,7 +552,9 @@
 	      <stack/>
 	      <heap/>
 	      <let kind="m">
-		<id/>
+		<canonical>
+		  <id/>
+		</canonical>
 		<aVal num="1"/>
 		<aExpr num="2"/>
 	      </let>
@@ -617,7 +585,9 @@
 	      <stack/>
 	      <heap/>
 	      <let kind="p">              
-		<id/>
+		<canonical>
+		  <id/>
+		</canonical>
 		<aVal num="1"/>
 		<aExpr num="2"/>
 	      </let>

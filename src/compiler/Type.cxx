@@ -299,49 +299,47 @@ Type::getTheType(bool mutableOK, bool maybeOK)
 bool
 Type::isTvar()
 {
+  shared_ptr<Type> t = getType();  
+  return (t->kind == ty_tvar);
+}
+
+bool
+Type::isVariable()
+{
   shared_ptr<Type> t = getBareType();  
   return (t->kind == ty_tvar);
 }
 
 bool
-Type::isUnifiableTvar(size_t flags)
+Type::isUnifiableVar(UnifyFlags uflags)
 {
   shared_ptr<Type> t = getType();
-  if (t->kind != ty_tvar)
-    return false;
+  shared_ptr<Type> var = t;
   
-  if (flags & UN_IGN_RIGIDITY)
+  switch(t->kind) {
+  case ty_tvar:
+    var = t;
+    break;
+
+  case ty_mbTop:
+    var = t->Var()->getType();
+    break;
+
+  case ty_mbFull:
+    var = t->Var()->getType();
+  
+    if(var->isMutable())
+      var = var->Base()->getType();
+    break;
+    
+  default:
+    return false;
+  }
+
+  if (uflags & UFLG_UN_IGN_RIGIDITY)
     return true;
   
-  if ((t->flags & TY_RIGID) == 0)
-    return true;
-
-  return false;
-}
-
-bool
-Type::isUnifiableMbTop(size_t flags)
-{
-  shared_ptr<Type> t = getType();
-  if (t->kind != ty_mbTop)
-    return false;
-  
-  return t->Var()->isUnifiableTvar(flags);
-}
-
-bool
-Type::isUnifiableMbFull(size_t flags)
-{
-  shared_ptr<Type> t = getType();
-  if (t->kind != ty_mbFull)
-    return false;
-  
-  shared_ptr<Type> var = t->Var()->getType();
-  
-  if(var->isMutable())
-    var = var->Base()->getType();
-  
-  return var->isUnifiableTvar(flags);
+  return ((var->flags & TY_RIGID) == 0);
 }
 
 bool 
@@ -469,25 +467,52 @@ Type::isMutable()
 }
 
 bool 
+Type::isMutType()
+{
+  shared_ptr<Type> t = getType();
+  return(t->isMutable() ||
+	 (t->isMbFull() && t->Var()->isMutable()));
+}
+
+bool 
+Type::isConst()
+{
+  shared_ptr<Type> t = getType();
+  return t->kind == ty_const;
+}
+
+bool 
 Type::isMaybe()
 {
   shared_ptr<Type> t = getType();
   return (t->kind == ty_mbTop || t->kind == ty_mbFull);
 }
- 
+
 bool 
-Type::isMbVar()
+Type::isMbFull()
 {
   shared_ptr<Type> t = getType();
-  TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
-  shared_ptr<Type> v = t->Var();
-  TYPE_ACC_DEBUG 
-    if (t->kind == ty_mbFull)
-      assert(v->kind != ty_mbFull);
-    else
-      assert(v->kind != ty_mbFull && v->kind != ty_mbTop);
-  
-  return (v->kind == ty_tvar);
+  return (t->kind == ty_mbFull);
+}
+
+bool 
+Type::isMbTop()
+{
+  shared_ptr<Type> t = getType();
+  return (t->kind == ty_mbTop);
+}
+ 
+bool 
+Type::isMaxMutable()
+{
+  return strictlyEquals(maximizeMutability());
+}
+
+extern shared_ptr<TvPrinter> debugTvp;
+bool
+Type::isMinMutable()
+{
+  return strictlyEquals(minimizeMutability());
 }
 
 bool 
@@ -669,10 +694,10 @@ Type::isDeepMut()
 {
   shared_ptr<Type> t = getType();
   
-  if (t->mark & MARK_IS_DEEP_MUT)
+  if (t->mark & MARK_PREDICATE)
     return true;
   
-  t->mark |= MARK_IS_DEEP_MUT;
+  t->mark |= MARK_PREDICATE;
   
   bool mut = false;
   
@@ -697,7 +722,7 @@ Type::isDeepMut()
     break;
   }
   
-  t->mark &= ~MARK_IS_DEEP_MUT;
+  t->mark &= ~MARK_PREDICATE;
   return mut;
 }
   
@@ -706,10 +731,10 @@ Type::isDeepImmut()
 {
   shared_ptr<Type> t = getType();
   
-  if (t->mark & MARK_IS_DEEP_IMMUT)
+  if (t->mark & MARK_PREDICATE)
     return true;
   
-  t->mark |= MARK_IS_DEEP_IMMUT;
+  t->mark |= MARK_PREDICATE;
   
   bool immut = true;
   
@@ -736,7 +761,7 @@ Type::isDeepImmut()
     break;
   }
 
-  t->mark &= ~MARK_IS_DEEP_IMMUT;
+  t->mark &= ~MARK_PREDICATE;
   return immut;  
 }
 
@@ -745,10 +770,10 @@ Type::isConcretizable()
 {
   shared_ptr<Type> t = getType();
   
-  if (t->mark & MARK_IS_CONCRETIZABLE)
+  if (t->mark & MARK_PREDICATE)
     return true;
   
-  t->mark |= MARK_IS_CONCRETIZABLE;
+  t->mark |= MARK_PREDICATE;
   
   bool concretizable = true;
   
@@ -770,7 +795,7 @@ Type::isConcretizable()
     break;
   }
   
-  t->mark &= ~MARK_IS_CONCRETIZABLE;
+  t->mark &= ~MARK_PREDICATE;
   return concretizable;  
 }
 
@@ -779,10 +804,10 @@ Type::isShallowConcretizable()
 {
   shared_ptr<Type> t = getType();
   
-  if (t->mark & MARK_IS_SHALLOW_CONCRETIZABLE)
+  if (t->mark & MARK_PREDICATE)
     return true;
   
-  t->mark |= MARK_IS_SHALLOW_CONCRETIZABLE;
+  t->mark |= MARK_PREDICATE;
   
   bool concretizable = true;
   
@@ -812,8 +837,80 @@ Type::isShallowConcretizable()
     break;
   }
   
-  t->mark &= ~MARK_IS_SHALLOW_CONCRETIZABLE;
+  t->mark &= ~MARK_PREDICATE;
   return concretizable;  
+}
+
+bool 
+Type::isEffectivelyConst()
+{
+  shared_ptr<Type> t = getType();
+  
+  if (t->mark & MARK_PREDICATE)
+    return true;
+  
+  t->mark |= MARK_PREDICATE;
+  
+  bool effConst = true;
+  
+  switch(t->kind) {
+  case ty_tvar:
+  case ty_mbTop:
+  case ty_mbFull:
+  case ty_mutable:
+    effConst = false;
+    
+  case ty_array:
+  case ty_structv:
+  case ty_unionv:
+  case ty_uvalv:
+  case ty_uconv:
+    for (size_t i=0; effConst && i < t->components.size(); i++)
+      effConst = t->CompType(i)->isEffectivelyConst();
+    break;
+    
+  default:
+    break;
+  }
+  
+  t->mark &= ~MARK_PREDICATE;
+  return effConst;
+}
+
+bool 
+Type::isConstReducible()
+{
+  shared_ptr<Type> t = getType();
+  
+  if (t->mark & MARK_PREDICATE)
+    return true;
+  
+  t->mark |= MARK_PREDICATE;
+  
+  bool constred = true;
+  
+  switch(t->kind) {
+  case ty_tvar:
+  case ty_mbTop:
+  case ty_mbFull:
+    constred = false;
+    
+  case ty_mutable:
+  case ty_array:
+  case ty_structv:
+  case ty_unionv:
+  case ty_uvalv:
+  case ty_uconv:
+    for (size_t i=0; constred && i < t->components.size(); i++)
+      constred = t->CompType(i)->isConstReducible();
+    break;
+
+  default:
+    break;
+  }
+  
+  t->mark &= ~MARK_PREDICATE;
+  return constred;
 }
 
 void 
@@ -881,10 +978,10 @@ Type::isOfInfiniteType()
   if (getType() != shared_from_this())
     return getType()->isOfInfiniteType();
 
-  if (mark & MARK_IS_OF_INFINITE_TYPE) 
+  if (mark & MARK_PREDICATE) 
     return true;
 
-  mark |= MARK_IS_OF_INFINITE_TYPE;
+  mark |= MARK_PREDICATE;
 
   switch(kind) {
   case ty_tvar:
@@ -917,13 +1014,21 @@ Type::isOfInfiniteType()
 
   case ty_mbFull:
   case ty_mbTop:
+  case ty_array:
+  case ty_vector:
+  case ty_ref:
+  case ty_byref:
+  case ty_mutable:
+  case ty_const:
+  case ty_fn:
     {
-      return Core()->isOfInfiniteType();
+      for (size_t i=0; !infType && (i < components.size()); i++)
+      	if (CompType(i)->isOfInfiniteType())
+      	  infType = true;
       break;
     }
 
   case ty_letGather:
-  case ty_fn:
   case ty_tyfn:
   case ty_fnarg:
   case ty_structv:
@@ -935,11 +1040,6 @@ Type::isOfInfiniteType()
   case ty_unionv:
   case ty_unionr:
   case ty_typeclass:
-  case ty_array:
-  case ty_vector:
-  case ty_ref:
-  case ty_byref:
-  case ty_mutable:
   case ty_exn:
   case ty_pcst:
     {      
@@ -951,7 +1051,7 @@ Type::isOfInfiniteType()
     }
   }
   
- mark &= ~MARK_IS_OF_INFINITE_TYPE;
+ mark &= ~MARK_PREDICATE;
  return infType;
 }
 
@@ -1021,14 +1121,14 @@ Type::SetTvarsToUnit()
   }
 }
   
-comp::comp(shared_ptr<Type> t, unsigned long _flags) 
+comp::comp(shared_ptr<Type> t, CompFlagSet _flags) 
 {
   name = "";
   typ = (shared_ptr<Type> )t;
   flags=_flags;
 }
   
-comp::comp(const std::string s, shared_ptr<Type> t, unsigned long _flags) 
+comp::comp(const std::string s, shared_ptr<Type> t, CompFlagSet _flags) 
 {
   name = s;
   typ = t;
@@ -1049,12 +1149,12 @@ comp::comp(const std::string s, shared_ptr<Type> t, unsigned long _flags)
     Isize = 0;					\
     minSignedRep = 0;				\
     minUnsignedRep = 0;				\
-    mark = 0;					\
+    mark = MARK_NONE;				\
     pMark = 0;					\
     sp = GC_NULL;				\
     myContainer = GC_NULL;			\
     link = GC_NULL;				\
-    flags = 0;					\
+    flags = TY_NO_FLAGS;			\
   } while (0);
 
 
@@ -1100,7 +1200,7 @@ Type::Type(shared_ptr<Type>  t)
     components.push_back(comp::make(t->CompName(i), t->CompType(i), t->CompFlags(i)));
 
 
-  mark = 0;
+  mark = MARK_NONE;
   pMark = 0;  
   sp = GC_NULL;
   flags = t->flags;
@@ -1114,7 +1214,7 @@ Type::getDCopy()
   shared_ptr<TypeScheme> sigma = TypeScheme::make(t, GC_NULL);
   // sigma's ftvs are empty, therefore, TypeSpecialize will link
   // all type-variables to the original ones
-  shared_ptr<Type> newTyp = sigma->type_instance_copy();
+  shared_ptr<Type> newTyp = sigma->type_instance();
   newTyp->flags = flags;
   return newTyp;
 }
@@ -1133,7 +1233,7 @@ Type::getDCopy()
 // strictlyEquals which removes the above two restrictions.
 bool
 Type::eql(shared_ptr<Type> t, bool verbose, std::ostream &errStream,
-	  unsigned long uflags, bool keepSub,
+	  UnifyFlags uflags, bool keepSub,
 	  shared_ptr<Trail> trail)
 {
   std::stringstream ss;  
@@ -1160,7 +1260,7 @@ Type::eql(shared_ptr<Type> t, bool verbose, std::ostream &errStream,
 bool
 Type::equals(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
-  return eql(t, verbose, errStream, UNIFY_TRY, false);
+  return eql(t, verbose, errStream, UFLG_NO_FLAGS, false);
 }
 
 bool 
@@ -1168,9 +1268,9 @@ Type::strictlyEquals(shared_ptr<Type> t, bool verbose,
 		     bool noAlphaRename,
 		     std::ostream &errStream)
 {
-  unsigned long uflags = UNIFY_TRY | UNIFY_STRICT;
+  UnifyFlags uflags = UFLG_UNIFY_STRICT;
   if (noAlphaRename)
-    uflags |= UNIFY_STRICT_TVAR;
+    uflags |= UFLG_UNIFY_STRICT_TVAR;
   return eql(t, verbose, errStream, uflags, false);
 }
 
@@ -1178,21 +1278,19 @@ bool
 Type::unifyWith(shared_ptr<Type> t, bool verbose, 
 		shared_ptr<Trail> trail, ostream &errStream)
 {
-  return eql(t, verbose, errStream, 0, true, trail);
+  return eql(t, verbose, errStream, UFLG_NO_FLAGS, true, trail);
 }
 
 bool 
 Type::forcedUnify(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
-  return eql(t, verbose, errStream, 
-	     UN_IGN_RIGIDITY, true);
+  return eql(t, verbose, errStream, UFLG_UN_IGN_RIGIDITY, true);
 }
 
 bool
 Type::equalsA(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
-  return eql(t, verbose, errStream, 
-	     UNIFY_TRY | UN_IGN_RIGIDITY, false);
+  return eql(t, verbose, errStream, UFLG_UN_IGN_RIGIDITY, false);
 }
 
 bool 
@@ -1200,7 +1298,19 @@ Type::strictlyEqualsA(shared_ptr<Type> t, bool verbose,
 		      std::ostream &errStream)
 {
   return eql(t, verbose, errStream, 
-	     UNIFY_TRY | UNIFY_STRICT | UN_IGN_RIGIDITY, false);
+	     UFLG_UNIFY_STRICT | UFLG_UN_IGN_RIGIDITY, false);
+}
+
+bool 
+Type::copy_compatible(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
+{
+  return MBF(shared_from_this())->equals(MBF(t), verbose, errStream);
+}
+
+bool 
+Type::copy_compatibleA(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
+{
+  return MBF(shared_from_this())->equalsA(MBF(t), verbose, errStream);
 }
 
 bool

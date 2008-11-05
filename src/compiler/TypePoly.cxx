@@ -86,10 +86,10 @@ Type::boundInType(shared_ptr<Type> tv)
   if (t == tv->getType())
     return true;
    
-  if (t->mark & MARK_BOUND_IN_TYPE)
+  if (t->mark & MARK_PREDICATE)
     return false;
   
-  t->mark |= MARK_BOUND_IN_TYPE;
+  t->mark |= MARK_PREDICATE;
   bool bound = false;
   
   for (size_t i=0; (!bound) && (i < t->components.size()); i++) 
@@ -104,7 +104,7 @@ Type::boundInType(shared_ptr<Type> tv)
       (!bound) && itr != t->fnDeps.end(); ++itr)
     bound = (*itr)->boundInType(tv);
   
-  t->mark &= ~MARK_BOUND_IN_TYPE;
+  t->mark &= ~MARK_PREDICATE;
   return bound;
 }
 
@@ -389,6 +389,10 @@ TypeScheme::normalizeConstruction(shared_ptr<Trail> trail)
    Input is a type t and a set of constraints C, wrt to 
    the current let expression let(k) x = e in ...
 
+   0) Normalize the type representation. For example, this eliminates
+      unnecessary maybe types such as (mutable 'a)|bool and converts
+      them to (mutable bool).
+
    1) Solve predicates: let (t', C') = SolvePredicates(C)
       The constraint set C' contains residual constraints. It cannot
       contain any constraints over concrete types.
@@ -508,6 +512,8 @@ TypeScheme::generalize(std::ostream& errStream,
   
   GEN_DEBUG_TL if (mode == gen_top)
     mode = gen_local;
+
+  tau->normalize();
   
   if (Options::heuristicInference) {
     switch(mode) {

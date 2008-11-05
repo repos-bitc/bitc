@@ -251,8 +251,12 @@
 <!ELEMENT minD                    %anything.group;>
 <!ELEMENT minDOp                  EMPTY>
 <!ELEMENT minD                    %anything.group;>
+<!ELEMENT minCOp                  EMPTY>
+<!ELEMENT minC                    %anything.group;>
 <!ELEMENT concrete                %anything.group;>
-<!ATTLIST concrete                sp    CDATA   #IMPLIED
+<!ATTLIST concrete                
+                                  sp    CDATA   #IMPLIED
+                                  sp2   CDATA   #IMPLIED
 >
 
 <!-- More or less generality -->

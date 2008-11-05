@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -76,20 +76,21 @@ cl_HoistInstLam(shared_ptr<UocInfo> uoc)
       // any constraint that is not on an instantiated variable will
       // not do the right thing.
       for (size_t m = 0; m < methods->children.size(); m++) {
-	shared_ptr<AST> meth = methods->child(m);
-	if (meth->astType != at_ident) {
+	shared_ptr<AST> method = methods->child(m);
+	shared_ptr<AST> methodValue = method->child(1);
+	
+	if (methodValue->astType != at_ident) {
 	  // It's an expression. Need to hoist it into a new binding.
+	  shared_ptr<AST> newDef = AST::make(at_define, methodValue->loc);
 
-	  // FIX: redef or define?
-	  shared_ptr<AST> newDef = AST::make(at_define, meth->loc);
-
-	  shared_ptr<AST> lamName = AST::genSym(meth, "lam");
+	  shared_ptr<AST> lamName = AST::genSym(methodValue, "lam");
 	  lamName->identType = id_value;
 	  lamName->flags |= ID_IS_GLOBAL;
 
-	  shared_ptr<AST> lamPat = AST::make(at_identPattern, meth->loc, lamName);
+	  shared_ptr<AST> lamPat = AST::make(at_identPattern,
+					     methodValue->loc, lamName); 
 	  newDef->addChild(lamPat);
-	  newDef->addChild(meth);
+	  newDef->addChild(methodValue);
 	  newDef->addChild(AST::make(at_constraints));
 
 	  outAsts.push_back(newDef);
@@ -97,17 +98,16 @@ cl_HoistInstLam(shared_ptr<UocInfo> uoc)
 	  shared_ptr<AST> instName = lamName->Use();
 	  shared_ptr<AST> the = AST::make(at_tqexpr);
 	  the->addChild(instName);
-	  the->addChild(meth->symType->asAST(meth->loc));
+	  the->addChild(methodValue->symType->asAST(methodValue->loc));
 
-	  meth = the;
+	  method->child(1) = the;
 	}
-	methods->child(m) = meth;
       }
     }
 
     outAsts.push_back(child);
   }
-  
+
   modOrIf->children = outAsts;
 }
 
@@ -115,7 +115,7 @@ cl_HoistInstLam(shared_ptr<UocInfo> uoc)
 bool
 UocInfo::be_HoistInstLam(std::ostream& errStream,
 			 bool init, unsigned long flags)
-{ 
+{
   bool errFree = true;
 
   shared_ptr<AST> &ast = UocInfo::linkedUoc.ast;
@@ -140,7 +140,7 @@ UocInfo::be_HoistInstLam(std::ostream& errStream,
 bool
 UocInfo::fe_HoistInstLam(std::ostream& errStream,
 			 bool init, unsigned long flags)
-{ 
+{
   bool errFree = true;
 
   ILH_DEBUG if (isSourceUoc())
@@ -148,10 +148,10 @@ UocInfo::fe_HoistInstLam(std::ostream& errStream,
 
   ILH_DEBUG std::cerr << "cl_HoistInstLam" << std::endl;
   cl_HoistInstLam(shared_from_this());
-
+  
   ILH_DEBUG if (isSourceUoc())
     PrettyPrint(errStream);
-
+  
   ILH_DEBUG std::cerr << "RandT" << std::endl;
   // Re-run the type checker to propagate the changes:
   CHKERR(errFree, RandT(errStream, true, PI_SYM_FLAGS, PI_TYP_FLAGS));

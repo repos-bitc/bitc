@@ -52,13 +52,26 @@
 #include "TypeInfer.hxx"
 #include "WorkList.hxx"
 
-#define UOC_IS_PRELUDE    0x001u
-#define UOC_IS_BUILTIN    0x002u
-#define UOC_IS_MUTABLE    0x004u // New definitions can be added to
-  // this UOC after the frontend has seen it once, ex. in the case of
-  // an interactive environment.
-#define UOC_SEEN_BY_INST  0x008u // UOC already seen by Instantiator.
- 
+enum UocFlagValues {
+  UOC_NO_FLAGS = 0,
+
+  /// @brief Indicates that this UOC is the prelude UOC.
+  ///
+  /// This does not appear to be consulted anywhere.
+  UOC_IS_PRELUDE   = 0x1u,
+
+  /// @brief Indicates that definitions in this UOC may be changed.
+  ///
+  /// This is (in theory) used in the instantiator.
+  ///
+  /// @bug This flag is not set anywhere. What is it for?
+  UOC_IS_MUTABLE   = 0x2u,
+
+  /// @brief Indicates that this UOC has been visited by the instantiator.
+  UOC_SEEN_BY_INST = 0x4u,
+};
+
+typedef sherpa::EnumSet<UocFlagValues> UocFlags;
 
 // Passes consist of transforms on the AST. The parse pass is included in 
 // the list for debugging annotation purposes, but is handled as a special
@@ -110,7 +123,7 @@ class UocInfo : public boost::enable_shared_from_this<UocInfo> {
 public:
   std::string uocName;		// either ifName or simulated
   std::string origin;		// typically the file name
-  unsigned long flags;
+  UocFlags flags;
   
   Pass lastCompletedPass;
 
@@ -195,6 +208,10 @@ public:
   // Parse a file, admitting source and/or interface units of
   // compilation into the ifList or the srcList as a side effect.
   static bool 
+  CompileFromSexprFile(const boost::filesystem::path& src, bool fromCmdLine);
+  static bool 
+  CompileFromBlockFile(const boost::filesystem::path& src, bool fromCmdLine);
+  static bool 
   CompileFromFile(const boost::filesystem::path& src, bool fromCmdLine);
 
   // Individual passes:
@@ -238,43 +255,50 @@ public:
   void unwrapEnvs();
   
 // Post inference Flags
-#define PI_SYM_FLAGS (NO_RESOLVE_DECL)
-#define PI_TYP_FLAGS (ALL_INSTS_OK)
+#define PI_SYM_FLAGS (RSLV_NO_RESOLVE_DECL)
+#define PI_TYP_FLAGS (TI_ALL_INSTS_OK)
 
 // RandTflags used by onePass definitions
-#define OP_SYM_FLAGS (PI_SYM_FLAGS | SYM_NO_PRELUDE)
-#define OP_TYP_FLAGS (PI_TYP_FLAGS | TYP_NO_PRELUDE)
+#define OP_SYM_FLAGS (PI_SYM_FLAGS | RSLV_SYM_NO_PRELUDE)
+#define OP_TYP_FLAGS (PI_TYP_FLAGS | TI_NO_PRELUDE)
 
 // RandT flags used by passes past polyinstantiation. 
-#define POLY_SYM_FLAGS (OP_SYM_FLAGS | SYM_POST_POLY)
-#define POLY_TYP_FLAGS (OP_TYP_FLAGS | NO_MORE_TC | DEF_DECL_NO_MATCH)
+#define POLY_SYM_FLAGS (OP_SYM_FLAGS | RSLV_SYM_POST_POLY)
+#define POLY_TYP_FLAGS (OP_TYP_FLAGS | TI_NO_MORE_TC | TI_DEF_DECL_NO_MATCH)
 
 // RandT flags used by passes Refization pass of Closure-conversion.
-#define REF_SYM_FLAGS (POLY_SYM_FLAGS)
-#define REF_TYP_FLAGS (POLY_TYP_FLAGS | POST_REFIZE)
+#define REF_SYM_FLAGS (POLY_SYM_FLAGS | RSLV_INCOMPLETE_NO_CHK)
+#define REF_TYP_FLAGS (POLY_TYP_FLAGS)
 
 // RandT flags used by passes past Closure-conversion. 
 #define CL_SYM_FLAGS (REF_SYM_FLAGS)
 #define CL_TYP_FLAGS (REF_TYP_FLAGS)
 
 
+  bool DoResolve(std::ostream& errStream, bool init, 
+	       ResolverFlags rflags);
+
   bool Resolve(std::ostream& errStream, bool init, 
-	       unsigned long rflags, std::string pre);
+	       ResolverFlags rflags, std::string pre);
+
+  bool 
+  DoTypeCheck(std::ostream& errStream, bool init, 
+	      TI_Flags ti_flags);
 
   bool 
   TypeCheck(std::ostream& errStream, bool init, 
-	    unsigned long tflags, std::string pre);
+	    TI_Flags ti_flags, std::string pre);
 
   bool RandT(std::ostream& errStream,
 	     bool init=false, 
-	     unsigned long rflags=0,
-	     unsigned long tflags=0,
+	     ResolverFlags rflags= RSLV_NO_FLAGS,
+	     TI_Flags ti_flags=TI_NO_FLAGS,
 	     std::string pre = "Internal Compiler error :");
 
   bool RandTexpr(std::ostream& errStream,
 		 boost::shared_ptr<AST> ast,
-		 unsigned long rflags=0,
-		 unsigned long tflags=0,
+		 ResolverFlags rflags= RSLV_NO_FLAGS,
+		 TI_Flags ti_flags=TI_NO_FLAGS,
 		 std::string pre = "Internal Compiler error :",
 		 bool keepResults = true,
 		 boost::shared_ptr<EnvSet> altEnvSet=boost::GC_NULL);

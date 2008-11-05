@@ -62,9 +62,10 @@
     none
     (some value:'a))
   
-  (defunion (forall ((ref-types 'a)) (nullable 'a)):val
-    Null
-    (non-null ptr:'a))
+  (forall ((ref-types 'a))
+    (defunion  (nullable 'a):val
+      Null
+      (non-null ptr:'a)))
   
   (defunion (list 'a):ref
     nil
@@ -93,25 +94,25 @@
   ;; built-in string type is a member of Ord whose implementation is
   ;; found in libbitc.a
 
-  (proclaim __+:(fn ('a 'a) 'a) external)
-  (proclaim __-:(fn ('a 'a) 'a) external)
-  (proclaim __*:(fn ('a 'a) 'a) external)
-  (proclaim __/:(fn ('a 'a) 'a) external)
-  (proclaim __%:(fn ('a 'a) 'a) external)
+  (proclaim __+:(fn 'a 'a -> 'a) external)
+  (proclaim __-:(fn 'a 'a -> 'a) external)
+  (proclaim __*:(fn 'a 'a -> 'a) external)
+  (proclaim __/:(fn 'a 'a -> 'a) external)
+  (proclaim __%:(fn 'a 'a -> 'a) external)
 
-  (proclaim __==:(fn ('a 'a) bool) external)
-  (proclaim __!=:(fn ('a 'a) bool) external)
-  (proclaim __<:(fn ('a 'a) bool) external)
-  (proclaim __<=:(fn ('a 'a) bool) external)
-  (proclaim __>:(fn ('a 'a) bool) external)
-  (proclaim __>=:(fn ('a 'a) bool) external)
+  (proclaim __==:(fn 'a 'a -> bool) external)
+  (proclaim __!=:(fn 'a 'a -> bool) external)
+  (proclaim __<:(fn 'a 'a -> bool) external)
+  (proclaim __<=:(fn 'a 'a -> bool) external)
+  (proclaim __>:(fn 'a 'a -> bool) external)
+  (proclaim __>=:(fn 'a 'a -> bool) external)
 
-  (proclaim __b_and:(fn ('a 'a) 'a) external)
-  (proclaim __b_or:(fn ('a 'a) 'a) external)
-  (proclaim __b_not:(fn ('a) 'a) external)
-  (proclaim __b_xor:(fn ('a 'a) 'a) external)
-  (proclaim __<<:(fn ('a word) 'a) external)
-  (proclaim __>>:(fn ('a word) 'a) external)
+  (proclaim __b_and:(fn 'a 'a -> 'a) external)
+  (proclaim __b_or:(fn 'a 'a -> 'a) external)
+  (proclaim __b_not:(fn 'a -> 'a) external)
+  (proclaim __b_xor:(fn 'a 'a -> 'a) external)
+  (proclaim __<<:(fn 'a word -> 'a) external)
+  (proclaim __>>:(fn 'a word -> 'a) external)
 
   
   ;; Conversion operation. This one is actually quite dangerous,
@@ -120,27 +121,52 @@
   ;; syntactic support in the form of a first argument that is a 
   ;; type name.
 
-  (proclaim sign-extend:(fn ('a) 'b) external)
-  (proclaim zero-extend:(fn ('a) 'b) external)
-  (proclaim truncate:(fn ('a) 'b) external)
+  (proclaim sign-extend:(fn 'a -> 'b) external)
+  (proclaim zero-extend:(fn 'a -> 'b) external)
+  (proclaim truncate:(fn 'a -> 'b) external)
 
-  (proclaim unsigned:(fn ('a) 'b) external)
-  (proclaim signed  :(fn ('a) 'b) external)
+  (proclaim unsigned:(fn 'a -> 'b) external)
+  (proclaim signed  :(fn 'a -> 'b) external)
 
-  (proclaim convert: (fn ('a) 'b) external) 
+  (proclaim convert: (fn 'a -> 'b) external) 
 
   ;; This is the < operator to be used for the 
   ;; index computation. By declaring external, we force 
   ;; the polyinstantiator to keep this definition.
   ;; By giving the proper external name, we give it the 
   ;; correct function to use.
-  (proclaim __index_lt: (fn (word word) bool) external bitc_index_lt)
+  (proclaim __index_lt: (fn word word -> bool) external bitc_index_lt)
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; TYPE CLASS FOR TYPES THAT HAVE LITERALS
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  (deftypeclass (LiteralType 'a))
+
+  (definstance (LiteralType char))
+
+  (definstance (LiteralType word))
+  (definstance (LiteralType  int8))
+  (definstance (LiteralType uint8))
+  (definstance (LiteralType  int16))
+  (definstance (LiteralType uint16))
+  (definstance (LiteralType  int32))
+  (definstance (LiteralType uint32))
+  (definstance (LiteralType  int64))
+  (definstance (LiteralType uint64))
+
+  (definstance (LiteralType float))
+  (definstance (LiteralType double))
+  (definstance (LiteralType quad))
+
+  (definstance (LiteralType string))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPE CLASS FOR INTEGER LITERALS
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  (deftypeclass (IntLit 'a))
+  (forall ((LiteralType 'a))
+    (deftypeclass (IntLit 'a)))
 
   (definstance (IntLit word))
   (definstance (IntLit  int8))
@@ -155,7 +181,8 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPE CLASS FOR FLOATING POINT LITERALS
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (deftypeclass (FloatLit 'a))  	
+  (forall ((LiteralType 'a))
+    (deftypeclass (FloatLit 'a)))
 
   (definstance (FloatLit float))
   (definstance (FloatLit double))
@@ -165,159 +192,173 @@
   ;; TYPES ADMITTING EQUALITY
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (deftypeclass (Eq 'a)
-    == : (fn ('a 'a) bool)
-    != : (fn ('a 'a) bool))
+    == : (fn 'a 'a -> bool)
+    != : (fn 'a 'a -> bool))
   
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPES ADMITTING ORDERING
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (deftypeclass (forall ((Eq 'a)) (Ord 'a))
-    <  : (fn ('a 'a) bool)
-    >  : (fn ('a 'a) bool)
-    <= : (fn ('a 'a) bool)
-    >= : (fn ('a 'a) bool))
+  (forall ((Eq 'a))
+    (deftypeclass (Ord 'a)
+      <  : (fn 'a 'a -> bool)
+      >  : (fn 'a 'a -> bool)
+      <= : (fn 'a 'a -> bool)
+      >= : (fn 'a 'a -> bool)))
   
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPES ADMITTING (FOUR-FUNCTION) ARITHMETIC
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (deftypeclass (forall ((Ord 'a)) (Arith 'a))
-    + : (fn ('a 'a) 'a)
-    - : (fn ('a 'a) 'a)
-    * : (fn ('a 'a) 'a)
-    / : (fn ('a 'a) 'a))
+  (forall ((Ord 'a))
+    (deftypeclass (Arith 'a)
+      + : (fn 'a 'a -> 'a)
+      - : (fn 'a 'a -> 'a)
+      * : (fn 'a 'a -> 'a)
+      / : (fn 'a 'a -> 'a)))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPES ADMITTING INTEGER MODULUS ARITHMETIC
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (deftypeclass (forall ((Arith 'a) (IntLit 'a)) (IntArith 'a)) 
-    % : (fn ('a 'a) 'a))
+  (forall ((Arith 'a) (IntLit 'a)) 
+    (deftypeclass (IntArith 'a)
+      % : (fn 'a 'a -> 'a)))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPES ADMITTING BITWISE ARITHMETIC
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (deftypeclass (forall ((IntLit 'a)) (Bitwise 'a)) 
-    bit-and  : (fn ('a 'a) 'a)   ;; Bitwise AND
-    bit-or   : (fn ('a 'a) 'a)   ;; Bitwise OR
-    bit-not  : (fn ('a) 'a)      ;; One's Complement
-    bit-xor  : (fn ('a 'a) 'a)   ;; Bitwise XOR
-    <<  : (fn ('a word) 'a)      ;; Left Shift
-    >>  : (fn ('a word) 'a)      ;; Right Shift
-    )
+  (forall ((IntLit 'a)) 
+    (deftypeclass (Bitwise 'a)
+      bit-and  : (fn 'a 'a -> 'a)   ;; Bitwise AND
+      bit-or   : (fn 'a 'a -> 'a)   ;; Bitwise OR
+      bit-not  : (fn 'a -> 'a)      ;; One's Complement
+      bit-xor  : (fn 'a 'a -> 'a)   ;; Bitwise XOR
+      <<  : (fn 'a word -> 'a)      ;; Left Shift
+      >>  : (fn 'a word -> 'a)      ;; Right Shift
+      ))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Instance Definitions
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  (definstance (Eq ()) __== __!=)
+  (definstance (Eq ()) (== = __==) (!= = __!=))
     
-  (definstance (Eq char) __== __!=)
+  (definstance (Eq char) (== = __==) (!= = __!=))
 
-  (definstance (Eq bool) __== __!=)
+  (definstance (Eq bool) (== = __==) (!= = __!=))
 
-  (definstance (Eq int8) __== __!=)
-  (definstance (Eq int16) __== __!=)
-  (definstance (Eq int32) __== __!=)
-  (definstance (Eq int64) __== __!=)
-  (definstance (Eq uint8) __== __!=)
-  (definstance (Eq uint16) __== __!=)
-  (definstance (Eq uint32) __== __!=)
-  (definstance (Eq uint64) __== __!=)
-  (definstance (Eq word) __== __!=)
+  (definstance (Eq int8) (== = __==) (!= = __!=))
+  (definstance (Eq int16) (== = __==) (!= = __!=))
+  (definstance (Eq int32) (== = __==) (!= = __!=))
+  (definstance (Eq int64) (== = __==) (!= = __!=))
+  (definstance (Eq uint8) (== = __==) (!= = __!=))
+  (definstance (Eq uint16) (== = __==) (!= = __!=))
+  (definstance (Eq uint32) (== = __==) (!= = __!=))
+  (definstance (Eq uint64) (== = __==) (!= = __!=))
+  (definstance (Eq word) (== = __==) (!= = __!=))
 
-  (definstance (Eq float) __== __!=)
-  (definstance (Eq double) __== __!=)
-  (definstance (Eq quad) __== __!=)
+  (definstance (Eq float) (== = __==) (!= = __!=))
+  (definstance (Eq double) (== = __==) (!= = __!=))
+  (definstance (Eq quad) (== = __==) (!= = __!=))
 
-  (definstance (Eq string) __== __!=)
+  (definstance (Eq string) (== = __==) (!= = __!=))
 
   (definstance (Ord char)
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
   
   (definstance (Ord bool)
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
 
   (definstance (Ord int8) 
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
   (definstance (Ord int16) 
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
   (definstance (Ord int32) 
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
   (definstance (Ord int64) 
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
   (definstance (Ord uint8) 
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
   (definstance (Ord uint16) 
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
   (definstance (Ord uint32) 
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
   (definstance (Ord uint64) 
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
 
   (definstance (Ord word) 
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
 
   (definstance (Ord float) 
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
   (definstance (Ord double) 
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
   (definstance (Ord quad) 
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
 
   (definstance (Ord string)
-    __< __> __<= __>=)
+    (< = __<) (> = __>) (<= = __<=) (>= = __>=))
 
   (definstance (Arith int8) 
-    __+ __- __* __/)
+    (+ = __+) (- = __-) (* = __*) (/ = __/))
   (definstance (Arith int16) 
-    __+ __- __* __/)
+    (+ = __+) (- = __-) (* = __*) (/ = __/))
   (definstance (Arith int32) 
-    __+ __- __* __/)
+    (+ = __+) (- = __-) (* = __*) (/ = __/))
   (definstance (Arith int64) 
-    __+ __- __* __/)
+    (+ = __+) (- = __-) (* = __*) (/ = __/))
   (definstance (Arith uint8) 
-    __+ __- __* __/)
+    (+ = __+) (- = __-) (* = __*) (/ = __/))
   (definstance (Arith uint16) 
-    __+ __- __* __/)
+    (+ = __+) (- = __-) (* = __*) (/ = __/))
   (definstance (Arith uint32) 
-    __+ __- __* __/)
+    (+ = __+) (- = __-) (* = __*) (/ = __/))
   (definstance (Arith uint64) 
-    __+ __- __* __/)
+    (+ = __+) (- = __-) (* = __*) (/ = __/))
   (definstance (Arith word) 
-    __+ __- __* __/)
+    (+ = __+) (- = __-) (* = __*) (/ = __/))
 
   (definstance (Arith float) 
-    __+ __- __* __/)
+    (+ = __+) (- = __-) (* = __*) (/ = __/))
   (definstance (Arith double) 
-    __+ __- __* __/)
+    (+ = __+) (- = __-) (* = __*) (/ = __/))
   (definstance (Arith quad) 
-    __+ __- __* __/)
+    (+ = __+) (- = __-) (* = __*) (/ = __/))
 
-  (definstance (IntArith int8) __%)
-  (definstance (IntArith int16) __%)
-  (definstance (IntArith int32) __%)
-  (definstance (IntArith int64) __%)
-  (definstance (IntArith uint8) __%)
-  (definstance (IntArith uint16) __%)
-  (definstance (IntArith uint32) __%)
-  (definstance (IntArith uint64) __%)
-  (definstance (IntArith word) __%)
+  (definstance (IntArith int8) (% = __%))
+  (definstance (IntArith int16) (% = __%))
+  (definstance (IntArith int32) (% = __%))
+  (definstance (IntArith int64) (% = __%))
+  (definstance (IntArith uint8) (% = __%))
+  (definstance (IntArith uint16) (% = __%))
+  (definstance (IntArith uint32) (% = __%))
+  (definstance (IntArith uint64) (% = __%))
+  (definstance (IntArith word) (% = __%))
 
   (definstance (Bitwise uint8) 
-    __b_and __b_or __b_not __b_xor __<< __>>)
+    (bit-and = __b_and) (bit-or = __b_or) 
+    (bit-not = __b_not) (bit-xor = __b_xor) 
+    (<< =  __<<) (>> =  __>>))
   (definstance (Bitwise uint16) 
-    __b_and __b_or __b_not __b_xor __<< __>>)
+    (bit-and = __b_and) (bit-or = __b_or) 
+    (bit-not = __b_not) (bit-xor = __b_xor) 
+    (<< =  __<<) (>> =  __>>))
   (definstance (Bitwise uint32) 
-    __b_and __b_or __b_not __b_xor __<< __>>)
+    (bit-and = __b_and) (bit-or = __b_or) 
+    (bit-not = __b_not) (bit-xor = __b_xor)
+    (<< =  __<<) (>> =  __>>))
   (definstance (Bitwise uint64) 
-    __b_and __b_or __b_not __b_xor __<< __>>)
+    (bit-and = __b_and) (bit-or = __b_or)
+    (bit-not = __b_not) (bit-xor = __b_xor) 
+    (<< =  __<<) (>> =  __>>))
   (definstance (Bitwise word) 
-    __b_and __b_or __b_not __b_xor __<< __>>)
+    (bit-and = __b_and) (bit-or = __b_or) 
+    (bit-not = __b_not) (bit-xor = __b_xor) 
+    (<< =  __<<) (>> =  __>>))
 
   (deftypeclass (Length 'a)
-    length: (fn ('a) word))		; built-in => no methods
+    length: (fn 'a -> word))		; built-in => no methods
 
   (definstance (Length (vector 'a))
-    (lambda (x) (vector-length x)))
+    (length = (lambda (x) (vector-length x))))
 
  )
 

@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -58,68 +58,37 @@ using namespace std;
 using namespace boost;
 using namespace sherpa;
 
-bool 
-UocInfo::Resolve(std::ostream& errStream, bool init, 
-		 unsigned long rflags, std::string mesg)
-{
-  bool errFree = true;
-  errFree = fe_symresolve(errStream, init, rflags);
-  if (!errFree)
-    errStream << mesg
-	      << std::endl;
-  return errFree;
-}
-
-bool 
-UocInfo::TypeCheck(std::ostream& errStream, bool init, 
-		   unsigned long tflags, std::string mesg)
-{
-  bool errFree = true;
-
-  // If one considers removing this clear clause,
-  // be careful about old types. Pay attention to
-  // bindIdentDef() function which preserves types
-  // if a type already exists.
-  uocAst->clearTypes();  
-
-  errFree = fe_typeCheck(errStream, init, tflags);    
-  if (!errFree) 
-    errStream << mesg
-	      << std::endl;
-  return errFree;
-}
-
-bool 
+bool
 UocInfo::RandT(std::ostream& errStream,
-	       bool init, 
-	       unsigned long rflags,
-	       unsigned long tflags,
+	       bool init,
+	       ResolverFlags rflags,
+	       TI_Flags uflags,
 	       std::string mesg)
 {
   bool errFree = true;
 
   CHKERR(errFree, Resolve(errStream, init, rflags, mesg));
-  
+
   if (errFree)
-    CHKERR(errFree, TypeCheck(errStream, init, tflags, mesg));
-  
+    CHKERR(errFree, TypeCheck(errStream, init, uflags, mesg));
+
   if (!errFree)
     errStream << "WHILE R&Ting:" << std::endl
 	      << uocAst->asString() << std::endl;
-  
+
   return errFree;
 }
 
 
-void 
+void
 UocInfo::wrapEnvs()
 {
   env = env->newDefScope();
   gamma = gamma->newDefScope();
-  instEnv = instEnv->newDefScope();  
+  instEnv = instEnv->newDefScope();
 }
 
-void 
+void
 UocInfo::unwrapEnvs()
 {
   env = env->defEnv;
@@ -130,20 +99,20 @@ UocInfo::unwrapEnvs()
 // The following is used to R&T any sub-expression
 
 bool
-resolve(std::ostream& errStream, 
-	shared_ptr<AST> ast, 
+resolve(std::ostream& errStream,
+	shared_ptr<AST> ast,
 	shared_ptr<ASTEnvironment > env,
 	shared_ptr<ASTEnvironment > lamLevel,
-	int mode, 
+	int mode,
 	IdentType identType,
 	shared_ptr<AST> currLB,
 	unsigned long flags);
 
-bool 
+bool
 UocInfo::RandTexpr(std::ostream& errStream,
 		   shared_ptr<AST> expr,
-		   unsigned long rflags,
-		   unsigned long tflags,
+		   ResolverFlags rflags,
+		   TI_Flags uflags,
 		   std::string mesg,
 		   bool keepResults,
 		   shared_ptr<EnvSet> altEnvSet)
@@ -151,23 +120,23 @@ UocInfo::RandTexpr(std::ostream& errStream,
   bool errFree = true;
   shared_ptr<UocInfo> myUoc = UocInfo::make(shared_from_this());
   myUoc->uocAst = expr;
-  
+
   if (altEnvSet) {
     myUoc->env = altEnvSet->env;
     myUoc->gamma = altEnvSet->gamma;
-    myUoc->instEnv = altEnvSet->instEnv;    
+    myUoc->instEnv = altEnvSet->instEnv;
   }
-  
-  if (!keepResults) 
+
+  if (!keepResults)
     myUoc->wrapEnvs();
-  
+
   CHKERR(errFree, myUoc->Resolve(errStream, false, rflags, mesg));
   if (errFree)
-    CHKERR(errFree, myUoc->TypeCheck(errStream, false, tflags, mesg));
-  
+    CHKERR(errFree, myUoc->TypeCheck(errStream, false, uflags, mesg));
+
   if (!keepResults)
     myUoc->unwrapEnvs();
-  
+
   if (!errFree)
     errStream << "WHILE R&Ting:" << std::endl
 	      << expr->asString() << std::endl;
@@ -185,15 +154,15 @@ UocInfo::RandTexpr(std::ostream& errStream,
 
 
 /** @brief For every defining occurrence of an identifier, set up a
- * back pointer to the containing defining form. 
+ * back pointer to the containing defining form.
  *
  * See the explanation in AST.ast*/
 void
 UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST> top)
 {
-  bool processChildren = true; 
+  bool processChildren = true;
 
-  switch(ast->astType) {        
+  switch(ast->astType) {
   case at_let:
   case at_letrec:
   case at_letStar:
@@ -202,7 +171,7 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
       local = ast;
       break;
     }
-    
+
   case at_letbindings:
     {
       assert(local != top);
@@ -218,7 +187,7 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
       MARKDEF(id, ast);
       break;
     }
-    
+
   case at_define:
   case at_recdef:
     {
@@ -228,7 +197,7 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
       local = ast;
       break;
     }
-    
+
   case at_declstruct:
   case at_declunion:
   case at_proclaim:
@@ -269,7 +238,7 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
       processChildren = false;
       break;
     }
-    
+
   case at_do:
     {
       local = ast;
@@ -281,7 +250,7 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
       assert(local != top);
       MARKDEF(ast, local);
       local = ast;
-      break;    
+      break;
     }
 
   case at_dobinding:
@@ -291,16 +260,16 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
       MARKDEF(id, ast);
       break;
     }
-    
+
   default:
     {
       break;
     }
   }
-  
+
   if (processChildren)
     for (size_t c=0; c < ast->children.size(); c++)
-      findDefForms(ast->child(c), local, top);	  
+      findDefForms(ast->child(c), local, top);	
 }
 
 /** @brief Make a pass over every AST, setting up back pointers to the
@@ -334,9 +303,9 @@ addCandidates(shared_ptr<AST> mod)
     case at_defexception:
       if (id->symType->isConcrete())
 	Options::entryPts.insert(id->fqn.asString());
-      
+
       break;
-      
+
     default:
 	break;
     }
@@ -344,14 +313,14 @@ addCandidates(shared_ptr<AST> mod)
 }
 
 
-void  
+void
 UocInfo::addAllCandidateEPs()
 {
   for (UocMap::iterator itr = UocInfo::ifList.begin();
       itr != UocInfo::ifList.end(); ++itr) {
     shared_ptr<UocInfo> puoci = itr->second;
     addCandidates(puoci->uocAst);
-  }  
+  }
 
   for (UocMap::iterator itr = UocInfo::srcList.begin();
       itr != UocInfo::srcList.end(); ++itr) {

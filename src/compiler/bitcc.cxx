@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -35,42 +35,47 @@
  *
  **************************************************************************/
 
-/** @file
- *
- * @brief Command line driver for the static, whole-program BitC
- * compiler.
- *
- * There are three input file extensions:
- *
- *   .bitc  - bitc interface files
- *   .bits  - bitc source files
- *   .bito  - bitc "object" files.
- *
- * This compiler basically operates in three modes:
- *
- *  1. source->object mode, in which X.bits is checked and re-emitted
- *     as X.bito, which is a legal BitC file. We pretend that such
- *     files are object files for command line handling purposes.
- *
- *     This mode can be identified by the presence of the -c option on
- *     the command line. If -c is specified, no output will be emitted.
- *
- *  2. As a header file synthesizer, in which an interface file is
- *     re-emitted as a C header file, allowing portions of the
- *     low-level runtime to be implemented in C.
- *
- *     This usage can be identified by the presence of the -h option
- *     on the command line, but has no effect if -c is also specified.
- *
- *     Note that -h is a convenience shorthand for --lang h.
- *
- *  3. As a linker, in which some number of .bits and .bito files are
- *     combined to form an executable. This is actually the
- *     whole-program compiler mode.
- *
- *     This mode can be identified by the @em absence of either the -c
- *     or the -h options on the command line.
- */
+/// @file
+///
+/// @brief Command line driver for the static, whole-program BitC
+/// compiler.
+///
+/// There are three input file extensions:
+///
+///   .bitc  - bitc interface files
+///   .bits  - bitc source files
+///   .bito  - bitc "object" files.
+///
+/// This compiler basically operates in three modes:
+///
+/// <ol>
+/// <li>
+///     source->object mode, in which X.bits is checked and re-emitted
+///     as X.bito, which is a legal BitC file. We pretend that such
+///     files are object files for command line handling purposes.
+///
+///     This mode can be identified by the presence of the -c option on
+///     the command line. If -c is specified, no output will be emitted.
+/// </li>
+/// <li>
+///     As a header file synthesizer, in which an interface file is
+///     re-emitted as a C header file, allowing portions of the
+///     low-level runtime to be implemented in C.
+///
+///     This usage can be identified by the presence of the -h option
+///     on the command line, but has no effect if -c is also specified.
+///
+///     Note that -h is a convenience shorthand for --lang h.
+/// </li>
+/// <li>
+///     As a linker, in which some number of .bits and .bito files are
+///     combined to form an executable. This is actually the
+///     whole-program compiler mode.
+///
+///     This mode can be identified by the @em absence of either the -c
+///     or the -h options on the command line.
+/// </li>
+/// </ol>
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -117,61 +122,79 @@ using namespace sherpa;
 #define LOPT_SHOWPASSNMS  260   /* Show all pass names */
 #define LOPT_NOSTDINC     261   /* Do not append std search paths */
 #define LOPT_NOSTDLIB     262   /* Do not append std lib paths */
-#define LOPT_ADVISORY     263   /* Show advisory information */
-#define LOPT_RAW_TVARS    264   /* Show tvars as is */
-#define LOPT_FQ_TYPES     265   /* Show fully qualified types */
-#define LOPT_SA_TCC       266   /* Show all Type class constraints */
-#define LOPT_SHOWPASSES   267   /* Show passes as they are run */
-#define LOPT_PPFQNS       268   /* Show FQNs when pretty printing */
-#define LOPT_DUMPTYPES    269   /* Show types after this pass */
-#define LOPT_STOPAFTER    270   /* Stop after this pass */
-#define LOPT_PPDECORATE   271   /* Decorate pretty printing with types */
-#define LOPT_SHOW_MAYBES  272   /* Show all maybe wrapper types, hints */
-#define LOPT_SHOW_TYPES   273   /* Dump types a particular uoc only */
-#define LOPT_EQ_INFER     274   /* Equational (Complete) Type Inference */
-#define LOPT_XML_TYPES    275   /* Dump XML types */
-#define LOPT_NOGC         276   /* NO GC mode */
-#define LOPT_NOPRELUDE    277   /* Don't process prelude */
-#define LOPT_DBG_TVARS    278   /* Show globally unqiue tvar naming */
-#define LOPT_HEURISTIC    279   /* Use Heuristic Inference */
-#define LOPT_HELP         280   /* Display usage information. */
-#define LOPT_EMIT         281   /* Specify the desired output
+#define LOPT_RAW_TVARS    263   /* Show tvars as is */
+#define LOPT_FQ_TYPES     264   /* Show fully quantified types */
+#define LOPT_SA_TCC       265   /* Show all Type class constraints */
+#define LOPT_SHOWPASSES   266   /* Show passes as they are run */
+#define LOPT_PPFQNS       267   /* Show FQNs when pretty printing */
+#define LOPT_DUMPTYPES    268   /* Show types after this pass */
+#define LOPT_STOPAFTER    269   /* Stop after this pass */
+#define LOPT_PPDECORATE   270   /* Decorate pretty printing with types */
+#define LOPT_SHOW_TYPES   271   /* Dump types a particular uoc only */
+#define LOPT_XML_TYPES    272   /* Dump XML types */
+#define LOPT_NOGC         273   /* NO GC mode */
+#define LOPT_NOPRELUDE    274   /* Don't process prelude */
+#define LOPT_HEURISTIC    275   /* Use Heuristic Inference */
+#define LOPT_HELP         276   /* Display usage information. */
+#define LOPT_EMIT         277   /* Specify the desired output language. */
+#define LOPT_SYSTEM       278   /* Specify the desired output
 				   language. */
-#define LOPT_SYSTEM       282   /* Specify the desired output
-				   language. */
-#define LOPT_NOALLOC      283   /* Statically reject heap-allocating
+#define LOPT_NOALLOC      279   /* Statically reject heap-allocating
 				   operations and constructs */
 
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
-  { "debug-tvars",          0,  0, LOPT_DBG_TVARS },
+  // Decorate pretty printing with types */
   { "decorate",             0,  0, LOPT_PPDECORATE },
+  // Dump the AST after the named pass
   { "dumpafter",            1,  0, LOPT_DUMPAFTER },
+  // Dump symbol types after the named pass
   { "dumptypes",            1,  0, LOPT_DUMPTYPES },
+  // Specify the desired output language.
   { "emit",                 1,  0, LOPT_EMIT },
-  { "eqinfer",              0,  0, LOPT_EQ_INFER },
-  { "free-advice",          0,  0, LOPT_ADVISORY },
+  // Show fully quantified types in output
   { "full-qual-types",      0,  0, LOPT_FQ_TYPES },
+  // Print command line help and exit
   { "help",                 0,  0, LOPT_HELP },
+  // Use heuristic inference instead of complete inference
   { "heuristic-inf",        0,  0, LOPT_HEURISTIC },
+  // Disallow any construct that would cause heap allocation at runtime.
   { "no-alloc",             0,  0, LOPT_NOALLOC },
+  // Do not link the garbage collector.
   { "no-gc",                0,  0, LOPT_NOGC },
+  // Do not load the standard BitC prelude.
   { "no-prelude",           0,  0, LOPT_NOPRELUDE },
+  // Do not add standard include locations to the include search path.
   { "nostdinc",             0,  0, LOPT_NOSTDINC },
+  // Do not add standard library locations to the library/module search path.
   { "nostdlib",             0,  0, LOPT_NOSTDLIB },
+  // Show FQNs when pretty printing
   { "ppfqns",               0,  0, LOPT_PPFQNS },
+  // Show tvars without pretty-printing: useful for Debugging
   { "raw-tvars",            0,  0, LOPT_RAW_TVARS },
+  // Show all Type class constraints, including subsumed ones
   { "show-all-tccs",        0,  0, LOPT_SA_TCC },
-  { "show-maybes",          0,  0, LOPT_SHOW_MAYBES },
+  // Print tokens as they are accepted. Primarily useful for debugging
+  // parse errors.
   { "showlex",              0,  0, LOPT_SHOWLEX },
+  // Print parse reductions as they occur.
   { "showparse",            0,  0, LOPT_SHOWPARSE },
+  // Print the names of all passes as they are executed
   { "showpasses",           0,  0, LOPT_SHOWPASSES },
+  // Print the names of all passes
   { "showpassnames",        0,  0, LOPT_SHOWPASSNMS },
+  // Show types as they appear after the named path
   { "showtypes",            1,  0, LOPT_SHOW_TYPES },
+  // Stop processing after the named pass
   { "stopafter",            1,  0, LOPT_STOPAFTER },
+  // Change the standard search prefix directory, similar to gcc --system
   { "system",               1,  0, LOPT_SYSTEM },
+  // Run verbosely. Not clear that this is actually being used anyware.
   { "verbose",              0,  0, 'v' },
+  // Print compiler version and exit
   { "version",              0,  0, 'V' },
+  // Dump symbol types in XML form after the named pass. This should
+  // probably be obsoleted.
   { "xmltypes",             1,  0, LOPT_XML_TYPES },
 #if 0
   /* Options that have short-form equivalents: */
@@ -190,10 +213,11 @@ struct option longopts[] = {
   {0,                       0,  0, 0}
 };
 
+/// @brief Print usage information and exit.
 void
 help()
 {
-  std::cerr 
+  std::cerr
     << "Common Usage:" << endl
     //    << "  bitcc [-I include] -c file1.bits ...\n"
     << "  bitcc [-I include] [-o outfile.bito] -c file.bits\n"
@@ -213,10 +237,11 @@ help()
     << "  --raw-tvars --show-maybes --show-all-tccs \n"
     << "\n"
     << "Languages: xmlpp, xmldump, xmltypes, bitcpp, showtypes, bito,\n"
-    << "           c, h, obj\n" 
+    << "           c, h, obj\n"
     << flush;
 }
- 
+
+/// @brief Cease processing after fatal error
 void
 fatal()
 {
@@ -226,7 +251,15 @@ fatal()
 }
 
 
+/// @brief Record whether we have seen any BitC input file yet.
+///
+/// This determines whether a command line link argument should be
+/// presented to the linker before or after the object file comprising
+/// the BitC portion of the program.
 static bool SawFirstBitcInput = false;
+
+/// @brief Add an argument to be passed to the linker either before or
+/// after the generated BitC object file.
 void
 AddLinkArgumentForGCC(const std::string& s)
 {
@@ -237,13 +270,21 @@ AddLinkArgumentForGCC(const std::string& s)
   }
 }
 
+/// @brief Add an argument to be passed to the compiler before or
+/// after the generated BitC C file.
 void
 AddCompileArgumentForGCC(const std::string& s)
 {
-  if (!SawFirstBitcInput)
-    Options::CompilePreOptionsGCC.push_back(s);    
+  if (SawFirstBitcInput) {
+    cerr << "Compiler options must appear before the first BitC input file."
+	 << endl;
+    exit(1);
+  }
+
+  Options::CompilePreOptionsGCC.push_back(s);
 }
 
+/// @brief Find the backend corresponding to the specified target type.
 BackEnd *
 FindBackEnd(const char *nm)
 {
@@ -255,7 +296,12 @@ FindBackEnd(const char *nm)
   return NULL;
 }
 
-void 
+/// @brief Catch certain memory errors that plagued us for a while in
+/// GCPtr.
+///
+/// These were subsequently resolved, but reporting borkage is not a
+/// bad thing.
+void
 handle_sigsegv(int param)
 {
   cerr << "Internal Compiler error: SIGSEGV. "
@@ -264,29 +310,32 @@ handle_sigsegv(int param)
   exit(1);
 }
 
+/// @brief Resolve a library name to a path.
+///
+/// This is called when we see <code>-lname</code> or <code>-l
+/// name</code> on the command line. The @em name will be passed as an
+/// argument here. What we need to do here is
+/// check the currently known library paths for a resolution. If we
+/// find a file matching "libname.bita" on the search path, we add it
+/// to the list of inputs.
+///
+/// In some cases, -lmumble will indicate simultaneously a need to
+/// add an input file named ..../libmumble.bita and also an archive
+/// library named .../libmumble.a. This arises in libbitc, for
+/// example, where some of the library is implemented in C.
+///
+/// Unfortunately, this means that the @em absence of
+/// .../libmumble.bita does not reliably indicate an error.
 filesystem::path
 ResolveLibPath(std::string name)
 {
-  // We either saw -lname or -l name. What we need to do here is
-  // check the currently known library paths for a resolution. If we
-  // find a file matching "libname.bita" on the search path, we add it
-  // to the list of inputs.
-  //
-  // In some cases, -lmumble will indicate simultaneously a need to
-  // add an input file named ..../libmumble.bita and also an archive
-  // library named .../libmumble.a. This arises in libbitc, for
-  // example, where some of the library is implemented in C.
-  //
-  // Unfortunately, this means that the @em absence of
-  // .../libmumble.bita does not reliably indicate an error.
-
   string fullNm = "lib" + name + ".bita";
 
   for (size_t i = 0; i < Options::libDirs.size(); i++) {
     filesystem::path testPath = Options::libDirs[i] / fullNm;
     if (filesystem::exists(testPath)) {
       if (!filesystem::is_regular(testPath)) {
-	std::cerr << "bitcc: error: \"-l" << name 
+	std::cerr << "bitcc: error: \"-l" << name
 		  << "\" resolves to \""
 		  << testPath
 		  << "\", which is not a regular file."
@@ -298,34 +347,17 @@ ResolveLibPath(std::string name)
     }
   }
 
-  return filesystem::path();    
+  return filesystem::path();
 }
 
 int
-main(int argc, char *argv[]) 
+main(int argc, char *argv[])
 {
   int c;
   //  extern int optind;
   int opterr = 0;
 
   signal(SIGSEGV, handle_sigsegv);
-
-#if 0
-  // Shap thinks this is no longer necessary now that he gave up and
-  // pulled in libicu.
-
-  // Make sure that we are running in a UNICODE locale:
-  setlocale(LC_ALL, "");
-  if (strcmp("UTF-8", nl_langinfo(CODESET)) != 0) {
-    std::cerr
-      << "We appear to be running in the non-unicode locale "
-      << nl_langinfo(CODESET)
-      << ".\n"
-      << "The BitC compiler will only operate correctly "
-      << "in a unicode locale.\n";
-    exit(1);
-  }
-#endif
 
   /// Note the "-" at the start of the getopt_long option string. In
   /// order to generate behavior that is compatible with other
@@ -350,7 +382,7 @@ main(int argc, char *argv[])
   /// along to gcc, and given the interspersal we need to do so in an
   /// order-preserving way.
 
-  while ((c = getopt_long(argc, argv, 
+  while ((c = getopt_long(argc, argv,
 			  "-e:o:O::l:VvcghI:L:",
 			  longopts, 0
 		     )) != -1) {
@@ -433,34 +465,31 @@ main(int argc, char *argv[])
       Options::heuristicInference=true;
       break;
 
-    case LOPT_EQ_INFER:
-      //Options::inferenceAlgorithm = inf_eq;
-      // FIX: TEMPORARY
-      //UocInfo::passInfo[pn_typeCheck].stopAfter = true;
-      break;
-
     case LOPT_SHOWPASSNMS:
       {
 	std::cerr.width(15);
-	std::cerr << left 
+	std::cerr << left
 		  << "PASS"
 		  << "PURPOSE" << std::endl << std::endl;
 
 	for (size_t i = (size_t)pn_none+1; i < (size_t) pn_npass; i++) {
 	  std::cerr.width(15);
-	  std::cerr << left 
+	  std::cerr << left
 		    << UocInfo::passInfo[i].name
 		    << UocInfo::passInfo[i].descrip << std::endl;
 	}
 
+	std::cerr << left
+		  << "Polyinst"
+		  << "Template-like instantiation of polymorphic definitions" << std::endl;
+
 	for (size_t i = (size_t)op_none+1; i < (size_t) op_npass; i++) {
 	  std::cerr.width(15);
-	  std::cerr << left 
+	  std::cerr << left
 		    << UocInfo::onePassInfo[i].name
 		    << UocInfo::onePassInfo[i].descrip << std::endl;
 	}
 
-	// FIX: What about the onepass passes? 
 	exit(0);
       }
 
@@ -479,9 +508,9 @@ main(int argc, char *argv[])
 	}
 	
 	if (strcmp("midend", optarg) == 0 ||
-	    strcmp("ALL", optarg) == 0) 
+	    strcmp("ALL", optarg) == 0)
 	  Options::dumpAfterMidEnd = true;
- 
+
 	break;
       }
 
@@ -500,7 +529,7 @@ main(int argc, char *argv[])
 	}
 	
 	if (strcmp("midend", optarg) == 0 ||
-	    strcmp("ALL", optarg) == 0) 
+	    strcmp("ALL", optarg) == 0)
 	  Options::dumpTypesAfterMidEnd = true;
 
 	break;
@@ -523,23 +552,12 @@ main(int argc, char *argv[])
 	break;
       }
 
-    case LOPT_ADVISORY:
-      {
-	Options::advisory = true;
-      }      
-
     case LOPT_RAW_TVARS:
       {
 	Options::rawTvars = true;
 	break;
       }
 
-    case LOPT_SHOW_MAYBES:
-      {
-	Options::showMaybes = true;
-	break;
-      }
-      
     case LOPT_FQ_TYPES:
       {
 	Options::FQtypes = true;
@@ -622,7 +640,7 @@ main(int argc, char *argv[])
 	break;
       }
 
-    case LOPT_HELP: 
+    case LOPT_HELP:
       {
 	help();
 	exit(0);
@@ -690,14 +708,14 @@ main(int argc, char *argv[])
       break;
     }
   }
-  
+
   // Select default backend if none chosen otherwise.
   if (Options::backEnd == 0)
     Options::backEnd = &BackEnd::backends[0];
 
   for (size_t i = 0; i < Options::SystemDirs.size(); i++) {
     filesystem::path incPath = Options::SystemDirs[i] / "include";
-    
+
     UocInfo::searchPath.push_back(incPath);
     Options::CompilePreOptionsGCC.push_back("-I");
     Options::CompilePreOptionsGCC.push_back(incPath.string());
@@ -733,7 +751,7 @@ main(int argc, char *argv[])
 
   if (Options::outputFileName.size() == 0)
     Options::outputFileName = "bitc.out";
-  
+
   /************************************************************/
   /*                UOC Parse and Validate                    */
   /************************************************************/
@@ -744,7 +762,7 @@ main(int argc, char *argv[])
     sherpa::LexLoc loc = LexLoc();
     (void) UocInfo::importInterface(std::cerr, loc, "bitc.prelude");
   }
-  
+
   // Compile everything
   for (size_t i = 0; i < Options::inputs.size(); i++)
     UocInfo::CompileFromFile(Options::inputs[i], true);
@@ -756,14 +774,14 @@ main(int argc, char *argv[])
   for (UocMap::iterator itr = UocInfo::ifList.begin();
       itr != UocInfo::ifList.end(); ++itr) {
     shared_ptr<UocInfo> puoci = itr->second;
-    
+
     if (puoci->lastCompletedPass >= Options::backEnd->needPass) {
       if (Options::backEnd->fn)
 	Options::backEnd->fn(std::cout, std::cerr, puoci);
     }
     else
       doFinal = false;
-  } 
+  }
 
   /* Output for Source modules */
   for (UocMap::iterator itr = UocInfo::srcList.begin();
@@ -776,7 +794,7 @@ main(int argc, char *argv[])
     }
     else
       doFinal = false;
-  } 
+  }
 
   /* We have completed all of the per-UOC passes. Assuming that we did
    * so successfully, run any required mid-end function:
@@ -817,7 +835,7 @@ main(int argc, char *argv[])
    * temporary expedient. We need to re-examine the rules for legal
    * top-level initialization.
    */
-  UocInfo::addAllCandidateEPs(); 
+  UocInfo::addAllCandidateEPs();
 #endif
 
   /* Create a new unit of compilation that will become the grand,
@@ -826,7 +844,7 @@ main(int argc, char *argv[])
 
   // Update all of the defForm pointers so that we can find things:
   UocInfo::findAllDefForms();
-    
+
   // Build the master back-end AST. This is done in a way that can be
   // extended incrementally.
   // The batch version is similar to the unbatched instantiator as
@@ -837,7 +855,7 @@ main(int argc, char *argv[])
   // one entry point, one might as well use instantiate instead of
   // instantiateBatch call.
   bool midPassOK = unifiedUOC->instantiateBatch(std::cerr, Options::entryPts);
-    
+
   if (Options::dumpAfterMidEnd) {
     std::cerr << "==== DUMPING *unified UOC*"
 	      << " AFTER mid-end"
@@ -851,28 +869,28 @@ main(int argc, char *argv[])
     unifiedUOC->ShowTypes(std::cerr);
     std::cerr <<std::endl << std::endl;
   }
-  
+
   if (!midPassOK) {
     std::cerr << "Exiting due to errors during Instantiation."
 	      << std::endl;
-    exit(1);    
+    exit(1);
   }
-  
+
   /************************************************************/
   /*                        The backend                       */
   /************************************************************/
 
   // Finally perform one-pass backend Functions.
   unifiedUOC->DoBackend();
-  
+
   // If there is any post-gather output, it should be done now.
   if (Options::backEnd->plfn) {
-    bool done = Options::backEnd->plfn(std::cout, std::cerr, 
+    bool done = Options::backEnd->plfn(std::cout, std::cerr,
 				       unifiedUOC);
     if (!done)
       exit(1);
   }
-  
+
   exit(0);
 }
 

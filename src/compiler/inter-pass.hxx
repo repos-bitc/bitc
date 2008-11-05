@@ -10,19 +10,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -41,15 +41,34 @@
 #include "UocInfo.hxx"
 #include "AST.hxx"
 #include "Type.hxx"
-#include "die.hxx"
 
-/* Definitions of mode used in Symbol Resolution 
-   and Type-inference */
-#define NULL_MODE   0x0u
-#define DEF_MODE    0x1u
-#define REDEF_MODE  0x2u
-#define USE_MODE    0x3u
-#define DECL_MODE   0x4u
+/// @bug EVERYTHING IN THIS FILE APPEARS TO BE UTILITY FUNCTIONS. WHY
+/// IS IT CALLED INTER-PASS?
+
+/// @brief Mode of operation used in Symbol Resolution and Type-inference.
+enum ResolutionMode {
+  /// @brief Don't care or error case.
+  NULL_MODE   = 0x0u,
+  /// @brief Introducing a newly defined symbol into the environment.
+  ///
+  /// This mode is used when recursing into a defining occurrence. It
+  /// is currently used as the default at top-level in most cases.
+  DEF_MODE    = 0x1u,
+  /// @brief Checking a use-occurrence of a symbol
+  ///
+  /// This mode is used when recursing into a use occurrence
+  /// context.
+  USE_MODE    = 0x2u,
+  /// @brief Introducing a newly declared symbol into the environment.
+  ///
+  /// This mode is used when recursing into a @em declaring
+  /// occurrence.
+  DECL_MODE   = 0x3u,
+  /// @brief Local definitions, used only in closure conversion.
+  LOCAL_MODE  = 0x4u,
+  /// @brief Type definitions, used only in closure conversion.
+  TYPE_MODE   = 0x5u
+};
 
 #define CHKERR(noerr, exp) \
   do {			   \
@@ -76,8 +95,8 @@
 // at_try expr *ident* sw_legs ow
 #define IGNORE(ast) ((size_t)(((ast)->astType == at_switch)?0:1))
 
-void BitcP(std::ostream& out, 
-	   const boost::shared_ptr<AST> ast, 
+void BitcP(std::ostream& out,
+	   const boost::shared_ptr<AST> ast,
 	   bool showTypes);
 
 void addDecl(boost::shared_ptr<AST> decl);

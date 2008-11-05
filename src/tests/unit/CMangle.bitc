@@ -41,6 +41,6 @@
 
 (define $ (the int32 100))
 (define $@%<> (the int32 25))
-(define main.main:(fn ((vector string)) int32) 
+(define main.main:(fn (vector string) -> int32) 
   (lambda (argVec) 
     (+ $ $@%<>) 0))

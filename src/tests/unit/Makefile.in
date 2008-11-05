@@ -182,6 +182,8 @@ sha1-file.test: ARGS="file.input 128028"
 sha1-file.test: EXPECT_OUTPUT=sha1-file.stdout
 sha1-test.test: EXPECT_OUTPUT=sha1-test.stdout 
 twomodule.test: EXPECT_OUTPUT=twomodule.stdout 
+sizeof.test: EXPECT_STATUS=4
+bitsizeof.test: EXPECT_STATUS=32
 
 BUILD/%: %.bitc $(BITCC) $(LIBBITC_C_RUNTIME) | BUILD
 	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME)

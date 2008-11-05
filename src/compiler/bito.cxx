@@ -7,19 +7,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -35,14 +35,12 @@
  *
  **************************************************************************/
 
-/** @file
- *
- * @brief Back end to emit BitC "object" files.
- *
- * Calling this a back end is moderately laughable. All it does is
- * pretty-print the original UoC.
- */
-
+/// @file
+///
+/// @brief Back end to emit BitC "object" files.
+///
+/// Calling this a back end is moderately laughable. All it does is
+/// pretty-print the original UoC.
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -66,7 +64,7 @@ EmitBitO(std::ostream &optStream, std::ostream &errStream)
   std::ofstream out(Options::outputFileName.c_str(),
 		    std::ios_base::out|std::ios_base::trunc);
 
-  if (!out.is_open()) 
+  if (!out.is_open())
     errStream << "Couldn't open output file \""
 	      << Options::outputFileName
 	      << "\" -- "

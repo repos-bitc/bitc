@@ -1,0 +1,182 @@
+/* -*- mode: c++ -*-  */
+
+/// @page InitializerRules Rules for BitC Initializers
+///
+/// <h1>Requirements</h1>
+///
+/// We need a set of rules for initialization that ensure the
+/// following properties about the state of the program:
+///
+/// <ol>
+/// <li>
+/// <p>
+/// The state of the program at the first instruction of
+/// <code>main()</code> should be well defined, and should not depend
+/// (as, e.g., in O'Caml) on the accident of link order. In
+/// particular, we should avoid the C++ bug that constructors on
+/// globals run in unspecified order, as this fact routinely bites C++
+/// programmers in the ass.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// In abstract, it should be possible for all initializing
+/// expressions to be evaluated at compile time by a whole-program
+/// compiler, or at pre-link time in an environment supporting dynamic
+/// linking. No compiler should be <em>obligated</em> to implement
+/// this, but it should be possible for an aggressive compiler to
+/// <em>choose</em> to implement this.
+/// </p>
+/// <p>
+/// One implication of this is that external proclaimed procedures
+/// that are not part of the core bitc libraries should not be
+/// callable by initializers.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// The result of initialization should respect dependency ordering,
+/// in the sense that any identifier that is evaluated by an
+/// initializing expression must have been initialized prior to
+/// evaluation.
+/// </p>
+/// <p>
+/// Certain forms of forward reference need to be permitted, however.
+/// In particular it must be legal to evaluate an identifier naming a
+/// procedure object (thereby obtaining the <em>location</em> of the
+/// procedure object) that has not yet been defined. What is
+/// <em>not</em> permitted is to <em>apply</em> such a procedure. In
+/// the terminology of the specification, application requires that
+/// the procedure definition be <em>complete</em>.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// Requirement 3 must be preserved in the face of separate
+/// compilation. This is a restatement of [1], but it motivates some
+/// restrictions on use-occurrences in initializing expressions.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// No working program should break in the field as a consequence of a
+/// dynamic library update, unless due to bugs in the library. In
+/// particular, the satisfaction of initialization ordering
+/// constraints and type checking shoudl not lead to breakage in the
+/// field.
+/// </p>
+///
+/// <p>
+/// Note that shap is no longer sure what he meant here. Possibly he
+/// was concerned about init ordering again.
+/// </p>
+/// </li>
+/// </ol>
+///
+/// <h1>Discussion</h1>
+///
+/// Causal ordering in the presence of separate compilation is
+/// moderately difficult to establish. We can (just barely) achieve it
+/// if we require that initializing expressions are pure, meaning that
+/// the result of any initializing expression is some deterministic
+/// function of the inputs to that expression plus the pre-existing
+/// bindings in the lexical environment of that function. If we allow
+/// initializing expressions to have side effects, the ordering
+/// requirements must be strengthened beyond what can be achieved
+/// under separate compilation.
+/// 
+/// <ul>
+///
+///    Details: certain side effects are actually okay.  The
+///    particular side effects that cannot be permitted are side
+///    effects to objects in the heap (including the global bindings)
+///    that are reachable from the global bindings. Mutations of
+///    purely local, uncaptured state are actually okay.
+/// 
+///    Perhaps a better way to say that is to emphasize my choice of
+///    wording of the requirement. The requirement is that the
+///    initializing expressions must be pure in the mathematical
+///    sense. This is not the same as requiring them to be functional
+///    in the sense of ML or Haskell.
+///
+/// </ul>
+/// 
+/// We need to allow initializing expressions to refer to global
+/// mutable variables (that is: to source them, not to target
+/// them). The constraint we will impose (by construction) is that
+/// globally reachable state cannot be modified until after all
+/// initializers have been executed.
+///
+/// <h1>Rules Ensuring Causal (Dependency) Ordering</h1>
+///
+/// The following rules are sufficient to ensure causal dependency
+/// ordering:
+/// 
+/// <ol>
+/// <li>
+/// <p>
+/// If an interface B imports an interface A, all symbols bound in
+/// interface A will be initialized before any symbol in interface B is
+/// initialized.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// At any use occurrence where a symbol X is evaluated by an
+/// initializing expression, that symbol must be defined (not just
+/// proclaimed) in the lexical environment of the use occurrence.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// At any use occurrence where an IMPORTED symbol X bound in an
+/// interface I is defined, we examine the transitive closure of
+/// free variables that are evaluated by the initializing expression
+/// of X, and we require that for each such free variable V, either:
+/// </p>
+/// <ol type="A">
+///   <li>
+///   <p>
+///   V is defined (not just proclaimed) in the lexical environment
+///   where X is bound [That is: in the *interface* environment], OR
+///   </p>
+///   </li>
+///   <li>
+///   <p>
+///   V has been imported into the lexical environment where X is
+///   bound [That is: the *interface* environment], OR
+///   </p>
+///   </li>
+///   <li>
+///   <p>
+///   V is defined in the source unit of compilation where X is
+///   defined, and further is defined in the lexical environment at
+///   the point where X is defined [That is: the environment at the
+///   point of definition].
+///   </p>
+///   </li>
+/// </ol> 
+/// <p>
+///      This restriction is a bit subtle. What it ensures is that anything
+///      appearing in the initializer for X respects (transitively) the
+///      interface initialization ordering requirement.
+/// 
+/// </p>
+/// <p>
+///      When rule (3B) applies, the interface supplying B must still be
+///      imported into the defining unit of compilation in order for symbol
+///      resolution requirements to be satisfied. The purpose of (3B) is to
+///      ensure that causal ordering of exported symbols cannot be violated.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// Every initializer expression must be a pure expression. This
+/// ensures that no intertwining of causal dependencies can occur as a
+/// consequence of having some initializers check a value
+/// <em>before</em> an assignment while others check <em>after</em>
+/// the assignment.
+/// </p>
+/// </li>
+/// </ol>
+/// 

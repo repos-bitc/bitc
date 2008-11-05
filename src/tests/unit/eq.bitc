@@ -40,17 +40,18 @@
 (provide bitc.main main)
 
 (deftypeclass (EQL 'a)
-  ===: (fn ('a 'a) bool)
+  ===: (fn 'a 'a -> bool)
   )
 
-(deftypeclass (forall ((EQL 'a)) (ORD 'a))  
-  <<==: (fn ('a 'a) bool)
-  )
+(forall ((EQL 'a)) 
+  (deftypeclass (ORD 'a)
+    <<==: (fn 'a 'a -> bool)
+  ))
 
 ;(definstance (EQL 'a) ==)
-(definstance (EQL bool) ==)
-(definstance (EQL int32) ==)
-(definstance (ORD int32) <=)
+(definstance (EQL bool) (=== = ==))
+(definstance (EQL int32) (=== = ==))
+(definstance (ORD int32) (<<== = <=))
 ;(definstance (ORD int64) (lambda (x y) (<= x y)))
  
 
@@ -67,13 +68,13 @@
 ;;(define RPQ (<<== (the int64 123) 456)) 
 
 (definstance (Eq (list 'a)) 
-  (lambda (x y) #t)
-  (lambda (x y) #f))
+  (== = (lambda (x y) #t))
+  (!= = (lambda (x y) #f)))
 
-(definstance (EQL (list 'a)) ==)
+(definstance (EQL (list 'a)) (=== = ==))
 (define (f x:(list 'a)) (=== x x))
 
-(define main.main:(fn ((vector string)) int32)
+(define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (=== (the int32 10) 20)
     (=== #t #f)

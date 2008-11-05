@@ -45,7 +45,6 @@
 
 #include "AST.hxx"
 #include "Environment.hxx"
-#include "Symtab.hxx"
 #include "inter-pass.hxx"
 
 using namespace boost;
@@ -207,7 +206,6 @@ TopInit(std::ostream& errStream,
   case at_fields:
   case at_field:
   case at_fill:
-  case at_reserved:
   case at_proclaim:
   case at_defexception:
   case at_deftypeclass:
@@ -217,7 +215,8 @@ TopInit(std::ostream& errStream,
   case at_method_decls:
   case at_method_decl:
   case at_definstance:
-  case at_methods:
+  case at_tcmethods:
+  case at_tcmethod_binding:
   case at_ifident:
   case at_importAs:
   case at_provide:
@@ -238,6 +237,7 @@ TopInit(std::ostream& errStream,
   case at_exceptionType:
   case at_dummyType:
   case at_mutableType:
+  case at_constType:
   case at_typeapp:
   case at_qualType:
   case at_constraints:
@@ -250,6 +250,8 @@ TopInit(std::ostream& errStream,
   case at_stringLiteral:
   case at_unit:
   case at_lambda:
+  case at_sizeof:
+  case at_bitsizeof:
     break;
 
   case at_ident:
@@ -257,7 +259,7 @@ TopInit(std::ostream& errStream,
       // We must only deal with value definitions.
       assert(ast->isIdentType(id_value));
       
-      if (ast->isMethod())
+      if (ast->isTcMethod())
 	break;
       
       shared_ptr<AST> def = ast->symbolDef;
@@ -327,6 +329,8 @@ TopInit(std::ostream& errStream,
     }
 
   case at_array:
+  case at_block:
+  case at_return_from:
   case at_vector:
   case at_makevectorL:
   case at_begin:
