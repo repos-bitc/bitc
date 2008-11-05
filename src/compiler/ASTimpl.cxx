@@ -63,6 +63,7 @@ AST::makeBoolLit(const sherpa::LToken &tok)
     ast->litValue.b = true;
   else
     ast->litValue.b = false;
+  ast->litValue.lr = lr_bool;
 
   return ast;
 }
@@ -77,6 +78,8 @@ AST::makeCharLit(const sherpa::LToken &tok)
   //  mpz_init_set_str(ast->litValue.i, tok.is.c_str(), 0);
 
   ast->litValue.c = LitValue::DecodeCharacter(tok.str);
+  ast->litValue.lr = lr_char;
+
   return ast;
 }
 
@@ -115,6 +118,8 @@ AST::makeIntLit(const sherpa::LToken &tok)
   if (negative)
     ast->litValue.i = -ast->litValue.i;
 
+  ast->litValue.lr = lr_int;
+
   return ast;
 }
 
@@ -126,6 +131,8 @@ AST::makeFloatLit(const sherpa::LToken &tok)
   shared_ptr<AST> ast = AST::make(at_floatLiteral, tok);
   ast->litBase = 10;
   ast->litValue.d = strtod(tok.str.c_str(), 0);
+
+  ast->litValue.lr = lr_float;
 #if 0
   std::string litString = tok.str;
   std::string expString;
@@ -206,6 +213,7 @@ AST::makeStringLit(const sherpa::LToken &tok)
 {
   shared_ptr<AST> ast = AST::make(at_stringLiteral, tok);
   ast->litValue.s = tok.str;
+  ast->litValue.lr = lr_string;
 
   return ast;
 }

@@ -65,7 +65,18 @@ DEFKIND(double,    true,   true,   true,  true,  false, false,  true)
 DEFKIND(quad,      true,   true,   true,  true,  false, false,  true)
 //Strings are considered scalars by special dispensation, because they
 //are immutable.
-DEFKIND(string,    true,   true,   false, true,  true,  false,  true)
+DEFKIND(string,    true,   true,   false, true,  true,  false,  false)
+
+// A literal is a bit of an odd duck. On the one hand it is an
+// instance of one of the above underlying types, but it is
+// simultaneously an instance of a singleton type containing only that
+// literal which is in turn of a *kind* corresponding to one of the
+// above underlying types. To make all of this particularly
+// entertaining, there are contexts in which literals will be lifted
+// to their types. While some literals may be PRIMFLOAT, not *all*
+// literals are PRIMFLOAT.
+
+DEFKIND(lit,       true,   true,   true,  true,  false, false,  false)
 
 //DEFKIND(bitfield,  true,   false,  true,  false, false,  false)
 DEFKIND(fn,        true,   false,  true,  true,  false, false,  false)

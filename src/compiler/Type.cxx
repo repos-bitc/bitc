@@ -443,6 +443,8 @@ Type::isBaseConstType()
   case ty_double:
   case ty_quad:
   case ty_dummy:
+
+    // FIX: case ty_lit:
     return true;
   default:
     return false;
@@ -519,14 +521,18 @@ bool
 Type::isPrimInt()
 {
   shared_ptr<Type> t = getBareType();
-  return kindInfo[t->kind].isPrimInt;
+  return (kindInfo[t->kind].isPrimInt ||
+	  (t->kind == ty_lit && 
+	   t->CompType(0)->isPrimInt()));
 }
 
 bool 
 Type::isPrimFloat()
 {
   shared_ptr<Type> t = getBareType();
-  return kindInfo[t->kind].isPrimFloat;
+  return (kindInfo[t->kind].isPrimFloat ||
+	  (t->kind == ty_lit && 
+	   t->CompType(0)->isPrimFloat()));
 }
 
 bool 
@@ -562,6 +568,13 @@ Type::isbool()
 {
   shared_ptr<Type> t = getBareType();
   return (t->kind == ty_bool);
+}
+
+bool 
+Type::isLiteral()
+{
+  shared_ptr<Type> t = getBareType();
+  return (t->kind == ty_lit);
 }
 
 bool 

@@ -67,12 +67,16 @@ struct spStruct {
 /* I am not superimpressed with this structure, Once a better method
    is obtained, THIS SRUCTURE IS VERY LIKELY TO GO AWAY */
 
-#define SP_NAME_INTEGER          0x02u
-#define SP_NAME_FP               0x04u
-#define SP_NAME_IOB              0x08u
-#define SP_NAME_LT               0x10u
-#define SP_NAME_REF_TYPES        0x20u
-#define SP_NAME_COPY_COMPAT      0x40u
+enum SpNameId {
+  SP_NAME_INTEGER      = 0x1u,
+  SP_NAME_FP           = 0x2u,
+  SP_NAME_IOB          = 0x3u,
+  SP_NAME_LT           = 0x4u,
+  SP_NAME_REF_TYPES    = 0x5u,
+  SP_NAME_COPY_COMPAT  = 0x6u,
+  SP_NAME_COPY_FROM_TO = 0x7u,
+  SP_NAME_HAS_FIELD    = 0x8u
+};
 
 struct SpecialNames {
   std::string sp_integral;
@@ -81,9 +85,11 @@ struct SpecialNames {
   std::string sp_lt;
   std::string sp_ref_types;
   std::string sp_copy_compat;
+  std::string sp_copy_from_to;
+  std::string sp_has_field;
 
   SpecialNames();
-  std::string getSpName(unsigned name);
+  std::string getSpName(SpNameId name);
   void fixUpSpNames(boost::shared_ptr<UocInfo> prelude);
   static SpecialNames spNames;
 };

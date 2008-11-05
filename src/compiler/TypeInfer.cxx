@@ -2306,7 +2306,18 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
          is immediately eliminated as solved. */ 
       const std::string& copy_compat =
 	SpecialNames::spNames.sp_copy_compat;
+      const std::string& copy_from_to =
+	SpecialNames::spNames.sp_copy_from_to;
+
       if (tc->defAst->s == copy_compat) {
+	shared_ptr<Type> tv = newTvar();
+	UNIFY(trail, ast->child(1)->loc, 
+	      ast->child(1)->symType, MBF(tv));
+	UNIFY(trail, ast->child(2)->loc,
+	      ast->child(2)->symType, MBF(tv));
+	tcc->clearPred(tc);
+      }
+      else if (tc->defAst->s == copy_from_to) {
 	shared_ptr<Type> tv = newTvar();
 	UNIFY(trail, ast->child(1)->loc, 
 	      ast->child(1)->symType, MBF(tv));

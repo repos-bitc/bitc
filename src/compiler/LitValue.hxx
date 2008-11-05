@@ -43,20 +43,35 @@
 #include <libsherpa/BigNum.hxx>
 
 
+enum LitRepr {
+  lr_none,
+  lr_bool,
+  lr_char,
+  lr_int,
+  lr_float,
+  lr_string
+};
+
 struct LitValue {
-  bool   b;        /* boolean Values */
-  unsigned long c; /* utf32 code points */
-  sherpa::BigNum i;	   /* large precision integers */
-  double d;	   /* doubles, floats          */
+  LitRepr lr;
+
+  bool   b;			/* boolean Values */
+  unsigned long c;		/* utf32 code points */
+  sherpa::BigNum i;		/* large precision integers */
+  double d;			/* doubles, floats          */
 
   // FIX: (shap) the original input is being saved in AST.s for replay
   // purposes. String literals need to be stored here as a vector of
   // character representations.
-  std::string s;  /* String Literals          */
+  std::string s;		/* String Literals          */
 
   static uint32_t DecodeStringCharacter(const char *s, const char **next);
   static uint32_t DecodeRawCharacter(const char *s, const char **next);
   static uint32_t DecodeCharacter(const std::string&);
+
+  LitValue() {
+    lr = lr_none;
+  }
 };
 
 #endif /* LITVALUE_HXX */

@@ -53,10 +53,12 @@ SpecialNames::SpecialNames()
   sp_lt = "__index_lt";
   sp_ref_types = "ref-types";
   sp_copy_compat = "copy-compat";
+  sp_copy_from_to = "copy-from-to";
+  sp_has_field = "has-field";
 }
 
 std::string
-SpecialNames::getSpName(unsigned name) {
+SpecialNames::getSpName(SpNameId name) {
   switch(name) {
     
   case SP_NAME_INTEGER:
@@ -76,6 +78,12 @@ SpecialNames::getSpName(unsigned name) {
 
   case SP_NAME_COPY_COMPAT:
     return sp_copy_compat;
+
+  case SP_NAME_COPY_FROM_TO:
+    return sp_copy_from_to;
+  
+  case SP_NAME_HAS_FIELD:
+    return sp_has_field;
   
   default:
     assert(false);
@@ -94,4 +102,6 @@ SpecialNames::fixUpSpNames(shared_ptr<UocInfo> theUoc)
   sp_lt = theUoc->env->getBinding(sp_lt)->s;
   sp_ref_types = theUoc->env->getBinding(sp_ref_types)->s;
   sp_copy_compat = theUoc->env->getBinding(sp_copy_compat)->s;
+  sp_copy_from_to = theUoc->env->getBinding(sp_copy_from_to)->s;
+  sp_has_field = theUoc->env->getBinding(sp_has_field)->s;
 }

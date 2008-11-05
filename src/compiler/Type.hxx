@@ -275,8 +275,11 @@ struct Type : public boost::enable_shared_from_this<Type> {
 public:
   Kind kind;
   
-  boost::shared_ptr<Type> link; // Linked into a chain of types 
-                            // constrained by equality
+  /// @brief Pointer to next element of a chain constrained by
+  /// equality.
+  ///
+  /// This is set by the unifier.
+  boost::shared_ptr<Type> link;
   
   /* If this is the type node that is authoritative
      to answer to the link, it will be the last one, and 
@@ -340,6 +343,8 @@ public:
 
   boost::shared_ptr<ArrLen> arrLen;	// Length in the case of an array type
   
+  LitValue  val;		// for literal types
+
   size_t    Isize;		// size in fixint
   TypeSet   fnDeps;		// Functional Dependencies (for 
 				//   Type classes only).
@@ -464,6 +469,7 @@ public:
   bool isPrimFloat();
   void SetTvarsTo(boost::shared_ptr<Type> t);
   void SetTvarsToUnit();
+  bool isLiteral();
   bool isInteger();
   bool isIntegral();
   bool isbool();
