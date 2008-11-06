@@ -215,7 +215,7 @@ struct SexprLexer::KeyWord SexprLexer::keywords[] = {
   { "define",           tk_DEFINE },
   { "definstance",      tk_DEFINSTANCE },
   { "definvariant",     tk_ReservedWord },
-  { "defobject",        tk_ReservedWord },
+  { "defobject",        tk_DEFOBJECT },
   { "defrefine",        tk_ReservedWord },
   { "defrepr",          tk_DEFREPR },
   { "defstruct",        tk_DEFSTRUCT },

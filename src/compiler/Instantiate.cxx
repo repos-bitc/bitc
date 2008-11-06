@@ -220,7 +220,7 @@ importSymBindings(shared_ptr<ASTEnvironment > fromEnv,
       toEnv->setFlags(nm, BF_REBIND | BF_COMPLETE);
 
       INST_ENV_DEBUG
-	cerr << "Added to env:"
+	cerr << "Added to env: "
 	     << bdng->val->fqn.asString()
 	     << endl;
     }
@@ -241,9 +241,9 @@ importTSBindings(shared_ptr<TSEnvironment > fromEnv,
       toEnv->setFlags(nm, BF_REBIND | BF_COMPLETE);
 
       INST_ENV_DEBUG
-	cerr << "Added to Gamma:"
+	cerr << "Added to Gamma: "
 	     << bdng->val->ast->fqn.asString()
-	     << ": "
+	     << " with type "
 	     << bdng->val->asString()
 	     << endl;
     }
@@ -355,9 +355,9 @@ UpdateMegaEnvs(shared_ptr<UocInfo> uoc)
 shared_ptr<AST>
 UocInfo::lookupByFqn(const string& fqn, shared_ptr<UocInfo> &targetUoc)
 {
-  string::size_type lastDot = fqn.rfind('.');
-  string ifName = fqn.substr(0, lastDot);
-  string idName = fqn.substr(lastDot+1, fqn.size());
+  string::size_type ifSep = fqn.rfind(FQName::sep);
+  string ifName = fqn.substr(0, ifSep);
+  string idName = fqn.substr(ifSep+1, fqn.size());
   targetUoc = GC_NULL;
 
 
@@ -495,6 +495,7 @@ name2fqn(shared_ptr<AST> ast)
     }
 
   case at_field:
+  case at_methdecl:
     {
       name2fqn(ast->child(1));
       break;
@@ -1098,6 +1099,8 @@ UocInfo::recInstantiate(ostream &errStream,
       break;
     }
 
+  case at_methdecl:
+    // FIX: instantiating at_methdecl may not be correct here.
   case at_block:
   case at_return_from:
   case at_field:
@@ -2054,8 +2057,7 @@ UocInfo::doInstantiate(ostream &errStream,
 *******************************************************************/
 
 bool
-UocInfo::instantiateFQN(ostream &errStream,
-			   const string& epName)
+UocInfo::instantiateFQN(ostream &errStream, const string& epName)
 {
   bool errFree = true;
   shared_ptr<UocInfo> targetUoc = GC_NULL;
@@ -2089,7 +2091,7 @@ UocInfo::instantiateFQN(ostream &errStream,
   doInstantiate(errStream, defIdent,
 		defIdent->symType, errFree, worklist);
 
-  if (epName == "bitc.main.main")
+  if (epName == "bitc.main:main")
     UocInfo::mainIsDefined = true;
 
   return errFree;
@@ -2097,8 +2099,7 @@ UocInfo::instantiateFQN(ostream &errStream,
 
 // One Shot instantiator
 bool
-UocInfo::instantiate(ostream &errStream,
-		     const string& epName)
+UocInfo::instantiate(ostream &errStream, const string& epName)
 {
   bool errFree = true;
   UpdateMegaEnvs(shared_from_this());
@@ -2134,8 +2135,8 @@ UocInfo::instantiateBatch(ostream &errStream,
   /// These need to be instantiated before any of the user-specified
   /// entry points are instantiated, because the entry point
   /// instantiations may reference these.
-  CHKERR(errFree, instantiateFQN(errStream, "bitc.prelude.__index_lt"));
-  CHKERR(errFree, instantiateFQN(errStream, "bitc.prelude.IndexBoundsError"));
+  CHKERR(errFree, instantiateFQN(errStream, "bitc.prelude:__index_lt"));
+  CHKERR(errFree, instantiateFQN(errStream, "bitc.prelude:IndexBoundsError"));
 
   for (set<string>::iterator itr = epNames.begin();
       itr != epNames.end(); ++itr)

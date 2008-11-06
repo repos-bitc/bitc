@@ -218,7 +218,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_ifident:
     out << ast->s;
     if (Options::ppFQNS) {
-      out << "{" << ast->fqn.asString("::");
+      out << "{" << ast->fqn.asString(FQName::sep);
       if (ast->externalName.size()) {
 	out << "," << ast->externalName;
       }
@@ -383,6 +383,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_letGather:
   case at_apply:
   case at_struct_apply:
+  case at_object_apply:
   case at_ucon_apply:
     {
       out << "(";
@@ -519,6 +520,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       out << ")";
       break;
     }
+  case at_methType:
   case at_fn:
     {
       // Reworked by shap on 10/9/2008 to use arrow syntax
@@ -675,6 +677,8 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     {
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> proc_type = ast->child(1);
+      shared_ptr<AST> constraints = ast->child(2);
+
       out << "(" << ast->atKwd() << " ";
       BitcP(out, ident, showTypes);
       out << " : ";
@@ -838,7 +842,8 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       BitcP(out, category, showTypes);
       out << endl;
       BitcP(out, declares, showTypes);
-      out << endl;
+      if (declares->children.size())
+	out << endl;
       BitcP(out, fc, showTypes);
       out << ")";
 
@@ -1003,6 +1008,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     }
 
   case at_field:
+  case at_methdecl:
     {
       BitcP(out, ast->child(0), showTypes);
       if (ast->children.size() > 1) {

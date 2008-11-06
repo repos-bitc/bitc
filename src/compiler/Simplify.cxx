@@ -176,6 +176,7 @@ LetInsert(shared_ptr<AST> ast, bool skip = false)
   switch(ast->astType) {
   case at_apply:
   case at_struct_apply:
+  case at_object_apply:
   case at_ucon_apply:
     {
       //      bool needRewrite = false;

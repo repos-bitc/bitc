@@ -81,6 +81,10 @@ enum TI_FlagValues {
   /// No longer need to check instance permissibility, since this
   /// check is expensive, and only needs to be performed once.
   TI_ALL_INSTS_OK        = 0x100u,
+
+  /// @brief Passed downward from at_apply handler when the thing in
+  /// the applicative position is a select node.
+  TI_METHOD_OK           = 0x200u
 };
 typedef sherpa::EnumSet<TI_FlagValues> TI_Flags;
 

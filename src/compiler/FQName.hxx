@@ -50,6 +50,8 @@ struct FQName {
   std::string iface;
   std::string ident;
 
+  static const char sep;
+
   bool operator <(const FQName&) const;
   bool operator >(const FQName&) const;
   bool operator ==(const FQName&) const;
@@ -86,8 +88,8 @@ struct FQName {
     ident = _ident;
   }
 
-  std::string asString(const char *s = ".") const;
-  std::string asString(const char *s,
+  std::string asString(const char s = FQName::sep) const;
+  std::string asString(const char s,
 		       const std::string altifn) const;
 };
 

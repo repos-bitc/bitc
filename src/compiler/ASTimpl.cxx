@@ -309,7 +309,10 @@ AST::atKwd() const
     return "<fields>";
 
   case at_field:
-    return "field";
+    return "<field>";
+
+  case at_methdecl:
+    return "<method>";
 
   case at_fill:
     return "fill";
@@ -328,6 +331,9 @@ AST::atKwd() const
 
   case at_fn:
     return "fn";
+
+  case at_methType:
+    return "method";
 
 //   case at_closureType:
 //     return "closure";
@@ -585,6 +591,9 @@ AST::atKwd() const
   case at_struct_apply:
     return "<struct_apply>";
 
+  case at_object_apply:
+    return "<object_apply>";
+
   case at_ucon_apply:
     return "<ucon_apply>";
 
@@ -642,6 +651,8 @@ identTypeToString(IdentType id)
     return "union";
   case id_struct:
     return "struct";
+  case id_object:
+    return "object";
   case id_typeclass:
     return "typeclass";
   case id_tcmethod:
@@ -888,11 +899,13 @@ AST::isIdentType(IdentType t)
   return ((identType == t) ||
 	  ((t == idc_type) && ((identType == id_tvar) ||
 			       (identType == id_union) ||
-			       (identType == id_struct))) ||
+			       (identType == id_struct) ||
+			       (identType == id_object))) ||
 	  ((t == idc_value) && ((identType == id_value) ||
 				(identType == id_ucon0) ||
 				(identType == id_tcmethod))) ||
 	  ((t == idc_ctor)  && ((identType == id_struct) ||
+				(identType == id_object) ||
 				(identType == id_ucon) ||
 				(identType == id_ucon0))) ||
 	  ((t == idc_uctor) && ((identType == id_ucon) ||
@@ -902,5 +915,9 @@ AST::isIdentType(IdentType t)
 	  // where we are applying a valye that was proclaimed, the
 	  // identType would still be idc_value, and not id_value.
 	  ((t == idc_apply) && (isIdentType(idc_value) ||
-				isIdentType(idc_ctor))));
+				isIdentType(idc_ctor) ||
+				isIdentType(id_method))) ||
+	  ((t == idc_usesel_lhs) && ((identType == id_interface) ||
+				     (identType == id_struct) ||
+				     (identType == id_object))));
 }

@@ -35,7 +35,9 @@
  *
  **************************************************************************/
 
-/// @file REPR simplification pass.
+/// @file 
+///
+/// @brief REPR simplification pass.
 ///
 /// For almost all purposes in the compiler, a DEFREPR form can be
 /// treated as a discriminated union form. This pass converts a

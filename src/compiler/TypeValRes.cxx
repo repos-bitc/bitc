@@ -332,6 +332,7 @@ isExpansive(std::ostream& errStream,
     }
 
   case at_struct_apply:
+  case at_object_apply:
   case at_ucon_apply:
     {
       for (size_t i=1; !itsExpansive && i < ast->children.size(); i++)

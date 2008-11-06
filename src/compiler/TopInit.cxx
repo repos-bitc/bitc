@@ -205,6 +205,7 @@ TopInit(std::ostream& errStream,
   case at_constructor:
   case at_fields:
   case at_field:
+  case at_methdecl:
   case at_fill:
   case at_proclaim:
   case at_defexception:
@@ -378,6 +379,7 @@ TopInit(std::ostream& errStream,
     
   case at_struct_apply:
   case at_ucon_apply: 
+  case at_object_apply: 
     {
       for (size_t c = 1; c < ast->children.size(); c++)
 	TOPINIT(ast->child(c), flags);

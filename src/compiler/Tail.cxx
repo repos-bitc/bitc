@@ -147,6 +147,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_fields:
   case at_constructor:
   case at_field:
+  case at_methdecl:
   case at_fill:
   case at_defexception:
   case at_proclaim:
@@ -279,6 +280,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
 
   case at_ucon_apply:
   case at_struct_apply:
+  case at_object_apply:
     {
       //       for (size_t c = 1; c < ast->children.size(); c++)
       // 	markTail(ast->child(i), fn, bps, false);

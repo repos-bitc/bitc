@@ -423,6 +423,13 @@ Type::isFnxn()
 }
 
 bool 
+Type::isMethod()
+{
+  shared_ptr<Type> t = getBareType();
+  return (t->kind == ty_method);
+}
+
+bool 
 Type::isBaseConstType()
 {
   switch(getType()->kind) {
@@ -960,11 +967,17 @@ Type::isStruct()
 {
   shared_ptr<Type> t = getBareType();
 
-  // WAS  return (((t->kind == ty_structv) || 
-  //               (t->kind == ty_structr)) &&
-  //           	  (t->components->size() != 0));
   return ((t->kind == ty_structv) || 
 	  (t->kind == ty_structr));
+}
+
+bool 
+Type::isObject()
+{
+  shared_ptr<Type> t = getBareType();
+
+  return ((t->kind == ty_objectv) || 
+	  (t->kind == ty_objectr));
 }
 
 bool 
@@ -1177,6 +1190,8 @@ Type::Type(const Kind k)
   TYPE_CTR_INIT(k);
 }
 
+/// @bug There are LOTS of constructions of ty_byref floating around
+/// that should be updated to use this.
 Type::Type(const Kind k, shared_ptr<Type> child)
   : uniqueID(genTypeID())
 {
@@ -1211,7 +1226,8 @@ Type::Type(shared_ptr<Type>  t)
     
   for (size_t i=0; i<t->components.size(); i++)
     components.push_back(comp::make(t->CompName(i), t->CompType(i), t->CompFlags(i)));
-
+  for (size_t i=0; i<t->methods.size(); i++)
+    methods.push_back(comp::make(t->MethodName(i), t->MethodType(i), t->MethodFlags(i)));
 
   mark = MARK_NONE;
   pMark = 0;  
@@ -1234,7 +1250,7 @@ Type::getDCopy()
 
 // Returns true of the type `t' is structurally equal to `this'
 // under alpha renaming -- modulo:
-// i)   mutabality 
+// i)   mutability 
 // ii)  declarations unify with definitions
 // iii) Imprecise integer/floating point types unify with 
 //          compatible primitive/prelude typres
