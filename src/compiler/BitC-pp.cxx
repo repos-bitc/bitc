@@ -102,17 +102,40 @@ doChildren(INOstream& out, shared_ptr <const AST> ast, size_t from,
 }
 
 static void
+maybe_open_quantifier(INOstream& out, shared_ptr<const AST> defn,
+		      const bool showTypes)
+{
+  size_t nChildren = defn->children.size();
+  shared_ptr<const AST> constraints = defn->child(nChildren-1);
+
+  assert(constraints);
+  if (constraints->children.size() == 0)
+    return;
+
+  out << "(forall ";
+  BitcP(out, constraints, showTypes);
+  out << " ";
+}
+
+static void
+maybe_close_quantifier(INOstream& out, shared_ptr<const AST> defn,
+		       const bool showTypes)
+{
+  size_t nChildren = defn->children.size();
+  shared_ptr<const AST> constraints = defn->child(nChildren-1);
+
+  assert(constraints);
+  if (constraints->children.size() == 0)
+    return;
+  out << ")";
+}
+
+static void
 show_qual_name(INOstream &out,  shared_ptr <const AST> ident,
-	       shared_ptr <const AST> tvlist, shared_ptr <const AST> constraints,
+	       shared_ptr <const AST> tvlist,
 	       const bool showTypes)
 {
-  bool constraintsPresent = constraints && (constraints->children.size() > 0);
   bool argsPresent = (tvlist->children.size() > 0);
-  if (constraintsPresent) {
-    out << "(forall ";
-    BitcP(out, constraints, showTypes);
-    out << " ";
-  }
 
   if (argsPresent) {
     out << "(" ;
@@ -124,11 +147,9 @@ show_qual_name(INOstream &out,  shared_ptr <const AST> ident,
   else {
     BitcP(out, ident, showTypes);
   }
-
-  if (constraintsPresent)
-    out << ")";
 }
 
+#if 0
 static void
 show_qual_name(INOstream &out,  shared_ptr <const AST> tapp,
 	       shared_ptr <const AST> constraints, bool showTypes)
@@ -145,6 +166,7 @@ show_qual_name(INOstream &out,  shared_ptr <const AST> tapp,
   if (constraintsPresent)
     out << ")";
 }
+#endif
 
 /// @brief Core of the pretty printer.
 static void
@@ -233,6 +255,8 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     ///////////////////////////////////////////////////////////
   case at_recdef:
     {
+      maybe_open_quantifier(out, ast, showTypes);
+
       out << "(" << ast->atKwd();
 
       size_t oldIndent = out.indentToHere();
@@ -255,11 +279,15 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       doChildren(out, iLambda, 1, true, showTypes);
       out << ")";
 
+      maybe_close_quantifier(out, ast, showTypes);
+
       break;
     }
 
   case at_define:
     {
+      maybe_open_quantifier(out, ast, showTypes);
+
       if (ast->child(1)->astType == at_lambda) {
 	out << "(" << ast->atKwd() << " ";
 
@@ -280,6 +308,8 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 	out << ")";
 	out.less();
       }
+
+      maybe_close_quantifier(out, ast, showTypes);
       break;
     }
 
@@ -668,13 +698,18 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> methods = ast->child(3);
       shared_ptr<AST> constraints = ast->child(4);
 
+      maybe_open_quantifier(out, ast, showTypes);
+
       out << "(" << ast->atKwd() << " ";
-      show_qual_name(out, ident, tvlist, constraints, showTypes);
+      show_qual_name(out, ident, tvlist, showTypes);
       out << " ";
       BitcP(out, tcdecls, showTypes);
       out << " ";
       BitcP(out, methods, showTypes);
       out << ")";
+
+      maybe_close_quantifier(out, ast, showTypes);
+
       break;
     }
 
@@ -683,10 +718,16 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> tapp = ast->child(0);
       shared_ptr<AST> methods = ast->child(1);
       shared_ptr<AST> constraints = ast->child(2);
+
+      maybe_open_quantifier(out, ast, showTypes);
+
       out << "(" << ast->atKwd() << " ";
-      show_qual_name(out, tapp, constraints, showTypes);
+      BitcP(out, tapp, showTypes);
       BitcP(out, methods, showTypes);
       out << ")";
+
+      maybe_close_quantifier(out, ast, showTypes);
+
       break;
     }
 
@@ -788,15 +829,20 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> fc = ast->child(4);
       shared_ptr<AST> constraints = ast->child(5);
 
+      maybe_open_quantifier(out, ast, showTypes);
+
       out << "(" << ast->atKwd() << " ";
       out.indentToHere();
-      show_qual_name(out, ident, tvlist, constraints, showTypes);
+      show_qual_name(out, ident, tvlist, showTypes);
       BitcP(out, category, showTypes);
       out << endl;
       BitcP(out, declares, showTypes);
       out << endl;
       BitcP(out, fc, showTypes);
       out << ")";
+
+      maybe_close_quantifier(out, ast, showTypes);
+
       break;
     }
 
@@ -809,9 +855,10 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> category = ast->child(2);
       shared_ptr<AST> constraints = ast->child(3);
 
+      maybe_open_quantifier(out, ast, showTypes);
 
       out << "(" << ast->atKwd() << " ";
-      show_qual_name(out, ident, tvlist, constraints, showTypes);
+      show_qual_name(out, ident, tvlist, showTypes);
       BitcP(out, category, showTypes);
 
       if (ident->flags & DEF_IS_EXTERNAL) {
@@ -820,6 +867,9 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 	  out << " " << ident->externalName;	
       }
       out << ")";
+
+      maybe_close_quantifier(out, ast, showTypes);
+
       break;
     }
 
