@@ -806,30 +806,134 @@ Type::normalize_mbFull(boost::shared_ptr<Trail> trail)
                       Const handling
  *******************************************************************/
 
-/* Normalize types such as (const bool) to bool*/
+/* Normalize types such as (const bool) to bool ONLY when thhe const
+   wrapper can be completely removed. This is an in-place
+   normalization operation [Functional version: \mahtcal{N}] */
 
 void
-Type::normalize_const(boost::shared_ptr<Trail> trail)
+Type::normalize_const_inplace(boost::shared_ptr<Trail> trail)
 {
   shared_ptr<Type> t = getType();
   
-  if (t->mark & MARK_NORMALIZE_CONST)
+  if (t->mark & MARK_NORMALIZE_CONST_INPLACE)
     return;
   
-  t->mark |= MARK_NORMALIZE_CONST;  
+  t->mark |= MARK_NORMALIZE_CONST_INPLACE;  
   
   for (size_t i=0; i < t->components.size(); i++)
-    t->CompType(i)->normalize_const(trail);
+    t->CompType(i)->normalize_const_inplace(trail);
   
   for (size_t i=0; i < t->typeArgs.size(); i++)
-    t->TypeArg(i)->normalize_const(trail);
+    t->TypeArg(i)->normalize_const_inplace(trail);
   
   for (TypeSet::iterator itr = t->fnDeps.begin();
        itr != t->fnDeps.end(); ++itr)
-    (*itr)->normalize_const(trail);
+    (*itr)->normalize_const_inplace(trail);
 
   if((t->kind == ty_const) && t->Base()->isConstReducible())
     trail->link(t, t->Base()->minimizeMutability());
+  
+  t->mark &= ~MARK_NORMALIZE_CONST_INPLACE;
+}
+
+/* Complete const normalization: Reduce const to only appear on 
+   type variables and constrained types [\mathbb{N}] */
+
+boost::shared_ptr<Type> 
+Type::normalize_const(const bool inConst)
+{
+  bool needConstWrapper = false;
+  shared_ptr<Type> t = getType();
+  shared_ptr<Type> rt = GC_NULL;
+  
+  if (t->mark & MARK_NORMALIZE_CONST)
+    return t;
+  
+  t->mark |= MARK_NORMALIZE_CONST;  
+
+  switch(t->kind) {
+    
+  case ty_tvar:
+    {
+      rt = t->getDCopy();
+      if(inConst)
+	rt = Type::make(ty_const, rt);
+      break;
+    }
+    
+  case ty_mbTop:    
+  case ty_mbFull:    
+    {
+      shared_ptr<Type> var = t->Var()->getType();
+      shared_ptr<Type> inner = t->Core()->getType();
+      
+      rt = Type::make(t->kind, var->getDCopy(),
+		      inner->normalize_const(false));
+      
+      if(inConst)
+	rt = Type::make(ty_const, rt);
+      
+      break;
+    }
+    
+  case ty_const:
+    {
+      rt = t->Base()->normalize_const(true);
+      break;
+    }
+
+  case ty_mutable:
+    {
+      rt = t->Base()->normalize_const(inConst);
+      if(!inConst) 
+	rt = Type::make(ty_mutable, rt);
+      break;
+    }
+
+  case ty_array:
+    {
+      rt = Type::make(ty_array, t->Base()->normalize_const(inConst));
+      break;
+    }
+    
+  case ty_structv:
+  case ty_uvalv: 
+  case ty_uconv: 
+    {
+      rt = t->getDCopy();
+      for (size_t i=0; i < rt->components.size(); i++) {
+	shared_ptr<Type> fld = rt->CompType(i);
+	if(inConst) 
+	  fld = Type::make(ty_const, fld);
+	rt->CompType(i) = fld->normalize_const(false);
+      }
+      break;
+    }
+    
+  case ty_unionv: 
+    {
+      rt = t->getDCopy();
+      for (size_t i=0; i < rt->components.size(); i++) {
+	shared_ptr<Type> ctr = rt->CompType(i);
+	rt->CompType(i) = ctr->normalize_const(inConst);
+      }
+      
+      break;
+    }
+    
+  case ty_letGather:
+    {
+      assert(false);
+      break;
+    }
+    
+    // concrete types, function type and reference types.
+  default:
+    {
+      rt = t->getDCopy();
+      break;
+    }
+  }
   
   t->mark &= ~MARK_NORMALIZE_CONST;
 }

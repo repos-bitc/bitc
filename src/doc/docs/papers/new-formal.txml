@@ -902,13 +902,11 @@
               </pred>
             </lhs>
             <rhs>
-              <ref>
-                <pred mbb="yes" name="N">
-                  <const>
-                    <type/>
-                  </const>
-                </pred>
-              </ref>
+              <pred mbb="yes" name="N">
+                <const>
+                  <type/>
+                </const>
+              </pred>
             </rhs>
           </equation>
           <equation>

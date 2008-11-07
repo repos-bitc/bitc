@@ -197,15 +197,16 @@ enum MarkFlagValues {
   MARK_MINIMIZE_MUTABILITY      = 0x0000800u,
   MARK_MINIMIZE_DEEP_MUTABILITY = 0x0001000u,
   MARK_MIN_MUT_CONSTLESS        = 0x0002000u,
+  MARK_NORMALIZE_CONST          = 0x0004000u,
 
   // Functions that affect type structure/contents
-  MARK_SIGN_MBS                 = 0x0004000u,
-  MARK_ADJ_MAYBE                = 0x0008000u,
-  MARK_FIXUP_FN_TYPES           = 0x0010000u,
-  MARK_PROPAGATE_MUTABILITY     = 0x0020000u,
-  MARK_NORMALIZE_MBFULL         = 0x0040000u,
-  MARK_NORMALIZE_CONST          = 0x0080000u,
-  MARK_ENSURE_MINIMIZABILITY    = 0x0100000u,
+  MARK_SIGN_MBS                 = 0x0008000u,
+  MARK_ADJ_MAYBE                = 0x0010000u,
+  MARK_FIXUP_FN_TYPES           = 0x0020000u,
+  MARK_PROPAGATE_MUTABILITY     = 0x0040000u,
+  MARK_NORMALIZE_MBFULL         = 0x0080000u,
+  MARK_NORMALIZE_CONST_INPLACE  = 0x0100000u,
+  MARK_ENSURE_MINIMIZABILITY    = 0x0200000u,
 };
 typedef sherpa::EnumSet<MarkFlagValues> MarkFlags;
 
@@ -418,11 +419,18 @@ private:
   // This normalization is done in-place.
   void normalize_mbFull(boost::shared_ptr<Trail> trail=Trail::make());
 
-  // Normalize types such as (const bool) to bool
-  // const reduction function
-  // This normalization is done in-place.
-  void normalize_const(boost::shared_ptr<Trail> trail=Trail::make());
+  // Inplace partial Const normalization
+  // Normalize types such as (const bool) to bool inplace.
+  // This const-reduction is ONLY DONE when a const constructor can be
+  // dropped. It does not reduce (const ('a, 'b)) to 
+  // ((const 'a), (const 'b))
+  void normalize_const_inplace(boost::shared_ptr<Trail> trail=Trail::make());
 
+  // Complete const normalization: Returns a new type where const only
+  // wraps type variables or maybe types.
+  // This is NOT an in-place normalization
+  boost::shared_ptr<Type> normalize_const(const bool inConst=false);
+  
 public:
   boost::shared_ptr<Type> getType();  
   boost::shared_ptr <const Type> getType() const;

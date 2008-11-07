@@ -248,7 +248,7 @@ findComponent(std::ostream& errStream,
       valid = ((sut->CompFlags(i) & COMP_INVALID) == 0);
       break;
     }
-      
+  
   if (!fct) {
     errStream << ast->loc << ": "
 	      << " In the expression " << ast->asString() << ", "
@@ -2869,9 +2869,9 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       ast->symType = Type::make(ty_fn);
       shared_ptr<Type> fnarg = ast->child(0)->symType->getType();
+      shared_ptr<Type> ret = ast->child(1)->symType->getType();
       ast->symType->components.push_back(comp::make(fnarg));
-      shared_ptr<comp> nComp = comp::make(ast->child(1)->getType());
-      ast->symType->components.push_back(nComp);    
+      ast->symType->components.push_back(comp::make(ret));    
       break;
     }
 
@@ -3423,6 +3423,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	 - union values: determining tag (need to convert it to at_sel_ctr)
 	 Note that selection for fqn-naming a union constructor
 	 is already handled by the symbol resolver pass  */
+      ast->symType = Type::make(ty_tvar); 
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		trail,  USE_MODE, TI_EXPRESSION);
             
@@ -3468,11 +3469,9 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       shared_ptr<Type> fld;
       CHKERR(errFree, findComponent(errStream, tr, ast, fld));
-
+      
       if (errFree)
 	ast->symType = fld;
-      else
-	ast->symType = Type::make(ty_tvar); 
       
       break;
     }
