@@ -232,6 +232,7 @@ help()
     << "  --stopafter 'pass'\n"
     << "  --decorate --dumpafter 'pass' --dumptypes 'pass'\n"
     << "  --showtypes 'uoc' \n"
+    << "  -- emit 'Language'\n" 
     //<< "  --xmltypes 'uoc' \n"
     << "  --ppfqns --full-qual-types\n"
     << "  --raw-tvars --show-maybes --show-all-tccs \n"

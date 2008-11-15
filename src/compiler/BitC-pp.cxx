@@ -640,7 +640,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> ifAst = ast->child(0);
       shared_ptr<AST> idAst = ast->child(1);
 
-      out << "(" << ast->atKwd();
+      out << "(" << ast->atKwd() << " ";
       BitcP(out, ifAst, showTypes);
       out << " as ";
       BitcP(out, idAst, showTypes);
