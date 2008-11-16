@@ -657,17 +657,17 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
   case at_import:
     out << "(" << ast->atKwd();
-    BitcP(out, ast->child(0), showTypes);
-    out << " import ";
-    doChildren(out, ast, 1, true, showTypes);
+    doChildren(out, ast, 0, true, showTypes);
+    out << ")";
     break;
 
   case at_ifsel:
     if (ast->child(0)->s == ast->child(1)->s)
       out << ast->child(0)->s;
     else
-      out << "(= " << ast->child(0)->s
-	  << " " << ast->child(1)->s
+      out << "(" << ast->child(1)->s
+	  << " as "
+	  << ast->child(0)->s
 	  << ")";
     break;
 
