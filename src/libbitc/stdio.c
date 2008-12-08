@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006, The EROS Group, LLC.
+ * Copyright (C) 2008, The EROS Group, LLC.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -39,6 +39,7 @@
 #include "BUILD/bitc-runtime.h"
 
 struct ty_bitc_stdioStream {
+  bool isInit;
   FILE *f;
 } ;
 
@@ -56,21 +57,22 @@ struct ty_bitc_stdioStream {
 // dependent and not everyone uses ELF (which is silly, but what can
 // you do).
 
-static ty_bitc_stdioStream our_stdin = { 0 };
-static ty_bitc_stdioStream our_stdout = { 0 };
-static ty_bitc_stdioStream our_stderr = { 0 };
+static ty_bitc_stdioStream our_stdin = { false, 0 };
+static ty_bitc_stdioStream our_stdout = { false, 0 };
+static ty_bitc_stdioStream our_stderr = { false, 0 };
  
 static inline void
 fix_stdio_stream(ty_bitc_stdioStream *ios)
 {
-  if (ios->f == 0) {
-    if (ios == &our_stdin)
-      ios->f = stdin;
-    else if (ios == &our_stdout)
-      ios->f = stdout;
-    else if (ios == &our_stderr)
-      ios->f = stderr;
-  }
+  if (ios->isInit)
+    return;
+
+  if (ios == &our_stdin)
+    ios->f = stdin;
+  else if (ios == &our_stdout)
+    ios->f = stdout;
+  else if (ios == &our_stderr)
+    ios->f = stderr;
 }
 
 ty_bitc_stdioStream *bitc_stdio_stdin  = &our_stdin;
@@ -85,6 +87,8 @@ DEFUN(bitc_stdio_open, bitc_string_t *nm, bitc_string_t *mode)
   if (ios->f == NULL)
     bitc_throw(&val_ExNoPermission);
 
+  ios->isInit = true;
+
   return ios;
 }
 DEFCLOSURE(bitc_stdio_open);
@@ -94,7 +98,7 @@ DEFUN(bitc_stdio_close, ty_bitc_stdioStream *ios)
 {
   fix_stdio_stream(ios);
 
-  if (ios->f > 0) {
+  if (ios->f) {
     fclose(ios->f);
     ios->f = NULL;
   }
@@ -118,6 +122,9 @@ DEFUN(bitc_stdio_read_char, ty_bitc_stdioStream *ios)
   ssize_t result;
 
   fix_stdio_stream(ios);
+
+  if (ios->f == NULL)
+    bitc_throw(&val_ExFileIsClosed);
 
   // Read the first char:
   result = fread(&encoded[0], 1, 1, ios->f);
@@ -192,6 +199,9 @@ DEFUN(bitc_stdio_write_char, ty_bitc_stdioStream *ios, bitc_char_t ucs4)
   ssize_t result;
   fix_stdio_stream(ios);
 
+  if (ios->f == NULL)
+    bitc_throw(&val_ExFileIsClosed);
+
   bitc_uns8_t encoded[6];
   bitc_uns8_t *utf8 = encoded;
 
@@ -247,7 +257,10 @@ DEFUN(bitc_stdio_read_byte, ty_bitc_stdioStream *ios)
 
   fix_stdio_stream(ios);
 
-  if ( fread(&c, 1, 1, ios->f) < 0 )
+  if (ios->f == NULL)
+    bitc_throw(&val_ExFileIsClosed);
+
+  if ( fread(&c, 1, 1, ios->f) != 1 )
     bitc_throw(&val_ExNoPermission);
 
   return c;
@@ -261,7 +274,10 @@ DEFUN(bitc_stdio_write_byte, ty_bitc_stdioStream *ios, bitc_uns8_t c)
 {
   fix_stdio_stream(ios);
 
-  if ( fwrite(&c, 1, 1, ios->f) < 0 )
+  if (ios->f == NULL)
+    bitc_throw(&val_ExFileIsClosed);
+
+  if ( fwrite(&c, 1, 1, ios->f) != 1 )
     bitc_throw(&val_ExNoPermission);
 }
 DEFCLOSURE(bitc_stdio_write_byte);
@@ -270,6 +286,9 @@ bitc_bool_t
 DEFUN(bitc_stdio_eofp, ty_bitc_stdioStream *ios)
 {
   fix_stdio_stream(ios);
+
+  if (ios->f == NULL)
+    bitc_throw(&val_ExFileIsClosed);
 
   return (feof(ios->f) ? true : false);
 }
