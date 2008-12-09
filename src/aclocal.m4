@@ -11,6 +11,7 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
+m4_include([aclocal/ac_define_dir.m4])
 m4_include([aclocal/ax_boost_base.m4])
 m4_include([aclocal/ax_boost_filesystem.m4])
 m4_include([aclocal/ax_boost_system.m4])

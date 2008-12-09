@@ -724,9 +724,20 @@ main(int argc, char *argv[])
     /// @bug: What about lib64?
     std::string lib_leaf_name = filesystem::path(AUTOCONF_LIBDIR).leaf();
     filesystem::path libPath = Options::SystemDirs[i] / lib_leaf_name;
+
     Options::libDirs.push_back(libPath);
     Options::LinkPostOptionsGCC.push_back("-L");
     Options::LinkPostOptionsGCC.push_back(libPath.string());
+  }
+
+  // Since BitC may hot have been compiled for install into a standard
+  // location, add AUTOCONF_LIBDIR to libDirs and also to the link
+  // options:
+
+  if (Options::useStdLib) {
+    Options::libDirs.push_back(filesystem::path(AUTOCONF_LIBDIR));
+    Options::LinkPostOptionsGCC.push_back("-L");
+    Options::LinkPostOptionsGCC.push_back(AUTOCONF_LIBDIR);
   }
 
   if (Options::useStdLib) {

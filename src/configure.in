@@ -68,6 +68,8 @@ AC_CHECK_PROG(HAVE_MAKEINFO, makeinfo, yes, no)
 AC_CHECK_PROG(HAVE_TEXI2DVI, texi2dvi, yes, no)
 AC_CHECK_PROG(HAVE_DVIPS, dvips, yes, no)
 
+AC_DEFINE_DIR([EXPANDED_LIBDIR], [libdir], [Where libraries live])
+
 dnl Set the inline keyword appropriately for the platform
 AC_C_INLINE
 

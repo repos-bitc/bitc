@@ -1,10 +1,46 @@
 /* config.h.in.  Generated from configure.in by autoheader.  */
 
+/* Where libraries live */
+#undef EXPANDED_LIBDIR
+
+/* define if the Boost library is available */
+#undef HAVE_BOOST
+
+/* Define to 1 if you have the <boost/enable_shared_from_this.hpp> header
+   file. */
+#undef HAVE_BOOST_ENABLE_SHARED_FROM_THIS_HPP
+
+/* define if the Boost::Filesystem library is available */
+#undef HAVE_BOOST_FILESYSTEM
+
+/* Define to 1 if you have the <boost/filesystem/convenience.hpp> header file.
+   */
+#undef HAVE_BOOST_FILESYSTEM_CONVENIENCE_HPP
+
+/* Define to 1 if you have the <boost/filesystem/operations.hpp> header file.
+   */
+#undef HAVE_BOOST_FILESYSTEM_OPERATIONS_HPP
+
+/* Define to 1 if you have the <boost/filesystem/path.hpp> header file. */
+#undef HAVE_BOOST_FILESYSTEM_PATH_HPP
+
+/* Define to 1 if you have the <boost/shared_ptr.hpp> header file. */
+#undef HAVE_BOOST_SHARED_PTR_HPP
+
+/* define if the Boost::System library is available */
+#undef HAVE_BOOST_SYSTEM
+
+/* Define to 1 if you have the <boost/version.hpp> header file. */
+#undef HAVE_BOOST_VERSION_HPP
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* Define if you have the OSDoc documentation tools */
+#undef HAVE_OSDOC
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -24,6 +60,9 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
+/* Define to 1 if you have the <unicode/uchar.h> header file. */
+#undef HAVE_UNICODE_UCHAR_H
+
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
@@ -42,11 +81,20 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* The size of `void *', as computed by sizeof. */
+#undef SIZEOF_VOID_P
+
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
+
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
+#undef inline
+#endif
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef size_t
