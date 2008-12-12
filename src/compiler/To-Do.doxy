@@ -6,25 +6,93 @@
 /// Here are all of the open "to do" items before we can release R1 of
 /// the BitC Research Compiler, along with current status:
 ///
+/// <h1>Technical Issues</h1>
 /// <ol>
 /// <li>
-/// Go through and document (doxygen comment) all of the source code.
+/// Implement the "constantness by path" rule, including the CONST type
+/// metaconstructor.
 ///
-/// <b>Status:</b> In progress, not yet complete.
+/// <b>Rationale:</b> Without this, inner references and by-ref can
+/// create a number of problems.
+///
+/// <b>Status:</b> Essentially done as of 12/12/2008. Needs to be
+/// documented in the specification.
+///
+/// <b>Complexity:</b> This turned out to be moderately nasty.
 /// </li>
 /// <li>
 /// Define and enforce the rules for initializer ordering. The
 /// proposed rules are defined in 
 /// @ref InitializerRules.
 ///
+/// <b>Rationale:</b> Without this, our ability to initialize is
+/// severely restricted.
+///
 /// <b>Status:</b> Defined. Effect types must be implemented before
 /// this can be completed.
+///
+/// <b>Complexity:</b> Straightforward.
 /// </li>
 /// <li>
 /// Implement and enforce purity of initializer expressions and the
 /// <code>(pure&nbsp;...)</code> form more generally.
 ///
+/// <b>Rationale:</b> Without this, many globals must be declared
+/// mutable that could otherwise be constant, which in turn impedes 
+/// optimization.
+///
 /// <b>Status:</b> Depends on implementation of effect types.
+///
+/// <b>Complexity:</b> Trivial once effect types are done.
+/// </li>
+/// <li>
+/// Implement literal instantiation.
+///
+/// <b>Rationale:</b> Essential for efficient I/O implementation.
+///
+/// <b>Status:</b> Tentative fumblings have started.
+///
+/// <b>Complexity:</b> Straightforward.
+/// </li>
+/// <li>
+/// Implement typeclass instance resolution by lexical lookup rule.
+///
+/// <b>Rationale:</b> Solves the "colliding type class" problem.
+///
+/// <b>Status:</b> Not yet started.
+///
+/// <b>Complexity:</b> Requires that we switch to a back-tracking
+/// solver.
+/// </li>
+/// <li>
+/// Implement record inference (a.k.a. <code>has-field</code>)
+///
+/// <b>Rationale:</b> Required to state type class dependencies for
+/// objects/capsules. Also gives us a form of lateral abstraction.
+///
+/// <b>Status:</b> Straightforward, but not yet started. Ideal
+/// implementation requires literal instantiation.
+///
+/// <b>Complexity:</b> Requires updates in the solver.
+/// </li>
+/// <li>
+/// Implement capsule/object notion.
+///
+/// <b>Rationale:</b> Gives us just enough existential typing to get by.
+///
+/// <b>Status:</b> Shap has implemented structure methods. Object
+/// methods are straightforward, but the associated type constraints
+/// cannot be expressed without <tt>has-field</tt>.
+///
+/// <b>Complexity:</b> Straightforward.
+/// </li>
+/// </ol>
+/// <h1>Non-Technical Issues</h1>
+/// <ol>
+/// <li>
+/// Go through and document (doxygen comment) all of the source code.
+///
+/// <b>Status:</b> In progress, not yet complete.
 /// </li>
 /// <li>
 /// Specify syntax for function types expressing effects.
@@ -33,22 +101,13 @@
 /// issues here.
 /// </li>
 /// <li>
-/// Implement the "constantness by path" rule, including the COST type
-/// metaconstructor.
+/// Update spec to reflect all of the above.
 ///
-/// <b>Status:</b> In final stage development as of 10/23. Needs to be
-/// documented in the specification.
+/// <b>Status:</b> Not yet started.
 /// </li>
-/// <li>
-/// Implement typeclass instance resolution by lexical lookup rule.
-///
-/// <b>Status:</b> Straightforward, but not yet started.
-/// </li>
-/// <li>
-/// Implement literal instantiation.
-///
-/// <b>Status:</b> Straightforward, but not yet started.
-/// </li>
+/// </ol>
+/// <h1>Dropped</h1>
+/// <ol>
 /// <li>
 /// Implement subtyping on structures
 ///
@@ -57,18 +116,6 @@
 /// <li>
 /// Implement existential types.
 ///
-/// <b>Status:</b> Shap is currently (10/23) working on implementation
-/// of methods for structures. Objects and methods will follow
-/// directly.
-/// </li>
-/// <li>
-/// Implement record inference (a.k.a. <code>has-field</code>)
-///
-/// <b>Status:</b> Straightforward, but not yet started.
-/// </li>
-/// <li>
-/// Update spec to reflect all of the above.
-///
-/// <b>Status:</b> Not yet started.
+/// <b>Status:</b> Dropped in favor of the capsule/object notion.
 /// </li>
 /// </ol>
