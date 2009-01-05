@@ -2228,7 +2228,9 @@ toc(std::ostream& errStream,
 
 	TOC(errStream, uoc, legIdent, out, IDname, decls, theCase, 0, flags);
 	out << " = ";
-	
+
+	if (t->isRefType())
+	  out << "&";
 	TOC(errStream, uoc, topExp, out, IDname, decls, ast, 0, flags);	
 	if (t->isValType())
 	  out << ".";

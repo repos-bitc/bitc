@@ -1099,7 +1099,8 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
     }
     
     if (!stSigma) {
-      sType = Type::make(ty_structv);
+      Kind ctrStructKind = (isReference)?ty_structr:ty_structv;      
+      sType = Type::make(ctrStructKind);
       sType->defAst = ctr; // structures have names like (cons 'a)
       for (size_t i=0; i < ctrType->components.size(); i++)
 	sType->components.push_back(comp::make(ctrType->CompName(i),
@@ -4559,6 +4560,9 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	}	
 	
 	shared_ptr<TSEnvironment > legGamma = gamma;
+	// The deconstructed identifier is bound for use in the
+	// legGamma environment only if we are catching a single
+	// constructor. 
 	if (theCase->children.size() == 3) {
 	  legGamma = gamma->newScope();
 	  theCase->envs.gamma = legGamma;
