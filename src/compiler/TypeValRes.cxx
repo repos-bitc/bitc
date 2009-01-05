@@ -235,7 +235,7 @@ isExpansive(std::ostream& errStream,
       break;
     }
     
-  case at_otherwise:
+  case at_condelse:
     {
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 				       ast->child(0)));
@@ -268,6 +268,7 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
+  case at_otherwise:
   case at_sw_leg:
     {
       // expr is at the same position

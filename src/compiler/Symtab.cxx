@@ -2185,7 +2185,7 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      idc_value, currLB, flags);
 
-      //match at_otherwise
+      //match at_condelse
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
 	      idc_value, currLB, flags);
       break;
@@ -2211,6 +2211,14 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
 	      idc_value, currLB, flags);
 
+      break;
+    }
+
+  case at_condelse:
+    {
+      // match agt_expr
+      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
+	      idc_value, currLB, flags);
       break;
     }
 
@@ -2311,6 +2319,7 @@ resolve(std::ostream& errStream,
     }
 
   case at_sw_leg:
+  case at_otherwise:
     {
       shared_ptr<ASTEnvironment > legEnv = env->newScope();
       ast->envs.env = legEnv;
@@ -2330,19 +2339,11 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(1), legEnv, lamLevel, USE_MODE, 
 	      idc_value, currLB, flags);
 
-      /* match at_ident -- the constructors*/
+      /* match at_ident -- the constructors (if any) */
       for (size_t c=2; c < ast->children.size(); c++)
 	RESOLVE(ast->child(c), legEnv, lamLevel, USE_MODE, 
 		idc_uctor, currLB, flags);      
       
-      break;
-    }
-
-  case at_otherwise:
-    {
-      // match agt_expr
-      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
       break;
     }
 

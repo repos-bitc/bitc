@@ -1121,10 +1121,10 @@ AST or = expr+;
 // NOT [7.11.5]
 AST not = expr;
 // COND [7.11.6]
-AST cond = cond_legs otherwise;
+AST cond = cond_legs condelse;
 AST cond_legs = cond_leg*;
 AST cond_leg = expr expr;
-AST otherwise = expr;
+AST condelse = expr;
 
 // SET! [7.12.1]
 AST setbang = expr expr;
@@ -1153,6 +1153,7 @@ AST return_from = ident expr;
 AST switch = ident expr sw_legs ow;
 AST sw_legs = sw_leg*;
 AST sw_leg = ident expr ucon+;
+AST otherwise = ident expr;
 GROUP ow = otherwise | Null;
 
 /* // TYPECASE  [11]

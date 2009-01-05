@@ -4037,30 +4037,30 @@ bitsizeof(<em>T</em>)</literallayout>
           constructors may be matched by a single clause only if all
           matched constructors dominate identical fields. Since the
           type and bit-offsets of identically named fields within
-          repr-constructors are required to be the same, any two
+          repr-constructors are required to be the same, multiple
           repr-constructors can be matched in a single clause. In this
           case, only the common fields of all matched
           repr-constructors will be visible for selection within
           <progident><em>e<sub>i.i</sub></em>...<em>e<sub>i.i</sub></em></progident>.
         </p>
         <p>
-          A <progident>switch</progident> expression performs a
-          value match on the tag fields of the expression
+          A <progident>switch</progident> expression performs a value
+          match on the tag fields of the expression
           <progident><em>e</em></progident> (or if
           <progident><em>e</em></progident> is of repr type, on the
           tags of its outermost body) in sequence. The first
-          <progident><em>match<sub>i</sub></em></progident>
-          expression containining a matching tag value is selected,
-          and the corresponding expression sequence
+          <progident><em>match<sub>i</sub></em></progident> expression
+          containining a matching tag value is selected, and the
+          corresponding expression sequence
           <progident><em>e<sub>i.1</sub></em>...<em>e<sub>i.ni</sub></em></progident>
-          is executed in an environment where
-          <progident>x</progident> is a value of anonymous type.
-          For every field of the original expresion type such that
-          all of its containing union or repr tag qualifications are
-          satisfied, the anonymous type contains a field with the
-          same name denoting the same portion of the The value of
-          <progident>x</progident> is a <em>copy</em> of the value
-          returned by the expression
+          is executed in an environment where <progident>x</progident>
+          is a value of anonymous type.  For every field of the
+          original expresion type such that all of its containing
+          union or repr tag qualifications are satisfied, the
+          anonymous type contains a field with the same name denoting
+          the same portion of the The value of
+          <progident>x</progident> is a <em>copy</em> of the
+          (discriminated) value returned by the expression
           <progident><em>e</em></progident>.
         </p>
         <p>
@@ -4070,6 +4070,19 @@ bitsizeof(<em>T</em>)</literallayout>
           <progident><em>e</em></progident> of a
           <progident>switch</progident> form. It may not be passed
           as an argument, rebound, or returned as a result value.
+        </p>
+        <p>
+          If an otherwise form is present, then the body of the
+          otherwise clause is executed in an environment where
+          <progident>x</progident> is bound to a <em>copy</em> of the
+          (undiscriminated) value returned by the expression
+          <progident><em>e</em></progident>.<footnote>
+            <p>
+              Technically, this need not be a copy, and we are
+              reviewing whether the copy should be bypassed in the
+              otherwise form.
+            </p>
+          </footnote>
         </p>
         <p>
           If the matches performed by a given

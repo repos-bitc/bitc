@@ -308,8 +308,8 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
 
   case at_cond:
   case at_cond_legs:
+  case at_condelse:
   case at_sw_legs:
-  case at_otherwise:
   case at_throw:
   case at_setClosure:
   case at_copyREF:
@@ -335,6 +335,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
       break;
     }
 
+  case at_otherwise:
   case at_sw_leg:
     {
       markTail(ast->child(1), fn, bps, isTail);

@@ -1435,6 +1435,7 @@ UocInfo::recInstantiate(ostream &errStream,
     }
 
   case at_sw_leg:
+  case at_otherwise:
     {
       shared_ptr<AST> local = ast->child(0);
       shared_ptr<AST> expr = ast->child(1);

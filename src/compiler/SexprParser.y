@@ -1933,8 +1933,9 @@ eform: '(' tk_OR expr_seq ')'  {
 };
 
 // COND [7.15.6]           
-eform: '(' tk_COND  condcases  otherwise ')'  {
-  SHOWPARSE("eform -> (COND  ( condcases ) ) ");
+eform: '(' tk_COND condcases otherwise ')'  {
+  SHOWPARSE("eform -> (COND  ( condcases otherwise ) ) ");
+  $4->astType = at_condelse;
   $$ = AST::make(at_cond, $2.loc, $3, $4);
 };
 
@@ -1968,6 +1969,11 @@ eform: '(' tk_SWITCH ident expr sw_legs ow ')' {
     shared_ptr<AST> sw_leg = $5->child(c);
     sw_leg->children.insert(sw_leg->children.begin(), 
 			    $3->getDeepCopy());
+  }
+  if ($6->astType == at_otherwise) {
+    shared_ptr<AST> ow = $6;
+    ow->children.insert(ow->children.begin(), 
+			$3->getDeepCopy());
   }
 };
 
@@ -2073,16 +2079,28 @@ eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
     sw_leg->children.insert(sw_leg->children.begin(), 
 			    $6->getDeepCopy());
   }
+  if ($8->astType == at_otherwise) {
+    shared_ptr<AST> ow = $8;
+    ow->children.insert(ow->children.begin(), 
+			$6->getDeepCopy());
+  }
 };
 // shap: empty switch legs permitted, but only if otherwise clause is present.
 eform: '(' tk_TRY expr '(' tk_CATCH ident ow ')' ')'  {
   SHOWPARSE("eform -> ( TRY expr ( CATCH ( ident sw_legs ) ) )");
   $$ = AST::make(at_try, $2.loc, $3, $6, 
 		 AST::make(at_sw_legs, $7->loc), $7);
+  // Following loop has no effect, but is preserved for consistency
+  // with the general case above.
   for (size_t c =0; c < $7->children.size(); c++) {
     shared_ptr<AST> sw_leg = $7->child(c);
     sw_leg->children.insert(sw_leg->children.begin(), 
 			    $6->getDeepCopy());
+  }
+  if ($7->astType == at_otherwise) {
+    shared_ptr<AST> ow = $7;
+    ow->children.insert(ow->children.begin(), 
+			$6->getDeepCopy());
   }
 };
 

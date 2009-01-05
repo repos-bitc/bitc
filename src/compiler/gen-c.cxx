@@ -2250,11 +2250,20 @@ toc(std::ostream& errStream,
       } // for each case
 
       if (ow->astType != at_Null) {
+	shared_ptr<AST> legIdent = ow->child(0);
+
 	out << "default:" << endl;
 	out.more();
 	out << "{" << endl;
 	out.more();
-	TOC(errStream, uoc, ow->child(0), out, IDname, decls, ow, 2, flags);
+
+	TOC(errStream, uoc, legIdent, out, IDname, decls, ow, 0, flags);
+	out << " = ";
+
+	TOC(errStream, uoc, topExp, out, IDname, decls, ast, 0, flags);	
+	out << ";" << endl;
+		
+	TOC(errStream, uoc, ow->child(1), out, IDname, decls, ow, 1, flags);
 	out << "break;";
 	out << endl;
 	out.less();
@@ -2271,6 +2280,7 @@ toc(std::ostream& errStream,
   case at_sw_legs:
   case at_sw_leg:
   case at_otherwise:
+  case at_condelse:
     {
       assert(false);
       break;
@@ -2300,7 +2310,7 @@ toc(std::ostream& errStream,
       out << "curCatchBlock = lastJB;" << endl;
 
       // Too bad I cannot use a switch ...
-      for (size_t c = 0; c < cases->children.size(); c++) {	
+      for (size_t c = 0; c < cases->children.size(); c++) {
 	shared_ptr<AST> theCase = cases->child(c);
 	shared_ptr<AST> expr = theCase->child(1);
 	shared_ptr<AST> legIdent = theCase->child(0);
@@ -2319,7 +2329,7 @@ toc(std::ostream& errStream,
 	}
 	out << ") {" << endl;
 	out.more();
-	TOC(errStream, uoc, legIdent, out, IDname, decls, theCase, 0, flags);
+	TOC(errStream, uoc, legIdent, out, IDname, decls, ow, 0, flags);
 	out << " = "
 	    << "*((" << toCtype(legIdent->symType, legIdent->s) <<  " *)"
 	    << "curException);" << endl;
@@ -2332,7 +2342,15 @@ toc(std::ostream& errStream,
       if (ow->astType != at_Null) {
 	out << "else {" << endl;
 	out.more();
-	TOC(errStream, uoc, ow->child(0), out, IDname, decls, ow, 0, flags);
+
+	shared_ptr<AST> legIdent = ow->child(0);
+
+	TOC(errStream, uoc, legIdent, out, IDname, decls, ow, 0, flags);
+	out << " = "
+	    << "*((" << toCtype(legIdent->symType, legIdent->s) <<  " *)"
+	    << "curException);" << endl;
+
+	TOC(errStream, uoc, ow->child(1), out, IDname, decls, ow, 1, flags);
 	out.less();
 	out << "}" << endl;
 	out << endl;

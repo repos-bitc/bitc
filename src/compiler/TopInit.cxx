@@ -347,11 +347,11 @@ TopInit(std::ostream& errStream,
   case at_cond:
   case at_cond_legs:
   case at_cond_leg:
+  case at_condelse:
   case at_dup:
   case at_deref:
   case at_inner_ref:
   case at_sw_legs:
-  case at_otherwise:
   case at_let:
   case at_letrec:    
   case at_letStar:
@@ -438,6 +438,7 @@ TopInit(std::ostream& errStream,
     }
 
   case at_sw_leg:
+  case at_otherwise:
     {
       // The identifier that binds the copy is observably defined.
       TOPINIT(ast->child(0), flags);

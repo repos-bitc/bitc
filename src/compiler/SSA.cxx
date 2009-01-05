@@ -291,6 +291,7 @@ ssa(std::ostream& errStream,
   case at_cond_leg:
   case at_sw_legs:
   case at_sw_leg:
+  case at_condelse:
   case at_otherwise:
   case at_letGather:
     {
@@ -975,11 +976,15 @@ ssa(std::ostream& errStream,
       // otherwise
       shared_ptr<AST> ow = ast->child(3);
       if (ow->astType == at_otherwise) {
-	shared_ptr<AST> owExpr = ow->child(0);
+	shared_ptr<AST> owIdent = ow->child(0);
+	shared_ptr<AST> owExpr = ow->child(1);
 	shared_ptr<AST> gl = newGrandLet(owExpr);
+
+	addIL(identList, owIdent);
+
 	SSA(errStream, uoc, owExpr, gl, identList, ast, 2, flags);
 	FEXPR(gl) = addLB(gl, identList, FEXPR(gl), NO_FLAGS, res, false);
-	SETGL(ow->child(0), gl);
+	SETGL(ow->child(1), gl);
       }
       shared_ptr<AST> topres = UseCase(res);
       FEXPR(grandLet) = addLB(grandLet, identList, ast, LB_IS_DUMMY, topres, false);

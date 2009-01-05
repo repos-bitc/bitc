@@ -498,6 +498,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_setbang:
   case at_mutableType:
   case at_constType:
+  case at_condelse:
   case at_otherwise:
   case at_array_nth:
   case at_vector_nth:

@@ -4298,12 +4298,25 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       // match at_otherwise
       shared_ptr<AST> otherwise = ast->child(3);
       if (otherwise->astType != at_Null) {
-	TYPEINFER(otherwise, gamma, instEnv, impTypes, isVP, tcc,
-		  trail,  USE_MODE, TI_EXPRESSION);
-	
+	shared_ptr<TSEnvironment > legGamma = gamma->newScope();
+	otherwise->envs.gamma = legGamma;
+
+	shared_ptr<AST> stIdent = otherwise->child(0); 
+	TYPEINFER(stIdent, legGamma, instEnv, impTypes, isVP, 
+		  tcc, trail,  DEF_MODE, TI_EXPRESSION);
+
+	stIdent->symType->link = topExpr->symType;
+
+	// match agt_expr
+	TYPEINFER(otherwise->child(1), legGamma, instEnv, impTypes, isVP, 
+		  tcc, trail,  USE_MODE, TI_EXPRESSION);
+
+	otherwise->symType = otherwise->child(1)->symType;
+
 	UNIFY(trail, otherwise->loc, 
 	      otherwise->symType, MBF(tv));
       }
+
       ast->symType = MBF(tv);
       
       /* Check consistency and coverage of the switch */
@@ -4387,7 +4400,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     /* FIX: I forgot if I really mean break here or assert(false); */
     break;
 
-  case at_otherwise:
+  case at_condelse:
     {
       // match agt_expr
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
@@ -4397,6 +4410,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
+  case at_otherwise:
+    {
+      // Handled explicitly in at_try and at_switch
+      assert(false);
+    }
   case at_sw_leg:
     {
       // This is used only in the case of a union leg match.
@@ -4501,7 +4519,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       TYPEINFER(ast->child(1), legGamma, instEnv, impTypes, isVP, 
 		tcc, trail,  USE_MODE, TI_EXPRESSION);
 
-       ast->symType = ast->child(1)->symType;
+      ast->symType = ast->child(1)->symType;
       break;
     }
     
@@ -4560,9 +4578,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	}	
 	
 	shared_ptr<TSEnvironment > legGamma = gamma;
+
 	// The deconstructed identifier is bound for use in the
 	// legGamma environment only if we are catching a single
-	// constructor. 
+	// constructor.
 	if (theCase->children.size() == 3) {
 	  legGamma = gamma->newScope();
 	  theCase->envs.gamma = legGamma;
@@ -4593,11 +4612,21 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       // match agt_ow
       shared_ptr<AST> ow = ast->child(3);
       if (ow->astType != at_Null) {
-	TYPEINFER(ow->child(0), gamma, instEnv, impTypes, isVP, tcc,
+	shared_ptr<TSEnvironment > legGamma = gamma->newScope();
+	ow->envs.gamma = legGamma;
+
+	shared_ptr<AST> stIdent = ow->child(0);
+	// Add sIdent to the legGamma environment.
+	TYPEINFER(stIdent, legGamma, instEnv, impTypes, isVP, 
+		  tcc, trail,  DEF_MODE, TI_EXPRESSION);
+
+	stIdent->symType->link = Type::make(ty_exn);
+
+	TYPEINFER(ow->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		  trail,  USE_MODE, TI_EXPRESSION);
-	UNIFY(trail, ow->child(0)->loc,
-	      ow->child(0)->symType, MBF(tv));  
-	ow->symType = ow->child(0)->symType;
+	UNIFY(trail, ow->child(1)->loc,
+	      ow->child(1)->symType, MBF(tv));  
+	ow->symType = ow->child(1)->symType;
       }
       
       break;

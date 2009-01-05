@@ -459,6 +459,9 @@ AST::atKwd() const
   case at_otherwise:
     return "otherwise";
 
+  case at_condelse:
+    return "otherwise";
+
   case at_switch:
     return "switch";
 

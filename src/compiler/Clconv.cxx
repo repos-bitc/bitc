@@ -438,10 +438,10 @@ findusedef(std::ostream &errStream,
   case at_not:
   case at_cond:
   case at_cond_legs:
+  case at_condelse:
   case at_dup:
   case at_deref:
   case at_sw_legs:
-  case at_otherwise:
   case at_throw:
   case at_array_length:
   case at_vector_length:
@@ -515,6 +515,7 @@ findusedef(std::ostream &errStream,
       break;
     }
 
+  case at_otherwise:
   case at_sw_leg:
     {
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(0),
