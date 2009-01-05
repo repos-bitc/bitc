@@ -1151,7 +1151,7 @@ AST return_from = ident expr;
 
 // SWITCH
 AST switch = ident expr sw_legs ow;
-AST sw_legs = sw_leg+;
+AST sw_legs = sw_leg*;
 AST sw_leg = ident expr ucon+;
 GROUP ow = otherwise | Null;
 

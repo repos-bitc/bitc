@@ -4101,10 +4101,10 @@ bitsizeof(<em>T</em>)</literallayout>
 	  </p>
 	  <literallayout>
 (try <em>expr</em>
-  (catch <em>id</em> (<em>tagid<sub>1</sub></em> <em>e<sub>1</sub></em>)
+  (catch <em>id</em> [(<em>tagid<sub>1</sub></em> <em>e<sub>1</sub></em>)
             ...
             (<em>tagid<sub>2</sub></em> <em>e<sub>2</sub></em>)
-            ((<em>tagid<sub>x</sub></em> <em>tagid<sub>y</sub></em>) <em>e<sub>xy</sub></em>)
+            ((<em>tagid<sub>x</sub></em> <em>tagid<sub>y</sub></em>) <em>e<sub>xy</sub></em>)]
             [(otherwise <em>e<sub>n</sub></em>)]))</literallayout>
           <p indent="no">
             In the absence of a programmer-specified
@@ -4113,7 +4113,7 @@ bitsizeof(<em>T</em>)</literallayout>
             clause
           </p>
           <literallayout>
-(otherwise (throw <em>nm</em>))</literallayout>
+(otherwise (throw <em>id</em>))</literallayout>
           <p indent="no">
             had been present.
           </p>

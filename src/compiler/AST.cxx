@@ -3910,16 +3910,7 @@ AST::isValid() const
     break;
 
   case at_sw_legs: // normal AST:
-    // match at_sw_leg+
-    if(c >= children.size()) {
-      astChNumError(*this, c+1, children.size());
-      errorsPresent = true;
-      break;
-    }
-    if (!ISSET(astMembers[at_sw_leg], child(c)->astType)) {
-      astChTypeError(*this, at_sw_leg, child(c)->astType, 0);
-      errorsPresent = true;
-    }
+    // match at_sw_leg*
     while (c < children.size()) {
       if (!ISSET(astMembers[at_sw_leg], child(c)->astType))
         astChTypeError(*this, at_sw_leg, child(c)->astType, c);

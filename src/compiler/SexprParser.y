@@ -2074,6 +2074,17 @@ eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
 			    $6->getDeepCopy());
   }
 };
+// shap: empty switch legs permitted, but only if otherwise clause is present.
+eform: '(' tk_TRY expr '(' tk_CATCH ident ow ')' ')'  {
+  SHOWPARSE("eform -> ( TRY expr ( CATCH ( ident sw_legs ) ) )");
+  $$ = AST::make(at_try, $2.loc, $3, $6, 
+		 AST::make(at_sw_legs, $7->loc), $7);
+  for (size_t c =0; c < $7->children.size(); c++) {
+    shared_ptr<AST> sw_leg = $7->child(c);
+    sw_leg->children.insert(sw_leg->children.begin(), 
+			    $6->getDeepCopy());
+  }
+};
 
 // THROW  [7.19.2]               
 eform: '(' tk_THROW expr ')' {
