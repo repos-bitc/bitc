@@ -315,7 +315,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
 
   case at_try:
-    out << "(" << ast->atKwd();
+    out << "(" << ast->atKwd() << " ";
     BitcP(out, ast->child(0), showTypes);
     out << endl;
     out.more();
@@ -499,7 +499,6 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_mutableType:
   case at_constType:
   case at_condelse:
-  case at_otherwise:
   case at_array_nth:
   case at_vector_nth:
   case at_array_length:
@@ -910,6 +909,14 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 	out << ")";
 	break;
       }
+    }
+
+  case at_otherwise:
+    {
+      out << "(otherwise ";
+      BitcP(out, ast->child(1), showTypes);
+      out << ")";
+      break;
     }
 
   case at_sw_leg:
