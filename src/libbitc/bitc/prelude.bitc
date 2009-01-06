@@ -48,14 +48,44 @@
   (defexception IndexBoundsError)
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;    SPECIAL built-in  typeclasses (no instances needed)
+  ;;    SPECIAL built-in  typeclasses. Instances of these are
+  ;;    generated internally by the compiler.
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   
+  ;; Set of all by-reference types, covering (ref 'a), (vector 'a),
+  ;; boxed structure types, boxed union types, and exception.
   (deftypeclass (ref-types 'a) :closed)
-  (deftypeclass (copy-compat 'a 'b) :closed)
+
+  ;; Type class describing all types 'a that can receive a copy from
+  ;; type 'b. This is NOT symmetric. For example:
+  ;;   (forall ((LiteralUnitType int32 'a))
+  ;;     (copy-from-to 'a 'b)
+  ;;     but NOT (copy-from-to 'b 'a)
   (deftypeclass (copy-from-to 'a 'b) :closed)
-  (deftypeclass (has-field 'a 'b 'c) :closed)
-  (deftypeclass (literal 'a 'b) :closed)
+
+  ;; Type class relating two types 'a, 'b such that they are
+  ;; compatible under binding, assignment, and argument passing. This
+  ;; relation is symmetric.
+  ;;
+  ;; (copy-compat 'a 'b) => (copy-from-to 'a 'b) AND (copy-from-to 'b 'a)
+  (deftypeclass (copy-compat 'a 'b) :closed)
+
+  ;; Type class identifying the set of types for which a literal
+  ;; syntax exists.
+  (deftypeclass (LiteralType 'a) :closed)
+
+
+  ;; Type class relating literal unit types to the underlying type of
+  ;; the literal. This can be used to constrain the set of legal
+  ;; literals in a declaration.
+  (deftypeclass (LiteralUnitType 'a 'b) :closed)
+
+  ;; Type class used for record polymorphism. Describes a field of
+  ;; some structure type 's having name nm (captured as a literal atom
+  ;; unit type) whose field type is 'a. Note that this definition is
+  ;; currently inaccurate, because we haven't implemented the atom
+  ;; type yet.
+  (deftypeclass (has-field 's 'nm 'a) :closed)
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;    Structure and union definitions 
@@ -141,10 +171,8 @@
   (proclaim __index_lt: (fn word word -> bool) external bitc_index_lt)
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; TYPE CLASS FOR TYPES THAT HAVE LITERALS
+  ;; TYPES THAT HAVE LITERALS
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-  (deftypeclass (LiteralType 'a) :closed)
 
   (definstance (LiteralType char))
 
