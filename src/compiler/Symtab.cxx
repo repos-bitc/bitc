@@ -2042,6 +2042,12 @@ resolve(std::ostream& errStream,
       
       // CAREFUL: this might be a usesel
       if (lhs->astType == at_ident || lhs->astType == at_usesel) {
+	// Strictly speaking, RSLV_SWITCHED_ID_OK should only be
+	// passed if the lhs->astType is at_ident. It is harmless here
+	// because if lhs->astType is at_usesel, we know by
+	// construction that the LHS cannot possibly be a switched ID,
+	// so the resolver cannot return a boogered answer in that
+	// case.
 	
 	RESOLVE(lhs, env, lamLevel, USE_MODE, identType, currLB, 
 		flags | RSLV_NO_CHK_USE_TYPE | RSLV_SWITCHED_ID_OK);
@@ -2330,7 +2336,9 @@ resolve(std::ostream& errStream,
       ASTEnvironment::iterator itr = legEnv->find(ast->child(0)->s);
       assert(itr != legEnv->end());
       itr->second->flags |= BF_COMPLETE;
-      ast->child(0)->flags |= ID_FOR_SWITCH;
+
+      if (ast->astType == at_sw_leg)
+	ast->child(0)->flags |= ID_FOR_SWITCH;
 
       /* match at_expr */
       if ((flags & RSLV_WITHIN_CATCH) && (ast->children.size() > 3))
@@ -2368,10 +2376,15 @@ resolve(std::ostream& errStream,
 
   case at_throw:
     {
+      ResolverFlags rf = flags;
+
+      if (ast->child(0)->astType == at_ident)
+	rf |= RSLV_SWITCHED_ID_OK;
+
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
 	      idc_value, currLB, 
-	      flags);
+	      rf);
       break;
     }
 

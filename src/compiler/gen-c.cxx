@@ -2340,7 +2340,11 @@ toc(std::ostream& errStream,
       } /* for each case */
 
       if (ow->astType != at_Null) {
-	out << "else {" << endl;
+	// Careful! There may not have been any cases.
+	if (cases->children.size())
+	  out << "else ";
+
+	out << "{" << endl;
 	out.more();
 
 	shared_ptr<AST> legIdent = ow->child(0);

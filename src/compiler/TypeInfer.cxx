@@ -4616,13 +4616,14 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	ow->envs.gamma = legGamma;
 
 	shared_ptr<AST> stIdent = ow->child(0);
+
 	// Add sIdent to the legGamma environment.
 	TYPEINFER(stIdent, legGamma, instEnv, impTypes, isVP, 
 		  tcc, trail,  DEF_MODE, TI_EXPRESSION);
 
 	stIdent->symType->link = Type::make(ty_exn);
 
-	TYPEINFER(ow->child(1), gamma, instEnv, impTypes, isVP, tcc,
+	TYPEINFER(ow->child(1), legGamma, instEnv, impTypes, isVP, tcc,
 		  trail,  USE_MODE, TI_EXPRESSION);
 	UNIFY(trail, ow->child(1)->loc,
 	      ow->child(1)->symType, MBF(tv));  
@@ -4642,8 +4643,35 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       // match agt_var
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
 		trail,  USE_MODE, TI_EXPRESSION);
-      UNIFY(trail, ast->child(0)->loc,
-	    ast->child(0)->symType, MBF(Type::make(ty_exn)));  
+      
+      // HACK: We now allow exception legs as arguments to throw. If
+      // an exception leg is being presented, then it is presented as
+      // an identifier that is known to be lexically in scope.
+      //
+      // If that case pertains, then TYPEINFER will have looked up the
+      // identifier and arrived at a structure type, and we can chase
+      // the pointers to determine whether we built that structure
+      // type as a leg type for some exception.
+      //
+      // If that check fails, or if the argument to THROW is something
+      // other than an identifier, we should introduce a unification
+      // constraint that the argument must be of some exception type.
+
+      shared_ptr<AST> id = ast->child(0);
+      if (id->astType == at_ident &&
+	  (id->symbolDef->flags & ID_FOR_SWITCH) &&
+	  (id->symType->defAst->symType->isException())) {
+	// Concrete type already determined; nothing further to do.
+      }
+      else {
+	// Try to resolve it. See if resolved result is marked as a
+	// switched id. If so we are good, and no unification is
+	// required here.
+	//
+	// If that fails, then unify with ty_exn.
+	UNIFY(trail, ast->child(0)->loc,
+	      ast->child(0)->symType, MBF(Type::make(ty_exn)));
+      }
       
       ast->symType = newTvar();    
       break;

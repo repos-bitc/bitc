@@ -4171,7 +4171,12 @@ bitsizeof(<em>T</em>)</literallayout>
 	  <p>
             throws the exception computed by the expression
             <progident><em>e</em></progident>, which must be an
-            expression of type <progident>exception</progident>.
+            expression of type <progident>exception</progident> or of
+            some concrete exception type. The latter case permits
+            the locally bound identifier in a discriminated catch
+            block to be passed directly to throw so that a
+            pre-existing exception can be re-thrown without allocating
+            new storage.
 	  </p>
 	</sect3>
       </sect2>

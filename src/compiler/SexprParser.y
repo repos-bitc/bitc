@@ -2072,7 +2072,7 @@ typecase_leg: '(' bindingpattern expr ')'  {
 
 // TRY/CATCH [7.19.1]
 eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
-  SHOWPARSE("eform -> ( TRY expr ( CATCH ( ident sw_legs ) ) )");
+  SHOWPARSE("eform -> ( TRY expr ( CATCH ident sw_legs ow) )");
   $$ = AST::make(at_try, $2.loc, $3, $6, $7, $8);
   for (size_t c =0; c < $7->children.size(); c++) {
     shared_ptr<AST> sw_leg = $7->child(c);
@@ -2087,16 +2087,10 @@ eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
 };
 // shap: empty switch legs permitted, but only if otherwise clause is present.
 eform: '(' tk_TRY expr '(' tk_CATCH ident ow ')' ')'  {
-  SHOWPARSE("eform -> ( TRY expr ( CATCH ( ident sw_legs ) ) )");
+  SHOWPARSE("eform -> ( TRY expr ( CATCH ident ow) )");
   $$ = AST::make(at_try, $2.loc, $3, $6, 
 		 AST::make(at_sw_legs, $7->loc), $7);
-  // Following loop has no effect, but is preserved for consistency
-  // with the general case above.
-  for (size_t c =0; c < $7->children.size(); c++) {
-    shared_ptr<AST> sw_leg = $7->child(c);
-    sw_leg->children.insert(sw_leg->children.begin(), 
-			    $6->getDeepCopy());
-  }
+
   if ($7->astType == at_otherwise) {
     shared_ptr<AST> ow = $7;
     ow->children.insert(ow->children.begin(), 
