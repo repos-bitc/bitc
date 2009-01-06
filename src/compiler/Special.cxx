@@ -47,14 +47,15 @@ SpecialNames SpecialNames::spNames;
 
 SpecialNames::SpecialNames()
 {
-  sp_integral = "IntLit";
-  sp_fp = "FloatLit";
-  sp_iob = "IndexBoundsError";
-  sp_lt = "__index_lt";
-  sp_ref_types = "ref-types";
-  sp_copy_compat = "copy-compat";
-  sp_copy_from_to = "copy-from-to";
-  sp_has_field = "has-field";
+  sp_integral          = "IntLit";
+  sp_fp                = "FloatLit";
+  sp_iob               = "IndexBoundsError";
+  sp_lt                = "__index_lt";
+  sp_ref_types         = "ref-types";
+  sp_copy_compat       = "copy-compat";
+  sp_copy_from_to      = "copy-from-to";
+  sp_has_field         = "has-field";
+  sp_literal_unit_type = "LiteralUnitType";
 }
 
 std::string
@@ -85,6 +86,9 @@ SpecialNames::getSpName(SpNameId name) {
   case SP_NAME_HAS_FIELD:
     return sp_has_field;
   
+  case SP_NAME_LITERAL_UNIT_TYPE:
+    return sp_literal_unit_type;
+  
   default:
     assert(false);
     return "unknown";
@@ -104,4 +108,5 @@ SpecialNames::fixUpSpNames(shared_ptr<UocInfo> theUoc)
   sp_copy_compat = theUoc->env->getBinding(sp_copy_compat)->s;
   sp_copy_from_to = theUoc->env->getBinding(sp_copy_from_to)->s;
   sp_has_field = theUoc->env->getBinding(sp_has_field)->s;
+  sp_literal_unit_type = theUoc->env->getBinding(sp_literal_unit_type)->s;
 }

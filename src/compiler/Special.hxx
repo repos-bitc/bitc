@@ -68,14 +68,15 @@ struct spStruct {
    is obtained, THIS SRUCTURE IS VERY LIKELY TO GO AWAY */
 
 enum SpNameId {
-  SP_NAME_INTEGER      = 0x1u,
-  SP_NAME_FP           = 0x2u,
-  SP_NAME_IOB          = 0x3u,
-  SP_NAME_LT           = 0x4u,
-  SP_NAME_REF_TYPES    = 0x5u,
-  SP_NAME_COPY_COMPAT  = 0x6u,
-  SP_NAME_COPY_FROM_TO = 0x7u,
-  SP_NAME_HAS_FIELD    = 0x8u
+  SP_NAME_INTEGER           = 0x1u,
+  SP_NAME_FP                = 0x2u,
+  SP_NAME_IOB               = 0x3u,
+  SP_NAME_LT                = 0x4u,
+  SP_NAME_REF_TYPES         = 0x5u,
+  SP_NAME_COPY_COMPAT       = 0x6u,
+  SP_NAME_COPY_FROM_TO      = 0x7u,
+  SP_NAME_HAS_FIELD         = 0x8u,
+  SP_NAME_LITERAL_UNIT_TYPE = 0x98u
 };
 
 struct SpecialNames {
@@ -87,6 +88,7 @@ struct SpecialNames {
   std::string sp_copy_compat;
   std::string sp_copy_from_to;
   std::string sp_has_field;
+  std::string sp_literal_unit_type;
 
   SpecialNames();
   std::string getSpName(SpNameId name);
