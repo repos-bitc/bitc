@@ -344,7 +344,7 @@ public:
 
   boost::shared_ptr<ArrLen> arrLen;	// Length in the case of an array type
   
-  LitValue  val;		// for literal types
+  LitValue  litValue;		// for literal types
 
   size_t    Isize;		// size in fixint
   TypeSet   fnDeps;		// Functional Dependencies (for 

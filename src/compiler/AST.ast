@@ -929,7 +929,7 @@ LEAF valCat;
 LEAF opaqueCat;
 GROUP category = refCat | valCat | opaqueCat;
 
-// Typeclass open/closed market
+// Typeclass open/closed mark
 LEAF closed;
 GROUP openclosed = closed | Null;
 
@@ -983,6 +983,9 @@ GROUP fielditem = field | fill;
 AST fields = fielditem*;
 AST field = ident type;
 AST fill = type intLiteral?;
+
+// Concrete literal types.
+AST literalType = literal primaryType?;
 
 // Qualified Type
 GROUP qtype = qualType | type;

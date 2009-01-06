@@ -118,6 +118,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_Char
 %token <tok> tk_String
 
+%token <tok> tk_LITERAL
 
 /* Primary types and associated hand-recognized literals: */
 %token <tok> '(' ')' ','	/* unit */
@@ -1325,6 +1326,23 @@ type: any_int_type {
 type: float_type {
   SHOWPARSE("type -> float_type");
   $$ = $1;
+};
+
+// LITERAL UNIT TYPES
+type: '(' tk_LITERAL literal ')' {
+  SHOWPARSE("type -> ( LITERAL literal )");
+  $$ = AST::make(at_literalType, $1.loc, $3);
+};
+
+type: '(' tk_LITERAL literal ':' type ')' {
+  SHOWPARSE("type -> ( LITERAL literal : type )");
+
+  if ($5->astType != at_primaryType) {
+    cerr << $1.loc.asString() << ": Type qualifier in a literal type must be a primary type.\n" << $1.str ;
+    lexer->num_errors++;
+  }
+
+  $$ = AST::make(at_literalType, $1.loc, $3, $5);
 };
 
 // EXCEPTION type

@@ -184,6 +184,7 @@ isExpansive(std::ostream& errStream,
  				 ast->child(1));
       break;
     }
+
   case at_tqexpr:
     {
       itsExpansive = isExpansive(errStream, gamma,

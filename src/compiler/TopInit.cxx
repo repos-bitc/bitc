@@ -320,6 +320,7 @@ TopInit(std::ostream& errStream,
     break;
 
   case at_identPattern:
+  case at_literalType:
   case at_tqexpr:
   case at_select:
   case at_sel_ctr:

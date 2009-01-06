@@ -587,6 +587,17 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     out << "()";
     break;
 
+  case at_literalType:
+    // Argument order was swapped.
+    out << "(" << ast->atKwd() << " ";
+    BitcP(out, ast->child(0), showTypes);
+    if (ast->children.size() > 1) {
+      out << ":";
+      BitcP(out, ast->child(1), showTypes);
+    }
+
+    out << ")";
+
   case at_tqexpr:
     // Argument order was swapped.
     out << "(" << ast->atKwd() << " ";
