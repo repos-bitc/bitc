@@ -71,9 +71,10 @@
   (deftypeclass (copy-compat 'a 'b) :closed)
 
   ;; Type class identifying the set of types for which a literal
-  ;; syntax exists.
+  ;; syntax exists. This is actually NOT an incestuously magical type
+  ;; class, but we need to declare it here so that LiteralUnitType
+  ;; (below) can be properly quantified.
   (deftypeclass (LiteralType 'a) :closed)
-
 
   ;; Type class relating literal unit types to the underlying type of
   ;; the literal. This can be used to constrain the set of legal
