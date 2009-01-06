@@ -2374,7 +2374,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       }
 
       // Build the structure type for the component structure.
-      shared_ptr<Type> sType = Type::make(ty_structv);
+      shared_ptr<Type> sType = Type::make(ty_structr);
       sType->defAst = ctr;
       for (size_t i=0; i < t->components.size(); i++)
 	sType->components.push_back(comp::make(t->CompName(i),

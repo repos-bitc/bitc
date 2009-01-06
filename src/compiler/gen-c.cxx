@@ -465,7 +465,7 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
   case ty_structr:
   case ty_unionr:
     {
-      out << TY_PFX << CMangle(t->defAst) << "*";
+      out << TY_PFX << CMangle(t->defAst) << " *";
       break;
     }
 
@@ -479,7 +479,7 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
   case ty_uvalr:
   case ty_uconr:
     {
-      out << TY_PFX << CMangle(t->myContainer) << "*";
+      out << TY_PFX << CMangle(t->myContainer) << " *";
       break;
     }
 
@@ -491,7 +491,7 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
 
   case ty_vector:
     {
-      out << CMangle(t->mangledString(true)) << "*";
+      out << CMangle(t->mangledString(true)) << " *";
       break;
     }
 
@@ -499,14 +499,14 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
   case ty_ref:
     {
       out << toCtype(t->Base(), IDname, flags, arrsz)
-	  << "*";
+	  << " *";
       break;
     }
 
   case ty_exn:
     {
       if (t->defAst)
-	out << TY_PFX << CMangle(t->defAst) << "*";
+	out << TY_PFX << CMangle(t->defAst) << " *";
       else
 	out << "bitc_exception_t *";
       break;
@@ -2331,7 +2331,7 @@ toc(std::ostream& errStream,
 	out.more();
 	TOC(errStream, uoc, legIdent, out, IDname, decls, ow, 0, flags);
 	out << " = "
-	    << "*((" << toCtype(legIdent->symType, legIdent->s) <<  " *)"
+	    << "((" << toCtype(legIdent->symType, legIdent->s) <<  ") "
 	    << "curException);" << endl;
 
 	TOC(errStream, uoc, expr, out, IDname, decls, theCase, 1, flags);
@@ -2349,10 +2349,10 @@ toc(std::ostream& errStream,
 
 	shared_ptr<AST> legIdent = ow->child(0);
 
+	// In otherwise leg, id has type exception, so no need for a
+	// cast here.
 	TOC(errStream, uoc, legIdent, out, IDname, decls, ow, 0, flags);
-	out << " = "
-	    << "*((" << toCtype(legIdent->symType, legIdent->s) <<  " *)"
-	    << "curException);" << endl;
+	out << " = curException;" << endl;
 
 	TOC(errStream, uoc, ow->child(1), out, IDname, decls, ow, 1, flags);
 	out.less();
@@ -2376,7 +2376,11 @@ toc(std::ostream& errStream,
 
   case at_throw:
     {
-      out << "bitc_throw(";
+      // Value passed may be either an exception or an exception
+      // instance. Both have the same underlying representation, but
+      // emit an explicit cast to suppress complaint from the
+      // high-level macroassembler. Er, um, I mean the C compiler.
+      out << "bitc_throw((bitc_exception_t *) ";
       TOC(errStream, uoc, ast->child(0), out, IDname, decls,
 	  ast, 0, flags);
       out <<");" << endl;
