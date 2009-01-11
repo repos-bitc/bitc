@@ -90,14 +90,32 @@ AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 CHECK_LIBICUUC
 
-AC_LANG([C++])
+dnl BEGIN PARANOIA
+dnl
+dnl Paranoia check: verify that the boost header files which we
+dnl require are really really present.
+
+CPPFLAGS_SAVED="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+export CPPFLAGS
+
+LDFLAGS_SAVED="$LDFLAGS"
+LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"
+export LDFLAGS
+
+AC_LANG_PUSH(C++)
 AC_CHECK_HEADERS([boost/shared_ptr.hpp] \
                  [boost/version.hpp] \
                  [boost/enable_shared_from_this.hpp] \
                  [boost/filesystem/convenience.hpp] \
                  [boost/filesystem/operations.hpp] \
                  [boost/filesystem/path.hpp] )
-AC_LANG([C])
+AC_LANG_POP([C++])
+CPPFLAGS="$CPPFLAGS_SAVED"
+LDFLAGS="$LDFLAGS_SAVED"
+
+dnl END PARANOIA
+
 
 AC_C_CONST
 AC_TYPE_SIZE_T
