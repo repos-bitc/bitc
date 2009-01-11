@@ -88,8 +88,8 @@ destdir = $(if $(DESTDIR),$(DESTDIR)/,)
 mkinstalldirs = $(top_srcdir)/mkinstalldirs
 
 #### End of system configuration section. ####
-CXXFLAGS += @BOOST_CPPFLAGS@
-LDFLAGS += @BOOST_LDFLAGS@
+override CXXFLAGS += @BOOST_CPPFLAGS@
+override LDFLAGS += @BOOST_LDFLAGS@
 LIBS += @BOOST_FILESYSTEM_LIB@
 LIBS += @BOOST_SYSTEM_LIB@
 
