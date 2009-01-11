@@ -7544,6 +7544,15 @@ rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
 
 
+
+CPPFLAGS_SAVED="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+export CPPFLAGS
+
+LDFLAGS_SAVED="$LDFLAGS"
+LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"
+export LDFLAGS
+
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -7932,6 +7941,10 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+CPPFLAGS="$CPPFLAGS_SAVED"
+LDFLAGS="$LDFLAGS_SAVED"
+
 
 
 { echo "$as_me:$LINENO: checking for an ANSI C-conforming const" >&5
