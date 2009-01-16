@@ -2737,7 +2737,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
     // The restriction that byref types can only appear on the
     // arguments of a function is enforced in the parser.
-  case at_byrefType:
+  case at_byRefType:
     {
       // match agt_type
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,

@@ -1750,7 +1750,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_byrefType:
+  case at_byRefType:
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 

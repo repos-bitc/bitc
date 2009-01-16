@@ -989,7 +989,7 @@ GROUP qtype = qualType | type;
 
 // argVec is not able to appear in a "type" position.
 GROUP type = var | tvar | bitfield | refType | valType
-           | fn | byrefType | primaryType | dummyType
+           | fn | byRefType | primaryType | dummyType
            | arrayType | vectorType | typeapp
            // | closureType;
            | mutableType | constType | exceptionType;
@@ -999,7 +999,7 @@ AST bitfield = primaryType intLiteral;
 
 // REF TYPES [3.4.1]
 AST refType = type;
-AST byrefType = type;
+AST byRefType = type;
 
 // VAL TYPES [3.4.2]
 AST valType = type;

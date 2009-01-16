@@ -990,7 +990,7 @@ toc(std::ostream& errStream,
   case at_usesel:
 
   case at_refType:
-  case at_byrefType:
+  case at_byRefType:
   case at_exceptionType:
   case at_dummyType:
   case at_valType:

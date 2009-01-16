@@ -1183,8 +1183,8 @@ UocInfo::recInstantiate(ostream &errStream,
       if (ast->children.size() > 1) {
 	shared_ptr<AST> typeAST = typeAsAst(ast->child(0)->symType,
 				       ast->child(1)->loc);
-	if (ast->child(1)->astType == at_byrefType)
-	  ast->child(1) = AST::make(at_byrefType,
+	if (ast->child(1)->astType == at_byRefType)
+	  ast->child(1) = AST::make(at_byRefType,
 				  typeAST->loc, typeAST);
 	else
 	  ast->child(1) = typeAST;

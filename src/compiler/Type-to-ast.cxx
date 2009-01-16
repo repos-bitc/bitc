@@ -233,7 +233,7 @@ Type::asAST(const sherpa::LexLoc &loc,
       for (size_t i=0; i < t->components.size(); i++) {
 	shared_ptr<AST> arg = t->CompType(i)->asAST(loc, tvP);
 	if (t->CompFlags(i) & COMP_BYREF)
-	  arg = AST::make(at_byrefType, arg->loc, arg);
+	  arg = AST::make(at_byRefType, arg->loc, arg);
 	
 	ast->children.push_back(arg);
       }
@@ -310,7 +310,7 @@ Type::asAST(const sherpa::LexLoc &loc,
   case ty_byref:
     {
       shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
-      ast = AST::make(at_byrefType, loc, typ);
+      ast = AST::make(at_byRefType, loc, typ);
       break;
     }
 

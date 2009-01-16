@@ -133,7 +133,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_arrayType:
   case at_vectorType:
   case at_refType:
-  case at_byrefType:
+  case at_byRefType:
   case at_exceptionType:
   case at_dummyType:
   case at_valType:

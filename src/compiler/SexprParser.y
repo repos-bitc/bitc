@@ -1501,7 +1501,7 @@ type_pl_byref: type {
 
 type_pl_byref: '(' tk_BY_REF type ')' {
   SHOWPARSE("type_pl_byref -> ( BY-REF type )");
-  $$ = AST::make(at_byrefType, $2.loc, $3);
+  $$ = AST::make(at_byRefType, $2.loc, $3);
 };
 
 types_pl_byref: type_pl_byref {
@@ -1579,7 +1579,7 @@ lambdapattern: ident {
 lambdapattern: ident ':' type_pl_byref {
   SHOWPARSE("lambdapattern -> ident : type_pl_byref");
   $$ = AST::make(at_identPattern, $1->loc, $1, $3);
-  if ($3->astType == at_byrefType)
+  if ($3->astType == at_byRefType)
     $1->flags |= ARG_BYREF;
 };
 

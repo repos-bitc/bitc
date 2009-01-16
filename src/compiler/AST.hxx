@@ -583,7 +583,7 @@ enum AstType {
   at_fill,
   at_bitfield,
   at_refType,
-  at_byrefType,
+  at_byRefType,
   at_valType,
   at_fn,
   at_primaryType,
