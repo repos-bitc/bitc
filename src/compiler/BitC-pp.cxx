@@ -488,6 +488,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_array:
   case at_arrayType:
   case at_byRefType:
+  case at_arrayByRefType:
   case at_refType:
   case at_valType:
   case at_letStar:

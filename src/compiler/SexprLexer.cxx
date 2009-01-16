@@ -186,6 +186,7 @@ struct SexprLexer::KeyWord SexprLexer::keywords[] = {
   { "and",              tk_AND },
   { "apply",            tk_APPLY },
   { "array",            tk_ARRAY },
+  { "array-by-ref",     tk_ARRAY_BY_REF },
   { "array-length",     tk_ARRAY_LENGTH },
   { "array-nth",        tk_ARRAY_NTH },
   { "as",               tk_AS },

@@ -2737,6 +2737,19 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
     // The restriction that byref types can only appear on the
     // arguments of a function is enforced in the parser.
+  case at_arrayByRefType:
+    {
+      // match agt_type
+      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
+		trail,  USE_MODE, TI_NON_APP_TYPE);
+    
+      shared_ptr<Type> t = ast->child(0)->getType();
+    
+      ast->symType = Type::make(ty_array_byref);
+      ast->symType->components.push_back(comp::make(t));
+    
+      break;
+    }
   case at_byRefType:
     {
       // match agt_type

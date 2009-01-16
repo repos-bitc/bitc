@@ -991,6 +991,7 @@ toc(std::ostream& errStream,
 
   case at_refType:
   case at_byRefType:
+  case at_arrayByRefType:
   case at_exceptionType:
   case at_dummyType:
   case at_valType:
@@ -1113,6 +1114,9 @@ toc(std::ostream& errStream,
 
       if (id->flags & ARG_BYREF)
 	out << ")";
+
+      if (id->flags & ARG_ARRAY_BYREF)
+	out << ".contents";
 
       break;
     }

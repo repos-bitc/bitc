@@ -1178,7 +1178,7 @@ UocInfo::recInstantiate(ostream &errStream,
       //
       // Need to be careful here about byref types: The byref
       // type goes on the function type, not on the identifier's type
-      // Therefore, need to preserve by-ref AST qualifications as is.
+      // Therefore, need to preserve by-ref AST qualifications as-is.
 
       if (ast->children.size() > 1) {
 	shared_ptr<AST> typeAST = typeAsAst(ast->child(0)->symType,

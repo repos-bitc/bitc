@@ -90,6 +90,8 @@ DEFKIND(ref,       false,  true,   false, false, true,  false,  false)
 // component-flags of ty_fnArgvec, and the ty_byref wrapper is
 // discarded henceforth.
 DEFKIND(byref,     false,  true,   false, false, true,  false,  false)
+// array_byref is similar to by-ref, but for arrays.
+DEFKIND(array_byref, false,  true,   false, false, true,  false,  false)
 DEFKIND(mutable,   false,  false,  false, false, false, false,  false)
 DEFKIND(const,     false,  false,  false, false, false, false,  false)
 DEFKIND(mbTop,     false,  false,  false, false, false, false,  false)

@@ -314,6 +314,13 @@ Type::asAST(const sherpa::LexLoc &loc,
       break;
     }
 
+  case ty_array_byref:
+    {
+      shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
+      ast = AST::make(at_arrayByRefType, loc, typ);
+      break;
+    }
+
   case ty_mutable:
     {
       shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);

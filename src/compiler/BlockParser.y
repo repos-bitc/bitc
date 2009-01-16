@@ -186,6 +186,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_VECTOR_NTH
 
 %token <tok> tk_BY_REF
+%token <tok> tk_ARRAY_BY_REF
 %token <tok> tk_REF
 %token <tok> tk_VAL
 
@@ -1047,6 +1048,8 @@ lambdapattern: type_pl_byref ident {
   $$ = AST::make(at_identPattern, $1->loc, $2, $1);
   if ($1->astType == at_byRefType)
     $2->flags |= ARG_BYREF;
+  else if ($1->astType == at_arrayByRefType)
+    $2->flags |= ARG_ARRAY_BYREF;
 };
 
 // EXPRESSIONS [7]
@@ -1690,6 +1693,11 @@ type_pl_byref: type {
 };
 
 type_pl_byref: tk_BY_REF type {
+  SHOWPARSE("type_pl_byref -> BY-REF type");
+  $$ = AST::make(at_byRefType, $1.loc, $2);
+};
+
+type_pl_byref: tk_ARRAY_BY_REF type {
   SHOWPARSE("type_pl_byref -> BY-REF type");
   $$ = AST::make(at_byRefType, $1.loc, $2);
 };

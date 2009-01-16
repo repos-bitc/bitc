@@ -85,8 +85,11 @@ enum CompFlagValues {
   /// and is therefore only checked there.   
   COMP_INVALID    = 0x2u,
 
+  /// FIX: The following first sentence is not english. When is this
+  /// used?
+  ///
   /// The Flag is not marked on the Component types themselves
-  /// becaluse this will cause problems with flag propagation during
+  /// because this will cause problems with flag propagation during
   /// unification (especially since the component type may be a type
   /// variable. We do not have a (by-ref 'a) type itself because that
   /// will result in types such as (mutable (byref 'a)) during
@@ -97,6 +100,9 @@ enum CompFlagValues {
   /// Valid on ty_argvec only.
   COMP_BYREF      = 0x4u,
 
+  /// FIX: Very badly named (confusable with BYREF) and what the hell
+  /// does 'extected' mean?
+  ///
   /// Valid on ty_argvec only.
   /// This flag indicates that this 
   /// component is open to be either ByREF

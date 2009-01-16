@@ -183,6 +183,7 @@ validate_string(const char *s)
 
 struct BlockLexer::KeyWord BlockLexer::keywords[] = {
   { "array",            tk_ARRAY },
+  { "array_byref",      tk_ARRAY_BY_REF },
   { "as",               tk_AS },
   { "bitc-version",     tk_BITC_VERSION },
   { "bitfield",         tk_BITFIELD },

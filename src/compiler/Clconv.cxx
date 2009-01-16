@@ -385,6 +385,7 @@ findusedef(std::ostream &errStream,
   case at_vectorType:
   case at_refType:
   case at_byRefType:
+  case at_arrayByRefType:
   case at_valType:
   case at_primaryType:
   case at_fnargVec:

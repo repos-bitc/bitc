@@ -208,6 +208,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_DO
 %token <tok> tk_APPLY
 %token <tok> tk_BY_REF
+%token <tok> tk_ARRAY_BY_REF
 
 %token <tok> tk_EXCEPTION
 %token <tok> tk_TRY
@@ -1504,6 +1505,11 @@ type_pl_byref: '(' tk_BY_REF type ')' {
   $$ = AST::make(at_byRefType, $2.loc, $3);
 };
 
+type_pl_byref: '(' tk_ARRAY_BY_REF type ')' {
+  SHOWPARSE("type_pl_byref -> ( ARRAY-BY-REF type )");
+  $$ = AST::make(at_arrayByRefType, $2.loc, $3);
+};
+
 types_pl_byref: type_pl_byref {
   SHOWPARSE("types_pl_byref -> type_pl_byref");
   $$ = AST::make(at_fnargVec);
@@ -1581,17 +1587,25 @@ lambdapattern: ident ':' type_pl_byref {
   $$ = AST::make(at_identPattern, $1->loc, $1, $3);
   if ($3->astType == at_byRefType)
     $1->flags |= ARG_BYREF;
+  else if ($3->astType == at_arrayByRefType)
+    $1->flags |= ARG_ARRAY_BYREF;
 };
 
 lambdapattern: '(' tk_THE type ident ')' {
-  SHOWPARSE("lambdapattern -> ( the type ident ) ");
+  SHOWPARSE("lambdapattern -> ( THE type ident ) ");
   $$ = AST::make(at_identPattern, $1.loc, $4, $3);  
 };
 
 lambdapattern: '(' tk_THE '(' tk_BY_REF type ')' ident ')' {
-  SHOWPARSE("lambdapattern -> ( the ( by-ref type ) ident )");
+  SHOWPARSE("lambdapattern -> ( THE ( BY-REF type ) ident )");
   $$ = AST::make(at_identPattern, $1.loc, $7, $5);
   $5->flags |= ARG_BYREF;
+};
+
+lambdapattern: '(' tk_THE '(' tk_ARRAY_BY_REF type ')' ident ')' {
+  SHOWPARSE("lambdapattern -> ( THE ( ARRAY_BY-REF type ) ident )");
+  $$ = AST::make(at_identPattern, $1.loc, $7, $5);
+  $5->flags |= ARG_ARRAY_BYREF;
 };
 
 // EXPRESSIONS [7]

@@ -442,6 +442,11 @@ enum AstFlagValues {
   /// by-ref constructor at every r-value usage of the identifier.
   ARG_BYREF = 0x20000000u,
 
+  /// @brief Parameter is array-by-reference.
+  ///
+  /// See discussion of ARG_BYREF, above.
+  ARG_ARRAY_BYREF = 0x40000000u,
+
   /// @brief Set of ast flag values that must be masked from
   /// definitions when copying to use cases.
   MASK_FLAGS_FROM_USE = (DEF_IS_ENTRYPT|ID_IS_CAPTURED)
@@ -989,7 +994,7 @@ GROUP qtype = qualType | type;
 
 // argVec is not able to appear in a "type" position.
 GROUP type = var | tvar | bitfield | refType | valType
-           | fn | byRefType | primaryType | dummyType
+           | fn | byRefType | arrayByRefType | primaryType | dummyType
            | arrayType | vectorType | typeapp
            // | closureType;
            | mutableType | constType | exceptionType;
@@ -1000,6 +1005,7 @@ AST bitfield = primaryType intLiteral;
 // REF TYPES [3.4.1]
 AST refType = type;
 AST byRefType = type;
+AST arrayByRefType = type;
 
 // VAL TYPES [3.4.2]
 AST valType = type;
