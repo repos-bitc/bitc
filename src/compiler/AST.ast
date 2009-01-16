@@ -984,9 +984,6 @@ AST fields = fielditem*;
 AST field = ident type;
 AST fill = type intLiteral?;
 
-// Concrete literal types.
-AST literalType = literal primaryType?;
-
 // Qualified Type
 GROUP qtype = qualType | type;
 

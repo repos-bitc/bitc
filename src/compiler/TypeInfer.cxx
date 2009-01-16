@@ -3135,53 +3135,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
-  case at_literalType:
-    {
-      // FIX: type rule needs adjustment
-      /*------------------------------------------------
-              A |- e:t1  U(t = t1)
-	  ______________________________
-                A |- (e:t): t
-	------------------------------------------------*/
-      // match agt_eform
-      TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
-		trail,  USE_MODE, TI_EXPRESSION);
-    
-      if (ast->children.size() > 1) {
-	TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
-		  trail,  USE_MODE, TI_NON_APP_TYPE);
-
-	// No need to check mutability consistency, since the legal
-	// types are syntactically constrained.
-
-	// literalType: U(t1 == t2)
-	UNIFY(trail, ast->child(1)->loc, 
-	      ast->child(0)->symType, ast->child(1)->symType);
-      }
-
-      // FIX: Need to ensure that we inferred a unique primary type,
-      // but I'm not entirely sure how to do that, so check the code
-      // below. If we were handed something like:
-      //
-      //  (literal 1)
-      // 
-      // then it is still ambiguous. If the developer wanted to
-      // express a constrained family, the right way was to use the
-      // LiteralUnitType class with a constraint.
-      if (!ast->child(0)->symType->isPrimaryType()) {
-	errStream << ast->loc
-		  << ": Literal unit types must have unique primary type."
-		  << std::endl;
-	errFree = false;
-      }
-
-      // FIX: This part is wrong. This is where we need to fabricate a
-      // new type record of ty_lit.
-      ast->symType = Type::make(ty_lit, ast->child(0)->symType);
-      ast->symType->litValue = ast->child(0)->litValue;
-      break;
-    }
-    
   case at_tqexpr:
     {
       /*------------------------------------------------

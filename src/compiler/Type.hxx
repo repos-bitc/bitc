@@ -477,7 +477,6 @@ public:
   bool isPrimFloat();
   void SetTvarsTo(boost::shared_ptr<Type> t);
   void SetTvarsToUnit();
-  bool isLiteral();
   bool isInteger();
   bool isIntegral();
   bool isbool();

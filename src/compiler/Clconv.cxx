@@ -299,15 +299,6 @@ findusedef(std::ostream &errStream,
       break;
     }
 
-  case at_literalType:
-    {
-      CHKERR(errFree, findusedef(errStream, topAst, ast->child(0),
-				 USE_MODE, boundVars, freeVars));
-      if (ast->children.size() > 1)
-	CHKERR(errFree, findusedef(errStream, topAst, ast->child(1),
-				   TYPE_MODE, boundVars, freeVars));
-      break;
-    }
   case at_tqexpr:
     {
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(0),

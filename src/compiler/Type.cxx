@@ -521,18 +521,14 @@ bool
 Type::isPrimInt()
 {
   shared_ptr<Type> t = getBareType();
-  return (kindInfo[t->kind].isPrimInt ||
-	  (t->kind == ty_lit && 
-	   t->CompType(0)->isPrimInt()));
+  return (kindInfo[t->kind].isPrimInt);
 }
 
 bool 
 Type::isPrimFloat()
 {
   shared_ptr<Type> t = getBareType();
-  return (kindInfo[t->kind].isPrimFloat ||
-	  (t->kind == ty_lit && 
-	   t->CompType(0)->isPrimFloat()));
+  return (kindInfo[t->kind].isPrimFloat);
 }
 
 bool 
@@ -568,13 +564,6 @@ Type::isbool()
 {
   shared_ptr<Type> t = getBareType();
   return (t->kind == ty_bool);
-}
-
-bool 
-Type::isLiteral()
-{
-  shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_lit);
 }
 
 bool 

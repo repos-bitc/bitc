@@ -1904,19 +1904,6 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_literalType:
-    {
-      // match agt_eform
-      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
-
-      if (ast->children.size() > 1)
-	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		idc_type, currLB, flags);
-    
-      break;
-    }
-
   case at_tqexpr:
     {
       // match agt_eform

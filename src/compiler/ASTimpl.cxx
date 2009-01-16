@@ -360,9 +360,6 @@ AST::atKwd() const
   case at_tqexpr:
     return "the";
 
-  case at_literalType:
-    return "literal";
-
   case at_suspend:
     return "suspend";
 

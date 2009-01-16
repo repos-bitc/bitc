@@ -76,11 +76,6 @@
   ;; (below) can be properly quantified.
   (deftypeclass (LiteralType 'a) :closed)
 
-  ;; Type class relating literal unit types to the underlying type of
-  ;; the literal. This can be used to constrain the set of legal
-  ;; literals in a declaration.
-  (deftypeclass (LiteralUnitType 'a 'b) :closed)
-
   ;; Type class used for record polymorphism. Describes a field of
   ;; some structure type 's having name nm (captured as a literal atom
   ;; unit type) whose field type is 'a. Note that this definition is
