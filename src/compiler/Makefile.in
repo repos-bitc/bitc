@@ -169,7 +169,6 @@ clean:
 	-rm -rf BUILD doxygen *~
 
 .PHONY: doxygen
-
 doxygen: AST.hxx AST.cxx
 	doxygen doxygen.html.cfg
 

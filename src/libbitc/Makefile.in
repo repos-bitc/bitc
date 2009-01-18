@@ -200,8 +200,12 @@ BUILD/%.o: %.cxx | BUILD
 	@$(CXX_DEP)
 	$(CXX_BUILD)
 
+.PHONY: doxygen
+doxygen:
+	doxygen doxygen.html.cfg
+
 clean:
-	-rm -rf BUILD
+	-rm -rf BUILD doxygen
 
 DEPFILES=$(wildcard BUILD/*.m)
 -include $(DEPFILES)

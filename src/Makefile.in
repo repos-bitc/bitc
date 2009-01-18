@@ -126,6 +126,7 @@ DOC_SUBDIRS=doc
 endif
 
 SUBDIRS=compiler libbitc man $(DOC_SUBDIRS)
+DOXY_SUBDIRS=compiler libbitc
 CLEAN_SUBDIRS=tests
 
 .PHONY: all install uninstall installdirs
@@ -177,6 +178,10 @@ ls:
 			echo $$dir/$$i ; \
 		done ; \
 	done
+
+.PHONY: doxygen
+doxygen:
+	@for dir in $(DOXY_SUBDIRS); do echo making $@ in $$dir; cd $$dir && $(MAKE) $(FLAGS_TO_PASS) $@ || exit 1; cd ..; done
 
 .PHONY: clean
 clean: clean-local
