@@ -60,7 +60,10 @@ clean.browse:
 
 browse:
 	(cd ../compiler;make doxygen)
-	rsync --delete -avz ../compiler/doxygen/html/ $(BITC_SRC)/doc/browse/
+	(cd ../libbitc;make doxygen)
+	mkdir -p $(BITC_SRC)/doc/browse/
+	rsync --delete -avz ../compiler/doxygen/html/ $(BITC_SRC)/doc/browse/compiler
+	rsync --delete -avz ../libbitc/doxygen/html/ $(BITC_SRC)/doc/browse/libbitc
 
 index.html: bitc.html
 	ln -s bitc.html index.html

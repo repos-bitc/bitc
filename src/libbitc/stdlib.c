@@ -2,6 +2,10 @@
 
 #include "BUILD/bitc-runtime.h"
 
+/// @brief Return an integer from the leading characters of a string.
+///
+/// @bug Why isn't this implemented as BitC code?
+
 /* (proclaim atoi: (fn (string) int32) external bitc_stdlib_atoi) */
 bitc_int32_t
 bitc_stdlib_atoi(bitc_string_t *str)
@@ -28,6 +32,11 @@ bitc_stdlib_atoi(bitc_string_t *str)
   
   return val;
 }
+
+/// @brief Read the IA32 time stamp counter.
+///
+/// @bug This exists to provide support for Swaroop's benchmarking. It
+/// should be moved to an IA32 architecture-specific subdirectory.
 
 /* (proclaim getTimeStamp: (fn () uint64) external bitc_stdlib_rdtsc) */
 bitc_uns64_t

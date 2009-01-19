@@ -127,7 +127,10 @@ extern bitc_exception_t *curException;
     longjmp(*curCatchBlock, 1);		       \
   }while(0)
 
+/// @brief Raised when an attempt to allocate heap memory fails.
 extern bitc_exception_t val_ExOutOfMemory;
+/// @brief Raised when an attempt to access an offset in a vector, array,
+/// or string position exceeds the length of the vector, array, or string.
 extern bitc_exception_t val_ExIndexBoundsError;
 
 #define TY_VECTOR_OF_STRINGS K_6string

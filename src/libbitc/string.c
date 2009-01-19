@@ -37,6 +37,14 @@
 #include <fcntl.h>
 #include "BUILD/bitc-runtime.h"
 
+/// @brief Decode a UTF-8 encoded character, returning both the code
+/// point and updating @p snext (if non-null) to point to the next
+/// byte in the string.
+///
+/// @bug This implementation accepts the IEEE application code plain,
+/// which was later decided to have been a mistake. It needs to do
+/// something sensible in that case, which almost certainly means
+/// raising an exception, but it does not currently do so.
 static bitc_char_t
 utf8_decode(const char *s, const char **snext)
 {
@@ -82,7 +90,14 @@ utf8_decode(const char *s, const char **snext)
 }
 
 
-// FIX: Swaroop carried this code over from Libsherpa
+/// @brief Encode a unicode code point into a UTF-8 encoded byte sequence.
+///
+/// @bug This implementation will gleefully encode code points that
+/// fall within the IEEE application code plain, which are
+/// non-conforming code points. In theory it should raise an exception
+/// in these cases.  The BitC implementation
+/// should simply never permit such malformed code points to arise in
+/// a well-typed string in the first place.
 static unsigned
 utf8_encode(uint32_t ucs4, char utf[7])
 {
@@ -128,6 +143,8 @@ utf8_encode(uint32_t ucs4, char utf[7])
 }
 
 
+/// @brief Return the number of UNICODE code points in a UTF8-encoded
+/// string.
 bitc_word_t
 DEFUN(bitc_string_length, bitc_string_t *str)
 {
@@ -142,6 +159,9 @@ DEFUN(bitc_string_length, bitc_string_t *str)
 }
 DEFCLOSURE(bitc_string_length);
 
+/// @brief Fetch the UNICODE code point at offset @p ndx in a UTF-8
+/// encoded string.
+/// @exception IndexBoundsError Parameter @p ndx exceeds last string position.
 bitc_char_t
 DEFUN(bitc_string_nth, bitc_string_t *str, bitc_word_t ndx)
 {
@@ -160,9 +180,14 @@ DEFUN(bitc_string_nth, bitc_string_t *str, bitc_word_t ndx)
 }
 DEFCLOSURE(bitc_string_nth);
 
-/* This is a very bad implementation of vector->string, and it is
-   probably even wrong, deppending on how correct the utf8_encode is.
-   This should be considered a placeholder for real code */
+/// @brief Given a vector of characters, return the corresponding
+/// string.
+/// @exception OutOfMemory Heap memory was exhausted.
+///
+/// This is implemented by the C runtime library because it needs to
+/// initialize all of the positions in the vector. This cannot
+/// (currently) be encoded in BitC without making the elements of the
+/// vector mutable.
 bitc_string_t *
 DEFUN(bitc_vector_string, arg_0_bitc_vector_string vec)
 {
