@@ -39,6 +39,32 @@
 #include <inttypes.h>
 #include "BUILD/bitc-runtime.h"
 
+/// @addtogroup ProcObjectImplementations
+///
+/// <b>SPARC</b> The SPARC implementation uses a position-independent
+/// variant of the Procedure-Object-Relative method, storing the
+/// closure record pointer into <code>@%g1</code>, which is defined as
+/// call-clobbered on this architecture. No other register is touched
+/// by this sequence.
+///
+/// The code sequence is slightly tricky. It takes advantage of the
+/// fact that the jump and link instruction (<code>JMPL</code>) can
+/// write the address of the <code>JMPL</code> instruction into a
+/// designated register (in this case <code>@%g1</code>, and uses JMPL
+/// to collect the address at which the procedure object is
+/// executing. It then exploits the delay slot of the
+/// <code>JMPL</code> to implement the actual load of the closure
+/// pointer.
+///
+/// On its face this sequence should not be efficient, since it
+/// involves <em>both</em> a PC store and a D-space load. In practice
+/// it is the canonical sequence used for PC-relative load on this
+/// architecture, and is therefore a specifically optimized case in
+/// SPARC hardware implementations.
+///
+/// Thanks to Jonathan Adams for assistance in defining and debugging
+/// this sequence.
+
 void *
 bitc_emit_procedure_object(void *stubP, void *envP)
 {

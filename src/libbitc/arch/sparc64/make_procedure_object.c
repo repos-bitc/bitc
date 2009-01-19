@@ -39,6 +39,26 @@
 #include <inttypes.h>
 #include "BUILD/bitc-runtime.h"
 
+/// @addtogroup ProcObjectImplementations
+///
+/// <b>SPARC64</b> The SPARC64 implementation uses a
+/// position-independent variant of the Procedure-Object-Relative
+/// method, ultimately storing the closure record pointer into
+/// <code>@%g1</code>. The <code>@%g4</code> register is clobbered
+/// while loading the address of the stub procedure. Both
+/// <code>@%g1</code> and <code>@%g4</code> are defined as
+/// call-clobbered on this architecture.
+///
+/// The code sequence uses the same delay slot trick that is used on
+/// the 32-bit SPARC implementation.  SPARC64 implementations are
+/// multi-issue, so this sequence is only <em>almost</em> as expensive
+/// as it looks. On the other hand, SPARC64 does not implement any
+/// jump immediate or call immediate instruction with a 64-bit span,
+/// so this code sequence is specifically optimized in SPARC64
+/// hardware implementations.
+///
+/// Thanks to Jonathan Adams for assistance in defining and debugging
+/// this sequence.
 void *
 bitc_emit_procedure_object(void *stubP, void *envP)
 {

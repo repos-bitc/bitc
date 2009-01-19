@@ -39,12 +39,21 @@
 #include <inttypes.h>
 #include "BUILD/bitc-runtime.h"
 
+/// @addtogroup ProcObjectImplementations
+///
+/// <b>IA32</b> The IA32 implementation uses the Load-Immediate
+/// method, storing the closure record pointer into
+/// <code>@%eax</code>. No other register is touched, and
+/// <code>@%eax</code> is reserved on this architecture for use as the
+/// return register. Note that <code>@%eax</code> is considered
+/// call-clobbered even when the called procedure
+/// returns <code>void</code>.
 void *
 bitc_emit_procedure_object(void *stubP, void *envP)
 {
   uint32_t envW = (uint32_t) envP;
   uint32_t stubW = (uint32_t) stubP;
-
+  
   bitc_Procedure* proc = GC_ALLOC(sizeof(bitc_Procedure));
 
   proc->code[0] = 0x90;		/* padding */

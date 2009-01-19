@@ -90,19 +90,30 @@ typedef long double bitc_quad_t;
 #define BITC_UNIT '\000'
 #define MAYBE_UNUSED __attribute__((unused))
 
-/* For DEFEXCEPTION, we emit a C declaration of the form
-
-  const char *CMANGLE(excpt-id) = "CMANGLE(excpt-id)"
-
-Later, use the following structure as the common "base" class for
-the exception structure that is actually being thrown. The reason
-to have the structure is so that we can do a cast to it at the site
-of the CATCH.
-
-This is a debugging trick to make the exception human-readable in a
-debugger. For production purposes, it would be perfectly acceptable
-to emit a non-static const char having no meaningful value and use
-the address of that. */
+/// @brief Common "base class" for all exception objects.
+///
+/// We use bitc_exception_t as a common "base" class (i.e. as the
+/// first element) of every exception structure that is emitted by the
+/// C emitter. This gives us something that we can cast to at the site
+/// of the catch in order to perform the dispatch across the catch
+/// blocks.
+///
+/// The inclusion of the @p name field gives us something to
+/// print for debugging purposes. At the moment, it is also used as
+/// our unique exception code. To support this, we emit a C
+/// declaration of the form:
+///
+/// <pre>const char *CMANGLE(excpt-id) = "CMANGLE(excpt-id)"</pre>
+///
+/// for each exception at the point of declaration.
+///
+/// @bug The string strategy works fine when we are doing
+/// whole-program compiles, but it does not generalize. It relies on
+/// the linker to perform cross-file string constang merging, which is
+/// not implemented by many (or even most) linkers. A better strategy
+/// would be to emit an uninitialized common symbol of (e.g.) type
+/// integer, which <em>must</em> be merged by the linker, and use the
+/// address of that symbol as the exception ID.
 typedef struct bitc_exception_t {
   const char *__name;
 } bitc_exception_t;
@@ -124,6 +135,11 @@ extern bitc_exception_t val_ExIndexBoundsError;
 #define GC_ALLOC(x) bitc_malloc(x)
 #define GC_ALLOC_ATOMIC(x) bitc_malloc_atomic(x)
 
+/// @brief Trivial wrapper for allocating storage that may contain
+/// pointers.
+///
+/// This exists to let us convert malloc failures into BitC
+/// exceptions.
 INLINE void *
 bitc_malloc(size_t sz)
 {
@@ -134,6 +150,11 @@ bitc_malloc(size_t sz)
   return ptr;
 }
  
+/// @brief Trivial wrapper for allocating storage that may @em not
+/// contain pointers.
+///
+/// This exists to let us convert malloc failures into BitC
+/// exceptions.
 INLINE void *
 bitc_malloc_atomic(size_t sz)
 {
@@ -144,16 +165,30 @@ bitc_malloc_atomic(size_t sz)
   return ptr;
 }
 
-/* The Bitc String */
-
+/// @brief C representation of the BitC string type.
+///
+/// This is basically the same as the vector structure, but we need a
+/// common declaration for it that spans all generated source files.
 typedef struct {
   bitc_word_t length;
-  const char *s;		/* immutable, unicode UTF-8! */
+  /** @brief Immutable, unicode UTF-8! */
+  const char *s;
 } bitc_string_t;
 
+/* Forward declaration, solely so that we can attach the MAYBE_UNUSED
+   attribute. GCC won't let us attach that on the definition. */
 static bitc_string_t *
 mkStringLiteral(const char *s) MAYBE_UNUSED;
 
+/// @brief Constructor for string literals when they are emitted by the
+/// compiler.
+///
+/// This is currently used for any string literal that appears in the
+/// input source code, and also for the elements of the argv[] (and
+/// eventually env[]) structure. Note that the actual string pointer
+/// in those cases will point to static global storage. If your
+/// copying collector is not savvy, it may or may not copy those
+/// string constants.
 static bitc_string_t *
 mkStringLiteral(const char *s)
 {
@@ -174,6 +209,7 @@ mkStringLiteral(const char *s)
 #define DEFCLOSURE_INLINE(NM)
 /* Primitive index comparison */
 
+/// @brief Less-than operator for type Word.
 INLINE bitc_bool_t
 DEFUN(bitc_index_lt, bitc_word_t a, bitc_word_t b)
 
@@ -934,6 +970,172 @@ DEFCAST(bitc_word_t,  _4word,  bitc_double_t, _6double);
  * the best one to use.
  *****************************************************************/
 
+/// @brief Architecture-specific run time function that allocates and
+/// initialized procedure objects.
+///
+/// @defgroup ProcObjectImplementations Implementations of bitc_emit_procedure_object
+///
+/// Logically, all BitC procedures that a (possibly empty) closure.
+/// As an optimization, the BitC compiler will elide any members of
+/// the closure record that are statically global, and will then elide
+/// the closure record itself if it has no surviving members. This
+/// leaves us with a design in which no top-level procedure will ever
+/// be emitted with an implementation that expects a closure
+/// record. All top-level procedures therefore obey the native calling
+/// convention directly. The challenge is to arrive at an
+/// implementation of inner procedures that <em>also</em> obeys the
+/// native calling convention.
+///
+/// Inner procedures are hoisted to top-level by the
+/// implementation. The hoisted procedure may or may not expect to
+/// receive a closure record pointer depending on which identifiers
+/// were closed over. If it does not, then its behavior is exactly
+/// like that of a top-level procedure, and no further action is
+/// required.
+///
+/// When an inner procedure requires a closure record, it is rewritten
+/// during hoisting in such a way as to render the closure record type
+/// and the associated procedure argument explicit. For such
+/// procedures, the compiler allocates the required closure record on
+/// the heap at the procedure construction site and emits a call to
+/// bitc_emit_procedure_object() to generate a heap-allocated
+/// trampoline function. It then returns the address of the generated
+/// trampoline function as the address of the inner procedure. 
+/// 
+/// Two optimizations on this are possible:
+///
+/// - Recursive calls proceed directly through the emitted procedure
+///   label. This optimization is obligatory, and is implemented
+///   (albeit not correctly) by the current compiler.
+/// - If the inner procedure does not escape, the closure record can
+///   be stack allocated in the caller and the hoisted implementation
+///   can be called directly. This is @em not implemented in the
+///   current compiler. 
+///
+/// The current BitC code generator assumes that the closure pointer
+/// will be injected as the first parameter of the hoisted inner
+/// procedure. On architectures that place parameters in registers,
+/// this requires a non-trivial architecture dependent rewriting of
+/// the call frame. Rather than try to implement a generic foreign
+/// function interface library, which has stymied many other
+/// implementations, we let the C compiler do the heavy lifting
+/// here. For each hoisted procedure, we emit a helper procedure that
+/// looks like:
+///
+/// <pre>
+/// ReturnType
+/// hoistedProcStub(Ty1 arg1, ... TyN argN) {
+///   void *__theClosureEnv;
+///   BITC_GET_CLOSURE_ENV(theClosureEnv);
+///   return hoistedProc(theClosureEnv, arg1, ... argn);
+/// }
+/// </pre>
+///
+/// With this helper in place, what we need from the trampoline code
+/// is an assembly stub that:
+/// -# Stuffs the environment pointer into an architecture-dependent
+///    location from which BITC_GET_CLOSURE_ENV() can fetch it, and
+/// -# Performs a JUMP to hoistedProcStub, which does the rest of
+///    the work. Note that hoistedProcStub has exactly the same
+///    signature as hoistedProc, so the frame that was constructed by
+///    the caller can be re-used.
+///
+/// Finally, since closure records may be garbage collected, we add
+/// one further constraint, which is that the closure record pointer
+/// that is embedded in the heap-allocated trampoline should appear at
+/// a naturally aligned address for pointers according to the
+/// requirements of the target architecture.
+///
+/// <h1>Porting Advice</h1>
+///
+/// While other implementations are possible, the preferred method to
+/// use in the stub trampoline is to use a register as a transfer
+/// buffer for the closure record pointer. This method is compatible
+/// with concurrent runtimes, and is generally faster than
+/// reading/writing a global location. Look for a register that is
+/// call-clobbered but not used for parameters. If return values are
+/// returned via registers on your target, the return value register
+/// is usually a good choice. Registers that are tied up in the stack
+/// frame fabrication, such as the stack pointer, frame pointer, or
+/// return register (a.k.a. link register) are probably not good
+/// choices.
+///
+/// Having found your register, there are two possible strategies for
+/// implementing your trampoline:
+///
+/// <h2>Load-Immediate Method</h2>
+///
+/// This method is preferred, but it is only feasible on architectures
+/// that can load a full-register-width immediate constant out of the
+/// instruction stream from a naturally aligned position. It is
+/// currently used on IA32 and X86_64. We expect that a variant will
+/// eventually be used on Coldfire. This method is preferred mainly
+/// because it does not require any references via D-space, which on most
+/// architectures will eliminate a load delay stall.
+///
+/// Aside: This approach also preserves the possibility of a copying
+/// collector that can blindly relocate procedure objects, but the
+/// current implementation does not use a copying collector. A copying
+/// implementation is possible for the stub-relative method (below),
+/// but the collector needs to be made aware of how to rewrite the
+/// stubs in that case.
+///
+/// To use this approach, write some assembly code that uses that
+/// instruction to load some recognizable constant value:
+///
+/// <pre>
+/// ldimm @%rclosure,$0xdeadbeef   ;; closure record to register
+/// jmp $0xfeedface               ;; jump to stub</pre>
+///
+/// On CISC architectures it may be necessary to insert NOP
+/// instructions before the immediate load in order to get your
+/// constant to be naturally aligned. Now use
+/// <kbd>objdump&nbsp;--disssemble</kbd> to determine what byte
+/// sequence results from these instructions. Figure out where the
+/// 0xdeadbeef constant ended up, and define the bitc_Procedure union
+/// accordingly such that the @p env.ptr field ends up overlaying that
+/// location. Your version of bitc_emit_procedure_object() will copy
+/// this byte sequence into the @p code leg of the union, replacing
+/// the $0xfeedface with the passed stub procedure address @p stubW
+/// and then store the passed environment pointer value @p envP into
+/// the @p env.ptr slot.
+///
+/// <h2>Procedure-Object-Relative Method</h2>
+///
+/// On architectures that do not have an easy way to load a
+/// naturally-aligned immediate value, there is generally some
+/// instruction sequence that synthesizes constant values, such as
+/// <code>loadhi</code> followed by <code>add</code>. Since we want
+/// the target address of the closure record to appear naturally
+/// aligned, the preferred solution is to synthesize a PC-relative
+/// load:
+///
+/// <pre>
+/// ldc @%rclosure,$proc-address      ;; load address of proc object
+/// mov @%rclosure,4(@%rclosure)       ;; fetch from env.ptr slot
+/// jmp $0xfeedface                  ;; jump to stub</pre>
+/// .long 0xdeadbeef                 ;; closure record ptr
+///
+/// This method is currently used on SPARC and SPARC64. It is probably
+/// needed on MIPS as well. In this implementation, it becomes the
+/// responsibility of the garbage collector to patch the instructions
+/// emitted by the LDC pseudo-op if the procedure object is relocated.
+///
+/// As before, you can now use <kbd>objdump&nbsp;--disssemble</kbd> to
+/// determine what byte sequence results from these
+/// instructions. Figure out where the 0xdeadbeef constant ended up,
+/// and define the bitc_Procedure union accordingly such that the @p
+/// env.ptr field ends up overlaying that location. Also patch up the
+/// offset used in the <code>mov</code> instruction to replace the "4"
+/// with the proper offset of @p env.ptr.
+/// Your version of
+/// bitc_emit_procedure_object() will copy this byte sequence into the
+/// @p code leg of the union, replacing the $proc-address with the
+/// heap address of the procedure object, $0xfeedface with the
+/// passed stub procedure address @p stubW, and storing the passed
+/// environment pointer value @p envP into the @p env.ptr slot.
+///
+/// <h2>Notes on Specific Implementations</h2>
 void *
 bitc_emit_procedure_object(void *stubP, void *envP) MAYBE_UNUSED;
 

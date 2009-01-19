@@ -39,6 +39,15 @@
 #include <inttypes.h>
 #include "BUILD/bitc-runtime.h"
 
+/// @addtogroup ProcObjectImplementations
+///
+/// <b>x86_64</b> The X86_64 implementation uses the Load-Immediate
+/// method, storing the closure record pointer into
+/// <code>@%rax</code>. No other register is touched, and
+/// <code>@%rax</code> is reserved on this architecture for use as the
+/// return register. Note that <code>@%rax</code> is considered
+/// call-clobbered even when the called procedure
+/// returns <code>void</code>.
 void *
 bitc_emit_procedure_object(void *stubP, void *envP)
 {
@@ -47,7 +56,7 @@ bitc_emit_procedure_object(void *stubP, void *envP)
 
   bitc_Procedure* proc = GC_ALLOC(sizeof(bitc_Procedure));
 
-  /* MOVQ $stubW, %eax */
+  /* MOVQ $stubW, %rax */
   proc->code[0] = 0x48;
   proc->code[1] = 0xb8;
   proc->code[2] = stubW;
@@ -67,7 +76,7 @@ bitc_emit_procedure_object(void *stubP, void *envP)
   proc->code[12] = 0x90;
   proc->code[13] = 0x90;
 
-  /* movq $envP,%eax */
+  /* movq $envP,%rax */
   proc->code[14] = 0x48u;
   proc->code[15] = 0xb8u;
 
