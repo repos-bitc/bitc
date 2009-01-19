@@ -39,7 +39,7 @@
 #include <inttypes.h>
 #include "BUILD/bitc-runtime.h"
 
-/// @addtogroup ProcObjectImplementations
+/// @addtogroup ProcObjects
 ///
 /// <b>SPARC64</b> The SPARC64 implementation uses a
 /// position-independent variant of the Procedure-Object-Relative

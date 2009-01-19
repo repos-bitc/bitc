@@ -973,9 +973,9 @@ DEFCAST(bitc_word_t,  _4word,  bitc_double_t, _6double);
  * the best one to use.
  *****************************************************************/
 
-/// @defgroup ProcObjectImplementations Implementations of bitc_emit_procedure_object
+/// @defgroup ProcObjects Procedure Objects
 ///
-/// Logically, all BitC procedures that a (possibly empty) closure.
+/// Logically, all BitC procedures have a (possibly empty) closure.
 /// As an optimization, the BitC compiler will elide any members of
 /// the closure record that are statically global, and will then elide
 /// the closure record itself if it has no surviving members. This
@@ -1138,7 +1138,7 @@ DEFCAST(bitc_word_t,  _4word,  bitc_double_t, _6double);
 /// <h2>Notes on Specific Implementations</h2>
 
 
-/// @ingroup ProcObjectImplementations
+/// @ingroup ProcObjects
 /// @brief Architecture-specific run time function that allocates and
 /// initialized procedure objects.
 void *

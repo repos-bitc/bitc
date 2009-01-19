@@ -39,7 +39,7 @@
 #include <inttypes.h>
 #include "BUILD/bitc-runtime.h"
 
-/// @addtogroup ProcObjectImplementations
+/// @addtogroup ProcObjects
 ///
 /// <b>x86_64</b> The X86_64 implementation uses the Load-Immediate
 /// method, storing the closure record pointer into

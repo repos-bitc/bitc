@@ -39,7 +39,7 @@
 #include <inttypes.h>
 #include "BUILD/bitc-runtime.h"
 
-/// @addtogroup ProcObjectImplementations
+/// @addtogroup ProcObjects
 ///
 /// <b>IA32</b> The IA32 implementation uses the Load-Immediate
 /// method, storing the closure record pointer into
