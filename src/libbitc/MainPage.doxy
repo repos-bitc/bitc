@@ -1,0 +1,9 @@
+/* -*- mode: c++ -*-  */
+
+/// @mainpage Source Code for the BitC Runtime Library
+///
+/// On these pages you can browse the source code for the BitC runtime
+/// library and examine its source documentation, which is still a
+/// work in progress. All architectures are documented simultaneously,
+/// which means (for example) that there are multiple
+/// implementations of bitc_emit_procedure_object.  This is intentional.
