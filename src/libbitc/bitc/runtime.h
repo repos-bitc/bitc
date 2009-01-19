@@ -973,9 +973,6 @@ DEFCAST(bitc_word_t,  _4word,  bitc_double_t, _6double);
  * the best one to use.
  *****************************************************************/
 
-/// @brief Architecture-specific run time function that allocates and
-/// initialized procedure objects.
-///
 /// @defgroup ProcObjectImplementations Implementations of bitc_emit_procedure_object
 ///
 /// Logically, all BitC procedures that a (possibly empty) closure.
@@ -1139,6 +1136,11 @@ DEFCAST(bitc_word_t,  _4word,  bitc_double_t, _6double);
 /// environment pointer value @p envP into the @p env.ptr slot.
 ///
 /// <h2>Notes on Specific Implementations</h2>
+
+
+/// @ingroup ProcObjectImplementations
+/// @brief Architecture-specific run time function that allocates and
+/// initialized procedure objects.
 void *
 bitc_emit_procedure_object(void *stubP, void *envP) MAYBE_UNUSED;
 
