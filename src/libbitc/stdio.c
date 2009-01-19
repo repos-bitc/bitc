@@ -38,7 +38,24 @@
 
 #include "BUILD/bitc-runtime.h"
 
+/// @brief External structure definition for STDIO streams.
+///
+/// BitC heap structure that acts as a proxy for C library streams.
+///
 struct ty_bitc_stdioStream {
+  /// @brief Field to tell us if a BitC STDIO stream has been properly
+  /// initialized.
+  ///
+  /// The need for the @p isInit field is moderately irritating. It
+  /// arises  entirely because the C standard does not require @p stdin, @p
+  /// stdout, and @p stderr to be implemented as variables whose
+  /// address can be taken. The result is that we cannot just use the
+  /// linker to take the address of the corresponding libc structures.
+  ///
+  /// For the moment, we "solve" this by calling a fixup routine at
+  /// the front of every read/write call. A more efficient approach
+  /// would be to call a BitC-specific stdio initializer routine from
+  /// main().
   bool isInit;
   FILE *f;
 } ;
