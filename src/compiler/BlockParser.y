@@ -1048,8 +1048,6 @@ lambdapattern: type_pl_byref ident {
   $$ = AST::make(at_identPattern, $1->loc, $2, $1);
   if ($1->astType == at_byRefType)
     $2->flags |= ARG_BYREF;
-  else if ($1->astType == at_arrayByRefType)
-    $2->flags |= ARG_ARRAY_BYREF;
 };
 
 // EXPRESSIONS [7]

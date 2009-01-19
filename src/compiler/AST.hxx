@@ -445,11 +445,6 @@ enum AstFlagValues {
   /// by-ref constructor at every r-value usage of the identifier.
   ARG_BYREF = 0x20000000u,
 
-  /// @brief Parameter is array-by-reference.
-  ///
-  /// See discussion of ARG_BYREF, above.
-  ARG_ARRAY_BYREF = 0x40000000u,
-
   /// @brief Set of ast flag values that must be masked from
   /// definitions when copying to use cases.
   MASK_FLAGS_FROM_USE = (DEF_IS_ENTRYPT|ID_IS_CAPTURED)
@@ -640,6 +635,7 @@ enum AstType {
   at_copyREF,
   at_mkClosure,
   at_setClosure,
+  at_mkArrayByref,
   at_block,
   at_return_from,
   at_switch,

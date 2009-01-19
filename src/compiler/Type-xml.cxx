@@ -315,6 +315,16 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
       break;
     }
 
+  case ty_array_byref:
+    {
+      out << "<array-byref>" << endl;
+      out.more();
+      t->Base()->asXML(tvP, out);
+      out.less();       
+      out << "</array-byref>" << endl; 
+      break;
+    }
+
   case ty_mbTop:
   case ty_mbFull:
     {

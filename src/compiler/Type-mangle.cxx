@@ -139,7 +139,8 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     ss << components.size();
     for (size_t i=0; i<components.size(); i++) {
       if (CompFlags(i) & COMP_BYREF)
-	ss << "Z";
+	ss << "Y";
+      
       ss << CompType(i)->mangledString(igMut, true, 
 				       maxArgMut);
     }
@@ -200,6 +201,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     {
       ss << "J" << Base()->mangledString(igMut, false, maxArgMut)
 	 << "__" << arrLen->len;
+      
       break;
     }
     
@@ -215,6 +217,10 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
   case ty_byref:
     ss << "Z" << Base()->mangledString(igMut, false, maxArgMut);
+    break;
+    
+  case ty_array_byref:
+    ss << "W" << Base()->mangledString(igMut, false, maxArgMut);
     break;
 
   case ty_mutable:

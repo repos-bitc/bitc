@@ -842,7 +842,6 @@ Type::normalize_const_inplace(boost::shared_ptr<Trail> trail)
 boost::shared_ptr<Type> 
 Type::normalize_const(const bool inConst)
 {
-  bool needConstWrapper = false;
   shared_ptr<Type> t = getType();
   shared_ptr<Type> rt = GC_NULL;
   
@@ -936,6 +935,7 @@ Type::normalize_const(const bool inConst)
   }
   
   t->mark &= ~MARK_NORMALIZE_CONST;
+  return rt;
 }
 
 /* Ensure that this type can be wrapped within a const type, that is,
@@ -1269,6 +1269,7 @@ Type::markSignMbs(bool cppos)
   case ty_vector:
   case ty_ref:
   case ty_byref:
+  case ty_array_byref:
     {
       t->Base()->markSignMbs(false);
       break;
@@ -1359,6 +1360,7 @@ Type::fixupFnTypes()
   case ty_vector:    
   case ty_ref:
   case ty_byref:
+  case ty_array_byref:
     {
       t->Base()->fixupFnTypes();
       break;

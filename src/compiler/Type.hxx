@@ -74,7 +74,7 @@ enum CompFlagValues {
   COMP_NO_FLAGS = 0u,
 
   /// @brief Union discriminator of defrepr
-  COMP_UNIN_DISCM = 0x1u,
+  COMP_UNIN_DISCM  = 0x01u,
 
   /// Field (component) in a defrepr leg is
   /// marked invalid within switch statement
@@ -83,10 +83,10 @@ enum CompFlagValues {
   /// must be valid) The switced value is
   /// only valid within select operations,
   /// and is therefore only checked there.   
-  COMP_INVALID    = 0x2u,
+  COMP_INVALID     = 0x02u,
 
-  /// FIX: The following first sentence is not english. When is this
-  /// used?
+  /// This flag is marked on the components of a function argVec at
+  /// positions where by-ref arguments are expected.
   ///
   /// The Flag is not marked on the Component types themselves
   /// because this will cause problems with flag propagation during
@@ -98,18 +98,21 @@ enum CompFlagValues {
   /// all of their components and flags match.
   ///
   /// Valid on ty_argvec only.
-  COMP_BYREF      = 0x4u,
+  COMP_BYREF       = 0x04u,
 
-  /// FIX: Very badly named (confusable with BYREF) and what the hell
-  /// does 'extected' mean?
+  /// This flag is marked on the components of a function argVec at
+  /// whenever we don't know the by-ref status of the argument.
+  /// Whenever this flag is set, this parameter's by-ref status is
+  /// open, and can later become by-ref due to unification. If this
+  /// flag is clear, the absence of COMP-BYREF flag decisively states
+  /// that the argument is passed by value only.
+  ///
+  /// This flag is used during inference when we construct a function
+  /// type at the time of application, but do not know the exact
+  /// by-ref state of the parameters. 
   ///
   /// Valid on ty_argvec only.
-  /// This flag indicates that this 
-  /// component is open to be either ByREF
-  /// or ByVALUE. We need this to unify the
-  /// (extected) functions that we build
-  /// with the actual functions.
-  COMP_BYREF_P    = 0x8u,
+  COMP_MAYBE_BYREF = 0x08u,
 };
 typedef sherpa::EnumSet<CompFlagValues> CompFlagSet;
 
@@ -347,7 +350,7 @@ public:
   //
   // we need to unify the T and the n, but we cannot unify the overall
   // types, because they differ w.r.t. mutability.
-
+  
   boost::shared_ptr<ArrLen> arrLen;	// Length in the case of an array type
   
   LitValue  litValue;		// for literal types
@@ -456,6 +459,8 @@ public:
   bool isDecl();
   bool isException();
   bool isStruct();
+  bool isArray();
+  bool isVector();
   bool isTvar();
   bool isVariable(); // Checks beyond mutability maybe-ness
   bool isAtomic();
@@ -464,6 +469,7 @@ public:
   bool isRefType();
   bool isValType();
   bool isByrefType();
+  bool isArrayByref();
   bool isNullableType();
   bool isConstrainedToRefType(boost::shared_ptr<TCConstraints> tcc);
   bool isFnxn();
@@ -493,6 +499,11 @@ public:
   bool isConstReducible(); // (const T) is equivalent to minimizeMutability(T)
   size_t nBits();
   bool needsCaptureConversion();
+
+  // Check if values of a type cannot be returned or be captured
+  // Currently true only for array-by-ref
+  bool isNonEscaping();
+
   // Test if the type is a variable that can be substituted with
   // another type. Tests if the type is a variable (mbFull or mbTop)
   // wherein the variable (possible within Var() component) is 

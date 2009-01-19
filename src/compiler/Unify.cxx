@@ -208,14 +208,14 @@ UnifyFnArgs(std::ostream& errStream, shared_ptr<Trail> trail,
   
   for (size_t i=0; i< t1->components.size(); i++) {
     
-    if ((t1->CompFlags(i) & COMP_BYREF_P) &&
-	((t2->CompFlags(i) & COMP_BYREF_P) == 0)) {
-      t1->CompFlags(i) &= ~COMP_BYREF_P;
+    if ((t1->CompFlags(i) & COMP_MAYBE_BYREF) &&
+	((t2->CompFlags(i) & COMP_MAYBE_BYREF) == 0)) {
+      t1->CompFlags(i) &= ~COMP_MAYBE_BYREF;
       t1->CompFlags(i) |= t2->CompFlags(i) & COMP_BYREF;
     }
-    else if ((t2->CompFlags(i) & COMP_BYREF_P) &&
-	     ((t1->CompFlags(i) & COMP_BYREF_P) == 0)) {
-      t2->CompFlags(i) &= ~COMP_BYREF_P;
+    else if ((t2->CompFlags(i) & COMP_MAYBE_BYREF) &&
+	     ((t1->CompFlags(i) & COMP_MAYBE_BYREF) == 0)) {
+      t2->CompFlags(i) &= ~COMP_MAYBE_BYREF;
       t2->CompFlags(i) |= t1->CompFlags(i) & COMP_BYREF;
     }
     else if (t1->CompFlags(i) != t2->CompFlags(i)) {
@@ -573,7 +573,9 @@ Unify(std::ostream& errStream,
 	CHKERR(errFree, 
 	       Unify(errStream, trail, errLoc, t1->Base(), 
 		     t2->Base(), uflags));
-
+	
+	// FIX: Need to link arrLen structures here, since 
+	// the two length might be 0, indicating later resolvability.
 	if (t1->arrLen->len == t2->arrLen->len)
 	  break;
       
@@ -676,6 +678,7 @@ Unify(std::ostream& errStream,
     
     case ty_ref:
     case ty_byref:
+    case ty_array_byref:
       {
 	CHKERR(errFree,
 	       Unify(errStream, trail, errLoc, t1->Base(), 

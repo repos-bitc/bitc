@@ -442,11 +442,6 @@ enum AstFlagValues {
   /// by-ref constructor at every r-value usage of the identifier.
   ARG_BYREF = 0x20000000u,
 
-  /// @brief Parameter is array-by-reference.
-  ///
-  /// See discussion of ARG_BYREF, above.
-  ARG_ARRAY_BYREF = 0x40000000u,
-
   /// @brief Set of ast flag values that must be masked from
   /// definitions when copying to use cases.
   MASK_FLAGS_FROM_USE = (DEF_IS_ENTRYPT|ID_IS_CAPTURED)
@@ -1056,7 +1051,7 @@ GROUP eform = literal | var | unit
  	    | container | do
 	    | mkClosure | allocREF | copyREF | setClosure
 	    | block | return_from
-	    | sizeof | bitsizeof
+	    | sizeof | bitsizeof | mkArrayByref
             // | loop | typecase | casebang
             ;
 // *select* is record selection.
@@ -1150,6 +1145,9 @@ AST allocREF = type;
 AST copyREF = expr expr;
 AST mkClosure = expr ident;
 AST setClosure = ident expr expr+;
+
+// Build an array-by-ref pair
+AST mkArrayByref = expr;
 
 // BLOCK and RETURN-FROM
 AST block = ident expr;

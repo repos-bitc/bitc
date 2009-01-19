@@ -216,6 +216,23 @@ findusedef(std::ostream &errStream,
 
 	  ast->flags |= ID_IS_CLOSED;
 	  ast->symbolDef->flags |= ID_IS_CAPTURED;
+	  
+	  if(ast->flags & ARG_BYREF) {
+	    errStream << ast->loc << ": Non-Capturable by-ref variable "
+		      << ast->s
+		      << " captured in a closure."
+		      << std::endl;
+	    errFree = false;
+	  }
+
+	  if(ast->symType->isNonEscaping()) {
+	    errStream << ast->loc << ": Variable " << ast->s 
+		      << " with Non-Capturable type "
+		      << ast->symType->asString()
+		      << " captured in a closure."
+		      << std::endl;
+	    return false;
+	  }
 
 	  if (ast->symbolDef->getType()->needsCaptureConversion()) {
 	    ast->flags |= ID_NEEDS_HEAPIFY;
@@ -451,6 +468,7 @@ findusedef(std::ostream &errStream,
   case at_vector:
   case at_array:
   case at_makevectorL:
+  case at_mkArrayByref:
   case at_apply:
     {
       for (size_t c=0; c<ast->children.size();c++)
