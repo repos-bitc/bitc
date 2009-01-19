@@ -1952,6 +1952,14 @@ resolve(std::ostream& errStream,
       break;
     }
 
+  case at_mkArrayByref:
+    {
+      // match at_expr
+      RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
+	      idc_value, currLB, flags);
+      break;
+    }
+
   case at_copyREF:
   case at_setClosure:
     {

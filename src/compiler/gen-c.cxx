@@ -484,6 +484,7 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
     }
 
   case ty_array:
+  case ty_array_byref:
     {
       out << CMangle(t->mangledString(true));
       break;
@@ -1114,9 +1115,6 @@ toc(std::ostream& errStream,
 
       if (id->flags & ARG_BYREF)
 	out << ")";
-
-      if (id->flags & ARG_ARRAY_BYREF)
-	out << ".contents";
 
       break;
     }
@@ -2063,6 +2061,19 @@ toc(std::ostream& errStream,
 
       break;
     }
+    
+  case at_mkArrayByref:
+    {
+      assert(IDname.size());
+      shared_ptr<Type> arrType = ast->child(0)->symType->getType();
+      assert(arrType->arrLen->len != 0);
+      out << IDname << ".len = " << arrType->arrLen->len << ";" << endl;
+      out << IDname << ".elem = ";
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls,
+	  ast, 0, flags);
+      out << ".elem;" << endl;
+      break;
+    }
 
   case at_array:
     {
@@ -2161,7 +2172,9 @@ toc(std::ostream& errStream,
 
   case at_array_length:
     {
-      out << ast->child(0)->symType->getBareType()->arrLen->len;
+      shared_ptr<Type> arrType =
+	ast->child(0)->symType->getBareType();
+      out << arrType->arrLen->len;
       break;
     }
 
@@ -2585,6 +2598,7 @@ static void
 emit_arr_vec_fn_types(shared_ptr<Type> candidate,
 		      INOstream &out,
 		      set<string>& arrSet,
+		      set<string>& arrByrefSet,
 		      set<string>& vecSet,
 		      set<string>& fnSet)
 {
@@ -2596,11 +2610,11 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
 
   for (size_t i=0; i<t->typeArgs.size(); i++)
     emit_arr_vec_fn_types(t->TypeArg(i), out,
-			     arrSet, vecSet, fnSet);
+			  arrSet, arrByrefSet, vecSet, fnSet);
 
   for (size_t i=0; i<t->components.size(); i++)
     emit_arr_vec_fn_types(t->CompType(i), out,
-			     arrSet, vecSet, fnSet);
+			     arrSet, arrByrefSet, vecSet, fnSet);
 
   switch(t->kind) {
   case ty_array:
@@ -2608,9 +2622,7 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
       if (alreadyEmitted(t, arrSet))
 	break;
 
-      if (t->arrLen->len == 0) {
-	assert(false);
-      }
+      assert(t->arrLen->len != 0);
 
       arrSet.insert(CMangle(t->mangledString(true)));
       //emitted = true;
@@ -2628,6 +2640,34 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
       out.more();
 
       out << toCtype(et) << " elem[" << t->arrLen->len << "];" << endl;
+      out.less();
+      out << "} " << CMangle(t->mangledString(true))
+	  << ";" << endl << endl;
+      break;
+    }
+
+  case ty_array_byref:
+    {
+      if (alreadyEmitted(t, arrByrefSet))
+	break;
+
+      arrByrefSet.insert(CMangle(t->mangledString(true)));
+      //emitted = true;
+      //std::cerr << "Emitted: " << CMangle(t->mangledString(true))
+      //	  << " for " << t->asString()
+      // 	  << std::endl;
+
+      shared_ptr<Type> et = t->Base()->getBareType();
+      out << "/* Typedef in anticipation of the arrayByRef type:"
+	  << endl
+	  << t->asString()
+	  << "*/" << endl;
+	
+      out << "typedef struct {" << endl;
+      out.more();
+      
+      out << "bitc_word_t len;" << endl;
+      out << toCtype(et) << " *elem;" << endl;
       out.less();
       out << "} " << CMangle(t->mangledString(true))
 	  << ";" << endl << endl;
@@ -2689,17 +2729,18 @@ static void
 emit_arr_vec_fn_types(shared_ptr<AST> ast,
 		      INOstream &out,
 		      set<string>& arrSet,
+		      set<string>& arrByrefSet,
 		      set<string>& vecSet,
 		      set<string>& fnSet)
 {
   if (ast->symType)
     emit_arr_vec_fn_types(ast->symType, out,
-			     arrSet, vecSet, fnSet);
+			     arrSet, arrByrefSet, vecSet, fnSet);
 
 
   for (size_t c = 0; c < ast->children.size(); c++)
     emit_arr_vec_fn_types(ast->child(c), out,
-			     arrSet, vecSet, fnSet);
+			     arrSet, arrByrefSet, vecSet, fnSet);
 }
 
 
@@ -2713,6 +2754,7 @@ TypesTOC(std::ostream& errStream,
   bool errFree = true;
   shared_ptr<AST> mod = uoc->uocAst;
   set<string> arrSet;
+  set<string> arrByrefSet;
   set<string> vecSet;
   set<string> fnSet;
 
@@ -2746,8 +2788,8 @@ TypesTOC(std::ostream& errStream,
 	//    << " \"" << *(ast->loc.path) << "\""
 	//    << std::endl;
 
-	emit_arr_vec_fn_types(ast, out, arrSet, vecSet,
-				 fnSet);
+	emit_arr_vec_fn_types(ast, out, arrSet, arrByrefSet,  
+			      vecSet, fnSet);
 
 	out << "/***************************************" << endl
 	    << "   " << ast->loc << endl
@@ -2778,8 +2820,8 @@ TypesTOC(std::ostream& errStream,
 	//    << " \"" << *(ast->loc.path) << "\""
 	//    << std::endl;
 	
-	emit_arr_vec_fn_types(ast, out, arrSet, vecSet,
-				 fnSet);
+	emit_arr_vec_fn_types(ast, out, arrSet, arrByrefSet, 
+			      vecSet, fnSet);
 
 	out << "/***************************************" << endl
 	    << "   " << ast->loc << endl
@@ -2796,8 +2838,8 @@ TypesTOC(std::ostream& errStream,
     case at_recdef:
     case at_define:
       {
-	emit_arr_vec_fn_types(ast, out, arrSet, vecSet,
-				 fnSet);
+	emit_arr_vec_fn_types(ast, out, arrSet, arrByrefSet, 
+			      vecSet, fnSet);
 	break;
       }
 

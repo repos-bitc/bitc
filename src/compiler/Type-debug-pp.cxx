@@ -259,6 +259,10 @@ Type::toString()
     ss << "(by-ref " << Base()->toString() << ")";
     break;
 
+  case ty_array_byref:
+    ss << "(array-by-ref " << Base()->toString() << ")";
+    break;
+
   case ty_mutable:
     ss << "(mutable " << Base()->toString() << ")";
     break;

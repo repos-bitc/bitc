@@ -334,6 +334,7 @@ TopInit(std::ostream& errStream,
   case at_return_from:
   case at_vector:
   case at_makevectorL:
+  case at_mkArrayByref:
   case at_begin:
   case at_array_length:
   case at_vector_length:

@@ -378,6 +378,9 @@ AST::atKwd() const
   case at_mkClosure:
     return "MAKE-CLOSURE";
 
+  case at_mkArrayByref:
+    return "MAKE-ARRAY-BY-REF";
+
   case at_copyREF:
     return "COPY-REF";
 

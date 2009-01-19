@@ -139,7 +139,7 @@ buildFnFromApp(shared_ptr<AST> ast)
   for (size_t i = 1; i < ast->children.size(); i++) {
     shared_ptr<Type> argi = MBF(newTvar());
     shared_ptr<comp> ncomp = comp::make(argi);
-    ncomp->flags |= COMP_BYREF_P;
+    ncomp->flags |= COMP_MAYBE_BYREF;
     targ->components.push_back(ncomp);
   }
   
@@ -219,7 +219,6 @@ findField(std::ostream& errStream,
   return false;
 }
 
-
 static bool
 findComponent(std::ostream& errStream, 
 	      shared_ptr<Type> sut, shared_ptr<AST> ast, shared_ptr<Type> &fct)
@@ -272,6 +271,21 @@ findComponent(std::ostream& errStream,
 }
 
 static bool
+testNonEscaping(std::ostream& errStream, shared_ptr<AST> errAst,
+		shared_ptr<Type> t)
+{
+  if(t->isNonEscaping()) {
+    errStream << errAst->loc << ": Non-Capturable type "
+	      << t->asString()
+	      << " in Captuarable/Escape position."
+	      << std::endl;
+    return false;
+  }
+  
+  return true;
+}
+
+static bool
 ProcessLetExprs(std::ostream& errStream, shared_ptr<AST> lbs, 
 		shared_ptr<TSEnvironment > gamma,
 		shared_ptr<InstEnvironment > instEnv,
@@ -286,6 +300,8 @@ ProcessLetExprs(std::ostream& errStream, shared_ptr<AST> lbs,
     shared_ptr<AST> expr = lb->child(1);
     TYPEINFER(expr, gamma, instEnv, impTypes, isVP, tcc,
 	      trail, USE_MODE, TI_EXPRESSION);
+    
+    CHKERR(errFree, testNonEscaping(errStream, expr, expr->symType));
   }
   return errFree;
 }
@@ -2893,16 +2909,17 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     {      
       shared_ptr<Type> fnarg = Type::make(ty_fnarg);
       for (size_t c = 0; c < ast->children.size(); c++) {
-	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
+	shared_ptr<AST> arg = ast->child(c);
+	TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
 		  trail, mode, TI_NON_APP_TYPE);
-	shared_ptr<Type> argType = ast->child(c)->symType->getType();
+	shared_ptr<Type> argType = arg->symType->getType();
 
 	shared_ptr<comp> nComp = comp::make(argType);	
 	if (argType->isByrefType()) {
 	  nComp = comp::make(argType->Base());
 	  nComp->flags |= COMP_BYREF;
 	}
-	
+
 	fnarg->components.push_back(nComp);
       }
       ast->symType = fnarg;
@@ -3217,6 +3234,36 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
+
+  case at_mkArrayByref:
+    {
+      /*------------------------------------------------
+	         A |- e:t  U(t = 'w|(array 'a ?))
+          _________________________________________________
+            A |- (make-array-byref e): (array-byref 'a)
+	------------------------------------------------*/
+      // match agt_expr
+      shared_ptr<AST> arg = ast->child(0);
+
+      // Usually, the type of the child is always inferred because 
+      // at_maArrayByref is constructed from at_apply case after
+      // observing the type of the argument
+      if(!arg->symType)
+	TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
+		  trail,  USE_MODE, TI_EXPRESSION);
+      
+      shared_ptr<Type> var = Type::make(ty_tvar);
+      shared_ptr<Type> arr = Type::make(ty_array, var);
+      
+      UNIFY(trail, arg->loc, arg->symType, MBF(arr));
+      if(errFree)
+	ast->symType = Type::make(ty_array_byref, arr->Base());
+      else
+	ast->symType = Type::make(ty_tvar);
+      
+      break;
+    }
+
   case at_makevectorL:
     {
       /*------------------------------------------------
@@ -3251,6 +3298,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       UNIFY(trail, ast->child(1)->loc, 
 	    ast->child(1)->symType, fnType);
       
+      CHKERR(errFree, testNonEscaping(errStream, ast, ret));
+
       ast->symType = Type::make(ty_vector, MBF(ret));
       break;
     }
@@ -3274,15 +3323,19 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       Kind k = (ast->astType == at_array) ? ty_array : ty_vector;
       shared_ptr<Type> compType = MBF(newTvar());
       ast->symType = Type::make(k, compType);
-      ast->symType->arrLen->len = ast->children.size();
+      if(k == ty_array)
+	ast->symType->arrLen->len = ast->children.size();
       
       // match agt_expr+
       for (size_t c = 0; c < ast->children.size(); c++) {
-	TYPEINFER(ast->child(c), gamma, instEnv, impTypes, isVP, tcc,
+	shared_ptr<AST> expr = ast->child(c);
+	TYPEINFER(expr, gamma, instEnv, impTypes, isVP, tcc,
 		  trail,  USE_MODE, TI_EXPRESSION);
 	
-	UNIFY(trail, ast->child(c)->loc, 
-	      ast->child(c)->symType, MBF(compType));
+	CHKERR(errFree, testNonEscaping(errStream, expr,
+					expr->symType)); 
+	
+	UNIFY(trail, expr->loc, expr->symType, MBF(compType));
       }
       
       break;
@@ -3756,21 +3809,40 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> fnArgs = Fn->Args();
       for (size_t i = 0; i < ast->children.size()-1; i++) {
 	shared_ptr<AST> arg = ast->child(i+1);
-	shared_ptr<Type> fnArg = fnArgs->CompType(i);
 	TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
 		  trail,  USE_MODE, TI_EXPRESSION);
+	
+	shared_ptr<Type> fnArg = fnArgs->CompType(i)->getType();
+	shared_ptr<Type> acArg = arg->symType->getType();
 	
 	// by-ref arguments need strict compatibility.
 	// by-value arguments can have copy-compatibility.
 	if (fnArgs->CompFlags(i) & COMP_BYREF)
-	  UNIFY(trail, ast->child(i+1)->loc, 
-		fnArg, arg->symType);
+	  UNIFY(trail, arg->loc, fnArg, acArg);
+	else if(fnArg->isArrayByref()) {
+
+	  // This case is an array argument being applied when an
+	  // array-byref is expected, so need to construct the
+	  // array-byref pair.
+	  if(acArg->isArray()) {
+	    ast->child(1) = AST::make(at_mkArrayByref, arg->loc, arg);
+	    arg = ast->child(1);
+	    TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
+		      trail,  USE_MODE, TI_EXPRESSION);
+	    acArg = arg->symType->getType();
+	  }
+	  
+	  UNIFY(trail, arg->loc, fnArg, acArg);
+	}
 	else
-	  UNIFY(trail, ast->child(i+1)->loc, 
-		MBF(fnArg), arg->symType);
+	  UNIFY(trail, arg->loc, MBF(fnArg), acArg);
+	
       }
       
-      ast->symType = MBF(Fn->Ret());
+      shared_ptr<Type> ret = MBF(Fn->Ret());
+      CHKERR(errFree, testNonEscaping(errStream, ast, ret));
+
+      ast->symType = ret;
       break;
     }
     
@@ -3847,6 +3919,9 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
 		  trail, USE_MODE, TI_EXPRESSION);
 
+	CHKERR(errFree, testNonEscaping(errStream, arg,
+					arg->symType)); 
+
 	shared_ptr<Type> tv = newTvar();
 	UNIFY(trail, arg->loc, t->CompType(i), MBF(tv)); 
 	UNIFY(trail, arg->loc, arg->symType, MBF(tv));
@@ -3919,7 +3994,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	shared_ptr<AST> arg = ast->child(i+1);
 	TYPEINFER(arg, gamma, instEnv, impTypes, isVP, tcc,
 		  trail,  USE_MODE, TI_EXPRESSION);
-	
+
+	CHKERR(errFree, testNonEscaping(errStream, arg,
+					arg->symType)); 
+
 	shared_ptr<Type> tv = newTvar();
 	UNIFY(trail, arg->loc, t->CompType(i), MBF(tv));
 	
@@ -4106,6 +4184,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       UNIFY(trail, ast->child(1)->loc,
 	    ast->child(1)->symType, MBF(base));
+
+      CHKERR(errFree, testNonEscaping(errStream, ast->child(0), base));
       break;
     }
 

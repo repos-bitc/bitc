@@ -384,11 +384,24 @@ Type::isByrefType()
 }
 
 bool 
+Type::isArrayByref()
+{
+  shared_ptr<Type> t = getBareType();
+  return (t->kind == ty_array_byref);
+}
+
+bool 
 Type::isNullableType()
 {
   shared_ptr<Type> t = getBareType();
   return (t->kind == ty_unionv &&
 	  (t->defAst->flags & NULLABLE_UN));
+}
+
+bool 
+Type::isNonEscaping()
+{
+  return isArrayByref();
 }
 
 
@@ -956,6 +969,21 @@ Type::isStruct()
 	  (t->kind == ty_structr));
 }
 
+bool
+Type::isArray()
+{
+  shared_ptr<Type> t = getBareType();
+  return (t->kind == ty_array);
+}
+
+bool
+Type::isVector()
+{
+  shared_ptr<Type> t = getBareType();
+  return (t->kind == ty_vector);
+}
+
+
 bool 
 Type::isDecl()
 {
@@ -1020,6 +1048,7 @@ Type::isOfInfiniteType()
   case ty_vector:
   case ty_ref:
   case ty_byref:
+  case ty_array_byref:
   case ty_mutable:
   case ty_const:
   case ty_fn:
@@ -1147,7 +1176,10 @@ comp::comp(const std::string s, shared_ptr<Type> t, CompFlagSet _flags)
 #define TYPE_CTR_INIT(k) do {			\
     kind = k;					\
     defAst = GC_NULL;				\
-    arrLen = ArrLen::make(0);			\
+    if(kind == ty_array)			\
+      arrLen = ArrLen::make(0);			\
+    else					\
+      arrLen = GC_NULL;				\
     Isize = 0;					\
     minSignedRep = 0;				\
     minUnsignedRep = 0;				\

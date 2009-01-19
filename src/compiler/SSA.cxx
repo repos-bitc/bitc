@@ -502,6 +502,7 @@ ssa(std::ostream& errStream,
   case at_makevectorL:
   case at_throw:
   case at_mkClosure:
+  case at_mkArrayByref:
     {
       for (c=0; c < ast->children.size(); c++) {
 	SSA(errStream, uoc, ast->child(c), grandLet, identList, 

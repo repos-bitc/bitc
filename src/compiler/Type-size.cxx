@@ -208,7 +208,11 @@ Type::size()
   case ty_ref:
   case ty_byref:
   case ty_exn:
-    theSize = TARGET_QUAD_SIZE;
+    theSize = TARGET_WORD_SIZE;
+    break;
+
+  case ty_array_byref:
+    theSize = TARGET_WORD_SIZE * 2;
     break;
 
   case ty_tvar:

@@ -1587,8 +1587,6 @@ lambdapattern: ident ':' type_pl_byref {
   $$ = AST::make(at_identPattern, $1->loc, $1, $3);
   if ($3->astType == at_byRefType)
     $1->flags |= ARG_BYREF;
-  else if ($3->astType == at_arrayByRefType)
-    $1->flags |= ARG_ARRAY_BYREF;
 };
 
 lambdapattern: '(' tk_THE type ident ')' {
@@ -1605,7 +1603,6 @@ lambdapattern: '(' tk_THE '(' tk_BY_REF type ')' ident ')' {
 lambdapattern: '(' tk_THE '(' tk_ARRAY_BY_REF type ')' ident ')' {
   SHOWPARSE("lambdapattern -> ( THE ( ARRAY_BY-REF type ) ident )");
   $$ = AST::make(at_identPattern, $1.loc, $7, $5);
-  $5->flags |= ARG_ARRAY_BYREF;
 };
 
 // EXPRESSIONS [7]
