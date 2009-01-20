@@ -175,8 +175,10 @@ stripDocString(shared_ptr<AST> exprSeq)
  //%token <tok> tk_MAKE_VECTOR
 %token <tok> tk_MAKE_VECTORL
 %token <tok> tk_ARRAY_LENGTH
+%token <tok> tk_ARRAY_REF_LENGTH
 %token <tok> tk_VECTOR_LENGTH
 %token <tok> tk_ARRAY_NTH
+%token <tok> tk_ARRAY_REF_NTH
 %token <tok> tk_VECTOR_NTH
 
 %token <tok> tk_DEFSTRUCT
@@ -1759,6 +1761,10 @@ eform: '(' tk_ARRAY_NTH expr expr ')' {
   SHOWPARSE("eform -> ( ARRAY-NTH expr expr )");
   $$ = AST::make(at_array_nth, $2.loc, $3, $4);
 };
+eform: '(' tk_ARRAY_REF_NTH expr expr ')' {
+  SHOWPARSE("eform -> ( ARRAY-REF-NTH expr expr )");
+  $$ = AST::make(at_array_ref_nth, $2.loc, $3, $4);
+};
 eform: '(' tk_VECTOR_NTH expr expr ')' {
   SHOWPARSE("eform -> ( VECTOR-NTH expr expr )");
   $$ = AST::make(at_vector_nth, $2.loc, $3, $4);
@@ -1856,6 +1862,10 @@ eform: '(' tk_RETURN_FROM ident expr ')' {
 eform: '(' tk_ARRAY_LENGTH expr ')' {
   SHOWPARSE("eform -> ( ARRAY-LENGTH expr )");
   $$ = AST::make(at_array_length, $2.loc, $3);
+};
+eform: '(' tk_ARRAY_REF_LENGTH expr ')' {
+  SHOWPARSE("eform -> ( ARRAY-REF-LENGTH expr )");
+  $$ = AST::make(at_array_ref_length, $2.loc, $3);
 };
 // VECTOR-LENGTH [7.11.1]
 eform: '(' tk_VECTOR_LENGTH expr ')' {

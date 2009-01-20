@@ -39,9 +39,14 @@
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define (f x:(array-by-ref int32)) ())
-(define arr (array 1:int32 2 3 4 5 6 7 8 9 10))
+(define (g x:(array-by-ref 'a)) 
+  (array-ref-length x))
+
+(define (f x:(array-by-ref 'a)) 
+  (array-ref-nth x (/ (g x) 2)))
+
+(define arr (array 1 2 3 4 5 6 7 8 9 10))
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (f arr) 0))
+    (f arr)))

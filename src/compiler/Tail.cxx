@@ -295,8 +295,10 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_deref:
   case at_inner_ref:
   case at_array_length:
+  case at_array_ref_length:
   case at_vector_length:
   case at_array_nth:
+  case at_array_ref_nth:
   case at_vector_nth:
   case at_vector:
   case at_array:

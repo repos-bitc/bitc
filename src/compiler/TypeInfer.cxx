@@ -3342,6 +3342,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     }
 
   case at_array_length:
+  case at_array_ref_length:
   case at_vector_length:
     {
     /*------------------------------------------------
@@ -3350,11 +3351,17 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
              A |- (array-length e): word
 
 
+             A |- e: t   U(t = 'a|array-ref('c|'b))
+          _________________________________________
+             A |- (array-ref-length e): word
+
              A |- e: t   U(t = 'a|vector('c|'b))
           _________________________________________
              A |- (vector-length e): word
        ------------------------------------------------*/
-      Kind k = (ast->astType == at_array_length) ? ty_array : ty_vector;
+      Kind k = ((ast->astType == at_array_length) ? ty_array :
+		((ast->astType == at_array_ref_length) ?
+		 ty_array_byref : ty_vector));
       
       // match agt_expr
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
@@ -3372,13 +3379,19 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     }
 
   case at_array_nth:
+  case at_array_ref_nth:
   case at_vector_nth:
     {
     /*------------------------------------------------
              A |- e: t   U(t = 'a!array('b|'c, ?len))
              A |- en: tn  U(tn = 'd|word)
           _________________________________________
-             A |- (array-nth e): 'b|'c
+             A |- (array-nth e en): 'b|'c
+
+             A |- e: t   U(t = 'a!array-ref('b|'c))
+             A |- en: tn  U(tn = 'd|word)
+          _________________________________________
+             A |- (array-ref-nth e en): 'b|'c
 
 
              A |- e: t   U(t = 'a|vector('b|'c))
@@ -3391,18 +3404,19 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       shared_ptr<Type> av = GC_NULL;
       shared_ptr<Type> cmp = MBF(newTvar());
-      if (ast->astType == at_array_nth) {
-	av = MBT(Type::make(ty_array, cmp));
+      Kind k = ((ast->astType == at_array_nth) ? ty_array :
+		((ast->astType == at_array_ref_nth) ?
+		 ty_array_byref : ty_vector));
+      
+      av = MBT(Type::make(k, cmp));
+      if (ast->astType == at_array_nth)
 	impTypes[av] = ast->child(0);
-      }
-      else {
-	av = MBF(Type::make(ty_vector, cmp));
-      }
       
       UNIFY(trail, ast->child(0)->loc, ast->child(0)->symType, av);
       
       TYPEINFER(ast->child(1), gamma, instEnv, impTypes, isVP, tcc,
 		trail,  USE_MODE, TI_EXPRESSION);
+
       // FIX TO WORD
       UNIFY(trail, ast->child(1)->loc, 
 	    ast->child(1)->symType, MBF(Type::make(ty_word)));

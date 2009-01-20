@@ -189,6 +189,8 @@ struct SexprLexer::KeyWord SexprLexer::keywords[] = {
   { "array-by-ref",     tk_ARRAY_BY_REF },
   { "array-length",     tk_ARRAY_LENGTH },
   { "array-nth",        tk_ARRAY_NTH },
+  { "array-ref-length", tk_ARRAY_REF_LENGTH },
+  { "array-ref-nth",    tk_ARRAY_REF_NTH },
   { "as",               tk_AS },
   { "assert",           tk_ReservedWord },
   { "begin",            tk_BEGIN },

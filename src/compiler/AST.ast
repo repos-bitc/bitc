@@ -1052,6 +1052,7 @@ GROUP eform = literal | var | unit
 	    | mkClosure | allocREF | copyREF | setClosure
 	    | block | return_from
 	    | sizeof | bitsizeof | mkArrayByref
+  	    | array_ref_nth | array_ref_length
             // | loop | typecase | casebang
             ;
 // *select* is record selection.
@@ -1095,10 +1096,14 @@ AST sel_ctr = expr ident;
 
 // ARRAY-NTH [7.8.2]
 AST array_nth = expr expr;
+AST array_ref_nth = expr expr;
+
 // VECTOR-NTH [7.8.2]
 AST vector_nth = expr expr;
 // ARRAY-LENGTH [7.8.1]
 AST array_length = expr;
+AST array_ref_length = expr;
+
 // VECTOR-LENGTH [7.8.1]
 AST vector_length = expr;
 

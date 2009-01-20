@@ -501,8 +501,10 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_constType:
   case at_condelse:
   case at_array_nth:
+  case at_array_ref_nth:
   case at_vector_nth:
   case at_array_length:
+  case at_array_ref_length:
   case at_vector_length:
   case at_localFrame:
   case at_frameBindings:

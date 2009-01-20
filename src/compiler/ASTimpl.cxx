@@ -405,6 +405,9 @@ AST::atKwd() const
   case at_array_length:
     return "array-length";
 
+  case at_array_ref_length:
+    return "array-ref-length";
+
   case at_begin:
     return "begin";
 
@@ -545,6 +548,9 @@ AST::atKwd() const
 
   case at_array_nth:
     return "array-nth";
+
+  case at_array_ref_nth:
+    return "array-ref-nth";
 
   case at_vector_nth:
     return "vector-nth";

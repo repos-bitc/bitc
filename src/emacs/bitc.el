@@ -287,8 +287,10 @@ See `run-hooks'."
 	"(\\s-*" (regexp-opt
 	     '(
 	       "#f" "#t"
-	       "and" "apply" "array" "array-length"
-	       "array-nth" "assert"
+	       "and" "apply" "array" "array-by-ref"
+	       "array-length" "array-nth" 
+	       "array-ref-length" "array-ref-nth" 
+	       "assert"
 	       "begin" "bitc-version" "bitfield" "by-ref"
 	       "case" "case!" "catch" "check" "coindset"
 	       "cond" "constrain" 

@@ -462,8 +462,10 @@ findusedef(std::ostream &errStream,
   case at_sw_legs:
   case at_throw:
   case at_array_length:
+  case at_array_ref_length:
   case at_vector_length:
   case at_array_nth:
+  case at_array_ref_nth:
   case at_vector_nth:
   case at_vector:
   case at_array:

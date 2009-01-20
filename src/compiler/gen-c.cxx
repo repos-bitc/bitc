@@ -2178,6 +2178,14 @@ toc(std::ostream& errStream,
       break;
     }
 
+  case at_array_ref_length:
+    {
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls,
+	  ast, 0, flags);
+      out << ".len";
+      break;
+    }
+
   case at_vector_length:
     {
       TOC(errStream, uoc, ast->child(0), out, IDname, decls,
@@ -2187,16 +2195,17 @@ toc(std::ostream& errStream,
     }
 
   case at_array_nth:
+  case at_array_ref_nth:
   case at_vector_nth:
     {
       TOC(errStream, uoc, ast->child(0), out, IDname, decls,
 	  ast, 0, flags);
 
-      if (ast->astType == at_array_nth)
-	out << ".";
-      else
+      if (ast->astType == at_vector_nth)
 	out << "->";
-
+      else
+	out << ".";
+      
       out << "elem[";
       TOC(errStream, uoc, ast->child(1), out, IDname, decls,
 	  ast, 1, flags);

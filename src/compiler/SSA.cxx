@@ -483,6 +483,7 @@ ssa(std::ostream& errStream,
     }
     
   case at_array_length:
+  case at_array_ref_length:
   case at_vector_length:
   case at_struct_apply:
   case at_ucon_apply: 
@@ -590,6 +591,7 @@ ssa(std::ostream& errStream,
     }
 
   case at_array_nth:
+  case at_array_ref_nth:
   case at_vector_nth:
     {
       shared_ptr<AST> expr = ast->child(0);
@@ -625,11 +627,13 @@ ssa(std::ostream& errStream,
       IOB->symType = Type::make(ty_exn);
       InstMangle(IOB);
 
-      shared_ptr<AST> len;
-      if (ast->astType == at_array_nth)
-	len = AST::make(at_array_length, ast->loc, UseCase(expr));
-      else
-	len = AST::make(at_vector_length, ast->loc, UseCase(expr));
+      AstType lenType = ((ast->astType == at_array_nth) ?
+			 at_array_length :
+			 ((ast->astType == at_array_ref_nth) ?
+			  at_array_ref_length : at_vector_length));
+      
+      shared_ptr<AST> len = AST::make(lenType, ast->loc,
+				      UseCase(expr));
       
       shared_ptr<AST> ltApp = AST::make(at_apply, ast->loc, lt, UseCase(ndx), len);
       

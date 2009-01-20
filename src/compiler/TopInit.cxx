@@ -337,8 +337,10 @@ TopInit(std::ostream& errStream,
   case at_mkArrayByref:
   case at_begin:
   case at_array_length:
+  case at_array_ref_length:
   case at_vector_length:
   case at_array_nth:
+  case at_array_ref_nth:
   case at_vector_nth:
   case at_if:
   case at_when:

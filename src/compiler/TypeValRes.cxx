@@ -243,14 +243,6 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
-  case at_and:
-  case at_or:
-  case at_not:
-    {
-      itsExpansive = false;
-      break;
-    }
-
   case at_switch:
     {
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
@@ -258,14 +250,6 @@ isExpansive(std::ostream& errStream,
       if (ast->child(3)->astType != at_Null)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 					 ast->child(3)));
-      break;
-    }
-
-  case at_sw_legs:
-    {
-      for (size_t i=0; !itsExpansive && i < ast->children.size(); i++)
-	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
-					 ast->child(i)));
       break;
     }
 
@@ -293,6 +277,19 @@ isExpansive(std::ostream& errStream,
   case at_letGather:
   case at_vector:
   case at_array:
+  case at_mkArrayByref:
+  case at_array_length:
+  case at_array_ref_length:
+  case at_vector_length:
+  case at_array_nth:
+  case at_array_ref_nth:
+  case at_vector_nth:
+  case at_inner_ref:
+  case at_deref:
+  case at_sw_legs:
+  case at_and:
+  case at_or:
+  case at_not:
     {
       for (size_t i=0; !itsExpansive && i < ast->children.size(); i++)
 	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
@@ -311,25 +308,6 @@ isExpansive(std::ostream& errStream,
     {
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
 				       ast->child(0)));      
-      break;
-    }
-
-  case at_array_length:
-  case at_vector_length:
-  case at_array_nth:
-  case at_vector_nth:
-    {
-      CHKEXP(itsExpansive, isExpansive(errStream, gamma,
-				       ast->child(0)));
-      break;
-    }
-
-  case at_inner_ref:
-  case at_deref:
-    {    
-      for (size_t i=0; !itsExpansive && i < ast->children.size(); i++)
-	CHKEXP(itsExpansive, isExpansive(errStream, gamma,
-					 ast->child(i)));
       break;
     }
 
@@ -542,6 +520,7 @@ isExpansive(std::ostream& errStream,
 
   case ty_letGather:
   case ty_array:
+  case ty_array_byref:
   case ty_vector:
     for (size_t i=0; i<t->components.size(); i++) 
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
