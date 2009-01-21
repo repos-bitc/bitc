@@ -394,7 +394,8 @@
 	<literallayout indent="no">
 #f            #t            -&gt;
 and           apply         array         
-array-length  array-nth     begin         
+array-length  array-nth     array-ref
+array-ref-length  array-ref-nth  begin         
 bitc-version  as            bitfield      
 bool          block         by-ref        
 case          catch         char          
@@ -1102,6 +1103,34 @@ use</literallayout>
 	    <progident><em>T</em></progident>. 
 	  </p>
 	</sect3>
+        <sect3 id="type:array-ref">
+	  <title>Array References</title>
+          <p>
+            An array reference is a sequence type whose elements are
+            of type <progident><em>T</em></progident> and whose length
+            is dynamic. A parameter or let binding of type
+            <progident>(array-ref&nbsp;<em>T</em>)</progident> will
+            accept as its corresponding actual parameter or
+            initializer a value of either type
+            <progident>(array-ref&nbsp;<em>T</em>)</progident> or type
+            <progident>(array&nbsp;<em>T</em>&nbsp;<em>len</em>)</progident>
+            for <em>any</em> length. There is no value constructor for
+            array reference types.
+          </p>
+          <p>
+            Array references are not permitted to escape. Pending
+            definition of a standardized escape analysis for BitC, the
+            <progident>array-ref</progident> type is not permitted as
+            the return value of a procedure, a non-value expression, a
+            structure field, or a closed-over value. The type:
+          </p>
+	  <literallayout>
+(array-ref <em>T</em>)</literallayout>
+	  <p>
+	    describes array references of element type
+	    <progident><em>T</em></progident>.
+	  </p>
+        </sect3>
       </sect2>
       <sect2>
         <title>Named Constructed Types</title>
@@ -1675,7 +1704,7 @@ use</literallayout>
           is the type of mutable instances of
           <progident><em>T</em></progident>. If the type
           <progident><em>T</em></progident> is a reference type
-          (including by-reference structure types), then the type
+          (including <progident>:ref</progident> structure types), then the type
           <progident>(mutable&nbsp;<em>T</em>)</progident> describes a
           mutable reference to a memory location in the heap.
         </p>
@@ -3246,42 +3275,45 @@ bitsizeof(<em>T</em>)</literallayout>
       <sect2>
         <title>Array and Vector Expressions</title>
         <sect3>
-          <title>array-length, vector-length</title>
+          <title>array-length, array-ref-length, vector-length</title>
           <p>
             If <progident><em>e</em></progident> is an expression of
-            array (respectively: vector) type, then
+            array (respectively: array-ref, vector) type, then
           </p>
           <literallayout>
 (array-length <em>e</em>)
+(array-ref-length <em>e</em>)
 (vector-length <em>e</em>)</literallayout>
           <p indent="no">
-            returns a <progident>word</progident> whose value is the
-            number of elements in the array.
+            return a <progident>word</progident> whose value is the
+            number of elements in the array, array-ref, or vector.
           </p>
         </sect3>
         <sect3>
-          <title>array-nth, vector-nth</title>
+          <title>array-nth, array-ref-nth vector-nth</title>
           <p>
             If <progident><em>e</em></progident> is an expression of
-            array (respectively: vector) type, and
+            array (respectively: array-ref, vector) type, and
             <progident><em>e<sub>i</sub></em></progident> is an
             expression with result type <progident>word</progident>,
             then:
           </p>
           <literallayout>
 (array-nth <em>e<sub>loc</sub></em> <em>e<sub>i</sub></em>)
+(array-ref-nth <em>e<sub>loc</sub></em> <em>e<sub>i</sub></em>)
 (vector-nth <em>e</em> <em>e<sub>i</sub></em>)</literallayout>
           <p indent="no">
             are (respectively) expressions that return the
             <em>e<sub>i</sub></em>'th element of the array
-            (respectively: vector).  If the value
+            (respectively: array-ref, vector).  If the value
             <progident><em>e<sub>i</sub></em></progident> is greater
             than or equal to the length of the array (respectively:
             vector), then a <progident>IndexBoundsError</progident>
             exception is thrown.
           </p>
           <p>
-            <progident>array-nth</progident> and
+            <progident>array-nth</progident>,
+            <progident>array-ref-nth</progident>, and
             <progident>vector-nth</progident> are syntactic forms. The
             returned value is a location, and can be used as an
             argument to <progident>set!</progident>.
