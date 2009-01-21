@@ -1750,7 +1750,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_arrayByRefType:
+  case at_arrayRefType:
   case at_byRefType:
     {
       // match agt_type

@@ -678,7 +678,7 @@ Unify(std::ostream& errStream,
     
     case ty_ref:
     case ty_byref:
-    case ty_array_byref:
+    case ty_array_ref:
       {
 	CHKERR(errFree,
 	       Unify(errStream, trail, errLoc, t1->Base(), 

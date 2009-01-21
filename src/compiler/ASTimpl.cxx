@@ -320,7 +320,7 @@ AST::atKwd() const
   case at_byRefType:
     return "by-ref";
 
-  case at_arrayByRefType:
+  case at_arrayRefType:
     return "array-by-ref";
 
   case at_refType:

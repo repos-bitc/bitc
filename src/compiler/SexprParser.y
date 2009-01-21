@@ -210,7 +210,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_DO
 %token <tok> tk_APPLY
 %token <tok> tk_BY_REF
-%token <tok> tk_ARRAY_BY_REF
+%token <tok> tk_ARRAY_REF
 
 %token <tok> tk_EXCEPTION
 %token <tok> tk_TRY
@@ -1507,9 +1507,9 @@ type_pl_byref: '(' tk_BY_REF type ')' {
   $$ = AST::make(at_byRefType, $2.loc, $3);
 };
 
-type_pl_byref: '(' tk_ARRAY_BY_REF type ')' {
+type_pl_byref: '(' tk_ARRAY_REF type ')' {
   SHOWPARSE("type_pl_byref -> ( ARRAY-BY-REF type )");
-  $$ = AST::make(at_arrayByRefType, $2.loc, $3);
+  $$ = AST::make(at_arrayRefType, $2.loc, $3);
 };
 
 types_pl_byref: type_pl_byref {
@@ -1602,8 +1602,8 @@ lambdapattern: '(' tk_THE '(' tk_BY_REF type ')' ident ')' {
   $5->flags |= ARG_BYREF;
 };
 
-lambdapattern: '(' tk_THE '(' tk_ARRAY_BY_REF type ')' ident ')' {
-  SHOWPARSE("lambdapattern -> ( THE ( ARRAY_BY-REF type ) ident )");
+lambdapattern: '(' tk_THE '(' tk_ARRAY_REF type ')' ident ')' {
+  SHOWPARSE("lambdapattern -> ( THE ( ARRAY-REF type ) ident )");
   $$ = AST::make(at_identPattern, $1.loc, $7, $5);
 };
 

@@ -2753,7 +2753,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
     // The restriction that byref types can only appear on the
     // arguments of a function is enforced in the parser.
-  case at_arrayByRefType:
+  case at_arrayRefType:
     {
       // match agt_type
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
@@ -2761,7 +2761,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     
       shared_ptr<Type> t = ast->child(0)->getType();
     
-      ast->symType = Type::make(ty_array_byref);
+      ast->symType = Type::make(ty_array_ref);
       ast->symType->components.push_back(comp::make(t));
     
       break;
@@ -3257,7 +3257,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       UNIFY(trail, arg->loc, arg->symType, MBF(arr));
       if(errFree)
-	ast->symType = Type::make(ty_array_byref, arr->Base());
+	ast->symType = Type::make(ty_array_ref, arr->Base());
       else
 	ast->symType = Type::make(ty_tvar);
       
@@ -3361,7 +3361,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
        ------------------------------------------------*/
       Kind k = ((ast->astType == at_array_length) ? ty_array :
 		((ast->astType == at_array_ref_length) ?
-		 ty_array_byref : ty_vector));
+		 ty_array_ref : ty_vector));
       
       // match agt_expr
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,
@@ -3406,7 +3406,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> cmp = MBF(newTvar());
       Kind k = ((ast->astType == at_array_nth) ? ty_array :
 		((ast->astType == at_array_ref_nth) ?
-		 ty_array_byref : ty_vector));
+		 ty_array_ref : ty_vector));
       
       av = MBT(Type::make(k, cmp));
       if (ast->astType == at_array_nth)

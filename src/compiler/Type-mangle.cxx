@@ -219,7 +219,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     ss << "Z" << Base()->mangledString(igMut, false, maxArgMut);
     break;
     
-  case ty_array_byref:
+  case ty_array_ref:
     ss << "W" << Base()->mangledString(igMut, false, maxArgMut);
     break;
 

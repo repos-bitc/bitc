@@ -1269,7 +1269,7 @@ Type::markSignMbs(bool cppos)
   case ty_vector:
   case ty_ref:
   case ty_byref:
-  case ty_array_byref:
+  case ty_array_ref:
     {
       t->Base()->markSignMbs(false);
       break;
@@ -1360,7 +1360,7 @@ Type::fixupFnTypes()
   case ty_vector:    
   case ty_ref:
   case ty_byref:
-  case ty_array_byref:
+  case ty_array_ref:
     {
       t->Base()->fixupFnTypes();
       break;

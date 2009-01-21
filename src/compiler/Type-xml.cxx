@@ -315,7 +315,7 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
       break;
     }
 
-  case ty_array_byref:
+  case ty_array_ref:
     {
       out << "<array-byref>" << endl;
       out.more();

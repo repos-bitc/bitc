@@ -186,7 +186,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_VECTOR_NTH
 
 %token <tok> tk_BY_REF
-%token <tok> tk_ARRAY_BY_REF
+%token <tok> tk_ARRAY_REF
 %token <tok> tk_REF
 %token <tok> tk_VAL
 
@@ -1695,7 +1695,7 @@ type_pl_byref: tk_BY_REF type {
   $$ = AST::make(at_byRefType, $1.loc, $2);
 };
 
-type_pl_byref: tk_ARRAY_BY_REF type {
+type_pl_byref: tk_ARRAY_REF type {
   SHOWPARSE("type_pl_byref -> BY-REF type");
   $$ = AST::make(at_byRefType, $1.loc, $2);
 };

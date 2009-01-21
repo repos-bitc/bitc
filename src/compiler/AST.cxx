@@ -411,8 +411,8 @@ AST::tagName(const AstType at)
     return "at_refType";
   case at_byRefType:
     return "at_byRefType";
-  case at_arrayByRefType:
-    return "at_arrayByRefType";
+  case at_arrayRefType:
+    return "at_arrayRefType";
   case at_valType:
     return "at_valType";
   case at_fn:
@@ -728,8 +728,8 @@ AST::astName() const
     return "refType";
   case at_byRefType:
     return "byRefType";
-  case at_arrayByRefType:
-    return "arrayByRefType";
+  case at_arrayRefType:
+    return "arrayRefType";
   case at_valType:
     return "valType";
   case at_fn:
@@ -1003,7 +1003,7 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_bitfield
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_refType
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_byRefType
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_arrayByRefType
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_arrayRefType
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_valType
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_fn
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_primaryType
@@ -2579,7 +2579,7 @@ AST::isValid() const
     }
     break;
 
-  case at_arrayByRefType: // normal AST:
+  case at_arrayRefType: // normal AST:
     // match agt_type
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());

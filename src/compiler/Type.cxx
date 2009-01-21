@@ -387,7 +387,7 @@ bool
 Type::isArrayByref()
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_array_byref);
+  return (t->kind == ty_array_ref);
 }
 
 bool 
@@ -1048,7 +1048,7 @@ Type::isOfInfiniteType()
   case ty_vector:
   case ty_ref:
   case ty_byref:
-  case ty_array_byref:
+  case ty_array_ref:
   case ty_mutable:
   case ty_const:
   case ty_fn:

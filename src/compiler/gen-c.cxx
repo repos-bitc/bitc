@@ -484,7 +484,7 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
     }
 
   case ty_array:
-  case ty_array_byref:
+  case ty_array_ref:
     {
       out << CMangle(t->mangledString(true));
       break;
@@ -992,7 +992,7 @@ toc(std::ostream& errStream,
 
   case at_refType:
   case at_byRefType:
-  case at_arrayByRefType:
+  case at_arrayRefType:
   case at_exceptionType:
   case at_dummyType:
   case at_valType:
@@ -2655,7 +2655,7 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
       break;
     }
 
-  case ty_array_byref:
+  case ty_array_ref:
     {
       if (alreadyEmitted(t, arrByrefSet))
 	break;

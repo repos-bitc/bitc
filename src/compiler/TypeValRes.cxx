@@ -356,7 +356,7 @@ isExpansive(std::ostream& errStream,
   case at_fields:
   case at_field:
   case at_bitfield:
-  case at_arrayByRefType:
+  case at_arrayRefType:
   case at_byRefType:
   case at_refType:
   case at_exceptionType:
@@ -520,7 +520,7 @@ isExpansive(std::ostream& errStream,
 
   case ty_letGather:
   case ty_array:
-  case ty_array_byref:
+  case ty_array_ref:
   case ty_vector:
     for (size_t i=0; i<t->components.size(); i++) 
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,

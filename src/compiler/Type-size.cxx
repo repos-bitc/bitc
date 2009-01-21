@@ -211,7 +211,7 @@ Type::size()
     theSize = TARGET_WORD_SIZE;
     break;
 
-  case ty_array_byref:
+  case ty_array_ref:
     theSize = TARGET_WORD_SIZE * 2;
     break;
 
