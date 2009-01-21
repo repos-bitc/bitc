@@ -45,6 +45,7 @@
 #define DEBUG_VERBOSE true
 
 #define BEG_SIMP_DEBUG    DEBUG_OFF
+#define METH_DECL_DEBUG   DEBUG_OFF
 #define ILH_DEBUG         DEBUG_OFF   // Inst-Lambda-Hoist
 #define INST_DEBUG        DEBUG_OFF   // Debug Polyinstantiation
 #define INST_ENV_DEBUG    DEBUG_OFF   // Debug Polyinstantiator's env-handling

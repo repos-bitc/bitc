@@ -40,6 +40,7 @@ PASS(parse,         "parser",       "Parsing")
 //Remove redundant begins, simplify local defines
 PASS(reprSimp,      "reprsimp",     "Defrepr Simplification")
 PASS(beginSimp,     "beginsimp",    "Some simplifications in the begining")
+PASS(methDecl,      "methdecl",     "Inject method function proclaims")
 PASS(symresolve,    "symresolve",   "Symbol Resolution")
 PASS(typeCheck,     "typecheck",    "Type Checking")
 PASS(locCheck,      "loccheck",     "Location semantics Checking")

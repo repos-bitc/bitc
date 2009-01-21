@@ -114,8 +114,8 @@ useIFGamma(const std::string& idName,
     shared_ptr<TypeScheme> ts = bdng->val;
 
     if (idName.size())
-      s = idName + "." + s;
-    
+      s = idName + FQName::sep + s;
+
     toEnv->addBinding(s, ts);
     toEnv->setFlags(s, BF_PRIVATE|BF_COMPLETE);
   }  
@@ -138,7 +138,7 @@ useIFInsts(const std::string& idName,
     shared_ptr<set<shared_ptr<Instance> > > insts = bdng->val;
     
     if (idName.size())
-      s = idName + "." + s;
+      s = idName + FQName::sep + s;
     
     toEnv->addBinding(s, insts);
     toEnv->setFlags(s, BF_PRIVATE|BF_COMPLETE);

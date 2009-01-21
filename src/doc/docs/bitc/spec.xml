@@ -1035,7 +1035,7 @@ use</literallayout>
 	    types (including type variables), then:
 	  </p>
 	  <literallayout>
-(fn <em>t<sub>arg_1</sub></em>...<em>t<sub>arg_n</sub></em> -> <em>t<sub>result</sub></em>)</literallayout>
+(fn <em>t<sub>arg_1</sub></em>...<em>t<sub>arg_n</sub></em> -&gt; <em>t<sub>result</sub></em>)</literallayout>
 	  <p indent="no">
 	    is the type of a function taking <em>n</em> arguments of
 	    types <em>t<sub>arg1</sub></em> through
@@ -1046,7 +1046,7 @@ use</literallayout>
 	    function taking zero arguments is written as:
           </p>
 	  <literallayout>
-(fn () <em>t<sub>result</sub></em>)</literallayout>
+(fn -&gt; <em>t<sub>result</sub></em>)</literallayout>
           <p>
             Function types are considered reference types that denote
             an object of statically undefined size. The size and
@@ -1524,15 +1524,85 @@ use</literallayout>
             arguments). 
           </p>          
         </sect3>
+        <sect3 id="ty_object">
+          <title>Objects</title>
+          <p>
+            In BitC, an object provides a form of existential
+            dispatch. Objects are declared similarly to
+            structures. The syntax of an object declaration is:
+          </p>
+	  <literallayout>
+(defobject <em>nm</em> <em>field</em> ...)
+(defobject (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>) <em>field</em> ...)</literallayout>
+          <p indent="no">
+            where each field is required to be of <link
+              href="#ty_method">method</link> type.
+          </p>
+          <p>
+	    An identifier that is bound to a object type may be used
+	    as a procedure to instantiate new values of that object
+	    type. The single argument to this procedure must be an
+	    instance of some compatible structure type
+	    <progident><em>S</em></progident>. A structure type
+	    <progident><em>S</em></progident> is deemed compatible if
+	    <progident><em>S</em></progident> is of reference type and
+	    for every method <progident><em>m</em></progident> in the
+	    object type, there must be a corresponding method of the
+	    same name in <progident><em>S</em></progident> whose type
+	    is at least as general as the method type declared in the
+	    object type.
+          </p>
+	  <p>
+	    An identifier that is bound to a non-parameterized
+	    object type may be used as a type name.  An identifier
+	    that is bound to a parameterized object type may be
+	    used in a type constructor application within a type
+	    specification. Its arguments are the types over which the
+	    newly instantiated object type should be instantiated.
+	    For example, the declarations:
+          </p>
+          <literallayout>
+(defobject O i:int32)
+(defobject (Oparam 'a) x:'a)</literallayout>
+          <p indent="no">
+            define (respectively) the type name
+            <progident>O</progident> and the single argument type
+            constructor <progident>Oparam</progident>.
+          </p>
+          <p>
+            An object occupies two words of storage one of which is a
+            reference to a method table and the other is a reference
+            to an object of corresponding structure type. Construction
+            of an object from a structure instance entails capturing a
+            reference to that instance and a reference to a method
+            table mapping the method declarations of the object onto
+            the corresponding method definitions of the referenced
+            structure type.  Invocation of an object method is
+            realized as invocation of the corresponding method of the
+            referenced structure instance.
+          </p>
+          <sect4>
+            <title>Storage Layout</title>
+            <p>
+              An object occupies two machine words, the first of which
+              is a reference to a method table and the second of which
+              is a reference to an object of corresponding structure
+              type. The alignment of this structure is dictated by the
+              pointer alignment requirements of the underlying
+              hardware implementation. 
+            </p>
+          </sect4>
+        </sect3>
         <sect3>
           <title>Value vs. Reference Types</title>
           <p>
             In the absence of other specification, the
             <progident>defstruct</progident>,
-            <progident>defrepr</progident>, and
-            <progident>defunion</progident> forms declare reference
-            types. The developer may optionally qualify
-            the declaration to make this intention explicit:
+            <progident>defrepr</progident>,
+            <progident>defunion</progident>, and
+            <progident>defobject</progident>, forms declare reference
+            types.  The developer may optionally qualify the
+            declaration to make this intention explicit:
           </p>
 	  <literallayout>
 (defstruct <em>nm</em><b>:ref</b> <em>field</em> ...)
@@ -1618,6 +1688,86 @@ use</literallayout>
             order to declare fields and variables of value type.
           </p>
         </sect3>
+	<sect3>
+	  <title>Method Types</title>
+<!--           <p> -->
+<!--             A method is a function that is syntactically associated -->
+<!--             with a particular object type. If -->
+<!--             <progident><em>e</em></progident> is an expression of -->
+<!--             structure or object type <progident>T</progident>, and -->
+<!--             <progident>m</progident> is a method of -->
+<!--             <progident>T</progident>, then -->
+<!--             <progident>(<em>e</em>.m&nbsp;...)</progident> is an -->
+<!--             application of that method to the object returned by -->
+<!--             <progident><em>e</em></progident>. -->
+<!--           </p> -->
+	  <p>
+	    If <progident>S</progident> is a structure or object type,
+	    and <progident><em>t<sub>arg</sub></em></progident> and
+	    <progident><em>t<sub>result</sub></em></progident> are
+	    types (including type variables), then a field
+	    <progident><em>m</em></progident> of
+	    <progident>S</progident> may be declared as:
+	  </p>
+	  <literallayout>
+(method <em>t<sub>arg_1</sub></em>...<em>t<sub>arg_n</sub></em> -&gt; <em>t<sub>result</sub></em>)</literallayout>
+          <p indent="no">
+            A method type may only be specified as a field type of a
+            field within a structure or object type. Methods occupy no
+            storage in their associated structure or object.
+          </p>
+          <sect4 id="ty_method">
+            <title>Structure Methods</title>
+            <p>
+              In a structure type, methods may be viewed as a
+              procedure proclamation that is coupled to a convenience
+              syntax supported by application. The declarations:
+            </p>
+            <literallayout>
+(defstruct S
+  m: (method int32 -&gt; bool))
+(defstruct T : val
+  m: (method int32 -&gt; bool))</literallayout>
+            <p indent="no">
+              implicitly proclaim (respectively) the procedures:
+            </p>
+            <literallayout>
+(proclaim S.m: (fn S int32 -&gt; bool))
+(proclaim T.m:
+   (fn (by-ref T) int32 -&gt; bool))</literallayout>
+            <p indent="no">
+              where the parameter corresponding to the argument of
+              structure type is <progident>by-ref</progident> exactly if
+              the corresponding structure type is a value type.
+              Implementations of these procedures must be provided
+              elsewhere by the developer.
+            </p>
+            <p>
+              Given these declarations, and an expression
+              <progident><em>e</em></progident> returning a value of
+              type <progident>S</progident>, the application:
+            </p>
+            <literallayout>
+(<em>e</em>.m 3)</literallayout>
+            <p indent="no">
+              is a syntactic convenience for:
+            </p>
+            <literallayout>
+(S.m <em>e</em> 3)</literallayout>
+          </sect4>
+          <sect4>
+            <title>Object Methods</title>
+            <p>
+              In an object type, methods may be viewed as a procedure
+              proclamation that is likewise coupled to a convenience
+              syntax supported by application. As with structure
+              methods, they implicitly proclaim corresponding
+              procedures. In <em>contrast</em> to structure methods,
+              the implementation of these procedures is provided by
+              the compiler.
+            </p>
+          </sect4>
+	</sect3>
 	<sect3>
 	  <title>Named Type Conveniences</title>
 	  <p>

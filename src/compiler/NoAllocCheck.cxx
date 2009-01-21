@@ -71,6 +71,7 @@ AllocCheck(std::ostream &errStream, shared_ptr<AST> ast)
     break;
 
   case at_struct_apply:
+  case at_object_apply:
   case at_ucon_apply:
     if (ast->child(0)->symType->isRefType()) {
       errStream << ast->loc << ": "

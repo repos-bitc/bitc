@@ -102,6 +102,7 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
       return true;
     }
 
+    /// @bug Not clear that this should return true. Swaroop?
   case at_fqCtr:
     {
       return true;

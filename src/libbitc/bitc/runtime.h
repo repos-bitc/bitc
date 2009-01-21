@@ -225,139 +225,139 @@ DEFCLOSURE_INLINE(bitc_index_lt);
 
 #define DEFEQL(TY,MTY)							\
   INLINE bitc_bool_t							\
-  DEFUN(_17bitc_DTprelude_DT___EQ_EQ_SHFN2##MTY##MTY##_4bool, TY arg1, TY arg2) \
+  DEFUN(_17bitc_DTprelude_CN___EQ_EQ_SHFN2##MTY##MTY##_4bool, TY arg1, TY arg2) \
   {									\
     return (arg1 == arg2);						\
   }									\
-  DEFCLOSURE_INLINE(_17bitc_DTprelude_DT___EQ_EQ_SHFN2##MTY##MTY##_4bool)
+  DEFCLOSURE_INLINE(_17bitc_DTprelude_CN___EQ_EQ_SHFN2##MTY##MTY##_4bool)
 
 #define DEFNEQ(TY,MTY)							\
   INLINE bitc_bool_t							\
-  DEFUN(_17bitc_DTprelude_DT___EX_EQ_SHFN2##MTY##MTY##_4bool, TY arg1, TY arg2) \
+  DEFUN(_17bitc_DTprelude_CN___EX_EQ_SHFN2##MTY##MTY##_4bool, TY arg1, TY arg2) \
   {									\
     return (arg1 != arg2);						\
   }									\
-  DEFCLOSURE_INLINE(_17bitc_DTprelude_DT___EX_EQ_SHFN2##MTY##MTY##_4bool)
+  DEFCLOSURE_INLINE(_17bitc_DTprelude_CN___EX_EQ_SHFN2##MTY##MTY##_4bool)
 
 #define DEFLESS(TY,MTY)							\
   INLINE bitc_bool_t							\
-  DEFUN(_16bitc_DTprelude_DT___LT_SHFN2##MTY##MTY##_4bool, TY arg1, TY arg2) \
+  DEFUN(_16bitc_DTprelude_CN___LT_SHFN2##MTY##MTY##_4bool, TY arg1, TY arg2) \
   {									\
     return (arg1 < arg2);						\
   }									\
-  DEFCLOSURE_INLINE(_16bitc_DTprelude_DT___LT_SHFN2##MTY##MTY##_4bool)
+  DEFCLOSURE_INLINE(_16bitc_DTprelude_CN___LT_SHFN2##MTY##MTY##_4bool)
 
 #define DEFGREATER(TY,MTY)						\
   INLINE bitc_bool_t							\
-  DEFUN(_16bitc_DTprelude_DT___GT_SHFN2##MTY##MTY##_4bool, TY arg1, TY arg2) \
+  DEFUN(_16bitc_DTprelude_CN___GT_SHFN2##MTY##MTY##_4bool, TY arg1, TY arg2) \
   {									\
     return (arg1 > arg2);						\
   }									\
-  DEFCLOSURE_INLINE(_16bitc_DTprelude_DT___GT_SHFN2##MTY##MTY##_4bool)
+  DEFCLOSURE_INLINE(_16bitc_DTprelude_CN___GT_SHFN2##MTY##MTY##_4bool)
 
 #define DEFLESSOREQUAL(TY,MTY)						\
   INLINE bitc_bool_t							\
-  DEFUN(_17bitc_DTprelude_DT___LT_EQ_SHFN2##MTY##MTY##_4bool, TY arg1, TY arg2) \
+  DEFUN(_17bitc_DTprelude_CN___LT_EQ_SHFN2##MTY##MTY##_4bool, TY arg1, TY arg2) \
   {									\
     return (arg1 <= arg2);						\
   }									\
-  DEFCLOSURE_INLINE(_17bitc_DTprelude_DT___LT_EQ_SHFN2##MTY##MTY##_4bool)
+  DEFCLOSURE_INLINE(_17bitc_DTprelude_CN___LT_EQ_SHFN2##MTY##MTY##_4bool)
 
 #define DEFGREATEROREQUAL(TY,MTY)					\
   INLINE bitc_bool_t							\
-  DEFUN(_17bitc_DTprelude_DT___GT_EQ_SHFN2##MTY##MTY##_4bool, TY arg1, TY arg2) \
+  DEFUN(_17bitc_DTprelude_CN___GT_EQ_SHFN2##MTY##MTY##_4bool, TY arg1, TY arg2) \
   {									\
     return (arg1 >= arg2);						\
   }									\
-  DEFCLOSURE_INLINE(_17bitc_DTprelude_DT___GT_EQ_SHFN2##MTY##MTY##_4bool)
+  DEFCLOSURE_INLINE(_17bitc_DTprelude_CN___GT_EQ_SHFN2##MTY##MTY##_4bool)
 
 #define DEFADD(TY,MTY)						\
   INLINE TY							\
-  DEFUN(_16bitc_DTprelude_DT___PL_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
+  DEFUN(_16bitc_DTprelude_CN___PL_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
   {								\
     return (arg1 + arg2);					\
   }								\
-  DEFCLOSURE_INLINE(_16bitc_DTprelude_DT___PL_SHFN2##MTY##MTY##MTY)
+  DEFCLOSURE_INLINE(_16bitc_DTprelude_CN___PL_SHFN2##MTY##MTY##MTY)
 
 #define DEFSUBTRACT(TY,MTY)					\
   INLINE TY							\
-  DEFUN(_16bitc_DTprelude_DT___HY_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
+  DEFUN(_16bitc_DTprelude_CN___HY_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
   {								\
     return (arg1 - arg2);					\
   }								\
-  DEFCLOSURE_INLINE(_16bitc_DTprelude_DT___HY_SHFN2##MTY##MTY##MTY)
+  DEFCLOSURE_INLINE(_16bitc_DTprelude_CN___HY_SHFN2##MTY##MTY##MTY)
 
 #define DEFMULTIPLY(TY,MTY)					\
   INLINE TY							\
-  DEFUN(_16bitc_DTprelude_DT___ST_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
+  DEFUN(_16bitc_DTprelude_CN___ST_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
   {								\
     return (arg1 * arg2);					\
   }								\
-  DEFCLOSURE_INLINE(_16bitc_DTprelude_DT___ST_SHFN2##MTY##MTY##MTY)
+  DEFCLOSURE_INLINE(_16bitc_DTprelude_CN___ST_SHFN2##MTY##MTY##MTY)
 
 #define DEFDIVIDE(TY,MTY)					\
   INLINE TY							\
-  DEFUN(_16bitc_DTprelude_DT___FS_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
+  DEFUN(_16bitc_DTprelude_CN___FS_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
   {								\
     return (arg1 / arg2);					\
   }								\
-  DEFCLOSURE_INLINE(_16bitc_DTprelude_DT___FS_SHFN2##MTY##MTY##MTY)
+  DEFCLOSURE_INLINE(_16bitc_DTprelude_CN___FS_SHFN2##MTY##MTY##MTY)
 
 #define DEFMODULO(TY,MTY)					\
   INLINE TY							\
-  DEFUN(_16bitc_DTprelude_DT___PC_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
+  DEFUN(_16bitc_DTprelude_CN___PC_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
   {								\
     return (arg1 % arg2);					\
   }								\
-  DEFCLOSURE_INLINE(_16bitc_DTprelude_DT___PC_SHFN2##MTY##MTY##MTY)
+  DEFCLOSURE_INLINE(_16bitc_DTprelude_CN___PC_SHFN2##MTY##MTY##MTY)
 
 #define DEFBAND(TY,MTY)						\
   INLINE TY							\
-  DEFUN(_20bitc_DTprelude_DT__b_and_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
+  DEFUN(_20bitc_DTprelude_CN__b_and_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
   {								\
     return (arg1 & arg2);					\
   }								\
-  DEFCLOSURE_INLINE(_20bitc_DTprelude_DT__b_and_SHFN2##MTY##MTY##MTY)
+  DEFCLOSURE_INLINE(_20bitc_DTprelude_CN__b_and_SHFN2##MTY##MTY##MTY)
 
 #define DEFBOR(TY,MTY)						\
   INLINE TY							\
-  DEFUN(_19bitc_DTprelude_DT__b_or_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
+  DEFUN(_19bitc_DTprelude_CN__b_or_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
   {								\
     return (arg1 | arg2);					\
   }								\
-  DEFCLOSURE_INLINE(_19bitc_DTprelude_DT__b_or_SHFN2##MTY##MTY##MTY)
+  DEFCLOSURE_INLINE(_19bitc_DTprelude_CN__b_or_SHFN2##MTY##MTY##MTY)
 
 #define DEFBNOT(TY,MTY)						\
   INLINE TY							\
-  DEFUN(_20bitc_DTprelude_DT__b_not_SHFN1##MTY##MTY, TY arg1)	\
+  DEFUN(_20bitc_DTprelude_CN__b_not_SHFN1##MTY##MTY, TY arg1)	\
   {								\
     return (~arg1);						\
   }								\
-  DEFCLOSURE_INLINE(_20bitc_DTprelude_DT__b_not_SHFN1##MTY##MTY)
+  DEFCLOSURE_INLINE(_20bitc_DTprelude_CN__b_not_SHFN1##MTY##MTY)
 
 #define DEFBXOR(TY,MTY)						\
   INLINE TY							\
-  DEFUN(_20bitc_DTprelude_DT__b_xor_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
+  DEFUN(_20bitc_DTprelude_CN__b_xor_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
   {								\
     return (arg1 ^ arg2);					\
   }								\
-  DEFCLOSURE_INLINE(_20bitc_DTprelude_DT__b_xor_SHFN2##MTY##MTY##MTY)
+  DEFCLOSURE_INLINE(_20bitc_DTprelude_CN__b_xor_SHFN2##MTY##MTY##MTY)
 
 #define DEFBLS(TY,MTY)						\
   INLINE TY							\
-  DEFUN(_17bitc_DTprelude_DT___LT_LT_SHFN2##MTY##_4word##MTY, TY arg1, bitc_word_t arg2) \
+  DEFUN(_17bitc_DTprelude_CN___LT_LT_SHFN2##MTY##_4word##MTY, TY arg1, bitc_word_t arg2) \
   {								\
     return (arg1 << arg2);					\
   }								\
-  DEFCLOSURE_INLINE(_17bitc_DTprelude_DT___LT_LT_SHFN2##MTY##_4word##MTY)
+  DEFCLOSURE_INLINE(_17bitc_DTprelude_CN___LT_LT_SHFN2##MTY##_4word##MTY)
 
 #define DEFBRS(TY,MTY)						\
   INLINE TY							\
-  DEFUN(_17bitc_DTprelude_DT___GT_GT_SHFN2##MTY##_4word##MTY, TY arg1, bitc_word_t arg2) \
+  DEFUN(_17bitc_DTprelude_CN___GT_GT_SHFN2##MTY##_4word##MTY, TY arg1, bitc_word_t arg2) \
   {								\
     return (arg1 >> arg2);					\
   }								\
-  DEFCLOSURE_INLINE(_17bitc_DTprelude_DT___GT_GT_SHFN2##MTY##_4word##MTY)
+  DEFCLOSURE_INLINE(_17bitc_DTprelude_CN___GT_GT_SHFN2##MTY##_4word##MTY)
 
 
 #define DEFORD(TY,MTY) \
@@ -414,92 +414,92 @@ DEFORD(bitc_bool_t,_4bool);
 
 /* String type is ORD, but requires special comparator: */
 INLINE bitc_bool_t
-DEFUN(_17bitc_DTprelude_DT___EQ_EQ_SHFN2_6string_6string_4bool, bitc_string_t *arg1, bitc_string_t *arg2)
+DEFUN(_17bitc_DTprelude_CN___EQ_EQ_SHFN2_6string_6string_4bool, bitc_string_t *arg1, bitc_string_t *arg2)
 {
   return ((arg1->length == arg2->length) &&
 	  (__builtin_strcmp((const char *)arg1->s,(const char *)arg2->s) == 0));
 }						\
-DEFCLOSURE_INLINE(_17bitc_DTprelude_DT___EQ_EQ_SHFN2_6string_6string_4bool);
+DEFCLOSURE_INLINE(_17bitc_DTprelude_CN___EQ_EQ_SHFN2_6string_6string_4bool);
 
 INLINE bitc_bool_t
-DEFUN(_16bitc_DTprelude_DT___LT_SHFN2_6string_6string_4bool, bitc_string_t *arg1, bitc_string_t *arg2)
+DEFUN(_16bitc_DTprelude_CN___LT_SHFN2_6string_6string_4bool, bitc_string_t *arg1, bitc_string_t *arg2)
 {
   return (__builtin_strcmp((const char *)arg1->s,(const char *)arg2->s) < 0);
 }						\
-DEFCLOSURE_INLINE(_16bitc_DTprelude_DT___LT_SHFN2_6string_6string_4bool);
+DEFCLOSURE_INLINE(_16bitc_DTprelude_CN___LT_SHFN2_6string_6string_4bool);
     
 
 INLINE bitc_bool_t
-DEFUN(_16bitc_DTprelude_DT___GT_SHFN2_6string_6string_4bool, bitc_string_t *arg1, bitc_string_t *arg2)
+DEFUN(_16bitc_DTprelude_CN___GT_SHFN2_6string_6string_4bool, bitc_string_t *arg1, bitc_string_t *arg2)
 {
   return (__builtin_strcmp((const char *)arg1->s,(const char *)arg2->s) > 0);
 }						\
-DEFCLOSURE_INLINE(_16bitc_DTprelude_DT___GT_SHFN2_6string_6string_4bool);
+DEFCLOSURE_INLINE(_16bitc_DTprelude_CN___GT_SHFN2_6string_6string_4bool);
 
 INLINE bitc_bool_t
-DEFUN(_17bitc_DTprelude_DT___LT_EQ_SHFN2_6string_6string_4bool, bitc_string_t *arg1, bitc_string_t *arg2)
+DEFUN(_17bitc_DTprelude_CN___LT_EQ_SHFN2_6string_6string_4bool, bitc_string_t *arg1, bitc_string_t *arg2)
 {
   return (__builtin_strcmp((const char *)arg1->s,(const char *)arg2->s) <= 0);
 }						\
-DEFCLOSURE_INLINE(_17bitc_DTprelude_DT___LT_EQ_SHFN2_6string_6string_4bool);
+DEFCLOSURE_INLINE(_17bitc_DTprelude_CN___LT_EQ_SHFN2_6string_6string_4bool);
 
 INLINE bitc_bool_t
-DEFUN(_17bitc_DTprelude_DT___GT_EQ_SHFN2_6string_6string_4bool, bitc_string_t *arg1, bitc_string_t *arg2)
+DEFUN(_17bitc_DTprelude_CN___GT_EQ_SHFN2_6string_6string_4bool, bitc_string_t *arg1, bitc_string_t *arg2)
 {
   return (__builtin_strcmp((const char *)arg1->s,(const char *)arg2->s) >= 0);
 }						\
-DEFCLOSURE_INLINE(_17bitc_DTprelude_DT___GT_EQ_SHFN2_6string_6string_4bool);
+DEFCLOSURE_INLINE(_17bitc_DTprelude_CN___GT_EQ_SHFN2_6string_6string_4bool);
 
 /* CAST Operations */
 
 #define DEFSIGNEX(TY1,MTY1,TY2,MTY2)					\
   INLINE TY2								\
-  DEFUN(_24bitc_DTprelude_DTsign_HYextend_SHFN1##MTY1##MTY2, TY1 arg1) \
+  DEFUN(_24bitc_DTprelude_CNsign_HYextend_SHFN1##MTY1##MTY2, TY1 arg1) \
   {									\
     return (TY2) arg1;							\
   }									\
-  DEFCLOSURE_INLINE(_24bitc_DTprelude_DTsign_HYextend_SHFN1##MTY1##MTY2)
+  DEFCLOSURE_INLINE(_24bitc_DTprelude_CNsign_HYextend_SHFN1##MTY1##MTY2)
 
 
 #define DEFZEROEX(TY1,MTY1,TY2,MTY2)					\
   INLINE TY2								\
-  DEFUN(_24bitc_DTprelude_DTzero_HYextend_SHFN1##MTY1##MTY2, TY1 arg1) \
+  DEFUN(_24bitc_DTprelude_CNzero_HYextend_SHFN1##MTY1##MTY2, TY1 arg1) \
   {									\
     return (TY2) arg1;							\
   }									\
-  DEFCLOSURE_INLINE(_24bitc_DTprelude_DTzero_HYextend_SHFN1##MTY1##MTY2)
+  DEFCLOSURE_INLINE(_24bitc_DTprelude_CNzero_HYextend_SHFN1##MTY1##MTY2)
 
 #define DEFTRUNCATE(TY1,MTY1,TY2,MTY2)					\
   INLINE TY2								\
-  DEFUN(_21bitc_DTprelude_DTtruncate_SHFN1##MTY1##MTY2, TY1 arg1)	\
+  DEFUN(_21bitc_DTprelude_CNtruncate_SHFN1##MTY1##MTY2, TY1 arg1)	\
   {									\
     return (TY2) arg1;							\
   }									\
-  DEFCLOSURE_INLINE(_21bitc_DTprelude_DTtruncate_SHFN1##MTY1##MTY2)
+  DEFCLOSURE_INLINE(_21bitc_DTprelude_CNtruncate_SHFN1##MTY1##MTY2)
 
 #define DEFSIGNED(TY1,MTY1,TY2,MTY2)					\
   INLINE TY2								\
-  DEFUN(_19bitc_DTprelude_DTsigned_SHFN1##MTY1##MTY2, TY1 arg1)	\
+  DEFUN(_19bitc_DTprelude_CNsigned_SHFN1##MTY1##MTY2, TY1 arg1)	\
   {									\
     return (TY2) arg1;							\
   }									\
-  DEFCLOSURE_INLINE(_19bitc_DTprelude_DTsigned_SHFN1##MTY1##MTY2)
+  DEFCLOSURE_INLINE(_19bitc_DTprelude_CNsigned_SHFN1##MTY1##MTY2)
 
 #define DEFUNSIGNED(TY1,MTY1,TY2,MTY2)					\
   INLINE TY2								\
-  DEFUN(_21bitc_DTprelude_DTunsigned_SHFN1##MTY1##MTY2, TY1 arg1)	\
+  DEFUN(_21bitc_DTprelude_CNunsigned_SHFN1##MTY1##MTY2, TY1 arg1)	\
   {									\
     return (TY2) arg1;							\
   }									\
-  DEFCLOSURE_INLINE(_21bitc_DTprelude_DTunsigned_SHFN1##MTY1##MTY2)
+  DEFCLOSURE_INLINE(_21bitc_DTprelude_CNunsigned_SHFN1##MTY1##MTY2)
 
 #define DEFCAST(TY1,MTY1,TY2,MTY2)					\
   INLINE TY2								\
-  DEFUN(_20bitc_DTprelude_DTconvert_SHFN1##MTY1##MTY2, TY1 arg1)	\
+  DEFUN(_20bitc_DTprelude_CNconvert_SHFN1##MTY1##MTY2, TY1 arg1)	\
   {									\
     return (TY2) arg1;							\
   }									\
-  DEFCLOSURE_INLINE(_20bitc_DTprelude_DTconvert_SHFN1##MTY1##MTY2)
+  DEFCLOSURE_INLINE(_20bitc_DTprelude_CNconvert_SHFN1##MTY1##MTY2)
 
 #define DEFSIGNEDOPS(TY1,MTY1,TY2,MTY2) \
   DEFSIGNEX(TY1,MTY1,TY2,MTY2);		\

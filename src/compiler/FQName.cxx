@@ -37,6 +37,8 @@
 
 #include "FQName.hxx"
 
+const char FQName::sep = ':';
+
 bool
 FQName::operator<(const FQName& that) const
 {
@@ -66,7 +68,7 @@ FQName::operator=(const FQName& that)
 }
 
 std::string
-FQName::asString(const char *s) const
+FQName::asString(const char s) const
 {
   if (iface.size())
     return (iface + s + ident);
@@ -75,7 +77,7 @@ FQName::asString(const char *s) const
 }
 
 std::string
-FQName::asString(const char *s, const std::string altifn) const
+FQName::asString(const char s, const std::string altifn) const
 {
   return ((iface.size()) ? (iface + s + ident) : (ident));
 }
