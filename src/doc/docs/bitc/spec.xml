@@ -1527,6 +1527,10 @@ use</literallayout>
         <sect3 id="ty_object">
           <title>Objects</title>
           <p>
+            <em>This description is provisional. The feature is a work
+            in progress.</em>
+          </p>
+          <p>
             In BitC, an object provides a form of existential
             dispatch. Objects are declared similarly to
             structures. The syntax of an object declaration is:
