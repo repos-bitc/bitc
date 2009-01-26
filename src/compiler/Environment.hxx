@@ -163,8 +163,8 @@ public:
 
   inline boost::shared_ptr<T>
   getBinding(const std::string& nm,
-	       boost::shared_ptr<Environment<T> > outerLimit
-	       = boost::GC_NULL) const
+	     boost::shared_ptr<Environment<T> > outerLimit
+	     = boost::GC_NULL) const
   {
     boost::shared_ptr<const Binding<T> > binding = doGetBinding(nm, outerLimit);
     if (binding) return binding->val;

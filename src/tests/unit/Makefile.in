@@ -91,6 +91,7 @@ GC_LIB=-lgc
 
 LIBBITC_SRC=@top_srcdir@/libbitc
 LIBBITC_C_RUNTIME=@top_srcdir@/libbitc/BUILD/libbitc.a
+LIBBITC_BITA=@top_srcdir@/libbitc/BUILD/libbitc.bita
 LIBBITC_NO_GC=@top_srcdir@/libbitc/BUILD/libbitc-no-gc.a
 
 BITCC_SRC=@top_srcdir@/compiler
@@ -193,11 +194,14 @@ BUILD/%: %.bitc $(BITCC) $(LIBBITC_C_RUNTIME) | BUILD
 
 LIBBITC_SHA1_SRC=@top_srcdir@/libbitc/crypt/sha1.bits
 
-BUILD/sha1-test: sha1-test.bitc  $(BITCC) $(LIBBITC_SHA1_SRC)
+BUILD/sha1-test: sha1-test.bitc  $(BITCC) $(LIBBITC_SHA1_SRC) | BUILD
 	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
 
-BUILD/sha1-file: sha1-file.bitc  $(BITCC) $(LIBBITC_SHA1_SRC)
+BUILD/sha1-file: sha1-file.bitc  $(BITCC) $(LIBBITC_SHA1_SRC) | BUILD
 	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
+
+BUILD/libbitc-bita: libbitc-bita.bitc  $(BITCC) $(LIBBITC_BITA) | BUILD
+	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_BITA) $(LIBBITC_C_RUNTIME)
 
 #BUILD/%.c: %.bitc  $(BITCC)
 #	$(RUN_BITCC) $(BITCOPT) $(INC) --emit c -o $@ $<

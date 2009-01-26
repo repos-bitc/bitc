@@ -203,13 +203,12 @@ aliasPublicBindings(const std::string& idName,
 
     shared_ptr<AST> ast = bdng->val;
 
-    if (aliasEnv && 
-	aliasEnv->getBinding(ast->fqn.asString(FQName::sep)))
+    if (aliasEnv && aliasEnv->getBinding(ast->fqn.asString()))
       continue;
 
 
     if (idName.size())
-      s = idName + FQName::sep + s;
+      s = idName + FQName::LocalBindingSep + s;
 
     toEnv->addBinding(s, ast);
 
@@ -302,6 +301,7 @@ providing(shared_ptr<ASTEnvironment > aliasEnv, const FQName& fqn)
   return (bdng->flags & BF_PROVIDING);
 }
 
+#if 0
 bool
 makeLocalAlias(shared_ptr<ASTEnvironment > fromEnv,
 	       std::string fromName,
@@ -325,6 +325,7 @@ makeLocalAlias(shared_ptr<ASTEnvironment > fromEnv,
 
   return true;
 }
+#endif
 
 static void
 bindIdentDef(shared_ptr<AST> ast, shared_ptr<ASTEnvironment > env, 
@@ -930,7 +931,7 @@ resolve(std::ostream& errStream,
       
 	FQName importedFQN = FQName(ifName, ast->child(1)->s);
       
-	ast->s = lhs->s + FQName::sep + ast->child(1)->s;
+	ast->s = lhs->s + FQName::LocalBindingSep + ast->child(1)->s;
 	ast->astType = at_ident;
 	ast->identType = ast->child(1)->identType;
 	ast->flags = ast->child(1)->flags;
@@ -1562,7 +1563,7 @@ resolve(std::ostream& errStream,
 	  shared_ptr<Binding<AST> > bndg = 
 	    ifAst->envs.env->doGetBinding(pubName->s);
 
-	  std::string pubFQN = bndg->val->fqn.asString(FQName::sep);
+	  std::string pubFQN = bndg->val->fqn.asString();
 
 	  shared_ptr<AST> oldAlias = aliasEnv->getBinding(pubFQN);
 	  if (oldAlias) {

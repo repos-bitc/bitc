@@ -49,4 +49,5 @@
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (f arr)))
+    (f arr)
+    0:int32))

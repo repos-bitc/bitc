@@ -637,7 +637,7 @@ main(int argc, char *argv[])
 
     case 'e':
       {	
-	Options::entryPts.insert(optarg);
+	Options::entryPts.insert(FQName(optarg));
 	break;
       }
 
@@ -840,7 +840,7 @@ main(int argc, char *argv[])
   /// point to emit.
   if (Options::entryPts.empty() &&
      ((Options::backEnd->flags & BK_HDR_MODE) == 0))
-    Options::entryPts.insert("bitc.main:main");
+    Options::entryPts.insert(FQName("bitc.main","main"));
 
   /** Add all other top level forms that might cause
    * side-effects. These are the top-level initializers. This is a

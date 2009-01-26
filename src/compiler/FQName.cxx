@@ -37,7 +37,10 @@
 
 #include "FQName.hxx"
 
+using namespace std;
+
 const char FQName::sep = ':';
+const char FQName::LocalBindingSep = '.';
 
 bool
 FQName::operator<(const FQName& that) const
@@ -67,17 +70,19 @@ FQName::operator=(const FQName& that)
   return *this;
 }
 
-std::string
-FQName::asString(const char s) const
+FQName::FQName(const std::string& nm)
 {
-  if (iface.size())
-    return (iface + s + ident);
-  else
-    return ident;
+  string::size_type ifSep = nm.rfind(FQName::sep);
+  iface = nm.substr(0, ifSep);
+  ident = nm.substr(ifSep+1, nm.size());
 }
 
+
 std::string
-FQName::asString(const char s, const std::string altifn) const
+FQName::asString() const
 {
-  return ((iface.size()) ? (iface + s + ident) : (ident));
+  if (iface.size())
+    return (iface + FQName::sep + ident);
+  else
+    return ident;
 }

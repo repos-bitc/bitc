@@ -308,7 +308,7 @@ public:
   // New instantiation logic:
   //
   //////////////////////////////////////////////////////
-  static boost::shared_ptr<AST> lookupByFqn(const std::string& s, 
+  static boost::shared_ptr<AST> lookupByFqn(const FQName& fqn, 
 			  boost::shared_ptr<UocInfo> &targetUoc);
   
 
@@ -316,7 +316,7 @@ private:
   void addTopLevelForm(boost::shared_ptr<AST> ast); // Add a new Top-level form
 
   bool instantiateFQN(std::ostream &errStream, 
-			 const std::string& fqn);
+		      const FQName& fqn);
 
   // The main AST specializer/ instantiator
   boost::shared_ptr<AST> doInstantiate(std::ostream &errStream, 
@@ -332,11 +332,13 @@ private:
                      // specialized AST, and specialize the body.
 
 public:
+  /// @brief Instantiate a single fully qualified name.
   bool instantiate(std::ostream &errStream, 
-		   const std::string& fqn);
+		   const FQName& fqn);
   
+  /// @brief Instantiate a set of entry point names.
   bool instantiateBatch(std::ostream &errStream, 
-			std::set<std::string>& fqns);
+			std::set<FQName>& epName);
 
 };
 

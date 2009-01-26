@@ -863,11 +863,9 @@ use</literallayout>
  	    <label><term>bool</term></label>
  	    <li>
  	      <p>
-                 A boolean value, either
- 		<progident>#f</progident> or
+                 A boolean value, either <progident>#f</progident> or
  		<progident>#t</progident>. The representation of this
- 		type is a single byte, aligned at a arbitrary byte
- 		boundary.
+ 		type is a single byte, aligned at a byte boundary.
                </p>
  	    </li>
  	  </defli>
@@ -984,22 +982,6 @@ use</literallayout>
 	    </li>
 	  </defli>
 	</deflist>
-        <p>
-          The type <progident>bool</progident> and its constructors
-          <progident>#t</progident> and <progident>#f</progident> are
-          defined in the standard prelude.
-        </p>
-        <p>
-          At present, the BitC runtime system assumes that actual
-          character values will be limited to the Unicode
-          characters whose encoding falls between 0 and 127. This
-          is a temporary restriction.
-        </p>
-<!--          <p> -->
-<!--            The specification does not require that these types be -->
-<!--            ``built in'' to the compiler. It is permissable to provide -->
-<!--            some or all of them in the Standard Prelude. -->
-<!--          </p> -->
       </sect2>
       <sect2>
 	<title>Simple Constructed Types</title>
@@ -2545,24 +2527,31 @@ nm : <em>function-type</em></literallayout>
         </p>
       </sect2>
       <sect2>
-        <title>Primitive Type Classes</title>
+        <title>Core Type Classes</title>
         <p>
-          BitC defines three ``primitive'' type classes. These cover
-          cases that cannot be cleanly expressed within the language,
-          or describe type compatibility constraints that are part of
-          the language's intrinsic type compatibility rules.
+          BitC defines several core type classes. These classes cover
+          type relations that are required internally by the type
+          checker, or in some cases relations that cannot be expressed
+          within the language. All of these type classes are closed,
+          though not necessarily finite &mdash; the compiler
+          implements their membership internally.
         </p>
-        <p>
-          <leadin><progident>(ref-types&nbsp;'a)</progident></leadin> is the type
-          class consisting of all heap-allocated types:
-          <progident>(ref&nbsp;'a)</progident>,
-          <progident>(vector&nbsp;'a)</progident>, and
-          <progident>string</progident>. Use of this type class is
-          appropriate when a structure or union should not be
-          instantiated over value types. The
-          <progident>(nullable&nbsp;'a)</progident> type is an example
-          of this.
-        </p>
+        <sect3>
+          <title><progident>ref-types</progident></title>
+          <p>
+            <leadin><progident>(ref-types&nbsp;'a)</progident></leadin> is the type
+            class consisting of all heap-allocated types:
+            <progident>(ref&nbsp;'a)</progident>,
+            <progident>(vector&nbsp;'a)</progident>, and
+            <progident>string</progident>. Use of this type class is
+            appropriate when a structure or union should not be
+            instantiated over value types. The
+            <progident>(nullable&nbsp;'a)</progident> type is an example
+            of this.
+          </p>
+        </sect3>
+        <sect3>
+          <title><progident>copy-compat</progident></title>
         <p>
           <leadin><progident>(copy-compat&nbsp;'a&nbsp;'b)</progident></leadin>
           is an equivalence relation containing all pairs of types
@@ -3234,11 +3223,12 @@ bitsizeof(<em>T</em>)</literallayout>
           </p>
           <literallayout>
 (a,b) =&gt; (pair a b)
-(a,b,c) =&gt; (pair a (pair b c))
+(a,b,c) =&gt; (pair a (pair b c))</literallayout>
 
+<!-- At some point we seem to have lost the following convenience syntax:
 []    =&gt; nil
 [a] =&gt; (cons a nil)
-[a,b] =&gt; (cons a (cons b nil))</literallayout>
+[a,b] =&gt; (cons a (cons b nil)) -->
         </sect3>
       </sect2>
       <sect2>
@@ -3442,6 +3432,14 @@ bitsizeof(<em>T</em>)</literallayout>
             return a <progident>word</progident> whose value is the
             number of elements in the array, array-ref, or vector.
           </p>
+          <note>
+            <p>
+              The <progident>array-length</progident>,
+              <progident>array-ref-length</progident>, and 
+              <progident>vector-length</progident>,
+              operations are library routines, implementedsyntax becaus arrays, array-refs, and
+              vectors are mutable and the operations that compute
+              locations within these objects must be non-expansive.
         </sect3>
         <sect3>
           <title>array-nth, array-ref-nth vector-nth</title>
@@ -3466,15 +3464,6 @@ bitsizeof(<em>T</em>)</literallayout>
             exception is thrown.
           </p>
           <p>
-            <progident>array-nth</progident>,
-            <progident>array-ref-nth</progident>, and
-            <progident>vector-nth</progident> are syntactic forms. The
-            returned value is a location, and can be used as an
-            argument to <progident>set!</progident>.
-            <progident>array-nth</progident> requires a location as
-            its argument.
-          </p>
-          <p>
             The expression:
           </p>
           <literallayout>
@@ -3486,6 +3475,10 @@ bitsizeof(<em>T</em>)</literallayout>
           <literallayout>
 (vector-nth <em>e</em> <em>e<sub>i</sub></em>)
 </literallayout>
+          <p>
+
+            Because the string values are immutable, the
+            implementations of 
         </sect3>
       </sect2>
       <sect2>
@@ -4973,6 +4966,10 @@ For example:
   <subpart>
     <title>Standard Prelude</title>
     <p>
+      A range of types, type classes, and functions supporting
+      operations on primary types are defined in the BitC standard prelude.
+    </p>
+    <p>
       <font color="red">This section needs to be defined.</font>
     </p>
     <p>
@@ -5366,8 +5363,8 @@ For example:
         <title>Miscellaneous</title>
         <literallayout indent="no">
 <em>declare</em> ::=
-    (declare {(<em>ident</em> <em>type</em>) | <em>ident</em>}<sup>+</sup>)</literallayout>
-<em>docstring</em> := StringLit
+    (declare {(<em>ident</em> <em>type</em>) | <em>ident</em>}<sup>+</sup>)
+<em>docstring</em> := StringLit</literallayout>
       </sect2>
     </sect1>
   </subpart>
@@ -5375,6 +5372,8 @@ For example:
     <title>Standard Library</title>
     <sect1>
       <title>BitC Standard Library</title>
+      <sect2>
+        <title>Core Type Support</title>
       <p>
         <font color="red">This section needs badly to be completely
         revisited.</font>

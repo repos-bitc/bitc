@@ -353,11 +353,8 @@ UpdateMegaEnvs(shared_ptr<UocInfo> uoc)
 *******************************************************************/
 
 shared_ptr<AST>
-UocInfo::lookupByFqn(const string& fqn, shared_ptr<UocInfo> &targetUoc)
+UocInfo::lookupByFqn(const FQName& fqn, shared_ptr<UocInfo> &targetUoc)
 {
-  string::size_type ifSep = fqn.rfind(FQName::sep);
-  string ifName = fqn.substr(0, ifSep);
-  string idName = fqn.substr(ifSep+1, fqn.size());
   targetUoc = GC_NULL;
 
 
@@ -373,14 +370,14 @@ UocInfo::lookupByFqn(const string& fqn, shared_ptr<UocInfo> &targetUoc)
 
   // Search all interfaces
   {
-    UocMap::iterator itr = UocInfo::ifList.find(ifName);
+    UocMap::iterator itr = UocInfo::ifList.find(fqn.iface);
 
     if (itr != UocInfo::ifList.end()) {
       shared_ptr<UocInfo> uoc = itr->second;
 
       targetUoc = uoc;
-      shared_ptr<AST> def = uoc->env->getBinding(idName);
-      assert(def->fqn.asString() == fqn);
+      shared_ptr<AST> def = uoc->env->getBinding(fqn.ident);
+      assert(def->fqn == fqn);
 
       // If this is a declaration, then try to get the definition if
       // one exists, and return that.
@@ -396,12 +393,12 @@ UocInfo::lookupByFqn(const string& fqn, shared_ptr<UocInfo> &targetUoc)
       itr != UocInfo::srcList.end(); ++itr) {
     shared_ptr<UocInfo> uoc = itr->second;
 
-    if (uoc->uocName != ifName)
+    if (uoc->uocName != fqn.iface)
       continue;
 
     targetUoc = uoc;
-    shared_ptr<AST> def = uoc->env->getBinding(idName);
-    assert(def->fqn.asString() == fqn);
+    shared_ptr<AST> def = uoc->env->getBinding(fqn.ident);
+      assert(def->fqn == fqn);
 
     if (def->defn)
       def = def->defn;
@@ -2058,7 +2055,7 @@ UocInfo::doInstantiate(ostream &errStream,
 *******************************************************************/
 
 bool
-UocInfo::instantiateFQN(ostream &errStream, const string& epName)
+UocInfo::instantiateFQN(ostream &errStream, const FQName& epName)
 {
   bool errFree = true;
   shared_ptr<UocInfo> targetUoc = GC_NULL;
@@ -2092,7 +2089,7 @@ UocInfo::instantiateFQN(ostream &errStream, const string& epName)
   doInstantiate(errStream, defIdent,
 		defIdent->symType, errFree, worklist);
 
-  if (epName == "bitc.main:main")
+  if (epName == FQName("bitc.main", "main"))
     UocInfo::mainIsDefined = true;
 
   return errFree;
@@ -2100,7 +2097,7 @@ UocInfo::instantiateFQN(ostream &errStream, const string& epName)
 
 // One Shot instantiator
 bool
-UocInfo::instantiate(ostream &errStream, const string& epName)
+UocInfo::instantiate(ostream &errStream, const FQName& epName)
 {
   bool errFree = true;
   UpdateMegaEnvs(shared_from_this());
@@ -2122,7 +2119,7 @@ UocInfo::instantiate(ostream &errStream, const string& epName)
 
 bool
 UocInfo::instantiateBatch(ostream &errStream,
-			  set<string>& epNames)
+			  set<FQName>& epNames)
 {
   bool errFree = true;
   UpdateMegaEnvs(shared_from_this());
@@ -2136,10 +2133,14 @@ UocInfo::instantiateBatch(ostream &errStream,
   /// These need to be instantiated before any of the user-specified
   /// entry points are instantiated, because the entry point
   /// instantiations may reference these.
-  CHKERR(errFree, instantiateFQN(errStream, "bitc.prelude:__index_lt"));
-  CHKERR(errFree, instantiateFQN(errStream, "bitc.prelude:IndexBoundsError"));
+  CHKERR(errFree, 
+	 instantiateFQN(errStream, 
+			FQName("bitc.prelude","__index_lt")));
+  CHKERR(errFree,
+	 instantiateFQN(errStream, 
+			FQName("bitc.prelude","IndexBoundsError")));
 
-  for (set<string>::iterator itr = epNames.begin();
+  for (set<FQName>::iterator itr = epNames.begin();
       itr != epNames.end(); ++itr)
     CHKERR(errFree, instantiateFQN(errStream, (*itr)));
 
