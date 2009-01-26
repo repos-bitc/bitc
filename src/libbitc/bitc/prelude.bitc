@@ -111,17 +111,22 @@
   
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;    Primitive arithmetic proclaimations 
+  ;;    Primitive arithmetic proclamations 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   ;; Following is a sleazy (but clever -- blame Swaroop) trick for
-  ;; getting comparison operations defined for the built-in types with
-  ;; minimal hassle. We define the comparison operations as
-  ;; polymorphic, and rely on the polyinstantiator to instantiate them
-  ;; only where they are supposed to occur. Most of the instantiations
-  ;; are handled in runtime.h. A notable exception is that the
-  ;; built-in string type is a member of Ord whose implementation is
-  ;; found in libbitc.a
+  ;; getting comparison and arithmetic operations defined for the
+  ;; built-in types with minimal hassle. We define the operations as
+  ;; polymorphic using the reserved namespace, and then set up
+  ;; instances below using these to instantiate the core type classes
+  ;; over the primitive types. We then rely on the polyinstantiator to
+  ;; instantiate them only at the types where they are supposed to
+  ;; occur.
+  ;;
+  ;; The concrete implementations for most of these are handled
+  ;; in runtime.h. A notable exception is that the built-in string
+  ;; type is a member of Ord whose implementation is found in
+  ;; libbitc.a
 
   (proclaim __+:(fn 'a 'a -> 'a) external)
   (proclaim __-:(fn 'a 'a -> 'a) external)
