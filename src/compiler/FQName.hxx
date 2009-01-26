@@ -50,10 +50,15 @@ struct FQName {
   std::string iface;
   std::string ident;
 
-  /// @brief Separator to use when displaying a fully qualified name:
+  /// @brief Separator to use when displaying a fully qualified name.
+  ///
+  /// This must <em>not</em> be a legal identifier character.
   static const char sep;
   /// @brief Separator to use when making a local binding of a name
   /// that is being imported.
+  ///
+  /// This should be the same character that is used in any
+  /// environment-like combining form, which is usually '.'
   static const char LocalBindingSep;
 
   bool operator <(const FQName&) const;
@@ -74,27 +79,26 @@ struct FQName {
   FQName()
   {
   }
-//   FQName(const std::string& id)
-//   {
-//     iface="__bogus";
-//     ident = id;
-//   }
 
+  /// @brief Copy constructor
   FQName(const FQName& that)
   {
     iface = that.iface;
     ident = that.ident;
   }
 
+  /// @brief Initialize from separate strings
   FQName(const std::string& _iface, const std::string& _ident)
   {
     iface = _iface;
     ident = _ident;
   }
 
-  std::string asString(const char s = FQName::sep) const;
-  std::string asString(const char s,
-		       const std::string altifn) const;
+  /// @brief Initialize from a single string, where the interface and
+  /// ident components are separated by FQName::sep.
+  FQName(const std::string& nm);
+
+  std::string asString() const;
 };
 
 inline

@@ -203,8 +203,7 @@ aliasPublicBindings(const std::string& idName,
 
     shared_ptr<AST> ast = bdng->val;
 
-    if (aliasEnv && 
-	aliasEnv->getBinding(ast->fqn.asString(FQName::sep)))
+    if (aliasEnv && aliasEnv->getBinding(ast->fqn.asString()))
       continue;
 
 
@@ -1564,7 +1563,7 @@ resolve(std::ostream& errStream,
 	  shared_ptr<Binding<AST> > bndg = 
 	    ifAst->envs.env->doGetBinding(pubName->s);
 
-	  std::string pubFQN = bndg->val->fqn.asString(FQName::sep);
+	  std::string pubFQN = bndg->val->fqn.asString();
 
 	  shared_ptr<AST> oldAlias = aliasEnv->getBinding(pubFQN);
 	  if (oldAlias) {

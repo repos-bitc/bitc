@@ -41,6 +41,7 @@
 #include <set>
 #include <boost/filesystem/path.hpp>
 #include "backend.hxx"
+#include "FQName.hxx"
 #include "Special.hxx"
 #include "TvPrinter.hxx"
 
@@ -74,7 +75,7 @@ namespace Options {
   extern bool dumpTypesAfterMidEnd;
   extern std::set<std::string> showTypesUocs;
   extern std::set<std::string> xmlTypesUocs;
-  extern std::set<std::string> entryPts;
+  extern std::set<FQName> entryPts;
   extern BackEnd *backEnd;
   extern std::string outputFileName;
   extern std::vector<boost::filesystem::path> libDirs;

@@ -218,7 +218,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_ifident:
     out << ast->s;
     if (Options::ppFQNS) {
-      out << "{" << ast->fqn.asString(FQName::sep);
+      out << "{" << ast->fqn;
       if (ast->externalName.size()) {
 	out << "," << ast->externalName;
       }
