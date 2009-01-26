@@ -316,7 +316,7 @@ private:
   void addTopLevelForm(boost::shared_ptr<AST> ast); // Add a new Top-level form
 
   bool instantiateFQN(std::ostream &errStream, 
-			 const std::string& fqn);
+		      const std::string& fqn);
 
   // The main AST specializer/ instantiator
   boost::shared_ptr<AST> doInstantiate(std::ostream &errStream, 

@@ -38,6 +38,7 @@
 #include "FQName.hxx"
 
 const char FQName::sep = ':';
+const char FQName::LocalBindingSep = '.';
 
 bool
 FQName::operator<(const FQName& that) const

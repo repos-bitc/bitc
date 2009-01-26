@@ -2136,8 +2136,12 @@ UocInfo::instantiateBatch(ostream &errStream,
   /// These need to be instantiated before any of the user-specified
   /// entry points are instantiated, because the entry point
   /// instantiations may reference these.
-  CHKERR(errFree, instantiateFQN(errStream, "bitc.prelude:__index_lt"));
-  CHKERR(errFree, instantiateFQN(errStream, "bitc.prelude:IndexBoundsError"));
+  CHKERR(errFree, 
+	 instantiateFQN(errStream, 
+			FQName("bitc.prelude","__index_lt").asString()));
+  CHKERR(errFree,
+	 instantiateFQN(errStream, 
+			FQName("bitc.prelude","IndexBoundsError").asString()));
 
   for (set<string>::iterator itr = epNames.begin();
       itr != epNames.end(); ++itr)

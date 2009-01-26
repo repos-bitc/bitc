@@ -50,7 +50,11 @@ struct FQName {
   std::string iface;
   std::string ident;
 
+  /// @brief Separator to use when displaying a fully qualified name:
   static const char sep;
+  /// @brief Separator to use when making a local binding of a name
+  /// that is being imported.
+  static const char LocalBindingSep;
 
   bool operator <(const FQName&) const;
   bool operator >(const FQName&) const;
