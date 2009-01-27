@@ -49,7 +49,7 @@ bitc_stdlib_atoi(bitc_string_t *str)
     }
   }
 
-  for ( ; i < i < str->length; i++) {
+  for ( ; i < str->length; i++) {
     // Note: We are dealing with a UTF8-encoded string.  All legal
     // ASCII digits, including hexadecimal digits, fall within the
     // leading 128 code points.  Any code point whose encoding
