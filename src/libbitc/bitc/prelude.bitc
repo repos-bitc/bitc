@@ -76,13 +76,12 @@
   ;; (below) can be properly quantified.
   (deftypeclass (LiteralType 'a) :closed)
 
-  ;; Type class used for record polymorphism. Describes a field of
-  ;; some structure type 's having name nm (captured as a literal atom
-  ;; unit type) whose field type is 'a. Note that this definition is
-  ;; currently inaccurate, because we haven't implemented the atom
-  ;; type yet.
+  ;; Type class used for record polymorphism. Describes a field/method
+  ;; of some structure type 's having a field/method 'nm with type 'a.
+  ;; This type class is called has-field, but really means 
+  ;; has-field-or-method
   (deftypeclass (has-field 's 'nm 'a) :closed)
-
+  
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;    Structure and union definitions 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -192,6 +191,7 @@
   (definstance (LiteralType quad))
 
   (definstance (LiteralType string))
+
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TYPE CLASS FOR INTEGER LITERALS
