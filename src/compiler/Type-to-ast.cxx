@@ -67,7 +67,7 @@ Type::asAST(const sherpa::LexLoc &loc,
 { 
   shared_ptr<AST> ast = GC_NULL;
   shared_ptr<Type> t = getType();  
-
+  
   if (t->pMark >= 1) {
     ast = AST::make(at_ident, loc);
     ast->s = tvP->tvName(t);
@@ -206,6 +206,7 @@ Type::asAST(const sherpa::LexLoc &loc,
       break;
     }
 
+
 #ifdef KEEP_BF
   case  ty_bitfield:
     {
@@ -217,6 +218,15 @@ Type::asAST(const sherpa::LexLoc &loc,
       break;
     }
 #endif
+
+  case ty_method:
+    {
+      assert(t->components.size() == 2);
+      shared_ptr<AST> arg = t->Args()->asAST(loc, tvP);
+      shared_ptr<AST> ret = t->Ret()->asAST(loc, tvP);
+      ast = AST::make(at_methType, loc, arg, ret);
+      break;
+    }
 
   case ty_fn:
     {
@@ -262,7 +272,15 @@ Type::asAST(const sherpa::LexLoc &loc,
       }
       break;
     }
-
+    
+  case ty_field:
+    {
+      shared_ptr<AST> fld = AST::make(at_ident, loc);
+      fld->s = t->litValue.s;
+      ast = AST::make(at_fieldType, fld->loc, fld);
+      break;;
+    }
+    
   case ty_uconv: 
   case ty_uconr:
   case ty_uvalv: 

@@ -134,6 +134,12 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
       break;
     }
 
+  case ty_field:
+    {
+      ss << t->litValue.s;
+      break;
+    }
+
   case ty_tvar:
     {
       if (!tvP) {
@@ -174,9 +180,19 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
     }
 #endif
 
+  case ty_method:
+    {
+      assert(t->components.size() == 2);
+      ss << "(method " 
+	 << t->Args()->asString(tvP, traverse) 
+	 << " -> " 
+	 << t->Ret()->asString(tvP, traverse) 
+	 << ")";
+      break;
+    }
+
   case ty_fn:
     {
-      // Reworked by shap on 10/9/2008 to use arrow syntax
       assert(t->components.size() == 2);
       ss << "(fn " 
 	 << t->Args()->asString(tvP, traverse) 
@@ -188,7 +204,6 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
 
   case ty_fnarg:
     {
-      // Reworked by shap on 10/9/2008 to use arrow syntax
       // ss <<  "(";
       for (size_t i=0; i < t->components.size(); i++) {
 	if (i > 0) 

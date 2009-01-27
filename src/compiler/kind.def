@@ -101,6 +101,7 @@ DEFKIND(mbTop,     false,  false,  false, false, false, false,  false)
 DEFKIND(mbFull,    false,  false,  false, false, false, false,  false)
 DEFKIND(exn,       false,  false,  false, false, true,  false,  false)
 DEFKIND(dummy,     false,  false,  false, false, false, false,  false)
+DEFKIND(field,     false,  false,  true,  false, false, false,  false)
 
 // The following are constraints, stricttly speaking, but are types at
 // the next level.
@@ -119,3 +120,4 @@ DEFKIND(letGather, false,  false,  false, false, false, false,  false)
 
 #undef DEFKIND
 
+                                                                                

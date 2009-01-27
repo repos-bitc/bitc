@@ -143,7 +143,13 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
       out << "<uint sz='64'/>" << endl;
       break;
     }
- 
+
+  case ty_field:
+    {
+      out << "<field name='" << t->litValue.s << "'/>";
+      break;
+    }
+
   case ty_tvar:
     {
       string name;
@@ -183,10 +189,12 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
     }
 #endif
 
+  case ty_method:
   case ty_fn:
     {
+      std::string s = (t->kind == ty_fn)?"fn":"method";
       assert(t->components.size() == 2);
-      out << "<fn>" << endl;
+      out << "<" << s << ">" << endl;
       out.more();
       out << "<tuple>" << endl;
       out.more();
@@ -195,7 +203,7 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
       out << "</tuple>" << endl;
       t->Ret()->minimizeMutability()->asXML(tvP, out);
       out.less();
-      out << "</fn>" << endl;
+      out << "</" << s << ">" << endl;
       break;
     }
 

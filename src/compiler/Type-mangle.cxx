@@ -128,6 +128,12 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     break;
 #endif
 
+  case ty_method:
+    ss << "H" 
+       << Args()->mangledString(igMut, true,maxArgMut)
+       << Ret()->mangledString(igMut, true, maxArgMut);
+    break;
+
   case ty_fn:
     ss << "FN" 
        << Args()->mangledString(igMut, true,maxArgMut)
@@ -256,6 +262,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
   case ty_pcst:
   case ty_kvar:
   case ty_kfix:
+  case ty_field:
     {
       assert(false);
       break;

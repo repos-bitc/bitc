@@ -40,7 +40,7 @@
 (provide bitc.main main)
 
 (defstruct S
-  i: int32;
+  i: int32
   m: (method -> bool))
 
 (define (S.m s:S) #t)

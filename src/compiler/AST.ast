@@ -1018,7 +1018,7 @@ GROUP qtype = qualType | type;
 // argVec is not able to appear in a "type" position.
 GROUP type = var | tvar | bitfield | refType | valType
            | fn | methType | byRefType | arrayRefType | primaryType | dummyType
-           | arrayType | vectorType | typeapp
+           | arrayType | vectorType | typeapp | fieldType
            // | closureType;
            | mutableType | constType | exceptionType;
 
@@ -1052,7 +1052,8 @@ AST constType = type;
 AST typeapp = var type+;
 // EXCEPTION TYPE
 LEAF exceptionType;
-
+// Field type, identifies a literal field-name
+AST fieldType = ident;
 // Dumy types
 LEAF dummyType;
 

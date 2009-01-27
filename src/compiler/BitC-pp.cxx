@@ -193,6 +193,10 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     out << ":opaque";
     break;
 
+  case at_closed:
+    out << ":closed";
+    break;
+
   case at_boolLiteral:
   case at_charLiteral:
   case at_intLiteral:
@@ -711,6 +715,10 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
       out << "(" << ast->atKwd() << " ";
       show_qual_name(out, ident, tvlist, showTypes);
+      if(openclosed->astType != at_Null) {
+	out << " ";
+	BitcP(out, openclosed, showTypes);
+      }
       out << " ";
       BitcP(out, tcdecls, showTypes);
       out << " ";
@@ -1001,6 +1009,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
   case at_tvlist:
   case at_tcdecls:
+  case at_fieldType:
     {
       doChildren(out, ast, 0, false, showTypes);
       break;
@@ -1095,7 +1104,8 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     //case agt_reprbodyitem:
   case agt_ucon:
   case agt_expr_or_define:
-
+  case agt_openclosed:
+  case agt_uselhs:
 #if 0
   case at_xdefrepr:
   case at_reprcase:

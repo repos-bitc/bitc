@@ -338,6 +338,7 @@ isExpansive(std::ostream& errStream,
     
   case at_refCat:
   case at_valCat:
+  case at_closed:
   case at_opaqueCat:
   case agt_category:
   case at_module:
@@ -356,6 +357,8 @@ isExpansive(std::ostream& errStream,
   case at_constructor:
   case at_fields:
   case at_field:
+  case at_fieldType:
+  case at_methdecl:
   case at_bitfield:
   case at_arrayRefType:
   case at_byRefType:
@@ -371,6 +374,7 @@ isExpansive(std::ostream& errStream,
   case at_constType:
   case at_typeapp:
   case at_qualType:
+  case at_methType:
   case at_constraints:
   case at_identPattern:
   case at_Null:
@@ -381,7 +385,9 @@ isExpansive(std::ostream& errStream,
   case agt_definition:
   case agt_type_definition:
   case agt_value_definition:
+  case agt_uselhs:
   case agt_type:
+  case agt_openclosed:
     //case at_reprbody:
     //case at_reprcase:
     //case at_reprcaselegR:
@@ -500,7 +506,8 @@ isExpansive(std::ostream& errStream,
   case ty_float:
   case ty_double:
   case ty_quad:
-
+  case ty_field:
+    
   case ty_tvar:
   case ty_dummy:
   case ty_kvar:
@@ -510,6 +517,7 @@ isExpansive(std::ostream& errStream,
   case ty_bitfield:
 #endif
   case ty_fn:
+  case ty_method:
   case ty_typeclass:
     break;
 

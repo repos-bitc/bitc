@@ -447,6 +447,7 @@ resolve(std::ostream& errStream,
   case agt_type_definition:
     //case agt_reprbodyitem:
   case agt_value_definition:
+  case agt_uselhs:
   case at_letbindings:
   case at_dobindings:
   case at_dobinding:
@@ -464,6 +465,8 @@ resolve(std::ostream& errStream,
     //case at_reprcase:
     //case at_reprcaselegR:
     //case at_reprtag:
+  case at_closed:
+  case agt_openclosed:
   case at_reprctrs:
   case at_reprctr:
   case at_reprrepr:
@@ -1863,6 +1866,7 @@ resolve(std::ostream& errStream,
 
 
   case at_primaryType:
+  case at_fieldType:
     {
       break;
     }

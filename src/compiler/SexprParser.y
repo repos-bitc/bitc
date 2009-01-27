@@ -1229,7 +1229,7 @@ field: '(' tk_RESERVED bitfieldtype intLit ')'  {
 };
 
 methdecl: ident ':' method_type  {
-  SHOWPARSE("field -> ident : method_type");
+  SHOWPARSE("methdecl -> ident : method_type");
   $$ = AST::make(at_methdecl, $1->loc, $1, $3);
 };
 

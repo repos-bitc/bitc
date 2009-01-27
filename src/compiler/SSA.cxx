@@ -225,6 +225,7 @@ ssa(std::ostream& errStream,
   case at_Null:
   case at_refCat:
   case at_valCat:
+  case at_closed:
   case at_opaqueCat:
   case agt_category:
   case at_AnyGroup:
@@ -238,6 +239,7 @@ ssa(std::ostream& errStream,
   case agt_eform:
   case agt_type_definition:
   case agt_value_definition:
+  case agt_openclosed:
   case at_letbindings:
   case at_letbinding:
   case at_dobindings:
@@ -270,6 +272,7 @@ ssa(std::ostream& errStream,
   case at_identList:
   case at_container:
   case agt_ucon:
+  case agt_uselhs:
     
   case at_exceptionType:
   case at_dummyType:
@@ -288,6 +291,8 @@ ssa(std::ostream& errStream,
   case at_bitfield:
   case at_qualType:    
   case at_constraints:
+  case at_fieldType:
+  case at_methType:
     
   case at_cond_legs:
   case at_cond_leg:

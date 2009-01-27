@@ -123,6 +123,7 @@ findusedef(std::ostream &errStream,
   case agt_eform:
   case agt_type_definition:
   case agt_value_definition:
+  case agt_openclosed:
   case at_letbindings:
   case at_letbinding:
   case at_dobindings:
@@ -139,6 +140,7 @@ findusedef(std::ostream &errStream,
   case agt_fielditem:
   case at_refCat:
   case at_valCat:
+  case at_closed:
   case at_opaqueCat:
   case at_tcdecls:
   case at_tyfn:
@@ -173,6 +175,7 @@ findusedef(std::ostream &errStream,
   case at_tvlist:
   case at_docString:
   case agt_ucon:
+  case agt_uselhs:
     break;
 
 
@@ -293,6 +296,7 @@ findusedef(std::ostream &errStream,
     }
 
   case at_fn:
+  case at_methType:
     {
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(0),
 				 TYPE_MODE, boundVars, freeVars));
@@ -424,6 +428,7 @@ findusedef(std::ostream &errStream,
     /// @bug ?? Is at_methdecl correct ??
   case at_constructor:
   case at_field:
+  case at_fieldType:
   case at_defexception:
     {
       for (size_t c=1; c<ast->children.size();c++)

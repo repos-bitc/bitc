@@ -1139,6 +1139,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	  ctr->total_fill += field->field_bits;
 	  break;
 	}
+
 	// Note: at_methdecl illegal here, so omission is intentional.
       default:
 	{
@@ -1904,6 +1905,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_Null:
   case at_refCat:
   case at_valCat:
+  case at_closed:
   case at_opaqueCat:
   case at_tcmethods:
   case at_tcmethod_binding:
@@ -1922,6 +1924,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case agt_CompilationUnit:
   case agt_tc_definition:
   case agt_if_definition:
+  case agt_openclosed:
   case agt_ow:
   case agt_qtype:
   case agt_fielditem:
@@ -1930,6 +1933,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_frameBindings:
   case at_identList:
   case agt_ucon:
+  case agt_uselhs:
 
   case at_defrepr:
     //case at_reprbody:
@@ -3071,6 +3075,15 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_primaryType:
     {
       ast->symType = Type::make(Type::LookupKind(ast->s));
+      break;
+    }
+
+  case at_fieldType:
+    {
+      shared_ptr<AST> fName = ast->child(0);
+      shared_ptr<Type> ft = Type::make(ty_field);
+      ft->litValue.s = fName->s;
+      ast->symType = fName->symType = ft;
       break;
     }
 
@@ -4535,7 +4548,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
              A |- (inner-ref e f): ref(t)
        ------------------------------------------------*/
 
-      
       ast->symType = newTvar();
       // match agt_expr
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,

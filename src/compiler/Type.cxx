@@ -1050,11 +1050,12 @@ Type::isOfInfiniteType()
 #ifdef KEEP_BF
   case ty_bitfield:
 #endif
+  case ty_field:
     {
       infType = false;
       break;
     }
-
+    
   case ty_mbFull:
   case ty_mbTop:
   case ty_array:
@@ -1065,6 +1066,7 @@ Type::isOfInfiniteType()
   case ty_mutable:
   case ty_const:
   case ty_fn:
+  case ty_method:
     {
       for (size_t i=0; !infType && (i < components.size()); i++)
       	if (CompType(i)->isOfInfiniteType())
