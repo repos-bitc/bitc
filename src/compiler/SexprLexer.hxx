@@ -120,7 +120,7 @@ struct SexprLexer {
 
   /** @brief If @p c is a digit character in radix @p radix, return
    * its decimal value */
-  long digitValue(ucs4_t c, unsigned radix);
+  static long digitValue(ucs4_t c, unsigned radix);
 
   /** @brief Fetch next character from input stream. */
   ucs4_t getChar();

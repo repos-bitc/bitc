@@ -161,9 +161,18 @@ validate_string(const char *s)
 	    return (spos - s);
 	  if (*++spos != '+')
 	    return (spos - s);
-	  while (*++spos != '}')
-	    if (!isxdigit(*spos))
-	      return (spos - s);
+	  {
+	    uint32_t codePoint = 0;
+
+	    while (*++spos != '}') {
+	      if (!isxdigit(*spos))
+		return (spos - s);
+	      codePoint *= 16;
+	      codePoint += SexprLexer::digitValue(*spos, 16);
+	      if (codePoint > UCHAR_MAX_VALUE)
+		return (spos - s);
+	    }
+	  }
 	}
 	spos++;
 	break;
@@ -597,11 +606,20 @@ SexprLexer::lex(ParseType *lvalp)
 	    return tk_Char;
 	  }
 	  else if (c == 'U') {
+	    uint32_t codePoint = 0;
+
 	    c = getChar();
 	    if (c == '+') {
-	      do {
+	      for(;;) {
 		c = getChar();
-	      } while (digitValue(c, 16) >= 0);
+		long dv = digitValue(c, 16);
+		if (dv < 0)
+		  break;
+		codePoint *= 16;
+		codePoint += dv;
+		if (codePoint > UCHAR_MAX_VALUE)
+		  return EOF;
+	      }
 	      
 	      if (!isCharDelimiter(c)) {
 		ungetChar(c);

@@ -622,7 +622,9 @@ float double quad</literallayout>
 	  <literallayout>
 #\U+<em>digits</em></literallayout>
 	  <p indent="no">
-	    Where <em>digits</em> are hexidecimal.
+	    Where <em>digits</em> are hexidecimal. The value supplied
+	    must be a valid unicode code point, which is a value in
+	    the range 0..10FFFF hexadecimal.
 	  </p>
 	  <p>
 	    Certain commonly used non-printing characters have
