@@ -39,12 +39,11 @@
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defstruct S
-  i: int32
-  m: (method -> bool))
+(defstruct S1:val i: int32)
+(defstruct S2:ref b:bool i: int32)
 
-(define (S.m s:S) #t)
+(define (f x) x.i)
 
 (define (main.main argv:(vector string))
-  ((S 32).m)
-  0:int32)
+  (f (S1 10))
+  (f (S2 #t 0)))

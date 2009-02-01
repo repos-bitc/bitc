@@ -112,6 +112,12 @@ Type::toString()
       break;
     }
 
+  case ty_field:
+    {
+      ss << litValue.s;
+      break;
+    }
+
 #ifdef KEEP_BF
   case  ty_bitfield:
     ss << "(bitfield "
@@ -122,6 +128,12 @@ Type::toString()
     break;
 #endif
     
+  case ty_method:
+    assert(components.size() == 2);
+    ss << "(method " << Args()->toString() 
+       <<  " " << Ret()->toString() << ")";
+    break;
+
   case ty_fn:
     assert(components.size() == 2);
     ss << "(fn " << Args()->toString() 

@@ -202,6 +202,7 @@ Type::size()
 #endif
 
   case ty_fn:
+  case ty_method:
   case ty_string:
   case ty_dummy:
   case ty_structr:
@@ -227,6 +228,7 @@ Type::size()
   case ty_pcst:
   case ty_kvar:
   case ty_kfix:
+  case ty_field:
     assert(false);
     break;
     

@@ -520,6 +520,7 @@ Unify(std::ostream& errStream,
 
     case ty_tyfn:
     case ty_fn:
+    case ty_method:
       {
 	shared_ptr<Type> t1Args = t1->Args();
 	shared_ptr<Type> t2Args = t2->Args();
@@ -723,6 +724,13 @@ Unify(std::ostream& errStream,
 	  CHKERR(errFree,
 		 Unify(errStream, trail, errLoc, t1->CompType(i), 
 		       t2->CompType(i), uflags));
+	break;
+      }
+
+    case ty_field:
+      {
+	if(t1->litValue.s != t2->litValue.s)
+	  errFree = typeError(errStream, errLoc, t1, t2);
 	break;
       }
       

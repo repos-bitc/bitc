@@ -1139,6 +1139,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	  ctr->total_fill += field->field_bits;
 	  break;
 	}
+
 	// Note: at_methdecl illegal here, so omission is intentional.
       default:
 	{
@@ -1904,6 +1905,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_Null:
   case at_refCat:
   case at_valCat:
+  case at_closed:
   case at_opaqueCat:
   case at_tcmethods:
   case at_tcmethod_binding:
@@ -1922,6 +1924,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case agt_CompilationUnit:
   case agt_tc_definition:
   case agt_if_definition:
+  case agt_openclosed:
   case agt_ow:
   case agt_qtype:
   case agt_fielditem:
@@ -1930,6 +1933,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_frameBindings:
   case at_identList:
   case agt_ucon:
+  case agt_uselhs:
 
   case at_defrepr:
     //case at_reprbody:
@@ -3074,6 +3078,15 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
+  case at_fieldType:
+    {
+      shared_ptr<AST> fName = ast->child(0);
+      shared_ptr<Type> ft = Type::make(ty_field);
+      ft->litValue.s = fName->s;
+      ast->symType = fName->symType = ft;
+      break;
+    }
+
   case at_arrayType:
     {
       // match agt_type
@@ -3639,6 +3652,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
                U(tr = tr')   tf = tr'.fld
           _________________________________________
                   A |- e.fld: tf
+
+                          A |- e:'a    
+       ___________________________________________________
+          A |- e.fld: 'b \ has-field('a, field(fld), 'b)
+
        ------------------------------------------------*/
 
       // match agt_expr 
@@ -3653,11 +3671,38 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
             
       shared_ptr<Type> t = ast->child(0)->symType->getType();
       shared_ptr<Type> t1 = t->getBareType();
-
+      
       if (t1->isUType()) {
 	ast->astType = at_sel_ctr;
 	TYPEINFER(ast, gamma, instEnv, impTypes, isVP, tcc,
 		  trail, USE_MODE, TI_EXPRESSION);
+	break;
+      }
+
+      if(t1->isTvar() && !Options::noPrelude) {
+
+	if (ti_flags & TI_NO_MORE_TC) {
+	  ast->symType = Type::make(ty_tvar);
+	  break;
+	}
+	
+	const std::string& hasFld = SpecialNames::spNames.sp_has_field;
+	shared_ptr<TypeScheme> hfSigma = gamma->getBinding(hasFld);
+	assert(hfSigma);
+	
+	shared_ptr<Typeclass> hf = hfSigma->type_instance();
+	assert(hf->typeArgs.size() == 3);
+	
+	shared_ptr<Type> fldName = Type::make(ty_field);
+	fldName->litValue.s = ast->child(1)->s;
+
+	// has-field constraint is of the form:
+	// has-field('structure, 'field-name, 'field-type)
+	UNIFY(trail, ast->loc, hf->TypeArg(0), t1);
+	UNIFY(trail, ast->loc, hf->TypeArg(1), fldName);
+	UNIFY(trail, ast->loc, hf->TypeArg(2), ast->symType);
+
+	tcc->addPred(hf);
 	break;
       }
       
@@ -4535,7 +4580,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
              A |- (inner-ref e f): ref(t)
        ------------------------------------------------*/
 
-      
       ast->symType = newTvar();
       // match agt_expr
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, isVP, tcc,

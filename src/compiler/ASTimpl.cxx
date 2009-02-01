@@ -277,6 +277,9 @@ AST::atKwd() const
   case at_declstruct:
     return "defstruct";
 
+  case at_defobject:
+    return "defobject";
+
   case at_define:
   case at_recdef:
     return "define";
@@ -338,6 +341,9 @@ AST::atKwd() const
   case at_methType:
     return "method";
 
+  case at_fieldType:
+    return "<field>";
+    
 //   case at_closureType:
 //     return "closure";
 
@@ -585,6 +591,9 @@ AST::atKwd() const
   case at_refCat:
     return "ref";
 
+  case at_closed:
+    return "closed";
+    
   case at_valCat:
     return "val";
 
@@ -625,6 +634,7 @@ AST::atKwd() const
     return "<container>";
 
   case at_AnyGroup:
+  case agt_uselhs:
   case agt_var:
   case agt_literal:
   case agt_tvar:
@@ -658,6 +668,8 @@ std::string
 identTypeToString(IdentType id)
 {
   switch (id) {
+  case id_block:
+    return "block";
   case id_unresolved:
     return "unresolved";
   case id_tvar:
@@ -671,6 +683,8 @@ identTypeToString(IdentType id)
   case id_typeclass:
     return "typeclass";
   case id_tcmethod:
+    return "method";
+  case id_method:
     return "method";
   case id_field:
     return "field";
@@ -692,7 +706,10 @@ identTypeToString(IdentType id)
     return "Union-ctor";
   case idc_apply:
     return "Applicable-value";
+  case idc_usesel_lhs:
+    return "Usesel-lhs";
   }
+  return "IMPOSSIBLE";
 }
 
 void

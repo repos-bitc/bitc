@@ -615,6 +615,7 @@ enum AstType {
   at_constType,
   at_typeapp,
   at_exceptionType,
+  at_fieldType,
   at_dummyType,
   at_identPattern,
   at_tqexpr,

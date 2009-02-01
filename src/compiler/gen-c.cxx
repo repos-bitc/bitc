@@ -353,10 +353,6 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
       break;
     }
 
-  case ty_letGather:
-    assert(false);
-    break;
-
   case ty_mbTop:
   case ty_mbFull:
     out << toCtype(t->Core(), IDname, flags, arrsz);
@@ -434,6 +430,16 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
 
     break;
 
+  case ty_method:
+    {
+      // This case cannot happen for static dispatch since it will be
+      // re-written to a normal function call. In the case of dynamic
+      // dispatch, we will have to handle this case, probably by
+      // falling through to the function case (handled similarly)
+      assert(false);
+      break;
+    }
+
   case ty_fn:
     {
       out << CMangle(t->mangledString(true));
@@ -447,12 +453,6 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
 	  out << ", ";
 	out << toCtype(t->CompType(i), IDname, flags, arrsz);
       }
-      break;
-    }
-
-  case ty_tyfn:
-    {
-      assert(false);
       break;
     }
 
@@ -514,10 +514,13 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
       break;
     }
 
+  case ty_tyfn:
   case ty_typeclass:
   case ty_pcst:
   case ty_kvar:
   case ty_kfix:
+  case ty_letGather:
+  case ty_field:
     assert(false);
     break;
   }
@@ -961,6 +964,7 @@ toc(std::ostream& errStream,
   case at_Null:
   case at_refCat:
   case at_valCat:
+  case at_closed:
   case at_opaqueCat:
   case agt_category:
   case at_AnyGroup:
@@ -977,6 +981,7 @@ toc(std::ostream& errStream,
   case agt_CompilationUnit:
   case agt_tc_definition:
   case agt_if_definition:
+  case agt_openclosed:
   case agt_ow:
   case agt_qtype:
   case agt_fielditem:
@@ -984,6 +989,7 @@ toc(std::ostream& errStream,
   case at_frameBindings:
   case at_ifident:
   case agt_ucon:
+  case agt_uselhs:
 
   case at_declares:
   case at_declare:
@@ -1012,7 +1018,9 @@ toc(std::ostream& errStream,
   case at_bitfield:
   case at_qualType:
   case at_constraints:
-
+  case at_fieldType:
+  case at_methType:
+    
   case at_deftypeclass:
   case at_definstance:
   case at_tcmethods:
@@ -1280,6 +1288,9 @@ toc(std::ostream& errStream,
       }
       break;
     }
+
+  case at_methdecl:
+    break;
 
   case at_field:
     {

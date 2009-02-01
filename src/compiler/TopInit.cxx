@@ -146,6 +146,7 @@ TopInit(std::ostream& errStream,
   switch(ast->astType) {
   case at_refCat:
   case at_valCat:
+  case at_closed:
   case at_opaqueCat:
   case agt_category:
   case at_AnyGroup:
@@ -164,12 +165,14 @@ TopInit(std::ostream& errStream,
   case agt_tc_definition:
   case agt_if_definition:
   case agt_ow:
+  case agt_openclosed:
   case at_localFrame:
   case at_frameBindings:
   case at_identList:
   case at_container:
   case agt_qtype:
   case agt_fielditem:
+  case agt_uselhs:
   case at_defrepr:
     //case at_reprbody:
     //case at_reprcase:
@@ -234,6 +237,7 @@ TopInit(std::ostream& errStream,
   case at_fn:
   case at_fnargVec:
   case at_primaryType:
+  case at_fieldType:
   case at_arrayType:
   case at_vectorType:
   case at_exceptionType:
@@ -242,6 +246,7 @@ TopInit(std::ostream& errStream,
   case at_constType:
   case at_typeapp:
   case at_qualType:
+  case at_methType:
   case at_constraints:
     break;
     

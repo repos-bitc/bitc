@@ -1182,13 +1182,13 @@ UocInfo::recInstantiate(ostream &errStream,
 
       if (ast->children.size() > 1) {
 	shared_ptr<AST> typeAST = typeAsAst(ast->child(0)->symType,
-				       ast->child(1)->loc);
+					    ast->child(1)->loc);
 	if (ast->child(1)->astType == at_byRefType)
 	  ast->child(1) = AST::make(at_byRefType,
-				  typeAST->loc, typeAST);
+				    typeAST->loc, typeAST);
 	else
 	  ast->child(1) = typeAST;
-	
+ 	
 	RANDT_DROP(ast->child(1), "[[IP R&T]]", UNIFIED_ENVS);	
 	
 	ast->child(1) = recInstantiate(errStream,
@@ -1250,7 +1250,7 @@ UocInfo::recInstantiate(ostream &errStream,
       assert(ast->symType->isConcrete());
 
       ast = AST::make(at_tqexpr, ast->loc, ast,
-		    typeAsAst(ast->symType, ast->loc));
+		      typeAsAst(ast->symType, ast->loc));
       RANDT_DROP(ast, "[[IntFloat R&T]]", UNIFIED_ENVS);
       break;	
     }
@@ -1384,6 +1384,21 @@ UocInfo::recInstantiate(ostream &errStream,
 	ast->envs.updateKey(oldName, arg->s);
 	
 	substitute(body, arg, arg); //!!
+	
+	shared_ptr<AST> typeAST = typeAsAst(arg->symType,
+					    argPat->loc);
+	
+	if(args->symType->CompFlags(c) & COMP_BYREF)
+	  typeAST = AST::make(at_byRefType, typeAST->loc, typeAST);
+	
+	if(argPat->children.size() == 2)
+	  ast->child(1) = typeAST;
+	else
+	  argPat->addChild(typeAST);
+	
+	// No need to RANDT the new type AST generated here, it will
+	// be handled in the identPattern case in the following
+	// recInstantiate calls. 
       }
 
       ast->child(0) = recInstantiate(errStream, args,

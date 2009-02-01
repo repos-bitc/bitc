@@ -1050,11 +1050,12 @@ Type::isOfInfiniteType()
 #ifdef KEEP_BF
   case ty_bitfield:
 #endif
+  case ty_field:
     {
       infType = false;
       break;
     }
-
+    
   case ty_mbFull:
   case ty_mbTop:
   case ty_array:
@@ -1065,6 +1066,7 @@ Type::isOfInfiniteType()
   case ty_mutable:
   case ty_const:
   case ty_fn:
+  case ty_method:
     {
       for (size_t i=0; !infType && (i < components.size()); i++)
       	if (CompType(i)->isOfInfiniteType())
@@ -1189,17 +1191,17 @@ comp::comp(const std::string s, shared_ptr<Type> t, CompFlagSet _flags)
 #define TYPE_CTR_INIT(k) do {			\
     kind = k;					\
     defAst = GC_NULL;				\
+    myContainer = GC_NULL;			\
+    minSignedRep = 0;				\
+    minUnsignedRep = 0;				\
+    Isize = 0;					\
     if(kind == ty_array)			\
       arrLen = ArrLen::make(0);			\
     else					\
       arrLen = GC_NULL;				\
-    Isize = 0;					\
-    minSignedRep = 0;				\
-    minUnsignedRep = 0;				\
     mark = MARK_NONE;				\
     pMark = 0;					\
     sp = GC_NULL;				\
-    myContainer = GC_NULL;			\
     link = GC_NULL;				\
     flags = TY_NO_FLAGS;			\
   } while (0);
@@ -1241,6 +1243,7 @@ Type::Type(shared_ptr<Type>  t)
   Isize = t->Isize;
   minSignedRep = t->minSignedRep;
   minUnsignedRep = t->minUnsignedRep;
+  litValue = t->litValue;
 
   typeArgs = t->typeArgs;
   fnDeps = t->fnDeps;

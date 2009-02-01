@@ -78,6 +78,8 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case agt_eform:
   case agt_type_definition:
   case agt_value_definition:
+  case agt_openclosed:
+  case agt_uselhs:
   case at_letbindings:
   case at_letbinding:
   case at_dobindings:
@@ -94,6 +96,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case agt_fielditem:
   case at_refCat:
   case at_valCat:
+  case at_closed:
   case at_opaqueCat:
   case at_tcdecls:
   case at_tyfn:
@@ -139,8 +142,10 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_dummyType:
   case at_valType:
   case at_primaryType:
+  case at_fieldType:
   case at_fnargVec:
   case at_mutableType: 
+  case at_methType:
   case at_constType:
   case at_defunion:
   case at_defstruct:
