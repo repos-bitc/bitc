@@ -257,55 +257,135 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
 		  shared_ptr<Constraint> pred, shared_ptr<Constraints> cset, 
 		  bool &handled, bool &handlable)
 {
+  bool errFree = true;
   pred = pred->getType();
-  if (pred->kind != ty_typeclass) {
-    // This must be a pcst constraint;
+
+  do{//dummy loop, so that we can break in between
+
+    if (pred->kind != ty_typeclass) {
+      handlable = false;
+      handled = false;
+      break;
+    }
+
+    // Safe to do name comparison, everyone includes the prelude.
+    const std::string &ref_types = SpecialNames::spNames.sp_ref_types; 
+    const std::string &has_field = SpecialNames::spNames.sp_has_field; 
+    
+    if (pred->defAst->s == ref_types) {
+      handlable = true;
+      SPSOL_DEBUG errStream << "\t\tCase RefTypes for "
+			    << pred->asString(Options::debugTvP)
+			    << std::endl;
+
+      shared_ptr<Type> it = pred->TypeArg(0)->getType();
+      if (it->isVariable()) { // checks beyond mutability, maybe-ness
+	SPSOL_DEBUG errStream << "\t\t ... Variable, KEEP"
+			      << pred->asString(Options::debugTvP)
+			      << std::endl;
+	handled = false;
+	break;
+      }
+
+      handled = true;
+      if (it->isRefType()) {
+	SPSOL_DEBUG errStream << "\t\t ... Satisfied, CLEAR"
+			      << pred->asString(Options::debugTvP)
+			      << std::endl;
+	break;
+      }
+
+      /* Otherwise, we have a Value Type */
+      SPSOL_DEBUG errStream << "\t\t ... Unboxed-type, ERROR"
+			    << pred->asString(Options::debugTvP)
+			    << std::endl;
+      
+      errFree = false;      
+      break;
+    }
+    
+    if(pred->defAst->s == has_field) {
+      handlable = true;
+      SPSOL_DEBUG errStream << "\t\tCase has-field for "
+			    << pred->asString(Options::debugTvP)
+			    << std::endl;
+      
+      shared_ptr<Type> st = pred->TypeArg(0)->getType();
+      shared_ptr<Type> fName = pred->TypeArg(1)->getType();
+      shared_ptr<Type> fType = pred->TypeArg(2)->getType();
+    
+      if(st->isVariable()) {
+	SPSOL_DEBUG errStream << "\t\t ... Variable, KEEP"
+			      << pred->asString(Options::debugTvP)
+			      << std::endl;
+	handled = false;
+	break;
+      }
+      
+      handled = true;
+      if (st->kind != ty_structv && st->kind != ty_structr) {
+	SPSOL_DEBUG errStream << "\t\t ... Non-structure type, ERROR"
+			      << pred->asString(Options::debugTvP)
+			      << std::endl;
+	errFree = false;
+	break;
+      }
+      
+      if (fName->kind != ty_field) {
+	SPSOL_DEBUG errStream << "\t\t ... Non-field type, ERROR"
+			      << pred->asString(Options::debugTvP)
+			      << std::endl;
+	errFree = false;
+	break;
+      }
+      
+      shared_ptr<Type> fld = GC_NULL;
+      for (size_t i=0; i < st->components.size(); i++)
+	if (st->CompName(i) == fName->litValue.s)
+	  if((st->CompFlags(i) & COMP_INVALID) == 0) {
+	    fld = st->CompType(i)->getType();
+	    break;
+	  }
+      
+      
+      for (size_t i=0; i < st->methods.size(); i++)
+	if (st->MethodName(i) == fName->litValue.s)
+	  if((st->MethodFlags(i) & COMP_INVALID) == 0) {
+	    fld = st->MethodType(i)->getType();
+	    break;
+	  }
+      
+      if(!fld) {
+	SPSOL_DEBUG errStream << "\t\t ... Field/Method not found, ERROR"
+			      << pred->asString(Options::debugTvP)
+			      << std::endl;
+	errFree = false;
+	break;
+      }
+      
+      CHKERR(errFree, fType->unifyWith(fld));
+      if(!errFree)
+	SPSOL_DEBUG errStream << "\t\t ... Field Unification failure, ERROR"
+			      << pred->asString(Options::debugTvP)
+			      << std::endl;
+      else
+	SPSOL_DEBUG errStream << "\t\t ... Field found, CLEAR"
+			      << pred->asString(Options::debugTvP)
+			      << std::endl;
+      break;
+    }
+    
+    // This constraint is non of the above checked special type
+    // classes.
     handlable = false;
     handled = false;
-    return true;
-  }
+    break;
+  }while(false);
   
-  // Special handling for ref-types
-  // Safe to do name comparison, everyone includes the prelude.
-  const std::string &ref_types = SpecialNames::spNames.sp_ref_types; 
-  if (pred->defAst->s == ref_types) {
-    handlable = true;
-    assert(pred->typeArgs.size() == 1);
-    shared_ptr<Type> it = pred->TypeArg(0)->getType();
-
-    SPSOL_DEBUG errStream << "\t\tCase RefTypes for "
-			  << pred->asString(Options::debugTvP)
-			  << std::endl;
-    
-    if (it->isRefType()) {
-      SPSOL_DEBUG errStream << "\t\t ... Satisfied, CLEAR"
-			    << pred->asString(Options::debugTvP)
-			    << std::endl;
-      cset->clearPred(pred);
-      handled = true;
-      return true;
-    }
-    
-    if (it->isVariable()) { // checks beyond mutability, maybe-ness
-      SPSOL_DEBUG errStream << "\t\t ... Variable, KEEP"
-			    << pred->asString(Options::debugTvP)
-			    << std::endl;
-      handled = false;
-      return true;
-    }
-    
-    /* Value Type */
-    SPSOL_DEBUG errStream << "\t\t ... Unboxed-type, ERROR"
-			  << pred->asString(Options::debugTvP)
-			  << std::endl;
+  if(handled)
     cset->clearPred(pred);
-    handled = true;
-    return false;
-  }
-  
-  handlable = false;
-  handled = false;
-  return true;
+
+  return errFree;
 }
 
 bool
@@ -510,7 +590,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
    
    errFree/errFreeNow: Decides correctness of current constraints
 
-   In the case of and error, the rpedicate is removed, and handles
+   In the case of and error, the pedicate is removed, and handles
    must be true */
   bool errFree = true;
   bool handled = false;
