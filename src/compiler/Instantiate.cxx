@@ -1901,7 +1901,7 @@ UocInfo::doInstantiate(ostream &errStream,
       break;
     }
 
-  default:
+   default:
     assert(false);
     break;
   }
@@ -2014,7 +2014,76 @@ UocInfo::doInstantiate(ostream &errStream,
   // Now that we are (almost) done, remove current entry from the
   // worklist so that we are really done
   worklist.erase(wkName);
+  if(copy->astType == at_defstruct) {
+    shared_ptr<AST> fields = copy->child(4);
+    for (size_t i=0; i < fields->children.size(); i++) {
+      shared_ptr<AST> field = fields->child(i);
 
+      if(!field->symType->isMethod())
+	continue;
+      
+      shared_ptr<AST> methName = field->child(0);
+
+      std::stringstream oldMeth;
+      oldMeth << defIdent->fqn << "." << methName->s;
+      std::stringstream newMeth;
+      newMeth << copyIdent->s << "." << methName->s;
+
+      shared_ptr<AST> methAST = env->getBinding(oldMeth.str());
+      env->addBinding(newMeth.str(), methAST);
+
+      shared_ptr<TypeScheme> methTS =
+	gamma->getBinding(oldMeth.str())->ts_instance();
+      errStream << "methTS is: " << methTS->asString() << std::endl;
+      shared_ptr<Type> methType = methTS->tau->getType();
+      shared_ptr<Type> methArgs = methType->Args()->getType();
+      shared_ptr<Type> structArg = methArgs->CompType(0)->getType();
+      assert(structArg->isStruct());
+      errStream << "structArg: " << structArg->asString() << std::endl;
+      structArg->defAst = copyIdent;
+      structArg->myContainer = copyIdent;
+      errStream << "structArg: " << structArg->asString() << std::endl;
+      errStream << "methType: " << methType->asString() << std::endl;
+      errStream << "methTS now is: " << methTS->asString() << std::endl;
+      gamma->addBinding(newMeth.str(), methTS);
+      
+      errStream << "For Structure: " << copyIdent->s
+		<< " obtained from " << defIdent->s 
+		<< ", Adding binding "
+		<< newMeth.str() << " ==> "
+		<< oldMeth.str() << " with type "
+		<< methTS->asString()
+		<< std::endl;
+      
+#if 0
+
+      shared_ptr<AST> methName = field->child(0);
+      shared_ptr<AST> newMethName = AST::make(at_ident,
+					      methName->loc);
+      newMethName->flags |= ID_IS_GLOBAL;
+      newMethName->s = copyIdent->s + "." + methName->s;
+      
+      shared_ptr<AST> oldMethName = AST::make(at_ident,
+					      methName->loc);
+      oldMethName->s = defIdent->fqn.asString() + "." + methName->s;
+      
+      shared_ptr<AST> newMethPat =  AST::make(at_identPattern,
+					      newMethName->loc,
+					      newMethName); 
+      shared_ptr<AST> newMethDefn = AST::make(at_define,
+					      methName->loc, 
+					      newMethPat,
+					      oldMethName);
+      
+      errStream << "For Structure: " << copyIdent->s
+		<< " obtained from " << defIdent->s 
+		<< ", generated definition "
+		<< newMethDefn->asString()
+		<< std::endl;
+#endif
+    }
+  }
+  
   INST_DEBUG
     cerr << "Instantiated: " << def->asString()
 	 << " for type " << typ->asString() << endl

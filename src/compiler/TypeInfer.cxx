@@ -2282,7 +2282,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ident->symType = Type::make(decl_ty);
       ident->symType->defAst = ident;
       ident->symType->myContainer = ident;
-      shared_ptr<TypeScheme> sigma = TypeScheme::make(ident->symType, ident, TCConstraints::make());
+      shared_ptr<TypeScheme> sigma = TypeScheme::make(ident->symType, ident,
+						      TCConstraints::make());
 
       // match at_tvlist
       shared_ptr<AST> tvList = ast->child(1);

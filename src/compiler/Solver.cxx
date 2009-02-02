@@ -351,7 +351,11 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
       for (size_t i=0; i < st->methods.size(); i++)
 	if (st->MethodName(i) == fName->litValue.s)
 	  if((st->MethodFlags(i) & COMP_INVALID) == 0) {
-	    fld = st->MethodType(i)->getType();
+	    fld = st->MethodType(i)->getType()->getDCopy();
+
+	    // Form a function type for unification with constraint.
+	    assert(fld->kind == ty_method);
+	    fld->kind = ty_fn;
 	    break;
 	  }
       
