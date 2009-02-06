@@ -42,7 +42,7 @@
  * collector.
  */
 
-#include <malloc.h>
+#include <stdlib.h>
 
 extern void *GC_malloc(size_t nBytes)
 {

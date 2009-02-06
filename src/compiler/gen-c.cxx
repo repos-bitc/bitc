@@ -35,6 +35,8 @@
  *
  **************************************************************************/
 
+#include "../config.h"
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -45,6 +47,10 @@
 #include <set>
 #include <sstream>
 #include <cctype>
+
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
 
 #include <libsherpa/utf8.hxx>
 #include <libsherpa/INOstream.hxx>
