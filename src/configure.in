@@ -84,6 +84,7 @@ AC_CHECK_FILE(/usr/share/osdoc)
 
 AC_CHECK_HEADERS(stdint.h inttypes.h)
 AC_CHECK_HEADERS(unicode/uchar.h)
+AC_CHECK_HEADERS(sys/wait.h)
 
 AX_BOOST_BASE(1.33.1)
 AX_BOOST_SYSTEM
