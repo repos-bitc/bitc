@@ -1988,15 +1988,20 @@ UocInfo::doInstantiate(ostream &errStream,
 
   RANDT_DROP(copy, "[[Inst: R&T-1: ]]", envset);
   
+  // The type inference system can potentially perform some AST re-writes 
+  // For example, in the case of method calls. These re-writes will
+  // interfere with instantiator's own re-writes since they proceed in
+  // parallel. Therefore, we must ensure that all inference re-writes
+  // are completed by the time instantiator re-writes begin. Since all
+  // types are comcrete at this stage, this serialization of re-writes
+  // is possible. However, for this to happen correctly, we must
+  // propagate annotations on to non-generalizing defining forms and
+  // R&T again. Otherwise, not all re-writes would have happened yet.
   propagate_type_annotations(copy);
-
+  RANDT_DROP(copy, "[[Inst: R&T-2: ]]", envset);
+  
   INST_DEBUG
-    cerr << "Copy after name fixup, Propagation: " << copy->asString() << endl;
-
-  RANDT_DROP(copy, "[[Inst: R&T-1: ]]", envset);
-
-  INST_DEBUG
-    cerr << "Copy after name fixup, propagation, R&T: " << copy->asString() << endl;
+    cerr << "Copy after name fixup, R&T: " << copy->asString() << endl;
   
   // Now that the expression is typed, recurse over the body and
   // process dependencies
