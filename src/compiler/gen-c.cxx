@@ -3376,7 +3376,7 @@ EmitExe(std::ostream &optStream, std::ostream &errStream,
   }
 
  done:
-  filesystem::remove("bitc.out.c");
+  //filesystem::remove("bitc.out.c");
   filesystem::remove("bitc.out.o");
 
   return WEXITSTATUS(status) ? false : true;

@@ -543,13 +543,15 @@ name2fqn(shared_ptr<AST> ast)
 
 // Warning: The following macros need local errStream
 #define RANDT_DROP(expr, mess, env) do {		\
-    assert(RandTexpr(errStream, expr,			\
+    bool rewrite=false;					\
+    assert(RandTexpr(errStream, expr, rewrite,		\
 		     POLY_SYM_FLAGS, POLY_TYP_FLAGS,	\
 		     mess, false, env));		\
   }while (0);
 
 #define RANDT_COMMIT(expr, mess, env) do {		\
-    assert(RandTexpr(errStream, expr,			\
+    bool rewrite=false;					\
+    assert(RandTexpr(errStream, expr, rewrite,		\
 		     POLY_SYM_FLAGS, POLY_TYP_FLAGS,	\
 		     mess, true, env));			\
   }while (0);
@@ -625,7 +627,14 @@ substitute(shared_ptr<AST> ast, shared_ptr<AST> from, shared_ptr<AST> to)
   case at_ident:
     {
       if (ast->symbolDef == from) {
-	assert((ast->flags & IDENT_MANGLED) == 0);
+	//assert((ast->flags & IDENT_MANGLED) == 0);
+	if (ast->flags & IDENT_MANGLED) {
+	  std::cerr << "AST " << ast->s << " is mangled while "
+		    << "substituting " << from->s 
+		    << " <- " << to->s
+		    << std::endl;
+	  
+	}
 	
 	NAMKARAN(ast, to->s);
 	ast->symbolDef = to;
@@ -820,6 +829,41 @@ getIDFromInstantiation(shared_ptr<AST> oldDefID, shared_ptr<AST> newDef)
   return newDef->getID()->Use();	
 }
 
+// Qualify non-generalizing variable definitions with their type.
+static void
+propagate_type_annotations(shared_ptr<AST> ast)
+{
+  switch(ast->astType) {
+  case at_argVec:
+    {
+      for (size_t c=0; c < ast->children.size(); c++) {
+	shared_ptr<AST> argPat = ast->child(c);
+	shared_ptr<AST> arg = argPat->child(0);
+	
+	shared_ptr<AST> typeAST = typeAsAst(arg->symType,
+					    argPat->loc);
+	
+	if(ast->symType->CompFlags(c) & COMP_BYREF)
+	  typeAST = AST::make(at_byRefType, typeAST->loc, typeAST);
+	
+	if(argPat->children.size() == 2)
+	  argPat->child(1) = typeAST;
+	else
+	  argPat->addChild(typeAST);
+      }
+      break;
+    }
+    
+  case at_let:
+  case at_letrec:
+    break;
+
+  default:
+    for (size_t c=0; c < ast->children.size(); c++)
+      propagate_type_annotations(ast->child(c));
+    break;
+  }
+}
 
 // Take in an identifier and return the symbol environment in which
 // that identifier is defined
@@ -1188,12 +1232,12 @@ UocInfo::recInstantiate(ostream &errStream,
 				    typeAST->loc, typeAST);
 	else
 	  ast->child(1) = typeAST;
- 	
+
 	RANDT_DROP(ast->child(1), "[[IP R&T]]", UNIFIED_ENVS);	
 	
 	ast->child(1) = recInstantiate(errStream,
 				       ast->child(1),
-				       errFree, worklist);	
+				       errFree, worklist);
       }
       break;
     }
@@ -1374,6 +1418,7 @@ UocInfo::recInstantiate(ostream &errStream,
     {
       shared_ptr<AST> args = ast->child(0);
       shared_ptr<AST> body = ast->child(1);
+
       for (size_t c=0; c < args->children.size(); c++) {
 	shared_ptr<AST> argPat = args->child(c);
 	shared_ptr<AST> arg = argPat->child(0);
@@ -1387,20 +1432,20 @@ UocInfo::recInstantiate(ostream &errStream,
 	
 	shared_ptr<AST> typeAST = typeAsAst(arg->symType,
 					    argPat->loc);
+	// No need to RANDT the new type AST generated here, it will
+	// be handled in the identPattern case in the following
+	// recInstantiate calls. 
 	
 	if(args->symType->CompFlags(c) & COMP_BYREF)
 	  typeAST = AST::make(at_byRefType, typeAST->loc, typeAST);
 	
 	if(argPat->children.size() == 2)
-	  ast->child(1) = typeAST;
+	  argPat->child(1) = typeAST;
 	else
 	  argPat->addChild(typeAST);
 	
-	// No need to RANDT the new type AST generated here, it will
-	// be handled in the identPattern case in the following
-	// recInstantiate calls. 
       }
-
+      
       ast->child(0) = recInstantiate(errStream, args,
 				     errFree, worklist);
       ast->child(1) = recInstantiate(errStream, body,
@@ -1738,6 +1783,21 @@ UocInfo::doInstantiate(ostream &errStream,
   // symbolDefs to still point to the old ones so that substitute
   // works correctly.
   shared_ptr<AST> copy = def->getTrueCopy();
+
+#if 0
+  if(copy->astType == at_define || copy->astType == at_recdef) {
+    shared_ptr<AST> ip = copy->child(0);
+    assert(ip->astType == at_identPattern);
+    shared_ptr<AST> typAST = typeAsAst(typ, copy->loc);
+
+    if (ip->children.size() > 1)
+      ip->child(1) = typAST;	
+    else
+      ip->children.push_back(typAST);	
+    
+  }
+#endif
+
   shared_ptr<AST> copyIdent = copy->getID();
   NAMKARAN(copyIdent, newName);
 
@@ -1927,7 +1987,17 @@ UocInfo::doInstantiate(ostream &errStream,
 			       (EnvSet::make(getOuterLet(copy)->envs)));
 
   RANDT_DROP(copy, "[[Inst: R&T-1: ]]", envset);
+  
+  propagate_type_annotations(copy);
 
+  INST_DEBUG
+    cerr << "Copy after name fixup, Propagation: " << copy->asString() << endl;
+
+  RANDT_DROP(copy, "[[Inst: R&T-1: ]]", envset);
+
+  INST_DEBUG
+    cerr << "Copy after name fixup, propagation, R&T: " << copy->asString() << endl;
+  
   // Now that the expression is typed, recurse over the body and
   // process dependencies
 
@@ -1942,12 +2012,13 @@ UocInfo::doInstantiate(ostream &errStream,
 				    ip->child(1),
 				    errFree, worklist);
 
+
       // Attend to any instantiations necessary in the body of this
       // definition
       copy->child(1) = recInstantiate(errStream,
 				      copy->child(1),
 				      errFree, worklist);
-
+      
       break;
     }
 
@@ -2013,77 +2084,7 @@ UocInfo::doInstantiate(ostream &errStream,
 
   // Now that we are (almost) done, remove current entry from the
   // worklist so that we are really done
-  worklist.erase(wkName);
-  if(copy->astType == at_defstruct) {
-    shared_ptr<AST> fields = copy->child(4);
-    for (size_t i=0; i < fields->children.size(); i++) {
-      shared_ptr<AST> field = fields->child(i);
-
-      if(!field->symType->isMethod())
-	continue;
-      
-      shared_ptr<AST> methName = field->child(0);
-
-      std::stringstream oldMeth;
-      oldMeth << defIdent->fqn << "." << methName->s;
-      std::stringstream newMeth;
-      newMeth << copyIdent->s << "." << methName->s;
-
-      shared_ptr<AST> methAST = env->getBinding(oldMeth.str());
-      env->addBinding(newMeth.str(), methAST);
-
-      shared_ptr<TypeScheme> methTS =
-	gamma->getBinding(oldMeth.str())->ts_instance();
-      errStream << "methTS is: " << methTS->asString() << std::endl;
-      shared_ptr<Type> methType = methTS->tau->getType();
-      shared_ptr<Type> methArgs = methType->Args()->getType();
-      shared_ptr<Type> structArg = methArgs->CompType(0)->getType();
-      assert(structArg->isStruct());
-      errStream << "structArg: " << structArg->asString() << std::endl;
-      structArg->defAst = copyIdent;
-      structArg->myContainer = copyIdent;
-      errStream << "structArg: " << structArg->asString() << std::endl;
-      errStream << "methType: " << methType->asString() << std::endl;
-      errStream << "methTS now is: " << methTS->asString() << std::endl;
-      gamma->addBinding(newMeth.str(), methTS);
-      
-      errStream << "For Structure: " << copyIdent->s
-		<< " obtained from " << defIdent->s 
-		<< ", Adding binding "
-		<< newMeth.str() << " ==> "
-		<< oldMeth.str() << " with type "
-		<< methTS->asString()
-		<< std::endl;
-      
-#if 0
-
-      shared_ptr<AST> methName = field->child(0);
-      shared_ptr<AST> newMethName = AST::make(at_ident,
-					      methName->loc);
-      newMethName->flags |= ID_IS_GLOBAL;
-      newMethName->s = copyIdent->s + "." + methName->s;
-      
-      shared_ptr<AST> oldMethName = AST::make(at_ident,
-					      methName->loc);
-      oldMethName->s = defIdent->fqn.asString() + "." + methName->s;
-      
-      shared_ptr<AST> newMethPat =  AST::make(at_identPattern,
-					      newMethName->loc,
-					      newMethName); 
-      shared_ptr<AST> newMethDefn = AST::make(at_define,
-					      methName->loc, 
-					      newMethPat,
-					      oldMethName);
-      
-      errStream << "For Structure: " << copyIdent->s
-		<< " obtained from " << defIdent->s 
-		<< ", generated definition "
-		<< newMethDefn->asString()
-		<< std::endl;
-#endif
-    }
-  }
-  
+  worklist.erase(wkName);  
   INST_DEBUG
     cerr << "Instantiated: " << def->asString()
 	 << " for type " << typ->asString() << endl

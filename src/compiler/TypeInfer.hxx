@@ -84,7 +84,14 @@ enum TI_FlagValues {
 
   /// @brief Passed downward from at_apply handler when the thing in
   /// the applicative position is a select node.
-  TI_METHOD_OK           = 0x200u
+  TI_METHOD_OK           = 0x200u,
+
+  /// @brief The passes beyond the polyinstiator use FQNs to denote
+  /// all names. The type inferrence engine constructs names from
+  /// types (ex: re-writing method call ASTs) and needs to know which
+  /// one to use. 
+  TI_USING_FQNS          = 0x400u
+
 };
 typedef sherpa::EnumSet<TI_FlagValues> TI_Flags;
 

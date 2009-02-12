@@ -2696,8 +2696,6 @@ resolve(std::ostream& errStream,
     // THIS CASE MUST NOT BE USED BY OTHER LET FORMS
   case at_letbinding:
     {
-      assert(flags & RSLV_SYM_POST_POLY);
-
       // The lamLevel is bogus here, but OK only for
       // the sake of polyinstantiation.      
       if (ast->flags & LB_REC_BIND) {

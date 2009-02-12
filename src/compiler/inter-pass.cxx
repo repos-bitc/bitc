@@ -62,15 +62,16 @@ bool
 UocInfo::RandT(std::ostream& errStream,
 	       bool init,
 	       ResolverFlags rflags,
-	       TI_Flags uflags,
+	       TI_Flags tflags,
 	       std::string mesg)
 {
   bool errFree = true;
+  bool rewrite=false;
 
   CHKERR(errFree, Resolve(errStream, init, rflags, mesg));
 
   if (errFree)
-    CHKERR(errFree, TypeCheck(errStream, init, uflags, mesg));
+    CHKERR(errFree, TypeCheck(errStream, init, rewrite, tflags, mesg));
 
   if (!errFree)
     errStream << "WHILE R&Ting:" << std::endl
@@ -99,20 +100,11 @@ UocInfo::unwrapEnvs()
 // The following is used to R&T any sub-expression
 
 bool
-resolve(std::ostream& errStream,
-	shared_ptr<AST> ast,
-	shared_ptr<ASTEnvironment > env,
-	shared_ptr<ASTEnvironment > lamLevel,
-	int mode,
-	IdentType identType,
-	shared_ptr<AST> currLB,
-	unsigned long flags);
-
-bool
 UocInfo::RandTexpr(std::ostream& errStream,
 		   shared_ptr<AST> expr,
+		   bool &rewrite,
 		   ResolverFlags rflags,
-		   TI_Flags uflags,
+		   TI_Flags tflags,
 		   std::string mesg,
 		   bool keepResults,
 		   shared_ptr<EnvSet> altEnvSet)
@@ -132,8 +124,9 @@ UocInfo::RandTexpr(std::ostream& errStream,
 
   CHKERR(errFree, myUoc->Resolve(errStream, false, rflags, mesg));
   if (errFree)
-    CHKERR(errFree, myUoc->TypeCheck(errStream, false, uflags, mesg));
-
+    CHKERR(errFree, myUoc->TypeCheck(errStream, false, rewrite,
+				     tflags, mesg)); 
+  
   if (!keepResults)
     myUoc->unwrapEnvs();
 

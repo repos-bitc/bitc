@@ -131,6 +131,7 @@ public:
   boost::shared_ptr<AST> uocAst;
   boost::shared_ptr<ASTEnvironment > env;
   boost::shared_ptr<TSEnvironment > gamma;
+  boost::shared_ptr<InstEnvironment > instEnv;
 
   inline bool isSourceUoc() {
     return (uocAst->astType == at_module);
@@ -140,25 +141,6 @@ public:
     return (uocAst->astType == at_interface);
   }
 
-  // This is the Instance environment. 
-  // Currently indexed by FQN onto a list of Instances 
-  // currently visible. The key must be FQN and not the 
-  // because this environment must be cross referenced 
-  // across modules and recognizable by the common
-  // Type-class name.
-
-  // TODO TODO TODO:
-  // Using FQN (in its string representation) is actually 
-  // very stupid. The AST pointer of the defining occurance
-  // of the typeclass is what I should really use. However,
-  // due to the shortsightedness of initial implementation,
-  // the key in the environment structure is fixed to
-  // std::string. This must someday be changed to use 2 
-  // template parameters for the key and value. I dont want
-  // to jump and make this change unless I know that this
-  // implementation of instances works. 
-   
-  boost::shared_ptr<InstEnvironment > instEnv;
   
   UocInfo(const std::string& _uocName, const std::string& _origin, 
 	  boost::shared_ptr<AST> _uocAst);
@@ -263,9 +245,10 @@ public:
 #define OP_TYP_FLAGS (PI_TYP_FLAGS | TI_NO_PRELUDE)
 
 // RandT flags used by passes past polyinstantiation. 
-#define POLY_SYM_FLAGS (OP_SYM_FLAGS | RSLV_SYM_POST_POLY)
-#define POLY_TYP_FLAGS (OP_TYP_FLAGS | TI_NO_MORE_TC | TI_DEF_DECL_NO_MATCH)
-
+#define POLY_SYM_FLAGS (OP_SYM_FLAGS)
+#define POLY_TYP_FLAGS (OP_TYP_FLAGS | TI_NO_MORE_TC |		\
+			TI_DEF_DECL_NO_MATCH | TI_USING_FQNS)
+  
 // RandT flags used by passes Refization pass of Closure-conversion.
 #define REF_SYM_FLAGS (POLY_SYM_FLAGS | RSLV_INCOMPLETE_NO_CHK)
 #define REF_TYP_FLAGS (POLY_TYP_FLAGS)
@@ -283,12 +266,12 @@ public:
 
   bool 
   DoTypeCheck(std::ostream& errStream, bool init, 
-	      TI_Flags ti_flags);
-
+	      bool &rewrite, TI_Flags ti_flags);
+  
   bool 
   TypeCheck(std::ostream& errStream, bool init, 
-	    TI_Flags ti_flags, std::string pre);
-
+	    bool& rewrite, TI_Flags ti_flags, std::string pre);
+  
   bool RandT(std::ostream& errStream,
 	     bool init=false, 
 	     ResolverFlags rflags= RSLV_NO_FLAGS,
@@ -297,6 +280,7 @@ public:
 
   bool RandTexpr(std::ostream& errStream,
 		 boost::shared_ptr<AST> ast,
+		 bool &rewrite,
 		 ResolverFlags rflags= RSLV_NO_FLAGS,
 		 TI_Flags ti_flags=TI_NO_FLAGS,
 		 std::string pre = "Internal Compiler error :",

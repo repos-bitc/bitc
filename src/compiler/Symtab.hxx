@@ -94,10 +94,6 @@ enum ResolverFlagValues {
 
   /// Processing a Catch block with multiple exceptions
   RSLV_WITHIN_CATCH_MC          = 0x1000u,
-  
-  /// Resolution *during* (and post) polyinstantiation. 
-  /// Here, we ignore tvar-scoping.
-  RSLV_SYM_POST_POLY            = 0x2000u,
 };
 
 typedef sherpa::EnumSet<ResolverFlagValues> ResolverFlags;
