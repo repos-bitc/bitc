@@ -5126,8 +5126,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<TSEnvironment > doGamma = gamma->newScope();
       ast->envs.gamma = doGamma;
 
-      shared_ptr<TCConstraints> doTcc = TCConstraints::make();
-      
       shared_ptr<AST> dbs = ast->child(0);
       dbs->symType = Type::make(ty_tvar);
 
@@ -5136,7 +5134,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	shared_ptr<AST> db = dbs->child(c);
 	shared_ptr<AST> init = db->child(1);
 	shared_ptr<Type> tv = newTvar();
-	TYPEINFER(init, doGamma, instEnv, impTypes, rewrite, doTcc,
+	TYPEINFER(init, doGamma, instEnv, impTypes, rewrite, tcc,
 		  trail, USE_MODE, TI_EXPRESSION);
 	UNIFY(trail, init->loc, 
 	      init->symType, MBF(tv));
@@ -5150,7 +5148,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	shared_ptr<AST> init = db->child(1);
 	
 	localDef->symType = MBF(init->symType);
-	TYPEINFER(localDefPat, doGamma, instEnv, impTypes, rewrite, doTcc,
+	TYPEINFER(localDefPat, doGamma, instEnv, impTypes, rewrite, tcc,
 		  trail, DEF_MODE, TI_EXPRESSION);
       }
 
@@ -5160,7 +5158,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	shared_ptr<AST> localDef = db->getID();
 	shared_ptr<AST> step = db->child(2);
 	
-	TYPEINFER(step, doGamma, instEnv, impTypes, rewrite, doTcc,
+	TYPEINFER(step, doGamma, instEnv, impTypes, rewrite, tcc,
 		  trail, USE_MODE, TI_EXPRESSION);
 	
 	UNIFY(trail, step->loc, step->symType, 

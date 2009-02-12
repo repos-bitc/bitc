@@ -44,9 +44,8 @@
   (lambda (argvec)
     (define (endl) (stdio.write-char stdio.stdout #\linefeed))
     (stdio.write-int stdio.stdout 10:int32 10) (endl)
-    ;(stdio.write-int stdio.stdout 16rfaceabcd:uint32 16) (endl)
-    ;(stdio.write-int stdio.stdout 100000:int64 8) (endl)
-    ;(stdio.write-int stdio.stdout 0:int8 10) (endl)
-    ;(stdio.write-int stdio.stdout -12345:int32 10) (endl)
+    (stdio.write-int stdio.stdout 16rfaceabcd:uint32 16) (endl)
+    (stdio.write-int stdio.stdout 100000:int64 8) (endl)
+    (stdio.write-int stdio.stdout 0:int8 10) (endl)
+    (stdio.write-int stdio.stdout -12345:int32 10) (endl)
     0))
-
