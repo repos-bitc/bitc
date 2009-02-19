@@ -3404,7 +3404,7 @@ bitsizeof(<em>T</em>)</literallayout>
           an argument to <progident>set!</progident>.
         </p>
       </sect2>
-      <sect2>
+      <sect2 id="tagref">
         <title>Union, Repr Tag Reference</title>
         <p>
           If <progident><em>e<sub>loc</sub></em></progident> is a
