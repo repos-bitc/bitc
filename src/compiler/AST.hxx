@@ -141,12 +141,16 @@ enum IdentType {
   // Anything below here is a category that is some union of
   // IdentTypes above
   //
+  // The value of idc_FIRST_CATEGORY matches the value of idc_type,
+  // but we list idc_type first so that debuggers will report the
+  // value at runtime using that identifier.
   ///////////////////////////////////////////////////////////////////
-  idc_FIRST_CATEGORY,
 
   /// @brief %Type, which is one of <code>id_tvar</code>,
   /// <code>id_union</code>, or <code>id_struct</code>.
-  idc_type = idc_FIRST_CATEGORY,
+  idc_type,
+
+  idc_FIRST_CATEGORY = idc_type,
 
   /// @brief Value, which is one of <code>id_value</code>,
   /// <code>id_ucon0</code>, or <code>id_tcmethod</code>.
