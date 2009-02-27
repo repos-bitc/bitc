@@ -2652,7 +2652,7 @@ id : T
       </sect2>
       <sect2>
 	<title>Local Binding Forms</title>
-        <sect3>
+        <sect3 id="let">
           <title>let</title>
 <!--           <p> -->
 <!--             BitC provides an extended form of the -->
@@ -2707,7 +2707,7 @@ id : T
             lambda arguments means that this is not (quite) true.
           </p>
         </sect3>
-        <sect3>
+        <sect3 id="letrec">
           <title>letrec</title>
 <!--           <p> -->
 <!--             BitC provides an extended form of the -->
@@ -2734,10 +2734,11 @@ id : T
             <progident>letrec</progident> is:
           </p>
           <literallayout>
-(let ((x <em>e<sub>1</sub></em>)
+(let ((<em>bp<sub>1</sub></em> <em>e<sub>1</sub></em>)
       ...
-      (y <em>e<sub>2</sub></em>))
-  ; <em>x, y are bound in:</em>
+      (<em>bp<sub>n</sub></em> <em>e<sub>n</sub></em>))
+  ; Identifiers in <em>bp<sub>i</sub></em>
+  ; are bound in:
   <em>e<sub>body-1</sub></em>
   ...
   <em>e<sub>body-n</sub></em>)</literallayout>
@@ -2796,25 +2797,25 @@ id : T
             termination reasoning in the prover.</p>
             </footnote>
           </p>
-          <p>
-            Any binding pattern appearing in the
-            <progident><em>bp<sub>i</sub></em></progident> position in
-            a <progident>letrec</progident> must be statically
-            decomposable at compile time. It is not sufficient that
-            the corresponding
-            <progident><em>e<sub>i</sub></em></progident> be of
-            compatible type. This restriction allows the binding
-            patterns to be flattened away by the compiler without
-            internally violating the completeness
-            restriction.<footnote><p>The alternative was to disallow
-            binding patterns in <progident>letrec</progident>
-            forms. The static decomposition constraint preserves
-            greater syntactic consistency with
-            <progident>let</progident>.</p>
-            </footnote>
-          </p>
+<!--           <p> -->
+<!--             Any binding pattern appearing in the -->
+<!--             <progident><em>bp<sub>i</sub></em></progident> position in -->
+<!--             a <progident>letrec</progident> must be statically -->
+<!--             decomposable at compile time. It is not sufficient that -->
+<!--             the corresponding -->
+<!--             <progident><em>e<sub>i</sub></em></progident> be of -->
+<!--             compatible type. This restriction allows the binding -->
+<!--             patterns to be flattened away by the compiler without -->
+<!--             internally violating the completeness -->
+<!--             restriction.<footnote><p>The alternative was to disallow -->
+<!--             binding patterns in <progident>letrec</progident> -->
+<!--             forms. The static decomposition constraint preserves -->
+<!--             greater syntactic consistency with -->
+<!--             <progident>let</progident>.</p> -->
+<!--             </footnote> -->
+<!--           </p> -->
         </sect3>
-        <sect3>
+        <sect3 id="local-define">
           <title>local define</title>
           <p>
             The <progident>define</progident> form may be used to
@@ -4908,27 +4909,36 @@ For example:
       <sect2 id="TailRecursion">
         <title>Tail Recursion</title>
         <p>
-          BitC provides no syntactic form providing for non-recursive
-          iteration. Instead, the language requires a limited form of tail
-          recursion. We do not require fully proper tail recursion because
-          this is difficult to accomplish efficiently in C, and we wish to
+          BitC requires a limited form of tail recursion. We do not
+          require fully proper tail recursion because this is
+          difficult to accomplish efficiently in C, and we wish to
           preserve the ability to compile BitC programs into C for the
           sake of portability.
         </p>
         <p>
           <em>Definition:</em> Within a BitC form
-          <progident>f</progident>, a form <progident>g</progident> occurs
-          in <term>tail position</term> with respect to the form
-          <progident>f</progident> if the return value of
-          <progident>g</progident> is the final computation (and therefore
-          the return value) computed by <progident>f</progident>. A
-          function call is said to be <term>tail recursive</term> if it is
+          <progident>f</progident>, a form <progident>g</progident>
+          occurs in <term>tail position</term> with respect to the
+          form <progident>f</progident> if the evaluation of
+          <progident>g</progident> is the final evaluation (and
+          therefore the return value) computed by the form
+          <progident>f</progident>. This definition is transitive. A
+          structural consequence of this relationship is that the type
+          of <progident>g</progident> is (copy compatible with) the
+          type of <progident>f</progident>.
+        </p>
+        <p>
+          An application of a function <progident>f</progident> is
+          said to be <term>tail recursive</term> if (a) it appears in
+          tail position with respect to the body of its most closely
+          containing <progident>lambda</progident> body, and (b) it is
           implemented in such a way as to re-use its containing stack
           frame.
         </p>
         <p>
-          The BitC specification <em>requires</em> that certain procedure
-          calls must be compiled using a tail-recursive implementation:
+          The BitC specification <em>requires</em> that certain
+          procedure calls appearing in tail position must be compiled
+          using a tail-recursive implementation:
         </p>
         <ul>
           <li>
