@@ -46,15 +46,6 @@
 /// <b>Complexity:</b> Trivial once effect types are done.
 /// </li>
 /// <li>
-/// Implement literal instantiation.
-///
-/// <b>Rationale:</b> Essential for efficient I/O implementation.
-///
-/// <b>Status:</b> Tentative fumblings have started.
-///
-/// <b>Complexity:</b> Straightforward.
-/// </li>
-/// <li>
 /// Implement typeclass instance resolution by lexical lookup rule.
 ///
 /// <b>Rationale:</b> Solves the "colliding type class" problem.
@@ -63,17 +54,6 @@
 ///
 /// <b>Complexity:</b> Requires that we switch to a back-tracking
 /// solver.
-/// </li>
-/// <li>
-/// Implement record inference (a.k.a. <code>has-field</code>)
-///
-/// <b>Rationale:</b> Required to state type class dependencies for
-/// objects/capsules. Also gives us a form of lateral abstraction.
-///
-/// <b>Status:</b> Straightforward, but not yet started. Ideal
-/// implementation requires literal instantiation.
-///
-/// <b>Complexity:</b> Requires updates in the solver.
 /// </li>
 /// <li>
 /// Implement capsule/object notion.
@@ -85,6 +65,53 @@
 /// cannot be expressed without <tt>has-field</tt>.
 ///
 /// <b>Complexity:</b> Straightforward.
+/// </li>
+/// </ol>
+/// <h1>Technical Issues (Completed)</h1>
+/// <ol>
+/// <li>
+/// Implement literal instantiation.
+///
+/// <b>Rationale:</b> Essential for efficient I/O implementation.
+///
+/// <b>Status:</b> Dropped. See <a href="#array-ref">array-ref</a>. A
+/// specialized form of literal instantiation was implemented to
+/// support has-field, but this case was straightforward.
+/// An integer literal was to have been simultaneously a member of a
+/// single-element integer literal type and a member of the usual
+/// integer types. That proved to be excessively complicated, which is
+/// why we dropped the more general form of literal instantiation.
+///
+/// <b>Complexity:</b> Straightforward.
+/// </li>
+/// <li>
+/// <a name="array-ref">Array-ref</a>
+///
+/// <b>Rationale:</b> Essential for efficient I/O
+/// implementation. Replaces literal instantiation.
+///
+/// <b>Status:</b> Completed
+///
+/// <b>Complexity:</b> Straightforward.
+/// </li>
+/// <li>
+/// Implement record inference (a.k.a. <code>has-field</code>)
+///
+/// <b>Rationale:</b> Required to state type class dependencies for
+/// objects/capsules. Also gives us a form of lateral abstraction.
+///
+/// <b>Status:</b> Straightforward, but not yet started. Ideal
+/// implementation requires literal instantiation.
+///
+/// <b>Complexity:</b> Requires updates in the solver. Turned out to
+/// be less straightforward than we initially thought, because the
+/// method rewrite can occur late (in the instantiator), which
+/// required some care about the ordering of AST rewrites and calls to
+/// the type checker to re-type things.
+///
+/// Has-field is a specialized form of literal inference, but each
+/// field name is a member only of its corresponding unit type. There
+/// is no generalized type of field names.
 /// </li>
 /// </ol>
 /// <h1>Non-Technical Issues</h1>
