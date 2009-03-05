@@ -100,12 +100,12 @@
         ref="shapBitcSpec2006"/>, we decided to take implement
       polymorphism by full polyinstantiation. This will also simplify
       the implementation of overloading (type-classes), at the
-      cost of requiring whole-program compilation. In the next few
-      mails, I will try to describe our attempts to implement
-      polymorphism by polyinstantiation, and the associated problems.
+      cost of requiring whole-program compilation. In this document,
+      we try to describe our approach to implement
+      polymorphism by polyinstantiation, and the associated problems
+      and their solutions.
     </p>
   </sect1>
-
   <sect1>
     <title>Compiler organization</title>
     <p>
