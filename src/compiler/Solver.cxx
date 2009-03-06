@@ -310,7 +310,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
 			    << pred->asString(Options::debugTvP)
 			    << std::endl;
       
-      shared_ptr<Type> st = pred->TypeArg(0)->getType();
+      shared_ptr<Type> st = pred->TypeArg(0)->getBareType();
       shared_ptr<Type> fName = pred->TypeArg(1)->getType();
       shared_ptr<Type> fType = pred->TypeArg(2)->getType();
     
