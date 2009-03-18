@@ -1528,7 +1528,7 @@ toc(std::ostream& errStream,
 		  << "arg)->"
 		  << CMangle(field->child(0), CMGL_ID_FLD)
 		  << " == "
-		  << field->field_bits
+		  << field->unin_discm
 		  << ")";
 	      emitted1=true;
 	    }

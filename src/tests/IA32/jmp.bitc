@@ -13,7 +13,7 @@
 ;  FF      00 100 101  JMP imm32  Jump absolute, immediate indirect
 
 
-(defrepr jmp
+(defrepr jmp:val
   (jmp-short-rel
      opCode: uint8
      opCode2: uint8
@@ -41,3 +41,17 @@
 	    (== reg 2r100) (== rm 101))))
 
 
+(import bitc.main as main)
+(import bitc.stdio as stdio)
+
+(provide bitc.main main)
+(define main.main:(fn (vector string) -> int32)
+  (lambda (argvec)
+    (define jump (jmp-reg-direct 2r000))
+    (switch x jump
+      ((jmp-short-rel jmp-near-rel)
+       (stdio.write-int stdio.stdout x.opCode 16)
+       (stdio.write-int stdio.stdout x.opCode2 16))
+      ((jmp-reg-direct jmp-imm-indirect)
+       (stdio.write-int stdio.stdout x.opCode 16)
+       (stdio.write-int stdio.stdout 4:uint8 16))) 0))
