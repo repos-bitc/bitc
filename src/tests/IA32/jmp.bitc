@@ -1,0 +1,43 @@
+; As an example, we show the encoding of the op-code for an
+; unconditional jump instruction provided by the IA-32
+; architecture. Since IA-32 is a CISC architecture, the 
+; jmp instruction has different versions with varying lengths. 
+; In the interest of brevity, we present the encodings
+; only for the cases shown in fllowing table. 
+;
+; Op code}  Mod/rm    Instruction  Description
+;  (hex)   (binary)             
+;  EB CB               JMP rel8   Jump relative, 8-bit displacement
+;  E9 CD               JMP rel32  Jump relative, 32-bit displacement
+;  FF      11 100 reg  JMP reg    Jump absolute, register direct
+;  FF      00 100 101  JMP imm32  Jump absolute, immediate indirect
+
+
+(defrepr jmp
+  (jmp-short-rel
+     opCode: uint8
+     opCode2: uint8
+     disp8: uint8
+     (where (== opCode 16rEB) (== opCode2 16rCB)))
+  (jmp-near-rel
+     opCode: uint8
+     opCode2: uint8
+     disp32: uint32
+     (where (== opCode 16rE9) (== opCode2 16rCD)))
+  (jmp-reg-direct
+     opCode: uint8
+     mod: (bitfield uint8 2)
+     reg: (bitfield uint8 3)
+     rm:  (bitfield uint8 3)
+     (where (== opCode 16rFF) (== mod 2r11)
+	    (== reg 2r100)))
+  (jmp-imm-indirect
+     opCode: uint8
+     mod: (bitfield uint8 2)
+     reg: (bitfield uint8 3)
+     rm:  (bitfield uint8 3)
+     imm: uint32
+     (where (== opCode 16rFF) (== mod 2r00)
+	    (== reg 2r100) (== rm 101))))
+
+
