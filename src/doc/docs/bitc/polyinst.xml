@@ -1075,7 +1075,7 @@ p2: (pair (mutable bool) bool)</literallayout>
     </bibentry>
     <bibentry label="harperPoly1995">
       R. Harper,  G. Morrisett, ``Compiling polymorphism using
-      intentional  type analysis.''
+      intentional type analysis.''
       <doctitle> ACM SIGPLAN Symposium on Principles of 
         Programming Languages</doctitle>
       pages 130-141, January 1995.
