@@ -10,19 +10,19 @@
  * without modification, are permitted provided that the following
  * conditions are met:
  *
- *   - Redistributions of source code must contain the above 
+ *   - Redistributions of source code must contain the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer. 
+ *     disclaimer.
  *
  *   - Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions, and the following
- *     disclaimer in the documentation and/or other materials 
+ *     disclaimer in the documentation and/or other materials
  *     provided with the distribution.
  *
  *   - Neither the names of the copyright holders nor the names of any
  *     of any contributors may be used to endorse or promote products
  *     derived from this software without specific prior written
- *     permission. 
+ *     permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -149,10 +149,10 @@ bitc_malloc(size_t sz)
   void *ptr = GC_malloc(sz);
   if(ptr == NULL)
     bitc_throw(&val_ExOutOfMemory);
-    
+
   return ptr;
 }
- 
+
 /// @brief Trivial wrapper for allocating storage that may @em not
 /// contain pointers.
 ///
@@ -164,7 +164,7 @@ bitc_malloc_atomic(size_t sz)
   void *ptr = GC_malloc_atomic(sz);
   if(ptr == NULL)
     bitc_throw(&val_ExOutOfMemory);
-  
+
   return ptr;
 }
 
@@ -196,7 +196,7 @@ static bitc_string_t *
 mkStringLiteral(const char *s)
 {
   size_t len = strlen(s);
-  bitc_string_t *tmp = (bitc_string_t *) 
+  bitc_string_t *tmp = (bitc_string_t *)
     GC_ALLOC_ATOMIC(sizeof(bitc_string_t));
   tmp->length = len;
   tmp->s = s;
@@ -389,7 +389,7 @@ DEFCLOSURE_INLINE(bitc_index_lt);
   DEFBNOT(TY, MTY);	     \
   DEFBXOR(TY, MTY);	     \
   DEFBLS(TY, MTY);	     \
-  DEFBRS(TY, MTY);	     
+  DEFBRS(TY, MTY);
 
 DEFARITH(bitc_int64_t,_5int64);
 DEFARITH(bitc_int32_t,_5int32);
@@ -427,7 +427,7 @@ DEFUN(_16bitc_DTprelude_CN___LT_SHFN2_6string_6string_4bool, bitc_string_t *arg1
   return (__builtin_strcmp((const char *)arg1->s,(const char *)arg2->s) < 0);
 }						\
 DEFCLOSURE_INLINE(_16bitc_DTprelude_CN___LT_SHFN2_6string_6string_4bool);
-    
+
 
 INLINE bitc_bool_t
 DEFUN(_16bitc_DTprelude_CN___GT_SHFN2_6string_6string_4bool, bitc_string_t *arg1, bitc_string_t *arg2)
@@ -1000,8 +1000,8 @@ DEFCAST(bitc_word_t,  _4word,  bitc_double_t, _6double);
 /// the heap at the procedure construction site and emits a call to
 /// bitc_emit_procedure_object() to generate a heap-allocated
 /// trampoline function. It then returns the address of the generated
-/// trampoline function as the address of the inner procedure. 
-/// 
+/// trampoline function as the address of the inner procedure.
+///
 /// Two optimizations on this are possible:
 ///
 /// - Recursive calls proceed directly through the emitted procedure
@@ -1010,7 +1010,7 @@ DEFCAST(bitc_word_t,  _4word,  bitc_double_t, _6double);
 /// - If the inner procedure does not escape, the closure record can
 ///   be stack allocated in the caller and the hoisted implementation
 ///   can be called directly. This is @em not implemented in the
-///   current compiler. 
+///   current compiler.
 ///
 /// The current BitC code generator assumes that the closure pointer
 /// will be injected as the first parameter of the hoisted inner
@@ -1171,6 +1171,16 @@ typedef union {
 #define BITC_GET_CLOSURE_ENV(nm) \
   void *nm; \
   __asm__ __volatile__("movq %%rax,%0" : "=g" (nm))
+
+#elif defined(__POWERPC__) && defined(__MACH__)
+
+typedef union {
+  uint32_t code[10];
+} bitc_Procedure;
+
+#define BITC_GET_CLOSURE_ENV(nm) \
+  void *nm; \
+  __asm__ __volatile__("stw r2,%0" : "=m" (nm))
 
 #elif defined(__sparc__)
 
