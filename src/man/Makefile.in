@@ -117,5 +117,7 @@ BUILD/%.gz: %.man | BUILD
 clean:
 	-rm -rf BUILD
 
+distclean: clean
+
 -include BUILD/.*.m
 

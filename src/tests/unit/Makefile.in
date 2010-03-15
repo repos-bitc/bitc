@@ -211,5 +211,7 @@ DEPFILES=$(wildcard BUILD/*.m)
 clean:
 	-rm -rf BUILD
 
+distclean: clean
+
 DEPFILES=$(wildcard BUILD/*.m)
 -include $(DEPFILES)

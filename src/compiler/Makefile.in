@@ -168,6 +168,8 @@ endif
 clean:
 	-rm -rf BUILD doxygen *~
 
+distclean: clean
+
 .PHONY: doxygen
 doxygen: AST.hxx AST.cxx
 	doxygen doxygen.html.cfg
