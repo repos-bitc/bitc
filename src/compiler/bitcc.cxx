@@ -106,9 +106,9 @@
 #include "backend.hxx"
 #include "Instantiate.hxx"
 #include "TvPrinter.hxx"
+#include "FileUtil.hxx"
 
 using namespace std;
-using namespace boost;
 using namespace boost;
 using namespace sherpa;
 
@@ -335,10 +335,10 @@ ResolveLibPath(std::string name)
   for (size_t i = 0; i < Options::libDirs.size(); i++) {
     filesystem::path testPath = Options::libDirs[i] / fullNm;
     if (filesystem::exists(testPath)) {
-      if (!filesystem::is_regular(testPath)) {
+      if (!is_regular_file(testPath)) {
 	std::cerr << "bitcc: error: \"-l" << name
 		  << "\" resolves to \""
-		  << testPath
+		  << testPath.string()
 		  << "\", which is not a regular file."
 		  << endl;
 	exit(1);

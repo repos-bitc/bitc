@@ -54,8 +54,9 @@
 #include <boost/filesystem/operations.hpp>
 #include <libsherpa/util.hxx>
 
+#include "FileUtil.hxx"
+
 using namespace std;
-using namespace boost;
 using namespace boost;
 using namespace sherpa;
 
@@ -149,9 +150,9 @@ UocInfo::resolveInterfacePath(std::string ifName)
     filesystem::path testPath = UocInfo::searchPath[i] / leafName;
     
     if (filesystem::exists(testPath)) {
-      if (!filesystem::is_regular(testPath)) {
+      if (!is_regular_file(testPath)) {
 	std::cerr << "bitcc: source path \""
-		  << testPath << "\" for interface \""
+		  << testPath.string() << "\" for interface \""
 		  << ifName << "\" is not "
 		  << "a regular file." << std::endl;
 	exit(1);
@@ -182,7 +183,7 @@ UocInfo::CompileFromSexprFile(const filesystem::path& src, bool fromCmdLine)
 
   if (!fin.is_open()) {
     std::cerr << "Couldn't open input file \""
-	      << src
+	      << src.string()
 	      << "\"" << std::endl;
     return false;
   }
@@ -218,7 +219,7 @@ UocInfo::CompileFromBlockFile(const filesystem::path& src, bool fromCmdLine)
 
   if (!fin.is_open()) {
     std::cerr << "Couldn't open input file \""
-	      << src
+	      << src.string()
 	      << "\"" << std::endl;
     return false;
   }
