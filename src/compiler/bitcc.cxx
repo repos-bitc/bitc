@@ -335,7 +335,7 @@ ResolveLibPath(std::string name)
   for (size_t i = 0; i < Options::libDirs.size(); i++) {
     filesystem::path testPath = Options::libDirs[i] / fullNm;
     if (filesystem::exists(testPath)) {
-      if (!is_regular_file(testPath)) {
+      if (!BoostCompat::is_regular_file(testPath)) {
 	std::cerr << "bitcc: error: \"-l" << name
 		  << "\" resolves to \""
 		  << testPath.string()

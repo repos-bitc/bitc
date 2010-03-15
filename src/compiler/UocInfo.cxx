@@ -150,7 +150,7 @@ UocInfo::resolveInterfacePath(std::string ifName)
     filesystem::path testPath = UocInfo::searchPath[i] / leafName;
     
     if (filesystem::exists(testPath)) {
-      if (!is_regular_file(testPath)) {
+      if (!BoostCompat::is_regular_file(testPath)) {
 	std::cerr << "bitcc: source path \""
 		  << testPath.string() << "\" for interface \""
 		  << ifName << "\" is not "

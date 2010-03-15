@@ -38,6 +38,8 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 
-/// @brief Compatibility wrapper to deal with missing function in 
-/// older boost library versions.
-bool is_regular_file(boost::filesystem::path);
+namespace BoostCompat {
+    /// @brief Compatibility wrapper to deal with missing function in 
+    /// older boost library versions.
+    bool is_regular_file(boost::filesystem::path);
+}

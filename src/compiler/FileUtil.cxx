@@ -39,17 +39,19 @@
 
 using namespace boost;
 
-bool is_regular_file(filesystem::path testPath)
-{
+namespace BoostCompat {
+  bool is_regular_file(filesystem::path testPath)
+  {
 #if BOOST_VERSION >= 103700
-  return filesystem::is_regular_file(testPath);
+    return filesystem::is_regular_file(testPath);
 #else
-  // Strictly speaking, it may be that we ought to accept symbolic links,
-  // but not for now.
-  if (filesystem::symbolic_link_exists(testPath))
-    return false;
-  if (filesystem::is_directory(testPath))
-    return false;
-  return true;			// by exclusion
+    // Strictly speaking, it may be that we ought to accept symbolic links,
+    // but not for now.
+    if (filesystem::symbolic_link_exists(testPath))
+      return false;
+    if (filesystem::is_directory(testPath))
+      return false;
+    return true;			// by exclusion
 #endif
+  }
 }
