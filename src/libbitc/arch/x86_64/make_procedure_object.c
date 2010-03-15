@@ -82,9 +82,6 @@ bitc_emit_procedure_object(void *stubP, void *envP)
 
   /* [16..23] will be filled in via env.ptr */
 
-  /* jmp rel32 */
-  stubW -= (uint32_t)&proc->code[13];
-
   /* RETQ */
   proc->code[24] = 0xc3u;
 
