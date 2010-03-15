@@ -35,23 +35,24 @@
  *
  **************************************************************************/
 
-#include "FileUtil.hxx"
+#include "BoostCompat.hxx"
 
 using namespace boost;
 
-namespace BoostCompat {
-  bool is_regular_file(filesystem::path testPath)
-  {
-#if BOOST_VERSION >= 103700
-    return filesystem::is_regular_file(testPath);
-#else
-    // Strictly speaking, it may be that we ought to accept symbolic links,
-    // but not for now.
-    if (filesystem::symbolic_link_exists(testPath))
-      return false;
-    if (filesystem::is_directory(testPath))
-      return false;
-    return true;			// by exclusion
+namespace boost {
+  namespace filesystem {
+
+#ifdef BOOSTCOMPAT_NEED_IS_REGULAR_FILE
+    bool is_regular_file(filesystem::path testPath)
+    {
+      // Strictly speaking, it may be that we ought to accept symbolic links,
+      // but not for now.
+      if (filesystem::symbolic_link_exists(testPath))
+	return false;
+      if (filesystem::is_directory(testPath))
+	return false;
+      return true;			// by exclusion
+    }
 #endif
   }
 }

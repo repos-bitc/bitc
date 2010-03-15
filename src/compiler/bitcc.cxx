@@ -97,6 +97,7 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
+#include "BoostCompat.hxx"
 #include <libsherpa/util.hxx>
 
 #include "Version.hxx"
@@ -106,7 +107,6 @@
 #include "backend.hxx"
 #include "Instantiate.hxx"
 #include "TvPrinter.hxx"
-#include "FileUtil.hxx"
 
 using namespace std;
 using namespace boost;
@@ -335,7 +335,7 @@ ResolveLibPath(std::string name)
   for (size_t i = 0; i < Options::libDirs.size(); i++) {
     filesystem::path testPath = Options::libDirs[i] / fullNm;
     if (filesystem::exists(testPath)) {
-      if (!BoostCompat::is_regular_file(testPath)) {
+      if (!filesystem::is_regular_file(testPath)) {
 	std::cerr << "bitcc: error: \"-l" << name
 		  << "\" resolves to \""
 		  << testPath.string()

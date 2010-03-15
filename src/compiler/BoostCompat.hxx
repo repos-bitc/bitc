@@ -35,11 +35,23 @@
  *
  **************************************************************************/
 
+#include <boost/version.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 
-namespace BoostCompat {
+#if BOOST_VERSION < 103700
+// filesystem::is_regular_file is definitely missing in version 103301
+// and definitely present in 103700. Not sure about versions in between.
+#define BOOSTCOMPAT_NEED_IS_REGULAR_FILE
+#endif
+
+namespace boost {
+  namespace filesystem {
+
+#ifdef BOOSTCOMPAT_NEED_IS_REGULAR_FILE
     /// @brief Compatibility wrapper to deal with missing function in 
     /// older boost library versions.
     bool is_regular_file(boost::filesystem::path);
+#endif
+  }
 }

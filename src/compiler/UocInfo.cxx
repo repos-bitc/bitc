@@ -52,9 +52,9 @@
 #include "BlockLexer.hxx"
 
 #include <boost/filesystem/operations.hpp>
+#include "BoostCompat.hxx"
 #include <libsherpa/util.hxx>
 
-#include "FileUtil.hxx"
 
 using namespace std;
 using namespace boost;
@@ -150,7 +150,7 @@ UocInfo::resolveInterfacePath(std::string ifName)
     filesystem::path testPath = UocInfo::searchPath[i] / leafName;
     
     if (filesystem::exists(testPath)) {
-      if (!BoostCompat::is_regular_file(testPath)) {
+      if (!filesystem::is_regular_file(testPath)) {
 	std::cerr << "bitcc: source path \""
 		  << testPath.string() << "\" for interface \""
 		  << ifName << "\" is not "
