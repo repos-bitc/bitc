@@ -172,7 +172,7 @@ TypeScheme::normalize()
 {
   bool changed = false;
 
-  TS_NORM_DEBUG
+  DEBUG(TS_NORM)
     std::cerr << "Considering: "
 	      << asString(Options::debugTvP, false)
 	      << std::endl;
@@ -226,7 +226,7 @@ TypeScheme::normalize()
     }
   }
   
-  TS_NORM_DEBUG
+  DEBUG(TS_NORM)
     if (changed)
       std::cerr << "\t\tNormalized to "
 		<< asString(Options::debugTvP, false)

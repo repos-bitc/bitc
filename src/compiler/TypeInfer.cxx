@@ -623,7 +623,7 @@ matchDefDecl(std::ostream& errStream,
   const shared_ptr<AST> decl = declSigma->ast;
   shared_ptr<const AST>  def = defSigma->ast;
   bool verbose = false;
-  DEF_DECL_DEBUG 
+  DEBUG(DEF_DECL) 
     verbose = true;
   
   if (declSigma->ftvs.size() != defSigma->ftvs.size()) {
@@ -1365,7 +1365,7 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 	lastTagValueCardelli = (2 * lastTagValue) - 1;
       }
       
-      UNION_INF_DEBUG
+      DEBUG(UNION_INF)
 	errStream << "Union " << uIdent->s << ": " 
 		  << std::endl
 		  << "  nBits = " << declares->tagType->nBits() 
@@ -1892,7 +1892,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   ast->envs.gamma = gamma;
   ast->envs.instEnv = instEnv;  
 
-  TI_AST_DEBUG
+  DEBUG(TI_AST)
     errStream << "INF: " << ast->loc << ": " 
 	      << ast->s << " [" << ast->astTypeName() << "]" 
 	      << "   mode = " << mode
@@ -2125,7 +2125,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 	  shared_ptr<Type> ins = tsIns->tau->getType();
 	  ast->symType = ins;
 	  
-	  ID_INS_DEBUG
+	  DEBUG(ID_INS)
 	    errStream << " For " << ast->s << ", "
 		      << "Obtained " << ins->asString(Options::debugTvP)
 		      << " From " 
@@ -2612,7 +2612,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<TypeScheme> sigma = ident->scheme;
       sigma->tcc = currTcc;
 
-      DEF_INF_DEBUG
+      DEBUG(DEF_INF)
 	errStream << "At define " << ident->asString() << ":"
 		  << " LHS = " << idType->asString()
 		  << " RHS = " << rhsType->asString()
@@ -2621,7 +2621,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       UNIFY(trail, ast->child(1)->loc, 
 	    ast->child(1)->symType, MBF(ast->child(0)->symType));
       
-      DEF_INF_DEBUG
+      DEBUG(DEF_INF)
 	errStream << "After Unification: " 
 		  << ast->getID()->symType->asString()
 		  << " LHS = " << idType->asString()
@@ -2636,7 +2636,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       CHKERR(errFree, sigma->generalize(errStream, ast->loc, gamma,
 					instEnv,  ast->child(1), GC_NULL, 
 					trail, gen_top));
-      DEF_INF_DEBUG
+      DEBUG(DEF_INF)
 	errStream << "After Generalization: " 
 		  << ast->getID()->scheme->asString()
 		  << std::endl << std::endl;
@@ -5381,7 +5381,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     
   } /* switch */
 
-  TI_AST_DEBUG
+  DEBUG(TI_AST)
     if (ast->symType)
       errStream << "\t Obtained [" << ast->atKwd() << "] " 
 		<< ast->asString() << ": "
@@ -5400,7 +5400,7 @@ bool
 UocInfo::DoTypeCheck(std::ostream& errStream, bool init, 
 		     bool &rewrite, TI_Flags ti_flags)
 {
-  TI_UNITWISE
+  DEBUG(TI_UNITWISE)
     errStream << "Now Processing " << uocName
 	      << " ast = " << uocAst->astTypeName()
 	      << std::endl;
@@ -5440,7 +5440,7 @@ UocInfo::DoTypeCheck(std::ostream& errStream, bool init,
 			    USE_MODE, ti_flags));
   CHKERR(errFree, checkImpreciseTypes(errStream, gamma, impTypes));
 
-  TI_UNITWISE {
+  DEBUG(TI_UNITWISE) {
     errStream << "- - - - - - - - - - - - - - - - - - - - - - - " 
 	      << endl;
     

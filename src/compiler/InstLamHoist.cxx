@@ -120,16 +120,16 @@ UocInfo::be_HoistInstLam(std::ostream& errStream,
 
   shared_ptr<AST> &ast = UocInfo::linkedUoc.ast;
 
-  ILH_DEBUG if (isSourceUoc)
+  DEBUG(ILH) if (isSourceUoc)
     BitcPP(errStream, &UocInfo::linkedUoc);
 
-  ILH_DEBUG std::cerr << "cl_HoistInstLam" << std::endl;
+  DEBUG(ILH) std::cerr << "cl_HoistInstLam" << std::endl;
   cl_HoistInstLam(&UocInfo::linkedUoc);
 
-  ILH_DEBUG if (isSourceUoc)
+  DEBUG(ILH) if (isSourceUoc)
     BitcPP(errStream, &UocInfo::linkedUoc);
 
-  ILH_DEBUG std::cerr << "RandT" << std::endl;
+  DEBUG(ILH) std::cerr << "RandT" << std::endl;
   // Re-run the type checker to propagate the changes:
   CHKERR(errFree, RandT(errStream, &UocInfo::linkedUoc, true, POLY_SYM_FLAGS, POLY_TYP_FLAGS));
   assert(errFree);
@@ -143,16 +143,16 @@ UocInfo::fe_HoistInstLam(std::ostream& errStream,
 {
   bool errFree = true;
 
-  ILH_DEBUG if (isSourceUoc())
+  DEBUG(ILH) if (isSourceUoc())
     PrettyPrint(errStream);
 
-  ILH_DEBUG std::cerr << "cl_HoistInstLam" << std::endl;
+  DEBUG(ILH) std::cerr << "cl_HoistInstLam" << std::endl;
   cl_HoistInstLam(shared_from_this());
   
-  ILH_DEBUG if (isSourceUoc())
+  DEBUG(ILH) if (isSourceUoc())
     PrettyPrint(errStream);
   
-  ILH_DEBUG std::cerr << "RandT" << std::endl;
+  DEBUG(ILH) std::cerr << "RandT" << std::endl;
   // Re-run the type checker to propagate the changes:
   CHKERR(errFree, RandT(errStream, true, PI_SYM_FLAGS, PI_TYP_FLAGS));
   assert(errFree);

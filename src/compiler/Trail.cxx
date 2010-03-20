@@ -61,7 +61,7 @@ Trail::link(shared_ptr<Type> from, shared_ptr<Type> to)
     assert(false);
   }
 
-  TRAIL_DEBUG 
+  DEBUG(TRAIL) 
     std::cerr << "LINKING: "
 	      << from->asString(Options::debugTvP)
 	      << " |-> "
@@ -89,7 +89,7 @@ Trail::subst(shared_ptr<Type> from, shared_ptr<Type> to)
     assert(false);
   }
 
-  TRAIL_DEBUG 
+  DEBUG(TRAIL) 
     std::cerr << "SUBSTITUTING: "
 	      << from->asString(Options::debugTvP)
 	      << " |-> "
@@ -108,7 +108,7 @@ Trail::rollBack(size_t upto)
   
   for (size_t i = upto; i < vec.size(); i++) {
     vec[i]->link = GC_NULL;
-    TRAIL_DEBUG 
+    DEBUG(TRAIL) 
       std::cerr << "[RB] Releasing: "
 		<< vec[i]->asString(Options::debugTvP)
 		<< std::endl;
@@ -124,7 +124,7 @@ Trail::release(const size_t n, shared_ptr<Type> rel)
   
   rel->link = GC_NULL;
   
-  TRAIL_DEBUG 
+  DEBUG(TRAIL) 
     std::cerr << "[RB] Releasing: "
 	      << rel->asString(Options::debugTvP)
 	      << std::endl;

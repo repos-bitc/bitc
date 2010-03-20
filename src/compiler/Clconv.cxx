@@ -242,7 +242,7 @@ findusedef(std::ostream &errStream,
 	    ast->symbolDef->flags |= ID_NEEDS_HEAPIFY;
 	  }
 
-	  CLCONV_DEBUG std::cerr << "Append " << ast->symbolDef->fqn
+	  DEBUG(CLCONV) std::cerr << "Append " << ast->symbolDef->fqn
 				 << " to freeVars" << std::endl;
 	
 	  freeVars.insert(ast->symbolDef);
@@ -777,7 +777,7 @@ cl_convert_ast(shared_ptr<AST> ast,
       shared_ptr<AST> clenvName = GC_NULL;
       shared_ptr<TvPrinter> tvP = TvPrinter::make();
 
-      CLCONV_DEBUG std::cerr << "Processing lambda. " << std::endl;
+      DEBUG(CLCONV) std::cerr << "Processing lambda. " << std::endl;
 
       // Need to re-run this here, because we may have hoisted inner
       // lambdas and/or introduced a closure conversion, which will
@@ -791,7 +791,7 @@ cl_convert_ast(shared_ptr<AST> ast,
       bool needsClosure = !freeVars.empty();
       if (needsClosure) {
 
-	CLCONV_DEBUG std::cerr << "Need to generate closure struct. "
+	DEBUG(CLCONV) std::cerr << "Need to generate closure struct. "
 			       << std::endl;
 
 	//////// Build the Environment Structure //////////////
@@ -852,9 +852,9 @@ cl_convert_ast(shared_ptr<AST> ast,
 
       //////////// Hoist the inner Lambda ///////////////
       if (shouldHoist) {
-	CLCONV_DEBUG std::cerr << "Need to hoist this lambda. "
+	DEBUG(CLCONV) std::cerr << "Need to hoist this lambda. "
 			       << std::endl;
-	CLCONV_DEBUG ast->PrettyPrint(std::cerr);
+	DEBUG(CLCONV) ast->PrettyPrint(std::cerr);
 	
 	// AST define = bindingPattern expr;
 	// This can be done as a recdef since we don't allow top-level
@@ -901,7 +901,7 @@ cl_convert_ast(shared_ptr<AST> ast,
 	// We have built the hoisted procedure. Emit that:
 	outAsts.push_back(newDef);
 
-	CLCONV_DEBUG ast->PrettyPrint(newDef);
+	DEBUG(CLCONV) ast->PrettyPrint(newDef);
 
 	// If the lambda requires a closure, emit a make-closure, else
 	// emit an identifier reference in place of the lambda:
@@ -1030,7 +1030,7 @@ cl_heapify(shared_ptr<AST> ast)
       assert(bpattern->astType == at_identPattern);
       shared_ptr<AST> ident = bpattern->child(0);
 
-      CLCONV_DEBUG std::cerr << "Let binding for " << ident->s << std::endl;
+      DEBUG(CLCONV) std::cerr << "Let binding for " << ident->s << std::endl;
 
       /* Must heapify EXPR unconditionally */
       expr = cl_heapify(expr);
@@ -1038,7 +1038,7 @@ cl_heapify(shared_ptr<AST> ast)
       if (ident->flags & ID_NEEDS_HEAPIFY) {
 	// Process the RHS:
 
-	CLCONV_DEBUG std::cerr << "  Needs dup " << ident->s << std::endl;
+	DEBUG(CLCONV) std::cerr << "  Needs dup " << ident->s << std::endl;
 	
 	assert (ident->flags & ID_IS_CAPTURED);
 	expr = AST::make(at_dup, expr->loc, expr);
@@ -1061,7 +1061,7 @@ cl_heapify(shared_ptr<AST> ast)
       // If this is a use occurrence of a heapified symbol, rewrite it
       // into a DEREF reference.
 
-      CLCONV_DEBUG std::cerr << "Processing " << ast->loc << ": "
+      DEBUG(CLCONV) std::cerr << "Processing " << ast->loc << ": "
 			  << ast->s << std::endl;
       /* Swaroop: ID_NEEDS_HEAPIFY must always be checked on the
 	 symbolDef because all use cases may not be corerectly
@@ -1075,13 +1075,13 @@ cl_heapify(shared_ptr<AST> ast)
 
       shared_ptr<AST> def = (ast->symbolDef) ? ast->symbolDef : ast;
 
-      CLCONV_DEBUG if (def->flags & ID_NEEDS_HEAPIFY)
+      DEBUG(CLCONV) if (def->flags & ID_NEEDS_HEAPIFY)
 	std::cerr << "  needs heapify" << std::endl;
-      CLCONV_DEBUG if (def->flags & ID_IS_CAPTURED)
+      DEBUG(CLCONV) if (def->flags & ID_IS_CAPTURED)
 	std::cerr << "  closed" << std::endl;
 
       if (def->flags & ID_NEEDS_HEAPIFY) {
-	CLCONV_DEBUG std::cerr << "Needs deref " << ast->s << std::endl;
+	DEBUG(CLCONV) std::cerr << "Needs deref " << ast->s << std::endl;
 	ast = AST::make(at_deref, ast->loc, ast);
       }
       break;
@@ -1116,7 +1116,7 @@ UocInfo::be_clconv(std::ostream& errStream,
   AstSet freeVars;
   AstSet boundVars;
 
-  CLCONV_DEBUG std::cerr << "findusedef 1" << std::endl;
+  DEBUG(CLCONV) std::cerr << "findusedef 1" << std::endl;
 
   CHKERR(errFree, findusedef(errStream, uocAst, uocAst,
 			     NULL_MODE, boundVars, freeVars));
@@ -1124,34 +1124,34 @@ UocInfo::be_clconv(std::ostream& errStream,
   if (!errFree)
     return false;
 
-  CLCONV_DEBUG PrettyPrint(errStream, true);
+  DEBUG(CLCONV) PrettyPrint(errStream, true);
 
-  CLCONV_DEBUG std::cerr << "cl_heapify" << std::endl;
+  DEBUG(CLCONV) std::cerr << "cl_heapify" << std::endl;
   uocAst = cl_heapify(uocAst);
 
-  CLCONV_DEBUG PrettyPrint(errStream, true);
+  DEBUG(CLCONV) PrettyPrint(errStream, true);
 
-  CLCONV_DEBUG std::cerr << "RandT 1" << std::endl;
+  DEBUG(CLCONV) std::cerr << "RandT 1" << std::endl;
   // Re-run the type checker to propagate the changes:
   CHKERR(errFree,
 	 RandT(errStream, true, REF_SYM_FLAGS, REF_TYP_FLAGS));
   assert(errFree);
 
-  CLCONV_DEBUG std::cerr << "findusedef 2" << std::endl;
+  DEBUG(CLCONV) std::cerr << "findusedef 2" << std::endl;
 
   // This *shouldn't* be necessary, but it doesn't hurt anything.
   clearusedef(uocAst);
   findusedef(errStream, uocAst, uocAst, NULL_MODE,
 	     boundVars, freeVars);
 
-  CLCONV_DEBUG PrettyPrint(errStream);
+  DEBUG(CLCONV) PrettyPrint(errStream);
 
-  CLCONV_DEBUG std::cerr << "cl_convert" << std::endl;
+  DEBUG(CLCONV) std::cerr << "cl_convert" << std::endl;
   cl_convert(shared_from_this());
 
-  CLCONV_DEBUG PrettyPrint(errStream);
+  DEBUG(CLCONV) PrettyPrint(errStream);
 
-  CLCONV_DEBUG std::cerr << "RandT 2" << std::endl;
+  DEBUG(CLCONV) std::cerr << "RandT 2" << std::endl;
   // Re-run the type checker to propagate the changes:
   CHKERR(errFree,
 	 RandT(errStream, true, CL_SYM_FLAGS, CL_TYP_FLAGS));

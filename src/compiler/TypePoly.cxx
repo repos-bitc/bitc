@@ -504,13 +504,13 @@ TypeScheme::generalize(std::ostream& errStream,
   bool rem1=false;
   bool rem2=false;
 
-  GEN_DEBUG errStream << "To Generalize " 
+  DEBUG(GEN) errStream << "To Generalize " 
 		      << asString(Options::debugTvP)
 		      << " for expression "
 		      << expr->asString() 
 		      << std::endl;
   
-  GEN_DEBUG_TL if (mode == gen_top)
+  DEBUG(GEN_TL) if (mode == gen_top)
     mode = gen_local;
 
   tau->normalize();
@@ -536,7 +536,7 @@ TypeScheme::generalize(std::ostream& errStream,
   GEN_STEP(mode, gs_fixAll) {
     tau->adjMaybe(trail, false, true);
 
-    GEN_DEBUG errStream << "[0] Heuristic Adjustment " 
+    DEBUG(GEN) errStream << "[0] Heuristic Adjustment " 
 			<< asString(Options::debugTvP)
 			<< std::endl;
   }
@@ -546,7 +546,7 @@ TypeScheme::generalize(std::ostream& errStream,
     CHKERR(errFree, solvePredicates(errStream, errLoc, 
 				    instEnv, trail)); 
     
-    GEN_DEBUG errStream << "[1] Solve: " 
+    DEBUG(GEN) errStream << "[1] Solve: " 
 			<< asString(Options::debugTvP)
 			<< std::endl;
   }
@@ -560,7 +560,7 @@ TypeScheme::generalize(std::ostream& errStream,
       pcst->components.push_back(comp::make(tau)); // Instantiation Type
       tcc->addPred(pcst);
       
-      GEN_DEBUG errStream << "[2] With Pcst: " 
+      DEBUG(GEN) errStream << "[2] With Pcst: " 
 			  << asString(Options::debugTvP)
 			  << std::endl;
       
@@ -611,7 +611,7 @@ TypeScheme::generalize(std::ostream& errStream,
 				      instEnv, trail)); 
     }
 
-    GEN_DEBUG errStream << "[3] Top-Fix: " 
+    DEBUG(GEN) errStream << "[3] Top-Fix: " 
 			<< asString(Options::debugTvP)
 			<< std::endl;
   }
@@ -628,7 +628,7 @@ TypeScheme::generalize(std::ostream& errStream,
     if (!expansive)
       collectftvs(gamma);
     
-    GEN_DEBUG errStream << "[5] Generalize: " 
+    DEBUG(GEN) errStream << "[5] Generalize: " 
 			<< ((expansive) ? " {Expansive} " : " {Value} ")
 			<< asString(Options::debugTvP)
 			<< std::endl;    
@@ -639,7 +639,7 @@ TypeScheme::generalize(std::ostream& errStream,
     if (!expansive) {
       rem1 = removeUnInstFtvs();
     
-      GEN_DEBUG errStream << "[6] Remove Uninst-Ftvs: " 
+      DEBUG(GEN) errStream << "[6] Remove Uninst-Ftvs: " 
 			  << asString(Options::debugTvP)
 			  << std::endl;
     }
@@ -650,7 +650,7 @@ TypeScheme::generalize(std::ostream& errStream,
     if (!expansive) {
       rem2 = normalizeConstruction(trail);
       
-      GEN_DEBUG errStream << "[7] Construction Normalization: " 
+      DEBUG(GEN) errStream << "[7] Construction Normalization: " 
 			  << asString(Options::debugTvP)
 			  << std::endl;
     }
@@ -661,7 +661,7 @@ TypeScheme::generalize(std::ostream& errStream,
       CHKERR(errFree, solvePredicates(errStream, errLoc, 
 				      instEnv, trail)); 
     
-    GEN_DEBUG errStream << "[7#] Re-Solve: " 
+    DEBUG(GEN) errStream << "[7#] Re-Solve: " 
 			<< asString(Options::debugTvP)
 			<< std::endl;
   }
@@ -696,7 +696,7 @@ TypeScheme::generalize(std::ostream& errStream,
   // Step 9
   GEN_STEP(mode, gs_migrate) {
     migratePredicates(parentTCC);
-    GEN_DEBUG errStream << "[9] Migrated Constraints: " 
+    DEBUG(GEN) errStream << "[9] Migrated Constraints: " 
 			<< asString(Options::debugTvP)
 			<< std::endl;
   }
@@ -705,7 +705,7 @@ TypeScheme::generalize(std::ostream& errStream,
   GEN_STEP(mode, gs_ambgCheck) {
     CHKERR(errFree, checkAmbiguity(errStream, errLoc));
     
-    GEN_DEBUG errStream << "FINAL: " 
+    DEBUG(GEN) errStream << "FINAL: " 
 			<< asString(Options::debugTvP)
 			<< std::endl 
 			<< std::endl;
@@ -997,7 +997,7 @@ Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
   theType->components.clear();
   shared_ptr<Type> retType = theType;
   
-  INS_DEBUG std::cout << "To Specialize " 
+  DEBUG(INS) std::cout << "To Specialize " 
 		      << this->asString()  
 		      << std::endl;  
 
@@ -1076,7 +1076,7 @@ Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
     }
   }
   
-  INS_DEBUG std::cout << "\t Specialized " 
+  DEBUG(INS) std::cout << "\t Specialized " 
 		      << getType()->asString(GC_NULL)
 		      << " to " 
 		      << retType->getType()->asString(GC_NULL)

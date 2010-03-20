@@ -44,31 +44,38 @@
 #define DEBUG_OFF if (0)
 #define DEBUG_VERBOSE true
 
-#define BEG_SIMP_DEBUG    DEBUG_OFF
-#define METH_DECL_DEBUG   DEBUG_OFF
-#define ILH_DEBUG         DEBUG_OFF   // Inst-Lambda-Hoist
-#define INST_DEBUG        DEBUG_OFF   // Debug Polyinstantiation
-#define INST_ENV_DEBUG    DEBUG_OFF   // Debug Polyinstantiator's env-handling
-#define REPR_SIMP_DEBUG   DEBUG_OFF
-#define UNION_INF_DEBUG   DEBUG_OFF
-#define DEF_INF_DEBUG     DEBUG_OFF
-#define TI_TOP_DEBUG      DEBUG_OFF   // Inference Top-Loop
-#define TI_UNITWISE       DEBUG_OFF   // Print Inferred interface/module info
-#define TI_AST_DEBUG      DEBUG_OFF   // Inference AST-wise output
-#define CLCONV_DEBUG      DEBUG_OFF
-#define GEN_DEBUG_TL      DEBUG_OFF   // Treat all generalization as local
-#define GEN_DEBUG         DEBUG_OFF   // Debug Type Generalization
-#define INS_DEBUG         DEBUG_OFF   // Debug Type Instantiation
-#define ID_INS_DEBUG      DEBUG_OFF   // Debug Instantiation at at_ident
-#define SOL_DEBUG         DEBUG_OFF   // Debug Constraint Solver
-#define SPSOL_DEBUG       DEBUG_OFF   // Debug Solving Special constaints
-#define PCST_DEBUG        DEBUG_OFF   // Debug Solving Polymorhic * constaints
-#define TCSOL_DEBUG       DEBUG_OFF   // Debug Solving Type-class constaints
-#define UNIFY_DEBUG       DEBUG_OFF   // Debug Unification
-#define UNF_RES_DEBUG     DEBUG_OFF  // Debug Unification by showing Results
-#define TRAIL_DEBUG       DEBUG_OFF   // Debug Type Linking
-#define TS_NORM_DEBUG     DEBUG_OFF   // Debug TypeScheme Normalization
-#define TYPE_ACC_DEBUG    DEBUG_OFF
-#define DEF_DECL_DEBUG    DEBUG_OFF   // Debug Definition-Declaration consistency checking
+#define dbg_all           ~0u
+
+#define dbg_BEG_SIMP    0x00000001u
+#define dbg_METH_DECL   0x00000002u
+#define dbg_ILH         0x00000004u	// Inst-Lambda-Hoist
+#define dbg_INST        0x00000008u	// Debug Polyinstantiation
+#define dbg_INST_ENV    0x00000010u // Debug Polyinstantiator's env-handling
+#define dbg_REPR_SIMP   0x00000020u
+#define dbg_UNION_INF   0x00000040u
+#define dbg_DEF_INF     0x00000080u
+#define dbg_TI_TOP      0x00000100u   // Inference Top-Loop
+#define dbg_TI_UNITWISE 0x00000200u   // Print Inferred interface/module info
+#define dbg_TI_AST      0x00000400u   // Inference AST-wise output
+#define dbg_CLCONV      0x00000800u
+#define dbg_GEN_TL      0x00001000u   // Treat all generalization as local
+#define dbg_GEN         0x00002000u   // Debug Type Generalization
+#define dbg_INS         0x00004000u   // Debug Type Instantiation
+#define dbg_ID_INS      0x00008000u   // Debug Instantiation at at_ident
+#define dbg_SOL         0x00010000u   // Debug Constraint Solver
+#define dbg_SPSOL       0x00020000u   // Debug Solving Special constaints
+#define dbg_PCST        0x00040000u   // Debug Solving Polymorhic * constaints
+#define dbg_TCSOL       0x00080000u   // Debug Solving Type-class constaints
+#define dbg_UNIFY       0x00100000u   // Debug Unification
+#define dbg_UNF_RES     0x00200000u  // Debug Unification by showing Results
+#define dbg_TRAIL       0x00400000u   // Debug Type Linking
+#define dbg_TS_NORM     0x00800000u   // Debug TypeScheme Normalization
+#define dbg_TYPE_ACC    0x01000000u
+#define dbg_DEF_DECL    0x02000000u   // Debug Definition-Declaration consistency checking
+
+#define dbg_flags         (0u)
+
+#define DEBUG_CND(x) ((dbg_flags) & (dbg_ ## x))
+#define DEBUG(x) if (DEBUG_CND(x))
 
 #endif /* DEBUG_HXX */

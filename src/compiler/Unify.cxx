@@ -107,7 +107,7 @@ UnifyDecl(std::ostream& errStream,
 {
   bool errFree = true;
 
-  UNIFY_DEBUG std::cout << "UnifyDecl " 
+  DEBUG(UNIFY) std::cout << "UnifyDecl " 
 			<< t1->asString(Options::debugTvP) 
 			<< " ==? " 
 			<< t2->asString(Options::debugTvP)
@@ -137,7 +137,7 @@ UnifyStructUnion(std::ostream& errStream,
 {
   bool errFree = true;
 
-  UNIFY_DEBUG std::cout << "UnifyStructUnion " 
+  DEBUG(UNIFY) std::cout << "UnifyStructUnion " 
 			<< t1->asString(Options::debugTvP) 
 			<< " ==? "
 			<< t2->asString(Options::debugTvP)
@@ -263,7 +263,7 @@ Unify(std::ostream& errStream,
   shared_ptr<Type> t2 = st->getType();
   bool errFree = true;
 
-  UNIFY_DEBUG std::cerr << "Unifier: " 
+  DEBUG(UNIFY) std::cerr << "Unifier: " 
 			<< ft->asString(Options::debugTvP)
 			<< " ==? " 
 			<< st->asString(Options::debugTvP)
@@ -746,7 +746,7 @@ Unify(std::ostream& errStream,
     }
   }
   
-  UNF_RES_DEBUG errStream << "\t Result: " 
+  DEBUG(UNF_RES) errStream << "\t Result: " 
 			  << ft->asString(Options::debugTvP)
 			  << " == " 
 			  << st->asString(Options::debugTvP)
