@@ -146,7 +146,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
     return true;
   }
 
-  PCST_DEBUG errStream << "\t\tTrying PCST: " 
+  DEBUG(PCST) errStream << "\t\tTrying PCST: " 
 		       << ct->asString(Options::debugTvP)
 		       << std::endl;
   
@@ -156,7 +156,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
   
   // *(m, tg, ti)
   if (k == Type::Kmono) {
-    PCST_DEBUG errStream << "\t\tCase *(m, tg, ti), CLEAR." 
+    DEBUG(PCST) errStream << "\t\tCase *(m, tg, ti), CLEAR." 
 			 << std::endl;
     cset->clearPred(ct);
     handled = true;
@@ -168,7 +168,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
     //                _
     // *(p, tg, ti), |_|(tg)
     if (gen->isConcretizable()) {
-      PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), [](tg), CLEAR."
+      DEBUG(PCST) errStream << "\t\tCase *(p, tg, ti), [](tg), CLEAR."
 			   << std::endl;
       cset->clearPred(ct);
       handled = true;
@@ -182,14 +182,14 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
     
     // *(p, tg, ti),  Mut(ti)
     if (ins->isDeepMut()) {
-      PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), Mut(ti) ERROR." 
+      DEBUG(PCST) errStream << "\t\tCase *(p, tg, ti), Mut(ti) ERROR." 
 			   << std::endl;
       cset->clearPred(ct);
       handled = true;
       return false;
     }
     
-    PCST_DEBUG errStream << "\t\tCase *(p, tg, ti), " 
+    DEBUG(PCST) errStream << "\t\tCase *(p, tg, ti), " 
 			 << "Immut(ti) KEEP." 
 			 << std::endl;
     
@@ -202,7 +202,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
   
   // *(k, tg, ti), Mut(ti)
   if (ins->isDeepMut()) {
-    PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), " 
+    DEBUG(PCST) errStream << "\t\tCase *(k, tg, ti), " 
 			 << "Mut(ti) [k |-> m]." 
 			 << std::endl;
     trail->subst(k, Type::Kmono);
@@ -212,7 +212,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
 
   // *(k, tg, ti), Immut(tg)
   if (gen->isDeepImmut()) {
-    PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), Immut(tg)" 
+    DEBUG(PCST) errStream << "\t\tCase *(k, tg, ti), Immut(tg)" 
 			 << "Immut(tg) [k |-> p]." 
 			 << std::endl;
     trail->subst(k, Type::Kpoly);
@@ -235,7 +235,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
     shared_ptr<Type> newIns = newCt->CompType(2)->getType();
     
     if (newK == k && !ins->equals(newIns)) {
-      PCST_DEBUG errStream << "\t\tCase *(k, tg, ti), *(k, tg, tj)" 
+      DEBUG(PCST) errStream << "\t\tCase *(k, tg, ti), *(k, tg, tj)" 
 			   << " ti !~~ tj, [k |-> p]." 
 			   << std::endl;
       
@@ -245,7 +245,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
     }
   }
   
-  PCST_DEBUG errStream << "\t\tCase *(k, tg, ti) KEEP." 
+  DEBUG(PCST) errStream << "\t\tCase *(k, tg, ti) KEEP." 
 		       << std::endl;
   
   handled = false;
@@ -274,13 +274,13 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
     
     if (pred->defAst->s == ref_types) {
       handlable = true;
-      SPSOL_DEBUG errStream << "\t\tCase RefTypes for "
+      DEBUG(SPSOL) errStream << "\t\tCase RefTypes for "
 			    << pred->asString(Options::debugTvP)
 			    << std::endl;
 
       shared_ptr<Type> it = pred->TypeArg(0)->getType();
       if (it->isVariable()) { // checks beyond mutability, maybe-ness
-	SPSOL_DEBUG errStream << "\t\t ... Variable, KEEP"
+	DEBUG(SPSOL) errStream << "\t\t ... Variable, KEEP"
 			      << pred->asString(Options::debugTvP)
 			      << std::endl;
 	handled = false;
@@ -289,14 +289,14 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
 
       handled = true;
       if (it->isRefType()) {
-	SPSOL_DEBUG errStream << "\t\t ... Satisfied, CLEAR"
+	DEBUG(SPSOL) errStream << "\t\t ... Satisfied, CLEAR"
 			      << pred->asString(Options::debugTvP)
 			      << std::endl;
 	break;
       }
 
       /* Otherwise, we have a Value Type */
-      SPSOL_DEBUG errStream << "\t\t ... Unboxed-type, ERROR"
+      DEBUG(SPSOL) errStream << "\t\t ... Unboxed-type, ERROR"
 			    << pred->asString(Options::debugTvP)
 			    << std::endl;
       
@@ -306,7 +306,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
     
     if(pred->defAst->s == has_field) {
       handlable = true;
-      SPSOL_DEBUG errStream << "\t\tCase has-field for "
+      DEBUG(SPSOL) errStream << "\t\tCase has-field for "
 			    << pred->asString(Options::debugTvP)
 			    << std::endl;
       
@@ -315,7 +315,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
       shared_ptr<Type> fType = pred->TypeArg(2)->getType();
     
       if(st->isVariable()) {
-	SPSOL_DEBUG errStream << "\t\t ... Variable, KEEP"
+	DEBUG(SPSOL) errStream << "\t\t ... Variable, KEEP"
 			      << pred->asString(Options::debugTvP)
 			      << std::endl;
 	handled = false;
@@ -324,7 +324,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
       
       handled = true;
       if (st->kind != ty_structv && st->kind != ty_structr) {
-	SPSOL_DEBUG errStream << "\t\t ... Non-structure type, ERROR"
+	DEBUG(SPSOL) errStream << "\t\t ... Non-structure type, ERROR"
 			      << pred->asString(Options::debugTvP)
 			      << std::endl;
 	errFree = false;
@@ -332,7 +332,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
       }
       
       if (fName->kind != ty_field) {
-	SPSOL_DEBUG errStream << "\t\t ... Non-field type, ERROR"
+	DEBUG(SPSOL) errStream << "\t\t ... Non-field type, ERROR"
 			      << pred->asString(Options::debugTvP)
 			      << std::endl;
 	errFree = false;
@@ -360,7 +360,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
 	  }
       
       if(!fld) {
-	SPSOL_DEBUG errStream << "\t\t ... Field/Method not found, ERROR"
+	DEBUG(SPSOL) errStream << "\t\t ... Field/Method not found, ERROR"
 			      << pred->asString(Options::debugTvP)
 			      << std::endl;
 	errFree = false;
@@ -369,11 +369,11 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
       
       CHKERR(errFree, fType->unifyWith(fld));
       if(!errFree)
-	SPSOL_DEBUG errStream << "\t\t ... Field Unification failure, ERROR"
+	DEBUG(SPSOL) errStream << "\t\t ... Field Unification failure, ERROR"
 			      << pred->asString(Options::debugTvP)
 			      << std::endl;
       else
-	SPSOL_DEBUG errStream << "\t\t ... Field found, CLEAR"
+	DEBUG(SPSOL) errStream << "\t\t ... Field found, CLEAR"
 			      << pred->asString(Options::debugTvP)
 			      << std::endl;
       break;
@@ -398,7 +398,7 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
 	     shared_ptr<const InstEnvironment > instEnv,
 	     bool must_solve, bool trial_mode, bool &handled)
 {
-  TCSOL_DEBUG errStream << "\t\tInstance Solver for: "
+  DEBUG(TCSOL) errStream << "\t\tInstance Solver for: "
 			<< pred->asString(Options::debugTvP)
 			<< (trial_mode ? " [TRIAL]" : "")
 			<< std::endl;
@@ -407,7 +407,7 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
     instEnv->getBinding(pred->defAst->fqn.asString());
   
   if (!insts) {
-    TCSOL_DEBUG errStream << "\t\t ... No Instances in Environment"
+    DEBUG(TCSOL) errStream << "\t\t ... No Instances in Environment"
 			  << std::endl;
     if (must_solve) {
       tcc->clearPred(pred);
@@ -442,7 +442,7 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
   }
 
   if (!instScheme) {
-    TCSOL_DEBUG errStream << "\t\t ... No Suitable Instance found"
+    DEBUG(TCSOL) errStream << "\t\t ... No Suitable Instance found"
 			  << std::endl;
     if (must_solve) {
       tcc->clearPred(pred);
@@ -462,7 +462,7 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
   
   bool errFree = pred->unifyWith(instScheme->tau);
 
-  TCSOL_DEBUG errStream << "\t\t .. Post Unification with Instance: "
+  DEBUG(TCSOL) errStream << "\t\t .. Post Unification with Instance: "
 			<< pred->asString(Options::debugTvP)
 			<< " CLEAR."
 			<< std::endl;
@@ -480,7 +480,7 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
       // type specializer clears the TY_SELF flag.
       if (!pred->equals(instPred)) {
 	tcc->addPred(instPred);
-	TCSOL_DEBUG errStream << "\t\t .. Adding pre-condition: "
+	DEBUG(TCSOL) errStream << "\t\t .. Adding pre-condition: "
 			      << instPred->asString(Options::debugTvP)
 			      << std::endl;
       }
@@ -508,7 +508,7 @@ handleEquPreds(std::ostream &errStream, shared_ptr<Trail> trail,
       continue;
     
     if (pred->equals(newCt)) {
-      TCSOL_DEBUG errStream << "\t\t EquPreds: "
+      DEBUG(TCSOL) errStream << "\t\t EquPreds: "
 			    << pred->asString(Options::debugTvP)
 			    << " === "
 			    << newCt->asString(Options::debugTvP)
@@ -599,7 +599,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
   bool errFree = true;
   bool handled = false;
   
-  SOL_DEBUG errStream << "\tTo Solve: " 
+  DEBUG(SOL) errStream << "\tTo Solve: " 
 		      << asString(Options::debugTvP)
 		      << std::endl;
   
@@ -619,7 +619,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
 					   pred, tcc, 
 					   handled, handlable));
 
-      SOL_DEBUG errStream << "\t[Sol 1] (special): " 
+      DEBUG(SOL) errStream << "\t[Sol 1] (special): " 
 			  << asString(Options::debugTvP)
 			  << (handled ? " [HANDLED]" : "")
 			  << (handlable ? " [HANDLABLE]" : "")
@@ -635,7 +635,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
       CHKERR(errFreeNow, handlePcst(errStream, trail, 
 				    pred, tcc, handled, handlable));
       
-      SOL_DEBUG errStream << "\t[Sol 2] (pcst): " 
+      DEBUG(SOL) errStream << "\t[Sol 2] (pcst): " 
 			  << asString(Options::debugTvP)
 			  << (handled ? " [HANDLED]" : "")
 			  << (handlable ? " [HANDLABLE]" : "")
@@ -654,7 +654,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
  	// Step 3.a
 	CHKERR(errFreeNow, handleTCPred(errStream, trail, pred, tcc,
 					instEnv, ms, false, handled));
-	SOL_DEBUG errStream << "\t[Sol 3.a] (must-solve): " 
+	DEBUG(SOL) errStream << "\t[Sol 3.a] (must-solve): " 
 			    << asString(Options::debugTvP)
 			    << (handled ? " [HANDLED]" : "")
 			    << (handlable ? " [HANDLABLE]" : "")
@@ -670,7 +670,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
       handleTCPred(errStream, trail, pred, tcc,
 		   instEnv, ms, false, handled);
       unrigidify(vars);
-      SOL_DEBUG errStream << "\t[Sol 3.b.i] (exact): " 
+      DEBUG(SOL) errStream << "\t[Sol 3.b.i] (exact): " 
 			  << asString(Options::debugTvP)
 			  << (handled ? " [HANDLED]" : "")
 			  << (handlable ? " [HANDLABLE]" : "")
@@ -682,7 +682,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
       // Step 3.b.ii
       CHKERR(errFreeNow, handleTCPred(errStream, trail, pred, tcc,
 				      instEnv, false, true, handled));
-      SOL_DEBUG errStream << "[Sol 3.b.ii] (solvability): " 
+      DEBUG(SOL) errStream << "[Sol 3.b.ii] (solvability): " 
 			  << asString(Options::debugTvP)
 			  << (handled ? " [HANDLED]" : "")
 			  << (handlable ? " [HANDLABLE]" : "")
@@ -694,7 +694,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
       // Step 4
       CHKERR(errFreeNow, handleEquPreds(errStream, trail, 
 					pred, tcc, vars, handled));
-      SOL_DEBUG errStream << "[Sol 4] (equ-pred): " 
+      DEBUG(SOL) errStream << "[Sol 4] (equ-pred): " 
 			  << asString(Options::debugTvP)
 			  << (handled ? " [HANDLED]" : "")
 			  << (handlable ? " [HANDLABLE]" : "")

@@ -175,14 +175,14 @@ bool
 UocInfo::fe_methDecl(std::ostream& errStream,
 		      bool init, unsigned long flags)
 {
-  METH_DECL_DEBUG if (isSourceUoc())
+  DEBUG(METH_DECL) if (isSourceUoc())
     PrettyPrint(errStream);
 
-  BEG_SIMP_DEBUG std::cerr << "fe_beginSimp" << std::endl;
+  DEBUG(BEG_SIMP) std::cerr << "fe_beginSimp" << std::endl;
   bool errFree = true;
   insertMethDecls(uocAst, errStream, errFree);
 
-  METH_DECL_DEBUG if (isSourceUoc())
+  DEBUG(METH_DECL) if (isSourceUoc())
     PrettyPrint(errStream);
 
   return true;

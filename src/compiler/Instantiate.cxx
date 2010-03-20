@@ -56,7 +56,7 @@ using namespace std;
 using namespace boost;
 using namespace sherpa;
 
-#if #INST_DEBUG == #DEBUG_ON
+#if DEBUG_CND(INST)
 #define STRICTLYEQUALS(x) strictlyEqualsA(x, DEBUG_VERBOSE)
 #else
 #define STRICTLYEQUALS(x) strictlyEqualsA(x)
@@ -219,7 +219,7 @@ importSymBindings(shared_ptr<ASTEnvironment > fromEnv,
       toEnv->addBinding(nm, bdng->val);
       toEnv->setFlags(nm, BF_REBIND | BF_COMPLETE);
 
-      INST_ENV_DEBUG
+      DEBUG(INST_ENV)
 	cerr << "Added to env: "
 	     << bdng->val->fqn.asString()
 	     << endl;
@@ -240,7 +240,7 @@ importTSBindings(shared_ptr<TSEnvironment > fromEnv,
       toEnv->addBinding(nm, bdng->val);
       toEnv->setFlags(nm, BF_REBIND | BF_COMPLETE);
 
-      INST_ENV_DEBUG
+      DEBUG(INST_ENV)
 	cerr << "Added to Gamma: "
 	     << bdng->val->ast->fqn.asString()
 	     << " with type "
@@ -287,7 +287,7 @@ importInstBindings(shared_ptr<InstEnvironment > fromEnv,
       assert(false);
     }
 
-    INST_ENV_DEBUG
+    DEBUG(INST_ENV)
       cerr << "Adding Instance for " << tcFQN << endl;
     toEnv->addBinding(tcFQN, fromInsts);
   }
@@ -304,7 +304,7 @@ UpdateMegaEnvs(shared_ptr<UocInfo> uoc)
   shared_ptr<InstEnvironment > megaInstEnv =
     uoc->instEnv->parent;
 
-  INST_ENV_DEBUG
+  DEBUG(INST_ENV)
     cerr << "#envs = " << megaEnv->size()
 	 << endl
 	 << "#tss = " << megaGamma->size()
@@ -317,7 +317,7 @@ UpdateMegaEnvs(shared_ptr<UocInfo> uoc)
     shared_ptr<UocInfo> puoci = itr->second;
     if ((puoci->flags & UOC_IS_MUTABLE) ||
        ((puoci->flags & UOC_SEEN_BY_INST) == 0)) {
-      INST_ENV_DEBUG
+      DEBUG(INST_ENV)
 	cerr << "Importing Symbols from Interface: "
 	     << puoci->uocName << "."
 	     << endl;
@@ -334,7 +334,7 @@ UpdateMegaEnvs(shared_ptr<UocInfo> uoc)
     shared_ptr<UocInfo> puoci = itr->second;
     if ((puoci->flags & UOC_IS_MUTABLE) ||
        ((puoci->flags & UOC_SEEN_BY_INST) == 0)) {
-      INST_ENV_DEBUG
+      DEBUG(INST_ENV)
 	cerr << "Importing Symbols from Module: "
 	     << puoci->uocName << "."
 	     << endl;
@@ -435,7 +435,7 @@ getInstName(shared_ptr<const AST> def, shared_ptr<Type> typ)
   ss << "_" << fqnString.size() << fqnString;
   ss << "#" << uAdjTyp->mangledString();
 
-  INST_DEBUG
+  DEBUG(INST)
     cerr << "New Name: " << ss.str()
 	 << " for " << def->s << " with type "
 	 << typ->asString()
@@ -739,14 +739,14 @@ static void
 coerce(ostream &errStream, shared_ptr<Type> t, 
        bool maybeOnly=false)
 {
-  INST_DEBUG
+  DEBUG(INST)
     errStream << "COERCING "
 	      << t->asString(Options::debugTvP)
 	      << " to ";
   t->adjMaybe(Trail::make(), false, false, true);
   if(!maybeOnly)
     t->SetTvarsToUnit();
-  INST_DEBUG
+  DEBUG(INST)
     errStream << t->asString(Options::debugTvP)
 	      << endl;
 }
@@ -797,7 +797,7 @@ buildNewDeclaration(shared_ptr<AST> def, shared_ptr<Type> typ)
     break;
   }
 
-  INST_DEBUG
+  DEBUG(INST)
     cerr << "Built new Declaration "
 	 << " for " << def->s << " with type "
 	 << typ->asString() << " as " << endl
@@ -1062,7 +1062,7 @@ UocInfo::recInstantiate(ostream &errStream,
 			bool &errFree,
 			WorkList<string>& worklist)
 {
-  INST_DEBUG
+  DEBUG(INST)
     cerr << "RecInstantiate: "
 	 << "[" << ast->atKwd() << "]"
 	 << ast->asString() << ": "
@@ -1337,7 +1337,7 @@ UocInfo::recInstantiate(ostream &errStream,
       // We re-built the let-expression, So, remark all defForms.
       findDefForms(ast, GC_NULL, ast->defForm);
 
-      INST_DEBUG
+      DEBUG(INST)
 	errStream << "recInstantiate: WrappedLet =  "
 		  << endl
 		  << ast->asString()
@@ -1535,7 +1535,7 @@ UocInfo::recInstantiate(ostream &errStream,
     }
   }
 
-  INST_DEBUG
+  DEBUG(INST)
     cerr << "##" << "[" << ast->atKwd() << "]"
 	 << " RecInstantiated to: " << ast->asString()
 	 << " with type "
@@ -1577,7 +1577,7 @@ UocInfo::doInstantiate(ostream &errStream,
   assert((def->astType != at_deftypeclass) ||
 	 (def->astType == at_definstance));
 
-  INST_DEBUG
+  DEBUG(INST)
     cerr << "To Instantiate: " << def->asString()
 	 << " for type " << typ->asString() << endl;
 
@@ -1600,7 +1600,7 @@ UocInfo::doInstantiate(ostream &errStream,
     typ = typ->getDCopy()->maximizeMutability();
     typ = typ->getBareType();
 
-    INST_DEBUG
+    DEBUG(INST)
       cerr << "Type after maximizeMutability = "
 	   << typ->asString() << endl;
   }
@@ -1649,7 +1649,7 @@ UocInfo::doInstantiate(ostream &errStream,
     assert(globalInst);
     defIdent = defIdent->defn;
     def = defIdent->defForm;
-    INST_DEBUG
+    DEBUG(INST)
       cerr << "Definition found, will instantiate: "
 	   << def->asString() << endl;
   }
@@ -1694,7 +1694,7 @@ UocInfo::doInstantiate(ostream &errStream,
     }
   }
 
-  INST_DEBUG
+  DEBUG(INST)
     if (!alreadyInstantiated) {
       errStream << "No existing instantiation found for "
 		<< newName;
@@ -1727,7 +1727,7 @@ UocInfo::doInstantiate(ostream &errStream,
       res->symbolDef = GC_NULL;
       NAMKARAN(res, newName);
 
-      INST_DEBUG
+      DEBUG(INST)
 	errStream << "LOCAL definition "
 		  << wkName << " is present in the workist, "
 		  << " returning " << newName
@@ -1979,7 +1979,7 @@ UocInfo::doInstantiate(ostream &errStream,
   // rest of the expression is unchanged, and we can recurse over the
   // expression body an instantiate any dependencies properly
 
-  INST_DEBUG
+  DEBUG(INST)
     cerr << "Copy after name fixup: " << copy->asString() << endl;
 
   shared_ptr<EnvSet> envset = (globalInst ? UNIFIED_ENVS
@@ -2000,7 +2000,7 @@ UocInfo::doInstantiate(ostream &errStream,
   propagate_type_annotations(copy);
   RANDT_DROP(copy, "[[Inst: R&T-2: ]]", envset);
   
-  INST_DEBUG
+  DEBUG(INST)
     cerr << "Copy after name fixup, R&T: " << copy->asString() << endl;
   
   // Now that the expression is typed, recurse over the body and
@@ -2080,7 +2080,7 @@ UocInfo::doInstantiate(ostream &errStream,
     // R&T in my UOC to make sure everything is OK. This will also add
     // the copy to the environment so that further calls can just use
     // this one.
-    INST_DEBUG
+    DEBUG(INST)
       cerr << "Copy after all fixup: " << copy->asString() << endl;
     RANDT_COMMIT(copy, "[[Inst: R&T-COMMIT]]", UNIFIED_ENVS);
   }
@@ -2090,7 +2090,7 @@ UocInfo::doInstantiate(ostream &errStream,
   // Now that we are (almost) done, remove current entry from the
   // worklist so that we are really done
   worklist.erase(wkName);  
-  INST_DEBUG
+  DEBUG(INST)
     cerr << "Instantiated: " << def->asString()
 	 << " for type " << typ->asString() << endl
 	 << " to " << copy->asString();
@@ -2166,7 +2166,7 @@ UocInfo::instantiateFQN(ostream &errStream, const FQName& epName)
 
   shared_ptr<AST> defIdent = def->getID();
 
-  INST_DEBUG {
+  DEBUG(INST) {
     INOstream ino(cerr);
     ino << "Instantiating form " << endl;
     ino.more();
@@ -2194,7 +2194,7 @@ UocInfo::instantiate(ostream &errStream, const FQName& epName)
 
   CHKERR(errFree, instantiateFQN(errStream, epName));
 
-  INST_DEBUG
+  DEBUG(INST)
     cerr << "Unified UOC after instantiation is "
 	 << uocAst->asString() << endl;
   CHKERR(errFree, RandT(errStream, true, POLY_SYM_FLAGS,
@@ -2234,7 +2234,7 @@ UocInfo::instantiateBatch(ostream &errStream,
       itr != epNames.end(); ++itr)
     CHKERR(errFree, instantiateFQN(errStream, (*itr)));
 
-  INST_DEBUG
+  DEBUG(INST)
     cerr << "Unified UOC after instantiation is "
 	 << uocAst->asString() << endl;
   CHKERR(errFree, RandT(errStream, true, POLY_SYM_FLAGS,

@@ -794,29 +794,29 @@ public:
   //Argument and return types of function-types
   boost::shared_ptr<Type> & Args() const
   {
-    TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn || kind == ty_method);
+    DEBUG(TYPE_ACC) assert(kind == ty_fn || kind == ty_tyfn || kind == ty_method);
     return CompType(0);
   }  
   boost::shared_ptr<Type> & Ret() const
   {
-    TYPE_ACC_DEBUG assert(kind == ty_fn || kind == ty_tyfn || kind == ty_method);
+    DEBUG(TYPE_ACC) assert(kind == ty_fn || kind == ty_tyfn || kind == ty_method);
     return CompType(1);
   }  
   //The Inner type of Maybe-types
   boost::shared_ptr<Type> &Var() const
   {
-    TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
+    DEBUG(TYPE_ACC) assert(kind == ty_mbTop || kind == ty_mbFull);
     return CompType(0);
   }  
   boost::shared_ptr<Type> & Core() const
   {
-    TYPE_ACC_DEBUG assert(kind == ty_mbTop || kind == ty_mbFull);
+    DEBUG(TYPE_ACC) assert(kind == ty_mbTop || kind == ty_mbFull);
     return CompType(1);
   }
   // The first component of an array/vector/mutable/ref type
   boost::shared_ptr<Type> & Base() const
   {
-    TYPE_ACC_DEBUG assert(kind == ty_mutable || 
+    DEBUG(TYPE_ACC) assert(kind == ty_mutable || 
 			  kind == ty_const || 
  			  kind == ty_byref || 
  			  kind == ty_ref || 
