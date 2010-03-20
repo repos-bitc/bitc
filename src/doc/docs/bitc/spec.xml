@@ -1676,7 +1676,7 @@ use</literallayout>
             order to declare fields and variables of value type.
           </p>
         </sect3>
-	<sect3>
+	<sect3 id="ty_method">
 	  <title>Method Types</title>
 <!--           <p> -->
 <!--             A method is a function that is syntactically associated -->
@@ -1704,7 +1704,7 @@ use</literallayout>
             field within a structure or object type. Methods occupy no
             storage in their associated structure or object.
           </p>
-          <sect4 id="ty_method">
+          <sect4>
             <title>Structure Methods</title>
             <p>
               In a structure type, methods may be viewed as a
