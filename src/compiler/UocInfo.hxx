@@ -194,6 +194,8 @@ public:
   static bool 
   CompileFromBlockFile(const boost::filesystem::path& src, bool fromCmdLine);
   static bool 
+  CompileFromTransitionFile(const boost::filesystem::path& src, bool fromCmdLine);
+  static bool 
   CompileFromFile(const boost::filesystem::path& src, bool fromCmdLine);
 
   // Individual passes:
