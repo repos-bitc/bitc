@@ -2466,6 +2466,11 @@ nm : <em>function-type</em></literallayout>
       <sect2>
         <title>Qualified Types</title>
         <p>
+          <font color="red"><em>Constraints are now permitted only as
+              the outermost form. This section needs to be updated
+              accordingly.</em></font>
+        </p>
+        <p>
           It is sometimes necessary to qualify the types of instances,
           type classes, constructed type definitions, or value
           declarations explicitly. A qualified type takes the general

@@ -260,7 +260,6 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> sxp_repr_reprs sxp_repr_repr
 %type <ast> sxp_bindingpattern sxp_lambdapatterns sxp_lambdapattern
 %type <ast> sxp_expr_seq
-%type <ast> sxp_qual_type
 %type <ast> sxp_expr sxp_the_expr sxp_eform sxp_method_decls sxp_method_decl
 %type <ast> sxp_method_bindings sxp_method_binding
 %type <ast> sxp_constraints sxp_constraint_seq sxp_constraint
@@ -999,8 +998,8 @@ sxp_value_definition: '(' tk_DEFINE '(' defident sxp_lambdapatterns ')'
 };
 
 // PROCLAIM DEFINITION -- VALUES [6.2]
-sxp_value_declaration: '(' tk_PROCLAIM defident ':' sxp_qual_type sxp_optdocstring sxp_externals ')' {
-  SHOWPARSE("sxp_if_definition -> ( PROCLAIM ident : sxp_qual_type sxp_optdocstring sxp_externals )");
+sxp_value_declaration: '(' tk_PROCLAIM defident ':' sxp_type sxp_optdocstring sxp_externals ')' {
+  SHOWPARSE("sxp_if_definition -> ( PROCLAIM ident : sxp_type sxp_optdocstring sxp_externals )");
   $$ = AST::make(at_proclaim, $2.loc, $3, $5);
   $$->flags |= $7->flags;
   $$->getID()->flags |= $7->flags;
@@ -1590,19 +1589,6 @@ sxp_types_pl_byref: sxp_types_pl_byref sxp_type_pl_byref {
   $1->addChild($2);
 };
 
-
-// Qualified types:
-
-sxp_qual_type: sxp_type {
-  SHOWPARSE("sxp_qual_type -> sxp_type");
-  $$ = $1;
-};
-
-sxp_qual_type: '(' tk_FORALL sxp_constraints sxp_type ')' {
- SHOWPARSE("sxp_qual_type -> ( FORALL sxp_constraints sxp_type )");
- $$ = AST::make(at_qualType, $2.loc, $3, $4);
-};
-
 // BINDING PATTERNS [5.1]
 sxp_bindingpattern: ident {
   SHOWPARSE("sxp_bindingpattern -> ident");
@@ -1624,11 +1610,11 @@ sxp_defpattern: defident {
   SHOWPARSE("sxp_defpattern -> defident");
   $$ = AST::make(at_identPattern, $1->loc, $1);
 };
-sxp_defpattern: defident ':' sxp_qual_type {
+sxp_defpattern: defident ':' sxp_type {
   SHOWPARSE("sxp_defpattern -> defident : sxp_qual_type");
   $$ = AST::make(at_identPattern, $1->loc, $1, $3);
 };
-sxp_defpattern: '(' tk_THE sxp_qual_type defident ')' {
+sxp_defpattern: '(' tk_THE sxp_type defident ')' {
   SHOWPARSE("sxp_defpattern -> (THE sxp_qual_type sxp_defident)");
   $$ = AST::make(at_identPattern, $1.loc, $4, $3);
 };

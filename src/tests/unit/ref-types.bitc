@@ -37,11 +37,13 @@
 
 (bitc-version "0.10")
 
-(define abc:(forall ((ref-types (ref int32))) (ref int32)) 
-  (dup 10))
+(forall ((ref-types (ref int32))) 
+  (define abc:(ref int32)
+    (dup 10)))
 
-(define refID:(forall ((ref-types 'a)) (fn 'a -> 'a)) 
-  (lambda (x) x))
+(forall ((ref-types 'a)) 
+  (define refID:(fn 'a -> 'a)
+    (lambda (x) x)))
 
 (import bitc.main as main)
 (provide bitc.main main)

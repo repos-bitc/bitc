@@ -36,9 +36,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc-version "0.10")
-(define charEQ:(forall ((copy-compat 'a char))
-		       (fn (ref 'a) -> bool))
-  (lambda (x) #t))
+(forall ((copy-compat 'a char))
+  (define charEQ:(fn (ref 'a) -> bool)
+    (lambda (x) #t)))
 
 (import bitc.main as main)
 (provide bitc.main main)

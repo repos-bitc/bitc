@@ -37,11 +37,13 @@
 
 (bitc-version "0.10")
 
-(define abc:(forall ((copy-compat 'a 'b)) (fn 'a 'b -> ())) 
-  (lambda (x:'a y:'b) ()))
+(forall ((copy-compat 'a 'b)) 
+  (define abc: (fn 'a 'b -> ())
+    (lambda (x:'a y:'b) ())))
 
-(define fgh:(forall ((copy-compat (ref 'a) (ref 'a))) (fn 'a 'b -> ())) 
-  (lambda (x:'a y:'b) ()))
+(forall ((copy-compat (ref 'a) (ref 'a)))
+  (define fgh:(fn 'a 'b -> ())
+    (lambda (x:'a y:'b) ())))
 
 (import bitc.main as main)
 (provide bitc.main main)

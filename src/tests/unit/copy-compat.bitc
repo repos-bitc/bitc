@@ -37,9 +37,9 @@
 
 (bitc-version "0.10")
 (define dupize1 (lambda (x) (dup x)))
-(define dupize2:(forall ((copy-compat 'a 'b))
-			(fn 'a -> (ref 'b)))
-  (lambda (x) (dup x)))
+(forall ((copy-compat 'a 'b))
+  (define dupize2:(fn 'a -> (ref 'b))
+    (lambda (x) (dup x))))
 
 (import bitc.main as main)
 (provide bitc.main main)
