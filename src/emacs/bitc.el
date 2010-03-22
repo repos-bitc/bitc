@@ -426,6 +426,7 @@ See `run-hooks'."
 ;; it is indented like any other form (i.e. forms line up under first).
 
 (put 'begin 'bitc-indent-function 0)
+(put 'forall 'bitc-indent-function 0)
 (put 'switch 'bitc-indent-function 'defun)
 (put 'interface 'bitc-indent-function 1)
 (put 'module 'bitc-indent-function 1)
