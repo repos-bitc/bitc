@@ -101,7 +101,7 @@ TARGETS=bitcc
 #CLEANLIST=./AST.cxx ./AST.hxx
 
 OBJECTS=\
-	$(patsubst %.cxx,BUILD/%.o,$(filter-out SexprParser.cxx BlockParser.cxx,$(wildcard *.cxx))) \
+	$(patsubst %.cxx,BUILD/%.o,$(filter-out SexprParser.cxx BlockParser.cxx TransitionParser.cxx,$(wildcard *.cxx))) \
 	$(patsubst %.y,BUILD/%.o,$(wildcard *.y)) \
         $(patsubst %.cxx,BUILD/%.o,$(notdir $(wildcard libsherpa/*.cxx)))
 
@@ -137,6 +137,13 @@ BUILD/%.o: %.cxx | BUILD
 #$(BUILDDIR)/SexprParser.o: $(BUILDDIR)/SexprParser.cxx
 #	$(CXX_DEP)
 #	$(CXX_BUILD) 
+
+BUILD/TransitionParser.cxx BUILD/TransitionParser.hxx: TransitionParser.y
+	$(BISON) -t -p transition_ -v -d -o BUILD/TransitionParser.cxx -y TransitionParser.y
+
+BUILD/TransitionParser.o: BUILD/TransitionParser.cxx | BUILD
+	$(CXX_DEP)
+	$(CXX_BUILD)
 
 BUILD/SexprParser.cxx BUILD/SexprParser.hxx: SexprParser.y
 	$(BISON) -t -p sexpr_ -v -d -o BUILD/SexprParser.cxx -y SexprParser.y
@@ -177,6 +184,8 @@ doxygen: AST.hxx AST.cxx
 # Following is a dummy dependency. It ensures that the header file
 # containing token numbers gets generated before we try to compile
 # SexprLexer.cxx
+TransitionLexer.cxx: BUILD/TransitionParser.hxx
+
 SexprLexer.cxx: BUILD/SexprParser.hxx
 
 BlockLexer.cxx: BUILD/BlockParser.hxx
