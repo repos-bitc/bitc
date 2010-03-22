@@ -106,7 +106,8 @@ BITC_SOURCES=\
 
 BITC_IFS=\
 	$(wildcard *.bitc) \
-	$(wildcard */*.bitc)
+	$(wildcard */*.bitc) \
+	$(wildcard */*/*.bitc)
 
 BITC_IF_DIRS=$(sort $(dir $(BITC_IFS)))
 

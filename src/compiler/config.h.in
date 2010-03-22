@@ -44,4 +44,8 @@ static const char *BITC_VERSION = "@LANGUAGE_VERSION@";
 
 static const char *AUTOCONF_LIBDIR = "@EXPANDED_LIBDIR@";
 
+static const char *TARGET_ARCH = "@TARGET_ARCH@";
+
+static const char *CANONICAL_TARGET = "@CANONICAL_TARGET@";
+
 #endif /* COMPILER_CONFIG_H */

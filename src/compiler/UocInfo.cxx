@@ -145,6 +145,13 @@ UocInfo::resolveInterfacePath(std::string ifName)
       tmp[i] = '/';
   }
   
+  // Hack: if the interface name is bitc.target.arch, then we now have
+  // bitc/target/arch. Re-write that as 
+  // bitc/target/arch-<thearch>, so that we have a way to get 
+  // target-dependent information into the standard build environment.
+  if (ifName == "bitc.target.arch")
+    tmp = std::string("bitc/target/arch-") + TARGET_ARCH;
+
   std::string leafName = tmp + ".bitc";
 
   for (size_t i = 0; i < UocInfo::searchPath.size(); i++) {

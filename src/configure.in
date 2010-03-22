@@ -49,7 +49,9 @@ case $target_cpu in
   *)           TARGET_ARCH=$target_cpu;;
 esac
 
+CANONICAL_TARGET=$target
 AC_SUBST([TARGET_ARCH])
+AC_SUBST([CANONICAL_TARGET])
 
 VERSION="0.0.1"
 BUILD="1"
