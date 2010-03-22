@@ -184,7 +184,7 @@ sha1-file.test: EXPECT_OUTPUT=sha1-file.stdout
 sha1-test.test: EXPECT_OUTPUT=sha1-test.stdout 
 twomodule.test: EXPECT_OUTPUT=twomodule.stdout 
 sizeof.test: EXPECT_STATUS=4
-bitsizeof.test: EXPECT_STATUS=32
+bitsizeof.test: EXPECT_STATUS=1
 array-byref.test: EXPECT_STATUS=6
 
 BUILD/%: %.bitc $(BITCC) $(LIBBITC_C_RUNTIME) | BUILD

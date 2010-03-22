@@ -37,8 +37,11 @@
 
 (bitc-version "0.10")
 (import bitc.main as main)
+(import bitc.target.arch as target-arch)
 (provide bitc.main main)
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (convert (bitsizeof (fn 'a -> 'a)))))
+    (if (== (bitsizeof (fn 'a -> 'a))
+	    target-arch.word-size)
+	1 0)))
