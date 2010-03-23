@@ -6,6 +6,18 @@
 /// Here are all of the open "to do" items before we can release R1 of
 /// the BitC Research Compiler, along with current status:
 ///
+/// <h1>Syntax Issues</h1>
+/// <ol>
+/// <li>
+/// Decide on and implement the final surface syntax for BitC, which
+/// will <em>not</em> be an S-expression syntax.
+///
+/// <b>Complexity</b>: Implementation is straightforward, but overall
+/// complexity is moderate, because we need to make decisions about
+/// how to deal with things like looping constructs.
+/// </li>
+/// </ol>
+///
 /// <h1>Technical Issues</h1>
 /// <ol>
 /// <li>
