@@ -16,6 +16,17 @@
 /// complexity is moderate, because we need to make decisions about
 /// how to deal with things like looping constructs.
 /// </li>
+/// <li>
+/// Figure out what, if anything, we want to do about inheritance and 
+/// virtual functions in R1, in particular for addressing things along
+/// the lines of Common Type System compatibility. This may be something
+/// that should be deferred.
+///
+/// <b>Complexity</b>: High. There are type system issues, but more 
+/// importantly, the whole design space is one in which everyone has
+/// an opinion but converging on workable answers is challenging. There
+/// has been productive discussion on-going on the BitC list.
+/// </li>
 /// </ol>
 ///
 /// <h1>Technical Issues</h1>
