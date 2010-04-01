@@ -93,6 +93,11 @@ AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 CHECK_LIBICUUC
 
+dnl Need to confirm that libgc is present, because the bitcc output
+dnl requires it, but we do NOT want it to end up in the link line for
+dnl the compiler. Our checking macro sets LIB_GC instead.
+CHECK_LIBGC
+
 dnl BEGIN PARANOIA
 dnl
 dnl Paranoia check: verify that the boost header files which we
