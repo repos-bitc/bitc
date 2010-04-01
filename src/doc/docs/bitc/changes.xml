@@ -4,7 +4,7 @@
 
 <!ENTITY BitcVersion "0.10">
 ]>
-  <article id="capidl-spec" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <article id="change-history" xmlns:xi="http://www.w3.org/2001/XInclude">
   <docinfo twocolumn="yes">
     <title>BitC Language Change History</title>
     <subtitle>Version &BitcVersion;</subtitle>
