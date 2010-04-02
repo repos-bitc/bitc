@@ -120,7 +120,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 
 /* Primary types and associated hand-recognized literals: */
 %token <tok> '(' ')' ','	/* unit */
-%token <tok> '[' ']'	/* unit */
+%token <tok> '[' ']'
 %token <tok> '.'
 %token <tok> tk_AS
 %token <tok> tk_BOOL
