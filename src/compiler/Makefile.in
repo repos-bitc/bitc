@@ -101,7 +101,7 @@ TARGETS=bitcc
 #CLEANLIST=./AST.cxx ./AST.hxx
 
 OBJECTS=\
-	$(patsubst %.cxx,BUILD/%.o,$(filter-out SexprParser.cxx BlockParser.cxx TransitionParser.cxx,$(wildcard *.cxx))) \
+	$(patsubst %.cxx,BUILD/%.o,$(filter-out SexprParser.cxx TransitionParser.cxx,$(wildcard *.cxx))) \
 	$(patsubst %.y,BUILD/%.o,$(wildcard *.y)) \
         $(patsubst %.cxx,BUILD/%.o,$(notdir $(wildcard libsherpa/*.cxx)))
 
@@ -152,13 +152,6 @@ BUILD/SexprParser.o: BUILD/SexprParser.cxx | BUILD
 	$(CXX_DEP)
 	$(CXX_BUILD)
 
-BUILD/BlockParser.cxx BUILD/BlockParser.hxx: BlockParser.y
-	$(BISON) -t -p block_ -v -d -o BUILD/BlockParser.cxx -y BlockParser.y
-
-BUILD/BlockParser.o: BUILD/BlockParser.cxx | BUILD
-	$(CXX_DEP)
-	$(CXX_BUILD)
-
 # If ASTMAKER is not locally available, simply drop these rules.
 # The output files should have been shipped in proper form, but not
 # all source code control systems get the associated time stamps right.
@@ -187,8 +180,6 @@ doxygen: AST.hxx AST.cxx
 TransitionLexer.cxx: BUILD/TransitionParser.hxx
 
 SexprLexer.cxx: BUILD/SexprParser.hxx
-
-BlockLexer.cxx: BUILD/BlockParser.hxx
 
 -include BUILD/*.m
 

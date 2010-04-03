@@ -192,8 +192,6 @@ public:
   static bool 
   CompileFromSexprFile(const boost::filesystem::path& src, bool fromCmdLine);
   static bool 
-  CompileFromBlockFile(const boost::filesystem::path& src, bool fromCmdLine);
-  static bool 
   CompileFromTransitionFile(const boost::filesystem::path& src, bool fromCmdLine);
   static bool 
   CompileFromFile(const boost::filesystem::path& src, bool fromCmdLine);
