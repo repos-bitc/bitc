@@ -62,14 +62,14 @@ using namespace std;
 
 bool 
 Instance::equals(shared_ptr<Instance> ins, 
-		 shared_ptr<const InstEnvironment > instEnv) const
+                 shared_ptr<const InstEnvironment > instEnv) const
 {
   shared_ptr<TypeScheme> mySigma = ts->ts_instance();
   shared_ptr<TypeScheme> hisSigma = ins->ts->ts_instance();
 
   //std::cerr << mySigma->asString() << " vs " 
-  //	    << hisSigma->asString() 
-  //	    << std::endl;
+  //            << hisSigma->asString() 
+  //            << std::endl;
 
   bool unifies = true;
   
@@ -90,7 +90,7 @@ Instance::equals(shared_ptr<Instance> ins,
   
   std::stringstream ss;
   CHKERR(unifies, mySigma->solvePredicates(ss, ast->loc, 
-					   instEnv, Trail::make())); 
+                                           instEnv, Trail::make())); 
   
   if (!unifies)
     return false;
@@ -132,9 +132,9 @@ Instance::overlaps(boost::shared_ptr<Instance> ins) const
 
 
 bool 
-Instance::satisfies(shared_ptr<Typeclass> pred, 		    
-		    shared_ptr<const InstEnvironment >
-		    instEnv) const
+Instance::satisfies(shared_ptr<Typeclass> pred,                     
+                    shared_ptr<const InstEnvironment >
+                    instEnv) const
 {
   bool unifies = true;
   shared_ptr<TypeScheme> sigma = ts->ts_instance();
@@ -150,7 +150,7 @@ Instance::satisfies(shared_ptr<Typeclass> pred,
   std::stringstream ss;
   LexLoc internalLocation;
   CHKERR(unifies, sigma->solvePredicates(ss, internalLocation, 
-					 instEnv, Trail::make()));
+                                         instEnv, Trail::make()));
   
   if (!unifies)
     return false;
@@ -180,8 +180,8 @@ Typeclass::addFnDep(shared_ptr<Type> dep)
   }
 
   //   std::cout << "Adding fnDep " << dep->asString(NULL) 
-  //   	    << " to " << this->asString(NULL) << "."
-  //   	    << std::endl;
+  //               << " to " << this->asString(NULL) << "."
+  //               << std::endl;
   fnDeps.insert(dep);
   return true;
 }
@@ -193,7 +193,7 @@ TCConstraints::collectAllFnDeps(set<shared_ptr<Type> >& fnDeps)
     shared_ptr<Typeclass> pr = (*itr)->getType();    
 
     for (TypeSet::iterator itr_j=pr->fnDeps.begin();
-	itr_j != pr->fnDeps.end(); ++itr_j) {
+        itr_j != pr->fnDeps.end(); ++itr_j) {
       shared_ptr<Type> fnDep = (*itr_j)->getType();
       assert(fnDep->kind == ty_tyfn);
       fnDeps.insert(fnDep);
@@ -209,7 +209,7 @@ TCConstraints::collectAllFnDeps(set<shared_ptr<Type> >& fnDeps)
 
 void 
 TCConstraints::close(TypeSet& closure,
-		     const TypeSet& fnDeps)
+                     const TypeSet& fnDeps)
 {
   size_t newSize = 0; 
   size_t oldSize = 0;
@@ -217,7 +217,7 @@ TCConstraints::close(TypeSet& closure,
   do {
     oldSize = newSize;    
     for (TypeSet::iterator itr = fnDeps.begin();
-	itr != fnDeps.end(); ++itr) {
+        itr != fnDeps.end(); ++itr) {
       shared_ptr<Type> fnDep = (*itr)->getType();
       shared_ptr<Type> fnDepArgs = fnDep->Args()->getType();
       shared_ptr<Type> fnDepRet = fnDep->Ret()->getType();      
@@ -226,23 +226,23 @@ TCConstraints::close(TypeSet& closure,
       fnDepArgs->collectAllftvs(argTvs);      
       bool foundAll = true;
       for (TypeSet::iterator itr_j = argTvs.begin();
-	  itr_j != argTvs.end(); ++itr_j) {
-	shared_ptr<Type> argTv = (*itr_j);
-	if (closure.find(argTv) == closure.end()) {
-	  foundAll = false;
-	  break;
-	}
+          itr_j != argTvs.end(); ++itr_j) {
+        shared_ptr<Type> argTv = (*itr_j);
+        if (closure.find(argTv) == closure.end()) {
+          foundAll = false;
+          break;
+        }
       }
 
-      if (foundAll) {	
-	fnDepRet->collectAllftvs(retTvs);	
-	for (TypeSet::iterator itr_j = retTvs.begin();
-	    itr_j != retTvs.end(); ++itr_j) {
-	  shared_ptr<Type> retTv = (*itr_j);
-	  if (closure.find(retTv) == closure.end())
-	    closure.insert(retTv);
-	}
-      }	
+      if (foundAll) {        
+        fnDepRet->collectAllftvs(retTvs);        
+        for (TypeSet::iterator itr_j = retTvs.begin();
+            itr_j != retTvs.end(); ++itr_j) {
+          shared_ptr<Type> retTv = (*itr_j);
+          if (closure.find(retTv) == closure.end())
+            closure.insert(retTv);
+        }
+      }        
     }
     newSize = closure.size();
   } while (newSize > oldSize);

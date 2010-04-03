@@ -87,7 +87,7 @@ UocInfo::UocNameFromSrcName(const std::string& srcFileName, unsigned ndx)
 }
 
 UocInfo::UocInfo(const std::string& _uocName, const std::string& _origin,
-		 shared_ptr<AST> _uocAst)
+                 shared_ptr<AST> _uocAst)
 {
   lastCompletedPass = pn_none;
   uocAst = _uocAst;
@@ -159,18 +159,18 @@ UocInfo::resolveInterfacePath(std::string ifName)
     
     if (filesystem::exists(testPath)) {
       if (!filesystem::is_regular_file(testPath)) {
-	std::cerr << "bitcc: source path \""
-		  << testPath.string() << "\" for interface \""
-		  << ifName << "\" is not "
-		  << "a regular file." << std::endl;
-	exit(1);
+        std::cerr << "bitcc: source path \""
+                  << testPath.string() << "\" for interface \""
+                  << ifName << "\" is not "
+                  << "a regular file." << std::endl;
+        exit(1);
       }
       return testPath;
     }
   }
 
   std::cerr << "bitcc: error: no source path found for interface \""
-	    << ifName << "\"." << std::endl;
+            << ifName << "\"." << std::endl;
   exit(0);
 }
 
@@ -191,8 +191,8 @@ UocInfo::CompileFromTransitionFile(const filesystem::path& src, bool fromCmdLine
 
   if (!fin.is_open()) {
     std::cerr << "Couldn't open input file \""
-	      << src.string()
-	      << "\"" << std::endl;
+              << src.string()
+              << "\"" << std::endl;
     return false;
   }
 
@@ -227,8 +227,8 @@ UocInfo::CompileFromSexprFile(const filesystem::path& src, bool fromCmdLine)
 
   if (!fin.is_open()) {
     std::cerr << "Couldn't open input file \""
-	      << src.string()
-	      << "\"" << std::endl;
+              << src.string()
+              << "\"" << std::endl;
     return false;
   }
 
@@ -263,8 +263,8 @@ UocInfo::CompileFromBlockFile(const filesystem::path& src, bool fromCmdLine)
 
   if (!fin.is_open()) {
     std::cerr << "Couldn't open input file \""
-	      << src.string()
-	      << "\"" << std::endl;
+              << src.string()
+              << "\"" << std::endl;
     return false;
   }
 
@@ -295,7 +295,7 @@ UocInfo::CompileFromFile(const filesystem::path& src, bool fromCmdLine)
 {
 #if 0
   return (CompileFromSexprFile(src, fromCmdLine) ||
-	  CompileFromBlockFile(src, fromCmdLine));
+          CompileFromBlockFile(src, fromCmdLine));
 #else
   return (CompileFromTransitionFile(src, fromCmdLine));
 #endif
@@ -313,7 +313,7 @@ UocInfo::findInterface(const std::string& ifName)
 
 shared_ptr<UocInfo> 
 UocInfo::importInterface(std::ostream& errStream,
-			 const LexLoc& loc, const std::string& ifName)
+                         const LexLoc& loc, const std::string& ifName)
 {
   // First check to see if we already have it. Yes, this
   // IS a gratuitously stupid way to do it.
@@ -350,14 +350,14 @@ UocInfo::importInterface(std::ostream& errStream,
 
 bool
 UocInfo::fe_none(std::ostream& errStream, bool init, 
-		 unsigned long flags)
+                 unsigned long flags)
 {
   return true;
 }
 
 bool
 UocInfo::fe_npass(std::ostream& errStream, bool init,
-		  unsigned long flags)
+                  unsigned long flags)
 {
   return true;
 }
@@ -365,14 +365,14 @@ UocInfo::fe_npass(std::ostream& errStream, bool init,
 
 bool
 UocInfo::be_none(std::ostream& errStream, bool init, 
-		 unsigned long flags)
+                 unsigned long flags)
 {
   return true;
 }
 
 bool
 UocInfo::be_npass(std::ostream& errStream, bool init,
-		  unsigned long flags)
+                  unsigned long flags)
 {
   return true;
 }
@@ -380,7 +380,7 @@ UocInfo::be_npass(std::ostream& errStream, bool init,
 
 bool
 UocInfo::fe_parse(std::ostream& errStream, bool init,
-		  unsigned long flags)
+                  unsigned long flags)
 {
   // The parse pass is now vestigial. The only reason that it still
   // exists is to preserve the ability to get a post-parse dump of the
@@ -397,9 +397,9 @@ UocInfo::Compile()
       std::cerr << uocName << " PASS " << passInfo[i].name << std::endl;
     
     //std::cout << "Now performing "
-    //	      << passInfo[i].descrip
-    //	      << " on " << path->asString()
-    //	      << std::endl;
+    //              << passInfo[i].descrip
+    //              << " on " << path->asString()
+    //              << std::endl;
     
     bool showTypes = false;
     
@@ -415,49 +415,49 @@ UocInfo::Compile()
       bareName = uocName.substr(0, pos);
 
     if (Options::showTypesUocs.find(bareName) !=
-	Options::showTypesUocs.end())
+        Options::showTypesUocs.end())
       showTypes = true;
     
     if (! (this->*passInfo[i].fn)(std::cerr, true, 0) ) {
       std::cerr << "Exiting due to errors during "
-		<< passInfo[i].descrip
-		<< std::endl;
+                << passInfo[i].descrip
+                << std::endl;
       exit(1);
     }
 
     if (!uocAst->isValid()) {
-      std::cerr << "PANIC: Invalid AST built for file \""	
-		<< origin
-		<< "\"."
-		<< "[Pass: "
-		<< passInfo[i].descrip
-		<< "] "
-		<< "Please report this problem.\n"; 
+      std::cerr << "PANIC: Invalid AST built for file \""        
+                << origin
+                << "\"."
+                << "[Pass: "
+                << passInfo[i].descrip
+                << "] "
+                << "Please report this problem.\n"; 
       std::cerr << uocAst->asString() << std::endl;
       exit(1);
     }
 
     if (passInfo[i].printAfter) {
       std::cerr << "==== DUMPING "
-		<< uocName
-		<< " AFTER " << passInfo[i].name 
-		<< " ====" << std::endl;
+                << uocName
+                << " AFTER " << passInfo[i].name 
+                << " ====" << std::endl;
       this->PrettyPrint(std::cerr, Options::ppDecorate);
     }
     if (passInfo[i].typesAfter || 
-	(showTypes && passInfo[i].name == "typecheck")) {
+        (showTypes && passInfo[i].name == "typecheck")) {
       std::cerr << "==== TYPES "
-		<< uocName
-		<< " AFTER " << passInfo[i].name 
-		<< " ====" << std::endl;
+                << uocName
+                << " AFTER " << passInfo[i].name 
+                << " ====" << std::endl;
       this->ShowTypes(std::cerr);
       std::cerr <<std::endl << std::endl;
     }
 
     if (passInfo[i].stopAfter) {
       std::cerr << "Stopping (on request) after "
-		<< passInfo[i].name
-		<< std::endl;
+                << passInfo[i].name
+                << std::endl;
       return;
     }
 
@@ -475,39 +475,39 @@ UocInfo::DoBackend()
 
     if (! (this->*onePassInfo[i].fn)(std::cerr, true, 0)) {
       std::cerr << "Exiting due to errors during "
-		<< onePassInfo[i].descrip
-		<< std::endl;
+                << onePassInfo[i].descrip
+                << std::endl;
       exit(1);
     }
 
     if (!uocAst->isValid()) {
       std::cerr << "PANIC: Invalid AST built for file \""
-		<< origin
-		<< "\"."
-		<< "Please report this problem.\n"; 
+                << origin
+                << "\"."
+                << "Please report this problem.\n"; 
       std::cerr << uocAst->asString() << std::endl;
       exit(1);
     }
 
     if (onePassInfo[i].printAfter) {
       std::cerr << "==== DUMPING bigAST AFTER"
-		<< onePassInfo[i].name 
-		<< " ====" << std::endl;
+                << onePassInfo[i].name 
+                << " ====" << std::endl;
       this->PrettyPrint(std::cerr, Options::ppDecorate);
     }
 
     if (onePassInfo[i].typesAfter) {
       std::cerr << "==== TYPES bigAST AFTER"
-		<< onePassInfo[i].name 
-		<< " ====" << std::endl;
+                << onePassInfo[i].name 
+                << " ====" << std::endl;
       this->ShowTypes(std::cerr);
       std::cerr <<std::endl << std::endl;
     }
 
     if (onePassInfo[i].stopAfter) {
       std::cerr << "Stopping (on request) after "
-		<< onePassInfo[i].name
-		<< std::endl;
+                << onePassInfo[i].name
+                << std::endl;
       exit(1);
     }
   }  

@@ -65,7 +65,7 @@ Environment<T>::getLocalBinding(const std::string& nm) const
 template<class T>
 shared_ptr<Binding<T> >
 Environment<T>::doGetBinding(const std::string& nm,
-			     shared_ptr<Environment<T> > outerLimit) const
+                             shared_ptr<Environment<T> > outerLimit) const
 {
   shared_ptr<Binding<T> > binding = getLocalBinding(nm);
 
@@ -114,8 +114,8 @@ Environment<T>::removeBinding(const std::string& nm)
 template<class T>
 void
 Environment<T>::addBinding(const std::string& nm,
-			   shared_ptr<T> val,
-			   bool rebind)
+                           shared_ptr<T> val,
+                           bool rebind)
 {
   if (rebind) {
     iterator itr = bindings.find(nm);
@@ -133,7 +133,7 @@ Environment<T>::addBinding(const std::string& nm,
 template<class T>
 void
 Environment<T>::updateKey(const std::string& from,
-			  const std::string& to)
+                          const std::string& to)
 {
   iterator itr = bindings.find(from);
   if (itr != bindings.end()) {
@@ -223,21 +223,21 @@ InstEnvironment::getLocalBinding
 
 template shared_ptr<Binding<AST> >
 Environment<AST>::doGetBinding(const std::string& nm,
-			       shared_ptr<Environment<AST> >) const;
+                               shared_ptr<Environment<AST> >) const;
 template shared_ptr<Binding<TypeScheme> >
 Environment<TypeScheme>::doGetBinding(const std::string& nm,
-			       shared_ptr<Environment<TypeScheme> >) const;
+                               shared_ptr<Environment<TypeScheme> >) const;
 template shared_ptr<Binding<set<shared_ptr<Instance> > > >
 InstEnvironment::doGetBinding
 (const std::string& nm, shared_ptr<InstEnvironment>) const;
 
 template void
 Environment<AST>::addBinding(const std::string& nm, shared_ptr<AST> val,
-			     bool rebind);
+                             bool rebind);
 template void
 Environment<TypeScheme>::addBinding(const std::string& nm,
-				    shared_ptr<TypeScheme> val,
-				    bool rebind);
+                                    shared_ptr<TypeScheme> val,
+                                    bool rebind);
 template void
 InstEnvironment::addBinding
 (const std::string& nm, shared_ptr<set<shared_ptr<Instance> > > val, bool rebind);
@@ -253,10 +253,10 @@ InstEnvironment::removeBinding
 
 template void
 Environment<AST>::updateKey(const std::string& from,
-			    const std::string& to);
+                            const std::string& to);
 template void
 Environment<TypeScheme>::updateKey(const std::string& from,
-				   const std::string& to);
+                                   const std::string& to);
 template void
 InstEnvironment::updateKey
 (const std::string& from, const std::string& to);

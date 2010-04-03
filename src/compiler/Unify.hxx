@@ -55,13 +55,13 @@
 #include "backend.hxx"
 
 bool unify(std::ostream& errStream,
-	   boost::shared_ptr<Trail> trail,
-	   const sherpa::LexLoc &errLoc,
-	   boost::shared_ptr<Type> ft, boost::shared_ptr<Type> st,
-	   UnifyFlags uflags);
+           boost::shared_ptr<Trail> trail,
+           const sherpa::LexLoc &errLoc,
+           boost::shared_ptr<Type> ft, boost::shared_ptr<Type> st,
+           UnifyFlags uflags);
 
 bool unifyPrim(std::ostream& errStream,
-	       boost::shared_ptr<Trail> trail, const sherpa::LexLoc &errLoc, 
-	       boost::shared_ptr<Type> tau, std::string ptype);
+               boost::shared_ptr<Trail> trail, const sherpa::LexLoc &errLoc, 
+               boost::shared_ptr<Type> tau, std::string ptype);
 
 #endif /* UNIFY_HXX */

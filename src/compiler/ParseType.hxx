@@ -43,9 +43,9 @@
 
 typedef struct ParseType ParseType;
 struct ParseType {
-  sherpa::LToken     tok;		/* a literal string from the
-				 * tokenizer. Used for strings,
-				 * characters, numerical values. */
+  sherpa::LToken     tok;                /* a literal string from the
+                                 * tokenizer. Used for strings,
+                                 * characters, numerical values. */
 
   boost::shared_ptr<AST> ast;
 

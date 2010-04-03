@@ -75,12 +75,12 @@ using namespace std;
 #define SHOWPARSE(s) \
   do { \
     if (Options::showParse) \
-      lexer->errStream << (s) << std::endl;		\
+      lexer->errStream << (s) << std::endl;                \
   } while (false);
 #define SHOWPARSE1(s,x) \
   do { \
     if (Options::showParse) \
-      lexer->errStream << (s) << " " << (x) << std::endl;	\
+      lexer->errStream << (s) << " " << (x) << std::endl;        \
   } while (false);
 
 
@@ -107,7 +107,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %pure-parser
 %parse-param {SexprLexer *lexer}
 
-%token <tok> tk_ReservedWord	/* reserved words */
+%token <tok> tk_ReservedWord        /* reserved words */
 
 /* Categorical terminals: */
 %token <tok> tk_Ident
@@ -119,7 +119,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_String
 
 /* Primary types and associated hand-recognized literals: */
-%token <tok> '(' ')' ','	/* unit */
+%token <tok> '(' ')' ','        /* unit */
 %token <tok> '[' ']'
 %token <tok> '.'
 %token <tok> tk_AS
@@ -638,9 +638,9 @@ ptype_name: '(' defident tvlist ')' {
 // STRUCTURE TYPES [3.6.1]           
 type_definition: '(' tk_DEFSTRUCT ptype_name val optdocstring declares fields_and_methods ')'  {
   SHOWPARSE("type_definition -> ( DEFSTRUCT ptype_name val "
-	    "optdocstring declares fields )");
+            "optdocstring declares fields )");
   $$ = AST::make(at_defstruct, $2.loc, $3->child(0), $3->child(1), $4,
-	       $6, $7);
+               $6, $7);
   $$->child(0)->defForm = $$;
   $$->addChild($3->child(2));
 };
@@ -649,9 +649,9 @@ type_definition: '(' tk_DEFSTRUCT ptype_name val optdocstring declares fields_an
 // UNION TYPES [3.6.2]                
 type_definition: '(' tk_DEFUNION ptype_name val optdocstring declares constructors  ')'  {
   SHOWPARSE("type_definition -> ( DEFUNION ptype_name val "
-	    "optdocstring declares constructors");
+            "optdocstring declares constructors");
   $$ = AST::make(at_defunion, $2.loc, $3->child(0), $3->child(1), $4,
-	       $6, $7);
+               $6, $7);
   $$->child(0)->defForm = $$;
   $$->addChild($3->child(2));  
 };
@@ -659,9 +659,9 @@ type_definition: '(' tk_DEFUNION ptype_name val optdocstring declares constructo
 /* // REPR TYPES */
 /* type_definition: '(' tk_DEFREPR defident val optdocstring declares reprbody  ')'  { */
 /*   SHOWPARSE("type_definition -> ( DEFUNION ptype_name val " */
-/* 	    "optdocstring declares reprbody"); */
+/*             "optdocstring declares reprbody"); */
 /*   $$ = AST::make(at_defrepr, $2.loc, $3->child(0), $3->child(1), $4, */
-/* 	       $6, $7); */
+/*                $6, $7); */
 /*   $$->addChild($3->child(2));   */
 /* }; */
 /* reprbody: '(' reprbodyitems ')' { */
@@ -734,7 +734,7 @@ type_definition: '(' tk_DEFUNION ptype_name val optdocstring declares constructo
 // REPR TYPES
 type_definition: '(' tk_DEFREPR defident val optdocstring declares repr_constructors  ')'  {
   SHOWPARSE("type_definition -> ( DEFREPR defident val "
-	    "optdocstring declares repr_constructors");
+            "optdocstring declares repr_constructors");
   $$ = AST::make(at_defrepr, $2.loc, $3, $4, $6, $7);
   $$->child(0)->defForm = $$;
 };
@@ -764,14 +764,14 @@ externals: tk_EXTERNAL exident {
 // OBJECT TYPES [3.6.1]           
 type_definition: '(' tk_DEFOBJECT ptype_name optdocstring declares methods_only ')'  {
   SHOWPARSE("type_definition -> ( DEFSTRUCT ptype_name val "
-	    "optdocstring declares fields )");
+            "optdocstring declares fields )");
 
   // For the moment, all objects are value types:
   shared_ptr<AST> valCat = AST::make(at_valCat, LToken($2.loc, "val"));
 
   $$ = AST::make(at_defobject, $2.loc, $3->child(0), $3->child(1), 
-		 valCat,
-		 $5, $6);
+                 valCat,
+                 $5, $6);
   $$->child(0)->defForm = $$;
   $$->addChild($3->child(2));
 };
@@ -781,7 +781,7 @@ type_definition: '(' tk_DEFOBJECT ptype_name optdocstring declares methods_only 
 type_decl: '(' tk_DEFSTRUCT ptype_name val externals ')' {
   SHOWPARSE("type_decl -> ( DEFSTRUCT ptype_name val externals )");
   $$ = AST::make(at_declstruct, $2.loc, $3->child(0), $3->child(1), $4,
-	       $3->child(2));
+               $3->child(2));
   $$->child(0)->defForm = $$;
   $$->flags |= $5->flags;
   $$->getID()->flags |= $5->flags;
@@ -792,7 +792,7 @@ type_decl: '(' tk_DEFSTRUCT ptype_name val externals ')' {
 type_decl: '(' tk_DEFUNION ptype_name val externals ')' {
   SHOWPARSE("type_decl -> ( DEFUNION ptype_name val )");
   $$ = AST::make(at_declunion, $2.loc, $3->child(0), $3->child(1), $4,
-	       $3->child(2));
+               $3->child(2));
   $$->child(0)->defForm = $$;
   $$->flags |= $5->flags;
   $$->getID()->flags |= $5->flags;
@@ -864,7 +864,7 @@ type_definition: '(' tk_DEFEXCEPTION ident optdocstring fields ')' {
 tc_definition: '(' tk_DEFTYPECLASS ptype_name optdocstring tc_decls openclosed method_decls ')' {
   SHOWPARSE("tc_definition -> ( DEFTYPECLASS ptype_name optdocstring tc_decls openclosed method_decls)");
   $$ = AST::make(at_deftypeclass, $2.loc, $3->child(0), 
-		 $3->child(1), $5, $6, $7);
+                 $3->child(1), $5, $6, $7);
   $$->addChild($3->child(2));
   $$->child(0)->defForm = $$;
 };
@@ -872,7 +872,7 @@ tc_definition: '(' tk_DEFTYPECLASS ptype_name optdocstring tc_decls openclosed m
 //tc_definition: '(' tk_DEFTYPECLASS ptype_name optdocstring tc_decls method_decls ')' {
 //  SHOWPARSE("tc_definition -> ( DEFTYPECLASS ptype_name optdocstring tc_decls openclosed method_decls)");
 //  $$ = AST::make(at_deftypeclass, $2.loc, $3->child(0), 
-//		 $3->child(1), $5, $6, $3->child(2));  
+//                 $3->child(1), $5, $6, $3->child(2));  
 //  $$->child(0)->defForm = $$;
 //};
 
@@ -921,13 +921,13 @@ method_decl: ident ':' fntype {
 ti_definition: '(' tk_DEFINSTANCE constraint optdocstring ')' {
   SHOWPARSE("ti_definition -> ( DEFINSTANCE constraint [docstring])");
   $$ = AST::make(at_definstance, $2.loc, $3, 
-		 AST::make(at_tcmethods, $5.loc),
-		 AST::make(at_constraints, $3->loc));
+                 AST::make(at_tcmethods, $5.loc),
+                 AST::make(at_constraints, $3->loc));
 };
 ti_definition: '(' tk_DEFINSTANCE constraint optdocstring method_bindings ')' {
   SHOWPARSE("ti_definition -> ( DEFINSTANCE constraint [docstring] method_bindings)");
   $$ = AST::make(at_definstance, $2.loc, $3, $5, 
-		 AST::make(at_constraints, $3->loc));
+                 AST::make(at_constraints, $3->loc));
 };
 
 method_bindings: method_binding {
@@ -984,7 +984,7 @@ value_definition: '(' tk_DEFINE '(' defident ')' expr_seq ')'  {
 value_definition: '(' tk_DEFINE '(' defident lambdapatterns ')' 
                   expr_seq ')'  {
   SHOWPARSE("value_definition -> ( DEFINE  ( defident lambdapatterns ) "
-	    "[docstring] expr_seq )");
+            "[docstring] expr_seq )");
   $7 = stripDocString($7);
   shared_ptr<AST> iRetBlock = 
     AST::make(at_block, $2.loc, AST::make(at_ident, LToken("__return")), $7);
@@ -1137,7 +1137,7 @@ constructors: constructors constructor {
   $$ = $1;
   $$->addChild($2);
 };
-constructor: ident { 	       	  /* simple constructor */ 
+constructor: ident {                          /* simple constructor */ 
   SHOWPARSE("constructor -> defident");
   $1->flags |= (ID_IS_GLOBAL);
   $$ = AST::make(at_constructor, $1->loc, $1);
@@ -1159,7 +1159,7 @@ repr_constructors: repr_constructors repr_constructor {
   $$ = $1;
   $$->addChild($2);
 };
-/* repr_constructor: ident repr_reprs { 	       	  /\* simple constructor *\/  */
+/* repr_constructor: ident repr_reprs {                          /\* simple constructor *\/  */
 /*   SHOWPARSE("repr_constructor -> defident"); */
 /*   $1->flags |= (ID_IS_GLOBAL); */
 /*   $$ = AST::make(at_reprctr, $1->loc, $1); */
@@ -1288,7 +1288,7 @@ types: types type {
   $1->addChild($2);
 };
 
-type: useident  { 			/* previously defined type */ 
+type: useident  {                         /* previously defined type */ 
   SHOWPARSE("type -> useident");
   $$ = $1;
 };
@@ -1297,7 +1297,7 @@ type: useident  { 			/* previously defined type */
 type: '(' ')' {
   SHOWPARSE("type -> ( )");
   $$ = AST::make(at_primaryType, $1.loc);
-  $$->s = "unit";		/* for lookup! */
+  $$->s = "unit";                /* for lookup! */
 };
 
 bool_type: tk_BOOL {
@@ -1394,7 +1394,7 @@ type: tk_EXCEPTION {
 };
 
 // TYPE VARIABLES [3.3]            
-type: typevar  { 		
+type: typevar  {                 
   SHOWPARSE("type -> typevar");
   $$ = $1;
 };
@@ -1486,15 +1486,15 @@ method_type: '(' fneffect tk_METHOD types_pl_byref tk_FNARROW type ')' {
 type_cpair: type ',' type {
   SHOWPARSE("type_cpair -> type ',' type");
   $$ = AST::make(at_typeapp, $2.loc,
-	       AST::make(at_ident, LToken($2.loc, "pair")),
-	       $1, $3);
+               AST::make(at_ident, LToken($2.loc, "pair")),
+               $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 type_cpair: type ',' type_cpair {
   SHOWPARSE("type_cpair -> type ',' type_cpair");
   $$ = AST::make(at_typeapp, $2.loc,
-	       AST::make(at_ident, LToken($2.loc, "pair")),
-	       $1, $3);
+               AST::make(at_ident, LToken($2.loc, "pair")),
+               $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 
@@ -1703,11 +1703,11 @@ expr_seq: expr_seq value_definition {
 //  // AST define = identPattern expr constraints;
 //  SHOWPARSE("expr_seq -> value_definition expr_seq");
 //  shared_ptr<AST> letBinding = AST::make(at_letbinding, $1->loc, 
-//			    $1->child(0), $1->child(1));
+//                            $1->child(0), $1->child(1));
 //  $$ = AST::make(at_letrec, $1->loc, 
-//	       AST::make(at_letbindings, $1->loc, letBinding),
-//	       $2,
-//	       $1->child(2));
+//               AST::make(at_letbindings, $1->loc, letBinding),
+//               $2,
+//               $1->child(2));
 //};
 
 
@@ -1866,15 +1866,15 @@ eform: '(' tk_DEREF expr ')' {
 eform_cpair: expr ',' expr {
   SHOWPARSE("eform_cpair -> expr ',' expr");
   $$ = AST::make(at_apply, $2.loc,
-	       AST::make(at_ident, LToken($2.loc, "pair")),
-	       $1, $3);
+               AST::make(at_ident, LToken($2.loc, "pair")),
+               $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 eform_cpair: expr ',' eform_cpair {
   SHOWPARSE("eform_cpair -> expr ',' eform_cpair");
   $$ = AST::make(at_apply, $2.loc,
-	       AST::make(at_ident, LToken($2.loc, "pair")),
-	       $1, $3);
+               AST::make(at_ident, LToken($2.loc, "pair")),
+               $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 eform: '(' eform_cpair ')' {
@@ -1968,7 +1968,7 @@ eform: '(' tk_LAMBDA '(' lambdapatterns ')' expr_seq ')'  {
 eform: '(' tk_RETURN expr ')' {
   SHOWPARSE("eform -> (RETURN expr)");
   $$ = AST::make(at_return_from, $2.loc, 
-		 AST::make(at_ident, LToken("__return")), $3);
+                 AST::make(at_ident, LToken("__return")), $3);
 }
 
 // APPLICATION [7.14]          
@@ -2052,12 +2052,12 @@ eform: '(' tk_SWITCH ident expr sw_legs ow ')' {
   for (size_t c =0; c < $5->children.size(); c++) {
     shared_ptr<AST> sw_leg = $5->child(c);
     sw_leg->children.insert(sw_leg->children.begin(), 
-			    $3->getDeepCopy());
+                            $3->getDeepCopy());
   }
   if ($6->astType == at_otherwise) {
     shared_ptr<AST> ow = $6;
     ow->children.insert(ow->children.begin(), 
-			$3->getDeepCopy());
+                        $3->getDeepCopy());
   }
 };
 
@@ -2162,24 +2162,24 @@ eform: '(' tk_TRY expr '(' tk_CATCH  ident sw_legs ow ')' ')'  {
   for (size_t c =0; c < $7->children.size(); c++) {
     shared_ptr<AST> sw_leg = $7->child(c);
     sw_leg->children.insert(sw_leg->children.begin(), 
-			    $6->getDeepCopy());
+                            $6->getDeepCopy());
   }
   if ($8->astType == at_otherwise) {
     shared_ptr<AST> ow = $8;
     ow->children.insert(ow->children.begin(), 
-			$6->getDeepCopy());
+                        $6->getDeepCopy());
   }
 };
 // shap: empty switch legs permitted, but only if otherwise clause is present.
 eform: '(' tk_TRY expr '(' tk_CATCH ident ow ')' ')'  {
   SHOWPARSE("eform -> ( TRY expr ( CATCH ident ow) )");
   $$ = AST::make(at_try, $2.loc, $3, $6, 
-		 AST::make(at_sw_legs, $7->loc), $7);
+                 AST::make(at_sw_legs, $7->loc), $7);
 
   if ($7->astType == at_otherwise) {
     shared_ptr<AST> ow = $7;
     ow->children.insert(ow->children.begin(), 
-			$6->getDeepCopy());
+                        $6->getDeepCopy());
   }
 };
 
@@ -2243,8 +2243,8 @@ eform: '(' tk_DO '(' dobindings ')' dotest expr_seq ')' {
 
   shared_ptr<AST> iContinueBlock = 
     AST::make(at_block, $2.loc, 
-	      AST::make(at_ident, LToken("__continue")), 
-	      $7);
+              AST::make(at_ident, LToken("__continue")), 
+              $7);
   $$ = AST::make(at_do, $2.loc, $4, $6, iContinueBlock);
 };
 
@@ -2278,8 +2278,8 @@ dotest: '(' expr expr ')' {
 eform: '(' tk_CONTINUE ')' {
   SHOWPARSE("eform -> (CONTINUE)");
   $$ = AST::make(at_return_from, $2.loc, 
-		 AST::make(at_ident, LToken("__continue")),
-		 AST::make(at_unit, $2.loc));
+                 AST::make(at_ident, LToken("__continue")),
+                 AST::make(at_unit, $2.loc));
 }
 
 /* Literals and Variables */

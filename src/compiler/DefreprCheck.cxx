@@ -168,133 +168,133 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
   case at_defunion:
     {
       if ((ast->flags & UNION_IS_REPR) == 0)
-	break;
+        break;
 
       shared_ptr<AST> ctrs = ast->child(4);
 
       /* The fields in the when cluses must be of integer-type
          This may be relaxed later. */
       for (size_t c=0; c < ctrs->children.size(); c++) {
-	shared_ptr<AST> ctrc = ctrs->child(c);
-	
-	for (size_t i=1; i < ctrc->children.size(); i++) {
-	  shared_ptr<AST> fldi = ctrc->child(i);
+        shared_ptr<AST> ctrc = ctrs->child(c);
+        
+        for (size_t i=1; i < ctrc->children.size(); i++) {
+          shared_ptr<AST> fldi = ctrc->child(i);
 
-	  if (fldi->astType == at_field)
-	    if (fldi->flags & FLD_IS_DISCM)
-	      if (!fldi->symType->isInteger()) {
-		errStream << fldi->loc << ": "
-			  << " The discriminating field "
-			  << fldi->child(0)->s
-			  << " has a non-integer/bitfield type."
-			  << std::endl;
-		errFree = false;
-	      }	  	
-	}
+          if (fldi->astType == at_field)
+            if (fldi->flags & FLD_IS_DISCM)
+              if (!fldi->symType->isInteger()) {
+                errStream << fldi->loc << ": "
+                          << " The discriminating field "
+                          << fldi->child(0)->s
+                          << " has a non-integer/bitfield type."
+                          << std::endl;
+                errFree = false;
+              }                  
+        }
       }
 
       /* Ascertain that common fields are at the same bit-offset
          and have the same type */
       for (size_t c=0; c < ctrs->children.size(); c++) {
-	shared_ptr<AST> ctrc = ctrs->child(c);
+        shared_ptr<AST> ctrc = ctrs->child(c);
 
-	for (size_t i=1; i < ctrc->children.size(); i++) {
-	  shared_ptr<AST> fldi = ctrc->child(i);
-	  if (fldi->astType != at_field)
-	    continue;
-	
- 	  size_t offc = bitOffset(ctrc, i);	  	
-	  for (size_t d=c+1; d < ctrs->children.size(); d++) {
-	    shared_ptr<AST> ctrd = ctrs->child(d);
-	
-	    for (size_t j=1; j < ctrd->children.size(); j++) {
-	      shared_ptr<AST> fldj = ctrd->child(j);
-	      if (fldj->astType != at_field)
-		continue;
-	
-	      if (fldi->child(0)->s == fldj->child(0)->s) {
-		if (offc != bitOffset(ctrd, j)) {
-		  errStream << ctrd->loc << ": "
-			    << " The constructors "
-			    << ctrc->child(0)->s << " and "
-			    << ctrd->child(0)->s
-			    << " don't agree on the bit-offset "
-			    << " for field " << fldi->child(0)->s
-			    << std::endl;
-		  errFree = false;
-		}
-		
-		if (!TypesAgree(fldi, fldj)) {
-		  errStream << ctrd->loc << ": "
-			    << " The constructors "
-			    << ctrc->child(0)->s << " and "
-			    << ctrd->child(0)->s
-			    << " don't agree on types "
-			    << " for field " << fldi->child(0)->s
-			    << std::endl;
-		  errFree = false;
-		}
-	      }
-	    }
-	  }
-	}
+        for (size_t i=1; i < ctrc->children.size(); i++) {
+          shared_ptr<AST> fldi = ctrc->child(i);
+          if (fldi->astType != at_field)
+            continue;
+        
+           size_t offc = bitOffset(ctrc, i);                  
+          for (size_t d=c+1; d < ctrs->children.size(); d++) {
+            shared_ptr<AST> ctrd = ctrs->child(d);
+        
+            for (size_t j=1; j < ctrd->children.size(); j++) {
+              shared_ptr<AST> fldj = ctrd->child(j);
+              if (fldj->astType != at_field)
+                continue;
+        
+              if (fldi->child(0)->s == fldj->child(0)->s) {
+                if (offc != bitOffset(ctrd, j)) {
+                  errStream << ctrd->loc << ": "
+                            << " The constructors "
+                            << ctrc->child(0)->s << " and "
+                            << ctrd->child(0)->s
+                            << " don't agree on the bit-offset "
+                            << " for field " << fldi->child(0)->s
+                            << std::endl;
+                  errFree = false;
+                }
+                
+                if (!TypesAgree(fldi, fldj)) {
+                  errStream << ctrd->loc << ": "
+                            << " The constructors "
+                            << ctrc->child(0)->s << " and "
+                            << ctrd->child(0)->s
+                            << " don't agree on types "
+                            << " for field " << fldi->child(0)->s
+                            << std::endl;
+                  errFree = false;
+                }
+              }
+            }
+          }
+        }
       }
 
       /* Ascertain that ``where'' fields are decisive */
       for (size_t c=0; c < ctrs->children.size(); c++) {
-	shared_ptr<AST> ctrc = ctrs->child(c);
-	
-	typedef map<string, size_t> WhenMap;
-	WhenMap when;
-	
-	for (size_t i=1; i < ctrc->children.size(); i++) {
-	  shared_ptr<AST> fldi = ctrc->child(i);
-	  if (fldi->flags & FLD_IS_DISCM) {
-	    assert(fldi->astType == at_field);
+        shared_ptr<AST> ctrc = ctrs->child(c);
+        
+        typedef map<string, size_t> WhenMap;
+        WhenMap when;
+        
+        for (size_t i=1; i < ctrc->children.size(); i++) {
+          shared_ptr<AST> fldi = ctrc->child(i);
+          if (fldi->flags & FLD_IS_DISCM) {
+            assert(fldi->astType == at_field);
 
-	    when[fldi->child(0)->s] = fldi->unin_discm;
-	  }
-	}
-	
-	for (size_t d=c+1; d < ctrs->children.size(); d++) {
-	  shared_ptr<AST> ctrd = ctrs->child(d);
-	  bool differ=false;
+            when[fldi->child(0)->s] = fldi->unin_discm;
+          }
+        }
+        
+        for (size_t d=c+1; d < ctrs->children.size(); d++) {
+          shared_ptr<AST> ctrd = ctrs->child(d);
+          bool differ=false;
 
-	  for (size_t j=1; (!differ) && (j < ctrd->children.size()); j++) {
-	    shared_ptr<AST> fldj = ctrd->child(j);
+          for (size_t j=1; (!differ) && (j < ctrd->children.size()); j++) {
+            shared_ptr<AST> fldj = ctrd->child(j);
 
-	    if (fldj->flags & FLD_IS_DISCM) {
-	      assert(fldj->astType == at_field);
-	
-	      WhenMap::iterator itr_k = when.find(fldj->child(0)->s);
-	      if (itr_k == when.end())
-		continue;
+            if (fldj->flags & FLD_IS_DISCM) {
+              assert(fldj->astType == at_field);
+        
+              WhenMap::iterator itr_k = when.find(fldj->child(0)->s);
+              if (itr_k == when.end())
+                continue;
 
-	      if (itr_k->second != fldj->unin_discm) {
-		differ=true;
-		break;
-	      }
-	    }
-	  }
-	
-	  if (!differ) {
-	    errStream << ctrc->loc << ": "
-		      << "Ambiguous defrepr constructors: "
-		      << ctrc->child(0)->s << " and "
-		      << ctrd->child(0)->s << ". Ambiguous case is: "
-		      << std::endl;
-	
-	    for (WhenMap::iterator itr_k = when.begin();
-		itr_k != when.end(); ++itr_k) {
-	      if (itr_k != when.begin())
-		errStream << ", ";	
-	      errStream << itr_k->first << " = " << itr_k->second;
-	    }
-	
-	    errStream << "." << std::endl;	
-	    errFree = false;
-	  }
-	}
+              if (itr_k->second != fldj->unin_discm) {
+                differ=true;
+                break;
+              }
+            }
+          }
+        
+          if (!differ) {
+            errStream << ctrc->loc << ": "
+                      << "Ambiguous defrepr constructors: "
+                      << ctrc->child(0)->s << " and "
+                      << ctrd->child(0)->s << ". Ambiguous case is: "
+                      << std::endl;
+        
+            for (WhenMap::iterator itr_k = when.begin();
+                itr_k != when.end(); ++itr_k) {
+              if (itr_k != when.begin())
+                errStream << ", ";        
+              errStream << itr_k->first << " = " << itr_k->second;
+            }
+        
+            errStream << "." << std::endl;        
+            errFree = false;
+          }
+        }
       }
     }
 
@@ -302,7 +302,7 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
     {
       // only defunion clause has meaning
       for (size_t c=0; c < ast->children.size(); c++)
-	CHKERR(errFree, reprCheck(errStream, ast->child(c)));
+        CHKERR(errFree, reprCheck(errStream, ast->child(c)));
       break;
     }
   }
@@ -312,7 +312,7 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
 
 bool
 UocInfo::fe_reprCheck(std::ostream& errStream,
-		      bool init, unsigned long flags)
+                      bool init, unsigned long flags)
 {
   bool errFree = reprCheck(errStream, uocAst);
   return errFree;

@@ -54,14 +54,14 @@
 #define BF_PRIVATE   0x1u  /* Binding is a private binding */
 #define BF_COMPLETE  0x2u  /* Binding def is completed */
 #define BF_REBIND    0x4u  /* On merge, this binding should replace
-			      any existing binding. */
+                              any existing binding. */
 #define BF_NO_MERGE  0x8u  /* This flag should not survive a merger */
 
 /* The following two flags should only be found in the private per-UoC
    copy of the interface environment that is made in importIfBinding()
    in Symtab.cxx */
 #define BF_PROVIDING 0x10u /* Interface binding that we are
-			      providing. */
+                              providing. */
 
 template <class T>
 struct Binding {
@@ -127,8 +127,8 @@ public:
   /// the environment specified by outerLimit.
   boost::shared_ptr< Binding<T> >
   doGetBinding(const std::string& nm,
-	       boost::shared_ptr<Environment<T> > outerLimit
-	       = boost::GC_NULL) const;
+               boost::shared_ptr<Environment<T> > outerLimit
+               = boost::GC_NULL) const;
 
   boost::shared_ptr< Binding<T> >
   getLocalBinding(const std::string& nm) const;
@@ -149,7 +149,7 @@ public:
   ~Environment();
 
   void addBinding(const std::string& name, boost::shared_ptr<T> val,
-		  bool rebind = false);
+                  bool rebind = false);
   void
   addDefBinding(const std::string& name, boost::shared_ptr<T> val)
   {
@@ -163,8 +163,8 @@ public:
 
   inline boost::shared_ptr<T>
   getBinding(const std::string& nm,
-	     boost::shared_ptr<Environment<T> > outerLimit
-	     = boost::GC_NULL) const
+             boost::shared_ptr<Environment<T> > outerLimit
+             = boost::GC_NULL) const
   {
     boost::shared_ptr<const Binding<T> > binding = doGetBinding(nm, outerLimit);
     if (binding) return binding->val;

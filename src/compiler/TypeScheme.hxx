@@ -49,7 +49,7 @@
 #include "Typeclass.hxx"
 
 enum GeneralizeMode {gen_instance=0, gen_top=1, gen_local=2, 
-		     gen_Hinstance=3, gen_Htop=4, gen_Hlocal=5};
+                     gen_Hinstance=3, gen_Htop=4, gen_Hlocal=5};
 
 struct TypeScheme {
   
@@ -66,7 +66,7 @@ struct TypeScheme {
 
   // The constructor
   TypeScheme(boost::shared_ptr<Type> _tau, boost::shared_ptr<AST> _ast,
-	     boost::shared_ptr<TCConstraints> _tcc = boost::GC_NULL);
+             boost::shared_ptr<TCConstraints> _tcc = boost::GC_NULL);
   
   static inline boost::shared_ptr<TypeScheme>
   make(boost::shared_ptr<Type> _tau, 
@@ -79,13 +79,13 @@ struct TypeScheme {
 
   // The generalizer
   bool generalize(std::ostream& errStream,
-		  const sherpa::LexLoc &errLoc,
-		  boost::shared_ptr<const TSEnvironment > gamma,
-		  boost::shared_ptr<const InstEnvironment >instEnv, 
-		  boost::shared_ptr<const AST> expr, 
-		  boost::shared_ptr<TCConstraints >parentTCC,
-		  boost::shared_ptr<Trail> trail,
-		  GeneralizeMode gen);
+                  const sherpa::LexLoc &errLoc,
+                  boost::shared_ptr<const TSEnvironment > gamma,
+                  boost::shared_ptr<const InstEnvironment >instEnv, 
+                  boost::shared_ptr<const AST> expr, 
+                  boost::shared_ptr<TCConstraints >parentTCC,
+                  boost::shared_ptr<Trail> trail,
+                  GeneralizeMode gen);
   
   // The function that actually makes a copy of the 
   // Produce a type, that is an instace of the current type scheme.
@@ -103,7 +103,7 @@ struct TypeScheme {
   
   //boost::shared_ptr<Type> type_copy();
   std::string asString(boost::shared_ptr<TvPrinter> tvP=TvPrinter::make(),
-		       bool norm=false);
+                       bool norm=false);
 
   void asXML(boost::shared_ptr<TvPrinter> tvP, sherpa::INOstream &out);
   std::string asXML(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make());
@@ -115,9 +115,9 @@ struct TypeScheme {
   bool normalizeConstruction(boost::shared_ptr<Trail> trail);
 
   bool solvePredicates(std::ostream &errStream,
-		       const sherpa::LexLoc &errLoc,
-		       boost::shared_ptr<const InstEnvironment > instEnv,
-		       boost::shared_ptr<Trail> trail);
+                       const sherpa::LexLoc &errLoc,
+                       boost::shared_ptr<const InstEnvironment > instEnv,
+                       boost::shared_ptr<Trail> trail);
   
   bool checkAmbiguity(std::ostream &errStream, const sherpa::LexLoc &errLoc);
   bool migratePredicates(boost::shared_ptr<TCConstraints> parentTCC);    

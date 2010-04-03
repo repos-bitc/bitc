@@ -138,9 +138,9 @@ using namespace sherpa;
 #define LOPT_HELP         276   /* Display usage information. */
 #define LOPT_EMIT         277   /* Specify the desired output language. */
 #define LOPT_SYSTEM       278   /* Specify the desired output
-				   language. */
+                                   language. */
 #define LOPT_NOALLOC      279   /* Statically reject heap-allocating
-				   operations and constructs */
+                                   operations and constructs */
 
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
@@ -278,7 +278,7 @@ AddCompileArgumentForGCC(const std::string& s)
 {
   if (SawFirstBitcInput) {
     cerr << "Compiler options must appear before the first BitC input file."
-	 << endl;
+         << endl;
     exit(1);
   }
 
@@ -336,12 +336,12 @@ ResolveLibPath(std::string name)
     filesystem::path testPath = Options::libDirs[i] / fullNm;
     if (filesystem::exists(testPath)) {
       if (!filesystem::is_regular_file(testPath)) {
-	std::cerr << "bitcc: error: \"-l" << name
-		  << "\" resolves to \""
-		  << testPath.string()
-		  << "\", which is not a regular file."
-		  << endl;
-	exit(1);
+        std::cerr << "bitcc: error: \"-l" << name
+                  << "\" resolves to \""
+                  << testPath.string()
+                  << "\", which is not a regular file."
+                  << endl;
+        exit(1);
       }
 
       return testPath;
@@ -384,34 +384,34 @@ main(int argc, char *argv[])
   /// order-preserving way.
 
   while ((c = getopt_long(argc, argv,
-			  "-e:o:O::l:VvcghI:L:",
-			  longopts, 0
-		     )) != -1) {
+                          "-e:o:O::l:VvcghI:L:",
+                          longopts, 0
+                     )) != -1) {
     switch(c) {
     case 1:
       {
-	std::string sfx = filesystem::extension(optarg);
+        std::string sfx = filesystem::extension(optarg);
 
-	if (
-	    // Interface files. Probably should not appear on the
-	    // command line, but this may be a case of obsolete
-	    // usage. Allow it for now.
-	    (sfx == ".bitc")
-	    // BitC source file.
-	    || (sfx == ".bits")
-	    // BitC "object" file.
-	    || (sfx == ".bito")
-	    // BitC archive file.
-	    || (sfx == ".bita")) {
+        if (
+            // Interface files. Probably should not appear on the
+            // command line, but this may be a case of obsolete
+            // usage. Allow it for now.
+            (sfx == ".bitc")
+            // BitC source file.
+            || (sfx == ".bits")
+            // BitC "object" file.
+            || (sfx == ".bito")
+            // BitC archive file.
+            || (sfx == ".bita")) {
 
-	  SawFirstBitcInput = true;
-	  Options::inputs.push_back(optarg);
-	}
-	else
-	  // Else it is something to be passed through to GCC:
-	  AddLinkArgumentForGCC(optarg);
+          SawFirstBitcInput = true;
+          Options::inputs.push_back(optarg);
+        }
+        else
+          // Else it is something to be passed through to GCC:
+          AddLinkArgumentForGCC(optarg);
 
-	break;
+        break;
       }
 
     case 'V':
@@ -468,183 +468,183 @@ main(int argc, char *argv[])
 
     case LOPT_SHOWPASSNMS:
       {
-	std::cerr.width(15);
-	std::cerr << left
-		  << "PASS"
-		  << "PURPOSE" << std::endl << std::endl;
+        std::cerr.width(15);
+        std::cerr << left
+                  << "PASS"
+                  << "PURPOSE" << std::endl << std::endl;
 
-	for (size_t i = (size_t)pn_none+1; i < (size_t) pn_npass; i++) {
-	  std::cerr.width(15);
-	  std::cerr << left
-		    << UocInfo::passInfo[i].name
-		    << UocInfo::passInfo[i].descrip << std::endl;
-	}
+        for (size_t i = (size_t)pn_none+1; i < (size_t) pn_npass; i++) {
+          std::cerr.width(15);
+          std::cerr << left
+                    << UocInfo::passInfo[i].name
+                    << UocInfo::passInfo[i].descrip << std::endl;
+        }
 
-	std::cerr << left
-		  << "Polyinst"
-		  << "Template-like instantiation of polymorphic definitions" << std::endl;
+        std::cerr << left
+                  << "Polyinst"
+                  << "Template-like instantiation of polymorphic definitions" << std::endl;
 
-	for (size_t i = (size_t)op_none+1; i < (size_t) op_npass; i++) {
-	  std::cerr.width(15);
-	  std::cerr << left
-		    << UocInfo::onePassInfo[i].name
-		    << UocInfo::onePassInfo[i].descrip << std::endl;
-	}
+        for (size_t i = (size_t)op_none+1; i < (size_t) op_npass; i++) {
+          std::cerr.width(15);
+          std::cerr << left
+                    << UocInfo::onePassInfo[i].name
+                    << UocInfo::onePassInfo[i].descrip << std::endl;
+        }
 
-	exit(0);
+        exit(0);
       }
 
     case LOPT_DUMPAFTER:
       {
-	for (size_t i = (size_t)pn_none+1; i < (size_t) pn_npass; i++) {
-	  if (strcmp(UocInfo::passInfo[i].name, optarg) == 0 ||
-	      strcmp("ALL", optarg) == 0)
-	    UocInfo::passInfo[i].printAfter = true;
-	}
+        for (size_t i = (size_t)pn_none+1; i < (size_t) pn_npass; i++) {
+          if (strcmp(UocInfo::passInfo[i].name, optarg) == 0 ||
+              strcmp("ALL", optarg) == 0)
+            UocInfo::passInfo[i].printAfter = true;
+        }
 
-	for (size_t i = (size_t)op_none+1; i < (size_t) op_npass; i++) {
-	  if (strcmp(UocInfo::onePassInfo[i].name, optarg) == 0 ||
-	      strcmp("ALL", optarg) == 0)
-	    UocInfo::onePassInfo[i].printAfter = true;
-	}
-	
-	if (strcmp("midend", optarg) == 0 ||
-	    strcmp("ALL", optarg) == 0)
-	  Options::dumpAfterMidEnd = true;
+        for (size_t i = (size_t)op_none+1; i < (size_t) op_npass; i++) {
+          if (strcmp(UocInfo::onePassInfo[i].name, optarg) == 0 ||
+              strcmp("ALL", optarg) == 0)
+            UocInfo::onePassInfo[i].printAfter = true;
+        }
+        
+        if (strcmp("midend", optarg) == 0 ||
+            strcmp("ALL", optarg) == 0)
+          Options::dumpAfterMidEnd = true;
 
-	break;
+        break;
       }
 
     case LOPT_DUMPTYPES:
       {
-	for (size_t i = (size_t)pn_none+1; i < (size_t) pn_npass; i++) {
-	  if (strcmp(UocInfo::passInfo[i].name, optarg) == 0 ||
-	      strcmp("ALL", optarg) == 0)
-	    UocInfo::passInfo[i].typesAfter = true;
-	}
+        for (size_t i = (size_t)pn_none+1; i < (size_t) pn_npass; i++) {
+          if (strcmp(UocInfo::passInfo[i].name, optarg) == 0 ||
+              strcmp("ALL", optarg) == 0)
+            UocInfo::passInfo[i].typesAfter = true;
+        }
 
-	for (size_t i = (size_t)op_none+1; i < (size_t) op_npass; i++) {
-	  if (strcmp(UocInfo::onePassInfo[i].name, optarg) == 0 ||
-	      strcmp("ALL", optarg) == 0)
-	    UocInfo::onePassInfo[i].typesAfter = true;
-	}
-	
-	if (strcmp("midend", optarg) == 0 ||
-	    strcmp("ALL", optarg) == 0)
-	  Options::dumpTypesAfterMidEnd = true;
+        for (size_t i = (size_t)op_none+1; i < (size_t) op_npass; i++) {
+          if (strcmp(UocInfo::onePassInfo[i].name, optarg) == 0 ||
+              strcmp("ALL", optarg) == 0)
+            UocInfo::onePassInfo[i].typesAfter = true;
+        }
+        
+        if (strcmp("midend", optarg) == 0 ||
+            strcmp("ALL", optarg) == 0)
+          Options::dumpTypesAfterMidEnd = true;
 
-	break;
+        break;
       }
 
     case LOPT_STOPAFTER:
       {
-	for (size_t i = (size_t)pn_none+1; i < (size_t) pn_npass; i++) {
-	  if (strcmp(UocInfo::passInfo[i].name, optarg) == 0 ||
-	      strcmp("ALL", optarg) == 0)
-	    UocInfo::passInfo[i].stopAfter = true;
-	}
+        for (size_t i = (size_t)pn_none+1; i < (size_t) pn_npass; i++) {
+          if (strcmp(UocInfo::passInfo[i].name, optarg) == 0 ||
+              strcmp("ALL", optarg) == 0)
+            UocInfo::passInfo[i].stopAfter = true;
+        }
 
-	for (size_t i = (size_t)op_none+1; i < (size_t) op_npass; i++) {
-	  if (strcmp(UocInfo::onePassInfo[i].name, optarg) == 0 ||
-	      strcmp("ALL", optarg) == 0)
-	    UocInfo::onePassInfo[i].stopAfter = true;
-	}
+        for (size_t i = (size_t)op_none+1; i < (size_t) op_npass; i++) {
+          if (strcmp(UocInfo::onePassInfo[i].name, optarg) == 0 ||
+              strcmp("ALL", optarg) == 0)
+            UocInfo::onePassInfo[i].stopAfter = true;
+        }
 
-	break;
+        break;
       }
 
     case LOPT_RAW_TVARS:
       {
-	Options::rawTvars = true;
-	break;
+        Options::rawTvars = true;
+        break;
       }
 
     case LOPT_FQ_TYPES:
       {
-	Options::FQtypes = true;
-	break;
+        Options::FQtypes = true;
+        break;
       }
 
     case LOPT_SA_TCC:
       {
-	Options::showAllTccs = true;
-	break;
+        Options::showAllTccs = true;
+        break;
       }
 
     case LOPT_SHOW_TYPES:
       {
-	Options::showTypesUocs.insert(optarg);
-	break;
+        Options::showTypesUocs.insert(optarg);
+        break;
       }
 
     case LOPT_XML_TYPES:
       {
-	Options::xmlTypesUocs.insert(optarg);
-	break;
+        Options::xmlTypesUocs.insert(optarg);
+        break;
       }
 
     case 'v':
       Options::verbose++;
       if (Options::verbose > 1) {
-	AddCompileArgumentForGCC("-v");
-	AddLinkArgumentForGCC("-v");
+        AddCompileArgumentForGCC("-v");
+        AddLinkArgumentForGCC("-v");
       }
       break;
 
     case 'c':
       {
-	if (Options::backEnd) {
-	  std::cerr << "Can only specify one output language.\n";
-	  exit(1);
-	}
+        if (Options::backEnd) {
+          std::cerr << "Can only specify one output language.\n";
+          exit(1);
+        }
 
-	// Issue: if we are passed a .c file, shouldn't we pass that
-	// along to GCC in this case? Problem: what if there aren't
-	// any inputs exclusively for GCC?
-	//
-	// AddArgumentForGCC("-c");
+        // Issue: if we are passed a .c file, shouldn't we pass that
+        // along to GCC in this case? Problem: what if there aren't
+        // any inputs exclusively for GCC?
+        //
+        // AddArgumentForGCC("-c");
 
-	Options::backEnd = FindBackEnd("bito");
-	break;
+        Options::backEnd = FindBackEnd("bito");
+        break;
       }
 
     case 'h':
       {
-	if (Options::backEnd) {
-	  std::cerr << "Can only specify one output language.\n";
-	  exit(1);
-	}
+        if (Options::backEnd) {
+          std::cerr << "Can only specify one output language.\n";
+          exit(1);
+        }
 
-	Options::backEnd = FindBackEnd("h");
-	break;
+        Options::backEnd = FindBackEnd("h");
+        break;
       }
 
     case LOPT_EMIT:
       {
-	if (Options::backEnd) {
-	  std::cerr << "Can only specify one output language.\n";
-	  exit(1);
-	}
+        if (Options::backEnd) {
+          std::cerr << "Can only specify one output language.\n";
+          exit(1);
+        }
 
-	Options::backEnd = FindBackEnd(optarg);
-	if (!Options::backEnd) {
-	  std::cerr << "Unknown target language.\n";
-	  exit(1);
-	}
+        Options::backEnd = FindBackEnd(optarg);
+        if (!Options::backEnd) {
+          std::cerr << "Unknown target language.\n";
+          exit(1);
+        }
 
-	break;
+        break;
       }
 
     case 'e':
-      {	
-	Options::entryPts.insert(FQName(optarg));
-	break;
+      {        
+        Options::entryPts.insert(FQName(optarg));
+        break;
       }
 
     case LOPT_HELP:
       {
-	help();
-	exit(0);
+        help();
+        exit(0);
       }
 
     case 'o':
@@ -669,13 +669,13 @@ main(int argc, char *argv[])
 
     case 'l':
       {
-	AddLinkArgumentForGCC("-l");
-	AddLinkArgumentForGCC(optarg);
+        AddLinkArgumentForGCC("-l");
+        AddLinkArgumentForGCC(optarg);
 
-	filesystem::path path = ResolveLibPath(optarg);
-	if (!path.empty())
-	  Options::inputs.push_back(path.string());
-	break;
+        filesystem::path path = ResolveLibPath(optarg);
+        if (!path.empty())
+          Options::inputs.push_back(path.string());
+        break;
       }
 
     case 'L':
@@ -687,19 +687,19 @@ main(int argc, char *argv[])
 
     case 'g':
       {
-	AddCompileArgumentForGCC("-g");
-	AddLinkArgumentForGCC("-g");
-	break;
+        AddCompileArgumentForGCC("-g");
+        AddLinkArgumentForGCC("-g");
+        break;
       }
 
-    case 'O':			// a.k.a. -O2
+    case 'O':                        // a.k.a. -O2
       {
-	std::string optlevel = "-O";
-	if (optarg)
-	  optlevel += optarg;
+        std::string optlevel = "-O";
+        if (optarg)
+          optlevel += optarg;
 
-	AddCompileArgumentForGCC(optlevel);
-	AddLinkArgumentForGCC(optlevel);
+        AddCompileArgumentForGCC(optlevel);
+        AddLinkArgumentForGCC(optlevel);
       }
 
       break;
@@ -744,7 +744,7 @@ main(int argc, char *argv[])
     filesystem::path path = ResolveLibPath("bitc");
     if (path.empty() && (Options::backEnd->flags & BK_LINKING)) {
       cerr << "Cannot find bitc standard library, which is needed"
-	   << endl;
+           << endl;
       exit(1);
     }
     if (!path.empty())
@@ -789,7 +789,7 @@ main(int argc, char *argv[])
 
     if (puoci->lastCompletedPass >= Options::backEnd->needPass) {
       if (Options::backEnd->fn)
-	Options::backEnd->fn(std::cout, std::cerr, puoci);
+        Options::backEnd->fn(std::cout, std::cerr, puoci);
     }
     else
       doFinal = false;
@@ -802,7 +802,7 @@ main(int argc, char *argv[])
 
     if (puoci->lastCompletedPass >= Options::backEnd->needPass){
       if (Options::backEnd->fn)
-	Options::backEnd->fn(std::cout, std::cerr, puoci);
+        Options::backEnd->fn(std::cout, std::cerr, puoci);
     }
     else
       doFinal = false;
@@ -870,21 +870,21 @@ main(int argc, char *argv[])
 
   if (Options::dumpAfterMidEnd) {
     std::cerr << "==== DUMPING *unified UOC*"
-	      << " AFTER mid-end"
-	      << " ====" << std::endl;
+              << " AFTER mid-end"
+              << " ====" << std::endl;
     unifiedUOC->PrettyPrint(std::cerr, Options::ppDecorate);
   }
   if (Options::dumpTypesAfterMidEnd) {
     std::cerr << "==== TYPES for *unified UOC*"
-	      << " AFTER mid-end"
-	      << " ====" << std::endl;
+              << " AFTER mid-end"
+              << " ====" << std::endl;
     unifiedUOC->ShowTypes(std::cerr);
     std::cerr <<std::endl << std::endl;
   }
 
   if (!midPassOK) {
     std::cerr << "Exiting due to errors during Instantiation."
-	      << std::endl;
+              << std::endl;
     exit(1);
   }
 
@@ -898,7 +898,7 @@ main(int argc, char *argv[])
   // If there is any post-gather output, it should be done now.
   if (Options::backEnd->plfn) {
     bool done = Options::backEnd->plfn(std::cout, std::cerr,
-				       unifiedUOC);
+                                       unifiedUOC);
     if (!done)
       exit(1);
   }

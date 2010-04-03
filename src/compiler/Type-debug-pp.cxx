@@ -145,9 +145,9 @@ Type::toString()
     for (size_t i=0; i<components.size(); i++) {
       if (i > 0) ss << " ";
       if (CompFlags(i) & COMP_BYREF)
-	ss << "(by-ref " << CompType(i)->toString() << ")";
+        ss << "(by-ref " << CompType(i)->toString() << ")";
       else
-	ss << CompType(i)->toString();      
+        ss << CompType(i)->toString();      
     }
     ss << ")";
     break;
@@ -166,7 +166,7 @@ Type::toString()
     ss << "(struct " <<defAst->s << " - ";
     for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
-	 << CompType(i)->toString() << " ";
+         << CompType(i)->toString() << " ";
     ss << ")";
     break;
     
@@ -174,7 +174,7 @@ Type::toString()
     ss <<  "(structR " << defAst->s << " - ";
     for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
-	 << CompType(i)->toString() << " ";
+         << CompType(i)->toString() << " ";
     ss << ")";
     break;
     
@@ -185,7 +185,7 @@ Type::toString()
     ss << ") [";
     for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
-	 << CompType(i)->getType()->toString();
+         << CompType(i)->getType()->toString();
     ss << "]";
     break;
 
@@ -196,7 +196,7 @@ Type::toString()
     ss << ") [";
     for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
-	 << CompType(i)->getType()->toString();
+         << CompType(i)->getType()->toString();
     ss << "]";
     break;
 
@@ -208,7 +208,7 @@ Type::toString()
       
     for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
-	 << CompType(i)->getType()->toString();
+         << CompType(i)->getType()->toString();
     ss << "]";
     break;
 
@@ -220,7 +220,7 @@ Type::toString()
       
     for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
-	 << CompType(i)->getType()->toString();
+         << CompType(i)->getType()->toString();
     ss << "]";
     break;
 
@@ -231,7 +231,7 @@ Type::toString()
     ss << ") [";
     for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
-	 << CompType(i)->getType()->toString();
+         << CompType(i)->getType()->toString();
     ss << "]";
     break;
 
@@ -242,7 +242,7 @@ Type::toString()
     ss << ") [";
     for (size_t i=0; i<components.size(); i++)
       ss << CompName(i) << ":" 
-	 << CompType(i)->getType()->toString();
+         << CompType(i)->getType()->toString();
     ss << "]";
     break;
 
@@ -307,7 +307,7 @@ Type::toString()
     {
       ss << "(*";
       for (size_t i=0; i<components.size(); i++)
-	ss << CompType(i)->toString();
+        ss << CompType(i)->toString();
       break;
     }
 
@@ -315,11 +315,11 @@ Type::toString()
     {
       shared_ptr<Type> t = shared_from_this(); // To satisfy libsherpa
       if (t == Type::Kmono)
-	ss << "m";
+        ss << "m";
       else if (t == Type::Kpoly)
-	ss << "P";
+        ss << "P";
       else
-	assert(false);
+        assert(false);
       break;
     }
   }

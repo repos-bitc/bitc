@@ -48,10 +48,10 @@ namespace boost {
       // Strictly speaking, it may be that we ought to accept symbolic links,
       // but not for now.
       if (filesystem::symbolic_link_exists(testPath))
-	return false;
+        return false;
       if (filesystem::is_directory(testPath))
-	return false;
-      return true;			// by exclusion
+        return false;
+      return true;                        // by exclusion
     }
 #endif
   }

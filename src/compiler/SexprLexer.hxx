@@ -116,7 +116,7 @@ struct SexprLexer {
   std::string thisToken;
 
   /** @brief Up to one UCS4 character of push-back, -1 if none. */
-  ucs4_t putbackChar;		// -1 or UCS4
+  ucs4_t putbackChar;                // -1 or UCS4
 
   /** @brief If @p c is a digit character in radix @p radix, return
    * its decimal value */
@@ -135,8 +135,8 @@ struct SexprLexer {
    * false if this unit of compilation was imported rather than
    * processed from the command line or the user */
   SexprLexer(std::ostream& errStream, std::istream& inStream, 
-	     const std::string& origin,
-	     bool commandLineInput);
+             const std::string& origin,
+             bool commandLineInput);
 
   /** @brief Report parse error @p msg attributed to a particular
    * location @p loc. */

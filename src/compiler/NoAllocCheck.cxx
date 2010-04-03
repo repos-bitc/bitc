@@ -64,9 +64,9 @@ AllocCheck(std::ostream &errStream, shared_ptr<AST> ast)
   case at_vector:
   case at_makevectorL:
     errStream << ast->loc << ": "
-	      << "Expression requires dynamic allocation. "
-	      << "Disallowed in NO-GC mode"
-	      << std::endl;
+              << "Expression requires dynamic allocation. "
+              << "Disallowed in NO-GC mode"
+              << std::endl;
     errFree = false;
     break;
 
@@ -75,9 +75,9 @@ AllocCheck(std::ostream &errStream, shared_ptr<AST> ast)
   case at_ucon_apply:
     if (ast->child(0)->symType->isRefType()) {
       errStream << ast->loc << ": "
-		<< "Expression requires dynamic allocation. "
-		<< "Disallowed in NO-GC mode"
-		<< std::endl;
+                << "Expression requires dynamic allocation. "
+                << "Disallowed in NO-GC mode"
+                << std::endl;
       errFree = false;
     }
     break;
@@ -89,12 +89,12 @@ AllocCheck(std::ostream &errStream, shared_ptr<AST> ast)
   for (size_t c = 0; c < ast->children.size(); c++)
     CHKERR(errFree, AllocCheck(errStream, ast->child(c)));
   
-  return errFree;	   
+  return errFree;           
 }
 
 bool
 UocInfo::fe_noAllocCheck(std::ostream& errStream, 
-			 bool init, unsigned long flags)
+                         bool init, unsigned long flags)
 {
   /* This pass only recognizes syntactic structures that perform
      memory alocation. The requirement not performing closure

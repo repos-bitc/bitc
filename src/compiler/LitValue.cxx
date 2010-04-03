@@ -67,85 +67,85 @@ LitValue::DecodeStringCharacter(const char *s, const char **next)
     switch(*s++) {
     case '{':
       {
-	// Okay, could be either a natural number or one of the special
-	// character expansions.
-	if (isdigit(*s)) {
-	  char *snext;
-	  unsigned long radix = strtoul(s, &snext, 10); //&OK
+        // Okay, could be either a natural number or one of the special
+        // character expansions.
+        if (isdigit(*s)) {
+          char *snext;
+          unsigned long radix = strtoul(s, &snext, 10); //&OK
 
-	  // Okay, this is pretty disgusting. If there actually WAS a
-	  // radix prefix, then *snext is now 'r'. If not, then either
-	  // /radix/ holds the actual numerical code point or something
-	  // went horribly wrong.
+          // Okay, this is pretty disgusting. If there actually WAS a
+          // radix prefix, then *snext is now 'r'. If not, then either
+          // /radix/ holds the actual numerical code point or something
+          // went horribly wrong.
 
-	  if (*snext == 'r') {
-	    s = snext+1;
-	    codePoint = strtoul(s, &snext, radix); //&OK
-	  }
-	  else {
-	    codePoint = radix;
-	    s = snext;
-	  }
-	}
-	else if (s[0] == 'U' && s[1] == '+') {
-	  char *snext;
-	  s += 2;
-	  codePoint = strtoul(s, &snext, 16); //&OK
-	  s = snext;
-	}
-	else
-	  assert(false);
+          if (*snext == 'r') {
+            s = snext+1;
+            codePoint = strtoul(s, &snext, radix); //&OK
+          }
+          else {
+            codePoint = radix;
+            s = snext;
+          }
+        }
+        else if (s[0] == 'U' && s[1] == '+') {
+          char *snext;
+          s += 2;
+          codePoint = strtoul(s, &snext, 16); //&OK
+          s = snext;
+        }
+        else
+          assert(false);
 
-	assert (*s == '}');
+        assert (*s == '}');
 
-	s++;
+        s++;
 
-	break;
+        break;
       }
     case 'n':
       {
-	codePoint = '\n';	// newline
-	break;
+        codePoint = '\n';        // newline
+        break;
       }
     case 'r':
       {
-	codePoint = '\r';	// return
-	break;
+        codePoint = '\r';        // return
+        break;
       }
     case 't':
       {
-	codePoint = '\t';	// tab
-	break;
+        codePoint = '\t';        // tab
+        break;
       }
     case 'b':
       {
-	codePoint = '\010';	// backspace
-	break;
+        codePoint = '\010';        // backspace
+        break;
       }
     case 's':
       {
-	codePoint = ' ';	// space
-	break;
+        codePoint = ' ';        // space
+        break;
       }
     case 'f':
       {
-	codePoint = '\f';	// formfeed
-	break;
+        codePoint = '\f';        // formfeed
+        break;
       }
     case '"':
       {
-	codePoint = '"';	// double quote
-	break;
+        codePoint = '"';        // double quote
+        break;
       }
     case '\\':
       {
-	codePoint = '\\';	// backslash
-	break;
+        codePoint = '\\';        // backslash
+        break;
       }
     default:
       {
-	assert(false);
-	break;
+        assert(false);
+        break;
       }
     }
   }

@@ -59,8 +59,8 @@ XMLp(std::ostream& out, shared_ptr<AST> ast, std::string pad, bool showLoc)
       << "\"";
   if (ast->s.size()) {
     out << " s=\""
-	<< ast->s
-	<< "\"";
+        << ast->s
+        << "\"";
   }
 
   if (showLoc)
@@ -74,14 +74,14 @@ XMLp(std::ostream& out, shared_ptr<AST> ast, std::string pad, bool showLoc)
     out << " Sym=\"";
     if (!ast->symbolDef) {
       out << "DEF"
-	  << "\"";
+          << "\"";
     }
     else {
       out << "USE"
-	  << "\"";
+          << "\"";
       out << " symDef=\""
-	  << ast->symbolDef->ID
-	  << "\"";
+          << ast->symbolDef->ID
+          << "\"";
     }
   }
  
@@ -90,9 +90,9 @@ XMLp(std::ostream& out, shared_ptr<AST> ast, std::string pad, bool showLoc)
     for (unsigned i = 0; i < ast->children.size(); i++)
       XMLp(out, ast->child(i), pad + "   ", showLoc);
     out << pad
-	<< "</" 
-	<< AST::tagName(ast->astType)
-	<< ">\n";
+        << "</" 
+        << AST::tagName(ast->astType)
+        << ">\n";
   }
   else {
     out << "/>\n";
@@ -110,8 +110,8 @@ XMLd(std::ostream& out, shared_ptr<AST> ast, bool showLoc)
 
   if (ast->s.size()) {
     out << " s=\""
-	<< ast->s
-	<< "\"";
+        << ast->s
+        << "\"";
   }
   
   if (showLoc)
@@ -126,14 +126,14 @@ XMLd(std::ostream& out, shared_ptr<AST> ast, bool showLoc)
     out << " Sym=\"";
     if (!ast->symbolDef) {
       out << "DEF"
-	  << "\"";
+          << "\"";
     }
     else {
       out << "USE"
-	  << "\"";
+          << "\"";
       out << "symDef=\""
-	  << ast->symbolDef->ID
-	  << "\"";
+          << ast->symbolDef->ID
+          << "\"";
     }
   }
 
@@ -142,8 +142,8 @@ XMLd(std::ostream& out, shared_ptr<AST> ast, bool showLoc)
     for (unsigned i = 0; i < ast->children.size(); i++)
       XMLd(out, ast->child(i), showLoc);
     out << "</" 
-	<< AST::tagName(ast->astType)
-	<< ">";
+        << AST::tagName(ast->astType)
+        << ">";
   }
   else {
     out << "/>";
@@ -193,7 +193,7 @@ xmlMangle(std::string idName)
 
 static void
 emitXMLType(INOstream &out, std::string name, shared_ptr<TypeScheme> ts,
-	    bool raw=false)
+            bool raw=false)
 {
   shared_ptr<TvPrinter> tvP = GC_NULL;
   if (!raw)
@@ -233,17 +233,17 @@ XMLtypes(INOstream &out, shared_ptr<AST> ast, bool raw=false)
       out.more();
       out << "<text content='";
       if (ast->astType == at_interface) {
-	i=1;
-	out << "*** Interface: " << ast->child(0)->s << " ***";
+        i=1;
+        out << "*** Interface: " << ast->child(0)->s << " ***";
       }
       else {
-	out << "*** Source Module ***";
+        out << "*** Source Module ***";
       }
       out << "'/>" << endl;
       out << "<br/>" << endl;
       for (; i<ast->children.size(); i++) {
-	XMLtypes(out, ast->child(i), raw);
-	out << "<br/>" << endl;
+        XMLtypes(out, ast->child(i), raw);
+        out << "<br/>" << endl;
       }      
       out << "<br/>" << endl;      
       out.less();  

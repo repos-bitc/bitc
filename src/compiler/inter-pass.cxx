@@ -60,10 +60,10 @@ using namespace sherpa;
 
 bool
 UocInfo::RandT(std::ostream& errStream,
-	       bool init,
-	       ResolverFlags rflags,
-	       TI_Flags tflags,
-	       std::string mesg)
+               bool init,
+               ResolverFlags rflags,
+               TI_Flags tflags,
+               std::string mesg)
 {
   bool errFree = true;
   bool rewrite=false;
@@ -75,7 +75,7 @@ UocInfo::RandT(std::ostream& errStream,
 
   if (!errFree)
     errStream << "WHILE R&Ting:" << std::endl
-	      << uocAst->asString() << std::endl;
+              << uocAst->asString() << std::endl;
 
   return errFree;
 }
@@ -101,13 +101,13 @@ UocInfo::unwrapEnvs()
 
 bool
 UocInfo::RandTexpr(std::ostream& errStream,
-		   shared_ptr<AST> expr,
-		   bool &rewrite,
-		   ResolverFlags rflags,
-		   TI_Flags tflags,
-		   std::string mesg,
-		   bool keepResults,
-		   shared_ptr<EnvSet> altEnvSet)
+                   shared_ptr<AST> expr,
+                   bool &rewrite,
+                   ResolverFlags rflags,
+                   TI_Flags tflags,
+                   std::string mesg,
+                   bool keepResults,
+                   shared_ptr<EnvSet> altEnvSet)
 {
   bool errFree = true;
   shared_ptr<UocInfo> myUoc = UocInfo::make(shared_from_this());
@@ -125,25 +125,25 @@ UocInfo::RandTexpr(std::ostream& errStream,
   CHKERR(errFree, myUoc->Resolve(errStream, false, rflags, mesg));
   if (errFree)
     CHKERR(errFree, myUoc->TypeCheck(errStream, false, rewrite,
-				     tflags, mesg)); 
+                                     tflags, mesg)); 
   
   if (!keepResults)
     myUoc->unwrapEnvs();
 
   if (!errFree)
     errStream << "WHILE R&Ting:" << std::endl
-	      << expr->asString() << std::endl;
+              << expr->asString() << std::endl;
 
   return errFree;
 }
 
 
 #define MARKDEF(ast, def) do {\
-    assert(def);	      \
-    ast->defForm = def;	      \
+    assert(def);              \
+    ast->defForm = def;              \
   } while (0);
 //std::cout << "Marked " << ast->asString() << "->defForm = "
-//	<< def->asString() << std::endl;
+//        << def->asString() << std::endl;
 
 
 /** @brief For every defining occurrence of an identifier, set up a
@@ -209,9 +209,9 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
       MARKDEF(id, ast);
       shared_ptr<AST> ctrs = ast->child(4);
       for (size_t i=0; i < ctrs->children.size(); i++) {
-	shared_ptr<AST> ctr = ctrs->child(i);
-	shared_ptr<AST> ctrID = ctr->child(0);
-	MARKDEF(ctrID, ast);
+        shared_ptr<AST> ctr = ctrs->child(i);
+        shared_ptr<AST> ctrID = ctr->child(0);
+        MARKDEF(ctrID, ast);
       }
       processChildren = false;
       break;
@@ -221,12 +221,12 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
     {
       shared_ptr<AST> id = ast->child(0);
       MARKDEF(id, ast);
-	
+        
       shared_ptr<AST> methods = ast->child(4);
       for (size_t i = 0; i < methods->children.size(); i++) {
-	shared_ptr<AST> method = methods->child(i);
-	shared_ptr<AST> mID = method->child(0);
-	MARKDEF(mID, ast);
+        shared_ptr<AST> method = methods->child(i);
+        shared_ptr<AST> mID = method->child(0);
+        MARKDEF(mID, ast);
       }
       processChildren = false;
       break;
@@ -262,7 +262,7 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
 
   if (processChildren)
     for (size_t c=0; c < ast->children.size(); c++)
-      findDefForms(ast->child(c), local, top);	
+      findDefForms(ast->child(c), local, top);        
 }
 
 /** @brief Make a pass over every AST, setting up back pointers to the
@@ -295,12 +295,12 @@ addCandidates(shared_ptr<AST> mod)
     case at_recdef:
     case at_defexception:
       if (id->symType->isConcrete())
-	Options::entryPts.insert(id->fqn.asString());
+        Options::entryPts.insert(id->fqn.asString());
 
       break;
 
     default:
-	break;
+        break;
     }
   }
 }

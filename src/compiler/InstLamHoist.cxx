@@ -76,32 +76,32 @@ cl_HoistInstLam(shared_ptr<UocInfo> uoc)
       // any constraint that is not on an instantiated variable will
       // not do the right thing.
       for (size_t m = 0; m < methods->children.size(); m++) {
-	shared_ptr<AST> method = methods->child(m);
-	shared_ptr<AST> methodValue = method->child(1);
-	
-	if (methodValue->astType != at_ident) {
-	  // It's an expression. Need to hoist it into a new binding.
-	  shared_ptr<AST> newDef = AST::make(at_define, methodValue->loc);
+        shared_ptr<AST> method = methods->child(m);
+        shared_ptr<AST> methodValue = method->child(1);
+        
+        if (methodValue->astType != at_ident) {
+          // It's an expression. Need to hoist it into a new binding.
+          shared_ptr<AST> newDef = AST::make(at_define, methodValue->loc);
 
-	  shared_ptr<AST> lamName = AST::genSym(methodValue, "lam");
-	  lamName->identType = id_value;
-	  lamName->flags |= ID_IS_GLOBAL;
+          shared_ptr<AST> lamName = AST::genSym(methodValue, "lam");
+          lamName->identType = id_value;
+          lamName->flags |= ID_IS_GLOBAL;
 
-	  shared_ptr<AST> lamPat = AST::make(at_identPattern,
-					     methodValue->loc, lamName); 
-	  newDef->addChild(lamPat);
-	  newDef->addChild(methodValue);
-	  newDef->addChild(AST::make(at_constraints));
+          shared_ptr<AST> lamPat = AST::make(at_identPattern,
+                                             methodValue->loc, lamName); 
+          newDef->addChild(lamPat);
+          newDef->addChild(methodValue);
+          newDef->addChild(AST::make(at_constraints));
 
-	  outAsts.push_back(newDef);
+          outAsts.push_back(newDef);
 
-	  shared_ptr<AST> instName = lamName->Use();
-	  shared_ptr<AST> the = AST::make(at_tqexpr);
-	  the->addChild(instName);
-	  the->addChild(methodValue->symType->asAST(methodValue->loc));
+          shared_ptr<AST> instName = lamName->Use();
+          shared_ptr<AST> the = AST::make(at_tqexpr);
+          the->addChild(instName);
+          the->addChild(methodValue->symType->asAST(methodValue->loc));
 
-	  method->child(1) = the;
-	}
+          method->child(1) = the;
+        }
       }
     }
 
@@ -114,7 +114,7 @@ cl_HoistInstLam(shared_ptr<UocInfo> uoc)
 #if 0
 bool
 UocInfo::be_HoistInstLam(std::ostream& errStream,
-			 bool init, unsigned long flags)
+                         bool init, unsigned long flags)
 {
   bool errFree = true;
 
@@ -139,7 +139,7 @@ UocInfo::be_HoistInstLam(std::ostream& errStream,
 #else
 bool
 UocInfo::fe_HoistInstLam(std::ostream& errStream,
-			 bool init, unsigned long flags)
+                         bool init, unsigned long flags)
 {
   bool errFree = true;
 

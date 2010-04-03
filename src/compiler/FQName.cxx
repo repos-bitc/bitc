@@ -46,14 +46,14 @@ bool
 FQName::operator<(const FQName& that) const
 {
   return (iface < that.iface ||
-	  (iface == that.iface && ident < that.ident));
+          (iface == that.iface && ident < that.ident));
 }
 
 bool
 FQName::operator>(const FQName& that) const
 {
   return (iface > that.iface ||
-	  (iface == that.iface && ident > that.ident));
+          (iface == that.iface && ident > that.ident));
 }
 
 bool

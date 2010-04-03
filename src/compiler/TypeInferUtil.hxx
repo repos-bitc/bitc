@@ -49,19 +49,19 @@ obtainFullUnionType(boost::shared_ptr<Type> t);
 
 bool
 initGamma(std::ostream& errStream, 
-	  boost::shared_ptr<TSEnvironment > gamma,
-	  boost::shared_ptr<InstEnvironment > instEnv,
-	  const boost::shared_ptr<AST> ast);
+          boost::shared_ptr<TSEnvironment > gamma,
+          boost::shared_ptr<InstEnvironment > instEnv,
+          const boost::shared_ptr<AST> ast);
 
 void
 useIFGamma(const std::string& idName,
-	   boost::shared_ptr<TSEnvironment > fromEnv, 
-	   boost::shared_ptr<TSEnvironment > toEnv);
+           boost::shared_ptr<TSEnvironment > fromEnv, 
+           boost::shared_ptr<TSEnvironment > toEnv);
 
 void
 useIFInsts(const std::string& idName,
-	   boost::shared_ptr<InstEnvironment >fromEnv, 
-	   boost::shared_ptr<InstEnvironment >toEnv);
+           boost::shared_ptr<InstEnvironment >fromEnv, 
+           boost::shared_ptr<InstEnvironment >toEnv);
 
 size_t
 nCtArgs(boost::shared_ptr<Type> t);

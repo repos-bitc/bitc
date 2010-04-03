@@ -145,10 +145,10 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     ss << components.size();
     for (size_t i=0; i<components.size(); i++) {
       if (CompFlags(i) & COMP_BYREF)
-	ss << "Y";
+        ss << "Y";
       
       ss << CompType(i)->mangledString(igMut, true, 
-				       maxArgMut);
+                                       maxArgMut);
     }
     break;
 
@@ -156,7 +156,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
     ss << "LG";
     for (size_t i=0; i<components.size(); i++) {
       ss << CompType(i)->mangledString(igMut, igTlMut, 
-					      maxArgMut);
+                                              maxArgMut);
     }
     
     break;
@@ -165,23 +165,23 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
   case ty_structr:
     {
       ss << "S"
-	 << ((kind == ty_structv) ? "V" : "R")
-	 << typeArgs.size() 
-	 << "_" << defAst->s.size() << defAst->s;
+         << ((kind == ty_structv) ? "V" : "R")
+         << typeArgs.size() 
+         << "_" << defAst->s.size() << defAst->s;
 
       for (size_t i=0; i < typeArgs.size(); i++)
-	ss << TypeArg(i)->mangledString(igMut, false, 
-					 maxArgMut);
+        ss << TypeArg(i)->mangledString(igMut, false, 
+                                         maxArgMut);
       break;
     }
 
   case ty_typeclass:    
     {
       ss << "TC"
-	 << "_" << defAst->s.size() << defAst->s;
+         << "_" << defAst->s.size() << defAst->s;
       for (size_t i=0; i < typeArgs.size(); i++)
-	ss << TypeArg(i)->mangledString(igMut, false, 
-					 maxArgMut);
+        ss << TypeArg(i)->mangledString(igMut, false, 
+                                         maxArgMut);
       
       break;
     }
@@ -194,19 +194,19 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
   case ty_unionr:
     {
       ss << "U"
-	 << (isRefType() ? "R" : "V")
-	 << typeArgs.size() 
-	 << "_" << myContainer->s.size() << myContainer->s;
+         << (isRefType() ? "R" : "V")
+         << typeArgs.size() 
+         << "_" << myContainer->s.size() << myContainer->s;
 
       for (size_t i=0; i < typeArgs.size(); i++)
-	ss << TypeArg(i)->mangledString(igMut, false, maxArgMut);
+        ss << TypeArg(i)->mangledString(igMut, false, maxArgMut);
     }
     break;
 
   case ty_array:
     {
       ss << "J" << Base()->mangledString(igMut, false, maxArgMut)
-	 << "__" << arrLen->len;
+         << "__" << arrLen->len;
       
       break;
     }

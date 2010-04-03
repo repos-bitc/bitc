@@ -87,8 +87,8 @@ using namespace sherpa;
 
 static bool
 warnUnresRef(std::ostream& errStream, 
-	     shared_ptr<AST> mod,
-	     shared_ptr<ASTEnvironment > env)
+             shared_ptr<AST> mod,
+             shared_ptr<ASTEnvironment > env)
 {
   bool errorFree = true;
   
@@ -100,25 +100,25 @@ warnUnresRef(std::ostream& errStream,
     case at_declstruct:
     case at_proclaim:
       {
-	if (ast->flags & PROCLAIM_IS_INTERNAL)
-	  break;
-	
-	shared_ptr<AST> def = env->getBinding(ast->child(0)->s);
-	if (((ast->flags & DEF_IS_EXTERNAL) == 0) && (def == NULL)) {
+        if (ast->flags & PROCLAIM_IS_INTERNAL)
+          break;
+        
+        shared_ptr<AST> def = env->getBinding(ast->child(0)->s);
+        if (((ast->flags & DEF_IS_EXTERNAL) == 0) && (def == NULL)) {
 
-	  errStream << ast->loc << ": WARNING: " 
-		    << "Local declaration of " << ast->child(0)->s 
-		    << " found here, but no definition found";
-	  
-	  errStream << std::endl;
-	  
-	  if (Options::Wall)
-	    errorFree = false;
-	  break;
-	}
+          errStream << ast->loc << ": WARNING: " 
+                    << "Local declaration of " << ast->child(0)->s 
+                    << " found here, but no definition found";
+          
+          errStream << std::endl;
+          
+          if (Options::Wall)
+            errorFree = false;
+          break;
+        }
 
-	if (def != NULL)
-	  assert(!def->isDecl);
+        if (def != NULL)
+          assert(!def->isDecl);
       }
     default:
       break;
@@ -140,19 +140,19 @@ findInterface(std::ostream& errStream, shared_ptr<AST> ifAst)
       
   if (!iface) {
     errStream << ifAst->loc << ": "
-	      << "Internal Compiler Error. "
-	      << "Interface " << ifAst->s
-	      << " has NOT been processed"
-	      << std::endl;
+              << "Internal Compiler Error. "
+              << "Interface " << ifAst->s
+              << " has NOT been processed"
+              << std::endl;
     return GC_NULL;
   }
   
   if (!iface->env || !iface->gamma || !iface->instEnv) { 
     errStream << ifAst->loc << ": "
-	      << "Internal Compiler Error. "
-	      << "Interface " << ifAst->s
-	      << " has at least one NULL environment"
-	      << std::endl;
+              << "Internal Compiler Error. "
+              << "Interface " << ifAst->s
+              << " has at least one NULL environment"
+              << std::endl;
     return GC_NULL;
   }
   
@@ -168,7 +168,7 @@ findInterface(std::ostream& errStream, shared_ptr<AST> ifAst)
 // along with status of completeness
 static void
 showEnv(std::ostream& errStream, 
-	shared_ptr<ASTEnvironment > env)
+        shared_ptr<ASTEnvironment > env)
 {
   for (ASTEnvironment::iterator itr = env->begin(); 
        itr != env->end(); ++ itr) {
@@ -176,8 +176,8 @@ showEnv(std::ostream& errStream,
     shared_ptr<Binding<AST> > bdng = itr->second;
     
     errStream << name << ": "
-	      << ((bdng->flags & BF_COMPLETE)? "Complete" : "Incomplete")
-	      << std::endl;
+              << ((bdng->flags & BF_COMPLETE)? "Complete" : "Incomplete")
+              << std::endl;
   }
   
   if(env->parent) {
@@ -186,12 +186,12 @@ showEnv(std::ostream& errStream,
   }
 }
 #endif
-	      
+              
 static void
 aliasPublicBindings(const std::string& idName,
-		    shared_ptr<ASTEnvironment > aliasEnv, 
-		    shared_ptr<ASTEnvironment > fromEnv, 
-		    shared_ptr<ASTEnvironment > toEnv)
+                    shared_ptr<ASTEnvironment > aliasEnv, 
+                    shared_ptr<ASTEnvironment > fromEnv, 
+                    shared_ptr<ASTEnvironment > toEnv)
 {
   for (ASTEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
@@ -237,8 +237,8 @@ aliasPublicBindings(const std::string& idName,
 
 static void
 importIfBinding(std::ostream& errStream, 
-		shared_ptr<ASTEnvironment > aliasEnv,
-		shared_ptr<AST> ifName)
+                shared_ptr<ASTEnvironment > aliasEnv,
+                shared_ptr<AST> ifName)
 {
   findInterface(errStream, ifName);
   std::string canonicalIfName = ifName->s;
@@ -304,10 +304,10 @@ providing(shared_ptr<ASTEnvironment > aliasEnv, const FQName& fqn)
 #if 0
 bool
 makeLocalAlias(shared_ptr<ASTEnvironment > fromEnv,
-	       std::string fromName,
-	       shared_ptr<ASTEnvironment > toEnv, 
-	       const std::string& toPfx,
-	       shared_ptr<AST> toIdent)
+               std::string fromName,
+               shared_ptr<ASTEnvironment > toEnv, 
+               const std::string& toPfx,
+               shared_ptr<AST> toIdent)
 {
   shared_ptr<Binding<AST> > bndg = fromEnv->doGetBinding(fromName);
 
@@ -329,8 +329,8 @@ makeLocalAlias(shared_ptr<ASTEnvironment > fromEnv,
 
 static void
 bindIdentDef(shared_ptr<AST> ast, shared_ptr<ASTEnvironment > env, 
-	     IdentType identType, shared_ptr<AST> currLB,
-	     ResolverFlags rflags)
+             IdentType identType, shared_ptr<AST> currLB,
+             ResolverFlags rflags)
 {  
   if (ast->isIdentType(id_tvar)) {
     env->addDefBinding(ast->s, ast);
@@ -372,12 +372,12 @@ markComplete(shared_ptr<ASTEnvironment > env)
 
 //WARNING: **REQUIRES** answer and errorFree.
 // Carries aliasEnv passively throughout, as if closed over.
-#define RESOLVE(ast,env,lamLevel,mode,identType,currLB,flags)	\
-  do {								\
+#define RESOLVE(ast,env,lamLevel,mode,identType,currLB,flags)        \
+  do {                                                                \
     answer = resolve(errStream, (ast), aliasEnv, (env), (lamLevel), \
-		     (mode), (identType), (currLB), (flags));	\
-    if (answer == false)						\
-      errorFree = false;					\
+                     (mode), (identType), (currLB), (flags));        \
+    if (answer == false)                                                \
+      errorFree = false;                                        \
   }while (0)
 
 
@@ -406,14 +406,14 @@ markComplete(shared_ptr<ASTEnvironment > env)
 /// DECL_MODE?
 bool
 resolve(std::ostream& errStream, 
-	shared_ptr<AST> ast, 
-	shared_ptr<ASTEnvironment > aliasEnv,
-	shared_ptr<ASTEnvironment > env,
-	shared_ptr<ASTEnvironment > lamLevel,
-	ResolutionMode mode, 
-	IdentType identType,
-	shared_ptr<AST> currLB,
-	ResolverFlags flags)
+        shared_ptr<AST> ast, 
+        shared_ptr<ASTEnvironment > aliasEnv,
+        shared_ptr<ASTEnvironment > env,
+        shared_ptr<ASTEnvironment > lamLevel,
+        ResolutionMode mode, 
+        IdentType identType,
+        shared_ptr<AST> currLB,
+        ResolverFlags flags)
 {
   bool errorFree = true, answer = false;
 
@@ -422,11 +422,11 @@ resolve(std::ostream& errStream,
   ast->envs.env = env;
 
   //     errStream << "RES: " << ast->loc << ": " 
-  //     	    << ast->s << "[" << ast->astTypeName() << "]" 
-  //     	    << "   identType = " << identTypeToString(identType)
-  //     	    << " IncompleteOK = " 
-  //     	    << ((flags & RSLV_INCOMPLETE_OK)? "true" : "false")
-  //     	    << std::endl;  
+  //                 << ast->s << "[" << ast->astTypeName() << "]" 
+  //                 << "   identType = " << identTypeToString(identType)
+  //                 << " IncompleteOK = " 
+  //                 << ((flags & RSLV_INCOMPLETE_OK)? "true" : "false")
+  //                 << std::endl;  
   
   switch(ast->astType) {
 
@@ -475,9 +475,9 @@ resolve(std::ostream& errStream,
   case agt_ucon:
     {
       errStream << ast->loc << ": Internal Compiler Error. " 
-		<< "Function resolve, unexpected astType: " 
-		<< ast->astTypeName()
-		<< std::endl;
+                << "Function resolve, unexpected astType: " 
+                << ast->astTypeName()
+                << std::endl;
       
       errorFree = false;
       break;
@@ -495,342 +495,342 @@ resolve(std::ostream& errStream,
       // If you change the way this works, see the comment in the
       // at_usesel case first!
       if (!ast->fqn.isInitialized()) {
-	if (ast->isGlobal()) {
-	  ast->fqn = FQName(env->uocName, ast->s);
-	  ast->flags |= ID_IS_PRIVATE;
-	}
-	else
-	  ast->fqn = FQName(FQ_NOIF, ast->s);
+        if (ast->isGlobal()) {
+          ast->fqn = FQName(env->uocName, ast->s);
+          ast->flags |= ID_IS_PRIVATE;
+        }
+        else
+          ast->fqn = FQName(FQ_NOIF, ast->s);
       }
 
       switch(mode) {
-	// DEF_MODE is mainly for top level. It can be a:
-	// type name
-	// value
-	// constructor
-	// field name
-	// module/interface name
-	// Individial cases distinguished using identType
+        // DEF_MODE is mainly for top level. It can be a:
+        // type name
+        // value
+        // constructor
+        // field name
+        // module/interface name
+        // Individial cases distinguished using identType
 
       case DEF_MODE:
-	{
-	  assert(env);
-	  assert(identType != id_unresolved);
-	  
-	  shared_ptr<AST> sym = env->getBinding(ast->s);
-	
-	  if (sym) {
-	    if (sym->isDecl) {
-	      if ((sym->fqn.iface != ast->fqn.iface) &&
-		  !providing(aliasEnv, sym->fqn)) {
-		// We are defining an ident that has an existing
-		// binding that came about through import. Confirm
-		// that we also marked it as providable:
+        {
+          assert(env);
+          assert(identType != id_unresolved);
+          
+          shared_ptr<AST> sym = env->getBinding(ast->s);
+        
+          if (sym) {
+            if (sym->isDecl) {
+              if ((sym->fqn.iface != ast->fqn.iface) &&
+                  !providing(aliasEnv, sym->fqn)) {
+                // We are defining an ident that has an existing
+                // binding that came about through import. Confirm
+                // that we also marked it as providable:
 
-		errStream << ast->loc << ": " 
-			  << ast->s
-			  << " aliases an interface symbol that"
-			  << " is not being provided."
-			  << std::endl;
-		errorFree = false;
-		break;
-		
-	      }
+                errStream << ast->loc << ": " 
+                          << ast->s
+                          << " aliases an interface symbol that"
+                          << " is not being provided."
+                          << std::endl;
+                errorFree = false;
+                break;
+                
+              }
 
-	      ast->identType = identType;
-	      if (!ast->isIdentType(sym->identType)) {
-		errStream << sym->loc << ": " 
-			  << ast->s << " is declared here as "
-			  << identTypeToString(sym->identType)
-			  << std::endl
-			  << ast->loc
-			  << " and defined here as " 
-			  << identTypeToString(identType)
-			  << std::endl;
-		errorFree = false;
-		break;
-	      }
-	      
-	      sym->identType = ast->identType;
-	      sym->defn = ast;
-	      ast->decl = sym;
-	      env->removeBinding(ast->s);
-	      
-	      if (sym->externalName.size()) {
-		ast->externalName = sym->externalName;
-	      }
-	    }
-	    else if (ast->isGlobal()) {
-	      errStream << ast->loc << ": Redefinition of Symbol " 
-			<< ast->s << ". Already defined at " 
-			<< sym->loc << "." << std::endl;
-	      errorFree = false;
-	      break;
-	    }
-	  }
-	  
-	  assert(!ast->isDecl);
-	  bindIdentDef(ast, env, identType, currLB, flags);
-	  break;
-	}
+              ast->identType = identType;
+              if (!ast->isIdentType(sym->identType)) {
+                errStream << sym->loc << ": " 
+                          << ast->s << " is declared here as "
+                          << identTypeToString(sym->identType)
+                          << std::endl
+                          << ast->loc
+                          << " and defined here as " 
+                          << identTypeToString(identType)
+                          << std::endl;
+                errorFree = false;
+                break;
+              }
+              
+              sym->identType = ast->identType;
+              sym->defn = ast;
+              ast->decl = sym;
+              env->removeBinding(ast->s);
+              
+              if (sym->externalName.size()) {
+                ast->externalName = sym->externalName;
+              }
+            }
+            else if (ast->isGlobal()) {
+              errStream << ast->loc << ": Redefinition of Symbol " 
+                        << ast->s << ". Already defined at " 
+                        << sym->loc << "." << std::endl;
+              errorFree = false;
+              break;
+            }
+          }
+          
+          assert(!ast->isDecl);
+          bindIdentDef(ast, env, identType, currLB, flags);
+          break;
+        }
       
       case DECL_MODE:
-	{
-	  assert(env);
-	  assert(identType != id_unresolved);
+        {
+          assert(env);
+          assert(identType != id_unresolved);
 
-	  ast->isDecl = true;
+          ast->isDecl = true;
 
-	  shared_ptr<AST> sym = env->getBinding(ast->s);
-	  
-	  if (sym) {	    
-	    if (!sym->isDecl) {
-	      // Will not be necessary in the new Polyinstantiator
-	      if ((flags & RSLV_NO_RESOLVE_DECL) == 0) {
-		errStream << ast->loc << ": Symbol " 
-			  << ast->s << " already defined at " 
-			  << sym->loc << "." << std::endl;
-		errorFree = false;
-		break;
-	      }
-	    }
-	    
-	    if (!sym->isIdentType(identType)) {
-	      errStream << sym->loc << ": " 
-			<< ast->s << " is declared/defined here as "
-			<< identTypeToString(sym->identType)
-			<< std::endl
-			<< ast->loc
-			<< " and here as " 
-			<< identTypeToString(identType)
-			<< std::endl;
-	      errorFree = false;
-	      break;
-	    }
-	    ast->identType = sym->identType;
+          shared_ptr<AST> sym = env->getBinding(ast->s);
+          
+          if (sym) {            
+            if (!sym->isDecl) {
+              // Will not be necessary in the new Polyinstantiator
+              if ((flags & RSLV_NO_RESOLVE_DECL) == 0) {
+                errStream << ast->loc << ": Symbol " 
+                          << ast->s << " already defined at " 
+                          << sym->loc << "." << std::endl;
+                errorFree = false;
+                break;
+              }
+            }
+            
+            if (!sym->isIdentType(identType)) {
+              errStream << sym->loc << ": " 
+                        << ast->s << " is declared/defined here as "
+                        << identTypeToString(sym->identType)
+                        << std::endl
+                        << ast->loc
+                        << " and here as " 
+                        << identTypeToString(identType)
+                        << std::endl;
+              errorFree = false;
+              break;
+            }
+            ast->identType = sym->identType;
 
-	    if (ast->externalName.size()) {
-	      assert(ast->flags & DEF_IS_EXTERNAL);
-	      if (sym->externalName.size()) {
-		if (sym->externalName != ast->externalName) {
-		  errStream << ast->loc << ": " 
-			    << ast->s << " Identifier was previously "
-			    << " declared with a different external name. "
-			    << "Name here: " << ast->externalName
-			    << "Previous name: " << sym->externalName
-			    << std::endl;
-		  errorFree = false;
-		  break;
-		}  
-	      }
-	      else {
-		sym->externalName = ast->externalName;
-	      }
-	    }
-	    else {
-	      if (sym->externalName.size()) {
-		ast->externalName = sym->externalName;
-	      }
-	    }
-	    
-	    /* This is a compatible declaration, do nothing */
-	  }
-	  else
-	    bindIdentDef(ast, env, identType, currLB, flags);
-	  break;
-	}
+            if (ast->externalName.size()) {
+              assert(ast->flags & DEF_IS_EXTERNAL);
+              if (sym->externalName.size()) {
+                if (sym->externalName != ast->externalName) {
+                  errStream << ast->loc << ": " 
+                            << ast->s << " Identifier was previously "
+                            << " declared with a different external name. "
+                            << "Name here: " << ast->externalName
+                            << "Previous name: " << sym->externalName
+                            << std::endl;
+                  errorFree = false;
+                  break;
+                }  
+              }
+              else {
+                sym->externalName = ast->externalName;
+              }
+            }
+            else {
+              if (sym->externalName.size()) {
+                ast->externalName = sym->externalName;
+              }
+            }
+            
+            /* This is a compatible declaration, do nothing */
+          }
+          else
+            bindIdentDef(ast, env, identType, currLB, flags);
+          break;
+        }
        
       case USE_MODE:
-	{
-	  assert(env);
-	  assert((flags & RSLV_NO_CHK_USE_TYPE) || 
-		 (identType != id_unresolved));
-	  
-	  // When resolving a label, must find it within current
-	  // lambda body or no joy.
-	  
-	  ast->symbolDef = env->getBinding(ast->s);
-	  
-	  // 	if (ast->symbolDef == NULL) 
-	  // 	  cout << " Symdef is NULL for " << ast->s << endl;
-	  
-	  if (!ast->symbolDef) {
-	    // If there is a type-variable, it must be treated as though
-	    // it is a defining occurrence in order to support things
-	    // like:
-	    //
-	    // (define x:'a 100)
-	    //
-	    // However, a further caveat is that a type-variable should
-	    // be considered as a defining occurance ONLY for its first
-	    // opccurance in a defining scope.  This is to support
-	    // definitions like:
-	    //
-	    //   (lambda x:'a (lambda y:'a 0))
-	    //
-	    // That is, a type-variable in this slot should be treated
-	    // as a defining occurance ONLY if it is NOT ALREADY bound
-	    // in the current scope.  Also, it should only be done in
-	    // some cases -- the cases where RSLV_NEW_TV_OK is set in
-	    // flags. Otherwise, things like: (defunion list:ref (Next
-	    // 'a)) will also resolve.
-	
- 	    if (ast->isIdentType(id_tvar) &&
-	       ((flags & RSLV_NEW_TV_OK) || 
-		(ast->flags & TVAR_POLY_SPECIAL))) {
-	      bindIdentDef(ast, env, identType, currLB, flags);
-	      ast->symbolDef = ast;
-	      //errStream << "Created new ident for " << ast->s
-	      //	      << " identType = " 
-	      //              << identTypeToString(ast->identType)
-	      //	      << std::endl;
-	    }
-	    else {
-	      errStream << ast->loc << ": Identifier `"
-			<< ast->s << "' used here, Undefined." 
-			<< std::endl;
-	      
-	      //errStream << "Available bindings are: "
-	      //	  << env->asString()
-	      // 	  << std::endl;
-	      
-	      errorFree = false;
-	      break;
-	    }
-	  }
-	  
-	  assert(ast->symbolDef);
+        {
+          assert(env);
+          assert((flags & RSLV_NO_CHK_USE_TYPE) || 
+                 (identType != id_unresolved));
+          
+          // When resolving a label, must find it within current
+          // lambda body or no joy.
+          
+          ast->symbolDef = env->getBinding(ast->s);
+          
+          //         if (ast->symbolDef == NULL) 
+          //           cout << " Symdef is NULL for " << ast->s << endl;
+          
+          if (!ast->symbolDef) {
+            // If there is a type-variable, it must be treated as though
+            // it is a defining occurrence in order to support things
+            // like:
+            //
+            // (define x:'a 100)
+            //
+            // However, a further caveat is that a type-variable should
+            // be considered as a defining occurance ONLY for its first
+            // opccurance in a defining scope.  This is to support
+            // definitions like:
+            //
+            //   (lambda x:'a (lambda y:'a 0))
+            //
+            // That is, a type-variable in this slot should be treated
+            // as a defining occurance ONLY if it is NOT ALREADY bound
+            // in the current scope.  Also, it should only be done in
+            // some cases -- the cases where RSLV_NEW_TV_OK is set in
+            // flags. Otherwise, things like: (defunion list:ref (Next
+            // 'a)) will also resolve.
+        
+             if (ast->isIdentType(id_tvar) &&
+               ((flags & RSLV_NEW_TV_OK) || 
+                (ast->flags & TVAR_POLY_SPECIAL))) {
+              bindIdentDef(ast, env, identType, currLB, flags);
+              ast->symbolDef = ast;
+              //errStream << "Created new ident for " << ast->s
+              //              << " identType = " 
+              //              << identTypeToString(ast->identType)
+              //              << std::endl;
+            }
+            else {
+              errStream << ast->loc << ": Identifier `"
+                        << ast->s << "' used here, Undefined." 
+                        << std::endl;
+              
+              //errStream << "Available bindings are: "
+              //          << env->asString()
+              //           << std::endl;
+              
+              errorFree = false;
+              break;
+            }
+          }
+          
+          assert(ast->symbolDef);
 
-	  // If we are resolving a use occurrence of a label for
-	  // labeled escape, check that we did not cross a lambda
-	  // boundary.
-	  if ((identType == id_block) &&
-	      !env->getBinding(ast->s, lamLevel)) {
-	    errStream << ast->loc << ": Escape to "
-		      << ast->s << "' must not cross lambda boundary."
-		      << std::endl;
-	    errorFree = false;
-	    break;
-	  }
+          // If we are resolving a use occurrence of a label for
+          // labeled escape, check that we did not cross a lambda
+          // boundary.
+          if ((identType == id_block) &&
+              !env->getBinding(ast->s, lamLevel)) {
+            errStream << ast->loc << ": Escape to "
+                      << ast->s << "' must not cross lambda boundary."
+                      << std::endl;
+            errorFree = false;
+            break;
+          }
 
-	  shared_ptr<AST> def = ast->symbolDef;
+          shared_ptr<AST> def = ast->symbolDef;
 
-	  if ((flags & RSLV_USE_ONLY_PUBLIC) && 
-	     ((env->getFlags(ast->s) & BF_PRIVATE))) {
-	    errStream << ast->loc << ": Identifier `"
-		      << ast->s << "' used here, But NO public definition "
-		      << "found." << std::endl;
-	    errorFree = false;
-	    break;
-	  }
-	
-	  if (((flags & RSLV_NO_CHK_USE_TYPE) == 0) && 
-	     (!def->isIdentType(identType))) {
-	    errStream << ast->loc << ": " << identTypeToString(identType) 
-		      << " `" << ast->s << "' Undefined"
-		      << " [But there is a " 
-		      << identTypeToString(def->identType) 
-		      << " defined]" << std::endl;
-	    errorFree = false;
-	  }
-	
-	  bool ICRviolation = false;
-	  // The closure-conversion pass introduces some carefully 
-	  // crafted code using internal constructors that appear
-	  // incomplete the following restrictions. Since there cannot
-	  // be any incompleteness errors at that point,
-	  // incompleteness checking is disabled. otherwise,
-	  // incompleteness checking proceeds as usual.
-	  if (((flags & RSLV_INCOMPLETE_NO_CHK) == 0) &&
-	      ((env->getFlags(ast->s) & BF_COMPLETE) == 0)) {
-	    if ((flags & RSLV_INCOMPLETE_OK) == 0) {
-	      // If usage of an Incomplete variable is NOT OK, 
-	      // there is a violation, and we are done.
-	      ICRviolation = true;
-	    }
-	    else {		
-	      if (def->isIdentType(id_value)) {
-		assert(lamLevel);
-		  
-		// This is a little subtle.
-		// In cases like:
-		// (define main3 (lambda () 
-		//                       (letrec ((x x))
-		//                          x))
-		// Usage of x in the letrec should not be allowed
-		// even though we are in a lambda.
-		// However, letrec cannot disable RSLV_INCOMPLETE_OK 
-		// because, it is still OK to use main3 inside
-		// the letrec expression
-		// So, here, if the RSLV_INCOMPLETE_OK is true,
-		// we still check that the identifier is defined at 
-		// the right LAMBDA LEVEL. 	   
-		  
-		if (!lamLevel->getBinding(ast->s))
-		  ICRviolation = true;
-	      }
-	    }
-	  }
+          if ((flags & RSLV_USE_ONLY_PUBLIC) && 
+             ((env->getFlags(ast->s) & BF_PRIVATE))) {
+            errStream << ast->loc << ": Identifier `"
+                      << ast->s << "' used here, But NO public definition "
+                      << "found." << std::endl;
+            errorFree = false;
+            break;
+          }
+        
+          if (((flags & RSLV_NO_CHK_USE_TYPE) == 0) && 
+             (!def->isIdentType(identType))) {
+            errStream << ast->loc << ": " << identTypeToString(identType) 
+                      << " `" << ast->s << "' Undefined"
+                      << " [But there is a " 
+                      << identTypeToString(def->identType) 
+                      << " defined]" << std::endl;
+            errorFree = false;
+          }
+        
+          bool ICRviolation = false;
+          // The closure-conversion pass introduces some carefully 
+          // crafted code using internal constructors that appear
+          // incomplete the following restrictions. Since there cannot
+          // be any incompleteness errors at that point,
+          // incompleteness checking is disabled. otherwise,
+          // incompleteness checking proceeds as usual.
+          if (((flags & RSLV_INCOMPLETE_NO_CHK) == 0) &&
+              ((env->getFlags(ast->s) & BF_COMPLETE) == 0)) {
+            if ((flags & RSLV_INCOMPLETE_OK) == 0) {
+              // If usage of an Incomplete variable is NOT OK, 
+              // there is a violation, and we are done.
+              ICRviolation = true;
+            }
+            else {                
+              if (def->isIdentType(id_value)) {
+                assert(lamLevel);
+                  
+                // This is a little subtle.
+                // In cases like:
+                // (define main3 (lambda () 
+                //                       (letrec ((x x))
+                //                          x))
+                // Usage of x in the letrec should not be allowed
+                // even though we are in a lambda.
+                // However, letrec cannot disable RSLV_INCOMPLETE_OK 
+                // because, it is still OK to use main3 inside
+                // the letrec expression
+                // So, here, if the RSLV_INCOMPLETE_OK is true,
+                // we still check that the identifier is defined at 
+                // the right LAMBDA LEVEL.            
+                  
+                if (!lamLevel->getBinding(ast->s))
+                  ICRviolation = true;
+              }
+            }
+          }
 
-	  if (ICRviolation) {
-	    errStream << ast->loc << ": Usage of Identifier `"
-		      << ast->s << "' Violates Incompleteness Restriction." 
-		      << std::endl;
-	    errorFree = false;
-	  }
+          if (ICRviolation) {
+            errStream << ast->loc << ": Usage of Identifier `"
+                      << ast->s << "' Violates Incompleteness Restriction." 
+                      << std::endl;
+            errorFree = false;
+          }
       
-	  if (def->flags & ID_FOR_SWITCH) {
-	    if ((flags & RSLV_SWITCHED_ID_OK) == 0) {
-	      errStream << ast->loc << ": The identifier `"
-			<< ast->s << "' can only appear to the left of a `.'" 
-			<< std::endl;
-	      errorFree = false;
-	    }
-	    else if (flags & RSLV_WITHIN_CATCH_MC) {
-	      errStream << ast->loc << ": The identifier `"
-			<< ast->s << "' cannot be used while"
-			<< " catching multiple exceptions."
-			<< std::endl;
-	      errorFree = false;	      
-	    }
-	  }
+          if (def->flags & ID_FOR_SWITCH) {
+            if ((flags & RSLV_SWITCHED_ID_OK) == 0) {
+              errStream << ast->loc << ": The identifier `"
+                        << ast->s << "' can only appear to the left of a `.'" 
+                        << std::endl;
+              errorFree = false;
+            }
+            else if (flags & RSLV_WITHIN_CATCH_MC) {
+              errStream << ast->loc << ": The identifier `"
+                        << ast->s << "' cannot be used while"
+                        << " catching multiple exceptions."
+                        << std::endl;
+              errorFree = false;              
+            }
+          }
 
-	  ast->identType = def->identType;
-	  ast->flags  |= def->flags;
-	  ast->flags |= def->flags;
-	  ast->flags  &= ~MASK_FLAGS_FROM_USE;
-	  ast->externalName = def->externalName;
+          ast->identType = def->identType;
+          ast->flags  |= def->flags;
+          ast->flags |= def->flags;
+          ast->flags  &= ~MASK_FLAGS_FROM_USE;
+          ast->externalName = def->externalName;
 
-	  /* Make sure tvars are scoped properly */
-	  if (def->isIdentType(id_tvar)) {	    	    
-	    assert(currLB);
-	    
-	    shared_ptr<AST> thisLB = GC_NULL;
-	    if (def->tvarLB->envs.env->isAncestor(currLB->envs.env))
-	      thisLB = currLB;
-	    else
-	      thisLB = def->tvarLB;
-	    
-	    while (thisLB->flags & LBS_PROCESSED) {
-	      thisLB = thisLB->parentLB;
-	      assert(thisLB);
-	    }
-	    
-	    def->tvarLB = thisLB;	  	  
-	  }
+          /* Make sure tvars are scoped properly */
+          if (def->isIdentType(id_tvar)) {                        
+            assert(currLB);
+            
+            shared_ptr<AST> thisLB = GC_NULL;
+            if (def->tvarLB->envs.env->isAncestor(currLB->envs.env))
+              thisLB = currLB;
+            else
+              thisLB = def->tvarLB;
+            
+            while (thisLB->flags & LBS_PROCESSED) {
+              thisLB = thisLB->parentLB;
+              assert(thisLB);
+            }
+            
+            def->tvarLB = thisLB;                    
+          }
 
-	  // 	cout << "Resolved " << ast->s << " at " << ast->loc
-	  // 	     << " to " << def->loc
-	  // 	     << " addr = " << &(*def)
-	  // 	     <<endl;
-	  break;
-	}
+          //         cout << "Resolved " << ast->s << " at " << ast->loc
+          //              << " to " << def->loc
+          //              << " addr = " << &(*def)
+          //              <<endl;
+          break;
+        }
 
       default:
-	{
-	  assert(false);
-	  break;
-	}
+        {
+          assert(false);
+          break;
+        }
       }
 
       break;
@@ -888,88 +888,88 @@ resolve(std::ostream& errStream,
 
       shared_ptr<AST> lhs = ast->child(0);
       {
-	// at_usesel can now have at_usesel as a left-hand element, in
-	// which case we have ifName.StructTypeName.methodName and we
-	// need to recurse on the LHS first.
+        // at_usesel can now have at_usesel as a left-hand element, in
+        // which case we have ifName.StructTypeName.methodName and we
+        // need to recurse on the LHS first.
 
-	if (lhs->astType == at_usesel) {
-	  RESOLVE(lhs, env, lamLevel, USE_MODE, id_interface, 
-		  GC_NULL, flags);
+        if (lhs->astType == at_usesel) {
+          RESOLVE(lhs, env, lamLevel, USE_MODE, id_interface, 
+                  GC_NULL, flags);
 
-	  if (!errorFree)
-	    break;
+          if (!errorFree)
+            break;
 
-	  // ast->astType should now be at_ident.
-	  assert(lhs->astType == at_ident);
-	}
+          // ast->astType should now be at_ident.
+          assert(lhs->astType == at_ident);
+        }
       }
 
       RESOLVE(lhs, env, lamLevel, USE_MODE, idc_usesel_lhs, 
-	      GC_NULL, flags);
+              GC_NULL, flags);
 
       if (!errorFree)
-	break;
+        break;
 
       if (lhs->identType == id_interface) {
-	shared_ptr<AST> iface = lhs;
+        shared_ptr<AST> iface = lhs;
       
-	stringstream lookupStream;
-	lookupStream << ":" << iface->s << ":";
-	std::string lookupName = lookupStream.str();
-	shared_ptr<AST> ifNameAst= aliasEnv->getBinding(lookupName);
-	std::string ifName = ifNameAst->s;
-	assert(ifName != "");
+        stringstream lookupStream;
+        lookupStream << ":" << iface->s << ":";
+        std::string lookupName = lookupStream.str();
+        shared_ptr<AST> ifNameAst= aliasEnv->getBinding(lookupName);
+        std::string ifName = ifNameAst->s;
+        assert(ifName != "");
       
-	shared_ptr<ASTEnvironment > ifenv = iface->symbolDef->envs.env;
+        shared_ptr<ASTEnvironment > ifenv = iface->symbolDef->envs.env;
       
-	if (!ifenv) {
-	  errStream << ast->loc << ": "
-		    << "Internal Compiler Error. "
-		    << "Interface " << ifName
-		    << " needed by "<< iface->s << " has a NULL environment"
-		    << std::endl;
-	  errorFree = false;
-	  break;
-	}
+        if (!ifenv) {
+          errStream << ast->loc << ": "
+                    << "Internal Compiler Error. "
+                    << "Interface " << ifName
+                    << " needed by "<< iface->s << " has a NULL environment"
+                    << std::endl;
+          errorFree = false;
+          break;
+        }
       
-	FQName importedFQN = FQName(ifName, ast->child(1)->s);
+        FQName importedFQN = FQName(ifName, ast->child(1)->s);
       
-	ast->s = lhs->s + FQName::LocalBindingSep + ast->child(1)->s;
-	ast->astType = at_ident;
-	ast->identType = ast->child(1)->identType;
-	ast->flags = ast->child(1)->flags;
-	ast->flags |= ID_IS_GLOBAL;
+        ast->s = lhs->s + FQName::LocalBindingSep + ast->child(1)->s;
+        ast->astType = at_ident;
+        ast->identType = ast->child(1)->identType;
+        ast->flags = ast->child(1)->flags;
+        ast->flags |= ID_IS_GLOBAL;
 
-	ast->children.clear();
+        ast->children.clear();
 
-	// SHOULD THE PUBLIC FLAG BE TAKEN OFF HERE ??
-	RESOLVE(ast, env, lamLevel, mode, identType, currLB,  
-		(flags & (~RSLV_BIND_PUBLIC)));
+        // SHOULD THE PUBLIC FLAG BE TAKEN OFF HERE ??
+        RESOLVE(ast, env, lamLevel, mode, identType, currLB,  
+                (flags & (~RSLV_BIND_PUBLIC)));
 
-	ast->fqn = importedFQN;
+        ast->fqn = importedFQN;
       }
       else if ((lhs->identType == id_struct) ||
-	       (lhs->identType == id_object)) {
-	ast->s = lhs->s + "." + ast->child(1)->s;
-	ast->astType = at_ident;
-	ast->identType = ast->child(1)->identType;
-	ast->flags = ast->child(1)->flags;
-	ast->flags |= ID_IS_GLOBAL;
+               (lhs->identType == id_object)) {
+        ast->s = lhs->s + "." + ast->child(1)->s;
+        ast->astType = at_ident;
+        ast->identType = ast->child(1)->identType;
+        ast->flags = ast->child(1)->flags;
+        ast->flags |= ID_IS_GLOBAL;
 
-	ast->children.clear();
+        ast->children.clear();
 
-	RESOLVE(ast, env, lamLevel, mode, identType, currLB, 
-		flags);
+        RESOLVE(ast, env, lamLevel, mode, identType, currLB, 
+                flags);
 
-	break;
+        break;
       }
       else {
-	errStream << ast->loc << ": "
-		  << "Required struct name or interface name to"
-		  << " the left of this dot."
-		  << std::endl;
-	errorFree = false;
-	break;
+        errStream << ast->loc << ": "
+                  << "Required struct name or interface name to"
+                  << " the left of this dot."
+                  << std::endl;
+        errorFree = false;
+        break;
       }
 
       break;
@@ -981,8 +981,8 @@ resolve(std::ostream& errStream,
 
       // match agt_definition*
       for (size_t c = 1; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
-		GC_NULL, flags);
+        RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
+                GC_NULL, flags);
 
       break;
     }
@@ -991,11 +991,11 @@ resolve(std::ostream& errStream,
     {
       // match agt_definition*
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
-		GC_NULL, flags);
+        RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
+                GC_NULL, flags);
 
-      if ((flags & RSLV_NO_RESOLVE_DECL) == 0)	
-	CHKERR(errorFree, warnUnresRef(errStream, ast, env));
+      if ((flags & RSLV_NO_RESOLVE_DECL) == 0)        
+        CHKERR(errorFree, warnUnresRef(errStream, ast, env));
 
       break;
     }
@@ -1009,33 +1009,33 @@ resolve(std::ostream& errStream,
 
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
-	      id_union, ast, 
-	      (flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)) | RSLV_BIND_PUBLIC);
+              id_union, ast, 
+              (flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)) | RSLV_BIND_PUBLIC);
       if (category->astType == at_refCat)
-	tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
+        tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
 
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
-	      id_tvar, ast,
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              id_tvar, ast,
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
       // category keyword at child(2)
 
       // match at_declares
       RESOLVE(ast->child(3), tmpEnv, lamLevel, NULL_MODE,
-	      id_unresolved, ast,	      
-	      ((flags & (~RSLV_NEW_TV_OK)) & (~RSLV_INCOMPLETE_OK)) | RSLV_WITHIN_DEFUNION);
+              id_unresolved, ast,              
+              ((flags & (~RSLV_NEW_TV_OK)) & (~RSLV_INCOMPLETE_OK)) | RSLV_WITHIN_DEFUNION);
 
     
       // match at_constructors
       RESOLVE(ast->child(4), tmpEnv, lamLevel, DEF_MODE,
-	      idc_uctor, ast, 	      
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              idc_uctor, ast,               
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
       // match at_constraints
       RESOLVE(ast->child(5), tmpEnv, lamLevel, USE_MODE, 
-	      idc_type, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              idc_type, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
       break;
@@ -1050,36 +1050,36 @@ resolve(std::ostream& errStream,
       shared_ptr<AST> category = ast->child(2);
 
       IdentType identType = 
-	(ast->astType == at_defstruct) ? id_struct : id_object;
+        (ast->astType == at_defstruct) ? id_struct : id_object;
 
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
-	      identType, ast,
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK) | RSLV_BIND_PUBLIC);
+              identType, ast,
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK) | RSLV_BIND_PUBLIC);
       if (category->astType == at_refCat)
-	tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
+        tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
       
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
-	      id_tvar, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              id_tvar, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
     
       // category keyword at child(2)
 
       // match at_declares
       RESOLVE(ast->child(3), tmpEnv, lamLevel, NULL_MODE, 
-	      id_unresolved, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              id_unresolved, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       // match at at_fields
       RESOLVE(ast->child(4), tmpEnv, lamLevel, DEF_MODE, 
-	      id_field, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              id_field, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
  
       // match at_constraints
       RESOLVE(ast->child(5), tmpEnv, lamLevel, USE_MODE, 
-	      idc_type, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              idc_type, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
       break;
@@ -1093,25 +1093,25 @@ resolve(std::ostream& errStream,
       ast->envs.env = tmpEnv;
 
       IdentType it = ((ast->astType == at_declstruct) ?
-		      id_struct : id_union);
+                      id_struct : id_union);
       
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DECL_MODE, 
-	      it, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
-	      | RSLV_BIND_PUBLIC);
+              it, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
+              | RSLV_BIND_PUBLIC);
     
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
-	      id_tvar, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              id_tvar, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
       // category keyword at child(2)
       
       // match at_constraints
       RESOLVE(ast->child(3), tmpEnv, lamLevel, USE_MODE, 
-	      idc_type, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              idc_type, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
       break;
@@ -1124,19 +1124,19 @@ resolve(std::ostream& errStream,
 
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DECL_MODE, 
-	      idc_value, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
-	      | RSLV_BIND_PUBLIC);
+              idc_value, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
+              | RSLV_BIND_PUBLIC);
    
       // match at_type
       RESOLVE(ast->child(1), tmpEnv, lamLevel, USE_MODE, 
-	      idc_type, ast, 
-	      flags | (RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              idc_type, ast, 
+              flags | (RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       // match at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
-	      idc_type, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              idc_type, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       env->mergeBindingsFrom(tmpEnv);
       break;
@@ -1150,9 +1150,9 @@ resolve(std::ostream& errStream,
       IdentType it = ((ast->children.size() > 1) ? id_ucon : id_ucon0);
       
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
-	      it, ast,
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
-	      | RSLV_BIND_PUBLIC);
+              it, ast,
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
+              | RSLV_BIND_PUBLIC);
       // The exception value is defined and is complete
       
       // match at_fields+
@@ -1161,22 +1161,22 @@ resolve(std::ostream& errStream,
 
       names.insert(ast->child(0)->s);
       for (size_t c = 1; c < ast->children.size(); c++) {
-	shared_ptr<AST> field = ast->child(c);
-	RESOLVE(field, tmpEnv, lamLevel, USE_MODE, 
-		idc_type, ast, 
-		flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+        shared_ptr<AST> field = ast->child(c);
+        RESOLVE(field, tmpEnv, lamLevel, USE_MODE, 
+                idc_type, ast, 
+                flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
-	pr = names.insert(field->child(0)->s);
+        pr = names.insert(field->child(0)->s);
 
-	if (!pr.second) {
-	  errStream << field->child(0)->loc << ": "
-		    << "field name `" << field->child(0)->s
-		    << "' conflicts with another field / "		
-		    << "constructor definition in exception "
-		    << ast->child(0)->s
-		    << std::endl;
-	  errorFree = false;
-	}	      
+        if (!pr.second) {
+          errStream << field->child(0)->loc << ": "
+                    << "field name `" << field->child(0)->s
+                    << "' conflicts with another field / "                
+                    << "constructor definition in exception "
+                    << ast->child(0)->s
+                    << std::endl;
+          errorFree = false;
+        }              
       }
 
       env->mergeBindingsFrom(tmpEnv);
@@ -1203,31 +1203,31 @@ resolve(std::ostream& errStream,
       ast->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
       
       if (ast->astType == at_recdef) {
-	// Binding patterns must be in scope.
-	// match agt_bindingPattern
-	RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
-		id_value, ast, 
-		flags | (RSLV_NEW_TV_OK) | RSLV_BIND_PUBLIC);
+        // Binding patterns must be in scope.
+        // match agt_bindingPattern
+        RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
+                id_value, ast, 
+                flags | (RSLV_NEW_TV_OK) | RSLV_BIND_PUBLIC);
       }
 
       // match agt_expr
       RESOLVE(ast->child(1), tmpEnv, lamLevel, USE_MODE, 
-	      idc_value, ast, 
-	      flags | (RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              idc_value, ast, 
+              flags | (RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       if (ast->astType == at_define) {
-	// Binding patterns not in scope within expr, so handle them
-	// later.
-	// match agt_bindingPattern
-	RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
-		id_value, ast, 
-		flags | (RSLV_NEW_TV_OK) | RSLV_BIND_PUBLIC);
+        // Binding patterns not in scope within expr, so handle them
+        // later.
+        // match agt_bindingPattern
+        RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
+                id_value, ast, 
+                flags | (RSLV_NEW_TV_OK) | RSLV_BIND_PUBLIC);
       }
 
       // match at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
-	      idc_type, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));    
+              idc_type, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));    
       
       /* Mark the present identifier closed wrt mutability */
       ast->child(0)->child(0)->flags |= ID_MUT_CLOSED;
@@ -1243,32 +1243,32 @@ resolve(std::ostream& errStream,
 
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
-	      id_typeclass, ast,
-	      (flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
-	       | RSLV_BIND_PUBLIC));
+              id_typeclass, ast,
+              (flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
+               | RSLV_BIND_PUBLIC));
       
       // match at_tvlist
       RESOLVE(ast->child(1), tmpEnv, lamLevel, DEF_MODE, 
-	      idc_type, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              idc_type, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
 
       // match at_tc_decls
       RESOLVE(ast->child(2), tmpEnv, lamLevel, USE_MODE, 
-	      idc_type, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              idc_type, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       // Skip the open/closed node.
 
       // match at method_decls
       RESOLVE(ast->child(4), tmpEnv, lamLevel, USE_MODE, 
-	      idc_type, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));      
+              idc_type, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));      
 
       // match at constraints
       RESOLVE(ast->child(5), tmpEnv, lamLevel, USE_MODE, 
-	      idc_type, ast, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));      
+              idc_type, ast, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));      
 
       tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
       env->mergeBindingsFrom(tmpEnv);
@@ -1279,8 +1279,8 @@ resolve(std::ostream& errStream,
     {
       // match at agt_tcdecl+ 
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, 
-		USE_MODE, identType, currLB,  flags);
+        RESOLVE(ast->child(c), env, lamLevel, 
+                USE_MODE, identType, currLB,  flags);
       
       break;
     }
@@ -1289,11 +1289,11 @@ resolve(std::ostream& errStream,
     {
       // match at_tvlist
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, flags);
+              idc_type, currLB, flags);
       
       // match agt_tvar
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, flags);  
+              idc_type, currLB, flags);  
       break;
     }
 
@@ -1301,12 +1301,12 @@ resolve(std::ostream& errStream,
     {
       // match at agt_var
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_typeclass, currLB, flags);
+              id_typeclass, currLB, flags);
 
       // match at agt_type+
       for (size_t c = 1; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		idc_type, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
+                idc_type, currLB, flags);
 
       break;
     }
@@ -1315,8 +1315,8 @@ resolve(std::ostream& errStream,
     {
       // match at at_method_decl+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, 
-		DEF_MODE, id_tcmethod, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, 
+                DEF_MODE, id_tcmethod, currLB, flags);
       
       break;
     }
@@ -1325,13 +1325,13 @@ resolve(std::ostream& errStream,
     {
       // match at at_ident
       RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
-	      id_tcmethod, currLB,
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
-	      | RSLV_BIND_PUBLIC);
+              id_tcmethod, currLB,
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
+              | RSLV_BIND_PUBLIC);
       
       // match at at_fn
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, flags);
+              idc_type, currLB, flags);
       
       break;
     }
@@ -1343,7 +1343,7 @@ resolve(std::ostream& errStream,
 
       // match at at_tcapp
       RESOLVE(ast->child(0), tmpEnv, lamLevel, 
-	      USE_MODE, idc_type, ast, flags | RSLV_NEW_TV_OK);
+              USE_MODE, idc_type, ast, flags | RSLV_NEW_TV_OK);
 
       /// If the type class is marked ":closed", then it is required
       /// that all instance definitions appear in the same interface or
@@ -1355,28 +1355,28 @@ resolve(std::ostream& errStream,
       /// implementation. Examples of this include
 
       if (errorFree) {
-	shared_ptr<AST> tcName = ast->child(0)->child(0);
-	shared_ptr<AST> tcSym = tcName->symbolDef;
-	shared_ptr<AST> tcDef = tcSym->defForm;
-	bool isClosed = (tcDef->child(3)->astType == at_closed);
+        shared_ptr<AST> tcName = ast->child(0)->child(0);
+        shared_ptr<AST> tcSym = tcName->symbolDef;
+        shared_ptr<AST> tcDef = tcSym->defForm;
+        bool isClosed = (tcDef->child(3)->astType == at_closed);
 
-	if (isClosed && tcSym->fqn.iface != env->uocName) {
-	  errStream << ast->loc
-		    << ": Type class " << tcSym->fqn
-		    << " is closed. Instances may not be defined by other"
-		    << " modules or interfaces."
-		    << std::endl;
-	  errorFree = false;
-	}
+        if (isClosed && tcSym->fqn.iface != env->uocName) {
+          errStream << ast->loc
+                    << ": Type class " << tcSym->fqn
+                    << " is closed. Instances may not be defined by other"
+                    << " modules or interfaces."
+                    << std::endl;
+          errorFree = false;
+        }
       }
 
       // match at at_tcmethods
       RESOLVE(ast->child(1), tmpEnv, lamLevel, 
-	      USE_MODE, idc_value, ast, flags);
+              USE_MODE, idc_value, ast, flags);
       
       // match at at_constraints
       RESOLVE(ast->child(2), tmpEnv, lamLevel, 
-	      USE_MODE, idc_type, ast, flags | RSLV_NEW_TV_OK);
+              USE_MODE, idc_type, ast, flags | RSLV_NEW_TV_OK);
       break;
     }
 
@@ -1384,30 +1384,30 @@ resolve(std::ostream& errStream,
     { 
       // match at expr+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, 
-		USE_MODE, idc_value, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, 
+                USE_MODE, idc_value, currLB, flags);
       
       // Make sure that each method is defined at most once (no
       // duplicates). 
       
       //std::cerr << ast->loc << ": Processing :" 
-      //  	  << ast->asString() << std::endl;
+      //            << ast->asString() << std::endl;
       
       for (size_t i = 0; i < ast->children.size(); i++) {
-	shared_ptr<AST> ith_bind = ast->child(i);
+        shared_ptr<AST> ith_bind = ast->child(i);
 
-	for (size_t j = i+1; j < ast->children.size(); j++) {
-	  shared_ptr<AST> jth_bind = ast->child(j);
+        for (size_t j = i+1; j < ast->children.size(); j++) {
+          shared_ptr<AST> jth_bind = ast->child(j);
 
-	  if(ith_bind->child(0)->s == jth_bind->child(0)->s) {
-	    errStream << jth_bind->loc 
-		      << ": Duplicate method definition for "
-		      << ith_bind->child(0)->s
-		      << std::endl;
-	    errorFree = false;
-	    break;
-	  }
-	}
+          if(ith_bind->child(0)->s == jth_bind->child(0)->s) {
+            errStream << jth_bind->loc 
+                      << ": Duplicate method definition for "
+                      << ith_bind->child(0)->s
+                      << std::endl;
+            errorFree = false;
+            break;
+          }
+        }
       }
       
       // Checking that all methods are being defined, and that only
@@ -1424,8 +1424,8 @@ resolve(std::ostream& errStream,
     { 
       // match at expr+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, 
-		USE_MODE, idc_value, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, 
+                USE_MODE, idc_value, currLB, flags);
       break;
     }
 
@@ -1440,32 +1440,32 @@ resolve(std::ostream& errStream,
       shared_ptr<ASTEnvironment > ifEnv = ifAst->envs.env;
 
       for (size_t i = 1; i < ast->children.size(); i++) {
-	shared_ptr<AST> provideName=ast->child(i);
-	shared_ptr<Binding<AST> > bndg = ifEnv->doGetBinding(provideName->s);
+        shared_ptr<AST> provideName=ast->child(i);
+        shared_ptr<Binding<AST> > bndg = ifEnv->doGetBinding(provideName->s);
         if (!bndg) {
-	  errStream << ast->loc << ": "
-		    << provideName->s
-		    << " not found in interface "
-		    << ifAst->s
-		    << std::endl;
-	  
-	  errorFree = false;
-	  break;
-	}
+          errStream << ast->loc << ": "
+                    << provideName->s
+                    << " not found in interface "
+                    << ifAst->s
+                    << std::endl;
+          
+          errorFree = false;
+          break;
+        }
 
-	if (!bndg->val->isDecl) {
-	  errStream << ast->loc << ": Cannot provide "
-		    << provideName->s
-		    << " in interface "
-		    << ifAst->s
-		    << ", which is defined in the interface."
-		    << std::endl;
-	  
-	  errorFree = false;
-	  break;
-	}
+        if (!bndg->val->isDecl) {
+          errStream << ast->loc << ": Cannot provide "
+                    << provideName->s
+                    << " in interface "
+                    << ifAst->s
+                    << ", which is defined in the interface."
+                    << std::endl;
+          
+          errorFree = false;
+          break;
+        }
 
-	bndg->flags |= BF_PROVIDING;
+        bndg->flags |= BF_PROVIDING;
       }
 
       break;
@@ -1480,21 +1480,21 @@ resolve(std::ostream& errStream,
 
       // import ident ifname
       shared_ptr<ASTEnvironment > tmpEnv = env->newScope();
-	//	new ASTEnvironment(ifAst->envs.env->uocName);
+        //        new ASTEnvironment(ifAst->envs.env->uocName);
 
       ast->envs.env = tmpEnv;
       
       if (ifAst->s == env->uocName) {
-	errStream << ast->loc << ": "
-		  << "Cannot import an undefined interface. "
-		  << std::endl;
-	
-	errorFree = false;
-	break;
+        errStream << ast->loc << ": "
+                  << "Cannot import an undefined interface. "
+                  << std::endl;
+        
+        errorFree = false;
+        break;
       }
       
       RESOLVE(idAst, tmpEnv, lamLevel, DEF_MODE,
-	      id_interface, GC_NULL, flags);
+              id_interface, GC_NULL, flags);
 
       // For every (importAs local global) add to the alias
       // environment, the mapping :local: -> ifAst which 
@@ -1513,8 +1513,8 @@ resolve(std::ostream& errStream,
 
       // The interface name must not be exported
       env->setFlags(idAst->s,
-		    ((env->getFlags(idAst->s)) |
-		     BF_PRIVATE)); 
+                    ((env->getFlags(idAst->s)) |
+                     BF_PRIVATE)); 
    
       idAst->envs.env = ifAst->envs.env;
       idAst->envs.gamma = ifAst->envs.gamma;
@@ -1534,71 +1534,71 @@ resolve(std::ostream& errStream,
       shared_ptr<AST> ifAst = ast->child(0);
 
       if (ifAst->s == env->uocName) {
-	errStream << ast->loc << ": "
-		  << "Cannot import an undefined interface. "
-		  << std::endl;
-	
-	errorFree = false;
-	break;
+        errStream << ast->loc << ": "
+                  << "Cannot import an undefined interface. "
+                  << std::endl;
+        
+        errorFree = false;
+        break;
       }
 
       importIfBinding(errStream, aliasEnv, ifAst);
 
       if (ast->children.size() == 1) {
-	// This is an import-all form
-	aliasPublicBindings(std::string(), aliasEnv, ifAst->envs.env, tmpEnv);
+        // This is an import-all form
+        aliasPublicBindings(std::string(), aliasEnv, ifAst->envs.env, tmpEnv);
       }
       else {
-	// Need to import only certain bindings
-	for (size_t c = 1; c < ast->children.size(); c++) {
-	  shared_ptr<AST> alias = ast->child(c);
-	  shared_ptr<AST> localName = alias->child(0);
-	  shared_ptr<AST> pubName = alias->child(1);
-	
-	  RESOLVE(pubName, ifAst->envs.env, lamLevel, USE_MODE,
-		  id_unresolved, currLB, 
-		  ((flags & (~RSLV_NEW_TV_OK))) | RSLV_NO_CHK_USE_TYPE);
-	
-	  if (!errorFree)
-	    break;
+        // Need to import only certain bindings
+        for (size_t c = 1; c < ast->children.size(); c++) {
+          shared_ptr<AST> alias = ast->child(c);
+          shared_ptr<AST> localName = alias->child(0);
+          shared_ptr<AST> pubName = alias->child(1);
+        
+          RESOLVE(pubName, ifAst->envs.env, lamLevel, USE_MODE,
+                  id_unresolved, currLB, 
+                  ((flags & (~RSLV_NEW_TV_OK))) | RSLV_NO_CHK_USE_TYPE);
+        
+          if (!errorFree)
+            break;
 
-	  // Enforce the "one alias" rule.
-	  shared_ptr<Binding<AST> > bndg = 
-	    ifAst->envs.env->doGetBinding(pubName->s);
+          // Enforce the "one alias" rule.
+          shared_ptr<Binding<AST> > bndg = 
+            ifAst->envs.env->doGetBinding(pubName->s);
 
-	  std::string pubFQN = bndg->val->fqn.asString();
+          std::string pubFQN = bndg->val->fqn.asString();
 
-	  shared_ptr<AST> oldAlias = aliasEnv->getBinding(pubFQN);
-	  if (oldAlias) {
-	    errStream << alias->loc << ": The public identifier "
-		      << pubFQN
-		      << ", being aliased here to " 
-		      << pubName->s
-		      << ", was previously aliased to "
-		      << oldAlias->s
-		      << " at "
-		      << oldAlias->loc
-		      << std::endl;
-	    errorFree = false;
-	    break;
-	  }
-	    
-	  aliasEnv->addBinding(pubFQN, localName);
+          shared_ptr<AST> oldAlias = aliasEnv->getBinding(pubFQN);
+          if (oldAlias) {
+            errStream << alias->loc << ": The public identifier "
+                      << pubFQN
+                      << ", being aliased here to " 
+                      << pubName->s
+                      << ", was previously aliased to "
+                      << oldAlias->s
+                      << " at "
+                      << oldAlias->loc
+                      << std::endl;
+            errorFree = false;
+            break;
+          }
+            
+          aliasEnv->addBinding(pubFQN, localName);
 
-	  shared_ptr<AST> oldDef = env->getBinding(localName->s);
-	  if (oldDef) {
-	    errStream << alias->loc << ": Conflict for alias definition"
-		      << localName->s
-		      << ". Previously defined at "
-		      << oldDef->loc
-		      << std::endl;
-	    errorFree = false;
-	    break;
-	  }
-	
-	  tmpEnv->addBinding(localName->s, pubName->symbolDef);
-	  tmpEnv->setFlags(localName->s, BF_PRIVATE);
-	}
+          shared_ptr<AST> oldDef = env->getBinding(localName->s);
+          if (oldDef) {
+            errStream << alias->loc << ": Conflict for alias definition"
+                      << localName->s
+                      << ". Previously defined at "
+                      << oldDef->loc
+                      << std::endl;
+            errorFree = false;
+            break;
+          }
+        
+          tmpEnv->addBinding(localName->s, pubName->symbolDef);
+          tmpEnv->setFlags(localName->s, BF_PRIVATE);
+        }
       }
 
       env->mergeBindingsFrom(tmpEnv);
@@ -1615,8 +1615,8 @@ resolve(std::ostream& errStream,
     {
       // match at_declare*
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, NULL_MODE, identType,  
-		currLB,  flags);
+        RESOLVE(ast->child(c), env, lamLevel, NULL_MODE, identType,  
+                currLB,  flags);
 
       break;
     }
@@ -1628,27 +1628,27 @@ resolve(std::ostream& errStream,
       // dealt with by hand.
 
       if (ast->child(0)->s == "stateful") {
-	if (!(flags & RSLV_IS_INTERFACE)) {
-	  errStream << ast->child(0)->loc 
-		    << ": Only Interfaces can be declared to be stateful"
-		    << std::endl;
-	  errorFree = false;
-	}
+        if (!(flags & RSLV_IS_INTERFACE)) {
+          errStream << ast->child(0)->loc 
+                    << ": Only Interfaces can be declared to be stateful"
+                    << std::endl;
+          errorFree = false;
+        }
       }
 
       if (ast->child(0)->s == "tag-type") {
-	if (!(flags & RSLV_WITHIN_DEFUNION)) {
-	  errStream << ast->child(0)->loc 
-		    << ": tag-type can only occur within a defunion"
-		    << std::endl;
-	  errorFree = false;
-	} 
-      }	
-	    
+        if (!(flags & RSLV_WITHIN_DEFUNION)) {
+          errStream << ast->child(0)->loc 
+                    << ": tag-type can only occur within a defunion"
+                    << std::endl;
+          errorFree = false;
+        } 
+      }        
+            
       // match agt_type?
       if (ast->children.size() > 1) {
-	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		idc_type, currLB, flags);
+        RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
+                idc_type, currLB, flags);
       }
 
       break;
@@ -1658,8 +1658,8 @@ resolve(std::ostream& errStream,
     {
       // match agt_tvar*
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, mode, identType, 
-		currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, mode, identType, 
+                currLB, flags);
 
       break;
     }
@@ -1673,35 +1673,35 @@ resolve(std::ostream& errStream,
       // No problem with usesel here. select cannot appear in
       // this context.
       if (ast->child(0)->child(0)->astType == at_usesel) {
-	ifName = ast->child(0)->child(0)->child(0)->s;
-	varConst = true;
+        ifName = ast->child(0)->child(0)->child(0)->s;
+        varConst = true;
       }
       
       // FIX: Isn't this stale now? Aren't constructor names
       // now constrained to unqualified idents?
       for (size_t c = 0; c < ast->children.size(); c++) {
-	if (varConst) {
-	  if (ast->child(c)->child(0)->astType != at_usesel ||
-	     ast->child(c)->child(0)->child(0)->s != ifName) {
-	    errStream << ast->child(c)->child(0)->loc << ": "
-		      << " All Constructors of a Union declaration must "
-		      << "belong to the same interface "
-		      << std::endl;
-	    errorFree = false;
-	  }
-	}
-	else {
-	  if (ast->child(c)->child(0)->astType == at_usesel) {
-	    errStream << ast->child(c)->child(0)->loc << ": "
-		      << " All Constructors of a Union declaration must "
-		      << "belong to the same compilation Unit "
-		      << std::endl;
-	    errorFree = false;
-	  }
-	}
-	
-	RESOLVE(ast->child(c), env, lamLevel, NULL_MODE, identType, 
-		currLB, flags);
+        if (varConst) {
+          if (ast->child(c)->child(0)->astType != at_usesel ||
+             ast->child(c)->child(0)->child(0)->s != ifName) {
+            errStream << ast->child(c)->child(0)->loc << ": "
+                      << " All Constructors of a Union declaration must "
+                      << "belong to the same interface "
+                      << std::endl;
+            errorFree = false;
+          }
+        }
+        else {
+          if (ast->child(c)->child(0)->astType == at_usesel) {
+            errStream << ast->child(c)->child(0)->loc << ": "
+                      << " All Constructors of a Union declaration must "
+                      << "belong to the same compilation Unit "
+                      << std::endl;
+            errorFree = false;
+          }
+        }
+        
+        RESOLVE(ast->child(c), env, lamLevel, NULL_MODE, identType, 
+                currLB, flags);
       }
       break;
     }
@@ -1710,10 +1710,10 @@ resolve(std::ostream& errStream,
     {
       // match at_ident
       IdentType it = ((ast->children.size() > 1) ? 
-		      id_ucon : id_ucon0);
+                      id_ucon : id_ucon0);
       
       RESOLVE(ast->child(0), env, lamLevel, DEF_MODE,
-	      it, currLB, flags | RSLV_BIND_PUBLIC);
+              it, currLB, flags | RSLV_BIND_PUBLIC);
             
       pair< set<string>::iterator, bool > pr;
       set<string> names;
@@ -1721,21 +1721,21 @@ resolve(std::ostream& errStream,
       // Resolve each field name, test for collisions:
 
       for (size_t c = 1; c < ast->children.size(); c++) {
-	shared_ptr<AST> fld = ast->child(c);
-	RESOLVE(fld, env, lamLevel, USE_MODE, identType,
-		currLB, flags); 
+        shared_ptr<AST> fld = ast->child(c);
+        RESOLVE(fld, env, lamLevel, USE_MODE, identType,
+                currLB, flags); 
 
-	if (fld->astType != at_field)
-	  continue;
-	
-	pr = names.insert(fld->child(0)->s);
-	if (!pr.second) {
-	  errStream << ast->loc << ": "
-		    << "Duplicate field label: "
-		    << fld->child(0)->s
-		    << std::endl;
-	  errorFree = false;
-	}
+        if (fld->astType != at_field)
+          continue;
+        
+        pr = names.insert(fld->child(0)->s);
+        if (!pr.second) {
+          errStream << ast->loc << ": "
+                    << "Duplicate field label: "
+                    << fld->child(0)->s
+                    << std::endl;
+          errorFree = false;
+        }
       }
       break;
     }
@@ -1749,22 +1749,22 @@ resolve(std::ostream& errStream,
       set<string> names;
 
       for (size_t c = 0; c < ast->children.size(); c++) {
-	shared_ptr<AST> fld = ast->child(c);
-	RESOLVE(fld, env, lamLevel, USE_MODE, identType,
-		currLB, flags); 
+        shared_ptr<AST> fld = ast->child(c);
+        RESOLVE(fld, env, lamLevel, USE_MODE, identType,
+                currLB, flags); 
 
-	if (fld->astType == at_fill)
-	  // This entry has no name.
-	  continue;
-	
-	pr = names.insert(fld->child(0)->s);
-	if (!pr.second) {
-	  errStream << ast->loc << ": "
-		    << "Duplicate field/method name: "
-		    << fld->child(0)->s
-		    << std::endl;
-	  errorFree = false;
-	}
+        if (fld->astType == at_fill)
+          // This entry has no name.
+          continue;
+        
+        pr = names.insert(fld->child(0)->s);
+        if (!pr.second) {
+          errStream << ast->loc << ": "
+                    << "Duplicate field/method name: "
+                    << fld->child(0)->s
+                    << std::endl;
+          errorFree = false;
+        }
       }
       break;
     }
@@ -1777,8 +1777,8 @@ resolve(std::ostream& errStream,
 
       // match agt_type:
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              idc_type, currLB, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
       break;
     }
@@ -1787,13 +1787,13 @@ resolve(std::ostream& errStream,
     {
       // match agt_type?
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, 
-	      flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              idc_type, currLB, 
+              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
       if(ast->children.size() == 2)
-	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		idc_type, currLB, 
-		flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+        RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
+                idc_type, currLB, 
+                flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
       break;
     }
@@ -1802,12 +1802,12 @@ resolve(std::ostream& errStream,
     {
       // match at_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, flags);
+              idc_type, currLB, flags);
 
       // match at_intLiteral
       RESOLVE(ast->child(1), env, lamLevel, NULL_MODE, 
-	      identType, currLB,  
-	      flags & (~RSLV_INCOMPLETE_OK));
+              identType, currLB,  
+              flags & (~RSLV_INCOMPLETE_OK));
       break;
     }
 
@@ -1816,8 +1816,8 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, 
-	      flags | (RSLV_INCOMPLETE_OK));
+              idc_type, currLB, 
+              flags | (RSLV_INCOMPLETE_OK));
       break;
     }
 
@@ -1825,8 +1825,8 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, 
-	      flags | (RSLV_INCOMPLETE_OK));
+              idc_type, currLB, 
+              flags | (RSLV_INCOMPLETE_OK));
       break;
     }
 
@@ -1834,8 +1834,8 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, 
-	      flags & (~RSLV_INCOMPLETE_OK));
+              idc_type, currLB, 
+              flags & (~RSLV_INCOMPLETE_OK));
 
       break;
     }
@@ -1845,11 +1845,11 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, flags);
+              idc_type, currLB, flags);
 
       // match agt_type
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, flags);
+              idc_type, currLB, flags);
     
       break;
     }
@@ -1858,8 +1858,8 @@ resolve(std::ostream& errStream,
     {
       // match agt_type*
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		idc_type, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
+                idc_type, currLB, flags);
 
       break;
     }
@@ -1875,16 +1875,16 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, flags);
+              idc_type, currLB, flags);
 
       // match at_intLiteral
       RESOLVE(ast->child(1), env, lamLevel, NULL_MODE, identType,
-	      currLB, flags); 
+              currLB, flags); 
       if (ast->child(1)->litValue.i < 0) {
-	errStream << ast->child(1)->loc << ": "
-		  << "Array index cannot be negative." 
-		  << std::endl;
-	errorFree = false;
+        errStream << ast->child(1)->loc << ": "
+                  << "Array index cannot be negative." 
+                  << std::endl;
+        errorFree = false;
       }
 
       break;
@@ -1894,12 +1894,12 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, flags);
+              idc_type, currLB, flags);
 
       // match at_intLiteral?
       if (ast->children.size() > 1) {
-	RESOLVE(ast->child(1), env, lamLevel, NULL_MODE, identType,
-		currLB, flags); 
+        RESOLVE(ast->child(1), env, lamLevel, NULL_MODE, identType,
+                currLB, flags); 
       }
 
       break;
@@ -1920,7 +1920,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, flags);
+              idc_type, currLB, flags);
 
       break;
     }
@@ -1929,8 +1929,8 @@ resolve(std::ostream& errStream,
     {
       // match agt_var agt_tvar+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		idc_type, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
+                idc_type, currLB, flags);
 
       break;
     }
@@ -1938,17 +1938,17 @@ resolve(std::ostream& errStream,
   case at_qualType:
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, flags);      
+              idc_type, currLB, flags);      
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, flags);      
+              idc_type, currLB, flags);      
       break;
     }
 
   case at_constraints:
     {
       for (size_t c=0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		idc_type, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
+                idc_type, currLB, flags);
       break;
     }    
     
@@ -1956,13 +1956,13 @@ resolve(std::ostream& errStream,
     {
       // match agt_var
       RESOLVE(ast->child(0), env, lamLevel, mode, identType,
-	      currLB, flags); 
+              currLB, flags); 
       
       // Type Qualifications ONLY in Binding Patterns
       // match agt_type?
       if (ast->children.size() > 1) {
-	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, idc_type,
-		currLB, flags); 
+        RESOLVE(ast->child(1), env, lamLevel, USE_MODE, idc_type,
+                currLB, flags); 
       }
     
       break;
@@ -1972,10 +1972,10 @@ resolve(std::ostream& errStream,
     {
       // match agt_eform
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
 
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, flags);
+              idc_type, currLB, flags);
     
       break;
     }
@@ -1984,10 +1984,10 @@ resolve(std::ostream& errStream,
     {
       // match agt_var
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
       // match agt_eform
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
       break;
     }
 
@@ -2000,8 +2000,8 @@ resolve(std::ostream& errStream,
     {
       // match at_type, at_fn+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		idc_type, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
+                idc_type, currLB, flags);
       break;
     }
 
@@ -2009,9 +2009,9 @@ resolve(std::ostream& errStream,
     {
       // match at_type, at_fn+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		idc_value, currLB, 
-		flags | RSLV_INCOMPLETE_OK);
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
+                idc_value, currLB, 
+                flags | RSLV_INCOMPLETE_OK);
       break;
     }
 
@@ -2019,7 +2019,7 @@ resolve(std::ostream& errStream,
     {
       // match at_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
       break;
     }
 
@@ -2028,8 +2028,8 @@ resolve(std::ostream& errStream,
     {
       // match at_type, at_fn+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		id_value, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
+                id_value, currLB, flags);
       break;
     }
     
@@ -2038,11 +2038,11 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
 
       // match agt_expr
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
 
       break;
     }
@@ -2052,8 +2052,8 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, idc_value,
-		currLB, flags); 
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, idc_value,
+                currLB, flags); 
 
       break;
     }
@@ -2062,8 +2062,8 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, idc_value,
-		currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, idc_value,
+                currLB, flags);
 
       break;
     }
@@ -2071,28 +2071,28 @@ resolve(std::ostream& errStream,
   case at_block:
     {
       RESOLVE(ast->child(0), env, lamLevel, DEF_MODE,
-	      id_block, currLB, flags);
+              id_block, currLB, flags);
       // I suspect that LABEL needs to be treated as a let boundary,
       // in the sense that definitions within label must not float 
       // outside it. Given this, is currLB correct?
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE,
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
       break;
     }
 
   case at_return_from:
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE,
-	      id_block, currLB, flags);
+              id_block, currLB, flags);
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE,
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
       break;
     }
 
   case at_fqCtr:
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, flags);
+              idc_type, currLB, flags);
      
       // Second Component handled by the type checker
       break;
@@ -2101,7 +2101,7 @@ resolve(std::ostream& errStream,
   case at_sel_ctr:
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags );
+              idc_value, currLB, flags );
 
       // Second Component handled by the type checker
       break;
@@ -2114,43 +2114,43 @@ resolve(std::ostream& errStream,
       
       // CAREFUL: this might be a usesel
       if (lhs->astType == at_ident || lhs->astType == at_usesel) {
-	// Strictly speaking, RSLV_SWITCHED_ID_OK should only be
-	// passed if the lhs->astType is at_ident. It is harmless here
-	// because if lhs->astType is at_usesel, we know by
-	// construction that the LHS cannot possibly be a switched ID,
-	// so the resolver cannot return a boogered answer in that
-	// case.
-	
-	RESOLVE(lhs, env, lamLevel, USE_MODE, identType, currLB, 
-		flags | RSLV_NO_CHK_USE_TYPE | RSLV_SWITCHED_ID_OK);
-	
-	// If ast->child(0) was a at_usesel, now it would have
-	// turned into at_ident.
-	if (lhs->isIdentType(id_interface)) {
-	  ast->astType = at_usesel;
-	  // Recursively call RESOLVE on ourselves to process the
-	  // at_usesel
-	  RESOLVE(ast, env, lamLevel, USE_MODE, identType, currLB, flags);
-	} 
-	else if (lhs->isIdentType(id_union)) {
-	  // This is UNIONNAME.LEGNAME.
-	  ast->astType = at_fqCtr;
-	  RESOLVE(ast, env, lamLevel, USE_MODE, idc_type, currLB, flags);
-	}
-	else if (!lhs->isIdentType(id_value)) {
-	  errStream << lhs->loc 
-		    << ": At selection, Identifier "
-		    << " `" << lhs->s << "'" 
-		    << " is not an imported interface"
-		    << " or a value, but a " 
-		    << identTypeToString(lhs->identType) 
-		    << "." << std::endl;
-	  errorFree = false;
-	  break;
-	}
+        // Strictly speaking, RSLV_SWITCHED_ID_OK should only be
+        // passed if the lhs->astType is at_ident. It is harmless here
+        // because if lhs->astType is at_usesel, we know by
+        // construction that the LHS cannot possibly be a switched ID,
+        // so the resolver cannot return a boogered answer in that
+        // case.
+        
+        RESOLVE(lhs, env, lamLevel, USE_MODE, identType, currLB, 
+                flags | RSLV_NO_CHK_USE_TYPE | RSLV_SWITCHED_ID_OK);
+        
+        // If ast->child(0) was a at_usesel, now it would have
+        // turned into at_ident.
+        if (lhs->isIdentType(id_interface)) {
+          ast->astType = at_usesel;
+          // Recursively call RESOLVE on ourselves to process the
+          // at_usesel
+          RESOLVE(ast, env, lamLevel, USE_MODE, identType, currLB, flags);
+        } 
+        else if (lhs->isIdentType(id_union)) {
+          // This is UNIONNAME.LEGNAME.
+          ast->astType = at_fqCtr;
+          RESOLVE(ast, env, lamLevel, USE_MODE, idc_type, currLB, flags);
+        }
+        else if (!lhs->isIdentType(id_value)) {
+          errStream << lhs->loc 
+                    << ": At selection, Identifier "
+                    << " `" << lhs->s << "'" 
+                    << " is not an imported interface"
+                    << " or a value, but a " 
+                    << identTypeToString(lhs->identType) 
+                    << "." << std::endl;
+          errorFree = false;
+          break;
+        }
       }
       else {
-	RESOLVE(lhs, env, lamLevel, USE_MODE, idc_value, currLB, flags);
+        RESOLVE(lhs, env, lamLevel, USE_MODE, idc_value, currLB, flags);
       }
       
       // match at_ident
@@ -2167,7 +2167,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+              id_value, currLB, flags);
 
       break;
     }
@@ -2178,11 +2178,11 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+              id_value, currLB, flags);
 
       // match agt_expr
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+              id_value, currLB, flags);
 
       break;
     }
@@ -2195,16 +2195,16 @@ resolve(std::ostream& errStream,
       // match agt_bindingPatterns
       shared_ptr<AST> argVec = ast->child(0);
       for (size_t c = 0; c < argVec->children.size(); c++) {
-	RESOLVE(argVec->child(c), lamEnv, lamEnv, DEF_MODE, 
-		id_value, currLB, flags);
-	shared_ptr<AST> id = argVec->child(c)->child(0);
-	lamEnv->setFlags(id->s, BF_COMPLETE);
+        RESOLVE(argVec->child(c), lamEnv, lamEnv, DEF_MODE, 
+                id_value, currLB, flags);
+        shared_ptr<AST> id = argVec->child(c)->child(0);
+        lamEnv->setFlags(id->s, BF_COMPLETE);
       }
       
       // match agt_expr
       RESOLVE(ast->child(1), lamEnv, lamEnv, USE_MODE, 
-	      idc_value, currLB, 
-	      flags | (RSLV_INCOMPLETE_OK));
+              idc_value, currLB, 
+              flags | (RSLV_INCOMPLETE_OK));
       break;
     }
 
@@ -2220,11 +2220,11 @@ resolve(std::ostream& errStream,
   case at_apply:
     {
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_apply, currLB, flags);	
+              idc_apply, currLB, flags);        
       
       for (size_t c = 1; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		idc_value, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
+                idc_value, currLB, flags);
 
       break;
     }
@@ -2233,15 +2233,15 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
 
       // match agt_expr
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
 
       // match agt_expr
       RESOLVE(ast->child(2), env, lamLevel, USE_MODE,
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
 
       break;
     }
@@ -2253,8 +2253,8 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		idc_value, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
+                idc_value, currLB, flags);
 
       break;
     }
@@ -2263,11 +2263,11 @@ resolve(std::ostream& errStream,
     {
       // match at_cond_legs
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
 
       //match at_condelse
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
       break;
     }
 
@@ -2275,8 +2275,8 @@ resolve(std::ostream& errStream,
     {
       // match at_cond_leg+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		idc_value, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
+                idc_value, currLB, flags);
 
       break;
     }
@@ -2285,11 +2285,11 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
   
       // match agt_expr
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
 
       break;
     }
@@ -2298,7 +2298,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
       break;
     }
 
@@ -2314,8 +2314,8 @@ resolve(std::ostream& errStream,
       RESOLVE(rhs, env, lamLevel, USE_MODE, idc_value, currLB, flags);
 
       if (lhs->astType == at_ident)
-	if ((lhs->symbolDef->flags & ID_MUT_CLOSED) == 0)
-	  lhs->symbolDef->flags |= ID_IS_MUTATED;
+        if ((lhs->symbolDef->flags & ID_MUT_CLOSED) == 0)
+          lhs->symbolDef->flags |= ID_IS_MUTATED;
 
       break;
     }
@@ -2328,8 +2328,8 @@ resolve(std::ostream& errStream,
       // The type must be complete, because otherwise we can get
       // cyclically self-referencing types.
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_type, currLB, 
-	      flags | (~RSLV_INCOMPLETE_OK));
+              idc_type, currLB, 
+              flags | (~RSLV_INCOMPLETE_OK));
       break;      
     }    
 
@@ -2337,7 +2337,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
       break;      
     }    
 
@@ -2345,7 +2345,7 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+              id_value, currLB, flags);
 
       break;
     }
@@ -2354,16 +2354,16 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
 
       if (((ast->flags & INNER_REF_NDX) == 0) &&
-	 ast->child(1)->astType == at_ident) {
-	// Could be a field-select
+         ast->child(1)->astType == at_ident) {
+        // Could be a field-select
       }
       else {
-	// match agt_expr
-	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		id_value, currLB, flags);
+        // match agt_expr
+        RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
+                id_value, currLB, flags);
       }
       break;
     }
@@ -2374,16 +2374,16 @@ resolve(std::ostream& errStream,
 
       // match at agt_expr
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);    
+              idc_value, currLB, flags);    
       
       // match at_case_legs or at_sw_legs
       RESOLVE(ast->child(2), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
 
       // match at_otherwise (agt_ow)
       if (ast->child(3)->astType != at_Null) 
-	RESOLVE(ast->child(3), env, lamLevel, USE_MODE, 
-		idc_value, currLB, flags);
+        RESOLVE(ast->child(3), env, lamLevel, USE_MODE, 
+                idc_value, currLB, flags);
 
       break;
     }
@@ -2392,8 +2392,8 @@ resolve(std::ostream& errStream,
     {
       // match at_case_leg+ or at_sw_leg+
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		idc_value, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
+                idc_value, currLB, flags);
 
       break;
     }
@@ -2406,25 +2406,25 @@ resolve(std::ostream& errStream,
 
       /* match at_ident -- the contents after cracking the constructor */
       RESOLVE(ast->child(0), legEnv, lamLevel, DEF_MODE, 
-	      id_value, currLB, flags);
+              id_value, currLB, flags);
       ASTEnvironment::iterator itr = legEnv->find(ast->child(0)->s);
       assert(itr != legEnv->end());
       itr->second->flags |= BF_COMPLETE;
 
       if (ast->astType == at_sw_leg)
-	ast->child(0)->flags |= ID_FOR_SWITCH;
+        ast->child(0)->flags |= ID_FOR_SWITCH;
 
       /* match at_expr */
       if ((flags & RSLV_WITHIN_CATCH) && (ast->children.size() > 3))
-	flags |= RSLV_WITHIN_CATCH_MC;
-	
+        flags |= RSLV_WITHIN_CATCH_MC;
+        
       RESOLVE(ast->child(1), legEnv, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
 
       /* match at_ident -- the constructors (if any) */
       for (size_t c=2; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), legEnv, lamLevel, USE_MODE, 
-		idc_uctor, currLB, flags);      
+        RESOLVE(ast->child(c), legEnv, lamLevel, USE_MODE, 
+                idc_uctor, currLB, flags);      
       
       break;
     }
@@ -2433,18 +2433,18 @@ resolve(std::ostream& errStream,
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      id_value, currLB, flags);
+              id_value, currLB, flags);
     
       // match_at_ident: ignore
 
       // match at_case_legs
       RESOLVE(ast->child(2), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags | RSLV_WITHIN_CATCH);
+              idc_value, currLB, flags | RSLV_WITHIN_CATCH);
 
       // match at_otherwise
       if (ast->child(3)->astType != at_Null) 
-	RESOLVE(ast->child(3), env, lamLevel, USE_MODE, 
-		idc_value, currLB, flags | RSLV_WITHIN_CATCH);
+        RESOLVE(ast->child(3), env, lamLevel, USE_MODE, 
+                idc_value, currLB, flags | RSLV_WITHIN_CATCH);
       break;
     }
 
@@ -2453,20 +2453,20 @@ resolve(std::ostream& errStream,
       ResolverFlags rf = flags;
 
       if (ast->child(0)->astType == at_ident)
-	rf |= RSLV_SWITCHED_ID_OK;
+        rf |= RSLV_SWITCHED_ID_OK;
 
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, 
-	      rf);
+              idc_value, currLB, 
+              rf);
       break;
     }
 
   case at_container:
     {
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-	      idc_value, currLB, 
-	      flags);      
+              idc_value, currLB, 
+              flags);      
       break;
     }
 
@@ -2481,19 +2481,19 @@ resolve(std::ostream& errStream,
       // match at_dobindings
       // First process the initializers.
       for (size_t c = 0; c < dbs->children.size(); c++) {
-	shared_ptr<AST> db = dbs->child(c);	
-	shared_ptr<AST> init = db->child(1);
-	RESOLVE(init, doEnv, lamLevel, USE_MODE, idc_value, 
-		currLB, flags);
+        shared_ptr<AST> db = dbs->child(c);        
+        shared_ptr<AST> init = db->child(1);
+        RESOLVE(init, doEnv, lamLevel, USE_MODE, idc_value, 
+                currLB, flags);
       }
             
       // First add the definitions.
       for (size_t c = 0; c < dbs->children.size(); c++) {
-	shared_ptr<AST> db = dbs->child(c);	
-	shared_ptr<AST> localDef = db->child(0);
-	//shared_ptr<AST> init = db->child(1);
-	RESOLVE(localDef, doEnv, lamLevel, DEF_MODE, 
-		id_value, currLB, flags);	
+        shared_ptr<AST> db = dbs->child(c);        
+        shared_ptr<AST> localDef = db->child(0);
+        //shared_ptr<AST> init = db->child(1);
+        RESOLVE(localDef, doEnv, lamLevel, DEF_MODE, 
+                id_value, currLB, flags);        
       }
 
       // Make them complete
@@ -2501,29 +2501,29 @@ resolve(std::ostream& errStream,
       
       // Then process all the next step initializers
       for (size_t c = 0; c < dbs->children.size(); c++) {
-	shared_ptr<AST> db = dbs->child(c);	
-	shared_ptr<AST> step = db->child(2);
-	RESOLVE(step, doEnv, lamLevel, USE_MODE, 
-		idc_value, currLB, flags);	
+        shared_ptr<AST> db = dbs->child(c);        
+        shared_ptr<AST> step = db->child(2);
+        RESOLVE(step, doEnv, lamLevel, USE_MODE, 
+                idc_value, currLB, flags);        
       }
       
       // Process the condition/result
       // match at_dotest
       RESOLVE(ast->child(1), doEnv, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);      
+              idc_value, currLB, flags);      
       
       // And finally process the body with a rich environment
       // match agt_expr, with my Parent's Incompleteness restrictions
       RESOLVE(ast->child(2), doEnv, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);    
+              idc_value, currLB, flags);    
       break;
     }
     
   case at_dotest:
     {
       for (size_t c = 0; c < ast->children.size(); c++)
-	RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
-		idc_value, currLB, flags);
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
+                idc_value, currLB, flags);
       break;
     }
 
@@ -2549,23 +2549,23 @@ resolve(std::ostream& errStream,
       // match agt_expr
       // For each individual binding // match at_letbinding+
       for (size_t c = 0; c < lbs->children.size(); c++) {
-	shared_ptr<AST> lb = lbs->child(c);
-	
-	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
-		idc_value, lbs, flags);
+        shared_ptr<AST> lb = lbs->child(c);
+        
+        RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
+                idc_value, lbs, flags);
       }      
       
       // match agt_bindingPattern
       // For each individual binding // match at_letbinding+
       for (size_t c = 0; c < lbs->children.size(); c++) {
-	shared_ptr<AST> lb = lbs->child(c);
-	
-	// match agt_bindingPattern
-	RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
-		id_value, lbs, flags);
+        shared_ptr<AST> lb = lbs->child(c);
+        
+        // match agt_bindingPattern
+        RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
+                id_value, lbs, flags);
 
-	assert(lb->child(0)->astType == at_identPattern);
-	lb->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
+        assert(lb->child(0)->astType == at_identPattern);
+        lb->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
       }
 
       // Now we are done with all let-bindings
@@ -2575,11 +2575,11 @@ resolve(std::ostream& errStream,
       // match agt_expr, with my Parent's Incompleteness restrictions
       markComplete(letEnv);
       RESOLVE(ast->child(1), letEnv, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
     
       // match at_constraints
       RESOLVE(ast->child(2), letEnv, lamLevel, USE_MODE, 
-	      idc_type, currLB,  flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
+              idc_type, currLB,  flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       break;
     }
 
@@ -2604,19 +2604,19 @@ resolve(std::ostream& errStream,
       // match agt_expr
       // For each individual binding // match at_letbinding+
       for (size_t c = 0; c < lbs->children.size(); c++) {
-	shared_ptr<AST> lb = lbs->child(c);
-	
-	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
-		idc_value, lbs, flags);
-	
-	RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
-		id_value, lbs, flags);
-	assert(lb->child(0)->astType == at_identPattern);
-	lb->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
-	
-	ASTEnvironment::iterator itr = 
-	  letEnv->find(lb->child(0)->child(0)->s);
-	itr->second->flags |= BF_COMPLETE;
+        shared_ptr<AST> lb = lbs->child(c);
+        
+        RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
+                idc_value, lbs, flags);
+        
+        RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
+                id_value, lbs, flags);
+        assert(lb->child(0)->astType == at_identPattern);
+        lb->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
+        
+        ASTEnvironment::iterator itr = 
+          letEnv->find(lb->child(0)->child(0)->s);
+        itr->second->flags |= BF_COMPLETE;
       }
 
       // Now we are done with all let-bindings
@@ -2624,7 +2624,7 @@ resolve(std::ostream& errStream,
       
       // Evaluate the final Expression with a rich environment
       RESOLVE(ast->child(1), letEnv, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
       
       break;
     }
@@ -2652,23 +2652,23 @@ resolve(std::ostream& errStream,
 
       // For each individual binding // match at_letbinding+
       for (size_t c = 0; c < lbs->children.size(); c++) {
-	shared_ptr<AST> lb = lbs->child(c);
+        shared_ptr<AST> lb = lbs->child(c);
       
-	// match agt_bindingPattern
-	RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
-		id_value, lbs, flags);	
-	assert(lb->child(0)->astType == at_identPattern);
-	lb->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
+        // match agt_bindingPattern
+        RESOLVE(lb->child(0), letEnv, lamLevel, DEF_MODE, 
+                id_value, lbs, flags);        
+        assert(lb->child(0)->astType == at_identPattern);
+        lb->child(0)->child(0)->flags &= ~ID_IS_MUTATED;
       }      
     
       // For each individual binding // match at_letbinding+
       for (size_t c = 0; c < lbs->children.size(); c++) {
-	shared_ptr<AST> lb = lbs->child(c);
+        shared_ptr<AST> lb = lbs->child(c);
 
-	// match agt_expr
-	RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
-		idc_value, lbs, flags);
-	
+        // match agt_expr
+        RESOLVE(lb->child(1), letEnv, lamLevel, USE_MODE, 
+                idc_value, lbs, flags);
+        
       }
 
       // Now we are done with all let-bindings
@@ -2680,7 +2680,7 @@ resolve(std::ostream& errStream,
       // match agt_expr
       markComplete(letEnv);
       RESOLVE(ast->child(1), letEnv, lamLevel, USE_MODE, 
-	      idc_value, currLB, flags);
+              idc_value, currLB, flags);
 
       break;
     }
@@ -2699,18 +2699,18 @@ resolve(std::ostream& errStream,
       // The lamLevel is bogus here, but OK only for
       // the sake of polyinstantiation.      
       if (ast->flags & LB_REC_BIND) {
-	RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
-		id_value, ast, flags);
+        RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
+                id_value, ast, flags);
 
-	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		idc_value, ast, flags);	
-      }	
+        RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
+                idc_value, ast, flags);        
+      }        
       else {
-	RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
-		idc_value, ast, flags);
-	
-	RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
-		idc_value, ast, flags);
+        RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
+                idc_value, ast, flags);
+        
+        RESOLVE(ast->child(0), env, lamLevel, DEF_MODE, 
+                idc_value, ast, flags);
       }
 
       assert(ast->child(0)->astType == at_identPattern);
@@ -2723,9 +2723,9 @@ resolve(std::ostream& errStream,
 
 static bool
 initEnv(std::ostream& errStream,
-	shared_ptr<AST> ast,
-	shared_ptr<ASTEnvironment > aliasEnv,
-	shared_ptr<ASTEnvironment > env)
+        shared_ptr<AST> ast,
+        shared_ptr<ASTEnvironment > aliasEnv,
+        shared_ptr<ASTEnvironment > env)
 {
   // See if I am processing the prelude or some other file.
   if (ast->astType == at_interface &&
@@ -2741,9 +2741,9 @@ initEnv(std::ostream& errStream,
   UocMap::iterator itr = UocInfo::ifList.find("bitc.prelude");
   if (itr == UocInfo::ifList.end()) {
     errStream << ast->loc << ": "
-	      << "Internal Compiler Error. "
-	      << " Prelude has NOT been processed."
-	      << std::endl;
+              << "Internal Compiler Error. "
+              << " Prelude has NOT been processed."
+              << std::endl;
     ::exit(1);
   }
   preenv = itr->second->env;
@@ -2752,9 +2752,9 @@ initEnv(std::ostream& errStream,
     // GCFIX: Why does this return on error instead of exiting? This
     // is a FATAL compiler errors!
     errStream << ast->loc << ": "
-	      << "Internal Compiler Error. "
-	      << " Prelude's environment is NULL "
-	      << std::endl;
+              << "Internal Compiler Error. "
+              << " Prelude's environment is NULL "
+              << std::endl;
     ::exit(1);
   }
   
@@ -2765,7 +2765,7 @@ initEnv(std::ostream& errStream,
 
 bool 
 UocInfo::DoResolve(std::ostream& errStream, bool init, 
-		   ResolverFlags rflags)
+                   ResolverFlags rflags)
 {
   bool errFree = true;
 
@@ -2789,26 +2789,26 @@ UocInfo::DoResolve(std::ostream& errStream, bool init,
   }
   
   CHKERR(errFree, resolve(errStream, uocAst, aliasEnv, env, GC_NULL, 
-			  USE_MODE, idc_type, GC_NULL, rflags));
+                          USE_MODE, idc_type, GC_NULL, rflags));
 
   return errFree;
 }
 
 bool 
 UocInfo::Resolve(std::ostream& errStream, bool init, 
-		 ResolverFlags rflags, std::string mesg)
+                 ResolverFlags rflags, std::string mesg)
 {
   bool errFree = true;
   errFree = DoResolve(errStream, init, rflags);
   if (!errFree)
     errStream << mesg
-	      << std::endl;
+              << std::endl;
   return errFree;
 }
 
 bool
 UocInfo::fe_symresolve(std::ostream& errStream,
-		       bool init, unsigned long flags)
+                       bool init, unsigned long flags)
 {
   return DoResolve(errStream, init, RSLV_NO_FLAGS);
 }

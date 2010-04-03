@@ -183,12 +183,12 @@ LetInsert(shared_ptr<AST> ast, bool skip = false)
 
       // First, figure out if we require a rewrite:
       for (size_t c = 0; c < ast->children.size(); c++) {
-	shared_ptr<AST> child = ast->child(c);
-	LetInsert(child);
+        shared_ptr<AST> child = ast->child(c);
+        LetInsert(child);
       }
 
       if (!skip)
-	ast = LetWrap(ast);
+        ast = LetWrap(ast);
 
       break;
     }
@@ -196,7 +196,7 @@ LetInsert(shared_ptr<AST> ast, bool skip = false)
   case at_letbinding:
     {
       LetInsert(ast->child(1), 
-		(ast->child(0)->astType == at_identPattern));
+                (ast->child(0)->astType == at_identPattern));
       break;
     }
   default:

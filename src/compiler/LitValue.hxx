@@ -55,15 +55,15 @@ enum LitRepr {
 struct LitValue {
   LitRepr lr;
 
-  bool   b;			/* boolean Values */
-  unsigned long c;		/* utf32 code points */
-  sherpa::BigNum i;		/* large precision integers */
-  double d;			/* doubles, floats          */
+  bool   b;                        /* boolean Values */
+  unsigned long c;                /* utf32 code points */
+  sherpa::BigNum i;                /* large precision integers */
+  double d;                        /* doubles, floats          */
 
   // FIX: (shap) the original input is being saved in AST.s for replay
   // purposes. String literals need to be stored here as a vector of
   // character representations.
-  std::string s;		/* String Literals          */
+  std::string s;                /* String Literals          */
 
   static uint32_t DecodeStringCharacter(const char *s, const char **next);
   static uint32_t DecodeRawCharacter(const char *s, const char **next);

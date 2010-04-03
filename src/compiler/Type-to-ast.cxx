@@ -63,7 +63,7 @@ using namespace std;
 
 shared_ptr<AST> 
 Type::asAST(const sherpa::LexLoc &loc,
-	    shared_ptr<TvPrinter> tvP)
+            shared_ptr<TvPrinter> tvP)
 { 
   shared_ptr<AST> ast = GC_NULL;
   shared_ptr<Type> t = getType();  
@@ -193,10 +193,10 @@ Type::asAST(const sherpa::LexLoc &loc,
   case ty_mbFull:
     {
       if(t->Var()->isMutable())
-	ast = t->Core()->maximizeMutability()->asAST(loc, tvP);
+        ast = t->Core()->maximizeMutability()->asAST(loc, tvP);
       else
-	ast = t->Core()->asAST(loc, tvP);
-	
+        ast = t->Core()->asAST(loc, tvP);
+        
       break;
     }
 
@@ -241,11 +241,11 @@ Type::asAST(const sherpa::LexLoc &loc,
     {
       ast = AST::make(at_fnargVec, loc);
       for (size_t i=0; i < t->components.size(); i++) {
-	shared_ptr<AST> arg = t->CompType(i)->asAST(loc, tvP);
-	if (t->CompFlags(i) & COMP_BYREF)
-	  arg = AST::make(at_byRefType, arg->loc, arg);
-	
-	ast->children.push_back(arg);
+        shared_ptr<AST> arg = t->CompType(i)->asAST(loc, tvP);
+        if (t->CompFlags(i) & COMP_BYREF)
+          arg = AST::make(at_byRefType, arg->loc, arg);
+        
+        ast->children.push_back(arg);
       }
       break;
     }
@@ -266,9 +266,9 @@ Type::asAST(const sherpa::LexLoc &loc,
       //ast->s = t->defAst->s;
       //ast->symbolDef = t->defAst;
       if (t->typeArgs.size() > 0) {
-	ast = AST::make(at_typeapp, loc, ast);
-	for (size_t i=0; i < t->typeArgs.size(); i++)
-	  ast->children.push_back(t->TypeArg(i)->asAST(loc, tvP));
+        ast = AST::make(at_typeapp, loc, ast);
+        for (size_t i=0; i < t->typeArgs.size(); i++)
+          ast->children.push_back(t->TypeArg(i)->asAST(loc, tvP));
       }
       break;
     }
@@ -290,9 +290,9 @@ Type::asAST(const sherpa::LexLoc &loc,
       //ast = AST::make(at_ident, loc);
       //ast->s = t->myContainer->s;
       if (t->typeArgs.size()) {
-	ast = AST::make(at_typeapp, loc, ast);
-	for (size_t i=0; i < t->typeArgs.size(); i++)
-	  ast->children.push_back(t->TypeArg(i)->asAST(loc, tvP));
+        ast = AST::make(at_typeapp, loc, ast);
+        for (size_t i=0; i < t->typeArgs.size(); i++)
+          ast->children.push_back(t->TypeArg(i)->asAST(loc, tvP));
       }
       break;
     }

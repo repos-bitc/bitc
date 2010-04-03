@@ -117,7 +117,7 @@ TypeScheme::ts_instance()
     
     ts->tcc = TCConstraints::make();
     for (TypeSet::iterator itr = _tcc->begin();
-	itr != _tcc->end(); ++itr) {
+        itr != _tcc->end(); ++itr) {
       shared_ptr<Typeclass> pred;
       
       pred = (*itr)->TypeSpecializeReal(cftvs, cnftvs);
@@ -129,7 +129,7 @@ TypeScheme::ts_instance()
   
   if (tcc)
     for (TypeSet::iterator itr = tcc->begin();
-	itr != tcc->end(); ++itr)
+        itr != tcc->end(); ++itr)
       (*itr)->clear_sp();
   
   return ts;
@@ -147,23 +147,23 @@ TypeScheme::addConstraints(shared_ptr<TCConstraints> _tcc) const
   for (TypeSet::iterator itr = tcc->begin();
       itr != tcc->end(); ++itr) {
     for (TypeSet::iterator itr_j = allFtvs.begin();
-	itr_j != allFtvs.end(); ++itr_j)
+        itr_j != allFtvs.end(); ++itr_j)
       if ((*itr)->boundInType(*itr_j)) {
-	_tcc->addPred(*itr);
-	break;
+        _tcc->addPred(*itr);
+        break;
       }
   }
   
   //if (tcc->pred.size()) {
   // std::cout << tau->ast->loc << "AddConstraints("
-  //	      << tau->asString() << ", ";    
+  //              << tau->asString() << ", ";    
   // for (size_t i = 0; i < tcc->pred.size(); i++)
   //   std::cout << tcc->pred[i]->asString() << ", ";
   // std::cout << ") = ";
   // for (size_t i = 0; i < _tcc->pred.size(); i++)
   //   std::cout << _tcc->pred[i]->asString() << ", ";       
   // std::cout << "."
-  //	      << std::endl;
+  //              << std::endl;
   //}
 }
 
@@ -174,8 +174,8 @@ TypeScheme::normalize()
 
   DEBUG(TS_NORM)
     std::cerr << "Considering: "
-	      << asString(Options::debugTvP, false)
-	      << std::endl;
+              << asString(Options::debugTvP, false)
+              << std::endl;
   
   
   TypeSet newTvs;
@@ -195,33 +195,33 @@ TypeScheme::normalize()
     tcc->pred.clear();
     
     for (TypeSet::iterator itr = allPreds.begin();
-	itr != allPreds.end(); ++itr) {
+        itr != allPreds.end(); ++itr) {
       shared_ptr<Constraint> ct = (*itr)->getType();
       if (!ct->isPcst()) {
-	tcc->addPred(ct);
-	continue;
+        tcc->addPred(ct);
+        continue;
       }
       
       shared_ptr<Type> k = ct->CompType(0)->getType();
       shared_ptr<Type> tg = ct->CompType(1)->getType();
 
       /* If k = M, the solver must have handled this case
-	 and unified tg = ti
-	               _
-	 If k = P and |_|(tg), then the solver must have handled this
-	 case and unified tg = I(tg) and ti = I(ti).
-	 Actually, we can check Immut(tg) here;
+         and unified tg = ti
+                       _
+         If k = P and |_|(tg), then the solver must have handled this
+         case and unified tg = I(tg) and ti = I(ti).
+         Actually, we can check Immut(tg) here;
 
 
-	 In either case, drop this predicate. 
-	 Otherwise, add it to newPred.                  */
+         In either case, drop this predicate. 
+         Otherwise, add it to newPred.                  */
       
       if ((k == Type::Kmono) ||
-	 ((k == Type::Kpoly) && tg->isConcretizable())) {
-	changed = true;
+         ((k == Type::Kpoly) && tg->isConcretizable())) {
+        changed = true;
       }
       else {
-	tcc->addPred(ct);
+        tcc->addPred(ct);
       }
     }
   }
@@ -229,8 +229,8 @@ TypeScheme::normalize()
   DEBUG(TS_NORM)
     if (changed)
       std::cerr << "\t\tNormalized to "
-		<< asString(Options::debugTvP, false)
-		<< std::endl;
+                << asString(Options::debugTvP, false)
+                << std::endl;
   
   return changed;
 }

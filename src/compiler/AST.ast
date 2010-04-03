@@ -499,7 +499,7 @@ struct EnvSet {
   }
 
   EnvSet(boost::shared_ptr<ASTEnvironment > _env, boost::shared_ptr<TSEnvironment >_gamma,
-	 boost::shared_ptr<InstEnvironment > _instEnv)
+         boost::shared_ptr<InstEnvironment > _instEnv)
   {
     env = _env;
     gamma = _gamma;
@@ -560,10 +560,10 @@ struct EnvSet {
   IdentType identType;
   AstFlags flags;
 
-  PrintFlags printVariant;	// which syntax to use for pretty printing
+  PrintFlags printVariant;        // which syntax to use for pretty printing
 
-  boost::shared_ptr<TypeScheme> scheme;		// defining occurrences only
-  boost::shared_ptr<Type> symType;		// the (pre-unified) type
+  boost::shared_ptr<TypeScheme> scheme;                // defining occurrences only
+  boost::shared_ptr<Type> symType;                // the (pre-unified) type
   boost::shared_ptr<AST> symbolDef;
 
   bool isDecl;                  // is This a declaration or definition?
@@ -739,8 +739,8 @@ struct EnvSet {
   /// Generate an at_ident AST providing a temporary symbol that is
   /// type-compatible with the type of the passed AST @p lhs.
   static boost::shared_ptr<AST> genSym(boost::shared_ptr<AST> lhs,
-		     const char *pfx="tmp",
-		     const bool isTV = false);
+                     const char *pfx="tmp",
+                     const bool isTV = false);
 
   /// For each AST type, return an associated keyword name.
   ///
@@ -756,8 +756,8 @@ struct EnvSet {
   /// if getPattern is true, it adds the identPattern ASTs
   /// instead of ident ASTs
   void getIds(std::ostream &errStream,
-	      std::vector<boost::shared_ptr<AST> >& ids,
-	      bool getPattern = false);
+              std::vector<boost::shared_ptr<AST> >& ids,
+              bool getPattern = false);
 
   /// @brief Utility function to call symType->getType()
   boost::shared_ptr<Type> getType();
@@ -825,7 +825,7 @@ struct EnvSet {
   /// type if @p showTypes is true, and appending a final end of line
   /// of @p endline is true.
   void PrettyPrint(std::ostream& out, bool showTypes = false,
-		   bool endline=true) const;
+                   bool endline=true) const;
 
   // For use in GDB:
   void PrettyPrint(bool decorated) const;
@@ -856,7 +856,7 @@ unsigned long long AST::astCount = 0;
   defForm = GC_NULL;
   defbps = GC_NULL;
   decl = GC_NULL;
-  printVariant = pf_NONE;		// until otherwise stated
+  printVariant = pf_NONE;                // until otherwise stated
   tagType = GC_NULL;
   field_bits = 0;
   unin_discm = 0;
@@ -945,7 +945,7 @@ AST defobject = ident tvlist category declares fields constraints;
 //GROUP reprbodyitem = reprtag | field | fill | reprcase;
 //AST reprbody = reprbodyitem+;
 //AST reprcase = reprcaselegR+;
-//AST reprcaselegR = reprbody ident+;	// note reversal!
+//AST reprcaselegR = reprbody ident+;        // note reversal!
 //AST reprtag = ident+;
 AST defrepr = ident category declares reprctrs;
 AST declrepr = ident category;
@@ -1079,12 +1079,12 @@ GROUP eform = literal | var | unit
             | apply | struct_apply | object_apply | ucon_apply
             | if | when | and | or | not | cond | switch
             | setbang | dup | deref | inner_ref
-	    | try | throw | let | letStar | letrec
- 	    | container | do
-	    | mkClosure | allocREF | copyREF | setClosure
-	    | block | return_from
-	    | sizeof | bitsizeof | mkArrayByref
-  	    | array_ref_nth | array_ref_length
+            | try | throw | let | letStar | letrec
+             | container | do
+            | mkClosure | allocREF | copyREF | setClosure
+            | block | return_from
+            | sizeof | bitsizeof | mkArrayByref
+              | array_ref_nth | array_ref_length
             // | loop | typecase | casebang
             ;
 // *select* is record selection.

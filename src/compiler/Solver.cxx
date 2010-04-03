@@ -78,7 +78,7 @@ getDomain(shared_ptr<Typeclass> t)
       
     for (TypeSet::iterator itr_d = dom.begin(); itr_d != dom.end(); ++itr_d)
       if ((*itr_d)->getType() != ret->getType())
-	newDom.insert(*itr_d);
+        newDom.insert(*itr_d);
       
     dom = newDom;
   }
@@ -134,8 +134,8 @@ unrigidify(TypeSet& vars)
 
 bool
 handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
-	   shared_ptr<Constraint> ct, shared_ptr<Constraints> cset, 
-	   bool &handled, bool &handlable)
+           shared_ptr<Constraint> ct, shared_ptr<Constraints> cset, 
+           bool &handled, bool &handlable)
 {
   if (ct->isPcst()) {
     handlable = true;
@@ -147,8 +147,8 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
   }
 
   DEBUG(PCST) errStream << "\t\tTrying PCST: " 
-		       << ct->asString(Options::debugTvP)
-		       << std::endl;
+                       << ct->asString(Options::debugTvP)
+                       << std::endl;
   
   shared_ptr<Type> k = ct->CompType(0)->getType();
   shared_ptr<Type> gen = ct->CompType(1)->getType();
@@ -157,7 +157,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
   // *(m, tg, ti)
   if (k == Type::Kmono) {
     DEBUG(PCST) errStream << "\t\tCase *(m, tg, ti), CLEAR." 
-			 << std::endl;
+                         << std::endl;
     cset->clearPred(ct);
     handled = true;
     bool unifies = ins->unifyWith(gen, false, trail, errStream);
@@ -169,7 +169,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
     // *(p, tg, ti), |_|(tg)
     if (gen->isConcretizable()) {
       DEBUG(PCST) errStream << "\t\tCase *(p, tg, ti), [](tg), CLEAR."
-			   << std::endl;
+                           << std::endl;
       cset->clearPred(ct);
       handled = true;
       shared_ptr<Type> tgg = gen->minimizeDeepMutability();
@@ -183,15 +183,15 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
     // *(p, tg, ti),  Mut(ti)
     if (ins->isDeepMut()) {
       DEBUG(PCST) errStream << "\t\tCase *(p, tg, ti), Mut(ti) ERROR." 
-			   << std::endl;
+                           << std::endl;
       cset->clearPred(ct);
       handled = true;
       return false;
     }
     
     DEBUG(PCST) errStream << "\t\tCase *(p, tg, ti), " 
-			 << "Immut(ti) KEEP." 
-			 << std::endl;
+                         << "Immut(ti) KEEP." 
+                         << std::endl;
     
     // *(p, tg, ti), ~Immut(ti), ~Mut(ti)
     handled = false;
@@ -203,8 +203,8 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
   // *(k, tg, ti), Mut(ti)
   if (ins->isDeepMut()) {
     DEBUG(PCST) errStream << "\t\tCase *(k, tg, ti), " 
-			 << "Mut(ti) [k |-> m]." 
-			 << std::endl;
+                         << "Mut(ti) [k |-> m]." 
+                         << std::endl;
     trail->subst(k, Type::Kmono);
     handled = true;
     return true;
@@ -213,8 +213,8 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
   // *(k, tg, ti), Immut(tg)
   if (gen->isDeepImmut()) {
     DEBUG(PCST) errStream << "\t\tCase *(k, tg, ti), Immut(tg)" 
-			 << "Immut(tg) [k |-> p]." 
-			 << std::endl;
+                         << "Immut(tg) [k |-> p]." 
+                         << std::endl;
     trail->subst(k, Type::Kpoly);
     handled = true;
     return true;
@@ -236,8 +236,8 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
     
     if (newK == k && !ins->equals(newIns)) {
       DEBUG(PCST) errStream << "\t\tCase *(k, tg, ti), *(k, tg, tj)" 
-			   << " ti !~~ tj, [k |-> p]." 
-			   << std::endl;
+                           << " ti !~~ tj, [k |-> p]." 
+                           << std::endl;
       
       trail->subst(k, Type::Kpoly);
       handled = true;
@@ -246,7 +246,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
   }
   
   DEBUG(PCST) errStream << "\t\tCase *(k, tg, ti) KEEP." 
-		       << std::endl;
+                       << std::endl;
   
   handled = false;
   return true;
@@ -254,8 +254,8 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
 
 bool
 handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
-		  shared_ptr<Constraint> pred, shared_ptr<Constraints> cset, 
-		  bool &handled, bool &handlable)
+                  shared_ptr<Constraint> pred, shared_ptr<Constraints> cset, 
+                  bool &handled, bool &handlable)
 {
   bool errFree = true;
   pred = pred->getType();
@@ -275,30 +275,30 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
     if (pred->defAst->s == ref_types) {
       handlable = true;
       DEBUG(SPSOL) errStream << "\t\tCase RefTypes for "
-			    << pred->asString(Options::debugTvP)
-			    << std::endl;
+                            << pred->asString(Options::debugTvP)
+                            << std::endl;
 
       shared_ptr<Type> it = pred->TypeArg(0)->getType();
       if (it->isVariable()) { // checks beyond mutability, maybe-ness
-	DEBUG(SPSOL) errStream << "\t\t ... Variable, KEEP"
-			      << pred->asString(Options::debugTvP)
-			      << std::endl;
-	handled = false;
-	break;
+        DEBUG(SPSOL) errStream << "\t\t ... Variable, KEEP"
+                              << pred->asString(Options::debugTvP)
+                              << std::endl;
+        handled = false;
+        break;
       }
 
       handled = true;
       if (it->isRefType()) {
-	DEBUG(SPSOL) errStream << "\t\t ... Satisfied, CLEAR"
-			      << pred->asString(Options::debugTvP)
-			      << std::endl;
-	break;
+        DEBUG(SPSOL) errStream << "\t\t ... Satisfied, CLEAR"
+                              << pred->asString(Options::debugTvP)
+                              << std::endl;
+        break;
       }
 
       /* Otherwise, we have a Value Type */
       DEBUG(SPSOL) errStream << "\t\t ... Unboxed-type, ERROR"
-			    << pred->asString(Options::debugTvP)
-			    << std::endl;
+                            << pred->asString(Options::debugTvP)
+                            << std::endl;
       
       errFree = false;      
       break;
@@ -307,75 +307,75 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
     if(pred->defAst->s == has_field) {
       handlable = true;
       DEBUG(SPSOL) errStream << "\t\tCase has-field for "
-			    << pred->asString(Options::debugTvP)
-			    << std::endl;
+                            << pred->asString(Options::debugTvP)
+                            << std::endl;
       
       shared_ptr<Type> st = pred->TypeArg(0)->getBareType();
       shared_ptr<Type> fName = pred->TypeArg(1)->getType();
       shared_ptr<Type> fType = pred->TypeArg(2)->getType();
     
       if(st->isVariable()) {
-	DEBUG(SPSOL) errStream << "\t\t ... Variable, KEEP"
-			      << pred->asString(Options::debugTvP)
-			      << std::endl;
-	handled = false;
-	break;
+        DEBUG(SPSOL) errStream << "\t\t ... Variable, KEEP"
+                              << pred->asString(Options::debugTvP)
+                              << std::endl;
+        handled = false;
+        break;
       }
       
       handled = true;
       if (st->kind != ty_structv && st->kind != ty_structr) {
-	DEBUG(SPSOL) errStream << "\t\t ... Non-structure type, ERROR"
-			      << pred->asString(Options::debugTvP)
-			      << std::endl;
-	errFree = false;
-	break;
+        DEBUG(SPSOL) errStream << "\t\t ... Non-structure type, ERROR"
+                              << pred->asString(Options::debugTvP)
+                              << std::endl;
+        errFree = false;
+        break;
       }
       
       if (fName->kind != ty_field) {
-	DEBUG(SPSOL) errStream << "\t\t ... Non-field type, ERROR"
-			      << pred->asString(Options::debugTvP)
-			      << std::endl;
-	errFree = false;
-	break;
+        DEBUG(SPSOL) errStream << "\t\t ... Non-field type, ERROR"
+                              << pred->asString(Options::debugTvP)
+                              << std::endl;
+        errFree = false;
+        break;
       }
       
       shared_ptr<Type> fld = GC_NULL;
       for (size_t i=0; i < st->components.size(); i++)
-	if (st->CompName(i) == fName->litValue.s)
-	  if((st->CompFlags(i) & COMP_INVALID) == 0) {
-	    fld = st->CompType(i)->getType();
-	    break;
-	  }
+        if (st->CompName(i) == fName->litValue.s)
+          if((st->CompFlags(i) & COMP_INVALID) == 0) {
+            fld = st->CompType(i)->getType();
+            break;
+          }
       
       
       for (size_t i=0; i < st->methods.size(); i++)
-	if (st->MethodName(i) == fName->litValue.s)
-	  if((st->MethodFlags(i) & COMP_INVALID) == 0) {
-	    fld = st->MethodType(i)->getType()->getDCopy();
+        if (st->MethodName(i) == fName->litValue.s)
+          if((st->MethodFlags(i) & COMP_INVALID) == 0) {
+            fld = st->MethodType(i)->getType()->getDCopy();
 
-	    // Form a function type for unification with constraint.
-	    assert(fld->kind == ty_method);
-	    fld->kind = ty_fn;
-	    break;
-	  }
+            // Form a function type for unification with constraint.
+            assert(fld->kind == ty_method);
+            fld->kind = ty_fn;
+            break;
+          }
       
       if(!fld) {
-	DEBUG(SPSOL) errStream << "\t\t ... Field/Method not found, ERROR"
-			      << pred->asString(Options::debugTvP)
-			      << std::endl;
-	errFree = false;
-	break;
+        DEBUG(SPSOL) errStream << "\t\t ... Field/Method not found, ERROR"
+                              << pred->asString(Options::debugTvP)
+                              << std::endl;
+        errFree = false;
+        break;
       }
       
       CHKERR(errFree, fType->unifyWith(fld));
       if(!errFree)
-	DEBUG(SPSOL) errStream << "\t\t ... Field Unification failure, ERROR"
-			      << pred->asString(Options::debugTvP)
-			      << std::endl;
+        DEBUG(SPSOL) errStream << "\t\t ... Field Unification failure, ERROR"
+                              << pred->asString(Options::debugTvP)
+                              << std::endl;
       else
-	DEBUG(SPSOL) errStream << "\t\t ... Field found, CLEAR"
-			      << pred->asString(Options::debugTvP)
-			      << std::endl;
+        DEBUG(SPSOL) errStream << "\t\t ... Field found, CLEAR"
+                              << pred->asString(Options::debugTvP)
+                              << std::endl;
       break;
     }
     
@@ -394,21 +394,21 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
 
 bool
 handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
-	     shared_ptr<Typeclass> pred, shared_ptr<TCConstraints> tcc, 
-	     shared_ptr<const InstEnvironment > instEnv,
-	     bool must_solve, bool trial_mode, bool &handled)
+             shared_ptr<Typeclass> pred, shared_ptr<TCConstraints> tcc, 
+             shared_ptr<const InstEnvironment > instEnv,
+             bool must_solve, bool trial_mode, bool &handled)
 {
   DEBUG(TCSOL) errStream << "\t\tInstance Solver for: "
-			<< pred->asString(Options::debugTvP)
-			<< (trial_mode ? " [TRIAL]" : "")
-			<< std::endl;
+                        << pred->asString(Options::debugTvP)
+                        << (trial_mode ? " [TRIAL]" : "")
+                        << std::endl;
 
   shared_ptr<set<shared_ptr<Instance> > > insts = 
     instEnv->getBinding(pred->defAst->fqn.asString());
   
   if (!insts) {
     DEBUG(TCSOL) errStream << "\t\t ... No Instances in Environment"
-			  << std::endl;
+                          << std::endl;
     if (must_solve) {
       tcc->clearPred(pred);
       handled = true;
@@ -443,7 +443,7 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
 
   if (!instScheme) {
     DEBUG(TCSOL) errStream << "\t\t ... No Suitable Instance found"
-			  << std::endl;
+                          << std::endl;
     if (must_solve) {
       tcc->clearPred(pred);
       handled = true;
@@ -463,26 +463,26 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
   bool errFree = pred->unifyWith(instScheme->tau);
 
   DEBUG(TCSOL) errStream << "\t\t .. Post Unification with Instance: "
-			<< pred->asString(Options::debugTvP)
-			<< " CLEAR."
-			<< std::endl;
+                        << pred->asString(Options::debugTvP)
+                        << " CLEAR."
+                        << std::endl;
   
   assert(errFree);  
   tcc->clearPred(pred);
   
   if (instScheme->tcc)
     for (TypeSet::iterator itr = instScheme->tcc->begin(); 
-	 itr != instScheme->tcc->end(); ++itr) {
+         itr != instScheme->tcc->end(); ++itr) {
       shared_ptr<Typeclass> instPred = (*itr);
 
       // Add all preconditions, except for the self-condition
       // added to all instances. Remember that the 
       // type specializer clears the TY_SELF flag.
       if (!pred->equals(instPred)) {
-	tcc->addPred(instPred);
-	DEBUG(TCSOL) errStream << "\t\t .. Adding pre-condition: "
-			      << instPred->asString(Options::debugTvP)
-			      << std::endl;
+        tcc->addPred(instPred);
+        DEBUG(TCSOL) errStream << "\t\t .. Adding pre-condition: "
+                              << instPred->asString(Options::debugTvP)
+                              << std::endl;
       }
     }
   
@@ -492,9 +492,9 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
 
 static bool
 handleEquPreds(std::ostream &errStream, shared_ptr<Trail> trail,
-	       shared_ptr<Typeclass> pred, shared_ptr<TCConstraints> tcc, 
-	       TypeSet& vars,
-	       bool &handled)
+               shared_ptr<Typeclass> pred, shared_ptr<TCConstraints> tcc, 
+               TypeSet& vars,
+               bool &handled)
 {
   // Equality of domain types in two type class predicated is achieved
   // by testing for unification wherein the type variables in the
@@ -509,11 +509,11 @@ handleEquPreds(std::ostream &errStream, shared_ptr<Trail> trail,
     
     if (pred->equals(newCt)) {
       DEBUG(TCSOL) errStream << "\t\t EquPreds: "
-			    << pred->asString(Options::debugTvP)
-			    << " === "
-			    << newCt->asString(Options::debugTvP)
-			    << " UNIFY, CLEAR1."
-			    << std::endl;
+                            << pred->asString(Options::debugTvP)
+                            << " === "
+                            << newCt->asString(Options::debugTvP)
+                            << " UNIFY, CLEAR1."
+                            << std::endl;
       
       pred->unifyWith(newCt);
       tcc->clearPred(pred);
@@ -586,8 +586,8 @@ handleEquPreds(std::ostream &errStream, shared_ptr<Trail> trail,
 
 bool
 TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
-			    shared_ptr< const InstEnvironment > instEnv,
-			    shared_ptr<Trail> trail)
+                            shared_ptr< const InstEnvironment > instEnv,
+                            shared_ptr<Trail> trail)
 {
 /* handled: Signifies any changes to the tcc individual handler
    functions might have performed.
@@ -600,8 +600,8 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
   bool handled = false;
   
   DEBUG(SOL) errStream << "\tTo Solve: " 
-		      << asString(Options::debugTvP)
-		      << std::endl;
+                      << asString(Options::debugTvP)
+                      << std::endl;
   
   do {
     handled = false;
@@ -609,111 +609,111 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
     bool errFreeNow = true;
     
     for (TypeSet::iterator itr = tcc->begin(); 
-	 itr != tcc->end(); ++itr) {
+         itr != tcc->end(); ++itr) {
       shared_ptr<Typeclass> pred = (*itr);
       errPred = pred;
       bool handlable = false;
       
       // Step 1
       CHKERR(errFreeNow, handleSpecialPred(errStream, trail, 
-					   pred, tcc, 
-					   handled, handlable));
+                                           pred, tcc, 
+                                           handled, handlable));
 
       DEBUG(SOL) errStream << "\t[Sol 1] (special): " 
-			  << asString(Options::debugTvP)
-			  << (handled ? " [HANDLED]" : "")
-			  << (handlable ? " [HANDLABLE]" : "")
-			  << (!errFreeNow ? " [ERROR]" : "")
-			  << std::endl;
+                          << asString(Options::debugTvP)
+                          << (handled ? " [HANDLED]" : "")
+                          << (handlable ? " [HANDLABLE]" : "")
+                          << (!errFreeNow ? " [ERROR]" : "")
+                          << std::endl;
       
       if (handled)
-	break;
+        break;
       if (handlable)
-	continue;
+        continue;
 
       // Step 2
       CHKERR(errFreeNow, handlePcst(errStream, trail, 
-				    pred, tcc, handled, handlable));
+                                    pred, tcc, handled, handlable));
       
       DEBUG(SOL) errStream << "\t[Sol 2] (pcst): " 
-			  << asString(Options::debugTvP)
-			  << (handled ? " [HANDLED]" : "")
-			  << (handlable ? " [HANDLABLE]" : "")
-			  << (!errFreeNow ? " [ERROR]" : "")
-			  << std::endl;
+                          << asString(Options::debugTvP)
+                          << (handled ? " [HANDLED]" : "")
+                          << (handlable ? " [HANDLABLE]" : "")
+                          << (!errFreeNow ? " [ERROR]" : "")
+                          << std::endl;
 
       if (handled)
-	break;
+        break;
       if (handlable)
-	continue;
+        continue;
       
       TypeSet dom = getDomain(pred);
       TypeSet vars = getDomVars(dom);
       bool ms = mustSolve(dom);
       if (ms) {
- 	// Step 3.a
-	CHKERR(errFreeNow, handleTCPred(errStream, trail, pred, tcc,
-					instEnv, ms, false, handled));
-	DEBUG(SOL) errStream << "\t[Sol 3.a] (must-solve): " 
-			    << asString(Options::debugTvP)
-			    << (handled ? " [HANDLED]" : "")
-			    << (handlable ? " [HANDLABLE]" : "")
-			    << (!errFreeNow ? " [ERROR]" : "")
-			    << std::endl;
+         // Step 3.a
+        CHKERR(errFreeNow, handleTCPred(errStream, trail, pred, tcc,
+                                        instEnv, ms, false, handled));
+        DEBUG(SOL) errStream << "\t[Sol 3.a] (must-solve): " 
+                            << asString(Options::debugTvP)
+                            << (handled ? " [HANDLED]" : "")
+                            << (handlable ? " [HANDLABLE]" : "")
+                            << (!errFreeNow ? " [ERROR]" : "")
+                            << std::endl;
 
-	if (handled)
-	  break;
+        if (handled)
+          break;
       }
       
       // Step 3.b.i
       rigidify(vars);
       handleTCPred(errStream, trail, pred, tcc,
-		   instEnv, ms, false, handled);
+                   instEnv, ms, false, handled);
       unrigidify(vars);
       DEBUG(SOL) errStream << "\t[Sol 3.b.i] (exact): " 
-			  << asString(Options::debugTvP)
-			  << (handled ? " [HANDLED]" : "")
-			  << (handlable ? " [HANDLABLE]" : "")
-			  << (!errFreeNow ? " [ERROR]" : "")
-			  << std::endl;
+                          << asString(Options::debugTvP)
+                          << (handled ? " [HANDLED]" : "")
+                          << (handlable ? " [HANDLABLE]" : "")
+                          << (!errFreeNow ? " [ERROR]" : "")
+                          << std::endl;
       if (handled)
-	break;
+        break;
       
       // Step 3.b.ii
       CHKERR(errFreeNow, handleTCPred(errStream, trail, pred, tcc,
-				      instEnv, false, true, handled));
+                                      instEnv, false, true, handled));
       DEBUG(SOL) errStream << "[Sol 3.b.ii] (solvability): " 
-			  << asString(Options::debugTvP)
-			  << (handled ? " [HANDLED]" : "")
-			  << (handlable ? " [HANDLABLE]" : "")
-			  << (!errFreeNow ? " [ERROR]" : "")
-			  << std::endl;
+                          << asString(Options::debugTvP)
+                          << (handled ? " [HANDLED]" : "")
+                          << (handlable ? " [HANDLABLE]" : "")
+                          << (!errFreeNow ? " [ERROR]" : "")
+                          << std::endl;
       if (handled)
-	break;
+        break;
       
       // Step 4
       CHKERR(errFreeNow, handleEquPreds(errStream, trail, 
-					pred, tcc, vars, handled));
+                                        pred, tcc, vars, handled));
       DEBUG(SOL) errStream << "[Sol 4] (equ-pred): " 
-			  << asString(Options::debugTvP)
-			  << (handled ? " [HANDLED]" : "")
-			  << (handlable ? " [HANDLABLE]" : "")
-			  << (!errFreeNow ? " [ERROR]" : "")
-			  << std::endl;      
+                          << asString(Options::debugTvP)
+                          << (handled ? " [HANDLED]" : "")
+                          << (handlable ? " [HANDLABLE]" : "")
+                          << (!errFreeNow ? " [ERROR]" : "")
+                          << std::endl;      
       if (handled)
-	break;
+        break;
       
       if (!errFreeNow)
-	assert(false);
+        assert(false);
     }
     
     if (!errFreeNow) {
       assert(handled);
       assert(errPred);
       errStream << errLoc << ": "
-		<< "Unsatisfiable Constraint: "
-		<< errPred->asString() 
-		<< std::endl; 
+                << "Unsatisfiable Constraint: "
+                << errPred->asString() 
+                << std::endl; 
     }
     
     CHKERR(errFree, errFreeNow);

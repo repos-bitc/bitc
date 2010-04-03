@@ -54,19 +54,19 @@ Trail::link(shared_ptr<Type> from, shared_ptr<Type> to)
   
   if (to->boundInType(from)) {
     std::cerr << "CYCLIC SUBSTITUTION "
-	      << from->asString(Options::debugTvP)
-	      << " |-> "
-	      << to->asString(Options::debugTvP)
-	      << std::endl;
+              << from->asString(Options::debugTvP)
+              << " |-> "
+              << to->asString(Options::debugTvP)
+              << std::endl;
     assert(false);
   }
 
   DEBUG(TRAIL) 
     std::cerr << "LINKING: "
-	      << from->asString(Options::debugTvP)
-	      << " |-> "
-	      << to->asString(Options::debugTvP)
-	      << std::endl;
+              << from->asString(Options::debugTvP)
+              << " |-> "
+              << to->asString(Options::debugTvP)
+              << std::endl;
   
   vec.push_back(from);   
   from->link = to; 
@@ -82,19 +82,19 @@ Trail::subst(shared_ptr<Type> from, shared_ptr<Type> to)
   
   if (to->boundInType(from)) {
     std::cerr << "CYCLIC SUBSTITUTION "
-	      << from->asString(Options::debugTvP)
-	      << " |-> "
-	      << to->asString(Options::debugTvP)
-	      << std::endl;
+              << from->asString(Options::debugTvP)
+              << " |-> "
+              << to->asString(Options::debugTvP)
+              << std::endl;
     assert(false);
   }
 
   DEBUG(TRAIL) 
     std::cerr << "SUBSTITUTING: "
-	      << from->asString(Options::debugTvP)
-	      << " |-> "
-	      << to->asString(Options::debugTvP)
-	      << std::endl;
+              << from->asString(Options::debugTvP)
+              << " |-> "
+              << to->asString(Options::debugTvP)
+              << std::endl;
 
   
   vec.push_back(from);   
@@ -110,8 +110,8 @@ Trail::rollBack(size_t upto)
     vec[i]->link = GC_NULL;
     DEBUG(TRAIL) 
       std::cerr << "[RB] Releasing: "
-		<< vec[i]->asString(Options::debugTvP)
-		<< std::endl;
+                << vec[i]->asString(Options::debugTvP)
+                << std::endl;
   }
 
   vec.erase(vec.begin() + upto, vec.end());
@@ -126,8 +126,8 @@ Trail::release(const size_t n, shared_ptr<Type> rel)
   
   DEBUG(TRAIL) 
     std::cerr << "[RB] Releasing: "
-	      << rel->asString(Options::debugTvP)
-	      << std::endl;
+              << rel->asString(Options::debugTvP)
+              << std::endl;
 
   vec.erase(vec.begin() + n);
 }

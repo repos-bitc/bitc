@@ -93,7 +93,7 @@ TCConstraints::addPred(shared_ptr<Typeclass> tc)
       // alpha-renaming is not allowed here. Addition of predcates is
       // not a unifying operation.
       if (tc->flags & TY_CT_SUBSUMED)
-	(*itr)->flags |= TY_CT_SUBSUMED;
+        (*itr)->flags |= TY_CT_SUBSUMED;
       return;
     }
   }

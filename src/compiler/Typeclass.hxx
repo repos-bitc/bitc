@@ -72,10 +72,10 @@ struct Instance {
   }
 
   bool equals(boost::shared_ptr<Instance> ins, 
-	      boost::shared_ptr<const InstEnvironment > instEnv) const;
+              boost::shared_ptr<const InstEnvironment > instEnv) const;
   bool overlaps(boost::shared_ptr<Instance> ins) const;
   bool satisfies(boost::shared_ptr<Typeclass> pred, 
-		 boost::shared_ptr<const InstEnvironment > instEnv) const;
+                 boost::shared_ptr<const InstEnvironment > instEnv) const;
   std::string asString();
 
   std::string asXML();
@@ -114,7 +114,7 @@ struct TCConstraints {
   // Compute the closure of all functional dependencies 
   // supplied in the vector
   static void close(TypeSet& closure,
-		    const TypeSet& fnDeps);
+                    const TypeSet& fnDeps);
   void clearHintsOnPreds(boost::shared_ptr<Trail> trail);  
 
   iterator begin() {

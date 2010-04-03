@@ -154,18 +154,18 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
     {
       string name;
       if (tvP)
-	name = tvP->tvName(t);
+        name = tvP->tvName(t);
       
       if (name == "'a")
-	out << "<tvar name='alpha'/>" << endl; 
+        out << "<tvar name='alpha'/>" << endl; 
       else if (name == "'b")
-	out << "<tvar name='beta'/>" << endl; 
+        out << "<tvar name='beta'/>" << endl; 
       else if (name == "'c")
-	out << "<tvar name='gamma'/>" << endl; 
+        out << "<tvar name='gamma'/>" << endl; 
       else if (name == "'d")
-	out << "<tvar name='delta'/>" << endl; 
+        out << "<tvar name='delta'/>" << endl; 
       else
-	out << "<tvar name='alpha' num='"<< t->uniqueID << "'/>" << endl; 
+        out << "<tvar name='alpha' num='"<< t->uniqueID << "'/>" << endl; 
       break;
     }
 
@@ -210,14 +210,14 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
   case ty_fnarg:
     {
       for (size_t i=0; i < t->components.size(); i++) {
-	if (t->CompFlags(i) & COMP_BYREF) {
-	  out << " <byref> ";
-	  t->CompType(i)->asXML(tvP, out);
-	  out << "<byref> ";
-	}
-	else {
-	  t->CompType(i)->minimizeMutability()->asXML(tvP, out);
-	}
+        if (t->CompFlags(i) & COMP_BYREF) {
+          out << " <byref> ";
+          t->CompType(i)->asXML(tvP, out);
+          out << "<byref> ";
+        }
+        else {
+          t->CompType(i)->minimizeMutability()->asXML(tvP, out);
+        }
       }
       break;
     }
@@ -250,10 +250,10 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
       out << "<struct inline='yes' name='" << printName(t->defAst) <<"'>" << endl; 
       out.more();
       for (size_t i=0; i < t->typeArgs.size(); i++)
-	t->TypeArg(i)->asXML(tvP, out);
+        t->TypeArg(i)->asXML(tvP, out);
       out.less();
       out << "</struct>" << endl;
-	break;
+        break;
     }
 
   case ty_unionv: 
@@ -266,7 +266,7 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
       out << "<union inline='yes' name='" << printName(t->myContainer) <<"'>" << endl; 
       out.more();
       for (size_t i=0; i < t->typeArgs.size(); i++)
-	t->TypeArg(i)->asXML(tvP, out);
+        t->TypeArg(i)->asXML(tvP, out);
       out.less();
       out << "</union>" << endl;
       break;
@@ -277,7 +277,7 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
       out << "<typeclass name='" << printName(t->defAst) <<"'>" << endl; 
       out.more();
       for (size_t i=0; i < t->typeArgs.size(); i++)
-	t->TypeArg(i)->asXML(tvP, out);
+        t->TypeArg(i)->asXML(tvP, out);
       out.less();
       out << "</typeclass>" << endl;
       break;
@@ -337,12 +337,12 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
   case ty_mbFull:
     {
       out << ((t->kind == ty_mbFull) ? "<MBPAIR>" : "<mbpair>") 
-	  << endl;
+          << endl;
       out.more();
       t->Var()->asXML(tvP, out);
       t->Core()->asXML(tvP, out);
       out << ((t->kind == ty_mbFull) ? "</MBPAIR>" : "</mbpair>") 
-	  << endl;
+          << endl;
       break;
     }
 
@@ -374,18 +374,18 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
       t->CompType(1)->asXML(tvP, out);
       out << "</pcst>" << endl; 
       for (size_t i=0; i<t->components.size(); i++)
-	t->CompType(i)->asXML(tvP, out);
+        t->CompType(i)->asXML(tvP, out);
       break;
     }
 
   case ty_kfix:
     {
       if (t == Type::Kmono)
-	out << "<lKind k='mono'/>" << endl; 
+        out << "<lKind k='mono'/>" << endl; 
       else if (t == Type::Kpoly)
-	out << "<lKind k='poly'/>" << endl; 
+        out << "<lKind k='poly'/>" << endl; 
       else
-	assert(false);
+        assert(false);
       break;
     }
 
@@ -442,9 +442,9 @@ TypeScheme::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
   out.more();
   if (_tcc->size()) {
     for (TypeSet::iterator itr = _tcc->begin();
-	itr != _tcc->end(); ++itr)
+        itr != _tcc->end(); ++itr)
       if (mustShowPred((*itr)))
-	(*itr)->asXML(tvP);
+        (*itr)->asXML(tvP);
   }
   
   tau->asXML(tvP, out);

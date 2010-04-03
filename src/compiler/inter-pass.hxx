@@ -71,18 +71,18 @@ enum ResolutionMode {
 };
 
 #define CHKERR(noerr, exp) \
-  do {			   \
-    bool ans = (exp);	   \
-    if (ans == false)	   \
-      (noerr) = false;	   \
+  do {                           \
+    bool ans = (exp);           \
+    if (ans == false)           \
+      (noerr) = false;           \
   }while (0)
 
-#define BE_CHKERR(noerr, exp)	 \
-  do {				 \
-    bool ans = (exp);		 \
-    assert(ans);		 \
-    if (ans == false)		 \
-      (noerr) = false;		 \
+#define BE_CHKERR(noerr, exp)         \
+  do {                                 \
+    bool ans = (exp);                 \
+    assert(ans);                 \
+    if (ans == false)                 \
+      (noerr) = false;                 \
   }while (0)
 
 // Final expression of a let
@@ -96,8 +96,8 @@ enum ResolutionMode {
 #define IGNORE(ast) ((size_t)(((ast)->astType == at_switch)?0:1))
 
 void BitcP(std::ostream& out,
-	   const boost::shared_ptr<AST> ast,
-	   bool showTypes);
+           const boost::shared_ptr<AST> ast,
+           bool showTypes);
 
 void addDecl(boost::shared_ptr<AST> decl);
 extern void fatal();

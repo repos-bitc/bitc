@@ -62,11 +62,11 @@ using namespace sherpa;
 using namespace std;
 
 bool isExpansive(std::ostream& errStream, 
-		shared_ptr<const TSEnvironment > gamma,
-		shared_ptr<const AST> ast);
+                shared_ptr<const TSEnvironment > gamma,
+                shared_ptr<const AST> ast);
 bool isExpansive(std::ostream& errStream, 
-		 shared_ptr<const TSEnvironment > gamma,
-		 shared_ptr<Type> typ);
+                 shared_ptr<const TSEnvironment > gamma,
+                 shared_ptr<Type> typ);
 
 /**********************************************************
  **********************************************************
@@ -114,17 +114,17 @@ Type::boundInGamma(shared_ptr<const TSEnvironment > gamma)
   shared_ptr<Type> tvar = getType();
   while (gamma) {
     for (TSEnvironment::const_iterator itr = gamma->begin();
-	itr != gamma->end(); ++itr) {
+        itr != gamma->end(); ++itr) {
       shared_ptr<TypeScheme> sigma = itr->second->val;
 
       for (TypeSet::iterator tv = sigma->ftvs.begin();
-	   tv != sigma->ftvs.end(); ++tv) {
-	if ((*tv)->uniqueID == tvar->uniqueID)
-	  return true;
+           tv != sigma->ftvs.end(); ++tv) {
+        if ((*tv)->uniqueID == tvar->uniqueID)
+          return true;
       }
       
       if (sigma->tau->boundInType(tvar))
-	return true;
+        return true;
     }
     
     gamma = gamma->parent;
@@ -157,7 +157,7 @@ Type::collectAllftvs(TypeSet& tvs)
       t->TypeArg(i)->collectAllftvs(tvs);
 
     for (TypeSet::iterator itr = t->fnDeps.begin();
-	itr != t->fnDeps.end(); ++itr)
+        itr != t->fnDeps.end(); ++itr)
       (*itr)->collectAllftvs(tvs);
   }
 
@@ -171,7 +171,7 @@ TypeScheme::collectAllFtvs()
   tau->collectAllftvs(ftvs);  
   if (tcc) {
     for (TypeSet::iterator itr = tcc->begin();
-	itr != tcc->end(); ++itr)
+        itr != tcc->end(); ++itr)
       (*itr)->collectAllftvs(ftvs);      
   }  
 }
@@ -180,7 +180,7 @@ TypeScheme::collectAllFtvs()
 // that are unbound in gamma
 void
 Type::collectftvsWrtGamma(TypeSet& tvs,
-			  shared_ptr<const TSEnvironment > gamma)
+                          shared_ptr<const TSEnvironment > gamma)
 {   
   shared_ptr<Type> t = getType();
 
@@ -202,7 +202,7 @@ Type::collectftvsWrtGamma(TypeSet& tvs,
       t->TypeArg(i)->collectftvsWrtGamma(tvs, gamma);
 
     for (TypeSet::iterator itr = t->fnDeps.begin();
-	itr != t->fnDeps.end(); ++itr)
+        itr != t->fnDeps.end(); ++itr)
       (*itr)->collectftvsWrtGamma(tvs, gamma);
   }
 
@@ -215,8 +215,8 @@ Type::collectftvsWrtGamma(TypeSet& tvs,
 // Functional Dependencies
 static void
 remftvsWrtFnDeps(TypeSet &ftvs,
-		 TypeSet fnDeps,
-		 shared_ptr<const TSEnvironment > gamma)
+                 TypeSet fnDeps,
+                 shared_ptr<const TSEnvironment > gamma)
 {
   // closure wrt tvs in fnDeps influenced by Gamma.
   TypeSet closure;
@@ -227,10 +227,10 @@ remftvsWrtFnDeps(TypeSet &ftvs,
     TypeSet tvs;
     fnDep->collectAllftvs(tvs);
     for (TypeSet::iterator itr_j = tvs.begin();
-	itr_j != tvs.end(); ++itr_j) {
+        itr_j != tvs.end(); ++itr_j) {
       shared_ptr<Type> tv = (*itr_j);
       if (tv->boundInGamma(gamma))
-	closure.insert(tv);
+        closure.insert(tv);
     }
   }
 
@@ -257,7 +257,7 @@ TypeScheme::collectftvs(shared_ptr<const TSEnvironment > gamma)
   tau->collectftvsWrtGamma(ftvs, gamma);  
   if (tcc) {    
     for (TypeSet::iterator itr = tcc->begin();
-	itr != tcc->end(); ++itr) {
+        itr != tcc->end(); ++itr) {
       shared_ptr<Typeclass> pred = (*itr);
       pred->collectftvsWrtGamma(ftvs, gamma);  
     }
@@ -291,21 +291,21 @@ TypeScheme::removeUnInstFtvs()
 
     bool mustAdd=false;
     for (TypeSet::iterator itr_c = ftvs.begin();
-	itr_c != ftvs.end(); ++itr_c) {
+        itr_c != ftvs.end(); ++itr_c) {
       shared_ptr<Type> ftv = (*itr_c)->getType();
       if (ct->boundInType(ftv) && (ftv->flags & TY_CLOS)) {
-	mustAdd = true;
-	break;
+        mustAdd = true;
+        break;
       }
     }
 
     if (mustAdd) {
       for (TypeSet::iterator itr_c = ftvs.begin();
-	  itr_c != ftvs.end(); ++itr_c) {
-	shared_ptr<Type> ftv = (*itr_c)->getType();
-	
-	if (ct->boundInType(ftv))
-	  ftv->flags |= TY_CLOS;
+          itr_c != ftvs.end(); ++itr_c) {
+        shared_ptr<Type> ftv = (*itr_c)->getType();
+        
+        if (ct->boundInType(ftv))
+          ftv->flags |= TY_CLOS;
       }
     }
   }
@@ -488,14 +488,14 @@ static bool genSteps[6][11] = {
 
 bool
 TypeScheme::generalize(std::ostream& errStream, 
-		       const LexLoc &errLoc,
-		       shared_ptr<const TSEnvironment > gamma,
-		       shared_ptr<const InstEnvironment >
-		       instEnv, 
-		       shared_ptr<const AST> expr, 
-		       shared_ptr<TCConstraints> parentTCC,
-		       shared_ptr<Trail> trail,
-		       GeneralizeMode mode)
+                       const LexLoc &errLoc,
+                       shared_ptr<const TSEnvironment > gamma,
+                       shared_ptr<const InstEnvironment >
+                       instEnv, 
+                       shared_ptr<const AST> expr, 
+                       shared_ptr<TCConstraints> parentTCC,
+                       shared_ptr<Trail> trail,
+                       GeneralizeMode mode)
 {
   bool errFree = true;  
   bool exprExpansive=false;
@@ -505,10 +505,10 @@ TypeScheme::generalize(std::ostream& errStream,
   bool rem2=false;
 
   DEBUG(GEN) errStream << "To Generalize " 
-		      << asString(Options::debugTvP)
-		      << " for expression "
-		      << expr->asString() 
-		      << std::endl;
+                      << asString(Options::debugTvP)
+                      << " for expression "
+                      << expr->asString() 
+                      << std::endl;
   
   DEBUG(GEN_TL) if (mode == gen_top)
     mode = gen_local;
@@ -537,18 +537,18 @@ TypeScheme::generalize(std::ostream& errStream,
     tau->adjMaybe(trail, false, true);
 
     DEBUG(GEN) errStream << "[0] Heuristic Adjustment " 
-			<< asString(Options::debugTvP)
-			<< std::endl;
+                        << asString(Options::debugTvP)
+                        << std::endl;
   }
 
   // Step 1
   GEN_STEP(mode, gs_solve) {
     CHKERR(errFree, solvePredicates(errStream, errLoc, 
-				    instEnv, trail)); 
+                                    instEnv, trail)); 
     
     DEBUG(GEN) errStream << "[1] Solve: " 
-			<< asString(Options::debugTvP)
-			<< std::endl;
+                        << asString(Options::debugTvP)
+                        << std::endl;
   }
 
   // Step 2
@@ -561,8 +561,8 @@ TypeScheme::generalize(std::ostream& errStream,
       tcc->addPred(pcst);
       
       DEBUG(GEN) errStream << "[2] With Pcst: " 
-			  << asString(Options::debugTvP)
-			  << std::endl;
+                          << asString(Options::debugTvP)
+                          << std::endl;
       
     }
   }
@@ -573,10 +573,10 @@ TypeScheme::generalize(std::ostream& errStream,
 
     bool cleared = false;
     for (TypeSet::iterator itr = tcc->begin();
-	itr != tcc->end(); ++itr) {
+        itr != tcc->end(); ++itr) {
       shared_ptr<Type> pred = (*itr);
       if (!pred->isPcst())
-	continue;
+        continue;
 
       cleared = true;
       shared_ptr<Type> k = pred->CompType(0)->getType();
@@ -585,8 +585,8 @@ TypeScheme::generalize(std::ostream& errStream,
       
       assert(k != Type::Kmono);
       if (k->kind == ty_kvar) {
-	trail->subst(k, Type::Kpoly);
-	k = k->getType();
+        trail->subst(k, Type::Kpoly);
+        k = k->getType();
       }
       assert(k == Type::Kpoly);
       
@@ -601,19 +601,19 @@ TypeScheme::generalize(std::ostream& errStream,
       tcc->pred.clear();
       
       for (TypeSet::iterator itr = oldPreds.begin();
-	  itr != oldPreds.end(); ++itr) {
-	shared_ptr<Type> pred = (*itr);
-	if (!pred->isPcst())
-	  tcc->addPred(pred);
+          itr != oldPreds.end(); ++itr) {
+        shared_ptr<Type> pred = (*itr);
+        if (!pred->isPcst())
+          tcc->addPred(pred);
       }
       
       CHKERR(errFree, solvePredicates(errStream, errLoc, 
-				      instEnv, trail)); 
+                                      instEnv, trail)); 
     }
 
     DEBUG(GEN) errStream << "[3] Top-Fix: " 
-			<< asString(Options::debugTvP)
-			<< std::endl;
+                        << asString(Options::debugTvP)
+                        << std::endl;
   }
   
   // Step 4
@@ -629,9 +629,9 @@ TypeScheme::generalize(std::ostream& errStream,
       collectftvs(gamma);
     
     DEBUG(GEN) errStream << "[5] Generalize: " 
-			<< ((expansive) ? " {Expansive} " : " {Value} ")
-			<< asString(Options::debugTvP)
-			<< std::endl;    
+                        << ((expansive) ? " {Expansive} " : " {Value} ")
+                        << asString(Options::debugTvP)
+                        << std::endl;    
   }
   
   // Step 6
@@ -640,8 +640,8 @@ TypeScheme::generalize(std::ostream& errStream,
       rem1 = removeUnInstFtvs();
     
       DEBUG(GEN) errStream << "[6] Remove Uninst-Ftvs: " 
-			  << asString(Options::debugTvP)
-			  << std::endl;
+                          << asString(Options::debugTvP)
+                          << std::endl;
     }
   }
   
@@ -651,19 +651,19 @@ TypeScheme::generalize(std::ostream& errStream,
       rem2 = normalizeConstruction(trail);
       
       DEBUG(GEN) errStream << "[7] Construction Normalization: " 
-			  << asString(Options::debugTvP)
-			  << std::endl;
+                          << asString(Options::debugTvP)
+                          << std::endl;
     }
   }
   
   GEN_STEP2(mode, gs_ctrNorm, gs_fnNorm) {
     if (rem1 || rem2)
       CHKERR(errFree, solvePredicates(errStream, errLoc, 
-				      instEnv, trail)); 
+                                      instEnv, trail)); 
     
     DEBUG(GEN) errStream << "[7#] Re-Solve: " 
-			<< asString(Options::debugTvP)
-			<< std::endl;
+                        << asString(Options::debugTvP)
+                        << std::endl;
   }
   
   // Step 8
@@ -672,23 +672,23 @@ TypeScheme::generalize(std::ostream& errStream,
       collectftvs(gamma);
 
       if (ftvs.size()) {
-	TypeSet dummys = ftvs;
-	ftvs.clear();
-	
-	for (TypeSet::iterator itr = dummys.begin();
-	    itr != dummys.end(); ++itr) {
-	  shared_ptr<Type> ftv = (*itr)->getType();
-	  ftv->link = Type::make(ty_dummy);
-	}
-	
-	errStream << errLoc << ": WARNING: The type of"
-		  << " this toplevel definition "
-		  << expr->asString() << " "
-		  << " cannot be fully generalized"
-		  << " due to the value restriction."
-		  << " The type obtained is: "
-		  << tau->asString() << "."
-		  << std::endl;    
+        TypeSet dummys = ftvs;
+        ftvs.clear();
+        
+        for (TypeSet::iterator itr = dummys.begin();
+            itr != dummys.end(); ++itr) {
+          shared_ptr<Type> ftv = (*itr)->getType();
+          ftv->link = Type::make(ty_dummy);
+        }
+        
+        errStream << errLoc << ": WARNING: The type of"
+                  << " this toplevel definition "
+                  << expr->asString() << " "
+                  << " cannot be fully generalized"
+                  << " due to the value restriction."
+                  << " The type obtained is: "
+                  << tau->asString() << "."
+                  << std::endl;    
       }
     }
   }
@@ -697,8 +697,8 @@ TypeScheme::generalize(std::ostream& errStream,
   GEN_STEP(mode, gs_migrate) {
     migratePredicates(parentTCC);
     DEBUG(GEN) errStream << "[9] Migrated Constraints: " 
-			<< asString(Options::debugTvP)
-			<< std::endl;
+                        << asString(Options::debugTvP)
+                        << std::endl;
   }
 
   // Step 10
@@ -706,9 +706,9 @@ TypeScheme::generalize(std::ostream& errStream,
     CHKERR(errFree, checkAmbiguity(errStream, errLoc));
     
     DEBUG(GEN) errStream << "FINAL: " 
-			<< asString(Options::debugTvP)
-			<< std::endl 
-			<< std::endl;
+                        << asString(Options::debugTvP)
+                        << std::endl 
+                        << std::endl;
   }
   
   return errFree;
@@ -722,7 +722,7 @@ TypeScheme::generalize(std::ostream& errStream,
 /* Helper routines to generalize a pattern */
 static void
 updateSigmas(shared_ptr<const AST> bp, const TypeSet& ftvs,
-	     shared_ptr<TCConstraints> tcc)
+             shared_ptr<TCConstraints> tcc)
 {
   switch(bp->astType) {
   case at_identPattern:
@@ -733,21 +733,21 @@ updateSigmas(shared_ptr<const AST> bp, const TypeSet& ftvs,
       shared_ptr<Type> tau = sigma->tau;;
       
       for (TypeSet::iterator itr_i = ftvs.begin();
-	  itr_i != ftvs.end(); ++itr_i) {
-	if (tau->boundInType(*itr_i)) {
-	  sigma->ftvs.insert(*itr_i);
-	  continue;
-	}
-	
-	if (tcc)
-	  for (TypeSet::iterator itr = tcc->begin();
-	      itr != tcc->end(); ++itr) {
-	    shared_ptr<Constraint> pred = (*itr);
-	    if (pred->boundInType(*itr_i)) {
-	      sigma->ftvs.insert(*itr_i);
-	      break;
-	    }
-	  }
+          itr_i != ftvs.end(); ++itr_i) {
+        if (tau->boundInType(*itr_i)) {
+          sigma->ftvs.insert(*itr_i);
+          continue;
+        }
+        
+        if (tcc)
+          for (TypeSet::iterator itr = tcc->begin();
+              itr != tcc->end(); ++itr) {
+            shared_ptr<Constraint> pred = (*itr);
+            if (pred->boundInType(*itr_i)) {
+              sigma->ftvs.insert(*itr_i);
+              break;
+            }
+          }
       }
       
       sigma->tcc = tcc;
@@ -757,7 +757,7 @@ updateSigmas(shared_ptr<const AST> bp, const TypeSet& ftvs,
   case at_letGather:
     {
       for (size_t c = 0; c < bp->children.size(); c++)
-	updateSigmas(bp->child(c), ftvs, tcc);
+        updateSigmas(bp->child(c), ftvs, tcc);
       break;
     }
 
@@ -771,13 +771,13 @@ updateSigmas(shared_ptr<const AST> bp, const TypeSet& ftvs,
 
 bool
 generalizePat(std::ostream& errStream,
-	      const LexLoc &errLoc,
-	      shared_ptr<TSEnvironment > gamma,
-	      shared_ptr<const InstEnvironment > instEnv,
-	      shared_ptr<AST> bp, shared_ptr<AST> expr,
-	      shared_ptr<TCConstraints> tcc,
-	      shared_ptr<TCConstraints> parentTCC,
-	      shared_ptr<Trail> trail)
+              const LexLoc &errLoc,
+              shared_ptr<TSEnvironment > gamma,
+              shared_ptr<const InstEnvironment > instEnv,
+              shared_ptr<AST> bp, shared_ptr<AST> expr,
+              shared_ptr<TCConstraints> tcc,
+              shared_ptr<TCConstraints> parentTCC,
+              shared_ptr<Trail> trail)
 {
   bool errFree = true;
 
@@ -787,9 +787,9 @@ generalizePat(std::ostream& errStream,
   shared_ptr<TypeScheme> sigma = TypeScheme::make(bp->symType, bp, tcc);
 
   CHKERR(errFree, 
-	 sigma->generalize(errStream, errLoc, 
-			   gamma, instEnv, expr, parentTCC,
-			   trail, gen_local));
+         sigma->generalize(errStream, errLoc, 
+                           gamma, instEnv, expr, parentTCC,
+                           trail, gen_local));
   
   updateSigmas(bp, sigma->ftvs, tcc);
 
@@ -842,12 +842,12 @@ TypeScheme::migratePredicates(shared_ptr<TCConstraints> parentTCC)
     
     bool hasFtv = false;
     for (TypeSet::iterator itr_j = allFtvs.begin();
-	itr_j != allFtvs.end(); ++itr_j) {
+        itr_j != allFtvs.end(); ++itr_j) {
       shared_ptr<Type> ftv = (*itr_j)->getType();
       
       if (ftvs.find(ftv) != ftvs.end()) {
-	hasFtv = true;
-	break;
+        hasFtv = true;
+        break;
       }
     }
     
@@ -940,33 +940,33 @@ TypeScheme::checkAmbiguity(std::ostream &errStream, const LexLoc &errLoc)
       // ftv must be bound in some predicate.
 
       for (size_t c=0; c < tcc->size(); c++) {
-	shared_ptr<Typeclass> pred = tcc->Pred(c);
-	if (pred->isPcst())
-	  continue;
-	
-	// The ftv is bound in a type-class predicate.
-	if (pred->boundInType(ftv)) {
-	  errStream << errLoc << ": "
-		    << "Type variable "
-		    << ftv->asString(Options::debugTvP)
-		    << " unbound in "
-		    << tau->asString(Options::debugTvP)
-		    << " wrt "
-		    << asString(Options::debugTvP)
-		    << std::endl;
-	  
-	  errFree = false;
-	  break;
-	}
+        shared_ptr<Typeclass> pred = tcc->Pred(c);
+        if (pred->isPcst())
+          continue;
+        
+        // The ftv is bound in a type-class predicate.
+        if (pred->boundInType(ftv)) {
+          errStream << errLoc << ": "
+                    << "Type variable "
+                    << ftv->asString(Options::debugTvP)
+                    << " unbound in "
+                    << tau->asString(Options::debugTvP)
+                    << " wrt "
+                    << asString(Options::debugTvP)
+                    << std::endl;
+          
+          errFree = false;
+          break;
+        }
       }
     }
   }
 
   if (!errFree)
     errStream << errLoc << ": "
-	      << "Ambiguous type definition:"
-	      << asString()
-	      << std::endl;
+              << "Ambiguous type definition:"
+              << asString()
+              << std::endl;
   return errFree;
 #else
   return true;
@@ -988,7 +988,7 @@ TypeScheme::checkAmbiguity(std::ostream &errStream, const LexLoc &errLoc)
 
 shared_ptr<Type> 
 Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
-			 std::vector<boost::shared_ptr<Type> >& nftvs)
+                         std::vector<boost::shared_ptr<Type> >& nftvs)
 {
   shared_ptr<Type> t = getType();
   shared_ptr<Type> theType = Type::make(t);
@@ -998,8 +998,8 @@ Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
   shared_ptr<Type> retType = theType;
   
   DEBUG(INS) std::cout << "To Specialize " 
-		      << this->asString()  
-		      << std::endl;  
+                      << this->asString()  
+                      << std::endl;  
 
   if (t->sp)
     retType = t->sp;
@@ -1009,78 +1009,78 @@ Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
     switch(t->kind) {    
     case ty_kvar:
       {
-	retType = t;
-	break;
+        retType = t;
+        break;
       }
     case ty_pcst:
       {
-	// the let-kind and generic type are added as is.
-	theType->components.push_back(comp::make(t->CompType(0)));
-	theType->components.push_back(comp::make(t->CompType(1)));
-	// The instance of the constraint is specialized.
-	shared_ptr<Type> ins = t->CompType(2)->TypeSpecializeReal(ftvs, nftvs);
-	theType->components.push_back(comp::make(ins));
-	break;
+        // the let-kind and generic type are added as is.
+        theType->components.push_back(comp::make(t->CompType(0)));
+        theType->components.push_back(comp::make(t->CompType(1)));
+        // The instance of the constraint is specialized.
+        shared_ptr<Type> ins = t->CompType(2)->TypeSpecializeReal(ftvs, nftvs);
+        theType->components.push_back(comp::make(ins));
+        break;
       }
     case ty_tvar:
       {
-	size_t i=0;
-	for (i=0; i<ftvs.size(); i++) {
-	  shared_ptr<Type> ftv = ftvs[i]->getType();	  
-	  if (ftv->kind == ty_tvar && t->uniqueID == ftv->uniqueID) {
-	    theType->link = nftvs[i]; 
-	    break;
-	  }
-	}
-	
-	// If the variable was NOT in ftv list, then 
-	// we should link it to the original, in order to honor
-	// variable capture
-	if (i == ftvs.size())
-	  theType->link = t;
-      	break;
+        size_t i=0;
+        for (i=0; i<ftvs.size(); i++) {
+          shared_ptr<Type> ftv = ftvs[i]->getType();          
+          if (ftv->kind == ty_tvar && t->uniqueID == ftv->uniqueID) {
+            theType->link = nftvs[i]; 
+            break;
+          }
+        }
+        
+        // If the variable was NOT in ftv list, then 
+        // we should link it to the original, in order to honor
+        // variable capture
+        if (i == ftvs.size())
+          theType->link = t;
+              break;
       }
 
     default:
       {      
-	/* Deal with Type-args */
-	for (size_t i=0; i<t->typeArgs.size(); i++) {
-	  shared_ptr<Type> arg = t->TypeArg(i)->getType();
-	  shared_ptr<Type> newArg = arg->TypeSpecializeReal(ftvs, nftvs);
-	  
-	  theType->typeArgs.push_back(newArg);
-	}
+        /* Deal with Type-args */
+        for (size_t i=0; i<t->typeArgs.size(); i++) {
+          shared_ptr<Type> arg = t->TypeArg(i)->getType();
+          shared_ptr<Type> newArg = arg->TypeSpecializeReal(ftvs, nftvs);
+          
+          theType->typeArgs.push_back(newArg);
+        }
             
-	/* Deal with Components */
-	for (size_t i=0; i<t->components.size(); i++) {
-	  shared_ptr<comp> nComp = 
-	    comp::make(t->CompName(i),
-		       t->CompType(i)->TypeSpecializeReal(ftvs, nftvs),
-		       t->CompFlags(i));
-	  theType->components.push_back(nComp);
-	}
+        /* Deal with Components */
+        for (size_t i=0; i<t->components.size(); i++) {
+          shared_ptr<comp> nComp = 
+            comp::make(t->CompName(i),
+                       t->CompType(i)->TypeSpecializeReal(ftvs, nftvs),
+                       t->CompFlags(i));
+          theType->components.push_back(nComp);
+        }
 
-	/* Deal with fnDeps if any */
-	if (t->fnDeps.size()) {
-	  theType->fnDeps.clear();
+        /* Deal with fnDeps if any */
+        if (t->fnDeps.size()) {
+          theType->fnDeps.clear();
 
-	  for (TypeSet::iterator itr = t->fnDeps.begin();
-	      itr != t->fnDeps.end(); ++itr) {
-	    shared_ptr<Type> fnDep = (*itr)->TypeSpecializeReal(ftvs, nftvs);
-	    theType->addFnDep(fnDep);
-	  }
-	}
-	
-	break;
+          for (TypeSet::iterator itr = t->fnDeps.begin();
+              itr != t->fnDeps.end(); ++itr) {
+            shared_ptr<Type> fnDep = (*itr)->TypeSpecializeReal(ftvs, nftvs);
+            theType->addFnDep(fnDep);
+          }
+        }
+        
+        break;
       }      
     }
   }
   
   DEBUG(INS) std::cout << "\t Specialized " 
-		      << getType()->asString(GC_NULL)
-		      << " to " 
-		      << retType->getType()->asString(GC_NULL)
-		      << std::endl;
+                      << getType()->asString(GC_NULL)
+                      << " to " 
+                      << retType->getType()->asString(GC_NULL)
+                      << std::endl;
   
   return retType;
 }
@@ -1112,7 +1112,7 @@ Type::clear_sp()
 
 shared_ptr<Type> 
 Type::TypeSpecialize(const std::vector<boost::shared_ptr<Type> >& ftvs,
-		     std::vector<boost::shared_ptr<Type> >& nftvs)
+                     std::vector<boost::shared_ptr<Type> >& nftvs)
 {
   shared_ptr<Type> specializedType = TypeSpecializeReal(ftvs, nftvs);
   clear_sp();

@@ -92,21 +92,21 @@ class UocInfo;
 struct PassInfo {
   const char *name;
   bool (UocInfo::* fn)(std::ostream& errStream, 
-		       bool init, unsigned long flags);
+                       bool init, unsigned long flags);
   const char *descrip;
-  bool printAfter;		// for debugging
-  bool typesAfter;		// for debugging
-  bool stopAfter;		// for debugging
+  bool printAfter;                // for debugging
+  bool typesAfter;                // for debugging
+  bool stopAfter;                // for debugging
 };
 
 struct OnePassInfo {
   const char *name;
   bool (UocInfo::* fn)(std::ostream& errStream, 
-		       bool init, unsigned long flags);
+                       bool init, unsigned long flags);
   const char *descrip;
-  bool printAfter;		// for debugging
-  bool typesAfter;		// for debugging
-  bool stopAfter;		// for debugging
+  bool printAfter;                // for debugging
+  bool typesAfter;                // for debugging
+  bool stopAfter;                // for debugging
 };
 
 
@@ -121,8 +121,8 @@ class UocInfo : public boost::enable_shared_from_this<UocInfo> {
   static boost::filesystem::path resolveInterfacePath(std::string ifName);
 
 public:
-  std::string uocName;		// either ifName or simulated
-  std::string origin;		// typically the file name
+  std::string uocName;                // either ifName or simulated
+  std::string origin;                // typically the file name
   UocFlags flags;
   
   Pass lastCompletedPass;
@@ -143,12 +143,12 @@ public:
 
   
   UocInfo(const std::string& _uocName, const std::string& _origin, 
-	  boost::shared_ptr<AST> _uocAst);
+          boost::shared_ptr<AST> _uocAst);
   UocInfo(boost::shared_ptr<UocInfo> uoc);
 
   static inline boost::shared_ptr<UocInfo>
   make(const std::string& _uocName, const std::string& _origin, 
-	  boost::shared_ptr<AST> _uocAst) {
+          boost::shared_ptr<AST> _uocAst) {
     UocInfo *tmp = new UocInfo(_uocName, _origin, _uocAst);
     return boost::shared_ptr<UocInfo>(tmp);
   }
@@ -180,7 +180,7 @@ public:
 
   static boost::shared_ptr<UocInfo> 
   importInterface(std::ostream&, const sherpa::LexLoc& loc, 
-		  const std::string& ifName);
+                  const std::string& ifName);
 
   // This is only used within the parser, and perhaps should not be
   // part of UocInfo.
@@ -199,14 +199,14 @@ public:
   CompileFromFile(const boost::filesystem::path& src, bool fromCmdLine);
 
   // Individual passes:
-#define PASS(nm,short,descrip)				  \
-  bool fe_##nm(std::ostream& errStream,			  \
-	       bool init=true, unsigned long flags=0);
+#define PASS(nm,short,descrip)                                  \
+  bool fe_##nm(std::ostream& errStream,                          \
+               bool init=true, unsigned long flags=0);
 #include "pass.def"
 
-#define ONEPASS(nm,short,descrip)				\
-  bool be_##nm(std::ostream& errStream,				\
-	       bool init=true, unsigned long flags=0);
+#define ONEPASS(nm,short,descrip)                                \
+  bool be_##nm(std::ostream& errStream,                                \
+               bool init=true, unsigned long flags=0);
 #include "onepass.def"  
 
   static PassInfo passInfo[];  
@@ -226,8 +226,8 @@ public:
   //
   //////////////////////////////////////////////////////
   void findDefForms(boost::shared_ptr<AST> start, 
-		    boost::shared_ptr<AST> local=boost::GC_NULL, 
-		    boost::shared_ptr<AST> top=boost::GC_NULL);
+                    boost::shared_ptr<AST> local=boost::GC_NULL, 
+                    boost::shared_ptr<AST> top=boost::GC_NULL);
   static void findAllDefForms();
   
   // Add all candidate Entry-points to the entry-point vectror
@@ -248,8 +248,8 @@ public:
 
 // RandT flags used by passes past polyinstantiation. 
 #define POLY_SYM_FLAGS (OP_SYM_FLAGS)
-#define POLY_TYP_FLAGS (OP_TYP_FLAGS | TI_NO_MORE_TC |		\
-			TI_DEF_DECL_NO_MATCH | TI_USING_FQNS)
+#define POLY_TYP_FLAGS (OP_TYP_FLAGS | TI_NO_MORE_TC |                \
+                        TI_DEF_DECL_NO_MATCH | TI_USING_FQNS)
   
 // RandT flags used by passes Refization pass of Closure-conversion.
 #define REF_SYM_FLAGS (POLY_SYM_FLAGS | RSLV_INCOMPLETE_NO_CHK)
@@ -261,33 +261,33 @@ public:
 
 
   bool DoResolve(std::ostream& errStream, bool init, 
-	       ResolverFlags rflags);
+               ResolverFlags rflags);
 
   bool Resolve(std::ostream& errStream, bool init, 
-	       ResolverFlags rflags, std::string pre);
+               ResolverFlags rflags, std::string pre);
 
   bool 
   DoTypeCheck(std::ostream& errStream, bool init, 
-	      bool &rewrite, TI_Flags ti_flags);
+              bool &rewrite, TI_Flags ti_flags);
   
   bool 
   TypeCheck(std::ostream& errStream, bool init, 
-	    bool& rewrite, TI_Flags ti_flags, std::string pre);
+            bool& rewrite, TI_Flags ti_flags, std::string pre);
   
   bool RandT(std::ostream& errStream,
-	     bool init=false, 
-	     ResolverFlags rflags= RSLV_NO_FLAGS,
-	     TI_Flags ti_flags=TI_NO_FLAGS,
-	     std::string pre = "Internal Compiler error :");
+             bool init=false, 
+             ResolverFlags rflags= RSLV_NO_FLAGS,
+             TI_Flags ti_flags=TI_NO_FLAGS,
+             std::string pre = "Internal Compiler error :");
 
   bool RandTexpr(std::ostream& errStream,
-		 boost::shared_ptr<AST> ast,
-		 bool &rewrite,
-		 ResolverFlags rflags= RSLV_NO_FLAGS,
-		 TI_Flags ti_flags=TI_NO_FLAGS,
-		 std::string pre = "Internal Compiler error :",
-		 bool keepResults = true,
-		 boost::shared_ptr<EnvSet> altEnvSet=boost::GC_NULL);
+                 boost::shared_ptr<AST> ast,
+                 bool &rewrite,
+                 ResolverFlags rflags= RSLV_NO_FLAGS,
+                 TI_Flags ti_flags=TI_NO_FLAGS,
+                 std::string pre = "Internal Compiler error :",
+                 bool keepResults = true,
+                 boost::shared_ptr<EnvSet> altEnvSet=boost::GC_NULL);
 
   //////////////////////////////////////////////////////
   //
@@ -295,36 +295,36 @@ public:
   //
   //////////////////////////////////////////////////////
   static boost::shared_ptr<AST> lookupByFqn(const FQName& fqn, 
-			  boost::shared_ptr<UocInfo> &targetUoc);
+                          boost::shared_ptr<UocInfo> &targetUoc);
   
 
 private:
   void addTopLevelForm(boost::shared_ptr<AST> ast); // Add a new Top-level form
 
   bool instantiateFQN(std::ostream &errStream, 
-		      const FQName& fqn);
+                      const FQName& fqn);
 
   // The main AST specializer/ instantiator
   boost::shared_ptr<AST> doInstantiate(std::ostream &errStream, 
-		     boost::shared_ptr<AST> defAST, 
-		     boost::shared_ptr<Type> typ,
-		     bool &errFree,
-		     WorkList<std::string>& worklist);
+                     boost::shared_ptr<AST> defAST, 
+                     boost::shared_ptr<Type> typ,
+                     bool &errFree,
+                     WorkList<std::string>& worklist);
 
   boost::shared_ptr<AST> recInstantiate(std::ostream &errStream, 
-		      boost::shared_ptr<AST> ast,
-		      bool &errFree,
-		      WorkList<std::string>& worklist); // Recursively walk the
+                      boost::shared_ptr<AST> ast,
+                      bool &errFree,
+                      WorkList<std::string>& worklist); // Recursively walk the
                      // specialized AST, and specialize the body.
 
 public:
   /// @brief Instantiate a single fully qualified name.
   bool instantiate(std::ostream &errStream, 
-		   const FQName& fqn);
+                   const FQName& fqn);
   
   /// @brief Instantiate a set of entry point names.
   bool instantiateBatch(std::ostream &errStream, 
-			std::set<FQName>& epName);
+                        std::set<FQName>& epName);
 
 };
 

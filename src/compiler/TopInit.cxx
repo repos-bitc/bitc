@@ -57,7 +57,7 @@ using namespace sherpa;
    2) This pass deals with Values definitions only.
       That is, it does not deal with 
         - Constructor Visibility
-	- Type variable scoping
+        - Type variable scoping
 
    3) For top-level definitions, the environment pointer refers to: 
         - The definition if available in scope
@@ -66,9 +66,9 @@ using namespace sherpa;
       Therefore, if a source module defined an implementation for a
       declaration in an interface, 
         - Only the provider for that definition will have a pointer
-	  to the defintion
-	- The interface and all other importers/providers will have a
-  	  pointer to the declaration.
+          to the defintion
+        - The interface and all other importers/providers will have a
+            pointer to the declaration.
 
    4) We still need the ID_OBSERV_DEF flag (and cannot just rely on
       whether the env points to decl/def) because in the case of
@@ -106,8 +106,8 @@ enum pop_type {
 };
 
 #define CHOOSE(a, b) do { \
-    if (ast->s == #a)	  \
-      return b;		  \
+    if (ast->s == #a)          \
+      return b;                  \
   }while (0)
 
 static pop_type
@@ -132,14 +132,14 @@ primOp(shared_ptr<AST> ast)
 }
 
 //WARNING: **REQUIRES** errStream, errFree.
-#define TOPINIT(ast, flags)					\
-  CHKERR(errFree, TopInit((errStream), (ast), (flags)));	
+#define TOPINIT(ast, flags)                                        \
+  CHKERR(errFree, TopInit((errStream), (ast), (flags)));        
 
 
 bool
 TopInit(std::ostream& errStream, 
-	shared_ptr<AST> ast, 
-	unsigned long flags)
+        shared_ptr<AST> ast, 
+        unsigned long flags)
 {
   bool errFree = true;
 
@@ -267,29 +267,29 @@ TopInit(std::ostream& errStream,
       assert(ast->isIdentType(id_value));
       
       if (ast->isTcMethod())
-	break;
+        break;
       
       shared_ptr<AST> def = ast->symbolDef;
       if (!def) {
-	// Defining Occurence.
-	// This loop MUST only enter the ident case ONLY for 
-	//  definitions that are _observably defined_.
-	assert(!ast->isDecl);
-	ast->flags |= ID_OBSERV_DEF;
+        // Defining Occurence.
+        // This loop MUST only enter the ident case ONLY for 
+        //  definitions that are _observably defined_.
+        assert(!ast->isDecl);
+        ast->flags |= ID_OBSERV_DEF;
       }
       else {
-	// Constructors like `nil'.
-	if (def->isUnionLeg())
-	  break;
+        // Constructors like `nil'.
+        if (def->isUnionLeg())
+          break;
 
-	if ((def->flags & ID_OBSERV_DEF) == 0) {
-	  errStream << ast->loc << ": "
-		    << "Identifier " << ast->s
-		    << " is not observably defined, "
-		    << "but is used in an initializing expression"
-		    << std::endl;
-	  errFree = false;
-	}
+        if ((def->flags & ID_OBSERV_DEF) == 0) {
+          errStream << ast->loc << ": "
+                    << "Identifier " << ast->s
+                    << " is not observably defined, "
+                    << "but is used in an initializing expression"
+                    << std::endl;
+          errFree = false;
+        }
       }
       break;
     }
@@ -298,7 +298,7 @@ TopInit(std::ostream& errStream,
     {
       // match agt_definition*
       for (size_t c = 1; c < ast->children.size(); c++)
-	TOPINIT(ast->child(c), flags);
+        TOPINIT(ast->child(c), flags);
 
       break;
     }
@@ -307,7 +307,7 @@ TopInit(std::ostream& errStream,
     {
       // match agt_definition*
       for (size_t c = 0; c < ast->children.size(); c++)
-	TOPINIT(ast->child(c), flags);
+        TOPINIT(ast->child(c), flags);
       
       break;
     }
@@ -318,7 +318,7 @@ TopInit(std::ostream& errStream,
       TOPINIT(ast->child(1), flags);      
 
       if (errFree)
-	TOPINIT(ast->child(0), flags);
+        TOPINIT(ast->child(0), flags);
       
       break;
     }
@@ -372,7 +372,7 @@ TopInit(std::ostream& errStream,
   case at_dobinding:
     {
       for (size_t c = 0; c < ast->children.size(); c++)
-	TOPINIT(ast->child(c), flags);
+        TOPINIT(ast->child(c), flags);
       
       break;
     }
@@ -381,8 +381,8 @@ TopInit(std::ostream& errStream,
   case at_switch:
     {
       for (size_t c = 0; c < ast->children.size(); c++)
-	if (c != IGNORE(ast))
-	  TOPINIT(ast->child(c), flags);
+        if (c != IGNORE(ast))
+          TOPINIT(ast->child(c), flags);
       break;
     }
     
@@ -391,7 +391,7 @@ TopInit(std::ostream& errStream,
   case at_object_apply: 
     {
       for (size_t c = 1; c < ast->children.size(); c++)
-	TOPINIT(ast->child(c), flags);
+        TOPINIT(ast->child(c), flags);
       
       break;
     }
@@ -402,48 +402,48 @@ TopInit(std::ostream& errStream,
       pop_type pop = primOp(ast->child(0));
       switch(pop) {
       case pop_sclar:
-	for (size_t i=1; i < ast->children.size(); i++)
-	  if (!ast->child(0)->symType->isScalar()) {
-	    errFree = false;
-	    break;
-	  }
-	break;
+        for (size_t i=1; i < ast->children.size(); i++)
+          if (!ast->child(0)->symType->isScalar()) {
+            errFree = false;
+            break;
+          }
+        break;
 
       case pop_intFl:
-	for (size_t i=1; i < ast->children.size(); i++)
-	  if (!ast->child(0)->symType->isPrimInt() &&
-	     !ast->child(0)->symType->isPrimFloat()) {
-	    errFree = false;
-	    break;
-	  }
-	break;
+        for (size_t i=1; i < ast->children.size(); i++)
+          if (!ast->child(0)->symType->isPrimInt() &&
+             !ast->child(0)->symType->isPrimFloat()) {
+            errFree = false;
+            break;
+          }
+        break;
 
       case pop_int:
-	for (size_t i=1; i < ast->children.size(); i++)
-	  if (!ast->child(0)->symType->isPrimInt()) {
-	    errFree = false;
-	    break;
-	  }
-	break;
+        for (size_t i=1; i < ast->children.size(); i++)
+          if (!ast->child(0)->symType->isPrimInt()) {
+            errFree = false;
+            break;
+          }
+        break;
 
       case pop_none:
-	errFree = false;
-	break;
+        errFree = false;
+        break;
       }
 
       if (!errFree)
-	errStream << ast->loc << ": "
-		  << "This kind of application is not "
-		  << " a valid Initializer." 
-		  << std::endl;
+        errStream << ast->loc << ": "
+                  << "This kind of application is not "
+                  << " a valid Initializer." 
+                  << std::endl;
       break;
     }
     
   case at_setbang:
     {
       errStream << ast->loc << ": "
-		<< "set! is not a valid Initializer."
-		<< std::endl;
+                << "set! is not a valid Initializer."
+                << std::endl;
       errFree = false;
       break;
     }
@@ -460,7 +460,7 @@ TopInit(std::ostream& errStream,
     {
       TOPINIT(ast->child(1), flags);
       if (errFree)
-	TOPINIT(ast->child(0), flags);
+        TOPINIT(ast->child(0), flags);
       break;
     }
   }
@@ -469,7 +469,7 @@ TopInit(std::ostream& errStream,
 
 bool
 UocInfo::fe_initCheck(std::ostream& errStream,
-		      bool init, unsigned long flags)
+                      bool init, unsigned long flags)
 {
   return true;
 

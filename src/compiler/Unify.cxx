@@ -63,12 +63,12 @@ using namespace sherpa;
 
 static bool
 typeError(std::ostream& errStream, const LexLoc &errLoc,
-	  shared_ptr<Type> t1, shared_ptr<Type> t2)
+          shared_ptr<Type> t1, shared_ptr<Type> t2)
 {
   errStream << errLoc << ": Type Error."
-	    << "Expected " << t1->asString(GC_NULL) 
-	    << ", Obtained " << t2->asString(GC_NULL)
-	    << std::endl;
+            << "Expected " << t1->asString(GC_NULL) 
+            << ", Obtained " << t2->asString(GC_NULL)
+            << std::endl;
   
     if (errStream == std::cerr)
       errStream << "Real Error!" << std::endl;
@@ -80,8 +80,8 @@ typeError(std::ostream& errStream, const LexLoc &errLoc,
 // Get an instance of a primary type defined in the Prelude.
 bool
 unifyPrim(std::ostream& errStream,
-	  shared_ptr<Trail> trail, const LexLoc &errLoc,
-	  shared_ptr<Type> tau, const std::string ptype) 
+          shared_ptr<Trail> trail, const LexLoc &errLoc,
+          shared_ptr<Type> tau, const std::string ptype) 
 {
   bool errFree = true;
 
@@ -100,18 +100,18 @@ Unify(std::ostream& errStream,
 // Handle unification of struct/union decl+decl or decl+def
 static bool 
 UnifyDecl(std::ostream& errStream,
-	  shared_ptr<Trail> trail,
-	  const LexLoc &errLoc,
-	  shared_ptr<Type> t1, shared_ptr<Type> t2,
-	  UnifyFlags uflags) 
+          shared_ptr<Trail> trail,
+          const LexLoc &errLoc,
+          shared_ptr<Type> t1, shared_ptr<Type> t2,
+          UnifyFlags uflags) 
 {
   bool errFree = true;
 
   DEBUG(UNIFY) std::cout << "UnifyDecl " 
-			<< t1->asString(Options::debugTvP) 
-			<< " ==? " 
-			<< t2->asString(Options::debugTvP)
-			<< std::endl;
+                        << t1->asString(Options::debugTvP) 
+                        << " ==? " 
+                        << t2->asString(Options::debugTvP)
+                        << std::endl;
 
   assert(t1->defAst == t2->defAst);
   assert(t1->kind != ty_uconv || t1->kind != ty_uconr);
@@ -122,7 +122,7 @@ UnifyDecl(std::ostream& errStream,
     
   for (size_t i=0; i<t1->typeArgs.size(); i++)
     CHKERR(errFree, Unify(errStream, trail, errLoc, t1->TypeArg(i), 
-			  t2->TypeArg(i), uflags)); 
+                          t2->TypeArg(i), uflags)); 
     
   return errFree;
 }
@@ -130,18 +130,18 @@ UnifyDecl(std::ostream& errStream,
 
 static bool 
 UnifyStructUnion(std::ostream& errStream,
-		 shared_ptr<Trail> trail,
-		 const LexLoc &errLoc,
-		 shared_ptr<Type> t1, shared_ptr<Type> t2,
-		 UnifyFlags uflags) 
+                 shared_ptr<Trail> trail,
+                 const LexLoc &errLoc,
+                 shared_ptr<Type> t1, shared_ptr<Type> t2,
+                 UnifyFlags uflags) 
 {
   bool errFree = true;
 
   DEBUG(UNIFY) std::cout << "UnifyStructUnion " 
-			<< t1->asString(Options::debugTvP) 
-			<< " ==? "
-			<< t2->asString(Options::debugTvP)
-			<< std::endl;
+                        << t1->asString(Options::debugTvP) 
+                        << " ==? "
+                        << t2->asString(Options::debugTvP)
+                        << std::endl;
 
   if (t1->isULeg() || t2->isULeg()) {
     if (t1->myContainer != t2->myContainer)
@@ -161,7 +161,7 @@ UnifyStructUnion(std::ostream& errStream,
   assert(t1->typeArgs.size() == t2->typeArgs.size());  
   for (size_t i=0; i<t1->typeArgs.size(); i++) 
     CHKERR(errFree, Unify(errStream, trail, errLoc, t1->TypeArg(i), 
-			  t2->TypeArg(i), uflags));
+                          t2->TypeArg(i), uflags));
   
   if (!errFree)
     trail->rollBack(n);
@@ -171,7 +171,7 @@ UnifyStructUnion(std::ostream& errStream,
 
 static bool 
 UnifyMbCt(std::ostream& errStream, shared_ptr<Trail> trail,
-	  shared_ptr<Type> mb, shared_ptr<Type> ct)
+          shared_ptr<Type> mb, shared_ptr<Type> ct)
 {
   mb = mb->getType();
   ct = ct->getType();
@@ -192,10 +192,10 @@ UnifyMbCt(std::ostream& errStream, shared_ptr<Trail> trail,
 // ty_fnarg case )in thich case errt1 = t1 and errt2=t2)
 static bool 
 UnifyFnArgs(std::ostream& errStream, shared_ptr<Trail> trail,
-	    const LexLoc &errLoc,
- 	    shared_ptr<Type> errt1, shared_ptr<Type> errt2,
-	    shared_ptr<Type> t1, shared_ptr<Type> t2,
-	    UnifyFlags uflags)
+            const LexLoc &errLoc,
+             shared_ptr<Type> errt1, shared_ptr<Type> errt2,
+            shared_ptr<Type> t1, shared_ptr<Type> t2,
+            UnifyFlags uflags)
 {
   bool errFree = true;
   t1 = t1->getType();
@@ -209,12 +209,12 @@ UnifyFnArgs(std::ostream& errStream, shared_ptr<Trail> trail,
   for (size_t i=0; i< t1->components.size(); i++) {
     
     if ((t1->CompFlags(i) & COMP_MAYBE_BYREF) &&
-	((t2->CompFlags(i) & COMP_MAYBE_BYREF) == 0)) {
+        ((t2->CompFlags(i) & COMP_MAYBE_BYREF) == 0)) {
       t1->CompFlags(i) &= ~COMP_MAYBE_BYREF;
       t1->CompFlags(i) |= t2->CompFlags(i) & COMP_BYREF;
     }
     else if ((t2->CompFlags(i) & COMP_MAYBE_BYREF) &&
-	     ((t1->CompFlags(i) & COMP_MAYBE_BYREF) == 0)) {
+             ((t1->CompFlags(i) & COMP_MAYBE_BYREF) == 0)) {
       t2->CompFlags(i) &= ~COMP_MAYBE_BYREF;
       t2->CompFlags(i) |= t1->CompFlags(i) & COMP_BYREF;
     }
@@ -224,8 +224,8 @@ UnifyFnArgs(std::ostream& errStream, shared_ptr<Trail> trail,
     }
     
     CHKERR(errFree, Unify(errStream, trail, errLoc,
-			  t1->CompType(i), 
-			  t2->CompType(i), uflags));
+                          t1->CompType(i), 
+                          t2->CompType(i), uflags));
   }
 
   return errFree;
@@ -235,20 +235,20 @@ UnifyFnArgs(std::ostream& errStream, shared_ptr<Trail> trail,
 // which includes printing error message.
 static bool
 PropagateMutability(std::ostream& errStream,
-		    shared_ptr<Trail> trail, 
-		    const LexLoc &errLoc,
-		    shared_ptr<Type> t) 
+                    shared_ptr<Trail> trail, 
+                    const LexLoc &errLoc,
+                    shared_ptr<Type> t) 
 {
   bool errFree = true;
   CHKERR(errFree, t->propagateMutability(trail));
   if(!errFree)
     errStream << errLoc << ": Unsound Mutable type: "
-	      << t->asString()
-	      << std::endl;
+              << t->asString()
+              << std::endl;
   // else
   //     errStream << errLoc << ": Mutability propagation okay for: "
-  // 	      << t->asString()
-  // 	      << std::endl;
+  //               << t->asString()
+  //               << std::endl;
   return errFree;
 }
 
@@ -264,10 +264,10 @@ Unify(std::ostream& errStream,
   bool errFree = true;
 
   DEBUG(UNIFY) std::cerr << "Unifier: " 
-			<< ft->asString(Options::debugTvP)
-			<< " ==? " 
-			<< st->asString(Options::debugTvP)
-			<< std::endl;  
+                        << ft->asString(Options::debugTvP)
+                        << " ==? " 
+                        << st->asString(Options::debugTvP)
+                        << std::endl;  
   
   if (t1->uniqueID == t2->uniqueID)
     return true;
@@ -277,9 +277,9 @@ Unify(std::ostream& errStream,
   switch(unifingSameKind) {
   case false:
     if (t1->isUType(false) && t2->isUType(false) && 
-	t1->isRefType() == t2->isRefType()) {
+        t1->isRefType() == t2->isRefType()) {
       CHKERR(errFree, UnifyStructUnion(errStream, trail, errLoc, 
-				       t1, t2, uflags));
+                                       t1, t2, uflags));
       break;
     }
     
@@ -307,16 +307,16 @@ Unify(std::ostream& errStream,
 
 
       if(!var->isUnifiableVar()) {
-	errStream << errLoc << " Rigid variable "
-		  << var->asString() << " cannot be unified with "
-		  << other->asString() << std::endl;
-	errFree = false;
+        errStream << errLoc << " Rigid variable "
+                  << var->asString() << " cannot be unified with "
+                  << other->asString() << std::endl;
+        errFree = false;
 
-	if (errStream == std::cerr)
-	  errStream << "Real Error!" << std::endl;
-	
+        if (errStream == std::cerr)
+          errStream << "Real Error!" << std::endl;
+        
 
-	break;
+        break;
       }
 
       // Now, we check to make sure that substitution of t for 'a
@@ -333,8 +333,8 @@ Unify(std::ostream& errStream,
       // should be fixed to the immutable version.
 
       if(!other->boundInType(var)) {
-	trail->subst(var, other);
-	break;
+        trail->subst(var, other);
+        break;
       }
       // Otherwise, try other options ...
     }
@@ -344,11 +344,11 @@ Unify(std::ostream& errStream,
       shared_ptr<Type> other = t1->isMbFull() ? t2 : t1;
       
       if(!mb->isUnifiableVar()) {
-	errStream << errLoc << "Rigid type "
-		  << mb->asString() << " cannot be unified with "
-		  << other->asString() << std::endl;
-	errFree = false;
-	break;
+        errStream << errLoc << "Rigid type "
+                  << mb->asString() << " cannot be unified with "
+                  << other->asString() << std::endl;
+        errFree = false;
+        break;
       }
 
       // Handle the special case: U(s|'b == M'a):
@@ -362,24 +362,24 @@ Unify(std::ostream& errStream,
       // within composite type definitions.
 
       if(t2->isMutable() && t2->Base()->isTvar()) {
-	CHKERR(errFree, Unify(errStream, trail, errLoc, mb->Var(),
-			      Type::make(ty_mutable, newTvar()), uflags));
-	
-	trail->link(other, mb);
+        CHKERR(errFree, Unify(errStream, trail, errLoc, mb->Var(),
+                              Type::make(ty_mutable, newTvar()), uflags));
+        
+        trail->link(other, mb);
       }
       else {
-	CHKERR(errFree, Unify(errStream, trail, errLoc, 
-			      mb->minMutConstless(), 
-			      other->minMutConstless(), uflags));
-	
-	CHKERR(errFree, Unify(errStream, trail, errLoc, 
-			      mb->Var(), other, uflags));
+        CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                              mb->minMutConstless(), 
+                              other->minMutConstless(), uflags));
+        
+        CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                              mb->Var(), other, uflags));
       }
       
       
       if(errFree && (other->isMutable() || mb->Var()->isMutable()))
-	CHKERR(errFree, PropagateMutability(errStream, trail, 
-					    errLoc, mb));
+        CHKERR(errFree, PropagateMutability(errStream, trail, 
+                                            errLoc, mb));
       
       break;
     }
@@ -389,26 +389,26 @@ Unify(std::ostream& errStream,
       shared_ptr<Type> other = t1->isMbTop() ? t2 : t1;
       
       if(!mb->isUnifiableVar()) {
-	errStream << errLoc << "Rigid type "
-		  << mb->asString() << " cannot be unified with "
-		  << other->asString() << std::endl;
-	errFree = false;
-	break;
+        errStream << errLoc << "Rigid type "
+                  << mb->asString() << " cannot be unified with "
+                  << other->asString() << std::endl;
+        errFree = false;
+        break;
       }
       
       CHKERR(errFree, Unify(errStream, trail, errLoc, 
-			    mb->minimizeTopMutability(), 
-			    other->minimizeTopMutability(), uflags));
+                            mb->minimizeTopMutability(), 
+                            other->minimizeTopMutability(), uflags));
       
       CHKERR(errFree, Unify(errStream, trail, errLoc, 
-			    mb->Var(), other, uflags));
+                            mb->Var(), other, uflags));
       break;
     }
 
     /* Certain types have multiple equivalent representations. 
        For example,
         1) (array (mutable int32)) == (mutable (array (mutable int32)))
-	2) An unboxed structure is mutable as a whole if all of its
+        2) An unboxed structure is mutable as a whole if all of its
            components are mutable.  
        
        Therefore, (array T) must potentially unify with 
@@ -420,12 +420,12 @@ Unify(std::ostream& errStream,
       shared_ptr<Type> other = t1->isMutType() ? t2 : t1;
       
       assert(!other->isMutType() &&  // Otherwise, it would be 
-	     !other->isMaybe());     // handled already.  
+             !other->isMaybe());     // handled already.  
       
       if(other->kind == ty_array || other->kind == ty_structv) {
-	CHKERR(errFree, Unify(errStream, trail, errLoc, 
-			      mut, Mutable(other), uflags));
-	break;
+        CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                              mut, Mutable(other), uflags));
+        break;
       }
     }
 
@@ -437,11 +437,11 @@ Unify(std::ostream& errStream,
       shared_ptr<Type> other = t1->isConst() ? t2 : t1;
 
       if(other->isEffectivelyConst()) {
-	CHKERR(errFree,
-	       Unify(errStream, trail, errLoc, 
-		     constType->Base()->minMutConstless(), 
-		     other->minMutConstless(), uflags));
-	break;
+        CHKERR(errFree,
+               Unify(errStream, trail, errLoc, 
+                     constType->Base()->minMutConstless(), 
+                     other->minMutConstless(), uflags));
+        break;
       }
     }
     
@@ -469,52 +469,52 @@ Unify(std::ostream& errStream,
       break;
 
     case ty_tvar:
-      {		
-	if (uflags & UFLG_UNIFY_STRICT_TVAR) {
-	  errFree = typeError(errStream, errLoc, t1, t2);
-	  break;
-	}
+      {                
+        if (uflags & UFLG_UNIFY_STRICT_TVAR) {
+          errFree = typeError(errStream, errLoc, t1, t2);
+          break;
+        }
 
-	if ((t1->flags & TY_RIGID) && (t2->flags & TY_RIGID) &&
-	    ((uflags & UFLG_UN_IGN_RIGIDITY) == 0)) {
-	  errFree = typeError(errStream, errLoc, t1, t2);
-	  break;
-	}
+        if ((t1->flags & TY_RIGID) && (t2->flags & TY_RIGID) &&
+            ((uflags & UFLG_UN_IGN_RIGIDITY) == 0)) {
+          errFree = typeError(errStream, errLoc, t1, t2);
+          break;
+        }
 
-	// One of the types is not rigid, or we are ignoring rigidity.
-	if (t1->flags & TY_RIGID)
-	  trail->subst(t2, t1);
-	else
-	  trail->subst(t1, t2);
-	
-	break;
+        // One of the types is not rigid, or we are ignoring rigidity.
+        if (t1->flags & TY_RIGID)
+          trail->subst(t2, t1);
+        else
+          trail->subst(t1, t2);
+        
+        break;
       }
 
     case ty_dummy:
       {
-	break;
+        break;
       }
     
 #ifdef KEEP_BF
     case ty_bitfield:
-      {	
-	CHKERR(errFree, Unify(errStream, trail, errLoc,
-			      t1->CompType(0), 
-			      t2->CompType(0), uflags));
-	
-	if (!errFree)
-	  break;
-	
-	if (t1->Isize == t2->Isize)
-	  break;
+      {        
+        CHKERR(errFree, Unify(errStream, trail, errLoc,
+                              t1->CompType(0), 
+                              t2->CompType(0), uflags));
+        
+        if (!errFree)
+          break;
+        
+        if (t1->Isize == t2->Isize)
+          break;
 
-	errStream << errLoc << ": "
-		  << "Incompatibility in integer types "
-		  << t1->asString() << " and " << t2->asString() 
-		  << "." << std::endl;
+        errStream << errLoc << ": "
+                  << "Incompatibility in integer types "
+                  << t1->asString() << " and " << t2->asString() 
+                  << "." << std::endl;
 
-	errFree = false;
-	break;
+        errFree = false;
+        break;
       } 
 #endif     
 
@@ -522,22 +522,22 @@ Unify(std::ostream& errStream,
     case ty_fn:
     case ty_method:
       {
-	shared_ptr<Type> t1Args = t1->Args();
-	shared_ptr<Type> t2Args = t2->Args();
-	CHKERR(errFree, UnifyFnArgs(errStream, trail, errLoc, 
-				    t1, t2, t1Args, t2Args, uflags));
+        shared_ptr<Type> t1Args = t1->Args();
+        shared_ptr<Type> t2Args = t2->Args();
+        CHKERR(errFree, UnifyFnArgs(errStream, trail, errLoc, 
+                                    t1, t2, t1Args, t2Args, uflags));
       
-	CHKERR(errFree, 
-	       Unify(errStream, trail, errLoc, t1->Ret(), 
-		     t2->Ret(), uflags));
-	break;
+        CHKERR(errFree, 
+               Unify(errStream, trail, errLoc, t1->Ret(), 
+                     t2->Ret(), uflags));
+        break;
       }
 
     case ty_fnarg:
       {
-	CHKERR(errFree, UnifyFnArgs(errStream, trail, errLoc, 
-				    t1, t2, t1, t2, uflags));
-	break;
+        CHKERR(errFree, UnifyFnArgs(errStream, trail, errLoc, 
+                                    t1, t2, t1, t2, uflags));
+        break;
       }
 
     case ty_structv:
@@ -549,220 +549,220 @@ Unify(std::ostream& errStream,
     case ty_uvalr:
     case ty_uvalv:
       {
-	CHKERR(errFree,
-	       UnifyStructUnion(errStream, trail, errLoc, t1, t2, uflags));
-	break;
+        CHKERR(errFree,
+               UnifyStructUnion(errStream, trail, errLoc, t1, t2, uflags));
+        break;
       }
 
     case ty_letGather:
       {      
-	if (t1->components.size() != t2->components.size()) {
-	  errFree = typeError(errStream, errLoc, t1, t2);
-	  break;
-	}
+        if (t1->components.size() != t2->components.size()) {
+          errFree = typeError(errStream, errLoc, t1, t2);
+          break;
+        }
 
-	for (size_t i=0; i<t1->components.size(); i++) 
-	  CHKERR(errFree, 
-		 Unify(errStream, trail, errLoc, t1->CompType(i), 
-		       t2->CompType(i), uflags));
-	
-	break;
+        for (size_t i=0; i<t1->components.size(); i++) 
+          CHKERR(errFree, 
+                 Unify(errStream, trail, errLoc, t1->CompType(i), 
+                       t2->CompType(i), uflags));
+        
+        break;
       }
       
     case ty_array:
       {
-	CHKERR(errFree, 
-	       Unify(errStream, trail, errLoc, t1->Base(), 
-		     t2->Base(), uflags));
-	
-	// FIX: Need to link arrLen structures here, since 
-	// the two length might be 0, indicating later resolvability.
-	if (t1->arrLen->len == t2->arrLen->len)
-	  break;
+        CHKERR(errFree, 
+               Unify(errStream, trail, errLoc, t1->Base(), 
+                     t2->Base(), uflags));
+        
+        // FIX: Need to link arrLen structures here, since 
+        // the two length might be 0, indicating later resolvability.
+        if (t1->arrLen->len == t2->arrLen->len)
+          break;
       
-	// Array lengths did not Unify
-	if (t1->arrLen->len == 0) {
-	  t1->arrLen->len = t2->arrLen->len;
-	  break;
-	}
-	else if (t2->arrLen->len == 0) {
-	  t2->arrLen->len = t1->arrLen->len;
-	  break;
-	}
-	else {
-	  errStream << errLoc 
-		    << ": Array lengths do not match. "
-		    << t1->arrLen->len
-		    << " vs " 
-		    << t2->arrLen->len
-		    << std::endl;
-	  errFree = false;
-	}
+        // Array lengths did not Unify
+        if (t1->arrLen->len == 0) {
+          t1->arrLen->len = t2->arrLen->len;
+          break;
+        }
+        else if (t2->arrLen->len == 0) {
+          t2->arrLen->len = t1->arrLen->len;
+          break;
+        }
+        else {
+          errStream << errLoc 
+                    << ": Array lengths do not match. "
+                    << t1->arrLen->len
+                    << " vs " 
+                    << t2->arrLen->len
+                    << std::endl;
+          errFree = false;
+        }
       
-	break;
+        break;
       }
       
     case ty_vector:
       {
-	CHKERR(errFree, 
-	       Unify(errStream, trail, errLoc, t1->Base(), 
-		     t2->Base(), uflags));
-	break;
+        CHKERR(errFree, 
+               Unify(errStream, trail, errLoc, t1->Base(), 
+                     t2->Base(), uflags));
+        break;
       }
     
     case ty_mbTop:
       {
-	CHKERR(errFree,
-	       Unify(errStream, trail, errLoc, 
-		     t1->Core()->minimizeTopMutability(), 
-		     t2->Core()->minimizeTopMutability(), 
-		     uflags));
+        CHKERR(errFree,
+               Unify(errStream, trail, errLoc, 
+                     t1->Core()->minimizeTopMutability(), 
+                     t2->Core()->minimizeTopMutability(), 
+                     uflags));
       
-	if (!errFree)
-	  break;
+        if (!errFree)
+          break;
       
-	CHKERR(errFree, Unify(errStream, trail, errLoc, 
-			      t1->Var(), t2->Var(), uflags));
-	break;
+        CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                              t1->Var(), t2->Var(), uflags));
+        break;
       }
     
     case ty_mbFull:
       {
-	CHKERR(errFree,
-	       Unify(errStream, trail, errLoc, 
-		     t1->Core()->minMutConstless(), 
-		     t2->Core()->minMutConstless(), 
-		     uflags));
+        CHKERR(errFree,
+               Unify(errStream, trail, errLoc, 
+                     t1->Core()->minMutConstless(), 
+                     t2->Core()->minMutConstless(), 
+                     uflags));
       
-	if (!errFree)
-	  break;
+        if (!errFree)
+          break;
       
-	shared_ptr<Type> var1 = t1->Var()->getType();
-	shared_ptr<Type> var2 = t2->Var()->getType();
+        shared_ptr<Type> var1 = t1->Var()->getType();
+        shared_ptr<Type> var2 = t2->Var()->getType();
       
-	if(var1->isMutable() && var2->isMutable())
-	  CHKERR(errFree, Unify(errStream, trail, errLoc, 
-				var1->Base(), var2->Base(), uflags));
-	else
-	  CHKERR(errFree, Unify(errStream, trail, errLoc, 
-				var1, var2, uflags));
+        if(var1->isMutable() && var2->isMutable())
+          CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                                var1->Base(), var2->Base(), uflags));
+        else
+          CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                                var1, var2, uflags));
       
-	if(errFree && t1->Var()->isMutable())
-	  CHKERR(errFree, PropagateMutability(errStream, trail, 
-					      errLoc, t1));
+        if(errFree && t1->Var()->isMutable())
+          CHKERR(errFree, PropagateMutability(errStream, trail, 
+                                              errLoc, t1));
       
-	break;
+        break;
       }
 
     case ty_mutable:
       {
-	CHKERR(errFree,
-	       Unify(errStream, trail, errLoc, t1->Base(), 
-		     t2->Base(), uflags));
+        CHKERR(errFree,
+               Unify(errStream, trail, errLoc, t1->Base(), 
+                     t2->Base(), uflags));
 
-	if(!errFree)
-	  break;
+        if(!errFree)
+          break;
       
-	CHKERR(errFree, PropagateMutability(errStream, trail, 
-					    errLoc, t1));
-	break;
+        CHKERR(errFree, PropagateMutability(errStream, trail, 
+                                            errLoc, t1));
+        break;
       }
 
     case ty_const:
       {
-	CHKERR(errFree,
-	       Unify(errStream, trail, errLoc, 
-		     t1->Base()->minMutConstless(), 
-		     t2->Base()->minMutConstless(), uflags));
-	break;
+        CHKERR(errFree,
+               Unify(errStream, trail, errLoc, 
+                     t1->Base()->minMutConstless(), 
+                     t2->Base()->minMutConstless(), uflags));
+        break;
       }
     
     case ty_ref:
     case ty_byref:
     case ty_array_ref:
       {
-	CHKERR(errFree,
-	       Unify(errStream, trail, errLoc, t1->Base(), 
-		     t2->Base(), uflags));
-	break;
+        CHKERR(errFree,
+               Unify(errStream, trail, errLoc, t1->Base(), 
+                     t2->Base(), uflags));
+        break;
       }
 
     case ty_exn:
       {
-	// All exceptions belong to the same sum type.	
-	break;
+        // All exceptions belong to the same sum type.        
+        break;
       }
 
     case ty_typeclass:
       {
-	if (t1->defAst != t2->defAst) {
-	  errFree = typeError(errStream, errLoc, t1, t2);
-	  break;
-	}
-	
-	if (t1->typeArgs.size() != t2->typeArgs.size()) {
-	  errFree = typeError(errStream, errLoc, t1, t2);
-	  break;
-	}
-	
-	for (size_t i = 0; i < t1->typeArgs.size(); i++) {
-	  
-	  CHKERR(errFree, Unify(errStream, trail, errLoc, 
-				t1->TypeArg(i), t2->TypeArg(i),
-				uflags));
-	}
-	
-	break;
+        if (t1->defAst != t2->defAst) {
+          errFree = typeError(errStream, errLoc, t1, t2);
+          break;
+        }
+        
+        if (t1->typeArgs.size() != t2->typeArgs.size()) {
+          errFree = typeError(errStream, errLoc, t1, t2);
+          break;
+        }
+        
+        for (size_t i = 0; i < t1->typeArgs.size(); i++) {
+          
+          CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                                t1->TypeArg(i), t2->TypeArg(i),
+                                uflags));
+        }
+        
+        break;
       }
       
       // The following cases are filled in so that strictlyEquals()
       // function works correctly.
     case ty_pcst:
       {
-	assert(t1->components.size() == t2->components.size());
-	for (size_t i=0; i < t1->components.size(); i++) 
-	  CHKERR(errFree,
-		 Unify(errStream, trail, errLoc, t1->CompType(i), 
-		       t2->CompType(i), uflags));
-	break;
+        assert(t1->components.size() == t2->components.size());
+        for (size_t i=0; i < t1->components.size(); i++) 
+          CHKERR(errFree,
+                 Unify(errStream, trail, errLoc, t1->CompType(i), 
+                       t2->CompType(i), uflags));
+        break;
       }
 
     case ty_field:
       {
-	if(t1->litValue.s != t2->litValue.s)
-	  errFree = typeError(errStream, errLoc, t1, t2);
-	break;
+        if(t1->litValue.s != t2->litValue.s)
+          errFree = typeError(errStream, errLoc, t1, t2);
+        break;
       }
       
     case ty_kvar:
     case ty_kfix:
       {
-	// This check will never unify, since the following check has
-	// already failed at the start of the unification algorithm.
-	if (t1->uniqueID != t2->uniqueID)
-	  errFree = typeError(errStream, errLoc, t1, t2);
-	break;
+        // This check will never unify, since the following check has
+        // already failed at the start of the unification algorithm.
+        if (t1->uniqueID != t2->uniqueID)
+          errFree = typeError(errStream, errLoc, t1, t2);
+        break;
       }
     }
   }
   
   DEBUG(UNF_RES) errStream << "\t Result: " 
-			  << ft->asString(Options::debugTvP)
-			  << " == " 
-			  << st->asString(Options::debugTvP)
-			  << "{" << (errFree?"OK":"ERR") << "}"
-			  << std::endl;  
+                          << ft->asString(Options::debugTvP)
+                          << " == " 
+                          << st->asString(Options::debugTvP)
+                          << "{" << (errFree?"OK":"ERR") << "}"
+                          << std::endl;  
   
   return errFree;
 }
 
 bool
 acyclic(std::ostream& errStream,
-	const LexLoc &errLoc,
-	shared_ptr<Type> typ, 
-	WorkList<shared_ptr<Type> >& worklist, // Types currently visiting
- 	DoneList<shared_ptr<Type> >& donelist, // Types Known to be OK 
-	bool inref=false)
+        const LexLoc &errLoc,
+        shared_ptr<Type> typ, 
+        WorkList<shared_ptr<Type> >& worklist, // Types currently visiting
+         DoneList<shared_ptr<Type> >& donelist, // Types Known to be OK 
+        bool inref=false)
 {
   assert(typ);
 
@@ -770,7 +770,7 @@ acyclic(std::ostream& errStream,
   bool errFree = true;
 
   //std::cout << "Acyclic: Processing: " << t->asString(Options::debugTvP)
-  //	    << std::endl;
+  //            << std::endl;
   
   if (donelist.contains(t))
     return true;
@@ -787,33 +787,33 @@ acyclic(std::ostream& errStream,
       return true;
     
     std::cerr << errLoc << ": " 
-	      << "Cyclic Type Definitions among the following " 
-	      << worklist.size() << " types:" << std::endl;
+              << "Cyclic Type Definitions among the following " 
+              << worklist.size() << " types:" << std::endl;
     
     // By now, we know that the current type is already 
     // in the worklist
     std::cerr << t->asString(GC_NULL, false) 
-    	      << std::endl;
+                  << std::endl;
     for (WorkList<shared_ptr<Type> >::iterator itr = worklist.begin();
-	itr != worklist.end(); ++itr)
+        itr != worklist.end(); ++itr)
       std::cerr << (*itr)->asString(GC_NULL, false)
-		<< std::endl;
+                << std::endl;
     fatal();
     return false;
   }
-	
+        
   assert(!worklist.contains(t));
   worklist.insert(t);
 
   for (size_t i=0; i < t->components.size(); i++)
     CHKERR(errFree, acyclic(errStream, errLoc, t->CompType(i),
-			    worklist, donelist,
-			    (inref || t->kind == ty_ref)));
+                            worklist, donelist,
+                            (inref || t->kind == ty_ref)));
 
 //   for (size_t i=0; i < t->typeArgs.size(); i++) {
 //     CHKERR(errFree, acyclic(errStream, errLoc, t->TypeArg(i),  
-// 			    worklist, donelist,
-// 			    (inref || t->kind == ty_ref)));
+//                             worklist, donelist,
+//                             (inref || t->kind == ty_ref)));
 //   }
   
   worklist.erase(t);   
@@ -823,7 +823,7 @@ acyclic(std::ostream& errStream,
   //std::cout << "--"
   //          << std::endl;
   
-  return errFree;		
+  return errFree;                
 }
 
 bool

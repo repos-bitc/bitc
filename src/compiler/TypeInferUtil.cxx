@@ -100,8 +100,8 @@ nCtArgs(shared_ptr<Type> t)
 /* Use all bindings in the some other environment */
 void
 useIFGamma(const std::string& idName,
-	   shared_ptr<TSEnvironment > fromEnv, 
-	   shared_ptr<TSEnvironment > toEnv)
+           shared_ptr<TSEnvironment > fromEnv, 
+           shared_ptr<TSEnvironment > toEnv)
 {
   for (TSEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
@@ -124,8 +124,8 @@ useIFGamma(const std::string& idName,
 
 void
 useIFInsts(const std::string& idName,
-	   shared_ptr<InstEnvironment >fromEnv, 
-	   shared_ptr<InstEnvironment >toEnv)
+           shared_ptr<InstEnvironment >fromEnv, 
+           shared_ptr<InstEnvironment >toEnv)
 {
   for (InstEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
@@ -148,9 +148,9 @@ useIFInsts(const std::string& idName,
 /* Initialize my environment */
 bool
 initGamma(std::ostream& errStream, 
-	  shared_ptr<TSEnvironment > gamma,
-	  shared_ptr<InstEnvironment > instEnv,
-	  const shared_ptr<AST> topAst)
+          shared_ptr<TSEnvironment > gamma,
+          shared_ptr<InstEnvironment > instEnv,
+          const shared_ptr<AST> topAst)
 {
   bool errFree = true;
   // Make sure I am not processing the prelude itself
@@ -169,10 +169,10 @@ initGamma(std::ostream& errStream,
   UocMap::iterator itr = UocInfo::ifList.find("bitc.prelude");
   if (itr == UocInfo::ifList.end()) {
     errStream << topAst->loc << ": "
-	      << "Internal Compiler Error. "
-	      << "Prelude has NOT been processed till " 
-	      << "type inference."
-	      << std::endl;
+              << "Internal Compiler Error. "
+              << "Prelude has NOT been processed till " 
+              << "type inference."
+              << std::endl;
     ::exit(1);
   }
 
@@ -181,9 +181,9 @@ initGamma(std::ostream& errStream,
 
   if (!preenv || !preInsts) {
     errStream << topAst->loc << ": "
-	      << "Internal Compiler Error. "
-	      << "Prelude's Gamma is NULL "
-	      << std::endl;
+              << "Internal Compiler Error. "
+              << "Prelude's Gamma is NULL "
+              << std::endl;
     ::exit(1);
   }
   

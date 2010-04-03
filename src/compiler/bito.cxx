@@ -62,14 +62,14 @@ bool
 EmitBitO(std::ostream &optStream, std::ostream &errStream)
 {
   std::ofstream out(Options::outputFileName.c_str(),
-		    std::ios_base::out|std::ios_base::trunc);
+                    std::ios_base::out|std::ios_base::trunc);
 
   if (!out.is_open())
     errStream << "Couldn't open output file \""
-	      << Options::outputFileName
-	      << "\" -- "
-	      << strerror(errno)
-	      << std::endl;
+              << Options::outputFileName
+              << "\" -- "
+              << strerror(errno)
+              << std::endl;
 
 
   out << "(bitc-version \"" << BITC_VERSION << "\")" << std::endl;

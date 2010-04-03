@@ -502,7 +502,7 @@ struct EnvSet {
   }
 
   EnvSet(boost::shared_ptr<ASTEnvironment > _env, boost::shared_ptr<TSEnvironment >_gamma,
-	 boost::shared_ptr<InstEnvironment > _instEnv)
+         boost::shared_ptr<InstEnvironment > _instEnv)
   {
     env = _env;
     gamma = _gamma;
@@ -752,10 +752,10 @@ public:
   IdentType identType;
   AstFlags flags;
 
-  PrintFlags printVariant;	// which syntax to use for pretty printing
+  PrintFlags printVariant;        // which syntax to use for pretty printing
 
-  boost::shared_ptr<TypeScheme> scheme;		// defining occurrences only
-  boost::shared_ptr<Type> symType;		// the (pre-unified) type
+  boost::shared_ptr<TypeScheme> scheme;                // defining occurrences only
+  boost::shared_ptr<Type> symType;                // the (pre-unified) type
   boost::shared_ptr<AST> symbolDef;
 
   bool isDecl;                  // is This a declaration or definition?
@@ -931,8 +931,8 @@ public:
   /// Generate an at_ident AST providing a temporary symbol that is
   /// type-compatible with the type of the passed AST @p lhs.
   static boost::shared_ptr<AST> genSym(boost::shared_ptr<AST> lhs,
-		     const char *pfx="tmp",
-		     const bool isTV = false);
+                     const char *pfx="tmp",
+                     const bool isTV = false);
 
   /// For each AST type, return an associated keyword name.
   ///
@@ -948,8 +948,8 @@ public:
   /// if getPattern is true, it adds the identPattern ASTs
   /// instead of ident ASTs
   void getIds(std::ostream &errStream,
-	      std::vector<boost::shared_ptr<AST> >& ids,
-	      bool getPattern = false);
+              std::vector<boost::shared_ptr<AST> >& ids,
+              bool getPattern = false);
 
   /// @brief Utility function to call symType->getType()
   boost::shared_ptr<Type> getType();
@@ -1017,7 +1017,7 @@ public:
   /// type if @p showTypes is true, and appending a final end of line
   /// of @p endline is true.
   void PrettyPrint(std::ostream& out, bool showTypes = false,
-		   bool endline=true) const;
+                   bool endline=true) const;
 
   // For use in GDB:
   void PrettyPrint(bool decorated) const;

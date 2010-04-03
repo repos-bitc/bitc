@@ -74,12 +74,12 @@ using namespace std;
 #define SHOWPARSE(s) \
   do { \
     if (Options::showParse) \
-      lexer->errStream << (s) << std::endl;		\
+      lexer->errStream << (s) << std::endl;                \
   } while (false);
 #define SHOWPARSE1(s,x) \
   do { \
     if (Options::showParse) \
-      lexer->errStream << (s) << " " << (x) << std::endl;	\
+      lexer->errStream << (s) << " " << (x) << std::endl;        \
   } while (false);
 
 
@@ -109,7 +109,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %expect 7
 %parse-param {BlockLexer *lexer}
 
-%token <tok> tk_Reserved	/* reserved words */
+%token <tok> tk_Reserved        /* reserved words */
 
 /* Categorical terminals: */
 %token <tok> tk_Ident
@@ -128,8 +128,8 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_GETS
 
 /* Primary types and associated hand-recognized literals: */
-%token <tok> '(' ')' ','	/* unit */
-%token <tok> '[' ']'	/* unit */
+%token <tok> '(' ')' ','        /* unit */
+%token <tok> '[' ']'        /* unit */
 %token <tok> tk_AS
 %token <tok> tk_UNIT
 %token <tok> tk_BOOL
@@ -674,9 +674,9 @@ ptype_name: defident '(' tvlist ')' {
 // STRUCTURE TYPES [3.6.1]
 type_definition: tk_STRUCT ptype_name val optdocstring declares '{' fields '}' ';' {
   SHOWPARSE("type_definition -> STRUCT ptype_name val "
-	    "optdocstring '{' declares fields '}' ';'");
+            "optdocstring '{' declares fields '}' ';'");
   $$ = AST::make(at_defstruct, $1.loc, $2->child(0), $2->child(1), $3,
-	       $5, $7);
+               $5, $7);
   $$->child(0)->defForm = $$;
   $$->addChild($2->child(2));
 };
@@ -684,9 +684,9 @@ type_definition: tk_STRUCT ptype_name val optdocstring declares '{' fields '}' '
 // UNION TYPES [3.6.2]
 type_definition: tk_UNION ptype_name val optdocstring declares '{' constructors '}' ';'  {
   SHOWPARSE("type_definition -> STRUCT ptype_name val "
-	    "optdocstring '{' declares fields '}' ';'");
+            "optdocstring '{' declares fields '}' ';'");
   $$ = AST::make(at_defunion, $1.loc, $2->child(0), $2->child(1), $3,
-		 $5, $7);
+                 $5, $7);
   $$->child(0)->defForm = $$;
   $$->addChild($2->child(2));
 };
@@ -701,7 +701,7 @@ constructors: constructors constructor {
   $$ = $1;
   $$->addChild($2);
 };
-constructor: ident { 	       	  /* simple constructor */ 
+constructor: ident {                          /* simple constructor */ 
   SHOWPARSE("constructor -> defident");
   $1->flags |= (ID_IS_GLOBAL);
   $$ = AST::make(at_constructor, $1->loc, $1);
@@ -716,7 +716,7 @@ constructor: ident '{' fields '}' ';' {  /* compound constructor */
 // REPR TYPES
 type_definition: tk_REPR defident val optdocstring declares '{' repr_constructors '}' ';' {
   SHOWPARSE("type_definition -> REPR defident val optdocstring "
-	    "'{' declares repr_constructors '}' ';'");
+            "'{' declares repr_constructors '}' ';'");
   $$ = AST::make(at_defrepr, $1.loc, $2, $3, $5, $7);
   $$->child(0)->defForm = $$;
 };
@@ -731,7 +731,7 @@ repr_constructors: repr_constructors repr_constructor {
   $$ = $1;
   $$->addChild($2);
 };
-/* repr_constructor: ident repr_reprs { 	       	  /\* simple constructor *\/  */
+/* repr_constructor: ident repr_reprs {                          /\* simple constructor *\/  */
 /*   SHOWPARSE("repr_constructor -> defident"); */
 /*   $1->flags |= (ID_IS_GLOBAL); */
 /*   $$ = AST::make(at_reprctr, $1->loc, $1); */
@@ -786,7 +786,7 @@ declares: {
 tc_definition: tk_TYPECLASS ptype_name optdocstring tc_decls '{' method_decls '}' ';' {
   SHOWPARSE("tc_definition -> ( TYPECLASS ptype_name optdocstring tc_decls { method_decls } ;");
   $$ = AST::make(at_deftypeclass, $1.loc, $2->child(0), 
-	       $2->child(1), $4, $6, $2->child(2));  
+               $2->child(1), $4, $6, $2->child(2));  
   $$->child(0)->defForm = $$;
 };
 
@@ -837,8 +837,8 @@ ti_definition: tk_INSTANCE constraint optdocstring ';' {
   // appropriate) from above in the constrained_definition case.
   shared_ptr<AST> constrs = AST::make(at_constraints, $2->loc);
   $$ = AST::make(at_definstance, $1.loc, $2,
-		 AST::make(at_tcmethods, $1.loc),
-		 constrs);  
+                 AST::make(at_tcmethods, $1.loc),
+                 constrs);  
 };
 ti_definition: tk_INSTANCE constraint optdocstring '{' method_bindings '}' ';' {
   SHOWPARSE("ti_definition -> INSTANCE constraint [docstring] method_seq ;");
@@ -847,7 +847,7 @@ ti_definition: tk_INSTANCE constraint optdocstring '{' method_bindings '}' ';' {
   // appropriate) from above in the constrained_definition case.
   shared_ptr<AST> constrs = AST::make(at_constraints, $2->loc);
   $$ = AST::make(at_definstance, $1.loc, $2, $5, 
-		 constrs);  
+                 constrs);  
 };
 
 method_bindings: method_binding {
@@ -892,7 +892,7 @@ externals: tk_EXTERNAL exident {
 type_decl: tk_STRUCT ptype_name val externals ';' {
   SHOWPARSE("type_decl -> STRUCT ptype_name val externals ;");
   $$ = AST::make(at_declstruct, $1.loc, $2->child(0), $2->child(1), $3,
-	       $2->child(2));
+               $2->child(2));
   $$->child(0)->defForm = $$;
   $$->flags |= $4->flags;
   $$->getID()->flags |= $4->flags;
@@ -903,7 +903,7 @@ type_decl: tk_STRUCT ptype_name val externals ';' {
 type_decl: tk_UNION ptype_name val externals ';' {
   SHOWPARSE("type_decl -> UNION ptype_name val ;");
   $$ = AST::make(at_declunion, $1.loc, $2->child(0), $2->child(1), $3,
-	       $2->child(2));
+               $2->child(2));
   $$->child(0)->defForm = $$;
   $$->flags |= $4->flags;
   $$->getID()->flags |= $4->flags;
@@ -1006,7 +1006,7 @@ value_definition: tk_DEF defident '(' ')' optdocstring block {
 value_definition: tk_DEF defident '(' lambdapatterns ')' optdocstring
                   block {
   SHOWPARSE("value_definition -> DEF defident ( lambdapatterns ) optdocstring "
-	    "{ expr_seq }");
+            "{ expr_seq }");
   shared_ptr<AST> iRetBlock = 
     AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $7);
   shared_ptr<AST> iLambda = AST::make(at_lambda, $1.loc, $4, iRetBlock);
@@ -1443,7 +1443,7 @@ types: types type {
   $1->addChild($2);
 };
 
-type: useident  { 			/* previously defined type */
+type: useident  {                         /* previously defined type */
   SHOWPARSE("type -> useident");
   $$ = $1;
 };
@@ -1452,7 +1452,7 @@ type: useident  { 			/* previously defined type */
 type: tk_UNIT {
   SHOWPARSE("type -> UNIT");
   $$ = AST::make(at_primaryType, $1.loc);
-  $$->s = "unit";		/* for lookup! */
+  $$->s = "unit";                /* for lookup! */
 };
 
 bool_type: tk_BOOL {
@@ -1545,7 +1545,7 @@ type: tk_EXCEPTION {
 };
 
 // TYPE VARIABLES [3.3]
-type: typevar  { 		
+type: typevar  {                 
   SHOWPARSE("type -> typevar");
   $$ = $1;
 };
@@ -1602,15 +1602,15 @@ fntype: '(' types_pl_byref ')' fneffect tk_FNARROW type {
 type_cpair: type ',' type {
   SHOWPARSE("type_cpair -> type ',' type");
   $$ = AST::make(at_typeapp, $2.loc,
-	       AST::make(at_ident, LToken($2.loc, "pair")),
-	       $1, $3);
+               AST::make(at_ident, LToken($2.loc, "pair")),
+               $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 type_cpair: type ',' type_cpair {
   SHOWPARSE("type_cpair -> type ',' type_cpair");
   $$ = AST::make(at_typeapp, $2.loc,
-	       AST::make(at_ident, LToken($2.loc, "pair")),
-	       $1, $3);
+               AST::make(at_ident, LToken($2.loc, "pair")),
+               $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 

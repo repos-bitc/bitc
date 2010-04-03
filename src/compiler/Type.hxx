@@ -309,7 +309,7 @@ public:
 
   // defAST points to the AST of the defining occurrence. This field
   // is set for ty_struct*, ty_union*, tu_ucon, ty_exn
-  boost::shared_ptr<AST> defAst;			// Defining occurrence (or declare)
+  boost::shared_ptr<AST> defAst;                        // Defining occurrence (or declare)
 
   // If type is a union constructor, points to identifier AST of the
   // defining occurrence of the defunion.  If type is a type class
@@ -328,8 +328,8 @@ public:
   // that the literal must be handled as an arbitrary precision
   // integer.
 
-  uint8_t   minSignedRep;	// minimum signed representation size
-  uint8_t   minUnsignedRep;	// minimum signed representation size
+  uint8_t   minSignedRep;        // minimum signed representation size
+  uint8_t   minUnsignedRep;        // minimum signed representation size
 
   // Array length is actually a type variable, which ultimnately
   // resolves to  singleton types. Strictly speaking, we must use type
@@ -351,13 +351,13 @@ public:
   // we need to unify the T and the n, but we cannot unify the overall
   // types, because they differ w.r.t. mutability.
   
-  boost::shared_ptr<ArrLen> arrLen;	// Length in the case of an array type
+  boost::shared_ptr<ArrLen> arrLen;        // Length in the case of an array type
   
-  LitValue  litValue;		// for literal types
+  LitValue  litValue;                // for literal types
 
-  size_t    Isize;		// size in fixint
-  TypeSet   fnDeps;		// Functional Dependencies (for 
-				//   Type classes only).
+  size_t    Isize;                // size in fixint
+  TypeSet   fnDeps;                // Functional Dependencies (for 
+                                //   Type classes only).
   
   std::vector<boost::shared_ptr<comp> > components;
   std::vector<boost::shared_ptr<Type> > typeArgs;  
@@ -370,7 +370,7 @@ public:
   // while printing infinitely recursivetypes.
   MarkFlags mark;                // General traversal
   unsigned pMark;               // Type printer
-  boost::shared_ptr<Type> sp;			// Type specializer.
+  boost::shared_ptr<Type> sp;                        // Type specializer.
   TypeFlags flags;               
 
   // Main (Base) Constructor
@@ -574,8 +574,8 @@ public:
 
 private:  
   bool eql(boost::shared_ptr<Type> t, bool verbose, std::ostream &errStream,
-	   UnifyFlags uflags, bool keepSub,
-	   boost::shared_ptr<Trail> trail=Trail::make());
+           UnifyFlags uflags, bool keepSub,
+           boost::shared_ptr<Trail> trail=Trail::make());
 public:
   // Returns true of the type `t' is structurally equal to `this'
   // under alpha renaming (and declarations unify with definitions)
@@ -583,17 +583,17 @@ public:
   // The next function strictlyEquals removes the above two
   // restrictions. 
   bool equals(boost::shared_ptr<Type> t, bool verbose=false,
-	      std::ostream &errStream=std::cerr);
+              std::ostream &errStream=std::cerr);
   bool strictlyEquals(boost::shared_ptr<Type> t, bool verbose=false,
-		      bool noAlphaRename=false,
-		      std::ostream &errStream=std::cerr);  
+                      bool noAlphaRename=false,
+                      std::ostream &errStream=std::cerr);  
   bool unifyWith(boost::shared_ptr<Type> t, bool verbose=false,
-		 boost::shared_ptr<Trail> trail=Trail::make(),
-		 std::ostream &errStream=std::cerr);
+                 boost::shared_ptr<Trail> trail=Trail::make(),
+                 std::ostream &errStream=std::cerr);
 
   // Unify Ignoring rigidity
   bool forcedUnify(boost::shared_ptr<Type> t, bool verbose=false,
-		   std::ostream &errStream=std::cerr);
+                   std::ostream &errStream=std::cerr);
   
   // All Tvars are rigid?
   bool allTvarsRigid();
@@ -602,16 +602,16 @@ public:
   // variables. The following functions are the same as equals and
   // strictlyEquals except for the fact that they ignore rigidity.
   bool equalsA(boost::shared_ptr<Type> t, bool verbose=false,
-	       std::ostream &errStream=std::cerr);
+               std::ostream &errStream=std::cerr);
   bool strictlyEqualsA(boost::shared_ptr<Type> t, bool verbose=false,
-		       std::ostream &errStream=std::cerr);
+                       std::ostream &errStream=std::cerr);
   
   /* Test for copy compatibility 
      two versions based on inner function equal or equalsA? */
   bool copy_compatible(boost::shared_ptr<Type> t, bool verbose=false,
-			   std::ostream &errStream=std::cerr);
+                           std::ostream &errStream=std::cerr);
   bool copy_compatibleA(boost::shared_ptr<Type> t, bool verbose=false,
-			      std::ostream &errStream=std::cerr);
+                              std::ostream &errStream=std::cerr);
  
   /* Methods to support polymorphism */
   /* Is that Type variable contained in my type somewhere (deeply)? */
@@ -629,7 +629,7 @@ public:
   // Collect the Free Type Variables in a type
   // that are unbound in gamma
   void collectftvsWrtGamma(/* OUT */ TypeSet& tvs,
-			   boost::shared_ptr<const TSEnvironment > gamma);
+                           boost::shared_ptr<const TSEnvironment > gamma);
 
   // Meta-polymorphism
   static boost::shared_ptr<Type> Kmono;
@@ -638,7 +638,7 @@ public:
 private:
   boost::shared_ptr<Type> 
   TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
-		     std::vector<boost::shared_ptr<Type> >& nftvs);
+                     std::vector<boost::shared_ptr<Type> >& nftvs);
   
   // Clear the sp (specialization) field of type records recursively.
   void clear_sp();
@@ -646,7 +646,7 @@ private:
 public:
   boost::shared_ptr<Type> 
   TypeSpecialize(const std::vector<boost::shared_ptr<Type> >& ftvs,
-		 std::vector<boost::shared_ptr<Type> >& nftvs);
+                 std::vector<boost::shared_ptr<Type> >& nftvs);
 
   /* Methods to deal with mutability issues */
   // Fix all Maybe types surrounding type records containing a
@@ -654,28 +654,28 @@ public:
   // directly surrounding type variables, unless clearall is
   // mentioned. 
   bool fixMaybes(const TypeSet& ftvs, boost::shared_ptr<Trail> trail,
-		 bool clearAll);
+                 bool clearAll);
 
   // Wrapper for the above function with the clearAll flag set.
   void clearAllMaybes();
   
 public:
   void adjMaybe(boost::shared_ptr<Trail> trail, bool markedOnly=false,
-		bool minimize=false, bool adjFn=false);
+                bool minimize=false, bool adjFn=false);
   
   // Get the maximally-mutable, but copy-compatible type.
   boost::shared_ptr<Type> maximizeMutability(boost::shared_ptr<Trail>
-					     trail=Trail::make()); 
+                                             trail=Trail::make()); 
   // Get the minimally-mutable, but copy-compatible type.
   boost::shared_ptr<Type> minimizeMutability(boost::shared_ptr<Trail>
-					     trail=Trail::make()); 
+                                             trail=Trail::make()); 
 
   // Get the minimally-mutable version of this type, but interpret
   // const-meta-constructors at this step. This function is useful to
   // construct a maybe(full) type, since in 'a|p, p need not  
   // preserve const-ness.
   boost::shared_ptr<Type> minMutConstless(boost::shared_ptr<Trail> 
-					  trail=Trail::make());
+                                          trail=Trail::make());
   
   // Ensure that this type can be wrapped within a const type, that
   // is, all variables at shallow-positions are in a mbFull, so that
@@ -685,7 +685,7 @@ public:
   // This marking is used to mark type arguments in structure/union
   // definitions that appear at copy-position within const. 
   void ensureMinimizability(boost::shared_ptr<Trail> trail, 
-			    bool markOnly);
+                            bool markOnly);
   
   boost::shared_ptr<Type>
   maximizeTopMutability(boost::shared_ptr<Trail> trail=Trail::make()); 
@@ -702,7 +702,7 @@ public:
   // type, for example (mutable (pair (int32 bool)))
   bool
   propagateMutability(boost::shared_ptr<Trail> trail, 
-		      const bool inMutable=false); 
+                      const bool inMutable=false); 
   
   
   // Check if maximally / minimally mutable
@@ -727,18 +727,18 @@ public:
   // Use Output
   std::string 
   asString(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make(), 
-	   bool traverse = true);
+           bool traverse = true);
 
   void asXML(boost::shared_ptr<TvPrinter> tvP, sherpa::INOstream &out);
   std::string asXML(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make());
   
   boost::shared_ptr<AST> 
   asAST(const sherpa::LexLoc &loc,
-	boost::shared_ptr<TvPrinter> tvP = TvPrinter::make());
+        boost::shared_ptr<TvPrinter> tvP = TvPrinter::make());
   // Ignore mutability, Ignore Top-level Mutability, or
   // Maximize mutability of type-args
   std::string mangledString(bool igMut=false, bool igTlMut=false,
-			    bool maxArgMut=false);
+                            bool maxArgMut=false);
 
   const char *kindName() const
   { return KindName(kind); }
@@ -817,11 +817,11 @@ public:
   boost::shared_ptr<Type> & Base() const
   {
     DEBUG(TYPE_ACC) assert(kind == ty_mutable || 
-			  kind == ty_const || 
- 			  kind == ty_byref || 
- 			  kind == ty_ref || 
-			  kind == ty_array || 
-			  kind == ty_vector);
+                          kind == ty_const || 
+                           kind == ty_byref || 
+                           kind == ty_ref || 
+                          kind == ty_array || 
+                          kind == ty_vector);
     return CompType(0);
   }
 };

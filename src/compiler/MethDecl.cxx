@@ -80,7 +80,7 @@ insertMethDecls(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
     newChildren.push_back(theTypeDefn);
 
     if ((theTypeDefn->astType != at_defstruct) &&
-	(theTypeDefn->astType != at_defobject))
+        (theTypeDefn->astType != at_defobject))
       continue;
 
     // Typename might be an at_usesel here, but the parser has set
@@ -93,7 +93,7 @@ insertMethDecls(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       shared_ptr<AST> fld = fields->child(f);
 
       if (fld->astType != at_methdecl)
-	continue;
+        continue;
 
       shared_ptr<AST> methName = fld->child(0);
       shared_ptr<AST> methFnType = fld->child(1)->getDeepCopy();
@@ -110,19 +110,19 @@ insertMethDecls(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       assert(tvList->astType == at_tvlist);
 
       if (tvList->children.size()) {
-	structArgType = AST::make(at_typeapp, tvList->loc, structArgType);
-	for (size_t tv = 0; tv < tvList->children.size(); tv++) {
-	  shared_ptr<AST> theTV = tvList->child(tv);
-	  structArgType->addChild(theTV->getDeepCopy());
-	}
+        structArgType = AST::make(at_typeapp, tvList->loc, structArgType);
+        for (size_t tv = 0; tv < tvList->children.size(); tv++) {
+          shared_ptr<AST> theTV = tvList->child(tv);
+          structArgType->addChild(theTV->getDeepCopy());
+        }
       }
 
       // If the structure is a :val type, we need to wrap the argument
       // type in a BY-REF. Check child(4):
       if (theTypeDefn->child(4)->astType == at_valCat)
-	structArgType = 
-	  AST::make(at_byRefType, structArgType->child(4)->loc,
-		    structArgType);
+        structArgType = 
+          AST::make(at_byRefType, structArgType->child(4)->loc,
+                    structArgType);
 
       // Fetch the (possibly empty) constraint set from the original
       // structure:
@@ -130,32 +130,32 @@ insertMethDecls(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       shared_ptr<AST> constraintSet = theTypeDefn->child(nChildren - 1);
 
       if (constraintSet->children.size()) {
-	// There are constraints. Wrap the AST describing the type in
-	// an at_qualtype node:
+        // There are constraints. Wrap the AST describing the type in
+        // an at_qualtype node:
 
-	structArgType =
-	  AST::make(at_qualType, constraintSet->loc,
-		    constraintSet->getDeepCopy(), structArgType);
+        structArgType =
+          AST::make(at_qualType, constraintSet->loc,
+                    constraintSet->getDeepCopy(), structArgType);
       }
 
       methFnArgs->children.insert(methFnArgs->children.begin(),
-				  structArgType);
+                                  structArgType);
 
       // We should probably build a at_usesel here, but the resolver
       // pass will simply smash that into an identifier anyway, so go
       // ahead and build the identifier directly:
 
       shared_ptr<AST> methFnIdentNode = 
-	AST::make(at_usesel, 
-		  methName->loc,
-		  typeName->getDeepCopy(),
-		  methName->getDeepCopy());
+        AST::make(at_usesel, 
+                  methName->loc,
+                  typeName->getDeepCopy(),
+                  methName->getDeepCopy());
 
       shared_ptr<AST> mFnDecl = 
-	AST::make(at_proclaim, fld->loc, 
-		  methFnIdentNode,
-		  methFnType,
-		  constraintSet->getDeepCopy());
+        AST::make(at_proclaim, fld->loc, 
+                  methFnIdentNode,
+                  methFnType,
+                  constraintSet->getDeepCopy());
 
       mFnDecl->isDecl = true;
 
@@ -173,7 +173,7 @@ insertMethDecls(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
 
 bool
 UocInfo::fe_methDecl(std::ostream& errStream,
-		      bool init, unsigned long flags)
+                      bool init, unsigned long flags)
 {
   DEBUG(METH_DECL) if (isSourceUoc())
     PrettyPrint(errStream);

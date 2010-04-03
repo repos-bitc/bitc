@@ -62,7 +62,7 @@ namespace Options {
   extern bool showPasses;
   extern bool ppFQNS;
   extern bool ppDecorate;
-  extern unsigned verbose;	// 0 = no, 1 = show exec, 2 = forward
+  extern unsigned verbose;        // 0 = no, 1 = show exec, 2 = forward
 
   /// @brief Suppress load of the prelude.
   ///

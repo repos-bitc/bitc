@@ -51,7 +51,7 @@
  */
 
 typedef bool (*BackEndFn) (std::ostream& out, std::ostream& err,
-			   boost::shared_ptr<UocInfo> uoc);
+                           boost::shared_ptr<UocInfo> uoc);
 
 typedef bool (*MidEndFn) (std::ostream& out, std::ostream& err);
 
@@ -77,7 +77,7 @@ bool XMLtypesPP(std::ostream& out, std::ostream& err, boost::shared_ptr<UocInfo>
  * units of compilation.
  */
 bool EmitHeader(std::ostream& out, std::ostream& err,
-		boost::shared_ptr<UocInfo> uoc);
+                boost::shared_ptr<UocInfo> uoc);
 
 /* @brief Emit a C source file that is the whole-program compilation
  * result for all input source files.

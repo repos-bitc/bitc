@@ -69,7 +69,7 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
   case at_deref:
     {
       for (size_t c = 0; c < ast->children.size(); c++)
-	LocChk(errStream, errFree, ast->child(c), false);
+        LocChk(errStream, errFree, ast->child(c), false);
        
       return true;
     }
@@ -80,10 +80,10 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
       LocChk(errStream, errFree, ast->child(1), inSET);
 
       if (!isLoc) {
-	errStream << ast->child(0)->loc << ": "
-		  << "Non-location in set! context"
-		  << std::endl;
-	errFree = false;
+        errStream << ast->child(0)->loc << ": "
+                  << "Non-location in set! context"
+                  << std::endl;
+        errFree = false;
       }
 
       return false;
@@ -93,10 +93,10 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
     {
       bool isLoc = LocChk(errStream, errFree, ast->child(0), inSET);
       if (inSET && !isLoc) {
-	errStream << ast->child(0)->loc << ": "
-		  << "Non-location in set! context"
-		  << std::endl;
-	errFree = false;
+        errStream << ast->child(0)->loc << ": "
+                  << "Non-location in set! context"
+                  << std::endl;
+        errFree = false;
       }
 
       return true;
@@ -113,10 +113,10 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
       bool isLoc = LocChk(errStream, errFree, ast->child(0), inSET);
       
       if (inSET && !isLoc && !ast->child(0)->symType->isRefType()) {
-	errStream << ast->child(0)->loc << ": "
-		  << "Non-location in set! context"
-		  << std::endl;
-	errFree = false;
+        errStream << ast->child(0)->loc << ": "
+                  << "Non-location in set! context"
+                  << std::endl;
+        errFree = false;
       }
       
       return true;
@@ -132,8 +132,8 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
   case at_try:
     {
       for (size_t c = 0; c < ast->children.size(); c++)
-	if (c != IGNORE(ast))
-	  LocChk(errStream, errFree, ast->child(c), inSET);
+        if (c != IGNORE(ast))
+          LocChk(errStream, errFree, ast->child(c), inSET);
       
       return false;
     }
@@ -141,7 +141,7 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
   default:
     {
       for (size_t c = 0; c < ast->children.size(); c++)
-	LocChk(errStream, errFree, ast->child(c), inSET);
+        LocChk(errStream, errFree, ast->child(c), inSET);
 
       return false;
     }
@@ -150,7 +150,7 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
 
 bool
 UocInfo::fe_locCheck(std::ostream& errStream, 
-		     bool init, unsigned long flags)
+                     bool init, unsigned long flags)
 {
   bool errFree = true;  
   LocChk(errStream, errFree, uocAst, false);  

@@ -71,14 +71,14 @@ static bool
 valid_ident_start(uint32_t ucs4)
 {
   return (u_hasBinaryProperty(ucs4,UCHAR_XID_START) || 
-	  valid_ident_punct(ucs4));
+          valid_ident_punct(ucs4));
 }
 
 static bool
 valid_ident_continue(uint32_t ucs4)
 {
   return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE) ||
-	  valid_ident_punct(ucs4));
+          valid_ident_punct(ucs4));
 }
 
 static bool
@@ -100,14 +100,14 @@ static bool
 valid_tv_ident_start(uint32_t ucs4)
 {
   return (u_hasBinaryProperty(ucs4,UCHAR_XID_START) || 
-	  ucs4 == '_');
+          ucs4 == '_');
 }
 
 static bool
 valid_tv_ident_continue(uint32_t ucs4)
 {
   return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE) ||
-	  ucs4 == '_');
+          ucs4 == '_');
 }
 static bool
 valid_charpoint(uint32_t ucs4)
@@ -136,10 +136,10 @@ validate_string(const char *s)
     const char *snext;
     c = sherpa::utf8_decode(spos, &snext); //&OK
 
-    if (c == ' ') {		/* spaces are explicitly legal */
+    if (c == ' ') {                /* spaces are explicitly legal */
       spos = snext;
     }
-    else if (c == '\\') {	/* escaped characters are legal */
+    else if (c == '\\') {        /* escaped characters are legal */
       const char *escStart = spos;
       spos++;
       switch (*spos) {
@@ -151,34 +151,34 @@ validate_string(const char *s)
       case 'f':
       case '"':
       case '\\':
-	{
-	  spos++;
-	  break;
-	}
+        {
+          spos++;
+          break;
+        }
       case '{':
-	{
-	  if (*++spos != 'U')
-	    return (spos - s);
-	  if (*++spos != '+')
-	    return (spos - s);
-	  {
-	    uint32_t codePoint = 0;
+        {
+          if (*++spos != 'U')
+            return (spos - s);
+          if (*++spos != '+')
+            return (spos - s);
+          {
+            uint32_t codePoint = 0;
 
-	    while (*++spos != '}') {
-	      if (!isxdigit(*spos))
-		return (spos - s);
-	      codePoint *= 16;
-	      codePoint += SexprLexer::digitValue(*spos, 16);
-	      if (codePoint > UCHAR_MAX_VALUE)
-		return (spos - s);
-	    }
-	  }
-	}
-	spos++;
-	break;
+            while (*++spos != '}') {
+              if (!isxdigit(*spos))
+                return (spos - s);
+              codePoint *= 16;
+              codePoint += SexprLexer::digitValue(*spos, 16);
+              if (codePoint > UCHAR_MAX_VALUE)
+                return (spos - s);
+            }
+          }
+        }
+        spos++;
+        break;
       default:
-	// Bad escape sequence
-	return (escStart - s);
+        // Bad escape sequence
+        return (escStart - s);
       }
     }
     else if (u_isgraph(c)) {
@@ -334,7 +334,7 @@ SexprLexer::kwCheck(const char *s)
 
     for (++s; *s; s++)
       if (!valid_ifident_continue(*s))
-	return tk_ReservedWord;
+        return tk_ReservedWord;
 
     return tk_Ident;
   }
@@ -342,8 +342,8 @@ SexprLexer::kwCheck(const char *s)
   KeyWord key = { s, 0 };
   KeyWord *entry = 
     (KeyWord *)bsearch(&key, keywords, // &OK
-		       sizeof(keywords)/sizeof(keywords[0]), 
-		       sizeof(keywords[0]), kwstrcmp);
+                       sizeof(keywords)/sizeof(keywords[0]), 
+                       sizeof(keywords[0]), kwstrcmp);
 
   // If it is in the token table, return the indicated token type:
   if (entry)
@@ -372,7 +372,7 @@ void
 SexprLexer::ReportParseError()
 {
   errStream << here
-	    << ": syntax error (via yyerror)" << '\n';
+            << ": syntax error (via yyerror)" << '\n';
   num_errors++;
 }
  
@@ -380,8 +380,8 @@ void
 SexprLexer::ReportParseError(const LexLoc& where, std::string msg)
 {
   errStream << where
-	    << ": "
-	    << msg << std::endl;
+            << ": "
+            << msg << std::endl;
 
   num_errors++;
 }
@@ -390,13 +390,13 @@ void
 SexprLexer::ReportParseWarning(const LexLoc& where, std::string msg)
 {
   errStream << where
-	    << ": "
-	    << msg << std::endl;
+            << ": "
+            << msg << std::endl;
 }
 
 SexprLexer::SexprLexer(std::ostream& _err, std::istream& _in, 
-		       const std::string& origin,
-		       bool commandLineInput)
+                       const std::string& origin,
+                       bool commandLineInput)
   :here(origin, 1, 0), inStream(_in), errStream(_err)
 {
   inStream.unsetf(std::ios_base::skipws);
@@ -528,14 +528,14 @@ SexprLexer::lex(ParseType *lvalp)
   c = getChar();
 
   switch (c) {
-  case ';':			// Comments
+  case ';':                        // Comments
     do {
       c = getChar();
     } while (c != '\n' && c != '\r');
     ungetChar(c);
     // FALL THROUGH 
 
-  case ' ':			// White space
+  case ' ':                        // White space
   case '\t':
   case '\n':
   case '\r':
@@ -543,7 +543,7 @@ SexprLexer::lex(ParseType *lvalp)
     goto startOver;
 
 
-  case '.':			// Single character tokens
+  case '.':                        // Single character tokens
   case ',':
   case '[':
   case ']':
@@ -556,25 +556,25 @@ SexprLexer::lex(ParseType *lvalp)
     return c;
 
 
-  case '"':			// String literal
+  case '"':                        // String literal
     {
       do {
-	c = getChar();
+        c = getChar();
 
-	if (c == '\\') {
-	  (void) getChar();	// just ignore it -- will validate later
-	}
-      }	while (c != '"');
+        if (c == '\\') {
+          (void) getChar();        // just ignore it -- will validate later
+        }
+      }        while (c != '"');
       
       unsigned badpos = validate_string(thisToken.c_str());
 
       if (badpos) {
-	LexLoc badHere = here;
-	badHere.offset += badpos;
-	errStream << badHere.asString()
-		  << ": Illegal (non-printing) character in string '"
-		  << thisToken << "'\n";
-	num_errors++;
+        LexLoc badHere = here;
+        badHere.offset += badpos;
+        errStream << badHere.asString()
+                  << ": Illegal (non-printing) character in string '"
+                  << thisToken << "'\n";
+        num_errors++;
       }
 
       LexLoc tokStart = here;
@@ -584,104 +584,104 @@ SexprLexer::lex(ParseType *lvalp)
     }
 
 
-  case '#':			// character and boolean literals
+  case '#':                        // character and boolean literals
     {
       c = getChar();
       switch(c) {
       case 't':
-	lvalp->tok = LToken(here, thisToken);
-	here.updateWith(thisToken);
-	return tk_TRUE;
+        lvalp->tok = LToken(here, thisToken);
+        here.updateWith(thisToken);
+        return tk_TRUE;
       case 'f':
-	lvalp->tok = LToken(here, thisToken);
-	here.updateWith(thisToken);
-	return tk_FALSE;
+        lvalp->tok = LToken(here, thisToken);
+        here.updateWith(thisToken);
+        return tk_FALSE;
       case '\\':
-	{
-	  c = getChar();
+        {
+          c = getChar();
 
-	  if (valid_charpunct(c)) {
-	    lvalp->tok = LToken(here, thisToken);
-	    here.updateWith(thisToken);
-	    return tk_Char;
-	  }
-	  else if (c == 'U') {
-	    uint32_t codePoint = 0;
+          if (valid_charpunct(c)) {
+            lvalp->tok = LToken(here, thisToken);
+            here.updateWith(thisToken);
+            return tk_Char;
+          }
+          else if (c == 'U') {
+            uint32_t codePoint = 0;
 
-	    c = getChar();
-	    if (c == '+') {
-	      for(;;) {
-		c = getChar();
-		long dv = digitValue(c, 16);
-		if (dv < 0)
-		  break;
-		codePoint *= 16;
-		codePoint += dv;
-		if (codePoint > UCHAR_MAX_VALUE)
-		  return EOF;
-	      }
-	      
-	      if (!isCharDelimiter(c)) {
-		ungetChar(c);
-		return EOF;
-	      }
-	    }
-	    ungetChar(c);
+            c = getChar();
+            if (c == '+') {
+              for(;;) {
+                c = getChar();
+                long dv = digitValue(c, 16);
+                if (dv < 0)
+                  break;
+                codePoint *= 16;
+                codePoint += dv;
+                if (codePoint > UCHAR_MAX_VALUE)
+                  return EOF;
+              }
+              
+              if (!isCharDelimiter(c)) {
+                ungetChar(c);
+                return EOF;
+              }
+            }
+            ungetChar(c);
 
-	    lvalp->tok = LToken(here, thisToken);
-	    here.updateWith(thisToken);
-	    return tk_Char;
-	  }
-	  else if (valid_charpoint(c)) {
-	    // Collect more characters in case this is a named character
-	    // literal.
-	    do {
-	      c = getChar();
-	    } while (isalpha(c));
-	    ungetChar(c);
+            lvalp->tok = LToken(here, thisToken);
+            here.updateWith(thisToken);
+            return tk_Char;
+          }
+          else if (valid_charpoint(c)) {
+            // Collect more characters in case this is a named character
+            // literal.
+            do {
+              c = getChar();
+            } while (isalpha(c));
+            ungetChar(c);
 
-	    if (thisToken.size() == 3 || // '#' '\' CHAR
-		thisToken == "#\\space" ||
-		thisToken == "#\\linefeed" ||
-		thisToken == "#\\return" ||
-		thisToken == "#\\tab" ||
-		thisToken == "#\\backspace" ||
-		thisToken == "#\\lbrace" ||
-		thisToken == "#\\rbrace") {
-	      lvalp->tok = LToken(here, thisToken);
-	      here.updateWith(thisToken);
-	      return tk_Char;
-	    }
-	  }
+            if (thisToken.size() == 3 || // '#' '\' CHAR
+                thisToken == "#\\space" ||
+                thisToken == "#\\linefeed" ||
+                thisToken == "#\\return" ||
+                thisToken == "#\\tab" ||
+                thisToken == "#\\backspace" ||
+                thisToken == "#\\lbrace" ||
+                thisToken == "#\\rbrace") {
+              lvalp->tok = LToken(here, thisToken);
+              here.updateWith(thisToken);
+              return tk_Char;
+            }
+          }
 
-	  // FIX: this is bad input
-	  return EOF;
-	}
+          // FIX: this is bad input
+          return EOF;
+        }
       default:
-	// FIX: this is bad input
-	return EOF;
+        // FIX: this is bad input
+        return EOF;
       }
     }
 
-  case '\'':			// Type variables
+  case '\'':                        // Type variables
     {
       int tokType = tk_TypeVar;
 
       c = getChar();
 
       if (c == '%') {
-	tokType = tk_EffectVar;
-	c = getChar();
+        tokType = tk_EffectVar;
+        c = getChar();
       }
 
       if (!valid_tv_ident_start(c)) {
-	// FIX: this is bad input
-	ungetChar(c);
-	return EOF;
+        // FIX: this is bad input
+        ungetChar(c);
+        return EOF;
       }
 
       do {
-	c = getChar();
+        c = getChar();
       } while (valid_tv_ident_continue(c));
       ungetChar(c);
 
@@ -715,82 +715,82 @@ SexprLexer::lex(ParseType *lvalp)
       int radix = 10;
 
       do {
-	c = getChar();
+        c = getChar();
       } while (digitValue(c, 10) >= 0);
 
       /* At this point we could either discover a radix marker 'r', or
-	 a decimal point (indicating a floating poing literal). If it
-	 is a radix marker, change the radix value here so that we
-	 match the succeeding digits in the correct radix. */
+         a decimal point (indicating a floating poing literal). If it
+         is a radix marker, change the radix value here so that we
+         match the succeeding digits in the correct radix. */
       if (c == 'r') {
-	radix = strtol(thisToken.c_str(), 0, 10);
-	if (radix < 0) radix = -radix; // leading sign not part of radix
+        radix = strtol(thisToken.c_str(), 0, 10);
+        if (radix < 0) radix = -radix; // leading sign not part of radix
 
-	long count = 0;
-	do {
-	  c = getChar();
-	  count++;
-	} while (digitValue(c, radix) >= 0);
-	count--;
-	/* FIX: if count is 0, number is malformed */
+        long count = 0;
+        do {
+          c = getChar();
+          count++;
+        } while (digitValue(c, radix) >= 0);
+        count--;
+        /* FIX: if count is 0, number is malformed */
       }
 
       /* We are either done with the literal, in which case it is an
-	 integer literal, or we are about to see a decimal point, in
-	 which case it is a floating point literal */
+         integer literal, or we are about to see a decimal point, in
+         which case it is a floating point literal */
       if (c != '.') {
-	ungetChar(c);
-	lvalp->tok = LToken(here, thisToken);
-	here.updateWith(thisToken);
-	return tk_Int;
+        ungetChar(c);
+        lvalp->tok = LToken(here, thisToken);
+        here.updateWith(thisToken);
+        return tk_Int;
       }
 
       /* We have seen a decimal point, so from here on it must be a
-	 floating point literal. */
+         floating point literal. */
       {
-	long count = 0;
-	do {
-	  c = getChar();
-	  count++;
-	} while (digitValue(c, radix) >= 0);
-	count--;
-	/* FIX: if count is 0, number is malformed */
+        long count = 0;
+        do {
+          c = getChar();
+          count++;
+        } while (digitValue(c, radix) >= 0);
+        count--;
+        /* FIX: if count is 0, number is malformed */
       }
 
       /* We are either done with this token or we are looking at a '^'
-	 indicating start of an exponent. */
+         indicating start of an exponent. */
       if (c != '^') {
-	ungetChar(c);
-	lvalp->tok = LToken(here, thisToken);
-	here.updateWith(thisToken);
-	return tk_Float;
+        ungetChar(c);
+        lvalp->tok = LToken(here, thisToken);
+        here.updateWith(thisToken);
+        return tk_Float;
       }
 
       /* Need to collect the exponent. Revert to radix 10 until
-	 otherwise proven. */
+         otherwise proven. */
       c = getChar();
       radix = 10;
 
       if (c != '-' && digitValue(c, radix) < 0) {
-	// FIX: Malformed token
+        // FIX: Malformed token
       }
 
       do {
-	c = getChar();
+        c = getChar();
       } while (digitValue(c, 10) >= 0);
 
       /* Check for radix marker on exponent */
       if (c == 'r') {
-	radix = strtol(thisToken.c_str(), 0, 10);
-	if (radix < 0) radix = -radix; // leading sign not part of radix
+        radix = strtol(thisToken.c_str(), 0, 10);
+        if (radix < 0) radix = -radix; // leading sign not part of radix
 
-	long count = 0;
-	do {
-	  c = getChar();
-	  count++;
-	} while (digitValue(c, radix) >= 0);
-	count--;
-	/* FIX: if count is 0, number is malformed */
+        long count = 0;
+        do {
+          c = getChar();
+          count++;
+        } while (digitValue(c, radix) >= 0);
+        count--;
+        /* FIX: if count is 0, number is malformed */
       }
 
       ungetChar(c);

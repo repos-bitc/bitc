@@ -48,8 +48,8 @@
 
 #define dbg_BEG_SIMP    0x00000001u
 #define dbg_METH_DECL   0x00000002u
-#define dbg_ILH         0x00000004u	// Inst-Lambda-Hoist
-#define dbg_INST        0x00000008u	// Debug Polyinstantiation
+#define dbg_ILH         0x00000004u        // Inst-Lambda-Hoist
+#define dbg_INST        0x00000008u        // Debug Polyinstantiation
 #define dbg_INST_ENV    0x00000010u // Debug Polyinstantiator's env-handling
 #define dbg_REPR_SIMP   0x00000020u
 #define dbg_UNION_INF   0x00000040u

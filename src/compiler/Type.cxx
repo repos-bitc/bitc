@@ -77,7 +77,7 @@ static struct {
   bool isPrimInt;
   bool isPrimFloat;
 } kindInfo[] = {
-#define DEFKIND(nm, prim, csimp, atom, scalar, ref, primInt, primFloat)	\
+#define DEFKIND(nm, prim, csimp, atom, scalar, ref, primInt, primFloat)        \
   { #nm, prim, csimp, atom, scalar, ref, primInt, primFloat },
 #include "kind.def"
 };
@@ -214,7 +214,7 @@ Type::getType()
   if (t->kind == ty_mbFull) {
     shared_ptr<Type> in = t->Var()->normalize_mut();
     shared_ptr<Type> within = ((in->kind == ty_mutable) ?
-			       in->Base()->getTypePrim(): in);
+                               in->Base()->getTypePrim(): in);
     
     if(within->kind != ty_tvar)
       t = in;
@@ -395,7 +395,7 @@ Type::isNullableType()
 {
   shared_ptr<Type> t = getBareType();
   return (t->kind == ty_unionv &&
-	  (t->defAst->flags & NULLABLE_UN));
+          (t->defAst->flags & NULLABLE_UN));
 }
 
 bool 
@@ -420,7 +420,7 @@ Type::isConstrainedToRefType(boost::shared_ptr<TCConstraints> tcc)
     if (pred->defAst->s == ref_types) {
       shared_ptr<Type> arg = pred->TypeArg(0)->getType();
       if (strictlyEquals(arg, false, true))
-	return true;
+        return true;
     }
   }
 
@@ -493,7 +493,7 @@ Type::isMutType()
 {
   shared_ptr<Type> t = getType();
   return(t->isMutable() ||
-	 (t->isMbFull() && t->Var()->isMutable()));
+         (t->isMbFull() && t->Var()->isMutable()));
 }
 
 bool 
@@ -682,7 +682,7 @@ Type::isUnion(bool ignMut)
 {
   shared_ptr<Type> t = ((ignMut) ? getBareType() : getType());
   return (((t->kind == ty_unionv) || (t->kind == ty_unionr)) &&
-	  (t->components.size()));
+          (t->components.size()));
 }
 
 bool 
@@ -970,7 +970,7 @@ Type::isStruct()
   shared_ptr<Type> t = getBareType();
 
   return ((t->kind == ty_structv) || 
-	  (t->kind == ty_structr));
+          (t->kind == ty_structr));
 }
 
 bool
@@ -994,7 +994,7 @@ Type::isObject()
   shared_ptr<Type> t = getBareType();
 
   return ((t->kind == ty_objectv) || 
-	  (t->kind == ty_objectr));
+          (t->kind == ty_objectr));
 }
 
 bool 
@@ -1069,8 +1069,8 @@ Type::isOfInfiniteType()
   case ty_method:
     {
       for (size_t i=0; !infType && (i < components.size()); i++)
-      	if (CompType(i)->isOfInfiniteType())
-      	  infType = true;
+              if (CompType(i)->isOfInfiniteType())
+                infType = true;
       break;
     }
 
@@ -1090,8 +1090,8 @@ Type::isOfInfiniteType()
   case ty_pcst:
     {      
       for (size_t i=0; !infType && (i < typeArgs.size()); i++)
-      	if (TypeArg(i)->isOfInfiniteType())
-      	  infType = true;
+              if (TypeArg(i)->isOfInfiniteType())
+                infType = true;
 
       break;
     }
@@ -1188,22 +1188,22 @@ comp::comp(const std::string s, shared_ptr<Type> t, CompFlagSet _flags)
 //   flags = c.flags;  
 // }
 
-#define TYPE_CTR_INIT(k) do {			\
-    kind = k;					\
-    defAst = GC_NULL;				\
-    myContainer = GC_NULL;			\
-    minSignedRep = 0;				\
-    minUnsignedRep = 0;				\
-    Isize = 0;					\
-    if(kind == ty_array)			\
-      arrLen = ArrLen::make(0);			\
-    else					\
-      arrLen = GC_NULL;				\
-    mark = MARK_NONE;				\
-    pMark = 0;					\
-    sp = GC_NULL;				\
-    link = GC_NULL;				\
-    flags = TY_NO_FLAGS;			\
+#define TYPE_CTR_INIT(k) do {                        \
+    kind = k;                                        \
+    defAst = GC_NULL;                                \
+    myContainer = GC_NULL;                        \
+    minSignedRep = 0;                                \
+    minUnsignedRep = 0;                                \
+    Isize = 0;                                        \
+    if(kind == ty_array)                        \
+      arrLen = ArrLen::make(0);                        \
+    else                                        \
+      arrLen = GC_NULL;                                \
+    mark = MARK_NONE;                                \
+    pMark = 0;                                        \
+    sp = GC_NULL;                                \
+    link = GC_NULL;                                \
+    flags = TY_NO_FLAGS;                        \
   } while (0);
 
 
@@ -1286,13 +1286,13 @@ Type::getDCopy()
 // strictlyEquals which removes the above two restrictions.
 bool
 Type::eql(shared_ptr<Type> t, bool verbose, std::ostream &errStream,
-	  UnifyFlags uflags, bool keepSub,
-	  shared_ptr<Trail> trail)
+          UnifyFlags uflags, bool keepSub,
+          shared_ptr<Trail> trail)
 {
   std::stringstream ss;  
   LexLoc internalLocation;
   bool errFree = unify(ss, trail, internalLocation, 
-		       shared_from_this(), t, uflags);
+                       shared_from_this(), t, uflags);
   
   if (!keepSub)
     trail->rollBack();
@@ -1300,11 +1300,11 @@ Type::eql(shared_ptr<Type> t, bool verbose, std::ostream &errStream,
   if (verbose) {
     if (errFree)
       errStream << asString() << " === " << t->asString()
-		<< std::endl;
+                << std::endl;
     else
       errStream << asString() << " !== " << t->asString()
-		<< " because " << ss.str() 
-		<< std::endl;
+                << " because " << ss.str() 
+                << std::endl;
   }
 
   return errFree;
@@ -1318,8 +1318,8 @@ Type::equals(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 
 bool 
 Type::strictlyEquals(shared_ptr<Type> t, bool verbose,
-		     bool noAlphaRename,
-		     std::ostream &errStream)
+                     bool noAlphaRename,
+                     std::ostream &errStream)
 {
   UnifyFlags uflags = UFLG_UNIFY_STRICT;
   if (noAlphaRename)
@@ -1329,7 +1329,7 @@ Type::strictlyEquals(shared_ptr<Type> t, bool verbose,
 
 bool
 Type::unifyWith(shared_ptr<Type> t, bool verbose, 
-		shared_ptr<Trail> trail, ostream &errStream)
+                shared_ptr<Trail> trail, ostream &errStream)
 {
   return eql(t, verbose, errStream, UFLG_NO_FLAGS, true, trail);
 }
@@ -1348,10 +1348,10 @@ Type::equalsA(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 
 bool 
 Type::strictlyEqualsA(shared_ptr<Type> t, bool verbose,
-		      std::ostream &errStream)
+                      std::ostream &errStream)
 {
   return eql(t, verbose, errStream, 
-	     UFLG_UNIFY_STRICT | UFLG_UN_IGN_RIGIDITY, false);
+             UFLG_UNIFY_STRICT | UFLG_UN_IGN_RIGIDITY, false);
 }
 
 bool 

@@ -81,23 +81,23 @@ calc_struct_size(const shared_ptr<Type> t)
     switch(fld->astType) {
     case at_fill:
       {
-	sz += fld->field_bits;
-	break;
+        sz += fld->field_bits;
+        break;
       }
       
     case at_field:
       {
-	if (fld->field_bits != 0) {
-	  assert(fld->symType->isIntegral());
-	  sz += fld->field_bits;
-	}
-	else {
-	  sz+= t->CompType(compCnt)->size();
-	}
+        if (fld->field_bits != 0) {
+          assert(fld->symType->isIntegral());
+          sz += fld->field_bits;
+        }
+        else {
+          sz+= t->CompType(compCnt)->size();
+        }
 
-	if ((fld->flags & FLD_IS_DISCM) == 0)
-	  compCnt++;
-	break;
+        if ((fld->flags & FLD_IS_DISCM) == 0)
+          compCnt++;
+        break;
       }
       
     case at_methdecl:
@@ -106,8 +106,8 @@ calc_struct_size(const shared_ptr<Type> t)
 
     default:
       {
-	assert(false);
-	break;
+        assert(false);
+        break;
       }
     }
   }
@@ -236,7 +236,7 @@ Type::size()
     {
       //       // Fix: inner bit-fields
       //       for (size_t i=0; i < components->size(); i++)
-      // 	theSize += CompType(i)->size();
+      //         theSize += CompType(i)->size();
       //       theSize += defAst->total_fill;
       //       break;
       

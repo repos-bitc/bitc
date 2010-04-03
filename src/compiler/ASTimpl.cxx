@@ -177,12 +177,12 @@ AST::makeFloatLit(const sherpa::LToken &tok)
     if (pos != std::string::npos) {
       std::string rad;
       if (expString[0] == '-') {
-	rad = expString.substr(1, pos);
-	expString = "-" + expString.substr(pos+1, expString.size());
+        rad = expString.substr(1, pos);
+        expString = "-" + expString.substr(pos+1, expString.size());
       }
       else {
-	rad = expString.substr(0, pos);
-	expString = expString.substr(pos+1, expString.size());
+        rad = expString.substr(0, pos);
+        expString = expString.substr(pos+1, expString.size());
       }
 
       char *end;
@@ -196,12 +196,12 @@ AST::makeFloatLit(const sherpa::LToken &tok)
     exponent = "@0";
 
   //std::cout << " Mantissa = " << mantissaString << " Exponent = "
-  //	    << exponent
-  //	    << " Base = " << ast->litBase;
+  //            << exponent
+  //            << " Base = " << ast->litBase;
 
   /* Finish off */
   mpf_init_set_str(ast->litValue.d, (mantissaString + exponent).c_str(),
-		   ast->litBase);
+                   ast->litBase);
   //gmp_printf(" %Ff\n", ast->litValue.d);
 
 #endif
@@ -775,8 +775,8 @@ AST::clearTypes() {
 
 void
 AST::getIds(std::ostream &errStream,
-	    std::vector<shared_ptr<AST> >& ids,
-	    bool getPattern)
+            std::vector<shared_ptr<AST> >& ids,
+            bool getPattern)
 {
   switch(astType) {
   case at_identPattern:
@@ -788,9 +788,9 @@ AST::getIds(std::ostream &errStream,
 
   default:
     errStream << loc << ": Internal Compiler Error,"
-	      << " getIds routine obtained the wrong "
-	      << "AST TYPE " << astTypeName()
-	      << std::endl;
+              << " getIds routine obtained the wrong "
+              << "AST TYPE " << astTypeName()
+              << std::endl;
   }
 }
 
@@ -907,27 +907,27 @@ bool
 AST::isIdentType(IdentType t)
 {
   return ((identType == t) ||
-	  ((t == idc_type) && ((identType == id_tvar) ||
-			       (identType == id_union) ||
-			       (identType == id_struct) ||
-			       (identType == id_object))) ||
-	  ((t == idc_value) && ((identType == id_value) ||
-				(identType == id_ucon0) ||
-				(identType == id_tcmethod))) ||
-	  ((t == idc_ctor)  && ((identType == id_struct) ||
-				(identType == id_object) ||
-				(identType == id_ucon) ||
-				(identType == id_ucon0))) ||
-	  ((t == idc_uctor) && ((identType == id_ucon) ||
-				(identType == id_ucon0))) ||
-	  // The idc_apply case is written as a recursive call and not
-	  // as disjunction of various id_* cases since in the case
-	  // where we are applying a valye that was proclaimed, the
-	  // identType would still be idc_value, and not id_value.
-	  ((t == idc_apply) && (isIdentType(idc_value) ||
-				isIdentType(idc_ctor) ||
-				isIdentType(id_method))) ||
-	  ((t == idc_usesel_lhs) && ((identType == id_interface) ||
-				     (identType == id_struct) ||
-				     (identType == id_object))));
+          ((t == idc_type) && ((identType == id_tvar) ||
+                               (identType == id_union) ||
+                               (identType == id_struct) ||
+                               (identType == id_object))) ||
+          ((t == idc_value) && ((identType == id_value) ||
+                                (identType == id_ucon0) ||
+                                (identType == id_tcmethod))) ||
+          ((t == idc_ctor)  && ((identType == id_struct) ||
+                                (identType == id_object) ||
+                                (identType == id_ucon) ||
+                                (identType == id_ucon0))) ||
+          ((t == idc_uctor) && ((identType == id_ucon) ||
+                                (identType == id_ucon0))) ||
+          // The idc_apply case is written as a recursive call and not
+          // as disjunction of various id_* cases since in the case
+          // where we are applying a valye that was proclaimed, the
+          // identType would still be idc_value, and not id_value.
+          ((t == idc_apply) && (isIdentType(idc_value) ||
+                                isIdentType(idc_ctor) ||
+                                isIdentType(id_method))) ||
+          ((t == idc_usesel_lhs) && ((identType == id_interface) ||
+                                     (identType == id_struct) ||
+                                     (identType == id_object))));
 }
