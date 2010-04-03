@@ -1073,18 +1073,17 @@ GROUP eform = literal | var | unit
             | array | vector | makevectorL
             | begin | select
             | fqCtr | sel_ctr
-            | array_nth | vector_nth
-            | array_length | vector_length
+            | array_nth | vector_nth | array_ref_nth
+            | array_length | vector_length | array_ref_length
             | lambda | suspend
             | apply | struct_apply | object_apply | ucon_apply
             | if | when | and | or | not | cond | switch
             | setbang | dup | deref | inner_ref
             | try | throw | let | letStar | letrec
-             | container | do
+            | container | do
             | mkClosure | allocREF | copyREF | setClosure
             | block | return_from
             | sizeof | bitsizeof | mkArrayByref
-              | array_ref_nth | array_ref_length
             // | loop | typecase | casebang
             ;
 // *select* is record selection.
