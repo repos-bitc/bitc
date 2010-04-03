@@ -763,7 +763,6 @@ public:
   bool isGlobal() { return (flags & ID_IS_GLOBAL); }
   bool isFnxn(); // Function
   size_t nBits();
-  bool isLocation();
   bool isLiteral();
   bool isTopLevelForm();
   bool isIdentType(IdentType idt);

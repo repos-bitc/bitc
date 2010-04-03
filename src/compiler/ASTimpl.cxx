@@ -888,28 +888,6 @@ AST::rename(shared_ptr<AST> from, std::string newName)
 }
 
 bool
-AST::isLocation()
-{
-  switch (astType) {
-  case at_ident:
-      return true;
-
-  case at_vector_nth:
-  case at_deref:
-      return true;
-
-  case at_array_nth:
-      return child(0)->isLocation();
-
-  case at_select:
-    return child(0)->isLocation();
-
-  default:
-      return false;
-  }
-}
-
-bool
 AST::isLiteral()
 {
   switch (astType) {
