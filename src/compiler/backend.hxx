@@ -94,6 +94,8 @@ bool EmitExe(std::ostream& out, std::ostream& err, boost::shared_ptr<UocInfo> uo
 
 /* @brief Gather all of ths source units of compilation mentioned on
  * the command line into a quasi-archive file.
+ *
+ * This is a mid-end pass!
  */
 bool EmitBitO(std::ostream& out, std::ostream& err);
 
@@ -103,11 +105,11 @@ struct BackEnd {
   /** @brief Name of last front-end pass that is required before
    * proceeding to the mid-end */
   Pass needPass;
-  /** @brief Name of last mid-end pass that must be run before
+  /** @brief Name of last whole program pass that must be run before
    * proceeding to the back end.
    */
   OnePass oPass;
-  /** @brief For targets that enit on a per-UoC basis, procedure to
+  /** @brief For targets that emit on a per-UoC basis, procedure to
    * run on each input unit of compilation. */
   BackEndFn fn;
   /** @brief For targets that require the grand UoC to be built,
