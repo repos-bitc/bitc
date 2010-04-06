@@ -53,7 +53,28 @@
 using namespace boost;
 using namespace sherpa;
 
-// Return whether the expression returns a location or not.
+/// Return whether the expression constitutes an assignable location
+/// (an l-value).
+///
+/// The general idea here is to prevent assignment to intermediate
+/// expressions, though the implementation is haphazard.
+///
+/// Rules:
+///  1. If e is an identifier node, then e is a location.
+///
+///  2. If e is a reference type, then (deref e) is a location.
+///     By extension, if v is a vector , then v[i] is a location.
+///
+///  3. If e is an array reference a[i], then e is a location exactly
+///     if a is a location.
+///
+///  4. s.f is a location exactly if s is a location.
+///
+///  5. Nothing else is a location, though switch and try require some
+///     special handling.
+///
+/// Generally, we do not require a location, but we *do* require one
+/// within the l-value argument to set!.
 static bool
 LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
 {
@@ -68,6 +89,8 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
   case at_vector_nth:
   case at_deref:
     {
+      // Need to recurse because we need to perform the location check
+      // within the expression that produces the value.
       for (size_t c = 0; c < ast->children.size(); c++)
         LocChk(errStream, errFree, ast->child(c), false);
        
