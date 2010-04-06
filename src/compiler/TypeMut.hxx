@@ -63,12 +63,14 @@ newTvar()
   return Type::make(ty_tvar);
 }
 
+// shap's conjecture: Add mutability up to the ref/function boundary.
 static inline boost::shared_ptr<Type> 
 MBF(boost::shared_ptr<Type> t)
 {
   return Type::make(ty_mbFull, newTvar(), t->minMutConstless());
 }
 
+// shap's conjecture: Add top-most mutability.
 static inline boost::shared_ptr<Type> 
 MBT(boost::shared_ptr<Type> t)
 {
