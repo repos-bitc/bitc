@@ -80,7 +80,11 @@ cl_HoistInstLam(shared_ptr<UocInfo> uoc)
         shared_ptr<AST> methodValue = method->child(1);
         
         if (methodValue->astType != at_ident) {
-          // It's an expression. Need to hoist it into a new binding.
+          // It's an expression. Since instance definitions consist
+          // entirely of procedure bindings/mappings, and we know this
+          // type checked, it must be a lambda. Need to hoist it into
+          // a top-level binding and replace the expression occurrence
+          // with the resulting identifier.
           shared_ptr<AST> newDef = AST::make(at_define, methodValue->loc);
 
           shared_ptr<AST> lamName = AST::genSym(methodValue, "lam");

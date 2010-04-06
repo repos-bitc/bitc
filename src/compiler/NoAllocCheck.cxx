@@ -54,7 +54,7 @@
 using namespace boost;
 using namespace sherpa;
 
-// Return whether the expression returns a location or not.
+// Return whether the expression performs an allocating operation or not.
 static bool
 AllocCheck(std::ostream &errStream, shared_ptr<AST> ast)
 {
