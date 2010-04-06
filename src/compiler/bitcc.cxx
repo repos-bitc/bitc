@@ -782,7 +782,7 @@ main(int argc, char *argv[])
   /* Per-file backend output after processing frontend, if any */
   bool doFinal = true;
 
-  /* Output for interfaces */
+  /* Backend-defined processing for each interface module */
   for (UocMap::iterator itr = UocInfo::ifList.begin();
       itr != UocInfo::ifList.end(); ++itr) {
     shared_ptr<UocInfo> puoci = itr->second;
@@ -795,7 +795,7 @@ main(int argc, char *argv[])
       doFinal = false;
   }
 
-  /* Output for Source modules */
+  /* Backend-defined processing for each source module */
   for (UocMap::iterator itr = UocInfo::srcList.begin();
       itr != UocInfo::srcList.end(); ++itr) {
     shared_ptr<UocInfo> puoci = itr->second;
@@ -850,12 +850,12 @@ main(int argc, char *argv[])
   UocInfo::addAllCandidateEPs();
 #endif
 
+  // Update all of the defForm pointers so that we can find things:
+  UocInfo::findAllDefForms();
+
   /* Create a new unit of compilation that will become the grand,
      unified UoC */
   shared_ptr<UocInfo> unifiedUOC = UocInfo::CreateUnifiedUoC();
-
-  // Update all of the defForm pointers so that we can find things:
-  UocInfo::findAllDefForms();
 
   // Build the master back-end AST. This is done in a way that can be
   // extended incrementally.
