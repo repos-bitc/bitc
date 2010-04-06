@@ -369,8 +369,8 @@ public:
   // Used to prevent infinite recursion
   // while printing infinitely recursivetypes.
   MarkFlags mark;                // General traversal
-  unsigned pMark;               // Type printer
-  boost::shared_ptr<Type> sp;                        // Type specializer.
+  unsigned pMark;                // Type printer
+  boost::shared_ptr<Type> sp;    // Type specializer.
   TypeFlags flags;               
 
   // Main (Base) Constructor
@@ -817,11 +817,11 @@ public:
   boost::shared_ptr<Type> & Base() const
   {
     DEBUG(TYPE_ACC) assert(kind == ty_mutable || 
-                          kind == ty_const || 
+                           kind == ty_const || 
                            kind == ty_byref || 
                            kind == ty_ref || 
-                          kind == ty_array || 
-                          kind == ty_vector);
+                           kind == ty_array || 
+                           kind == ty_vector);
     return CompType(0);
   }
 };
@@ -834,6 +834,3 @@ std::ostream& operator<<(std::ostream& strm, Type& t)
 }
 
 #endif /* TYPE_HXX */
-
-
-

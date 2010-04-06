@@ -752,10 +752,10 @@ public:
   IdentType identType;
   AstFlags flags;
 
-  PrintFlags printVariant;        // which syntax to use for pretty printing
+  PrintFlags printVariant;  // which syntax to use for pretty printing
 
-  boost::shared_ptr<TypeScheme> scheme;                // defining occurrences only
-  boost::shared_ptr<Type> symType;                // the (pre-unified) type
+  boost::shared_ptr<TypeScheme> scheme;	// defining occurrences only
+  boost::shared_ptr<Type> symType;	// the (pre-unified) type
   boost::shared_ptr<AST> symbolDef;
 
   bool isDecl;                  // is This a declaration or definition?
