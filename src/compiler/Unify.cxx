@@ -169,6 +169,44 @@ UnifyStructUnion(std::ostream& errStream,
   return errFree;
 }
 
+#ifdef WEAK_VECTOR
+// Note that this is only called when t1, t2 have distinct kind.
+static bool 
+UnifyWeakVector(std::ostream& errStream,
+                shared_ptr<Trail> trail,
+                const LexLoc &errLoc,
+                shared_ptr<Type> t1, shared_ptr<Type> t2,
+                UnifyFlags uflags) 
+{
+  bool errFree = true;
+
+  assert(t1->isWeakVector() || t2->isWeakVector());
+
+  DEBUG(UNIFY) std::cout << "UnifyWeakVector " 
+                        << t1->asString(Options::debugTvP) 
+                        << " ==? "
+                        << t2->asString(Options::debugTvP)
+                        << std::endl;
+
+  // Check that the respective base types are compatible:
+  CHKERR(errFree, 
+         Unify(errStream, trail, errLoc, t1->Base(), 
+               t2->Base(), uflags));
+  if (!errFree)
+    return typeError(errStream, errLoc, t1, t2);
+
+  shared_ptr<Type> tWeak = t1->isWeakVector() ? t1 : t2;
+  shared_ptr<Type> tOther = t1->isWeakVector() ? t2 : t1;
+
+  // Re-write this type as a type variable:
+  tWeak->kind = ty_tvar;
+  tWeak->components.clear();
+
+  trail->link(tWeak, tOther);
+  return true;
+}
+#endif
+
 static bool 
 UnifyMbCt(std::ostream& errStream, shared_ptr<Trail> trail,
           shared_ptr<Type> mb, shared_ptr<Type> ct)
@@ -276,472 +314,488 @@ Unify(std::ostream& errStream,
 
   switch(unifingSameKind) {
   case false:
-    if (t1->isUType(false) && t2->isUType(false) && 
-        t1->isRefType() == t2->isRefType()) {
-      CHKERR(errFree, UnifyStructUnion(errStream, trail, errLoc, 
-                                       t1, t2, uflags));
-      break;
-    }
+    {
+      if (t1->isUType(false) && t2->isUType(false) && 
+          t1->isRefType() == t2->isRefType()) {
+        CHKERR(errFree, UnifyStructUnion(errStream, trail, errLoc, 
+                                         t1, t2, uflags));
+        break;
+      }
     
-    if (uflags & UFLG_UNIFY_STRICT) {
-      errFree = typeError(errStream, errLoc, t1, t2);
-      break;
-    }
+#ifdef WEAK_VECTOR
+      // Note this can only arise when they are not the same kind.
+      if (t1->isIndexableType(false) && t2->isIndexableType(false) &&
+          (t1->isWeakVector() || t2->isWeakVector())) {
+        CHKERR(errFree, UnifyWeakVector(errStream, trail, errLoc, 
+                                        t1, t2, uflags));
+        break;
+      }
+#endif
+
+      if (uflags & UFLG_UNIFY_STRICT) {
+        errFree = typeError(errStream, errLoc, t1, t2);
+        break;
+      }
       
-    /* 1. Handle the case of Type Variables unifying with 
-          another type
-       2. If no such unification is possible, handle the case of
-          a mbFull unifying with a mbTop or other non-maybe type
-       3. If no such unification is possible, handle the case of 
-          a mbTop unifying with a non-maybe type.      */
+      /* 1. Handle the case of Type Variables unifying with 
+         another type
+         2. If no such unification is possible, handle the case of
+         a mbFull unifying with a mbTop or other non-maybe type
+         3. If no such unification is possible, handle the case of 
+         a mbTop unifying with a non-maybe type.      */
       
-    if(t1->isTvar() || t2->isTvar()) {
-      shared_ptr<Type> var = t1->isTvar() ? t1 : t2;
-      shared_ptr<Type> other = t1->isTvar() ? t2 : t1;
+      if(t1->isTvar() || t2->isTvar()) {
+        shared_ptr<Type> var = t1->isTvar() ? t1 : t2;
+        shared_ptr<Type> other = t1->isTvar() ? t2 : t1;
 
-      // The current unification case is 'a = t. 
-      // If 'a is a rigid variable, we  ust immediately return an
-      // error, since unification through other cases will be less
-      // precise (that is, if t is a maybe type, we will get a type
-      // whole variability wrt mutability is lost.
+        // The current unification case is 'a = t. 
+        // If 'a is a rigid variable, we  ust immediately return an
+        // error, since unification through other cases will be less
+        // precise (that is, if t is a maybe type, we will get a type
+        // whole variability wrt mutability is lost.
 
 
-      if(!var->isUnifiableVar()) {
-        errStream << errLoc << " Rigid variable "
-                  << var->asString() << " cannot be unified with "
-                  << other->asString() << std::endl;
-        errFree = false;
+        if(!var->isUnifiableVar()) {
+          errStream << errLoc << " Rigid variable "
+                    << var->asString() << " cannot be unified with "
+                    << other->asString() << std::endl;
+          errFree = false;
 
-        if (errStream == std::cerr)
-          errStream << "Real Error!" << std::endl;
+          if (errStream == std::cerr)
+            errStream << "Real Error!" << std::endl;
         
 
-        break;
-      }
-
-      // Now, we check to make sure that substitution of t for 'a
-      // does not lead to cyclic substitution.
-      // If 'a does not occur in t, we can substitute t for 'a and
-      // declare victory. 
-      // 
-      // However, if 'a is bound in t, we cannot immediately declare
-      // an error, but must try other options. For example, this case
-      // arises in the solver and generalizer where a type is unified
-      // with its (deeply) most immutable version.
-      // One of the possibilities we can end up here is 'a = 'b|'a,
-      // where the intension really is to ensure that the mutability
-      // should be fixed to the immutable version.
-
-      if(!other->boundInType(var)) {
-        trail->subst(var, other);
-        break;
-      }
-      // Otherwise, try other options ...
-    }
-
-    if (t1->isMbFull() || t2->isMbFull()) {
-      shared_ptr<Type> mb = t1->isMbFull() ? t1 : t2;
-      shared_ptr<Type> other = t1->isMbFull() ? t2 : t1;
-      
-      if(!mb->isUnifiableVar()) {
-        errStream << errLoc << "Rigid type "
-                  << mb->asString() << " cannot be unified with "
-                  << other->asString() << std::endl;
-        errFree = false;
-        break;
-      }
-
-      // Handle the special case: U(s|'b == M'a):
-      // Under the normal unification rules, this will result in 
-      // the type s|'b = M'a = M'a|'a, 
-      // but what we want is s|'b = M'a = M'c|'b
-      // This kind of unification constraint can only arise out of
-      // explicit qualification, and must therefore be handled
-      // specially (theory does not mention it). We cannot interpret
-      // all M'a types as M'a|'b, since such qualifications might be
-      // within composite type definitions.
-
-      if(t2->isMutable() && t2->Base()->isTvar()) {
-        CHKERR(errFree, Unify(errStream, trail, errLoc, mb->Var(),
-                              Type::make(ty_mutable, newTvar()), uflags));
-        
-        trail->link(other, mb);
-      }
-      else {
-        CHKERR(errFree, Unify(errStream, trail, errLoc, 
-                              mb->minMutConstless(), 
-                              other->minMutConstless(), uflags));
-        
-        CHKERR(errFree, Unify(errStream, trail, errLoc, 
-                              mb->Var(), other, uflags));
-      }
-      
-      
-      if(errFree && (other->isMutable() || mb->Var()->isMutable()))
-        CHKERR(errFree, PropagateMutability(errStream, trail, 
-                                            errLoc, mb));
-      
-      break;
-    }
-
-    if (t1->isMbTop() || t2->isMbTop()) {
-      shared_ptr<Type> mb = t1->isMbTop() ? t1 : t2;
-      shared_ptr<Type> other = t1->isMbTop() ? t2 : t1;
-      
-      if(!mb->isUnifiableVar()) {
-        errStream << errLoc << "Rigid type "
-                  << mb->asString() << " cannot be unified with "
-                  << other->asString() << std::endl;
-        errFree = false;
-        break;
-      }
-      
-      CHKERR(errFree, Unify(errStream, trail, errLoc, 
-                            mb->minimizeTopMutability(), 
-                            other->minimizeTopMutability(), uflags));
-      
-      CHKERR(errFree, Unify(errStream, trail, errLoc, 
-                            mb->Var(), other, uflags));
-      break;
-    }
-
-    /* Certain types have multiple equivalent representations. 
-       For example,
-        1) (array (mutable int32)) == (mutable (array (mutable int32)))
-        2) An unboxed structure is mutable as a whole if all of its
-           components are mutable.  
-       
-       Therefore, (array T) must potentially unify with 
-       (mutable T) and (mutable 'a)|t.  The following rule
-       checks to see if such a match is possible */
-    
-    if(t1->isMutType() || t2->isMutType()) {
-      shared_ptr<Type> mut = t1->isMutType() ? t1 : t2;
-      shared_ptr<Type> other = t1->isMutType() ? t2 : t1;
-      
-      assert(!other->isMutType() &&  // Otherwise, it would be 
-             !other->isMaybe());     // handled already.  
-      
-      if(other->kind == ty_array || other->kind == ty_structv) {
-        CHKERR(errFree, Unify(errStream, trail, errLoc, 
-                              mut, Mutable(other), uflags));
-        break;
-      }
-    }
-
-    /* Const equivalent representation handling
-       For example: (const (bool, bool)) == (bool, bool) */
-
-    if(t1->isConst() || t2->isConst()) {
-      shared_ptr<Type> constType = t1->isConst() ? t1 : t2;
-      shared_ptr<Type> other = t1->isConst() ? t2 : t1;
-
-      if(other->isEffectivelyConst()) {
-        CHKERR(errFree,
-               Unify(errStream, trail, errLoc, 
-                     constType->Base()->minMutConstless(), 
-                     other->minMutConstless(), uflags));
-        break;
-      }
-    }
-    
-    errFree = typeError(errStream, errLoc, t1, t2);
-    break;
-    
-  case true:
-    switch(t1->kind) {
-    case ty_unit:
-    case ty_bool:
-    case ty_char:
-    case ty_string:
-    case ty_int8:
-    case ty_int16:
-    case ty_int32:
-    case ty_int64:
-    case ty_uint8:
-    case ty_uint16:
-    case ty_uint32:
-    case ty_uint64:
-    case ty_word:
-    case ty_float:
-    case ty_double:
-    case ty_quad:
-      break;
-
-    case ty_tvar:
-      {                
-        if (uflags & UFLG_UNIFY_STRICT_TVAR) {
-          errFree = typeError(errStream, errLoc, t1, t2);
           break;
         }
 
-        if ((t1->flags & TY_RIGID) && (t2->flags & TY_RIGID) &&
-            ((uflags & UFLG_UN_IGN_RIGIDITY) == 0)) {
-          errFree = typeError(errStream, errLoc, t1, t2);
+        // Now, we check to make sure that substitution of t for 'a
+        // does not lead to cyclic substitution.
+        // If 'a does not occur in t, we can substitute t for 'a and
+        // declare victory. 
+        // 
+        // However, if 'a is bound in t, we cannot immediately declare
+        // an error, but must try other options. For example, this case
+        // arises in the solver and generalizer where a type is unified
+        // with its (deeply) most immutable version.
+        // One of the possibilities we can end up here is 'a = 'b|'a,
+        // where the intension really is to ensure that the mutability
+        // should be fixed to the immutable version.
+
+        if(!other->boundInType(var)) {
+          trail->subst(var, other);
+          break;
+        }
+        // Otherwise, try other options ...
+      }
+
+      if (t1->isMbFull() || t2->isMbFull()) {
+        shared_ptr<Type> mb = t1->isMbFull() ? t1 : t2;
+        shared_ptr<Type> other = t1->isMbFull() ? t2 : t1;
+      
+        if(!mb->isUnifiableVar()) {
+          errStream << errLoc << "Rigid type "
+                    << mb->asString() << " cannot be unified with "
+                    << other->asString() << std::endl;
+          errFree = false;
           break;
         }
 
-        // One of the types is not rigid, or we are ignoring rigidity.
-        if (t1->flags & TY_RIGID)
-          trail->subst(t2, t1);
-        else
-          trail->subst(t1, t2);
+        // Handle the special case: U(s|'b == M'a):
+        // Under the normal unification rules, this will result in 
+        // the type s|'b = M'a = M'a|'a, 
+        // but what we want is s|'b = M'a = M'c|'b
+        // This kind of unification constraint can only arise out of
+        // explicit qualification, and must therefore be handled
+        // specially (theory does not mention it). We cannot interpret
+        // all M'a types as M'a|'b, since such qualifications might be
+        // within composite type definitions.
+
+        if(t2->isMutable() && t2->Base()->isTvar()) {
+          CHKERR(errFree, Unify(errStream, trail, errLoc, mb->Var(),
+                                Type::make(ty_mutable, newTvar()), uflags));
         
-        break;
-      }
-
-    case ty_dummy:
-      {
-        break;
-      }
-    
-#ifdef KEEP_BF
-    case ty_bitfield:
-      {        
-        CHKERR(errFree, Unify(errStream, trail, errLoc,
-                              t1->CompType(0), 
-                              t2->CompType(0), uflags));
-        
-        if (!errFree)
-          break;
-        
-        if (t1->Isize == t2->Isize)
-          break;
-
-        errStream << errLoc << ": "
-                  << "Incompatibility in integer types "
-                  << t1->asString() << " and " << t2->asString() 
-                  << "." << std::endl;
-
-        errFree = false;
-        break;
-      } 
-#endif     
-
-    case ty_tyfn:
-    case ty_fn:
-    case ty_method:
-      {
-        shared_ptr<Type> t1Args = t1->Args();
-        shared_ptr<Type> t2Args = t2->Args();
-        CHKERR(errFree, UnifyFnArgs(errStream, trail, errLoc, 
-                                    t1, t2, t1Args, t2Args, uflags));
-      
-        CHKERR(errFree, 
-               Unify(errStream, trail, errLoc, t1->Ret(), 
-                     t2->Ret(), uflags));
-        break;
-      }
-
-    case ty_fnarg:
-      {
-        CHKERR(errFree, UnifyFnArgs(errStream, trail, errLoc, 
-                                    t1, t2, t1, t2, uflags));
-        break;
-      }
-
-    case ty_structv:
-    case ty_structr:
-    case ty_unionv:
-    case ty_unionr:
-    case ty_uconr:
-    case ty_uconv:
-    case ty_uvalr:
-    case ty_uvalv:
-      {
-        CHKERR(errFree,
-               UnifyStructUnion(errStream, trail, errLoc, t1, t2, uflags));
-        break;
-      }
-
-    case ty_letGather:
-      {      
-        if (t1->components.size() != t2->components.size()) {
-          errFree = typeError(errStream, errLoc, t1, t2);
-          break;
-        }
-
-        for (size_t i=0; i<t1->components.size(); i++) 
-          CHKERR(errFree, 
-                 Unify(errStream, trail, errLoc, t1->CompType(i), 
-                       t2->CompType(i), uflags));
-        
-        break;
-      }
-      
-    case ty_array:
-      {
-        CHKERR(errFree, 
-               Unify(errStream, trail, errLoc, t1->Base(), 
-                     t2->Base(), uflags));
-        
-        // FIX: Need to link arrLen structures here, since 
-        // the two length might be 0, indicating later resolvability.
-        if (t1->arrLen->len == t2->arrLen->len)
-          break;
-      
-        // Array lengths did not Unify
-        if (t1->arrLen->len == 0) {
-          t1->arrLen->len = t2->arrLen->len;
-          break;
-        }
-        else if (t2->arrLen->len == 0) {
-          t2->arrLen->len = t1->arrLen->len;
-          break;
+          trail->link(other, mb);
         }
         else {
-          errStream << errLoc 
-                    << ": Array lengths do not match. "
-                    << t1->arrLen->len
-                    << " vs " 
-                    << t2->arrLen->len
-                    << std::endl;
-          errFree = false;
+          CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                                mb->minMutConstless(), 
+                                other->minMutConstless(), uflags));
+        
+          CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                                mb->Var(), other, uflags));
         }
       
+      
+        if(errFree && (other->isMutable() || mb->Var()->isMutable()))
+          CHKERR(errFree, PropagateMutability(errStream, trail, 
+                                              errLoc, mb));
+      
         break;
       }
+
+      if (t1->isMbTop() || t2->isMbTop()) {
+        shared_ptr<Type> mb = t1->isMbTop() ? t1 : t2;
+        shared_ptr<Type> other = t1->isMbTop() ? t2 : t1;
       
-    case ty_vector:
-      {
-        CHKERR(errFree, 
-               Unify(errStream, trail, errLoc, t1->Base(), 
-                     t2->Base(), uflags));
-        break;
-      }
-    
-    case ty_mbTop:
-      {
-        CHKERR(errFree,
-               Unify(errStream, trail, errLoc, 
-                     t1->Core()->minimizeTopMutability(), 
-                     t2->Core()->minimizeTopMutability(), 
-                     uflags));
-      
-        if (!errFree)
+        if(!mb->isUnifiableVar()) {
+          errStream << errLoc << "Rigid type "
+                    << mb->asString() << " cannot be unified with "
+                    << other->asString() << std::endl;
+          errFree = false;
           break;
+        }
       
         CHKERR(errFree, Unify(errStream, trail, errLoc, 
-                              t1->Var(), t2->Var(), uflags));
+                              mb->minimizeTopMutability(), 
+                              other->minimizeTopMutability(), uflags));
+      
+        CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                              mb->Var(), other, uflags));
         break;
       }
+
+      /* Certain types have multiple equivalent representations. 
+         For example,
+         1) (array (mutable int32)) == (mutable (array (mutable int32)))
+         2) An unboxed structure is mutable as a whole if all of its
+         components are mutable.  
+       
+         Therefore, (array T) must potentially unify with 
+         (mutable T) and (mutable 'a)|t.  The following rule
+         checks to see if such a match is possible */
     
-    case ty_mbFull:
-      {
-        CHKERR(errFree,
-               Unify(errStream, trail, errLoc, 
-                     t1->Core()->minMutConstless(), 
-                     t2->Core()->minMutConstless(), 
-                     uflags));
+      if(t1->isMutType() || t2->isMutType()) {
+        shared_ptr<Type> mut = t1->isMutType() ? t1 : t2;
+        shared_ptr<Type> other = t1->isMutType() ? t2 : t1;
       
-        if (!errFree)
+        assert(!other->isMutType() &&  // Otherwise, it would be 
+               !other->isMaybe());     // handled already.  
+      
+        if(other->kind == ty_array || other->kind == ty_structv) {
+          CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                                mut, Mutable(other), uflags));
           break;
+        }
+      }
+
+      /* Const equivalent representation handling
+         For example: (const (bool, bool)) == (bool, bool) */
+
+      if(t1->isConst() || t2->isConst()) {
+        shared_ptr<Type> constType = t1->isConst() ? t1 : t2;
+        shared_ptr<Type> other = t1->isConst() ? t2 : t1;
+
+        if(other->isEffectivelyConst()) {
+          CHKERR(errFree,
+                 Unify(errStream, trail, errLoc, 
+                       constType->Base()->minMutConstless(), 
+                       other->minMutConstless(), uflags));
+          break;
+        }
+      }
+    
+      errFree = typeError(errStream, errLoc, t1, t2);
+      break;
+    }    
+  case true:
+    {
+      switch(t1->kind) {
+      case ty_unit:
+      case ty_bool:
+      case ty_char:
+      case ty_string:
+      case ty_int8:
+      case ty_int16:
+      case ty_int32:
+      case ty_int64:
+      case ty_uint8:
+      case ty_uint16:
+      case ty_uint32:
+      case ty_uint64:
+      case ty_word:
+      case ty_float:
+      case ty_double:
+      case ty_quad:
+        break;
+
+      case ty_tvar:
+        {                
+          if (uflags & UFLG_UNIFY_STRICT_TVAR) {
+            errFree = typeError(errStream, errLoc, t1, t2);
+            break;
+          }
+
+          if ((t1->flags & TY_RIGID) && (t2->flags & TY_RIGID) &&
+              ((uflags & UFLG_UN_IGN_RIGIDITY) == 0)) {
+            errFree = typeError(errStream, errLoc, t1, t2);
+            break;
+          }
+
+          // One of the types is not rigid, or we are ignoring rigidity.
+          if (t1->flags & TY_RIGID)
+            trail->subst(t2, t1);
+          else
+            trail->subst(t1, t2);
+        
+          break;
+        }
+
+      case ty_dummy:
+        {
+          break;
+        }
+    
+#ifdef KEEP_BF
+      case ty_bitfield:
+        {        
+          CHKERR(errFree, Unify(errStream, trail, errLoc,
+                                t1->CompType(0), 
+                                t2->CompType(0), uflags));
+        
+          if (!errFree)
+            break;
+        
+          if (t1->Isize == t2->Isize)
+            break;
+
+          errStream << errLoc << ": "
+                    << "Incompatibility in integer types "
+                    << t1->asString() << " and " << t2->asString() 
+                    << "." << std::endl;
+
+          errFree = false;
+          break;
+        } 
+#endif     
+
+      case ty_tyfn:
+      case ty_fn:
+      case ty_method:
+        {
+          shared_ptr<Type> t1Args = t1->Args();
+          shared_ptr<Type> t2Args = t2->Args();
+          CHKERR(errFree, UnifyFnArgs(errStream, trail, errLoc, 
+                                      t1, t2, t1Args, t2Args, uflags));
       
-        shared_ptr<Type> var1 = t1->Var()->getType();
-        shared_ptr<Type> var2 = t2->Var()->getType();
+          CHKERR(errFree, 
+                 Unify(errStream, trail, errLoc, t1->Ret(), 
+                       t2->Ret(), uflags));
+          break;
+        }
+
+      case ty_fnarg:
+        {
+          CHKERR(errFree, UnifyFnArgs(errStream, trail, errLoc, 
+                                      t1, t2, t1, t2, uflags));
+          break;
+        }
+
+      case ty_structv:
+      case ty_structr:
+      case ty_unionv:
+      case ty_unionr:
+      case ty_uconr:
+      case ty_uconv:
+      case ty_uvalr:
+      case ty_uvalv:
+        {
+          CHKERR(errFree,
+                 UnifyStructUnion(errStream, trail, errLoc, t1, t2, uflags));
+          break;
+        }
+
+      case ty_letGather:
+        {      
+          if (t1->components.size() != t2->components.size()) {
+            errFree = typeError(errStream, errLoc, t1, t2);
+            break;
+          }
+
+          for (size_t i=0; i<t1->components.size(); i++) 
+            CHKERR(errFree, 
+                   Unify(errStream, trail, errLoc, t1->CompType(i), 
+                         t2->CompType(i), uflags));
+        
+          break;
+        }
       
-        if(var1->isMutable() && var2->isMutable())
+      case ty_array:
+        {
+          CHKERR(errFree, 
+                 Unify(errStream, trail, errLoc, t1->Base(), 
+                       t2->Base(), uflags));
+        
+          // FIX: Need to link arrLen structures here, since 
+          // the two length might be 0, indicating later resolvability.
+          if (t1->arrLen->len == t2->arrLen->len)
+            break;
+      
+          // Array lengths did not Unify
+          if (t1->arrLen->len == 0) {
+            t1->arrLen->len = t2->arrLen->len;
+            break;
+          }
+          else if (t2->arrLen->len == 0) {
+            t2->arrLen->len = t1->arrLen->len;
+            break;
+          }
+          else {
+            errStream << errLoc 
+                      << ": Array lengths do not match. "
+                      << t1->arrLen->len
+                      << " vs " 
+                      << t2->arrLen->len
+                      << std::endl;
+            errFree = false;
+          }
+      
+          break;
+        }
+      
+        // We are doing same-kind unification here. Treat ty_wkvector
+        // like vector for the moment, since we don't have any
+        // knowledge of a length yet.
+      case ty_vector:
+        {
+          CHKERR(errFree, 
+                 Unify(errStream, trail, errLoc, t1->Base(), 
+                       t2->Base(), uflags));
+          break;
+        }
+    
+      case ty_mbTop:
+        {
+          CHKERR(errFree,
+                 Unify(errStream, trail, errLoc, 
+                       t1->Core()->minimizeTopMutability(), 
+                       t2->Core()->minimizeTopMutability(), 
+                       uflags));
+      
+          if (!errFree)
+            break;
+      
           CHKERR(errFree, Unify(errStream, trail, errLoc, 
-                                var1->Base(), var2->Base(), uflags));
-        else
-          CHKERR(errFree, Unify(errStream, trail, errLoc, 
-                                var1, var2, uflags));
+                                t1->Var(), t2->Var(), uflags));
+          break;
+        }
+    
+      case ty_mbFull:
+        {
+          CHKERR(errFree,
+                 Unify(errStream, trail, errLoc, 
+                       t1->Core()->minMutConstless(), 
+                       t2->Core()->minMutConstless(), 
+                       uflags));
       
-        if(errFree && t1->Var()->isMutable())
+          if (!errFree)
+            break;
+      
+          shared_ptr<Type> var1 = t1->Var()->getType();
+          shared_ptr<Type> var2 = t2->Var()->getType();
+      
+          if(var1->isMutable() && var2->isMutable())
+            CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                                  var1->Base(), var2->Base(), uflags));
+          else
+            CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                                  var1, var2, uflags));
+      
+          if(errFree && t1->Var()->isMutable())
+            CHKERR(errFree, PropagateMutability(errStream, trail, 
+                                                errLoc, t1));
+      
+          break;
+        }
+
+      case ty_mutable:
+        {
+          CHKERR(errFree,
+                 Unify(errStream, trail, errLoc, t1->Base(), 
+                       t2->Base(), uflags));
+
+          if(!errFree)
+            break;
+      
           CHKERR(errFree, PropagateMutability(errStream, trail, 
                                               errLoc, t1));
-      
-        break;
-      }
-
-    case ty_mutable:
-      {
-        CHKERR(errFree,
-               Unify(errStream, trail, errLoc, t1->Base(), 
-                     t2->Base(), uflags));
-
-        if(!errFree)
-          break;
-      
-        CHKERR(errFree, PropagateMutability(errStream, trail, 
-                                            errLoc, t1));
-        break;
-      }
-
-    case ty_const:
-      {
-        CHKERR(errFree,
-               Unify(errStream, trail, errLoc, 
-                     t1->Base()->minMutConstless(), 
-                     t2->Base()->minMutConstless(), uflags));
-        break;
-      }
-    
-    case ty_ref:
-    case ty_byref:
-    case ty_array_ref:
-      {
-        CHKERR(errFree,
-               Unify(errStream, trail, errLoc, t1->Base(), 
-                     t2->Base(), uflags));
-        break;
-      }
-
-    case ty_exn:
-      {
-        // All exceptions belong to the same sum type.        
-        break;
-      }
-
-    case ty_typeclass:
-      {
-        if (t1->defAst != t2->defAst) {
-          errFree = typeError(errStream, errLoc, t1, t2);
           break;
         }
-        
-        if (t1->typeArgs.size() != t2->typeArgs.size()) {
-          errFree = typeError(errStream, errLoc, t1, t2);
-          break;
-        }
-        
-        for (size_t i = 0; i < t1->typeArgs.size(); i++) {
-          
-          CHKERR(errFree, Unify(errStream, trail, errLoc, 
-                                t1->TypeArg(i), t2->TypeArg(i),
-                                uflags));
-        }
-        
-        break;
-      }
-      
-      // The following cases are filled in so that strictlyEquals()
-      // function works correctly.
-    case ty_pcst:
-      {
-        assert(t1->components.size() == t2->components.size());
-        for (size_t i=0; i < t1->components.size(); i++) 
+
+      case ty_const:
+        {
           CHKERR(errFree,
-                 Unify(errStream, trail, errLoc, t1->CompType(i), 
-                       t2->CompType(i), uflags));
-        break;
-      }
+                 Unify(errStream, trail, errLoc, 
+                       t1->Base()->minMutConstless(), 
+                       t2->Base()->minMutConstless(), uflags));
+          break;
+        }
+    
+      case ty_ref:
+      case ty_byref:
+      case ty_array_ref:
+        {
+          CHKERR(errFree,
+                 Unify(errStream, trail, errLoc, t1->Base(), 
+                       t2->Base(), uflags));
+          break;
+        }
 
-    case ty_field:
-      {
-        if(t1->litValue.s != t2->litValue.s)
-          errFree = typeError(errStream, errLoc, t1, t2);
-        break;
-      }
+      case ty_exn:
+        {
+          // All exceptions belong to the same sum type.        
+          break;
+        }
+
+      case ty_typeclass:
+        {
+          if (t1->defAst != t2->defAst) {
+            errFree = typeError(errStream, errLoc, t1, t2);
+            break;
+          }
+        
+          if (t1->typeArgs.size() != t2->typeArgs.size()) {
+            errFree = typeError(errStream, errLoc, t1, t2);
+            break;
+          }
+        
+          for (size_t i = 0; i < t1->typeArgs.size(); i++) {
+          
+            CHKERR(errFree, Unify(errStream, trail, errLoc, 
+                                  t1->TypeArg(i), t2->TypeArg(i),
+                                  uflags));
+          }
+        
+          break;
+        }
       
-    case ty_kvar:
-    case ty_kfix:
-      {
-        // This check will never unify, since the following check has
-        // already failed at the start of the unification algorithm.
-        if (t1->uniqueID != t2->uniqueID)
-          errFree = typeError(errStream, errLoc, t1, t2);
-        break;
+        // The following cases are filled in so that strictlyEquals()
+        // function works correctly.
+      case ty_pcst:
+        {
+          assert(t1->components.size() == t2->components.size());
+          for (size_t i=0; i < t1->components.size(); i++) 
+            CHKERR(errFree,
+                   Unify(errStream, trail, errLoc, t1->CompType(i), 
+                         t2->CompType(i), uflags));
+          break;
+        }
+
+      case ty_field:
+        {
+          if(t1->litValue.s != t2->litValue.s)
+            errFree = typeError(errStream, errLoc, t1, t2);
+          break;
+        }
+      
+      case ty_kvar:
+      case ty_kfix:
+        {
+          // This check will never unify, since the following check has
+          // already failed at the start of the unification algorithm.
+          if (t1->uniqueID != t2->uniqueID)
+            errFree = typeError(errStream, errLoc, t1, t2);
+          break;
+        }
       }
     }
   }

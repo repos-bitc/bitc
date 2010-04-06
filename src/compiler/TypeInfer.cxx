@@ -3524,8 +3524,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
              A |- (vector-length e): word
        ------------------------------------------------*/
       Kind k = ((ast->astType == at_array_length) ? ty_array :
-                ((ast->astType == at_array_ref_length) ?
-                 ty_array_ref : ty_vector));
+                ((ast->astType == at_array_ref_length) ? ty_array_ref :
+                 ty_vector));
       
       // match agt_expr
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, rewrite, tcc,
@@ -3569,8 +3569,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> av = GC_NULL;
       shared_ptr<Type> cmp = MBF(newTvar());
       Kind k = ((ast->astType == at_array_nth) ? ty_array :
-                ((ast->astType == at_array_ref_nth) ?
-                 ty_array_ref : ty_vector));
+                ((ast->astType == at_array_ref_nth) ? ty_array_ref :
+                 ty_vector));
       
       av = MBT(Type::make(k, cmp));
       if (ast->astType == at_array_nth)
@@ -4636,6 +4636,17 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       case ty_vector:
         {
+#ifdef WEAK_VECTOR
+          // The use of inner-ref on this is sufficient to infer that
+          // it must have been vector after all. The following
+          // unification will be harmless if the type is already
+          // ty_vector:
+
+          shared_ptr<Type> cmp = MBF(newTvar());
+          shared_ptr<Type> av = MBT(Type::make(ty_vector, cmp));
+          UNIFY(trail, ast->child(0)->loc, ast->child(0)->symType, av);
+#endif
+
           process_ndx = true;
           ast->symType = Type::make(ty_ref, t->Base());
           break;
