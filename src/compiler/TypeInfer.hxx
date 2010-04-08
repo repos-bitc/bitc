@@ -95,11 +95,34 @@ enum TI_FlagValues {
 };
 typedef sherpa::EnumSet<TI_FlagValues> TI_Flags;
 
-/* The following flags are Unification Flags. */
+/// @brief Flags that control the unifier.
+///
+/// There are different "degrees" of unification that are desirable
+/// depending on how the unifier is being driven. These flags control
+/// which unifications are permitted.
 enum UnifyFlagValues {
+  /// @brief Any unification permitted. All of Unify('a, T), Unify('a,
+  /// 'b), and Unify(Ctr('a), Ctr('a)) are OK.
   UFLG_NO_FLAGS            = 0x00,
-  UFLG_UNIFY_STRICT        = 0x01u, // Overrides everything else.
-  UFLG_UNIFY_STRICT_TVAR   = 0x02u, // No-alpha-renaming.
+  /// @brief Unification in strict mode. Type variables can only unify
+  /// with other type variables. Unify('a,T) is rejected, but Unify('a,
+  /// 'b), and Unify(Ctr('a), Ctr('a)) are OK.
+  UFLG_UNIFY_STRICT        = 0x01u,
+  /// @brief Unification in strict mode. Type variables can only unify
+  /// with other type variables, and only if the type variables have
+  /// the same name. That is: no alpha-renaming is
+  /// permitted. Unify('a,T) is rejected, Unify('a, 'a) is OK,
+  /// Unify('a, 'b) is rejected, and Unify(Ctr('a), Ctr('a)) is OK.
+  ///
+  /// This mode is used when 
+  UFLG_UNIFY_STRICT_TVAR   = 0x02u,
+  /// @brief Unify ignoring rigidity.
+  ///
+  /// A type variable is "rigid" when it's variability is
+  /// (temporarily) frozen. That is: when it cannot unify with other
+  /// types. This provides finer-grain control than
+  /// UFLG_UNIFY_STRICT_TVAR, because some type variables can be
+  /// allowed to unify while others are held rigid.
   UFLG_UN_IGN_RIGIDITY     = 0x04u,
 };
 
