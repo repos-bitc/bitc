@@ -1,90 +1,91 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;; Copyright (C) 2006, Johns Hopkins University.
-;; All rights reserved.
-;;
-;; Redistribution and use in source and binary forms, with or
-;; without modification, are permitted provided that the following
-;; conditions are met:
-;;
-;;   - Redistributions of source code must contain the above 
-;;     copyright notice, this list of conditions, and the following
-;;     disclaimer. 
-;;
-;;   - Redistributions in binary form must reproduce the above
-;;     copyright notice, this list of conditions, and the following
-;;     disclaimer in the documentation and/or other materials 
-;;     provided with the distribution.
-;;
-;;   - Neither the names of the copyright holders nor the names of any
-;;     of any contributors may be used to endorse or promote products
-;;     derived from this software without specific prior written
-;;     permission. 
-;;
-;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+//////////////////////////////////////////////////////////////////////////
+//
+// Copyright (C) 2006, Johns Hopkins University.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted provided that the following
+// conditions are met:
+//
+//   - Redistributions of source code must contain the above 
+//     copyright notice, this list of conditions, and the following
+//     disclaimer. 
+//
+//   - Redistributions in binary form must reproduce the above
+//     copyright notice, this list of conditions, and the following
+//     disclaimer in the documentation and/or other materials 
+//     provided with the distribution.
+//
+//   - Neither the names of the copyright holders nor the names of any
+//     of any contributors may be used to endorse or promote products
+//     derived from this software without specific prior written
+//     permission. 
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
 
-(bitc-version "0.10")
+(bitc-version 0.10)
+
 (interface bitc.prelude
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;    Exception Defintions
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ///////////////////////////////////////////////////////////////
+  //    Exception Defintions
+  ///////////////////////////////////////////////////////////////
   (proclaim OutOfMemory : exception external ExOutOfMemory)
   (proclaim IndexBoundsError : exception external ExIndexBoundsError)
   
   (defexception OutOfMemory)
   (defexception IndexBoundsError)
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;    SPECIAL built-in  typeclasses. Instances of these are
-  ;;    generated internally by the compiler.
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ///////////////////////////////////////////////////////////////
+  //    SPECIAL built-in  typeclasses. Instances of these are
+  //    generated internally by the compiler.
+  ///////////////////////////////////////////////////////////////
   
-  ;; Set of all by-reference types, covering (ref 'a), (vector 'a),
-  ;; boxed structure types, boxed union types, and exception.
+  // Set of all by-reference types, covering (ref 'a), (vector 'a),
+  // boxed structure types, boxed union types, and exception.
   (deftypeclass (ref-types 'a) :closed)
 
-  ;; Type class describing all types 'a that can receive a copy from
-  ;; type 'b. This is NOT symmetric. For example:
-  ;;   (forall ((LiteralUnitType int32 'a))
-  ;;     (copy-from-to 'a 'b)
-  ;;     but NOT (copy-from-to 'b 'a)
+  // Type class describing all types 'a that can receive a copy from
+  // type 'b. This is NOT symmetric. For example:
+  //   (forall ((LiteralUnitType int32 'a))
+  //     (copy-from-to 'a 'b)
+  //     but NOT (copy-from-to 'b 'a)
   (deftypeclass (copy-from-to 'a 'b) :closed)
 
-  ;; Type class relating two types 'a, 'b such that they are
-  ;; compatible under binding, assignment, and argument passing. This
-  ;; relation is symmetric.
-  ;;
-  ;; (copy-compat 'a 'b) => (copy-from-to 'a 'b) AND (copy-from-to 'b 'a)
+  // Type class relating two types 'a, 'b such that they are
+  // compatible under binding, assignment, and argument passing. This
+  // relation is symmetric.
+  //
+  // (copy-compat 'a 'b) => (copy-from-to 'a 'b) AND (copy-from-to 'b 'a)
   (deftypeclass (copy-compat 'a 'b) :closed)
 
-  ;; Type class identifying the set of types for which a literal
-  ;; syntax exists. This is actually NOT an incestuously magical type
-  ;; class, but we need to declare it here so that LiteralUnitType
-  ;; (below) can be properly quantified.
+  // Type class identifying the set of types for which a literal
+  // syntax exists. This is actually NOT an incestuously magical type
+  // class, but we need to declare it here so that LiteralUnitType
+  // (below) can be properly quantified.
   (deftypeclass (LiteralType 'a) :closed)
 
-  ;; Type class used for record polymorphism. Describes a field/method
-  ;; of some structure type 's having a field/method 'nm with type 'a.
-  ;; This type class is called has-field, but really means 
-  ;; has-field-or-method
+  // Type class used for record polymorphism. Describes a field/method
+  // of some structure type 's having a field/method 'nm with type 'a.
+  // This type class is called has-field, but really means 
+  // has-field-or-method
   (deftypeclass (has-field 's 'nm 'a) :closed)
   
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;    Structure and union definitions 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ///////////////////////////////////////////////////////////////
+  //    Structure and union definitions 
+  ///////////////////////////////////////////////////////////////
 
   (defunion (optional 'a):val
     none
@@ -99,33 +100,33 @@
     nil
     (cons car:'a cdr:(list 'a)))
   
-  ;; The pair structure
+  // The pair structure
   (defstruct (pair 'a 'b):val fst:'a snd: 'b)
 
-  ;;  (defunion int:val
-  ;;    ;; Small representation:
-  ;;    (fix (bitfield int32 31))
-  ;;    ;; Big representation: sign plus digits mod word size
-  ;;    (big (ref (pair bool (vector word)))))
+  //  (defunion int:val
+  //    // Small representation:
+  //    (fix (bitfield int32 31))
+  //    // Big representation: sign plus digits mod word size
+  //    (big (ref (pair bool (vector word)))))
   
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;    Primitive arithmetic proclamations 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ///////////////////////////////////////////////////////////////
+  //    Primitive arithmetic proclamations 
+  ///////////////////////////////////////////////////////////////
 
-  ;; Following is a sleazy (but clever -- blame Swaroop) trick for
-  ;; getting comparison and arithmetic operations defined for the
-  ;; built-in types with minimal hassle. We define the operations as
-  ;; polymorphic using the reserved namespace, and then set up
-  ;; instances below using these to instantiate the core type classes
-  ;; over the primitive types. We then rely on the polyinstantiator to
-  ;; instantiate them only at the types where they are supposed to
-  ;; occur.
-  ;;
-  ;; The concrete implementations for most of these are handled
-  ;; in runtime.h. A notable exception is that the built-in string
-  ;; type is a member of Ord whose implementation is found in
-  ;; libbitc.a
+  // Following is a sleazy (but clever -- blame Swaroop) trick for
+  // getting comparison and arithmetic operations defined for the
+  // built-in types with minimal hassle. We define the operations as
+  // polymorphic using the reserved namespace, and then set up
+  // instances below using these to instantiate the core type classes
+  // over the primitive types. We then rely on the polyinstantiator to
+  // instantiate them only at the types where they are supposed to
+  // occur.
+  //
+  // The concrete implementations for most of these are handled
+  // in runtime.h. A notable exception is that the built-in string
+  // type is a member of Ord whose implementation is found in
+  // libbitc.a
 
   (proclaim __+:(fn 'a 'a -> 'a) external)
   (proclaim __-:(fn 'a 'a -> 'a) external)
@@ -148,11 +149,11 @@
   (proclaim __>>:(fn 'a word -> 'a) external)
 
   
-  ;; Conversion operation. This one is actually quite dangerous,
-  ;; and I'm not convinced that we should have it at all. If we *do*
-  ;; have it, then I am inclined to think that it should perhaps have
-  ;; syntactic support in the form of a first argument that is a 
-  ;; type name.
+  // Conversion operation. This one is actually quite dangerous,
+  // and I'm not convinced that we should have it at all. If we *do*
+  // have it, then I am inclined to think that it should perhaps have
+  // syntactic support in the form of a first argument that is a 
+  // type name.
 
   (proclaim sign-extend:(fn 'a -> 'b) external)
   (proclaim zero-extend:(fn 'a -> 'b) external)
@@ -163,16 +164,16 @@
 
   (proclaim convert: (fn 'a -> 'b) external) 
 
-  ;; This is the < operator to be used for the 
-  ;; index computation. By declaring external, we force 
-  ;; the polyinstantiator to keep this definition.
-  ;; By giving the proper external name, we give it the 
-  ;; correct function to use.
+  // This is the < operator to be used for the 
+  // index computation. By declaring external, we force 
+  // the polyinstantiator to keep this definition.
+  // By giving the proper external name, we give it the 
+  // correct function to use.
   (proclaim __index_lt: (fn word word -> bool) external bitc_index_lt)
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; TYPES THAT HAVE LITERALS
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ///////////////////////////////////////////////////////////
+  // TYPES THAT HAVE LITERALS
+  ///////////////////////////////////////////////////////////
 
   (definstance (LiteralType char))
 
@@ -193,9 +194,9 @@
   (definstance (LiteralType string))
 
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; TYPE CLASS FOR INTEGER LITERALS
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ///////////////////////////////////////////////////////////
+  // TYPE CLASS FOR INTEGER LITERALS
+  ///////////////////////////////////////////////////////////
 
   (forall ((LiteralType 'a))
     (deftypeclass (IntLit 'a) :closed))
@@ -210,9 +211,9 @@
   (definstance (IntLit  int64))
   (definstance (IntLit uint64))
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; TYPE CLASS FOR FLOATING POINT LITERALS
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ///////////////////////////////////////////////////////////
+  // TYPE CLASS FOR FLOATING POINT LITERALS
+  ///////////////////////////////////////////////////////////
   (forall ((LiteralType 'a))
     (deftypeclass (FloatLit 'a) :closed))
 
@@ -220,16 +221,16 @@
   (definstance (FloatLit double))
   (definstance (FloatLit quad))  
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; TYPES ADMITTING EQUALITY
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ///////////////////////////////////////////////////////////
+  // TYPES ADMITTING EQUALITY
+  ///////////////////////////////////////////////////////////
   (deftypeclass (Eq 'a)
     == : (fn 'a 'a -> bool)
     != : (fn 'a 'a -> bool))
   
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; TYPES ADMITTING ORDERING
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ///////////////////////////////////////////////////////////
+  // TYPES ADMITTING ORDERING
+  ///////////////////////////////////////////////////////////
   (forall ((Eq 'a))
     (deftypeclass (Ord 'a)
       <  : (fn 'a 'a -> bool)
@@ -237,9 +238,9 @@
       <= : (fn 'a 'a -> bool)
       >= : (fn 'a 'a -> bool)))
   
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; TYPES ADMITTING (FOUR-FUNCTION) ARITHMETIC
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ///////////////////////////////////////////////////////////
+  // TYPES ADMITTING (FOUR-FUNCTION) ARITHMETIC
+  ///////////////////////////////////////////////////////////
   (forall ((Ord 'a))
     (deftypeclass (Arith 'a)
       + : (fn 'a 'a -> 'a)
@@ -247,29 +248,29 @@
       * : (fn 'a 'a -> 'a)
       / : (fn 'a 'a -> 'a)))
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; TYPES ADMITTING INTEGER MODULUS ARITHMETIC
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ///////////////////////////////////////////////////////////
+  // TYPES ADMITTING INTEGER MODULUS ARITHMETIC
+  ///////////////////////////////////////////////////////////
   (forall ((Arith 'a) (IntLit 'a)) 
     (deftypeclass (IntArith 'a)
       % : (fn 'a 'a -> 'a)))
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; TYPES ADMITTING BITWISE ARITHMETIC
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ///////////////////////////////////////////////////////////
+  // TYPES ADMITTING BITWISE ARITHMETIC
+  ///////////////////////////////////////////////////////////
   (forall ((IntLit 'a)) 
     (deftypeclass (Bitwise 'a)
-      bit-and  : (fn 'a 'a -> 'a)   ;; Bitwise AND
-      bit-or   : (fn 'a 'a -> 'a)   ;; Bitwise OR
-      bit-not  : (fn 'a -> 'a)      ;; One's Complement
-      bit-xor  : (fn 'a 'a -> 'a)   ;; Bitwise XOR
-      <<  : (fn 'a word -> 'a)      ;; Left Shift
-      >>  : (fn 'a word -> 'a)      ;; Right Shift
+      bit-and  : (fn 'a 'a -> 'a)   // Bitwise AND
+      bit-or   : (fn 'a 'a -> 'a)   // Bitwise OR
+      bit-not  : (fn 'a -> 'a)      // One's Complement
+      bit-xor  : (fn 'a 'a -> 'a)   // Bitwise XOR
+      <<  : (fn 'a word -> 'a)      // Left Shift
+      >>  : (fn 'a word -> 'a)      // Right Shift
       ))
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; Instance Definitions
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ///////////////////////////////////////////////////////////
+  // Instance Definitions
+  ///////////////////////////////////////////////////////////
 
   (definstance (Eq ()) (== = __==) (!= = __!=))
     
@@ -391,6 +392,5 @@
 
   (definstance (Length (vector 'a))
     (length = (lambda (x) (vector-length x))))
-
  )
 
