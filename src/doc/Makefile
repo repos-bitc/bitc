@@ -58,6 +58,8 @@ clean: clean.browse
 clean.browse:
 	rm -rf browse
 
+distclean: clean
+
 browse:
 	(cd ../compiler;make doxygen)
 	(cd ../libbitc;make doxygen)

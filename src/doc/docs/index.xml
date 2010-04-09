@@ -17,4 +17,8 @@
     <title>Technical Reports</title>
     <dir-expand-entries category="report"/>
   </dirgroup>
+  <dirgroup>
+    <title>The Compiler Implementation</title>
+    <dir-expand-entries category="compiler/implementation"/>
+  </dirgroup>
 </directory>

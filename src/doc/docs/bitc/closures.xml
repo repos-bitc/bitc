@@ -4,7 +4,7 @@
 
 <!ENTITY BitcVersion "0.8+">
 ]>
-  <article id="capidl-spec" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <article id="closure-impl" xmlns:xi="http://www.w3.org/2001/XInclude">
   <docinfo latex.stylemod="twocolumn">
     <title>Closure Implementation in BitC</title>
     <subtitle>Preliminary Implementation Note</subtitle>
@@ -26,7 +26,7 @@
       <holder>Jonathan S. Shapiro</holder>
     </copyright>
     <categories>
-      <category>dev/bitc</category>
+      <category>compiler/implementation</category>
     </categories>
     <synopsis>
       <p>Notes on closure construction for BitC.</p>

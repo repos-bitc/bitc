@@ -719,16 +719,22 @@ float double quad</literallayout>
           <progident>bitc-version</progident> form is:
 	</p>
 	<literallayout>
-(bitc-version <em>s</em>)</literallayout>
+(bitc-version <em>n.m</em>)</literallayout>
 	<p indent="no">
-	  where <progident><em>s</em></progident> is the version
-	  string of the BitC version to which this program
+	  where <progident><em>n.m</em></progident> is the version
+	  of BitC version (major <em>dot</em> minor) to which this program
 	  conforms. For the version of BitC described in this
-	  document, the proper version string is
-	  <progident>"&BitcVersion;"</progident>. It is a compile-time
+	  document, the proper version is
+	  <progident>&BitcVersion;</progident>. It is a compile-time
 	  error if the language version accepted by the current
 	  compiler is not backwards compatible with the version
 	  specified by the <progident>bitc-version</progident> form.
+	</p>
+        <p>
+          Compatibility: An older version of this form, in which the
+          version number had to be provided as a string, will be
+          accepted up through language version 0.11. It will be
+          obsoleted beginning in language version 0.12.
 	</p>
         <p>
           In an interface compilation unit, the optional

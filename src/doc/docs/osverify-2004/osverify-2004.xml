@@ -64,7 +64,8 @@
       <category>papers</category>
     </categories>
     <synopsis>
-      <p>Describes our approach to creating a fully verified
+      <p>Paper for the 2004 NICTA Operating Systems Verification
+      Workshop. Describes our approach to creating a fully verified
       capability-based kernel and system.</p>
     </synopsis>
   </docinfo>
