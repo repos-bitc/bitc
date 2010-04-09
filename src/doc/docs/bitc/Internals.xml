@@ -1,0 +1,583 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+               "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd" [
+
+<!ENTITY BitcVersion "0.8+">
+]>
+  <article id="compiler-passes" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <docinfo latex.stylemod="twocolumn">
+    <title>Prototype Compiler Internals</title>
+    <subtitle>Preliminary Notes</subtitle>
+    <authorgroup>
+      <author>
+	<firstname>Jonathan</firstname>
+	<surname>Shapiro</surname>
+	<degree>Ph.D.</degree>
+      </author>
+      <affiliation>
+	<orgname>The EROS Group, LLC</orgname>
+      </affiliation>
+    </authorgroup>
+    <pubdate>April 5, 2010</pubdate>
+    <copyright>
+      <year>2010</year> 
+      <holder>Jonathan S. Shapiro</holder>
+    </copyright>
+    <categories>
+      <category>compiler/implementation</category>
+    </categories>
+    <synopsis>
+      <p>Quick note on the compiler passes and what they do.</p>
+    </synopsis>
+  </docinfo>
+  <!-- latex.incolumn="yes" latex.breakafter="yes" -->
+  <abstract latex.incolumn="yes">
+    <p>
+      This note describes the general structure of the BitC prototype
+      compiler, including documentation of what each pass does. It is
+      intended as a (very) rough guide to the structure and
+      assumptions of each phase.
+    </p>
+  </abstract>
+<!--   <toc/> -->
+  <sect1>
+    <title>Introduction</title>
+    <p>
+      As I start to wrap my head around the compiler once again, I'm
+      gathering notes on the internals. Hopefully these will help me
+      (or someone else) maintain the beast later. At the moment, I'm
+      mainly after wrapping my head around the type system again.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Structure of the Compiler</title>
+    <p>
+      The BitC compiler acts almost entirely as a sequence of
+      BitC-&gt;BitC transformations. It is a whole-program compiler
+      that operates in several major phases:
+    </p>
+    <sect2>
+      <title>Front-End Processing</title>
+      <p>
+        The prelude is imported (which ultimately calls
+        <progident>CompileFile</progident> on standard library source
+        code). <progident>CompileFile</progident> is then called on
+        each unit of compilation named on the command line in
+        turn. The effect of <progident>CompileFile</progident> is to
+        parse the input file and then invoke the remaining compile
+        phases on the resulting AST. The parsing pass is recursively
+        re-entrant: an import causes the imported unit to be processed
+        immediately as a consequence of import.
+      </p>
+      <p>
+        The import/compile mechanism records each result module as
+        processing is started, and checks at import time to see if the
+        desired module has already been loaded. This ensures that
+        each module processed by the compiler is processed only
+        once, and serves as a guard against cyclic import.
+      </p>
+      <p>
+        The passes applied by the front end are (file
+        <filename>pass.def</filename>):
+      </p>
+      <ol>
+        <li>
+          <p>
+            <leadin><b>parse</b></leadin> The input unit of
+            compilation is parsed, and an AST is
+            constructed. <progident>import</progident> forms are
+            processed eagerly and recursively.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b><progident>defrepr</progident>
+            elimination</b></leadin> The semantics of
+            <progident>defrepr</progident> are essentially those of
+            unions, with special handling for the tag check. This pass
+            syntactically rewrites each <progident>defrepr</progident>
+            form into a corresponding union form, marking the
+            resulting AST as originating from a
+            <progident>defrepr</progident> form.
+          </p>
+          <p>
+            No <progident>defrepr</progident> or
+            <progident>declrepr</progident> forms survive this pass.
+            The interesting processing here concerns the handling of
+            <em>where</em> clauses.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b><progident>begin</progident>
+            simplification</b></leadin> The front end is moderately
+            aggressive about introducing <progident>begin</progident>
+            forms. This pass removes the ones that are unnecessary,
+            which serves to reduce nesting and processing overheads
+            all the way through the compiler.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b>Method Declaration Insertion</b></leadin> For
+            any structure or object that contains a field of method
+            type, this pass inserts a corresponding
+            <progident>proclaim</progident> form for the method's
+            definition. This ensures that when the method is actually
+            defined it is type-compatible with the original
+            declaration that lived inside the struct/object. It also
+            ensures that the defining form passes symbol resolution.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b>Symbol Resolution</b></leadin> A pass is made
+            over the AST constructing a symbol environment and
+            ensuring that all symbol references resolve.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b>Type Checking</b></leadin> The type inference
+            and checking pass, which is where most of the
+            "interesting" stuff in the current BitC implementation
+            happens.
+          </p>
+          <p>
+            In the current implementation, the type inference and
+            checking pass checks the compatibility of destination and
+            source in assignments, but does not validate location
+            semantics.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b>Location Semantics Check</b></leadin> This pass
+            checks location semantics.
+          </p>
+          <p>
+            The intent of this pass is to ensure that assignments
+            proceed only to valid locations -- which is to say, an
+            "l-value". Or to put it another way, the goal was to
+            ensure that intermediate expression results (which are
+            ephemeral) would not be targeted by assignments whose
+            result would immediately be lost, such as:
+          </p>
+          <literallayout>
+(set! (+ 3 5) 2)</literallayout>
+          <p>
+            Note that there is no error here from the standpoint of
+            type checking or semantics, but the operation is
+            complete nonsense, because the result is immediately
+            lost. Which is perhaps not so bad here, but consider:
+          </p>
+          <literallayout>
+(set! (array-ref (make-array a 300 3:int32) 1) 5)</literallayout>
+          <p indent="no">
+            Where we will go and initialize a complete array, only to
+            discover that the whole thing is unreferenced.
+          </p>
+          <p>
+            <font color="red">There are several bugs in this pass at
+            the moment. Need to discuss them.</font>
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b><progident>defrepr</progident> Consistency
+            Check</b></leadin> This pass checks that the
+            <progident>where</progident> clauses of
+            <progident>defrepr</progident> forms are valid, and that
+            all <progident>defrepr</progident> forms are fully
+            concrete. Note that this pass cannot be done until after
+            type checking, because we need the type checker to have
+            assigned types at all ASTs before we run this.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b><progident>noalloc</progident>
+            Check</b></leadin> This is a vestigial, half-implemented
+            pass that is essentially useless in its current form and
+            should be changed to simply complain when
+            <progident>noalloc</progident> is required, because the
+            check isn't actually being done properly.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b>Initialization 
+            Check</b></leadin> This pass ensures that initialization
+            ordering restrictions are honored.
+            It attempts to ensure that no use-occurrence of an identifier appears
+            before that identifier has been "observably defined". The
+            intent is to impose a lattice ordering on initialization
+            so that the state of globals is unambiguously defined at the first
+            instruction of the <progident>main</progident>
+            procedure.
+          </p>
+          <p>
+            <font color="red">The current checking pass isn't right.</font>
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b>Instance Lambda Hoisting</b></leadin>
+            Many (perhaps most) type class instances define their
+            corresponding methods using "immediate" lambda forms. The
+            instantiator can't currently handle that. This pass
+            "hoists" the immediate lambdas into global procedures, and
+            replaces the original lambdas with the names of those
+            global procedures.
+          </p>
+          <p>
+            <font color="red">The current implementation does not
+            correctly hoist constraints.</font>
+          </p>
+        </li>
+      </ol>
+      <p>
+        The internal result of this pass is a
+        <progident>UocInfo</progident> object for each module, which
+        contains references to the parsed and decorated AST, the
+        top-level lexical environment for symbols, the top-level
+        lexical environment for types, and the "instance
+        environment".
+      </p>
+      <p>
+        If a module passes the front end, it has passed all
+        checks. In principle, no errors resulting from type checking
+        or semantics program should be possible in the mid-end or
+        the whole-program pass. It is, of course, possible that
+        there will be unresolved symbols due to missing source
+        units.
+      </p>
+    </sect2>
+    <sect2>
+      <title>Backend Directed Per-UoC Processing</title>
+      <p>
+        Once all ASTs have been processed by the front end, further
+        processing depends on the choice of backend (more precisely:
+        the output target). The prototype compiler currently has
+        several back-ends (files <filename>backend.cxx</filename>,
+        <filename>backend.hxx</filename>):
+      </p>
+      <ul>
+        <li>
+          <p>
+            <leadin><b>exe</b></leadin>
+            Generates whole-program executables. The executable is
+            produced by compiling the C code generated by the
+            <b>c</b> back-end.
+          </p>
+          <p>
+            This backend operates whole-program.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b>c</b></leadin>
+              Generates C code corresponding to a whole progam
+              (primarily for debugging).
+          </p>
+          <p>
+            This backend operates whole-program.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b>h</b></leadin>
+              Produces a C header file for use by C runtime functions to ensure
+              compatibility with the type declarations created by the
+              BitC compiler.
+          </p>
+          <p>
+            This backend operates whole-program.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b>bito</b></leadin>
+              Produces a BitC "object" file, which is merely an
+              aggregation of checked input units into a single file,
+              multi-module representation (for now, a
+              <filename>.bito</filename> file is actually source
+              code). This is a disgusting hack, but it allows us to
+              emulate the behavior of static link lines and libraries
+              until we can do run-time specialization.
+          </p>
+          <p>
+            This backend target does not execute the gather phase or
+            the whole-program phase.
+          </p>
+          <p>
+            Note that this pass relies on the correctness of the AST
+            pretty-print implementation to re-emit the program
+            originally presented by the user. The BitC pretty
+            printer is not merely a convenience tool.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><em>others</em></leadin>
+              Various XML-ish dump formats for debugging
+              purposes. These are mostly obsolete.
+          </p>
+        </li>
+      </ul>
+      <p>
+        The front-end processing is identical for all back ends. The
+        selected back end optionally defines a backend-specific phase
+        that can be run on each unit of compilation after the front
+        end has run.
+      </p>
+      <p>
+        If a per-UoC phase is defined by the back end, it
+        is first run on the interface modules and then on the source
+        modules.
+      </p>
+    </sect2>
+    <sect2>
+      <title>Pre-Gather Phase</title>
+      <p>
+        Once all modules have been processed by the front end, the
+        backend is given an opportunity to run a single pass over
+        the entire input processed to this point. The distinction
+        between this pass and the per-UoC pass defined by the
+        backend is that the per-UoC pass is executed on each module/UoC
+        in turn, and is not designed to retain state from one UoC to
+        the next. The pre-gather backend pass directs its own
+        iteration over the UoCs, and is consequently able to retain
+        state across them.
+      </p>
+      <p>
+        At the moment, the only backend that defines a pre-gather
+        phase is the <filename>.bito</filename> emitter. This phase
+        also indicates (through a flag in its specification) that it
+        does not actually want the gather phase or the whole program
+        phase to be run.
+      </p>
+      <p>
+        A cleanup should be considered here, which is to implement a
+        generic "all modules" helper function that in turn calls the
+        per-module function. This would encapsulate some of the
+        appearance of complexity from the command driver without
+        leading to replicated code.
+      </p>
+    </sect2>
+    <sect2>
+      <title>Instantiation (Gather) Phase</title>
+      <p>
+        Once all per-UoC processing has been done, we reach the
+        instantiation phase of the compiler. This part of the compiler
+        is in flux between a static compiler and an interactive top
+        level. The current implementation only handles static
+        compilation, but it does so using the same incremental
+        mechanisms that will eventually be used by the interactive top
+        level. The following description applies primarily to the
+        static compiler.
+      </p>
+      <p>
+        What we are planning to do here is to create a single,
+        self-contained module (and unit of compilation) that contains
+        every reachable procedure, type, and constant from the
+        original program. All procedures in the unified UoC
+        are fully concretized by the instantiator - no type variables
+        appear. Procedure names in this UoC are mangled to reflect
+        both their specialized type signature and their originating
+        source module. Once this module is built, we will do back-end
+        processing on it, ultimately arriving at a module that we can
+        emit directly to C.
+      </p>
+      <p>
+        The process of copying things into the "grand UoC" is driven
+        incrementally from the initial entry points. For each entry point:
+      </p>
+      <ul>
+        <li>
+          <p>
+            The current entry point will be copied to the Grand
+            UoC. Make it the "current definition". If it has already
+            been migrated, declare that we are done.
+          </p>
+          <p>
+            In order to be suitable, an entry point must already have
+            a fully concrete type. The intuition is that this is
+            something like <progident>main</progident>, where a
+            concretely realized label is going to be invoked as an
+            external entry point to the program.
+          </p>
+          <p>
+            Note that <em>because</em> instantiation proceeds from a
+            fully concrete procedure, any type variables that
+            <em>cannot</em> be instantiated (recursively) from the
+            initializing expression/form will never be used, and will
+            be instantiated to unit.
+          </p>
+        </li>
+        <li>
+          <p>
+            Walk the body of the current definition, type, or variable
+            definition. For each procedure, type, or variable definition
+            that is referenced by the definition of the current form,
+            resolve any type variables for that use-case, determine what
+            (mangled) name the resulting concrete instance will have,
+            and if no copy of that instance has been performed,
+            instantiate it and copy it to the Grand UoC.
+          </p>
+        </li>
+      </ul>
+      <p>
+        Note that the procedure is incremental, and proceeds one entry
+        point at a time. A small detail glossed over above is that new
+        definitions are instantiated into a transient unit of
+        compilation and merged into the Grand UoC when instantiation
+        has fully completed. When we implement an interactive top
+        level, the Grand UoC will constitute everything instantiated
+        prior to the current top-level form, and the transient UoC
+        will handle the instantiation necessary to evaluate the
+        current top-level expression. Only the new forms are passed
+        through whole-program processing (see below).
+      </p>
+    </sect2>
+    <sect2>
+      <title>Whole-Program Processing</title>
+      <p>
+        Once the Grand UoC has been constructed, we perform back-end
+        whole-program processing on it. The objective of this
+        processing is to reduce the program (which is still 
+        a legal BitC program) down to something that can be emitted
+        directly as C code. That is: to reconcile the differences
+        between the semantics required by BitC and the semantics
+        expressable in C. Three transforms are performed at the
+        whole-program layer:
+      </p>
+      <ol>
+        <li>
+          <p>
+            <leadin><b>Closure Conversion</b></leadin> Inner
+            procedures are lifted, closure records are constructed,
+            and wrapper procedures are introduced.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b>Tail-Call Marking</b></leadin> The "call" ASTs
+            for procedures
+            that can legally be implemented as tail calls are marked
+            for special handling. This signals to the C code emitter
+            that these calls should be performed using labeled gotos.
+          </p>
+          <p>
+            I don't recall at the moment whether the target procedures
+            are also marked.
+          </p>
+        </li>
+        <li>
+          <p>
+            <leadin><b>SSA Transformation</b></leadin> An SSA-like
+            transform is performed. This is an enormously ugly
+            requirement, and we had hoped that it would not be
+            necessary. Unfortunately, GCC expression blocks cannot
+            contain <progident>goto</progident>, so we were forced to
+            introduce an SSA-like transformation.
+          </p>
+          <p>
+            The SSA pass is the one pass that does <em>not</em>
+            perform a strict BitC-&gt;BitC transformation. There are
+            cases where it generates a "fake"
+            <progident>let</progident> form for the sake of symbol
+            resolution, whose initializers are missing.
+          </p>
+        </li>
+      </ol>
+    </sect2>
+  </sect1>
+  <bibliography>
+    <bibentry label="ansi1999c">
+      &mdash;: American National Standard for Information Systems,
+	Programming Language C ANSI X3.159-1999, 2000.
+    </bibentry>
+    <bibentry label="ieee1985std754">
+      &mdash;: <doctitle>IEEE Standard for Binary Floating-Point
+      Arithmetic</doctitle>, 1985, ANSI/IEEE Standard 754-1985.
+    </bibentry>
+    <bibentry label="ieee1987std854">
+      &mdash;: <doctitle>IEEE Standard for Radix-Independent
+      Floating-Point Arithmetic</doctitle>, 1987, ANSI/IEEE Standard
+      854-1987.
+    </bibentry>
+    <bibentry label="appel1994emprical">
+      Andrew W. Appel and Zhong Shao. ``An Empirical Study of
+      Stack vs. Heap Cost for Languages with
+      Closures.'' <doctitle>Journal of Functional
+      Programming</doctitle>, <b>1</b>(1), January 1993
+    </bibentry>
+    <bibentry label="bartlett1989mostly">
+      Joel F. Bartlett. <doctitle>Mostly-Copying Garbage Collection
+      Picks Up Generations and C++</doctitle>. WRL Technical Note
+      TN-12. Digital Equipment Corporation, 1989.
+    </bibentry>
+    <bibentry label="garrigue2004value">
+      Jacques Garrigue. ``Relaxing the Value Restriction.''
+      <doctitle>Proc. International Symposium on Functional and Logic
+      Programming</doctitle>. 2004.
+    </bibentry>
+    <bibentry label="jones73thesis">
+      Anita K. Jones. <doctitle>Protection in Programmed
+      Systems</doctitle>, Doctoral Dissertation, Department of
+      Computer Science, Carnegie-Mellon University, June 1973.
+    </bibentry>
+    <bibentry label="jones2000tcfndepend">
+      Mark Jones. ``Type Classes With Functional Dependencies.''
+      <doctitle>Proc. 9th European Symposium on Programming</doctitle>
+      (ESOP 2000). Berlin, Germany. March 2000. Springer-Verlag
+      Lecture Notes in Computer Science 1782.
+    </bibentry>
+    <bibentry label="kaufmann00acl2">
+      M. Kaufmann, J. S. Moore. <doctitle>Computer Aided Reasoning: An
+      Approach</doctitle>, Kluwer Academic Publishers, 2000.
+    </bibentry>
+    <bibentry label="kelsey1998r5rs">
+      Richard Kelsey, William Clinger, and Jonathan Rees (Ed.)
+      <doctitle>Revised<sup>5</sup> Report on the Algorithmic Language
+      Scheme</doctitle>,
+      ACM SIGPLAN Notices, 33(<b>9</b>), pp 26&ndash;76, 1998.
+    </bibentry>
+    <bibentry label="macqueen1984modules">
+      David MacQueen, ``Modules for Standard ML.''
+      <doctitle>Proc. 1984 ACM Conference on LISP and Functional
+      Programming</doctitle>, pp. 198&ndash;207, 1984.
+    </bibentry>
+    <bibentry label="milner1997definition">
+      Robin Milner, Mads Tofte, Robert Harper, and David
+      MacQueen. <doctitle>The Definition of Standard ML -
+      Revised</doctitle>
+      The MIT Press, May 1997.
+    </bibentry>
+    <bibentry label="shap1999fastcapsystem">
+      J. S. Shapiro, J. M. Smith, and D. J. Farber. ``EROS, A Fast
+      Capability System'' <doctitle>Proc. 17th ACM Symposium on Operating
+      Systems Principles</doctitle>. Dec 1999, pp. 170&ndash;185. Kiawah
+      Island Resort, SC, USA.
+    </bibentry>
+    <bibentry label="siskind1999flow">
+      Jeffrey Mark Siskind. <doctitle>``Flow-Directed Lightweight
+      Closure Conversion''</doctitle> Technical Report 99-109R, NEC
+      Research Institute, Inc., Dec. 1999.
+    </bibentry>
+    <bibentry label="shao1994space">
+      Zhong Shao and Andrew W. Appel. ``Space-Efficient Closure
+      Representations.'' <doctitle>Proc. LISP and Fucntional
+      Programming</doctitle>, pp. 150-161, 1994.
+    </bibentry>
+    <bibentry label="wirth1988pascal">
+      N. Wirth and K. Jensen. <doctitle>Pascal: User Manual and
+      Report</doctitle>, 3rd Edition, Springer-Verlag, 1988
+    </bibentry>
+  </bibliography>
+  </article>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->
