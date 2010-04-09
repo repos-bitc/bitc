@@ -77,20 +77,20 @@ typedef map<shared_ptr<Type>, shared_ptr<AST> > TypeAstMap;
 #define TI_CONSTRAINT      (TI_NON_APP_TYPE)
 
 //WARNING: **REQUIRES** errFree and errStream
-#define TYPEINFER(ast, gamma, instEnv, impTypes, rewrite, tcc,        \
-                  trail, mode, flags)                                \
-  do {                                                                \
-    CHKERR((errFree),                                                \
-           (typeInfer(errStream, (ast), (gamma), (instEnv),        \
-                      (impTypes), (rewrite), (tcc),                \
-                      (trail), (mode), (flags))));                \
+#define TYPEINFER(ast, gamma, instEnv, impTypes, rewrite, tcc,  \
+                  trail, mode, flags)                           \
+  do {                                                          \
+    CHKERR((errFree),                                           \
+           (typeInfer(errStream, (ast), (gamma), (instEnv),     \
+                      (impTypes), (rewrite), (tcc),             \
+                      (trail), (mode), (flags))));              \
   }while (0)
 
 //WARNING: **REQUIRES** errFree and errStream
-#define UNIFY(trail, errLoc, type1, type2)                        \
-  do {                                                                \
-  CHKERR(errFree, unify(errStream, trail, errLoc,                \
-                        type1, type2, UFLG_NO_FLAGS));                \
+#define UNIFY(trail, errLoc, type1, type2)                      \
+  do {                                                          \
+    CHKERR(errFree, unify(errStream, trail, errLoc,             \
+                          type1, type2, UFLG_NO_FLAGS));        \
   }while (0)
 
 
