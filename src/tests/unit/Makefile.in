@@ -135,6 +135,8 @@ comp:
 
 EXPECT_STATUS=0
 EXPECT_OUTPUT=/dev/null
+COMPILE_OUTPUT=/dev/null
+TEST_MODE=exec
 USE_INPUT=/dev/null
 ARGS=""
 TESTOPTS=-v
@@ -156,7 +158,7 @@ $(BITCC):
 	make -C $(BITCC_SRC) BUILD/bitcc
 
 %.test: BUILD/% | BUILD
-	@../testit.sh ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -i $(USE_INPUT) "./$< $(ARGS)"
+	@../testit.sh -m ${TEST_MODE} ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -i $(USE_INPUT) "./$< $(ARGS)"
 
 clconv1.test: EXPECT_STATUS=1
 closure.test: EXPECT_STATUS=3
@@ -186,22 +188,24 @@ twomodule.test: EXPECT_OUTPUT=twomodule.stdout
 sizeof.test: EXPECT_STATUS=4
 bitsizeof.test: EXPECT_STATUS=1
 array-byref.test: EXPECT_STATUS=6
+vec-badly-typed.test: TEST_MODE=compile
+vec-badly-typed.test: EXPECT_STATUS=1
 
 BUILD/%: %.bitc $(BITCC) $(LIBBITC_C_RUNTIME) | BUILD
-	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME)
+	@../compileit.sh -m ${TEST_MODE} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME)
 
 # .PRECIOUS: $(SOURCE:%.bitc=%.c)
 
 LIBBITC_SHA1_SRC=@top_srcdir@/libbitc/crypt/sha1.bits
 
 BUILD/sha1-test: sha1-test.bitc  $(BITCC) $(LIBBITC_SHA1_SRC) | BUILD
-	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
+	@../compileit.sh -m ${TEST_MODE} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
 
 BUILD/sha1-file: sha1-file.bitc  $(BITCC) $(LIBBITC_SHA1_SRC) | BUILD
-	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
+	@../compileit.sh -m ${TEST_MODE} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
 
 BUILD/libbitc-bita: libbitc-bita.bitc  $(BITCC) $(LIBBITC_BITA) | BUILD
-	$(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_BITA) $(LIBBITC_C_RUNTIME)
+	@../compileit.sh -m ${TEST_MODE} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_BITA) $(LIBBITC_C_RUNTIME)
 
 #BUILD/%.c: %.bitc  $(BITCC)
 #	$(RUN_BITCC) $(BITCOPT) $(INC) --emit c -o $@ $<

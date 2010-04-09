@@ -39,7 +39,6 @@ usage() {
     echo "Recognized options: "
     echo "  -s <int>   # expect non-zero status code <int>"
     echo "  -o <file>  # match output against content of <file>"
-    echo "  -i <file>  # use <file> as input"
     echo "  -m <mode>  # one of \"compile\" or \"exec\""
     echo "  -v         # verbose: show stdout/stderr on miscompare"
     echo "  -q         # quiet: issue output only on bad result"
@@ -50,7 +49,6 @@ quiet=0
 verbose=0
 expect_status=0
 expect_out=""
-use_input=""
 
 if [ -n "${expect_out}" ]
 then
@@ -69,7 +67,6 @@ do
 	-m)     test_mode=$2; shift; shift;;
 	-q)     quiet=1; shift;;
 	-v)     verbose=1; shift;;
-	-i)     use_input=$2; shift; shift;;
 	--help)	usage; break;;
 	-*)	usage; break;;
 	*)      break;;
@@ -81,38 +78,21 @@ then
     usage
 fi
 
-if [ "${test_mode}" = "compile" ]
+if [ ${test_mode} = "exec" ]
 then
-    # If we were only supposed to compile, then execution 
-    # presumptively succeeded:
-    exit 0
-fi
-
-if [ -n "${use_input}" ]
-then
-    if [ ! -r $use_input ]
-    then
-	echo "Cannot open reference input ${use_input}"
-    fi
+    expect_status=0
 fi
 
 trap "{ rm /tmp/$$.*; exit; }" EXIT
 trap "{ exit; }" SEGV
 
 cmd=$1
-shift
 
 # This is HORRIBLE. Bash insists on printing out extraneous output even
 # if an offending signal has a trap handler! The following sleazy
 # bullshit is needed to suppress this misbehavior.
-if [ -n "${use_input}" ]
-then
-    (${cmd} $* > /tmp/$$.out 2>/tmp/$$.err < ${use_input}; exit $?) 2>/dev/null
-    sub_status=$?
-else
-    (${cmd} $* > /tmp/$$.out 2>/tmp/$$.err; exit $?) 2>/dev/null
-    sub_status=$?
-fi
+("$@" > /tmp/$$.out 2>/tmp/$$.err; exit $?) 2>/dev/null
+sub_status=$?
 
 good="yes"
 
@@ -147,11 +127,16 @@ then
     fi
 fi
 
+# This script is run even if we aren't doing a compile-only test, so
+# in the case of a valid result, it may only be a partial result
+# (because the execution phase hasn't happened yet). Only report
+# an OK status on matching zero status result when we are asked to do so.
+
 if [ ${good} = "no" ]
 then
     echo -n "[BAD] "
     echo "${cmd} $* "
-elif [ ${quiet} -eq 0 ]
+elif [ \( ${quiet} -eq 0 \) ]
 then
     echo -n "[OK]  "
     echo "${cmd} $* "
