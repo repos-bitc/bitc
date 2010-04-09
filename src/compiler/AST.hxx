@@ -637,6 +637,7 @@ enum AstType {
   at_array_nth,
   at_array_ref_nth,
   at_vector_nth,
+  at_nth,
   at_array_length,
   at_array_ref_length,
   at_vector_length,

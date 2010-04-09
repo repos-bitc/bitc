@@ -52,66 +52,68 @@ using namespace sherpa;
 
 #include "TransitionLexer.hxx"
 
-static bool
-valid_char_printable(uint32_t ucs4)
+bool
+TransitionLexer::valid_char_printable(uint32_t ucs4)
 {
   if (strchr("!#$%&`()*+-.,/:;<>=?@_|~^[]'", ucs4))
     return true;
   return false;
 }
 
-static bool
-valid_ident_punct(uint32_t ucs4)
+bool
+TransitionLexer::valid_ident_punct(uint32_t ucs4)
 {
-  if (strchr("!$%&|*+-/<>=?@_~", ucs4))
+  if (ucs4 == '_')
+    return true;
+  if ((currentLang & lf_LispIdents) && strchr("!$%&|*+-/<>=?@_~", ucs4))
     return true;
   return false;
 }
 
-static bool
-valid_ident_start(uint32_t ucs4)
+bool
+TransitionLexer::valid_ident_start(uint32_t ucs4)
 {
-  return (u_hasBinaryProperty(ucs4,UCHAR_XID_START) || 
-          valid_ident_punct(ucs4));
+  return (u_hasBinaryProperty(ucs4,UCHAR_XID_START)
+          || valid_ident_punct(ucs4));
 }
 
-static bool
-valid_ident_continue(uint32_t ucs4)
+bool
+TransitionLexer::valid_ident_continue(uint32_t ucs4)
 {
   return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE) ||
           valid_ident_punct(ucs4));
 }
 
-static bool
-valid_ifident_start(uint32_t ucs4)
+bool
+TransitionLexer::valid_ifident_start(uint32_t ucs4)
 {
   return (isalpha(ucs4) || ucs4 == '_');
   //  return (u_hasBinaryProperty(ucs4,UCHAR_XID_START));
 }
 
-static bool
-valid_ifident_continue(uint32_t ucs4)
+bool
+TransitionLexer::valid_ifident_continue(uint32_t ucs4)
 {
   return (isalpha(ucs4) || isdigit(ucs4) || ucs4 == '_' || ucs4 == '-');
   //  return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE) ||
   //valid_ifident_punct(ucs4));
 }
 
-static bool
-valid_tv_ident_start(uint32_t ucs4)
+bool
+TransitionLexer::valid_tv_ident_start(uint32_t ucs4)
 {
   return (u_hasBinaryProperty(ucs4,UCHAR_XID_START) || 
           ucs4 == '_');
 }
 
-static bool
-valid_tv_ident_continue(uint32_t ucs4)
+bool
+TransitionLexer::valid_tv_ident_continue(uint32_t ucs4)
 {
   return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE) ||
           ucs4 == '_');
 }
-static bool
-valid_charpoint(uint32_t ucs4)
+bool
+TransitionLexer::valid_charpoint(uint32_t ucs4)
 {
   if (valid_char_printable(ucs4))
     return true;
@@ -119,16 +121,16 @@ valid_charpoint(uint32_t ucs4)
   return u_isgraph(ucs4);
 }
 
-static bool
-valid_charpunct(uint32_t ucs4)
+bool
+TransitionLexer::valid_charpunct(uint32_t ucs4)
 {
   if (strchr("!\"#$%&'()*+,-./:;{}<=>?@[\\]^_`|~", ucs4))
     return true;
   return false;
 }
 
-static unsigned
-validate_string(const char *s)
+unsigned
+TransitionLexer::validate_string(const char *s)
 {
   const char *spos = s;
   uint32_t c;
@@ -192,129 +194,130 @@ validate_string(const char *s)
 }
 
 struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
-  { "->",               tk_FNARROW },
-  { "and",              tk_AND },
-  { "apply",            tk_APPLY },
-  { "array",            tk_ARRAY },
-  { "array-length",     tk_ARRAY_LENGTH },
-  { "array-nth",        tk_ARRAY_NTH },
-  { "array-ref",        tk_ARRAY_REF },
-  { "array-ref-length", tk_ARRAY_REF_LENGTH },
-  { "array-ref-nth",    tk_ARRAY_REF_NTH },
-  { "as",               tk_AS },
-  { "assert",           tk_ReservedWord },
-  { "begin",            tk_BEGIN },
-  { "bitc-version",     tk_BITC_VERSION },
-  { "bitfield",         tk_BITFIELD },
-  { "bitsizeof",        tk_BITSIZEOF },
-  { "block",            tk_BLOCK },
-  { "bool",             tk_BOOL },
-  { "break",            tk_ReservedWord },
-  { "by-ref",           tk_BY_REF },
-  { "case",             tk_CASE },
-  { "catch",            tk_CATCH },
-  { "char",             tk_CHAR },
-  { "check",            tk_ReservedWord },
-  { "closed",           tk_CLOSED },
-  { "coindset",         tk_ReservedWord },
-  { "cond",             tk_COND },
-  { "const",            tk_CONST },
-  { "constrain",        tk_ReservedWord },
-  { "continue",         tk_CONTINUE },
-  { "declare",          tk_DECLARE },
-  { "deep-const",       tk_ReservedWord },
-  { "defequiv",         tk_ReservedWord },
-  { "defexception",     tk_DEFEXCEPTION },
-  { "define",           tk_DEFINE },
-  { "definstance",      tk_DEFINSTANCE },
-  { "definvariant",     tk_ReservedWord },
-  { "defobject",        tk_DEFOBJECT },
-  { "defrefine",        tk_ReservedWord },
-  { "defrepr",          tk_DEFREPR },
-  { "defstruct",        tk_DEFSTRUCT },
-  { "deftheory",        tk_ReservedWord },
-  { "defthm",           tk_DEFTHM },
-  { "deftypeclass",     tk_DEFTYPECLASS },
-  { "defunion",         tk_DEFUNION },
-  { "defvariant",       tk_ReservedWord },
-  { "deref",            tk_DEREF },
-  { "disable",          tk_ReservedWord },
-  { "do",               tk_DO },
-  { "do*",              tk_ReservedWord },
-  { "double",           tk_DOUBLE },
-  { "dup",              tk_DUP },
-  { "enable",           tk_ReservedWord },
-  { "exception",        tk_EXCEPTION },
-  { "external",         tk_EXTERNAL },
-  { "fill",             tk_FILL },
-  { "float",            tk_FLOAT },
-  { "fn",               tk_FN },
-  { "forall",           tk_FORALL },
-  { "if",               tk_IF },
-  { "import",           tk_IMPORT },
-  { "import!",          tk_ReservedWord },
-  { "impure",           tk_IMPURE },
-  { "indset",           tk_ReservedWord },
-  { "inner-ref",        tk_INNER_REF },
-  { "int16",            tk_INT16 },
-  { "int32",            tk_INT32 },
-  { "int64",            tk_INT64 },
-  { "int8",             tk_INT8 },
-  { "interface",        tk_INTERFACE },
-  { "lambda",           tk_LAMBDA },
-  { "let",              tk_LET },
-  { "let*",             tk_ReservedWord },
-  { "letrec",           tk_LETREC },
-  { "location",         tk_ReservedWord },
-  //  { "make-vector",      tk_MAKE_VECTOR },
-  { "make-vector",      tk_MAKE_VECTORL },
-  { "member",           tk_MEMBER },   /* REDUNDANT */
-  { "method",           tk_METHOD },
-  { "module",           tk_MODULE },
-  { "mutable",          tk_MUTABLE },
-  { "namespace",        tk_ReservedWord },
-  { "not",              tk_NOT },
-  { "nth",              tk_ReservedWord },
-  { "opaque",           tk_OPAQUE },
-  { "or",               tk_OR },
-  { "otherwise",        tk_OTHERWISE },
-  { "proclaim",         tk_PROCLAIM },
-  { "provide",          tk_PROVIDE },
-  { "provide!",         tk_ReservedWord },
-  { "pure",             tk_PURE },
-  { "quad",             tk_QUAD },
-  { "read-only",        tk_ReservedWord },
-  { "ref",              tk_REF },
-  { "require",          tk_ReservedWord },
-  { "reserved",         tk_RESERVED },
-  { "return",           tk_RETURN },
-  { "return-from",      tk_RETURN_FROM },
-  { "sensory",          tk_ReservedWord },
-  { "set!",             tk_SET },
-  { "sizeof",           tk_SIZEOF },
-  { "string",           tk_STRING },
-  { "super",            tk_ReservedWord },
-  { "suspend",          tk_SUSPEND },  
-  { "switch",           tk_SWITCH },
-  { "tag",              tk_TAG },
-  { "the",              tk_THE },
-  { "throw",            tk_THROW },
-  { "try",              tk_TRY },
-  { "tycon",            tk_ReservedWord },
-  { "tyfn",             tk_TYFN },
-  { "uint16",           tk_UINT16 },
-  { "uint32",           tk_UINT32 },
-  { "uint64",           tk_UINT64 },
-  { "uint8",            tk_UINT8 },
-  { "using",            tk_ReservedWord },
-  { "val",              tk_VAL },
-  { "value-at",         tk_ReservedWord },
-  { "vector",           tk_VECTOR },
-  { "vector-length",    tk_VECTOR_LENGTH },
-  { "vector-nth",       tk_VECTOR_NTH },
-  { "when",             tk_WHEN },
-  { "where",            tk_WHERE },
-  { "word",             tk_WORD }
+  { "and",              lf_transition,        tk_AND },
+  { "apply",            lf_transition,        tk_APPLY },
+  { "array",            lf_transition,        tk_ARRAY },
+  { "array-length",     lf_transition,        tk_ARRAY_LENGTH },
+  { "array-nth",        lf_transition,        tk_ARRAY_NTH },
+  { "array-ref",        lf_transition,        tk_ARRAY_REF },
+  { "array-ref-length", lf_transition,        tk_ARRAY_REF_LENGTH },
+  { "array-ref-nth",    lf_transition,        tk_ARRAY_REF_NTH },
+  { "as",               lf_transition,        tk_AS },
+  { "assert",           lf_transition,        tk_ReservedWord },
+  { "begin",            lf_transition,        tk_BEGIN },
+  { "bitc",             lf_version,        tk_BITC },
+  { "bitc-version",     lf_version,        tk_BITC_VERSION },
+  { "bitfield",         lf_transition,        tk_BITFIELD },
+  { "bitsizeof",        lf_transition,        tk_BITSIZEOF },
+  { "block",            lf_transition,        tk_BLOCK },
+  { "bool",             lf_transition,        tk_BOOL },
+  { "break",            lf_transition,        tk_ReservedWord },
+  { "by-ref",           lf_transition,        tk_BY_REF },
+  { "case",             lf_transition,        tk_CASE },
+  { "catch",            lf_transition,        tk_CATCH },
+  { "char",             lf_transition,        tk_CHAR },
+  { "check",            lf_transition,        tk_ReservedWord },
+  { "closed",           lf_transition,        tk_CLOSED },
+  { "coindset",         lf_transition,        tk_ReservedWord },
+  { "cond",             lf_transition,        tk_COND },
+  { "const",            lf_transition,        tk_CONST },
+  { "constrain",        lf_transition,        tk_ReservedWord },
+  { "continue",         lf_transition,        tk_CONTINUE },
+  { "declare",          lf_transition,        tk_DECLARE },
+  { "deep-const",       lf_transition,        tk_ReservedWord },
+  { "defequiv",         lf_transition,        tk_ReservedWord },
+  { "defexception",     lf_transition,        tk_DEFEXCEPTION },
+  { "define",           lf_transition,        tk_DEFINE },
+  { "definstance",      lf_transition,        tk_DEFINSTANCE },
+  { "definvariant",     lf_transition,        tk_ReservedWord },
+  { "defobject",        lf_transition,        tk_DEFOBJECT },
+  { "defrefine",        lf_transition,        tk_ReservedWord },
+  { "defrepr",          lf_transition,        tk_DEFREPR },
+  { "defstruct",        lf_transition,        tk_DEFSTRUCT },
+  { "deftheory",        lf_transition,        tk_ReservedWord },
+  { "defthm",           lf_transition,        tk_DEFTHM },
+  { "deftypeclass",     lf_transition,        tk_DEFTYPECLASS },
+  { "defunion",         lf_transition,        tk_DEFUNION },
+  { "defvariant",       lf_transition,        tk_ReservedWord },
+  { "deref",            lf_transition,        tk_DEREF },
+  { "disable",          lf_transition,        tk_ReservedWord },
+  { "do",               lf_transition,        tk_DO },
+  { "do*",              lf_transition,        tk_ReservedWord },
+  { "double",           lf_transition,        tk_DOUBLE },
+  { "dup",              lf_transition,        tk_DUP },
+  { "enable",           lf_transition,        tk_ReservedWord },
+  { "exception",        lf_transition,        tk_EXCEPTION },
+  { "external",         lf_transition,        tk_EXTERNAL },
+  { "fill",             lf_transition,        tk_FILL },
+  { "float",            lf_transition,        tk_FLOAT },
+  { "fn",               lf_transition,        tk_FN },
+  { "forall",           lf_transition,        tk_FORALL },
+  { "if",               lf_transition,        tk_IF },
+  { "import",           lf_transition,        tk_IMPORT },
+  { "import!",          lf_transition,        tk_ReservedWord },
+  { "impure",           lf_transition,        tk_IMPURE },
+  { "indset",           lf_transition,        tk_ReservedWord },
+  { "inner-ref",        lf_transition,        tk_INNER_REF },
+  { "int16",            lf_transition,        tk_INT16 },
+  { "int32",            lf_transition,        tk_INT32 },
+  { "int64",            lf_transition,        tk_INT64 },
+  { "int8",             lf_transition,        tk_INT8 },
+  { "interface",        lf_transition,        tk_INTERFACE },
+  { "lambda",           lf_transition,        tk_LAMBDA },
+  { "let",              lf_transition,        tk_LET },
+  { "let*",             lf_transition,        tk_ReservedWord },
+  { "letrec",           lf_transition,        tk_LETREC },
+  { "location",         lf_transition,        tk_ReservedWord },
+  //  { "make-vector",      lf_transition,        tk_MAKE_VECTOR },
+  { "make-vector",      lf_transition,        tk_MAKE_VECTORL },
+  { "member",           lf_transition,        tk_MEMBER },   /* REDUNDANT */
+  { "method",           lf_transition,        tk_METHOD },
+  { "module",           lf_transition,        tk_MODULE },
+  { "mutable",          lf_transition,        tk_MUTABLE },
+  { "namespace",        lf_transition,        tk_ReservedWord },
+  { "not",              lf_transition,        tk_NOT },
+  { "nth",              lf_transition,        tk_NTH },
+  { "opaque",           lf_transition,        tk_OPAQUE },
+  { "or",               lf_transition,        tk_OR },
+  { "otherwise",        lf_transition,        tk_OTHERWISE },
+  { "proclaim",         lf_transition,        tk_PROCLAIM },
+  { "provide",          lf_transition,        tk_PROVIDE },
+  { "provide!",         lf_transition,        tk_ReservedWord },
+  { "pure",             lf_transition,        tk_PURE },
+  { "quad",             lf_transition,        tk_QUAD },
+  { "read-only",        lf_transition,        tk_ReservedWord },
+  { "ref",              lf_transition,        tk_REF },
+  { "require",          lf_transition,        tk_ReservedWord },
+  { "reserved",         lf_transition,        tk_RESERVED },
+  { "return",           lf_transition,        tk_RETURN },
+  { "return-from",      lf_transition,        tk_RETURN_FROM },
+  { "sensory",          lf_transition,        tk_ReservedWord },
+  { "set!",             lf_transition,        tk_SET },
+  { "sizeof",           lf_transition,        tk_SIZEOF },
+  { "string",           lf_transition,        tk_STRING },
+  { "super",            lf_transition,        tk_ReservedWord },
+  { "suspend",          lf_transition,        tk_SUSPEND },  
+  { "switch",           lf_transition,        tk_SWITCH },
+  { "tag",              lf_transition,        tk_TAG },
+  { "the",              lf_transition,        tk_THE },
+  { "throw",            lf_transition,        tk_THROW },
+  { "try",              lf_transition,        tk_TRY },
+  { "tycon",            lf_transition,        tk_ReservedWord },
+  { "tyfn",             lf_transition,        tk_TYFN },
+  { "uint16",           lf_transition,        tk_UINT16 },
+  { "uint32",           lf_transition,        tk_UINT32 },
+  { "uint64",           lf_transition,        tk_UINT64 },
+  { "uint8",            lf_transition,        tk_UINT8 },
+  { "using",            lf_transition,        tk_ReservedWord },
+  { "val",              lf_transition,        tk_VAL },
+  { "value-at",         lf_transition,        tk_ReservedWord },
+  { "vector",           lf_transition,        tk_VECTOR },
+  { "vector-length",    lf_transition,        tk_VECTOR_LENGTH },
+  { "vector-nth",       lf_transition,        tk_VECTOR_NTH },
+  { "version",          lf_version,        tk_VERSION },
+  { "when",             lf_transition,        tk_WHEN },
+  { "where",            lf_transition,        tk_WHERE },
+  { "word",             lf_transition,        tk_WORD }
 };
 
 static int
@@ -340,15 +343,24 @@ TransitionLexer::kwCheck(const char *s)
     return tk_Ident;
   }
 
-  KeyWord key = { s, 0 };
+  KeyWord key = { s, lf_transition, 0 };
   KeyWord *entry = 
     (KeyWord *)bsearch(&key, keywords, // &OK
                        sizeof(keywords)/sizeof(keywords[0]), 
                        sizeof(keywords[0]), kwstrcmp);
 
-  // If it is in the token table, return the indicated token type:
-  if (entry)
-    return entry->tokValue;
+  // If it is in the token table, and it is accepted in the prevailing
+  // language variant, return the indicated token type. Note a trick
+  // here that the very first token accepted may be accepted under the
+  // lf_version sub-language. Once the first token has been accepted,
+  // we disable that sub-language.
+  if (entry) {
+    if (currentLang & entry->whichLang) {
+      if (entry->tokValue != tk_BITC_VERSION)
+        currentLang &= ~LangFlags(lf_version);
+      return entry->tokValue;
+    }
+  }
 
   // Otherwise, check for various reserved words:
 
@@ -402,6 +414,9 @@ TransitionLexer::TransitionLexer(std::ostream& _err, std::istream& _in,
 {
   inStream.unsetf(std::ios_base::skipws);
 
+  // Don't accept block syntax keywords until we see the new version syntax,
+  // which is accepted under lf_version
+  currentLang = lf_sexpr | lf_version | lf_LispIdents | lf_LispComments;
   num_errors = 0;
   isRuntimeUoc = false;
   ifIdentMode = false;
@@ -529,11 +544,71 @@ TransitionLexer::lex(ParseType *lvalp)
   c = getChar();
 
   switch (c) {
+  case '/':
+    c = getChar();
+    if (c == '/') {
+      do {
+        c = getChar();
+      } while (c != '\n' && c != '\r');
+      ungetChar(c);
+      here.updateWith(thisToken);
+      goto startOver;
+    }
+    else if (c == '*') {
+      for (;;) {
+        c = getChar();
+        if (c == '*') {
+          c = getChar();
+          if (c == '/') {
+            break;
+          }
+          else if (c == EOF)
+            return EOF;
+          else
+            ungetChar(c);
+        }
+        else if (c == EOF)
+          return EOF;
+      }
+
+      here.updateWith(thisToken);
+      goto startOver;
+    }
+    else {
+      ungetChar(c);
+      if (currentLang & lf_LispIdents)
+        goto identifier;
+      else {
+#if 1
+        return EOF;                // temporary
+#else
+        lvalp->tok = LToken(here, thisToken);
+        here.updateWith(thisToken);
+        return '/':
+#endif
+      }
+    }
+
+  case '*':
+  case '+':
+    {
+      if (currentLang & lf_LispIdents)
+        goto identifier;
+      else {
+#if 1
+        return EOF;                // temporary
+#else
+        lvalp->tok = LToken(here, thisToken);
+        here.updateWith(thisToken);
+        return c:
+#endif
+      }
+    }
+
   case ';':                        // Comments
     do {
       c = getChar();
     } while (c != '\n' && c != '\r');
-    ungetChar(c);
     // FALL THROUGH 
 
   case ' ':                        // White space
@@ -696,9 +771,22 @@ TransitionLexer::lex(ParseType *lvalp)
     // of an identifier.
   case '-':
     c = getChar();
+    if (c == '>')
+      return tk_FNARROW;
+
     if (digitValue(c, 10) < 0) {
       ungetChar(c);
-      goto identifier;
+      if (currentLang & lf_LispIdents)
+        goto identifier;
+      else {
+#if 1
+        return EOF;                // temporary
+#else
+        lvalp->tok = LToken(here, thisToken);
+        here.updateWith(thisToken);
+        return '-':
+#endif
+      }
     }
 
     /* ELSE fall through to digit processing */
@@ -720,9 +808,10 @@ TransitionLexer::lex(ParseType *lvalp)
       } while (digitValue(c, 10) >= 0);
 
       /* At this point we could either discover a radix marker 'r', or
-         a decimal point (indicating a floating poing literal). If it
-         is a radix marker, change the radix value here so that we
-         match the succeeding digits in the correct radix. */
+         a decimal point (indicating a floating poing literal or a
+         language version). If it is a radix marker, change the radix
+         value here so that we match the succeeding digits in the
+         correct radix. */
       if (c == 'r') {
         radix = strtol(thisToken.c_str(), 0, 10);
         if (radix < 0) radix = -radix; // leading sign not part of radix
@@ -738,7 +827,8 @@ TransitionLexer::lex(ParseType *lvalp)
 
       /* We are either done with the literal, in which case it is an
          integer literal, or we are about to see a decimal point, in
-         which case it is a floating point literal */
+         which case it is either a floating point literal or a
+         language version. */
       if (c != '.') {
         ungetChar(c);
         lvalp->tok = LToken(here, thisToken);
@@ -746,9 +836,22 @@ TransitionLexer::lex(ParseType *lvalp)
         return tk_Int;
       }
 
-      /* We have seen a decimal point, so from here on it must be a
-         floating point literal. */
-      {
+      if (currentLang & lf_version) {
+        /* Looking for a language version number. */
+        long count = 0;
+        do {
+          c = getChar();
+          count++;
+        } while (digitValue(c, 10) >= 0);
+        count--;
+        ungetChar(c);
+        lvalp->tok = LToken(here, thisToken);
+        here.updateWith(thisToken);
+        return tk_VersionNumber;
+      }
+      else {
+        /* We have seen a decimal point, so from here on it must be a
+           floating point literal. */
         long count = 0;
         do {
           c = getChar();

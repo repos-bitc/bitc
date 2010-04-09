@@ -3545,6 +3545,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_array_nth:
   case at_array_ref_nth:
   case at_vector_nth:
+  case at_nth:
     {
     /*------------------------------------------------
              A |- e: t   U(t = 'a!array('b|'c, ?len))
@@ -3557,14 +3558,43 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
           _________________________________________
              A |- (array-ref-nth e en): 'b|'c
 
-
              A |- e: t   U(t = 'a|vector('b|'c))
              A |- en: tn  U(tn = 'd|word)
           _________________________________________
              A |- (vector-nth e en): 'b|'c
+
+          !! Note that at_nth is a kludge that will be
+          !! rewritten in-place here to one of the cases above.
        ------------------------------------------------*/
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, rewrite, tcc,
                 trail,  USE_MODE, TI_EXPRESSION);
+
+      // Type-directed inference here for at_nth. If a type is already
+      // known (either through declaration or previous inference), and
+      // it is a type that is compatible with the indexing operation,
+      // whack the AST type to match and then behave as if we had that
+      // AST type in the first place. We whack the AST type so that
+      // later passes don't need to deal with this issue at all.
+      //
+      // This is unquestionably a kludge, and an ugly one at that.
+
+      if (ast->astType == at_nth) {
+        shared_ptr<Type> t = ast->child(0)->symType->getBareType();
+        switch(t->kind) {
+        case ty_array_ref:
+          ast->astType = at_array_ref_nth;
+          break;
+        case ty_array:
+          ast->astType = at_array_nth;
+          break;
+        case ty_vector:
+        default:
+          // In the absence of an already-defined type, it's
+          // presumptively a vector.
+          ast->astType = at_vector_nth;
+          break;
+        }
+      }
 
       shared_ptr<Type> av = GC_NULL;
       shared_ptr<Type> cmp = MBF(newTvar());

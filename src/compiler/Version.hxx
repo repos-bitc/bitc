@@ -40,8 +40,9 @@
 
 #include "config.h"
 
-inline bool CheckVersionCompatibility(std::string ver) {
-  return (ver == BITC_VERSION);
+inline bool CheckVersionCompatibility(std::string ver, 
+                                      std::string curVersion = BITC_VERSION) {
+  return (ver == curVersion);
 }
 
 //inline bool CheckVersionCompatibility(sherpa::BigNum major, sherpa::BigNum minor) {

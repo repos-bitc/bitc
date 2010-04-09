@@ -42,6 +42,7 @@
 #include <iostream>
 
 #include "ParseType.hxx"
+#include "libsherpa/EnumSet.hxx"
 
 typedef long ucs4_t;
 
@@ -58,6 +59,19 @@ typedef long ucs4_t;
  * it is processing.
  */
 struct TransitionLexer {
+  enum LangFlagsValues {
+    lf_sexpr = 0x1u,
+    lf_block = 0x2u,
+    lf_transition = 0x3u,
+    lf_version = 0x4u,
+    lf_LispIdents = 0x8u,
+    lf_LispComments = 0x10u
+  };
+
+  typedef sherpa::EnumSet<LangFlagsValues> LangFlags;
+
+  LangFlags currentLang;
+
   /** @brief Start position of current token. */
   sherpa::LexLoc here;
   /** @brief Number of parse errors incurred.
@@ -128,6 +142,18 @@ struct TransitionLexer {
   /** @brief Push a lookahead character back onto the input stream. */
   void ungetChar(ucs4_t);
 
+  bool valid_ident_punct(uint32_t ucs4);
+  bool valid_ident_start(uint32_t ucs4);
+  bool valid_ident_continue(uint32_t ucs4);
+  bool valid_ifident_start(uint32_t ucs4);
+  bool valid_ifident_continue(uint32_t ucs4);
+  bool valid_tv_ident_start(uint32_t ucs4);
+  bool valid_tv_ident_continue(uint32_t ucs4);
+  bool valid_char_printable(uint32_t ucs4);
+  bool valid_charpoint(uint32_t ucs4);
+  bool valid_charpunct(uint32_t ucs4);
+  unsigned validate_string(const char *s);
+
   /** @brief Constructor
    *
    * Instantiate a new TransitionLexer drawing input from @p inStream and
@@ -184,6 +210,10 @@ struct TransitionLexer {
    * within TransitionLexer.cxx.  */
   struct KeyWord {
     const char *nm;
+    /** @brief Which language variants accept this keyword.
+     *
+     */
+    LangFlags whichLang;
     int tokValue;
   };
 

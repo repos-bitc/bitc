@@ -103,6 +103,18 @@ stripDocString(shared_ptr<AST> exprSeq)
   return exprSeq;
 }
 
+static unsigned VersionMajor(const std::string s)
+{
+  std::string::size_type dotPos = s.find('.');
+  return strtoul(s.substr(0, dotPos).c_str(), 0, 10);
+}
+
+static unsigned VersionMinor(const std::string s)
+{
+  std::string::size_type dotPos = s.find('.');
+  return strtoul(s.substr(dotPos+1, s.size()).c_str(), 0, 10);
+}
+
 %}
 
 %pure-parser
@@ -118,6 +130,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_Float
 %token <tok> tk_Char
 %token <tok> tk_String
+%token <tok> tk_VersionNumber
 
 /* Primary sxp_types and associated hand-recognized literals: */
 %token <tok> '(' ')' ','        /* unit */
@@ -152,6 +165,8 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_WHERE
 
 %token <tok> tk_BITC_VERSION
+%token <tok> tk_BITC
+%token <tok> tk_VERSION
 
 %token <tok> tk_PURE
 %token <tok> tk_IMPURE
@@ -182,6 +197,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_ARRAY_NTH
 %token <tok> tk_ARRAY_REF_NTH
 %token <tok> tk_VECTOR_NTH
+%token <tok> tk_NTH
 
 %token <tok> tk_DEFSTRUCT
 %token <tok> tk_DEFOBJECT
@@ -289,15 +305,15 @@ stripDocString(shared_ptr<AST> exprSeq)
 %type <ast> intLit floatLit charLit strLit boolLit
 %%
 
-// Parser built for sxp_version 0.9
+// Parser built for version 10.0
 // Section Numbers indicated within []
 
 // COMPILATION UNITS [2.5]
 // This definition od sxp_start mus be changed as it ignores
 // junk after the body.
 
-sxp_start: sxp_version sxp_uoc_body {
-  SHOWPARSE("sxp_start -> sxp_version sxp_uoc_body");
+sxp_start: trn_version sxp_uoc_body {
+  SHOWPARSE("sxp_start -> trn_version sxp_uoc_body");
   return 0;
 };
 
@@ -320,13 +336,59 @@ sxp_uoc_body: sxp_module_seq {
 
 // VERSION [2.5]
 
+trn_version: sxp_version;
+trn_version: blk_version;
+
 // We cannot do optversion, because that would require two token look-ahead.
 sxp_version: '(' tk_BITC_VERSION strLit ')' {
   SHOWPARSE("sxp_version -> ( BITC-VERSION strLit )");
-  if (!CheckVersionCompatibility($3->s)) {
-    std::string s = ": Warning: BitC sxp_version conflict " + $3->s + " vs " + Version();
-    lexer->ReportParseWarning($3->loc, s);
+  shared_ptr<AST> version = $3;
+
+  if ((VersionMajor(version->s) == 0) && (VersionMinor(version->s) < 10)) {
+    std::string s = ": Error: input language version " + version->s + " is no longer accepted.";
+    lexer->ReportParseError(version->loc, s);
   }
+
+  if ((VersionMajor(version->s) == 0) && (VersionMinor(version->s) == 11)) {
+    std::string s = ": Warning: bitc-version with stringified version number is deprecated.";
+    lexer->ReportParseWarning(version->loc, s);
+  }
+
+  // Beginning in version 0.12, this entire form will be gone.
+
+  if (!CheckVersionCompatibility(version->s)) {
+    std::string s = ": Warning: BitC version conflict " 
+      + version->s + " vs " + Version();
+    lexer->ReportParseWarning(version->loc, s);
+  }
+};
+
+sxp_version: '(' tk_BITC_VERSION tk_VersionNumber ')' {
+  SHOWPARSE("sxp_version -> ( BITC-VERSION strLit )");
+  shared_ptr<AST> version = AST::makeStringLit($3);
+
+  // Beginning in version 0.12, this entire form will be gone.
+
+  if ((VersionMajor(version->s) == 0) && (VersionMinor(version->s) < 10)) {
+    std::string s = ": Error: input language version " + version->s + " is no longer accepted.";
+    lexer->ReportParseError(version->loc, s);
+  }
+};
+
+blk_version: tk_BITC {
+    lexer->currentLang |= TransitionLexer::lf_version; 
+    lexer->currentLang &= ~TransitionLexer::lf_LispComments; 
+} tk_VERSION tk_VersionNumber ';' {
+  SHOWPARSE("sxp_version -> ( BITC-VERSION strLit )");
+  shared_ptr<AST> version = AST::makeStringLit($3);
+
+  if ((VersionMajor(version->s) == 0) && (VersionMinor(version->s) < 11)) {
+    std::string s = ": Error: block syntax is supported in versions 0.11 and above.";
+    lexer->ReportParseError(version->loc, s);
+  }
+
+  lexer->currentLang |= TransitionLexer::lf_block; 
+  lexer->currentLang &= ~TransitionLexer::lf_LispComments;
 };
 
 // It would be really nice to support this, but the tokenizer will
@@ -1807,7 +1869,7 @@ sxp_eform: '(' tk_MEMBER sxp_expr ident ')' {
 // NTH-REF [7.11.2]         
 sxp_eform: sxp_expr '[' sxp_expr ']' {
   SHOWPARSE("sxp_eform -> sxp_expr [ sxp_expr ]");
-  $$ = AST::make(at_vector_nth, $1->loc, $1, $3);
+  $$ = AST::make(at_nth, $1->loc, $1, $3);
 };
 
 sxp_eform: '(' tk_ARRAY_NTH sxp_expr sxp_expr ')' {

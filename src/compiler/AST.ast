@@ -1073,7 +1073,7 @@ GROUP eform = literal | var | unit
             | array | vector | makevectorL
             | begin | select
             | fqCtr | sel_ctr
-            | array_nth | vector_nth | array_ref_nth
+            | array_nth | vector_nth | array_ref_nth | nth
             | array_length | vector_length | array_ref_length
             | lambda | suspend
             | apply | struct_apply | object_apply | ucon_apply
@@ -1131,6 +1131,9 @@ AST array_ref_nth = expr expr;
 
 // VECTOR-NTH [7.8.2]
 AST vector_nth = expr expr;
+
+// (Generic) NTH [7.8.2]
+AST nth = expr expr;
 
 // ARRAY-LENGTH [7.8.1]
 AST array_length = expr;

@@ -326,7 +326,7 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
   case ty_array_ref:
     {
       assert(t->components.size() == 1);
-      ss << "(array-by-ref "
+      ss << "(array-ref "
          << t->Base()->asString(tvP, traverse) 
          << ")";
       break;
