@@ -452,7 +452,7 @@ public:
   // Get the type without some combinations of the above
   boost::shared_ptr<Type> getTheType(bool mutableOK=false, bool maybeOK=false);   
 
-  // The only reason the following unctions are not marked const is
+  // The only reason the following functions are not marked const is
   // that they call getType(), which uses the mark flag. 
   bool isUnion(bool ignMut=true); // 1. Union type.
   bool isUcon(bool ignMut=true);  // 2. Union Constructor.
@@ -475,6 +475,7 @@ public:
   bool isValType();
   bool isByrefType();
   bool isArrayByref();
+  bool isIndexableType();
   bool isNullableType();
   bool isConstrainedToRefType(boost::shared_ptr<TCConstraints> tcc);
   bool isFnxn();
@@ -502,6 +503,7 @@ public:
   bool isPcst();
   bool isOfInfiniteType();
   bool isConstReducible(); // (const T) is equivalent to minimizeMutability(T)
+
   size_t nBits();
   bool needsCaptureConversion();
 

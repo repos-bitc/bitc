@@ -1383,6 +1383,21 @@ toc(std::ostream& errStream,
       TOC(errStream, uoc, ast->child(0), out, IDname, decls,
           ast, 0, flags);
 
+      // Handle array, array-ref, vector as special cases:
+      shared_ptr<Type> t = ast->child(0)->symType->getBareType();
+      if (t->kind == ty_vector) {
+        out << "->length";
+        break;
+      }
+      else if (t->kind == ty_array_ref) {
+        out << ".length";
+        break;
+      }
+      else if (t->kind == ty_array) {
+        out << t->arrLen->len;
+        break;
+      }
+
       out << ((ast->child(0)->symType->isRefType()) ? "->" : "." );
       out << CMangle(ast->child(1), CMGL_ID_FLD);
       break;
@@ -2093,7 +2108,7 @@ toc(std::ostream& errStream,
       assert(IDname.size());
       shared_ptr<Type> arrType = ast->child(0)->symType->getType();
       assert(arrType->arrLen->len != 0);
-      out << IDname << ".len = " << arrType->arrLen->len << ";" << endl;
+      out << IDname << ".length = " << arrType->arrLen->len << ";" << endl;
       out << IDname << ".elem = ";
       TOC(errStream, uoc, ast->child(0), out, IDname, decls,
           ast, 0, flags);
@@ -2128,7 +2143,7 @@ toc(std::ostream& errStream,
           << toCtype(t->Base()) << ")));"
           << endl;
 
-      out << IDname << "->len = " << ast->children.size()
+      out << IDname << "->length = " << ast->children.size()
           << ";" << endl;
       out << IDname << "->elem = (("
           << toCtype(t->Base())
@@ -2159,7 +2174,7 @@ toc(std::ostream& errStream,
           << toCtype(t->Base()) << ")));"
           << endl;
 
-      out << IDname << "->len = ";
+      out << IDname << "->length = ";
       TOC(errStream, uoc, ast->child(0), out, IDname, decls,
           ast, 0, flags);
       out << ";" << endl;
@@ -2208,7 +2223,7 @@ toc(std::ostream& errStream,
     {
       TOC(errStream, uoc, ast->child(0), out, IDname, decls,
           ast, 0, flags);
-      out << ".len";
+      out << ".length";
       break;
     }
 
@@ -2216,7 +2231,7 @@ toc(std::ostream& errStream,
     {
       TOC(errStream, uoc, ast->child(0), out, IDname, decls,
           ast, 0, flags);
-      out << "->len";
+      out << "->length";
       break;
     }
 
@@ -2701,7 +2716,7 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
       out << "typedef struct {" << endl;
       out.more();
       
-      out << "bitc_word_t len;" << endl;
+      out << "bitc_word_t length;" << endl;
       out << toCtype(et) << " *elem;" << endl;
       out.less();
       out << "} " << CMangle(t->mangledString(true))
@@ -2725,7 +2740,7 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
       out << "typedef struct {" << endl;
       out.more();
 
-      out << "bitc_word_t len;" << endl;
+      out << "bitc_word_t length;" << endl;
       out << toCtype(et) << " *elem;" << endl;
       out.less();
       out << "} " << CMangle(t->mangledString(true))
@@ -3138,7 +3153,7 @@ EmitMain(INOstream &out)
       << endl;
   out.less();
 
-  out << "argVec->len = argc;" << endl
+  out << "argVec->length = argc;" << endl
       << "argVec->elem = " << endl;
   out.more();
   out << "(bitc_string_t **) GC_ALLOC(sizeof(bitc_string_t *) * argc);"

@@ -2124,7 +2124,7 @@ resolve(std::ostream& errStream,
         RESOLVE(lhs, env, lamLevel, USE_MODE, identType, currLB, 
                 flags | RSLV_NO_CHK_USE_TYPE | RSLV_SWITCHED_ID_OK);
         
-        // If ast->child(0) was a at_usesel, now it would have
+        // If ast->child(0) was an at_usesel, now it would have
         // turned into at_ident.
         if (lhs->isIdentType(id_interface)) {
           ast->astType = at_usesel;

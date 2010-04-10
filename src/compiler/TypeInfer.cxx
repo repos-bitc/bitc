@@ -219,6 +219,8 @@ findField(std::ostream& errStream,
   return false;
 }
 
+/// @brief Find a component of a struct or union type having a
+/// particular name.
 static bool
 findComponent(std::ostream& errStream, 
               shared_ptr<Type> sut, shared_ptr<AST> ast,
@@ -233,7 +235,7 @@ findComponent(std::ostream& errStream,
   if (sut->isUType())
     sut = obtainFullUnionType(sut)->getType();
   
-  if (sut->components.empty()) {
+  if (sut->components.empty() && !sut->isIndexableType()) {
     errStream << ast->loc << ": "
               << "cannot dereference fields as only "
               << "an opaque declaration is available."
@@ -3744,11 +3746,20 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
         break;
       }
       
+      // If it is one of the "by courtesy" fields, then we are trivially
+      // done:
+      if (t1->isIndexableType() && ast->child(1)->s == "length") {
+        // Note: NOT mutable word. The length pseudo-field is constant!
+        ast->symType = Type::make(ty_word);
+        ast->child(1)->symType = Type::make(ty_word);
+        // UNIFY(trail, ast->child(1)->loc, ast->child(1)->symType, ast->symType);
+        break;
+      }
+
       if (t1->kind != ty_structv && t1->kind != ty_structr) {
         errStream << ast->child(0)->loc << ": "
-                  << ast->child(0)->s << " cannot be resolved" 
-                  << " to a structure, union, or exception type." 
-                  << " but obtained " << t1->asString() 
+                  << ast->child(0)->s << " has type "
+                  << t1->asString() << " which does not have fields."
                   << std::endl;
         errFree = false;
         break;

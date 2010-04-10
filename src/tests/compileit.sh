@@ -103,7 +103,7 @@ then
     good="no"
 fi
 
-if [ -n "${expect_out}" ]
+if [ \( -n "${expect_out}" \) -a \( ${good} = "yes" \) ]
 then
     cmp -s /tmp/$$.out ${expect_out}
     if [ $? -ne 0 ]
@@ -135,11 +135,11 @@ fi
 if [ ${good} = "no" ]
 then
     echo -n "[BAD] "
-    echo "${cmd} $* "
+    echo "$@ "
 elif [ \( ${quiet} -eq 0 \) ]
 then
     echo -n "[OK]  "
-    echo "${cmd} $* "
+    echo "$@ "
 fi
 
 exit 0

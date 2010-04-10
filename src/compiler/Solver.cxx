@@ -322,6 +322,27 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
         break;
       }
       
+      // Vectors, arrays, and array-ref have a synthetic length field
+      // by courtesy.
+      if (st->isIndexableType() && fName->litValue.s == "length") {
+        handled = false;
+        errFree = true;
+
+        shared_ptr<Type> fld = Type::make(ty_word);
+        CHKERR(errFree, fType->unifyWith(fld));
+
+        if (errFree) {
+          handled = true;
+        }
+        else {
+          DEBUG(SPSOL) errStream << "\t\t ... Field Unification failure, ERROR"
+                                 << pred->asString(Options::debugTvP)
+                                 << std::endl;
+        }
+
+        break;
+      }
+
       handled = true;
       if (st->kind != ty_structv && st->kind != ty_structr) {
         DEBUG(SPSOL) errStream << "\t\t ... Non-structure type, ERROR"
@@ -379,12 +400,12 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
       break;
     }
     
-    // This constraint is non of the above checked special type
+    // This constraint is none of the above checked special type
     // classes.
     handlable = false;
     handled = false;
     break;
-  }while(false);
+  } while(false);
   
   if(handled)
     cset->clearPred(pred);

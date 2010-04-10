@@ -391,6 +391,15 @@ Type::isArrayByref()
 }
 
 bool 
+Type::isIndexableType()
+{
+  shared_ptr<Type> t = getBareType();
+  return (t->kind == ty_array_ref 
+          || t->kind == ty_vector 
+          || t->kind == ty_array);
+}
+
+bool 
 Type::isNullableType()
 {
   shared_ptr<Type> t = getBareType();

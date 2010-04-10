@@ -191,7 +191,7 @@ DEFCLOSURE(bitc_string_nth);
 bitc_string_t *
 DEFUN(bitc_vector_string, arg_0_bitc_vector_string vec)
 {
-  size_t len = vec->len;
+  size_t len = vec->length;
   bitc_string_t *tmp = (bitc_string_t *) 
     GC_ALLOC_ATOMIC(sizeof(bitc_string_t));
 

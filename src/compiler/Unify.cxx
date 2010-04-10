@@ -65,7 +65,7 @@ static bool
 typeError(std::ostream& errStream, const LexLoc &errLoc,
           shared_ptr<Type> t1, shared_ptr<Type> t2)
 {
-  errStream << errLoc << ": Type Error."
+  errStream << errLoc << ": Type Error. "
             << "Expected " << t1->asString(GC_NULL) 
             << ", Obtained " << t2->asString(GC_NULL)
             << std::endl;
