@@ -142,7 +142,7 @@ struct TransitionLexer {
   /** @brief Push a lookahead character back onto the input stream. */
   void ungetChar(ucs4_t);
 
-  bool valid_ident_punct(uint32_t ucs4);
+  bool valid_ident_punct(uint32_t ucs4, bool allowExtended);
   bool valid_ident_start(uint32_t ucs4);
   bool valid_ident_continue(uint32_t ucs4);
   bool valid_ifident_start(uint32_t ucs4);
