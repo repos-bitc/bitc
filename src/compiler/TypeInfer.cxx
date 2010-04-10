@@ -1876,6 +1876,17 @@ CheckLetrecFnxnRestriction(std::ostream &errStream, shared_ptr<AST> ast)
 }
 #endif
 
+/// @brief Core type inference algorithm.
+///
+/// @param[in] ast The ast to be (recursively) traversed.
+/// @param[in] gamma The type scheme environment.
+/// @param[in] instEnv The type environment.
+/// @param[in,out] impTypes Record of all imprecisely inferred types (arrays).
+/// @param[in,out] rewrite Whether we are re-writing method ASTs in place.
+/// @param[in] tcc Prevailing type class constraints.
+/// @param[in] trail Prevailing unification trail.
+/// @param[in] mode How resolution should proceed (define, use...).
+/// @param[in] ti_flags Inference control flags.
 static bool
 typeInfer(std::ostream& errStream, shared_ptr<AST> ast, 
           shared_ptr<TSEnvironment > gamma,
