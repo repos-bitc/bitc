@@ -66,12 +66,11 @@ UocInfo::RandT(std::ostream& errStream,
                std::string mesg)
 {
   bool errFree = true;
-  bool rewrite=false;
 
   CHKERR(errFree, Resolve(errStream, init, rflags, mesg));
 
   if (errFree)
-    CHKERR(errFree, TypeCheck(errStream, init, rewrite, tflags, mesg));
+    CHKERR(errFree, TypeCheck(errStream, init, tflags, mesg));
 
   if (!errFree)
     errStream << "WHILE R&Ting:" << std::endl
@@ -102,7 +101,6 @@ UocInfo::unwrapEnvs()
 bool
 UocInfo::RandTexpr(std::ostream& errStream,
                    shared_ptr<AST> expr,
-                   bool &rewrite,
                    ResolverFlags rflags,
                    TI_Flags tflags,
                    std::string mesg,
@@ -124,7 +122,7 @@ UocInfo::RandTexpr(std::ostream& errStream,
 
   CHKERR(errFree, myUoc->Resolve(errStream, false, rflags, mesg));
   if (errFree)
-    CHKERR(errFree, myUoc->TypeCheck(errStream, false, rewrite,
+    CHKERR(errFree, myUoc->TypeCheck(errStream, false,
                                      tflags, mesg)); 
   
   if (!keepResults)

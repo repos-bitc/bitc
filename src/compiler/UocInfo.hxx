@@ -266,11 +266,11 @@ public:
 
   bool 
   DoTypeCheck(std::ostream& errStream, bool init, 
-              bool &rewrite, TI_Flags ti_flags);
+              TI_Flags ti_flags);
   
   bool 
   TypeCheck(std::ostream& errStream, bool init, 
-            bool& rewrite, TI_Flags ti_flags, std::string pre);
+            TI_Flags ti_flags, std::string pre);
   
   bool RandT(std::ostream& errStream,
              bool init=false, 
@@ -280,7 +280,6 @@ public:
 
   bool RandTexpr(std::ostream& errStream,
                  boost::shared_ptr<AST> ast,
-                 bool &rewrite,
                  ResolverFlags rflags= RSLV_NO_FLAGS,
                  TI_Flags ti_flags=TI_NO_FLAGS,
                  std::string pre = "Internal Compiler error :",
