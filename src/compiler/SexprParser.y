@@ -358,9 +358,6 @@ optdocstring: {
   $$ = AST::make(at_docString);
 };
 
-// TODO: The ident in interface rule should be restricted to 
-// ({ALPHA} | [_\-]) (({ALPHA} | {DECDIGIT} | [_\-])*
-
 // INTERFACES [8.1]
 interface: '(' tk_INTERFACE ifident {
     if ($3.str.find("bitc.") == 0)
