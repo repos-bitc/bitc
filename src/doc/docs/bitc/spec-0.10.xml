@@ -2,11 +2,11 @@
 <!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
                   "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd"
 [
-<!ENTITY BitcVersion "0.11+">
+<!ENTITY BitcVersion "0.10+">
 ]>
-  <article id="bitc-spec-0.11" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <article id="bitc-spec-0.10" xmlns:xi="http://www.w3.org/2001/XInclude">
   <docinfo twocolumn="yes">
-    <title>BitC (0.11 Transitional) Language Specification</title>
+    <title>BitC 0.10 Language Specification</title>
     <subtitle>Version &BitcVersion;</subtitle>
     <authorgroup>
       <author>
@@ -52,13 +52,8 @@
       <category>dev/bitc</category>
     </categories>
     <synopsis>
-      <p>Provisional specification for the BitC programming language.</p>
-      <p>
-        Version 0.11 is a transitional version that is working our
-        the final surface syntax. This version of the language
-        supports the old s-expression syntax and the new syntax
-        simultaneously to ease transition.
-      </p>
+      <p>Specification for version 0.10 of the language. This is the
+      last version that was s-expression based.</p>
     </synopsis>
   </docinfo>
   <abstract latex.incolumn="yes" latex.breakafter="yes">
