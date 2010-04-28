@@ -148,6 +148,8 @@
   (proclaim __<<:(fn 'a word -> 'a) external)
   (proclaim __>>:(fn 'a word -> 'a) external)
 
+  (proclaim !:(fn bool -> bool))
+  (define (not b) (! b))
   
   // Conversion operation. This one is actually quite dangerous,
   // and I'm not convinced that we should have it at all. If we *do*
