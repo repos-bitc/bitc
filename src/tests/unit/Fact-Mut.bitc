@@ -35,7 +35,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(bitc-version "0.10")
+(bitc version 0.10)
 
 ;; Implementation of factorial using mutation
 (define (fact x) (do ((ans 1 ans) 

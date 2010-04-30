@@ -81,7 +81,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;   Interface    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(bitc-version "0.10")
+(bitc version 0.10)
 (interface crypt.sha1
   (import bitc.stdio as stdio)
   (import bitc.stdlib as stdlib)

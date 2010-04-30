@@ -36,7 +36,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(bitc-version "0.10")
+(bitc version 0.10)
 (interface bitc.stdio
   (import bitc.string as str)
   (import bitc.list as lst)

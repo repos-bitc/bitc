@@ -35,7 +35,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(bitc-version "0.10")
+(bitc version 0.10)
 (interface bitc.main
   (proclaim main: (fn (vector string) -> int32) external bitc_main)
 )

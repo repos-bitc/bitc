@@ -41,7 +41,7 @@
 ;;   -- mutable
 ;;   -- abstract
 
-(bitc-version "0.10")
+(bitc version 0.10)
 (import bitc.stdio as stdio)
 (import bitc.main as main)
 (provide bitc.main main)

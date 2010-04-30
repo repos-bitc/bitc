@@ -35,7 +35,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(bitc-version "0.10")
+(bitc version 0.10)
 
 ;; Test for mutability inference and hint propagation.
 (define p (if #t 

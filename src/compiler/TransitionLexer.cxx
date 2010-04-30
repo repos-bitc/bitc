@@ -210,8 +210,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   { "as",               lf_transition,        tk_AS },
   { "assert",           lf_transition,        tk_ReservedWord },
   { "begin",            lf_transition,        tk_BEGIN },
-  { "bitc",             lf_version,        tk_BITC },
-  { "bitc-version",     lf_version,        tk_BITC_VERSION },
+  { "bitc",             lf_version,           tk_BITC },
   { "bitfield",         lf_transition,        tk_BITFIELD },
   { "bitsizeof",        lf_transition,        tk_BITSIZEOF },
   { "block",            lf_transition,        tk_BLOCK },
@@ -360,8 +359,8 @@ TransitionLexer::kwCheck(const char *s)
   // we disable that sub-language.
   if (entry) {
     if (currentLang & entry->whichLang) {
-      if (entry->tokValue != tk_BITC_VERSION)
-        currentLang &= ~LangFlags(lf_version);
+      currentLang &= ~LangFlags(lf_version);
+
       return entry->tokValue;
     }
   }

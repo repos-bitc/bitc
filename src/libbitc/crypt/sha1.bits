@@ -106,7 +106,7 @@
   ;      a multiple of the size of an 8-bit character.
 
 
-(bitc-version "0.10")
+(bitc version 0.10)
 (module sha1-impl
   (import bitc.stdio as stdio)
   (import bitc.stdlib as stdlib)

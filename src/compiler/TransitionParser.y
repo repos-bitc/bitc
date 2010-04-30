@@ -164,7 +164,6 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_RESERVED
 %token <tok> tk_WHERE
 
-%token <tok> tk_BITC_VERSION
 %token <tok> tk_BITC
 %token <tok> tk_VERSION
 
@@ -339,32 +338,13 @@ trn_version: sxp_version;
 trn_version: blk_version;
 
 // We cannot do optversion, because that would require two token look-ahead.
-sxp_version: '(' tk_BITC_VERSION strLit ')' {
-  SHOWPARSE("sxp_version -> ( BITC-VERSION strLit )");
-  shared_ptr<AST> version = $3;
-
-  if ((VersionMajor(version->s) == 0) && (VersionMinor(version->s) < 10)) {
-    std::string s = ": Error: input language version " + version->s + " is no longer accepted.";
-    lexer->ReportParseError(version->loc, s);
-  }
-
-  if ((VersionMajor(version->s) == 0) && (VersionMinor(version->s) == 11)) {
-    std::string s = ": Warning: bitc-version with stringified version number is deprecated.";
-    lexer->ReportParseWarning(version->loc, s);
-  }
-
-  // Beginning in version 0.12, this entire form will be gone.
-
-  if (!CheckVersionCompatibility(version->s)) {
-    std::string s = ": Warning: BitC version conflict " 
-      + version->s + " vs " + Version();
-    lexer->ReportParseWarning(version->loc, s);
-  }
-};
-
-sxp_version: '(' tk_BITC_VERSION tk_VersionNumber ')' {
-  SHOWPARSE("sxp_version -> ( BITC-VERSION strLit )");
-  shared_ptr<AST> version = AST::makeStringLit($3);
+sxp_version: '(' tk_BITC {
+    lexer->currentLang |= TransitionLexer::lf_version; 
+} tk_VERSION { 
+    lexer->currentLang |= TransitionLexer::lf_version; 
+} tk_VersionNumber ')' {
+  SHOWPARSE("sxp_version -> LP BITC-VERSION VersionNumber RP");
+  shared_ptr<AST> version = AST::makeStringLit($6);
 
   // Beginning in version 0.12, this entire form will be gone.
 
@@ -375,11 +355,13 @@ sxp_version: '(' tk_BITC_VERSION tk_VersionNumber ')' {
 };
 
 blk_version: tk_BITC {
-    lexer->currentLang |= TransitionLexer::lf_version; 
     lexer->currentLang &= ~TransitionLexer::lf_LispComments; 
-} tk_VERSION tk_VersionNumber ';' {
-  SHOWPARSE("sxp_version -> ( BITC-VERSION strLit )");
-  shared_ptr<AST> version = AST::makeStringLit($3);
+    lexer->currentLang |= TransitionLexer::lf_version; 
+} tk_VERSION {
+    lexer->currentLang |= TransitionLexer::lf_version; 
+} tk_VersionNumber {
+  SHOWPARSE("blk_version -> BITC VERSION VersionNumber");
+  shared_ptr<AST> version = AST::makeStringLit($5);
 
   if ((VersionMajor(version->s) == 0) && (VersionMinor(version->s) < 11)) {
     std::string s = ": Error: block syntax is supported in versions 0.11 and above.";
@@ -387,6 +369,7 @@ blk_version: tk_BITC {
   }
 
   lexer->currentLang |= TransitionLexer::lf_block; 
+  lexer->currentLang &= ~TransitionLexer::lf_sexpr; 
   lexer->currentLang &= ~TransitionLexer::lf_LispComments;
 };
 
