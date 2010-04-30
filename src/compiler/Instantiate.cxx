@@ -543,18 +543,16 @@ name2fqn(shared_ptr<AST> ast)
 
 // Warning: The following macros need local errStream
 #define RANDT_DROP(expr, mess, env) do {                \
-    bool rewrite=false;                                 \
     assert(RandTexpr(errStream, expr,                   \
                      POLY_SYM_FLAGS, POLY_TYP_FLAGS,    \
                      mess, false, env));                \
-  }while (0);
+  } while (0);
 
 #define RANDT_COMMIT(expr, mess, env) do {              \
-    bool rewrite=false;                                 \
     assert(RandTexpr(errStream, expr,                   \
                      POLY_SYM_FLAGS, POLY_TYP_FLAGS,    \
                      mess, true, env));                 \
-  }while (0);
+  } while (0);
 
 
 // Many a time, we will have to explicitely write (or re-write)

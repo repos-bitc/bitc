@@ -137,7 +137,7 @@ Type::toString()
   case ty_fn:
     assert(components.size() == 2);
     ss << "(fn " << Args()->toString() 
-       <<  " " << Ret()->toString() << ")";
+       <<  " -> " << Ret()->toString() << ")";
     break;
 
   case ty_fnarg:
@@ -150,6 +150,12 @@ Type::toString()
         ss << CompType(i)->toString();      
     }
     ss << ")";
+    break;
+
+  case ty_tyfn:
+    assert(components.size() == 2);
+    ss << "(tyfn " << Args()->toString() 
+       <<  " -> " << Ret()->toString() << ")";
     break;
 
   case ty_letGather:
@@ -286,13 +292,6 @@ Type::toString()
   case ty_exn:
     ss << "exception";     
     break;
-
-  case ty_tyfn:
-    assert(components.size() == 2);
-    ss << "(tyfn (" << Args()->toString() 
-       <<  ") " << Ret()->toString() << ")";
-    break;
-
 
   case ty_mbFull:
   case ty_mbTop:

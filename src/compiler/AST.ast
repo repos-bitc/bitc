@@ -477,7 +477,12 @@ enum PrintFlagValues {
   ///
   /// This typically appears where an at_begin node was introduced to
   /// convert a block into a single expression.
-  pf_IMPLIED
+  pf_IMPLIED,
+
+  /// In the block syntax, indicates an expression tree that must
+  /// be pretty-printed within parenthesis to preserve operator
+  /// precedence.
+  pf_PARENWRAP
 };
 typedef sherpa::EnumSet<PrintFlagValues> PrintFlags;
 
@@ -1073,8 +1078,9 @@ GROUP eform = literal | var | unit
             | array | vector | makevectorL
             | begin | select
             | fqCtr | sel_ctr
-            | array_nth | vector_nth | array_ref_nth | nth
-            | array_length | vector_length | array_ref_length
+            | array_nth | array_ref_nth | vector_nth
+            | nth
+            | array_length | array_ref_length | vector_length
             | lambda | suspend
             | apply | struct_apply | object_apply | ucon_apply
             | if | when | and | or | cond | uswitch
@@ -1125,22 +1131,19 @@ AST select = expr ident;
 AST fqCtr = ident ident;
 AST sel_ctr = expr ident;
 
-// ARRAY-NTH [7.8.2]
+// xxx-nth are preserved for inference purposes.
+// ARRAY-NTH, VECTOR-NTH [7.8.2]
 AST array_nth = expr expr;
 AST array_ref_nth = expr expr;
-
-// VECTOR-NTH [7.8.2]
 AST vector_nth = expr expr;
+
+// ARRAY-LENGTH, VECTOR-LENGTH [7.8.1]
+AST array_length = expr;
+AST array_ref_length = expr;
+AST vector_length = expr;
 
 // (Generic) NTH [7.8.2]
 AST nth = expr expr;
-
-// ARRAY-LENGTH [7.8.1]
-AST array_length = expr;
-AST array_ref_length = expr;
-
-// VECTOR-LENGTH [7.8.1]
-AST vector_length = expr;
 
 // LAMBDA [7.9]
 AST lambda = argVec expr;
@@ -1204,6 +1207,15 @@ AST try = expr ident usw_legs ow;
 // THROW  [7.15.2]
 AST throw = expr;
 
+// LET and LETREC require a constraints node because they are
+// generalized. Generalization demands a type scheme, and a type
+// scheme demands a constraint set. While there is no syntactic means
+// to write constraints by hand[1], they are gathered here through
+// inference.
+//
+// [1] In fact, you can write them by annotating the types of the
+// binding patterns using forall in the S-expression syntax.
+
 // LET [7.16.1]
 AST let = letbindings expr constraints;
 AST letbindings = letbinding+;
@@ -1222,8 +1234,7 @@ AST dotest = expr expr;
 AST localFrame = frameBindings expr;
 AST frameBindings = identPattern*;
 
-// letStar is not a letStar. It is an internal representation.
-// types are NOT generalize
+// See big comment concerning letStar in TypeInfer.cxx
 AST letStar = letbindings expr;
 AST identList = ident*;
 AST container = identList expr;

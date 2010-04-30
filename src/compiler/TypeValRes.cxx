@@ -67,9 +67,16 @@ if (ans == true) \
  (itsExpansive) = true; \
 }while (0)
            
+// Shap has tripped on the term "expansive" for years. What
+// "expansive" means is that term substitution might result in a term
+// that requires more evaluation steps than the original term. That
+// is, it violates the downward deconstructive induction intuition. A
+// discussion of the term "expansive" can probably be found in the ML
+// book or the value restriction paper.
+
 // FIX: I am not clear why an identifier is intrinsically considered
 // expansive, since many identifiers are bound to compile-time deeply 
-// immutable values constants and these can be viewed as term
+// immutable values and these can be viewed as term
 // substitutions. Handling them in this way would let many of the
 // special cases below collapse.
 // Swaroop: Identifiers are intrinsically NOT expansive. This code

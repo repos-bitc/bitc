@@ -169,44 +169,8 @@ UnifyStructUnion(std::ostream& errStream,
   return errFree;
 }
 
-#ifdef WEAK_VECTOR
-// Note that this is only called when t1, t2 have distinct kind.
-static bool 
-UnifyWeakVector(std::ostream& errStream,
-                shared_ptr<Trail> trail,
-                const LexLoc &errLoc,
-                shared_ptr<Type> t1, shared_ptr<Type> t2,
-                UnifyFlags uflags) 
-{
-  bool errFree = true;
-
-  assert(t1->isWeakVector() || t2->isWeakVector());
-
-  DEBUG(UNIFY) std::cout << "UnifyWeakVector " 
-                        << t1->asString(Options::debugTvP) 
-                        << " ==? "
-                        << t2->asString(Options::debugTvP)
-                        << std::endl;
-
-  // Check that the respective base types are compatible:
-  CHKERR(errFree, 
-         Unify(errStream, trail, errLoc, t1->Base(), 
-               t2->Base(), uflags));
-  if (!errFree)
-    return typeError(errStream, errLoc, t1, t2);
-
-  shared_ptr<Type> tWeak = t1->isWeakVector() ? t1 : t2;
-  shared_ptr<Type> tOther = t1->isWeakVector() ? t2 : t1;
-
-  // Re-write this type as a type variable:
-  tWeak->kind = ty_tvar;
-  tWeak->components.clear();
-
-  trail->link(tWeak, tOther);
-  return true;
-}
-#endif
-
+#ifdef DEAD_CODE
+// Unification of a maybe type with a core type.
 static bool 
 UnifyMbCt(std::ostream& errStream, shared_ptr<Trail> trail,
           shared_ptr<Type> mb, shared_ptr<Type> ct)
@@ -220,6 +184,7 @@ UnifyMbCt(std::ostream& errStream, shared_ptr<Trail> trail,
   
   return true;
 }
+#endif
 
 // While unifying two fnArgs, it is better to report the entire
 // function type rather than the argument types (if we know the 
@@ -322,16 +287,6 @@ Unify(std::ostream& errStream,
         break;
       }
     
-#ifdef WEAK_VECTOR
-      // Note this can only arise when they are not the same kind.
-      if (t1->isIndexableType(false) && t2->isIndexableType(false) &&
-          (t1->isWeakVector() || t2->isWeakVector())) {
-        CHKERR(errFree, UnifyWeakVector(errStream, trail, errLoc, 
-                                        t1, t2, uflags));
-        break;
-      }
-#endif
-
       if (uflags & UFLG_UNIFY_STRICT) {
         errFree = typeError(errStream, errLoc, t1, t2);
         break;
@@ -349,13 +304,13 @@ Unify(std::ostream& errStream,
         shared_ptr<Type> other = t1->isTvar() ? t2 : t1;
 
         // The current unification case is 'a = t. 
-        // If 'a is a rigid variable, we  ust immediately return an
+        // If 'a is a rigid variable, we just immediately return an
         // error, since unification through other cases will be less
         // precise (that is, if t is a maybe type, we will get a type
         // whole variability wrt mutability is lost.
 
 
-        if(!var->isUnifiableVar()) {
+        if(!var->isUnifiableVar()) { // i.e. if it is rigid
           errStream << errLoc << " Rigid variable "
                     << var->asString() << " cannot be unified with "
                     << other->asString() << std::endl;
@@ -377,22 +332,27 @@ Unify(std::ostream& errStream,
         // an error, but must try other options. For example, this case
         // arises in the solver and generalizer where a type is unified
         // with its (deeply) most immutable version.
+        //
         // One of the possibilities we can end up here is 'a = 'b|'a,
         // where the intension really is to ensure that the mutability
-        // should be fixed to the immutable version.
+        // should be fixed to the immutable version. This case is
+        // handled below in the fall-through.
 
-        if(!other->boundInType(var)) {
+        if(!other->boundInType(var)) { // easy case
           trail->subst(var, other);
           break;
         }
         // Otherwise, try other options ...
       }
 
+      // Note that if there was a possibility of substitution yielding
+      // a cycle, either t1 or t2 could be a type variable here.
+
       if (t1->isMbFull() || t2->isMbFull()) {
         shared_ptr<Type> mb = t1->isMbFull() ? t1 : t2;
         shared_ptr<Type> other = t1->isMbFull() ? t2 : t1;
       
-        if(!mb->isUnifiableVar()) {
+        if(!mb->isUnifiableVar()) { // i.e. it is rigid
           errStream << errLoc << "Rigid type "
                     << mb->asString() << " cannot be unified with "
                     << other->asString() << std::endl;
@@ -400,15 +360,26 @@ Unify(std::ostream& errStream,
           break;
         }
 
-        // Handle the special case: U(s|'b == M'a):
-        // Under the normal unification rules, this will result in 
-        // the type s|'b = M'a = M'a|'a, 
-        // but what we want is s|'b = M'a = M'c|'b
+        // Handle the special case: U('s|'b == M'a): Under the normal
+        // unification rules, this will result in the type 's|'b = M'a
+        // = M'a|'a, but what we want is 's|'b = M'a = (M'c)|'b
+        //
         // This kind of unification constraint can only arise out of
         // explicit qualification, and must therefore be handled
         // specially (theory does not mention it). We cannot interpret
         // all M'a types as M'a|'b, since such qualifications might be
         // within composite type definitions.
+        //
+        // Shap needs an illustrating use case.
+        //
+        // Ex. We have a parameter wanting type 'b. It's internal type
+        // is therefore 's|'b. We end up unifying it with (mutable e), 
+        //
+        // e infers to (MBF 'e), then
+        // (mutable 'a) ~ (MBF 'e) -> (mutable 'e)
+        //
+        // What is going on here is that an explicit mutable wrapper
+        // can only arise out of annotation.
 
         if(t2->isMutable() && t2->Base()->isTvar()) {
           CHKERR(errFree, Unify(errStream, trail, errLoc, mb->Var(),

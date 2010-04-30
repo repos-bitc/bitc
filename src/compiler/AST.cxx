@@ -591,14 +591,14 @@ AST::tagName(const AstType at)
     return "at_array_ref_nth";
   case at_vector_nth:
     return "at_vector_nth";
-  case at_nth:
-    return "at_nth";
   case at_array_length:
     return "at_array_length";
   case at_array_ref_length:
     return "at_array_ref_length";
   case at_vector_length:
     return "at_vector_length";
+  case at_nth:
+    return "at_nth";
   case at_lambda:
     return "at_lambda";
   case at_argVec:
@@ -920,14 +920,14 @@ AST::astName() const
     return "array_ref_nth";
   case at_vector_nth:
     return "vector_nth";
-  case at_nth:
-    return "nth";
   case at_array_length:
     return "array_length";
   case at_array_ref_length:
     return "array_ref_length";
   case at_vector_length:
     return "vector_length";
+  case at_nth:
+    return "nth";
   case at_lambda:
     return "lambda";
   case at_argVec:
@@ -1175,10 +1175,10 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_array_nth
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_array_ref_nth
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_vector_nth
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_nth
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00", // at_array_length
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00", // at_array_ref_length
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00", // at_vector_length
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_array_length
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00", // at_array_ref_length
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00", // at_vector_length
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00", // at_nth
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00", // at_lambda
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00", // at_argVec
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00", // at_apply
@@ -3532,37 +3532,6 @@ AST::isValid() const
     }
     break;
 
-  case at_nth: // normal AST:
-    // match agt_expr
-    if(c >= children.size()) {
-      astChNumError(*this, c+1, children.size());
-      errorsPresent = true;
-      break;
-    }
-    if (!ISSET(astMembers[agt_expr], child(c)->astType)) {
-      astChTypeError(*this, agt_expr, child(c)->astType, c);
-      errorsPresent = true;
-    }
-    c++;
-
-    // match agt_expr
-    if(c >= children.size()) {
-      astChNumError(*this, c+1, children.size());
-      errorsPresent = true;
-      break;
-    }
-    if (!ISSET(astMembers[agt_expr], child(c)->astType)) {
-      astChTypeError(*this, agt_expr, child(c)->astType, c);
-      errorsPresent = true;
-    }
-    c++;
-
-    if(c != children.size()) {
-      astChNumError(*this, c, children.size());
-      errorsPresent = true;
-    }
-    break;
-
   case at_array_length: // normal AST:
     // match agt_expr
     if(c >= children.size()) {
@@ -3602,6 +3571,37 @@ AST::isValid() const
     break;
 
   case at_vector_length: // normal AST:
+    // match agt_expr
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[agt_expr], child(c)->astType)) {
+      astChTypeError(*this, agt_expr, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
+    if(c != children.size()) {
+      astChNumError(*this, c, children.size());
+      errorsPresent = true;
+    }
+    break;
+
+  case at_nth: // normal AST:
+    // match agt_expr
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[agt_expr], child(c)->astType)) {
+      astChTypeError(*this, agt_expr, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
     // match agt_expr
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());

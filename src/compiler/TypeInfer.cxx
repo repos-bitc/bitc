@@ -3551,7 +3551,30 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_vector_nth:
   case at_nth:
     {
-    /*------------------------------------------------
+      /* Shap: Canonical form in array types must be preserved. It's
+       * either (array T) or (mutable (array (mutable T))). The
+       * "mutable" in both cases expresses top-level mutability.
+       *
+       * In the type rules, ! is the half downarrow (left harpoon),
+       * while | is the full downarrow (harpoon). ! signals
+       * introduction of possible top-level mutability, while |
+       * signals introduction of possible full (up-to-ref) mutability.
+       *
+       * In this case, the vector case could be written as either ! or
+       * |, because there isn't any "deep" mutability in a ref, so
+       * there isn't really a difference. The type rule below was
+       * originally written as
+       *
+       *     A |- e: t   U(t = 'a|vector('b|'c))
+       *     A |- en: tn  U(tn = 'd|word)
+       *  _________________________________________
+       *     A |- (vector-nth e en): 'b|'c
+       *
+       * but the implementation always used MBT. Since it doesn't
+       * matter, shap updated the type rule to use !
+       */
+
+      /*------------------------------------------------
              A |- e: t   U(t = 'a!array('b|'c, ?len))
              A |- en: tn  U(tn = 'd|word)
           _________________________________________
@@ -3562,7 +3585,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
           _________________________________________
              A |- (array-ref-nth e en): 'b|'c
 
-             A |- e: t   U(t = 'a|vector('b|'c))
+             A |- e: t   U(t = 'a!vector('b|'c))
              A |- en: tn  U(tn = 'd|word)
           _________________________________________
              A |- (vector-nth e en): 'b|'c
@@ -3688,18 +3711,26 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
   case at_select:
     {
-    /*------------------------------------------------
-              A(r) = ['a1.. 'am] {... fld:t ... }  
-        A |- e: tr     tr' = 'd!r('c1|'b1, ... 'c1|'bm)
-               U(tr = tr')   tf = tr'.fld
-          _________________________________________
-                  A |- e.fld: tf
+      /*
+       * A is the environment. "r" is the name of the record whose
+       * field we are looking up. "tr" is the type of the record.
+       * What d' does is provide a placeholder where we determine the
+       * top-level mutability of the record as a whole OR the
+       * reference that names it.
+       */
 
-                          A |- e:'a    
-       ___________________________________________________
-          A |- e.fld: 'b \ has-field('a, field(fld), 'b)
+      /*------------------------------------------------
+                A(r) = ['a1.. 'am] {... fld:t ... }  
+          A |- e: tr     tr' = 'd!r('c1|'b1, ... 'c1|'bm)
+                 U(tr = tr')   tf = tr'.fld
+            _________________________________________
+                    A |- e.fld: tf
 
-       ------------------------------------------------*/
+                            A |- e:'a    
+         ___________________________________________________
+            A |- e.fld: 'b \ has-field('a, field(fld), 'b)
+
+         ------------------------------------------------*/
 
       // match agt_expr 
       /* Selection is only permitted on 
@@ -3783,6 +3814,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
             trail->subst(arg, MBF(newTvar()));
         }
       
+      // MBT because the record or the reference *might* be mutable.
       shared_ptr<Type> trt = MBT(tr);
 
       UNIFY(trail, ast->child(0)->loc, t, trt);
@@ -4674,17 +4706,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       case ty_vector:
         {
-#ifdef WEAK_VECTOR
-          // The use of inner-ref on this is sufficient to infer that
-          // it must have been vector after all. The following
-          // unification will be harmless if the type is already
-          // ty_vector:
-
-          shared_ptr<Type> cmp = MBF(newTvar());
-          shared_ptr<Type> av = MBT(Type::make(ty_vector, cmp));
-          UNIFY(trail, ast->child(0)->loc, ast->child(0)->symType, av);
-#endif
-
           process_ndx = true;
           ast->symType = Type::make(ty_ref, t->Base());
           break;
@@ -5171,6 +5192,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
                              (xn ein esn))
                          (et  er)  eb): tr
         ------------------------------------------------*/
+
       // match at_letbindings
       shared_ptr<TSEnvironment > doGamma = gamma->newScope();
       ast->envs.gamma = doGamma;
@@ -5280,6 +5302,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
      __________________________________________________________
          A |- (letrec ((x1[:t1] e1) ... (xn[:tn] en)) e): t
         ------------------------------------------------*/
+
       // match at_letbindings
       shared_ptr<TSEnvironment > letGamma = gamma->newScope();
       shared_ptr<TCConstraints> letTcc = TCConstraints::make();
@@ -5320,6 +5343,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
         break;
       }
       
+      // BEGIN stuff not needed in at_letStar
+
       // Consider all constraints
       TYPEINFER(ast->child(2), letGamma, instEnv, impTypes, 
                 letTcc, trail, mode, TI_CONSTRAINT);
@@ -5334,6 +5359,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       lbs->symType = bAst->symType;
       lbs->scheme = bAst->scheme;
       
+      // END stuff not needed in at_letStar
+
       // Finally evaluate the final expression
       TYPEINFER(ast->child(1), letGamma, instEnv, impTypes, 
                 tcc, trail, USE_MODE, TI_EXPRESSION);
@@ -5342,8 +5369,16 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
     
-    // letStar is not a letStar. It is an internal representation.
-    // types are NOT generalized
+    // The SSA pass introduces at_letStar, which is structurally
+    // similar to the Scheme or Common LISP let* construct.  In the
+    // current top-level syntax, there is no way to introduce one of
+    // these. This may change with the block syntax, or I may
+    // (probably) just us an at_let with a single binding
+    //
+    // at_letStar nodes get introduced during the SSA pass, which is
+    // post-polyinstantiation. A consequence is that no generalization
+    // can occur on one of these nodes or its body, so we do not call
+    // the generalizer.
   case at_letStar:
     {
       /*------------------------------------------------

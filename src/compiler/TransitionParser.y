@@ -933,13 +933,13 @@ sxp_tc_decls: sxp_tc_decls sxp_tc_decl {
   $$->addChild($2);
 };
 
-sxp_tc_decl: '(' tk_TYFN '(' sxp_tvlist ')' sxp_typevar ')' {
+sxp_tc_decl: '(' tk_TYFN sxp_tvlist tk_FNARROW sxp_typevar ')' {
   //                     ^^^^^^
   // I really mean sxp_tvlist here, arbitraty sxp_types
   // are not accepptable.
   SHOWPARSE("sxp_tc_decl -> ( TYFN ( sxp_tvlist ) sxp_typevar )");
-  $4->astType = at_fnargVec;
-  $$ = AST::make(at_tyfn, $2.loc, $4, $6);
+  $3->astType = at_fnargVec;
+  $$ = AST::make(at_tyfn, $2.loc, $3, $5);
 };
 
 sxp_method_decls: /* Nothing */ {

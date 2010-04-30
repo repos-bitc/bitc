@@ -51,11 +51,19 @@
 enum GeneralizeMode {gen_instance=0, gen_top=1, gen_local=2, 
                      gen_Hinstance=3, gen_Htop=4, gen_Hlocal=5};
 
+// A type scheme identifies which type variables in a type are to be
+// generalized, and what constraints apply to the generalization of
+// those type variables.
 struct TypeScheme {
   
   boost::shared_ptr<Type> tau;
-  boost::shared_ptr<AST> ast; // Need to maintained the official version here,
-                  // Type pointers get linked, typeschemes don't
+
+  // Need to maintained the official version here for debugging.
+  // Type pointers get linked, which leaves them in a state where the
+  // originating AST becomes ambiguous. Type schemes do not get
+  // linked, so the originating AST for them remains unambiguous.
+  boost::shared_ptr<AST> ast;
+
   TypeSet ftvs;
   
   // Type class constraints 

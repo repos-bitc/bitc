@@ -252,7 +252,7 @@ const struct MangleMap {
   { '@',  "_AT" },
   { '~',  "_TL" },
   { ':',  "_CN" },
-  { '_',  "_" },
+  { '_',  "_" },                // THIS IS HORRIBLE!
   { '.',  "_DT"},
   { '\'', "_QT" }
 };

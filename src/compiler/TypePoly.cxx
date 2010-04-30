@@ -211,7 +211,7 @@ Type::collectftvsWrtGamma(TypeSet& tvs,
  
 
 // Remove Free Type Variables that are indirectly influenced
-// by type variablles that are bound in Gamma through
+// by type variables that are bound in Gamma through
 // Functional Dependencies
 static void
 remftvsWrtFnDeps(TypeSet &ftvs,

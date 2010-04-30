@@ -1990,6 +1990,9 @@ eform: '(' tk_WHEN expr expr_seq ')' {
   $$ = AST::make(at_when, $2.loc, $3, $4);
 };
 
+// NOT [7.15.3]
+// no longer a keyword and no longer syntactic
+
 // AND [7.15.4]                  
 eform: '(' tk_AND expr_seq ')'  {
   SHOWPARSE("eform -> ( AND expr_seq )");

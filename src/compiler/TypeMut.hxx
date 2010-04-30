@@ -63,14 +63,17 @@ newTvar()
   return Type::make(ty_tvar);
 }
 
-// shap's conjecture: Add mutability up to the ref/function boundary.
+// MBF introduces variability of mutation at the top (outermost) shell
+// of a record and also at all fields (recursively) within that record
+// up to the ref boundary. This is almost always the one you want.
 static inline boost::shared_ptr<Type> 
 MBF(boost::shared_ptr<Type> t)
 {
   return Type::make(ty_mbFull, newTvar(), t->minMutConstless());
 }
 
-// shap's conjecture: Add top-most mutability.
+// MBT introduces variability of mutation at the top (outermost) shell
+// of a record. It says nothing about the mutability of the elements.
 static inline boost::shared_ptr<Type> 
 MBT(boost::shared_ptr<Type> t)
 {

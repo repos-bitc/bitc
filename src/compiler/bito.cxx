@@ -72,7 +72,7 @@ EmitBitO(std::ostream &optStream, std::ostream &errStream)
               << std::endl;
 
 
-  out << "(bitc version \"" << BITC_VERSION << "\")" << std::endl;
+  out << "(bitc version " << BITC_VERSION << ")" << std::endl;
 
   for (UocMap::iterator itr = UocInfo::srcList.begin();
       itr != UocInfo::srcList.end(); ++itr) {

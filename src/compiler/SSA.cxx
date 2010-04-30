@@ -1097,7 +1097,7 @@ ssa(std::ostream& errStream,
 
 
 /* NOTE: SSA Pass introduces explicit bounds checks.
-   Beyond this pass, no fuether bounds checks are done */
+   Beyond this pass, no further bounds checks are done */
 
 bool
 UocInfo::be_ssaTrans(std::ostream& errStream,

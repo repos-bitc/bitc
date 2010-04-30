@@ -73,6 +73,9 @@ printName(shared_ptr<AST> ast)
   return ast->s;
 }
 
+// FIX: Differences in the debug version should be merged here. Main
+// difference seems to be that (a) the debug version in
+// Type-debug-pp.cxx is stale, and (b) it prints aggregate fields.
 string
 Type::asString(shared_ptr<TvPrinter> tvP, bool traverse) 
 { 
@@ -108,6 +111,34 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
 #endif
     
   switch(t->kind) {
+  case ty_tvar:
+    {
+      if (!tvP) {
+        ss << "'a" << t->uniqueID;
+        if (t->flags & TY_RIGID) 
+          ss << 'R';
+      }
+      else {
+        ss << tvP->tvName(t);
+      }
+      
+
+      break;
+    }
+
+  case ty_kvar:
+    {
+      ss << "'K" << t->uniqueID;
+      break;
+    }
+
+  case ty_dummy:
+    {
+      ss << "#DUMMY#";
+      //ss << "#X" << t->uniqueID;
+      break;
+    }
+
   case ty_unit:
     {
       ss << "()";
@@ -137,34 +168,6 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
   case ty_field:
     {
       ss << t->litValue.s;
-      break;
-    }
-
-  case ty_tvar:
-    {
-      if (!tvP) {
-        ss << "'a" << t->uniqueID;
-        if (t->flags & TY_RIGID) 
-          ss << 'R';
-      }
-      else {
-        ss << tvP->tvName(t);
-      }
-      
-
-      break;
-    }
-
-  case ty_kvar:
-    {
-      ss << "'K" << t->uniqueID;
-      break;
-    }
-
-  case ty_dummy:
-    {
-      ss << "#DUMMY#";
-      //ss << "#X" << t->uniqueID;
       break;
     }
 
@@ -225,7 +228,7 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
       assert(t->components.size() == 2);
       ss << "(tyfn " 
          <<  t->Args()->asString(tvP, traverse) 
-         << " " 
+         << " -> " 
          << t->Ret()->asString(tvP, traverse) 
          << ")";
       break;          

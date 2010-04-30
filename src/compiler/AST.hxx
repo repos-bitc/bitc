@@ -480,7 +480,12 @@ enum PrintFlagValues {
   ///
   /// This typically appears where an at_begin node was introduced to
   /// convert a block into a single expression.
-  pf_IMPLIED
+  pf_IMPLIED,
+
+  /// In the block syntax, indicates an expression tree that must
+  /// be pretty-printed within parenthesis to preserve operator
+  /// precedence.
+  pf_PARENWRAP
 };
 typedef sherpa::EnumSet<PrintFlagValues> PrintFlags;
 
@@ -637,10 +642,10 @@ enum AstType {
   at_array_nth,
   at_array_ref_nth,
   at_vector_nth,
-  at_nth,
   at_array_length,
   at_array_ref_length,
   at_vector_length,
+  at_nth,
   at_lambda,
   at_argVec,
   at_apply,

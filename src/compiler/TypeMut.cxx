@@ -69,7 +69,8 @@ using namespace std;
          The following are some implementation level Observations
               in implementing mutability rules in BitC. 
 
-1) All tvars MUST have a maybe-wrapper around them. For example:
+1) When a type variable is introduced in an expression, it MUST have a
+maybe-wrapper around it. For example: 
 
 (define (f x y)
   (if #t x y)  
@@ -78,6 +79,9 @@ using namespace std;
 
   if x and y are just given the types 'a and 'b, then they are linked at
   the if expression, and subsequent steps will fail to type check.
+
+  When a type variable is introduced to construct a type, this need
+  not be true.
 
   Since:
     - when the use writes 'a, he means any type whether mutable or
