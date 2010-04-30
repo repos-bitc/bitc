@@ -2012,14 +2012,6 @@ toc(std::ostream& errStream,
       break;
     }
 
-  case at_not:
-    {
-      out << "(! ";
-      TOC(errStream, uoc, ast->child(0), out, IDname, decls, ast, 0, flags);
-      out << ")";
-      break;
-    }
-
   case at_apply:
     {
       // FIX: Shap has a test case that shows that the thing in apply

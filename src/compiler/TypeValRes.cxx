@@ -289,7 +289,6 @@ isExpansive(std::ostream& errStream,
   case at_usw_legs:
   case at_and:
   case at_or:
-  case at_not:
     {
       for (size_t i=0; !itsExpansive && i < ast->children.size(); i++)
         CHKEXP(itsExpansive, isExpansive(errStream, gamma,

@@ -412,6 +412,13 @@ DEFBITARITH(bitc_word_t,_4word);
 DEFORD(bitc_char_t,_4char);
 DEFORD(bitc_bool_t,_4bool);
 
+INLINE bitc_bool_t
+DEFUN(_14bitc_DTprelude_CN_EX_SHFN1_4bool_4bool, bitc_bool_t arg)
+{
+  return(!arg);
+}
+DEFCLOSURE_INLINE(_14bitc_DTprelude_CN_EX_SHFN1_4bool_4bool);
+
 /* String type is ORD, but requires special comparator: */
 INLINE bitc_bool_t
 DEFUN(_17bitc_DTprelude_CN___EQ_EQ_SHFN2_6string_6string_4bool, bitc_string_t *arg1, bitc_string_t *arg2)

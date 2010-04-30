@@ -462,9 +462,6 @@ AST::atKwd() const
   case at_and:
     return "and";
 
-  case at_not:
-    return "not";
-
   case at_or:
     return "or";
 

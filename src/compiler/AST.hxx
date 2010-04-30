@@ -651,7 +651,6 @@ enum AstType {
   at_when,
   at_and,
   at_or,
-  at_not,
   at_cond,
   at_cond_legs,
   at_cond_leg,

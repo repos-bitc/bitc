@@ -460,7 +460,6 @@ findusedef(std::ostream &errStream,
   case at_mkClosure:
   case at_and:
   case at_or:
-  case at_not:
   case at_cond:
   case at_cond_legs:
   case at_condelse:

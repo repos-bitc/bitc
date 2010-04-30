@@ -497,7 +497,6 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_valType:
   case at_letStar:
   case at_declare:
-  case at_not:
   case at_cond:
   case at_throw:
   case at_setbang:

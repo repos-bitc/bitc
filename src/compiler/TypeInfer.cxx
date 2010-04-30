@@ -4434,7 +4434,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
   case at_and:
   case at_or:
-  case at_not:
     {
        /*------------------------------------------------
                       A |- e1:t1  ...  A |- en: tn
@@ -4447,9 +4446,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
        ________________________________________________
                    A |- (or e1 ... en): bool
 
-                      A |- e:t       U(t = 'a|bool)
-       ________________________________________________
-                   A |- (not e): bool
        ------------------------------------------------*/
 
       // match agt_expr+

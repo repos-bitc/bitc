@@ -352,7 +352,6 @@ TopInit(std::ostream& errStream,
   case at_when:
   case at_and:
   case at_or:
-  case at_not: 
   case at_throw:
   case at_cond:
   case at_cond_legs:

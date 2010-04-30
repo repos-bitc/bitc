@@ -280,7 +280,6 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   { "module",           lf_transition,        tk_MODULE },
   { "mutable",          lf_transition,        tk_MUTABLE },
   { "namespace",        lf_transition,        tk_ReservedWord },
-  { "not",              lf_transition,        tk_NOT },
   { "nth",              lf_transition,        tk_NTH },
   { "opaque",           lf_transition,        tk_OPAQUE },
   { "or",               lf_transition,        tk_OR },

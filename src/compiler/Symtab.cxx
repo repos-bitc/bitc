@@ -2249,7 +2249,6 @@ resolve(std::ostream& errStream,
   case at_when:
   case at_and:
   case at_or:
-  case at_not:
     {
       // match agt_expr+
       for (size_t c = 0; c < ast->children.size(); c++)

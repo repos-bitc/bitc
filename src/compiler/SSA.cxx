@@ -738,18 +738,6 @@ ssa(std::ostream& errStream,
       break;
     }    
 
-  case at_not:
-    {
-      for (c=0; c < ast->children.size(); c++) {
-        SSA(errStream, uoc, ast->child(c), grandLet, identList, 
-               ast, c, flags);
-        ast->child(c) = FEXPR(grandLet);
-      }
-
-      FEXPR(grandLet) = ast;
-      break;
-    }    
-
   case at_if:
     {
       SSA(errStream, uoc, ast->child(0), grandLet, identList, 

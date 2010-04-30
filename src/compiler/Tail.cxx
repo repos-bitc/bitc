@@ -297,7 +297,6 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_allocREF:
   case at_and:
   case at_or:
-  case at_not:
   case at_dup:
   case at_deref:
   case at_inner_ref:

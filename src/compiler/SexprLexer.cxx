@@ -272,7 +272,6 @@ struct SexprLexer::KeyWord SexprLexer::keywords[] = {
   { "module",           tk_MODULE },
   { "mutable",          tk_MUTABLE },
   { "namespace",        tk_ReservedWord },
-  { "not",              tk_NOT },
   { "nth",              tk_ReservedWord },
   { "opaque",           tk_OPAQUE },
   { "or",               tk_OR },

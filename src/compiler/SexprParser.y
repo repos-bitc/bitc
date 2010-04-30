@@ -161,7 +161,6 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_WHEN
 %token <tok> tk_AND
 %token <tok> tk_OR
-%token <tok> tk_NOT
 %token <tok> tk_COND
 %token <tok> tk_SWITCH
 %token <tok> tk_CASE
@@ -1989,12 +1988,6 @@ eform: '(' tk_IF expr expr expr ')' {
 eform: '(' tk_WHEN expr expr_seq ')' {
   SHOWPARSE("eform -> (WHEN expr_seq )");
   $$ = AST::make(at_when, $2.loc, $3, $4);
-};
-
-// NOT [7.15.3]
-eform: '(' tk_NOT expr ')'  {
-  SHOWPARSE("eform -> ( NOT expr )");
-  $$ = AST::make(at_not, $2.loc, $3);
 };
 
 // AND [7.15.4]                  

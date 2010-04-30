@@ -177,7 +177,6 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_WHEN
 %token <tok> tk_AND
 %token <tok> tk_OR
-%token <tok> tk_NOT
 %token <tok> tk_COND
 %token <tok> tk_SWITCH
 %token <tok> tk_CASE
@@ -2046,10 +2045,6 @@ sxp_eform: '(' tk_WHEN sxp_expr sxp_expr_seq ')' {
 };
 
 // NOT [7.15.3]
-sxp_eform: '(' tk_NOT sxp_expr ')'  {
-  SHOWPARSE("sxp_eform -> ( NOT sxp_expr )");
-  $$ = AST::make(at_not, $2.loc, $3);
-};
 
 // AND [7.15.4]                 
 sxp_eform: '(' tk_AND sxp_expr_seq ')'  {
