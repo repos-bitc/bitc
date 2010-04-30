@@ -361,7 +361,7 @@ TopInit(std::ostream& errStream,
   case at_dup:
   case at_deref:
   case at_inner_ref:
-  case at_sw_legs:
+  case at_usw_legs:
   case at_let:
   case at_letrec:    
   case at_letStar:
@@ -378,7 +378,7 @@ TopInit(std::ostream& errStream,
     }
 
   case at_try:
-  case at_switch:
+  case at_uswitch:
     {
       for (size_t c = 0; c < ast->children.size(); c++)
         if (c != IGNORE(ast))
@@ -448,7 +448,7 @@ TopInit(std::ostream& errStream,
       break;
     }
 
-  case at_sw_leg:
+  case at_usw_leg:
   case at_otherwise:
     {
       // The identifier that binds the copy is observably defined.

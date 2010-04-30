@@ -151,7 +151,7 @@ LocChk(std::ostream &errStream, bool &errFree, shared_ptr<AST> ast, bool inSET)
       return false;
     }
 
-  case at_switch:
+  case at_uswitch:
   case at_try:
     {
       for (size_t c = 0; c < ast->children.size(); c++)

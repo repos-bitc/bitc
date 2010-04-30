@@ -2099,7 +2099,7 @@ sxp_eform: '(' tk_SET sxp_expr sxp_expr ')' {
 // SWITCH
 sxp_eform: '(' tk_SWITCH ident sxp_expr sxp_sw_legs sxp_ow ')' {
   SHOWPARSE("sxp_eform -> ( SWITCH ident sxp_expr sxp_sw_legs sxp_ow)");
-  $$ = AST::make(at_switch, $2.loc, $3, $4, $5, $6);
+  $$ = AST::make(at_uswitch, $2.loc, $3, $4, $5, $6);
   for (size_t c =0; c < $5->children.size(); c++) {
     shared_ptr<AST> sw_leg = $5->child(c);
     sw_leg->children.insert(sw_leg->children.begin(),
@@ -2114,7 +2114,7 @@ sxp_eform: '(' tk_SWITCH ident sxp_expr sxp_sw_legs sxp_ow ')' {
 
 sxp_sw_legs: sxp_sw_leg {
   SHOWPARSE("sxp_sw_legs -> sxp_sw_leg");
-  $$ = AST::make(at_sw_legs, $1->loc, $1);
+  $$ = AST::make(at_usw_legs, $1->loc, $1);
 };
 
 sxp_sw_legs: sxp_sw_legs sxp_sw_leg {
@@ -2125,12 +2125,12 @@ sxp_sw_legs: sxp_sw_legs sxp_sw_leg {
 
 sxp_sw_leg: '(' sxp_switch_match sxp_expr_seq ')'  {
   SHOWPARSE("sxp_sw_leg -> ( sxp_switch_match sxp_expr_seq )");
-  $$ = AST::make(at_sw_leg, $1.loc, $3, $2);
+  $$ = AST::make(at_usw_leg, $1.loc, $3, $2);
 };
 
 sxp_sw_leg: '(' '(' sxp_switch_matches ')' sxp_expr_seq ')'  {
   SHOWPARSE("sxp_sw_leg -> ( ( sxp_switch_matches ) sxp_expr_seq )");
-  $$ = AST::make(at_sw_leg, $1.loc, $5);
+  $$ = AST::make(at_usw_leg, $1.loc, $5);
   $$->addChildrenFrom($3);
 };
 
@@ -2225,7 +2225,7 @@ sxp_eform: '(' tk_TRY sxp_expr '(' tk_CATCH  ident sxp_sw_legs sxp_ow ')' ')'  {
 sxp_eform: '(' tk_TRY sxp_expr '(' tk_CATCH ident sxp_ow ')' ')'  {
   SHOWPARSE("sxp_eform -> ( TRY sxp_expr ( CATCH ident sxp_ow) )");
   $$ = AST::make(at_try, $2.loc, $3, $6,
-                 AST::make(at_sw_legs, $7->loc), $7);
+                 AST::make(at_usw_legs, $7->loc), $7);
 
   if ($7->astType == at_otherwise) {
     shared_ptr<AST> ow = $7;

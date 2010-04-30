@@ -483,13 +483,13 @@ AST::atKwd() const
   case at_condelse:
     return "otherwise";
 
-  case at_switch:
+  case at_uswitch:
     return "switch";
 
-  case at_sw_legs:
+  case at_usw_legs:
     return "<sw_legs>";
 
-  case at_sw_leg:
+  case at_usw_leg:
     return "<sw_leg>";
 
   case at_setbang:

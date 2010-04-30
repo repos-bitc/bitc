@@ -2254,7 +2254,7 @@ toc(std::ostream& errStream,
       break;
     }
 
-  case at_switch:
+  case at_uswitch:
     {
       shared_ptr<AST> topExp = ast->child(1);
       shared_ptr<AST> cases = ast->child(2);
@@ -2344,8 +2344,8 @@ toc(std::ostream& errStream,
       break;
     }
 
-  case at_sw_legs:
-  case at_sw_leg:
+  case at_usw_legs:
+  case at_usw_leg:
   case at_otherwise:
   case at_condelse:
     {

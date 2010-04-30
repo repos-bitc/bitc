@@ -297,14 +297,14 @@ enum AstFlagValues {
   ///////////////// SECOND ROUND OF FLAGS  /////////////////////
 
   /// Marks the place-holder identifier that is introduced in the
-  /// at_sw_leg AST to replicate the (switch ...) temporary identifier.
+  /// at_usw_leg AST to replicate the (switch ...) temporary identifier.
   ///
   /// This flag ensures that an identifier that stores a de-constructed
   /// value in a switch statement can only appear on the left of
   /// a select (.) operator. The specification enforces this rule so that
   /// the de-constructed value does not escape as a whole (as a return
   /// value, by assignment or closure).
-  ID_FOR_SWITCH = 0x00001000u,
+  ID_FOR_USWITCH = 0x00001000u,
 
   /// Identifier is closed over by something.
   ID_IS_CAPTURED = 0x00002000u,
@@ -667,9 +667,9 @@ enum AstType {
   at_mkArrayByref,
   at_block,
   at_return_from,
-  at_switch,
-  at_sw_legs,
-  at_sw_leg,
+  at_uswitch,
+  at_usw_legs,
+  at_usw_leg,
   at_otherwise,
   at_try,
   at_throw,
@@ -833,7 +833,7 @@ public:
   ///     ___________
   ///    |           |
   ///    v           |
-  ///  (switch ... ("sw_leg" id ...) ...)
+  ///  (switch ... ("usw_leg" id ...) ...)
   ///                  ^    |
   ///                  |____|
   ///     _____      __________
@@ -1047,6 +1047,30 @@ public:
       AST_SMART_PTR<AST> child3,
       AST_SMART_PTR<AST> child4,
       AST_SMART_PTR<AST> child5);
+  AST(const AstType at, const AST_LOCATION_TYPE &loc,
+      AST_SMART_PTR<AST> child1,
+      AST_SMART_PTR<AST> child2,
+      AST_SMART_PTR<AST> child3,
+      AST_SMART_PTR<AST> child4,
+      AST_SMART_PTR<AST> child5,
+      AST_SMART_PTR<AST> child6);
+  AST(const AstType at, const AST_LOCATION_TYPE &loc,
+      AST_SMART_PTR<AST> child1,
+      AST_SMART_PTR<AST> child2,
+      AST_SMART_PTR<AST> child3,
+      AST_SMART_PTR<AST> child4,
+      AST_SMART_PTR<AST> child5,
+      AST_SMART_PTR<AST> child6,
+      AST_SMART_PTR<AST> child7);
+  AST(const AstType at, const AST_LOCATION_TYPE &loc,
+      AST_SMART_PTR<AST> child1,
+      AST_SMART_PTR<AST> child2,
+      AST_SMART_PTR<AST> child3,
+      AST_SMART_PTR<AST> child4,
+      AST_SMART_PTR<AST> child5,
+      AST_SMART_PTR<AST> child6,
+      AST_SMART_PTR<AST> child7,
+      AST_SMART_PTR<AST> child8);
   ~AST();
 
   // Helper quasi-constructors
@@ -1121,6 +1145,54 @@ public:
   {
     AST *ast = new AST(at, loc, child1, child2,
                        child3, child4, child5);
+    return AST_SMART_PTR<AST>(ast);
+  }
+
+  static inline AST_SMART_PTR<AST>
+  make(const AstType at, const AST_LOCATION_TYPE &loc,
+       const AST_SMART_PTR<AST> child1,
+       const AST_SMART_PTR<AST> child2,
+       const AST_SMART_PTR<AST> child3,
+       const AST_SMART_PTR<AST> child4,
+       const AST_SMART_PTR<AST> child5,
+       const AST_SMART_PTR<AST> child6)
+  {
+    AST *ast = new AST(at, loc, child1, child2,
+                       child3, child4, child5,
+                       child6);
+    return AST_SMART_PTR<AST>(ast);
+  }
+
+  static inline AST_SMART_PTR<AST>
+  make(const AstType at, const AST_LOCATION_TYPE &loc,
+       const AST_SMART_PTR<AST> child1,
+       const AST_SMART_PTR<AST> child2,
+       const AST_SMART_PTR<AST> child3,
+       const AST_SMART_PTR<AST> child4,
+       const AST_SMART_PTR<AST> child5,
+       const AST_SMART_PTR<AST> child6,
+       const AST_SMART_PTR<AST> child7)
+  {
+    AST *ast = new AST(at, loc, child1, child2,
+                       child3, child4, child5,
+                       child6, child7);
+    return AST_SMART_PTR<AST>(ast);
+  }
+
+  static inline AST_SMART_PTR<AST>
+  make(const AstType at, const AST_LOCATION_TYPE &loc,
+       const AST_SMART_PTR<AST> child1,
+       const AST_SMART_PTR<AST> child2,
+       const AST_SMART_PTR<AST> child3,
+       const AST_SMART_PTR<AST> child4,
+       const AST_SMART_PTR<AST> child5,
+       const AST_SMART_PTR<AST> child6,
+       const AST_SMART_PTR<AST> child7,
+       const AST_SMART_PTR<AST> child8)
+  {
+    AST *ast = new AST(at, loc, child1, child2,
+                       child3, child4, child5,
+                       child6, child7, child8);
     return AST_SMART_PTR<AST>(ast);
   }
 

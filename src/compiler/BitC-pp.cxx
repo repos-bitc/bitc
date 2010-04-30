@@ -317,7 +317,6 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
-
   case at_try:
     out << "(" << ast->atKwd() << " ";
     BitcP(out, ast->child(0), showTypes);
@@ -486,7 +485,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
-  case at_switch:
+  case at_uswitch:
   case at_vector:
   case at_vectorType:
   case at_makevectorL:
@@ -936,7 +935,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
-  case at_sw_leg:
+  case at_usw_leg:
     {
       out << "(";
       doChildren(out, ast, 2, false, showTypes);
@@ -993,7 +992,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
-  case at_sw_legs:
+  case at_usw_legs:
   case at_constructors:
   case at_reprctrs:
   case at_fields:

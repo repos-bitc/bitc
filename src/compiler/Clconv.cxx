@@ -466,7 +466,7 @@ findusedef(std::ostream &errStream,
   case at_condelse:
   case at_dup:
   case at_deref:
-  case at_sw_legs:
+  case at_usw_legs:
   case at_throw:
   case at_array_length:
   case at_array_ref_length:
@@ -494,7 +494,7 @@ findusedef(std::ostream &errStream,
       break;
     }
 
-  case at_switch:
+  case at_uswitch:
   case at_try:
     {
       for (size_t c=0; c<ast->children.size();c++)
@@ -545,7 +545,7 @@ findusedef(std::ostream &errStream,
     }
 
   case at_otherwise:
-  case at_sw_leg:
+  case at_usw_leg:
     {
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(0),
                                  LOCAL_MODE, boundVars, freeVars));
@@ -1087,7 +1087,7 @@ cl_heapify(shared_ptr<AST> ast)
       break;
     }
 
-  case at_switch:
+  case at_uswitch:
   case at_try:
     {
       for (size_t c = 0; c < ast->children.size(); c++)

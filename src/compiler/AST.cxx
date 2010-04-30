@@ -285,6 +285,122 @@ AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
   parentLB = GC_NULL;
 }
 
+AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
+         AST_SMART_PTR<AST> child1,
+         AST_SMART_PTR<AST> child2,
+         AST_SMART_PTR<AST> child3,
+         AST_SMART_PTR<AST> child4,
+         AST_SMART_PTR<AST> child5,
+         AST_SMART_PTR<AST> child6)
+{
+  astType = at;
+  loc = _loc;
+  addChild(child1);
+  addChild(child2);
+  addChild(child3);
+  addChild(child4);
+  addChild(child5);
+  addChild(child6);
+
+  ID = ++(AST::astCount);
+  identType = id_unresolved;
+  flags = NO_FLAGS;
+  isDecl = false;
+  scheme = GC_NULL;
+  symType = GC_NULL;
+  symbolDef = GC_NULL;
+  defn = GC_NULL;
+  defForm = GC_NULL;
+  defbps = GC_NULL;
+  decl = GC_NULL;
+  printVariant = pf_NONE;                // until otherwise stated
+  tagType = GC_NULL;
+  field_bits = 0;
+  unin_discm = 0;
+  total_fill = 0;
+  tvarLB = GC_NULL;
+  parentLB = GC_NULL;
+}
+
+AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
+         AST_SMART_PTR<AST> child1,
+         AST_SMART_PTR<AST> child2,
+         AST_SMART_PTR<AST> child3,
+         AST_SMART_PTR<AST> child4,
+         AST_SMART_PTR<AST> child5,
+         AST_SMART_PTR<AST> child6,
+         AST_SMART_PTR<AST> child7)
+{
+  astType = at;
+  loc = _loc;
+  addChild(child1);
+  addChild(child2);
+  addChild(child3);
+  addChild(child4);
+  addChild(child5);
+  addChild(child6);
+  addChild(child7);
+
+  ID = ++(AST::astCount);
+  identType = id_unresolved;
+  flags = NO_FLAGS;
+  isDecl = false;
+  scheme = GC_NULL;
+  symType = GC_NULL;
+  symbolDef = GC_NULL;
+  defn = GC_NULL;
+  defForm = GC_NULL;
+  defbps = GC_NULL;
+  decl = GC_NULL;
+  printVariant = pf_NONE;                // until otherwise stated
+  tagType = GC_NULL;
+  field_bits = 0;
+  unin_discm = 0;
+  total_fill = 0;
+  tvarLB = GC_NULL;
+  parentLB = GC_NULL;
+}
+
+AST::AST(const AstType at, const AST_LOCATION_TYPE& _loc,
+         AST_SMART_PTR<AST> child1,
+         AST_SMART_PTR<AST> child2,
+         AST_SMART_PTR<AST> child3,
+         AST_SMART_PTR<AST> child4,
+         AST_SMART_PTR<AST> child5,
+         AST_SMART_PTR<AST> child6,
+         AST_SMART_PTR<AST> child7,
+         AST_SMART_PTR<AST> child8)
+{
+  astType = at;
+  loc = _loc;
+  addChild(child1);
+  addChild(child2);
+  addChild(child3);
+  addChild(child4);
+  addChild(child5);
+  addChild(child6);
+  addChild(child8);
+
+  ID = ++(AST::astCount);
+  identType = id_unresolved;
+  flags = NO_FLAGS;
+  isDecl = false;
+  scheme = GC_NULL;
+  symType = GC_NULL;
+  symbolDef = GC_NULL;
+  defn = GC_NULL;
+  defForm = GC_NULL;
+  defbps = GC_NULL;
+  decl = GC_NULL;
+  printVariant = pf_NONE;                // until otherwise stated
+  tagType = GC_NULL;
+  field_bits = 0;
+  unin_discm = 0;
+  total_fill = 0;
+  tvarLB = GC_NULL;
+  parentLB = GC_NULL;
+}
+
 ::std::string
 AST::getTokenString()
 {
@@ -535,12 +651,12 @@ AST::tagName(const AstType at)
     return "at_block";
   case at_return_from:
     return "at_return_from";
-  case at_switch:
-    return "at_switch";
-  case at_sw_legs:
-    return "at_sw_legs";
-  case at_sw_leg:
-    return "at_sw_leg";
+  case at_uswitch:
+    return "at_uswitch";
+  case at_usw_legs:
+    return "at_usw_legs";
+  case at_usw_leg:
+    return "at_usw_leg";
   case at_otherwise:
     return "at_otherwise";
   case at_try:
@@ -866,12 +982,12 @@ AST::astName() const
     return "block";
   case at_return_from:
     return "return_from";
-  case at_switch:
-    return "switch";
-  case at_sw_legs:
-    return "sw_legs";
-  case at_sw_leg:
-    return "sw_leg";
+  case at_uswitch:
+    return "uswitch";
+  case at_usw_legs:
+    return "usw_legs";
+  case at_usw_leg:
+    return "usw_leg";
   case at_otherwise:
     return "otherwise";
   case at_try:
@@ -1093,9 +1209,9 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00", // at_mkArrayByref
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00", // at_block
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00", // at_return_from
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00", // at_switch
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00", // at_sw_legs
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00", // at_sw_leg
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00", // at_uswitch
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00", // at_usw_legs
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00", // at_usw_leg
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00", // at_otherwise
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00", // at_try
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00", // at_throw
@@ -3029,14 +3145,14 @@ AST::isValid() const
     break;
 
   case at_tqexpr: // normal AST:
-    // match agt_eform
+    // match agt_expr
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
-    if (!ISSET(astMembers[agt_eform], child(c)->astType)) {
-      astChTypeError(*this, agt_eform, child(c)->astType, c);
+    if (!ISSET(astMembers[agt_expr], child(c)->astType)) {
+      astChTypeError(*this, agt_expr, child(c)->astType, c);
       errorsPresent = true;
     }
     c++;
@@ -4224,7 +4340,7 @@ AST::isValid() const
     }
     break;
 
-  case at_switch: // normal AST:
+  case at_uswitch: // normal AST:
     // match at_ident
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
@@ -4249,14 +4365,14 @@ AST::isValid() const
     }
     c++;
 
-    // match at_sw_legs
+    // match at_usw_legs
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
-    if (!ISSET(astMembers[at_sw_legs], child(c)->astType)) {
-      astChTypeError(*this, at_sw_legs, child(c)->astType, c);
+    if (!ISSET(astMembers[at_usw_legs], child(c)->astType)) {
+      astChTypeError(*this, at_usw_legs, child(c)->astType, c);
       errorsPresent = true;
     }
     c++;
@@ -4279,11 +4395,11 @@ AST::isValid() const
     }
     break;
 
-  case at_sw_legs: // normal AST:
-    // match at_sw_leg*
+  case at_usw_legs: // normal AST:
+    // match at_usw_leg*
     while (c < children.size()) {
-      if (!ISSET(astMembers[at_sw_leg], child(c)->astType))
-        astChTypeError(*this, at_sw_leg, child(c)->astType, c);
+      if (!ISSET(astMembers[at_usw_leg], child(c)->astType))
+        astChTypeError(*this, at_usw_leg, child(c)->astType, c);
       c++;
     }
 
@@ -4293,7 +4409,7 @@ AST::isValid() const
     }
     break;
 
-  case at_sw_leg: // normal AST:
+  case at_usw_leg: // normal AST:
     // match at_ident
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
@@ -4396,14 +4512,14 @@ AST::isValid() const
     }
     c++;
 
-    // match at_sw_legs
+    // match at_usw_legs
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
-    if (!ISSET(astMembers[at_sw_legs], child(c)->astType)) {
-      astChTypeError(*this, at_sw_legs, child(c)->astType, c);
+    if (!ISSET(astMembers[at_usw_legs], child(c)->astType)) {
+      astChTypeError(*this, at_usw_legs, child(c)->astType, c);
       errorsPresent = true;
     }
     c++;

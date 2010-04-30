@@ -296,8 +296,8 @@ ssa(std::ostream& errStream,
     
   case at_cond_legs:
   case at_cond_leg:
-  case at_sw_legs:
-  case at_sw_leg:
+  case at_usw_legs:
+  case at_usw_leg:
   case at_condelse:
   case at_otherwise:
   case at_letGather:
@@ -946,7 +946,7 @@ ssa(std::ostream& errStream,
       break;
     }
 
-  case at_switch:
+  case at_uswitch:
   case at_try:
     {           
       shared_ptr<AST> res = AST::genSym(ast, "t");

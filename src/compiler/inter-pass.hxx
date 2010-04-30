@@ -91,9 +91,9 @@ enum ResolutionMode {
 #define IDENT(let) (let)->child(0)->child(0)
 
 // Ignore identifier at the following positions:
-// at_switch *ident* expr sw_legs ow
+// at_uswitch *ident* expr sw_legs ow
 // at_try expr *ident* sw_legs ow
-#define IGNORE(ast) ((size_t)(((ast)->astType == at_switch)?0:1))
+#define IGNORE(ast) ((size_t)(((ast)->astType == at_uswitch)?0:1))
 
 void BitcP(std::ostream& out,
            const boost::shared_ptr<AST> ast,

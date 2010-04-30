@@ -294,14 +294,14 @@ enum AstFlagValues {
   ///////////////// SECOND ROUND OF FLAGS  /////////////////////
 
   /// Marks the place-holder identifier that is introduced in the
-  /// at_sw_leg AST to replicate the (switch ...) temporary identifier.
+  /// at_usw_leg AST to replicate the (switch ...) temporary identifier.
   ///
   /// This flag ensures that an identifier that stores a de-constructed
   /// value in a switch statement can only appear on the left of
   /// a select (.) operator. The specification enforces this rule so that
   /// the de-constructed value does not escape as a whole (as a return
   /// value, by assignment or closure).
-  ID_FOR_SWITCH = 0x00001000u,
+  ID_FOR_USWITCH = 0x00001000u,
 
   /// Identifier is closed over by something.
   ID_IS_CAPTURED = 0x00002000u,
@@ -640,7 +640,7 @@ struct EnvSet {
   ///     ___________
   ///    |           |
   ///    v           |
-  ///  (switch ... ("sw_leg" id ...) ...)
+  ///  (switch ... ("usw_leg" id ...) ...)
   ///                  ^    |
   ///                  |____|
   ///     _____      __________
@@ -1066,7 +1066,7 @@ AST identPattern = var qtype?;
 // TYPE QUALIFIED EXPRESSIONS  [7.3]
 GROUP expr = eform | tqexpr;
 GROUP expr_or_define = expr | define | recdef;
-AST tqexpr = eform type;
+AST tqexpr = expr type;
 
 // EXPRESSIONS [7]
 GROUP eform = literal | var | unit
@@ -1077,7 +1077,7 @@ GROUP eform = literal | var | unit
             | array_length | vector_length | array_ref_length
             | lambda | suspend
             | apply | struct_apply | object_apply | ucon_apply
-            | if | when | and | or | not | cond | switch
+            | if | when | and | or | not | cond | uswitch
             | setbang | dup | deref | inner_ref
             | try | throw | let | letStar | letrec
             | container | do
@@ -1195,18 +1195,14 @@ AST block = ident expr;
 AST return_from = ident expr;
 
 // SWITCH
-AST switch = ident expr sw_legs ow;
-AST sw_legs = sw_leg*;
-AST sw_leg = ident expr ucon+;
+AST uswitch = ident expr usw_legs ow;
+AST usw_legs = usw_leg*;
+AST usw_leg = ident expr ucon+;
 AST otherwise = ident expr;
 GROUP ow = otherwise | Null;
 
-/* // TYPECASE  [11]
-AST typecase = typecase_leg+;
-AST typecase_leg = identPattern expr;*/
-
 // TRY/CATCH [7.15.1]
-AST try = expr ident sw_legs ow;
+AST try = expr ident usw_legs ow;
 // THROW  [7.15.2]
 AST throw = expr;
 

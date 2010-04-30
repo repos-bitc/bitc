@@ -779,7 +779,7 @@ resolve(std::ostream& errStream,
             errorFree = false;
           }
       
-          if (def->flags & ID_FOR_SWITCH) {
+          if (def->flags & ID_FOR_USWITCH) {
             if ((flags & RSLV_SWITCHED_ID_OK) == 0) {
               errStream << ast->loc << ": The identifier `"
                         << ast->s << "' can only appear to the left of a `.'" 
@@ -2368,7 +2368,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_switch:
+  case at_uswitch:
     {
       // match at at_ident: ignore
 
@@ -2376,7 +2376,7 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(1), env, lamLevel, USE_MODE, 
               idc_value, currLB, flags);    
       
-      // match at_case_legs or at_sw_legs
+      // match at_case_legs or at_usw_legs
       RESOLVE(ast->child(2), env, lamLevel, USE_MODE, 
               idc_value, currLB, flags);
 
@@ -2388,9 +2388,9 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_sw_legs:
+  case at_usw_legs:
     {
-      // match at_case_leg+ or at_sw_leg+
+      // match at_case_leg+ or at_usw_leg+
       for (size_t c = 0; c < ast->children.size(); c++)
         RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
                 idc_value, currLB, flags);
@@ -2398,7 +2398,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_sw_leg:
+  case at_usw_leg:
   case at_otherwise:
     {
       shared_ptr<ASTEnvironment > legEnv = env->newScope();
@@ -2411,8 +2411,8 @@ resolve(std::ostream& errStream,
       assert(itr != legEnv->end());
       itr->second->flags |= BF_COMPLETE;
 
-      if (ast->astType == at_sw_leg)
-        ast->child(0)->flags |= ID_FOR_SWITCH;
+      if (ast->astType == at_usw_leg)
+        ast->child(0)->flags |= ID_FOR_USWITCH;
 
       /* match at_expr */
       if ((flags & RSLV_WITHIN_CATCH) && (ast->children.size() > 3))

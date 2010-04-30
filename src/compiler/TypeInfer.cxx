@@ -1847,7 +1847,7 @@ CheckLetrecFnxnRestriction(std::ostream &errStream, shared_ptr<AST> ast)
       break;
     }
 
-  case at_switch:
+  case at_uswitch:
   case at_try:
     {
       for (size_t c=0; c < ast->children.size(); c++)
@@ -4717,7 +4717,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
     
-  case at_switch:    
+  case at_uswitch:    
     {      
       /*------------------------------------------------
         A(v) = ['a1.. 'am] C11(r1) | ... | C1p(r1) |
@@ -4868,7 +4868,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
-  case at_sw_legs:
+  case at_usw_legs:
     /* FIX: I forgot if I really mean break here or assert(false); */
     break;
 
@@ -4887,7 +4887,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       // Handled explicitly in at_try and at_switch
       assert(false);
     }
-  case at_sw_leg:
+  case at_usw_leg:
     {
       // This is used only in the case of a union leg match.
       // match agt_valuePattern
@@ -5027,7 +5027,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       // match at_ident: ignore
 
-      // match at_sw_legs
+      // match at_usw_legs
       shared_ptr<AST> cases = ast->child(2);     
       cases->symType = MBF(tv);
       for (size_t c = 0; c < cases->children.size(); c++) {
@@ -5131,7 +5131,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       shared_ptr<AST> id = ast->child(0);
       if (id->astType == at_ident &&
-          (id->symbolDef->flags & ID_FOR_SWITCH) &&
+          (id->symbolDef->flags & ID_FOR_USWITCH) &&
           (id->symType->defAst->symType->isException())) {
         // Concrete type already determined; nothing further to do.
       }

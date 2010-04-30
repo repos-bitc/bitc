@@ -543,17 +543,17 @@ name2fqn(shared_ptr<AST> ast)
 
 // Warning: The following macros need local errStream
 #define RANDT_DROP(expr, mess, env) do {                \
-    bool rewrite=false;                                        \
-    assert(RandTexpr(errStream, expr, rewrite,                \
-                     POLY_SYM_FLAGS, POLY_TYP_FLAGS,        \
+    bool rewrite=false;                                 \
+    assert(RandTexpr(errStream, expr,                   \
+                     POLY_SYM_FLAGS, POLY_TYP_FLAGS,    \
                      mess, false, env));                \
   }while (0);
 
-#define RANDT_COMMIT(expr, mess, env) do {                \
-    bool rewrite=false;                                        \
-    assert(RandTexpr(errStream, expr, rewrite,                \
-                     POLY_SYM_FLAGS, POLY_TYP_FLAGS,        \
-                     mess, true, env));                        \
+#define RANDT_COMMIT(expr, mess, env) do {              \
+    bool rewrite=false;                                 \
+    assert(RandTexpr(errStream, expr,                   \
+                     POLY_SYM_FLAGS, POLY_TYP_FLAGS,    \
+                     mess, true, env));                 \
   }while (0);
 
 
@@ -716,7 +716,7 @@ tvarInst(shared_ptr<AST> ast, shared_ptr<AST> scope, AstMap &newBinds)
     }
 
 
-  case at_switch:
+  case at_uswitch:
   case at_try:
     {
       for (size_t c = 0; c < ast->children.size(); c++)
@@ -1494,7 +1494,7 @@ UocInfo::recInstantiate(ostream &errStream,
       break;
     }
 
-  case at_sw_leg:
+  case at_usw_leg:
   case at_otherwise:
     {
       shared_ptr<AST> local = ast->child(0);
@@ -1513,7 +1513,7 @@ UocInfo::recInstantiate(ostream &errStream,
       break;
     }
 
-  case at_switch:
+  case at_uswitch:
   case at_try:
     {
       for (size_t c = 0; c < ast->children.size(); c++)

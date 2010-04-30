@@ -243,7 +243,7 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
-  case at_switch:
+  case at_uswitch:
     {
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
                                        ast->child(2)));
@@ -254,7 +254,7 @@ isExpansive(std::ostream& errStream,
     }
 
   case at_otherwise:
-  case at_sw_leg:
+  case at_usw_leg:
     {
       // expr is at the same position
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
@@ -286,7 +286,7 @@ isExpansive(std::ostream& errStream,
   case at_vector_nth:
   case at_inner_ref:
   case at_deref:
-  case at_sw_legs:
+  case at_usw_legs:
   case at_and:
   case at_or:
   case at_not:
