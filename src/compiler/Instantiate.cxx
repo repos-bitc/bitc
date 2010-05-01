@@ -368,7 +368,7 @@ UocInfo::lookupByFqn(const FQName& fqn, shared_ptr<UocInfo> &targetUoc)
   // the type of the declaration, we might end up in a type
   // qualification that can never be satisfied.
 
-  // Search all interfaces
+  // Search the specified interface first:
   {
     UocMap::iterator itr = UocInfo::ifList.find(fqn.iface);
 
@@ -377,14 +377,17 @@ UocInfo::lookupByFqn(const FQName& fqn, shared_ptr<UocInfo> &targetUoc)
 
       targetUoc = uoc;
       shared_ptr<AST> def = uoc->env->getBinding(fqn.ident);
-      assert(def->fqn == fqn);
 
-      // If this is a declaration, then try to get the definition if
-      // one exists, and return that.
-      if (def->defn)
-        def = def->defn;
+      if (def) {
+        assert(def->fqn == fqn);
 
-      return def->defForm;
+        // If this is a declaration, then try to get the definition if
+        // one exists, and return that.
+        if (def->defn)
+          def = def->defn;
+        
+        return def->defForm;
+      }
     }
   }
 
@@ -398,12 +401,14 @@ UocInfo::lookupByFqn(const FQName& fqn, shared_ptr<UocInfo> &targetUoc)
 
     targetUoc = uoc;
     shared_ptr<AST> def = uoc->env->getBinding(fqn.ident);
+    if (def) {
       assert(def->fqn == fqn);
 
-    if (def->defn)
-      def = def->defn;
+      if (def->defn)
+        def = def->defn;
 
-    return def->defForm;
+      return def->defForm;
+    }
   }
 
   return GC_NULL;
