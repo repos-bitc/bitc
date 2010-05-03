@@ -157,11 +157,11 @@
     (set! context.lenLow 0)
     (set! context.lenHigh 0)
     (set! context.messNdx 0)
-    (set! (array-nth context.digest 0) 16r67452301)
-    (set! (array-nth context.digest 1) 16rEFCDAB89)
-    (set! (array-nth context.digest 2) 16r98BADCFE)
-    (set! (array-nth context.digest 3) 16r10325476)
-    (set! (array-nth context.digest 4) 16rC3D2E1F0)
+    (set! (nth context.digest 0) 16r67452301)
+    (set! (nth context.digest 1) 16rEFCDAB89)
+    (set! (nth context.digest 2) 16r98BADCFE)
+    (set! (nth context.digest 3) 16r10325476)
+    (set! (nth context.digest 4) 16rC3D2E1F0)
     
     (set! context.computed #f)
     (set! context.corrupted sha1.sha-Success)
@@ -198,7 +198,7 @@
 		(sha1PadMessage context)
 		(do ((i 0 (+ i 1)))
 		    ((>= i 64) ())
-		    (set! (array-nth context.message i) 0))
+		    (set! (nth context.message i) 0))
 		(set! context.lenLow 0)
 		(set! context.lenHigh 0)
 		(set! context.computed #t)) ())
@@ -206,8 +206,8 @@
 	  (do ((i 0 (+ i 1)))
 	      ((>= i 20) ())
 	      
-	      (set! (array-nth digest i)
-		    (truncate (>> (array-nth context.digest (>> i 2))
+	      (set! (nth digest i)
+		    (truncate (>> (nth context.digest (>> i 2))
 				  (* 8 (- 3 (bit-and i 16r03)))))))
 	  sha1.sha-Success)
 	context.corrupted))
@@ -244,8 +244,8 @@
 		      ((and (>= i (vector-length message))
 			    context.corrupted.sha-Success) ())
 		      
-		      (set! (array-nth context.message context.messNdx)
-			    (bit-and (vector-nth message i) 16rff))
+		      (set! (nth context.message context.messNdx)
+			    (bit-and (nth message i) 16rff))
 		      (set! context.messNdx (+ context.messNdx 1))
 		      (set! context.lenLow (+ context.lenLow 8))
 		      (if (== context.lenLow 0)
@@ -299,41 +299,41 @@
     
     (do ((t 0 (+ t 1)))
 	((>= t 16) ())
-	(set! (array-nth W t)
+	(set! (nth W t)
 	      (<< (zero-extend 
-		   (array-nth context.message (* t 4))) 24))
-	(set! (array-nth W t)
-	      (bit-or (array-nth W t)
+		   (nth context.message (* t 4))) 24))
+	(set! (nth W t)
+	      (bit-or (nth W t)
 		      (<< (zero-extend 
-			   (array-nth context.message 
+			   (nth context.message 
 				      (+ (* t 4) 1))) 16)))
-	(set! (array-nth W t)
-	      (bit-or (array-nth W t)
+	(set! (nth W t)
+	      (bit-or (nth W t)
 		      (<< (zero-extend 
-			   (array-nth context.message 
+			   (nth context.message 
 				      (+ (* t 4) 2))) 8)))
-	(set! (array-nth W t)
-	      (bit-or (array-nth W t)
+	(set! (nth W t)
+	      (bit-or (nth W t)
 		      (zero-extend 
-		       (array-nth context.message (+ (* t 4) 3))))))
+		       (nth context.message (+ (* t 4) 3))))))
 
     (do ((t 16 (+ t 1)))
 	((>= t 80) ())
-	(set! (array-nth W t)
+	(set! (nth W t)
 	      (circShift 1
 			 (bit-xor 
-			  (array-nth W (- t 3))
+			  (nth W (- t 3))
 			  (bit-xor
-			   (array-nth W (- t 8))
+			   (nth W (- t 8))
 			   (bit-xor
-			    (array-nth W (- t 14))
-			    (array-nth W (- t 16))))))))
+			    (nth W (- t 14))
+			    (nth W (- t 16))))))))
 
-    (define A (array-nth context.digest 0))
-    (define B (array-nth context.digest 1))
-    (define C (array-nth context.digest 2))
-    (define D (array-nth context.digest 3))
-    (define E (array-nth context.digest 4))
+    (define A (nth context.digest 0))
+    (define B (nth context.digest 1))
+    (define C (nth context.digest 2))
+    (define D (nth context.digest 3))
+    (define E (nth context.digest 4))
 
     (do ((t 0 (+ t 1)))
 	((>= t 20) ())
@@ -342,8 +342,8 @@
 			(+ (bit-or (bit-and B C)
 				   (bit-and (bit-not B) D))
 			   (+ E
-			      (+ (array-nth W t)
-				 (array-nth K 0))))))
+			      (+ (nth W t)
+				 (nth K 0))))))
 	(set! E D)
 	(set! D C)
 	(set! C (circShift 30 B))
@@ -357,8 +357,8 @@
 			(+ (bit-xor B
 				    (bit-xor C D))
 			   (+ E
-			      (+ (array-nth W t)
-				 (array-nth K 1))))))
+			      (+ (nth W t)
+				 (nth K 1))))))
 	(set! E D)
 	(set! D C)
 	(set! C (circShift 30 B))
@@ -374,8 +374,8 @@
 				   (bit-or (bit-and B D) 
 					   (bit-and C D)))
 			   (+ E
-			      (+ (array-nth W t)
-				 (array-nth K 2))))))
+			      (+ (nth W t)
+				 (nth K 2))))))
 	(set! E D)
 	(set! D C)
 	(set! C (circShift 30 B))
@@ -389,24 +389,24 @@
 			(+ (bit-xor B
 				    (bit-xor C D))
 			   (+ E
-			      (+ (array-nth W t)
-				 (array-nth K 3))))))
+			      (+ (nth W t)
+				 (nth K 3))))))
 	(set! E D)
 	(set! D C)
 	(set! C (circShift 30 B))
 	(set! B A)
 	(set! A temp))
 
-    (set! (array-nth context.digest 0) 
-	  (+ (array-nth context.digest 0) A))
-    (set! (array-nth context.digest 1) 
-	  (+ (array-nth context.digest 1) B))
-    (set! (array-nth context.digest 2) 
-	  (+ (array-nth context.digest 2) C))
-    (set! (array-nth context.digest 3) 
-	  (+ (array-nth context.digest 3) D))
-    (set! (array-nth context.digest 4) 
-	  (+ (array-nth context.digest 4) E))
+    (set! (nth context.digest 0) 
+	  (+ (nth context.digest 0) A))
+    (set! (nth context.digest 1) 
+	  (+ (nth context.digest 1) B))
+    (set! (nth context.digest 2) 
+	  (+ (nth context.digest 2) C))
+    (set! (nth context.digest 3) 
+	  (+ (nth context.digest 3) D))
+    (set! (nth context.digest 4) 
+	  (+ (nth context.digest 4) E))
     
     (set! context.messNdx 0)
     )
@@ -442,12 +442,12 @@
     
     (if (> context.messNdx  55)
 	(begin
-	  (set! (array-nth context.message context.messNdx) 16r80)
+	  (set! (nth context.message context.messNdx) 16r80)
 	  (set! context.messNdx (+ context.messNdx 1))
 	  
 	  (do ((dummy () ()))
 	      ((>= context.messNdx 64) ())	    
-	      (set! (array-nth context.message context.messNdx) 0)
+	      (set! (nth context.message context.messNdx) 0)
 	      (set! context.messNdx (+ context.messNdx 1)))
 
 	  (sha1ProcessMessageBlock context)
@@ -455,34 +455,34 @@
  
  	(do ((dummy () ()))
 	    ((>= context.messNdx 56) ())	    
-	    (set! (array-nth context.message context.messNdx) 0)
+	    (set! (nth context.message context.messNdx) 0)
 	    (set! context.messNdx (+ context.messNdx 1))))
 	(begin
-	  (set! (array-nth context.message context.messNdx) 16r80)
+	  (set! (nth context.message context.messNdx) 16r80)
 	  (set! context.messNdx (+ context.messNdx 1))
 
 	  (do ((dummy () ()))
 	      ((>= context.messNdx 56) ())	    
-	      (set! (array-nth context.message context.messNdx) 0)
+	      (set! (nth context.message context.messNdx) 0)
 	      (set! context.messNdx (+ context.messNdx 1)))))
 
   
      ;; Store the message length as the last 8 octets
-    (set! (array-nth context.message 56) 
+    (set! (nth context.message 56) 
 	  (truncate (>> context.lenHigh 24)))
-    (set! (array-nth context.message 57) 
+    (set! (nth context.message 57) 
 	  (truncate (>> context.lenHigh 16)))
-    (set! (array-nth context.message 58) 
+    (set! (nth context.message 58) 
 	  (truncate (>> context.lenHigh 8)))
-    (set! (array-nth context.message 59)
+    (set! (nth context.message 59)
 	  (truncate context.lenHigh))
-    (set! (array-nth context.message 60) 
+    (set! (nth context.message 60) 
 	  (truncate (>> context.lenLow 24)))
-    (set! (array-nth context.message 61)
+    (set! (nth context.message 61)
 	  (truncate (>> context.lenLow 16)))
-    (set! (array-nth context.message 62) 
+    (set! (nth context.message 62) 
 	  (truncate (>> context.lenLow 8)))
-    (set! (array-nth context.message 63) 
+    (set! (nth context.message 63) 
 	  (truncate context.lenLow))
     
     (sha1ProcessMessageBlock context)

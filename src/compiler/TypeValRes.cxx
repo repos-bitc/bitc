@@ -302,6 +302,10 @@ isExpansive(std::ostream& errStream,
                                          ast->child(i)));
       break;
     }
+  case at_nth:
+    // Shouldn't get here
+    assert(false);
+    break;
     
   case at_fqCtr:
     {

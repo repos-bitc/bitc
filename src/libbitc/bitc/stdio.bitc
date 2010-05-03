@@ -116,8 +116,8 @@
 	 (log log (/ log base)))
 	((== log 0) ())	
 	(write-char ostream  
-			  (array-nth digits 
-				     (convert (/ x log))))))
+			  (nth digits 
+			       (convert (/ x log))))))
   
   ;; Read a string from an input stream.
   ;;(proclaim read-string:(fn stream word -> string) external)

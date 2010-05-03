@@ -46,6 +46,6 @@
     (do ((i:word 0 (+ i 1)))
 	((== i (vector-length argvec)) ())
 	(begin
-	  (stdio.write-string stdio.stdout (vector-nth argvec i))
+	  (stdio.write-string stdio.stdout (nth argvec i))
 	  (stdio.write-char stdio.stdout #\linefeed)))
     0))

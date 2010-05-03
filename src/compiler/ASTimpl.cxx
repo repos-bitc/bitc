@@ -556,13 +556,13 @@ AST::atKwd() const
     return "proclaim";
 
   case at_array_nth:
-    return "array-nth";
+    return "/* array */ nth";
 
   case at_array_ref_nth:
-    return "array-ref-nth";
+    return "/* array ref */ nth";
 
   case at_vector_nth:
-    return "vector-nth";
+    return "/* vector */ nth";
 
   case at_tcdecls:
     return "<tc_decls>";

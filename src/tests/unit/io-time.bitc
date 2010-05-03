@@ -66,7 +66,7 @@
   ;(TS "Print to stdout: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
-    (define iStream (stdio.open (vector-nth argvec 1) "r"))
+    (define iStream (stdio.open (nth argvec 1) "r"))
     (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Open Read Stream: " (- stop start))
     
@@ -83,21 +83,21 @@
     (set! start (stdlib.getTimeStamp))
     (do ((i 0 (+ i 1)))
 	((>= i len) ())
-	(set! (vector-nth vec i) (stdio.read-byte iStream)))  
+	(set! (nth vec i) (stdio.read-byte iStream)))  
     (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Input from File: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
     (do ((i 0 (+ i 1)))
 	((>= i len) ())
-	(stdio.write-byte stdio.stdout (vector-nth vec i)))  
+	(stdio.write-byte stdio.stdout (nth vec i)))  
     (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Write to stdout: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
     (do ((i 0 (+ i 1)))
 	((>= i len) ())
-	(set!  (vector-nth vec i)
+	(set!  (nth vec i)
 	       (if (not (stdio.eof? iStream))
 		   (stdio.read-byte iStream) 0)))  
     (set! stop (stdlib.getTimeStamp)) 
@@ -106,7 +106,7 @@
     (set! start (stdlib.getTimeStamp))
     (do ((i 0 (+ i 1)))
 	((>= i len) ())
-	(stdio.write-byte oStream (vector-nth vec i)))  
+	(stdio.write-byte oStream (nth vec i)))  
     (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Write to file: " (- stop start))
     

@@ -46,4 +46,4 @@
     (set! x (array 0 0 0))
     ;; Must not work
     ;; (set! y x)
-    (array-nth x 0)))
+    (nth x 0)))

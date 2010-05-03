@@ -316,6 +316,11 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
       break;
     }
 
+  case at_nth:
+    // Shouldn't get here
+    assert(false);
+    break;
+
   case at_cond:
   case at_cond_legs:
   case at_condelse:

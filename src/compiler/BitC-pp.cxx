@@ -503,9 +503,6 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_mutableType:
   case at_constType:
   case at_condelse:
-  case at_array_nth:
-  case at_array_ref_nth:
-  case at_vector_nth:
   case at_array_length:
   case at_array_ref_length:
   case at_vector_length:
@@ -526,6 +523,19 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       out << ")";
       break;
     }
+
+  case at_nth:
+  case at_array_nth:
+  case at_array_ref_nth:
+  case at_vector_nth:
+    {
+      BitcP(out, ast->child(0), showTypes);
+      out << "[";
+      BitcP(out, ast->child(1), showTypes);
+      out << "]";
+      break;
+    }
+
   case at_methType:
   case at_fn:
     {

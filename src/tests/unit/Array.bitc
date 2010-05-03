@@ -46,5 +46,5 @@
 (define a1 (array i0 i1 i2))
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
-    (begin (array-length a1) (array-nth a1 1)) 
+    (begin (array-length a1) (nth a1 1)) 
     i0))

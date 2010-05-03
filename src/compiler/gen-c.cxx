@@ -2227,6 +2227,10 @@ toc(std::ostream& errStream,
       break;
     }
 
+  case at_nth:
+    // Shouldn't survive to this point.
+    assert(false);
+    break;
   case at_array_nth:
   case at_array_ref_nth:
   case at_vector_nth:

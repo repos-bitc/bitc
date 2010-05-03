@@ -43,7 +43,7 @@
   (array-ref-length x))
 
 (define (f x:(array-ref 'a)) 
-  (array-ref-nth x (/ (g x) 2)))
+  (nth x (/ (g x) 2)))
 
 (define arr (array 1 2 3 4 5 6 7 8 9 10))
 

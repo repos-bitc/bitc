@@ -44,7 +44,7 @@
 
 (define (choose-array-ref-nth e:(array-ref 'a)) e[4])
 
-(define (choose-vector-nth e) e[4])
+(define (choose-nth e) e[4])
 
 ;; Use these for type matching purposes to check what was inferred above.
 (define (f-a-n f:(fn (array 'a 5) -> 'a)) f)
@@ -55,5 +55,5 @@
   (lambda (args)
     (f-a-n choose-array-nth)
     (f-ar-n choose-array-ref-nth)
-    (f-v-n choose-vector-nth)
+    (f-v-n choose-nth)
     0))

@@ -192,9 +192,6 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_ARRAY_LENGTH
 %token <tok> tk_ARRAY_REF_LENGTH
 %token <tok> tk_VECTOR_LENGTH
-%token <tok> tk_ARRAY_NTH
-%token <tok> tk_ARRAY_REF_NTH
-%token <tok> tk_VECTOR_NTH
 %token <tok> tk_NTH
 
 %token <tok> tk_DEFSTRUCT
@@ -1854,17 +1851,9 @@ sxp_eform: sxp_expr '[' sxp_expr ']' {
   $$ = AST::make(at_nth, $1->loc, $1, $3);
 };
 
-sxp_eform: '(' tk_ARRAY_NTH sxp_expr sxp_expr ')' {
-  SHOWPARSE("sxp_eform -> ( ARRAY-NTH sxp_expr sxp_expr )");
-  $$ = AST::make(at_array_nth, $2.loc, $3, $4);
-};
-sxp_eform: '(' tk_ARRAY_REF_NTH sxp_expr sxp_expr ')' {
-  SHOWPARSE("sxp_eform -> ( ARRAY-REF-NTH sxp_expr sxp_expr )");
-  $$ = AST::make(at_array_ref_nth, $2.loc, $3, $4);
-};
-sxp_eform: '(' tk_VECTOR_NTH sxp_expr sxp_expr ')' {
-  SHOWPARSE("sxp_eform -> ( VECTOR-NTH sxp_expr sxp_expr )");
-  $$ = AST::make(at_vector_nth, $2.loc, $3, $4);
+sxp_eform: '(' tk_NTH sxp_expr sxp_expr ')' {
+  SHOWPARSE("sxp_eform -> ( NTH sxp_expr sxp_expr )");
+  $$ = AST::make(at_nth, $2.loc, $3, $4);
 };
 
 // DUP [7.17.1]

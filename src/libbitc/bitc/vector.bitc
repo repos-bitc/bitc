@@ -42,7 +42,7 @@
     "Apply procedure f to each element of vector."
     (do ((pos 0 (+ 1 pos)))
 	((== pos (vector-length vec)) ())
-	(f (vector-nth vec pos))))
+	(f (nth vec pos))))
 
   (define (vector->list vec:(vector 'a))
     "Given a vector, return a list of its elements."
@@ -51,7 +51,7 @@
 	     (throw IndexBoundsError))
 	    ((== pos len) nil: (list 'a))
 	    (otherwise
-	     (cons (vector-nth vec pos)
+	     (cons (nth vec pos)
 		   (subvector->list vec (+ pos 1) len)))))
     (subvector->list vec 0 (vector-length vec)))
 

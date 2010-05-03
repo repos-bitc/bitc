@@ -64,12 +64,12 @@
     
     (define digest:(array (mutable uint8) 20)
       (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
-    (define len:word (convert (stdlib.atoi (vector-nth argvec 2))))
+    (define len:word (convert (stdlib.atoi (nth argvec 2))))
  ;(define stop (stdlib.getTimeStamp)) 
  ;(TS "Initialization: " (- stop start))
     
  ;(set! start (stdlib.getTimeStamp))
-    (define iStream (stdio.open (vector-nth argvec 1) "r"))
+    (define iStream (stdio.open (nth argvec 1) "r"))
     (define input:(vector (mutable uint8)) 
       (make-vector (convert len)
 		   (lambda (i) 
@@ -77,7 +77,7 @@
 			 (stdio.read-byte iStream) 0))))
   ;(do ((i 0 (+ i 1)))
   ;    ((>= i len) ())
-  ;    (set! (vector-nth input i) 
+  ;    (set! (nth input i) 
   ;	    (if (not (stdio.eof? iStream))
   ;		(stdio.read-byte iStream) 0)))  
     (stdio.close iStream)
@@ -109,7 +109,7 @@
 	(if (> i 0)
 	    (begin (stdio.write-char stdio.stdout #\space) ())
 	    ())
-	(stdio.write-int stdio.stdout (array-nth digest i) 16))
+	(stdio.write-int stdio.stdout (nth digest i) 16))
     (stdio.write-char stdio.stdout #\linefeed)
     
  ;(set! stop (stdlib.getTimeStamp)) 

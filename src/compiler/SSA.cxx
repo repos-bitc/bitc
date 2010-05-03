@@ -569,6 +569,10 @@ ssa(std::ostream& errStream,
         // inner-ref.
         
         shared_ptr<AST> tempAst = GC_NULL;
+        if (expr->symType->getBareType()->kind == ty_array_ref) {
+          // This should have failed to type check.
+          assert(false);
+        }
         if (expr->symType->getBareType()->kind == ty_vector) {
           // Vector-Index
           tempAst = AST::make(at_vector_nth, expr->loc, 
@@ -596,6 +600,11 @@ ssa(std::ostream& errStream,
       FEXPR(grandLet) = ast;      
       break;      
     }
+
+  case at_nth:
+    // Shouldn't get here
+    assert(false);
+    break;
 
   case at_array_nth:
   case at_array_ref_nth:
@@ -634,10 +643,10 @@ ssa(std::ostream& errStream,
       IOB->symType = Type::make(ty_exn);
       InstMangle(IOB);
 
-      AstType lenType = ((ast->astType == at_array_nth) ?
-                         at_array_length :
-                         ((ast->astType == at_array_ref_nth) ?
-                          at_array_ref_length : at_vector_length));
+      AstType lenType = 
+        ((ast->astType == at_array_nth) ? at_array_length 
+         : ((ast->astType == at_array_ref_nth) ? at_array_ref_length
+            : at_vector_length));
       
       shared_ptr<AST> len = AST::make(lenType, ast->loc,
                                       UseCase(expr));

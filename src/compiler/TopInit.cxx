@@ -376,6 +376,11 @@ TopInit(std::ostream& errStream,
       break;
     }
 
+  case at_nth:
+    // Shouldn't get here
+    assert(false);
+    break;
+
   case at_try:
   case at_uswitch:
     {

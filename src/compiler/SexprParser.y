@@ -177,9 +177,7 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_ARRAY_LENGTH
 %token <tok> tk_ARRAY_REF_LENGTH
 %token <tok> tk_VECTOR_LENGTH
-%token <tok> tk_ARRAY_NTH
-%token <tok> tk_ARRAY_REF_NTH
-%token <tok> tk_VECTOR_NTH
+%token <tok> tk_NTH
 
 %token <tok> tk_DEFSTRUCT
 %token <tok> tk_DEFOBJECT
@@ -1814,20 +1812,12 @@ eform: '(' tk_MEMBER expr ident ')' {
 // NTH-REF [7.11.2]          
 eform: expr '[' expr ']' {
   SHOWPARSE("eform -> expr [ expr ]");
-  $$ = AST::make(at_vector_nth, $1->loc, $1, $3);
+  $$ = AST::make(at_nth, $1->loc, $1, $3);
 };
 
-eform: '(' tk_ARRAY_NTH expr expr ')' {
-  SHOWPARSE("eform -> ( ARRAY-NTH expr expr )");
-  $$ = AST::make(at_array_nth, $2.loc, $3, $4);
-};
-eform: '(' tk_ARRAY_REF_NTH expr expr ')' {
-  SHOWPARSE("eform -> ( ARRAY-REF-NTH expr expr )");
-  $$ = AST::make(at_array_ref_nth, $2.loc, $3, $4);
-};
-eform: '(' tk_VECTOR_NTH expr expr ')' {
-  SHOWPARSE("eform -> ( VECTOR-NTH expr expr )");
-  $$ = AST::make(at_vector_nth, $2.loc, $3, $4);
+eform: '(' tk_NTH expr expr ')' {
+  SHOWPARSE("eform -> ( NTH expr expr )");
+  $$ = AST::make(at_nth, $2.loc, $3, $4);
 };
 
 // DUP [7.17.1]

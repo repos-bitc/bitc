@@ -43,5 +43,5 @@
 (define V2  (vector p))
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (vector-nth V1 0)
+    (nth V1 0)
     0))

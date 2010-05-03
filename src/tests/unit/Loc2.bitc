@@ -42,5 +42,5 @@
 (provide bitc.main main)
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-;  (set! (array-nth (array 1 2 3) 2) 25:int32)
-    (array-nth (array (id 0:int32) (id (id 0)) 0) 1)))
+;  (set! (nth (array 1 2 3) 2) 25:int32)
+    (nth (array (id 0:int32) (id (id 0)) 0) 1)))

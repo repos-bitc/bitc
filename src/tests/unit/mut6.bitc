@@ -41,7 +41,7 @@
 (define V:(vector (mutable int32))  (vector 0 1 2 3 4 5))
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (set! (vector-nth V 3) 25)
-    (vector-nth V 0) 
+    (set! (nth V 3) 25)
+    (nth V 0) 
     0))
   

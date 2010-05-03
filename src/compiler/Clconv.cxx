@@ -485,6 +485,11 @@ findusedef(std::ostream &errStream,
       break;
     }
 
+  case at_nth:
+    // Shouldn't survive to this point
+    assert(false);
+    break;
+
   case at_block:
   case at_return_from:
     {
