@@ -446,7 +446,7 @@ TransitionLexer::kwCheck(const char *s)
 
   if (currentLang & lf_sexpr) 
     return tk_SxpIdent;
-  else if (valid_ident_punct(s[0], false))
+  else if (valid_ident_punct(s[0], true))
     return tk_MixIdent;
   else
     return tk_BlkIdent;
