@@ -501,7 +501,6 @@ TransitionLexer::TransitionLexer(std::ostream& _err, std::istream& _in,
   ifIdentMode = false;
   isCommandLineInput = commandLineInput;
   debug = false;
-  putbackChar = -1;
   nModules = 0;
 }
 
@@ -528,10 +527,9 @@ TransitionLexer::getChar()
   char utf[8];
   unsigned char c;
 
-  long ucs4 = putbackChar;
+  long ucs4 = pushBackStack.pop();
 
-  if (putbackChar != -1) {
-    putbackChar = -1;
+  if (ucs4 != -1) {
     utf8_encode(ucs4, utf);
     goto checkDigit;
   }
@@ -590,8 +588,7 @@ void
 TransitionLexer::ungetChar(ucs4_t c)
 {
   char utf[8];
-  assert(putbackChar == -1);
-  putbackChar = c;
+  pushBackStack.push(c);
 
   unsigned len = utf8_encode(c, utf);
   thisToken.erase( thisToken.length() - len);

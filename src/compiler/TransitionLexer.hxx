@@ -46,6 +46,31 @@
 
 typedef long ucs4_t;
 
+class PushBack {
+  enum { maxPushBack = 4 };
+
+  long stack[maxPushBack];
+  unsigned depth;
+
+public:
+  inline void push(ucs4_t c) {
+    assert (depth < maxPushBack);
+    stack[depth] = c;
+    depth++;
+  }
+
+  inline long pop() {
+    if (depth == 0)
+      return -1;
+    depth--;
+    return stack[depth];
+  }
+
+  PushBack() {
+    depth = 0;
+  }
+};
+
 /** @brief Hand-crafted S-expression lexer.
  *
  * TransitionLexer is yet another variant of shap's generic hand-crafted
@@ -131,8 +156,7 @@ struct TransitionLexer {
    * by ungetChar() */
   std::string thisToken;
 
-  /** @brief Up to one UCS4 character of push-back, -1 if none. */
-  ucs4_t putbackChar;                // -1 or UCS4
+  PushBack pushBackStack;
 
   /** @brief If @p c is a digit character in radix @p radix, return
    * its decimal value */
