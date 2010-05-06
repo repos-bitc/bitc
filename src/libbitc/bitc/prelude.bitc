@@ -393,6 +393,6 @@
     length: (fn 'a -> word))		; built-in => no methods
 
   (definstance (Length (vector 'a))
-    (length = (lambda (x) (vector-length x))))
+    (length = (lambda (x) x.length)))
  )
 

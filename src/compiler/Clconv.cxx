@@ -467,9 +467,11 @@ findusedef(std::ostream &errStream,
   case at_deref:
   case at_usw_legs:
   case at_throw:
+#ifdef HAVE_INDEXABLE_LENGTH_OPS
   case at_array_length:
   case at_array_ref_length:
   case at_vector_length:
+#endif
   case at_array_nth:
   case at_array_ref_nth:
   case at_vector_nth:

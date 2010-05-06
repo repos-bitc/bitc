@@ -300,9 +300,11 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_dup:
   case at_deref:
   case at_inner_ref:
+#ifdef HAVE_INDEXABLE_LENGTH_OPS
   case at_array_length:
   case at_array_ref_length:
   case at_vector_length:
+#endif
   case at_array_nth:
   case at_array_ref_nth:
   case at_vector_nth:

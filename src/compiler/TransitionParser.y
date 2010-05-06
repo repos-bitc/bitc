@@ -189,9 +189,6 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_ARRAY
  //%token <tok> tk_MAKE_VECTOR
 %token <tok> tk_MAKE_VECTORL
-%token <tok> tk_ARRAY_LENGTH
-%token <tok> tk_ARRAY_REF_LENGTH
-%token <tok> tk_VECTOR_LENGTH
 %token <tok> tk_NTH
 
 %token <tok> tk_DEFSTRUCT
@@ -1944,8 +1941,8 @@ sxp_eform: '(' tk_RETURN_FROM ident sxp_expr ')' {
   $$ = AST::make(at_return_from, $2.loc, $3, $4);
 }
 
-// ARRAY-LENGTH [7.11.1]
-sxp_eform: '(' tk_ARRAY_LENGTH sxp_expr ')' {
+// ARRAY-LENGTH, ARRAY-REF_LENGTH,VECTOR-LENGTH [7.11.1]
+/* sxp_eform: '(' tk_ARRAY_LENGTH sxp_expr ')' {
   SHOWPARSE("sxp_eform -> ( ARRAY-LENGTH sxp_expr )");
   $$ = AST::make(at_array_length, $2.loc, $3);
 };
@@ -1953,11 +1950,10 @@ sxp_eform: '(' tk_ARRAY_REF_LENGTH sxp_expr ')' {
   SHOWPARSE("sxp_eform -> ( ARRAY-REF-LENGTH sxp_expr )");
   $$ = AST::make(at_array_ref_length, $2.loc, $3);
 };
-// VECTOR-LENGTH [7.11.1]
 sxp_eform: '(' tk_VECTOR_LENGTH sxp_expr ')' {
   SHOWPARSE("sxp_eform -> ( VECTOR-LENGTH sxp_expr )");
   $$ = AST::make(at_vector_length, $2.loc, $3);
-};
+}; */
 
 // LAMBDA [7.12]
 // handles unit argument

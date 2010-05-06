@@ -1080,7 +1080,7 @@ GROUP eform = literal | var | unit
             | fqCtr | sel_ctr
             | array_nth | array_ref_nth | vector_nth
             | nth
-            | array_length | array_ref_length | vector_length
+//            | array_length | array_ref_length | vector_length
             | lambda | suspend
             | apply | struct_apply | object_apply | ucon_apply
             | if | when | and | or | cond | uswitch
@@ -1131,16 +1131,17 @@ AST select = expr ident;
 AST fqCtr = ident ident;
 AST sel_ctr = expr ident;
 
-// xxx-nth are preserved for inference purposes.
+// xxx-nth are preserved for inference purposes, though it isn't clear
+// that we still need to do that.
 // ARRAY-NTH, VECTOR-NTH [7.8.2]
 AST array_nth = expr expr;
 AST array_ref_nth = expr expr;
 AST vector_nth = expr expr;
 
 // ARRAY-LENGTH, VECTOR-LENGTH [7.8.1]
-AST array_length = expr;
-AST array_ref_length = expr;
-AST vector_length = expr;
+//AST array_length = expr;
+//AST array_ref_length = expr;
+//AST vector_length = expr;
 
 // (Generic) NTH [7.8.2]
 AST nth = expr expr;

@@ -44,5 +44,5 @@
 
 (define main.main:(fn (vector string) -> int32)  
   (lambda (argVec)
-    (begin (array-length a23))
+    (begin a23.length)
     0:int32))

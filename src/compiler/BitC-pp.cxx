@@ -503,9 +503,11 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_mutableType:
   case at_constType:
   case at_condelse:
+#ifdef HAVE_INDEXABLE_LENGTH_OPS
   case at_array_length:
   case at_array_ref_length:
   case at_vector_length:
+#endif
   case at_localFrame:
   case at_frameBindings:
   case at_do:

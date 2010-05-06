@@ -40,7 +40,7 @@
 (provide bitc.main main)
 
 (define (g x:(array-ref 'a)) 
-  (array-ref-length x))
+  x.length)
 
 (define (f x:(array-ref 'a)) 
   (nth x (/ (g x) 2)))

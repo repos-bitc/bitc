@@ -41,7 +41,7 @@
   (define (vector-map vec :(vector 'a) f:(fn 'a -> ()))
     "Apply procedure f to each element of vector."
     (do ((pos 0 (+ 1 pos)))
-	((== pos (vector-length vec)) ())
+	((== pos vec.length) ())
 	(f (nth vec pos))))
 
   (define (vector->list vec:(vector 'a))
@@ -53,7 +53,7 @@
 	    (otherwise
 	     (cons (nth vec pos)
 		   (subvector->list vec (+ pos 1) len)))))
-    (subvector->list vec 0 (vector-length vec)))
+    (subvector->list vec 0 vec.length))
 
   (define (make-mutable-vector n:word e:(mutable 'a))
     (make-vector n (lambda (i) e)))

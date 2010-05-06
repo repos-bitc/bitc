@@ -488,9 +488,11 @@ ssa(std::ostream& errStream,
       break;
     }
     
+#ifdef HAVE_INDEXABLE_LENGTH_OPS
   case at_array_length:
   case at_array_ref_length:
   case at_vector_length:
+#endif
   case at_struct_apply:
   case at_object_apply:
   case at_ucon_apply: 
@@ -643,6 +645,7 @@ ssa(std::ostream& errStream,
       IOB->symType = Type::make(ty_exn);
       InstMangle(IOB);
 
+#ifdef HAVE_INDEXABLE_LENGTH_OPS
       AstType lenType = 
         ((ast->astType == at_array_nth) ? at_array_length 
          : ((ast->astType == at_array_ref_nth) ? at_array_ref_length
@@ -650,6 +653,12 @@ ssa(std::ostream& errStream,
       
       shared_ptr<AST> len = AST::make(lenType, ast->loc,
                                       UseCase(expr));
+#else
+      shared_ptr<AST> lengthIdent = 
+        AST::make(at_ident, LToken(ast->loc, "length"));
+      shared_ptr<AST> len = AST::make(at_select, ast->loc,
+                                      UseCase(expr), lengthIdent);
+#endif
       
       shared_ptr<AST> ltApp = AST::make(at_apply, ast->loc, lt, UseCase(ndx), len);
       

@@ -1380,26 +1380,36 @@ toc(std::ostream& errStream,
 
   case at_select:
     {
-      TOC(errStream, uoc, ast->child(0), out, IDname, decls,
-          ast, 0, flags);
-
-      // Handle array, array-ref, vector as special cases:
       shared_ptr<Type> t = ast->child(0)->symType->getBareType();
-      if (t->kind == ty_vector) {
-        out << "->length";
-        break;
-      }
-      else if (t->kind == ty_array_ref) {
-        out << ".length";
-        break;
-      }
-      else if (t->kind == ty_array) {
+
+      // Array, array-ref, and vector have "length" as a special-case
+      // field. If we see an at_select whose LHS has one of these
+      // types, it can *only* be a length access, so we handle these
+      // as special cases.
+
+      // For arrays, the result is an integer literal length, not an
+      // actual field selection:
+
+      if (t->kind == ty_array) {
         out << t->arrLen->len;
         break;
       }
 
-      out << ((ast->child(0)->symType->isRefType()) ? "->" : "." );
-      out << CMangle(ast->child(1), CMGL_ID_FLD);
+      TOC(errStream, uoc, ast->child(0), out, IDname, decls,
+          ast, 0, flags);
+
+      // We have already handled array. Handle special cases for
+      // array-ref and vector here:
+      if (t->kind == ty_vector) {
+        out << "->length";
+      }
+      else if (t->kind == ty_array_ref) {
+        out << ".length";
+      }
+      else {
+        out << ((ast->child(0)->symType->isRefType()) ? "->" : "." );
+        out << CMangle(ast->child(1), CMGL_ID_FLD);
+      }
       break;
     }
 
@@ -2203,6 +2213,7 @@ toc(std::ostream& errStream,
       break;
     }
 
+#ifdef HAVE_INDEXABLE_LENGTH_OPS
   case at_array_length:
     {
       shared_ptr<Type> arrType =
@@ -2226,6 +2237,7 @@ toc(std::ostream& errStream,
       out << "->length";
       break;
     }
+#endif
 
   case at_nth:
     // Shouldn't survive to this point.

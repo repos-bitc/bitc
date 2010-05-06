@@ -411,14 +411,16 @@ AST::atKwd() const
   case at_array:
     return "array";
 
-  case at_vector_length:
-    return "vector-length";
-
+#ifdef HAVE_INDEXABLE_LENGTH_OPS
   case at_array_length:
     return "array-length";
 
   case at_array_ref_length:
     return "array-ref-length";
+
+  case at_vector_length:
+    return "vector-length";
+#endif
 
   case at_begin:
     return "begin";

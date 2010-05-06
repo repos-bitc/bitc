@@ -44,7 +44,7 @@
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (do ((i:word 0 (+ i 1)))
-	((== i (vector-length argvec)) ())
+	((== i argvec.length) ())
 	(begin
 	  (stdio.write-string stdio.stdout (nth argvec i))
 	  (stdio.write-char stdio.stdout #\linefeed)))

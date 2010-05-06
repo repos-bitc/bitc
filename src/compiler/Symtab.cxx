@@ -2161,6 +2161,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
+#ifdef HAVE_INDEXABLE_LENGTH_OPS
   case at_array_length:
   case at_array_ref_length:
   case at_vector_length:
@@ -2171,6 +2172,7 @@ resolve(std::ostream& errStream,
 
       break;
     }
+#endif
 
   case at_nth:
   case at_array_nth:

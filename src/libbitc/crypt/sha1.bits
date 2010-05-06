@@ -232,7 +232,7 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   (define (sha1.sha1Input context:sha1.sha1Context message:(vector (mutable uint8))) 
-    (if (== (vector-length message) 0)
+    (if (== message.length 0)
 	sha1.sha-Success
 	(if context.computed
 	    (begin
@@ -241,7 +241,7 @@
 	    (if context.corrupted.sha-Success
 		(begin 
 		  (do ((i 0 (+ i 1)))
-		      ((and (>= i (vector-length message))
+		      ((and (>= i message.length)
 			    context.corrupted.sha-Success) ())
 		      
 		      (set! (nth context.message context.messNdx)

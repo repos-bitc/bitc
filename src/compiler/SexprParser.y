@@ -174,9 +174,6 @@ stripDocString(shared_ptr<AST> exprSeq)
 %token <tok> tk_ARRAY
  //%token <tok> tk_MAKE_VECTOR
 %token <tok> tk_MAKE_VECTORL
-%token <tok> tk_ARRAY_LENGTH
-%token <tok> tk_ARRAY_REF_LENGTH
-%token <tok> tk_VECTOR_LENGTH
 %token <tok> tk_NTH
 
 %token <tok> tk_DEFSTRUCT
@@ -1908,8 +1905,8 @@ eform: '(' tk_RETURN_FROM ident expr ')' {
   $$ = AST::make(at_return_from, $2.loc, $3, $4);
 }
 
-// ARRAY-LENGTH [7.11.1]
-eform: '(' tk_ARRAY_LENGTH expr ')' {
+// ARRAY-LENGTH, ARRAY-REF-LENGTH, VECTOR-LENGTH [7.11.1]
+/* eform: '(' tk_ARRAY_LENGTH expr ')' {
   SHOWPARSE("eform -> ( ARRAY-LENGTH expr )");
   $$ = AST::make(at_array_length, $2.loc, $3);
 };
@@ -1917,11 +1914,10 @@ eform: '(' tk_ARRAY_REF_LENGTH expr ')' {
   SHOWPARSE("eform -> ( ARRAY-REF-LENGTH expr )");
   $$ = AST::make(at_array_ref_length, $2.loc, $3);
 };
-// VECTOR-LENGTH [7.11.1]
 eform: '(' tk_VECTOR_LENGTH expr ')' {
   SHOWPARSE("eform -> ( VECTOR-LENGTH expr )");
   $$ = AST::make(at_vector_length, $2.loc, $3);
-};
+}; */
 
 // LAMBDA [7.12]
 // handles unit argument

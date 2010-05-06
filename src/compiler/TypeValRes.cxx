@@ -285,9 +285,11 @@ isExpansive(std::ostream& errStream,
   case at_vector:
   case at_array:
   case at_mkArrayByref:
+#ifdef HAVE_INDEXABLE_LENGTH_OPS
   case at_array_length:
   case at_array_ref_length:
   case at_vector_length:
+#endif
   case at_array_nth:
   case at_array_ref_nth:
   case at_vector_nth:
@@ -478,8 +480,21 @@ isAValue(shared_ptr<const AST> ast)
   case at_tqexpr:
     return isAValue(ast->child(0));
     
+#ifdef HAVE_INDEXABLE_LENGTH_OPS
   case at_array_length:
+    // This should have just been TRUE, since it always reduces to a
+    // constant.
     return isAValue(ast->child(0));
+#else
+  case at_select:
+    {
+      shared_ptr<Type> t = ast->child(0)->symType->getBareType();
+      if (t->kind == ty_array)
+        return true;
+      else
+        return false;
+    }
+#endif
     
   default:
     return false;

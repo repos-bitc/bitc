@@ -195,9 +195,7 @@ struct SexprLexer::KeyWord SexprLexer::keywords[] = {
   { "and",              tk_AND },
   { "apply",            tk_APPLY },
   { "array",            tk_ARRAY },
-  { "array-length",     tk_ARRAY_LENGTH },
   { "array-ref",        tk_ARRAY_REF },
-  { "array-ref-length", tk_ARRAY_REF_LENGTH },
   { "as",               tk_AS },
   { "assert",           tk_ReservedWord },
   { "begin",            tk_BEGIN },
@@ -306,7 +304,6 @@ struct SexprLexer::KeyWord SexprLexer::keywords[] = {
   { "val",              tk_VAL },
   { "value-at",         tk_ReservedWord },
   { "vector",           tk_VECTOR },
-  { "vector-length",    tk_VECTOR_LENGTH },
   { "when",             tk_WHEN },
   { "where",            tk_WHERE },
   { "word",             tk_WORD }
