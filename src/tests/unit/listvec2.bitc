@@ -48,5 +48,5 @@
 (provide bitc.main main)
 (define main.main:(fn (vector string) -> int32)
   (lambda (argv)
-    (let ((vec (make-vector 10 (lambda (x) x))))
+    (let ((vec (MakeVector 10 (lambda (x) x))))
       vec) 0))

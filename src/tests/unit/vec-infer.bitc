@@ -42,13 +42,13 @@
 
 (define (choose-array-nth e:(array 'a 5)) e[4])
 
-(define (choose-array-ref-nth e:(array-ref 'a)) e[4])
+(define (choose-array-ref-nth e:(ArrayRef 'a)) e[4])
 
 (define (choose-nth e) e[4])
 
 ;; Use these for type matching purposes to check what was inferred above.
 (define (f-a-n f:(fn (array 'a 5) -> 'a)) f)
-(define (f-ar-n f:(fn (array-ref 'a) -> 'a)) f)
+(define (f-ar-n f:(fn (ArrayRef 'a) -> 'a)) f)
 (define (f-v-n f:(fn (vector 'a) -> 'a)) f)
 
 (define main.main:(fn (vector string) -> int32)

@@ -54,7 +54,7 @@
     (define digest:(array (mutable uint8) 20)
       (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
     
-    (define input (make-vector 5 (lambda (i) (convert (+ 100 i)))))
+    (define input (MakeVector 5 (lambda (i) (convert (+ 100 i)))))
     
     (define (examine res mesg)
       (switch x res

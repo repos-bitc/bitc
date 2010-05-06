@@ -56,11 +56,11 @@
     (subvector->list vec 0 vec.length))
 
   (define (make-mutable-vector n:word e:(mutable 'a))
-    (make-vector n (lambda (i) e)))
+    (MakeVector n (lambda (i) e)))
 
   (define (list->vector l)
     "Given a list, return a vector of its elements."
-    (make-vector (length l) 
+    (MakeVector (length l) 
 		 (lambda (n) (lst.list-nth l n))))
   )
 

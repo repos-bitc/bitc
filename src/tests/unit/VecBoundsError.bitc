@@ -42,6 +42,6 @@
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     ;; The following *should* cause an exception:
-    (let ((v (make-vector 10 (lambda (n) #\c))))
+    (let ((v (MakeVector 10 (lambda (n) #\c))))
       (nth v 12))
     0))

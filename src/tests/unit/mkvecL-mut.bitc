@@ -38,7 +38,7 @@
 (bitc version 0.10)
 
 ;; This program is intended to test the flow of mutability and
-;; interconversion in the presence of the new make-vector.
+;; interconversion in the presence of the new MakeVector.
 
 (define (id x) x)
 
@@ -47,5 +47,5 @@
 (define main.main:(fn (vector string) -> int32)
   (lambda (argv)
     (let ((vec:(vector (mutable int32)) 
-	       (make-vector 30 (lambda (x) (convert x)))))
+	       (MakeVector 30 (lambda (x) (convert x)))))
       vec) 0))

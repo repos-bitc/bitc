@@ -58,7 +58,7 @@
   ;(TS "Time Stamping: " (- stop start))
     
     (define vec:(vector (mutable uint8))
-      (make-vector len zero))
+      (MakeVector len zero))
     
     (set! start (stdlib.getTimeStamp))
     (stdio.write-string stdio.stdout "This is a test string\n")

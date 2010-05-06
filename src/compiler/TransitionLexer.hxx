@@ -64,9 +64,10 @@ struct TransitionLexer {
     lf_block = 0x2u,
     lf_transition = 0x3u,
     lf_version = 0x4u,
-    lf_LispIdents = 0x8u,
     lf_LispComments = 0x10u
   };
+
+  int lispParenDepth;
 
   typedef sherpa::EnumSet<LangFlagsValues> LangFlags;
 
@@ -198,6 +199,13 @@ struct TransitionLexer {
     ifIdentMode = arg;
   }
 
+  /** @brief Fetch next token, return result via @p yylvalp.
+   *
+   * This is the actual work-horse procedure. The one below is a
+   * wrapper for debugging purposes.
+   */
+  int do_lex(ParseType *yylvalp);
+
   /** @brief Fetch next token, return result via @p yylvalp. */
   int lex(ParseType *yylvalp);
 
@@ -214,7 +222,11 @@ struct TransitionLexer {
      *
      */
     LangFlags whichLang;
-    int tokValue;
+    int sexprTokValue;
+    int blockTokValue;
+
+    KeyWord(const char *_nm, LangFlags _whichLang, int _tokValue);
+    KeyWord(const char *_nm, LangFlags _whichLang, int _lispTokValue, int _blockTokValue);
   };
 
 private:

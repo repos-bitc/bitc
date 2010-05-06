@@ -61,11 +61,11 @@
 (define v33q:(mutable int32) (if #t m1 2:int32))
 
 (define (l2v lst)
-  (make-vector (length lst) 
+  (MakeVector (length lst) 
 		(lambda (n) (ls.list-nth lst n))))
 (define l2vq:(fn (list 'a) -> (vector 'a))
   (lambda (lst)
-    (make-vector (length lst) 
+    (MakeVector (length lst) 
 		  (lambda (n) (ls.list-nth lst n)))))
 
 

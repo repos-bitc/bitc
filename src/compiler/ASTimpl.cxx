@@ -59,7 +59,7 @@ shared_ptr<AST>
 AST::makeBoolLit(const sherpa::LToken &tok)
 {
   shared_ptr<AST> ast = AST::make(at_boolLiteral, tok);
-  if (tok.str == "#t")
+  if (tok.str == "#t" || tok.str == "true")
     ast->litValue.b = true;
   else
     ast->litValue.b = false;

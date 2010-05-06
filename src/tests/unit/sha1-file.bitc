@@ -71,7 +71,7 @@
  ;(set! start (stdlib.getTimeStamp))
     (define iStream (stdio.open (nth argvec 1) "r"))
     (define input:(vector (mutable uint8)) 
-      (make-vector (convert len)
+      (MakeVector (convert len)
 		   (lambda (i) 
 		     (if (not (stdio.eof? iStream))
 			 (stdio.read-byte iStream) 0))))

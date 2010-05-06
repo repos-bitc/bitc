@@ -42,4 +42,4 @@
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)   
     (begin (vector #t #f #t).length
-	   (nth (make-vector 25 (lambda (n) 0:int32)) 10))))
+	   (nth (MakeVector 25 (lambda (n) 0:int32)) 10))))
