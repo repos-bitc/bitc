@@ -71,7 +71,7 @@ public:
   }
 };
 
-/** @brief Hand-crafted S-expression lexer.
+/** @brief Hand-crafted transitional syntax lexer.
  *
  * TransitionLexer is yet another variant of shap's generic hand-crafted
  * lexer. The main job of TransitionLexer is to generate tokens (instances
