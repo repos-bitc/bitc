@@ -61,11 +61,11 @@ TransitionLexer::valid_char_printable(uint32_t ucs4)
 }
 
 bool
-TransitionLexer::valid_ident_punct(uint32_t ucs4, bool allowExtended)
+TransitionLexer::valid_ident_punct(uint32_t ucs4)
 {
   if (ucs4 == '_')
     return true;
-  if (allowExtended && strchr("!$%&|*+-/<>=?@~", ucs4))
+  if (strchr("!$%&|*+-/<>=?@~", ucs4))
     return true;
   return false;
 }
@@ -75,9 +75,8 @@ TransitionLexer::valid_ident_start(uint32_t ucs4)
 {
   // Extended characters are only permitted as the first
   // identifier character in lisp identifier mode.
-  bool allowExtended = (currentLang & lf_sexpr) ? true : false;
   return (u_hasBinaryProperty(ucs4,UCHAR_XID_START)
-          || valid_ident_punct(ucs4, allowExtended));
+          || valid_ident_punct(ucs4));
 }
 
 bool
@@ -86,7 +85,7 @@ TransitionLexer::valid_ident_continue(uint32_t ucs4)
   // For the moment, extended characters are permitted as 
   // continue characters.
   return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE) ||
-          valid_ident_punct(ucs4, true));
+          valid_ident_punct(ucs4));
 }
 
 bool
@@ -446,7 +445,7 @@ TransitionLexer::kwCheck(const char *s)
 
   if (currentLang & lf_sexpr) 
     return tk_SxpIdent;
-  else if (valid_ident_punct(s[0], true))
+  else if (valid_ident_punct(s[0]))
     return tk_MixIdent;
   else
     return tk_BlkIdent;
