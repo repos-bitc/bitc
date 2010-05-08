@@ -16,6 +16,7 @@ src/libbitc/Makefile
 src/man/Makefile
 src/tests/Makefile
 src/tests/unit/Makefile
+src/tests/n-unit/Makefile
 
 # Emacs turds:
 *~

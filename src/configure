@@ -8693,7 +8693,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile compiler/config.h compiler/Makefile libbitc/Makefile man/Makefile tests/Makefile tests/unit/Makefile"
+ac_config_files="$ac_config_files Makefile compiler/config.h compiler/Makefile libbitc/Makefile man/Makefile tests/Makefile tests/unit/Makefile tests/n-unit/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -9299,6 +9299,7 @@ do
     "man/Makefile") CONFIG_FILES="$CONFIG_FILES man/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "tests/unit/Makefile") CONFIG_FILES="$CONFIG_FILES tests/unit/Makefile" ;;
+    "tests/n-unit/Makefile") CONFIG_FILES="$CONFIG_FILES tests/n-unit/Makefile" ;;
 
   *) { { $as_echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 $as_echo "$as_me: error: invalid argument: $ac_config_target" >&2;}

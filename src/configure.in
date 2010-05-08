@@ -138,6 +138,7 @@ AC_CONFIG_FILES([Makefile]
 		[libbitc/Makefile]
 		[man/Makefile]
                 [tests/Makefile]
-                [tests/unit/Makefile])
+                [tests/unit/Makefile]
+                [tests/n-unit/Makefile])
 
 AC_OUTPUT
