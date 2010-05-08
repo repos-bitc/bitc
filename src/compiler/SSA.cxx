@@ -659,7 +659,7 @@ ssa(std::ostream& errStream,
       shared_ptr<AST> len = AST::make(at_select, ast->loc,
                                       UseCase(expr), lengthIdent);
 #endif
-      
+
       shared_ptr<AST> ltApp = AST::make(at_apply, ast->loc, lt, UseCase(ndx), len);
       
       shared_ptr<AST> throwAst = AST::make(at_throw, ast->loc, IOB);
