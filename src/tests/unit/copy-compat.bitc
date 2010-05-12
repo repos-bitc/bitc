@@ -37,7 +37,7 @@
 
 (bitc version 0.10)
 (define dupize1 (lambda (x) (dup x)))
-(forall ((copy-compat 'a 'b))
+(forall ((CopyCompat 'a 'b))
   (define dupize2:(fn 'a -> (ref 'b))
     (lambda (x) (dup x))))
 

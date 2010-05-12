@@ -45,7 +45,7 @@
 
 (define q1 (St (vector #t) #f))
 (define q2:(mutable 'a) (St (vector #t) #f))
-;WORKS OK because of copy-compatibility at arg position of vector
+;WORKS OK because of CopyCompatibility at arg position of vector
 ;constructor !
 (define q3:(St (mutable bool) bool) (St (vector #t) #f))
 ;SHOULD NOT WORK

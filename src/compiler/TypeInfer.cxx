@@ -3730,7 +3730,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
                             A |- e:'a    
          ___________________________________________________
-            A |- e.fld: 'b \ has-field('a, field(fld), 'b)
+            A |- e.fld: 'b \ HasField('a, field(fld), 'b)
 
          ------------------------------------------------*/
 
@@ -3771,8 +3771,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
         shared_ptr<Type> fldName = Type::make(ty_field);
         fldName->litValue.s = ast->child(1)->s;
 
-        // has-field constraint is of the form:
-        // has-field('structure, 'field-name, 'field-type)
+        // HasField constraint is of the form:
+        // HasField('structure, 'field-name, 'field-type)
         UNIFY(trail, ast->loc, hf->TypeArg(0), t1);
         UNIFY(trail, ast->loc, hf->TypeArg(1), fldName);
         UNIFY(trail, ast->loc, hf->TypeArg(2), ast->symType);

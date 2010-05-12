@@ -50,17 +50,17 @@
 ;   ((f, g), h)))
 
 
-;(define abc:(forall ((ref-types int32)) int32) 
+;(define abc:(forall ((RefTypes int32)) int32) 
 ;  10)
 
-;(define abc:(forall ((copy-compat 'a 'b)) (fn ('a 'b) ())) 
+;(define abc:(forall ((CopyCompat 'a 'b)) (fn ('a 'b) ())) 
 ;  (lambda (x:'a y:'b) ()))
 
-;(define fgh:(forall ((copy-compat (ref 'a) (ref 'a))) (fn ('a 'b) ())) 
+;(define fgh:(forall ((CopyCompat (ref 'a) (ref 'a))) (fn ('a 'b) ())) 
 ;  (lambda (x:'a y:'b) ()))
 
 ;(define dupize1 (lambda (x) (dup x)))
-;(define dupize2:(forall ((copy-compat 'a 'b))
+;(define dupize2:(forall ((CopyCompat 'a 'b))
 ;			(fn ('a) (ref 'b)))
 ;  (lambda (x) (dup x)))
 

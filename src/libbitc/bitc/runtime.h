@@ -461,28 +461,28 @@ DEFCLOSURE_INLINE(_17bitc_DTprelude_CN___GT_EQ_SHFN2_6string_6string_4bool);
 
 #define DEFSIGNEX(TY1,MTY1,TY2,MTY2)					\
   INLINE TY2								\
-  DEFUN(_24bitc_DTprelude_CNsign_HYextend_SHFN1##MTY1##MTY2, TY1 arg1) \
+  DEFUN(_23bitc_DTprelude_CNSignExtend_SHFN1##MTY1##MTY2, TY1 arg1) \
   {									\
     return (TY2) arg1;							\
   }									\
-  DEFCLOSURE_INLINE(_24bitc_DTprelude_CNsign_HYextend_SHFN1##MTY1##MTY2)
+  DEFCLOSURE_INLINE(_23bitc_DTprelude_CNSignExtend_SHFN1##MTY1##MTY2)
 
 
 #define DEFZEROEX(TY1,MTY1,TY2,MTY2)					\
   INLINE TY2								\
-  DEFUN(_24bitc_DTprelude_CNzero_HYextend_SHFN1##MTY1##MTY2, TY1 arg1) \
+  DEFUN(_23bitc_DTprelude_CNZeroExtend_SHFN1##MTY1##MTY2, TY1 arg1) \
   {									\
     return (TY2) arg1;							\
   }									\
-  DEFCLOSURE_INLINE(_24bitc_DTprelude_CNzero_HYextend_SHFN1##MTY1##MTY2)
+  DEFCLOSURE_INLINE(_23bitc_DTprelude_CNZeroExtend_SHFN1##MTY1##MTY2)
 
 #define DEFTRUNCATE(TY1,MTY1,TY2,MTY2)					\
   INLINE TY2								\
-  DEFUN(_21bitc_DTprelude_CNtruncate_SHFN1##MTY1##MTY2, TY1 arg1)	\
+  DEFUN(_21bitc_DTprelude_CNTruncate_SHFN1##MTY1##MTY2, TY1 arg1)	\
   {									\
     return (TY2) arg1;							\
   }									\
-  DEFCLOSURE_INLINE(_21bitc_DTprelude_CNtruncate_SHFN1##MTY1##MTY2)
+  DEFCLOSURE_INLINE(_21bitc_DTprelude_CNTruncate_SHFN1##MTY1##MTY2)
 
 #define DEFSIGNED(TY1,MTY1,TY2,MTY2)					\
   INLINE TY2								\

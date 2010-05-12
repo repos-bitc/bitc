@@ -51,10 +51,10 @@ SpecialNames::SpecialNames()
   sp_fp                = "FloatLit";
   sp_iob               = "IndexBoundsError";
   sp_lt                = "__index_lt";
-  sp_ref_types         = "ref-types";
-  sp_copy_compat       = "copy-compat";
-  sp_copy_from_to      = "copy-from-to";
-  sp_has_field         = "has-field";
+  sp_ref_types         = "RefTypes";
+  sp_copy_compat       = "CopyCompat";
+  sp_copy_from_to      = "CopyFromTo";
+  sp_has_field         = "HasField";
 }
 
 std::string

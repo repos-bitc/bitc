@@ -50,7 +50,7 @@
   en11 en12 (ptr1 p:(ref int32)))
 
 ;; Constrained Reference type
-(forall ((ref-types 'a)) 
+(forall ((RefTypes 'a)) 
   (defunion (un-ct-ref 'a):val 
     en21 en22 (ptr2 p:'a)))
 

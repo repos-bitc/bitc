@@ -306,7 +306,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
     
     if(pred->defAst->s == has_field) {
       handlable = true;
-      DEBUG(SPSOL) errStream << "\t\tCase has-field for "
+      DEBUG(SPSOL) errStream << "\t\tCase HasField for "
                             << pred->asString(Options::debugTvP)
                             << std::endl;
       

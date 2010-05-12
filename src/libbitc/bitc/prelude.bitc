@@ -55,21 +55,21 @@
   
   // Set of all by-reference types, covering (ref 'a), (vector 'a),
   // boxed structure types, boxed union types, and exception.
-  (deftypeclass (ref-types 'a) :closed)
+  (deftypeclass (RefTypes 'a) :closed)
 
   // Type class describing all types 'a that can receive a copy from
   // type 'b. This is NOT symmetric. For example:
   //   (forall ((LiteralUnitType int32 'a))
-  //     (copy-from-to 'a 'b)
-  //     but NOT (copy-from-to 'b 'a)
-  (deftypeclass (copy-from-to 'a 'b) :closed)
+  //     (CopyFromTo 'a 'b)
+  //     but NOT (CopyFromTo 'b 'a)
+  (deftypeclass (CopyFromTo 'a 'b) :closed)
 
   // Type class relating two types 'a, 'b such that they are
   // compatible under binding, assignment, and argument passing. This
   // relation is symmetric.
   //
-  // (copy-compat 'a 'b) => (copy-from-to 'a 'b) AND (copy-from-to 'b 'a)
-  (deftypeclass (copy-compat 'a 'b) :closed)
+  // (CopyCompat 'a 'b) => (CopyFromTo 'a 'b) AND (copy-from-to 'b 'a)
+  (deftypeclass (CopyCompat 'a 'b) :closed)
 
   // Type class identifying the set of types for which a literal
   // syntax exists. This is actually NOT an incestuously magical type
@@ -79,9 +79,9 @@
 
   // Type class used for record polymorphism. Describes a field/method
   // of some structure type 's having a field/method 'nm with type 'a.
-  // This type class is called has-field, but really means 
-  // has-field-or-method
-  (deftypeclass (has-field 's 'nm 'a) :closed)
+  // This type class is called HasField, but really means 
+  // HasField-or-method
+  (deftypeclass (HasField 's 'nm 'a) :closed)
   
   ///////////////////////////////////////////////////////////////
   //    Structure and union definitions 
@@ -91,7 +91,7 @@
     none
     (some value:'a))
   
-  (forall ((ref-types 'a))
+  (forall ((RefTypes 'a))
     (defunion  (nullable 'a):val
       Null
       (non-null ptr:'a)))
@@ -157,9 +157,9 @@
   // syntactic support in the form of a first argument that is a 
   // type name.
 
-  (proclaim sign-extend:(fn 'a -> 'b) external)
-  (proclaim zero-extend:(fn 'a -> 'b) external)
-  (proclaim truncate:(fn 'a -> 'b) external)
+  (proclaim SignExtend:(fn 'a -> 'b) external)
+  (proclaim ZeroExtend:(fn 'a -> 'b) external)
+  (proclaim Truncate:(fn 'a -> 'b) external)
 
   (proclaim unsigned:(fn 'a -> 'b) external)
   (proclaim signed  :(fn 'a -> 'b) external)

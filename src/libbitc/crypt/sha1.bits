@@ -207,7 +207,7 @@
 	      ((>= i 20) ())
 	      
 	      (set! (nth digest i)
-		    (truncate (>> (nth context.digest (>> i 2))
+		    (Truncate (>> (nth context.digest (>> i 2))
 				  (* 8 (- 3 (bit-and i 16r03)))))))
 	  sha1.sha-Success)
 	context.corrupted))
@@ -300,21 +300,21 @@
     (do ((t 0 (+ t 1)))
 	((>= t 16) ())
 	(set! (nth W t)
-	      (<< (zero-extend 
+	      (<< (ZeroExtend 
 		   (nth context.message (* t 4))) 24))
 	(set! (nth W t)
 	      (bit-or (nth W t)
-		      (<< (zero-extend 
+		      (<< (ZeroExtend 
 			   (nth context.message 
 				      (+ (* t 4) 1))) 16)))
 	(set! (nth W t)
 	      (bit-or (nth W t)
-		      (<< (zero-extend 
+		      (<< (ZeroExtend 
 			   (nth context.message 
 				      (+ (* t 4) 2))) 8)))
 	(set! (nth W t)
 	      (bit-or (nth W t)
-		      (zero-extend 
+		      (ZeroExtend 
 		       (nth context.message (+ (* t 4) 3))))))
 
     (do ((t 16 (+ t 1)))
@@ -469,21 +469,21 @@
   
      ;; Store the message length as the last 8 octets
     (set! (nth context.message 56) 
-	  (truncate (>> context.lenHigh 24)))
+	  (Truncate (>> context.lenHigh 24)))
     (set! (nth context.message 57) 
-	  (truncate (>> context.lenHigh 16)))
+	  (Truncate (>> context.lenHigh 16)))
     (set! (nth context.message 58) 
-	  (truncate (>> context.lenHigh 8)))
+	  (Truncate (>> context.lenHigh 8)))
     (set! (nth context.message 59)
-	  (truncate context.lenHigh))
+	  (Truncate context.lenHigh))
     (set! (nth context.message 60) 
-	  (truncate (>> context.lenLow 24)))
+	  (Truncate (>> context.lenLow 24)))
     (set! (nth context.message 61)
-	  (truncate (>> context.lenLow 16)))
+	  (Truncate (>> context.lenLow 16)))
     (set! (nth context.message 62) 
-	  (truncate (>> context.lenLow 8)))
+	  (Truncate (>> context.lenLow 8)))
     (set! (nth context.message 63) 
-	  (truncate context.lenLow))
+	  (Truncate context.lenLow))
     
     (sha1ProcessMessageBlock context)
     )

@@ -38,7 +38,7 @@
 (bitc version 0.10)
 
 ;; Test for porper instantiation in the presence of
-;; full-copy-compatibility. 
+;; full-CopyCompatibility. 
 
 (define mb:(mutable bool) #t)
 (define p1:(pair bool (mutable bool)) (pair #t mb))

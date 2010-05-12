@@ -37,11 +37,11 @@
 
 (bitc version 0.10)
 
-(forall ((ref-types (ref int32))) 
+(forall ((RefTypes (ref int32))) 
   (define abc:(ref int32)
     (dup 10)))
 
-(forall ((ref-types 'a)) 
+(forall ((RefTypes 'a)) 
   (define refID:(fn 'a -> 'a)
     (lambda (x) x)))
 

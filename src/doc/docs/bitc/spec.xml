@@ -79,12 +79,6 @@
       languages have a common frame of reference on which to base
       their discussions.
     </p>
-    <p>
-      While the current language specification uses a Scheme-like
-      concrete syntax, this choice is a matter of convenience only. It
-      is entirely possible to build a C-like concrete syntax for BitC,
-      and at some point it may become compelling to do so.
-    </p>
   </abstract>
   <toc/>
   <sect1>
@@ -110,26 +104,41 @@
       <title>About the Language</title>
       <p>
 	BitC is conceptually derived in various measure from Standard
-	ML, Scheme, and C. Like Standard ML <cite
+	ML, and C. Like Standard ML <cite
 	ref="milner1997definition"/>, BitC has a formal semantics,
-	static typing, a type inference mechanism, and type
-	variables. Like Scheme <cite ref="kelsey1998r5rs"/>, BitC uses
-	a surface syntax that is readily represented as BitC
-	data. Like C <cite ref="ansi1999c"/>, BitC provides full
-	control over data structure representation, which is necessary
-	for high-performance systems programming.  The BitC language
-	is a direct expression of the typed lambda calculus with side
+	static typing, a type inference mechanism, and type variables.
+	Like C <cite ref="ansi1999c"/>, BitC provides full control
+	over data structure representation, which is necessary for
+	high-performance systems programming. BitC also provides
+	support for unboxed mutable locations.  The BitC language is a
+	direct expression of the typed lambda calculus with side
 	effects, extended to be able to reflect the semantics of
 	explicit representation.
       </p>
       <p>
-	In contrast to ML, BitC syntax is designed to discourage
-	currying. Currying encourages the formation of closures that
+        Versions of BitC up to 0.10 used an s-expression syntax
+        similar to that of Scheme <cite ref="kelsey1998r5rs"/>.  This
+        allowed us to focus our attention on type inference and
+        semantic issues first. The main goal of version 0.11 is to
+        choose the production surface syntax for the language. For the
+        sake of people who are already familiar with the s-expression
+        syntax, this version of the specification includes
+        <em>both</em> syntactic variants.
+      </p>
+      <p>
+        The transitional syntax is testing a curried style of
+	application syntax so that we can experiment with mixfix
+	operators. In spite of this syntax, BitC application is not
+	curried. Currying encourages the formation of closures that
 	capture non-global state. This requires dynamic storage
-	allocation to instantiate these closures at runtime. Since
-	there are applications of BitC in which dynamic allocation is
-	prohibited, currying is an inappropriate idiom for this
-	language.
+	allocation to instantiate these closures at runtime, and it is
+	difficult for the programmer to determine syntactically when
+	this is happening. Since there are applications of BitC in
+	which dynamic allocation is prohibited, currying is an
+	inappropriate default idiom for this language. We will
+	consider introducing explicit convenience syntax for curried
+	application if this proves to be an impediment to effective
+	use of the language.
       </p>
       <p>
 	In contrast to both Scheme and ML, BitC does <em>not</em>
@@ -142,11 +151,11 @@
 	tail recursion that we know about, while still permitting a
 	high-performance translation of BitC code to C code.
       </p>
-      <p>
-	Building on the features of ACL2 <cite ref="kaufmann00acl2"/>,
-	BitC incorporates explicit support for stating theorems and
-	invariants about the program as part of the program's text.
-      </p>
+      <!-- <p> -->
+      <!--   Building on the features of ACL2 <cite ref="kaufmann00acl2"/>, -->
+      <!--   BitC incorporates explicit support for stating theorems and -->
+      <!--   invariants about the program as part of the program's text. -->
+      <!-- </p> -->
       <p>
 	As a consequence of these modifications, BitC is suitable for
 	the expression of verifiable, low-level ``systems'' programs.
@@ -158,6 +167,62 @@
 	program's data representation. Indeed, this was a key reason
 	for our decision to move our implementation efforts into BitC.
       </p>
+    </sect2>
+    <sect2>
+      <title>Transitional Input Language</title>
+      <p>
+        Development of the transitional syntax is proceeding in
+        phases. The compiler internally relies on being able to
+        emit and re-read the s-expression syntax when building
+        libraries. In order to limit the amount of upheaval
+        associated with the syntactic migration, the current compiler
+        accepts two types of input according to the source language
+        version declaration found in the input unit of compilation.
+      </p>
+      <p>
+        Any source file beginning with a source version written as an
+        s-expression:
+      </p>
+      <literallayout>
+(bitc-version 0.11)</literallayout>
+      <p indent="no">
+        will accept only the s-expression syntax. In the absence of an
+        explicit version declaration, this form is currently assumed
+        to ease transition.
+      </p>
+      <p>
+        If the version declaration is given in the new syntax:
+      </p>
+      <literallayout>
+bitc version 0.11</literallayout>
+      <p indent="no">
+        then several changes occur in the accepted input language:
+      </p>
+      <ul>
+        <li>
+          <p>
+            The lisp-style comment syntax beginning with a semicolon
+            is no longer accepted after the initial
+            <progident>bitc</progident> keyword is seen. Note that the
+            semicolon at the end of this declaration is <em>not</em>
+            the beginning of a comment.
+          </p>
+        </li>
+        <li>
+          <p>
+            Top-level forms will be accepted in either the new syntax
+            or the s-expression syntax. The two may be intermingled at
+            the granularity of top-level forms. A given top level form
+            must be entirely s-expression syntax or entirely new
+            syntax.
+          </p>
+          <p>
+            For purposes of this change, forms that appear at top level
+            within a surrounding module or interface form are
+            considered top-level forms.
+          </p>
+        </li>
+      </ul>
     </sect2>
     <sect2>
       <title>Conventions Used in This Document</title>
@@ -222,11 +287,17 @@
 	expression indicating its result type, as in:
       </p>
       <literallayout>
+(a + b) : int32
 (+ a b) : int32</literallayout>
       <p indent="no">
 	by similarly qualifying a formal parameter, as in:
       </p>
       <literallayout>
+def fact x =
+  if (x &lt; 0) then - (fact (-x))
+  else if (x == 0) then 1
+  else x * fact (x - 1)
+
 (define (fact x:int32)
   (cond ((&lt; x 0) (- (fact (- x))))
         ((= x 0) 1)

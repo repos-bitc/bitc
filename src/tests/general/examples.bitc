@@ -148,7 +148,7 @@
 ;; PROPOSED: 
 ;; An internal typeclass called ``refType'' should be defined, which
 ;; contins all reference types by default, so that polymorphism can be
-;; constrained to ref-types only, when the user desires so.
+;; constrained to RefTypes only, when the user desires so.
 ;; This may be done to ensure that the definition is not
 ;; polyinstantiated, or does not incur other overheads (like
 ;; dictionaries)  due to support for polymorphism.
@@ -203,7 +203,7 @@
 ;; the types based on the flow of types, but can always be overridden
 ;; by user annotation.
 
-;; Illustration of copy-compatibility at argument passing position.
+;; Illustration of CopyCompatibility at argument passing position.
 (define (plus1 x:(mutable int32)) 
   (set! x (+ x 1)) x)
 
