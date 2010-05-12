@@ -675,10 +675,6 @@ TransitionLexer::do_lex(ParseType *lvalp)
     here.updateWith(thisToken);
     return c;
 
-  case '*':
-  case '+':
-    goto identifier;
-
   case ';':                        // Comments
     if ((currentLang & lf_LispComments) == 0) {
       lvalp->tok = LToken(here, thisToken);
