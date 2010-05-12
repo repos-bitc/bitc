@@ -61,22 +61,22 @@
       (nil (throw IndexBoundsError))
       (cons x.cdr)))
 
-  (define (list-nth lst n)
+  (define (list_nth lst n)
     "Return nth element of list."
     (if (== n 0)
 	(car lst)
-	(list-nth (cdr lst) (- n 1))))
+	(list_nth (cdr lst) (- n 1))))
   
-  (define (list-length lst)
+  (define (list_length lst)
     "Return length of list."
-    (define (length-helper lst count)
+    (define (length_helper lst count)
       (if (null? lst)
 	  count
-	  (length-helper (cdr lst) (+ 1 count))))
-    (length-helper lst 0:word))
+	  (length_helper (cdr lst) (+ 1 count))))
+    (length_helper lst 0:word))
   
   (definstance (Length (list 'a)) 
-    (length = list-length))
+    (length = list_length))
   
   (define (append l1 l2)
     "Append two lists."
@@ -85,8 +85,8 @@
 
   (define (reverse lst)
     "Reverse the argument list."
-    (define (do-reverse l1 l2)
+    (define (do_reverse l1 l2)
       (if (null? l1) l2
-	  (do-reverse (cdr l1) (cons (car l1) l2))))
-    (do-reverse lst nil))
+	  (do_reverse (cdr l1) (cons (car l1) l2))))
+    (do_reverse lst nil))
   )

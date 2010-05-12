@@ -45,9 +45,9 @@
 (define (S2.f s:S2) s.i)
 (define (zero) 0:int32)
 
-(define (fm-poly s) (s.f))
+(define (fm_poly s) (s.f))
 
 (define (main.main argv:(vector string))
-  (fm-poly (S1 zero))
-  (fm-poly (S2 0))
+  (fm_poly (S1 zero))
+  (fm_poly (S2 0))
   )

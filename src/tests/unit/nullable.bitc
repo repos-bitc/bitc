@@ -41,7 +41,7 @@
 
 (define main.main:(fn (vector string) -> int32)
   (lambda(argvec)
-    (let ((np Null))
+    (let ((np null))
       (switch tmp np
-	      (Null 0)
-	      (non-null 1)))))
+	      (null 0)
+	      (not_null 1)))))

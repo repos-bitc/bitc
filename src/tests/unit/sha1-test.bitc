@@ -49,7 +49,7 @@
 		 (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-			0 0 0 0) 0 #f sha1.sha-Success))
+			0 0 0 0) 0 #f sha1.sha_Success))
     
     (define digest:(array (mutable uint8) 20)
       (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
@@ -58,23 +58,23 @@
     
     (define (examine res mesg)
       (switch x res
-	(sha1.sha-Success ())
-	(otherwise (stdio.write-string stdio.stdout "Failed ")
-		   (stdio.write-string stdio.stdout mesg)
-		   (stdio.write-string stdio.stdout ": ")
-		   (stdio.write-string stdio.stdout (sha1.shaResultAsString res))
-		   (stdio.write-char stdio.stdout #\linefeed))))
+	(sha1.sha_Success ())
+	(otherwise (stdio.write_string stdio.stdout "Failed ")
+		   (stdio.write_string stdio.stdout mesg)
+		   (stdio.write_string stdio.stdout ": ")
+		   (stdio.write_string stdio.stdout (sha1.shaResultAsString res))
+		   (stdio.write_char stdio.stdout #\linefeed))))
     
     (examine (sha1.sha1Reset sha) "Reset")
     (examine (sha1.sha1Input sha input) "Input")
     (examine (sha1.sha1Result sha digest) "Result")
     
-    (stdio.write-char stdio.stdout #\tab)
+    (stdio.write_char stdio.stdout #\tab)
     (do ((i:word 0 (+ i 1)))
 	((>= i 20) ())
-	(stdio.write-int stdio.stdout (nth digest i) 16)
-	(stdio.write-char stdio.stdout #\space))
-    (stdio.write-char stdio.stdout #\linefeed)
+	(stdio.write_int stdio.stdout (nth digest i) 16)
+	(stdio.write_char stdio.stdout #\space))
+    (stdio.write_char stdio.stdout #\linefeed)
     
     0))
   

@@ -39,7 +39,7 @@
 (import bitc.main as main)
 (provide bitc.main main)
  
-(define add-one (lambda (x) (+ x 1)))
+(define AddOne (lambda (x) (+ x 1)))
 
 (define f (let ((x 1))
 	    (lambda (y:int32) (+ x y))))

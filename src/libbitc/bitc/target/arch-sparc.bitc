@@ -39,5 +39,5 @@
 (interface bitc.target.arch
   ;; Architecture-specific information for SPARC
 
-  (define word-size 32)
+  (define WordSize 32)
 )

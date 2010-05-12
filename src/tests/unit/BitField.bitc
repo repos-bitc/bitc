@@ -48,7 +48,7 @@
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
-    (let ((s-instance (s 1 2))
-	  (u-instance (a 1)))
+    (let ((s_instance (s 1 2))
+	  (u_instance (a 1)))
       (begin (cons 0:int32 (cons 1 nil))
 	     0))))

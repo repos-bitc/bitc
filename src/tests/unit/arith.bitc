@@ -49,7 +49,7 @@
   (++ = +) (-- = -))
 
 (defexception LengthError)
-(define (list-sum x y)
+(define (list_sum x y)
   (switch e1 x
     (nil (switch e2 y
            (nil nil)
@@ -57,10 +57,10 @@
     (cons (switch e2 y
             (nil (throw LengthError))
             (cons (cons (+ e1.car e2.car)
-			(list-sum e1.cdr e2.cdr)
+			(list_sum e1.cdr e2.cdr)
 			))))))
 
-(define (list-dif x y)
+(define (list_dif x y)
   (switch e1 x
     (nil (switch e2 y
            (nil nil)
@@ -68,17 +68,17 @@
     (cons (switch e2 y
             (nil (throw LengthError))
             (cons (cons (- e1.car e2.car)
-			(list-sum e1.cdr e2.cdr)
+			(list_sum e1.cdr e2.cdr)
 			))))))
 
-;(defthm list-sum-throws-on-length-mismatch
+;(defthm list_sum-throws-on-length-mismatch
 ;  (implies (not `(equal (length ,l1) (length ,l2)))
-;           `(try (begin (list-sum ,l1 ,l2) #f)
+;           `(try (begin (list_sum ,l1 ,l2) #f)
 ;		 (catch id (otherwise #t)))))
 ;
-;(defthm list-sum-valid-on-length-match
+;(defthm list_sum-valid-on-length-match
 ;  (implies `(equal (length ,l1) (length ,l2)))
-;           `(try (begin (list-sum ,l1 ,l2) #t)
+;           `(try (begin (list_sum ,l1 ,l2) #t)
 ;		 (catch id (otherwise #f))))
   
 ;; should not work
@@ -86,7 +86,7 @@
 ;; lp lm)
 
 (definstance (arith (list 'a) (list 'b) (list 'a))
-  (++ = list-sum) (-- = list-dif))
+  (++ = list_sum) (-- = list_dif))
 
 ;; Should not work
 ;;(definstance (arith int32 int32 int64)

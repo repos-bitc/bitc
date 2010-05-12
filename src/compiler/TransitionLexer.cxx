@@ -53,25 +53,114 @@ using namespace sherpa;
 #include "TransitionLexer.hxx"
 
 bool
-TransitionLexer::valid_char_printable(uint32_t ucs4)
+TransitionLexer::valid_ident_punct(ucs4_t ucs4)
 {
-  if (strchr("!#$%&`()*+-.,/:;<>=?@_|~^[]'", ucs4))
+  switch (ucs4) {
+  case '_':
     return true;
-  return false;
+
+  case '!':
+  case '$':
+  case '%':
+  case '&':
+  case '|':
+  case '*':
+  case '+':
+  case '-':
+  case '/':
+  case '<':
+  case '>':
+  case '=':
+  case '?':
+  case '@':
+  case '~':
+    return true;
+
+  default:
+    return false;
+  }
 }
 
 bool
-TransitionLexer::valid_ident_punct(uint32_t ucs4)
+TransitionLexer::valid_char_printable(ucs4_t ucs4)
 {
-  if (ucs4 == '_')
+  switch (ucs4) {
+  case '_':
     return true;
-  if (strchr("!$%&|*+-/<>=?@~", ucs4))
+
+    // This should match the list above in valid_ident_punct:
+  case '!':
+  case '$':
+  case '%':
+  case '&':
+  case '|':
+  case '*':
+  case '+':
+  case '-':
+  case '/':
+  case '<':
+  case '>':
+  case '=':
+  case '?':
+  case '@':
+  case '~':
     return true;
-  return false;
+
+    // Other characters that can appear "naked" in a character constant:
+  case '^':
+  case '.':
+  case ',':
+  case ':':
+  case ';':
+  case '[':
+  case ']':
+  case '\'':
+  case '#':
+  case '`':
+  case '(':
+  case ')':
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool
-TransitionLexer::valid_ident_start(uint32_t ucs4)
+TransitionLexer::valid_ident_separator(ucs4_t ucs4)
+{
+  switch (ucs4) {
+  case '(':
+  case ')':
+  case ' ':
+  case '\t':
+  case '\n':
+  case '\r':
+  case ',':
+  case ':':
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool
+TransitionLexer::alpha_ident_start(ucs4_t ucs4)
+{
+  // Extended characters are only permitted as the first
+  // identifier character in lisp identifier mode.
+  return (u_hasBinaryProperty(ucs4,UCHAR_XID_START));
+}
+
+bool
+TransitionLexer::alpha_ident_continue(ucs4_t ucs4)
+{
+  // Extended characters are only permitted as the first
+  // identifier character in lisp identifier mode.
+  return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE));
+}
+
+bool
+TransitionLexer::valid_ident_start(ucs4_t ucs4)
 {
   // Extended characters are only permitted as the first
   // identifier character in lisp identifier mode.
@@ -80,7 +169,7 @@ TransitionLexer::valid_ident_start(uint32_t ucs4)
 }
 
 bool
-TransitionLexer::valid_ident_continue(uint32_t ucs4)
+TransitionLexer::valid_ident_continue(ucs4_t ucs4)
 {
   // For the moment, extended characters are permitted as 
   // continue characters.
@@ -89,14 +178,14 @@ TransitionLexer::valid_ident_continue(uint32_t ucs4)
 }
 
 bool
-TransitionLexer::valid_ifident_start(uint32_t ucs4)
+TransitionLexer::valid_ifident_start(ucs4_t ucs4)
 {
   return (isalpha(ucs4) || ucs4 == '_');
   //  return (u_hasBinaryProperty(ucs4,UCHAR_XID_START));
 }
 
 bool
-TransitionLexer::valid_ifident_continue(uint32_t ucs4)
+TransitionLexer::valid_ifident_continue(ucs4_t ucs4)
 {
   return (isalpha(ucs4) || isdigit(ucs4) || ucs4 == '_' || ucs4 == '-');
   //  return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE) ||
@@ -104,20 +193,20 @@ TransitionLexer::valid_ifident_continue(uint32_t ucs4)
 }
 
 bool
-TransitionLexer::valid_tv_ident_start(uint32_t ucs4)
+TransitionLexer::valid_tv_ident_start(ucs4_t ucs4)
 {
   return (u_hasBinaryProperty(ucs4,UCHAR_XID_START) || 
           ucs4 == '_');
 }
 
 bool
-TransitionLexer::valid_tv_ident_continue(uint32_t ucs4)
+TransitionLexer::valid_tv_ident_continue(ucs4_t ucs4)
 {
   return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE) ||
           ucs4 == '_');
 }
 bool
-TransitionLexer::valid_charpoint(uint32_t ucs4)
+TransitionLexer::valid_charpoint(ucs4_t ucs4)
 {
   if (valid_char_printable(ucs4))
     return true;
@@ -126,7 +215,7 @@ TransitionLexer::valid_charpoint(uint32_t ucs4)
 }
 
 bool
-TransitionLexer::valid_charpunct(uint32_t ucs4)
+TransitionLexer::valid_charpunct(ucs4_t ucs4)
 {
   if (strchr("!\"#$%&'()*+,-./:;{}<=>?@[\\]^_`|~", ucs4))
     return true;
@@ -249,7 +338,6 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( ">",                lf_block,             '>' ),
   TransitionLexer::KeyWord( ">=",               lf_block,             tk_GE ),
   TransitionLexer::KeyWord( ">>",               lf_block,             tk_RSHIFT ),
-  TransitionLexer::KeyWord( "^",                lf_block,             '^' ),
   TransitionLexer::KeyWord( "and",              lf_transition,        tk_AND ),
   TransitionLexer::KeyWord( "apply",            lf_transition,        tk_APPLY ),
   TransitionLexer::KeyWord( "array",            lf_transition,        tk_ARRAY ),
@@ -263,7 +351,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "block",            lf_transition,        tk_BLOCK ),
   TransitionLexer::KeyWord( "bool",             lf_transition,        tk_BOOL ),
   TransitionLexer::KeyWord( "break",            lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "by-ref",           lf_transition,        tk_BY_REF ),
+  TransitionLexer::KeyWord( "ByRef",            lf_transition,        tk_BY_REF ),
   TransitionLexer::KeyWord( "case",             lf_transition,        tk_CASE ),
   TransitionLexer::KeyWord( "catch",            lf_transition,        tk_CATCH ),
   TransitionLexer::KeyWord( "char",             lf_transition,        tk_CHAR ),
@@ -306,7 +394,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "float",            lf_transition,        tk_FLOAT ),
   TransitionLexer::KeyWord( "fn",               lf_transition,        tk_FN ),
   TransitionLexer::KeyWord( "forall",           lf_transition,        tk_FORALL ),
-  TransitionLexer::KeyWord( "from",             lf_block,             tk_FROM ),
+  TransitionLexer::KeyWord( "from",             lf_transition,        tk_FROM ),
   TransitionLexer::KeyWord( "if",               lf_transition,        tk_IF ),
   TransitionLexer::KeyWord( "import",           lf_transition,        tk_IMPORT ),
   TransitionLexer::KeyWord( "import!",          lf_transition,        tk_ReservedWord ),
@@ -348,7 +436,6 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "require",          lf_transition,        tk_ReservedWord ),
   TransitionLexer::KeyWord( "reserved",         lf_transition,        tk_RESERVED ),
   TransitionLexer::KeyWord( "return",           lf_transition,        tk_RETURN ),
-  TransitionLexer::KeyWord( "return-from",      lf_transition,        tk_RETURN_FROM ),
   TransitionLexer::KeyWord( "sensory",          lf_transition,        tk_ReservedWord ),
   TransitionLexer::KeyWord( "set!",             lf_transition,        tk_SET ),
   TransitionLexer::KeyWord( "sizeof",           lf_transition,        tk_SIZEOF ),
@@ -394,7 +481,7 @@ kwstrcmp(const void *vKey, const void *vCandidate)
 }
 
 int
-TransitionLexer::kwCheck(const char *s)
+TransitionLexer::kwCheck(const char *s, int identType)
 {
   if (ifIdentMode) {
     if (!valid_ifident_start(*s))
@@ -445,10 +532,7 @@ TransitionLexer::kwCheck(const char *s)
 
   if (currentLang & lf_sexpr) 
     return tk_SxpIdent;
-  else if (valid_ident_punct(s[0]))
-    return tk_MixIdent;
-  else
-    return tk_BlkIdent;
+  else return identType;
 }
 
 void
@@ -587,6 +671,12 @@ void
 TransitionLexer::ungetChar(ucs4_t c)
 {
   char utf[8];
+
+  // Never bother to push back EOF, since it is reproduced by the
+  // input.
+  if (c == EOF)
+    return;
+
   pushBackStack.push(c);
 
   unsigned len = utf8_encode(c, utf);
@@ -663,7 +753,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
     }
     else {
       ungetChar(c);
-      goto identifier;
+      c = '/';
+      goto mixfix_identifier;
     }
 
   case '`':
@@ -874,7 +965,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
     c = getChar();
     if (digitValue(c, 10) < 0) {
       ungetChar(c);
-      goto identifier;
+      c = '-';
+      goto mixfix_identifier;
     }
 
     /* ELSE fall through to digit processing */
@@ -995,8 +1087,10 @@ TransitionLexer::do_lex(ParseType *lvalp)
     return EOF;
 
   default:
-    if (valid_ident_start(c))
+    if (valid_ident_start(c)) {
+      ungetChar(c);
       goto identifier;
+    }
 
     // FIX: Malformed token
     return EOF;
@@ -1005,9 +1099,87 @@ TransitionLexer::do_lex(ParseType *lvalp)
  identifier:
   do {
     c = getChar();
-  } while (valid_ident_continue(c));
+  } while (c == '_');
   ungetChar(c);
-  lvalp->tok = LToken(here, thisToken);
-  here.updateWith(thisToken);
-  return kwCheck(thisToken.c_str());
+
+ mixfix_identifier:
+
+  // Possibly an alpha identifier:
+  if (alpha_ident_start(c)) {
+  more:
+    do {
+      c = getChar();
+    } while (alpha_ident_continue(c));
+
+    // Trailing '?' or '!' are allowed under certain circumstances:
+    if (c == '!' || c == '?') {
+      int c2 = getChar();
+
+      if (valid_ident_separator(c2)) {
+        ungetChar(c2);
+      }
+      else {
+          ungetChar(c2);
+          ungetChar(c);
+      }
+      goto ident_done;
+
+      switch (c2) {
+      case '(':
+      case ')':
+      case ' ':
+      case '\t':
+      case '\n':
+      case '\r':
+      case ',':
+        {
+          // Followed by a valid separator, so it's okay:
+          ungetChar(c2);
+          goto ident_done;
+        }
+      default:
+          // NOT followed by a valid separator, so it's not a trailing case:
+          ungetChar(c2);
+          ungetChar(c);
+          goto ident_done;
+      }
+
+    }
+    // alphaident->alphaident is legal:
+    else if (c == '-') {
+      int c2 = getChar();
+      if (c2 != '>') {
+        ungetChar(c2);
+        ungetChar(c);
+        goto ident_done;
+      }
+
+      int c3 = getChar();
+      if (!alpha_ident_start(c3)) {
+        ungetChar(c3);
+        ungetChar(c2);
+        ungetChar(c);
+        goto ident_done;
+      }
+
+      goto more;
+    }
+    else
+      ungetChar(c);
+
+  ident_done:
+    lvalp->tok = LToken(here, thisToken);
+    here.updateWith(thisToken);
+    return kwCheck(thisToken.c_str(), tk_BlkIdent);
+  }
+  else if (valid_ident_punct(c)) {
+    do {
+      c = getChar();
+    } while (valid_ident_punct(c));
+    ungetChar(c);
+
+    lvalp->tok = LToken(here, thisToken);
+    here.updateWith(thisToken);
+    return kwCheck(thisToken.c_str(), tk_MixIdent);
+  }
 }

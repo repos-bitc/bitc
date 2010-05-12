@@ -39,7 +39,7 @@
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define (add1 n:(by-ref 'a)) (set! n (+ n 1)) n)
+(define (add1 n:(ByRef 'a)) (set! n (+ n 1)) n)
 
 (define main.main:(fn (vector string) -> int32) 
   (lambda (argVec)

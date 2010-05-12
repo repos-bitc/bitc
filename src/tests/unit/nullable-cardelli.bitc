@@ -46,16 +46,16 @@
 
 
 ;; Evident Reference type
-(defunion un-ref:val 
+(defunion un_ref:val 
   en11 en12 (ptr1 p:(ref int32)))
 
 ;; Constrained Reference type
 (forall ((RefTypes 'a)) 
-  (defunion (un-ct-ref 'a):val 
+  (defunion (un_ct_ref 'a):val 
     en21 en22 (ptr2 p:'a)))
 
 ;; Nullable type
-(defunion un-nul:val 
+(defunion un_nul:val 
   en31 en32 (ptr3 p:(nullable (ref int32))))
 
 (define main.main:(fn (vector string) -> int32)
@@ -63,5 +63,5 @@
     (let ((n (dup 10)))
       (ptr1 n)
       (ptr2 n)
-      (ptr3 (non-null n)) 
+      (ptr3 (not_null n)) 
       0)))

@@ -62,11 +62,11 @@
 
 (define (l2v lst)
   (MakeVector (length lst) 
-		(lambda (n) (ls.list-nth lst n))))
+		(lambda (n) (ls.list_nth lst n))))
 (define l2vq:(fn (list 'a) -> (vector 'a))
   (lambda (lst)
     (MakeVector (length lst) 
-		  (lambda (n) (ls.list-nth lst n)))))
+		  (lambda (n) (ls.list_nth lst n)))))
 
 
 (define (lvm lst:(list (mutable char)))

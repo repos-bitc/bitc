@@ -87,12 +87,12 @@
   (import bitc.stdlib as stdlib)
 
 
-  ;; Definition of SHA1 context
-  ;; I think shaNull can never happen for the code written in a safe
-  ;; language, just maintaining it for conformance with standards.
+  // Definition of SHA1 context
+  // I think shaNull can never happen for the code written in a safe
+  // language, just maintaining it for conformance with standards.
   
-  (defunion sha-Result:val
-    sha-Success sha-Null sha-InputTooLong sha-StateError)
+  (defunion sha_Result:val
+    sha_Success sha_Null sha_InputTooLong sha_StateError)
   
   ;;(define sha1HashSize 20:uint32)
   
@@ -103,13 +103,13 @@
     message   : (array (mutable uint8) 64)
     messNdx   : (mutable word)
     computed  : (mutable bool)
-    corrupted : (mutable sha-Result))
+    corrupted : (mutable sha_Result))
   
-  (proclaim sha1Reset:(fn sha1Context -> sha-Result))
-  (proclaim sha1Input:(fn sha1Context (vector (mutable uint8)) -> sha-Result))
+  (proclaim sha1Reset:(fn sha1Context -> sha_Result))
+  (proclaim sha1Input:(fn sha1Context (vector (mutable uint8)) -> sha_Result))
   (proclaim sha1Result:(fn sha1Context 
-			   (by-ref (array (mutable uint8) 20))
-			   -> sha-Result))
-  (proclaim shaResultAsString:(fn sha-Result -> string))
+			   (ByRef (array (mutable uint8) 20))
+			   -> sha_Result))
+  (proclaim shaResultAsString:(fn sha_Result -> string))
 )  
   

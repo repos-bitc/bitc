@@ -50,7 +50,7 @@
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
-    (let ((s-instance (s 1 (array 1 2 3))))
+    (let ((s_instance (s 1 (array 1 2 3))))
       (begin (cons i0 (cons i1 nil))
 	     i0))))
   

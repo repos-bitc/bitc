@@ -43,9 +43,9 @@
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
-    (bit-and i i)
-    (bit-or i i)
-    (bit-not i)
+    (bit_and i i)
+    (bit_or i i)
+    (bit_not i)
     (<< i 2)
     (>> i 2)
     0))

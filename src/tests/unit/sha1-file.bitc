@@ -44,9 +44,9 @@
 
 
 (define (TS str ts)
-  (stdio.write-string stdio.stdout str)
-  (stdio.write-int stdio.stdout ts 10)  
-  (stdio.write-char stdio.stdout #\linefeed))  
+  (stdio.write_string stdio.stdout str)
+  (stdio.write_int stdio.stdout ts 10)  
+  (stdio.write_char stdio.stdout #\linefeed))  
 
 (define (id x) (convert x))
 
@@ -60,7 +60,7 @@
 		 (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-			0 0 0 0) 0 #f sha1.sha-Success))
+			0 0 0 0) 0 #f sha1.sha_Success))
     
     (define digest:(array (mutable uint8) 20)
       (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
@@ -74,12 +74,12 @@
       (MakeVector (convert len)
 		   (lambda (i) 
 		     (if (not (stdio.eof? iStream))
-			 (stdio.read-byte iStream) 0))))
+			 (stdio.read_byte iStream) 0))))
   ;(do ((i 0 (+ i 1)))
   ;    ((>= i len) ())
   ;    (set! (nth input i) 
   ;	    (if (not (stdio.eof? iStream))
-  ;		(stdio.read-byte iStream) 0)))  
+  ;		(stdio.read_byte iStream) 0)))  
     (stdio.close iStream)
     
  ;(set! stop (stdlib.getTimeStamp)) 
@@ -87,12 +87,12 @@
     
     (define (examine res mesg)
       (switch x res
-	(sha1.sha-Success ())
-	(otherwise (stdio.write-string stdio.stdout "Failed ")
-		   (stdio.write-string stdio.stdout mesg)
-		   (stdio.write-string stdio.stdout ": ")
-		   (stdio.write-string stdio.stdout (sha1.shaResultAsString res))
-		   (stdio.write-char stdio.stdout #\linefeed))))
+	(sha1.sha_Success ())
+	(otherwise (stdio.write_string stdio.stdout "Failed ")
+		   (stdio.write_string stdio.stdout mesg)
+		   (stdio.write_string stdio.stdout ": ")
+		   (stdio.write_string stdio.stdout (sha1.shaResultAsString res))
+		   (stdio.write_char stdio.stdout #\linefeed))))
     
     (set! start (stdlib.getTimeStamp)) 
     (do ((i:word 0 (+ i 1)))
@@ -107,10 +107,10 @@
     (do ((i 0 (+ i 1)))
 	((>= i 20) ())
 	(if (> i 0)
-	    (begin (stdio.write-char stdio.stdout #\space) ())
+	    (begin (stdio.write_char stdio.stdout #\space) ())
 	    ())
-	(stdio.write-int stdio.stdout (nth digest i) 16))
-    (stdio.write-char stdio.stdout #\linefeed)
+	(stdio.write_int stdio.stdout (nth digest i) 16))
+    (stdio.write_char stdio.stdout #\linefeed)
     
  ;(set! stop (stdlib.getTimeStamp)) 
  ;(TS "Output: " (- stop start))

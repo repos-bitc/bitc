@@ -39,16 +39,17 @@
   (import bitc.list as lst)
   (import bitc.vector as vec)
 
-  (proclaim string-length : (fn string -> word) external bitc_string_length)
-  (proclaim string-nth :    (fn string word -> char) external bitc_string_nth)
+  (proclaim string_length : (fn string -> word) external bitc_string_length)
+  (proclaim string_nth :    (fn string word -> char) external bitc_string_nth)
 
-  (proclaim string-map : (fn string (fn char -> ()) -> ()) external bitc_string_map)
+  (proclaim string_map : (fn string (fn char -> ()) -> ()) external bitc_string_map)
+
   (define (string->list s)
     (let ((lst : (mutable (list char)) nil))
 
-      (do ((pos (string-length s) (- pos 1)))
+      (do ((pos (string_length s) (- pos 1)))
 	  ((== pos 0) lst)
-	  (set! lst (cons (string-nth s (- pos 1)) lst)))))
+	  (set! lst (cons (string_nth s (- pos 1)) lst)))))
 
   (proclaim list->string : (fn (list char) -> string) external bitc_list_string)
 

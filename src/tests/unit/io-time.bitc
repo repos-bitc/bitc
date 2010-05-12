@@ -43,9 +43,9 @@
 
 
 (define (TS str ts)
-  (stdio.write-string stdio.stdout str)
-  (stdio.write-int stdio.stdout ts 10)  
-  (stdio.write-char stdio.stdout #\linefeed))  
+  (stdio.write_string stdio.stdout str)
+  (stdio.write_int stdio.stdout ts 10)  
+  (stdio.write_char stdio.stdout #\linefeed))  
 
 (define (zero x) 0)
 
@@ -61,7 +61,7 @@
       (MakeVector len zero))
     
     (set! start (stdlib.getTimeStamp))
-    (stdio.write-string stdio.stdout "This is a test string\n")
+    (stdio.write_string stdio.stdout "This is a test string\n")
     (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Print to stdout: " (- stop start))
     
@@ -76,21 +76,21 @@
   ;(TS "Open Write Stream: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
-    (define temp (stdio.read-byte iStream))
+    (define temp (stdio.read_byte iStream))
     (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Read 1 Byte from file: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
     (do ((i 0 (+ i 1)))
 	((>= i len) ())
-	(set! (nth vec i) (stdio.read-byte iStream)))  
+	(set! (nth vec i) (stdio.read_byte iStream)))  
     (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Input from File: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
     (do ((i 0 (+ i 1)))
 	((>= i len) ())
-	(stdio.write-byte stdio.stdout (nth vec i)))  
+	(stdio.write_byte stdio.stdout (nth vec i)))  
     (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Write to stdout: " (- stop start))
     
@@ -99,14 +99,14 @@
 	((>= i len) ())
 	(set!  (nth vec i)
 	       (if (not (stdio.eof? iStream))
-		   (stdio.read-byte iStream) 0)))  
+		   (stdio.read_byte iStream) 0)))  
     (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Checked Input From file: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
     (do ((i 0 (+ i 1)))
 	((>= i len) ())
-	(stdio.write-byte oStream (nth vec i)))  
+	(stdio.write_byte oStream (nth vec i)))  
     (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Write to file: " (- stop start))
     

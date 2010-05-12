@@ -43,10 +43,10 @@
   inc: (fn -> ())
   odd: (fn -> bool)) 
 
-(define (has-Odd? oList)
+(define (has_odd? oList)
   (switch x oList 
     (nil #f)
-    (cons (or (x.car.odd) (has-Odd? x.cdr)))))
+    (cons (or (x.car.odd) (has_odd? x.cdr)))))
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argVec)
@@ -55,30 +55,30 @@
     (define obji
       (begin
 	(define i 10:int32)               ;state
-	(define (inc-i) (set! i (+ i 1))) ;methods
-	(define (odd-i) (!= (% i 2) 0))
-	(Obj inc-i odd-i)))
+	(define (inc_i) (set! i (+ i 1))) ;methods
+	(define (odd_i) (!= (% i 2) 0))
+	(Obj inc_i odd_i)))
     
     ;; An object with encapsulated float state
     (define objf 
       (begin
 	(define f 10.0:float)
-	(define (inc-f) (set! f (+ f 1.0)))
-	(define (odd-f) #f) ; :)
-	(Obj inc-f odd-f)))
+	(define (inc_f) (set! f (+ f 1.0)))
+	(define (odd_f) #f) ; :)
+	(Obj inc_f odd_f)))
 	
     ;; An object with encapsulated boolean state
     (define objb
       (begin
 	(define b #t)
-	(define (inc-b) (set! b #t))  ; :)
-	(define (odd-b) #t)           ; :)
-	(Obj inc-b odd-b)))
+	(define (inc_b) (set! b #t))  ; :)
+	(define (odd_b) #t)           ; :)
+	(Obj inc_b odd_b)))
 
     ;; All objects have the same type Obj, no way to recover the inner
     ;; hidden state.
     (define objList (cons obji (cons objf (cons objb nil))))
     
     ;; Operation on list of objects
-    (if (has-Odd? objList) 0:int32 1:int32)
+    (if (has_odd? objList) 0:int32 1:int32)
     ))

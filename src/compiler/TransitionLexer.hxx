@@ -167,16 +167,19 @@ struct TransitionLexer {
   /** @brief Push a lookahead character back onto the input stream. */
   void ungetChar(ucs4_t);
 
-  bool valid_ident_punct(uint32_t ucs4);
-  bool valid_ident_start(uint32_t ucs4);
-  bool valid_ident_continue(uint32_t ucs4);
-  bool valid_ifident_start(uint32_t ucs4);
-  bool valid_ifident_continue(uint32_t ucs4);
-  bool valid_tv_ident_start(uint32_t ucs4);
-  bool valid_tv_ident_continue(uint32_t ucs4);
-  bool valid_char_printable(uint32_t ucs4);
-  bool valid_charpoint(uint32_t ucs4);
-  bool valid_charpunct(uint32_t ucs4);
+  bool valid_ident_separator(ucs4_t ucs4);
+  bool valid_ident_punct(ucs4_t ucs4);
+  bool alpha_ident_start(ucs4_t ucs4);
+  bool alpha_ident_continue(ucs4_t ucs4);
+  bool valid_ident_start(ucs4_t ucs4);
+  bool valid_ident_continue(ucs4_t ucs4);
+  bool valid_ifident_start(ucs4_t ucs4);
+  bool valid_ifident_continue(ucs4_t ucs4);
+  bool valid_tv_ident_start(ucs4_t ucs4);
+  bool valid_tv_ident_continue(ucs4_t ucs4);
+  bool valid_char_printable(ucs4_t ucs4);
+  bool valid_charpoint(ucs4_t ucs4);
+  bool valid_charpunct(ucs4_t ucs4);
   unsigned validate_string(const char *s);
 
   /** @brief Constructor
@@ -264,7 +267,7 @@ private:
    * appear in @p keywords, return the token number meaning
    * identifier.
    */
-  int kwCheck(const char *s);
+  int kwCheck(const char *s, int identType);
 };
 
 #endif /* TRANSITIONLEXER_HXX */

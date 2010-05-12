@@ -224,7 +224,6 @@ static unsigned VersionMinor(const std::string s)
 %left <tok> '='
 
 %token <tok> tk_BLOCK
-%token <tok> tk_RETURN_FROM // nuke me
 %token <tok> tk_RETURN tk_FROM tk_CONTINUE
 
 %token <tok> tk_PAIR
@@ -3348,10 +3347,6 @@ sxp_unqual_expr: '(' tk_BLOCK sxp_ident sxp_block ')' {
 blk_stmt: tk_FROM blk_ident tk_RETURN blk_stmt {
   SHOWPARSE("blk_stmt -> FROM blk_ident RETURN blk_stmt");
   $$ = AST::make(at_return_from, $1.loc, $2, $4);
-}
-sxp_unqual_expr: '(' tk_RETURN_FROM sxp_ident sxp_expr ')' {
-  SHOWPARSE("sxp_unqual_expr -> (RETURN-FROM sxp_ident sxp_expr)");
-  $$ = AST::make(at_return_from, $2.loc, $3, $4);
 }
 sxp_unqual_expr: '(' tk_FROM sxp_ident tk_RETURN sxp_expr ')' {
   SHOWPARSE("sxp_unqual_expr -> (RETURN sxp_ident FROM sxp_expr)");

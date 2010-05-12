@@ -107,7 +107,7 @@
 
 
 (bitc version 0.10)
-(module sha1-impl
+(module sha1_impl
   (import bitc.stdio as stdio)
   (import bitc.stdlib as stdlib)
   (import crypt.sha1 as sha1)
@@ -120,10 +120,10 @@
 
   ;; Define the SHA1 circular left shift operation
   (define (circShift bits value) 
-    (bit-or (<< value bits) (>> value (- 32 bits))))
+    (bit_or (<< value bits) (>> value (- 32 bits))))
 
   ;; Encoding the C-like Return statement using exceptions
-  (defexception Ret retVal:sha1.sha-Result)
+  (defexception Ret retVal:sha1.sha_Result)
 
   ;; Forward declarations
   (proclaim sha1PadMessage:(fn sha1.sha1Context -> ()))
@@ -133,10 +133,10 @@
   ;; Strings for Sha-Result
   (define (sha1.shaResultAsString res)
     (switch x res 
-      (sha1.sha-Success "Success")
-      (sha1.sha-Null    "Null")
-      (sha1.sha-InputTooLong "Too-Long")
-      (sha1.sha-StateError "State-Error")))
+      (sha1.sha_Success "Success")
+      (sha1.sha_Null    "Null")
+      (sha1.sha_InputTooLong "Too-Long")
+      (sha1.sha_StateError "State-Error")))
     
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;  SHA1Reset  
@@ -164,9 +164,9 @@
     (set! (nth context.digest 4) 16rC3D2E1F0)
     
     (set! context.computed #f)
-    (set! context.corrupted sha1.sha-Success)
+    (set! context.corrupted sha1.sha_Success)
     
-    sha1.sha-Success
+    sha1.sha_Success
     )
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -190,8 +190,8 @@
 
 
   (define (sha1.sha1Result context:sha1.sha1Context 
-		      digest:(by-ref (array (mutable uint8) 20)))
-    (if context.corrupted.sha-Success 
+		      digest:(ByRef (array (mutable uint8) 20)))
+    (if context.corrupted.sha_Success 
 	(begin
 	  (if (not context.computed)
 	      (begin 
@@ -208,8 +208,8 @@
 	      
 	      (set! (nth digest i)
 		    (Truncate (>> (nth context.digest (>> i 2))
-				  (* 8 (- 3 (bit-and i 16r03)))))))
-	  sha1.sha-Success)
+				  (* 8 (- 3 (bit_and i 16r03)))))))
+	  sha1.sha_Success)
 	context.corrupted))
 
 
@@ -233,33 +233,33 @@
 
   (define (sha1.sha1Input context:sha1.sha1Context message:(vector (mutable uint8))) 
     (if (== message.length 0)
-	sha1.sha-Success
+	sha1.sha_Success
 	(if context.computed
 	    (begin
-	      (set! context.corrupted sha1.sha-StateError)
-	      sha1.sha-StateError)
-	    (if context.corrupted.sha-Success
+	      (set! context.corrupted sha1.sha_StateError)
+	      sha1.sha_StateError)
+	    (if context.corrupted.sha_Success
 		(begin 
 		  (do ((i 0 (+ i 1)))
 		      ((and (>= i message.length)
-			    context.corrupted.sha-Success) ())
+			    context.corrupted.sha_Success) ())
 		      
 		      (set! (nth context.message context.messNdx)
-			    (bit-and (nth message i) 16rff))
+			    (bit_and (nth message i) 16rff))
 		      (set! context.messNdx (+ context.messNdx 1))
 		      (set! context.lenLow (+ context.lenLow 8))
 		      (if (== context.lenLow 0)
 			  (begin
 			    (set! context.lenHigh (+ context.lenHigh 1))
 			    (if (== context.lenHigh 0)
-				(set! context.corrupted sha1.sha-InputTooLong) ()))
+				(set! context.corrupted sha1.sha_InputTooLong) ()))
 			  ())
 		      
 		      (if (== context.messNdx 64)	     
 			  (sha1ProcessMessageBlock context) 
 			  ()))
 		  
-		  sha1.sha-Success)
+		  sha1.sha_Success)
 		context.corrupted)))
     )
 
@@ -303,17 +303,17 @@
 	      (<< (ZeroExtend 
 		   (nth context.message (* t 4))) 24))
 	(set! (nth W t)
-	      (bit-or (nth W t)
+	      (bit_or (nth W t)
 		      (<< (ZeroExtend 
 			   (nth context.message 
 				      (+ (* t 4) 1))) 16)))
 	(set! (nth W t)
-	      (bit-or (nth W t)
+	      (bit_or (nth W t)
 		      (<< (ZeroExtend 
 			   (nth context.message 
 				      (+ (* t 4) 2))) 8)))
 	(set! (nth W t)
-	      (bit-or (nth W t)
+	      (bit_or (nth W t)
 		      (ZeroExtend 
 		       (nth context.message (+ (* t 4) 3))))))
 
@@ -321,11 +321,11 @@
 	((>= t 80) ())
 	(set! (nth W t)
 	      (circShift 1
-			 (bit-xor 
+			 (bit_xor 
 			  (nth W (- t 3))
-			  (bit-xor
+			  (bit_xor
 			   (nth W (- t 8))
-			   (bit-xor
+			   (bit_xor
 			    (nth W (- t 14))
 			    (nth W (- t 16))))))))
 
@@ -339,8 +339,8 @@
 	((>= t 20) ())
 
 	(define temp (+ (circShift 5 A)
-			(+ (bit-or (bit-and B C)
-				   (bit-and (bit-not B) D))
+			(+ (bit_or (bit_and B C)
+				   (bit_and (bit_not B) D))
 			   (+ E
 			      (+ (nth W t)
 				 (nth K 0))))))
@@ -354,8 +354,8 @@
 	((>= t 40) ())
 
 	(define temp (+ (circShift 5 A)
-			(+ (bit-xor B
-				    (bit-xor C D))
+			(+ (bit_xor B
+				    (bit_xor C D))
 			   (+ E
 			      (+ (nth W t)
 				 (nth K 1))))))
@@ -370,9 +370,9 @@
 	((>= t 60) ())
 
 	(define temp (+ (circShift 5 A)
-			(+ (bit-or (bit-and B C)
-				   (bit-or (bit-and B D) 
-					   (bit-and C D)))
+			(+ (bit_or (bit_and B C)
+				   (bit_or (bit_and B D) 
+					   (bit_and C D)))
 			   (+ E
 			      (+ (nth W t)
 				 (nth K 2))))))
@@ -386,8 +386,8 @@
 	((>= t 80) ())
 
 	(define temp (+ (circShift 5 A)
-			(+ (bit-xor B
-				    (bit-xor C D))
+			(+ (bit_xor B
+				    (bit_xor C D))
 			   (+ E
 			      (+ (nth W t)
 				 (nth K 3))))))
