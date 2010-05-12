@@ -1110,19 +1110,9 @@ TransitionLexer::do_lex(ParseType *lvalp)
       c = getChar();
     } while (alpha_ident_continue(c));
 
-    // Trailing '!' is allowed under certain circumstances:
-    if (c == '!') {
-      int c2 = getChar();
-
-      if (valid_ident_separator(c2)) {
-        ungetChar(c2);
-      }
-      else {
-        ungetChar(c2);
-        ungetChar(c);
-      }
-    }
-    else
+    // Transitional handling for set! for S-expression LISP
+    // syntax. The conditional will go away once we drop set!
+    if (thisToken != "set!")
       ungetChar(c);
 
   ident_done:
