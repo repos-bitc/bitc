@@ -36,13 +36,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bitc version 0.10)
-(import bitc.vector list->vector)
+(import bitc.vector listToVector)
 
 (define (lv_m lst:(list (mutable char)))
-  (list->vector lst))
+  (listToVector lst))
 
 (define (lv_nm lst:(list char))
-  (list->vector lst))
+  (listToVector lst))
 
 (import bitc.main as main)
 (provide bitc.main main)

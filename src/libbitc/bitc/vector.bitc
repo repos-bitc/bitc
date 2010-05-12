@@ -44,21 +44,21 @@
 	((== pos vec.length) ())
 	(f (nth vec pos))))
 
-  (define (vector->list vec:(vector 'a))
+  (define (vectorToList vec:(vector 'a))
     "Given a vector, return a list of its elements."
-    (define (subvector->list vec pos len)
+    (define (subvectorToList vec pos len)
       (cond ((> pos len)
 	     (throw IndexBoundsError))
 	    ((== pos len) nil: (list 'a))
 	    (otherwise
 	     (cons (nth vec pos)
-		   (subvector->list vec (+ pos 1) len)))))
-    (subvector->list vec 0 vec.length))
+		   (subvectorToList vec (+ pos 1) len)))))
+    (subvectorToList vec 0 vec.length))
 
   (define (make_mutable_vector n:word e:(mutable 'a))
     (MakeVector n (lambda (i) e)))
 
-  (define (list->vector l)
+  (define (listToVector l)
     "Given a list, return a vector of its elements."
     (MakeVector (length l) 
 		 (lambda (n) (lst.list_nth l n))))

@@ -784,7 +784,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
   case '\n':
   case '\r':
     here.updateWith(thisToken);
-    goto startOver;
+  goto startOver;
 
 
   case ':':
@@ -812,8 +812,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
   case ')':
   case '^':
     lvalp->tok = LToken(here, thisToken);
-    here.updateWith(thisToken);
-    return c;
+  here.updateWith(thisToken);
+  return c;
 
 
   case '"':                        // String literal
@@ -1106,7 +1106,6 @@ TransitionLexer::do_lex(ParseType *lvalp)
 
   // Possibly an alpha identifier:
   if (alpha_ident_start(c)) {
-  more:
     do {
       c = getChar();
     } while (alpha_ident_continue(c));
@@ -1119,8 +1118,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
         ungetChar(c2);
       }
       else {
-          ungetChar(c2);
-          ungetChar(c);
+        ungetChar(c2);
+        ungetChar(c);
       }
       goto ident_done;
 
@@ -1138,31 +1137,12 @@ TransitionLexer::do_lex(ParseType *lvalp)
           goto ident_done;
         }
       default:
-          // NOT followed by a valid separator, so it's not a trailing case:
-          ungetChar(c2);
-          ungetChar(c);
-          goto ident_done;
-      }
-
-    }
-    // alphaident->alphaident is legal:
-    else if (c == '-') {
-      int c2 = getChar();
-      if (c2 != '>') {
+        // NOT followed by a valid separator, so it's not a trailing case:
         ungetChar(c2);
         ungetChar(c);
         goto ident_done;
       }
 
-      int c3 = getChar();
-      if (!alpha_ident_start(c3)) {
-        ungetChar(c3);
-        ungetChar(c2);
-        ungetChar(c);
-        goto ident_done;
-      }
-
-      goto more;
     }
     else
       ungetChar(c);

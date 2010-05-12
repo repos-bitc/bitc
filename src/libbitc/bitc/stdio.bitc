@@ -94,7 +94,7 @@
   ;; implemented it will have to suffice.
   (define (write_string ios s)
     (lst.map (lambda (c) (write_char ios c))
-  	     (str.string->list s)))
+  	     (str.stringToList s)))
 
   ;; Integer Output
   (define (write_int ostream x:'a base:'a)
