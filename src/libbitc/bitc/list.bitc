@@ -36,7 +36,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (interface bitc.list
-  (define (null? l:(list 'a))
+  (define (isNull l:(list 'a))
     "Return #t (#f) if list is empty (non-empty)."
     (if l.nil #t #f))
 
@@ -70,7 +70,7 @@
   (define (list_length lst)
     "Return length of list."
     (define (length_helper lst count)
-      (if (null? lst)
+      (if (isNull lst)
 	  count
 	  (length_helper (cdr lst) (+ 1 count))))
     (length_helper lst 0:word))
@@ -80,13 +80,13 @@
   
   (define (append l1 l2)
     "Append two lists."
-    (if (null? l1) l2
+    (if (isNull l1) l2
 	(cons (car l1) (append (cdr l1) l2))))
 
   (define (reverse lst)
     "Reverse the argument list."
     (define (do_reverse l1 l2)
-      (if (null? l1) l2
+      (if (isNull l1) l2
 	  (do_reverse (cdr l1) (cons (car l1) l2))))
     (do_reverse lst nil))
   )

@@ -98,7 +98,7 @@
     (do ((i 0 (+ i 1)))
 	((>= i len) ())
 	(set!  (nth vec i)
-	       (if (not (stdio.eof? iStream))
+	       (if (not (stdio.isEOF iStream))
 		   (stdio.read_byte iStream) 0)))  
     (set! stop (stdlib.getTimeStamp)) 
   ;(TS "Checked Input From file: " (- stop start))

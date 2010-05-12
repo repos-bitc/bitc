@@ -1110,8 +1110,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
       c = getChar();
     } while (alpha_ident_continue(c));
 
-    // Trailing '?' or '!' are allowed under certain circumstances:
-    if (c == '!' || c == '?') {
+    // Trailing '!' is allowed under certain circumstances:
+    if (c == '!') {
       int c2 = getChar();
 
       if (valid_ident_separator(c2)) {
@@ -1121,28 +1121,6 @@ TransitionLexer::do_lex(ParseType *lvalp)
         ungetChar(c2);
         ungetChar(c);
       }
-      goto ident_done;
-
-      switch (c2) {
-      case '(':
-      case ')':
-      case ' ':
-      case '\t':
-      case '\n':
-      case '\r':
-      case ',':
-        {
-          // Followed by a valid separator, so it's okay:
-          ungetChar(c2);
-          goto ident_done;
-        }
-      default:
-        // NOT followed by a valid separator, so it's not a trailing case:
-        ungetChar(c2);
-        ungetChar(c);
-        goto ident_done;
-      }
-
     }
     else
       ungetChar(c);

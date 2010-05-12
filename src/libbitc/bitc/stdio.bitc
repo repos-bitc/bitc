@@ -61,7 +61,7 @@
   ;;
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  (proclaim eof? : (fn stream -> bool) external bitc_stdio_eofp)
+  (proclaim isEOF : (fn stream -> bool) external bitc_stdio_eofp)
 
   ;; Open a file with given name and mode
   (proclaim open : (fn string string -> stream) external bitc_stdio_open)

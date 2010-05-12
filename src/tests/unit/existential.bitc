@@ -43,10 +43,10 @@
   inc: (fn -> ())
   odd: (fn -> bool)) 
 
-(define (has_odd? oList)
+(define (hasOdd oList)
   (switch x oList 
     (nil #f)
-    (cons (or (x.car.odd) (has_odd? x.cdr)))))
+    (cons (or (x.car.odd) (hasOdd x.cdr)))))
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argVec)
@@ -80,5 +80,5 @@
     (define objList (cons obji (cons objf (cons objb nil))))
     
     ;; Operation on list of objects
-    (if (has_odd? objList) 0:int32 1:int32)
+    (if (hasOdd objList) 0:int32 1:int32)
     ))
