@@ -1,0 +1,205 @@
+State 7 conflicts: 1 shift/reduce
+
+
+Grammar
+
+    0 $accept: start $end
+
+    1 start: expr
+
+    2 expr: infix_expr
+
+    3 primary_expr: '1'
+    4             | '(' expr ')'
+
+    5 postfix_expr: primary_expr
+    6             | postfix_expr tk_PreInPost
+
+    7 prefix_expr: postfix_expr
+    8            | tk_PreInPost prefix_expr
+
+    9 infix_expr: prefix_expr
+   10           | infix_expr tk_PreInPost prefix_expr
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'(' (40) 4
+')' (41) 4
+'1' (49) 3
+error (256)
+tk_PreInPost (258) 6 8 10
+
+
+Nonterminals, with rules where they appear
+
+$accept (7)
+    on left: 0
+start (8)
+    on left: 1, on right: 0
+expr (9)
+    on left: 2, on right: 1 4
+primary_expr (10)
+    on left: 3 4, on right: 5
+postfix_expr (11)
+    on left: 5 6, on right: 6 7
+prefix_expr (12)
+    on left: 7 8, on right: 8 9 10
+infix_expr (13)
+    on left: 9 10, on right: 2 10
+
+
+state 0
+
+    0 $accept: . start $end
+
+    tk_PreInPost  shift, and go to state 1
+    '1'           shift, and go to state 2
+    '('           shift, and go to state 3
+
+    start         go to state 4
+    expr          go to state 5
+    primary_expr  go to state 6
+    postfix_expr  go to state 7
+    prefix_expr   go to state 8
+    infix_expr    go to state 9
+
+
+state 1
+
+    8 prefix_expr: tk_PreInPost . prefix_expr
+
+    tk_PreInPost  shift, and go to state 1
+    '1'           shift, and go to state 2
+    '('           shift, and go to state 3
+
+    primary_expr  go to state 6
+    postfix_expr  go to state 7
+    prefix_expr   go to state 10
+
+
+state 2
+
+    3 primary_expr: '1' .
+
+    $default  reduce using rule 3 (primary_expr)
+
+
+state 3
+
+    4 primary_expr: '(' . expr ')'
+
+    tk_PreInPost  shift, and go to state 1
+    '1'           shift, and go to state 2
+    '('           shift, and go to state 3
+
+    expr          go to state 11
+    primary_expr  go to state 6
+    postfix_expr  go to state 7
+    prefix_expr   go to state 8
+    infix_expr    go to state 9
+
+
+state 4
+
+    0 $accept: start . $end
+
+    $end  shift, and go to state 12
+
+
+state 5
+
+    1 start: expr .
+
+    $default  reduce using rule 1 (start)
+
+
+state 6
+
+    5 postfix_expr: primary_expr .
+
+    $default  reduce using rule 5 (postfix_expr)
+
+
+state 7
+
+    6 postfix_expr: postfix_expr . tk_PreInPost
+    7 prefix_expr: postfix_expr .
+
+    tk_PreInPost  shift, and go to state 13
+
+    tk_PreInPost  [reduce using rule 7 (prefix_expr)]
+    $default      reduce using rule 7 (prefix_expr)
+
+
+state 8
+
+    9 infix_expr: prefix_expr .
+
+    $default  reduce using rule 9 (infix_expr)
+
+
+state 9
+
+    2 expr: infix_expr .
+   10 infix_expr: infix_expr . tk_PreInPost prefix_expr
+
+    tk_PreInPost  shift, and go to state 14
+
+    $default  reduce using rule 2 (expr)
+
+
+state 10
+
+    8 prefix_expr: tk_PreInPost prefix_expr .
+
+    $default  reduce using rule 8 (prefix_expr)
+
+
+state 11
+
+    4 primary_expr: '(' expr . ')'
+
+    ')'  shift, and go to state 15
+
+
+state 12
+
+    0 $accept: start $end .
+
+    $default  accept
+
+
+state 13
+
+    6 postfix_expr: postfix_expr tk_PreInPost .
+
+    $default  reduce using rule 6 (postfix_expr)
+
+
+state 14
+
+   10 infix_expr: infix_expr tk_PreInPost . prefix_expr
+
+    tk_PreInPost  shift, and go to state 1
+    '1'           shift, and go to state 2
+    '('           shift, and go to state 3
+
+    primary_expr  go to state 6
+    postfix_expr  go to state 7
+    prefix_expr   go to state 16
+
+
+state 15
+
+    4 primary_expr: '(' expr ')' .
+
+    $default  reduce using rule 4 (primary_expr)
+
+
+state 16
+
+   10 infix_expr: infix_expr tk_PreInPost prefix_expr .
+
+    $default  reduce using rule 10 (infix_expr)
