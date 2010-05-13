@@ -212,11 +212,11 @@ static unsigned VersionMinor(const std::string s)
    precedence operators come first: */
 %left <tok> tk_OR
 %left <tok> tk_AND
+%left <tok> tk_EQUALS tk_NOTEQUALS
+%left <tok> '<' tk_LE '>' tk_GE
 %left <tok> '|'
 %left <tok> '^'
 %left <tok> '&'
-%left <tok> tk_EQUALS tk_NOTEQUALS
-%left <tok> '<' tk_LE '>' tk_GE
 %left <tok> tk_LSHIFT tk_RSHIFT // eventually
 %left <tok> '+' '-'
 %left <tok> '*' '/' '%'
