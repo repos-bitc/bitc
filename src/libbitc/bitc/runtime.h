@@ -303,6 +303,14 @@ DEFCLOSURE_INLINE(bitc_index_lt);
   }								\
   DEFCLOSURE_INLINE(_16bitc_DTprelude_CN___FS_SHFN2##MTY##MTY##MTY)
 
+#define DEFNEGATE(TY,MTY)					\
+  INLINE TY							\
+  DEFUN(_20bitc_DTprelude_CN__negate_SHFN1##MTY##MTY, TY arg1)  \
+  {								\
+    return (-arg1);                                             \
+  }								\
+  DEFCLOSURE_INLINE(_20bitc_DTprelude_CN__negate_SHFN1##MTY##MTY)
+
 #define DEFMODULO(TY,MTY)					\
   INLINE TY							\
   DEFUN(_16bitc_DTprelude_CN___PC_SHFN2##MTY##MTY##MTY, TY arg1, TY arg2) \
@@ -374,6 +382,7 @@ DEFCLOSURE_INLINE(bitc_index_lt);
   DEFMULTIPLY(TY, MTY);			        \
   DEFDIVIDE(TY, MTY);			        \
   DEFMODULO(TY, MTY);			        \
+  DEFNEGATE(TY, MTY);			        \
   DEFORD(TY, MTY)
 
 #define DEFFLOATARITH(TY,MTY) \
