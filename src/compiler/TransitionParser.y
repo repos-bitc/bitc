@@ -147,8 +147,19 @@ static unsigned VersionMinor(const std::string s)
 
 %token <tok> tk_TypeVar
 %token <tok> tk_EffectVar
-%token <tok> tk_Int
-%token <tok> tk_Float
+ /* Nat and NegativeInt are distinguished to ensure that only naturals
+    are legal in types. The lexer returns tk_Nat for positive integer
+    literals and tk_NegativeInt for negative integer literals. In the
+    expression grammar these are re-merged immediately in the IntLit
+    production. 
+
+    Actually, this distinction reflects a bug in the grammar in the
+    handling of unary negation. The lexer should really be returning
+    tk_Nat at all times, and negation should be getting handled at
+    the grammar level. */
+%token <tok> tk_NegativeInt     /* S-expression only */
+%token <tok> tk_Nat         /* in block: *postive* integer */
+%token <tok> tk_Float       /* in block: *postive* float */
 %token <tok> tk_Char
 %token <tok> tk_String
 %token <tok> tk_VersionNumber
@@ -394,7 +405,7 @@ static unsigned VersionMinor(const std::string s)
 
 %type <ast> sxp_ident sxp_defident sxp_useident
 %type <ast> blk_ident blk_defident blk_useident
-%type <ast> intLit floatLit charLit strLit boolLit
+%type <ast> intLit natLit floatLit charLit strLit boolLit
 
 %%
 
@@ -2080,8 +2091,8 @@ sxp_field: '(' tk_FILL sxp_bitfieldtype ')'  {
 
 // Some low level data structures have reserved bit positions that are
 // required to hold designated values.
-sxp_field: '(' tk_RESERVED sxp_bitfieldtype intLit ')'  {
-  SHOWPARSE("sxp_field -> '(' RESERVED sxp_bitfieldtype intLit ')'");
+sxp_field: '(' tk_RESERVED sxp_bitfieldtype natLit ')'  {
+  SHOWPARSE("sxp_field -> '(' RESERVED sxp_bitfieldtype natLit ')'");
   $$ = AST::make(at_fill, $1.loc, $3, $4);
 };
 
@@ -2230,15 +2241,22 @@ blk_prefix_type: blk_postfix_type {
 }
 
 primary_type: sxp_useident  {   /* previously defined sxp_type */
-  SHOWPARSE("sxp_type -> sxp_useident");
+  SHOWPARSE("primary_type -> sxp_useident");
   $$ = $1;
 };
 
 primary_type: '(' ')' {
-  SHOWPARSE("sxp_type -> ( )");
+  SHOWPARSE("primary_type -> ( )");
   $$ = AST::make(at_primaryType, $1.loc);
   $$->s = "unit";                /* for lookup! */
 };
+
+// primary_type: tk_Nat {
+//   SHOWPARSE("primary_type -> Nat");
+//   // Temporary, for testing:
+//   $$ = AST::make(at_primaryType, $1.loc);
+//   $$->s = "unit";                /* for lookup! */
+// }
 
 bool_type: tk_BOOL {
   SHOWPARSE("bool_type -> BOOL");
@@ -2532,12 +2550,12 @@ sxp_type: '(' sxp_type_cpair ')' {
 };
 
 // ARRAY TYPE [3.5.1]               
-blk_postfix_type: blk_postfix_type '[' intLit ']'  {
-  SHOWPARSE("blk_postfix_type -> blk_postfix_type '[' intLit ']'");
+blk_postfix_type: blk_postfix_type '[' natLit ']'  {
+  SHOWPARSE("blk_postfix_type -> blk_postfix_type '[' natLit ']'");
   $$ = AST::make(at_arrayType, $1->loc, $1, $3);
 };
-sxp_type: '(' tk_ARRAY sxp_type intLit ')'  {
-  SHOWPARSE("sxp_type -> ( ARRAY sxp_type intLit )");
+sxp_type: '(' tk_ARRAY sxp_type natLit ')'  {
+  SHOWPARSE("sxp_type -> ( ARRAY sxp_type natLit )");
   $$ = AST::make(at_arrayType, $2.loc, $3, $4);
 };
 // VECTOR TYPE [3.5.2]             
@@ -2599,21 +2617,21 @@ sxp_type: '(' tk_CONST sxp_type ')' {
   };
 
 // BITFIELD TYPE
-blk_bitfieldtype: any_int_type '(' intLit ')' {
-  SHOWPARSE("blk_bitfieldtype -> any_int_type ( intLit )");
+blk_bitfieldtype: any_int_type '(' natLit ')' {
+  SHOWPARSE("blk_bitfieldtype -> any_int_type ( natLit )");
   $$ = AST::make(at_bitfield, $1->loc, $1, $3);
 };
-blk_bitfieldtype: bool_type '(' intLit ')' {
-  SHOWPARSE("blk_bitfieldtype -> bool_type ( intLit )");
+blk_bitfieldtype: bool_type '(' natLit ')' {
+  SHOWPARSE("blk_bitfieldtype -> bool_type ( natLit )");
   $$ = AST::make(at_bitfield, $1->loc, $1, $3);
 };
 
-sxp_bitfieldtype: '(' tk_BITFIELD any_int_type intLit ')' {
-  SHOWPARSE("sxp_bitfieldtype -> ( BITFIELD any_int_type intLit )");
+sxp_bitfieldtype: '(' tk_BITFIELD any_int_type natLit ')' {
+  SHOWPARSE("sxp_bitfieldtype -> ( BITFIELD any_int_type natLit )");
   $$ = AST::make(at_bitfield, $2.loc, $3, $4);
 };
-sxp_bitfieldtype: '(' tk_BITFIELD bool_type intLit ')' {
-  SHOWPARSE("sxp_bitfieldtype -> ( BITFIELD bool_type intLit )");
+sxp_bitfieldtype: '(' tk_BITFIELD bool_type natLit ')' {
+  SHOWPARSE("sxp_bitfieldtype -> ( BITFIELD bool_type natLit )");
   $$ = AST::make(at_bitfield, $2.loc, $3, $4);
 };
 
@@ -3434,6 +3452,13 @@ sxp_unqual_expr: '(' tk_WHEN sxp_expr sxp_block ')' {
   $$ = AST::make(at_when, $2.loc, $3, $4);
 };
 
+// Unary negation - block syntax only:
+blk_prefix_expr: '-' blk_prefix_expr  {
+  SHOWPARSE("blk_prefix_expr -> - blk_prefix_expr");
+  $$ = AST::make(at_apply, $1.loc, 
+                 AST::make(at_ident, LToken($1.loc, "negate")), $2);
+};
+
 // NOT [7.15.3]
 // in the s-expression version this is just a procedure.
 blk_prefix_expr: tk_NOT blk_prefix_expr  {
@@ -3958,15 +3983,17 @@ sxp_unqual_expr: '(' tk_CONTINUE ')' {
 }
 
 /* Literals and Variables */
-// INTEGER LITERALS [2.4.1]
+// BOOLEAN LITERALS [2.4.1]
 trn_literal: boolLit {
   SHOWPARSE("trn_literal -> boolLit");
   $$ = $1;
 };
+// (signed) INTEGER LITERALS [2.4.1]
 trn_literal: intLit {
   SHOWPARSE("trn_literal -> intLit");
   $$ = $1;
 };
+
 // FLOATING POINT LITERALS [2.4.2]
 trn_literal: floatLit {
   SHOWPARSE("trn_literal -> floatLit");
@@ -4139,8 +4166,18 @@ charLit: tk_Char {
   $$ = AST::makeCharLit($1);
 };
 
-intLit: tk_Int {
+intLit: tk_NegativeInt {        /* S-expression only */
   SHOWPARSE("intLit -> <Int=" + $1.str +">");
+  $$ = AST::makeIntLit($1);
+};
+
+intLit: tk_Nat {
+  SHOWPARSE("intLit -> <Nat=" + $1.str +">");
+  $$ = AST::makeIntLit($1);
+};
+
+natLit: tk_Nat {
+  SHOWPARSE("natLit -> <Nat=" + $1.str +">");
   $$ = AST::makeIntLit($1);
 };
 

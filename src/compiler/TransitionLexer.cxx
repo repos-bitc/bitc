@@ -949,6 +949,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
     // of an identifier.
   case '-':
     c = getChar();
+
     if (digitValue(c, 10) < 0) {
       ungetChar(c);
       ungetChar('-');
@@ -999,7 +1000,10 @@ TransitionLexer::do_lex(ParseType *lvalp)
         ungetChar(c);
         lvalp->tok = LToken(here, thisToken);
         here.updateWith(thisToken);
-        return tk_Int;
+        if (thisToken[0] == '-')
+          return tk_NegativeInt;
+        else
+          return tk_Nat;
       }
 
       if (currentLang & lf_version) {
