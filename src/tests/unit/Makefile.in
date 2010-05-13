@@ -122,6 +122,9 @@ all:  $(TARGETS)
 # so that all of the results are reported together.
 test: all $(SOURCE:%.bitc=%.test)
 
+quietly:
+	$(MAKE) TESTOPTS=-q test
+
 install: all test
 
 c-source: $(SOURCE:%.bitc=%.c)
