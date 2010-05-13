@@ -53,35 +53,6 @@ using namespace sherpa;
 #include "TransitionLexer.hxx"
 
 bool
-TransitionLexer::valid_ident_punct(ucs4_t ucs4)
-{
-  switch (ucs4) {
-  case '_':
-    return true;
-
-  case '!':
-  case '$':
-  case '%':
-  case '&':
-  case '|':
-  case '*':
-  case '+':
-  case '-':
-  case '/':
-  case '<':
-  case '>':
-  case '=':
-  case '?':
-  case '@':
-  case '~':
-    return true;
-
-  default:
-    return false;
-  }
-}
-
-bool
 TransitionLexer::valid_char_printable(ucs4_t ucs4)
 {
   switch (ucs4) {
@@ -126,46 +97,12 @@ TransitionLexer::valid_char_printable(ucs4_t ucs4)
 }
 
 bool
-TransitionLexer::valid_ident_separator(ucs4_t ucs4)
-{
-  switch (ucs4) {
-  case '(':
-  case ')':
-  case ' ':
-  case '\t':
-  case '\n':
-  case '\r':
-  case ',':
-  case ':':
-    return true;
-  default:
-    return false;
-  }
-}
-
-bool
-TransitionLexer::alpha_ident_start(ucs4_t ucs4)
-{
-  // Extended characters are only permitted as the first
-  // identifier character in lisp identifier mode.
-  return (u_hasBinaryProperty(ucs4,UCHAR_XID_START));
-}
-
-bool
-TransitionLexer::alpha_ident_continue(ucs4_t ucs4)
-{
-  // Extended characters are only permitted as the first
-  // identifier character in lisp identifier mode.
-  return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE));
-}
-
-bool
 TransitionLexer::valid_ident_start(ucs4_t ucs4)
 {
   // Extended characters are only permitted as the first
   // identifier character in lisp identifier mode.
   return (u_hasBinaryProperty(ucs4,UCHAR_XID_START)
-          || valid_ident_punct(ucs4));
+          || (ucs4 == '_'));
 }
 
 bool
@@ -173,8 +110,56 @@ TransitionLexer::valid_ident_continue(ucs4_t ucs4)
 {
   // For the moment, extended characters are permitted as 
   // continue characters.
-  return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE) ||
-          valid_ident_punct(ucs4));
+  return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE)
+          || (ucs4 == '_'));
+}
+
+bool
+TransitionLexer::valid_ascii_symbol(ucs4_t ucs4)
+{
+  switch (ucs4) {
+  case '#':                     // until S-expressions are gone
+  case '_':                     // because it is extended alphabetic
+    return false;
+
+  case '!':
+  case '$':
+  case '%':
+  case '&':
+  case '*':
+  case '+':
+  case '-':
+  case '/':
+  case '<':
+  case '>':
+  case '=':
+  case '?':
+  case '@':
+  case '^':
+  case '|':
+  case '~':
+    return true;
+
+  default:
+    return false;
+  }
+}
+
+bool
+TransitionLexer::valid_operator_start(ucs4_t ucs4)
+{
+
+  // Extended characters are only permitted as the first
+  // identifier character in lisp identifier mode.
+  return (valid_ascii_symbol(ucs4));
+}
+
+bool
+TransitionLexer::valid_operator_continue(ucs4_t ucs4)
+{
+  // For the moment, extended characters are permitted as 
+  // continue characters.
+  return (valid_ascii_symbol(ucs4));
 }
 
 bool
@@ -334,6 +319,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "<<",               lf_block,             tk_LSHIFT ),
   TransitionLexer::KeyWord( "<=",               lf_block,             tk_LE ),
   TransitionLexer::KeyWord( "=",                lf_transition,        tk_SxpIdent, '=' ),
+  TransitionLexer::KeyWord( "^",                lf_transition,        '^' ),
   TransitionLexer::KeyWord( "==",               lf_block,             tk_EQUALS ),
   TransitionLexer::KeyWord( ">",                lf_block,             '>' ),
   TransitionLexer::KeyWord( ">=",               lf_block,             tk_GE ),
@@ -753,8 +739,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
     }
     else {
       ungetChar(c);
-      c = '/';
-      goto mixfix_identifier;
+      ungetChar('/');
+      goto identifier_or_operator;
     }
 
   case '`':
@@ -810,11 +796,11 @@ TransitionLexer::do_lex(ParseType *lvalp)
   case ']':
   case '(':
   case ')':
-  case '^':
-    lvalp->tok = LToken(here, thisToken);
-  here.updateWith(thisToken);
-  return c;
-
+    {
+      lvalp->tok = LToken(here, thisToken);
+      here.updateWith(thisToken);
+      return c;
+    }
 
   case '"':                        // String literal
     {
@@ -965,8 +951,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
     c = getChar();
     if (digitValue(c, 10) < 0) {
       ungetChar(c);
-      c = '-';
-      goto mixfix_identifier;
+      ungetChar('-');
+      goto identifier_or_operator;
     }
 
     /* ELSE fall through to digit processing */
@@ -1087,28 +1073,26 @@ TransitionLexer::do_lex(ParseType *lvalp)
     return EOF;
 
   default:
-    if (valid_ident_start(c)) {
+    if (valid_ident_start(c) || valid_operator_start(c)) {
       ungetChar(c);
-      goto identifier;
+      goto identifier_or_operator;
     }
 
     // FIX: Malformed token
     return EOF;
   }
 
- identifier:
+ identifier_or_operator:
   do {
     c = getChar();
   } while (c == '_');
   ungetChar(c);
 
- mixfix_identifier:
-
   // Possibly an alpha identifier:
-  if (alpha_ident_start(c)) {
+  if (valid_ident_start(c)) {
     do {
       c = getChar();
-    } while (alpha_ident_continue(c));
+    } while (valid_ident_continue(c));
 
     // Transitional handling for set! for S-expression LISP
     // syntax. The conditional will go away once we drop set!
@@ -1120,10 +1104,10 @@ TransitionLexer::do_lex(ParseType *lvalp)
     here.updateWith(thisToken);
     return kwCheck(thisToken.c_str(), tk_BlkIdent);
   }
-  else if (valid_ident_punct(c)) {
+  else if (valid_operator_start(c)) {
     do {
       c = getChar();
-    } while (valid_ident_punct(c));
+    } while (valid_operator_continue(c));
     ungetChar(c);
 
     lvalp->tok = LToken(here, thisToken);
