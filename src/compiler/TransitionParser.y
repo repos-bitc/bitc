@@ -121,9 +121,18 @@ static unsigned VersionMinor(const std::string s)
 //   x -> a
 //   x -> a ( {args} )
 //
+// that are resolved by explicit prioritization.
+// 
 // The first is type = identifier vs type = type application
 // The second is parameterized type names (with or without type vars)
 // The third is constraint = identifier vs constraint = type app
+//
+// We have one that is the classic dangling if/then/else problem. This
+// one probably *should* be resolved by explicit prioritization.
+//
+// We have ten associated with opt_docstring in the s-expression
+// grammar that will be going away when the s-expression syntax is
+// dropped.
 //
 // We will undoubtedly see another when we introduce procedure
 // application syntax.
@@ -2929,6 +2938,9 @@ blk_infix_expr: blk_tqual_expr {
   $$ = $1;
 }
 
+// This is the only production defining blk_expr. It is causing
+// a (correctly resolved) S/R ambiguity that we should probably try to
+// clean up.
 blk_expr: blk_infix_expr {
   SHOWPARSE("blk_expr -> blk_infix_expr");
   $$ = $1;
@@ -3353,9 +3365,15 @@ sxp_unqual_expr: '(' tk_BEGIN sxp_block_exprs ')' {
 };
 
 // LABELS and LABELED EXIT [7.6]
-blk_stmt: blk_ident ':' blk_block {
-  SHOWPARSE("blk_stmt -> blk_ident : blk_block");
-  $$ = AST::make(at_block, $1->loc, $1, $3);
+// Note that we do not want a generalized blk_ident in the first
+// position here, because that creates an ambiguity with primary
+// expressions. Note that we only want a local identifier here in any
+// case, and not an operator, so using tk_BlkIdent is fine here.
+blk_stmt: tk_BlkIdent ':' blk_block {
+  SHOWPARSE("blk_stmt -> Ident : blk_block");
+  $$ = AST::make(at_block, $1.loc, 
+                 $$ = AST::make(at_ident, $1),
+                 $3);
 }
 sxp_unqual_expr: '(' tk_BLOCK sxp_ident sxp_block ')' {
   SHOWPARSE("sxp_unqual_expr -> (BLOCK sxp_ident sxp_block)");
