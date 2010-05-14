@@ -218,8 +218,15 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_IMPURE
 %token <tok> tk_CONST
 
+/* The following are on separate lines so that tk_ELSE has slightly
+   higher precedence than tk_THEN. This lets us use %prec to
+   explicitly resolve the S/R ambiguity for dangling else. */
+%token <tok> tk_IF
+%nonassoc <tok> tk_THEN
+%nonassoc <tok> tk_ELSE
+
 %token <tok> tk_THE
-%token <tok> tk_IF tk_THEN tk_ELSE
+
 %token <tok> tk_WHEN
 %token <tok> tk_NOT '!'
 %token <tok> tk_COND
@@ -836,11 +843,6 @@ trn_if_definitions: trn_if_definitions trn_if_definition {
 
 trn_if_definition: sxp_common_definition {
   SHOWPARSE("trn_if_definition -> sxp_common_definition");
-  $$ = $1;
-};
-
-trn_if_definition: blk_common_definition {
-  SHOWPARSE("trn_if_definition -> blk_common_definition");
   $$ = $1;
 };
 
@@ -1645,13 +1647,13 @@ sxp_value_definition: LP tk_DEFINE sxp_defpattern sxp_expr RP  {
   $$ = AST::make(at_define, $2.loc, $3, $4);
   $$->addChild(AST::make(at_constraints));
 };
-sxp_value_definition: LP tk_DEFINE sxp_defpattern trn_optdocstring sxp_expr RP  {
-  SHOWPARSE("sxp_value_definition -> ( DEFINE  sxp_defpattern trn_optdocstring sxp_expr )");
+sxp_value_definition: LP tk_DEFINE sxp_defpattern trn_docstring sxp_expr RP  {
+  SHOWPARSE("sxp_value_definition -> ( DEFINE  sxp_defpattern trn_docstring sxp_expr )");
   $$ = AST::make(at_define, $2.loc, $3, $5);
   $$->addChild(AST::make(at_constraints));
 };
 
-blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints trn_optdocstring '=' blk_stmt {
+blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints trn_optdocstring '=' blk_stmt %prec '(' {
   SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints trn_optdocstring blk_stmt");
   // $5 = stripDocString($5);
   shared_ptr<AST> iRetBlock =
@@ -1661,6 +1663,17 @@ blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints trn_optdocstri
   iLambda->printVariant = pf_IMPLIED;
   shared_ptr<AST> iP = AST::make(at_identPattern, $2->loc, $2);
   $$ = AST::make(at_recdef, $1.loc, iP, iLambda, $5);
+}
+
+blk_value_definition: tk_DEF blk_defident '(' blk_lambdapatterns ')' blk_constraints trn_optdocstring '=' blk_stmt %prec '(' {
+  SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints trn_optdocstring blk_stmt");
+  // $5 = stripDocString($5);
+  shared_ptr<AST> iRetBlock =
+    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $9);
+  shared_ptr<AST> iLambda = AST::make(at_lambda, $1.loc, $4, iRetBlock);
+  iLambda->printVariant = pf_IMPLIED;
+  shared_ptr<AST> iP = AST::make(at_identPattern, $2->loc, $2);
+  $$ = AST::make(at_recdef, $1.loc, iP, iLambda, $6);
 }
 
 // Define convenience syntax case 1: no arguments
@@ -1677,17 +1690,6 @@ sxp_value_definition: LP tk_DEFINE '(' sxp_defident ')' sxp_block RP {
   $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
   $$->addChild(AST::make(at_constraints));
 };
-
-blk_value_definition: tk_DEF blk_defident '(' blk_lambdapatterns ')' blk_constraints trn_optdocstring '=' blk_stmt {
-  SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints trn_optdocstring blk_stmt");
-  // $5 = stripDocString($5);
-  shared_ptr<AST> iRetBlock =
-    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $9);
-  shared_ptr<AST> iLambda = AST::make(at_lambda, $1.loc, $4, iRetBlock);
-  iLambda->printVariant = pf_IMPLIED;
-  shared_ptr<AST> iP = AST::make(at_identPattern, $2->loc, $2);
-  $$ = AST::make(at_recdef, $1.loc, iP, iLambda, $6);
-}
 
 // Define convenience syntax case 3: one or more arguments
 // No trn_docstring here because of sxp_block
@@ -2747,7 +2749,7 @@ sxp_bindingpattern: '(' tk_THE sxp_type sxp_ident ')' {
 // There are no sxp_defpattern sequences, because there is no top-level
 // pattern application
 // DEFPATTERN
-blk_defpattern: blk_defident {
+blk_defpattern: blk_defident %prec tk_BlkIdent {
   SHOWPARSE("blk_defpattern -> blk_defident");
   $$ = AST::make(at_identPattern, $1->loc, $1);
 };
@@ -2951,22 +2953,6 @@ blk_stmt: blk_expr {
   $$ = $1;
 }
 
-blk_stmt: blk_stmt ';' {
-  SHOWPARSE("blk_stmt -> blk_stmt ;");
-  $$ = $1;
-}
-
-//blk_stmt: blk_expr SC {
-//  SHOWPARSE("blk_stmt -> blk_expr ;");
-//  $$ = $1;
-//}
-
-// See also labeled exit, far below.
-//blk_stmt: blk_block {
-//  SHOWPARSE("blk_stmt -> blk_block ;");
-//  $$ = $1;
-//}
-
 blk_block: '{' blk_stmt_seq '}' {
   SHOWPARSE("blk_block -> { blk_stmt_seq }");
   // Remove redundant blocks eagerly:
@@ -2974,15 +2960,15 @@ blk_block: '{' blk_stmt_seq '}' {
     $2 = $2->child(0);
   $$ = $2;
 }
-blk_stmt_seq: blk_stmt {
+blk_stmt_seq: blk_stmt SC {
   SHOWPARSE("blk_stmt_seq -> blk_stmt");
   $$ = AST::make(at_begin, $1->loc, $1);
 };
-blk_stmt_seq: blk_value_definition {
+blk_stmt_seq: blk_value_definition SC {
   SHOWPARSE("blk_stmt_seq -> blk_value_definition");
   $$ = AST::make(at_begin, $1->loc, $1);
 };
-blk_stmt_seq: blk_stmt_seq blk_stmt {
+/*blk_stmt_seq: blk_stmt_seq blk_stmt {
   SHOWPARSE("blk_stmt_seq -> blk_stmt_seq blk_stmt");
   $$ = $1;
   $$->addChild($2);
@@ -2991,16 +2977,16 @@ blk_stmt_seq: blk_stmt_seq blk_value_definition {
   SHOWPARSE("blk_stmt_seq -> blk_stmt_seq blk_value_definition");
   $$ = $1;
   $$->addChild($2);
-};
-blk_stmt_seq: blk_stmt_seq SC blk_stmt {
-  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq SC blk_stmt");
+  };*/
+blk_stmt_seq: blk_stmt_seq blk_stmt SC {
+  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq blk_stmt SC");
   $$ = $1;
-  $$->addChild($3);
+  $$->addChild($2);
 };
-blk_stmt_seq: blk_stmt_seq SC blk_value_definition {
-  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq SC blk_value_definition");
+blk_stmt_seq: blk_stmt_seq blk_value_definition SC {
+  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq blk_value_definition SC");
   $$ = $1;
-  $$->addChild($3);
+  $$->addChild($2);
 };
 
 sxp_block: sxp_block_exprs {
@@ -3369,8 +3355,8 @@ sxp_unqual_expr: '(' tk_BEGIN sxp_block_exprs ')' {
 // position here, because that creates an ambiguity with primary
 // expressions. Note that we only want a local identifier here in any
 // case, and not an operator, so using tk_BlkIdent is fine here.
-blk_stmt: tk_BlkIdent ':' blk_block {
-  SHOWPARSE("blk_stmt -> Ident : blk_block");
+blk_primary_expr: tk_BlkIdent ':' blk_block {
+  SHOWPARSE("blk_primary_expr -> Ident : blk_block");
   $$ = AST::make(at_block, $1.loc, 
                  $$ = AST::make(at_ident, $1),
                  $3);
@@ -3447,11 +3433,11 @@ sxp_unqual_expr: '(' sxp_expr sxp_actual_params ')' { /* apply to zero or more a
 };
 
 // IF [7.15.1]
-blk_stmt: tk_IF blk_expr tk_THEN blk_stmt tk_ELSE blk_stmt {
+blk_stmt: tk_IF blk_expr tk_THEN blk_stmt tk_ELSE blk_stmt %prec tk_ELSE {
   SHOWPARSE("blk_stmt -> IF blk_expr THEN blk_stmt ELSE blk_stmt");
   $$ = AST::make(at_if, $1.loc, $2, $4, $6);
 };
-blk_stmt: tk_IF blk_expr tk_THEN blk_stmt {
+blk_stmt: tk_IF blk_expr tk_THEN blk_stmt %prec tk_THEN {
   SHOWPARSE("blk_stmt -> IF blk_expr THEN blk_stmt");
   $$ = AST::make(at_when, $1.loc, $2, $4);
 };
@@ -4227,11 +4213,10 @@ RP: ')' {
   $$ = $1;
 } 
 
-//SC: {
-//  SHOWPARSE("SC -> ");
-//}
+SC: {
+  SHOWPARSE("SC -> ");
+}
 SC: ';' {
   SHOWPARSE("SC -> ;");
 }
 %%
-
