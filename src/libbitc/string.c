@@ -41,7 +41,7 @@
 /// point and updating @p snext (if non-null) to point to the next
 /// byte in the string.
 ///
-/// @bug This implementation accepts the IEEE application code plain,
+/// @bug This implementation accepts the IEEE application code plane,
 /// which was later decided to have been a mistake. It needs to do
 /// something sensible in that case, which almost certainly means
 /// raising an exception, but it does not currently do so.
@@ -93,7 +93,7 @@ utf8_decode(const char *s, const char **snext)
 /// @brief Encode a unicode code point into a UTF-8 encoded byte sequence.
 ///
 /// @bug This implementation will gleefully encode code points that
-/// fall within the IEEE application code plain, which are
+/// fall within the IEEE application code plane, which are
 /// non-conforming code points. In theory it should raise an exception
 /// in these cases.  The BitC implementation
 /// should simply never permit such malformed code points to arise in

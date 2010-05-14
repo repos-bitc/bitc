@@ -47,8 +47,8 @@ struct ty_bitc_stdioStream {
   /// initialized.
   ///
   /// The need for the @p isInit field is moderately irritating. It
-  /// arises  entirely because the C standard does not require @p stdin, @p
-  /// stdout, and @p stderr to be implemented as variables whose
+  /// arises  entirely because the C standard does not require @p stdin,
+  /// @p stdout, and @p stderr to be implemented as variables whose
   /// address can be taken. The result is that we cannot just use the
   /// linker to take the address of the corresponding libc structures.
   ///
