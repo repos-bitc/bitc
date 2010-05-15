@@ -2405,7 +2405,7 @@ sxp_type: primary_type {
 };
 
 // REF TYPES [3.4.1]             
-blk_prefix_type: tk_REF blk_type {
+blk_prefix_type: tk_BOXED blk_type {
   SHOWPARSE("blk_prefix_type -> REF blk_type");
   $$ = AST::make(at_refType, $1.loc, $2);
 };
