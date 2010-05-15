@@ -1629,7 +1629,19 @@ resolve(std::ostream& errStream,
       // The first identifier has special meaning, and must be 
       // dealt with by hand.
 
-      if (ast->child(0)->s == "stateful") {
+      std::string declID = ast->child(0)->s;
+
+      if (declID != "stateful"
+          && declID != "tag") {
+        errStream << ast->child(0)->loc 
+                  << ": " 
+                  << declID 
+                  << " is not a recognized declare identifier"
+                  << std::endl;
+        errorFree = false;
+      }
+
+      if (declID == "stateful") {
         if (!(flags & RSLV_IS_INTERFACE)) {
           errStream << ast->child(0)->loc 
                     << ": Only Interfaces can be declared to be stateful"
@@ -1638,10 +1650,10 @@ resolve(std::ostream& errStream,
         }
       }
 
-      if (ast->child(0)->s == "tag-type") {
+      if (declID == "tag") {
         if (!(flags & RSLV_WITHIN_DEFUNION)) {
           errStream << ast->child(0)->loc 
-                    << ": tag-type can only occur within a defunion"
+                    << ": tag declaration can only occur within a defunion"
                     << std::endl;
           errorFree = false;
         } 

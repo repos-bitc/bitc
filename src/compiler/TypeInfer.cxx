@@ -1259,14 +1259,14 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
        If necessary, add them with some other name */
   }
   
-  // Deal with tag-type declaration and Cardelli Optimization
+  // Deal with tag type declaration and Cardelli Optimization
 
   /* If we are dealing with defrepr, don't perform any
      optimization */ 
   if (ast->flags & UNION_IS_REPR) {
     if (declares->tagType) {
       errStream << ast->loc << ": "
-                << "tag-type declarations cannot be "
+                << "tag type declarations cannot be "
                 << "given with defreprs."
                 << std::endl;
       errFree = false;      
@@ -1285,9 +1285,9 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 
       if (lastTagValue > (maxCtrs - 1)) {
         errStream << ast->loc << ": "
-                  << "Not enough bits in the tag-type to represent "
-                  << "all Constructors. Use a bigger tag-type. "
-                  << "[If no tag-type declaration is found, "
+                  << "Not enough bits in the tag type to represent "
+                  << "all Constructors. Use a bigger tag type. "
+                  << "[If no tag type declaration is found, "
                   << "the defalut is `word']"
                   << std::endl;
         errFree = false;
@@ -2754,7 +2754,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
           }
           else {
             errStream << ast->child(c)->loc << ": "
-                      << "Only one tag-type declaration "
+                      << "Only one tag type declaration "
                       << "is allowed per definition"
                       << std::endl;          
           }
@@ -2782,7 +2782,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       }
 
       // These names are never mangled.
-      if (ident->s == "tag-type") {
+      if (ident->s == "tag") {
         // compatible type
         
         shared_ptr<Type> realType = ast->child(1)->symType->getType();
