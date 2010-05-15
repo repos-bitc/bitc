@@ -1,66 +1,70 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;; Copyright (C) 2006, Johns Hopkins University.
-;; All rights reserved.
-;;
-;; Redistribution and use in source and binary forms, with or
-;; without modification, are permitted provided that the following
-;; conditions are met:
-;;
-;;   - Redistributions of source code must contain the above 
-;;     copyright notice, this list of conditions, and the following
-;;     disclaimer. 
-;;
-;;   - Redistributions in binary form must reproduce the above
-;;     copyright notice, this list of conditions, and the following
-;;     disclaimer in the documentation and/or other materials 
-;;     provided with the distribution.
-;;
-;;   - Neither the names of the copyright holders nor the names of any
-;;     of any contributors may be used to endorse or promote products
-;;     derived from this software without specific prior written
-;;     permission. 
-;;
-;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+//////////////////////////////////////////////////////////////////////////
+//
+// Copyright (C) 2006, Johns Hopkins University.
+// Copyright (C) 2010, Jonathan S. Shapiro
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted provided that the following
+// conditions are met:
+//
+//   - Redistributions of source code must contain the above 
+//     copyright notice, this list of conditions, and the following
+//     disclaimer. 
+//
+//   - Redistributions in binary form must reproduce the above
+//     copyright notice, this list of conditions, and the following
+//     disclaimer in the documentation and/or other materials 
+//     provided with the distribution.
+//
+//   - Neither the names of the copyright holders nor the names of any
+//     of any contributors may be used to endorse or promote products
+//     derived from this software without specific prior written
+//     permission. 
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES/ LOSS OF USE,
+// DATA, OR PROFITS/ OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
 
-(bitc version 0.10)
-(interface bitc.int
-  ;; arbitrary precision integer type.
+bitc version 0.11
 
-  (defunion int:val external bitc_int)
+interface bitc.int {
+  // arbitrary precision integer type.
 
-  ;; Representation trick: this is a case where the tag value can be
-  ;; expressed in a one or two bits. That allows us to exploit a
-  ;; Cardelli-like optimization to get the classic fixnum/bignum
-  ;; representation. The bad news here is that we cannot exploit
-  ;; 64-bit fixnums on platforms where they are available, because
-  ;; there is no way to conditionalize the literal in the 'fix' leg
-  ;; (which might be a good reason to move this back to the prelude).
-  (defunion int:val
-    (declare (tag-type (bitfield uint32 2)))
+  unboxed union int external bitc_int
 
-    ;; Small representation:
-    (fix fx:(bitfield int32 30))
-    ;; Big representation: sign plus digits mod word size
-    (big bg:(vector word)))
+  // Representation trick: this is a case where the tag value can be
+  // expressed in a one or two bits. That allows us to exploit a
+  // Cardelli-like optimization to get the classic fixnum/bignum
+  // representation. The bad news here is that we cannot exploit
+  // 64-bit fixnums on platforms where they are available, because
+  // there is no way to conditionalize the literal in the 'fix' leg
+  // (which might be a good reason to move this back to the prelude).
+  unboxed union int
+    declare TagType uint32(2)
+  {
+    // Small representation:
+    fix { fx : int32(30) }
+    // Big representation: sign plus digits mod word size
+    big { bg : word[] }
+  }
 
-  (proclaim add : (fn (int int) int) external bignum_add)
-  (proclaim sub : (fn (int int) int) external bignum_sub)
-  ;;(proclaim mul : (fn (int int) int))
-  ;;(proclaim div : (fn (int int) int))
+  def add : fn (int, int) -> int external bignum_add
+  def sub : fn (int, int) -> int external bignum_sub
+  // def mul : fn (int, int) -> int
+  // def div : fn (int, int) -> int
 
-  ;;(proclaim toString : (fn (int) string));
-  ;;(proclaim fromString : (fn (string) int));
-)
+  // def toString : fn (int) -> string
+  // def fromString : fn (int) -> string
+}
+
