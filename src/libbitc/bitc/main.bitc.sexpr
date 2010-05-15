@@ -1,7 +1,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Copyright (C) 2006, Johns Hopkins University.
-// Copyright (C) 2010, Jonathan S. Shapiro
 ;; All rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or
@@ -36,9 +35,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-bitc version 0.11
-
-interface bitc.stdlib {
-  def atoi : fn (string) -> int32 external bitc_stdlib_atoi
-  def getTimeStamp : fn () -> uint64 external bitc_stdlib_getTimeStamp
-}
+(bitc version 0.10)
+(interface bitc.main
+  (proclaim main: (fn (vector string) -> int32) external bitc_main)
+)
