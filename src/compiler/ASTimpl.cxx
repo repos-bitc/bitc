@@ -596,6 +596,12 @@ AST::atKwd() const
   case at_valCat:
     return "val";
 
+  case at_unboxedCat:
+    return "unboxed";
+
+  case at_boxedCat:
+    return "boxed";
+
   case at_opaqueCat:
     return "opaque";
 

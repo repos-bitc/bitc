@@ -961,8 +961,10 @@ AST reprrepr = ident intLiteral;
 // UNION/STRUCT Categories
 LEAF refCat;
 LEAF valCat;
+LEAF boxedCat;
+LEAF unboxedCat;
 LEAF opaqueCat;
-GROUP category = refCat | valCat | opaqueCat;
+GROUP category = refCat | valCat | opaqueCat | boxedCat | unboxedCat;
 
 // Typeclass open/closed mark
 LEAF closed;

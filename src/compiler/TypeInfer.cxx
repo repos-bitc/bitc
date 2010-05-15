@@ -1909,6 +1909,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_Null:
   case at_refCat:
   case at_valCat:
+  case at_unboxedCat:
+  case at_boxedCat:
   case at_closed:
   case at_opaqueCat:
   case at_tcmethods:
@@ -2208,7 +2210,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ast->envs.gamma = defGamma;
       
       shared_ptr<AST> category = ast->child(2);
-      bool isRefType = (category->astType == at_refCat);
+      bool isRefType = ((category->astType == at_refCat) || 
+                        (category->astType == at_boxedCat));
       
       CHKERR(errFree, InferUnion(errStream, ast, defGamma, instEnv,
                                  impTypes, tcc,
@@ -2225,7 +2228,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ast->envs.gamma = defGamma;
 
       shared_ptr<AST> category = ast->child(2);
-      bool isRefType = (category->astType == at_refCat);
+      bool isRefType = ((category->astType == at_refCat) || 
+                        (category->astType == at_boxedCat));
 
       CHKERR(errFree, InferStruct(errStream, ast, defGamma, instEnv,
                                   impTypes, tcc,
@@ -2242,7 +2246,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ast->envs.gamma = defGamma;
 
       shared_ptr<AST> category = ast->child(2);
-      bool isRefType = (category->astType == at_refCat);
+      bool isRefType = ((category->astType == at_refCat) || 
+                        (category->astType == at_boxedCat));
 
       CHKERR(errFree, InferObject(errStream, ast, defGamma, instEnv,
                                   impTypes, tcc,
@@ -2266,17 +2271,20 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<TSEnvironment > defGamma = gamma->newDefScope();
       ast->envs.gamma = defGamma;
 
+      shared_ptr<AST> category = ast->child(2);
+
+      bool isRefType = ((category->astType == at_refCat) || 
+                        (category->astType == at_boxedCat));
+
       // match at_ident
       // FIX: (shap) Not convinced this is correct for opaque...
       Kind decl_ty;      
       switch(ast->astType) {
       case at_declunion:
-        decl_ty = 
-          (ast->child(2)->astType == at_refCat) ?  ty_unionr : ty_unionv;
+        decl_ty = (isRefType ?  ty_unionr : ty_unionv);
         break;
       case at_declstruct:
-        decl_ty = 
-          (ast->child(2)->astType == at_refCat) ?  ty_structr : ty_structv;
+        decl_ty = (isRefType ? ty_structr : ty_structv);
         break;
       default:
         die();

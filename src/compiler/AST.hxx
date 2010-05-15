@@ -579,6 +579,8 @@ enum AstType {
   at_reprrepr,
   at_refCat,
   at_valCat,
+  at_boxedCat,
+  at_unboxedCat,
   at_opaqueCat,
   at_closed,
   at_defexception,

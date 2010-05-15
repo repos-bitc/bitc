@@ -433,6 +433,8 @@ resolve(std::ostream& errStream,
   case at_Null:
   case at_refCat:
   case at_valCat:
+  case at_boxedCat:
+  case at_unboxedCat:
   case at_opaqueCat:
   case agt_category:
   case at_AnyGroup:
@@ -1011,7 +1013,7 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
               id_union, ast, 
               (flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)) | RSLV_BIND_PUBLIC);
-      if (category->astType == at_refCat)
+      if (category->astType == at_refCat || category->astType == at_boxedCat)
         tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
 
       // match at_tvlist
@@ -1056,7 +1058,7 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
               identType, ast,
               flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK) | RSLV_BIND_PUBLIC);
-      if (category->astType == at_refCat)
+      if (category->astType == at_refCat || category->astType == at_boxedCat)
         tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
       
       // match at_tvlist

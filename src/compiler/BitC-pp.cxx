@@ -183,10 +183,12 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     break;
 
   case at_refCat:
+  case at_boxedCat:
     if (!(ast->printVariant & pf_IMPLIED))
       out << ":ref";
     break;
   case at_valCat:
+  case at_unboxedCat:
     out << ":val";
     break;
   case at_opaqueCat:

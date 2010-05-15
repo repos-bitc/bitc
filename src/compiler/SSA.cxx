@@ -225,6 +225,8 @@ ssa(std::ostream& errStream,
   case at_Null:
   case at_refCat:
   case at_valCat:
+  case at_boxedCat:
+  case at_unboxedCat:
   case at_closed:
   case at_opaqueCat:
   case agt_category:
