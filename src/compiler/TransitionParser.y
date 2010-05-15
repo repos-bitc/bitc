@@ -241,6 +241,7 @@ static unsigned VersionMinor(const std::string s)
 %left <tok> tk_AND
 %left <tok> tk_EQUALS tk_NOTEQUALS
 %left <tok> '<' tk_LE '>' tk_GE
+%right <tok> tk_INFIX_CONS
 %left <tok> '|'
 %left <tok> '^'
 %left <tok> '&'
@@ -354,6 +355,7 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_importList blk_provideList
 %type <ast> sxp_type_cpair sxp_unqual_expr_cpair
 %type <ast> blk_type_cpair blk_expr_cpair
+%type <ast> blk_list_elements
 %type <ast> sxp_value_definition blk_value_definition 
 %type <ast> sxp_tc_definition sxp_ti_definition
 %type <ast> blk_tc_definition blk_ti_definition
@@ -3291,8 +3293,38 @@ sxp_unqual_expr_cpair: sxp_expr ',' sxp_unqual_expr_cpair {
   $$->printVariant = pf_IMPLIED;
 };
 
+// Following four productions provide experimental list support.
+blk_infix_expr: blk_infix_expr tk_INFIX_CONS blk_infix_expr {
+  SHOWPARSE("blk_infix_expr -> blk_infix_expr :: blk_infix_expr");
+  $$ = AST::make(at_apply, $1->loc,
+                 AST::make(at_ident, LToken($1->loc, "cons")),
+                 $1, 
+                 $3);
+};
+
+blk_primary_expr: '(' '[' blk_list_elements ']' ')' {
+  SHOWPARSE("blk_primary_expr -> ([ blk_expr_cpair ])");
+  $$ = $3;
+}
+
+blk_list_elements: blk_expr {
+  SHOWPARSE("blk_list_elements -> blk_expr");
+  $$ = AST::make(at_apply, $1->loc,
+                 AST::make(at_ident, LToken($1->loc, "cons")),
+                 $1, 
+                 AST::make(at_ident, LToken($1->loc, "nil")));
+}
+
+blk_list_elements: blk_expr ',' blk_list_elements {
+  SHOWPARSE("blk_list_elements -> blk_expr");
+  $$ = AST::make(at_apply, $1->loc,
+                 AST::make(at_ident, LToken($1->loc, "cons")),
+                 $1, $3);
+
+}
+
 blk_primary_expr: '(' blk_expr_cpair ')' {
-  SHOWPARSE("blk_unqual_expr -> ( blk_expr_cpair )");
+  SHOWPARSE("blk_primary_expr -> ( blk_expr_cpair )");
   $$ = $2;
 };
 sxp_unqual_expr: '(' sxp_unqual_expr_cpair ')' {
@@ -3301,7 +3333,7 @@ sxp_unqual_expr: '(' sxp_unqual_expr_cpair ')' {
 };
 
 blk_postfix_expr: tk_MAKE_VECTOR '(' blk_expr ',' blk_expr ')' {
-  SHOWPARSE("sxp_unqual_expr -> MAKE-VECTOR ( sxp_expr , sxp_expr )");
+  SHOWPARSE("blk_postfix_expr -> MAKE-VECTOR ( blk_expr , blk_expr )");
   $$ = AST::make(at_makevectorL, $1.loc, $3, $5);
 };
 sxp_unqual_expr: '(' tk_MAKE_VECTOR sxp_expr sxp_expr ')' {

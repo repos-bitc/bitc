@@ -780,6 +780,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
       ucs4_t c2 = getChar();
       if (c2 == '=')
         tokID = tk_ASSIGN;
+      else if (c2 == ':')
+        tokID = tk_INFIX_CONS;
       else
         ungetChar(c2);
 
