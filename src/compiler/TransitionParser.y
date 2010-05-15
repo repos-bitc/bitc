@@ -1721,7 +1721,7 @@ blk_value_declaration: tk_DEF blk_defpattern blk_constraints trn_optdocstring bl
   shared_ptr<AST> declIdent = $2->child(0);
   shared_ptr<AST> declType = $2->child(1);
 
-  $$ = AST::make(at_proclaim, $1.loc, declIdent, declType, $5);
+  $$ = AST::make(at_proclaim, $1.loc, declIdent, declType, $3);
   $$->flags |= $5->flags;
   $$->getID()->flags |= $5->flags;
   $$->getID()->externalName = $5->externalName;
