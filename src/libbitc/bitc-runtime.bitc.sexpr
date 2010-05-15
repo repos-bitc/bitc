@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
 // Copyright (C) 2006, Johns Hopkins University.
-// Copyright (C) 2010, Jonathan s. Shapiro
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or
@@ -39,7 +38,6 @@
 // This file exists to support header generation so that we can compile
 // those elements of the BitC runtime that are implemented in C.
 
-bitc version 0.11
-
-import bitc.string as str
-import bitc.stdio as stdio
+(bitc version 0.10)
+(import bitc.string as str)
+(import bitc.stdio as stdio)
