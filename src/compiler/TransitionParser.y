@@ -2416,7 +2416,7 @@ sxp_type: '(' tk_REF sxp_type ')' {
 };
 
 // VAL TYPES [3.4.2]
-blk_type: tk_UNBOXED blk_type {
+blk_prefix_type: tk_UNBOXED blk_type {
   SHOWPARSE("blk_type -> UNBOXED blk_type");
   $$ = AST::make(at_valType, $1.loc, $2);
 };
