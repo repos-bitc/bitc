@@ -112,11 +112,6 @@ interface bitc.prelude {
     snd: 'b
   }
 
-  // unboxed union int {
-  //   fix { i : int32(31) }
-  //  big { num : ref pair(bool, word[]) }
-  // }
-
   ///////////////////////////////////////////////////////////////
   //    Primitive arithmetic proclamations 
   ///////////////////////////////////////////////////////////////
