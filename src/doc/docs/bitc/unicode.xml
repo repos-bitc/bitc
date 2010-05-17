@@ -1,0 +1,408 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+                  "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd"
+[
+<!ENTITY BitcVersion "0.11+">
+]>
+  <article id="unicode-in-bitc" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <docinfo twocolumn="yes">
+    <title>Unicode Handling in BitC</title>
+    <authorgroup>
+      <author>
+	<firstname>Jonathan</firstname>
+	<surname>Shapiro</surname>
+	<degree>Ph.D.</degree>
+      </author>
+      <affiliation>
+	<orgname>The EROS Group, LLC</orgname>
+      </affiliation>
+    </authorgroup>
+    <pubdate>May 17, 2010</pubdate>
+    <copyright>
+      <year>2010</year> 
+      <holder>Jonathan S. Shapiro</holder>
+    </copyright>
+    <legalnotice>
+      <p indent="no">
+	THIS SPECIFICATION IS PROVIDED ``AS IS'' WITHOUT ANY
+	WARRANTIES, INCLUDING ANY WARRANTY OF MERCHANTABILITY,
+	NON-INFRINGEMENT, FITNESS FOR ANY PARTICULAR PURPOSE, OR ANY
+	WARRANTY OTHERWISE ARISING OF ANY PROPOSAL, SPECIFICATION OR
+	SAMPLE.
+      </p>
+    </legalnotice>
+    <categories>
+      <category>dev/bitc</category>
+    </categories>
+    <synopsis>
+      <p>Describes how Unicode character handling works in BitC, and
+      the assumptions behind our decisions.
+      </p>
+    </synopsis>
+  </docinfo>
+  <abstract latex.incolumn="yes">
+    <p>
+      International character set handling basically requires that new
+      programming languages adopt the Unicode standard. There are many
+      choices and options in the standard, and the <em>model</em> for
+      how characters and encoding works is quite different from
+      previous models. In consequence, deciding <em>how</em> to adopt
+      Unicode is not straightforward.
+    </p>
+    <p>
+      This note captures both my current summary understanding of how
+      Unicode works and the decisions that have consequently been made
+      in the design of BitC.
+    </p>
+  </abstract>
+  <sect1>
+    <title>Introduction</title>
+    <p>
+      International character set handling basically requires that new
+      programming languages adopt the Unicode     <cite ref="unicode410"/>.
+      standard. There are many
+      choices and options in the standard, and the <em>model</em> for
+      how characters and encoding works is quite different from
+      previous models. In consequence, deciding <em>how</em> to adopt
+      Unicode is therefore not straightforward. This document
+      discusses the key concepts in the Unicode standard from the
+      standpoint of the programming language designer.
+    </p>
+    <p>
+      There are three main issues that any programming language must
+      decide:
+    </p>
+    <ol>
+      <li>
+        <p>
+          The encoding and normalization of input units of
+          compilation.
+        </p>
+      </li>
+      <li>
+        <p>
+          What data type will serve as the near-analogue to the
+          <progident>char</progident> type of legacy languages, and
+          incidentally, whether that type will be called "char".
+        </p>
+      </li>
+      <li>
+        <p>
+          The runtime encoding to be used for strings, and the
+          consistency rules to be imposed on string content.
+        </p>
+      </li>
+    </ol>
+    <p>
+      This note describes how each issue is resolved in BitC, and my
+      rationale.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Characters</title>
+    <p>
+      The conceptual model of characters in Unicode is different from
+      that of ASCII or ISO-Latin-1. I haven't seen a clear exposition
+      of this issue anywhere. Perhaps one exists and I haven't found
+      it. I am merely a Unicode "consumer", not an expert.
+    </p>
+    <p>
+      A Unicode character is made up of one or more code points.  This
+      was done because there were simply too many combinations of
+      glyphs, accents, and modifiers to sensibly encode in any other
+      way. Characters are not uniquely encoded; several
+      <em>normalizations</em> are defined. I am uncertain whether a
+      Unicode code point sequence can be decoded into characters
+      successfully without prior knowledge of the normalization.
+    </p>
+    <p>
+      Key points to remember here:
+    </p>
+    <ul>
+      <li>
+        <p>
+          The encoding of a unicode character is inherently
+          variable-length.
+        </p>
+      </li>
+      <li>
+        <p>
+          Programs that truly wish to handle international character
+          sets <em>must</em> use strings, vectors, or some other
+          variable-length representation as the representation for
+          characters.
+        </p>
+      </li>
+      <li>
+        <p>
+          In consequence, there is no natural analogy to the legacy
+          notion of a <progident>char</progident> type.
+        </p>
+      </li>
+    </ul>
+    <p>
+      For programmers familiar with ASCII or ISO-Latin-1, these three
+      points are terribly confusing.  The confusion is amplified by
+      the fact that, for reasons of backwards compatibility, these
+      older "character sets" have a direct and compatible encoding
+      within the Unicode code point space. When trying to get your
+      head around Unicode, it is best to first ignore these cases, get
+      the big picture straight, and then come back to these. <b>Code
+      points are not characters</b>.
+    </p>
+    <p>
+      Character set processing is complex, and it is best not to have
+      to process characters (in the Unicode sense) within the compiler
+      at all. BitC adopts the following rules to avoid this:
+    </p>
+    <ul>
+      <li>
+        <p>
+          Input files are encoded in UTF-8 using Normalization C. The
+          tokenizer does not perform any normalization.<footnote>
+            <p>
+              There are standardized ways to encode both the encoding
+              and the normalization at the head of a text file. At the
+              moment, I don't know enough about the complexity of
+              doing normalization to admit this into the
+              tokenizer. What I <em>will</em> do in the specification
+              is arrange that the meta-encoding for
+              UTF-8/Normalization C will be accepted and ignored if
+              present.
+            </p>
+          </footnote>
+        </p>
+      </li>
+      <li>
+        <p>
+          String literals are not interpreted by the compiler.  Note
+          that this is not a restriction imposed by the language
+          definition.
+        </p>
+      </li>
+      <li>
+        <p>
+          Identifiers are encoded according to Unicode conventions,
+          but there is no compiler-level operation that exposes
+          lexical ordering on identifiers. This leaves us free to sort
+          on code points or code units interchangeably for internal
+          purposes.<footnote>
+            <p>
+              The problem with normalization in the tokenizer is that
+              identifier [in]equality comparison can fail if you get
+              it wrong.
+            </p>
+            <p>
+              This problem might turn out to be moot if the unicode
+              codepoint classes UCHAR_XID_START and UCHAR_XID_CONTINUE
+              all happen to be non-combining code points, but I
+              haven't had a chance to examine that.
+            </p>
+          </footnote>
+        </p>
+      </li>
+    </ul>
+    <p>
+      Because Unicode characters consist of code point
+      <em>sequences</em>, there is no sensible notion of a
+      <progident>char</progident> type corresponding to pre-Unicode
+      programming language notions. Applications that wish to handle
+      characters in the Unicode space in any non-trivial way must deal
+      with the fact that characters are variable length sequences. As
+      a practical consequence, most character processing in such
+      languages must be done using a variable-length representation,
+      such as a string.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Code Points</title>
+    <p>
+      The bulk of the unicode standard deals with the definition of
+      <term>code points</term>.  The unicode code point space has 21
+      significant bits, with legal values in the range [0,
+      0x10FFFF].
+    </p>
+    <p>
+      Earlier versions of the Unicode standard (Unicode 2.1 and below)
+      had a code point space that could be captured in 16
+      bits. Unfortunately, many popular languages were designed around
+      this assumption, with the result that choosing a 32-bit
+      representation for code points raises serious interoperability
+      issues. Specifications for these languages are often fuzzy on
+      the distinction between code points and code units, which makes
+      things worse.
+    </p>
+    <p>
+      All code points in the Unicode "Basic Multilingual Plane" can be
+      encoded in 16 bits. The extended planes mainly cover synthetic
+      languages, languages that are not seen on computers, and
+      embeddings of legacy encodings like Shift-JIS. It is unclear
+      (to me) how much of a problem it is that (e.g.) Java/C# doesn't
+      readily support the extended planes, but for reasons I will
+      detail below, I suspect the answer is "not much".
+    </p>
+    <p>
+      For this note, the main points to remember are:
+    </p>
+    <ul>
+      <li>
+        <p>
+          The <progident>char</progident> type in Java/C# describes a
+          code <em>unit</em>, not a code <em>point</em>. Specifically,
+          a UCS-2 code unit.
+        </p>
+      </li>
+      <li>
+        <p>
+          Even within the Basic Multilingual Plane, there are
+          characters that involve multiple code points, so an instance
+          of the Java/C# <progident>char</progident> type has no
+          meaningful interpretation as a character outside the ASCII
+          and ISO-Latin-1 subsets.
+        </p>
+      </li>
+    </ul>
+    <p>
+      <b>Outside of the ASCII and ISO-Latin-1 subranges of the Unicode
+        space, the type <progident>char</progident> no longer
+        describes a character</b>.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Encodings and Code Units</title>
+    <p>
+      For reasons of space efficiency, there are multiple ways to
+      encode Unicode code points. A given encoding represents code
+      points as <term>code units</term>. Code units cannot be
+      interpreted unless the encoding is known.
+    </p>
+    <p>
+      The Unicode standard specifies encodings into single byte
+      (UCS-1), double byte (UCS-2) and four-byte (UCS-4)
+      encodings. These are, respectively, UTF8, UTF16, and UTF32.
+    </p>
+    <p>
+      BitC initially chose to make <progident>char</progident> a UCS-4
+      code unit in order to completely cover the Unicode code point
+      space. This creates major interoperability issues, and given the
+      inherent multi-unit nature of characters it isn't clear that any
+      benefit was had. We will probably shift to a scheme in which
+      UCS1, UCS2 and UCS4 are primary types. While these
+      <em>could</em> be encoded as uint8, uint16, and uint32, my
+      intuition is that the code unit type should remain
+      distinguished. If so, then these types must be primary, because
+      the <progident>string</progident> indexing operation must return
+      <em>something</em>.
+    </p>
+    <p>
+      Because of the liberal confusion of legacy
+      <progident>char</progident> type with code units, we are
+      considering <em>removing</em> the <progident>char</progident>
+      type in BitC. If we keep it, it will be retained only as a type
+      alias.
+    </p>
+    <p>
+      <leadin>Heap vs External</leadin> There is no need for the
+      heap-encoding of strings to match the external encoding of
+      files.
+    </p>
+  </sect1>
+  <sect1>
+    <title>String Encoding</title>
+    <p>
+      From a language perspective, the Unicode standard raises
+      significant complications about the definition of "string". Is
+      a string:
+    </p>
+    <ul>
+      <li>
+        <p>
+          A sequence of well-formed characters in <em>some</em>
+          (unknown) normalization? This gives maximal freedom to
+          programmers.
+        </p>
+      </li>
+      <li>
+        <p>
+          A sequence of well-formed characters in a <em>particular</em>
+          normalization? This promotes cross-library consistency.
+        </p>
+      </li>
+      <li>
+        <p>
+          A sequence of code points?
+        </p>
+      </li>
+      <li>
+        <p>
+          A sequence of code particular code unit?
+        </p>
+      </li>
+    </ul>
+    <p>
+      Since <progident>string</progident> is a primitive type, BitC
+      rejects the first two options, but the latter two are more
+      problematic. The problem is pragmatic: using a UCS-4 encoding in
+      the heap wastes a great deal of space, but any other simple
+      encoding involves a non-unit-time indexing operation.
+    </p>
+    <p>
+      There is a compromise position, which is where we are currently
+      leaning:
+    </p>
+    <ul>
+      <li>
+        <p>
+          A well-formed <progident>string</progident> consists of a
+          sequence of code points. The specification does not take a
+          position on the encoding of strings in the heap.
+        </p>
+      </li>
+      <li>
+        <p>
+          Strings support indexing on both UCS-2 and UCS-4 code
+          units.
+        </p>
+      </li>
+      <li>
+        <p>
+          Any operation that accepts code units and produces a string
+          is obliged to confirm that the code unit sequence
+          constitutes a well-formed code point sequence to ensure that
+          multiple indexing schemes are possible.
+        </p>
+      </li>
+      <li>
+        <p>
+          Implementations are encouraged where possible to use a
+          run-encoded internal representation of strings incorporating
+          a hidden cached cursor, such that arbitrary indexing and
+          sequential indexing are both implemented in O(1) time. A
+          reference implementation for such an encoding will
+          eventually be provided by the BitC implementation.
+        </p>
+      </li>
+    </ul>
+  </sect1>
+  <sect1>
+    <title>Conclusion</title>
+    <p>
+      So that seems to be where we are at right now. Our understanding
+      of Unicode is still evolving, and we'ld appreciate pointers to
+      things we may have gotten wrong.
+    </p>
+  </sect1>
+  <bibliography>
+    <bibentry label="unicode410">
+      Unicode Consortium. The Unicode Standard, version 4.1.0, defined
+      by <doctitle>The Unicode Standard Version 4.0</doctitle>,
+      Addison Wesley, 2003, ISBN 0-321-18578-1, as amended by
+      <doctitle>Unicode 4.0.1</doctitle> and by <doctitle>Unicode
+        4.1.0</doctitle>. <tt>http://www.unicode.org</tt>.
+    </bibentry>
+  </bibliography>
+  </article>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->
