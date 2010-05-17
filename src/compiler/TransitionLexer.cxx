@@ -382,6 +382,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "fn",               lf_transition,        tk_FN ),
   TransitionLexer::KeyWord( "forall",           lf_transition,        tk_FORALL ),
   TransitionLexer::KeyWord( "from",             lf_transition,        tk_FROM ),
+  TransitionLexer::KeyWord( "giving",           lf_transition,        tk_GIVING ),
   TransitionLexer::KeyWord( "if",               lf_transition,        tk_IF ),
   TransitionLexer::KeyWord( "import",           lf_transition,        tk_IMPORT ),
   TransitionLexer::KeyWord( "import!",          lf_transition,        tk_ReservedWord ),
@@ -395,6 +396,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "int64",            lf_transition,        tk_INT64 ),
   TransitionLexer::KeyWord( "int8",             lf_transition,        tk_INT8 ),
   TransitionLexer::KeyWord( "interface",        lf_transition,        tk_INTERFACE ),
+  TransitionLexer::KeyWord( "label",            lf_block,             tk_LABEL ),
   TransitionLexer::KeyWord( "lambda",           lf_transition,        tk_LAMBDA ),
   TransitionLexer::KeyWord( "let",              lf_transition,        tk_LET ),
   TransitionLexer::KeyWord( "let*",             lf_transition,        tk_ReservedWord ),
@@ -447,6 +449,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "uint8",            lf_transition,        tk_UINT8 ),
   TransitionLexer::KeyWord( "unboxed",          lf_block,             tk_UNBOXED ),
   TransitionLexer::KeyWord( "union",            lf_block,             tk_UNION ),
+  TransitionLexer::KeyWord( "until",            lf_block,             tk_UNTIL ),
   TransitionLexer::KeyWord( "using",            lf_transition,        tk_ReservedWord ),
   TransitionLexer::KeyWord( "val",              lf_transition,        tk_VAL ),
   TransitionLexer::KeyWord( "value-at",         lf_transition,        tk_ReservedWord ),
@@ -952,6 +955,14 @@ TransitionLexer::do_lex(ParseType *lvalp)
     // then it is the beginning of a numeric literal, else it is part
     // of an identifier.
   case '-':
+
+    // We now handle unary negate at the expression level in the block
+    // syntax:
+    if ((currentLang & lf_sexpr) == 0) {
+      ungetChar(c);
+      goto identifier_or_operator;
+    }
+
     c = getChar();
 
     if (digitValue(c, 10) < 0) {

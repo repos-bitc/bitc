@@ -87,6 +87,9 @@ using namespace std;
 inline int
 transition_lex(YYSTYPE *lvalp, TransitionLexer *lexer)
 {
+  extern int yydebug;
+
+  // yydebug = 1;
   return lexer->lex(lvalp);
 }
 
@@ -255,6 +258,7 @@ static unsigned VersionMinor(const std::string s)
 %left <tok> '='
 
 %token <tok> tk_BLOCK
+%token <tok> tk_LABEL
 %token <tok> tk_RETURN tk_FROM tk_CONTINUE
 
 %token <tok> tk_PAIR
@@ -307,6 +311,8 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_FNARROW
 %token <tok> tk_BEGIN
 %token <tok> tk_DO
+%token <tok> tk_UNTIL
+%token <tok> tk_GIVING
 %token <tok> tk_APPLY
 %token <tok> tk_BY_REF
 %token <tok> tk_ARRAY_REF
@@ -423,7 +429,8 @@ static unsigned VersionMinor(const std::string s)
 //%type <ast> catchclauses catchclause
 %type <ast> sxp_letbindings sxp_letbinding
 %type <ast> blk_letbindings blk_letbinding
-%type <ast> sxp_dobindings ne_dobindings sxp_dobinding sxp_dotest
+%type <ast> sxp_dobindings sxp_nonempty_dobindings sxp_dobinding sxp_dotest
+%type <ast> blk_dobindings blk_nonempty_dobindings blk_dobinding
 %type <ast> sxp_let_eform
 %type <ast> sxp_type_val_definition blk_type_val_definition
 %type <ast> sxp_constrained_definition
@@ -2161,7 +2168,7 @@ sxp_methods_only: sxp_methods_only sxp_methdecl  {
   $$->addChild($2);
 };
 
-sxp_methdecl: sxp_ident ':' sxp_method_type  {
+sxp_methdecl: sxp_ident ':' sxp_method_type SC {
   SHOWPARSE("sxp_methdecl -> sxp_ident : sxp_method_type");
   $$ = AST::make(at_methdecl, $1->loc, $1, $3);
 };
@@ -2276,8 +2283,13 @@ blk_prefix_type: blk_postfix_type {
   $$ = $1;
 }
 
-primary_type: sxp_useident  {   /* previously defined sxp_type */
+primary_type: sxp_useident  {   /* previously defined type */
   SHOWPARSE("primary_type -> sxp_useident");
+  $$ = $1;
+};
+
+primary_type: blk_useident %prec prec_PreferShift {   /* previously defined type */
+  SHOWPARSE("primary_type -> blk_useident");
   $$ = $1;
 };
 
@@ -2455,24 +2467,6 @@ trn_fneffect: tk_EffectVar {
   $$ = AST::make(at_ident, $1);
 };
 
-blk_fntype: trn_fneffect tk_FN '(' ')' tk_FNARROW blk_type {
-  SHOWPARSE("blk_fntype -> trn_fneffect FN () -> blk_type )");
-  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $5.loc);
-  $$ = AST::make(at_fn, $1->loc, fnargVec, $6);
-};
-
-// Reworked by shap on 10/9/2008 to use arrow syntax
-sxp_fntype: '(' trn_fneffect tk_FN tk_FNARROW sxp_type ')' {
-  SHOWPARSE("sxp_fntype -> ( trn_fneffect FN -> sxp_type )");
-  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $4.loc);
-  $$ = AST::make(at_fn, $1.loc, fnargVec, $5);
-};
-//fntype: '(' trn_fneffect tk_FN '(' ')' sxp_type ')' {
-//  SHOWPARSE("sxp_fntype -> ( trn_fneffect FN () sxp_type )");
-//  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $4.loc);
-//  $$ = AST::make(at_fn, $1.loc, fnargVec, $6);
-//};
-
 blk_type_args: blk_type  {
   SHOWPARSE("blk_type_args -> blk_type");
   $$ = AST::make(at_Null);
@@ -2482,6 +2476,17 @@ blk_type_args: blk_type_args ',' blk_type {
   SHOWPARSE("blk_type_args -> blk_type_args, blk_type");
   $$ = $1;
   $1->addChild($3);
+};
+
+blk_fntype: trn_fneffect tk_FN '(' ')' tk_FNARROW blk_type {
+  SHOWPARSE("blk_fntype -> trn_fneffect FN () -> blk_type )");
+  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $5.loc);
+  $$ = AST::make(at_fn, $1->loc, fnargVec, $6);
+};
+
+blk_fntype: trn_fneffect tk_FN '(' blk_type_args_pl_byref ')' tk_FNARROW blk_type {
+  SHOWPARSE("blk_fntype -> trn_fneffect FN ( blk_type_args_pl_byref ) -> blk_type )");
+  $$ = AST::make(at_fn, $1->loc, $4, $7);
 };
 
 sxp_type_args: sxp_type  {
@@ -2495,10 +2500,17 @@ sxp_type_args: sxp_type_args sxp_type {
   $1->addChild($2);
 };
 
-blk_fntype: trn_fneffect tk_FN '(' blk_type_args_pl_byref ')' tk_FNARROW blk_type {
-  SHOWPARSE("blk_fntype -> trn_fneffect FN ( blk_type_args_pl_byref ) -> blk_type )");
-  $$ = AST::make(at_fn, $1->loc, $4, $7);
+// Reworked by shap on 10/9/2008 to use arrow syntax
+sxp_fntype: '(' trn_fneffect tk_FN tk_FNARROW sxp_type ')' {
+  SHOWPARSE("sxp_fntype -> ( trn_fneffect FN -> sxp_type )");
+  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $4.loc);
+  $$ = AST::make(at_fn, $1.loc, fnargVec, $5);
 };
+//fntype: '(' trn_fneffect tk_FN '(' ')' sxp_type ')' {
+//  SHOWPARSE("sxp_fntype -> ( trn_fneffect FN () sxp_type )");
+//  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $4.loc);
+//  $$ = AST::make(at_fn, $1.loc, fnargVec, $6);
+//};
 
 // Reworked by shap on 10/9/2008 to use arrow syntax
 sxp_fntype: '(' trn_fneffect tk_FN sxp_type_args_pl_byref tk_FNARROW sxp_type ')'  {
@@ -3408,11 +3420,11 @@ sxp_unqual_expr: '(' tk_BEGIN sxp_block_exprs ')' {
 // position here, because that creates an ambiguity with primary
 // expressions. Note that we only want a local identifier here in any
 // case, and not an operator, so using tk_BlkIdent is fine here.
-blk_primary_expr: tk_BlkIdent ':' blk_block {
-  SHOWPARSE("blk_primary_expr -> Ident : blk_block");
+blk_primary_expr: tk_LABEL tk_BlkIdent '=' blk_block {
+  SHOWPARSE("blk_primary_expr -> LABEL Ident = blk_block");
   $$ = AST::make(at_block, $1.loc, 
-                 $$ = AST::make(at_ident, $1),
-                 $3);
+                 $$ = AST::make(at_ident, $2),
+                 $4);
 }
 sxp_unqual_expr: '(' tk_BLOCK sxp_ident sxp_block ')' {
   SHOWPARSE("sxp_unqual_expr -> (BLOCK sxp_ident sxp_block)");
@@ -3433,13 +3445,21 @@ sxp_unqual_expr: '(' tk_FROM sxp_ident tk_RETURN sxp_expr ')' {
 // Replaced by v.length, a.length, ar.length
 
 // convenience syntax: multiple arguments
-blk_stmt: tk_LAMBDA '(' ')' blk_stmt {
-  SHOWPARSE("blk_expr -> LAMBDA () blk_expr )");
+blk_expr: tk_LAMBDA '(' ')' blk_stmt {
+  SHOWPARSE("blk_expr -> LAMBDA () blk_stmt )");
   shared_ptr<AST> argVec = AST::make(at_argVec, $2.loc);
   shared_ptr<AST> iRetBlock =
     AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $4);
   $$ = AST::make(at_lambda, $1.loc, argVec, iRetBlock);
 };
+
+blk_expr: tk_LAMBDA '(' blk_lambdapatterns ')' blk_stmt {
+  SHOWPARSE("blk_expr -> LAMBDA (blk_lambdapatterns) blk_stmt");
+  shared_ptr<AST> iRetBlock =
+    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $5);
+  $$ = AST::make(at_lambda, $1.loc, $3, iRetBlock);
+};
+
 sxp_unqual_expr: '(' tk_LAMBDA '(' ')' sxp_block ')'  {
   SHOWPARSE("lambda -> ( LAMBDA () sxp_block )");
   shared_ptr<AST> argVec = AST::make(at_argVec, $3.loc);
@@ -3448,12 +3468,6 @@ sxp_unqual_expr: '(' tk_LAMBDA '(' ')' sxp_block ')'  {
   $$ = AST::make(at_lambda, $2.loc, argVec, iRetBlock);
 };
 
-blk_stmt: tk_LAMBDA '(' blk_lambdapatterns ')' blk_stmt {
-  SHOWPARSE("blk_stmt -> LAMBDA (blk_lambdapatterns) blk_expr");
-  shared_ptr<AST> iRetBlock =
-    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $5);
-  $$ = AST::make(at_lambda, $1.loc, $3, iRetBlock);
-};
 sxp_unqual_expr: '(' tk_LAMBDA '(' sxp_lambdapatterns ')' sxp_block ')'  {
   SHOWPARSE("lambda -> ( LAMBDA (sxp_lambdapatterns) sxp_block )");
   shared_ptr<AST> iRetBlock =
@@ -3985,12 +3999,55 @@ sxp_let_eform: '(' tk_LETREC '(' sxp_letbindings ')' sxp_block ')' {
   $$->addChild(AST::make(at_constraints));
 };
 
-//HERE
+blk_stmt: tk_DO blk_dobindings tk_UNTIL blk_expr tk_GIVING blk_expr blk_block {
+  SHOWPARSE("blk_stmt -> DO blk_dobindings UNTIL blk_expr OTHERWISE blk_expr blk_block");
+
+  // In the block syntax, I didn't fabricate the test AST in a
+  // separate production:
+  shared_ptr<AST> iDoTest = AST::make(at_dotest, $3.loc, $4, $6);
+
+  // The body is executed for side effects. We need to know its result
+  // type so that the CONTINUE block will be properly typed. Since we
+  // are only running the body for side effects, force the result sxp_type
+  // to be unit by appending a unit sxp_constructor at the end of the
+  // expression sequence:
+  $7->addChild(AST::make(at_unit, $7->loc));
+
+  shared_ptr<AST> iContinueBlock =
+    AST::make(at_block, $1.loc,
+              AST::make(at_ident, LToken("__continue")),
+              $7);
+  $$ = AST::make(at_do, $1.loc, $2, iDoTest, iContinueBlock);
+}
+
+blk_dobindings: {
+  SHOWPARSE("sxp_dobindings -> <empty>");
+  $$ = AST::make(at_dobindings);
+};
+blk_dobindings: blk_nonempty_dobindings {
+  SHOWPARSE("blk_dobindings -> blk_nonempty_dobindings");
+  $$ = $1;
+};
+blk_nonempty_dobindings: blk_dobinding {
+  SHOWPARSE("blk_nonempty_dobindings -> blk_dobinding");
+  $$ = AST::make(at_dobindings, $1->loc, $1);
+};
+blk_nonempty_dobindings: blk_nonempty_dobindings blk_dobinding {
+  SHOWPARSE("blk_nonempty_dobindings -> blk_nonempty_dobindings blk_dobinding");
+  $$ = $1;
+  $$->addChild($2);
+};
+blk_dobinding: blk_bindingpattern '=' blk_expr tk_THEN blk_expr {
+  SHOWPARSE("blk_dobinding -> blk_bindingpattern = blk_expr THEN blk_expr");
+  $$ = AST::make(at_dobinding, $1->loc, $1, $3, $5);
+};
+
+
 sxp_unqual_expr: '(' tk_DO '(' sxp_dobindings ')' sxp_dotest sxp_block ')' {
   SHOWPARSE("sxp_unqual_expr -> (DO (dobindings) sxp_dotest sxp_block)");
 
   // The body is executed for side effects. We need to know its result
-  // sxp_type so that the CONTINUE block will be properly typed. Since we
+  // type so that the CONTINUE block will be properly typed. Since we
   // are only running the body for side effects, force the result sxp_type
   // to be unit by appending a unit sxp_constructor at the end of the
   // expression sequence:
@@ -4008,21 +4065,21 @@ sxp_dobindings: {
   SHOWPARSE("sxp_dobindings -> <empty>");
   $$ = AST::make(at_dobindings);
 };
-sxp_dobindings: ne_dobindings {
-  SHOWPARSE("sxp_dobindings -> ne_dobindings");
+sxp_dobindings: sxp_nonempty_dobindings {
+  SHOWPARSE("sxp_dobindings -> sxp_nonempty_dobindings");
   $$ = $1;
 };
-ne_dobindings: sxp_dobinding {
-  SHOWPARSE("ne_dobindings -> sxp_dobinding");
+sxp_nonempty_dobindings: sxp_dobinding {
+  SHOWPARSE("sxp_nonempty_dobindings -> sxp_dobinding");
   $$ = AST::make(at_dobindings, $1->loc, $1);
 };
-ne_dobindings: ne_dobindings sxp_dobinding {
-  SHOWPARSE("ne_dobindings -> ne_dobindings sxp_dobinding");
+sxp_nonempty_dobindings: sxp_nonempty_dobindings sxp_dobinding {
+  SHOWPARSE("sxp_nonempty_dobindings -> sxp_nonempty_dobindings sxp_dobinding");
   $$ = $1;
   $$->addChild($2);
 };
 sxp_dobinding: '(' sxp_bindingpattern sxp_expr sxp_expr ')' {
-  SHOWPARSE("sxp_dobinding -> ( sxp_bindingpattern sxp_expr )");
+  SHOWPARSE("sxp_dobinding -> ( sxp_bindingpattern sxp_expr sxp_expr )");
   $$ = AST::make(at_dobinding, $2->loc, $2, $3, $4);
 };
 sxp_dotest: '(' sxp_expr sxp_expr ')' {
