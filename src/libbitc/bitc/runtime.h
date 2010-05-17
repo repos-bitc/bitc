@@ -305,11 +305,11 @@ DEFCLOSURE_INLINE(bitc_index_lt);
 
 #define DEFNEGATE(TY,MTY)					\
   INLINE TY							\
-  DEFUN(_20bitc_DTprelude_CN__negate_SHFN1##MTY##MTY, TY arg1)  \
+  DEFUN(_21bitc_DTprelude_CN__negate_SHFN1##MTY##MTY, TY arg1)  \
   {								\
     return (-arg1);                                             \
   }								\
-  DEFCLOSURE_INLINE(_20bitc_DTprelude_CN__negate_SHFN1##MTY##MTY)
+  DEFCLOSURE_INLINE(_21bitc_DTprelude_CN__negate_SHFN1##MTY##MTY)
 
 #define DEFMODULO(TY,MTY)					\
   INLINE TY							\
