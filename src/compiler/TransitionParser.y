@@ -432,6 +432,7 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_letbindings blk_letbinding
 %type <ast> sxp_dobindings sxp_nonempty_dobindings sxp_dobinding sxp_dotest
 %type <ast> blk_dobindings blk_nonempty_dobindings blk_dobinding
+%type <ast> blk_giving
 %type <ast> sxp_let_eform
 %type <ast> sxp_type_val_definition blk_type_val_definition
 %type <ast> sxp_constrained_definition
@@ -4014,24 +4015,24 @@ sxp_let_eform: '(' tk_LETREC '(' sxp_letbindings ')' sxp_block ')' {
   $$->addChild(AST::make(at_constraints));
 };
 
-blk_stmt: tk_DO blk_dobindings tk_UNTIL blk_expr tk_GIVING blk_expr blk_block {
+blk_stmt: tk_DO blk_dobindings tk_UNTIL blk_expr blk_giving blk_block {
   SHOWPARSE("blk_stmt -> DO blk_dobindings UNTIL blk_expr OTHERWISE blk_expr blk_block");
 
   // In the block syntax, I didn't fabricate the test AST in a
   // separate production:
-  shared_ptr<AST> iDoTest = AST::make(at_dotest, $3.loc, $4, $6);
+  shared_ptr<AST> iDoTest = AST::make(at_dotest, $3.loc, $4, $5);
 
   // The body is executed for side effects. We need to know its result
   // type so that the CONTINUE block will be properly typed. Since we
   // are only running the body for side effects, force the result sxp_type
   // to be unit by appending a unit sxp_constructor at the end of the
   // expression sequence:
-  $7->addChild(AST::make(at_unit, $7->loc));
+  $6->addChild(AST::make(at_unit, $6->loc));
 
   shared_ptr<AST> iContinueBlock =
     AST::make(at_block, $1.loc,
               AST::make(at_ident, LToken("__continue")),
-              $7);
+              $6);
   $$ = AST::make(at_do, $1.loc, $2, iDoTest, iContinueBlock);
 }
 
@@ -4057,6 +4058,12 @@ blk_dobinding: blk_bindingpattern '=' blk_expr tk_THEN blk_expr {
   $$ = AST::make(at_dobinding, $1->loc, $1, $3, $5);
 };
 
+blk_giving: {
+  $$ = AST::make(at_unit);
+}
+blk_giving: tk_GIVING blk_expr {
+  $$ = $2;
+}
 
 sxp_unqual_expr: '(' tk_DO '(' sxp_dobindings ')' sxp_dotest sxp_block ')' {
   SHOWPARSE("sxp_unqual_expr -> (DO (dobindings) sxp_dotest sxp_block)");

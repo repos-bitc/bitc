@@ -44,9 +44,7 @@ interface bitc.vector {
   def vector_map(vec, f)
     "Apply procedure f to each element of vector."
     = do pos = 0 then 1 + pos
-        until pos == vec.length 
-        giving ()
-      {
+      until pos == vec.length {
         f(vec[pos])
       }
 

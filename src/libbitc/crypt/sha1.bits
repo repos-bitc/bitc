@@ -196,7 +196,7 @@ module sha1_impl {
       then {
 	sha1PadMessage(context)
 	do i = 0 then i + 1
-	until i >= 64 giving () {
+	until i >= 64 {
 	  context.message[i] := 0
         }
 	context.lenLow := 0
@@ -206,7 +206,7 @@ module sha1_impl {
       else ()
 
       do i = 0 then i + 1
-      until i >= 20 giving () {
+      until i >= 20 {
         digest[i] := Truncate(context.digest[i >> 2] >> (8 * (3 - i & 16r03)))
       }
       sha1.sha_Success
@@ -247,8 +247,7 @@ module sha1_impl {
         if context.corrupted.sha_Success
 	then {
 	  do i = 0 then i + 1
-    	  until (i >= message.length) && context.corrupted.sha_Success
-          giving () {
+    	  until (i >= message.length) && context.corrupted.sha_Success {
 	    context.message[context.messNdx] := message[i] & 16rff
 	    context.messNdx := context.messNdx + 1
 	    context.lenLow := context.lenLow + 8
@@ -303,7 +302,7 @@ module sha1_impl {
 	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     
     do t = 0 then t + 1
-    until t >= 16 giving () {
+    until t >= 16 {
       W[t] := ZeroExtend(context.message[t*4]) << 24
       W[t] := W[t] | ZeroExtend(context.message[t*4 + 1]) << 16
       W[t] := W[t] | ZeroExtend(context.message[t*4 + 2]) << 8
@@ -311,7 +310,7 @@ module sha1_impl {
     }
 
     do t = 16 then t + 1
-    until t >= 80 giving () {
+    until t >= 80 {
       W[t] := circShift(1, W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16])
     }
 
@@ -322,7 +321,7 @@ module sha1_impl {
     def E = context.digest[4]
 
     do t = 0 then t + 1
-    until t >= 20 giving () {
+    until t >= 20 {
       def temp = circShift(5, A) + ((B&C) | (~B & D)) + E + W[t] + K[0]
 
       E := D
@@ -333,7 +332,7 @@ module sha1_impl {
     }
 
     do t = 20 then t + 1
-    until t >= 40 giving () {
+    until t >= 40 {
       def temp = circShift(5, A) + (B^(C^D)) + E + W[t] + K[1]
 
       E := D
@@ -344,7 +343,7 @@ module sha1_impl {
     }
 
     do t = 40 then t + 1
-    until t >= 60 giving () {
+    until t >= 60 {
       def temp = circShift(5, A) + ((B&C)|(B&D)|(C&D)) + E + W[t] + K[2]
 
       E := D
@@ -355,7 +354,7 @@ module sha1_impl {
     }
 
     do t = 60 then t + 1
-    until t >= 80 giving () {
+    until t >= 80 {
       def temp = circShift(5, A) + (B^(C^D)) + E + W[t] + K[3]
 
       E := D
@@ -407,8 +406,7 @@ module sha1_impl {
       	context.message[context.messNdx] := 16r80
 	context.messNdx := context.messNdx + 1
 	  
-      	do dummy = () then ()
-        until context.messNdx >= 64 giving () {
+      	do until context.messNdx >= 64 {
 	  context.message[context.messNdx] := 0
 	  context.messNdx := context.messNdx + 1
         }
@@ -417,8 +415,7 @@ module sha1_impl {
 
 	// Will reset context.messNdx to 0
  
-      	do dummy = () then ()
-        until context.messNdx >= 56 giving () {
+      	do until context.messNdx >= 56 {
 	  context.message[context.messNdx] := 0
 	  context.messNdx := context.messNdx + 1
         }
@@ -427,8 +424,7 @@ module sha1_impl {
       	context.message[context.messNdx] := 16r80
 	context.messNdx := context.messNdx + 1
 
-      	do dummy = () then ()
-        until context.messNdx >= 56 giving () {
+      	do until context.messNdx >= 56 {
 	  context.message[context.messNdx] := 0
 	  context.messNdx := context.messNdx + 1
         }
