@@ -235,6 +235,7 @@ static unsigned VersionMinor(const std::string s)
 
 %token <tok> tk_WHEN
 %token <tok> tk_NOT '!'
+%token <tok> '~'
 %token <tok> tk_COND
 %token <tok> tk_SWITCH
 %token <tok> tk_TYPECASE
@@ -1491,7 +1492,7 @@ sxp_type_definition: LP tk_DEFEXCEPTION sxp_ident trn_optdocstring RP {
 
 blk_type_definition: tk_EXCEPTION blk_ident trn_optdocstring '{' blk_fields '}' {
   SHOWPARSE("blk_type_definition -> exception blk_ident { blk_fields }");
-  $3->flags |= ID_IS_GLOBAL;
+  $2->flags |= ID_IS_GLOBAL;
   $$ = AST::make(at_defexception, $1.loc, $2);
   $$->child(0)->defForm = $$;
   $$->addChildrenFrom($5);
@@ -3251,11 +3252,13 @@ sxp_unqual_expr: '(' tk_DUP sxp_expr ')' {
 // DEREF [7.17.2]               
 // Anybody else around here old enough to remember Pascal?
 // Here we are dereferencing values by wirth.
-blk_postfix_expr: blk_postfix_expr '^' {
-  SHOWPARSE("blk_postfix_expr -> blk_postfix ^");
-  $$ = AST::make(at_deref, $1->loc, $1);
-  $$->printVariant = pf_IMPLIED;
-};
+
+// This has a conflict with a^b
+//blk_postfix_expr: blk_postfix_expr '^' {
+//  SHOWPARSE("blk_postfix_expr -> blk_postfix ^");
+//  $$ = AST::make(at_deref, $1->loc, $1);
+//  $$->printVariant = pf_IMPLIED;
+//};
 sxp_unqual_expr: sxp_expr '^' {
   SHOWPARSE("sxp_unqual_expr -> sxp_expr ^");
   $$ = AST::make(at_deref, $1->loc, $1);
@@ -3530,6 +3533,15 @@ blk_prefix_expr: '-' blk_prefix_expr  {
                  AST::make(at_ident, LToken($1.loc, "negate")), $2);
 };
 
+// Bitwise negation - block syntax only:
+blk_prefix_expr: '~' blk_prefix_expr  {
+  SHOWPARSE("blk_prefix_expr -> ~ blk_prefix_expr");
+  //$$ = AST::make(at_apply, $1.loc, 
+  //                 AST::make(at_ident, $1), $2);
+  $$ = AST::make(at_apply, $1.loc, 
+                 AST::make(at_ident, LToken($1.loc, "bit_not")), $2);
+};
+
 // NOT [7.15.3]
 // in the s-expression version this is just a procedure.
 blk_prefix_expr: tk_NOT blk_prefix_expr  {
@@ -3568,15 +3580,18 @@ sxp_unqual_expr: '(' tk_OR sxp_nonempty_params ')'  {
 // OTHER BLOCK INFIX OPERATORS
 blk_infix_expr: blk_infix_expr '|' blk_infix_expr  {
   SHOWPARSE("blk_infix_expr -> blk_infix_expr | blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
+  // $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
+  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, LToken($2.loc, "bit_or")), $1, $3);
 };
 blk_infix_expr: blk_infix_expr '^' blk_infix_expr  {
   SHOWPARSE("blk_infix_expr -> blk_infix_expr ^ blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
+  //$$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
+  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, LToken($2.loc, "bit_xor")), $1, $3);
 };
 blk_infix_expr: blk_infix_expr '&' blk_infix_expr  {
   SHOWPARSE("blk_infix_expr -> blk_infix_expr & blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
+  //$$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
+  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, LToken($2.loc, "bit_and")), $1, $3);
 };
 blk_infix_expr: blk_infix_expr tk_EQUALS blk_infix_expr  {
   SHOWPARSE("blk_infix_expr -> blk_infix_expr == blk_infix_expr");
@@ -4218,6 +4233,10 @@ blk_ident: '`' '^' {
   $$ = AST::make(at_ident, $2);
 };
 blk_ident: '`' '&' {
+  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
+  $$ = AST::make(at_ident, $2);
+};
+blk_ident: '`' '~' {
   SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
   $$ = AST::make(at_ident, $2);
 };

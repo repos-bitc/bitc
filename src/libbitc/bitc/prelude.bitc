@@ -274,6 +274,11 @@ interface bitc.prelude {
       `>>      : fn('a, word) -> 'a      // Right Shift
   }
 
+  def `&(x, y) = bit_and(x, y)
+  def `|(x, y) = bit_or(x, y)
+  def `^(x, y) = bit_xor(x, y)
+  def `~(x) = bit_not(x)
+
   ///////////////////////////////////////////////////////////
   // Instance Definitions
   ///////////////////////////////////////////////////////////

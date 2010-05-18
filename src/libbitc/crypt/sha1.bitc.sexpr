@@ -1,0 +1,115 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; RFC 3174 - US Secure Hash Algorithm 1 (SHA1)
+;; See: http://www.faqs.org/rfcs/rfc3174.html   
+;;
+;; Copyright (C) 2006, Johns Hopkins University.
+;; All rights reserved.
+;;
+;; Redistribution and use in source and binary forms, with or
+;; without modification, are permitted provided that the following
+;; conditions are met:
+;;
+;;   - Redistributions of source code must contain the above 
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer. 
+;;
+;;   - Redistributions in binary form must reproduce the above
+;;     copyright notice, this list of conditions, and the following
+;;     disclaimer in the documentation and/or other materials 
+;;     provided with the distribution.
+;;
+;;   - Neither the names of the copyright holders nor the names of any
+;;     of any contributors may be used to endorse or promote products
+;;     derived from this software without specific prior written
+;;     permission. 
+;;
+;;   - Redistributions must comply with the requirements of the
+;;     baseline copyright notice below. Note that the BitC
+;;     transcription is NOT the original document, and the provisions
+;;     below governing the original document therefore do not apply
+;;     to derivatives of this file.
+;;
+;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;
+;;
+;; This interface is a BitC transcription of the reference SHA-1
+;; hash algorithm published by the Internet Society in RFC3174.
+;; The accompanying source code was originally published under the
+;; following notice:
+;;
+;;
+;; Copyright (C) 2001, The Internet Society.
+;; All rights reserved.
+;;
+;; This document and translations of it may be copied and furnished to
+;; others, and derivative works that comment on or otherwise explain it
+;; or assist in its implementation may be prepared, copied, published
+;; and distributed, in whole or in part, without restriction of any
+;; kind, provided that the above copyright notice and this paragraph are
+;; included on all such copies and derivative works.  However, this
+;; document itself may not be modified in any way, such as by removing
+;; the copyright notice or references to the Internet Society or other
+;; Internet organizations, except as needed for the purpose of
+;; developing Internet standards in which case the procedures for
+;; copyrights defined in the Internet Standards process must be
+;; followed, or as required to translate it into languages other than
+;; English.
+;;
+;; The limited permissions granted above are perpetual and will not be
+;; revoked by the Internet Society or its successors or assigns.
+;;
+;; This document and the information contained herein is provided on an
+;; "AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
+;; TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+;; BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
+;; HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
+;; MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;   Interface    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(bitc version 0.10)
+(interface crypt.sha1
+  (import bitc.stdio as stdio)
+  (import bitc.stdlib as stdlib)
+
+
+  // Definition of SHA1 context
+  // I think shaNull can never happen for the code written in a safe
+  // language, just maintaining it for conformance with standards.
+  
+  (defunion sha_Result:val
+    sha_Success sha_Null sha_InputTooLong sha_StateError)
+  
+  ;;(define sha1HashSize 20:uint32)
+  
+  (defstruct sha1Context:ref
+    digest    : (array (mutable uint32) 5)
+    lenLow    : (mutable uint32)
+    lenHigh   : (mutable uint32)
+    message   : (array (mutable uint8) 64)
+    messNdx   : (mutable word)
+    computed  : (mutable bool)
+    corrupted : (mutable sha_Result))
+  
+  (proclaim sha1Reset:(fn sha1Context -> sha_Result))
+  (proclaim sha1Input:(fn sha1Context (vector (mutable uint8)) -> sha_Result))
+  (proclaim sha1Result:(fn sha1Context 
+			   (ByRef (array (mutable uint8) 20))
+			   -> sha_Result))
+  (proclaim shaResultAsString:(fn sha_Result -> string))
+)  
+  

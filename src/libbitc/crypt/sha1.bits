@@ -1,490 +1,449 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;; RFC 3174 - US Secure Hash Algorithm 1 (SHA1)
-;; See: http://www.faqs.org/rfcs/rfc3174.html   
-;;
-;; Copyright (C) 2006, Johns Hopkins University.
-;; All rights reserved.
-;;
-;; Redistribution and use in source and binary forms, with or
-;; without modification, are permitted provided that the following
-;; conditions are met:
-;;
-;;   - Redistributions of source code must contain the above 
-;;     copyright notice, this list of conditions, and the following
-;;     disclaimer. 
-;;
-;;   - Redistributions in binary form must reproduce the above
-;;     copyright notice, this list of conditions, and the following
-;;     disclaimer in the documentation and/or other materials 
-;;     provided with the distribution.
-;;
-;;   - Neither the names of the copyright holders nor the names of any
-;;     of any contributors may be used to endorse or promote products
-;;     derived from this software without specific prior written
-;;     permission. 
-;;
-;;   - Redistributions must comply with the requirements of the
-;;     baseline copyright notice below. Note that the BitC
-;;     transcription is NOT the original document, and the provisions
-;;     below governing the original document therefore do not apply
-;;     to derivatives of this file.
-;;
-;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-;;
-;;
-;; This implementation is a BitC transcription of the reference SHA-1
-;; hash algorithm published by the Internet Society in RFC3174.
-;; The accompanying source code was originally published under the
-;; following notice:
-;;
-;;
-;; Copyright (C) 2001, The Internet Society.
-;; All rights reserved.
-;;
-;; This document and translations of it may be copied and furnished to
-;; others, and derivative works that comment on or otherwise explain it
-;; or assist in its implementation may be prepared, copied, published
-;; and distributed, in whole or in part, without restriction of any
-;; kind, provided that the above copyright notice and this paragraph are
-;; included on all such copies and derivative works.  However, this
-;; document itself may not be modified in any way, such as by removing
-;; the copyright notice or references to the Internet Society or other
-;; Internet organizations, except as needed for the purpose of
-;; developing Internet standards in which case the procedures for
-;; copyrights defined in the Internet Standards process must be
-;; followed, or as required to translate it into languages other than
-;; English.
-;;
-;; The limited permissions granted above are perpetual and will not be
-;; revoked by the Internet Society or its successors or assigns.
-;;
-;; This document and the information contained herein is provided on an
-;; "AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
-;; TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
-;; BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
-;; HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
-;; MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+//////////////////////////////////////////////////////////////////////////
+//
+// RFC 3174 - US Secure Hash Algorithm 1 (SHA1)
+// See: http://www.faqs.org/rfcs/rfc3174.html   
+//
+// Copyright (C) 2006, Johns Hopkins University.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted provided that the following
+// conditions are met:
+//
+//   - Redistributions of source code must contain the above 
+//     copyright notice, this list of conditions, and the following
+//     disclaimer. 
+//
+//   - Redistributions in binary form must reproduce the above
+//     copyright notice, this list of conditions, and the following
+//     disclaimer in the documentation and/or other materials 
+//     provided with the distribution.
+//
+//   - Neither the names of the copyright holders nor the names of any
+//     of any contributors may be used to endorse or promote products
+//     derived from this software without specific prior written
+//     permission. 
+//
+//   - Redistributions must comply with the requirements of the
+//     baseline copyright notice below. Note that the BitC
+//     transcription is NOT the original document, and the provisions
+//     below governing the original document therefore do not apply
+//     to derivatives of this file.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//
+// This implementation is a BitC transcription of the reference SHA-1
+// hash algorithm published by the Internet Society in RFC3174.
+// The accompanying source code was originally published under the
+// following notice:
+//
+//
+// Copyright (C) 2001, The Internet Society.
+// All rights reserved.
+//
+// This document and translations of it may be copied and furnished to
+// others, and derivative works that comment on or otherwise explain it
+// or assist in its implementation may be prepared, copied, published
+// and distributed, in whole or in part, without restriction of any
+// kind, provided that the above copyright notice and this paragraph are
+// included on all such copies and derivative works.  However, this
+// document itself may not be modified in any way, such as by removing
+// the copyright notice or references to the Internet Society or other
+// Internet organizations, except as needed for the purpose of
+// developing Internet standards in which case the procedures for
+// copyrights defined in the Internet Standards process must be
+// followed, or as required to translate it into languages other than
+// English.
+//
+// The limited permissions granted above are perpetual and will not be
+// revoked by the Internet Society or its successors or assigns.
+//
+// This document and the information contained herein is provided on an
+// "AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
+// TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+// BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
+// HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
+// MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+//
+//////////////////////////////////////////////////////////////////////////
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; RFC 3174 - US Secure Hash Algorithm 1 (SHA1)
-;; See: http://www.faqs.org/rfcs/rfc3174.html   
-;; Original C version: 
-;; Copyright (C) The Internet Society (2001).  All Rights Reserved.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+//////////////////////////////////////////////////////////////////////////
+// RFC 3174 - US Secure Hash Algorithm 1 (SHA1)
+// See: http://www.faqs.org/rfcs/rfc3174.html   
+// Original C version: 
+// Copyright (C) The Internet Society (2001).  All Rights Reserved.
+//////////////////////////////////////////////////////////////////////////
 
-  ;;;;;;;;;;;;;;;;;;;;;   Implementation  ;;;;;;;;;;;;;;;;;;;;;;;;;;;  
-  ;  Description:
-  ;      This file implements the Secure Hashing Algorithm 1 as
-  ;      defined in FIPS PUB 180-1 published April 17, 1995.  
-  ;
-  ;      The SHA-1, produces a 160-bit message digest for a given
-  ;      data stream.  It should take about 2**n steps to find a
-  ;      message with the same digest as a given message and
-  ;      2**(n/2) to find any two messages with the same digest,
-  ;      when n is the digest size in bits.  Therefore, this
-  ;      algorithm can serve as a means of providing a
-  ;      "fingerprint" for a message.  
-  ;
-  ;  Caveats:
-  ;      SHA-1 is designed to work with messages less than 2^64 bits
-  ;      long.  Although SHA-1 allows a message digest to be generated
-  ;      for messages of any number of bits less than 2^64, this
-  ;      implementation only works with messages with a length that is
-  ;      a multiple of the size of an 8-bit character.
+  /////////////////////   Implementation  ///////////////////////////  
+  // Description:
+  //     This file implements the Secure Hashing Algorithm 1 as
+  //     defined in FIPS PUB 180-1 published April 17, 1995.  
+  //
+  //     The SHA-1, produces a 160-bit message digest for a given
+  //     data stream.  It should take about 2**n steps to find a
+  //     message with the same digest as a given message and
+  //     2**(n/2) to find any two messages with the same digest,
+  //     when n is the digest size in bits.  Therefore, this
+  //     algorithm can serve as a means of providing a
+  //     "fingerprint" for a message.  
+  //
+  // Caveats:
+  //     SHA-1 is designed to work with messages less than 2^64 bits
+  //     long.  Although SHA-1 allows a message digest to be generated
+  //     for messages of any number of bits less than 2^64, this
+  //     implementation only works with messages with a length that is
+  //     a multiple of the size of an 8-bit character.
 
+bitc version 0.11
 
-(bitc version 0.10)
-(module sha1_impl
-  (import bitc.stdio as stdio)
-  (import bitc.stdlib as stdlib)
-  (import crypt.sha1 as sha1)
-  (provide crypt.sha1
-	   shaResultAsString 
-	   sha1Reset
-	   sha1Result
-	   sha1Input)
+module sha1_impl {
+  import bitc.stdio as stdio
+  import bitc.stdlib as stdlib
+  import crypt.sha1 as sha1
+
+  provide crypt.sha1 shaResultAsString, sha1Reset, sha1Result, sha1Input
 
 
-  ;; Define the SHA1 circular left shift operation
-  (define (circShift bits value) 
-    (bit_or (<< value bits) (>> value (- 32 bits))))
+  // Define the SHA1 circular left shift operation
+  def circShift(bits, value) = {
+    (value << bits) | (value >> (32 - bits))
+  }
 
-  ;; Encoding the C-like Return statement using exceptions
-  (defexception Ret retVal:sha1.sha_Result)
+  // Encoding the C-like Return statement using exceptions
+  exception Ret {
+    retVal : sha1.sha_Result
+  }
 
-  ;; Forward declarations
-  (proclaim sha1PadMessage:(fn sha1.sha1Context -> ()))
-  (proclaim sha1ProcessMessageBlock:(fn sha1.sha1Context -> ()))
+  // Forward declarations
+  def sha1PadMessage : fn (sha1.sha1Context) -> ()
+  def sha1ProcessMessageBlock : fn(sha1.sha1Context) -> ()
 
-
-  ;; Strings for Sha-Result
-  (define (sha1.shaResultAsString res)
-    (switch x res 
-      (sha1.sha_Success "Success")
-      (sha1.sha_Null    "Null")
-      (sha1.sha_InputTooLong "Too-Long")
-      (sha1.sha_StateError "State-Error")))
+  // Strings for Sha-Result
+  def sha1.shaResultAsString(res) =
+    switch(res) {
+    case x as sha1.sha_Success in "Success"
+    case x as sha1.sha_Null in "Null"
+    case x as sha1.sha_InputTooLong in "Too-Long"
+    case x as sha1.sha_StateError in "State-Error"
+    }
     
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;  SHA1Reset  
-  ;
-  ;  Description:
-  ;      This function will initialize the SHA1Context in preparation
-  ;      for computing a new SHA1 message digest.
-  ;
-  ;  Parameters:
-  ;      context: [in/out]
-  ;          The context to reset. 
-  ; 
-  ;  Returns:
-  ;      sha Error Code.
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  //////////////////////////////////////////////////////////
+  // SHA1Reset  
+  //
+  // Description:
+  //     This function will initialize the SHA1Context in preparation
+  //     for computing a new SHA1 message digest.
+  //
+  // Parameters:
+  //     context: [in/out]
+  //         The context to reset. 
+  //
+  // Returns:
+  //     sha Error Code.
+  //////////////////////////////////////////////////////////
 
-  (define (sha1.sha1Reset context:sha1.sha1Context)
-    (set! context.lenLow 0)
-    (set! context.lenHigh 0)
-    (set! context.messNdx 0)
-    (set! (nth context.digest 0) 16r67452301)
-    (set! (nth context.digest 1) 16rEFCDAB89)
-    (set! (nth context.digest 2) 16r98BADCFE)
-    (set! (nth context.digest 3) 16r10325476)
-    (set! (nth context.digest 4) 16rC3D2E1F0)
+  def sha1.sha1Reset(context:sha1.sha1Context) = {
+    context.lenLow := 0
+    context.lenHigh := 0
+    context.messNdx := 0
+    context.digest[0] := 16r67452301
+    context.digest[1] := 16rEFCDAB89
+    context.digest[2] := 16r98BADCFE
+    context.digest[3] := 16r10325476
+    context.digest[4] := 16rC3D2E1F0
     
-    (set! context.computed #f)
-    (set! context.corrupted sha1.sha_Success)
+    context.computed := false
+    context.corrupted := sha1.sha_Success
     
     sha1.sha_Success
-    )
+  }
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;  SHA1Result  
-  ;
-  ;  Description:
-  ;      This function will return the 160-bit message digest into the
-  ;      Message_Digest array  provided by the caller.
-  ;      NOTE: The first octet of hash is stored in the 0th element,
-  ;            the last octet of hash in the 19th element.  
-  ;
-  ;  Parameters:
-  ;      context: [in/out]
-  ;          The context to use to calculate the SHA-1 hash.
-  ;      Message_Digest: [out]
-  ;          Where the digest is returned. 
-  ;
-  ;  Returns:
-  ;      sha Error Code.
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  //////////////////////////////////////////////////////////
+  // SHA1Result  
+  //
+  // Description:
+  //     This function will return the 160-bit message digest into the
+  //     Message_Digest array  provided by the caller.
+  //     NOTE: The first octet of hash is stored in the 0th element,
+  //           the last octet of hash in the 19th element.  
+  //
+  // Parameters:
+  //     context: [in/out]
+  //         The context to use to calculate the SHA-1 hash.
+  //     Message_Digest: [out]
+  //         Where the digest is returned. 
+  //
+  // Returns:
+  //     sha Error Code.
+  //////////////////////////////////////////////////////////
+
+  def sha1.sha1Result(context:sha1.sha1Context,
+		      digest:ByRef((mutable uint8)[20])) = {
+    if context.corrupted.sha_Success
+    then {
+      if not context.computed
+      then {
+	sha1PadMessage(context)
+	do i = 0 then i + 1
+	until i >= 64 giving () {
+	  context.message[i] := 0
+        }
+	context.lenLow := 0
+	context.lenHigh := 0
+	context.computed := true
+      }
+      else ()
+
+      do i = 0 then i + 1
+      until i >= 20 giving () {
+        digest[i] := Truncate(context.digest[i >> 2] >> (8 * (3 - i & 16r03)))
+      }
+      sha1.sha_Success
+    }
+    else context.corrupted
+  }
 
 
-  (define (sha1.sha1Result context:sha1.sha1Context 
-		      digest:(ByRef (array (mutable uint8) 20)))
-    (if context.corrupted.sha_Success 
-	(begin
-	  (if (not context.computed)
-	      (begin 
-		(sha1PadMessage context)
-		(do ((i 0 (+ i 1)))
-		    ((>= i 64) ())
-		    (set! (nth context.message i) 0))
-		(set! context.lenLow 0)
-		(set! context.lenHigh 0)
-		(set! context.computed #t)) ())
+  //////////////////////////////////////////////////////////
+  // SHA1Input  
+  //
+  // Description:
+  //     This function accepts an array of octets as the next portion
+  //     of the message. 
+  //
+  // Parameters:
+  //     context: [in/out]
+  //         The SHA context to update
+  //      message: [in]
+  //         A vector of characters representing the next portion of
+  //         the message. 
+  //
+  // Returns:
+  //      sha Error Code.
+  //////////////////////////////////////////////////////////
+
+  def sha1.sha1Input(context:sha1.sha1Context, message:(mutable uint8)[]) =
+  {
+    if message.length == 0
+    then sha1.sha_Success
+    else {
+      if context.computed
+      then {
+        context.corrupted := sha1.sha_StateError
+        sha1.sha_StateError
+      }
+      else {
+        if context.corrupted.sha_Success
+	then {
+	  do i = 0 then i + 1
+    	  until (i >= message.length) && context.corrupted.sha_Success
+          giving () {
+	    context.message[context.messNdx] := message[i] & 16rff
+	    context.messNdx := context.messNdx + 1
+	    context.lenLow := context.lenLow + 8
+
+	    if context.lenLow == 0
+	    then {
+	      context.lenHigh := context.lenHigh + 1
+	      if context.lenHigh == 0
+	      then context.corrupted := sha1.sha_InputTooLong
+	    }
+
+	    if context.messNdx == 64
+	    then sha1ProcessMessageBlock(context)
+          }
+
+	  sha1.sha_Success
+        }
+        else context.corrupted
+      }
+    }
+  }
+
+  //////////////////////////////////////////////////////////
+  // SHA1ProcessMessageBlock 
+  //
+  // Description:
+  //      This function will process the next 512 bits of the message
+  //     stored in the Message_Block array. 
+  //
+  // Parameters:
+  //     None.
+  //
+  // Returns:
+  //     Nothing. 
+  //
+  // Comments:
+  //
+  //      Many of the variable names in this code, especially the
+  //      single character names, were used because those were the
+  //      names used in the publication.
+  //////////////////////////////////////////////////////////
+
+  def sha1ProcessMessageBlock(context : sha1.sha1Context) = 
+  {
+    // Constants defined in SHA-1 
+    def K = array(16r5A827999, 16r6ED9EBA1, 16r8F1BBCDC, 16rCA62C1D6)
+    
+    def W: (mutable uint32)[80] =
+      array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    
+    do t = 0 then t + 1
+    until t >= 16 giving () {
+      W[t] := ZeroExtend(context.message[t*4]) << 24
+      W[t] := W[t] | ZeroExtend(context.message[t*4 + 1]) << 16
+      W[t] := W[t] | ZeroExtend(context.message[t*4 + 2]) << 8
+      W[t] := W[t] | ZeroExtend(context.message[t*4 + 3])
+    }
+
+    do t = 16 then t + 1
+    until t >= 80 giving () {
+      W[t] := circShift(1, W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16])
+    }
+
+    def A = context.digest[0]
+    def B = context.digest[1]
+    def C = context.digest[2]
+    def D = context.digest[3]
+    def E = context.digest[4]
+
+    do t = 0 then t + 1
+    until t >= 20 giving () {
+      def temp = circShift(5, A) + ((B&C) | (~B & D)) + E + W[t] + K[0]
+
+      E := D
+      D := C
+      C := circShift(30, B)
+      B := A
+      A := temp
+    }
+
+    do t = 20 then t + 1
+    until t >= 40 giving () {
+      def temp = circShift(5, A) + (B^(C^D)) + E + W[t] + K[1]
+
+      E := D
+      D := C
+      C := circShift(30, B)
+      B := A
+      A := temp
+    }
+
+    do t = 40 then t + 1
+    until t >= 60 giving () {
+      def temp = circShift(5, A) + ((B&C)|(B&D)|(C&D)) + E + W[t] + K[2]
+
+      E := D
+      D := C
+      C := circShift(30, B)
+      B := A
+      A := temp
+    }
+
+    do t = 60 then t + 1
+    until t >= 80 giving () {
+      def temp = circShift(5, A) + (B^(C^D)) + E + W[t] + K[3]
+
+      E := D
+      D := C
+      C := circShift(30, B)
+      B := A
+      A := temp
+    }
+
+    context.digest[0] := context.digest[0] + A
+    context.digest[1] := context.digest[1] + B
+    context.digest[2] := context.digest[2] + C
+    context.digest[3] := context.digest[3] + D
+    context.digest[4] := context.digest[4] + E
+
+    context.messNdx := 0
+  }
+
+  //////////////////////////////////////////////////////////
+  //  SHA1PadMessage
+  //
+  //  Description:
+  //      According to the standard, the message must be padded to an even
+  //      512 bits.  The first padding bit must be a '1'.  The last 64
+  //      bits represent the length of the original message.  All bits in
+  //      between should be 0.  This function will pad the message
+  //      according to those rules by filling the Message_Block array
+  //      accordingly.  It will also call the ProcessMessageBlock function
+  //       provided appropriately.  When it returns, it can be assumed that
+  //      the message digest has been computed.
+  //
+  //  Parameters:
+  //      context: [in/out]
+  //          The context to pad
+  //      ProcessMessageBlock: [in]
+  //          The appropriate SHA*ProcessMessageBlock function
+  //  Returns:
+  //      Nothing.
+  //////////////////////////////////////////////////////////
+
+
+  def sha1PadMessage(context:sha1.sha1Context)
+    // Check to see if the current message block is too small to hold
+    // the initial padding bits and length. If so, we will pad the
+    // block, process it, and then continue padding into a second block.
+  = {
+      if context.messNdx > 55   
+      then {
+      	context.message[context.messNdx] := 16r80
+	context.messNdx := context.messNdx + 1
 	  
-	  (do ((i 0 (+ i 1)))
-	      ((>= i 20) ())
-	      
-	      (set! (nth digest i)
-		    (Truncate (>> (nth context.digest (>> i 2))
-				  (* 8 (- 3 (bit_and i 16r03)))))))
-	  sha1.sha_Success)
-	context.corrupted))
+      	do dummy = () then ()
+        until context.messNdx >= 64 giving () {
+	  context.message[context.messNdx] := 0
+	  context.messNdx := context.messNdx + 1
+        }
+	
+        sha1ProcessMessageBlock(context)
 
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;  SHA1Input  
-  ;
-  ;  Description:
-  ;      This function accepts an array of octets as the next portion
-  ;      of the message. 
-  ;
-  ;  Parameters:
-  ;      context: [in/out]
-  ;          The SHA context to update
-  ;       message: [in]
-  ;          A vector of characters representing the next portion of
-  ;          the message. 
-  ;
-  ;  Returns:
-  ;       sha Error Code.
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-  (define (sha1.sha1Input context:sha1.sha1Context message:(vector (mutable uint8))) 
-    (if (== message.length 0)
-	sha1.sha_Success
-	(if context.computed
-	    (begin
-	      (set! context.corrupted sha1.sha_StateError)
-	      sha1.sha_StateError)
-	    (if context.corrupted.sha_Success
-		(begin 
-		  (do ((i 0 (+ i 1)))
-		      ((and (>= i message.length)
-			    context.corrupted.sha_Success) ())
-		      
-		      (set! (nth context.message context.messNdx)
-			    (bit_and (nth message i) 16rff))
-		      (set! context.messNdx (+ context.messNdx 1))
-		      (set! context.lenLow (+ context.lenLow 8))
-		      (if (== context.lenLow 0)
-			  (begin
-			    (set! context.lenHigh (+ context.lenHigh 1))
-			    (if (== context.lenHigh 0)
-				(set! context.corrupted sha1.sha_InputTooLong) ()))
-			  ())
-		      
-		      (if (== context.messNdx 64)	     
-			  (sha1ProcessMessageBlock context) 
-			  ()))
-		  
-		  sha1.sha_Success)
-		context.corrupted)))
-    )
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;  SHA1ProcessMessageBlock 
-  ; 
-  ;  Description:
-  ;       This function will process the next 512 bits of the message
-  ;      stored in the Message_Block array. 
-  ;
-  ;  Parameters:
-  ;      None.
-  ;
-  ;  Returns:
-  ;      Nothing. 
-  ;
-  ;  Comments:
-  ;
-  ;       Many of the variable names in this code, especially the
-  ;       single character names, were used because those were the
-  ;       names used in the publication.
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-  (define (sha1ProcessMessageBlock context:sha1.sha1Context)
-					; Constants defined in SHA-1 
-    (define K (array 16r5A827999
-		     16r6ED9EBA1
-		     16r8F1BBCDC
-		     16rCA62C1D6))
-    
-    (define W:(array (mutable uint32) 80)
-      (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-	     0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-	     0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-	     0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
-    
-    (do ((t 0 (+ t 1)))
-	((>= t 16) ())
-	(set! (nth W t)
-	      (<< (ZeroExtend 
-		   (nth context.message (* t 4))) 24))
-	(set! (nth W t)
-	      (bit_or (nth W t)
-		      (<< (ZeroExtend 
-			   (nth context.message 
-				      (+ (* t 4) 1))) 16)))
-	(set! (nth W t)
-	      (bit_or (nth W t)
-		      (<< (ZeroExtend 
-			   (nth context.message 
-				      (+ (* t 4) 2))) 8)))
-	(set! (nth W t)
-	      (bit_or (nth W t)
-		      (ZeroExtend 
-		       (nth context.message (+ (* t 4) 3))))))
-
-    (do ((t 16 (+ t 1)))
-	((>= t 80) ())
-	(set! (nth W t)
-	      (circShift 1
-			 (bit_xor 
-			  (nth W (- t 3))
-			  (bit_xor
-			   (nth W (- t 8))
-			   (bit_xor
-			    (nth W (- t 14))
-			    (nth W (- t 16))))))))
-
-    (define A (nth context.digest 0))
-    (define B (nth context.digest 1))
-    (define C (nth context.digest 2))
-    (define D (nth context.digest 3))
-    (define E (nth context.digest 4))
-
-    (do ((t 0 (+ t 1)))
-	((>= t 20) ())
-
-	(define temp (+ (circShift 5 A)
-			(+ (bit_or (bit_and B C)
-				   (bit_and (bit_not B) D))
-			   (+ E
-			      (+ (nth W t)
-				 (nth K 0))))))
-	(set! E D)
-	(set! D C)
-	(set! C (circShift 30 B))
-	(set! B A)
-	(set! A temp))
-
-    (do ((t 20 (+ t 1)))
-	((>= t 40) ())
-
-	(define temp (+ (circShift 5 A)
-			(+ (bit_xor B
-				    (bit_xor C D))
-			   (+ E
-			      (+ (nth W t)
-				 (nth K 1))))))
-	(set! E D)
-	(set! D C)
-	(set! C (circShift 30 B))
-	(set! B A)
-	(set! A temp))
-
-
-    (do ((t 40 (+ t 1)))
-	((>= t 60) ())
-
-	(define temp (+ (circShift 5 A)
-			(+ (bit_or (bit_and B C)
-				   (bit_or (bit_and B D) 
-					   (bit_and C D)))
-			   (+ E
-			      (+ (nth W t)
-				 (nth K 2))))))
-	(set! E D)
-	(set! D C)
-	(set! C (circShift 30 B))
-	(set! B A)
-	(set! A temp))
-
-    (do ((t 60 (+ t 1)))
-	((>= t 80) ())
-
-	(define temp (+ (circShift 5 A)
-			(+ (bit_xor B
-				    (bit_xor C D))
-			   (+ E
-			      (+ (nth W t)
-				 (nth K 3))))))
-	(set! E D)
-	(set! D C)
-	(set! C (circShift 30 B))
-	(set! B A)
-	(set! A temp))
-
-    (set! (nth context.digest 0) 
-	  (+ (nth context.digest 0) A))
-    (set! (nth context.digest 1) 
-	  (+ (nth context.digest 1) B))
-    (set! (nth context.digest 2) 
-	  (+ (nth context.digest 2) C))
-    (set! (nth context.digest 3) 
-	  (+ (nth context.digest 3) D))
-    (set! (nth context.digest 4) 
-	  (+ (nth context.digest 4) E))
-    
-    (set! context.messNdx 0)
-    )
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;   SHA1PadMessage
-  ;
-  ;   Description:
-  ;       According to the standard, the message must be padded to an even
-  ;       512 bits.  The first padding bit must be a '1'.  The last 64
-  ;       bits represent the length of the original message.  All bits in
-  ;       between should be 0.  This function will pad the message
-  ;       according to those rules by filling the Message_Block array
-  ;       accordingly.  It will also call the ProcessMessageBlock function
-  ;        provided appropriately.  When it returns, it can be assumed that
-  ;       the message digest has been computed.
-  ;
-  ;   Parameters:
-  ;       context: [in/out]
-  ;           The context to pad
-  ;       ProcessMessageBlock: [in]
-  ;           The appropriate SHA*ProcessMessageBlock function
-  ;   Returns:
-  ;       Nothing.
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-  (define (sha1PadMessage context:sha1.sha1Context)
-  ; Check to see if the current message block is too small to hold
-  ; the initial padding bits and length.  If so, we will pad the
-  ; block, process it, and then continue padding into a second
-  ; block.
-    
-    (if (> context.messNdx  55)
-	(begin
-	  (set! (nth context.message context.messNdx) 16r80)
-	  (set! context.messNdx (+ context.messNdx 1))
-	  
-	  (do ((dummy () ()))
-	      ((>= context.messNdx 64) ())	    
-	      (set! (nth context.message context.messNdx) 0)
-	      (set! context.messNdx (+ context.messNdx 1)))
-
-	  (sha1ProcessMessageBlock context)
-	;; Will reset context.messNdx to 0
+	// Will reset context.messNdx to 0
  
- 	(do ((dummy () ()))
-	    ((>= context.messNdx 56) ())	    
-	    (set! (nth context.message context.messNdx) 0)
-	    (set! context.messNdx (+ context.messNdx 1))))
-	(begin
-	  (set! (nth context.message context.messNdx) 16r80)
-	  (set! context.messNdx (+ context.messNdx 1))
+      	do dummy = () then ()
+        until context.messNdx >= 56 giving () {
+	  context.message[context.messNdx] := 0
+	  context.messNdx := context.messNdx + 1
+        }
+      }
+      else {
+      	context.message[context.messNdx] := 16r80
+	context.messNdx := context.messNdx + 1
 
-	  (do ((dummy () ()))
-	      ((>= context.messNdx 56) ())	    
-	      (set! (nth context.message context.messNdx) 0)
-	      (set! context.messNdx (+ context.messNdx 1)))))
+      	do dummy = () then ()
+        until context.messNdx >= 56 giving () {
+	  context.message[context.messNdx] := 0
+	  context.messNdx := context.messNdx + 1
+        }
+      }
 
-  
-     ;; Store the message length as the last 8 octets
-    (set! (nth context.message 56) 
-	  (Truncate (>> context.lenHigh 24)))
-    (set! (nth context.message 57) 
-	  (Truncate (>> context.lenHigh 16)))
-    (set! (nth context.message 58) 
-	  (Truncate (>> context.lenHigh 8)))
-    (set! (nth context.message 59)
-	  (Truncate context.lenHigh))
-    (set! (nth context.message 60) 
-	  (Truncate (>> context.lenLow 24)))
-    (set! (nth context.message 61)
-	  (Truncate (>> context.lenLow 16)))
-    (set! (nth context.message 62) 
-	  (Truncate (>> context.lenLow 8)))
-    (set! (nth context.message 63) 
-	  (Truncate context.lenLow))
-    
-    (sha1ProcessMessageBlock context)
-    )
-)  
+      // Store the message length as the last 8 octets
+      context.message[56] := Truncate(context.lenHigh >> 24);
+      context.message[57] := Truncate(context.lenHigh >> 16);
+      context.message[58] := Truncate(context.lenHigh >> 8);
+      context.message[59] := Truncate(context.lenHigh);
+      context.message[60] := Truncate(context.lenLow >> 24);
+      context.message[61] := Truncate(context.lenLow >> 16);
+      context.message[62] := Truncate(context.lenLow >> 8);
+      context.message[63] := Truncate(context.lenLow);
+
+      sha1ProcessMessageBlock(context);
+    }
+}

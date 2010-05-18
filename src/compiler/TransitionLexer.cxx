@@ -306,6 +306,7 @@ static bool keywords_sorted = false;
 
 struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "!",                lf_block,             '!' ),
+  TransitionLexer::KeyWord( "~",                lf_block,             '~' ),
   TransitionLexer::KeyWord( "!=",               lf_block,             tk_NOTEQUALS ),
   TransitionLexer::KeyWord( "%",                lf_block,             '%' ),
   TransitionLexer::KeyWord( "&",                lf_block,             '&' ),
