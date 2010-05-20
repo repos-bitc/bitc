@@ -1051,6 +1051,14 @@ resolve(std::ostream& errStream,
 
       shared_ptr<AST> category = ast->child(2);
 
+      if (category->astType == at_boxedCat) {
+        errStream << ast->loc << ": "
+                  << "struct " << ast->child(0)->s
+                  << ": Structure definitions cannot be boxed."
+                  << std::endl;
+        errorFree = false;
+      }              
+
       IdentType identType = 
         (ast->astType == at_defstruct) ? id_struct : id_object;
 
