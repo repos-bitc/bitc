@@ -102,7 +102,7 @@ interface crypt.sha1 {
   
   //def sha1HashSize 20:uint32
   
-  boxed struct sha1Context {
+  unboxed struct sha1Context {
     digest    : (mutable uint32)[5]
     lenLow    : mutable uint32
     lenHigh   : mutable uint32
@@ -112,9 +112,10 @@ interface crypt.sha1 {
     corrupted : mutable sha_Result
   }
   
-  def sha1Reset : fn (sha1Context) -> sha_Result
-  def sha1Input : fn (sha1Context, (mutable uint8)[] ) -> sha_Result
-  def sha1Result : fn (sha1Context, ByRef (mutable uint8)[20]) -> sha_Result
+  def sha1Reset : fn (ByRef sha1Context) -> sha_Result
+  def sha1Input : fn (ByRef sha1Context, (mutable uint8)[] ) -> sha_Result
+  def sha1Result : fn (ByRef sha1Context, ByRef (mutable uint8)[20])
+                    -> sha_Result
   def shaResultAsString : fn (sha_Result) -> string
 }
   
