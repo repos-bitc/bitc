@@ -684,14 +684,12 @@ Type::isPcst()
   return (t->kind == ty_pcst);    
 }
 
-// Returns true if this is a union or a structure definition 
-// respectively
+// Returns true if this is a union type 
 bool 
 Type::isUnion(bool ignMut) 
 {
   shared_ptr<Type> t = ((ignMut) ? getBareType() : getType());
-  return (((t->kind == ty_unionv) || (t->kind == ty_unionr)) &&
-          (t->components.size()));
+  return ((t->kind == ty_unionv) || (t->kind == ty_unionr));
 }
 
 bool 
