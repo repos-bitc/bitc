@@ -1290,19 +1290,19 @@ sxp_type_definition: LP tk_DEFREPR sxp_defident sxp_val trn_optdocstring sxp_dec
 // Type Declarations
 // External declarations
 blk_externals: /* nothing */ {
-  SHOWPARSE("sxp_externals -> ");
+  SHOWPARSE("blk_externals -> ");
   $$ = AST::make(at_Null);
   $$->flags = NO_FLAGS;
 };
 
 blk_externals: tk_EXTERNAL {
-  SHOWPARSE("sxp_externals -> EXTERNAL");
+  SHOWPARSE("blk_externals -> EXTERNAL");
   $$ = AST::make(at_Null, $1.loc);
   $$->flags = DEF_IS_EXTERNAL;
 };
 
 blk_externals: tk_EXTERNAL blk_exident {
-  SHOWPARSE("sxp_externals -> EXTERNAL blk_exident");
+  SHOWPARSE("blk_externals -> EXTERNAL blk_exident");
   $$ = AST::make(at_Null, $1.loc);
   $$->flags = DEF_IS_EXTERNAL;
   $$->externalName = $2->s;
@@ -1421,7 +1421,6 @@ sxp_type_decl: LP tk_DEFREPR sxp_defident sxp_val sxp_externals RP {
 blk_val: tk_BOXED {
   SHOWPARSE("blk_val -> BOXED");
   $$ = AST::make(at_boxedCat);
-  $$->printVariant = pf_IMPLIED;
 }
 
 blk_val: tk_UNBOXED {
