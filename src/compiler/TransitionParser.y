@@ -447,21 +447,21 @@ static unsigned VersionMinor(const std::string s)
 // Section Numbers indicated within []
 
 // COMPILATION UNITS [2.5]
-// This definition of sxp_start mus be changed as it ignores
+// This definition of start must be changed as it ignores
 // junk after the body.
 
-sxp_start: sxp_version sxp_uoc_body {
-  SHOWPARSE("sxp_start -> sxp_version sxp_uoc_body");
+start: sxp_version sxp_uoc_body {
+  SHOWPARSE("start -> sxp_version sxp_uoc_body");
   return 0;
 };
 
-sxp_start: sxp_uoc_body {
-  SHOWPARSE("sxp_start -> sxp_uoc_body");
+start: sxp_uoc_body {
+  SHOWPARSE("start -> sxp_uoc_body");
   return 0;
 };
 
-sxp_start: blk_version trn_uoc_body {
-  SHOWPARSE("sxp_start -> blk_version trn_uoc_body");
+start: blk_version trn_uoc_body {
+  SHOWPARSE("start -> blk_version trn_uoc_body");
   return 0;
 };
 
