@@ -59,8 +59,6 @@ using namespace boost;
 using namespace sherpa;
 using namespace std;
 
-#define SWAROOP_TYPES
-
 // At the moment, the "pretty" part of the pretty printing is broken.
 static void
 print_type(INOstream& out, shared_ptr <const AST> ast)
@@ -68,9 +66,9 @@ print_type(INOstream& out, shared_ptr <const AST> ast)
   shared_ptr<Type> ty = ast->symType;
 
   if (ty)
-    out << " {" << ty->asString() << "}";
+    out << " /* : " << ty->asString() << "*/";
   else
-    out << " {" << "??" << "}";
+    out << " /* : " << "??" << " */";
 
 }
 
@@ -206,17 +204,13 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
     out << ast->s;
 
-#ifdef SWAROOP_TYPES
     if (showTypes) print_type(out, ast);
-#endif
 
     break;
   case at_stringLiteral:
     out << "\"" << ast->s << "\"";
 
-#ifdef SWAROOP_TYPES
     if (showTypes) print_type(out, ast);
-#endif
 
     break;
 
@@ -231,9 +225,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       out << "}";
     }
 
-#ifdef SWAROOP_TYPES
     if (showTypes) print_type(out, ast);
-#endif
 
     break;
 
@@ -617,10 +609,8 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     BitcP(out, ast->child(0), showTypes);
     out << ")";
 
-
-#ifdef SWAROOP_TYPES
     if (showTypes) print_type(out, ast);
-#endif
+
     break;
 
   case at_fnargVec:
@@ -628,9 +618,9 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     out << "(";
     doChildren(out, ast, 0, false, showTypes);
     out << ")";
-#ifdef SWAROOP_TYPES
+
     if (showTypes) print_type(out, ast);
-#endif
+
     break;
 
   case at_allocREF:
@@ -645,9 +635,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
         BitcP(out, ast->child(1), showTypes);
         out << ")";
 
-#ifdef SWAROOP_TYPES
         if (showTypes) print_type(out, ast);
-#endif
       }
       else {
         out << "(" << ast->atKwd();
@@ -999,9 +987,9 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       }
 
       out << ")";
-#ifdef SWAROOP_TYPES
+
       if (showTypes) print_type(out, ast);
-#endif
+
       break;
     }
 
@@ -1130,9 +1118,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     }
   }
 
-#ifndef SWAROOP_TYPES
   if (showTypes) print_type(out, ast);
-#endif
 
   out.setIndent(startIndent);
 }
