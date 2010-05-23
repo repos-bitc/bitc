@@ -2998,6 +2998,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
           break;
         }
 
+#ifdef DEADCODE
       case ty_vector:
         {
           errStream << ast->loc << ": Cannot dereference a "
@@ -3041,12 +3042,13 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
           errFree = false;
           break;
         }
+#endif
         
       default:
         {
           errStream << ast->loc << ": "
-                    << "Target of a val should be a ref type." 
-                    << "But obtained" << t1->asString() << std::endl;
+                    << "Target of unbox should be a type of the form (ref 'a). " 
+                    << " But obtained" << t1->asString() << std::endl;
           errFree = false;
           break;
         }
