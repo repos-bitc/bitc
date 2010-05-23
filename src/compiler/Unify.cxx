@@ -817,11 +817,11 @@ acyclic(std::ostream& errStream,
     
     // By now, we know that the current type is already 
     // in the worklist
-    std::cerr << t->asString(GC_NULL, false) 
+    std::cerr << t->asString(GC_NULL, PO_NO_TRAVERSE) 
                   << std::endl;
     for (WorkList<shared_ptr<Type> >::iterator itr = worklist.begin();
         itr != worklist.end(); ++itr)
-      std::cerr << (*itr)->asString(GC_NULL, false)
+      std::cerr << (*itr)->asString(GC_NULL, PO_NO_TRAVERSE)
                 << std::endl;
     fatal();
     return false;

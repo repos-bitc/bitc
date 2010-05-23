@@ -168,10 +168,6 @@ struct ArrLen {
   }
 };
 
-
-struct tvPrinter;
-struct TypeScheme;
-
 /// @brief Mark values for types.
 ///
 /// The following marks are present on types to ensure that
@@ -256,8 +252,32 @@ enum TypeFlagValues {
   /// const type. 
   TY_ARG_IN_CONST = 0x80u
 };
-
 typedef sherpa::EnumSet<TypeFlagValues> TypeFlags;
+
+enum PrintOptionValues {
+  PO_NO_FLAGS     = 0x0,
+
+  /// @brief Suppress link field traversal
+  ///
+  /// The pretty printer normally traverses the unification link
+  /// fields to find the resolved type. If this option is set,
+  /// traversal is suppressed, which can be useful for debugging
+  /// purposes.
+  PO_NO_TRAVERSE  = 0x01u,
+
+  /// @brief Display type linkages.
+  ///
+  /// If this option is set, the traversal information will be
+  /// displayed, which can be useful for debugging purposes.
+  PO_SHOW_LINKS  = 0x02u,
+
+  /// @brief Display internal field types
+  ///
+  /// For debugging purposes it is often useful to see aggregate types
+  /// displayed in "exploded" form.
+  PO_SHOW_FIELDS  = 0x04u,
+};
+typedef sherpa::EnumSet<PrintOptionValues> PrintOptions;
 
 // Specialization mask -- those flags which should NOT survive
 // specialization. 
@@ -266,6 +286,8 @@ const TypeFlags TY_SP_MASK  =
 
 struct Type;
 typedef std::set<boost::shared_ptr<Type > > TypeSet;
+
+struct TypeScheme;
 
 struct Type : public boost::enable_shared_from_this<Type> {
   
@@ -723,13 +745,14 @@ public:
   // TY_ARG_IN_CONST flag markings 
   bool argInConst(size_t argN);  
   
-  /* Various kinds of printing */
-  // Internal debugging purposes only, do not use for user output.
-  std::string toString();  
-  // Use Output
+  /* Print a type into a string for interactive or debugging display. */
   std::string 
   asString(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make(), 
-           bool traverse = true);
+           PrintOptions options = PO_NO_FLAGS);
+
+  //  std::string 
+  //  asString(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make(), 
+  //           bool traverse = true);
 
   void asXML(boost::shared_ptr<TvPrinter> tvP, sherpa::INOstream &out);
   std::string asXML(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make());

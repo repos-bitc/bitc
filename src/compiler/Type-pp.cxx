@@ -1,6 +1,7 @@
 /**************************************************************************
  *
  * Copyright (C) 2008, Johns Hopkins University.
+ * Copyright (C) 2010, Jonathan S. Shapiro.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -76,29 +77,35 @@ printName(shared_ptr<AST> ast)
 // FIX: Differences in the debug version should be merged here. Main
 // difference seems to be that (a) the debug version in
 // Type-debug-pp.cxx is stale, and (b) it prints aggregate fields.
+
+// FIX: A general difference was print style for
+// struct/union/typeclass. The debug version was intended to print
+// fields. The non-debug version was not.
 string
-Type::asString(shared_ptr<TvPrinter> tvP, bool traverse) 
+Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options) 
 { 
+  stringstream ss;
+  
+  if (options & PO_SHOW_LINKS)
+    options |= PO_NO_TRAVERSE;
 
   if (Options::rawTvars)
     tvP = GC_NULL;
 
-  shared_ptr<Type> t;
-  if (traverse)
-    t = getType();
-  else
-    t = shared_from_this();
+  shared_ptr<Type> t = 
+    (options & PO_NO_TRAVERSE) ? shared_from_this() : getType();
   
+  // Bound the display recursion artificially. there really needs to be a
+  // better way to do this, but I don't have a quick solution, and
+  // this choice has worked well in practice so far.
   if (t->pMark >= 2)
     return " ... ";
   else 
     t->pMark++;
 
-  stringstream ss;
-  
-#ifdef DEBUG_SHOW_ALL_LINKS  
-  if (traverse) {
-    shared_ptr<Type> t1 = this;
+  // Debugging support for type variable linkage display:
+  if (options & PO_SHOW_LINKS) {
+    shared_ptr<Type> t1 = shared_from_this();
     ss << "[";
     while (t1->link) {
       ss << "'a" << t1->uniqueID;
@@ -108,42 +115,31 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
     ss << "'a" << t1->uniqueID;
     ss << "]";
   }
-#endif
     
   switch(t->kind) {
   case ty_tvar:
-    {
-      if (!tvP) {
-        ss << "'a" << t->uniqueID;
-        if (t->flags & TY_RIGID) 
-          ss << 'R';
-      }
-      else {
-        ss << tvP->tvName(t);
-      }
-      
-
-      break;
+    if (!tvP) {
+      ss << "'a" << t->uniqueID;
+      if (t->flags & TY_RIGID) 
+        ss << 'R';
     }
+    else {
+      ss << tvP->tvName(t);
+    }
+      
+    break;
 
   case ty_kvar:
-    {
-      ss << "'K" << t->uniqueID;
-      break;
-    }
+    ss << "'K" << t->uniqueID;
+    break;
 
   case ty_dummy:
-    {
       ss << "#DUMMY#";
-      //ss << "#X" << t->uniqueID;
       break;
-    }
 
   case ty_unit:
-    {
       ss << "()";
       break;
-    }
 
   case ty_bool:
   case ty_char:
@@ -160,101 +156,85 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
   case ty_float:
   case ty_double:
   case ty_quad:
-    {
-      ss << t->kindName();
-      break;
-    }
+    ss << t->kindName();
+    break;
 
   case ty_field:
-    {
-      ss << t->litValue.s;
-      break;
-    }
+    ss << t->litValue.s;
+    break;
 
 #ifdef KEEP_BF
   case  ty_bitfield:
-    {
-      ss << "(bitfield "
-         << t->CompType(0)->toString()
-         << " "
-         << t->Isize
-         << ")";
-      break;
-    }
+    ss << "(bitfield "
+       << t->CompType(0)->toString()
+       << " "
+       << t->Isize
+       << ")";
+    break;
 #endif
 
   case ty_method:
-    {
-      assert(t->components.size() == 2);
-      ss << "(method " 
-         << t->Args()->asString(tvP, traverse) 
-         << " -> " 
-         << t->Ret()->asString(tvP, traverse) 
-         << ")";
-      break;
-    }
+    assert(t->components.size() == 2);
+    ss << "(method " << t->Args()->asString(tvP, options) 
+       << " -> " << t->Ret()->asString(tvP, options) << ")";
+    break;
 
   case ty_fn:
-    {
-      assert(t->components.size() == 2);
-      ss << "(fn " 
-         << t->Args()->asString(tvP, traverse) 
-         << " -> " 
-         << t->Ret()->asString(tvP, traverse) 
-         << ")";
-      break;
-    }
+    assert(t->components.size() == 2);
+    ss << "(fn " << t->Args()->asString(tvP, options) 
+       << " -> " << t->Ret()->asString(tvP, options) << ")";
+    break;
 
   case ty_fnarg:
-    {
-      // ss <<  "(";
-      for (size_t i=0; i < t->components.size(); i++) {
-        if (i > 0) 
-          ss << " ";
-        if (t->CompFlags(i) & COMP_BYREF)
-          ss << "(by-ref " 
-             << t->CompType(i)->asString(tvP, traverse)
-             << ")";
-        else           
-          ss << t->CompType(i)->asString(tvP, traverse);
-
-      }
-      // ss << ")";
-      break;
+    for (size_t i=0; i < t->components.size(); i++) {
+      if (i > 0) ss << " ";
+      if (t->CompFlags(i) & COMP_BYREF)
+        ss << "(by-ref " << t->CompType(i)->asString(tvP, options)
+           << ")";
+      else           
+        ss << t->CompType(i)->asString(tvP, options);
     }
+    break;
 
   case ty_tyfn:
-    {
-      assert(t->components.size() == 2);
-      ss << "(tyfn " 
-         <<  t->Args()->asString(tvP, traverse) 
-         << " -> " 
-         << t->Ret()->asString(tvP, traverse) 
-         << ")";
-      break;          
-    }
+    assert(t->components.size() == 2);
+    ss << "(tyfn " <<  t->Args()->asString(tvP, options) 
+       << " -> " << t->Ret()->asString(tvP, options) << ")";
+    break;          
 
   case ty_letGather:
-    {
-      ss <<  "(__letGather ";
-      for (size_t i=0; i < t->components.size(); i++) {
-        if (i > 0) ss << " ";
-        ss << t->CompType(i)->asString(tvP, traverse);
-      }
-      ss << ")";
-      break;
+    ss <<  "(__letGather ";
+    for (size_t i=0; i < t->components.size(); i++) {
+      if (i > 0) ss << " ";
+      ss << t->CompType(i)->asString(tvP, options);
     }
+    ss << ")";
+
+    break;
 
   case ty_structv:
   case ty_structr:
     {
-      if (t->typeArgs.size() == 0)
-        ss << printName(t->defAst);
-      else {
-        ss << "(" << printName(t->defAst);
-        for (size_t i=0; i < t->typeArgs.size(); i++)
-          ss << " " << t->TypeArg(i)->asString(tvP, traverse);
+      // The debug version dumps the structure body in detail. These
+      // should be reconciled more cleanly when we switch the type
+      // syntax over.
+      if (options & PO_SHOW_FIELDS) {
+        ss << "(" << ((t->kind == ty_structr) ? "struct " : "structR ")
+           << defAst->s << " - ";
+        for (size_t i=0; i<components.size(); i++)
+          ss << CompName(i) << ":" 
+             << CompType(i)->asString(tvP, options) << " ";
         ss << ")";
+      }
+      else {
+        if (t->typeArgs.size() == 0)
+          ss << printName(t->defAst);
+        else {
+          ss << "(" << printName(t->defAst);
+          for (size_t i=0; i < t->typeArgs.size(); i++)
+            ss << " " << t->TypeArg(i)->asString(tvP, options);
+          ss << ")";
+        }
       }
       
       break;
@@ -266,101 +246,116 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
   case ty_uvalr:
   case ty_uconv: 
   case ty_uconr:
-    {
+    // The debug version dumps the structure body in detail. These
+    // should be reconciled more cleanly when we switch the type
+    // syntax over.
+    if (options & PO_SHOW_FIELDS) {
+      const char *dbName;
+      switch(t->kind) {
+      case ty_unionv: 
+        dbName = "union";
+        break;
+      case ty_unionr:
+        dbName = "unionR";
+        break;
+      case ty_uvalv: 
+        dbName = "union-val";
+        break;
+      case ty_uvalr:
+        dbName = "unionR-val";
+        break;
+      case ty_uconv: 
+        dbName = "union-con";
+        break;
+      case ty_uconr:
+        dbName = "unionR-con";
+        break;
+      }
+      ss << "(" << dbName << " " << defAst->s;
+      for (size_t i=0; i<typeArgs.size(); i++)
+        ss << TypeArg(i)->getType()->asString(tvP, options);
+      ss << ") [";
+      for (size_t i=0; i<components.size(); i++)
+        ss << CompName(i) << ":" 
+           << CompType(i)->getType()->asString(tvP, options);
+      ss << "]";
+    }
+    else {
       if (t->typeArgs.size() == 0)
         ss << printName(t->myContainer);
       else {
         ss << "(" << printName(t->myContainer);
         for (size_t i=0; i < t->typeArgs.size(); i++)
-          ss << " " << t->TypeArg(i)->asString(tvP, traverse);
+          ss << " " << t->TypeArg(i)->asString(tvP, options);
         ss << ")";
       }
-      
-      break;
     }
+      
+    break;
 
   case ty_typeclass:    
-    if (t->typeArgs.size() == 0)
-      ss << printName(t->defAst);
+    // The debug version dumps the structure body in detail. These
+    // should be reconciled more cleanly when we switch the type
+    // syntax over.
+    if (options & PO_SHOW_FIELDS) {
+      ss << "(Typeclass " << defAst->s;
+      for (size_t i=0; i < typeArgs.size(); i++)
+        ss << " " << TypeArg(i)->asString(tvP, options);
+      ss << ")";
+    }
     else {
-      ss << "(" << printName(t->defAst);
+      if (t->typeArgs.size() == 0)
+        ss << printName(t->defAst);
+      else {
+        ss << "(" << printName(t->defAst);
         for (size_t i=0; i < t->typeArgs.size(); i++)
-          ss << " " << t->TypeArg(i)->asString(tvP, traverse);
+          ss << " " << t->TypeArg(i)->asString(tvP, options);
         ss << ")";
+      }
     }
     break;
 
   case ty_array:
-    {
-      ss << "(array "
-         << t->Base()->asString(tvP, traverse)
-         << " "
-         << t->arrLen->len
-         << ")";
-      break;
-    }
+    ss << "(array " << t->Base()->asString(tvP, options)
+       << " " << t->arrLen->len << ")";
+    break;
 
   case ty_vector:
-    {
-      ss << "(vector " 
-         << t->Base()->asString(tvP, traverse) 
-         <<  ")";
-      break;
-    }
+    ss << "(vector " << t->Base()->asString(tvP, options) <<  ")";
+    break;
     
   case ty_ref:
-    {
-      assert(t->components.size() == 1);
-      ss << "(ref "
-         << t->Base()->asString(tvP, traverse) 
-         << ")";
-      break;
-    }
+    ss << "(ref " << t->Base()->asString(tvP, options) << ")";
+    break;
 
   case ty_byref:
-    {
-      assert(t->components.size() == 1);
-      ss << "(by-ref "
-         << t->Base()->asString(tvP, traverse) 
-         << ")";
-      break;
-    }
+    ss << "(by-ref " << t->Base()->asString(tvP, options) << ")";
+    break;
 
   case ty_array_ref:
-    {
-      assert(t->components.size() == 1);
-      ss << "(array-ref "
-         << t->Base()->asString(tvP, traverse) 
-         << ")";
-      break;
-    }
+    ss << "(array-ref " << t->Base()->asString(tvP, options) << ")";
+    break;
 
-  case ty_mbFull:
-  case ty_mbTop:
-    {
-      ss << t->Var()->asString(tvP, traverse)
-         << ((t->kind == ty_mbFull) ? "|" : "!")
-         << ((t->Core()->kind == ty_fn)?"(":"")
-         << t->Core()->asString(tvP, traverse)
-         << ((t->Core()->kind == ty_fn)?")":"");
-      break;
-    }
+ case ty_mbFull:
+ case ty_mbTop:
+   ss << t->Var()->asString(tvP, options)
+      << ((t->kind == ty_mbFull) ? "|" : "!")
+      << ((t->Core()->kind == ty_fn)?"(":"")
+      << t->Core()->asString(tvP, options)
+      << ((t->Core()->kind == ty_fn)?")":"");
+   break;
 
   case ty_mutable:
-    {
-      ss << "(mutable " 
-         << t->Base()->asString(tvP, traverse) 
-         << ")";
-      break;  
-    }
+    ss << "(mutable " << t->Base()->asString(tvP, options) << ")";
+    break;  
 
   case ty_const:
-    {
-      ss << "(const " 
-         << t->Base()->asString(tvP, traverse) 
-         << ")";
-      break;
-    }
+    ss << "(const " << t->Base()->asString(tvP, options) << ")";
+    break;
+
+  case ty_exn:
+    ss << "exception"; 
+    break;
 
   case ty_pcst:
     {
@@ -368,7 +363,7 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
       for (size_t i=0; i<t->components.size(); i++) {
         if (i > 0)
           ss << ", ";
-        ss << t->CompType(i)->asString(tvP, traverse);
+        ss << t->CompType(i)->asString(tvP, options);
       }
       ss << ")";
       break;
@@ -385,17 +380,11 @@ Type::asString(shared_ptr<TvPrinter> tvP, bool traverse)
       break;
     }
 
-  case ty_exn:
-    {
-      ss << "exception"; 
-      break;
-    }
   }
   
   t->pMark--;
   return ss.str();
 }
-
 
 std::string
 TypeScheme::asString(shared_ptr<TvPrinter> tvP, bool norm)
