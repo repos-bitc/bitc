@@ -384,6 +384,8 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_constructors blk_constructor
 %type <ast> sxp_repr_constructors sxp_repr_constructor
 %type <ast> sxp_repr_reprs sxp_repr_repr
+%type <ast> blk_repr_constructors blk_repr_constructor
+%type <ast> blk_repr_reprs blk_repr_repr
 %type <ast> sxp_bindingpattern sxp_lambdapatterns sxp_lambdapattern
 %type <ast> blk_bindingpattern blk_lambdapatterns blk_lambdapattern
 %type <ast> sxp_actual_params sxp_nonempty_params
@@ -1287,7 +1289,49 @@ sxp_type_definition: LP tk_DEFUNION sxp_ptype_name sxp_val trn_optdocstring sxp_
 /* }; */
 
 // REPR TYPES
-//HERE
+blk_type_definition: blk_val tk_REPR blk_defident trn_optdocstring blk_declares '{' blk_repr_constructors '}' {
+  SHOWPARSE("blk_type_definition -> blk_val REPR blk_defident "
+            "trn_optdocstring blk_declares { blk_repr_constructors }");
+  $$ = AST::make(at_defrepr, $2.loc, $3, $1, $5, $7);
+  $$->child(0)->defForm = $$;
+}
+
+blk_repr_constructors: blk_repr_constructor {
+  SHOWPARSE("blk_repr_constructors -> blk_repr_constructor");
+  $$ = AST::make(at_reprctrs, $1->loc, $1);
+}
+
+blk_repr_constructors: blk_repr_constructors blk_repr_constructor {
+  SHOWPARSE("blk_repr_constructors -> blk_repr_constructors blk_repr_constructor");
+  $$ = $1;
+  $$->addChild($2);
+}
+
+blk_repr_constructor: blk_ident '{' blk_fields '}' tk_WHERE blk_repr_reprs SC {
+  SHOWPARSE("blk_repr_constructor ->  blk_ident '{ sxp_fields '}' WHERE blk_repr_reprs SC");
+  $1->flags |= (ID_IS_GLOBAL);
+  shared_ptr<AST> ctr = AST::make(at_constructor, $1->loc, $1);
+  ctr->addChildrenFrom($3);
+  $$ = AST::make(at_reprctr, $1->loc, ctr);
+  $$->addChildrenFrom($6);
+}
+
+blk_repr_reprs: blk_repr_repr {
+  SHOWPARSE("blk_repr_reprs -> blk_repr_repr");
+  $$ = AST::make(at_Null, $1->loc, $1);
+};
+blk_repr_reprs: blk_repr_reprs tk_AND blk_repr_repr {
+  SHOWPARSE("blk_repr_reprs -> blk_repr_reprs tk_AND blk_repr_repr");
+  $$ = $1;
+  $$->addChild($3);
+};
+
+blk_repr_repr: blk_ident tk_EQUALS intLit {
+  SHOWPARSE("blk_repr_repr ->  sxp_ident == intLit");
+
+  $$ = AST::make(at_reprrepr, $2.loc, $1, $3);
+};
+
 sxp_type_definition: LP tk_DEFREPR sxp_defident sxp_val trn_optdocstring sxp_declares sxp_repr_constructors  RP {
   SHOWPARSE("sxp_type_definition -> ( DEFREPR sxp_defident sxp_val "
             "trn_optdocstring sxp_declares sxp_repr_constructors");
@@ -2093,7 +2137,6 @@ sxp_repr_repr: '(' sxp_ident sxp_ident intLit')' {
   $$ = AST::make(at_reprrepr, $2->loc, $3, $4);
 };
 
-
 /* defstruct / sxp_constructor / exception sxp_fields */
 blk_fields: blk_field  {
   SHOWPARSE("blk_fields -> blk_field");
@@ -2309,6 +2352,24 @@ blk_primary_type: '(' blk_type_cpair ')' {
   $$ = $2;
 };
 
+// Temporary expedient: for each of the postfix types, introduce an
+// application-style alternate syntax for use in pretty-printing:
+blk_primary_type: tk_PTR '(' blk_type ')' {
+  SHOWPARSE("blk_primary_type -> tk_PTR ( blk_type )");
+  $$ = AST::make(at_refType, $1.loc, $3);
+
+}
+blk_primary_type: tk_ARRAY '(' blk_type ',' natLit ')' {
+  SHOWPARSE("blk_primary_type -> tk_ARRAY ( blk_type, natLit )");
+  $$ = AST::make(at_arrayType, $1.loc, $3, $5);
+
+}
+blk_primary_type: tk_VECTOR '(' blk_type ')' {
+  SHOWPARSE("blk_primary_type -> tk_VECTOR ( blk_type )");
+  $$ = AST::make(at_vectorType, $1.loc, $3);
+
+}
+
 primary_type: sxp_useident  {   /* previously defined type */
   SHOWPARSE("primary_type -> sxp_useident");
   $$ = $1;
@@ -2430,7 +2491,6 @@ primary_type: typevar  {
   SHOWPARSE("primary_type -> typevar");
   $$ = $1;
 };
-
 
 sxp_type: primary_type {
   SHOWPARSE("sxp_type -> primary_type");
