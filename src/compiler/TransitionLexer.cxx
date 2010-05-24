@@ -422,6 +422,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "quad",             lf_transition,        tk_QUAD ),
   TransitionLexer::KeyWord( "read-only",        lf_transition,        tk_ReservedWord ),
   TransitionLexer::KeyWord( "ref",              lf_transition,        tk_REF ),
+  TransitionLexer::KeyWord( "reference",        lf_block,             tk_PTR ),
   TransitionLexer::KeyWord( "repr",             lf_block,             tk_REPR ),
   TransitionLexer::KeyWord( "require",          lf_transition,        tk_ReservedWord ),
   TransitionLexer::KeyWord( "reserved",         lf_transition,        tk_RESERVED ),

@@ -182,8 +182,8 @@ static unsigned VersionMinor(const std::string s)
 %left <tok> '('
 %left <tok> ':'
 %token <tok> ')'                /* procedure call, unit */
-%token <tok> ','                /* pair */
-%token <tok> '[' ']'            /* array, vector */
+%right <tok> ','                /* pair */
+%left <tok> '[' ']'            /* array, vector */
 %token <tok> '.'
 %token <tok> '`'
 %token <tok> tk_ASSIGN
@@ -301,6 +301,7 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_VAL
 %token <tok> tk_UNBOXED
 %token <tok> tk_BOXED
+%left <tok> tk_PTR
 %token <tok> tk_OPAQUE
 %token <tok> tk_CLOSED
 %token <tok> tk_MEMBER
@@ -401,7 +402,14 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_constraints sxp_constraint_seq sxp_constraint
 %type <ast> blk_constraints blk_constraint_seq blk_constraint
 %type <ast> sxp_type_args sxp_type sxp_bitfieldtype
-%type <ast> blk_type blk_postfix_type blk_prefix_type
+
+// in order of precedence, *lowest* first:
+%type <ast> blk_type
+%type <ast> blk_prefix_type
+%type <ast> blk_postfix_type
+%type <ast> blk_shallowperm_type
+%type <ast> blk_primary_type
+
 %type <ast> blk_type_args blk_bitfieldtype
 %type <ast> sxp_field_type sxp_type_pl_byref sxp_type_args_pl_byref
 %type <ast> blk_field_type blk_type_pl_byref blk_type_args_pl_byref
@@ -2267,22 +2275,37 @@ sxp_tvlist: sxp_tvlist typevar {
 // the context for resolving '.' is never actually ambiguous, so it
 // doesn't matter here.
 
-// FIX: This ought to be blk_primary_type, but we don't have such a
-// thing. Since primary_type doesn't actually appear in a left-context
-// anywhere, using blk_postfix_type should suffice.
-blk_postfix_type: '(' blk_type ')' {
-  SHOWPARSE("blk_postfix_type -> '(' blk_type ')'");
-  $$ = $2;
+blk_postfix_type: blk_primary_type {
+  SHOWPARSE("blk_postfix_type -> blk_primary_type");
+  $$ = $1;
 }
 
+blk_postfix_type: blk_shallowperm_type {
+  SHOWPARSE("blk_postfix_type -> blk_shallowperm_type");
+  $$ = $1;
+}
+
+blk_prefix_type: blk_postfix_type %prec prec_PreferShift {
+  SHOWPARSE("blk_prefix_type -> blk_postfix_type");
+  $$ = $1;
+}
 blk_type: blk_prefix_type {
   SHOWPARSE("blk_type -> blk_prefix_type");
   $$ = $1;
 }
-blk_prefix_type: blk_postfix_type {
-  SHOWPARSE("blk_prefix_type -> blk_postfix_type");
+
+blk_primary_type: primary_type {
+  SHOWPARSE("blk_primary_type -> primary_type");
   $$ = $1;
 }
+blk_primary_type: '(' blk_type ')' {
+  SHOWPARSE("blk_primary_type -> '(' blk_type ')'");
+  $$ = $2;
+}
+blk_primary_type: '(' blk_type_cpair ')' {
+  SHOWPARSE("blk_primary_type -> (blk_type_cpair)");
+  $$ = $2;
+};
 
 primary_type: sxp_useident  {   /* previously defined type */
   SHOWPARSE("primary_type -> sxp_useident");
@@ -2407,21 +2430,20 @@ primary_type: typevar  {
 };
 
 
-blk_postfix_type: primary_type {
-  SHOWPARSE("blk_type -> primary_type");
-  $$ = $1;
-};
-
 sxp_type: primary_type {
   SHOWPARSE("sxp_type -> primary_type");
   $$ = $1;
 };
 
 // REF TYPES [3.4.1]             
-blk_prefix_type: tk_BOXED blk_type {
-  SHOWPARSE("blk_prefix_type -> REF blk_type");
-  $$ = AST::make(at_refType, $1.loc, $2);
+blk_postfix_type: blk_postfix_type tk_PTR %prec tk_PTR {
+  SHOWPARSE("blk_postfix_type -> blk_postfix_type PTR");
+  $$ = AST::make(at_refType, $2.loc, $1);
 };
+//blk_prefix_type: tk_BOXED blk_type {
+//  SHOWPARSE("blk_prefix_type -> BOXED blk_type");
+//  $$ = AST::make(at_refType, $1.loc, $2);
+//};
 
 sxp_type: '(' tk_REF sxp_type ')' {
   SHOWPARSE("sxp_type -> ( REF sxp_type )");
@@ -2587,17 +2609,13 @@ sxp_type_cpair: sxp_type ',' sxp_type_cpair {
   $$->printVariant = pf_IMPLIED;
 };
 
-blk_type: '(' blk_type_cpair ')' {
-  SHOWPARSE("blk_type -> (blk_type_cpair)");
-  $$ = $2;
-};
 sxp_type: '(' sxp_type_cpair ')' {
   SHOWPARSE("sxp_type -> (sxp_type_cpair)");
   $$ = $2;
 };
 
 // ARRAY TYPE [3.5.1]               
-blk_postfix_type: blk_postfix_type '[' natLit ']'  {
+blk_postfix_type: blk_postfix_type '[' natLit ']' %prec '[' {
   SHOWPARSE("blk_postfix_type -> blk_postfix_type '[' natLit ']'");
   $$ = AST::make(at_arrayType, $1->loc, $1, $3);
 };
@@ -2606,7 +2624,7 @@ sxp_type: '(' tk_ARRAY sxp_type natLit ')'  {
   $$ = AST::make(at_arrayType, $2.loc, $3, $4);
 };
 // VECTOR TYPE [3.5.2]             
-blk_postfix_type: blk_postfix_type '[' ']'  {
+blk_postfix_type: blk_postfix_type '[' ']' %prec '['  {
   SHOWPARSE("blk_postfix_type -> blk_postfix_type '[' ']'");
   $$ = AST::make(at_vectorType, $1->loc, $1);
 };
@@ -2621,8 +2639,8 @@ sxp_type: '(' tk_VECTOR sxp_type ')' {
 //  $$ = AST::make(at_typeapp, $1->loc, $1);
 //  $$->addChildrenFrom($3);
 //};
-blk_postfix_type: blk_typeapp {
-  SHOWPARSE("blk_postfix_type -> blk_typeapp");
+blk_primary_type: blk_typeapp {
+  SHOWPARSE("blk_primary_type -> blk_typeapp");
   $$ = $1;
 };
 
@@ -2644,12 +2662,12 @@ sxp_typeapp: '(' sxp_useident sxp_type_args ')' {
 };
 
 // MUTABLE TYPE [3.7]            
-blk_prefix_type: tk_MUTABLE blk_type {
-  SHOWPARSE("blk_prefix_type -> MUTABLE blk_type");
+blk_shallowperm_type: tk_MUTABLE blk_type {
+  SHOWPARSE("blk_shallowperm_type -> MUTABLE blk_type");
   $$ = AST::make(at_mutableType, $1.loc, $2);
 }
-blk_prefix_type: tk_CONST blk_type {
-  SHOWPARSE("blk_prefix_type -> CONST blk_type");
+blk_shallowperm_type: tk_CONST blk_type {
+  SHOWPARSE("blk_shallowperm_type -> CONST blk_type");
   $$ = AST::make(at_constType, $1.loc, $2);
 }
 
