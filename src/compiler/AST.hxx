@@ -1017,6 +1017,10 @@ public:
   /// @brief Return true IFF this AST is a type class method name identifier.
   bool isTcMethod();
 
+  // @brief Return the precedence of this AST node, for use in
+  // pretty-printing the block syntax.
+  int precedence() const;
+
   /// @brief Pretty print this AST to @p out, annotating each with its
   /// type if @p showTypes is true, and appending a final end of line
   /// of @p endline is true.

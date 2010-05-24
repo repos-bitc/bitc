@@ -74,15 +74,8 @@ printName(shared_ptr<AST> ast)
   return ast->s;
 }
 
-// FIX: Differences in the debug version should be merged here. Main
-// difference seems to be that (a) the debug version in
-// Type-debug-pp.cxx is stale, and (b) it prints aggregate fields.
-
-// FIX: A general difference was print style for
-// struct/union/typeclass. The debug version was intended to print
-// fields. The non-debug version was not.
 string
-Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options) 
+Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options) 
 { 
   stringstream ss;
   
@@ -175,38 +168,38 @@ Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options)
 
   case ty_method:
     assert(t->components.size() == 2);
-    ss << "(method " << t->Args()->asString(tvP, options) 
-       << " -> " << t->Ret()->asString(tvP, options) << ")";
+    ss << "(method " << t->Args()->asSexprString(tvP, options) 
+       << " -> " << t->Ret()->asSexprString(tvP, options) << ")";
     break;
 
   case ty_fn:
     assert(t->components.size() == 2);
-    ss << "(fn " << t->Args()->asString(tvP, options) 
-       << " -> " << t->Ret()->asString(tvP, options) << ")";
+    ss << "(fn " << t->Args()->asSexprString(tvP, options) 
+       << " -> " << t->Ret()->asSexprString(tvP, options) << ")";
     break;
 
   case ty_fnarg:
     for (size_t i=0; i < t->components.size(); i++) {
       if (i > 0) ss << " ";
       if (t->CompFlags(i) & COMP_BYREF)
-        ss << "(by-ref " << t->CompType(i)->asString(tvP, options)
+        ss << "(by-ref " << t->CompType(i)->asSexprString(tvP, options)
            << ")";
       else           
-        ss << t->CompType(i)->asString(tvP, options);
+        ss << t->CompType(i)->asSexprString(tvP, options);
     }
     break;
 
   case ty_tyfn:
     assert(t->components.size() == 2);
-    ss << "(tyfn " <<  t->Args()->asString(tvP, options) 
-       << " -> " << t->Ret()->asString(tvP, options) << ")";
+    ss << "(tyfn " <<  t->Args()->asSexprString(tvP, options) 
+       << " -> " << t->Ret()->asSexprString(tvP, options) << ")";
     break;          
 
   case ty_letGather:
     ss <<  "(__letGather ";
     for (size_t i=0; i < t->components.size(); i++) {
       if (i > 0) ss << " ";
-      ss << t->CompType(i)->asString(tvP, options);
+      ss << t->CompType(i)->asSexprString(tvP, options);
     }
     ss << ")";
 
@@ -223,7 +216,7 @@ Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options)
            << defAst->s << " - ";
         for (size_t i=0; i<components.size(); i++)
           ss << CompName(i) << ":" 
-             << CompType(i)->asString(tvP, options) << " ";
+             << CompType(i)->asSexprString(tvP, options) << " ";
         ss << ")";
       }
       else {
@@ -232,7 +225,7 @@ Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options)
         else {
           ss << "(" << printName(t->defAst);
           for (size_t i=0; i < t->typeArgs.size(); i++)
-            ss << " " << t->TypeArg(i)->asString(tvP, options);
+            ss << " " << t->TypeArg(i)->asSexprString(tvP, options);
           ss << ")";
         }
       }
@@ -273,11 +266,11 @@ Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options)
       }
       ss << "(" << dbName << " " << defAst->s;
       for (size_t i=0; i<typeArgs.size(); i++)
-        ss << TypeArg(i)->getType()->asString(tvP, options);
+        ss << TypeArg(i)->getType()->asSexprString(tvP, options);
       ss << ") [";
       for (size_t i=0; i<components.size(); i++)
         ss << CompName(i) << ":" 
-           << CompType(i)->getType()->asString(tvP, options);
+           << CompType(i)->getType()->asSexprString(tvP, options);
       ss << "]";
     }
     else {
@@ -286,7 +279,7 @@ Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options)
       else {
         ss << "(" << printName(t->myContainer);
         for (size_t i=0; i < t->typeArgs.size(); i++)
-          ss << " " << t->TypeArg(i)->asString(tvP, options);
+          ss << " " << t->TypeArg(i)->asSexprString(tvP, options);
         ss << ")";
       }
     }
@@ -300,7 +293,7 @@ Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options)
     if (options & PO_SHOW_FIELDS) {
       ss << "(Typeclass " << defAst->s;
       for (size_t i=0; i < typeArgs.size(); i++)
-        ss << " " << TypeArg(i)->asString(tvP, options);
+        ss << " " << TypeArg(i)->asSexprString(tvP, options);
       ss << ")";
     }
     else {
@@ -309,48 +302,48 @@ Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options)
       else {
         ss << "(" << printName(t->defAst);
         for (size_t i=0; i < t->typeArgs.size(); i++)
-          ss << " " << t->TypeArg(i)->asString(tvP, options);
+          ss << " " << t->TypeArg(i)->asSexprString(tvP, options);
         ss << ")";
       }
     }
     break;
 
   case ty_array:
-    ss << "(array " << t->Base()->asString(tvP, options)
+    ss << "(array " << t->Base()->asSexprString(tvP, options)
        << " " << t->arrLen->len << ")";
     break;
 
   case ty_vector:
-    ss << "(vector " << t->Base()->asString(tvP, options) <<  ")";
+    ss << "(vector " << t->Base()->asSexprString(tvP, options) <<  ")";
     break;
     
   case ty_ref:
-    ss << "(ref " << t->Base()->asString(tvP, options) << ")";
+    ss << "(ref " << t->Base()->asSexprString(tvP, options) << ")";
     break;
 
   case ty_byref:
-    ss << "(by-ref " << t->Base()->asString(tvP, options) << ")";
+    ss << "(by-ref " << t->Base()->asSexprString(tvP, options) << ")";
     break;
 
   case ty_array_ref:
-    ss << "(array-ref " << t->Base()->asString(tvP, options) << ")";
+    ss << "(array-ref " << t->Base()->asSexprString(tvP, options) << ")";
     break;
 
  case ty_mbFull:
  case ty_mbTop:
-   ss << t->Var()->asString(tvP, options)
+   ss << t->Var()->asSexprString(tvP, options)
       << ((t->kind == ty_mbFull) ? "|" : "!")
       << ((t->Core()->kind == ty_fn)?"(":"")
-      << t->Core()->asString(tvP, options)
+      << t->Core()->asSexprString(tvP, options)
       << ((t->Core()->kind == ty_fn)?")":"");
    break;
 
   case ty_mutable:
-    ss << "(mutable " << t->Base()->asString(tvP, options) << ")";
+    ss << "(mutable " << t->Base()->asSexprString(tvP, options) << ")";
     break;  
 
   case ty_const:
-    ss << "(const " << t->Base()->asString(tvP, options) << ")";
+    ss << "(const " << t->Base()->asSexprString(tvP, options) << ")";
     break;
 
   case ty_exn:
@@ -363,7 +356,7 @@ Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options)
       for (size_t i=0; i<t->components.size(); i++) {
         if (i > 0)
           ss << ", ";
-        ss << t->CompType(i)->asString(tvP, options);
+        ss << t->CompType(i)->asSexprString(tvP, options);
       }
       ss << ")";
       break;
@@ -383,6 +376,396 @@ Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options)
   }
   
   t->pMark--;
+  return ss.str();
+}
+
+string
+Type::asBlockString(shared_ptr<TvPrinter> tvP, PrintOptions options)
+{
+  return asBlockStringProducer(tvP, options, false);
+}
+
+string
+Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options)
+{
+  return asBlockString(tvP, options) + " OR " + asSexprString(tvP, options);
+}
+
+// Return the precedence (in the grammar's view) of the production
+// that produces a given type.
+static int typePrecedence(Kind k)
+{
+  switch(k) {
+  case ty_fn:
+  case ty_tyfn:
+  case ty_method:
+    return 3;
+
+  case ty_array:
+  case ty_vector:
+  case ty_ref:
+    return 2;
+
+  case ty_mutable:
+  case ty_const:
+    return 1;
+
+  default:
+    return 0;
+  }
+}
+
+static bool shouldParenWrap(Kind parent, Kind child)
+{
+  return typePrecedence(parent) < typePrecedence(child);
+  // return true;
+}
+
+string
+Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options, 
+                       bool parenWrap) 
+{ 
+  stringstream ss;
+  
+  if (options & PO_SHOW_LINKS)
+    options |= PO_NO_TRAVERSE;
+
+  if (Options::rawTvars)
+    tvP = GC_NULL;
+
+  shared_ptr<Type> t = 
+    (options & PO_NO_TRAVERSE) ? shared_from_this() : getType();
+  
+  // Bound the display recursion artificially. there really needs to be a
+  // better way to do this, but I don't have a quick solution, and
+  // this choice has worked well in practice so far.
+  if (t->pMark >= 2)
+    return " ... ";
+  else 
+    t->pMark++;
+
+  if (parenWrap) ss << '(';
+
+  // Debugging support for type variable linkage display:
+  if (options & PO_SHOW_LINKS) {
+    shared_ptr<Type> t1 = shared_from_this();
+    ss << "[";
+    while (t1->link) {
+      ss << "'a" << t1->uniqueID;
+      ss << "->";
+      t1 = t1->link;
+    }
+    ss << "'a" << t1->uniqueID;
+    ss << "]";
+  }
+    
+  switch(t->kind) {
+  case ty_tvar:
+    if (!tvP) {
+      ss << "'a" << t->uniqueID;
+      if (t->flags & TY_RIGID) 
+        ss << 'R';
+    }
+    else {
+      ss << tvP->tvName(t);
+    }
+      
+    break;
+
+  case ty_kvar:
+    ss << "'K" << t->uniqueID;
+    break;
+
+  case ty_dummy:
+    ss << "#DUMMY#";
+    break;
+
+  case ty_unit:
+    ss << "()";
+    break;
+
+  case ty_bool:
+  case ty_char:
+  case ty_string:
+  case ty_int8:
+  case ty_int16:
+  case ty_int32:
+  case ty_int64:
+  case ty_uint8:
+  case ty_uint16:
+  case ty_uint32:
+  case ty_uint64:
+  case ty_word:
+  case ty_float:
+  case ty_double:
+  case ty_quad:
+    ss << t->kindName();
+    break;
+
+  case ty_field:
+    ss << t->litValue.s;
+    break;
+
+#ifdef KEEP_BF
+  case  ty_bitfield:
+    ss << t->CompType(0)->toString()
+       << "("
+       << t->Isize
+       << ")";
+    break;
+#endif
+
+  case ty_method:
+    assert(t->components.size() == 2);
+    ss << "method (" << t->Args()->asBlockStringProducer(tvP, options, false) 
+       << ") -> " << t->Ret()->asBlockStringProducer(tvP, options, false);
+    break;
+
+  case ty_fn:
+    // No paren wrapping here. While the return value is not fully
+    // bracketed by ty_fn itself, the bracketing decision must be made
+    // by our container.
+    assert(t->components.size() == 2);
+    ss << "fn (" << t->Args()->asBlockStringProducer(tvP, options, false) 
+       << ") -> " << t->Ret()->asBlockStringProducer(tvP, options, false);
+    break;
+
+  case ty_fnarg:
+    // No paren wrapping here. Function arguments are fully bracketed,
+    // and ByRef is always outermost and lowest precedence.
+    for (size_t i=0; i < t->components.size(); i++) {
+      if (i > 0) ss << ", ";
+      if (t->CompFlags(i) & COMP_BYREF)
+        ss << "ByRef" << t->CompType(i)->asBlockStringProducer(tvP, options, false)
+           << "";
+      else           
+        ss << t->CompType(i)->asBlockStringProducer(tvP, options, false);
+    }
+    break;
+
+  case ty_tyfn:
+    // No paren wrapping here. Same argument as for ty_fn
+    assert(t->components.size() == 2);
+    ss << "tyfn (" <<  t->Args()->asBlockStringProducer(tvP, options, false)
+       << ", -> " << t->Ret()->asBlockStringProducer(tvP, options, false);
+    break;          
+
+  case ty_letGather:
+    //HERE
+    ss <<  "(__letGather ";
+    for (size_t i=0; i < t->components.size(); i++) {
+      shared_ptr<Type> compType = t->CompType(i);
+
+      if (i > 0) ss << " ";
+      ss << compType->asBlockStringProducer(tvP, options, shouldParenWrap(t->kind, compType->kind));
+
+    }
+    ss << ")";
+
+    break;
+
+  case ty_structv:
+  case ty_structr:
+    {
+      // No paren wrapping here. Everything here is fully bracketed,
+      // and [type] application has about the highest precedence of anything.
+      ss << printName(t->defAst);
+      if (t->kind == ty_structr) ss << '^';
+
+      if (t->typeArgs.size() > 0) {
+        ss << '(';
+        for (size_t i=0; i < t->typeArgs.size(); i++) {
+          if (i > 0) ss << ", ";
+          ss << t->TypeArg(i)->asBlockStringProducer(tvP, options, false);
+        }
+        ss << ')';
+      }
+        
+      if (options & PO_SHOW_FIELDS) {
+        ss << "{ ";
+        for (size_t i=0; i<components.size(); i++)
+          ss << CompName(i) << ":" 
+             << CompType(i)->asBlockStringProducer(tvP, options, false) << "; ";
+        ss << "}";
+      }
+      
+      break;
+    }
+
+  case ty_unionv: 
+  case ty_unionr:
+  case ty_uvalv: 
+  case ty_uvalr:
+  case ty_uconv: 
+  case ty_uconr:
+    {
+      // No paren wrapping here. Everything here is fully bracketed,
+      // and [type] application has about the highest precedence of anything.
+      ss << printName(t->myContainer);
+      if ((t->kind == ty_unionr) ||
+          (t->kind == ty_uvalr) ||
+          (t->kind == ty_uconr)) 
+        ss << '^';
+
+      if (t->typeArgs.size() > 0) {
+        ss << '(';
+        for (size_t i=0; i < t->typeArgs.size(); i++) {
+          if (i > 0) ss << ", ";
+          ss << t->TypeArg(i)->asBlockStringProducer(tvP, options, false);
+        }
+        ss << ")";
+      }
+
+      if (options & PO_SHOW_FIELDS) {
+        const char *dbName;
+        switch(t->kind) {
+        case ty_unionv: 
+          dbName = "union";
+          break;
+        case ty_unionr:
+          dbName = "union^";
+          break;
+        case ty_uvalv: 
+          dbName = "union-val";
+          break;
+        case ty_uvalr:
+          dbName = "union^-val";
+          break;
+        case ty_uconv: 
+          dbName = "union-con";
+          break;
+        case ty_uconr:
+          dbName = "union^-con";
+          break;
+        }
+
+        ss << dbName << "{ ";
+        for (size_t i=0; i<components.size(); i++)
+          ss << CompName(i) << ":" 
+             << CompType(i)->getType()->asBlockStringProducer(tvP, options, false)
+             << "; ";
+        ss << "}";
+      }
+      break;
+    }
+  case ty_typeclass:    
+    {
+      // No paren wrapping here. Everything here is fully bracketed,
+      // and [type] application has about the highest precedence of anything.
+      ss << printName(t->defAst);
+      if (t->typeArgs.size() != 0) {
+        ss << "(" << printName(t->defAst);
+        for (size_t i=0; i < t->typeArgs.size(); i++) {
+          if (i > 0) ss << ", ";
+          ss << t->TypeArg(i)->asBlockStringProducer(tvP, options, false);
+        }
+        ss << ")";
+      }
+
+      break;
+    }
+
+  case ty_array:
+    {
+      shared_ptr<Type> base = t->Base();
+      bool wrap = shouldParenWrap(t->kind, base->kind);
+
+      ss << base->asBlockStringProducer(tvP, options, wrap);
+      ss << '[' << t->arrLen->len << "]";
+      break;
+    }
+
+  case ty_vector:
+    {
+      shared_ptr<Type> base = t->Base();
+      bool wrap = shouldParenWrap(t->kind, base->kind);
+
+      ss << base->asBlockStringProducer(tvP, options, wrap);
+      ss <<  "[]";
+      break;
+    }
+
+  case ty_ref:
+    {
+      shared_ptr<Type> base = t->Base();
+      bool wrap = shouldParenWrap(t->kind, base->kind);
+
+      ss << base->asBlockStringProducer(tvP, options, wrap);
+      ss << " reference";
+      break;
+    }
+    break;
+
+  case ty_byref:
+    // Always outermost, so never needs paren wrapping
+    ss << "ByRef " << t->Base()->asBlockStringProducer(tvP, options, false);
+
+  case ty_array_ref:
+    // Always outermost, so never needs paren wrapping
+    ss << "ArrayRef " << t->Base()->asBlockStringProducer(tvP, options, false);
+    break;
+
+  case ty_mbFull:
+  case ty_mbTop:
+    ss << t->Var()->asBlockStringProducer(tvP, options, false)
+       << ((t->kind == ty_mbFull) ? "|" : "!")
+       << ((t->Core()->kind == ty_fn)?"(":"")
+       << t->Core()->asBlockStringProducer(tvP, options, false)
+       << ((t->Core()->kind == ty_fn)?")":"");
+    break;
+
+  case ty_mutable:
+    {
+      shared_ptr<Type> base = t->Base();
+      bool wrap = shouldParenWrap(t->kind, base->kind);
+
+      ss << "mutable "
+         << base->asBlockStringProducer(tvP, options, wrap);
+      break;
+    }
+
+  case ty_const:
+    {
+      shared_ptr<Type> base = t->Base();
+      bool wrap = shouldParenWrap(t->kind, base->kind);
+
+      ss << "const "
+         << base->asBlockStringProducer(tvP, options, wrap);
+      break;
+    }
+
+  case ty_exn:
+    ss << "exception"; 
+    break;
+
+  case ty_pcst:
+    {
+      ss << "*(";
+      for (size_t i=0; i<t->components.size(); i++) {
+        if (i > 0) ss << ", ";
+        ss << t->CompType(i)->asBlockStringProducer(tvP, options, true);
+      }
+      ss << ")";
+      break;
+    }
+
+  case ty_kfix:
+    {
+      if (t == Type::Kmono)
+        ss << "m";
+      else if (t == Type::Kpoly)
+        ss << "P";
+      else
+        assert(false);
+      break;
+    }
+
+  }
+  
+  t->pMark--;
+
+  if (parenWrap) ss << ')';
+
   return ss.str();
 }
 

@@ -2301,6 +2301,8 @@ blk_primary_type: primary_type {
 blk_primary_type: '(' blk_type ')' {
   SHOWPARSE("blk_primary_type -> '(' blk_type ')'");
   $$ = $2;
+  // Preserve precedence when pretty printing:
+  $2->printVariant |= pf_PARENWRAP;
 }
 blk_primary_type: '(' blk_type_cpair ')' {
   SHOWPARSE("blk_primary_type -> (blk_type_cpair)");
@@ -2501,6 +2503,7 @@ blk_type_args: blk_type_args ',' blk_type {
   $1->addChild($3);
 };
 
+// Really blk_type, but broken out for the sake of trait declarations
 blk_fntype: trn_fneffect tk_FN '(' ')' tk_FNARROW blk_type {
   SHOWPARSE("blk_fntype -> trn_fneffect FN () -> blk_type )");
   shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $5.loc);

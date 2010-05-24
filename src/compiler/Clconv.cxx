@@ -233,7 +233,7 @@ findusedef(std::ostream &errStream,
           if(ast->symType->isNonEscaping()) {
             errStream << ast->loc << ": Variable " << ast->s 
                       << " with Non-Capturable type "
-                      << ast->symType->asString()
+                      << ast->symType->asBlockString()
                       << " captured in a closure."
                       << std::endl;
             return false;

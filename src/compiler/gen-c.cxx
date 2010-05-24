@@ -2693,8 +2693,9 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
       shared_ptr<Type> et = t->Base()->getBareType();
       out << "/* Typedef in anticipation of the array type:"
           << endl
-          << t->asString()
-          << "*/" << endl;
+          << " * Sexpr: " << t->asSexprString() << endl
+          << " * Block: " << t->asBlockString() << endl
+          << " */" << endl;
         
       out << "typedef struct {" << endl;
       out.more();
@@ -2720,8 +2721,9 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
       shared_ptr<Type> et = t->Base()->getBareType();
       out << "/* Typedef in anticipation of the arrayByRef type:"
           << endl
-          << t->asString()
-          << "*/" << endl;
+          << " * Sexpr: " << t->asSexprString() << endl
+          << " * Block: " << t->asBlockString() << endl
+          << " */" << endl;
         
       out << "typedef struct {" << endl;
       out.more();
@@ -2744,8 +2746,9 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
       shared_ptr<Type> et = t->Base()->getBareType();
       out << "/* Typedef in anticipation of the vector type:"
           << endl
-          << t->asString()
-          << "*/" << endl;
+          << " * Sexpr: " << t->asSexprString() << endl
+          << " * Block: " << t->asBlockString() << endl
+          << " */" << endl;
 
       out << "typedef struct {" << endl;
       out.more();
@@ -2767,8 +2770,9 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
       fnSet.insert(CMangle(fnName));
       out << "/* Typedef in anticipation of the function (pointer) type:"
           << endl
-          << t->asString()
-          << "*/" << endl;
+          << " * Sexpr: " << t->asSexprString() << endl
+          << " * Block: " << t->asBlockString() << endl
+          << " */" << endl;
       out << "typedef ";
       emit_fnxn_type(out, fnName, t, true);
       out << ";" << endl << endl;

@@ -331,7 +331,7 @@ public:
 
   // defAST points to the AST of the defining occurrence. This field
   // is set for ty_struct*, ty_union*, tu_ucon, ty_exn
-  boost::shared_ptr<AST> defAst;                        // Defining occurrence (or declare)
+  boost::shared_ptr<AST> defAst;  // Defining occurrence (or declare)
 
   // If type is a union constructor, points to identifier AST of the
   // defining occurrence of the defunion.  If type is a type class
@@ -746,7 +746,21 @@ public:
   bool argInConst(size_t argN);  
   
   /* Print a type into a string for interactive or debugging display. */
+protected:
   std::string 
+  asBlockStringProducer(boost::shared_ptr<TvPrinter> tvP, 
+                   PrintOptions options, bool parenWrap);
+public:
+  std::string 
+  asBlockString(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make(), 
+                PrintOptions options = PO_NO_FLAGS);
+
+  /* Print a type into a string for interactive or debugging display. */
+  std::string 
+  asSexprString(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make(), 
+                PrintOptions options = PO_NO_FLAGS);
+
+  std::string
   asString(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make(), 
            PrintOptions options = PO_NO_FLAGS);
 

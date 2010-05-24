@@ -936,3 +936,34 @@ AST::isIdentType(IdentType t)
                                      (identType == id_struct) ||
                                      (identType == id_object))));
 }
+
+int
+AST::precedence() const
+{
+  switch(astType) {
+
+  case at_usesel:
+  case at_ident:
+  case at_select:
+  case at_primaryType:
+  case at_exceptionType:
+    return 0;
+
+  case at_typeapp:
+    return 1;
+
+    /* blk_permqual_type */
+  case at_mutableType:
+  case at_constType:
+    return 2;
+
+    /* blk_postfix_type */
+  case at_refType:
+  case at_arrayType:
+  case at_vectorType:
+    return 3;
+
+  default:
+    return -1;                  // no particular precedence
+  }
+}
