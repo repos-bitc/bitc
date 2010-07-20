@@ -1,0 +1,1233 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//EROS Group//DTD OSDoc XML V0.1//EN"
+                  "http://www.coyotos.org/OSDoc/DTD/osdoc-0.1.dtd"
+[
+<!ENTITY BitcVersion "0.10+">
+]>
+  <article id="scheme-bitc" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <docinfo twocolumn="yes">
+    <title>BitC and Pieces</title>
+    <subtitle>The Challenge of Integrating Tested Language Ideas</subtitle>
+    <authorgroup>
+      <author>
+	<firstname>Jonathan</firstname>
+	<surname>Shapiro</surname>
+	<degree>Ph.D.</degree>
+      </author>
+      <affiliation>
+	<orgname>The EROS Group, LLC</orgname>
+      </affiliation>
+    </authorgroup>
+    <!-- <authorgroup> -->
+    <!--   <author> -->
+    <!--     <firstname>Swaroop</firstname> -->
+    <!--     <surname>Sridhar</surname> -->
+    <!--   </author> -->
+    <!--   <author> -->
+    <!--     <firstname>M.</firstname> -->
+    <!--     <othername>Scott</othername> -->
+    <!--     <surname>Doerrie</surname> -->
+    <!--   </author> -->
+    <!--   <author> -->
+    <!--     <firstname>Eric</firstname> -->
+    <!--     <surname>Northup</surname> -->
+    <!--   </author> -->
+    <!--   <affiliation> -->
+    <!--     <orgname>Systems Research Laboratory</orgname> -->
+    <!--     <address>Dept. of Computer Science</address> -->
+    <!--     <address>Johns Hopkins University</address> -->
+    <!--   </affiliation> -->
+    <!-- </authorgroup> -->
+    <pubdate>UNPUBLISHED draft of July 19, 2010</pubdate>
+    <copyright>
+      <year>2010</year> 
+      <holder>Jonathan S. Shapiro</holder>
+    </copyright>
+    <categories>
+      <category>dev/bitc</category>
+    </categories>
+    <synopsis>
+      <p>Our policy in BitC was to borrow ideas and techniques
+from other<em>Work in progress!</em> Paper describing how, practically
+      speaking, the features of BitC evolved.</p>
+    </synopsis>
+  </docinfo>
+  <abstract>
+<!-- latex.incolumn="yes" -->
+<!-- latex.breakafter="yes" -->
+    <p>
+      One of the earliest decisions in BitC was that we would try
+      <em>not</em> to invent. We wanted to build a robust operating
+      system; language design wasn't our core strength, and we took it
+      on very reluctantly. The pieces we wanted in BitC existed in the
+      literature, but had never been integrated in a single
+      language. That's what we set out to do.  Six years of part-time
+      effort and a depressing amount of invention later, the first
+      version of BitC is now emerging.
+    </p>
+    <p>
+      Integrating language design concepts is harder than it appears,
+      because they interact. This note discusses, in no particular
+      order, some of the issues and traps that have caught us along
+      the way. It then discusses some of the new features that will be
+      arriving in future language versions.
+    </p>
+  </abstract>
+  <sect1>
+    <title>Motivation</title>
+    <p>
+      BitC is about building reliable systems programs. Between
+      KeyKOS, EROS, and Coyotos, our group had a fair amount of
+      experience doing that, but we wanted to take it to the next
+      level, and we wanted to let other people do it too. This had two
+      components: we wanted to migrate to a safe, statically-typed
+      language without giving up performance, and we wanted to explore
+      software verification for the most critical components of
+      Coyotos. Basically, we wanted a language that helped us write
+      robust code at low cost with high performance.
+    </p>
+    <p>
+      <leadin>Robustness</leadin> If you want to write robust code,
+      you need a language that is type and memory safe, has a formally
+      defined semantics, and can express the kinds of low-level data
+      structures that operating systems need. Each of these is a
+      foundational requirement for writing robust code whether you
+      want to verify it or not. It is striking, and in my opinion
+      criminal, that people are still building large runtime
+      infrastructure projects like LLVM in unsafe languages. These
+      libraries will be haunting us for a long time, and they will
+      prolong the vulnerabilities of systems that adopt them.
+    </p>
+    <p>
+      <leadin>Cost</leadin> Even if you don't care about security, the
+      case for a systems programming language with a modern type
+      system remains strong. There is evidence that writing code in a
+      functional style typically involves 1/4th to 1/10th the number
+      of lines as the same code in C or C++.  Subjectively, functional
+      languages tend to have less "programmer overhead" than Java or
+      C#, and I would expect the 1/4th number to hold. Programmers
+      produce approximately the same number of lines of code per year
+      regardless of programming language. Bugs scale linearly with the
+      number of lines of code, and the hardest bugs to track down are
+      the kinds of memory errors that BitC prohibits.
+    </p>
+    <p>
+      <leadin>Performance</leadin> Functional programming advocates
+      are often apologists for performance, but this is an artifact of
+      purity, not of functional programming or strong type systems. If
+      the results from early benchmarks hold up, the performance of
+      BitC is within 1.5% of C when the code exploits comparable
+      idioms. The problem with a language like Haskell, ML, or Scheme
+      is that the code <em>can't</em> exploit comparable idioms
+      <em>when it is appropriate to do so.</em>
+    </p>
+    <p>
+      BitC offers both options: it is possible to write imperative
+      code when performance matters, and equally possible to stay
+      within the pure functional programming model where that is
+      appropriate. Our view is that a satisfactory programming
+      language must address a continous range of programmer
+      requirements in order to be truly general. In the real world,
+      ``mere details of implementation'' sometimes mean a difference
+      of 40x to 100x in program performance. Not often, but sometimes.
+      I'll have more to say concerning performance in a moment.
+    </p>
+    <p>
+      I should also add that when we started we weren't language
+      designers. We were idle users of ML, and knew next to nothing
+      about type system design. In fact, we didn't really
+      <em>want</em> to be language designers &mdash; we wanted to
+      build an operating system. Given this, our goal from the
+      beginning was to borrow and integrate successful components and
+      ideas from other languages. Coherent integration of this sort
+      isn't easy, but it's certainly easier than inventing the pieces
+      from nothing. This paper describes some of our
+      experiences. Thus: BitC and Pieces.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Origins</title>
+    <p>
+      I have sometimes described BitC as derived from Scheme <cite
+      ref="kelsey1998r5rs"/>. In hindsight. In reality, it is probably
+      closer in spirit to ML or Haskell. Like ML, BitC is a
+      higher-order, statically typed language with parametric
+      polymorphism. Like Haskell, BitC provides <em>type classes</em>
+      as a means of expressing constraints on genericity. Like C and
+      C++, BitC provides direct support for low-level machine types
+      and explicit data structure layout.
+    </p>
+    <p>
+      The story about BitC being derived from Scheme probably came
+      about for three reasons.<footnote>
+        <p>
+          For completeness, I should also mention Infer <cite
+            ref="haynes1992infer"/>, which I learned about just a few
+            days ago. Unfortunately, Haynes never completed this work,
+            and it didn't come to our attention at the time.
+        </p>
+      </footnote>
+      The first was that I had been working on TinyScheme, so Scheme
+      was on my mind. The second was that my group at Johns Hopkins
+      was using ACL2 <cite ref="kaufmann2000acl2"/> at the time, and
+      that was what originally started us down the path of language
+      design.  Finally, we had been looking at Kelsey's work on
+      Pre-Scheme <cite ref="kelsey1997prescheme"/>, which inferred
+      static types in a systems-oriented dialect of Scheme. Guttman
+      and Ramsdell <cite ref="guttman1995vlisp"/> based their
+      successful verification work in VLISP on this approach. This
+      seemed like a promising place to start.
+    </p>
+    <p>
+      Separately, I had two <em>social</em> concerns about describing
+      BitC as derived from ML:
+    </p>
+    <ul>
+      <li>
+        <p>
+          ML is a mostly ``pure'' programming language. Systems
+          programs are highly stateful, so people (correctly) assume
+          that ML isn't relevant.
+        </p>
+      </li>
+      <li>
+        <p>
+          Several serious efforts had been made to build low-level
+          code in ML. The best of them at the time achieved 25% of the
+          performance of a comparable C implementation, and required
+          60% more CPU cycles to do so.
+        </p>
+      </li>
+    </ul>
+    <p>
+      Perversely, it was better to describe BitC as derived from
+      Scheme. The very idea was absurd enough that it bought us the
+      time to explain. It also gave us an excuse <em>not</em> to
+      design a serious surface syntax too early.
+    </p>
+    <p>
+      At the time BitC got started, we were exploring software
+      verification, primarily in ACL2, which really wasn't designed
+      for what we were trying to do. The big issue was that ACL2 was
+      dynamically typed, and we were trying to write statically typed
+      code. When you are working in a LISP derivative, it seems
+      natural to build an overlay language. The first version of BitC
+      was our attempt to do that for ACL2.
+    </p>
+    <p>
+      What we envisioned was a Scheme variant similar to Pre-Scheme,
+      in which Damas-Milner style type inference would be applied to
+      produce a polymorphic, statically typed language in the
+      Hindley-Milner type system family. We anticipated using a
+      size-based instantiation scheme to implement polymorphism, as
+      was done in Pre-Scheme. This approach implements polymorphic
+      procedures by what we would now call template expansion &mdash;
+      though some interesting refinements are possible which I will
+      get to later.
+    </p>
+    <p>
+      Our overlay language attempts didn't work out too well, because
+      the first-order restrictions of ACL2 made implementing BitC
+      difficult.  At a certain point it became obvious that if we were
+      going to build a new language, we shouldn't do it haphazardly,
+      so we set out, very reluctantly, to design a new language.  The
+      current version of BitC is the language that emerged.
+    </p>
+    <p>
+      I say ``reluctantly'' because language design is hard. I watched
+      Bjarne Stroustrup struggle with C++ at Bell Labs for many
+      years. I wasn't thrilled with the prospect of that long an
+      effort.  To avoid stalling the Coyotos work we decided to
+      proceed along in a subset of C and convert to BitC when it was
+      ready.
+    </p>
+    <p>
+      BitC is now well along, and we can only hope that the uptake
+      justifies the effort.
+    </p>
+  </sect1>
+  <sect1>
+    <title>The Cost of Safety</title>
+    <p>
+      Say what you like about robustness, safety, and development cost
+      benefits in a new programming language. Performance is critical
+      in systems programming, and it always will be. Systems programs
+      can succeed or fail on ten extra cycles in an inner loop
+      somewhere. Safe languages frequently carry a 300% overhead
+      relative to C. Given this, it is relevant to ask (a) why safe
+      languages haven't delivered C-like performance in the past, and
+      (b) why we thought we could do better in BitC.
+    </p>
+    <p>
+      There are several sources of performance overhead in current safe
+      languages.
+    </p>
+    <p>
+      <leadin>Layout</leadin> The most important source of performance
+      bottlenecks in modern computers is memory access speed. The main
+      tool that programmers have for managing that is explicit data
+      layout, but safe languages generally don't let the programmer
+      say much about low-level data representation. C# perhaps comes
+      closest, but not close enough.
+    </p>
+    <p>
+      The view of modern programming language designers seems to be
+      that layout is non-semantic and therefore unimportant. Another
+      reason, I suspect, is that matters of layout complicate the core
+      semantics of the language. That makes safety verification more
+      laborious, and researchers aren't paid to deliver directly
+      usable implementations.  Whatever the real reason may be, ML,
+      Haskell, Java, and C# provide minimal support for explicit
+      layout.
+    </p>
+    <p>
+      In our experience, poor choices of layout in systems programs
+      can account for 40x to 100x slowdowns. A single extra cache load
+      in a critical path can be hundreds of cycles. Finally, hardware
+      doesn't negotiate about layout. In systems codes, <em>the
+      ability to specify fine-grain data layout is a matter of
+      semantics</em>.
+    </p>
+    <p>
+      BitC provides the fine-grain layout expressiveness of C or
+      C++.
+    </p>
+    <p>
+      <leadin>Heap Allocation</leadin> This is a corollary to the
+      layout issue. In ML, Haskell, Java, and C#, the data model
+      is that most objects live in the heap and are dynamically
+      allocated. The compiler is sometimes able to show that these
+      objects could live on the stack, but there is no way for the
+      programmer to state this directly &mdash; which is common in
+      C. This manifests as unnecessary allocations, heap pressure,
+      and consequently garbage collection.  There has been a lot
+      of work on optimizing these allocations away, but success
+      relies on liveness and alias analysis, which are known to be
+      hard problems.
+    </p>
+    <p>
+      This problem is simply an expressiveness failure, and it
+      interacts with the issue of purity (below).
+    </p>
+    <p>
+      <leadin>Garbage Collection</leadin> People continue to believe
+      that garbage collection (GC) is slow, even though modern
+      measurements contradict this. This may be because GC has
+      traditionally been associated with slower languages. In measured
+      practice, GC is <em>not</em> slower than manual storage
+      management, but its cost is amortized differently and occurs in
+      less predictable circumstances. Many of the costs attributed to
+      GC are actually costs of just-in-time compilation on small
+      programs or costs that should properly be attributed to the
+      failure of layout expressiveness in widely used safe languages.
+    </p>
+    <p>
+      That said, there <em>is</em> a cost to GC, which is the size of
+      the memory that is required for comparable performance. For
+      large programs, a GC'd program typically requires three times as
+      much heap memory as a manually storage-managed program in order
+      to perform competitively. This is a major concern in large data
+      centers, where every RAM chip contributes heat and cost in large
+      multiples.
+    </p>
+    <p>
+      We don't have a silver buller for this in BitC. We
+      <em>do</em> expect that robust systems are built out of
+      smaller components where the 3x heap size rule does not
+      apply and the GC pause times are naturally smaller. 
+      In
+      Coyotos, we find that critical components neither allocate
+      nor deallocate during their critical phases, and have a
+      natural point at the top of their event loops when the heaps
+      are essentially empty. The Coyotos kernel does not allocate
+      at all.
+    </p>
+    <p>
+      We also believe that GC heap overheads are partly driven by data
+      layout, but we're not aware of any serious quantitative study
+      on this.
+    </p>
+    <p>
+      <leadin>Purity</leadin> Java and C# are imperative
+      languages, but ML and Haskell prohibit assignment. In many
+      cases the compiler can re-discover the imperative algorithm,
+      but not always. It is difficult to measure the quantitative
+      impact of this. Sometimes there isn't any, but in other
+      cases it can be substantial. We believe that the main
+      problem here arises from the interaction of purity with heap
+      allocation. As with stack allocation, some of the problem in
+      re-discovering stateful code opportunities is a consequence
+      of alias and liveness analysis.
+    </p>
+    <p>
+      BitC has a pure subset, and we are currently introducing a
+      mechanism to require that a sub-computation must be
+      pure. This preserves the ability to do the same kinds of
+      program transforms that functional languages can do on
+      subsets of the program, but it also gives us the ability to
+      take over and do something imperative when performance or
+      directness of expression make that desirable.
+    </p>
+    <p>
+      <leadin>Safety</leadin> Safe languages impose things like
+      array bounds checks that add 1.5% to 3% to the run-time of
+      typical programs. These are the overheads that we haven't
+      <em>yet</em> eliminated in BitC, and they account for our
+      current overhead relative to C.
+    </p>
+    <p>
+      I have two broad observations on all of this, and they are
+      contradictory.
+    </p>
+    <p>
+      The first is that the most important sources of performance
+      overhead in safe languages are a consequence of expressiveness
+      failures: the programmer knew what to do, but for reasons of
+      language design was unable to express it. This is particularly
+      true for data layout and imperative constructs.
+    </p>
+    <p>
+      The other is that purity is an important capability, because it
+      enables composition. It is therefore a key enabler for the
+      reduced cost of functional programming. It is possible to mix
+      the two effectively with care, but the pure/imperative divide is
+      a fairly sharp idiom boundary from the standpoint of library
+      support. This is pushing us to look at some interesting forms of
+      region analysis going into BitC v2. The main point, in my view,
+      is that we don't really know where the right boundary is between
+      pure and imperative programming from the standpoint of overall
+      effectiveness, and we aren't going to find out without a
+      language that lets us explore both sides of this boundary at the
+      same time. BitC lets us do that.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Requirements</title>
+    <p>
+      A safe systems programming language has a number of
+      requirements. In no particular order:
+    </p>
+    <ul>
+      <li>
+        <p>
+          <leadin>Inferred Static Type System</leadin> We need a
+          modern, static type system. None of the current safe
+          languages provide all of the pieces we need. The main
+          question here was: should we adopt dependent types? Our
+          initial answer was no, and this section explains why.
+        </p>
+        <p>
+          We believe that type inference is an important tool, because
+          it improves genericity and reduces manual annotations. Both,
+          in practice, were sources of difficulty in the merge of SVR4
+          and Solaris, and we believe that the importance of inference
+          rises with the size of the code base involved. That said, we
+          made some initial mistakes that are also worth discussing.
+        </p>
+      </li>
+      <li>
+        <p>
+          <leadin>Hardware Types</leadin> The language must provide
+          low-level integer and floating point types that map directly to
+          the hardware.
+        </p>
+      </li>
+      <li>
+        <p>
+          <leadin>Arrays and Vectors</leadin> Systems programs often
+          have need of arrays (fixed-length sequences, where length is
+          part of type). Safe languages generally provide vectors,
+          which aren't the same thing. Both are needed.
+        </p>
+      </li>
+      <li>
+        <p>
+          <leadin>Layout</leadin> The language must specify the sizes and
+          alignments of scalar types and their composition rules when
+          forming aggregates.
+        </p>
+        <p>
+          This ought to be an easy one, but there are decisions to be
+          made here too.
+        </p>
+      </li>
+      <li>
+        <p>
+          <leadin>Procedure Arity</leadin> Scheme procedures all have one
+          argument and return one value. Systems code is ``close to the
+          metal,'' and needs to be able to use an efficient calling
+          convention that does not implicitly allocate heap storage when
+          calling procedures.
+        </p>
+      </li>
+      <li>
+        <p>
+          <leadin>Aggregate Types</leadin> The language must provide
+          direct support for defining unboxed composite (aggregate) types,
+          including both structures and unions.
+        </p>
+      </li>
+      <li>
+        <p>
+          <leadin>Unboxed Unions</leadin> Systems programs frequently rely
+          on unboxed unions containing object references. This raises
+          particular issues in regards to safety.
+        </p>
+      </li>
+      <li>
+        <p>
+          <leadin>Permissions</leadin> It is desirable to have notions of
+          read-only and immutable locations.
+        </p>
+      </li>
+      <li>
+        <p>
+          <leadin>Surface Syntax</leadin> An S-expression surface syntax
+          is a ``love it or hate it'' sort of thing. I (Shapiro) happen to
+          be fond of it, but C/C++ programmers are notoriously
+          unenlightened. We decided to stay with the LISP syntax until we
+          understood the BitC language design, and re-syntax the language
+          later. Examples in this paper reflect the new syntax.
+        </p>
+      </li>
+      <li>
+        <p>
+          <leadin>Imperative Programming</leadin> The language must
+          support imperative programming idioms.
+        </p>
+        <p>
+          The impacts of this are threaded throughout the rest of the
+          discussion.
+        </p>
+      </li>
+    </ul>
+    <p>
+      A few of these issues are easy. Most, it turns out, involved
+      trade-offs and subtleties. As we set out to introduce them one
+      at a time, we begain to invent &mdash; very much against our
+      will.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Inferred Static Type System</title>
+    <p>
+      From the beginning, we planned to use a static type system in
+      BitC, and we anticipated strong use of type inference. Beyond a
+      certain point, humans aren't very good at identifying
+      generalization opportunities in types, so inference is a useful
+      tool. By encouraging genericity, inference also facilitates
+      composition, which is an important aspect of low-cost
+      programming.
+    </p>
+    <p>
+      Nearly all modern programming languages rely on some variant of
+      the Hindley-Milner (HM) type system and the Damas-Milner type
+      inference algorithm. These are quite beautiful, but they stand
+      at a knife edge in the design space: almost any feature added to
+      the type system pushes the inference algorithm over a complexity
+      cliff. Two features in particular that we eventually wanted were
+      polymorphic procedure call and higher-order kinds. Since both have
+      been implemented successfully and acceptably in Haskell, we
+      didn't worry about those two much. The main question was: should
+      we adopt a <em>dependent</em> type system in BitC?
+    </p>
+    <sect2>
+      <title>Dependent Types</title>
+      <p>
+        A dependent type system is one where types can depend on
+        values. For example, we can say that <progident>i</progident> is
+        an integer parameter whose value is required to lie between the
+        values of <progident>x</progident> and
+        <progident>y</progident>. Note that <progident>x</progident> and
+        <em>y</em> here are <em>variables</em>, not just
+        literals.
+      </p>
+      <p>
+        Dependent type systems are a fairly new idea in the type
+        system literature. The ``obvious'' uses concern elimination of
+        array bounds checking, but dependent types enable some very
+        useful statements that can't be expressed in conventional type
+        systems: ``this procedure accepts references to capabilities
+        whose target object is known to be in memory.'' The
+        <em>problem</em> with dependent types in their full form is
+        that predicates on values cannot generally be checked
+        (discharged) at compile time. Worse, the compiler cannot even
+        tell (except through <foreignphrase>ad hoc</foreignphrase>
+        means) whether the attempt to check is making progress: the
+        problem is mathematically undecidable.
+      </p>
+      <p>
+        The usual solution is to restrict the type checker to some
+        bounded number of steps, and if the check cannot be done in
+        that number of steps, declare that it has failed. The question
+        is: what do you do now? The usual answer is that you add a
+        run-time check to the program. This is called a
+        <em>hybrid</em> dependent type system. From most perspectives,
+        the run-time check is strictly an improvement. Either:
+      </p>
+      <ul>
+        <li>
+          <p>
+            The requirement was previously being checked, and may now be
+            checked earlier or in a cheaper way, <em>or</em>
+          </p>
+        </li>
+        <li>
+          <p>
+            The requirement <em>wasn't</em> being checked, and wasn't
+            obvously true in the eyes of the compiler. Better, in this
+            view, for the program to stop than for it to continue.
+          </p>
+        </li>
+      </ul>
+      <p>
+        BitC is targeted at robust systems. In these systems, the goal
+        is to <em>eliminate</em> exceptions rather than move them
+        around.  We knew that dependent predicate checking is a
+        problem with many cliff edges, that many seemingly simple
+        dependencies could not be discharged, and that the checking
+        problem is harder in an imperative language. We therefore
+        expected that general dependent types would introduce more
+        run-time exceptions rather than less, and it wasn't clear
+        how to reduce the dependent expressiveness to solve this while
+        keeping dependent types expressive enough to be useful.
+      </p>
+      <p>
+        Given these concerns, we felt that it would be better to
+        encourage use of non-dependent encodings or static
+        checking. Ultimately, we made the decision that BitC v1 would
+        <em>not</em> use a dependent type system.  We eventually came
+        to re-examine this decision, but that would be getting ahead
+        of the story.
+      </p>
+    </sect2>
+    <sect2>
+      <title>Type Inference</title>
+      <p>
+        In my view, there are three reasons to use type inference:
+        brevity, generality, and manageability.
+      </p>
+      <p>
+        <leadin>Brevity</leadin> Every type that has to be manually
+        entered takes time and present an opportunity for
+        error. Unless it provides useful documentation of intent, it's
+        simply wasted effort.
+      </p>
+      <p>
+        <leadin>Generality</leadin> Functions cannot be reused unless
+        they are general, and humans aren't very good at determining
+        either the most general types or identifying necessary
+        constraints on arguments. What type would <em>you</em> give to
+        the following procedure:
+      </p>
+      <literallayout>
+def add(x, y) = x + y;</literallayout>
+      <p indent="no">
+        Did you remember that the type can be either floating point or
+        integer? Did you consider that arithmetic can be defined for
+        user-defined types? Is <progident>+</progident> defined to
+        provide concatenation on strings, so
+        that:
+      </p>
+      <literallayout>
+add("abc", "def");
+> "abcdef" : string</literallayout>
+      <p indent="no">
+        works (answer: not in BitC)? If so, what does <em>that</em>
+        say about the type of <progident>add</progident>? If you
+        defined a red-black tree implementation, would you remember to
+        specify the constraint that <progident>&lt;</progident> and
+        <progident>&le;</progident> must be defined over the element
+        type? And these are the <em>easy</em> examples!
+      </p>
+      <p>
+        <leadin>Manageability</leadin> The third reason has to do with
+        software maintenance. Early in my career, I had occasion to
+        watch as Sun's Solaris was merged with AT&amp;T's System V
+        Release 4 UNIX. Not surprisingly, there were many places where
+        the systems had diverged, and C provided very limited help in
+        discovering these. One example should suffice to make the
+        point.
+      </p>
+      <p>
+        For historical reasons, each of the two systems had multiple
+        representations for time with different accuracies, all
+        represented as integers. This meant that C would happily allow
+        them to be inter-assigned without complaining. Each case where
+        a time value should have been converted had to be hunted down
+        by hand, and lots of places had to be modified in the process.
+      </p>
+      <p>
+        Many of these modifications amounted to changing type
+        declarations in one place or another &mdash; an activity that
+        should have been completely unnecessary, since most of those
+        declarations were inferrable. Most of the rest amounted to
+        replicating functionality. A version of
+        <progident>GetDay</progident> was needed for both
+        <progident>struct&nbsp;tms</progident> and
+        <progident>struct&nbsp;tm</progident>. In C, the two versions
+        needed different names, which caused a lot of recursive source
+        code multiplication for no good reason. This is something that
+        constraint-based parametricity and type inference taken
+        together can greatly reduce.
+      </p>
+    </sect2>
+    <sect2>
+      <title>Modular Inference</title>
+      <p>
+        For all the advantages of type inference, there is a place
+        where things should <em>not</em> be inferred: module
+        boundaries. The problem is that most general inference
+        requires access to the <em>bodies</em> of procedures, which
+        should not be visible at interface boundaries.
+      </p>
+      <p>
+        To satisfy the biases of academic publication in the
+        programming language community, BitC currently implements
+        fully general inference. Cyclone, by contrast, got this right
+        <cite ref="jim2002cyclone"/> by intentionally reducing the
+        degree of inference at declarations.  We will be introducing a
+        comparable change prior to BitC v1's release.
+      </p>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>Hardware Types and Overloading</title>
+    <p>
+      BitC supports 8-, 16-, 32-, and 64-bit integers in both signed
+      and unsigned variants, and we added signed and unsigned word
+      types as a way to say ``use the natural hardware register
+      size.'' This didn't seem like a large change relative to the ML
+      type system, but it was: <foreignphrase>ad hoc</foreignphrase>
+      overloading and type inference don't get along.
+    </p>
+    <sect2>
+      <title>Type Classes</title>
+      <p>
+        The problem is that the Damas-Milner algorithm and its
+        successors are structural. They deduce the type of a definition
+        in bottom-up fashion from the known types of the bottom-most
+        elements. In ML, the <progident>+</progident> operator only
+        accepts one type: <progident>int</progident>. In consequence,
+        the type inference system can easily derive a type for something
+        like:
+      </p>
+      <literallayout>
+(* OCaml: *)
+let myadd x y = x + y;;
+val myadd : int -&gt; int -&gt; int = &lt;fun&gt;</literallayout>
+      <p>
+        In BitC, this isn't so, because the <progident>+</progident>
+        operator is overloaded. We could assign the type:
+      </p>
+      <literallayout>
+def add(x, y) = x + y;
+add: fn 'a 'a -&gt; 'a</literallayout>
+      <p indent="no">
+        but this type is wrong, because it says that we should be able
+        to pass, say, characters to the primitive
+        <progident>+</progident> operator.<footnote> <p>BitC adopts the
+            ML convention that parametric type variables are indicated by a
+            leading single quote.
+          </p>
+        </footnote>
+        This is an example of <foreignphrase>ad hoc</foreignphrase>
+        polymorphism.
+        The <progident>+</progident> operator is defined
+        over more than one type, but it isn't universally defined. What
+        we need here is some form of constraint on polymorphism, which
+        is something the Hindley-Milner type system doesn't provide.
+      </p>
+      <p>
+        Haskell provides an extension to the Hindley-Milner type system
+        called <em>type classes</em> that does this, so we adopted type
+        classes into BitC. In BitC, the type of this procedure
+        is:
+      </p>
+      <literallayout>
+def add(x, y) = x + y;
+add: fn('a, 'a) -&gt; 'a where Arith('a)</literallayout>
+      <p indent="no">
+        This is called a ``qualified type,'' and it is the subject of
+        Mark Jones' dissertation <cite ref="jones1994qualified"/>.
+      </p>
+    </sect2>
+    <sect2>
+      <title>Multiple Constraints</title>
+      <p>
+        But what about something like:
+      </p>
+      <literallayout>
+def addone(x) = x + 1;</literallayout>
+      <p indent="no">
+        The literal <progident>1</progident> is not a floating-point
+        value, so We need some way to say that floating point
+        arguments are no longer permitted. The current constraint name
+        awkward, but it gets the job done:
+      </p>
+      <literallayout>
+def addone(x) = x + 1;
+addone: fn('a, 'a) -&gt; 'a
+          where (Arith 'a), (IntLit 'a)</literallayout>
+      <p indent="no">
+        The <progident>IntLit('a)</progident> constraint says that
+        <progident>'a</progident> must be some type that admits integer
+        literals. In practice, all such types are members of
+        <progident>Arith('a)</progident>, so this type simplifies:
+      </p>
+      <literallayout>
+def addone(x) = x + 1;
+addone: fn('a, 'a) -&gt; 'a
+          where IntLit('a)</literallayout>
+    </sect2>
+    <sect2>
+      <title>Range Restrictions</title>
+      <p>
+        So what about something like:
+      </p>
+      <literallayout>
+def add256(x) = x + 256;</literallayout> 
+      <p>
+        We should not use <progident>IntLit('a)</progident> here,
+        because <progident>int8</progident> and
+        <progident>uint8</progident> satisfy the
+        <progident>IntLit('a)</progident> constraint, and 256 cannot
+        be represented by an 8-bit type. This is an example where
+        dependent types would be useful, and the current BitC type
+        system cannot express this restriction. We type this with the
+        <progident>IntLit('a)</progident> constraint and allow it to
+        fail at procedure instantiation time. One could approximate a
+        solution with type classes:
+      </p>
+    <literallayout>
+def add256(x) = x + 256;
+add256: fn('a, 'a) -&gt; 'a
+          where IntLit('a), Holds16Bits('a)</literallayout>
+      <p indent="no">
+        This works for 256, but not so well for 255: a
+        <progident>uint8</progident> <em>can</em> hold 255. We would
+        need a series of awkward type classes to handle this. There is
+        an elegant, general solution due to Mark Jones <cite
+        ref="jones2009habitreport"/>, and it will arrive in BitC v2.
+      </p>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>Arrays and Vectors</title>
+    <p>
+      BitC needs an array type; there are too many C data structures
+      that use them. We also need a vector type, because for general
+      programming vectors are better than arrays. Unfortunately, this
+      creates a syntactic ambiguity. What type should be given to:
+    </p>
+    <literallayout>
+def fetchThird(x) = x[3];</literallayout>
+    <p indent="no">
+      Today, we do not support complete inference on the indexing
+      operations. If <progident>x</progident> has been declared as an
+      array, we accept that, otherwise we infer vector. In order to
+      make procedures like <progident>fetchThird</progident>
+      semi-generic, we introduced a new type
+      <progident>ArrayRef('a)</progident>. The procedure:
+    </p>
+    <literallayout>
+def fetchThird(x:ArrayRef('a)) = x[3];</literallayout>
+    <p indent="no">
+      can be called with either an array or a vector. It may be worth
+      a digression to explain why something that looks so simple is
+      such a mess. There are actually two distinct problems here:
+    </p>
+    <sect2>
+      <title>Overloading on Literals</title>
+      <p>
+        The first problem with the procedure:
+      </p>
+      <literallayout>
+def fetchThird(x) = x[3];</literallayout>
+      <p>
+        is that BitC has no way to describe a type class that consists
+        of ``any vector and arrays of size greater than three''. The
+        problem here is that the size of the array is part of its
+        type, and BitC doesn't currently have a way to parameterized
+        over literal values.
+      </p>
+      <p>
+        Part of the solution is to introduce ``literal types.'' The
+        idea is that each literal 1, 2, 3... has an associated type 1,
+        2, 3... that is occupied by exactly one element. We then allow
+        implicit coercion between literal types and the corresponding
+        integer types, replacing the current
+        <progident>IntLit('a)</progident> type class.
+      </p>
+      <p>
+        Mark Jones' approach in Habit takes this a step further: he
+        observes that we can introduce a kind system for literals and
+        arithmetic relations into the type system, and that having
+        done so, we can express range restrictions such as:
+      </p>
+      <literallayout>
+'lit > 3</literallayout>
+      <p indent="no">
+        this sort of thing provides quite a number of opportunities
+        enumerated in the Habit Report <cite
+          ref="jones2009habitreport"/>, including generalized range
+        restrictions, alignment restrictions, divide functions that
+        exclude zero, and many others. As before, we will be adopting
+        one of Mark's excellent ideas.
+      </p>
+    </sect2>
+    <sect2>
+      <title>Generalized Accessors</title>
+      <p>
+        The second problem with the procedure:
+      </p>
+      <literallayout>
+def fetchThird(x) = x[3];</literallayout>
+      <p>
+        is that the indexing operation isn't a procedure call; it's an
+        address computation. That is: it's <em>syntax</em>. In order
+        to create a procedure call, it would have to be able to return
+        an inner reference into the array or vector
+        <progident>x</progident>. But the array may be a
+        stack-allocated temporary (unboxing into the stack could bite
+        us here) and we have to be careful to make sure that the inner
+        reference doesn't outlive its object.
+      </p>
+      <p>
+        The general way to deal with this is to use region typing,
+        where we get to specify that the type of the return value from
+        <progident>GetCell</progident> is a reference into the same
+        region as the array, and then impose a safety check based on
+        region lifetimes.
+      </p>
+      <p>
+        To be brutally frank, it isn't clear that regions for this
+        purpose are worth the bother. They would allow us to do
+        generalized accessors, but the use cases in which a
+        generalized accessor touches something on the stack are
+        rare. We are looking at region types for other reasons, but at
+        the moment it isn't clear whether this use will ever become
+        motivated.
+      </p>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>Layout</title>
+    <p>
+      The general problem of layout isn't that big a deal. The
+      behavior needs to be codified, but C implementations seem to do
+      it quite well. The problem is that one is tempted to mandate
+      certain optimizations. Two cases in particular come to mind.
+    </p>
+    <p>
+      The first is nullable references, which is an unboxed union
+      type. We would like to require that a nullable reference
+      occupies exactly one word. It is straightforward to show that
+      this is safe, and it turns out that this can be implemented on
+      all platforms, including the CLR.
+    </p>
+    <p>
+      The second is arbitrary-precision integers, where we would
+      really prefer a one word implementation. This one is also safe,
+      but unfortunately it won't pass the safety checks of CLR. This
+      raises a general problem: how far should a language go in
+      dictating layout and representation?
+    </p>
+    <p>
+      While we very much wanted to have efficient bignum
+      representation, we have tentatively given up on that part of the
+      BitC specification. We have identified and recommended an
+      encoding scheme that is safe and space-efficient but cannot be
+      realized on the CLR. Programs that rely (directly or indirectly)
+      on the size of a bignum may not be portable.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Procedure Arity</title>
+    <p>
+      In most functional languages, including Scheme, ML, and Haskell,
+      procedures take one argument and return one
+      result. Conceptually, the Scheme application
+      <progident>(+&nbsp;x&nbsp;y)</progident> is actually processed
+      as <progident>((+&nbsp;x)&nbsp;y)</progident>.  The inner
+      application <em>logically</em> forms a closure to contain
+      <progident>x</progident>, which is later used to compute the sum
+      of <progident>x</progident> and <progident>y</progident>.
+    </p>
+    <p>
+      If what you are trying to achieve in your programming language
+      is functional composition, the ``one argument'' rule is very
+      convenient.  It is also useful from the perspective of
+      procedure type genericity. The catch is that closure formation
+      requires heap allocation and defeats register-based argument
+      passing. Current Scheme, Haskell and ML compilers go to some
+      length to perform ``argument flattening or ``arity raising'',
+      recovering the customary arity-2 addition operator that is
+      directly implemented by conventional hardware. Because modern
+      calling conventions use registerized parameters that are
+      allocated to registers based on position, arity raising is a
+      performance-critical optimization.
+    </p>
+    <p>
+      In some cases, higher-arity procedures cannot be recovered by
+      the compiler. These notably include mutable procedure variables,
+      where we cannot know the ``natural'' arity of the referenced
+      procedure object.  Which way should the following type be
+      interpreted:
+    </p>
+    <literallayout>
+'a -&gt; 'a -&gt; 'a; <em>is it</em>
+('a -&gt; 'a) -&gt; 'a; <em>or</em>
+'a -&gt; ('a -&gt; 'a)</literallayout>
+    <p indent="no">
+      Mathematically, these are all the same, but at the
+      implementation level they aren't.  In most calling conventions,
+      we need to know. For mutable procedure variables, we must adopt
+      the conservative choice (the second one). In consequence, the
+      ``one argument'' rule means that ``hidden'' heap allocation may
+      occur at applications and that the native calling convention
+      cannot generally be used for mutable procedure variables.
+    </p>
+    <p>
+      In BitC, our reluctant conclusion was that visibility of
+      allocation was more important than functional composition. It is
+      easy enough to introduce an explicit partial application
+      operator into the language if one turns out to be useful.  It
+      was also a strong objective to stay within the native calling
+      convention wherever possible. For these reasons the BitC types:
+    </p>
+    <literallayout>
+fn('a, 'a) -&gt; 'a
+fn('a) -&gt; fn('a, 'a))</literallayout>
+    <p indent="no">
+      are different. The first describes a procedure taking two
+      arguments. The second describes a procedure taking one argument
+      that returns a value having procedure type.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Aggregate Types</title>
+    <p>
+      With multiple integer and floating-point types added to the
+      language, defining a mechanism for aggregate (structure) types
+      seemed straightforward, but there was a choice to be made: what
+      name space should field names occupy?
+    </p>
+    <p>
+      In ML and Haskell, record field names are ``selectors,'' and
+      they are defined in the same scope as the record type name. A
+      record in these languages is really a tuple type in
+      disguise. This is convenient to the language designer, because
+      record types don't really add much anything to the core type
+      system. It is inconvenient to the systems software author,
+      because field names ``escape'' their expected lexical context.
+    </p>
+    <p>
+      One might argue that this is merely a matter of what is
+      familiar, but it isn't: the issue touches on the module
+      system. If I import an ML-style record type from a providing
+      module, do the selector names come with it implicitly? If not,
+      how do I access the fields? There does not seem to be any
+      particularly ``hygienic'' resolution to this sort of
+      question. In BitC, we elected to make field names be scoped by
+      their containing structure type. I will describe these as
+      <em>structure</em> types rather than record types, mainly to
+      emphasize the differences in field name spaces.
+    </p>
+    <p>
+      In ML, record types arrived late. Structure types in BitC were
+      part of the design from day one. Because of this, BitC does not
+      implement a tuple type in the style of ML. An unboxed pair type
+      is provided by the preamble. A tuple-like convenience syntax is
+      provided:
+    </p>
+    <literallayout>
+(a, b, c) ; <em>convenience for:</em>
+(pair a (pair b c))</literallayout>
+    <p indent="no">
+      A minor consequence of this is that BitC does not really have a
+      product type. Our unions are "sums of structures" rather than
+      sums of products. In practical terms, the resulting difference
+      between the BitC and ML semantics is not large.
+    </p>
+    <p>
+      A larger difference is that BitC structure types are unboxed.<footnote>
+        <p>
+          Structure types could originally be boxed. For the moment,
+          this has been temporarily removed from the language because
+          of permission complications.
+        </p>
+      </footnote>
+      An <em>unboxed</em> structure is one that occupies multiple
+      words, and whose representation is ``inlined'' into the
+      representation of its containing structure or stack frame. BitC
+      structures behave very much like their C counterparts.  As in C
+      values of a structure type <progident>S</progident> can be
+      allocated on the heap using <progident>new</progident>,
+      returning a reference of type <progident>ref&nbsp;S</progident>.
+    </p>
+    <p>
+      Passing or returning an unboxed structure is not always cheap,
+      which imposes a pragmatic requirement on the type system:
+      by-reference parameters. The copy and initialization semantics
+      of by-reference types needs to be defined with some care, to
+      ensure that type safety is not violated by liveness errors.
+      By-reference parameters also introduce the possibility that an
+      inner reference can be the last live reference to an object,
+      which imposes requirements on the design of the garbage
+      collector.
+    </p>
+    <p>
+      Because of the concern about imposition on the garbage
+      collector, BitC does not specify a ``native'' size for
+      by-reference parameters or inner references.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Unboxed Unions</title>
+    <p>
+      Once we had added structure types, we of course needed union
+      types. BitC is not object-oriented (perish the thought), so we
+      could not rely on the class hierarchy to provide union semantics
+      (as Java and C# do).  
+      <!-- Union types in BitC can be defined as boxed or unboxed. A boxed -->
+      <!-- union is a sum of record references in the style of ML. An -->
+      <!-- <em>unboxed</em> union is a sum of structures. -->
+    </p>
+    <p>
+      Unfortunately, systems code frequently wants to ``embed'' unions
+      inside containing structures. Indeed, the most critical data
+      structure in the Coyotos kernel &mdash; the capability structure
+      &mdash; is an example of such an unboxed union.  Unboxed unions
+      are a potential source of subtle safety violations.
+    </p>
+    <p>
+      In CLR, JVM, and in all safe languages prior to BitC, unions are
+      boxed. A location of union type can be overwritten, but this is
+      done by storing a single pointer. When all union instances are
+      boxed, the ``leg type'' of a given union value cannot change
+      during its lifetime. This eliminates a number of possible safety
+      hazards.
+    </p>
+    <p>
+      In the presence of <em>unboxed</em> unions, a safety hazard
+      arises in union leg dispatch. If you dispatch on a union tag
+      that resides in a mutable location, and the union value is
+      overwritten with a different leg type while you are executing
+      code assuming the <em>old</em> leg type, a safety violation
+      occurs. To avoid this, the semantics of the BitC ``case''
+      statement requires that the discriminating code operate on a
+      private, immutable <em>copy</em> of the union value.
+    </p>
+    <p>
+      The fact that boxed unions are changed by a pointer store
+      becomes crucial when a concurrent collector is in use, because a
+      single-word store can be performed atomically on all hardware
+      architectures.  A concurrent garbage collector therefore does not need
+      to guard against the union tag type changing while traversal is
+      underway. From the perspective of the collector, a union value
+      is actually a structure.
+    </p>
+    <p>
+      Unboxed unions may occupy multiple words. In consequence, an
+      overwrite of an unboxed union cannot be performed atomically in
+      the general case. To avoid concurrency races between the
+      application and the garbage collector, the protocol is to first
+      nullify (zero) every word in the union that contains a reference
+      under <em>either</em> the old leg type <em>or</em> the new leg
+      type, then update the leg type, then write the new union
+      value.<footnote><p>Thanks to Bjarne Steensgaard for identifying
+      this hazard.</p> </footnote> With some care, this protocol is
+      sufficient to avoid a safety violation arising from the race
+      between a concurrent collector and the main execution path.
+    </p>
+    <p>
+      Unboxed unions cannot be supported with any faithful
+      representation under the CLR, because the byte code verifier
+      cannot confirm the safety of the overwrite. Eric Northup has
+      identified a representation that both virtual machines will
+      correctly identify as safe at the cost of occupying more space
+      per instance. The trick is to ``hoist'' all of the references
+      occurring in the union (in any leg) to the end, and to reserve
+      storage for all of them in every instance. The net effect is
+      that unboxed unions are represented as a (potentially bloated)
+      CLR structure.
+    </p>
+    <p>
+      To our knowledge, BitC's unboxed types cannot be faithfully
+      represented on the JVM. A BitC implementation targeting JVM must
+      implement unboxed copy semantics by hand, and is unable to honor
+      the structure size and alignment portion of the BitC
+      specification.
+    </p>
+  </sect1>
+  <sect1>
+    <title>Permissions</title>
+  </sect1>
+  <sect1>
+    <title>Looking Forward</title>
+    <sect2>
+      <title>Effect Types</title>
+    </sect2>
+    <sect2>
+      <title>Regions</title>
+    </sect2>
+    <sect2>
+      <title>Immutability</title>
+    </sect2>
+    <sect2>
+      <title>Concurrency</title>
+    </sect2>
+  </sect1>
+
+  <bibliography>
+    <bibentry label="haynes1992infer">
+      C. Haynes. ``Infer: A Statically-typed Dialect of Scheme -
+      Preliminary Tutorial and Documentation.'' <em>Computer Science
+      Technical Report TR367</em>, Indiana University at Bloomington 1992.
+    </bibentry>
+    <bibentry label="jim2002cyclone">
+      T. Jim, G. Morrisett, D. Grossman, M. Hicks, J. Cheney, and
+      Y. Wang. ``Cyclone: A Safe Dialect of C.''
+      <doctitle>Proc. 2002 USENIX Annual Technical
+      Conference</doctitle>. pp. 275-288, Monterey, CA. June 2002.
+    </bibentry>
+    <bibentry label="grossman2002region">
+      D. Grossman, G. Morrisett, T. Jim, M. Hicks, Y. Wang, and
+      J. Cheney. ``Region Based Memory Management in Cyclone.''
+      <doctitle>Proc. SICPLAN '02 Conference on Progrmaming Language
+      Design and Implementation</doctitle>, Berlin, Germany, June
+      2002.
+    </bibentry>
+    <bibentry label="guttman1995vlisp">
+      J. Guttman and J. Ramsdell. ``VLISP: A Verified Implementation
+      of Scheme.'' <em>LISP and Symbolic Computation</em>, 1995.
+    </bibentry>
+    <bibentry label="jones2009habitreport">
+      M. P. Jones. <em>The Habit Programming Language Preliminary
+      Report</em>. Portland State University, Aug. 2009.
+    </bibentry>
+    <bibentry label="jones1994qualified">
+      M. P. Jones. <em>Qualified Types: Theory and
+      Practice</em>. Cambridge University Press, 1994
+    </bibentry>
+    <bibentry label="kaufmann2000acl2">
+      M. Kaufmann, J. S. Moore. <doctitle>Computer Aided Reasoning: An
+      Approach</doctitle>, Kluwer Academic Publishers, 2000.
+    </bibentry>
+    <bibentry label="kelsey1997prescheme">
+      R. A. Kelsey. <em>Pre-Scheme: A Scheme Dialect for Systems
+      Programming</em>, 1997.
+    </bibentry>
+    <bibentry label="kelsey1998r5rs">
+      Richard Kelsey, William Clinger, and Jonathan Rees (Ed.)
+      <doctitle>Revised<sup>5</sup> Report on the Algorithmic Language
+      Scheme</doctitle>,
+      ACM SIGPLAN Notices, 33(<b>9</b>), pp 26&ndash;76, 1998.
+    </bibentry>
+  </bibliography>
+  </article>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode:nil -->
+<!-- End: -->
