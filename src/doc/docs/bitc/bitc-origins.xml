@@ -4,7 +4,7 @@
 [
 <!ENTITY BitcVersion "0.10+">
 ]>
-  <article id="bitc-intro" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <article id="bitc-origins" xmlns:xi="http://www.w3.org/2001/XInclude">
   <docinfo twocolumn="yes">
     <title>The Origins of the BitC Programming Language</title>
     <subtitle>SRL Technical Report 2008-04</subtitle>
@@ -163,18 +163,18 @@
       verified, therefore not repeatable but potentially high
       confidence).  At least one example now exists where a
       verification efforts have proceeded successfully using a subset
-      of the C language (SEL4 <cite ref="klein2007verifiying"/>). The
+      of the C language (seL4 <cite ref="klein2007verifiying"/>). The
       effort required was truly herculean, and it is a
       <foreignphrase>tour de force</foreignphrase> of verification. At
-      the time of this writing (September, 2008), the SEL4 team is
+      the time of this writing (September, 2008), the seL4 team is
       still working on connecting their low-level formal design to the
       code, and also on connecting their high-level formal design to
       their security specification.
     </p>
     <p>
-      The point that we really want to make about the SEL4 approach is
+      The point that we really want to make about the seL4 approach is
       that it does not generalize to any <em>other</em> effort to
-      verify programs in C. Having achieved a verification of the SEL4
+      verify programs in C. Having achieved a verification of the seL4
       kernel, and assuming that all of the verification libraries
       associated with that result were made public, the advance in the
       available verification art that can be applied to other programs
@@ -183,7 +183,7 @@
     </p>
     <p>
       We emphasize that this is primarily a criticism of C rather than
-      a complaint about the SEL4 results.  C is somehow bipolar:
+      a complaint about the seL4 results.  C is somehow bipolar:
       Hercules apparently <em>can</em> verify selected programs, but
       even fairly modest checks on general programs remain very hard
       to achieve. To make this area sustainable, we need both more
