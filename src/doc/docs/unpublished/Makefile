@@ -34,39 +34,42 @@
 #
 
 default: package
-BITC_SRC=../..
+BITC_SRC=../../..
 
-CLEANLIST=dir.dev.gxml
-DIRS=bitc osverify-2004 papers
-CLEANDIRS=$(DIRS) unpublished
-OSDOC_XML_SRC=index
-# Only build the HTML targets in this directory...
-OSDOC_NAVCONTEXT="Docs"
-OSDOC_TARGETS=%.html
+.SECONDARY:
+
+#OSDOC_XML_SRC=$(patsubst %.xml,%,$(wildcard *.xml)) \
+#              $(patsubst %.txml,%,$(wildcard *.txml)) 
+
+TEXINPUTS=":../latex_classes::"
+export TEXINPUTS
+
+XSL_BTYPE=../txml_proc/btypes-osdoc.xsl
+FIX_LTX='../txml_proc/fixup.pl'
+
+MY_XML=$(patsubst %.xml,%,$(wildcard *.xml))
+MY_TYPE_XML=$(patsubst %.txml,%,$(wildcard *.txml))
+
+OSDOC_XML_SRC=$(MY_XML) $(MY_TYPE_XML)
+OSDOC_SBOX_SRC=$(wildcard *.sbox)
+
+CLEANLIST=bitc-grammar.c
+CLEANLIST+=$(MY_TYPE_XML:%=%.xml)
 
 include $(BITC_SRC)/build/make/makerules.mk
+OSDOC_TARGETS+=%.ps
 
-all: index.html
+all:
+
 install: all
 
-dirfrag:
-	$(XSLTPROC) \
-		--stringparam url $(patsubst %.xml,%.html,$(XMLURL)) \
-		--stringparam pdfurl $(patsubst %.xml,%.pdf,$(XMLURL)) \
-		$(OSDOC_DIRENT) $(XMLURL) >> tmp.xml
 
-xmlroots:
-	for i in $(DIRS); do \
-	  make -C $$d xmlsources; \
-	done
+$(MY_TYPE_XML:%=%.xml): %.xml : %.txml $(XSL_BTYPE) include/%/$(wildcard *.xmli)
+	$(XSLTPROC) -o $@ $(XSL_BTYPE) $<
 
-dir.dev.gxml:
-	echo "<fakeroot>" > tmp.xml
-	for i in $(foreach dir,$(DIRS),$(wildcard $(dir)/*.xml)); do \
-		$(MAKE) XMLURL="$$i" dirfrag; \
-	done
-	echo "</fakeroot>" >> tmp.xml
-	mv tmp.xml dir.dev.gxml
-
-#index.html: STYLESHEET="$(WEBROOT)/dirstyles.css"
-index.html: index.xml dir.dev.gxml $(XSL_HTML)
+$(MY_TYPE_XML:%=%.ltx): %.ltx : %.xml.ltx
+	$(FIX_LTX) $< |\
+	awk '$$1 ~ /\\begin{alltt}/ {if(pre != ""){print pre;} pre = $$0;}\
+	     $$1 !~ /\\begin{alltt}/ {print pre; pre = $$0;}\
+	     END {print $$0;}' - |\
+	sed '/./,/^$$/!d' - > $@
