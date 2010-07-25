@@ -226,6 +226,19 @@ interface bitc.prelude {
   instance FloatLit(double)
   instance FloatLit(quad)  
 
+  closed trait Unsigned('a) where IntLit('a) {}
+  instance Unsigned(word)
+  instance Unsigned(uint8)
+  instance Unsigned(uint16)
+  instance Unsigned(uint32)
+  instance Unsigned(uint64)
+
+  closed trait Signed('a) where IntLit('a) {}
+  instance Signed( int8)
+  instance Signed( int16)
+  instance Signed( int32)
+  instance Signed( int64)
+
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING EQUALITY
   ///////////////////////////////////////////////////////////
@@ -262,16 +275,24 @@ interface bitc.prelude {
     `% : fn('a, 'a) -> 'a
   }
 
+  trait LeftLeft('a, 'b) {
+    `<<      : fn('a, 'b) -> 'a      // Left Shift
+  }
+
+  trait RightRight('a, 'b) {
+    `>>      : fn('a, 'b) -> 'a      // Left Shift
+  }
+
+  trait BitShiftable('a) where LeftLeft('a, word), RightRight('a, word) { }
+ 
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING BITWISE ARITHMETIC
   ///////////////////////////////////////////////////////////
-  trait Bitwise('a) where IntLit('a) {
+  trait Bitwise('a) where Unsigned('a), BitShiftable('a) {
       bit_and  : fn('a, 'a)   -> 'a   // Bitwise AND
       bit_or   : fn('a, 'a)   -> 'a   // Bitwise OR
-      bit_not  : fn('a)       -> 'a      // One's Complement
+      bit_not  : fn('a)       -> 'a   // One's Complement
       bit_xor  : fn('a, 'a)   -> 'a   // Bitwise XOR
-      `<<      : fn('a, word) -> 'a      // Left Shift
-      `>>      : fn('a, word) -> 'a      // Right Shift
   }
 
   def `&(x, y) = bit_and(x, y)
@@ -292,12 +313,10 @@ interface bitc.prelude {
     `== = __==
     `!= = __!=
   }
-
   instance Eq(bool) {
     `== = __==
     `!= = __!=
   }
-
   instance Eq(int8) {
     `== = __==
     `!= = __!=
@@ -333,8 +352,8 @@ interface bitc.prelude {
   instance Eq(word) {
     `== = __==
     `!= = __!=
-  }
-
+   }
+ 
   instance Eq(float) {
     `== = __==
     `!= = __!=
@@ -347,7 +366,6 @@ interface bitc.prelude {
     `== = __==
     `!= = __!=
   }
-
   instance Eq(string) {
     `== = __==
     `!= = __!=
@@ -545,45 +563,77 @@ interface bitc.prelude {
   instance IntArith(uint64) { `% = __% }
   instance IntArith(word)   { `% = __% }
 
+  instance LeftLeft(uint8, word) {
+    `<< =  __<<
+  }
+  instance LeftLeft(uint16, word) {
+    `<< =  __<<
+  }
+  instance LeftLeft(uint32, word) {
+    `<< =  __<<
+  }
+  instance LeftLeft(uint64, word) {
+    `<< =  __<<
+  }
+  instance LeftLeft(word, word) {
+    `<< =  __<<
+  }
+
+  instance RightRight(uint8, word) {
+    `>> =  __>>
+  }
+  instance RightRight(uint16, word) {
+    `>> =  __>>
+  }
+  instance RightRight(uint32, word) {
+    `>> =  __>>
+  }
+  instance RightRight(uint64, word) {
+    `>> =  __>>
+  }
+  instance RightRight(word, word) {
+    `>> =  __>>
+  }
+
+  instance BitShiftable(int8)
+  instance BitShiftable(int16)
+  instance BitShiftable(int32)
+  instance BitShiftable(int64)
+  instance BitShiftable(uint8)
+  instance BitShiftable(uint16)
+  instance BitShiftable(uint32)
+  instance BitShiftable(uint64)
+  instance BitShiftable(word)
+
   instance Bitwise(uint8) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
     bit_xor = __b_xor
-    `<< =  __<<
-    `>> =  __>>
   }
   instance Bitwise(uint16) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
     bit_xor = __b_xor
-    `<< =  __<<
-    `>> =  __>>
   }
   instance Bitwise(uint32) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
     bit_xor = __b_xor
-    `<< =  __<<
-    `>> =  __>>
   }
   instance Bitwise(uint64) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
     bit_xor = __b_xor
-    `<< =  __<<
-    `>> =  __>>
   }
   instance Bitwise(word) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
     bit_xor = __b_xor
-    `<< =  __<<
-    `>> =  __>>
   }
 
   trait Length('a) {
