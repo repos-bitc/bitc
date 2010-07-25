@@ -213,7 +213,7 @@ Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options)
       // syntax over.
       if (options & PO_SHOW_FIELDS) {
         ss << "(" << ((t->kind == ty_structr) ? "struct " : "structR ")
-           << defAst->s << " - ";
+           << printName(t->defAst) << " - ";
         for (size_t i=0; i<components.size(); i++)
           ss << CompName(i) << ":" 
              << CompType(i)->asSexprString(tvP, options) << " ";
@@ -264,7 +264,7 @@ Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options)
         dbName = "unionR-con";
         break;
       }
-      ss << "(" << dbName << " " << defAst->s;
+      ss << "(" << dbName << " " << printName(t->defAst);
       for (size_t i=0; i<typeArgs.size(); i++)
         ss << TypeArg(i)->getType()->asSexprString(tvP, options);
       ss << ") [";
@@ -291,7 +291,7 @@ Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options)
     // should be reconciled more cleanly when we switch the type
     // syntax over.
     if (options & PO_SHOW_FIELDS) {
-      ss << "(Typeclass " << defAst->s;
+      ss << "(Typeclass " << printName(t->defAst);
       for (size_t i=0; i < typeArgs.size(); i++)
         ss << " " << TypeArg(i)->asSexprString(tvP, options);
       ss << ")";
@@ -536,7 +536,7 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
     for (size_t i=0; i < t->components.size(); i++) {
       if (i > 0) ss << ", ";
       if (t->CompFlags(i) & COMP_BYREF)
-        ss << "ByRef" << t->CompType(i)->asBlockStringProducer(tvP, options, false)
+        ss << "ByRef " << t->CompType(i)->asBlockStringProducer(tvP, options, false)
            << "";
       else           
         ss << t->CompType(i)->asBlockStringProducer(tvP, options, false);
@@ -654,7 +654,7 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
       // and [type] application has about the highest precedence of anything.
       ss << printName(t->defAst);
       if (t->typeArgs.size() != 0) {
-        ss << "(" << printName(t->defAst);
+        ss << "(";
         for (size_t i=0; i < t->typeArgs.size(); i++) {
           if (i > 0) ss << ", ";
           ss << t->TypeArg(i)->asBlockStringProducer(tvP, options, false);
@@ -699,6 +699,7 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
   case ty_byref:
     // Always outermost, so never needs paren wrapping
     ss << "ByRef " << t->Base()->asBlockStringProducer(tvP, options, false);
+    break;
 
   case ty_array_ref:
     // Always outermost, so never needs paren wrapping
