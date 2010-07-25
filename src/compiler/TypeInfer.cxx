@@ -671,7 +671,7 @@ matchDefDecl(std::ostream& errStream,
               << " does not match that of "
               << std::endl
               << decl->loc << ": declaration / definition "
-              << declSigma->asString() << " EXACTLY."
+              << declSigma->asString() << " exactly."
               << std::endl;
   
   return errorFree;

@@ -732,7 +732,7 @@ TypeScheme::solvePredicates(std::ostream &errStream, const LexLoc &errLoc,
       assert(handled);
       assert(errPred);
       errStream << errLoc << ": "
-                << "Unsatisfiable Constraint: "
+                << "Unsatisfiable constraint: "
                 << errPred->asString() 
                 << std::endl; 
     }
