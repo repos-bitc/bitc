@@ -1051,6 +1051,7 @@ resolve(std::ostream& errStream,
 
       shared_ptr<AST> category = ast->child(2);
 
+#if 0
       if (category->astType == at_boxedCat) {
         errStream << ast->loc << ": "
                   << "struct " << ast->child(0)->s
@@ -1058,6 +1059,7 @@ resolve(std::ostream& errStream,
                   << std::endl;
         errorFree = false;
       }              
+#endif
 
       IdentType identType = 
         (ast->astType == at_defstruct) ? id_struct : id_object;
