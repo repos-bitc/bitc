@@ -1113,7 +1113,7 @@ sxp_constraint_seq: sxp_constraint {
  $$ = AST::make(at_constraints, $1->loc, $1);
 };
 
-sxp_typeapp: '(' sxp_useident sxp_type_args_pl_byref ')' {
+sxp_constraint: '(' sxp_useident sxp_type_args_pl_byref ')' {
   SHOWPARSE("sxp_typeapp -> ( sxp_useident sxp_type_args_pl_byref )");
   $$ = AST::make(at_tcapp, $2->loc, $2);
   $$->addChildrenFrom($3);
