@@ -80,7 +80,7 @@ enum CompFlagValues {
   /// marked invalid within switch statement
   /// when used in conjuction with other
   /// constructors (only the common fields
-  /// must be valid) The switced value is
+  /// must be valid) The switched value is
   /// only valid within select operations,
   /// and is therefore only checked there.   
   COMP_INVALID     = 0x02u,
