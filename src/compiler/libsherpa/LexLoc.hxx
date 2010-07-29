@@ -79,6 +79,20 @@ namespace sherpa {
       return *this;
     }
 
+    inline bool operator==(const LexLoc& ll)
+    {
+      return ((origin == ll.origin) &&
+              (line = ll.line) &&
+              (offset = ll.offset));
+    }
+
+    inline bool operator!=(const LexLoc& ll)
+    {
+      return ((origin != ll.origin) ||
+              (line != ll.line) ||
+              (offset != ll.offset));
+    }
+
     std::string asString() const;
 
     const char *c_str() const;
