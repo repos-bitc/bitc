@@ -1137,13 +1137,13 @@ blk_ptype_name: blk_defident %prec prec_PreferShift {
 };
 
 blk_ptype_name: blk_defident '(' blk_tvlist ')' %prec '(' {
-  SHOWPARSE("blk_ptype_name -> blk_ptype_name_primary ( blk_tvlist )");
+  SHOWPARSE("blk_ptype_name -> blk_defident ( blk_tvlist )");
   $$ = AST::make(at_Null, $1->loc, $1, $3);
 };
 
 
 blk_ptype_name: blk_defident '<' blk_tvlist '>' {
-  SHOWPARSE("blk_ptype_name -> blk_ptype_name_primary < blk_tvlist >");
+  SHOWPARSE("blk_ptype_name -> blk_defident < blk_tvlist >");
   $$ = AST::make(at_Null, $1->loc, $1, $3);
 };
 
