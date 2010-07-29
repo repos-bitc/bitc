@@ -192,7 +192,9 @@ UnifyMbCt(std::ostream& errStream, shared_ptr<Trail> trail,
 // Therefore, this function is called from the Unifier
 // from both ty_fn case (in which case the errt1 and errt2
 // types are the full function types) and the
-// ty_fnarg case )in thich case errt1 = t1 and errt2=t2)
+// ty_fnarg case (in which case errt1 = t1 and errt2=t2)
+// In both cases, what is passed to us here as t1, t2 is the
+// ty_fnarg element.
 static bool 
 UnifyFnArgs(std::ostream& errStream, shared_ptr<Trail> trail,
             const LexLoc &errLoc,
