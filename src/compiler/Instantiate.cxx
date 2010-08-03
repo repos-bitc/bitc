@@ -991,6 +991,11 @@ getDefToInstantiate(ostream &errStream, shared_ptr<UocInfo> unifiedUOC,
     shared_ptr<AST> tcID = typClass->child(0);
     shared_ptr<Typeclass> pred = tcID->scheme->type_instance();
 
+    DEBUG(TC_INST)
+      cerr << "Instantiating method " << def->s << " from TC " 
+           << typClass->asString() << std::endl 
+           << " over type " << typ->asString() << std::endl;
+
     // Then find out which method we are concerned about.
     size_t nthMethod = 0;
     bool found = false;

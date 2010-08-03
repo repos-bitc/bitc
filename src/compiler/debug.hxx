@@ -48,9 +48,9 @@
 
 #define dbg_BEG_SIMP    0x00000001u
 #define dbg_METH_DECL   0x00000002u
-#define dbg_ILH         0x00000004u        // Inst-Lambda-Hoist
-#define dbg_INST        0x00000008u        // Debug Polyinstantiation
-#define dbg_INST_ENV    0x00000010u // Debug Polyinstantiator's env-handling
+#define dbg_ILH         0x00000004u   // Inst-Lambda-Hoist
+#define dbg_INST        0x00000008u   // Debug Polyinstantiation
+#define dbg_INST_ENV    0x00000010u   // Debug Polyinstantiator's env-handling
 #define dbg_REPR_SIMP   0x00000020u
 #define dbg_UNION_INF   0x00000040u
 #define dbg_DEF_INF     0x00000080u
@@ -67,12 +67,14 @@
 #define dbg_PCST        0x00040000u   // Debug Solving Polymorhic * constaints
 #define dbg_TCSOL       0x00080000u   // Debug Solving Type-class constaints
 #define dbg_UNIFY       0x00100000u   // Debug Unification
-#define dbg_UNF_RES     0x00200000u  // Debug Unification by showing Results
+#define dbg_UNF_RES     0x00200000u   // Debug Unification by showing Results
 #define dbg_TRAIL       0x00400000u   // Debug Type Linking
 #define dbg_TS_NORM     0x00800000u   // Debug TypeScheme Normalization
 #define dbg_TYPE_ACC    0x01000000u
 #define dbg_DEF_DECL    0x02000000u   // Debug Definition-Declaration consistency checking
+#define dbg_TC_INST     0x04000000u   // Concrete type class instantiation
 
+// #define dbg_flags         (dbg_INS|dbg_GEN|dbg_SOL|dbg_SPSOL|0u)
 #define dbg_flags         (0u)
 
 #define DEBUG_CND(x) ((dbg_flags) & (dbg_ ## x))
