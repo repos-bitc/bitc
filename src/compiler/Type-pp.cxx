@@ -388,7 +388,7 @@ Type::asBlockString(shared_ptr<TvPrinter> tvP, PrintOptions options)
 string
 Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options)
 {
-  return asBlockString(tvP, options) + " OR " + asSexprString(tvP, options);
+  return /*asBlockString(tvP, options) + " OR " + */asSexprString(tvP, options);
 }
 
 // Return the precedence (in the grammar's view) of the production
