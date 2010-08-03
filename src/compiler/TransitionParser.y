@@ -1133,14 +1133,25 @@ sxp_constraint: sxp_useident {
 blk_ptype_name: blk_defident %prec prec_PreferShift {
   SHOWPARSE("blk_ptype_name -> blk_defident");
   shared_ptr<AST> tvlist = AST::make(at_tvlist, $1->loc);
-  shared_ptr<AST> constraints = AST::make(at_constraints, $1->loc);
-  $$ = AST::make(at_Null, $1->loc, $1, tvlist, constraints);
+
+  // In the block syntax, we have a reliable syntactic position for
+  // constraints later, so we don't build one here as we needed to do
+  // in the S-expression syntax.
+
+  // shared_ptr<AST> constraints = AST::make(at_constraints, $1->loc);
+
+  $$ = AST::make(at_Null, $1->loc, $1, tvlist);
 };
 
 blk_ptype_name: blk_defident '(' blk_tvlist ')' %prec '(' {
   SHOWPARSE("blk_ptype_name -> blk_defident ( blk_tvlist )");
-  shared_ptr<AST> constraints = AST::make(at_constraints, $1->loc);
-  $$ = AST::make(at_Null, $1->loc, $1, $3, constraints);
+  // In the block syntax, we have a reliable syntactic position for
+  // constraints later, so we don't build one here as we needed to do
+  // in the S-expression syntax.
+
+  // shared_ptr<AST> constraints = AST::make(at_constraints, $1->loc);
+
+  $$ = AST::make(at_Null, $1->loc, $1, $3);
 };
 
 sxp_ptype_name: sxp_defident {
