@@ -443,7 +443,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "true",             lf_block,             tk_TRUE ),
   TransitionLexer::KeyWord( "try",              lf_transition,        tk_TRY ),
   TransitionLexer::KeyWord( "tycon",            lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "tyfn",             lf_transition,        tk_TYFN ),
+  TransitionLexer::KeyWord( "tyfn",             lf_transition,        tk_ReservedWord ),
   TransitionLexer::KeyWord( "typecase",         lf_block,             tk_TYPECASE ),
   TransitionLexer::KeyWord( "uint16",           lf_transition,        tk_UINT16 ),
   TransitionLexer::KeyWord( "uint32",           lf_transition,        tk_UINT32 ),

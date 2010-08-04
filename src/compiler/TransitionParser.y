@@ -334,7 +334,6 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_IMPORT
 %token <tok> tk_PROVIDE
 
-%token <tok> tk_TYFN
 //%token <tok> tk_SUPER
 %token <tok> tk_SUSPEND
 %type <tok>  sxp_ifident blk_ifident
@@ -376,8 +375,8 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_tc_definition blk_ti_definition
 %type <ast> sxp_import_definition sxp_provide_definition
 %type <ast> blk_import_definition blk_provide_definition
-%type <ast> sxp_tc_decls sxp_tc_decl
-%type <ast> blk_tc_decls blk_tc_decl
+%type <ast> sxp_tc_decls // sxp_tc_decl
+%type <ast> blk_tc_decls // blk_tc_decl
 %type <ast> sxp_declares sxp_declare sxp_decls sxp_decl
 %type <ast> blk_declares blk_declare blk_decls blk_decl
 %type <ast> sxp_constructors sxp_constructor
@@ -1593,40 +1592,46 @@ blk_tc_decls: {
   $$ = AST::make(at_tcdecls);
 };
 
-blk_tc_decls: blk_tc_decls blk_tc_decl {
-  SHOWPARSE("blk_tcdecls -> blk_tcdelcs sxp_tcdecl");
-  $$ = $1;
-  $$->addChild($2);
-};
+// This used to support TYFN. I've left in the empty node
+// as a placeholder against the possible need for other
+// declarations later.
+//blk_tc_decls: blk_tc_decls blk_tc_decl {
+//  SHOWPARSE("blk_tcdecls -> blk_tcdelcs sxp_tcdecl");
+//  $$ = $1;
+//  $$->addChild($2);
+//};
+//
+//blk_tc_decl: tk_TYFN '(' blk_tvlist ')' tk_FNARROW typevar {
+//  //                     ^^^^^^
+//  // I really mean sxp_tvlist here, arbitrary types
+//  // are not acceptable.
+//  SHOWPARSE("blk_tc_decl -> TYFN ( blk_tvlist ) -> typevar");
+//  $3->astType = at_fnargVec;
+//  $$ = AST::make(at_tyfn, $2.loc, $3, $6);
+//};
 
 sxp_tc_decls: {
   SHOWPARSE("sxp_tcdecls -> <empty>");
   $$ = AST::make(at_tcdecls);
 };
 
-sxp_tc_decls: sxp_tc_decls sxp_tc_decl {
-  SHOWPARSE("sxp_tcdecls -> sxp_tcdelcs sxp_tcdecl");
-  $$ = $1;
-  $$->addChild($2);
-};
-
-blk_tc_decl: tk_TYFN '(' blk_tvlist ')' tk_FNARROW typevar {
-  //                     ^^^^^^
-  // I really mean sxp_tvlist here, arbitrary types
-  // are not acceptable.
-  SHOWPARSE("blk_tc_decl -> TYFN ( blk_tvlist ) -> typevar");
-  $3->astType = at_fnargVec;
-  $$ = AST::make(at_tyfn, $2.loc, $3, $6);
-};
-
-sxp_tc_decl: '(' tk_TYFN  sxp_tvlist tk_FNARROW typevar ')' {
-  //                         ^^^^^^
-  // I really mean sxp_tvlist here, arbitrary types
-  // are not acceptable.
-  SHOWPARSE("sxp_tc_decl -> ( TYFN sxp_tvlist -> typevar )");
-  $3->astType = at_fnargVec;
-  $$ = AST::make(at_tyfn, $2.loc, $3, $5);
-};
+// This used to support TYFN. I've left in the empty node
+// as a placeholder against the possible need for other
+// declarations later.
+//sxp_tc_decls: sxp_tc_decls sxp_tc_decl {
+//  SHOWPARSE("sxp_tcdecls -> sxp_tcdelcs sxp_tcdecl");
+//  $$ = $1;
+//  $$->addChild($2);
+//};
+//
+//sxp_tc_decl: '(' tk_TYFN  sxp_tvlist tk_FNARROW typevar ')' {
+//  //                         ^^^^^^
+//  // I really mean sxp_tvlist here, arbitrary types
+//  // are not acceptable.
+//  SHOWPARSE("sxp_tc_decl -> ( TYFN sxp_tvlist -> typevar )");
+//  $3->astType = at_fnargVec;
+//  $$ = AST::make(at_tyfn, $2.loc, $3, $5);
+//};
 
 blk_method_decls: /* Nothing */ {
   SHOWPARSE("blk_method_decls -> ");
