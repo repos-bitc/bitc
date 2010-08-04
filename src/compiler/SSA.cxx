@@ -573,11 +573,11 @@ ssa(std::ostream& errStream,
         // inner-ref.
         
         shared_ptr<AST> tempAst = GC_NULL;
-        if (expr->symType->getBareType()->kind == ty_array_ref) {
+        if (expr->symType->getBareType()->typeTag == ty_array_ref) {
           // This should have failed to type check.
           assert(false);
         }
-        if (expr->symType->getBareType()->kind == ty_vector) {
+        if (expr->symType->getBareType()->typeTag == ty_vector) {
           // Vector-Index
           tempAst = AST::make(at_vector_nth, expr->loc, 
                             expr, ndx);
@@ -585,7 +585,7 @@ ssa(std::ostream& errStream,
         }
         else {
           // ref(Array)-Index
-          assert(expr->symType->getBareType()->kind == ty_ref);
+          assert(expr->symType->getBareType()->typeTag == ty_ref);
           tempAst = AST::make(at_array_nth, expr->loc, 
                             AST::make(at_deref, expr->loc, expr), ndx);          
         }

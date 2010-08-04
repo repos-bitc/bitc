@@ -146,7 +146,7 @@ Type::collectAllftvs(TypeSet& tvs)
 
   t->mark |= MARK_COLLECT_ALL_FTVS;
   
-  if (t->kind == ty_tvar) {
+  if (t->typeTag == ty_tvar) {
     tvs.insert(t);
   }      
   else {
@@ -189,7 +189,7 @@ Type::collectftvsWrtGamma(TypeSet& tvs,
 
   t->mark |= MARK_COLLECT_FTVS_WRT_GAMMA;
 
-  if (t->kind == ty_tvar) {
+  if (t->typeTag == ty_tvar) {
     assert(t->components.size() == 0);
     if (!t->boundInGamma(gamma))
       tvs.insert(t);
@@ -584,7 +584,7 @@ TypeScheme::generalize(std::ostream& errStream,
       shared_ptr<Type> ins = pred->CompType(2)->getType();
       
       assert(k != Type::Kmono);
-      if (k->kind == ty_kvar) {
+      if (k->typeTag == ty_kvar) {
         trail->subst(k, Type::Kpoly);
         k = k->getType();
       }
@@ -1006,7 +1006,7 @@ Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
   else {    
     t->sp = retType;
   
-    switch(t->kind) {    
+    switch(t->typeTag) {    
     case ty_kvar:
       {
         retType = t;
@@ -1027,7 +1027,7 @@ Type::TypeSpecializeReal(const std::vector<boost::shared_ptr<Type> >& ftvs,
         size_t i=0;
         for (i=0; i<ftvs.size(); i++) {
           shared_ptr<Type> ftv = ftvs[i]->getType();          
-          if (ftv->kind == ty_tvar && t->uniqueID == ftv->uniqueID) {
+          if (ftv->typeTag == ty_tvar && t->uniqueID == ftv->uniqueID) {
             theType->link = nftvs[i]; 
             break;
           }

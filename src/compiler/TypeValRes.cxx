@@ -491,7 +491,7 @@ isAValue(shared_ptr<const AST> ast)
   case at_select:
     {
       shared_ptr<Type> t = ast->child(0)->symType->getBareType();
-      if (t->kind == ty_array)
+      if (t->typeTag == ty_array)
         return true;
       else
         return false;
@@ -516,7 +516,7 @@ isExpansive(std::ostream& errStream,
 
   t->mark |= MARK_PREDICATE;
 
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_unit:
   case ty_bool:
   case ty_char:

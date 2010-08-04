@@ -79,7 +79,7 @@ Type::asAST(const sherpa::LexLoc &loc,
     t->pMark++;
   }
 
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_unit:
     {
       ast = AST::make(at_primaryType, loc);

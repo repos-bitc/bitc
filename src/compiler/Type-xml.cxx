@@ -85,7 +85,7 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
     t->pMark++;
   }
   
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_unit:
     {
       out << "<unit/>" << endl;
@@ -100,7 +100,7 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
   case ty_double:
   case ty_quad:
     {
-      out << "<" << t->kindName() << "/>" << endl;
+      out << "<" << t->typeTagName() << "/>" << endl;
       break;
     }    
   case ty_int8:
@@ -192,7 +192,7 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
   case ty_method:
   case ty_fn:
     {
-      std::string s = (t->kind == ty_fn)?"fn":"method";
+      std::string s = (t->typeTag == ty_fn)?"fn":"method";
       assert(t->components.size() == 2);
       out << "<" << s << ">" << endl;
       out.more();
@@ -336,12 +336,12 @@ Type::asXML(shared_ptr<TvPrinter> tvP, INOstream &out)
   case ty_mbTop:
   case ty_mbFull:
     {
-      out << ((t->kind == ty_mbFull) ? "<MBPAIR>" : "<mbpair>") 
+      out << ((t->typeTag == ty_mbFull) ? "<MBPAIR>" : "<mbpair>") 
           << endl;
       out.more();
       t->Var()->asXML(tvP, out);
       t->Core()->asXML(tvP, out);
-      out << ((t->kind == ty_mbFull) ? "</MBPAIR>" : "</mbpair>") 
+      out << ((t->typeTag == ty_mbFull) ? "</MBPAIR>" : "</mbpair>") 
           << endl;
       break;
     }

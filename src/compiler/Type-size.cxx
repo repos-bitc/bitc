@@ -60,11 +60,11 @@ calc_struct_size(const shared_ptr<Type> t)
   size_t sz = 0;
   shared_ptr<AST> base = GC_NULL;
 
-  if (t->kind == ty_structv) {
+  if (t->typeTag == ty_structv) {
     start = 0;
     base = t->defAst->defForm->child(4);
   }
-  else if (t->kind == ty_uconv) {
+  else if (t->typeTag == ty_uconv) {
     start = 1;
     base = t->defAst;
   }
@@ -119,7 +119,7 @@ calc_struct_size(const shared_ptr<Type> t)
 static size_t
 calc_unin_size(const shared_ptr<Type> t)
 {
-  assert(t->kind == ty_unionv);
+  assert(t->typeTag == ty_unionv);
   shared_ptr<AST> base = t->defAst->defForm;
   
   size_t max=0;
@@ -161,7 +161,7 @@ Type::size()
 
   size_t theSize=0;
   
-  switch(kind) {
+  switch(typeTag) {
   case ty_unit:
   case ty_bool:
   case ty_char:

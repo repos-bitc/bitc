@@ -183,7 +183,7 @@ TypeScheme::normalize()
       itr_c != ftvs.end(); ++itr_c) {
     shared_ptr<Type> ftv = (*itr_c)->getType();
     
-    if (ftv->kind == ty_tvar)
+    if (ftv->typeTag == ty_tvar)
       newTvs.insert(ftv);
     else
       changed = true;

@@ -426,7 +426,7 @@ checkImpreciseTypes(std::ostream& errStream,
        itr != impTypes.end(); ++itr) {
     shared_ptr<Type> t = itr->first->getBareType();
     shared_ptr<AST> ast = itr->second;
-    switch(t->kind) {
+    switch(t->typeTag) {
     case ty_array:
       {
         if (t->arrLen->len == 0) {
@@ -590,7 +590,7 @@ isAsGeneral(std::ostream& errStream,
         isAsGeneral && itr != sigmaB->ftvs.end(); ++itr) {
       shared_ptr<Type> ftv = (*itr)->getType();
       gottenTypes.insert(ftv);
-      CHKERR(isAsGeneral, (ftv->kind == ty_tvar));
+      CHKERR(isAsGeneral, (ftv->typeTag == ty_tvar));
     }
 
     if (isAsGeneral)
@@ -658,7 +658,7 @@ matchDefDecl(std::ostream& errStream,
           errorFree && itr != defTS->ftvs.end(); ++itr) {
         shared_ptr<Type> ftv = (*itr)->getType();
         gottenTypes.insert(ftv);
-        CHKERR(errorFree, (ftv->kind == ty_tvar));
+        CHKERR(errorFree, (ftv->typeTag == ty_tvar));
       }
 
       CHKERR(errorFree, gottenTypes.size() == defTS->ftvs.size());
@@ -765,7 +765,7 @@ InferTvList(std::ostream& errStream, shared_ptr<AST> tvList,
     TYPEINFER(tv, gamma, instEnv, impTypes, 
               tcc, trail, DEF_MODE, ti_flags | TI_TYP_EXP);
     shared_ptr<Type> tvType = tv->symType->getType();
-    assert(tvType->kind == ty_tvar);
+    assert(tvType->typeTag == ty_tvar);
     tvType->flags |= TY_RIGID;
     container->typeArgs.push_back(tvType);
   }
@@ -785,7 +785,7 @@ addTvsToSigma(std::ostream& errStream, shared_ptr<AST> tvList,
   for (size_t i = 0; i < tvList->children.size(); i++) {
     shared_ptr<AST> tv = tvList->child(i);
     shared_ptr<Type> tvType = tv->symType->getType();
-    assert(tvType->kind == ty_tvar);
+    assert(tvType->typeTag == ty_tvar);
     sigma->ftvs.insert(tvType);
   }
 }
@@ -828,14 +828,14 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
             TI_Flags ti_flags)
 {
   bool errFree = true;
-  Kind structKind;
+  TypeTag structTypeTag;
   
   shared_ptr<AST> sIdent = ast->child(0);
 
   // match at_ident
-  structKind = (isReference)? ty_structr : ty_structv;
+  structTypeTag = (isReference)? ty_structr : ty_structv;
    
-  shared_ptr<Type> st = Type::make(structKind);
+  shared_ptr<Type> st = Type::make(structTypeTag);
   st->defAst = sIdent;
   st->myContainer = sIdent;
   sIdent->symType = st;
@@ -946,14 +946,14 @@ InferObject(std::ostream& errStream, shared_ptr<AST> ast,
             TI_Flags ti_flags)
 {
   bool errFree = true;
-  Kind structKind;
+  TypeTag structTypeTag;
   
   shared_ptr<AST> sIdent = ast->child(0);
 
   // match at_ident
-  structKind = (isReference)? ty_objectr : ty_objectv;
+  structTypeTag = (isReference)? ty_objectr : ty_objectv;
    
-  shared_ptr<Type> st = Type::make(structKind);
+  shared_ptr<Type> st = Type::make(structTypeTag);
   st->defAst = sIdent;
   st->myContainer = sIdent;
   sIdent->symType = st;
@@ -1047,14 +1047,14 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
 {
 
   bool errFree = true;
-  Kind unionKind;
+  TypeTag unionTypeTag;
   
   shared_ptr<AST> uIdent = ast->child(0);
 
   // match at_ident
-  unionKind = (isReference)? ty_unionr : ty_unionv;
+  unionTypeTag = (isReference)? ty_unionr : ty_unionv;
   
-  shared_ptr<Type> ut = Type::make(unionKind);
+  shared_ptr<Type> ut = Type::make(unionTypeTag);
   ut->defAst = uIdent;
   ut->myContainer = uIdent;
   uIdent->symType = ut;
@@ -1099,14 +1099,14 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
     // Careful: 
     // Constructors with components are typed ucon 
     // and those without any are typed uval.
-    Kind ctrKind;
+    TypeTag ctrTypeTag;
 
     if (ctr->children.size() > 1)
-      ctrKind = (isReference) ? ty_uconr : ty_uconv;
+      ctrTypeTag = (isReference) ? ty_uconr : ty_uconv;
     else
-      ctrKind = (isReference) ? ty_uvalr : ty_uvalv;
+      ctrTypeTag = (isReference) ? ty_uvalr : ty_uvalv;
     
-    ctrId->symType = Type::make(ctrKind);
+    ctrId->symType = Type::make(ctrTypeTag);
     ctrId->symType->defAst = ctrId;
     ctrId->symType->myContainer = uIdent;
     ctr->symType = ctrId->symType;
@@ -1232,8 +1232,8 @@ InferUnion(std::ostream& errStream, shared_ptr<AST> ast,
     }
     
     if (!stSigma) {
-      Kind ctrStructKind = (isReference)?ty_structr:ty_structv;      
-      sType = Type::make(ctrStructKind);
+      TypeTag ctrStructTypeTag = (isReference)?ty_structr:ty_structv;      
+      sType = Type::make(ctrStructTypeTag);
       sType->defAst = ctr; // structures have names like (cons 'a)
       for (size_t i=0; i < ctrType->components.size(); i++)
         sType->components.push_back(comp::make(ctrType->CompName(i),
@@ -1505,7 +1505,7 @@ InferTypeClass(std::ostream& errStream, shared_ptr<AST> ast,
         break;
       }
         
-      if (mType->kind != ty_fn) {
+      if (mType->typeTag != ty_fn) {
         errStream << ast->loc << ": " 
                   << "The type of \"method\" " << mID->s
                   << "was infered as " << mType->asString()
@@ -2278,7 +2278,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       // match at_ident
       // FIX: (shap) Not convinced this is correct for opaque...
-      Kind decl_ty;      
+      TypeTag decl_ty;      
       switch(ast->astType) {
       case at_declunion:
         decl_ty = (isRefType ?  ty_unionr : ty_unionv);
@@ -2445,7 +2445,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
                 ti_flags | TI_TYP_EXP | TI_TYP_APP);
       shared_ptr<Typeclass> tc = tcIdent->symType->getType();      
 
-      if (tc->kind != ty_typeclass) {
+      if (tc->typeTag != ty_typeclass) {
         // This is the result of some other error
         errFree = false;
         break;
@@ -2787,7 +2787,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
         
         shared_ptr<Type> realType = ast->child(1)->symType->getType();
         shared_ptr<Type> t = realType->getBareType();        
-        if (t->kind == ty_mutable) {
+        if (t->typeTag == ty_mutable) {
           errStream << ast->child(1)->loc << ": "
                     << "Tag type cannot be mutable"
                     << std::endl;
@@ -2982,11 +2982,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> t1 = ast->child(0)->symType->getType();
       shared_ptr<Type> t = ast->child(0)->symType->getBareType();
       
-      switch(t->kind) {
+      switch(t->typeTag) {
       case ty_tvar:
         {
           shared_ptr<Type> tvar = Type::make(ty_tvar);
-          t->kind = ty_ref;          
+          t->typeTag = ty_ref;          
           t->components.push_back(comp::make(tvar));
           ast->symType = tvar;
           break;
@@ -3022,7 +3022,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
           }               
           else {
             ast->symType = t->getDCopy();
-            ast->symType->kind = Type::getValKind(t->kind);
+            ast->symType->typeTag = Type::getValTypeTag(t->typeTag);
           }
           break;
         }
@@ -3096,7 +3096,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
   case at_primaryType:
     {
-      ast->symType = Type::make(Type::LookupKind(ast->s));
+      ast->symType = Type::make(Type::LookupTypeTag(ast->s));
       break;
     }
 
@@ -3151,7 +3151,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     
       shared_ptr<Type> t = ast->child(0)->symType->getType();
       
-      if (t->kind == ty_mutable) {
+      if (t->typeTag == ty_mutable) {
         //The Type is already mutable
         ast->symType = t;
       }
@@ -3174,7 +3174,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> t = ast->child(0)->symType->getType();
 
       // If the inner type is already const, we are done.
-      if (t->kind == ty_const) {
+      if (t->typeTag == ty_const) {
         ast->symType = t;
         break;
       }
@@ -3235,11 +3235,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> realType = t;
       t = t->getBareType(); 
       
-      if (t->kind != ty_structv && t->kind != ty_structr &&
-         t->kind != ty_unionv && t->kind != ty_unionr) {
+      if (t->typeTag != ty_structv && t->typeTag != ty_structr &&
+         t->typeTag != ty_unionv && t->typeTag != ty_unionr) {
         
-        if (t->kind == ty_uconv || t->kind == ty_uconr || 
-           t->kind == ty_uvalv || t->kind == ty_uvalr) {
+        if (t->typeTag == ty_uconv || t->typeTag == ty_uconr || 
+           t->typeTag == ty_uvalv || t->typeTag == ty_uvalr) {
           
           errStream << ast->loc << ": "
                     << "cannot use a value constructor "
@@ -3498,10 +3498,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
              A |- (vector e1 ... en): vector('a|'b)
        ------------------------------------------------*/
 
-      Kind k = (ast->astType == at_array) ? ty_array : ty_vector;
+      TypeTag ttag = (ast->astType == at_array) ? ty_array : ty_vector;
       shared_ptr<Type> compType = MBF(newTvar());
-      ast->symType = Type::make(k, compType);
-      if(k == ty_array)
+      ast->symType = Type::make(ttag, compType);
+      if(ttag == ty_array)
         ast->symType->arrLen->len = ast->children.size();
       
       // match agt_expr+
@@ -3538,7 +3538,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
           _________________________________________
              A |- (vector-length e): word
        ------------------------------------------------*/
-      Kind k = ((ast->astType == at_array_length) ? ty_array :
+      TypeTag ttag = ((ast->astType == at_array_length) ? ty_array :
                 ((ast->astType == at_array_ref_length) ? ty_array_ref :
                  ty_vector));
       
@@ -3619,7 +3619,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       if (ast->astType == at_nth) {
         shared_ptr<Type> t = ast->child(0)->symType->getBareType();
-        switch(t->kind) {
+        switch(t->typeTag) {
         case ty_array_ref:
           ast->astType = at_array_ref_nth;
           break;
@@ -3637,11 +3637,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       shared_ptr<Type> av = GC_NULL;
       shared_ptr<Type> cmp = MBF(newTvar());
-      Kind k = ((ast->astType == at_array_nth) ? ty_array :
+      TypeTag ttag = ((ast->astType == at_array_nth) ? ty_array :
                 ((ast->astType == at_array_ref_nth) ? ty_array_ref :
                  ty_vector));
       
-      av = MBT(Type::make(k, cmp));
+      av = MBT(Type::make(ttag, cmp));
       if (ast->astType == at_array_nth)
         impTypes[av] = ast->child(0);
       
@@ -3801,7 +3801,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
         break;
       }
 
-      if (t1->kind != ty_structv && t1->kind != ty_structr) {
+      if (t1->typeTag != ty_structv && t1->typeTag != ty_structr) {
         errStream << ast->child(0)->loc << ": "
                   << ast->child(0)->s << " has type "
                   << t1->asString() << " which does not have fields."
@@ -4034,7 +4034,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> fullMkClType = fullClFnType->getDCopy();
       shared_ptr<Type> mkClType= fullMkClType->getBareType();
       shared_ptr<Type> mkClArg = mkClType->Args()->getType(); 
-      assert(mkClArg->kind == ty_fnarg);
+      assert(mkClArg->typeTag == ty_fnarg);
       
       mkClArg->components.erase(mkClArg->components.begin());
 
@@ -4227,8 +4227,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       
       // The constructor type cannot be a mutable or a maybe type
       shared_ptr<Type> t = ctr->symType->getType();
-      if (t->kind != ty_uconv && t->kind != ty_uconr && 
-         t->kind != ty_exn) {
+      if (t->typeTag != ty_uconv && t->typeTag != ty_uconr && 
+         t->typeTag != ty_exn) {
         
         errStream << ast->child(0)->loc << ": "
                   << ast->child(0)->s << " cannot be resolved" 
@@ -4686,15 +4686,15 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       shared_ptr<Type> t = ast->child(0)->symType->getBareType();
       bool process_ndx = false;
       
-      switch(t->kind) {
+      switch(t->typeTag) {
       case ty_ref:
         {                  
           shared_ptr<Type> drType = t->Base()->getBareType();
-          if (drType->kind == ty_array) {
+          if (drType->typeTag == ty_array) {
             ast->symType = Type::make(ty_ref, drType->Base());
             process_ndx = true;
           }
-          else if (drType->kind == ty_structv) {
+          else if (drType->typeTag == ty_structv) {
             shared_ptr<Type> fType = GC_NULL;
             CHKERR(errFree, findField(errStream, drType, 
                                       ast->child(1), fType));
@@ -5068,7 +5068,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
           TYPEINFER(aCtr, gamma, instEnv, impTypes, 
                     tcc, trail, USE_MODE, TI_EXPRESSION);      
           
-          if (aCtr->symType->getType()->kind != ty_exn) {
+          if (aCtr->symType->getType()->typeTag != ty_exn) {
             errStream << aCtr->loc << ": "
                       << " Only Exceptions can be caught"
                       << " Obtained type " 

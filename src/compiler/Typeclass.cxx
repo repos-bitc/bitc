@@ -167,10 +167,10 @@ Typeclass::addFnDep(shared_ptr<Type> dep)
   if (getType() != shared_from_this())
     return getType()->addFnDep(dep); // getType() OK
   
-  if (kind != ty_typeclass)
+  if (typeTag != ty_typeclass)
     assert(false);
 
-  if (dep->kind != ty_tyfn)
+  if (dep->typeTag != ty_tyfn)
     assert(false);
   
   for (TypeSet::iterator itr = fnDeps.begin(); 
@@ -195,7 +195,7 @@ TCConstraints::collectAllFnDeps(set<shared_ptr<Type> >& fnDeps)
     for (TypeSet::iterator itr_j=pr->fnDeps.begin();
         itr_j != pr->fnDeps.end(); ++itr_j) {
       shared_ptr<Type> fnDep = (*itr_j)->getType();
-      assert(fnDep->kind == ty_tyfn);
+      assert(fnDep->typeTag == ty_tyfn);
       fnDeps.insert(fnDep);
     }
   }  

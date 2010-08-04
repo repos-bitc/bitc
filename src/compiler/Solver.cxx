@@ -116,7 +116,7 @@ rigidify(TypeSet& vars)
 {  
   for (TypeSet::iterator itr = vars.begin(); itr != vars.end(); ++itr) {
     shared_ptr<Type> arg = (*itr)->getType();
-    assert(arg->kind == ty_tvar);
+    assert(arg->typeTag == ty_tvar);
     arg->flags |= TY_RIGID;
   }
 }
@@ -126,7 +126,7 @@ unrigidify(TypeSet& vars)
 {  
   for (TypeSet::iterator itr = vars.begin(); itr != vars.end(); ++itr) {
     shared_ptr<Type> arg = (*itr)->getType();
-    assert(arg->kind == ty_tvar);
+    assert(arg->typeTag == ty_tvar);
     arg->flags &= ~TY_RIGID;
   }
 }
@@ -198,7 +198,7 @@ handlePcst(std::ostream &errStream, shared_ptr<Trail> trail,
     return true;
   }
   
-  assert(k->kind == ty_kvar);
+  assert(k->typeTag == ty_kvar);
   
   // *(k, tg, ti), Mut(ti)
   if (ins->isDeepMut()) {
@@ -262,7 +262,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
 
   do{//dummy loop, so that we can break in between
 
-    if (pred->kind != ty_typeclass) {
+    if (pred->typeTag != ty_typeclass) {
       handlable = false;
       handled = false;
       break;
@@ -344,7 +344,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
       }
 
       handled = true;
-      if (st->kind != ty_structv && st->kind != ty_structr) {
+      if (st->typeTag != ty_structv && st->typeTag != ty_structr) {
         DEBUG(SPSOL) errStream << "\t\t ... Non-structure type, ERROR"
                               << pred->asString(Options::debugTvP)
                               << std::endl;
@@ -352,7 +352,7 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
         break;
       }
       
-      if (fName->kind != ty_field) {
+      if (fName->typeTag != ty_field) {
         DEBUG(SPSOL) errStream << "\t\t ... Non-field type, ERROR"
                               << pred->asString(Options::debugTvP)
                               << std::endl;
@@ -375,8 +375,8 @@ handleSpecialPred(std::ostream &errStream, shared_ptr<Trail> trail,
             fld = st->MethodType(i)->getType()->getDCopy();
 
             // Form a function type for unification with constraint.
-            assert(fld->kind == ty_method);
-            fld->kind = ty_fn;
+            assert(fld->typeTag == ty_method);
+            fld->typeTag = ty_fn;
             break;
           }
       

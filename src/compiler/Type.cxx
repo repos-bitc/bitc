@@ -76,35 +76,35 @@ static struct {
   bool isRefType;
   bool isPrimInt;
   bool isPrimFloat;
-} kindInfo[] = {
-#define DEFKIND(nm, prim, csimp, atom, scalar, ref, primInt, primFloat)        \
+} typeInfo[] = {
+#define DEFTYPE(nm, prim, csimp, atom, scalar, ref, primInt, primFloat)        \
   { #nm, prim, csimp, atom, scalar, ref, primInt, primFloat },
-#include "kind.def"
+#include "types.def"
 };
 
 const char *
-KindName(Kind k)
+TypeTagName(TypeTag ttag)
 {
-  return kindInfo[k].nm;
+  return typeInfo[ttag].nm;
 }
 
-Kind
-Type::LookupKind(const std::string& s)
+TypeTag
+Type::LookupTypeTag(const std::string& s)
 {
   // The check for isPrimary is completely unnecessary, but
   // it makes the fail cases faster.
-  for (size_t i = 0; i < (sizeof(kindInfo) / sizeof(kindInfo[0])); i++)
-    if (kindInfo[i].isPrimary && kindInfo[i].nm == s)
-      return (Kind) i;
+  for (size_t i = 0; i < (sizeof(typeInfo) / sizeof(typeInfo[0])); i++)
+    if (typeInfo[i].isPrimary && typeInfo[i].nm == s)
+      return (TypeTag) i;
 
   assert(false);
 }
 
 
-Kind 
-Type::getValKind(const Kind refKind)
+TypeTag 
+Type::getValTypeTag(const TypeTag refTag)
 {
-  switch(refKind) {
+  switch(refTag) {
   case ty_structr:
     return ty_structv;
 
@@ -126,10 +126,10 @@ Type::getValKind(const Kind refKind)
   }
 }
 
-Kind 
-Type::getRefKind(const Kind valKind)
+TypeTag 
+Type::getRefTypeTag(const TypeTag valTag)
 {
-  switch(valKind) {
+  switch(valTag) {
   case ty_structv:
     return ty_structr;
 
@@ -185,7 +185,7 @@ Type::normalize_mut()
   shared_ptr<Type> t = getTypePrim();
   shared_ptr<Type> in = t;
   
-  while (in->kind == ty_mutable) {
+  while (in->typeTag == ty_mutable) {
     t = in;
     in = in->Base()->getTypePrim();
   }
@@ -211,22 +211,22 @@ Type::getType()
   // The Var() part of an mbFull can be linked to an mbTop type or an
   // unconstrained type.
 
-  if (t->kind == ty_mbFull) {
+  if (t->typeTag == ty_mbFull) {
     shared_ptr<Type> in = t->Var()->normalize_mut();
-    shared_ptr<Type> within = ((in->kind == ty_mutable) ?
+    shared_ptr<Type> within = ((in->typeTag == ty_mutable) ?
                                in->Base()->getTypePrim(): in);
     
-    if(within->kind != ty_tvar)
+    if(within->typeTag != ty_tvar)
       t = in;
   }
 
-  if(t->kind == ty_mbTop) {
+  if(t->typeTag == ty_mbTop) {
     shared_ptr<Type> in = t->Var()->normalize_mut();
-    if(in->kind != ty_tvar)
+    if(in->typeTag != ty_tvar)
       t = in;
   }
 
-  if (t->kind == ty_mbFull || t->kind == ty_mbTop) {
+  if (t->typeTag == ty_mbFull || t->typeTag == ty_mbTop) {
     shared_ptr<Type> var = t->Var()->normalize_mut();
     shared_ptr<Type> core = t->Core()->normalize_mut();
     
@@ -242,9 +242,9 @@ Type::getType() const
 { 
   shared_ptr<const Type> t = getTypePrim();
   
-  if (t->kind == ty_mutable) {    
+  if (t->typeTag == ty_mutable) {    
     shared_ptr<Type> in = t->components[0]->typ->getTypePrim();
-    while (in->kind == ty_mutable) {
+    while (in->typeTag == ty_mutable) {
       t = in;
       in = t->components[0]->typ->getTypePrim();
     }
@@ -287,7 +287,7 @@ Type::getTheType(bool mutableOK, bool maybeOK)
 
   shared_ptr<Type> retType = t;
   
-  if ((t->kind == ty_mutable) && !mutableOK)
+  if ((t->typeTag == ty_mutable) && !mutableOK)
     retType = t->Base()->getTheType(mutableOK, maybeOK);
   else if (t->isMaybe() && !maybeOK)
     retType = t->Core()->getTheType(mutableOK, maybeOK);
@@ -300,14 +300,14 @@ bool
 Type::isTvar()
 {
   shared_ptr<Type> t = getType();  
-  return (t->kind == ty_tvar);
+  return (t->typeTag == ty_tvar);
 }
 
 bool
 Type::isVariable()
 {
   shared_ptr<Type> t = getBareType();  
-  return (t->kind == ty_tvar);
+  return (t->typeTag == ty_tvar);
 }
 
 bool
@@ -316,7 +316,7 @@ Type::isUnifiableVar(UnifyFlags uflags)
   shared_ptr<Type> t = getType();
   shared_ptr<Type> var = t;
   
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_tvar:
     var = t;
     break;
@@ -346,28 +346,28 @@ bool
 Type::isAtomic()
 {
   shared_ptr<Type> t = getBareType();  
-  return kindInfo[t->kind].isAtomic;
+  return typeInfo[t->typeTag].isAtomic;
 }
 
 bool 
 Type::isSimpleTypeForC()
 {
   shared_ptr<Type> t = getBareType();
-  return kindInfo[t->kind].isSimpleTypeForC;
+  return typeInfo[t->typeTag].isSimpleTypeForC;
 }
 
 bool 
 Type::isScalar()
 {
   shared_ptr<Type> t = getBareType();  
-  return kindInfo[t->kind].isScalarType;
+  return typeInfo[t->typeTag].isScalarType;
 }
 
 bool 
 Type::isRefType()
 {
   shared_ptr<Type> t = getBareType();
-  return kindInfo[t->kind].isRefType;
+  return typeInfo[t->typeTag].isRefType;
 }
 
 bool 
@@ -380,30 +380,30 @@ bool
 Type::isByrefType()
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_byref);
+  return (t->typeTag == ty_byref);
 }
 
 bool 
 Type::isArrayByref()
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_array_ref);
+  return (t->typeTag == ty_array_ref);
 }
 
 bool 
 Type::isIndexableType()
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_array_ref 
-          || t->kind == ty_vector 
-          || t->kind == ty_array);
+  return (t->typeTag == ty_array_ref 
+          || t->typeTag == ty_vector 
+          || t->typeTag == ty_array);
 }
 
 bool 
 Type::isNullableType()
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_unionv &&
+  return (t->typeTag == ty_unionv &&
           (t->defAst->flags & NULLABLE_UN));
 }
 
@@ -441,20 +441,20 @@ bool
 Type::isFnxn()
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_fn);
+  return (t->typeTag == ty_fn);
 }
 
 bool 
 Type::isMethod()
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_method);
+  return (t->typeTag == ty_method);
 }
 
 bool 
 Type::isBaseConstType()
 {
-  switch(getType()->kind) {
+  switch(getType()->typeTag) {
   case ty_unit:
   case ty_bool:
   case ty_char:
@@ -486,7 +486,7 @@ bool
 Type::isClosure()
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_fn);
+  return (t->typeTag == ty_fn);
 }
 //#endif
 
@@ -494,7 +494,7 @@ bool
 Type::isMutable()
 {
   shared_ptr<Type> t = getType();
-  return t->kind == ty_mutable;
+  return t->typeTag == ty_mutable;
 }
 
 bool 
@@ -509,28 +509,28 @@ bool
 Type::isConst()
 {
   shared_ptr<Type> t = getType();
-  return t->kind == ty_const;
+  return t->typeTag == ty_const;
 }
 
 bool 
 Type::isMaybe()
 {
   shared_ptr<Type> t = getType();
-  return (t->kind == ty_mbTop || t->kind == ty_mbFull);
+  return (t->typeTag == ty_mbTop || t->typeTag == ty_mbFull);
 }
 
 bool 
 Type::isMbFull()
 {
   shared_ptr<Type> t = getType();
-  return (t->kind == ty_mbFull);
+  return (t->typeTag == ty_mbFull);
 }
 
 bool 
 Type::isMbTop()
 {
   shared_ptr<Type> t = getType();
-  return (t->kind == ty_mbTop);
+  return (t->typeTag == ty_mbTop);
 }
  
 bool 
@@ -550,27 +550,27 @@ bool
 Type::isPrimInt()
 {
   shared_ptr<Type> t = getBareType();
-  return (kindInfo[t->kind].isPrimInt);
+  return (typeInfo[t->typeTag].isPrimInt);
 }
 
 bool 
 Type::isPrimFloat()
 {
   shared_ptr<Type> t = getBareType();
-  return (kindInfo[t->kind].isPrimFloat);
+  return (typeInfo[t->typeTag].isPrimFloat);
 }
 
 bool 
 Type::isPrimaryType()
 {
   shared_ptr<Type> t = getBareType();
-  return (kindInfo[t->kind].isPrimary);
+  return (typeInfo[t->typeTag].isPrimary);
 }
 bool 
 Type::isInteger()
 {
   shared_ptr<Type> t = getBareType();
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_int8:
   case ty_int16:
   case ty_int32:
@@ -592,14 +592,14 @@ bool
 Type::isbool()
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_bool);
+  return (t->typeTag == ty_bool);
 }
 
 bool 
 Type::isIntegral()
 {
   shared_ptr<Type> t = getBareType();
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_int8:
   case ty_int16:
   case ty_int32:
@@ -623,7 +623,7 @@ size_t
 Type::nBits()
 {
   shared_ptr<Type> t = getBareType();
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_bool:
     return 1;
 
@@ -660,7 +660,7 @@ bool
 Type::isFloat()
 {
   shared_ptr<Type> t = getBareType();
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_float:
   case ty_double:
   case ty_quad:
@@ -674,14 +674,14 @@ bool
 Type::isTypeClass()
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_typeclass);    
+  return (t->typeTag == ty_typeclass);    
 }
 
 bool
 Type::isPcst()
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_pcst);    
+  return (t->typeTag == ty_pcst);    
 }
 
 // Returns true if this is a union type 
@@ -689,21 +689,21 @@ bool
 Type::isUnion(bool ignMut) 
 {
   shared_ptr<Type> t = ((ignMut) ? getBareType() : getType());
-  return ((t->kind == ty_unionv) || (t->kind == ty_unionr));
+  return ((t->typeTag == ty_unionv) || (t->typeTag == ty_unionr));
 }
 
 bool 
 Type::isUcon(bool ignMut) 
 {
   shared_ptr<Type> t = ((ignMut) ? getBareType() : getType());
-  return ((t->kind == ty_uconv) || (t->kind == ty_uconr));
+  return ((t->typeTag == ty_uconv) || (t->typeTag == ty_uconr));
 }
 
 bool 
 Type::isUval(bool ignMut) 
 {
   shared_ptr<Type> t =  ((ignMut) ? getBareType() : getType());
-  return ((t->kind == ty_uvalv) || (t->kind == ty_uvalr));
+  return ((t->typeTag == ty_uvalv) || (t->typeTag == ty_uvalr));
 }
 
 bool 
@@ -730,7 +730,7 @@ Type::isDeepMut()
   
   bool mut = false;
   
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_mutable:
     mut = true;
     break;
@@ -767,7 +767,7 @@ Type::isDeepImmut()
   
   bool immut = true;
   
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_mutable:
   case ty_tvar:
     immut = false;
@@ -806,7 +806,7 @@ Type::isConcretizable()
   
   bool concretizable = true;
   
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_tvar:
     concretizable = false;
     break;
@@ -840,7 +840,7 @@ Type::isShallowConcretizable()
   
   bool concretizable = true;
   
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_tvar:
     concretizable = false;
     break;
@@ -882,7 +882,7 @@ Type::isEffectivelyConst()
   
   bool effConst = true;
   
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_tvar:
   case ty_mbTop:
   case ty_mbFull:
@@ -918,7 +918,7 @@ Type::isConstReducible()
   
   bool constred = true;
   
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_tvar:
   case ty_mbTop:
   case ty_mbFull:
@@ -958,7 +958,7 @@ Type::getUnionType()
   assert(uType->isUType());
   shared_ptr<Type> uCopy = uType->getType()->getDCopy();
   shared_ptr<Type> t = uCopy->getBareType();
-  t->kind = (uType->isRefType() ? ty_unionr : ty_unionv);
+  t->typeTag = (uType->isRefType() ? ty_unionr : ty_unionv);
   t->defAst = t->myContainer;
   t->components.clear();
   return uCopy;
@@ -968,7 +968,7 @@ bool
 Type::isException() 
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_exn);
+  return (t->typeTag == ty_exn);
 }
 
 bool 
@@ -976,22 +976,22 @@ Type::isStruct()
 {
   shared_ptr<Type> t = getBareType();
 
-  return ((t->kind == ty_structv) || 
-          (t->kind == ty_structr));
+  return ((t->typeTag == ty_structv) || 
+          (t->typeTag == ty_structr));
 }
 
 bool
 Type::isArray()
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_array);
+  return (t->typeTag == ty_array);
 }
 
 bool
 Type::isVector()
 {
   shared_ptr<Type> t = getBareType();
-  return (t->kind == ty_vector);
+  return (t->typeTag == ty_vector);
 }
 
 
@@ -1000,15 +1000,15 @@ Type::isObject()
 {
   shared_ptr<Type> t = getBareType();
 
-  return ((t->kind == ty_objectv) || 
-          (t->kind == ty_objectr));
+  return ((t->typeTag == ty_objectv) || 
+          (t->typeTag == ty_objectr));
 }
 
 bool 
 Type::isDecl()
 {
   shared_ptr<Type> t = getBareType();
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_unionv:
   case ty_unionr:
   case ty_structv:
@@ -1033,7 +1033,7 @@ Type::isOfInfiniteType()
 
   mark |= MARK_PREDICATE;
 
-  switch(kind) {
+  switch(typeTag) {
   case ty_tvar:
   case ty_kvar:
   case ty_kfix:
@@ -1195,44 +1195,44 @@ comp::comp(const std::string s, shared_ptr<Type> t, CompFlagSet _flags)
 //   flags = c.flags;  
 // }
 
-#define TYPE_CTR_INIT(k) do {                        \
-    kind = k;                                        \
-    defAst = GC_NULL;                                \
-    myContainer = GC_NULL;                        \
-    minSignedRep = 0;                                \
-    minUnsignedRep = 0;                                \
-    Isize = 0;                                        \
-    if(kind == ty_array)                        \
-      arrLen = ArrLen::make(0);                        \
+#define TYPE_CTR_INIT(tt) do {                  \
+    typeTag = tt;                               \
+    defAst = GC_NULL;                           \
+    myContainer = GC_NULL;                      \
+    minSignedRep = 0;                           \
+    minUnsignedRep = 0;                         \
+    Isize = 0;                                  \
+    if(typeTag == ty_array)                     \
+      arrLen = ArrLen::make(0);                 \
     else                                        \
-      arrLen = GC_NULL;                                \
-    mark = MARK_NONE;                                \
-    pMark = 0;                                        \
-    sp = GC_NULL;                                \
-    link = GC_NULL;                                \
+      arrLen = GC_NULL;                         \
+    mark = MARK_NONE;                           \
+    pMark = 0;                                  \
+    sp = GC_NULL;                               \
+    link = GC_NULL;                             \
     flags = TY_NO_FLAGS;                        \
   } while (0);
 
 
-Type::Type(const Kind k)
+Type::Type(const TypeTag ttag)
   : uniqueID(genTypeID())
 {
-  TYPE_CTR_INIT(k);
+  TYPE_CTR_INIT(ttag);
 }
 
 /// @bug There are LOTS of constructions of ty_byref floating around
 /// that should be updated to use this.
-Type::Type(const Kind k, shared_ptr<Type> child)
+Type::Type(const TypeTag ttag, shared_ptr<Type> child)
   : uniqueID(genTypeID())
 {
-  TYPE_CTR_INIT(k);
+  TYPE_CTR_INIT(ttag);
   components.push_back(comp::make(child));
 }
 
-Type::Type(const Kind k, shared_ptr<Type> child1, shared_ptr<Type> child2)
+Type::Type(const TypeTag ttag, shared_ptr<Type> child1, shared_ptr<Type> child2)
   : uniqueID(genTypeID())
 {
-  TYPE_CTR_INIT(k);
+  TYPE_CTR_INIT(ttag);
   components.push_back(comp::make(child1));
   components.push_back(comp::make(child2));
 }
@@ -1242,7 +1242,7 @@ Type::Type(shared_ptr<Type>  t)
   : uniqueID(genTypeID())
 {
   assert(t);
-  kind = t->kind;
+  typeTag = t->typeTag;
   defAst = t->defAst;
   myContainer = t->myContainer;
   link = t->link;    

@@ -195,7 +195,7 @@ Type::maximizeTopMutability(shared_ptr<Trail> trail)
   shared_ptr<Type> t = getType();
   shared_ptr<Type> rt = GC_NULL;
   
-  switch(t->kind) {
+  switch(t->typeTag) {
     
   case ty_mbFull:    
   case ty_mbTop:    
@@ -232,7 +232,7 @@ Type::minimizeTopMutability(shared_ptr<Trail> trail)
   shared_ptr<Type> t = getType();
   shared_ptr<Type> rt = GC_NULL;
   
-  switch(t->kind) {
+  switch(t->typeTag) {
     
   case ty_mbFull:    
   case ty_mbTop:    
@@ -275,7 +275,7 @@ Type::maximizeMutability(shared_ptr<Trail> trail)
   
   t->mark |= MARK_MAXIMIZE_MUTABILITY;  
   
-  switch(t->kind) {
+  switch(t->typeTag) {
     
   case ty_mbFull:    
   case ty_mbTop:    
@@ -350,7 +350,7 @@ Type::minimizeMutability(shared_ptr<Trail> trail)
   
   t->mark |= MARK_MINIMIZE_MUTABILITY;  
   
-  switch(t->kind) {
+  switch(t->typeTag) {
     
   case ty_mbFull:    
   case ty_mbTop:    
@@ -421,7 +421,7 @@ Type::minimizeDeepMutability(shared_ptr<Trail> trail)
   
   t->mark |= MARK_MINIMIZE_DEEP_MUTABILITY;  
   
-  switch(t->kind) {
+  switch(t->typeTag) {
     
   case ty_mbFull:    
   case ty_mbTop:    
@@ -507,7 +507,7 @@ Type::minMutConstless(shared_ptr<Trail> trail)
   
   t->mark |= MARK_MIN_MUT_CONSTLESS;  
   
-  switch(t->kind) {
+  switch(t->typeTag) {
     
   case ty_mbFull:    
   case ty_mbTop:    
@@ -585,7 +585,7 @@ Type::checkMutConsistency(bool inMut, bool seenMut)
   
   t->mark |= MARK_CHECK_MUT_CONSISTENCY;
   
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_tvar:
     {
       // Should we enforce:  
@@ -671,7 +671,7 @@ Type::propagateMutability(boost::shared_ptr<Trail> trail,
   
   t->mark |= MARK_PROPAGATE_MUTABILITY;  
   
-  switch(t->kind) {
+  switch(t->typeTag) {
     
   case ty_tvar:
     {
@@ -772,7 +772,7 @@ Type::normalize_mbFull(boost::shared_ptr<Trail> trail)
   
   t->mark |= MARK_NORMALIZE_MBFULL;  
   
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_mbFull:    
     {
       shared_ptr<Type> var = t->Var()->getType();
@@ -834,7 +834,7 @@ Type::normalize_const_inplace(boost::shared_ptr<Trail> trail)
        itr != t->fnDeps.end(); ++itr)
     (*itr)->normalize_const_inplace(trail);
 
-  if((t->kind == ty_const) && t->Base()->isConstReducible())
+  if((t->typeTag == ty_const) && t->Base()->isConstReducible())
     trail->link(t, t->Base()->minimizeMutability());
   
   t->mark &= ~MARK_NORMALIZE_CONST_INPLACE;
@@ -854,7 +854,7 @@ Type::normalize_const(const bool inConst)
   
   t->mark |= MARK_NORMALIZE_CONST;  
 
-  switch(t->kind) {
+  switch(t->typeTag) {
     
   case ty_tvar:
     {
@@ -870,7 +870,7 @@ Type::normalize_const(const bool inConst)
       shared_ptr<Type> var = t->Var()->getType();
       shared_ptr<Type> inner = t->Core()->getType();
       
-      rt = Type::make(t->kind, var->getDCopy(),
+      rt = Type::make(t->typeTag, var->getDCopy(),
                       inner->normalize_const(false));
       
       if(inConst)
@@ -963,7 +963,7 @@ Type::ensureMinimizability(boost::shared_ptr<Trail> trail,
   
   t->mark |= MARK_ENSURE_MINIMIZABILITY;  
   
-  switch(t->kind) {
+  switch(t->typeTag) {
     
   case ty_tvar:
     if(markOnly)
@@ -1104,7 +1104,7 @@ Type::determineCCC(shared_ptr<Type> t, bool inRefType)
   t->mark |= MARK_PREDICATE;  
   bool cccOK = true;
   
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_tvar:                                       
     {
       if ((t == shared_from_this()) && (inRefType))
@@ -1153,18 +1153,18 @@ coerceMaybe(shared_ptr<Type> t, shared_ptr<Trail> trail,
   shared_ptr<Type> core = t->Core()->getType();
   shared_ptr<Type> var = t->Var()->getType();
 
-  if((t->kind == ty_mbFull) && var->isMutable()) {
+  if((t->typeTag == ty_mbFull) && var->isMutable()) {
     var = var->Base()->getType();
     core = core->maximizeMutability()->getType();
   }
   else {
-    if (minimize && (t->kind == ty_mbFull))
+    if (minimize && (t->typeTag == ty_mbFull))
       core = core->minimizeMutability()->getType();
     else
       core = core->minimizeTopMutability()->getType();
   }
   
-  if (core->kind != ty_tvar)
+  if (core->typeTag != ty_tvar)
     trail->subst(var, core);
   else
     trail->link(t, core);
@@ -1181,7 +1181,7 @@ Type::adjMaybe(shared_ptr<Trail> trail, bool markedOnly,
   
   t->mark |= MARK_ADJ_MAYBE;
     
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_mbFull:
     {
       t->Core()->adjMaybe(trail, markedOnly, minimize, adjFn);
@@ -1245,7 +1245,7 @@ Type::markSignMbs(bool cppos)
   
   t->mark |= MARK_SIGN_MBS;  
   
-  switch(t->kind) {
+  switch(t->typeTag) {
     
   case ty_tvar:
     {
@@ -1350,7 +1350,7 @@ Type::fixupFnTypes()
   
   t->mark |= MARK_FIXUP_FN_TYPES;
   
-  switch(t->kind) {
+  switch(t->typeTag) {
     
   case ty_mbFull:    
   case ty_mbTop:    
@@ -1375,7 +1375,7 @@ Type::fixupFnTypes()
       t->Args()->fixupFnTypes();
       t->Ret()->fixupFnTypes();
       shared_ptr<Type> ret = t->Ret()->getType();
-      if (ret->kind != ty_mbFull)
+      if (ret->typeTag != ty_mbFull)
         t->Ret() = MBF(ret);
       break;
     }
@@ -1386,7 +1386,7 @@ Type::fixupFnTypes()
         t->CompType(i)->fixupFnTypes();
         shared_ptr<Type> arg = t->CompType(i)->getType();
         if ((t->CompFlags(i) & COMP_BYREF) == 0) {
-          if (arg->kind != ty_mbFull)
+          if (arg->typeTag != ty_mbFull)
             t->CompType(i) = MBF(arg);
         }
       }

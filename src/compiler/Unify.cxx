@@ -85,7 +85,7 @@ unifyPrim(std::ostream& errStream,
 {
   bool errFree = true;
 
-  shared_ptr<Type> primType = Type::make(Type::LookupKind(ptype));
+  shared_ptr<Type> primType = Type::make(Type::LookupTypeTag(ptype));
   CHKERR(errFree, unify(errStream, trail, errLoc, primType, tau, UFLG_NO_FLAGS));
   return errFree;
 }
@@ -114,8 +114,8 @@ UnifyDecl(std::ostream& errStream,
                         << std::endl;
 
   assert(t1->defAst == t2->defAst);
-  assert(t1->kind != ty_uconv || t1->kind != ty_uconr);
-  assert(t1->kind != ty_uvalv || t1->kind != ty_uvalr);
+  assert(t1->typeTag != ty_uconv || t1->typeTag != ty_uconr);
+  assert(t1->typeTag != ty_uvalv || t1->typeTag != ty_uvalr);
 
   if (t1->typeArgs.size() != t2->typeArgs.size())
     return typeError(errStream, errLoc, t1, t2);
@@ -205,8 +205,8 @@ UnifyFnArgs(std::ostream& errStream, shared_ptr<Trail> trail,
   bool errFree = true;
   t1 = t1->getType();
   t2 = t2->getType();
-  assert(t1->kind == ty_fnarg);
-  assert(t2->kind == ty_fnarg);
+  assert(t1->typeTag == ty_fnarg);
+  assert(t2->typeTag == ty_fnarg);
   
   if (t1->components.size() != t2->components.size())
     return typeError(errStream, errLoc, errt1, errt2);
@@ -277,9 +277,9 @@ Unify(std::ostream& errStream,
   if (t1->uniqueID == t2->uniqueID)
     return true;
 
-  bool unifingSameKind = (t1->kind == t2->kind);
+  bool unifyingSameType = (t1->typeTag == t2->typeTag);
 
-  switch(unifingSameKind) {
+  switch(unifyingSameType) {
   case false:
     {
       if (t1->isUType(false) && t2->isUType(false) && 
@@ -444,7 +444,7 @@ Unify(std::ostream& errStream,
         assert(!other->isMutType() &&  // Otherwise, it would be 
                !other->isMaybe());     // handled already.  
       
-        if(other->kind == ty_array || other->kind == ty_structv) {
+        if(other->typeTag == ty_array || other->typeTag == ty_structv) {
           CHKERR(errFree, Unify(errStream, trail, errLoc, 
                                 mut, Mutable(other), uflags));
           break;
@@ -472,7 +472,7 @@ Unify(std::ostream& errStream,
     }    
   case true:
     {
-      switch(t1->kind) {
+      switch(t1->typeTag) {
       case ty_unit:
       case ty_bool:
       case ty_char:
@@ -625,7 +625,7 @@ Unify(std::ostream& errStream,
           break;
         }
       
-        // We are doing same-kind unification here. Treat ty_wkvector
+        // We are doing same-type unification here. Treat ty_wkvector
         // like vector for the moment, since we don't have any
         // knowledge of a length yet.
       case ty_vector:
@@ -804,10 +804,10 @@ acyclic(std::ostream& errStream,
   
   if (worklist.contains(t)) {
     
-    if (t->kind == ty_structr ||
-       t->kind == ty_unionr || 
-       t->kind == ty_uconr ||
-       t->kind == ty_uvalr)
+    if (t->typeTag == ty_structr ||
+       t->typeTag == ty_unionr || 
+       t->typeTag == ty_uconr ||
+       t->typeTag == ty_uvalr)
       return true;
     
     if (inref)
@@ -835,12 +835,12 @@ acyclic(std::ostream& errStream,
   for (size_t i=0; i < t->components.size(); i++)
     CHKERR(errFree, acyclic(errStream, errLoc, t->CompType(i),
                             worklist, donelist,
-                            (inref || t->kind == ty_ref)));
+                            (inref || t->typeTag == ty_ref)));
 
 //   for (size_t i=0; i < t->typeArgs.size(); i++) {
 //     CHKERR(errFree, acyclic(errStream, errLoc, t->TypeArg(i),  
 //                             worklist, donelist,
-//                             (inref || t->kind == ty_ref)));
+//                             (inref || t->typeTag == ty_ref)));
 //   }
   
   worklist.erase(t);   

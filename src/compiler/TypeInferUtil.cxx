@@ -68,7 +68,7 @@ obtainFullUnionType(shared_ptr<Type> t)
   shared_ptr<TypeScheme> uScheme = unin->scheme;
   shared_ptr<Type> uType = uScheme->type_instance()->getType();
 
-  assert(uType->kind == ty_unionv || uType->kind == ty_unionr);
+  assert(uType->typeTag == ty_unionv || uType->typeTag == ty_unionr);
   assert(uType->typeArgs.size() == t->typeArgs.size());
 
   for (size_t c=0; c < uType->typeArgs.size(); c++)

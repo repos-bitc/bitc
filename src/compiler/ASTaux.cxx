@@ -108,7 +108,7 @@ AST::asString() const
 bool
 AST::isFnxn()
 {
-  return (symType->getBareType()->kind == ty_fn);
+  return (symType->getBareType()->typeTag == ty_fn);
 }
 
 size_t

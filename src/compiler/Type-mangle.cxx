@@ -81,7 +81,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
 
   mark |= MARK_MANGLED_STRING;
 
-  switch(kind) {
+  switch(typeTag) {
   case ty_tvar:
     {
       stringstream avss;
@@ -117,7 +117,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
   case ty_double:
   case ty_quad:
     {
-      const char *tn = kindName();
+      const char *tn = typeTagName();
       ss << "_" << strlen(tn) << tn;
       break;
     }
@@ -165,7 +165,7 @@ Type::mangledString(bool igMut, bool igTlMut, bool maxArgMut)
   case ty_structr:
     {
       ss << "S"
-         << ((kind == ty_structv) ? "V" : "R")
+         << ((typeTag == ty_structv) ? "V" : "R")
          << typeArgs.size() 
          << "_" << defAst->s.size() << defAst->s;
 

@@ -348,7 +348,7 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
   shared_ptr<Type> t = typ->getBareType();
   stringstream out;
 
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_tvar:
     {
       // This case is not wrong; for example, consider
@@ -536,7 +536,7 @@ toCtype(shared_ptr<Type> typ, string IDname="", unsigned long flags=0,
 static inline bool
 isUnitType(shared_ptr<Type> ty)
 {
-  return (ty->getBareType()->kind == ty_unit);
+  return (ty->getBareType()->typeTag == ty_unit);
 }
 
 static inline bool
@@ -890,7 +890,7 @@ bool
 typeIsUnmangled(shared_ptr<Type> typ)
 {
   typ = typ->getBareType();
-  switch(typ->kind) {
+  switch(typ->typeTag) {
 
   case ty_tvar:
   case ty_unit:
@@ -1118,8 +1118,8 @@ toc(std::ostream& errStream,
 
       if (id->isIdentType(id_ucon0)) {
         shared_ptr<Type> t = id->symType->getBareType();
-        if (t->kind == ty_uvalv || t->kind == ty_uvalr ||
-           t->kind == ty_exn) {
+        if (t->typeTag == ty_uvalv || t->typeTag == ty_uvalr ||
+           t->typeTag == ty_exn) {
           shared_ptr<AST> dummy = AST::make(at_ucon_apply, ast->loc, ast);
           dummy->symType = ast->symType;
           TOC(errStream, uoc, dummy, out, IDname,
@@ -1268,7 +1268,7 @@ toc(std::ostream& errStream,
 
       out.more();
       std::string pre;
-      if (ident->symType->getBareType()->kind == ty_structv) {
+      if (ident->symType->getBareType()->typeTag == ty_structv) {
         out << toCtype(ident->symType)
             << " val;";
         pre = "val.";
@@ -1392,7 +1392,7 @@ toc(std::ostream& errStream,
       // For arrays, the result is an integer literal length, not an
       // actual field selection:
 
-      if (t->kind == ty_array) {
+      if (t->typeTag == ty_array) {
         out << t->arrLen->len;
         break;
       }
@@ -1402,10 +1402,10 @@ toc(std::ostream& errStream,
 
       // We have already handled array. Handle special cases for
       // array-ref and vector here:
-      if (t->kind == ty_vector) {
+      if (t->typeTag == ty_vector) {
         out << "->length";
       }
-      else if (t->kind == ty_array_ref) {
+      else if (t->typeTag == ty_array_ref) {
         out << ".length";
       }
       else {
@@ -1604,7 +1604,7 @@ toc(std::ostream& errStream,
       out << "/*** Constructors: ***/" << endl;
       std::string pre;
       stringstream udecl;
-      if (ident->symType->getBareType()->kind == ty_unionv) {
+      if (ident->symType->getBareType()->typeTag == ty_unionv) {
         udecl << toCtype(ident->symType) << " val;" << endl;
         pre = "val.";
       }
@@ -1775,7 +1775,7 @@ toc(std::ostream& errStream,
       decls.insert(CMangle(id));
 
       //shared_ptr<Type> t = id->symType->getType();
-      //if (hasDefn && t->isSimpleTypeForC() && (t->kind != ty_mutable))
+      //if (hasDefn && t->isSimpleTypeForC() && (t->typeTag != ty_mutable))
       // out << "const ";
 
       if (id->symType->isFnxn() && !id->symType->isMutable()) {
@@ -1862,7 +1862,7 @@ toc(std::ostream& errStream,
           e = e->child(0);
         }
         
-        //if (t->isSimpleTypeForC() && t->kind != ty_mutable)
+        //if (t->isSimpleTypeForC() && t->typeTag != ty_mutable)
         // out << "const ";
         
         out << decl(id) << " = ";
@@ -2058,7 +2058,7 @@ toc(std::ostream& errStream,
       }
 
       shared_ptr<Type> clType = ast->child(0)->symType->getBareType();
-      assert(clType->kind == ty_fn);
+      assert(clType->typeTag == ty_fn);
       shared_ptr<Type> retType = clType->Ret()->getType();
       shared_ptr<Type> argsType = clType->Args()->getType();
 
@@ -2274,9 +2274,9 @@ toc(std::ostream& errStream,
 
       out << "switch(";
 
-      assert(t->kind == ty_uvalv || t->kind == ty_unionv ||
-             t->kind == ty_uvalr || t->kind == ty_unionr ||
-             t->kind == ty_uconr || t->kind == ty_uconv);
+      assert(t->typeTag == ty_uvalv || t->typeTag == ty_unionv ||
+             t->typeTag == ty_uvalr || t->typeTag == ty_unionr ||
+             t->typeTag == ty_uconr || t->typeTag == ty_uconv);
 
       out << "TAG_" << CMangle(t->myContainer) << "(";
       if (!topExp->symType->isRefType())
@@ -2676,7 +2676,7 @@ emit_arr_vec_fn_types(shared_ptr<Type> candidate,
     emit_arr_vec_fn_types(t->CompType(i), out,
                              arrSet, arrByrefSet, vecSet, fnSet);
 
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_array:
     {
       if (alreadyEmitted(t, arrSet))

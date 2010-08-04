@@ -4,6 +4,7 @@
 /**************************************************************************
  *
  * Copyright (C) 2008, Johns Hopkins University.
+ * Copyright (C) 2010, Jonathan S. Shapiro
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -56,14 +57,14 @@
 #include "TypeInfer.hxx"
 #include "Trail.hxx"
 
-// Elements of the Kind enumeration have moved to kind.def
+// Elements of the TypeTag enumeration have moved to types.def
 
-enum Kind { // What kind of type?
-#define DEFKIND(nm,prim,csimp,atom,scalar,ref,impint,impfloat) ty_##nm,
-#include "kind.def"
+enum TypeTag { // What kind of type?
+#define DEFTYPE(nm,prim,csimp,atom,scalar,ref,impint,impfloat) ty_##nm,
+#include "types.def"
 };
 
-const char *KindName(Kind k);
+const char *TypeTagName(TypeTag tt);
 
 typedef long long TargetSWord;
 
@@ -305,7 +306,7 @@ struct Type : public boost::enable_shared_from_this<Type> {
   }
 
 public:
-  Kind kind;
+  TypeTag typeTag;
   
   /// @brief Pointer to next element of a chain constrained by
   /// equality.
@@ -317,7 +318,7 @@ public:
      to answer to the link, it will be the last one, and 
      link will be NULL. If so, examine the details */
   
-  // Depending on kind, store a reference 
+  // Depending on type, store a reference 
   // to the actual type. The following 3 fields should be in a union, 
   // but using a union makes the C++ constructor logic unhappy....
 
@@ -338,7 +339,7 @@ public:
   // method type, points to the identifier AST of the typeclass.
   boost::shared_ptr<AST> myContainer;
 
-  // Note that we use two different kinds, ty_int/ty_impint,
+  // Note that we use two different type tags, ty_int/ty_impint,
   // ty_float/ty_impfloat, to deal with whether the concrete type of a
   // literal has been successfully decided.
   //
@@ -396,17 +397,17 @@ public:
   TypeFlags flags;               
 
   // Main (Base) Constructor
-  Type(const Kind k);
+  Type(const TypeTag ttag);
   // Copy Constructor.
   Type(boost::shared_ptr<Type> t); 
-  Type(const Kind k, boost::shared_ptr<Type> child);
-  Type(const Kind k, boost::shared_ptr<Type> child1, boost::shared_ptr<Type> child2);
+  Type(const TypeTag ttag, boost::shared_ptr<Type> child);
+  Type(const TypeTag ttag, boost::shared_ptr<Type> child1, boost::shared_ptr<Type> child2);
 
   // Quasi-constructors
   static inline boost::shared_ptr<Type>
-  make(const Kind k)
+  make(const TypeTag ttag)
   {
-    Type *tmp = new Type(k);
+    Type *tmp = new Type(ttag);
     return boost::shared_ptr<Type>(tmp);
   }
 
@@ -418,18 +419,18 @@ public:
   }
 
   static inline boost::shared_ptr<Type>
-  make(const Kind k, boost::shared_ptr<Type> child)
+  make(const TypeTag ttag, boost::shared_ptr<Type> child)
   {
-    Type *tmp = new Type(k, child);
+    Type *tmp = new Type(ttag, child);
     return boost::shared_ptr<Type>(tmp);
   }
 
   static inline boost::shared_ptr<Type>
-  make(const Kind k,
+  make(const TypeTag ttag,
        boost::shared_ptr<Type> child1, 
        boost::shared_ptr<Type> child2)
   {
-    Type *tmp = new Type(k, child1, child2);
+    Type *tmp = new Type(ttag, child1, child2);
     return boost::shared_ptr<Type>(tmp);
   }
 
@@ -779,11 +780,11 @@ public:
   std::string mangledString(bool igMut=false, bool igTlMut=false,
                             bool maxArgMut=false);
 
-  const char *kindName() const
-  { return KindName(kind); }
-  static Kind LookupKind(const std::string& nm);  
-  static Kind getValKind(Kind refKind);
-  static Kind getRefKind(Kind valKind);
+  const char *typeTagName() const
+  { return TypeTagName(typeTag); }
+  static TypeTag LookupTypeTag(const std::string& nm);  
+  static TypeTag getValTypeTag(TypeTag refTag);
+  static TypeTag getRefTypeTag(TypeTag valTag);
 
   /* Typeclass special */
   bool addFnDep(boost::shared_ptr<Type> tc);
@@ -833,34 +834,34 @@ public:
   //Argument and return types of function-types
   boost::shared_ptr<Type> & Args() const
   {
-    DEBUG(TYPE_ACC) assert(kind == ty_fn || kind == ty_tyfn || kind == ty_method);
+    DEBUG(TYPE_ACC) assert(typeTag == ty_fn || typeTag == ty_tyfn || typeTag == ty_method);
     return CompType(0);
   }  
   boost::shared_ptr<Type> & Ret() const
   {
-    DEBUG(TYPE_ACC) assert(kind == ty_fn || kind == ty_tyfn || kind == ty_method);
+    DEBUG(TYPE_ACC) assert(typeTag == ty_fn || typeTag == ty_tyfn || typeTag == ty_method);
     return CompType(1);
   }  
   //The Inner type of Maybe-types
   boost::shared_ptr<Type> &Var() const
   {
-    DEBUG(TYPE_ACC) assert(kind == ty_mbTop || kind == ty_mbFull);
+    DEBUG(TYPE_ACC) assert(typeTag == ty_mbTop || typeTag == ty_mbFull);
     return CompType(0);
   }  
   boost::shared_ptr<Type> & Core() const
   {
-    DEBUG(TYPE_ACC) assert(kind == ty_mbTop || kind == ty_mbFull);
+    DEBUG(TYPE_ACC) assert(typeTag == ty_mbTop || typeTag == ty_mbFull);
     return CompType(1);
   }
   // The first component of an array/vector/mutable/ref type
   boost::shared_ptr<Type> & Base() const
   {
-    DEBUG(TYPE_ACC) assert(kind == ty_mutable || 
-                           kind == ty_const || 
-                           kind == ty_byref || 
-                           kind == ty_ref || 
-                           kind == ty_array || 
-                           kind == ty_vector);
+    DEBUG(TYPE_ACC) assert(typeTag == ty_mutable || 
+                           typeTag == ty_const || 
+                           typeTag == ty_byref || 
+                           typeTag == ty_ref || 
+                           typeTag == ty_array || 
+                           typeTag == ty_vector);
     return CompType(0);
   }
 };

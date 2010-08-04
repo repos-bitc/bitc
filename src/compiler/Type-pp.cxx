@@ -109,7 +109,7 @@ Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options)
     ss << "]";
   }
     
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_tvar:
     if (!tvP) {
       ss << "'a" << t->uniqueID;
@@ -149,7 +149,7 @@ Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options)
   case ty_float:
   case ty_double:
   case ty_quad:
-    ss << t->kindName();
+    ss << t->typeTagName();
     break;
 
   case ty_field:
@@ -212,7 +212,7 @@ Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options)
       // should be reconciled more cleanly when we switch the type
       // syntax over.
       if (options & PO_SHOW_FIELDS) {
-        ss << "(" << ((t->kind == ty_structr) ? "struct " : "structR ")
+        ss << "(" << ((t->typeTag == ty_structr) ? "struct " : "structR ")
            << printName(t->defAst) << " - ";
         for (size_t i=0; i<components.size(); i++)
           ss << CompName(i) << ":" 
@@ -244,7 +244,7 @@ Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options)
     // syntax over.
     if (options & PO_SHOW_FIELDS) {
       const char *dbName;
-      switch(t->kind) {
+      switch(t->typeTag) {
       case ty_unionv: 
         dbName = "union";
         break;
@@ -332,10 +332,10 @@ Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options)
  case ty_mbFull:
  case ty_mbTop:
    ss << t->Var()->asSexprString(tvP, options)
-      << ((t->kind == ty_mbFull) ? "|" : "!")
-      << ((t->Core()->kind == ty_fn)?"(":"")
+      << ((t->typeTag == ty_mbFull) ? "|" : "!")
+      << ((t->Core()->typeTag == ty_fn)?"(":"")
       << t->Core()->asSexprString(tvP, options)
-      << ((t->Core()->kind == ty_fn)?")":"");
+      << ((t->Core()->typeTag == ty_fn)?")":"");
    break;
 
   case ty_mutable:
@@ -394,9 +394,9 @@ Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options)
 
 // Return the precedence (in the grammar's view) of the production
 // that produces a given type.
-static int typePrecedence(Kind k)
+static int typePrecedence(TypeTag ttag)
 {
-  switch(k) {
+  switch(ttag) {
   case ty_fn:
   case ty_tyfn:
   case ty_method:
@@ -416,7 +416,7 @@ static int typePrecedence(Kind k)
   }
 }
 
-static bool shouldParenWrap(Kind parent, Kind child)
+static bool shouldParenWrap(TypeTag parent, TypeTag child)
 {
   return typePrecedence(parent) < typePrecedence(child);
   // return true;
@@ -460,7 +460,7 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
     ss << "]";
   }
     
-  switch(t->kind) {
+  switch(t->typeTag) {
   case ty_tvar:
     if (!tvP) {
       ss << "'a" << t->uniqueID;
@@ -500,7 +500,7 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
   case ty_float:
   case ty_double:
   case ty_quad:
-    ss << t->kindName();
+    ss << t->typeTagName();
     break;
 
   case ty_field:
@@ -558,7 +558,7 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
       shared_ptr<Type> compType = t->CompType(i);
 
       if (i > 0) ss << " ";
-      ss << compType->asBlockStringProducer(tvP, options, shouldParenWrap(t->kind, compType->kind));
+      ss << compType->asBlockStringProducer(tvP, options, shouldParenWrap(t->typeTag, compType->typeTag));
 
     }
     ss << ")";
@@ -571,7 +571,7 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
       // No paren wrapping here. Everything here is fully bracketed,
       // and [type] application has about the highest precedence of anything.
       ss << printName(t->defAst);
-      if (t->kind == ty_structr) ss << '^';
+      if (t->typeTag == ty_structr) ss << '^';
 
       if (t->typeArgs.size() > 0) {
         ss << '(';
@@ -603,9 +603,9 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
       // No paren wrapping here. Everything here is fully bracketed,
       // and [type] application has about the highest precedence of anything.
       ss << printName(t->myContainer);
-      if ((t->kind == ty_unionr) ||
-          (t->kind == ty_uvalr) ||
-          (t->kind == ty_uconr)) 
+      if ((t->typeTag == ty_unionr) ||
+          (t->typeTag == ty_uvalr) ||
+          (t->typeTag == ty_uconr)) 
         ss << '^';
 
       if (t->typeArgs.size() > 0) {
@@ -619,7 +619,7 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
 
       if (options & PO_SHOW_FIELDS) {
         const char *dbName;
-        switch(t->kind) {
+        switch(t->typeTag) {
         case ty_unionv: 
           dbName = "union";
           break;
@@ -669,7 +669,7 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
   case ty_array:
     {
       shared_ptr<Type> base = t->Base();
-      bool wrap = shouldParenWrap(t->kind, base->kind);
+      bool wrap = shouldParenWrap(t->typeTag, base->typeTag);
 
       ss << base->asBlockStringProducer(tvP, options, wrap);
       ss << '[' << t->arrLen->len << "]";
@@ -679,7 +679,7 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
   case ty_vector:
     {
       shared_ptr<Type> base = t->Base();
-      bool wrap = shouldParenWrap(t->kind, base->kind);
+      bool wrap = shouldParenWrap(t->typeTag, base->typeTag);
 
       ss << base->asBlockStringProducer(tvP, options, wrap);
       ss <<  "[]";
@@ -689,7 +689,7 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
   case ty_ref:
     {
       shared_ptr<Type> base = t->Base();
-      bool wrap = shouldParenWrap(t->kind, base->kind);
+      bool wrap = shouldParenWrap(t->typeTag, base->typeTag);
 
       ss << base->asBlockStringProducer(tvP, options, wrap);
       ss << " reference";
@@ -710,16 +710,16 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
   case ty_mbFull:
   case ty_mbTop:
     ss << t->Var()->asBlockStringProducer(tvP, options, false)
-       << ((t->kind == ty_mbFull) ? "|" : "!")
-       << ((t->Core()->kind == ty_fn)?"(":"")
+       << ((t->typeTag == ty_mbFull) ? "|" : "!")
+       << ((t->Core()->typeTag == ty_fn)?"(":"")
        << t->Core()->asBlockStringProducer(tvP, options, false)
-       << ((t->Core()->kind == ty_fn)?")":"");
+       << ((t->Core()->typeTag == ty_fn)?")":"");
     break;
 
   case ty_mutable:
     {
       shared_ptr<Type> base = t->Base();
-      bool wrap = shouldParenWrap(t->kind, base->kind);
+      bool wrap = shouldParenWrap(t->typeTag, base->typeTag);
 
       ss << "mutable "
          << base->asBlockStringProducer(tvP, options, wrap);
@@ -729,7 +729,7 @@ Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options,
   case ty_const:
     {
       shared_ptr<Type> base = t->Base();
-      bool wrap = shouldParenWrap(t->kind, base->kind);
+      bool wrap = shouldParenWrap(t->typeTag, base->typeTag);
 
       ss << "const "
          << base->asBlockStringProducer(tvP, options, wrap);
