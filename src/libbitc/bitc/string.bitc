@@ -48,19 +48,19 @@ interface bitc.string {
   def string_map : fn (string, fn (char) -> ()) -> () external bitc_string_map
 
   def stringToList(s) =
-    let lst : mutable list(char) = nil in
+    let lst : mutable list<char> = nil in
       do pos = string_length(s) then pos - 1
       until pos == 0 giving lst {
         lst := cons(string_nth(s, pos-1), lst)
       }
 
-  def listToString: fn (list(char)) -> string 
+  def listToString: fn (list<char>) -> string 
     external bitc_list_string
 
   def vectorToString: fn (char[]) -> string external bitc_vector_string
   
   // This generates unfortunate intermediate garbage, but it lets me
   // do the C implementation more easily.
-  def listToString(lst : list(char)) = 
+  def listToString(lst : list<char>) = 
     vectorToString(vec.listToVector(lst))
 }
