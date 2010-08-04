@@ -1086,11 +1086,10 @@ blk_constraint_seq: blk_constraint {
  $$ = AST::make(at_constraints, $1->loc, $1);
 };
 
-blk_constraint: blk_useident '(' blk_type_args_pl_byref ')' %prec '(' {
-  SHOWPARSE("blk_constraint -> blk_useident (blk_type_args_pl_byref)");
-  $$ = AST::make(at_tcapp, $1->loc, $1);
-  $$->addChildrenFrom($3);
-};
+blk_constraint: blk_typeapp {
+  $1->astType = at_tcapp;
+  $$ = $1;
+}
 
 blk_constraint: blk_useident %prec prec_PreferShift {
  SHOWPARSE("blk_constraint -> blk_useident");
@@ -1113,11 +1112,10 @@ sxp_constraint_seq: sxp_constraint {
  $$ = AST::make(at_constraints, $1->loc, $1);
 };
 
-sxp_constraint: '(' sxp_useident sxp_type_args_pl_byref ')' {
-  SHOWPARSE("sxp_typeapp -> ( sxp_useident sxp_type_args_pl_byref )");
-  $$ = AST::make(at_tcapp, $2->loc, $2);
-  $$->addChildrenFrom($3);
-};
+sxp_constraint: sxp_typeapp {
+  $1->astType = at_tcapp;
+  $$ = $1;
+}
 
 sxp_constraint: sxp_useident {
  SHOWPARSE("sxp_constraint -> sxp_useident");
