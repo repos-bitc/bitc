@@ -66,11 +66,10 @@ print_type(INOstream& out, shared_ptr <const AST> ast)
   shared_ptr<Type> ty = ast->symType;
 
   if (ty) {
-    out << " /* : " << ty->asBlockString() << "*/";
-    out << " /* : " << ty->asSexprString() << "*/";
+    out << " /* : " << ty->asString() << " */";
   }
   else
-    out << " /* : " << "??" << " */";
+    out << " /* : " << "?untyped?" << " */";
 
 }
 

@@ -382,6 +382,7 @@ Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options)
 string
 Type::asBlockString(shared_ptr<TvPrinter> tvP, PrintOptions options)
 {
+  return " block type disabled ";
   return asBlockStringProducer(tvP, options, false);
 }
 
