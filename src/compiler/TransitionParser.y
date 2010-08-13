@@ -1125,7 +1125,7 @@ sxp_constraint: sxp_useident {
 // shift/reduce ambiguity at:
 //
 //  blk_defident .
-//  blk_defident . '<' blk_tvlist '>' blk_constraints
+//  blk_defident . '(' blk_tvlist ')' blk_constraints
 
 blk_ptype_name: blk_defident %prec prec_PreferShift {
   SHOWPARSE("blk_ptype_name -> blk_defident");
@@ -1140,8 +1140,8 @@ blk_ptype_name: blk_defident %prec prec_PreferShift {
   $$ = AST::make(at_Null, $1->loc, $1, tvlist);
 };
 
-blk_ptype_name: blk_defident '<' blk_tvlist '>' %prec '<' {
-  SHOWPARSE("blk_ptype_name -> blk_defident < blk_tvlist >");
+blk_ptype_name: blk_defident '(' blk_tvlist ')' %prec '(' {
+  SHOWPARSE("blk_ptype_name -> blk_defident ( blk_tvlist )");
   // In the block syntax, we have a reliable syntactic position for
   // constraints later, so we don't build one here as we needed to do
   // in the S-expression syntax.
@@ -2364,18 +2364,18 @@ blk_primary_type: '(' blk_type_cpair ')' {
 
 // Temporary expedient: for each of the postfix types, introduce an
 // application-style alternate syntax for use in pretty-printing:
-blk_primary_type: tk_PTR '<' blk_type '>' {
-  SHOWPARSE("blk_primary_type -> tk_PTR < blk_type >");
+blk_primary_type: tk_PTR '(' blk_type ')' {
+  SHOWPARSE("blk_primary_type -> tk_PTR ( blk_type )");
   $$ = AST::make(at_refType, $1.loc, $3);
 
 }
-blk_primary_type: tk_ARRAY '<' blk_type ',' natLit '>' {
-  SHOWPARSE("blk_primary_type -> tk_ARRAY < blk_type, natLit >");
+blk_primary_type: tk_ARRAY '(' blk_type ',' natLit ')' {
+  SHOWPARSE("blk_primary_type -> tk_ARRAY ( blk_type, natLit )");
   $$ = AST::make(at_arrayType, $1.loc, $3, $5);
 
 }
-blk_primary_type: tk_VECTOR '<' blk_type '>' {
-  SHOWPARSE("blk_primary_type -> tk_VECTOR < blk_type >");
+blk_primary_type: tk_VECTOR '(' blk_type ')' {
+  SHOWPARSE("blk_primary_type -> tk_VECTOR ( blk_type )");
   $$ = AST::make(at_vectorType, $1.loc, $3);
 
 }
@@ -2707,13 +2707,18 @@ sxp_type: '(' tk_VECTOR sxp_type ')' {
 };
 
 // TYPE CONSTRUCTORS (typeapp)
+//blk_type:  blk_useident '(' blk_type_args ')' {
+//  SHOWPARSE("blk_typeapp -> blk_useident (blk_type_args)");
+//  $$ = AST::make(at_typeapp, $1->loc, $1);
+//  $$->addChildrenFrom($3);
+//};
 blk_primary_type: blk_typeapp {
   SHOWPARSE("blk_primary_type -> blk_typeapp");
   $$ = $1;
 };
 
-blk_typeapp: blk_useident '<' blk_type_args '>' %prec '<' {
-  SHOWPARSE("blk_typeapp -> blk_useident <blk_type_args>");
+blk_typeapp: blk_useident '(' blk_type_args ')' %prec '(' {
+  SHOWPARSE("blk_typeapp -> blk_useident (blk_type_args)");
   $$ = AST::make(at_typeapp, $1->loc, $1);
   $$->addChildrenFrom($3);
 };

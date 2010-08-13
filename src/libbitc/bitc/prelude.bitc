@@ -56,58 +56,58 @@ interface bitc.prelude {
   
   // Set of all by-reference types, covering (ref 'a), (vector 'a),
   // boxed structure types, boxed union types, and exception.
-  closed trait RefTypes<'a> {}
+  closed trait RefTypes('a) {}
 
   // Type class describing all types 'a that can receive a copy from
   // type 'b. This is NOT symmetric. For example:
   //   (forall ((LiteralUnitType int32 'a))
   //     (CopyFromTo 'a 'b)
   //     but NOT (CopyFromTo 'b 'a)
-  closed trait CopyFromTo<'a, 'b> {}
+  closed trait CopyFromTo('a, 'b) {}
 
   // Type class relating two types 'a, 'b such that they are
   // compatible under binding, assignment, and argument passing. This
   // relation is symmetric.
   //
   // (CopyCompat 'a 'b) => (CopyFromTo 'a 'b) AND (copy-from-to 'b 'a)
-  closed trait CopyCompat<'a, 'b> {}
+  closed trait CopyCompat('a, 'b) {}
 
   // Type class identifying the set of types for which a literal
   // syntax exists. This is actually NOT an incestuously magical type
   // class, but we need to declare it here so that LiteralUnitType
   // (below) can be properly quantified.
-  closed trait LiteralType<'a> {}
+  closed trait LiteralType('a) {}
 
   // Type class used for record polymorphism. Describes a field/method
   // of some structure type 's having a field/method 'nm with type 'a.
   // This type class is called HasField, but really means 
   // HasField-or-method
-  closed trait HasField<'s, 'nm, 'a> {}
+  closed trait HasField('s, 'nm, 'a) {}
   
   ///////////////////////////////////////////////////////////////
   //    Structure and union definitions 
   ///////////////////////////////////////////////////////////////
 
-  unboxed union optional<'a> {
+  unboxed union optional('a) {
     none
     some { value : 'a }
   }
 
-  unboxed union nullable<'a>
+  unboxed union nullable('a)
   where 
-    RefTypes<'a>
+    RefTypes('a)
   {
       null
       not_null { ptr: 'a }
   }
 
-  boxed union list<'a> {
+  boxed union list('a) {
     nil
-    cons { car:'a cdr: list<'a> }
+    cons { car:'a cdr: list('a) }
   }
   
   // The pair structure
-  unboxed struct pair<'a, 'b> {
+  unboxed struct pair('a, 'b) {
     fst: 'a
     snd: 'b
   }
@@ -182,67 +182,67 @@ interface bitc.prelude {
   // TYPES THAT HAVE LITERALS
   ///////////////////////////////////////////////////////////
 
-  instance LiteralType<char>
+  instance LiteralType(char)
 
-  instance LiteralType<word>
-  instance LiteralType< int8>
-  instance LiteralType<uint8>
-  instance LiteralType< int16>
-  instance LiteralType<uint16>
-  instance LiteralType< int32>
-  instance LiteralType<uint32>
-  instance LiteralType< int64>
-  instance LiteralType<uint64>
+  instance LiteralType(word)
+  instance LiteralType( int8)
+  instance LiteralType(uint8)
+  instance LiteralType( int16)
+  instance LiteralType(uint16)
+  instance LiteralType( int32)
+  instance LiteralType(uint32)
+  instance LiteralType( int64)
+  instance LiteralType(uint64)
 
-  instance LiteralType<float>
-  instance LiteralType<double>
-  instance LiteralType<quad>
+  instance LiteralType(float)
+  instance LiteralType(double)
+  instance LiteralType(quad)
 
-  instance LiteralType<string>
+  instance LiteralType(string)
 
 
   ///////////////////////////////////////////////////////////
   // TYPE CLASS FOR INTEGER LITERALS
   ///////////////////////////////////////////////////////////
 
-  closed trait IntLit<'a> where LiteralType<'a> {}
+  closed trait IntLit('a) where LiteralType('a) {}
 
-  instance IntLit<word>
-  instance IntLit< int8>
-  instance IntLit<uint8>
-  instance IntLit< int16>
-  instance IntLit<uint16>
-  instance IntLit< int32>
-  instance IntLit<uint32>
-  instance IntLit< int64>
-  instance IntLit<uint64>
+  instance IntLit(word)
+  instance IntLit( int8)
+  instance IntLit(uint8)
+  instance IntLit( int16)
+  instance IntLit(uint16)
+  instance IntLit( int32)
+  instance IntLit(uint32)
+  instance IntLit( int64)
+  instance IntLit(uint64)
 
   ///////////////////////////////////////////////////////////
   // TYPE CLASS FOR FLOATING POINT LITERALS
   ///////////////////////////////////////////////////////////
-  closed trait FloatLit<'a> where LiteralType<'a> {}
+  closed trait FloatLit('a) where LiteralType('a) {}
 
-  instance FloatLit<float>
-  instance FloatLit<double>
-  instance FloatLit<quad>  
+  instance FloatLit(float)
+  instance FloatLit(double)
+  instance FloatLit(quad)  
 
-  closed trait Unsigned<'a> where IntLit<'a> {}
-  instance Unsigned<word>
-  instance Unsigned<uint8>
-  instance Unsigned<uint16>
-  instance Unsigned<uint32>
-  instance Unsigned<uint64>
+  closed trait Unsigned('a) where IntLit('a) {}
+  instance Unsigned(word)
+  instance Unsigned(uint8)
+  instance Unsigned(uint16)
+  instance Unsigned(uint32)
+  instance Unsigned(uint64)
 
-  closed trait Signed<'a> where IntLit<'a> {}
-  instance Signed< int8>
-  instance Signed< int16>
-  instance Signed< int32>
-  instance Signed< int64>
+  closed trait Signed('a) where IntLit('a) {}
+  instance Signed( int8)
+  instance Signed( int16)
+  instance Signed( int32)
+  instance Signed( int64)
 
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING EQUALITY
   ///////////////////////////////////////////////////////////
-  trait Eq<'a> {
+  trait Eq('a) {
     `== : fn('a,'a) -> bool
     `!= : fn('a,'a) -> bool
   }
@@ -250,7 +250,7 @@ interface bitc.prelude {
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING ORDERING
   ///////////////////////////////////////////////////////////
-  trait Ord<'a> where Eq<'a> {
+  trait Ord('a) where Eq('a) {
     `<  : fn('a, 'a) -> bool
     `>  : fn('a, 'a) -> bool
     `<= : fn('a, 'a) -> bool
@@ -260,7 +260,7 @@ interface bitc.prelude {
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING (FOUR-FUNCTION) ARITHMETIC
   ///////////////////////////////////////////////////////////
-  trait Arith<'a> where Ord<'a> {
+  trait Arith('a) where Ord('a) {
     `+ : fn('a, 'a) -> 'a
     `- : fn('a, 'a) -> 'a
     `* : fn('a, 'a) -> 'a
@@ -271,14 +271,14 @@ interface bitc.prelude {
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING INTEGER MODULUS ARITHMETIC
   ///////////////////////////////////////////////////////////
-  trait IntArith<'a> where Arith<'a>, IntLit<'a> {
+  trait IntArith('a) where Arith('a), IntLit('a) {
     `% : fn('a, 'a) -> 'a
   }
 
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING BITWISE ARITHMETIC
   ///////////////////////////////////////////////////////////
-  trait Bitwise<'a> where Unsigned<'a> {
+  trait Bitwise('a) where Unsigned('a) {
       bit_and  : fn('a, 'a)   -> 'a   // Bitwise AND
       bit_or   : fn('a, 'a)   -> 'a   // Bitwise OR
       bit_not  : fn('a)       -> 'a   // One's Complement
@@ -296,261 +296,239 @@ interface bitc.prelude {
   // Instance Definitions
   ///////////////////////////////////////////////////////////
 
-  instance Eq<()> {
+  instance Eq(()) {
     `== = __==
     `!= = __!=
   }
     
-  instance Eq<char> {
+  instance Eq(char) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<bool> {
+  instance Eq(bool) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<int8> {
+  instance Eq(int8) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<int16> {
+  instance Eq(int16) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<int32> {
+  instance Eq(int32) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<int64> {
+  instance Eq(int64) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<uint8> {
+  instance Eq(uint8) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<uint16> {
+  instance Eq(uint16) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<uint32> {
+  instance Eq(uint32) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<uint64> {
+  instance Eq(uint64) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<word> {
+  instance Eq(word) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<float> {
+  instance Eq(float) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<double> {
+  instance Eq(double) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<quad> {
+  instance Eq(quad) {
     `== = __==
     `!= = __!=
   }
 
-  instance Eq<string> {
+  instance Eq(string) {
     `== = __==
     `!= = __!=
   }
 
-  instance Ord<char> {
+  instance Ord(char) {
     `< = __<
     `> = __>
     `<= = __<=
     `>= = __>=
   }
   
-  instance Ord<bool> {
+  instance Ord(bool) {
     `< = __<
     `> = __>
     `<= = __<=
     `>= = __>=
   }
 
-  instance Ord<int8> {
+  instance Ord(int8) {
     `< = __<
     `> = __>
     `<= = __<=
     `>= = __>=
   }
-  instance Ord<int16> {
+  instance Ord(int16) {
     `< = __<
     `> = __>
     `<= = __<=
     `>= = __>=
   }
-  instance Ord<int32> {
+  instance Ord(int32) {
     `< = __<
     `> = __>
     `<= = __<=
     `>= = __>=
   }
-  instance Ord<int64> {
+  instance Ord(int64) {
     `< = __<
     `> = __>
     `<= = __<=
     `>= = __>=
   }
-  instance Ord<uint8> {
+  instance Ord(uint8) {
     `< = __<
     `> = __>
     `<= = __<=
     `>= = __>=
   }
-  instance Ord<uint16> {
+  instance Ord(uint16) {
     `< = __<
     `> = __>
     `<= = __<=
     `>= = __>=
   }
-  instance Ord<uint32> {
+  instance Ord(uint32) {
     `< = __<
     `> = __>
     `<= = __<=
     `>= = __>=
   }
-  instance Ord<uint64> {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
-  }
-
-  instance Ord<word> {
+  instance Ord(uint64) {
     `< = __<
     `> = __>
     `<= = __<=
     `>= = __>=
   }
 
-  instance Ord<float> {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
-  }
-  instance Ord<double> {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
-  }
-  instance Ord<quad> {
+  instance Ord(word) {
     `< = __<
     `> = __>
     `<= = __<=
     `>= = __>=
   }
 
-  instance Ord<string> {
+  instance Ord(float) {
+    `< = __<
+    `> = __>
+    `<= = __<=
+    `>= = __>=
+  }
+  instance Ord(double) {
+    `< = __<
+    `> = __>
+    `<= = __<=
+    `>= = __>=
+  }
+  instance Ord(quad) {
     `< = __<
     `> = __>
     `<= = __<=
     `>= = __>=
   }
 
-  instance Arith<int8> {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
-    negate = __negate
-  }
-  instance Arith<int16> {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
-    negate = __negate
-  }
-  instance Arith<int32> {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
-    negate = __negate
-  }
-  instance Arith<int64> {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
-    negate = __negate
-  }
-  instance Arith<uint8> {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
-    negate = __negate
-  }
-  instance Arith<uint16> {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
-    negate = __negate
-  }
-  instance Arith<uint32> {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
-    negate = __negate
-  }
-  instance Arith<uint64> {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
-    negate = __negate
-  }
-  instance Arith<word> {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
-    negate = __negate
+  instance Ord(string) {
+    `< = __<
+    `> = __>
+    `<= = __<=
+    `>= = __>=
   }
 
-  instance Arith<float> {
+  instance Arith(int8) {
     `+ = __+
     `- = __-
     `* = __*
     `/ = __/
     negate = __negate
   }
-  instance Arith<double> {
+  instance Arith(int16) {
     `+ = __+
     `- = __-
     `* = __*
     `/ = __/
     negate = __negate
   }
-  instance Arith<quad> {
+  instance Arith(int32) {
+    `+ = __+
+    `- = __-
+    `* = __*
+    `/ = __/
+    negate = __negate
+  }
+  instance Arith(int64) {
+    `+ = __+
+    `- = __-
+    `* = __*
+    `/ = __/
+    negate = __negate
+  }
+  instance Arith(uint8) {
+    `+ = __+
+    `- = __-
+    `* = __*
+    `/ = __/
+    negate = __negate
+  }
+  instance Arith(uint16) {
+    `+ = __+
+    `- = __-
+    `* = __*
+    `/ = __/
+    negate = __negate
+  }
+  instance Arith(uint32) {
+    `+ = __+
+    `- = __-
+    `* = __*
+    `/ = __/
+    negate = __negate
+  }
+  instance Arith(uint64) {
+    `+ = __+
+    `- = __-
+    `* = __*
+    `/ = __/
+    negate = __negate
+  }
+  instance Arith(word) {
     `+ = __+
     `- = __-
     `* = __*
@@ -558,17 +536,39 @@ interface bitc.prelude {
     negate = __negate
   }
 
-  instance IntArith<int8>   { `% = __% }
-  instance IntArith<int16>  { `% = __% }
-  instance IntArith<int32>  { `% = __% }
-  instance IntArith<int64>  { `% = __% }
-  instance IntArith<uint8>  { `% = __% }
-  instance IntArith<uint16> { `% = __% }
-  instance IntArith<uint32> { `% = __% }
-  instance IntArith<uint64> { `% = __% }
-  instance IntArith<word>   { `% = __% }
+  instance Arith(float) {
+    `+ = __+
+    `- = __-
+    `* = __*
+    `/ = __/
+    negate = __negate
+  }
+  instance Arith(double) {
+    `+ = __+
+    `- = __-
+    `* = __*
+    `/ = __/
+    negate = __negate
+  }
+  instance Arith(quad) {
+    `+ = __+
+    `- = __-
+    `* = __*
+    `/ = __/
+    negate = __negate
+  }
 
-  instance Bitwise<uint8> {
+  instance IntArith(int8)   { `% = __% }
+  instance IntArith(int16)  { `% = __% }
+  instance IntArith(int32)  { `% = __% }
+  instance IntArith(int64)  { `% = __% }
+  instance IntArith(uint8)  { `% = __% }
+  instance IntArith(uint16) { `% = __% }
+  instance IntArith(uint32) { `% = __% }
+  instance IntArith(uint64) { `% = __% }
+  instance IntArith(word)   { `% = __% }
+
+  instance Bitwise(uint8) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
@@ -576,7 +576,7 @@ interface bitc.prelude {
     `<< =  __<<
     `>> =  __>>
   }
-  instance Bitwise<uint16> {
+  instance Bitwise(uint16) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
@@ -584,7 +584,7 @@ interface bitc.prelude {
     `<< =  __<<
     `>> =  __>>
   }
-  instance Bitwise<uint32> {
+  instance Bitwise(uint32) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
@@ -592,7 +592,7 @@ interface bitc.prelude {
     `<< =  __<<
     `>> =  __>>
   }
-  instance Bitwise<uint64> {
+  instance Bitwise(uint64) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
@@ -600,7 +600,7 @@ interface bitc.prelude {
     `<< =  __<<
     `>> =  __>>
   }
-  instance Bitwise<word> {
+  instance Bitwise(word) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
@@ -609,11 +609,11 @@ interface bitc.prelude {
     `>> =  __>>
   }
 
-  trait Length<'a> {
+  trait Length('a) {
     length: fn('a) -> word		// built-in => no methods
   }
 
-  instance Length<'a[]> {
+  instance Length('a[]) {
     length = lambda (x) x.length
   }
 }

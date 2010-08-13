@@ -40,11 +40,11 @@ bitc version 0.11
 
 interface bitc.list {
 
-  def isNull(l:list<'a>) 
+  def isNull(l:list('a)) 
     "Return #t (#f) if list is empty (non-empty)."
     = if l.nil then true else false
 
-  def map(f, lst:list<'a>)
+  def map(f, lst:list('a))
     "Apply procedure f to each element of list."
     = switch lst {
       case x as nil  in true
@@ -83,7 +83,7 @@ interface bitc.list {
         length_helper(lst, 0:word)
       }
 
-  instance Length<list<'a> > {
+  instance Length(list('a)) {
     length = list_length
   }
   
