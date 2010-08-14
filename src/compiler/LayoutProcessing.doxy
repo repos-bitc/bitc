@@ -1,0 +1,164 @@
+/* -*- mode: c++ -*-  */
+
+/// @page LayoutProcessing Layout Processing Rules
+///
+/// Layout processing is handled by a cooperation between the lexer
+/// and the parser. This page describes how that works.
+///
+/// <h1>Objective</h1>
+///
+/// The general idea is to automatically insert curly braces at any
+/// point where they are missing, and to automatically insert
+/// statement termination semicolons at well-defined points if the
+/// user has not already inserted them.
+///
+/// <h2>General Rules</h2>
+///
+/// <ul>
+/// <li>
+/// <p>
+/// The term <em>column number</em>, as used here, is defined as the
+/// number of preceding UCS4 code points that occur to the left of the
+/// token on the same line, without regard to comments.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// An opening '{' signals the beginning of a <em>layout item
+/// sequence</em>, which is a sequence of layout items separated by
+/// semicolons (';').
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// At any point where a left curly brace is required by the
+/// grammar, one will be inserted by the lexer if the required '{'
+/// is missing. A '{' inserted in this fashion is said to be
+/// <em>implicit</em>. A '{' obtained from the input stream is said to
+/// <em>explicit</em>.
+/// </p>
+/// <p>
+/// "Required", in this context, means that the only token that may
+/// appear next in a legal input stream is '{'.
+/// </li>
+/// <li>
+/// <p>
+/// At any <em>implied close brace position</em>:
+/// </p>
+/// <ul>
+/// <li>
+/// <p>
+/// If the current open brace was implicit, a '}' is inserted.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// If the current open brace was explicit and the last token
+/// processed was not '}', an error is signalled.
+/// </p>
+/// </li>
+/// </ul>
+/// <li>
+/// <p>
+/// After an opening '{', if the following token is <em>not</em>
+/// preceded by an implied close brace position, it starts a layout item.
+/// The column number of this token
+/// defines the <em>layout item sequence indent level</em> for the
+/// containing layout item sequence. A stack of such indent levels
+/// associated with the opening and closing of curly braces is
+/// maintained by the lexer.
+/// </p>
+/// </li>
+/// <li>
+/// <p>Lines consisting entirely of white
+/// space and lines whose first non-whitespace token occurs at an
+/// indentation <em>greater than</em> the current item indent level
+/// are treated as continuation lines; no special processing for these
+/// lines occurs.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// Lines whose first non-whitespace token occurs at a column
+/// <em>equal to</em> the current layout item, and whose first token
+/// is not ';' or '}', will have a
+/// semicolon inserted <em>unless</em> the previously encountered
+/// token was a semicolon, this has the effect of terminating the
+/// current layout item and starting a new one.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// Lines whose first non-whitespace token occurs at a column <em>less
+/// than</em> the
+/// current item indent level, and whose first token is not '}', are
+/// deemed to be preceded by an implied close brace 
+/// position for as long as the current indent level is greater than
+/// that of the token. The implied close brace processing occurs
+/// before this token is consumed.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// When a '}' (whether or not inserted) is encountered, the current
+/// item indent level reverts to the item indent level that was in
+/// effect prior to the matching '{'
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// An implicit '{' must be matched by an implicit '}'. Similarly, an
+/// explicit '{' must be matched by an explicit '}'. If this requirement
+/// is violated, an error is signalled.
+/// </p>
+/// </li>
+/// </ul>
+/// <p>
+/// These rules are applied iteratively until no action is taken. For
+/// example, an out-dented line can potentially cause multiple
+/// implicit '}' insertions and a ';' insertion.
+/// </p>
+/// <h2>Syntactically Implied Close Brace Positions</h2>
+/// <p>
+/// We have a few syntactic constructs that use curly bracketing which
+/// do not, strictly speaking, need them at all. They do this for the
+/// sake of the layout rule. Example:
+/// </p>
+/// <pre>
+/// let x = 5 ; y = 6 in <em>expr</em></pre>
+/// <p>
+/// is really parsed as:
+/// </p>
+/// <pre>
+/// let <b>{</b> x = 5 ; y = 6 <b>}</b> in <em>expr</em></pre>
+/// <p>
+/// The problem with the layout rule as stated in its basic form above
+/// is
+/// that it would require the <tt>in</tt> to appear on a new line, as
+/// in:
+/// </p>
+/// <pre>
+/// let x = 5 ; y = 6
+/// in <em>expr</em></pre>
+/// <p>
+/// While there is nothing wrong with doing this, it's a case where
+/// inserting an implied closing brace before <tt>in</tt> probably
+/// makes the programming experience more pleasant. We resolve this by
+/// ruling that <tt>in</tt> is preceded by an implied close brace
+/// position. This enables:
+/// </p>
+/// <pre>
+/// let x = 5 in <em>expr</em></pre>
+/// <p>
+/// Haskell handles this in an <em>ad hoc</em> way, by declaring that
+/// an unexpected token at any point where a closing curly brace would
+/// be legal triggers close brace insertion. I prefer to specify those
+/// positions explicitly.
+/// </p>
+/// <p>
+/// I'm still working out the details on where such implied closing
+/// braces should occur. This may turn out to be the only example,
+/// because we do <em>not</em> want it in, say:
+/// </p>
+/// <pre>
+/// if <em>e<sub>test</sub></em> then <em>expr<sub>true</sub></em> else <em>expr<sub>false</sub></em></pre>
