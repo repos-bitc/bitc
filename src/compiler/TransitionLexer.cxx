@@ -677,18 +677,25 @@ TransitionLexer::ungetChar(ucs4_t c)
 }
 
 static bool
-isCharDelimiter(ucs4_t c)
+isWhiteSpace(ucs4_t c)
 {
   switch (c) {
   case ' ':
   case '\t':
   case '\n':
   case '\r':
-  case ')':
     return true;
   default:
     return false;
   }
+}
+
+static bool
+isCharDelimiter(ucs4_t c)
+{
+  if (c == ')') return true;
+
+  return isWhiteSpace(c);
 }
 
 int
@@ -703,6 +710,8 @@ TransitionLexer::lex(ParseType *lvalp)
   return tokType;
 }
 
+#define RETURN_TOKEN(_tok) return (_tok)
+
 int
 TransitionLexer::do_lex(ParseType *lvalp)
 {
@@ -713,7 +722,58 @@ TransitionLexer::do_lex(ParseType *lvalp)
 
   c = getChar();
 
+  if (c == '/') {
+    c = getChar();
+    if (c == '/') {
+      do {
+        c = getChar();
+      } while (c != '\n' && c != '\r');
+      // Back out the EOL. We'll handle that with white space
+      // processing below to simplify layout processing.
+      ungetChar(c);
+      here.updateWith(thisToken);
+      goto startOver;
+    }
+    else if (c == '*') {
+      for (;;) {
+        c = getChar();
+        if (c == '*') {
+          c = getChar();
+          if (c == '/') {
+            break;
+          }
+          else if (c == EOF)
+            RETURN_TOKEN(EOF);
+          else
+            ungetChar(c);
+        }
+        else if (c == EOF)
+          RETURN_TOKEN(EOF);
+      }
+
+      here.updateWith(thisToken);
+      goto startOver;
+    }
+    else {
+      ungetChar(c);
+      c = '/';
+    }
+  }
+
+  if (isWhiteSpace(c)) {
+    while (isWhiteSpace(c)) {
+      c = getChar();
+    }
+    ungetChar(c);
+
+    here.updateWith(thisToken);
+    goto startOver;
+  }
+
   switch (c) {
+#ifdef OBSOLETE
+    // This is how I used to handle comments before I started the
+    // conversion to layout rules
   case '/':
     c = getChar();
     if (c == '/') {
@@ -733,12 +793,12 @@ TransitionLexer::do_lex(ParseType *lvalp)
             break;
           }
           else if (c == EOF)
-            return EOF;
+            RETURN_TOKEN(EOF);
           else
             ungetChar(c);
         }
         else if (c == EOF)
-          return EOF;
+          RETURN_TOKEN(EOF);
       }
 
       here.updateWith(thisToken);
@@ -749,36 +809,50 @@ TransitionLexer::do_lex(ParseType *lvalp)
       ungetChar('/');
       goto identifier_or_operator;
     }
+#endif /* OBSOLETE */
 
   case '`':
-    // back-tick should never appear in any context where a sexpr is legal:
-    if (currentLang & lf_sexpr)
-      return EOF;
+    {
+      // back-tick should never appear in any context where a sexpr is
+      // legal:
+      if (currentLang & lf_sexpr)
+        RETURN_TOKEN(EOF);
 
-    lvalp->tok = LToken(here, thisToken);
-    here.updateWith(thisToken);
-    return c;
-
-  case ';':                        // Comments
-    if ((currentLang & lf_LispComments) == 0) {
       lvalp->tok = LToken(here, thisToken);
       here.updateWith(thisToken);
-      return c;
+      RETURN_TOKEN(c);
     }
 
-    // Otherwise, process a LISP-style comment:
-    do {
-      c = getChar();
-    } while (c != '\n' && c != '\r');
-    // FALL THROUGH 
+  case ';':                        // Comments
+    {
+      if ((currentLang & lf_LispComments) == 0) {
+        lvalp->tok = LToken(here, thisToken);
+        here.updateWith(thisToken);
+        RETURN_TOKEN(c);
+      }
 
+      // Otherwise, process a LISP-style comment:
+      do {
+        c = getChar();
+      } while (c != '\n' && c != '\r');
+      // Back out the NL or CR, so that we can do start of line
+      // processing. We'll pick it up when we handle it as white space
+      // later.
+      ungetChar(c);
+      here.updateWith(thisToken);
+      goto startOver;
+    }
+
+#ifdef OBSOLETE
   case ' ':                        // White space
   case '\t':
   case '\n':
   case '\r':
-    here.updateWith(thisToken);
-  goto startOver;
-
+    {
+      here.updateWith(thisToken);
+      goto startOver;
+    }
+#endif /* OBSOLETE */
 
   case ':':
     {
@@ -794,7 +868,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
 
       lvalp->tok = LToken(here, thisToken);
       here.updateWith(thisToken);
-      return tokID;
+      RETURN_TOKEN(tokID);
     }
 
   case '{':
@@ -808,7 +882,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
     {
       lvalp->tok = LToken(here, thisToken);
       here.updateWith(thisToken);
-      return c;
+      RETURN_TOKEN(c);
     }
 
   case '"':                        // String literal
@@ -835,7 +909,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
       LexLoc tokStart = here;
       here.updateWith(thisToken);
       lvalp->tok = LToken(here, thisToken.substr(1, thisToken.size()-2));
-      return tk_String;
+      RETURN_TOKEN(tk_String);
     }
 
 
@@ -846,18 +920,18 @@ TransitionLexer::do_lex(ParseType *lvalp)
       case 't':
         {
           if ((currentLang & lf_sexpr) == 0)
-            return EOF;
+            RETURN_TOKEN(EOF);
           lvalp->tok = LToken(here, thisToken);
           here.updateWith(thisToken);
-          return tk_TRUE;
+          RETURN_TOKEN(tk_TRUE);
         }
       case 'f':
         {
           if ((currentLang & lf_sexpr) == 0)
-            return EOF;
+            RETURN_TOKEN(EOF);
           lvalp->tok = LToken(here, thisToken);
           here.updateWith(thisToken);
-          return tk_FALSE;
+          RETURN_TOKEN(tk_FALSE);
         }
       case '\\':
         {
@@ -866,7 +940,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
           if (valid_charpunct(c)) {
             lvalp->tok = LToken(here, thisToken);
             here.updateWith(thisToken);
-            return tk_Char;
+            RETURN_TOKEN(tk_Char);
           }
           else if (c == 'U') {
             uint32_t codePoint = 0;
@@ -881,19 +955,19 @@ TransitionLexer::do_lex(ParseType *lvalp)
                 codePoint *= 16;
                 codePoint += dv;
                 if (codePoint > UCHAR_MAX_VALUE)
-                  return EOF;
+                  RETURN_TOKEN(EOF);
               }
               
               if (!isCharDelimiter(c)) {
                 ungetChar(c);
-                return EOF;
+                RETURN_TOKEN(EOF);
               }
             }
             ungetChar(c);
 
             lvalp->tok = LToken(here, thisToken);
             here.updateWith(thisToken);
-            return tk_Char;
+            RETURN_TOKEN(tk_Char);
           }
           else if (valid_charpoint(c)) {
             // Collect more characters in case this is a named character
@@ -913,16 +987,16 @@ TransitionLexer::do_lex(ParseType *lvalp)
                 thisToken == "#\\rbrace") {
               lvalp->tok = LToken(here, thisToken);
               here.updateWith(thisToken);
-              return tk_Char;
+              RETURN_TOKEN(tk_Char);
             }
           }
 
           // FIX: this is bad input
-          return EOF;
+          RETURN_TOKEN(EOF);
         }
       default:
         // FIX: this is bad input
-        return EOF;
+        RETURN_TOKEN(EOF);
       }
     }
 
@@ -940,7 +1014,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
       if (!valid_tv_ident_start(c)) {
         // FIX: this is bad input
         ungetChar(c);
-        return EOF;
+        RETURN_TOKEN(EOF);
       }
 
       do {
@@ -950,7 +1024,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
 
       here.updateWith(thisToken);
       lvalp->tok = LToken(here, thisToken);
-      return tokType;
+      RETURN_TOKEN(tokType);
     }
 
     // Hyphen requires special handling. If it is followed by a digit
@@ -1018,9 +1092,9 @@ TransitionLexer::do_lex(ParseType *lvalp)
         lvalp->tok = LToken(here, thisToken);
         here.updateWith(thisToken);
         if (thisToken[0] == '-')
-          return tk_NegativeInt;
+          RETURN_TOKEN(tk_NegativeInt);
         else
-          return tk_Nat;
+          RETURN_TOKEN(tk_Nat);
       }
 
       if (currentLang & lf_version) {
@@ -1034,7 +1108,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
         ungetChar(c);
         lvalp->tok = LToken(here, thisToken);
         here.updateWith(thisToken);
-        return tk_VersionNumber;
+        RETURN_TOKEN(tk_VersionNumber);
       }
       else {
         /* We have seen a decimal point, so from here on it must be a
@@ -1054,7 +1128,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
         ungetChar(c);
         lvalp->tok = LToken(here, thisToken);
         here.updateWith(thisToken);
-        return tk_Float;
+        RETURN_TOKEN(tk_Float);
       }
 
       /* Need to collect the exponent. Revert to radix 10 until
@@ -1087,11 +1161,11 @@ TransitionLexer::do_lex(ParseType *lvalp)
       ungetChar(c);
       lvalp->tok = LToken(here, thisToken);
       here.updateWith(thisToken);
-      return tk_Float;
+      RETURN_TOKEN(tk_Float);
     }
 
   case EOF:
-    return EOF;
+    RETURN_TOKEN(EOF);
 
   default:
     if (valid_ident_start(c) || valid_operator_start(c)) {
@@ -1100,7 +1174,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
     }
 
     // FIX: Malformed token
-    return EOF;
+    RETURN_TOKEN(EOF);
   }
 
  identifier_or_operator:
@@ -1123,7 +1197,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
   ident_done:
     lvalp->tok = LToken(here, thisToken);
     here.updateWith(thisToken);
-    return kwCheck(thisToken.c_str(), tk_BlkIdent);
+    RETURN_TOKEN(kwCheck(thisToken.c_str(), tk_BlkIdent));
   }
   else if (valid_operator_start(c)) {
     do {
@@ -1133,6 +1207,6 @@ TransitionLexer::do_lex(ParseType *lvalp)
 
     lvalp->tok = LToken(here, thisToken);
     here.updateWith(thisToken);
-    return kwCheck(thisToken.c_str(), tk_MixIdent);
+    RETURN_TOKEN(kwCheck(thisToken.c_str(), tk_MixIdent));
   }
 }
